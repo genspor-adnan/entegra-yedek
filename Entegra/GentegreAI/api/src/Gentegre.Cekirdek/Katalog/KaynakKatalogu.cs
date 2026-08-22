@@ -82,6 +82,10 @@ public static class KaynakKatalogu
         Ekle(KasaIslemTuru());
         Ekle(HesapEkstre());
         Ekle(CariEkstre());
+        // Kasa motoru (076, F2)
+        Ekle(KasaIslem());
+        Ekle(MuhasebeFis());
+        Ekle(MuhasebeFisSatir());
     }
 
     private static void Ekle(KaynakTanimi k) => Kaynaklar[k.Ad] = k;
@@ -674,5 +678,106 @@ public static class KaynakKatalogu
             new("alacak",       "e.alacak",       "para",  "Doviz Alacak", Hizalama: "sag", Varsayilan: false),
             new("planTarihi",   "e.plan_tarihi",  "tarih", "Vade", Hizalama: "orta", Bicim: "dd.MM.yyyy", Varsayilan: false),
             new("subeId",       "e.sube_id",      "sayi",  "Sube", Varsayilan: false)
+        });
+
+    // ---------------------------------------------------------- kasa islem ----
+    // Baslik listesi (makbuz seviyesi). Bacaklar "mali-hareket" listesindedir;
+    //   ikisi ayni veriye iki farkli granulariteden bakar.
+    private static KaynakTanimi KasaIslem() => new(
+        Ad: "kasa-islem",
+        YetkiKodu: "kasa_islem",
+        Kaynak: """
+            public.kasa_islem ki
+            join      public.kasa_islem_turu kt on kt.kod = ki.tur
+            left join public.taraf t            on t.id   = ki.taraf_id
+            left join public.hesap h            on h.id   = ki.hesap_id
+            left join public.hesap kh           on kh.id  = ki.karsi_hesap_id
+            left join public.proje p            on p.id   = ki.proje_id
+            left join public.muhasebe_fis f     on f.id   = ki.muhasebe_fis_id
+            """,
+        SubeKolonu: "ki.sube_id",
+        KapsamKolonu: "ki.taraf_id",
+        VarsayilanSirala: "ki.islem_tarihi desc, ki.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",            "ki.id",                "sayi",  "Id",        Varsayilan: false),
+            new("islemTarihi",   "ki.islem_tarihi",      "tarih", "Tarih",     Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("turAdi",        "kt.ad",                "metin", "İşlem",     Genislik: 180),
+            new("tur",           "ki.tur",               "sayi",  "Tür Kodu",  Hizalama: "orta", Varsayilan: false),
+            new("turGrup",       "kt.grup",              "metin", "Grup",      Hizalama: "orta", Varsayilan: false),
+            new("islemNo",       "ki.islem_no",          "metin", "Makbuz No"),
+            new("tarafUnvan",    "coalesce(t.unvan, ki.taraf_unvan)", "metin", "Cari", Genislik: 220),
+            new("hesapAdi",      "h.ad",                 "metin", "Hesap",     Genislik: 180),
+            new("karsiHesapAdi", "kh.ad",                "metin", "Karşı Hesap", Varsayilan: false),
+            new("tutar",         "ki.tutar",             "para",  "Tutar",     Hizalama: "sag", Bicim: "#,##0.00"),
+            new("dovizCinsi",    "ki.doviz_cinsi",       "metin", "Döviz",     Hizalama: "orta"),
+            new("dovizKuru",     "ki.doviz_kuru",        "para",  "Kur",       Hizalama: "sag", Varsayilan: false),
+            new("yerelTutar",    "ki.yerel_tutar",       "para",  "TL Tutar",  Hizalama: "sag", Bicim: "#,##0.00"),
+            new("projeAdi",      "p.ad",                 "metin", "Proje",     Varsayilan: false),
+            new("planTarihi",    "ki.plan_tarihi",       "tarih", "Vade",      Hizalama: "orta", Bicim: "dd.MM.yyyy", Varsayilan: false),
+            new("kalanTutar",    "ki.kalan_tutar",       "para",  "Kalan",     Hizalama: "sag", Bicim: "#,##0.00", Varsayilan: false),
+            new("fisNo",         "f.fis_no",             "metin", "Fiş No",    Varsayilan: false),
+            new("muhasebeFisId", "ki.muhasebe_fis_id",   "sayi",  "Fiş Id",    Varsayilan: false),
+            new("durum",         "ki.durum",             "kod",   "Durum",     Hizalama: "orta"),
+            new("aciklama",      "ki.aciklama",          "metin", "Açıklama",  Genislik: 240),
+            new("iptalIslemId",  "ki.iptal_islem_id",    "sayi",  "Ters İşlem", Varsayilan: false),
+            new("subeId",        "ki.sube_id",           "sayi",  "Şube",      Varsayilan: false)
+        });
+
+    // ------------------------------------------------------- muhasebe fisi ----
+    private static KaynakTanimi MuhasebeFis() => new(
+        Ad: "muhasebe-fis",
+        YetkiKodu: "muhasebe_fis",
+        Kaynak: """
+            public.muhasebe_fis f
+            left join public.muhasebe_donem d on d.id = f.donem_id
+            """,
+        SubeKolonu: "f.sube_id",
+        VarsayilanSirala: "f.fis_tarihi desc, f.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",           "f.id",            "sayi",  "Id",       Varsayilan: false),
+            new("fisNo",        "f.fis_no",        "metin", "Fiş No"),
+            new("fisTarihi",    "f.fis_tarihi",    "tarih", "Tarih",    Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("tur",          "f.tur",           "kod",   "Fiş Türü", Hizalama: "orta"),
+            new("durum",        "f.durum",         "kod",   "Durum",    Hizalama: "orta"),
+            new("kaynakTur",    "f.kaynak_tur",    "kod",   "Kaynak",   Hizalama: "orta"),
+            new("kaynakId",     "f.kaynak_id",     "sayi",  "Kaynak Id", Varsayilan: false),
+            new("toplamBorc",   "f.toplam_borc",   "para",  "Borç",     Hizalama: "sag", Bicim: "#,##0.00"),
+            new("toplamAlacak", "f.toplam_alacak", "para",  "Alacak",   Hizalama: "sag", Bicim: "#,##0.00"),
+            new("aciklama",     "f.aciklama",      "metin", "Açıklama", Genislik: 280),
+            new("tersFisId",    "f.ters_fis_id",   "sayi",  "Ters Fiş", Varsayilan: false),
+            new("donem",        "case when d.id is null then '' else lpad(d.ay::text, 2, '0') || '.' || d.yil::text end",
+                                                    "metin", "Dönem",    Hizalama: "orta", Varsayilan: false),
+            new("subeId",       "f.sube_id",       "sayi",  "Şube",     Varsayilan: false)
+        });
+
+    private static KaynakTanimi MuhasebeFisSatir() => new(
+        Ad: "muhasebe-fis-satir",
+        YetkiKodu: "muhasebe_fis",
+        Kaynak: """
+            public.muhasebe_fis_satir s
+            join      public.muhasebe_fis f  on f.id  = s.fis_id
+            join      public.hesap_plani hp  on hp.id = s.hesap_plani_id
+            left join public.taraf t         on t.id  = s.taraf_id
+            left join public.proje p         on p.id  = s.proje_id
+            """,
+        SubeKolonu: "f.sube_id",
+        VarsayilanSirala: "f.fis_tarihi desc, s.fis_id desc, s.sira",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",         "s.id",         "sayi",  "Id",      Varsayilan: false),
+            new("fisId",      "s.fis_id",     "sayi",  "Fiş Id",  Varsayilan: false),
+            new("fisNo",      "f.fis_no",     "metin", "Fiş No"),
+            new("fisTarihi",  "f.fis_tarihi", "tarih", "Tarih",   Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("sira",       "s.sira",       "sayi",  "Sıra",    Hizalama: "orta", Varsayilan: false),
+            new("hesapKodu",  "hp.kod",       "metin", "Hesap Kodu"),
+            new("hesapAdi",   "hp.ad",        "metin", "Hesap Adı", Genislik: 240),
+            new("borc",       "s.borc",       "para",  "Borç",    Hizalama: "sag", Bicim: "#,##0.00"),
+            new("alacak",     "s.alacak",     "para",  "Alacak",  Hizalama: "sag", Bicim: "#,##0.00"),
+            new("dovizCinsi", "s.doviz_cinsi","metin", "Döviz",   Hizalama: "orta", Varsayilan: false),
+            new("tarafUnvan", "t.unvan",      "metin", "Cari",    Varsayilan: false),
+            new("projeAdi",   "p.ad",         "metin", "Proje",   Varsayilan: false),
+            new("aciklama",   "s.aciklama",   "metin", "Açıklama", Genislik: 260)
         });
 }

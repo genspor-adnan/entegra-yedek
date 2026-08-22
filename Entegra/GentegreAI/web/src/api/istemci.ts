@@ -4,6 +4,7 @@ import {
   type AksiyonListesi, type KartMetaYaniti, type KartYaniti, type KartYazmaIstegi, type KolonMeta,
   type ListeIstegi, type ListeYaniti, type BelgeYaniti,
   type KisiKaydi, type KisiIstegi, type YerlerYaniti,
+  type KasaIslemTuru, type KasaIslemYaniti, type KasaIslemYazmaIstegi, type FisOzeti,
   type YetkiSatiri, type YetkiSatiriIstegi, type DokumanSatiri,
 } from './sozlesme';
 
@@ -148,6 +149,9 @@ export const api = {
   parolaDegistir: (eskiParola: string, yeniParola: string) =>
     gonder<void>('/api/kimlik/parola', { eskiParola, yeniParola }),
 
+  dilDegistir: (dil: number) =>
+    gonder<void>('/api/kimlik/dil', { dil }),
+
   // -------------------------------------------------------------- liste ----
   liste: (kaynak: string, istekGovdesi: ListeIstegi) =>
     gonder<ListeYaniti>(`/api/liste/${kaynak}`, istekGovdesi),
@@ -197,8 +201,8 @@ export const api = {
   },
   dokumanVarsayilanYap: (kartAdi: string, kaynakId: number, dokumanId: number) =>
     gonder<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}/${dokumanId}/varsayilan`, {}),
-  dokumanDuzenle: (kartAdi: string, kaynakId: number, dokumanId: number, ad: string) =>
-    istek<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}/${dokumanId}`, { method: 'PUT', body: JSON.stringify({ ad }) }),
+  dokumanDuzenle: (kartAdi: string, kaynakId: number, dokumanId: number, ad: string, belgeTuru: string) =>
+    istek<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}/${dokumanId}`, { method: 'PUT', body: JSON.stringify({ ad, belgeTuru }) }),
   dokumanSil: (kartAdi: string, kaynakId: number, dokumanId: number) =>
     istek<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}/${dokumanId}`, { method: 'DELETE' }),
   dokumanIcerikUrl: (dokumanId: number) => dosyaIndir(`/api/dokuman-icerik/${dokumanId}`),
@@ -217,4 +221,34 @@ export const api = {
   // -------------------------------------------------------------- belge ----
   belgeOku: (id: number) => istek<BelgeYaniti>(`/api/belge/${id}`),
   belgeEkle: (govde: unknown) => gonder<BelgeYaniti>('/api/belge', govde),
+
+  // --------------------------------------------------------------- kasa ----
+  kasaIslemTurleri: () =>
+    istek<{ turler: KasaIslemTuru[] }>('/api/kasa-islem-turu').then(y => y.turler),
+
+  kasaOku: (id: number) => istek<KasaIslemYaniti>(`/api/kasa-islem/${id}`),
+
+  kasaEkle: (govde: KasaIslemYazmaIstegi) =>
+    gonder<KasaIslemYaniti>('/api/kasa-islem', govde),
+
+  kasaGuncelle: (id: number, govde: KasaIslemYazmaIstegi) =>
+    gonder<KasaIslemYaniti>(`/api/kasa-islem/${id}`, govde, 'PUT'),
+
+  kasaKesinlestir: (id: number) =>
+    gonder<KasaIslemYaniti>(`/api/kasa-islem/${id}/kesinlestir`, {}),
+
+  kasaIptal: (id: number, sebep: string, tarih?: string) =>
+    gonder<{ islem: Record<string, unknown>; tersIslemId: number }>(
+      `/api/kasa-islem/${id}/iptal`, { sebep, tarih }),
+
+  kasaSil: (id: number) =>
+    istek<{ silindi: boolean }>(`/api/kasa-islem/${id}`, { method: 'DELETE' }),
+
+  /** Kur kutusu: o tarihin kuru (yoksa onceki en yakin gun). yon 1 satis / 2 alis. */
+  dovizKur: (cins: string, tarih: string, yon = 1) =>
+    istek<{ dovizCinsi: string; tarih: string; kur: number | null }>(
+      `/api/referans/doviz-kur?cins=${encodeURIComponent(cins)}&tarih=${tarih}&yon=${yon}`),
+
+  fisOku: (id: number) =>
+    istek<{ fis: FisOzeti }>(`/api/muhasebe/fis/${id}`).then(y => y.fis),
 };

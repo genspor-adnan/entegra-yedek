@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Gentegre.Api.AraKatman;
@@ -37,6 +37,7 @@ kurucu.Services.AddScoped<RolYetkiDeposu>();
 kurucu.Services.AddScoped<DokumanDeposu>();
 kurucu.Services.AddSingleton<ReferansDeposu>();
 kurucu.Services.AddScoped<BelgeDeposu>();
+kurucu.Services.AddScoped<KasaDeposu>();
 kurucu.Services.AddScoped<GunlukDeposu>();
 kurucu.Services.AddSingleton<LogDeposu>();
 kurucu.Services.AddScoped<KimlikServisi>();
@@ -133,6 +134,7 @@ uygulama.DokumanUclariniEkle();
 uygulama.DokumanIcerikUcunuEkle();
 uygulama.ReferansUclariniEkle();
 uygulama.BelgeUclariniEkle();
+uygulama.KasaUclariniEkle();
 uygulama.AksiyonUclariniEkle();
 
 uygulama.Run();

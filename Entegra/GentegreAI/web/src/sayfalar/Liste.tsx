@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
-import type { Kosul } from '../api/sozlesme';
+import { ApiHatasi, type Kosul, type ListeSatiri } from '../api/sozlesme';
+import { api } from '../api/istemci';
 
 export interface ListeTanimi {
   kaynak: string;
@@ -33,6 +34,9 @@ export interface ListeTanimi {
       cevrilir (ör. /hesap-ekstre?hesapId=12). Parametre yoksa liste TUM kayitlari
       gosterir - bos ekran yerine "hepsi" daha kullanisli. */
   urlFiltreAlani?: string;
+  /** Kart generic GenForm degil, kendi sayfasi (ör. kasa-islem): Liste modal ACMAZ,
+      rotayi App.tsx kendisi tanimlar. Cift tik yine kartYolu'na gider. */
+  ozelKart?: boolean;
 }
 
 /**
@@ -66,6 +70,56 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   //   az once ekledigi kaydi listede otomatik en ustte gorsun.
   const [odaklaSonEklenen, setOdaklaSonEklenen] = useState(0);
 
+  // Aksiyon yonlendirme. Kasa aksiyonlari API cagirir (kesinlestir/iptal/sil) ve
+  //   sonrasinda grid'i tazeler; digerleri kart rotasina gider.
+  async function aksiyon(kod: string, satir?: ListeSatiri | null) {
+    const kartaGit = (kayitId: unknown) => git(`${tanim.kartYolu}/${kayitId}`);
+
+    try {
+      switch (kod) {
+        case 'kasa.tahsilat.yeni': git('/kasa-islem/yeni?tur=21'); return;
+        case 'kasa.odeme.yeni':    git('/kasa-islem/yeni?tur=31'); return;
+        case 'kasa.ac':
+        case 'kasa.fis-gor':
+          if (satir) git(`/kasa-islem/${satir.id}`);
+          return;
+
+        case 'kasa.kesinlestir':
+          if (!satir) return;
+          if (!confirm('İşlem kesinleştirilecek: makbuz numarası verilir ve muhasebe fişi yazılır. Onaylıyor musunuz?')) return;
+          await api.kasaKesinlestir(Number(satir.id));
+          setYenile(t => t + 1);
+          return;
+
+        case 'kasa.iptal': {
+          if (!satir) return;
+          const sebep = window.prompt('İptal sebebi:');
+          if (!sebep) return;
+          await api.kasaIptal(Number(satir.id), sebep);
+          setYenile(t => t + 1);
+          return;
+        }
+
+        case 'kasa.sil':
+          if (!satir) return;
+          if (!confirm('Taslak/plan kaydı silinecek. Onaylıyor musunuz?')) return;
+          await api.kasaSil(Number(satir.id));
+          setYenile(t => t + 1);
+          return;
+
+        case 'belge.yeni': git('/belge/yeni'); return;
+        case 'genel.yazdir': alert('Yazdirma henuz baglanmadi.'); return;
+      }
+
+      if (kod.endsWith('.yeni') && tanim.kartYolu) git(`${tanim.kartYolu}/yeni`);
+      else if ((kod.endsWith('.duzenle') || kod.endsWith('.sil') || kod.endsWith('.ac')) && satir && tanim.kartYolu)
+        kartaGit(satir.id);
+      else if (satir) alert(`"${kod}" aksiyonu henuz baglanmadi.`);
+    } catch (h) {
+      alert(h instanceof ApiHatasi ? h.message : String(h));
+    }
+  }
+
   return (
     <>
     <GenGrid
@@ -87,17 +141,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       icerikAlani={tanim.icerikAlani}
       icerikBaslik={tanim.icerikBaslik}
       onSatirAc={satir => { if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`) }}
-      onAksiyon={(kod, satir) => {
-        if (kod.endsWith('.yeni') && tanim.kartYolu) git(`${tanim.kartYolu}/yeni`);
-        else if (kod === 'belge.yeni') git('/belge/yeni');
-        else if ((kod.endsWith('.duzenle') || kod.endsWith('.sil')) && satir && tanim.kartYolu)
-          git(`${tanim.kartYolu}/${satir.id}`);
-        else if (kod === 'genel.yazdir') alert('Yazdirma henuz baglanmadi.');
-        else if (satir) alert(`"${kod}" aksiyonu henuz baglanmadi.`);
-      }}
+      onAksiyon={(kod, satir) => { void aksiyon(kod, satir) }}
     />
 
-    {kartId !== null && tanim.kartYolu && (
+    {kartId !== null && tanim.kartYolu && !tanim.ozelKart && (
       <GenForm
         kaynak={tanim.kaynak}
         id={kartId}
@@ -181,6 +228,22 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Alis', filtre: { alan: 'tur', op: 'icinde', deger: [10, 11, 12] } },
     ],
     menuGrup: 'Satış', menuAd: 'Satış Fatura Listesi', ic: '🧾', yetkiKodu: 'belge',
+  },
+  {
+    // Kasa alt sisteminin ANA ekrani (F2): makbuz seviyesindeki islemler.
+    //   Karti generic GenForm degil, kendi sayfasi (KasaIslemKarti) - tur sablonu,
+    //   bacaklar ve muhasebe fisi paneli generic karta sigmiyor.
+    kaynak: 'kasa-islem', baslik: 'Kasa İşlemleri', yol: 'Kasa › İşlemler',
+    kartYolu: '/kasa-islem', ozelKart: true, aksiyonEkrani: 'kasa-liste',
+    toplam: ['yerelTutar'],
+    cipler: [
+      { ad: 'Tumu' },
+      { ad: 'Tahsilat', filtre: { alan: 'turGrup', op: 'esit', deger: 'tahsilat' } },
+      { ad: 'Ödeme',    filtre: { alan: 'turGrup', op: 'esit', deger: 'odeme' } },
+      { ad: 'Taslak',   filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Plan',     filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+    ],
+    menuGrup: 'Kasa', menuAd: 'Kasa İşlemleri', ic: '🧾', yetkiKodu: 'kasa_islem',
   },
   {
     // "Kasa" grubu, Satış'in HEMEN ALTINDA (kullanici istegi) - "Cari Hareketleri"
@@ -290,6 +353,22 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'islem-log', baslik: 'Islem Gunlugu', yol: 'Yonetim › Islem Gunlugu',
     icerikAlani: 'bilgi', icerikBaslik: 'Log İçeriği',
     menuGrup: 'Yönetim', menuAd: 'İşlem Günlüğü', ic: '📋', yetkiKodu: 'islem_log',
+  },
+  {
+    // Muhasebe fisleri: kasa islemi/belge kesinlestikce OTOMATIK uretilir; buradan
+    //   yalniz izlenir (elle fis girisi F4/F7 kapsaminda degil).
+    kaynak: 'muhasebe-fis', baslik: 'Muhasebe Fişleri', yol: 'Yonetim › Muhasebe Fisleri',
+    aksiyonEkrani: 'fis-liste', toplam: ['toplamBorc', 'toplamAlacak'],
+    cipler: [
+      { ad: 'Kayıtlı', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Yönetim', menuAd: 'Muhasebe Fişleri', ic: '📕', yetkiKodu: 'muhasebe_fis',
+  },
+  {
+    kaynak: 'muhasebe-fis-satir', baslik: 'Fiş Satırları', yol: 'Yonetim › Fis Satirlari',
+    toplam: ['borc', 'alacak'],
+    menuGrup: 'Yönetim', menuAd: 'Fiş Satırları', ic: '📗', yetkiKodu: 'muhasebe_fis',
   },
   {
     kaynak: 'hesap-plani', baslik: 'Hesap Planı', yol: 'Yonetim › Hesap Plani',

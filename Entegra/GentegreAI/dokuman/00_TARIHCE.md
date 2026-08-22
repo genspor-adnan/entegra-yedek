@@ -2222,3 +2222,86 @@ hesap kartı (4 alt grup) çalışıyor. `dotnet build` + `tsc --noEmit` temiz.
 
 **Sırada (F2):** motor fonksiyonları (`fn_kasa_islem_bacak_uret/dogrula/kesinlestir/fisle/
 iptal`, `fn_muh_hesap_coz`), `KasaDeposu` + `KasaUclari`, tahsilat/ödeme kartı ve fiş önizleme.
+
+---
+
+## F2 — Kasa motoru: bacak üretimi, doğrulama, muhasebe fişi, iptal (22.08.2026)
+
+Kasa alt sisteminin **çalışan hâli**: tahsilat/ödeme kaydedilir, sunucu bacakları üretir,
+dengeyi doğrular, çift taraflı muhasebe fişi yazar, makbuz numarasını **en son** verir.
+
+### Motor veritabanında (076_fn_kasa.sql)
+
+Kurallar C#'ta değil PG'de: `fn_kasa_islem_bacak_uret` (şablondan bacak),
+`fn_kasa_islem_dogrula` (K5 denge + hesap/döviz/cari/proje/dönem kontrolleri),
+`fn_kasa_islem_fisle` (idempotent, bacak→fiş satırı 1:1), `fn_kasa_islem_kesinlestir`
+(doğrula → fişle → **numara en son**), `fn_kasa_islem_iptal` (ters başlık + ters fiş,
+silme yok), `fn_muh_hesap_coz` (hesap kartı → tür+rol istisnası → kalem → cari → hesap
+türü), `fn_hesap_plani_alt_ac` (`120.<tarafId>` alt hesabı otomatik), silme koruma trigger'ı.
+
+Üç karar kayda değer:
+
+1. **`mali_hareket.rol` kolonu eklendi.** Şablonda rol vardı ama bacakta yoktu; muhasebe
+   eşlemesinin tür+rol istisnası (44 komisyon → 770, 58 faiz → 780, 88/98 kur farkı) rolü
+   okuyamıyordu.
+2. **İş kuralı hataları `errcode 'GK422'`** ile atılır; `KasaDeposu` bunu 422 IS_KURALI'ya
+   çevirir. `P0001` (beklenmeyen) 500 kalır — kullanıcı hatası ile çökme ayrışır.
+3. **Bacaklar istemciden gelmez.** İstek yalnız başlığı taşır; `bacaklar[]` alanı serbest
+   mahsup için opsiyoneldir ve `yerelBorc/yerelAlacak` gönderilirse **400**. Ekran ile
+   muhasebenin aynı sayıyı görmesinin tek yolu tek hesaplama yeri.
+
+### Para birimi kodlaması düzeltildi (083_doviz_kod_iso.sql)
+
+Motor bacak dövizi ile hesap dövizini karşılaştırır — ama aynı para birimi **üç ayrı kodla**
+yazılıydı: `hesap` `'$'/'€'/'TRY'`, `doviz_kur` `'$'/'€'`, `mali_hareket` `'USD'/'EUR'`
+(080 göçünde ISO'ya çevrilmişti). Bu hâliyle her dövizli işlem "hesabın para birimi farklı"
+hatası verir ve kur tablosundan hiçbir kur bulunamazdı. Her yer ISO-4217'ye normalize edildi
+(`fn_doviz_iso`, yerel para `'TL'` — `TRY` değil): 6157 kur satırı, 30 hesap. Ayrıca legacy
+`KUR` alanında para birimi yerine **sayı** yazılmış 3 açılış-devri satırı (`'7591'`) TL'ye
+alındı. `fn_doviz_kur_getir(cins, tarih, yön)` eklendi: o günün kuru yoksa **önceki en yakın
+gün** (hafta sonu/tatil), yön 1 satış (tahsilat) / 2 alış (ödeme).
+
+### API
+
+`Kasa.cs` (sözleşme), `KasaHesap.cs` (para matematiği; yuvarlama `BelgeHesap` ile aynı —
+belge ve kasa aynı faturayı farklı kuruşa yuvarlarsa cari bakiye asla kapanmaz),
+`KasaDeposu` (tek transaction: doğrula → taraf snapshot → kur → başlık → bacak → motor →
+log), `KasaUclari`: `GET /api/kasa-islem-turu`, `GET /api/referans/doviz-kur`,
+`POST/PUT/GET /api/kasa-islem`, `/{id}/kesinlestir`, `/{id}/iptal`, `DELETE`,
+`GET /api/muhasebe/fis/{id}`. Kesin kayıt `kasa.kesinlestir` aksiyon yetkisi ister.
+Kataloglara `kasa-islem`, `muhasebe-fis`, `muhasebe-fis-satir` listeleri ve `kasa-liste` /
+`kasa-kart` / `fis-liste` aksiyon ekranları eklendi. 084: kod listelerinin Türkçe adları +
+`muhasebe_fis.kaynak_tur` listesi (grid'de ham 1/2/5 görünüyordu).
+
+### Web
+
+`KasaIslemKarti.tsx` (bespoke — tür şeritli, hesap seçilince döviz kilitlenir ve kur
+otomatik dolar, TL karşılığı **önizleme**), `kasa/BacakSatiri.tsx` (üretilen bacaklar +
+denge rozeti), `kasa/FisOnizleme.tsx`. `ListeTanimi.ozelKart` eklendi: kartı GenForm değil
+kendi sayfası olan kaynaklarda Liste modal açmaz. Liste aksiyonları artık gerçek API çağırır
+(kesinleştir/iptal/sil → onay + grid tazeleme). Menü: **Kasa › Kasa İşlemleri**,
+**Yönetim › Muhasebe Fişleri / Fiş Satırları**.
+
+Uçtan uca doğrulandı (curl + tarayıcı): TL nakit tahsilat taslak → kesinleştir →
+`T00000001` + fiş `100 KASA borç / 120.<cari> alacak` dengeli; USD banka ödemesi masraflı
+4 bacak → fiş `120 B / 102 A / 770 B / 102 A` (döviz kolonları USD, TL kolonları kurdan);
+GBP tahsilat tarayıcıda 250 GBP → 5.280,93 TL, cari alt hesabı `120.3861` otomatik açıldı.
+Korumalar: ikinci kesinleştirme 422, gerçekleşmiş kayıt DELETE 422, `yerelTutar` gönderimi
+400, sebepsiz iptal 400. Değişmezler (dengesiz fiş / dengesiz işlem / mükerrer fiş /
+mükerrer makbuz / geçersiz hesap türü) hepsi **0**. Test kayıtları sonradan temizlendi.
+
+### F8 plana eklendi + sipariş altyapısı (082_belge_donusum.sql)
+
+Kullanıcı sorusu üzerine sipariş → irsaliye → fatura dönüşümü **F8** olarak plana girdi ve
+şema adımı şimdi yapıldı. **Sipariş ayrı tablo değildir**: `belge` türleridir (9 alış / 19
+satış siparişi) — irsaliye ve fatura ile aynı tablo, aynı `BelgeDeposu`, aynı satır yapısı
+(legacy'de de tek `FATBASLIK`'tı). Zaten hazır olan `belge_satir.kaynak_tur/kaynak_id` satır
+bağı kısmi dönüşümün taşıyıcısı; eksik olan **kalan miktar takibi** eklendi:
+`belge_satir.kapatilan_miktar` + generated `kalan_miktar`, `belge.kapanma_durum`
+(0 açık / 1 kısmi / 2 kapandı), `v_belge_acik_satir`, `kasa_islem_turu.stok_etkiler`
+(irsaliye→fatura dönüşümünde stok iki kez düşmesin). Sayaç **trigger** ile tutulur —
+uygulama koduna bırakılsa bir yerde unutulur ve "kalan" sessizce yanlışlaşırdı.
+Dönüşüm fonksiyonu/ekranı F8'e kaldı.
+
+**Sırada (F3):** virman (40-50), döviz alış/satış + kuruş farkı bacağı, plan (61/71/63) ve
+`fn_plan_gerceklestir`.

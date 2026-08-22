@@ -72,6 +72,17 @@ public static class AksiyonKatalogu
                 new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
+            ["hasta-liste"] = new AksiyonTanimi[]
+            {
+                new("hasta.yeni",    "＋ Yeni",     "hasta", Kisayol: "Ctrl+N",
+                    KaynakKodu: "personel", Islem: Islem.Ekle, Sira: 10),
+                new("hasta.duzenle", "✎ Düzenle",   "hasta", Kisayol: "Enter",
+                    KaynakKodu: "personel", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("hasta.sil",     "Sil",         "hasta", Hedef: "sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "personel", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+                new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
 
             ["stok-liste"] = new AksiyonTanimi[]
             {
@@ -121,6 +132,51 @@ public static class AksiyonKatalogu
             {
                 new("stok.sil", "Sil", "stok", Hedef: "araccubugu,palet",
                     KaynakKodu: "stok", Islem: Islem.Sil, KayitGerekir: true, Sira: 20),
+            },
+
+            // ---------------------------------------------------------- kasa ----
+            // "Yeni" tek dugme degil, tur GRUBU basina bir giris: tahsilat ile
+            //   odeme ayni ekrandir ama kullanicinin kafasinda ayri islemdir.
+            ["kasa-liste"] = new AksiyonTanimi[]
+            {
+                new("kasa.tahsilat.yeni", "＋ Tahsilat", "kasa", Kisayol: "Ctrl+N",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Ekle, Sira: 10),
+                new("kasa.odeme.yeni",    "－ Ödeme",    "kasa",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Ekle, Sira: 20),
+                new("kasa.ac",            "Aç",          "kasa", Kisayol: "Enter",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Gor, KayitGerekir: true, Sira: 30),
+                new("kasa.kesinlestir",   "Kesinleştir", "kasa", Hedef: "araccubugu,sagtus,palet",
+                    AksiyonYetkisi: "kasa.kesinlestir", KayitGerekir: true, Sira: 40),
+                new("kasa.iptal",         "İptal Et",    "kasa", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "kasa.iptal", KayitGerekir: true, Sira: 50),
+                new("kasa.sil",           "Sil",         "kasa", Hedef: "sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Sil, KayitGerekir: true, Sira: 60),
+                new("kasa.fis-gor",       "Muhasebe Fişi", "muhasebe", Hedef: "sagtus,palet",
+                    KaynakKodu: "muhasebe_fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 70),
+                new("genel.yazdir",       "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
+            ["kasa-kart"] = new AksiyonTanimi[]
+            {
+                new("kasa.kesinlestir", "Kesinleştir", "kasa",
+                    AksiyonYetkisi: "kasa.kesinlestir", KayitGerekir: true, Sira: 10),
+                new("kasa.fis-gor",     "Muhasebe Fişi", "muhasebe",
+                    KaynakKodu: "muhasebe_fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                new("kasa.iptal",       "İptal Et",    "kasa", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "kasa.iptal", KayitGerekir: true, Sira: 30),
+                new("kasa.sil",         "Sil",         "kasa", Hedef: "sagtus,palet",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Sil, KayitGerekir: true, Sira: 40),
+            },
+
+            ["fis-liste"] = new AksiyonTanimi[]
+            {
+                new("fis.ac",         "Aç",           "muhasebe", Kisayol: "Enter",
+                    KaynakKodu: "muhasebe_fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 10),
+                new("fis.ters-kayit", "Ters Kayıt",   "muhasebe", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "fis.ters-kayit", KayitGerekir: true, Sira: 20),
+                new("genel.yazdir",   "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
         };
 

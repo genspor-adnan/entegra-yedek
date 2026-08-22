@@ -3,6 +3,7 @@ import { OturumSaglayici, useOturum } from './kimlik/OturumBaglami';
 import { Giris } from './sayfalar/Giris';
 import { Kabuk } from './sayfalar/Kabuk';
 import { BelgeKarti } from './sayfalar/BelgeKarti';
+import { KasaIslemKarti } from './sayfalar/KasaIslemKarti';
 import { Liste, LISTELER } from './sayfalar/Liste';
 
 function Yollar() {
@@ -26,13 +27,19 @@ function Yollar() {
           const rota = l.rota ?? l.kaynak;
           return [
             <Route key={rota} path={`/${rota}`} element={<Liste tanim={l} />} />,
-            ...(l.kartYolu ? [
+            ...(l.kartYolu && !l.ozelKart ? [
               <Route key={`${rota}-kart`} path={`/${rota}/:id`} element={<Liste tanim={l} />} />,
             ] : []),
           ];
         })}
 
         <Route path="/belge/yeni" element={<BelgeKarti />} />
+
+        {/* Kasa islem karti BESPOKE (GenForm degil): tur sablonu, bacaklar ve fis
+            paneli generic karta sigmaz. LISTELER dongusu 'kasa-islem' icin kart
+            uretmez (ozelKart), bu iki rota onun yerine gecer. */}
+        <Route path="/kasa-islem/yeni" element={<KasaIslemKarti />} />
+        <Route path="/kasa-islem/:id" element={<KasaIslemKarti />} />
 
         <Route path="*" element={<Navigate to={ilk ? `/${ilk.rota ?? ilk.kaynak}` : '/cari'} replace />} />
       </Route>
