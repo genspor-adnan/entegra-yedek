@@ -2073,3 +2073,27 @@ Tarayicida uctan uca dogrulandi: /cari 2.318 kayit (2.350'den 32 saf-tedarikci d
 dogru), /tedarikci 40 kayit (2K CNC gibi cift-rollu kayitlar HER IKI listede de - beklenen),
 Tedarikci Listesi'nden "+Yeni" -> "Tedarikçi — Yeni" basligi + Tedarikçi checkbox ONCEDEN
 ISARETLI/Musteri bos, Kişi Listesi + "Cari" grup ac/kapa calisti.
+
+### Ayni oturum: iki tek-ogeli ana menu daha - "Hasta" (Cari'nin ustunde) + "Satış" (altinda)
+
+Kullanici iki ayri istekte: "Cari menü üstüne Hasta menüsü aç, altına Hasta Listesi ekle"
+ve "Cari altına Satış Menüsü aç altına Belgeler'i rename edip Satış Fatura Listesi ekle".
+
+Ikisi de `menuGrup` mekanizmasinin (Cari icin kurulan) TEK OGELI kullanimi - yeni kaynak/
+kart YOK, sadece LISTELER'de var olan girdiye `menuGrup` + `menuAd` eklenip sirasi
+tasindi:
+- **Hasta**: mevcut `hasta` girdisi LISTELER'in EN BASINA (Cari'den once) tasindi,
+  `menuGrup: 'Hasta'`, `menuAd: 'Hasta Listesi'` eklendi. Kaynak/route/kart/filtre
+  DEGISMEDI (hala `hasta-liste` aksiyonu, `/hasta` rotasi).
+- **Satış**: mevcut `belge` girdisi Cari grubunun hemen ALTINA tasindi, `menuGrup: 'Satış'`,
+  `menuAd: 'Belgeler'` -> `'Satış Fatura Listesi'`. Kullanici sadece "rename" dedi,
+  "kopyala" DEMEDI - Musteri/Tedarikci'nin aksine buraya sabitFiltre EKLENMEDI, ekran hala
+  hem satis hem alis faturasini gosteriyor (mevcut Tumu/Satis/Alis cip'leriyle secim
+  ayni). Sayfa basligi (`baslik: 'Belgeler'`, breadcrumb 'Satis › Faturalar') BILEREK
+  degistirilmedi - Cari grubunda da ayni ayrim var (menuAd sidebar metni, baslik sayfa
+  H1'i, farkli olabiliyor - `Müşteri Listesi` menuAd'i / `Müşteriler` baslik gibi).
+
+Sidebar sirasi simdi: Hasta, Cari (Müşteri/Tedarikçi/Kişi Listesi), Satış (Satış Fatura
+Listesi), Stok, Hareketler, Hizmet, Masraf, Personel, e-Belge, Islem Gunlugu, Roller.
+Tarayicida dogrulandi: her iki grup ayri ayri ac/kapaniyor, /belge ekrani (Satış Fatura
+Listesi tiklaninca) 446 kayit + Tumu/Satis/Alis cip'leriyle degismeden calisiyor.

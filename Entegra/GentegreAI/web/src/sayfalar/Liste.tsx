@@ -114,6 +114,13 @@ const DURUM_CIPLERI: ListeTanimi['cipler'] = [
     ana menu altinda TOPLANIR. */
 export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: string; menuGrup?: string })[] = [
   {
+    // Tek ogeli grup (kullanici: "Cari menu ustune Hasta menusu ac, altina Hasta
+    // Listesi ekle") - Cari grubunun HEMEN USTUNDE, ayni acilir-kapanir desende.
+    kaynak: 'hasta', baslik: 'Hastalar', yol: 'Hasta › Hastalar', kartYolu: '/hasta',
+    aksiyonEkrani: 'hasta-liste', cipler: DURUM_CIPLERI,
+    menuGrup: 'Hasta', menuAd: 'Hasta Listesi', ic: '🏥', yetkiKodu: 'personel',
+  },
+  {
     // Kaynak id, API route ve yetki kodu 'cari' KALDI - Musteri Listesi kendi URL'ini
     // ('/cari') korur (eski link/rota kirilmasin); Tedarikci Listesi asagida AYNI
     // kaynagi farkli `rota` ile kullanir. Ekran artik SADECE musteri=1 gosterir
@@ -146,16 +153,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Cari', menuAd: 'Kişi Listesi', ic: '🧑', yetkiKodu: 'cari',
   },
   {
-    kaynak: 'stok', baslik: 'Stoklar', yol: 'Stok › Stok Karti', kartYolu: '/stok',
-    aksiyonEkrani: 'stok-liste', cipler: DURUM_CIPLERI,
-    // Mockup'ta (stok_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
-    //   Stok Durumu icin gercek tablo (stok_durum) var ama PK'si (stok_id,depo_id) -
-    //   detay tablosu id kolonu varsayar, o yuzden bu da simdilik yer tutucu.
-    yerTutucuSekmeler: ['ÜTS Bilgileri', 'Reçete', 'Stok Durumu', 'Hareketler', 'Yorum / Medya', 'Ek Alanlar'],
-    resimYerTutucu: true,
-    menuAd: 'Stok', ic: '📦', yetkiKodu: 'stok',
-  },
-  {
+    // "Satış" grubu, Cari'nin HEMEN ALTINDA (kullanici istegi) - "Belgeler" ayni kaynak/
+    // ekran, sadece grup+menu adi degisti (filtre/kapsam AYNI - hala hem satis hem alis
+    // faturalarini gosterir, cip'lerle (Tumu/Satis/Alis) secilir; "kopyala" DENMEDI).
     kaynak: 'belge', baslik: 'Belgeler', yol: 'Satis › Faturalar',
     aksiyonEkrani: 'belge-liste',
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
@@ -164,7 +164,17 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Satis', filtre: { alan: 'tur', op: 'icinde', deger: [14, 15, 16] } },
       { ad: 'Alis', filtre: { alan: 'tur', op: 'icinde', deger: [10, 11, 12] } },
     ],
-    menuAd: 'Belgeler', ic: '🧾', yetkiKodu: 'belge',
+    menuGrup: 'Satış', menuAd: 'Satış Fatura Listesi', ic: '🧾', yetkiKodu: 'belge',
+  },
+  {
+    kaynak: 'stok', baslik: 'Stoklar', yol: 'Stok › Stok Karti', kartYolu: '/stok',
+    aksiyonEkrani: 'stok-liste', cipler: DURUM_CIPLERI,
+    // Mockup'ta (stok_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
+    //   Stok Durumu icin gercek tablo (stok_durum) var ama PK'si (stok_id,depo_id) -
+    //   detay tablosu id kolonu varsayar, o yuzden bu da simdilik yer tutucu.
+    yerTutucuSekmeler: ['ÜTS Bilgileri', 'Reçete', 'Stok Durumu', 'Hareketler', 'Yorum / Medya', 'Ek Alanlar'],
+    resimYerTutucu: true,
+    menuAd: 'Stok', ic: '📦', yetkiKodu: 'stok',
   },
   {
     kaynak: 'mali-hareket', baslik: 'Cari Hareketleri', yol: 'Mali › Hareketler',
@@ -183,11 +193,6 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'personel', baslik: 'Personel', yol: 'IK › Personel', kartYolu: '/personel',
     aksiyonEkrani: 'personel-liste', cipler: DURUM_CIPLERI,
     menuAd: 'Personel', ic: '🪪', yetkiKodu: 'personel',
-  },
-  {
-    kaynak: 'hasta', baslik: 'Hastalar', yol: 'Hasta › Hastalar', kartYolu: '/hasta',
-    aksiyonEkrani: 'hasta-liste', cipler: DURUM_CIPLERI,
-    menuAd: 'Hasta', ic: '🏥', yetkiKodu: 'personel',
   },
   {
     kaynak: 'e-belge', baslik: 'e-Belge Kuyrugu', yol: 'e-Belge › Kuyruk',
