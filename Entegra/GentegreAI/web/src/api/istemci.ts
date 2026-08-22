@@ -160,6 +160,12 @@ export const api = {
   kolonlar: (kaynak: string) =>
     istek<{ kaynak: string; kolonlar: KolonMeta[] }>(`/api/liste/${kaynak}/kolonlar`),
 
+  /** "Son / Sik Aranan" sayacini artirir - kart acilisi disindaki secimler icin
+   *  (or. belge kalemine stok secmek). Hata yutulur: sayac akisi bloklamamali. */
+  aramaIsaretle: (kaynak: string, id: number) =>
+    gonder<{ isaretlendi: boolean }>(`/api/liste/${kaynak}/${id}/isaretle`, {})
+      .catch(() => ({ isaretlendi: false })),
+
   kaynaklar: () => istek<{ kaynaklar: { ad: string; yetkiKodu: string }[] }>('/api/liste'),
 
   // --------------------------------------------------------------- kart ----

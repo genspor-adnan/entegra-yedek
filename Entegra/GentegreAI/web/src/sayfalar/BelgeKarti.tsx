@@ -912,9 +912,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                ve siradaki stok secilir (ardisik hizli giris). */}
         {stokArama && (
           <StokAramaPenceresi
+            etkin={kalem === null}
             onKapat={() => setStokArama(false)}
             onSec={sec => {
               const hizmet = sec.tip === 'hizmet';
+              // Secim "Son / Sik Aranan" sayacina islensin - listede oldugu gibi.
+              void api.aramaIsaretle(hizmet ? 'hizmet' : 'stok', Number(sec.id));
               setKalem({
                 ...bosSatir(Math.max(0, ...satirlar.map(x => x.anahtar)) + 1),
                 satirTur: hizmet ? 2 : 1,
@@ -963,7 +966,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
  * o kapaninca kullanici buradan siradaki stogu secer. Boylece on kalemlik bir
  * irsaliye tek arama penceresiyle girilir.
  */
-function StokAramaPenceresi({ onSec, onKapat }: {
+function StokAramaPenceresi({ etkin, onSec, onKapat }: {
+  /** Ustunde kalem penceresi acikken false olur; true'ya donunce arama
+      kutusuna odak GERI GELIR (ardisik girişte fare gerekmesin). */
+  etkin: boolean;
   onSec(satir: ListeSatiri): void;
   onKapat(): void;
 }) {
@@ -975,6 +981,7 @@ function StokAramaPenceresi({ onSec, onKapat }: {
   /** Liste / Son Aranan / Sik Aranan - GenGrid ile ayni (kullanici_arama). */
   const [aramaGorunumu, setAramaGorunumu] = useState<'tum' | 'son' | 'sik'>('tum');
   const zamanlayici = useRef<number | undefined>(undefined);
+  const kutu = useRef<HTMLInputElement | null>(null);
 
   // STOK ve HIZMET birlikte aranir: belge satiri ikisinden birine baglanabilir,
   //   kullanicinin once "hangi listede acayim" diye dusunmesi gereksiz. Iki
@@ -1010,6 +1017,9 @@ function StokAramaPenceresi({ onSec, onKapat }: {
 
   useEffect(() => { void ara(arama, aramaGorunumu) }, [ara, aramaGorunumu]);  // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Pencere one gelince (acilista ve kalem penceresi kapaninca) imlec aramada.
+  useEffect(() => { if (etkin) kutu.current?.focus() }, [etkin]);
+
   const yaz = (metin: string) => {
     setArama(metin);
     window.clearTimeout(zamanlayici.current);
@@ -1041,6 +1051,7 @@ function StokAramaPenceresi({ onSec, onKapat }: {
             }}>
               <span>🔍</span>
               <input
+                ref={kutu}
                 autoFocus
                 style={{ border: 0, background: 'transparent', outline: 'none', width: '100%', color: 'inherit' }}
                 placeholder="Stok ya da hizmet ara…"

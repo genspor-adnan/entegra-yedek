@@ -31,6 +31,21 @@ public static class ListeUclari
         });
 
         // GET /api/liste/{kaynak}/kolonlar  - yetkisiz kolon bu listede de DONMEZ (§2.4)
+        // POST /api/liste/{kaynak}/{id}/isaretle - "Son / Sik Aranan" sayaci
+        //   Kart acilisi disinda da isaretlenmeli: kullanici bir stogu BELGE
+        //   KALEMINDEN seciyorsa da o kayitla calismis olur; sayac buna kordu.
+        grup.MapPost("/{kaynak}/{id:long}/isaretle", async (
+            string kaynak, long id, BaglamCozucu cozucu, KullaniciAramaDeposu arama,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            var tanim = KaynakKatalogu.Bul(kaynak) ?? throw GentegreHatasi.Bulunamadi();
+            baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
+
+            await arama.IsaretleAsync(baglam.KullaniciId, kaynak, id, iptal);
+            return Results.Ok(new { isaretlendi = true, izlemeNo = baglam.IzlemeNo });
+        });
+
         grup.MapGet("/{kaynak}/kolonlar", async (
             string kaynak, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
