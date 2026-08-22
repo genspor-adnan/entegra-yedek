@@ -843,27 +843,27 @@ public static class KaynakKatalogu
             //   kullaniciya gorunen kolonlar SQL'de metne cevrilir, ham kodlar gizli
             //   kalir (cip filtreleri onlari kullanir).
             //
-            // TIP: mockup SVK/NUM/IPT gosteriyor ama `belge.tipi` gocten 10 farkli
-            //   deger tasiyor (415'i "1") ve anlami belgesiz - o kodu etiketlemek
-            //   uydurma olurdu. Kisaltma BELGE TURUNDEN uretilir, iade bayragi
-            //   (tipi=2, plan §4.1) ustune biner.
-            new("tipAdi",
-                "case when b.tipi = 2 then 'İADE' " +
-                "when b.tur = 14 then 'SVK' when b.tur = 10 then 'ALŞ' " +
-                "when b.tur in (109, 119) then 'KNS' else 'İRS' end",
-                                                      "metin", "Tip",       Hizalama: "orta"),
+            // TIP kolonu YOK: mockup SVK/NUM/IPT gosteriyor ama gocten gelen
+            //   `belge.tipi` 10 farkli deger tasiyor (415 kaydin hepsi "1") ve anlami
+            //   belgesiz. Ekran zaten YALNIZ satis irsaliyelerini gosterdigi icin her
+            //   satirda ayni kisaltmayi tekrarlamanin bilgi degeri de yoktu.
             new("tipi",          "b.tipi",           "sayi",  "Tip Kodu",  Hizalama: "orta", Varsayilan: false),
             new("belgeNo",       "b.belge_no",       "metin", "İrsaliye No"),
             new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",     Hizalama: "orta", Bicim: "dd.MM.yyyy"),
             new("tarafUnvan",    "b.taraf_unvan",    "metin", "Müşteri",   Genislik: 220),
             new("cikisDepo",     "cd.ad",            "metin", "Çıkış Deposu"),
-            new("kaynakBelgeNo", "kb.belge_no",      "metin", "Sipariş No"),
+            // Siparis No ve Arac/Sofor GIZLI (Varsayilan:false): gocten gelen 28
+            //   irsaliyenin hicbirinde dolu degil, her satirda bos kolon goruntu
+            //   kirliligi. Silinmedi - kolon seciciden acilabilir ve F8 zincirini
+            //   (siparis -> irsaliye) gostermenin tek yeri.
+            new("kaynakBelgeNo", "kb.belge_no",      "metin", "Sipariş No", Varsayilan: false),
             // Plaka ve sofor tek kolonda: mockup "07 ABC 145 / Hasan Celik" gosteriyor.
             new("aracSofor",
                 "case when btrim(coalesce(b.arac_plaka, '') || coalesce(b.sofor_ad, '')) = '' then '' " +
                 "else btrim(coalesce(b.arac_plaka, '')) || " +
                 "case when coalesce(b.sofor_ad, '') <> '' then ' / ' || b.sofor_ad else '' end end",
-                                                      "metin", "Araç / Şoför", Genislik: 170),
+                                                      "metin", "Araç / Şoför", Genislik: 170,
+                                                      Varsayilan: false),
             // Teslim eden bos ise satis temsilcisi gosterilir (mockup'taki davranis).
             new("teslimEden",    "coalesce(te.unvan, sc.unvan)", "metin", "Teslim Eden"),
             new("faturalama",
