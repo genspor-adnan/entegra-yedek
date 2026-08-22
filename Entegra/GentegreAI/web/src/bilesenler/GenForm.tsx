@@ -29,6 +29,10 @@ interface Props {
       butonu GIZLENIR - yoksa TarafArama'nin icinden bir baska TarafArama acilir, tekrarli/
       kafa karistirici olur (kullanici). */
   cariyeBaglaGizli?: boolean;
+  /** Yeni kayitta mantik alanlara EKRANA OZEL varsayilan (ör. Tedarikçi Listesi'nden
+      "+Yeni" -> tedarikci:true, musteri:false) - ayni "cari" karti Musteri/Tedarikci
+      ekranlarindan farkli varsayilanla acilsin diye. */
+  yeniKayitVarsayilanlari?: Record<string, boolean>;
 }
 
 /** Modal sarmalayici — mockup'taki .kaperde / .kawin duzeni. */
@@ -96,7 +100,7 @@ const TELEFON_ALANLARI = new Set(['telefon', 'cepTel']);
  *  - Alan hatalari (`alanlar[]`) ilgili girdinin altina yazilir.
  *  - Detaylar FARK olarak gonderilir (eklenen / degisen / silinen), tam liste degil.
  */
-export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSekmeler, resimYerTutucu, cariyeBaglaGizli }: Props) {
+export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSekmeler, resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari }: Props) {
   const yeniMi = id === 'yeni';
 
   const [meta, setMeta] = useState<KartMetaYaniti | null>(null);
@@ -135,6 +139,11 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         m.alanlar.forEach(a => {
           baslangic[a.ad] = a.ad === 'durum' ? '1' : a.tip === 'mantik' ? false : '';
         });
+        // Ekrana ozel mantik varsayilan (ör. Tedarikçi Listesi -> tedarikci:true) -
+        // yukaridaki genel "false" varsayilaninin UZERINE yazar.
+        if (yeniKayitVarsayilanlari) {
+          Object.entries(yeniKayitVarsayilanlari).forEach(([ad, deger]) => { baslangic[ad] = deger });
+        }
         setDeger(baslangic);
         setIlkDeger(baslangic);
         setSurum(undefined);
@@ -160,7 +169,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
     } finally {
       setYukleniyor(false);
     }
-  }, [kaynak, id, yeniMi]);
+  }, [kaynak, id, yeniMi, yeniKayitVarsayilanlari]);
 
   useEffect(() => { void yukle() }, [yukle]);
 

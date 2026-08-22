@@ -20,6 +20,15 @@ export interface ListeTanimi {
   /** Verilirse (ör. islem-log > "bilgi") satir bu alaniyla "İçerik" penceresinde gosterilir. */
   icerikAlani?: string;
   icerikBaslik?: string;
+  /** Kosulsuz sunucu filtresi (ör. Tedarikci Listesi: tedarikci=1) - cip/arama filtreleriyle
+      AND'lenir. Ayni kaynagi (ör. 'cari') farkli görünümlerde tekrar kullanmak icin. */
+  sabitFiltre?: Kosul;
+  /** Verilirse rota (URL/route path) `kaynak` yerine bunu kullanir - ayni kaynagi
+      ("cari") birden fazla ekranda (Musteri/Tedarikci) farkli URL'lerle kullanmak icin. */
+  rota?: string;
+  /** Yeni kayitta mantik alanlara ekrana ozel varsayilan (ör. Tedarikci Listesi ->
+      tedarikci:true, musteri:false) - GenForm'a gecirilir. */
+  yeniKayitVarsayilanlari?: Record<string, boolean>;
 }
 
 /**
@@ -55,6 +64,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       yol={tanim.yol}
       toplam={tanim.toplam}
       cipler={tanim.cipler}
+      sabitFiltre={tanim.sabitFiltre}
       aksiyonEkrani={tanim.aksiyonEkrani}
       yenile={yenile}
       odaklaSonEklenen={odaklaSonEklenen}
@@ -78,6 +88,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         baslik={tanim.baslik.replace(/ler$|lar$/, '')}
         yerTutucuSekmeler={tanim.yerTutucuSekmeler}
         resimYerTutucu={tanim.resimYerTutucu}
+        yeniKayitVarsayilanlari={tanim.yeniKayitVarsayilanlari}
         onKapat={() => git(tanim.kartYolu!)}
         onKaydedildi={yeniId => {
           setYenile(t => t + 1);
@@ -98,25 +109,41 @@ const DURUM_CIPLERI: ListeTanimi['cipler'] = [
   { ad: 'Tumu' },
 ];
 
-/** Menu + rota kaynagi. Yetki sunucudan gelir; burada yalnizca ekran tanimi var. */
-export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: string })[] = [
+/** Menu + rota kaynagi. Yetki sunucudan gelir; burada yalnizca ekran tanimi var.
+    menuGrup verilirse Kabuk.tsx'te ayni gruptaki ogeler "Cari" gibi acilir-kapanir bir
+    ana menu altinda TOPLANIR. */
+export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: string; menuGrup?: string })[] = [
   {
-    // Kaynak id, URL, API route ve yetki kodu 'cari' KALDI - yalniz GORUNEN metin
-    // "Musteri"ye cevrildi (kullanici istegi). Ekran hala musteri+tedarikci ikisini de
-    // gosterir (SabitKosul degismedi) - isim degisikligi bunu etkilemez.
-    kaynak: 'cari', baslik: 'Müşteriler', yol: 'Müşteri › Müşteriler', kartYolu: '/cari',
+    // Kaynak id, API route ve yetki kodu 'cari' KALDI - Musteri Listesi kendi URL'ini
+    // ('/cari') korur (eski link/rota kirilmasin); Tedarikci Listesi asagida AYNI
+    // kaynagi farkli `rota` ile kullanir. Ekran artik SADECE musteri=1 gosterir
+    // (sabitFiltre) - Tedarikci Listesi ayrildigi icin "ikisi birden" gorunumu gerekmiyor.
+    kaynak: 'cari', baslik: 'Müşteriler', yol: 'Cari › Müşteriler', kartYolu: '/cari',
     aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    sabitFiltre: { alan: 'musteri', op: 'esit', deger: 1 },
+    yeniKayitVarsayilanlari: { musteri: true, tedarikci: false },
     // Mockup'ta (cari_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
     yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
-    menuAd: 'Müşteri', ic: '👥', yetkiKodu: 'cari',
+    menuGrup: 'Cari', menuAd: 'Müşteri Listesi', ic: '👥', yetkiKodu: 'cari',
+  },
+  {
+    // Musteri Listesi'nin BIREBIR kopyasi (kullanici istegi) - ayni kaynak ('cari'),
+    // ayni kart, farkli `rota`/kartYolu ('/tedarikci') + ters sabitFiltre.
+    kaynak: 'cari', rota: 'tedarikci', baslik: 'Tedarikçiler', yol: 'Cari › Tedarikçiler',
+    kartYolu: '/tedarikci',
+    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    sabitFiltre: { alan: 'tedarikci', op: 'esit', deger: 1 },
+    yeniKayitVarsayilanlari: { musteri: false, tedarikci: true },
+    yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
+    menuGrup: 'Cari', menuAd: 'Tedarikçi Listesi', ic: '🚚', yetkiKodu: 'cari',
   },
   {
     // kisi_listesi.html mockup - kullanici "sade grid olsun, altta sekme yanda bilgi
     // olmasin" dedi; GenGrid zaten duz grid (mockup'taki sag "Secili Kisi" paneli hic
     // yapilmadi, ozel bir "sadelestirme" gerekmedi).
-    kaynak: 'kisi', baslik: 'Kisiler', yol: 'Müşteri › Kisiler', kartYolu: '/kisi',
+    kaynak: 'kisi', baslik: 'Kisiler', yol: 'Cari › Kisiler', kartYolu: '/kisi',
     aksiyonEkrani: 'kisi-liste', cipler: DURUM_CIPLERI,
-    menuAd: 'Kisiler', ic: '🧑', yetkiKodu: 'cari',
+    menuGrup: 'Cari', menuAd: 'Kişi Listesi', ic: '🧑', yetkiKodu: 'cari',
   },
   {
     kaynak: 'stok', baslik: 'Stoklar', yol: 'Stok › Stok Karti', kartYolu: '/stok',

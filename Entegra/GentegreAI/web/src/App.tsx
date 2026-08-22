@@ -18,17 +18,23 @@ function Yollar() {
     <Routes>
       <Route element={<Kabuk />}>
         {/* Kart modal oldugu icin liste ile AYNI bilesende acilir: /cari ve /cari/4911
-            ayni ekrani cizer, ikincisinde modal ustte durur. */}
-        {LISTELER.filter(l => yetki(l.yetkiKodu)).flatMap(l => [
-          <Route key={l.kaynak} path={`/${l.kaynak}`} element={<Liste tanim={l} />} />,
-          ...(l.kartYolu ? [
-            <Route key={`${l.kaynak}-kart`} path={`/${l.kaynak}/:id`} element={<Liste tanim={l} />} />,
-          ] : []),
-        ])}
+            ayni ekrani cizer, ikincisinde modal ustte durur. Rota=kaynak DEGILDIR
+            zorunlu olarak - ayni kaynak ('cari') Musteri/Tedarikci gibi birden fazla
+            ekranda farkli `rota` ile kullanilabilir, o yuzden path `rota ?? kaynak`dan
+            uretilir. */}
+        {LISTELER.filter(l => yetki(l.yetkiKodu)).flatMap(l => {
+          const rota = l.rota ?? l.kaynak;
+          return [
+            <Route key={rota} path={`/${rota}`} element={<Liste tanim={l} />} />,
+            ...(l.kartYolu ? [
+              <Route key={`${rota}-kart`} path={`/${rota}/:id`} element={<Liste tanim={l} />} />,
+            ] : []),
+          ];
+        })}
 
         <Route path="/belge/yeni" element={<BelgeKarti />} />
 
-        <Route path="*" element={<Navigate to={ilk ? `/${ilk.kaynak}` : '/cari'} replace />} />
+        <Route path="*" element={<Navigate to={ilk ? `/${ilk.rota ?? ilk.kaynak}` : '/cari'} replace />} />
       </Route>
     </Routes>
   );

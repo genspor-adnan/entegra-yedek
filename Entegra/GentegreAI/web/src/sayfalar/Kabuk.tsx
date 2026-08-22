@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { LISTELER } from './Liste';
@@ -13,10 +14,32 @@ export function Kabuk() {
   const { kullanici, cikisYap, subeDegistir, yetki } = useOturum();
   const konum = useLocation();
 
-  // Menu, liste tanimlarindan uretilir; yetkisiz modul hic cizilmez.
-  const moduller = LISTELER
-    .filter(l => yetki(l.yetkiKodu))
-    .map(l => ({ yol: `/${l.kaynak}`, ad: l.menuAd, ic: l.ic, rz: 'liste' }));
+  // Menu, liste tanimlarindan uretilir; yetkisiz modul hic cizilmez. menuGrup verilen
+  //   ogeler ("Cari" -> Musteri/Tedarikci/Kisi Listesi) acilir-kapanir bir ana menu
+  //   altinda TOPLANIR; menuGrup'suz ogeler eskisi gibi duz sirada kalir.
+  const yetkiliListeler = LISTELER.filter(l => yetki(l.yetkiKodu));
+  const moduller: { yol: string; ad: string; ic: string; rz: string; grup?: string }[] =
+    yetkiliListeler.map(l => ({
+      yol: `/${l.rota ?? l.kaynak}`, ad: l.menuAd, ic: l.ic, rz: 'liste', grup: l.menuGrup,
+    }));
+
+  // Sira korunarak grupla: her benzersiz grup adi ilk gorundugu yerde acilir.
+  const satirlar: ({ tur: 'duz'; m: typeof moduller[number] } | { tur: 'grup'; ad: string; alt: typeof moduller })[] = [];
+  const grupIndeksi = new Map<string, number>();
+  moduller.forEach(m => {
+    if (!m.grup) { satirlar.push({ tur: 'duz', m }); return }
+    if (!grupIndeksi.has(m.grup)) {
+      grupIndeksi.set(m.grup, satirlar.length);
+      satirlar.push({ tur: 'grup', ad: m.grup, alt: [] });
+    }
+    (satirlar[grupIndeksi.get(m.grup)!] as { tur: 'grup'; ad: string; alt: typeof moduller }).alt.push(m);
+  });
+
+  // Acik/kapali durumu kullanici ELLE degistirmedikce, aktif alt-ogeyi iceren grup
+  //   otomatik acik gelir (dogrudan /tedarikci gibi bir URL'e gelindiginde de gorunsun).
+  const [acikGruplar, setAcikGruplar] = useState<Record<string, boolean>>({});
+  const grupAcikMi = (ad: string, alt: typeof moduller) =>
+    ad in acikGruplar ? acikGruplar[ad] : alt.some(m => konum.pathname.startsWith(m.yol));
 
   const aktifSube = kullanici?.subeler.find(s => s.id === kullanici?.subeId);
   const basHarfler = (kullanici?.ad ?? '?')
@@ -66,16 +89,41 @@ export function Kabuk() {
         <aside className="yan">
           <div className="yanic">
             <div className="bolum">Calisma alani</div>
-            {moduller.map(m => (
+            {satirlar.map(s => s.tur === 'duz' ? (
               <NavLink
-                key={m.yol}
-                to={m.yol}
-                className={() => `mi ${konum.pathname.startsWith(m.yol) ? 'on' : ''}`}
+                key={s.m.yol}
+                to={s.m.yol}
+                className={() => `mi ${konum.pathname.startsWith(s.m.yol) ? 'on' : ''}`}
               >
-                <span className="ic">{m.ic}</span>
-                <span>{m.ad}</span>
-                <span className="rz">{m.rz}</span>
+                <span className="ic">{s.m.ic}</span>
+                <span>{s.m.ad}</span>
+                <span className="rz">{s.m.rz}</span>
               </NavLink>
+            ) : (
+              <div key={s.ad}>
+                <button
+                  type="button"
+                  className="mi"
+                  style={{ width: '100%', border: 0, background: 'transparent', cursor: 'pointer' }}
+                  onClick={() => setAcikGruplar(g => ({ ...g, [s.ad]: !grupAcikMi(s.ad, s.alt) }))}
+                >
+                  <span className="ic">📇</span>
+                  <span>{s.ad}</span>
+                  <span className="rz">{grupAcikMi(s.ad, s.alt) ? '▾' : '▸'}</span>
+                </button>
+                {grupAcikMi(s.ad, s.alt) && s.alt.map(m => (
+                  <NavLink
+                    key={m.yol}
+                    to={m.yol}
+                    className={() => `mi ${konum.pathname.startsWith(m.yol) ? 'on' : ''}`}
+                    style={{ paddingLeft: 34 }}
+                  >
+                    <span className="ic">{m.ic}</span>
+                    <span>{m.ad}</span>
+                    <span className="rz">{m.rz}</span>
+                  </NavLink>
+                ))}
+              </div>
             ))}
 
             <div className="bolum">Oturum</div>

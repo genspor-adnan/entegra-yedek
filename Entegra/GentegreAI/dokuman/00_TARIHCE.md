@@ -2037,3 +2037,39 @@ bunlarin hepsi hem musteri hem tedarikci tarafini kapsiyor, "Müşteri"ye cevirm
 (tedarikçi) taraflarinda anlam hatasi yaratirdi. Tarayicida dogrulandi: sidebar "Müşteri",
 "Müşteriler" liste basligi + breadcrumb, kart "Müşteri #1855", Kişiler'de "Müşteri › Kisiler"
 breadcrumb + "Cari (Firma)" kolonu degismeden kaldi.
+
+### Ayni oturum: "Cari" ana menu + Tedarikci Listesi/Karti (Musteri'den kopya)
+
+Kullanici: "Cari ana menü oluştur, altına Müşteri Listesi, Tedarikçi Listesi, Kişi Listesi
+ekle, Tedarikçi listesi ve kartını Müşteri listesi/kartından kopyala".
+
+**Mimari karar: Tedarikçi Listesi AYRI backend kaynak/kart DEGIL** - ayni `cari` kaynagi
+ve karti farkli `sabitFiltre` + rota ile tekrar kullanildi:
+- `Liste.tsx`: `ListeTanimi`ye `sabitFiltre` (kosulsuz sunucu filtresi, cip'lerle AND'lenir),
+  `rota` (URL/route `kaynak`dan FARKLI olabilsin - ayni kaynagi iki ekranda kullanmak icin),
+  `yeniKayitVarsayilanlari` (yeni kayitta ekrana ozel mantik alan varsayilani) eklendi.
+- Musteri Listesi artik SADECE `musteri=1` gosteriyor (`sabitFiltre`) - onceki "ikisi
+  birden" davranisi (Tedarikci ayrildigi icin) gerekmiyordu; kaynak/URL/yetki kodu `cari`
+  aynen kaldi (eski linkler kirilmadi).
+- Tedarikçi Listesi: `kaynak:'cari'` + `rota:'tedarikci'` + `kartYolu:'/tedarikci'` +
+  `sabitFiltre: tedarikci=1`. Ayni `aksiyonEkrani:'cari-liste'` (aksiyon etiketleri zaten
+  genel "+Yeni/Düzenle/Sil", kaynağa özel metin yok - katalogda yeni girdi gerekmedi).
+- **`App.tsx` route path artik `l.rota ?? l.kaynak`dan** uretiliyor (route key + path +
+  catch-all yonlendirme) - iki liste tanimi AYNI `kaynak`i paylasinca (`cari`) path
+  cakismasin diye. Kaynak (`GenForm`/`GenGrid`e giden `tanim.kaynak`) HER ZAMAN 'cari' -
+  URL segmenti ile API kaynagi boylece ayristirildi.
+- **Yeni kayitta dogru varsayilan**: GenForm'a `yeniKayitVarsayilanlari` prop'u eklendi -
+  Musteri Listesi'nden "+Yeni" -> `musteri:true,tedarikci:false`; Tedarikci Listesi'nden
+  -> tam tersi. Bug bulundu/duzeltildi: mevcut "+Yeni" zaten hicbir ekrandan varsayilan
+  musteri/tedarikci vermiyordu (checkbox'lar bos geliyordu, `YeniKayitVarsayilanlari`
+  backend alani bu iki alan icin fiilen kullanilmiyordu) - bu ekleme ayni zamanda o
+  eksikligi kapatti.
+- **Kabuk.tsx**: sidebar'a ilk kez GRUPLU/acilir-kapanir menu eklendi (`menuGrup` alani
+  LISTELER girdisinde) - "Cari" basligina tiklayinca alt-ogeler (Musteri/Tedarikci/Kisi
+  Listesi) acilir/kapanir; aktif alt-oge icindeyken grup otomatik acik gelir. menuGrup'suz
+  digerleri (Stok, Belgeler...) eskisi gibi duz sirada kaliyor.
+
+Tarayicida uctan uca dogrulandi: /cari 2.318 kayit (2.350'den 32 saf-tedarikci dustu,
+dogru), /tedarikci 40 kayit (2K CNC gibi cift-rollu kayitlar HER IKI listede de - beklenen),
+Tedarikci Listesi'nden "+Yeni" -> "Tedarikçi — Yeni" basligi + Tedarikçi checkbox ONCEDEN
+ISARETLI/Musteri bos, Kişi Listesi + "Cari" grup ac/kapa calisti.
