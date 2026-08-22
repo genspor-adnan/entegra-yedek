@@ -250,6 +250,17 @@ public static class KaynakKatalogu
             new("ad",      "h.ad",       "metin", "Hizmet Adi"),
             new("grubu",   "h.grubu",    "kod",   "Grup"),
             new("kdv",     "h.kdv",      "sayi",  "KDV %",      Hizalama: "sag"),
+            // Hizmette satis/alis ayrimi yok - tek fiyat listesi.
+            new("fiyat",
+                "(select f.fiyat from public.hizmet_fiyat f " +
+                " where f.hizmet_id = h.id and f.fiyat > 0 order by f.fiyat_adi limit 1)",
+                                            "para",  "Fiyat",      Hizalama: "sag", Bicim: "#,##0.00",
+                                            Siralanabilir: false, Filtrelenebilir: false),
+            new("fiyatDovizi",
+                "(select f.doviz_cinsi from public.hizmet_fiyat f " +
+                " where f.hizmet_id = h.id and f.fiyat > 0 order by f.fiyat_adi limit 1)",
+                                            "metin", "Döviz",      Hizalama: "orta",
+                                            Siralanabilir: false, Filtrelenebilir: false),
             new("birim",   "h.birim",    "kod",   "Birim",      Hizalama: "orta"),
             new("muhKodu", "h.muh_kodu", "metin", "Muh. Kodu",  Varsayilan: false),
             new("durum",   "h.durum",    "kod",   "Durum",      Hizalama: "orta")
@@ -499,6 +510,32 @@ public static class KaynakKatalogu
                 "when 4 then 'Karekod' when 5 then 'Lot No + SKT' when 6 then 'Seri + Lot' else 'Yok' end",
                                             "metin", "İzleme",   Hizalama: "orta"),
             new("izleme",    "s.izleme",    "sayi",  "İzleme Kodu", Hizalama: "orta", Varsayilan: false),
+            // Fiyat: stok_fiyat'ta satis/alis AYRI kayittir ve -1 "fiyat girilmemis"
+            //   demektir; en dusuk fiyat_adi (ana liste) alinir.
+            new("fiyat",
+                "(select f.fiyat from public.stok_fiyat f " +
+                " where f.stok_id = s.id and f.satis = 1 and f.fiyat > 0 " +
+                " order by f.fiyat_adi limit 1)",
+                                            "para",  "Fiyat",    Hizalama: "sag", Bicim: "#,##0.00",
+                                            Siralanabilir: false, Filtrelenebilir: false),
+            new("fiyatDovizi",
+                "(select f.doviz_cinsi from public.stok_fiyat f " +
+                " where f.stok_id = s.id and f.satis = 1 and f.fiyat > 0 " +
+                " order by f.fiyat_adi limit 1)",
+                                            "metin", "Döviz",    Hizalama: "orta",
+                                            Siralanabilir: false, Filtrelenebilir: false),
+            new("alisFiyat",
+                "(select f.fiyat from public.stok_fiyat f " +
+                " where f.stok_id = s.id and f.satis = 0 and f.fiyat > 0 " +
+                " order by f.fiyat_adi limit 1)",
+                                            "para",  "Alış Fiyatı", Hizalama: "sag", Bicim: "#,##0.00",
+                                            Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
+            new("alisDovizi",
+                "(select f.doviz_cinsi from public.stok_fiyat f " +
+                " where f.stok_id = s.id and f.satis = 0 and f.fiyat > 0 " +
+                " order by f.fiyat_adi limit 1)",
+                                            "metin", "Alış Dövizi", Hizalama: "orta",
+                                            Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
             new("minStok",   "s.min_stok",  "sayi",  "Min. Stok",Hizalama: "sag", Varsayilan: false),
             new("durum",     "s.durum",     "kod",   "Durum",    Hizalama: "orta"),
             new("urunNo",    "s.urun_no",   "metin", "Urun No",  Varsayilan: false),

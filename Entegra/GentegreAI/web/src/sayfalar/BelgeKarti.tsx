@@ -923,6 +923,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 stokKodu: String(sec.kod ?? ''),
                 stokAdi: String(sec.ad ?? ''),
                 kdv: sec.kdv !== undefined && sec.kdv !== null ? String(sec.kdv) : '20',
+                // Kart fiyati onyuklenir - kullanici zaten listede gorup seciyor;
+                //   pencerede degistirebilir.
+                birimFiyat: sec.fiyat ? String(sec.fiyat) : '',
               });
             }}
           />
@@ -969,12 +972,14 @@ function StokAramaPenceresi({ onSec, onKapat }: {
   const [yukleniyor, setYukleniyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const [secili, setSecili] = useState(0);
+  /** Liste / Son Aranan / Sik Aranan - GenGrid ile ayni (kullanici_arama). */
+  const [aramaGorunumu, setAramaGorunumu] = useState<'tum' | 'son' | 'sik'>('tum');
   const zamanlayici = useRef<number | undefined>(undefined);
 
   // STOK ve HIZMET birlikte aranir: belge satiri ikisinden birine baglanabilir,
   //   kullanicinin once "hangi listede acayim" diye dusunmesi gereksiz. Iki
   //   kaynak paralel cekilir ve tip alaniyla isaretlenir.
-  const ara = useCallback(async (metin: string) => {
+  const ara = useCallback(async (metin: string, gorunumSecimi: 'tum' | 'son' | 'sik' = 'tum') => {
     setYukleniyor(true);
     setHata(null);
     try {
@@ -983,9 +988,11 @@ function StokAramaPenceresi({ onSec, onKapat }: {
             alan, op: 'icerir' as const, deger: metin.trim() })) }
         : undefined;
 
+      // gorunum: Son/Sik Aranan sunucuda kullanici_arama ile suzulur+siralanir.
+      const gorunum = gorunumSecimi === 'tum' ? undefined : gorunumSecimi;
       const [stoklar, hizmetler] = await Promise.all([
-        api.liste('stok',   { sayfa: 1, boyut: 25, filtre }),
-        api.liste('hizmet', { sayfa: 1, boyut: 25, filtre }),
+        api.liste('stok',   { sayfa: 1, boyut: 25, filtre, gorunum }),
+        api.liste('hizmet', { sayfa: 1, boyut: 25, filtre, gorunum }),
       ]);
 
       const birlesik: ListeSatiri[] = [
@@ -1001,12 +1008,12 @@ function StokAramaPenceresi({ onSec, onKapat }: {
     } finally { setYukleniyor(false) }
   }, []);
 
-  useEffect(() => { void ara('') }, [ara]);
+  useEffect(() => { void ara(arama, aramaGorunumu) }, [ara, aramaGorunumu]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const yaz = (metin: string) => {
     setArama(metin);
     window.clearTimeout(zamanlayici.current);
-    zamanlayici.current = window.setTimeout(() => void ara(metin), 250);
+    zamanlayici.current = window.setTimeout(() => void ara(metin, aramaGorunumu), 250);
   };
 
   const tus = (e: React.KeyboardEvent) => {
@@ -1024,9 +1031,33 @@ function StokAramaPenceresi({ onSec, onKapat }: {
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}
         <div className="kagrup">
-          <div style={{ margin: 10 }}>
-            <input autoFocus className="arama" placeholder="stok kodu ya da adı…"
-                   value={arama} onChange={e => yaz(e.target.value)} onKeyDown={tus} />
+          {/* Arama kutusu ve Liste/Son/Sik dugmeleri LISTE EKRANLARIYLA ayni
+              (GenGrid deseni) - kullanici ayni araci iki farkli bicimde
+              ogrenmek zorunda kalmasin. */}
+          <div className="cipler" style={{ margin: 10 }}>
+            <div className="ara" style={{
+              maxWidth: 260, margin: 0, height: 23, borderRadius: 12,
+              background: 'var(--yuz)', color: 'var(--yazi)', border: '1px solid var(--cizgi)',
+            }}>
+              <span>🔍</span>
+              <input
+                autoFocus
+                style={{ border: 0, background: 'transparent', outline: 'none', width: '100%', color: 'inherit' }}
+                placeholder="Stok ya da hizmet ara…"
+                value={arama}
+                onChange={e => yaz(e.target.value)}
+                onKeyDown={tus}
+              />
+            </div>
+
+            <div className="durumseg">
+              <button className={`ikon-liste ${aramaGorunumu === 'tum' ? 'on' : ''}`}
+                      title="Tüm Liste" onClick={() => setAramaGorunumu('tum')}>☰</button>
+              <button className={`ikon-liste ${aramaGorunumu === 'son' ? 'on' : ''}`}
+                      title="Son Aranan" onClick={() => setAramaGorunumu('son')}>🕓</button>
+              <button className={`ikon-liste ${aramaGorunumu === 'sik' ? 'on' : ''}`}
+                      title="Sık Aranan" onClick={() => setAramaGorunumu('sik')}>⭐</button>
+            </div>
           </div>
           <table className="detay-tablo secilebilir">
             <thead>
@@ -1035,6 +1066,8 @@ function StokAramaPenceresi({ onSec, onKapat }: {
                 <th style={{ width: 130 }}>Kod</th>
                 <th>Ad</th>
                 <th className="hiza-sag" style={{ width: 90 }}>Kalan</th>
+                <th className="hiza-sag" style={{ width: 100 }}>Fiyat</th>
+                <th style={{ width: 60 }} className="hiza-orta">Döviz</th>
                 <th style={{ width: 110 }} className="hiza-orta">İzleme</th>
                 <th className="hiza-sag" style={{ width: 70 }}>KDV</th>
               </tr>
@@ -1056,6 +1089,10 @@ function StokAramaPenceresi({ onSec, onKapat }: {
                     {r.tip === 'hizmet' ? <span className="sonuk">—</span>
                       : Number(r.kalan ?? 0).toLocaleString('tr-TR')}
                   </td>
+                  <td className="hiza-sag">
+                    {r.fiyat ? para.format(Number(r.fiyat)) : <span className="sonuk">—</span>}
+                  </td>
+                  <td className="hiza-orta sonuk">{String(r.fiyatDovizi ?? '') || '—'}</td>
                   <td className="hiza-orta">
                     {r.tip === 'hizmet' ? <span className="sonuk">—</span>
                       : String(r.izlemeAdi ?? 'Yok') === 'Yok'
@@ -1066,7 +1103,7 @@ function StokAramaPenceresi({ onSec, onKapat }: {
                 </tr>
               ))}
               {!yukleniyor && satirlar.length === 0 && (
-                <tr><td colSpan={6} className="bos">Kayıt yok</td></tr>
+                <tr><td colSpan={8} className="bos">Kayıt yok</td></tr>
               )}
             </tbody>
           </table>
