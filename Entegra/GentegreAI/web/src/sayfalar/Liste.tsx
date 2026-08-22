@@ -175,6 +175,16 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Kasa', menuAd: 'Kasa Hareketleri', ic: '💰', yetkiKodu: 'mali_hareket',
   },
   {
+    // Kullanici: "Kasa altına Hizmet Listesi ve Masraf Listesi'ı taşı".
+    kaynak: 'hizmet', baslik: 'Hizmetler', yol: 'Stok › Hizmetler', cipler: DURUM_CIPLERI,
+    menuGrup: 'Kasa', menuAd: 'Hizmet Listesi', ic: '🛠️', yetkiKodu: 'hizmet',
+  },
+  {
+    kaynak: 'masraf', baslik: 'Masraflar', yol: 'Stok › Masraflar', cipler: DURUM_CIPLERI,
+    menuGrup: 'Kasa', menuAd: 'Masraf Listesi', ic: '🧾', yetkiKodu: 'masraf',
+  },
+  {
+    // Kullanici: "Stok altına Stok Listesi [taşı]" - tek ogeli grup, digerleriyle ayni desen.
     kaynak: 'stok', baslik: 'Stoklar', yol: 'Stok › Stok Karti', kartYolu: '/stok',
     aksiyonEkrani: 'stok-liste', cipler: DURUM_CIPLERI,
     // Mockup'ta (stok_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
@@ -182,35 +192,29 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   detay tablosu id kolonu varsayar, o yuzden bu da simdilik yer tutucu.
     yerTutucuSekmeler: ['ÜTS Bilgileri', 'Reçete', 'Stok Durumu', 'Hareketler', 'Yorum / Medya', 'Ek Alanlar'],
     resimYerTutucu: true,
-    menuAd: 'Stok', ic: '📦', yetkiKodu: 'stok',
+    menuGrup: 'Stok', menuAd: 'Stok Listesi', ic: '📦', yetkiKodu: 'stok',
   },
   {
-    kaynak: 'hizmet', baslik: 'Hizmetler', yol: 'Stok › Hizmetler', cipler: DURUM_CIPLERI,
-    menuAd: 'Hizmet', ic: '🛠️', yetkiKodu: 'hizmet',
-  },
-  {
-    kaynak: 'masraf', baslik: 'Masraflar', yol: 'Stok › Masraflar', cipler: DURUM_CIPLERI,
-    menuAd: 'Masraf', ic: '🧾', yetkiKodu: 'masraf',
-  },
-  {
+    // Kullanici: "İK altına Personel Listesi taşı" - tek ogeli grup, digerleriyle ayni desen.
     kaynak: 'personel', baslik: 'Personel', yol: 'IK › Personel', kartYolu: '/personel',
     aksiyonEkrani: 'personel-liste', cipler: DURUM_CIPLERI,
-    menuAd: 'Personel', ic: '🪪', yetkiKodu: 'personel',
+    menuGrup: 'İK', menuAd: 'Personel Listesi', ic: '🪪', yetkiKodu: 'personel',
   },
   {
     kaynak: 'e-belge', baslik: 'e-Belge Kuyrugu', yol: 'e-Belge › Kuyruk',
     menuAd: 'e-Belge', ic: '📨', yetkiKodu: 'e_belge',
   },
   {
+    // Kullanici: "Yönetim altına Roller ve İşlem Günlüğü al".
     kaynak: 'islem-log', baslik: 'Islem Gunlugu', yol: 'Yonetim › Islem Gunlugu',
     icerikAlani: 'bilgi', icerikBaslik: 'Log İçeriği',
-    menuAd: 'Islem Gunlugu', ic: '📋', yetkiKodu: 'islem_log',
+    menuGrup: 'Yönetim', menuAd: 'İşlem Günlüğü', ic: '📋', yetkiKodu: 'islem_log',
   },
   {
     // Rol'un durum kolonu "durum" degil "aktif" - DURUM_CIPLERI (alan:'durum') buraya
     //   UYMAZ, kullanilmadi (yoksa "Bilinmeyen alan: durum" 400 verirdi).
     kaynak: 'rol', baslik: 'Roller', yol: 'Yonetim › Roller ve Yetkiler', kartYolu: '/rol',
     aksiyonEkrani: 'rol-liste',
-    menuAd: 'Roller', ic: '🛡️', yetkiKodu: 'rol',
+    menuGrup: 'Yönetim', menuAd: 'Roller', ic: '🛡️', yetkiKodu: 'rol',
   },
 ];

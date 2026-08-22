@@ -2109,3 +2109,22 @@ Hareketleri" -> "Kasa Hareketleri") **hem `baslik` hem `menuAd`** "Kasa Hareketl
 Sidebar sirasi: Hasta, Cari, Satış, **Kasa** (Kasa Hareketleri), Stok, Hizmet, Masraf,
 Personel, e-Belge, Islem Gunlugu, Roller. Tarayicida dogrulandi: 799 kayit ayni, baslik+
 breadcrumb "Kasa Hareketleri"/"Kasa › Hareketler".
+
+### Ayni oturum: kalan duz ogeler de gruplandi (Stok, Kasa+2, İK, Yönetim)
+
+Ard arda 3 istek, hepsi ayni "tek/coklu ogeyi var olan ya da yeni gruba tasi" deseni -
+yeni kaynak/kart/filtre YOK, sadece `menuGrup`/`menuAd` + LISTELER sirasi:
+
+1. "Stok altına Stok Listesi, Kasa altına Hizmet Listesi ve Masraf Listesi'ı taşı" -
+   `stok` kendi tek-ogeli "Stok" grubuna gecti (`menuAd: 'Stok Listesi'`); `hizmet`/`masraf`
+   VAR OLAN "Kasa" grubuna eklendi (`'Hizmet Listesi'`/`'Masraf Listesi'`, Kasa Hareketleri'nin
+   hemen altina).
+2. "İK altına Personel Listesi taşı" - `personel` yeni tek-ogeli "İK" grubuna
+   (`menuAd: 'Personel Listesi'`).
+3. "Yönetim altına Roller ve İşlem Günlüğü al" - `islem-log` + `rol` yeni "Yönetim"
+   grubuna (`menuAd`'lar "İşlem Günlüğü"/"Roller" - "Islem Gunlugu" bu arada duzgun
+   Turkce'ye cevrildi).
+
+Sidebar son hali: Hasta, Cari(3), Satış(1), Kasa(3: Hareketleri/Hizmet/Masraf Listesi),
+Stok(1), İK(1), e-Belge(duz), Yönetim(2: İşlem Günlüğü/Roller). Tarayicida hepsi tek tek
+ac/kapa + dogru alt-ogelerle dogrulandi.
