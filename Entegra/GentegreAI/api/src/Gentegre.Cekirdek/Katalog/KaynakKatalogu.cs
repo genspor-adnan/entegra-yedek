@@ -90,6 +90,7 @@ public static class KaynakKatalogu
         // Belge donusumu (F8)
         Ekle(BelgeAcikSatir());
         Ekle(Depo());
+        Ekle(Irsaliye());
     }
 
     private static void Ekle(KaynakTanimi k) => Kaynaklar[k.Ad] = k;
@@ -814,6 +815,86 @@ public static class KaynakKatalogu
             new("projeId",          "v.proje_id",          "sayi",  "Proje Id", Varsayilan: false),
             new("aciklama",         "v.aciklama",          "metin", "Açıklama", Genislik: 240),
             new("subeId",           "v.sube_id",           "sayi",  "Şube",   Varsayilan: false)
+        });
+
+    // ---------------------------------------------------------- irsaliye ----
+    // Ekranlar/satis_irsaliye_listesi.html kolonlariyla BIREBIR. Ayni `belge`
+    //   tablosu ama AYRI kaynak: irsaliye listesi sevkiyat odakli (arac/sofor,
+    //   cikis deposu, kaynak siparis, faturalama durumu) - bu kolonlari genel
+    //   belge listesine eklemek onu 20 kolonluk bir seye cevirirdi.
+    private static KaynakTanimi Irsaliye() => new(
+        Ad: "irsaliye",
+        YetkiKodu: "belge",
+        Kaynak: """
+            public.belge b
+            left join public.depo  cd on cd.id = b.cikis_depo_id
+            left join public.taraf te on te.id = b.teslim_eden_id
+            left join public.taraf sc on sc.id = b.satici_id
+            left join public.belge kb on kb.id = b.kaynak_id and b.kaynak_tur = 30
+            """,
+        SabitKosul: "b.tur in (10, 14, 109, 119)",
+        SubeKolonu: "b.sube_id",
+        KapsamKolonu: "b.taraf_id",
+        VarsayilanSirala: "b.belge_tarihi desc, b.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",            "b.id",             "sayi",  "Id",        Varsayilan: false),
+            // Liste katmaninda kod_liste cozumu YOK (yalniz kartta var); bu yuzden
+            //   kullaniciya gorunen kolonlar SQL'de metne cevrilir, ham kodlar gizli
+            //   kalir (cip filtreleri onlari kullanir).
+            //
+            // TIP: mockup SVK/NUM/IPT gosteriyor ama `belge.tipi` gocten 10 farkli
+            //   deger tasiyor (415'i "1") ve anlami belgesiz - o kodu etiketlemek
+            //   uydurma olurdu. Kisaltma BELGE TURUNDEN uretilir, iade bayragi
+            //   (tipi=2, plan §4.1) ustune biner.
+            new("tipAdi",
+                "case when b.tipi = 2 then 'İADE' " +
+                "when b.tur = 14 then 'SVK' when b.tur = 10 then 'ALŞ' " +
+                "when b.tur in (109, 119) then 'KNS' else 'İRS' end",
+                                                      "metin", "Tip",       Hizalama: "orta"),
+            new("tipi",          "b.tipi",           "sayi",  "Tip Kodu",  Hizalama: "orta", Varsayilan: false),
+            new("belgeNo",       "b.belge_no",       "metin", "İrsaliye No"),
+            new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",     Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("tarafUnvan",    "b.taraf_unvan",    "metin", "Müşteri",   Genislik: 220),
+            new("cikisDepo",     "cd.ad",            "metin", "Çıkış Deposu"),
+            new("kaynakBelgeNo", "kb.belge_no",      "metin", "Sipariş No"),
+            // Plaka ve sofor tek kolonda: mockup "07 ABC 145 / Hasan Celik" gosteriyor.
+            new("aracSofor",
+                "case when btrim(coalesce(b.arac_plaka, '') || coalesce(b.sofor_ad, '')) = '' then '' " +
+                "else btrim(coalesce(b.arac_plaka, '')) || " +
+                "case when coalesce(b.sofor_ad, '') <> '' then ' / ' || b.sofor_ad else '' end end",
+                                                      "metin", "Araç / Şoför", Genislik: 170),
+            // Teslim eden bos ise satis temsilcisi gosterilir (mockup'taki davranis).
+            new("teslimEden",    "coalesce(te.unvan, sc.unvan)", "metin", "Teslim Eden"),
+            new("faturalama",
+                "case b.kapanma_durum when 2 then 'Faturalandı' when 1 then 'Kısmi' else 'Faturalanmadı' end",
+                                                      "metin", "Faturalama", Hizalama: "orta"),
+            new("kapanmaDurum",  "b.kapanma_durum",  "sayi",  "Faturalama Kodu", Hizalama: "orta", Varsayilan: false),
+            new("eIrsaliye",
+                "case when coalesce(b.efatura_durum, 0) = 0 then 'Kağıt' " +
+                "when b.efatura_durum = 1 then 'Hazırlandı' when b.efatura_durum = 2 then 'Gönderildi' " +
+                "when b.efatura_durum = 3 then 'Kabul' when b.efatura_durum = 4 then 'Red' else 'Bilinmiyor' end",
+                                                      "metin", "e-İrsaliye", Hizalama: "orta"),
+            new("efaturaDurum",  "b.efatura_durum",  "sayi",  "e-Belge Kodu", Hizalama: "orta", Varsayilan: false),
+            new("miktar",
+                "(select coalesce(sum(s.miktar), 0) from public.belge_satir s where s.belge_id = b.id)",
+                                                      "para",  "Miktar",    Hizalama: "sag", Bicim: "#,##0.##",
+                                                      Siralanabilir: false, Filtrelenebilir: false),
+            new("genelToplam",   "b.genel_toplam",   "para",  "Tutar",     Hizalama: "sag", Bicim: "#,##0.00"),
+            new("teslimSekli",
+                "case b.teslim_sekli when 1 then 'Alıcı adresine teslim' when 2 then 'Alıcı kendi aracıyla' " +
+                "when 3 then 'Kargo / nakliye' when 4 then 'Depoda teslim' when 5 then 'Yurt dışı sevk' " +
+                "else 'Belirtilmemiş' end",
+                                                      "metin", "Teslim Şekli", Hizalama: "orta", Varsayilan: false),
+            new("irsaliyeTarihi","b.irsaliye_tarihi","tarih", "Sevk Zamanı", Hizalama: "orta",
+                                                      Bicim: "dd.MM.yyyy HH:mm", Varsayilan: false),
+            new("aracPlaka",     "b.arac_plaka",     "metin", "Plaka",     Varsayilan: false),
+            new("soforAd",       "b.sofor_ad",       "metin", "Şoför",     Varsayilan: false),
+            new("tur",           "b.tur",            "sayi",  "Tür Kodu",  Hizalama: "orta", Varsayilan: false),
+            new("durumAdi",      "case b.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end",
+                                                      "metin", "Durum",     Hizalama: "orta"),
+            new("durum",         "b.durum",          "sayi",  "Durum Kodu", Hizalama: "orta", Varsayilan: false),
+            new("subeId",        "b.sube_id",        "sayi",  "Şube",      Varsayilan: false)
         });
 
     // -------------------------------------------------------------- depo ----

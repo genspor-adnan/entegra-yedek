@@ -2483,5 +2483,31 @@ numarasını taşıyor, alanlar ve satırlar salt okunur, dip toplam sunucudan g
 görünür. Kaydet düğmesi kesin belgede pasif (`PUT /api/belge/{id}` yok; değişiklik =
 iptal + yeniden kesme, F7). Çift tık da aynı modalı açıyor.
 
+### Satış İrsaliyeleri listesi (089)
+
+`Ekranlar/satis_irsaliye_listesi.html` kolonlarıyla birebir **ayrı bir kaynak**
+(`irsaliye`) tanımlandı — aynı `belge` tablosu ama sevkiyat odaklı görünüm (araç/şoför,
+çıkış deposu, kaynak sipariş, faturalama durumu). Bu kolonları genel belge listesine
+eklemek onu 20 kolonluk bir şeye çevirirdi.
+
+Mockup'ın istediği **araç/şoför ve teslim eden** alanları şemada yoktu; eklendi
+(`arac_plaka`, `sofor_ad`, `sofor_tckn`, `tasiyici_id`, `teslim_eden_id`). Süs değil:
+e-İrsaliye UBL'inde `TransportMeans/PlateID` ve `DriverPerson` zorunlu alanlar, kâğıt
+irsaliyede de matbu formda yer alıyor.
+
+İki karar kayda değer:
+
+1. **Liste katmanında kod çözümü yok** (yalnız kartta var), bu yüzden Tip / Faturalama /
+   e-İrsaliye / Teslim Şekli kolonları SQL'de metne çevriliyor; ham kodlar gizli kolon
+   olarak duruyor çünkü çip filtreleri onları kullanıyor.
+2. **Tip kolonu `belge.tipi`'den ÜRETİLMİYOR.** Mockup SVK/NUM/İPT gösteriyor ama göçten
+   gelen `tipi` 10 farklı değer taşıyor (415 kaydın hepsi "1") ve anlamı belgesiz — o kodu
+   etiketlemek uydurma olurdu. Kısaltma belge **türünden** üretiliyor (14→SVK, 10→ALŞ,
+   109/119→KNS), iade bayrağı (`tipi=2`) üstüne biniyor.
+
+Menü: **Satış** grubu sipariş → irsaliye → fatura sırasına dizildi (belgenin yaşam
+döngüsü sırası). `irsaliye-liste` aksiyon ekranı: Yeni İrsaliye · İrsaliyeyi Aç ·
+Faturaya Dönüştür (F8 modalı) · e-İrsaliye Gönder · İptal · Yazdır.
+
 **Sırada (F4):** kapatma + kur farkı; ardından F5 (çek/senet), F6 (kredi/kupon),
 F7 (belge fişleme).

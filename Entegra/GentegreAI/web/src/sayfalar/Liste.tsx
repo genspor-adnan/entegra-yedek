@@ -168,7 +168,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       icerikBaslik={tanim.icerikBaslik}
       onSatirAc={satir => {
         // Belge listelerinde kart MODAL acilir (rota yok); digerlerinde kartYolu.
-        if (tanim.kaynak === 'belge') setAcikBelgeId(Number(satir.id));
+        if (tanim.kaynak === 'belge' || tanim.kaynak === 'irsaliye')
+          setAcikBelgeId(Number(satir.id));
         else if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`);
       }}
       onAksiyon={(kod, satir) => { void aksiyon(kod, satir) }}
@@ -269,6 +270,39 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Cari', menuAd: 'Kişi Listesi', ic: '🧑', yetkiKodu: 'cari',
   },
   {
+    // Siparisler AYNI 'belge' kaynagi, tur in (9,19) sabit filtresiyle (Musteri/
+    //   Tedarikci deseni). "Kalan" takibi belge_satir.kapatilan_miktar uzerinden;
+    //   "Dönüştür" aksiyonu secili siparisten irsaliye/fatura uretir (F8).
+    kaynak: 'belge', rota: 'siparis', baslik: 'Satış Siparişleri', yol: 'Satis › Satış Siparişleri',
+    aksiyonEkrani: 'siparis-liste', yeniBelgeTuru: 19,
+    sabitFiltre: { alan: 'tur', op: 'icinde', deger: [9, 19] },
+    toplam: ['genelToplam'],
+    cipler: [
+      { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
+      { ad: 'Kısmi',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
+      { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Satış', menuAd: 'Satış Siparişleri', ic: '📋', yetkiKodu: 'belge',
+  },
+  {
+    // Satis irsaliyeleri (Ekranlar/satis_irsaliye_listesi.html): AYRI kaynak
+    //   ('irsaliye') - sevkiyat odakli kolonlar (arac/sofor, cikis deposu,
+    //   kaynak siparis, faturalama durumu). Ekran satisa daraltir (tur=14).
+    kaynak: 'irsaliye', rota: 'satis-irsaliye', baslik: 'Satış İrsaliyeleri',
+    yol: 'Satis › Irsaliyeler', aksiyonEkrani: 'irsaliye-liste',
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 14 },
+    yeniBelgeTuru: 14,
+    toplam: ['miktar', 'genelToplam'],
+    cipler: [
+      { ad: 'Faturalanmadı', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
+      { ad: 'Kısmi',         filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
+      { ad: 'Faturalandı',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Satış', menuAd: 'Satış İrsaliyeleri', ic: '🚚', yetkiKodu: 'belge',
+  },
+  {
     // "Satış" grubu, Cari'nin HEMEN ALTINDA (kullanici istegi) - "Belgeler" ayni kaynak/
     // ekran, sadece grup+menu adi degisti (filtre/kapsam AYNI - hala hem satis hem alis
     // faturalarini gosterir, cip'lerle (Tumu/Satis/Alis) secilir; "kopyala" DENMEDI).
@@ -280,23 +314,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Satis', filtre: { alan: 'tur', op: 'icinde', deger: [14, 15, 16] } },
       { ad: 'Alis', filtre: { alan: 'tur', op: 'icinde', deger: [10, 11, 12] } },
     ],
-    menuGrup: 'Satış', menuAd: 'Satış Fatura Listesi', ic: '🧾', yetkiKodu: 'belge',
-  },
-  {
-    // Siparisler AYNI 'belge' kaynagi, tur in (9,19) sabit filtresiyle (Musteri/
-    //   Tedarikci deseni). "Kalan" takibi belge_satir.kapatilan_miktar uzerinden;
-    //   "Dönüştür" aksiyonu secili siparisten irsaliye/fatura uretir (F8).
-    kaynak: 'belge', rota: 'siparis', baslik: 'Siparişler', yol: 'Satis › Siparisler',
-    aksiyonEkrani: 'siparis-liste', yeniBelgeTuru: 19,
-    sabitFiltre: { alan: 'tur', op: 'icinde', deger: [9, 19] },
-    toplam: ['genelToplam'],
-    cipler: [
-      { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
-      { ad: 'Kısmi',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
-      { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
-      { ad: 'Tumu' },
-    ],
-    menuGrup: 'Satış', menuAd: 'Siparişler', ic: '📋', yetkiKodu: 'belge',
+    menuGrup: 'Satış', menuAd: 'Satış Faturaları', ic: '🧾', yetkiKodu: 'belge',
   },
   {
     // "Hangi siparisin nesi teslim edilmedi" - satir bazli acik liste.

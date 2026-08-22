@@ -169,7 +169,7 @@ public static class BelgeUclari
     {
         "tur" or "tipi" or "tarafId" or "tarafAdresId" or "kocanNo" or "girisDepoId" or
         "cikisDepoId" or "subeId" or "projeId" or "vadeGun" or "durum" or "senaryo" or
-        "saticiId" or "teslimSekli" or "merkezId" => "sayi",
+        "saticiId" or "teslimSekli" or "merkezId" or "tasiyiciId" or "teslimEdenId" => "sayi",
 
         "dovizKuru" => "para",
 
@@ -178,7 +178,8 @@ public static class BelgeUclari
         "tarafUnvan" or "tarafVkno" or "tarafVd" or "tarafAdres" or "tarafIlce" or "tarafIl" or
         "belgeSeri" or "belgeNo" or "irsaliyeNo" or "kdvDurum" or "belgeDovizi" or
         "dovizCinsi" or "kur" or "raporDovizi" or "aciklama" or "ozelKod" or
-        "gondericiUnvan" or "gondericiVkno" or "gondericiAlias" => "metin",
+        "gondericiUnvan" or "gondericiVkno" or "gondericiAlias" or
+        "aracPlaka" or "soforAd" or "soforTckn" => "metin",
 
         _ => null
     };

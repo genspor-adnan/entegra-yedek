@@ -130,6 +130,25 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            // Irsaliye listesi (Ekranlar/satis_irsaliye_listesi.html aksiyonlari).
+            //   Ucu olan ucu calisir: ac, donustur, yeni. Digerleri yetkiye bagli
+            //   gorunur ama tiklaninca "henuz baglanmadi" der.
+            ["irsaliye-liste"] = new AksiyonTanimi[]
+            {
+                new("belge.yeni",     "＋ Yeni İrsaliye", "belge", Kisayol: "Ctrl+N",
+                    KaynakKodu: "belge", Islem: Islem.Ekle, Sira: 10),
+                new("belge.ac",       "İrsaliyeyi Aç",    "belge", Kisayol: "Enter",
+                    KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                new("belge.donustur", "🧾 Faturaya Dönüştür", "belge",
+                    AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 30),
+                new("ebelge.gonder",  "📨 e-İrsaliye Gönder", "ebelge", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 40),
+                new("belge.iptal",    "✖ İrsaliyeyi İptal Et", "belge", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "belge.iptal", KayitGerekir: true, Sira: 50),
+                new("genel.yazdir",   "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             ["belge-kart"] = new AksiyonTanimi[]
             {
                 new("belge.kesinlestir", "Kesinlestir", "belge",

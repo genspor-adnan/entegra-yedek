@@ -90,6 +90,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [satici, setSatici] = useState<{ id: number; ad: string } | null>(null);
   const [sevkTarihi, setSevkTarihi] = useState('');
   const [teslimSekli, setTeslimSekli] = useState(0);
+  const [aracPlaka, setAracPlaka] = useState('');
+  const [soforAd, setSoforAd] = useState('');
+  const [teslimEden, setTeslimEden] = useState<{ id: number; ad: string } | null>(null);
   const [taslak, setTaslak] = useState(false);
   const [satirlar, setSatirlar] = useState<SatirDurumu[]>([bosSatir(1)]);
 
@@ -145,6 +148,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           ? { id: Number(y.belge.saticiId), ad: String(y.belge.saticiAdi ?? '') } : null);
         setSevkTarihi(y.belge.irsaliyeTarihi ? String(y.belge.irsaliyeTarihi).slice(0, 16) : '');
         setTeslimSekli(Number(y.belge.teslimSekli ?? 0));
+        setAracPlaka(String(y.belge.aracPlaka ?? ''));
+        setSoforAd(String(y.belge.soforAd ?? ''));
+        setTeslimEden(y.belge.teslimEdenId
+          ? { id: Number(y.belge.teslimEdenId), ad: String(y.belge.teslimEdenAdi ?? '') } : null);
         setSatirlar((y.satirlar ?? []).map((r, i) => ({
           anahtar: i + 1,
           stokId: r.stokId ? Number(r.stokId) : null,
@@ -219,6 +226,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           // Irsaliyede sevk zamani ve teslim sekli GIB'in bekledigi alanlar.
           irsaliyeTarihi: irsaliyeMi && sevkTarihi ? sevkTarihi : undefined,
           teslimSekli: irsaliyeMi ? teslimSekli : undefined,
+          aracPlaka: irsaliyeMi ? aracPlaka : undefined,
+          soforAd: irsaliyeMi ? soforAd : undefined,
+          teslimEdenId: irsaliyeMi ? teslimEden?.id ?? null : undefined,
         },
         satirlar: dolu.map((s, i) => ({
           sira: i + 1,
@@ -532,6 +542,30 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 Number(sonuc?.belge.dovizKuru ?? 1).toLocaleString('tr-TR', { minimumFractionDigits: 6 })}`}
                      readOnly />
             </label>
+
+            {irsaliyeMi && (
+              <>
+                <label className="alan">
+                  <span className="etiket">Araç Plakası</span>
+                  <input value={aracPlaka} maxLength={20} disabled={kilitli}
+                         placeholder="07 ABC 145"
+                         onChange={e => setAracPlaka(e.target.value.toUpperCase())} />
+                </label>
+                <label className="alan">
+                  <span className="etiket">Şoför</span>
+                  <input value={soforAd} maxLength={60} disabled={kilitli}
+                         onChange={e => setSoforAd(e.target.value)} />
+                </label>
+                <GenLookup
+                  kaynak="cari"
+                  etiket="Teslim Eden"
+                  alanlar={LOOKUP_CARI}
+                  deger={teslimEden?.ad}
+                  saltOkunur={kilitli}
+                  onSec={s => setTeslimEden(s ? { id: Number(s.id), ad: String(s.unvan ?? '') } : null)}
+                />
+              </>
+            )}
 
             <label className="alan">
               <span className="etiket">Belge Türü</span>
