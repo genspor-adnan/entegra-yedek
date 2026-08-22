@@ -4,6 +4,7 @@ import { api } from '../api/istemci';
 import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru, type ListeSatiri } from '../api/sozlesme';
 import { GenLookup, LOOKUP_CARI, LOOKUP_STOK } from '../bilesenler/GenLookup';
 import { Modal } from '../bilesenler/GenForm';
+import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { useOturum } from '../kimlik/OturumBaglami';
 
 interface SatirDurumu {
@@ -73,6 +74,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
   const [kaydediyor, setKaydediyor] = useState(false);
   const [aciliyor, setAciliyor] = useState(!!belgeId);
+  const [donusum, setDonusum] = useState(false);
   const [sonuc, setSonuc] = useState<BelgeYaniti | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [alanHatalari, setAlanHatalari] = useState<Record<string, string>>({});
@@ -91,6 +93,18 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   /** Mevcut belge SALT GORUNUM: duzenleme ucu (PUT /api/belge/{id}) henuz yok. */
   const mevcutBelge = !!belgeId;
   const kilitli = mevcutBelge || !!sonuc;
+  const siparisMi = tur === 9 || tur === 19;
+  const irsaliyeMi = tur === 10 || tur === 14 || tur === 109 || tur === 119;
+  /** Kaydedilmis belgenin id'si (yeni kayittan ya da acilan belgeden). */
+  const kayitliId = belgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
+
+  /** Bu belge icin tahsilat islemi ac (cari ve tutar onyuklu). */
+  const tahsilatAc = () => {
+    if (!kayitliId) return;
+    kapat();
+    git(`/kasa-islem/yeni?tur=21&tarafId=${cari?.id ?? ''}` +
+        `&belgeId=${kayitliId}&tutar=${sonuc?.belge.genelToplam ?? ''}`);
+  };
 
   // Mevcut belgeyi ac: baslik + satirlar + dip toplam sunucudan gelir.
   useEffect(() => {
@@ -226,10 +240,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         ? <span className="rozet uyari">salt okuma şubesi</span>
         : <span className="kapt">{kullanici?.subeler.find(s => s.id === kullanici?.subeId)?.ad}</span>}
       onKapat={kapat}
-      // Arac cubugu duzeni mockup'tan (Ekranlar/satis_faturasi.html): Kaydet yesil,
-      //   Sil kirmizi, e-Belge mavi, gruplar ayracla ayrilir. Henuz ucu olmayan
-      //   islemler GORUNUR ama PASIF - kullanici neyin gelecegini gorur, tikladiginda
-      //   sessizce hicbir sey olmaz diye sasirmaz (title ile sebep yazili).
+      // Arac cubugu TURE GORE degisir; duzen mockup'lardan birebir alindi:
+      //   Ekranlar/satis_faturasi.html · satis_irsaliye_karti.html · satis_siparis_karti.html
+      //   (Kaydet yesil, Sil kirmizi, e-Belge mavi, gruplar ayracla ayrilir.)
+      // Ucu henuz olmayan islemler GORUNUR ama PASIF ve title'inda sebebi yazili -
+      //   kullanici neyin gelecegini gorur, tikladiginda sessiz kalmaz.
       alt={
         <>
           {mevcutBelge
@@ -248,22 +263,79 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
           <span className="ayrac" />
 
-          <button className="d bir" disabled={!sonuc}
-                  title={sonuc ? 'e-Belge gönderimi henüz bağlanmadı.' : 'Önce belgeyi kaydedin.'}>
-            📤 e‑Fatura Gönder
-          </button>
-          <button className="d" disabled={!sonuc || !cari}
-                  title={sonuc ? 'Bu belge için tahsilat işlemi aç' : 'Önce belgeyi kaydedin.'}
-                  onClick={() => {
-                    if (!sonuc) return;
-                    kapat();
-                    git(`/kasa-islem/yeni?tur=21&tarafId=${cari?.id ?? ''}` +
-                        `&belgeId=${sonuc.belge.id}&tutar=${sonuc.belge.genelToplam}`);
-                  }}>
-            💵 Tahsilat
-          </button>
-          <button className="d" disabled title="İade belgesi henüz bağlanmadı.">↩ İade</button>
-          <button className="d" disabled title="Yazdırma henüz bağlanmadı.">🖨️ Yazdır</button>
+          {/* ---------------------------------------------------- SIPARIS ---- */}
+          {siparisMi && (
+            <>
+              <button className="d bir" disabled title="Stok rezervasyonu henüz bağlanmadı.">
+                🔒 Rezervasyon Yap
+              </button>
+              <button className="d" disabled={!kayitliId}
+                      title={kayitliId ? 'Seçili satırları irsaliyeye aktar' : 'Önce siparişi kaydedin.'}
+                      onClick={() => setDonusum(true)}>
+                🚚 İrsaliyeye Dönüştür
+              </button>
+              <button className="d" disabled={!kayitliId}
+                      title={kayitliId ? 'Seçili satırları faturaya aktar' : 'Önce siparişi kaydedin.'}
+                      onClick={() => setDonusum(true)}>
+                🧾 Faturaya Dönüştür
+              </button>
+              <button className="d" disabled title="Üretim emri henüz bağlanmadı.">🏭 Üretime Aktar</button>
+              <span className="ayrac" />
+              <button className="d" disabled={!kayitliId || !cari}
+                      title={kayitliId ? 'Bu sipariş için ön ödeme (tahsilat) işlemi aç' : 'Önce siparişi kaydedin.'}
+                      onClick={tahsilatAc}>
+                💵 Ön Ödeme Al
+              </button>
+              <button className="d" disabled title="Termin güncelleme henüz bağlanmadı.">📅 Termin Güncelle</button>
+              <button className="d" disabled title="Yazdırma henüz bağlanmadı.">🖨️ Yazdır</button>
+            </>
+          )}
+
+          {/* --------------------------------------------------- IRSALIYE ---- */}
+          {irsaliyeMi && (
+            <>
+              <button className="d bir" disabled={!kayitliId}
+                      title={kayitliId ? 'e-İrsaliye gönderimi henüz bağlanmadı.' : 'Önce irsaliyeyi kaydedin.'}>
+                ✉ e‑İrsaliye Gönder
+              </button>
+              <button className="d" disabled={!kayitliId}
+                      title={kayitliId ? 'Sevk edilen satırları faturaya aktar' : 'Önce irsaliyeyi kaydedin.'}
+                      onClick={() => setDonusum(true)}>
+                🧾 Faturaya Dönüştür
+              </button>
+              <button className="d" disabled title="Sevk fişi yazdırma henüz bağlanmadı.">
+                🖨️ Sevk Fişi Yazdır
+              </button>
+              <span className="ayrac" />
+              <button className="d" disabled
+                      title="Siparişten aktarım için Siparişler listesinden ilgili siparişi açıp Dönüştür deyin.">
+                📋 Siparişten Aktar
+              </button>
+              <button className="d" disabled title="GİB durum sorgusu henüz bağlanmadı.">
+                ⟳ GİB Durum Sorgula
+              </button>
+              <button className="d" disabled title="İade irsaliyesi henüz bağlanmadı.">
+                ↩ İade İrsaliyesi
+              </button>
+            </>
+          )}
+
+          {/* ----------------------------------------------------- FATURA ---- */}
+          {!siparisMi && !irsaliyeMi && (
+            <>
+              <button className="d bir" disabled={!kayitliId}
+                      title={kayitliId ? 'e-Belge gönderimi henüz bağlanmadı.' : 'Önce belgeyi kaydedin.'}>
+                📤 e‑Fatura Gönder
+              </button>
+              <button className="d" disabled={!kayitliId || !cari}
+                      title={kayitliId ? 'Bu belge için tahsilat işlemi aç' : 'Önce belgeyi kaydedin.'}
+                      onClick={tahsilatAc}>
+                💵 Tahsilat
+              </button>
+              <button className="d" disabled title="İade belgesi henüz bağlanmadı.">↩ İade</button>
+              <button className="d" disabled title="Yazdırma henüz bağlanmadı.">🖨️ Yazdır</button>
+            </>
+          )}
 
           <span className="ayrac" />
 
@@ -415,6 +487,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           )}
           {!sonuc && <div className="not">Kesin tutar sunucuda hesaplanır; buradaki değerler önizlemedir.</div>}
         </div>
+
+        {/* Donusum modali bu kartin USTUNDE acilir: hedef turu ve satir miktarlari
+            orada secilir, kalan bu belgede kalir (F8). */}
+        {donusum && kayitliId > 0 && (
+          <BelgeDonusumModali
+            belgeId={kayitliId}
+            belgeTur={tur}
+            onKapat={() => setDonusum(false)}
+            onTamam={() => onKaydedildi?.()}
+          />
+        )}
       </>
     </Modal>
   );

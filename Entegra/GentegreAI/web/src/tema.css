@@ -502,3 +502,7 @@ table.grid tr.flt input {
 .katoolbar .satir-ici { color: var(--yazi); font-weight: 400 }
 /* Arac cubugu grup ayraci (mockup .sepv). */
 .katoolbar .ayrac { width: 1px; align-self: stretch; margin: 2px 4px; background: var(--cizgi) }
+/* Belge kartinda 11 dugmeye kadar cikabiliyor: metin KIRILMAZ, gerekirse serit
+   alt satira sarar (mockup .toolbar flex-wrap deseni). */
+.katoolbar { flex-wrap: wrap; row-gap: 4px }
+.katoolbar .d { white-space: nowrap; flex: none }
