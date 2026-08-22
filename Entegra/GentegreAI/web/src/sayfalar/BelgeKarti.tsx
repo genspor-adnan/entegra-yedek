@@ -611,18 +611,20 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         <div className="kagrup">
           <h6>
             Kalemler
-            {!kilitli && (
-              <>
-                <button type="button" className="d bir" onClick={() => setKalem('yeni')}>
-                  ＋ Satır
-                </button>
-                <button type="button" className="d teh" disabled={seciliSatirlar.size === 0}
-                        title={seciliSatirlar.size === 0 ? 'Önce satır seçin' : 'Seçili satırları sil'}
-                        onClick={seciliSil}>
-                  🗑 Sil{seciliSatirlar.size > 0 ? ` (${seciliSatirlar.size})` : ''}
-                </button>
-              </>
-            )}
+            {/* Dugmeler kesin belgede de GORUNUR, yalnizca pasif - kaybolunca
+                kullanici "nereye gitti" diye ariyordu; sebebi title'da yazili. */}
+            <button type="button" className="d bir" disabled={kilitli}
+                    title={kilitli ? 'Kesin belgeye satır eklenemez (İptal edip yeniden kesin).' : 'Yeni kalem ekle'}
+                    onClick={() => setKalem('yeni')}>
+              ＋ Satır
+            </button>
+            <button type="button" className="d teh"
+                    disabled={kilitli || seciliSatirlar.size === 0}
+                    title={kilitli ? 'Kesin belgeden satır silinemez.'
+                          : seciliSatirlar.size === 0 ? 'Önce satır seçin' : 'Seçili satırları sil'}
+                    onClick={seciliSil}>
+              🗑 Sil{seciliSatirlar.size > 0 ? ` (${seciliSatirlar.size})` : ''}
+            </button>
           </h6>
 
           {/* Grid SALT GORUNUM (mockup deseni): hucre ici input yok, satir secimi
@@ -631,14 +633,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           <table className="detay-tablo secilebilir">
             <thead>
               <tr>
-                {!kilitli && (
-                  <th style={{ width: 30 }} className="hiza-orta">
-                    <input type="checkbox"
-                           checked={satirlar.length > 0 && seciliSatirlar.size === satirlar.length}
-                           onChange={e => setSeciliSatirlar(
-                             e.target.checked ? new Set(satirlar.map(x => x.anahtar)) : new Set())} />
-                  </th>
-                )}
+                <th style={{ width: 30 }} className="hiza-orta">
+                  <input type="checkbox"
+                         checked={satirlar.length > 0 && seciliSatirlar.size === satirlar.length}
+                         onChange={e => setSeciliSatirlar(
+                           e.target.checked ? new Set(satirlar.map(x => x.anahtar)) : new Set())} />
+                </th>
                 <th style={{ width: 30 }} className="hiza-orta">#</th>
                 <th style={{ width: 110 }}>Stok Kodu</th>
                 <th>Stok / Hizmet</th>
@@ -659,12 +659,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 return (
                   <tr key={r.anahtar} className={secili ? 'secili' : ''}
                       onDoubleClick={() => !kilitli && setKalem(r)}>
-                    {!kilitli && (
-                      <td className="hiza-orta">
-                        <input type="checkbox" checked={secili}
-                               onChange={() => secimDegis(r.anahtar)} />
-                      </td>
-                    )}
+                    <td className="hiza-orta">
+                      <input type="checkbox" checked={secili}
+                             onChange={() => secimDegis(r.anahtar)} />
+                    </td>
                     <td className="hiza-orta sonuk">{sira + 1}</td>
                     <td><code>{r.stokKodu}</code></td>
                     <td>{r.stokAdi || <span className="sonuk">(stok seçilmedi)</span>}</td>
@@ -677,14 +675,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 );
               })}
               {satirlar.length === 0 && (
-                <tr><td colSpan={kilitli ? 6 : 7} className="bos">
+                <tr><td colSpan={irsaliyeMi ? 5 : 7} className="bos">
                   Kalem yok — “＋ Satır” ile ekleyin.
                 </td></tr>
               )}
             </tbody>
             <tfoot>
               <tr className="genel">
-                <td colSpan={kilitli ? 3 : 4} className="hiza-sag">TOPLAM</td>
+                <td colSpan={4} className="hiza-sag">TOPLAM</td>
                 <td className="hiza-sag">
                   {satirlar.reduce((t, r) => t + (Number(r.adet.replace(',', '.')) || 0), 0)
                            .toLocaleString('tr-TR')}
