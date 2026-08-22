@@ -58,10 +58,6 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, onKapat, chil
           <span>{baslik}</span>
           {ustBilgi}
           <span className="kapt">Esc ile kapanır</span>
-          {/* Pencere kapatma SAG UST KOSEDE (tarayici/isletim sistemi aliskanligi) -
-              arac cubugundaki Kapat dugmesi bu yuzden gereksizlesti. */}
-          <button type="button" className="kabas-kapat" title="Kapat (Esc)"
-                  onClick={() => onKapat?.()}>×</button>
         </div>
         {/* Mockup: Kaydet/Sil/Yazdir/Kapat baslikla idstrip ARASINDA arac cubugu (alt degil). */}
         <div className="katoolbar">{alt}</div>

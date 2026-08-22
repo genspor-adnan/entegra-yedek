@@ -46,9 +46,10 @@ input, select { font: inherit; color: inherit }
 }
 .marka { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px; color: #fff }
 .marka .lg {
-  width: 24px; height: 24px; border-radius: 5px; display: grid; place-items: center;
-  background: rgba(255, 255, 255, .18); color: #fff; font-size: 13px; border: 1px solid rgba(255, 255, 255, .3);
+  height: 26px; display: flex; align-items: center; justify-content: center;
+  background: none; border: 0; padding: 0; flex: none;
 }
+.marka .lg img { height: 26px; width: auto; display: block }
 .ara {
   flex: 1; max-width: 400px; margin: 0 auto; display: flex; align-items: center; gap: 10px;
   height: 30px; padding: 0 12px; border: 1px solid rgba(255, 255, 255, .25); border-radius: var(--r);
@@ -70,7 +71,9 @@ input, select { font: inherit; color: inherit }
   width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, .18);
   color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 12px;
   border: 1px solid rgba(255, 255, 255, .35);
+  padding: 0;
 }
+.avt:hover { box-shadow: 0 0 0 3px rgba(255, 255, 255, .18) }
 .ust select {
   height: 28px; border: 1px solid rgba(255, 255, 255, .3); border-radius: var(--r);
   background: rgba(255, 255, 255, .12); padding: 0 8px; color: #fff;
@@ -188,6 +191,13 @@ table.grid th.siralanir:hover { color: var(--mor) }
 table.grid td { padding: 4px 14px; border-bottom: 1px solid var(--cizgi2); border-right: 1px solid var(--cizgi2); white-space: nowrap }
 table.grid tbody tr:hover td { background: #f2f7fd }
 table.grid tbody tr.secili td { background: var(--mor2) }
+table.grid tr.log-bolum-satiri td {
+  background: #eef3f8;
+  color: #2f4d69;
+  font-weight: 700;
+  border-top: 1px solid var(--cizgi);
+}
+table.grid tr.log-bolum-satiri:hover td { background: #eef3f8 }
 table.grid tfoot td {
   position: sticky; bottom: 0; background: var(--yuz2); border-top: 1px solid var(--cizgi);
   font-weight: 700;
@@ -197,6 +207,13 @@ table.grid tfoot td {
 /* ilk sutun: onay kutusu + sutun sonunda "3 nokta" grid menusu */
 table.grid th.cbk, table.grid td.cbk { width: 34px; padding: 4px; text-align: center; white-space: nowrap }
 .grid-cb { width: 14px; height: 14px; accent-color: var(--mor); cursor: pointer; vertical-align: middle }
+.icerik-dugmesi:not(:disabled) {
+  background: linear-gradient(#f6a543, #d97813);
+  border-color: #b9650f;
+  color: #fff;
+  font-weight: 700;
+}
+.icerik-dugmesi:hover:not(:disabled) { background: linear-gradient(#ffb458, #cf6f0f) }
 .grid-noktalar {
   border: 0; background: transparent; color: var(--soluk); cursor: pointer; font-size: 15px;
   line-height: 1; padding: 3px 4px; border-radius: 3px; vertical-align: middle; margin-left: 2px;
@@ -212,6 +229,9 @@ table.grid tr.flt input {
 .satir-kritik td { background: #fdf2f2 !important }
 .satir-uyari td { background: #fdf8ec !important }
 .satir-pasif td { color: var(--soluk) }
+.satir-log-ekle td { background: #eaf7ef !important }
+.satir-log-degisiklik td { background: #fff6dc !important }
+.satir-log-sil td { background: #fde8e8 !important }
 .bos { padding: 30px; text-align: center; color: var(--soluk) }
 .yukleniyor {
   position: absolute; inset: 0; display: grid; place-items: center;
@@ -261,13 +281,47 @@ table.grid tr.flt input {
   border-radius: var(--r) var(--r) 0 0;
 }
 .kabas .kapt { margin-left: auto; font-weight: 400; font-size: 10.5px; opacity: .8 }
-.kabas-kapat {
-  width: 22px; height: 22px; margin-left: 8px; flex: none; cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, .35); border-radius: 3px; line-height: 1;
-  background: rgba(255, 255, 255, .12); color: #fff; font-size: 15px; font-weight: 700;
-}
-.kabas-kapat:hover { background: #c0413d; border-color: #a3312f }
 .kagov { padding: 14px; overflow: auto; flex: 1; min-height: 0; background: var(--yuz) }
+.kullanici-ayarlari { width: min(560px, 94vw) }
+.kullanici-ayarlari .kagov { max-height: min(620px, 74vh) }
+.kullanici-ayarlari .kagrup > h6 span {
+  margin-left: 4px; text-transform: none; letter-spacing: 0; color: var(--soluk); font-weight: 400;
+}
+.kasat { display: grid; grid-template-columns: 118px 1fr; gap: 8px 10px; align-items: center; padding: 10px }
+.kasat label { color: var(--soluk); font-size: 12px }
+.kasat input, .kasat select {
+  height: 32px; border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz);
+  color: var(--yazi); font: inherit; font-size: 12.5px; padding: 0 9px; width: 100%; min-width: 0;
+}
+.kasat input:disabled, .kasat select:disabled { background: var(--yuz2); color: var(--soluk); cursor: default }
+.kaara { display: flex; align-items: center; gap: 6px; min-width: 0 }
+.kaara input { flex: 1; min-width: 0 }
+.kabtn {
+  flex: none; width: 32px; height: 32px; border: 1px solid var(--cizgi); border-radius: 3px;
+  background: linear-gradient(#fbfcfe, #e7edf4);
+}
+.kabtn:disabled { opacity: .55; cursor: default }
+.karoz {
+  flex: none; padding: 4px 8px; border-radius: 10px; background: var(--mor2);
+  color: var(--mor); font-size: 11px; font-weight: 700;
+}
+.kaok { color: var(--ok); font-weight: 700; font-size: 14px; width: 16px; text-align: center }
+.kauyari {
+  margin: 8px 10px 0; padding: 7px 9px; border: 1px solid #eeddb4; border-radius: 3px;
+  background: #fdf6e3; color: var(--uyari); font-size: 12px;
+}
+.kanot { margin: 8px 10px 10px; color: var(--soluk); font-size: 11.5px; line-height: 1.35 }
+.kaalt {
+  display: flex; justify-content: flex-end; gap: 8px; padding: 10px 12px;
+  border-top: 1px solid var(--cizgi); background: var(--yuz2);
+}
+.kaalt button {
+  height: 28px; padding: 0 13px; border: 1px solid var(--cizgi); border-radius: 3px;
+  background: linear-gradient(#fbfcfe, #e7edf4); font-weight: 600;
+}
+.kaalt button.bas {
+  border-color: #2f6db3; background: linear-gradient(#4d8fd6, #2f6db3); color: #fff;
+}
 /* Mockup: Kaydet/Sil/Yazdir/Kapat baslikla idstrip ARASINDA arac cubugu (.toolbar). */
 .katoolbar {
   display: flex; gap: 4px; padding: 6px 8px;
@@ -284,8 +338,8 @@ table.grid tr.flt input {
 /* Kisi idstrip'i (Kod/Unvan/Departman/Gorev, 4 sabit alan): Kod dar, Unvan onun aldigi yeri devralir. */
 .kaid .alan-izgara.kaid-kisi { grid-template-columns: 0.5fr 1.5fr 1fr 1fr }
 /* Kimlik seridi mockup'ta etiket USTTE (.fld deseni) - sekme icindeki grid2'den farkli, dokunma. */
-.kaid .alan { display: flex; flex-direction: column; gap: 2px }
-.kaid .alan .etiket { text-align: left; font-size: 10.5px; letter-spacing: .2px }
+.kaid .alan { display: flex; flex-direction: column; align-items: stretch; gap: 2px }
+.kaid .alan .etiket { align-self: flex-start; width: 100%; text-align: left; font-size: 10.5px; letter-spacing: .2px }
 .kaid .alan input, .kaid .alan select { font-weight: 700; font-size: 13px; color: var(--yazi2) }
 
 /* Kart ic sekmeleri (mockup: Genel / Fatura Bilgileri / Mali Durum / ...).
@@ -303,6 +357,24 @@ table.grid tr.flt input {
   font-weight: 700; min-width: 15px; text-align: center;
 }
 
+.mesaj-perde {
+  position: absolute; inset: 0; z-index: 5; display: grid; place-items: center;
+  background: rgba(17, 28, 42, .18);
+}
+.mesaj-kutu {
+  width: min(360px, calc(100% - 32px)); border: 1px solid var(--cizgi); border-radius: 4px;
+  background: #fff; box-shadow: 0 12px 32px rgba(22, 34, 48, .2); overflow: hidden;
+}
+.mesaj-kutu h3 {
+  margin: 0; padding: 8px 10px; font-size: 13px; font-weight: 700;
+  background: linear-gradient(#f0f5fa, #e6eef6); border-bottom: 1px solid var(--cizgi2);
+}
+.mesaj-kutu p { margin: 0; padding: 16px 12px; font-size: 12px }
+.mesaj-dugme {
+  display: flex; justify-content: flex-end; gap: 6px; padding: 8px 10px;
+  border-top: 1px solid var(--cizgi2); background: var(--yuz2);
+}
+
 /* ---------------------------------------------------------------- kart ---- */
 .kagrup { border: 1px solid var(--cizgi2); border-radius: var(--r); background: #fbfcfd; margin-bottom: 12px; overflow: hidden }
 .kagrup > h6 {
@@ -317,17 +389,20 @@ table.grid tr.flt input {
 .kasira .kagrup { flex: 1; min-width: 0; margin-bottom: 0 }
 .kasutun { display: flex; flex-direction: column; gap: 14px; flex: 1; min-width: 0 }
 .kasutun .kagrup { flex: initial }
-.kagrup-resim { flex: 0 0 200px }
+.personel-iletisim-yerlesim { flex: 1; min-width: 0; width: 100% }
+.personel-iletisim-yerlesim > .kagrup { margin-bottom: 0 }
+.kagrup-resim { flex: 0 0 150px; width: 150px; max-width: 150px }
 .resim-kutusu {
-  height: 130px; border: 1px dashed var(--cizgi); border-radius: 3px; background: #eef3f8;
+  width: 130px; height: 130px; border: 1px dashed var(--cizgi); border-radius: 3px; background: #eef3f8;
   display: grid; place-items: center; font-size: 30px; color: var(--soluk);
 }
+.resim-kutusu img { width: 100%; height: 100%; object-fit: contain }
 .alan-izgara { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px 10px }
 /* Yan yana kutu icinde tek sutun - mockup'ta her alan kendi satirinda (grid2). */
 .alan-izgara.tek-sutun { grid-template-columns: 1fr; gap: 8px 0 }
-/* Mockup (grid2): etiket SOLDA, dar, sabit genislikte - input sagda genisliyor. */
+/* Genel form kurali: etiket solda, input sagda genisler. */
 .alan { display: grid; grid-template-columns: 84px 1fr; column-gap: 8px; align-items: center }
-.alan .etiket { grid-column: 1; font-size: 11px; color: var(--soluk); text-align: right }
+.alan .etiket { grid-column: 1; font-size: 11px; color: var(--soluk); text-align: left }
 .alan .zorunlu { color: var(--hata) }
 .alan input, .alan select, .inp {
   grid-column: 2; border: 1px solid var(--cizgi); border-radius: 2px; background: var(--yuz);
@@ -351,6 +426,7 @@ table.grid tr.flt input {
 /* Adres kutusu (TekAdres.tsx): her satirda iki alan yan yana (Tip/Ulke, Adres/PK, Il/Ilce). */
 .adres-satir { display: flex; gap: 10px }
 .adres-satir .alan { flex: 1; min-width: 0 }
+.adres-alt-baslik { color: var(--soluk); font-size: 12px; font-weight: 600; margin-top: 2px }
 /* Telefon: ulke bayragi/kodu + yerel numara yan yana (TelefonGirdi.tsx). */
 .tel-girdi { grid-column: 2; display: flex; gap: 5px; min-width: 0 }
 .tel-girdi select { flex: none; width: 78px }

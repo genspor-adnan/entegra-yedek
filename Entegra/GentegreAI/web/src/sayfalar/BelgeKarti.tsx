@@ -88,7 +88,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [vadeGun, setVadeGun] = useState('30');
   const [depo, setDepo] = useState<{ id: number; ad: string } | null>(null);
   const [satici, setSatici] = useState<{ id: number; ad: string } | null>(null);
-  const [sevkTarihi, setSevkTarihi] = useState('');
   const [teslimSekli, setTeslimSekli] = useState(0);
   const [aracPlaka, setAracPlaka] = useState('');
   const [soforAd, setSoforAd] = useState('');
@@ -146,7 +145,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           ? { id: Number(y.belge.cikisDepoId), ad: String(y.belge.cikisDepoAdi ?? '') } : null);
         setSatici(y.belge.saticiId
           ? { id: Number(y.belge.saticiId), ad: String(y.belge.saticiAdi ?? '') } : null);
-        setSevkTarihi(y.belge.irsaliyeTarihi ? String(y.belge.irsaliyeTarihi).slice(0, 16) : '');
         setTeslimSekli(Number(y.belge.teslimSekli ?? 0));
         setAracPlaka(String(y.belge.aracPlaka ?? ''));
         setSoforAd(String(y.belge.soforAd ?? ''));
@@ -223,8 +221,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           subeId: kullanici?.subeId ?? undefined,
           cikisDepoId: depo?.id ?? null,
           saticiId: satici?.id ?? null,
-          // Irsaliyede sevk zamani ve teslim sekli GIB'in bekledigi alanlar.
-          irsaliyeTarihi: irsaliyeMi && sevkTarihi ? sevkTarihi : undefined,
+          // Teslim sekli e-Irsaliye'de GIB'in bekledigi alan.
           teslimSekli: irsaliyeMi ? teslimSekli : undefined,
           aracPlaka: irsaliyeMi ? aracPlaka : undefined,
           soforAd: irsaliyeMi ? soforAd : undefined,
@@ -381,6 +378,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
           <span className="ayrac" />
 
+          <button className="d" onClick={kapat}>✖ Kapat</button>
+
           <label className="satir-ici">
             <input type="checkbox" checked={taslak} disabled={kilitli}
                    onChange={e => setTaslak(e.target.checked)} />
@@ -444,13 +443,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             </label>
 
             {/* --- 2. satir --- */}
-            {irsaliyeMi ? (
-              <label className="alan">
-                <span className="etiket">Sevk Tarih / Saati</span>
-                <input type="datetime-local" value={sevkTarihi} disabled={kilitli}
-                       onChange={e => setSevkTarihi(e.target.value)} />
-              </label>
-            ) : (
+            {/* Irsaliyede Vade YOK (mal cikis tarihi belge tarihidir); o yuzden
+                bu hucre atlanir ve Irsaliye Tarihi sola kayar. */}
+            {!irsaliyeMi && (
               <label className="alan">
                 <span className="etiket">Vade (gün)</span>
                 <input className="hiza-sag" value={vadeGun} disabled={kilitli}
@@ -558,13 +553,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               </>
             )}
 
-            {/* --- son satir: vergi / doviz / tur --- */}
-            <label className="alan">
-              <span className="etiket">Vergi Dairesi / VKN</span>
-              <input value={[sonuc?.belge.tarafVd, sonuc?.belge.tarafVkno]
-                              .filter(Boolean).join(' · ')} readOnly />
-            </label>
-
+            {/* --- son satir: doviz ---
+                Vergi Dairesi/VKN kartta gosterilmiyor: cari kartindan gelen ve
+                belgeye DONDURULAN bir bilgi, e-Belge XML'ine oradan gidiyor. */}
             <label className="alan">
               <span className="etiket">Döviz / Kur</span>
               <input value={`${String(sonuc?.belge.belgeDovizi ?? 'TL')} · ${
