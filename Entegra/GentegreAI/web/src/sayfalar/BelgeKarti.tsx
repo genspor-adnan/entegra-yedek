@@ -493,6 +493,15 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               </label>
             )}
 
+            <GenLookup
+              kaynak="cari"
+              etiket="Satış Temsilcisi"
+              alanlar={LOOKUP_CARI}
+              deger={satici?.ad}
+              saltOkunur={kilitli}
+              onSec={s => setSatici(s ? { id: Number(s.id), ad: String(s.unvan ?? '') } : null)}
+            />
+
             <label className="alan">
               <span className="etiket zorunlu-isaret">
                 {irsaliyeMi ? 'İrsaliye Tarihi' : 'Belge Tarihi'}
@@ -511,15 +520,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             </label>
 
             {/* --- 3. satir --- */}
-            <GenLookup
-              kaynak="cari"
-              etiket="Satış Temsilcisi"
-              alanlar={LOOKUP_CARI}
-              deger={satici?.ad}
-              saltOkunur={kilitli}
-              onSec={s => setSatici(s ? { id: Number(s.id), ad: String(s.unvan ?? '') } : null)}
-            />
-
             <GenLookup
               kaynak="depo"
               etiket={siparisMi ? 'Depo' : 'Çıkış Deposu'}
@@ -545,22 +545,19 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             </label>
 
             {/* --- 4. satir: adres / teslim --- */}
-            <label className="alan genis-2">
-              <span className="etiket">{irsaliyeMi ? 'Sevk Adresi' : 'Adres'}</span>
-              <input value={[sonuc?.belge.tarafAdres, sonuc?.belge.tarafIlce, sonuc?.belge.tarafIl]
-                              .filter(Boolean).join(' / ')} readOnly
-                     placeholder="Cari seçilince kartındaki varsayılan adres gelir" />
-            </label>
-
-            {irsaliyeMi ? (
-              <label className="alan">
-                <span className="etiket">Teslim Şekli</span>
-                <select value={teslimSekli} disabled={kilitli}
-                        onChange={e => setTeslimSekli(Number(e.target.value))}>
-                  {TESLIM_SEKLI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
-                </select>
+            {/* Sevk Adresi / Arac Plakasi / Sofor IRSALIYEDE basliktan cikti,
+                "Tasiyici / Sevkiyat" sekmesinde toplandi. Diger turlerde adres
+                basliktaki yerinde kalir (o turlerde sevkiyat sekmesi yok). */}
+            {!irsaliyeMi && (
+              <label className="alan genis-2">
+                <span className="etiket">Adres</span>
+                <input value={[sonuc?.belge.tarafAdres, sonuc?.belge.tarafIlce, sonuc?.belge.tarafIl]
+                                .filter(Boolean).join(' / ')} readOnly
+                       placeholder="Cari seçilince kartındaki varsayılan adres gelir" />
               </label>
-            ) : (
+            )}
+
+            {!irsaliyeMi && (
               <label className="alan">
                 <span className="etiket">Seri</span>
                 <input value={seri} maxLength={5} disabled={kilitli}
@@ -569,29 +566,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             )}
 
             {/* --- 5. satir: arac / sofor / teslim eden (yalniz irsaliye) --- */}
-            {irsaliyeMi && (
-              <>
-                <label className="alan">
-                  <span className="etiket">Araç Plakası</span>
-                  <input value={aracPlaka} maxLength={20} disabled={kilitli}
-                         placeholder="07 ABC 145"
-                         onChange={e => setAracPlaka(e.target.value.toUpperCase())} />
-                </label>
-                <label className="alan">
-                  <span className="etiket">Şoför</span>
-                  <input value={soforAd} maxLength={60} disabled={kilitli}
-                         onChange={e => setSoforAd(e.target.value)} />
-                </label>
-                <GenLookup
-                  kaynak="cari"
-                  etiket="Teslim Eden"
-                  alanlar={LOOKUP_CARI}
-                  deger={teslimEden?.ad}
-                  saltOkunur={kilitli}
-                  onSec={s => setTeslimEden(s ? { id: Number(s.id), ad: String(s.unvan ?? '') } : null)}
-                />
-              </>
-            )}
 
             {/* --- son satir: doviz ---
                 Vergi Dairesi/VKN kartta gosterilmiyor: cari kartindan gelen ve
@@ -748,6 +722,23 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           <div className="kagrup">
             <h6>Taşıyıcı Bilgileri</h6>
             <div className="alan-izgara">
+              <label className="alan genis-2">
+                <span className="etiket">Sevk Adresi</span>
+                <input value={[sonuc?.belge.tarafAdres, sonuc?.belge.tarafIlce, sonuc?.belge.tarafIl]
+                                .filter(Boolean).join(' / ')} readOnly
+                       placeholder="Cari seçilince kartındaki varsayılan adres gelir" />
+              </label>
+              <label className="alan">
+                <span className="etiket">Araç Plakası</span>
+                <input value={aracPlaka} maxLength={20} disabled={kilitli}
+                       placeholder="07 ABC 145"
+                       onChange={e => setAracPlaka(e.target.value.toUpperCase())} />
+              </label>
+              <label className="alan">
+                <span className="etiket">Şoför Adı</span>
+                <input value={soforAd} maxLength={60} disabled={kilitli}
+                       onChange={e => setSoforAd(e.target.value)} />
+              </label>
               <label className="alan">
                 <span className="etiket">Şoför TC</span>
                 <input value={soforTckn} maxLength={11} disabled={kilitli}
@@ -767,12 +758,26 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 <input type="datetime-local" value={sevkTarihi} disabled={kilitli}
                        onChange={e => setSevkTarihi(e.target.value)} />
               </label>
+              <GenLookup
+                kaynak="cari"
+                etiket="Teslim Eden"
+                alanlar={LOOKUP_CARI}
+                deger={teslimEden?.ad}
+                saltOkunur={kilitli}
+                onSec={s => setTeslimEden(s ? { id: Number(s.id), ad: String(s.unvan ?? '') } : null)}
+              />
+              <label className="alan">
+                <span className="etiket">Teslim Şekli</span>
+                <select value={teslimSekli} disabled={kilitli}
+                        onChange={e => setTeslimSekli(Number(e.target.value))}>
+                  {TESLIM_SEKLI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
+                </select>
+              </label>
             </div>
             <div className="not">
-              Araç plakası, şoför adı ve teslim eden başlıkta girilir. Bu üç alan
-              e-İrsaliye UBL'ini tamamlar (DriverPerson/ID, CarrierParty,
-              ShipmentStage). Kap adedi, brüt ağırlık ve sevkiyat aşamaları
-              (yola çıkış / teslim) henüz şemada yok.
+              Bu alanlar e-İrsaliye UBL'ine gider (TransportMeans/PlateID,
+              DriverPerson, CarrierParty, ShipmentStage). Kap adedi, brüt ağırlık
+              ve sevkiyat aşamaları (yola çıkış / teslim) henüz şemada yok.
             </div>
           </div>
         )}
