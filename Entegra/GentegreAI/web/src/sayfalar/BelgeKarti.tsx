@@ -733,23 +733,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 <input type="datetime-local" value={sevkTarihi} disabled={kilitli}
                        onChange={e => setSevkTarihi(e.target.value)} />
               </label>
-              <label className="alan">
-                <span className="etiket">Araç Plakası</span>
-                <input value={aracPlaka} maxLength={20} disabled={kilitli}
-                       placeholder="07 ABC 145"
-                       onChange={e => setAracPlaka(e.target.value.toUpperCase())} />
-              </label>
-              <label className="alan">
-                <span className="etiket">Şoför Adı</span>
-                <input value={soforAd} maxLength={60} disabled={kilitli}
-                       onChange={e => setSoforAd(e.target.value)} />
-              </label>
-              <label className="alan">
-                <span className="etiket">Şoför TC</span>
-                <input value={soforTckn} maxLength={11} disabled={kilitli}
-                       placeholder="11 hane"
-                       onChange={e => setSoforTckn(e.target.value.replace(/\D/g, ''))} />
-              </label>
               <GenLookup
                 kaynak="cari"
                 etiket="Taşıyıcı Ünvan"
@@ -772,6 +755,23 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                         onChange={e => setTeslimSekli(Number(e.target.value))}>
                   {TESLIM_SEKLI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
                 </select>
+              </label>
+              <label className="alan">
+                <span className="etiket">Araç Plakası</span>
+                <input value={aracPlaka} maxLength={20} disabled={kilitli}
+                       placeholder="07 ABC 145"
+                       onChange={e => setAracPlaka(e.target.value.toUpperCase())} />
+              </label>
+              <label className="alan">
+                <span className="etiket">Şoför Adı</span>
+                <input value={soforAd} maxLength={60} disabled={kilitli}
+                       onChange={e => setSoforAd(e.target.value)} />
+              </label>
+              <label className="alan">
+                <span className="etiket">Şoför TC</span>
+                <input value={soforTckn} maxLength={11} disabled={kilitli}
+                       placeholder="11 hane"
+                       onChange={e => setSoforTckn(e.target.value.replace(/\D/g, ''))} />
               </label>
             </div>
             <div className="not">
