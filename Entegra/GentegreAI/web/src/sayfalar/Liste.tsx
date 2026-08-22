@@ -167,6 +167,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Satış', menuAd: 'Satış Fatura Listesi', ic: '🧾', yetkiKodu: 'belge',
   },
   {
+    // "Kasa" grubu, Satış'in HEMEN ALTINDA (kullanici istegi) - "Cari Hareketleri"
+    // (mali-hareket) yeniden adlandirildi: hem sayfa basligi hem menu adi "Kasa
+    // Hareketleri" oldu (Satış'in aksine kullanici burada baslik metnini ACIKCA verdi).
+    kaynak: 'mali-hareket', baslik: 'Kasa Hareketleri', yol: 'Kasa › Hareketler',
+    toplam: ['borc', 'alacak'],
+    menuGrup: 'Kasa', menuAd: 'Kasa Hareketleri', ic: '💰', yetkiKodu: 'mali_hareket',
+  },
+  {
     kaynak: 'stok', baslik: 'Stoklar', yol: 'Stok › Stok Karti', kartYolu: '/stok',
     aksiyonEkrani: 'stok-liste', cipler: DURUM_CIPLERI,
     // Mockup'ta (stok_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
@@ -175,11 +183,6 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     yerTutucuSekmeler: ['ÜTS Bilgileri', 'Reçete', 'Stok Durumu', 'Hareketler', 'Yorum / Medya', 'Ek Alanlar'],
     resimYerTutucu: true,
     menuAd: 'Stok', ic: '📦', yetkiKodu: 'stok',
-  },
-  {
-    kaynak: 'mali-hareket', baslik: 'Cari Hareketleri', yol: 'Mali › Hareketler',
-    toplam: ['borc', 'alacak'],
-    menuAd: 'Hareketler', ic: '💰', yetkiKodu: 'mali_hareket',
   },
   {
     kaynak: 'hizmet', baslik: 'Hizmetler', yol: 'Stok › Hizmetler', cipler: DURUM_CIPLERI,

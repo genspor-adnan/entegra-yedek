@@ -2097,3 +2097,15 @@ Sidebar sirasi simdi: Hasta, Cari (Müşteri/Tedarikçi/Kişi Listesi), Satış 
 Listesi), Stok, Hareketler, Hizmet, Masraf, Personel, e-Belge, Islem Gunlugu, Roller.
 Tarayicida dogrulandi: her iki grup ayri ayri ac/kapaniyor, /belge ekrani (Satış Fatura
 Listesi tiklaninca) 446 kayit + Tumu/Satis/Alis cip'leriyle degismeden calisiyor.
+
+### Ayni oturum: "Kasa" grubu (Satış'in altinda) - Cari Hareketleri -> Kasa Hareketleri
+
+Kullanici: "Satış altına Kasa ekle içine Cari Hareketleri rename edip Kasa Hareketleri".
+Ayni desen: `mali-hareket` girdisi Satış grubunun hemen ALTINA tasindi, `menuGrup:'Kasa'`.
+Bu kez (Satış'in aksine) kullanici sayfa basligini da ACIKCA soyledigi icin ("Cari
+Hareketleri" -> "Kasa Hareketleri") **hem `baslik` hem `menuAd`** "Kasa Hareketleri" oldu
+(breadcrumb da "Kasa › Hareketler"). Kaynak/filtre/kolonlar degismedi.
+
+Sidebar sirasi: Hasta, Cari, Satış, **Kasa** (Kasa Hareketleri), Stok, Hizmet, Masraf,
+Personel, e-Belge, Islem Gunlugu, Roller. Tarayicida dogrulandi: 799 kayit ayni, baslik+
+breadcrumb "Kasa Hareketleri"/"Kasa › Hareketler".
