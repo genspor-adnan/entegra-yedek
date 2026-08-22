@@ -446,6 +446,9 @@ table.grid tr.flt input {
   width: 14px; height: 14px; min-width: 14px; padding: 0; accent-color: var(--mor);
 }
 .alan.tip-mantik .etiket { order: 2; font-size: 12px; color: var(--yazi); text-align: left }
+/* Ayar kartlari (tek sutun, ör. Depo): onay kutulari sola yapismasin, ustteki
+   editlerin basladigi hizada dursun - 84px etiket kolonu + 8px bosluk. */
+.alan-izgara.ayar-formu .alan.tip-mantik { padding-left: 92px }
 .alan-hata { color: var(--hata); font-size: 11px }
 .kod-ad { color: var(--soluk); font-size: 11px }
 

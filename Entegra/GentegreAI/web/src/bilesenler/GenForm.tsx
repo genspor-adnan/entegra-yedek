@@ -36,12 +36,14 @@ interface Props {
 }
 
 /** Modal sarmalayici — mockup'taki .kaperde / .kawin duzeni. */
-export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, onKapat, children }: {
+export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, onKapat, children }: {
   baslik: string;
   ustBilgi?: React.ReactNode;
   ustSerit?: React.ReactNode;
   sekmeBar?: React.ReactNode;
   alt: React.ReactNode;
+  /** Az alanli kartlar icin yarim genislik (1080 -> 560): bos beyaz alan kalmasin. */
+  dar?: boolean;
   onKapat?(): void;
   children: React.ReactNode;
 }) {
@@ -53,7 +55,7 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, onKapat, chil
 
   return (
     <div className="kaperde" onMouseDown={e => { if (e.target === e.currentTarget) onKapat?.() }}>
-      <div className="kawin genis" onMouseDown={e => e.stopPropagation()}>
+      <div className={`kawin${dar ? '' : ' genis'}`} onMouseDown={e => e.stopPropagation()}>
         <div className="kabas">
           <span>{baslik}</span>
           {ustBilgi}
@@ -167,6 +169,10 @@ type Deger = string | number | boolean | null;
 // (taraf.eposta_web/alias_eposta yorumlari), sadece duz "eposta" alani her zaman e-posta.
 const EPOSTA_ALANLARI = new Set(['eposta']);
 const TELEFON_ALANLARI = new Set(['telefon', 'cepTel']);
+
+// Az alanli ayar kartlari: alanlar yan yana degil ALT ALTA (tek sutun) - 4-5 alan
+//   genis izgaraya yayilinca form dagilmis gorunuyor, sira da okunmuyordu.
+const TEK_SUTUN_KARTLAR = new Set(['depo']);
 
 /**
  * Kart sozlesmesini (§3) tuketen genel form.
@@ -486,14 +492,14 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
 
   if (yukleniyor)
     return (
-      <Modal baslik={baslik ?? kaynak} alt={<button className="d" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
+      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} alt={<button className="d" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
         <div className="yukleniyor-satir">Yukleniyor…</div>
       </Modal>
     );
 
   if (!meta)
     return (
-      <Modal baslik={baslik ?? kaynak} alt={<button className="d" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
+      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} alt={<button className="d" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
         <div className="hata-kutusu">{hata}</div>
       </Modal>
     );
@@ -545,7 +551,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         disabled={salt || !a.yazilabilir}
         onChange={e => setDeger(d => ({ ...d, [a.ad]: e.target.value }))}
       >
-        <option value="">—</option>
+        {/* Bos secenek yalniz ZORUNLU OLMAYAN alanlarda: zorunlu bir kod alaninda
+            (ör. Depo > Durum) "—" secilebilir gorunmesi yaniltici. */}
+        {!a.zorunlu && <option value="">—</option>}
         {Object.entries(a.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
       </select>
     ) : TELEFON_ALANLARI.has(a.ad) ? (
@@ -615,6 +623,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
   return (
     <Modal
       baslik={`${baslik ?? kaynak} ${yeniMi ? '— Yeni' : `#${id}`}`}
+      dar={TEK_SUTUN_KARTLAR.has(kaynak)}
       ustBilgi={
         <>
           {surum && <span className="rozet gri">surum {surum}</span>}
@@ -945,7 +954,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
             doldurur (kullanici: "rol ve durum saga yanasik, aradaki bosluk bagli cari editi
             doldursun"). Alan sirasi katalogda Bagli Cari, Rol, Durum. */}
         const adsizBlok = adsizUst.length > 0 && (
-          <div className={`alan-izgara${kaynak === 'kisi' ? ' kisi-ust-satir' : ''}`}>
+          <div className={`alan-izgara${kaynak === 'kisi' ? ' kisi-ust-satir' : ''}` +
+                          (TEK_SUTUN_KARTLAR.has(kaynak) ? ' tek-sutun ayar-formu' : '')}>
             {renderAlanListesi(adsizUst)}
           </div>
         );

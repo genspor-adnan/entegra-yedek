@@ -818,17 +818,19 @@ public static class KartKatalogu
               ["tip"] = (short)1 },
         Alanlar: new KartAlani[]
         {
+            // Alan sirasi = GRID kolon sirasi (kullanici istegi): ekranda gorulen
+            //   duzenle karta girince degismesin.
             new("id",                 "id",                 "sayi",  Yazilabilir: false),
             new("ad",                 "ad",                 "metin", Zorunlu: true, EnFazlaUzunluk: 50,
                 Baslik: "Depo Adı", Grup: "Genel"),
-            new("tip",                "tip",                "kod",   KodListesi: "depo.tip",
+            new("tip",                "tip",                "kod",   Zorunlu: true, KodListesi: "depo.tip",
                 Baslik: "Tipi", Grup: "Genel"),
-            new("varsayilan",         "varsayilan",         "mantik", Baslik: "Varsayılan Depo", Grup: "Genel"),
-            new("maliyetiEtkilesin",  "maliyeti_etkilesin", "mantik", Baslik: "Maliyeti Etkilesin", Grup: "Genel"),
-            new("durum",              "durum",              "kod",   SabitKodlar: DurumKodlari,
+            new("durum",              "durum",              "kod",   Zorunlu: true, SabitKodlar: DurumKodlari,
                 Baslik: "Durum", Grup: "Genel"),
-            new("sonSayimTarihi",     "son_sayim_tarihi",   "tarih", Yazilabilir: false,
-                Baslik: "Son Sayım Tarihi", Grup: "Genel")
+            new("maliyetiEtkilesin",  "maliyeti_etkilesin", "mantik", Baslik: "Maliyeti Etkilesin", Grup: "Genel"),
+            new("varsayilan",         "varsayilan",         "mantik", Baslik: "Varsayılan Depo", Grup: "Genel")
+            // son_sayim_tarihi kartta YOK: sayim modulu henuz olmadigi icin hep bos
+            //   duruyordu; kolon tabloda kaliyor, sayim gelince geri eklenir.
         },
         SilmeEngelleri: new[]
         {

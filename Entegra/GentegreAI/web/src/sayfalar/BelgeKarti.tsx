@@ -251,7 +251,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       try {
         const y = await api.liste('depo', {
           sayfa: 1, boyut: 1,
-          filtre: { op: 'and', kosullar: [{ alan: 'varsayilan', op: 'esit', deger: 1 }] },
+          filtre: { op: 'and', kosullar: [
+            { alan: 'varsayilan', op: 'esit', deger: 1 },
+            { alan: 'durum', op: 'esit', deger: 1 },
+          ] },
         });
         const d = y.satirlar[0];
         if (d) setDepo(o => o ?? { id: Number(d.id), ad: String(d.ad ?? '') });
@@ -603,6 +606,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             <GenLookup
               kaynak="depo"
               etiket={siparisMi ? 'Depo' : 'Çıkış Deposu'}
+              // Pasif depo secilemez: kapatilmis depoya belge kesilmesin.
+              sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
               alanlar={LOOKUP_DEPO}
               deger={depo?.ad}
               saltOkunur={kilitli}

@@ -41,6 +41,27 @@ interface Props {
   icerikBaslik?: string;
 }
 
+/**
+ * GENEL KURAL: aktif/pasif durumu her listede AYNI gorunur - yesil "Aktif" /
+ * kirmizi "Pasif" rozeti (kullanici: "durumlar hep boyle gosterilmeli").
+ *
+ * Iki kaynak: mantik tipli `durum` kolonu (1/0) ve sunucuda metne cevrilmis
+ * durum kolonlari ("Aktif"/"Pasif"). Belge/kasa gibi COK DEGERLI durum
+ * kolonlari (taslak/kesin/iptal) bu kalibin disinda kalir - onlar rozet degil
+ * duz metin, cunku iki renkli bir gosterim yaniltirdi.
+ */
+function durumRozeti(deger: unknown, kolon: KolonMeta) {
+  const aktifMi =
+    kolon.ad === 'durum' && kolon.tip === 'mantik' ? Number(deger) === 1
+    : deger === 'Aktif' ? true
+    : deger === 'Pasif' ? false
+    : null;
+  if (aktifMi === null) return null;
+  return (
+    <span className={`rozet ${aktifMi ? 'ok' : 'hata'}`}>{aktifMi ? 'Aktif' : 'Pasif'}</span>
+  );
+}
+
 /** "İçerik" penceresi (ör. islem-log > bilgi) - JSON ise okunakli bicimde, degilse duz metin. */
 function icerikMetni(deger: unknown): string {
   if (deger === null || deger === undefined || deger === '') return 'İçerik yok.';
@@ -430,9 +451,11 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
         </div>
       )}
       {gomulu && aksiyonEkrani && (
-        <div style={{ display: 'flex',
-                      justifyContent: aracCubuguSol ? 'flex-start' : 'flex-end',
-                      marginBottom: 6 }}>
+        <div style={aracCubuguSol
+          // Sola yaslidayken sekme cubuguna yapismasin: biraz asagi ve iceri.
+          ? { display: 'flex', justifyContent: 'flex-start',
+              marginTop: 10, marginLeft: 14, marginBottom: 8 }
+          : { display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
           <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} />
         </div>
       )}
@@ -638,11 +661,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
                             } : undefined}
                             title={k.genislik ? String(satir[k.ad] ?? '') : undefined}
                           >
-                            {k.ad === 'durum' && k.tip === 'mantik' ? (
-                              <span className={`rozet ${Number(satir[k.ad]) === 1 ? 'ok' : 'gri'}`}>
-                                {Number(satir[k.ad]) === 1 ? 'Aktif' : 'Pasif'}
-                              </span>
-                            ) : bicimle(satir[k.ad], k)}
+                            {durumRozeti(satir[k.ad], k) ?? bicimle(satir[k.ad], k)}
                           </td>
                         ))}
                       </tr>

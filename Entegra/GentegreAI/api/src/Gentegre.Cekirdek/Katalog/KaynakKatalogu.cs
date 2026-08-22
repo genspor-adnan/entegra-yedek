@@ -994,11 +994,14 @@ public static class KaynakKatalogu
                                               "metin", "Tipi", Genislik: 150, Filtrelenebilir: false),
             new("tip",        "d.tip",        "kod",   "Tip Kodu", Varsayilan: false),
             new("durumAdi",   "case d.durum when 1 then 'Aktif' else 'Pasif' end",
-                                              "metin", "Durum", Hizalama: "orta", Filtrelenebilir: false),
+                                              "metin", "Durum", Hizalama: "orta", Genislik: 90,
+                                              Filtrelenebilir: false),
             new("durum",      "d.durum",      "kod",   "Durum Kodu", Varsayilan: false),
+            // Tek isaretlik kolonlar: genislik verilmezse baslik kadar yayilip
+            //   satirin yarisini bos birakiyordu.
             new("maliyetiEtkilesin", "d.maliyeti_etkilesin", "mantik", "Maliyeti Etkilesin",
-                                              Hizalama: "orta"),
-            new("varsayilan", "d.varsayilan", "mantik","Varsayılan", Hizalama: "orta"),
+                                              Hizalama: "orta", Genislik: 130),
+            new("varsayilan", "d.varsayilan", "mantik","Varsayılan", Hizalama: "orta", Genislik: 90),
             new("subeId",     "d.sube_id",    "sayi",  "Şube", Varsayilan: false)
         });
 
