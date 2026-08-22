@@ -993,11 +993,11 @@ public static class KaynakKatalogu
                 "when 3 then 'Konsinye Alış' when 4 then 'Konsinye Satış' else '' end",
                                               "metin", "Tipi", Genislik: 150, Filtrelenebilir: false),
             new("tip",        "d.tip",        "kod",   "Tip Kodu", Varsayilan: false),
-            new("maliyetiEtkilesin", "d.maliyeti_etkilesin", "mantik", "Maliyeti Etkilesin",
-                                              Hizalama: "orta"),
             new("durumAdi",   "case d.durum when 1 then 'Aktif' else 'Pasif' end",
                                               "metin", "Durum", Hizalama: "orta", Filtrelenebilir: false),
             new("durum",      "d.durum",      "kod",   "Durum Kodu", Varsayilan: false),
+            new("maliyetiEtkilesin", "d.maliyeti_etkilesin", "mantik", "Maliyeti Etkilesin",
+                                              Hizalama: "orta"),
             new("varsayilan", "d.varsayilan", "mantik","Varsayılan", Hizalama: "orta"),
             new("subeId",     "d.sube_id",    "sayi",  "Şube", Varsayilan: false)
         });
