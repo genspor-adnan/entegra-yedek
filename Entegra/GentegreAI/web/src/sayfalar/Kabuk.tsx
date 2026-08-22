@@ -1,7 +1,37 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { LISTELER } from './Liste';
+
+interface MenuOgesi {
+  yol: string;
+  ad: string;
+  ic: string;
+  rz: string;
+  grup?: string;
+  altGrup?: string;
+}
+
+type MenuSatiri =
+  | { tur: 'duz'; m: MenuOgesi }
+  | { tur: 'grup'; ad: string; alt: MenuOgesi[] };
+
+/** Sira korunarak grupla: her benzersiz grup adi ILK gorundugu yerde acilir. */
+function grupla(liste: MenuOgesi[], sec: (m: MenuOgesi) => string | undefined): MenuSatiri[] {
+  const satirlar: MenuSatiri[] = [];
+  const indeks = new Map<string, number>();
+  liste.forEach(m => {
+    const ad = sec(m);
+    if (!ad) { satirlar.push({ tur: 'duz', m }); return }
+    if (!indeks.has(ad)) {
+      indeks.set(ad, satirlar.length);
+      satirlar.push({ tur: 'grup', ad, alt: [] });
+    }
+    (satirlar[indeks.get(ad)!] as { tur: 'grup'; ad: string; alt: MenuOgesi[] }).alt.push(m);
+  });
+  return satirlar;
+}
 
 /**
  * Uygulama kabugu — ana mockup (Ekranlar/gentegre_v4_web.html, "Konsept C") duzeni:
@@ -11,33 +41,33 @@ import { LISTELER } from './Liste';
  * Menu kullanicinin YETKISINE gore uretilir; yetkisiz modul hic cizilmez.
  */
 export function Kabuk() {
-  const { kullanici, cikisYap, subeDegistir, yetki } = useOturum();
+  const { kullanici, cikisYap, subeDegistir, dilDegistir, yetki } = useOturum();
   const konum = useLocation();
 
   // Menu, liste tanimlarindan uretilir; yetkisiz modul hic cizilmez. menuGrup verilen
   //   ogeler ("Cari" -> Musteri/Tedarikci/Kisi Listesi) acilir-kapanir bir ana menu
   //   altinda TOPLANIR; menuGrup'suz ogeler eskisi gibi duz sirada kalir.
   const yetkiliListeler = LISTELER.filter(l => yetki(l.yetkiKodu));
-  const moduller: { yol: string; ad: string; ic: string; rz: string; grup?: string }[] =
+  const moduller: MenuOgesi[] =
     yetkiliListeler.map(l => ({
-      yol: `/${l.rota ?? l.kaynak}`, ad: l.menuAd, ic: l.ic, rz: 'liste', grup: l.menuGrup,
+      yol: `/${l.rota ?? l.kaynak}`, ad: l.menuAd, ic: l.ic,
+      rz: l.ozelSayfa ? 'ayar' : 'liste', grup: l.menuGrup, altGrup: l.menuAltGrup,
     }));
 
-  // Sira korunarak grupla: her benzersiz grup adi ilk gorundugu yerde acilir.
-  const satirlar: ({ tur: 'duz'; m: typeof moduller[number] } | { tur: 'grup'; ad: string; alt: typeof moduller })[] = [];
-  const grupIndeksi = new Map<string, number>();
-  moduller.forEach(m => {
-    if (!m.grup) { satirlar.push({ tur: 'duz', m }); return }
-    if (!grupIndeksi.has(m.grup)) {
-      grupIndeksi.set(m.grup, satirlar.length);
-      satirlar.push({ tur: 'grup', ad: m.grup, alt: [] });
-    }
-    (satirlar[grupIndeksi.get(m.grup)!] as { tur: 'grup'; ad: string; alt: typeof moduller }).alt.push(m);
-  });
+  // Iki seviye: grup (Cari, Kasa, Yönetim…) ve grubun icinde alt grup
+  //   (Yönetim › Ayarlar). Ayni yardimci iki seviyede de kullanilir.
+  const satirlar = grupla(moduller, m => m.grup);
 
   // Acik/kapali durumu kullanici ELLE degistirmedikce, aktif alt-ogeyi iceren grup
   //   otomatik acik gelir (dogrudan /tedarikci gibi bir URL'e gelindiginde de gorunsun).
   const [acikGruplar, setAcikGruplar] = useState<Record<string, boolean>>({});
+  const [kullaniciAyariAcik, setKullaniciAyariAcik] = useState(false);
+  const [eskiSifre, setEskiSifre] = useState('');
+  const [sifre1, setSifre1] = useState('');
+  const [sifre2, setSifre2] = useState('');
+  const [seciliDil, setSeciliDil] = useState(0);
+  const [ayarMesaji, setAyarMesaji] = useState('');
+  const [ayarKaydediliyor, setAyarKaydediliyor] = useState(false);
   const grupAcikMi = (ad: string, alt: typeof moduller) =>
     ad in acikGruplar ? acikGruplar[ad] : alt.some(m => konum.pathname.startsWith(m.yol));
 
@@ -49,11 +79,55 @@ export function Kabuk() {
   const paletiAc = () =>
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
 
+  const ayarKapat = () => {
+    setKullaniciAyariAcik(false);
+    setAyarMesaji('');
+    setEskiSifre('');
+    setSifre1('');
+    setSifre2('');
+  };
+
+  const ayarTamam = async () => {
+    setAyarMesaji('');
+    if (sifre1 || sifre2 || eskiSifre) {
+      if (!eskiSifre) { setAyarMesaji('Mevcut şifre gerekli.'); return }
+      if (sifre1.length < 8) { setAyarMesaji('Şifre en az 8 karakter olmalı.'); return }
+      if (sifre1 !== sifre2) { setAyarMesaji('Şifreler aynı değil.'); return }
+    }
+
+    setAyarKaydediliyor(true);
+    try {
+      if (seciliDil !== (kullanici?.dil ?? 0)) await dilDegistir(seciliDil);
+      if (sifre1 || sifre2 || eskiSifre) {
+        await api.parolaDegistir(eskiSifre, sifre1);
+        ayarKapat();
+        await cikisYap();
+        return;
+      }
+      ayarKapat();
+    } catch (e) {
+      setAyarMesaji(e instanceof Error ? e.message : 'Kullanıcı ayarları kaydedilemedi.');
+    } finally {
+      setAyarKaydediliyor(false);
+    }
+  };
+
+  useEffect(() => {
+    if (kullaniciAyariAcik) setSeciliDil(kullanici?.dil ?? 0);
+  }, [kullaniciAyariAcik, kullanici?.dil]);
+
+  useEffect(() => {
+    if (!kullaniciAyariAcik) return;
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') ayarKapat() };
+    window.addEventListener('keydown', esc);
+    return () => window.removeEventListener('keydown', esc);
+  }, [kullaniciAyariAcik]);
+
   return (
     <div className="kabuk">
       <header className="ust">
         <div className="marka">
-          <span className="lg">G</span>
+          <span className="lg"><img src="/gentegre-sembol.svg" alt="Gentegre" /></span>
           Gentegre AI
         </div>
 
@@ -81,7 +155,14 @@ export function Kabuk() {
           <button className="ib" title="Bildirimler">🔔</button>
           <button className="ib" title="Yardim">?</button>
           <button className="ib" title="Cikis" onClick={() => void cikisYap()}>⏻</button>
-          <div className="avt" title={`${kullanici?.ad} · ${kullanici?.rolAdi}`}>{basHarfler}</div>
+          <button
+            type="button"
+            className="avt"
+            title={`Kullanıcı Ayarları — ${kullanici?.ad ?? ''}`}
+            onClick={() => setKullaniciAyariAcik(true)}
+          >
+            {basHarfler}
+          </button>
         </div>
       </header>
 
@@ -111,17 +192,46 @@ export function Kabuk() {
                   <span>{s.ad}</span>
                   <span className="rz">{grupAcikMi(s.ad, s.alt) ? '▾' : '▸'}</span>
                 </button>
-                {grupAcikMi(s.ad, s.alt) && s.alt.map(m => (
+                {grupAcikMi(s.ad, s.alt) && grupla(s.alt, m => m.altGrup).map(a => a.tur === 'duz' ? (
                   <NavLink
-                    key={m.yol}
-                    to={m.yol}
-                    className={() => `mi ${konum.pathname.startsWith(m.yol) ? 'on' : ''}`}
+                    key={a.m.yol}
+                    to={a.m.yol}
+                    className={() => `mi ${konum.pathname.startsWith(a.m.yol) ? 'on' : ''}`}
                     style={{ paddingLeft: 34 }}
                   >
-                    <span className="ic">{m.ic}</span>
-                    <span>{m.ad}</span>
-                    <span className="rz">{m.rz}</span>
+                    <span className="ic">{a.m.ic}</span>
+                    <span>{a.m.ad}</span>
+                    <span className="rz">{a.m.rz}</span>
                   </NavLink>
+                ) : (
+                  // Ikinci seviye (ör. Yönetim › Ayarlar): kendi ac/kapa durumu,
+                  //   bir tik daha icerden.
+                  <div key={`${s.ad}/${a.ad}`}>
+                    <button
+                      type="button"
+                      className="mi"
+                      style={{ width: '100%', border: 0, background: 'transparent',
+                               cursor: 'pointer', paddingLeft: 34 }}
+                      onClick={() => setAcikGruplar(g => ({
+                        ...g, [`${s.ad}/${a.ad}`]: !grupAcikMi(`${s.ad}/${a.ad}`, a.alt) }))}
+                    >
+                      <span className="ic">⚙️</span>
+                      <span>{a.ad}</span>
+                      <span className="rz">{grupAcikMi(`${s.ad}/${a.ad}`, a.alt) ? '▾' : '▸'}</span>
+                    </button>
+                    {grupAcikMi(`${s.ad}/${a.ad}`, a.alt) && a.alt.map(m => (
+                      <NavLink
+                        key={m.yol}
+                        to={m.yol}
+                        className={() => `mi ${konum.pathname.startsWith(m.yol) ? 'on' : ''}`}
+                        style={{ paddingLeft: 52 }}
+                      >
+                        <span className="ic">{m.ic}</span>
+                        <span>{m.ad}</span>
+                        <span className="rz">{m.rz}</span>
+                      </NavLink>
+                    ))}
+                  </div>
                 ))}
               </div>
             ))}
@@ -148,6 +258,86 @@ export function Kabuk() {
 
         <main className="ana"><Outlet /></main>
       </div>
+
+      {kullaniciAyariAcik && (
+        <div className="kaperde" onMouseDown={e => { if (e.target === e.currentTarget) ayarKapat() }}>
+          <div className="kawin kullanici-ayarlari" role="dialog" aria-label="Kullanıcı Ayarları">
+            <div className="kabas">
+              <span>👤 Kullanıcı Ayarları</span>
+              <span className="kapt">Ortak\UKullaniciDuzenle · KULLANICI</span>
+            </div>
+
+            <div className="kagov">
+              <div className="kagrup">
+                <h6>Kimlik <span>kendi hesabınızda salt okunur</span></h6>
+                <div className="kasat">
+                  <label>Kullanıcı Adı</label>
+                  <div className="kaara">
+                    <input value={kullanici?.ad ?? ''} disabled />
+                    <button className="kabtn" disabled title="Rehberden seç">⋯</button>
+                    <span className="karoz">ID {kullanici?.id ?? '-'}</span>
+                  </div>
+                  <label>Kullanıcı Kodu</label><input value={kullanici?.kod ?? ''} disabled />
+                  <label>Rol</label><input value={kullanici?.rolAdi ?? ''} disabled />
+                  <label>Kullanıcı Durumu</label><input value="Aktif" disabled />
+                  <label>Çalışılan Şube</label><input value={aktifSube?.ad ?? '-'} disabled />
+                  <label>Dil</label>
+                  <select value={seciliDil} onChange={e => setSeciliDil(Number(e.target.value))} disabled={ayarKaydediliyor}>
+                    <option value={0}>Türkçe</option>
+                    <option value={1}>English</option>
+                    <option value={2}>Deutsch</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="kagrup">
+                <h6>Şifre</h6>
+                <div className="kasat">
+                  <label>Mevcut Şifre</label>
+                  <input
+                    type="password"
+                    value={eskiSifre}
+                    onChange={e => setEskiSifre(e.target.value)}
+                    disabled={ayarKaydediliyor}
+                    autoComplete="current-password"
+                  />
+                  <label>Yeni Şifre</label>
+                  <div className="kaara">
+                    <input
+                      type="password"
+                      value={sifre1}
+                      onChange={e => setSifre1(e.target.value)}
+                      disabled={ayarKaydediliyor}
+                      autoComplete="new-password"
+                    />
+                    {sifre1 && sifre1 === sifre2 && <span className="kaok">✓</span>}
+                  </div>
+                  <label>Yeni Şifre (Tekrar)</label>
+                  <div className="kaara">
+                    <input
+                      type="password"
+                      value={sifre2}
+                      onChange={e => setSifre2(e.target.value)}
+                      disabled={ayarKaydediliyor}
+                      autoComplete="new-password"
+                    />
+                    {sifre2 && sifre1 === sifre2 && <span className="kaok">✓</span>}
+                  </div>
+                </div>
+                {ayarMesaji && <div className="kauyari">{ayarMesaji}</div>}
+                <div className="kanot">Şifre boş bırakılırsa değiştirilmez. Şifre değişirse oturum kapanır; yeni şifreyle tekrar girilir.</div>
+              </div>
+            </div>
+
+            <div className="kaalt">
+              <button className="bas" onClick={() => void ayarTamam()} disabled={ayarKaydediliyor}>
+                {ayarKaydediliyor ? 'Kaydediliyor...' : 'Tamam'}
+              </button>
+              <button onClick={ayarKapat} disabled={ayarKaydediliyor}>İptal</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

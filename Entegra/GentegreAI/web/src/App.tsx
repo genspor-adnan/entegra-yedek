@@ -5,6 +5,7 @@ import { Kabuk } from './sayfalar/Kabuk';
 import { BelgeKarti } from './sayfalar/BelgeKarti';
 import { KasaIslemKarti } from './sayfalar/KasaIslemKarti';
 import { Liste, LISTELER } from './sayfalar/Liste';
+import { StokAyarlar } from './sayfalar/StokAyarlar';
 
 function Yollar() {
   const { kullanici, yukleniyor, yetki } = useOturum();
@@ -23,7 +24,7 @@ function Yollar() {
             zorunlu olarak - ayni kaynak ('cari') Musteri/Tedarikci gibi birden fazla
             ekranda farkli `rota` ile kullanilabilir, o yuzden path `rota ?? kaynak`dan
             uretilir. */}
-        {LISTELER.filter(l => yetki(l.yetkiKodu)).flatMap(l => {
+        {LISTELER.filter(l => yetki(l.yetkiKodu) && !l.ozelSayfa).flatMap(l => {
           const rota = l.rota ?? l.kaynak;
           return [
             <Route key={rota} path={`/${rota}`} element={<Liste tanim={l} />} />,
@@ -40,6 +41,9 @@ function Yollar() {
             uretmez (ozelKart), bu iki rota onun yerine gecer. */}
         <Route path="/kasa-islem/yeni" element={<KasaIslemKarti />} />
         <Route path="/kasa-islem/:id" element={<KasaIslemKarti />} />
+
+        {/* Ayar ekranlari liste degil (ozelSayfa) - rotalari burada. */}
+        {yetki('stok') && <Route path="/stok-ayarlar" element={<StokAyarlar />} />}
 
         <Route path="*" element={<Navigate to={ilk ? `/${ilk.rota ?? ilk.kaynak}` : '/cari'} replace />} />
       </Route>

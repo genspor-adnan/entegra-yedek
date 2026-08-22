@@ -115,6 +115,7 @@ public static class KartKatalogu
         Ekle(MasrafMerkezi());
         Ekle(HesapPlani());
         Ekle(CekSenet());
+        Ekle(Depo());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
 
@@ -800,6 +801,39 @@ public static class KartKatalogu
         SilmeEngelleri: new[]
         {
             new SilmeEngeli("public.mali_hareket", "merkez_id", "Bu merkeze ait hareket var, silinemez.")
+        });
+
+    // ----------------------------------------------------------------- depo ----
+    // Stok Ayarlari ekraninin "Depolar" sekmesi. Varsayilan depo TEKTIR
+    //   (ux_depo_varsayilan); ikinci bir depo varsayilan yapilinca eskisini
+    //   trg_depo_varsayilan_tek (db/090) birakir - kart ozel kod tasimaz.
+    private static KartTanimi Depo() => new(
+        Ad: "depo",
+        YetkiKodu: "stok",
+        Tablo: "public.depo",
+        LogTabloId: 918,
+        SubeKolonu: "sube_id",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+            { ["durum"] = (short)1, ["maliyetiEtkilesin"] = (short)1, ["varsayilan"] = (short)0 },
+        Alanlar: new KartAlani[]
+        {
+            new("id",                 "id",                 "sayi",  Yazilabilir: false),
+            new("ad",                 "ad",                 "metin", Zorunlu: true, EnFazlaUzunluk: 50,
+                Baslik: "Depo Adı", Grup: "Genel"),
+            new("varsayilan",         "varsayilan",         "mantik", Baslik: "Varsayılan Depo", Grup: "Genel"),
+            new("maliyetiEtkilesin",  "maliyeti_etkilesin", "mantik", Baslik: "Maliyeti Etkilesin", Grup: "Genel"),
+            new("durum",              "durum",              "kod",   SabitKodlar: DurumKodlari,
+                Baslik: "Durum", Grup: "Genel"),
+            new("sonSayimTarihi",     "son_sayim_tarihi",   "tarih", Yazilabilir: false,
+                Baslik: "Son Sayım Tarihi", Grup: "Genel")
+        },
+        SilmeEngelleri: new[]
+        {
+            new SilmeEngeli("public.stok_durum",  "depo_id",        "Bu depoda stok bakiyesi var, silinemez."),
+            new SilmeEngeli("public.belge",       "cikis_depo_id",  "Bu depodan cikisli belge var, silinemez."),
+            new SilmeEngeli("public.belge",       "giris_depo_id",  "Bu depoya girisli belge var, silinemez."),
+            new SilmeEngeli("public.belge_satir", "cikis_depo_id",  "Bu depodan cikisli belge satiri var, silinemez."),
+            new SilmeEngeli("public.belge_satir", "giris_depo_id",  "Bu depoya girisli belge satiri var, silinemez.")
         });
 
     // ---------------------------------------------------------- hesap plani ----

@@ -42,6 +42,11 @@ export interface ListeTanimi {
   /** "Yeni" aksiyonunda belge kartinin acilacagi tur (ör. Siparisler -> 19).
       Verilmezse kart kendi varsayilanini (satis faturasi) kullanir. */
   yeniBelgeTuru?: number;
+  /** Menude grubun ICINDE ikinci bir kirilim (ör. Yönetim › Ayarlar › Stok Ayarları). */
+  menuAltGrup?: string;
+  /** Liste DEGIL, kendi sayfasi olan menu ogesi (ör. Stok Ayarları: sekmeli ekran).
+      App.tsx rotayi kendisi tanimlar; buradaki `kaynak` yalnizca anahtar/rota icindir. */
+  ozelSayfa?: boolean;
 }
 
 /**
@@ -507,5 +512,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'rol', baslik: 'Roller', yol: 'Yonetim › Roller ve Yetkiler', kartYolu: '/rol',
     aksiyonEkrani: 'rol-liste',
     menuGrup: 'Yönetim', menuAd: 'Roller', ic: '🛡️', yetkiKodu: 'rol',
+  },
+  {
+    // Sekmeli AYAR ekrani - liste degil (ozelSayfa): Genel + Depolar. Menude
+    //   Yönetim grubunun altinda "Ayarlar" alt basligiyla toplanir.
+    kaynak: 'stok-ayarlar', baslik: 'Stok Ayarları', yol: 'Yonetim › Ayarlar › Stok Ayarlari',
+    ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Stok Ayarları',
+    ic: '📦', yetkiKodu: 'stok',
   },
 ];

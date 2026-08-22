@@ -96,6 +96,17 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            // Stok Ayarlari > Depolar sekmesi.
+            ["depo-liste"] = new AksiyonTanimi[]
+            {
+                new("depo.yeni",    "＋ Ekle",   "depo", Kisayol: "Ctrl+N",
+                    KaynakKodu: "stok", Islem: Islem.Ekle, Sira: 10),
+                new("depo.duzenle", "✎ Düzenle", "depo", Kisayol: "Enter",
+                    KaynakKodu: "stok", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("depo.sil",     "🗑 Sil",    "depo", Kisayol: "Del",
+                    KaynakKodu: "stok", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+            },
+
             ["belge-liste"] = new AksiyonTanimi[]
             {
                 new("belge.yeni",  "＋ Yeni",      "belge", Kisayol: "Ctrl+N",

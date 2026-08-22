@@ -71,6 +71,36 @@ const GIRILEBILIR_TURLER = [19, 15, 14, 9, 11, 10, 16, 12] as const;
 const LISTE_YOLU = (tur: number) => (tur === 9 || tur === 19 ? '/siparis' : '/belge');
 
 /**
+ * TarafArama ile doldurulan baslik alani (cari, satis temsilcisi...).
+ *
+ * GenLookup DEGIL: secim her yerde AYNI arama ekranindan yapilsin diye alan
+ * kendisi salt okunur, tiklayinca (ya da "…" dugmesiyle) modali cagirir.
+ */
+function TarafAlani({ etiket, deger, kilitli, ipucu, zorunlu, hata, onAc }: {
+  etiket: string;
+  deger?: string;
+  kilitli: boolean;
+  ipucu: string;
+  zorunlu?: boolean;
+  hata?: string;
+  onAc(): void;
+}) {
+  return (
+    <label className="alan">
+      <span className={`etiket${zorunlu ? ' zorunlu-isaret' : ''}`}>{etiket}</span>
+      <span className="lookup-kutu">
+        <input readOnly value={deger ?? ''} placeholder="Seçiniz…" disabled={kilitli}
+               onMouseDown={e => { if (!kilitli) { e.preventDefault(); onAc() } }} />
+        {!kilitli && (
+          <button type="button" className="mini" title={ipucu} onClick={onAc}>…</button>
+        )}
+      </span>
+      {hata && <span className="alan-hata">{hata}</span>}
+    </label>
+  );
+}
+
+/**
  * Belge kesme ekrani (satis faturasi, siparis, irsaliye…).
  *
  * TUR URL'DEN GELIR (?tur=19). Ekran eskiden 15'e (satis faturasi) SABITTI;
@@ -498,21 +528,15 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             {/* Cari alani GenLookup DEGIL: secim ayni TarafArama modalindan yapilir
                 ki "yeni belge" akisiyla ayni ekran olsun (iki farkli cari secme
                 bicimi kullaniciyi sasirtiyordu). */}
-            <label className="alan">
-              <span className="etiket zorunlu-isaret">
-                {siparisMi || irsaliyeMi ? 'Müşteri (Cari)' : 'Cari'}
-              </span>
-              <span className="lookup-kutu">
-                <input readOnly value={cari?.unvan ?? ''} placeholder="Seçiniz…"
-                       disabled={kilitli}
-                       onMouseDown={e => { if (!kilitli) { e.preventDefault(); setCariArama(true) } }} />
-                {!kilitli && (
-                  <button type="button" className="mini" title="Cari ara"
-                          onClick={() => setCariArama(true)}>…</button>
-                )}
-              </span>
-              {alanHatalari.tarafId && <span className="alan-hata">{alanHatalari.tarafId}</span>}
-            </label>
+            <TarafAlani
+              etiket={siparisMi || irsaliyeMi ? 'Müşteri (Cari)' : 'Cari'}
+              zorunlu
+              deger={cari?.unvan}
+              kilitli={kilitli}
+              ipucu="Cari ara"
+              onAc={() => setCariArama(true)}
+              hata={alanHatalari.tarafId}
+            />
 
             <label className="alan">
               <span className="etiket">{irsaliyeMi ? 'İrsaliye No' : 'Belge No'}</span>
@@ -544,18 +568,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
             {/* Satis temsilcisi PERSONEL'dir (cari degil) ve secim cari ile ayni
                 TarafArama ekranindan yapilir - tek arama bicimi. */}
-            <label className="alan">
-              <span className="etiket">Satış Temsilcisi</span>
-              <span className="lookup-kutu">
-                <input readOnly value={satici?.ad ?? ''} placeholder="Seçiniz…"
-                       disabled={kilitli}
-                       onMouseDown={e => { if (!kilitli) { e.preventDefault(); setSaticiArama(true) } }} />
-                {!kilitli && (
-                  <button type="button" className="mini" title="Personel ara"
-                          onClick={() => setSaticiArama(true)}>…</button>
-                )}
-              </span>
-            </label>
+            <TarafAlani
+              etiket="Satış Temsilcisi"
+              deger={satici?.ad}
+              kilitli={kilitli}
+              ipucu="Personel ara"
+              onAc={() => setSaticiArama(true)}
+            />
 
             <label className="alan">
               <span className="etiket zorunlu-isaret">
