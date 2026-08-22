@@ -722,17 +722,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           <div className="kagrup">
             <h6>Taşıyıcı Bilgileri</h6>
             <div className="alan-izgara uc-sutun">
-              <label className="alan genis-2">
-                <span className="etiket">Sevk Adresi</span>
-                <input value={[sonuc?.belge.tarafAdres, sonuc?.belge.tarafIlce, sonuc?.belge.tarafIl]
-                                .filter(Boolean).join(' / ')} readOnly
-                       placeholder="Cari seçilince kartındaki varsayılan adres gelir" />
-              </label>
-              <label className="alan">
-                <span className="etiket">Sevk Zamanı</span>
-                <input type="datetime-local" value={sevkTarihi} disabled={kilitli}
-                       onChange={e => setSevkTarihi(e.target.value)} />
-              </label>
               <GenLookup
                 kaynak="cari"
                 etiket="Taşıyıcı Ünvan"
@@ -755,6 +744,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                         onChange={e => setTeslimSekli(Number(e.target.value))}>
                   {TESLIM_SEKLI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
                 </select>
+              </label>
+              <label className="alan genis-2">
+                <span className="etiket">Sevk Adresi</span>
+                <input value={[sonuc?.belge.tarafAdres, sonuc?.belge.tarafIlce, sonuc?.belge.tarafIl]
+                                .filter(Boolean).join(' / ')} readOnly
+                       placeholder="Cari seçilince kartındaki varsayılan adres gelir" />
+              </label>
+              <label className="alan">
+                <span className="etiket">Sevk Zamanı</span>
+                <input type="datetime-local" value={sevkTarihi} disabled={kilitli}
+                       onChange={e => setSevkTarihi(e.target.value)} />
               </label>
               <label className="alan">
                 <span className="etiket">Araç Plakası</span>
