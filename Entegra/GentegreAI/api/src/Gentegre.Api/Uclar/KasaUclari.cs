@@ -142,6 +142,29 @@ public static class KasaUclari
             return Results.Ok(new { islem = kayit.Islem, tersIslemId = tersId, izlemeNo = baglam.IzlemeNo });
         });
 
+        // POST /api/kasa-islem/{id}/gerceklestir - plandan tahsilat/odeme uret
+        grup.MapPost("/{id:int}/gerceklestir", async (
+            int id, GerceklestirIstegi istek, BaglamCozucu cozucu, KasaDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("kasa_islem", Islem.Ekle);
+            baglam.AksiyonIste("kasa.gerceklestir");
+
+            if (istek is null || istek.HesapId <= 0)
+                throw GentegreHatasi.Dogrulama("Tahsilat/ödeme hesabı seçilmeli.",
+                    new AlanHatasi("hesapId", "Zorunlu."));
+
+            await SubeKontrolAsync(depo, id, baglam, iptal);
+
+            var yeniId = await depo.PlanGerceklestirAsync(id, istek.HesapId, istek.Tutar,
+                istek.Tarih, istek.Tur, new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+
+            var kayit = await depo.OkuAsync(yeniId, iptal) ?? throw GentegreHatasi.Bulunamadi();
+            kayit.IzlemeNo = baglam.IzlemeNo;
+            return Results.Created($"/api/kasa-islem/{yeniId}", kayit);
+        });
+
         // DELETE /api/kasa-islem/{id} - yalniz taslak / plan (DB trigger de korur)
         grup.MapDelete("/{id:int}", async (
             int id, BaglamCozucu cozucu, KasaDeposu depo, HttpContext ctx, CancellationToken iptal) =>
@@ -169,6 +192,15 @@ public static class KasaUclari
     {
         public string Sebep { get; set; } = "";
         public DateTime? Tarih { get; set; }
+    }
+
+    /// <summary>Tutar bos ise planin KALANI gerceklesir; tur bos ise hesap turunden secilir.</summary>
+    public sealed class GerceklestirIstegi
+    {
+        public int HesapId { get; set; }
+        public decimal? Tutar { get; set; }
+        public DateTime? Tarih { get; set; }
+        public int? Tur { get; set; }
     }
 
     /// <summary>Baska subenin islemi yokmus gibi davranir (API §8).</summary>

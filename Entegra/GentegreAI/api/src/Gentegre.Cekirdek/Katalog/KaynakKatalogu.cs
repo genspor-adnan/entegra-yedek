@@ -86,6 +86,7 @@ public static class KaynakKatalogu
         Ekle(KasaIslem());
         Ekle(MuhasebeFis());
         Ekle(MuhasebeFisSatir());
+        Ekle(PlanVade());
     }
 
     private static void Ekle(KaynakTanimi k) => Kaynaklar[k.Ad] = k;
@@ -779,5 +780,33 @@ public static class KaynakKatalogu
             new("tarafUnvan", "t.unvan",      "metin", "Cari",    Varsayilan: false),
             new("projeAdi",   "p.ad",         "metin", "Proje",   Varsayilan: false),
             new("aciklama",   "s.aciklama",   "metin", "Açıklama", Genislik: 260)
+        });
+
+    // ------------------------------------------------------- vade / planlar ----
+    // Acik planlar (durum 1): beklenen tahsilat/odemeler. `gecikmeGun` pozitifse
+    //   vade gecmis - listenin varsayilan sirasi en gecikmisi ustte.
+    private static KaynakTanimi PlanVade() => new(
+        Ad: "plan-vade",
+        YetkiKodu: "kasa_islem",
+        Kaynak: "public.v_plan_vade v",
+        SubeKolonu: "v.sube_id",
+        KapsamKolonu: "v.taraf_id",
+        VarsayilanSirala: "v.plan_tarihi asc, v.id asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",               "v.id",                "sayi",  "Id",     Varsayilan: false),
+            new("planTarihi",       "v.plan_tarihi",       "tarih", "Vade",   Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("gecikmeGun",       "v.gecikme_gun",       "sayi",  "Gecikme (gün)", Hizalama: "sag"),
+            new("turAdi",           "v.tur_adi",           "metin", "Plan Türü"),
+            new("turGrup",          "v.tur_grup",          "metin", "Grup",   Hizalama: "orta", Varsayilan: false),
+            new("tarafUnvan",       "v.taraf_unvan",       "metin", "Cari",   Genislik: 220),
+            new("tutar",            "v.tutar",             "para",  "Plan Tutarı", Hizalama: "sag", Bicim: "#,##0.00"),
+            new("gerceklesenTutar", "v.gerceklesen_tutar", "para",  "Gerçekleşen", Hizalama: "sag", Bicim: "#,##0.00"),
+            new("kalanTutar",       "v.kalan_tutar",       "para",  "Kalan",  Hizalama: "sag", Bicim: "#,##0.00"),
+            new("dovizCinsi",       "v.doviz_cinsi",       "metin", "Döviz",  Hizalama: "orta"),
+            new("yerelTutar",       "v.yerel_tutar",       "para",  "TL Tutar", Hizalama: "sag", Bicim: "#,##0.00", Varsayilan: false),
+            new("projeId",          "v.proje_id",          "sayi",  "Proje Id", Varsayilan: false),
+            new("aciklama",         "v.aciklama",          "metin", "Açıklama", Genislik: 240),
+            new("subeId",           "v.sube_id",           "sayi",  "Şube",   Varsayilan: false)
         });
 }

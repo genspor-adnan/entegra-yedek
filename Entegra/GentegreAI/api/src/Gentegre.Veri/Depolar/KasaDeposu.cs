@@ -209,6 +209,42 @@ public sealed class KasaDeposu
         return yeniId;
     }
 
+    /// <summary>
+    /// Plan gerceklesmesi (K10): plan DEGISMEZ, yeni bir islem basligi acilir ve
+    /// plandan yalniz `gerceklesen_tutar` birikir. Kismi gerceklesme dogaldir.
+    /// </summary>
+    public async Task<int> PlanGerceklestirAsync(int planId, int hesapId, decimal? tutar,
+        DateTime? tarih, int? tur, YazmaBaglami baglam, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var tx = await baglanti.BeginTransactionAsync(iptal);
+
+        int yeniId;
+        await using (var komut = new NpgsqlCommand(
+            "select public.fn_plan_gerceklestir(@p0, @p1, @p2, @p3::date, @p4, @p5)", baglanti, tx))
+        {
+            komut.Parameters.AddWithValue("p0", planId);
+            komut.Parameters.AddWithValue("p1", hesapId);
+            komut.Parameters.AddWithValue("p2", (object?)tutar ?? DBNull.Value);
+            komut.Parameters.AddWithValue("p3", (object?)tarih?.Date ?? DBNull.Value);
+            komut.Parameters.AddWithValue("p4", (object?)tur ?? DBNull.Value);
+            komut.Parameters.AddWithValue("p5", baglam.KullaniciId);
+            yeniId = Convert.ToInt32(await CalistirAsync(komut, iptal));
+        }
+
+        await _log.YazAsync(baglanti, tx, LogIslemi.Ekle, LogTabloKasa, yeniId,
+            baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+            new Dictionary<string, string>
+            {
+                ["aksiyon"] = "plan-gerceklestir",
+                ["planId"] = planId.ToString(CultureInfo.InvariantCulture),
+                ["tutar"] = (tutar ?? 0).ToString(CultureInfo.InvariantCulture)
+            }, iptal: iptal);
+
+        await tx.CommitAsync(iptal);
+        return yeniId;
+    }
+
     public async Task SilAsync(int id, YazmaBaglami baglam, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);

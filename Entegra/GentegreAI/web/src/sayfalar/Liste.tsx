@@ -77,8 +77,16 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
     try {
       switch (kod) {
+        // Grup basina bir giris: kart tur seridini o grubun turleriyle acar.
         case 'kasa.tahsilat.yeni': git('/kasa-islem/yeni?tur=21'); return;
         case 'kasa.odeme.yeni':    git('/kasa-islem/yeni?tur=31'); return;
+        case 'kasa.virman.yeni':   git('/kasa-islem/yeni?tur=41'); return;
+        case 'kasa.doviz.yeni':    git('/kasa-islem/yeni?tur=45'); return;
+        case 'kasa.plan.yeni':     git('/kasa-islem/yeni?tur=61'); return;
+        case 'kasa.gerceklestir':
+          // Gerceklestirme hesap/tutar secimi ister - plan kartindaki panele goturur.
+          if (satir) git(`/kasa-islem/${satir.id}`);
+          return;
         case 'kasa.ac':
         case 'kasa.fis-gor':
           if (satir) git(`/kasa-islem/${satir.id}`);
@@ -244,6 +252,20 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Plan',     filtre: { alan: 'durum', op: 'esit', deger: 1 } },
     ],
     menuGrup: 'Kasa', menuAd: 'Kasa İşlemleri', ic: '🧾', yetkiKodu: 'kasa_islem',
+  },
+  {
+    // Acik planlar (v_plan_vade): beklenen tahsilat/odemeler, en yakin vade ustte.
+    //   "Gerceklestir" plan kaydini DEGISTIRMEZ - yeni bir islem acar (K10).
+    kaynak: 'plan-vade', baslik: 'Vade / Planlar', yol: 'Kasa › Vadeler',
+    kartYolu: '/kasa-islem', ozelKart: true, aksiyonEkrani: 'plan-liste',
+    toplam: ['tutar', 'gerceklesenTutar', 'kalanTutar'],
+    cipler: [
+      { ad: 'Tumu' },
+      { ad: 'Vadesi Geçmiş', filtre: { alan: 'gecikmeGun', op: 'buyuk', deger: 0 } },
+      { ad: 'Tahsilat', filtre: { alan: 'turAdi', op: 'icerir', deger: 'Tahsilat' } },
+      { ad: 'Ödeme',    filtre: { alan: 'turAdi', op: 'icerir', deger: 'Ödeme' } },
+    ],
+    menuGrup: 'Kasa', menuAd: 'Vade / Planlar', ic: '📅', yetkiKodu: 'kasa_islem',
   },
   {
     // "Kasa" grubu, Satış'in HEMEN ALTINDA (kullanici istegi) - "Cari Hareketleri"

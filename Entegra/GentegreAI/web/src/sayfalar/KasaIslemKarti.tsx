@@ -26,16 +26,26 @@ const LOOKUP_PROJE = [
   { ad: 'ad', baslik: 'Proje', genis: true },
 ];
 
+const GRUP_ADI: Record<string, string> = {
+  tahsilat: 'Tahsilat', odeme: 'Ödeme', virman: 'Virman', doviz: 'Döviz', plan: 'Plan',
+};
+
 /** Sayi girisi: "1.234,56" ve "1234.56" ikisini de kabul eder. */
 const sayi = (metin: string) => Number(metin.replace(/\./g, '').replace(',', '.')) || 0;
 
+interface HesapSecimi { id: number; ad: string; doviz: string }
+interface CariSecimi { id: number; unvan: string }
+
 /**
- * Kasa (tahsilat / ödeme) islem karti — F2.
+ * Kasa islem karti — tahsilat / odeme (F2) + virman / doviz / plan (F3).
  *
- * BACAKLARI KULLANICI GIRMEZ. Ekran basligi doldurur (tur, hesap, cari, tutar,
- * masraf); bacaklari ve muhasebe fisini SUNUCU turun sablonundan uretir
- * (fn_kasa_islem_bacak_uret / fn_kasa_islem_fisle). Ekranda gorunen tutarlar
- * kaydettikten sonra sunucunun dondugu degerlerdir - iki taraf ayrisamaz.
+ * BACAKLARI KULLANICI GIRMEZ. Ekran basligi doldurur; bacaklari ve muhasebe
+ * fisini SUNUCU turun sablonundan uretir. Ekranda gorunen tutarlar kaydettikten
+ * sonra sunucunun dondugu degerlerdir - iki taraf ayrisamaz.
+ *
+ * Tur SERIDI yalniz AKTIF GRUBUN turlerini gosterir (40 turun hepsi degil):
+ * grup listedeki "+ Tahsilat / Virman / Döviz…" aksiyonundan ya da URL'deki
+ * ?tur= parametresinden gelir.
  */
 export function KasaIslemKarti() {
   const git = useNavigate();
@@ -48,14 +58,23 @@ export function KasaIslemKarti() {
   const [turler, setTurler] = useState<KasaIslemTuru[]>([]);
   const [tur, setTur] = useState<number>(Number(sorgu.get('tur')) || 21);
   const [tarih, setTarih] = useState(new Date().toISOString().slice(0, 10));
-  const [cari, setCari] = useState<{ id: number; unvan: string } | null>(null);
-  const [hesap, setHesap] = useState<{ id: number; ad: string; doviz: string } | null>(null);
+  const [planTarihi, setPlanTarihi] = useState('');
+  const [cari, setCari] = useState<CariSecimi | null>(null);
+  const [karsiCari, setKarsiCari] = useState<CariSecimi | null>(null);
+  const [hesap, setHesap] = useState<HesapSecimi | null>(null);
+  const [karsiHesap, setKarsiHesap] = useState<HesapSecimi | null>(null);
   const [tutar, setTutar] = useState('');
   const [kur, setKur] = useState('1');
+  const [karsiTutar, setKarsiTutar] = useState('');
   const [masrafTutar, setMasrafTutar] = useState('');
   const [kalem, setKalem] = useState<{ id: number; ad: string } | null>(null);
   const [proje, setProje] = useState<{ id: number; ad: string } | null>(null);
   const [aciklama, setAciklama] = useState('');
+
+  // Plan gerceklestirme paneli
+  const [gHesap, setGHesap] = useState<HesapSecimi | null>(null);
+  const [gTutar, setGTutar] = useState('');
+  const [gTarih, setGTarih] = useState(new Date().toISOString().slice(0, 10));
 
   const [sonuc, setSonuc] = useState<KasaIslemYaniti | null>(null);
   const [calisiyor, setCalisiyor] = useState(false);
@@ -63,9 +82,15 @@ export function KasaIslemKarti() {
   const [alanHatalari, setAlanHatalari] = useState<Record<string, string>>({});
 
   const secili = useMemo(() => turler.find(t => t.kod === tur), [turler, tur]);
+  const grup = secili?.grup ?? 'tahsilat';
   const durum = sonuc ? Number(sonuc.islem.durum ?? 0) : null;
   const kilitli = durum !== null && durum >= 2;      // gerceklesmis / iptal: salt gorunum
-  const dovizli = (hesap?.doviz ?? 'TL') !== 'TL';
+  const planMi = grup === 'plan';
+  const karsiHesapli = grup === 'virman' || grup === 'doviz';
+  const donusum = grup === 'doviz';
+  const cariVirman = tur === 49;
+  const anaDoviz = hesap?.doviz ?? (planMi ? 'TL' : 'TL');
+  const dovizli = anaDoviz !== 'TL';
   const ekleyebilir = yetki('kasa_islem', 'ekle');
 
   // Turler bir kez yuklenir (katalog degismez, 5 dk cache sunucuda).
@@ -81,15 +106,23 @@ export function KasaIslemKarti() {
     const i = y.islem;
     setTur(Number(i.tur));
     if (i.islemTarihi) setTarih(String(i.islemTarihi).slice(0, 10));
+    setPlanTarihi(i.planTarihi ? String(i.planTarihi).slice(0, 10) : '');
     setTutar(String(i.tutar ?? ''));
     setKur(String(i.dovizKuru ?? 1));
+    setKarsiTutar(Number(i.karsiTutar) ? String(i.karsiTutar) : '');
     setMasrafTutar(Number(i.masrafTutar) ? String(i.masrafTutar) : '');
     setAciklama(String(i.aciklama ?? ''));
-    if (i.tarafId) setCari({ id: Number(i.tarafId), unvan: String(i.tarafUnvan ?? '') });
-    if (i.hesapId) setHesap({
+    setCari(i.tarafId ? { id: Number(i.tarafId), unvan: String(i.tarafUnvan ?? '') } : null);
+    setKarsiCari(i.karsiTarafId ? { id: Number(i.karsiTarafId), unvan: '' } : null);
+    setHesap(i.hesapId ? {
       id: Number(i.hesapId), ad: String(i.hesapAdi ?? ''), doviz: String(i.dovizCinsi ?? 'TL'),
-    });
-    if (i.projeId) setProje({ id: Number(i.projeId), ad: String(i.projeAdi ?? '') });
+    } : null);
+    setKarsiHesap(i.karsiHesapId ? {
+      id: Number(i.karsiHesapId), ad: String(i.karsiHesapAdi ?? ''),
+      doviz: String(i.karsiDovizCinsi || 'TL'),
+    } : null);
+    setProje(i.projeId ? { id: Number(i.projeId), ad: String(i.projeAdi ?? '') } : null);
+    setGTutar(Number(i.kalanTutar) ? String(i.kalanTutar) : '');
   }, []);
 
   // Mevcut kaydi ac
@@ -103,52 +136,63 @@ export function KasaIslemKarti() {
 
   // Hesap ya da tarih degisince kuru tazele (yalniz dovizli hesapta, kilitli degilse).
   useEffect(() => {
-    if (kilitli) return;
-    const cins = hesap?.doviz ?? 'TL';
-    if (cins === 'TL') { setKur('1'); return }
-    const yon = secili?.grup === 'tahsilat' ? 1 : 2;      // giris satis, cikis alis kuru
+    if (kilitli || anaDoviz === 'TL') { if (!kilitli && anaDoviz === 'TL') setKur('1'); return }
+    const yon = grup === 'tahsilat' ? 1 : 2;      // giris satis, cikis alis kuru
     void (async () => {
       try {
-        const k = await api.dovizKur(cins, tarih, yon);
+        const k = await api.dovizKur(anaDoviz, tarih, yon);
         if (k.kur) setKur(String(k.kur));
       } catch { /* kur yoksa kullanici elle girer */ }
     })();
-  }, [hesap?.doviz, tarih, secili?.grup, kilitli]);
+  }, [anaDoviz, tarih, grup, kilitli]);
 
   const yerelOnizleme = sayi(tutar) * (Number(kur.replace(',', '.')) || 1);
+  // Doviz donusumunde efektif kur: verilen yerel tutar / alinan doviz tutari.
+  const caprazKur = donusum && sayi(karsiTutar) > 0 ? yerelOnizleme / sayi(karsiTutar) : 0;
 
-  function govde(taslak: boolean) {
+  function govde(taslak: boolean, plan: boolean) {
     return {
       islem: {
         tur,
         islemTarihi: tarih,
+        planTarihi: plan && planTarihi ? planTarihi : null,
         tarafId: cari?.id ?? null,
+        karsiTarafId: cariVirman ? karsiCari?.id ?? null : null,
         hesapId: hesap?.id ?? null,
+        karsiHesapId: karsiHesapli ? karsiHesap?.id ?? null : null,
         tutar: sayi(tutar),
-        dovizCinsi: hesap?.doviz ?? 'TL',
+        dovizCinsi: anaDoviz,
         dovizKuru: Number(kur.replace(',', '.')) || 1,
+        karsiDovizCinsi: donusum ? karsiHesap?.doviz ?? '' : '',
+        karsiTutar: donusum ? sayi(karsiTutar) : 0,
         masrafTutar: sayi(masrafTutar),
         masrafId: kalem?.id ?? null,
         projeId: proje?.id ?? null,
         aciklama,
       },
-      secenekler: { taslak, kurKontrolu: true },
+      secenekler: { taslak, plan, kurKontrolu: true },
     };
   }
 
-  async function kaydet(taslak: boolean) {
+  async function kaydet(taslak: boolean, plan = planMi) {
     setHata(null);
     setAlanHatalari({});
 
-    if (!hesap) { setAlanHatalari({ hesapId: 'Hesap seçilmeli.' }); return }
-    if (sayi(tutar) <= 0) { setAlanHatalari({ tutar: 'Sıfırdan büyük olmalı.' }); return }
-    if (secili?.cariZorunlu === 1 && !cari) { setAlanHatalari({ tarafId: 'Cari zorunlu.' }); return }
+    const hatalar: Record<string, string> = {};
+    if (!planMi && !cariVirman && !hesap) hatalar.hesapId = 'Hesap seçilmeli.';
+    if (karsiHesapli && !karsiHesap) hatalar.karsiHesapId = 'Karşı hesap seçilmeli.';
+    if (cariVirman && !karsiCari) hatalar.karsiTarafId = 'Karşı cari seçilmeli.';
+    if (sayi(tutar) <= 0) hatalar.tutar = 'Sıfırdan büyük olmalı.';
+    if (donusum && sayi(karsiTutar) <= 0) hatalar.karsiTutar = 'Sıfırdan büyük olmalı.';
+    if (secili?.cariZorunlu === 1 && !cari) hatalar.tarafId = 'Cari zorunlu.';
+    if (plan && !planTarihi) hatalar.planTarihi = 'Vade zorunlu.';
+    if (Object.keys(hatalar).length) { setAlanHatalari(hatalar); return }
 
     setCalisiyor(true);
     try {
       const y = kayitId === null
-        ? await api.kasaEkle(govde(taslak))
-        : await api.kasaGuncelle(kayitId, { ...govde(taslak), surum: String(sonuc?.islem.surum ?? '') });
+        ? await api.kasaEkle(govde(taslak, plan))
+        : await api.kasaGuncelle(kayitId, { ...govde(taslak, plan), surum: String(sonuc?.islem.surum ?? '') });
       yaniti(y);
       if (kayitId === null) git(`/kasa-islem/${y.islem.id}`, { replace: true });
     } catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
@@ -174,6 +218,17 @@ export function KasaIslemKarti() {
     } catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
   }
 
+  /** Plandan tahsilat/odeme uretir; plan kaydi DEGISMEZ, yeni islem acilir. */
+  async function gerceklestir() {
+    if (!kayitId || !gHesap) { setAlanHatalari({ gHesapId: 'Hesap seçilmeli.' }); return }
+    setHata(null);
+    setCalisiyor(true);
+    try {
+      const y = await api.kasaGerceklestir(kayitId, gHesap.id, sayi(gTutar) || undefined, gTarih);
+      git(`/kasa-islem/${y.islem.id}`);
+    } catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
+  }
+
   function hataYaz(h: unknown) {
     if (h instanceof ApiHatasi) {
       if (h.hata.alanlar)
@@ -185,8 +240,10 @@ export function KasaIslemKarti() {
   if (!ekleyebilir && kayitId === null)
     return <div className="sahne"><div className="hata-kutusu">Kasa işlemi ekleme yetkiniz yok.</div></div>;
 
-  const gruplar = ['tahsilat', 'odeme'] as const;
-  const grupAdi: Record<string, string> = { tahsilat: 'Tahsilat', odeme: 'Ödeme' };
+  const gruptakiTurler = turler.filter(t => t.grup === grup);
+  const anaEtiket = grup === 'odeme' ? 'Ödenen Hesap'
+                  : grup === 'virman' || grup === 'doviz' ? 'Kaynak Hesap'
+                  : 'Tahsil Edilen Hesap';
 
   return (
     <>
@@ -194,7 +251,7 @@ export function KasaIslemKarti() {
         <div className="basrow">
           <h1>{secili?.ad ?? 'Kasa İşlemi'}</h1>
           <span className="yol">
-            Kasa › {secili?.grup === 'odeme' ? 'Ödeme' : 'Tahsilat'}
+            Kasa › {GRUP_ADI[grup] ?? grup}
             {sonuc?.islem.islemNo ? ` · ${sonuc.islem.islemNo}` : ''}
           </span>
           {durum !== null && (
@@ -205,15 +262,21 @@ export function KasaIslemKarti() {
           {kullanici?.subeYazma === false && <span className="rozet uyari">salt okuma şubesi</span>}
 
           <div className="sag">
-            <button className="d" onClick={() => git('/kasa-islem')}>Listeye Dön</button>
-            {!kilitli && (
+            <button className="d" onClick={() => git(planMi ? '/plan-vade' : '/kasa-islem')}>
+              Listeye Dön
+            </button>
+            {!kilitli && durum !== 1 && (
               <>
-                <button className="d" disabled={calisiyor} onClick={() => void kaydet(true)}>
+                <button className="d" disabled={calisiyor} onClick={() => void kaydet(true, false)}>
                   Taslak Kaydet
                 </button>
-                <button className="d bir" disabled={calisiyor} onClick={() => void kaydet(false)}>
-                  {calisiyor ? 'Kaydediliyor…' : 'Kaydet ve Kesinleştir'}
-                </button>
+                {planMi
+                  ? <button className="d bir" disabled={calisiyor} onClick={() => void kaydet(false, true)}>
+                      {calisiyor ? 'Kaydediliyor…' : 'Planı Kaydet'}
+                    </button>
+                  : <button className="d bir" disabled={calisiyor} onClick={() => void kaydet(false, false)}>
+                      {calisiyor ? 'Kaydediliyor…' : 'Kaydet ve Kesinleştir'}
+                    </button>}
               </>
             )}
             {kayitId !== null && durum === 0 && (
@@ -237,12 +300,12 @@ export function KasaIslemKarti() {
         ) : null}
 
         <div className="kutu" style={{ padding: 14 }}>
-          {/* Islem turu: grup sekmeleri + o gruptaki turler. Kaydedildikten sonra
-              tur DEGISTIRILEMEZ - bacak sablonu ve fis buna bagli. */}
+          {/* Tur seridi: yalniz AKTIF GRUP. Kaydedildikten sonra tur degistirilemez -
+              bacak sablonu ve fis buna baglidir. */}
           <div className="kagrup">
-            <h6>İşlem Türü</h6>
+            <h6>{GRUP_ADI[grup] ?? grup} Türü</h6>
             <div className="cip-serit">
-              {gruplar.flatMap(g => turler.filter(t => t.grup === g)).map(t => (
+              {gruptakiTurler.map(t => (
                 <button
                   key={t.kod}
                   type="button"
@@ -250,7 +313,7 @@ export function KasaIslemKarti() {
                   disabled={sonuc !== null}
                   onClick={() => setTur(t.kod)}
                 >
-                  {grupAdi[t.grup] === 'Ödeme' ? '－' : '＋'} {t.ad}
+                  {t.ad}
                 </button>
               ))}
             </div>
@@ -265,26 +328,55 @@ export function KasaIslemKarti() {
                        onChange={e => setTarih(e.target.value)} />
               </label>
 
-              <GenLookup
-                kaynak="hesap"
-                etiket={secili?.grup === 'odeme' ? 'Ödenen Hesap' : 'Tahsil Edilen Hesap'}
-                zorunlu
-                alanlar={LOOKUP_HESAP}
-                sabitFiltre={secili?.anaHesapTuru
-                  ? { alan: 'tur', op: 'esit', deger: secili.anaHesapTuru }
-                  : undefined}
-                deger={hesap?.ad}
-                hata={alanHatalari.hesapId}
-                saltOkunur={kilitli}
-                onSec={(s: ListeSatiri | null) => setHesap(s ? {
-                  id: Number(s.id), ad: String(s.ad ?? ''), doviz: String(s.dovizCinsi ?? 'TL'),
-                } : null)}
-              />
+              {planMi && (
+                <label className="alan">
+                  <span className="etiket">Vade *</span>
+                  <input type="date" value={planTarihi} disabled={kilitli || durum === 1}
+                         onChange={e => setPlanTarihi(e.target.value)} />
+                  {alanHatalari.planTarihi && <span className="alan-hata">{alanHatalari.planTarihi}</span>}
+                </label>
+              )}
+
+              {!planMi && !cariVirman && (
+                <GenLookup
+                  kaynak="hesap"
+                  etiket={anaEtiket}
+                  zorunlu
+                  alanlar={LOOKUP_HESAP}
+                  sabitFiltre={secili?.anaHesapTuru
+                    ? { alan: 'tur', op: 'esit', deger: secili.anaHesapTuru }
+                    : undefined}
+                  deger={hesap?.ad}
+                  hata={alanHatalari.hesapId}
+                  saltOkunur={kilitli}
+                  onSec={(s: ListeSatiri | null) => setHesap(s ? {
+                    id: Number(s.id), ad: String(s.ad ?? ''), doviz: String(s.dovizCinsi ?? 'TL'),
+                  } : null)}
+                />
+              )}
+
+              {karsiHesapli && (
+                <GenLookup
+                  kaynak="hesap"
+                  etiket="Hedef Hesap"
+                  zorunlu
+                  alanlar={LOOKUP_HESAP}
+                  sabitFiltre={secili?.karsiHesapTuru
+                    ? { alan: 'tur', op: 'esit', deger: secili.karsiHesapTuru }
+                    : undefined}
+                  deger={karsiHesap?.ad}
+                  hata={alanHatalari.karsiHesapId}
+                  saltOkunur={kilitli}
+                  onSec={s => setKarsiHesap(s ? {
+                    id: Number(s.id), ad: String(s.ad ?? ''), doviz: String(s.dovizCinsi ?? 'TL'),
+                  } : null)}
+                />
+              )}
 
               {secili?.cariZorunlu !== -1 && (
                 <GenLookup
                   kaynak="cari"
-                  etiket="Cari"
+                  etiket={cariVirman ? 'Kaynak Cari' : 'Cari'}
                   zorunlu={secili?.cariZorunlu === 1}
                   alanlar={LOOKUP_CARI}
                   deger={cari?.unvan}
@@ -294,8 +386,23 @@ export function KasaIslemKarti() {
                 />
               )}
 
+              {cariVirman && (
+                <GenLookup
+                  kaynak="cari"
+                  etiket="Hedef Cari"
+                  zorunlu
+                  alanlar={LOOKUP_CARI}
+                  deger={karsiCari?.unvan}
+                  hata={alanHatalari.karsiTarafId}
+                  saltOkunur={kilitli}
+                  onSec={s => setKarsiCari(s ? { id: Number(s.id), unvan: String(s.unvan ?? '') } : null)}
+                />
+              )}
+
               <label className="alan">
-                <span className="etiket">Tutar {dovizli && `(${hesap?.doviz})`}</span>
+                <span className="etiket">
+                  {donusum ? `Verilen Tutar (${anaDoviz})` : `Tutar${dovizli ? ` (${anaDoviz})` : ''}`}
+                </span>
                 <input className="hiza-sag" value={tutar} disabled={kilitli}
                        onChange={e => setTutar(e.target.value)} />
                 {alanHatalari.tutar && <span className="alan-hata">{alanHatalari.tutar}</span>}
@@ -311,6 +418,24 @@ export function KasaIslemKarti() {
                   <label className="alan">
                     <span className="etiket">TL Karşılığı (önizleme)</span>
                     <input className="hiza-sag onizleme" value={para.format(yerelOnizleme)} readOnly />
+                  </label>
+                </>
+              )}
+
+              {donusum && (
+                <>
+                  <label className="alan">
+                    <span className="etiket">
+                      Alınan Tutar{karsiHesap ? ` (${karsiHesap.doviz})` : ''}
+                    </span>
+                    <input className="hiza-sag" value={karsiTutar} disabled={kilitli}
+                           onChange={e => setKarsiTutar(e.target.value)} />
+                    {alanHatalari.karsiTutar && <span className="alan-hata">{alanHatalari.karsiTutar}</span>}
+                  </label>
+                  <label className="alan">
+                    <span className="etiket">Efektif Kur (önizleme)</span>
+                    <input className="hiza-sag onizleme"
+                           value={caprazKur ? caprazKur.toFixed(6) : ''} readOnly />
                   </label>
                 </>
               )}
@@ -352,10 +477,51 @@ export function KasaIslemKarti() {
             </div>
           </div>
 
+          {/* Acik plan: gerceklestirme paneli. Plan kaydi degismez (K10), yeni
+              bir tahsilat/odeme islemi acilir ve plandan kalan dusulur. */}
+          {durum === 1 && (
+            <div className="kagrup">
+              <h6>
+                Planı Gerçekleştir
+                <span className="rozet">
+                  kalan {para.format(Number(sonuc?.islem.kalanTutar ?? 0))} {String(sonuc?.islem.dovizCinsi ?? '')}
+                </span>
+              </h6>
+              <div className="alan-izgara">
+                <GenLookup
+                  kaynak="hesap"
+                  etiket="Tahsilat / Ödeme Hesabı"
+                  zorunlu
+                  alanlar={LOOKUP_HESAP}
+                  deger={gHesap?.ad}
+                  hata={alanHatalari.gHesapId}
+                  onSec={s => setGHesap(s ? {
+                    id: Number(s.id), ad: String(s.ad ?? ''), doviz: String(s.dovizCinsi ?? 'TL'),
+                  } : null)}
+                />
+                <label className="alan">
+                  <span className="etiket">Tutar (boş = kalanın tamamı)</span>
+                  <input className="hiza-sag" value={gTutar}
+                         onChange={e => setGTutar(e.target.value)} />
+                </label>
+                <label className="alan">
+                  <span className="etiket">Tarih</span>
+                  <input type="date" value={gTarih} onChange={e => setGTarih(e.target.value)} />
+                </label>
+                <label className="alan">
+                  <span className="etiket">&nbsp;</span>
+                  <button className="d bir" disabled={calisiyor} onClick={() => void gerceklestir()}>
+                    {calisiyor ? 'İşleniyor…' : '✔ Gerçekleştir'}
+                  </button>
+                </label>
+              </div>
+            </div>
+          )}
+
           {/* Bacaklar: sunucunun urettigi muhasebe kaydinin ham hali. */}
           <div className="kagrup">
             <h6>Hareket Bacakları</h6>
-            <BacakListesi bacaklar={sonuc?.bacaklar ?? []} dovizCinsi={hesap?.doviz ?? 'TL'} />
+            <BacakListesi bacaklar={sonuc?.bacaklar ?? []} dovizCinsi={anaDoviz} />
           </div>
 
           {sonuc?.fis && <FisOnizleme fis={sonuc.fis} />}
@@ -364,6 +530,7 @@ export function KasaIslemKarti() {
             <div className="not">
               Bacaklar ve muhasebe fişi sunucuda işlem türünün şablonundan üretilir;
               buradaki TL karşılığı yalnızca önizlemedir.
+              {donusum && ' Verilen ve alınan tutarın TL karşılığı tutmazsa fark kambiyo kâr/zararı olarak yazılır.'}
             </div>
           )}
         </div>

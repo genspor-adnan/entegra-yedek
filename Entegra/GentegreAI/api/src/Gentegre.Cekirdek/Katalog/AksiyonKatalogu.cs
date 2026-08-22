@@ -143,6 +143,12 @@ public static class AksiyonKatalogu
                     KaynakKodu: "kasa_islem", Islem: Islem.Ekle, Sira: 10),
                 new("kasa.odeme.yeni",    "－ Ödeme",    "kasa",
                     KaynakKodu: "kasa_islem", Islem: Islem.Ekle, Sira: 20),
+                new("kasa.virman.yeni",   "⇄ Virman",    "kasa",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Ekle, Sira: 22),
+                new("kasa.doviz.yeni",    "💱 Döviz",    "kasa",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Ekle, Sira: 24),
+                new("kasa.plan.yeni",     "📅 Plan",     "kasa", Hedef: "araccubugu,palet",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Ekle, Sira: 26),
                 new("kasa.ac",            "Aç",          "kasa", Kisayol: "Enter",
                     KaynakKodu: "kasa_islem", Islem: Islem.Gor, KayitGerekir: true, Sira: 30),
                 new("kasa.kesinlestir",   "Kesinleştir", "kasa", Hedef: "araccubugu,sagtus,palet",
@@ -161,12 +167,30 @@ public static class AksiyonKatalogu
             {
                 new("kasa.kesinlestir", "Kesinleştir", "kasa",
                     AksiyonYetkisi: "kasa.kesinlestir", KayitGerekir: true, Sira: 10),
+                new("kasa.gerceklestir", "✔ Gerçekleştir", "kasa",
+                    AksiyonYetkisi: "kasa.gerceklestir", KayitGerekir: true, Sira: 15),
                 new("kasa.fis-gor",     "Muhasebe Fişi", "muhasebe",
                     KaynakKodu: "muhasebe_fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
                 new("kasa.iptal",       "İptal Et",    "kasa", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "kasa.iptal", KayitGerekir: true, Sira: 30),
                 new("kasa.sil",         "Sil",         "kasa", Hedef: "sagtus,palet",
                     KaynakKodu: "kasa_islem", Islem: Islem.Sil, KayitGerekir: true, Sira: 40),
+            },
+
+            // Acik planlar: buradan "Gerceklestir" ile tahsilat/odeme uretilir.
+            //   Plan kaydin KENDISI degismez (K10) - yeni bir islem acilir.
+            ["plan-liste"] = new AksiyonTanimi[]
+            {
+                new("kasa.plan.yeni",    "📅 Yeni Plan", "kasa", Kisayol: "Ctrl+N",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Ekle, Sira: 10),
+                new("kasa.ac",           "Aç",           "kasa", Kisayol: "Enter",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                new("kasa.gerceklestir", "✔ Gerçekleştir", "kasa",
+                    AksiyonYetkisi: "kasa.gerceklestir", KayitGerekir: true, Sira: 30),
+                new("kasa.sil",          "Sil",          "kasa", Hedef: "sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Sil, KayitGerekir: true, Sira: 40),
+                new("genel.yazdir",      "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
             ["fis-liste"] = new AksiyonTanimi[]

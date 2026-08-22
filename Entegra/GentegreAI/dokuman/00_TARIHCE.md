@@ -2305,3 +2305,75 @@ Dönüşüm fonksiyonu/ekranı F8'e kaldı.
 
 **Sırada (F3):** virman (40-50), döviz alış/satış + kuruş farkı bacağı, plan (61/71/63) ve
 `fn_plan_gerceklestir`.
+
+---
+
+## F3 — Virman, döviz dönüşümü, plan (22.08.2026)
+
+Motor üç yeni akışı öğrendi; şablonlar 073'te hazırdı, eksik olan doğrulama muafiyeti,
+kambiyo bacağı ve plan gerçekleştirmeydi (`085_fn_kasa_f3.sql`).
+
+### Plan tek bacaklıdır — denge kuralı ona uygulanamaz
+
+`fn_kasa_islem_dogrula` "en az iki bacak" ve `Σborç = Σalacak` arıyordu; plan satırının
+karşı tarafı henüz yoktur (tahsilat gerçekleşince oluşur). Plan türlerine (`plan_mi=1`
+veya `durum=1`) **muafiyet** tanındı, karşılığında **vade zorunlu** kılındı. Ayrıca
+virman/döviz için iki yeni kural: kaynak ve karşı hesap **ikisi de** seçilmeli ve **aynı
+olamaz** (cari virmanda aynısı carilere).
+
+### Kambiyo kâr/zararı bacağı
+
+Bacak üretimi bitince toplam borç/alacak farkı hesaplanır ve fark **kayıp değil, kambiyo
+kâr/zararı** olarak yazılır (646/656). Ayrım şu:
+
+- **Döviz grubu** (45-48, 50): fark ne olursa olsun yazılır — efektif kur ile TCMB kuru
+  arasındaki fark tam olarak budur ve küçük olmak zorunda değildir.
+- **Diğer türler**: yalnız `kasa.kurus_farki_siniri` (varsayılan 0,05 TL) kadar otomatik
+  bacak açılır; büyük fark kullanıcı hatasıdır, doğrulama reddetsin.
+
+Eşleme için `muhasebe_eslestirme`'ye **tür bağımsız `kural_turu='rol'`** dalı eklendi
+(`kambiyo_kar`→646, `kambiyo_zarar`→656) ve `fn_muh_hesap_coz` bu dalı öğrendi.
+`rol` kolonları varchar(12)→(20) (`kambiyo_zarar` 13 karakter).
+
+Not: döviz **alışında** kur verilmezse sunucu efektif kuru (ödenen TL / alınan döviz)
+kullanır, dolayısıyla fark 0 olur — dövizin kasaya **maliyet bedeliyle** girmesi
+muhasebeten doğrudur; kâr/zarar satışta ya da dönem sonu değerlemesinde (F4) doğar.
+Kullanıcı TCMB kurunu elle girerse fark anında kambiyoya yazılır.
+
+### `mali_hareket.durum`'a artık dokunulmuyor
+
+F2'de kesinleştirme bacakların `durum`'unu 2, iptal 3 yapıyordu. **Yanlıştı**: işlemin
+durumu başlıkta (`kasa_islem.durum`) tutulur ve ekstre görünümleri oradan okur
+(`v_mali_hareket_ek.islem_durum = coalesce(ki.durum, 2)`). Bacaktaki `durum` legacy
+anlamlı bir kolondur — göçten gelen 42 satırda `-1` var; üzerine yazmak o anlamı sessizce
+silerdi. Motor artık bu kolona yazmıyor, kolona açıklama düşüldü.
+
+### Plan gerçekleşmesi (K10)
+
+`fn_plan_gerceklestir(plan, hesap, tutar, tarih, tür, kullanıcı)`: plan **in-place
+değişmez**, yeni bir tahsilat/ödeme başlığı açılır (`plan_islem_id` ile bağlı), plandan
+yalnız `gerceklesen_tutar` birikir ve kalan sıfırlanınca plan `durum=4` olur. Tür
+verilmezse planın yönü + hesabın türünden seçilir (kasa→21/31, banka→22/32, POS→25,
+kredi kartı→35). Tutar verilmezse **kalanın tamamı**. Legacy'de plan satırı UPDATE ile
+gerçeğe dönüşüyor ve plan izi kayboluyordu.
+
+### API + Web
+
+`POST /api/kasa-islem/{id}/gerceklestir` (yetki `kasa.gerceklestir`), `plan-vade` liste
+kaynağı (açık planlar, gecikme günü ile), `plan-liste` aksiyon ekranı, liste araç
+çubuğuna **Virman / Döviz / Plan** girişleri. `KasaIslemKarti` artık tür şeridini yalnız
+**aktif grubun** türleriyle çizer (40 türün hepsini değil) ve gruba göre alan gösterir:
+virman/dövizde Kaynak+Hedef hesap, dövizde Alınan Tutar + Efektif Kur önizlemesi, cari
+virmanda Kaynak+Hedef cari, planda Vade + "Planı Kaydet". Açık plan kartında
+**Gerçekleştir paneli** (hesap + tutar + tarih) var; boş tutar kalanın tamamı demek.
+Menüye **Kasa › Vade / Planlar** eklendi.
+
+Doğrulandı (SQL + curl + tarayıcı): USD kasa→USD banka virman dengeli; 4.800 TL → 100 USD
+alış (elle TCMB kuruyla 10,30 TL kambiyo zararı bacağı + fiş 656); cari virman
+`120.4 borç / 120.1100 alacak`; 1.000 TL plan → 400 kısmi → kalan 600 → `durum=4`;
+kapanmış plandan tekrar 422; aynı hesaba virman / karşısız virman / aynı cari virmanı
+hepsi 422. Ekstre tutarlılığı: `v_hesap_ekstre` toplamı = ham hareket toplamı ve
+`v_hesap_bakiye` = ekstre sonu, ikisinde de **0 fark**. Test kayıtları temizlendi.
+
+**Sırada (F4):** kapatma (`kasa_kapatma`, FIFO, `belge.kapatilan_tutar`), dönem sonu kur
+değerlemesi, mizan ve dönem kilidi.

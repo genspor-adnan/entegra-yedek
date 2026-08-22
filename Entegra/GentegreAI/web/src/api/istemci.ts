@@ -237,6 +237,10 @@ export const api = {
   kasaKesinlestir: (id: number) =>
     gonder<KasaIslemYaniti>(`/api/kasa-islem/${id}/kesinlestir`, {}),
 
+  /** Plandan tahsilat/odeme uretir. tutar bos = planin kalani. */
+  kasaGerceklestir: (id: number, hesapId: number, tutar?: number, tarih?: string, tur?: number) =>
+    gonder<KasaIslemYaniti>(`/api/kasa-islem/${id}/gerceklestir`, { hesapId, tutar, tarih, tur }),
+
   kasaIptal: (id: number, sebep: string, tarih?: string) =>
     gonder<{ islem: Record<string, unknown>; tersIslemId: number }>(
       `/api/kasa-islem/${id}/iptal`, { sebep, tarih }),
