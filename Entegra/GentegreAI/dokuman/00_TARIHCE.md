@@ -2451,5 +2451,29 @@ stoğu tekrar düşürmedi; fatura iptal edilince kaynak kalanı geri geldi; sip
 ne cari hareket yazdı; `v_belge_donusum` zinciri iki dalı da gösterdi. Tarayıcıda sipariş
 listesi + dönüşüm modalı ile 20 adetten 8'i kısmi dönüştürüldü. Test verileri temizlendi.
 
+### F8 sonrası: sipariş girişi ve modal belge kartı
+
+Kullanıcı "sipariş ekleyemedim" dedi — haklıydı: **belge kartı tür 15'e (satış
+faturası) SABİTTİ**. Siparişler listesinden "Yeni" denince fatura ekranı açılıyor,
+kaydedilen belge de fatura oluyordu. Kart artık türü URL'den (`?tur=19`) ya da
+çağıranından alıyor, üstte **tür seçici** var (sipariş/irsaliye/fatura/fiş — alış ve
+satış), başlık ve kaydet düğmesi türün adını gösteriyor, "Listeye Dön" doğru listeye
+(sipariş ise `/siparis`) gidiyor. `/api/kasa-islem-turu` artık belge türlerini de
+döndürüyor (eskiden `grup <> 'belge'` süzüyordu), böylece tür adları istemciye ikinci
+kez kopyalanmadı.
+
+Kullanıcı isteğiyle **belge kartı da modal** oldu (diğer kartlarla aynı `Modal`
+deseni): liste arkada kalıyor, rota değişmiyor. Araç çubuğu `Ekranlar/satis_faturasi.html`
+mockup'ından birebir alındı — **💾 Kaydet** (yeşil), **🗑 Sil** (kırmızı), ayraç,
+**📤 e‑Fatura Gönder** (mavi), **💵 Tahsilat**, **↩ İade**, **🖨️ Yazdır**, ayraç,
+Taslak + **✖ Kapat**. Ucu henüz olmayan düğmeler görünür ama **pasif** ve `title`'ında
+sebebi yazılı; kullanıcı neyin geleceğini görür, tıklayınca sessizce hiçbir şey olmaz
+diye şaşırmaz. Tahsilat düğmesi kayıttan sonra aktifleşip kasa kartını cari/tutar
+önyüklü açıyor. Tema: `.d.onay` (yeşil) ve `.katoolbar .ayrac`.
+
+Doğrulandı (tarayıcı): Siparişler › + Yeni Sipariş → modal "Satış Siparişi" → cari +
+stok + 15 adet × 340 → Kaydet → `000000001`, genel toplam 6.120,00; liste "Açık"
+çipinde satırı gösterdi.
+
 **Sırada (F4):** kapatma + kur farkı; ardından F5 (çek/senet), F6 (kredi/kupon),
 F7 (belge fişleme).

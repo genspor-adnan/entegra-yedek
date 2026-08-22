@@ -121,6 +121,9 @@ input, select { font: inherit; color: inherit }
 .d.bir { background: linear-gradient(#4d8fd6, #2f6db3); border-color: #2f6db3; color: #fff; font-weight: 700 }
 .d.bir:hover:not(:disabled) { background: linear-gradient(#5b98da, #2f6db3) }
 .d.teh { color: #fff; background: linear-gradient(#d9534f, #b83b37); border-color: #a3312f; font-weight: 700 }
+/* Mockup (Ekranlar/satis_faturasi.html) arac cubugu: Kaydet YESIL, e-Belge MAVI. */
+.d.onay { color: #fff; background: linear-gradient(#4fae68, #2e7d46); border-color: #2e7d46; font-weight: 700 }
+.d.onay:hover:not(:disabled) { background: linear-gradient(#5cbb75, #2e7d46) }
 .d.teh:hover:not(:disabled) { background: linear-gradient(#e0605c, #c0413d) }
 .d:disabled { opacity: .45; cursor: default }
 .d .kisayol { font-size: 10px; opacity: .75 }
@@ -497,3 +500,5 @@ table.grid tr.flt input {
 .satir-ici { display: flex; align-items: center; gap: 6px; font-size: 12px }
 .satir-ici input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--mor); margin: 0 }
 .katoolbar .satir-ici { color: var(--yazi); font-weight: 400 }
+/* Arac cubugu grup ayraci (mockup .sepv). */
+.katoolbar .ayrac { width: 1px; align-self: stretch; margin: 2px 4px; background: var(--cizgi) }

@@ -5,6 +5,7 @@ import { GenForm } from '../bilesenler/GenForm';
 import { ApiHatasi, type Kosul, type ListeSatiri } from '../api/sozlesme';
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
+import { BelgeKarti } from './BelgeKarti';
 
 export interface ListeTanimi {
   kaynak: string;
@@ -38,6 +39,9 @@ export interface ListeTanimi {
   /** Kart generic GenForm degil, kendi sayfasi (ör. kasa-islem): Liste modal ACMAZ,
       rotayi App.tsx kendisi tanimlar. Cift tik yine kartYolu'na gider. */
   ozelKart?: boolean;
+  /** "Yeni" aksiyonunda belge kartinin acilacagi tur (ör. Siparisler -> 19).
+      Verilmezse kart kendi varsayilanini (satis faturasi) kullanir. */
+  yeniBelgeTuru?: number;
 }
 
 /**
@@ -72,6 +76,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [odaklaSonEklenen, setOdaklaSonEklenen] = useState(0);
   // Donusum modali (F8): siparis/irsaliye satirlarindan yeni belge uretir.
   const [donusum, setDonusum] = useState<{ belgeId: number; belgeTur: number } | null>(null);
+  // Belge (fatura/siparis) karti da MODAL: liste arkada kalir, rota degismez.
+  const [yeniBelgeTuru, setYeniBelgeTuru] = useState<number | null>(null);
 
   // Aksiyon yonlendirme. Kasa aksiyonlari API cagirir (kesinlestir/iptal/sil) ve
   //   sonrasinda grid'i tazeler; digerleri kart rotasina gider.
@@ -118,7 +124,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           setYenile(t => t + 1);
           return;
 
-        case 'belge.yeni': git('/belge/yeni'); return;
+        case 'belge.yeni': setYeniBelgeTuru(tanim.yeniBelgeTuru ?? 15); return;
         case 'belge.donustur':
           if (!satir) return;
           setDonusum({ belgeId: Number(satir.id), belgeTur: Number(satir.tur) });
@@ -158,6 +164,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       onSatirAc={satir => { if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`) }}
       onAksiyon={(kod, satir) => { void aksiyon(kod, satir) }}
     />
+
+    {yeniBelgeTuru !== null && (
+      <BelgeKarti
+        tur={yeniBelgeTuru}
+        onKapat={() => setYeniBelgeTuru(null)}
+        onKaydedildi={() => setYenile(t => t + 1)}
+      />
+    )}
 
     {donusum && (
       <BelgeDonusumModali
@@ -260,7 +274,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   Tedarikci deseni). "Kalan" takibi belge_satir.kapatilan_miktar uzerinden;
     //   "Dönüştür" aksiyonu secili siparisten irsaliye/fatura uretir (F8).
     kaynak: 'belge', rota: 'siparis', baslik: 'Siparişler', yol: 'Satis › Siparisler',
-    aksiyonEkrani: 'siparis-liste',
+    aksiyonEkrani: 'siparis-liste', yeniBelgeTuru: 19,
     sabitFiltre: { alan: 'tur', op: 'icinde', deger: [9, 19] },
     toplam: ['genelToplam'],
     cipler: [

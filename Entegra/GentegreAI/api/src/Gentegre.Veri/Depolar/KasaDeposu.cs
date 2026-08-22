@@ -368,6 +368,11 @@ public sealed class KasaDeposu
         return await FisOkuAsync(baglanti, fisId, iptal);
     }
 
+    /// <summary>
+    /// Tur katalogu - BELGE turleri de dahil (grup='belge'). Kasa karti kendi
+    /// grubunu suzer; belge karti da tur adini/gruplarini buradan okur, boylece
+    /// tur adlari istemciye ikinci kez kopyalanmaz.
+    /// </summary>
     public async Task<List<KasaIslemTuru>> TurlerAsync(CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
@@ -375,7 +380,7 @@ public sealed class KasaDeposu
             select kod, ad, grup, yon, ana_hesap_turu, karsi_hesap_turu, cari_zorunlu,
                    kalem_turu, plan_mi, fis_mi, fis_turu, makbuz_basligi, sablon::text as sablon
               from public.kasa_islem_turu
-             where aktif = 1 and grup <> 'belge'
+             where aktif = 1
              order by sira, kod
             """, baglanti);
 

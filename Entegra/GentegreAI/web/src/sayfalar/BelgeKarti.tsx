@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
-import { ApiHatasi, type BelgeYaniti, type ListeSatiri } from '../api/sozlesme';
+import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru, type ListeSatiri } from '../api/sozlesme';
 import { GenLookup, LOOKUP_CARI, LOOKUP_STOK } from '../bilesenler/GenLookup';
+import { Modal } from '../bilesenler/GenForm';
 import { useOturum } from '../kimlik/OturumBaglami';
 
 interface SatirDurumu {
@@ -21,17 +22,44 @@ const bosSatir = (anahtar: number): SatirDurumu => ({
 
 const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+/** Kartin acabilecegi belge turleri - grup='belge' katalogundan suzulur. */
+const GIRILEBILIR_TURLER = [19, 15, 14, 9, 11, 10, 16, 12] as const;
+
+/** Hangi turden sonra hangi listeye donulur. */
+const LISTE_YOLU = (tur: number) => (tur === 9 || tur === 19 ? '/siparis' : '/belge');
+
 /**
- * Satis faturasi ekrani — Faz 1 dikey diliminin son parcasi.
+ * Belge kesme ekrani (satis faturasi, siparis, irsaliye…).
+ *
+ * TUR URL'DEN GELIR (?tur=19). Ekran eskiden 15'e (satis faturasi) SABITTI;
+ * Siparisler listesinden "Yeni" denince yine fatura ekrani aciliyordu.
+ *
+ * Ekran MODAL acilir (diger kartlarla ayni desen): liste arkada kalir.
  *
  * TUTAR HESABI SUNUCUDA. Ekranda gosterilen satir tutari yalnizca ONIZLEMEDIR;
  * kaydedilen degerler her zaman sunucudan donen belgeden okunur. Delphi ile kurusu
  * kurusuna ayni olmasi gereken formul (ic yuvarlama + carpimsal iskonto + banker's)
  * tek yerde, sunucuda durur — istemciye kopyalanirsa iki formul birbirinden kayar.
  */
-export function BelgeKarti() {
+interface Props {
+  /** Acilis turu; verilmezse URL'deki ?tur= ya da satis faturasi (15). */
+  tur?: number;
+  /** Liste icinden acildiginda: modal kapanisi cagirani ilgilendirir. */
+  onKapat?(): void;
+  /** Kayit sonrasi cagirani (grid) tazelemek icin. */
+  onKaydedildi?(): void;
+}
+
+export function BelgeKarti({ tur: acilisTuru, onKapat, onKaydedildi }: Props = {}) {
   const git = useNavigate();
+  const [sorgu] = useSearchParams();
   const { yetki, kullanici } = useOturum();
+
+  const [tur, setTur] = useState<number>(() => {
+    const istenen = acilisTuru ?? Number(sorgu.get('tur'));
+    return GIRILEBILIR_TURLER.includes(istenen as typeof GIRILEBILIR_TURLER[number]) ? istenen : 15;
+  });
+  const [turler, setTurler] = useState<KasaIslemTuru[]>([]);
 
   const [cari, setCari] = useState<{ id: number; unvan: string } | null>(null);
   const [tarih, setTarih] = useState(new Date().toISOString().slice(0, 10));
@@ -47,6 +75,16 @@ export function BelgeKarti() {
   const [alanHatalari, setAlanHatalari] = useState<Record<string, string>>({});
 
   const ekleyebilir = yetki('belge', 'ekle');
+
+  // Tur adlari katalogtan gelir (istemcide ikinci bir liste tutulmaz).
+  useEffect(() => {
+    void (async () => {
+      try { setTurler(await api.kasaIslemTurleri()) } catch { /* ad yoksa kod gosterilir */ }
+    })();
+  }, []);
+
+  const turAdi = (kod: number) => turler.find(t => t.kod === kod)?.ad ?? `Belge (${kod})`;
+  const seciliTurAdi = turAdi(tur);
 
   /** Yalniz ONIZLEME: gercek tutar sunucudan gelir. */
   const onizleme = useMemo(() => {
@@ -94,13 +132,14 @@ export function BelgeKarti() {
     try {
       const govde = {
         belge: {
-          tur: 15,                       // satis faturasi
+          tur,
           tarafId: cari.id,
           belgeTarihi: `${tarih}T${new Date().toTimeString().slice(0, 8)}`,
           belgeSeri: seri,
           belgeDovizi: 'TL',
           dovizKuru: 1,
           vadeGun: Number(vadeGun) || 0,
+          subeId: kullanici?.subeId ?? undefined,
           cikisDepoId: Number(depoId) || null,
         },
         satirlar: dolu.map((s, i) => ({
@@ -117,6 +156,7 @@ export function BelgeKarti() {
       };
 
       setSonuc(await api.belgeEkle(govde));
+      onKaydedildi?.();
     } catch (h) {
       if (h instanceof ApiHatasi) {
         if (h.dogrulamaMi && h.hata.alanlar)
@@ -135,32 +175,69 @@ export function BelgeKarti() {
     setHata(null);
   }
 
+  /** Modal icinde acildiysa cagiran kapatir; dogrudan URL ile acildiysa listeye doner. */
+  const kapat = () => (onKapat ? onKapat() : git(LISTE_YOLU(tur)));
+
   if (!ekleyebilir)
-    return <div className="sahne"><div className="hata-kutusu">Belge ekleme yetkiniz yok.</div></div>;
+    return (
+      <Modal baslik="Belge" onKapat={kapat} alt={<button className="d" onClick={kapat}>Kapat</button>}>
+        <div className="hata-kutusu">Belge ekleme yetkiniz yok.</div>
+      </Modal>
+    );
 
   return (
-    <>
-      <div className="sayfabas">
-        <div className="basrow">
-          <h1>Satis Faturasi</h1>
-          <span className="yol">Satis › Yeni Fatura · {kullanici?.subeler.find(s => s.id === kullanici?.subeId)?.ad}</span>
-          {kullanici?.subeYazma === false && <span className="rozet uyari">salt okuma subesi</span>}
-          <div className="sag">
-            <label className="satir-ici">
-            <input type="checkbox" checked={taslak} onChange={e => setTaslak(e.target.checked)} />
-            Taslak (numara tuketmez)
-          </label>
-            <button className="d" onClick={() => git('/belge')}>Listeye Don</button>
-            {sonuc
-              ? <button className="d bir" onClick={yeniBelge}>Yeni Belge</button>
-              : <button className="d bir" disabled={kaydediyor} onClick={() => void kes()}>
-                  {kaydediyor ? 'Kesiliyor…' : 'Faturayi Kes'}
-                </button>}
-          </div>
-        </div>
-      </div>
+    <Modal
+      baslik={seciliTurAdi}
+      ustBilgi={kullanici?.subeYazma === false
+        ? <span className="rozet uyari">salt okuma şubesi</span>
+        : <span className="kapt">{kullanici?.subeler.find(s => s.id === kullanici?.subeId)?.ad}</span>}
+      onKapat={kapat}
+      // Arac cubugu duzeni mockup'tan (Ekranlar/satis_faturasi.html): Kaydet yesil,
+      //   Sil kirmizi, e-Belge mavi, gruplar ayracla ayrilir. Henuz ucu olmayan
+      //   islemler GORUNUR ama PASIF - kullanici neyin gelecegini gorur, tikladiginda
+      //   sessizce hicbir sey olmaz diye sasirmaz (title ile sebep yazili).
+      alt={
+        <>
+          {sonuc
+            ? <button className="d onay" onClick={yeniBelge}>＋ Yeni Belge</button>
+            : <button className="d onay" disabled={kaydediyor} onClick={() => void kes()}>
+                {kaydediyor ? '💾 Kaydediliyor…' : '💾 Kaydet'}
+              </button>}
+          <button className="d teh" disabled title="Belge iptali henüz bağlanmadı (F7).">
+            🗑 Sil
+          </button>
 
-      <div className="sahne">
+          <span className="ayrac" />
+
+          <button className="d bir" disabled={!sonuc}
+                  title={sonuc ? 'e-Belge gönderimi henüz bağlanmadı.' : 'Önce belgeyi kaydedin.'}>
+            📤 e‑Fatura Gönder
+          </button>
+          <button className="d" disabled={!sonuc || !cari}
+                  title={sonuc ? 'Bu belge için tahsilat işlemi aç' : 'Önce belgeyi kaydedin.'}
+                  onClick={() => {
+                    if (!sonuc) return;
+                    kapat();
+                    git(`/kasa-islem/yeni?tur=21&tarafId=${cari?.id ?? ''}` +
+                        `&belgeId=${sonuc.belge.id}&tutar=${sonuc.belge.genelToplam}`);
+                  }}>
+            💵 Tahsilat
+          </button>
+          <button className="d" disabled title="İade belgesi henüz bağlanmadı.">↩ İade</button>
+          <button className="d" disabled title="Yazdırma henüz bağlanmadı.">🖨️ Yazdır</button>
+
+          <span className="ayrac" />
+
+          <label className="satir-ici">
+            <input type="checkbox" checked={taslak} disabled={!!sonuc}
+                   onChange={e => setTaslak(e.target.checked)} />
+            Taslak (numara tüketmez)
+          </label>
+          <button className="d" onClick={kapat}>✖ Kapat</button>
+        </>
+      }
+    >
+      <>
         {hata && <div className="hata-kutusu">{hata}</div>}
 
         {sonuc && (
@@ -168,17 +245,24 @@ export function BelgeKarti() {
           <b>Belge kaydedildi.</b>{' '}
           No: <b>{String(sonuc.belge.belgeNo || '(taslak — numara verilmedi)')}</b> ·
           Genel toplam: <b>{para.format(Number(sonuc.belge.genelToplam))}</b> ·
-          <a href="#" onClick={e => { e.preventDefault(); git('/belge') }}> listede gor</a>
+          <a href="#" onClick={e => { e.preventDefault(); kapat() }}> listede gör</a>
           {sonuc.uyarilar && sonuc.uyarilar.length > 0 && (
             <ul className="uyari-liste">{sonuc.uyarilar.map((u, i) => <li key={i}>{u}</li>)}</ul>
           )}
         </div>
       )}
 
-        <div className="kutu" style={{ padding: 14 }}>
         <div className="kagrup">
           <h6>Belge</h6>
           <div className="alan-izgara">
+            <label className="alan">
+              <span className="etiket">Belge Türü</span>
+              <select value={tur} disabled={!!sonuc} onChange={e => setTur(Number(e.target.value))}>
+                {GIRILEBILIR_TURLER.map(k => (
+                  <option key={k} value={k}>{turAdi(k)}</option>
+                ))}
+              </select>
+            </label>
             <GenLookup
               kaynak="cari"
               etiket="Cari"
@@ -211,7 +295,7 @@ export function BelgeKarti() {
         <div className="kagrup">
           <h6>
             Satirlar
-            {!sonuc && <button type="button" className="d" onClick={satirEkle}>+ Satir</button>}
+            {!sonuc && <button type="button" className="d bir" onClick={satirEkle}>+ Satir</button>}
           </h6>
 
           <table className="detay-tablo">
@@ -288,10 +372,9 @@ export function BelgeKarti() {
               </tbody>
             </table>
           )}
-          {!sonuc && <div className="not">Kesin tutar sunucuda hesaplanir; buradaki degerler onizlemedir.</div>}
+          {!sonuc && <div className="not">Kesin tutar sunucuda hesaplanır; buradaki değerler önizlemedir.</div>}
         </div>
-      </div>
-      </div>
-    </>
+      </>
+    </Modal>
   );
 }
