@@ -408,17 +408,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       )}
 
         <div className="belge-hdr-sar">
-          {/* Alan duzeni mockup'tan (Ekranlar/satis_irsaliye_karti.html .hdr):
-              BASLIKSIZ 3 sutunlu izgara - mockup'ta da bu blogun basligi yok,
-              belge zaten pencere basliginda yaziyor. */}
+          {/* Alan duzeni: Ekranlar/satis_irsaliye_karti.html .hdr + kullanici
+              sirasi. BASLIKSIZ 3 sutunlu izgara; her alanda etiket EDITIN
+              USTUNDE. Satirlar:
+                1) Musteri . Belge No . e-Belge
+                2) Sevk Tarihi . Belge Tarihi . Bagli Siparis
+                3) Satis Temsilcisi . Cikis Deposu . Faturalama Durumu */}
           <div className="alan-izgara uc-sutun belge-hdr">
-            <label className="alan">
-              <span className="etiket">{irsaliyeMi ? 'İrsaliye No' : 'Belge No'}</span>
-              <input className="one-cikan"
-                     value={String(sonuc?.belge.belgeNo ?? '') || (kilitli ? '' : '(kaydedince verilir)')}
-                     readOnly />
-            </label>
-
+            {/* --- 1. satir --- */}
             <GenLookup
               kaynak="cari"
               etiket={siparisMi || irsaliyeMi ? 'Müşteri (Cari)' : 'Cari'}
@@ -431,25 +428,23 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             />
 
             <label className="alan">
+              <span className="etiket">{irsaliyeMi ? 'İrsaliye No' : 'Belge No'}</span>
+              <input className="one-cikan"
+                     value={String(sonuc?.belge.belgeNo ?? '') || (kilitli ? '' : '(kaydedince verilir)')}
+                     readOnly />
+            </label>
+
+            <label className="alan">
               <span className="etiket">e-Belge</span>
               <span className="deger-serit">
-                {irsaliyeMi
-                  ? <span className="rozet bilgi">e‑İrsaliye</span>
-                  : <span className="rozet bilgi">e‑Fatura</span>}
+                <span className="rozet bilgi">{irsaliyeMi ? 'e-İrsaliye' : 'e-Fatura'}</span>
                 {Number(sonuc?.belge.efaturaDurum ?? 0) > 0
                   ? <span className="rozet olumlu">✓ Gönderildi</span>
                   : <span className="rozet">gönderilmedi</span>}
               </span>
             </label>
 
-            <label className="alan">
-              <span className="etiket zorunlu-isaret">
-                {irsaliyeMi ? 'İrsaliye Tarihi' : 'Belge Tarihi'}
-              </span>
-              <input type="date" value={tarih} disabled={kilitli}
-                     onChange={e => setTarih(e.target.value)} />
-            </label>
-
+            {/* --- 2. satir --- */}
             {irsaliyeMi ? (
               <label className="alan">
                 <span className="etiket">Sevk Tarih / Saati</span>
@@ -465,6 +460,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             )}
 
             <label className="alan">
+              <span className="etiket zorunlu-isaret">
+                {irsaliyeMi ? 'İrsaliye Tarihi' : 'Belge Tarihi'}
+              </span>
+              <input type="date" value={tarih} disabled={kilitli}
+                     onChange={e => setTarih(e.target.value)} />
+            </label>
+
+            <label className="alan">
               <span className="etiket">{siparisMi ? 'Kaynak Belge' : 'Bağlı Sipariş'}</span>
               <span className="deger-serit">
                 {sonuc?.belge.kaynakBelgeNo
@@ -472,6 +475,16 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                   : <span className="sonuk">—</span>}
               </span>
             </label>
+
+            {/* --- 3. satir --- */}
+            <GenLookup
+              kaynak="cari"
+              etiket="Satış Temsilcisi"
+              alanlar={LOOKUP_CARI}
+              deger={satici?.ad}
+              saltOkunur={kilitli}
+              onSec={s => setSatici(s ? { id: Number(s.id), ad: String(s.unvan ?? '') } : null)}
+            />
 
             <GenLookup
               kaynak="depo"
@@ -482,31 +495,22 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               onSec={s => setDepo(s ? { id: Number(s.id), ad: String(s.ad ?? '') } : null)}
             />
 
-            <GenLookup
-              kaynak="cari"
-              etiket="Satış Temsilcisi"
-              alanlar={LOOKUP_CARI}
-              deger={satici?.ad}
-              saltOkunur={kilitli}
-              onSec={s => setSatici(s ? { id: Number(s.id), ad: String(s.unvan ?? '') } : null)}
-            />
-
             <label className="alan">
               <span className="etiket">{irsaliyeMi ? 'Faturalama Durumu' : 'Kapanma'}</span>
               <span className="deger-serit">
                 {(() => {
                   const k = KAPANMA_ETIKET[Number(sonuc?.belge.kapanmaDurum ?? 0)];
-                  const acik = satirlar.length;
                   return (
                     <>
                       <span className={`rozet ${k?.sinif ?? ''}`}>{k?.ad ?? '—'}</span>
-                      {kayitliId > 0 && <span className="sonuk">{acik} kalem</span>}
+                      {kayitliId > 0 && <span className="sonuk">{satirlar.length} kalem</span>}
                     </>
                   );
                 })()}
               </span>
             </label>
 
+            {/* --- 4. satir: adres / teslim --- */}
             <label className="alan genis-2">
               <span className="etiket">{irsaliyeMi ? 'Sevk Adresi' : 'Adres'}</span>
               <input value={[sonuc?.belge.tarafAdres, sonuc?.belge.tarafIlce, sonuc?.belge.tarafIl]
@@ -530,19 +534,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               </label>
             )}
 
-            <label className="alan">
-              <span className="etiket">Vergi Dairesi / VKN</span>
-              <input value={[sonuc?.belge.tarafVd, sonuc?.belge.tarafVkno]
-                              .filter(Boolean).join(' · ')} readOnly />
-            </label>
-
-            <label className="alan">
-              <span className="etiket">Döviz / Kur</span>
-              <input value={`${String(sonuc?.belge.belgeDovizi ?? 'TL')} · ${
-                Number(sonuc?.belge.dovizKuru ?? 1).toLocaleString('tr-TR', { minimumFractionDigits: 6 })}`}
-                     readOnly />
-            </label>
-
+            {/* --- 5. satir: arac / sofor / teslim eden (yalniz irsaliye) --- */}
             {irsaliyeMi && (
               <>
                 <label className="alan">
@@ -566,6 +558,20 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 />
               </>
             )}
+
+            {/* --- son satir: vergi / doviz / tur --- */}
+            <label className="alan">
+              <span className="etiket">Vergi Dairesi / VKN</span>
+              <input value={[sonuc?.belge.tarafVd, sonuc?.belge.tarafVkno]
+                              .filter(Boolean).join(' · ')} readOnly />
+            </label>
+
+            <label className="alan">
+              <span className="etiket">Döviz / Kur</span>
+              <input value={`${String(sonuc?.belge.belgeDovizi ?? 'TL')} · ${
+                Number(sonuc?.belge.dovizKuru ?? 1).toLocaleString('tr-TR', { minimumFractionDigits: 6 })}`}
+                     readOnly />
+            </label>
 
             <label className="alan">
               <span className="etiket">Belge Türü</span>
