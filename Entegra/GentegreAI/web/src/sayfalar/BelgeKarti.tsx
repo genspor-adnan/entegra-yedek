@@ -5,6 +5,7 @@ import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru, type ListeSatiri } fro
 import { GenLookup, LOOKUP_CARI } from '../bilesenler/GenLookup';
 import { Modal } from '../bilesenler/GenForm';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
+import { TarafArama } from '../bilesenler/TarafArama';
 import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { useOturum } from '../kimlik/OturumBaglami';
 
@@ -131,6 +132,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   /** Ardisik giris: stok arama penceresi acik mi. Kalem eklendikten sonra
       KAPANMAZ - kullanici arka arkaya satir girer, isi bitince Kapat der. */
   const [stokArama, setStokArama] = useState(false);
+  /** Cari secim modali. YENI belgede acilista kendiliginden acilir: belgenin
+      ilk sorusu "kime?" - kullaniciyi bos formda birakip aramaya zorlamak yerine
+      dogrudan secim ekrani gelir (kisi kartindaki "Cariye Bağla" deseni). */
+  const [cariArama, setCariArama] = useState(!belgeId);
+  /** Satis temsilcisi (personel) secim modali - cari ile ayni ekran. */
+  const [saticiArama, setSaticiArama] = useState(false);
   const [donusumler, setDonusumler] = useState<Record<string, unknown>[]>([]);
   const [sonuc, setSonuc] = useState<BelgeYaniti | null>(null);
   const [hata, setHata] = useState<string | null>(null);
@@ -471,16 +478,24 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 3) Satis Temsilcisi . Cikis Deposu . Faturalama Durumu */}
           <div className="alan-izgara uc-sutun belge-hdr">
             {/* --- 1. satir --- */}
-            <GenLookup
-              kaynak="cari"
-              etiket={siparisMi || irsaliyeMi ? 'Müşteri (Cari)' : 'Cari'}
-              zorunlu
-              alanlar={LOOKUP_CARI}
-              deger={cari?.unvan}
-              hata={alanHatalari.tarafId}
-              saltOkunur={kilitli}
-              onSec={s => setCari(s ? { id: Number(s.id), unvan: String(s.unvan ?? '') } : null)}
-            />
+            {/* Cari alani GenLookup DEGIL: secim ayni TarafArama modalindan yapilir
+                ki "yeni belge" akisiyla ayni ekran olsun (iki farkli cari secme
+                bicimi kullaniciyi sasirtiyordu). */}
+            <label className="alan">
+              <span className="etiket zorunlu-isaret">
+                {siparisMi || irsaliyeMi ? 'Müşteri (Cari)' : 'Cari'}
+              </span>
+              <span className="lookup-kutu">
+                <input readOnly value={cari?.unvan ?? ''} placeholder="Seçiniz…"
+                       disabled={kilitli}
+                       onMouseDown={e => { if (!kilitli) { e.preventDefault(); setCariArama(true) } }} />
+                {!kilitli && (
+                  <button type="button" className="mini" title="Cari ara"
+                          onClick={() => setCariArama(true)}>…</button>
+                )}
+              </span>
+              {alanHatalari.tarafId && <span className="alan-hata">{alanHatalari.tarafId}</span>}
+            </label>
 
             <label className="alan">
               <span className="etiket">{irsaliyeMi ? 'İrsaliye No' : 'Belge No'}</span>
@@ -510,14 +525,20 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               </label>
             )}
 
-            <GenLookup
-              kaynak="cari"
-              etiket="Satış Temsilcisi"
-              alanlar={LOOKUP_CARI}
-              deger={satici?.ad}
-              saltOkunur={kilitli}
-              onSec={s => setSatici(s ? { id: Number(s.id), ad: String(s.unvan ?? '') } : null)}
-            />
+            {/* Satis temsilcisi PERSONEL'dir (cari degil) ve secim cari ile ayni
+                TarafArama ekranindan yapilir - tek arama bicimi. */}
+            <label className="alan">
+              <span className="etiket">Satış Temsilcisi</span>
+              <span className="lookup-kutu">
+                <input readOnly value={satici?.ad ?? ''} placeholder="Seçiniz…"
+                       disabled={kilitli}
+                       onMouseDown={e => { if (!kilitli) { e.preventDefault(); setSaticiArama(true) } }} />
+                {!kilitli && (
+                  <button type="button" className="mini" title="Personel ara"
+                          onClick={() => setSaticiArama(true)}>…</button>
+                )}
+              </span>
+            </label>
 
             <label className="alan">
               <span className="etiket zorunlu-isaret">
@@ -907,6 +928,30 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
         {/* Kalem penceresi: grid salt gorunum oldugu icin ekleme/duzenleme burada.
             Alanlar ture gore degisir (irsaliyede seri/lot, faturada iskonto/KDV). */}
+        {/* 0) Cari secimi - yeni belgenin ilk adimi. */}
+        <TarafArama
+          acik={cariArama}
+          kaynaklar={['cari']}
+          yerTutucu="Müşteri / tedarikçi ara…"
+          onKapat={() => setCariArama(false)}
+          onSec={sec => {
+            setCari({ id: sec.id, unvan: sec.unvan });
+            setCariArama(false);
+          }}
+        />
+
+        {/* 0b) Satis temsilcisi - ayni ekran, kaynak personel. */}
+        <TarafArama
+          acik={saticiArama}
+          kaynaklar={['personel']}
+          yerTutucu="Personel ara…"
+          onKapat={() => setSaticiArama(false)}
+          onSec={sec => {
+            setSatici({ id: sec.id, ad: sec.unvan });
+            setSaticiArama(false);
+          }}
+        />
+
         {/* 1) Stok/hizmet arama - satir eklemenin BASLANGICI. Secim yapilinca
                kapanmaz; kalem penceresi ustune acilir, o kapaninca buraya donulur
                ve siradaki stok secilir (ardisik hizli giris). */}

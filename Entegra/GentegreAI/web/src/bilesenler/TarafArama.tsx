@@ -15,6 +15,8 @@ interface TarafSatiri {
 
 const tipEtiketi = (kaynak: string, s: ListeSatiri): string => {
   if (kaynak === 'kisi') return 'Kişi';
+  if (kaynak === 'personel') return 'Personel';
+  if (kaynak === 'hasta') return 'Hasta';
   const musteri = Number(s.musteri) === 1;
   const tedarikci = Number(s.tedarikci) === 1;
   if (musteri && tedarikci) return 'Müşteri/Tedarikçi';
@@ -51,7 +53,11 @@ interface Props {
  * butonu) acik/kapali kontrol edilir (`acik` prop) - kendi tetikleyicisi yok.
  */
 export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKapat, onSec }: Props) {
+  /** Kutuda yazan metin (aninda) - `arama` bunun gecikmeli (debounce) hali. */
+  const [metin, setMetin] = useState('');
   const [arama, setArama] = useState('');
+  /** Tum Liste / Son Aranan / Sik Aranan - liste ekranlariyla ayni (kullanici_arama). */
+  const [gorunum, setGorunum] = useState<'tum' | 'son' | 'sik'>('tum');
   const [satirlar, setSatirlar] = useState<TarafSatiri[]>([]);
   const [yukleniyor, setYukleniyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
@@ -62,7 +68,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
   const zamanlayici = useRef<number | undefined>(undefined);
   const kutu = useRef<HTMLInputElement | null>(null);
 
-  const ara = useCallback(async (metin: string) => {
+  const ara = useCallback(async (metin: string, gorunumSecimi: 'tum' | 'son' | 'sik' = 'tum') => {
     setYukleniyor(true);
     setHata(null);
     try {
@@ -72,8 +78,10 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
             { alan: 'unvan', op: 'icerir' as const, deger: metin.trim() },
           ] }
         : undefined;
+      // gorunum: Son/Sik Aranan sunucuda kullanici_arama ile suzulur+siralanir.
+      const gorunumParam = gorunumSecimi === 'tum' ? undefined : gorunumSecimi;
       const yanitlar = await Promise.all(
-        kaynaklar.map(k => api.liste(k, { sayfa: 1, boyut: 20, filtre })));
+        kaynaklar.map(k => api.liste(k, { sayfa: 1, boyut: 20, filtre, gorunum: gorunumParam })));
       setSatirlar(yanitlar.flatMap((y, i) => y.satirlar.map(s => satiraCevir(kaynaklar[i], s))));
       setSecili(0);
     } catch (h) {
@@ -87,22 +95,27 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
 
   useEffect(() => {
     if (!acik) return;
-    void ara(arama);
+    void ara(arama, gorunum);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [acik, arama, ara]);
+  }, [acik, arama, gorunum, ara]);
 
   useEffect(() => {
     if (acik) { setTimeout(() => kutu.current?.focus(), 0); return }
+    setMetin('');
     setArama('');
+    setGorunum('tum');
     setSatirlar([]);
   }, [acik]);
 
-  const yaz = (metin: string) => {
+  const yaz = (yeni: string) => {
+    setMetin(yeni);
     window.clearTimeout(zamanlayici.current);
-    zamanlayici.current = window.setTimeout(() => setArama(metin), 300);
+    zamanlayici.current = window.setTimeout(() => setArama(yeni), 300);
   };
 
   const sec = (satir: TarafSatiri) => {
+    // Secim "Son / Sik Aranan" sayacina islensin - listede oldugu gibi.
+    void api.aramaIsaretle(satir.kaynak, satir.id);
     onSec({ kaynak: satir.kaynak, id: satir.id, unvan: satir.unvan });
     onKapat();
   };
@@ -157,15 +170,31 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
           <button type="button" className="d" onClick={onKapat}>Kapat</button>
         </div>
 
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <input
-            ref={kutu}
-            className="arama"
-            style={{ flex: 1 }}
-            placeholder={yerTutucu ?? 'Ara…'}
-            defaultValue=""
-            onChange={e => yaz(e.target.value)}
-          />
+        {/* Arama kutusu ve Liste/Son/Sik dugmeleri LISTE EKRANLARIYLA ayni
+            (GenGrid deseni) - ayni arac her yerde ayni gorunsun. */}
+        <div className="cipler" style={{ margin: 0 }}>
+          <div className="ara" style={{
+            maxWidth: 260, margin: 0, height: 23, borderRadius: 12,
+            background: 'var(--yuz)', color: 'var(--yazi)', border: '1px solid var(--cizgi)',
+          }}>
+            <span>🔍</span>
+            <input
+              ref={kutu}
+              style={{ border: 0, background: 'transparent', outline: 'none', width: '100%', color: 'inherit' }}
+              placeholder={yerTutucu ?? 'Ara…'}
+              value={metin}
+              onChange={e => yaz(e.target.value)}
+            />
+          </div>
+
+          <div className="durumseg">
+            <button type="button" className={`ikon-liste ${gorunum === 'tum' ? 'on' : ''}`}
+                    title="Tüm Liste" onClick={() => setGorunum('tum')}>☰</button>
+            <button type="button" className={`ikon-liste ${gorunum === 'son' ? 'on' : ''}`}
+                    title="Son Aranan" onClick={() => setGorunum('son')}>🕓</button>
+            <button type="button" className={`ikon-liste ${gorunum === 'sik' ? 'on' : ''}`}
+                    title="Sık Aranan" onClick={() => setGorunum('sik')}>⭐</button>
+          </div>
         </div>
 
         {hata && <div className="hata-kutusu">{hata}</div>}
