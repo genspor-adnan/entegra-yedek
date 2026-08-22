@@ -814,12 +814,15 @@ public static class KartKatalogu
         LogTabloId: 918,
         SubeKolonu: "sube_id",
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
-            { ["durum"] = (short)1, ["maliyetiEtkilesin"] = (short)1, ["varsayilan"] = (short)0 },
+            { ["durum"] = (short)1, ["maliyetiEtkilesin"] = (short)1, ["varsayilan"] = (short)0,
+              ["tip"] = (short)1 },
         Alanlar: new KartAlani[]
         {
             new("id",                 "id",                 "sayi",  Yazilabilir: false),
             new("ad",                 "ad",                 "metin", Zorunlu: true, EnFazlaUzunluk: 50,
                 Baslik: "Depo Adı", Grup: "Genel"),
+            new("tip",                "tip",                "kod",   KodListesi: "depo.tip",
+                Baslik: "Tipi", Grup: "Genel"),
             new("varsayilan",         "varsayilan",         "mantik", Baslik: "Varsayılan Depo", Grup: "Genel"),
             new("maliyetiEtkilesin",  "maliyeti_etkilesin", "mantik", Baslik: "Maliyeti Etkilesin", Grup: "Genel"),
             new("durum",              "durum",              "kod",   SabitKodlar: DurumKodlari,

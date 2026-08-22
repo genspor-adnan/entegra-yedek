@@ -981,12 +981,24 @@ public static class KaynakKatalogu
         Kaynak: "public.depo d",
         SubeKolonu: "d.sube_id",
         VarsayilanSirala: "d.ad asc",
+        // Tipi ve Durum METIN olarak uretilir: liste katmani kod listesi cozmuyor
+        //   (kart cozuyor), ham kod gosterirsek kullanici sayi gorur. Ham kodlar
+        //   gizli kolon olarak durur - cip/filtre onlar uzerinden calisir.
         Kolonlar: new KolonTanimi[]
         {
             new("id",         "d.id",         "sayi",  "Id",   Varsayilan: false),
-            new("ad",         "d.ad",         "metin", "Depo", Genislik: 220),
+            new("ad",         "d.ad",         "metin", "Depo Adı", Genislik: 220),
+            new("tipAdi",
+                "case d.tip when 1 then 'Merkez' when 2 then 'Demirbaş' " +
+                "when 3 then 'Konsinye Alış' when 4 then 'Konsinye Satış' else '' end",
+                                              "metin", "Tipi", Genislik: 150, Filtrelenebilir: false),
+            new("tip",        "d.tip",        "kod",   "Tip Kodu", Varsayilan: false),
+            new("maliyetiEtkilesin", "d.maliyeti_etkilesin", "mantik", "Maliyeti Etkilesin",
+                                              Hizalama: "orta"),
+            new("durumAdi",   "case d.durum when 1 then 'Aktif' else 'Pasif' end",
+                                              "metin", "Durum", Hizalama: "orta", Filtrelenebilir: false),
+            new("durum",      "d.durum",      "kod",   "Durum Kodu", Varsayilan: false),
             new("varsayilan", "d.varsayilan", "mantik","Varsayılan", Hizalama: "orta"),
-            new("durum",      "d.durum",      "kod",   "Durum", Hizalama: "orta", Varsayilan: false),
             new("subeId",     "d.sube_id",    "sayi",  "Şube", Varsayilan: false)
         });
 
