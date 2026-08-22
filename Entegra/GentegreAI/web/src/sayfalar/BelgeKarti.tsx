@@ -572,14 +572,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                      readOnly />
             </label>
 
-            <label className="alan">
-              <span className="etiket">Belge Türü</span>
-              <select value={tur} disabled={kilitli} onChange={e => setTur(Number(e.target.value))}>
-                {GIRILEBILIR_TURLER.map(k => (
-                  <option key={k} value={k}>{turAdi(k)}</option>
-                ))}
-              </select>
-            </label>
+            {/* Belge turu SECICISI YOK: tur ekranin kendisinden gelir (Siparisler
+                19, Irsaliyeler 14, Faturalar 15) ve pencere basliginda zaten yazili.
+                Kartta degistirilebilir olmasi, kaydedilen belgenin hangi listede
+                cikacagini belirsizlestiriyordu. */}
           </div>
         </div>
 
