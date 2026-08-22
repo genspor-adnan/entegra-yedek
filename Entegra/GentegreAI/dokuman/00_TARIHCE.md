@@ -2128,3 +2128,10 @@ yeni kaynak/kart/filtre YOK, sadece `menuGrup`/`menuAd` + LISTELER sirasi:
 Sidebar son hali: Hasta, Cari(3), Satış(1), Kasa(3: Hareketleri/Hizmet/Masraf Listesi),
 Stok(1), İK(1), e-Belge(duz), Yönetim(2: İşlem Günlüğü/Roller). Tarayicida hepsi tek tek
 ac/kapa + dogru alt-ogelerle dogrulandi.
+
+### Ayni oturum: e-Belge de Yönetim'e - artik duz oge kalmadi
+
+Kullanici: "e-Belge'yi de bir Yönetim altına". `e-belge` girdisine `menuGrup:'Yönetim'`
+eklendi (Yönetim grubunun EN BASINA, İşlem Günlüğü/Roller'den once). Sidebar artik
+TAMAMEN gruplu: Hasta, Cari(3), Satış(1), Kasa(3), Stok(1), İK(1), Yönetim(3: e-Belge/
+İşlem Günlüğü/Roller) - hicbir duz (menuGrup'suz) oge kalmadi. Tarayicida dogrulandi.

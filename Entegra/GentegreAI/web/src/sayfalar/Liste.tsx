@@ -201,8 +201,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'İK', menuAd: 'Personel Listesi', ic: '🪪', yetkiKodu: 'personel',
   },
   {
+    // Kullanici: "e-Belge'yi de bir Yönetim altına".
     kaynak: 'e-belge', baslik: 'e-Belge Kuyrugu', yol: 'e-Belge › Kuyruk',
-    menuAd: 'e-Belge', ic: '📨', yetkiKodu: 'e_belge',
+    menuGrup: 'Yönetim', menuAd: 'e-Belge', ic: '📨', yetkiKodu: 'e_belge',
   },
   {
     // Kullanici: "Yönetim altına Roller ve İşlem Günlüğü al".
