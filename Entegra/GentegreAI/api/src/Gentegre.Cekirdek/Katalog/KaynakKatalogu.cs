@@ -897,10 +897,14 @@ public static class KaynakKatalogu
                 "when b.efatura_durum = 3 then 'Kabul' when b.efatura_durum = 4 then 'Red' else 'Bilinmiyor' end",
                                                       "metin", "e-İrsaliye", Hizalama: "orta"),
             new("efaturaDurum",  "b.efatura_durum",  "sayi",  "e-Belge Kodu", Hizalama: "orta", Varsayilan: false),
+            // Miktar GIZLI: satir-basi alt sorgu (her satirda bir belge_satir taramasi)
+            //   ve irsaliyede farkli birimler (adet/kg/metre) toplanip tek sayi olarak
+            //   gosterildiginde yaniltici. Kolon seciciden acilabilir.
             new("miktar",
                 "(select coalesce(sum(s.miktar), 0) from public.belge_satir s where s.belge_id = b.id)",
                                                       "para",  "Miktar",    Hizalama: "sag", Bicim: "#,##0.##",
-                                                      Siralanabilir: false, Filtrelenebilir: false),
+                                                      Siralanabilir: false, Filtrelenebilir: false,
+                                                      Varsayilan: false),
             new("genelToplam",   "b.genel_toplam",   "para",  "Tutar",     Hizalama: "sag", Bicim: "#,##0.00"),
             new("teslimSekli",
                 "case b.teslim_sekli when 1 then 'Alıcı adresine teslim' when 2 then 'Alıcı kendi aracıyla' " +

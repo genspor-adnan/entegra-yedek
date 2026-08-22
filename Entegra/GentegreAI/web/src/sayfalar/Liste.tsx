@@ -293,7 +293,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     yol: 'Satis › Irsaliyeler', aksiyonEkrani: 'irsaliye-liste',
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 14 },
     yeniBelgeTuru: 14,
-    toplam: ['miktar', 'genelToplam'],
+    toplam: ['genelToplam'],
     cipler: [
       { ad: 'Faturalanmadı', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
       { ad: 'Kısmi',         filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
