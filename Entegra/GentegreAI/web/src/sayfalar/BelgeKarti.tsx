@@ -1115,14 +1115,15 @@ function KalemPenceresi({ satir, irsaliyeMi, onKapat, onKaydet }: {
       alt={
         <>
           <button className="d onay" onClick={kaydet}>💾 Tamam (Enter)</button>
-          <button className="d" onClick={onKapat}>✖ Vazgeç</button>
+          <button className="d" onClick={onKapat}>✖ Kapat</button>
         </>
       }
     >
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}
+        {/* Cerceve kalir, BASLIK yok: pencerenin kendi basligi zaten "Kalem — <ad>",
+            ikinci bir "Kalem Bilgisi" satiri gereksiz tekrardi. */}
         <div className="kagrup">
-          <h6>Kalem Bilgisi</h6>
           <div className="alan-izgara">
             {/* Stok/hizmet adi PENCERE BASLIGINDA yaziyor - burada tekrarlamak
                 yer kaplamaktan baska ise yaramiyordu. Baska bir kalem icin arama
