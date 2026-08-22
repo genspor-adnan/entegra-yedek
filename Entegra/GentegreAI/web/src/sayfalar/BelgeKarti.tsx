@@ -23,6 +23,24 @@ const bosSatir = (anahtar: number): SatirDurumu => ({
 
 const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+const LOOKUP_DEPO = [{ ad: 'ad', baslik: 'Depo', genis: true }];
+
+/** Teslim sekli (088 kod listesi belge.teslim_sekli) - e-Irsaliye'de GIB bekler. */
+const TESLIM_SEKLI: { deger: number; ad: string }[] = [
+  { deger: 0, ad: 'Belirtilmemiş' },
+  { deger: 1, ad: 'Alıcı adresine teslim' },
+  { deger: 2, ad: 'Alıcı kendi aracıyla' },
+  { deger: 3, ad: 'Kargo / nakliye firması' },
+  { deger: 4, ad: 'Depoda teslim' },
+  { deger: 5, ad: 'Yurt dışı sevk' },
+];
+
+const KAPANMA_ETIKET: Record<number, { ad: string; sinif: string }> = {
+  0: { ad: 'Faturalanmadı', sinif: 'uyari' },
+  1: { ad: 'Kısmi faturalandı', sinif: '' },
+  2: { ad: 'Faturalandı', sinif: 'olumlu' },
+};
+
 /** Kartin acabilecegi belge turleri - grup='belge' katalogundan suzulur. */
 const GIRILEBILIR_TURLER = [19, 15, 14, 9, 11, 10, 16, 12] as const;
 
@@ -68,7 +86,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [tarih, setTarih] = useState(new Date().toISOString().slice(0, 10));
   const [seri, setSeri] = useState('WEB');
   const [vadeGun, setVadeGun] = useState('30');
-  const [depoId, setDepoId] = useState('1');
+  const [depo, setDepo] = useState<{ id: number; ad: string } | null>(null);
+  const [satici, setSatici] = useState<{ id: number; ad: string } | null>(null);
+  const [sevkTarihi, setSevkTarihi] = useState('');
+  const [teslimSekli, setTeslimSekli] = useState(0);
   const [taslak, setTaslak] = useState(false);
   const [satirlar, setSatirlar] = useState<SatirDurumu[]>([bosSatir(1)]);
 
@@ -117,6 +138,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setCari({ id: Number(y.belge.tarafId), unvan: String(y.belge.tarafUnvan ?? '') });
         setTarih(String(y.belge.belgeTarihi ?? '').slice(0, 10));
         setSeri(String(y.belge.belgeSeri ?? ''));
+        setVadeGun(String(y.belge.vadeGun ?? 0));
+        setDepo(y.belge.cikisDepoId
+          ? { id: Number(y.belge.cikisDepoId), ad: String(y.belge.cikisDepoAdi ?? '') } : null);
+        setSatici(y.belge.saticiId
+          ? { id: Number(y.belge.saticiId), ad: String(y.belge.saticiAdi ?? '') } : null);
+        setSevkTarihi(y.belge.irsaliyeTarihi ? String(y.belge.irsaliyeTarihi).slice(0, 16) : '');
+        setTeslimSekli(Number(y.belge.teslimSekli ?? 0));
         setSatirlar((y.satirlar ?? []).map((r, i) => ({
           anahtar: i + 1,
           stokId: r.stokId ? Number(r.stokId) : null,
@@ -186,7 +214,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           dovizKuru: 1,
           vadeGun: Number(vadeGun) || 0,
           subeId: kullanici?.subeId ?? undefined,
-          cikisDepoId: Number(depoId) || null,
+          cikisDepoId: depo?.id ?? null,
+          saticiId: satici?.id ?? null,
+          // Irsaliyede sevk zamani ve teslim sekli GIB'in bekledigi alanlar.
+          irsaliyeTarihi: irsaliyeMi && sevkTarihi ? sevkTarihi : undefined,
+          teslimSekli: irsaliyeMi ? teslimSekli : undefined,
         },
         satirlar: dolu.map((s, i) => ({
           sira: i + 1,
@@ -365,20 +397,21 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         </div>
       )}
 
-        <div className="kagrup">
-          <h6>Belge</h6>
-          <div className="alan-izgara">
+        <div className="belge-hdr-sar">
+          {/* Alan duzeni mockup'tan (Ekranlar/satis_irsaliye_karti.html .hdr):
+              BASLIKSIZ 3 sutunlu izgara - mockup'ta da bu blogun basligi yok,
+              belge zaten pencere basliginda yaziyor. */}
+          <div className="alan-izgara uc-sutun belge-hdr">
             <label className="alan">
-              <span className="etiket">Belge Türü</span>
-              <select value={tur} disabled={kilitli} onChange={e => setTur(Number(e.target.value))}>
-                {GIRILEBILIR_TURLER.map(k => (
-                  <option key={k} value={k}>{turAdi(k)}</option>
-                ))}
-              </select>
+              <span className="etiket">{irsaliyeMi ? 'İrsaliye No' : 'Belge No'}</span>
+              <input className="one-cikan"
+                     value={String(sonuc?.belge.belgeNo ?? '') || (kilitli ? '' : '(kaydedince verilir)')}
+                     readOnly />
             </label>
+
             <GenLookup
               kaynak="cari"
-              etiket="Cari"
+              etiket={siparisMi || irsaliyeMi ? 'Müşteri (Cari)' : 'Cari'}
               zorunlu
               alanlar={LOOKUP_CARI}
               deger={cari?.unvan}
@@ -386,21 +419,127 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               saltOkunur={kilitli}
               onSec={s => setCari(s ? { id: Number(s.id), unvan: String(s.unvan ?? '') } : null)}
             />
+
             <label className="alan">
-              <span className="etiket">Belge Tarihi</span>
-              <input type="date" value={tarih} disabled={kilitli} onChange={e => setTarih(e.target.value)} />
+              <span className="etiket">e-Belge</span>
+              <span className="deger-serit">
+                {irsaliyeMi
+                  ? <span className="rozet bilgi">e‑İrsaliye</span>
+                  : <span className="rozet bilgi">e‑Fatura</span>}
+                {Number(sonuc?.belge.efaturaDurum ?? 0) > 0
+                  ? <span className="rozet olumlu">✓ Gönderildi</span>
+                  : <span className="rozet">gönderilmedi</span>}
+              </span>
             </label>
+
             <label className="alan">
-              <span className="etiket">Seri</span>
-              <input value={seri} maxLength={5} disabled={kilitli} onChange={e => setSeri(e.target.value.toUpperCase())} />
+              <span className="etiket zorunlu-isaret">
+                {irsaliyeMi ? 'İrsaliye Tarihi' : 'Belge Tarihi'}
+              </span>
+              <input type="date" value={tarih} disabled={kilitli}
+                     onChange={e => setTarih(e.target.value)} />
             </label>
+
+            {irsaliyeMi ? (
+              <label className="alan">
+                <span className="etiket">Sevk Tarih / Saati</span>
+                <input type="datetime-local" value={sevkTarihi} disabled={kilitli}
+                       onChange={e => setSevkTarihi(e.target.value)} />
+              </label>
+            ) : (
+              <label className="alan">
+                <span className="etiket">Vade (gün)</span>
+                <input className="hiza-sag" value={vadeGun} disabled={kilitli}
+                       onChange={e => setVadeGun(e.target.value)} />
+              </label>
+            )}
+
             <label className="alan">
-              <span className="etiket">Vade (gun)</span>
-              <input value={vadeGun} disabled={kilitli} onChange={e => setVadeGun(e.target.value)} />
+              <span className="etiket">{siparisMi ? 'Kaynak Belge' : 'Bağlı Sipariş'}</span>
+              <span className="deger-serit">
+                {sonuc?.belge.kaynakBelgeNo
+                  ? <>{String(sonuc.belge.kaynakTurAdi ?? '')} <b>{String(sonuc.belge.kaynakBelgeNo)}</b></>
+                  : <span className="sonuk">—</span>}
+              </span>
             </label>
+
+            <GenLookup
+              kaynak="depo"
+              etiket={siparisMi ? 'Depo' : 'Çıkış Deposu'}
+              alanlar={LOOKUP_DEPO}
+              deger={depo?.ad}
+              saltOkunur={kilitli}
+              onSec={s => setDepo(s ? { id: Number(s.id), ad: String(s.ad ?? '') } : null)}
+            />
+
+            <GenLookup
+              kaynak="cari"
+              etiket="Satış Temsilcisi"
+              alanlar={LOOKUP_CARI}
+              deger={satici?.ad}
+              saltOkunur={kilitli}
+              onSec={s => setSatici(s ? { id: Number(s.id), ad: String(s.unvan ?? '') } : null)}
+            />
+
             <label className="alan">
-              <span className="etiket">Cikis Deposu</span>
-              <input value={depoId} disabled={kilitli} onChange={e => setDepoId(e.target.value)} />
+              <span className="etiket">{irsaliyeMi ? 'Faturalama Durumu' : 'Kapanma'}</span>
+              <span className="deger-serit">
+                {(() => {
+                  const k = KAPANMA_ETIKET[Number(sonuc?.belge.kapanmaDurum ?? 0)];
+                  const acik = satirlar.length;
+                  return (
+                    <>
+                      <span className={`rozet ${k?.sinif ?? ''}`}>{k?.ad ?? '—'}</span>
+                      {kayitliId > 0 && <span className="sonuk">{acik} kalem</span>}
+                    </>
+                  );
+                })()}
+              </span>
+            </label>
+
+            <label className="alan genis-2">
+              <span className="etiket">{irsaliyeMi ? 'Sevk Adresi' : 'Adres'}</span>
+              <input value={[sonuc?.belge.tarafAdres, sonuc?.belge.tarafIlce, sonuc?.belge.tarafIl]
+                              .filter(Boolean).join(' / ')} readOnly
+                     placeholder="Cari seçilince kartındaki varsayılan adres gelir" />
+            </label>
+
+            {irsaliyeMi ? (
+              <label className="alan">
+                <span className="etiket">Teslim Şekli</span>
+                <select value={teslimSekli} disabled={kilitli}
+                        onChange={e => setTeslimSekli(Number(e.target.value))}>
+                  {TESLIM_SEKLI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
+                </select>
+              </label>
+            ) : (
+              <label className="alan">
+                <span className="etiket">Seri</span>
+                <input value={seri} maxLength={5} disabled={kilitli}
+                       onChange={e => setSeri(e.target.value.toUpperCase())} />
+              </label>
+            )}
+
+            <label className="alan">
+              <span className="etiket">Vergi Dairesi / VKN</span>
+              <input value={[sonuc?.belge.tarafVd, sonuc?.belge.tarafVkno]
+                              .filter(Boolean).join(' · ')} readOnly />
+            </label>
+
+            <label className="alan">
+              <span className="etiket">Döviz / Kur</span>
+              <input value={`${String(sonuc?.belge.belgeDovizi ?? 'TL')} · ${
+                Number(sonuc?.belge.dovizKuru ?? 1).toLocaleString('tr-TR', { minimumFractionDigits: 6 })}`}
+                     readOnly />
+            </label>
+
+            <label className="alan">
+              <span className="etiket">Belge Türü</span>
+              <select value={tur} disabled={kilitli} onChange={e => setTur(Number(e.target.value))}>
+                {GIRILEBILIR_TURLER.map(k => (
+                  <option key={k} value={k}>{turAdi(k)}</option>
+                ))}
+              </select>
             </label>
           </div>
         </div>

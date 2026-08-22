@@ -89,6 +89,7 @@ public static class KaynakKatalogu
         Ekle(PlanVade());
         // Belge donusumu (F8)
         Ekle(BelgeAcikSatir());
+        Ekle(Depo());
     }
 
     private static void Ekle(KaynakTanimi k) => Kaynaklar[k.Ad] = k;
@@ -813,6 +814,23 @@ public static class KaynakKatalogu
             new("projeId",          "v.proje_id",          "sayi",  "Proje Id", Varsayilan: false),
             new("aciklama",         "v.aciklama",          "metin", "Açıklama", Genislik: 240),
             new("subeId",           "v.sube_id",           "sayi",  "Şube",   Varsayilan: false)
+        });
+
+    // -------------------------------------------------------------- depo ----
+    // Belge kartinda cikis/giris deposu ADIYLA secilir (GenLookup kaynagi).
+    private static KaynakTanimi Depo() => new(
+        Ad: "depo",
+        YetkiKodu: "stok",
+        Kaynak: "public.depo d",
+        SubeKolonu: "d.sube_id",
+        VarsayilanSirala: "d.ad asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",         "d.id",         "sayi",  "Id",   Varsayilan: false),
+            new("ad",         "d.ad",         "metin", "Depo", Genislik: 220),
+            new("varsayilan", "d.varsayilan", "mantik","Varsayılan", Hizalama: "orta"),
+            new("durum",      "d.durum",      "kod",   "Durum", Hizalama: "orta", Varsayilan: false),
+            new("subeId",     "d.sube_id",    "sayi",  "Şube", Varsayilan: false)
         });
 
     // ------------------------------------------------- acik belge satirlari ----

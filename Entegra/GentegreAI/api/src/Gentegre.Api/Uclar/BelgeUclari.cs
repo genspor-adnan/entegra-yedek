@@ -169,7 +169,7 @@ public static class BelgeUclari
     {
         "tur" or "tipi" or "tarafId" or "tarafAdresId" or "kocanNo" or "girisDepoId" or
         "cikisDepoId" or "subeId" or "projeId" or "vadeGun" or "durum" or "senaryo" or
-        "saticiId" => "sayi",
+        "saticiId" or "teslimSekli" or "merkezId" => "sayi",
 
         "dovizKuru" => "para",
 

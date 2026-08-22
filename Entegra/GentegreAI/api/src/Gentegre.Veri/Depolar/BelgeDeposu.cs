@@ -458,8 +458,28 @@ public sealed class BelgeDeposu
                    b.genel_toplam as "genelToplam", b.belge_dovizi as "belgeDovizi",
                    b.doviz_tutari as "dovizTutari", b.doviz_kuru as "dovizKuru",
                    b.kdv_durum as "kdvDurum", b.durum, b.sube_id as "subeId",
+                   -- Irsaliye/siparis kartinin baslik alanlari (mockup ile birebir)
+                   b.tipi, b.belge_seri as "belgeSeri",
+                   b.irsaliye_no as "irsaliyeNo", b.irsaliye_tarihi as "irsaliyeTarihi",
+                   b.taraf_vd as "tarafVd", b.taraf_adres_id as "tarafAdresId",
+                   b.taraf_adres as "tarafAdres", b.taraf_ilce as "tarafIlce", b.taraf_il as "tarafIl",
+                   b.cikis_depo_id as "cikisDepoId", cd.ad as "cikisDepoAdi",
+                   b.giris_depo_id as "girisDepoId", gd.ad as "girisDepoAdi",
+                   b.satici_id as "saticiId", sc.unvan as "saticiAdi",
+                   b.teslim_sekli as "teslimSekli", b.vade_gun as "vadeGun",
+                   b.proje_id as "projeId", b.efatura_durum as "efaturaDurum",
+                   b.kapanma_durum as "kapanmaDurum",
+                   b.kaynak_tur as "kaynakTur", b.kaynak_id as "kaynakId",
+                   kb.belge_no as "kaynakBelgeNo", kb.belge_tarihi as "kaynakBelgeTarihi",
+                   kt.ad as "kaynakTurAdi", b.aciklama,
                    b.xmin::text as surum
-              from public.belge b where b.id = @p0
+              from public.belge b
+              left join public.depo  cd on cd.id = b.cikis_depo_id
+              left join public.depo  gd on gd.id = b.giris_depo_id
+              left join public.taraf sc on sc.id = b.satici_id
+              left join public.belge kb on kb.id = b.kaynak_id and b.kaynak_tur = 30
+              left join public.kasa_islem_turu kt on kt.kod = kb.tur
+             where b.id = @p0
             """, baglanti))
         {
             komut.Parameters.AddWithValue("p0", belgeId);
@@ -537,7 +557,9 @@ public sealed class BelgeDeposu
         ["raporDovizi"] = "rapor_dovizi", ["vadeGun"] = "vade_gun", ["durum"] = "durum",
         ["aciklama"] = "aciklama", ["ozelKod"] = "ozel_kod", ["senaryo"] = "senaryo",
         ["gondericiUnvan"] = "gonderici_unvan", ["gondericiVkno"] = "gonderici_vkno",
-        ["gondericiAlias"] = "gonderici_alias", ["saticiId"] = "satici_id"
+        ["gondericiAlias"] = "gonderici_alias", ["saticiId"] = "satici_id",
+        // Irsaliye karti (088): sevk bilgileri
+        ["teslimSekli"] = "teslim_sekli", ["merkezId"] = "merkez_id"
     };
 
     private async Task<int> BelgeEkleAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,

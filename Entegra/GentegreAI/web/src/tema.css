@@ -506,3 +506,22 @@ table.grid tr.flt input {
    alt satira sarar (mockup .toolbar flex-wrap deseni). */
 .katoolbar { flex-wrap: wrap; row-gap: 4px }
 .katoolbar .d { white-space: nowrap; flex: none }
+
+/* Belge karti baslik alani: mockup'ta (.hdr) BASLIKSIZ, hafif gradient bir serit -
+   kagrup cercevesi/h6 basligi yok (belge adi zaten pencere basliginda). */
+.belge-hdr-sar {
+  margin: -14px -14px 10px; padding: 12px 14px;
+  background: linear-gradient(#fff, #f5f8fb); border-bottom: 1px solid var(--cizgi);
+}
+.belge-hdr-sar .alan-izgara { margin: 0 }
+
+/* Belge karti basligi: mockup (.hdr) 3 sutunlu izgara. */
+.alan-izgara.uc-sutun { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+.alan-izgara.uc-sutun .genis-2 { grid-column: span 2 }
+@media (max-width: 900px) { .alan-izgara.uc-sutun { grid-template-columns: 1fr } }
+/* Belge/irsaliye numarasi one cikar (mockup .inp.big). */
+.alan input.one-cikan { font-weight: 700; font-size: 13px; color: var(--yazi2) }
+/* Salt gorunum alani: rozet + aciklama yan yana. */
+.alan .deger-serit { display: flex; align-items: center; gap: 6px; min-height: 28px; flex-wrap: wrap }
+.alan .deger-serit .sonuk { color: var(--soluk); font-size: 11px }
+.rozet.bilgi { background: #e6f0fb; color: #2f6db3; border-color: #cfe0f4 }
