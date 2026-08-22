@@ -148,13 +148,23 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
   }, [kaynak, sayfa, boyut, sirala, toplam, sabitFiltre, aramaFiltresi, filtreSatiriFiltresi, cipler, cipIndeks, kolonlar.length, aramaGorunumu]);
 
   useEffect(() => { void yukle() }, [yukle]);
-  // Kart kaydedilince (ekleme ya da duzenleme - GenForm onKaydedildi) disaridan tetiklenen
-  //   yeniden yukleme: "yenile" degeri her kaydetmede bir arttirilir.
-  useEffect(() => { if (yenile !== undefined) void yukle() }, [yenile]);
-  // Yeni kart eklenince "Son Aranan"a gec - yeni kayit orada otomatik en ustte cikar.
-  //   (aramaGorunumu zaten "son" ise deger degismez, ustteki "yenile" tetiklemesi yeniden
-  //   yuklemeyi zaten yapar.)
+  // "yenile"/"odaklaSonEklenen" Liste.tsx'te YASIYOR (kaynak degisince sifirlanmiyor) -
+  //   GenGrid kaynak degisince "key" ile yeniden kurulunca bu prop'lar eski sayimla
+  //   gelir. "Onceki deger" ref'iyle karsilastirip GERCEK degisimde tetikliyoruz -
+  //   ilk mount'ta ref zaten ayni degerle baslar, calismaz. Basit bir "ilk calisti mi"
+  //   bool bayragi StrictMode'da KIRILIR (efektler dev'de cift calisir, ikinci calismada
+  //   bayrak zaten false olur ve yanlislikla tetiklenir) - deger karsilastirmasi
+  //   tekrar calismaya karsi dogal olarak baglisiktir (idempotent).
+  const yenileOnceki = useRef(yenile);
   useEffect(() => {
+    if (yenileOnceki.current === yenile) return;
+    yenileOnceki.current = yenile;
+    if (yenile !== undefined) void yukle();
+  }, [yenile]);
+  const odaklaOnceki = useRef(odaklaSonEklenen);
+  useEffect(() => {
+    if (odaklaOnceki.current === odaklaSonEklenen) return;
+    odaklaOnceki.current = odaklaSonEklenen;
     if (odaklaSonEklenen === undefined) return;
     setSayfa(1);
     setAramaGorunumu('son');

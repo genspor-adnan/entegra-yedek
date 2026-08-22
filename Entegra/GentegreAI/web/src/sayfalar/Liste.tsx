@@ -41,6 +41,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   return (
     <>
     <GenGrid
+      // key: kaynak degisince (baska liste ekranina gecince) GenGrid TAMAMEN yeniden
+      //   kurulsun - Route ayni tree konumunda kaldigi icin React bilesen orneğini
+      //   REUSE ediyordu, onceki ekranin state'i (aramaGorunumu, sirala, arama, sayfa...)
+      //   yeni ekrana sizip yanlis/bos sonuc gosteriyordu (ör. Cari'de "Son Aranan"
+      //   secilince Islem Gunlugu'ne gecince orada da "son" gonderiliyordu).
+      key={tanim.kaynak}
       kaynak={tanim.kaynak}
       baslik={tanim.baslik}
       yol={tanim.yol}

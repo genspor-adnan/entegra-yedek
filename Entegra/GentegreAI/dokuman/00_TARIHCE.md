@@ -1950,3 +1950,24 @@ sayfanin herhangi bir yerine dusebilirdi).
 (`son_tarih desc`). `Liste.tsx` bunu SADECE ekleme'de artiriyor (`kartId === 'yeni'`),
 duzenlemede degil - var olan bir kaydi degistirirken kullanicinin bakmakta oldugu gorunum/
 sayfa/filtre degismemeli, sadece o satirin verisi tazelenmeli (`yenile` zaten bunu yapiyor).
+
+### Bug: liste ekranlari arasi state sizintisi (Islem Gunlugu hep "Kayit yok" gosteriyordu)
+
+Kullanici bildirdi: "Islem Gunlugu bos" - halbuki `islem_log` tablosunda 80 satir vardi
+(curl ile dogrulandi, API/DB saglam). Kok neden: `App.tsx`taki route'lar `LISTELER` dizisinden
+farkli path'lerde ayni `<Liste>`/`<GenGrid>` agac konumunu paylasiyor - React Router sayfa
+DEGISTIRINCE bilesen orneğini REUSE ediyor, unmount/mount etmiyor. Sonuc: Cari'de "Son Aranan"
+ikonuna tiklayip Islem Gunlugu'ne gecince `aramaGorunumu` state'i ORADA DA "son" olarak
+kaliyordu; Islem Gunlugu kaynaginda hic kimse hic kayit acmadigi icin `kullanici_arama` join'i
+hakli olarak 0 satir donduruyordu - veri kaybi degil, yanlis gorunumde kalma sorunuydu.
+
+Fix: `Liste.tsx`'te `<GenGrid key={tanim.kaynak} .../>` - kaynak degisince GenGrid tamamen
+yeniden kurulur, TUM local state (aramaGorunumu, sayfa, sirala, arama, filtreDeger, secili
+satirlar...) temiz baslar. Ek tuzak: `yenile`/`odaklaSonEklenen` prop'lari Liste.tsx'te
+(parent'ta) yasadigi icin key-remount sirasinda ESKI sayimla gelirler; "ilk calisti mi" bool
+bayragiyla korumaya calisildi ama **React StrictMode dev'de efektleri cift calistirdigi icin
+bu bayrak bozuluyordu** (ikinci calismada bayrak zaten false, yanlislikla tetikliyordu) -
+dogru cozum "onceki deger" ref'iyle KARSILASTIRMA (idempotent, kac kez calisirsa calissin
+guvenli), bool toggle degil. Tarayicida uctan uca dogrulandi: Cari'de Son Aranan ac ->
+Islem Gunlugu'ne gec (80 kayit dogru geldi) -> Cari'ye don (kendi "Tum Liste"sine donmus,
+2.350 kayit dogru).
