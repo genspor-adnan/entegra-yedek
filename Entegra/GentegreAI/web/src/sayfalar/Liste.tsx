@@ -78,6 +78,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [donusum, setDonusum] = useState<{ belgeId: number; belgeTur: number } | null>(null);
   // Belge (fatura/siparis) karti da MODAL: liste arkada kalir, rota degismez.
   const [yeniBelgeTuru, setYeniBelgeTuru] = useState<number | null>(null);
+  // Mevcut belgeyi ac (salt gorunum) - ayni modal, id ile.
+  const [acikBelgeId, setAcikBelgeId] = useState<number | null>(null);
 
   // Aksiyon yonlendirme. Kasa aksiyonlari API cagirir (kesinlestir/iptal/sil) ve
   //   sonrasinda grid'i tazeler; digerleri kart rotasina gider.
@@ -125,6 +127,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           return;
 
         case 'belge.yeni': setYeniBelgeTuru(tanim.yeniBelgeTuru ?? 15); return;
+        case 'belge.ac':
+          if (satir) setAcikBelgeId(Number(satir.id));
+          return;
         case 'belge.donustur':
           if (!satir) return;
           setDonusum({ belgeId: Number(satir.id), belgeTur: Number(satir.tur) });
@@ -161,9 +166,17 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       odaklaSonEklenen={odaklaSonEklenen}
       icerikAlani={tanim.icerikAlani}
       icerikBaslik={tanim.icerikBaslik}
-      onSatirAc={satir => { if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`) }}
+      onSatirAc={satir => {
+        // Belge listelerinde kart MODAL acilir (rota yok); digerlerinde kartYolu.
+        if (tanim.kaynak === 'belge') setAcikBelgeId(Number(satir.id));
+        else if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`);
+      }}
       onAksiyon={(kod, satir) => { void aksiyon(kod, satir) }}
     />
+
+    {acikBelgeId !== null && (
+      <BelgeKarti id={acikBelgeId} onKapat={() => setAcikBelgeId(null)} />
+    )}
 
     {yeniBelgeTuru !== null && (
       <BelgeKarti

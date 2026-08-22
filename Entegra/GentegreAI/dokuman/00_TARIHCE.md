@@ -2475,5 +2475,13 @@ Doğrulandı (tarayıcı): Siparişler › + Yeni Sipariş → modal "Satış Si
 stok + 15 adet × 340 → Kaydet → `000000001`, genel toplam 6.120,00; liste "Açık"
 çipinde satırı gösterdi.
 
+Ardından "Belgeyi Aç çalışmıyor" bildirildi — aksiyon katalogda vardı ama hiçbir şeye
+bağlı değildi. Aynı modal artık `id` ile **mevcut belgeyi** de açıyor: başlık belge
+numarasını taşıyor, alanlar ve satırlar salt okunur, dip toplam sunucudan geliyor.
+`OkuAsync` satır sorgusuna stok/hizmet/masraf **adları** ve dönüşüm alanları
+(`kapatilanMiktar`, `kalanMiktar`, `kaynakTur/Id`) eklendi — kart satırında id değil ad
+görünür. Kaydet düğmesi kesin belgede pasif (`PUT /api/belge/{id}` yok; değişiklik =
+iptal + yeniden kesme, F7). Çift tık da aynı modalı açıyor.
+
 **Sırada (F4):** kapatma + kur farkı; ardından F5 (çek/senet), F6 (kredi/kupon),
 F7 (belge fişleme).

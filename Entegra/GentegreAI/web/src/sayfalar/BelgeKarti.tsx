@@ -42,6 +42,8 @@ const LISTE_YOLU = (tur: number) => (tur === 9 || tur === 19 ? '/siparis' : '/be
  * tek yerde, sunucuda durur — istemciye kopyalanirsa iki formul birbirinden kayar.
  */
 interface Props {
+  /** Verilirse MEVCUT belge acilir (salt gorunum). Duzenleme F7'de gelecek. */
+  id?: number;
   /** Acilis turu; verilmezse URL'deki ?tur= ya da satis faturasi (15). */
   tur?: number;
   /** Liste icinden acildiginda: modal kapanisi cagirani ilgilendirir. */
@@ -50,7 +52,7 @@ interface Props {
   onKaydedildi?(): void;
 }
 
-export function BelgeKarti({ tur: acilisTuru, onKapat, onKaydedildi }: Props = {}) {
+export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi }: Props = {}) {
   const git = useNavigate();
   const [sorgu] = useSearchParams();
   const { yetki, kullanici } = useOturum();
@@ -70,6 +72,7 @@ export function BelgeKarti({ tur: acilisTuru, onKapat, onKaydedildi }: Props = {
   const [satirlar, setSatirlar] = useState<SatirDurumu[]>([bosSatir(1)]);
 
   const [kaydediyor, setKaydediyor] = useState(false);
+  const [aciliyor, setAciliyor] = useState(!!belgeId);
   const [sonuc, setSonuc] = useState<BelgeYaniti | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [alanHatalari, setAlanHatalari] = useState<Record<string, string>>({});
@@ -85,6 +88,35 @@ export function BelgeKarti({ tur: acilisTuru, onKapat, onKaydedildi }: Props = {
 
   const turAdi = (kod: number) => turler.find(t => t.kod === kod)?.ad ?? `Belge (${kod})`;
   const seciliTurAdi = turAdi(tur);
+  /** Mevcut belge SALT GORUNUM: duzenleme ucu (PUT /api/belge/{id}) henuz yok. */
+  const mevcutBelge = !!belgeId;
+  const kilitli = mevcutBelge || !!sonuc;
+
+  // Mevcut belgeyi ac: baslik + satirlar + dip toplam sunucudan gelir.
+  useEffect(() => {
+    if (!belgeId) return;
+    void (async () => {
+      try {
+        const y = await api.belgeOku(belgeId);
+        setSonuc(y);
+        setTur(Number(y.belge.tur));
+        setCari({ id: Number(y.belge.tarafId), unvan: String(y.belge.tarafUnvan ?? '') });
+        setTarih(String(y.belge.belgeTarihi ?? '').slice(0, 10));
+        setSeri(String(y.belge.belgeSeri ?? ''));
+        setSatirlar((y.satirlar ?? []).map((r, i) => ({
+          anahtar: i + 1,
+          stokId: r.stokId ? Number(r.stokId) : null,
+          stokAdi: String(r.stokAdi ?? r.aciklama ?? ''),
+          adet: String(r.miktar ?? r.adet ?? 0),
+          birimFiyat: String(r.birimFiyat ?? 0),
+          iskonto: String(r.iskonto ?? 0),
+          kdv: String(r.kdv ?? 0),
+        })));
+      } catch (h) {
+        setHata(h instanceof ApiHatasi ? h.message : String(h));
+      } finally { setAciliyor(false) }
+    })();
+  }, [belgeId]);
 
   /** Yalniz ONIZLEME: gercek tutar sunucudan gelir. */
   const onizleme = useMemo(() => {
@@ -187,7 +219,9 @@ export function BelgeKarti({ tur: acilisTuru, onKapat, onKaydedildi }: Props = {
 
   return (
     <Modal
-      baslik={seciliTurAdi}
+      baslik={mevcutBelge
+        ? `${seciliTurAdi}${sonuc?.belge.belgeNo ? ` — ${sonuc.belge.belgeNo}` : ''}`
+        : seciliTurAdi}
       ustBilgi={kullanici?.subeYazma === false
         ? <span className="rozet uyari">salt okuma şubesi</span>
         : <span className="kapt">{kullanici?.subeler.find(s => s.id === kullanici?.subeId)?.ad}</span>}
@@ -198,11 +232,16 @@ export function BelgeKarti({ tur: acilisTuru, onKapat, onKaydedildi }: Props = {
       //   sessizce hicbir sey olmaz diye sasirmaz (title ile sebep yazili).
       alt={
         <>
-          {sonuc
-            ? <button className="d onay" onClick={yeniBelge}>＋ Yeni Belge</button>
-            : <button className="d onay" disabled={kaydediyor} onClick={() => void kes()}>
-                {kaydediyor ? '💾 Kaydediliyor…' : '💾 Kaydet'}
-              </button>}
+          {mevcutBelge
+            ? <button className="d onay" disabled
+                      title="Kesin belge düzenlenemez; değişiklik için iptal edip yeniden kesin (F7).">
+                💾 Kaydet
+              </button>
+            : sonuc
+              ? <button className="d onay" onClick={yeniBelge}>＋ Yeni Belge</button>
+              : <button className="d onay" disabled={kaydediyor} onClick={() => void kes()}>
+                  {kaydediyor ? '💾 Kaydediliyor…' : '💾 Kaydet'}
+                </button>}
           <button className="d teh" disabled title="Belge iptali henüz bağlanmadı (F7).">
             🗑 Sil
           </button>
@@ -229,7 +268,7 @@ export function BelgeKarti({ tur: acilisTuru, onKapat, onKaydedildi }: Props = {
           <span className="ayrac" />
 
           <label className="satir-ici">
-            <input type="checkbox" checked={taslak} disabled={!!sonuc}
+            <input type="checkbox" checked={taslak} disabled={kilitli}
                    onChange={e => setTaslak(e.target.checked)} />
             Taslak (numara tüketmez)
           </label>
@@ -240,7 +279,9 @@ export function BelgeKarti({ tur: acilisTuru, onKapat, onKaydedildi }: Props = {
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}
 
-        {sonuc && (
+        {aciliyor && <div className="yukleniyor">Belge açılıyor…</div>}
+
+        {sonuc && !mevcutBelge && (
         <div className="bilgi-kutusu">
           <b>Belge kaydedildi.</b>{' '}
           No: <b>{String(sonuc.belge.belgeNo || '(taslak — numara verilmedi)')}</b> ·
@@ -257,7 +298,7 @@ export function BelgeKarti({ tur: acilisTuru, onKapat, onKaydedildi }: Props = {
           <div className="alan-izgara">
             <label className="alan">
               <span className="etiket">Belge Türü</span>
-              <select value={tur} disabled={!!sonuc} onChange={e => setTur(Number(e.target.value))}>
+              <select value={tur} disabled={kilitli} onChange={e => setTur(Number(e.target.value))}>
                 {GIRILEBILIR_TURLER.map(k => (
                   <option key={k} value={k}>{turAdi(k)}</option>
                 ))}
@@ -270,24 +311,24 @@ export function BelgeKarti({ tur: acilisTuru, onKapat, onKaydedildi }: Props = {
               alanlar={LOOKUP_CARI}
               deger={cari?.unvan}
               hata={alanHatalari.tarafId}
-              saltOkunur={!!sonuc}
+              saltOkunur={kilitli}
               onSec={s => setCari(s ? { id: Number(s.id), unvan: String(s.unvan ?? '') } : null)}
             />
             <label className="alan">
               <span className="etiket">Belge Tarihi</span>
-              <input type="date" value={tarih} disabled={!!sonuc} onChange={e => setTarih(e.target.value)} />
+              <input type="date" value={tarih} disabled={kilitli} onChange={e => setTarih(e.target.value)} />
             </label>
             <label className="alan">
               <span className="etiket">Seri</span>
-              <input value={seri} maxLength={5} disabled={!!sonuc} onChange={e => setSeri(e.target.value.toUpperCase())} />
+              <input value={seri} maxLength={5} disabled={kilitli} onChange={e => setSeri(e.target.value.toUpperCase())} />
             </label>
             <label className="alan">
               <span className="etiket">Vade (gun)</span>
-              <input value={vadeGun} disabled={!!sonuc} onChange={e => setVadeGun(e.target.value)} />
+              <input value={vadeGun} disabled={kilitli} onChange={e => setVadeGun(e.target.value)} />
             </label>
             <label className="alan">
               <span className="etiket">Cikis Deposu</span>
-              <input value={depoId} disabled={!!sonuc} onChange={e => setDepoId(e.target.value)} />
+              <input value={depoId} disabled={kilitli} onChange={e => setDepoId(e.target.value)} />
             </label>
           </div>
         </div>
@@ -295,7 +336,7 @@ export function BelgeKarti({ tur: acilisTuru, onKapat, onKaydedildi }: Props = {
         <div className="kagrup">
           <h6>
             Satirlar
-            {!sonuc && <button type="button" className="d bir" onClick={satirEkle}>+ Satir</button>}
+            {!kilitli && <button type="button" className="d bir" onClick={satirEkle}>+ Satır</button>}
           </h6>
 
           <table className="detay-tablo">
@@ -307,7 +348,7 @@ export function BelgeKarti({ tur: acilisTuru, onKapat, onKaydedildi }: Props = {
                 <th className="hiza-sag">Iskonto %</th>
                 <th className="hiza-sag">KDV %</th>
                 <th className="hiza-sag">Tutar (onizleme)</th>
-                {!sonuc && <th />}
+                {!kilitli && <th />}
               </tr>
             </thead>
             <tbody>
@@ -323,20 +364,20 @@ export function BelgeKarti({ tur: acilisTuru, onKapat, onKaydedildi }: Props = {
                         kaynak="stok"
                         alanlar={LOOKUP_STOK}
                         deger={s.stokAdi}
-                        saltOkunur={!!sonuc}
+                        saltOkunur={kilitli}
                         onSec={satir => stokSec(s.anahtar, satir)}
                       />
                     </td>
-                    <td><input className="hiza-sag" value={s.adet} disabled={!!sonuc}
+                    <td><input className="hiza-sag" value={s.adet} disabled={kilitli}
                                onChange={e => satirDegis(s.anahtar, 'adet', e.target.value)} /></td>
-                    <td><input className="hiza-sag" value={s.birimFiyat} disabled={!!sonuc}
+                    <td><input className="hiza-sag" value={s.birimFiyat} disabled={kilitli}
                                onChange={e => satirDegis(s.anahtar, 'birimFiyat', e.target.value)} /></td>
-                    <td><input className="hiza-sag" value={s.iskonto} disabled={!!sonuc}
+                    <td><input className="hiza-sag" value={s.iskonto} disabled={kilitli}
                                onChange={e => satirDegis(s.anahtar, 'iskonto', e.target.value)} /></td>
-                    <td><input className="hiza-sag" value={s.kdv} disabled={!!sonuc}
+                    <td><input className="hiza-sag" value={s.kdv} disabled={kilitli}
                                onChange={e => satirDegis(s.anahtar, 'kdv', e.target.value)} /></td>
                     <td className="hiza-sag onizleme">{para.format(tutar)}</td>
-                    {!sonuc && (
+                    {!kilitli && (
                       <td className="hiza-orta">
                         <button type="button" className="d teh" onClick={() => satirSil(s.anahtar)}>×</button>
                       </td>

@@ -477,8 +477,17 @@ public sealed class BelgeDeposu
                    s.doviz_cinsi as "dovizCinsi", s.doviz_birim_fiyat as "dovizBirimFiyat",
                    s.doviz_tutari as "dovizTutari", s.doviz_kuru as "dovizKuru",
                    s.giris_depo_id as "girisDepoId", s.cikis_depo_id as "cikisDepoId",
-                   s.izleme_kodu as "izlemeKodu"
-              from public.belge_satir s where s.belge_id = @p0 order by s.sira, s.id
+                   s.izleme_kodu as "izlemeKodu",
+                   -- Kart satiri stok ADINI gosterir; id'yi ekranda kimse okuyamaz.
+                   coalesce(st.kod, '') as "stokKodu", coalesce(st.ad, '') as "stokAdi",
+                   coalesce(hz.ad, '')  as "hizmetAdi", coalesce(ms.ad, '') as "masrafAdi",
+                   s.kapatilan_miktar as "kapatilanMiktar", s.kalan_miktar as "kalanMiktar",
+                   s.kaynak_tur as "kaynakTur", s.kaynak_id as "kaynakId"
+              from public.belge_satir s
+              left join public.stok   st on st.id = s.stok_id
+              left join public.hizmet hz on hz.id = s.hizmet_id
+              left join public.masraf ms on ms.id = s.masraf_id
+             where s.belge_id = @p0 order by s.sira, s.id
             """, baglanti))
         {
             komut.Parameters.AddWithValue("p0", belgeId);
