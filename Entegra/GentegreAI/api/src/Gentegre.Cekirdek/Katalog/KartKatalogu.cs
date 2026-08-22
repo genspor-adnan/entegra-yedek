@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// Kart alani. Yazilabilir olmayan alanlar istek govdesinde gelse bile YOK SAYILMAZ -
@@ -105,8 +105,16 @@ public static class KartKatalogu
         Ekle(Cari());
         Ekle(Kisi());
         Ekle(Personel());
+        Ekle(Hasta());
         Ekle(Rol());
         Ekle(Stok());
+        // Kasa alt sistemi ana verileri (071-074). Kasa ISLEMI kart degil - belge
+        //   gibi ayri sozlesme (baslik + bacak), KasaUclari ile yazilir.
+        Ekle(Hesap());
+        Ekle(Proje());
+        Ekle(MasrafMerkezi());
+        Ekle(HesapPlani());
+        Ekle(CekSenet());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
 
@@ -145,37 +153,37 @@ public static class KartKatalogu
     //   1/2/3/4/9 - hangi liste gecerli, o satirin sahibi taraf.kisi'ye gore belirlenir).
     //   Kullanici: "kişi de adres tipleri sadece Ev/İş olabilir".
     private static readonly Dictionary<string, string> KisiAdresTurKodlari =
-        new() { ["1"] = "Ev", ["2"] = "İş" };
+        new() { ["1"] = "Ev Adresi", ["2"] = "İş Adresi" };
 
     // TARAF.ROL (kisi_karti.html/kisi_listesi.html "KARAR/ETKİ/MUHS/KULL/TEKN") - GENINI
     //   karsiligi yok, mockup'a ozel sabit liste (040_kisi_rol.sql).
     private static readonly Dictionary<string, string> KisiRolKodlari =
         new() { ["1"] = "Karar Verici", ["2"] = "Etkileyen", ["3"] = "Kullanıcı", ["4"] = "Mali/Muhasebe", ["5"] = "Teknik" };
 
-    // PERSONEL_OZLUK.CINSIYET - GENINI karsiligi yok, yeni tablo (046_personel_kart.sql).
+    // taraf_personel.CINSIYET - GENINI karsiligi yok, yeni tablo (046_personel_kart.sql).
     private static readonly Dictionary<string, string> CinsiyetKodlari =
         new() { ["1"] = "Erkek", ["2"] = "Kadın" };
 
-    // PERSONEL_OZLUK.CALISMA_SEKLI - GENINI karsiligi yok (047_personel_ozluk_ogrenim.sql).
+    // taraf_personel.CALISMA_SEKLI - GENINI karsiligi yok (047_personel_ozluk_ogrenim.sql).
     private static readonly Dictionary<string, string> CalismaSekliKodlari =
         new() { ["1"] = "Tam Zamanlı", ["2"] = "Yarı Zamanlı" };
 
-    // PERSONEL_OZLUK.VARDIYA_TURU - GENINI karsiligi yok (048_personel_ozluk_uyruk_vardiya_sgk.sql).
+    // taraf_personel.VARDIYA_TURU - GENINI karsiligi yok (048_personel_ozluk_uyruk_vardiya_sgk.sql).
     private static readonly Dictionary<string, string> VardiyaTuruKodlari =
         new() { ["1"] = "Gündüz", ["2"] = "Gece", ["3"] = "Vardiyalı" };
 
-    // PERSONEL_OZLUK.MEDENI_HAL - GENINI karsiligi yok (049_personel_ozluk_medeni_kan.sql).
+    // taraf_personel.MEDENI_HAL - GENINI karsiligi yok (049_personel_ozluk_medeni_kan.sql).
     private static readonly Dictionary<string, string> MedeniHalKodlari =
         new() { ["1"] = "Bekar", ["2"] = "Evli", ["3"] = "Boşanmış", ["4"] = "Dul" };
 
-    // PERSONEL_OZLUK.SOZLESME_TURU - GENINI karsiligi yok (050_personel_ozluk_sozlesme_deneme.sql).
+    // taraf_personel.SOZLESME_TURU - GENINI karsiligi yok (050_personel_ozluk_sozlesme_deneme.sql).
     private static readonly Dictionary<string, string> SozlesmeTuruKodlari =
         new() {
             ["1"] = "Belirsiz Süreli", ["2"] = "Belirli Süreli", ["3"] = "Deneme Süreli",
             ["4"] = "Stajyer/Çırak", ["5"] = "Mevsimlik",
         };
 
-    // PERSONEL_OZLUK.DENEME_SURESI - GENINI karsiligi yok (050_personel_ozluk_sozlesme_deneme.sql).
+    // taraf_personel.DENEME_SURESI - GENINI karsiligi yok (050_personel_ozluk_sozlesme_deneme.sql).
     private static readonly Dictionary<string, string> DenemeSuresiKodlari =
         new() { ["0"] = "Yok", ["1"] = "1 Ay", ["2"] = "2 Ay", ["3"] = "3 Ay", ["4"] = "4 Ay" };
 
@@ -190,6 +198,18 @@ public static class KartKatalogu
     //   karsiligi yok (053_personel_egitim.sql).
     private static readonly Dictionary<string, string> EgitimTuruKodlari =
         new() { ["1"] = "Diploma", ["2"] = "Sertifika", ["3"] = "Eğitim" };
+
+    private static readonly Dictionary<string, string> HastaMeslekKodlari =
+        new()
+        {
+            ["1"] = "Ev Hanımı",
+            ["2"] = "İşçi",
+            ["3"] = "Memur",
+            ["4"] = "Öğrenci",
+            ["5"] = "Serbest",
+            ["6"] = "Emekli",
+            ["9"] = "Diğer"
+        };
 
     // --------------------------------------------------------------- cari ----
     private static KartTanimi Cari() => new(
@@ -266,7 +286,7 @@ public static class KartKatalogu
         {
             new SilmeEngeli("public.belge",        "taraf_id", "Bu cariye ait belge var, silinemez."),
             new SilmeEngeli("public.mali_hareket", "taraf_id", "Bu cariye ait kasa/banka hareketi var, silinemez."),
-            new SilmeEngeli("public.kullanici",    "taraf_id", "Bu kart bir kullaniciya bagli, silinemez.")
+            new SilmeEngeli("public.taraf_kullanici",    "id", "Bu kart bir kullaniciya bagli, silinemez.")
         });
 
     // --------------------------------------------------------------- kisi ----
@@ -405,10 +425,20 @@ public static class KartKatalogu
                 new("varsayilan", "varsayilan",  "mantik"),
                 new("aktif",      "aktif",       "mantik")
             }, Sirala: "varsayilan desc, id", LogTabloId: 901),
-            // Ozluk - personel_ozluk 1:1 (taraf_id UNIQUE, 046_personel_kart.sql'de
-            //   synthetic id eklendi). Kisi'nin TekAdres'i gibi TEK SATIR gosterilir
+            // ik_karti.html İletişim sekmesi: "Acil Durumda Aranacak Kişiler"
+            // REHBERILETISIM (1:N) mockup karsiligi. Ayrı sekme degil, İletişim
+            // sekmesinde Ev Adresi'nin altina gomulu grid olarak render edilir.
+            new DetayTanimi("acilKisiler", "public.personel_acil_kisi", "taraf_id", new KartAlani[]
+            {
+                new("id",         "id",          "sayi",  Yazilabilir: false),
+                new("varsayilan", "varsayilan",  "mantik", Baslik: "★"),
+                new("adSoyad",    "ad_soyad",    "metin", EnFazlaUzunluk: 120, Baslik: "Ad Soyad", Zorunlu: true),
+                new("yakinlik",   "yakinlik",    "metin", EnFazlaUzunluk: 60,  Baslik: "Yakınlık"),
+                new("telefon",    "telefon",     "metin", EnFazlaUzunluk: 30,  Baslik: "Telefon")
+            }, Sirala: "varsayilan desc, sira, id", LogTabloId: 906, Baslik: "Acil Durumda Aranacak Kişiler"),
+            // Ozluk - taraf_personel 1:1 (id = taraf.id). Kisi'nin TekAdres'i gibi TEK SATIR gosterilir
             //   (TekOzluk.tsx) - satir ekle/sil YOK, tek satir hep var/yok.
-            new DetayTanimi("ozluk", "public.personel_ozluk", "taraf_id", new KartAlani[]
+            new DetayTanimi("ozluk", "public.taraf_personel", "id", new KartAlani[]
             {
                 new("id",                 "id",                  "sayi",  Yazilabilir: false),
                 new("dogumTarihi",        "dogum_tarihi",        "tarih", Zorunlu: true, Baslik: "Doğum Tarihi"),
@@ -461,8 +491,68 @@ public static class KartKatalogu
         },
         SilmeEngelleri: new[]
         {
-            new SilmeEngeli("public.kullanici", "taraf_id", "Bu kart bir kullaniciya bagli, silinemez.")
+            new SilmeEngeli("public.taraf_kullanici", "id", "Bu kart bir kullaniciya bagli, silinemez.")
         });
+
+    private static KartTanimi Hasta()
+    {
+        var p = Personel();
+        var alanlar = p.Alanlar.Select(a => a.Ad switch
+        {
+            "personel" => new KartAlani("hasta", "hasta", "mantik", Baslik: "Hasta"),
+            "kod" => a with { Baslik = "Dosya No" },
+            "vkno" => a with { Baslik = "TC No", Grup = "Kimlik", AltGrup = null },
+            "cepTel" => a with { Baslik = "Telefon" },
+            "subeId" => a with { Baslik = "Şube" },
+            _ => a
+        }).Where(a => a.Ad is not ("departman" or "telefon" or "epostaWeb")).ToList();
+        var durum = alanlar.FirstOrDefault(a => a.Ad == "durum");
+        if (durum is not null)
+        {
+            alanlar.Remove(durum);
+            var vknoIndex = alanlar.FindIndex(a => a.Ad == "vkno");
+            alanlar.Insert(vknoIndex >= 0 ? vknoIndex + 1 : alanlar.Count, durum);
+        }
+        alanlar.AddRange(new[]
+        {
+            new KartAlani("faturaUnvan", "fatura_unvan", "metin", EnFazlaUzunluk: 200, Baslik: "Fatura Unvani", Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
+            new KartAlani("vd", "vd", "metin", EnFazlaUzunluk: 60, Baslik: "Vergi Dairesi", Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
+            new KartAlani("efatura", "efatura", "mantik", Baslik: "e-Fatura mukellefi", Grup: "Fatura Bilgileri", AltGrup: "e-Belge Ayarlari"),
+            new KartAlani("aliasEposta", "alias_eposta", "metin", EnFazlaUzunluk: 200, Baslik: "Alias / e-Posta", Grup: "Fatura Bilgileri", AltGrup: "e-Belge Ayarlari"),
+            // YeniKayitVarsayilanlari'ndaki grup=101 kayda yazılsın; UI'da gizlenir.
+            new KartAlani("grup", "grup", "kod", Baslik: "Grup")
+        });
+
+        var detaylar = p.Detaylar?.Select(d => d.Ad == "ozluk"
+            ? new DetayTanimi("ozluk", "public.taraf_hasta", "id", new KartAlani[]
+            {
+                new("id",          "id",           "sayi",  Yazilabilir: false),
+                new("dogumTarihi", "dogum_tarihi", "tarih", Baslik: "Dogum Tarihi"),
+                new("dogumYeri",   "dogum_yeri",   "metin", EnFazlaUzunluk: 60, Baslik: "Dogum Yeri"),
+                new("cinsiyet",    "cinsiyet",     "kod",   SabitKodlar: CinsiyetKodlari, Baslik: "Cinsiyet"),
+                new("uyruk",       "uyruk",        "metin", EnFazlaUzunluk: 60, Baslik: "Uyrugu"),
+                new("kanGrubu",    "kan_grubu",    "kod",   KodListesi: "taraf.kan_grubu", Baslik: "Kan Grubu"),
+                new("meslek",      "meslek",       "kod",   SabitKodlar: HastaMeslekKodlari, Baslik: "Meslek")
+            }, SubeKolonu: null, Baslik: "Hasta Bilgisi", LogTabloId: 907)
+            : d).ToArray();
+
+        return p with
+        {
+            Ad = "hasta",
+            // Ayrı hasta yetkisi seed edilmediği için personel yetkisiyle yönetilir.
+            YetkiKodu = "personel",
+            LogTabloId = 71,
+            SabitKosul = "grup = 101",
+            YeniKayitVarsayilanlari = new Dictionary<string, object?>
+            {
+                ["grup"] = (short)101,
+                ["hasta"] = (short)1,
+                ["durum"] = (short)1
+            },
+            Alanlar = alanlar.ToArray(),
+            Detaylar = detaylar
+        };
+    }
 
     // ----------------------------------------------------------------- rol ----
     // Kullanici: "eski sistemde rol tablosu ve buna bagli kullanici/personel vardi..
@@ -581,4 +671,208 @@ public static class KartKatalogu
             new SilmeEngeli("public.belge_satir", "stok_id", "Bu stok belgelerde kullanilmis, silinemez."),
             new SilmeEngeli("public.stok_izleme", "stok_id", "Bu stokun hareket kaydi var, silinemez.")
         });
+
+    // ======================================================== KASA ANA VERI ====
+
+    // hesap.tur - tek tabloda kasa/banka/POS/kredi karti/kredi/kupon (K1, 071).
+    //   Harfler mali_hareket.hesap_turu ile AYNI kod uzayindan gelir.
+    private static readonly Dictionary<string, string> HesapTuruKodlari =
+        new() { ["K"] = "Kasa", ["B"] = "Banka", ["P"] = "POS",
+                ["V"] = "Kredi Kartı", ["R"] = "Kredi", ["H"] = "Kupon Kasası" };
+
+    // POS komisyonunun ne zaman kesildigi (eski POS.MASRAFCIKIS).
+    private static readonly Dictionary<string, string> KomisyonZamaniKodlari =
+        new() { ["1"] = "Bankaya aktarımda", ["2"] = "Tahsilat anında" };
+
+    private static readonly Dictionary<string, string> ProjeDurumKodlari =
+        new() { ["1"] = "Açık", ["2"] = "Tamamlandı", ["0"] = "İptal" };
+
+    private static readonly Dictionary<string, string> HesapSinifKodlari =
+        new() { ["1"] = "Aktif", ["2"] = "Pasif", ["3"] = "Gelir",
+                ["4"] = "Gider", ["5"] = "Maliyet", ["6"] = "Nazım" };
+
+    private static readonly Dictionary<string, string> CekSenetTurKodlari =
+        new() { ["1"] = "Çek", ["2"] = "Senet" };
+
+    private static readonly Dictionary<string, string> CekSenetYonKodlari =
+        new() { ["1"] = "Alınan", ["2"] = "Verilen" };
+
+    private static readonly Dictionary<string, string> CekSenetDurumKodlari =
+        new() { ["10"] = "Portföyde", ["20"] = "Ciro Edildi", ["30"] = "Bankada Tahsilde",
+                ["40"] = "Teminatta", ["50"] = "Tahsil Edildi / Ödendi", ["60"] = "Karşılıksız",
+                ["70"] = "İade Edildi", ["0"] = "İptal" };
+
+    // --------------------------------------------------------------- hesap ----
+    // Tur-ozel alanlar (Banka / POS-Kart) AltGrup ile ayrilir; GenForm bunlari
+    //   ayri kutularda cizer. Bos kalmalari normaldir (kasa hesabinda IBAN yok).
+    private static KartTanimi Hesap() => new(
+        Ad: "hesap",
+        YetkiKodu: "hesap",
+        Tablo: "public.hesap",
+        LogTabloId: 909,
+        SubeKolonu: "sube_id",                // K11: her hesap tek subeye ait
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+            { ["durum"] = (short)1, ["dovizCinsi"] = "TL", ["tur"] = "K" },
+        Alanlar: new KartAlani[]
+        {
+            new("id",              "id",                "sayi",  Yazilabilir: false),
+            new("tur",             "tur",               "kod",   Zorunlu: true, SabitKodlar: HesapTuruKodlari, Baslik: "Hesap Türü", Grup: "Kimlik"),
+            new("kod",             "kod",               "metin", EnFazlaUzunluk: 40,  Baslik: "Kod",  Grup: "Kimlik"),
+            new("ad",              "ad",                "metin", Zorunlu: true, EnFazlaUzunluk: 150, Baslik: "Ad", Grup: "Kimlik"),
+            new("dovizCinsi",      "doviz_cinsi",       "metin", Zorunlu: true, EnFazlaUzunluk: 6, Baslik: "Para Birimi", Grup: "Kimlik"),
+            new("durum",           "durum",             "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
+            // --- Genel
+            new("sorumluId",       "sorumlu_id",        "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Sorumlu", Grup: "Genel", AltGrup: "Tanımlama"),
+            new("bagliHesapId",    "bagli_hesap_id",    "kod",   KodTablosu: "public.v_hesap_lookup", Baslik: "Bağlı Hesap", Grup: "Genel", AltGrup: "Tanımlama"),
+            new("altTur",          "alt_tur",           "kod",   KodListesi: "hesap.alt_tur", Baslik: "Alt Tür", Grup: "Genel", AltGrup: "Tanımlama"),
+            new("aciklama",        "aciklama",          "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama", Grup: "Genel", AltGrup: "Tanımlama"),
+            new("bankaAdi",        "banka_adi",         "metin", EnFazlaUzunluk: 60, Baslik: "Banka", Grup: "Genel", AltGrup: "Banka Bilgileri"),
+            new("bankaSubesi",     "banka_subesi",      "metin", EnFazlaUzunluk: 60, Baslik: "Şube", Grup: "Genel", AltGrup: "Banka Bilgileri"),
+            new("hesapNo",         "hesap_no",          "metin", EnFazlaUzunluk: 30, Baslik: "Hesap No", Grup: "Genel", AltGrup: "Banka Bilgileri"),
+            new("iban",            "iban",              "metin", EnFazlaUzunluk: 34, Baslik: "IBAN", Grup: "Genel", AltGrup: "Banka Bilgileri"),
+            new("komisyonOrani",   "komisyon_orani",    "para",  Baslik: "Komisyon %", Grup: "Genel", AltGrup: "POS / Kart"),
+            new("komisyonMasrafId","komisyon_masraf_id","kod",   KodTablosu: "public.v_masraf_lookup", Baslik: "Komisyon Gider Kalemi", Grup: "Genel", AltGrup: "POS / Kart"),
+            new("komisyonZamani",  "komisyon_zamani",   "kod",   SabitKodlar: KomisyonZamaniKodlari, Baslik: "Komisyon Kesimi", Grup: "Genel", AltGrup: "POS / Kart"),
+            new("valorGun",        "valor_gun",         "sayi",  Baslik: "Valör (gün)", Grup: "Genel", AltGrup: "POS / Kart"),
+            new("hesapKesimGunu",  "hesap_kesim_gunu",  "sayi",  Baslik: "Hesap Kesim Günü", Grup: "Genel", AltGrup: "POS / Kart"),
+            new("sonOdemeGunu",    "son_odeme_gunu",    "sayi",  Baslik: "Son Ödeme Günü", Grup: "Genel", AltGrup: "POS / Kart"),
+            new("limitTutar",      "limit_tutar",       "para",  Baslik: "Limit", Grup: "Genel", AltGrup: "POS / Kart"),
+            new("acilisBakiye",    "acilis_bakiye",     "para",  Baslik: "Açılış Bakiyesi", Grup: "Genel", AltGrup: "Muhasebe"),
+            new("acilisTarihi",    "acilis_tarihi",     "tarih", Baslik: "Açılış Tarihi", Grup: "Genel", AltGrup: "Muhasebe"),
+            new("muhHesapId",      "muh_hesap_id",      "kod",   KodTablosu: "public.v_hesap_plani_lookup", Baslik: "Muhasebe Hesabı", Grup: "Genel", AltGrup: "Muhasebe"),
+            new("subeId",          "sube_id",           "sayi",  Yazilabilir: false, Baslik: "Şube"),
+            new("eklemeTarihi",    "ekleme_tarihi",     "tarih", Yazilabilir: false)
+        },
+        SilmeEngelleri: new[]
+        {
+            new SilmeEngeli("public.mali_hareket", "hesap_id", "Bu hesabin hareketi var, silinemez."),
+            new SilmeEngeli("public.kasa_islem",   "hesap_id", "Bu hesaba ait kasa islemi var, silinemez.")
+        });
+
+    // --------------------------------------------------------------- proje ----
+    private static KartTanimi Proje() => new(
+        Ad: "proje",
+        YetkiKodu: "proje",
+        Tablo: "public.proje",
+        LogTabloId: 913,
+        SubeKolonu: null,                     // ana veri - subeler arasi ortak
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+            { ["durum"] = (short)1, ["butceDovizi"] = "TL" },
+        Alanlar: new KartAlani[]
+        {
+            new("id",          "id",           "sayi",  Yazilabilir: false),
+            new("kod",         "kod",          "metin", EnFazlaUzunluk: 40,  Baslik: "Kod", Grup: "Kimlik"),
+            new("ad",          "ad",           "metin", Zorunlu: true, EnFazlaUzunluk: 150, Baslik: "Proje Adı", Grup: "Kimlik"),
+            new("durum",       "durum",        "kod",   SabitKodlar: ProjeDurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
+            new("ustId",       "ust_id",       "kod",   KodTablosu: "public.v_proje_lookup", Baslik: "Üst Proje", Grup: "Genel", AltGrup: "Tanımlama"),
+            new("tarafId",     "taraf_id",     "kod",   KodTablosu: "public.v_cari_lookup", Baslik: "Müşteri", Grup: "Genel", AltGrup: "Tanımlama"),
+            new("sorumluId",   "sorumlu_id",   "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Sorumlu", Grup: "Genel", AltGrup: "Tanımlama"),
+            new("baslangic",   "baslangic",    "tarih", Baslik: "Başlangıç", Grup: "Genel", AltGrup: "Süre"),
+            new("bitis",       "bitis",        "tarih", Baslik: "Bitiş", Grup: "Genel", AltGrup: "Süre"),
+            new("butceTutar",  "butce_tutar",  "para",  Baslik: "Bütçe", Grup: "Genel", AltGrup: "Bütçe"),
+            new("butceDovizi", "butce_dovizi", "metin", EnFazlaUzunluk: 6, Baslik: "Bütçe Dövizi", Grup: "Genel", AltGrup: "Bütçe"),
+            new("aciklama",    "aciklama",     "metin", EnFazlaUzunluk: 400, Baslik: "Açıklama", Grup: "Genel", AltGrup: "Bütçe"),
+            new("eklemeTarihi","ekleme_tarihi","tarih", Yazilabilir: false)
+        },
+        SilmeEngelleri: new[]
+        {
+            new SilmeEngeli("public.kasa_islem",   "proje_id", "Bu projeye ait kasa islemi var, silinemez."),
+            new SilmeEngeli("public.mali_hareket", "proje_id", "Bu projeye ait hareket var, silinemez."),
+            new SilmeEngeli("public.belge",        "proje_id", "Bu projeye ait belge var, silinemez.")
+        });
+
+    // ------------------------------------------------------ masraf merkezi ----
+    private static KartTanimi MasrafMerkezi() => new(
+        Ad: "masraf-merkezi",
+        YetkiKodu: "masraf_merkezi",
+        Tablo: "public.masraf_merkezi",
+        LogTabloId: 915,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["durum"] = (short)1 },
+        Alanlar: new KartAlani[]
+        {
+            new("id",    "id",     "sayi",  Yazilabilir: false),
+            new("kod",   "kod",    "metin", EnFazlaUzunluk: 40,  Baslik: "Kod", Grup: "Kimlik"),
+            new("ad",    "ad",     "metin", Zorunlu: true, EnFazlaUzunluk: 100, Baslik: "Ad", Grup: "Kimlik"),
+            new("ustId", "ust_id", "kod",   KodTablosu: "public.v_masraf_merkezi_lookup", Baslik: "Üst Merkez", Grup: "Kimlik"),
+            new("durum", "durum",  "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum", Grup: "Kimlik")
+        },
+        SilmeEngelleri: new[]
+        {
+            new SilmeEngeli("public.mali_hareket", "merkez_id", "Bu merkeze ait hareket var, silinemez.")
+        });
+
+    // ---------------------------------------------------------- hesap plani ----
+    private static KartTanimi HesapPlani() => new(
+        Ad: "hesap-plani",
+        YetkiKodu: "hesap_plani",
+        Tablo: "public.hesap_plani",
+        LogTabloId: 914,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+            { ["durum"] = (short)1, ["dovizCinsi"] = "TL", ["calisirMi"] = (short)1 },
+        Alanlar: new KartAlani[]
+        {
+            new("id",           "id",             "sayi",  Yazilabilir: false),
+            new("kod",          "kod",            "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "Hesap Kodu", Grup: "Kimlik"),
+            new("ad",           "ad",             "metin", Zorunlu: true, EnFazlaUzunluk: 150, Baslik: "Hesap Adı", Grup: "Kimlik"),
+            new("sinif",        "sinif",          "kod",   SabitKodlar: HesapSinifKodlari, Baslik: "Sınıf", Grup: "Kimlik"),
+            new("durum",        "durum",          "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
+            new("ustId",        "ust_id",         "kod",   KodTablosu: "public.v_hesap_plani_lookup", Baslik: "Üst Hesap", Grup: "Genel"),
+            new("seviye",       "seviye",         "sayi",  Baslik: "Seviye", Grup: "Genel"),
+            // calisir_mi: yalniz YAPRAK hesaplar fis satiri alabilir (ara hesaba kayit yasak)
+            new("calisirMi",    "calisir_mi",     "mantik", Baslik: "Fiş satırı alabilir", Grup: "Genel"),
+            new("cariAltHesap", "cari_alt_hesap", "mantik", Baslik: "Cari alt hesabı açılsın", Grup: "Genel"),
+            new("dovizCinsi",   "doviz_cinsi",    "metin", EnFazlaUzunluk: 6, Baslik: "Para Birimi", Grup: "Genel")
+        },
+        SilmeEngelleri: new[]
+        {
+            new SilmeEngeli("public.muhasebe_fis_satir", "hesap_plani_id", "Bu hesaba fis satiri yazilmis, silinemez.")
+        });
+
+    // ------------------------------------------------------------ cek/senet ----
+    // durum Yazilabilir:false - portfoy durumu ELLE degil, yalnizca aksiyonlarla
+    //   (tahsil / ciro / bozdur / iade) degisir; her degisim cek_senet_hareket'e
+    //   iz birakir. Elle degistirilebilse defter ile durum tutarsizlasirdi.
+    private static KartTanimi CekSenet() => new(
+        Ad: "cek-senet",
+        YetkiKodu: "cek_senet",
+        Tablo: "public.cek_senet",
+        LogTabloId: 910,
+        SubeKolonu: "sube_id",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+            { ["durum"] = (short)10, ["tur"] = (short)1, ["yon"] = (short)1,
+              ["dovizCinsi"] = "TL", ["dovizKuru"] = 1m },
+        Alanlar: new KartAlani[]
+        {
+            new("id",            "id",              "sayi",  Yazilabilir: false),
+            new("tur",           "tur",             "kod",   Zorunlu: true, SabitKodlar: CekSenetTurKodlari, Baslik: "Tür", Grup: "Kimlik"),
+            new("yon",           "yon",             "kod",   Zorunlu: true, SabitKodlar: CekSenetYonKodlari, Baslik: "Yön", Grup: "Kimlik"),
+            new("seriNo",        "seri_no",         "metin", EnFazlaUzunluk: 30, Baslik: "Seri No", Grup: "Kimlik"),
+            new("durum",         "durum",           "kod",   Yazilabilir: false, SabitKodlar: CekSenetDurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
+            new("tarafId",       "taraf_id",        "kod",   KodTablosu: "public.v_cari_lookup", Baslik: "Cari", Grup: "Genel", AltGrup: "Taraf"),
+            new("kesideci",      "kesideci",        "metin", EnFazlaUzunluk: 150, Baslik: "Keşideci", Grup: "Genel", AltGrup: "Taraf"),
+            new("ciroTarafId",   "ciro_taraf_id",   "kod",   Yazilabilir: false, KodTablosu: "public.v_cari_lookup", Baslik: "Ciro Edilen", Grup: "Genel", AltGrup: "Taraf"),
+            new("tarih",         "tarih",           "tarih", Zorunlu: true, Baslik: "Tarih", Grup: "Genel", AltGrup: "Tutar / Vade"),
+            new("vade",          "vade",            "tarih", Zorunlu: true, Baslik: "Vade", Grup: "Genel", AltGrup: "Tutar / Vade"),
+            new("tutar",         "tutar",           "para",  Zorunlu: true, Baslik: "Tutar", Grup: "Genel", AltGrup: "Tutar / Vade"),
+            new("dovizCinsi",    "doviz_cinsi",     "metin", EnFazlaUzunluk: 6, Baslik: "Para Birimi", Grup: "Genel", AltGrup: "Tutar / Vade"),
+            new("dovizKuru",     "doviz_kuru",      "para",  Baslik: "Kur", Grup: "Genel", AltGrup: "Tutar / Vade"),
+            new("bankaAdi",      "banka_adi",       "metin", EnFazlaUzunluk: 60, Baslik: "Banka", Grup: "Genel", AltGrup: "Banka"),
+            new("bankaSubesi",   "banka_subesi",    "metin", EnFazlaUzunluk: 60, Baslik: "Şube", Grup: "Genel", AltGrup: "Banka"),
+            new("hesapNo",       "hesap_no",        "metin", EnFazlaUzunluk: 30, Baslik: "Hesap No", Grup: "Genel", AltGrup: "Banka"),
+            new("hesapId",       "hesap_id",        "kod",   Yazilabilir: false, KodTablosu: "public.v_hesap_lookup", Baslik: "Bulunduğu Hesap", Grup: "Genel", AltGrup: "Banka"),
+            new("projeId",       "proje_id",        "kod",   KodTablosu: "public.v_proje_lookup", Baslik: "Proje", Grup: "Genel", AltGrup: "Diğer"),
+            new("makbuzNo",      "makbuz_no",       "metin", EnFazlaUzunluk: 30, Baslik: "Makbuz No", Grup: "Genel", AltGrup: "Diğer"),
+            new("aciklama",      "aciklama",        "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama", Grup: "Genel", AltGrup: "Diğer"),
+            new("subeId",        "sube_id",         "sayi",  Yazilabilir: false, Baslik: "Şube"),
+            new("eklemeTarihi",  "ekleme_tarihi",   "tarih", Yazilabilir: false)
+        },
+        SilmeEngelleri: new[]
+        {
+            new SilmeEngeli("public.mali_hareket", "cek_senet_id", "Bu cek/senedin hareketi var, silinemez.")
+        });
 }
+
+
+

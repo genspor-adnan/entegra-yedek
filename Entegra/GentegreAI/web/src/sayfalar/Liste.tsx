@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
 import type { Kosul } from '../api/sozlesme';
@@ -29,6 +29,10 @@ export interface ListeTanimi {
   /** Yeni kayitta mantik alanlara ekrana ozel varsayilan (ör. Tedarikci Listesi ->
       tedarikci:true, musteri:false) - GenForm'a gecirilir. */
   yeniKayitVarsayilanlari?: Record<string, boolean>;
+  /** Ekstre ekranlari: URL'deki ?<alan>=<id> sorgu parametresi sunucu filtresine
+      cevrilir (ör. /hesap-ekstre?hesapId=12). Parametre yoksa liste TUM kayitlari
+      gosterir - bos ekran yerine "hepsi" daha kullanisli. */
+  urlFiltreAlani?: string;
 }
 
 /**
@@ -39,9 +43,21 @@ export interface ListeTanimi {
 export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const git = useNavigate();
   const { id } = useParams();
+  const [sorgu] = useSearchParams();
 
   // Kart MODAL acilir (mockup deseni): liste arkada kalir, URL yine /cari/4911.
   const kartId = id === undefined ? null : (id === 'yeni' ? 'yeni' as const : Number(id));
+
+  // Ekstre ekranlari: /hesap-ekstre?hesapId=12 -> sunucu filtresi. Tanimdaki
+  //   sabitFiltre ile birlikte gelirse ikisi AND'lenir.
+  const urlDegeri = tanim.urlFiltreAlani ? sorgu.get(tanim.urlFiltreAlani) : null;
+  const sabitFiltre = useMemo<Kosul | undefined>(() => {
+    if (!tanim.urlFiltreAlani || !urlDegeri) return tanim.sabitFiltre;
+    const urlKosul: Kosul = { alan: tanim.urlFiltreAlani, op: 'esit', deger: Number(urlDegeri) };
+    return tanim.sabitFiltre
+      ? { op: 'and', kosullar: [tanim.sabitFiltre, urlKosul] }
+      : urlKosul;
+  }, [tanim.urlFiltreAlani, tanim.sabitFiltre, urlDegeri]);
 
   // Kart kaydedilince (ekleme ya da duzenleme) grid'i yeniden yukletmek icin - GenForm
   //   onKaydedildi'de bir arttirilir, GenGrid bu degisimi izleyip yukle() cagirir.
@@ -58,13 +74,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   REUSE ediyordu, onceki ekranin state'i (aramaGorunumu, sirala, arama, sayfa...)
       //   yeni ekrana sizip yanlis/bos sonuc gosteriyordu (ör. Cari'de "Son Aranan"
       //   secilince Islem Gunlugu'ne gecince orada da "son" gonderiliyordu).
-      key={tanim.kaynak}
+      key={tanim.rota ?? tanim.kaynak}
       kaynak={tanim.kaynak}
       baslik={tanim.baslik}
       yol={tanim.yol}
       toplam={tanim.toplam}
       cipler={tanim.cipler}
-      sabitFiltre={tanim.sabitFiltre}
+      sabitFiltre={sabitFiltre}
       aksiyonEkrani={tanim.aksiyonEkrani}
       yenile={yenile}
       odaklaSonEklenen={odaklaSonEklenen}
@@ -174,6 +190,61 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     toplam: ['borc', 'alacak'],
     menuGrup: 'Kasa', menuAd: 'Kasa Hareketleri', ic: '💰', yetkiKodu: 'mali_hareket',
   },
+  // --- Hesaplar: TEK kaynak ('hesap'), tur'e gore 5 ayri ekran. Musteri/Tedarikci
+  //     deseninin aynisi: sabitFiltre + rota + yeniKayitVarsayilanlari.
+  {
+    kaynak: 'hesap', rota: 'kasa-hesap', baslik: 'Kasalar', yol: 'Kasa › Kasa Hesaplari',
+    kartYolu: '/kasa-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'K' },
+    toplam: ['yerelBakiye'],
+    menuGrup: 'Kasa', menuAd: 'Kasa Hesapları', ic: '💵', yetkiKodu: 'hesap',
+  },
+  {
+    kaynak: 'hesap', rota: 'banka-hesap', baslik: 'Banka Hesapları', yol: 'Kasa › Banka Hesaplari',
+    kartYolu: '/banka-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'B' },
+    toplam: ['yerelBakiye'],
+    menuGrup: 'Kasa', menuAd: 'Banka Hesapları', ic: '🏦', yetkiKodu: 'hesap',
+  },
+  {
+    kaynak: 'hesap', rota: 'pos-hesap', baslik: 'POS Hesapları', yol: 'Kasa › POS',
+    kartYolu: '/pos-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'P' },
+    toplam: ['yerelBakiye'],
+    menuGrup: 'Kasa', menuAd: 'POS', ic: '💳', yetkiKodu: 'hesap',
+  },
+  {
+    kaynak: 'hesap', rota: 'kredi-karti', baslik: 'Kredi Kartları', yol: 'Kasa › Kredi Kartlari',
+    kartYolu: '/kredi-karti', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'V' },
+    toplam: ['yerelBakiye'],
+    menuGrup: 'Kasa', menuAd: 'Kredi Kartları', ic: '💳', yetkiKodu: 'hesap',
+  },
+  {
+    kaynak: 'hesap', rota: 'kredi-hesap', baslik: 'Krediler', yol: 'Kasa › Krediler',
+    kartYolu: '/kredi-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'R' },
+    toplam: ['yerelBakiye'],
+    menuGrup: 'Kasa', menuAd: 'Krediler', ic: '🏛️', yetkiKodu: 'hesap',
+  },
+  {
+    kaynak: 'cek-senet', baslik: 'Çek / Senet', yol: 'Kasa › Cek ve Senet', kartYolu: '/cek-senet',
+    toplam: ['tutar'],
+    cipler: [
+      { ad: 'Portföy', filtre: { alan: 'durum', op: 'esit', deger: 10 } },
+      { ad: 'Tahsilde', filtre: { alan: 'durum', op: 'esit', deger: 30 } },
+      { ad: 'Kapanan', filtre: { alan: 'durum', op: 'icinde', deger: [50, 70] } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Kasa', menuAd: 'Çek / Senet', ic: '📃', yetkiKodu: 'cek_senet',
+  },
+  {
+    // Yuruyen bakiyeli ekstre: hesap secimi URL'den gelir (?hesapId=), grid
+    //   sabit tarih sirasinda kalir (bakiye kolonu siralanamaz - sunucu tarafi).
+    kaynak: 'hesap-ekstre', baslik: 'Hesap Ekstresi', yol: 'Kasa › Hesap Ekstresi',
+    urlFiltreAlani: 'hesapId', toplam: ['giris', 'cikis'],
+    menuGrup: 'Kasa', menuAd: 'Hesap Ekstresi', ic: '📈', yetkiKodu: 'hesap',
+  },
+  {
+    kaynak: 'cari-ekstre', baslik: 'Cari Ekstre', yol: 'Kasa › Cari Ekstre',
+    urlFiltreAlani: 'tarafId', toplam: ['yerelBorc', 'yerelAlacak'],
+    menuGrup: 'Kasa', menuAd: 'Cari Ekstre', ic: '🧮', yetkiKodu: 'mali_hareket',
+  },
   {
     // Kullanici: "Kasa altına Hizmet Listesi ve Masraf Listesi'ı taşı".
     kaynak: 'hizmet', baslik: 'Hizmetler', yol: 'Stok › Hizmetler', cipler: DURUM_CIPLERI,
@@ -182,6 +253,15 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   {
     kaynak: 'masraf', baslik: 'Masraflar', yol: 'Stok › Masraflar', cipler: DURUM_CIPLERI,
     menuGrup: 'Kasa', menuAd: 'Masraf Listesi', ic: '🧾', yetkiKodu: 'masraf',
+  },
+  {
+    kaynak: 'proje', baslik: 'Projeler', yol: 'Proje › Projeler', kartYolu: '/proje',
+    cipler: [
+      { ad: 'Açık',       filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tamamlanan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Proje', menuAd: 'Projeler', ic: '📁', yetkiKodu: 'proje',
   },
   {
     // Kullanici: "Stok altına Stok Listesi [taşı]" - tek ogeli grup, digerleriyle ayni desen.
@@ -210,6 +290,30 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'islem-log', baslik: 'Islem Gunlugu', yol: 'Yonetim › Islem Gunlugu',
     icerikAlani: 'bilgi', icerikBaslik: 'Log İçeriği',
     menuGrup: 'Yönetim', menuAd: 'İşlem Günlüğü', ic: '📋', yetkiKodu: 'islem_log',
+  },
+  {
+    kaynak: 'hesap-plani', baslik: 'Hesap Planı', yol: 'Yonetim › Hesap Plani',
+    kartYolu: '/hesap-plani',
+    cipler: [
+      { ad: 'Çalışan', filtre: { alan: 'calisirMi', op: 'esit', deger: 1 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Yönetim', menuAd: 'Hesap Planı', ic: '📒', yetkiKodu: 'hesap_plani',
+  },
+  {
+    kaynak: 'masraf-merkezi', baslik: 'Masraf Merkezleri', yol: 'Yonetim › Masraf Merkezleri',
+    kartYolu: '/masraf-merkezi', cipler: DURUM_CIPLERI,
+    menuGrup: 'Yönetim', menuAd: 'Masraf Merkezleri', ic: '🏷️', yetkiKodu: 'masraf_merkezi',
+  },
+  {
+    // Islem turu katalogu: kasa hareketlerinin ekstre/fis davranisini VERI olarak
+    //   tasir (bkz. 073). Salt gorunum - duzenleme yonetici isi, kart yok.
+    kaynak: 'kasa-islem-turu', baslik: 'İşlem Türleri', yol: 'Yonetim › Islem Turleri',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Yönetim', menuAd: 'İşlem Türleri', ic: '⚙️', yetkiKodu: 'kasa_islem_turu',
   },
   {
     // Rol'un durum kolonu "durum" degil "aktif" - DURUM_CIPLERI (alan:'durum') buraya

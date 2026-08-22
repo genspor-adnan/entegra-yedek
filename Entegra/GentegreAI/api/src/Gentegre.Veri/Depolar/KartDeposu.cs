@@ -171,6 +171,10 @@ public sealed class KartDeposu
     private static readonly HashSet<string> KodTablosuBeyazListe =
         new(StringComparer.Ordinal) {
             "public.kategori", "public.v_cari_lookup", "public.rol", "public.sube", "public.v_personel_lookup",
+            // Kasa alt sistemi (071/074). Hepsi "id, ad, aktif" kolonlu gorunum -
+            //   hizmet/masraf/proje "durum" kullandigi icin gorunumle uyarlandi.
+            "public.v_hesap_lookup", "public.v_proje_lookup", "public.v_hesap_plani_lookup",
+            "public.v_masraf_lookup", "public.v_hizmet_lookup", "public.v_masraf_merkezi_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

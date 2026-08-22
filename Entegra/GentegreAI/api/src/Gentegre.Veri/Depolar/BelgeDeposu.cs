@@ -442,15 +442,26 @@ public sealed class BelgeDeposu
     private async Task MaliHareketYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, int tur, int tarafId, YazmaBaglami baglam, CancellationToken iptal)
     {
+        // Bacak duzeni (080 gocu ile gelen K2 kurali):
+        //   doviz_cinsi = bacagin KENDI para birimi (belgenin dovizi)
+        //   borc/alacak = O DOVIZDE tutar  (TL belgede zaten TL)
+        //   yerel_borc / yerel_alacak = TL karsiligi (genel_toplam)
+        //   doviz_kuru  = belgedeki kur
+        // Eski "kur" ve "doviz_tutari" kolonlari 080'de DUSURULDU.
+        // hesap_turu 'C' (cari) - eskiden yanlislikla '1' yaziliyordu; sema
+        //   yorumu (012_sema_belge.sql:212) ve tum ekstre gorunumleri 'C' bekler.
         await using var komut = new NpgsqlCommand("""
             insert into public.mali_hareket
                 (tur, hesap_turu, taraf_id, belge_id, belge_no, islem_tarihi,
-                 borc, alacak, doviz_cinsi, doviz_tutari, doviz_kuru, kur,
-                 aciklama, sube_id, ekleyen)
-            select @p0, 1, b.taraf_id, b.id, b.belge_no, b.belge_tarihi,
+                 borc, alacak, yerel_borc, yerel_alacak,
+                 doviz_cinsi, doviz_kuru, aciklama, sube_id, ekleyen)
+            select @p0, 'C', b.taraf_id, b.id, b.belge_no, b.belge_tarihi,
+                   case when @p1 then coalesce(nullif(b.doviz_tutari, 0), b.genel_toplam) else 0 end,
+                   case when @p1 then 0 else coalesce(nullif(b.doviz_tutari, 0), b.genel_toplam) end,
                    case when @p1 then b.genel_toplam else 0 end,
                    case when @p1 then 0 else b.genel_toplam end,
-                   b.belge_dovizi, b.doviz_tutari, b.doviz_kuru, b.kur,
+                   coalesce(nullif(btrim(b.belge_dovizi), ''), 'TL'),
+                   case when coalesce(b.doviz_kuru, 0) > 0 then b.doviz_kuru else 1 end,
                    b.taraf_unvan, b.sube_id, @p2
               from public.belge b where b.id = @p3
             """, baglanti, islem);

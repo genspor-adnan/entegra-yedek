@@ -2135,3 +2135,90 @@ Kullanici: "e-Belge'yi de bir Yönetim altına". `e-belge` girdisine `menuGrup:'
 eklendi (Yönetim grubunun EN BASINA, İşlem Günlüğü/Roller'den once). Sidebar artik
 TAMAMEN gruplu: Hasta, Cari(3), Satış(1), Kasa(3), Stok(1), İK(1), Yönetim(3: e-Belge/
 İşlem Günlüğü/Roller) - hicbir duz (menuGrup'suz) oge kalmadi. Tarayicida dogrulandi.
+
+## 22.08.2026 — KASA (mali hareket) alt sistemi · F1: şema, göç, ana veri ekranları
+
+Kullanıcı planı: nakit/POS/çek/senet/havale-EFT/döviz tahsilat-ödeme, cariye bağlı ya da
+bağımsız masraf ödemesi, kasa↔banka virman, TL↔döviz dönüşümü, her harekette masraf/gelir
+kodu + proje, tutarın hem TL hem döviz karşılığı, işlem bitince **dengeli muhasebe fişi**.
+Plan dosyası: `~/.claude/plans/kasa-mali-hareketler-ile-resilient-sun.md` (7 faz). Bu giriş
+**F1**'i (şema + göç + master ekranları) kapsar.
+
+### Kararlar (planın K1-K14'ü, uygulananlar)
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K1 | Kasa/banka/POS/kredi kartı/kredi/kupon **tek `hesap` tablosunda** (`tur` harfi), yalnız kredi 1:1 uzantı (`kredi`) | `mali_hareket.hesap_id` tek FK hedefi ister (bugüne dek FK'sız boştaydı); tür-özel kolon az. Kredi kendi taksit planını taşıdığı için ayrı — `taraf_musteri` deseni |
+| K2 | Bacak parası: `doviz_cinsi` = bacağın kendi birimi, `borc/alacak` o birimde, `yerel_borc/yerel_alacak` = TL, `doviz_kuru` **saklanır**. Eski `kur` + `doviz_tutari` DÜŞTÜ | Hesap ekstresi kendi dövizinde, muhasebe TL toplar; kur artık yeniden türetilmiyor |
+| K4 | **İşaret = muhasebe işareti**: hesap bacağında `borc` = hesaba GİRİŞ | Legacy'nin "ekranda ters çevir" hilesi kalktı; fiş bacakları işaret değiştirmeden kopyalayacak |
+| K5 | `durum=2` başlıkta `Σ yerel_borc = Σ yerel_alacak` | Tek kural tüm çok bacaklı türleri doğrular, fiş otomatik dengeli çıkar |
+| K7 | `masraf_merkezi` ayrı tablo (projeye katlanmadı) | Biri organizasyonel (kalıcı), diğeri zamansal boyut |
+| K8 | Çek/senet portföyü **sanal hesap**: bacakta `hesap_turu='E'`, `cek_senet_id` dolu | Her döviz için fiziksel portföy hesabı açtırmamak |
+| K11 | Her hesap **tek şubeye** ait (kullanıcı kararı) | |
+| K14 | Makbuz no `fn_kasa_islem_no_uret` (seri+şube+yıl), fiş no `fn_muhasebe_fis_no_uret` **yıllık tek yevmiye** (kullanıcı) | `fn_belge_no_uret` deseni: `for update`, boşluksuz |
+
+**TUR kod uzayı artık VERİ**: `kasa_islem_turu` tablosu (57 tür seed). Legacy'de bu bilgi
+Pascal sabitlerinde + GENINI'de dağınıktı ve "hangi tür cari ekstresine girer" kuralı
+SQL'lere gömülü `TUR NOT BETWEEN 40 AND 79` gibi **sihirli aralıklardaydı** (altı ayrı
+yerde, birbirinden kayarak). Şimdi `cari_ekstre` / `hesap_ekstre` / `bakiye_dahil` /
+`fis_mi` bayrakları + `sablon` (jsonb bacak şablonu) tabloda.
+
+### Migration'lar (071-081)
+
+- **071** `proje`, `masraf_merkezi`, `hesap`, `kredi`, `kredi_taksit`, `kupon_turu` + lookup görünümleri; `merkez_id` 0→null + FK
+- **072** `cek_senet` + `cek_senet_hareket` (eski CEKLER+SENETLER birleşti: `tur` 1 çek/2 senet, `yon` 1 alınan/2 verilen)
+- **073** `kasa_islem_turu` (+57 tür seed), `kasa_islem` başlığı, `mali_hareket`e bacak kolonları (`kasa_islem_id, sira, proje_id, yerel_borc, yerel_alacak, cek_senet_id`), `fn_kasa_islem_no_uret`
+- **074** `hesap_plani` (65 hesap, TR tek düzen), `muhasebe_donem` (48), `muhasebe_fis`, `muhasebe_fis_satir`, `muhasebe_eslestirme` (21 kural), `muh_hesap_id` kolonları, `fn_muhasebe_fis_no_uret`, `fn_muhasebe_donem_kontrol`
+- **077** ekstre görünümleri: `v_mali_hareket_ek` (temel) üstüne `v_cari_ekstre`, `v_hesap_ekstre`, `v_hesap_bakiye`, `v_proje_ekstre`, `v_masraf_ekstre`, `v_plan_vade`, `fn_mizan`
+- **078** 22 yetki + 55 kod değeri (kod_liste)
+- **079** `stg` şeması (8 master tablo) → `goc_al.ps1` ile MSSQL'den çekildi
+- **080** göç: **229 hesap** (119 kasa + 40 banka + 13 POS + 6 kredi kartı + 51 kredi), 51 kredi ayrıntısı, 6 proje, 6 masraf merkezi, 11 kupon türü
+- **081** legacy hareketleri başlık+bacak modeline çevirme
+
+### Göçte çıkan üç gerçek bulgu
+
+1. **`mali_hareket` döviz kolonları TERS anlamdaymış** (planı yazarken varsayılanın aksine,
+   veriyle doğrulandı): `kur` = gerçek para birimi (`$`/`€`), `borc/alacak` = **o dövizde**,
+   `doviz_tutari` = TL karşılığı, `doviz_cinsi` her satırda anlamsızca `'TL'`. Backfill buna
+   göre yazıldı; TL toplamı **498.017.457,54** göç öncesi/sonrası birebir korundu (migration
+   içinde `raise exception` ile korumalı).
+2. **5 satırda negatif borç** var (plan iptali). İlk backfill `case when borc > 0` kullanınca
+   399,60 TL kayboldu ve doğrulama patladı — `<> 0`'a çevrildi. Doğrulama olmasa sessiz
+   veri kaybı olacaktı.
+3. **Legacy KASA satırı ÇİFT ANLAMLIYDI**: tek satır hem hesabı hem cariyi temsil ediyordu
+   (`HESAPID` + `REHBERID` aynı satırda) ve işaret **cari-merkezliydi** — banka tahsilatı
+   banka hesabında `ALACAK` yazıyordu (oysa para girdi). Hesap ekstresi bunu okurken her
+   satırda borç/alacak yer değiştiriyordu. **081** bunu düzeltti: 175 hesap hareketinin
+   işareti K4'e çevrildi, her biri için sentetik `kasa_islem` başlığı açıldı, karşı bacak
+   üretildi (79 cari + 96 denge bacağı) → 350 bacak, **dengesiz başlık 0**, cari ekstresi
+   624→654 satır (legacy'de görünen ama göçte kaybolan 30 satır geri geldi).
+
+`BelgeDeposu.MaliHareketYazAsync` aynı commit'te düzeltildi: `hesap_turu` artık `'C'`
+(eskiden `'1'` yazıyordu, şema yorumu ve tüm ekstreler `'C'` bekliyor), döşen `kur`/
+`doviz_tutari` yerine `doviz_cinsi` + `yerel_borc/yerel_alacak` + `doviz_kuru`.
+
+### API + Web (F1 kapsamı)
+
+- `KartKatalogu`: **hesap** (909), **proje** (913), **masraf-merkezi** (915), **hesap-plani**
+  (914), **cek-senet** (910). Hesap kartı tür-özel alanları AltGrup ile ayırır
+  (Tanımlama / Banka / POS-Kart / Muhasebe). Çek-senet `durum` **Yazılabilir:false** — portföy
+  durumu yalnız aksiyonla değişir, elle değişebilse defterle tutarsızlaşırdı.
+- `KaynakKatalogu`: `hesap` (v_hesap_bakiye join'li), `cek-senet`, `proje`, `masraf-merkezi`,
+  `hesap-plani`, `kasa-islem-turu`, `hesap-ekstre`, `cari-ekstre`; `mali-hareket` genişletildi
+  (hesap adı, tür adı, makbuz no, kalem, proje, TL tutarlar — düşen `doviz_tutari` kolonu çıktı).
+- `KartDeposu.KodTablosuBeyazListe` += 6 lookup görünümü.
+- Web: **Kasa** grubu artık 12 öge (Kasa Hareketleri, Kasa/Banka/POS/Kredi Kartı/Krediler
+  hesapları, Çek-Senet, Hesap Ekstresi, Cari Ekstre, Hizmet, Masraf), yeni **Proje** grubu,
+  **Yönetim** += Hesap Planı / Masraf Merkezleri / İşlem Türleri. Hesap ekranlarının beşi de
+  **tek kaynak** (`hesap`) üzerinde `sabitFiltre tur=...` + ayrı `rota` ile çalışır
+  (Müşteri/Tedarikçi deseni). `ListeTanimi.urlFiltreAlani` eklendi: `/hesap-ekstre?hesapId=12`
+  URL parametresini sunucu filtresine çevirir. `GenGrid` key'i `rota ?? kaynak` oldu — aynı
+  kaynak beş ekranda kullanıldığı için, yoksa ekranlar arası state sızıntısı geri gelirdi.
+
+Doğrulandı: 9 liste ucu curl ile (hesap 229, proje 6, hesap-planı 65, işlem türü 57,
+hesap-ekstre 172, cari-ekstre 654, mali-hareket 974); tarayıcıda Kasalar listesi (119 kayıt,
+çok dövizli bakiye: STERLİN KASASI 11.005 GBP → 231.260,17 TL, toplam 20.042.090,14 TL) ve
+hesap kartı (4 alt grup) çalışıyor. `dotnet build` + `tsc --noEmit` temiz.
+
+**Sırada (F2):** motor fonksiyonları (`fn_kasa_islem_bacak_uret/dogrula/kesinlestir/fisle/
+iptal`, `fn_muh_hesap_coz`), `KasaDeposu` + `KasaUclari`, tahsilat/ödeme kartı ve fiş önizleme.
