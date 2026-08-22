@@ -2016,3 +2016,24 @@ Varsayilan yalniz istemci-tarafi varsayilan gorunum bayragidir).
 `Modal` bileseni `GenForm.tsx`'ten `export` edildi (kart modaliyla AYNI gorsel stil
 icin tekrar kullanildi, GenGrid'de kopyalanmadi). Tarayicida hem "İçerik" dugmesi hem
 satira cift-tik ile dogrulandi (ör. Ekleme kaydi -> kod/kişi/telefon JSON'u dogru gorundu).
+
+### Ayni oturum: "Cari" menu/baslik -> "Müşteri" (yalniz gorunen metin)
+
+Kullanici: "Cari ismini Müşteri diye rename et". Netlestirme sorusu soruldu: Cari listesi
+hem musteri hem tedarikci gosteriyor (`t.musteri = 1 or t.tedarikci = 1`), "Musteri"ye
+cevirmek yaniltici olabilirdi - kullanici "sadece gorunen metni degistir" dedi (kaynak id,
+URL, API route, yetki kodu `cari` AYNEN kaldi, filtre degismedi).
+
+`Liste.tsx` LISTELER'de sadece Cari MODULUNUN navigasyon etiketleri degisti: sidebar
+`menuAd: 'Cari'` -> `'Müşteri'`, `baslik: 'Cariler'` -> `'Müşteriler'`, breadcrumb
+`yol: 'Cari › Musteriler'` -> `'Müşteri › Müşteriler'` (Kisi'nin breadcrumb'i de
+`'Müşteri › Kisiler'`). Kart basligi (`GenForm`'daki `tanim.baslik.replace(/ler$|lar$/,'')`)
+otomatik "Müşteri" oldu.
+
+**Bilerek DEGISTIRILMEYEN yerler**: Belge/MaliHareket/EBelge kaynaklarindaki "Cari" kolon
+basligi (`tarafUnvan`), Kisi listesindeki "Cari (Firma)" kolonu, "Bagli Cari" alan basligi,
+"Cariye Bağla" butonu, BelgeKarti'ndaki "Cari" secici (satış VE alış faturasinda ayni alan) -
+bunlarin hepsi hem musteri hem tedarikci tarafini kapsiyor, "Müşteri"ye cevirmek alış
+(tedarikçi) taraflarinda anlam hatasi yaratirdi. Tarayicida dogrulandi: sidebar "Müşteri",
+"Müşteriler" liste basligi + breadcrumb, kart "Müşteri #1855", Kişiler'de "Müşteri › Kisiler"
+breadcrumb + "Cari (Firma)" kolonu degismeden kaldi.

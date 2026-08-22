@@ -101,17 +101,20 @@ const DURUM_CIPLERI: ListeTanimi['cipler'] = [
 /** Menu + rota kaynagi. Yetki sunucudan gelir; burada yalnizca ekran tanimi var. */
 export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: string })[] = [
   {
-    kaynak: 'cari', baslik: 'Cariler', yol: 'Cari › Musteriler', kartYolu: '/cari',
+    // Kaynak id, URL, API route ve yetki kodu 'cari' KALDI - yalniz GORUNEN metin
+    // "Musteri"ye cevrildi (kullanici istegi). Ekran hala musteri+tedarikci ikisini de
+    // gosterir (SabitKosul degismedi) - isim degisikligi bunu etkilemez.
+    kaynak: 'cari', baslik: 'Müşteriler', yol: 'Müşteri › Müşteriler', kartYolu: '/cari',
     aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
     // Mockup'ta (cari_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
     yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
-    menuAd: 'Cari', ic: '👥', yetkiKodu: 'cari',
+    menuAd: 'Müşteri', ic: '👥', yetkiKodu: 'cari',
   },
   {
     // kisi_listesi.html mockup - kullanici "sade grid olsun, altta sekme yanda bilgi
     // olmasin" dedi; GenGrid zaten duz grid (mockup'taki sag "Secili Kisi" paneli hic
     // yapilmadi, ozel bir "sadelestirme" gerekmedi).
-    kaynak: 'kisi', baslik: 'Kisiler', yol: 'Cari › Kisiler', kartYolu: '/kisi',
+    kaynak: 'kisi', baslik: 'Kisiler', yol: 'Müşteri › Kisiler', kartYolu: '/kisi',
     aksiyonEkrani: 'kisi-liste', cipler: DURUM_CIPLERI,
     menuAd: 'Kisiler', ic: '🧑', yetkiKodu: 'cari',
   },
