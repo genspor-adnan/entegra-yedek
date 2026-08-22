@@ -1124,13 +1124,9 @@ function KalemPenceresi({ satir, irsaliyeMi, onKapat, onKaydet }: {
         <div className="kagrup">
           <h6>Kalem Bilgisi</h6>
           <div className="alan-izgara">
-            {/* Kalem SALT GORUNUM: secim arama penceresinde yapildi. Baska bir
-                stok icin o pencereden yeniden secilir - burada degistirilebilir
-                olmasi iki ayri secim yolu demek olurdu. */}
-            <label className="alan genis-2">
-              <span className="etiket">{r.satirTur === 2 ? 'Hizmet' : 'Stok'}</span>
-              <input value={`${r.stokKodu ? r.stokKodu + ' — ' : ''}${r.stokAdi}`} readOnly />
-            </label>
+            {/* Stok/hizmet adi PENCERE BASLIGINDA yaziyor - burada tekrarlamak
+                yer kaplamaktan baska ise yaramiyordu. Baska bir kalem icin arama
+                penceresinden yeniden secilir. */}
             <label className="alan">
               <span className="etiket">Miktar</span>
               <input autoFocus className="hiza-sag" value={r.adet} onKeyDown={tus}
