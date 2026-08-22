@@ -386,7 +386,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                    onChange={e => setTaslak(e.target.checked)} />
             Taslak (numara tüketmez)
           </label>
-          <button className="d" onClick={kapat}>✖ Kapat</button>
         </>
       }
     >

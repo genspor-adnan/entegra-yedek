@@ -261,6 +261,12 @@ table.grid tr.flt input {
   border-radius: var(--r) var(--r) 0 0;
 }
 .kabas .kapt { margin-left: auto; font-weight: 400; font-size: 10.5px; opacity: .8 }
+.kabas-kapat {
+  width: 22px; height: 22px; margin-left: 8px; flex: none; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .35); border-radius: 3px; line-height: 1;
+  background: rgba(255, 255, 255, .12); color: #fff; font-size: 15px; font-weight: 700;
+}
+.kabas-kapat:hover { background: #c0413d; border-color: #a3312f }
 .kagov { padding: 14px; overflow: auto; flex: 1; min-height: 0; background: var(--yuz) }
 /* Mockup: Kaydet/Sil/Yazdir/Kapat baslikla idstrip ARASINDA arac cubugu (.toolbar). */
 .katoolbar {
