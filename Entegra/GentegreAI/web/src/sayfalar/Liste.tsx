@@ -4,6 +4,7 @@ import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
 import { ApiHatasi, type Kosul, type ListeSatiri } from '../api/sozlesme';
 import { api } from '../api/istemci';
+import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 
 export interface ListeTanimi {
   kaynak: string;
@@ -69,6 +70,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // Yeni kart EKLENINCE (duzenlemede degil) grid "Son Aranan"a gecsin - kullanici
   //   az once ekledigi kaydi listede otomatik en ustte gorsun.
   const [odaklaSonEklenen, setOdaklaSonEklenen] = useState(0);
+  // Donusum modali (F8): siparis/irsaliye satirlarindan yeni belge uretir.
+  const [donusum, setDonusum] = useState<{ belgeId: number; belgeTur: number } | null>(null);
 
   // Aksiyon yonlendirme. Kasa aksiyonlari API cagirir (kesinlestir/iptal/sil) ve
   //   sonrasinda grid'i tazeler; digerleri kart rotasina gider.
@@ -116,6 +119,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           return;
 
         case 'belge.yeni': git('/belge/yeni'); return;
+        case 'belge.donustur':
+          if (!satir) return;
+          setDonusum({ belgeId: Number(satir.id), belgeTur: Number(satir.tur) });
+          return;
         case 'genel.yazdir': alert('Yazdirma henuz baglanmadi.'); return;
       }
 
@@ -151,6 +158,17 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       onSatirAc={satir => { if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`) }}
       onAksiyon={(kod, satir) => { void aksiyon(kod, satir) }}
     />
+
+    {donusum && (
+      <BelgeDonusumModali
+        belgeId={donusum.belgeId}
+        belgeTur={donusum.belgeTur}
+        onKapat={() => setDonusum(null)}
+        // Modal KAPANMAZ: sonucu (yeni belge no + tutar) kendi icinde gosterir.
+        //   alert() kullanmak tarayici diyalogu acar ve sayfayi kilitler.
+        onTamam={() => setYenile(t => t + 1)}
+      />
+    )}
 
     {kartId !== null && tanim.kartYolu && !tanim.ozelKart && (
       <GenForm
@@ -236,6 +254,28 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Alis', filtre: { alan: 'tur', op: 'icinde', deger: [10, 11, 12] } },
     ],
     menuGrup: 'Satış', menuAd: 'Satış Fatura Listesi', ic: '🧾', yetkiKodu: 'belge',
+  },
+  {
+    // Siparisler AYNI 'belge' kaynagi, tur in (9,19) sabit filtresiyle (Musteri/
+    //   Tedarikci deseni). "Kalan" takibi belge_satir.kapatilan_miktar uzerinden;
+    //   "Dönüştür" aksiyonu secili siparisten irsaliye/fatura uretir (F8).
+    kaynak: 'belge', rota: 'siparis', baslik: 'Siparişler', yol: 'Satis › Siparisler',
+    aksiyonEkrani: 'siparis-liste',
+    sabitFiltre: { alan: 'tur', op: 'icinde', deger: [9, 19] },
+    toplam: ['genelToplam'],
+    cipler: [
+      { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
+      { ad: 'Kısmi',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
+      { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Satış', menuAd: 'Siparişler', ic: '📋', yetkiKodu: 'belge',
+  },
+  {
+    // "Hangi siparisin nesi teslim edilmedi" - satir bazli acik liste.
+    kaynak: 'belge-acik-satir', baslik: 'Açık Sipariş Satırları', yol: 'Satis › Acik Satirlar',
+    toplam: ['miktar', 'kapatilanMiktar', 'kalanMiktar'],
+    menuGrup: 'Satış', menuAd: 'Açık Satırlar', ic: '📑', yetkiKodu: 'belge',
   },
   {
     // Kasa alt sisteminin ANA ekrani (F2): makbuz seviyesindeki islemler.

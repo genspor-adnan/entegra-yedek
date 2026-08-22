@@ -87,6 +87,8 @@ public static class KaynakKatalogu
         Ekle(MuhasebeFis());
         Ekle(MuhasebeFisSatir());
         Ekle(PlanVade());
+        // Belge donusumu (F8)
+        Ekle(BelgeAcikSatir());
     }
 
     private static void Ekle(KaynakTanimi k) => Kaynaklar[k.Ad] = k;
@@ -164,7 +166,7 @@ public static class KaynakKatalogu
     private static KaynakTanimi Belge() => new(
         Ad: "belge",
         YetkiKodu: "belge",
-        Kaynak: "public.belge b",
+        Kaynak: "public.belge b left join public.kasa_islem_turu bt on bt.kod = b.tur",
         SubeKolonu: "b.sube_id",
         VarsayilanSirala: "b.belge_tarihi desc, b.id desc",
         KapsamKolonu: "b.taraf_id",
@@ -172,6 +174,9 @@ public static class KaynakKatalogu
         {
             new("id",            "b.id",             "sayi",  "Id",          Varsayilan: false),
             new("tur",           "b.tur",            "kod",   "Tur",         Hizalama: "orta"),
+            new("turAdi",        "bt.ad",            "metin", "Belge Türü"),
+            // F8: siparis/irsaliye ne kadari donusturuldu (0 acik / 1 kismi / 2 kapandi)
+            new("kapanmaDurum",  "b.kapanma_durum",  "kod",   "Kapanma",     Hizalama: "orta", Varsayilan: false),
             new("tipi",          "b.tipi",           "kod",   "Tipi",        Hizalama: "orta", Varsayilan: false),
             new("belgeSeri",     "b.belge_seri",     "metin", "Seri",        Varsayilan: false),
             new("belgeNo",       "b.belge_no",       "metin", "Belge No"),
@@ -808,5 +813,36 @@ public static class KaynakKatalogu
             new("projeId",          "v.proje_id",          "sayi",  "Proje Id", Varsayilan: false),
             new("aciklama",         "v.aciklama",          "metin", "Açıklama", Genislik: 240),
             new("subeId",           "v.sube_id",           "sayi",  "Şube",   Varsayilan: false)
+        });
+
+    // ------------------------------------------------- acik belge satirlari ----
+    // "Hangi siparislerin nesi teslim edilmedi" raporu. Donusum ekrani ayri bir
+    //   uctan (GET /api/belge/{id}/acik-satirlar) okur; bu liste genel gorunum.
+    private static KaynakTanimi BelgeAcikSatir() => new(
+        Ad: "belge-acik-satir",
+        YetkiKodu: "belge",
+        Kaynak: "public.v_belge_acik_satir a",
+        SubeKolonu: "a.sube_id",
+        KapsamKolonu: "a.taraf_id",
+        VarsayilanSirala: "a.belge_tarihi asc, a.belge_id asc, a.sira asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("satirId",         "a.satir_id",         "sayi",  "Satır Id", Varsayilan: false),
+            new("belgeId",         "a.belge_id",         "sayi",  "Belge Id", Varsayilan: false),
+            new("belgeTurAdi",     "a.belge_tur_adi",    "metin", "Belge Türü"),
+            new("belgeTur",        "a.belge_tur",        "sayi",  "Tür Kodu", Hizalama: "orta", Varsayilan: false),
+            new("belgeNo",         "a.belge_no",         "metin", "Belge No"),
+            new("belgeTarihi",     "a.belge_tarihi",     "tarih", "Tarih",    Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("tarafUnvan",      "a.taraf_unvan",      "metin", "Cari",     Genislik: 220),
+            new("stokKodu",        "a.stok_kodu",        "metin", "Stok Kodu"),
+            new("stokAdi",         "a.stok_adi",         "metin", "Stok",     Genislik: 240),
+            new("aciklama",        "a.aciklama",         "metin", "Açıklama", Varsayilan: false),
+            new("miktar",          "a.miktar",           "para",  "Miktar",   Hizalama: "sag", Bicim: "#,##0.##"),
+            new("kapatilanMiktar", "a.kapatilan_miktar", "para",  "Dönüşen",  Hizalama: "sag", Bicim: "#,##0.##"),
+            new("kalanMiktar",     "a.kalan_miktar",     "para",  "Kalan",    Hizalama: "sag", Bicim: "#,##0.##"),
+            new("birimFiyat",      "a.birim_fiyat",      "para",  "Birim Fiyat", Hizalama: "sag", Bicim: "#,##0.00", Varsayilan: false),
+            new("belgeDovizi",     "a.belge_dovizi",     "metin", "Döviz",    Hizalama: "orta", Varsayilan: false),
+            new("kapanmaDurum",    "a.kapanma_durum",    "kod",   "Kapanma",  Hizalama: "orta", Varsayilan: false),
+            new("subeId",          "a.sube_id",          "sayi",  "Şube",     Varsayilan: false)
         });
 }

@@ -177,7 +177,11 @@ public sealed class SorguUretici
             {
                 var liste = Liste(kosul.Deger, kolon);
                 if (liste.Count == 0) return "false";
-                return $"{x} = any({Ekle(liste.ToArray())})";
+                // `= any(@p)` KULLANILMAZ: liste object?[] oldugu icin Npgsql tipi
+                //   cikaramiyor ve "Writing values of 'System.Object[]' is not
+                //   supported" ile patliyordu. Her deger AYRI parametre olarak
+                //   baglanir - tip cikarimi eleman basina calisir.
+                return $"{x} in ({string.Join(", ", liste.Select(Ekle))})";
             }
 
             case KosulOperatoru.Arasinda:

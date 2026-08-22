@@ -5,6 +5,7 @@ import {
   type ListeIstegi, type ListeYaniti, type BelgeYaniti,
   type KisiKaydi, type KisiIstegi, type YerlerYaniti,
   type KasaIslemTuru, type KasaIslemYaniti, type KasaIslemYazmaIstegi, type FisOzeti,
+  type AcikSatir,
   type YetkiSatiri, type YetkiSatiriIstegi, type DokumanSatiri,
 } from './sozlesme';
 
@@ -221,6 +222,16 @@ export const api = {
   // -------------------------------------------------------------- belge ----
   belgeOku: (id: number) => istek<BelgeYaniti>(`/api/belge/${id}`),
   belgeEkle: (govde: unknown) => gonder<BelgeYaniti>('/api/belge', govde),
+
+  /** Donusturulmeyi bekleyen satirlar (siparis/irsaliye kalanlari). */
+  belgeAcikSatirlar: (id: number) =>
+    istek<{ satirlar: AcikSatir[] }>(`/api/belge/${id}/acik-satirlar`).then(y => y.satirlar),
+
+  /** Siparis -> irsaliye -> fatura. Miktar KISMI olabilir; kalan kaynakta durur. */
+  belgeDonustur: (id: number, hedefTur: number,
+                  satirlar: { satirId: number; miktar: number }[],
+                  belgeTarihi?: string, taslak = false) =>
+    gonder<BelgeYaniti>(`/api/belge/${id}/donustur`, { hedefTur, satirlar, belgeTarihi, taslak }),
 
   // --------------------------------------------------------------- kasa ----
   kasaIslemTurleri: () =>

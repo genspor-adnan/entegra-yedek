@@ -2377,3 +2377,79 @@ hepsi 422. Ekstre tutarlılığı: `v_hesap_ekstre` toplamı = ham hareket topla
 
 **Sırada (F4):** kapatma (`kasa_kapatma`, FIFO, `belge.kapatilan_tutar`), dönem sonu kur
 değerlemesi, mizan ve dönem kilidi.
+
+---
+
+## F8 — Sipariş → irsaliye → fatura dönüşümü (22.08.2026)
+
+Şema 082'de kurulmuştu; bu adımda iş mantığı, uçlar ve ekran yapıldı. Yol boyunca üç
+gerçek hata çıktı (ikisi F8'den önce de vardı).
+
+### Dönüşüm aynı kayıt yolundan geçer
+
+`fn_belge_donustur` gibi ayrı bir SQL fonksiyonu **yazılmadı**: stok, cari, numara ve
+toplam mantığı `BelgeDeposu.KaydetAsync` içinde ve onu SQL'de tekrarlamak iki ayrı
+doğruluk kaynağı yaratırdı. Bunun yerine `KaydetAsync` ikiye ayrıldı — dıştaki metot
+transaction'ı açıyor, `KaydetIcAsync` işi yapıyor. `DonusturAsync` kaynak satırları
+`for update` ile **kilitliyor**, kalanı aynı transaction içinde kontrol ediyor ve sonra
+aynı çekirdeğe giriyor; iki kullanıcı aynı siparişi eş zamanlı tüketemez.
+
+Hedef satırlar `kaynak_tur=30, kaynak_id=<kaynak satır>` ile yazılır; `kapatilan_miktar`
+sayacını 082'nin trigger'ı sürer. Başlığa ayrıca `belge.kaynak_id` bağı konur ("bu belge
+neyden türedi" tek sorguluk cevap).
+
+### Belge türü ne yapar — kod değil, katalog söyler
+
+`BelgeDeposu` türe bakmadan **her** kesin belgede stok düşürüyor ve cari hareket
+yazıyordu. Sipariş bir **taahhüttür**: ne mal çıkar ne cari borçlanır. `kasa_islem_turu`
+artık `stok_etkiler` (082) yanında `cari_etkiler` (086) taşıyor; sipariş/teklif/talep,
+üretim ve depo-içi transferler `cari_etkiler=0`. Satırın `stok_durum_degis` bayrağı da
+türü izliyor — stoğu etkilemeyen belgede 0 yazılıyor, yoksa satır "stok düşürdüm" diye
+işaretli kalıyor ve iptal/dönüşüm gibi sonraki işler yanlış karar veriyordu.
+
+İrsaliye→fatura zincirinde stok **iki kez düşmez**: dönüşümde kaynak satır zaten
+düşürmüşse hedef satır `stok_durum_degis=0` alır. Doğrulandı — irsaliyeden fatura
+kesildiğinde stok bakiyesi değişmedi.
+
+### İptal edilen hedef kalanı serbest bırakır
+
+082'nin sayacı "bu satırdan türetilmiş tüm satırların toplamı" diyordu; faturayı iptal
+edince (durum=2) satırları durduğu için sipariş sonsuza dek "kapalı" kalıyor ve bir daha
+faturalanamıyordu. Sayaç artık yalnız **iptal olmayan** hedefleri sayıyor ve
+`belge.durum` değişince (`trg_belge_durum_kapatma`) kaynak satırların sayacı tazeleniyor.
+
+### İki yan bulgu — ikisi de mevcut hataydı
+
+1. **`lpad` numarayı KESİYORDU** (087). PostgreSQL'de `lpad(metin, n, '0')` metin `n`'den
+   uzunsa doldurmaz, **kırpar**: `lpad('2025000000707', 9, '0') = '202500000'`. Sayaç
+   doğru artıyordu ama üretilen numara ilk 9 karaktere kırpıldığı için **iki fatura aynı
+   numarayı aldı**. Üç üreticide de (`fn_belge_no_uret`, `fn_kasa_islem_no_uret`,
+   `fn_muhasebe_fis_no_uret`) hane artık bir **alt sınır**; numara zaten uzunsa olduğu
+   gibi döner. Geçmişteki mükerrer numaralar (2 grup / 5 belge) **düzeltilmedi** —
+   yayınlanmış belgeye yeni numara vermek daha büyük hata olurdu; migration onları
+   raporluyor.
+2. **`in` filtresi çalışmıyordu.** `KosulOperatoru.Icinde` `= any(@p)` üretiyor ve diziyi
+   `object?[]` olarak bind ediyordu; Npgsql tipi çıkaramayıp `Writing values of
+   'System.Object[]' is not supported` ile 500 veriyordu. Yani **her** `icinde` filtresi
+   (Belge listesindeki Satış/Alış çipleri dahil) bozuktu. Artık her değer ayrı parametre:
+   `in (@p0, @p1, …)`.
+
+### API + Web
+
+`GET /api/belge/{id}/acik-satirlar`, `POST /api/belge/{id}/donustur` (yetki
+`belge.donustur`, kısmi miktar destekli). Kataloglara `belge-acik-satir` kaynağı,
+`belge` listesine `turAdi` + `kapanmaDurum`, `siparis-liste` aksiyon ekranı ve
+`belge-liste`'ye Dönüştür. Web: **Satış › Siparişler** (aynı `belge` kaynağı,
+`tur in (9,19)` sabit filtresi, Açık/Kısmi/Kapanan çipleri) ve **Açık Satırlar**
+ekranları; `BelgeDonusumModali` (hedef türü, satır seçimi, satır başına miktar, kalan
+gösterimi). Modal sonucu kendi içinde gösterir ve kalan satırları tazeler — `alert()`
+tarayıcı diyaloğu açıp sayfayı kilitlediği için kullanılmadı.
+
+Doğrulandı: 10 adetlik sipariş → 4 adet irsaliye (`kalan=6`, `kapanma_durum=1`) → kalan 6
+fatura (`kalan=0`, `kapanma_durum=2`); kalanı aşan istek **422**; irsaliyeden fatura
+stoğu tekrar düşürmedi; fatura iptal edilince kaynak kalanı geri geldi; sipariş ne stok
+ne cari hareket yazdı; `v_belge_donusum` zinciri iki dalı da gösterdi. Tarayıcıda sipariş
+listesi + dönüşüm modalı ile 20 adetten 8'i kısmi dönüştürüldü. Test verileri temizlendi.
+
+**Sırada (F4):** kapatma + kur farkı; ardından F5 (çek/senet), F6 (kredi/kupon),
+F7 (belge fişleme).

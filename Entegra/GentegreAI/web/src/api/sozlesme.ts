@@ -243,6 +243,38 @@ export interface BelgeYaniti {
   izlemeNo: string;
 }
 
+// ------------------------------------------------------- belge donusumu ----
+/** v_belge_acik_satir: donusturulmeyi bekleyen satir (F8). */
+export interface AcikSatir {
+  satirId: number;
+  sira: number;
+  satirTur: number;
+  stokId?: number | null;
+  stokKodu?: string | null;
+  stokAdi?: string | null;
+  hizmetId?: number | null;
+  masrafId?: number | null;
+  aciklama: string;
+  miktar: number;
+  kapatilanMiktar: number;
+  kalanMiktar: number;
+  birim: number;
+  birimFiyat: number;
+  iskonto: number;
+  kdv: number;
+  belgeTur: number;
+  belgeTurAdi?: string | null;
+  belgeNo: string;
+  tarafUnvan: string;
+  belgeDovizi: string;
+  kapanmaDurum: number;
+}
+
+/** belge.kapanma_durum */
+export const KAPANMA_DURUM: Record<number, string> = {
+  0: 'Açık', 1: 'Kısmi Dönüştü', 2: 'Kapandı',
+};
+
 // -------------------------------------------------------------- referans ----
 /** Il/Ilce/Ulke (039_il_ilce_ulke.sql) - Adresler grid'inde il->ilce cascading secim. */
 export interface YerlerYaniti {

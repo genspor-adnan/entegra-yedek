@@ -39,10 +39,29 @@ public sealed class BelgeDeposu
         YazmaBaglami baglam,
         CancellationToken iptal = default)
     {
-        var uyarilar = new List<string>();
-
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+        var (id, uyarilar) = await KaydetIcAsync(baglanti, islem, belge, satirlar, secenekler, baglam, iptal);
+
+        await islem.CommitAsync(iptal);
+        return (id, uyarilar);
+    }
+
+    /// <summary>
+    /// Kaydetmenin TRANSACTION ICI cekirdegi. Donusum (F8) kaynak satirlari
+    /// kilitledikten SONRA ayni transaction'da buraya girer - yoksa iki es
+    /// zamanli donusum ayni kalani iki kez tuketirdi.
+    /// </summary>
+    private async Task<(int Id, List<string> Uyarilar)> KaydetIcAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        IDictionary<string, object?> belge,
+        List<Dictionary<string, JsonElement>> satirlar,
+        BelgeSecenekleri secenekler,
+        YazmaBaglami baglam,
+        CancellationToken iptal)
+    {
+        var uyarilar = new List<string>();
 
         var tur = Sayi(belge, "tur");
         var tarafId = Sayi(belge, "tarafId");
@@ -127,11 +146,18 @@ public sealed class BelgeDeposu
         var belgeId = await BelgeEkleAsync(baglanti, islem, belge, baglam, iptal);
 
         // ------------------------------------------------------ 4) satirlar INSERT ----
+        // Tur etkisi satirlardan ONCE okunur: stogu etkilemeyen bir belgede
+        //   (siparis/teklif) satirin stok_durum_degis bayragi da 0 yazilmali -
+        //   yoksa satir "stok dusurdum" diye isaretli kalir ve iptal/donusum gibi
+        //   sonraki isler yanlis karar verir.
+        var etki = await TurEtkileriAsync(baglanti, islem, tur, iptal);
+
         var sira = 0;
         foreach (var satir in satirlar)
         {
             sira++;
-            await SatirEkleAsync(baglanti, islem, belgeId, sira, satir, belge, baglam, uyarilar, iptal);
+            await SatirEkleAsync(baglanti, islem, belgeId, sira, satir, belge, baglam,
+                                 etki.Stok, uyarilar, iptal);
         }
 
         // ------------------------------------------------------------ 5) toplamlar ----
@@ -141,10 +167,18 @@ public sealed class BelgeDeposu
         await ToplamlariYazAsync(baglanti, islem, belgeId, iptal);
 
         // ----------------------------------------------- 6) stok durumu + hareket ----
+        // HANGI belge turunun neyi etkiledigi KATALOGTA (kasa_islem_turu):
+        //   siparis/teklif/talep bir TAAHHUTTUR - ne mal cikar ne cari borclanir.
+        //   Irsaliyeden turetilen faturada stok TEKRAR dusmez (satir bazinda
+        //   stok_durum_degis=0 yazilir, asagidaki sorgu onu zaten atlar).
         if (!secenekler.Taslak)
         {
-            await StokDurumGuncelleAsync(baglanti, islem, belgeId, tur, secenekler.StokKontrolu, uyarilar, iptal);
-            await MaliHareketYazAsync(baglanti, islem, belgeId, tur, tarafId, baglam, iptal);
+            var (stokEtkiler, cariEtkiler) = etki;
+
+            if (stokEtkiler)
+                await StokDurumGuncelleAsync(baglanti, islem, belgeId, tur, secenekler.StokKontrolu, uyarilar, iptal);
+            if (cariEtkiler)
+                await MaliHareketYazAsync(baglanti, islem, belgeId, tur, tarafId, baglam, iptal);
 
             // ------------------------------------------------------- 7) belge NUMARASI ----
             // EN SON: buraya kadar her sey basarili. Satir kilidi altinda, BOSLUKSUZ.
@@ -163,9 +197,250 @@ public sealed class BelgeDeposu
             },
             tarafId: tarafId, iptal: iptal);
 
-        await islem.CommitAsync(iptal);
         return (belgeId, uyarilar);
     }
+
+    // ============================================================== donusum ====
+    /// <summary>
+    /// Siparis -> irsaliye -> fatura donusumu (F8).
+    ///
+    /// SIPARIS AYRI TABLO DEGILDIR: ayni `belge` tablosunun turudur, bu yuzden
+    /// donusum de ayni kayit yolundan (KaydetIcAsync) gecer - stok, cari, numara
+    /// ve toplam mantigi TEK yerde kalir.
+    ///
+    /// Kaynak satirlar `for update` ile KILITLENIR ve kalan miktar ayni
+    /// transaction icinde kontrol edilir; iki kullanici ayni siparisi es zamanli
+    /// donusturemez. Hedef satirlar `kaynak_tur=30, kaynak_id=<kaynak satir>` ile
+    /// yazilir - kapatilan_miktar sayacini DB trigger'i gunceller.
+    /// </summary>
+    public async Task<(int Id, List<string> Uyarilar)> DonusturAsync(
+        int kaynakBelgeId, int hedefTur,
+        IReadOnlyList<(int SatirId, decimal Miktar)> secilen,
+        DateTime? belgeTarihi, bool taslak,
+        YazmaBaglami baglam, CancellationToken iptal = default)
+    {
+        if (secilen.Count == 0)
+            throw GentegreHatasi.Dogrulama("Dönüştürülecek satır seçilmeli.",
+                new AlanHatasi("satirlar", "Boş bırakılamaz."));
+
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+        // ------------------------------------------------- 1) kaynak baslik ----
+        IDictionary<string, object?> kaynak;
+        await using (var komut = new NpgsqlCommand("""
+            select b.id, b.tur, b.tipi, b.taraf_id, b.taraf_unvan, b.taraf_vkno, b.taraf_vd,
+                   b.taraf_adres_id, b.belge_dovizi, b.doviz_kuru, b.kdv_durum, b.durum,
+                   b.proje_id, b.sube_id, b.vade_gun, b.giris_depo_id, b.cikis_depo_id,
+                   b.satici_id, b.ozel_kod, b.aciklama, b.belge_no, kt.ad as tur_adi
+              from public.belge b
+              left join public.kasa_islem_turu kt on kt.kod = b.tur
+             where b.id = @p0
+            """, baglanti, islem))
+        {
+            komut.Parameters.AddWithValue("p0", kaynakBelgeId);
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            if (!await o.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi("Kaynak belge bulunamadı.");
+            kaynak = Satir(o);
+        }
+
+        if (Convert.ToInt32(kaynak["durum"]) != 0)
+            throw GentegreHatasi.IsKurali("Yalnız kesinleşmiş belge dönüştürülebilir (taslak/iptal değil).");
+
+        if (baglam.SubeId is { } sube && kaynak["sube_id"] is { } ks && Convert.ToInt32(ks) != sube)
+            throw GentegreHatasi.Bulunamadi();
+
+        var hedefEtki = await TurEtkileriAsync(baglanti, islem, hedefTur, iptal);
+
+        // -------------------------- 2) kaynak satirlari KILITLE + kalan kontrol ----
+        var satirlar = new List<Dictionary<string, JsonElement>>();
+        var idler = secilen.Select(s => s.SatirId).ToArray();
+
+        var kaynakSatirlar = new Dictionary<int, IDictionary<string, object?>>();
+        await using (var komut = new NpgsqlCommand("""
+            select s.id, s.tur, s.stok_id, s.hizmet_id, s.masraf_id, s.aciklama,
+                   s.miktar, s.adet, s.birim, s.birim_fiyat, s.iskonto, s.iskonto2,
+                   s.kdv, s.otv_yuzde, s.otv_miktar, s.kdv_muafiyeti,
+                   s.doviz_cinsi, s.doviz_birim_fiyat, s.doviz_kuru,
+                   s.giris_depo_id, s.cikis_depo_id, s.izleme, s.izleme_kodu,
+                   s.stok_durum_degis, s.proje_id, s.kalan_miktar, s.belge_id
+              from public.belge_satir s
+             where s.id = any(@p0)
+             order by s.sira
+             for update
+            """, baglanti, islem))
+        {
+            komut.Parameters.AddWithValue("p0", idler);
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            while (await o.ReadAsync(iptal))
+            {
+                var satir = Satir(o);
+                kaynakSatirlar[Convert.ToInt32(satir["id"])] = satir;
+            }
+        }
+
+        foreach (var (satirId, miktar) in secilen)
+        {
+            if (!kaynakSatirlar.TryGetValue(satirId, out var ks2))
+                throw GentegreHatasi.Bulunamadi($"Kaynak satır bulunamadı: {satirId}");
+            if (Convert.ToInt32(ks2["belge_id"]) != kaynakBelgeId)
+                throw GentegreHatasi.Dogrulama("Satır bu belgeye ait değil.",
+                    new AlanHatasi($"satirlar[{satirId}]", "Başka belgenin satırı."));
+
+            var kalan = Convert.ToDecimal(ks2["kalan_miktar"] ?? 0m);
+            if (miktar <= 0)
+                throw GentegreHatasi.Dogrulama("Miktar sıfırdan büyük olmalı.",
+                    new AlanHatasi($"satirlar[{satirId}].miktar", "Sıfırdan büyük olmalı."));
+            if (miktar > kalan)
+                throw GentegreHatasi.IsKurali(
+                    $"Seçilen miktar kalanı aşıyor (istenen {miktar:0.####}, kalan {kalan:0.####}).");
+
+            // Kaynak satir zaten stok dusurduyse (irsaliye) hedef TEKRAR dusurmez.
+            var kaynakDusurdu = Convert.ToInt32(ks2["stok_durum_degis"] ?? 0) == 1
+                                && Convert.ToInt32(kaynak["tur"]) is var kt2
+                                && await StokEtkilerMiAsync(baglanti, islem, kt2, iptal);
+
+            satirlar.Add(SatirJson(ks2, miktar, satirId,
+                stokDurumDegis: hedefEtki.Stok && !kaynakDusurdu ? 1 : 0));
+        }
+
+        // --------------------------------------------------- 3) hedef baslik ----
+        var belge = new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["tur"] = hedefTur,
+            ["tipi"] = kaynak["tipi"],
+            ["tarafId"] = kaynak["taraf_id"],
+            ["tarafUnvan"] = kaynak["taraf_unvan"],
+            ["tarafVkno"] = kaynak["taraf_vkno"],
+            ["tarafVd"] = kaynak["taraf_vd"],
+            ["tarafAdresId"] = kaynak["taraf_adres_id"],
+            ["belgeTarihi"] = belgeTarihi ?? DateTime.Now,
+            ["belgeDovizi"] = kaynak["belge_dovizi"],
+            ["dovizKuru"] = kaynak["doviz_kuru"],
+            ["kdvDurum"] = kaynak["kdv_durum"],
+            ["projeId"] = kaynak["proje_id"],
+            ["vadeGun"] = kaynak["vade_gun"],
+            ["girisDepoId"] = kaynak["giris_depo_id"],
+            ["cikisDepoId"] = kaynak["cikis_depo_id"],
+            ["saticiId"] = kaynak["satici_id"],
+            ["ozelKod"] = kaynak["ozel_kod"],
+            ["aciklama"] = Kirp($"{kaynak["tur_adi"]} {kaynak["belge_no"]} dönüşümü", 200),
+        };
+
+        var (yeniId, uyarilar) = await KaydetIcAsync(baglanti, islem, belge, satirlar,
+            new BelgeSecenekleri { Taslak = taslak, StokKontrolu = true }, baglam, iptal);
+
+        // ------------------------------------------------ 4) baslik bagi + log ----
+        // Satir bagi kapatma sayacini surer; baslik bagi "bu belge sundan turedi"
+        //   sorusunun tek sorguluk cevabidir.
+        await using (var komut = new NpgsqlCommand(
+            "update public.belge set kaynak_tur = 30, kaynak_id = @p1 where id = @p0", baglanti, islem))
+        {
+            komut.Parameters.AddWithValue("p0", yeniId);
+            komut.Parameters.AddWithValue("p1", (long)kaynakBelgeId);
+            await komut.ExecuteNonQueryAsync(iptal);
+        }
+
+        await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloBelge, kaynakBelgeId,
+            baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+            new Dictionary<string, string>
+            {
+                ["aksiyon"] = "donustur",
+                ["hedefTur"] = hedefTur.ToString(CultureInfo.InvariantCulture),
+                ["hedefBelgeId"] = yeniId.ToString(CultureInfo.InvariantCulture),
+                ["satirAdedi"] = secilen.Count.ToString(CultureInfo.InvariantCulture)
+            },
+            tarafId: SayiNull(kaynak, "taraf_id"), iptal: iptal);
+
+        await islem.CommitAsync(iptal);
+        return (yeniId, uyarilar);
+    }
+
+    /// <summary>Acik (kalani olan) satirlar - donusum ekraninin kaynagi.</summary>
+    public async Task<List<IDictionary<string, object?>>> AcikSatirlarAsync(
+        int belgeId, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = new NpgsqlCommand("""
+            select v.satir_id as "satirId", v.sira, v.satir_tur as "satirTur",
+                   v.stok_id as "stokId", v.stok_kodu as "stokKodu", v.stok_adi as "stokAdi",
+                   v.hizmet_id as "hizmetId", v.masraf_id as "masrafId", v.aciklama,
+                   v.miktar, v.kapatilan_miktar as "kapatilanMiktar",
+                   v.kalan_miktar as "kalanMiktar", v.birim,
+                   v.birim_fiyat as "birimFiyat", v.iskonto, v.kdv,
+                   v.belge_tur as "belgeTur", v.belge_tur_adi as "belgeTurAdi",
+                   v.belge_no as "belgeNo", v.taraf_unvan as "tarafUnvan",
+                   v.belge_dovizi as "belgeDovizi", v.kapanma_durum as "kapanmaDurum"
+              from public.v_belge_acik_satir v
+             where v.belge_id = @p0 order by v.sira
+            """, baglanti);
+        komut.Parameters.AddWithValue("p0", belgeId);
+
+        var liste = new List<IDictionary<string, object?>>();
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        while (await o.ReadAsync(iptal)) liste.Add(Satir(o));
+        return liste;
+    }
+
+    /// <summary>Belge turunun stok/cari etkisi - katalogtan (kasa_islem_turu).</summary>
+    private static async Task<(bool Stok, bool Cari)> TurEtkileriAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction islem, int tur, CancellationToken iptal)
+    {
+        await using var komut = new NpgsqlCommand(
+            "select stok_etkiler, cari_etkiler from public.kasa_islem_turu where kod = @p0",
+            baglanti, islem);
+        komut.Parameters.AddWithValue("p0", (short)tur);
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        // Katalogda olmayan tur: eski davranis (ikisini de etkiler).
+        if (!await o.ReadAsync(iptal)) return (true, true);
+        return (o.Bayrak("stok_etkiler"), o.Bayrak("cari_etkiler"));
+    }
+
+    private static async Task<bool> StokEtkilerMiAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction islem, int tur, CancellationToken iptal)
+        => (await TurEtkileriAsync(baglanti, islem, tur, iptal)).Stok;
+
+    /// <summary>Kaynak satiri hedef satir JSON'una cevirir (fiyat/iskonto/KDV aynen tasinir).</summary>
+    private static Dictionary<string, JsonElement> SatirJson(
+        IDictionary<string, object?> k, decimal miktar, int kaynakSatirId, int stokDurumDegis)
+    {
+        var govde = new Dictionary<string, object?>
+        {
+            ["tur"] = k["tur"],
+            ["stokId"] = k["stok_id"],
+            ["hizmetId"] = k["hizmet_id"],
+            ["masrafId"] = k["masraf_id"],
+            ["aciklama"] = k["aciklama"],
+            ["adet"] = miktar,
+            ["miktar"] = miktar,
+            ["birim"] = k["birim"],
+            ["birimFiyat"] = k["birim_fiyat"],
+            ["iskonto"] = k["iskonto"],
+            ["iskonto2"] = k["iskonto2"],
+            ["kdv"] = k["kdv"],
+            ["otvYuzde"] = k["otv_yuzde"],
+            ["otvMiktar"] = k["otv_miktar"],
+            ["kdvMuafiyeti"] = k["kdv_muafiyeti"],
+            ["dovizCinsi"] = k["doviz_cinsi"],
+            ["dovizBirimFiyat"] = k["doviz_birim_fiyat"],
+            ["dovizKuru"] = k["doviz_kuru"],
+            ["girisDepoId"] = k["giris_depo_id"],
+            ["cikisDepoId"] = k["cikis_depo_id"],
+            ["izleme"] = k["izleme"],
+            ["izlemeKodu"] = k["izleme_kodu"],
+            ["stokDurumDegis"] = stokDurumDegis,
+            ["kaynakTur"] = 30,
+            ["kaynakId"] = kaynakSatirId,
+        };
+
+        var json = JsonSerializer.SerializeToElement(govde);
+        var sonuc = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+        foreach (var alan in json.EnumerateObject()) sonuc[alan.Name] = alan.Value;
+        return sonuc;
+    }
+
+    private static string Kirp(string deger, int sinir)
+        => deger.Length <= sinir ? deger : deger[..sinir];
 
     // ================================================================== okuma ====
     public async Task<(IDictionary<string, object?> Belge, List<IDictionary<string, object?>> Satirlar,
@@ -284,8 +559,8 @@ public sealed class BelgeDeposu
 
     private async Task SatirEkleAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, int sira, Dictionary<string, JsonElement> satir,
-        IDictionary<string, object?> belge, YazmaBaglami baglam, List<string> uyarilar,
-        CancellationToken iptal)
+        IDictionary<string, object?> belge, YazmaBaglami baglam, bool turStokEtkiler,
+        List<string> uyarilar, CancellationToken iptal)
     {
         var tur = (int)JsonSayi(satir, "tur", 1);
         var stokId   = JsonSayiNull(satir, "stokId");
@@ -338,6 +613,9 @@ public sealed class BelgeDeposu
             "otv_yuzde", "otv_miktar", "kdv_muafiyeti", "tutar",
             "doviz_cinsi", "doviz_birim_fiyat", "doviz_tutari", "doviz_kuru",
             "giris_depo_id", "cikis_depo_id", "izleme", "izleme_kodu", "stok_durum_degis",
+            // Donusum bagi (F8): kaynak_tur=30 -> kaynak belge_satir. Kapatma
+            //   sayacini bu iki alan uzerinden DB trigger'i surer.
+            "kaynak_tur", "kaynak_id", "proje_id",
             "sube_id", "ekleyen"
         };
         var parametreler = new List<object?>
@@ -350,7 +628,9 @@ public sealed class BelgeDeposu
             JsonSayiNull(satir, "girisDepoId") ?? SayiNull(belge, "girisDepoId"),
             JsonSayiNull(satir, "cikisDepoId") ?? SayiNull(belge, "cikisDepoId"),
             (short)JsonSayi(satir, "izleme", 0), JsonMetin(satir, "izlemeKodu"),
-            (short)JsonSayi(satir, "stokDurumDegis", 1),
+            (short)(turStokEtkiler ? JsonSayi(satir, "stokDurumDegis", 1) : 0),
+            (int)JsonSayi(satir, "kaynakTur", 0), JsonSayi(satir, "kaynakId", 0),
+            JsonSayiNull(satir, "projeId") ?? SayiNull(belge, "projeId"),
             (short)(baglam.SubeId ?? 0), baglam.KullaniciId
         };
 

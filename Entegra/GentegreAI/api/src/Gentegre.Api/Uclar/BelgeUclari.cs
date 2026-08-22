@@ -64,6 +64,52 @@ public static class BelgeUclari
             });
         });
 
+        // GET /api/belge/{id}/acik-satirlar - donusturulmeyi bekleyen satirlar
+        grup.MapGet("/{id:int}/acik-satirlar", async (
+            int id, BaglamCozucu cozucu, BelgeDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+            return Results.Ok(new
+            {
+                satirlar = await depo.AcikSatirlarAsync(id, iptal),
+                izlemeNo = baglam.IzlemeNo
+            });
+        });
+
+        // POST /api/belge/{id}/donustur - siparis -> irsaliye -> fatura
+        grup.MapPost("/{id:int}/donustur", async (
+            int id, DonusumIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Ekle);
+            baglam.AksiyonIste("belge.donustur");
+
+            if (istek is null || istek.HedefTur <= 0)
+                throw GentegreHatasi.Dogrulama("Hedef belge türü seçilmeli.",
+                    new AlanHatasi("hedefTur", "Zorunlu."));
+
+            var secilen = (istek.Satirlar ?? new List<DonusumSatiri>())
+                .Where(s => s.SatirId > 0 && s.Miktar > 0)
+                .Select(s => (s.SatirId, s.Miktar))
+                .ToList();
+
+            var (yeniId, uyarilar) = await depo.DonusturAsync(id, istek.HedefTur, secilen,
+                istek.BelgeTarihi, istek.Taslak,
+                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+
+            var kayit = await depo.OkuAsync(yeniId, iptal) ?? throw GentegreHatasi.Bulunamadi();
+            return Results.Created($"/api/belge/{yeniId}", new BelgeYaniti
+            {
+                Belge = kayit.Belge,
+                Satirlar = kayit.Satirlar,
+                DipToplam = kayit.DipToplam,
+                Uyarilar = uyarilar,
+                IzlemeNo = baglam.IzlemeNo
+            });
+        });
+
         // GET /api/belge/{id}/diptoplam - ekranin alt toplam seridi
         grup.MapGet("/{id:int}/diptoplam", async (
             int id, BaglamCozucu cozucu, BelgeDeposu depo, HttpContext ctx, CancellationToken iptal) =>
@@ -73,6 +119,21 @@ public static class BelgeUclari
             var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
             return Results.Ok(new { dipToplam = kayit.DipToplam, izlemeNo = baglam.IzlemeNo });
         });
+    }
+
+    /// <summary>Siparis/irsaliye donusum istegi (F8). Miktar KISMI olabilir.</summary>
+    public sealed class DonusumIstegi
+    {
+        public int HedefTur { get; set; }
+        public List<DonusumSatiri>? Satirlar { get; set; }
+        public DateTime? BelgeTarihi { get; set; }
+        public bool Taslak { get; set; }
+    }
+
+    public sealed class DonusumSatiri
+    {
+        public int SatirId { get; set; }
+        public decimal Miktar { get; set; }
     }
 
     /// <summary>
