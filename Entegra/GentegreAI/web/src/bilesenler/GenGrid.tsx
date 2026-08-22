@@ -27,6 +27,8 @@ interface Props {
   /** Arama + Liste/Grup/Analiz + toplu aksiyon seridini hic cizme (ör. Stok Ayarlari >
       Depolar): birkac satirlik ayar listesinde bu serit bilgi degil gurultu. */
   seritGizli?: boolean;
+  /** Gomulu gridin arac cubugu saga degil SOLA yaslanir (gridin sol ust kosesi). */
+  aracCubuguSol?: boolean;
   /** Degisince (kart kaydedilince - ekleme ya da duzenleme) grid yeniden yuklenir. */
   yenile?: number;
   /** Degisince (yeni kart EKLENINCE) gorunum "Son Aranan"a gecer - yeni kayit sunucu
@@ -154,8 +156,8 @@ const GORUNUMLER: { v: 'liste' | 'grup' | 'analiz'; ik: string; ad: string }[] =
  * arayuzde gizleme mantigi YOKTUR. Filtre, siralama ve sayfalama da sunucuda calisir.
  */
 export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, onSatirAc,
-                          aksiyonEkrani, onAksiyon, cipler, gomulu, seritGizli, yenile,
-                          odaklaSonEklenen, icerikAlani, icerikBaslik }: Props) {
+                          aksiyonEkrani, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
+                          yenile, odaklaSonEklenen, icerikAlani, icerikBaslik }: Props) {
   const [kolonlar, setKolonlar] = useState<KolonMeta[]>([]);
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [toplamKayit, setToplamKayit] = useState(0);
@@ -428,7 +430,9 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
         </div>
       )}
       {gomulu && aksiyonEkrani && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
+        <div style={{ display: 'flex',
+                      justifyContent: aracCubuguSol ? 'flex-start' : 'flex-end',
+                      marginBottom: 6 }}>
           <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} />
         </div>
       )}

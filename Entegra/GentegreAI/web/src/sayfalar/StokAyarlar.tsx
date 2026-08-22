@@ -80,6 +80,7 @@ export function StokAyarlar() {
           kaynak="depo"
           gomulu
           seritGizli
+          aracCubuguSol
           aksiyonEkrani="depo-liste"
           yenile={yenile}
           onSatirAc={satir => setDepoKart(Number(satir.id))}
