@@ -616,3 +616,14 @@ table.grid tr.flt input {
 .alan .deger-serit { display: flex; align-items: center; gap: 6px; min-height: 28px; flex-wrap: wrap }
 .alan .deger-serit .sonuk { color: var(--soluk); font-size: 11px }
 .rozet.bilgi { background: #e6f0fb; color: #2f6db3; border-color: #cfe0f4 }
+
+/* Sekme icindeki alan izgarasinda etiketler SOLDA (.alan'in varsayilani boyle).
+   GenLookup kendi icinde dikeydi; burada o da yatay hizaya cekilir ki
+   "Tasiyici Unvan" / "Teslim Eden" yanindaki duz alanlarla ayni satirda dursun.
+   BASLIK seridi bunun disinda - orada tum etiketler editin ustunde. */
+.kagrup > .alan-izgara .lookup {
+  display: grid; grid-template-columns: 84px 1fr; align-items: center; gap: 0 8px;
+}
+.kagrup > .alan-izgara .lookup > .etiket { grid-column: 1; font-size: 11px }
+.kagrup > .alan-izgara .lookup > .lookup-kutu { grid-column: 2 }
+.kagrup > .alan-izgara .lookup > .alan-hata { grid-column: 2 }

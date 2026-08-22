@@ -536,12 +536,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             />
 
             <label className="alan">
-              <span className="etiket">{siparisMi ? 'Kaynak Belge' : 'Bağlı Sipariş'}</span>
-              <span className="deger-serit">
-                {sonuc?.belge.kaynakBelgeNo
-                  ? <>{String(sonuc.belge.kaynakTurAdi ?? '')} <b>{String(sonuc.belge.kaynakBelgeNo)}</b></>
-                  : <span className="sonuk">—</span>}
-              </span>
+              <span className="etiket">Döviz / Kur</span>
+              <input value={`${String(sonuc?.belge.belgeDovizi ?? 'TL')} · ${
+                Number(sonuc?.belge.dovizKuru ?? 1).toLocaleString('tr-TR', { minimumFractionDigits: 6 })}`}
+                     readOnly />
             </label>
 
             {/* --- 4. satir: adres / teslim --- */}
@@ -571,10 +569,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 Vergi Dairesi/VKN kartta gosterilmiyor: cari kartindan gelen ve
                 belgeye DONDURULAN bir bilgi, e-Belge XML'ine oradan gidiyor. */}
             <label className="alan">
-              <span className="etiket">Döviz / Kur</span>
-              <input value={`${String(sonuc?.belge.belgeDovizi ?? 'TL')} · ${
-                Number(sonuc?.belge.dovizKuru ?? 1).toLocaleString('tr-TR', { minimumFractionDigits: 6 })}`}
-                     readOnly />
+              <span className="etiket">{siparisMi ? 'Kaynak Belge' : 'Bağlı Sipariş'}</span>
+              <span className="deger-serit">
+                {sonuc?.belge.kaynakBelgeNo
+                  ? <>{String(sonuc.belge.kaynakTurAdi ?? '')} <b>{String(sonuc.belge.kaynakBelgeNo)}</b></>
+                  : <span className="sonuk">—</span>}
+              </span>
             </label>
 
             {/* Belge turu SECICISI YOK: tur ekranin kendisinden gelir (Siparisler
