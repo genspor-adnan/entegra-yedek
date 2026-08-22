@@ -627,3 +627,11 @@ table.grid tr.flt input {
 .kagrup > .alan-izgara .lookup > .etiket { grid-column: 1; font-size: 11px }
 .kagrup > .alan-izgara .lookup > .lookup-kutu { grid-column: 2 }
 .kagrup > .alan-izgara .lookup > .alan-hata { grid-column: 2 }
+
+/* Salt gorunum kalem gridi: satir secimi onay kutusuyla, cift tik duzenler. */
+.detay-tablo.secilebilir tbody tr { cursor: default }
+.detay-tablo.secilebilir tbody tr:hover td { background: #f3f7fc }
+.detay-tablo.secilebilir tbody tr.secili td { background: var(--sec, #d7e7fb) }
+.detay-tablo.secilebilir td { padding: 5px 8px }
+.detay-tablo .sonuk { color: var(--soluk) }
+.detay-tablo td.bos { text-align: center; color: var(--soluk); padding: 14px }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
-import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru, type ListeSatiri } from '../api/sozlesme';
+import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru } from '../api/sozlesme';
 import { GenLookup, LOOKUP_CARI, LOOKUP_STOK } from '../bilesenler/GenLookup';
 import { Modal } from '../bilesenler/GenForm';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
@@ -118,6 +118,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [aciliyor, setAciliyor] = useState(!!belgeId);
   const [donusum, setDonusum] = useState(false);
   const [aktifSekme, setAktifSekme] = useState('kalem');
+  /** Grid satir secimi (kirmizi Sil dugmesi bunlari siler). */
+  const [seciliSatirlar, setSeciliSatirlar] = useState<Set<number>>(new Set());
+  /** Acik kalem duzenleme penceresi; 'yeni' ise satir eklenir. */
+  const [kalem, setKalem] = useState<SatirDurumu | 'yeni' | null>(null);
   const [donusumler, setDonusumler] = useState<Record<string, unknown>[]>([]);
   const [sonuc, setSonuc] = useState<BelgeYaniti | null>(null);
   const [hata, setHata] = useState<string | null>(null);
@@ -213,24 +217,25 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     return { matrah, kdv, genel: matrah + kdv };
   }, [satirlar]);
 
-  const satirDegis = (anahtar: number, alan: keyof SatirDurumu, deger: unknown) =>
-    setSatirlar(s => s.map(x => x.anahtar === anahtar ? { ...x, [alan]: deger } : x));
+  /** Kalem penceresinden donen satiri yazar (yeni ise ekler). */
+  const kalemKaydet = (satir: SatirDurumu) =>
+    setSatirlar(s => s.some(x => x.anahtar === satir.anahtar)
+      ? s.map(x => (x.anahtar === satir.anahtar ? satir : x))
+      : [...s, satir]);
 
-  const stokSec = (anahtar: number, satir: ListeSatiri | null) => {
-    setSatirlar(s => s.map(x => x.anahtar !== anahtar ? x : {
-      ...x,
-      stokId: satir ? Number(satir.id) : null,
-      stokKodu: satir ? String(satir.kod ?? '') : '',
-      stokAdi: satir ? String(satir.ad ?? '') : '',
-      kdv: satir?.kdv !== undefined && satir?.kdv !== null ? String(satir.kdv) : x.kdv,
-    }));
+  /** Secili satirlari siler - grid salt gorunum oldugu icin satir ici silme yok. */
+  const seciliSil = () => {
+    if (seciliSatirlar.size === 0) return;
+    setSatirlar(s => s.filter(x => !seciliSatirlar.has(x.anahtar)));
+    setSeciliSatirlar(new Set());
   };
 
-  const satirEkle = () =>
-    setSatirlar(s => [...s, bosSatir(Math.max(0, ...s.map(x => x.anahtar)) + 1)]);
-
-  const satirSil = (anahtar: number) =>
-    setSatirlar(s => (s.length === 1 ? s : s.filter(x => x.anahtar !== anahtar)));
+  const secimDegis = (anahtar: number) =>
+    setSeciliSatirlar(k => {
+      const y = new Set(k);
+      if (y.has(anahtar)) y.delete(anahtar); else y.add(anahtar);
+      return y;
+    });
 
   async function kes() {
     setHata(null);
@@ -606,88 +611,92 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         <div className="kagrup">
           <h6>
             Kalemler
-            {!kilitli && <button type="button" className="d bir" onClick={satirEkle}>+ Satır</button>}
+            {!kilitli && (
+              <>
+                <button type="button" className="d bir" onClick={() => setKalem('yeni')}>
+                  ＋ Satır
+                </button>
+                <button type="button" className="d teh" disabled={seciliSatirlar.size === 0}
+                        title={seciliSatirlar.size === 0 ? 'Önce satır seçin' : 'Seçili satırları sil'}
+                        onClick={seciliSil}>
+                  🗑 Sil{seciliSatirlar.size > 0 ? ` (${seciliSatirlar.size})` : ''}
+                </button>
+              </>
+            )}
           </h6>
 
-          {/* Irsaliye kalemleri mockup'taki kolonlarla: sevk belgesidir, iskonto/KDV
-              GOSTERILMEZ (onlar faturada); yerine Depo ve Seri/Lot gelir.
-              Mockup'taki "Raf" kolonu yok - depo raf sistemi semada tanimli degil,
-              "Birim" de kod olarak duruyor (birim adi sozlugu henuz baglanmadi). */}
-          <table className="detay-tablo">
+          {/* Grid SALT GORUNUM (mockup deseni): hucre ici input yok, satir secimi
+              onay kutusuyla, ekleme/duzenleme ayri kalem penceresinde. Boylece
+              satirlar okunakli kalir ve yanlislikla ustune yazilmaz. */}
+          <table className="detay-tablo secilebilir">
             <thead>
               <tr>
+                {!kilitli && (
+                  <th style={{ width: 30 }} className="hiza-orta">
+                    <input type="checkbox"
+                           checked={satirlar.length > 0 && seciliSatirlar.size === satirlar.length}
+                           onChange={e => setSeciliSatirlar(
+                             e.target.checked ? new Set(satirlar.map(x => x.anahtar)) : new Set())} />
+                  </th>
+                )}
                 <th style={{ width: 30 }} className="hiza-orta">#</th>
                 <th style={{ width: 110 }}>Stok Kodu</th>
                 <th>Stok / Hizmet</th>
                 <th className="hiza-sag" style={{ width: 90 }}>Miktar</th>
-                {irsaliyeMi && <th style={{ width: 130 }}>Depo</th>}
-                {irsaliyeMi && <th style={{ width: 130 }}>Seri / Lot</th>}
                 {!irsaliyeMi && <th className="hiza-sag" style={{ width: 80 }}>İskonto %</th>}
                 {!irsaliyeMi && <th className="hiza-sag" style={{ width: 70 }}>KDV %</th>}
                 <th className="hiza-sag" style={{ width: 100 }}>Br. Fiyat</th>
                 <th className="hiza-sag" style={{ width: 120 }}>Tutar</th>
-                {!kilitli && <th style={{ width: 34 }} />}
               </tr>
             </thead>
             <tbody>
-              {satirlar.map((s, sira) => {
-                const adet = Number(s.adet.replace(',', '.')) || 0;
-                const fiyat = Number(s.birimFiyat.replace(',', '.')) || 0;
-                const isk = Number(s.iskonto.replace(',', '.')) || 0;
+              {satirlar.map((r, sira) => {
+                const adet = Number(r.adet.replace(',', '.')) || 0;
+                const fiyat = Number(r.birimFiyat.replace(',', '.')) || 0;
+                const isk = Number(r.iskonto.replace(',', '.')) || 0;
                 const tutar = Math.round(adet * fiyat * 100) / 100 * (1 - isk / 100);
+                const secili = seciliSatirlar.has(r.anahtar);
                 return (
-                  <tr key={s.anahtar}>
-                    <td className="hiza-orta sonuk">{sira + 1}</td>
-                    <td><code>{s.stokKodu}</code></td>
-                    <td>
-                      <GenLookup
-                        kaynak="stok"
-                        alanlar={LOOKUP_STOK}
-                        deger={s.stokAdi}
-                        saltOkunur={kilitli}
-                        onSec={satir => stokSec(s.anahtar, satir)}
-                      />
-                    </td>
-                    <td><input className="hiza-sag" value={s.adet} disabled={kilitli}
-                               onChange={e => satirDegis(s.anahtar, 'adet', e.target.value)} /></td>
-                    {irsaliyeMi && <td className="sonuk">{depo?.ad ?? '—'}</td>}
-                    {irsaliyeMi && (
-                      <td><input value={s.izlemeKodu} disabled={kilitli} placeholder="LOT / seri"
-                                 onChange={e => satirDegis(s.anahtar, 'izlemeKodu', e.target.value)} /></td>
-                    )}
-                    {!irsaliyeMi && (
-                      <td><input className="hiza-sag" value={s.iskonto} disabled={kilitli}
-                                 onChange={e => satirDegis(s.anahtar, 'iskonto', e.target.value)} /></td>
-                    )}
-                    {!irsaliyeMi && (
-                      <td><input className="hiza-sag" value={s.kdv} disabled={kilitli}
-                                 onChange={e => satirDegis(s.anahtar, 'kdv', e.target.value)} /></td>
-                    )}
-                    <td><input className="hiza-sag" value={s.birimFiyat} disabled={kilitli}
-                               onChange={e => satirDegis(s.anahtar, 'birimFiyat', e.target.value)} /></td>
-                    <td className="hiza-sag onizleme">{para.format(tutar)}</td>
+                  <tr key={r.anahtar} className={secili ? 'secili' : ''}
+                      onDoubleClick={() => !kilitli && setKalem(r)}>
                     {!kilitli && (
                       <td className="hiza-orta">
-                        <button type="button" className="d teh" onClick={() => satirSil(s.anahtar)}>×</button>
+                        <input type="checkbox" checked={secili}
+                               onChange={() => secimDegis(r.anahtar)} />
                       </td>
                     )}
+                    <td className="hiza-orta sonuk">{sira + 1}</td>
+                    <td><code>{r.stokKodu}</code></td>
+                    <td>{r.stokAdi || <span className="sonuk">(stok seçilmedi)</span>}</td>
+                    <td className="hiza-sag">{adet.toLocaleString('tr-TR')}</td>
+                    {!irsaliyeMi && <td className="hiza-sag">{isk ? `%${isk}` : ''}</td>}
+                    {!irsaliyeMi && <td className="hiza-sag">%{r.kdv}</td>}
+                    <td className="hiza-sag">{para.format(fiyat)}</td>
+                    <td className="hiza-sag"><b>{para.format(tutar)}</b></td>
                   </tr>
                 );
               })}
+              {satirlar.length === 0 && (
+                <tr><td colSpan={kilitli ? 6 : 7} className="bos">
+                  Kalem yok — “＋ Satır” ile ekleyin.
+                </td></tr>
+              )}
             </tbody>
             <tfoot>
               <tr className="genel">
-                <td colSpan={3} className="hiza-sag">TOPLAM</td>
+                <td colSpan={kilitli ? 3 : 4} className="hiza-sag">TOPLAM</td>
                 <td className="hiza-sag">
-                  {satirlar.reduce((t, s) => t + (Number(s.adet.replace(',', '.')) || 0), 0)
+                  {satirlar.reduce((t, r) => t + (Number(r.adet.replace(',', '.')) || 0), 0)
                            .toLocaleString('tr-TR')}
                 </td>
-                <td colSpan={irsaliyeMi ? 3 : 3} />
+                <td colSpan={irsaliyeMi ? 1 : 3} />
                 <td className="hiza-sag">{para.format(onizleme.matrah)}</td>
-                {!kilitli && <td />}
               </tr>
             </tfoot>
           </table>
+          {!kilitli && satirlar.length > 0 && (
+            <div className="not">Satırı düzenlemek için çift tıklayın.</div>
+          )}
         </div>
 
         <div className="kagrup dip-toplam">
@@ -880,6 +889,19 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           </div>
         )}
 
+        {/* Kalem penceresi: grid salt gorunum oldugu icin ekleme/duzenleme burada.
+            Alanlar ture gore degisir (irsaliyede seri/lot, faturada iskonto/KDV). */}
+        {kalem !== null && (
+          <KalemPenceresi
+            satir={kalem === 'yeni'
+              ? bosSatir(Math.max(0, ...satirlar.map(x => x.anahtar)) + 1)
+              : kalem}
+            irsaliyeMi={irsaliyeMi}
+            onKapat={() => setKalem(null)}
+            onKaydet={r => { kalemKaydet(r); setKalem(null) }}
+          />
+        )}
+
         {/* Donusum modali bu kartin USTUNDE acilir: hedef turu ve satir miktarlari
             orada secilir, kalan bu belgede kalir (F8). */}
         {donusum && kayitliId > 0 && (
@@ -890,6 +912,107 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             onTamam={() => onKaydedildi?.()}
           />
         )}
+      </>
+    </Modal>
+  );
+}
+
+/**
+ * Tek kalem giris penceresi. Kalemler gridi SALT GORUNUM oldugu icin
+ * ekleme/duzenleme buradan yapilir - hucre ici duzenlemede satir yanlislikla
+ * ustune yaziliyor ve uzun stok adlari okunmuyordu.
+ */
+function KalemPenceresi({ satir, irsaliyeMi, onKapat, onKaydet }: {
+  satir: SatirDurumu;
+  irsaliyeMi: boolean;
+  onKapat(): void;
+  onKaydet(r: SatirDurumu): void;
+}) {
+  const [r, setR] = useState<SatirDurumu>(satir);
+  const [hata, setHata] = useState<string | null>(null);
+
+  const degis = (alan: keyof SatirDurumu, deger: string) =>
+    setR(x => ({ ...x, [alan]: deger }));
+
+  const adet = Number(r.adet.replace(',', '.')) || 0;
+  const fiyat = Number(r.birimFiyat.replace(',', '.')) || 0;
+  const isk = Number(r.iskonto.replace(',', '.')) || 0;
+  const tutar = Math.round(adet * fiyat * 100) / 100 * (1 - isk / 100);
+
+  function kaydet() {
+    if (!r.stokId) { setHata('Stok seçilmeli.'); return }
+    if (adet <= 0) { setHata('Miktar sıfırdan büyük olmalı.'); return }
+    onKaydet(r);
+  }
+
+  return (
+    <Modal
+      baslik="Kalem"
+      onKapat={onKapat}
+      alt={
+        <>
+          <button className="d onay" onClick={kaydet}>💾 Tamam</button>
+          <button className="d" onClick={onKapat}>✖ Vazgeç</button>
+        </>
+      }
+    >
+      <>
+        {hata && <div className="hata-kutusu">{hata}</div>}
+        <div className="kagrup">
+          <h6>Kalem Bilgisi</h6>
+          <div className="alan-izgara">
+            <GenLookup
+              kaynak="stok"
+              etiket="Stok / Hizmet"
+              zorunlu
+              alanlar={LOOKUP_STOK}
+              deger={r.stokAdi}
+              onSec={sec => setR(x => ({
+                ...x,
+                stokId: sec ? Number(sec.id) : null,
+                stokKodu: sec ? String(sec.kod ?? '') : '',
+                stokAdi: sec ? String(sec.ad ?? '') : '',
+                kdv: sec?.kdv !== undefined && sec?.kdv !== null ? String(sec.kdv) : x.kdv,
+              }))}
+            />
+            <label className="alan">
+              <span className="etiket">Miktar</span>
+              <input className="hiza-sag" value={r.adet}
+                     onChange={e => degis('adet', e.target.value)} />
+            </label>
+            <label className="alan">
+              <span className="etiket">Birim Fiyat</span>
+              <input className="hiza-sag" value={r.birimFiyat}
+                     onChange={e => degis('birimFiyat', e.target.value)} />
+            </label>
+
+            {irsaliyeMi ? (
+              <label className="alan">
+                <span className="etiket">Seri / Lot</span>
+                <input value={r.izlemeKodu} placeholder="LOT / seri"
+                       onChange={e => degis('izlemeKodu', e.target.value)} />
+              </label>
+            ) : (
+              <>
+                <label className="alan">
+                  <span className="etiket">İskonto %</span>
+                  <input className="hiza-sag" value={r.iskonto}
+                         onChange={e => degis('iskonto', e.target.value)} />
+                </label>
+                <label className="alan">
+                  <span className="etiket">KDV %</span>
+                  <input className="hiza-sag" value={r.kdv}
+                         onChange={e => degis('kdv', e.target.value)} />
+                </label>
+              </>
+            )}
+
+            <label className="alan">
+              <span className="etiket">Tutar (önizleme)</span>
+              <input className="hiza-sag onizleme" value={para.format(tutar)} readOnly />
+            </label>
+          </div>
+        </div>
       </>
     </Modal>
   );
