@@ -1971,3 +1971,26 @@ dogru cozum "onceki deger" ref'iyle KARSILASTIRMA (idempotent, kac kez calisirsa
 guvenli), bool toggle degil. Tarayicida uctan uca dogrulandi: Cari'de Son Aranan ac ->
 Islem Gunlugu'ne gec (80 kayit dogru geldi) -> Cari'ye don (kendi "Tum Liste"sine donmus,
 2.350 kayit dogru).
+
+### Ayni oturum: Islem Gunlugu kolonlari okunabilir + Kod/Ad cozumu (eski LOGCOZUM)
+
+Kullanici once "log da islem ve tablo id anlasilir olsun" dedi, ardindan tam kolon setini
+verdi: **Tarih, İşlem, Modül, Kod, Ad, Kayıt Id, Kullanıcı, IP**.
+
+- `islem_tipi` (0/1/2) ve `tablo_id` (`KartTanimi.LogTabloId` kodlari) sunucuda SQL `CASE`
+  ile okunabilir metne cevriliyor (`IslemAdiIfade`/`TabloAdiIfade`, `KaynakKatalogu.cs`):
+  "0/71" yerine "Silme/Cari-Kişi-Hasta". 71 hem cari hem kişi hem hasta icin ortak kod
+  (ucu de ayni fiziksel `taraf` tablosu) - eski GENDEPO'daki ayni belirsizlik burada da var,
+  ayrim satirdan yapilamiyor.
+- **Kod/Ad** (eski LOGCOZUM karsiligi): `tablo_id`'ye gore DOGRU tabloya conditional
+  LEFT JOIN (`taraf` 71/73, `stok` 88, `belge` 30, `rol` 903) - sadece kart-seviyeli
+  tablolar cozuluyor; detay satirlari (adres/barkod/fiyat/izin/egitim... 340-907 arasi)
+  ve SILINMIS kayitlar (join eslesmiyor) icin Kod/Ad bos kaliyor - "bilgi" JSON'daki anlik
+  degerler kullanilmadi (alan adlari tabloya gore degisir, tek SQL'de genellenemez).
+- Kolon sirasi + varsayilan gorunurluk istenen sete birebir: IP varsayilan GORUNUR yapildi
+  (eskiden gizliydi), `tabloId`/`Tablo` -> `modul`/`Modül` olarak yeniden adlandirildi.
+- Turkce karakter gozden kacti ilk turda ("Degisiklik", "Kisi") - Ortam.md/CLAUDE.md kurali
+  geregi duzeltildi ("Değişiklik", "Kişi", "İzin", "Eğitim").
+- curl ile dogrulandi: id=88 Değişiklik/Cari-Kişi-Hasta/4478/"AHMET ABUSALİHli" (bilgi
+  JSON'daki "unvan" degisikligiyle birebir), id=87 Silme/kod-ad NULL (kayit silindi,
+  join'e dusmedi), id=86 Ekleme/"k12"/"Aslan Demir".
