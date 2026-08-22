@@ -212,6 +212,23 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     })();
   }, [belgeId]);
 
+  // YENI belgede cikis deposu ANA DEPO ile dolu gelir (depo.varsayilan = 1).
+  //   Depo cogu belgede hep aynidir; kullaniciyi her seferinde secmeye zorlamak
+  //   yerine varsayilani koyariz, isteyen degistirir. Kayitli belgede dokunulmaz.
+  useEffect(() => {
+    if (belgeId) return;
+    void (async () => {
+      try {
+        const y = await api.liste('depo', {
+          sayfa: 1, boyut: 1,
+          filtre: { op: 'and', kosullar: [{ alan: 'varsayilan', op: 'esit', deger: 1 }] },
+        });
+        const d = y.satirlar[0];
+        if (d) setDepo(o => o ?? { id: Number(d.id), ad: String(d.ad ?? '') });
+      } catch { /* varsayilan depo yoksa alan bos kalir - engelleyici degil */ }
+    })();
+  }, [belgeId]);
+
   // Faturalama sekmesi: bu belgeden turetilmis belgeler (F8 zinciri).
   useEffect(() => {
     if (!kayitliId || aktifSekme !== 'fatura') return;
