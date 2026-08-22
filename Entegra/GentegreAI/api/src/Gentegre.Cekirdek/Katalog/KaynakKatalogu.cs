@@ -831,6 +831,7 @@ public static class KaynakKatalogu
             left join public.taraf te on te.id = b.teslim_eden_id
             left join public.taraf sc on sc.id = b.satici_id
             left join public.belge kb on kb.id = b.kaynak_id and b.kaynak_tur = 30
+            left join public.kasa_islem_turu kt2 on kt2.kod = kb.tur
             """,
         SabitKosul: "b.tur in (10, 14, 109, 119)",
         SubeKolonu: "b.sube_id",
@@ -852,11 +853,26 @@ public static class KaynakKatalogu
             new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",     Hizalama: "orta", Bicim: "dd.MM.yyyy"),
             new("tarafUnvan",    "b.taraf_unvan",    "metin", "Müşteri",   Genislik: 220),
             new("cikisDepo",     "cd.ad",            "metin", "Çıkış Deposu"),
-            // Siparis No ve Arac/Sofor GIZLI (Varsayilan:false): gocten gelen 28
-            //   irsaliyenin hicbirinde dolu degil, her satirda bos kolon goruntu
-            //   kirliligi. Silinmedi - kolon seciciden acilabilir ve F8 zincirini
-            //   (siparis -> irsaliye) gostermenin tek yeri.
-            new("kaynakBelgeNo", "kb.belge_no",      "metin", "Sipariş No", Varsayilan: false),
+            // KAYNAK / HEDEF: F8 donusum zincirinin iki ucu. Kaynak baslik bagindan
+            //   (belge.kaynak_id) okunur; hedef ise SATIR bagindan turetilir -
+            //   bir irsaliye birden fazla faturaya bolunebilir, o yuzden distinct
+            //   belge numaralari birlestirilir. Iptal (durum=2) hedefler sayilmaz.
+            new("kaynak",
+                "case when kb.id is null then '' " +
+                "else coalesce(kt2.ad, '') || case when kb.belge_no <> '' " +
+                "then ' ' || kb.belge_no else '' end end",
+                                                      "metin", "Kaynak",    Genislik: 170,
+                                                      Siralanabilir: false, Filtrelenebilir: false),
+            new("hedef",
+                "coalesce((select string_agg(distinct coalesce(ht.ad, '') || ' ' || hb.belge_no, ', ') " +
+                "            from public.belge_satir hs " +
+                "            join public.belge_satir ks on ks.id = hs.kaynak_id and hs.kaynak_tur = 30 " +
+                "            join public.belge hb on hb.id = hs.belge_id " +
+                "            left join public.kasa_islem_turu ht on ht.kod = hb.tur " +
+                "           where ks.belge_id = b.id and hb.durum <> 2), '')",
+                                                      "metin", "Hedef",     Genislik: 190,
+                                                      Siralanabilir: false, Filtrelenebilir: false),
+            new("kaynakBelgeNo", "kb.belge_no",      "metin", "Kaynak Belge No", Varsayilan: false),
             // Plaka ve sofor tek kolonda: mockup "07 ABC 145 / Hasan Celik" gosteriyor.
             new("aracSofor",
                 "case when btrim(coalesce(b.arac_plaka, '') || coalesce(b.sofor_ad, '')) = '' then '' " +
@@ -865,10 +881,15 @@ public static class KaynakKatalogu
                                                       "metin", "Araç / Şoför", Genislik: 170,
                                                       Varsayilan: false),
             // Teslim eden bos ise satis temsilcisi gosterilir (mockup'taki davranis).
-            new("teslimEden",    "coalesce(te.unvan, sc.unvan)", "metin", "Teslim Eden"),
+            new("teslimEden",    "coalesce(te.unvan, sc.unvan)", "metin", "Teslim Eden",
+                                                      Varsayilan: false),
+            // Faturalama durumu GIZLI: Hedef kolonu zaten hangi faturaya donustugunu
+            //   (ya da donusmedigini) gosteriyor; ikisi ayni bilgiyi tekrarliyordu.
+            //   Cip filtreleri kapanmaDurum uzerinden calismaya devam eder.
             new("faturalama",
                 "case b.kapanma_durum when 2 then 'Faturalandı' when 1 then 'Kısmi' else 'Faturalanmadı' end",
-                                                      "metin", "Faturalama", Hizalama: "orta"),
+                                                      "metin", "Faturalama", Hizalama: "orta",
+                                                      Varsayilan: false),
             new("kapanmaDurum",  "b.kapanma_durum",  "sayi",  "Faturalama Kodu", Hizalama: "orta", Varsayilan: false),
             new("eIrsaliye",
                 "case when coalesce(b.efatura_durum, 0) = 0 then 'Kağıt' " +
