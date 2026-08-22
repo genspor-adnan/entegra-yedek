@@ -1824,6 +1824,20 @@ sadeleştirdik, davranış DEĞİŞMEDİ:
 Build (`dotnet build` + `npm run build`) temiz, davranış testi yapılmadı (fonksiyonel olarak
 aynı SQL/JSX — sadece tekrar eden kod tek yere toplandı).
 
+## 21.08.2026 — Araç çubuğu butonları ikon + hover hint'e çevrildi
+
+Kullanıcı: "doküman üstteki butonları sade ikon göster üzerine gelince hint yaz". Metin
+etiketleri kaldırıldı, `title` attribute (native tarayıcı tooltip) eklendi:
+＋ Dosya Ekle, 🖼️ Resimleri Göster/Kapat, 👁️ Gör, ✏️ Düzenle, ⬇️ İndir, 🔗 Paylaş,
+⭐ Varsayılan Yap, 🗑️ Sil.
+
+## 21.08.2026 — Tüm "Ekle" butonları mavi (`.d.bir`)
+
+Kullanıcı: "ekle mavi olsun her yerde". Mevcut `.d.bir` CSS sınıfı (zaten "Yeni" kayıt
+butonunda kullanılıyordu, mavi degrade) 4 yerdeki "ekle" butonuna da eklendi:
+`DokumanGalerisi.tsx` (Dosya Ekle), `GenDetayTablo.tsx` + `BelgeKarti.tsx` (+ Satır),
+`IlgiliKisiler.tsx` (Kişi Ekle). Yeni CSS yok, mevcut sınıf yaygınlaştırıldı.
+
 ## Oturum kapanışı — 19.08.2026, kaldığımız yer
 
 **Veritabanı durumu** (docker `gentegre-pg18`, port 5434, db `gentegre_ai`):
@@ -1877,3 +1891,62 @@ liste/kart kaynakları, `kod_liste` eşleşmeleri ve F0-02 SP envanteri.
 muayene), hasta dosya no sayacı (şube bazlı, `belge_no_sayac` deseni), MHRS/e-Nabız entegrasyonu,
 SGK provizyon. Zemin hazır: `taraf_hasta`, `hasta` görünümü, `sube.tur = 2`,
 `taraf.hasta_grubu` / `taraf.kan_grubu` / `taraf.sigorta_turu` kod listeleri.
+
+## 22.08.2026 — Son Aranan / Sik Aranan gercek oldu (eski KULLANICI_ARAMA)
+
+Kullanici: "kartlara yeni record ekleyince sql de oldugu gibi son eklenen sik eklenen verisi
+tut" - hem kart ACILISINDA hem EKLEMEDE (20.08.2026'daki GORSEL-yalniz durumseg ikonlarinin
+backend'i eksikti). Kapsam: liste ekranindaki Son/Sik Aranan ikonlari (GenLookup arama
+dialogu HARIC - kullanici bilerek disi birakti).
+
+**`070_kullanici_arama.sql`**: eski `KULLANICI_ARAMA` (KULID+MODUL+KAYITID+SAY+
+DEGISTIRMETARIHI) karsiligi, PK `(kullanici_id, kaynak, kayit_id)`, `say`/`son_tarih` uzerinde
+ayri indeks (Sik/Son siralama).
+
+**Backend**: `KullaniciAramaDeposu.IsaretleAsync` (upsert: `say+1`, `son_tarih=now()`) - genel
+`KartUclari` GET `/api/kart/{kaynak}/{id}` (acilis) ve POST `/api/kart/{kaynak}` (ekleme,
+yeni id ile) uclarina baglandi. PUT (guncelleme) KAPSAM DISI - "acilis" GET'te zaten
+isaretlendigi icin ayrica gerekmiyor.
+
+Liste tarafinda `ListeIstegi.Gorunum` (onceden tanimli ama HIC kullanilmayan alan) artik
+`"son"`/`"sik"` degerini isliyor: `SorguUretici.KaynakIfadesi` bu degerlerde FROM ifadesine
+`kullanici_arama`'ya bu kullanici+kaynak icin `INNER JOIN` ekliyor (sonuc kullanicinin daha
+once actigi/ekledigi kayitlarla sinirlanir), `Sirala` da `ka.son_tarih desc` / `ka.say desc`
+donduruyor. Sayim/Toplam sorgulari da ayni join'i alarak filtrelenmis kumeye gore hesapliyor.
+`Satirlar`/`Sayim`/`Toplamlar` imzalarina `kullaniciId` eklendi (`ListeDeposu.SorgulaAsync` →
+`ListeUclari` `baglam.KullaniciId`'yi geciyor).
+
+**Istemci**: `GenGrid.tsx` durumseg'teki uc ikon (☰/🕓/⭐) artik gercek `aramaGorunumu` state'i
+(`tum`/`son`/`sik`) tasiyor, `api.liste`'ye `gorunum` alani olarak gidiyor. `alert('...henuz
+baglanmadi')` stub'lari kaldirildi.
+
+Build: `dotnet build` (Cekirdek+Veri) temiz derledi; Api projesinin kopyalama adimi calisan
+`dotnet run` sureci dll'i kilitledigi icin atlandi (kod hatasi degil, calisan sunucu yeniden
+baslatilinca yeni koda gecer).
+
+### Ayni oturum: kayittan sonra grid otomatik yenilensin
+
+Kullanici: "yeni kayıt ekleyince otomatik grid refresh olsun... değişiklikte de grid de o
+satır refresh olsun". Kok neden: `Liste.tsx`'te `GenGrid` ve `GenForm` KARDES bilesenler -
+kart kaydedilince (`GenForm.onKaydedildi`, hem ekleme hem duzenlemede tek yerden ateslenir)
+grid'e haber giden bir yol yoktu, kapaninca URL degisiyordu ama liste yeniden cekilmiyordu.
+
+`GenGrid`e `yenile?: number` prop'u eklendi - degisince (deger farki, ne olduğu onemsiz)
+`yukle()` yeniden cagrilir. `Liste.tsx`'te `yenile` state'i `onKaydedildi`de bir arttiriliyor.
+Boylece: yeni kayit eklenince Son Aranan gorunumunde en ustte cikiyor (backend zaten
+`son_tarih desc` sirali, sadece grid'in yeniden cekmesi gerekiyordu); mevcut kayit
+duzenlenince o satirin guncel hali sayfa yeniden cekilince geliyor (satir bazli kismi
+guncelleme degil, tam sayfa yenileme - sadelik tercih edildi, grid zaten sayfali/kucuk).
+
+### Ayni oturum: yeni kart ekleyince gorunum otomatik "Son Aranan"a gecsin
+
+Kullanici: "yeni kart ekleyince liste otomatik son eklenen gelsin" - onceki adim sadece
+grid'i yeniliyordu, kullanici Son Aranan ikonuna kendi tiklamadikca yeni kayit gorunmeyebilirdi
+(varsayilan gorunum "Tum Liste", varsayilan siralama cogu kaynakta alfabetik - yeni kayit
+sayfanin herhangi bir yerine dusebilirdi).
+
+`GenGrid`e ikinci prop: `odaklaSonEklenen?: number`. Degisince (`setSayfa(1)` +
+`setAramaGorunumu('son')`) gorunum "Son Aranan"a atlar - yeni kayit orada zaten en ustte
+(`son_tarih desc`). `Liste.tsx` bunu SADECE ekleme'de artiriyor (`kartId === 'yeni'`),
+duzenlemede degil - var olan bir kaydi degistirirken kullanicinin bakmakta oldugu gorunum/
+sayfa/filtre degismemeli, sadece o satirin verisi tazelenmeli (`yenile` zaten bunu yapiyor).

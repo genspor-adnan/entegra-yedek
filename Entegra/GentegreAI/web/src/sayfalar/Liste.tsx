@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
@@ -30,6 +31,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // Kart MODAL acilir (mockup deseni): liste arkada kalir, URL yine /cari/4911.
   const kartId = id === undefined ? null : (id === 'yeni' ? 'yeni' as const : Number(id));
 
+  // Kart kaydedilince (ekleme ya da duzenleme) grid'i yeniden yukletmek icin - GenForm
+  //   onKaydedildi'de bir arttirilir, GenGrid bu degisimi izleyip yukle() cagirir.
+  const [yenile, setYenile] = useState(0);
+  // Yeni kart EKLENINCE (duzenlemede degil) grid "Son Aranan"a gecsin - kullanici
+  //   az once ekledigi kaydi listede otomatik en ustte gorsun.
+  const [odaklaSonEklenen, setOdaklaSonEklenen] = useState(0);
+
   return (
     <>
     <GenGrid
@@ -39,6 +47,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       toplam={tanim.toplam}
       cipler={tanim.cipler}
       aksiyonEkrani={tanim.aksiyonEkrani}
+      yenile={yenile}
+      odaklaSonEklenen={odaklaSonEklenen}
       onSatirAc={satir => { if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`) }}
       onAksiyon={(kod, satir) => {
         if (kod.endsWith('.yeni') && tanim.kartYolu) git(`${tanim.kartYolu}/yeni`);
@@ -58,7 +68,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         yerTutucuSekmeler={tanim.yerTutucuSekmeler}
         resimYerTutucu={tanim.resimYerTutucu}
         onKapat={() => git(tanim.kartYolu!)}
-        onKaydedildi={yeniId => { if (kartId === 'yeni') git(`${tanim.kartYolu}/${yeniId}`, { replace: true }) }}
+        onKaydedildi={yeniId => {
+          setYenile(t => t + 1);
+          if (kartId === 'yeni') {
+            setOdaklaSonEklenen(t => t + 1);
+            git(`${tanim.kartYolu}/${yeniId}`, { replace: true });
+          }
+        }}
       />
     )}
     </>
@@ -126,6 +142,11 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'personel', baslik: 'Personel', yol: 'IK › Personel', kartYolu: '/personel',
     aksiyonEkrani: 'personel-liste', cipler: DURUM_CIPLERI,
     menuAd: 'Personel', ic: '🪪', yetkiKodu: 'personel',
+  },
+  {
+    kaynak: 'hasta', baslik: 'Hastalar', yol: 'Hasta › Hastalar', kartYolu: '/hasta',
+    aksiyonEkrani: 'hasta-liste', cipler: DURUM_CIPLERI,
+    menuAd: 'Hasta', ic: '🏥', yetkiKodu: 'personel',
   },
   {
     kaynak: 'e-belge', baslik: 'e-Belge Kuyrugu', yol: 'e-Belge › Kuyruk',

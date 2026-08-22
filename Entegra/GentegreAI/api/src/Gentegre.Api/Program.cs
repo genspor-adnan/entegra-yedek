@@ -31,6 +31,7 @@ kurucu.Services.AddScoped<OturumDeposu>();
 kurucu.Services.AddSingleton<YetkiDeposu>();
 kurucu.Services.AddScoped<ListeDeposu>();
 kurucu.Services.AddScoped<KartDeposu>();
+kurucu.Services.AddScoped<KullaniciAramaDeposu>();
 kurucu.Services.AddScoped<KisiDeposu>();
 kurucu.Services.AddScoped<RolYetkiDeposu>();
 kurucu.Services.AddScoped<DokumanDeposu>();

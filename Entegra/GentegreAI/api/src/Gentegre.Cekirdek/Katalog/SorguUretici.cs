@@ -27,18 +27,21 @@ public sealed class SorguUretici
 
     /// <summary>Sayfali satir sorgusu.</summary>
     public SorguParcasi Satirlar(ListeIstegi istek, IReadOnlyList<KolonTanimi> kolonlar,
-                                 int? subeId, IReadOnlyList<int>? kapsamTarafIdleri)
+                                 int? subeId, IReadOnlyList<int>? kapsamTarafIdleri, int? kullaniciId)
     {
         var secim = string.Join(", ", kolonlar.Select(k => $"{k.Sql} as \"{k.Ad}\""));
+        var kaynakIfadesi = KaynakIfadesi(istek, kullaniciId);
         var nerede = Nerede(istek, subeId, kapsamTarafIdleri);
-        var sirala = Sirala(istek);
+        // "son"/"sik" siralamasi yalniz KaynakIfadesi'nin gercekten "ka" join'i
+        //   eklediginde anlamli - kullaniciId eksikken normal siralamaya duser.
+        var sirala = Sirala(istek, kullaniciGorunumuAktif: kullaniciId is not null);
 
         var boyut = Math.Clamp(istek.Boyut, 1, ListeIstegi.EnBuyukBoyut);
         var sayfa = Math.Max(1, istek.Sayfa);
 
         var sql = new StringBuilder()
             .Append("select ").Append(secim)
-            .Append(" from ").Append(_kaynak.Kaynak)
+            .Append(" from ").Append(kaynakIfadesi)
             .Append(nerede)
             .Append(" order by ").Append(sirala)
             .Append(" limit ").Append(Ekle(boyut))
@@ -49,16 +52,17 @@ public sealed class SorguUretici
     }
 
     /// <summary>Toplam kayit sayisi (ayni WHERE, sayfalama yok).</summary>
-    public SorguParcasi Sayim(ListeIstegi istek, int? subeId, IReadOnlyList<int>? kapsamTarafIdleri)
+    public SorguParcasi Sayim(ListeIstegi istek, int? subeId, IReadOnlyList<int>? kapsamTarafIdleri, int? kullaniciId)
     {
         _par.Clear();
-        var sql = "select count(*) from " + _kaynak.Kaynak + Nerede(istek, subeId, kapsamTarafIdleri);
+        var sql = "select count(*) from " + KaynakIfadesi(istek, kullaniciId) +
+                  Nerede(istek, subeId, kapsamTarafIdleri);
         return new SorguParcasi(sql, _par.ToArray());
     }
 
     /// <summary>Istenen alanlarin toplamlari (yalniz para/sayi kolonlari).</summary>
     public SorguParcasi? Toplamlar(ListeIstegi istek, IReadOnlyList<KolonTanimi> kolonlar,
-                                   int? subeId, IReadOnlyList<int>? kapsamTarafIdleri)
+                                   int? subeId, IReadOnlyList<int>? kapsamTarafIdleri, int? kullaniciId)
     {
         if (istek.Toplam is not { Count: > 0 }) return null;
 
@@ -72,9 +76,27 @@ public sealed class SorguUretici
 
         _par.Clear();
         var secim = string.Join(", ", secilen.Select(k => $"coalesce(sum({k.Sql}), 0) as \"{k.Ad}\""));
-        var sql = "select " + secim + " from " + _kaynak.Kaynak +
+        var sql = "select " + secim + " from " + KaynakIfadesi(istek, kullaniciId) +
                   Nerede(istek, subeId, kapsamTarafIdleri);
         return new SorguParcasi(sql, _par.ToArray());
+    }
+
+    // ------------------------------------------------------------- son/sik ----
+    /// <summary>
+    /// "Son Aranan"/"Sik Aranan" gorunumu (eski KULLANICI_ARAMA): kaynak ifadesine
+    /// bu kullanicinin kullanici_arama satirlarina INNER JOIN eklenir - sonuc yalniz
+    /// bu kullanicinin daha once actigi/eklediği kayitlarla sinirlanir.
+    /// </summary>
+    private string KaynakIfadesi(ListeIstegi istek, int? kullaniciId)
+    {
+        if (istek.Gorunum is not ("son" or "sik") || kullaniciId is null) return _kaynak.Kaynak;
+
+        var idKolon = _kaynak.Kolon("id")?.Sql
+            ?? throw new InvalidOperationException($"'{_kaynak.Ad}' kaynaginda 'id' kolonu yok.");
+
+        return _kaynak.Kaynak +
+            $" join public.kullanici_arama ka on ka.kaynak = {Ekle(_kaynak.Ad)}" +
+            $" and ka.kullanici_id = {Ekle(kullaniciId)} and ka.kayit_id = {idKolon}";
     }
 
     // ------------------------------------------------------------------ where ----
@@ -191,8 +213,11 @@ public sealed class SorguUretici
     }
 
     // ----------------------------------------------------------------- sirala ----
-    private string Sirala(ListeIstegi istek)
+    private string Sirala(ListeIstegi istek, bool kullaniciGorunumuAktif)
     {
+        if (kullaniciGorunumuAktif && istek.Gorunum == "son") return "ka.son_tarih desc";
+        if (kullaniciGorunumuAktif && istek.Gorunum == "sik") return "ka.say desc, ka.son_tarih desc";
+
         if (istek.Sirala is not { Count: > 0 }) return _kaynak.VarsayilanSirala;
 
         var parcalar = new List<string>();

@@ -15,15 +15,15 @@ public sealed class ListeDeposu
     /// </summary>
     public async Task<ListeYaniti> SorgulaAsync(KaynakTanimi kaynak, ListeIstegi istek,
         IReadOnlyList<KolonTanimi> kolonlar, int? subeId, IReadOnlyList<int>? kapsam,
-        string izlemeNo, CancellationToken iptal = default)
+        string izlemeNo, int? kullaniciId, CancellationToken iptal = default)
     {
         var kronometre = Stopwatch.StartNew();
 
         var satirUretici = new SorguUretici(kaynak);
-        var satirSorgu = satirUretici.Satirlar(istek, kolonlar, subeId, kapsam);
+        var satirSorgu = satirUretici.Satirlar(istek, kolonlar, subeId, kapsam, kullaniciId);
 
-        var sayimSorgu = new SorguUretici(kaynak).Sayim(istek, subeId, kapsam);
-        var toplamSorgu = new SorguUretici(kaynak).Toplamlar(istek, kolonlar, subeId, kapsam);
+        var sayimSorgu = new SorguUretici(kaynak).Sayim(istek, subeId, kapsam, kullaniciId);
+        var toplamSorgu = new SorguUretici(kaynak).Toplamlar(istek, kolonlar, subeId, kapsam, kullaniciId);
 
         await using var baglanti = await _veri.AcAsync(iptal);
 

@@ -23,6 +23,11 @@ interface Props {
   /** Kart icine gomulu kucuk grid (ör. cari kartinda İlgili Kişiler) - buyuk baslik/yol
       satiri (.sayfabas) gizlenir, geri kalan (arama/cipler/tablo/sayfalama) ayni kalir. */
   gomulu?: boolean;
+  /** Degisince (kart kaydedilince - ekleme ya da duzenleme) grid yeniden yuklenir. */
+  yenile?: number;
+  /** Degisince (yeni kart EKLENINCE) gorunum "Son Aranan"a gecer - yeni kayit sunucu
+      sirasinda (son_tarih desc) zaten ilk sirada oldugu icin liste otomatik onu gosterir. */
+  odaklaSonEklenen?: number;
 }
 
 /** Mockup: cip seridinde Liste/Grup/Analiz gorunum secimi (search kutusunun hemen sagi). */
@@ -42,7 +47,7 @@ const GORUNUMLER: { v: 'liste' | 'grup' | 'analiz'; ik: string; ad: string }[] =
  * arayuzde gizleme mantigi YOKTUR. Filtre, siralama ve sayfalama da sunucuda calisir.
  */
 export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, onSatirAc,
-                          aksiyonEkrani, onAksiyon, cipler, gomulu }: Props) {
+                          aksiyonEkrani, onAksiyon, cipler, gomulu, yenile, odaklaSonEklenen }: Props) {
   const [kolonlar, setKolonlar] = useState<KolonMeta[]>([]);
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [toplamKayit, setToplamKayit] = useState(0);
@@ -51,6 +56,9 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
   const [sirala, setSirala] = useState<Siralama[]>([]);
   const [arama, setArama] = useState('');
   const [cipIndeks, setCipIndeks] = useState(0);
+  // "Tum Liste / Son Aranan / Sik Aranan" (eski KULLANICI_ARAMA) - sunucuya `gorunum`
+  //   olarak gider, kart acilis/ekleme sikligina gore filtreler+siralar.
+  const [aramaGorunumu, setAramaGorunumu] = useState<'tum' | 'son' | 'sik'>('tum');
   // Mockup: Liste/Grup/Analiz gorunum secimi. Grup/Analiz backend'de HENUZ YOK -
   //   grid yerine "yakinda" yer tutucu gosterilir (aksiyon stub'lariyla ayni durustluk).
   const [gorunum, setGorunum] = useState<'liste' | 'grup' | 'analiz'>('liste');
@@ -125,7 +133,8 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
         : parcalar.length === 1 ? parcalar[0]
         : { op: 'and' as const, kosullar: parcalar };
 
-      const yanit = await api.liste(kaynak, { sayfa, boyut, sirala, filtre, toplam });
+      const gorunum = aramaGorunumu === 'tum' ? undefined : aramaGorunumu;
+      const yanit = await api.liste(kaynak, { sayfa, boyut, sirala, filtre, toplam, gorunum });
       setSatirlar(yanit.satirlar);
       setToplamKayit(yanit.toplamKayit);
       setToplamlar(yanit.toplamlar);
@@ -136,9 +145,20 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
     } finally {
       setYukleniyor(false);
     }
-  }, [kaynak, sayfa, boyut, sirala, toplam, sabitFiltre, aramaFiltresi, filtreSatiriFiltresi, cipler, cipIndeks, kolonlar.length]);
+  }, [kaynak, sayfa, boyut, sirala, toplam, sabitFiltre, aramaFiltresi, filtreSatiriFiltresi, cipler, cipIndeks, kolonlar.length, aramaGorunumu]);
 
   useEffect(() => { void yukle() }, [yukle]);
+  // Kart kaydedilince (ekleme ya da duzenleme - GenForm onKaydedildi) disaridan tetiklenen
+  //   yeniden yukleme: "yenile" degeri her kaydetmede bir arttirilir.
+  useEffect(() => { if (yenile !== undefined) void yukle() }, [yenile]);
+  // Yeni kart eklenince "Son Aranan"a gec - yeni kayit orada otomatik en ustte cikar.
+  //   (aramaGorunumu zaten "son" ise deger degismez, ustteki "yenile" tetiklemesi yeniden
+  //   yuklemeyi zaten yapar.)
+  useEffect(() => {
+    if (odaklaSonEklenen === undefined) return;
+    setSayfa(1);
+    setAramaGorunumu('son');
+  }, [odaklaSonEklenen]);
 
   // Arama yazarken her tusa istek atilmaz (Delphi tarafindaki debounce deseni).
   const aramaDegisti = (deger: string) => {
@@ -337,26 +357,26 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
 
         {cipler && cipler.length > 0 && (
           <div className="durumseg">
-            {/* Delphi'deki "Tum Liste / Son Aranan / Sik Aranan" (KULLANICI_ARAMA) - sadece
-                Tum Liste calisir (varsayilan gorunum zaten bu); Son/Sik'in backend'i yok. */}
+            {/* Delphi'deki "Tum Liste / Son Aranan / Sik Aranan" (KULLANICI_ARAMA) -
+                kart acilis/ekleme sikligina gore sunucuda filtrelenir+siralanir. */}
             <button
-              className="ikon-liste on"
+              className={`ikon-liste ${aramaGorunumu === 'tum' ? 'on' : ''}`}
               title="Tüm Liste"
-              onClick={() => {}}
+              onClick={() => { setAramaGorunumu('tum'); setSayfa(1) }}
             >
               ☰
             </button>
             <button
-              className="ikon-liste"
+              className={`ikon-liste ${aramaGorunumu === 'son' ? 'on' : ''}`}
               title="Son Aranan"
-              onClick={() => alert('Son Aranan henüz bağlanmadı.')}
+              onClick={() => { setAramaGorunumu('son'); setSayfa(1) }}
             >
               🕓
             </button>
             <button
-              className="ikon-liste"
+              className={`ikon-liste ${aramaGorunumu === 'sik' ? 'on' : ''}`}
               title="Sık Aranan"
-              onClick={() => alert('Sık Aranan henüz bağlanmadı.')}
+              onClick={() => { setAramaGorunumu('sik'); setSayfa(1) }}
             >
               ⭐
             </button>

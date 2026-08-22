@@ -15,7 +15,7 @@ public static class KartUclari
 
         // ------------------------------------------------------------- oku ----
         grup.MapGet("/{kaynak}/{id:long}", async (
-            string kaynak, long id, BaglamCozucu cozucu, KartDeposu depo,
+            string kaynak, long id, BaglamCozucu cozucu, KartDeposu depo, KullaniciAramaDeposu arama,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
@@ -26,6 +26,9 @@ public static class KartUclari
 
             var kart = await depo.OkuAsync(tanim, id, okunabilir, baglam.Kapsam, iptal)
                        ?? throw GentegreHatasi.Bulunamadi();
+
+            // KULLANICI_ARAMA karsiligi: kart her acilista upsert (Son/Sik Aranan).
+            await arama.IsaretleAsync(baglam.KullaniciId, tanim.Ad, id, iptal);
 
             var govde = new Dictionary<string, object?>(kart.Kart, StringComparer.Ordinal)
             {
@@ -49,7 +52,7 @@ public static class KartUclari
 
         // ------------------------------------------------------------ ekle ----
         grup.MapPost("/{kaynak}", async (
-            string kaynak, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo,
+            string kaynak, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo, KullaniciAramaDeposu arama,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
@@ -59,6 +62,9 @@ public static class KartUclari
             var degerler = Degerler(tanim, istek.Kart, baglam, yeni: true);
             var yeniId = await depo.EkleAsync(tanim, degerler, istek.Detaylar,
                 new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+
+            // KULLANICI_ARAMA karsiligi: yeni kayit da ekleyen kullanici icin isaretlenir.
+            await arama.IsaretleAsync(baglam.KullaniciId, tanim.Ad, yeniId, iptal);
 
             var (okunabilir, _) = Alanlar(tanim, baglam);
             var kart = await depo.OkuAsync(tanim, yeniId, okunabilir, null, iptal);
