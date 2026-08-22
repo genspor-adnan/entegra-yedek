@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { ApiHatasi, type KolonMeta, type Kosul, type ListeSatiri, type Siralama } from '../api/sozlesme';
 import { bicimle } from './bicim';
@@ -24,6 +24,9 @@ interface Props {
   /** Kart icine gomulu kucuk grid (ör. cari kartinda İlgili Kişiler) - buyuk baslik/yol
       satiri (.sayfabas) gizlenir, geri kalan (arama/cipler/tablo/sayfalama) ayni kalir. */
   gomulu?: boolean;
+  /** Arama + Liste/Grup/Analiz + toplu aksiyon seridini hic cizme (ör. Stok Ayarlari >
+      Depolar): birkac satirlik ayar listesinde bu serit bilgi degil gurultu. */
+  seritGizli?: boolean;
   /** Degisince (kart kaydedilince - ekleme ya da duzenleme) grid yeniden yuklenir. */
   yenile?: number;
   /** Degisince (yeni kart EKLENINCE) gorunum "Son Aranan"a gecer - yeni kayit sunucu
@@ -47,6 +50,93 @@ function icerikMetni(deger: unknown): string {
   }
 }
 
+function jsonCoz(deger: unknown): unknown {
+  if (deger === null || deger === undefined || deger === '') return null;
+  if (typeof deger !== 'string') return deger;
+  try {
+    return JSON.parse(deger);
+  } catch {
+    return deger;
+  }
+}
+
+const degerMetni = (deger: unknown) =>
+  deger === null || deger === undefined || deger === '' ? '-' : String(deger);
+
+const degisimAyir = (deger: unknown): { onceki?: string; sonraki?: string; duz: string } => {
+  const metin = degerMetni(deger);
+  const ayirac = ' -> ';
+  const indeks = metin.indexOf(ayirac);
+  if (indeks < 0) return { duz: metin };
+  return {
+    onceki: metin.slice(0, indeks) || '-',
+    sonraki: metin.slice(indeks + ayirac.length) || '-',
+    duz: metin,
+  };
+};
+
+function LogTablosu({ deger }: { deger: unknown }) {
+  const veri = jsonCoz(deger);
+  if (veri === null) return <div className="grid-bilgi">İçerik yok.</div>;
+  if (typeof veri !== 'object') return <div className="grid-bilgi">{icerikMetni(veri)}</div>;
+
+  const satirlar: { bolum: string; alan: string; onceki?: string; sonraki?: string; deger: string }[] = [];
+  const ekle = (bolum: string, alan: string, ham: unknown) => {
+    const d = degisimAyir(ham);
+    satirlar.push({ bolum, alan, onceki: d.onceki, sonraki: d.sonraki, deger: d.duz });
+  };
+  const nesneEkle = (bolum: string, nesne: Record<string, unknown>) =>
+    Object.entries(nesne).forEach(([alan, ham]) => ekle(bolum, alan, ham));
+
+  const kok = veri as Record<string, unknown>;
+  if (kok.kart && typeof kok.kart === 'object' && !Array.isArray(kok.kart))
+    nesneEkle('Kart', kok.kart as Record<string, unknown>);
+  if (kok.detaylar && typeof kok.detaylar === 'object' && !Array.isArray(kok.detaylar)) {
+    Object.entries(kok.detaylar as Record<string, unknown>).forEach(([detayAd, liste]) => {
+      if (Array.isArray(liste)) {
+        liste.forEach((satir, i) => {
+          if (satir && typeof satir === 'object' && !Array.isArray(satir))
+            nesneEkle(`${detayAd} #${i + 1}`, satir as Record<string, unknown>);
+        });
+      }
+    });
+  }
+  if (satirlar.length === 0) nesneEkle('Bilgi', kok);
+
+  const degisimVar = satirlar.some(s => s.onceki !== undefined || s.sonraki !== undefined);
+  const gruplar = satirlar.reduce<Record<string, typeof satirlar>>((sonuc, satir) => {
+    (sonuc[satir.bolum] ??= []).push(satir);
+    return sonuc;
+  }, {});
+  const kolonSayisi = degisimVar ? 3 : 2;
+
+  return (
+    <table className="grid">
+      <thead>
+        <tr>
+          <th>Alan</th>
+          {degisimVar ? <><th>Önceki</th><th>Sonraki</th></> : <th>Değer</th>}
+        </tr>
+      </thead>
+      <tbody>
+        {Object.entries(gruplar).map(([bolum, liste]) => (
+          <Fragment key={bolum}>
+            <tr className="log-bolum-satiri">
+              <td colSpan={kolonSayisi}>Bölüm: {bolum}</td>
+            </tr>
+            {liste.map((s, i) => (
+              <tr key={`${s.bolum}:${s.alan}:${i}`}>
+                <td>{s.alan}</td>
+                {degisimVar ? <><td>{s.onceki ?? '-'}</td><td>{s.sonraki ?? s.deger}</td></> : <td>{s.deger}</td>}
+              </tr>
+            ))}
+          </Fragment>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
 /** Mockup: cip seridinde Liste/Grup/Analiz gorunum secimi (search kutusunun hemen sagi). */
 const GORUNUMLER: { v: 'liste' | 'grup' | 'analiz'; ik: string; ad: string }[] = [
   { v: 'liste', ik: '▤', ad: 'Liste' },
@@ -64,8 +154,8 @@ const GORUNUMLER: { v: 'liste' | 'grup' | 'analiz'; ik: string; ad: string }[] =
  * arayuzde gizleme mantigi YOKTUR. Filtre, siralama ve sayfalama da sunucuda calisir.
  */
 export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, onSatirAc,
-                          aksiyonEkrani, onAksiyon, cipler, gomulu, yenile, odaklaSonEklenen,
-                          icerikAlani, icerikBaslik }: Props) {
+                          aksiyonEkrani, onAksiyon, cipler, gomulu, seritGizli, yenile,
+                          odaklaSonEklenen, icerikAlani, icerikBaslik }: Props) {
   const [kolonlar, setKolonlar] = useState<KolonMeta[]>([]);
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [toplamKayit, setToplamKayit] = useState(0);
@@ -280,10 +370,16 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
   };
 
   const satirSinifi = (satir: ListeSatiri) => {
+    const islemRengi = kaynak === 'islem-log'
+      ? String(satir.islemTipi ?? '').toLocaleLowerCase('tr-TR').includes('ekle') ? 'satir-log-ekle'
+        : String(satir.islemTipi ?? '').toLocaleLowerCase('tr-TR').includes('değiş') ? 'satir-log-degisiklik'
+        : String(satir.islemTipi ?? '').toLocaleLowerCase('tr-TR').includes('sil') ? 'satir-log-sil'
+        : ''
+      : '';
     const renk = satir.satirRengi === 'kritik' ? 'satir-kritik'
       : satir.satirRengi === 'uyari' ? 'satir-uyari'
       : satir.satirRengi === 'pasif' ? 'satir-pasif' : '';
-    return `${renk} ${seciliSatir?.id === satir.id ? 'secili' : ''}`.trim();
+    return `${renk} ${islemRengi} ${seciliSatir?.id === satir.id ? 'secili' : ''}`.trim();
   };
 
   const gorunenToplamlar = useMemo(() => Object.entries(toplamlar ?? {}), [toplamlar]);
@@ -337,6 +433,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
         </div>
       )}
 
+      {!seritGizli && (
       <div className="cipler">
         <div className="ara" style={{
           maxWidth: 225, margin: 0, height: 23, borderRadius: 12,
@@ -387,7 +484,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
           {icerikAlani && (
             <button
               type="button"
-              className="d"
+              className="d icerik-dugmesi"
               disabled={!seciliSatir}
               title={seciliSatir ? '' : 'Once bir satir secin'}
               onClick={() => { if (seciliSatir) setIcerikAcikSatir(seciliSatir) }}
@@ -397,6 +494,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
           )}
         </span>
       </div>
+      )}
 
       <div className="sahne">
         {hata && <div className="hata-kutusu">{hata}</div>}
@@ -634,12 +732,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
                 ))}
               </tbody>
             </table>
-            <pre style={{
-              whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: 'var(--yuz)',
-              padding: 10, borderRadius: 4, margin: 0,
-            }}>
-              {icerikMetni(icerikAcikSatir[icerikAlani])}
-            </pre>
+            <LogTablosu deger={icerikAcikSatir[icerikAlani]} />
           </div>
         </Modal>
       )}
