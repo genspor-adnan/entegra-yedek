@@ -110,6 +110,19 @@ public static class BelgeUclari
             });
         });
 
+        // GET /api/belge/{id}/donusumler - bu belgeden turetilmis belgeler
+        grup.MapGet("/{id:int}/donusumler", async (
+            int id, BaglamCozucu cozucu, BelgeDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+            return Results.Ok(new
+            {
+                belgeler = await depo.DonusumlerAsync(id, iptal),
+                izlemeNo = baglam.IzlemeNo
+            });
+        });
+
         // GET /api/belge/{id}/diptoplam - ekranin alt toplam seridi
         grup.MapGet("/{id:int}/diptoplam", async (
             int id, BaglamCozucu cozucu, BelgeDeposu depo, HttpContext ctx, CancellationToken iptal) =>

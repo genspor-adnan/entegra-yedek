@@ -227,6 +227,11 @@ export const api = {
   belgeAcikSatirlar: (id: number) =>
     istek<{ satirlar: AcikSatir[] }>(`/api/belge/${id}/acik-satirlar`).then(y => y.satirlar),
 
+  /** Bu belgeden turetilmis belgeler (irsaliye kartinin Faturalama sekmesi). */
+  belgeDonusumler: (id: number) =>
+    istek<{ belgeler: Record<string, unknown>[] }>(`/api/belge/${id}/donusumler`)
+      .then(y => y.belgeler),
+
   /** Siparis -> irsaliye -> fatura. Miktar KISMI olabilir; kalan kaynakta durur. */
   belgeDonustur: (id: number, hedefTur: number,
                   satirlar: { satirId: number; miktar: number }[],

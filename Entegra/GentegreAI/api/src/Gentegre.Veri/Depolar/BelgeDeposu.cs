@@ -382,6 +382,40 @@ public sealed class BelgeDeposu
         return liste;
     }
 
+    /// <summary>
+    /// Bu belgeden TURETILMIS belgeler (irsaliye kartinin Faturalama sekmesi).
+    /// Satir bagindan gruplanir: bir irsaliye birden fazla faturaya bolunebilir.
+    /// </summary>
+    public async Task<List<IDictionary<string, object?>>> DonusumlerAsync(
+        int belgeId, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = new NpgsqlCommand("""
+            select hb.id                       as "belgeId",
+                   hb.belge_no                 as "belgeNo",
+                   hb.belge_tarihi             as "belgeTarihi",
+                   coalesce(ht.ad, '')         as "turAdi",
+                   hb.taraf_unvan              as "tarafUnvan",
+                   sum(hs.miktar)              as miktar,
+                   sum(hs.tutar)               as tutar,
+                   hb.durum,
+                   case hb.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end as "durumAdi"
+              from public.belge_satir hs
+              join public.belge_satir ks on ks.id = hs.kaynak_id and hs.kaynak_tur = 30
+              join public.belge hb       on hb.id = hs.belge_id
+              left join public.kasa_islem_turu ht on ht.kod = hb.tur
+             where ks.belge_id = @p0
+             group by hb.id, hb.belge_no, hb.belge_tarihi, ht.ad, hb.taraf_unvan, hb.durum
+             order by hb.belge_tarihi, hb.id
+            """, baglanti);
+        komut.Parameters.AddWithValue("p0", belgeId);
+
+        var liste = new List<IDictionary<string, object?>>();
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        while (await o.ReadAsync(iptal)) liste.Add(Satir(o));
+        return liste;
+    }
+
     /// <summary>Belge turunun stok/cari etkisi - katalogtan (kasa_islem_turu).</summary>
     private static async Task<(bool Stok, bool Cari)> TurEtkileriAsync(
         NpgsqlConnection baglanti, NpgsqlTransaction islem, int tur, CancellationToken iptal)

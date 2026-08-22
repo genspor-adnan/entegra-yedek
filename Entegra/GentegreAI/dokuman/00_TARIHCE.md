@@ -2509,5 +2509,31 @@ Menü: **Satış** grubu sipariş → irsaliye → fatura sırasına dizildi (be
 döngüsü sırası). `irsaliye-liste` aksiyon ekranı: Yeni İrsaliye · İrsaliyeyi Aç ·
 Faturaya Dönüştür (F8 modalı) · e-İrsaliye Gönder · İptal · Yazdır.
 
+### İrsaliye kartı sekmeleri
+
+`satis_irsaliye_karti.html` mockup'ının sekme yapısı açıldı: **Kalemler · Taşıyıcı /
+Sevkiyat · e-Belge · Faturalama · İmza / Teslim · Yorum / Medya**. Taşıyıcı ve
+İmza/Teslim yalnız irsaliye türlerinde görünür. Sekme çubuğu `Modal`'ın `sekmeBar`
+yuvasında değil, **başlık alanlarının altında** — mockup düzeni (toolbar → hdr → tabs
+→ pane) ve kullanıcının istediği yer: grid'in hemen üstü.
+
+**Kalemler grid'i türe göre değişiyor.** İrsaliye bir sevk belgesidir: mockup'ta
+iskonto/KDV kolonu yok, yerine Depo ve Seri/Lot var. Grid artık
+`# · Stok Kodu · Stok/Hizmet · Miktar · Depo · Seri/Lot · Br. Fiyat · Tutar` +
+TOPLAM satırı; faturada eski düzen (İskonto/KDV) duruyor. Mockup'taki **Raf** kolonu
+yapılmadı (depo raf sistemi şemada yok), **Birim** de öyle (birim adı sözlüğü
+bağlanmadı) — ikisi de not olarak yazılı.
+
+**Faturalama sekmesi gerçek veri:** `GET /api/belge/{id}/donusumler` bu belgeden
+türetilmiş belgeleri satır bağından gruplayarak döndürüyor (bir irsaliye birden fazla
+faturaya bölünebilir). Sekmede ayrıca "Faturaya Dönüştür" düğmesi F8 modalını açıyor.
+**Yorum / Medya** mevcut `DokumanGalerisi`'ne bağlandı. **e-Belge** sekmesi seri/alias/
+durumu gösteriyor; ETTN, zarf no ve GİB yanıtı e-Belge kuyruğu bağlanınca gelecek.
+**İmza / Teslim** yer tutucu — o alanlar şemada yok.
+
+Taşıyıcı sekmesi başlıktakileri tekrarlamıyor: plaka, şoför adı ve teslim eden
+başlıkta kalıyor; sekmede **Şoför TC**, **Taşıyıcı Ünvan** ve **Sevk Tarih/Saati** var
+(e-İrsaliye UBL'ini tamamlayan üç alan).
+
 **Sırada (F4):** kapatma + kur farkı; ardından F5 (çek/senet), F6 (kredi/kupon),
 F7 (belge fişleme).

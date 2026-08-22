@@ -5,20 +5,25 @@ import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru, type ListeSatiri } fro
 import { GenLookup, LOOKUP_CARI, LOOKUP_STOK } from '../bilesenler/GenLookup';
 import { Modal } from '../bilesenler/GenForm';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
+import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { useOturum } from '../kimlik/OturumBaglami';
 
 interface SatirDurumu {
   anahtar: number;
   stokId: number | null;
+  stokKodu: string;
   stokAdi: string;
   adet: string;
   birimFiyat: string;
   iskonto: string;
   kdv: string;
+  /** Seri / lot takibi (belge_satir.izleme_kodu) - irsaliyede gorunur. */
+  izlemeKodu: string;
 }
 
 const bosSatir = (anahtar: number): SatirDurumu => ({
-  anahtar, stokId: null, stokAdi: '', adet: '1', birimFiyat: '', iskonto: '0', kdv: '20',
+  anahtar, stokId: null, stokKodu: '', stokAdi: '', adet: '1', birimFiyat: '',
+  iskonto: '0', kdv: '20', izlemeKodu: '',
 });
 
 const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -40,6 +45,17 @@ const KAPANMA_ETIKET: Record<number, { ad: string; sinif: string }> = {
   1: { ad: 'Kısmi faturalandı', sinif: '' },
   2: { ad: 'Faturalandı', sinif: 'olumlu' },
 };
+
+/** Kart sekmeleri (mockup satis_irsaliye_karti.html .tabs).
+    `irsaliye:true` olanlar yalniz irsaliye turlerinde gorunur. */
+const SEKMELER: { anahtar: string; baslik: string; irsaliye?: boolean }[] = [
+  { anahtar: 'kalem',    baslik: 'Kalemler' },
+  { anahtar: 'tasiyici', baslik: 'Taşıyıcı / Sevkiyat', irsaliye: true },
+  { anahtar: 'ebelge',   baslik: 'e-Belge' },
+  { anahtar: 'fatura',   baslik: 'Faturalama' },
+  { anahtar: 'imza',     baslik: 'İmza / Teslim', irsaliye: true },
+  { anahtar: 'yorum',    baslik: 'Yorum / Medya' },
+];
 
 /** Kartin acabilecegi belge turleri - grup='belge' katalogundan suzulur. */
 const GIRILEBILIR_TURLER = [19, 15, 14, 9, 11, 10, 16, 12] as const;
@@ -89,6 +105,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [depo, setDepo] = useState<{ id: number; ad: string } | null>(null);
   const [satici, setSatici] = useState<{ id: number; ad: string } | null>(null);
   const [teslimSekli, setTeslimSekli] = useState(0);
+  const [sevkTarihi, setSevkTarihi] = useState('');
+  const [soforTckn, setSoforTckn] = useState('');
+  const [tasiyici, setTasiyici] = useState<{ id: number; ad: string } | null>(null);
   const [aracPlaka, setAracPlaka] = useState('');
   const [soforAd, setSoforAd] = useState('');
   const [teslimEden, setTeslimEden] = useState<{ id: number; ad: string } | null>(null);
@@ -98,6 +117,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [kaydediyor, setKaydediyor] = useState(false);
   const [aciliyor, setAciliyor] = useState(!!belgeId);
   const [donusum, setDonusum] = useState(false);
+  const [aktifSekme, setAktifSekme] = useState('kalem');
+  const [donusumler, setDonusumler] = useState<Record<string, unknown>[]>([]);
   const [sonuc, setSonuc] = useState<BelgeYaniti | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [alanHatalari, setAlanHatalari] = useState<Record<string, string>>({});
@@ -146,6 +167,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setSatici(y.belge.saticiId
           ? { id: Number(y.belge.saticiId), ad: String(y.belge.saticiAdi ?? '') } : null);
         setTeslimSekli(Number(y.belge.teslimSekli ?? 0));
+        setSevkTarihi(y.belge.irsaliyeTarihi ? String(y.belge.irsaliyeTarihi).slice(0, 16) : '');
+        setSoforTckn(String(y.belge.soforTckn ?? ''));
         setAracPlaka(String(y.belge.aracPlaka ?? ''));
         setSoforAd(String(y.belge.soforAd ?? ''));
         setTeslimEden(y.belge.teslimEdenId
@@ -153,7 +176,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setSatirlar((y.satirlar ?? []).map((r, i) => ({
           anahtar: i + 1,
           stokId: r.stokId ? Number(r.stokId) : null,
+          stokKodu: String(r.stokKodu ?? ''),
           stokAdi: String(r.stokAdi ?? r.aciklama ?? ''),
+          izlemeKodu: String(r.izlemeKodu ?? ''),
           adet: String(r.miktar ?? r.adet ?? 0),
           birimFiyat: String(r.birimFiyat ?? 0),
           iskonto: String(r.iskonto ?? 0),
@@ -164,6 +189,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       } finally { setAciliyor(false) }
     })();
   }, [belgeId]);
+
+  // Faturalama sekmesi: bu belgeden turetilmis belgeler (F8 zinciri).
+  useEffect(() => {
+    if (!kayitliId || aktifSekme !== 'fatura') return;
+    void (async () => {
+      try { setDonusumler(await api.belgeDonusumler(kayitliId)) } catch { setDonusumler([]) }
+    })();
+  }, [kayitliId, aktifSekme]);
 
   /** Yalniz ONIZLEME: gercek tutar sunucudan gelir. */
   const onizleme = useMemo(() => {
@@ -187,6 +220,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     setSatirlar(s => s.map(x => x.anahtar !== anahtar ? x : {
       ...x,
       stokId: satir ? Number(satir.id) : null,
+      stokKodu: satir ? String(satir.kod ?? '') : '',
       stokAdi: satir ? String(satir.ad ?? '') : '',
       kdv: satir?.kdv !== undefined && satir?.kdv !== null ? String(satir.kdv) : x.kdv,
     }));
@@ -225,6 +259,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           teslimSekli: irsaliyeMi ? teslimSekli : undefined,
           aracPlaka: irsaliyeMi ? aracPlaka : undefined,
           soforAd: irsaliyeMi ? soforAd : undefined,
+          // Tasiyici / Sevkiyat sekmesindeki ek UBL alanlari
+          irsaliyeTarihi: irsaliyeMi && sevkTarihi ? sevkTarihi : undefined,
+          soforTckn: irsaliyeMi ? soforTckn : undefined,
+          tasiyiciId: irsaliyeMi ? tasiyici?.id ?? null : undefined,
           teslimEdenId: irsaliyeMi ? teslimEden?.id ?? null : undefined,
         },
         satirlar: dolu.map((s, i) => ({
@@ -236,6 +274,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           birimFiyat: Number(s.birimFiyat.replace(',', '.')) || 0,
           iskonto: Number(s.iskonto.replace(',', '.')) || 0,
           kdv: Number(s.kdv.replace(',', '.')) || 0,
+          izlemeKodu: s.izlemeKodu,
+          izleme: s.izlemeKodu ? 1 : 0,
         })),
         secenekler: { taslak, stokKontrolu: true },
       };
@@ -570,32 +610,61 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           </div>
         </div>
 
+        {/* Sekmeler BASLIK ALANLARININ ALTINDA, grid'in hemen ustunde -
+            mockup duzeni (toolbar > hdr > tabs > pane). Tasiyici ve Imza/Teslim
+            yalniz irsaliyede anlamli, o yuzden suzuluyor. */}
+        <div className="katab">
+          {SEKMELER.filter(x => !x.irsaliye || irsaliyeMi).map(x => (
+            <div key={x.anahtar}
+                 className={`kat${x.anahtar === aktifSekme ? ' on' : ''}`}
+                 onClick={() => setAktifSekme(x.anahtar)}>
+              {x.baslik}
+              {x.anahtar === 'kalem' && <span className="b">{satirlar.length}</span>}
+              {x.anahtar === 'fatura' && donusumler.length > 0 && (
+                <span className="b">{donusumler.length}</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {aktifSekme === 'kalem' && (
+        <>
         <div className="kagrup">
           <h6>
-            Satirlar
+            Kalemler
             {!kilitli && <button type="button" className="d bir" onClick={satirEkle}>+ Satır</button>}
           </h6>
 
+          {/* Irsaliye kalemleri mockup'taki kolonlarla: sevk belgesidir, iskonto/KDV
+              GOSTERILMEZ (onlar faturada); yerine Depo ve Seri/Lot gelir.
+              Mockup'taki "Raf" kolonu yok - depo raf sistemi semada tanimli degil,
+              "Birim" de kod olarak duruyor (birim adi sozlugu henuz baglanmadi). */}
           <table className="detay-tablo">
             <thead>
               <tr>
-                <th style={{ width: '34%' }}>Stok</th>
-                <th className="hiza-sag">Adet</th>
-                <th className="hiza-sag">Birim Fiyat</th>
-                <th className="hiza-sag">Iskonto %</th>
-                <th className="hiza-sag">KDV %</th>
-                <th className="hiza-sag">Tutar (onizleme)</th>
-                {!kilitli && <th />}
+                <th style={{ width: 30 }} className="hiza-orta">#</th>
+                <th style={{ width: 110 }}>Stok Kodu</th>
+                <th>Stok / Hizmet</th>
+                <th className="hiza-sag" style={{ width: 90 }}>Miktar</th>
+                {irsaliyeMi && <th style={{ width: 130 }}>Depo</th>}
+                {irsaliyeMi && <th style={{ width: 130 }}>Seri / Lot</th>}
+                {!irsaliyeMi && <th className="hiza-sag" style={{ width: 80 }}>İskonto %</th>}
+                {!irsaliyeMi && <th className="hiza-sag" style={{ width: 70 }}>KDV %</th>}
+                <th className="hiza-sag" style={{ width: 100 }}>Br. Fiyat</th>
+                <th className="hiza-sag" style={{ width: 120 }}>Tutar</th>
+                {!kilitli && <th style={{ width: 34 }} />}
               </tr>
             </thead>
             <tbody>
-              {satirlar.map(s => {
+              {satirlar.map((s, sira) => {
                 const adet = Number(s.adet.replace(',', '.')) || 0;
                 const fiyat = Number(s.birimFiyat.replace(',', '.')) || 0;
                 const isk = Number(s.iskonto.replace(',', '.')) || 0;
                 const tutar = Math.round(adet * fiyat * 100) / 100 * (1 - isk / 100);
                 return (
                   <tr key={s.anahtar}>
+                    <td className="hiza-orta sonuk">{sira + 1}</td>
+                    <td><code>{s.stokKodu}</code></td>
                     <td>
                       <GenLookup
                         kaynak="stok"
@@ -607,12 +676,21 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                     </td>
                     <td><input className="hiza-sag" value={s.adet} disabled={kilitli}
                                onChange={e => satirDegis(s.anahtar, 'adet', e.target.value)} /></td>
+                    {irsaliyeMi && <td className="sonuk">{depo?.ad ?? '—'}</td>}
+                    {irsaliyeMi && (
+                      <td><input value={s.izlemeKodu} disabled={kilitli} placeholder="LOT / seri"
+                                 onChange={e => satirDegis(s.anahtar, 'izlemeKodu', e.target.value)} /></td>
+                    )}
+                    {!irsaliyeMi && (
+                      <td><input className="hiza-sag" value={s.iskonto} disabled={kilitli}
+                                 onChange={e => satirDegis(s.anahtar, 'iskonto', e.target.value)} /></td>
+                    )}
+                    {!irsaliyeMi && (
+                      <td><input className="hiza-sag" value={s.kdv} disabled={kilitli}
+                                 onChange={e => satirDegis(s.anahtar, 'kdv', e.target.value)} /></td>
+                    )}
                     <td><input className="hiza-sag" value={s.birimFiyat} disabled={kilitli}
                                onChange={e => satirDegis(s.anahtar, 'birimFiyat', e.target.value)} /></td>
-                    <td><input className="hiza-sag" value={s.iskonto} disabled={kilitli}
-                               onChange={e => satirDegis(s.anahtar, 'iskonto', e.target.value)} /></td>
-                    <td><input className="hiza-sag" value={s.kdv} disabled={kilitli}
-                               onChange={e => satirDegis(s.anahtar, 'kdv', e.target.value)} /></td>
                     <td className="hiza-sag onizleme">{para.format(tutar)}</td>
                     {!kilitli && (
                       <td className="hiza-orta">
@@ -623,13 +701,23 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 );
               })}
             </tbody>
+            <tfoot>
+              <tr className="genel">
+                <td colSpan={3} className="hiza-sag">TOPLAM</td>
+                <td className="hiza-sag">
+                  {satirlar.reduce((t, s) => t + (Number(s.adet.replace(',', '.')) || 0), 0)
+                           .toLocaleString('tr-TR')}
+                </td>
+                <td colSpan={irsaliyeMi ? 3 : 3} />
+                <td className="hiza-sag">{para.format(onizleme.matrah)}</td>
+                {!kilitli && <td />}
+              </tr>
+            </tfoot>
           </table>
         </div>
 
-        {/* Dip toplam: kaydedilmeden ONCE onizleme, kaydedildikten sonra SUNUCUNUN
-            hesabi (fn_belge_diptoplam) - tevkifat/OTV/stopaj satirlariyla birlikte. */}
         <div className="kagrup dip-toplam">
-          <h6>{sonuc ? 'Dip Toplam (sunucu)' : 'Dip Toplam (onizleme)'}</h6>
+          <h6>{sonuc ? 'Dip Toplam (sunucu)' : 'Dip Toplam (önizleme)'}</h6>
           {sonuc ? (
             <table className="dip-tablo">
               <tbody>
@@ -650,8 +738,142 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               </tbody>
             </table>
           )}
-          {!sonuc && <div className="not">Kesin tutar sunucuda hesaplanır; buradaki değerler önizlemedir.</div>}
+          {!kilitli && <div className="not">Kesin tutar sunucuda hesaplanır; buradaki değerler önizlemedir.</div>}
         </div>
+        </>
+        )}
+
+        {/* ========================================= TASIYICI / SEVKIYAT ==== */}
+        {aktifSekme === 'tasiyici' && (
+          <div className="kagrup">
+            <h6>Taşıyıcı Bilgileri</h6>
+            <div className="alan-izgara">
+              <label className="alan">
+                <span className="etiket">Şoför TC</span>
+                <input value={soforTckn} maxLength={11} disabled={kilitli}
+                       placeholder="11 hane"
+                       onChange={e => setSoforTckn(e.target.value.replace(/\D/g, ''))} />
+              </label>
+              <GenLookup
+                kaynak="cari"
+                etiket="Taşıyıcı Ünvan"
+                alanlar={LOOKUP_CARI}
+                deger={tasiyici?.ad}
+                saltOkunur={kilitli}
+                onSec={s => setTasiyici(s ? { id: Number(s.id), ad: String(s.unvan ?? '') } : null)}
+              />
+              <label className="alan">
+                <span className="etiket">Sevk Tarih / Saati</span>
+                <input type="datetime-local" value={sevkTarihi} disabled={kilitli}
+                       onChange={e => setSevkTarihi(e.target.value)} />
+              </label>
+            </div>
+            <div className="not">
+              Araç plakası, şoför adı ve teslim eden başlıkta girilir. Bu üç alan
+              e-İrsaliye UBL'ini tamamlar (DriverPerson/ID, CarrierParty,
+              ShipmentStage). Kap adedi, brüt ağırlık ve sevkiyat aşamaları
+              (yola çıkış / teslim) henüz şemada yok.
+            </div>
+          </div>
+        )}
+
+        {/* ================================================== e-BELGE ==== */}
+        {aktifSekme === 'ebelge' && (
+          <div className="kagrup">
+            <h6>e-Belge Zarf Bilgisi</h6>
+            <div className="alan-izgara">
+              <label className="alan">
+                <span className="etiket">Belge Tipi</span>
+                <input value={irsaliyeMi ? 'e-İrsaliye' : 'e-Fatura'} readOnly />
+              </label>
+              <label className="alan">
+                <span className="etiket">Seri</span>
+                <input value={String(sonuc?.belge.belgeSeri ?? seri)} readOnly />
+              </label>
+              <label className="alan">
+                <span className="etiket">Alias (URN)</span>
+                <input value={String(sonuc?.belge.gondericiAlias ?? '') || '—'} readOnly />
+              </label>
+              <label className="alan">
+                <span className="etiket">Durum</span>
+                <span className="deger-serit">
+                  {Number(sonuc?.belge.efaturaDurum ?? 0) > 0
+                    ? <span className="rozet olumlu">Gönderildi</span>
+                    : <span className="rozet">Kâğıt / gönderilmedi</span>}
+                </span>
+              </label>
+            </div>
+            <div className="not">
+              ETTN, zarf numarası, gönderim zamanı ve GİB yanıtı e-Belge kuyruğundan
+              (e_belge tablosu) gelecek — gönderim ucu henüz bağlanmadı.
+            </div>
+          </div>
+        )}
+
+        {/* =============================================== FATURALAMA ==== */}
+        {aktifSekme === 'fatura' && (
+          <div className="kagrup">
+            <h6>
+              Faturalama
+              {kayitliId > 0 && (
+                <button type="button" className="d bir" onClick={() => setDonusum(true)}>
+                  🧾 Faturaya Dönüştür
+                </button>
+              )}
+            </h6>
+            <table className="detay-tablo">
+              <thead>
+                <tr>
+                  <th style={{ width: 160 }}>Belge No</th>
+                  <th style={{ width: 100 }}>Tarih</th>
+                  <th>Tür</th>
+                  <th className="hiza-sag" style={{ width: 100 }}>Miktar</th>
+                  <th className="hiza-sag" style={{ width: 130 }}>Tutar</th>
+                  <th style={{ width: 90 }}>Durum</th>
+                </tr>
+              </thead>
+              <tbody>
+                {donusumler.map((d, i) => (
+                  <tr key={i}>
+                    <td><b>{String(d.belgeNo ?? '')}</b></td>
+                    <td>{String(d.belgeTarihi ?? '').slice(0, 10).split('-').reverse().join('.')}</td>
+                    <td>{String(d.turAdi ?? '')}</td>
+                    <td className="hiza-sag">{Number(d.miktar ?? 0).toLocaleString('tr-TR')}</td>
+                    <td className="hiza-sag">{para.format(Number(d.tutar ?? 0))}</td>
+                    <td>{String(d.durumAdi ?? '')}</td>
+                  </tr>
+                ))}
+                {donusumler.length === 0 && (
+                  <tr><td colSpan={6} className="bos">
+                    {kayitliId > 0 ? 'Bu belgeden henüz belge türetilmemiş.' : 'Önce belgeyi kaydedin.'}
+                  </td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* ============================================= IMZA / TESLIM ==== */}
+        {aktifSekme === 'imza' && (
+          <div className="kagrup">
+            <h6>İmza / Teslim Alan</h6>
+            <div className="not">
+              Teslim alan kişi, TC, görev, teslim zamanı, nüsha sayısı ve teslim notu
+              alanları henüz şemada yok — e-İrsaliye teslim onayı akışıyla gelecek.
+              İmzalı teslim belgesi şimdilik Yorum / Medya sekmesine eklenebilir.
+            </div>
+          </div>
+        )}
+
+        {/* ============================================= YORUM / MEDYA ==== */}
+        {aktifSekme === 'yorum' && (
+          <div className="kagrup">
+            <h6>Yorum / Medya</h6>
+            {kayitliId > 0
+              ? <DokumanGalerisi kartAdi="belge" kaynakId={kayitliId} saltOkunur={false} />
+              : <div className="not">Belge kaydedilince ek ve yorum eklenebilir.</div>}
+          </div>
+        )}
 
         {/* Donusum modali bu kartin USTUNDE acilir: hedef turu ve satir miktarlari
             orada secilir, kalan bu belgede kalir (F8). */}

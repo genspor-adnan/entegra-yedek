@@ -592,10 +592,13 @@ table.grid tr.flt input {
 /* Belge karti baslik alani: mockup'ta (.hdr) BASLIKSIZ, hafif gradient bir serit -
    kagrup cercevesi/h6 basligi yok (belge adi zaten pencere basliginda). */
 .belge-hdr-sar {
-  margin: -14px -14px 10px; padding: 12px 14px;
+  /* Modal govdesinin 14px dolgusunu asarak tam genislik serit olur. */
+  margin: -14px -14px 0; padding: 12px 14px;
   background: linear-gradient(#fff, #f5f8fb); border-bottom: 1px solid var(--cizgi);
 }
 .belge-hdr-sar .alan-izgara { margin: 0 }
+/* Sekme cubugu baslik seridinin hemen altinda, grid'in ustunde (mockup duzeni). */
+.kagov > .katab { margin: 0 -14px 10px }
 /* Baslikta etiket EDITIN USTUNDE (mockup .fld deseni) - alan-izgara'nin
    varsayilani 84px etiket + input yan yana; burada dikey. */
 .belge-hdr-sar .alan { display: flex; flex-direction: column; align-items: stretch; gap: 2px }
