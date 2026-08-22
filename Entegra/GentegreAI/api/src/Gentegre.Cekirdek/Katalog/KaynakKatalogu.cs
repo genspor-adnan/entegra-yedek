@@ -485,6 +485,20 @@ public static class KaynakKatalogu
             new("model",     "s.model",     "metin", "Model",    Varsayilan: false),
             new("anaBirim",  "s.ana_birim", "kod",   "Birim",    Hizalama: "orta"),
             new("kdv",       "s.kdv",       "sayi",  "KDV %",    Hizalama: "sag"),
+            // Kalem arama penceresi icin: VARSAYILAN depodaki kalan ve izleme
+            //   turu. Kullanici "elimde var mi, seri/lot girmem gerekecek mi"
+            //   sorusunu stok secerken gormeli - sonradan degil.
+            new("kalan",
+                "(select coalesce(sum(sd.kalan), 0) from public.stok_durum sd " +
+                " join public.depo d on d.id = sd.depo_id " +
+                " where sd.stok_id = s.id and d.varsayilan = 1)",
+                                            "para",  "Kalan",    Hizalama: "sag", Bicim: "#,##0.##",
+                                            Siralanabilir: false, Filtrelenebilir: false),
+            new("izlemeAdi",
+                "case s.izleme when 1 then 'Seri No' when 2 then 'Lot No' when 3 then 'SKT' " +
+                "when 4 then 'Karekod' when 5 then 'Lot No + SKT' when 6 then 'Seri + Lot' else 'Yok' end",
+                                            "metin", "İzleme",   Hizalama: "orta"),
+            new("izleme",    "s.izleme",    "sayi",  "İzleme Kodu", Hizalama: "orta", Varsayilan: false),
             new("minStok",   "s.min_stok",  "sayi",  "Min. Stok",Hizalama: "sag", Varsayilan: false),
             new("durum",     "s.durum",     "kod",   "Durum",    Hizalama: "orta"),
             new("urunNo",    "s.urun_no",   "metin", "Urun No",  Varsayilan: false),

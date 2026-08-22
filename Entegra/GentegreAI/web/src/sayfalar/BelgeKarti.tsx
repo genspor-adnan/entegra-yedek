@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
-import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru } from '../api/sozlesme';
-import { GenLookup, LOOKUP_CARI, LOOKUP_STOK } from '../bilesenler/GenLookup';
+import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru, type ListeSatiri } from '../api/sozlesme';
+import { GenLookup, LOOKUP_CARI } from '../bilesenler/GenLookup';
 import { Modal } from '../bilesenler/GenForm';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
@@ -10,7 +10,10 @@ import { useOturum } from '../kimlik/OturumBaglami';
 
 interface SatirDurumu {
   anahtar: number;
+  /** 1 stok · 2 hizmet · 3 masraf (belge_satir.tur). */
+  satirTur: number;
   stokId: number | null;
+  hizmetId: number | null;
   stokKodu: string;
   stokAdi: string;
   adet: string;
@@ -22,8 +25,8 @@ interface SatirDurumu {
 }
 
 const bosSatir = (anahtar: number): SatirDurumu => ({
-  anahtar, stokId: null, stokKodu: '', stokAdi: '', adet: '1', birimFiyat: '',
-  iskonto: '0', kdv: '20', izlemeKodu: '',
+  anahtar, satirTur: 1, stokId: null, hizmetId: null, stokKodu: '', stokAdi: '',
+  adet: '1', birimFiyat: '', iskonto: '0', kdv: '20', izlemeKodu: '',
 });
 
 const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -120,8 +123,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [aktifSekme, setAktifSekme] = useState('kalem');
   /** Grid satir secimi (kirmizi Sil dugmesi bunlari siler). */
   const [seciliSatirlar, setSeciliSatirlar] = useState<Set<number>>(new Set());
-  /** Acik kalem duzenleme penceresi; 'yeni' ise satir eklenir. */
-  const [kalem, setKalem] = useState<SatirDurumu | 'yeni' | null>(null);
+  /** Acik kalem penceresi (adet / fiyat). Stok zaten secilmis olarak gelir. */
+  const [kalem, setKalem] = useState<SatirDurumu | null>(null);
+  /** Ardisik giris: stok arama penceresi acik mi. Kalem eklendikten sonra
+      KAPANMAZ - kullanici arka arkaya satir girer, isi bitince Kapat der. */
+  const [stokArama, setStokArama] = useState(false);
   const [donusumler, setDonusumler] = useState<Record<string, unknown>[]>([]);
   const [sonuc, setSonuc] = useState<BelgeYaniti | null>(null);
   const [hata, setHata] = useState<string | null>(null);
@@ -179,9 +185,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           ? { id: Number(y.belge.teslimEdenId), ad: String(y.belge.teslimEdenAdi ?? '') } : null);
         setSatirlar((y.satirlar ?? []).map((r, i) => ({
           anahtar: i + 1,
+          satirTur: Number(r.tur ?? 1),
           stokId: r.stokId ? Number(r.stokId) : null,
+          hizmetId: r.hizmetId ? Number(r.hizmetId) : null,
           stokKodu: String(r.stokKodu ?? ''),
-          stokAdi: String(r.stokAdi ?? r.aciklama ?? ''),
+          stokAdi: String(r.stokAdi ?? r.hizmetAdi ?? r.aciklama ?? ''),
           izlemeKodu: String(r.izlemeKodu ?? ''),
           adet: String(r.miktar ?? r.adet ?? 0),
           birimFiyat: String(r.birimFiyat ?? 0),
@@ -242,9 +250,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     setAlanHatalari({});
     setSonuc(null);
 
-    if (!cari) { setAlanHatalari({ tarafId: 'Cari secilmeli.' }); return }
-    const dolu = satirlar.filter(s => s.stokId);
-    if (dolu.length === 0) { setHata('En az bir satirda stok secilmeli.'); return }
+    if (!cari) { setAlanHatalari({ tarafId: 'Cari seçilmeli.' }); return }
+    const dolu = satirlar.filter(s => s.stokId || s.hizmetId);
+    if (dolu.length === 0) { setHata('En az bir satırda stok ya da hizmet seçilmeli.'); return }
 
     setKaydediyor(true);
     try {
@@ -272,8 +280,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         },
         satirlar: dolu.map((s, i) => ({
           sira: i + 1,
-          tur: 1,
+          tur: s.satirTur,
           stokId: s.stokId,
+          hizmetId: s.hizmetId,
           adet: Number(s.adet.replace(',', '.')) || 0,
           miktar: Number(s.adet.replace(',', '.')) || 0,
           birimFiyat: Number(s.birimFiyat.replace(',', '.')) || 0,
@@ -615,7 +624,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 kullanici "nereye gitti" diye ariyordu; sebebi title'da yazili. */}
             <button type="button" className="d bir" disabled={kilitli}
                     title={kilitli ? 'Kesin belgeye satır eklenemez (İptal edip yeniden kesin).' : 'Yeni kalem ekle'}
-                    onClick={() => setKalem('yeni')}>
+                    onClick={() => setStokArama(true)}>
               ＋ Satır
             </button>
             <button type="button" className="d teh"
@@ -639,8 +648,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                          onChange={e => setSeciliSatirlar(
                            e.target.checked ? new Set(satirlar.map(x => x.anahtar)) : new Set())} />
                 </th>
+                <th style={{ width: 70 }} className="hiza-orta">Tip</th>
                 <th style={{ width: 30 }} className="hiza-orta">#</th>
-                <th style={{ width: 110 }}>Stok Kodu</th>
+                <th style={{ width: 110 }}>Kod</th>
                 <th>Stok / Hizmet</th>
                 <th className="hiza-sag" style={{ width: 90 }}>Miktar</th>
                 {!irsaliyeMi && <th className="hiza-sag" style={{ width: 80 }}>İskonto %</th>}
@@ -663,6 +673,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                       <input type="checkbox" checked={secili}
                              onChange={() => secimDegis(r.anahtar)} />
                     </td>
+                    <td className="hiza-orta">
+                      <span className={`rozet ${r.satirTur === 2 ? 'bilgi' : ''}`}>
+                        {r.satirTur === 2 ? 'Hizmet' : 'Stok'}
+                      </span>
+                    </td>
                     <td className="hiza-orta sonuk">{sira + 1}</td>
                     <td><code>{r.stokKodu}</code></td>
                     <td>{r.stokAdi || <span className="sonuk">(stok seçilmedi)</span>}</td>
@@ -675,14 +690,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 );
               })}
               {satirlar.length === 0 && (
-                <tr><td colSpan={irsaliyeMi ? 5 : 7} className="bos">
+                <tr><td colSpan={irsaliyeMi ? 6 : 8} className="bos">
                   Kalem yok — “＋ Satır” ile ekleyin.
                 </td></tr>
               )}
             </tbody>
             <tfoot>
               <tr className="genel">
-                <td colSpan={4} className="hiza-sag">TOPLAM</td>
+                <td colSpan={5} className="hiza-sag">TOPLAM</td>
                 <td className="hiza-sag">
                   {satirlar.reduce((t, r) => t + (Number(r.adet.replace(',', '.')) || 0), 0)
                            .toLocaleString('tr-TR')}
@@ -889,11 +904,31 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
         {/* Kalem penceresi: grid salt gorunum oldugu icin ekleme/duzenleme burada.
             Alanlar ture gore degisir (irsaliyede seri/lot, faturada iskonto/KDV). */}
+        {/* 1) Stok/hizmet arama - satir eklemenin BASLANGICI. Secim yapilinca
+               kapanmaz; kalem penceresi ustune acilir, o kapaninca buraya donulur
+               ve siradaki stok secilir (ardisik hizli giris). */}
+        {stokArama && (
+          <StokAramaPenceresi
+            onKapat={() => setStokArama(false)}
+            onSec={sec => {
+              const hizmet = sec.tip === 'hizmet';
+              setKalem({
+                ...bosSatir(Math.max(0, ...satirlar.map(x => x.anahtar)) + 1),
+                satirTur: hizmet ? 2 : 1,
+                stokId: hizmet ? null : Number(sec.id),
+                hizmetId: hizmet ? Number(sec.id) : null,
+                stokKodu: String(sec.kod ?? ''),
+                stokAdi: String(sec.ad ?? ''),
+                kdv: sec.kdv !== undefined && sec.kdv !== null ? String(sec.kdv) : '20',
+              });
+            }}
+          />
+        )}
+
+        {/* 2) Adet / birim fiyat - Enter satiri gride ekler ve buraya doner. */}
         {kalem !== null && (
           <KalemPenceresi
-            satir={kalem === 'yeni'
-              ? bosSatir(Math.max(0, ...satirlar.map(x => x.anahtar)) + 1)
-              : kalem}
+            satir={kalem}
             irsaliyeMi={irsaliyeMi}
             onKapat={() => setKalem(null)}
             onKaydet={r => { kalemKaydet(r); setKalem(null) }}
@@ -916,7 +951,132 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 }
 
 /**
- * Tek kalem giris penceresi. Kalemler gridi SALT GORUNUM oldugu icin
+ * Stok / hizmet arama penceresi - satir eklemenin ilk adimi.
+ *
+ * Secim yapilinca KAPANMAZ: cagiran uzerine kalem (adet/fiyat) penceresini acar,
+ * o kapaninca kullanici buradan siradaki stogu secer. Boylece on kalemlik bir
+ * irsaliye tek arama penceresiyle girilir.
+ */
+function StokAramaPenceresi({ onSec, onKapat }: {
+  onSec(satir: ListeSatiri): void;
+  onKapat(): void;
+}) {
+  const [arama, setArama] = useState('');
+  const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
+  const [yukleniyor, setYukleniyor] = useState(false);
+  const [hata, setHata] = useState<string | null>(null);
+  const [secili, setSecili] = useState(0);
+  const zamanlayici = useRef<number | undefined>(undefined);
+
+  // STOK ve HIZMET birlikte aranir: belge satiri ikisinden birine baglanabilir,
+  //   kullanicinin once "hangi listede acayim" diye dusunmesi gereksiz. Iki
+  //   kaynak paralel cekilir ve tip alaniyla isaretlenir.
+  const ara = useCallback(async (metin: string) => {
+    setYukleniyor(true);
+    setHata(null);
+    try {
+      const filtre = metin.trim()
+        ? { op: 'or' as const, kosullar: ['kod', 'ad'].map(alan => ({
+            alan, op: 'icerir' as const, deger: metin.trim() })) }
+        : undefined;
+
+      const [stoklar, hizmetler] = await Promise.all([
+        api.liste('stok',   { sayfa: 1, boyut: 25, filtre }),
+        api.liste('hizmet', { sayfa: 1, boyut: 25, filtre }),
+      ]);
+
+      const birlesik: ListeSatiri[] = [
+        ...stoklar.satirlar.map((r): ListeSatiri => ({ ...r, tip: 'stok' })),
+        ...hizmetler.satirlar.map((r): ListeSatiri => ({ ...r, tip: 'hizmet' })),
+      ].sort((a, b) => String(a.ad ?? '').localeCompare(String(b.ad ?? ''), 'tr'));
+
+      setSatirlar(birlesik);
+      setSecili(0);
+    } catch (h) {
+      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setSatirlar([]);
+    } finally { setYukleniyor(false) }
+  }, []);
+
+  useEffect(() => { void ara('') }, [ara]);
+
+  const yaz = (metin: string) => {
+    setArama(metin);
+    window.clearTimeout(zamanlayici.current);
+    zamanlayici.current = window.setTimeout(() => void ara(metin), 250);
+  };
+
+  const tus = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); setSecili(i => Math.min(i + 1, satirlar.length - 1)) }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setSecili(i => Math.max(i - 1, 0)) }
+    else if (e.key === 'Enter' && satirlar[secili]) { e.preventDefault(); onSec(satirlar[secili]) }
+  };
+
+  return (
+    <Modal
+      baslik="Stok / Hizmet Ara"
+      onKapat={onKapat}
+      alt={<button className="d" onClick={onKapat}>✖ Kapat</button>}
+    >
+      <>
+        {hata && <div className="hata-kutusu">{hata}</div>}
+        <div className="kagrup">
+          <h6>Arama <span className="kapt">↑↓ gez · Enter seç · seçimden sonra pencere açık kalır</span></h6>
+          <div style={{ margin: 10 }}>
+            <input autoFocus className="arama" placeholder="stok kodu ya da adı…"
+                   value={arama} onChange={e => yaz(e.target.value)} onKeyDown={tus} />
+          </div>
+          <table className="detay-tablo secilebilir">
+            <thead>
+              <tr>
+                <th style={{ width: 70 }} className="hiza-orta">Tip</th>
+                <th style={{ width: 130 }}>Kod</th>
+                <th>Ad</th>
+                <th className="hiza-sag" style={{ width: 90 }}>Kalan</th>
+                <th style={{ width: 110 }} className="hiza-orta">İzleme</th>
+                <th className="hiza-sag" style={{ width: 70 }}>KDV</th>
+              </tr>
+            </thead>
+            <tbody>
+              {satirlar.map((r, i) => (
+                <tr key={`${r.tip}-${r.id}`} className={i === secili ? 'secili' : ''}
+                    onMouseEnter={() => setSecili(i)}
+                    onClick={() => onSec(r)}>
+                  <td className="hiza-orta">
+                    <span className={`rozet ${r.tip === 'hizmet' ? 'bilgi' : ''}`}>
+                      {r.tip === 'hizmet' ? 'Hizmet' : 'Stok'}
+                    </span>
+                  </td>
+                  <td><code>{String(r.kod ?? '')}</code></td>
+                  <td>{String(r.ad ?? '')}</td>
+                  {/* Kalan ve izleme yalniz STOKTA anlamli - hizmette stok bakiyesi yok. */}
+                  <td className="hiza-sag">
+                    {r.tip === 'hizmet' ? <span className="sonuk">—</span>
+                      : Number(r.kalan ?? 0).toLocaleString('tr-TR')}
+                  </td>
+                  <td className="hiza-orta">
+                    {r.tip === 'hizmet' ? <span className="sonuk">—</span>
+                      : String(r.izlemeAdi ?? 'Yok') === 'Yok'
+                        ? <span className="sonuk">Yok</span>
+                        : <span className="rozet bilgi">{String(r.izlemeAdi)}</span>}
+                  </td>
+                  <td className="hiza-sag">%{String(r.kdv ?? 0)}</td>
+                </tr>
+              ))}
+              {!yukleniyor && satirlar.length === 0 && (
+                <tr><td colSpan={6} className="bos">Kayıt yok</td></tr>
+              )}
+            </tbody>
+          </table>
+          {yukleniyor && <div className="yukleniyor">Aranıyor…</div>}
+        </div>
+      </>
+    </Modal>
+  );
+}
+
+/**
+ * Adet / birim fiyat penceresi. Kalemler gridi SALT GORUNUM oldugu icin
  * ekleme/duzenleme buradan yapilir - hucre ici duzenlemede satir yanlislikla
  * ustune yaziliyor ve uzun stok adlari okunmuyordu.
  */
@@ -932,24 +1092,29 @@ function KalemPenceresi({ satir, irsaliyeMi, onKapat, onKaydet }: {
   const degis = (alan: keyof SatirDurumu, deger: string) =>
     setR(x => ({ ...x, [alan]: deger }));
 
+  /** Enter = Tamam: adet/fiyat yazip Enter'a basinca satir gride eklenir. */
+  const tus = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') { e.preventDefault(); kaydet() }
+  };
+
   const adet = Number(r.adet.replace(',', '.')) || 0;
   const fiyat = Number(r.birimFiyat.replace(',', '.')) || 0;
   const isk = Number(r.iskonto.replace(',', '.')) || 0;
   const tutar = Math.round(adet * fiyat * 100) / 100 * (1 - isk / 100);
 
   function kaydet() {
-    if (!r.stokId) { setHata('Stok seçilmeli.'); return }
+    if (!r.stokId && !r.hizmetId) { setHata('Stok ya da hizmet seçilmeli.'); return }
     if (adet <= 0) { setHata('Miktar sıfırdan büyük olmalı.'); return }
     onKaydet(r);
   }
 
   return (
     <Modal
-      baslik="Kalem"
+      baslik={`Kalem — ${r.stokAdi || 'stok seçilmedi'}`}
       onKapat={onKapat}
       alt={
         <>
-          <button className="d onay" onClick={kaydet}>💾 Tamam</button>
+          <button className="d onay" onClick={kaydet}>💾 Tamam (Enter)</button>
           <button className="d" onClick={onKapat}>✖ Vazgeç</button>
         </>
       }
@@ -959,47 +1124,40 @@ function KalemPenceresi({ satir, irsaliyeMi, onKapat, onKaydet }: {
         <div className="kagrup">
           <h6>Kalem Bilgisi</h6>
           <div className="alan-izgara">
-            <GenLookup
-              kaynak="stok"
-              etiket="Stok / Hizmet"
-              zorunlu
-              alanlar={LOOKUP_STOK}
-              deger={r.stokAdi}
-              onSec={sec => setR(x => ({
-                ...x,
-                stokId: sec ? Number(sec.id) : null,
-                stokKodu: sec ? String(sec.kod ?? '') : '',
-                stokAdi: sec ? String(sec.ad ?? '') : '',
-                kdv: sec?.kdv !== undefined && sec?.kdv !== null ? String(sec.kdv) : x.kdv,
-              }))}
-            />
+            {/* Kalem SALT GORUNUM: secim arama penceresinde yapildi. Baska bir
+                stok icin o pencereden yeniden secilir - burada degistirilebilir
+                olmasi iki ayri secim yolu demek olurdu. */}
+            <label className="alan genis-2">
+              <span className="etiket">{r.satirTur === 2 ? 'Hizmet' : 'Stok'}</span>
+              <input value={`${r.stokKodu ? r.stokKodu + ' — ' : ''}${r.stokAdi}`} readOnly />
+            </label>
             <label className="alan">
               <span className="etiket">Miktar</span>
-              <input className="hiza-sag" value={r.adet}
+              <input autoFocus className="hiza-sag" value={r.adet} onKeyDown={tus}
                      onChange={e => degis('adet', e.target.value)} />
             </label>
             <label className="alan">
               <span className="etiket">Birim Fiyat</span>
-              <input className="hiza-sag" value={r.birimFiyat}
+              <input className="hiza-sag" value={r.birimFiyat} onKeyDown={tus}
                      onChange={e => degis('birimFiyat', e.target.value)} />
             </label>
 
             {irsaliyeMi ? (
               <label className="alan">
                 <span className="etiket">Seri / Lot</span>
-                <input value={r.izlemeKodu} placeholder="LOT / seri"
+                <input value={r.izlemeKodu} placeholder="LOT / seri" onKeyDown={tus}
                        onChange={e => degis('izlemeKodu', e.target.value)} />
               </label>
             ) : (
               <>
                 <label className="alan">
                   <span className="etiket">İskonto %</span>
-                  <input className="hiza-sag" value={r.iskonto}
+                  <input className="hiza-sag" value={r.iskonto} onKeyDown={tus}
                          onChange={e => degis('iskonto', e.target.value)} />
                 </label>
                 <label className="alan">
                   <span className="etiket">KDV %</span>
-                  <input className="hiza-sag" value={r.kdv}
+                  <input className="hiza-sag" value={r.kdv} onKeyDown={tus}
                          onChange={e => degis('kdv', e.target.value)} />
                 </label>
               </>
