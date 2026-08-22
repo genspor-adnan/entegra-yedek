@@ -43,6 +43,9 @@ const TESLIM_SEKLI: { deger: number; ad: string }[] = [
   { deger: 5, ad: 'Yurt dışı sevk' },
 ];
 
+/** Yururlukteki ve gecmis KDV oranlari - eski belgeler %8/%18 tasiyor. */
+const KDV_ORANLARI = [0, 1, 8, 10, 18, 20] as const;
+
 const KAPANMA_ETIKET: Record<number, { ad: string; sinif: string }> = {
   0: { ad: 'Faturalanmadı', sinif: 'uyari' },
   1: { ad: 'Kısmi faturalandı', sinif: '' },
@@ -1021,7 +1024,6 @@ function StokAramaPenceresi({ onSec, onKapat }: {
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}
         <div className="kagrup">
-          <h6>Arama <span className="kapt">↑↓ gez · Enter seç · seçimden sonra pencere açık kalır</span></h6>
           <div style={{ margin: 10 }}>
             <input autoFocus className="arama" placeholder="stok kodu ya da adı…"
                    value={arama} onChange={e => yaz(e.target.value)} onKeyDown={tus} />
@@ -1110,7 +1112,7 @@ function KalemPenceresi({ satir, irsaliyeMi, onKapat, onKaydet }: {
 
   return (
     <Modal
-      baslik={`Kalem — ${r.stokAdi || 'stok seçilmedi'}`}
+      baslik={r.stokAdi || 'Kalem'}
       onKapat={onKapat}
       alt={
         <>
@@ -1121,8 +1123,7 @@ function KalemPenceresi({ satir, irsaliyeMi, onKapat, onKaydet }: {
     >
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}
-        {/* Cerceve kalir, BASLIK yok: pencerenin kendi basligi zaten "Kalem — <ad>",
-            ikinci bir "Kalem Bilgisi" satiri gereksiz tekrardi. */}
+        {/* Cerceve kalir, BASLIK yok: pencere basligi zaten stok/hizmet adi. */}
         <div className="kagrup">
           <div className="alan-izgara">
             {/* Stok/hizmet adi PENCERE BASLIGINDA yaziyor - burada tekrarlamak
@@ -1139,25 +1140,30 @@ function KalemPenceresi({ satir, irsaliyeMi, onKapat, onKaydet }: {
                      onChange={e => degis('birimFiyat', e.target.value)} />
             </label>
 
-            {irsaliyeMi ? (
+            {/* Iskonto ve KDV HER TURDE girilir - irsaliyede de matrah/KDV
+                hesaplanir (dip toplam ondan cikar), yalniz gridde gosterilmez. */}
+            <label className="alan">
+              <span className="etiket">İskonto %</span>
+              <input className="hiza-sag" value={r.iskonto} onKeyDown={tus}
+                     onChange={e => degis('iskonto', e.target.value)} />
+            </label>
+            <label className="alan">
+              <span className="etiket">KDV %</span>
+              <select value={r.kdv} onKeyDown={tus}
+                      onChange={e => degis('kdv', e.target.value)}>
+                {/* Stok kartindan gelen oran listede yoksa kaybolmasin. */}
+                {(KDV_ORANLARI as readonly number[]).includes(Number(r.kdv))
+                  ? null : <option value={r.kdv}>%{r.kdv}</option>}
+                {KDV_ORANLARI.map(o => <option key={o} value={o}>%{o}</option>)}
+              </select>
+            </label>
+
+            {irsaliyeMi && (
               <label className="alan">
                 <span className="etiket">Seri / Lot</span>
                 <input value={r.izlemeKodu} placeholder="LOT / seri" onKeyDown={tus}
                        onChange={e => degis('izlemeKodu', e.target.value)} />
               </label>
-            ) : (
-              <>
-                <label className="alan">
-                  <span className="etiket">İskonto %</span>
-                  <input className="hiza-sag" value={r.iskonto} onKeyDown={tus}
-                         onChange={e => degis('iskonto', e.target.value)} />
-                </label>
-                <label className="alan">
-                  <span className="etiket">KDV %</span>
-                  <input className="hiza-sag" value={r.kdv} onKeyDown={tus}
-                         onChange={e => degis('kdv', e.target.value)} />
-                </label>
-              </>
             )}
 
             <label className="alan">
