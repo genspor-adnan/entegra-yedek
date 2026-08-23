@@ -524,8 +524,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               sirasi. BASLIKSIZ 3 sutunlu izgara; her alanda etiket EDITIN
               USTUNDE. Satirlar:
                 1) Musteri . Belge No . e-Belge
-                2) Sevk Tarihi . Belge Tarihi . Bagli Siparis
-                3) Satis Temsilcisi . Cikis Deposu . Faturalama Durumu */}
+                2) Vade . Belge Tarihi . Kapanma
+                3) Satis Temsilcisi . Cikis Deposu . Doviz/Kur */}
           <div className="alan-izgara uc-sutun belge-hdr">
             {/* --- 1. satir --- */}
             {/* Cari alani GenLookup DEGIL: secim ayni TarafArama modalindan yapilir
@@ -558,17 +558,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               </span>
             </label>
 
-            {/* --- 2. satir --- */}
-            {/* Irsaliyede Vade YOK (mal cikis tarihi belge tarihidir); o yuzden
-                bu hucre atlanir ve Irsaliye Tarihi sola kayar. */}
-            {!irsaliyeMi && (
-              <label className="alan">
-                <span className="etiket">Vade (gün)</span>
-                <input className="hiza-sag" value={vadeGun} disabled={kilitli}
-                       onChange={e => setVadeGun(e.target.value)} />
-              </label>
-            )}
-
+            {/* --- 2. satir: Satis Temsilcisi cari'nin ALTINDA --- */}
             {/* Satis temsilcisi PERSONEL'dir (cari degil) ve secim cari ile ayni
                 TarafArama ekranindan yapilir - tek arama bicimi. */}
             <TarafAlani
@@ -602,7 +592,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               </span>
             </label>
 
-            {/* --- 3. satir --- */}
+            {/* --- 3. satir: Cikis Deposu temsilcinin ALTINDA --- */}
             <GenLookup
               kaynak="depo"
               etiket={siparisMi ? 'Depo' : 'Çıkış Deposu'}
@@ -614,6 +604,15 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               onSec={s => setDepo(s ? { id: Number(s.id), ad: String(s.ad ?? '') } : null)}
             />
 
+            {/* Irsaliyede Vade YOK (mal cikis tarihi belge tarihidir). */}
+            {!irsaliyeMi && (
+              <label className="alan">
+                <span className="etiket">Vade (gün)</span>
+                <input className="hiza-sag" value={vadeGun} disabled={kilitli}
+                       onChange={e => setVadeGun(e.target.value)} />
+              </label>
+            )}
+
             <label className="alan">
               <span className="etiket">Döviz / Kur</span>
               <input value={`${String(sonuc?.belge.belgeDovizi ?? 'TL')} · ${
@@ -621,30 +620,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                      readOnly />
             </label>
 
-            {/* --- 4. satir: adres / teslim --- */}
-            {/* Sevk Adresi / Arac Plakasi / Sofor IRSALIYEDE basliktan cikti,
-                "Tasiyici / Sevkiyat" sekmesinde toplandi. Diger turlerde adres
-                basliktaki yerinde kalir (o turlerde sevkiyat sekmesi yok). */}
-            {!irsaliyeMi && (
-              <label className="alan genis-2">
-                <span className="etiket">Adres</span>
-                <input value={[sonuc?.belge.tarafAdres, sonuc?.belge.tarafIlce, sonuc?.belge.tarafIl]
-                                .filter(Boolean).join(' / ')} readOnly
-                       placeholder="Cari seçilince kartındaki varsayılan adres gelir" />
-              </label>
-            )}
+            {/* Adres BASLIKTAN CIKTI: e-Belge sekmesinde (XML'e giden alanlarla
+                birlikte) duruyor. Seri de basliktan kaldirildi - kullanici
+                girmiyor, numara serisi zaten e-Belge sekmesinde gorunuyor.
 
-            {!irsaliyeMi && (
-              <label className="alan">
-                <span className="etiket">Seri</span>
-                <input value={seri} maxLength={5} disabled={kilitli}
-                       onChange={e => setSeri(e.target.value.toUpperCase())} />
-              </label>
-            )}
-
-            {/* --- 5. satir: arac / sofor / teslim eden (yalniz irsaliye) --- */}
-
-            {/* --- son satir: doviz ---
                 Vergi Dairesi/VKN kartta gosterilmiyor: cari kartindan gelen ve
                 belgeye DONDURULAN bir bilgi, e-Belge XML'ine oradan gidiyor. */}
             <label className="alan">
@@ -885,6 +864,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               <label className="alan">
                 <span className="etiket">Alias (URN)</span>
                 <input value={String(sonuc?.belge.gondericiAlias ?? '') || '—'} readOnly />
+              </label>
+              {/* Adres basliktan buraya tasindi: e-Belge XML'ine giden alici
+                  bilgisi, kesim sirasinda degil gonderim baglaminda okunuyor. */}
+              <label className="alan genis-2">
+                <span className="etiket">Adres</span>
+                <input value={[sonuc?.belge.tarafAdres, sonuc?.belge.tarafIlce, sonuc?.belge.tarafIl]
+                                .filter(Boolean).join(' / ')} readOnly
+                       placeholder="Cari seçilince kartındaki varsayılan adres gelir" />
               </label>
               <label className="alan">
                 <span className="etiket">Durum</span>
