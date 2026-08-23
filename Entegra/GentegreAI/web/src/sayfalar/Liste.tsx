@@ -459,14 +459,47 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Tur / Belge Turu kolonlari bu ekranda ayni degeri tekrarliyor (hepsi
     //   satis faturasi) - iade ayrimi cip seridinde zaten var.
     gizliKolonlar: ['tur', 'turAdi'],
-    sabitFiltre: { alan: 'tur', op: 'icinde', deger: [15, 16] },
+    // Yalniz SATIS FATURASI (15). 16 "Satis Fisi" ayri ekran; iade ise ayri tur
+    //   degil, belge.tipi = 2 - cipler onu kullanir.
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 15 },
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
     cipler: [
       { ad: 'Tumu' },
-      { ad: 'Fatura', filtre: { alan: 'tur', op: 'esit', deger: 15 } },
-      { ad: 'İade',   filtre: { alan: 'tur', op: 'esit', deger: 16 } },
+      { ad: 'Fatura', filtre: { alan: 'tipi', op: 'esitDegil', deger: 2 } },
+      { ad: 'İade',   filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
     ],
     menuGrup: 'Satış', menuAd: 'Satış Faturaları', ic: '🧾', yetkiKodu: 'belge',
+  },
+  {
+    // SATIS FISI (tur 16): perakende/pesin satis. Fatura ile ayni kart ve ayni
+    //   akis - fark yalniz belge turu ve numara serisi. Muhasebe fisi URETIR
+    //   (kasa_islem_turu.fis_mi = 1), belge fisleme F7'de baglanacak.
+    kaynak: 'belge', rota: 'satis-fisi', baslik: 'Satış Fişleri',
+    yol: 'Satis › Satış Fişleri', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 16,
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 16 },
+    gizliKolonlar: ['tur', 'turAdi'],
+    toplam: ['matrah', 'kdvTutari', 'genelToplam'],
+    cipler: [
+      { ad: 'Tumu' },
+      { ad: 'Fiş',  filtre: { alan: 'tipi', op: 'esitDegil', deger: 2 } },
+      { ad: 'İade', filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
+    ],
+    menuGrup: 'Satış', menuAd: 'Satış Fişleri', ic: '🧾', yetkiKodu: 'belge',
+  },
+  {
+    // TAHAKKUK (13 alacak / 17 borc): cari bakiyeyi ve ekstreyi etkiler ama
+    //   MUHASEBE FISI URETMEZ (db/098) - gerceklesen islem geldiginde muhasebe
+    //   onunla yazilir. Stok da etkilemez.
+    kaynak: 'belge', rota: 'tahakkuk', baslik: 'Tahakkuklar',
+    yol: 'Cari › Tahakkuklar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 13,
+    sabitFiltre: { alan: 'tur', op: 'icinde', deger: [13, 17] },
+    toplam: ['genelToplam'],
+    cipler: [
+      { ad: 'Tumu' },
+      { ad: 'Alacak', filtre: { alan: 'tur', op: 'esit', deger: 13 } },
+      { ad: 'Borç',   filtre: { alan: 'tur', op: 'esit', deger: 17 } },
+    ],
+    menuGrup: 'Cari', menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge',
   },
   {
     // "Hangi siparisin nesi teslim edilmedi" - satir bazli acik liste.

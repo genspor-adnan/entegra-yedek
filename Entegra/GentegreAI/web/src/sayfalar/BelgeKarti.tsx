@@ -135,14 +135,21 @@ const SEKMELER: {
   { anahtar: 'yorum',    baslik: 'Yorum / Medya' },
 ];
 
-/** Fatura turleri (satis 15/16, alis 11/12) - irsaliye/siparis disindakiler. */
+/** Fatura/fis turleri (satis 15/16, alis 11/12) - Tahsilat sekmesi bunlarda. */
 const FATURA_TURLERI = new Set([11, 12, 15, 16]);
 
+/** Tahakkuk turleri: 13 alacak / 17 borc. Stok YOK, muhasebe fisi YOK (db/098). */
+const TAHAKKUK_TURLERI = new Set([13, 17]);
+
 /** Kartin acabilecegi belge turleri - grup='belge' katalogundan suzulur. */
-const GIRILEBILIR_TURLER = [19, 15, 14, 9, 11, 10, 16, 12] as const;
+const GIRILEBILIR_TURLER = [19, 15, 14, 9, 11, 10, 16, 12, 13, 17] as const;
 
 /** Hangi turden sonra hangi listeye donulur. */
-const LISTE_YOLU = (tur: number) => (tur === 9 || tur === 19 ? '/siparis' : '/belge');
+const LISTE_YOLU = (tur: number) =>
+  tur === 9 || tur === 19 ? '/siparis'
+  : tur === 16 ? '/satis-fisi'
+  : tur === 13 || tur === 17 ? '/tahakkuk'
+  : '/belge';
 
 /**
  * TarafArama ile doldurulan baslik alani (cari, satis temsilcisi...).
@@ -276,6 +283,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const siparisMi = tur === 9 || tur === 19;
   const irsaliyeMi = tur === 10 || tur === 14 || tur === 109 || tur === 119;
   const faturaMi = FATURA_TURLERI.has(tur);
+  const tahakkukMu = TAHAKKUK_TURLERI.has(tur);
   /** Kaydedilmis belgenin id'si (yeni kayittan ya da acilan belgeden). */
   const kayitliId = belgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
 
@@ -610,7 +618,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           )}
 
           {/* ----------------------------------------------------- FATURA ---- */}
-          {!siparisMi && !irsaliyeMi && (
+          {/* Tahakkukta e-Belge dugmeleri YOK - GIB'e giden bir belge degil. */}
+          {!siparisMi && !irsaliyeMi && !tahakkukMu && (
             <>
               <button className="d bir" disabled={!kayitliId}
                       title={kayitliId ? 'e-Belge gönderimi henüz bağlanmadı.' : 'Önce belgeyi kaydedin.'}>
@@ -684,6 +693,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                      readOnly />
             </label>
 
+            {/* Tahakkuk e-Belge DEGIL (GIB'e gitmez) - o alan gosterilmez. */}
+            {!tahakkukMu && (
             <label className="alan">
               <span className="etiket">e-Belge</span>
               <span className="deger-serit">
@@ -693,6 +704,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                   : <span className="rozet">gönderilmedi</span>}
               </span>
             </label>
+            )}
 
             {/* --- 2. satir: Satis Temsilcisi cari'nin ALTINDA --- */}
             {/* Satis temsilcisi PERSONEL'dir (cari degil) ve secim cari ile ayni
@@ -728,7 +740,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               </span>
             </label>
 
-            {/* --- 3. satir: Cikis Deposu temsilcinin ALTINDA --- */}
+            {/* --- 3. satir: Cikis Deposu temsilcinin ALTINDA ---
+                Tahakkukta depo YOK: stok etkilemez (kasa_islem_turu.stok_etkiler=0). */}
+            {!tahakkukMu && (
             <GenLookup
               kaynak="depo"
               etiket={siparisMi ? 'Depo' : 'Çıkış Deposu'}
@@ -739,6 +753,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               saltOkunur={kilitli}
               onSec={s => setDepo(s ? { id: Number(s.id), ad: String(s.ad ?? '') } : null)}
             />
+            )}
 
             {/* Irsaliyede Vade YOK (mal cikis tarihi belge tarihidir). */}
             {!irsaliyeMi && (
@@ -784,8 +799,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         <div className="katab">
           {SEKMELER
             .filter(x => (!x.irsaliye || irsaliyeMi)
-                      && (!x.faturaYok || !faturaMi)
-                      && (!x.faturaMi || faturaMi))
+                      && (!x.faturaYok || !(faturaMi || tahakkukMu))
+                      // Tahsilat: fatura/fis VE tahakkuk (tahakkuk da tahsil edilir).
+                      && (!x.faturaMi || faturaMi || tahakkukMu)
+                      // Tahakkuk e-Belge DEGIL: GIB'e giden bir belge degil,
+                      //   ic muhasebe/cari ara kaydi.
+                      && !(tahakkukMu && x.anahtar === 'ebelge'))
             .map(x => (
             <div key={x.anahtar}
                  className={`kat${x.anahtar === aktifSekme ? ' on' : ''}`}
