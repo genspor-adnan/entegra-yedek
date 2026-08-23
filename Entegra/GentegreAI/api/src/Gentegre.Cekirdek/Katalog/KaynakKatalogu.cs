@@ -92,6 +92,7 @@ public static class KaynakKatalogu
         Ekle(Depo());
         Ekle(Irsaliye());
         Ekle(StokTransfer());
+        Ekle(StokTalep());
     }
 
     private static void Ekle(KaynakTanimi k) => Kaynaklar[k.Ad] = k;
@@ -948,6 +949,50 @@ public static class KaynakKatalogu
                 "(select coalesce(sum(s.miktar), 0) from public.belge_satir s where s.belge_id = b.id)",
                                                   "para",  "Miktar", Hizalama: "sag", Bicim: "#,##0.##",
                                                   Siralanabilir: false, Filtrelenebilir: false),
+            new("aciklama",    "coalesce(b.aciklama, '')", "metin", "Açıklama", Genislik: 240),
+            new("durumAdi",    "case b.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end",
+                                                  "metin", "Durum", Hizalama: "orta"),
+            new("durum",       "b.durum",        "sayi",  "Durum Kodu", Hizalama: "orta", Varsayilan: false),
+            new("subeId",      "b.sube_id",      "sayi",  "Şube", Varsayilan: false)
+        });
+
+    // ------------------------------------------------------ stoktan talep ----
+    // Belge turu 105: bir birim/kisi depodan mal ISTER. Stok ve cari ETKILEMEZ
+    //   (kasa_islem_turu 105: stok_etkiler=0, cari_etkiler=0) - talep karsilaninca
+    //   asil hareketi stok transferi (20) yapar.
+    private static KaynakTanimi StokTalep() => new(
+        Ad: "stok-talep",
+        YetkiKodu: "belge",
+        Kaynak: """
+            public.belge b
+            left join public.depo cd on cd.id = b.cikis_depo_id
+            left join public.depo gd on gd.id = b.giris_depo_id
+            left join public.taraf ta on ta.id = b.teslim_alan_id
+            """,
+        SabitKosul: "b.tur = 105",
+        SubeKolonu: "b.sube_id",
+        VarsayilanSirala: "b.belge_tarihi desc, b.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",          "b.id",           "sayi",  "Id",    Varsayilan: false),
+            new("belgeNo",     "b.belge_no",     "metin", "Talep No"),
+            new("belgeTarihi", "b.belge_tarihi", "tarih", "Tarih", Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("cikisDepo",   "coalesce(cd.ad, '')", "metin", "İstenen Depo", Genislik: 180),
+            new("girisDepo",   "coalesce(gd.ad, '')", "metin", "Teslim Deposu", Genislik: 180),
+            new("talepEden",   "coalesce(ta.unvan, '')", "metin", "Talep Eden", Genislik: 200),
+            new("kalemSayisi",
+                "(select count(*) from public.belge_satir s where s.belge_id = b.id)",
+                                                  "sayi",  "Kalem", Hizalama: "sag",
+                                                  Siralanabilir: false, Filtrelenebilir: false),
+            new("miktar",
+                "(select coalesce(sum(s.miktar), 0) from public.belge_satir s where s.belge_id = b.id)",
+                                                  "para",  "Miktar", Hizalama: "sag", Bicim: "#,##0.##",
+                                                  Siralanabilir: false, Filtrelenebilir: false),
+            // Talep KARSILANDI mi: F8 sayaci (0 acik / 1 kismi / 2 kapandi).
+            new("karsilanma",
+                "case b.kapanma_durum when 2 then 'Karşılandı' when 1 then 'Kısmi' else 'Bekliyor' end",
+                                                  "metin", "Karşılanma", Hizalama: "orta"),
+            new("kapanmaDurum","b.kapanma_durum","sayi",  "Karşılanma Kodu", Hizalama: "orta", Varsayilan: false),
             new("aciklama",    "coalesce(b.aciklama, '')", "metin", "Açıklama", Genislik: 240),
             new("durumAdi",    "case b.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end",
                                                   "metin", "Durum", Hizalama: "orta"),

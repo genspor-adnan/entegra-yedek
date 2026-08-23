@@ -266,7 +266,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       onSatirAc={satir => {
         // Belge listelerinde kart MODAL acilir (rota yok); digerlerinde kartYolu.
         if (tanim.kaynak === 'belge' || tanim.kaynak === 'irsaliye'
-            || tanim.kaynak === 'stok-transfer')
+            || tanim.kaynak === 'stok-transfer' || tanim.kaynak === 'stok-talep')
           setAcikBelgeId(Number(satir.id));
         else if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`);
       }}
@@ -741,6 +741,20 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     yol: 'Stok › Stok Transfer', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 20,
     cipler: [{ ad: 'Tumu' }],
     menuGrup: 'Stok', menuAd: 'Stok Transfer', ic: '🔄', yetkiKodu: 'belge',
+  },
+  {
+    // STOKTAN TALEP (tur 105): bir birim depodan mal ISTER. Stok ve cari
+    //   ETKILEMEZ - asil hareketi, talep karsilaninca kesilen transfer yapar.
+    //   Kart transferin kardesi: para yok, e-Belge yok; teslim eden yerine
+    //   TALEP EDEN sorulur.
+    kaynak: 'stok-talep', baslik: 'Stoktan Talepler',
+    yol: 'Stok › Stoktan Talep', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 105,
+    cipler: [
+      { ad: 'Bekleyen', filtre: { alan: 'kapanmaDurum', op: 'esitDegil', deger: 2 } },
+      { ad: 'Karşılanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Stok', menuAd: 'Stoktan Talep', ic: '📥', yetkiKodu: 'belge',
   },
   {
     // Kullanici: "İK altına Personel Listesi taşı" - tek ogeli grup, digerleriyle ayni desen.

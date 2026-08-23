@@ -156,7 +156,7 @@ const FATURA_TURLERI = new Set([11, 12, 15, 16]);
 const TAHAKKUK_TURLERI = new Set([13, 17]);
 
 /** Kartin acabilecegi belge turleri - grup='belge' katalogundan suzulur. */
-const GIRILEBILIR_TURLER = [19, 15, 14, 9, 11, 10, 16, 12, 13, 17, 119, 109, 20] as const;
+const GIRILEBILIR_TURLER = [19, 15, 14, 9, 11, 10, 16, 12, 13, 17, 119, 109, 20, 105] as const;
 
 /** Hangi turden sonra hangi listeye donulur. */
 const LISTE_YOLU = (tur: number) =>
@@ -176,6 +176,7 @@ const LISTE_YOLU = (tur: number) =>
   : tur === 109 ? '/alis-konsinye'
   // STOK
   : tur === 20 ? '/stok-transfer'
+  : tur === 105 ? '/stok-talep'
   : '/belge';
 
 /**
@@ -333,7 +334,15 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * cikis deposundan duser giris deposuna ekler - bu yuzden IKI depo alani vardir.
    */
   const transferMi = tur === 20;
-  const belgeAdi = transferMi ? 'Transfer' : konsinyeMi ? 'Konsinye' : irsaliyeMi ? 'İrsaliye' : 'Belge';
+  /**
+   * STOKTAN TALEP (105): bir birim depodan mal ister. Stok/cari ETKILEMEZ,
+   * para yok - transferin kardesi ama teslim eden degil TALEP EDEN sorulur
+   * (mali alacak kisi; ayni kolonda: teslim_alan_id).
+   */
+  const talepMi = tur === 105;
+  /** Ikisi de "parasiz depo belgesi": ayni sadelestirmeleri paylasirlar. */
+  const depoBelgesi = transferMi || talepMi;
+  const belgeAdi = talepMi ? 'Talep' : transferMi ? 'Transfer' : konsinyeMi ? 'Konsinye' : irsaliyeMi ? 'İrsaliye' : 'Belge';
   /**
    * Numarasi KARSI TARAFTA uretilen belge: alis faturasinin numarasi
    * tedarikcinin fatura numarasidir - kullanici girer, sayacimiz uretmez.
@@ -347,7 +356,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * transferin satirlari olur - stok yanlis depodan duser. Degistirmek isteyen
    * satirlari silip yeniden secer. Diger turlerde bu kisit yok.
    */
-  const baslikKilitli = kilitli || (transferMi && satirlar.length > 0);
+  const baslikKilitli = kilitli || (depoBelgesi && satirlar.length > 0);
 
   /**
    * Transferde BASLIK ONCE doldurulur: iki depo ve teslim eden/alan secilmeden
@@ -355,14 +364,21 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * icin sira zaten tersine cevrilemez - eksik baslikla girilen kalemler
    * duzeltilemez halde kalirdi.
    */
-  const transferBaslikEksigi = !transferMi ? null
-    : !depo ? 'çıkış deposu'
-    : !girisDepo ? 'giriş deposu'
-    : !teslimEden ? 'teslim eden'
-    : !teslimAlan ? 'teslim alan'
-    : depo.id === girisDepo.id ? 'farklı giriş/çıkış deposu'
-    : teslimEden.id === teslimAlan.id ? 'farklı teslim eden/alan'
-    : null;
+  const transferBaslikEksigi = !depoBelgesi ? null
+    : talepMi
+      // Talepte teslim eden YOK (mal henuz cikmadi) ve teslim deposu opsiyonel:
+      //   talep eden kendi eline de alabilir.
+      ? (!depo ? 'istenen depo'
+        : !teslimAlan ? 'talep eden'
+        : girisDepo && depo.id === girisDepo.id ? 'farklı teslim deposu'
+        : null)
+      : (!depo ? 'çıkış deposu'
+        : !girisDepo ? 'giriş deposu'
+        : !teslimEden ? 'teslim eden'
+        : !teslimAlan ? 'teslim alan'
+        : depo.id === girisDepo.id ? 'farklı giriş/çıkış deposu'
+        : teslimEden.id === teslimAlan.id ? 'farklı teslim eden/alan'
+        : null);
 
   /** Kutunun izin verdigi araligin iki ucu - her render'da "simdi"ye gore. */
   const tarihEnGec = yerelAnMetni(new Date());
@@ -378,7 +394,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * Bunlarda e-Belge sekmesi, baslik alani ve gonderim dugmeleri gosterilmez.
    */
   //   SIPARIS de e-Belge degil: hicbir siparis GIB'e gitmez.
-  const eBelgeYok = tahakkukMu || konsinyeMi || siparisMi || transferMi || tur === 16 || tur === 12;
+  const eBelgeYok = tahakkukMu || konsinyeMi || siparisMi || depoBelgesi || tur === 16 || tur === 12;
   /** Kaydedilmis belgenin id'si (yeni kayittan ya da acilan belgeden). */
   const kayitliId = belgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
 
@@ -554,13 +570,20 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     setSonuc(null);
 
     // Transferde cari YOK (sunucu da katalogtan ayni karari veriyor).
-    if (!cari && !transferMi) { setAlanHatalari({ tarafId: 'Cari seçilmeli.' }); return }
+    if (!cari && !depoBelgesi) { setAlanHatalari({ tarafId: 'Cari seçilmeli.' }); return }
     // Tarih penceresi (tum belge turleri): ileri tarih ve 7 gunden eski yasak.
     if (tarih > tarihEnGec) {
       setAlanHatalari({ belgeTarihi: 'Belge ileri tarihli olamaz.' }); return;
     }
     if (tarih < tarihEnErken) {
       setAlanHatalari({ belgeTarihi: `Belge tarihi ${GERIYE_GUN_SINIRI} günden eski olamaz.` }); return;
+    }
+    if (talepMi) {
+      if (!depo) { setAlanHatalari({ cikisDepoId: 'İstenen depo seçilmeli.' }); return }
+      if (!teslimAlan) { setAlanHatalari({ teslimAlanId: 'Talep eden seçilmeli.' }); return }
+      if (girisDepo && girisDepo.id === depo.id) {
+        setAlanHatalari({ girisDepoId: 'Teslim deposu istenen depo ile aynı olamaz.' }); return;
+      }
     }
     if (transferMi) {
       if (!depo || !girisDepo) {
@@ -594,7 +617,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           belgeTarihi: tarih,
           // Seri e-Belge kavrami: transferde YOK - yoksa numara "T20|SWEB" gibi
           //   ayri bir sayactan gelir ve eski transferlerle ayni seride olmaz.
-          belgeSeri: transferMi ? '' : seri,
+          belgeSeri: depoBelgesi ? '' : seri,
           // Alis faturasinda numara tedarikciden gelir; digerlerinde sunucu verir.
           belgeNo: disNumarali ? belgeNo.trim() : undefined,
           belgeDovizi: 'TL',
@@ -603,8 +626,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           subeId: kullanici?.subeId ?? undefined,
           // Depo ALANI ture gore: alista giris, satista cikis (stok yonu buradan).
           //   TRANSFERDE IKISI DE dolu - tek satir iki depoyu oynatir.
-          cikisDepoId: transferMi ? depo?.id ?? null : alisMi ? null : depo?.id ?? null,
-          girisDepoId: transferMi ? girisDepo?.id ?? null : alisMi ? depo?.id ?? null : null,
+          cikisDepoId: depoBelgesi ? depo?.id ?? null : alisMi ? null : depo?.id ?? null,
+          girisDepoId: depoBelgesi ? girisDepo?.id ?? null : alisMi ? depo?.id ?? null : null,
           // satici_id NOT NULL default 0 - "secilmedi" burada null degil 0
           //   (null gonderince sunucu "saticiId bos birakilamaz" ile reddediyordu).
           saticiId: satici?.id ?? 0,
@@ -620,7 +643,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           // Teslim eden irsaliyede opsiyonel, TRANSFERDE zorunlu; teslim alan
           //   yalniz transferde var (sorumluluk devri).
           teslimEdenId: irsaliyeMi || transferMi ? teslimEden?.id ?? null : undefined,
-          teslimAlanId: transferMi ? teslimAlan?.id ?? null : undefined,
+          teslimAlanId: depoBelgesi ? teslimAlan?.id ?? null : undefined,
 
         },
         satirlar: dolu.map((s, i) => ({
@@ -647,7 +670,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       // TRANSFERDE kayittan sonra kartta yapilacak is yok (e-Belge, tahsilat,
       //   donusum yok) - kart kapanir, kullanici listeye doner. Diger belgelerde
       //   kart acik kalir: numara/e-Belge/tahsilat oradan surdurulur.
-      if (transferMi) { kapat(); return }
+      if (depoBelgesi) { kapat(); return }
     } catch (h) {
       if (h instanceof ApiHatasi) {
         if (h.dogrulamaMi && h.hata.alanlar)
@@ -864,10 +887,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 bicimi kullaniciyi sasirtiyordu). */}
             {/* Transferde CARI YOK: mal firmanin kendi depolari arasinda gezer.
                 Cari hucresinin yerini CIKIS DEPOSU alir, alt satirda giris deposu. */}
-            {transferMi ? (
+            {depoBelgesi ? (
               <GenLookup
                 kaynak="depo"
-                etiket="Çıkış Deposu"
+                etiket={talepMi ? 'İstenen Depo' : 'Çıkış Deposu'}
                 zorunlu
                 sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
                 alanlar={LOOKUP_DEPO}
@@ -925,7 +948,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 Temsilcisi 1. satirin 3. hucresine dusuyordu). Bos yer tutucu
                 sutun duzenini korur: sol sutun Cari > Temsilci > Depo. */}
             {/* Transferde 3. sutun: Teslim Eden, altinda Teslim Alan (sorumluluk devri). */}
-            {eBelgeYok && (transferMi ? (
+            {eBelgeYok && (talepMi ? <span className="alan" aria-hidden />
+              : transferMi ? (
               <TarafAlani
                 etiket="Teslim Eden"
                 zorunlu
@@ -940,11 +964,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             {/* --- 2. satir: Satis Temsilcisi cari'nin ALTINDA --- */}
             {/* Satis temsilcisi PERSONEL'dir (cari degil) ve secim cari ile ayni
                 TarafArama ekranindan yapilir - tek arama bicimi. */}
-            {transferMi ? (
+            {depoBelgesi ? (
               <GenLookup
                 kaynak="depo"
-                etiket="Giriş Deposu"
-                zorunlu
+                etiket={talepMi ? 'Teslim Deposu' : 'Giriş Deposu'}
+                zorunlu={!talepMi}
                 sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
                 alanlar={LOOKUP_DEPO}
                 deger={girisDepo?.ad}
@@ -972,9 +996,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               )}
             </label>
 
-            {transferMi ? (
+            {depoBelgesi ? (
               <TarafAlani
-                etiket="Teslim Alan"
+                etiket={talepMi ? 'Talep Eden' : 'Teslim Alan'}
                 zorunlu
                 deger={teslimAlan?.ad}
                 kilitli={baslikKilitli}
@@ -986,7 +1010,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
             {/* --- 3. satir: Cikis Deposu temsilcinin ALTINDA ---
                 Tahakkukta depo YOK: stok etkilemez (kasa_islem_turu.stok_etkiler=0). */}
-            {!tahakkukMu && !transferMi && (
+            {!tahakkukMu && !depoBelgesi && (
             <GenLookup
               kaynak="depo"
               etiket={siparisMi ? 'Depo' : alisMi ? 'Giriş Deposu' : 'Çıkış Deposu'}
@@ -1004,8 +1028,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
             {/* Irsaliyede/konsinyede Vade YOK (mal cikis tarihi belge tarihidir);
                 e-Belgesiz turlerde yerine bos hucre - Doviz/Kur sag sutunda kalsin. */}
-            {eBelgeYok && irsaliyeMi && !transferMi && <span className="alan" aria-hidden />}
-            {!irsaliyeMi && !transferMi && (
+            {eBelgeYok && irsaliyeMi && !depoBelgesi && <span className="alan" aria-hidden />}
+            {!irsaliyeMi && !depoBelgesi && (
               <label className="alan">
                 <span className="etiket">Vade (gün)</span>
                 <input className="hiza-sag" value={vadeGun} disabled={kilitli}
@@ -1013,7 +1037,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               </label>
             )}
 
-            {!transferMi && (
+            {!depoBelgesi && (
             <label className="alan">
               <span className="etiket">Döviz / Kur</span>
               <input value={`${String(sonuc?.belge.belgeDovizi ?? 'TL')} · ${
@@ -1050,7 +1074,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                       //   ic muhasebe/cari ara kaydi.
                       && !(eBelgeYok && x.anahtar === 'ebelge')
                       // Transferde cari/fatura zinciri yok: yalniz Kalemler + Yorum.
-                      && !(transferMi && x.anahtar === 'fatura'))
+                      && !(depoBelgesi && x.anahtar === 'fatura'))
             .map(x => (
             <div key={x.anahtar}
                  className={`kat${x.anahtar === aktifSekme ? ' on' : ''}`}
@@ -1120,11 +1144,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 <th>Stok / Hizmet</th>
                 <th style={{ width: 200 }}>Açıklama</th>
                 <th className="hiza-sag" style={{ width: 90 }}>Miktar</th>
-                {!irsaliyeMi && !transferMi && <th className="hiza-sag" style={{ width: 80 }}>İskonto %</th>}
-                {!irsaliyeMi && !transferMi && <th className="hiza-sag" style={{ width: 70 }}>KDV %</th>}
+                {!irsaliyeMi && !depoBelgesi && <th className="hiza-sag" style={{ width: 80 }}>İskonto %</th>}
+                {!irsaliyeMi && !depoBelgesi && <th className="hiza-sag" style={{ width: 70 }}>KDV %</th>}
                 {/* Transferde FIYAT YOK: mal satilmiyor, depo degistiriyor. */}
-                {!transferMi && <th className="hiza-sag" style={{ width: 100 }}>Br. Fiyat</th>}
-                {!transferMi && <th className="hiza-sag" style={{ width: 120 }}>Tutar</th>}
+                {!depoBelgesi && <th className="hiza-sag" style={{ width: 100 }}>Br. Fiyat</th>}
+                {!depoBelgesi && <th className="hiza-sag" style={{ width: 120 }}>Tutar</th>}
               </tr>
             </thead>
             <tbody>
@@ -1153,15 +1177,15 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                     <td className="sonuk">{r.aciklama}</td>
                     <td className="hiza-sag">{adet.toLocaleString('tr-TR')}</td>
                     {/* Iki iskonto varsa ikisi de gorunsun: "%10 + %5". */}
-                    {!irsaliyeMi && !transferMi && <td className="hiza-sag">{iskonatoMetni(r)}</td>}
-                    {!irsaliyeMi && !transferMi && <td className="hiza-sag">%{r.kdv}</td>}
-                    {!transferMi && <td className="hiza-sag">{para.format(fiyat)}</td>}
-                    {!transferMi && <td className="hiza-sag"><b>{para.format(tutar)}</b></td>}
+                    {!irsaliyeMi && !depoBelgesi && <td className="hiza-sag">{iskonatoMetni(r)}</td>}
+                    {!irsaliyeMi && !depoBelgesi && <td className="hiza-sag">%{r.kdv}</td>}
+                    {!depoBelgesi && <td className="hiza-sag">{para.format(fiyat)}</td>}
+                    {!depoBelgesi && <td className="hiza-sag"><b>{para.format(tutar)}</b></td>}
                   </tr>
                 );
               })}
               {satirlar.length === 0 && (
-                <tr><td colSpan={transferMi ? 6 : irsaliyeMi ? 8 : 10} className="bos">
+                <tr><td colSpan={depoBelgesi ? 6 : irsaliyeMi ? 8 : 10} className="bos">
                   {transferBaslikEksigi
                     ? `Kalem eklemek için önce başlıkta ${transferBaslikEksigi} seçin.`
                     : 'Kalem yok — “＋” ile ekleyin.'}
@@ -1175,21 +1199,21 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                   {satirlar.reduce((t, r) => t + (Number(r.adet.replace(',', '.')) || 0), 0)
                            .toLocaleString('tr-TR')}
                 </td>
-                {!transferMi && <td colSpan={irsaliyeMi ? 1 : 3} />}
-                {!transferMi && <td className="hiza-sag">{para.format(onizleme.matrah)}</td>}
+                {!depoBelgesi && <td colSpan={irsaliyeMi ? 1 : 3} />}
+                {!depoBelgesi && <td className="hiza-sag">{para.format(onizleme.matrah)}</td>}
               </tr>
             </tfoot>
           </table>
           {!kilitli && satirlar.length > 0 && (
             <div className="not">
               Satırı düzenlemek için çift tıklayın.
-              {transferMi && ' Kalem eklendiği için başlık (depolar, teslim eden/alan, tarih) kilitlendi — değiştirmek için kalemleri silin.'}
+              {depoBelgesi && ` Kalem eklendiği için başlık (depolar, ${talepMi ? 'talep eden' : 'teslim eden/alan'}, tarih) kilitlendi — değiştirmek için kalemleri silin.`}
             </div>
           )}
         </div>
 
         {/* Transferde dip toplam YOK: para degil miktar hareketi. */}
-        {!transferMi && (
+        {!depoBelgesi && (
         <div className="kagrup dip-toplam">
           <h6>{sonuc ? 'Dip Toplam (sunucu)' : 'Dip Toplam (önizleme)'}</h6>
           {sonuc ? (
@@ -1607,7 +1631,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           <KalemPenceresi
             satir={kalem}
             irsaliyeMi={irsaliyeMi}
-            transferMi={transferMi}
+            transferMi={depoBelgesi}
             belgeTarihi={tarih}
             onKapat={() => setKalem(null)}
             onKaydet={r => { kalemKaydet(r); setKalem(null) }}

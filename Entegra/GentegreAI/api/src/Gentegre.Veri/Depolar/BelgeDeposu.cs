@@ -39,6 +39,13 @@ public sealed class BelgeDeposu
     private static bool TransferMi(int tur) => tur == 20;
 
     /// <summary>
+    /// Stoktan talep (tur 105): bir birim depodan mal ISTER. Stok ve cari
+    /// etkilemez - asil hareketi, talep karsilaninca kesilen transfer yapar.
+    /// Zorunlusu: istenen depo + talep eden kisi.
+    /// </summary>
+    private static bool TalepMi(int tur) => tur == 105;
+
+    /// <summary>
     /// Numarasi BIZDE degil, KARSI TARAFTA uretilen belge turleri. Alis faturasinin
     /// numarasi tedarikcinin fatura numarasidir: harf/tire icerebilir, bizim
     /// sayacimizla iliskisi yoktur (sayac tohumu eski veriden geldigi icin
@@ -120,6 +127,17 @@ public sealed class BelgeDeposu
         // Transferde SORUMLULUK DEVRI kayda gecer: mali kim verdi, kim aldi.
         //   Iki depo arasinda kaybolan malin hesabi bu iki isimden sorulur -
         //   bu yuzden ikisi de zorunlu ve birbirinden farkli olmali.
+        if (TalepMi(tur))
+        {
+            if (Sayi(belge, "cikisDepoId") <= 0)
+                throw GentegreHatasi.Dogrulama("İstenen depo seçilmeli.",
+                    new AlanHatasi("cikisDepoId", "Zorunlu."));
+            // Talep eden, mali TESLIM ALACAK kisidir - ayni kolonda tutulur.
+            if (Sayi(belge, "teslimAlanId") <= 0)
+                throw GentegreHatasi.Dogrulama("Talep eden seçilmeli.",
+                    new AlanHatasi("teslimAlanId", "Zorunlu."));
+        }
+
         if (TransferMi(tur))
         {
             if (Sayi(belge, "teslimEdenId") <= 0)
