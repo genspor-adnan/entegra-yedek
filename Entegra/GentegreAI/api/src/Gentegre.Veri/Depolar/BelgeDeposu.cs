@@ -59,7 +59,8 @@ public sealed class BelgeDeposu
         List<Dictionary<string, JsonElement>> satirlar,
         BelgeSecenekleri secenekler,
         YazmaBaglami baglam,
-        CancellationToken iptal)
+        CancellationToken iptal,
+        bool cariAtla = false)
     {
         var uyarilar = new List<string>();
 
@@ -177,7 +178,10 @@ public sealed class BelgeDeposu
 
             if (stokEtkiler)
                 await StokDurumGuncelleAsync(baglanti, islem, belgeId, tur, secenekler.StokKontrolu, uyarilar, iptal);
-            if (cariEtkiler)
+            // cariAtla: kaynak belge (irsaliye) cariyi ZATEN borclandirdi - ondan
+            //   turetilen fatura ikinci kez yazarsa cari bakiye ikiye katlanir.
+            //   Stok tarafinda ayni koruma satir bazinda (stok_durum_degis=0) var.
+            if (cariEtkiler && !cariAtla)
                 await MaliHareketYazAsync(baglanti, islem, belgeId, tur, tarafId, baglam, iptal);
 
             // ------------------------------------------------------- 7) belge NUMARASI ----
@@ -327,8 +331,14 @@ public sealed class BelgeDeposu
             ["aciklama"] = Kirp($"{kaynak["tur_adi"]} {kaynak["belge_no"]} dönüşümü", 200),
         };
 
+        // Kaynak turu cariyi zaten etkilediyse (irsaliye) hedef TEKRAR etkilemez;
+        //   yalniz kaynagin etkilemedigi durumda (siparis) fatura/irsaliye yazar.
+        var kaynakCariYazdi = (await TurEtkileriAsync(
+            baglanti, islem, Convert.ToInt32(kaynak["tur"]), iptal)).Cari;
+
         var (yeniId, uyarilar) = await KaydetIcAsync(baglanti, islem, belge, satirlar,
-            new BelgeSecenekleri { Taslak = taslak, StokKontrolu = true }, baglam, iptal);
+            new BelgeSecenekleri { Taslak = taslak, StokKontrolu = true }, baglam, iptal,
+            cariAtla: kaynakCariYazdi);
 
         // ------------------------------------------------ 4) baslik bagi + log ----
         // Satir bagi kapatma sayacini surer; baslik bagi "bu belge sundan turedi"
