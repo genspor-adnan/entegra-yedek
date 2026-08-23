@@ -26,8 +26,13 @@ interface SatirDurumu {
   dovizFiyat: string;
   /** fiyatDovizi -> yerel kur (gunluk kurdan gelir, elle degistirilebilir). */
   kur: string;
+  /** 1. iskonto yuzdesi. */
   iskonto: string;
+  /** 2. iskonto yuzdesi - birinciden SONRA, carpimsal uygulanir (BelgeHesap). */
+  iskonto2: string;
   kdv: string;
+  /** Satir aciklamasi (belge_satir.aciklama) - gridde stok adinin saginda. */
+  aciklama: string;
   /** Seri / lot takibi (belge_satir.izleme_kodu) - irsaliyede gorunur. */
   izlemeKodu: string;
 }
@@ -41,10 +46,29 @@ const YEREL_PARA = 'TL';
 const bosSatir = (anahtar: number): SatirDurumu => ({
   anahtar, satirTur: 1, stokId: null, hizmetId: null, stokKodu: '', stokAdi: '',
   adet: '1', birimFiyat: '', fiyatDovizi: YEREL_PARA, dovizFiyat: '', kur: '1',
-  iskonto: '0', kdv: '20', izlemeKodu: '',
+  iskonto: '0', iskonto2: '0', kdv: '20', aciklama: '', izlemeKodu: '',
 });
 
 const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+/**
+ * Satir tutari ONIZLEMESI - sunucudaki BelgeHesap.SatirTutari ile ayni sira:
+ * once (adet x fiyat) yuvarlanir, sonra iki iskonto CARPIMSAL uygulanir.
+ * Kesin tutar yine sunucudan gelir; bu yalniz ekranda anlik gosterim.
+ */
+/** Gridde iskonto gosterimi: tek iskonto "%10", iki kademeli "%10 + %5". */
+function iskonatoMetni(r: { iskonto: string; iskonto2: string }): string {
+  const i1 = Number(r.iskonto.replace(',', '.')) || 0;
+  const i2 = Number(r.iskonto2.replace(',', '.')) || 0;
+  if (!i1 && !i2) return '';
+  return i2 ? `%${i1} + %${i2}` : `%${i1}`;
+}
+
+function satirTutari(adet: number, fiyat: number, iskonto: string, iskonto2: string): number {
+  const i1 = Number(iskonto.replace(',', '.')) || 0;
+  const i2 = Number(iskonto2.replace(',', '.')) || 0;
+  return Math.round(adet * fiyat * 100) / 100 * ((100 - i1) / 100) * ((100 - i2) / 100);
+}
 
 const LOOKUP_DEPO = [{ ad: 'ad', baslik: 'Depo', genis: true }];
 
@@ -244,6 +268,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           hizmetId: r.hizmetId ? Number(r.hizmetId) : null,
           stokKodu: String(r.stokKodu ?? ''),
           stokAdi: String(r.stokAdi ?? r.hizmetAdi ?? r.aciklama ?? ''),
+          aciklama: String(r.aciklama ?? ''),
           izlemeKodu: String(r.izlemeKodu ?? ''),
           adet: String(r.miktar ?? r.adet ?? 0),
           birimFiyat: String(r.birimFiyat ?? 0),
@@ -253,6 +278,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           dovizFiyat: String(r.birimFiyat ?? 0),
           kur: '1',
           iskonto: String(r.iskonto ?? 0),
+          iskonto2: String(r.iskonto2 ?? 0),
           kdv: String(r.kdv ?? 0),
         })));
       } catch (h) {
@@ -295,9 +321,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     satirlar.forEach(s => {
       const adet = Number(s.adet.replace(',', '.')) || 0;
       const fiyat = Number(s.birimFiyat.replace(',', '.')) || 0;
-      const isk = Number(s.iskonto.replace(',', '.')) || 0;
       const oran = Number(s.kdv.replace(',', '.')) || 0;
-      const tutar = Math.round(adet * fiyat * 100) / 100 * (1 - isk / 100);
+      const tutar = satirTutari(adet, fiyat, s.iskonto, s.iskonto2);
       matrah += tutar;
       kdv += tutar * oran / 100;
     });
@@ -366,7 +391,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           miktar: Number(s.adet.replace(',', '.')) || 0,
           birimFiyat: Number(s.birimFiyat.replace(',', '.')) || 0,
           iskonto: Number(s.iskonto.replace(',', '.')) || 0,
+          iskonto2: Number(s.iskonto2.replace(',', '.')) || 0,
           kdv: Number(s.kdv.replace(',', '.')) || 0,
+          aciklama: s.aciklama,
           izlemeKodu: s.izlemeKodu,
           izleme: s.izlemeKodu ? 1 : 0,
         })),
@@ -715,6 +742,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 <th style={{ width: 30 }} className="hiza-orta">#</th>
                 <th style={{ width: 110 }}>Kod</th>
                 <th>Stok / Hizmet</th>
+                <th style={{ width: 200 }}>Açıklama</th>
                 <th className="hiza-sag" style={{ width: 90 }}>Miktar</th>
                 {!irsaliyeMi && <th className="hiza-sag" style={{ width: 80 }}>İskonto %</th>}
                 {!irsaliyeMi && <th className="hiza-sag" style={{ width: 70 }}>KDV %</th>}
@@ -726,8 +754,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               {satirlar.map((r, sira) => {
                 const adet = Number(r.adet.replace(',', '.')) || 0;
                 const fiyat = Number(r.birimFiyat.replace(',', '.')) || 0;
-                const isk = Number(r.iskonto.replace(',', '.')) || 0;
-                const tutar = Math.round(adet * fiyat * 100) / 100 * (1 - isk / 100);
+                const tutar = satirTutari(adet, fiyat, r.iskonto, r.iskonto2);
                 const secili = seciliSatirlar.has(r.anahtar);
                 return (
                   <tr key={r.anahtar} className={secili ? 'secili' : ''}
@@ -744,8 +771,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                     <td className="hiza-orta sonuk">{sira + 1}</td>
                     <td><code>{r.stokKodu}</code></td>
                     <td>{r.stokAdi || <span className="sonuk">(stok seçilmedi)</span>}</td>
+                    <td className="sonuk">{r.aciklama}</td>
                     <td className="hiza-sag">{adet.toLocaleString('tr-TR')}</td>
-                    {!irsaliyeMi && <td className="hiza-sag">{isk ? `%${isk}` : ''}</td>}
+                    {/* Iki iskonto varsa ikisi de gorunsun: "%10 + %5". */}
+                    {!irsaliyeMi && <td className="hiza-sag">{iskonatoMetni(r)}</td>}
                     {!irsaliyeMi && <td className="hiza-sag">%{r.kdv}</td>}
                     <td className="hiza-sag">{para.format(fiyat)}</td>
                     <td className="hiza-sag"><b>{para.format(tutar)}</b></td>
@@ -753,14 +782,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 );
               })}
               {satirlar.length === 0 && (
-                <tr><td colSpan={irsaliyeMi ? 6 : 8} className="bos">
+                <tr><td colSpan={irsaliyeMi ? 7 : 9} className="bos">
                   Kalem yok — “＋ Satır” ile ekleyin.
                 </td></tr>
               )}
             </tbody>
             <tfoot>
               <tr className="genel">
-                <td colSpan={5} className="hiza-sag">TOPLAM</td>
+                <td colSpan={6} className="hiza-sag">TOPLAM</td>
                 <td className="hiza-sag">
                   {satirlar.reduce((t, r) => t + (Number(r.adet.replace(',', '.')) || 0), 0)
                            .toLocaleString('tr-TR')}
@@ -1278,8 +1307,7 @@ function KalemPenceresi({ satir, irsaliyeMi, belgeTarihi, onKapat, onKaydet }: {
   const fiyat = dovizli
     ? Math.round(dovizFiyat * kur * 100) / 100
     : (Number(r.birimFiyat.replace(',', '.')) || 0);
-  const isk = Number(r.iskonto.replace(',', '.')) || 0;
-  const tutar = Math.round(adet * fiyat * 100) / 100 * (1 - isk / 100);
+  const tutar = satirTutari(adet, fiyat, r.iskonto, r.iskonto2);
 
   function kaydet() {
     if (!r.stokId && !r.hizmetId) { setHata('Stok ya da hizmet seçilmeli.'); return }
@@ -1370,10 +1398,18 @@ function KalemPenceresi({ satir, irsaliyeMi, belgeTarihi, onKapat, onKaydet }: {
               </select>
             </label>
 
+            {/* Iki kademeli iskonto: ikincisi birincinin ARDINDAN carpimsal
+                uygulanir (sunucudaki BelgeHesap.SatirTutari ile ayni sira). */}
             <label className="alan">
               <span className="etiket">İskonto %</span>
-              <input className="hiza-sag" value={r.iskonto} onKeyDown={tus}
-                     onChange={e => degis('iskonto', e.target.value)} />
+              <span className="ikili">
+                <input className="hiza-sag" value={r.iskonto} onKeyDown={tus}
+                       title="1. iskonto"
+                       onChange={e => degis('iskonto', e.target.value)} />
+                <input className="hiza-sag" value={r.iskonto2} onKeyDown={tus}
+                       title="2. iskonto (birincinin ardindan uygulanir)"
+                       onChange={e => degis('iskonto2', e.target.value)} />
+              </span>
             </label>
 
             {irsaliyeMi && (
@@ -1383,6 +1419,12 @@ function KalemPenceresi({ satir, irsaliyeMi, belgeTarihi, onKapat, onKaydet }: {
                        onChange={e => degis('izlemeKodu', e.target.value)} />
               </label>
             )}
+
+            <label className="alan">
+              <span className="etiket">Açıklama</span>
+              <input value={r.aciklama} onKeyDown={tus} placeholder="Satır açıklaması"
+                     onChange={e => degis('aciklama', e.target.value)} />
+            </label>
 
             <label className="alan">
               <span className="etiket">Tutar (önizleme)</span>
