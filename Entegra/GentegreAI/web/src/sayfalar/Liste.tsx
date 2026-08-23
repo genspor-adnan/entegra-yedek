@@ -349,6 +349,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Listesi ekle") - Cari grubunun HEMEN USTUNDE, ayni acilir-kapanir desende.
     kaynak: 'hasta', baslik: 'Hastalar', yol: 'Hasta › Hastalar', kartYolu: '/hasta',
     aksiyonEkrani: 'hasta-liste', cipler: DURUM_CIPLERI,
+    // Hasta da bir TARAF - cari ekstresi aynen gecerli (hasta hesabi hareketleri).
+    ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Hasta Ekstresi',
+              tarihAlani: 'islemTarihi' },
     menuGrup: 'Hasta', menuAd: 'Hasta Listesi', ic: '🏥', yetkiKodu: 'personel',
   },
   {
