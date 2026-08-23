@@ -54,8 +54,10 @@ function Yollar() {
 }
 
 export default function App() {
+  // basename: uygulama alt yolda yayinda olabilir (sunucuda /ai) - rotalar o
+  //   onekle calisir. import.meta.env.BASE_URL vite'in `base` degeri, yerelde "/".
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <OturumSaglayici>
         <Yollar />
       </OturumSaglayici>
