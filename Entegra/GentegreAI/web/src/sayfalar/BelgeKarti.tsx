@@ -214,7 +214,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [soforAd, setSoforAd] = useState('');
   const [teslimEden, setTeslimEden] = useState<{ id: number; ad: string } | null>(null);
   const [taslak, setTaslak] = useState(false);
-  const [satirlar, setSatirlar] = useState<SatirDurumu[]>([bosSatir(1)]);
+  // Yeni belge BOS grid ile acilir: "(stok seçilmedi)" yazan sahte satir
+  //   kullaniciyi "burasi nasil doldurulur" diye ariyordu; satir "＋" ile eklenir.
+  const [satirlar, setSatirlar] = useState<SatirDurumu[]>([]);
 
   const [kaydediyor, setKaydediyor] = useState(false);
   const [aciliyor, setAciliyor] = useState(!!belgeId);
@@ -474,7 +476,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   function yeniBelge() {
     setSonuc(null);
     setCari(null);
-    setSatirlar([bosSatir(1)]);
+    setSatirlar([]);
     setHata(null);
   }
 
@@ -814,8 +816,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                          onChange={e => setSeciliSatirlar(
                            e.target.checked ? new Set(satirlar.map(x => x.anahtar)) : new Set())} />
                 </th>
-                <th style={{ width: 70 }} className="hiza-orta">Tip</th>
-                <th style={{ width: 30 }} className="hiza-orta">#</th>
+                <th style={{ width: 34 }} className="hiza-orta">Tip</th>
                 <th style={{ width: 110 }}>Kod</th>
                 <th>Stok / Hizmet</th>
                 <th style={{ width: 200 }}>Açıklama</th>
@@ -827,7 +828,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               </tr>
             </thead>
             <tbody>
-              {satirlar.map((r, sira) => {
+              {satirlar.map(r => {
                 const adet = Number(r.adet.replace(',', '.')) || 0;
                 const fiyat = Number(r.birimFiyat.replace(',', '.')) || 0;
                 const tutar = satirTutari(adet, fiyat, r.iskonto, r.iskonto2);
@@ -839,12 +840,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                       <input type="checkbox" checked={secili}
                              onChange={() => secimDegis(r.anahtar)} />
                     </td>
-                    <td className="hiza-orta">
-                      <span className={`rozet ${r.satirTur === 2 ? 'bilgi' : ''}`}>
-                        {r.satirTur === 2 ? 'Hizmet' : 'Stok'}
-                      </span>
+                    {/* Tip IKON: metin kolonu yer kapliyordu, anlami title'da. */}
+                    <td className="hiza-orta" title={r.satirTur === 2 ? 'Hizmet' : 'Stok'}>
+                      {r.satirTur === 2 ? '🛠️' : '📦'}
                     </td>
-                    <td className="hiza-orta sonuk">{sira + 1}</td>
                     <td><code>{r.stokKodu}</code></td>
                     <td>{r.stokAdi || <span className="sonuk">(stok seçilmedi)</span>}</td>
                     <td className="sonuk">{r.aciklama}</td>
@@ -858,14 +857,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 );
               })}
               {satirlar.length === 0 && (
-                <tr><td colSpan={irsaliyeMi ? 7 : 9} className="bos">
+                <tr><td colSpan={irsaliyeMi ? 6 : 8} className="bos">
                   Kalem yok — “＋” ile ekleyin.
                 </td></tr>
               )}
             </tbody>
             <tfoot>
               <tr className="genel">
-                <td colSpan={6} className="hiza-sag">TOPLAM</td>
+                <td colSpan={5} className="hiza-sag">TOPLAM</td>
                 <td className="hiza-sag">
                   {satirlar.reduce((t, r) => t + (Number(r.adet.replace(',', '.')) || 0), 0)
                            .toLocaleString('tr-TR')}
