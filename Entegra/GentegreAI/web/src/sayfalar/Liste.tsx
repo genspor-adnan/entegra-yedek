@@ -10,24 +10,23 @@ import { KasaIslemKarti } from './KasaIslemKarti';
 
 /**
  * Kasa listesindeki "＋ Tahsilat" / "－ Ödeme" dugmelerinin ARAC menusu.
- * Kodlar kasa_islem_turu.kod ile birebir: tahsilat 21/22/25/23/24,
- * odeme 31/32/35/33/34. Cek ve senet turleri katalogda var (grup 'ceksenet');
- * kart bunlari acar, cek/senet KAYDI F5'te baglanacak.
+ * Kodlar kasa_islem_turu.kod ile birebir: tahsilat 21/22/25, odeme 31/32/35.
+ *
+ * CEK / SENET (23/24/33/34) SIMDILIK YOK: bu turlerin sablonu 'ceksenet'
+ * bacagi istiyor ve o bacak cek/senet KAYDINA baglaniyor (vade, seri,
+ * kesideci) - kayit ekrani Kasa planinin F5 fazinda gelecek. Menude durup
+ * kaydedilemeyen (422) bir secenek gostermek yerine F5'te eklenecek.
  */
 const KASA_ARAC_MENUSU: Record<string, { kod: string; ad: string }[]> = {
   'kasa.tahsilat.yeni': [
     { kod: 'kasa.yeni.21', ad: '💵 Nakit' },
     { kod: 'kasa.yeni.22', ad: '🏦 Banka' },
     { kod: 'kasa.yeni.25', ad: '💳 POS' },
-    { kod: 'kasa.yeni.23', ad: '🧾 Çek' },
-    { kod: 'kasa.yeni.24', ad: '📜 Senet' },
   ],
   'kasa.odeme.yeni': [
     { kod: 'kasa.yeni.31', ad: '💵 Nakit' },
     { kod: 'kasa.yeni.32', ad: '🏦 Banka' },
     { kod: 'kasa.yeni.35', ad: '💳 POS / Kredi Kartı' },
-    { kod: 'kasa.yeni.33', ad: '🧾 Çek' },
-    { kod: 'kasa.yeni.34', ad: '📜 Senet' },
   ],
 };
 
