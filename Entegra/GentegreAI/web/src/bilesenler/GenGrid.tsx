@@ -25,6 +25,16 @@ interface Props {
   /** Kart icine gomulu kucuk grid (ör. cari kartinda İlgili Kişiler) - buyuk baslik/yol
       satiri (.sayfabas) gizlenir, geri kalan (arama/cipler/tablo/sayfalama) ayni kalir. */
   gomulu?: boolean;
+  /** Cip seridinin SONUNA eklenecek dugmeler (ör. "│ 📄 Ekstre"). */
+  cipSonu?: React.ReactNode;
+  /** Acilista secili gelecek cip (geri donuste onceki filtreyi korumak icin). */
+  cipBaslangic?: number;
+  /** Cip'e tiklanınca cagrilir - ekstre modundan listeye donmek gibi ekran
+      disi davranislar icin (grid kendi filtresini yine uygular). */
+  onCipSecildi?(indeks: number): void;
+  /** Satir secimi degisince cagrilir - disaridaki dugmeler (Ekstre gibi) buna gore
+      aktif/pasif olur. */
+  onSecimDegisti?(satir: ListeSatiri | null): void;
   /** Arac cubugu dugmesine acilir alt menu (ör. "＋ Tahsilat" -> Nakit/Banka/...). */
   altSecenekler?: Record<string, AltSecenek[]>;
   /** Bu EKRANDA gizlenecek kolon adlari (katalogda varsayilan gelse bile).
@@ -185,7 +195,8 @@ const GORUNUMLER: { v: 'liste' | 'grup' | 'analiz'; ik: string; ad: string }[] =
  */
 export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, onSatirAc,
                           aksiyonEkrani, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
-                          gizliKolonlar, altSecenekler, yenile, odaklaSonEklenen,
+                          gizliKolonlar, altSecenekler, cipSonu, cipBaslangic,
+                          onCipSecildi, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik }: Props) {
   const [kolonlar, setKolonlar] = useState<KolonMeta[]>([]);
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
@@ -194,7 +205,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
   const [sayfa, setSayfa] = useState(1);
   const [sirala, setSirala] = useState<Siralama[]>([]);
   const [arama, setArama] = useState('');
-  const [cipIndeks, setCipIndeks] = useState(0);
+  const [cipIndeks, setCipIndeks] = useState(cipBaslangic ?? 0);
   // "Tum Liste / Son Aranan / Sik Aranan" (eski KULLANICI_ARAMA) - sunucuya `gorunum`
   //   olarak gider, kart acilis/ekleme sikligina gore filtreler+siralar.
   const [aramaGorunumu, setAramaGorunumu] = useState<'tum' | 'son' | 'sik'>('tum');
@@ -419,6 +430,9 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
 
   const gorunenToplamlar = useMemo(() => Object.entries(toplamlar ?? {}), [toplamlar]);
 
+  // Secim degisince disariya bildir (ör. "Ekstre" dugmesinin aktifligi).
+  useEffect(() => { onSecimDegisti?.(seciliSatir) }, [seciliSatir, onSecimDegisti]);
+
   const hepsiRef = useRef<HTMLInputElement | null>(null);
   useEffect(() => { if (hepsiRef.current) hepsiRef.current.indeterminate = bazisiSecili }, [bazisiSecili]);
 
@@ -568,11 +582,12 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
               <button
                 key={c.ad}
                 className={i === cipIndeks ? 'on' : ''}
-                onClick={() => { setCipIndeks(i); setSayfa(1) }}
+                onClick={() => { setCipIndeks(i); setSayfa(1); onCipSecildi?.(i) }}
               >
                 {c.ad}
               </button>
             ))}
+            {cipSonu && <><span className="durumseg-ayrac" />{cipSonu}</>}
           </div>
         )}
 

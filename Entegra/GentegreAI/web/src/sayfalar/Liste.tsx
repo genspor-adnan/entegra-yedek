@@ -67,6 +67,9 @@ export interface ListeTanimi {
   yeniBelgeTuru?: number;
   /** Menude grubun ICINDE ikinci bir kirilim (ör. Yönetim › Ayarlar › Stok Ayarları). */
   menuAltGrup?: string;
+  /** Cip seridine "📄 Ekstre" dugmesi ekler: secili satirin ekstresi AYNI
+      ekranda acilir (grid ekstre kaynagina doner), cip'e basinca liste geri gelir. */
+  ekstre?: { kaynak: string; alan: string; baslik: string };
   /** Bu ekranda gizlenecek kolonlar (ör. Satis Faturalari'nda tur / turAdi). */
   gizliKolonlar?: string[];
   /** Liste DEGIL, kendi sayfasi olan menu ogesi (ör. Stok Ayarları: sekmeli ekran).
@@ -112,6 +115,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [acikBelgeId, setAcikBelgeId] = useState<number | null>(null);
   // Kasa islem karti MODAL (tahsilat/odeme): liste arkada acik kalir.
   const [kasaTuru, setKasaTuru] = useState<number | null>(null);
+  // "Ekstre" modu (A secenegi): ayni grid ekstre kaynagina doner. null = liste.
+  const [ekstre, setEkstre] = useState<{ id: number; ad: string } | null>(null);
+  // Ekstre dugmesinin aktifligi icin gridden gelen secili satir.
+  const [seciliSatir, setSeciliSatir] = useState<ListeSatiri | null>(null);
+  // Ekstreden donunce ayni cip (Aktif/Pasif/Tumu) secili kalsin.
+  const [cipIndeks, setCipIndeks] = useState(0);
 
   // Aksiyon yonlendirme. Kasa aksiyonlari API cagirir (kesinlestir/iptal/sil) ve
   //   sonrasinda grid'i tazeler; digerleri kart rotasina gider.
@@ -190,6 +199,30 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
   return (
     <>
+    {/* EKSTRE MODU (A): grid ekstre kaynagina doner. Ust cip seridinden
+        Aktif/Pasif/Tumu'ye basmak listeye geri getirir. */}
+    {ekstre && tanim.ekstre ? (
+      <GenGrid
+        key={`${tanim.ekstre.kaynak}-${ekstre.id}`}
+        kaynak={tanim.ekstre.kaynak}
+        baslik={`${tanim.ekstre.baslik} — ${ekstre.ad}`}
+        yol={tanim.yol}
+        sabitFiltre={{ alan: tanim.ekstre.alan, op: 'esit', deger: ekstre.id }}
+        toplam={['giris', 'cikis']}
+        // Cipler ekstre modunda YALNIZ "geri don" gorevi gorur: filtreleri
+        //   birlikte gondermek ekstre kaynagina "Bilinmeyen alan: durum" 400'u
+        //   verdiriyordu (ekstre goruntusunde durum kolonu yok).
+        cipler={tanim.cipler?.map(c => ({ ad: c.ad }))}
+        cipBaslangic={cipIndeks}
+        // Cip'e basmak = listeye don (secilen filtreyle).
+        onCipSecildi={i => { setCipIndeks(i); setEkstre(null) }}
+        cipSonu={
+          <button className="on" disabled title="Ekstre gösteriliyor">
+            📄 {ekstre.ad}
+          </button>
+        }
+      />
+    ) : (
     <GenGrid
       // key: kaynak degisince (baska liste ekranina gecince) GenGrid TAMAMEN yeniden
       //   kurulsun - Route ayni tree konumunda kaldigi icin React bilesen orneğini
@@ -217,7 +250,23 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         else if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`);
       }}
       onAksiyon={(kod, satir) => { void aksiyon(kod, satir) }}
+      cipBaslangic={cipIndeks}
+      onCipSecildi={setCipIndeks}
+      onSecimDegisti={setSeciliSatir}
+      cipSonu={tanim.ekstre && (
+        <button
+          disabled={!seciliSatir}
+          title={seciliSatir ? 'Seçili hesabın ekstresi' : 'Önce bir satır seçin'}
+          onClick={() => seciliSatir && setEkstre({
+            id: Number(seciliSatir.id),
+            ad: String(seciliSatir.ad ?? seciliSatir.unvan ?? seciliSatir.id),
+          })}
+        >
+          📄 Ekstre
+        </button>
+      )}
     />
+    )}
 
     {kasaTuru !== null && (
       <KasaIslemKarti
@@ -425,7 +474,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   // --- Hesaplar: TEK kaynak ('hesap'), tur'e gore 5 ayri ekran. Musteri/Tedarikci
   //     deseninin aynisi: sabitFiltre + rota + yeniKayitVarsayilanlari.
   {
-    kaynak: 'hesap', rota: 'kasa-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI, baslik: 'Kasalar', yol: 'Kasa › Kasa Hesaplari',
+    kaynak: 'hesap', rota: 'kasa-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
+    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi' }, baslik: 'Kasalar', yol: 'Kasa › Kasa Hesaplari',
     kartYolu: '/kasa-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'K' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Kasa', menuAd: 'Kasa Hesapları', ic: '💵', yetkiKodu: 'hesap',
@@ -433,25 +483,29 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   // --- BANKA grubu (kullanici istegi): banka tarafi Kasa'dan ayrildi. Kaynak
   //     yine tek 'hesap' tablosu, tur'e gore ayri ekranlar.
   {
-    kaynak: 'hesap', rota: 'banka-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI, baslik: 'Banka Hesapları', yol: 'Banka › Hesaplar',
+    kaynak: 'hesap', rota: 'banka-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
+    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi' }, baslik: 'Banka Hesapları', yol: 'Banka › Hesaplar',
     kartYolu: '/banka-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'B' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Banka', menuAd: 'Banka Hesapları', ic: '🏦', yetkiKodu: 'hesap',
   },
   {
-    kaynak: 'hesap', rota: 'kredi-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI, baslik: 'Krediler', yol: 'Banka › Krediler',
+    kaynak: 'hesap', rota: 'kredi-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
+    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi' }, baslik: 'Krediler', yol: 'Banka › Krediler',
     kartYolu: '/kredi-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'R' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Banka', menuAd: 'Krediler', ic: '🏛️', yetkiKodu: 'hesap',
   },
   {
-    kaynak: 'hesap', rota: 'pos-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI, baslik: 'POS Hesapları', yol: 'Banka › POS',
+    kaynak: 'hesap', rota: 'pos-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
+    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi' }, baslik: 'POS Hesapları', yol: 'Banka › POS',
     kartYolu: '/pos-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'P' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Banka', menuAd: 'POS', ic: '💳', yetkiKodu: 'hesap',
   },
   {
-    kaynak: 'hesap', rota: 'kredi-karti', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI, baslik: 'Kredi Kartları', yol: 'Banka › Kredi Kartlari',
+    kaynak: 'hesap', rota: 'kredi-karti', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
+    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi' }, baslik: 'Kredi Kartları', yol: 'Banka › Kredi Kartlari',
     kartYolu: '/kredi-karti', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'V' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Banka', menuAd: 'Kredi Kartı', ic: '💳', yetkiKodu: 'hesap',
