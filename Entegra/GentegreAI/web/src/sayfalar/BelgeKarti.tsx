@@ -18,16 +18,30 @@ interface SatirDurumu {
   stokKodu: string;
   stokAdi: string;
   adet: string;
+  /** YEREL para biriminde birim fiyat - belgeye kaydedilen ve gridde gorunen deger. */
   birimFiyat: string;
+  /** Kartindan gelen fiyatin para birimi (ör. USD). Yerel ise donusum yok. */
+  fiyatDovizi: string;
+  /** Kart fiyati kendi doviziyle - kullanici bunu girer, yerel karsiligi hesaplanir. */
+  dovizFiyat: string;
+  /** fiyatDovizi -> yerel kur (gunluk kurdan gelir, elle degistirilebilir). */
+  kur: string;
   iskonto: string;
   kdv: string;
   /** Seri / lot takibi (belge_satir.izleme_kodu) - irsaliyede gorunur. */
   izlemeKodu: string;
 }
 
+/**
+ * Yerel para birimi. SIMDILIK sabit - opsiyona (kurulus ayari) baglanacak;
+ * mali_hareket/muhasebe tarafinda da ayni kavram "yerel tutar" olarak geciyor.
+ */
+const YEREL_PARA = 'TL';
+
 const bosSatir = (anahtar: number): SatirDurumu => ({
   anahtar, satirTur: 1, stokId: null, hizmetId: null, stokKodu: '', stokAdi: '',
-  adet: '1', birimFiyat: '', iskonto: '0', kdv: '20', izlemeKodu: '',
+  adet: '1', birimFiyat: '', fiyatDovizi: YEREL_PARA, dovizFiyat: '', kur: '1',
+  iskonto: '0', kdv: '20', izlemeKodu: '',
 });
 
 const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -233,6 +247,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           izlemeKodu: String(r.izlemeKodu ?? ''),
           adet: String(r.miktar ?? r.adet ?? 0),
           birimFiyat: String(r.birimFiyat ?? 0),
+          // Kayitli satir belgenin dovizinde saklanir; satir bazinda doviz/kur
+          //   tutulmuyor - kalem yeniden acilirsa yerel giris olarak gelir.
+          fiyatDovizi: YEREL_PARA,
+          dovizFiyat: String(r.birimFiyat ?? 0),
+          kur: '1',
           iskonto: String(r.iskonto ?? 0),
           kdv: String(r.kdv ?? 0),
         })));
@@ -1000,7 +1019,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 stokAdi: String(sec.ad ?? ''),
                 kdv: sec.kdv !== undefined && sec.kdv !== null ? String(sec.kdv) : '20',
                 // Kart fiyati onyuklenir - kullanici zaten listede gorup seciyor;
-                //   pencerede degistirebilir.
+                //   pencerede degistirebilir. Fiyatin PARA BIRIMI de gelir: yerel
+                //   degilse kalem penceresi kur + yerel karsilik satirini acar.
+                fiyatDovizi: String(sec.fiyatDovizi ?? YEREL_PARA) || YEREL_PARA,
+                dovizFiyat: sec.fiyat ? String(sec.fiyat) : '',
                 birimFiyat: sec.fiyat ? String(sec.fiyat) : '',
               });
             }}
@@ -1012,7 +1034,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           <KalemPenceresi
             satir={kalem}
             irsaliyeMi={irsaliyeMi}
-            doviz={String(sonuc?.belge.belgeDovizi ?? 'TL')}
+            belgeTarihi={tarih}
             onKapat={() => setKalem(null)}
             onKaydet={r => { kalemKaydet(r); setKalem(null) }}
           />
@@ -1214,16 +1236,18 @@ function adetKaydir(deger: string, yon: number): string {
   return Number.isInteger(yeni) ? String(yeni) : yeni.toFixed(2).replace('.', ',');
 }
 
-function KalemPenceresi({ satir, irsaliyeMi, doviz, onKapat, onKaydet }: {
+function KalemPenceresi({ satir, irsaliyeMi, belgeTarihi, onKapat, onKaydet }: {
   satir: SatirDurumu;
   irsaliyeMi: boolean;
-  /** Belgenin para birimi - birim fiyatin yaninda gosterilir. */
-  doviz: string;
+  /** Kur bu tarihten okunur (belge tarihi) - bugunun kuru degil. */
+  belgeTarihi: string;
   onKapat(): void;
   onKaydet(r: SatirDurumu): void;
 }) {
   const [r, setR] = useState<SatirDurumu>(satir);
   const [hata, setHata] = useState<string | null>(null);
+  /** Kur kutusu kullanici tarafindan degistirildi mi - degistiyse ustune yazma. */
+  const kurElle = useRef(false);
 
   const degis = (alan: keyof SatirDurumu, deger: string) =>
     setR(x => ({ ...x, [alan]: deger }));
@@ -1233,20 +1257,43 @@ function KalemPenceresi({ satir, irsaliyeMi, doviz, onKapat, onKaydet }: {
     if (e.key === 'Enter') { e.preventDefault(); kaydet() }
   };
 
+  const dovizli = r.fiyatDovizi !== YEREL_PARA && r.fiyatDovizi !== '';
+
+  // Dovizli kalemde gunun kuru cekilir; kullanici kutuyu elle degistirdiyse
+  //   dokunulmaz (kur pazarlikli olabiliyor - "istenirse degistirilebilsin").
+  useEffect(() => {
+    if (!dovizli || kurElle.current) return;
+    void (async () => {
+      try {
+        const y = await api.dovizKur(r.fiyatDovizi, belgeTarihi);
+        if (y.kur && y.kur > 0 && !kurElle.current) setR(x => ({ ...x, kur: String(y.kur) }));
+      } catch { /* kur yoksa kullanici elle girer */ }
+    })();
+  }, [dovizli, r.fiyatDovizi, belgeTarihi]);
+
   const adet = Number(r.adet.replace(',', '.')) || 0;
-  const fiyat = Number(r.birimFiyat.replace(',', '.')) || 0;
+  const kur = dovizli ? (Number(r.kur.replace(',', '.')) || 0) : 1;
+  const dovizFiyat = Number(r.dovizFiyat.replace(',', '.')) || 0;
+  // Yerel birim fiyat: dovizli kalemde doviz fiyati x kur, degilse dogrudan girilen.
+  const fiyat = dovizli
+    ? Math.round(dovizFiyat * kur * 100) / 100
+    : (Number(r.birimFiyat.replace(',', '.')) || 0);
   const isk = Number(r.iskonto.replace(',', '.')) || 0;
   const tutar = Math.round(adet * fiyat * 100) / 100 * (1 - isk / 100);
 
   function kaydet() {
     if (!r.stokId && !r.hizmetId) { setHata('Stok ya da hizmet seçilmeli.'); return }
     if (adet <= 0) { setHata('Miktar sıfırdan büyük olmalı.'); return }
-    onKaydet(r);
+    if (dovizli && kur <= 0) { setHata('Kur sıfırdan büyük olmalı.'); return }
+    // Belgeye YEREL fiyat gider; doviz/kur bilgisi satirda saklanir ki kalem
+    //   tekrar acildiginda ayni degerlerle gelsin.
+    onKaydet({ ...r, birimFiyat: String(fiyat) });
   }
 
   return (
     <Modal
       baslik={r.stokAdi || 'Kalem'}
+      dar
       onKapat={onKapat}
       alt={
         <>
@@ -1266,8 +1313,13 @@ function KalemPenceresi({ satir, irsaliyeMi, doviz, onKapat, onKaydet }: {
             <label className="alan">
               <span className="etiket">Miktar</span>
               <span className="ikili">
-                {/* Eksi isareti elle de yazilamaz. */}
-                <input autoFocus className="hiza-sag" value={r.adet} onKeyDown={tus}
+                {/* Eksi isareti elle de yazilamaz. Yukari/asagi ok = +1 / -1. */}
+                <input autoFocus className="hiza-sag" value={r.adet}
+                       onKeyDown={e => {
+                         if (e.key === 'ArrowUp') { e.preventDefault(); degis('adet', adetKaydir(r.adet, +1)) }
+                         else if (e.key === 'ArrowDown') { e.preventDefault(); degis('adet', adetKaydir(r.adet, -1)) }
+                         else tus(e);
+                       }}
                        onChange={e => degis('adet', e.target.value.replace(/-/g, ''))} />
                 {/* Fare ile hizli artir/azalt - klavyeden yazmak da serbest. */}
                 <button type="button" className="mini" title="Azalt"
@@ -1277,15 +1329,33 @@ function KalemPenceresi({ satir, irsaliyeMi, doviz, onKapat, onKaydet }: {
               </span>
             </label>
 
+            {/* Birim fiyat KARTIN para biriminde girilir (stok arama ekraninda
+                gorulen fiyat/doviz). Yerel para disindaysa yaninda gunun kuru
+                (elle degistirilebilir) ve ALTINDA yerel karsilik satiri cikar. */}
             <label className="alan">
               <span className="etiket">Birim Fiyat</span>
               <span className="ikili">
-                <input className="hiza-sag" value={r.birimFiyat} onKeyDown={tus}
-                       onChange={e => degis('birimFiyat', e.target.value)} />
-                {/* Para birimi BELGENIN dovizi - satir bazinda doviz yok. */}
-                <input className="birim" value={doviz} readOnly tabIndex={-1} />
+                <input className="hiza-sag"
+                       value={dovizli ? r.dovizFiyat : r.birimFiyat} onKeyDown={tus}
+                       onChange={e => degis(dovizli ? 'dovizFiyat' : 'birimFiyat', e.target.value)} />
+                <input className="birim" value={r.fiyatDovizi || YEREL_PARA} readOnly tabIndex={-1} />
+                {dovizli && (
+                  <input className="hiza-sag kur" value={r.kur} onKeyDown={tus}
+                         title="Günlük kur — değiştirilebilir"
+                         onChange={e => { kurElle.current = true; degis('kur', e.target.value) }} />
+                )}
               </span>
             </label>
+
+            {dovizli && (
+              <label className="alan">
+                <span className="etiket">Yerel Para</span>
+                <span className="ikili">
+                  <input className="hiza-sag onizleme" value={para.format(fiyat)} readOnly />
+                  <input className="birim" value={YEREL_PARA} readOnly tabIndex={-1} />
+                </span>
+              </label>
+            )}
 
             {/* Iskonto ve KDV HER TURDE girilir - irsaliyede de matrah/KDV
                 hesaplanir (dip toplam ondan cikar), yalniz gridde gosterilmez. */}

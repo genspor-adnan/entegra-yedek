@@ -422,6 +422,8 @@ table.grid tr.flt input {
   flex: none; width: 52px; text-align: center; background: var(--yuz2);
   color: var(--soluk); font-weight: 700; cursor: default;
 }
+/* Kur kutusu (birim fiyatin saginda) - dar ve okunakli. */
+.alan .ikili input.kur { flex: none; width: 84px }
 /* Miktar +/- dugmeleri edit yuksekliginde. */
 .alan .ikili button.mini { flex: none; width: 26px; height: 23px; font-size: 13px; line-height: 1 }
 .alan .kod-ad, .alan .alan-hata { grid-column: 2 }

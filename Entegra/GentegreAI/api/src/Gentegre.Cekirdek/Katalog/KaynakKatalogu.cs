@@ -256,9 +256,11 @@ public static class KaynakKatalogu
                 " where f.hizmet_id = h.id and f.fiyat > 0 order by f.fiyat_adi limit 1)",
                                             "para",  "Fiyat",      Hizalama: "sag", Bicim: "#,##0.00",
                                             Siralanabilir: false, Filtrelenebilir: false),
+            // ISO'ya cevrilir: fiyat tablolarinda kod SEMBOL olabiliyor ('$', '€'),
+            //   doviz_kur ise ISO tutuyor - kalem penceresi kuru bu kodla ariyor.
             new("fiyatDovizi",
-                "(select f.doviz_cinsi from public.hizmet_fiyat f " +
-                " where f.hizmet_id = h.id and f.fiyat > 0 order by f.fiyat_adi limit 1)",
+                "public.fn_doviz_iso((select f.doviz_cinsi from public.hizmet_fiyat f " +
+                " where f.hizmet_id = h.id and f.fiyat > 0 order by f.fiyat_adi limit 1))",
                                             "metin", "Döviz",      Hizalama: "orta",
                                             Siralanabilir: false, Filtrelenebilir: false),
             new("birim",   "h.birim",    "kod",   "Birim",      Hizalama: "orta"),
@@ -519,9 +521,9 @@ public static class KaynakKatalogu
                                             "para",  "Fiyat",    Hizalama: "sag", Bicim: "#,##0.00",
                                             Siralanabilir: false, Filtrelenebilir: false),
             new("fiyatDovizi",
-                "(select f.doviz_cinsi from public.stok_fiyat f " +
+                "public.fn_doviz_iso((select f.doviz_cinsi from public.stok_fiyat f " +
                 " where f.stok_id = s.id and f.satis = 1 and f.fiyat > 0 " +
-                " order by f.fiyat_adi limit 1)",
+                " order by f.fiyat_adi limit 1))",
                                             "metin", "Döviz",    Hizalama: "orta",
                                             Siralanabilir: false, Filtrelenebilir: false),
             new("alisFiyat",
