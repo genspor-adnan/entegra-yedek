@@ -239,8 +239,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [senaryo, setSenaryo] = useState(0);
   /** Bu belgeye baglanmis kasa islemleri (Tahsilat sekmesi). */
   const [tahsilatlar, setTahsilatlar] = useState<ListeSatiri[]>([]);
-  /** Tahsilat kasa karti MODAL - fatura arkada acik kalir. */
-  const [tahsilatAcik, setTahsilatAcik] = useState(false);
+  /** Acik tahsilat modalinin TURU (null = kapali) - fatura arkada acik kalir. */
+  const [tahsilatAcik, setTahsilatAcik] = useState<number | null>(null);
   /** Tahsilat kaydedilince listeyi tazelemek icin sayac. */
   const [tahsilatYenile, setTahsilatYenile] = useState(0);
   const [donusumler, setDonusumler] = useState<Record<string, unknown>[]>([]);
@@ -269,8 +269,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const kayitliId = belgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
 
   /** Bu belge icin tahsilat islemi ac (cari ve tutar onyuklu). */
-  /** Tahsilat MODAL acilir - belge kartindan cikmadan (kullanici istegi). */
-  const tahsilatAc = () => { if (kayitliId) setTahsilatAcik(true) };
+  /** Tahsilat MODAL acilir - belge kartindan cikmadan (kullanici istegi).
+      Tur: 21 nakit, 22 banka/havale (modal icinden de degistirilebilir). */
+  const tahsilatAc = (tahsilatTuru = 21) => {
+    if (kayitliId) setTahsilatAcik(tahsilatTuru);
+  };
 
   // Mevcut belgeyi ac: baslik + satirlar + dip toplam sunucudan gelir.
   useEffect(() => {
@@ -542,7 +545,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               <span className="ayrac" />
               <button className="d" disabled={!kayitliId || !cari}
                       title={kayitliId ? 'Bu sipariş için ön ödeme (tahsilat) işlemi aç' : 'Önce siparişi kaydedin.'}
-                      onClick={tahsilatAc}>
+                      onClick={() => tahsilatAc(21)}>
                 💵 Ön Ödeme Al
               </button>
               <button className="d" disabled title="Termin güncelleme henüz bağlanmadı.">📅 Termin Güncelle</button>
@@ -588,7 +591,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               </button>
               <button className="d" disabled={!kayitliId || !cari}
                       title={kayitliId ? 'Bu belge için tahsilat işlemi aç' : 'Önce belgeyi kaydedin.'}
-                      onClick={tahsilatAc}>
+                      onClick={() => tahsilatAc(21)}>
                 💵 Tahsilat
               </button>
               <button className="d" disabled title="İade belgesi henüz bağlanmadı.">↩ İade</button>
@@ -1112,10 +1115,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               {/* Mockup dugme seridi. "Tahsilat Ekle" CALISIR (kasa kartini cari
                   ve tutar onyuklu acar); POS ve Cek/Senet kasa turleri F5/F6'da. */}
               <div className="katoolbar" style={{ margin: 10 }}>
+                {/* Tahsilat ARACI adiyla: yanindaki POS / Cek-Senet ile ayni
+                    dizide - bu dugme NAKIT tahsilat (tur 21) acar. */}
                 <button className="d bir" disabled={!kayitliId}
-                        title={kayitliId ? 'Bu fatura için tahsilat işlemi aç' : 'Önce faturayı kaydedin.'}
-                        onClick={tahsilatAc}>
-                  ＋ Tahsilat Ekle
+                        title={kayitliId ? 'Nakit tahsilat işlemi aç' : 'Önce faturayı kaydedin.'}
+                        onClick={() => tahsilatAc(21)}>
+                  💵 Nakit
+                </button>
+                <button className="d bir" disabled={!kayitliId}
+                        title={kayitliId ? 'Banka (havale/EFT) tahsilat işlemi aç' : 'Önce faturayı kaydedin.'}
+                        onClick={() => tahsilatAc(22)}>
+                  🏦 Havale
                 </button>
                 <button className="d" disabled title="POS tahsilatı F5/F6'da bağlanacak">💳 POS</button>
                 <button className="d" disabled title="Çek/senet girişi F5'te bağlanacak">🧾 Çek/Senet Al</button>
@@ -1200,16 +1210,16 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         />
 
         {/* Tahsilat karti MODAL: cari, tutar ve belge bagi onyuklu gelir. */}
-        {tahsilatAcik && (
+        {tahsilatAcik !== null && (
           <KasaIslemKarti
             acilis={{
-              tur: 21,
+              tur: tahsilatAcik,
               tarafId: cari?.id,
               tarafUnvan: cari?.unvan,
               belgeId: kayitliId,
               tutar: String(sonuc?.belge.genelToplam ?? ''),
             }}
-            onKapat={() => { setTahsilatAcik(false); setTahsilatYenile(t => t + 1) }}
+            onKapat={() => { setTahsilatAcik(null); setTahsilatYenile(t => t + 1) }}
           />
         )}
 
