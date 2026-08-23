@@ -306,7 +306,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * konsinye (109/119 - mal birakma, faturasi ayri kesilir) ve tahakkuk (13/17).
    * Bunlarda e-Belge sekmesi, baslik alani ve gonderim dugmeleri gosterilmez.
    */
-  const eBelgeYok = tahakkukMu || konsinyeMi || tur === 16 || tur === 12;
+  //   SIPARIS de e-Belge degil: hicbir siparis GIB'e gitmez.
+  const eBelgeYok = tahakkukMu || konsinyeMi || siparisMi || tur === 16 || tur === 12;
   /** Kaydedilmis belgenin id'si (yeni kayittan ya da acilan belgeden). */
   const kayitliId = belgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
 
@@ -637,9 +638,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               <button className="d" disabled title="Üretim emri henüz bağlanmadı.">🏭 Üretime Aktar</button>
               <span className="ayrac" />
               <button className="d" disabled={!kayitliId || !cari}
-                      title={kayitliId ? 'Bu sipariş için ön ödeme (tahsilat) işlemi aç' : 'Önce siparişi kaydedin.'}
-                      onClick={() => tahsilatAc(21)}>
-                💵 Ön Ödeme Al
+                      title={kayitliId
+                        ? `Bu sipariş için ön ödeme (${alisMi ? 'ödeme' : 'tahsilat'}) işlemi aç`
+                        : 'Önce siparişi kaydedin.'}
+                      onClick={() => tahsilatAc(alisMi ? 31 : 21)}>
+                💵 {alisMi ? 'Ön Ödeme Yap' : 'Ön Ödeme Al'}
               </button>
               <button className="d" disabled title="Termin güncelleme henüz bağlanmadı.">📅 Termin Güncelle</button>
               <button className="d" disabled title="Yazdırma henüz bağlanmadı.">🖨️ Yazdır</button>
