@@ -491,7 +491,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   MUHASEBE FISI URETMEZ (db/098) - gerceklesen islem geldiginde muhasebe
     //   onunla yazilir. Stok da etkilemez.
     kaynak: 'belge', rota: 'tahakkuk', baslik: 'Tahakkuklar',
-    yol: 'Cari › Tahakkuklar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 13,
+    yol: 'Satis › Tahakkuklar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 13,
     sabitFiltre: { alan: 'tur', op: 'icinde', deger: [13, 17] },
     toplam: ['genelToplam'],
     cipler: [
@@ -499,7 +499,23 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Alacak', filtre: { alan: 'tur', op: 'esit', deger: 13 } },
       { ad: 'Borç',   filtre: { alan: 'tur', op: 'esit', deger: 17 } },
     ],
-    menuGrup: 'Cari', menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge',
+    menuGrup: 'Satış', menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge',
+  },
+  {
+    // SATIS KONSINYE (tur 119 Giden Konsinye): musteriye BIRAKILAN mal.
+    //   Stok ve cari etkiler; satildikca faturaya donusur (F8 zinciri).
+    kaynak: 'belge', rota: 'satis-konsinye', baslik: 'Satış Konsinyeler',
+    yol: 'Satis › Konsinye', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 119,
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 119 },
+    gizliKolonlar: ['tur', 'turAdi'],
+    toplam: ['matrah', 'kdvTutari', 'genelToplam'],
+    cipler: [
+      { ad: 'Tumu' },
+      { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
+      { ad: 'Kısmi',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
+      { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
+    ],
+    menuGrup: 'Satış', menuAd: 'Satış Konsinyeler', ic: '📦', yetkiKodu: 'belge',
   },
   {
     // "Hangi siparisin nesi teslim edilmedi" - satir bazli acik liste.

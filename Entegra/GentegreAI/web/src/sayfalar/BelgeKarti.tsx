@@ -142,13 +142,15 @@ const FATURA_TURLERI = new Set([11, 12, 15, 16]);
 const TAHAKKUK_TURLERI = new Set([13, 17]);
 
 /** Kartin acabilecegi belge turleri - grup='belge' katalogundan suzulur. */
-const GIRILEBILIR_TURLER = [19, 15, 14, 9, 11, 10, 16, 12, 13, 17] as const;
+const GIRILEBILIR_TURLER = [19, 15, 14, 9, 11, 10, 16, 12, 13, 17, 119, 109] as const;
 
 /** Hangi turden sonra hangi listeye donulur. */
 const LISTE_YOLU = (tur: number) =>
   tur === 9 || tur === 19 ? '/siparis'
   : tur === 16 ? '/satis-fisi'
   : tur === 13 || tur === 17 ? '/tahakkuk'
+  : tur === 119 ? '/satis-konsinye'
+  : tur === 14 ? '/satis-irsaliye'
   : '/belge';
 
 /**
@@ -284,6 +286,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const irsaliyeMi = tur === 10 || tur === 14 || tur === 109 || tur === 119;
   const faturaMi = FATURA_TURLERI.has(tur);
   const tahakkukMu = TAHAKKUK_TURLERI.has(tur);
+  // Konsinye (109 gelen / 119 giden) sevk belgesidir - irsaliye akisini kullanir
+  //   ama BASLIK ETIKETLERI kendi adiyla ("Konsinye No", "Konsinye Tarihi").
+  const konsinyeMi = tur === 109 || tur === 119;
+  const belgeAdi = konsinyeMi ? 'Konsinye' : irsaliyeMi ? 'İrsaliye' : 'Belge';
   /** Kaydedilmis belgenin id'si (yeni kayittan ya da acilan belgeden). */
   const kayitliId = belgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
 
@@ -687,7 +693,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             />
 
             <label className="alan">
-              <span className="etiket">{irsaliyeMi ? 'İrsaliye No' : 'Belge No'}</span>
+              <span className="etiket">{belgeAdi} No</span>
               <input className="one-cikan"
                      value={String(sonuc?.belge.belgeNo ?? '') || (kilitli ? '' : '(kaydedince verilir)')}
                      readOnly />
@@ -698,7 +704,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             <label className="alan">
               <span className="etiket">e-Belge</span>
               <span className="deger-serit">
-                <span className="rozet bilgi">{irsaliyeMi ? 'e-İrsaliye' : 'e-Fatura'}</span>
+                <span className="rozet bilgi">
+                  {konsinyeMi ? 'e-İrsaliye (konsinye)' : irsaliyeMi ? 'e-İrsaliye' : 'e-Fatura'}
+                </span>
                 {Number(sonuc?.belge.efaturaDurum ?? 0) > 0
                   ? <span className="rozet olumlu">✓ Gönderildi</span>
                   : <span className="rozet">gönderilmedi</span>}
@@ -718,9 +726,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             />
 
             <label className="alan">
-              <span className="etiket zorunlu-isaret">
-                {irsaliyeMi ? 'İrsaliye Tarihi' : 'Belge Tarihi'}
-              </span>
+              <span className="etiket zorunlu-isaret">{belgeAdi} Tarihi</span>
               <input type="date" value={tarih} disabled={kilitli}
                      onChange={e => setTarih(e.target.value)} />
             </label>
