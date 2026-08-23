@@ -490,15 +490,12 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // TAHAKKUK (13 alacak / 17 borc): cari bakiyeyi ve ekstreyi etkiler ama
     //   MUHASEBE FISI URETMEZ (db/098) - gerceklesen islem geldiginde muhasebe
     //   onunla yazilir. Stok da etkilemez.
-    kaynak: 'belge', rota: 'tahakkuk', baslik: 'Tahakkuklar',
+    // SATIS tarafi: ALACAK tahakkuku (13). Borc tahakkuku (17) Alis grubunda.
+    kaynak: 'belge', rota: 'tahakkuk', baslik: 'Alacak Tahakkukları',
     yol: 'Satis › Tahakkuklar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 13,
-    sabitFiltre: { alan: 'tur', op: 'icinde', deger: [13, 17] },
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 13 },
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum'],
     toplam: ['genelToplam'],
-    cipler: [
-      { ad: 'Tumu' },
-      { ad: 'Alacak', filtre: { alan: 'tur', op: 'esit', deger: 13 } },
-      { ad: 'Borç',   filtre: { alan: 'tur', op: 'esit', deger: 17 } },
-    ],
     menuGrup: 'Satış', menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge',
   },
   {
@@ -516,6 +513,81 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
     ],
     menuGrup: 'Satış', menuAd: 'Satış Konsinyeler', ic: '📦', yetkiKodu: 'belge',
+  },
+  // ------------------------------------------------------------- ALIS ----
+  //  Satis tarafinin birebir karsiligi: ayni 'belge' kaynagi, ayni kart, yalniz
+  //  tur farkli (9/10/11/12/17/109). Kartta cari etiketi "Tedarikçi" olur.
+  {
+    kaynak: 'belge', rota: 'alis-siparis', baslik: 'Alış Siparişleri',
+    yol: 'Alis › Siparişler', aksiyonEkrani: 'siparis-liste', yeniBelgeTuru: 9,
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 9 },
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum'],
+    toplam: ['genelToplam'],
+    cipler: [
+      { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
+      { ad: 'Kısmi',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
+      { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Alış', menuAd: 'Alış Siparişleri', ic: '📋', yetkiKodu: 'belge',
+  },
+  {
+    kaynak: 'belge', rota: 'alis-irsaliye', baslik: 'Alış İrsaliyeleri',
+    yol: 'Alis › İrsaliyeler', aksiyonEkrani: 'irsaliye-liste', yeniBelgeTuru: 10,
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 10 },
+    gizliKolonlar: ['tur', 'turAdi'],
+    toplam: ['genelToplam'],
+    cipler: [
+      { ad: 'Faturalanmadı', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
+      { ad: 'Kısmi',         filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
+      { ad: 'Faturalandı',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Alış', menuAd: 'Alış İrsaliyeleri', ic: '🚛', yetkiKodu: 'belge',
+  },
+  {
+    kaynak: 'belge', rota: 'alis-fatura', baslik: 'Alış Faturaları',
+    yol: 'Alis › Faturalar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 11,
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 11 },
+    gizliKolonlar: ['tur', 'turAdi'],
+    toplam: ['matrah', 'kdvTutari', 'genelToplam'],
+    cipler: [
+      { ad: 'Tumu' },
+      { ad: 'Fatura', filtre: { alan: 'tipi', op: 'esitDegil', deger: 2 } },
+      { ad: 'İade',   filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
+    ],
+    menuGrup: 'Alış', menuAd: 'Alış Faturaları', ic: '🧾', yetkiKodu: 'belge',
+  },
+  {
+    kaynak: 'belge', rota: 'alis-fisi', baslik: 'Alış Fişleri',
+    yol: 'Alis › Fişler', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 12,
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 12 },
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum'],
+    toplam: ['matrah', 'kdvTutari', 'genelToplam'],
+    menuGrup: 'Alış', menuAd: 'Alış Fişleri', ic: '🧾', yetkiKodu: 'belge',
+  },
+  {
+    // ALIS tarafi: BORC tahakkuku (17) - tedarikciye borc.
+    kaynak: 'belge', rota: 'borc-tahakkuk', baslik: 'Borç Tahakkukları',
+    yol: 'Alis › Tahakkuklar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 17,
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 17 },
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum'],
+    toplam: ['genelToplam'],
+    menuGrup: 'Alış', menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge',
+  },
+  {
+    kaynak: 'belge', rota: 'alis-konsinye', baslik: 'Alış Konsinyeler',
+    yol: 'Alis › Konsinye', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 109,
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 109 },
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum'],
+    toplam: ['matrah', 'kdvTutari', 'genelToplam'],
+    cipler: [
+      { ad: 'Tumu' },
+      { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
+      { ad: 'Kısmi',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
+      { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
+    ],
+    menuGrup: 'Alış', menuAd: 'Alış Konsinyeler', ic: '📦', yetkiKodu: 'belge',
   },
   {
     // "Hangi siparisin nesi teslim edilmedi" - satir bazli acik liste.

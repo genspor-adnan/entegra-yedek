@@ -130,7 +130,7 @@ const SEKMELER: {
   // Faturada "Faturalama" (bu belgeden turetilenler) anlamsiz - fatura zincirin
   //   SONU. Mockup'ta (satis_faturasi.html) onun yerinde TAHSILAT var.
   { anahtar: 'fatura',   baslik: 'Faturalama', faturaYok: true },
-  { anahtar: 'tahsilat', baslik: 'Tahsilat',   faturaMi: true },
+  { anahtar: 'tahsilat', baslik: 'Tahsilat',   faturaMi: true },   // alista "Ödeme" olur
   { anahtar: 'imza',     baslik: 'İmza / Teslim', irsaliye: true },
   { anahtar: 'yorum',    baslik: 'Yorum / Medya' },
 ];
@@ -146,11 +146,20 @@ const GIRILEBILIR_TURLER = [19, 15, 14, 9, 11, 10, 16, 12, 13, 17, 119, 109] as 
 
 /** Hangi turden sonra hangi listeye donulur. */
 const LISTE_YOLU = (tur: number) =>
-  tur === 9 || tur === 19 ? '/siparis'
-  : tur === 16 ? '/satis-fisi'
-  : tur === 13 || tur === 17 ? '/tahakkuk'
-  : tur === 119 ? '/satis-konsinye'
+  // SATIS
+  tur === 19 ? '/siparis'
   : tur === 14 ? '/satis-irsaliye'
+  : tur === 15 ? '/belge'
+  : tur === 16 ? '/satis-fisi'
+  : tur === 13 ? '/tahakkuk'
+  : tur === 119 ? '/satis-konsinye'
+  // ALIS
+  : tur === 9 ? '/alis-siparis'
+  : tur === 10 ? '/alis-irsaliye'
+  : tur === 11 ? '/alis-fatura'
+  : tur === 12 ? '/alis-fisi'
+  : tur === 17 ? '/borc-tahakkuk'
+  : tur === 109 ? '/alis-konsinye'
   : '/belge';
 
 /**
@@ -289,6 +298,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   // Konsinye (109 gelen / 119 giden) sevk belgesidir - irsaliye akisini kullanir
   //   ama BASLIK ETIKETLERI kendi adiyla ("Konsinye No", "Konsinye Tarihi").
   const konsinyeMi = tur === 109 || tur === 119;
+  /** ALIS turleri: cari TEDARIKCI'dir, kalemler stok GIRISI yapar. */
+  const alisMi = tur === 9 || tur === 10 || tur === 11 || tur === 12 || tur === 17 || tur === 109;
   const belgeAdi = konsinyeMi ? 'Konsinye' : irsaliyeMi ? 'İrsaliye' : 'Belge';
   /**
    * e-BELGE OLMAYAN turler: satis fisi (16 - perakende fis, GIB'e gitmez),
@@ -318,7 +329,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setTarih(String(y.belge.belgeTarihi ?? '').slice(0, 10));
         setSeri(String(y.belge.belgeSeri ?? ''));
         setVadeGun(String(y.belge.vadeGun ?? 0));
-        setDepo(y.belge.cikisDepoId
+        // Alis belgesi GIRIS deposunu, satis CIKIS deposunu kullanir.
+        setDepo(y.belge.girisDepoId
+          ? { id: Number(y.belge.girisDepoId), ad: String(y.belge.girisDepoAdi ?? '') }
+          : y.belge.cikisDepoId
           ? { id: Number(y.belge.cikisDepoId), ad: String(y.belge.cikisDepoAdi ?? '') } : null);
         setSatici(y.belge.saticiId
           ? { id: Number(y.belge.saticiId), ad: String(y.belge.saticiAdi ?? '') } : null);
@@ -477,7 +491,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           dovizKuru: 1,
           vadeGun: Number(vadeGun) || 0,
           subeId: kullanici?.subeId ?? undefined,
-          cikisDepoId: depo?.id ?? null,
+          // Depo ALANI ture gore: alista giris, satista cikis (stok yonu buradan).
+          cikisDepoId: alisMi ? null : depo?.id ?? null,
+          girisDepoId: alisMi ? depo?.id ?? null : null,
           // satici_id NOT NULL default 0 - "secilmedi" burada null degil 0
           //   (null gonderince sunucu "saticiId bos birakilamaz" ile reddediyordu).
           saticiId: satici?.id ?? 0,
@@ -676,7 +692,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               <button className="d" disabled={!kayitliId || !cari}
                       title={kayitliId ? 'Bu belge için tahsilat işlemi aç' : 'Önce belgeyi kaydedin.'}
                       onClick={() => tahsilatAc(21)}>
-                💵 Tahsilat
+                💵 {alisMi ? 'Ödeme' : 'Tahsilat'}
               </button>
               <button className="d" disabled title="İade belgesi henüz bağlanmadı.">↩ İade</button>
               <button className="d" disabled title="Yazdırma henüz bağlanmadı.">🖨️ Yazdır</button>
@@ -725,7 +741,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 ki "yeni belge" akisiyla ayni ekran olsun (iki farkli cari secme
                 bicimi kullaniciyi sasirtiyordu). */}
             <TarafAlani
-              etiket={siparisMi || irsaliyeMi ? 'Müşteri (Cari)' : 'Cari'}
+              etiket={alisMi ? 'Tedarikçi (Cari)'
+                    : siparisMi || irsaliyeMi ? 'Müşteri (Cari)' : 'Cari'}
               zorunlu
               deger={cari?.unvan}
               kilitli={kilitli}
@@ -763,7 +780,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             {/* Satis temsilcisi PERSONEL'dir (cari degil) ve secim cari ile ayni
                 TarafArama ekranindan yapilir - tek arama bicimi. */}
             <TarafAlani
-              etiket="Satış Temsilcisi"
+              etiket={alisMi ? 'Sorumlu' : 'Satış Temsilcisi'}
               deger={satici?.ad}
               kilitli={kilitli}
               ipucu="Personel ara"
@@ -783,7 +800,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             {!tahakkukMu && (
             <GenLookup
               kaynak="depo"
-              etiket={siparisMi ? 'Depo' : 'Çıkış Deposu'}
+              etiket={siparisMi ? 'Depo' : alisMi ? 'Giriş Deposu' : 'Çıkış Deposu'}
               // Pasif depo secilemez: kapatilmis depoya belge kesilmesin.
               sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
               alanlar={LOOKUP_DEPO}
@@ -844,7 +861,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             <div key={x.anahtar}
                  className={`kat${x.anahtar === aktifSekme ? ' on' : ''}`}
                  onClick={() => setAktifSekme(x.anahtar)}>
-              {x.baslik}
+              {x.anahtar === 'tahsilat' && alisMi ? 'Ödeme' : x.baslik}
               {x.anahtar === 'kalem' && <span className="b">{satirlar.length}</span>}
               {x.anahtar === 'fatura' && donusumler.length > 0 && (
                 <span className="b">{donusumler.length}</span>
@@ -1205,19 +1222,20 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               <div className="katoolbar" style={{ margin: 10 }}>
                 {/* Tahsilat ARACI adiyla: yanindaki POS / Cek-Senet ile ayni
                     dizide - bu dugme NAKIT tahsilat (tur 21) acar. */}
+                {/* Alista ODEME turleri (31/32/35), satista tahsilat (21/22/25). */}
                 <button className="d bir" disabled={!kayitliId}
-                        title={kayitliId ? 'Nakit tahsilat işlemi aç' : 'Önce faturayı kaydedin.'}
-                        onClick={() => tahsilatAc(21)}>
+                        title={kayitliId ? `Nakit ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç` : 'Önce belgeyi kaydedin.'}
+                        onClick={() => tahsilatAc(alisMi ? 31 : 21)}>
                   💵 Nakit
                 </button>
                 <button className="d bir" disabled={!kayitliId}
-                        title={kayitliId ? 'Banka (havale/EFT) tahsilat işlemi aç' : 'Önce faturayı kaydedin.'}
-                        onClick={() => tahsilatAc(22)}>
+                        title={kayitliId ? `Banka (havale/EFT) ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç` : 'Önce belgeyi kaydedin.'}
+                        onClick={() => tahsilatAc(alisMi ? 32 : 22)}>
                   🏦 Banka
                 </button>
                 <button className="d bir" disabled={!kayitliId}
-                        title={kayitliId ? 'Kredi kartı / POS tahsilat işlemi aç' : 'Önce faturayı kaydedin.'}
-                        onClick={() => tahsilatAc(25)}>
+                        title={kayitliId ? `Kredi kartı / POS ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç` : 'Önce belgeyi kaydedin.'}
+                        onClick={() => tahsilatAc(alisMi ? 35 : 25)}>
                   💳 POS
                 </button>
                 <button className="d" disabled title="Çek/senet girişi F5'te bağlanacak">🧾 Çek/Senet Al</button>
@@ -1246,13 +1264,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                   ))}
                   {tahsilatlar.length === 0 && (
                     <tr><td colSpan={5} className="bos">
-                      {kayitliId > 0 ? 'Bu faturaya bağlı tahsilat yok.' : 'Önce faturayı kaydedin.'}
+                      {kayitliId > 0
+                        ? `Bu belgeye bağlı ${alisMi ? 'ödeme' : 'tahsilat'} yok.`
+                        : 'Önce belgeyi kaydedin.'}
                     </td></tr>
                   )}
                 </tbody>
                 <tfoot>
                   <tr className="genel">
-                    <td colSpan={4} className="hiza-sag">Tahsil Edilen / Kalan</td>
+                    <td colSpan={4} className="hiza-sag">
+                      {alisMi ? 'Ödenen / Kalan' : 'Tahsil Edilen / Kalan'}
+                    </td>
                     <td className="hiza-sag">
                       {para.format(tahsil)} /{' '}
                       <b style={{ color: kalan > 0 ? 'var(--hata)' : 'var(--ok)' }}>
