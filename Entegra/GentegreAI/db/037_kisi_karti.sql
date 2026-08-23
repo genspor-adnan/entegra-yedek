@@ -1,4 +1,4 @@
--- ============================================================================
+﻿-- ============================================================================
 --  Gentegre AI — Kisi karti (kisi_karti.html / kisi_listesi.html mockuplari)
 --  037_kisi_karti.sql
 --
@@ -13,14 +13,14 @@
 --   ile KARISTIRILMASIN, o zaten kisi icin "Ad Soyad" gorunen adi tutuyor (asagidaki
 --   tetikleyici ile otomatik uretiliyor).
 -- departman: kod_liste secimi (BOLUM -2251, "Ops_Bizim_Departman" - PrjConst.pas),
---   personel_ozluk.departman ile AYNI kod listesini kullanir - kullanici "İK'da da
+--   taraf_personel.departman ile AYNI kod listesini kullanir - kullanici "İK'da da
 --   kullanacağız" dedi, tek liste iki modulde de gecerli olsun diye taraf'a eklendi
---   (personel_ozluk'un kendi departman kolonuna DOKUNULMADI, ileride birlestirme ayri is).
+--   (taraf_personel'un kendi departman kolonuna DOKUNULMADI, ileride birlestirme ayri is).
 alter table public.taraf add column if not exists gorev varchar(100);
 alter table public.taraf add column if not exists departman smallint;
 
 comment on column public.taraf.gorev is 'Kisi icin is unvani/gorevi (ör. Satınalma Müdürü). Sadece kisi=1 rollerinde kullanilir.';
-comment on column public.taraf.departman is 'kod_liste (taraf.departman, eski BOLUM -2251) - personel_ozluk.departman ile ayni liste.';
+comment on column public.taraf.departman is 'kod_liste (taraf.departman, eski BOLUM -2251) - taraf_personel.departman ile ayni liste.';
 
 update public.kod_liste set kod = 'taraf.departman', ad = 'Departman' where eski_bolum = -2251;
 
@@ -52,3 +52,4 @@ create or replace view public.v_cari_lookup as
 
 comment on view public.v_cari_lookup is
   'Kisi kartinin "Bagli Cari" KodTablosu secimi icin (id/ad/aktif sozlesmesi).';
+

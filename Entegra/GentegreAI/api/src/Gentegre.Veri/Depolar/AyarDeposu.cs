@@ -32,8 +32,25 @@ public sealed class AyarDeposu
     /// <summary>Ekranda gosterilen/yazilabilen ayarlar.</summary>
     public static readonly IReadOnlyList<string> BeyazListe = new[]
     {
+        "genel.yerel_para",
         "belge.geri_gun_siniri",
         "liste.sayfa_boyu",
+        "stok.negatif_davranis",
+        // Guvenlik ayarlarini KimlikServisi / KullaniciDeposu zaten referans
+        //   tablosundan okuyordu; ekranda gorunmedikleri icin kimse
+        //   degistiremiyordu (105).
+        "guvenlik.jwt_dakika",
+        "guvenlik.refresh_gun",
+        "guvenlik.parola_min_uzunluk",
+        "guvenlik.tek_oturum",
+        "guvenlik.hatali_giris_siniri",
+        "guvenlik.kilit_dakika",
+    };
+
+    /// <summary>Metin (sayi olmayan) ayarlar - uzunluk disinda bicim serbest.</summary>
+    private static readonly Dictionary<string, int> MetinAyar = new()
+    {
+        ["genel.yerel_para"] = 5,        // ISO kodu: TL, USD, EUR...
     };
 
     /// <summary>Ayar yoksa kullanilan degerler - DB'siz de dogru davranis.</summary>
@@ -41,6 +58,13 @@ public sealed class AyarDeposu
     {
         ["belge.geri_gun_siniri"] = 7,
         ["liste.sayfa_boyu"] = 50,
+        ["stok.negatif_davranis"] = 1,
+        ["guvenlik.jwt_dakika"] = 30,
+        ["guvenlik.refresh_gun"] = 30,
+        ["guvenlik.parola_min_uzunluk"] = 8,
+        ["guvenlik.tek_oturum"] = 0,
+        ["guvenlik.hatali_giris_siniri"] = 5,
+        ["guvenlik.kilit_dakika"] = 15,
     };
 
     /// <summary>Sayisal ayarlarin kabul araligi (yoksa yalniz "0 veya buyuk" kurali).</summary>
@@ -49,6 +73,13 @@ public sealed class AyarDeposu
         // Sunucu tek istekte 500'den fazlasini gondermiyor (ListeIstegi.EnBuyukBoyut);
         //   10'un altinda sayfalama ekrani surekli istek atmaya cevirir.
         ["liste.sayfa_boyu"] = (10, 500),
+        ["stok.negatif_davranis"] = (0, 2),          // serbest / uyar / engelle
+        ["guvenlik.jwt_dakika"] = (5, 1440),
+        ["guvenlik.refresh_gun"] = (1, 365),
+        ["guvenlik.parola_min_uzunluk"] = (6, 64),
+        ["guvenlik.tek_oturum"] = (0, 1),            // mantik ayari
+        ["guvenlik.hatali_giris_siniri"] = (3, 20),
+        ["guvenlik.kilit_dakika"] = (1, 1440),
     };
 
     private static readonly Dictionary<string, (int Deger, DateTime Zaman)> Onbellek = new();
@@ -93,6 +124,17 @@ public sealed class AyarDeposu
             throw GentegreHatasi.Dogrulama($"Bilinmeyen ayar: {anahtar}",
                 new AlanHatasi("anahtar", "Böyle bir ayar yok."));
 
+        if (MetinAyar.TryGetValue(anahtar, out var enFazla))
+        {
+            deger = deger.Trim().ToUpperInvariant();
+            if (deger.Length == 0)
+                throw GentegreHatasi.Dogrulama("Değer boş bırakılamaz.",
+                    new AlanHatasi("deger", "Zorunlu."));
+            if (deger.Length > enFazla)
+                throw GentegreHatasi.Dogrulama($"En fazla {enFazla} karakter olabilir.",
+                    new AlanHatasi("deger", $"En fazla {enFazla} karakter."));
+        }
+
         // Sayisal ayarlarda deger dogrulanir: "abc" yazilirsa belge kaydi patlardi.
         if (Varsayilan.ContainsKey(anahtar))
         {
@@ -112,7 +154,7 @@ public sealed class AyarDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using (var komut = new NpgsqlCommand("""
             insert into public.referans (anahtar, deger, tip, kapsam, degistiren, degistirme_tarihi)
-            values (@p0, @p1, 'sayi', 'firma', @p2, now()::timestamp)
+            values (@p0, @p1, @p3, 'firma', @p2, now()::timestamp)
             on conflict (anahtar) do update
                set deger = excluded.deger, degistiren = excluded.degistiren,
                    degistirme_tarihi = excluded.degistirme_tarihi,
@@ -122,6 +164,7 @@ public sealed class AyarDeposu
             komut.Parameters.AddWithValue("p0", anahtar);
             komut.Parameters.AddWithValue("p1", deger);
             komut.Parameters.AddWithValue("p2", baglam.KullaniciId);
+            komut.Parameters.AddWithValue("p3", MetinAyar.ContainsKey(anahtar) ? "metin" : "sayi");
             await komut.ExecuteNonQueryAsync(iptal);
         }
 

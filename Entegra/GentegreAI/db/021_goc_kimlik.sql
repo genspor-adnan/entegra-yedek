@@ -1,4 +1,4 @@
--- ============================================================================
+﻿-- ============================================================================
 --  Gentegre AI — Faz 0 / F0-05  kimlik / yetki gocu
 --  021_goc_kimlik.sql
 --
@@ -177,17 +177,17 @@ with kaynak as (
       from stg.kullanici k
      where k.rehberid is not null
        and exists (select 1 from public.taraf t where t.id = k.rehberid)
-       and not exists (select 1 from public.kullanici u where u.taraf_id = k.rehberid)
+       and not exists (select 1 from public.taraf_kullanici u where u.id = k.rehberid)
 ), numarali as (
     select s.*,
            row_number() over (partition by s.ham_kod order by s.eski_id) as sira
       from kaynak s
 )
-insert into public.kullanici (taraf_id, kod, rol_id, aktif, dil, mobil, eski_id,
+insert into public.taraf_kullanici (id, kod, rol_id, aktif, dil, mobil, eski_id,
                               parola_hash, parola_degismeli,
                               ekleyen, ekleme_tarihi, degistiren, degistirme_tarihi)
 select n.taraf_id,
-       case when n.sira = 1 and not exists (select 1 from public.kullanici u where u.kod = n.ham_kod)
+       case when n.sira = 1 and not exists (select 1 from public.taraf_kullanici u where u.kod = n.ham_kod)
             then n.ham_kod
             else n.ham_kod || '-' || n.eski_id end,
        coalesce(r.id, (select id from public.rol where kod = 'salt_okur')),
@@ -205,17 +205,17 @@ select n.taraf_id,
 -- personel bayragi: kullanici olan her taraf personeldir
 update public.taraf t
    set personel = 1
-  from public.kullanici u
- where u.taraf_id = t.id
+  from public.taraf_kullanici u
+ where u.id = t.id
    and coalesce(t.personel, 0) = 0;
 
 -- kullanicinin subesi (019'daki kullanici_sube). 018 gocu personeli varsayilan
 --   subeye bagladi; eksik kalan varsa burada tamamlanir.
 insert into public.kullanici_sube (taraf_id, sube_id, varsayilan)
-select u.taraf_id, s.id, 1
-  from public.kullanici u
+select u.id, s.id, 1
+  from public.taraf_kullanici u
  cross join lateral (select id from public.sube where varsayilan = 1 limit 1) s
- where not exists (select 1 from public.kullanici_sube ks where ks.taraf_id = u.taraf_id)
+ where not exists (select 1 from public.kullanici_sube ks where ks.taraf_id = u.id)
 on conflict (taraf_id, sube_id) do nothing;
 
 -- ====================================================== 5) kullanici_kapsam ====
@@ -225,7 +225,7 @@ select distinct a.sahiprehberid, 1, a.rehberid, coalesce(a.ekleyen, 0)
   from stg.yetkialani a
  where a.sahiprehberid is not null
    and a.rehberid is not null
-   and exists (select 1 from public.kullanici u where u.taraf_id = a.sahiprehberid)
+   and exists (select 1 from public.taraf_kullanici u where u.id = a.sahiprehberid)
    and exists (select 1 from public.taraf t     where t.id       = a.rehberid)
 on conflict (kullanici_id, tur, hedef_id) do nothing;
 
@@ -242,14 +242,14 @@ begin
     select count(*) into v_rol      from public.rol;
     select count(*) into v_yetki    from public.yetki;
     select count(*) into v_rolyetki from public.rol_yetki;
-    select count(*) into v_kul      from public.kullanici;
+    select count(*) into v_kul      from public.taraf_kullanici;
     select count(*) into v_kapsam   from public.kullanici_kapsam;
 
     -- kaynakta olup hedefe girmeyen kullanici (taraf kaydi bulunamayanlar)
     select count(*) into v_esiz
       from stg.kullanici k
      where k.rehberid is not null
-       and not exists (select 1 from public.kullanici u where u.taraf_id = k.rehberid);
+       and not exists (select 1 from public.taraf_kullanici u where u.id = k.rehberid);
 
     raise notice '021 tamam: % rol, % yetki, % rol_yetki, % kullanici, % kapsam satiri',
                  v_rol, v_yetki, v_rolyetki, v_kul, v_kapsam;
@@ -258,3 +258,5 @@ begin
     end if;
     raise notice 'PAROLALAR TASINMADI: tum gocmus kullanicilar parola_degismeli = 1, parola_hash bos.';
 end $$;
+
+

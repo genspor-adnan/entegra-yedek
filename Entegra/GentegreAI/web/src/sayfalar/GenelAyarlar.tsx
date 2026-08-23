@@ -1,11 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
-import { api } from '../api/istemci';
-import { ApiHatasi, type AyarSatiri } from '../api/sozlesme';
-import { YardimIkonu } from '../bilesenler/YardimIkonu';
-import { ayarOnbellegiTemizle } from '../api/ayarlar';
+import { useState } from 'react';
+import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
 
 const SEKMELER = [
-  { anahtar: 'genel', baslik: 'Genel' },
+  { anahtar: 'genel',    baslik: 'Genel' },
+  { anahtar: 'guvenlik', baslik: 'Güvenlik' },
 ] as const;
 
 type Sekme = typeof SEKMELER[number]['anahtar'];
@@ -13,56 +11,18 @@ type Sekme = typeof SEKMELER[number]['anahtar'];
 /**
  * Genel Ayarlar (Yönetim › Ayarlar › Genel) — firma geneli DAVRANIS ayarlari.
  *
- * Ayarlar `public.referans` tablosunda, sunucuda BEYAZ LISTE ile korunuyor
- * (AyarDeposu): ekran yalnizca tanimli anahtarlari gorur. Kayit ANINDA yapilir
- * (blur / Enter) - tek alanlik bir form icin ayrica "Kaydet" dugmesi koymak
- * kullaniciyi bekletmekten baska ise yaramiyordu.
+ * Ayarlar `public.referans` tablosunda ve sunucuda BEYAZ LISTE ile korunuyor
+ * (AyarDeposu). Alan cizimi/kayit AyarAlani'nda ortak: etiket ustte, "?" ikonu
+ * saginda, kayit aninda.
  */
 export function GenelAyarlar() {
   const [aktif, setAktif] = useState<Sekme>('genel');
-  const [ayarlar, setAyarlar] = useState<AyarSatiri[]>([]);
-  const [taslak, setTaslak] = useState<Record<string, string>>({});
-  const [yukleniyor, setYukleniyor] = useState(true);
-  const [hata, setHata] = useState<string | null>(null);
-  const [bilgi, setBilgi] = useState<string | null>(null);
+  const { ayarlar, yukleniyor, hata, bilgi, yaz } = useAyarlar();
 
-  const yukle = useCallback(async () => {
-    try {
-      setAyarlar(await api.ayarlar());
-      setHata(null);
-    } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
-    } finally { setYukleniyor(false) }
-  }, []);
-
-  useEffect(() => { void yukle() }, [yukle]);
-
-  const deger = (anahtar: string) =>
-    taslak[anahtar] ?? ayarlar.find(a => a.anahtar === anahtar)?.deger ?? '';
-
-  async function yaz(anahtar: string, yeni: string) {
-    const eski = ayarlar.find(a => a.anahtar === anahtar)?.deger ?? '';
-    setTaslak(t => { const y = { ...t }; delete y[anahtar]; return y });
-    if (yeni.trim() === eski) return;
-
-    try {
-      setAyarlar(await api.ayarYaz(anahtar, yeni.trim()));
-      ayarOnbellegiTemizle();       // acilacak ekranlar yeni degeri okusun
-      setHata(null);
-      setBilgi('Ayar kaydedildi.');
-      setTimeout(() => setBilgi(null), 2500);
-    } catch (h) {
-      // ONCE tazele, SONRA hatayi yaz: yukle() basarida setHata(null) yaptigi
-      //   icin ters sirada hata mesaji aninda siliniyordu (gecersiz deger
-      //   girildiginde kullaniciya hicbir sey gorunmuyordu).
-      await yukle();
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
-    }
-  }
-
-  const geriGun = deger('belge.geri_gun_siniri');
-  const sayfaBoyu = deger('liste.sayfa_boyu');
-  const kayit = (anahtar: string) => ayarlar.find(a => a.anahtar === anahtar);
+  const alan = (anahtar: string, etiket: string,
+                ek?: Partial<Parameters<typeof AyarAlani>[0]>) => (
+    <AyarAlani anahtar={anahtar} etiket={etiket} ayarlar={ayarlar} onYaz={yaz} {...ek} />
+  );
 
   return (
     <>
@@ -87,46 +47,50 @@ export function GenelAyarlar() {
         {hata && <div className="hata-kutusu">{hata}</div>}
         {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
 
-        {yukleniyor ? <div className="yukleniyor">Yükleniyor…</div> : (
-          <div className="kagrup">
-            <h6>Belge Girişi</h6>
-            <div className="alan-izgara tek-sutun ayar-formu">
-              {/* GENEL KURAL: aciklama alt paragrafta degil, editin SAGINDAKI
-                  "?" ikonunda (metin public.help'te - db/103). */}
-              <label className="alan">
-                <span className="etiket">Belgeler geriye dönük kaç güne kadar girilebilir</span>
-                <span className="ikili">
-                  <input className="hiza-sag" value={geriGun} inputMode="numeric"
-                         onChange={e => setTaslak(t => ({ ...t, 'belge.geri_gun_siniri': e.target.value }))}
-                         onBlur={e => void yaz('belge.geri_gun_siniri', e.target.value)}
-                         onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />
-                  <YardimIkonu anahtar="ayar.belge.geri_gun_siniri"
-                               baslik={kayit('belge.geri_gun_siniri')?.yardimBaslik}
-                               metin={kayit('belge.geri_gun_siniri')?.yardim} />
-                </span>
-              </label>
+        {yukleniyor ? <div className="yukleniyor">Yükleniyor…</div> : aktif === 'genel' ? (
+          <>
+            <div className="kagrup">
+              <h6>Genel</h6>
+              <div className="alan-izgara tek-sutun ayar-formu">
+                {alan('genel.yerel_para', 'Yerel para birimi', { tip: 'metin' })}
+              </div>
             </div>
-          </div>
-        )}
 
-        {!yukleniyor && (
-          <div className="kagrup">
-            <h6>Listeler</h6>
-            <div className="alan-izgara tek-sutun ayar-formu">
-              <label className="alan">
-                <span className="etiket">Sayfa boyu (bir sayfadaki kayıt sayısı)</span>
-                <span className="ikili">
-                  <input className="hiza-sag" value={sayfaBoyu} inputMode="numeric"
-                         onChange={e => setTaslak(t => ({ ...t, 'liste.sayfa_boyu': e.target.value }))}
-                         onBlur={e => void yaz('liste.sayfa_boyu', e.target.value)}
-                         onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />
-                  <YardimIkonu anahtar="ayar.liste.sayfa_boyu"
-                               baslik={kayit('liste.sayfa_boyu')?.yardimBaslik}
-                               metin={kayit('liste.sayfa_boyu')?.yardim} />
-                </span>
-              </label>
+            <div className="kagrup">
+              <h6>Belge Girişi</h6>
+              <div className="alan-izgara tek-sutun ayar-formu">
+                {alan('belge.geri_gun_siniri', 'Belgeler geriye dönük kaç güne kadar girilebilir')}
+              </div>
             </div>
-          </div>
+
+            <div className="kagrup">
+              <h6>Listeler</h6>
+              <div className="alan-izgara tek-sutun ayar-formu">
+                {alan('liste.sayfa_boyu', 'Sayfa boyu (bir sayfadaki kayıt sayısı)')}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="kagrup">
+              <h6>Oturum</h6>
+              <div className="alan-izgara tek-sutun ayar-formu">
+                {alan('guvenlik.jwt_dakika', 'Oturum süresi (dakika)')}
+                {alan('guvenlik.refresh_gun', 'Oturumu açık tutma (gün)')}
+                {/* Etiket KISA: uzun cumle satiri dagitiyordu, ayrinti "?" ikonunda. */}
+                {alan('guvenlik.tek_oturum', 'Tek oturum', { tip: 'mantik' })}
+              </div>
+            </div>
+
+            <div className="kagrup">
+              <h6>Parola ve Kilit</h6>
+              <div className="alan-izgara tek-sutun ayar-formu">
+                {alan('guvenlik.parola_min_uzunluk', 'En az parola uzunluğu')}
+                {alan('guvenlik.hatali_giris_siniri', 'Kaç hatalı girişten sonra kilitlensin')}
+                {alan('guvenlik.kilit_dakika', 'Kilit süresi (dakika)')}
+              </div>
+            </div>
+          </>
         )}
       </div>
     </>

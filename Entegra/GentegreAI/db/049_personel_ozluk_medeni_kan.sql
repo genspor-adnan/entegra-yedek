@@ -1,4 +1,4 @@
--- ============================================================================
+﻿-- ============================================================================
 --  Gentegre AI — Personel Özlük: Medeni Hal / Kan Grubu
 --  049_personel_ozluk_medeni_kan.sql
 --
@@ -7,8 +7,8 @@
 -- ============================================================================
 \set ON_ERROR_STOP on
 
-alter table public.personel_ozluk add column if not exists medeni_hal smallint not null default 0;
-alter table public.personel_ozluk add column if not exists kan_grubu smallint not null default 0;
+alter table public.taraf_personel add column if not exists medeni_hal smallint not null default 0;
+alter table public.taraf_personel add column if not exists kan_grubu smallint not null default 0;
 
 insert into public.kod_deger (liste_id, deger, dil, ad, sira, aktif)
 select l.id, v.deger, 0, v.ad, v.sira, 1
@@ -19,3 +19,4 @@ select l.id, v.deger, 0, v.ad, v.sira, 1
   ) as v(deger, ad, sira)
  where l.kod = 'taraf.kan_grubu'
    and not exists (select 1 from public.kod_deger kd where kd.liste_id = l.id);
+

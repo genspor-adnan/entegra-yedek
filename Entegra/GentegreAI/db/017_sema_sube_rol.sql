@@ -1,4 +1,4 @@
--- ============================================================================
+﻿-- ============================================================================
 --  Gentegre AI — Faz 1 sema genislemesi
 --  017_sema_sube_rol.sql  —  sube tablosu + taraf ROL modeli + rol uzantilari
 --
@@ -88,7 +88,7 @@ comment on column public.taraf.vd is
 -- ------------------------------------------------------- rol uzantilari ----
 -- Role OZEL alanlar ana tabloyu sismesin diye 1:1 uzanti tablolarinda.
 create table if not exists public.taraf_musteri (
-    taraf_id             integer primary key references public.taraf (id) on delete cascade,
+    id                   integer primary key references public.taraf (id) on delete cascade,
     risk_limiti          numeric(19,4) not null default 0,
     vade_gun             smallint      not null default 0,
     fiyat_listesi        smallint      not null default 0,
@@ -101,7 +101,7 @@ create table if not exists public.taraf_musteri (
 );
 
 create table if not exists public.taraf_tedarikci (
-    taraf_id             integer primary key references public.taraf (id) on delete cascade,
+    id                   integer primary key references public.taraf (id) on delete cascade,
     odeme_kosulu         smallint      not null default 0,
     vade_gun             smallint      not null default 0,
     temin_suresi_gun     smallint      not null default 0,
@@ -111,9 +111,17 @@ create table if not exists public.taraf_tedarikci (
     degistirme_tarihi    timestamp
 );
 
+create table if not exists public.taraf_kisi (
+    id                   integer primary key references public.taraf (id) on delete cascade,
+    ekleyen              integer   not null default 0,
+    ekleme_tarihi        timestamp not null default now()::timestamp,
+    degistiren           integer   not null default 0,
+    degistirme_tarihi    timestamp
+);
+
 -- Ozluk: KVKK geregi ayri tablo + ayri yetki.
-create table if not exists public.personel_ozluk (
-    taraf_id             integer primary key references public.taraf (id) on delete cascade,
+create table if not exists public.taraf_personel (
+    id                   integer primary key references public.taraf (id) on delete cascade,
     sicil_no             varchar(20)  not null default '',
     dogum_tarihi         date,
     cinsiyet             smallint     not null default 0,      -- 0 belirtilmemis, 1 erkek, 2 kadin
@@ -128,33 +136,25 @@ create table if not exists public.personel_ozluk (
     degistirme_tarihi    timestamp
 );
 
--- Hasta: hastane kullanimi. Ayni kisi hem personel hem hasta olabilir -> ayni
---   taraf kaydi, iki bayrak, iki uzanti.
+-- Hasta: Ayni kisi hem personel hem hasta olabilir -> ayni taraf kaydi,
+--   hasta bilgisi 1:1 uzanti tablosunda tutulur.
 create table if not exists public.taraf_hasta (
-    taraf_id             integer primary key references public.taraf (id) on delete cascade,
-    dosya_no             varchar(20)  not null default '',     -- protokol/dosya numarasi
-    hasta_grubu          smallint     not null default 0,      -- kod listesi: taraf.hasta_grubu
+    id                   integer primary key references public.taraf (id) on delete cascade,
     dogum_tarihi         date,
-    cinsiyet             smallint     not null default 0,
-    kan_grubu            smallint     not null default 0,
-    sigorta_turu         smallint     not null default 0,      -- SGK / ozel / ucretli
-    sigorta_no           varchar(30)  not null default '',
-    kurum_taraf_id       integer,                               -- anlasmali kurum (musteri rollu taraf)
-    acil_kisi_ad         varchar(60)  not null default '',
-    acil_kisi_telefon    varchar(30)  not null default '',
-    aktif                smallint     not null default 1,
-    ekleyen              integer   not null default 0,
-    ekleme_tarihi        timestamp not null default now()::timestamp,
-    degistiren           integer   not null default 0,
-    degistirme_tarihi    timestamp,
-    constraint fk_taraf_hasta_kurum foreign key (kurum_taraf_id) references public.taraf (id)
+    dogum_yeri           varchar(60) not null default '',
+    cinsiyet             smallint    not null default 0,
+    uyruk                varchar(60) not null default 'TC',
+    kan_grubu            smallint    not null default 0,
+    meslek               varchar(60) not null default '',
+    ekleyen              integer     not null default 0,
+    ekleme_tarihi        timestamp   not null default now()::timestamp,
+    degistiren           integer     not null default 0,
+    degistirme_tarihi    timestamp
 );
 
-create unique index if not exists ux_taraf_hasta_dosya on public.taraf_hasta (dosya_no) where dosya_no <> '';
-create index        if not exists ix_taraf_hasta_grup  on public.taraf_hasta (hasta_grubu);
-
-comment on table public.taraf_hasta   is 'Hasta rolu bilgileri (hastane kullanimi). KVKK: saglik verisi ozel nitelikli - erisim ayri yetkiyle verilir ve islem_log a yazilir.';
-comment on table public.personel_ozluk is 'Personel ozluk bilgileri. KVKK: ayri yetki; liste sorgulari bu tabloya dokunmaz.';
+comment on table public.taraf_hasta   is 'Hasta karti 1:1 kimlik/ozluk bilgileri. id = taraf.id.';
+comment on table public.taraf_kisi    is 'Kisi rolu 1:1 uzanti tablosu. id = taraf.id.';
+comment on table public.taraf_personel is 'Personel ozluk bilgileri. KVKK: ayri yetki; liste sorgulari bu tabloya dokunmaz.';
 
 -- ---------------------------------------------------------------- gorunumler ----
 drop view if exists public.cari;
@@ -177,3 +177,5 @@ create or replace view public.hasta as
 
 comment on view public.cari is 'Musteri + tedarikci (taraf.musteri=1 or taraf.tedarikci=1). Cift rollu kart TEK kayittir.';
 comment on view public.hasta is 'Hasta rollu kartlar. Ayrintilar taraf_hasta tablosunda.';
+
+

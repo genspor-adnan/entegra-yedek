@@ -3,6 +3,7 @@ import { api } from '../api/istemci';
 import { ApiHatasi, type ListeSatiri } from '../api/sozlesme';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
+import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
 
 const SEKMELER = [
   { anahtar: 'genel', baslik: 'Genel' },
@@ -23,6 +24,8 @@ export function StokAyarlar() {
   const [depoKart, setDepoKart] = useState<number | 'yeni' | null>(null);
   const [yenile, setYenile] = useState(0);
   const [hata, setHata] = useState<string | null>(null);
+  // "Genel" sekmesi artik bos degil: stok davranis ayarlari (public.referans).
+  const { ayarlar, yukleniyor: ayarYukleniyor, hata: ayarHatasi, bilgi, yaz } = useAyarlar();
 
   async function depoAksiyonu(kod: string, satir: ListeSatiri | null) {
     setHata(null);
@@ -61,15 +64,25 @@ export function StokAyarlar() {
         ))}
       </div>
 
-      {hata && <div className="hata-kutusu">{hata}</div>}
+      {(hata || ayarHatasi) && <div className="hata-kutusu">{hata ?? ayarHatasi}</div>}
+      {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
 
       {aktif === 'genel' && (
+        ayarYukleniyor ? <div className="yukleniyor">Yükleniyor…</div> : (
         <div className="kagrup">
           <h6>Genel</h6>
-          <div className="not" style={{ margin: 10 }}>
-            Stok modülünün genel ayarları henüz tanımlı değil.
+          <div className="alan-izgara tek-sutun ayar-formu">
+            <AyarAlani anahtar="stok.negatif_davranis" etiket="Negatif stok davranışı"
+                       tip="secenek"
+                       secenekler={[
+                         { deger: '0', ad: 'Serbest — bakiye eksiye düşebilir' },
+                         { deger: '1', ad: 'Uyar — kaydet, uyarı göster' },
+                         { deger: '2', ad: 'Engelle — belgeyi kaydetme' },
+                       ]}
+                       ayarlar={ayarlar} onYaz={yaz} />
           </div>
         </div>
+        )
       )}
 
       {aktif === 'depo' && (

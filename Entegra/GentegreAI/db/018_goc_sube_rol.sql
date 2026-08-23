@@ -1,4 +1,4 @@
--- ============================================================================
+﻿-- ============================================================================
 --  Gentegre AI — goc: sube ayrimi + taraf rolleri
 --  018_goc_sube_rol.sql
 --
@@ -118,17 +118,21 @@ update public.taraf
 update public.taraf set kisi = 1 where bag_id is not null;
 
 -- ------------------------------------------- 5) rol uzanti satirlarini kur ----
-insert into public.taraf_musteri (taraf_id)
+insert into public.taraf_musteri (id)
 select t.id from public.taraf t
- where t.musteri = 1 and not exists (select 1 from public.taraf_musteri x where x.taraf_id = t.id);
+ where t.musteri = 1 and not exists (select 1 from public.taraf_musteri x where x.id = t.id);
 
-insert into public.taraf_tedarikci (taraf_id)
+insert into public.taraf_tedarikci (id)
 select t.id from public.taraf t
- where t.tedarikci = 1 and not exists (select 1 from public.taraf_tedarikci x where x.taraf_id = t.id);
+ where t.tedarikci = 1 and not exists (select 1 from public.taraf_tedarikci x where x.id = t.id);
 
-insert into public.personel_ozluk (taraf_id, sube_id)
+insert into public.taraf_kisi (id)
+select t.id from public.taraf t
+ where t.kisi = 1 and not exists (select 1 from public.taraf_kisi x where x.id = t.id);
+
+insert into public.taraf_personel (id, sube_id)
 select t.id, t.sube_id from public.taraf t
- where t.personel = 1 and not exists (select 1 from public.personel_ozluk x where x.taraf_id = t.id);
+ where t.personel = 1 and not exists (select 1 from public.taraf_personel x where x.id = t.id);
 
 -- Ozluk alanlari: eski REHBERBILGI YERI=3 (TC Kimlik, dogum, cinsiyet, gorev)
 with ozluk as (
@@ -141,13 +145,13 @@ with ozluk as (
      where bi.yeri = 3 and coalesce(btrim(bi.bilgi), '') <> ''
      group by bi.yer_id
 )
-update public.personel_ozluk p
+update public.taraf_personel p
    set gorev      = left(coalesce(o.gorev, ''), 100),
        cinsiyet   = case when public.fn_etiket_anahtar(coalesce(o.cinsiyet,'')) like 'erkek%' then 1
                          when public.fn_etiket_anahtar(coalesce(o.cinsiyet,'')) like 'kad%'   then 2
                          else 0 end
   from ozluk o
- where o.taraf_id = p.taraf_id;
+ where o.taraf_id = p.id;
 
 -- Kimlik ve dogum yeri TEK ALANDA: personel/hastada vkno = TC no, vd = dogum yeri
 --   (musteri/tedarikcide ayni alanlar vergi no / vergi dairesi anlamindadir).
@@ -196,5 +200,8 @@ union all select 'vd dolu (daire/dogum yeri)', count(*) from public.taraf where 
 \echo '--- rol uzantilari ---'
 select 'taraf_musteri' as tablo, count(*) from public.taraf_musteri
 union all select 'taraf_tedarikci', count(*) from public.taraf_tedarikci
-union all select 'personel_ozluk', count(*) from public.personel_ozluk
+union all select 'taraf_kisi', count(*) from public.taraf_kisi
+union all select 'taraf_personel', count(*) from public.taraf_personel
 union all select 'taraf_hasta', count(*) from public.taraf_hasta;
+
+

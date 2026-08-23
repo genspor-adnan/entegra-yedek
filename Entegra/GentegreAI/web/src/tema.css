@@ -729,6 +729,12 @@ table.grid tr.flt input {
 .alan-izgara.ayar-formu .alan {
   display: flex; flex-direction: column; align-items: stretch; gap: 3px;
 }
-.alan-izgara.ayar-formu .alan .etiket { width: 100%; font-size: 11px }
+/* Etiket edit genisligini asmasin: uzun cumleler satiri dagitiyordu. */
+.alan-izgara.ayar-formu .alan .etiket { width: 100%; max-width: 460px; font-size: 11px }
 .alan-izgara.ayar-formu .alan input { max-width: 160px }
 .alan-izgara.ayar-formu .ikili { display: flex; align-items: center; gap: 6px }
+/* Metin ayarlarinda dar kutu yeter (ISO kodu, kisa kodlar); "genis-deger" istisna. */
+.alan-izgara.ayar-formu .alan input.genis-deger { max-width: 320px }
+/* Secenek metinleri uzun ("Engelle — belgeyi kaydetme") - dar kutu kirpiyordu. */
+.alan-izgara.ayar-formu .alan select { min-width: 320px; max-width: 460px; width: auto }
+.alan-izgara.ayar-formu .alan input[type=checkbox] { max-width: none; width: 15px; height: 15px }

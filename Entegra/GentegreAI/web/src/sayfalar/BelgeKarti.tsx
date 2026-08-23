@@ -42,7 +42,12 @@ interface SatirDurumu {
  * Yerel para birimi. SIMDILIK sabit - opsiyona (kurulus ayari) baglanacak;
  * mali_hareket/muhasebe tarafinda da ayni kavram "yerel tutar" olarak geciyor.
  */
-const YEREL_PARA = 'TL';
+/**
+ * Yerel (defter) para birimi VARSAYILANI. Gercek deger Genel Ayarlar'dan gelir
+ * (`genel.yerel_para`, db/106) - ayar yuklenene kadar bu kullanilir. Kalem
+ * penceresi "bu fiyat doviz mi" kararini buna gore verir.
+ */
+const YEREL_PARA_VARSAYILAN = 'TL';
 
 /**
  * Belge tarihi penceresi (GENEL KURAL, tum belge turleri): ileri tarih YOK,
@@ -78,7 +83,7 @@ function eBelgeTipi(tur: number, senaryo: number): string {
 
 const bosSatir = (anahtar: number): SatirDurumu => ({
   anahtar, satirTur: 1, stokId: null, hizmetId: null, stokKodu: '', stokAdi: '',
-  adet: '1', birimFiyat: '', fiyatDovizi: YEREL_PARA, dovizFiyat: '', kur: '1',
+  adet: '1', birimFiyat: '', fiyatDovizi: '', dovizFiyat: '', kur: '1',
   iskonto: '0', iskonto2: '0', kdv: '20', aciklama: '', izlemeKodu: '',
 });
 
@@ -275,6 +280,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       .then(a => {
         const s = a.find(x => x.anahtar === 'belge.geri_gun_siniri')?.deger;
         if (s !== undefined && s !== '' && Number.isFinite(Number(s))) setGeriGun(Number(s));
+        const p = a.find(x => x.anahtar === 'genel.yerel_para')?.deger;
+        if (p) setYerelPara(p);
       })
       .catch(() => { /* varsayilan kalir */ });
   }, []);
@@ -285,6 +292,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [seri, setSeri] = useState('WEB');
   /** Ayardan gelen geriye donuk gun siniri (0 = sinir yok). */
   const [geriGun, setGeriGun] = useState(GERIYE_GUN_VARSAYILAN);
+  /** Ayardan gelen yerel (defter) para birimi. */
+  const [yerelPara, setYerelPara] = useState(YEREL_PARA_VARSAYILAN);
   /** Yalniz dis numarali turde (alis faturasi) kullanilir - tedarikcinin no'su. */
   const [belgeNo, setBelgeNo] = useState('');
   const [vadeGun, setVadeGun] = useState('30');
@@ -505,7 +514,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           birimFiyat: String(r.birimFiyat ?? 0),
           // Kayitli satir belgenin dovizinde saklanir; satir bazinda doviz/kur
           //   tutulmuyor - kalem yeniden acilirsa yerel giris olarak gelir.
-          fiyatDovizi: YEREL_PARA,
+          fiyatDovizi: yerelPara,
           dovizFiyat: String(r.birimFiyat ?? 0),
           kur: '1',
           iskonto: String(r.iskonto ?? 0),
@@ -1728,7 +1737,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 // Kart fiyati onyuklenir - kullanici zaten listede gorup seciyor;
                 //   pencerede degistirebilir. Fiyatin PARA BIRIMI de gelir: yerel
                 //   degilse kalem penceresi kur + yerel karsilik satirini acar.
-                fiyatDovizi: String(sec.fiyatDovizi ?? YEREL_PARA) || YEREL_PARA,
+                fiyatDovizi: String(sec.fiyatDovizi ?? yerelPara) || yerelPara,
                 dovizFiyat: sec.fiyat ? String(sec.fiyat) : '',
                 birimFiyat: sec.fiyat ? String(sec.fiyat) : '',
               });
@@ -1743,6 +1752,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             irsaliyeMi={irsaliyeMi || stokFisiMi}
             transferMi={depoBelgesi}
             vergisiz={stokFisiMi}
+            yerelPara={yerelPara}
             belgeTarihi={tarih}
             onKapat={() => setKalem(null)}
             onKaydet={r => { kalemKaydet(r); setKalem(null) }}
@@ -1945,9 +1955,12 @@ function adetKaydir(deger: string, yon: number): string {
   return Number.isInteger(yeni) ? String(yeni) : yeni.toFixed(2).replace('.', ',');
 }
 
-function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, belgeTarihi, onKapat, onKaydet }: {
+function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, yerelPara,
+                         belgeTarihi, onKapat, onKaydet }: {
   satir: SatirDurumu;
   irsaliyeMi: boolean;
+  /** Genel Ayarlar'daki defter para birimi - "dovizli mi" karari buna gore. */
+  yerelPara: string;
   /** Stok fisi: fiyat var (muhasebe matrahi) ama KDV/iskonto YOK - vergi dogurmaz. */
   vergisiz: boolean;
   /** Depo transferi: para yok - yalniz miktar, seri/lot ve aciklama sorulur. */
@@ -1970,7 +1983,7 @@ function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, belgeTarihi, 
     if (e.key === 'Enter') { e.preventDefault(); kaydet() }
   };
 
-  const dovizli = r.fiyatDovizi !== YEREL_PARA && r.fiyatDovizi !== '';
+  const dovizli = r.fiyatDovizi !== yerelPara && r.fiyatDovizi !== '';
 
   // Dovizli kalemde gunun kuru cekilir; kullanici kutuyu elle degistirdiyse
   //   dokunulmaz (kur pazarlikli olabiliyor - "istenirse degistirilebilsin").
@@ -2052,7 +2065,7 @@ function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, belgeTarihi, 
                 <input className="hiza-sag"
                        value={dovizli ? r.dovizFiyat : r.birimFiyat} onKeyDown={tus}
                        onChange={e => degis(dovizli ? 'dovizFiyat' : 'birimFiyat', e.target.value)} />
-                <input className="birim" value={r.fiyatDovizi || YEREL_PARA} readOnly tabIndex={-1} />
+                <input className="birim" value={r.fiyatDovizi || yerelPara} readOnly tabIndex={-1} />
                 {dovizli && (
                   <input className="hiza-sag kur" value={r.kur} onKeyDown={tus}
                          title="Günlük kur — değiştirilebilir"
@@ -2067,7 +2080,7 @@ function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, belgeTarihi, 
                 <span className="etiket">Yerel Para</span>
                 <span className="ikili">
                   <input className="hiza-sag onizleme" value={para.format(fiyat)} readOnly />
-                  <input className="birim" value={YEREL_PARA} readOnly tabIndex={-1} />
+                  <input className="birim" value={yerelPara} readOnly tabIndex={-1} />
                 </span>
               </label>
             )}

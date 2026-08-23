@@ -965,6 +965,9 @@ public sealed class BelgeDeposu
     {
         var satis = SatisMi(tur);
         var transfer = TransferMi(tur);
+        // Ayar belge basina BIR KEZ okunur (60 sn onbellekli) - satir basina degil.
+        var negatifDavranis = await AyarDeposu.SayiAsync(baglanti, islem,
+                                                        "stok.negatif_davranis", iptal);
 
         // stok_durum_degis = 0 olan satirlar stok bakiyesini ETKILEMEZ.
         // Transferde IKI depo da okunur: satir cikis deposundan duser, giris
@@ -1001,9 +1004,9 @@ public sealed class BelgeDeposu
                     throw GentegreHatasi.IsKurali("Çıkış ve giriş deposu aynı olamaz.");
 
                 await DepoyaYazAsync(baglanti, islem, stokId, cikisDepo.Value, 0m, miktar,
-                                     stokKontrolu, uyarilar, iptal);
+                                     stokKontrolu, negatifDavranis, uyarilar, iptal);
                 await DepoyaYazAsync(baglanti, islem, stokId, girisDepo.Value, miktar, 0m,
-                                     stokKontrolu, uyarilar, iptal);
+                                     stokKontrolu, negatifDavranis, uyarilar, iptal);
                 continue;
             }
 
@@ -1013,14 +1016,18 @@ public sealed class BelgeDeposu
 
             await DepoyaYazAsync(baglanti, islem, stokId, depoId.Value,
                                  satis ? 0m : miktar, satis ? miktar : 0m,
-                                 stokKontrolu, uyarilar, iptal);
+                                 stokKontrolu, negatifDavranis, uyarilar, iptal);
         }
     }
 
-    /// <summary>Tek depo satirini gunceller (yoksa acar) ve negatif bakiyeyi uyarir.</summary>
+    /// <summary>
+    /// Tek depo satirini gunceller (yoksa acar). Bakiye eksiye duserse ne
+    /// olacagini AYAR belirler (stok.negatif_davranis, db/107):
+    /// 0 serbest / 1 uyar / 2 engelle. Eskiden her zaman "uyar" idi.
+    /// </summary>
     private static async Task DepoyaYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int stokId, int depoId, decimal giren, decimal cikan,
-        bool stokKontrolu, List<string> uyarilar, CancellationToken iptal)
+        bool stokKontrolu, int negatifDavranis, List<string> uyarilar, CancellationToken iptal)
     {
         await using var komut = new NpgsqlCommand("""
             insert into public.stok_durum (stok_id, depo_id, giren, cikan, kalan)
@@ -1037,8 +1044,14 @@ public sealed class BelgeDeposu
         komut.Parameters.AddWithValue("p3", cikan);
 
         var kalan = Convert.ToDecimal(await komut.ExecuteScalarAsync(iptal) ?? 0m);
-        if (stokKontrolu && kalan < 0)
-            uyarilar.Add($"Stok {stokId} deposunda bakiye negatife dustu ({kalan}).");
+        if (!stokKontrolu || kalan >= 0 || negatifDavranis == 0) return;
+
+        if (negatifDavranis >= 2)
+            throw GentegreHatasi.IsKurali(
+                $"Stok bakiyesi yetersiz: bu depoda {kalan:0.####} kalıyor. " +
+                "Önce giriş yapılmalı (Genel Ayarlar > Stok: negatif stok engelli).");
+
+        uyarilar.Add($"Stok {stokId} deposunda bakiye negatife dustu ({kalan}).");
     }
 
     private async Task MaliHareketYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
