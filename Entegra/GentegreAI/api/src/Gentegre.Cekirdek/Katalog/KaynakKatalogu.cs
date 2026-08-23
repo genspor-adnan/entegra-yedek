@@ -730,6 +730,9 @@ public static class KaynakKatalogu
         {
             new("id",           "e.id",            "sayi",  "Id", Varsayilan: false),
             new("hesapId",      "e.hesap_id",      "sayi",  "Hesap Id", Varsayilan: false),
+            // Cift tik hedefi (gizli): satiri ureten kasa islemi / belge.
+            new("kasaIslemId",  "e.kasa_islem_id", "sayi",  "Kasa Islem Id", Varsayilan: false),
+            new("belgeId",      "e.belge_id",      "sayi",  "Belge Id", Varsayilan: false),
             new("hesapAdi",     "e.hesap_adi",     "metin", "Hesap", Varsayilan: false),
             new("islemTarihi",  "e.islem_tarihi",  "tarih", "Tarih", Hizalama: "orta", Bicim: "dd.MM.yyyy"),
             new("turAdi",       "e.tur_adi",       "metin", "Islem"),
@@ -756,6 +759,9 @@ public static class KaynakKatalogu
         {
             new("id",           "e.id",           "sayi",  "Id", Varsayilan: false),
             new("tarafId",      "e.taraf_id",     "sayi",  "Cari Id", Varsayilan: false),
+            // Cift tik hedefi (gizli): satiri ureten kasa islemi / belge.
+            new("kasaIslemId",  "e.kasa_islem_id","sayi",  "Kasa Islem Id", Varsayilan: false),
+            new("belgeId",      "e.belge_id",     "sayi",  "Belge Id", Varsayilan: false),
             new("tarafUnvan",   "e.taraf_unvan",  "metin", "Cari", Genislik: 220),
             new("islemTarihi",  "e.islem_tarihi", "tarih", "Tarih", Hizalama: "orta", Bicim: "dd.MM.yyyy"),
             new("turAdi",       "e.tur_adi",      "metin", "Islem"),

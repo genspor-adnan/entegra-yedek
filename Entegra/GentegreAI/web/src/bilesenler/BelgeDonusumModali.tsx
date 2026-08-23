@@ -169,11 +169,17 @@ export function BelgeDonusumModali({ belgeId, belgeTur, onKapat, onTamam }: Prop
                 </thead>
                 <tbody>
                   {satirlar.map(s => (
-                    <tr key={s.satirId}>
+                    // Satira tiklamak da isaretler: burada secim = "bu satiri
+                    //   donustur" isareti, coklu secim ASILDIR - o yuzden duz tik
+                    //   digerlerini kaldirmaz (liste gridlerinin aksine).
+                    <tr key={s.satirId}
+                        className={secili[s.satirId] ? 'secili' : ''}
+                        onClick={() => setSecili(x => ({ ...x, [s.satirId]: !x[s.satirId] }))}>
                       <td className="hiza-orta">
                         <input
                           type="checkbox"
                           checked={!!secili[s.satirId]}
+                          onClick={e => e.stopPropagation()}
                           onChange={e => setSecili(x => ({ ...x, [s.satirId]: e.target.checked }))}
                         />
                       </td>
@@ -188,6 +194,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, onKapat, onTamam }: Prop
                           className="hiza-sag"
                           value={miktarlar[s.satirId] ?? ''}
                           disabled={!secili[s.satirId]}
+                          onClick={e => e.stopPropagation()}
                           onChange={e => setMiktarlar(x => ({ ...x, [s.satirId]: e.target.value }))}
                         />
                       </td>

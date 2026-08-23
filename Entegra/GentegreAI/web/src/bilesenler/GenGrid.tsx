@@ -416,9 +416,15 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
   };
 
   /**
-   * Satir tiklamasi: duz tik = TEK secim (eskisi gibi). Ctrl/Cmd+tik = o satiri
-   * mevcut secime EKLE/CIKAR (coklu). Shift+tik = son "ankor"dan buraya kadar
-   * ARALIK sec (standart dosya gezgini/tablo davranisi - Explorer, Excel...).
+   * GENEL KURAL — UYGULAMADAKI TUM GRIDLERDE AYNI (kullanici karari):
+   *   duz tik      : YALNIZ o satir secili kalir, onceki isaretler kalkar
+   *   Ctrl/Cmd+tik : o satiri secime ekler / cikarir
+   *   Shift+tik    : son "ankor" satirdan buraya kadar araligi secer
+   * (Explorer / Excel davranisi.) Onay kutusu tek satiri ekler-cikarir ve satir
+   * tiklamasini tetiklemez.
+   *
+   * ISTISNA: secimin kendisi "islem hedefi isaretleme" olan ekranlar - ör. belge
+   * DONUSUM modali - duz tikta digerlerini KALDIRMAZ; orada coklu isaret asildir.
    */
   const ankorRef = useRef<number | null>(null);
   const satirTiklandi = (e: React.MouseEvent, id: string, index: number) => {

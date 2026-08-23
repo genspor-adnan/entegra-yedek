@@ -117,6 +117,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [acikBelgeId, setAcikBelgeId] = useState<number | null>(null);
   // Kasa islem karti MODAL (tahsilat/odeme): liste arkada acik kalir.
   const [kasaTuru, setKasaTuru] = useState<number | null>(null);
+  // Ekstre satirindan acilan MEVCUT kasa islemi (salt gorunum/duzenleme).
+  const [acikKasaId, setAcikKasaId] = useState<number | null>(null);
   // "Ekstre" modu (A secenegi): ayni grid ekstre kaynagina doner. null = liste.
   const [ekstre, setEkstre] = useState<{ id: number; ad: string } | null>(null);
   // Ekstre dugmesinin aktifligi icin gridden gelen secili satir.
@@ -223,6 +225,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         // Ekstrede yalniz cikti aksiyonlari (Yazdir ▾ = CSV Kaydet / Yazdir);
         //   Ekle/Duzenle/Sil hesap listesine ait.
         aksiyonEkrani="cikti-liste"
+        // Cift tik: satiri URETEN kayda git - once kasa islemi, yoksa belge.
+        onSatirAc={satir => {
+          const kasaId = Number(satir.kasaIslemId ?? 0);
+          const belgeId = Number(satir.belgeId ?? 0);
+          if (kasaId) setAcikKasaId(kasaId);
+          else if (belgeId) setAcikBelgeId(belgeId);
+        }}
         onAksiyon={kod => { if (kod === 'genel.yazdir') alert('Yazdirma henuz baglanmadi.') }}
         cipBaslangic={cipIndeks}
         // Cip'e basmak = listeye don (secilen filtreyle).
@@ -280,6 +289,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         </button>
       )}
     />
+    )}
+
+    {acikKasaId !== null && (
+      <KasaIslemKarti
+        kayitIdProp={acikKasaId}
+        onKapat={() => setAcikKasaId(null)}
+      />
     )}
 
     {kasaTuru !== null && (

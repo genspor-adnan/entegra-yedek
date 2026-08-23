@@ -69,8 +69,11 @@ interface CariSecimi { id: number; unvan: string }
  * baslangic degerleri prop'tan gelir - kullanici faturadan cikmadan tahsilat
  * girer.
  */
-export function KasaIslemKarti({ acilis, onKapat, onKaydedildi }: {
+export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   acilis?: { tur?: number; tarafId?: number; tarafUnvan?: string; belgeId?: number; tutar?: string };
+  /** MODAL kullanimda MEVCUT kaydi acmak icin (ör. ekstre satirina cift tik).
+      Rota kullanimda id URL'den gelir. */
+  kayitIdProp?: number;
   onKapat?(): void;
   onKaydedildi?(): void;
 } = {}) {
@@ -80,7 +83,7 @@ export function KasaIslemKarti({ acilis, onKapat, onKaydedildi }: {
   const modalMi = typeof onKapat === 'function';
   const { yetki, kullanici } = useOturum();
 
-  const kayitId = id && id !== 'yeni' ? Number(id) : null;
+  const kayitId = kayitIdProp ?? (id && id !== 'yeni' ? Number(id) : null);
 
   const [turler, setTurler] = useState<KasaIslemTuru[]>([]);
   const [tur, setTur] = useState<number>(
