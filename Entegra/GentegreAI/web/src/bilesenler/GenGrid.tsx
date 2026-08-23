@@ -25,6 +25,14 @@ interface Props {
   /** Kart icine gomulu kucuk grid (ör. cari kartinda İlgili Kişiler) - buyuk baslik/yol
       satiri (.sayfabas) gizlenir, geri kalan (arama/cipler/tablo/sayfalama) ayni kalir. */
   gomulu?: boolean;
+  /** Verilirse cip seridine TARIH ARALIGI kutulari gelir; bu alan uzerinden
+      'arasinda' filtresi kurulur (ör. ekstrede 'islemTarihi'). */
+  tarihAlani?: string;
+  /** Acilista dolu gelen tarih araligi (ör. ekstre: 1 Ocak - bugun). */
+  tarihVarsayilan?: 'yilbasindanBugune';
+  /** Acilista secili gelecek satirin id'si (ör. ekstreden listeye donunce
+      ayni hesap yine secili kalsin). */
+  seciliBaslangicId?: number | null;
   /** Cip seridinin SONUNA eklenecek dugmeler (ör. "│ 📄 Ekstre"). */
   cipSonu?: React.ReactNode;
   /** Acilista secili gelecek cip (geri donuste onceki filtreyi korumak icin). */
@@ -195,7 +203,8 @@ const GORUNUMLER: { v: 'liste' | 'grup' | 'analiz'; ik: string; ad: string }[] =
  */
 export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, onSatirAc,
                           aksiyonEkrani, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
-                          gizliKolonlar, altSecenekler, cipSonu, cipBaslangic,
+                          gizliKolonlar, altSecenekler, tarihAlani, tarihVarsayilan,
+                          seciliBaslangicId, cipSonu, cipBaslangic,
                           onCipSecildi, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik }: Props) {
   const [kolonlar, setKolonlar] = useState<KolonMeta[]>([]);
@@ -206,6 +215,17 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
   const [sirala, setSirala] = useState<Siralama[]>([]);
   const [arama, setArama] = useState('');
   const [cipIndeks, setCipIndeks] = useState(cipBaslangic ?? 0);
+  /** Tarih araligi (bos = sinir yok). Tek uc verilmesi de gecerli.
+      'yilbasindanBugune': 1 Ocak - bugun. Ust sinir SUNUCUDA gun sonuna kadar
+      kapsanir (SorguUretici 'arasinda' + 1 gun), yani bugun 23:59'daki hareket
+      de listeye girer. */
+  const [tarihBas, setTarihBas] = useState(
+    tarihVarsayilan === 'yilbasindanBugune' ? `${new Date().getFullYear()}-01-01` : '');
+  const [tarihBit, setTarihBit] = useState(() => {
+    if (tarihVarsayilan !== 'yilbasindanBugune') return '';
+    const t = new Date();  // YEREL gun (toISOString UTC'ye kayar, gece yarisi tuzagi)
+    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+  });
   // "Tum Liste / Son Aranan / Sik Aranan" (eski KULLANICI_ARAMA) - sunucuya `gorunum`
   //   olarak gider, kart acilis/ekleme sikligina gore filtreler+siralar.
   const [aramaGorunumu, setAramaGorunumu] = useState<'tum' | 'son' | 'sik'>('tum');
@@ -241,7 +261,21 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
     aksiyonEkrani ?? 'cari-liste',
     seciliSatir?.id != null ? Number(seciliSatir.id) : null);
 
-  const aksiyonCalistir = (kod: string) => onAksiyon?.(kod, seciliSatir);
+  const aksiyonCalistir = (kod: string) => {
+    // CSV disariya CIKMAZ: veri (satirlar, kolonlar, filtre) burada, disarida degil.
+    if (kod === 'genel.csv') { void csvIndir(); return }
+    onAksiyon?.(kod === 'genel.yazdir.dogrudan' ? 'genel.yazdir' : kod, seciliSatir);
+  };
+
+  /** "🖨️ Yazdır" dugmesi acilir menu: CSV Kaydet + Yazdir. Disaridan gelen
+      alt menuler (ör. kasa tahsilat araclari) korunur. */
+  const toolbarAltSecenekler = useMemo(() => ({
+    ...(altSecenekler ?? {}),
+    'genel.yazdir': [
+      { kod: 'genel.csv', ad: '📄 CSV Kaydet' },
+      { kod: 'genel.yazdir.dogrudan', ad: '🖨️ Yazdır' },
+    ],
+  }), [altSecenekler]);
 
   // Mockup'taki "Aksiyon Sec + Uygula" (cip seridiyle ayni satir, saga yanasik) -
   //   sag tus menusuyle AYNI katalog seti (ayni ekranda iki farkli tetikleme yolu).
@@ -288,7 +322,17 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
     setYukleniyor(true);
     setHata(null);
     try {
-      const parcalar = [sabitFiltre, cipler?.[cipIndeks]?.filtre, aramaFiltresi(), filtreSatiriFiltresi()]
+      // Tarih araligi: iki uc da doluysa 'arasinda' (ust sinir gun sonuna kadar),
+      //   tek uc verilirse >= / <= olarak uygulanir.
+      const tarihFiltresi: Kosul | undefined =
+        !tarihAlani ? undefined
+        : tarihBas && tarihBit ? { alan: tarihAlani, op: 'arasinda', deger: [tarihBas, tarihBit] }
+        : tarihBas ? { alan: tarihAlani, op: 'buyukEsit', deger: tarihBas }
+        : tarihBit ? { alan: tarihAlani, op: 'kucukEsit', deger: tarihBit }
+        : undefined;
+
+      const parcalar = [sabitFiltre, cipler?.[cipIndeks]?.filtre, tarihFiltresi,
+                        aramaFiltresi(), filtreSatiriFiltresi()]
         .filter(Boolean) as Kosul[];
       const filtre = parcalar.length === 0 ? undefined
         : parcalar.length === 1 ? parcalar[0]
@@ -306,7 +350,8 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
     } finally {
       setYukleniyor(false);
     }
-  }, [kaynak, sayfa, boyut, sirala, toplam, sabitFiltre, aramaFiltresi, filtreSatiriFiltresi, cipler, cipIndeks, kolonlar.length, aramaGorunumu]);
+  }, [kaynak, sayfa, boyut, sirala, toplam, sabitFiltre, aramaFiltresi, filtreSatiriFiltresi,
+      cipler, cipIndeks, kolonlar.length, aramaGorunumu, tarihAlani, tarihBas, tarihBit]);
 
   useEffect(() => { void yukle() }, [yukle]);
   // "yenile"/"odaklaSonEklenen" Liste.tsx'te YASIYOR (kaynak degisince sifirlanmiyor) -
@@ -428,7 +473,66 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
     return `${renk} ${islemRengi} ${seciliSatir?.id === satir.id ? 'secili' : ''}`.trim();
   };
 
+  /**
+   * AKTIF gridi CSV olarak indirir: ekranda hangi kaynak/filtre/kolonlar varsa
+   * onlar. Sunucu sayfa boyutunu 500'le siniladigi icin sayfa sayfa cekilir
+   * (ust sinir 10.000 satir - daha buyugu tarayicida donma demek).
+   */
+  const csvIndir = useCallback(async () => {
+    setYukleniyor(true);
+    try {
+      const parcalar = [sabitFiltre, cipler?.[cipIndeks]?.filtre, aramaFiltresi(), filtreSatiriFiltresi()]
+        .filter(Boolean) as Kosul[];
+      const tarihFiltresi: Kosul | undefined =
+        !tarihAlani ? undefined
+        : tarihBas && tarihBit ? { alan: tarihAlani, op: 'arasinda', deger: [tarihBas, tarihBit] }
+        : tarihBas ? { alan: tarihAlani, op: 'buyukEsit', deger: tarihBas }
+        : tarihBit ? { alan: tarihAlani, op: 'kucukEsit', deger: tarihBit }
+        : undefined;
+      if (tarihFiltresi) parcalar.push(tarihFiltresi);
+      const filtre = parcalar.length === 0 ? undefined
+        : parcalar.length === 1 ? parcalar[0]
+        : { op: 'and' as const, kosullar: parcalar };
+
+      const gorunum = aramaGorunumu === 'tum' ? undefined : aramaGorunumu;
+      const tumu: ListeSatiri[] = [];
+      for (let sf = 1; sf <= 20; sf++) {
+        const y = await api.liste(kaynak, { sayfa: sf, boyut: 500, sirala, filtre, gorunum });
+        tumu.push(...y.satirlar);
+        if (tumu.length >= y.toplamKayit || y.satirlar.length === 0) break;
+      }
+
+      // Excel-TR uyumu: ayirici ';' ve UTF-8 BOM (yoksa Turkce karakter bozulur).
+      const kacir = (m: string) =>
+        (/[";\r\n]/.test(m) ? `"${m.replace(/"/g, '""')}"` : m);
+      const satirlar = [
+        kolonlar.map(k => kacir(k.baslik)).join(';'),
+        ...tumu.map(r => kolonlar.map(k => kacir(bicimle(r[k.ad], k))).join(';')),
+      ];
+      const ad = `${(baslik ?? kaynak).replace(/[\/:*?"<>|]/g, '')}-${new Date().toISOString().slice(0, 10)}.csv`;
+      const bag = document.createElement('a');
+      // '﻿' = UTF-8 BOM: Excel bunu gormezse Turkce karakterler bozulur.
+      bag.href = URL.createObjectURL(
+        new Blob(['﻿' + satirlar.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+      bag.download = ad;
+      bag.click();
+      URL.revokeObjectURL(bag.href);
+    } catch (h) {
+      setHata(h instanceof ApiHatasi ? h.message : String(h));
+    } finally { setYukleniyor(false) }
+  }, [kaynak, baslik, kolonlar, sabitFiltre, cipler, cipIndeks, aramaFiltresi, filtreSatiriFiltresi,
+      sirala, aramaGorunumu, tarihAlani, tarihBas, tarihBit]);
+
   const gorunenToplamlar = useMemo(() => Object.entries(toplamlar ?? {}), [toplamlar]);
+
+  // Ekstreden listeye donunce ayni satir secili gelsin (seciliBaslangicId).
+  const ilkSecimUygulandi = useRef(false);
+  useEffect(() => {
+    if (ilkSecimUygulandi.current || !seciliBaslangicId || satirlar.length === 0) return;
+    const bulunan = satirlar.find(r => Number(r.id) === seciliBaslangicId);
+    if (bulunan) { setSeciliSatir(bulunan); setSecili(new Set([String(seciliBaslangicId)])) }
+    ilkSecimUygulandi.current = true;
+  }, [satirlar, seciliBaslangicId]);
 
   // Secim degisince disariya bildir (ör. "Ekstre" dugmesinin aktifligi).
   useEffect(() => { onSecimDegisti?.(seciliSatir) }, [seciliSatir, onSecimDegisti]);
@@ -471,7 +575,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
             <h1>{baslik ?? kaynak}</h1>
             {yol && <span className="yol">{yol}</span>}
             <div className="sag">
-              {aksiyonEkrani && <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} altSecenekler={altSecenekler} />}
+              {aksiyonEkrani && <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} altSecenekler={toolbarAltSecenekler} />}
             </div>
           </div>
         </div>
@@ -482,7 +586,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
           ? { display: 'flex', justifyContent: 'flex-start',
               marginTop: 10, marginLeft: 14, marginBottom: 8 }
           : { display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
-          <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} altSecenekler={altSecenekler} />
+          <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} altSecenekler={toolbarAltSecenekler} />
         </div>
       )}
 
@@ -587,6 +691,22 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
                 {c.ad}
               </button>
             ))}
+            {tarihAlani && (
+              <>
+                <span className="durumseg-ayrac" />
+                <span className="tarih-araligi">
+                  <input type="date" value={tarihBas} title="Başlangıç tarihi"
+                         onChange={e => { setTarihBas(e.target.value); setSayfa(1) }} />
+                  <span className="ayrac-metin">–</span>
+                  <input type="date" value={tarihBit} title="Bitiş tarihi"
+                         onChange={e => { setTarihBit(e.target.value); setSayfa(1) }} />
+                  {(tarihBas || tarihBit) && (
+                    <button type="button" title="Tarih filtresini kaldır"
+                            onClick={() => { setTarihBas(''); setTarihBit(''); setSayfa(1) }}>×</button>
+                  )}
+                </span>
+              </>
+            )}
             {cipSonu && <><span className="durumseg-ayrac" />{cipSonu}</>}
           </div>
         )}

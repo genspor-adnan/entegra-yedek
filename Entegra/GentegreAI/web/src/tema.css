@@ -663,3 +663,11 @@ table.grid tr.flt input {
 }
 .dugme-menu-liste .mi { width: 100%; border: 0; background: transparent; text-align: left; cursor: pointer }
 .dugme-menu-liste .mi:hover { background: var(--mor2); color: var(--mor) }
+
+/* Cip seridindeki tarih araligi (ör. hesap ekstresi). */
+.tarih-araligi { display: inline-flex; align-items: center; gap: 4px }
+.tarih-araligi input[type="date"] {
+  height: 22px; border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz);
+  font-size: 11px; padding: 0 4px; color: var(--yazi);
+}
+.tarih-araligi .ayrac-metin { color: var(--soluk) }

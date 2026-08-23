@@ -69,7 +69,9 @@ export interface ListeTanimi {
   menuAltGrup?: string;
   /** Cip seridine "📄 Ekstre" dugmesi ekler: secili satirin ekstresi AYNI
       ekranda acilir (grid ekstre kaynagina doner), cip'e basinca liste geri gelir. */
-  ekstre?: { kaynak: string; alan: string; baslik: string };
+  ekstre?: { kaynak: string; alan: string; baslik: string; tarihAlani?: string };
+  /** Liste ekraninda tarih araligi filtresi (cip seridinde iki tarih kutusu). */
+  tarihAlani?: string;
   /** Bu ekranda gizlenecek kolonlar (ör. Satis Faturalari'nda tur / turAdi). */
   gizliKolonlar?: string[];
   /** Liste DEGIL, kendi sayfasi olan menu ogesi (ör. Stok Ayarları: sekmeli ekran).
@@ -119,6 +121,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [ekstre, setEkstre] = useState<{ id: number; ad: string } | null>(null);
   // Ekstre dugmesinin aktifligi icin gridden gelen secili satir.
   const [seciliSatir, setSeciliSatir] = useState<ListeSatiri | null>(null);
+  // Ekstreden donunce ayni satiri yeniden isaretlemek icin - grid unmount
+  //   olurken secim null'a duser, o yuzden SON DOLU deger ayrica saklanir.
+  const [sonSeciliId, setSonSeciliId] = useState<number | null>(null);
   // Ekstreden donunce ayni cip (Aktif/Pasif/Tumu) secili kalsin.
   const [cipIndeks, setCipIndeks] = useState(0);
 
@@ -213,6 +218,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         //   birlikte gondermek ekstre kaynagina "Bilinmeyen alan: durum" 400'u
         //   verdiriyordu (ekstre goruntusunde durum kolonu yok).
         cipler={tanim.cipler?.map(c => ({ ad: c.ad }))}
+        tarihAlani={tanim.ekstre.tarihAlani}
+        tarihVarsayilan="yilbasindanBugune"
+        // Ekstrede yalniz cikti aksiyonlari (Yazdir ▾ = CSV Kaydet / Yazdir);
+        //   Ekle/Duzenle/Sil hesap listesine ait.
+        aksiyonEkrani="cikti-liste"
+        onAksiyon={kod => { if (kod === 'genel.yazdir') alert('Yazdirma henuz baglanmadi.') }}
         cipBaslangic={cipIndeks}
         // Cip'e basmak = listeye don (secilen filtreyle).
         onCipSecildi={i => { setCipIndeks(i); setEkstre(null) }}
@@ -250,9 +261,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         else if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`);
       }}
       onAksiyon={(kod, satir) => { void aksiyon(kod, satir) }}
+      tarihAlani={tanim.tarihAlani}
+      // Ekstreden donunce ayni hesap secili kalsin.
+      seciliBaslangicId={sonSeciliId}
       cipBaslangic={cipIndeks}
       onCipSecildi={setCipIndeks}
-      onSecimDegisti={setSeciliSatir}
+      onSecimDegisti={s => { setSeciliSatir(s); if (s) setSonSeciliId(Number(s.id)) }}
       cipSonu={tanim.ekstre && (
         <button
           disabled={!seciliSatir}
@@ -475,7 +489,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   //     deseninin aynisi: sabitFiltre + rota + yeniKayitVarsayilanlari.
   {
     kaynak: 'hesap', rota: 'kasa-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
-    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi' }, baslik: 'Kasalar', yol: 'Kasa › Kasa Hesaplari',
+    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
+              tarihAlani: 'islemTarihi' }, baslik: 'Kasalar', yol: 'Kasa › Kasa Hesaplari',
     kartYolu: '/kasa-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'K' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Kasa', menuAd: 'Kasa Hesapları', ic: '💵', yetkiKodu: 'hesap',
@@ -484,28 +499,32 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   //     yine tek 'hesap' tablosu, tur'e gore ayri ekranlar.
   {
     kaynak: 'hesap', rota: 'banka-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
-    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi' }, baslik: 'Banka Hesapları', yol: 'Banka › Hesaplar',
+    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
+              tarihAlani: 'islemTarihi' }, baslik: 'Banka Hesapları', yol: 'Banka › Hesaplar',
     kartYolu: '/banka-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'B' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Banka', menuAd: 'Banka Hesapları', ic: '🏦', yetkiKodu: 'hesap',
   },
   {
     kaynak: 'hesap', rota: 'kredi-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
-    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi' }, baslik: 'Krediler', yol: 'Banka › Krediler',
+    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
+              tarihAlani: 'islemTarihi' }, baslik: 'Krediler', yol: 'Banka › Krediler',
     kartYolu: '/kredi-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'R' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Banka', menuAd: 'Krediler', ic: '🏛️', yetkiKodu: 'hesap',
   },
   {
     kaynak: 'hesap', rota: 'pos-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
-    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi' }, baslik: 'POS Hesapları', yol: 'Banka › POS',
+    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
+              tarihAlani: 'islemTarihi' }, baslik: 'POS Hesapları', yol: 'Banka › POS',
     kartYolu: '/pos-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'P' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Banka', menuAd: 'POS', ic: '💳', yetkiKodu: 'hesap',
   },
   {
     kaynak: 'hesap', rota: 'kredi-karti', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
-    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi' }, baslik: 'Kredi Kartları', yol: 'Banka › Kredi Kartlari',
+    ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
+              tarihAlani: 'islemTarihi' }, baslik: 'Kredi Kartları', yol: 'Banka › Kredi Kartlari',
     kartYolu: '/kredi-karti', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'V' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Banka', menuAd: 'Kredi Kartı', ic: '💳', yetkiKodu: 'hesap',

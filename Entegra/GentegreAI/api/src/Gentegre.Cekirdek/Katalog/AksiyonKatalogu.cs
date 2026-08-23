@@ -128,6 +128,14 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            // Salt-gorunum ekranlari (ekstre, mizan...): yalniz cikti alma.
+            //   "Yazdır" dugmesi acilir menusunde CSV Kaydet de var (GenGrid ekler).
+            ["cikti-liste"] = new AksiyonTanimi[]
+            {
+                new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             // Stok Ayarlari > Depolar sekmesi.
             ["depo-liste"] = new AksiyonTanimi[]
             {
