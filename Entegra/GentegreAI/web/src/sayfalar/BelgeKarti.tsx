@@ -1125,7 +1125,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 <button className="d bir" disabled={!kayitliId}
                         title={kayitliId ? 'Banka (havale/EFT) tahsilat işlemi aç' : 'Önce faturayı kaydedin.'}
                         onClick={() => tahsilatAc(22)}>
-                  🏦 Havale
+                  🏦 Banka
                 </button>
                 <button className="d" disabled title="POS tahsilatı F5/F6'da bağlanacak">💳 POS</button>
                 <button className="d" disabled title="Çek/senet girişi F5'te bağlanacak">🧾 Çek/Senet Al</button>
