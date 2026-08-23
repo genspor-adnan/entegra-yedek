@@ -586,7 +586,9 @@ public static class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",          "h.id",            "sayi",  "Id",   Varsayilan: false),
-            new("tur",         "h.tur",           "metin", "Tur",  Hizalama: "orta"),
+            // Tur kolonu GIZLI: her hesap ekrani (Kasa/Banka/POS/Kredi Karti/Kredi)
+            //   zaten TEK turu gosteriyor, her satirda ayni harf tekrarliyordu.
+            new("tur",         "h.tur",           "metin", "Tur",  Hizalama: "orta", Varsayilan: false),
             new("kod",         "h.kod",           "metin", "Kod"),
             new("ad",          "h.ad",            "metin", "Hesap Adi", Genislik: 220),
             new("dovizCinsi",  "h.doviz_cinsi",   "metin", "Doviz", Hizalama: "orta"),
@@ -596,7 +598,13 @@ public static class KaynakKatalogu
             new("iban",        "h.iban",          "metin", "IBAN",    Varsayilan: false),
             new("hesapNo",     "h.hesap_no",      "metin", "Hesap No", Varsayilan: false),
             new("bagliHesap",  "bh.ad",           "metin", "Bagli Hesap", Varsayilan: false),
-            new("durum",       "h.durum",         "kod",   "Durum",   Hizalama: "orta"),
+            // Durum METIN olarak: liste katmani kod listesi cozmuyordu, gridde
+            //   ham 0/1 gorunuyordu. Metin gelince GenGrid yesil/kirmizi rozet basar.
+            new("durumAdi",    "case h.durum when 1 then 'Aktif' else 'Pasif' end",
+                                                  "metin", "Durum",   Hizalama: "orta",
+                                                  Genislik: 90, Filtrelenebilir: false),
+            new("durum",       "h.durum",         "kod",   "Durum Kodu", Hizalama: "orta",
+                                                  Varsayilan: false),
             new("subeId",      "h.sube_id",       "sayi",  "Sube",    Varsayilan: false)
         });
 

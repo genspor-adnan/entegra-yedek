@@ -96,6 +96,20 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            // Hesap ekranlari (Kasa / Banka / POS / Kredi Karti / Kredi) - hepsi
+            //   ayni 'hesap' kaynagi, tur'e gore ayri liste.
+            ["hesap-liste"] = new AksiyonTanimi[]
+            {
+                new("hesap.yeni",    "＋ Ekle",     "hesap", Kisayol: "Ctrl+N",
+                    KaynakKodu: "hesap", Islem: Islem.Ekle, Sira: 10),
+                new("hesap.duzenle", "✎ Düzenle",   "hesap", Kisayol: "Enter",
+                    KaynakKodu: "hesap", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("hesap.sil",     "🗑 Sil",      "hesap", Kisayol: "Del",
+                    KaynakKodu: "hesap", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+                new("genel.yazdir",  "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             // Stok Ayarlari > Depolar sekmesi.
             ["depo-liste"] = new AksiyonTanimi[]
             {
