@@ -107,16 +107,26 @@ const KAPANMA_ETIKET: Record<number, { ad: string; sinif: string }> = {
   2: { ad: 'Faturalandı', sinif: 'olumlu' },
 };
 
-/** Kart sekmeleri (mockup satis_irsaliye_karti.html .tabs).
-    `irsaliye:true` olanlar yalniz irsaliye turlerinde gorunur. */
-const SEKMELER: { anahtar: string; baslik: string; irsaliye?: boolean }[] = [
+/** Kart sekmeleri (mockup satis_irsaliye_karti.html / satis_faturasi.html .tabs).
+    `irsaliye:true` yalniz irsaliyede, `faturaYok:true` faturada GIZLENIR,
+    `faturaMi:true` yalniz faturada gorunur. */
+const SEKMELER: {
+  anahtar: string; baslik: string;
+  irsaliye?: boolean; faturaYok?: boolean; faturaMi?: boolean;
+}[] = [
   { anahtar: 'kalem',    baslik: 'Kalemler' },
   { anahtar: 'tasiyici', baslik: 'Taşıyıcı / Sevkiyat', irsaliye: true },
   { anahtar: 'ebelge',   baslik: 'e-Belge' },
-  { anahtar: 'fatura',   baslik: 'Faturalama' },
+  // Faturada "Faturalama" (bu belgeden turetilenler) anlamsiz - fatura zincirin
+  //   SONU. Mockup'ta (satis_faturasi.html) onun yerinde TAHSILAT var.
+  { anahtar: 'fatura',   baslik: 'Faturalama', faturaYok: true },
+  { anahtar: 'tahsilat', baslik: 'Tahsilat',   faturaMi: true },
   { anahtar: 'imza',     baslik: 'İmza / Teslim', irsaliye: true },
   { anahtar: 'yorum',    baslik: 'Yorum / Medya' },
 ];
+
+/** Fatura turleri (satis 15/16, alis 11/12) - irsaliye/siparis disindakiler. */
+const FATURA_TURLERI = new Set([11, 12, 15, 16]);
 
 /** Kartin acabilecegi belge turleri - grup='belge' katalogundan suzulur. */
 const GIRILEBILIR_TURLER = [19, 15, 14, 9, 11, 10, 16, 12] as const;
@@ -224,6 +234,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [saticiArama, setSaticiArama] = useState(false);
   /** e-Fatura senaryosu (belge.senaryo) - GIB profilini belirler. */
   const [senaryo, setSenaryo] = useState(0);
+  /** Bu belgeye baglanmis kasa islemleri (Tahsilat sekmesi). */
+  const [tahsilatlar, setTahsilatlar] = useState<ListeSatiri[]>([]);
   const [donusumler, setDonusumler] = useState<Record<string, unknown>[]>([]);
   const [sonuc, setSonuc] = useState<BelgeYaniti | null>(null);
   const [hata, setHata] = useState<string | null>(null);
@@ -245,6 +257,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const kilitli = mevcutBelge || !!sonuc;
   const siparisMi = tur === 9 || tur === 19;
   const irsaliyeMi = tur === 10 || tur === 14 || tur === 109 || tur === 119;
+  const faturaMi = FATURA_TURLERI.has(tur);
   /** Kaydedilmis belgenin id'si (yeni kayittan ya da acilan belgeden). */
   const kayitliId = belgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
 
@@ -325,6 +338,24 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       } catch { /* varsayilan depo yoksa alan bos kalir - engelleyici degil */ }
     })();
   }, [belgeId]);
+
+  // Tahsilat sekmesi: bu belgeye bagli kasa islemleri (kasa_islem.belge_id).
+  //   Iptal edilenler (durum 3) haric - odenmis gibi gorunmesinler.
+  useEffect(() => {
+    if (!kayitliId || aktifSekme !== 'tahsilat') return;
+    void (async () => {
+      try {
+        const y = await api.liste('kasa-islem', {
+          sayfa: 1, boyut: 50,
+          filtre: { op: 'and', kosullar: [
+            { alan: 'belgeId', op: 'esit', deger: kayitliId },
+            { alan: 'durum', op: 'esitDegil', deger: 3 },
+          ] },
+        });
+        setTahsilatlar(y.satirlar);
+      } catch { setTahsilatlar([]) }
+    })();
+  }, [kayitliId, aktifSekme]);
 
   // Faturalama sekmesi: bu belgeden turetilmis belgeler (F8 zinciri).
   useEffect(() => {
@@ -714,7 +745,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             mockup duzeni (toolbar > hdr > tabs > pane). Tasiyici ve Imza/Teslim
             yalniz irsaliyede anlamli, o yuzden suzuluyor. */}
         <div className="katab">
-          {SEKMELER.filter(x => !x.irsaliye || irsaliyeMi).map(x => (
+          {SEKMELER
+            .filter(x => (!x.irsaliye || irsaliyeMi)
+                      && (!x.faturaYok || !faturaMi)
+                      && (!x.faturaMi || faturaMi))
+            .map(x => (
             <div key={x.anahtar}
                  className={`kat${x.anahtar === aktifSekme ? ' on' : ''}`}
                  onClick={() => setAktifSekme(x.anahtar)}>
@@ -1046,6 +1081,70 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             </table>
           </div>
         )}
+
+        {/* ================================================== TAHSILAT ==== */}
+        {/* Ekranlar/satis_faturasi.html "Tahsilat" panosu: belgeye bagli kasa
+            islemleri (kasa_islem.belge_id) + tahsil edilen / kalan. */}
+        {aktifSekme === 'tahsilat' && (() => {
+          const genel = Number(sonuc?.belge.genelToplam ?? 0);
+          const tahsil = tahsilatlar.reduce((t, k) => t + (Number(k.yerelTutar ?? k.tutar ?? 0) || 0), 0);
+          const kalan = Math.round((genel - tahsil) * 100) / 100;
+          return (
+            <div className="kagrup">
+              <h6>Tahsilatlar <span className="kapt">kasa_islem (1:N)</span></h6>
+              <table className="detay-tablo">
+                <thead>
+                  <tr>
+                    <th style={{ width: 100 }}>Tarih</th>
+                    <th>Tür</th>
+                    <th style={{ width: 200 }}>Kasa / Banka</th>
+                    <th style={{ width: 120 }}>Makbuz No</th>
+                    <th className="hiza-sag" style={{ width: 130 }}>Tutar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tahsilatlar.map((k, i) => (
+                    <tr key={i}>
+                      <td>{String(k.islemTarihi ?? '').slice(0, 10).split('-').reverse().join('.')}</td>
+                      <td>{String(k.turAdi ?? '')}</td>
+                      <td>{String(k.hesapAdi ?? '') || <span className="sonuk">—</span>}</td>
+                      <td>{String(k.islemNo ?? '')}</td>
+                      <td className="hiza-sag">{para.format(Number(k.yerelTutar ?? k.tutar ?? 0))}</td>
+                    </tr>
+                  ))}
+                  {tahsilatlar.length === 0 && (
+                    <tr><td colSpan={5} className="bos">
+                      {kayitliId > 0 ? 'Bu faturaya bağlı tahsilat yok.' : 'Önce faturayı kaydedin.'}
+                    </td></tr>
+                  )}
+                </tbody>
+                <tfoot>
+                  <tr className="genel">
+                    <td colSpan={4} className="hiza-sag">Tahsil Edilen / Kalan</td>
+                    <td className="hiza-sag">
+                      {para.format(tahsil)} /{' '}
+                      <b style={{ color: kalan > 0 ? 'var(--hata)' : 'var(--ok)' }}>
+                        {para.format(kalan)}
+                      </b>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+
+              {/* Mockup dugme seridi. "Tahsilat Ekle" CALISIR (kasa kartini cari
+                  ve tutar onyuklu acar); POS ve Cek/Senet kasa turleri F5/F6'da. */}
+              <div className="katoolbar" style={{ margin: 10 }}>
+                <button className="d bir" disabled={!kayitliId}
+                        title={kayitliId ? 'Bu fatura için tahsilat işlemi aç' : 'Önce faturayı kaydedin.'}
+                        onClick={tahsilatAc}>
+                  ＋ Tahsilat Ekle
+                </button>
+                <button className="d" disabled title="POS tahsilatı F5/F6'da bağlanacak">💳 POS</button>
+                <button className="d" disabled title="Çek/senet girişi F5'te bağlanacak">🧾 Çek/Senet Al</button>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ============================================= IMZA / TESLIM ==== */}
         {aktifSekme === 'imza' && (

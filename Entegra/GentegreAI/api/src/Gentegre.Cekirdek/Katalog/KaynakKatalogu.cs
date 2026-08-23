@@ -782,6 +782,9 @@ public static class KaynakKatalogu
             new("durum",         "ki.durum",             "kod",   "Durum",     Hizalama: "orta"),
             new("aciklama",      "ki.aciklama",          "metin", "Açıklama",  Genislik: 240),
             new("iptalIslemId",  "ki.iptal_islem_id",    "sayi",  "Ters İşlem", Varsayilan: false),
+            // Belge kartinin "Tahsilat" sekmesi bu kolonla suzuyor (belge basina
+            //   tahsilat/odeme listesi).
+            new("belgeId",       "ki.belge_id",          "sayi",  "Belge Id",  Varsayilan: false),
             new("subeId",        "ki.sube_id",           "sayi",  "Şube",      Varsayilan: false)
         });
 
