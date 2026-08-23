@@ -371,7 +371,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           vadeGun: Number(vadeGun) || 0,
           subeId: kullanici?.subeId ?? undefined,
           cikisDepoId: depo?.id ?? null,
-          saticiId: satici?.id ?? null,
+          // satici_id NOT NULL default 0 - "secilmedi" burada null degil 0
+          //   (null gonderince sunucu "saticiId bos birakilamaz" ile reddediyordu).
+          saticiId: satici?.id ?? 0,
           // Teslim sekli e-Irsaliye'de GIB'in bekledigi alan.
           teslimSekli: irsaliyeMi ? teslimSekli : undefined,
           aracPlaka: irsaliyeMi ? aracPlaka : undefined,
