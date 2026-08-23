@@ -286,7 +286,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Menude "Satis Siparisleri" seciliyse liste de yalniz SATIS siparisi (19)
     //   gostersin; tur kolonlari o yuzden gereksiz (alis siparisi ayri ekran).
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 19 },
-    gizliKolonlar: ['tur', 'turAdi'],
+    // e-Fatura durumu SIPARISTE anlamsiz (siparis e-Belge degil).
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum'],
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
