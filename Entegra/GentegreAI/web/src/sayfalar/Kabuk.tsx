@@ -40,6 +40,13 @@ function grupla(liste: MenuOgesi[], sec: (m: MenuOgesi) => string | undefined): 
  *
  * Menu kullanicinin YETKISINE gore uretilir; yetkisiz modul hic cizilmez.
  */
+/** Arayuz dilleri - db/081: taraf_kullanici.dil (0 TR / 1 EN / 2 DE). */
+const DILLER = [
+  { deger: 0, ad: 'Türkçe',  bayrak: '🇹🇷' },
+  { deger: 1, ad: 'English', bayrak: '🇬🇧' },
+  { deger: 2, ad: 'Deutsch', bayrak: '🇩🇪' },
+] as const;
+
 export function Kabuk() {
   const { kullanici, cikisYap, subeDegistir, dilDegistir, yetki } = useOturum();
   const konum = useLocation();
@@ -68,6 +75,8 @@ export function Kabuk() {
   const [seciliDil, setSeciliDil] = useState(0);
   const [ayarMesaji, setAyarMesaji] = useState('');
   const [ayarKaydediliyor, setAyarKaydediliyor] = useState(false);
+  /** Bayrak dugmesinin acilir listesi. */
+  const [dilMenusu, setDilMenusu] = useState(false);
   const grupAcikMi = (ad: string, alt: typeof moduller) =>
     ad in acikGruplar ? acikGruplar[ad] : alt.some(m => konum.pathname.startsWith(m.yol));
 
@@ -112,9 +121,22 @@ export function Kabuk() {
     }
   };
 
+  /** Bayraktan dil degistir - Kullanici Ayarlari'ndaki kutuyla ayni ucu cagirir. */
+  async function dilSec(dil: number) {
+    if (dil === (kullanici?.dil ?? 0)) return;
+    try { await dilDegistir(dil) } catch { /* oturum katmani hatayi gosterir */ }
+  }
+
   useEffect(() => {
     if (kullaniciAyariAcik) setSeciliDil(kullanici?.dil ?? 0);
   }, [kullaniciAyariAcik, kullanici?.dil]);
+
+  useEffect(() => {
+    if (!dilMenusu) return;
+    const kapat = () => setDilMenusu(false);
+    document.addEventListener('mousedown', kapat);
+    return () => document.removeEventListener('mousedown', kapat);
+  }, [dilMenusu]);
 
   useEffect(() => {
     if (!kullaniciAyariAcik) return;
@@ -153,6 +175,26 @@ export function Kabuk() {
           )}
 
           <button className="ib" title="Bildirimler">🔔</button>
+
+          {/* Dil secimi: zilin saginda bayrak. Kullanici Ayarlari icindeki dil
+              kutusuyla AYNI degeri yazar (taraf_kullanici.dil) - burasi kisayol. */}
+          <span className="dil-sec" onMouseDown={e => e.stopPropagation()}>
+            <button type="button" className="ib" title={`Dil — ${DILLER[kullanici?.dil ?? 0]?.ad ?? ''}`}
+                    onClick={() => setDilMenusu(a => !a)}>
+              {DILLER[kullanici?.dil ?? 0]?.bayrak ?? '🏳️'}
+            </button>
+            {dilMenusu && (
+              <span className="dil-menu">
+                {DILLER.map(d => (
+                  <button key={d.deger} type="button"
+                          className={`dil-oge${(kullanici?.dil ?? 0) === d.deger ? ' on' : ''}`}
+                          onClick={() => { setDilMenusu(false); void dilSec(d.deger) }}>
+                    <span className="bayrak">{d.bayrak}</span> {d.ad}
+                  </button>
+                ))}
+              </span>
+            )}
+          </span>
           <button className="ib" title="Yardim">?</button>
           <button className="ib" title="Cikis" onClick={() => void cikisYap()}>⏻</button>
           <button

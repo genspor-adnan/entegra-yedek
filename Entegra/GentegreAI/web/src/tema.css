@@ -738,3 +738,20 @@ table.grid tr.flt input {
 /* Secenek metinleri uzun ("Engelle — belgeyi kaydetme") - dar kutu kirpiyordu. */
 .alan-izgara.ayar-formu .alan select { min-width: 320px; max-width: 460px; width: auto }
 .alan-izgara.ayar-formu .alan input[type=checkbox] { max-width: none; width: 15px; height: 15px }
+
+/* ---- Ust seritteki bayrakli dil secimi (zilin sagi) ---- */
+.dil-sec { position: relative; display: inline-flex }
+.dil-menu {
+  position: absolute; z-index: 200; top: 30px; right: 0; min-width: 150px;
+  display: flex; flex-direction: column; padding: 3px;
+  border: 1px solid var(--cizgi); border-radius: var(--r);
+  background: var(--yuz); box-shadow: var(--golge);
+}
+.dil-oge {
+  display: flex; align-items: center; gap: 7px; padding: 5px 8px;
+  border: 0; background: none; text-align: left; font-size: 12px;
+  color: var(--yazi); cursor: pointer; border-radius: 3px; white-space: nowrap;
+}
+.dil-oge:hover { background: var(--yuz2) }
+.dil-oge.on { background: var(--mor2); font-weight: 700 }
+.dil-oge .bayrak { font-size: 14px; line-height: 1 }
