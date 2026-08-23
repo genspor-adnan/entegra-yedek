@@ -719,7 +719,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tamamlanan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Proje', menuAd: 'Projeler', ic: '📁', yetkiKodu: 'proje',
+    // Grup CRM: musteri iliskileri basligi altinda projeler (kullanici karari).
+    menuGrup: 'CRM', menuAd: 'Projeler', ic: '📁', yetkiKodu: 'proje',
   },
   {
     // Kullanici: "Stok altına Stok Listesi [taşı]" - tek ogeli grup, digerleriyle ayni desen.

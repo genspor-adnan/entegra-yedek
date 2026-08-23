@@ -52,7 +52,7 @@ const GRUP_IKON: Record<string, string> = {
   'Alış':    '🛒',
   'Kasa':    '💵',
   'Banka':   '🏦',
-  'Proje':   '🗂️',
+  'CRM':     '📈',
   'Stok':    '📦',
   'İK':      '👥',
   'Yönetim': '🛠️',
