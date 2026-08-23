@@ -43,6 +43,22 @@ interface SatirDurumu {
  */
 const YEREL_PARA = 'TL';
 
+/** Senaryo comboSU - SENARYO_ADI ile ayni kodlar, GIB profil sirasinda. */
+const SENARYO_SECENEK = [
+  { deger: 1, ad: 'Temel Fatura' },
+  { deger: 2, ad: 'Ticari Fatura' },
+  { deger: 3, ad: 'İhracat' },
+  { deger: 7, ad: 'Kamu' },
+  { deger: 8, ad: 'İlaç / Tıbbi Cihaz' },
+];
+
+/** Baslikta gosterilen e-Belge tipi: irsaliye / ihracat / normal fatura. */
+function eBelgeTipi(tur: number, senaryo: number): string {
+  if (tur === 10 || tur === 14) return 'e-İrsaliye';
+  if (senaryo === 3) return 'e-Fatura (İhracat)';
+  return 'e-Fatura (Mükellef)';
+}
+
 const bosSatir = (anahtar: number): SatirDurumu => ({
   anahtar, satirTur: 1, stokId: null, hizmetId: null, stokKodu: '', stokAdi: '',
   adet: '1', birimFiyat: '', fiyatDovizi: YEREL_PARA, dovizFiyat: '', kur: '1',
@@ -206,6 +222,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [cariArama, setCariArama] = useState(!belgeId);
   /** Satis temsilcisi (personel) secim modali - cari ile ayni ekran. */
   const [saticiArama, setSaticiArama] = useState(false);
+  /** e-Fatura senaryosu (belge.senaryo) - GIB profilini belirler. */
+  const [senaryo, setSenaryo] = useState(0);
   const [donusumler, setDonusumler] = useState<Record<string, unknown>[]>([]);
   const [sonuc, setSonuc] = useState<BelgeYaniti | null>(null);
   const [hata, setHata] = useState<string | null>(null);
@@ -255,6 +273,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setSatici(y.belge.saticiId
           ? { id: Number(y.belge.saticiId), ad: String(y.belge.saticiAdi ?? '') } : null);
         setTeslimSekli(Number(y.belge.teslimSekli ?? 0));
+        setSenaryo(Number(y.belge.senaryo ?? 0));
         setSevkTarihi(y.belge.irsaliyeTarihi ? String(y.belge.irsaliyeTarihi).slice(0, 16) : '');
         setSoforTckn(String(y.belge.soforTckn ?? ''));
         setAracPlaka(String(y.belge.aracPlaka ?? ''));
@@ -374,6 +393,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           // satici_id NOT NULL default 0 - "secilmedi" burada null degil 0
           //   (null gonderince sunucu "saticiId bos birakilamaz" ile reddediyordu).
           saticiId: satici?.id ?? 0,
+          senaryo,
           // Teslim sekli e-Irsaliye'de GIB'in bekledigi alan.
           teslimSekli: irsaliyeMi ? teslimSekli : undefined,
           aracPlaka: irsaliyeMi ? aracPlaka : undefined,
@@ -901,20 +921,62 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         {/* ================================================== e-BELGE ==== */}
         {aktifSekme === 'ebelge' && (
           <div className="kagrup">
-            <h6>e-Belge Zarf Bilgisi</h6>
-            <div className="alan-izgara">
+            {/* Alan sirasi Ekranlar/satis_faturasi.html "e-Belge" sekmesiyle AYNI:
+                Belge Tipi · Alias (URN) · Senaryo · Durum · ETTN/Zarf No · XSLT.
+                Adres mockup'ta yok, kullanici istegiyle burada duruyor. */}
+            <h6>
+              {irsaliyeMi ? 'e-İrsaliye' : 'e-Fatura / e-Arşiv'}
+              <span className="kapt">belge.efatura* · e_belge</span>
+            </h6>
+            {/* Mockup'ta (.grid2) her alan KENDI SATIRINDA: etiket solda, deger
+                sagda. Uc sutuna yayilinca sira okunmuyordu. */}
+            <div className="alan-izgara tek-sutun">
               <label className="alan">
                 <span className="etiket">Belge Tipi</span>
-                <input value={irsaliyeMi ? 'e-İrsaliye' : 'e-Fatura'} readOnly />
-              </label>
-              <label className="alan">
-                <span className="etiket">Seri</span>
-                <input value={String(sonuc?.belge.belgeSeri ?? seri)} readOnly />
+                <input value={eBelgeTipi(tur, senaryo)} readOnly />
               </label>
               <label className="alan">
                 <span className="etiket">Alias (URN)</span>
                 <input value={String(sonuc?.belge.gondericiAlias ?? '') || '—'} readOnly />
               </label>
+
+              <label className="alan">
+                <span className="etiket">Senaryo</span>
+                <select value={senaryo} disabled={kilitli}
+                        onChange={e => setSenaryo(Number(e.target.value))}>
+                  {SENARYO_SECENEK.map(o => (
+                    <option key={o.deger} value={o.deger}>{o.ad}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="alan">
+                <span className="etiket">Durum</span>
+                <span className="deger-serit">
+                  {Number(sonuc?.belge.efaturaDurum ?? 0) > 0
+                    ? <span className="rozet ok">Gönderildi</span>
+                    : <span className="rozet gri">Kâğıt / gönderilmedi</span>}
+                  {sonuc?.belge.gibDurumAciklama
+                    ? <span className="sonuk">{String(sonuc.belge.gibDurumAciklama)}</span>
+                    : null}
+                </span>
+              </label>
+
+              <label className="alan">
+                <span className="etiket">ETTN / Zarf No</span>
+                <input readOnly value={
+                  [String(sonuc?.belge.ettn ?? ''), String(sonuc?.belge.zarfId ?? 0) !== '0'
+                    ? String(sonuc?.belge.zarfId) : '']
+                    .filter(Boolean).join(' / ') || '—'} />
+              </label>
+              <label className="alan">
+                <span className="etiket">XSLT Tasarımı</span>
+                {/* Tasarim listesi (DOKUMLER) henuz baglanmadi - combo GORUNUR
+                    ama tek secenekli ve pasif; sahte secenek uretmiyoruz. */}
+                <select disabled title="Tasarım listesi henüz bağlanmadı">
+                  <option>Genel Fatura Tasarımı</option>
+                </select>
+              </label>
+
               {/* Adres basliktan buraya tasindi: e-Belge XML'ine giden alici
                   bilgisi, kesim sirasinda degil gonderim baglaminda okunuyor. */}
               <label className="alan genis-2">
@@ -923,18 +985,21 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                                 .filter(Boolean).join(' / ')} readOnly
                        placeholder="Cari seçilince kartındaki varsayılan adres gelir" />
               </label>
-              <label className="alan">
-                <span className="etiket">Durum</span>
-                <span className="deger-serit">
-                  {Number(sonuc?.belge.efaturaDurum ?? 0) > 0
-                    ? <span className="rozet olumlu">Gönderildi</span>
-                    : <span className="rozet">Kâğıt / gönderilmedi</span>}
-                </span>
-              </label>
             </div>
+
+            {/* Mockup'taki dugme seridi. Gonderim/sorgulama UCLARI HENUZ YOK -
+                dugmeler gorunur ama pasif (yalanci calisma yerine durust durum). */}
+            <div className="katoolbar" style={{ margin: 10 }}>
+              <button className="d" disabled title="Gönderim ucu henüz bağlanmadı">📤 Yeniden Gönder</button>
+              <button className="d" disabled title="Önizleme henüz bağlanmadı">👁 Önizle (PDF)</button>
+              <button className="d" disabled title="XML indirme henüz bağlanmadı">⬇ XML İndir</button>
+              <button className="d" disabled title="GİB durum sorgulama henüz bağlanmadı">📋 Durum Sorgula</button>
+            </div>
+
             <div className="not">
-              ETTN, zarf numarası, gönderim zamanı ve GİB yanıtı e-Belge kuyruğundan
-              (e_belge tablosu) gelecek — gönderim ucu henüz bağlanmadı.
+              ETTN / zarf no ve GİB yanıtı e-Belge kuyruğundan (e_belge) okunur;
+              gönderim ucu henüz bağlanmadı. XSLT tasarım seçimi de dokümanlar
+              tablosuna bağlanacak.
             </div>
           </div>
         )}

@@ -505,6 +505,13 @@ public sealed class BelgeDeposu
                    b.sofor_tckn as "soforTckn", b.teslim_eden_id as "teslimEdenId",
                    td.unvan as "teslimEdenAdi",
                    b.proje_id as "projeId", b.efatura_durum as "efaturaDurum",
+                   b.efatura_sonuc as "efaturaSonuc", b.senaryo, b.zarf_id as "zarfId",
+                   b.gonderici_alias as "gondericiAlias",
+                   -- e-Belge kuyrugundaki SON kayit: ETTN (uuid) ve GIB yaniti
+                   --   kartin e-Belge sekmesinde gosterilir.
+                   eb.uuid as "ettn", eb.belge_no as "eBelgeNo",
+                   eb.gib_durum_kodu as "gibDurumKodu", eb.gib_durum_aciklama as "gibDurumAciklama",
+                   eb.servis_durum_adi as "servisDurumAdi",
                    b.kapanma_durum as "kapanmaDurum",
                    b.kaynak_tur as "kaynakTur", b.kaynak_id as "kaynakId",
                    kb.belge_no as "kaynakBelgeNo", kb.belge_tarihi as "kaynakBelgeTarihi",
@@ -517,6 +524,14 @@ public sealed class BelgeDeposu
               left join public.taraf td on td.id = b.teslim_eden_id
               left join public.belge kb on kb.id = b.kaynak_id and b.kaynak_tur = 30
               left join public.kasa_islem_turu kt on kt.kod = kb.tur
+              left join lateral (
+                  select e.uuid, e.belge_no, e.gib_durum_kodu, e.gib_durum_aciklama,
+                         e.servis_durum_adi
+                    from public.e_belge e
+                   where e.belge_id = b.id
+                   order by e.id desc
+                   limit 1
+              ) eb on true
              where b.id = @p0
             """, baglanti))
         {

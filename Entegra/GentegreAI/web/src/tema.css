@@ -400,6 +400,9 @@ table.grid tr.flt input {
 .alan-izgara { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px 10px }
 /* Yan yana kutu icinde tek sutun - mockup'ta her alan kendi satirinda (grid2). */
 .alan-izgara.tek-sutun { grid-template-columns: 1fr; gap: 8px 0 }
+/* Tek sutunda "iki sutun kapla" anlamsiz - span 2 ORTULU ikinci kolon
+   uretip duzeni ikiye boluyordu. */
+.alan-izgara.tek-sutun .genis-2 { grid-column: span 1 }
 /* Iki sutun kaplayan alan (or. sevk adresi) - sekme icindeki izgarada da gecerli. */
 .alan-izgara .genis-2 { grid-column: span 2 }
 /* Genel form kurali: etiket solda, input sagda genisler. */
