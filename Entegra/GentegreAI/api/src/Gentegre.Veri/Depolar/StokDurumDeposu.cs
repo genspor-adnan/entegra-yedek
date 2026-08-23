@@ -254,9 +254,13 @@ public sealed class StokDurumDeposu
                     ? $"{cikisDepo} → {girisDepo}"
                     : girisDepo.Length > 0 ? girisDepo : cikisDepo;
 
+                // Depo suzgeci YOKKEN transfer satiri hem girer hem cikar (net 0):
+                //   "Giris" ya da "Cikis" demek yaniltici olurdu.
+                var yon = giris > 0 && cikis > 0 ? "transfer" : giris > 0 ? "giris" : "cikis";
+
                 satirlar.Add(new StokHareketSatiri(
                     o.GetInt64(0), o.GetDateTime(1), o.GetInt32(2), o.GetString(3), o.GetString(4),
-                    o.GetString(5), depoMetni, giris > 0 ? "giris" : "cikis",
+                    o.GetString(5), depoMetni, yon,
                     giris, cikis, kalan, o.GetString(10)));
             }
         }

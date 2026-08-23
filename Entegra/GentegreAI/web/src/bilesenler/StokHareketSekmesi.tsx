@@ -123,8 +123,9 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
                   <td>{gun(s.tarih)}</td>
                   <td>{s.belgeTurAdi} <b>{s.belgeNo}</b></td>
                   <td>
-                    <span className={`rozet ${s.yon === 'giris' ? 'ok' : 'hata'}`}>
-                      {s.yon === 'giris' ? 'Giriş' : 'Çıkış'}
+                    <span className={`rozet ${s.yon === 'giris' ? 'ok'
+                                            : s.yon === 'transfer' ? 'bilgi' : 'hata'}`}>
+                      {s.yon === 'giris' ? 'Giriş' : s.yon === 'transfer' ? 'Transfer' : 'Çıkış'}
                     </span>
                   </td>
                   <td>{s.depo}{s.tarafUnvan ? <span className="soluk"> · {s.tarafUnvan}</span> : null}</td>

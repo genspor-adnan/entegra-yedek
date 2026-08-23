@@ -33,6 +33,12 @@ public sealed class BelgeDeposu
     private static bool SatisMi(int tur) => tur is 14 or 15 or 16 or 119 or 29 or 105 or 133;
 
     /// <summary>
+    /// Depolar arasi transfer (tur 20): TEK satir IKI depoyu birden oynatir -
+    /// cikis deposundan duser, giris deposuna ekler. Cari yoktur, mal firmada kalir.
+    /// </summary>
+    private static bool TransferMi(int tur) => tur == 20;
+
+    /// <summary>
     /// Numarasi BIZDE degil, KARSI TARAFTA uretilen belge turleri. Alis faturasinin
     /// numarasi tedarikcinin fatura numarasidir: harf/tire icerebilir, bizim
     /// sayacimizla iliskisi yoktur (sayac tohumu eski veriden geldigi icin
@@ -101,7 +107,11 @@ public sealed class BelgeDeposu
 
         var tur = Sayi(belge, "tur");
         var tarafId = Sayi(belge, "tarafId");
-        if (tarafId <= 0)
+        // Cari her belgede zorunlu DEGIL: depolar arasi transferde (20) karsi taraf
+        //   yoktur, mal firmanin kendi depolari arasinda gezer. Zorunluluk katalogtan
+        //   okunur (kasa_islem_turu.cari_zorunlu), koda gomulmez.
+        var cariZorunlu = await CariZorunluMuAsync(baglanti, islem, tur, iptal);
+        if (tarafId <= 0 && cariZorunlu)
             throw GentegreHatasi.Dogrulama("Cari secilmeli.", new AlanHatasi("tarafId", "Zorunlu."));
         if (satirlar.Count == 0)
             throw GentegreHatasi.Dogrulama("Belgede en az bir satir olmali.",
@@ -111,6 +121,7 @@ public sealed class BelgeDeposu
         // Belge, kartin O ANDAKI halini tasir: kart sonradan degisse de belge degismez.
         //   tarafUnvan <- fatura_unvan (bos ise unvan). Istekte acikca gonderildiyse
         //   kullanicinin yazdigi deger kabul edilir (sozlesme §4/2).
+        if (tarafId > 0)
         await using (var komut = new NpgsqlCommand("""
             select t.unvan, t.fatura_unvan, t.vkno, t.vd
               from public.taraf t where t.id = @p0
@@ -506,6 +517,21 @@ public sealed class BelgeDeposu
         NpgsqlTransaction islem, int tur, CancellationToken iptal)
         => (await TurEtkileriAsync(baglanti, islem, tur, iptal)).Stok;
 
+    /// <summary>
+    /// Bu belge turunde cari SECILMEK ZORUNDA mi (kasa_islem_turu.cari_zorunlu:
+    /// 1 zorunlu / 0 istege bagli / -1 yasak). Katalogda olmayan tur: zorunlu
+    /// (eski davranis - yeni bir tur yanlislikla carisiz kaydedilmesin).
+    /// </summary>
+    private static async Task<bool> CariZorunluMuAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction islem, int tur, CancellationToken iptal)
+    {
+        await using var komut = new NpgsqlCommand(
+            "select cari_zorunlu from public.kasa_islem_turu where kod = @p0", baglanti, islem);
+        komut.Parameters.AddWithValue("p0", (short)tur);
+        var d = await komut.ExecuteScalarAsync(iptal);
+        return d is null or DBNull || Convert.ToInt32(d) == 1;
+    }
+
     /// <summary>Kaynak satiri hedef satir JSON'una cevirir (fiyat/iskonto/KDV aynen tasinir).</summary>
     private static Dictionary<string, JsonElement> SatirJson(
         IDictionary<string, object?> k, decimal miktar, int kaynakSatirId, int stokDurumDegis)
@@ -834,48 +860,81 @@ public sealed class BelgeDeposu
         int belgeId, int tur, bool stokKontrolu, List<string> uyarilar, CancellationToken iptal)
     {
         var satis = SatisMi(tur);
+        var transfer = TransferMi(tur);
 
         // stok_durum_degis = 0 olan satirlar stok bakiyesini ETKILEMEZ.
+        // Transferde IKI depo da okunur: satir cikis deposundan duser, giris
+        //   deposuna eklenir - tek satir iki hareket uretir.
         await using var oku = new NpgsqlCommand("""
             select s.stok_id, s.miktar, s.adet,
-                   coalesce(s.cikis_depo_id, s.giris_depo_id) as depo_id
+                   coalesce(s.cikis_depo_id, b.cikis_depo_id) as cikis_depo_id,
+                   coalesce(s.giris_depo_id, b.giris_depo_id) as giris_depo_id
               from public.belge_satir s
+              join public.belge b on b.id = s.belge_id
              where s.belge_id = @p0 and s.tur = 1 and s.stok_id is not null
                and s.stok_durum_degis = 1
             """, baglanti, islem);
         oku.Parameters.AddWithValue("p0", belgeId);
 
-        var hareketler = new List<(int StokId, decimal Miktar, int? DepoId)>();
+        var hareketler = new List<(int StokId, decimal Miktar, int? CikisDepo, int? GirisDepo)>();
         await using (var okuyucu = await oku.ExecuteReaderAsync(iptal))
             while (await okuyucu.ReadAsync(iptal))
             {
                 var miktar = okuyucu.GetDecimal(okuyucu.GetOrdinal("miktar"));
                 if (miktar == 0) miktar = okuyucu.GetDecimal(okuyucu.GetOrdinal("adet"));
-                hareketler.Add((okuyucu.Sayi("stok_id"), miktar, okuyucu.SayiNull("depo_id")));
+                hareketler.Add((okuyucu.Sayi("stok_id"), miktar,
+                                okuyucu.SayiNull("cikis_depo_id"), okuyucu.SayiNull("giris_depo_id")));
             }
 
-        foreach (var (stokId, miktar, depoId) in hareketler)
+        foreach (var (stokId, miktar, cikisDepo, girisDepo) in hareketler)
         {
+            if (transfer)
+            {
+                if (cikisDepo is null || girisDepo is null)
+                    throw GentegreHatasi.Dogrulama("Transferde çıkış ve giriş deposu seçilmeli.",
+                        new AlanHatasi(cikisDepo is null ? "cikisDepoId" : "girisDepoId", "Zorunlu."));
+                if (cikisDepo == girisDepo)
+                    throw GentegreHatasi.IsKurali("Çıkış ve giriş deposu aynı olamaz.");
+
+                await DepoyaYazAsync(baglanti, islem, stokId, cikisDepo.Value, 0m, miktar,
+                                     stokKontrolu, uyarilar, iptal);
+                await DepoyaYazAsync(baglanti, islem, stokId, girisDepo.Value, miktar, 0m,
+                                     stokKontrolu, uyarilar, iptal);
+                continue;
+            }
+
+            // Normal belge: yon TURDEN gelir, depo satirda hangisi doluysa o.
+            var depoId = satis ? cikisDepo ?? girisDepo : girisDepo ?? cikisDepo;
             if (depoId is null) continue;
 
-            await using var komut = new NpgsqlCommand("""
-                insert into public.stok_durum (stok_id, depo_id, giren, cikan, kalan)
-                values (@p0, @p1, @p2, @p3, @p2 - @p3)
-                on conflict (stok_id, depo_id) do update
-                   set giren = stok_durum.giren + excluded.giren,
-                       cikan = stok_durum.cikan + excluded.cikan,
-                       kalan = stok_durum.kalan + excluded.giren - excluded.cikan
-                returning kalan
-                """, baglanti, islem);
-            komut.Parameters.AddWithValue("p0", stokId);
-            komut.Parameters.AddWithValue("p1", depoId.Value);
-            komut.Parameters.AddWithValue("p2", satis ? 0m : miktar);   // giren
-            komut.Parameters.AddWithValue("p3", satis ? miktar : 0m);   // cikan
-
-            var kalan = Convert.ToDecimal(await komut.ExecuteScalarAsync(iptal) ?? 0m);
-            if (stokKontrolu && kalan < 0)
-                uyarilar.Add($"Stok {stokId} deposunda bakiye negatife dustu ({kalan}).");
+            await DepoyaYazAsync(baglanti, islem, stokId, depoId.Value,
+                                 satis ? 0m : miktar, satis ? miktar : 0m,
+                                 stokKontrolu, uyarilar, iptal);
         }
+    }
+
+    /// <summary>Tek depo satirini gunceller (yoksa acar) ve negatif bakiyeyi uyarir.</summary>
+    private static async Task DepoyaYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int stokId, int depoId, decimal giren, decimal cikan,
+        bool stokKontrolu, List<string> uyarilar, CancellationToken iptal)
+    {
+        await using var komut = new NpgsqlCommand("""
+            insert into public.stok_durum (stok_id, depo_id, giren, cikan, kalan)
+            values (@p0, @p1, @p2, @p3, @p2 - @p3)
+            on conflict (stok_id, depo_id) do update
+               set giren = stok_durum.giren + excluded.giren,
+                   cikan = stok_durum.cikan + excluded.cikan,
+                   kalan = stok_durum.kalan + excluded.giren - excluded.cikan
+            returning kalan
+            """, baglanti, islem);
+        komut.Parameters.AddWithValue("p0", stokId);
+        komut.Parameters.AddWithValue("p1", depoId);
+        komut.Parameters.AddWithValue("p2", giren);
+        komut.Parameters.AddWithValue("p3", cikan);
+
+        var kalan = Convert.ToDecimal(await komut.ExecuteScalarAsync(iptal) ?? 0m);
+        if (stokKontrolu && kalan < 0)
+            uyarilar.Add($"Stok {stokId} deposunda bakiye negatife dustu ({kalan}).");
     }
 
     private async Task MaliHareketYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,

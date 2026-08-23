@@ -426,7 +426,7 @@ export interface StokHareketSatiri {
   tarafUnvan: string;
   /** Tek depo ya da transferde "Çıkış → Giriş". */
   depo: string;
-  /** 'giris' | 'cikis' */
+  /** 'giris' | 'cikis' | 'transfer' (suzgecsiz gorunumde iki depoyu birden oynatir) */
   yon: string;
   giris: number;
   cikis: number;

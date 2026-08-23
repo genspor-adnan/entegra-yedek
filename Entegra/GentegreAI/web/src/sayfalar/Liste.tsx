@@ -731,6 +731,15 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Stok', menuAd: 'Stok Listesi', ic: '📦', yetkiKodu: 'stok',
   },
   {
+    // DEPOLAR ARASI TRANSFER (tur 20): cari YOK, para YOK - tek satir cikis
+    //   deposundan duser, giris deposuna eklenir. Kart BelgeKarti'nin transfer
+    //   dalidir (fiyat/KDV/e-Belge sutunlari gizli).
+    kaynak: 'stok-transfer', baslik: 'Stok Transferleri', kartYolu: '/stok-transfer',
+    yol: 'Stok › Stok Transfer', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 20,
+    cipler: [{ ad: 'Tumu' }],
+    menuGrup: 'Stok', menuAd: 'Stok Transfer', ic: '🔄', yetkiKodu: 'belge',
+  },
+  {
     // Kullanici: "İK altına Personel Listesi taşı" - tek ogeli grup, digerleriyle ayni desen.
     kaynak: 'personel', baslik: 'Personel', yol: 'IK › Personel', kartYolu: '/personel',
     aksiyonEkrani: 'personel-liste', cipler: DURUM_CIPLERI,

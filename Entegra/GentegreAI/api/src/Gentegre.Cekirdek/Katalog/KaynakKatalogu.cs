@@ -91,6 +91,7 @@ public static class KaynakKatalogu
         Ekle(BelgeAcikSatir());
         Ekle(Depo());
         Ekle(Irsaliye());
+        Ekle(StokTransfer());
     }
 
     private static void Ekle(KaynakTanimi k) => Kaynaklar[k.Ad] = k;
@@ -908,6 +909,45 @@ public static class KaynakKatalogu
             new("projeId",          "v.proje_id",          "sayi",  "Proje Id", Varsayilan: false),
             new("aciklama",         "v.aciklama",          "metin", "Açıklama", Genislik: 240),
             new("subeId",           "v.sube_id",           "sayi",  "Şube",   Varsayilan: false)
+        });
+
+    // --------------------------------------------------- stok transferi ----
+    // Ayni `belge` tablosu, tur 20. Ayri kaynak: transferde CARI ve TUTAR yoktur,
+    //   bunun yerine IKI DEPO ve miktar konusur - genel belge listesinin cari/tutar
+    //   kolonlari burada hep bos kalirdi.
+    private static KaynakTanimi StokTransfer() => new(
+        Ad: "stok-transfer",
+        YetkiKodu: "belge",
+        Kaynak: """
+            public.belge b
+            left join public.depo cd on cd.id = b.cikis_depo_id
+            left join public.depo gd on gd.id = b.giris_depo_id
+            """,
+        SabitKosul: "b.tur = 20",
+        SubeKolonu: "b.sube_id",
+        VarsayilanSirala: "b.belge_tarihi desc, b.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",          "b.id",           "sayi",  "Id",    Varsayilan: false),
+            new("belgeNo",     "b.belge_no",     "metin", "Transfer No"),
+            new("belgeTarihi", "b.belge_tarihi", "tarih", "Tarih", Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("cikisDepo",   "coalesce(cd.ad, '')", "metin", "Çıkış Deposu", Genislik: 180),
+            new("girisDepo",   "coalesce(gd.ad, '')", "metin", "Giriş Deposu", Genislik: 180),
+            // Kalem sayisi ve toplam miktar satir-basi alt sorgu; transfer listeleri
+            //   kucuk oldugu icin (belge sayisi binlerle olcülmez) maliyeti kabul.
+            new("kalemSayisi",
+                "(select count(*) from public.belge_satir s where s.belge_id = b.id)",
+                                                  "sayi",  "Kalem", Hizalama: "sag",
+                                                  Siralanabilir: false, Filtrelenebilir: false),
+            new("miktar",
+                "(select coalesce(sum(s.miktar), 0) from public.belge_satir s where s.belge_id = b.id)",
+                                                  "para",  "Miktar", Hizalama: "sag", Bicim: "#,##0.##",
+                                                  Siralanabilir: false, Filtrelenebilir: false),
+            new("aciklama",    "coalesce(b.aciklama, '')", "metin", "Açıklama", Genislik: 240),
+            new("durumAdi",    "case b.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end",
+                                                  "metin", "Durum", Hizalama: "orta"),
+            new("durum",       "b.durum",        "sayi",  "Durum Kodu", Hizalama: "orta", Varsayilan: false),
+            new("subeId",      "b.sube_id",      "sayi",  "Şube", Varsayilan: false)
         });
 
     // ---------------------------------------------------------- irsaliye ----
