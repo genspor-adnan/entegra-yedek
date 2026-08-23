@@ -44,6 +44,8 @@ export interface ListeTanimi {
   yeniBelgeTuru?: number;
   /** Menude grubun ICINDE ikinci bir kirilim (ör. Yönetim › Ayarlar › Stok Ayarları). */
   menuAltGrup?: string;
+  /** Bu ekranda gizlenecek kolonlar (ör. Satis Faturalari'nda tur / turAdi). */
+  gizliKolonlar?: string[];
   /** Liste DEGIL, kendi sayfasi olan menu ogesi (ör. Stok Ayarları: sekmeli ekran).
       App.tsx rotayi kendisi tanimlar; buradaki `kaynak` yalnizca anahtar/rota icindir. */
   ozelSayfa?: boolean;
@@ -167,6 +169,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       cipler={tanim.cipler}
       sabitFiltre={sabitFiltre}
       aksiyonEkrani={tanim.aksiyonEkrani}
+      gizliKolonlar={tanim.gizliKolonlar}
       yenile={yenile}
       odaklaSonEklenen={odaklaSonEklenen}
       icerikAlani={tanim.icerikAlani}
@@ -280,7 +283,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   "Dönüştür" aksiyonu secili siparisten irsaliye/fatura uretir (F8).
     kaynak: 'belge', rota: 'siparis', baslik: 'Satış Siparişleri', yol: 'Satis › Satış Siparişleri',
     aksiyonEkrani: 'siparis-liste', yeniBelgeTuru: 19,
-    sabitFiltre: { alan: 'tur', op: 'icinde', deger: [9, 19] },
+    // Menude "Satis Siparisleri" seciliyse liste de yalniz SATIS siparisi (19)
+    //   gostersin; tur kolonlari o yuzden gereksiz (alis siparisi ayri ekran).
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 19 },
+    gizliKolonlar: ['tur', 'turAdi'],
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
@@ -311,13 +317,20 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // "Satış" grubu, Cari'nin HEMEN ALTINDA (kullanici istegi) - "Belgeler" ayni kaynak/
     // ekran, sadece grup+menu adi degisti (filtre/kapsam AYNI - hala hem satis hem alis
     // faturalarini gosterir, cip'lerle (Tumu/Satis/Alis) secilir; "kopyala" DENMEDI).
-    kaynak: 'belge', baslik: 'Belgeler', yol: 'Satis › Faturalar',
-    aksiyonEkrani: 'belge-liste',
+    // Menude "Satis Faturalari" seciliyken liste de YALNIZ satis faturasi
+    //   gostermeli (irsaliye/alis karisinca kullanici hangi ekranda oldugunu
+    //   kaybediyordu) ve baslik menu adiyla ayni olmali.
+    kaynak: 'belge', baslik: 'Satış Faturaları', yol: 'Satis › Satış Faturaları',
+    aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 15,
+    // Tur / Belge Turu kolonlari bu ekranda ayni degeri tekrarliyor (hepsi
+    //   satis faturasi) - iade ayrimi cip seridinde zaten var.
+    gizliKolonlar: ['tur', 'turAdi'],
+    sabitFiltre: { alan: 'tur', op: 'icinde', deger: [15, 16] },
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
     cipler: [
       { ad: 'Tumu' },
-      { ad: 'Satis', filtre: { alan: 'tur', op: 'icinde', deger: [14, 15, 16] } },
-      { ad: 'Alis', filtre: { alan: 'tur', op: 'icinde', deger: [10, 11, 12] } },
+      { ad: 'Fatura', filtre: { alan: 'tur', op: 'esit', deger: 15 } },
+      { ad: 'İade',   filtre: { alan: 'tur', op: 'esit', deger: 16 } },
     ],
     menuGrup: 'Satış', menuAd: 'Satış Faturaları', ic: '🧾', yetkiKodu: 'belge',
   },

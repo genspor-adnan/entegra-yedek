@@ -168,7 +168,11 @@ public static class KaynakKatalogu
     private static KaynakTanimi Belge() => new(
         Ad: "belge",
         YetkiKodu: "belge",
-        Kaynak: "public.belge b left join public.kasa_islem_turu bt on bt.kod = b.tur",
+        Kaynak: "public.belge b " +
+                "left join public.kasa_islem_turu bt on bt.kod = b.tur " +
+                // F8 donusum zinciri: kaynak baslik bagindan okunur.
+                "left join public.belge kb on kb.id = b.kaynak_id and b.kaynak_tur = 30 " +
+                "left join public.kasa_islem_turu kt2 on kt2.kod = kb.tur",
         SubeKolonu: "b.sube_id",
         VarsayilanSirala: "b.belge_tarihi desc, b.id desc",
         KapsamKolonu: "b.taraf_id",
@@ -185,6 +189,25 @@ public static class KaynakKatalogu
             new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",       Hizalama: "orta", Bicim: "dd.MM.yyyy"),
             new("tarafId",       "b.taraf_id",       "sayi",  "Cari Id",     Varsayilan: false),
             new("tarafUnvan",    "b.taraf_unvan",    "metin", "Cari"),
+            // KAYNAK / HEDEF: donusum zincirinin iki ucu (irsaliye listesindeki
+            //   ile ayni). Kaynak baslik bagindan; hedef SATIR bagindan turer -
+            //   bir belge birden fazla belgeye bolunebilir, numaralar birlestirilir.
+            //   Iptal (durum=2) hedefler sayilmaz.
+            new("kaynak",
+                "case when kb.id is null then '' " +
+                "else coalesce(kt2.ad, '') || case when kb.belge_no <> '' " +
+                "then ' ' || kb.belge_no else '' end end",
+                                                      "metin", "Kaynak",      Genislik: 170,
+                                                      Siralanabilir: false, Filtrelenebilir: false),
+            new("hedef",
+                "coalesce((select string_agg(distinct coalesce(ht.ad, '') || ' ' || hb.belge_no, ', ') " +
+                "            from public.belge_satir hs " +
+                "            join public.belge_satir ks on ks.id = hs.kaynak_id and hs.kaynak_tur = 30 " +
+                "            join public.belge hb on hb.id = hs.belge_id " +
+                "            left join public.kasa_islem_turu ht on ht.kod = hb.tur " +
+                "           where ks.belge_id = b.id and hb.durum <> 2), '')",
+                                                      "metin", "Hedef",       Genislik: 190,
+                                                      Siralanabilir: false, Filtrelenebilir: false),
             new("tarafVkno",     "b.taraf_vkno",     "metin", "VKN/TCKN",    Varsayilan: false),
             new("matrah",        "b.matrah",         "para",  "Matrah",      Hizalama: "sag", Bicim: "#,##0.00"),
             new("kdvTutari",     "b.kdv_tutari",     "para",  "KDV",         Hizalama: "sag", Bicim: "#,##0.00"),
@@ -951,7 +974,9 @@ public static class KaynakKatalogu
                 "case when coalesce(b.efatura_durum, 0) = 0 then 'Kağıt' " +
                 "when b.efatura_durum = 1 then 'Hazırlandı' when b.efatura_durum = 2 then 'Gönderildi' " +
                 "when b.efatura_durum = 3 then 'Kabul' when b.efatura_durum = 4 then 'Red' else 'Bilinmiyor' end",
-                                                      "metin", "e-İrsaliye", Hizalama: "orta"),
+                                                      "metin", "e-İrsaliye", Hizalama: "orta",
+                                                      // Kullanici: listede gereksiz - kolon secicide duruyor.
+                                                      Varsayilan: false),
             new("efaturaDurum",  "b.efatura_durum",  "sayi",  "e-Belge Kodu", Hizalama: "orta", Varsayilan: false),
             // Miktar GIZLI: satir-basi alt sorgu (her satirda bir belge_satir taramasi)
             //   ve irsaliyede farkli birimler (adet/kg/metre) toplanip tek sayi olarak

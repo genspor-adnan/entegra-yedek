@@ -73,6 +73,15 @@ const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumF
  * once (adet x fiyat) yuvarlanir, sonra iki iskonto CARPIMSAL uygulanir.
  * Kesin tutar yine sunucudan gelir; bu yalniz ekranda anlik gosterim.
  */
+/** "2026-08-23T14:05:00" -> "23.08.2026 14:05" (saat yoksa yalniz tarih). */
+function tarihSaat(ham: unknown): string {
+  const metin = String(ham ?? '');
+  if (!metin) return '';
+  const gun = metin.slice(0, 10).split('-').reverse().join('.');
+  const saat = metin.slice(11, 16);
+  return saat && saat !== '00:00' ? `${gun} ${saat}` : gun;
+}
+
 /** Gridde iskonto gosterimi: tek iskonto "%10", iki kademeli "%10 + %5". */
 function iskonatoMetni(r: { iskonto: string; iskonto2: string }): string {
   const i1 = Number(r.iskonto.replace(',', '.')) || 0;
@@ -224,6 +233,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [aktifSekme, setAktifSekme] = useState('kalem');
   /** Grid satir secimi (kirmizi Sil dugmesi bunlari siler). */
   const [seciliSatirlar, setSeciliSatirlar] = useState<Set<number>>(new Set());
+  /** Shift ile ARALIK secimi icin son tiklanan satirin sirasi. */
+  const sonTiklanan = useRef<number | null>(null);
   /** Acik kalem penceresi (adet / fiyat). Stok zaten secilmis olarak gelir. */
   const [kalem, setKalem] = useState<SatirDurumu | null>(null);
   /** Ardisik giris: stok arama penceresi acik mi. Kalem eklendikten sonra
@@ -400,6 +411,22 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     if (seciliSatirlar.size === 0) return;
     setSatirlar(s => s.filter(x => !seciliSatirlar.has(x.anahtar)));
     setSeciliSatirlar(new Set());
+  };
+
+  /**
+   * Satira tiklama - liste gridleriyle ayni davranis:
+   *   duz tik = yalniz o satir · Ctrl/Cmd = ekle-cikar · Shift = aralik.
+   */
+  const satirTikla = (sira: number, e: React.MouseEvent) => {
+    const anahtarlar = satirlar.map(x => x.anahtar);
+    if (e.shiftKey && sonTiklanan.current !== null) {
+      const [bas, son] = [sonTiklanan.current, sira].sort((a, b) => a - b);
+      setSeciliSatirlar(k => new Set([...k, ...anahtarlar.slice(bas, son + 1)]));
+      return;
+    }
+    sonTiklanan.current = sira;
+    if (e.ctrlKey || e.metaKey) { secimDegis(anahtarlar[sira]); return }
+    setSeciliSatirlar(new Set([anahtarlar[sira]]));
   };
 
   const secimDegis = (anahtar: number) =>
@@ -831,17 +858,21 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               </tr>
             </thead>
             <tbody>
-              {satirlar.map(r => {
+              {satirlar.map((r, sira) => {
                 const adet = Number(r.adet.replace(',', '.')) || 0;
                 const fiyat = Number(r.birimFiyat.replace(',', '.')) || 0;
                 const tutar = satirTutari(adet, fiyat, r.iskonto, r.iskonto2);
                 const secili = seciliSatirlar.has(r.anahtar);
                 return (
                   <tr key={r.anahtar} className={secili ? 'secili' : ''}
+                      onClick={e => satirTikla(sira, e)}
                       onDoubleClick={() => !kilitli && setKalem(r)}>
                     <td className="hiza-orta">
+                      {/* Onay kutusu TEK satiri ekler/cikarir - satir tiklamasi
+                          (duz tik = yalniz o satir) tetiklenmesin. */}
                       <input type="checkbox" checked={secili}
-                             onChange={() => secimDegis(r.anahtar)} />
+                             onClick={e => e.stopPropagation()}
+                             onChange={() => { sonTiklanan.current = sira; secimDegis(r.anahtar) }} />
                     </td>
                     {/* Tip IKON: metin kolonu yer kapliyordu, anlami title'da. */}
                     <td className="hiza-orta" title={r.satirTur === 2 ? 'Hizmet' : 'Stok'}>
@@ -1112,8 +1143,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           const kalan = Math.round((genel - tahsil) * 100) / 100;
           return (
             <div className="kagrup">
-              {/* Mockup dugme seridi. "Tahsilat Ekle" CALISIR (kasa kartini cari
-                  ve tutar onyuklu acar); POS ve Cek/Senet kasa turleri F5/F6'da. */}
+              {/* Tahsilat araclari: Nakit 21 / Banka 22 / POS 25 - hepsi ayni
+                  modali (kasa karti) cari + tutar onyuklu acar. Cek/Senet kasa
+                  planinin F5 fazinda (cek_senet tablosu) baglanacak. */}
               <div className="katoolbar" style={{ margin: 10 }}>
                 {/* Tahsilat ARACI adiyla: yanindaki POS / Cek-Senet ile ayni
                     dizide - bu dugme NAKIT tahsilat (tur 21) acar. */}
@@ -1127,26 +1159,32 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                         onClick={() => tahsilatAc(22)}>
                   🏦 Banka
                 </button>
-                <button className="d" disabled title="POS tahsilatı F5/F6'da bağlanacak">💳 POS</button>
+                <button className="d bir" disabled={!kayitliId}
+                        title={kayitliId ? 'Kredi kartı / POS tahsilat işlemi aç' : 'Önce faturayı kaydedin.'}
+                        onClick={() => tahsilatAc(25)}>
+                  💳 POS
+                </button>
                 <button className="d" disabled title="Çek/senet girişi F5'te bağlanacak">🧾 Çek/Senet Al</button>
               </div>
               <table className="detay-tablo">
                 <thead>
                   <tr>
-                    <th style={{ width: 100 }}>Tarih</th>
-                    <th>Tür</th>
-                    <th style={{ width: 200 }}>Kasa / Banka</th>
+                    <th style={{ width: 140 }}>Tarih / Saat</th>
                     <th style={{ width: 120 }}>Makbuz No</th>
+                    <th style={{ width: 180 }}>Tür</th>
+                    <th>Kasa / Banka</th>
                     <th className="hiza-sag" style={{ width: 130 }}>Tutar</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tahsilatlar.map((k, i) => (
                     <tr key={i}>
-                      <td>{String(k.islemTarihi ?? '').slice(0, 10).split('-').reverse().join('.')}</td>
+                      {/* Tarih + saat: ayni gun birden fazla tahsilat olunca
+                          sira ancak saatle anlasiliyordu. */}
+                      <td>{tarihSaat(k.islemTarihi)}</td>
+                      <td>{String(k.islemNo ?? '')}</td>
                       <td>{String(k.turAdi ?? '')}</td>
                       <td>{String(k.hesapAdi ?? '') || <span className="sonuk">—</span>}</td>
-                      <td>{String(k.islemNo ?? '')}</td>
                       <td className="hiza-sag">{para.format(Number(k.yerelTutar ?? k.tutar ?? 0))}</td>
                     </tr>
                   ))}

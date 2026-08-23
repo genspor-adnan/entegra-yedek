@@ -24,6 +24,10 @@ interface Props {
   /** Kart icine gomulu kucuk grid (ör. cari kartinda İlgili Kişiler) - buyuk baslik/yol
       satiri (.sayfabas) gizlenir, geri kalan (arama/cipler/tablo/sayfalama) ayni kalir. */
   gomulu?: boolean;
+  /** Bu EKRANDA gizlenecek kolon adlari (katalogda varsayilan gelse bile).
+      Ayni kaynak farkli ekranlarda kullaniliyor: Satis Faturalari'nda tur/turAdi
+      gereksiz (hepsi ayni tur), Siparisler'de gerekli. */
+  gizliKolonlar?: string[];
   /** Arama + Liste/Grup/Analiz + toplu aksiyon seridini hic cizme (ör. Stok Ayarlari >
       Depolar): birkac satirlik ayar listesinde bu serit bilgi degil gurultu. */
   seritGizli?: boolean;
@@ -178,7 +182,7 @@ const GORUNUMLER: { v: 'liste' | 'grup' | 'analiz'; ik: string; ad: string }[] =
  */
 export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, onSatirAc,
                           aksiyonEkrani, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
-                          yenile, odaklaSonEklenen, icerikAlani, icerikBaslik }: Props) {
+                          gizliKolonlar, yenile, odaklaSonEklenen, icerikAlani, icerikBaslik }: Props) {
   const [kolonlar, setKolonlar] = useState<KolonMeta[]>([]);
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [toplamKayit, setToplamKayit] = useState(0);
@@ -235,7 +239,11 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
   useEffect(() => {
     let iptal = false;
     api.kolonlar(kaynak)
-      .then(y => { if (!iptal) setKolonlar(y.kolonlar.filter(k => k.varsayilan)) })
+      .then(y => {
+        if (iptal) return;
+        const gizli = new Set(gizliKolonlar ?? []);
+        setKolonlar(y.kolonlar.filter(k => k.varsayilan && !gizli.has(k.ad)));
+      })
       .catch((h: ApiHatasi) => { if (!iptal) setHata(h.message) });
     return () => { iptal = true };
   }, [kaynak]);
