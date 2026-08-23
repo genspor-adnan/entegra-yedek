@@ -421,7 +421,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   // --- Hesaplar: TEK kaynak ('hesap'), tur'e gore 5 ayri ekran. Musteri/Tedarikci
   //     deseninin aynisi: sabitFiltre + rota + yeniKayitVarsayilanlari.
   {
-    kaynak: 'hesap', rota: 'kasa-hesap', baslik: 'Kasalar', yol: 'Kasa › Kasa Hesaplari',
+    kaynak: 'hesap', rota: 'kasa-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI, baslik: 'Kasalar', yol: 'Kasa › Kasa Hesaplari',
     kartYolu: '/kasa-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'K' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Kasa', menuAd: 'Kasa Hesapları', ic: '💵', yetkiKodu: 'hesap',
