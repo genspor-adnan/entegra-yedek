@@ -922,6 +922,8 @@ public static class KaynakKatalogu
             public.belge b
             left join public.depo cd on cd.id = b.cikis_depo_id
             left join public.depo gd on gd.id = b.giris_depo_id
+            left join public.taraf te on te.id = b.teslim_eden_id
+            left join public.taraf ta on ta.id = b.teslim_alan_id
             """,
         SabitKosul: "b.tur = 20",
         SubeKolonu: "b.sube_id",
@@ -933,6 +935,9 @@ public static class KaynakKatalogu
             new("belgeTarihi", "b.belge_tarihi", "tarih", "Tarih", Hizalama: "orta", Bicim: "dd.MM.yyyy"),
             new("cikisDepo",   "coalesce(cd.ad, '')", "metin", "Çıkış Deposu", Genislik: 180),
             new("girisDepo",   "coalesce(gd.ad, '')", "metin", "Giriş Deposu", Genislik: 180),
+            // Sorumluluk devri: eski transferlerde bos olabilir (alan 100'de eklendi).
+            new("teslimEden",  "coalesce(te.unvan, '')", "metin", "Teslim Eden", Genislik: 180),
+            new("teslimAlan",  "coalesce(ta.unvan, '')", "metin", "Teslim Alan", Genislik: 180),
             // Kalem sayisi ve toplam miktar satir-basi alt sorgu; transfer listeleri
             //   kucuk oldugu icin (belge sayisi binlerle olcülmez) maliyeti kabul.
             new("kalemSayisi",

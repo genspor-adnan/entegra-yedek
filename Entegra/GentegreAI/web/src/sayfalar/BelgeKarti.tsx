@@ -349,6 +349,21 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    */
   const baslikKilitli = kilitli || (transferMi && satirlar.length > 0);
 
+  /**
+   * Transferde BASLIK ONCE doldurulur: iki depo ve teslim eden/alan secilmeden
+   * kalem eklenemez (kullanici karari). Ilk kalem eklenince baslik kilitlendigi
+   * icin sira zaten tersine cevrilemez - eksik baslikla girilen kalemler
+   * duzeltilemez halde kalirdi.
+   */
+  const transferBaslikEksigi = !transferMi ? null
+    : !depo ? 'çıkış deposu'
+    : !girisDepo ? 'giriş deposu'
+    : !teslimEden ? 'teslim eden'
+    : !teslimAlan ? 'teslim alan'
+    : depo.id === girisDepo.id ? 'farklı giriş/çıkış deposu'
+    : teslimEden.id === teslimAlan.id ? 'farklı teslim eden/alan'
+    : null;
+
   /** Kutunun izin verdigi araligin iki ucu - her render'da "simdi"ye gore. */
   const tarihEnGec = yerelAnMetni(new Date());
   const tarihEnErken = (() => {
@@ -1052,8 +1067,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             {/* Ekle / Duzenle / Sil - YALNIZ IKON (yer kazanmak icin), ne
                 yaptiklari title'da. Dugmeler kesin belgede de GORUNUR, yalnizca
                 pasif: kaybolunca kullanici "nereye gitti" diye ariyordu. */}
-            <button type="button" className="d bir ikon" disabled={kilitli}
-                    title={kilitli ? 'Kesin belgeye satır eklenemez (İptal edip yeniden kesin).' : 'Satır ekle'}
+            <button type="button" className="d bir ikon"
+                    disabled={kilitli || transferBaslikEksigi !== null}
+                    title={kilitli ? 'Kesin belgeye satır eklenemez (İptal edip yeniden kesin).'
+                          : transferBaslikEksigi
+                          ? `Önce başlıkta ${transferBaslikEksigi} seçin.`
+                          : 'Satır ekle'}
                     onClick={() => setStokArama(true)}>
               ＋
             </button>
@@ -1138,7 +1157,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               })}
               {satirlar.length === 0 && (
                 <tr><td colSpan={transferMi ? 6 : irsaliyeMi ? 8 : 10} className="bos">
-                  Kalem yok — “＋” ile ekleyin.
+                  {transferBaslikEksigi
+                    ? `Kalem eklemek için önce başlıkta ${transferBaslikEksigi} seçin.`
+                    : 'Kalem yok — “＋” ile ekleyin.'}
                 </td></tr>
               )}
             </tbody>
