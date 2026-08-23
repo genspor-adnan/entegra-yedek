@@ -33,12 +33,22 @@ public sealed class AyarDeposu
     public static readonly IReadOnlyList<string> BeyazListe = new[]
     {
         "belge.geri_gun_siniri",
+        "liste.sayfa_boyu",
     };
 
     /// <summary>Ayar yoksa kullanilan degerler - DB'siz de dogru davranis.</summary>
     private static readonly Dictionary<string, int> Varsayilan = new()
     {
         ["belge.geri_gun_siniri"] = 7,
+        ["liste.sayfa_boyu"] = 50,
+    };
+
+    /// <summary>Sayisal ayarlarin kabul araligi (yoksa yalniz "0 veya buyuk" kurali).</summary>
+    private static readonly Dictionary<string, (int EnAz, int EnCok)> Aralik = new()
+    {
+        // Sunucu tek istekte 500'den fazlasini gondermiyor (ListeIstegi.EnBuyukBoyut);
+        //   10'un altinda sayfalama ekrani surekli istek atmaya cevirir.
+        ["liste.sayfa_boyu"] = (10, 500),
     };
 
     private static readonly Dictionary<string, (int Deger, DateTime Zaman)> Onbellek = new();
@@ -89,6 +99,13 @@ public sealed class AyarDeposu
             if (!int.TryParse(deger, out var sayi) || sayi < 0)
                 throw GentegreHatasi.Dogrulama("Değer 0 veya daha büyük bir tam sayı olmalı.",
                     new AlanHatasi("deger", "Geçersiz sayı."));
+
+            if (Aralik.TryGetValue(anahtar, out var sinir) &&
+                (sayi < sinir.EnAz || sayi > sinir.EnCok))
+                throw GentegreHatasi.Dogrulama(
+                    $"Değer {sinir.EnAz} ile {sinir.EnCok} arasında olmalı.",
+                    new AlanHatasi("deger", $"{sinir.EnAz}-{sinir.EnCok}"));
+
             deger = sayi.ToString();
         }
 

@@ -1,5 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/istemci';
+import { ayarSayi } from '../api/ayarlar';
 import { ApiHatasi, type KolonMeta, type Kosul, type ListeSatiri, type Siralama } from '../api/sozlesme';
 import { bicimle } from './bicim';
 import { GenKomutPaleti, GenSagTus, GenToolbar, hedefte, useAksiyonlar,
@@ -201,12 +202,18 @@ const GORUNUMLER: { v: 'liste' | 'grup' | 'analiz'; ik: string; ad: string }[] =
  * Kolonlar SUNUCUDAN gelir (/kolonlar): yetkisiz kolon listede hic donmedigi icin
  * arayuzde gizleme mantigi YOKTUR. Filtre, siralama ve sayfalama da sunucuda calisir.
  */
-export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, onSatirAc,
+export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSatirAc,
                           aksiyonEkrani, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
                           gizliKolonlar, altSecenekler, tarihAlani, tarihVarsayilan,
                           seciliBaslangicId, cipSonu, cipBaslangic,
                           onCipSecildi, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik }: Props) {
+  // Sayfa boyu: cagiran acikca verdiyse o, yoksa Genel Ayarlar'daki
+  //   `liste.sayfa_boyu` (varsayilan 50). Ayar gelene kadar 50 ile calisir.
+  const [ayarBoyut, setAyarBoyut] = useState(50);
+  const sayfaBoyu = boyut ?? ayarBoyut;
+  useEffect(() => { void ayarSayi('liste.sayfa_boyu', 50).then(setAyarBoyut) }, []);
+
   const [kolonlar, setKolonlar] = useState<KolonMeta[]>([]);
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [toplamKayit, setToplamKayit] = useState(0);
@@ -339,7 +346,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
         : { op: 'and' as const, kosullar: parcalar };
 
       const gorunum = aramaGorunumu === 'tum' ? undefined : aramaGorunumu;
-      const yanit = await api.liste(kaynak, { sayfa, boyut, sirala, filtre, toplam, gorunum });
+      const yanit = await api.liste(kaynak, { sayfa, boyut: sayfaBoyu, sirala, filtre, toplam, gorunum });
       setSatirlar(yanit.satirlar);
       setToplamKayit(yanit.toplamKayit);
       setToplamlar(yanit.toplamlar);
@@ -350,7 +357,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
     } finally {
       setYukleniyor(false);
     }
-  }, [kaynak, sayfa, boyut, sirala, toplam, sabitFiltre, aramaFiltresi, filtreSatiriFiltresi,
+  }, [kaynak, sayfa, sayfaBoyu, sirala, toplam, sabitFiltre, aramaFiltresi, filtreSatiriFiltresi,
       cipler, cipIndeks, kolonlar.length, aramaGorunumu, tarihAlani, tarihBas, tarihBit]);
 
   useEffect(() => { void yukle() }, [yukle]);
@@ -460,7 +467,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
     setSayfa(1);
   };
 
-  const sonSayfa = Math.max(1, Math.ceil(toplamKayit / boyut));
+  const sonSayfa = Math.max(1, Math.ceil(toplamKayit / sayfaBoyu));
   const siraIsareti = (ad: string) => {
     const s = sirala.find(x => x.alan === ad);
     return s ? (s.yon === 'asc' ? ' ↑' : ' ↓') : '';

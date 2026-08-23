@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { ApiHatasi, type AyarSatiri } from '../api/sozlesme';
 import { YardimIkonu } from '../bilesenler/YardimIkonu';
+import { ayarOnbellegiTemizle } from '../api/ayarlar';
 
 const SEKMELER = [
   { anahtar: 'genel', baslik: 'Genel' },
@@ -46,6 +47,7 @@ export function GenelAyarlar() {
 
     try {
       setAyarlar(await api.ayarYaz(anahtar, yeni.trim()));
+      ayarOnbellegiTemizle();       // acilacak ekranlar yeni degeri okusun
       setHata(null);
       setBilgi('Ayar kaydedildi.');
       setTimeout(() => setBilgi(null), 2500);
@@ -59,6 +61,7 @@ export function GenelAyarlar() {
   }
 
   const geriGun = deger('belge.geri_gun_siniri');
+  const sayfaBoyu = deger('liste.sayfa_boyu');
   const kayit = (anahtar: string) => ayarlar.find(a => a.anahtar === anahtar);
 
   return (
@@ -100,6 +103,26 @@ export function GenelAyarlar() {
                   <YardimIkonu anahtar="ayar.belge.geri_gun_siniri"
                                baslik={kayit('belge.geri_gun_siniri')?.yardimBaslik}
                                metin={kayit('belge.geri_gun_siniri')?.yardim} />
+                </span>
+              </label>
+            </div>
+          </div>
+        )}
+
+        {!yukleniyor && (
+          <div className="kagrup">
+            <h6>Listeler</h6>
+            <div className="alan-izgara tek-sutun ayar-formu">
+              <label className="alan">
+                <span className="etiket">Sayfa boyu (bir sayfadaki kayıt sayısı)</span>
+                <span className="ikili">
+                  <input className="hiza-sag" value={sayfaBoyu} inputMode="numeric"
+                         onChange={e => setTaslak(t => ({ ...t, 'liste.sayfa_boyu': e.target.value }))}
+                         onBlur={e => void yaz('liste.sayfa_boyu', e.target.value)}
+                         onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />
+                  <YardimIkonu anahtar="ayar.liste.sayfa_boyu"
+                               baslik={kayit('liste.sayfa_boyu')?.yardimBaslik}
+                               metin={kayit('liste.sayfa_boyu')?.yardim} />
                 </span>
               </label>
             </div>
