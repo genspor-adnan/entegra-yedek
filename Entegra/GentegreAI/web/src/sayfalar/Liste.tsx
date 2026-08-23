@@ -733,17 +733,6 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Stok', menuAd: 'Stok Listesi', ic: '📦', yetkiKodu: 'stok',
   },
   {
-    // DEPOLAR ARASI TRANSFER (tur 20): cari YOK, para YOK - tek satir cikis
-    //   deposundan duser, giris deposuna eklenir. Kart BelgeKarti'nin transfer
-    //   dalidir (fiyat/KDV/e-Belge sutunlari gizli).
-    // kartYolu YOK: kart generic GenForm degil BelgeKarti (modal) - onSatirAc
-    //   'stok-transfer' kaynagini da belge kartina yonlendirir.
-    kaynak: 'stok-transfer', baslik: 'Stok Transferleri',
-    yol: 'Stok › Stok Transfer', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 20,
-    cipler: [{ ad: 'Tumu' }],
-    menuGrup: 'Stok', menuAd: 'Stok Transfer', ic: '🔄', yetkiKodu: 'belge',
-  },
-  {
     // STOKTAN TALEP (tur 105): bir birim depodan mal ISTER. Stok ve cari
     //   ETKILEMEZ - asil hareketi, talep karsilaninca kesilen transfer yapar.
     //   Kart transferin kardesi: para yok, e-Belge yok; teslim eden yerine
@@ -756,6 +745,17 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tumu' },
     ],
     menuGrup: 'Stok', menuAd: 'Stoktan Talep', ic: '📥', yetkiKodu: 'belge',
+  },
+  {
+    // DEPOLAR ARASI TRANSFER (tur 20): cari YOK, para YOK - tek satir cikis
+    //   deposundan duser, giris deposuna eklenir. Kart BelgeKarti'nin transfer
+    //   dalidir (fiyat/KDV/e-Belge sutunlari gizli).
+    // kartYolu YOK: kart generic GenForm degil BelgeKarti (modal) - onSatirAc
+    //   'stok-transfer' kaynagini da belge kartina yonlendirir.
+    kaynak: 'stok-transfer', baslik: 'Stok Transferleri',
+    yol: 'Stok › Stok Transfer', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 20,
+    cipler: [{ ad: 'Tumu' }],
+    menuGrup: 'Stok', menuAd: 'Stok Transfer', ic: '🔄', yetkiKodu: 'belge',
   },
   {
     // GIRIS FISI (3) / CIKIS FISI (4): irsaliye gibi stok oynatan ama CARISIZ
