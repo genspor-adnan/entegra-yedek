@@ -7,7 +7,7 @@ import {
   type KasaIslemTuru, type KasaIslemYaniti, type KasaIslemYazmaIstegi, type FisOzeti,
   type AcikSatir,
   type YetkiSatiri, type YetkiSatiriIstegi, type DokumanSatiri,
-  type StokDurumYaniti, type StokHareketYaniti,
+  type StokDurumYaniti, type StokHareketYaniti, type AyarSatiri,
 } from './sozlesme';
 
 const TABAN = import.meta.env.VITE_API ?? 'http://localhost:5180';
@@ -261,6 +261,13 @@ export const api = {
                    minStok: number | null, maxStok: number | null) =>
     gonder<StokDurumYaniti>(`/api/kart/stok/${stokId}/durum/limit`,
                             { depoId, minStok, maxStok }, 'PUT'),
+
+  // ---------------------------------------------------------- ayarlar ----
+  ayarlar: () => istek<{ ayarlar: AyarSatiri[] }>('/api/ayar').then(y => y.ayarlar),
+
+  ayarYaz: (anahtar: string, deger: string) =>
+    gonder<{ ayarlar: AyarSatiri[] }>(`/api/ayar/${encodeURIComponent(anahtar)}`,
+                                      { deger }, 'PUT').then(y => y.ayarlar),
 
   // --------------------------------------------------------------- kasa ----
   kasaIslemTurleri: () =>

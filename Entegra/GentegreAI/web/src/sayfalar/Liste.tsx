@@ -848,6 +848,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Yönetim', menuAd: 'Roller', ic: '🛡️', yetkiKodu: 'rol',
   },
   {
+    // Firma geneli DAVRANIS ayarlari (public.referans). Liste degil (ozelSayfa).
+    kaynak: 'genel-ayarlar', baslik: 'Genel Ayarlar', yol: 'Yonetim › Ayarlar › Genel',
+    ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Genel',
+    ic: '⚙️', yetkiKodu: 'ayar',
+  },
+  {
     // Sekmeli AYAR ekrani - liste degil (ozelSayfa): Genel + Depolar. Menude
     //   Yönetim grubunun altinda "Ayarlar" alt basligiyla toplanir.
     kaynak: 'stok-ayarlar', baslik: 'Stok Ayarları', yol: 'Yonetim › Ayarlar › Stok Ayarlari',

@@ -46,10 +46,12 @@ const YEREL_PARA = 'TL';
 
 /**
  * Belge tarihi penceresi (GENEL KURAL, tum belge turleri): ileri tarih YOK,
- * 7 gunden eski YOK. Sunucu da ayni kurali uygular (BelgeDeposu.BelgeTarihiKontrol) -
+ * N gunden eski YOK. N = Yönetim › Ayarlar › Genel'deki "geriye dönük gün"
+ * (db/102, varsayilan 7; 0 = sinir yok). Ayar yuklenene kadar bu varsayilan
+ * kullanilir. Sunucu da ayni kurali uygular (BelgeDeposu.BelgeTarihiKontrolAsync) -
  * buradaki sinirlar yalniz kullaniciyi erken uyarmak icindir.
  */
-const GERIYE_GUN_SINIRI = 7;
+const GERIYE_GUN_VARSAYILAN = 7;
 
 /** datetime-local kutusunun bekledigi YEREL "YYYY-MM-DDTHH:mm" (UTC'ye kaymaz). */
 const yerelAnMetni = (d: Date) => {
@@ -266,10 +268,23 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   });
   const [turler, setTurler] = useState<KasaIslemTuru[]>([]);
 
+  // Tarih penceresi ayardan gelir; ulasilamazsa varsayilan (7) ile devam edilir -
+  //   sunucu zaten ayni kurali uyguluyor, buradaki sinir sadece erken uyari.
+  useEffect(() => {
+    void api.ayarlar()
+      .then(a => {
+        const s = a.find(x => x.anahtar === 'belge.geri_gun_siniri')?.deger;
+        if (s !== undefined && s !== '' && Number.isFinite(Number(s))) setGeriGun(Number(s));
+      })
+      .catch(() => { /* varsayilan kalir */ });
+  }, []);
+
   const [cari, setCari] = useState<{ id: number; unvan: string } | null>(null);
   // Tarih SAATIYLE tutulur: ayni gun icindeki hareket sirasi buna gore.
   const [tarih, setTarih] = useState(() => yerelAnMetni(new Date()));
   const [seri, setSeri] = useState('WEB');
+  /** Ayardan gelen geriye donuk gun siniri (0 = sinir yok). */
+  const [geriGun, setGeriGun] = useState(GERIYE_GUN_VARSAYILAN);
   /** Yalniz dis numarali turde (alis faturasi) kullanilir - tedarikcinin no'su. */
   const [belgeNo, setBelgeNo] = useState('');
   const [vadeGun, setVadeGun] = useState('30');
@@ -419,8 +434,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   /** Kutunun izin verdigi araligin iki ucu - her render'da "simdi"ye gore. */
   const tarihEnGec = yerelAnMetni(new Date());
   const tarihEnErken = (() => {
+    if (geriGun <= 0) return undefined;              // sinir yok
     const d = new Date();
-    d.setDate(d.getDate() - GERIYE_GUN_SINIRI);
+    d.setDate(d.getDate() - geriGun);
     d.setHours(0, 0, 0, 0);
     return yerelAnMetni(d);
   })();
@@ -623,8 +639,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     if (tarih > tarihEnGec) {
       setAlanHatalari({ belgeTarihi: 'Belge ileri tarihli olamaz.' }); return;
     }
-    if (tarih < tarihEnErken) {
-      setAlanHatalari({ belgeTarihi: `Belge tarihi ${GERIYE_GUN_SINIRI} günden eski olamaz.` }); return;
+    if (tarihEnErken && tarih < tarihEnErken) {
+      setAlanHatalari({ belgeTarihi: `Belge tarihi ${geriGun} günden eski olamaz.` }); return;
     }
     if (talepMi) {
       if (!depo) { setAlanHatalari({ cikisDepoId: 'İstenen depo seçilmeli.' }); return }

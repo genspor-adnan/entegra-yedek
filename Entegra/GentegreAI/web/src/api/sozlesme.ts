@@ -442,3 +442,11 @@ export interface StokHareketYaniti {
   satirlar: StokHareketSatiri[];
   birim: string;
 }
+
+/** Genel Ayarlar satiri (public.referans, sunucuda beyaz listeli). */
+export interface AyarSatiri {
+  anahtar: string;
+  deger: string;
+  tip: string;
+  aciklama: string;
+}

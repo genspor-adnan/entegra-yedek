@@ -6,6 +6,7 @@ import { BelgeKarti } from './sayfalar/BelgeKarti';
 import { KasaIslemKarti } from './sayfalar/KasaIslemKarti';
 import { Liste, LISTELER } from './sayfalar/Liste';
 import { StokAyarlar } from './sayfalar/StokAyarlar';
+import { GenelAyarlar } from './sayfalar/GenelAyarlar';
 
 function Yollar() {
   const { kullanici, yukleniyor, yetki } = useOturum();
@@ -43,6 +44,7 @@ function Yollar() {
         <Route path="/kasa-islem/:id" element={<KasaIslemKarti />} />
 
         {/* Ayar ekranlari liste degil (ozelSayfa) - rotalari burada. */}
+        {yetki('ayar') && <Route path="/genel-ayarlar" element={<GenelAyarlar />} />}
         {yetki('stok') && <Route path="/stok-ayarlar" element={<StokAyarlar />} />}
 
         <Route path="*" element={<Navigate to={ilk ? `/${ilk.rota ?? ilk.kaynak}` : '/cari'} replace />} />

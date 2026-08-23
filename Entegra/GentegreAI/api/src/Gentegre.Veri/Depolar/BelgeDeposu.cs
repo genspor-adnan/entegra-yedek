@@ -181,7 +181,7 @@ public sealed class BelgeDeposu
         //   gecmise donuk degistirilirse kapanmis gunun raporu tutmaz; ileri tarih
         //   ise e-Belge'de GIB tarafindan zaten reddedilir.
         //   Saat de tasinir: ayni gun icindeki hareket sirasi (stok dokumu) buna gore.
-        BelgeTarihiKontrol(belge);
+        await BelgeTarihiKontrolAsync(baglanti, islem, belge, iptal);
 
         // ---------------------------------------------- 1) taraf bilgisini DONDUR ----
         // Belge, kartin O ANDAKI halini tasir: kart sonradan degisse de belge degismez.
@@ -583,10 +583,15 @@ public sealed class BelgeDeposu
         NpgsqlTransaction islem, int tur, CancellationToken iptal)
         => (await TurEtkileriAsync(baglanti, islem, tur, iptal)).Stok;
 
-    /// <summary>Belge tarihi penceresi: bugunden ileri YOK, 7 gunden eski YOK.</summary>
-    private const int GeriyeGunSiniri = 7;
-
-    private static void BelgeTarihiKontrol(IDictionary<string, object?> belge)
+    /// <summary>
+    /// Belge tarihi penceresi: bugunden ileri YOK, N gunden eski YOK.
+    /// N = Genel Ayarlar'daki `belge.geri_gun_siniri` (db/102, varsayilan 7).
+    /// 0 girilirse geriye donuk sinir KAPANIR - ileri tarih yasagi ayarla
+    /// kapatilamaz, onu GIB zaten reddeder.
+    /// </summary>
+    private static async Task BelgeTarihiKontrolAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        IDictionary<string, object?> belge, CancellationToken iptal)
     {
         if (!belge.TryGetValue("belgeTarihi", out var ham) || ham is null) return;
         if (ham is not DateTime tarih)
@@ -603,10 +608,13 @@ public sealed class BelgeDeposu
             throw GentegreHatasi.Dogrulama("Belge tarihi ileri tarihli olamaz.",
                 new AlanHatasi("belgeTarihi", $"En fazla {simdi:dd.MM.yyyy HH:mm} olabilir."));
 
-        var enEski = simdi.Date.AddDays(-GeriyeGunSiniri);
+        var geriGun = await AyarDeposu.SayiAsync(baglanti, islem, "belge.geri_gun_siniri", iptal);
+        if (geriGun <= 0) return;                       // 0 = geriye donuk sinir yok
+
+        var enEski = simdi.Date.AddDays(-geriGun);
         if (tarih < enEski)
             throw GentegreHatasi.Dogrulama(
-                $"Belge tarihi {GeriyeGunSiniri} günden eski olamaz.",
+                $"Belge tarihi {geriGun} günden eski olamaz.",
                 new AlanHatasi("belgeTarihi", $"En erken {enEski:dd.MM.yyyy} olabilir."));
     }
 
