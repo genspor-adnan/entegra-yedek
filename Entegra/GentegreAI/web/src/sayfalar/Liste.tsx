@@ -266,7 +266,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       onSatirAc={satir => {
         // Belge listelerinde kart MODAL acilir (rota yok); digerlerinde kartYolu.
         if (tanim.kaynak === 'belge' || tanim.kaynak === 'irsaliye'
-            || tanim.kaynak === 'stok-transfer' || tanim.kaynak === 'stok-talep')
+            || tanim.kaynak === 'stok-transfer' || tanim.kaynak === 'stok-talep'
+            || tanim.kaynak === 'giris-fis' || tanim.kaynak === 'cikis-fis')
           setAcikBelgeId(Number(satir.id));
         else if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`);
       }}
@@ -755,6 +756,32 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tumu' },
     ],
     menuGrup: 'Stok', menuAd: 'Stoktan Talep', ic: '📥', yetkiKodu: 'belge',
+  },
+  {
+    // GIRIS FISI (3) / CIKIS FISI (4): irsaliye gibi stok oynatan ama CARISIZ
+    //   belgeler - fire, sarf, imha, sayim farki. Muhasebe fisi URETIRLER
+    //   (kasa_islem_turu.fis_mi=1, F7'de baglanacak). TIPI fisin sebebidir.
+    kaynak: 'giris-fis', baslik: 'Giriş Fişleri', yol: 'Stok › Giriş Fişi',
+    aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 3,
+    toplam: ['genelToplam'],
+    cipler: [
+      { ad: 'Tumu' },
+      { ad: 'Fire',          filtre: { alan: 'tipi', op: 'esit', deger: 1 } },
+      { ad: 'Sayım Fazlası', filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
+    ],
+    menuGrup: 'Stok', menuAd: 'Giriş Fişi', ic: '📗', yetkiKodu: 'belge',
+  },
+  {
+    kaynak: 'cikis-fis', baslik: 'Çıkış Fişleri', yol: 'Stok › Çıkış Fişi',
+    aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 4,
+    toplam: ['genelToplam'],
+    cipler: [
+      { ad: 'Tumu' },
+      { ad: 'Sarf',         filtre: { alan: 'tipi', op: 'esit', deger: 1 } },
+      { ad: 'İmha',         filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
+      { ad: 'Sayım Eksiği', filtre: { alan: 'tipi', op: 'esit', deger: 5 } },
+    ],
+    menuGrup: 'Stok', menuAd: 'Çıkış Fişi', ic: '📕', yetkiKodu: 'belge',
   },
   {
     // Kullanici: "İK altına Personel Listesi taşı" - tek ogeli grup, digerleriyle ayni desen.

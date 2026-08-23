@@ -93,6 +93,8 @@ public static class KaynakKatalogu
         Ekle(Irsaliye());
         Ekle(StokTransfer());
         Ekle(StokTalep());
+        Ekle(StokFisi(3));
+        Ekle(StokFisi(4));
     }
 
     private static void Ekle(KaynakTanimi k) => Kaynaklar[k.Ad] = k;
@@ -999,6 +1001,59 @@ public static class KaynakKatalogu
             new("durum",       "b.durum",        "sayi",  "Durum Kodu", Hizalama: "orta", Varsayilan: false),
             new("subeId",      "b.sube_id",      "sayi",  "Şube", Varsayilan: false)
         });
+
+    // -------------------------------------------------------- stok fisleri ----
+    // 3 Giris Fisi / 4 Cikis Fisi (101). Irsaliye gibi ama CARI YOK; TIPI fisin
+    //   sebebini tasir ve listede METNE cevrilir (liste katmani kod cozmez).
+    private static KaynakTanimi StokFisi(int tur)
+    {
+        var giris = tur == 3;
+        // Tip adlari 101'deki kod_deger ile ayni; liste katmani kod_liste'ye
+        //   join atmaz (tek satirlik CASE hem daha hizli hem tek sorgu).
+        var tipIfade = giris
+            ? "case b.tipi when 1 then 'Fire' when 2 then 'Sayım Fazlası' else 'Diğer' end"
+            : "case b.tipi when 1 then 'Sarf' when 2 then 'İmha (Bozuk / SKT Geçmiş)' " +
+              "when 3 then 'Kayıp' when 4 then 'Fire' when 5 then 'Sayım Eksiği' else 'Diğer' end";
+
+        return new KaynakTanimi(
+            Ad: giris ? "giris-fis" : "cikis-fis",
+            YetkiKodu: "belge",
+            Kaynak: """
+                public.belge b
+                left join public.depo d on d.id = coalesce(b.giris_depo_id, b.cikis_depo_id)
+                left join public.taraf sc on sc.id = b.satici_id and b.satici_id > 0
+                """,
+            SabitKosul: $"b.tur = {tur}",
+            SubeKolonu: "b.sube_id",
+            VarsayilanSirala: "b.belge_tarihi desc, b.id desc",
+            Kolonlar: new KolonTanimi[]
+            {
+                new("id",          "b.id",           "sayi",  "Id", Varsayilan: false),
+                new("belgeNo",     "b.belge_no",     "metin", "Fiş No"),
+                new("belgeTarihi", "b.belge_tarihi", "tarih", "Tarih", Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+                new("tipAdi",      tipIfade,         "metin", "Tipi", Hizalama: "orta", Genislik: 170),
+                // Ham kod cip filtreleri icin gizli durur.
+                new("tipi",        "b.tipi",         "sayi",  "Tip Kodu", Hizalama: "orta", Varsayilan: false),
+                new("depo",        "coalesce(d.ad, '')", "metin", giris ? "Giriş Deposu" : "Çıkış Deposu",
+                                                      Genislik: 180),
+                new("sorumlu",     "coalesce(sc.unvan, '')", "metin", "Sorumlu", Genislik: 180),
+                new("kalemSayisi",
+                    "(select count(*) from public.belge_satir s where s.belge_id = b.id)",
+                                                      "sayi",  "Kalem", Hizalama: "sag",
+                                                      Siralanabilir: false, Filtrelenebilir: false),
+                new("miktar",
+                    "(select coalesce(sum(s.miktar), 0) from public.belge_satir s where s.belge_id = b.id)",
+                                                      "para",  "Miktar", Hizalama: "sag", Bicim: "#,##0.##",
+                                                      Siralanabilir: false, Filtrelenebilir: false),
+                // Tutar muhasebe fisinin (F7) matrahi - fiste KDV yok.
+                new("genelToplam", "b.genel_toplam", "para",  "Tutar", Hizalama: "sag", Bicim: "#,##0.00"),
+                new("aciklama",    "coalesce(b.aciklama, '')", "metin", "Açıklama", Genislik: 240),
+                new("durumAdi",    "case b.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end",
+                                                      "metin", "Durum", Hizalama: "orta"),
+                new("durum",       "b.durum",        "sayi",  "Durum Kodu", Hizalama: "orta", Varsayilan: false),
+                new("subeId",      "b.sube_id",      "sayi",  "Şube", Varsayilan: false)
+            });
+    }
 
     // ---------------------------------------------------------- irsaliye ----
     // Ekranlar/satis_irsaliye_listesi.html kolonlariyla BIREBIR. Ayni `belge`

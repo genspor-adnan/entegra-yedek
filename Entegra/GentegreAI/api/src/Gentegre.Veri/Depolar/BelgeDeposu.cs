@@ -29,8 +29,12 @@ public sealed class BelgeDeposu
         _log = log;
     }
 
-    /// <summary>Satis belgeleri (giden): cari BORCLANIR. Alis (gelen): cari ALACAKLANIR.</summary>
-    private static bool SatisMi(int tur) => tur is 14 or 15 or 16 or 119 or 29 or 105 or 133;
+    /// <summary>
+    /// Stok CIKISI yonundeki belgeler. Cari tarafi olanlarda ayni zamanda
+    /// "satis" demektir (cari BORCLANIR); cikis fisinde (4) cari yoktur, yalniz
+    /// stok yonunu belirler. Alis/giris belgelerinde tam tersi.
+    /// </summary>
+    private static bool SatisMi(int tur) => tur is 14 or 15 or 16 or 119 or 29 or 105 or 133 or 4;
 
     /// <summary>
     /// Depolar arasi transfer (tur 20): TEK satir IKI depoyu birden oynatir -
@@ -44,6 +48,15 @@ public sealed class BelgeDeposu
     /// Zorunlusu: istenen depo + talep eden kisi.
     /// </summary>
     private static bool TalepMi(int tur) => tur == 105;
+
+    /// <summary>
+    /// Stok fisleri: 3 giris / 4 cikis. Irsaliye gibi calisir (stok oynar,
+    /// miktar + birim fiyat girilir) ama CARI YOKTUR - karsilik gider/gelir
+    /// hesabidir, o yuzden muhasebe fisi uretirler (fis_mi=1).
+    /// TIPI fisin sebebini tasir (fire/sarf/imha/sayim...) ve zorunludur:
+    /// muhasebe hesabi ona gore secilecek (F7).
+    /// </summary>
+    private static bool StokFisiMi(int tur) => tur is 3 or 4;
 
     /// <summary>
     /// Numarasi BIZDE degil, KARSI TARAFTA uretilen belge turleri. Alis faturasinin
@@ -127,6 +140,18 @@ public sealed class BelgeDeposu
         // Transferde SORUMLULUK DEVRI kayda gecer: mali kim verdi, kim aldi.
         //   Iki depo arasinda kaybolan malin hesabi bu iki isimden sorulur -
         //   bu yuzden ikisi de zorunlu ve birbirinden farkli olmali.
+        if (StokFisiMi(tur))
+        {
+            if (Sayi(belge, "tipi") <= 0)
+                throw GentegreHatasi.Dogrulama("Fiş tipi seçilmeli.",
+                    new AlanHatasi("tipi", "Zorunlu."));
+
+            var depoAlani = SatisMi(tur) ? "cikisDepoId" : "girisDepoId";
+            if (Sayi(belge, depoAlani) <= 0)
+                throw GentegreHatasi.Dogrulama("Depo seçilmeli.",
+                    new AlanHatasi(depoAlani, "Zorunlu."));
+        }
+
         if (TalepMi(tur))
         {
             if (Sayi(belge, "cikisDepoId") <= 0)
