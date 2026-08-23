@@ -454,6 +454,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   },
   {
     kaynak: 'cek-senet', baslik: 'Çek / Senet', yol: 'Kasa › Cek ve Senet', kartYolu: '/cek-senet',
+    aksiyonEkrani: 'cek-senet-liste',
     toplam: ['tutar'],
     cipler: [
       { ad: 'Portföy', filtre: { alan: 'durum', op: 'esit', deger: 10 } },

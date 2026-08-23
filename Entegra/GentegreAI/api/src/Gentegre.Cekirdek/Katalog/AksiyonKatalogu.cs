@@ -110,6 +110,21 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            // Cek / Senet portfoyu. Cek uzerindeki ISLEMLER (tahsil/ciro/bozdurma)
+            //   kasa turleriyle yapilir - Kasa planinin F5 fazinda baglanacak;
+            //   burada simdilik kart islemleri var.
+            ["cek-senet-liste"] = new AksiyonTanimi[]
+            {
+                new("cek-senet.yeni",    "＋ Ekle",     "cek-senet", Kisayol: "Ctrl+N",
+                    KaynakKodu: "cek_senet", Islem: Islem.Ekle, Sira: 10),
+                new("cek-senet.duzenle", "✎ Düzenle",   "cek-senet", Kisayol: "Enter",
+                    KaynakKodu: "cek_senet", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("cek-senet.sil",     "🗑 Sil",      "cek-senet", Kisayol: "Del",
+                    KaynakKodu: "cek_senet", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+                new("genel.yazdir",      "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             // Stok Ayarlari > Depolar sekmesi.
             ["depo-liste"] = new AksiyonTanimi[]
             {
