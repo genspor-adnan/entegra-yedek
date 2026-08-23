@@ -18,6 +18,11 @@ public sealed class ParolaDegistirIstegi
     public string YeniParola { get; set; } = "";
 }
 
+public sealed class DilDegistirIstegi
+{
+    public int Dil { get; set; }
+}
+
 public sealed class GirisYaniti
 {
     public string AccessToken { get; set; } = "";
@@ -46,6 +51,7 @@ public sealed class KullaniciOzeti
     public string Ad { get; set; } = "";
     public int RolId { get; set; }
     public string RolAdi { get; set; } = "";
+    public int Dil { get; set; }
     public long YetkiSurumu { get; set; }
     public int? SubeId { get; set; }
     /// <summary>Aktif subede yazma hakki (kullanici_sube.yazma). 0 ise salt okuma.</summary>

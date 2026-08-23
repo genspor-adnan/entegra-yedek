@@ -6,6 +6,7 @@ import { api } from '../api/istemci';
 import { ApiHatasi } from '../api/sozlesme';
 
 interface Props {
+  kartAdi?: string;
   vknoAlan: KartAlanMeta;
   vkno: string;
   onVknoDegis(v: string): void;
@@ -17,11 +18,16 @@ interface Props {
   saltOkunur: boolean;
   onOzlukDegis(yeni: DetayDurumu): void;
   egitimler?: ReactNode;
-  /** Yeni kayıtta henüz yok (kart kaydedilmeden dosya yüklenemez) - Fotoğraf kutusu o zaman tıklanamaz. */
+  fotoSolEk?: ReactNode;
+  fotoSolEkOnce?: boolean;
+  ozetGizli?: boolean;
+  vknoGizli?: boolean;
+  kimlikSutunGenisligi?: string;
+  /** Yeni kayıtta henüz yok; kart kaydedilmeden dosya yüklenemez. */
   kaynakId?: number;
 }
 
-/** "01.09.2019" -> "6 yıl 11 ay" (ik_karti.html mockup "Kıdem" - hesaplanan, saklanmaz). */
+/** "01.09.2019" -> "6 yıl 11 ay" */
 function kidemHesapla(tarihStr: string): string | null {
   if (!tarihStr) return null;
   const giris = new Date(tarihStr);
@@ -35,7 +41,7 @@ function kidemHesapla(tarihStr: string): string | null {
   return yil > 0 ? `${yil} yıl ${kalanAy} ay` : `${kalanAy} ay`;
 }
 
-/** "14.06.1992" -> "33 yaş" (ik_karti.html mockup Doğum Tarihi yanındaki yaş rozeti). */
+/** "14.06.1992" -> "33 yaş" */
 function yasHesapla(tarihStr: string): string | null {
   const dogum = new Date(tarihStr);
   if (!tarihStr || Number.isNaN(dogum.getTime())) return null;
@@ -47,14 +53,13 @@ function yasHesapla(tarihStr: string): string | null {
 }
 
 /**
- * Personel kartı Genel sekmesi "Kimlik Bilgileri" + "Özet" kutuları (ik_karti.html
- * mockup) - İKİ FARKLI veri kaynağını birleştirir: TCKN/Görev taraf'ın kendi alanları,
- * geri kalanı personel_ozluk (1:1) detayı - bu yüzden TekAdres/TekOzluk gibi tek bir
- * detay'a bağlı değil, özel props alıyor.
+ * Personel/Hasta kartı Genel sekmesi kimlik özeti. TCKN/Görev taraf alanlarından,
+ * diğer kimlik alanları 1:1 detay kaydından gelir.
  */
 export function PersonelKimlikOzet({
-  vknoAlan, vkno, onVknoDegis, gorevAlan, gorev, onGorevDegis,
-  ozlukMeta, ozlukDurum, saltOkunur, onOzlukDegis, egitimler, kaynakId,
+  kartAdi = 'personel', vknoAlan, vkno, onVknoDegis, gorevAlan, gorev, onGorevDegis,
+  ozlukMeta, ozlukDurum, saltOkunur, onOzlukDegis, egitimler, fotoSolEk, ozetGizli,
+  vknoGizli, kimlikSutunGenisligi, kaynakId, fotoSolEkOnce = false,
 }: Props) {
   const yerler = useYerler(true);
   const [resimUrl, setResimUrl] = useState<string | null>(null);
@@ -65,7 +70,7 @@ export function PersonelKimlikOzet({
   useEffect(() => {
     if (!kaynakId) { setResimUrl(null); return }
     let iptal = false;
-    api.dokumanlar('personel', kaynakId)
+    api.dokumanlar(kartAdi, kaynakId)
       .then(satirlar => {
         const varsayilan = satirlar.find(s => s.varsayilan && s.contentType.startsWith('image/'));
         if (!varsayilan) return;
@@ -73,7 +78,7 @@ export function PersonelKimlikOzet({
       })
       .catch(() => { /* fotoğraf yoksa placeholder kalır */ });
     return () => { iptal = true };
-  }, [kaynakId]);
+  }, [kaynakId, kartAdi]);
 
   const resimSecildi = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const dosya = e.target.files?.[0];
@@ -82,7 +87,7 @@ export function PersonelKimlikOzet({
     setResimYukleniyor(true);
     setResimHata(null);
     try {
-      const satirlar = await api.dokumanYukle('personel', kaynakId, dosya, true);
+      const satirlar = await api.dokumanYukle(kartAdi, kaynakId, dosya, true);
       const varsayilan = satirlar.find(s => s.varsayilan && s.contentType.startsWith('image/'));
       if (varsayilan) setResimUrl(await api.dokumanIcerikUrl(varsayilan.id));
     } catch (h) {
@@ -91,8 +96,7 @@ export function PersonelKimlikOzet({
       setResimYukleniyor(false);
     }
   };
-  // Uyruk default TC - satira gercekten yaziliyor (TekAdres/TekOzluk'taki ayni bug-fix
-  // deseni), gorunumde degil.
+
   const satir: Satir = { uyruk: VARSAYILAN_ULKE, ...(ozlukDurum.guncel[0] ?? {}) };
 
   const ozlukDegis = (degisiklik: Record<string, unknown>) => {
@@ -105,21 +109,25 @@ export function PersonelKimlikOzet({
   const cinsiyetAlan = alan('cinsiyet');
   const medeniHalAlan = alan('medeniHal');
   const kanGrubuAlan = alan('kanGrubu');
+  const meslekAlan = alan('meslek');
 
   const kidem = kidemHesapla(String(satir.iseGirisTarihi ?? ''));
   const yas = yasHesapla(String(satir.dogumTarihi ?? ''));
 
   return (
     <div className="kasira">
-      <div className="kasutun" style={{ flex: 1 }}>
+      {fotoSolEkOnce && fotoSolEk}
+      <div className="kasutun" style={{ flex: kimlikSutunGenisligi ? `0 0 ${kimlikSutunGenisligi}` : 1 }}>
         <div className="kagrup">
           <h6>Kimlik Bilgileri</h6>
           <div className="alan-izgara tek-sutun">
-            <label className="alan tip-metin">
-              <span className="etiket">{vknoAlan.baslik}{vknoAlan.zorunlu && ' *'}</span>
-              <input value={vkno} maxLength={vknoAlan.enFazlaUzunluk ?? undefined} disabled={saltOkunur}
-                onChange={e => onVknoDegis(e.target.value)} />
-            </label>
+            {!vknoGizli && (
+              <label className="alan tip-metin">
+                <span className="etiket">{vknoAlan.baslik}{vknoAlan.zorunlu && ' *'}</span>
+                <input value={vkno} maxLength={vknoAlan.enFazlaUzunluk ?? undefined} disabled={saltOkunur}
+                  onChange={e => onVknoDegis(e.target.value)} />
+              </label>
+            )}
             <div className="adres-satir">
               <label className="alan tip-tarih">
                 <span className="etiket">Doğum Tarihi *</span>
@@ -140,18 +148,30 @@ export function PersonelKimlikOzet({
                 <span className="etiket">Cinsiyet</span>
                 <select value={String(satir.cinsiyet ?? '')} disabled={saltOkunur}
                   onChange={e => ozlukDegis({ cinsiyet: e.target.value })}>
-                  <option value="">—</option>
+                  <option value="">-</option>
                   {cinsiyetAlan?.kodlar && Object.entries(cinsiyetAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </select>
               </label>
-              <label className="alan tip-kod">
-                <span className="etiket">Medeni Hal</span>
-                <select value={String(satir.medeniHal ?? '')} disabled={saltOkunur}
-                  onChange={e => ozlukDegis({ medeniHal: e.target.value })}>
-                  <option value="">—</option>
-                  {medeniHalAlan?.kodlar && Object.entries(medeniHalAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                </select>
-              </label>
+              {meslekAlan && (
+                <label className="alan tip-kod">
+                  <span className="etiket">Meslek</span>
+                  <select value={String(satir.meslek ?? '')} disabled={saltOkunur}
+                    onChange={e => ozlukDegis({ meslek: e.target.value })}>
+                    <option value="">-</option>
+                    {meslekAlan.kodlar && Object.entries(meslekAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  </select>
+                </label>
+              )}
+              {medeniHalAlan && (
+                <label className="alan tip-kod">
+                  <span className="etiket">Medeni Hal</span>
+                  <select value={String(satir.medeniHal ?? '')} disabled={saltOkunur}
+                    onChange={e => ozlukDegis({ medeniHal: e.target.value })}>
+                    <option value="">-</option>
+                    {medeniHalAlan.kodlar && Object.entries(medeniHalAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  </select>
+                </label>
+              )}
             </div>
             <div className="adres-satir">
               <label className="alan tip-kod">
@@ -165,7 +185,7 @@ export function PersonelKimlikOzet({
                 <span className="etiket">Kan Grubu</span>
                 <select value={String(satir.kanGrubu ?? '')} disabled={saltOkunur}
                   onChange={e => ozlukDegis({ kanGrubu: e.target.value })}>
-                  <option value="">—</option>
+                  <option value="">-</option>
                   {kanGrubuAlan?.kodlar && Object.entries(kanGrubuAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </select>
               </label>
@@ -174,9 +194,8 @@ export function PersonelKimlikOzet({
         </div>
         {egitimler}
       </div>
-      {/* ik_karti.html mockup: dar sag sutunda Fotoğraf (ustte) + Özet (altta) ust uste -
-          Cari'nin Iletisim/Notlar kasutun'uyla AYNI desen. */}
-      <div className="kasutun" style={{ flex: '0 0 240px' }}>
+      {!fotoSolEkOnce && fotoSolEk}
+      <div className="kasutun" style={{ flex: '0 0 150px' }}>
         <div className="kagrup kagrup-resim">
           <h6>Fotoğraf</h6>
           {!saltOkunur && kaynakId && (
@@ -190,34 +209,36 @@ export function PersonelKimlikOzet({
             onClick={() => { if (!saltOkunur && kaynakId) resimGirdiRef.current?.click() }}
           >
             {resimYukleniyor
-              ? '…'
+              ? '...'
               : resimUrl
-                ? <img src={resimUrl} alt="Fotoğraf" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : '🖼️'}
+                ? <img src={resimUrl} alt="Fotoğraf" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                : 'Resim'}
           </div>
           {resimHata && <div className="alan-hata" style={{ margin: '4px 10px 0' }}>{resimHata}</div>}
         </div>
-        <div className="kagrup">
-          <h6>Özet</h6>
-          <div className="alan-izgara tek-sutun">
-            <label className="alan tip-metin">
-              <span className="etiket">{gorevAlan.baslik}</span>
-              <input value={gorev} maxLength={gorevAlan.enFazlaUzunluk ?? undefined} disabled={saltOkunur}
-                onChange={e => onGorevDegis(e.target.value)} />
-            </label>
-            <label className="alan tip-tarih">
-              <span className="etiket">İşe Giriş</span>
-              <input type="date" value={String(satir.iseGirisTarihi ?? '')} disabled={saltOkunur}
-                onChange={e => ozlukDegis({ iseGirisTarihi: e.target.value })} />
-            </label>
-            {kidem && (
+        {!ozetGizli && (
+          <div className="kagrup">
+            <h6>Özet</h6>
+            <div className="alan-izgara tek-sutun">
               <label className="alan tip-metin">
-                <span className="etiket">Kıdem</span>
-                <input value={kidem} disabled readOnly />
+                <span className="etiket">{gorevAlan.baslik}</span>
+                <input value={gorev} maxLength={gorevAlan.enFazlaUzunluk ?? undefined} disabled={saltOkunur}
+                  onChange={e => onGorevDegis(e.target.value)} />
               </label>
-            )}
+              <label className="alan tip-tarih">
+                <span className="etiket">İşe Giriş</span>
+                <input type="date" value={String(satir.iseGirisTarihi ?? '')} disabled={saltOkunur}
+                  onChange={e => ozlukDegis({ iseGirisTarihi: e.target.value })} />
+              </label>
+              {kidem && (
+                <label className="alan tip-metin">
+                  <span className="etiket">Kıdem</span>
+                  <input value={kidem} disabled readOnly />
+                </label>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

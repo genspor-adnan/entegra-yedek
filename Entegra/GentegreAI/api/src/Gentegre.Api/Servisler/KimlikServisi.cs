@@ -188,6 +188,16 @@ public sealed class KimlikServisi
         await _oturumlar.KullaniciOturumlariniKapatAsync(kullaniciId, "parola_degisti", iptal);
     }
 
+    public async Task DilDegistirAsync(int kullaniciId, DilDegistirIstegi istek,
+                                       CancellationToken iptal = default)
+    {
+        if (istek.Dil is < 0 or > 2)
+            throw GentegreHatasi.Dogrulama("Dil secimi gecersiz.",
+                new AlanHatasi("dil", "Gecerli bir dil secin."));
+
+        await _kullanicilar.DilAtaAsync(kullaniciId, (short)istek.Dil, iptal);
+    }
+
     // ------------------------------------------------------------------ ic ----
     private async Task<GirisYaniti> TokenUretAsync(KullaniciKaydi kullanici,
         IReadOnlyList<SubeOzeti> subeler, int? subeId, Guid? aileId, long? oncekiId,
@@ -224,6 +234,7 @@ public sealed class KimlikServisi
         Ad = kullanici.Ad,
         RolId = kullanici.RolId,
         RolAdi = kullanici.RolAdi,
+        Dil = kullanici.Dil,
         YetkiSurumu = kullanici.YetkiSurumu,
         SubeId = subeId,
         SubeYazma = subeId is null || subeler.FirstOrDefault(s => s.Id == subeId)?.Yazma != false,

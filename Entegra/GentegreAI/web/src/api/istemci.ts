@@ -7,6 +7,7 @@ import {
   type KasaIslemTuru, type KasaIslemYaniti, type KasaIslemYazmaIstegi, type FisOzeti,
   type AcikSatir,
   type YetkiSatiri, type YetkiSatiriIstegi, type DokumanSatiri,
+  type StokDurumYaniti, type StokHareketYaniti,
 } from './sozlesme';
 
 const TABAN = import.meta.env.VITE_API ?? 'http://localhost:5180';
@@ -244,6 +245,22 @@ export const api = {
                   belgeTarihi?: string, taslak = false, belgeNo?: string) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/donustur`,
                         { hedefTur, satirlar, belgeTarihi, taslak, belgeNo }),
+
+  // ------------------------------------------ stok karti: Stok Durumu ----
+  /** Depo bazli miktar/rezerve/kullanilabilir + KPI seridi (salt okunur). */
+  stokDurum: (stokId: number) =>
+    istek<StokDurumYaniti>(`/api/kart/stok/${stokId}/durum`),
+
+  /** Hareket dokumu: tarih araligi + depo suzgeci, yurumeli kalan. */
+  stokHareket: (stokId: number, bas: string, bit: string, depoId?: number | null) =>
+    istek<StokHareketYaniti>(`/api/kart/stok/${stokId}/hareket?bas=${bas}&bit=${bit}`
+      + (depoId ? `&depoId=${depoId}` : '')),
+
+  /** Depo bazli min/max seviye (099). Miktarlara DOKUNMAZ. */
+  stokDurumLimit: (stokId: number, depoId: number,
+                   minStok: number | null, maxStok: number | null) =>
+    gonder<StokDurumYaniti>(`/api/kart/stok/${stokId}/durum/limit`,
+                            { depoId, minStok, maxStok }, 'PUT'),
 
   // --------------------------------------------------------------- kasa ----
   kasaIslemTurleri: () =>

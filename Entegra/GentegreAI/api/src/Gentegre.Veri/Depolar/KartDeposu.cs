@@ -251,14 +251,25 @@ public sealed class KartDeposu
             degerler["kod"] = kodMetni;
         }
 
+        Dictionary<string, List<Dictionary<string, string>>>? eklenenDetaylar = null;
         if (detaylar is not null)
-            await DetayUygulaAsync(baglanti, islem, tanim, yeniId, detaylar, baglam, iptal);
+            eklenenDetaylar = await DetayUygulaAsync(
+                baglanti, islem, tanim, yeniId, detaylar, baglam, iptal, eklemeDetayLoguYaz: false);
 
-        // Ekleme logu: yeni satirin tam hali.
+        // Ekleme logu buyumesin: bos ve katalog varsayilani olan alanlar yazilmaz.
+        var kartLogu = EklemeLogDegerleri(degerler, tanim.YeniKayitVarsayilanlari, baglam.SubeId);
+        object logBilgisi = kartLogu;
+        if (eklenenDetaylar is { Count: > 0 })
+        {
+            logBilgisi = new Dictionary<string, object?>
+            {
+                ["kart"] = kartLogu,
+                ["detaylar"] = eklenenDetaylar
+            };
+        }
+
         await _log.YazAsync(baglanti, islem, LogIslemi.Ekle, tanim.LogTabloId, yeniId,
-            baglam.KullaniciId, baglam.SubeId, baglam.Ip, degerler
-                .Where(d => d.Key != "__sube_id")
-                .ToDictionary(d => d.Key, d => LogDeposu.Metin(d.Value)),
+            baglam.KullaniciId, baglam.SubeId, baglam.Ip, logBilgisi,
             tarafId: tanim.Ad == "cari" ? (int)yeniId : null,
             stokId: tanim.Ad == "stok" ? (int)yeniId : null,
             iptal: iptal);
@@ -426,11 +437,38 @@ public sealed class KartDeposu
         await islem.CommitAsync(iptal);
     }
 
-    // ========================================================== detay farki ====
-    private async Task DetayUygulaAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
-        KartTanimi tanim, long ustId, Dictionary<string, DetayFarki> farklar,
-        YazmaBaglami baglam, CancellationToken iptal)
+    private static Dictionary<string, string> EklemeLogDegerleri(
+        IDictionary<string, object?> degerler,
+        IReadOnlyDictionary<string, object?>? varsayilanlar = null,
+        int? subeId = null)
     {
+        var sonuc = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        foreach (var (alan, deger) in degerler)
+        {
+            if (alan == "__sube_id") continue;
+
+            var metin = LogDeposu.Metin(deger);
+            if (string.IsNullOrWhiteSpace(metin)) continue;
+            if (subeId is not null && alan == "subeId" &&
+                metin == subeId.Value.ToString(CultureInfo.InvariantCulture)) continue;
+            if (varsayilanlar is not null &&
+                varsayilanlar.TryGetValue(alan, out var varsayilan) &&
+                metin == LogDeposu.Metin(varsayilan)) continue;
+
+            sonuc[alan] = metin;
+        }
+
+        return sonuc;
+    }
+
+    // ========================================================== detay farki ====
+    private async Task<Dictionary<string, List<Dictionary<string, string>>>> DetayUygulaAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        KartTanimi tanim, long ustId, Dictionary<string, DetayFarki> farklar,
+        YazmaBaglami baglam, CancellationToken iptal, bool eklemeDetayLoguYaz = true)
+    {
+        var eklenenLoglari = new Dictionary<string, List<Dictionary<string, string>>>(StringComparer.Ordinal);
+
         foreach (var (ad, fark) in farklar)
         {
             var detay = tanim.Detay(ad)
@@ -466,8 +504,20 @@ public sealed class KartDeposu
                 await using (var komut = Komut(baglanti, islem, sql, parametreler))
                     detayId = Convert.ToInt64(await komut.ExecuteScalarAsync(iptal));
 
-                await DetayLogAsync(baglanti, islem, tanim, detay, LogIslemi.Ekle, detayId, ustId,
-                    degerler.ToDictionary(d => d.Key, d => LogDeposu.Metin(d.Value)), baglam, iptal);
+                var logDegerleri = EklemeLogDegerleri(degerler);
+                if (logDegerleri.Count > 0)
+                    logDegerleri["id"] = detayId.ToString(CultureInfo.InvariantCulture);
+
+                if (logDegerleri.Count > 0)
+                {
+                    if (!eklenenLoglari.TryGetValue(ad, out var detayListesi))
+                        eklenenLoglari[ad] = detayListesi = new List<Dictionary<string, string>>();
+                    detayListesi.Add(logDegerleri);
+                }
+
+                if (eklemeDetayLoguYaz && logDegerleri.Count > 0)
+                    await DetayLogAsync(baglanti, islem, tanim, detay, LogIslemi.Ekle, detayId, ustId,
+                        logDegerleri, baglam, iptal);
             }
 
             foreach (var satir in fark.Degisen ?? new List<Dictionary<string, JsonElement>>())
@@ -539,6 +589,8 @@ public sealed class KartDeposu
                 await komut.ExecuteNonQueryAsync(iptal);
             }
         }
+
+        return eklenenLoglari;
     }
 
     /// <summary>

@@ -671,3 +671,29 @@ table.grid tr.flt input {
   font-size: 11px; padding: 0 4px; color: var(--yazi);
 }
 .tarih-araligi .ayrac-metin { color: var(--soluk) }
+
+/* ---- Stok kartı "Stok Durumu" KPI şeridi (Ekranlar/stok_karti.html .kpis) ---- */
+.kpi-serit { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px }
+.kpi {
+  border: 1px solid var(--cizgi); border-radius: 4px;
+  background: linear-gradient(#fff, #f6f9fc); padding: 9px 11px;
+}
+.kpi .k { font-size: 11px; color: var(--soluk) }
+.kpi .v { font-size: 17px; font-weight: 700; color: var(--yazi2); margin-top: 3px }
+.kpi .v.uyari { color: var(--uyari) }
+.kpi .v.olumlu { color: var(--ok) }
+.kpi .s { font-size: 10px; color: var(--soluk); margin-top: 2px }
+/* Grid icindeki duzenlenebilir hucre: cerceve yalniz odakta belirir. */
+.hucre-girdi { width: 100%; border: 1px solid transparent; background: transparent; padding: 1px 3px }
+.hucre-girdi:hover { border-color: var(--cizgi) }
+.hucre-girdi:focus { border-color: var(--vurgu); background: #fff }
+
+/* Stok kartı "Hareketler": tarih aralığı + depo şeridi (mockup'ta grid üstü satır). */
+.hareket-serit {
+  display: flex; gap: 10px; align-items: center;
+  margin-bottom: 8px; font-size: 11px; color: var(--soluk);
+}
+.hareket-serit input[type=date], .hareket-serit select { font-size: 11px; padding: 2px 4px }
+.hareket-ozet { margin-left: auto }
+.detay-tablo tr.devir-satiri td { background: var(--yuz2); color: var(--soluk) }
+.gridtb { display: flex; gap: 4px; padding: 5px 0 0 }

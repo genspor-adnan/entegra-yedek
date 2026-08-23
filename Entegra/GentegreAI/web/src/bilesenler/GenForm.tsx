@@ -11,6 +11,8 @@ import { TekOzluk } from './TekOzluk';
 import { PersonelKimlikOzet } from './PersonelKimlikOzet';
 import { RolYetkiMatrisi } from './RolYetkiMatrisi';
 import { DokumanGalerisi } from './DokumanGalerisi';
+import { StokDurumSekmesi } from './StokDurumSekmesi';
+import { StokHareketSekmesi } from './StokHareketSekmesi';
 import { TarafArama } from './TarafArama';
 import { epostaGecerliMi } from './alanBicim';
 import { TelefonGirdi } from './TelefonGirdi';
@@ -316,6 +318,14 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
     (yerTutucuSekmeler ?? []).forEach(baslik => {
       if (dokumanliKart && !yeniMi && baslik === 'Yorum / Medya') {
         s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'Resim / Doküman' });
+      } else if (kaynak === 'stok' && !yeniMi && baslik === 'Hareketler') {
+        // Salt okunur hareket dokumu (stok_karti.html "Hareketler").
+        s.push({ tur: 'ozel', anahtar: 'ozel:stokHareket', baslik });
+      } else if (kaynak === 'stok' && !yeniMi && baslik === 'Stok Durumu') {
+        // Artik yer tutucu degil: depo bazli miktar/rezerve gercek veriden gelir
+        //   (stok_karti.html "Stok Durumu"). Yeni kayitta stok_id yok - kart once
+        //   kaydedilmeli, o yuzden yeniMi'de yer tutucu olarak kalir.
+        s.push({ tur: 'ozel', anahtar: 'ozel:stokDurum', baslik });
       } else {
         s.push({ tur: 'yerTutucu', anahtar: `y:${baslik}`, baslik });
       }
@@ -1042,6 +1052,14 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
 
       {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:dokuman' && (
         <DokumanGalerisi kartAdi={kaynak} kaynakId={id as number} saltOkunur={salt} />
+      )}
+
+      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:stokDurum' && (
+        <StokDurumSekmesi stokId={id as number} duzenlenebilir={!salt} />
+      )}
+
+      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:stokHareket' && (
+        <StokHareketSekmesi stokId={id as number} />
       )}
 
       {aktif?.tur === 'yerTutucu' && (

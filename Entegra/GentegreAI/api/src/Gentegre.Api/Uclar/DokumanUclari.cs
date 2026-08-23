@@ -10,7 +10,7 @@ namespace Gentegre.Api.Uclar;
 /// "cari", "kisi", "stok"), hem yetki kontrolü hem fiziksel `dokuman.kaynak` değerine
 /// çevirmek için kullanılır (cari/kisi/personel hepsi `taraf` satırı - tek fiziksel kaynak).
 /// </summary>
-public sealed record DuzenleIstegi(string Ad);
+public sealed record DuzenleIstegi(string Ad, string? BelgeTuru);
 
 public static class DokumanUclari
 {
@@ -65,7 +65,7 @@ public static class DokumanUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
-            var liste = await depo.DuzenleAsync(dokumanId, istek.Ad,
+            var liste = await depo.DuzenleAsync(dokumanId, istek.Ad, istek.BelgeTuru,
                 new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
             return Results.Ok(liste);
         });
@@ -122,13 +122,18 @@ public static class DokumanUclari
 
     private static string FizikselKaynak(string kartAdi) => kartAdi switch
     {
-        "cari" or "kisi" or "personel" => "taraf",
+        "cari" or "kisi" or "personel" or "hasta" => "taraf",
         "stok" => "stok",
         _ => throw new InvalidOperationException($"Bilinmeyen kart: {kartAdi}"),
     };
 
     // Kisi kendi yetki kodu yok, cari'yi kullanir (bkz. KisiUclari.cs).
-    private static string YetkiKodu(string kartAdi) => kartAdi == "kisi" ? "cari" : kartAdi;
+    private static string YetkiKodu(string kartAdi) => kartAdi switch
+    {
+        "kisi" => "cari",
+        "hasta" => "personel",
+        _ => kartAdi
+    };
 
     private static string Ip(HttpContext ctx) => ctx.Connection.RemoteIpAddress?.ToString() ?? "";
 }

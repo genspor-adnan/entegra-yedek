@@ -10,6 +10,7 @@ interface OturumDurumu {
   girisYap(kod: string, parola: string, subeId?: number): Promise<void>;
   cikisYap(): Promise<void>;
   subeDegistir(subeId: number): Promise<void>;
+  dilDegistir(dil: number): Promise<void>;
   /** Kaynak yetkisi: yetki('cari','ekle'). Sunucu da ayrica dogrular - bu yalniz arayuz icin. */
   yetki(kaynak: string, islem?: 'gor' | 'ekle' | 'degistir' | 'sil'): boolean;
   aksiyonVar(kod: string): boolean;
@@ -47,6 +48,11 @@ export function OturumSaglayici({ children }: { children: ReactNode }) {
       const yanit = await api.subeSec(subeId);
       oturum.yaz(yanit);
       oturum.subeYaz(subeId);
+      setBen(await api.ben());
+    },
+
+    async dilDegistir(dil) {
+      await api.dilDegistir(dil);
       setBen(await api.ben());
     },
 

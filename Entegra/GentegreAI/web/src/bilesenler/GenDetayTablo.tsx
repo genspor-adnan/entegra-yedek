@@ -80,10 +80,16 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Pro
   const alanlar = meta.alanlar.filter(a => a.ad !== 'id');
   const yerler = useYerler(meta.ad === 'adresler');
   const adresGrid = meta.ad === 'adresler';
+  const acilKisiGrid = meta.ad === 'acilKisiler';
   const ilAdIdHarita = new Map((yerler?.iller ?? []).map(i => [i.ad, i.id]));
 
   const hucreDegis = (satirIndeks: number, alan: string, deger: unknown) => {
-    const guncel = durum.guncel.map((s, i) => i === satirIndeks ? { ...s, [alan]: deger } : s);
+    const guncel = durum.guncel.map((s, i) => {
+      if (meta.ad === 'acilKisiler' && alan === 'varsayilan' && (deger === true || Number(deger) === 1)) {
+        return { ...s, varsayilan: i === satirIndeks ? 1 : 0 };
+      }
+      return i === satirIndeks ? { ...s, [alan]: deger } : s;
+    });
     onDegis({ ...durum, guncel });
   };
 
@@ -108,6 +114,9 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Pro
       yeni.tur = '1'; // Diploma
       yeni.gecerlilik = 'Süresiz';
     }
+    if (meta.ad === 'acilKisiler' && durum.guncel.length === 0) {
+      yeni.varsayilan = 1;
+    }
     onDegis({ ...durum, guncel: [...durum.guncel, yeni] });
   };
 
@@ -123,7 +132,9 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Pro
       <h6>
         {meta.baslik}
         {!saltOkunur && (
-          <button type="button" className="d" disabled={!satirEklenebilir} onClick={satirEkle}>+ Satir</button>
+          <button type="button" className="d bir" disabled={!satirEklenebilir} onClick={satirEkle}>
+            {acilKisiGrid ? '＋ Kişi Ekle' : '+ Satir'}
+          </button>
         )}
       </h6>
 
@@ -146,12 +157,25 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Pro
               {alanlar.map(a => (
                 <td key={a.ad}>
                   {a.tip === 'mantik' ? (
-                    <input
-                      type="checkbox"
-                      checked={Number(satir[a.ad]) === 1 || satir[a.ad] === true}
-                      disabled={saltOkunur || !a.yazilabilir}
-                      onChange={e => hucreDegis(i, a.ad, e.target.checked)}
-                    />
+                    acilKisiGrid && a.ad === 'varsayilan' ? (
+                      <button
+                        type="button"
+                        className="d"
+                        title="Varsayılan"
+                        disabled={saltOkunur || !a.yazilabilir}
+                        onClick={() => hucreDegis(i, a.ad, Number(satir[a.ad]) === 1 || satir[a.ad] === true ? 0 : 1)}
+                        style={{ minWidth: 24, height: 22, padding: 0 }}
+                      >
+                        {Number(satir[a.ad]) === 1 || satir[a.ad] === true ? '★' : ''}
+                      </button>
+                    ) : (
+                      <input
+                        type="checkbox"
+                        checked={Number(satir[a.ad]) === 1 || satir[a.ad] === true}
+                        disabled={saltOkunur || !a.yazilabilir}
+                        onChange={e => hucreDegis(i, a.ad, e.target.checked)}
+                      />
+                    )
                   ) : meta.ad === 'adresler' && a.ad === 'il' && yerler ? (
                     <select
                       value={String(satir.il ?? '')}

@@ -68,6 +68,7 @@ public static class KimlikUclari
                     Ad = kullanici.Ad,
                     RolId = kullanici.RolId,
                     RolAdi = kullanici.RolAdi,
+                    Dil = kullanici.Dil,
                     YetkiSurumu = baglam.Yetkiler.YetkiSurumu,
                     SubeId = baglam.SubeId,
                     SubeYazma = baglam.SubeYazma,
@@ -88,6 +89,15 @@ public static class KimlikUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             await servis.ParolaDegistirAsync(baglam.KullaniciId, istek, iptal);
+            return Results.NoContent();
+        }).RequireAuthorization();
+
+        grup.MapPost("/dil", async (
+            DilDegistirIstegi istek, KimlikServisi servis, BaglamCozucu cozucu,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            await servis.DilDegistirAsync(baglam.KullaniciId, istek, iptal);
             return Results.NoContent();
         }).RequireAuthorization();
     }

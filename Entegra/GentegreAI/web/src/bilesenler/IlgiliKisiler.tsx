@@ -89,7 +89,7 @@ export function IlgiliKisiler({ tarafId, saltOkunur }: { tarafId: number; saltOk
         İlgili Kişiler
         {!saltOkunur && (
           <>
-            <button type="button" className="d" onClick={() => setKisiEkleAcik(true)}>
+            <button type="button" className="d bir" onClick={() => setKisiEkleAcik(true)}>
               🔗 Kişi Ekle
             </button>
             <button type="button" className="d" disabled={seciliId === null}

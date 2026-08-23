@@ -1,20 +1,38 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { api } from '../api/istemci';
 import { ApiHatasi, type DokumanSatiri } from '../api/sozlesme';
 import { tarihYaz } from './bicim';
 
 const boyutYaz = (b: number) => b < 1024 ? `${b} B` : b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
 
-const belgeTuruYaz = (contentType: string) => {
+const dosyaTipiIkon = (contentType: string) => {
+  if (contentType.startsWith('image/')) return '🖼️';
+  if (contentType === 'application/pdf') return '📕';
+  if (contentType.includes('word')) return '📘';
+  if (contentType.includes('excel') || contentType.includes('spreadsheet')) return '📗';
+  if (contentType === 'text/plain') return '📄';
+  return '📎';
+};
+
+const dosyaTipiBaslik = (contentType: string) => {
   if (contentType.startsWith('image/')) return 'Resim';
   if (contentType === 'application/pdf') return 'PDF';
   if (contentType.includes('word')) return 'Word';
   if (contentType.includes('excel') || contentType.includes('spreadsheet')) return 'Excel';
   if (contentType === 'text/plain') return 'Metin';
-  return 'Doküman';
+  return 'Dosya';
 };
 
 const resimMi = (s: DokumanSatiri) => s.contentType.startsWith('image/');
+
+const belgeTuruSecenekleri = [
+  'Adli Sicil',
+  'Diploma',
+  'İş Sözleşmesi',
+  'Kimlik Fotokopisi',
+  'Sağlık Raporu',
+  'SGK İşe Giriş',
+];
 
 function ResimBandi({ resimler, resimUrlleri }: { resimler: DokumanSatiri[]; resimUrlleri: Record<number, string> }) {
   return (
@@ -32,7 +50,7 @@ function ResimBandi({ resimler, resimUrlleri }: { resimler: DokumanSatiri[]; res
             onClick={() => resimUrlleri[s.id] && window.open(resimUrlleri[s.id], '_blank')}
           >
             {resimUrlleri[s.id]
-              ? <img src={resimUrlleri[s.id]} alt={s.ad} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ? <img src={resimUrlleri[s.id]} alt={s.ad} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               : <span style={{ fontSize: 24 }}>🖼️</span>}
           </div>
           <div style={{ fontSize: 10, color: 'var(--soluk)', marginTop: 3, wordBreak: 'break-all' }}>{s.ad}</div>
@@ -63,6 +81,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
   const [bandAcik, setBandAcik] = useState(false);
   const [secili, setSecili] = useState<Set<number>>(new Set());
   const [paylasimMesaji, setPaylasimMesaji] = useState<string | null>(null);
+  const [duzenlenen, setDuzenlenen] = useState<{ id: number; ad: string; belgeTuru: string } | null>(null);
   const girdiRef = useRef<HTMLInputElement | null>(null);
   const sonSeciliIndex = useRef<number | null>(null);
 
@@ -158,9 +177,19 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
   };
 
   const duzenle = async (satir: DokumanSatiri) => {
-    const yeniAd = window.prompt('Yeni ad:', satir.ad);
-    if (!yeniAd || yeniAd === satir.ad) return;
-    await calistir(() => api.dokumanDuzenle(kartAdi, kaynakId, satir.id, yeniAd));
+    setDuzenlenen({ id: satir.id, ad: satir.ad, belgeTuru: satir.belgeTuru || '' });
+  };
+
+  const duzenlemeKaydet = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!duzenlenen || !duzenlenen.ad.trim()) return;
+    const satir = satirlarim.find(s => s.id === duzenlenen.id);
+    if (satir && duzenlenen.ad === satir.ad && duzenlenen.belgeTuru === (satir.belgeTuru || '')) {
+      setDuzenlenen(null);
+      return;
+    }
+    await calistir(() => api.dokumanDuzenle(kartAdi, kaynakId, duzenlenen.id, duzenlenen.ad, duzenlenen.belgeTuru));
+    setDuzenlenen(null);
   };
 
   const paylas = async (satir: DokumanSatiri) => {
@@ -203,31 +232,62 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
           <>
             <input ref={girdiRef} type="file" style={{ display: 'none' }} onChange={e => void dosyaSecildi(e)}
               accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,.doc,.docx,.xls,.xlsx,text/plain" />
-            <button type="button" className="d" disabled={yukleniyor} onClick={() => girdiRef.current?.click()}>
-              {yukleniyor ? 'Yükleniyor…' : '＋ Dosya Ekle'}
+            <button type="button" className="d bir" title="Dosya Ekle" disabled={yukleniyor} onClick={() => girdiRef.current?.click()}>
+              {yukleniyor ? '…' : '＋'}
             </button>
+            <button type="button" className="d teh" title="Sil" disabled={secili.size === 0} onClick={() => void seciliSil()}>🗑️</button>
           </>
         )}
         {resimler.length > 0 && (
-          <button type="button" className="d" onClick={() => setBandAcik(a => !a)}>
-            {bandAcik ? 'Resim Kapat' : 'Resimleri Göster'}
+          <button type="button" className="d" title={bandAcik ? 'Resim Kapat' : 'Resimleri Göster'} onClick={() => setBandAcik(a => !a)}>
+            🖼️
           </button>
         )}
-        <button type="button" className="d" disabled={!seciliSatir} onClick={() => seciliSatir && void gor(seciliSatir)}>Gör</button>
+        <button type="button" className="d" title="Gör" disabled={!seciliSatir} onClick={() => seciliSatir && void gor(seciliSatir)}>👁️</button>
         {!saltOkunur && (
-          <button type="button" className="d" disabled={!seciliSatir} onClick={() => seciliSatir && void duzenle(seciliSatir)}>Düzenle</button>
+          <button type="button" className="d" title="Düzenle" disabled={!seciliSatir} onClick={() => seciliSatir && void duzenle(seciliSatir)}>✏️</button>
         )}
-        <button type="button" className="d" disabled={!seciliSatir} onClick={() => seciliSatir && void indir(seciliSatir)}>İndir</button>
-        <button type="button" className="d" disabled={!seciliSatir} onClick={() => seciliSatir && void paylas(seciliSatir)}>Paylaş</button>
+        <button type="button" className="d" title="İndir" disabled={!seciliSatir} onClick={() => seciliSatir && void indir(seciliSatir)}>⬇️</button>
+        <button type="button" className="d" title="Paylaş" disabled={!seciliSatir} onClick={() => seciliSatir && void paylas(seciliSatir)}>🔗</button>
         {!saltOkunur && seciliResimMi && (
-          <button type="button" className="d" onClick={() => void varsayilanYap()}>Varsayılan Yap</button>
-        )}
-        {!saltOkunur && (
-          <button type="button" className="d teh" disabled={secili.size === 0} onClick={() => void seciliSil()}>Sil</button>
+          <button type="button" className="d" title="Varsayılan Yap" onClick={() => void varsayilanYap()}>⭐</button>
         )}
       </h6>
       {hata && <div className="alan-hata" style={{ margin: '0 10px' }}>{hata}</div>}
       {paylasimMesaji && <div style={{ margin: '0 10px 10px', wordBreak: 'break-all', fontSize: 12, color: 'var(--soluk)' }}>{paylasimMesaji}</div>}
+
+      {duzenlenen && (
+        <>
+          <div className="perde" style={{ zIndex: 420 }} onClick={() => setDuzenlenen(null)} />
+          <form className="lookup-pencere" style={{ zIndex: 421, width: 'min(440px, 92vw)' }} onSubmit={e => void duzenlemeKaydet(e)}>
+            <strong>Doküman Düzenle</strong>
+            <label className="alan">
+              <span className="etiket">Belge Türü</span>
+              <input
+                value={duzenlenen.belgeTuru}
+                onChange={e => setDuzenlenen(d => d && ({ ...d, belgeTuru: e.target.value }))}
+                list="dokuman-belge-turu-secenekleri"
+                autoFocus
+                placeholder="İş sözleşmesi, sağlık raporu..."
+              />
+              <datalist id="dokuman-belge-turu-secenekleri">
+                {belgeTuruSecenekleri.map(s => <option key={s} value={s} />)}
+              </datalist>
+            </label>
+            <label className="alan">
+              <span className="etiket">Ad</span>
+              <input value={duzenlenen.ad} onChange={e => setDuzenlenen(d => d && ({ ...d, ad: e.target.value }))} />
+            </label>
+            <div className="lookup-alt">
+              <span></span>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button type="button" onClick={() => setDuzenlenen(null)}>İptal</button>
+                <button type="submit" disabled={!duzenlenen.ad.trim()}>Kaydet</button>
+              </div>
+            </div>
+          </form>
+        </>
+      )}
 
       {bandAcik && <ResimBandi resimler={resimler} resimUrlleri={resimUrlleri} />}
 
@@ -236,8 +296,9 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
           <thead>
             <tr>
               <th style={{ width: 30 }}></th>
-              <th style={{ width: 80 }}>Belge Türü</th>
+              <th style={{ width: 150 }}>Belge Türü</th>
               <th>Ad</th>
+              <th style={{ width: 42, textAlign: 'center' }}>Tipi</th>
               <th style={{ width: 90 }}>Boyut</th>
               <th style={{ width: 90 }}>Tarih</th>
             </tr>
@@ -249,8 +310,9 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
                 <td onClick={e => e.stopPropagation()}>
                   <input type="checkbox" checked={secili.has(s.id)} onChange={() => secimiDegistir(s.id, index)} />
                 </td>
-                <td>{resimMi(s) ? '🖼️' : '📄'} {belgeTuruYaz(s.contentType)}</td>
+                <td>{s.belgeTuru || ''}</td>
                 <td>{s.ad}{s.varsayilan && resimMi(s) && ' (varsayılan)'}</td>
+                <td style={{ textAlign: 'center' }} title={dosyaTipiBaslik(s.contentType)}>{dosyaTipiIkon(s.contentType)}</td>
                 <td>{boyutYaz(s.boyut)}</td>
                 <td>{tarihYaz(s.eklemeTarihi)}</td>
               </tr>

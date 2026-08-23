@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Yetki;
+﻿using Gentegre.Cekirdek.Yetki;
 
 namespace Gentegre.Veri.Depolar;
 
@@ -24,9 +24,9 @@ public sealed class YetkiDeposu
     public Task<List<AlanYetkisi>> AlanYetkileriAsync(int kullaniciId, CancellationToken iptal = default)
         => _veri.ListeAsync("""
             select ay.kaynak, ay.alan, ay.izin
-              from public.kullanici k
+              from public.taraf_kullanici k
               join public.rol_alan_yetki ay on ay.rol_id = k.rol_id
-             where k.taraf_id = @p0
+             where k.id = @p0
             """, new object?[] { kullaniciId },
             o => new AlanYetkisi(o.Metin("kaynak"), o.Metin("alan"), (short)o.Sayi("izin")),
             iptal);
@@ -34,8 +34,10 @@ public sealed class YetkiDeposu
     /// <summary>JWT'deki yetkiSurumu ile karsilastirilir; eskiyse yetki yeniden cozulur.</summary>
     public Task<long> YetkiSurumuAsync(int kullaniciId, CancellationToken iptal = default)
         => _veri.TekDegerAsync<long>("""
-            select r.yetki_surumu from public.kullanici k
+            select r.yetki_surumu from public.taraf_kullanici k
               join public.rol r on r.id = k.rol_id
-             where k.taraf_id = @p0
+             where k.id = @p0
             """, new object?[] { kullaniciId }, iptal);
 }
+
+

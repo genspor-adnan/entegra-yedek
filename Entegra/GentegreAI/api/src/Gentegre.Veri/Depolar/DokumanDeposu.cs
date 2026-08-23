@@ -4,7 +4,7 @@ using Npgsql;
 
 namespace Gentegre.Veri.Depolar;
 
-public sealed record DokumanSatiri(int Id, string Ad, string ContentType, int Boyut,
+public sealed record DokumanSatiri(int Id, string Ad, string BelgeTuru, string ContentType, int Boyut,
     bool Varsayilan, short Sira, DateTime EklemeTarihi, string? PaylasimKodu);
 
 public sealed record DokumanIcerik(byte[] Veri, string ContentType, string Ad);
@@ -43,7 +43,7 @@ public sealed class DokumanDeposu
         KaynakDogrula(kaynak);
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = new NpgsqlCommand("""
-            select id, ad, content_type, boyut, varsayilan, sira, ekleme_tarihi, paylasim_kodu
+            select id, ad, belge_turu, content_type, boyut, varsayilan, sira, ekleme_tarihi, paylasim_kodu
               from public.dokuman
              where kaynak = @p0 and kaynak_id = @p1
              order by sira, id
@@ -55,9 +55,9 @@ public sealed class DokumanDeposu
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
         while (await okuyucu.ReadAsync(iptal))
             sonuc.Add(new DokumanSatiri(
-                okuyucu.GetInt32(0), okuyucu.GetString(1), okuyucu.GetString(2), okuyucu.GetInt32(3),
-                okuyucu.GetInt16(4) == 1, okuyucu.GetInt16(5), okuyucu.GetDateTime(6),
-                okuyucu.IsDBNull(7) ? null : okuyucu.GetString(7)));
+                okuyucu.GetInt32(0), okuyucu.GetString(1), okuyucu.GetString(2), okuyucu.GetString(3),
+                okuyucu.GetInt32(4), okuyucu.GetInt16(5) == 1, okuyucu.GetInt16(6), okuyucu.GetDateTime(7),
+                okuyucu.IsDBNull(8) ? null : okuyucu.GetString(8)));
         return sonuc;
     }
 
@@ -136,7 +136,8 @@ public sealed class DokumanDeposu
         return await ListeleAsync(kaynak, kaynakId, iptal);
     }
 
-    public async Task<IReadOnlyList<DokumanSatiri>> DuzenleAsync(int dokumanId, string yeniAd, YazmaBaglami baglam, CancellationToken iptal = default)
+    public async Task<IReadOnlyList<DokumanSatiri>> DuzenleAsync(int dokumanId, string yeniAd, string? yeniBelgeTuru,
+        YazmaBaglami baglam, CancellationToken iptal = default)
     {
         if (string.IsNullOrWhiteSpace(yeniAd))
             throw GentegreHatasi.Dogrulama("Ad boş olamaz.", new AlanHatasi("ad", "Ad girilmeli."));
@@ -149,11 +150,12 @@ public sealed class DokumanDeposu
             r => (r.GetString(0), r.GetInt32(1)), iptal);
 
         await using (var guncelle = new NpgsqlCommand(
-            "update public.dokuman set ad = @p0, degistiren = @p1 where id = @p2", baglanti, islem))
+            "update public.dokuman set ad = @p0, belge_turu = @p1, degistiren = @p2 where id = @p3", baglanti, islem))
         {
             guncelle.Parameters.AddWithValue("p0", yeniAd.Trim());
-            guncelle.Parameters.AddWithValue("p1", baglam.KullaniciId);
-            guncelle.Parameters.AddWithValue("p2", dokumanId);
+            guncelle.Parameters.AddWithValue("p1", (yeniBelgeTuru ?? "").Trim());
+            guncelle.Parameters.AddWithValue("p2", baglam.KullaniciId);
+            guncelle.Parameters.AddWithValue("p3", dokumanId);
             await guncelle.ExecuteNonQueryAsync(iptal);
         }
 
