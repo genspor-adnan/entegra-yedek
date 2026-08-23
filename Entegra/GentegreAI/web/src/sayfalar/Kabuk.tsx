@@ -40,6 +40,24 @@ function grupla(liste: MenuOgesi[], sec: (m: MenuOgesi) => string | undefined): 
  *
  * Menu kullanicinin YETKISINE gore uretilir; yetkisiz modul hic cizilmez.
  */
+/**
+ * Ana menu grup ikonlari. Hepsi ayni kart ikonuydu (📇) - gruplar birbirinden
+ * ayirt edilemiyordu. Grup adi ANAHTAR: yeni grup eklenirse buraya bir satir.
+ * Listede olmayan grup icin notr klasor cizilir.
+ */
+const GRUP_IKON: Record<string, string> = {
+  'Hasta':   '🏥',
+  'Cari':    '🤝',
+  'Satış':   '🛍️',
+  'Alış':    '🛒',
+  'Kasa':    '💵',
+  'Banka':   '🏦',
+  'Proje':   '🗂️',
+  'Stok':    '📦',
+  'İK':      '👥',
+  'Yönetim': '🛠️',
+};
+
 /** Arayuz dilleri - db/081: taraf_kullanici.dil (0 TR / 1 EN / 2 DE). */
 const DILLER = [
   { deger: 0, ad: 'Türkçe',  bayrak: '🇹🇷' },
@@ -230,7 +248,7 @@ export function Kabuk() {
                   style={{ width: '100%', border: 0, background: 'transparent', cursor: 'pointer' }}
                   onClick={() => setAcikGruplar(g => ({ ...g, [s.ad]: !grupAcikMi(s.ad, s.alt) }))}
                 >
-                  <span className="ic">📇</span>
+                  <span className="ic">{GRUP_IKON[s.ad] ?? '📁'}</span>
                   <span>{s.ad}</span>
                   <span className="rz">{grupAcikMi(s.ad, s.alt) ? '▾' : '▸'}</span>
                 </button>
