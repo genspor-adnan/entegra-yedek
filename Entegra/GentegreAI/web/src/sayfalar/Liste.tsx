@@ -426,29 +426,31 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     toplam: ['yerelBakiye'],
     menuGrup: 'Kasa', menuAd: 'Kasa Hesapları', ic: '💵', yetkiKodu: 'hesap',
   },
+  // --- BANKA grubu (kullanici istegi): banka tarafi Kasa'dan ayrildi. Kaynak
+  //     yine tek 'hesap' tablosu, tur'e gore ayri ekranlar.
   {
-    kaynak: 'hesap', rota: 'banka-hesap', baslik: 'Banka Hesapları', yol: 'Kasa › Banka Hesaplari',
+    kaynak: 'hesap', rota: 'banka-hesap', baslik: 'Banka Hesapları', yol: 'Banka › Hesaplar',
     kartYolu: '/banka-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'B' },
     toplam: ['yerelBakiye'],
-    menuGrup: 'Kasa', menuAd: 'Banka Hesapları', ic: '🏦', yetkiKodu: 'hesap',
+    menuGrup: 'Banka', menuAd: 'Banka Hesapları', ic: '🏦', yetkiKodu: 'hesap',
   },
   {
-    kaynak: 'hesap', rota: 'pos-hesap', baslik: 'POS Hesapları', yol: 'Kasa › POS',
-    kartYolu: '/pos-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'P' },
-    toplam: ['yerelBakiye'],
-    menuGrup: 'Kasa', menuAd: 'POS', ic: '💳', yetkiKodu: 'hesap',
-  },
-  {
-    kaynak: 'hesap', rota: 'kredi-karti', baslik: 'Kredi Kartları', yol: 'Kasa › Kredi Kartlari',
-    kartYolu: '/kredi-karti', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'V' },
-    toplam: ['yerelBakiye'],
-    menuGrup: 'Kasa', menuAd: 'Kredi Kartları', ic: '💳', yetkiKodu: 'hesap',
-  },
-  {
-    kaynak: 'hesap', rota: 'kredi-hesap', baslik: 'Krediler', yol: 'Kasa › Krediler',
+    kaynak: 'hesap', rota: 'kredi-hesap', baslik: 'Krediler', yol: 'Banka › Krediler',
     kartYolu: '/kredi-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'R' },
     toplam: ['yerelBakiye'],
-    menuGrup: 'Kasa', menuAd: 'Krediler', ic: '🏛️', yetkiKodu: 'hesap',
+    menuGrup: 'Banka', menuAd: 'Krediler', ic: '🏛️', yetkiKodu: 'hesap',
+  },
+  {
+    kaynak: 'hesap', rota: 'pos-hesap', baslik: 'POS Hesapları', yol: 'Banka › POS',
+    kartYolu: '/pos-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'P' },
+    toplam: ['yerelBakiye'],
+    menuGrup: 'Banka', menuAd: 'POS', ic: '💳', yetkiKodu: 'hesap',
+  },
+  {
+    kaynak: 'hesap', rota: 'kredi-karti', baslik: 'Kredi Kartları', yol: 'Banka › Kredi Kartlari',
+    kartYolu: '/kredi-karti', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'V' },
+    toplam: ['yerelBakiye'],
+    menuGrup: 'Banka', menuAd: 'Kredi Kartı', ic: '💳', yetkiKodu: 'hesap',
   },
   {
     kaynak: 'cek-senet', baslik: 'Çek / Senet', yol: 'Kasa › Cek ve Senet', kartYolu: '/cek-senet',
