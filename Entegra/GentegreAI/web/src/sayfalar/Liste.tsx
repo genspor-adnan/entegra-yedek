@@ -169,6 +169,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           if (!satir) return;
           setDonusum({ belgeId: Number(satir.id), belgeTur: Number(satir.tur) });
           return;
+        // Secili hesabin ekstresi - ayni ekran, hesapId sorgu parametresiyle.
+        case 'hesap.ekstre':
+          if (satir) git(`/hesap-ekstre?hesapId=${satir.id}`);
+          return;
         case 'genel.yazdir': alert('Yazdirma henuz baglanmadi.'); return;
       }
 

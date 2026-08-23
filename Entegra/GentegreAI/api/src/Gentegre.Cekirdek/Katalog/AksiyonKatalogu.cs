@@ -106,6 +106,10 @@ public static class AksiyonKatalogu
                     KaynakKodu: "hesap", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
                 new("hesap.sil",     "🗑 Sil",      "hesap", Kisayol: "Del",
                     KaynakKodu: "hesap", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+                // Secili hesabin EKSTRESI: /hesap-ekstre?hesapId=<id> (v_hesap_ekstre,
+                //   yurumeli bakiye). Liste tarafinda urlFiltreAlani zaten hazir.
+                new("hesap.ekstre",  "📄 Ekstre",   "hesap", Kisayol: "Ctrl+E",
+                    KaynakKodu: "hesap", Islem: Islem.Gor, KayitGerekir: true, Sira: 40),
                 new("genel.yazdir",  "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
