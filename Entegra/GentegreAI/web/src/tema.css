@@ -129,6 +129,8 @@ input, select { font: inherit; color: inherit }
 .d.onay:hover:not(:disabled) { background: linear-gradient(#5cbb75, #2e7d46) }
 .d.teh:hover:not(:disabled) { background: linear-gradient(#e0605c, #c0413d) }
 .d:disabled { opacity: .45; cursor: default }
+/* Yalniz-ikon dugme (grid arac cubugu): kare, metin yok - anlami title'da. */
+.d.ikon { width: 27px; padding: 0; justify-content: center; font-size: 13px }
 .d .kisayol { font-size: 10px; opacity: .75 }
 
 .cipler { display: flex; align-items: center; gap: 8px; padding: 10px 20px 0; flex-wrap: wrap }

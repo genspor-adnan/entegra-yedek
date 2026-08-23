@@ -9,6 +9,7 @@ import { GenLookup, LOOKUP_CARI } from '../bilesenler/GenLookup';
 import { BacakListesi } from '../bilesenler/kasa/BacakSatiri';
 import { FisOnizleme } from '../bilesenler/kasa/FisOnizleme';
 import { useOturum } from '../kimlik/OturumBaglami';
+import { Modal } from '../bilesenler/GenForm';
 
 const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -33,6 +34,18 @@ const GRUP_ADI: Record<string, string> = {
 /** Sayi girisi: "1.234,56" ve "1234.56" ikisini de kabul eder. */
 const sayi = (metin: string) => Number(metin.replace(/\./g, '').replace(',', '.')) || 0;
 
+/**
+ * Disaridan (URL / belge karti) gelen HAM tutari ekran bicimine cevirir.
+ * Ham deger JSON'dan gelir ve ondaligi NOKTAdir ("14579.97"); ekran Turkce
+ * bicim bekler - cevirmezsek sayi() noktayi binlik ayraci sanip 1.457.997
+ * yaziyordu (gercek vaka).
+ */
+const hamTutar = (ham: string | undefined | null): string => {
+  if (!ham) return '';
+  const n = Number(String(ham).replace(',', '.'));
+  return Number.isFinite(n) ? n.toFixed(2).replace('.', ',') : '';
+};
+
 interface HesapSecimi { id: number; ad: string; doviz: string }
 interface CariSecimi { id: number; unvan: string }
 
@@ -47,23 +60,42 @@ interface CariSecimi { id: number; unvan: string }
  * grup listedeki "+ Tahsilat / Virman / Döviz…" aksiyonundan ya da URL'deki
  * ?tur= parametresinden gelir.
  */
-export function KasaIslemKarti() {
+/**
+ * Ekran hem ROTA (tam sayfa) hem MODAL olarak acilir. Modal kullanimda
+ * (`onKapat` verilince) belge kartinin "Tahsilat" sekmesinden cagrilir ve
+ * baslangic degerleri prop'tan gelir - kullanici faturadan cikmadan tahsilat
+ * girer.
+ */
+export function KasaIslemKarti({ acilis, onKapat, onKaydedildi }: {
+  acilis?: { tur?: number; tarafId?: number; tarafUnvan?: string; belgeId?: number; tutar?: string };
+  onKapat?(): void;
+  onKaydedildi?(): void;
+} = {}) {
   const git = useNavigate();
   const { id } = useParams();
   const [sorgu] = useSearchParams();
+  const modalMi = typeof onKapat === 'function';
   const { yetki, kullanici } = useOturum();
 
   const kayitId = id && id !== 'yeni' ? Number(id) : null;
 
   const [turler, setTurler] = useState<KasaIslemTuru[]>([]);
-  const [tur, setTur] = useState<number>(Number(sorgu.get('tur')) || 21);
+  const [tur, setTur] = useState<number>(
+    acilis?.tur ?? (Number(sorgu.get('tur')) || 21));
   const [tarih, setTarih] = useState(new Date().toISOString().slice(0, 10));
   const [planTarihi, setPlanTarihi] = useState('');
-  const [cari, setCari] = useState<CariSecimi | null>(null);
+  // Belgeden gelen cari/tutar onyuklenir - kullanici ayni bilgiyi ikinci kez
+  //   girmesin (URL parametreleri tam sayfa acilista ayni isi gorur).
+  const [cari, setCari] = useState<CariSecimi | null>(() => {
+    const tarafId = acilis?.tarafId ?? (Number(sorgu.get('tarafId')) || 0);
+    return tarafId ? { id: tarafId, unvan: acilis?.tarafUnvan ?? '' } : null;
+  });
   const [karsiCari, setKarsiCari] = useState<CariSecimi | null>(null);
   const [hesap, setHesap] = useState<HesapSecimi | null>(null);
   const [karsiHesap, setKarsiHesap] = useState<HesapSecimi | null>(null);
-  const [tutar, setTutar] = useState('');
+  const [tutar, setTutar] = useState(hamTutar(acilis?.tutar ?? sorgu.get('tutar')));
+  /** Tahsilatin kapatacagi belge (kasa_islem.belge_id). */
+  const belgeBagi = acilis?.belgeId ?? (Number(sorgu.get('belgeId')) || 0);
   const [kur, setKur] = useState('1');
   const [karsiTutar, setKarsiTutar] = useState('');
   const [masrafTutar, setMasrafTutar] = useState('');
@@ -103,6 +135,8 @@ export function KasaIslemKarti() {
 
   const yaniti = useCallback((y: KasaIslemYaniti) => {
     setSonuc(y);
+    // Modal kullanimda cagiran (belge karti) tahsilat listesini tazelesin.
+    onKaydedildi?.();
     const i = y.islem;
     setTur(Number(i.tur));
     if (i.islemTarihi) setTarih(String(i.islemTarihi).slice(0, 10));
@@ -170,7 +204,10 @@ export function KasaIslemKarti() {
         projeId: proje?.id ?? null,
         aciklama,
       },
-      secenekler: { taslak, plan, kurKontrolu: true },
+      // belgeId: tahsilat bu belgeyi kapatir (kasa_islem.belge_id) - belge
+      //   kartinin Tahsilat sekmesi bu bagla listeliyor.
+      secenekler: { taslak, plan, kurKontrolu: true,
+                    ...(belgeBagi ? { belgeId: belgeBagi } : {}) },
     };
   }
 
@@ -194,7 +231,9 @@ export function KasaIslemKarti() {
         ? await api.kasaEkle(govde(taslak, plan))
         : await api.kasaGuncelle(kayitId, { ...govde(taslak, plan), surum: String(sonuc?.islem.surum ?? '') });
       yaniti(y);
-      if (kayitId === null) git(`/kasa-islem/${y.islem.id}`, { replace: true });
+      // Modalde rota DEGISMEZ: kasa karti fatura kartinin ustunde acik kalir
+      //   (rotayi degistirmek arkadaki faturayi kapatiyordu).
+      if (kayitId === null && !modalMi) git(`/kasa-islem/${y.islem.id}`, { replace: true });
     } catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
   }
 
@@ -225,7 +264,7 @@ export function KasaIslemKarti() {
     setCalisiyor(true);
     try {
       const y = await api.kasaGerceklestir(kayitId, gHesap.id, sayi(gTutar) || undefined, gTarih);
-      git(`/kasa-islem/${y.islem.id}`);
+      if (modalMi) yaniti(y); else git(`/kasa-islem/${y.islem.id}`);
     } catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
   }
 
@@ -245,26 +284,14 @@ export function KasaIslemKarti() {
                   : grup === 'virman' || grup === 'doviz' ? 'Kaynak Hesap'
                   : 'Tahsil Edilen Hesap';
 
-  return (
-    <>
-      <div className="sayfabas">
-        <div className="basrow">
-          <h1>{secili?.ad ?? 'Kasa İşlemi'}</h1>
-          <span className="yol">
-            Kasa › {GRUP_ADI[grup] ?? grup}
-            {sonuc?.islem.islemNo ? ` · ${sonuc.islem.islemNo}` : ''}
-          </span>
-          {durum !== null && (
-            <span className={`rozet ${durum === 2 ? 'olumlu' : durum === 3 ? 'uyari' : ''}`}>
-              {KASA_DURUM[durum] ?? durum}
-            </span>
-          )}
-          {kullanici?.subeYazma === false && <span className="rozet uyari">salt okuma şubesi</span>}
-
-          <div className="sag">
-            <button className="d" onClick={() => git(planMi ? '/plan-vade' : '/kasa-islem')}>
-              Listeye Dön
-            </button>
+  /** Baslik cubugu dugmeleri - hem sayfa hem modal duzeninde AYNI. */
+  const dugmeler = (
+          <>
+            {modalMi
+              ? <button className="d" onClick={onKapat}>✖ Kapat</button>
+              : <button className="d" onClick={() => git(planMi ? '/plan-vade' : '/kasa-islem')}>
+                  Listeye Dön
+                </button>}
             {!kilitli && durum !== 1 && (
               <>
                 <button className="d" disabled={calisiyor} onClick={() => void kaydet(true, false)}>
@@ -289,11 +316,11 @@ export function KasaIslemKarti() {
                 İptal Et
               </button>
             )}
-          </div>
-        </div>
-      </div>
+          </>
+  );
 
-      <div className="sahne">
+  const govdeIcerik = (
+      <div className={modalMi ? '' : 'sahne'}>
         {hata && <div className="hata-kutusu">{hata}</div>}
         {sonuc?.uyarilar?.length ? (
           <ul className="uyari-liste">{sonuc.uyarilar.map((u, i) => <li key={i}>{u}</li>)}</ul>
@@ -535,6 +562,44 @@ export function KasaIslemKarti() {
           )}
         </div>
       </div>
+  );
+
+  // MODAL: belge kartinin Tahsilat sekmesinden acilinca fatura arkada kalir.
+  if (modalMi)
+    return (
+      <Modal
+        baslik={`${secili?.ad ?? 'Kasa İşlemi'}${sonuc?.islem.islemNo ? ` — ${sonuc.islem.islemNo}` : ''}`}
+        ustBilgi={durum !== null
+          ? <span className={`rozet ${durum === 2 ? 'ok' : durum === 3 ? 'uyari' : 'gri'}`}>
+              {KASA_DURUM[durum] ?? durum}
+            </span>
+          : undefined}
+        onKapat={onKapat}
+        alt={dugmeler}
+      >
+        {govdeIcerik}
+      </Modal>
+    );
+
+  return (
+    <>
+      <div className="sayfabas">
+        <div className="basrow">
+          <h1>{secili?.ad ?? 'Kasa İşlemi'}</h1>
+          <span className="yol">
+            Kasa › {GRUP_ADI[grup] ?? grup}
+            {sonuc?.islem.islemNo ? ` · ${sonuc.islem.islemNo}` : ''}
+          </span>
+          {durum !== null && (
+            <span className={`rozet ${durum === 2 ? 'olumlu' : durum === 3 ? 'uyari' : ''}`}>
+              {KASA_DURUM[durum] ?? durum}
+            </span>
+          )}
+          {kullanici?.subeYazma === false && <span className="rozet uyari">salt okuma şubesi</span>}
+          <div className="sag">{dugmeler}</div>
+        </div>
+      </div>
+      {govdeIcerik}
     </>
   );
 }

@@ -7,6 +7,7 @@ import { Modal } from '../bilesenler/GenForm';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { TarafArama } from '../bilesenler/TarafArama';
 import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
+import { KasaIslemKarti } from './KasaIslemKarti';
 import { useOturum } from '../kimlik/OturumBaglami';
 
 interface SatirDurumu {
@@ -236,6 +237,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [senaryo, setSenaryo] = useState(0);
   /** Bu belgeye baglanmis kasa islemleri (Tahsilat sekmesi). */
   const [tahsilatlar, setTahsilatlar] = useState<ListeSatiri[]>([]);
+  /** Tahsilat kasa karti MODAL - fatura arkada acik kalir. */
+  const [tahsilatAcik, setTahsilatAcik] = useState(false);
+  /** Tahsilat kaydedilince listeyi tazelemek icin sayac. */
+  const [tahsilatYenile, setTahsilatYenile] = useState(0);
   const [donusumler, setDonusumler] = useState<Record<string, unknown>[]>([]);
   const [sonuc, setSonuc] = useState<BelgeYaniti | null>(null);
   const [hata, setHata] = useState<string | null>(null);
@@ -262,12 +267,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const kayitliId = belgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
 
   /** Bu belge icin tahsilat islemi ac (cari ve tutar onyuklu). */
-  const tahsilatAc = () => {
-    if (!kayitliId) return;
-    kapat();
-    git(`/kasa-islem/yeni?tur=21&tarafId=${cari?.id ?? ''}` +
-        `&belgeId=${kayitliId}&tutar=${sonuc?.belge.genelToplam ?? ''}`);
-  };
+  /** Tahsilat MODAL acilir - belge kartindan cikmadan (kullanici istegi). */
+  const tahsilatAc = () => { if (kayitliId) setTahsilatAcik(true) };
 
   // Mevcut belgeyi ac: baslik + satirlar + dip toplam sunucudan gelir.
   useEffect(() => {
@@ -347,15 +348,19 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       try {
         const y = await api.liste('kasa-islem', {
           sayfa: 1, boyut: 50,
+          // Iptal edilen islem (durum 3) ve onun TERS kaydi listeye girmez -
+          //   ikisi de iptalIslemId tasir, toplami sisirmesinler.
           filtre: { op: 'and', kosullar: [
             { alan: 'belgeId', op: 'esit', deger: kayitliId },
             { alan: 'durum', op: 'esitDegil', deger: 3 },
+            // Kolon NULL olabiliyor - '= 0' eslesmiyordu, 'bos' dogru kosul.
+            { alan: 'iptalIslemId', op: 'bos' },
           ] },
         });
         setTahsilatlar(y.satirlar);
       } catch { setTahsilatlar([]) }
     })();
-  }, [kayitliId, aktifSekme]);
+  }, [kayitliId, aktifSekme, tahsilatYenile]);
 
   // Faturalama sekmesi: bu belgeden turetilmis belgeler (F8 zinciri).
   useEffect(() => {
@@ -767,19 +772,33 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         <div className="kagrup">
           <h6>
             Kalemler
-            {/* Dugmeler kesin belgede de GORUNUR, yalnizca pasif - kaybolunca
-                kullanici "nereye gitti" diye ariyordu; sebebi title'da yazili. */}
-            <button type="button" className="d bir" disabled={kilitli}
-                    title={kilitli ? 'Kesin belgeye satır eklenemez (İptal edip yeniden kesin).' : 'Yeni kalem ekle'}
+            {/* Ekle / Duzenle / Sil - YALNIZ IKON (yer kazanmak icin), ne
+                yaptiklari title'da. Dugmeler kesin belgede de GORUNUR, yalnizca
+                pasif: kaybolunca kullanici "nereye gitti" diye ariyordu. */}
+            <button type="button" className="d bir ikon" disabled={kilitli}
+                    title={kilitli ? 'Kesin belgeye satır eklenemez (İptal edip yeniden kesin).' : 'Satır ekle'}
                     onClick={() => setStokArama(true)}>
-              ＋ Satır
+              ＋
             </button>
-            <button type="button" className="d teh"
+            <button type="button" className="d ikon"
+                    disabled={kilitli || seciliSatirlar.size !== 1}
+                    title={kilitli ? 'Kesin belge satırı düzenlenemez.'
+                          : seciliSatirlar.size === 0 ? 'Önce bir satır seçin'
+                          : seciliSatirlar.size > 1 ? 'Tek satır seçin' : 'Seçili satırı düzenle'}
+                    onClick={() => {
+                      const anahtar = [...seciliSatirlar][0];
+                      const satir = satirlar.find(x => x.anahtar === anahtar);
+                      if (satir) setKalem(satir);
+                    }}>
+              ✎
+            </button>
+            <button type="button" className="d teh ikon"
                     disabled={kilitli || seciliSatirlar.size === 0}
                     title={kilitli ? 'Kesin belgeden satır silinemez.'
-                          : seciliSatirlar.size === 0 ? 'Önce satır seçin' : 'Seçili satırları sil'}
+                          : seciliSatirlar.size === 0 ? 'Önce satır seçin'
+                          : `Seçili ${seciliSatirlar.size} satırı sil`}
                     onClick={seciliSil}>
-              🗑 Sil{seciliSatirlar.size > 0 ? ` (${seciliSatirlar.size})` : ''}
+              🗑
             </button>
           </h6>
 
@@ -840,7 +859,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               })}
               {satirlar.length === 0 && (
                 <tr><td colSpan={irsaliyeMi ? 7 : 9} className="bos">
-                  Kalem yok — “＋ Satır” ile ekleyin.
+                  Kalem yok — “＋” ile ekleyin.
                 </td></tr>
               )}
             </tbody>
@@ -1181,6 +1200,20 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             setCariArama(false);
           }}
         />
+
+        {/* Tahsilat karti MODAL: cari, tutar ve belge bagi onyuklu gelir. */}
+        {tahsilatAcik && (
+          <KasaIslemKarti
+            acilis={{
+              tur: 21,
+              tarafId: cari?.id,
+              tarafUnvan: cari?.unvan,
+              belgeId: kayitliId,
+              tutar: String(sonuc?.belge.genelToplam ?? ''),
+            }}
+            onKapat={() => { setTahsilatAcik(false); setTahsilatYenile(t => t + 1) }}
+          />
+        )}
 
         {/* 0b) Satis temsilcisi - ayni ekran, kaynak personel. */}
         <TarafArama
