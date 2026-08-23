@@ -641,8 +641,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         secenekler: { taslak, stokKontrolu: true },
       };
 
-      setSonuc(await api.belgeEkle(govde));
+      const yanit = await api.belgeEkle(govde);
+      setSonuc(yanit);
       onKaydedildi?.();
+      // TRANSFERDE kayittan sonra kartta yapilacak is yok (e-Belge, tahsilat,
+      //   donusum yok) - kart kapanir, kullanici listeye doner. Diger belgelerde
+      //   kart acik kalir: numara/e-Belge/tahsilat oradan surdurulur.
+      if (transferMi) { kapat(); return }
     } catch (h) {
       if (h instanceof ApiHatasi) {
         if (h.dogrulamaMi && h.hata.alanlar)
@@ -696,7 +701,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
   if (!ekleyebilir)
     return (
-      <Modal baslik="Belge" onKapat={kapat} alt={<button className="d" onClick={kapat}>Kapat</button>}>
+      <Modal baslik="Belge" onKapat={kapat} alt={<button className="d kapat-dugmesi" onClick={kapat}>Kapat</button>}>
         <div className="hata-kutusu">Belge ekleme yetkiniz yok.</div>
       </Modal>
     );
@@ -818,7 +823,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
           <span className="ayrac" />
 
-          <button className="d" onClick={kapat}>✖ Kapat</button>
+          <button className="d kapat-dugmesi" onClick={kapat}>✖ Kapat</button>
 
           <label className="satir-ici">
             <input type="checkbox" checked={taslak} disabled={kilitli}
@@ -1701,7 +1706,7 @@ function StokAramaPenceresi({ etkin, onSec, onKapat }: {
     <Modal
       baslik="Stok / Hizmet Ara"
       onKapat={onKapat}
-      alt={<button className="d" onClick={onKapat}>✖ Kapat</button>}
+      alt={<button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>}
     >
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}
@@ -1868,7 +1873,7 @@ function KalemPenceresi({ satir, irsaliyeMi, transferMi, belgeTarihi, onKapat, o
       alt={
         <>
           <button className="d onay" onClick={kaydet}>💾 Tamam (Enter)</button>
-          <button className="d" onClick={onKapat}>✖ Kapat</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>
         </>
       }
     >

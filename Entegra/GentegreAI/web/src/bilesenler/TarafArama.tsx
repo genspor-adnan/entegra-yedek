@@ -167,7 +167,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
             onClick={() => satirlar[secili] && sec(satirlar[secili])}>
             Seç
           </button>
-          <button type="button" className="d" onClick={onKapat}>Kapat</button>
+          <button type="button" className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>
         </div>
 
         {/* Arama kutusu ve Liste/Son/Sik dugmeleri LISTE EKRANLARIYLA ayni

@@ -697,3 +697,8 @@ table.grid tr.flt input {
 .hareket-ozet { margin-left: auto }
 .detay-tablo tr.devir-satiri td { background: var(--yuz2); color: var(--soluk) }
 .gridtb { display: flex; gap: 4px; padding: 5px 0 0 }
+
+/* Kart arac cubugunda "Kapat" HER ZAMAN saga yanasik (kullanici karari):
+   kaydet/sil gibi eylemler solda toplanir, cikis ucta durur - yanlislikla
+   tiklama riski de azalir. */
+.katoolbar .kapat-dugmesi { margin-left: auto; order: 99 }

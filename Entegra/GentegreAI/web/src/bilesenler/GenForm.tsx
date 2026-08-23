@@ -502,14 +502,14 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
 
   if (yukleniyor)
     return (
-      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} alt={<button className="d" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
+      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} alt={<button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
         <div className="yukleniyor-satir">Yukleniyor…</div>
       </Modal>
     );
 
   if (!meta)
     return (
-      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} alt={<button className="d" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
+      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} alt={<button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
         <div className="hata-kutusu">{hata}</div>
       </Modal>
     );
@@ -680,7 +680,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
           {kaynak === 'kisi' && !salt && !cariyeBaglaGizli && !deger.bagId && (
             <button className="d" onClick={() => setCariyeBaglaAcik(true)}>🔗 Cariye Bağla</button>
           )}
-          <button className="d" onClick={kapatIstendi}>Kapat</button>
+          <button className="d kapat-dugmesi" onClick={kapatIstendi}>Kapat</button>
           {/* Cari'ye ozel: Musteri/Tedarikci rolleri hizlı erisim icin arac cubuguna,
               Kaydet/Sil ile ayni satira, saga yanasik olarak da tasindi (Roller sekmesindeki
               alanlarla AYNI deger - ikisi de senkron, tekrar degil). */}

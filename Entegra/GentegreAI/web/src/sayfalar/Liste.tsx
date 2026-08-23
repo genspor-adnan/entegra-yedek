@@ -265,7 +265,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       icerikBaslik={tanim.icerikBaslik}
       onSatirAc={satir => {
         // Belge listelerinde kart MODAL acilir (rota yok); digerlerinde kartYolu.
-        if (tanim.kaynak === 'belge' || tanim.kaynak === 'irsaliye')
+        if (tanim.kaynak === 'belge' || tanim.kaynak === 'irsaliye'
+            || tanim.kaynak === 'stok-transfer')
           setAcikBelgeId(Number(satir.id));
         else if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`);
       }}
@@ -734,7 +735,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // DEPOLAR ARASI TRANSFER (tur 20): cari YOK, para YOK - tek satir cikis
     //   deposundan duser, giris deposuna eklenir. Kart BelgeKarti'nin transfer
     //   dalidir (fiyat/KDV/e-Belge sutunlari gizli).
-    kaynak: 'stok-transfer', baslik: 'Stok Transferleri', kartYolu: '/stok-transfer',
+    // kartYolu YOK: kart generic GenForm degil BelgeKarti (modal) - onSatirAc
+    //   'stok-transfer' kaynagini da belge kartina yonlendirir.
+    kaynak: 'stok-transfer', baslik: 'Stok Transferleri',
     yol: 'Stok › Stok Transfer', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 20,
     cipler: [{ ad: 'Tumu' }],
     menuGrup: 'Stok', menuAd: 'Stok Transfer', ic: '🔄', yetkiKodu: 'belge',

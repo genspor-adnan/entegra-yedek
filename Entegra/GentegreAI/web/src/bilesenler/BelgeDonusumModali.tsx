@@ -117,11 +117,11 @@ export function BelgeDonusumModali({ belgeId, belgeTur, onKapat, onTamam }: Prop
       onKapat={onKapat}
       alt={
         <>
-          <button className="d" onClick={onKapat}>Kapat</button>
           <button className="d bir" disabled={calisiyor || satirlar.length === 0}
                   onClick={() => void donustur()}>
             {calisiyor ? 'Dönüştürülüyor…' : sonuc ? '⇢ Kalanı Dönüştür' : '⇢ Dönüştür'}
           </button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>
         </>
       }
     >
