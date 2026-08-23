@@ -44,6 +44,20 @@ interface SatirDurumu {
  */
 const YEREL_PARA = 'TL';
 
+/**
+ * Belge tarihi penceresi (GENEL KURAL, tum belge turleri): ileri tarih YOK,
+ * 7 gunden eski YOK. Sunucu da ayni kurali uygular (BelgeDeposu.BelgeTarihiKontrol) -
+ * buradaki sinirlar yalniz kullaniciyi erken uyarmak icindir.
+ */
+const GERIYE_GUN_SINIRI = 7;
+
+/** datetime-local kutusunun bekledigi YEREL "YYYY-MM-DDTHH:mm" (UTC'ye kaymaz). */
+const yerelAnMetni = (d: Date) => {
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
+       + `T${p(d.getHours())}:${p(d.getMinutes())}`;
+};
+
 /** Senaryo comboSU - SENARYO_ADI ile ayni kodlar, GIB profil sirasinda. */
 const SENARYO_SECENEK = [
   { deger: 1, ad: 'Temel Fatura' },
@@ -230,7 +244,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [turler, setTurler] = useState<KasaIslemTuru[]>([]);
 
   const [cari, setCari] = useState<{ id: number; unvan: string } | null>(null);
-  const [tarih, setTarih] = useState(new Date().toISOString().slice(0, 10));
+  // Tarih SAATIYLE tutulur: ayni gun icindeki hareket sirasi buna gore.
+  const [tarih, setTarih] = useState(() => yerelAnMetni(new Date()));
   const [seri, setSeri] = useState('WEB');
   /** Yalniz dis numarali turde (alis faturasi) kullanilir - tedarikcinin no'su. */
   const [belgeNo, setBelgeNo] = useState('');
@@ -238,6 +253,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [depo, setDepo] = useState<{ id: number; ad: string } | null>(null);
   /** Yalniz transferde (20): malin GIDECEGI depo. Tekil belgelerde kullanilmaz. */
   const [girisDepo, setGirisDepo] = useState<{ id: number; ad: string } | null>(null);
+  /** Transferde sorumluluk devri: teslim EDEN (asagida, irsaliyeyle ortak) ve
+      teslim ALAN personel - transferde ikisi de zorunlu. */
+  const [teslimAlan, setTeslimAlan] = useState<{ id: number; ad: string } | null>(null);
+  /** Hangi personel alani araniyor - ayni TarafArama iki alani da besler. */
+  const [personelArama, setPersonelArama] = useState<'eden' | 'alan' | null>(null);
   const [satici, setSatici] = useState<{ id: number; ad: string } | null>(null);
   const [teslimSekli, setTeslimSekli] = useState(0);
   const [sevkTarihi, setSevkTarihi] = useState('');
@@ -267,7 +287,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   /** Cari secim modali. YENI belgede acilista kendiliginden acilir: belgenin
       ilk sorusu "kime?" - kullaniciyi bos formda birakip aramaya zorlamak yerine
       dogrudan secim ekrani gelir (kisi kartindaki "Cariye Bağla" deseni). */
-  const [cariArama, setCariArama] = useState(!belgeId);
+  // Yeni belgede kart acilir acilmaz cari arama gelir - TRANSFERDE cari yok,
+  //   acilmaz (kullanici: "yeni dediginde cari sormasin").
+  const [cariArama, setCariArama] = useState(!belgeId && tur !== 20);
   /** Satis temsilcisi (personel) secim modali - cari ile ayni ekran. */
   const [saticiArama, setSaticiArama] = useState(false);
   /** e-Fatura senaryosu (belge.senaryo) - GIB profilini belirler. */
@@ -318,6 +340,23 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * Sunucudaki BelgeDeposu.DisNumaraliTur ile ayni liste.
    */
   const disNumarali = tur === 11;
+
+  /**
+   * TRANSFERDE ilk kalem eklenince BASLIK KILITLENIR (kullanici karari): depo ya
+   * da teslim eden/alan sonradan degisirse gridde duran satirlar baska bir
+   * transferin satirlari olur - stok yanlis depodan duser. Degistirmek isteyen
+   * satirlari silip yeniden secer. Diger turlerde bu kisit yok.
+   */
+  const baslikKilitli = kilitli || (transferMi && satirlar.length > 0);
+
+  /** Kutunun izin verdigi araligin iki ucu - her render'da "simdi"ye gore. */
+  const tarihEnGec = yerelAnMetni(new Date());
+  const tarihEnErken = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - GERIYE_GUN_SINIRI);
+    d.setHours(0, 0, 0, 0);
+    return yerelAnMetni(d);
+  })();
   /**
    * e-BELGE OLMAYAN turler: satis fisi (16 - perakende fis, GIB'e gitmez),
    * konsinye (109/119 - mal birakma, faturasi ayri kesilir) ve tahakkuk (13/17).
@@ -344,7 +383,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setSonuc(y);
         setTur(Number(y.belge.tur));
         setCari({ id: Number(y.belge.tarafId), unvan: String(y.belge.tarafUnvan ?? '') });
-        setTarih(String(y.belge.belgeTarihi ?? '').slice(0, 10));
+        setTarih(String(y.belge.belgeTarihi ?? '').slice(0, 16));
         setSeri(String(y.belge.belgeSeri ?? ''));
         setVadeGun(String(y.belge.vadeGun ?? 0));
         // Alis belgesi GIRIS deposunu, satis CIKIS deposunu kullanir.
@@ -366,6 +405,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setSoforAd(String(y.belge.soforAd ?? ''));
         setTeslimEden(y.belge.teslimEdenId
           ? { id: Number(y.belge.teslimEdenId), ad: String(y.belge.teslimEdenAdi ?? '') } : null);
+        setTeslimAlan(y.belge.teslimAlanId
+          ? { id: Number(y.belge.teslimAlanId), ad: String(y.belge.teslimAlanAdi ?? '') } : null);
         setSatirlar((y.satirlar ?? []).map((r, i) => ({
           anahtar: i + 1,
           satirTur: Number(r.tur ?? 1),
@@ -499,12 +540,28 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
     // Transferde cari YOK (sunucu da katalogtan ayni karari veriyor).
     if (!cari && !transferMi) { setAlanHatalari({ tarafId: 'Cari seçilmeli.' }); return }
+    // Tarih penceresi (tum belge turleri): ileri tarih ve 7 gunden eski yasak.
+    if (tarih > tarihEnGec) {
+      setAlanHatalari({ belgeTarihi: 'Belge ileri tarihli olamaz.' }); return;
+    }
+    if (tarih < tarihEnErken) {
+      setAlanHatalari({ belgeTarihi: `Belge tarihi ${GERIYE_GUN_SINIRI} günden eski olamaz.` }); return;
+    }
     if (transferMi) {
       if (!depo || !girisDepo) {
         setAlanHatalari({ [!depo ? 'cikisDepoId' : 'girisDepoId']: 'Depo seçilmeli.' }); return;
       }
       if (depo.id === girisDepo.id) {
         setAlanHatalari({ girisDepoId: 'Çıkış ve giriş deposu aynı olamaz.' }); return;
+      }
+      // Sorumluluk devri: mali kim verdi, kim aldi (sunucu da ayni kontrolu yapar).
+      if (!teslimEden || !teslimAlan) {
+        setAlanHatalari(!teslimEden
+          ? { teslimEdenId: 'Teslim eden seçilmeli.' }
+          : { teslimAlanId: 'Teslim alan seçilmeli.' }); return;
+      }
+      if (teslimEden.id === teslimAlan.id) {
+        setAlanHatalari({ teslimAlanId: 'Teslim eden ve teslim alan aynı kişi olamaz.' }); return;
       }
     }
     if (disNumarali && belgeNo.trim() === '') {
@@ -519,7 +576,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         belge: {
           tur,
           tarafId: cari?.id ?? 0,
-          belgeTarihi: `${tarih}T${new Date().toTimeString().slice(0, 8)}`,
+          belgeTarihi: tarih,
           // Seri e-Belge kavrami: transferde YOK - yoksa numara "T20|SWEB" gibi
           //   ayri bir sayactan gelir ve eski transferlerle ayni seride olmaz.
           belgeSeri: transferMi ? '' : seri,
@@ -545,7 +602,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           irsaliyeTarihi: irsaliyeMi && sevkTarihi ? sevkTarihi : undefined,
           soforTckn: irsaliyeMi ? soforTckn : undefined,
           tasiyiciId: irsaliyeMi ? tasiyici?.id ?? null : undefined,
-          teslimEdenId: irsaliyeMi ? teslimEden?.id ?? null : undefined,
+          // Teslim eden irsaliyede opsiyonel, TRANSFERDE zorunlu; teslim alan
+          //   yalniz transferde var (sorumluluk devri).
+          teslimEdenId: irsaliyeMi || transferMi ? teslimEden?.id ?? null : undefined,
+          teslimAlanId: transferMi ? teslimAlan?.id ?? null : undefined,
+
         },
         satirlar: dolu.map((s, i) => ({
           sira: i + 1,
@@ -791,7 +852,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
                 alanlar={LOOKUP_DEPO}
                 deger={depo?.ad}
-                saltOkunur={kilitli}
+                saltOkunur={baslikKilitli}
                 hata={alanHatalari.cikisDepoId}
                 onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
               />
@@ -843,7 +904,18 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             {/* e-Belge hucresi kalkinca 3 sutunlu izgara KAYIYORDU (Satis
                 Temsilcisi 1. satirin 3. hucresine dusuyordu). Bos yer tutucu
                 sutun duzenini korur: sol sutun Cari > Temsilci > Depo. */}
-            {eBelgeYok && (transferMi ? <span className="alan" aria-hidden /> : kapanmaAlani)}
+            {/* Transferde 3. sutun: Teslim Eden, altinda Teslim Alan (sorumluluk devri). */}
+            {eBelgeYok && (transferMi ? (
+              <TarafAlani
+                etiket="Teslim Eden"
+                zorunlu
+                deger={teslimEden?.ad}
+                kilitli={baslikKilitli}
+                ipucu="Personel ara"
+                onAc={() => setPersonelArama('eden')}
+                hata={alanHatalari.teslimEdenId}
+              />
+            ) : kapanmaAlani)}
 
             {/* --- 2. satir: Satis Temsilcisi cari'nin ALTINDA --- */}
             {/* Satis temsilcisi PERSONEL'dir (cari degil) ve secim cari ile ayni
@@ -856,7 +928,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
                 alanlar={LOOKUP_DEPO}
                 deger={girisDepo?.ad}
-                saltOkunur={kilitli}
+                saltOkunur={baslikKilitli}
                 hata={alanHatalari.girisDepoId}
                 onSec={x => setGirisDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
               />
@@ -872,12 +944,25 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
             <label className="alan">
               <span className="etiket zorunlu-isaret">{belgeAdi} Tarihi</span>
-              <input type="date" value={tarih} disabled={kilitli}
+              <input type="datetime-local" value={tarih} disabled={baslikKilitli}
+                     min={tarihEnErken} max={tarihEnGec}
                      onChange={e => setTarih(e.target.value)} />
+              {alanHatalari.belgeTarihi && (
+                <span className="alan-hata">{alanHatalari.belgeTarihi}</span>
+              )}
             </label>
 
-            {transferMi ? <span className="alan" aria-hidden />
-              : eBelgeYok ? bagliSiparisAlani : kapanmaAlani}
+            {transferMi ? (
+              <TarafAlani
+                etiket="Teslim Alan"
+                zorunlu
+                deger={teslimAlan?.ad}
+                kilitli={baslikKilitli}
+                ipucu="Personel ara"
+                onAc={() => setPersonelArama('alan')}
+                hata={alanHatalari.teslimAlanId}
+              />
+            ) : eBelgeYok ? bagliSiparisAlani : kapanmaAlani}
 
             {/* --- 3. satir: Cikis Deposu temsilcinin ALTINDA ---
                 Tahakkukta depo YOK: stok etkilemez (kasa_islem_turu.stok_etkiler=0). */}
@@ -893,12 +978,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               onSec={s => setDepo(s ? { id: Number(s.id), ad: String(s.ad ?? '') } : null)}
             />
             )}
-            {/* 3. satirin sutun duzeni korunsun: depo yoksa (tahakkuk) bos hucre. */}
-            {eBelgeYok && (tahakkukMu || transferMi) && <span className="alan" aria-hidden />}
+            {/* 3. satirin sutun duzeni korunsun: depo yoksa (tahakkuk) bos hucre.
+                TRANSFERDE ayni yeri sorumluluk devri alanlari doldurur. */}
+            {eBelgeYok && tahakkukMu && <span className="alan" aria-hidden />}
 
             {/* Irsaliyede/konsinyede Vade YOK (mal cikis tarihi belge tarihidir);
                 e-Belgesiz turlerde yerine bos hucre - Doviz/Kur sag sutunda kalsin. */}
-            {eBelgeYok && (irsaliyeMi || transferMi) && <span className="alan" aria-hidden />}
+            {eBelgeYok && irsaliyeMi && !transferMi && <span className="alan" aria-hidden />}
             {!irsaliyeMi && !transferMi && (
               <label className="alan">
                 <span className="etiket">Vade (gün)</span>
@@ -1069,7 +1155,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             </tfoot>
           </table>
           {!kilitli && satirlar.length > 0 && (
-            <div className="not">Satırı düzenlemek için çift tıklayın.</div>
+            <div className="not">
+              Satırı düzenlemek için çift tıklayın.
+              {transferMi && ' Kalem eklendiği için başlık (depolar, teslim eden/alan, tarih) kilitlendi — değiştirmek için kalemleri silin.'}
+            </div>
           )}
         </div>
 
@@ -1440,6 +1529,20 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           onSec={sec => {
             setSatici({ id: sec.id, ad: sec.unvan });
             setSaticiArama(false);
+          }}
+        />
+
+        {/* 0c) Transferde teslim eden / teslim alan - ayni personel ekrani,
+               hangi alanin doldurulacagi personelArama ile secilir. */}
+        <TarafArama
+          acik={personelArama !== null}
+          kaynaklar={['personel']}
+          yerTutucu="Personel ara…"
+          onKapat={() => setPersonelArama(null)}
+          onSec={sec => {
+            const kayit = { id: sec.id, ad: sec.unvan };
+            if (personelArama === 'eden') setTeslimEden(kayit); else setTeslimAlan(kayit);
+            setPersonelArama(null);
           }}
         />
 

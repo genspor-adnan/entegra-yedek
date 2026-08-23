@@ -117,6 +117,29 @@ public sealed class BelgeDeposu
             throw GentegreHatasi.Dogrulama("Belgede en az bir satir olmali.",
                 new AlanHatasi("satirlar", "Bos birakilamaz."));
 
+        // Transferde SORUMLULUK DEVRI kayda gecer: mali kim verdi, kim aldi.
+        //   Iki depo arasinda kaybolan malin hesabi bu iki isimden sorulur -
+        //   bu yuzden ikisi de zorunlu ve birbirinden farkli olmali.
+        if (TransferMi(tur))
+        {
+            if (Sayi(belge, "teslimEdenId") <= 0)
+                throw GentegreHatasi.Dogrulama("Teslim eden seçilmeli.",
+                    new AlanHatasi("teslimEdenId", "Zorunlu."));
+            if (Sayi(belge, "teslimAlanId") <= 0)
+                throw GentegreHatasi.Dogrulama("Teslim alan seçilmeli.",
+                    new AlanHatasi("teslimAlanId", "Zorunlu."));
+            if (Sayi(belge, "teslimEdenId") == Sayi(belge, "teslimAlanId"))
+                throw GentegreHatasi.IsKurali("Teslim eden ve teslim alan aynı kişi olamaz.");
+        }
+
+        // ------------------------------------------------- 0) BELGE TARIHI kurali ----
+        // TUM belge turlerinde gecerli (kullanici karari): belge ILERI TARIHLI
+        //   kesilemez ve 7 GUNDEN eskiye girilemez. Gerekce: stok ve cari bakiye
+        //   gecmise donuk degistirilirse kapanmis gunun raporu tutmaz; ileri tarih
+        //   ise e-Belge'de GIB tarafindan zaten reddedilir.
+        //   Saat de tasinir: ayni gun icindeki hareket sirasi (stok dokumu) buna gore.
+        BelgeTarihiKontrol(belge);
+
         // ---------------------------------------------- 1) taraf bilgisini DONDUR ----
         // Belge, kartin O ANDAKI halini tasir: kart sonradan degisse de belge degismez.
         //   tarafUnvan <- fatura_unvan (bos ise unvan). Istekte acikca gonderildiyse
@@ -517,6 +540,33 @@ public sealed class BelgeDeposu
         NpgsqlTransaction islem, int tur, CancellationToken iptal)
         => (await TurEtkileriAsync(baglanti, islem, tur, iptal)).Stok;
 
+    /// <summary>Belge tarihi penceresi: bugunden ileri YOK, 7 gunden eski YOK.</summary>
+    private const int GeriyeGunSiniri = 7;
+
+    private static void BelgeTarihiKontrol(IDictionary<string, object?> belge)
+    {
+        if (!belge.TryGetValue("belgeTarihi", out var ham) || ham is null) return;
+        if (ham is not DateTime tarih)
+        {
+            if (!DateTime.TryParse(Convert.ToString(ham, CultureInfo.InvariantCulture),
+                                   CultureInfo.InvariantCulture, DateTimeStyles.None, out tarih))
+                return;
+        }
+
+        var simdi = DateTime.Now;
+        // Ayni dakikadaki saat farki (istemci saati birkac saniye ileri olabilir)
+        //   hata sayilmasin diye 5 dakikalik pay birakilir.
+        if (tarih > simdi.AddMinutes(5))
+            throw GentegreHatasi.Dogrulama("Belge tarihi ileri tarihli olamaz.",
+                new AlanHatasi("belgeTarihi", $"En fazla {simdi:dd.MM.yyyy HH:mm} olabilir."));
+
+        var enEski = simdi.Date.AddDays(-GeriyeGunSiniri);
+        if (tarih < enEski)
+            throw GentegreHatasi.Dogrulama(
+                $"Belge tarihi {GeriyeGunSiniri} günden eski olamaz.",
+                new AlanHatasi("belgeTarihi", $"En erken {enEski:dd.MM.yyyy} olabilir."));
+    }
+
     /// <summary>
     /// Bu belge turunde cari SECILMEK ZORUNDA mi (kasa_islem_turu.cari_zorunlu:
     /// 1 zorunlu / 0 istege bagli / -1 yasak). Katalogda olmayan tur: zorunlu
@@ -602,6 +652,7 @@ public sealed class BelgeDeposu
                    b.arac_plaka as "aracPlaka", b.sofor_ad as "soforAd",
                    b.sofor_tckn as "soforTckn", b.teslim_eden_id as "teslimEdenId",
                    td.unvan as "teslimEdenAdi",
+                   b.teslim_alan_id as "teslimAlanId", ta.unvan as "teslimAlanAdi",
                    b.proje_id as "projeId", b.efatura_durum as "efaturaDurum",
                    b.efatura_sonuc as "efaturaSonuc", b.senaryo, b.zarf_id as "zarfId",
                    b.gonderici_alias as "gondericiAlias",
@@ -620,6 +671,7 @@ public sealed class BelgeDeposu
               left join public.depo  gd on gd.id = b.giris_depo_id
               left join public.taraf sc on sc.id = b.satici_id
               left join public.taraf td on td.id = b.teslim_eden_id
+              left join public.taraf ta on ta.id = b.teslim_alan_id
               left join public.belge kb on kb.id = b.kaynak_id and b.kaynak_tur = 30
               left join public.kasa_islem_turu kt on kt.kod = kb.tur
               left join lateral (
@@ -713,7 +765,8 @@ public sealed class BelgeDeposu
         ["teslimSekli"] = "teslim_sekli", ["merkezId"] = "merkez_id",
         // 089 sevkiyat alanlari (e-Irsaliye UBL: plaka + sofor zorunlu)
         ["aracPlaka"] = "arac_plaka", ["soforAd"] = "sofor_ad", ["soforTckn"] = "sofor_tckn",
-        ["tasiyiciId"] = "tasiyici_id", ["teslimEdenId"] = "teslim_eden_id"
+        ["tasiyiciId"] = "tasiyici_id", ["teslimEdenId"] = "teslim_eden_id",
+        ["teslimAlanId"] = "teslim_alan_id"
     };
 
     private async Task<int> BelgeEkleAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
