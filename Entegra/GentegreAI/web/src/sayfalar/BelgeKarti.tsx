@@ -1012,6 +1012,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           <KalemPenceresi
             satir={kalem}
             irsaliyeMi={irsaliyeMi}
+            doviz={String(sonuc?.belge.belgeDovizi ?? 'TL')}
             onKapat={() => setKalem(null)}
             onKaydet={r => { kalemKaydet(r); setKalem(null) }}
           />
@@ -1203,9 +1204,21 @@ function StokAramaPenceresi({ etkin, onSec, onKapat }: {
  * ekleme/duzenleme buradan yapilir - hucre ici duzenlemede satir yanlislikla
  * ustune yaziliyor ve uzun stok adlari okunmuyordu.
  */
-function KalemPenceresi({ satir, irsaliyeMi, onKapat, onKaydet }: {
+/**
+ * "+/−" dugmeleri: 1 artirir/azaltir. Alt sinir 1 - eksi (ve sifir) miktar
+ * belge satirinda anlamsiz, dugmeyle oraya inilemez.
+ */
+function adetKaydir(deger: string, yon: number): string {
+  const sayi = Number(deger.replace(',', '.')) || 0;
+  const yeni = Math.max(1, sayi + yon);
+  return Number.isInteger(yeni) ? String(yeni) : yeni.toFixed(2).replace('.', ',');
+}
+
+function KalemPenceresi({ satir, irsaliyeMi, doviz, onKapat, onKaydet }: {
   satir: SatirDurumu;
   irsaliyeMi: boolean;
+  /** Belgenin para birimi - birim fiyatin yaninda gosterilir. */
+  doviz: string;
   onKapat(): void;
   onKaydet(r: SatirDurumu): void;
 }) {
@@ -1246,28 +1259,36 @@ function KalemPenceresi({ satir, irsaliyeMi, onKapat, onKaydet }: {
         {hata && <div className="hata-kutusu">{hata}</div>}
         {/* Cerceve kalir, BASLIK yok: pencere basligi zaten stok/hizmet adi. */}
         <div className="kagrup">
-          <div className="alan-izgara">
-            {/* Stok/hizmet adi PENCERE BASLIGINDA yaziyor - burada tekrarlamak
-                yer kaplamaktan baska ise yaramiyordu. Baska bir kalem icin arama
-                penceresinden yeniden secilir. */}
+          {/* Alanlar ALT ALTA ve giris sirasinda: Miktar > Birim Fiyat > KDV >
+              Iskonto. Stok/hizmet adi PENCERE BASLIGINDA yaziyor - burada
+              tekrarlamak yer kaplamaktan baska ise yaramiyordu. */}
+          <div className="alan-izgara tek-sutun">
             <label className="alan">
               <span className="etiket">Miktar</span>
-              <input autoFocus className="hiza-sag" value={r.adet} onKeyDown={tus}
-                     onChange={e => degis('adet', e.target.value)} />
+              <span className="ikili">
+                {/* Eksi isareti elle de yazilamaz. */}
+                <input autoFocus className="hiza-sag" value={r.adet} onKeyDown={tus}
+                       onChange={e => degis('adet', e.target.value.replace(/-/g, ''))} />
+                {/* Fare ile hizli artir/azalt - klavyeden yazmak da serbest. */}
+                <button type="button" className="mini" title="Azalt"
+                        onClick={() => degis('adet', adetKaydir(r.adet, -1))}>−</button>
+                <button type="button" className="mini" title="Artır"
+                        onClick={() => degis('adet', adetKaydir(r.adet, +1))}>+</button>
+              </span>
             </label>
+
             <label className="alan">
               <span className="etiket">Birim Fiyat</span>
-              <input className="hiza-sag" value={r.birimFiyat} onKeyDown={tus}
-                     onChange={e => degis('birimFiyat', e.target.value)} />
+              <span className="ikili">
+                <input className="hiza-sag" value={r.birimFiyat} onKeyDown={tus}
+                       onChange={e => degis('birimFiyat', e.target.value)} />
+                {/* Para birimi BELGENIN dovizi - satir bazinda doviz yok. */}
+                <input className="birim" value={doviz} readOnly tabIndex={-1} />
+              </span>
             </label>
 
             {/* Iskonto ve KDV HER TURDE girilir - irsaliyede de matrah/KDV
                 hesaplanir (dip toplam ondan cikar), yalniz gridde gosterilmez. */}
-            <label className="alan">
-              <span className="etiket">İskonto %</span>
-              <input className="hiza-sag" value={r.iskonto} onKeyDown={tus}
-                     onChange={e => degis('iskonto', e.target.value)} />
-            </label>
             <label className="alan">
               <span className="etiket">KDV %</span>
               <select value={r.kdv} onKeyDown={tus}
@@ -1277,6 +1298,12 @@ function KalemPenceresi({ satir, irsaliyeMi, onKapat, onKaydet }: {
                   ? null : <option value={r.kdv}>%{r.kdv}</option>}
                 {KDV_ORANLARI.map(o => <option key={o} value={o}>%{o}</option>)}
               </select>
+            </label>
+
+            <label className="alan">
+              <span className="etiket">İskonto %</span>
+              <input className="hiza-sag" value={r.iskonto} onKeyDown={tus}
+                     onChange={e => degis('iskonto', e.target.value)} />
             </label>
 
             {irsaliyeMi && (

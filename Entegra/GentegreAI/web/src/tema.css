@@ -416,6 +416,14 @@ table.grid tr.flt input {
 .alan .ikili { grid-column: 2; display: flex; gap: 5px; min-width: 0 }
 .alan .ikili input { flex: 1; min-width: 0 }
 .alan .ikili select { flex: none; width: 64px }
+/* Deger yanindaki sabit birim (ör. kalem penceresinde para birimi) - girdi degil,
+   etiket gibi durur ama hizalama ayni kalsin diye input olarak cizilir. */
+.alan .ikili input.birim {
+  flex: none; width: 52px; text-align: center; background: var(--yuz2);
+  color: var(--soluk); font-weight: 700; cursor: default;
+}
+/* Miktar +/- dugmeleri edit yuksekliginde. */
+.alan .ikili button.mini { flex: none; width: 26px; height: 23px; font-size: 13px; line-height: 1 }
 .alan .kod-ad, .alan .alan-hata { grid-column: 2 }
 /* Kisi karti Bagli Cari/Rol/Durum satiri: Bagli Cari buyur, Rol/Durum saga yanasik sabit genislik. */
 .kisi-ust-satir { display: flex; gap: 12px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--cizgi) }
