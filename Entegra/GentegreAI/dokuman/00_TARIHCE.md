@@ -2537,3 +2537,119 @@ başlıkta kalıyor; sekmede **Şoför TC**, **Taşıyıcı Ünvan** ve **Sevk T
 
 **Sırada (F4):** kapatma + kur farkı; ardından F5 (çek/senet), F6 (kredi/kupon),
 F7 (belge fişleme).
+
+## 23-24.08.2026 — Stok belgeleri, ayar altyapısı, sunucuya yayın
+
+Uzun bir oturum; sırayla ne yapıldığı ve **neden** öyle yapıldığı.
+
+### Alış kartlarının testinde çıkan iki kusur
+
+Altı alış türü (9/10/11/12/17/109) uçtan uca kayıt açılarak denendi. İki şey yanlıştı:
+**siparişte e-Belge sekmesi** görünüyordu (hiçbir sipariş GİB'e gitmez) ve alış
+siparişindeki düğme "Ön Ödeme **Al**" deyip tahsilat (21) açıyordu — alışta ödemedir
+(31). Cari yönü doğruydu: tedarikçiye borç = cari **alacak**.
+
+### Dönüşümde cari iki kez borçlanıyordu
+
+İrsaliye → fatura dönüşümünde hedef belge cari hareketini **tekrar** yazıyordu:
+alış irsaliyesi tedarikçiyi 6.000 alacaklandırıyor, ondan türeyen fatura bir 6.000
+daha. Stok tarafında bu koruma vardı (kaynak düşürdüyse hedef satır
+`stok_durum_degis=0`), cari tarafında yoktu. Kural stokla simetrik hale getirildi:
+`DonusturAsync` kaynak türün `cari_etkiler` bayrağını okuyor, 1 ise hedefte cari
+yazılmıyor. Sipariş → irsaliye etkilenmiyor (siparişin cari etkisi zaten yok).
+
+### Alış faturası numarası tedarikçinin
+
+Sayaç eski veriden tohumlandığı için `3012026000357895` gibi anlamsız numaralar
+üretiyordu. Alış faturasında (11) numara artık kullanıcıdan; aynı cariden aynı
+numara ikinci kez girilemiyor (mükerrer fatura = cari ve KDV iki kere). DB'ye UNIQUE
+konmadı: göç verisinde zaten mükerrer satırlar var, kısıt onların güncellenmesini
+kilitlerdi.
+
+### Stok kartı: Stok Durumu + Hareketler (mockup'a göre)
+
+- **Stok Durumu**: 4 KPI + depo bazlı grid. *Rezerve* = açık satış siparişi kalanı,
+  *Yolda* = açık alış siparişi kalanı — ikisi de F8 sayacından türer, ayrı
+  rezervasyon tablosu yok. **Kullanılabilir = Miktar − Rezerve** ve kritik uyarısı
+  buna bakar: depoda mal görünüp hepsi söz verilmişse "Yeterli" demek yanıltıcı.
+  Min/Max depo bazlı tanımlanabilsin diye `stok_durum`'a iki kolon eklendi (db/099).
+- **Hareketler**: tarih aralığı + depo süzgeci, devir → yürüyen kalan, CSV. Kaynak
+  `belge_satir`; yalnız **stoğu gerçekten oynatan** satırlar (`stok_durum_degis=1`) —
+  irsaliyeden türeyen fatura görünmez, yoksa aynı mal iki kez girmiş okunurdu.
+
+### Yeni stok belgeleri
+
+| Tür | Ne yapar | Cari | Muhasebe fişi |
+|---|---|---|---|
+| **20 Stok Transfer** | tek satır çıkış deposundan düşer, giriş deposuna ekler | yok | hayır |
+| **105 Stoktan Talep** | bir birim depodan mal ister | yok | hayır |
+| **3 Giriş Fişi** | fire / sayım fazlası | yok | **evet** (F7'de) |
+| **4 Çıkış Fişi** | sarf / imha / kayıp / fire / sayım eksiği | yok | **evet** (F7'de) |
+
+Transferde **teslim eden + teslim alan** zorunlu (iki depo arasındaki sorumluluk
+devrinin kaydı; `belge.teslim_alan_id` db/100 ile geldi) ve **ilk kalem eklenince
+başlık kilitlenir** — depo sonradan değişirse gridde duran satırlar başka bir
+transferin satırı olur, stok yanlış depodan düşer. Tersi de doğru: başlık (depolar,
+teslim eden/alan) tamamlanmadan kalem eklenemez. Stok fişlerinde **tip zorunlu**
+(fire/sarf/imha…) çünkü muhasebe hesabını o seçecek; fiş **vergisizdir** — fiyat
+kalır (matrah), KDV/iskonto yok.
+
+### Belge tarihi penceresi ve ayar altyapısı
+
+Tarih artık **saatiyle** giriliyor. İleri tarih yasak (GİB zaten reddeder), geriye
+dönük sınır **ayardan**: `belge.geri_gun_siniri` (varsayılan 7, 0 = sınırsız).
+Bu, **Yönetim › Ayarlar › Genel** ekranını doğurdu ve arkasından:
+
+- `AyarDeposu` — `public.referans` üzerinde **beyaz listeli** ayar deposu. Göçten
+  gelen yüzlerce `ops_*` satırı ekrana dökülmesin diye yalnız tanımlı anahtarlar
+  görünür/yazılır; sayısal ayarlarda **aralık** denetimi var.
+- **`help` tablosu (db/103)** ve alan yanındaki **"?" ikonu** — genel kural:
+  açıklama ekranın altına paragraf olarak yazılmaz. Metin kodda değil DB'de: dil
+  eklemek ve müşteriye göre değiştirmek sürüm gerektirmesin.
+- Eklenen ayarlar: sayfa boyu (10-500), yerel para birimi (kartta `'TL'` sabiti
+  buradan geliyor artık), negatif stok davranışı (serbest/uyar/**engelle**) ve
+  **Güvenlik sekmesi** — jwt süresi, refresh, tek oturum, parola uzunluğu, hatalı
+  giriş sınırı, kilit süresi. Bu altısını `KimlikServisi`/`KullaniciDeposu` zaten
+  referans tablosundan okuyordu; ekranda görünmedikleri için kimse değiştiremiyordu.
+
+`GET /api/ayar` yetki istemez: ayar ekranın davranışını belirliyor (tarih kutusunun
+sınırı gibi), yetkisiz kullanıcı varsayılanla çalışsaydı sunucunun kabul ettiği
+tarihi arayüz engellerdi. Yazma `ayar` yetkisine bağlı.
+
+### Sunucuya yayın (46.36.201.170)
+
+KoBoToolbox'ın çalıştığı sunucuya, ona dokunmadan: **PG18** (yalnız 127.0.0.1:5433,
+kalıcı volume) + yerelden `pg_dump -Fc` ile taşınan veri (70 tablo, 453 belge) +
+**API** docker'da `aspnet:10` ile 127.0.0.1:5180 + **web** `~/gentegre-ai/web`,
+mevcut nginx sitesine `/ai` blokları eklenerek.
+
+İki tuzak çıktı, ikisi de not:
+1. nginx'te **regex location prefix'ten önce eşleşir** — sitedeki `\.(js|css…)$`
+   bloğu `/ai/assets/*.js`'i yakalayıp 404 veriyordu; `^~` ile çözüldü.
+2. **Basic auth ile Bearer birlikte çalışmaz**: tarayıcı `Authorization: Basic`
+   gönderir, uygulama her API isteğine `Authorization: Bearer` koyar ve tek başlık
+   olabildiği için Basic ezilir → nginx 401. `/ai/api/` bloğunda basic auth kapatıldı
+   (API kendi JWT'siyle korunuyor, hatalı giriş kilidi var); statik dosyalar korumada.
+
+Yayın artık tek komut: `yayin\yayinla.ps1` (web build + api publish + göçler + scp) ve
+sunucuda `sunucu-guncelle.sh` — **göç geçmişi tablosu** (yalnız yeni dosyalar çalışır;
+göç patlarsa kod hiç değiştirilmez), önce-kopyala-sonra-taşı değişim ve **sağlık
+kontrolü düşerse otomatik geri alma**.
+
+### Refaktör: belge türü davranış tablosu
+
+Kart 12 ayrı bayrakla (`tur === 20`, `tur === 3 || tur === 4`…) hangi alanın
+görüneceğine karar ediyordu; her yeni tür bu koşulları onlarca yere serpiyordu.
+Davranış artık iki dosyada: **`web/src/sayfalar/belgeTuru.ts`** (ekran: hangi alan,
+kalem biçimi `tam|sade|miktar`, kaydedince kapan mı…) ve
+**`Cekirdek/Katalog/BelgeTuru.cs`** (sunucu: stok yönü, depo alanı, dış numara).
+Katalogdaki üç stok belgesi listesinin ortak kuyruk kolonları da tek yardımcıya indi.
+
+Refaktör sırasında bir regresyon yakalandı ve düzeltildi: sekme süzgecinde kalem
+biçimi ölçüt alınınca **irsaliyenin Faturalama sekmesi kayboldu** — doğru ölçüt
+"depo belgesi ya da stok fişi mi". Sekiz kart tipi (fatura, irsaliye, sipariş,
+tahakkuk, konsinye, transfer, talep, giriş fişi) refaktör öncesiyle birebir aynı
+çıktı verdiği doğrulandı.
+
+**Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
+(giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).

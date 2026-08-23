@@ -30,46 +30,6 @@ public sealed class BelgeDeposu
     }
 
     /// <summary>
-    /// Stok CIKISI yonundeki belgeler. Cari tarafi olanlarda ayni zamanda
-    /// "satis" demektir (cari BORCLANIR); cikis fisinde (4) cari yoktur, yalniz
-    /// stok yonunu belirler. Alis/giris belgelerinde tam tersi.
-    /// </summary>
-    private static bool SatisMi(int tur) => tur is 14 or 15 or 16 or 119 or 29 or 105 or 133 or 4;
-
-    /// <summary>
-    /// Depolar arasi transfer (tur 20): TEK satir IKI depoyu birden oynatir -
-    /// cikis deposundan duser, giris deposuna ekler. Cari yoktur, mal firmada kalir.
-    /// </summary>
-    private static bool TransferMi(int tur) => tur == 20;
-
-    /// <summary>
-    /// Stoktan talep (tur 105): bir birim depodan mal ISTER. Stok ve cari
-    /// etkilemez - asil hareketi, talep karsilaninca kesilen transfer yapar.
-    /// Zorunlusu: istenen depo + talep eden kisi.
-    /// </summary>
-    private static bool TalepMi(int tur) => tur == 105;
-
-    /// <summary>
-    /// Stok fisleri: 3 giris / 4 cikis. Irsaliye gibi calisir (stok oynar,
-    /// miktar + birim fiyat girilir) ama CARI YOKTUR - karsilik gider/gelir
-    /// hesabidir, o yuzden muhasebe fisi uretirler (fis_mi=1).
-    /// TIPI fisin sebebini tasir (fire/sarf/imha/sayim...) ve zorunludur:
-    /// muhasebe hesabi ona gore secilecek (F7).
-    /// </summary>
-    private static bool StokFisiMi(int tur) => tur is 3 or 4;
-
-    /// <summary>
-    /// Numarasi BIZDE degil, KARSI TARAFTA uretilen belge turleri. Alis faturasinin
-    /// numarasi tedarikcinin fatura numarasidir: harf/tire icerebilir, bizim
-    /// sayacimizla iliskisi yoktur (sayac tohumu eski veriden geldigi icin
-    /// "3012026000357895" gibi anlamsiz numaralar uretiyordu). Kullanici girer.
-    ///
-    /// Alis irsaliyesi (10) ve alis fisi (12) simdilik DISARIDA: onlarin sayaci
-    /// temiz calisiyor, ayni degisiklik istenirse buraya eklenir.
-    /// </summary>
-    private static bool DisNumaraliTur(int tur) => tur is 11;
-
-    /// <summary>
     /// Ayni tedarikciden ayni numarayi ikinci kez girmeyi engeller (mukerrer alis
     /// faturasi = cari ve KDV iki kere). DB'de UNIQUE degil: eski goc verisinde
     /// zaten mukerrer satirlar var, kisit onlari reddedip guncellemeyi kilitlerdi.
@@ -140,19 +100,19 @@ public sealed class BelgeDeposu
         // Transferde SORUMLULUK DEVRI kayda gecer: mali kim verdi, kim aldi.
         //   Iki depo arasinda kaybolan malin hesabi bu iki isimden sorulur -
         //   bu yuzden ikisi de zorunlu ve birbirinden farkli olmali.
-        if (StokFisiMi(tur))
+        if (BelgeTuru.StokFisiMi(tur))
         {
             if (Sayi(belge, "tipi") <= 0)
                 throw GentegreHatasi.Dogrulama("Fiş tipi seçilmeli.",
                     new AlanHatasi("tipi", "Zorunlu."));
 
-            var depoAlani = SatisMi(tur) ? "cikisDepoId" : "girisDepoId";
+            var depoAlani = BelgeTuru.CikisMi(tur) ? "cikisDepoId" : "girisDepoId";
             if (Sayi(belge, depoAlani) <= 0)
                 throw GentegreHatasi.Dogrulama("Depo seçilmeli.",
                     new AlanHatasi(depoAlani, "Zorunlu."));
         }
 
-        if (TalepMi(tur))
+        if (BelgeTuru.TalepMi(tur))
         {
             if (Sayi(belge, "cikisDepoId") <= 0)
                 throw GentegreHatasi.Dogrulama("İstenen depo seçilmeli.",
@@ -163,7 +123,7 @@ public sealed class BelgeDeposu
                     new AlanHatasi("teslimAlanId", "Zorunlu."));
         }
 
-        if (TransferMi(tur))
+        if (BelgeTuru.TransferMi(tur))
         {
             if (Sayi(belge, "teslimEdenId") <= 0)
                 throw GentegreHatasi.Dogrulama("Teslim eden seçilmeli.",
@@ -257,7 +217,7 @@ public sealed class BelgeDeposu
         //   (uretirse mukerrer/anlamsiz numara olur, e-Fatura eslesmesi kirilir).
         //   Kullanici girer, biz yalniz bosluk ve ayni tedarikciden mukerrer
         //   girisi kontrol ederiz. Diger turlerde numara EN SON, sayactan.
-        var disNumara = DisNumaraliTur(tur);
+        var disNumara = BelgeTuru.DisNumarali(tur);
         var girilenNo = Metin(belge, "belgeNo").Trim();
 
         if (disNumara)
@@ -468,7 +428,7 @@ public sealed class BelgeDeposu
 
         // Dis numarali hedefte (alis faturasi) numarayi kullanici verir - kaynagin
         //   irsaliye numarasi kopyalanmaz, sayac da uretmez.
-        if (DisNumaraliTur(hedefTur)) belge["belgeNo"] = (belgeNo ?? "").Trim();
+        if (BelgeTuru.DisNumarali(hedefTur)) belge["belgeNo"] = (belgeNo ?? "").Trim();
 
         // Kaynak turu cariyi zaten etkilediyse (irsaliye) hedef TEKRAR etkilemez;
         //   yalniz kaynagin etkilemedigi durumda (siparis) fatura/irsaliye yazar.
@@ -963,8 +923,8 @@ public sealed class BelgeDeposu
     private async Task StokDurumGuncelleAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, int tur, bool stokKontrolu, List<string> uyarilar, CancellationToken iptal)
     {
-        var satis = SatisMi(tur);
-        var transfer = TransferMi(tur);
+        var cikis = BelgeTuru.CikisMi(tur);
+        var transfer = BelgeTuru.TransferMi(tur);
         // Ayar belge basina BIR KEZ okunur (60 sn onbellekli) - satir basina degil.
         var negatifDavranis = await AyarDeposu.SayiAsync(baglanti, islem,
                                                         "stok.negatif_davranis", iptal);
@@ -1011,11 +971,11 @@ public sealed class BelgeDeposu
             }
 
             // Normal belge: yon TURDEN gelir, depo satirda hangisi doluysa o.
-            var depoId = satis ? cikisDepo ?? girisDepo : girisDepo ?? cikisDepo;
+            var depoId = cikis ? cikisDepo ?? girisDepo : girisDepo ?? cikisDepo;
             if (depoId is null) continue;
 
             await DepoyaYazAsync(baglanti, islem, stokId, depoId.Value,
-                                 satis ? 0m : miktar, satis ? miktar : 0m,
+                                 cikis ? 0m : miktar, cikis ? miktar : 0m,
                                  stokKontrolu, negatifDavranis, uyarilar, iptal);
         }
     }
@@ -1081,7 +1041,7 @@ public sealed class BelgeDeposu
               from public.belge b where b.id = @p3
             """, baglanti, islem);
         komut.Parameters.AddWithValue("p0", (short)tur);
-        komut.Parameters.AddWithValue("p1", SatisMi(tur));
+        komut.Parameters.AddWithValue("p1", BelgeTuru.CikisMi(tur));
         komut.Parameters.AddWithValue("p2", baglam.KullaniciId);
         komut.Parameters.AddWithValue("p3", belgeId);
         await komut.ExecuteNonQueryAsync(iptal);

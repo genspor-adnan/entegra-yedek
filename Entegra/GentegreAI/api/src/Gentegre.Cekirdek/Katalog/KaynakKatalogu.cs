@@ -914,6 +914,29 @@ public static class KaynakKatalogu
             new("subeId",           "v.sube_id",           "sayi",  "Şube",   Varsayilan: false)
         });
 
+    // ------------------------------------------- stok belgeleri: ortak kolonlar ----
+    // Transfer / talep / giris-cikis fisi listeleri ayni kuyrugu paylasiyor:
+    //   kac kalem, toplam miktar, aciklama, durum, sube. Uc yere kopyalanmisti;
+    //   yeni bir stok belgesi eklenince dorduncu kopya olacakti.
+    private static KolonTanimi[] StokBelgesiKuyrukKolonlari() => new KolonTanimi[]
+    {
+        // Satir-basi alt sorgu: bu listeler kucuktur (belge sayisi binlerle
+        //   olculmez), maliyeti kabul edilir.
+        new("kalemSayisi",
+            "(select count(*) from public.belge_satir s where s.belge_id = b.id)",
+                                              "sayi",  "Kalem", Hizalama: "sag",
+                                              Siralanabilir: false, Filtrelenebilir: false),
+        new("miktar",
+            "(select coalesce(sum(s.miktar), 0) from public.belge_satir s where s.belge_id = b.id)",
+                                              "para",  "Miktar", Hizalama: "sag", Bicim: "#,##0.##",
+                                              Siralanabilir: false, Filtrelenebilir: false),
+        new("aciklama",    "coalesce(b.aciklama, '')", "metin", "Açıklama", Genislik: 240),
+        new("durumAdi",    "case b.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end",
+                                              "metin", "Durum", Hizalama: "orta"),
+        new("durum",       "b.durum",        "sayi",  "Durum Kodu", Hizalama: "orta", Varsayilan: false),
+        new("subeId",      "b.sube_id",      "sayi",  "Şube", Varsayilan: false),
+    };
+
     // --------------------------------------------------- stok transferi ----
     // Ayni `belge` tablosu, tur 20. Ayri kaynak: transferde CARI ve TUTAR yoktur,
     //   bunun yerine IKI DEPO ve miktar konusur - genel belge listesinin cari/tutar
@@ -941,22 +964,7 @@ public static class KaynakKatalogu
             // Sorumluluk devri: eski transferlerde bos olabilir (alan 100'de eklendi).
             new("teslimEden",  "coalesce(te.unvan, '')", "metin", "Teslim Eden", Genislik: 180),
             new("teslimAlan",  "coalesce(ta.unvan, '')", "metin", "Teslim Alan", Genislik: 180),
-            // Kalem sayisi ve toplam miktar satir-basi alt sorgu; transfer listeleri
-            //   kucuk oldugu icin (belge sayisi binlerle olcülmez) maliyeti kabul.
-            new("kalemSayisi",
-                "(select count(*) from public.belge_satir s where s.belge_id = b.id)",
-                                                  "sayi",  "Kalem", Hizalama: "sag",
-                                                  Siralanabilir: false, Filtrelenebilir: false),
-            new("miktar",
-                "(select coalesce(sum(s.miktar), 0) from public.belge_satir s where s.belge_id = b.id)",
-                                                  "para",  "Miktar", Hizalama: "sag", Bicim: "#,##0.##",
-                                                  Siralanabilir: false, Filtrelenebilir: false),
-            new("aciklama",    "coalesce(b.aciklama, '')", "metin", "Açıklama", Genislik: 240),
-            new("durumAdi",    "case b.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end",
-                                                  "metin", "Durum", Hizalama: "orta"),
-            new("durum",       "b.durum",        "sayi",  "Durum Kodu", Hizalama: "orta", Varsayilan: false),
-            new("subeId",      "b.sube_id",      "sayi",  "Şube", Varsayilan: false)
-        });
+        }.Concat(StokBelgesiKuyrukKolonlari()).ToArray());
 
     // ------------------------------------------------------ stoktan talep ----
     // Belge turu 105: bir birim/kisi depodan mal ISTER. Stok ve cari ETKILEMEZ
@@ -982,25 +990,12 @@ public static class KaynakKatalogu
             new("cikisDepo",   "coalesce(cd.ad, '')", "metin", "İstenen Depo", Genislik: 180),
             new("girisDepo",   "coalesce(gd.ad, '')", "metin", "Teslim Deposu", Genislik: 180),
             new("talepEden",   "coalesce(ta.unvan, '')", "metin", "Talep Eden", Genislik: 200),
-            new("kalemSayisi",
-                "(select count(*) from public.belge_satir s where s.belge_id = b.id)",
-                                                  "sayi",  "Kalem", Hizalama: "sag",
-                                                  Siralanabilir: false, Filtrelenebilir: false),
-            new("miktar",
-                "(select coalesce(sum(s.miktar), 0) from public.belge_satir s where s.belge_id = b.id)",
-                                                  "para",  "Miktar", Hizalama: "sag", Bicim: "#,##0.##",
-                                                  Siralanabilir: false, Filtrelenebilir: false),
             // Talep KARSILANDI mi: F8 sayaci (0 acik / 1 kismi / 2 kapandi).
             new("karsilanma",
                 "case b.kapanma_durum when 2 then 'Karşılandı' when 1 then 'Kısmi' else 'Bekliyor' end",
                                                   "metin", "Karşılanma", Hizalama: "orta"),
             new("kapanmaDurum","b.kapanma_durum","sayi",  "Karşılanma Kodu", Hizalama: "orta", Varsayilan: false),
-            new("aciklama",    "coalesce(b.aciklama, '')", "metin", "Açıklama", Genislik: 240),
-            new("durumAdi",    "case b.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end",
-                                                  "metin", "Durum", Hizalama: "orta"),
-            new("durum",       "b.durum",        "sayi",  "Durum Kodu", Hizalama: "orta", Varsayilan: false),
-            new("subeId",      "b.sube_id",      "sayi",  "Şube", Varsayilan: false)
-        });
+        }.Concat(StokBelgesiKuyrukKolonlari()).ToArray());
 
     // -------------------------------------------------------- stok fisleri ----
     // 3 Giris Fisi / 4 Cikis Fisi (101). Irsaliye gibi ama CARI YOK; TIPI fisin
@@ -1037,22 +1032,9 @@ public static class KaynakKatalogu
                 new("depo",        "coalesce(d.ad, '')", "metin", giris ? "Giriş Deposu" : "Çıkış Deposu",
                                                       Genislik: 180),
                 new("sorumlu",     "coalesce(sc.unvan, '')", "metin", "Sorumlu", Genislik: 180),
-                new("kalemSayisi",
-                    "(select count(*) from public.belge_satir s where s.belge_id = b.id)",
-                                                      "sayi",  "Kalem", Hizalama: "sag",
-                                                      Siralanabilir: false, Filtrelenebilir: false),
-                new("miktar",
-                    "(select coalesce(sum(s.miktar), 0) from public.belge_satir s where s.belge_id = b.id)",
-                                                      "para",  "Miktar", Hizalama: "sag", Bicim: "#,##0.##",
-                                                      Siralanabilir: false, Filtrelenebilir: false),
                 // Tutar muhasebe fisinin (F7) matrahi - fiste KDV yok.
                 new("genelToplam", "b.genel_toplam", "para",  "Tutar", Hizalama: "sag", Bicim: "#,##0.00"),
-                new("aciklama",    "coalesce(b.aciklama, '')", "metin", "Açıklama", Genislik: 240),
-                new("durumAdi",    "case b.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end",
-                                                      "metin", "Durum", Hizalama: "orta"),
-                new("durum",       "b.durum",        "sayi",  "Durum Kodu", Hizalama: "orta", Varsayilan: false),
-                new("subeId",      "b.sube_id",      "sayi",  "Şube", Varsayilan: false)
-            });
+            }.Concat(StokBelgesiKuyrukKolonlari()).ToArray());
     }
 
     // ---------------------------------------------------------- irsaliye ----
