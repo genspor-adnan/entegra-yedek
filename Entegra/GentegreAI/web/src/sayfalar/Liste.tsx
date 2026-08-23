@@ -358,6 +358,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // (sabitFiltre) - Tedarikci Listesi ayrildigi icin "ikisi birden" gorunumu gerekmiyor.
     kaynak: 'cari', baslik: 'Müşteriler', yol: 'Cari › Müşteriler', kartYolu: '/cari',
     aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
+    //   "📄 Ekstre", secili carinin hareketleri, cipe basinca liste geri gelir.
+    ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Cari Ekstre',
+              tarihAlani: 'islemTarihi' },
     sabitFiltre: { alan: 'musteri', op: 'esit', deger: 1 },
     yeniKayitVarsayilanlari: { musteri: true, tedarikci: false },
     // Mockup'ta (cari_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
@@ -370,6 +374,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'cari', rota: 'tedarikci', baslik: 'Tedarikçiler', yol: 'Cari › Tedarikçiler',
     kartYolu: '/tedarikci',
     aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
+    //   "📄 Ekstre", secili carinin hareketleri, cipe basinca liste geri gelir.
+    ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Cari Ekstre',
+              tarihAlani: 'islemTarihi' },
     sabitFiltre: { alan: 'tedarikci', op: 'esit', deger: 1 },
     yeniKayitVarsayilanlari: { musteri: false, tedarikci: true },
     yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
