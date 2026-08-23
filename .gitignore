@@ -25,4 +25,6 @@ ComponentXE3yeni/
 
 # Buyuk yedek arsivleri (GitHub 100MB siniri) - git disinda tut
 _backup/
+# PG veritabani dokumleri (pg_dump -Fc) - veri, kod degil
+Entegra/GentegreAI/yedek/
 *.tar
