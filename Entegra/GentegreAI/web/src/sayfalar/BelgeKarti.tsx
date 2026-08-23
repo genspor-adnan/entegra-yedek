@@ -1110,7 +1110,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           const kalan = Math.round((genel - tahsil) * 100) / 100;
           return (
             <div className="kagrup">
-              <h6>Tahsilatlar <span className="kapt">kasa_islem (1:N)</span></h6>
+              {/* Mockup dugme seridi. "Tahsilat Ekle" CALISIR (kasa kartini cari
+                  ve tutar onyuklu acar); POS ve Cek/Senet kasa turleri F5/F6'da. */}
+              <div className="katoolbar" style={{ margin: 10 }}>
+                <button className="d bir" disabled={!kayitliId}
+                        title={kayitliId ? 'Bu fatura için tahsilat işlemi aç' : 'Önce faturayı kaydedin.'}
+                        onClick={tahsilatAc}>
+                  ＋ Tahsilat Ekle
+                </button>
+                <button className="d" disabled title="POS tahsilatı F5/F6'da bağlanacak">💳 POS</button>
+                <button className="d" disabled title="Çek/senet girişi F5'te bağlanacak">🧾 Çek/Senet Al</button>
+              </div>
               <table className="detay-tablo">
                 <thead>
                   <tr>
@@ -1150,17 +1160,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 </tfoot>
               </table>
 
-              {/* Mockup dugme seridi. "Tahsilat Ekle" CALISIR (kasa kartini cari
-                  ve tutar onyuklu acar); POS ve Cek/Senet kasa turleri F5/F6'da. */}
-              <div className="katoolbar" style={{ margin: 10 }}>
-                <button className="d bir" disabled={!kayitliId}
-                        title={kayitliId ? 'Bu fatura için tahsilat işlemi aç' : 'Önce faturayı kaydedin.'}
-                        onClick={tahsilatAc}>
-                  ＋ Tahsilat Ekle
-                </button>
-                <button className="d" disabled title="POS tahsilatı F5/F6'da bağlanacak">💳 POS</button>
-                <button className="d" disabled title="Çek/senet girişi F5'te bağlanacak">🧾 Çek/Senet Al</button>
-              </div>
             </div>
           );
         })()}
