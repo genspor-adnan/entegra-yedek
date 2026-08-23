@@ -702,3 +702,23 @@ table.grid tr.flt input {
    kaydet/sil gibi eylemler solda toplanir, cikis ucta durur - yanlislikla
    tiklama riski de azalir. */
 .katoolbar .kapat-dugmesi { margin-left: auto; order: 99 }
+
+/* ---- Alan yanindaki "?" yardim ikonu (GENEL KURAL, db/103 public.help) ---- */
+.yardim-sar { position: relative; display: inline-flex; align-items: center }
+.yardim-ikon {
+  width: 18px; height: 18px; flex: none; padding: 0; line-height: 1;
+  border: 1px solid var(--cizgi); border-radius: 50%;
+  background: var(--yuz2); color: var(--vurgu);
+  font-size: 11px; font-weight: 700; cursor: pointer;
+}
+.yardim-ikon:hover { background: var(--mor2); border-color: var(--vurgu) }
+.yardim-balon {
+  position: absolute; z-index: 60; top: 24px; right: 0; width: 320px;
+  padding: 8px 10px; border: 1px solid var(--cizgi); border-radius: var(--r);
+  background: var(--yuz); box-shadow: var(--golge);
+  font-size: 11.5px; line-height: 1.45; color: var(--yazi);
+  display: flex; flex-direction: column; gap: 4px; text-align: left;
+}
+.yardim-balon b { color: var(--yazi2) }
+/* Metindeki bos satirlar korunur: help kayitlari paragrafli yazilabiliyor. */
+.yardim-metin { white-space: pre-line }

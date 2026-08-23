@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { ApiHatasi, type AyarSatiri } from '../api/sozlesme';
+import { YardimIkonu } from '../bilesenler/YardimIkonu';
 
 const SEKMELER = [
   { anahtar: 'genel', baslik: 'Genel' },
@@ -49,12 +50,16 @@ export function GenelAyarlar() {
       setBilgi('Ayar kaydedildi.');
       setTimeout(() => setBilgi(null), 2500);
     } catch (h) {
+      // ONCE tazele, SONRA hatayi yaz: yukle() basarida setHata(null) yaptigi
+      //   icin ters sirada hata mesaji aninda siliniyordu (gecersiz deger
+      //   girildiginde kullaniciya hicbir sey gorunmuyordu).
+      await yukle();
       setHata(h instanceof ApiHatasi ? h.message : String(h));
-      void yukle();
     }
   }
 
   const geriGun = deger('belge.geri_gun_siniri');
+  const kayit = (anahtar: string) => ayarlar.find(a => a.anahtar === anahtar);
 
   return (
     <>
@@ -83,19 +88,20 @@ export function GenelAyarlar() {
           <div className="kagrup">
             <h6>Belge Girişi</h6>
             <div className="alan-izgara tek-sutun ayar-formu">
+              {/* GENEL KURAL: aciklama alt paragrafta degil, editin SAGINDAKI
+                  "?" ikonunda (metin public.help'te - db/103). */}
               <label className="alan">
                 <span className="etiket">Belgeler geriye dönük kaç güne kadar girilebilir</span>
-                <input className="hiza-sag" value={geriGun} inputMode="numeric"
-                       onChange={e => setTaslak(t => ({ ...t, 'belge.geri_gun_siniri': e.target.value }))}
-                       onBlur={e => void yaz('belge.geri_gun_siniri', e.target.value)}
-                       onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />
+                <span className="ikili">
+                  <input className="hiza-sag" value={geriGun} inputMode="numeric"
+                         onChange={e => setTaslak(t => ({ ...t, 'belge.geri_gun_siniri': e.target.value }))}
+                         onBlur={e => void yaz('belge.geri_gun_siniri', e.target.value)}
+                         onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />
+                  <YardimIkonu anahtar="ayar.belge.geri_gun_siniri"
+                               baslik={kayit('belge.geri_gun_siniri')?.yardimBaslik}
+                               metin={kayit('belge.geri_gun_siniri')?.yardim} />
+                </span>
               </label>
-            </div>
-            <div className="not">
-              Belge tarihi bugünden bu kadar gün öncesine kadar seçilebilir; daha
-              eskisi kaydedilmez. <b>0</b> yazılırsa geriye dönük sınır kalkar.
-              İleri tarihli belge her durumda engellenir (GİB zaten kabul etmez).
-              Kural tüm belge türlerinde geçerlidir ve sunucuda uygulanır.
             </div>
           </div>
         )}

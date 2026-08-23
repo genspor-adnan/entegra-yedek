@@ -449,4 +449,14 @@ export interface AyarSatiri {
   deger: string;
   tip: string;
   aciklama: string;
+  /** public.help'ten gelen "?" metni - bos ise ikon gosterilmez (db/103). */
+  yardimBaslik: string;
+  yardim: string;
+}
+
+/** public.help satiri - alan/opsiyon yanindaki "?" ikonunun icerigi. */
+export interface YardimKaydi {
+  anahtar: string;
+  baslik: string;
+  metin: string;
 }

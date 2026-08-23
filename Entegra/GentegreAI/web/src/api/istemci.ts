@@ -7,7 +7,7 @@ import {
   type KasaIslemTuru, type KasaIslemYaniti, type KasaIslemYazmaIstegi, type FisOzeti,
   type AcikSatir,
   type YetkiSatiri, type YetkiSatiriIstegi, type DokumanSatiri,
-  type StokDurumYaniti, type StokHareketYaniti, type AyarSatiri,
+  type StokDurumYaniti, type StokHareketYaniti, type AyarSatiri, type YardimKaydi,
 } from './sozlesme';
 
 const TABAN = import.meta.env.VITE_API ?? 'http://localhost:5180';
@@ -264,6 +264,10 @@ export const api = {
 
   // ---------------------------------------------------------- ayarlar ----
   ayarlar: () => istek<{ ayarlar: AyarSatiri[] }>('/api/ayar').then(y => y.ayarlar),
+
+  /** Tek yardim metni ("?" ikonu) - ayar disindaki ekranlar da bunu kullanir. */
+  yardim: (anahtar: string) =>
+    istek<YardimKaydi>(`/api/yardim/${encodeURIComponent(anahtar)}`),
 
   ayarYaz: (anahtar: string, deger: string) =>
     gonder<{ ayarlar: AyarSatiri[] }>(`/api/ayar/${encodeURIComponent(anahtar)}`,

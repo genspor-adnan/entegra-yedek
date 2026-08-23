@@ -3,8 +3,16 @@ using Npgsql;
 
 namespace Gentegre.Veri.Depolar;
 
-/// <summary>Genel Ayarlar ekranindaki tek satir (public.referans).</summary>
-public sealed record AyarSatiri(string Anahtar, string Deger, string Tip, string Aciklama);
+/// <summary>
+/// Genel Ayarlar ekranindaki tek satir (public.referans). <c>YardimBaslik</c> /
+/// <c>Yardim</c> alan yanindaki "?" ikonunun gosterdigi metindir (public.help,
+/// anahtar "ayar.&lt;referans anahtari&gt;") - ekranda paragraf olarak durmaz.
+/// </summary>
+public sealed record AyarSatiri(string Anahtar, string Deger, string Tip, string Aciklama,
+    string YardimBaslik = "", string Yardim = "");
+
+/// <summary>public.help satiri - "?" ikonunun gosterdigi metin.</summary>
+public sealed record YardimKaydi(string Anahtar, string Baslik, string Metin);
 
 /// <summary>
 /// Firma geneli ayarlar - <c>public.referans</c> tablosu.
@@ -43,17 +51,21 @@ public sealed class AyarDeposu
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = new NpgsqlCommand("""
-            select anahtar, deger, tip, aciklama
-              from public.referans
-             where anahtar = any(@p0)
-             order by anahtar
+            select r.anahtar, r.deger, r.tip, r.aciklama,
+                   coalesce(h.baslik, ''), coalesce(h.metin, '')
+              from public.referans r
+              left join public.help h
+                     on h.anahtar = 'ayar.' || r.anahtar and h.dil = 0
+             where r.anahtar = any(@p0)
+             order by r.anahtar
             """, baglanti);
         komut.Parameters.AddWithValue("p0", BeyazListe.ToArray());
 
         var liste = new List<AyarSatiri>();
         await using var o = await komut.ExecuteReaderAsync(iptal);
         while (await o.ReadAsync(iptal))
-            liste.Add(new AyarSatiri(o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3)));
+            liste.Add(new AyarSatiri(o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3),
+                                     o.GetString(4), o.GetString(5)));
 
         // DB'de henuz satiri olmayan ayar da ekranda gorunsun (varsayilaniyla).
         foreach (var anahtar in BeyazListe)
@@ -98,6 +110,20 @@ public sealed class AyarDeposu
 
         lock (Kilit) Onbellek.Remove(anahtar);
         return await ListeleAsync(iptal);
+    }
+
+    /// <summary>
+    /// Tek bir yardim metni (public.help). Ayar disindaki ekranlar da ayni ucu
+    /// kullanir - anahtar duzeni "kart.&lt;kart&gt;.&lt;alan&gt;" gibi genisler.
+    /// </summary>
+    public async Task<YardimKaydi?> YardimAsync(string anahtar, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = new NpgsqlCommand(
+            "select baslik, metin from public.help where anahtar = @p0 and dil = 0", baglanti);
+        komut.Parameters.AddWithValue("p0", anahtar);
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        return await o.ReadAsync(iptal) ? new YardimKaydi(anahtar, o.GetString(0), o.GetString(1)) : null;
     }
 
     /// <summary>

@@ -27,6 +27,17 @@ public static class AyarUclari
             return Results.Ok(new { ayarlar = await depo.ListeleAsync(iptal), izlemeNo = baglam.IzlemeNo });
         });
 
+        // Alan/opsiyon yardim metni (public.help, db/103). "?" ikonu bunu ceker.
+        //   Yetki ISTEMEZ: yardim metni gizli veri degil, ekranin parcasi.
+        yol.MapGet("/api/yardim/{anahtar}", async (
+            string anahtar, BaglamCozucu cozucu, AyarDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            await cozucu.CozAsync(ctx, iptal);
+            var y = await depo.YardimAsync(anahtar, iptal);
+            return y is null ? Results.NotFound() : Results.Ok(y);
+        }).WithTags("Ayar").RequireAuthorization();
+
         grup.MapPut("/{anahtar}", async (
             string anahtar, AyarIstegi istek, BaglamCozucu cozucu, AyarDeposu depo,
             HttpContext ctx, CancellationToken iptal) =>
