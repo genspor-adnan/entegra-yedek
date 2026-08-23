@@ -230,6 +230,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [cari, setCari] = useState<{ id: number; unvan: string } | null>(null);
   const [tarih, setTarih] = useState(new Date().toISOString().slice(0, 10));
   const [seri, setSeri] = useState('WEB');
+  /** Yalniz dis numarali turde (alis faturasi) kullanilir - tedarikcinin no'su. */
+  const [belgeNo, setBelgeNo] = useState('');
   const [vadeGun, setVadeGun] = useState('30');
   const [depo, setDepo] = useState<{ id: number; ad: string } | null>(null);
   const [satici, setSatici] = useState<{ id: number; ad: string } | null>(null);
@@ -301,6 +303,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   /** ALIS turleri: cari TEDARIKCI'dir, kalemler stok GIRISI yapar. */
   const alisMi = tur === 9 || tur === 10 || tur === 11 || tur === 12 || tur === 17 || tur === 109;
   const belgeAdi = konsinyeMi ? 'Konsinye' : irsaliyeMi ? 'İrsaliye' : 'Belge';
+  /**
+   * Numarasi KARSI TARAFTA uretilen belge: alis faturasinin numarasi
+   * tedarikcinin fatura numarasidir - kullanici girer, sayacimiz uretmez.
+   * Sunucudaki BelgeDeposu.DisNumaraliTur ile ayni liste.
+   */
+  const disNumarali = tur === 11;
   /**
    * e-BELGE OLMAYAN turler: satis fisi (16 - perakende fis, GIB'e gitmez),
    * konsinye (109/119 - mal birakma, faturasi ayri kesilir) ve tahakkuk (13/17).
@@ -477,6 +485,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     setSonuc(null);
 
     if (!cari) { setAlanHatalari({ tarafId: 'Cari seçilmeli.' }); return }
+    if (disNumarali && belgeNo.trim() === '') {
+      setAlanHatalari({ belgeNo: 'Tedarikçinin fatura numarası girilmeli.' }); return;
+    }
     const dolu = satirlar.filter(s => s.stokId || s.hizmetId);
     if (dolu.length === 0) { setHata('En az bir satırda stok ya da hizmet seçilmeli.'); return }
 
@@ -488,6 +499,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           tarafId: cari.id,
           belgeTarihi: `${tarih}T${new Date().toTimeString().slice(0, 8)}`,
           belgeSeri: seri,
+          // Alis faturasinda numara tedarikciden gelir; digerlerinde sunucu verir.
+          belgeNo: disNumarali ? belgeNo.trim() : undefined,
           belgeDovizi: 'TL',
           dovizKuru: 1,
           vadeGun: Number(vadeGun) || 0,
@@ -754,11 +767,23 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               hata={alanHatalari.tarafId}
             />
 
+            {/* Alis faturasinda numara TEDARIKCININ: sayacimiz uretemez (harf
+                icerebilir, bizim seriyle iliskisi yok), kullanici girer. Diger
+                turlerde numarayi kayitta sunucu verir - alan salt-okunur. */}
             <label className="alan">
-              <span className="etiket">{belgeAdi} No</span>
-              <input className="one-cikan"
-                     value={String(sonuc?.belge.belgeNo ?? '') || (kilitli ? '' : '(kaydedince verilir)')}
-                     readOnly />
+              <span className={`etiket${disNumarali && !kilitli ? ' zorunlu-isaret' : ''}`}>
+                {disNumarali ? 'Tedarikçi Fatura No' : `${belgeAdi} No`}
+              </span>
+              {disNumarali && !kilitli ? (
+                <input className="one-cikan" value={belgeNo} maxLength={20}
+                       placeholder="örn. ABC2026000001234"
+                       onChange={e => setBelgeNo(e.target.value)} />
+              ) : (
+                <input className="one-cikan"
+                       value={String(sonuc?.belge.belgeNo ?? '') || (kilitli ? '' : '(kaydedince verilir)')}
+                       readOnly />
+              )}
+              {alanHatalari.belgeNo && <span className="alan-hata">{alanHatalari.belgeNo}</span>}
             </label>
 
             {!eBelgeYok && (

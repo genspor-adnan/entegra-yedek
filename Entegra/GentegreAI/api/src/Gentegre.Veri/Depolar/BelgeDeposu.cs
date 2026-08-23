@@ -32,6 +32,41 @@ public sealed class BelgeDeposu
     /// <summary>Satis belgeleri (giden): cari BORCLANIR. Alis (gelen): cari ALACAKLANIR.</summary>
     private static bool SatisMi(int tur) => tur is 14 or 15 or 16 or 119 or 29 or 105 or 133;
 
+    /// <summary>
+    /// Numarasi BIZDE degil, KARSI TARAFTA uretilen belge turleri. Alis faturasinin
+    /// numarasi tedarikcinin fatura numarasidir: harf/tire icerebilir, bizim
+    /// sayacimizla iliskisi yoktur (sayac tohumu eski veriden geldigi icin
+    /// "3012026000357895" gibi anlamsiz numaralar uretiyordu). Kullanici girer.
+    ///
+    /// Alis irsaliyesi (10) ve alis fisi (12) simdilik DISARIDA: onlarin sayaci
+    /// temiz calisiyor, ayni degisiklik istenirse buraya eklenir.
+    /// </summary>
+    private static bool DisNumaraliTur(int tur) => tur is 11;
+
+    /// <summary>
+    /// Ayni tedarikciden ayni numarayi ikinci kez girmeyi engeller (mukerrer alis
+    /// faturasi = cari ve KDV iki kere). DB'de UNIQUE degil: eski goc verisinde
+    /// zaten mukerrer satirlar var, kisit onlari reddedip guncellemeyi kilitlerdi.
+    /// </summary>
+    private static async Task MukerrerNoKontrolAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int tur, int tarafId, string belgeNo, int haricId, CancellationToken iptal)
+    {
+        await using var komut = new NpgsqlCommand("""
+            select id from public.belge
+             where tur = @p0 and taraf_id = @p1 and belge_no = @p2
+               and durum <> 2 and id <> @p3
+             limit 1
+            """, baglanti, islem);
+        komut.Parameters.AddWithValue("p0", tur);
+        komut.Parameters.AddWithValue("p1", tarafId);
+        komut.Parameters.AddWithValue("p2", belgeNo);
+        komut.Parameters.AddWithValue("p3", haricId);
+        if (await komut.ExecuteScalarAsync(iptal) is { } varOlan and not DBNull)
+            throw GentegreHatasi.IsKurali(
+                $"Bu cariden \"{belgeNo}\" numarali belge zaten kayitli (#{varOlan}).");
+    }
+
     public async Task<(int Id, List<string> Uyarilar)> KaydetAsync(
         IDictionary<string, object?> belge,
         List<Dictionary<string, JsonElement>> satirlar,
@@ -140,9 +175,29 @@ public sealed class BelgeDeposu
         if (Metin(belge, "raporDovizi").Length == 0) belge["raporDovizi"] = belgeDovizi;
         if (Metin(belge, "kdvDurum").Length == 0) belge["kdvDurum"] = "Hariç";
 
-        // -------------------------------------------------- 3) belge basligi INSERT ----
-        // Numara TASLAKTA alinmaz, kesinlestirmede de EN SON alinir (asagida).
-        belge["belgeNo"] = "";
+        // ------------------------------------------------- 3) belge NUMARASI kimin ----
+        // Alis faturasinin numarasi TEDARIKCININDIR: bizim sayacimiz uretemez
+        //   (uretirse mukerrer/anlamsiz numara olur, e-Fatura eslesmesi kirilir).
+        //   Kullanici girer, biz yalniz bosluk ve ayni tedarikciden mukerrer
+        //   girisi kontrol ederiz. Diger turlerde numara EN SON, sayactan.
+        var disNumara = DisNumaraliTur(tur);
+        var girilenNo = Metin(belge, "belgeNo").Trim();
+
+        if (disNumara)
+        {
+            if (girilenNo.Length == 0 && !secenekler.Taslak)
+                throw GentegreHatasi.Dogrulama("Tedarikçi belge numarası girilmeli.",
+                    new AlanHatasi("belgeNo", "Zorunlu."));
+            if (girilenNo.Length > 0)
+                await MukerrerNoKontrolAsync(baglanti, islem, tur, tarafId, girilenNo, 0, iptal);
+            belge["belgeNo"] = girilenNo;
+        }
+        else
+        {
+            // Numara TASLAKTA alinmaz, kesinlestirmede de EN SON alinir (asagida).
+            belge["belgeNo"] = "";
+        }
+
         belge["durum"] = secenekler.Taslak ? 1 : 0;
         var belgeId = await BelgeEkleAsync(baglanti, islem, belge, baglam, iptal);
 
@@ -186,7 +241,9 @@ public sealed class BelgeDeposu
 
             // ------------------------------------------------------- 7) belge NUMARASI ----
             // EN SON: buraya kadar her sey basarili. Satir kilidi altinda, BOSLUKSUZ.
-            await NumaraVerAsync(baglanti, islem, belgeId, tur, Metin(belge, "belgeSeri"), baglam.SubeId, iptal);
+            // Dis numarali belgede (alis faturasi) numara kullanicidan geldi.
+            if (!disNumara)
+                await NumaraVerAsync(baglanti, islem, belgeId, tur, Metin(belge, "belgeSeri"), baglam.SubeId, iptal);
         }
 
         // ------------------------------------------------------------------ 8) log ----
@@ -221,7 +278,8 @@ public sealed class BelgeDeposu
         int kaynakBelgeId, int hedefTur,
         IReadOnlyList<(int SatirId, decimal Miktar)> secilen,
         DateTime? belgeTarihi, bool taslak,
-        YazmaBaglami baglam, CancellationToken iptal = default)
+        YazmaBaglami baglam, CancellationToken iptal = default,
+        string? belgeNo = null)
     {
         if (secilen.Count == 0)
             throw GentegreHatasi.Dogrulama("Dönüştürülecek satır seçilmeli.",
@@ -330,6 +388,10 @@ public sealed class BelgeDeposu
             ["ozelKod"] = kaynak["ozel_kod"],
             ["aciklama"] = Kirp($"{kaynak["tur_adi"]} {kaynak["belge_no"]} dönüşümü", 200),
         };
+
+        // Dis numarali hedefte (alis faturasi) numarayi kullanici verir - kaynagin
+        //   irsaliye numarasi kopyalanmaz, sayac da uretmez.
+        if (DisNumaraliTur(hedefTur)) belge["belgeNo"] = (belgeNo ?? "").Trim();
 
         // Kaynak turu cariyi zaten etkilediyse (irsaliye) hedef TEKRAR etkilemez;
         //   yalniz kaynagin etkilemedigi durumda (siparis) fatura/irsaliye yazar.

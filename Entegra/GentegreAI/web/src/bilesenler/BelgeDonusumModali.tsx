@@ -6,6 +6,13 @@ import { Modal } from './GenForm';
 const say = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 4 });
 const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+/**
+ * Numarasi KARSI TARAFTA uretilen belgeler: alis faturasinin numarasi
+ * tedarikcinin fatura numarasidir, sayacimiz uretemez - kullanici girer.
+ * Sunucudaki DisNumaraliTur ile ayni liste.
+ */
+const DIS_NUMARALI = new Set([11]);
+
 /** Kaynak turden hangi hedeflere donusulebilir (belge turu kod uzayi, 073 katalogu). */
 const HEDEFLER: Record<number, { kod: number; ad: string }[]> = {
   // Alis siparisi -> alis irsaliyesi / alis faturasi
@@ -41,6 +48,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, onKapat, onTamam }: Prop
   const [secili, setSecili] = useState<Record<number, boolean>>({});
   const [hedefTur, setHedefTur] = useState<number>(HEDEFLER[belgeTur]?.[0]?.kod ?? 0);
   const [tarih, setTarih] = useState(new Date().toISOString().slice(0, 10));
+  const [belgeNo, setBelgeNo] = useState('');
   const [taslak, setTaslak] = useState(false);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [calisiyor, setCalisiyor] = useState(false);
@@ -61,6 +69,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, onKapat, onTamam }: Prop
   }, [belgeId]);
 
   const hedefler = HEDEFLER[belgeTur] ?? [];
+  const disNumarali = DIS_NUMARALI.has(hedefTur);
   const sayi = (m: string) => Number(m.replace(/\./g, '').replace(',', '.')) || 0;
 
   const toplam = useMemo(() =>
@@ -84,11 +93,16 @@ export function BelgeDonusumModali({ belgeId, belgeTur, onKapat, onTamam }: Prop
       return g.miktar > Number(s.kalanMiktar);
     });
     if (asan) { setHata('Bir satırda girilen miktar kalanı aşıyor.'); return }
+    if (disNumarali && !taslak && belgeNo.trim() === '') {
+      setHata('Tedarikçi belge numarası girilmeli.'); return;
+    }
 
     setCalisiyor(true);
     try {
-      const yeni = await api.belgeDonustur(belgeId, hedefTur, gonderilecek, tarih, taslak);
+      const yeni = await api.belgeDonustur(belgeId, hedefTur, gonderilecek, tarih, taslak,
+                                           disNumarali ? belgeNo.trim() : undefined);
       setSonuc(yeni);
+      setBelgeNo('');
       // Kalan satirlari tazele: ayni siparisten ikinci bir belge kesilebilir.
       setSatirlar(await api.belgeAcikSatirlar(belgeId));
       onTamam(yeni);
@@ -137,6 +151,16 @@ export function BelgeDonusumModali({ belgeId, belgeTur, onKapat, onTamam }: Prop
                   {hedefler.map(h => <option key={h.kod} value={h.kod}>{h.ad}</option>)}
                 </select>
               </label>
+              {/* Alis faturasinda numara TEDARIKCININ - sayac uretmez, sorulur. */}
+              {disNumarali && (
+                <label className="alan">
+                  <span className={`etiket${taslak ? '' : ' zorunlu-isaret'}`}>
+                    Tedarikçi Fatura No
+                  </span>
+                  <input value={belgeNo} maxLength={20} placeholder="örn. ABC2026000001234"
+                         onChange={e => setBelgeNo(e.target.value)} />
+                </label>
+              )}
               <label className="alan">
                 <span className="etiket">Belge Tarihi</span>
                 <input type="date" value={tarih} onChange={e => setTarih(e.target.value)} />

@@ -97,7 +97,8 @@ public static class BelgeUclari
 
             var (yeniId, uyarilar) = await depo.DonusturAsync(id, istek.HedefTur, secilen,
                 istek.BelgeTarihi, istek.Taslak,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal,
+                istek.BelgeNo);
 
             var kayit = await depo.OkuAsync(yeniId, iptal) ?? throw GentegreHatasi.Bulunamadi();
             return Results.Created($"/api/belge/{yeniId}", new BelgeYaniti
@@ -141,6 +142,9 @@ public static class BelgeUclari
         public List<DonusumSatiri>? Satirlar { get; set; }
         public DateTime? BelgeTarihi { get; set; }
         public bool Taslak { get; set; }
+
+        /// <summary>Alis faturasinda TEDARIKCININ numarasi - sayac uretmez.</summary>
+        public string? BelgeNo { get; set; }
     }
 
     public sealed class DonusumSatiri

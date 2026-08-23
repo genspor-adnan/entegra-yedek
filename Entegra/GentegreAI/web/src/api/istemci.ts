@@ -241,8 +241,9 @@ export const api = {
   /** Siparis -> irsaliye -> fatura. Miktar KISMI olabilir; kalan kaynakta durur. */
   belgeDonustur: (id: number, hedefTur: number,
                   satirlar: { satirId: number; miktar: number }[],
-                  belgeTarihi?: string, taslak = false) =>
-    gonder<BelgeYaniti>(`/api/belge/${id}/donustur`, { hedefTur, satirlar, belgeTarihi, taslak }),
+                  belgeTarihi?: string, taslak = false, belgeNo?: string) =>
+    gonder<BelgeYaniti>(`/api/belge/${id}/donustur`,
+                        { hedefTur, satirlar, belgeTarihi, taslak, belgeNo }),
 
   // --------------------------------------------------------------- kasa ----
   kasaIslemTurleri: () =>
