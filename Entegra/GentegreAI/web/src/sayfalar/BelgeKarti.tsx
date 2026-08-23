@@ -724,6 +724,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               </span>
             </label>
             )}
+            {/* e-Belge hucresi kalkinca 3 sutunlu izgara KAYIYORDU (Satis
+                Temsilcisi 1. satirin 3. hucresine dusuyordu). Bos yer tutucu
+                sutun duzenini korur: sol sutun Cari > Temsilci > Depo. */}
+            {eBelgeYok && <span className="alan" aria-hidden />}
 
             {/* --- 2. satir: Satis Temsilcisi cari'nin ALTINDA --- */}
             {/* Satis temsilcisi PERSONEL'dir (cari degil) ve secim cari ile ayni
