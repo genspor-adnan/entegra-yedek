@@ -242,3 +242,57 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
     </>
   );
 }
+
+/**
+ * GENEL KURAL (kullanici): cari/kisi/personel secimi UYGULAMANIN HER YERINDE
+ * ayni ekrandan yapilir. Bu bilesen alan + TarafArama modalini birlikte verir:
+ * salt-okunur kutu, sagindaki "…" dugmesi ve modal. GenLookup'un kucuk kendi
+ * penceresi yerine bunu kullanin.
+ */
+export function TarafSecici({
+  etiket, deger, kilitli, zorunlu, hata, kaynaklar = ['cari'], yerTutucu, ipucu,
+  otomatikAc = false, onSec, onTemizle,
+}: {
+  etiket: string;
+  deger?: string;
+  kilitli?: boolean;
+  zorunlu?: boolean;
+  hata?: string;
+  kaynaklar?: string[];
+  yerTutucu?: string;
+  ipucu?: string;
+  /** Acilista modali kendiliginden ac (ör. yeni belgede "kime?" sorusu). */
+  otomatikAc?: boolean;
+  onSec(secilen: { kaynak: string; id: number; unvan: string }): void;
+  /** Verilirse "×" dugmesi cikar ve secimi bosaltir. */
+  onTemizle?(): void;
+}) {
+  const [acik, setAcik] = useState(otomatikAc);
+
+  return (
+    <label className="alan">
+      <span className={`etiket${zorunlu ? ' zorunlu-isaret' : ''}`}>{etiket}</span>
+      <span className="lookup-kutu">
+        <input readOnly value={deger ?? ''} placeholder="Seçiniz…" disabled={kilitli}
+               onMouseDown={e => { if (!kilitli) { e.preventDefault(); setAcik(true) } }} />
+        {!kilitli && onTemizle && deger && (
+          <button type="button" className="mini" title="Boşalt"
+                  onClick={onTemizle}>×</button>
+        )}
+        {!kilitli && (
+          <button type="button" className="mini" title={ipucu ?? `${etiket} ara`}
+                  onClick={() => setAcik(true)}>…</button>
+        )}
+      </span>
+      {hata && <span className="alan-hata">{hata}</span>}
+
+      <TarafArama
+        acik={acik}
+        kaynaklar={kaynaklar}
+        yerTutucu={yerTutucu}
+        onKapat={() => setAcik(false)}
+        onSec={sec => { onSec(sec); setAcik(false) }}
+      />
+    </label>
+  );
+}

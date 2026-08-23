@@ -5,7 +5,8 @@ import {
   ApiHatasi, KASA_DURUM,
   type KasaIslemTuru, type KasaIslemYaniti, type ListeSatiri,
 } from '../api/sozlesme';
-import { GenLookup, LOOKUP_CARI } from '../bilesenler/GenLookup';
+import { GenLookup } from '../bilesenler/GenLookup';
+import { TarafSecici } from '../bilesenler/TarafArama';
 import { BacakListesi } from '../bilesenler/kasa/BacakSatiri';
 import { FisOnizleme } from '../bilesenler/kasa/FisOnizleme';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -403,28 +404,28 @@ export function KasaIslemKarti({ acilis, onKapat, onKaydedildi }: {
               )}
 
               {secili?.cariZorunlu !== -1 && (
-                <GenLookup
-                  kaynak="cari"
+                <TarafSecici
                   etiket={cariVirman ? 'Kaynak Cari' : 'Cari'}
                   zorunlu={secili?.cariZorunlu === 1}
-                  alanlar={LOOKUP_CARI}
                   deger={cari?.unvan}
                   hata={alanHatalari.tarafId}
-                  saltOkunur={kilitli}
-                  onSec={s => setCari(s ? { id: Number(s.id), unvan: String(s.unvan ?? '') } : null)}
+                  kilitli={kilitli}
+                  yerTutucu="Müşteri / tedarikçi ara…"
+                  onSec={sec => setCari({ id: sec.id, unvan: sec.unvan })}
+                  onTemizle={() => setCari(null)}
                 />
               )}
 
               {cariVirman && (
-                <GenLookup
-                  kaynak="cari"
+                <TarafSecici
                   etiket="Hedef Cari"
                   zorunlu
-                  alanlar={LOOKUP_CARI}
                   deger={karsiCari?.unvan}
                   hata={alanHatalari.karsiTarafId}
-                  saltOkunur={kilitli}
-                  onSec={s => setKarsiCari(s ? { id: Number(s.id), unvan: String(s.unvan ?? '') } : null)}
+                  kilitli={kilitli}
+                  yerTutucu="Müşteri / tedarikçi ara…"
+                  onSec={sec => setKarsiCari({ id: sec.id, unvan: sec.unvan })}
+                  onTemizle={() => setKarsiCari(null)}
                 />
               )}
 

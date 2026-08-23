@@ -2,10 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru, type ListeSatiri } from '../api/sozlesme';
-import { GenLookup, LOOKUP_CARI } from '../bilesenler/GenLookup';
+import { GenLookup } from '../bilesenler/GenLookup';
 import { Modal } from '../bilesenler/GenForm';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
-import { TarafArama } from '../bilesenler/TarafArama';
+import { TarafArama, TarafSecici } from '../bilesenler/TarafArama';
 import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { KasaIslemKarti } from './KasaIslemKarti';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -945,21 +945,23 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           <div className="kagrup">
             <h6>Taşıyıcı Bilgileri</h6>
             <div className="alan-izgara uc-sutun">
-              <GenLookup
-                kaynak="cari"
+              <TarafSecici
                 etiket="Taşıyıcı Ünvan"
-                alanlar={LOOKUP_CARI}
                 deger={tasiyici?.ad}
-                saltOkunur={kilitli}
-                onSec={s => setTasiyici(s ? { id: Number(s.id), ad: String(s.unvan ?? '') } : null)}
+                kilitli={kilitli}
+                yerTutucu="Taşıyıcı ara…"
+                onSec={sec => setTasiyici({ id: sec.id, ad: sec.unvan })}
+                onTemizle={() => setTasiyici(null)}
               />
-              <GenLookup
-                kaynak="cari"
+              {/* Teslim eden PERSONEL de olabilir - iki kaynak birlikte aranir. */}
+              <TarafSecici
                 etiket="Teslim Eden"
-                alanlar={LOOKUP_CARI}
                 deger={teslimEden?.ad}
-                saltOkunur={kilitli}
-                onSec={s => setTeslimEden(s ? { id: Number(s.id), ad: String(s.unvan ?? '') } : null)}
+                kilitli={kilitli}
+                kaynaklar={['personel', 'cari']}
+                yerTutucu="Personel / cari ara…"
+                onSec={sec => setTeslimEden({ id: sec.id, ad: sec.unvan })}
+                onTemizle={() => setTeslimEden(null)}
               />
               <label className="alan">
                 <span className="etiket">Teslim Şekli</span>
