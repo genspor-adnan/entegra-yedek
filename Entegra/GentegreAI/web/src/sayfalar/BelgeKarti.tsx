@@ -531,6 +531,36 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   }
 
   /** Modal icinde acildiysa cagiran kapatir; dogrudan URL ile acildiysa listeye doner. */
+  /** Sag sutun hucreleri: e-Belge OLMAYAN turlerde sira Kapanma > Bagli Siparis
+      > Doviz olur; e-Belgeli turlerde eski duzen korunur. */
+  const kapanmaAlani = (
+    <label className="alan">
+      <span className="etiket">{irsaliyeMi ? 'Faturalama Durumu' : 'Kapanma'}</span>
+      <span className="deger-serit">
+        {(() => {
+          const k = KAPANMA_ETIKET[Number(sonuc?.belge.kapanmaDurum ?? 0)];
+          return (
+            <>
+              <span className={`rozet ${k?.sinif ?? ''}`}>{k?.ad ?? '—'}</span>
+              {kayitliId > 0 && <span className="sonuk">{satirlar.length} kalem</span>}
+            </>
+          );
+        })()}
+      </span>
+    </label>
+  );
+
+  const bagliSiparisAlani = (
+    <label className="alan">
+      <span className="etiket">{siparisMi ? 'Kaynak Belge' : 'Bağlı Sipariş'}</span>
+      <span className="deger-serit">
+        {sonuc?.belge.kaynakBelgeNo
+          ? <>{String(sonuc.belge.kaynakTurAdi ?? '')} <b>{String(sonuc.belge.kaynakBelgeNo)}</b></>
+          : <span className="sonuk">—</span>}
+      </span>
+    </label>
+  );
+
   const kapat = () => (onKapat ? onKapat() : git(LISTE_YOLU(tur)));
 
   if (!ekleyebilir)
@@ -727,7 +757,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             {/* e-Belge hucresi kalkinca 3 sutunlu izgara KAYIYORDU (Satis
                 Temsilcisi 1. satirin 3. hucresine dusuyordu). Bos yer tutucu
                 sutun duzenini korur: sol sutun Cari > Temsilci > Depo. */}
-            {eBelgeYok && <span className="alan" aria-hidden />}
+            {eBelgeYok && kapanmaAlani}
 
             {/* --- 2. satir: Satis Temsilcisi cari'nin ALTINDA --- */}
             {/* Satis temsilcisi PERSONEL'dir (cari degil) ve secim cari ile ayni
@@ -746,20 +776,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                      onChange={e => setTarih(e.target.value)} />
             </label>
 
-            <label className="alan">
-              <span className="etiket">{irsaliyeMi ? 'Faturalama Durumu' : 'Kapanma'}</span>
-              <span className="deger-serit">
-                {(() => {
-                  const k = KAPANMA_ETIKET[Number(sonuc?.belge.kapanmaDurum ?? 0)];
-                  return (
-                    <>
-                      <span className={`rozet ${k?.sinif ?? ''}`}>{k?.ad ?? '—'}</span>
-                      {kayitliId > 0 && <span className="sonuk">{satirlar.length} kalem</span>}
-                    </>
-                  );
-                })()}
-              </span>
-            </label>
+            {eBelgeYok ? bagliSiparisAlani : kapanmaAlani}
 
             {/* --- 3. satir: Cikis Deposu temsilcinin ALTINDA ---
                 Tahakkukta depo YOK: stok etkilemez (kasa_islem_turu.stok_etkiler=0). */}
@@ -775,8 +792,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               onSec={s => setDepo(s ? { id: Number(s.id), ad: String(s.ad ?? '') } : null)}
             />
             )}
+            {/* 3. satirin sutun duzeni korunsun: depo yoksa (tahakkuk) bos hucre. */}
+            {eBelgeYok && tahakkukMu && <span className="alan" aria-hidden />}
 
-            {/* Irsaliyede Vade YOK (mal cikis tarihi belge tarihidir). */}
+            {/* Irsaliyede/konsinyede Vade YOK (mal cikis tarihi belge tarihidir);
+                e-Belgesiz turlerde yerine bos hucre - Doviz/Kur sag sutunda kalsin. */}
+            {eBelgeYok && irsaliyeMi && <span className="alan" aria-hidden />}
             {!irsaliyeMi && (
               <label className="alan">
                 <span className="etiket">Vade (gün)</span>
@@ -798,14 +819,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
                 Vergi Dairesi/VKN kartta gosterilmiyor: cari kartindan gelen ve
                 belgeye DONDURULAN bir bilgi, e-Belge XML'ine oradan gidiyor. */}
-            <label className="alan">
-              <span className="etiket">{siparisMi ? 'Kaynak Belge' : 'Bağlı Sipariş'}</span>
-              <span className="deger-serit">
-                {sonuc?.belge.kaynakBelgeNo
-                  ? <>{String(sonuc.belge.kaynakTurAdi ?? '')} <b>{String(sonuc.belge.kaynakBelgeNo)}</b></>
-                  : <span className="sonuk">—</span>}
-              </span>
-            </label>
+            {!eBelgeYok && bagliSiparisAlani}
 
             {/* Belge turu SECICISI YOK: tur ekranin kendisinden gelir (Siparisler
                 19, Irsaliyeler 14, Faturalar 15) ve pencere basliginda zaten yazili.
