@@ -290,6 +290,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   //   ama BASLIK ETIKETLERI kendi adiyla ("Konsinye No", "Konsinye Tarihi").
   const konsinyeMi = tur === 109 || tur === 119;
   const belgeAdi = konsinyeMi ? 'Konsinye' : irsaliyeMi ? 'İrsaliye' : 'Belge';
+  /**
+   * e-BELGE OLMAYAN turler: satis fisi (16 - perakende fis, GIB'e gitmez),
+   * konsinye (109/119 - mal birakma, faturasi ayri kesilir) ve tahakkuk (13/17).
+   * Bunlarda e-Belge sekmesi, baslik alani ve gonderim dugmeleri gosterilmez.
+   */
+  const eBelgeYok = tahakkukMu || konsinyeMi || tur === 16 || tur === 12;
   /** Kaydedilmis belgenin id'si (yeni kayittan ya da acilan belgeden). */
   const kayitliId = belgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
 
@@ -597,10 +603,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           {/* --------------------------------------------------- IRSALIYE ---- */}
           {irsaliyeMi && (
             <>
-              <button className="d bir" disabled={!kayitliId}
-                      title={kayitliId ? 'e-İrsaliye gönderimi henüz bağlanmadı.' : 'Önce irsaliyeyi kaydedin.'}>
-                ✉ e‑İrsaliye Gönder
-              </button>
+              {/* Konsinyede e-Belge YOK: mal birakma GIB'e gitmez, faturasi
+                  satildikca ayri kesilir. */}
+              {!eBelgeYok && (
+                <button className="d bir" disabled={!kayitliId}
+                        title={kayitliId ? 'e-İrsaliye gönderimi henüz bağlanmadı.' : 'Önce irsaliyeyi kaydedin.'}>
+                  ✉ e‑İrsaliye Gönder
+                </button>
+              )}
               <button className="d" disabled={!kayitliId}
                       title={kayitliId ? 'Sevk edilen satırları faturaya aktar' : 'Önce irsaliyeyi kaydedin.'}
                       onClick={() => setDonusum(true)}>
@@ -614,9 +624,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                       title="Siparişten aktarım için Siparişler listesinden ilgili siparişi açıp Dönüştür deyin.">
                 📋 Siparişten Aktar
               </button>
-              <button className="d" disabled title="GİB durum sorgusu henüz bağlanmadı.">
-                ⟳ GİB Durum Sorgula
-              </button>
+              {!eBelgeYok && (
+                <button className="d" disabled title="GİB durum sorgusu henüz bağlanmadı.">
+                  ⟳ GİB Durum Sorgula
+                </button>
+              )}
               <button className="d" disabled title="İade irsaliyesi henüz bağlanmadı.">
                 ↩ İade İrsaliyesi
               </button>
@@ -624,8 +636,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           )}
 
           {/* ----------------------------------------------------- FATURA ---- */}
-          {/* Tahakkukta e-Belge dugmeleri YOK - GIB'e giden bir belge degil. */}
-          {!siparisMi && !irsaliyeMi && !tahakkukMu && (
+          {/* e-Belge olmayan turlerde (fis/konsinye/tahakkuk) gonderim dugmeleri YOK. */}
+          {!siparisMi && !irsaliyeMi && !eBelgeYok && (
             <>
               <button className="d bir" disabled={!kayitliId}
                       title={kayitliId ? 'e-Belge gönderimi henüz bağlanmadı.' : 'Önce belgeyi kaydedin.'}>
@@ -699,8 +711,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                      readOnly />
             </label>
 
-            {/* Tahakkuk e-Belge DEGIL (GIB'e gitmez) - o alan gosterilmez. */}
-            {!tahakkukMu && (
+            {!eBelgeYok && (
             <label className="alan">
               <span className="etiket">e-Belge</span>
               <span className="deger-serit">
@@ -810,7 +821,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                       && (!x.faturaMi || faturaMi || tahakkukMu)
                       // Tahakkuk e-Belge DEGIL: GIB'e giden bir belge degil,
                       //   ic muhasebe/cari ara kaydi.
-                      && !(tahakkukMu && x.anahtar === 'ebelge'))
+                      && !(eBelgeYok && x.anahtar === 'ebelge'))
             .map(x => (
             <div key={x.anahtar}
                  className={`kat${x.anahtar === aktifSekme ? ' on' : ''}`}
