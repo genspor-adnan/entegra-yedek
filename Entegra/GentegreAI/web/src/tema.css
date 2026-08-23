@@ -653,3 +653,13 @@ table.grid tr.flt input {
 .detay-tablo.secilebilir td { padding: 5px 8px }
 .detay-tablo .sonuk { color: var(--soluk) }
 .detay-tablo td.bos { text-align: center; color: var(--soluk); padding: 14px }
+
+/* Arac cubugu dugmesinin altina acilan secenek menusu (ör. Tahsilat araclari). */
+.dugme-menu { position: relative; display: inline-flex }
+.dugme-menu-liste {
+  position: absolute; top: calc(100% + 3px); left: 0; z-index: 60; min-width: 190px;
+  background: var(--yuz); border: 1px solid var(--cizgi); border-radius: var(--r);
+  box-shadow: var(--golge); padding: 4px; display: flex; flex-direction: column;
+}
+.dugme-menu-liste .mi { width: 100%; border: 0; background: transparent; text-align: left; cursor: pointer }
+.dugme-menu-liste .mi:hover { background: var(--mor2); color: var(--mor) }

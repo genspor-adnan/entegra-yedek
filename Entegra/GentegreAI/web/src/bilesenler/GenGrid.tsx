@@ -2,7 +2,8 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import { api } from '../api/istemci';
 import { ApiHatasi, type KolonMeta, type Kosul, type ListeSatiri, type Siralama } from '../api/sozlesme';
 import { bicimle } from './bicim';
-import { GenKomutPaleti, GenSagTus, GenToolbar, hedefte, useAksiyonlar } from './Aksiyonlar';
+import { GenKomutPaleti, GenSagTus, GenToolbar, hedefte, useAksiyonlar,
+         type AltSecenek } from './Aksiyonlar';
 import { Modal } from './GenForm';
 
 interface Props {
@@ -24,6 +25,8 @@ interface Props {
   /** Kart icine gomulu kucuk grid (ör. cari kartinda İlgili Kişiler) - buyuk baslik/yol
       satiri (.sayfabas) gizlenir, geri kalan (arama/cipler/tablo/sayfalama) ayni kalir. */
   gomulu?: boolean;
+  /** Arac cubugu dugmesine acilir alt menu (ör. "＋ Tahsilat" -> Nakit/Banka/...). */
+  altSecenekler?: Record<string, AltSecenek[]>;
   /** Bu EKRANDA gizlenecek kolon adlari (katalogda varsayilan gelse bile).
       Ayni kaynak farkli ekranlarda kullaniliyor: Satis Faturalari'nda tur/turAdi
       gereksiz (hepsi ayni tur), Siparisler'de gerekli. */
@@ -182,7 +185,8 @@ const GORUNUMLER: { v: 'liste' | 'grup' | 'analiz'; ik: string; ad: string }[] =
  */
 export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, onSatirAc,
                           aksiyonEkrani, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
-                          gizliKolonlar, yenile, odaklaSonEklenen, icerikAlani, icerikBaslik }: Props) {
+                          gizliKolonlar, altSecenekler, yenile, odaklaSonEklenen,
+                          icerikAlani, icerikBaslik }: Props) {
   const [kolonlar, setKolonlar] = useState<KolonMeta[]>([]);
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [toplamKayit, setToplamKayit] = useState(0);
@@ -453,7 +457,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
             <h1>{baslik ?? kaynak}</h1>
             {yol && <span className="yol">{yol}</span>}
             <div className="sag">
-              {aksiyonEkrani && <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} />}
+              {aksiyonEkrani && <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} altSecenekler={altSecenekler} />}
             </div>
           </div>
         </div>
@@ -464,7 +468,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut = 50, 
           ? { display: 'flex', justifyContent: 'flex-start',
               marginTop: 10, marginLeft: 14, marginBottom: 8 }
           : { display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
-          <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} />
+          <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} altSecenekler={altSecenekler} />
         </div>
       )}
 

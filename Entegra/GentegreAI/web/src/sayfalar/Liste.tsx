@@ -6,6 +6,30 @@ import { ApiHatasi, type Kosul, type ListeSatiri } from '../api/sozlesme';
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { BelgeKarti } from './BelgeKarti';
+import { KasaIslemKarti } from './KasaIslemKarti';
+
+/**
+ * Kasa listesindeki "＋ Tahsilat" / "－ Ödeme" dugmelerinin ARAC menusu.
+ * Kodlar kasa_islem_turu.kod ile birebir: tahsilat 21/22/25/23/24,
+ * odeme 31/32/35/33/34. Cek ve senet turleri katalogda var (grup 'ceksenet');
+ * kart bunlari acar, cek/senet KAYDI F5'te baglanacak.
+ */
+const KASA_ARAC_MENUSU: Record<string, { kod: string; ad: string }[]> = {
+  'kasa.tahsilat.yeni': [
+    { kod: 'kasa.yeni.21', ad: '💵 Nakit' },
+    { kod: 'kasa.yeni.22', ad: '🏦 Banka' },
+    { kod: 'kasa.yeni.25', ad: '💳 POS' },
+    { kod: 'kasa.yeni.23', ad: '🧾 Çek' },
+    { kod: 'kasa.yeni.24', ad: '📜 Senet' },
+  ],
+  'kasa.odeme.yeni': [
+    { kod: 'kasa.yeni.31', ad: '💵 Nakit' },
+    { kod: 'kasa.yeni.32', ad: '🏦 Banka' },
+    { kod: 'kasa.yeni.35', ad: '💳 POS / Kredi Kartı' },
+    { kod: 'kasa.yeni.33', ad: '🧾 Çek' },
+    { kod: 'kasa.yeni.34', ad: '📜 Senet' },
+  ],
+};
 
 export interface ListeTanimi {
   kaynak: string;
@@ -87,6 +111,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [yeniBelgeTuru, setYeniBelgeTuru] = useState<number | null>(null);
   // Mevcut belgeyi ac (salt gorunum) - ayni modal, id ile.
   const [acikBelgeId, setAcikBelgeId] = useState<number | null>(null);
+  // Kasa islem karti MODAL (tahsilat/odeme): liste arkada acik kalir.
+  const [kasaTuru, setKasaTuru] = useState<number | null>(null);
 
   // Aksiyon yonlendirme. Kasa aksiyonlari API cagirir (kesinlestir/iptal/sil) ve
   //   sonrasinda grid'i tazeler; digerleri kart rotasina gider.
@@ -96,11 +122,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     try {
       switch (kod) {
         // Grup basina bir giris: kart tur seridini o grubun turleriyle acar.
-        case 'kasa.tahsilat.yeni': git('/kasa-islem/yeni?tur=21'); return;
-        case 'kasa.odeme.yeni':    git('/kasa-islem/yeni?tur=31'); return;
-        case 'kasa.virman.yeni':   git('/kasa-islem/yeni?tur=41'); return;
-        case 'kasa.doviz.yeni':    git('/kasa-islem/yeni?tur=45'); return;
-        case 'kasa.plan.yeni':     git('/kasa-islem/yeni?tur=61'); return;
+        // Tahsilat/odeme dugmeleri ARAC (nakit/banka/pos/cek/senet) menusu acar;
+        //   secilen aracin kodu "kasa.yeni.<tur>" olarak geri gelir ve kart MODAL
+        //   olarak acilir (liste arkada kalsin, kullanici listeden kopmasin).
+        case 'kasa.tahsilat.yeni': setKasaTuru(21); return;
+        case 'kasa.odeme.yeni':    setKasaTuru(31); return;
+        case 'kasa.virman.yeni':   setKasaTuru(41); return;
+        case 'kasa.doviz.yeni':    setKasaTuru(45); return;
+        case 'kasa.plan.yeni':     setKasaTuru(61); return;
         case 'kasa.gerceklestir':
           // Gerceklestirme hesap/tutar secimi ister - plan kartindaki panele goturur.
           if (satir) git(`/kasa-islem/${satir.id}`);
@@ -144,6 +173,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         case 'genel.yazdir': alert('Yazdirma henuz baglanmadi.'); return;
       }
 
+      // Alt menuden gelen arac secimi: "kasa.yeni.22" -> tur 22 ile modal.
+      if (kod.startsWith('kasa.yeni.')) { setKasaTuru(Number(kod.slice(10))); return }
+
       if (kod.endsWith('.yeni') && tanim.kartYolu) git(`${tanim.kartYolu}/yeni`);
       else if ((kod.endsWith('.duzenle') || kod.endsWith('.sil') || kod.endsWith('.ac')) && satir && tanim.kartYolu)
         kartaGit(satir.id);
@@ -170,6 +202,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       sabitFiltre={sabitFiltre}
       aksiyonEkrani={tanim.aksiyonEkrani}
       gizliKolonlar={tanim.gizliKolonlar}
+      altSecenekler={KASA_ARAC_MENUSU}
       yenile={yenile}
       odaklaSonEklenen={odaklaSonEklenen}
       icerikAlani={tanim.icerikAlani}
@@ -182,6 +215,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       }}
       onAksiyon={(kod, satir) => { void aksiyon(kod, satir) }}
     />
+
+    {kasaTuru !== null && (
+      <KasaIslemKarti
+        acilis={{ tur: kasaTuru }}
+        onKapat={() => { setKasaTuru(null); setYenile(t => t + 1) }}
+      />
+    )}
 
     {acikBelgeId !== null && (
       <BelgeKarti id={acikBelgeId} onKapat={() => setAcikBelgeId(null)} />

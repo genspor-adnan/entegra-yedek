@@ -29,6 +29,8 @@ const LOOKUP_PROJE = [
 
 const GRUP_ADI: Record<string, string> = {
   tahsilat: 'Tahsilat', odeme: 'Ödeme', virman: 'Virman', doviz: 'Döviz', plan: 'Plan',
+  // Cek/senet turleri (23/24/33/34 + portfoy islemleri) ayni gruptan gelir.
+  ceksenet: 'Çek / Senet', kredi: 'Kredi', kupon: 'Kupon', kurfarki: 'Kur Farkı',
 };
 
 /** Sayi girisi: "1.234,56" ve "1234.56" ikisini de kabul eder. */

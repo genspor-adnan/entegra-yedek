@@ -38,24 +38,61 @@ interface CalistirProps {
 }
 
 /** Ust arac cubugu. */
-export function GenToolbar({ aksiyonlar, calistir }: CalistirProps) {
+/**
+ * Bir arac cubugu dugmesinin ALT SECENEKLERI (ör. "＋ Tahsilat" -> Nakit /
+ * Banka / POS / Cek / Senet). Kod anahtarli verilir; secilen secenegin `kod`u
+ * calistir()'a gider, boylece cagiran tek yerde ayirt eder.
+ */
+export interface AltSecenek { kod: string; ad: string }
+
+export function GenToolbar({ aksiyonlar, calistir, altSecenekler }: CalistirProps & {
+  altSecenekler?: Record<string, AltSecenek[]>;
+}) {
   const gorunen = aksiyonlar.filter(a => hedefte(a, 'araccubugu'));
+  const [acikMenu, setAcikMenu] = useState<string | null>(null);
+
+  // Disari tiklaninca menu kapansin - acik menu ekranda unutulmasin.
+  useEffect(() => {
+    if (!acikMenu) return;
+    const kapat = () => setAcikMenu(null);
+    window.addEventListener('click', kapat);
+    return () => window.removeEventListener('click', kapat);
+  }, [acikMenu]);
+
   if (gorunen.length === 0) return null;
 
   return (
     <div className="arac-cubugu">
-      {gorunen.map(a => (
-        <button
-          key={a.kod}
-          disabled={!a.aktif}
-          title={a.aktif ? (a.kisayol ?? a.ad) : (a.pasifSebep ?? '')}
-          // Yalniz "Yeni" birincil (dolu mor); Duzenle/Yazdir/... renksiz-transparan kalir.
-          className={`d ${a.kod.endsWith('.yeni') ? 'bir' : ''}`}
-          onClick={() => calistir(a.kod)}
-        >
-          <span>{a.ad}</span>
-        </button>
-      ))}
+      {gorunen.map(a => {
+        const alt = altSecenekler?.[a.kod];
+        return (
+          <span key={a.kod} className={alt ? 'dugme-menu' : undefined}>
+            <button
+              disabled={!a.aktif}
+              title={a.aktif ? (a.kisayol ?? a.ad) : (a.pasifSebep ?? '')}
+              // Yalniz "Yeni" birincil (dolu mor); Duzenle/Yazdir/... renksiz-transparan kalir.
+              className={`d ${a.kod.endsWith('.yeni') ? 'bir' : ''}`}
+              onClick={e => {
+                if (!alt) { calistir(a.kod); return }
+                e.stopPropagation();
+                setAcikMenu(m => (m === a.kod ? null : a.kod));
+              }}
+            >
+              <span>{a.ad}{alt ? ' ▾' : ''}</span>
+            </button>
+            {alt && acikMenu === a.kod && (
+              <div className="dugme-menu-liste">
+                {alt.map(o => (
+                  <button key={o.kod} type="button" className="mi"
+                          onClick={() => { setAcikMenu(null); calistir(o.kod) }}>
+                    {o.ad}
+                  </button>
+                ))}
+              </div>
+            )}
+          </span>
+        );
+      })}
     </div>
   );
 }
