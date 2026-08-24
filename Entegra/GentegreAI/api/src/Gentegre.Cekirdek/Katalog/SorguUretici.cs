@@ -128,6 +128,15 @@ public sealed class SorguUretici
         return new SorguParcasi(sql, _par.ToArray());
     }
 
+    /// <summary>Kolon telefon mu - adindan taninir (arayuzdeki telefonAlaniMi ile ayni kural).</summary>
+    private static bool TelefonKolonu(KolonTanimi kolon)
+        => System.Text.RegularExpressions.Regex.IsMatch(
+               kolon.Ad, "telefon|ceptel|gsm|faks",
+               System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+    private static string SadeceRakamlar(string metin)
+        => new string(metin.Where(char.IsDigit).ToArray());
+
     // ------------------------------------------------------------- son/sik ----
     /// <summary>
     /// "Son Aranan"/"Sik Aranan" gorunumu (eski KULLANICI_ARAMA): kaynak ifadesine
@@ -212,7 +221,19 @@ public sealed class SorguUretici
             //   ve 'GRANIT' ilike '%granit%' FALSE doner. fn_ara_metin iki tarafi da
             //   ASCII'ye indirger; ustundeki pg_trgm GIN indeksi de ayni ifadededir.
             case KosulOperatoru.Icerir:
-                return $"public.fn_ara_metin({x}) like '%' || public.fn_ara_metin({Ekle(Metin(kosul.Deger))}) || '%'";
+            {
+                // TELEFONDA RAKAM ARANIR: kayitta "+90 532 418 77 20" duruyor,
+                //   kullanici "5324187720" ya da "0532 418 77 20" yazabilir -
+                //   duz metin karsilastirmasi ikisini de KACIRIYORDU. Iki taraf
+                //   da rakama indirgenir, yerel "0" onegi ve "90" ulke kodu
+                //   atilir; boylece hangi yazimla ararsa arasin bulunur.
+                var arananMetin = Metin(kosul.Deger);
+                if (TelefonKolonu(kolon) && SadeceRakamlar(arananMetin).Length >= 3)
+                    return $"public.fn_telefon_rakam({x}) like '%' || " +
+                           $"public.fn_telefon_rakam({Ekle(arananMetin)}) || '%'";
+
+                return $"public.fn_ara_metin({x}) like '%' || public.fn_ara_metin({Ekle(arananMetin)}) || '%'";
+            }
 
             case KosulOperatoru.Baslar:
                 return $"public.fn_ara_metin({x}) like public.fn_ara_metin({Ekle(Metin(kosul.Deger))}) || '%'";
