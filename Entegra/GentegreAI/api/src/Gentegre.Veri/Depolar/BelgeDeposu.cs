@@ -1042,6 +1042,11 @@ public sealed class BelgeDeposu
             komut.Parameters.AddWithValue("p8", 0);
             komut.Parameters.AddWithValue("p9", (object?)girisDepo ?? DBNull.Value);
             await komut.ExecuteNonQueryAsync(iptal);
+
+            // Lot BAKIYESI (117) - stok_durum'un lot kirilimi. Izlem satiri
+            //   hareket defteri, bakiye burada tutulur.
+            if (girisDepo is { } gd)
+                await LotDurumYazAsync(baglanti, islem, stokId, gd, seriLotId, miktar, iptal);
         }
 
         // Lot toplami satir miktarini TUTMALI: tutmazsa depodaki miktar ile
@@ -1112,17 +1117,37 @@ public sealed class BelgeDeposu
         int seriLotId, decimal miktar, bool kalaniTasi,
         int? kaynakDepo, int? hedefDepo, CancellationToken iptal)
     {
-        var kalanIstek = miktar;
+        // 1) YETERLILIK: tek dogruluk kaynagi lot bakiyesidir (stok_lot_durum,
+        //    117). Eskiden izlem satirlarinin kalani toplanip bakiliyordu; o
+        //    alan gocmus veride "zincir devri" anlamina geldigi icin depoda
+        //    olmayan mali VAR gosterebiliyordu.
+        if (kaynakDepo is { } depo)
+        {
+            await using var kontrol = new NpgsqlCommand("""
+                select kalan from public.stok_lot_durum
+                 where stok_id = @p0 and depo_id = @p1 and seri_lot_id = @p2
+                 for update
+                """, baglanti, islem);
+            kontrol.Parameters.AddWithValue("p0", stokId);
+            kontrol.Parameters.AddWithValue("p1", depo);
+            kontrol.Parameters.AddWithValue("p2", seriLotId);
+            var eldeki = await kontrol.ExecuteScalarAsync(iptal) is { } d and not DBNull
+                ? Convert.ToDecimal(d) : 0m;
+            if (eldeki < miktar)
+                throw GentegreHatasi.IsKurali(
+                    $"{sira}. satirda secilen lotta bu depoda {eldeki:0.####} kaldi, {miktar:0.####} istendi.");
+        }
 
-        // Lotun giris hareketleri, en eskiden baslayarak. Ayni islem icinde
-        //   kilitlenir (for update) - iki kullanici ayni lotu paylasamaz.
+        // 2) ZINCIR: hangi girisin malinin gittigini izleyebilmek icin lotun
+        //    giris hareketlerinden FIFO dusulur. Gocmus veride zincir eksik
+        //    olabilir - bulunabildigi kadar dusulur, bakiye kontrolu zaten
+        //    yukarida yapildi.
+        var kalanIstek = miktar;
         var kaynaklar = new List<(int Id, decimal Kalan)>();
         await using (var komut = new NpgsqlCommand("""
             select id, kalan from public.stok_izleme
              where stok_id = @p0 and seri_lot_id = @p1 and kalan > 0
-               and belge_tur not in (14, 15, 16, 119, 4, 29, 105, 133)
-               -- Cikis O DEPODAN yapilir; deposu bilinmeyen (gocmus) hareketler
-               --   de kullanilabilir - kaynak veride depolari yok.
+               and belge_tur not in (14, 15, 16, 119, 4, 29, 105, 133, 101)
                and (@p2::int is null or depo_id = @p2 or depo_id is null)
              order by id
              for update
@@ -1136,46 +1161,70 @@ public sealed class BelgeDeposu
                 kaynaklar.Add((okuyucu.GetInt32(0), okuyucu.GetDecimal(1)));
         }
 
-        var stoktaki = kaynaklar.Sum(k => k.Kalan);
-        if (stoktaki < kalanIstek)
-            throw GentegreHatasi.IsKurali(
-                $"{sira}. satirda secilen lotta {stoktaki:0.####} kaldi, {miktar:0.####} istendi.");
-
+        var ilkKaynak = 0;
         foreach (var (kaynakId, kaynakKalan) in kaynaklar)
         {
             if (kalanIstek <= 0) break;
             var pay = Math.Min(kaynakKalan, kalanIstek);
             kalanIstek -= pay;
+            if (ilkKaynak == 0) ilkKaynak = kaynakId;
 
-            await using (var dus = new NpgsqlCommand(
+            await using var dus = new NpgsqlCommand(
                 "update public.stok_izleme set kalan = kalan - @p1 where id = @p0 and kalan >= @p1",
-                baglanti, islem))
-            {
-                dus.Parameters.AddWithValue("p0", kaynakId);
-                dus.Parameters.AddWithValue("p1", pay);
-                if (await dus.ExecuteNonQueryAsync(iptal) == 0)
-                    throw GentegreHatasi.IsKurali($"{sira}. satirda lot kalani degisti, tekrar deneyin.");
-            }
+                baglanti, islem);
+            dus.Parameters.AddWithValue("p0", kaynakId);
+            dus.Parameters.AddWithValue("p1", pay);
+            await dus.ExecuteNonQueryAsync(iptal);
+        }
 
-            await using var komut = new NpgsqlCommand("""
-                insert into public.stok_izleme
-                    (stok_id, seri_lot_id, izlem_tur, belge_tur, belge_id, belge_satir_id,
-                     adet, kalan, durum, donus_id, depo_id, ekleyen)
-                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, 0, @p8, @p9, 0)
-                """, baglanti, islem);
+        // 3) HAREKET: cikisin kendi izlem satiri - tek satir, tam miktar.
+        //    Transferde kalan TASINIR (mal stokta), cikista 0 (mal gitti).
+        await using (var komut = new NpgsqlCommand("""
+            insert into public.stok_izleme
+                (stok_id, seri_lot_id, izlem_tur, belge_tur, belge_id, belge_satir_id,
+                 adet, kalan, durum, donus_id, depo_id, ekleyen)
+            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, 0, @p8, @p9, 0)
+            """, baglanti, islem))
+        {
             komut.Parameters.AddWithValue("p0", stokId);
             komut.Parameters.AddWithValue("p1", seriLotId);
             komut.Parameters.AddWithValue("p2", (short)stokIzleme);
             komut.Parameters.AddWithValue("p3", (short)belgeTur);
             komut.Parameters.AddWithValue("p4", belgeId);
             komut.Parameters.AddWithValue("p5", satirId);
-            komut.Parameters.AddWithValue("p6", pay);
-            // TRANSFER: mal stokta kaliyor, yeni satir kalani tasir. CIKIS: 0.
-            komut.Parameters.AddWithValue("p7", kalaniTasi ? pay : 0m);
-            komut.Parameters.AddWithValue("p8", kaynakId);
+            komut.Parameters.AddWithValue("p6", miktar);
+            komut.Parameters.AddWithValue("p7", kalaniTasi ? miktar : 0m);
+            komut.Parameters.AddWithValue("p8", ilkKaynak);
             komut.Parameters.AddWithValue("p9", (object?)hedefDepo ?? DBNull.Value);
             await komut.ExecuteNonQueryAsync(iptal);
         }
+
+        // 4) BAKIYE: kaynak depodan duser; transferde hedef depoya eklenir.
+        if (kaynakDepo is { } kd)
+            await LotDurumYazAsync(baglanti, islem, stokId, kd, seriLotId, -miktar, iptal);
+        if (kalaniTasi && hedefDepo is { } hd)
+            await LotDurumYazAsync(baglanti, islem, stokId, hd, seriLotId, miktar, iptal);
+    }
+
+    /// <summary>
+    /// Lot bakiyesini (117) degistirir: stok x depo x lot basina tek satir.
+    /// Belge kaydinda stok_durum ile AYNI anda yurur - biri artarken digeri
+    /// artmazsa lot dokumu depo miktariyla ayrisir.
+    /// </summary>
+    private static async Task LotDurumYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int stokId, int depoId, int seriLotId, decimal degisim, CancellationToken iptal)
+    {
+        await using var komut = new NpgsqlCommand("""
+            insert into public.stok_lot_durum (stok_id, depo_id, seri_lot_id, kalan)
+            values (@p0, @p1, @p2, @p3)
+            on conflict (stok_id, depo_id, seri_lot_id) do update
+               set kalan = stok_lot_durum.kalan + excluded.kalan
+            """, baglanti, islem);
+        komut.Parameters.AddWithValue("p0", stokId);
+        komut.Parameters.AddWithValue("p1", depoId);
+        komut.Parameters.AddWithValue("p2", seriLotId);
+        komut.Parameters.AddWithValue("p3", degisim);
+        await komut.ExecuteNonQueryAsync(iptal);
     }
 
     /// <summary>Stok kartindaki izleme turu (0 = izlemsiz).</summary>

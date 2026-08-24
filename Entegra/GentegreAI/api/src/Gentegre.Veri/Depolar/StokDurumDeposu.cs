@@ -328,7 +328,13 @@ public sealed class StokDurumDeposu
     }
 
     /// <summary>
-    /// Stokta KALANI olan LOTLAR - cikis belgesinde secim listesi.
+    /// Stokta KALANI olan LOTLAR - cikis belgesinde secim listesi ve stok
+    /// kartindaki depo bazli lot dokumu.
+    ///
+    /// KAYNAK stok_lot_durum (117): lot bakiyesinin TEK dogruluk kaynagi.
+    /// stok_izleme.kalan buna KARISTIRILMAZ - o alan eski sistemde de "bu belge
+    /// satirindan devredilmemis miktar" (donusid zinciri) demekti; satis
+    /// faturasi satirinin bile kalani olur.
     ///
     /// LOT BAZINDA, hareket bazinda DEGIL: ayni lot her girisde yeni bir izlem
     /// satiri uretir; kullaniciya "PTL4106210826" lotunu alti kez gostermek
@@ -348,25 +354,21 @@ public sealed class StokDurumDeposu
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = new NpgsqlCommand("""
-            select i.seri_lot_id, min(i.lot_no) as lot_no, min(i.seri_no) as seri_no,
-                   min(i.uretim_tarihi) as uretim_tarihi,
-                   min(i.son_kullanma_tarihi) as son_kullanma_tarihi,
-                   sum(i.kalan) as kalan,
-                   i.depo_id, coalesce(max(d.ad), '') as depo_adi
-              from public.v_belge_satir_izlem i
-              left join public.depo d on d.id = i.depo_id
-             where i.stok_id = @p0
-               and i.kalan > 0
-               -- Cikis satirlarinin kalani secim listesine girmemeli: onlar
-               --   maldan DUSEN hareketler, stokta duran mal degil.
-               and i.belge_tur not in (14, 15, 16, 119, 4, 29, 105, 133)
-               -- Depo suzgeci: o deponun lotlari + DEPOSU BILINMEYENLER (goc).
-               --   Gocmus 326 bin hareketin deposu kaynak veride yok; onlari
-               --   listeden atmak eski mali secilemez yapardi.
-               and (@p1::int is null or i.depo_id = @p1 or i.depo_id is null)
-             group by i.seri_lot_id, i.depo_id
-            having sum(i.kalan) > 0
-             order by min(i.son_kullanma_tarihi) asc nulls last, i.seri_lot_id asc
+            select ld.seri_lot_id, l.lot_no, l.seri_no,
+                   case when l.uretim_tarihi in (timestamp '1899-12-31 00:00',
+                                                 timestamp '1990-01-01 00:00')
+                        then null else l.uretim_tarihi end,
+                   case when l.son_kullanma_tarihi in (timestamp '1899-12-31 00:00',
+                                                       timestamp '1990-01-01 00:00')
+                        then null else l.son_kullanma_tarihi end,
+                   ld.kalan, ld.depo_id, coalesce(d.ad, '')
+              from public.stok_lot_durum ld
+              join public.stok_seri_lot l on l.id = ld.seri_lot_id
+              left join public.depo d on d.id = ld.depo_id
+             where ld.stok_id = @p0
+               and ld.kalan > 0
+               and (@p1::int is null or ld.depo_id = @p1)
+             order by l.son_kullanma_tarihi asc nulls last, ld.seri_lot_id asc
             """, baglanti);
         komut.Parameters.AddWithValue("p0", (int)stokId);
         komut.Parameters.AddWithValue("p1", (object?)depoId ?? DBNull.Value);
