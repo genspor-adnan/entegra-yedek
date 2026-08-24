@@ -206,6 +206,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
   const [cakisma, setCakisma] = useState<{ alanlar: string[]; guncel: Record<string, unknown> } | null>(null);
   const [bilgi, setBilgi] = useState<string | null>(null);
   const [cariyeBaglaAcik, setCariyeBaglaAcik] = useState(false);
+  /** Katalogdaki AcilistaTarafSecimi ile acilan cari secimi (yeni kayitta). */
+  const [tarafSecimAcik, setTarafSecimAcik] = useState(false);
   const [kapatmaUyarisi, setKapatmaUyarisi] = useState(false);
   // TarafArama'dan bir KISI secilirse "public.v_cari_lookup" (KodTablosu) onu bilmiyor -
   // secim sonrasi ad gorunsun diye adini ayrica burada tutuyoruz (server'a etkisi yok).
@@ -243,6 +245,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         }
         setDeger(baslangic);
         setIlkDeger(baslangic);
+        // Katalog istiyorsa (cek/senet) kart acilir acilmaz CARI secimi gelsin -
+        //   yeni kayitta ilk is odur; kullanici kapatip alandan da secebilir.
+        if (m.acilistaTarafSecimi) setTarafSecimAcik(true);
         setSurum(undefined);
         setDetaylar(bosDetaylar);
       } else {
@@ -274,6 +279,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
     const harita = new Map<string, KartAlanMeta[]>();
     meta?.alanlar.forEach(a => {
       if (a.ad === 'id') return;
+      // ARKA PLAN alani: degeri tasinir (kaydetmede gonderilir) ama CIZILMEZ.
+      if (a.gizli) return;
       const g = a.grup ?? 'Genel';
       harita.set(g, [...(harita.get(g) ?? []), a]);
     });
@@ -1088,6 +1095,21 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
           onSec={secilen => {
             setDeger(d => ({ ...d, bagId: String(secilen.id) }));
             setBagliTarafAdi(secilen.unvan);
+          }}
+        />
+      )}
+
+      {/* Katalogdaki AcilistaTarafSecimi: yeni kayitta cari secim ekrani.
+          Secim ilgili alana yazilir; kullanici kapatip alandan da secebilir. */}
+      {meta?.acilistaTarafSecimi && (
+        <TarafArama
+          acik={tarafSecimAcik}
+          kaynaklar={['cari']}
+          yerTutucu="Cari (müşteri/tedarikçi) ara…"
+          onKapat={() => setTarafSecimAcik(false)}
+          onSec={secilen => {
+            setDeger(d => ({ ...d, [meta.acilistaTarafSecimi!]: String(secilen.id) }));
+            setTarafSecimAcik(false);
           }}
         />
       )}

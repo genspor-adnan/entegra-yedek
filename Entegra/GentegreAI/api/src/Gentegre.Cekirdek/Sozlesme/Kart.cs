@@ -52,7 +52,9 @@ public sealed record KartAlanMeta(
     bool Yazilabilir,
     bool Zorunlu,
     int? EnFazlaUzunluk,
-    IReadOnlyDictionary<string, string>? Kodlar);
+    IReadOnlyDictionary<string, string>? Kodlar,
+    /// <summary>Formda CIZILMEZ ama degeri tasinir (arka plan alani).</summary>
+    bool Gizli = false);
 
 public sealed record KartDetayMeta(
     string Ad,
@@ -69,6 +71,12 @@ public sealed class KartMetaYaniti
     /// </summary>
     public IReadOnlyDictionary<string, object?> Varsayilanlar { get; set; }
         = new Dictionary<string, object?>();
+
+    /// <summary>
+    /// Doluysa YENI kayitta taraf (cari) secim ekrani acilir; deger, secimin
+    /// yazilacagi alan adidir. Kullanici isterse sonra alandan degistirir.
+    /// </summary>
+    public string? AcilistaTarafSecimi { get; set; }
 
     public string Kaynak { get; set; } = "";
     public IReadOnlyList<KartAlanMeta> Alanlar { get; set; } = Array.Empty<KartAlanMeta>();

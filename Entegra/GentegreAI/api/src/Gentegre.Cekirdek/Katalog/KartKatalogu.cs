@@ -24,7 +24,11 @@ public sealed record KartAlani(
     string? AltGrup = null,
     // Mockup'taki ".ikili" (or. Raf Ömrü: sayi + birim combo TEK etiket altinda yan yana).
     //   Baska bir alanin Ad'ini gosterir; o alan kendi SATIRINI almaz, buraya eklenir.
-    string? EslesAlan = null
+    string? EslesAlan = null,
+    // ARKA PLAN alani: formda CIZILMEZ ama degeri tasinir (kaydetmede gonderilir).
+    //   Cek/senet "Tür" boyle: kagidin turu hangi listeden gelindigiyle belli,
+    //   ekranda yer kaplamasi gereksiz - ama kayda dogru deger gitmeli.
+    bool Gizli = false
 )
 {
     /// <summary>Etiket verilmediyse camelCase addan uretilir: faturaUnvan -> "Fatura Unvan".</summary>
@@ -77,7 +81,11 @@ public sealed record KartTanimi(
     string? SabitKosul = null,
     string? SubeKolonu = null,
     string? KapsamKolonu = null,
-    IReadOnlyDictionary<string, object?>? YeniKayitVarsayilanlari = null
+    IReadOnlyDictionary<string, object?>? YeniKayitVarsayilanlari = null,
+    // YENI kayitta acilir acilmaz taraf (cari) secim ekrani acilsin mi - deger,
+    //   secimin yazilacagi alan adidir ("tarafId"). Belge kartindaki desenin
+    //   generic kartlardaki karsiligi; kullanici isterse sonra degistirir.
+    string? AcilistaTarafSecimi = null
 )
 {
     private Dictionary<string, KartAlani>? _dizin;
@@ -721,7 +729,7 @@ public static class KartKatalogu
             new("tur",             "tur",               "kod",   Zorunlu: true, SabitKodlar: HesapTuruKodlari, Baslik: "Hesap Türü", Grup: "Kimlik"),
             new("kod",             "kod",               "metin", EnFazlaUzunluk: 40,  Baslik: "Kod",  Grup: "Kimlik"),
             new("ad",              "ad",                "metin", Zorunlu: true, EnFazlaUzunluk: 150, Baslik: "Ad", Grup: "Kimlik"),
-            new("dovizCinsi",      "doviz_cinsi",       "metin", Zorunlu: true, EnFazlaUzunluk: 6, Baslik: "Para Birimi", Grup: "Kimlik"),
+            new("dovizCinsi",      "doviz_cinsi",       "kod",   Zorunlu: true, SabitKodlar: DovizKodlari, Baslik: "Para Birimi", Grup: "Kimlik"),
             new("durum",           "durum",             "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
             // --- Genel
             new("sorumluId",       "sorumlu_id",        "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Sorumlu", Grup: "Genel", AltGrup: "Tanımlama"),
@@ -751,6 +759,15 @@ public static class KartKatalogu
             new SilmeEngeli("public.kasa_islem",   "hesap_id", "Bu hesaba ait kasa islemi var, silinemez.")
         });
 
+
+    /// <summary>
+    /// Kartlarda kullanilan para birimleri. doviz_kur tablosundaki kodlarla ayni
+    /// (TL yerel, digerleri kur tablosundan okunur) - elle metin girilince
+    /// "TRY"/"tl" gibi varyantlar olusup kur eslesmesi kaciyordu.
+    /// </summary>
+    private static readonly Dictionary<string, string> DovizKodlari =
+        new() { ["TL"] = "TL", ["USD"] = "USD", ["EUR"] = "EUR",
+                ["GBP"] = "GBP", ["CHF"] = "CHF", ["JPY"] = "JPY" };
 
     // --------------------------------------------------------------- gorev ----
     private static readonly Dictionary<string, string> GorevTurKodlari =
@@ -934,7 +951,7 @@ public static class KartKatalogu
             // calisir_mi: yalniz YAPRAK hesaplar fis satiri alabilir (ara hesaba kayit yasak)
             new("calisirMi",    "calisir_mi",     "mantik", Baslik: "Fiş satırı alabilir", Grup: "Genel"),
             new("cariAltHesap", "cari_alt_hesap", "mantik", Baslik: "Cari alt hesabı açılsın", Grup: "Genel"),
-            new("dovizCinsi",   "doviz_cinsi",    "metin", EnFazlaUzunluk: 6, Baslik: "Para Birimi", Grup: "Genel")
+            new("dovizCinsi",   "doviz_cinsi",    "kod",   SabitKodlar: DovizKodlari, Baslik: "Para Birimi", Grup: "Genel")
         },
         SilmeEngelleri: new[]
         {
@@ -954,6 +971,8 @@ public static class KartKatalogu
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
             { ["durum"] = (short)10, ["tur"] = (short)1, ["yon"] = (short)1,
               ["dovizCinsi"] = "TL", ["dovizKuru"] = 1m },
+        // Yeni cek/senette ilk is kimin kagidi oldugunu secmektir.
+        AcilistaTarafSecimi: "tarafId",
         Alanlar: new KartAlani[]
         {
             new("id",            "id",              "sayi",  Yazilabilir: false),
@@ -964,13 +983,15 @@ public static class KartKatalogu
             new("yon",           "yon",             "kod",   Zorunlu: true, SabitKodlar: CekSenetYonKodlari, Baslik: "Yön", Grup: "Kimlik"),
             new("seriNo",        "seri_no",         "metin", EnFazlaUzunluk: 30, Baslik: "Seri No", Grup: "Kimlik"),
             new("durum",         "durum",           "kod",   Yazilabilir: false, SabitKodlar: CekSenetDurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
-            new("tur",           "tur",             "kod",   Zorunlu: true, SabitKodlar: CekSenetTurKodlari, Baslik: "Tür", Grup: "Genel", AltGrup: "Taraf"),
+            // Tür ARKA PLANDA: hangi listeden gelindiyse o deger yazilir (Cek/Senet
+            //   listesi varsayilani), ekranda hic gorunmez.
+            new("tur",           "tur",             "kod",   Zorunlu: true, SabitKodlar: CekSenetTurKodlari, Baslik: "Tür", Gizli: true),
             new("kesideci",      "kesideci",        "metin", EnFazlaUzunluk: 150, Baslik: "Keşideci", Grup: "Genel", AltGrup: "Taraf"),
             new("ciroTarafId",   "ciro_taraf_id",   "kod",   Yazilabilir: false, KodTablosu: "public.v_cari_lookup", Baslik: "Ciro Edilen", Grup: "Genel", AltGrup: "Taraf"),
             new("tarih",         "tarih",           "tarih", Zorunlu: true, Baslik: "Tarih", Grup: "Genel", AltGrup: "Tutar / Vade"),
             new("vade",          "vade",            "tarih", Zorunlu: true, Baslik: "Vade", Grup: "Genel", AltGrup: "Tutar / Vade"),
             new("tutar",         "tutar",           "para",  Zorunlu: true, Baslik: "Tutar", Grup: "Genel", AltGrup: "Tutar / Vade"),
-            new("dovizCinsi",    "doviz_cinsi",     "metin", EnFazlaUzunluk: 6, Baslik: "Para Birimi", Grup: "Genel", AltGrup: "Tutar / Vade"),
+            new("dovizCinsi",    "doviz_cinsi",     "kod",   SabitKodlar: DovizKodlari, Baslik: "Para Birimi", Grup: "Genel", AltGrup: "Tutar / Vade"),
             new("dovizKuru",     "doviz_kuru",      "para",  Baslik: "Kur", Grup: "Genel", AltGrup: "Tutar / Vade"),
             new("bankaAdi",      "banka_adi",       "metin", EnFazlaUzunluk: 60, Baslik: "Banka", Grup: "Genel", AltGrup: "Banka"),
             new("bankaSubesi",   "banka_subesi",    "metin", EnFazlaUzunluk: 60, Baslik: "Şube", Grup: "Genel", AltGrup: "Banka"),

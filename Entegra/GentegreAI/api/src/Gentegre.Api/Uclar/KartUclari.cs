@@ -167,6 +167,7 @@ public static class KartUclari
                 //   alanlari bos kalmaz (bkz. KartMetaYaniti.Varsayilanlar).
                 Varsayilanlar = tanim.YeniKayitVarsayilanlari
                     ?? new Dictionary<string, object?>(),
+                AcilistaTarafSecimi = tanim.AcilistaTarafSecimi,
                 Alanlar = okunabilir.Select(MetaOptions).ToList(),
                 Detaylar = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
                     .Select(d => new KartDetayMeta(d.Ad, d.Etiket, d.SaltOkunur, d.Alanlar.Select(MetaOptions).ToList()))
@@ -214,7 +215,8 @@ public static class KartUclari
             alan.Yazilabilir && baglam.Yetkiler.AlanYazilir(tanim.Ad, alan.Ad),
             alan.Zorunlu,
             alan.EnFazlaUzunluk,
-            kodTablosuSecenekleri ?? alan.SabitKodlar);
+            kodTablosuSecenekleri ?? alan.SabitKodlar,
+            alan.Gizli);
 
     private static KartTanimi KartBul(string ad)
         => KartKatalogu.Bul(ad) ?? throw GentegreHatasi.Bulunamadi($"Bilinmeyen kart: {ad}");

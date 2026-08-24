@@ -200,6 +200,8 @@ export interface KartAlanMeta {
   zorunlu: boolean;
   enFazlaUzunluk?: number | null;
   kodlar?: Record<string, string> | null;
+  /** Formda cizilmez ama degeri tasinir (arka plan alani - or. cek/senet "Tür"). */
+  gizli?: boolean;
 }
 
 export interface KartDetayMeta { ad: string; baslik: string; saltOkunur: boolean; alanlar: KartAlanMeta[] }
@@ -207,6 +209,8 @@ export interface KartDetayMeta { ad: string; baslik: string; saltOkunur: boolean
 export interface KartMetaYaniti {
   /** Yeni kayitta doldurulacak alanlar (katalogdaki varsayilanlar). */
   varsayilanlar?: Record<string, unknown>;
+  /** Doluysa yeni kayitta taraf secim ekrani acilir; deger yazilacak alan adi. */
+  acilistaTarafSecimi?: string | null;
   kaynak: string;
   alanlar: KartAlanMeta[];
   detaylar: KartDetayMeta[];
