@@ -54,7 +54,7 @@ export interface ListeTanimi {
   rota?: string;
   /** Yeni kayitta mantik alanlara ekrana ozel varsayilan (ör. Tedarikci Listesi ->
       tedarikci:true, musteri:false) - GenForm'a gecirilir. */
-  yeniKayitVarsayilanlari?: Record<string, boolean>;
+  yeniKayitVarsayilanlari?: Record<string, boolean | number | string>;
   /** Ekstre ekranlari: URL'deki ?<alan>=<id> sorgu parametresi sunucu filtresine
       cevrilir (ör. /hesap-ekstre?hesapId=12). Parametre yoksa liste TUM kayitlari
       gosterir - bos ekran yerine "hepsi" daha kullanisli. */
@@ -196,7 +196,16 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       if (kod.startsWith('kasa.yeni.')) { setKasaTuru(Number(kod.slice(10))); return }
 
       if (kod.endsWith('.yeni') && tanim.kartYolu) git(`${tanim.kartYolu}/yeni`);
-      else if ((kod.endsWith('.duzenle') || kod.endsWith('.sil') || kod.endsWith('.ac')) && satir && tanim.kartYolu)
+      // SIL gercekten SILER: eskiden karti aciyordu ve kullanici "sildim" sanip
+      //   ekranda kaydi gorunce sasiriyordu. Onay sorulur; silme engelleri
+      //   (SilmeEngeli) sunucuda, 422 mesaji kullaniciya aynen gosterilir.
+      else if (kod.endsWith('.sil') && satir && tanim.kartYolu) {
+        const ad = String(satir.ad ?? satir.konu ?? satir.unvan ?? satir.kod ?? satir.id);
+        if (!confirm(`"${ad}" silinecek. Onaylıyor musunuz?`)) return;
+        await api.kartSil(tanim.kartYolu.replace(/^\//, ''), Number(satir.id));
+        setYenile(t => t + 1);
+      }
+      else if ((kod.endsWith('.duzenle') || kod.endsWith('.ac')) && satir && tanim.kartYolu)
         kartaGit(satir.id);
       else if (satir) alert(`"${kod}" aksiyonu henuz baglanmadi.`);
     } catch (h) {
@@ -679,9 +688,15 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     toplam: ['yerelBakiye'],
     menuGrup: 'Banka', menuAd: 'Kredi Kartı', ic: '💳', yetkiKodu: 'hesap',
   },
+  // CEK ve SENET AYRI listeler (kullanici karari): ayni `cek-senet` kaynagi,
+  //   sabit filtre tur=1 / tur=2. Ikisi ayni tabloda durur cunku portfoy,
+  //   ciro ve tahsil akislari birebir aynidir - degisen yalnizca kagit turu.
   {
-    kaynak: 'cek-senet', baslik: 'Çek / Senet', yol: 'Kasa › Cek ve Senet', kartYolu: '/cek-senet',
-    aksiyonEkrani: 'cek-senet-liste',
+    kaynak: 'cek-senet', rota: 'cek', baslik: 'Çekler', yol: 'Kasa › Çekler',
+    kartYolu: '/cek-senet', aksiyonEkrani: 'cek-senet-liste',
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 1 },
+    yeniKayitVarsayilanlari: { tur: 1 },
+    gizliKolonlar: ['tur'],
     toplam: ['tutar'],
     cipler: [
       { ad: 'Portföy', filtre: { alan: 'durum', op: 'esit', deger: 10 } },
@@ -689,7 +704,22 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Kapanan', filtre: { alan: 'durum', op: 'icinde', deger: [50, 70] } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Kasa', menuAd: 'Çek / Senet', ic: '📃', yetkiKodu: 'cek_senet',
+    menuGrup: 'Kasa', menuAd: 'Çek Listesi', ic: '📃', yetkiKodu: 'cek_senet',
+  },
+  {
+    kaynak: 'cek-senet', rota: 'senet', baslik: 'Senetler', yol: 'Kasa › Senetler',
+    kartYolu: '/cek-senet', aksiyonEkrani: 'cek-senet-liste',
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 2 },
+    yeniKayitVarsayilanlari: { tur: 2 },
+    gizliKolonlar: ['tur'],
+    toplam: ['tutar'],
+    cipler: [
+      { ad: 'Portföy', filtre: { alan: 'durum', op: 'esit', deger: 10 } },
+      { ad: 'Tahsilde', filtre: { alan: 'durum', op: 'esit', deger: 30 } },
+      { ad: 'Kapanan', filtre: { alan: 'durum', op: 'icinde', deger: [50, 70] } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Kasa', menuAd: 'Senet Listesi', ic: '🧾', yetkiKodu: 'cek_senet',
   },
   {
     // Yuruyen bakiyeli ekstre: hesap secimi URL'den gelir (?hesapId=), grid
@@ -725,6 +755,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   {
     // GOREV / HATIRLATMA / TAKVIM (db/108) - ana sayfa panelini besleyen kayitlar.
     kaynak: 'gorev', baslik: 'Görevler', yol: 'CRM › Görevler', kartYolu: '/gorev',
+    aksiyonEkrani: 'gorev-liste',
     cipler: [
       { ad: 'Bekleyen',  filtre: { alan: 'durum', op: 'kucukEsit', deger: 1 } },
       { ad: 'Tamamlanan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },

@@ -34,7 +34,9 @@ interface Props {
   /** Yeni kayitta mantik alanlara EKRANA OZEL varsayilan (ör. Tedarikçi Listesi'nden
       "+Yeni" -> tedarikci:true, musteri:false) - ayni "cari" karti Musteri/Tedarikci
       ekranlarindan farkli varsayilanla acilsin diye. */
-  yeniKayitVarsayilanlari?: Record<string, boolean>;
+  /** Ekrana ozel varsayilan: mantik alan icin boolean, kod/sayi alani icin
+      sayi (or. Cek Listesi'nden 'Yeni' -> tur=1). */
+  yeniKayitVarsayilanlari?: Record<string, boolean | number | string>;
 }
 
 /** Modal sarmalayici — mockup'taki .kaperde / .kawin duzeni. */

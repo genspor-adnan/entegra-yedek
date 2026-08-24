@@ -96,6 +96,21 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            // Gorev / hatirlatma / takvim (db/108): stok-liste ile ayni desen.
+            //   "Tamamla" ayri bir aksiyon DEGIL - durum kartta degisir; listede
+            //   tek tikla tamamlamak, ilerleme/tamamlanma alanlarini atlardi.
+            ["gorev-liste"] = new AksiyonTanimi[]
+            {
+                new("gorev.yeni",    "＋ Yeni",   "gorev", Kisayol: "Ctrl+N",
+                    KaynakKodu: "gorev", Islem: Islem.Ekle, Sira: 10),
+                new("gorev.duzenle", "✎ Düzenle", "gorev", Kisayol: "Enter",
+                    KaynakKodu: "gorev", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("gorev.sil",     "Sil",       "gorev", Hedef: "sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "gorev", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+                new("genel.yazdir",  "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             // Hesap ekranlari (Kasa / Banka / POS / Kredi Karti / Kredi) - hepsi
             //   ayni 'hesap' kaynagi, tur'e gore ayri liste.
             ["hesap-liste"] = new AksiyonTanimi[]
