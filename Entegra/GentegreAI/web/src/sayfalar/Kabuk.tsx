@@ -167,7 +167,11 @@ export function Kabuk() {
     <div className="kabuk">
       <header className="ust">
         <div className="marka">
-          <span className="lg"><img src="/gentegre-sembol.svg" alt="Gentegre" /></span>
+          {/* BASE_URL: uygulama alt yolda yayinda olabilir (/ai). Mutlak "/..." yazmak
+              yayinda 404 veriyordu - sunucu kokunde degil /ai altinda duruyor. */}
+          <span className="lg">
+            <img src={`${import.meta.env.BASE_URL}gentegre-sembol.svg`} alt="Gentegre" />
+          </span>
           Gentegre AI
         </div>
 
