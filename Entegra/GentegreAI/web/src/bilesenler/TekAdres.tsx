@@ -108,12 +108,9 @@ export function TekAdres({
           </div>
         )}
 
+        {/* POSTA KODU sorulmaz (kullanici): kolon duruyor, gocmus degerler
+            korunuyor - yalniz formda yer kaplamiyordu. */}
         <div className="adres-satir">
-          <label className="alan tip-metin">
-            <span className="etiket">PK</span>
-            <input value={String(satir.postaKodu ?? '')} disabled={saltOkunur}
-              onChange={e => degis({ postaKodu: e.target.value })} />
-          </label>
           <label className="alan tip-kod">
             <span className="etiket">Ülke</span>
             <select value={String(satir.ulke ?? VARSAYILAN_ULKE)} disabled={saltOkunur}

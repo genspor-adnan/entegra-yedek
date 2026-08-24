@@ -1147,7 +1147,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
               && gizliSekmeler?.includes('Fatura Bilgileri') && (() => {
                 const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
                 return (
-                  <div className="kasira">
+                  // Adres DAR, kisi gridi GENIS: adres bes kisa alandan ibaret,
+                  //   kisi tablosunda alti kolon var (bkz. .kasira.aday-alt).
+                  <div className="kasira aday-alt">
                     {adresDetay && (
                       <TekAdres
                         meta={adresDetay}

@@ -476,6 +476,12 @@ table.grid tr.flt input {
    editlerin basladigi hizada dursun - 84px etiket kolonu + 8px bosluk. */
 .alan-izgara.ayar-formu .alan.tip-mantik { padding-left: 92px }
 .alan-hata { color: var(--hata); font-size: 11px }
+/* Aday kartinin alt satiri: solda DAR adres, saginda GENIS kisi gridi.
+   Adres bes kisa alan, kisi tablosu alti kolon - esit bolmek ikisini de
+   kotu gosteriyordu. */
+.kasira.aday-alt > .kagrup:first-child { flex: 0 0 340px; max-width: 340px }
+.kasira.aday-alt > .kagrup:last-child  { flex: 1 1 auto; min-width: 0 }
+
 /* LOT DETAYI (master-detail): izlemli urunun / deponun altinda lotlari.
    Ok BELIRGIN olmali - kullanici acilir satiri fark etmiyordu: kutulu, mavi,
    uzerine gelince dolan bir dugme. */
