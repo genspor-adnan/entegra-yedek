@@ -84,14 +84,20 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            // AKSIYON KOMBOSU (sagtus hedefi) yalniz KOPYALA icerir (kullanici):
+            //   Yeni/Duzenle/Sil zaten arac cubugunda dugme; komboda tekrar
+            //   edilmeleri listeyi doldurup gercek aksiyonu goze batmaz yapiyordu.
             ["stok-liste"] = new AksiyonTanimi[]
             {
-                new("stok.yeni",    "＋ Yeni",     "stok", Kisayol: "Ctrl+N",
+                new("stok.yeni",    "＋ Yeni",     "stok", Hedef: "araccubugu,palet", Kisayol: "Ctrl+N",
                     KaynakKodu: "stok", Islem: Islem.Ekle, Sira: 10),
-                new("stok.duzenle", "✎ Düzenle",   "stok", Kisayol: "Enter",
+                new("stok.duzenle", "✎ Düzenle",   "stok", Hedef: "araccubugu,palet", Kisayol: "Enter",
                     KaynakKodu: "stok", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("stok.sil",     "Sil",         "stok", Hedef: "sagtus,palet", Kisayol: "Del",
+                new("stok.sil",     "Sil",         "stok", Hedef: "palet", Kisayol: "Del",
                     KaynakKodu: "stok", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+                // Kopyalama (126): secili kart icerigiyle cogaltilir.
+                new("stok.kopyala", "⧉ Stok Kartını Kopyala", "stok", Hedef: "sagtus,palet",
+                    KaynakKodu: "stok", Islem: Islem.Ekle, KayitGerekir: true, Sira: 40),
                 new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },

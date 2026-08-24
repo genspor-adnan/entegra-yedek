@@ -339,6 +339,47 @@ public sealed class StokDurumDeposu
     }
 
     /// <summary>
+    /// STOK KARTI KOPYALA (126): karti tum alanlariyla cogaltir, kod sonuna
+    /// "_Kn", ad sonuna " kopya" ekler; paket ise ICERIGI de kopyalanir.
+    ///
+    /// Kopyalama mantigi SQL fonksiyonunda (fn_stok_kopyala): kolon listesi
+    /// dinamik okundugu icin stok tablosuna kolon eklendiginde burasi
+    /// guncellenmek zorunda kalmaz.
+    /// </summary>
+    public async Task<long> KopyalaAsync(long stokId, YazmaBaglami baglam,
+        CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+        long yeniId;
+        await using (var komut = new NpgsqlCommand(
+            "select public.fn_stok_kopyala(@p0, @p1, @p2)", baglanti, islem))
+        {
+            komut.Parameters.AddWithValue("p0", (int)stokId);
+            komut.Parameters.AddWithValue("p1", baglam.KullaniciId);
+            komut.Parameters.AddWithValue("p2", (object?)baglam.SubeId ?? DBNull.Value);
+            var d = await komut.ExecuteScalarAsync(iptal);
+            if (d is null || d == DBNull.Value)
+                throw GentegreHatasi.IsKurali("Stok kartı kopyalanamadı.");
+            yeniId = Convert.ToInt64(d);
+        }
+
+        // Log YENI kayda yazilir (kaynak kart degismedi); bilgi alaninda
+        //   kaynagin id'si durur - "bu kart nereden cogaltildi" izi kalsin.
+        await _log.YazAsync(baglanti, islem, LogIslemi.Ekle, LogTabloStok, yeniId,
+            baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+            new Dictionary<string, string>
+            {
+                ["aksiyon"] = "stokKopyala",
+                ["kaynakStokId"] = stokId.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            }, stokId: (int)yeniId, iptal: iptal);
+
+        await islem.CommitAsync(iptal);
+        return yeniId;
+    }
+
+    /// <summary>
     /// Stokta KALANI olan LOTLAR - cikis belgesinde secim listesi ve stok
     /// kartindaki depo bazli lot dokumu.
     ///

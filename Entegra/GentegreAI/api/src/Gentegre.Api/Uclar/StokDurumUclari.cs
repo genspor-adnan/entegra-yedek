@@ -55,6 +55,19 @@ public static class StokDurumUclari
                                     izlemeNo = baglam.IzlemeNo });
         }).WithTags("Kart").RequireAuthorization();
 
+        // STOK KARTI KOPYALA (126): liste aksiyonu. Yetki EKLE - kopyalamak
+        //   yeni kart acmaktir; salt-okur kullanici cogaltamaz.
+        yol.MapPost("/api/kart/stok/{stokId:long}/kopyala", async (
+            long stokId, BaglamCozucu cozucu, StokDurumDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("stok", Islem.Ekle);
+            var yeniId = await depo.KopyalaAsync(stokId,
+                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+            return Results.Ok(new { id = yeniId, izlemeNo = baglam.IzlemeNo });
+        }).WithTags("Kart").RequireAuthorization();
+
         // PAKET ICERIGI (124): belge kaleminde paket secilince satirlar buradan
         //   uretilir - istemci kendi basina "paket icerigi nedir" bilemez.
         yol.MapGet("/api/kart/stok/{stokId:long}/paket", async (

@@ -268,6 +268,10 @@ export const api = {
     istek<{ icerik: PaketIcerikSatiri[] }>(
       `/api/kart/stok/${stokId}/paket${alis ? '?alis=true' : ''}`).then(y => y.icerik),
 
+  /** Stok kartini kopyalar (126): kod "_Kn", ad " kopya"; paket icerigi de gelir. */
+  stokKopyala: (stokId: number) =>
+    istek<{ id: number }>(`/api/kart/stok/${stokId}/kopyala`, { method: 'POST' }).then(y => y.id),
+
   /** Depo bazli min/max seviye (099). Miktarlara DOKUNMAZ. */
   stokDurumLimit: (stokId: number, depoId: number,
                    minStok: number | null, maxStok: number | null) =>

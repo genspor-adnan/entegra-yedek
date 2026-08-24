@@ -223,6 +223,19 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           })();
           return;
         }
+        // STOK KARTI KOPYALA (126): kopya olusur ve HEMEN acilir - kullanici
+        //   zaten degistirmek icin kopyaliyor, listeye donup aramasi gereksiz.
+        case 'stok.kopyala': {
+          if (!satir) return;
+          const ad = String(satir.ad ?? satir.kod ?? satir.id);
+          if (!confirm(`"${ad}" kartı kopyalanacak.\n\n`
+                     + 'Kod sonuna "_K1", ad sonuna " kopya" eklenir; paket ise içeriği de kopyalanır.\n'
+                     + 'Fiyat ve barkod kopyalanmaz.')) return;
+          const yeniId = await api.stokKopyala(Number(satir.id));
+          setYenile(t => t + 1);
+          kartaGit(yeniId);
+          return;
+        }
         case 'genel.yazdir': alert('Yazdirma henuz baglanmadi.'); return;
       }
 
