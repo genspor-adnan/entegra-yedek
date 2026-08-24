@@ -32,7 +32,10 @@ public sealed record StokLotSatiri(
     string seriNo,
     DateTime? uretimTarihi,
     DateTime? sonKullanmaTarihi,
-    decimal kalan);
+    decimal kalan,
+    /// <summary>Lotun bulundugu depo. Gocmus hareketlerde bilinmiyor (null).</summary>
+    int? depoId,
+    string depoAdi);
 
 public sealed record StokHareketSatiri(
     long BelgeId, DateTime Tarih, int BelgeTur, string BelgeTurAdi, string BelgeNo,
@@ -341,25 +344,32 @@ public sealed class StokDurumDeposu
     /// stok_izleme'ye depo kolonu eklenmeli - o ayri bir istir.
     /// </summary>
     public async Task<IReadOnlyList<StokLotSatiri>> LotlarAsync(
-        long stokId, CancellationToken iptal = default)
+        long stokId, int? depoId = null, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = new NpgsqlCommand("""
             select i.seri_lot_id, min(i.lot_no) as lot_no, min(i.seri_no) as seri_no,
                    min(i.uretim_tarihi) as uretim_tarihi,
                    min(i.son_kullanma_tarihi) as son_kullanma_tarihi,
-                   sum(i.kalan) as kalan
+                   sum(i.kalan) as kalan,
+                   i.depo_id, coalesce(max(d.ad), '') as depo_adi
               from public.v_belge_satir_izlem i
+              left join public.depo d on d.id = i.depo_id
              where i.stok_id = @p0
                and i.kalan > 0
                -- Cikis satirlarinin kalani secim listesine girmemeli: onlar
                --   maldan DUSEN hareketler, stokta duran mal degil.
                and i.belge_tur not in (14, 15, 16, 119, 4, 29, 105, 133)
-             group by i.seri_lot_id
+               -- Depo suzgeci: o deponun lotlari + DEPOSU BILINMEYENLER (goc).
+               --   Gocmus 326 bin hareketin deposu kaynak veride yok; onlari
+               --   listeden atmak eski mali secilemez yapardi.
+               and (@p1::int is null or i.depo_id = @p1 or i.depo_id is null)
+             group by i.seri_lot_id, i.depo_id
             having sum(i.kalan) > 0
              order by min(i.son_kullanma_tarihi) asc nulls last, i.seri_lot_id asc
             """, baglanti);
         komut.Parameters.AddWithValue("p0", (int)stokId);
+        komut.Parameters.AddWithValue("p1", (object?)depoId ?? DBNull.Value);
 
         var sonuc = new List<StokLotSatiri>();
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
@@ -370,7 +380,9 @@ public sealed class StokDurumDeposu
                 okuyucu.IsDBNull(2) ? "" : okuyucu.GetString(2),
                 okuyucu.IsDBNull(3) ? null : okuyucu.GetDateTime(3),
                 okuyucu.IsDBNull(4) ? null : okuyucu.GetDateTime(4),
-                okuyucu.GetDecimal(5)));
+                okuyucu.GetDecimal(5),
+                okuyucu.IsDBNull(6) ? null : okuyucu.GetInt32(6),
+                okuyucu.IsDBNull(7) ? "" : okuyucu.GetString(7)));
         return sonuc;
     }
 }

@@ -259,8 +259,9 @@ export const api = {
       + (depoId ? `&depoId=${depoId}` : '')),
 
   /** Cikis belgesinde secilebilecek lotlar: stokta KALANI olanlar (114). */
-  stokLotlari: (stokId: number) =>
-    istek<{ lotlar: StokLotSatiri[] }>(`/api/kart/stok/${stokId}/lot`).then(y => y.lotlar),
+  stokLotlari: (stokId: number, depoId?: number | null) =>
+    istek<{ lotlar: StokLotSatiri[] }>(`/api/kart/stok/${stokId}/lot`
+      + (depoId ? `?depoId=${depoId}` : '')).then(y => y.lotlar),
 
   /** Depo bazli min/max seviye (099). Miktarlara DOKUNMAZ. */
   stokDurumLimit: (stokId: number, depoId: number,

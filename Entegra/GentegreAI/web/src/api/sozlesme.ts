@@ -114,6 +114,9 @@ export interface StokLotSatiri {
   uretimTarihi?: string | null;
   sonKullanmaTarihi?: string | null;
   kalan: number;
+  /** Lotun bulundugu depo - gocmus hareketlerde bilinmiyor (null). */
+  depoId?: number | null;
+  depoAdi?: string;
 }
 
 /** §2.4 kolon metasi. Yetkisiz kolon bu listede HIC donmez. */

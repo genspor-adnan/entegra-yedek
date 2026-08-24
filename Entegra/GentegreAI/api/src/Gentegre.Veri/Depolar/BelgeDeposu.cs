@@ -923,7 +923,7 @@ public sealed class BelgeDeposu
         // Lot / seri izlemi: stok izlemliyse satirin miktari lotlara dagitilir.
         if (stokId is { } sid)
             await IzlemYazAsync(baglanti, islem, belgeId, satirId, sid, sira,
-                                Sayi(belge, "tur"), adet, satir, turStokEtkiler, iptal);
+                                Sayi(belge, "tur"), adet, satir, belge, turStokEtkiler, iptal);
     }
 
     // ============================================================ lot / seri ====
@@ -944,8 +944,14 @@ public sealed class BelgeDeposu
     /// </summary>
     private async Task IzlemYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, int satirId, int stokId, int sira, int belgeTur, decimal adet,
-        Dictionary<string, JsonElement> satir, bool turStokEtkiler, CancellationToken iptal)
+        Dictionary<string, JsonElement> satir, IDictionary<string, object?> belge,
+        bool turStokEtkiler, CancellationToken iptal)
     {
+        // Hareketin deposu (115): giris yonlu belgede giris deposu, cikista
+        //   cikis deposu. Transferde IKISI de var - tuketim cikis deposundan,
+        //   yeni satir giris deposuna yazilir.
+        int? girisDepo = JsonSayiNull(satir, "girisDepoId") ?? SayiNull(belge, "girisDepoId");
+        int? cikisDepo = JsonSayiNull(satir, "cikisDepoId") ?? SayiNull(belge, "cikisDepoId");
         var stokIzleme = await StokIzlemeTuruAsync(baglanti, islem, stokId, iptal);
         var izlemler = satir.TryGetValue("izlemler", out var dizi) && dizi.ValueKind == JsonValueKind.Array
             ? dizi.EnumerateArray().ToList()
@@ -974,7 +980,10 @@ public sealed class BelgeDeposu
         {
             await IzlemDusAsync(baglanti, islem, belgeId, satirId, stokId, sira,
                                 belgeTur, stokIzleme, adet, izlemler,
-                                kalaniTasi: BelgeTuru.TransferMi(belgeTur), iptal);
+                                kalaniTasi: BelgeTuru.TransferMi(belgeTur),
+                                kaynakDepo: cikisDepo,
+                                hedefDepo: BelgeTuru.TransferMi(belgeTur) ? girisDepo : cikisDepo,
+                                iptal);
             return;
         }
 
@@ -1017,8 +1026,8 @@ public sealed class BelgeDeposu
             await using var komut = new NpgsqlCommand("""
                 insert into public.stok_izleme
                     (stok_id, seri_lot_id, izlem_tur, belge_tur, belge_id, belge_satir_id,
-                     adet, kalan, durum, ekleyen)
-                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p6, @p7, @p8)
+                     adet, kalan, durum, depo_id, ekleyen)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p6, @p7, @p9, @p8)
                 """, baglanti, islem);
             komut.Parameters.AddWithValue("p0", stokId);
             komut.Parameters.AddWithValue("p1", seriLotId);
@@ -1031,6 +1040,7 @@ public sealed class BelgeDeposu
             //   kod listesi tanimlanınca isletilecek.
             komut.Parameters.AddWithValue("p7", (short)JsonSayi(izlem, "durum", 0));
             komut.Parameters.AddWithValue("p8", 0);
+            komut.Parameters.AddWithValue("p9", (object?)girisDepo ?? DBNull.Value);
             await komut.ExecuteNonQueryAsync(iptal);
         }
 
@@ -1057,7 +1067,8 @@ public sealed class BelgeDeposu
     /// </summary>
     private static async Task IzlemDusAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, int satirId, int stokId, int sira, int belgeTur, int stokIzleme,
-        decimal adet, List<JsonElement> izlemler, bool kalaniTasi, CancellationToken iptal)
+        decimal adet, List<JsonElement> izlemler, bool kalaniTasi,
+        int? kaynakDepo, int? hedefDepo, CancellationToken iptal)
     {
         if (izlemler.Count == 0)
             throw GentegreHatasi.Dogrulama($"{sira}. satir icin lot secilmeli.",
@@ -1079,7 +1090,8 @@ public sealed class BelgeDeposu
 
             toplam += miktar;
             await LottanDusAsync(baglanti, islem, belgeId, satirId, stokId, sira,
-                                 belgeTur, stokIzleme, seriLotId, miktar, kalaniTasi, iptal);
+                                 belgeTur, stokIzleme, seriLotId, miktar, kalaniTasi,
+                                 kaynakDepo, hedefDepo, iptal);
         }
 
         if (Math.Abs(toplam - adet) > 0.0001m)
@@ -1097,7 +1109,8 @@ public sealed class BelgeDeposu
     /// </summary>
     private static async Task LottanDusAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, int satirId, int stokId, int sira, int belgeTur, int stokIzleme,
-        int seriLotId, decimal miktar, bool kalaniTasi, CancellationToken iptal)
+        int seriLotId, decimal miktar, bool kalaniTasi,
+        int? kaynakDepo, int? hedefDepo, CancellationToken iptal)
     {
         var kalanIstek = miktar;
 
@@ -1108,12 +1121,16 @@ public sealed class BelgeDeposu
             select id, kalan from public.stok_izleme
              where stok_id = @p0 and seri_lot_id = @p1 and kalan > 0
                and belge_tur not in (14, 15, 16, 119, 4, 29, 105, 133)
+               -- Cikis O DEPODAN yapilir; deposu bilinmeyen (gocmus) hareketler
+               --   de kullanilabilir - kaynak veride depolari yok.
+               and (@p2::int is null or depo_id = @p2 or depo_id is null)
              order by id
              for update
             """, baglanti, islem))
         {
             komut.Parameters.AddWithValue("p0", stokId);
             komut.Parameters.AddWithValue("p1", seriLotId);
+            komut.Parameters.AddWithValue("p2", (object?)kaynakDepo ?? DBNull.Value);
             await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
             while (await okuyucu.ReadAsync(iptal))
                 kaynaklar.Add((okuyucu.GetInt32(0), okuyucu.GetDecimal(1)));
@@ -1143,8 +1160,8 @@ public sealed class BelgeDeposu
             await using var komut = new NpgsqlCommand("""
                 insert into public.stok_izleme
                     (stok_id, seri_lot_id, izlem_tur, belge_tur, belge_id, belge_satir_id,
-                     adet, kalan, durum, donus_id, ekleyen)
-                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, 0, @p8, 0)
+                     adet, kalan, durum, donus_id, depo_id, ekleyen)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, 0, @p8, @p9, 0)
                 """, baglanti, islem);
             komut.Parameters.AddWithValue("p0", stokId);
             komut.Parameters.AddWithValue("p1", seriLotId);
@@ -1156,6 +1173,7 @@ public sealed class BelgeDeposu
             // TRANSFER: mal stokta kaliyor, yeni satir kalani tasir. CIKIS: 0.
             komut.Parameters.AddWithValue("p7", kalaniTasi ? pay : 0m);
             komut.Parameters.AddWithValue("p8", kaynakId);
+            komut.Parameters.AddWithValue("p9", (object?)hedefDepo ?? DBNull.Value);
             await komut.ExecuteNonQueryAsync(iptal);
         }
     }

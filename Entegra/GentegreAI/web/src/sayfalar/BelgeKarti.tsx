@@ -1826,6 +1826,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             yerelPara={yerelPara}
             girisIzlemi={bilgi.girisIzlemi}
             cikisIzlemi={bilgi.cikisIzlemi}
+            cikisDepoId={depo?.id ?? null}
             belgeTarihi={tarih}
             onKapat={() => setKalem(null)}
             onKaydet={r => { kalemKaydet(r); setKalem(null) }}
@@ -2043,10 +2044,12 @@ function adetKaydir(deger: string, yon: number): string {
  * Durum GIRISTE 0 ("Girişte"); karantina/bloke gibi durumlar kod listesi
  * tanimlandiginda burada secilebilir olacak (db/114).
  */
-function IzlemPenceresi({ stokAdi, stokId, izleme, miktar, satirlar, cikis,
+function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirlar, cikis,
                          onKapat, onKaydet }: {
   stokAdi: string;
   stokId: number | null;
+  /** CIKISTA lotlar BU DEPODAN listelenir (115) - baska deponun lotu satilamaz. */
+  depoId: number | null;
   izleme: number;
   /** Kalemde girilen toplam miktar - lotlarin toplami buna esit olmali. */
   miktar: number;
@@ -2069,7 +2072,7 @@ function IzlemPenceresi({ stokAdi, stokId, izleme, miktar, satirlar, cikis,
   useEffect(() => {
     if (!cikis || !stokId) return;
     let iptal = false;
-    void api.stokLotlari(stokId)
+    void api.stokLotlari(stokId, depoId)
       .then(lotlar => {
         if (iptal) return;
         setListe(eski => {
@@ -2089,7 +2092,7 @@ function IzlemPenceresi({ stokAdi, stokId, izleme, miktar, satirlar, cikis,
       .catch(h => setHata(h instanceof ApiHatasi ? h.message : String(h)))
       .finally(() => { if (!iptal) setYukleniyor(false) });
     return () => { iptal = true };
-  }, [cikis, stokId]);
+  }, [cikis, stokId, depoId]);
 
   const sayi = (m: string) => Number(m.replace(',', '.')) || 0;
   const toplam = liste.reduce((t, z) => t + sayi(z.miktar), 0);
@@ -2216,13 +2219,16 @@ function IzlemPenceresi({ stokAdi, stokId, izleme, miktar, satirlar, cikis,
 }
 
 function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, yerelPara,
-                         girisIzlemi, cikisIzlemi, belgeTarihi, onKapat, onKaydet }: {
+                         girisIzlemi, cikisIzlemi, cikisDepoId, belgeTarihi,
+                         onKapat, onKaydet }: {
   satir: SatirDurumu;
   irsaliyeMi: boolean;
   /** Mal DEPOYA giriyor: izlemli stokta fiyattan sonra lot GIRIS ekrani acilir. */
   girisIzlemi: boolean;
   /** Mal DEPODAN cikiyor: izlemli stokta lot SECIM ekrani acilir. */
   cikisIzlemi: boolean;
+  /** Cikis deposu - lot listesi bu depoya gore suzulur. */
+  cikisDepoId: number | null;
   /** Genel Ayarlar'daki defter para birimi - "dovizli mi" karari buna gore. */
   yerelPara: string;
   /** Stok fisi: fiyat var (muhasebe matrahi) ama KDV/iskonto YOK - vergi dogurmaz. */
@@ -2430,6 +2436,7 @@ function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, yerelPara,
           <IzlemPenceresi
             stokAdi={r.stokAdi}
             stokId={r.stokId}
+            depoId={cikisDepoId}
             cikis={cikisIzlemi}
             izleme={r.izleme}
             miktar={adet}

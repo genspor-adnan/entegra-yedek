@@ -46,12 +46,12 @@ public static class StokDurumUclari
         //   lot GIRILMEZ, mevcut lotlardan SECILIR - yoksa depoda olmayan bir
         //   lottan mal cikmis gorunur ve geri izlenebilirlik kirilir.
         yol.MapGet("/api/kart/stok/{stokId:long}/lot", async (
-            long stokId, BaglamCozucu cozucu, StokDurumDeposu depo,
+            long stokId, int? depoId, BaglamCozucu cozucu, StokDurumDeposu depo,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("stok", Islem.Gor);
-            return Results.Ok(new { lotlar = await depo.LotlarAsync(stokId, iptal),
+            return Results.Ok(new { lotlar = await depo.LotlarAsync(stokId, depoId, iptal),
                                     izlemeNo = baglam.IzlemeNo });
         }).WithTags("Kart").RequireAuthorization();
 

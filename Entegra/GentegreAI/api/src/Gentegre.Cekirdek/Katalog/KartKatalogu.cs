@@ -689,20 +689,14 @@ public static class KartKatalogu
                 new("fiyat",       "fiyat",        "para", Zorunlu: true),
                 new("dovizCinsi",  "doviz_cinsi",  "kod"),
                 new("satis",       "satis",        "mantik")
-            }, Sirala: "id", SubeKolonu: null, LogTabloId: 346),  // stok_fiyatta sube_id YOK
+            }, Sirala: "id", SubeKolonu: null, LogTabloId: 346)   // stok_fiyatta sube_id YOK
                                                                    // (GENINI -11110: Stok Fiyat)
 
-            // mockup "Seri / Lot" sekmesi - gercek tablo (011_sema_stok.sql), id kolonu var,
-            //   duzenlenebilir DetayTanimi'ne birebir uyuyor.
-            new DetayTanimi("seriLot", "public.stok_seri_lot", "stok_id", new KartAlani[]
-            {
-                new("id",                 "id",                   "sayi",  Yazilabilir: false),
-                new("lotNo",               "lot_no",               "metin", EnFazlaUzunluk: 30, Baslik: "Lot No"),
-                new("lotNoEx",             "lot_no_ex",            "metin", EnFazlaUzunluk: 30, Baslik: "Lot No (Ek)"),
-                new("seriNo",              "seri_no",              "metin", EnFazlaUzunluk: 30, Baslik: "Seri No"),
-                new("uretimTarihi",        "uretim_tarihi",        "tarih", Baslik: "Uretim Tarihi"),
-                new("sonKullanmaTarihi",   "son_kullanma_tarihi",  "tarih", Baslik: "Son Kullanma Tarihi")
-            }, Sirala: "id desc", SubeKolonu: null, LogTabloId: 902, Baslik: "Seri / Lot")  // yeni tablo - eski karsiligi yok (bkz. taraf_adres: 901)
+            // "Seri / Lot" AYRI SEKME DEGIL (kullanici karari, 115): lot dokumu
+            //   artik Stok Durumu sekmesinde DEPO BAZINDA, master-detail olarak.
+            //   Ayri sekme lotlari depodan bagimsiz tek liste halinde gosteriyordu
+            //   ve "hangi depoda hangi lottan ne kadar var" sorusunu
+            //   cevaplamiyordu. Lotlar belge kaydiyla olusur, elle acilmaz.
         },
         SilmeEngelleri: new[]
         {

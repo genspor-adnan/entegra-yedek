@@ -1,8 +1,43 @@
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
-import { ApiHatasi, type StokDurumYaniti } from '../api/sozlesme';
+import { ApiHatasi, type StokDurumYaniti, type StokLotSatiri } from '../api/sozlesme';
 
 const say = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 4 });
+
+/** "2027-06-30T00:00:00" -> "30.06.2027"; bos ise tire. */
+const gun = (t?: string | null) => (t ? t.slice(0, 10).split('-').reverse().join('.') : '—');
+
+/**
+ * Depo satirinin altindaki lot dokumu (master-detail). Eskiden karttaki ayri
+ * "Seri / Lot" sekmesiydi: orada lotlar DEPOSUZ, tek liste halindeydi ve
+ * "hangi depoda hangi lottan ne kadar var" sorusunu cevaplamiyordu.
+ */
+function lotTablosu(satirlar: StokLotSatiri[]) {
+  return (
+    <table className="lot-tablo">
+      <thead>
+        <tr>
+          <th>Lot No</th>
+          <th>Seri No</th>
+          <th>Ürt. Tarihi</th>
+          <th>SKT</th>
+          <th className="hiza-sag">Kalan</th>
+        </tr>
+      </thead>
+      <tbody>
+        {satirlar.map(l => (
+          <tr key={`${l.seriLotId}-${l.depoId ?? 0}`}>
+            <td><code>{l.lotNo || '—'}</code></td>
+            <td>{l.seriNo || '—'}</td>
+            <td>{gun(l.uretimTarihi)}</td>
+            <td>{gun(l.sonKullanmaTarihi)}</td>
+            <td className="hiza-sag">{say.format(Number(l.kalan))}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
 
 /** Bos hucre "0" degil TIRE gosterir - "tanimlanmamis" ile "sifir" ayri seylerdir. */
 const limitMetni = (d: number | null | undefined) =>
@@ -35,6 +70,10 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
   const [hata, setHata] = useState<string | null>(null);
   /** Hucre duzenleme: "<depoId>:min" | "<depoId>:max" -> girilen metin. */
   const [taslak, setTaslak] = useState<Record<string, string>>({});
+  /** Stokun lot dagilimi (115) - depo satirinin altinda master-detail acilir. */
+  const [lotlar, setLotlar] = useState<StokLotSatiri[]>([]);
+  /** Lot detayi ACIK depolar. Kullanici oka basinca acilir - her depo icin ayri. */
+  const [acikDepolar, setAcikDepolar] = useState<Set<number>>(new Set());
 
   const yukle = useCallback(async () => {
     try {
@@ -46,6 +85,15 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
   }, [stokId]);
 
   useEffect(() => { void yukle() }, [yukle]);
+
+  // Lot dagilimi ayri istek: izlemsiz stokta bos doner, ekrani bekletmez.
+  useEffect(() => {
+    let iptal = false;
+    void api.stokLotlari(stokId)
+      .then(l => { if (!iptal) setLotlar(l) })
+      .catch(() => { if (!iptal) setLotlar([]) });
+    return () => { iptal = true };
+  }, [stokId]);
 
   async function limitYaz(depoId: number, hangi: 'min' | 'max', metin: string) {
     const satir = veri?.satirlar.find(s => s.depoId === depoId);
@@ -129,9 +177,31 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
             </tr>
           </thead>
           <tbody>
-            {(veri?.satirlar ?? []).map(s => (
-              <tr key={s.depoId}>
-                <td>{s.depoAdi}</td>
+            {(veri?.satirlar ?? []).map(s => {
+              // O deponun lotlari. Deposu BILINMEYEN (gocmus) lotlar asagida
+              //   ayri bir satirda toplanir - hicbir depoya yazamayiz.
+              const depoLotlari = lotlar.filter(l => l.depoId === s.depoId);
+              const acik = acikDepolar.has(s.depoId);
+              return (
+              <Fragment key={s.depoId}>
+              <tr>
+                <td>
+                  {depoLotlari.length > 0 && (
+                    <button type="button" className="lot-ok"
+                            title={acik ? 'Lotları gizle' : 'Lotları göster'}
+                            onClick={() => setAcikDepolar(k => {
+                              const y = new Set(k);
+                              if (y.has(s.depoId)) y.delete(s.depoId); else y.add(s.depoId);
+                              return y;
+                            })}>
+                      {acik ? '▾' : '▸'}
+                    </button>
+                  )}
+                  {s.depoAdi}
+                  {depoLotlari.length > 0 && (
+                    <span className="sonuk"> · {depoLotlari.length} lot</span>
+                  )}
+                </td>
                 <td className="hiza-sag"><b>{say.format(Number(s.miktar))}</b></td>
                 <td className="hiza-sag">{Number(s.rezerve) ? say.format(Number(s.rezerve)) : ''}</td>
                 <td className="hiza-sag">{say.format(Number(s.kullanilabilir))}</td>
@@ -145,13 +215,47 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
                   </span>
                 </td>
               </tr>
-            ))}
+              {acik && depoLotlari.length > 0 && (
+                <tr className="lot-detay">
+                  <td colSpan={8}>{lotTablosu(depoLotlari)}</td>
+                </tr>
+              )}
+              </Fragment>
+            )})}
             {(veri?.satirlar ?? []).length === 0 && (
               <tr><td colSpan={8} className="bos">Bu stokun hiçbir depoda hareketi yok.</td></tr>
+            )}
+            {/* Deposu bilinmeyen lotlar: gocmus hareketlerin kaynak verisinde
+                depo yok (115). Gizlemek yerine ayri satirda gosterilir - mal
+                stokta, yeri belirsiz. */}
+            {lotlar.some(l => l.depoId === null || l.depoId === undefined) && (
+              <>
+                <tr>
+                  <td colSpan={8} className="sonuk">
+                    <button type="button" className="lot-ok"
+                            onClick={() => setAcikDepolar(k => {
+                              const y = new Set(k);
+                              if (y.has(0)) y.delete(0); else y.add(0);
+                              return y;
+                            })}>
+                      {acikDepolar.has(0) ? '▾' : '▸'}
+                    </button>
+                    Deposu belirsiz (göçmüş hareketler)
+                    <span className="sonuk"> · {lotlar.filter(l => !l.depoId).length} lot</span>
+                  </td>
+                </tr>
+                {acikDepolar.has(0) && (
+                  <tr className="lot-detay">
+                    <td colSpan={8}>{lotTablosu(lotlar.filter(l => !l.depoId))}</td>
+                  </tr>
+                )}
+              </>
             )}
           </tbody>
         </table>
         <div className="not">
+          Depo satırındaki ok, o depodaki <b>lot/seri dağılımını</b> açar (izlemli
+          stoklarda). Lotlar belge kaydıyla oluşur; burada düzenlenmez.
           Miktarlar <b>salt-okunur</b>: belge kaydında güncellenir. Min/Max seviye depo
           bazlı tanımlanır; boş bırakılırsa stok kartındaki Minimum Stok geçerlidir.
           <b> Kullanılabilir</b> = Miktar − Rezerve; kritik uyarısı bu değere bakar.
