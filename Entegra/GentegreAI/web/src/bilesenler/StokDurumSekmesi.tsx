@@ -161,8 +161,9 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
         </div>
       </div>
 
-      <div className="kagrup">
-        <h6>Depo Bazlı Stok</h6>
+      {/* Cerceve YOK (kullanici karari): KPI seridinin altinda dogrudan tablo -
+          tek tablo icin baslikli kutu fazladan bir kat gorsel gurultuydu. */}
+      <div className="depo-stok">
         <table className="detay-tablo">
           <thead>
             <tr>

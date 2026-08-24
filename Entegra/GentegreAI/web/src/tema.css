@@ -476,18 +476,39 @@ table.grid tr.flt input {
    editlerin basladigi hizada dursun - 84px etiket kolonu + 8px bosluk. */
 .alan-izgara.ayar-formu .alan.tip-mantik { padding-left: 92px }
 .alan-hata { color: var(--hata); font-size: 11px }
-/* Kalem gridinde LOT DETAYI (master-detail): izlemli urunun altinda lotlari. */
+/* LOT DETAYI (master-detail): izlemli urunun / deponun altinda lotlari.
+   Ok BELIRGIN olmali - kullanici acilir satiri fark etmiyordu: kutulu, mavi,
+   uzerine gelince dolan bir dugme. */
 .lot-ok {
-  border: 0; background: none; cursor: pointer; color: var(--mor);
-  font-size: 11px; padding: 0 4px 0 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; margin-right: 6px; vertical-align: middle;
+  border: 1px solid var(--mor); border-radius: 3px;
+  background: var(--mor2); color: var(--mor);
+  font-size: 11px; line-height: 1; padding: 0; font-weight: 700;
 }
-tr.lot-detay > td { background: #f7f9fc; padding: 0 0 0 26px }
-table.lot-tablo { width: auto; min-width: 420px; border-collapse: collapse; font-size: 11px; margin: 2px 0 4px }
+.lot-ok:hover { background: var(--mor); color: #fff }
+
+/* Detay bloku: soldan girintili, sol kenarinda mavi seritle kalem/depo
+   satirina bagli oldugu belli olsun. */
+tr.lot-detay > td {
+  background: #eef4fb; padding: 6px 10px 8px 34px;
+  border-left: 3px solid var(--mor);
+}
+table.lot-tablo {
+  width: auto; min-width: 480px; border-collapse: collapse; font-size: 11.5px;
+  background: var(--yuz); border: 1px solid var(--cizgi2); border-radius: var(--r);
+}
 table.lot-tablo th {
-  text-align: left; color: var(--soluk); font-weight: 600; padding: 2px 12px 2px 0;
-  border-bottom: 1px solid var(--cizgi2);
+  text-align: left; color: var(--yazi2); font-weight: 700; padding: 4px 14px;
+  background: var(--yuz2); border-bottom: 1px solid var(--cizgi);
+  white-space: nowrap;
 }
-table.lot-tablo td { padding: 2px 12px 2px 0; border: 0 }
+table.lot-tablo td {
+  padding: 3px 14px; border-bottom: 1px solid var(--cizgi2); white-space: nowrap;
+}
+table.lot-tablo tr:last-child td { border-bottom: 0 }
+table.lot-tablo tbody tr:hover td { background: #f2f7fd }
+table.lot-tablo code { font-weight: 700; color: var(--yazi2) }
 
 /* Otomatik doldurulan alanin altindaki aciklama (ör. "24.08.2026 kuru"). */
 .alan-notu { color: var(--soluk); font-size: 11px }
