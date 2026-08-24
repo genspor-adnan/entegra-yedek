@@ -552,10 +552,12 @@ public static class KaynakKatalogu
             new("id",        "s.id",        "sayi",  "Id",       Varsayilan: false),
             new("kod",       "s.kod",       "metin", "Kod"),
             new("ad",        "s.ad",        "metin", "Stok Adi"),
-            new("kategori",  "s.kategori",  "kod",   "Kategori"),
+            // Kategori ve birim ADIYLA gosterilir: kolonlar "kod" tipindeydi ve
+            //   listede kod ad'a cevrilmedigi icin ekranda ham id goruluyordu.
+            new("kategori",  "(select k.ad from public.kategori k where k.id = s.kategori)",
+                                            "metin", "Kategori"),
             new("marka",     "s.marka",     "kod",   "Marka",    Varsayilan: false),
             new("model",     "s.model",     "metin", "Model",    Varsayilan: false),
-            new("anaBirim",  "s.ana_birim", "kod",   "Birim",    Hizalama: "orta"),
             new("kdv",       "s.kdv",       "sayi",  "KDV %",    Hizalama: "sag"),
             // Kalem arama penceresi icin: VARSAYILAN depodaki kalan ve izleme
             //   turu. Kullanici "elimde var mi, seri/lot girmem gerekecek mi"
@@ -566,6 +568,13 @@ public static class KaynakKatalogu
                 " where sd.stok_id = s.id and d.varsayilan = 1)",
                                             "para",  "Kalan",    Hizalama: "sag", Bicim: "#,##0.##",
                                             Siralanabilir: false, Filtrelenebilir: false),
+            // BIRIM, Kalan'in SAGINDA (kullanici): miktar ve birimi yan yana
+            //   okumak dogal - "78 Adet".
+            new("anaBirim",
+                "(select kd.ad from public.kod_deger kd" +
+                "   join public.kod_liste kl on kl.id = kd.liste_id" +
+                "  where kl.kod = 'stok.ana_birim' and kd.deger = s.ana_birim)",
+                                            "metin", "Birim",    Hizalama: "orta"),
             new("izlemeAdi",
                 "case s.izleme when 1 then 'Seri No' when 2 then 'Lot No' when 3 then 'SKT' " +
                 "when 4 then 'Karekod' when 5 then 'Lot No + SKT' when 6 then 'Seri + Lot' else 'Yok' end",
