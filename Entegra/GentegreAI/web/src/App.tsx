@@ -7,6 +7,7 @@ import { KasaIslemKarti } from './sayfalar/KasaIslemKarti';
 import { Liste, LISTELER } from './sayfalar/Liste';
 import { StokAyarlar } from './sayfalar/StokAyarlar';
 import { GenelAyarlar } from './sayfalar/GenelAyarlar';
+import { Panel } from './sayfalar/Panel';
 
 function Yollar() {
   const { kullanici, yukleniyor, yetki } = useOturum();
@@ -14,8 +15,8 @@ function Yollar() {
   if (yukleniyor) return <div className="tam-ekran-bilgi">Yukleniyor…</div>;
   if (!kullanici) return <Giris />;
 
-  // Yetkisi olan ilk liste acilis ekrani olur.
-  const ilk = LISTELER.find(l => yetki(l.yetkiKodu));
+  // Acilis ekrani artik PANEL (bkz. asagidaki "*" rotasi); eskiden yetkisi olan
+  //   ILK liste aciliyordu ve kullanici nerede oldugunu anlamiyordu.
 
   return (
     <Routes>
@@ -43,11 +44,15 @@ function Yollar() {
         <Route path="/kasa-islem/yeni" element={<KasaIslemKarti />} />
         <Route path="/kasa-islem/:id" element={<KasaIslemKarti />} />
 
+        {/* ANA SAYFA: panel. Giris sonrasi buraya gelinir - eskiden ilk listeye
+            (Hasta) dusuyordu, kullanici nerede oldugunu anlamiyordu. */}
+        <Route path="/panel" element={<Panel />} />
+
         {/* Ayar ekranlari liste degil (ozelSayfa) - rotalari burada. */}
         {yetki('ayar') && <Route path="/genel-ayarlar" element={<GenelAyarlar />} />}
         {yetki('stok') && <Route path="/stok-ayarlar" element={<StokAyarlar />} />}
 
-        <Route path="*" element={<Navigate to={ilk ? `/${ilk.rota ?? ilk.kaynak}` : '/cari'} replace />} />
+        <Route path="*" element={<Navigate to="/panel" replace />} />
       </Route>
     </Routes>
   );

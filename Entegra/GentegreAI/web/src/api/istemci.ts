@@ -8,6 +8,7 @@ import {
   type AcikSatir,
   type YetkiSatiri, type YetkiSatiriIstegi, type DokumanSatiri,
   type StokDurumYaniti, type StokHareketYaniti, type AyarSatiri, type YardimKaydi,
+  type PanelYaniti,
 } from './sozlesme';
 
 const TABAN = import.meta.env.VITE_API ?? 'http://localhost:5180';
@@ -261,6 +262,10 @@ export const api = {
                    minStok: number | null, maxStok: number | null) =>
     gonder<StokDurumYaniti>(`/api/kart/stok/${stokId}/durum/limit`,
                             { depoId, minStok, maxStok }, 'PUT'),
+
+  // -------------------------------------------------------- ana sayfa ----
+  /** Panel: kutular + listeler TEK istekte (acilista bes cagri yapmamak icin). */
+  panel: () => istek<PanelYaniti>('/api/panel'),
 
   // ---------------------------------------------------------- ayarlar ----
   ayarlar: () => istek<{ ayarlar: AyarSatiri[] }>('/api/ayar').then(y => y.ayarlar),

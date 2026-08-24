@@ -755,3 +755,13 @@ table.grid tr.flt input {
 .dil-oge:hover { background: var(--yuz2) }
 .dil-oge.on { background: var(--mor2); font-weight: 700 }
 .dil-oge .bayrak { font-size: 14px; line-height: 1 }
+
+/* ---------------------------------------------- ana sayfa paneli ---- */
+.panel-kutular { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-bottom: 14px }
+/* KPI kutusu tiklanabilir: dugme ama gorunumu kart. */
+.panel-kpi { text-align: left; cursor: pointer; font: inherit }
+.panel-kpi:hover { border-color: var(--vurgu); box-shadow: var(--golge) }
+.panel-sutunlar { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; align-items: start }
+.panel-sutunlar .kagrup { margin-bottom: 0 }
+.panel-sutunlar .detay-tablo { width: calc(100% - 20px); margin: 10px }
+.hata-metin { color: var(--hata) }

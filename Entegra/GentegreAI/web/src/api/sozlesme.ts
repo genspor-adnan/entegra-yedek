@@ -460,3 +460,32 @@ export interface YardimKaydi {
   baslik: string;
   metin: string;
 }
+
+// ------------------------------------------------------------- ana sayfa ----
+/** Panel ust seridindeki kutu. `vurgu`: '', 'olumlu', 'uyari', 'hata'. */
+export interface PanelKutusu {
+  anahtar: string;
+  baslik: string;
+  deger: number;
+  /** '₺' ise para bicimlenir, degilse adet/kalem gibi sayilir. */
+  birim: string;
+  alt: string;
+  /** Tiklaninca gidilecek liste; bos ise kutu tiklanmaz. */
+  yol: string;
+  vurgu: string;
+}
+
+export interface PanelSatiri {
+  id: number;
+  ana: string;
+  yan: string;
+  deger: string;
+  yol: string;
+}
+
+export interface PanelYaniti {
+  kutular: PanelKutusu[];
+  sonBelgeler: PanelSatiri[];
+  kritikStok: PanelSatiri[];
+  buyukBakiyeler: PanelSatiri[];
+}
