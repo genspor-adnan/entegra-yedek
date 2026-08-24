@@ -148,6 +148,7 @@ public static class KartKatalogu
         Ekle(Hesap());
         Ekle(Proje());
         Ekle(Gorev());
+        Ekle(Firsat());
         Ekle(Banka());
         Ekle(MasrafMerkezi());
         Ekle(HesapPlani());
@@ -1049,6 +1050,86 @@ public static class KartKatalogu
         {
             new SilmeEngeli("public.muhasebe_fis_satir", "hesap_plani_id", "Bu hesaba fis satiri yazilmis, silinemez.")
         });
+
+    // --------------------------------------------------------------- firsat ----
+    // CRM satis firsati karti (121, mockup firsat_karti.html). Kimlik seridi
+    //   mockup'takiyle ayni: Fırsat No · Konu · Aşama · Durum.
+    //
+    // FIRSAT NO kullanici bos birakirsa DB tetigi uretir (FRS.<yil>-<id>) -
+    //   sayac tablosuna gerek yok, numara id'den turedigi icin mukerrer olmaz.
+    // AGIRLIKLI TUTAR kartta YOK: listede hesaplanan bir kolon, kartta ikinci
+    //   kez gostermek "girilebilir" izlenimi verirdi.
+    private static KartTanimi Firsat() => new(
+        Ad: "firsat",
+        YetkiKodu: "firsat",
+        Tablo: "public.firsat",
+        LogTabloId: 918,
+        SubeKolonu: "sube_id",
+        KapsamKolonu: "taraf_id",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+            { ["durum"] = (short)1, ["asama"] = (short)1, ["oncelik"] = (short)2,
+              ["dovizCinsi"] = "TL", ["dovizKuru"] = 1m, ["olasilik"] = (short)10 },
+        // Yeni firsatta ilk is MUSTERIYI/ADAYI secmektir (cek-senet deseni).
+        AcilistaTarafSecimi: "tarafId",
+        Doviz: new DovizKurali("dovizCinsi", "dovizKuru", "tahminiTutar", "", "beklenenKapanis"),
+        Alanlar: new KartAlani[]
+        {
+            new("id",               "id",                "sayi",  Yazilabilir: false),
+            new("firsatNo",         "firsat_no",         "metin", EnFazlaUzunluk: 30, Baslik: "Fırsat No", Grup: "Kimlik"),
+            new("konu",             "konu",              "metin", Zorunlu: true, EnFazlaUzunluk: 200, Baslik: "Konu", Grup: "Kimlik"),
+            new("asama",            "asama",             "kod",   Zorunlu: true, KodListesi: "firsat.asama", Baslik: "Aşama", Grup: "Kimlik"),
+            new("durum",            "durum",             "kod",   Zorunlu: true, KodListesi: "firsat.durum", Baslik: "Durum", Grup: "Kimlik"),
+
+            new("tarafId",          "taraf_id",          "kod",   Zorunlu: true, KodTablosu: "public.v_cari_lookup", Baslik: "Müşteri / Aday", Grup: "Genel", AltGrup: "Fırsat"),
+            new("kaynak",           "kaynak",            "kod",   KodListesi: "firsat.kaynak", Baslik: "Kaynak", Grup: "Genel", AltGrup: "Fırsat"),
+            new("tur",              "tur",               "kod",   KodListesi: "firsat.tur", Baslik: "Tür", Grup: "Genel", AltGrup: "Fırsat"),
+            new("oncelik",          "oncelik",           "kod",   KodListesi: "firsat.oncelik", Baslik: "Öncelik", Grup: "Genel", AltGrup: "Fırsat"),
+            new("sorumluId",        "sorumlu_id",        "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Sorumlu", Grup: "Genel", AltGrup: "Fırsat"),
+
+            new("tahminiTutar",     "tahmini_tutar",     "para",  Baslik: "Tahmini Tutar", Grup: "Genel", AltGrup: "Tutar / Tahmin"),
+            new("dovizCinsi",       "doviz_cinsi",       "kod",   SabitKodlar: DovizKodlari, Baslik: "Para Birimi", Grup: "Genel", AltGrup: "Tutar / Tahmin"),
+            new("dovizKuru",        "doviz_kuru",        "para",  Baslik: "Kur", Grup: "Genel", AltGrup: "Tutar / Tahmin"),
+            new("olasilik",         "olasilik",          "sayi",  Baslik: "Olasılık %", Grup: "Genel", AltGrup: "Tutar / Tahmin"),
+            new("beklenenKapanis",  "beklenen_kapanis",  "tarih", Baslik: "Beklenen Kapanış", Grup: "Genel", AltGrup: "Tutar / Tahmin"),
+
+            new("sonTemas",         "son_temas",         "tarih", Baslik: "Son Temas", Grup: "Genel", AltGrup: "Takip"),
+            new("sonrakiAksiyon",   "sonraki_aksiyon",   "metin", EnFazlaUzunluk: 200, Baslik: "Sonraki Aksiyon", Grup: "Genel", AltGrup: "Takip"),
+            new("kapanisTarihi",    "kapanis_tarihi",    "tarih", Baslik: "Kapanış Tarihi", Grup: "Genel", AltGrup: "Takip"),
+            new("kayipNedeni",      "kayip_nedeni",      "metin", EnFazlaUzunluk: 200, Baslik: "Kayıp Nedeni", Grup: "Genel", AltGrup: "Takip"),
+            new("aciklama",         "aciklama",          "metin", Baslik: "Açıklama", Grup: "Genel", AltGrup: "Notlar"),
+
+            new("subeId",           "sube_id",           "sayi",  Yazilabilir: false, Baslik: "Şube"),
+            new("eklemeTarihi",     "ekleme_tarihi",     "tarih", Yazilabilir: false)
+        },
+        Detaylar: new[]
+        {
+            // "Ürünler": talep edilen kalemler - TAHMIN, belge degil (stok/cari
+            //   etkilemez). Firsat kazanilinca teklif/siparise donusturulur.
+            new DetayTanimi("urunler", "public.firsat_urun", "firsat_id", new KartAlani[]
+            {
+                new("id",          "id",          "sayi",  Yazilabilir: false),
+                new("sira",        "sira",        "sayi",  Baslik: "Sıra"),
+                new("stokId",      "stok_id",     "kod",   KodTablosu: "public.v_stok_lookup", Baslik: "Stok"),
+                new("aciklama",    "aciklama",    "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama"),
+                new("miktar",      "miktar",      "para",  Baslik: "Miktar"),
+                new("birimFiyat",  "birim_fiyat", "para",  Baslik: "Birim Fiyat"),
+                new("tutar",       "tutar",       "para",  Baslik: "Tutar")
+            }, Sirala: "sira, id", SubeKolonu: null, LogTabloId: 919, Baslik: "Ürünler"),
+
+            // "Aktiviteler": firsata bagli gorusme/toplanti/hatirlatma. Ayri
+            //   tablo YOK - gorev (108) tablosundaki firsat_id ile baglanir.
+            new DetayTanimi("aktiviteler", "public.gorev", "firsat_id", new KartAlani[]
+            {
+                new("id",         "id",         "sayi",  Yazilabilir: false),
+                new("tur",        "tur",        "kod",   KodListesi: "gorev.tur", Baslik: "Tür"),
+                new("konu",       "konu",       "metin", EnFazlaUzunluk: 200, Baslik: "Konu"),
+                new("sorumluId",  "sorumlu_id", "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Sorumlu"),
+                new("baslangic",  "baslangic",  "tarih", Baslik: "Başlangıç"),
+                new("termin",     "termin",     "tarih", Baslik: "Termin"),
+                new("durum",      "durum",      "kod",   KodListesi: "gorev.durum", Baslik: "Durum")
+            }, Sirala: "coalesce(baslangic, ekleme_tarihi) desc, id desc", LogTabloId: 108, Baslik: "Aktiviteler")
+        },
+        SilmeEngelleri: Array.Empty<SilmeEngeli>());
 
     // ------------------------------------------------------------ cek/senet ----
     // durum Yazilabilir:false - portfoy durumu ELLE degil, yalnizca aksiyonlarla

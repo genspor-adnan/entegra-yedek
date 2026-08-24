@@ -124,6 +124,21 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            // CRM satis firsati (121). Kazanildi/Kaybedildi ayri AKSIYON degil:
+            //   asama alanindan secilir - iki yerden degistirilen bir durum
+            //   birbirini tutmayan iki kayit uretir.
+            ["firsat-liste"] = new AksiyonTanimi[]
+            {
+                new("firsat.yeni",    "＋ Yeni",   "firsat", Kisayol: "Ctrl+N",
+                    KaynakKodu: "firsat", Islem: Islem.Ekle, Sira: 10),
+                new("firsat.duzenle", "✎ Düzenle", "firsat", Kisayol: "Enter",
+                    KaynakKodu: "firsat", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("firsat.sil",     "Sil",       "firsat", Hedef: "sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "firsat", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+                new("genel.yazdir",   "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             // Hesap ekranlari (Kasa / Banka / POS / Kredi Karti / Kredi) - hepsi
             //   ayni 'hesap' kaynagi, tur'e gore ayri liste.
             ["hesap-liste"] = new AksiyonTanimi[]

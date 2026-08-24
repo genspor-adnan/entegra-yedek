@@ -177,8 +177,8 @@ public sealed class KartDeposu
             "public.v_masraf_lookup", "public.v_hizmet_lookup", "public.v_masraf_merkezi_lookup",
             // Banka tanimlari (109) - cek/senet ve hesap kartlarindaki secim.
             "public.v_banka_lookup", "public.v_banka_sube_lookup",
-            // ÜTS mensei ulkesi (119).
-            "public.v_ulke_lookup",
+            // ÜTS mensei ulkesi (119), firsat urun satirinda stok secimi (121).
+            "public.v_ulke_lookup", "public.v_stok_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

@@ -785,6 +785,21 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'CRM', menuAd: 'Görevler', ic: '✅', yetkiKodu: 'gorev',
   },
   {
+    // SATIS FIRSATI (db/121, mockup firsat_karti/firsat_listesi.html) - teklif
+    //   ONCESI surec. Cipler huninin durumu: acik firsatlar, kazanilan, kaybedilen.
+    kaynak: 'firsat', baslik: 'Satış Fırsatları', yol: 'CRM › Satış Fırsatları',
+    kartYolu: '/firsat', aksiyonEkrani: 'firsat-liste',
+    cipler: [
+      { ad: 'Açık',        filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Kazanılan',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Kaybedilen',  filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tumu' },
+    ],
+    toplam: ['tahminiTutar', 'agirlikliTutar'],
+    yerTutucuSekmeler: ['Teklifler', 'Yorum / Medya', 'Ek Alanlar'],
+    menuGrup: 'CRM', menuAd: 'Satış Fırsatları', ic: '🎯', yetkiKodu: 'firsat',
+  },
+  {
     // Kullanici: "Stok altına Stok Listesi [taşı]" - tek ogeli grup, digerleriyle ayni desen.
     kaynak: 'stok', baslik: 'Stoklar', yol: 'Stok › Stok Karti', kartYolu: '/stok',
     aksiyonEkrani: 'stok-liste', cipler: DURUM_CIPLERI,

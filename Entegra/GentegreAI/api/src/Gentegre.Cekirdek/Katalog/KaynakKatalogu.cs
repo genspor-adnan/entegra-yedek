@@ -97,6 +97,7 @@ public static class KaynakKatalogu
         Ekle(MasrafMerkezi());
         Ekle(HesapPlani());
         Ekle(KasaIslemTuru());
+        Ekle(Firsat());
         Ekle(HesapEkstre());
         Ekle(CariEkstre());
         // Kasa motoru (076, F2)
@@ -736,6 +737,40 @@ public static class KaynakKatalogu
             new("fisMi",       "t.fis_mi",       "mantik","Fis Uretir", Hizalama: "orta"),
             new("makbuzSeri",  "t.makbuz_seri",  "metin", "Seri", Hizalama: "orta", Varsayilan: false),
             new("aktif",       "t.aktif",        "mantik","Aktif", Hizalama: "orta")
+        });
+
+    // ------------------------------------------------------------- firsat ----
+    // CRM satis firsati listesi (121, mockup firsat_listesi.html). AGIRLIKLI
+    //   tutar gorunumde hesaplanir (tutar x olasilik) - saklanan bir kolon
+    //   olsaydi olasilik degisince bayatlardi.
+    private static KaynakTanimi Firsat() => new(
+        Ad: "firsat",
+        YetkiKodu: "firsat",
+        Kaynak: "public.v_firsat_liste f",
+        SubeKolonu: "f.sube_id",
+        KapsamKolonu: "f.taraf_id",
+        VarsayilanSirala: "f.beklenen_kapanis asc nulls last, f.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",              "f.id",               "sayi",  "Id", Varsayilan: false),
+            new("oncelik",         "f.oncelik",          "kod",   "Önc.", Hizalama: "orta"),
+            new("firsatNo",        "f.firsat_no",        "metin", "Fırsat No", Genislik: 130),
+            new("konu",            "f.konu",             "metin", "Fırsat Adı", Genislik: 260),
+            new("tarafId",         "f.taraf_id",         "sayi",  "Cari Id", Varsayilan: false),
+            new("tarafUnvan",      "f.taraf_unvan",      "metin", "Müşteri / Aday", Genislik: 220),
+            new("sektor",          "f.sektor",           "metin", "Sektör", Varsayilan: false),
+            new("kaynak",          "f.kaynak",           "kod",   "Kaynak", Varsayilan: false),
+            new("sorumluAdi",      "f.sorumlu_adi",      "metin", "Temsilci", Genislik: 160),
+            new("asama",           "f.asama",            "kod",   "Aşama", Hizalama: "orta"),
+            new("olasilik",        "f.olasilik",         "sayi",  "Olasılık %", Hizalama: "sag"),
+            new("tahminiTutar",    "f.tahmini_tutar",    "para",  "Tahmini Tutar", Hizalama: "sag", Bicim: "#,##0.00"),
+            new("agirlikliTutar",  "f.agirlikli_tutar",  "para",  "Ağırlıklı", Hizalama: "sag", Bicim: "#,##0.00"),
+            new("dovizCinsi",      "f.doviz_cinsi",      "metin", "PB", Hizalama: "orta"),
+            new("sonTemas",        "f.son_temas",        "tarih", "Son Temas", Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("sonrakiAksiyon",  "f.sonraki_aksiyon",  "metin", "Sonraki Aksiyon", Genislik: 200),
+            new("beklenenKapanis", "f.beklenen_kapanis", "tarih", "Tah. Kapanış", Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("durum",           "f.durum",            "kod",   "Durum", Hizalama: "orta"),
+            new("subeId",          "f.sube_id",          "sayi",  "Sube", Varsayilan: false)
         });
 
     // ---------------------------------------------------------- ekstreler ----
