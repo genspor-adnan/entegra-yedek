@@ -202,7 +202,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       else if (kod.endsWith('.sil') && satir && tanim.kartYolu) {
         const ad = String(satir.ad ?? satir.konu ?? satir.unvan ?? satir.kod ?? satir.id);
         if (!confirm(`"${ad}" silinecek. Onaylıyor musunuz?`)) return;
-        await api.kartSil(tanim.kartYolu.replace(/^\//, ''), Number(satir.id));
+        // Kart adi KAYNAK'tir, rota degil: Cek/Senet listelerinin rotasi '/cek'
+        //   ama kart 'cek-senet'. Yoldan turetmek yanlis karta giderdi.
+        await api.kartSil(tanim.kaynak, Number(satir.id));
         setYenile(t => t + 1);
       }
       else if ((kod.endsWith('.duzenle') || kod.endsWith('.ac')) && satir && tanim.kartYolu)
@@ -693,7 +695,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   //   ciro ve tahsil akislari birebir aynidir - degisen yalnizca kagit turu.
   {
     kaynak: 'cek-senet', rota: 'cek', baslik: 'Çekler', yol: 'Kasa › Çekler',
-    kartYolu: '/cek-senet', aksiyonEkrani: 'cek-senet-liste',
+    // kartYolu ROTA ile ayni olmali: kart rotasi `/${rota}/:id` uretiliyor.
+    //   '/cek-senet' yazilinca "Ekle" tanimsiz rotaya gidip panele dusuyordu.
+    kartYolu: '/cek', aksiyonEkrani: 'cek-senet-liste',
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 1 },
     yeniKayitVarsayilanlari: { tur: 1 },
     gizliKolonlar: ['tur'],
@@ -708,7 +712,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   },
   {
     kaynak: 'cek-senet', rota: 'senet', baslik: 'Senetler', yol: 'Kasa › Senetler',
-    kartYolu: '/cek-senet', aksiyonEkrani: 'cek-senet-liste',
+    kartYolu: '/senet', aksiyonEkrani: 'cek-senet-liste',
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 2 },
     yeniKayitVarsayilanlari: { tur: 2 },
     gizliKolonlar: ['tur'],

@@ -233,6 +233,11 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         });
         // Ekrana ozel mantik varsayilan (ör. Tedarikçi Listesi -> tedarikci:true) -
         // yukaridaki genel "false" varsayilaninin UZERINE yazar.
+        // ONCE katalog varsayilanlari (sunucudan), SONRA ekrana ozel olanlar -
+        //   ekran (or. Cek Listesi'nden "Yeni" -> tur=1) katalogu ezebilsin.
+        Object.entries(m.varsayilanlar ?? {}).forEach(([ad, deger]) => {
+          baslangic[ad] = deger as Deger;
+        });
         if (yeniKayitVarsayilanlari) {
           Object.entries(yeniKayitVarsayilanlari).forEach(([ad, deger]) => { baslangic[ad] = deger });
         }
@@ -578,8 +583,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
     ) : (
       <input
         key={a.ad}
-        type={EPOSTA_ALANLARI.has(a.ad) ? 'email' : 'text'}
-        value={String(deger[a.ad] ?? '')}
+        // Tarih alani TAKVIM kutusu olur; deger ham ISO gelir ("2026-08-24T00:00:00")
+        //   ve type=date bunu GOSTEREMEZ - 10 karaktere kirpilir. Eskiden duz metin
+        //   kutusuydu ve kullanici ISO damgasini goruyordu.
+        type={a.tip === 'tarih' ? 'date' : EPOSTA_ALANLARI.has(a.ad) ? 'email' : 'text'}
+        value={a.tip === 'tarih' ? String(deger[a.ad] ?? '').slice(0, 10)
+                                 : String(deger[a.ad] ?? '')}
         maxLength={a.enFazlaUzunluk ?? undefined}
         disabled={salt || !a.yazilabilir}
         onChange={e => setDeger(d => ({ ...d, [a.ad]: e.target.value }))}

@@ -62,6 +62,14 @@ public sealed record KartDetayMeta(
 
 public sealed class KartMetaYaniti
 {
+    /// <summary>
+    /// YENI kayitta doldurulacak alanlar (katalogdaki YeniKayitVarsayilanlari).
+    /// Arayuz bunu bilmedigi icin zorunlu kod alanlari (or. cek/senet "Yön")
+    /// bos aciliyor ve kayit "zorunlu" hatasiyla donuyordu.
+    /// </summary>
+    public IReadOnlyDictionary<string, object?> Varsayilanlar { get; set; }
+        = new Dictionary<string, object?>();
+
     public string Kaynak { get; set; } = "";
     public IReadOnlyList<KartAlanMeta> Alanlar { get; set; } = Array.Empty<KartAlanMeta>();
     public IReadOnlyList<KartDetayMeta> Detaylar { get; set; } = Array.Empty<KartDetayMeta>();

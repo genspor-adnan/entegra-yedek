@@ -205,6 +205,8 @@ export interface KartAlanMeta {
 export interface KartDetayMeta { ad: string; baslik: string; saltOkunur: boolean; alanlar: KartAlanMeta[] }
 
 export interface KartMetaYaniti {
+  /** Yeni kayitta doldurulacak alanlar (katalogdaki varsayilanlar). */
+  varsayilanlar?: Record<string, unknown>;
   kaynak: string;
   alanlar: KartAlanMeta[];
   detaylar: KartDetayMeta[];

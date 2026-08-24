@@ -204,11 +204,15 @@ public sealed class KartDeposu
         foreach (var (ad, deger) in tanim.YeniKayitVarsayilanlari ?? new Dictionary<string, object?>())
             if (!degerler.ContainsKey(ad)) degerler[ad] = deger;
 
-        // "subeId" yazilabilir olan kartlarda (Personel: "Çalıştığı Şube") kullanici zaten
-        //   deger yollamis olabilir - o zaman oturumun subesiyle EZILMEMELI, yoksa ayni
-        //   fiziksel kolona iki kez deger atanip INSERT syntax hatasi verir.
-        if (tanim.SubeKolonu is null && tanim.Alan("subeId") is not null && baglam.SubeId is { } s
-            && !degerler.ContainsKey("subeId"))
+        // Kayit AKTIF SUBEYE yazilir. "subeId" yazilabilir olan kartlarda
+        //   (Personel: "Çalıştığı Şube") kullanici deger yollamis olabilir - o zaman
+        //   EZILMEZ, yoksa ayni fiziksel kolona iki kez deger atanip INSERT syntax
+        //   hatasi verir.
+        //   Eskiden kosul "SubeKolonu is null" idi: sube kolonu TANIMLI kartlarda
+        //   (cek-senet, hesap...) sube HIC yazilmiyor, kolon 0 kaliyor ve
+        //   sube(id) FK'si patliyordu ("Baglantili kayit bulunamadi").
+        if ((tanim.SubeKolonu is not null || tanim.Alan("subeId") is not null)
+            && baglam.SubeId is { } s && !degerler.ContainsKey("subeId"))
             degerler["__sube_id"] = s;
 
         var kolonlar = new List<string>();

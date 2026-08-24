@@ -162,6 +162,11 @@ public static class KartUclari
             return Results.Ok(new KartMetaYaniti
             {
                 Kaynak = tanim.Ad,
+                // Yeni kayit varsayilanlari ARAYUZE de gonderilir: kullanici
+                //   formu acar acmaz dogru degerleri gorur ve zorunlu kod
+                //   alanlari bos kalmaz (bkz. KartMetaYaniti.Varsayilanlar).
+                Varsayilanlar = tanim.YeniKayitVarsayilanlari
+                    ?? new Dictionary<string, object?>(),
                 Alanlar = okunabilir.Select(MetaOptions).ToList(),
                 Detaylar = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
                     .Select(d => new KartDetayMeta(d.Ad, d.Etiket, d.SaltOkunur, d.Alanlar.Select(MetaOptions).ToList()))
