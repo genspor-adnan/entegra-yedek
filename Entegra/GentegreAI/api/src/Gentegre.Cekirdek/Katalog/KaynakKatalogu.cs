@@ -128,7 +128,9 @@ public static class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",           "t.id",            "sayi",  "Id",            Varsayilan: false),
-            new("kod",          "t.kod",           "metin", "Kod"),
+            // Kod dar: cari kodlari "329.01.417" gibi kisa, kolon bosuna
+            //   genisleyip unvani sikistiriyordu.
+            new("kod",          "t.kod",           "metin", "Kod", Genislik: 110),
             new("unvan",        "t.unvan",         "metin", "Unvan"),
             new("faturaUnvan",  "t.fatura_unvan",  "metin", "Fatura Unvani", Varsayilan: false),
             new("vkno",         "t.vkno",          "metin", "VKN/TCKN"),
@@ -148,8 +150,13 @@ public static class KaynakKatalogu
             new("aday",         "t.aday",          "mantik","Aday",          Hizalama: "orta", Varsayilan: false),
             new("tedarikci",    "t.tedarikci",     "mantik","Tedarikci",     Hizalama: "orta"),
             new("grup",         "t.grup",          "kod",   "Grup",          Varsayilan: false),
-            new("kategori",     "t.kategori",      "kod",   "Kategori",      Varsayilan: false),
-            new("temsilci",     "t.temsilci",      "kod",   "Temsilci",      Varsayilan: false),
+            // Kategori ve temsilci ADIYLA gosterilir: kolonlar "kod" tipindeydi
+            //   ama listede kod ad'a cevrilmiyor, ekranda ham "1" / "2"
+            //   goruluyordu. Deger yine id, gosterim ad.
+            new("kategori",     "(select k.ad from public.kategori k where k.id = t.kategori)",
+                                                    "metin", "Kategori",      Varsayilan: false),
+            new("temsilci",     "(select p.unvan from public.taraf p where p.id = t.temsilci)",
+                                                    "metin", "Temsilci",      Varsayilan: false),
             new("efatura",      "t.efatura",       "mantik","e-Fatura",      Hizalama: "orta"),
             new("durum",        "t.durum",         "kod",   "Durum",         Hizalama: "orta"),
             new("subeId",       "t.sube_id",       "sayi",  "Sube",          Varsayilan: false),

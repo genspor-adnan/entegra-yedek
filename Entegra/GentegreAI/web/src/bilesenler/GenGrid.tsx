@@ -51,6 +51,9 @@ interface Props {
       Ayni kaynak farkli ekranlarda kullaniliyor: Satis Faturalari'nda tur/turAdi
       gereksiz (hepsi ayni tur), Siparisler'de gerekli. */
   gizliKolonlar?: string[];
+  /** Bu ekranda ONE alinacak kolonlar (soldan saga). Verilmeyenler katalog
+      sirasinda arkada kalir - kolon sirasi kaynak tanimina bagli olmasin. */
+  kolonSirasi?: string[];
   /** Arama + Liste/Grup/Analiz + toplu aksiyon seridini hic cizme (ör. Stok Ayarlari >
       Depolar): birkac satirlik ayar listesinde bu serit bilgi degil gurultu. */
   seritGizli?: boolean;
@@ -212,7 +215,7 @@ const GORUNUMLER: { v: 'liste' | 'grup' | 'analiz'; ik: string; ad: string }[] =
  */
 export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSatirAc,
                           aksiyonEkrani, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
-                          gizliKolonlar, altSecenekler, tarihAlani, tarihVarsayilan,
+                          gizliKolonlar, kolonSirasi, altSecenekler, tarihAlani, tarihVarsayilan,
                           seciliBaslangicId, cipSonu, cipBaslangic,
                           onCipSecildi, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik }: Props) {
@@ -310,7 +313,19 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       .then(y => {
         if (iptal) return;
         const gizli = new Set(gizliKolonlar ?? []);
-        setKolonlar(y.kolonlar.filter(k => k.varsayilan && !gizli.has(k.ad)));
+        // kolonSirasi'nda ADI GECEN kolon, katalogda varsayilan olmasa bile
+        //   gosterilir: ekran "temsilci solda olsun" diyorsa once GORUNMELI.
+        const zorunlu = new Set(kolonSirasi ?? []);
+        const gorunen = y.kolonlar.filter(k =>
+          (k.varsayilan || zorunlu.has(k.ad)) && !gizli.has(k.ad));
+        // Ekran sirasi: listede adi gecen kolonlar SOLDA ve verilen sirada.
+        const sira = (ad: string) => {
+          const i = kolonSirasi?.indexOf(ad) ?? -1;
+          return i < 0 ? 900 : i;
+        };
+        setKolonlar(kolonSirasi?.length
+          ? [...gorunen].sort((a, b) => sira(a.ad) - sira(b.ad))
+          : gorunen);
       })
       .catch((h: ApiHatasi) => { if (!iptal) setHata(h.message) });
     return () => { iptal = true };

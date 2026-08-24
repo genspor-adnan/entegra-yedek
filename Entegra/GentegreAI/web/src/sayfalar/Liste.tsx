@@ -66,6 +66,8 @@ export interface ListeTanimi {
   gizliKartAlanlari?: string[];
   /** Bu ekranda acilmayacak kart sekmeleri (ör. Aday kartinda "Fatura Bilgileri"). */
   gizliKartSekmeleri?: string[];
+  /** Bu ekranda ONE alinacak kolon sirasi (soldan saga). */
+  kolonSirasi?: string[];
   /** Bu ekranda zorunlu sayilacak kart alanlari (ör. Aday: Temsilci). */
   zorunluKartAlanlari?: string[];
   /** Menude grup ICINDEKI sira (kucuk once). Verilmeyen ogeler sonda, tanim
@@ -305,6 +307,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       sabitFiltre={sabitFiltre}
       aksiyonEkrani={tanim.aksiyonEkrani}
       gizliKolonlar={tanim.gizliKolonlar}
+      kolonSirasi={tanim.kolonSirasi}
       altSecenekler={KASA_ARAC_MENUSU}
       yenile={yenile}
       odaklaSonEklenen={odaklaSonEklenen}
@@ -799,7 +802,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Kasa', menuAd: 'Masraf Listesi', ic: '🧾', yetkiKodu: 'masraf',
   },
   {
-    kaynak: 'proje', baslik: 'Projeler', yol: 'Proje › Projeler', kartYolu: '/proje',
+    kaynak: 'proje', baslik: 'Projeler', yol: 'CRM › Projeler', kartYolu: '/proje',
+    aksiyonEkrani: 'proje-liste',
     cipler: [
       { ad: 'Açık',       filtre: { alan: 'durum', op: 'esit', deger: 1 } },
       { ad: 'Tamamlanan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
@@ -844,8 +848,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     yeniKayitVarsayilanlari: { aday: true, musteri: false, tedarikci: false },
     // Bu ekrandaki her kayit ADAY: "Musteri"/"Tedarikci" kolonlari hep bos,
     //   yer kaplamaktan baska ise yaramiyor.
-    //   VKN ve e-Fatura da yok: aday henuz faturalanmiyor.
-    gizliKolonlar: ['musteri', 'tedarikci', 'vkno', 'efatura'],
+    //   VKN, e-Fatura ve Adres yok: aday henuz faturalanmiyor, adres kartta.
+    gizliKolonlar: ['musteri', 'tedarikci', 'vkno', 'efatura', 'adres'],
+    // Once SAHIBI ve turu: kimin adayi, hangi kategoride.
+    kolonSirasi: ['temsilci', 'kategori', 'unvan', 'telefon', 'eposta', 'ilce', 'il', 'kod', 'durum'],
     cipler: DURUM_CIPLERI,
     // ADAY KARTI SADE (kullanici karari): aday henuz musteri degil - fatura
     //   unvani/vergi dairesi, mali durum ve ek alanlar musteri olunca anlamli.

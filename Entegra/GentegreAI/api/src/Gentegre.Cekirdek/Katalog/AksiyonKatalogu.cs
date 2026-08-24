@@ -124,6 +124,21 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            // Projeler - gorev/firsat listeleriyle AYNI desen (Yeni / Düzenle /
+            //   Sil / Yazdır); eskiden aksiyon seridi hic yoktu, kart yalniz
+            //   cift tikla aciliyordu.
+            ["proje-liste"] = new AksiyonTanimi[]
+            {
+                new("proje.yeni",    "＋ Yeni",   "proje", Kisayol: "Ctrl+N",
+                    KaynakKodu: "proje", Islem: Islem.Ekle, Sira: 10),
+                new("proje.duzenle", "✎ Düzenle", "proje", Kisayol: "Enter",
+                    KaynakKodu: "proje", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("proje.sil",     "Sil",       "proje", Hedef: "sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "proje", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+                new("genel.yazdir",  "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             // CRM satis firsati (121). Kazanildi/Kaybedildi ayri AKSIYON degil:
             //   asama alanindan secilir - iki yerden degistirilen bir durum
             //   birbirini tutmayan iki kayit uretir.
