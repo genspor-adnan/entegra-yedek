@@ -345,6 +345,7 @@ table.grid tr.flt input {
 .kaid {
   padding: 10px 12px; border-bottom: 1px solid var(--cizgi2);
   background: linear-gradient(#ffffff, #f5f8fb);
+  flex: none;   /* kimlik seridi de sikismasin (bkz. .katab) */
 }
 /* Mockup idstrip'i (Kod/Ad/Tur/Durum) TEK SATIRDA - genis min-width sarmaya zorluyordu. */
 .kaid .alan-izgara { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px 12px }
@@ -357,7 +358,13 @@ table.grid tr.flt input {
 
 /* Kart ic sekmeleri (mockup: Genel / Fatura Bilgileri / Mali Durum / ...).
    .kabas ile .kagov arasinda sabit kalir, icerik kaydiginda kaymaz. */
-.katab { display: flex; gap: 2px; padding: 0 8px; background: var(--yuz2); border-bottom: 1px solid var(--cizgi); flex-wrap: wrap; overflow-x: auto }
+/* flex: none SART - .kawin bir flex sutunu ve .kagov buyudukce sekme seridi
+   SIKISIP kirpilliyordu ("Genel" / "Resim / Doküman" yazilari yarim goruluyordu). */
+.katab {
+  display: flex; gap: 2px; padding: 0 8px; background: var(--yuz2);
+  border-bottom: 1px solid var(--cizgi); flex-wrap: wrap; overflow-x: auto;
+  flex: none;
+}
 .katab .kat {
   padding: 7px 13px; font-size: 12px; color: var(--soluk); cursor: pointer; white-space: nowrap;
   background: #e9eef4; border: 1px solid var(--cizgi); border-bottom: none; border-radius: 3px 3px 0 0;
