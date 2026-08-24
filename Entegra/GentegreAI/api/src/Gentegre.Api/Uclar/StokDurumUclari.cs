@@ -58,12 +58,12 @@ public static class StokDurumUclari
         // PAKET ICERIGI (124): belge kaleminde paket secilince satirlar buradan
         //   uretilir - istemci kendi basina "paket icerigi nedir" bilemez.
         yol.MapGet("/api/kart/stok/{stokId:long}/paket", async (
-            long stokId, BaglamCozucu cozucu, StokDurumDeposu depo,
+            long stokId, bool? alis, BaglamCozucu cozucu, StokDurumDeposu depo,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("stok", Islem.Gor);
-            return Results.Ok(new { icerik = await depo.PaketIcerigiAsync(stokId, iptal),
+            return Results.Ok(new { icerik = await depo.PaketIcerigiAsync(stokId, alis ?? false, iptal),
                                     izlemeNo = baglam.IzlemeNo });
         }).WithTags("Kart").RequireAuthorization();
 

@@ -726,13 +726,22 @@ public static class KartKatalogu
                 //   tasimiyor, bos birakilinca da NOT NULL kolonu patlatiyordu.
                 //   Gosterim sirasi ekleme sirasidir (id).
                 new("icerikStokId",  "icerik_stok_id", "kod",   Zorunlu: true,
-                    KodTablosu: "public.v_stok_lookup", Baslik: "Kod"),
+                    KodTablosu: "public.v_stok_lookup", Baslik: "Stok"),
+                // Kod ve ad SALT OKUNUR: stok kartindan gelir, burada
+                //   kopyalanmaz (stok adi degisirse bayatlardi).
+                new("kod",           "(select s.kod from public.stok s where s.id = stok_paket.icerik_stok_id)",
+                                                       "metin", Yazilabilir: false, Baslik: "Kod"),
                 // Ad SALT OKUNUR: kod secilince kendi gelir, iki yerde ad
                 //   tutmanin anlami yok (stok adi degisirse burasi bayatlardi).
                 new("ad",            "(select s.ad from public.stok s where s.id = stok_paket.icerik_stok_id)",
                                                        "metin", Yazilabilir: false, Baslik: "Ad"),
                 new("birim",         "birim",          "kod",   KodListesi: "stok.ana_birim", Baslik: "Birim"),
-                new("adet",          "adet",           "para",  Zorunlu: true, Baslik: "Adet")
+                new("adet",          "adet",           "para",  Zorunlu: true, Baslik: "Adet"),
+                // Birim fiyat + doviz (125): paketin bedelinin icerige nasil
+                //   dagildigi kart uzerinde okunsun. Belgeye paket eklenirken
+                //   KULLANILMAZ (tutar paket satirinda durur).
+                new("birimFiyat",    "birim_fiyat",    "para",  Baslik: "Birim Fiyat"),
+                new("dovizCinsi",    "doviz_cinsi",    "kod",   SabitKodlar: DovizKodlari, Baslik: "Döviz")
             }, Sirala: "id", SubeKolonu: null, LogTabloId: 920,
                Baslik: "Paket", KosulAlani: "paket"),
 

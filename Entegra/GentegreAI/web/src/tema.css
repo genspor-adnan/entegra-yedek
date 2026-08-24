@@ -448,6 +448,14 @@ table.grid tr.flt input {
 /* Kur kutusu (birim fiyatin saginda) - dar ve okunakli. */
 .alan .ikili input.kur { flex: none; width: 84px }
 /* Miktar +/- dugmeleri edit yuksekliginde. */
+/* Iki onay kutusu yan yana - her biri kendi adiyla (İnternet Satış | Paket). */
+.ikili-mantik { display: flex; align-items: center; gap: 18px }
+.ikili-mantik > .alan.tip-mantik { padding: 0 }
+
+/* Paket sekmesi arac satiri: ekle dugmesi + aciklama. */
+.detay-arac { display: flex; align-items: center; gap: 10px; padding: 8px 10px }
+.detay-tablo button.d.ufak { padding: 0 6px; height: 20px; line-height: 1 }
+
 .alan .ikili button.mini { flex: none; width: 26px; height: 23px; font-size: 13px; line-height: 1 }
 .alan .kod-ad, .alan .alan-hata, .alan .alan-notu { grid-column: 2 }
 /* Kisi karti Bagli Cari/Rol/Durum satiri: Bagli Cari buyur, Rol/Durum saga yanasik sabit genislik. */

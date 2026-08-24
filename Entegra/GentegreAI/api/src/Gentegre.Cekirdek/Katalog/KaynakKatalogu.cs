@@ -575,6 +575,9 @@ public static class KaynakKatalogu
                 "   join public.kod_liste kl on kl.id = kd.liste_id" +
                 "  where kl.kod = 'stok.ana_birim' and kd.deger = s.ana_birim)",
                                             "metin", "Birim",    Hizalama: "orta"),
+            // Birim KODU (gizli): secim pencerelerinden gelen satirda birimi
+            //   yazabilmek icin gerekli - ad ile kod eslestirmek kirilgan olurdu.
+            new("anaBirimKod","s.ana_birim","sayi",  "Birim Kodu", Hizalama: "orta", Varsayilan: false),
             new("izlemeAdi",
                 "case s.izleme when 1 then 'Seri No' when 2 then 'Lot No' when 3 then 'SKT' " +
                 "when 4 then 'Karekod' when 5 then 'Lot No + SKT' when 6 then 'Seri + Lot' else 'Yok' end",

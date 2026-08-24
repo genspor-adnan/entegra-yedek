@@ -2651,5 +2651,24 @@ biçimi ölçüt alınınca **irsaliyenin Faturalama sekmesi kayboldu** — doğ
 tahakkuk, konsinye, transfer, talep, giriş fişi) refaktör öncesiyle birebir aynı
 çıktı verdiği doğrulandı.
 
+### Paket (set) stok: içerik fiyatı ve stok arama ile giriş
+
+Paket içeriği (124) artık satır başına **birim fiyat + döviz** taşıyor (125) ve bu
+fiyat belgeye geçiyor: pakete fiyat girilmişse o, girilmemişse **içerik stoğunun
+kendi kart fiyatı** (belge yönüne göre alış ya da satış listesi) satıra yazılır.
+Karşılığında **paket satırı fiyatsız** gider — içerikler fiyatlandığı için pakete de
+fiyat yazılsa belge toplamı iki kez sayardı; paket satırı artık başlık.
+
+Paket sekmesi jenerik detay gridinden çıkarıldı: içerik satırı elle yazılmaz,
+belge kalemindeki **aynı stok arama penceresi** çağrılır (`bilesenler/
+StokAramaPenceresi.tsx` — BelgeKarti'ndan ortak dosyaya taşındı, `yalnizStok`
+seçeneğiyle; `Modal` da dairesel import olmasın diye kendi dosyasına ayrıldı).
+Seçilen stoğun birimi ve fiyatı satıra hazır gelir, grid salt görünümdür,
+adet/fiyat satıra tıklayınca açılan küçük pencerede değişir. Sekmede başlık ve
+çerçeve yok — sekmenin adı zaten "Paket".
+
+Yan düzeltme: eşleşen iki onay kutusu (İnternet Satış | Paket) tek etiket altında
+çiziliyor ve **Paket kutusunun adı görünmüyordu**; her kutu artık kendi adını taşır.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).

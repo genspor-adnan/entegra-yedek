@@ -6,10 +6,13 @@ import {
   type DokumanSatiri, type KartAlanMeta, type KartDetayMeta, type KartMetaYaniti, type KartYetkisi,
 } from '../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, bosDetay, detayFarki } from './GenDetayTablo';
+import { Modal } from './Modal';
+import { PaketSekmesi } from './PaketSekmesi';
 import { IlgiliKisiler } from './IlgiliKisiler';
 import { TekAdres } from './TekAdres';
 import { TekOzluk } from './TekOzluk';
 import { TekKayit } from './TekKayit';
+export { Modal };
 import { PersonelKimlikOzet } from './PersonelKimlikOzet';
 import { RolYetkiMatrisi } from './RolYetkiMatrisi';
 import { DokumanGalerisi } from './DokumanGalerisi';
@@ -53,41 +56,6 @@ interface Props {
 }
 
 /** Modal sarmalayici — mockup'taki .kaperde / .kawin duzeni. */
-export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, onKapat, children }: {
-  baslik: string;
-  ustBilgi?: React.ReactNode;
-  ustSerit?: React.ReactNode;
-  sekmeBar?: React.ReactNode;
-  alt: React.ReactNode;
-  /** Az alanli kartlar icin yarim genislik (1080 -> 560): bos beyaz alan kalmasin. */
-  dar?: boolean;
-  onKapat?(): void;
-  children: React.ReactNode;
-}) {
-  useEffect(() => {
-    const tus = (e: KeyboardEvent) => { if (e.key === 'Escape') onKapat?.() };
-    window.addEventListener('keydown', tus);
-    return () => window.removeEventListener('keydown', tus);
-  }, [onKapat]);
-
-  return (
-    <div className="kaperde" onMouseDown={e => { if (e.target === e.currentTarget) onKapat?.() }}>
-      <div className={`kawin${dar ? '' : ' genis'}`} onMouseDown={e => e.stopPropagation()}>
-        <div className="kabas">
-          <span>{baslik}</span>
-          {ustBilgi}
-          <span className="kapt">Esc ile kapanır</span>
-        </div>
-        {/* Mockup: Kaydet/Sil/Yazdir/Kapat baslikla idstrip ARASINDA arac cubugu (alt degil). */}
-        <div className="katoolbar">{alt}</div>
-        {ustSerit}
-        {sekmeBar}
-        <div className="kagov">{children}</div>
-      </div>
-    </div>
-  );
-}
-
 function KartResimKutusu({ kartAdi, kaynakId, saltOkunur, baslik = 'Resim' }: {
   kartAdi: string;
   kaynakId?: number;
@@ -819,6 +787,20 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
       .map(a => {
         const hedef = a.eslesAlan ? alanlar.find(x => x.ad === a.eslesAlan) : undefined;
         if (!hedef) return renderAlan(a);
+        // IKI CHECK yan yana: her kutu KENDI adini tasir. Tek etiket altinda
+        //   iki kutu ciziliyordu ve hangisinin hangi ad oldugu belirsizdi
+        //   (kullanici: "Paket check te Paket label yok").
+        if (a.tip === 'mantik' && hedef.tip === 'mantik')
+          return (
+            <div key={a.ad} className="alan ikili-mantik">
+              <label className="alan tip-mantik">
+                {renderGirdi(a)}<span className="etiket">{a.baslik}</span>
+              </label>
+              <label className="alan tip-mantik">
+                {renderGirdi(hedef)}<span className="etiket">{hedef.baslik}</span>
+              </label>
+            </div>
+          );
         return (
           <label key={a.ad} className={`alan tip-${a.tip}`}>
             <span className="etiket">
@@ -1308,8 +1290,19 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         />
       )}
 
+      {/* Stok > Paket: icerik satiri stok arama penceresinden gelir (grid salt
+          gorunum) - baslik/cerceve yok, sekmenin adi zaten "Paket". */}
+      {aktif?.tur === 'detay' && kaynak === 'stok' && aktif.detay.ad === 'paket' && (
+        <PaketSekmesi
+          meta={aktif.detay}
+          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
+          saltOkunur={salt || aktif.detay.saltOkunur}
+          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
+        />
+      )}
+
       {aktif?.tur === 'detay' && !(personelGibiKart && aktif.detay.ad === 'ozluk')
-        && !(kaynak === 'stok' && aktif.detay.ad === 'uts') && (
+        && !(kaynak === 'stok' && (aktif.detay.ad === 'uts' || aktif.detay.ad === 'paket')) && (
         <GenDetayTablo
           meta={aktif.detay}
           durum={detaylar[aktif.detay.ad] ?? bosDetay()}

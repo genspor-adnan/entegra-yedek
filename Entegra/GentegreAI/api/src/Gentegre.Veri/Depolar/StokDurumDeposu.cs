@@ -405,19 +405,30 @@ public sealed class StokDurumDeposu
     /// gelir - paketten miras almaz.
     /// </summary>
     public async Task<IReadOnlyList<PaketIcerikSatiri>> PaketIcerigiAsync(
-        long paketStokId, CancellationToken iptal = default)
+        long paketStokId, bool alis = false, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = new NpgsqlCommand("""
             select s.id, s.kod, s.ad,
                    case when p.birim > 0 then p.birim else s.ana_birim end as birim,
-                   p.adet, s.kdv, s.izleme
+                   p.adet, s.kdv, s.izleme,
+                   -- FIYAT: pakette girilmisse O, girilmemisse stogun KENDI kart
+                   --   fiyati (belge yonune gore alis ya da satis listesi).
+                   --   stok_fiyat'ta -1 "fiyat girilmemis" demektir.
+                   case when p.birim_fiyat > 0 then p.birim_fiyat
+                        else coalesce((select f.fiyat from public.stok_fiyat f
+                                        where f.stok_id = s.id
+                                          and f.satis = case when @p1 then 0 else 1 end
+                                          and f.fiyat > 0
+                                        order by f.fiyat_adi limit 1), 0)
+                   end as fiyat
               from public.stok_paket p
               join public.stok s on s.id = p.icerik_stok_id
              where p.paket_stok_id = @p0
-             order by p.sira, p.id
+             order by p.id
             """, baglanti);
         komut.Parameters.AddWithValue("p0", (int)paketStokId);
+        komut.Parameters.AddWithValue("p1", alis);
 
         var sonuc = new List<PaketIcerikSatiri>();
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
@@ -429,7 +440,7 @@ public sealed class StokDurumDeposu
                 okuyucu.IsDBNull(3) ? 0 : Convert.ToInt32(okuyucu.GetValue(3)),
                 okuyucu.GetDecimal(4),
                 okuyucu.IsDBNull(5) ? 0 : Convert.ToInt32(okuyucu.GetValue(5)),
-                0m,
+                okuyucu.IsDBNull(7) ? 0m : okuyucu.GetDecimal(7),
                 okuyucu.IsDBNull(6) ? 0 : Convert.ToInt32(okuyucu.GetValue(6))));
         return sonuc;
     }

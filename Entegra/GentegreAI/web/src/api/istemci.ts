@@ -264,8 +264,9 @@ export const api = {
       + (depoId ? `?depoId=${depoId}` : '')).then(y => y.lotlar),
 
   /** Paket icerigi (124): belge kaleminde paket secilince acilan satirlar. */
-  paketIcerigi: (stokId: number) =>
-    istek<{ icerik: PaketIcerikSatiri[] }>(`/api/kart/stok/${stokId}/paket`).then(y => y.icerik),
+  paketIcerigi: (stokId: number, alis = false) =>
+    istek<{ icerik: PaketIcerikSatiri[] }>(
+      `/api/kart/stok/${stokId}/paket${alis ? '?alis=true' : ''}`).then(y => y.icerik),
 
   /** Depo bazli min/max seviye (099). Miktarlara DOKUNMAZ. */
   stokDurumLimit: (stokId: number, depoId: number,
