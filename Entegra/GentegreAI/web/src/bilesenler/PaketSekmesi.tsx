@@ -27,6 +27,8 @@ export function PaketSekmesi({ meta, durum, saltOkunur, onDegis }: {
   onDegis(yeni: DetayDurumu): void;
 }) {
   const [arama, setArama] = useState(false);
+  /** Secili satir dizinleri - arac cubugundaki Duzenle/Sil bunlar uzerinde calisir. */
+  const [secili, setSecili] = useState<number[]>([]);
   /** Duzenlenen satir - yeni satirda id yok, dizin ile bulunur. */
   const [satirDuzen, setSatirDuzen] = useState<{ dizin: number; satir: Satir } | null>(null);
 
@@ -67,20 +69,36 @@ export function PaketSekmesi({ meta, durum, saltOkunur, onDegis }: {
     setSatirDuzen(null);
   };
 
-  const satirSil = (dizin: number) => {
-    const satir = durum.guncel[dizin];
-    const silinen = satir.id != null ? [...durum.silinen, Number(satir.id)] : durum.silinen;
-    yaz(durum.guncel.filter((_, i) => i !== dizin), silinen);
+  const seciliSil = () => {
+    if (!secili.length) return;
+    const silinen = [...durum.silinen];
+    secili.forEach(i => {
+      const kayitId = durum.guncel[i]?.id;
+      if (kayitId != null) silinen.push(Number(kayitId));
+    });
+    yaz(durum.guncel.filter((_, i) => !secili.includes(i)), silinen);
+    setSecili([]);
   };
+
+  const isaretle = (dizin: number) =>
+    setSecili(s => (s.includes(dizin) ? s.filter(i => i !== dizin) : [...s, dizin]));
+
+  const hepsi = durum.guncel.length > 0 && secili.length === durum.guncel.length;
 
   return (
     <>
+      {/* Arac cubugu YALNIZ IKON (kullanici): ekle / duzenle / sil. Duzenle tek
+          satir secilince, sil en az bir satir secilince calisir. */}
       {!saltOkunur && (
         <div className="detay-arac">
-          <button className="d" onClick={() => setArama(true)}>＋ Stok Ekle</button>
+          <button className="d ikon-dugme" title="Stok Ekle"
+                  onClick={() => setArama(true)}>＋</button>
+          <button className="d ikon-dugme" title="Düzenle" disabled={secili.length !== 1}
+                  onClick={() => setSatirDuzen({ dizin: secili[0], satir: durum.guncel[secili[0]] })}>✎</button>
+          <button className="d ikon-dugme" title="Sil" disabled={secili.length === 0}
+                  onClick={seciliSil}>🗑</button>
           <span className="alan-notu">
             Satırlar stok kartından gelir; birim ve fiyat seçilen stoktan yazılır.
-            Satıra tıklayarak adet/fiyat değiştirilir.
           </span>
         </div>
       )}
@@ -88,19 +106,32 @@ export function PaketSekmesi({ meta, durum, saltOkunur, onDegis }: {
       <table className="detay-tablo secilebilir">
         <thead>
           <tr>
+            {!saltOkunur && (
+              <th style={{ width: 28 }} className="hiza-orta">
+                <input type="checkbox" checked={hepsi}
+                       onChange={() => setSecili(hepsi ? [] : durum.guncel.map((_, i) => i))} />
+              </th>
+            )}
             <th style={{ width: 130 }}>Kod</th>
             <th>Ad</th>
             <th style={{ width: 90 }} className="hiza-orta">Birim</th>
             <th style={{ width: 90 }} className="hiza-sag">Adet</th>
             <th style={{ width: 110 }} className="hiza-sag">Birim Fiyat</th>
             <th style={{ width: 70 }} className="hiza-orta">Döviz</th>
-            {!saltOkunur && <th style={{ width: 40 }} />}
           </tr>
         </thead>
         <tbody>
           {durum.guncel.map((s, i) => (
             <tr key={s.id != null ? `k${s.id}` : `y${i}`}
-                onClick={() => !saltOkunur && setSatirDuzen({ dizin: i, satir: s })}>
+                className={secili.includes(i) ? 'secili' : ''}
+                onClick={() => !saltOkunur && isaretle(i)}
+                onDoubleClick={() => !saltOkunur && setSatirDuzen({ dizin: i, satir: s })}>
+              {!saltOkunur && (
+                <td className="hiza-orta" onClick={e => e.stopPropagation()}>
+                  <input type="checkbox" checked={secili.includes(i)}
+                         onChange={() => isaretle(i)} />
+                </td>
+              )}
               <td><code>{stokKodu(s)}</code></td>
               <td>{stokAdi(s)}</td>
               <td className="hiza-orta sonuk">{birimAdi(s.birim)}</td>
@@ -111,17 +142,11 @@ export function PaketSekmesi({ meta, durum, saltOkunur, onDegis }: {
                   : <span className="sonuk">—</span>}
               </td>
               <td className="hiza-orta sonuk">{String(s.dovizCinsi ?? '')}</td>
-              {!saltOkunur && (
-                <td className="hiza-orta">
-                  <button className="d ufak" title="Satırı sil"
-                          onClick={e => { e.stopPropagation(); satirSil(i) }}>✖</button>
-                </td>
-              )}
             </tr>
           ))}
           {durum.guncel.length === 0 && (
             <tr><td colSpan={saltOkunur ? 6 : 7} className="bos">
-              Paket içeriği boş — “＋ Stok Ekle” ile ürün seçin.
+              Paket içeriği boş — “＋” ile ürün seçin.
             </td></tr>
           )}
         </tbody>

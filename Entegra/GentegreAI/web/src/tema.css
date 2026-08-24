@@ -452,9 +452,14 @@ table.grid tr.flt input {
 .ikili-mantik { display: flex; align-items: center; gap: 18px }
 .ikili-mantik > .alan.tip-mantik { padding: 0 }
 
-/* Paket sekmesi arac satiri: ekle dugmesi + aciklama. */
-.detay-arac { display: flex; align-items: center; gap: 10px; padding: 8px 10px }
-.detay-tablo button.d.ufak { padding: 0 6px; height: 20px; line-height: 1 }
+/* Paket sekmesi arac satiri: yalniz ikon dugmeler + aciklama. */
+.detay-arac { display: flex; align-items: center; gap: 6px; padding: 8px 10px }
+.detay-arac .alan-notu { margin-left: 8px }
+.ikon-dugme {
+  width: 26px; height: 24px; padding: 0; font-size: 13px; line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.ikon-dugme:disabled { opacity: .4; cursor: default }
 
 .alan .ikili button.mini { flex: none; width: 26px; height: 23px; font-size: 13px; line-height: 1 }
 .alan .kod-ad, .alan .alan-hata, .alan .alan-notu { grid-column: 2 }
