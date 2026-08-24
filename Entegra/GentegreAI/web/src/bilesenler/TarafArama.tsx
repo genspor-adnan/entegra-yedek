@@ -22,6 +22,9 @@ const tipEtiketi = (kaynak: string, s: ListeSatiri): string => {
   if (musteri && tedarikci) return 'Müşteri/Tedarikçi';
   if (musteri) return 'Müşteri';
   if (tedarikci) return 'Tedarikçi';
+  // Henuz musteri olmayan ADAY (122): tip sutununda "cari" yazmasi
+  //   kullaniciya hicbir sey soylemiyordu.
+  if (Number(s.aday) === 1) return 'Aday';
   return kaynak;
 };
 

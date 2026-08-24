@@ -830,6 +830,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     yol: 'CRM › Aday Müşteriler', kartYolu: '/aday', aksiyonEkrani: 'aday-liste',
     sabitFiltre: { alan: 'aday', op: 'esit', deger: 1 },
     yeniKayitVarsayilanlari: { aday: true, musteri: false, tedarikci: false },
+    // Bu ekrandaki her kayit ADAY: "Musteri"/"Tedarikci" kolonlari hep bos,
+    //   yer kaplamaktan baska ise yaramiyor.
+    gizliKolonlar: ['musteri', 'tedarikci'],
     cipler: DURUM_CIPLERI,
     yerTutucuSekmeler: ['Mali Durum', 'Yorum / Medya', 'Ek Alanlar'],
     menuGrup: 'CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'cari',
