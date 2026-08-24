@@ -1140,7 +1140,31 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
             {/* Cari'ye ozel: mockup'ta Genel'in altinda "İlgili Kişiler" tablosu (ayri
                 uclar - /api/kart/cari/{id}/kisiler, kartin diger alanlari gibi Kaydet'i
                 beklemez). Yeni kayitta henuz id yok, kart once kaydedilmeli. */}
-            {kaynak === 'cari' && aktif.baslik === 'Genel' && !yeniMi && (
+            {/* Fatura sekmesi gizli ekranlarda (Aday) ADRES ve KISILER YAN YANA
+                (kullanici: "kişiler adres bölümünün sağına gelsin"); diger
+                ekranlarda adres kendi sekmesinde, kisiler tek basina. */}
+            {kaynak === 'cari' && aktif.baslik === 'Genel' && !yeniMi
+              && gizliSekmeler?.includes('Fatura Bilgileri') && (() => {
+                const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
+                return (
+                  <div className="kasira">
+                    {adresDetay && (
+                      <TekAdres
+                        meta={adresDetay}
+                        durum={detaylar[adresDetay.ad] ?? bosDetay()}
+                        saltOkunur={salt || adresDetay.saltOkunur}
+                        onDegis={yeni => setDetaylar(t => ({ ...t, [adresDetay.ad]: yeni }))}
+                        baslik="Adres"
+                        turGizli
+                        sabitTur="1"
+                      />
+                    )}
+                    <IlgiliKisiler tarafId={id as number} saltOkunur={salt} />
+                  </div>
+                );
+              })()}
+            {kaynak === 'cari' && aktif.baslik === 'Genel' && !yeniMi
+              && !gizliSekmeler?.includes('Fatura Bilgileri') && (
               <IlgiliKisiler tarafId={id as number} saltOkunur={salt} />
             )}
             {/* YENI kartta kisi eklenemez (henuz taraf id'si yok) ama kutu
@@ -1156,10 +1180,11 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
                 </div>
               </div>
             )}
+
             {/* ADRES: Fatura Bilgileri sekmesi bu ekranda GIZLIYSE (Aday karti)
                 adres oradan gorunmez - Genel sekmesine, Notlar'in USTUNE tek
                 adres olarak konur. Ayni taraf_adres tablosu, tek satir. */}
-            {kaynak === 'cari' && aktif.baslik === 'Genel'
+            {kaynak === 'cari' && aktif.baslik === 'Genel' && yeniMi
               && gizliSekmeler?.includes('Fatura Bilgileri') && (() => {
                 const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
                 if (!adresDetay) return null;
