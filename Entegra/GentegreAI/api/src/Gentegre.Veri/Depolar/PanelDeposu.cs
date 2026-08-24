@@ -108,15 +108,20 @@ public sealed class PanelDeposu
                  where b.tur = 19 and b.durum = 0 and bs.kalan_miktar > 0
                  group by 1
             )
+            -- ESIK once DEPO BAZINDA (stok_durum.min_stok - Stok Durumu sekmesi),
+            --   hicbir depoda tanimli degilse stok kartindaki ESKI deger.
+            --   Minimum stok karttan kaldirildi; eski veriler yedek kaliyor.
             select s.id, s.kod, s.ad,
                    sum(sd.kalan) - coalesce(max(r.m), 0) as kullanilabilir,
-                   max(s.min_stok) as esik
+                   coalesce(nullif(sum(coalesce(sd.min_stok, 0)), 0), max(s.min_stok)) as esik
               from public.stok_durum sd
               join public.stok s on s.id = sd.stok_id
               left join rez r on r.stok_id = sd.stok_id
-             where s.durum = 1 and coalesce(s.min_stok, 0) > 0
+             where s.durum = 1
              group by s.id, s.kod, s.ad
-            having sum(sd.kalan) - coalesce(max(r.m), 0) <= max(s.min_stok)
+            having coalesce(nullif(sum(coalesce(sd.min_stok, 0)), 0), max(s.min_stok), 0) > 0
+               and sum(sd.kalan) - coalesce(max(r.m), 0)
+                   <= coalesce(nullif(sum(coalesce(sd.min_stok, 0)), 0), max(s.min_stok), 0)
             """;
 
         await using (var komut = new NpgsqlCommand(

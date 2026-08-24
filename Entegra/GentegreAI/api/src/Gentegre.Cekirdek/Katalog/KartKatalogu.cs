@@ -634,11 +634,11 @@ public static class KartKatalogu
             new("kod",           "kod",             "metin", Zorunlu: true, EnFazlaUzunluk: 30, Baslik: "Stok Kodu", Grup: "Kimlik"),
             new("ad",            "ad",              "metin", Zorunlu: true, EnFazlaUzunluk: 200, Baslik: "Stok Adi", Grup: "Kimlik"),
             // mockup idstrip: Stok Kodu / Stok Adi / Tur / Durum - Tur (STOKLAR.TIPI) daha once hic acilmamisti.
-            new("tipi",          "tipi",            "kod",   KodListesi: "stok.tipi", Baslik: "Tur", Grup: "Kimlik"),
+            new("tipi",          "tipi",            "kod",   Zorunlu: true, KodListesi: "stok.tipi", Baslik: "Tur", Grup: "Kimlik"),
             // mockup "Genel" sekmesi 3 alt-bolume ayrilir: Tanım / Sınıflandırma · Vergi & Ana Birim · Resim
             //   (Resim - IMAJ→DOSYA - hic acilmadi, alan yok). Ayri Mali/Diger SEKMESI YOK -
             //   mockup'ta da yok, KDV/OTV/Min Stok buraya katlandi (eskiden ayri sekmelerdi).
-            new("kategori",      "kategori",        "kod",   KodTablosu: "public.kategori", Baslik: "Kategori", AltGrup: "Tanım / Sınıflandırma"),
+            new("kategori",      "kategori",        "kod",   Zorunlu: true, KodTablosu: "public.kategori", Baslik: "Kategori", AltGrup: "Tanım / Sınıflandırma"),
             new("marka",         "marka",           "kod",   KodListesi: "stok.marka",     Baslik: "Marka",     AltGrup: "Tanım / Sınıflandırma"),
             new("model",         "model",           "metin", EnFazlaUzunluk: 60, AltGrup: "Tanım / Sınıflandırma"),
             new("grup",          "grubu",           "kod",   KodListesi: "stok.grubu",     Baslik: "Grup",      AltGrup: "Tanım / Sınıflandırma"),
@@ -647,18 +647,22 @@ public static class KartKatalogu
             new("urunNo",        "urun_no",         "metin", EnFazlaUzunluk: 60, Baslik: "Urun No",             AltGrup: "Vergi & Ana Birim"),
             new("gtipKodu",      "gtip_kodu",       "metin", EnFazlaUzunluk: 30, Baslik: "GTIP Kodu",           AltGrup: "Vergi & Ana Birim"),
             new("anaBirim",      "ana_birim",       "kod",   KodListesi: "stok.ana_birim",  Baslik: "Ana Birim",AltGrup: "Vergi & Ana Birim"),
-            new("kdv",           "kdv",             "kod",   SabitKodlar: KdvKodlari, Baslik: "KDV %", AltGrup: "Vergi & Ana Birim"),
+            new("kdv",           "kdv",             "kod",   Zorunlu: true, SabitKodlar: KdvKodlari, Baslik: "KDV %", AltGrup: "Vergi & Ana Birim"),
             new("otvYuzde",      "otv_yuzde",       "para", Baslik: "OTV %",  AltGrup: "Vergi & Ana Birim"),
-            new("internetSatis", "internet_satis",  "mantik", AltGrup: "Vergi & Ana Birim"),
+            new("internetSatis", "internet_satis",  "mantik", Baslik: "İnternet Satış", AltGrup: "Diğer"),
             // Mockup'ta 3. kutu "Resim" - bu alanlarin orada karsiligi yok, ust-satirin
             //   ALTINDA adsiz/duz bolum olarak kalsinlar (kasira'nin 2 kutusunu bozmasin).
             new("rafKonum",      "raf_konum",       "metin", EnFazlaUzunluk: 30, Baslik: "Raf / Konum",         AltGrup: "Diğer"),
             new("rafOmruSure",   "raf_omru_sure",   "sayi",  Baslik: "Raf Ömrü", AltGrup: "Diğer", EslesAlan: "rafOmruBirim"),
             new("rafOmruBirim",  "raf_omru_birim",  "kod",   SabitKodlar: RafOmruBirimKodlari, AltGrup: "Diğer"),
-            new("minStok",       "min_stok",        "para", Baslik: "Minimum Stok", AltGrup: "Diğer"),
+            // MINIMUM STOK karttan KALDIRILDI (kullanici karari): esik DEPO
+            //   BAZINDA tutulur (stok_durum.min_stok, Stok Durumu sekmesi) -
+            //   ayni urunun ana depodaki ve konsinye depodaki esigi ayni olmaz.
+            //   Kolon veri olarak duruyor; eski degerler panel kritik listesinde
+            //   depo esigi tanimlanmamis stoklar icin yedek olarak kullanilir.
             new("ozelKod",       "ozel_kod",        "metin", EnFazlaUzunluk: 20, AltGrup: "Diğer"),
             new("faturaStokAdi", "fatura_stok_adi", "metin", EnFazlaUzunluk: 200, Baslik: "Faturadaki Ad", AltGrup: "Diğer"),
-            new("durum",         "durum",           "kod",   SabitKodlar: DurumKodlari, Grup: "Kimlik"),
+            new("durum",         "durum",           "kod",   Zorunlu: true, SabitKodlar: DurumKodlari, Grup: "Kimlik"),
             new("subeId",        "sube_id",         "sayi",  Yazilabilir: false),
             new("eklemeTarihi",  "ekleme_tarihi",   "tarih", Yazilabilir: false)
         },
@@ -689,8 +693,30 @@ public static class KartKatalogu
                 new("fiyat",       "fiyat",        "para", Zorunlu: true),
                 new("dovizCinsi",  "doviz_cinsi",  "kod"),
                 new("satis",       "satis",        "mantik")
-            }, Sirala: "id", SubeKolonu: null, LogTabloId: 346)   // stok_fiyatta sube_id YOK
+            }, Sirala: "id", SubeKolonu: null, LogTabloId: 346),  // stok_fiyatta sube_id YOK
                                                                    // (GENINI -11110: Stok Fiyat)
+
+            // ÜTS / medikal bilgileri (119) - stok_uts 1:1 uzanti. Tek satirlik
+            //   form olarak cizilir (grid degil): bir stokun BIR ÜTS kaydi olur.
+            //   Alan sirasi mockup'takiyle (stok_karti.html "ÜTS Bilgileri" =
+            //   Delphi UStokWizard.TabSheetUTS) ayni.
+            new DetayTanimi("uts", "public.stok_uts", "stok_id", new KartAlani[]
+            {
+                new("id",            "id",             "sayi",  Yazilabilir: false),
+                new("sutKodu",       "sut_kodu",       "metin", EnFazlaUzunluk: 50,  Baslik: "SUT Kodu"),
+                new("bransKodu",     "brans_kodu",     "metin", EnFazlaUzunluk: 100, Baslik: "Branş Kodu"),
+                new("utsRef",        "uts_ref",        "metin", EnFazlaUzunluk: 100, Baslik: "ÜTS REF (Katalog No)"),
+                new("ftn",           "ftn",            "metin", EnFazlaUzunluk: 100, Baslik: "FTN"),
+                new("gmdn",          "gmdn",           "metin", EnFazlaUzunluk: 100, Baslik: "GMDN"),
+                new("gmdnAdi",       "gmdn_adi",       "metin", EnFazlaUzunluk: 300, Baslik: "GMDN Adı"),
+                new("digerUrunAdi",  "diger_urun_adi", "metin", EnFazlaUzunluk: 300, Baslik: "Diğer Ürün Adı"),
+                new("medikalSinif",  "medikal_sinif",  "kod",   KodListesi: "stok.medikal_sinif", Baslik: "Sınıf"),
+                new("ithalImal",     "ithal_imal",     "kod",   KodListesi: "stok.ithal_imal", Baslik: "İthal / İmal"),
+                new("menseiUlke",    "mensei_ulke",    "kod",   KodTablosu: "public.v_ulke_lookup", Baslik: "Menşei Ülke"),
+                new("ihaleSiraNo",   "ihale_sira_no",  "metin", EnFazlaUzunluk: 100, Baslik: "İhale Sıra No"),
+                new("dmoKodu",       "dmo_kodu",       "metin", EnFazlaUzunluk: 40,  Baslik: "DMO Şartname Kodu"),
+                new("smKodu",        "sm_kodu",        "metin", EnFazlaUzunluk: 40,  Baslik: "SM Kodu")
+            }, Sirala: "id", SubeKolonu: null, LogTabloId: 903, Baslik: "ÜTS Bilgileri"),
 
             // "Seri / Lot" AYRI SEKME DEGIL (kullanici karari, 115): lot dokumu
             //   artik Stok Durumu sekmesinde DEPO BAZINDA, master-detail olarak.

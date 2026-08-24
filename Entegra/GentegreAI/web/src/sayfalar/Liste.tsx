@@ -791,7 +791,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Mockup'ta (stok_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
     //   Stok Durumu icin gercek tablo (stok_durum) var ama PK'si (stok_id,depo_id) -
     //   detay tablosu id kolonu varsayar, o yuzden bu da simdilik yer tutucu.
-    yerTutucuSekmeler: ['ÜTS Bilgileri', 'Reçete', 'Stok Durumu', 'Hareketler', 'Yorum / Medya', 'Ek Alanlar'],
+    // 'ÜTS Bilgileri' artik yer tutucu DEGIL - stok_uts (119) detayi olarak geliyor.
+    yerTutucuSekmeler: ['Reçete', 'Stok Durumu', 'Hareketler', 'Yorum / Medya', 'Ek Alanlar'],
     resimYerTutucu: true,
     menuGrup: 'Stok', menuAd: 'Stok Listesi', ic: '📦', yetkiKodu: 'stok',
   },

@@ -8,6 +8,7 @@ import { GenDetayTablo, type DetayDurumu, bosDetay, detayFarki } from './GenDeta
 import { IlgiliKisiler } from './IlgiliKisiler';
 import { TekAdres } from './TekAdres';
 import { TekOzluk } from './TekOzluk';
+import { TekKayit } from './TekKayit';
 import { PersonelKimlikOzet } from './PersonelKimlikOzet';
 import { RolYetkiMatrisi } from './RolYetkiMatrisi';
 import { DokumanGalerisi } from './DokumanGalerisi';
@@ -1162,7 +1163,22 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         />
       )}
 
-      {aktif?.tur === 'detay' && !(personelGibiKart && aktif.detay.ad === 'ozluk') && (
+      {/* Stok > ÜTS: stok_uts 1:1 uzanti (119) - grid degil TEK kayit formu.
+          Bir stokun bir ÜTS kaydi olur; "satir ekle" yanlis bir vaat olurdu. */}
+      {aktif?.tur === 'detay' && kaynak === 'stok' && aktif.detay.ad === 'uts' && (
+        <TekKayit
+          meta={aktif.detay}
+          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
+          saltOkunur={salt || aktif.detay.saltOkunur}
+          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
+          baslik="ÜTS / Medikal Bilgileri"
+          not={<>ÜTS REF ve GTIN, ÜTS bildiriminde ürün eşleştirmesinde kullanılır.
+               Menşei ülke listesi ülke tablosundan gelir.</>}
+        />
+      )}
+
+      {aktif?.tur === 'detay' && !(personelGibiKart && aktif.detay.ad === 'ozluk')
+        && !(kaynak === 'stok' && aktif.detay.ad === 'uts') && (
         <GenDetayTablo
           meta={aktif.detay}
           durum={detaylar[aktif.detay.ad] ?? bosDetay()}
