@@ -923,7 +923,8 @@ public sealed class BelgeDeposu
         // Lot / seri izlemi: stok izlemliyse satirin miktari lotlara dagitilir.
         if (stokId is { } sid)
             await IzlemYazAsync(baglanti, islem, belgeId, satirId, sid, sira,
-                                Sayi(belge, "tur"), adet, satir, belge, turStokEtkiler, iptal);
+                                Sayi(belge, "tur"), adet, satir, belge, turStokEtkiler,
+                                uyarilar, iptal);
     }
 
     // ============================================================ lot / seri ====
@@ -945,7 +946,7 @@ public sealed class BelgeDeposu
     private async Task IzlemYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, int satirId, int stokId, int sira, int belgeTur, decimal adet,
         Dictionary<string, JsonElement> satir, IDictionary<string, object?> belge,
-        bool turStokEtkiler, CancellationToken iptal)
+        bool turStokEtkiler, List<string> uyarilar, CancellationToken iptal)
     {
         // Hareketin deposu (115): giris yonlu belgede giris deposu, cikista
         //   cikis deposu. Transferde IKISI de var - tuketim cikis deposundan,
@@ -1019,6 +1020,12 @@ public sealed class BelgeDeposu
                     new AlanHatasi($"satirlar[{sira - 1}].izlemler", "SKT zorunlu."));
 
             toplam += miktar;
+
+            // SKT GECMIS: engel degil UYARI - mal fiilen gelmis olabilir (iade,
+            //   imha oncesi giris). Karar kullanicinin, ama kayit sessiz gecmez.
+            if (skt is { } sonGun && sonGun.Date < DateTime.Today)
+                uyarilar.Add($"{sira}. satır, lot {(lotNo.Length > 0 ? lotNo : seriNo)}: " +
+                             $"son kullanma tarihi geçmiş ({sonGun:dd.MM.yyyy}).");
 
             var seriLotId = await SeriLotIdAsync(baglanti, islem, stokId, lotNo, seriNo,
                                                  uretim, skt, iptal);

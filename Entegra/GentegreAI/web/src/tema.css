@@ -510,6 +510,11 @@ table.lot-tablo tr:last-child td { border-bottom: 0 }
 table.lot-tablo tbody tr:hover td { background: #f2f7fd }
 table.lot-tablo code { font-weight: 700; color: var(--yazi2) }
 
+/* SKT'si gecmis lot: kutunun kendisi kirmizi - satirda goze carpsin. */
+input.skt-gecmis {
+  border-color: var(--hata); background: #fdf1f1; color: var(--hata); font-weight: 700;
+}
+
 /* Otomatik doldurulan alanin altindaki aciklama (ör. "24.08.2026 kuru"). */
 .alan-notu { color: var(--soluk); font-size: 11px }
 .kod-ad { color: var(--soluk); font-size: 11px }

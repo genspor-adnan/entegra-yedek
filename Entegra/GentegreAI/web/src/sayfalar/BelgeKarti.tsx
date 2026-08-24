@@ -66,6 +66,30 @@ const bosIzlem = (miktar = ''): IzlemSatiri => ({
   lotNo: '', seriNo: '', uretimTarihi: '', sonKullanmaTarihi: '', durum: 0, miktar,
 });
 
+/** Raf omru birimi (stok.raf_omru_birim): 1 Gün · 2 Ay · 3 Yıl. */
+const RAF_BIRIM = { 1: 'Gün', 2: 'Ay', 3: 'Yıl' } as const;
+
+/** "2026-08-24" + raf omru -> SKT. Negatif adim ile ters yon (SKT'den ÜRT). */
+function tariheEkle(iso: string, sure: number, birim: number, yon: 1 | -1): string {
+  if (!iso || sure <= 0 || birim <= 0) return '';
+  const [y, a, g] = iso.slice(0, 10).split('-').map(Number);
+  if (!y || !a || !g) return '';
+  const t = new Date(y, a - 1, g);
+  const adim = sure * yon;
+  if (birim === 1) t.setDate(t.getDate() + adim);
+  else if (birim === 2) t.setMonth(t.getMonth() + adim);
+  else t.setFullYear(t.getFullYear() + adim);
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${t.getFullYear()}-${p(t.getMonth() + 1)}-${p(t.getDate())}`;
+}
+
+/** Bugunun ISO tarihi (yerel) - SKT gecmis mi kontrolu icin. */
+const bugunIso = () => {
+  const t = new Date();
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${t.getFullYear()}-${p(t.getMonth() + 1)}-${p(t.getDate())}`;
+};
+
 /** Stok kartindaki izleme turune gore hangi alan ZORUNLU. */
 function izlemKurali(izleme: number) {
   return {
@@ -2067,6 +2091,53 @@ function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirlar, cik
   const [yukleniyor, setYukleniyor] = useState(cikis);
   const kural = izlemKurali(izleme);
 
+  // RAF OMRU (stok karti): ÜRT <-> SKT donusumu bununla yapilir. Kartta yoksa
+  //   kullanicidan BURADA sorulur ve karta yazilir - lot girisini yarida kesip
+  //   stok kartina gitmek zorunda kalmasin.
+  const [rafSure, setRafSure] = useState(0);
+  const [rafBirim, setRafBirim] = useState(0);
+  const [rafSurum, setRafSurum] = useState<string | undefined>();
+  const [rafSoruluyor, setRafSoruluyor] = useState(false);
+  const [rafTaslak, setRafTaslak] = useState({ sure: '', birim: '2' });
+  const [rafNot, setRafNot] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (cikis || !stokId) return;
+    let iptal = false;
+    void api.kartOku('stok', stokId)
+      .then(k => {
+        if (iptal) return;
+        const sure = Number(k.kart.rafOmruSure ?? 0) || 0;
+        const birim = Number(k.kart.rafOmruBirim ?? 0) || 0;
+        setRafSure(sure); setRafBirim(birim);
+        setRafSurum(k.kart.surum as string | undefined);
+        // Tanimsizsa hemen sor: SKT hesabi buna bagli.
+        if (sure <= 0 || birim <= 0) setRafSoruluyor(true);
+      })
+      .catch(() => { /* kart okunamazsa raf omru sorulmaz, elle girilir */ });
+    return () => { iptal = true };
+  }, [cikis, stokId]);
+
+  /** Raf omru kullanicidan alindi: STOK KARTINA yazilir, sonra hesaplama acilir. */
+  async function rafKaydet() {
+    const sure = Number(rafTaslak.sure.replace(',', '.')) || 0;
+    const birim = Number(rafTaslak.birim) || 0;
+    if (sure <= 0 || birim <= 0) { setHata('Raf ömrü ve birimi girilmeli.'); return }
+    setRafSure(sure); setRafBirim(birim); setRafSoruluyor(false); setHata(null);
+    if (!stokId) return;
+    try {
+      const y = await api.kartGuncelle('stok', stokId,
+        { surum: rafSurum, kart: { rafOmruSure: sure, rafOmruBirim: String(birim) } });
+      setRafSurum(y.kart.surum as string | undefined);
+      setRafNot(`Raf ömrü stok kartına yazıldı: ${sure} ${RAF_BIRIM[birim as 1 | 2 | 3]}.`);
+    } catch (h) {
+      // Yetkisi yoksa kart guncellenmez ama hesaplama yine calisir.
+      setRafNot(h instanceof ApiHatasi
+        ? `Raf ömrü bu girişte kullanılacak; stok kartına yazılamadı (${h.message}).`
+        : 'Raf ömrü bu girişte kullanılacak; stok kartına yazılamadı.');
+    }
+  }
+
   // CIKISTA stoktaki lotlar getirilir: kullanici lot YAZMAZ, listeden secer.
   //   Sira SKT'ye gore (once tukenecek olan basta) - sunucu boyle veriyor.
   useEffect(() => {
@@ -2097,9 +2168,26 @@ function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirlar, cik
   const sayi = (m: string) => Number(m.replace(',', '.')) || 0;
   const toplam = liste.reduce((t, z) => t + sayi(z.miktar), 0);
   const fark = Math.round((miktar - toplam) * 10000) / 10000;
+  /** SKT'si gecmis lot sayisi - girisi ENGELLEMEZ, uyarir. */
+  const gecmisSkt = liste.filter(z => sayi(z.miktar) > 0
+                                   && z.sonKullanmaTarihi
+                                   && z.sonKullanmaTarihi < bugunIso()).length;
 
   const degis = (i: number, alan: keyof IzlemSatiri, deger: string | number) =>
-    setListe(l => l.map((z, x) => x === i ? { ...z, [alan]: deger } : z));
+    setListe(l => l.map((z, x) => {
+      if (x !== i) return z;
+      const yeni = { ...z, [alan]: deger } as IzlemSatiri;
+      // ÜRT <-> SKT: hangisi girildiyse DIGERI raf omrunden hesaplanir.
+      //   Kullanici sonra elle degistirebilir - hesap yalniz yazilan alanin
+      //   karsisini doldurur, yazdigi alana dokunmaz.
+      if (!cikis && rafSure > 0 && rafBirim > 0) {
+        if (alan === 'uretimTarihi' && deger)
+          yeni.sonKullanmaTarihi = tariheEkle(String(deger), rafSure, rafBirim, 1);
+        else if (alan === 'sonKullanmaTarihi' && deger)
+          yeni.uretimTarihi = tariheEkle(String(deger), rafSure, rafBirim, -1);
+      }
+      return yeni;
+    }));
 
   const satirEkle = () =>
     // Yeni satir KALAN miktarla acilir - kullanici hesap yapmasin.
@@ -2147,6 +2235,34 @@ function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirlar, cik
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}
         {yukleniyor && <div className="yukleniyor">Lotlar yükleniyor…</div>}
+
+        {/* RAF OMRU kartta tanimli degil: burada sorulur, karta yazilir.
+            Lot girisini birakip stok kartina gitmeye gerek kalmasin. */}
+        {rafSoruluyor && (
+          <div className="bilgi-kutusu">
+            <b>Bu stokta raf ömrü tanımlı değil.</b> Girilirse üretim tarihinden SKT
+            (ya da SKT'den üretim tarihi) otomatik hesaplanır ve stok kartına yazılır.
+            <div className="ikili" style={{ marginTop: 6, maxWidth: 320 }}>
+              <input className="hiza-sag" placeholder="Süre" value={rafTaslak.sure}
+                     onChange={e => setRafTaslak(t => ({ ...t, sure: e.target.value.replace(/[^0-9]/g, '') }))} />
+              <select value={rafTaslak.birim}
+                      onChange={e => setRafTaslak(t => ({ ...t, birim: e.target.value }))}>
+                <option value="1">Gün</option>
+                <option value="2">Ay</option>
+                <option value="3">Yıl</option>
+              </select>
+              <button type="button" className="d bir" onClick={() => void rafKaydet()}>Kaydet</button>
+              <button type="button" className="d" onClick={() => setRafSoruluyor(false)}>Şimdilik geç</button>
+            </div>
+          </div>
+        )}
+        {rafNot && <div className="bilgi-kutusu">{rafNot}</div>}
+        {!cikis && !rafSoruluyor && rafSure > 0 && rafBirim > 0 && (
+          <div className="not">
+            Raf ömrü <b>{rafSure} {RAF_BIRIM[rafBirim as 1 | 2 | 3]}</b> — üretim tarihi
+            girilince SKT, SKT girilince üretim tarihi otomatik hesaplanır.
+          </div>
+        )}
         {cikis && !yukleniyor && liste.length === 0 && (
           <div className="bilgi-kutusu">Bu stokta kalan lot yok — önce giriş yapılmalı.</div>
         )}
@@ -2176,8 +2292,13 @@ function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirlar, cik
                              onChange={e => degis(i, 'seriNo', e.target.value)} /></td>
                   <td><input type="date" value={z.uretimTarihi} readOnly={cikis} disabled={cikis}
                              onChange={e => degis(i, 'uretimTarihi', e.target.value)} /></td>
-                  <td><input type="date" value={z.sonKullanmaTarihi} readOnly={cikis} disabled={cikis}
-                             onChange={e => degis(i, 'sonKullanmaTarihi', e.target.value)} /></td>
+                  <td>
+                    <input type="date" value={z.sonKullanmaTarihi} readOnly={cikis} disabled={cikis}
+                           className={z.sonKullanmaTarihi && z.sonKullanmaTarihi < bugunIso() ? 'skt-gecmis' : undefined}
+                           title={z.sonKullanmaTarihi && z.sonKullanmaTarihi < bugunIso()
+                             ? 'Son kullanma tarihi GEÇMİŞ' : undefined}
+                           onChange={e => degis(i, 'sonKullanmaTarihi', e.target.value)} />
+                  </td>
                   {cikis
                     ? <td className="hiza-sag">{(z.kalan ?? 0).toLocaleString('tr-TR')}</td>
                     /* Giriste tek durum var; kod listesi genisleyince combo olur. */
@@ -2199,6 +2320,13 @@ function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirlar, cik
             <tfoot>
               <tr>
                 <td colSpan={5}>
+                  {/* SKT gecmisse ENGEL DEGIL UYARI: mal fiilen gelmis olabilir
+                      (iade, imha oncesi giris) - karar kullanicinin. */}
+                  {gecmisSkt > 0 && (
+                    <div className="hata-metin" style={{ marginBottom: 4 }}>
+                      ⚠ {gecmisSkt} lotta son kullanma tarihi geçmiş.
+                    </div>
+                  )}
                   {fark === 0 ? 'Dağıtım tamam.'
                     : fark > 0 ? `Dağıtılmayan miktar: ${fark.toLocaleString('tr-TR')}`
                     : `Fazla dağıtım: ${Math.abs(fark).toLocaleString('tr-TR')}`}
