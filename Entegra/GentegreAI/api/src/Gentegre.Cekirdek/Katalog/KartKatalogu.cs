@@ -957,11 +957,14 @@ public static class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id",            "id",              "sayi",  Yazilabilir: false),
-            new("tur",           "tur",             "kod",   Zorunlu: true, SabitKodlar: CekSenetTurKodlari, Baslik: "Tür", Grup: "Kimlik"),
+            // TUR kimlik seridinde DEGIL (kullanici karari): kagidin cek mi senet mi
+            //   oldugu zaten hangi listeden gelindigiyle belli - seride kimin
+            //   kagidi oldugu (CARI) daha degerli. Alan yine var, "Genel"de.
+            new("tarafId",       "taraf_id",        "kod",   KodTablosu: "public.v_cari_lookup", Baslik: "Cari", Grup: "Kimlik"),
             new("yon",           "yon",             "kod",   Zorunlu: true, SabitKodlar: CekSenetYonKodlari, Baslik: "Yön", Grup: "Kimlik"),
             new("seriNo",        "seri_no",         "metin", EnFazlaUzunluk: 30, Baslik: "Seri No", Grup: "Kimlik"),
             new("durum",         "durum",           "kod",   Yazilabilir: false, SabitKodlar: CekSenetDurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
-            new("tarafId",       "taraf_id",        "kod",   KodTablosu: "public.v_cari_lookup", Baslik: "Cari", Grup: "Genel", AltGrup: "Taraf"),
+            new("tur",           "tur",             "kod",   Zorunlu: true, SabitKodlar: CekSenetTurKodlari, Baslik: "Tür", Grup: "Genel", AltGrup: "Taraf"),
             new("kesideci",      "kesideci",        "metin", EnFazlaUzunluk: 150, Baslik: "Keşideci", Grup: "Genel", AltGrup: "Taraf"),
             new("ciroTarafId",   "ciro_taraf_id",   "kod",   Yazilabilir: false, KodTablosu: "public.v_cari_lookup", Baslik: "Ciro Edilen", Grup: "Genel", AltGrup: "Taraf"),
             new("tarih",         "tarih",           "tarih", Zorunlu: true, Baslik: "Tarih", Grup: "Genel", AltGrup: "Tutar / Vade"),

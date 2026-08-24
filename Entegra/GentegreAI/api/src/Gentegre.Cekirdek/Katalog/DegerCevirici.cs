@@ -69,12 +69,23 @@ public static class DegerCevirici
                          : throw GentegreHatasi.Dogrulama($"{alanBasligi}: tarih cozulemedi ({s}).",
                                new AlanHatasi(alanAdi, "Gecersiz tarih.")),
 
-            "sayi" or "kod" => string.IsNullOrWhiteSpace(s)
+            "sayi" => string.IsNullOrWhiteSpace(s)
                        ? null
                        : long.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var n)
                          ? n
                          : throw GentegreHatasi.Dogrulama($"{alanBasligi}: sayi bekleniyor ({s}).",
                                new AlanHatasi(alanAdi, "Sayi olmali.")),
+
+            // KOD her zaman sayi DEGILDIR: cogu kod listesi sayisaldir (durum, tur)
+            //   ama bazi kolonlar HARF tasir (hesap.tur = 'K'/'B'/'P', doviz kodu).
+            //   Sayiya cevrilebiliyorsa sayi, cevrilemiyorsa METIN gecer - kolonun
+            //   gercek tipini DB dogrular. (Eskiden hepsi sayi zorunluydu ve
+            //   "tur: sayi bekleniyor (K)" ile kasa/banka karti kaydedilemiyordu.)
+            "kod" => string.IsNullOrWhiteSpace(s)
+                       ? null
+                       : long.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var k)
+                         ? k
+                         : s,
 
             "para" => string.IsNullOrWhiteSpace(s)
                        ? null
