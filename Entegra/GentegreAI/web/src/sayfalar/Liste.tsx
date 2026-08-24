@@ -847,7 +847,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   donusumde (Müşteriye Dönüştür) belirlenir.
     //   "Aday" kutusu da gizli: bu ekrandaki her kayit zaten aday, kutu bilgi
     //   vermiyor ama yanlislikla kapatilirsa kayit listeden DUSER.
-    gizliKartAlanlari: ['kod', 'musteri', 'tedarikci', 'aday'],
+    //   Cep telefonu ve Web de yok: adayda tek telefon + e-posta yeter,
+    //   ayrinti musteri olunca girilir.
+    gizliKartAlanlari: ['kod', 'musteri', 'tedarikci', 'aday', 'cepTel', 'epostaWeb'],
     gizliKartSekmeleri: ['Fatura Bilgileri'],
     yerTutucuSekmeler: ['Yorum / Medya'],
     menuGrup: 'CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'cari',

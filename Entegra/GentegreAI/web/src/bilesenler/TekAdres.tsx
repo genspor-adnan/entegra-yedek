@@ -13,6 +13,8 @@ interface Props {
   turGizli?: boolean;
   sabitTur?: string;
   grupYok?: boolean;
+  /** Ulke satirini hic cizme (ör. Aday karti - yurt ici varsayilani yeterli). */
+  ulkeGizli?: boolean;
   ilIlceAyniSatir?: boolean;
   baslikGizli?: boolean;
 }
@@ -30,6 +32,7 @@ export function TekAdres({
   turGizli = false,
   sabitTur,
   grupYok = false,
+  ulkeGizli = false,
   ilIlceAyniSatir = false,
   baslikGizli = false,
 }: Props) {
@@ -110,6 +113,7 @@ export function TekAdres({
 
         {/* POSTA KODU sorulmaz (kullanici): kolon duruyor, gocmus degerler
             korunuyor - yalniz formda yer kaplamiyordu. */}
+        {!ulkeGizli && (
         <div className="adres-satir">
           <label className="alan tip-kod">
             <span className="etiket">Ülke</span>
@@ -119,6 +123,7 @@ export function TekAdres({
             </select>
           </label>
         </div>
+        )}
       </div>
   );
 

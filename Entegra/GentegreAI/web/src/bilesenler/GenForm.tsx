@@ -952,6 +952,31 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
                     <div className="kagrup">
                       <h6>{iletisim[0]}</h6>
                       <div className="alan-izgara tek-sutun">{renderAlanListesi(iletisim[1])}</div>
+                      {/* ADRES ayri kutu DEGIL (Aday karti): iletisim bilgisinin
+                          devami - adres, altinda İl ve saginda İlçe. Ayri bir
+                          "Adres" kutusu iki kisa alan icin fazladan bir kat
+                          gorsel gurultuydu. */}
+                      {kaynak === 'cari' && gizliSekmeler?.includes('Fatura Bilgileri') && (() => {
+                        const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
+                        if (!adresDetay) return null;
+                        return (
+                          <TekAdres
+                            meta={adresDetay}
+                            durum={detaylar[adresDetay.ad] ?? bosDetay()}
+                            saltOkunur={salt || adresDetay.saltOkunur}
+                            onDegis={yeni => setDetaylar(t => ({ ...t, [adresDetay.ad]: yeni }))}
+                            grupYok
+                            baslikGizli
+                            ilIlceAyniSatir
+                            turGizli
+                            sabitTur="1"
+                            // Ulke sorulmaz (kullanici): aday yurt ici, varsayilan
+                            //   yeterli. Musteri kartinda alan DURUYOR - ihracat
+                            //   carisinde ulke gerekir.
+                            ulkeGizli
+                          />
+                        );
+                      })()}
                     </div>
                     {notlar && kaynak !== 'cari' && (
                       <div className="kagrup">
@@ -1143,28 +1168,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
             {/* Fatura sekmesi gizli ekranlarda (Aday) ADRES ve KISILER YAN YANA
                 (kullanici: "kişiler adres bölümünün sağına gelsin"); diger
                 ekranlarda adres kendi sekmesinde, kisiler tek basina. */}
+            {/* Adres artik İletişim kutusunun icinde (yukarida) - burada yalniz
+                kisi gridi, tam genislikte. */}
             {kaynak === 'cari' && aktif.baslik === 'Genel' && !yeniMi
-              && gizliSekmeler?.includes('Fatura Bilgileri') && (() => {
-                const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
-                return (
-                  // Adres DAR, kisi gridi GENIS: adres bes kisa alandan ibaret,
-                  //   kisi tablosunda alti kolon var (bkz. .kasira.aday-alt).
-                  <div className="kasira aday-alt">
-                    {adresDetay && (
-                      <TekAdres
-                        meta={adresDetay}
-                        durum={detaylar[adresDetay.ad] ?? bosDetay()}
-                        saltOkunur={salt || adresDetay.saltOkunur}
-                        onDegis={yeni => setDetaylar(t => ({ ...t, [adresDetay.ad]: yeni }))}
-                        baslik="Adres"
-                        turGizli
-                        sabitTur="1"
-                      />
-                    )}
-                    <IlgiliKisiler tarafId={id as number} saltOkunur={salt} />
-                  </div>
-                );
-              })()}
+              && gizliSekmeler?.includes('Fatura Bilgileri') && (
+              <IlgiliKisiler tarafId={id as number} saltOkunur={salt} />
+            )}
             {kaynak === 'cari' && aktif.baslik === 'Genel' && !yeniMi
               && !gizliSekmeler?.includes('Fatura Bilgileri') && (
               <IlgiliKisiler tarafId={id as number} saltOkunur={salt} />
@@ -1186,26 +1195,6 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
             {/* ADRES: Fatura Bilgileri sekmesi bu ekranda GIZLIYSE (Aday karti)
                 adres oradan gorunmez - Genel sekmesine, Notlar'in USTUNE tek
                 adres olarak konur. Ayni taraf_adres tablosu, tek satir. */}
-            {kaynak === 'cari' && aktif.baslik === 'Genel' && yeniMi
-              && gizliSekmeler?.includes('Fatura Bilgileri') && (() => {
-                const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
-                if (!adresDetay) return null;
-                return (
-                  <div className="kasira">
-                    <TekAdres
-                      meta={adresDetay}
-                      durum={detaylar[adresDetay.ad] ?? bosDetay()}
-                      saltOkunur={salt || adresDetay.saltOkunur}
-                      onDegis={yeni => setDetaylar(t => ({ ...t, [adresDetay.ad]: yeni }))}
-                      baslik="Adres"
-                      // Adres TIPI sorulmaz (kullanici): adayin tek adresi var,
-                      //   fatura/sevkiyat ayrimi musteri olunca anlamli.
-                      turGizli
-                      sabitTur="1"
-                    />
-                  </div>
-                );
-              })()}
             {/* Kullanici: "notlar ilgili kişiler altına gelsin" - Cari'de Notlar kutusu
                 artik İletişim'in yaninda degil, İlgili Kişiler tablosunun altinda. */}
             {kaynak === 'cari' && aktif.baslik === 'Genel' && notlar && (
