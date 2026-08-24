@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { LISTELER } from './Liste';
@@ -68,6 +68,7 @@ const DILLER = [
 export function Kabuk() {
   const { kullanici, cikisYap, subeDegistir, dilDegistir, yetki } = useOturum();
   const konum = useLocation();
+  const git = useNavigate();
 
   // Menu, liste tanimlarindan uretilir; yetkisiz modul hic cizilmez. menuGrup verilen
   //   ogeler ("Cari" -> Musteri/Tedarikci/Kisi Listesi) acilir-kapanir bir ana menu
@@ -166,7 +167,10 @@ export function Kabuk() {
   return (
     <div className="kabuk">
       <header className="ust">
-        <div className="marka">
+        <div className="marka marka-bag" role="link" tabIndex={0}
+             title="Ana sayfa"
+             onClick={() => git('/panel')}
+             onKeyDown={e => { if (e.key === 'Enter') git('/panel') }}>
           {/* BASE_URL: uygulama alt yolda yayinda olabilir (/ai). Mutlak "/..." yazmak
               yayinda 404 veriyordu - sunucu kokunde degil /ai altinda duruyor. */}
           <span className="lg">
@@ -233,6 +237,14 @@ export function Kabuk() {
       <div className="govde">
         <aside className="yan">
           <div className="yanic">
+            {/* Panel menude YOKTU: kullanici bir listeye girince ana sayfaya
+                donmenin yolu kalmiyordu. En ustte, gruplarin disinda. */}
+            <NavLink to="/panel"
+                     className={() => `mi ${konum.pathname === '/panel' ? 'on' : ''}`}>
+              <span className="ic">🏠</span>
+              <span>Ana Sayfa</span>
+            </NavLink>
+
             <div className="bolum">Calisma alani</div>
             {satirlar.map(s => s.tur === 'duz' ? (
               <NavLink

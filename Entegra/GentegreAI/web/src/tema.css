@@ -765,3 +765,6 @@ table.grid tr.flt input {
 .panel-sutunlar .kagrup { margin-bottom: 0 }
 .panel-sutunlar .detay-tablo { width: calc(100% - 20px); margin: 10px }
 .hata-metin { color: var(--hata) }
+/* Marka (logo + ad) ana sayfaya goturur - imlec bunu belli etsin. */
+.marka-bag { cursor: pointer }
+.marka-bag:hover { opacity: .85 }
