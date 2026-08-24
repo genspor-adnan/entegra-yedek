@@ -103,6 +103,19 @@ export interface ListeYaniti {
   izlemeNo: string;
 }
 
+/**
+ * Cikis belgesinde secilebilecek lot (114). "kalan" o lottan geriye ne kaldigi -
+ * cikista bundan fazlasi secilemez.
+ */
+export interface StokLotSatiri {
+  seriLotId: number;
+  lotNo: string;
+  seriNo: string;
+  uretimTarihi?: string | null;
+  sonKullanmaTarihi?: string | null;
+  kalan: number;
+}
+
 /** §2.4 kolon metasi. Yetkisiz kolon bu listede HIC donmez. */
 export interface KolonMeta {
   ad: string;

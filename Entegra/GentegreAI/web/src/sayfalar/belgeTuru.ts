@@ -55,6 +55,10 @@ export interface BelgeTuruBilgisi {
   kalem: KalemBicimi;
   vade: boolean;
   doviz: boolean;         // Doviz/Kur alani
+  /** Mal depoya giriyor: izlemli stokta lot/seri bu belgede toplanir. */
+  girisIzlemi: boolean;
+  /** Mal depodan cikiyor: izlemli stokta stoktaki lotlardan SECIM yapilir. */
+  cikisIzlemi: boolean;
   /** Numara KARSI TARAFTA uretilir (alis faturasi): kullanici girer. */
   disNumara: boolean;
   /** Kaydedince kart kapanip listeye donulur (sonrasinda yapilacak is yok). */
@@ -136,8 +140,17 @@ export function belgeTuruBilgisi(tur: number): BelgeTuruBilgisi {
     kalem: depoBelgesi ? 'miktar' : (irsaliye || stokFisi) ? 'sade' : 'tam',
     vade: !irsaliye && !depoBelgesi && !stokFisi,
     doviz: !depoBelgesi && !stokFisi,
-    disNumara: tur === 11,
+      disNumara: tur === 11,
     kaydedinceKapan: depoBelgesi || stokFisi,
     kalemVarsaBaslikKilitli: depoBelgesi || stokFisi,
+    // Mal DEPOYA GIRIYOR: izlemli stokta lot/seri bilgisi burada TOPLANIR
+    //   (alis irsaliyesi/faturasi, konsinye giris, giris fisi). Cikista lot
+    //   girilmez SECILIR - mevcut stoktan, ayri ekran.
+    girisIzlemi: (alis && !siparis && !tahakkuk) || tur === 3,
+    // Satis irsaliyesi/faturasi/fisi, konsinye cikis, cikis fisi ve transferin
+    //   CIKIS bacagi: lot girilmez, stoktakilerden secilir.
+    cikisIzlemi: (!alis && !siparis && !tahakkuk && !talep
+                  && (irsaliye || FATURA_TURLERI.has(tur) || tur === 16 || tur === 119))
+                 || tur === 4,
   };
 }

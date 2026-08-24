@@ -22,6 +22,18 @@ public sealed record StokDurumYaniti(
 /// "Hareketler" sekmesinin bir satiri. <c>Kalan</c> = donem devri uzerine yurumeli
 /// bakiye (secili depo suzgeci neyse ona gore).
 /// </summary>
+/// <summary>
+/// Cikis belgesinde secilebilecek LOT: stokta kalani olan izlem satiri (114).
+/// Kalan, o lotun giris satirindan dusulerek yurur.
+/// </summary>
+public sealed record StokLotSatiri(
+    int seriLotId,
+    string lotNo,
+    string seriNo,
+    DateTime? uretimTarihi,
+    DateTime? sonKullanmaTarihi,
+    decimal kalan);
+
 public sealed record StokHareketSatiri(
     long BelgeId, DateTime Tarih, int BelgeTur, string BelgeTurAdi, string BelgeNo,
     string TarafUnvan, string Depo, string Yon, decimal Giris, decimal Cikis, decimal Kalan,
@@ -310,5 +322,55 @@ public sealed class StokDurumDeposu
 
         await islem.CommitAsync(iptal);
         return await OkuAsync(stokId, iptal);
+    }
+
+    /// <summary>
+    /// Stokta KALANI olan LOTLAR - cikis belgesinde secim listesi.
+    ///
+    /// LOT BAZINDA, hareket bazinda DEGIL: ayni lot her girisde yeni bir izlem
+    /// satiri uretir; kullaniciya "PTL4106210826" lotunu alti kez gostermek
+    /// (50, 38, 40, 20, 6, 4) secimi imkansiz kilar. Lotun kalani toplanir,
+    /// tuketim sirasi sunucunun isidir (giris sirasiyla, FIFO).
+    ///
+    /// Sira SKT'ye gore (once tukenecek olan once): son kullanma tarihi olan mal
+    /// FEFO ile cikar, tarihi olmayanlar giris sirasiyla arkada. Kullanici yine
+    /// istedigini secebilir; sira yalniz dogru olani ONE getirir.
+    ///
+    /// DEPO KIRILIMI YOK: izlem satiri depo tutmuyor (goc semasi da tutmuyordu),
+    /// bu yuzden lot kalanlari stok genelindedir. Depo bazli lot gerekirse
+    /// stok_izleme'ye depo kolonu eklenmeli - o ayri bir istir.
+    /// </summary>
+    public async Task<IReadOnlyList<StokLotSatiri>> LotlarAsync(
+        long stokId, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = new NpgsqlCommand("""
+            select i.seri_lot_id, min(i.lot_no) as lot_no, min(i.seri_no) as seri_no,
+                   min(i.uretim_tarihi) as uretim_tarihi,
+                   min(i.son_kullanma_tarihi) as son_kullanma_tarihi,
+                   sum(i.kalan) as kalan
+              from public.v_belge_satir_izlem i
+             where i.stok_id = @p0
+               and i.kalan > 0
+               -- Cikis satirlarinin kalani secim listesine girmemeli: onlar
+               --   maldan DUSEN hareketler, stokta duran mal degil.
+               and i.belge_tur not in (14, 15, 16, 119, 4, 29, 105, 133)
+             group by i.seri_lot_id
+            having sum(i.kalan) > 0
+             order by min(i.son_kullanma_tarihi) asc nulls last, i.seri_lot_id asc
+            """, baglanti);
+        komut.Parameters.AddWithValue("p0", (int)stokId);
+
+        var sonuc = new List<StokLotSatiri>();
+        await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
+        while (await okuyucu.ReadAsync(iptal))
+            sonuc.Add(new StokLotSatiri(
+                okuyucu.GetInt32(0),
+                okuyucu.IsDBNull(1) ? "" : okuyucu.GetString(1),
+                okuyucu.IsDBNull(2) ? "" : okuyucu.GetString(2),
+                okuyucu.IsDBNull(3) ? null : okuyucu.GetDateTime(3),
+                okuyucu.IsDBNull(4) ? null : okuyucu.GetDateTime(4),
+                okuyucu.GetDecimal(5)));
+        return sonuc;
     }
 }

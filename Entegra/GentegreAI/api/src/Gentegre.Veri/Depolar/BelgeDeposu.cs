@@ -729,6 +729,34 @@ public sealed class BelgeDeposu
             while (await okuyucu.ReadAsync(iptal)) satirlar.Add(Satir(okuyucu));
         }
 
+        // Kalemin LOT dagilimi: kart acilinca kullanici hangi lottan kac adet
+        //   girdigini geri gormeli (114). Izlemsiz belgede sorgu bos doner.
+        await using (var komut = new NpgsqlCommand("""
+            select i.belge_satir_id as "satirId", i.lot_no as "lotNo", i.seri_no as "seriNo",
+                   i.uretim_tarihi as "uretimTarihi", i.son_kullanma_tarihi as "sonKullanmaTarihi",
+                   i.durum, i.adet as "miktar", i.kalan
+              from public.v_belge_satir_izlem i
+             where i.belge_id = @p0
+             order by i.belge_satir_id, i.id
+            """, baglanti))
+        {
+            komut.Parameters.AddWithValue("p0", belgeId);
+            await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
+            var haritali = new Dictionary<int, List<IDictionary<string, object?>>>();
+            while (await okuyucu.ReadAsync(iptal))
+            {
+                var kayit = Satir(okuyucu);
+                var satirId = Convert.ToInt32(kayit["satirId"]);
+                if (!haritali.TryGetValue(satirId, out var liste))
+                    haritali[satirId] = liste = new List<IDictionary<string, object?>>();
+                liste.Add(kayit);
+            }
+            foreach (var s in satirlar)
+                if (s.TryGetValue("id", out var sid) && sid is not null &&
+                    haritali.TryGetValue(Convert.ToInt32(sid), out var liste))
+                    s["izlemler"] = liste;
+        }
+
         var dip = await DipToplamAsync(baglanti, null, belgeId, iptal);
         return (belge!, satirlar, dip);
     }
@@ -886,10 +914,281 @@ public sealed class BelgeDeposu
         var yerTutucular = Enumerable.Range(0, parametreler.Count)
             .Select(i => "@p" + i.ToString(CultureInfo.InvariantCulture));
         var sql = $"insert into public.belge_satir ({string.Join(", ", kolonlar)}) " +
-                  $"values ({string.Join(", ", yerTutucular)})";
+                  $"values ({string.Join(", ", yerTutucular)}) returning id";
 
-        await using var komut = Komut(baglanti, islem, sql, parametreler);
-        await komut.ExecuteNonQueryAsync(iptal);
+        int satirId;
+        await using (var komut = Komut(baglanti, islem, sql, parametreler))
+            satirId = Convert.ToInt32(await komut.ExecuteScalarAsync(iptal));
+
+        // Lot / seri izlemi: stok izlemliyse satirin miktari lotlara dagitilir.
+        if (stokId is { } sid)
+            await IzlemYazAsync(baglanti, islem, belgeId, satirId, sid, sira,
+                                Sayi(belge, "tur"), adet, satir, turStokEtkiler, iptal);
+    }
+
+    // ============================================================ lot / seri ====
+    /// <summary>
+    /// Satirin LOT/SERI dagilimini yazar (stok_seri_lot + stok_izleme).
+    ///
+    /// Kural stok kartindan gelir (stok.izleme): 0 izlemsiz, 1 Seri No, 2 Lot No,
+    /// 3 SKT, 4 Karekod, 5 Lot No + SKT, 6 Seri No + Lot No. Izlemli bir stokta
+    /// GIRIS belgesinde lot bilgisi ZORUNLUDUR - girilmezse mal hangi lottan
+    /// geldigi bilinmeden depoya girer ve geri izlenemez (gida/ilac/medikal
+    /// tarafinda tek sebeple: geri cagirma).
+    ///
+    /// Bir kalem 1:n lot tasiyabilir; lot miktarlarinin toplami satir miktarina
+    /// ESIT olmali - eksik/fazla dagitim depo miktariyla lot toplamini ayirir.
+    ///
+    /// CIKIS belgelerinde bu yol henuz calismaz: cikista lot SECILIR (mevcut
+    /// stoktan, kalan miktarina gore) - ayri ekran, ayri kural.
+    /// </summary>
+    private async Task IzlemYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int belgeId, int satirId, int stokId, int sira, int belgeTur, decimal adet,
+        Dictionary<string, JsonElement> satir, bool turStokEtkiler, CancellationToken iptal)
+    {
+        var stokIzleme = await StokIzlemeTuruAsync(baglanti, islem, stokId, iptal);
+        var izlemler = satir.TryGetValue("izlemler", out var dizi) && dizi.ValueKind == JsonValueKind.Array
+            ? dizi.EnumerateArray().ToList()
+            : new List<JsonElement>();
+
+        if (stokIzleme == 0)
+        {
+            if (izlemler.Count > 0)
+                throw GentegreHatasi.Dogrulama($"{sira}. satirdaki stok izlemli degil.",
+                    new AlanHatasi($"satirlar[{sira - 1}].izlemler", "Bu stok icin lot/seri tutulmuyor."));
+            return;
+        }
+
+        // Stok izlemli ama belge stogu etkilemiyorsa (siparis/teklif/talep) lot
+        //   istemenin anlami yok: henuz fiziki hareket yok. Irsaliyeden turetilen
+        //   faturada da stok TEKRAR dusmez - lot da tekrar dusmemeli
+        //   (stokDurumDegis satir bazinda 0 gelir).
+        if (!turStokEtkiler || JsonSayi(satir, "stokDurumDegis", 1) == 0) return;
+
+        // CIKIS: lot girilmez, mevcut lotlardan SECILIR ve o lotun kalani duser.
+        if (BelgeTuru.CikisMi(belgeTur))
+        {
+            await IzlemDusAsync(baglanti, islem, belgeId, satirId, stokId, sira,
+                                belgeTur, stokIzleme, adet, izlemler, iptal);
+            return;
+        }
+
+        if (izlemler.Count == 0)
+            throw GentegreHatasi.Dogrulama($"{sira}. satir icin lot/seri girilmeli.",
+                new AlanHatasi($"satirlar[{sira - 1}].izlemler", "İzlemli stok - lot bilgisi zorunlu."));
+
+        var lotGerekli  = stokIzleme is 2 or 5 or 6;
+        var seriGerekli = stokIzleme is 1 or 6;
+        var sktGerekli  = stokIzleme is 3 or 5;
+
+        decimal toplam = 0;
+        foreach (var oge in izlemler)
+        {
+            var izlem  = JsonNesne(oge);
+            var lotNo  = JsonMetin(izlem, "lotNo").Trim();
+            var seriNo = JsonMetin(izlem, "seriNo").Trim();
+            var miktar = JsonOndalik(izlem, "miktar", 0);
+            var uretim = JsonTarih(izlem, "uretimTarihi");
+            var skt    = JsonTarih(izlem, "sonKullanmaTarihi");
+
+            if (miktar <= 0)
+                throw GentegreHatasi.Dogrulama($"{sira}. satirdaki lot miktari sifirdan buyuk olmali.",
+                    new AlanHatasi($"satirlar[{sira - 1}].izlemler", "Miktar sifir olamaz."));
+            if (lotGerekli && lotNo.Length == 0)
+                throw GentegreHatasi.Dogrulama($"{sira}. satirda Lot No girilmeli.",
+                    new AlanHatasi($"satirlar[{sira - 1}].izlemler", "Lot No zorunlu."));
+            if (seriGerekli && seriNo.Length == 0)
+                throw GentegreHatasi.Dogrulama($"{sira}. satirda Seri No girilmeli.",
+                    new AlanHatasi($"satirlar[{sira - 1}].izlemler", "Seri No zorunlu."));
+            if (sktGerekli && skt is null)
+                throw GentegreHatasi.Dogrulama($"{sira}. satirda son kullanma tarihi girilmeli.",
+                    new AlanHatasi($"satirlar[{sira - 1}].izlemler", "SKT zorunlu."));
+
+            toplam += miktar;
+
+            var seriLotId = await SeriLotIdAsync(baglanti, islem, stokId, lotNo, seriNo,
+                                                 uretim, skt, iptal);
+
+            await using var komut = new NpgsqlCommand("""
+                insert into public.stok_izleme
+                    (stok_id, seri_lot_id, izlem_tur, belge_tur, belge_id, belge_satir_id,
+                     adet, kalan, durum, ekleyen)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p6, @p7, @p8)
+                """, baglanti, islem);
+            komut.Parameters.AddWithValue("p0", stokId);
+            komut.Parameters.AddWithValue("p1", seriLotId);
+            komut.Parameters.AddWithValue("p2", (short)stokIzleme);
+            komut.Parameters.AddWithValue("p3", (short)belgeTur);
+            komut.Parameters.AddWithValue("p4", belgeId);
+            komut.Parameters.AddWithValue("p5", satirId);
+            komut.Parameters.AddWithValue("p6", miktar);
+            // Giriste durum her zaman 0 (kullanici karari); diger durumlar
+            //   kod listesi tanimlanınca isletilecek.
+            komut.Parameters.AddWithValue("p7", (short)JsonSayi(izlem, "durum", 0));
+            komut.Parameters.AddWithValue("p8", 0);
+            await komut.ExecuteNonQueryAsync(iptal);
+        }
+
+        // Lot toplami satir miktarini TUTMALI: tutmazsa depodaki miktar ile
+        //   lotlarin toplami ayrisir, sonraki cikislar lot bulamaz.
+        if (Math.Abs(toplam - adet) > 0.0001m)
+            throw GentegreHatasi.Dogrulama(
+                $"{sira}. satirda lot toplami ({toplam:0.####}) miktarla ({adet:0.####}) ayni degil.",
+                new AlanHatasi($"satirlar[{sira - 1}].izlemler", "Lot miktarlari toplami satir miktarina esit olmali."));
+    }
+
+    /// <summary>
+    /// CIKIS belgesinde lot TUKETIMI (satis irsaliyesi/faturasi, konsinye cikis,
+    /// cikis fisi). Kullanici stoktaki lotlardan secer; her secim icin:
+    ///
+    ///  - kaynak izlem satirinin KALANI dusulur (yetmezse 422 - depoda olmayan
+    ///    lottan mal cikamaz),
+    ///  - cikisin kendi izlem satiri yazilir (donus_id = kaynak satir), boylece
+    ///    "bu lot hangi belgeyle cikti" sorusu cevaplanabilir. Cikis satirinin
+    ///    kalani 0'dir: o mal artik stokta degil.
+    ///
+    /// Kalan dusumu tek UPDATE icinde kosullu yapilir (kalan >= miktar): iki
+    /// kullanici ayni lotu ayni anda tuketirse ikincisi hata alir, eksiye dusmez.
+    /// </summary>
+    private static async Task IzlemDusAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int belgeId, int satirId, int stokId, int sira, int belgeTur, int stokIzleme,
+        decimal adet, List<JsonElement> izlemler, CancellationToken iptal)
+    {
+        if (izlemler.Count == 0)
+            throw GentegreHatasi.Dogrulama($"{sira}. satir icin lot secilmeli.",
+                new AlanHatasi($"satirlar[{sira - 1}].izlemler", "İzlemli stok - çıkışta lot seçimi zorunlu."));
+
+        decimal toplam = 0;
+        foreach (var oge in izlemler)
+        {
+            var izlem  = JsonNesne(oge);
+            var seriLotId = (int)JsonSayi(izlem, "seriLotId", 0);
+            var miktar = JsonOndalik(izlem, "miktar", 0);
+
+            if (seriLotId <= 0)
+                throw GentegreHatasi.Dogrulama($"{sira}. satirda lot secimi gecersiz.",
+                    new AlanHatasi($"satirlar[{sira - 1}].izlemler", "Stoktaki bir lot secilmeli."));
+            if (miktar <= 0)
+                throw GentegreHatasi.Dogrulama($"{sira}. satirdaki lot miktari sifirdan buyuk olmali.",
+                    new AlanHatasi($"satirlar[{sira - 1}].izlemler", "Miktar sifir olamaz."));
+
+            toplam += miktar;
+            await LottanDusAsync(baglanti, islem, belgeId, satirId, stokId, sira,
+                                 belgeTur, stokIzleme, seriLotId, miktar, iptal);
+        }
+
+        if (Math.Abs(toplam - adet) > 0.0001m)
+            throw GentegreHatasi.Dogrulama(
+                $"{sira}. satirda secilen lot toplami ({toplam:0.####}) miktarla ({adet:0.####}) ayni degil.",
+                new AlanHatasi($"satirlar[{sira - 1}].izlemler", "Secilen lot miktarlari satir miktarina esit olmali."));
+    }
+
+    /// <summary>
+    /// Secilen LOTTAN miktar kadar dusum. Bir lotun stogu birden fazla GIRIS
+    /// hareketine dagilmis olabilir (ayni lot iki kez alinmis); tuketim giris
+    /// sirasiyla (FIFO) yapilir ve tuketilen her giris icin bir cikis satiri
+    /// yazilir (donus_id = tuketilen giris). Boylece "bu cikis hangi girisin
+    /// malini goturdu" sorusu satir satir cevaplanabilir.
+    /// </summary>
+    private static async Task LottanDusAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int belgeId, int satirId, int stokId, int sira, int belgeTur, int stokIzleme,
+        int seriLotId, decimal miktar, CancellationToken iptal)
+    {
+        var kalanIstek = miktar;
+
+        // Lotun giris hareketleri, en eskiden baslayarak. Ayni islem icinde
+        //   kilitlenir (for update) - iki kullanici ayni lotu paylasamaz.
+        var kaynaklar = new List<(int Id, decimal Kalan)>();
+        await using (var komut = new NpgsqlCommand("""
+            select id, kalan from public.stok_izleme
+             where stok_id = @p0 and seri_lot_id = @p1 and kalan > 0
+               and belge_tur not in (14, 15, 16, 119, 4, 29, 105, 133)
+             order by id
+             for update
+            """, baglanti, islem))
+        {
+            komut.Parameters.AddWithValue("p0", stokId);
+            komut.Parameters.AddWithValue("p1", seriLotId);
+            await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
+            while (await okuyucu.ReadAsync(iptal))
+                kaynaklar.Add((okuyucu.GetInt32(0), okuyucu.GetDecimal(1)));
+        }
+
+        var stoktaki = kaynaklar.Sum(k => k.Kalan);
+        if (stoktaki < kalanIstek)
+            throw GentegreHatasi.IsKurali(
+                $"{sira}. satirda secilen lotta {stoktaki:0.####} kaldi, {miktar:0.####} istendi.");
+
+        foreach (var (kaynakId, kaynakKalan) in kaynaklar)
+        {
+            if (kalanIstek <= 0) break;
+            var pay = Math.Min(kaynakKalan, kalanIstek);
+            kalanIstek -= pay;
+
+            await using (var dus = new NpgsqlCommand(
+                "update public.stok_izleme set kalan = kalan - @p1 where id = @p0 and kalan >= @p1",
+                baglanti, islem))
+            {
+                dus.Parameters.AddWithValue("p0", kaynakId);
+                dus.Parameters.AddWithValue("p1", pay);
+                if (await dus.ExecuteNonQueryAsync(iptal) == 0)
+                    throw GentegreHatasi.IsKurali($"{sira}. satirda lot kalani degisti, tekrar deneyin.");
+            }
+
+            await using var komut = new NpgsqlCommand("""
+                insert into public.stok_izleme
+                    (stok_id, seri_lot_id, izlem_tur, belge_tur, belge_id, belge_satir_id,
+                     adet, kalan, durum, donus_id, ekleyen)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, 0, 0, @p7, 0)
+                """, baglanti, islem);
+            komut.Parameters.AddWithValue("p0", stokId);
+            komut.Parameters.AddWithValue("p1", seriLotId);
+            komut.Parameters.AddWithValue("p2", (short)stokIzleme);
+            komut.Parameters.AddWithValue("p3", (short)belgeTur);
+            komut.Parameters.AddWithValue("p4", belgeId);
+            komut.Parameters.AddWithValue("p5", satirId);
+            komut.Parameters.AddWithValue("p6", pay);
+            komut.Parameters.AddWithValue("p7", kaynakId);
+            await komut.ExecuteNonQueryAsync(iptal);
+        }
+    }
+
+    /// <summary>Stok kartindaki izleme turu (0 = izlemsiz).</summary>
+    private static async Task<int> StokIzlemeTuruAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction islem, int stokId, CancellationToken iptal)
+    {
+        await using var komut = new NpgsqlCommand(
+            "select izleme from public.stok where id = @p0", baglanti, islem);
+        komut.Parameters.AddWithValue("p0", stokId);
+        var sonuc = await komut.ExecuteScalarAsync(iptal);
+        return sonuc is null or DBNull ? 0 : Convert.ToInt32(sonuc);
+    }
+
+    /// <summary>
+    /// Lot kimligini bulur, yoksa acar (114'teki benzersiz kimlik: stok + lot + seri).
+    /// Var olan lotun tarihleri BOSSA doldurulur, DOLUYSA korunur: ilk giristeki
+    /// uretim/SKT bilgisi dogru kabul edilir, sonraki girisin farkli yazmasi
+    /// gecmisi degistirmemeli.
+    /// </summary>
+    private static async Task<int> SeriLotIdAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction islem, int stokId, string lotNo, string seriNo,
+        DateTime? uretim, DateTime? skt, CancellationToken iptal)
+    {
+        await using var komut = new NpgsqlCommand("""
+            insert into public.stok_seri_lot (stok_id, lot_no, seri_no, uretim_tarihi, son_kullanma_tarihi)
+            values (@p0, @p1, @p2, @p3, @p4)
+            on conflict (stok_id, lot_no, seri_no) do update
+               set uretim_tarihi = coalesce(public.stok_seri_lot.uretim_tarihi, excluded.uretim_tarihi),
+                   son_kullanma_tarihi = coalesce(public.stok_seri_lot.son_kullanma_tarihi,
+                                                  excluded.son_kullanma_tarihi)
+            returning id
+            """, baglanti, islem);
+        komut.Parameters.AddWithValue("p0", stokId);
+        komut.Parameters.AddWithValue("p1", lotNo);
+        komut.Parameters.AddWithValue("p2", seriNo);
+        komut.Parameters.AddWithValue("p3", (object?)uretim ?? DBNull.Value);
+        komut.Parameters.AddWithValue("p4", (object?)skt ?? DBNull.Value);
+        return Convert.ToInt32(await komut.ExecuteScalarAsync(iptal));
     }
 
     private async Task ToplamlariYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
@@ -1123,6 +1422,26 @@ public sealed class BelgeDeposu
     private static string JsonMetin(Dictionary<string, JsonElement> d, string ad)
         => d.TryGetValue(ad, out var e) && e.ValueKind == JsonValueKind.String
            ? e.GetString() ?? "" : "";
+
+    // Dizi ogeleri (or. satir.izlemler[i]) tek bir JsonElement olarak gelir -
+    //   yukaridaki sozluk yardimcilarinin oge karsiliklari.
+    private static Dictionary<string, JsonElement> JsonNesne(JsonElement e)
+    {
+        var sonuc = new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
+        if (e.ValueKind == JsonValueKind.Object)
+            foreach (var alan in e.EnumerateObject()) sonuc[alan.Name] = alan.Value;
+        return sonuc;
+    }
+
+    /// <summary>ISO tarih ("2026-08-24" ya da tam damga); bos/gecersiz ise null.</summary>
+    private static DateTime? JsonTarih(Dictionary<string, JsonElement> d, string ad)
+    {
+        if (!d.TryGetValue(ad, out var e) || e.ValueKind != JsonValueKind.String) return null;
+        var metin = e.GetString();
+        if (string.IsNullOrWhiteSpace(metin)) return null;
+        return DateTime.TryParse(metin, CultureInfo.InvariantCulture,
+                                 DateTimeStyles.None, out var t) ? t : null;
+    }
 
     private NpgsqlCommand Komut(NpgsqlConnection baglanti, NpgsqlTransaction? islem,
         string sql, IReadOnlyList<object?> parametreler)

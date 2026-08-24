@@ -42,6 +42,19 @@ public static class StokDurumUclari
             return Results.Ok(await depo.HareketAsync(stokId, baslangic, bitis, depoId, iptal));
         }).WithTags("Kart").RequireAuthorization();
 
+        // Cikis belgesinde LOT SECIMI: stokta kalani olan lotlar (114). Cikista
+        //   lot GIRILMEZ, mevcut lotlardan SECILIR - yoksa depoda olmayan bir
+        //   lottan mal cikmis gorunur ve geri izlenebilirlik kirilir.
+        yol.MapGet("/api/kart/stok/{stokId:long}/lot", async (
+            long stokId, BaglamCozucu cozucu, StokDurumDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("stok", Islem.Gor);
+            return Results.Ok(new { lotlar = await depo.LotlarAsync(stokId, iptal),
+                                    izlemeNo = baglam.IzlemeNo });
+        }).WithTags("Kart").RequireAuthorization();
+
         grup.MapPut("/limit", async (
             long stokId, LimitIstegi istek, BaglamCozucu cozucu, StokDurumDeposu depo,
             HttpContext ctx, CancellationToken iptal) =>

@@ -37,6 +37,42 @@ interface SatirDurumu {
   aciklama: string;
   /** Seri / lot takibi (belge_satir.izleme_kodu) - irsaliyede gorunur. */
   izlemeKodu: string;
+  /** Stok kartindaki izleme turu: 0 yok · 1 Seri · 2 Lot · 3 SKT · 5 Lot+SKT · 6 Seri+Lot. */
+  izleme: number;
+  /** Kalemin lot/seri dagilimi - bir kalem 1:n lottan gelebilir (db/114). */
+  izlemler: IzlemSatiri[];
+}
+
+/**
+ * Kalemin bir lot satiri. Miktarlarin TOPLAMI kalem miktarina esit olmali -
+ * eksik dagitim depodaki miktarla lot toplamini ayirir, sonraki cikis lot
+ * bulamaz. Sunucu da ayni kontrolu yapar (BelgeDeposu.IzlemYazAsync).
+ */
+export interface IzlemSatiri {
+  /** CIKISTA: secilen lot kimligi (stok_seri_lot.id). Giriste yok. */
+  seriLotId?: number;
+  /** CIKISTA: o lottan stokta kalan - secim listesinde gosterilir. */
+  kalan?: number;
+  lotNo: string;
+  seriNo: string;
+  uretimTarihi: string;
+  sonKullanmaTarihi: string;
+  /** Izlem satirinin durumu - GIRISTE 0 ("Girişte"). */
+  durum: number;
+  miktar: string;
+}
+
+const bosIzlem = (miktar = ''): IzlemSatiri => ({
+  lotNo: '', seriNo: '', uretimTarihi: '', sonKullanmaTarihi: '', durum: 0, miktar,
+});
+
+/** Stok kartindaki izleme turune gore hangi alan ZORUNLU. */
+function izlemKurali(izleme: number) {
+  return {
+    lot:  izleme === 2 || izleme === 5 || izleme === 6,
+    seri: izleme === 1 || izleme === 6,
+    skt:  izleme === 3 || izleme === 5,
+  };
 }
 
 /**
@@ -86,6 +122,7 @@ const bosSatir = (anahtar: number): SatirDurumu => ({
   anahtar, satirTur: 1, stokId: null, hizmetId: null, stokKodu: '', stokAdi: '',
   adet: '1', birimFiyat: '', fiyatDovizi: '', dovizFiyat: '', kur: '1',
   iskonto: '0', iskonto2: '0', kdv: '20', aciklama: '', izlemeKodu: '',
+  izleme: 0, izlemler: [],
 });
 
 const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -464,6 +501,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           iskonto: String(r.iskonto ?? 0),
           iskonto2: String(r.iskonto2 ?? 0),
           kdv: String(r.kdv ?? 0),
+          // Kayitli kalemin lot dagilimi (db/114) - kalem yeniden acilinca
+          //   kullanici hangi lottan kac adet girdigini gormeli.
+          izleme: Number(r.izleme ?? 0),
+          izlemler: ((r.izlemler ?? []) as Record<string, unknown>[]).map(z => ({
+            lotNo: String(z.lotNo ?? ''),
+            seriNo: String(z.seriNo ?? ''),
+            uretimTarihi: String(z.uretimTarihi ?? '').slice(0, 10),
+            sonKullanmaTarihi: String(z.sonKullanmaTarihi ?? '').slice(0, 10),
+            durum: Number(z.durum ?? 0),
+            miktar: String(z.miktar ?? 0),
+          })),
         })));
       } catch (h) {
         setHata(h instanceof ApiHatasi ? h.message : String(h));
@@ -685,7 +733,19 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           kdv: stokFisiMi ? 0 : Number(s.kdv.replace(',', '.')) || 0,
           aciklama: s.aciklama,
           izlemeKodu: s.izlemeKodu,
-          izleme: s.izlemeKodu ? 1 : 0,
+          izleme: s.izleme || (s.izlemeKodu ? 1 : 0),
+          // Lot dagilimi: bos dizi gonderilmez - izlemsiz stokta sunucu hata verir.
+          izlemler: s.izlemler.length > 0
+            ? s.izlemler.map(z => ({
+                seriLotId: z.seriLotId,
+                lotNo: z.lotNo.trim(),
+                seriNo: z.seriNo.trim(),
+                uretimTarihi: z.uretimTarihi || null,
+                sonKullanmaTarihi: z.sonKullanmaTarihi || null,
+                durum: z.durum,
+                miktar: Number(z.miktar.replace(',', '.')) || 0,
+              }))
+            : undefined,
         })),
         secenekler: { taslak, stokKontrolu: true },
       };
@@ -1681,6 +1741,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 hizmetId: hizmet ? Number(sec.id) : null,
                 stokKodu: String(sec.kod ?? ''),
                 stokAdi: String(sec.ad ?? ''),
+                // Stok LOT/SERI izlemli mi - kalem penceresi buna gore izlem
+                //   ekranini acar (db/114).
+                izleme: hizmet ? 0 : Number(sec.izleme ?? 0),
                 kdv: sec.kdv !== undefined && sec.kdv !== null ? String(sec.kdv) : '20',
                 // Kart fiyati onyuklenir - kullanici zaten listede gorup seciyor;
                 //   pencerede degistirebilir. Fiyatin PARA BIRIMI de gelir: yerel
@@ -1701,6 +1764,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             transferMi={bilgi.kalem === 'miktar'}
             vergisiz={bilgi.kalem === 'sade' && stokFisiMi}
             yerelPara={yerelPara}
+            girisIzlemi={bilgi.girisIzlemi}
+            cikisIzlemi={bilgi.cikisIzlemi}
             belgeTarihi={tarih}
             onKapat={() => setKalem(null)}
             onKaydet={r => { kalemKaydet(r); setKalem(null) }}
@@ -1903,10 +1968,201 @@ function adetKaydir(deger: string, yon: number): string {
   return Number.isInteger(yeni) ? String(yeni) : yeni.toFixed(2).replace('.', ',');
 }
 
+
+/**
+ * IZLEM (LOT / SERI) PENCERESI — giris belgelerinde izlemli stok icin.
+ *
+ * Kalem penceresinde miktar ve fiyat girildikten SONRA acilir: girilen miktar
+ * lotlara dagitilir. Bir kalem 1:n lot tasiyabilir (ayni urunden iki farkli
+ * partiden mal gelmesi normaldir).
+ *
+ * TOPLAM KILIDI: lot miktarlarinin toplami kalem miktarina esit olmadan
+ * kapanmaz. Esit degilse depodaki miktarla lotlarin toplami ayrisir ve maldan
+ * cikis yapilirken lot bulunamaz - geri izlenebilirlik orada kirilir.
+ *
+ * Durum GIRISTE 0 ("Girişte"); karantina/bloke gibi durumlar kod listesi
+ * tanimlandiginda burada secilebilir olacak (db/114).
+ */
+function IzlemPenceresi({ stokAdi, stokId, izleme, miktar, satirlar, cikis,
+                         onKapat, onKaydet }: {
+  stokAdi: string;
+  stokId: number | null;
+  izleme: number;
+  /** Kalemde girilen toplam miktar - lotlarin toplami buna esit olmali. */
+  miktar: number;
+  satirlar: IzlemSatiri[];
+  /** CIKIS belgesi: lot GIRILMEZ, stoktakilerden secilir. */
+  cikis: boolean;
+  onKapat(): void;
+  onKaydet(satirlar: IzlemSatiri[]): void;
+}) {
+  // Ilk acilista tek satir ve miktarin TAMAMI onda: tek lottan gelen mal en sik
+  //   durum, kullanici yalniz lot numarasini yazip gecer.
+  const [liste, setListe] = useState<IzlemSatiri[]>(
+    satirlar.length > 0 ? satirlar : cikis ? [] : [bosIzlem(String(miktar))]);
+  const [hata, setHata] = useState<string | null>(null);
+  const [yukleniyor, setYukleniyor] = useState(cikis);
+  const kural = izlemKurali(izleme);
+
+  // CIKISTA stoktaki lotlar getirilir: kullanici lot YAZMAZ, listeden secer.
+  //   Sira SKT'ye gore (once tukenecek olan basta) - sunucu boyle veriyor.
+  useEffect(() => {
+    if (!cikis || !stokId) return;
+    let iptal = false;
+    void api.stokLotlari(stokId)
+      .then(lotlar => {
+        if (iptal) return;
+        setListe(eski => {
+          if (eski.length > 0) return eski;          // kalem yeniden acildi
+          return lotlar.map(l => ({
+            seriLotId: l.seriLotId,
+            kalan: l.kalan,
+            lotNo: l.lotNo,
+            seriNo: l.seriNo,
+            uretimTarihi: (l.uretimTarihi ?? '').slice(0, 10),
+            sonKullanmaTarihi: (l.sonKullanmaTarihi ?? '').slice(0, 10),
+            durum: 0,
+            miktar: '',
+          }));
+        });
+      })
+      .catch(h => setHata(h instanceof ApiHatasi ? h.message : String(h)))
+      .finally(() => { if (!iptal) setYukleniyor(false) });
+    return () => { iptal = true };
+  }, [cikis, stokId]);
+
+  const sayi = (m: string) => Number(m.replace(',', '.')) || 0;
+  const toplam = liste.reduce((t, z) => t + sayi(z.miktar), 0);
+  const fark = Math.round((miktar - toplam) * 10000) / 10000;
+
+  const degis = (i: number, alan: keyof IzlemSatiri, deger: string | number) =>
+    setListe(l => l.map((z, x) => x === i ? { ...z, [alan]: deger } : z));
+
+  const satirEkle = () =>
+    // Yeni satir KALAN miktarla acilir - kullanici hesap yapmasin.
+    setListe(l => [...l, bosIzlem(fark > 0 ? String(fark) : '')]);
+
+  const satirSil = (i: number) =>
+    setListe(l => (l.length === 1 ? [bosIzlem(String(miktar))] : l.filter((_, x) => x !== i)));
+
+  function kaydet() {
+    const dolu = liste.filter(z => sayi(z.miktar) > 0);
+    if (dolu.length === 0) {
+      setHata(cikis ? 'En az bir lottan miktar girilmeli.' : 'En az bir lot satiri girilmeli.');
+      return;
+    }
+    // Cikista secilen miktar o lotun kalanini asamaz - depoda olmayan mal cikamaz.
+    const asan = cikis ? dolu.find(z => sayi(z.miktar) > (z.kalan ?? 0)) : undefined;
+    if (asan) {
+      setHata(`"${asan.lotNo || asan.seriNo}" lotunda ${asan.kalan?.toLocaleString('tr-TR')} kaldi.`);
+      return;
+    }
+    if (!cikis && kural.lot && dolu.some(z => !z.lotNo.trim())) { setHata('Lot No zorunlu.'); return }
+    if (!cikis && kural.seri && dolu.some(z => !z.seriNo.trim())) { setHata('Seri No zorunlu.'); return }
+    if (!cikis && kural.skt && dolu.some(z => !z.sonKullanmaTarihi)) { setHata('Son kullanma tarihi zorunlu.'); return }
+    const t = dolu.reduce((x, z) => x + sayi(z.miktar), 0);
+    if (Math.abs(t - miktar) > 0.0001) {
+      setHata(`Lot toplami ${t.toLocaleString('tr-TR')} - kalem miktari ${miktar.toLocaleString('tr-TR')}.`);
+      return;
+    }
+    onKaydet(dolu);
+  }
+
+  return (
+    <Modal
+      baslik={`${cikis ? 'Lot Seçimi' : 'Lot / Seri'} — ${stokAdi}`}
+      onKapat={onKapat}
+      alt={
+        <>
+          <button className="d onay" onClick={kaydet}>💾 Tamam</button>
+          {/* Cikista lot ACILMAZ: stokta olmayan lottan mal cikamaz. */}
+          {!cikis && <button className="d" onClick={satirEkle}>＋ Lot Ekle</button>}
+          <button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>
+        </>
+      }
+    >
+      <>
+        {hata && <div className="hata-kutusu">{hata}</div>}
+        {yukleniyor && <div className="yukleniyor">Lotlar yükleniyor…</div>}
+        {cikis && !yukleniyor && liste.length === 0 && (
+          <div className="bilgi-kutusu">Bu stokta kalan lot yok — önce giriş yapılmalı.</div>
+        )}
+        <div className="kagrup">
+          <table className="detay-tablo">
+            <thead>
+              <tr>
+                {/* Zorunluluk yildizi yalniz GIRISTE: cikista bu alanlar
+                    stoktan gelir, kullanici doldurmaz. */}
+                <th>Lot No{!cikis && kural.lot && <b className="zorunlu"> *</b>}</th>
+                <th>Seri No{!cikis && kural.seri && <b className="zorunlu"> *</b>}</th>
+                <th>Ürt. Tarihi</th>
+                <th>SKT{!cikis && kural.skt && <b className="zorunlu"> *</b>}</th>
+                {/* Giriste DURUM (girişte 0), cikista o lottan KALAN gosterilir. */}
+                <th>{cikis ? 'Kalan' : 'Durum'}</th>
+                <th className="hiza-sag">Miktar</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {liste.map((z, i) => (
+                <tr key={z.seriLotId ?? i}>
+                  {/* CIKISTA lot bilgisi stoktan gelir - yalniz miktar girilir. */}
+                  <td><input value={z.lotNo} autoFocus={!cikis && i === 0} readOnly={cikis} disabled={cikis}
+                             onChange={e => degis(i, 'lotNo', e.target.value)} /></td>
+                  <td><input value={z.seriNo} readOnly={cikis} disabled={cikis}
+                             onChange={e => degis(i, 'seriNo', e.target.value)} /></td>
+                  <td><input type="date" value={z.uretimTarihi} readOnly={cikis} disabled={cikis}
+                             onChange={e => degis(i, 'uretimTarihi', e.target.value)} /></td>
+                  <td><input type="date" value={z.sonKullanmaTarihi} readOnly={cikis} disabled={cikis}
+                             onChange={e => degis(i, 'sonKullanmaTarihi', e.target.value)} /></td>
+                  {cikis
+                    ? <td className="hiza-sag">{(z.kalan ?? 0).toLocaleString('tr-TR')}</td>
+                    /* Giriste tek durum var; kod listesi genisleyince combo olur. */
+                    : <td><input value="Girişte" readOnly disabled /></td>}
+                  <td><input className="hiza-sag" value={z.miktar}
+                             onChange={e => degis(i, 'miktar', e.target.value.replace(/-/g, ''))} /></td>
+                  <td>
+                    {cikis
+                      ? (sayi(z.miktar) > 0 && (
+                          <button type="button" className="mini" title="Seçimi kaldır"
+                                  onClick={() => degis(i, 'miktar', '')}>×</button>))
+                      : (
+                        <button type="button" className="mini" title="Satırı sil"
+                                onClick={() => satirSil(i)}>×</button>)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={5}>
+                  {fark === 0 ? 'Dağıtım tamam.'
+                    : fark > 0 ? `Dağıtılmayan miktar: ${fark.toLocaleString('tr-TR')}`
+                    : `Fazla dağıtım: ${Math.abs(fark).toLocaleString('tr-TR')}`}
+                </td>
+                <td className="hiza-sag">
+                  <b className={fark === 0 ? '' : 'hata-metin'}>
+                    {toplam.toLocaleString('tr-TR')} / {miktar.toLocaleString('tr-TR')}
+                  </b>
+                </td>
+                <td />
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </>
+    </Modal>
+  );
+}
+
 function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, yerelPara,
-                         belgeTarihi, onKapat, onKaydet }: {
+                         girisIzlemi, cikisIzlemi, belgeTarihi, onKapat, onKaydet }: {
   satir: SatirDurumu;
   irsaliyeMi: boolean;
+  /** Mal DEPOYA giriyor: izlemli stokta fiyattan sonra lot GIRIS ekrani acilir. */
+  girisIzlemi: boolean;
+  /** Mal DEPODAN cikiyor: izlemli stokta lot SECIM ekrani acilir. */
+  cikisIzlemi: boolean;
   /** Genel Ayarlar'daki defter para birimi - "dovizli mi" karari buna gore. */
   yerelPara: string;
   /** Stok fisi: fiyat var (muhasebe matrahi) ama KDV/iskonto YOK - vergi dogurmaz. */
@@ -1920,6 +2176,8 @@ function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, yerelPara,
 }) {
   const [r, setR] = useState<SatirDurumu>(satir);
   const [hata, setHata] = useState<string | null>(null);
+  /** Lot penceresi acik mi - miktar/fiyat girildikten SONRA acilir. */
+  const [izlemAcik, setIzlemAcik] = useState(false);
   /** Kur kutusu kullanici tarafindan degistirildi mi - degistiyse ustune yazma. */
   const kurElle = useRef(false);
 
@@ -1954,10 +2212,16 @@ function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, yerelPara,
     : (Number(r.birimFiyat.replace(',', '.')) || 0);
   const tutar = satirTutari(adet, fiyat, r.iskonto, r.iskonto2);
 
+  /** Izlemli stokta lot adimi: giriste DAGITIM, cikista SECIM (db/114). */
+  const izlemGerekli = (girisIzlemi || cikisIzlemi) && r.satirTur === 1 && r.izleme > 0;
+
   function kaydet() {
     if (!r.stokId && !r.hizmetId) { setHata('Stok ya da hizmet seçilmeli.'); return }
     if (adet <= 0) { setHata('Miktar sıfırdan büyük olmalı.'); return }
     if (dovizli && kur <= 0) { setHata('Kur sıfırdan büyük olmalı.'); return }
+    // Izlemli stokta once LOT dagitimi: miktar ve fiyat girildikten sonra lot
+    //   ekrani acilir, kalem ancak dagitim tamamlaninca gride eklenir.
+    if (izlemGerekli) { setHata(null); setIzlemAcik(true); return }
     // Belgeye YEREL fiyat gider; doviz/kur bilgisi satirda saklanir ki kalem
     //   tekrar acildiginda ayni degerlerle gelsin.
     onKaydet({ ...r, birimFiyat: String(fiyat) });
@@ -2064,7 +2328,10 @@ function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, yerelPara,
             </label>
             )}
 
-            {(irsaliyeMi || transferMi) && (
+            {/* Duz metin "Seri / Lot": yalniz IZLEMSIZ stokta. Izlemli stokta
+                dagitim lot ekraninda yapilir - iki ayri yerde lot tutmak
+                birbirini tutmayan iki kayit uretirdi. */}
+            {(irsaliyeMi || transferMi) && !izlemGerekli && (
               <label className="alan">
                 <span className="etiket">Seri / Lot</span>
                 <input value={r.izlemeKodu} placeholder="LOT / seri" onKeyDown={tus}
@@ -2084,8 +2351,36 @@ function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, yerelPara,
               <input className="hiza-sag onizleme" value={para.format(tutar)} readOnly />
             </label>
             )}
+
+            {/* Izlemli stokta girilmis lotlarin ozeti - kalem penceresine
+                donuldugunde dagitimin yapildigi gorunsun. */}
+            {izlemGerekli && r.izlemler.length > 0 && (
+              <label className="alan">
+                <span className="etiket">Lot / Seri</span>
+                <input className="onizleme" readOnly
+                       value={r.izlemler.map(z => `${z.lotNo || z.seriNo} (${z.miktar})`).join(', ')}
+                       onClick={() => setIzlemAcik(true)}
+                       title="Değiştirmek için tıklayın" />
+              </label>
+            )}
           </div>
         </div>
+
+        {izlemAcik && (
+          <IzlemPenceresi
+            stokAdi={r.stokAdi}
+            stokId={r.stokId}
+            cikis={cikisIzlemi}
+            izleme={r.izleme}
+            miktar={adet}
+            satirlar={r.izlemler}
+            onKapat={() => setIzlemAcik(false)}
+            onKaydet={izlemler => {
+              setIzlemAcik(false);
+              onKaydet({ ...r, birimFiyat: String(fiyat), izlemler });
+            }}
+          />
+        )}
       </>
     </Modal>
   );
