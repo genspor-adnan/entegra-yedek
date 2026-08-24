@@ -161,7 +161,17 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Pro
             <tr key={satir.id ?? `yeni-${i}`}>
               {alanlar.map(a => (
                 <td key={a.ad}>
-                  {a.tip === 'mantik' ? (
+                  {/* TELEFON her yerde ayni (genel kural): gride de ulke kodlu,
+                      gruplu kutu gelir; gecersiz numara kirmizi cerceve alir. */}
+                  {telefonAlaniMi(a.ad) ? (
+                    <span className={telefonGecerliMi(String(satir[a.ad] ?? '')) ? '' : 'tel-gecersiz'}>
+                      <TelefonGirdi
+                        value={String(satir[a.ad] ?? '')}
+                        disabled={saltOkunur || !a.yazilabilir}
+                        onChange={v => hucreDegis(i, a.ad, v)}
+                      />
+                    </span>
+                  ) : a.tip === 'mantik' ? (
                     acilKisiGrid && a.ad === 'varsayilan' ? (
                       <button
                         type="button"

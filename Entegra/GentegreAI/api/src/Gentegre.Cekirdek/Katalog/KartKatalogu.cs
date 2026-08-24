@@ -304,7 +304,12 @@ public static class KartKatalogu
             new("altSektor",   "alt_sektor",   "kod",   KodListesi: "taraf.alt_sektor", Baslik: "Alt Sektör", AltGrup: "Tanımlama"),
             new("sinif",       "sinif",        "kod",   KodListesi: "taraf.sinif",      Baslik: "Sınıf",      AltGrup: "Tanımlama"),
             new("bolge",       "bolge",        "kod",   KodListesi: "taraf.bolge",      Baslik: "Bölge",      AltGrup: "Tanımlama"),
-            new("temsilci",    "temsilci",     "kod",   Baslik: "Temsilci",  AltGrup: "Tanımlama"),
+            // TEMSILCI kimlik seridinde (Unvan'in saginda): "bu cari kimin"
+            //   sorusu kartin en ustunde cevaplanmali. Deger PERSONEL taraf
+            //   id'sidir - eskiden kod listesi bagli degildi ve ekranda ham
+            //   sayi goruluyordu.
+            new("temsilci",    "temsilci",     "kod",   KodTablosu: "public.v_personel_lookup",
+                                                        Baslik: "Temsilci", Grup: "Kimlik"),
             new("ozelKod",     "ozel_kod",     "metin", EnFazlaUzunluk: 20,  Baslik: "Ozel Kod",       AltGrup: "Tanımlama"),
             new("notlar",      "notlar",       "metin", EnFazlaUzunluk: 1000, Baslik: "Notlar",        AltGrup: "Notlar"),
             new("durum",       "durum",        "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum",    Grup: "Kimlik"),

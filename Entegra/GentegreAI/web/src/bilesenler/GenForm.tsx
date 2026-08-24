@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api, oturum } from '../api/istemci';
+import { useOturum } from '../kimlik/OturumBaglami';
 import {
   ApiHatasi,
   type DokumanSatiri, type KartAlanMeta, type KartDetayMeta, type KartMetaYaniti, type KartYetkisi,
@@ -15,7 +16,8 @@ import { DokumanGalerisi } from './DokumanGalerisi';
 import { StokDurumSekmesi } from './StokDurumSekmesi';
 import { StokHareketSekmesi } from './StokHareketSekmesi';
 import { TarafArama } from './TarafArama';
-import { epostaGecerliMi } from './alanBicim';
+import { epostaGecerliMi, telefonGecerliMi, telefonAlaniMi } from './alanBicim';
+import { telefonBicimle } from './bicim';
 import { TelefonGirdi } from './TelefonGirdi';
 
 interface Props {
@@ -44,6 +46,10 @@ interface Props {
   /** Bu EKRANDA acilmayacak sekmeler (ör. Aday kartinda "Fatura Bilgileri").
       Ayni kart farkli ekranlarda farkli genislikte kullanilabilsin diye. */
   gizliSekmeler?: string[];
+  /** Bu EKRANDA zorunlu sayilacak alanlar (ör. Aday kartinda "Temsilci").
+      Katalogda zorunlu YAPILMAZ: ayni alan Musteri kartinda bos olabilir ve
+      eski kayitlarin duzenlenmesini kilitlerdi. */
+  zorunluAlanlar?: string[];
 }
 
 /** Modal sarmalayici — mockup'taki .kaperde / .kawin duzeni. */
@@ -179,7 +185,8 @@ type Deger = string | number | boolean | null;
 // "epostaWeb"/"aliasEposta" DAHIL DEGIL - role gore URL/GIB-URN-alias de tutabiliyor
 // (taraf.eposta_web/alias_eposta yorumlari), sadece duz "eposta" alani her zaman e-posta.
 const EPOSTA_ALANLARI = new Set(['eposta']);
-const TELEFON_ALANLARI = new Set(['telefon', 'cepTel']);
+// Telefon alanlari ADINDAN taninir (telefonAlaniMi) - sabit liste yeni bir
+//   alanda (faks, gsm, 2. telefon...) unutuluyordu.
 
 // Az alanli ayar kartlari: alanlar yan yana degil ALT ALTA (tek sutun) - 4-5 alan
 //   genis izgaraya yayilinca form dagilmis gorunuyor, sira da okunmuyordu.
@@ -197,7 +204,8 @@ const TEK_SUTUN_KARTLAR = new Set(['depo']);
  */
 export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSekmeler,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
-                          gizliAlanlar, gizliSekmeler }: Props) {
+                          gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
+  const { kullanici } = useOturum();
   const yeniMi = id === 'yeni';
   const personelGibiKart = kaynak === 'personel' || kaynak === 'hasta';
 
@@ -230,7 +238,13 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
     setYukleniyor(true);
     setHata(null);
     try {
-      const m = await api.kartAlanlari(kaynak);
+      const ham = await api.kartAlanlari(kaynak);
+      // Ekrana ozel zorunluluk: katalog degismez, bu ekranda alan yildizli
+      //   gelir ve bos birakilirsa kayit engellenir.
+      const m: KartMetaYaniti = zorunluAlanlar?.length
+        ? { ...ham, alanlar: ham.alanlar.map(a =>
+            zorunluAlanlar.includes(a.ad) ? { ...a, zorunlu: true } : a) }
+        : ham;
       setMeta(m);
       setYetki(m.yetki);
 
@@ -243,6 +257,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         // varsa durum hep aktif gelsin") - DurumKodlari'nde 1 = Aktif (KartKatalogu.cs).
         m.alanlar.forEach(a => {
           baslangic[a.ad] = a.ad === 'durum' ? '1'
+            // TEMSILCI varsayilani: karti acan kullanici. Cogu kayitta dogru
+            //   cevap budur; farkliysa listeden degistirilir.
+            : a.ad === 'temsilci' && kullanici?.id ? String(kullanici.id)
             : a.ad === 'subeId' && oturum.subeId ? String(oturum.subeId)
             : a.tip === 'mantik' ? false : '';
         });
@@ -292,7 +309,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
     } finally {
       setYukleniyor(false);
     }
-  }, [kaynak, id, yeniMi, yeniKayitVarsayilanlari]);
+  }, [kaynak, id, yeniMi, yeniKayitVarsayilanlari, zorunluAlanlar]);
 
   useEffect(() => { void yukle() }, [yukle]);
 
@@ -543,15 +560,49 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
       return;
     }
 
+    // EKRANA OZEL zorunluluk sunucu tarafinda YOK (katalogda alan zorunlu
+    //   degil) - kontrol burada yapilir, yoksa yildiz kozmetik kalirdi.
+    const eksikZorunlu = meta?.alanlar.find(a =>
+      a.zorunlu && a.yazilabilir && !a.gizli
+      && (zorunluAlanlar?.includes(a.ad) ?? false)
+      && String(deger[a.ad] ?? '').trim() === '');
+    if (eksikZorunlu) {
+      setAlanHatalari(h => ({ ...h, [eksikZorunlu.ad]: `${eksikZorunlu.baslik} zorunlu.` }));
+      const hedef = sekmeBul(eksikZorunlu.ad);
+      if (hedef) setAktifSekme(hedef);
+      return;
+    }
+
+    const gecersizTelefon = meta?.alanlar.find(a => {
+      const v = deger[a.ad];
+      return telefonAlaniMi(a.ad) && typeof v === 'string' && !telefonGecerliMi(v);
+    });
+    if (gecersizTelefon) {
+      setAlanHatalari(h => ({ ...h,
+        [gecersizTelefon.ad]: 'Telefon 10 haneli olmalı (5xx / 2xx / 3xx / 4xx).' }));
+      const hedef = sekmeBul(gecersizTelefon.ad);
+      if (hedef) setAktifSekme(hedef);
+      return;
+    }
+
     setKaydediyor(true);
     setHata(null);
     setAlanHatalari({});
     setCakisma(null);
     setBilgi(null);
     try {
+      // Telefon TEK BICIMDE saklanir: kullanici gruplu da yazsa gruplamadan da
+      //   yazsa DB'ye "+90 532 418 77 20" gider. Aksi halde ayni numara iki
+      //   farkli metinle durup arama/mukerrer kontrolu kaciriyordu.
+      const kartGovdesi = degisenAlanlar();
+      Object.keys(kartGovdesi).forEach(ad => {
+        if (telefonAlaniMi(ad) && typeof kartGovdesi[ad] === 'string' && kartGovdesi[ad])
+          kartGovdesi[ad] = telefonBicimle(kartGovdesi[ad]);
+      });
+
       const govde = {
         surum,
-        kart: degisenAlanlar(),
+        kart: kartGovdesi,
         detaylar: Object.fromEntries(
           Object.entries(detaylar)
             .map(([ad, durum]) => [ad, detayFarki(durum)])
@@ -705,7 +756,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
           {secenekler.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
       );
-    })() : TELEFON_ALANLARI.has(a.ad) ? (
+    })() : telefonAlaniMi(a.ad) ? (
       <TelefonGirdi
         key={a.ad}
         value={String(deger[a.ad] ?? '')}

@@ -518,6 +518,10 @@ table.lot-tablo tbody tr:hover td { background: #f2f7fd }
 table.lot-tablo code { font-weight: 700; color: var(--yazi2) }
 
 /* SKT'si gecmis lot: kutunun kendisi kirmizi - satirda goze carpsin. */
+/* Gecersiz telefon: gridde kutu kirmizi cerceve alir (kart formunda alan-hata
+   metni cikiyor; gridde satir basina metin yeri yok). */
+.tel-gecersiz .tel-girdi input { border-color: var(--hata); background: #fdf1f1 }
+
 input.skt-gecmis {
   border-color: var(--hata); background: #fdf1f1; color: var(--hata); font-weight: 700;
 }

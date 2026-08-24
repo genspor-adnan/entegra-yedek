@@ -66,6 +66,8 @@ export interface ListeTanimi {
   gizliKartAlanlari?: string[];
   /** Bu ekranda acilmayacak kart sekmeleri (ör. Aday kartinda "Fatura Bilgileri"). */
   gizliKartSekmeleri?: string[];
+  /** Bu ekranda zorunlu sayilacak kart alanlari (ör. Aday: Temsilci). */
+  zorunluKartAlanlari?: string[];
   /** Menude grup ICINDEKI sira (kucuk once). Verilmeyen ogeler sonda, tanim
       sirasinda kalir - menu sirasi tanim dosyasindaki yere bagli olmasin. */
   menuSira?: number;
@@ -383,6 +385,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         yerTutucuSekmeler={tanim.yerTutucuSekmeler}
         gizliAlanlar={tanim.gizliKartAlanlari}
         gizliSekmeler={tanim.gizliKartSekmeleri}
+        zorunluAlanlar={tanim.zorunluKartAlanlari}
         resimYerTutucu={tanim.resimYerTutucu}
         yeniKayitVarsayilanlari={tanim.yeniKayitVarsayilanlari}
         onKapat={() => git(tanim.kartYolu!)}
@@ -855,6 +858,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   ayrinti musteri olunca girilir.
     gizliKartAlanlari: ['kod', 'musteri', 'tedarikci', 'aday', 'cepTel', 'epostaWeb'],
     gizliKartSekmeleri: ['Fatura Bilgileri'],
+    //   Temsilci ZORUNLU: sahipsiz aday takipsiz kalir (varsayilan karti acan
+    //   kullanici). Musteri kartinda zorunlu DEGIL - eski kayitlarin cogunda bos.
+    zorunluKartAlanlari: ['temsilci'],
     yerTutucuSekmeler: ['Yorum / Medya'],
     menuGrup: 'CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'cari', menuSira: 10,
   },

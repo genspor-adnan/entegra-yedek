@@ -55,6 +55,11 @@ export function TelefonGirdi({ value, onChange, onBlurSonrasi, disabled }: {
   disabled?: boolean;
 }) {
   const { ulke, yerel } = useMemo(() => coz(value), [value]);
+  // Kutuda da GRUPLU gorunur (genel kural: telefon her yerde ayni bicimde).
+  //   Yazarken imlec atlamasin diye gruplama BLUR'da yapiliyordu; acilista da
+  //   gruplu gostermek icin gorunum degeri burada bicimlenir - kullanici
+  //   yazmaya baslayinca kendi yazdigi kalir (deger degismedigi surece).
+  const gorunen = useMemo(() => yerelFormatla(ulke, yerel), [ulke, yerel]);
 
   return (
     <div className="tel-girdi">
@@ -70,7 +75,7 @@ export function TelefonGirdi({ value, onChange, onBlurSonrasi, disabled }: {
       </select>
       <input
         type="tel"
-        value={yerel}
+        value={gorunen}
         disabled={disabled}
         onChange={e => {
           // TR icin sadece rakam (+bosluk, gruplamayi bozma) - harf/sembol yazilamasin.

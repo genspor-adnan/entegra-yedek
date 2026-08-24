@@ -33,8 +33,48 @@ export function tarihYaz(deger: string): string {
  *
  * 'mantik' alanlar PG'de SMALLINT'tir (MSSQL bit karsiligi): 1 = evet.
  */
+/**
+ * TELEFON GOSTERIMI (genel kural): kayitta ne olursa olsun ekranda ayni bicim.
+ * "+905324187720" / "0532 418 77 20" / "5324187720" -> "+90 532 418 77 20".
+ * Yabanci numarada gruplama yapilmaz (format ulkeden ulkeye degisir), yalniz
+ * ulke kodu ayrilir.
+ */
+export function telefonBicimle(ham: unknown): string {
+  const metin = String(ham ?? '').trim();
+  if (!metin) return '';
+
+  const artili = metin.startsWith('+');
+  const rakam = metin.replace(/\D/g, '');
+  if (!rakam) return metin;
+
+  // Yerel yazim: "0532...", "532..." - Turkiye kabul edilir.
+  if (!artili) {
+    const on = rakam.length === 11 && rakam.startsWith('0') ? rakam.slice(1) : rakam;
+    if (on.length === 10) return `+90 ${on.slice(0, 3)} ${on.slice(3, 6)} ${on.slice(6, 8)} ${on.slice(8)}`;
+    return metin;
+  }
+
+  if (rakam.startsWith('90')) {
+    // Kullanici ulke kodunun ARDINDAN da "0" yazabiliyor ("+90 0532..."):
+    //   yerel onek atilir, kalan 10 hane ise gruplanir.
+    let on = rakam.slice(2);
+    if (on.length === 11 && on.startsWith('0')) on = on.slice(1);
+    if (on.length === 10)
+      return `+90 ${on.slice(0, 3)} ${on.slice(3, 6)} ${on.slice(6, 8)} ${on.slice(8)}`;
+  }
+  // Diger ulkeler: rakamlara dokunma, yalniz "+" korunur.
+  return `+${rakam}`;
+}
+
+/** Kolon telefon mu - katalogda Bicim:"telefon" ya da adindan anlasilir. */
+const telefonKolonu = (kolon: KolonMeta) =>
+  kolon.bicim === 'telefon' || /telefon|ceptel|gsm|faks/i.test(kolon.ad);
+
 export function bicimle(deger: unknown, kolon: KolonMeta): string {
   if (deger === null || deger === undefined) return '';
+  // Telefon HER LISTEDE ayni bicimde (genel kural) - kolon tipi metin oldugu
+  //   icin switch'e girmeden once yakalanir.
+  if (telefonKolonu(kolon)) return telefonBicimle(deger);
 
   switch (kolon.tip) {
     case 'para': {

@@ -1,3 +1,5 @@
+import { TelefonGirdi } from './TelefonGirdi';
+import { telefonAlaniMi } from './alanBicim';
 import type { DetayDurumu, Satir } from './GenDetayTablo';
 import type { KartAlanMeta, KartDetayMeta } from '../api/sozlesme';
 
@@ -35,6 +37,15 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not }: Prop
 
   const girdi = (a: KartAlanMeta) => {
     const deger = satir[a.ad];
+    // Telefon her yerde ayni kutu: ulke kodu + gruplu numara (genel kural).
+    if (telefonAlaniMi(a.ad))
+      return (
+        <TelefonGirdi
+          value={String(deger ?? '')}
+          disabled={saltOkunur || !a.yazilabilir}
+          onChange={v => degis(a.ad, v)}
+        />
+      );
     if (a.tip === 'mantik')
       return (
         <input type="checkbox" checked={Number(deger) === 1 || deger === true}
