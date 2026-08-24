@@ -38,6 +38,12 @@ interface Props {
   /** Ekrana ozel varsayilan: mantik alan icin boolean, kod/sayi alani icin
       sayi (or. Cek Listesi'nden 'Yeni' -> tur=1). */
   yeniKayitVarsayilanlari?: Record<string, boolean | number | string>;
+  /** Bu EKRANDA cizilmeyecek alanlar (ör. Aday kartinda "Kod"). Alan katalogda
+      kalir; deger tasinir, form onu gostermez. */
+  gizliAlanlar?: string[];
+  /** Bu EKRANDA acilmayacak sekmeler (ör. Aday kartinda "Fatura Bilgileri").
+      Ayni kart farkli ekranlarda farkli genislikte kullanilabilsin diye. */
+  gizliSekmeler?: string[];
 }
 
 /** Modal sarmalayici — mockup'taki .kaperde / .kawin duzeni. */
@@ -189,7 +195,9 @@ const TEK_SUTUN_KARTLAR = new Set(['depo']);
  *  - Alan hatalari (`alanlar[]`) ilgili girdinin altina yazilir.
  *  - Detaylar FARK olarak gonderilir (eklenen / degisen / silinen), tam liste degil.
  */
-export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSekmeler, resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari }: Props) {
+export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSekmeler,
+                          resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
+                          gizliAlanlar, gizliSekmeler }: Props) {
   const yeniMi = id === 'yeni';
   const personelGibiKart = kaynak === 'personel' || kaynak === 'hasta';
 
@@ -360,11 +368,14 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
       // Yerel parada Kur (hep 1) ve Yerel Tutar (= Tutar) alanlari GORUNMEZ -
       //   tekrar bilgi, formu uzatmaktan baska ise yaramaz.
       if (yerelParada && doviz && (a.ad === doviz.kurAlani || a.ad === doviz.yerelAlani)) return;
+      // Ekrana ozel gizleme (ör. Aday kartinda "Kod"): alan katalogda kalir,
+      //   degeri tasinir, yalniz CIZILMEZ.
+      if (gizliAlanlar?.includes(a.ad)) return;
       const g = a.grup ?? 'Genel';
       harita.set(g, [...(harita.get(g) ?? []), a]);
     });
     return [...harita.entries()];
-  }, [meta, doviz, yerelParada]);
+  }, [meta, doviz, yerelParada, gizliAlanlar]);
 
   /**
    * "Kimlik" grubu sekme DEGIL — mockup'taki idstrip gibi ust seritte, her sekmede
@@ -381,6 +392,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
     const yorumMedyaSekmesiVar = (yerTutucuSekmeler ?? []).includes('Yorum / Medya');
     const s: SekmeTanimi[] = gruplar
       .filter(([ad]) => ad !== KIMLIK_GRUP)
+      // Ekrana ozel sekme gizleme (ör. Aday kartinda "Fatura Bilgileri").
+      .filter(([ad]) => !gizliSekmeler?.includes(ad))
       .filter(([ad]) => !(kaynak === 'hasta' && ad === 'İletişim'))
       .map(([ad, alanlar]) => ({ tur: 'grup', anahtar: grupSekmeAnahtari(ad), baslik: ad, alanlar }));
     if (kaynak === 'cari' || kaynak === 'hasta') {
@@ -435,7 +448,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
       s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'Resim / Doküman' });
     }
     return s;
-  }, [gruplar, meta, yerTutucuSekmeler, kaynak, yeniMi, personelGibiKart]);
+  }, [gruplar, meta, yerTutucuSekmeler, kaynak, yeniMi, personelGibiKart, gizliSekmeler]);
 
   const [aktifSekme, setAktifSekme] = useState<string | null>(null);
   const kayitAnahtari = `${kaynak}:${id}`;
@@ -819,7 +832,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
           {/* Cari'ye ozel: Musteri/Tedarikci rolleri hizlı erisim icin arac cubuguna,
               Kaydet/Sil ile ayni satira, saga yanasik olarak da tasindi (Roller sekmesindeki
               alanlarla AYNI deger - ikisi de senkron, tekrar degil). */}
-          {kaynak === 'cari' && meta.alanlar.some(a => a.ad === 'musteri') && (
+          {/* Musteri/Tedarikci kutulari: ADAY ekraninda YOK (kullanici karari) -
+              aday henuz ne musteri ne tedarikci; rolu donusumde belirlenir. */}
+          {kaynak === 'cari' && !gizliAlanlar?.includes('musteri')
+            && meta.alanlar.some(a => a.ad === 'musteri') && (
             <span style={{ marginLeft: 'auto', display: 'flex', gap: 12, alignItems: 'center' }}>
               <label className="satir-ici">
                 <input

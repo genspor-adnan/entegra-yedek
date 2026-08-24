@@ -62,6 +62,10 @@ export interface ListeTanimi {
   /** Kart generic GenForm degil, kendi sayfasi (ör. kasa-islem): Liste modal ACMAZ,
       rotayi App.tsx kendisi tanimlar. Cift tik yine kartYolu'na gider. */
   ozelKart?: boolean;
+  /** Bu ekranda kart uzerinde CIZILMEYECEK alanlar (ör. Aday kartinda "Kod"). */
+  gizliKartAlanlari?: string[];
+  /** Bu ekranda acilmayacak kart sekmeleri (ör. Aday kartinda "Fatura Bilgileri"). */
+  gizliKartSekmeleri?: string[];
   /** "Yeni" aksiyonunda belge kartinin acilacagi tur (ör. Siparisler -> 19).
       Verilmezse kart kendi varsayilanini (satis faturasi) kullanir. */
   yeniBelgeTuru?: number;
@@ -374,6 +378,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         id={kartId}
         baslik={tanim.baslik.replace(/ler$|lar$/, '')}
         yerTutucuSekmeler={tanim.yerTutucuSekmeler}
+        gizliAlanlar={tanim.gizliKartAlanlari}
+        gizliSekmeler={tanim.gizliKartSekmeleri}
         resimYerTutucu={tanim.resimYerTutucu}
         yeniKayitVarsayilanlari={tanim.yeniKayitVarsayilanlari}
         onKapat={() => git(tanim.kartYolu!)}
@@ -834,7 +840,16 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   yer kaplamaktan baska ise yaramiyor.
     gizliKolonlar: ['musteri', 'tedarikci'],
     cipler: DURUM_CIPLERI,
-    yerTutucuSekmeler: ['Mali Durum', 'Yorum / Medya', 'Ek Alanlar'],
+    // ADAY KARTI SADE (kullanici karari): aday henuz musteri degil - fatura
+    //   unvani/vergi dairesi, mali durum ve ek alanlar musteri olunca anlamli.
+    //   Kod da gizli: aday icin kod uydurmak gereksiz, kaydedince id atanir.
+    //   Musteri/Tedarikci kutulari da yok: aday henuz ikisi de degil, rol
+    //   donusumde (Müşteriye Dönüştür) belirlenir.
+    //   "Aday" kutusu da gizli: bu ekrandaki her kayit zaten aday, kutu bilgi
+    //   vermiyor ama yanlislikla kapatilirsa kayit listeden DUSER.
+    gizliKartAlanlari: ['kod', 'musteri', 'tedarikci', 'aday'],
+    gizliKartSekmeleri: ['Fatura Bilgileri'],
+    yerTutucuSekmeler: ['Yorum / Medya'],
     menuGrup: 'CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'cari',
   },
   {
