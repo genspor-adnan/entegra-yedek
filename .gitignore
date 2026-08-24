@@ -28,3 +28,6 @@ _backup/
 # PG veritabani dokumleri (pg_dump -Fc) - veri, kod degil
 Entegra/GentegreAI/yedek/
 *.tar
+# PG dokumleri (veri, kod degil): GitHub 100 MB sert sinirina yaklasiyorlar -
+#   db/_yedek altindaki pg14 dokumu 99 MB ve push'ta uyari veriyor.
+Entegra/GentegreAI/db/_yedek/
