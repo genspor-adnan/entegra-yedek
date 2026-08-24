@@ -66,6 +66,9 @@ export interface ListeTanimi {
   gizliKartAlanlari?: string[];
   /** Bu ekranda acilmayacak kart sekmeleri (ör. Aday kartinda "Fatura Bilgileri"). */
   gizliKartSekmeleri?: string[];
+  /** Menude grup ICINDEKI sira (kucuk once). Verilmeyen ogeler sonda, tanim
+      sirasinda kalir - menu sirasi tanim dosyasindaki yere bagli olmasin. */
+  menuSira?: number;
   /** "Yeni" aksiyonunda belge kartinin acilacagi tur (ör. Siparisler -> 19).
       Verilmezse kart kendi varsayilanini (satis faturasi) kullanir. */
   yeniBelgeTuru?: number;
@@ -800,7 +803,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tumu' },
     ],
     // Grup CRM: musteri iliskileri basligi altinda projeler (kullanici karari).
-    menuGrup: 'CRM', menuAd: 'Projeler', ic: '📁', yetkiKodu: 'proje',
+    menuGrup: 'CRM', menuAd: 'Projeler', ic: '📁', yetkiKodu: 'proje', menuSira: 30,
   },
   {
     // GOREV / HATIRLATMA / TAKVIM (db/108) - ana sayfa panelini besleyen kayitlar.
@@ -811,7 +814,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tamamlanan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'CRM', menuAd: 'Görevler', ic: '✅', yetkiKodu: 'gorev',
+    menuGrup: 'CRM', menuAd: 'Görevler', ic: '✅', yetkiKodu: 'gorev', menuSira: 40,
   },
   {
     // SATIS FIRSATI (db/121, mockup firsat_karti/firsat_listesi.html) - teklif
@@ -826,7 +829,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ],
     toplam: ['tahminiTutar', 'agirlikliTutar'],
     yerTutucuSekmeler: ['Teklifler', 'Yorum / Medya', 'Ek Alanlar'],
-    menuGrup: 'CRM', menuAd: 'Satış Fırsatları', ic: '🎯', yetkiKodu: 'firsat',
+    menuGrup: 'CRM', menuAd: 'Satış Fırsatları', ic: '🎯', yetkiKodu: 'firsat', menuSira: 20,
   },
   {
     // ADAY MÜŞTERİLER (db/122): henuz musteri olmayan firmalar. AYNI taraf
@@ -838,7 +841,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     yeniKayitVarsayilanlari: { aday: true, musteri: false, tedarikci: false },
     // Bu ekrandaki her kayit ADAY: "Musteri"/"Tedarikci" kolonlari hep bos,
     //   yer kaplamaktan baska ise yaramiyor.
-    gizliKolonlar: ['musteri', 'tedarikci'],
+    //   VKN ve e-Fatura da yok: aday henuz faturalanmiyor.
+    gizliKolonlar: ['musteri', 'tedarikci', 'vkno', 'efatura'],
     cipler: DURUM_CIPLERI,
     // ADAY KARTI SADE (kullanici karari): aday henuz musteri degil - fatura
     //   unvani/vergi dairesi, mali durum ve ek alanlar musteri olunca anlamli.
@@ -852,7 +856,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     gizliKartAlanlari: ['kod', 'musteri', 'tedarikci', 'aday', 'cepTel', 'epostaWeb'],
     gizliKartSekmeleri: ['Fatura Bilgileri'],
     yerTutucuSekmeler: ['Yorum / Medya'],
-    menuGrup: 'CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'cari',
+    menuGrup: 'CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'cari', menuSira: 10,
   },
   {
     // Kullanici: "Stok altına Stok Listesi [taşı]" - tek ogeli grup, digerleriyle ayni desen.

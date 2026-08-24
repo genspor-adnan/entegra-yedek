@@ -11,6 +11,8 @@ interface MenuOgesi {
   rz: string;
   grup?: string;
   altGrup?: string;
+  /** Grup ICINDEKI sira (kucuk once). Gruplarin kendi sirasi degismez. */
+  sira?: number;
 }
 
 type MenuSatiri =
@@ -78,11 +80,21 @@ export function Kabuk() {
     yetkiliListeler.map(l => ({
       yol: `/${l.rota ?? l.kaynak}`, ad: l.menuAd, ic: l.ic,
       rz: l.ozelSayfa ? 'ayar' : 'liste', grup: l.menuGrup, altGrup: l.menuAltGrup,
+      sira: l.menuSira,
     }));
 
   // Iki seviye: grup (Cari, Kasa, Yönetim…) ve grubun icinde alt grup
   //   (Yönetim › Ayarlar). Ayni yardimci iki seviyede de kullanilir.
   const satirlar = grupla(moduller, m => m.grup);
+  // Sira YALNIZ grup icinde uygulanir: gruplarin kendi sirasi (Hasta, Cari,
+  //   Satis...) tanim sirasindan gelir, menuSira onu kaydirmamali.
+  satirlar.forEach(sat => {
+    if (sat.tur !== 'grup') return;
+    sat.alt = sat.alt
+      .map((m, i) => ({ m, i }))
+      .sort((a, b) => (a.m.sira ?? 900 + a.i) - (b.m.sira ?? 900 + b.i) || a.i - b.i)
+      .map(x => x.m);
+  });
 
   // Acik/kapali durumu kullanici ELLE degistirmedikce, aktif alt-ogeyi iceren grup
   //   otomatik acik gelir (dogrudan /tedarikci gibi bir URL'e gelindiginde de gorunsun).

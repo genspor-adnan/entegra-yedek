@@ -78,8 +78,15 @@ interface Props {
  * duz metin, cunku iki renkli bir gosterim yaniltirdi.
  */
 function durumRozeti(deger: unknown, kolon: KolonMeta) {
+  // "durum" kolonu bazi kaynaklarda mantik (1/0), bazilarinda kod tipinde -
+  //   ikisinde de AYNI rozet cikmali; kod tipinde ham "1" gostermek kullaniciya
+  //   hicbir sey soylemiyordu. Cok degerli durum kolonlari (belge/kasa:
+  //   taslak/kesin/iptal) 0/1 disinda deger tasidigi icin bu kalibin disinda kalir.
+  const sayisalDurum = kolon.ad === 'durum'
+    && (kolon.tip === 'mantik' || kolon.tip === 'kod')
+    && (Number(deger) === 1 || Number(deger) === 0);
   const aktifMi =
-    kolon.ad === 'durum' && kolon.tip === 'mantik' ? Number(deger) === 1
+    sayisalDurum ? Number(deger) === 1
     : deger === 'Aktif' ? true
     : deger === 'Pasif' ? false
     : null;

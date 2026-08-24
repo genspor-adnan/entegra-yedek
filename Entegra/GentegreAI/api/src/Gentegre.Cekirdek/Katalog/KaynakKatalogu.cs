@@ -138,6 +138,12 @@ public static class KaynakKatalogu
             new("eposta",       "t.eposta",        "metin", "E-posta"),
             new("adres",        "(select ta.adres from public.taraf_adres ta where ta.taraf_id = t.id and ta.varsayilan = 1 limit 1)",
                                                     "metin", "Adres"),
+            // Ilce/il adresle AYNI kaynaktan (varsayilan adres satiri) - adresin
+            //   sagina konur; ayri bir adres tablosu join'i gerektirmez.
+            new("ilce",         "(select ta.ilce from public.taraf_adres ta where ta.taraf_id = t.id and ta.varsayilan = 1 limit 1)",
+                                                    "metin", "İlçe"),
+            new("il",           "(select ta.il from public.taraf_adres ta where ta.taraf_id = t.id and ta.varsayilan = 1 limit 1)",
+                                                    "metin", "İl"),
             new("musteri",      "t.musteri",       "mantik","Musteri",       Hizalama: "orta"),
             new("aday",         "t.aday",          "mantik","Aday",          Hizalama: "orta", Varsayilan: false),
             new("tedarikci",    "t.tedarikci",     "mantik","Tedarikci",     Hizalama: "orta"),
