@@ -1143,6 +1143,29 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
             {kaynak === 'cari' && aktif.baslik === 'Genel' && !yeniMi && (
               <IlgiliKisiler tarafId={id as number} saltOkunur={salt} />
             )}
+            {/* ADRES: Fatura Bilgileri sekmesi bu ekranda GIZLIYSE (Aday karti)
+                adres oradan gorunmez - Genel sekmesine, Notlar'in USTUNE tek
+                adres olarak konur. Ayni taraf_adres tablosu, tek satir. */}
+            {kaynak === 'cari' && aktif.baslik === 'Genel'
+              && gizliSekmeler?.includes('Fatura Bilgileri') && (() => {
+                const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
+                if (!adresDetay) return null;
+                return (
+                  <div className="kasira">
+                    <TekAdres
+                      meta={adresDetay}
+                      durum={detaylar[adresDetay.ad] ?? bosDetay()}
+                      saltOkunur={salt || adresDetay.saltOkunur}
+                      onDegis={yeni => setDetaylar(t => ({ ...t, [adresDetay.ad]: yeni }))}
+                      baslik="Adres"
+                      // Adres TIPI sorulmaz (kullanici): adayin tek adresi var,
+                      //   fatura/sevkiyat ayrimi musteri olunca anlamli.
+                      turGizli
+                      sabitTur="1"
+                    />
+                  </div>
+                );
+              })()}
             {/* Kullanici: "notlar ilgili kişiler altına gelsin" - Cari'de Notlar kutusu
                 artik İletişim'in yaninda degil, İlgili Kişiler tablosunun altinda. */}
             {kaynak === 'cari' && aktif.baslik === 'Genel' && notlar && (
