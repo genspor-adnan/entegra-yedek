@@ -66,7 +66,11 @@ public sealed record DetayTanimi(
     //   logu ust_tablo_id / ust_kayit_id ile karta baglanir.
     int LogTabloId = 0,
     string? Baslik = null,         // sekme basligi; bos ise Ad'dan uretilir
-    bool SaltOkunur = false        // satir ekle/sil hic gosterilmez (or. hesaplanmis/derlenmis veri)
+    bool SaltOkunur = false,       // satir ekle/sil hic gosterilmez (or. hesaplanmis/derlenmis veri)
+    // Sekme KOSULLU: verilen mantik alani isaretli degilse sekme hic acilmaz
+    //   (or. stok "Paket" sekmesi yalniz paket=1 iken). Bos sekme gostermek,
+    //   kullaniciya doldurulacak bir sey varmis izlenimi verir.
+    string? KosulAlani = null
 )
 {
     public string Etiket => Baslik ?? (Ad.Length > 0 ? char.ToUpperInvariant(Ad[0]) + Ad[1..] : Ad);
@@ -662,7 +666,11 @@ public static class KartKatalogu
             new("anaBirim",      "ana_birim",       "kod",   KodListesi: "stok.ana_birim",  Baslik: "Ana Birim",AltGrup: "Vergi & Ana Birim"),
             new("kdv",           "kdv",             "kod",   Zorunlu: true, SabitKodlar: KdvKodlari, Baslik: "KDV %", AltGrup: "Vergi & Ana Birim"),
             new("otvYuzde",      "otv_yuzde",       "para", Baslik: "OTV %",  AltGrup: "Vergi & Ana Birim"),
-            new("internetSatis", "internet_satis",  "mantik", Baslik: "İnternet Satış", AltGrup: "Diğer"),
+            new("internetSatis", "internet_satis",  "mantik", Baslik: "İnternet Satış", AltGrup: "Diğer",
+                                                     EslesAlan: "paket"),
+            // PAKET (124): isaretlenince kartta "Paket" sekmesi acilir, icerik
+            //   orada tanimlanir. Internet Satis'in SAGINDA (ayni satirda).
+            new("paket",         "paket",           "mantik", Baslik: "Paket", AltGrup: "Diğer"),
             // Mockup'ta 3. kutu "Resim" - bu alanlarin orada karsiligi yok, ust-satirin
             //   ALTINDA adsiz/duz bolum olarak kalsinlar (kasira'nin 2 kutusunu bozmasin).
             new("rafKonum",      "raf_konum",       "metin", EnFazlaUzunluk: 30, Baslik: "Raf / Konum",         AltGrup: "Diğer"),
@@ -708,6 +716,25 @@ public static class KartKatalogu
                 new("satis",       "satis",        "mantik")
             }, Sirala: "id", SubeKolonu: null, LogTabloId: 346),  // stok_fiyatta sube_id YOK
                                                                    // (GENINI -11110: Stok Fiyat)
+
+            // PAKET ICERIGI (124) - yalniz paket isaretliyse acilir. Kod
+            //   secilir, ad otomatik gorunur; birim ve adet elle girilir.
+            new DetayTanimi("paket", "public.stok_paket", "paket_stok_id", new KartAlani[]
+            {
+                new("id",            "id",             "sayi",  Yazilabilir: false),
+                // SIRA alani kullaniciya SORULMAZ: pakette satir sirasi anlam
+                //   tasimiyor, bos birakilinca da NOT NULL kolonu patlatiyordu.
+                //   Gosterim sirasi ekleme sirasidir (id).
+                new("icerikStokId",  "icerik_stok_id", "kod",   Zorunlu: true,
+                    KodTablosu: "public.v_stok_lookup", Baslik: "Kod"),
+                // Ad SALT OKUNUR: kod secilince kendi gelir, iki yerde ad
+                //   tutmanin anlami yok (stok adi degisirse burasi bayatlardi).
+                new("ad",            "(select s.ad from public.stok s where s.id = stok_paket.icerik_stok_id)",
+                                                       "metin", Yazilabilir: false, Baslik: "Ad"),
+                new("birim",         "birim",          "kod",   KodListesi: "stok.ana_birim", Baslik: "Birim"),
+                new("adet",          "adet",           "para",  Zorunlu: true, Baslik: "Adet")
+            }, Sirala: "id", SubeKolonu: null, LogTabloId: 920,
+               Baslik: "Paket", KosulAlani: "paket"),
 
             // ÜTS / medikal bilgileri (119) - stok_uts 1:1 uzanti. Tek satirlik
             //   form olarak cizilir (grid degil): bir stokun BIR ÜTS kaydi olur.

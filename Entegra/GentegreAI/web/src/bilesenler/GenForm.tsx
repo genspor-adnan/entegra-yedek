@@ -423,6 +423,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
       }
     }
     meta?.detaylar.forEach(d => {
+      // KOSULLU sekme (ör. stok "Paket"): ilgili kutu isaretli degilse sekme
+      //   hic acilmaz - bos sekme "burada doldurulacak bir sey var" izlenimi
+      //   verir. Kutu isaretlenince ANINDA gorunur (deger state'i degisir).
+      if (d.kosulAlani && !deger[d.kosulAlani]) return;
       // Cari/Kisi/Personel'e ozel: Adresler mockup'ta ayri sekme DEGIL, ilgili grup
       //   sekmesinin icine gomulu bir tek-satir form - kendi sekmesi acilmasin (bkz.
       //   asagida grup render'i - Personel'de İletişim sekmesine gomulu, ik_karti.html).
@@ -465,7 +469,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
       s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'Resim / Doküman' });
     }
     return s;
-  }, [gruplar, meta, yerTutucuSekmeler, kaynak, yeniMi, personelGibiKart, gizliSekmeler]);
+  }, [gruplar, meta, yerTutucuSekmeler, kaynak, yeniMi, personelGibiKart, gizliSekmeler, deger]);
 
   const [aktifSekme, setAktifSekme] = useState<string | null>(null);
   const kayitAnahtari = `${kaynak}:${id}`;

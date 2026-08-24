@@ -39,6 +39,10 @@ interface SatirDurumu {
   izlemeKodu: string;
   /** Stok kartindaki izleme turu: 0 yok · 1 Seri · 2 Lot · 3 SKT · 5 Lot+SKT · 6 Seri+Lot. */
   izleme: number;
+  /** Bu satir bir PAKET mi (124) - altina icerik satirlari acilir. */
+  paket?: boolean;
+  /** Icerik satirinda: bagli oldugu paket satirinin anahtari. */
+  paketAnahtar?: number;
   /** Kalemin lot/seri dagilimi - bir kalem 1:n lottan gelebilir (db/114). */
   izlemler: IzlemSatiri[];
 }
@@ -612,16 +616,63 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     return { matrah, kdv, genel: matrah + kdv };
   }, [satirlar, stokFisiMi]);
 
-  /** Kalem penceresinden donen satiri yazar (yeni ise ekler). */
-  const kalemKaydet = (satir: SatirDurumu) =>
+  /**
+   * Kalem penceresinden donen satiri yazar (yeni ise ekler).
+   *
+   * PAKET (124): secilen stok bir paketse belgeye YALNIZ paket satiri degil,
+   * ICERIGI de eklenir - "paket item + icerikleri tumuyle" (kullanici).
+   * Icerik satirlari paketin adediyle CARPILIR (2 paket x 3 adet = 6) ve
+   * FIYATSIZ gelir: tutar paket satirinda durur, icerikler ikinci kez
+   * fiyatlanirsa belge toplami sisirdi. Icerik satirlari duzenlenebilir -
+   * kullanici pakette olmayan bir sey cikarabilir/ekleyebilir.
+   */
+  const kalemKaydet = (satir: SatirDurumu) => {
     setSatirlar(s => s.some(x => x.anahtar === satir.anahtar)
       ? s.map(x => (x.anahtar === satir.anahtar ? satir : x))
       : [...s, satir]);
 
+    if (!satir.paket || !satir.stokId) return;
+    const adet = Number(satir.adet.replace(',', '.')) || 1;
+    void api.paketIcerigi(satir.stokId)
+      .then(icerik => {
+        if (icerik.length === 0) return;
+        setSatirlar(s => {
+          // Ayni paketin ONCEKI icerik satirlari temizlenir (miktar degisince
+          //   yeniden uretilir), sonra guncel icerik eklenir.
+          const temiz = s.filter(x => x.paketAnahtar !== satir.anahtar);
+          let anahtar = Math.max(0, ...temiz.map(x => x.anahtar));
+          const yeniler = icerik.map(i => ({
+            ...bosSatir(++anahtar),
+            satirTur: 1,
+            stokId: i.stokId,
+            stokKodu: i.kod,
+            stokAdi: i.ad,
+            adet: String(i.adet * adet),
+            kdv: String(i.kdv ?? 0),
+            izleme: i.izleme ?? 0,
+            birimFiyat: '0',
+            dovizFiyat: '0',
+            aciklama: `${satir.stokKodu} paketi içeriği`,
+            paketAnahtar: satir.anahtar,
+          }));
+          // Icerik, paket satirinin HEMEN ALTINA girer.
+          const yer = temiz.findIndex(x => x.anahtar === satir.anahtar);
+          return yer < 0
+            ? [...temiz, ...yeniler]
+            : [...temiz.slice(0, yer + 1), ...yeniler, ...temiz.slice(yer + 1)];
+        });
+      })
+      .catch(h => setHata(h instanceof ApiHatasi ? h.message : String(h)));
+  };
+
   /** Secili satirlari siler - grid salt gorunum oldugu icin satir ici silme yok. */
   const seciliSil = () => {
     if (seciliSatirlar.size === 0) return;
-    setSatirlar(s => s.filter(x => !seciliSatirlar.has(x.anahtar)));
+    // Paket satiri silinince ICERIGI de gider - yoksa sahipsiz icerik
+    //   satirlari belgede kalirdi.
+    setSatirlar(s => s.filter(x =>
+      !seciliSatirlar.has(x.anahtar)
+      && !(x.paketAnahtar !== undefined && seciliSatirlar.has(x.paketAnahtar))));
     setSeciliSatirlar(new Set());
   };
 
@@ -1828,6 +1879,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 // Stok LOT/SERI izlemli mi - kalem penceresi buna gore izlem
                 //   ekranini acar (db/114).
                 izleme: hizmet ? 0 : Number(sec.izleme ?? 0),
+                // Paket (124): kalem kaydedilince icerigi de belgeye eklenir.
+                paket: !hizmet && Number(sec.paket ?? 0) === 1,
                 kdv: sec.kdv !== undefined && sec.kdv !== null ? String(sec.kdv) : '20',
                 // Kart fiyati onyuklenir - kullanici zaten listede gorup seciyor;
                 //   pencerede degistirebilir. Fiyatin PARA BIRIMI de gelir: yerel

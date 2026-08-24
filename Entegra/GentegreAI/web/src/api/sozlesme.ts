@@ -119,6 +119,18 @@ export interface StokLotSatiri {
   depoAdi?: string;
 }
 
+/** Paket icerigi satiri (124). */
+export interface PaketIcerikSatiri {
+  stokId: number;
+  kod: string;
+  ad: string;
+  birim: number;
+  adet: number;
+  kdv: number;
+  fiyat: number;
+  izleme: number;
+}
+
 /** §2.4 kolon metasi. Yetkisiz kolon bu listede HIC donmez. */
 export interface KolonMeta {
   ad: string;
@@ -243,7 +255,11 @@ export interface DovizMetasi {
   yerelPara: string;
 }
 
-export interface KartDetayMeta { ad: string; baslik: string; saltOkunur: boolean; alanlar: KartAlanMeta[] }
+export interface KartDetayMeta {
+  ad: string; baslik: string; saltOkunur: boolean; alanlar: KartAlanMeta[];
+  /** Doluysa sekme yalniz bu mantik alan isaretliyken acilir (stok "Paket"). */
+  kosulAlani?: string | null;
+}
 
 export interface KartMetaYaniti {
   /** Yeni kayitta doldurulacak alanlar (katalogdaki varsayilanlar). */

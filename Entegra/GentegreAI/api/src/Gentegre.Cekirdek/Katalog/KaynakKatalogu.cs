@@ -571,6 +571,9 @@ public static class KaynakKatalogu
                 "when 4 then 'Karekod' when 5 then 'Lot No + SKT' when 6 then 'Seri + Lot' else 'Yok' end",
                                             "metin", "İzleme",   Hizalama: "orta"),
             new("izleme",    "s.izleme",    "sayi",  "İzleme Kodu", Hizalama: "orta", Varsayilan: false),
+            // PAKET (124): belge kalemi secimde bunu okur ve paketi ICERIGIYLE
+            //   birlikte ekler.
+            new("paket",     "s.paket",     "mantik","Paket",     Hizalama: "orta", Varsayilan: false),
             // Fiyat: stok_fiyat'ta satis/alis AYRI kayittir ve -1 "fiyat girilmemis"
             //   demektir; en dusuk fiyat_adi (ana liste) alinir.
             new("fiyat",

@@ -7,7 +7,7 @@ import {
   type KasaIslemTuru, type KasaIslemYaniti, type KasaIslemYazmaIstegi, type FisOzeti,
   type AcikSatir,
   type YetkiSatiri, type YetkiSatiriIstegi, type DokumanSatiri,
-  type StokDurumYaniti, type StokHareketYaniti, type StokLotSatiri,
+  type StokDurumYaniti, type StokHareketYaniti, type StokLotSatiri, type PaketIcerikSatiri,
   type AyarSatiri, type YardimKaydi,
   type PanelYaniti,
 } from './sozlesme';
@@ -262,6 +262,10 @@ export const api = {
   stokLotlari: (stokId: number, depoId?: number | null) =>
     istek<{ lotlar: StokLotSatiri[] }>(`/api/kart/stok/${stokId}/lot`
       + (depoId ? `?depoId=${depoId}` : '')).then(y => y.lotlar),
+
+  /** Paket icerigi (124): belge kaleminde paket secilince acilan satirlar. */
+  paketIcerigi: (stokId: number) =>
+    istek<{ icerik: PaketIcerikSatiri[] }>(`/api/kart/stok/${stokId}/paket`).then(y => y.icerik),
 
   /** Depo bazli min/max seviye (099). Miktarlara DOKUNMAZ. */
   stokDurumLimit: (stokId: number, depoId: number,

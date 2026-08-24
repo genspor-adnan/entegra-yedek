@@ -23,7 +23,14 @@ export const bosDetay = (satirlar: Satir[] = []): DetayDurumu => ({
 
 /** Ekrandaki durumdan sunucunun bekledigi fark listesini uretir. */
 export function detayFarki(durum: DetayDurumu): DetayFarki {
-  const eklenen = durum.guncel.filter(s => s.id === undefined || s.id === null);
+  // YENI satirda BOS birakilan alan HIC GONDERILMEZ (GenForm'daki kuralin
+  //   detay karsiligi): bos metin NOT NULL + varsayilanli kolonlarda
+  //   "birim bos birakilamaz" gibi hatalara yol aciyordu. Gonderilmeyince
+  //   veritabani varsayilani devreye girer.
+  const eklenen = durum.guncel
+    .filter(s => s.id === undefined || s.id === null)
+    .map(s => Object.fromEntries(
+      Object.entries(s).filter(([, v]) => v !== '' && v !== null && v !== undefined)) as Satir);
 
   const degisen = durum.guncel
     .filter(s => s.id !== undefined && s.id !== null)

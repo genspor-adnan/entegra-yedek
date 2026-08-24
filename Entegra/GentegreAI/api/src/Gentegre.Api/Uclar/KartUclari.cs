@@ -186,7 +186,8 @@ public static class KartUclari
                 Doviz = dovizMeta,
                 Alanlar = okunabilir.Select(MetaOptions).ToList(),
                 Detaylar = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
-                    .Select(d => new KartDetayMeta(d.Ad, d.Etiket, d.SaltOkunur, d.Alanlar.Select(MetaOptions).ToList()))
+                    .Select(d => new KartDetayMeta(d.Ad, d.Etiket, d.SaltOkunur,
+                        d.Alanlar.Select(MetaOptions).ToList(), d.KosulAlani))
                     .ToList(),
                 Yetki = new KartYetkisi
                 {

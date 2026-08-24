@@ -64,7 +64,10 @@ public sealed record KartDetayMeta(
     string Ad,
     string Baslik,
     bool SaltOkunur,
-    IReadOnlyList<KartAlanMeta> Alanlar);
+    IReadOnlyList<KartAlanMeta> Alanlar,
+    /// <summary>Doluysa sekme YALNIZ bu (mantik) alan isaretliyken acilir
+    /// (ör. stok "Paket" sekmesi paket=1 iken).</summary>
+    string? KosulAlani = null);
 
 public sealed class KartMetaYaniti
 {
