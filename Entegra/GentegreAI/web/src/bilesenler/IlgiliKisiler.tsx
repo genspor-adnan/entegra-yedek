@@ -36,6 +36,10 @@ export function IlgiliKisiler({ tarafId, saltOkunur }: { tarafId: number; saltOk
 
   const kisiBagla = async (kisiId: number) => {
     try {
+      // Basarili baglamada onceki hata mesaji SILINIR: "zaten bir cariye bagli"
+      //   uyarisi, sonraki dogru secimden sonra da ekranda kalip kullaniciyi
+      //   islem basarisiz sandiriyordu.
+      setHata(null);
       setSatirlar(await api.kisiBagla(tarafId, kisiId));
     } catch (h) {
       setHata(h instanceof Error ? h.message : String(h));
@@ -44,6 +48,7 @@ export function IlgiliKisiler({ tarafId, saltOkunur }: { tarafId: number; saltOk
 
   const kopar = async () => {
     if (seciliId === null) return;
+    setHata(null);
     const onceki = satirlar;
     setSatirlar(s => s?.filter(k => k.id !== seciliId) ?? s);
     setSeciliId(null);

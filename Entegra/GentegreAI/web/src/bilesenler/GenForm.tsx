@@ -1143,6 +1143,19 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
             {kaynak === 'cari' && aktif.baslik === 'Genel' && !yeniMi && (
               <IlgiliKisiler tarafId={id as number} saltOkunur={salt} />
             )}
+            {/* YENI kartta kisi eklenemez (henuz taraf id'si yok) ama kutu
+                GORUNUR: eskiden hic cizilmedigi icin kullanici "kisi gridi yok"
+                saniyordu. Kaydedince ayni yerde gercek grid acilir. */}
+            {kaynak === 'cari' && aktif.baslik === 'Genel' && yeniMi && (
+              <div className="kasira">
+                <div className="kagrup">
+                  <h6>İlgili Kişiler</h6>
+                  <div className="not" style={{ padding: 10 }}>
+                    Kişiler kart kaydedildikten sonra eklenir.
+                  </div>
+                </div>
+              </div>
+            )}
             {/* ADRES: Fatura Bilgileri sekmesi bu ekranda GIZLIYSE (Aday karti)
                 adres oradan gorunmez - Genel sekmesine, Notlar'in USTUNE tek
                 adres olarak konur. Ayni taraf_adres tablosu, tek satir. */}
