@@ -1,5 +1,7 @@
 import type { DetayFarki, KartDetayMeta } from '../api/sozlesme';
 import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
+import { TelefonGirdi } from './TelefonGirdi';
+import { telefonAlaniMi, telefonGecerliMi } from './alanBicim';
 
 export type Satir = Record<string, unknown> & { id?: number };
 
@@ -168,7 +170,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Pro
                       <TelefonGirdi
                         value={String(satir[a.ad] ?? '')}
                         disabled={saltOkunur || !a.yazilabilir}
-                        onChange={v => hucreDegis(i, a.ad, v)}
+                        onChange={(v: string) => hucreDegis(i, a.ad, v)}
                       />
                     </span>
                   ) : a.tip === 'mantik' ? (
