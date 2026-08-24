@@ -1,7 +1,8 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
-import { ApiHatasi, type KolonMeta, type Kosul, type ListeSatiri, type Siralama } from '../api/sozlesme';
+import { ApiHatasi, type KolonMeta, type Kosul, type ListeSatiri, type ListeYaniti,
+         type Siralama } from '../api/sozlesme';
 import { bicimle } from './bicim';
 import { GenKomutPaleti, GenSagTus, GenToolbar, hedefte, useAksiyonlar,
          type AltSecenek } from './Aksiyonlar';
@@ -218,6 +219,10 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [toplamKayit, setToplamKayit] = useState(0);
   const [toplamlar, setToplamlar] = useState<Record<string, unknown> | undefined>();
+  /** Gruplu liste (ekstre): para birimi basina ozet - sunucudan, TUM kume icin. */
+  const [gruplar, setGruplar] = useState<ListeYaniti['gruplar']>();
+  /** Satirlarin hangi kolona gore obeklendigi (sunucudan; yoksa gruplama yok). */
+  const [grupKolonu, setGrupKolonu] = useState<string | null>(null);
   const [sayfa, setSayfa] = useState(1);
   const [sirala, setSirala] = useState<Siralama[]>([]);
   const [arama, setArama] = useState('');
@@ -350,6 +355,8 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       setSatirlar(yanit.satirlar);
       setToplamKayit(yanit.toplamKayit);
       setToplamlar(yanit.toplamlar);
+      setGruplar(yanit.gruplar);
+      setGrupKolonu(yanit.grupKolonu ?? null);
       setSureMs(yanit.sureMs);
     } catch (h) {
       setHata(h instanceof ApiHatasi ? `${h.hata.kod}: ${h.message}` : String(h));
@@ -537,6 +544,12 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       sirala, aramaGorunumu, tarihAlani, tarihBas, tarihBit]);
 
   const gorunenToplamlar = useMemo(() => Object.entries(toplamlar ?? {}), [toplamlar]);
+  // Alt toplam seridi yalniz GORUNEN bir kolonun toplami varsa cizilir. Gruplu
+  //   ekstrede para birimine bagli kolonlar genel toplama girmez; o kolonlardan
+  //   baskasi gorunmuyorsa serit bos "GENEL TOPLAM" satiri olarak kalirdi.
+  const toplamSeridiVar = useMemo(
+    () => gorunenToplamlar.some(([ad]) => kolonlar.some(k => k.ad === ad)),
+    [gorunenToplamlar, kolonlar]);
 
   // Ekstreden listeye donunce ayni satir secili gelsin (seciliBaslangicId).
   const ilkSecimUygulandi = useRef(false);
@@ -791,7 +804,34 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                 <tbody>
                   {satirlar.map((satir, i) => {
                     const id = String(satir.id ?? i);
+                    // ---- GRUPLU LISTE (ekstre: para birimi basina) ----------
+                    //   Grup basligi obegin ilk satirindan ONCE, ara toplam SON
+                    //   satirindan SONRA. Obek sayfa sonunda BOLUNDUYSE ara toplam
+                    //   yazilmaz - yarim toplam gostermek yaniltir; obek bitince
+                    //   (sonraki sayfada) yazilir.
+                    const grupDeger = grupKolonu ? String(satir[grupKolonu] ?? '') : null;
+                    const oncekiGrup = i > 0 && grupKolonu
+                      ? String(satirlar[i - 1][grupKolonu] ?? '') : null;
+                    const sonrakiGrup = i + 1 < satirlar.length && grupKolonu
+                      ? String(satirlar[i + 1][grupKolonu] ?? '') : null;
+                    const grupBasliyor = grupDeger !== null && (i === 0 || oncekiGrup !== grupDeger);
+                    const grupBitiyor = grupDeger !== null &&
+                      (sonrakiGrup !== null ? sonrakiGrup !== grupDeger : sayfa >= sonSayfa);
+                    const ozet = grupDeger !== null
+                      ? gruplar?.find(g => g.anahtar === grupDeger) : undefined;
+
                     return (
+                      <Fragment key={`gr-${id}`}>
+                      {grupBasliyor && (
+                        <tr className="grup-bas">
+                          <td className="cbk" />
+                          <td colSpan={kolonlar.length}>
+                            <b>{grupDeger || '—'}</b>
+                            {ozet && <span className="sonuk"> · {ozet.adet} hareket</span>}
+                            {oncekiGrup !== null && oncekiGrup !== grupDeger && ''}
+                          </td>
+                        </tr>
+                      )}
                       <tr
                         key={id}
                         className={satirSinifi(satir)}
@@ -825,13 +865,28 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           </td>
                         ))}
                       </tr>
+                      {grupBitiyor && ozet && (
+                        <tr className="grup-toplam">
+                          <td className="cbk" />
+                          {kolonlar.map((k, ki) => {
+                            const t = ozet.toplamlar?.[k.ad];
+                            return (
+                              <td key={k.ad} className={`hiza-${k.hizalama}`}>
+                                {t !== undefined && t !== null ? bicimle(t, k)
+                                  : ki === 0 ? `${grupDeger} toplamı` : ''}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      )}
+                      </Fragment>
                     );
                   })}
                   {!yukleniyor && satirlar.length === 0 && (
                     <tr><td colSpan={kolonlar.length + 1} className="bos">Kayit yok</td></tr>
                   )}
                 </tbody>
-                {gorunenToplamlar.length > 0 && (
+                {toplamSeridiVar && (
                   <tfoot>
                     <tr>
                       <td className="cbk" />
@@ -839,7 +894,8 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                         const t = gorunenToplamlar.find(([ad]) => ad === k.ad);
                         return (
                           <td key={k.ad} className={`hiza-${k.hizalama}`}>
-                            {t ? bicimle(t[1], k) : (i === 0 ? 'Toplam' : '')}
+                            {t ? bicimle(t[1], k)
+                               : (i === 0 ? (grupKolonu ? 'GENEL TOPLAM' : 'Toplam') : '')}
                           </td>
                         );
                       })}

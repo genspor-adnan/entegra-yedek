@@ -150,14 +150,29 @@ public static class KartUclari
                 .ToDictionary(t => t!, t => depo.KodTablosuSecenekleriAsync(t!, iptal));
             var listeGorevleri = tumAlanlar.Select(a => a.KodListesi).Where(t => t is not null).Distinct()
                 .ToDictionary(t => t!, t => depo.KodListesiSecenekleriAsync(t!, iptal));
-            await Task.WhenAll(tabloGorevleri.Values.Concat(listeGorevleri.Values));
+            // BAGLI alanlarin (Şube -> Banka) ust haritasi: arayuz secenekleri
+            //   secili ust'e gore suzsun diye secenek id -> ust id.
+            var ustGorevleri = tumAlanlar
+                .Where(a => a.BagliAlan is not null && a.KodTablosu is not null)
+                .Select(a => a.KodTablosu!).Distinct()
+                .ToDictionary(t => t, t => depo.KodTablosuUstAsync(t, iptal));
+            await Task.WhenAll(tabloGorevleri.Values.Concat(listeGorevleri.Values).Concat(ustGorevleri.Values));
             var tabloSecenekleri = tabloGorevleri.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
             var listeSecenekleri = listeGorevleri.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
+            var ustHaritalari = ustGorevleri.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
 
             KartAlanMeta MetaOptions(KartAlani a) => Meta(a, tanim, baglam,
                 a.KodTablosu is { } t ? tabloSecenekleri[t]
                 : a.KodListesi is { } l ? listeSecenekleri[l]
-                : null);
+                : null,
+                a.BagliAlan is not null && a.KodTablosu is { } bt ? ustHaritalari[bt] : null);
+
+            // Yerel para birimi kartla birlikte gider: arayuz "TL disi mi" karari
+            //   icin ayri bir istek yapmasin (kur kutusu bu karara gore acilir).
+            DovizMetasi? dovizMeta = null;
+            if (tanim.Doviz is { } dk)
+                dovizMeta = new DovizMetasi(dk.CinsAlani, dk.KurAlani, dk.TutarAlani, dk.YerelAlani,
+                    dk.TarihAlani, await depo.YerelParaAsync(iptal));
 
             return Results.Ok(new KartMetaYaniti
             {
@@ -168,6 +183,7 @@ public static class KartUclari
                 Varsayilanlar = tanim.YeniKayitVarsayilanlari
                     ?? new Dictionary<string, object?>(),
                 AcilistaTarafSecimi = tanim.AcilistaTarafSecimi,
+                Doviz = dovizMeta,
                 Alanlar = okunabilir.Select(MetaOptions).ToList(),
                 Detaylar = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
                     .Select(d => new KartDetayMeta(d.Ad, d.Etiket, d.SaltOkunur, d.Alanlar.Select(MetaOptions).ToList()))
@@ -204,7 +220,8 @@ public static class KartUclari
     /// belirlenir: okuma izni olup yazma izni olmayan alan formda salt okunur gelir.
     /// </summary>
     private static KartAlanMeta Meta(KartAlani alan, KartTanimi tanim, IstekBaglami baglam,
-        IReadOnlyDictionary<string, string>? kodTablosuSecenekleri = null)
+        IReadOnlyDictionary<string, string>? kodTablosuSecenekleri = null,
+        IReadOnlyDictionary<string, string>? ustHaritasi = null)
         => new(
             alan.Ad,
             alan.Etiket,
@@ -216,7 +233,9 @@ public static class KartUclari
             alan.Zorunlu,
             alan.EnFazlaUzunluk,
             kodTablosuSecenekleri ?? alan.SabitKodlar,
-            alan.Gizli);
+            alan.Gizli,
+            alan.BagliAlan,
+            ustHaritasi);
 
     private static KartTanimi KartBul(string ad)
         => KartKatalogu.Bul(ad) ?? throw GentegreHatasi.Bulunamadi($"Bilinmeyen kart: {ad}");

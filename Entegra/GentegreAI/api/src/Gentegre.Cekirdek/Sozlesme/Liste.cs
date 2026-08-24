@@ -67,11 +67,22 @@ public sealed class ListeYaniti
     public long ToplamKayit { get; set; }
     public IDictionary<string, object?>? Toplamlar { get; set; }
     public IReadOnlyList<GrupOzeti>? Gruplar { get; set; }
+    /// <summary>Gruplu listede satirlarin hangi kolona gore obeklendigi ("dovizCinsi").</summary>
+    public string? GrupKolonu { get; set; }
     public long SureMs { get; set; }
     public string IzlemeNo { get; set; } = "";
 }
 
-public sealed record GrupOzeti(string Anahtar, string Ad, long Adet);
+/// <summary>
+/// Gruplu listede (ekstre: para birimi basina) bir obegin ozeti. Toplamlar
+/// BUTUN suzulmus kume uzerinde hesaplanir - gorunen sayfaya bakilmaz; sayfa
+/// basina hesaplansa "USD toplami" sayfa degistikce degisirdi.
+/// </summary>
+public sealed record GrupOzeti(
+    string Anahtar,
+    string Ad,
+    long Adet,
+    IDictionary<string, object?>? Toplamlar = null);
 
 /// <summary>§2.4 kolon meta ucu. Yetkisiz kolon bu listede de DONMEZ.</summary>
 public sealed record KolonMeta(
@@ -83,4 +94,7 @@ public sealed record KolonMeta(
     bool Varsayilan,
     bool Siralanabilir,
     bool Filtrelenebilir,
-    int? Genislik = null);
+    int? Genislik = null,
+    /// <summary>Yalniz GRUP ara toplaminda toplanir, genel toplamda toplanmaz
+    /// (ekstrede doviz tutarlari: USD ile TL toplanmaz).</summary>
+    bool SadeceGrupToplami = false);

@@ -95,7 +95,10 @@ export interface ListeYaniti {
   satirlar: ListeSatiri[];
   toplamKayit: number;
   toplamlar?: Record<string, unknown>;
-  gruplar?: { anahtar: string; ad: string; adet: number }[];
+  /** Gruplu liste (ekstre: para birimi basina). Toplamlar TUM suzulmus kume icin. */
+  gruplar?: { anahtar: string; ad: string; adet: number; toplamlar?: Record<string, unknown> }[];
+  /** Satirlarin hangi kolona gore obeklendigi ("dovizCinsi"). */
+  grupKolonu?: string | null;
   sureMs: number;
   izlemeNo: string;
 }
@@ -111,6 +114,8 @@ export interface KolonMeta {
   siralanabilir: boolean;
   filtrelenebilir: boolean;
   genislik?: number | null;
+  /** Yalniz grup ara toplaminda toplanir (ekstrede doviz tutarlari). */
+  sadeceGrupToplami?: boolean;
 }
 
 // ----------------------------------------------------------------- kart ----
@@ -202,6 +207,24 @@ export interface KartAlanMeta {
   kodlar?: Record<string, string> | null;
   /** Formda cizilmez ama degeri tasinir (arka plan alani - or. cek/senet "Tür"). */
   gizli?: boolean;
+  /** Doluysa secenekler bu alanin degerine gore suzulur (Şube -> Banka). */
+  bagliAlan?: string | null;
+  /** Bagli alanda secenek id -> ust id (sube id -> banka id). */
+  kodUst?: Record<string, string> | null;
+}
+
+/**
+ * Karttaki para birimi / kur / tutar ucgeni. Yerel para disinda bir birim
+ * secilirse kur tarih kurundan cekilir, yerel karsilik gosterilir. Yerel tutari
+ * KAYDEDERKEN sunucu yeniden hesaplar - buradaki yalniz onizleme.
+ */
+export interface DovizMetasi {
+  cinsAlani: string;
+  kurAlani: string;
+  tutarAlani: string;
+  yerelAlani: string;
+  tarihAlani?: string | null;
+  yerelPara: string;
 }
 
 export interface KartDetayMeta { ad: string; baslik: string; saltOkunur: boolean; alanlar: KartAlanMeta[] }
@@ -211,6 +234,8 @@ export interface KartMetaYaniti {
   varsayilanlar?: Record<string, unknown>;
   /** Doluysa yeni kayitta taraf secim ekrani acilir; deger yazilacak alan adi. */
   acilistaTarafSecimi?: string | null;
+  /** Doluysa kartta doviz ucgeni var (kur otomatik + yerel tutar). */
+  doviz?: DovizMetasi | null;
   kaynak: string;
   alanlar: KartAlanMeta[];
   detaylar: KartDetayMeta[];

@@ -68,7 +68,11 @@ public sealed class SorguUretici
 
         var secilen = istek.Toplam
             .Select(a => kolonlar.FirstOrDefault(k => k.Ad == a))
-            .Where(k => k is { } kk && kk.SayiMi)
+            // GENEL toplamda para birimine bagli kolonlar YOK: gruplu ekstrede
+            //   "USD borc + TL borc" diye bir sayi yoktur. Onlar grup ara
+            //   toplamlarinda gorunur (bkz. Gruplar).
+            .Where(k => k is { } kk && kk.SayiMi
+                        && !(kk.SadeceGrupToplami && _kaynak.GrupKolonu is not null))
             .Select(k => k!)
             .ToList();
 
@@ -78,6 +82,49 @@ public sealed class SorguUretici
         var secim = string.Join(", ", secilen.Select(k => $"coalesce(sum({k.Sql}), 0) as \"{k.Ad}\""));
         var sql = "select " + secim + " from " + KaynakIfadesi(istek, kullaniciId) +
                   Nerede(istek, subeId, kapsamTarafIdleri);
+        return new SorguParcasi(sql, _par.ToArray());
+    }
+
+    /// <summary>
+    /// GRUP toplamlari (ekstrede para birimi basina): grup degeri + satir sayisi
+    /// + istenen kolonlarin toplami. BUTUN suzulmus kume uzerinde hesaplanir,
+    /// gorunen sayfa uzerinde degil - yoksa 2. sayfada "TL toplami" o sayfadaki
+    /// birkac satirin toplami olurdu.
+    ///
+    /// Siralama satir sorgusuyla AYNI olmali (kaynak VarsayilanSirala'sinin grup
+    /// onekini kullanir), yoksa grup basliklari gridde sirasiz gorunur.
+    /// </summary>
+    public SorguParcasi? Gruplar(ListeIstegi istek, IReadOnlyList<KolonTanimi> kolonlar,
+                                 int? subeId, IReadOnlyList<int>? kapsamTarafIdleri, int? kullaniciId)
+    {
+        if (_kaynak.GrupKolonu is not { } grupAd) return null;
+        if (_kaynak.Kolon(grupAd) is not { } grupKolon) return null;
+
+        var secilen = (istek.Toplam ?? new List<string>())
+            .Select(a => kolonlar.FirstOrDefault(k => k.Ad == a))
+            .Where(k => k is { } kk && kk.SayiMi)
+            .Select(k => k!)
+            .ToList();
+
+        _par.Clear();
+        var siraSql = _kaynak.GrupSiraKolonu is { } sk && _kaynak.Kolon(sk) is { } sirakol
+            ? sirakol.Sql : grupKolon.Sql;
+
+        var secim = new StringBuilder()
+            .Append(grupKolon.Sql).Append(" as \"grup\", count(*) as \"adet\"");
+        foreach (var k in secilen.Where(k => !k.GrupKapanisi))
+            secim.Append(", coalesce(sum(").Append(k.Sql).Append("), 0) as \"").Append(k.Ad).Append('"');
+
+        // KAPANIS kolonlari (yuruyen bakiye): toplanmaz, grubun SON satirindaki
+        //   deger alinir - satir sirasi listeyle ayni olsun diye ayni ORDER BY.
+        foreach (var k in kolonlar.Where(k => k.GrupKapanisi))
+            secim.Append(", (array_agg(").Append(k.Sql).Append(" order by ")
+                 .Append(_kaynak.VarsayilanSirala).Append("))[count(*)::int] as \"")
+                 .Append(k.Ad).Append('"');
+
+        var sql = "select " + secim + " from " + KaynakIfadesi(istek, kullaniciId) +
+                  Nerede(istek, subeId, kapsamTarafIdleri) +
+                  $" group by {grupKolon.Sql}, {siraSql} order by {siraSql}, {grupKolon.Sql}";
         return new SorguParcasi(sql, _par.ToArray());
     }
 

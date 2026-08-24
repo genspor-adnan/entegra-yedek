@@ -212,6 +212,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
   // TarafArama'dan bir KISI secilirse "public.v_cari_lookup" (KodTablosu) onu bilmiyor -
   // secim sonrasi ad gorunsun diye adini ayrica burada tutuyoruz (server'a etkisi yok).
   const [bagliTarafAdi, setBagliTarafAdi] = useState<string | null>(null);
+  /** Kur otomatik cekilirken / cekilemediginde alan altinda gosterilen not. */
+  const [kurNotu, setKurNotu] = useState<string | null>(null);
+  /** En son kuru cekilen "cins|tarih" - kayitli kartin kuru acilista ezilmesin. */
+  const sonKurAnahtari = useRef<string | null>(null);
 
   const yukle = useCallback(async () => {
     setYukleniyor(true);
@@ -245,6 +249,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         }
         setDeger(baslangic);
         setIlkDeger(baslangic);
+        sonKurAnahtari.current = null;   // yeni kartta kur cekilsin
         // Katalog istiyorsa (cek/senet) kart acilir acilmaz CARI secimi gelsin -
         //   yeni kayitta ilk is odur; kullanici kapatip alandan da secebilir.
         if (m.acilistaTarafSecimi) setTarafSecimAcik(true);
@@ -259,6 +264,13 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         });
         setDeger(gelen);
         setIlkDeger(gelen);
+        // KAYITLI kur tarihseldir - acilista bugunun kuruyla EZILMEMELI. Yuklenen
+        //   cins/tarih "zaten cekilmis" sayilir; kullanici birini degistirirse
+        //   anahtar degisir ve kur o zaman yenilenir.
+        sonKurAnahtari.current = m.doviz
+          ? `${String(gelen[m.doviz.cinsAlani] ?? '')}|` +
+            `${m.doviz.tarihAlani ? String(gelen[m.doviz.tarihAlani] ?? '').slice(0, 10) : ''}`
+          : null;
         setSurum(k.kart.surum as string | undefined);
         setYetki(k.yetki);
         m.detaylar.forEach(d => {
@@ -275,17 +287,83 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
 
   useEffect(() => { void yukle() }, [yukle]);
 
+  // ------------------------------------------------------------ doviz ------
+  // Kartta para birimi/kur/tutar ucgeni varsa (katalog: DovizKurali), yerel para
+  //   disinda bir birim SECILDIGINDE kur o tarihin kurundan cekilir ve yerel
+  //   karsilik gosterilir. Kayitli bir kartin kuru ACILISTA EZILMEZ - kur, belge
+  //   gunune ait tarihsel bir degerdir; onu bugunun kuruyla degistirmek gecmis
+  //   kaydin anlamini bozardi (asagidaki sonKurAnahtari nobeti).
+  const doviz = meta?.doviz ?? null;
+  const dovizCinsi = doviz ? String(deger[doviz.cinsAlani] ?? '') : '';
+  const dovizTarihi = doviz?.tarihAlani ? String(deger[doviz.tarihAlani] ?? '').slice(0, 10) : '';
+  const yerelParada = !doviz || dovizCinsi === '' || dovizCinsi === doviz.yerelPara;
+
+  useEffect(() => {
+    if (!doviz || !dovizCinsi) return;
+    const anahtar = `${dovizCinsi}|${dovizTarihi}`;
+    if (sonKurAnahtari.current === anahtar) return;   // acilis ya da tekrar render
+    sonKurAnahtari.current = anahtar;
+
+    if (dovizCinsi === doviz.yerelPara) {
+      setDeger(d => ({ ...d, [doviz.kurAlani]: '1' }));
+      setKurNotu(null);
+      return;
+    }
+    let iptal = false;
+    const tarih = dovizTarihi || new Date().toISOString().slice(0, 10);
+    setKurNotu('Kur alınıyor…');
+    api.dovizKur(dovizCinsi, tarih)
+      .then(y => {
+        if (iptal) return;
+        if (y.kur && y.kur > 0) {
+          setDeger(d => ({ ...d, [doviz.kurAlani]: String(y.kur) }));
+          // Kurun GERCEK gunu yazilir: istenen tarihe kur yoksa onceki en yakin
+          //   gun kullanilir, "bugunun kuru" demek yanlis olurdu.
+          const gun = (y.kurTarihi ?? tarih).slice(0, 10).split('-').reverse().join('.');
+          setKurNotu(`${gun} kuru — gerekirse değiştirin`);
+        } else {
+          setKurNotu('Bu tarihe kur girilmemiş, elle yazın.');
+        }
+      })
+      .catch(() => { if (!iptal) setKurNotu('Kur alınamadı, elle yazın.') });
+    return () => { iptal = true };
+  }, [doviz, dovizCinsi, dovizTarihi]);
+
+  /** Yerel karsilik ONIZLEMESI - kaydederken sunucu yeniden hesaplar. */
+  const yerelTutar = useMemo(() => {
+    if (!doviz) return 0;
+    const tutar = Number(String(deger[doviz.tutarAlani] ?? '0').replace(',', '.')) || 0;
+    const kur = Number(String(deger[doviz.kurAlani] ?? '1').replace(',', '.')) || 1;
+    return tutar * kur;
+  }, [doviz, deger]);
+
+  /**
+   * Alan degisimi. BAGLI alanlari (or. Şube -> Banka) TEMIZLER: banka degisince
+   * eski bankanin subesi secili kalirsa "Ziraat + Akbank subesi" gibi tutarsiz
+   * kayit olusur.
+   */
+  const alanDegistir = useCallback((ad: string, v: Deger) => {
+    setDeger(d => {
+      const yeni = { ...d, [ad]: v };
+      meta?.alanlar.forEach(x => { if (x.bagliAlan === ad) yeni[x.ad] = '' });
+      return yeni;
+    });
+  }, [meta]);
+
   const gruplar = useMemo(() => {
     const harita = new Map<string, KartAlanMeta[]>();
     meta?.alanlar.forEach(a => {
       if (a.ad === 'id') return;
       // ARKA PLAN alani: degeri tasinir (kaydetmede gonderilir) ama CIZILMEZ.
       if (a.gizli) return;
+      // Yerel parada Kur (hep 1) ve Yerel Tutar (= Tutar) alanlari GORUNMEZ -
+      //   tekrar bilgi, formu uzatmaktan baska ise yaramaz.
+      if (yerelParada && doviz && (a.ad === doviz.kurAlani || a.ad === doviz.yerelAlani)) return;
       const g = a.grup ?? 'Genel';
       harita.set(g, [...(harita.get(g) ?? []), a]);
     });
     return [...harita.entries()];
-  }, [meta]);
+  }, [meta, doviz, yerelParada]);
 
   /**
    * "Kimlik" grubu sekme DEGIL — mockup'taki idstrip gibi ust seritte, her sekmede
@@ -568,19 +646,44 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
           </button>
         )}
       </div>
-    ) : a.kodlar ? (
-      <select
+    ) : doviz && a.ad === doviz.yerelAlani ? (
+      // Yerel karsilik: HESAPLANIR, yazilamaz (sunucu da ayni carpimi yapar).
+      <input
         key={a.ad}
-        value={String(deger[a.ad] ?? '')}
-        disabled={salt || !a.yazilabilir}
-        onChange={e => setDeger(d => ({ ...d, [a.ad]: e.target.value }))}
-      >
-        {/* Bos secenek yalniz ZORUNLU OLMAYAN alanlarda: zorunlu bir kod alaninda
-            (ör. Depo > Durum) "—" secilebilir gorunmesi yaniltici. */}
-        {!a.zorunlu && <option value="">—</option>}
-        {Object.entries(a.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-      </select>
-    ) : TELEFON_ALANLARI.has(a.ad) ? (
+        readOnly
+        disabled
+        value={yerelTutar.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+               + ' ' + doviz.yerelPara}
+      />
+    ) : a.kodlar ? (() => {
+      // BAGLI liste (Şube -> Banka): yalniz secili ust'un altindakiler.
+      const ustDegeri = a.bagliAlan ? String(deger[a.bagliAlan] ?? '') : '';
+      const secenekler = Object.entries(a.kodlar).filter(
+        ([k]) => !a.bagliAlan || (a.kodUst?.[k] ?? '') === ustDegeri);
+      const ustBos = Boolean(a.bagliAlan) && ustDegeri === '';
+      return (
+        <select
+          key={a.ad}
+          value={String(deger[a.ad] ?? '')}
+          disabled={salt || !a.yazilabilir || ustBos}
+          onChange={e => alanDegistir(a.ad, e.target.value)}
+        >
+          {/* Bos secenek yalniz ZORUNLU OLMAYAN alanlarda: zorunlu bir kod alaninda
+              (ör. Depo > Durum) "—" secilebilir gorunmesi yaniltici. */}
+          {!a.zorunlu && (
+            <option value="">
+              {/* Bagli listede bos secenek NEDEN bos oldugunu soylesin: kullanici
+                  "sube gelmedi" diye ariyordu - once banka secilmesi ya da o
+                  bankaya hic sube girilmemis olmasi bilgisi ekranda yok. */}
+              {ustBos ? `— önce ${meta?.alanlar.find(x => x.ad === a.bagliAlan)?.baslik ?? 'üst'} seçin`
+                : a.bagliAlan && secenekler.length === 0 ? '— tanımlı kayıt yok'
+                : '—'}
+            </option>
+          )}
+          {secenekler.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        </select>
+      );
+    })() : TELEFON_ALANLARI.has(a.ad) ? (
       <TelefonGirdi
         key={a.ad}
         value={String(deger[a.ad] ?? '')}
@@ -618,6 +721,11 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         {a.baslik}{a.zorunlu && <b className="zorunlu"> *</b>}
       </span>
       {renderGirdi(a)}
+      {/* Kur kutusunun altinda kurun NEREDEN geldigi (tarih kuru / bulunamadi) -
+          otomatik gelen bir sayiyi kullanicinin sorgusuz kabul etmesi beklenmez. */}
+      {doviz && a.ad === doviz.kurAlani && kurNotu && (
+        <span className="alan-notu">{kurNotu}</span>
+      )}
       {alanHatalari[a.ad] && <span className="alan-hata">{alanHatalari[a.ad]}</span>}
     </label>
   );

@@ -195,6 +195,78 @@ public sealed class KartDeposu
                 null, r => (Id: r.GetInt32(0), Ad: r.GetString(1)), iptal))
             .ToDictionary(x => x.Id.ToString(CultureInfo.InvariantCulture), x => x.Ad, StringComparer.Ordinal);
 
+    /// <summary>Yerel para birimi (ayar genel.yerel_para) - kart metasina eklenir.</summary>
+    public async Task<string> YerelParaAsync(CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        return await AyarDeposu.MetinAsync(baglanti, null, "genel.yerel_para", "TL", iptal);
+    }
+
+    /// <summary>
+    /// DOVIZ UCGENI (katalogdaki DovizKurali): kur ve yerel karsilik SUNUCUDA
+    /// belirlenir.
+    ///
+    ///  - Yerel para (genel.yerel_para) secildiyse kur 1'e sabitlenir: "TL kayit,
+    ///    kur 41" gibi bir sey olusamaz.
+    ///  - Yabanci para ve kur bos/sifirsa kur 1 kabul edilir; kuru DOLDURMAK
+    ///    arayuzun isi (tarih kurunu cagirir), sunucu yalniz tutarliligi korur.
+    ///  - Yerel tutar = tutar x kur, her zaman yeniden hesaplanir - istemciden
+    ///    gelen yerel tutara guvenilmez (API §3.2).
+    ///
+    /// Kismi guncellemede eksik degerler mevcut kayittan tamamlanir.
+    /// </summary>
+    private static async Task DovizHesaplaAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction? islem, KartTanimi tanim,
+        IDictionary<string, object?> degerler, IDictionary<string, object?>? mevcut,
+        CancellationToken iptal)
+    {
+        if (tanim.Doviz is not { } d) return;
+
+        // Guncellemede ucgenin hicbir alani gelmediyse dokunma (baska bir alan
+        //   degistiriliyor demektir; kur/tutar aynen kalir).
+        if (mevcut is not null &&
+            !degerler.ContainsKey(d.CinsAlani) &&
+            !degerler.ContainsKey(d.KurAlani) &&
+            !degerler.ContainsKey(d.TutarAlani)) return;
+
+        object? Al(string ad)
+            => degerler.TryGetValue(ad, out var v) && v is not null ? v
+             : mevcut is not null && mevcut.TryGetValue(ad, out var m) ? m : null;
+
+        var yerelPara = await AyarDeposu.MetinAsync(baglanti, islem, "genel.yerel_para", "TL", iptal);
+        var cins = Al(d.CinsAlani)?.ToString() ?? "";
+        var kur = Ondalik(Al(d.KurAlani));
+
+        if (cins.Length == 0 || string.Equals(cins, yerelPara, StringComparison.OrdinalIgnoreCase) || kur <= 0)
+            kur = 1m;
+
+        if (tanim.Alan(d.KurAlani) is not null) degerler[d.KurAlani] = kur;
+        if (tanim.Alan(d.YerelAlani) is not null)
+            degerler[d.YerelAlani] = decimal.Round(Ondalik(Al(d.TutarAlani)) * kur, 4);
+    }
+
+    private static decimal Ondalik(object? deger) => deger switch
+    {
+        null => 0m,
+        decimal d => d,
+        string s when decimal.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var p) => p,
+        IConvertible c => Convert.ToDecimal(c, CultureInfo.InvariantCulture),
+        _ => 0m
+    };
+
+    /// <summary>
+    /// BAGLI secim listesinin ust bagi: secenek id -> ust id (or. sube -> banka).
+    /// Gorunumun <c>ust_id</c> kolonu vardir; arayuz seceneklerini buna gore suzer.
+    /// Ust'u bos olan satir hic donmez - suzulemeyecegi icin listede de yeri yok.
+    /// </summary>
+    public async Task<Dictionary<string, string>> KodTablosuUstAsync(
+        string tablo, CancellationToken iptal = default)
+        => (await _veri.ListeAsync(
+                $"select id, ust_id from {KodTablosuDogrula(tablo)} where aktif = 1 and ust_id is not null",
+                null, r => (Id: r.GetInt32(0), Ust: r.GetInt32(1)), iptal))
+            .ToDictionary(x => x.Id.ToString(CultureInfo.InvariantCulture),
+                          x => x.Ust.ToString(CultureInfo.InvariantCulture), StringComparer.Ordinal);
+
     // ============================================================== EKLEME ====
     public async Task<long> EkleAsync(KartTanimi tanim, IDictionary<string, object?> degerler,
         Dictionary<string, DetayFarki>? detaylar, YazmaBaglami baglam,
@@ -216,6 +288,8 @@ public sealed class KartDeposu
         if ((tanim.SubeKolonu is not null || tanim.Alan("subeId") is not null)
             && baglam.SubeId is { } s && !degerler.ContainsKey("subeId"))
             degerler["__sube_id"] = s;
+
+        await DovizHesaplaAsync(baglanti, islem, tanim, degerler, null, iptal);
 
         var kolonlar = new List<string>();
         var yerTutucular = new List<string>();
@@ -295,6 +369,11 @@ public sealed class KartDeposu
 
         var oncesi = await OkuAsync(baglanti, islem, tanim, id, okunabilirAlanlar, null, iptal)
                      ?? throw GentegreHatasi.Bulunamadi();
+
+        // Tutar/kur/para birimi degistiyse yerel karsilik yeniden hesaplanir.
+        //   Kismi guncellemede (yalniz "tutar" geldiginde) eksik degerler mevcut
+        //   kayittan tamamlanir - yoksa kur 0 sayilip yerel tutar sifirlanirdi.
+        await DovizHesaplaAsync(baglanti, islem, tanim, degerler, oncesi.Kart, iptal);
 
         if (degerler.Count > 0)
         {

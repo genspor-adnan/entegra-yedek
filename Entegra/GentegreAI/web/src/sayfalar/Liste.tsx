@@ -226,7 +226,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         baslik={`${tanim.ekstre.baslik} — ${ekstre.ad}`}
         yol={tanim.yol}
         sabitFiltre={{ alan: tanim.ekstre.alan, op: 'esit', deger: ekstre.id }}
-        toplam={['giris', 'cikis']}
+        // Cari ekstresinde kolonlar borc/alacak, hesap ekstresinde giris/cikis;
+        //   ikisinin de yerel karsiligi toplanir (genel toplam yerel parada).
+        toplam={tanim.ekstre.kaynak === 'cari-ekstre'
+          ? ['borc', 'alacak', 'yerelBorc', 'yerelAlacak']
+          : ['giris', 'cikis', 'yerelBorc', 'yerelAlacak']}
         // Cipler ekstre modunda YALNIZ "geri don" gorevi gorur: filtreleri
         //   birlikte gondermek ekstre kaynagina "Bilinmeyen alan: durum" 400'u
         //   verdiriyordu (ekstre goruntusunde durum kolonu yok).
@@ -740,12 +744,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Yuruyen bakiyeli ekstre: hesap secimi URL'den gelir (?hesapId=), grid
     //   sabit tarih sirasinda kalir (bakiye kolonu siralanamaz - sunucu tarafi).
     kaynak: 'hesap-ekstre', baslik: 'Hesap Ekstresi', yol: 'Kasa › Hesap Ekstresi',
-    urlFiltreAlani: 'hesapId', toplam: ['giris', 'cikis'],
+    // Para birimi gruplu (111): her grubun ara toplami + en altta genel toplam.
+    //   Yerel kolonlar da toplanir - genel toplam ancak yerel parada anlamli.
+    urlFiltreAlani: 'hesapId', toplam: ['giris', 'cikis', 'yerelBorc', 'yerelAlacak'],
     menuGrup: 'Kasa', menuAd: 'Hesap Ekstresi', ic: '📈', yetkiKodu: 'hesap',
   },
   {
     kaynak: 'cari-ekstre', baslik: 'Cari Ekstre', yol: 'Kasa › Cari Ekstre',
-    urlFiltreAlani: 'tarafId', toplam: ['yerelBorc', 'yerelAlacak'],
+    urlFiltreAlani: 'tarafId', toplam: ['borc', 'alacak', 'yerelBorc', 'yerelAlacak'],
     menuGrup: 'Kasa', menuAd: 'Cari Ekstre', ic: '🧮', yetkiKodu: 'mali_hareket',
   },
   {

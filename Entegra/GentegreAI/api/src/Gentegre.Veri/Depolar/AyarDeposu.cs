@@ -212,4 +212,19 @@ public sealed class AyarDeposu
         lock (Kilit) Onbellek[anahtar] = (sonuc, DateTime.UtcNow);
         return sonuc;
     }
+
+    /// <summary>
+    /// Metin ayari okur (or. genel.yerel_para = "TL"). Sayisal olanin aksine
+    /// onbelleklenmez: metin ayarlar tek tek ve seyrek okunuyor, buna karsilik
+    /// yanlis onbellekten donen para birimi butun tutarlari bozardi.
+    /// </summary>
+    public static async Task<string> MetinAsync(NpgsqlConnection baglanti, NpgsqlTransaction? islem,
+        string anahtar, string varsayilan, CancellationToken iptal = default)
+    {
+        await using var komut = new NpgsqlCommand(
+            "select deger from public.referans where anahtar = @p0", baglanti, islem);
+        komut.Parameters.AddWithValue("p0", anahtar);
+        return await komut.ExecuteScalarAsync(iptal) is string metin && metin.Length > 0
+            ? metin : varsayilan;
+    }
 }

@@ -420,6 +420,26 @@ public sealed class KasaDeposu
         return sonuc is null or DBNull ? null : Convert.ToDecimal(sonuc);
     }
 
+    /// <summary>
+    /// Kurun GERCEKTEN hangi gune ait oldugu. fn_doviz_kur_getir istenen tarihe
+    /// kur yoksa onceki en yakin gunu kullanir; arayuz "24.08 kuru" derken aslinda
+    /// 18.08 kurunu gosteriyor olabilirdi - kullanici bunu bilmeli.
+    /// </summary>
+    public async Task<DateTime?> KurTarihiAsync(string dovizCinsi, DateTime tarih,
+                                                CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = new NpgsqlCommand("""
+            select tarih from public.doviz_kur
+             where doviz_cinsi = public.fn_doviz_iso(@p0) and tarih <= @p1::date
+             order by tarih desc limit 1
+            """, baglanti);
+        komut.Parameters.AddWithValue("p0", dovizCinsi ?? "TL");
+        komut.Parameters.AddWithValue("p1", tarih.Date);
+        var sonuc = await komut.ExecuteScalarAsync(iptal);
+        return sonuc is null or DBNull ? null : Convert.ToDateTime(sonuc);
+    }
+
     // ============================================================ yardimcilar ====
     private const string BaslikSecim = """
         select ki.id, ki.tur, kt.ad as "turAdi", kt.grup as "turGrup",

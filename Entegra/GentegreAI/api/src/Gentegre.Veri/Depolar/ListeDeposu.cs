@@ -60,6 +60,26 @@ public sealed class ListeDeposu
             }
         }
 
+        // Gruplu liste (ekstre: para birimi basina ara toplam). Kaynak GrupKolonu
+        //   tanimlamadiysa sorgu hic uretilmez.
+        List<GrupOzeti>? gruplar = null;
+        var grupSorgu = new SorguUretici(kaynak).Gruplar(istek, kolonlar, subeId, kapsam, kullaniciId);
+        if (grupSorgu is not null)
+        {
+            gruplar = new List<GrupOzeti>();
+            await using var komut = _veri.Komut(baglanti, grupSorgu.Sql, grupSorgu.Parametreler);
+            await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
+            while (await okuyucu.ReadAsync(iptal))
+            {
+                var anahtar = okuyucu.IsDBNull(0) ? "" : okuyucu.GetValue(0)?.ToString() ?? "";
+                var adet = Convert.ToInt64(okuyucu.GetValue(1));
+                var grupToplam = new Dictionary<string, object?>(StringComparer.Ordinal);
+                for (var i = 2; i < okuyucu.FieldCount; i++)
+                    grupToplam[okuyucu.GetName(i)] = okuyucu.IsDBNull(i) ? null : okuyucu.GetValue(i);
+                gruplar.Add(new GrupOzeti(anahtar, anahtar, adet, grupToplam));
+            }
+        }
+
         kronometre.Stop();
 
         return new ListeYaniti
@@ -67,6 +87,8 @@ public sealed class ListeDeposu
             Satirlar = satirlar,
             ToplamKayit = toplamKayit,
             Toplamlar = toplamlar,
+            Gruplar = gruplar,
+            GrupKolonu = gruplar is null ? null : kaynak.GrupKolonu,
             SureMs = kronometre.ElapsedMilliseconds,
             IzlemeNo = izlemeNo
         };

@@ -54,7 +54,11 @@ public sealed record KartAlanMeta(
     int? EnFazlaUzunluk,
     IReadOnlyDictionary<string, string>? Kodlar,
     /// <summary>Formda CIZILMEZ ama degeri tasinir (arka plan alani).</summary>
-    bool Gizli = false);
+    bool Gizli = false,
+    /// <summary>Doluysa secenekler bu alanin degerine gore suzulur (Şube -> Banka).</summary>
+    string? BagliAlan = null,
+    /// <summary>Bagli alanda her secenegin UST degeri: secenek id -> ust id.</summary>
+    IReadOnlyDictionary<string, string>? KodUst = null);
 
 public sealed record KartDetayMeta(
     string Ad,
@@ -78,11 +82,27 @@ public sealed class KartMetaYaniti
     /// </summary>
     public string? AcilistaTarafSecimi { get; set; }
 
+    /// <summary>
+    /// Doluysa kartta para birimi / kur / tutar ucgeni vardir: yerel para
+    /// disinda bir birim secilince arayuz kuru sunucudan ceker, yerel karsiligi
+    /// gosterir. Yerel tutari YINE DE sunucu hesaplar - bu yalniz onizleme.
+    /// </summary>
+    public DovizMetasi? Doviz { get; set; }
+
     public string Kaynak { get; set; } = "";
     public IReadOnlyList<KartAlanMeta> Alanlar { get; set; } = Array.Empty<KartAlanMeta>();
     public IReadOnlyList<KartDetayMeta> Detaylar { get; set; } = Array.Empty<KartDetayMeta>();
     public KartYetkisi Yetki { get; set; } = new();
 }
+
+/// <summary>Kart doviz ucgeni metasi (bkz. Katalog.DovizKurali) + yerel para birimi.</summary>
+public sealed record DovizMetasi(
+    string CinsAlani,
+    string KurAlani,
+    string TutarAlani,
+    string YerelAlani,
+    string? TarihAlani,
+    string YerelPara);
 
 /// <summary>Silme engeli govdesi (§3.3): hata.engel = { tablo, adet }.</summary>
 public sealed record SilmeEngelBilgisi(string Tablo, long Adet);

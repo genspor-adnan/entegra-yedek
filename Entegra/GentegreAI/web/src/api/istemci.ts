@@ -306,7 +306,7 @@ export const api = {
 
   /** Kur kutusu: o tarihin kuru (yoksa onceki en yakin gun). yon 1 satis / 2 alis. */
   dovizKur: (cins: string, tarih: string, yon = 1) =>
-    istek<{ dovizCinsi: string; tarih: string; kur: number | null }>(
+    istek<{ dovizCinsi: string; tarih: string; kurTarihi: string | null; kur: number | null }>(
       `/api/referans/doviz-kur?cins=${encodeURIComponent(cins)}&tarih=${tarih}&yon=${yon}`),
 
   fisOku: (id: number) =>

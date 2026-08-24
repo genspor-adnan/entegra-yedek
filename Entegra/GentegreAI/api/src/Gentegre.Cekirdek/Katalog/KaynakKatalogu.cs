@@ -16,7 +16,14 @@ public sealed record KolonTanimi(
     bool Siralanabilir = true,
     bool Filtrelenebilir = true,
     string? YetkiAlani = null, // alan yetkisi adi; null ise kolon adi kullanilir
-    int? Genislik = null       // px - varsayilan (icerige gore) genislik gridde tasarsa (or. uzun metin)
+    int? Genislik = null,      // px - varsayilan (icerige gore) genislik gridde tasarsa (or. uzun metin)
+    // GRUPLU listede yalniz GRUP icinde toplanabilen kolon (ekstrede doviz
+    //   tutarlari): USD borcuyla TL borcunu toplamak anlamsizdir, o yuzden bu
+    //   kolonlar grup ara toplaminda VAR, en alttaki genel toplamda YOK.
+    bool SadeceGrupToplami = false,
+    // Grubun KAPANIS degeri: toplanmaz, grubun SON satirindaki deger alinir
+    //   (yuruyen bakiye boyledir - toplami degil son degeri anlamlidir).
+    bool GrupKapanisi = false
 )
 {
     public string AlanAdi => YetkiAlani ?? Ad;
@@ -37,7 +44,15 @@ public sealed record KaynakTanimi(
     string? SubeKolonu = null,     // "b.sube_id"
     string? SabitKosul = null,     // "t.musteri = 1 or t.tedarikci = 1"
     string VarsayilanSirala = "id desc",
-    string? KapsamKolonu = null    // kullanici_kapsam (tur=1) suzmesi icin taraf id kolonu
+    string? KapsamKolonu = null,   // kullanici_kapsam (tur=1) suzmesi icin taraf id kolonu
+    // GRUPLU LISTE (ekstreler): satirlar bu kolonun degerine gore obeklenir, her
+    //   obegin sonuna ARA TOPLAM satiri gelir (or. "dovizCinsi": once TL
+    //   hareketleri ve toplami, sonra USD...). Grup toplamlari sunucuda, butun
+    //   suzulmus kume uzerinde hesaplanir - sayfa basina degil.
+    string? GrupKolonu = null,
+    // Gruplarin SIRASI bu kolona gore (or. "dovizSira": yerel para 0, digerleri 1).
+    //   Verilmezse grup kolonunun kendisi kullanilir.
+    string? GrupSiraKolonu = null
 )
 {
     private Dictionary<string, KolonTanimi>? _dizin;
@@ -726,12 +741,19 @@ public static class KaynakKatalogu
     // ---------------------------------------------------------- ekstreler ----
     // Yuruyen bakiye SIRAYA bagli oldugu icin bakiye kolonu siralanamaz -
     //   kullanici siralamayi degistirse "bakiye" anlamsizlasirdi.
+    //
+    // EKSTRELER PARA BIRIMI BAZINDA GRUPLU (111): once yerel para (TL)
+    //   hareketleri ve ara toplami, sonra USD, sonra EUR... en altta yerel para
+    //   cinsinden genel toplam. Farkli para birimlerini tek yuruyen bakiyede
+    //   toplamak (eski hali) anlamsiz bir sayi uretiyordu.
     private static KaynakTanimi HesapEkstre() => new(
         Ad: "hesap-ekstre",
         YetkiKodu: "hesap",
         Kaynak: "public.v_hesap_ekstre e",
         SubeKolonu: "e.sube_id",
-        VarsayilanSirala: "e.islem_tarihi asc, e.id asc",
+        GrupKolonu: "dovizCinsi",
+        GrupSiraKolonu: "dovizSira",
+        VarsayilanSirala: "e.doviz_sira asc, e.doviz_cinsi asc, e.islem_tarihi asc, e.id asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",           "e.id",            "sayi",  "Id", Varsayilan: false),
@@ -746,11 +768,22 @@ public static class KaynakKatalogu
             new("belgeNo",      "e.belge_no",      "metin", "Belge No", Varsayilan: false),
             new("tarafUnvan",   "e.taraf_unvan",   "metin", "Cari", Genislik: 200),
             new("aciklama",     "e.aciklama",      "metin", "Aciklama", Genislik: 220),
-            new("giris",        "e.giris",         "para",  "Giris",  Hizalama: "sag", Bicim: "#,##0.00"),
-            new("cikis",        "e.cikis",         "para",  "Cikis",  Hizalama: "sag", Bicim: "#,##0.00"),
-            new("bakiye",       "e.bakiye",        "para",  "Bakiye", Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false, Filtrelenebilir: false),
+            // Doviz tutarlari GRUP ICINDE toplanir; en alttaki genel toplamda yer
+            //   almazlar (USD giris ile TL girisi toplamak anlamsiz).
+            new("giris",        "e.giris",         "para",  "Giris",  Hizalama: "sag", Bicim: "#,##0.00", SadeceGrupToplami: true),
+            new("cikis",        "e.cikis",         "para",  "Cikis",  Hizalama: "sag", Bicim: "#,##0.00", SadeceGrupToplami: true),
+            // Bakiye TOPLANMAZ: grubun son satirindaki deger o para biriminin
+            //   kapanis bakiyesidir.
+            new("bakiye",       "e.bakiye",        "para",  "Bakiye", Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false, Filtrelenebilir: false, SadeceGrupToplami: true, GrupKapanisi: true),
+            // Para birimi grup basliginda yaziyor; kolon olarak da acilabilir.
             new("dovizCinsi",   "e.doviz_cinsi",   "metin", "Doviz",  Hizalama: "orta", Varsayilan: false),
-            new("yerelBakiye",  "e.yerel_bakiye",  "para",  "TL Bakiye", Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
+            new("dovizSira",    "e.doviz_sira",    "sayi",  "Doviz Sira", Varsayilan: false),
+            new("dovizKuru",    "e.doviz_kuru",    "para",  "Kur",    Hizalama: "sag", Bicim: "#,##0.0000", Varsayilan: false),
+            // Yerel karsiliklar GORUNUR: gruplu ekstrede genel toplam ancak yerel
+            //   parada anlamli, gizli kolonun toplami da kullaniciya ulasmaz.
+            new("yerelBorc",    "e.yerel_borc",    "para",  "Yerel Giris",  Hizalama: "sag", Bicim: "#,##0.00"),
+            new("yerelAlacak",  "e.yerel_alacak",  "para",  "Yerel Cikis",  Hizalama: "sag", Bicim: "#,##0.00"),
+            new("yerelBakiye",  "e.yerel_bakiye",  "para",  "Yerel Bakiye", Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false, SadeceGrupToplami: true, GrupKapanisi: true),
             new("subeId",       "e.sube_id",       "sayi",  "Sube",   Varsayilan: false)
         });
 
@@ -760,7 +793,9 @@ public static class KaynakKatalogu
         Kaynak: "public.v_cari_ekstre e",
         SubeKolonu: "e.sube_id",
         KapsamKolonu: "e.taraf_id",
-        VarsayilanSirala: "e.islem_tarihi asc, e.id asc",
+        GrupKolonu: "dovizCinsi",
+        GrupSiraKolonu: "dovizSira",
+        VarsayilanSirala: "e.doviz_sira asc, e.doviz_cinsi asc, e.islem_tarihi asc, e.id asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",           "e.id",           "sayi",  "Id", Varsayilan: false),
@@ -774,12 +809,21 @@ public static class KaynakKatalogu
             new("islemNo",      "e.islem_no",     "metin", "Makbuz No", Varsayilan: false),
             new("belgeNo",      "e.belge_no",     "metin", "Belge No"),
             new("aciklama",     "e.aciklama",     "metin", "Aciklama", Genislik: 220),
-            new("yerelBorc",    "e.yerel_borc",   "para",  "Borc",   Hizalama: "sag", Bicim: "#,##0.00"),
-            new("yerelAlacak",  "e.yerel_alacak", "para",  "Alacak", Hizalama: "sag", Bicim: "#,##0.00"),
-            new("yerelBakiye",  "e.yerel_bakiye", "para",  "Bakiye", Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false, Filtrelenebilir: false),
+            // GRUP para biriminde: satirin kendi biriminde borc/alacak/bakiye.
+            //   Grup basligi hangi birim oldugunu soyler, kolon basliginda tekrar
+            //   edilmez ("Doviz Borc" gibi bir baslik gruplu ekranda gereksiz).
+            new("borc",         "e.borc",         "para",  "Borc",   Hizalama: "sag", Bicim: "#,##0.00", SadeceGrupToplami: true),
+            new("alacak",       "e.alacak",       "para",  "Alacak", Hizalama: "sag", Bicim: "#,##0.00", SadeceGrupToplami: true),
+            new("dovizKuru",    "e.doviz_kuru",   "para",  "Kur",    Hizalama: "sag", Bicim: "#,##0.0000"),
+            // Yerel karsilik HAREKETIN KENDI KURUYLA (kayit anindaki), ekstre
+            //   gununun kuruyla degil - gecmise donuk ekstre hep ayni cikmali.
+            new("yerelBorc",    "e.yerel_borc",   "para",  "Yerel Borc",   Hizalama: "sag", Bicim: "#,##0.00"),
+            new("yerelAlacak",  "e.yerel_alacak", "para",  "Yerel Alacak", Hizalama: "sag", Bicim: "#,##0.00"),
+            // Bakiye TOPLANMAZ - grubun son satirindaki deger kapanis bakiyesidir.
+            new("bakiye",       "e.bakiye",       "para",  "Bakiye", Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false, Filtrelenebilir: false, SadeceGrupToplami: true, GrupKapanisi: true),
+            new("yerelBakiye",  "e.yerel_bakiye", "para",  "Yerel Bakiye", Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false, SadeceGrupToplami: true, GrupKapanisi: true),
             new("dovizCinsi",   "e.doviz_cinsi",  "metin", "Doviz",  Hizalama: "orta", Varsayilan: false),
-            new("borc",         "e.borc",         "para",  "Doviz Borc",   Hizalama: "sag", Varsayilan: false),
-            new("alacak",       "e.alacak",       "para",  "Doviz Alacak", Hizalama: "sag", Varsayilan: false),
+            new("dovizSira",    "e.doviz_sira",   "sayi",  "Doviz Sira", Varsayilan: false),
             new("planTarihi",   "e.plan_tarihi",  "tarih", "Vade", Hizalama: "orta", Bicim: "dd.MM.yyyy", Varsayilan: false),
             new("subeId",       "e.sube_id",      "sayi",  "Sube", Varsayilan: false)
         });

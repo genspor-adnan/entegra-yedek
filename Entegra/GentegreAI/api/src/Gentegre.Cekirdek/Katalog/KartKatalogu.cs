@@ -17,6 +17,12 @@ public sealed record KartAlani(
     //   Tam secenek listesi VeriDeposu.KodTablosuBeyazListe'de whitelist'li tablolardan
     //   "select id, ad from <tablo> where aktif = 1 order by ad" ile cekilir.
     string? KodTablosu = null,
+    // BAGLI SECIM: bu alanin secenekleri baska bir alanin degerine gore SUZULUR
+    //   (or. Şube -> BagliAlan "bankaId"). Gorunum ust_id kolonunu doner; kart
+    //   yalniz ust_id = secili ust olan satirlari gosterir. Ust degisince, artik
+    //   gecerli olmayan alt deger TEMIZLENIR - yoksa "Ziraat + Akbank subesi"
+    //   gibi tutarsiz kayit olusur.
+    string? BagliAlan = null,
     string? Baslik = null,         // form etiketi; bos ise Ad'dan uretilir
     string? Grup = null,           // form bolumu / SEKME: "Kimlik", "Iletisim", "Mali"
     // Sekme DEGIL - ayni sekme icinde mockup'taki gibi kucuk alt-baslik
@@ -69,6 +75,24 @@ public sealed record DetayTanimi(
 /// <summary>Silmeyi engelleyen bag. Adet > 0 ise 422 IS_KURALI doner (API §3.3).</summary>
 public sealed record SilmeEngeli(string Tablo, string Kolon, string Aciklama);
 
+/// <summary>
+/// DOVIZ KURALI — karttaki para birimi / kur / tutar ucgeni.
+///
+/// Yerel para (ayar <c>genel.yerel_para</c>) disinda bir birim secilirse kur
+/// islem tarihinin kurundan OTOMATIK gelir ve yerel karsilik hesaplanir.
+/// Kullanici kuru elle degistirebilir (banka/anlasma kuru); yerel tutar HER
+/// ZAMAN sunucuda tutar x kur olarak yeniden hesaplanir - arayuzden gelen
+/// yerel tutara guvenilmez (API §3.2: hesaplanan alan istemciden alinmaz).
+///
+/// Yerel parada kur 1'e sabitlenir; "TL kaydin kuru 41" gibi bir sey olusamaz.
+/// </summary>
+public sealed record DovizKurali(
+    string CinsAlani,      // "dovizCinsi"
+    string KurAlani,       // "dovizKuru"
+    string TutarAlani,     // "tutar"
+    string YerelAlani,     // "yerelTutar" - Yazilabilir:false olmali
+    string? TarihAlani = null);  // kurun okunacagi tarih alani ("tarih")
+
 public sealed record KartTanimi(
     string Ad,                     // yol parcasi: "cari"
     string YetkiKodu,
@@ -85,7 +109,10 @@ public sealed record KartTanimi(
     // YENI kayitta acilir acilmaz taraf (cari) secim ekrani acilsin mi - deger,
     //   secimin yazilacagi alan adidir ("tarafId"). Belge kartindaki desenin
     //   generic kartlardaki karsiligi; kullanici isterse sonra degistirir.
-    string? AcilistaTarafSecimi = null
+    string? AcilistaTarafSecimi = null,
+    // Kartta para birimi / kur / tutar ucgeni varsa (cek-senet): yerel para
+    //   disinda bir birim secilince kur otomatik gelir, yerel tutar hesaplanir.
+    DovizKurali? Doviz = null
 )
 {
     private Dictionary<string, KartAlani>? _dizin;
@@ -740,7 +767,7 @@ public static class KartKatalogu
             // Banka ve sube artik TANIM tablosundan secilir (109): elle yazilinca ayni
             //   banka uc farkli yazimla kaydediliyordu ("Ziraat", "T.C. Ziraat...").
             new("bankaId",         "banka_id",          "kod",   KodTablosu: "public.v_banka_lookup", Baslik: "Banka", Grup: "Genel", AltGrup: "Banka Bilgileri"),
-            new("bankaSubeId",     "banka_sube_id",     "kod",   KodTablosu: "public.v_banka_sube_lookup", Baslik: "Şube", Grup: "Genel", AltGrup: "Banka Bilgileri"),
+            new("bankaSubeId",     "banka_sube_id",     "kod",   KodTablosu: "public.v_banka_sube_lookup", BagliAlan: "bankaId", Baslik: "Şube", Grup: "Genel", AltGrup: "Banka Bilgileri"),
             new("hesapNo",         "hesap_no",          "metin", EnFazlaUzunluk: 30, Baslik: "Hesap No", Grup: "Genel", AltGrup: "Banka Bilgileri"),
             new("iban",            "iban",              "metin", EnFazlaUzunluk: 34, Baslik: "IBAN", Grup: "Genel", AltGrup: "Banka Bilgileri"),
             new("komisyonOrani",   "komisyon_orani",    "para",  Baslik: "Komisyon %", Grup: "Genel", AltGrup: "POS / Kart"),
@@ -1018,6 +1045,10 @@ public static class KartKatalogu
               ["dovizCinsi"] = "TL", ["dovizKuru"] = 1m },
         // Yeni cek/senette ilk is kimin kagidi oldugunu secmektir.
         AcilistaTarafSecimi: "tarafId",
+        // TL disi bir para birimi secilirse kur cek tarihinin kurundan gelir ve
+        //   yerel karsilik (yerelTutar) hesaplanir - portfoy toplami tek para
+        //   biriminde okunabilsin diye.
+        Doviz: new DovizKurali("dovizCinsi", "dovizKuru", "tutar", "yerelTutar", "tarih"),
         Alanlar: new KartAlani[]
         {
             new("id",            "id",              "sayi",  Yazilabilir: false),
@@ -1038,8 +1069,11 @@ public static class KartKatalogu
             new("tutar",         "tutar",           "para",  Zorunlu: true, Baslik: "Tutar", Grup: "Genel", AltGrup: "Tutar / Vade"),
             new("dovizCinsi",    "doviz_cinsi",     "kod",   SabitKodlar: DovizKodlari, Baslik: "Para Birimi", Grup: "Genel", AltGrup: "Tutar / Vade"),
             new("dovizKuru",     "doviz_kuru",      "para",  Baslik: "Kur", Grup: "Genel", AltGrup: "Tutar / Vade"),
+            // Yerel karsilik SUNUCUDA hesaplanir (tutar x kur) - kullanici
+            //   yazamaz; yoksa kurla tutarsiz bir yerel tutar kaydedilebilirdi.
+            new("yerelTutar",    "yerel_tutar",     "para",  Yazilabilir: false, Baslik: "Yerel Tutar", Grup: "Genel", AltGrup: "Tutar / Vade"),
             new("bankaId",       "banka_id",        "kod",   KodTablosu: "public.v_banka_lookup", Baslik: "Banka", Grup: "Genel", AltGrup: "Banka"),
-            new("bankaSubeId",   "banka_sube_id",   "kod",   KodTablosu: "public.v_banka_sube_lookup", Baslik: "Şube", Grup: "Genel", AltGrup: "Banka"),
+            new("bankaSubeId",   "banka_sube_id",   "kod",   KodTablosu: "public.v_banka_sube_lookup", BagliAlan: "bankaId", Baslik: "Şube", Grup: "Genel", AltGrup: "Banka"),
             new("hesapNo",       "hesap_no",        "metin", EnFazlaUzunluk: 30, Baslik: "Hesap No", Grup: "Genel", AltGrup: "Banka"),
             new("hesapId",       "hesap_id",        "kod",   Yazilabilir: false, KodTablosu: "public.v_hesap_lookup", Baslik: "Bulunduğu Hesap", Grup: "Genel", AltGrup: "Banka"),
             new("projeId",       "proje_id",        "kod",   KodTablosu: "public.v_proje_lookup", Baslik: "Proje", Grup: "Genel", AltGrup: "Diğer"),
