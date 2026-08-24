@@ -256,7 +256,10 @@ public static class KartKatalogu
         YetkiKodu: "cari",
         Tablo: "public.taraf",
         LogTabloId: 71,                       // GENINI -11110: 71 = Cari
-        SabitKosul: "(musteri = 1 or tedarikci = 1)",
+        // ADAY (122) da bu kartla acilir: sabit kosul adayi disarida birakirsa
+        //   kayit yazilir ama geri OKUNAMAZ ("Nullable object must have a
+        //   value") - kisi kartinda ayni tuzak yasanmisti.
+        SabitKosul: "(musteri = 1 or tedarikci = 1 or aday = 1)",
         SubeKolonu: null,                     // ana veri - subeler arasi ORTAK (019 modeli)
         KapsamKolonu: "id",
         YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["musteri"] = (short)1, ["durum"] = (short)1 },
@@ -272,6 +275,10 @@ public static class KartKatalogu
             //   (bkz. GenForm.tsx kaynak==='cari'), Kisi Genel sekmesinde kaldi.
             new("musteri",     "musteri",      "mantik", Baslik: "Musteri"),
             new("tedarikci",   "tedarikci",    "mantik", Baslik: "Tedarikci"),
+            // ADAY (122): henuz musteri olmayan firma. Anlasma saglaninca
+            //   musteri=1 / aday=0 olur - AYNI kayit, gecmisi (firsat, gorev,
+            //   adres, ilgili kisi) yerinde kalir.
+            new("aday",        "aday",         "mantik", Baslik: "Aday"),
             new("kisi",        "kisi",         "mantik", Baslik: "Kisi"),
             // "Mali" -> "Fatura Bilgileri" (mockup adi birebir; AltGrup ile mockup'un iki
             //   kutusuna ayrildi: Fatura / Vergi Kimligi + e-Belge Ayarlari. Mockup'taki XSLT/

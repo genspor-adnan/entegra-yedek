@@ -476,7 +476,15 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
       const yeni = deger[a.ad];
 
       if (yeniMi) {
-        if (a.tip === 'mantik') { if (yeni) govde[a.ad] = true; return }
+        if (a.tip === 'mantik') {
+          if (yeni) { govde[a.ad] = true; return }
+          // EKRAN varsayilani alani acikca FALSE yaptiysa bunu SUNUCUYA SOYLE:
+          //   sessizce atlanirsa katalog varsayilani devreye girer ve Aday
+          //   Musterisi "musteri" olarak, Tedarikci de "musteri+tedarikci"
+          //   olarak kaydedilirdi (rol bayraklari birbirine karisiyordu).
+          if (yeniKayitVarsayilanlari && a.ad in yeniKayitVarsayilanlari) govde[a.ad] = false;
+          return;
+        }
         if (yeni === '' || yeni === null || yeni === undefined) return;
         govde[a.ad] = yeni;
         return;
@@ -486,7 +494,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
       govde[a.ad] = a.tip === 'mantik' ? Boolean(yeni) : (yeni === '' ? null : yeni);
     });
     return govde;
-  }, [meta, deger, ilkDeger, yeniMi]);
+  }, [meta, deger, ilkDeger, yeniMi, yeniKayitVarsayilanlari]);
 
   const kaydedilmemisDegisiklikVar = useMemo(() => {
     const kartDegisti = meta?.alanlar.some(a => {

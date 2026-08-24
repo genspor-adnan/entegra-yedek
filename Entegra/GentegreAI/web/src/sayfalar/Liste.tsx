@@ -189,6 +189,29 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         case 'hesap.ekstre':
           if (satir) git(`/hesap-ekstre?hesapId=${satir.id}`);
           return;
+        // ADAY -> MÜŞTERİ (122): kayit TASINMAZ, yalniz rol bayragi degisir.
+        //   Boylece firsat/gorev/adres/ilgili kisi gecmisi ayni kayitta kalir;
+        //   yeni bir cari acilsaydi butun bu baglar kirilirdi.
+        case 'aday.donustur': {
+          if (!satir) return;
+          const ad = String(satir.unvan ?? satir.ad ?? satir.id);
+          if (!confirm(`"${ad}" müşteriye dönüştürülsün mü?
+
+` +
+                       "Kayıt Müşteri Listesi'ne geçer; fırsat, görev ve adres geçmişi aynı kalır.")) return;
+          void (async () => {
+            try {
+              const k = await api.kartOku('cari', Number(satir.id));
+              await api.kartGuncelle('cari', Number(satir.id),
+                { surum: k.kart.surum as string | undefined,
+                  kart: { musteri: true, aday: false } });
+              setYenile(y => y + 1);
+            } catch (h) {
+              alert(h instanceof ApiHatasi ? h.message : String(h));
+            }
+          })();
+          return;
+        }
         case 'genel.yazdir': alert('Yazdirma henuz baglanmadi.'); return;
       }
 
@@ -798,6 +821,18 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     toplam: ['tahminiTutar', 'agirlikliTutar'],
     yerTutucuSekmeler: ['Teklifler', 'Yorum / Medya', 'Ek Alanlar'],
     menuGrup: 'CRM', menuAd: 'Satış Fırsatları', ic: '🎯', yetkiKodu: 'firsat',
+  },
+  {
+    // ADAY MÜŞTERİLER (db/122): henuz musteri olmayan firmalar. AYNI taraf
+    //   tablosu - anlasma saglaninca kayit tasinmaz, yalniz bayrak degisir
+    //   (musteri=1, aday=0) ve Musteri Listesi'nde gorunmeye baslar.
+    kaynak: 'cari', rota: 'aday', baslik: 'Aday Müşteriler',
+    yol: 'CRM › Aday Müşteriler', kartYolu: '/aday', aksiyonEkrani: 'aday-liste',
+    sabitFiltre: { alan: 'aday', op: 'esit', deger: 1 },
+    yeniKayitVarsayilanlari: { aday: true, musteri: false, tedarikci: false },
+    cipler: DURUM_CIPLERI,
+    yerTutucuSekmeler: ['Mali Durum', 'Yorum / Medya', 'Ek Alanlar'],
+    menuGrup: 'CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'cari',
   },
   {
     // Kullanici: "Stok altına Stok Listesi [taşı]" - tek ogeli grup, digerleriyle ayni desen.

@@ -122,7 +122,7 @@ public static class KaynakKatalogu
         Ad: "cari",
         YetkiKodu: "cari",
         Kaynak: "public.taraf t",
-        SabitKosul: "(t.musteri = 1 or t.tedarikci = 1)",
+        SabitKosul: "(t.musteri = 1 or t.tedarikci = 1 or t.aday = 1)",
         VarsayilanSirala: "t.unvan asc",
         KapsamKolonu: "t.id",
         Kolonlar: new KolonTanimi[]
@@ -139,6 +139,7 @@ public static class KaynakKatalogu
             new("adres",        "(select ta.adres from public.taraf_adres ta where ta.taraf_id = t.id and ta.varsayilan = 1 limit 1)",
                                                     "metin", "Adres"),
             new("musteri",      "t.musteri",       "mantik","Musteri",       Hizalama: "orta"),
+            new("aday",         "t.aday",          "mantik","Aday",          Hizalama: "orta", Varsayilan: false),
             new("tedarikci",    "t.tedarikci",     "mantik","Tedarikci",     Hizalama: "orta"),
             new("grup",         "t.grup",          "kod",   "Grup",          Varsayilan: false),
             new("kategori",     "t.kategori",      "kod",   "Kategori",      Varsayilan: false),

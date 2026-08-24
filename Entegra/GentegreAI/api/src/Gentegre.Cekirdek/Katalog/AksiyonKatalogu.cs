@@ -139,6 +139,22 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            // Aday musteriler (122). "Müşteriye Dönüştür" kaydi TASIMAZ, bayragi
+            //   degistirir - firsat/gorev/adres gecmisi ayni kayitta kalir.
+            ["aday-liste"] = new AksiyonTanimi[]
+            {
+                new("aday.yeni",      "＋ Yeni",   "cari", Kisayol: "Ctrl+N",
+                    KaynakKodu: "cari", Islem: Islem.Ekle, Sira: 10),
+                new("aday.duzenle",   "✎ Düzenle", "cari", Kisayol: "Enter",
+                    KaynakKodu: "cari", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("aday.donustur",  "🤝 Müşteriye Dönüştür", "cari",
+                    KaynakKodu: "cari", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30),
+                new("aday.sil",       "Sil",       "cari", Hedef: "sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "cari", Islem: Islem.Sil, KayitGerekir: true, Sira: 40),
+                new("genel.yazdir",   "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             // Hesap ekranlari (Kasa / Banka / POS / Kredi Karti / Kredi) - hepsi
             //   ayni 'hesap' kaynagi, tur'e gore ayri liste.
             ["hesap-liste"] = new AksiyonTanimi[]
