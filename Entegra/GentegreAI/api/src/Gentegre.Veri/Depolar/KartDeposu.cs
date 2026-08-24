@@ -175,6 +175,8 @@ public sealed class KartDeposu
             //   hizmet/masraf/proje "durum" kullandigi icin gorunumle uyarlandi.
             "public.v_hesap_lookup", "public.v_proje_lookup", "public.v_hesap_plani_lookup",
             "public.v_masraf_lookup", "public.v_hizmet_lookup", "public.v_masraf_merkezi_lookup",
+            // Banka tanimlari (109) - cek/senet ve hesap kartlarindaki secim.
+            "public.v_banka_lookup", "public.v_banka_sube_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

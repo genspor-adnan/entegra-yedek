@@ -121,6 +121,7 @@ public static class KartKatalogu
         Ekle(Hesap());
         Ekle(Proje());
         Ekle(Gorev());
+        Ekle(Banka());
         Ekle(MasrafMerkezi());
         Ekle(HesapPlani());
         Ekle(CekSenet());
@@ -736,8 +737,10 @@ public static class KartKatalogu
             new("bagliHesapId",    "bagli_hesap_id",    "kod",   KodTablosu: "public.v_hesap_lookup", Baslik: "Bağlı Hesap", Grup: "Genel", AltGrup: "Tanımlama"),
             new("altTur",          "alt_tur",           "kod",   KodListesi: "hesap.alt_tur", Baslik: "Alt Tür", Grup: "Genel", AltGrup: "Tanımlama"),
             new("aciklama",        "aciklama",          "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama", Grup: "Genel", AltGrup: "Tanımlama"),
-            new("bankaAdi",        "banka_adi",         "metin", EnFazlaUzunluk: 60, Baslik: "Banka", Grup: "Genel", AltGrup: "Banka Bilgileri"),
-            new("bankaSubesi",     "banka_subesi",      "metin", EnFazlaUzunluk: 60, Baslik: "Şube", Grup: "Genel", AltGrup: "Banka Bilgileri"),
+            // Banka ve sube artik TANIM tablosundan secilir (109): elle yazilinca ayni
+            //   banka uc farkli yazimla kaydediliyordu ("Ziraat", "T.C. Ziraat...").
+            new("bankaId",         "banka_id",          "kod",   KodTablosu: "public.v_banka_lookup", Baslik: "Banka", Grup: "Genel", AltGrup: "Banka Bilgileri"),
+            new("bankaSubeId",     "banka_sube_id",     "kod",   KodTablosu: "public.v_banka_sube_lookup", Baslik: "Şube", Grup: "Genel", AltGrup: "Banka Bilgileri"),
             new("hesapNo",         "hesap_no",          "metin", EnFazlaUzunluk: 30, Baslik: "Hesap No", Grup: "Genel", AltGrup: "Banka Bilgileri"),
             new("iban",            "iban",              "metin", EnFazlaUzunluk: 34, Baslik: "IBAN", Grup: "Genel", AltGrup: "Banka Bilgileri"),
             new("komisyonOrani",   "komisyon_orani",    "para",  Baslik: "Komisyon %", Grup: "Genel", AltGrup: "POS / Kart"),
@@ -837,6 +840,48 @@ public static class KartKatalogu
 
             new("tamamlanma", "tamamlanma", "tarih", Yazilabilir: false),
             new("eklemeTarihi", "ekleme_tarihi", "tarih", Yazilabilir: false)
+        });
+
+
+    // --------------------------------------------------------------- banka ----
+    /// <summary>
+    /// Banka tanimi ve SUBELERI (109). Subeler ayri bir ekran degil, bankanin
+    /// detay tablosu: sube tek basina anlamsizdir, hep bir bankaya aittir.
+    /// </summary>
+    private static KartTanimi Banka() => new(
+        Ad: "banka",
+        YetkiKodu: "hesap",                   // banka tanimi kasa/banka ekibinin isi
+        Tablo: "public.banka",
+        LogTabloId: 919,
+        SubeKolonu: null,                     // ana veri - subeler arasi ortak
+        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["aktif"] = (short)1 },
+        Alanlar: new KartAlani[]
+        {
+            new("id",      "id",      "sayi",  Yazilabilir: false),
+            new("kod",     "kod",     "metin", EnFazlaUzunluk: 10, Baslik: "EFT Kodu", Grup: "Kimlik"),
+            new("ad",      "ad",      "metin", Zorunlu: true, EnFazlaUzunluk: 120, Baslik: "Banka Adı", Grup: "Kimlik"),
+            new("kisaAd",  "kisa_ad", "metin", EnFazlaUzunluk: 40, Baslik: "Kısa Ad", Grup: "Kimlik"),
+            new("aktif",   "aktif",   "mantik", Baslik: "Aktif", Grup: "Kimlik"),
+            new("swift",   "swift",   "metin", EnFazlaUzunluk: 15, Baslik: "SWIFT / BIC", Grup: "Genel"),
+            new("sira",    "sira",    "sayi",  Baslik: "Sıra", Grup: "Genel"),
+        },
+        Detaylar: new[]
+        {
+            new DetayTanimi("subeler", "public.banka_sube", "banka_id", new KartAlani[]
+            {
+                new("id",      "id",      "sayi",  Yazilabilir: false),
+                new("kod",     "kod",     "metin", EnFazlaUzunluk: 10, Baslik: "Kod"),
+                new("ad",      "ad",      "metin", Zorunlu: true, EnFazlaUzunluk: 120, Baslik: "Şube Adı"),
+                new("il",      "il",      "metin", EnFazlaUzunluk: 60, Baslik: "İl"),
+                new("ilce",    "ilce",    "metin", EnFazlaUzunluk: 60, Baslik: "İlçe"),
+                new("telefon", "telefon", "metin", EnFazlaUzunluk: 30, Baslik: "Telefon"),
+                new("aktif",   "aktif",   "mantik", Baslik: "Aktif"),
+            }, Sirala: "ad", SubeKolonu: null, LogTabloId: 920, Baslik: "Şubeler")
+        },
+        SilmeEngelleri: new[]
+        {
+            new SilmeEngeli("public.hesap",     "banka_id", "Bu bankaya bagli hesap var, silinemez."),
+            new SilmeEngeli("public.cek_senet", "banka_id", "Bu bankaya bagli cek/senet var, silinemez."),
         });
 
     // --------------------------------------------------------------- proje ----
@@ -993,8 +1038,8 @@ public static class KartKatalogu
             new("tutar",         "tutar",           "para",  Zorunlu: true, Baslik: "Tutar", Grup: "Genel", AltGrup: "Tutar / Vade"),
             new("dovizCinsi",    "doviz_cinsi",     "kod",   SabitKodlar: DovizKodlari, Baslik: "Para Birimi", Grup: "Genel", AltGrup: "Tutar / Vade"),
             new("dovizKuru",     "doviz_kuru",      "para",  Baslik: "Kur", Grup: "Genel", AltGrup: "Tutar / Vade"),
-            new("bankaAdi",      "banka_adi",       "metin", EnFazlaUzunluk: 60, Baslik: "Banka", Grup: "Genel", AltGrup: "Banka"),
-            new("bankaSubesi",   "banka_subesi",    "metin", EnFazlaUzunluk: 60, Baslik: "Şube", Grup: "Genel", AltGrup: "Banka"),
+            new("bankaId",       "banka_id",        "kod",   KodTablosu: "public.v_banka_lookup", Baslik: "Banka", Grup: "Genel", AltGrup: "Banka"),
+            new("bankaSubeId",   "banka_sube_id",   "kod",   KodTablosu: "public.v_banka_sube_lookup", Baslik: "Şube", Grup: "Genel", AltGrup: "Banka"),
             new("hesapNo",       "hesap_no",        "metin", EnFazlaUzunluk: 30, Baslik: "Hesap No", Grup: "Genel", AltGrup: "Banka"),
             new("hesapId",       "hesap_id",        "kod",   Yazilabilir: false, KodTablosu: "public.v_hesap_lookup", Baslik: "Bulunduğu Hesap", Grup: "Genel", AltGrup: "Banka"),
             new("projeId",       "proje_id",        "kod",   KodTablosu: "public.v_proje_lookup", Baslik: "Proje", Grup: "Genel", AltGrup: "Diğer"),

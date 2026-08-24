@@ -78,6 +78,7 @@ public static class KaynakKatalogu
         Ekle(CekSenet());
         Ekle(Proje());
         Ekle(Gorev());
+        Ekle(BankaListesi());
         Ekle(MasrafMerkezi());
         Ekle(HesapPlani());
         Ekle(KasaIslemTuru());
@@ -937,6 +938,29 @@ public static class KaynakKatalogu
         new("durum",       "b.durum",        "sayi",  "Durum Kodu", Hizalama: "orta", Varsayilan: false),
         new("subeId",      "b.sube_id",      "sayi",  "Şube", Varsayilan: false),
     };
+
+    // --------------------------------------------------------------- banka ----
+    private static KaynakTanimi BankaListesi() => new(
+        Ad: "banka",
+        YetkiKodu: "hesap",
+        Kaynak: "public.banka b",
+        SubeKolonu: null,
+        VarsayilanSirala: "b.sira, b.ad",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",      "b.id",      "sayi",  "Id", Varsayilan: false),
+            new("kod",     "b.kod",     "metin", "EFT Kodu", Hizalama: "orta"),
+            new("ad",      "b.ad",      "metin", "Banka Adı", Genislik: 280),
+            new("kisaAd",  "b.kisa_ad", "metin", "Kısa Ad"),
+            new("swift",   "b.swift",   "metin", "SWIFT", Varsayilan: false),
+            new("subeSayisi",
+                "(select count(*) from public.banka_sube s where s.banka_id = b.id)",
+                                        "sayi",  "Şube", Hizalama: "sag",
+                                        Siralanabilir: false, Filtrelenebilir: false),
+            new("durumAdi", "case b.aktif when 1 then 'Aktif' else 'Pasif' end",
+                                        "metin", "Durum", Hizalama: "orta"),
+            new("aktif",   "b.aktif",   "sayi",  "Durum Kodu", Varsayilan: false),
+        });
 
     // --------------------------------------------------- stok transferi ----
     // Ayni `belge` tablosu, tur 20. Ayri kaynak: transferde CARI ve TUTAR yoktur,

@@ -101,7 +101,12 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Pro
   const satirEkle = () => {
     if (acikAdresSatiriVar) return;
     const yeni: Satir = {};
-    alanlar.forEach(a => { yeni[a.ad] = a.tip === 'mantik' ? 0 : '' });
+    // "aktif" alani yeni satirda ACIK baslar: kullanici bir kayit eklerken onu
+    //   pasif olsun diye eklemez. Kapali baslayinca (banka subesi ornegi) satir
+    //   kaydediliyor ama secim listelerinde HIC gorunmuyordu.
+    alanlar.forEach(a => {
+      yeni[a.ad] = a.tip === 'mantik' ? (a.ad === 'aktif' ? 1 : 0) : '';
+    });
     if (meta.ad === 'adresler') {
       yeni.ulke = VARSAYILAN_ULKE;
       // Ilk satir (henuz hic adres yok) - Adres Tipi varsayilan "Fatura" (kullanici:

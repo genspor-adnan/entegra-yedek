@@ -96,6 +96,19 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            // Banka tanimlari (db/109).
+            ["banka-liste"] = new AksiyonTanimi[]
+            {
+                new("banka.yeni",    "＋ Yeni",   "banka", Kisayol: "Ctrl+N",
+                    KaynakKodu: "hesap", Islem: Islem.Ekle, Sira: 10),
+                new("banka.duzenle", "✎ Düzenle", "banka", Kisayol: "Enter",
+                    KaynakKodu: "hesap", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("banka.sil",     "🗑 Sil",    "banka", Kisayol: "Del",
+                    KaynakKodu: "hesap", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+                new("genel.yazdir",  "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             // Gorev / hatirlatma / takvim (db/108): stok-liste ile ayni desen.
             //   "Tamamla" ayri bir aksiyon DEGIL - durum kartta degisir; listede
             //   tek tikla tamamlamak, ilerleme/tamamlanma alanlarini atlardi.

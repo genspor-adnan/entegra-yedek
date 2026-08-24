@@ -690,6 +690,17 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     toplam: ['yerelBakiye'],
     menuGrup: 'Banka', menuAd: 'Kredi Kartı', ic: '💳', yetkiKodu: 'hesap',
   },
+  {
+    // BANKA TANIMLARI (db/109): hesap ve cek/senet kartlarindaki banka secimini
+    //   besler. Subeler ayri ekran degil, banka kartinin detay tablosu.
+    kaynak: 'banka', baslik: 'Banka Tanımları', yol: 'Banka › Tanımlar',
+    kartYolu: '/banka', aksiyonEkrani: 'banka-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Banka', menuAd: 'Banka Tanımları', ic: '🏛️', yetkiKodu: 'hesap',
+  },
   // CEK ve SENET AYRI listeler (kullanici karari): ayni `cek-senet` kaynagi,
   //   sabit filtre tur=1 / tur=2. Ikisi ayni tabloda durur cunku portfoy,
   //   ciro ve tahsil akislari birebir aynidir - degisen yalnizca kagit turu.
