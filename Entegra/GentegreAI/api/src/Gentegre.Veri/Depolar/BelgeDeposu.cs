@@ -965,11 +965,16 @@ public sealed class BelgeDeposu
         //   (stokDurumDegis satir bazinda 0 gelir).
         if (!turStokEtkiler || JsonSayi(satir, "stokDurumDegis", 1) == 0) return;
 
-        // CIKIS: lot girilmez, mevcut lotlardan SECILIR ve o lotun kalani duser.
-        if (BelgeTuru.CikisMi(belgeTur))
+        // CIKIS ve TRANSFER: lot girilmez, mevcut lotlardan SECILIR.
+        //   Fark tuketimin sonucunda: cikista mal gider (yeni satirin kalani 0),
+        //   transferde mal DEPO DEGISTIRIR - ayni lot stokta durmaya devam eder,
+        //   o yuzden yeni satir kalanini TASIR. Aksi halde depolar arasi her
+        //   transfer lot kalanini eritir, urun stokta gorunur ama lotu kalmaz.
+        if (BelgeTuru.CikisMi(belgeTur) || BelgeTuru.TransferMi(belgeTur))
         {
             await IzlemDusAsync(baglanti, islem, belgeId, satirId, stokId, sira,
-                                belgeTur, stokIzleme, adet, izlemler, iptal);
+                                belgeTur, stokIzleme, adet, izlemler,
+                                kalaniTasi: BelgeTuru.TransferMi(belgeTur), iptal);
             return;
         }
 
@@ -1052,7 +1057,7 @@ public sealed class BelgeDeposu
     /// </summary>
     private static async Task IzlemDusAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, int satirId, int stokId, int sira, int belgeTur, int stokIzleme,
-        decimal adet, List<JsonElement> izlemler, CancellationToken iptal)
+        decimal adet, List<JsonElement> izlemler, bool kalaniTasi, CancellationToken iptal)
     {
         if (izlemler.Count == 0)
             throw GentegreHatasi.Dogrulama($"{sira}. satir icin lot secilmeli.",
@@ -1074,7 +1079,7 @@ public sealed class BelgeDeposu
 
             toplam += miktar;
             await LottanDusAsync(baglanti, islem, belgeId, satirId, stokId, sira,
-                                 belgeTur, stokIzleme, seriLotId, miktar, iptal);
+                                 belgeTur, stokIzleme, seriLotId, miktar, kalaniTasi, iptal);
         }
 
         if (Math.Abs(toplam - adet) > 0.0001m)
@@ -1092,7 +1097,7 @@ public sealed class BelgeDeposu
     /// </summary>
     private static async Task LottanDusAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, int satirId, int stokId, int sira, int belgeTur, int stokIzleme,
-        int seriLotId, decimal miktar, CancellationToken iptal)
+        int seriLotId, decimal miktar, bool kalaniTasi, CancellationToken iptal)
     {
         var kalanIstek = miktar;
 
@@ -1139,7 +1144,7 @@ public sealed class BelgeDeposu
                 insert into public.stok_izleme
                     (stok_id, seri_lot_id, izlem_tur, belge_tur, belge_id, belge_satir_id,
                      adet, kalan, durum, donus_id, ekleyen)
-                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, 0, 0, @p7, 0)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, 0, @p8, 0)
                 """, baglanti, islem);
             komut.Parameters.AddWithValue("p0", stokId);
             komut.Parameters.AddWithValue("p1", seriLotId);
@@ -1148,7 +1153,9 @@ public sealed class BelgeDeposu
             komut.Parameters.AddWithValue("p4", belgeId);
             komut.Parameters.AddWithValue("p5", satirId);
             komut.Parameters.AddWithValue("p6", pay);
-            komut.Parameters.AddWithValue("p7", kaynakId);
+            // TRANSFER: mal stokta kaliyor, yeni satir kalani tasir. CIKIS: 0.
+            komut.Parameters.AddWithValue("p7", kalaniTasi ? pay : 0m);
+            komut.Parameters.AddWithValue("p8", kaynakId);
             await komut.ExecuteNonQueryAsync(iptal);
         }
     }

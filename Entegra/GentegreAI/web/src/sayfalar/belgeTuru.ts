@@ -147,10 +147,11 @@ export function belgeTuruBilgisi(tur: number): BelgeTuruBilgisi {
     //   (alis irsaliyesi/faturasi, konsinye giris, giris fisi). Cikista lot
     //   girilmez SECILIR - mevcut stoktan, ayri ekran.
     girisIzlemi: (alis && !siparis && !tahakkuk) || tur === 3,
-    // Satis irsaliyesi/faturasi/fisi, konsinye cikis, cikis fisi ve transferin
-    //   CIKIS bacagi: lot girilmez, stoktakilerden secilir.
+    // Satis irsaliyesi/faturasi/fisi, konsinye cikis, cikis fisi ve TRANSFER:
+    //   lot girilmez, stoktakilerden secilir. Transferde mal stoktan CIKMAZ,
+    //   depo degistirir - lot kalani korunur (sunucu: kalaniTasi).
     cikisIzlemi: (!alis && !siparis && !tahakkuk && !talep
                   && (irsaliye || FATURA_TURLERI.has(tur) || tur === 16 || tur === 119))
-                 || tur === 4,
+                 || tur === 4 || transfer,
   };
 }
