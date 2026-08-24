@@ -476,6 +476,19 @@ table.grid tr.flt input {
    editlerin basladigi hizada dursun - 84px etiket kolonu + 8px bosluk. */
 .alan-izgara.ayar-formu .alan.tip-mantik { padding-left: 92px }
 .alan-hata { color: var(--hata); font-size: 11px }
+/* Kalem gridinde LOT DETAYI (master-detail): izlemli urunun altinda lotlari. */
+.lot-ok {
+  border: 0; background: none; cursor: pointer; color: var(--mor);
+  font-size: 11px; padding: 0 4px 0 0;
+}
+tr.lot-detay > td { background: #f7f9fc; padding: 0 0 0 26px }
+table.lot-tablo { width: auto; min-width: 420px; border-collapse: collapse; font-size: 11px; margin: 2px 0 4px }
+table.lot-tablo th {
+  text-align: left; color: var(--soluk); font-weight: 600; padding: 2px 12px 2px 0;
+  border-bottom: 1px solid var(--cizgi2);
+}
+table.lot-tablo td { padding: 2px 12px 2px 0; border: 0 }
+
 /* Otomatik doldurulan alanin altindaki aciklama (ör. "24.08.2026 kuru"). */
 .alan-notu { color: var(--soluk); font-size: 11px }
 .kod-ad { color: var(--soluk); font-size: 11px }

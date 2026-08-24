@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru, type ListeSatiri } from '../api/sozlesme';
@@ -333,6 +333,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [aktifSekme, setAktifSekme] = useState('kalem');
   /** Grid satir secimi (kirmizi Sil dugmesi bunlari siler). */
   const [seciliSatirlar, setSeciliSatirlar] = useState<Set<number>>(new Set());
+  /** Lot detayi KAPATILMIS kalemler. Lotlu kalem varsayilan ACIK gelir -
+      kullanici bakmak icin ayrica tiklamasin; isteyen oku ile kapatir. */
+  const [kapaliLotlar, setKapaliLotlar] = useState<Set<number>>(new Set());
   /** Shift ile ARALIK secimi icin son tiklanan satirin sirasi. */
   const sonTiklanan = useRef<number | null>(null);
   /** Acik kalem penceresi (adet / fiyat). Stok zaten secilmis olarak gelir. */
@@ -1284,8 +1287,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 const fiyat = Number(r.birimFiyat.replace(',', '.')) || 0;
                 const tutar = satirTutari(adet, fiyat, r.iskonto, r.iskonto2);
                 const secili = seciliSatirlar.has(r.anahtar);
+                // Izlemli kalemin lotlari ALTINDA acilir (master-detail):
+                //   hangi lottan kac adet oldugu kalemi acmadan gorunsun.
+                const lotlar = r.izlemler ?? [];
+                const acik = lotlar.length > 0 && !kapaliLotlar.has(r.anahtar);
+                const kolonSayisi = bilgi.kalem === 'miktar' ? 6 : bilgi.kalem === 'sade' ? 8 : 10;
                 return (
-                  <tr key={r.anahtar} className={secili ? 'secili' : ''}
+                  <Fragment key={r.anahtar}>
+                  <tr className={secili ? 'secili' : ''}
                       onClick={e => satirTikla(sira, e)}
                       onDoubleClick={() => !kilitli && setKalem(r)}>
                     <td className="hiza-orta">
@@ -1300,7 +1309,24 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                       {r.satirTur === 2 ? '🛠️' : '📦'}
                     </td>
                     <td><code>{r.stokKodu}</code></td>
-                    <td>{r.stokAdi || <span className="sonuk">(stok seçilmedi)</span>}</td>
+                    <td>
+                      {/* Lotlu kalemde ac/kapa oku - detay satirlari onun altinda. */}
+                      {lotlar.length > 0 && (
+                        <button type="button" className="lot-ok"
+                                title={acik ? 'Lotları gizle' : 'Lotları göster'}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  setKapaliLotlar(k => {
+                                    const y = new Set(k);
+                                    if (y.has(r.anahtar)) y.delete(r.anahtar); else y.add(r.anahtar);
+                                    return y;
+                                  });
+                                }}>
+                          {acik ? '▾' : '▸'}
+                        </button>
+                      )}
+                      {r.stokAdi || <span className="sonuk">(stok seçilmedi)</span>}
+                    </td>
                     <td className="sonuk">{r.aciklama}</td>
                     <td className="hiza-sag">{adet.toLocaleString('tr-TR')}</td>
                     {/* Iki iskonto varsa ikisi de gorunsun: "%10 + %5". */}
@@ -1309,6 +1335,40 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                     {bilgi.kalem !== 'miktar' && <td className="hiza-sag">{para.format(fiyat)}</td>}
                     {bilgi.kalem !== 'miktar' && <td className="hiza-sag"><b>{para.format(tutar)}</b></td>}
                   </tr>
+                  {/* DETAY: kalemin lot dagilimi. Kalem satirinin bir parcasi -
+                      ayri kolon basligi yok, kendi mini basligiyla gelir. */}
+                  {acik && lotlar.length > 0 && (
+                    <tr className="lot-detay">
+                      <td />
+                      <td colSpan={kolonSayisi - 1}>
+                        <table className="lot-tablo">
+                          <thead>
+                            <tr>
+                              <th>Lot No</th>
+                              <th>Seri No</th>
+                              <th>Ürt. Tarihi</th>
+                              <th>SKT</th>
+                              <th className="hiza-sag">Miktar</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {lotlar.map((z, li) => (
+                              <tr key={z.seriLotId ?? li}>
+                                <td><code>{z.lotNo || '—'}</code></td>
+                                <td>{z.seriNo || '—'}</td>
+                                <td>{z.uretimTarihi ? z.uretimTarihi.split('-').reverse().join('.') : '—'}</td>
+                                <td>{z.sonKullanmaTarihi ? z.sonKullanmaTarihi.split('-').reverse().join('.') : '—'}</td>
+                                <td className="hiza-sag">
+                                  {(Number(String(z.miktar).replace(',', '.')) || 0).toLocaleString('tr-TR')}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  )}
+                  </Fragment>
                 );
               })}
               {satirlar.length === 0 && (
