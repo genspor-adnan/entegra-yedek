@@ -723,6 +723,16 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'CRM', menuAd: 'Projeler', ic: '📁', yetkiKodu: 'proje',
   },
   {
+    // GOREV / HATIRLATMA / TAKVIM (db/108) - ana sayfa panelini besleyen kayitlar.
+    kaynak: 'gorev', baslik: 'Görevler', yol: 'CRM › Görevler', kartYolu: '/gorev',
+    cipler: [
+      { ad: 'Bekleyen',  filtre: { alan: 'durum', op: 'kucukEsit', deger: 1 } },
+      { ad: 'Tamamlanan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'CRM', menuAd: 'Görevler', ic: '✅', yetkiKodu: 'gorev',
+  },
+  {
     // Kullanici: "Stok altına Stok Listesi [taşı]" - tek ogeli grup, digerleriyle ayni desen.
     kaynak: 'stok', baslik: 'Stoklar', yol: 'Stok › Stok Karti', kartYolu: '/stok',
     aksiyonEkrani: 'stok-liste', cipler: DURUM_CIPLERI,

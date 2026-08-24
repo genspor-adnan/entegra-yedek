@@ -14,7 +14,9 @@ public sealed record PanelYaniti(
     IReadOnlyList<PanelKutusu> Kutular,
     IReadOnlyList<PanelSatiri> SonBelgeler,
     IReadOnlyList<PanelSatiri> KritikStok,
-    IReadOnlyList<PanelSatiri> BuyukBakiyeler);
+    IReadOnlyList<PanelSatiri> BuyukBakiyeler,
+    IReadOnlyList<PanelSatiri> Gorevler,
+    IReadOnlyList<PanelSatiri> Takvim);
 
 /// <summary>
 /// Ana sayfa paneli (giris_sayfasi.html mockup'i).
@@ -32,7 +34,8 @@ public sealed class PanelDeposu
 
     public PanelDeposu(VeriKaynagi veri) => _veri = veri;
 
-    public async Task<PanelYaniti> OkuAsync(int? subeId, CancellationToken iptal = default)
+    public async Task<PanelYaniti> OkuAsync(int? subeId, long? kullaniciTarafId,
+        CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
 
@@ -139,6 +142,28 @@ public sealed class PanelDeposu
                     $"{o.GetInt64(1)} hesap", "/kasa-hesap", "olumlu"));
         }
 
+        // ----------------------------------------------------- bekleyen gorev --
+        // "Bekleyen" = durum 0/1 (bitmemis). Gecikmis olan ayrica sayilir: panelde
+        //   alt satirda "N gecikti" olarak gorunur, kirmiziya buradan karar verilir.
+        long gecikenGorev = 0;
+        await using (var komut = new NpgsqlCommand("""
+            select count(*) filter (where durum in (0, 1)),
+                   count(*) filter (where durum in (0, 1) and termin is not null and termin < now())
+              from public.gorev
+             where (@p1::bigint is null or sorumlu_id = @p1 or sorumlu_id is null)
+            """, baglanti))
+        {
+            komut.Parameters.AddWithValue("p1", (object?)kullaniciTarafId ?? DBNull.Value);
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            if (await o.ReadAsync(iptal))
+            {
+                gecikenGorev = o.GetInt64(1);
+                kutular.Add(new("gorev", "Bekleyen Görev", o.GetInt64(0), "adet",
+                    gecikenGorev > 0 ? $"{gecikenGorev} tanesi gecikti" : "gecikme yok",
+                    "/gorev", gecikenGorev > 0 ? "hata" : ""));
+            }
+        }
+
         // ------------------------------------------------------- son belgeler --
         var sonBelgeler = new List<PanelSatiri>();
         await using (var komut = new NpgsqlCommand("""
@@ -194,7 +219,60 @@ public sealed class PanelDeposu
                     o.GetDecimal(3).ToString("N2"), "/cari"));
         }
 
-        return new PanelYaniti(kutular, sonBelgeler, kritik, bakiyeler);
+        // ------------------------------------------------- gorevlerim listesi --
+        // Once GECIKENLER, sonra termini en yakin olanlar. Sorumlusu bos gorevler
+        //   herkese gorunur (havuz isi) - kimse ustlenmemis demektir.
+        var gorevler = new List<PanelSatiri>();
+        await using (var komut = new NpgsqlCommand("""
+            select g.id, g.konu,
+                   case g.tur when 2 then 'Hatırlatma' when 3 then 'Görüşme'
+                              when 4 then 'Toplantı' else 'Görev' end
+                   || case when g.termin is null then ''
+                           else ' · ' || to_char(g.termin, 'DD.MM.YYYY') end,
+                   case when g.termin is not null and g.termin < now() then 'Gecikti'
+                        when g.durum = 1 then 'Devam'
+                        else 'Bekliyor' end
+              from public.gorev g
+             where g.durum in (0, 1)
+               and (@p1::bigint is null or g.sorumlu_id = @p1 or g.sorumlu_id is null)
+             order by (g.termin is not null and g.termin < now()) desc,
+                      g.termin nulls last, g.oncelik desc
+             limit 8
+            """, baglanti))
+        {
+            komut.Parameters.AddWithValue("p1", (object?)kullaniciTarafId ?? DBNull.Value);
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            while (await o.ReadAsync(iptal))
+                gorevler.Add(new(o.GetInt64(0), o.GetString(1), o.GetString(2),
+                                 o.GetString(3), "/gorev"));
+        }
+
+        // ---------------------------------------------------- yaklasan takvim --
+        // Onumuzdeki 14 gun: baslangici olan kayitlar (toplanti/gorusme takvimde
+        //   yer tutar). Terminle karistirmamak icin BASLANGIC'a bakilir.
+        var takvim = new List<PanelSatiri>();
+        await using (var komut = new NpgsqlCommand("""
+            select g.id, g.konu,
+                   to_char(g.baslangic, 'DD.MM.YYYY HH24:MI'),
+                   case g.tur when 4 then 'Toplantı' when 3 then 'Görüşme'
+                              when 2 then 'Hatırlatma' else 'Görev' end
+              from public.gorev g
+             where g.durum in (0, 1) and g.baslangic is not null
+               and g.baslangic >= date_trunc('day', now())
+               and g.baslangic < now() + interval '14 days'
+               and (@p1::bigint is null or g.sorumlu_id = @p1 or g.sorumlu_id is null)
+             order by g.baslangic
+             limit 8
+            """, baglanti))
+        {
+            komut.Parameters.AddWithValue("p1", (object?)kullaniciTarafId ?? DBNull.Value);
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            while (await o.ReadAsync(iptal))
+                takvim.Add(new(o.GetInt64(0), o.GetString(1), o.GetString(2),
+                               o.GetString(3), "/gorev"));
+        }
+
+        return new PanelYaniti(kutular, sonBelgeler, kritik, bakiyeler, gorevler, takvim);
     }
 
     /// <summary>Panel satirindan hangi liste ekranina gidilecegi (kart modal olarak acilir).</summary>

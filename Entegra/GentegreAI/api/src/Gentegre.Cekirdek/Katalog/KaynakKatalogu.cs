@@ -77,6 +77,7 @@ public static class KaynakKatalogu
         Ekle(Hesap());
         Ekle(CekSenet());
         Ekle(Proje());
+        Ekle(Gorev());
         Ekle(MasrafMerkezi());
         Ekle(HesapPlani());
         Ekle(KasaIslemTuru());
@@ -1036,6 +1037,56 @@ public static class KaynakKatalogu
                 new("genelToplam", "b.genel_toplam", "para",  "Tutar", Hizalama: "sag", Bicim: "#,##0.00"),
             }.Concat(StokBelgesiKuyrukKolonlari()).ToArray());
     }
+
+    // --------------------------------------------------------------- gorev ----
+    // Gorev / hatirlatma / takvim (108). Liste katmani kod cozmez: tur, durum ve
+    //   oncelik SQL'de metne cevrilir, ham kodlar cip filtreleri icin gizli kalir.
+    private static KaynakTanimi Gorev() => new(
+        Ad: "gorev",
+        YetkiKodu: "gorev",
+        Kaynak: """
+            public.gorev g
+            left join public.taraf so on so.id = g.sorumlu_id
+            left join public.taraf ta on ta.id = g.taraf_id
+            left join public.proje pr on pr.id = g.proje_id
+            """,
+        SubeKolonu: null,                    // gorev subeler arasi paylasilir
+        VarsayilanSirala: "coalesce(g.termin, g.baslangic) nulls last, g.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",        "g.id",        "sayi",  "Id", Varsayilan: false),
+            new("gorevNo",   "g.gorev_no",  "metin", "Görev No", Varsayilan: false),
+            new("konu",      "g.konu",      "metin", "Konu", Genislik: 280),
+            new("turAdi",
+                "case g.tur when 1 then 'Görev' when 2 then 'Hatırlatma' " +
+                "when 3 then 'Görüşme / Aktivite' when 4 then 'Toplantı' else 'Diğer' end",
+                                            "metin", "Tür", Hizalama: "orta"),
+            new("tur",       "g.tur",       "sayi",  "Tür Kodu", Varsayilan: false),
+            new("durumAdi",
+                "case g.durum when 0 then 'Bekliyor' when 1 then 'Devam Ediyor' " +
+                "when 2 then 'Tamamlandı' else 'İptal' end",
+                                            "metin", "Durum", Hizalama: "orta"),
+            new("durum",     "g.durum",     "sayi",  "Durum Kodu", Varsayilan: false),
+            new("oncelikAdi",
+                "case g.oncelik when 1 then 'Düşük' when 3 then 'Yüksek' " +
+                "when 4 then 'Acil' else 'Normal' end",
+                                            "metin", "Öncelik", Hizalama: "orta"),
+            new("oncelik",   "g.oncelik",   "sayi",  "Öncelik Kodu", Varsayilan: false),
+            new("sorumlu",   "coalesce(so.unvan, '')", "metin", "Sorumlu", Genislik: 180),
+            new("baslangic", "g.baslangic", "tarih", "Başlangıç", Hizalama: "orta",
+                                            Bicim: "dd.MM.yyyy HH:mm"),
+            new("termin",    "g.termin",    "tarih", "Termin", Hizalama: "orta",
+                                            Bicim: "dd.MM.yyyy HH:mm"),
+            // Gecikme LISTEDE hesaplanir: termin gecmis ve is bitmemisse.
+            new("gecikti",
+                "case when g.termin is not null and g.termin < now() and g.durum in (0,1) " +
+                "then 'Gecikti' else '' end",
+                                            "metin", "Gecikme", Hizalama: "orta"),
+            new("ilerleme",  "g.ilerleme",  "sayi",  "İlerleme %", Hizalama: "sag"),
+            new("cari",      "coalesce(ta.unvan, '')", "metin", "İlgili Cari", Genislik: 200),
+            new("proje",     "coalesce(pr.ad, '')",    "metin", "Proje", Varsayilan: false),
+            new("aciklama",  "g.aciklama",  "metin", "Açıklama", Genislik: 240, Varsayilan: false),
+        });
 
     // ---------------------------------------------------------- irsaliye ----
     // Ekranlar/satis_irsaliye_listesi.html kolonlariyla BIREBIR. Ayni `belge`

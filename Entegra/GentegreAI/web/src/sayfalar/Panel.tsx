@@ -23,15 +23,16 @@ const HIZLI_ERISIM = [
   { ad: '＋ Alış Faturası', yol: '/alis-fatura' },
   { ad: '＋ Tahsilat', yol: '/kasa-islem' },
   { ad: '＋ Stok Transfer', yol: '/stok-transfer' },
+  { ad: '＋ Görev', yol: '/gorev' },
   { ad: 'Cari Listesi', yol: '/musteri' },
 ];
 
 /**
  * ANA SAYFA PANELI (Ekranlar/giris_sayfasi.html).
  *
- * YALNIZ GERCEK VERI: mockup'ta gorev/takvim/duyuru kutulari da var ama o
- * moduller semada yok - uydurma sayi, panele bakip karar veren kullaniciyi
- * yaniltir. Modul geldiginde buraya eklenecek.
+ * YALNIZ GERCEK VERI. Gorev/takvim modulu db/108 ile acildi ve panele baglandi;
+ * mockup'taki DUYURULAR hala yok (tablosu yok) - uydurma icerik, panele bakip
+ * karar veren kullaniciyi yaniltir.
  *
  * Tek istek (/api/panel) butun kutulari ve listeleri getirir; sube suzgeci
  * sunucuda, oturumun aktif subesine gore uygulanir.
@@ -82,6 +83,49 @@ export function Panel() {
             </div>
 
             <div className="panel-sutunlar">
+              {/* Gorevler ve takvim EN BASTA: gun buradan planlanir. */}
+              <div className="kagrup">
+                <h6>Görevlerim / Hatırlatmalar</h6>
+                <table className="detay-tablo">
+                  <tbody>
+                    {(veri?.gorevler ?? []).map(s => (
+                      <tr key={`g${s.id}`} onDoubleClick={() => git(s.yol)}
+                          title="Çift tıkla: görev listesini aç">
+                        <td>{s.ana}</td>
+                        <td className="sonuk">{s.yan}</td>
+                        <td className="hiza-orta">
+                          <span className={`rozet ${s.deger === 'Gecikti' ? 'hata'
+                                                  : s.deger === 'Devam' ? 'uyari' : ''}`}>
+                            {s.deger}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                    {(veri?.gorevler ?? []).length === 0 && (
+                      <tr><td className="bos">Bekleyen görev yok.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="kagrup">
+                <h6>Yaklaşan Takvim <span className="sonuk">(14 gün)</span></h6>
+                <table className="detay-tablo">
+                  <tbody>
+                    {(veri?.takvim ?? []).map(s => (
+                      <tr key={`t${s.id}`} onDoubleClick={() => git(s.yol)}>
+                        <td className="sonuk">{s.yan}</td>
+                        <td>{s.ana}</td>
+                        <td className="hiza-orta"><span className="rozet bilgi">{s.deger}</span></td>
+                      </tr>
+                    ))}
+                    {(veri?.takvim ?? []).length === 0 && (
+                      <tr><td className="bos">Önümüzdeki iki haftada kayıt yok.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
               <div className="kagrup">
                 <h6>Son Belgeler</h6>
                 <table className="detay-tablo">

@@ -18,13 +18,18 @@ public static class PanelUclari
             //   listelerin ozetidir ve sube suzgeci baglamdan gelir. Kutuya
             //   tiklayinca acilan liste kendi yetkisini ayrica dogrular.
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            var p = await depo.OkuAsync(baglam.SubeId, iptal);
+            // Gorev/takvim KULLANICIYA ozel. taraf_kullanici.id = taraf.id
+            //   oldugu icin kullanici kimligi dogrudan sorumlu_id ile eslesir;
+            //   sorumlusu BOS gorevler (havuz isi) herkese gorunur.
+            var p = await depo.OkuAsync(baglam.SubeId, baglam.KullaniciId, iptal);
             return Results.Ok(new
             {
                 kutular = p.Kutular,
                 sonBelgeler = p.SonBelgeler,
                 kritikStok = p.KritikStok,
                 buyukBakiyeler = p.BuyukBakiyeler,
+                gorevler = p.Gorevler,
+                takvim = p.Takvim,
                 izlemeNo = baglam.IzlemeNo
             });
         }).WithTags("Panel").RequireAuthorization();

@@ -112,6 +112,7 @@ public static class KartKatalogu
         //   gibi ayri sozlesme (baslik + bacak), KasaUclari ile yazilir.
         Ekle(Hesap());
         Ekle(Proje());
+        Ekle(Gorev());
         Ekle(MasrafMerkezi());
         Ekle(HesapPlani());
         Ekle(CekSenet());
@@ -748,6 +749,77 @@ public static class KartKatalogu
         {
             new SilmeEngeli("public.mali_hareket", "hesap_id", "Bu hesabin hareketi var, silinemez."),
             new SilmeEngeli("public.kasa_islem",   "hesap_id", "Bu hesaba ait kasa islemi var, silinemez.")
+        });
+
+
+    // --------------------------------------------------------------- gorev ----
+    private static readonly Dictionary<string, string> GorevTurKodlari =
+        new() { ["1"] = "Görev", ["2"] = "Hatırlatma", ["3"] = "Görüşme / Aktivite",
+                ["4"] = "Toplantı", ["9"] = "Diğer" };
+
+    private static readonly Dictionary<string, string> GorevDurumKodlari =
+        new() { ["0"] = "Bekliyor", ["1"] = "Devam Ediyor",
+                ["2"] = "Tamamlandı", ["3"] = "İptal" };
+
+    private static readonly Dictionary<string, string> GorevOncelikKodlari =
+        new() { ["1"] = "Düşük", ["2"] = "Normal", ["3"] = "Yüksek", ["4"] = "Acil" };
+
+    private static readonly Dictionary<string, string> GorevKategoriKodlari =
+        new() { ["0"] = "Genel", ["1"] = "Satış", ["2"] = "Muhasebe",
+                ["3"] = "Depo", ["4"] = "İK", ["5"] = "Teknik" };
+
+    /// <summary>
+    /// Gorev / hatirlatma / takvim karti (108). Mockup: gorev_karti.html -
+    /// Konu, Tur, Kategori, Oncelik, Durum, Ilerleme, Sorumlu, Baslangic,
+    /// Termin, Hatirlatma, Ilgili Cari / Proje.
+    /// </summary>
+    private static KartTanimi Gorev() => new(
+        Ad: "gorev",
+        YetkiKodu: "gorev",
+        Tablo: "public.gorev",
+        LogTabloId: 918,                      // yeni tablo - eski karsiligi yok
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+            { ["tur"] = (short)1, ["durum"] = (short)0, ["oncelik"] = (short)2 },
+        Alanlar: new KartAlani[]
+        {
+            new("id",         "id",         "sayi",  Yazilabilir: false),
+            new("gorevNo",    "gorev_no",   "metin", EnFazlaUzunluk: 20, Baslik: "Görev No",
+                                            Yazilabilir: false, Grup: "Kimlik"),
+            new("konu",       "konu",       "metin", Zorunlu: true, EnFazlaUzunluk: 200,
+                                            Baslik: "Konu", Grup: "Kimlik"),
+            new("oncelik",    "oncelik",    "kod",   SabitKodlar: GorevOncelikKodlari,
+                                            Baslik: "Öncelik", Grup: "Kimlik"),
+            new("durum",      "durum",      "kod",   SabitKodlar: GorevDurumKodlari,
+                                            Baslik: "Durum", Grup: "Kimlik"),
+
+            new("tur",        "tur",        "kod",   SabitKodlar: GorevTurKodlari,
+                                            Baslik: "Tür", Grup: "Genel", AltGrup: "Görev Bilgileri"),
+            new("kategori",   "kategori",   "kod",   SabitKodlar: GorevKategoriKodlari,
+                                            Baslik: "Kategori", Grup: "Genel", AltGrup: "Görev Bilgileri"),
+            new("sorumluId",  "sorumlu_id", "kod",   KodTablosu: "public.v_personel_lookup",
+                                            Baslik: "Sorumlu", Grup: "Genel", AltGrup: "Görev Bilgileri"),
+            new("ilerleme",   "ilerleme",   "sayi",  Baslik: "İlerleme %",
+                                            Grup: "Genel", AltGrup: "Görev Bilgileri"),
+
+            new("baslangic",  "baslangic",  "tarih", Baslik: "Başlangıç",
+                                            Grup: "Genel", AltGrup: "Zaman"),
+            new("termin",     "termin",     "tarih", Baslik: "Termin",
+                                            Grup: "Genel", AltGrup: "Zaman"),
+            new("hatirlatma", "hatirlatma", "tarih", Baslik: "Hatırlatma",
+                                            Grup: "Genel", AltGrup: "Zaman"),
+            new("tumGun",     "tum_gun",    "mantik", Baslik: "Tüm Gün",
+                                            Grup: "Genel", AltGrup: "Zaman"),
+
+            new("tarafId",    "taraf_id",   "kod",   KodTablosu: "public.v_cari_lookup",
+                                            Baslik: "İlgili Cari", Grup: "Genel", AltGrup: "İlgili Kayıt"),
+            new("projeId",    "proje_id",   "kod",   KodTablosu: "public.v_proje_lookup",
+                                            Baslik: "İlgili Proje", Grup: "Genel", AltGrup: "İlgili Kayıt"),
+            new("aciklama",   "aciklama",   "metin", EnFazlaUzunluk: 4000, Baslik: "Açıklama",
+                                            Grup: "Genel", AltGrup: "İlgili Kayıt"),
+
+            new("tamamlanma", "tamamlanma", "tarih", Yazilabilir: false),
+            new("eklemeTarihi", "ekleme_tarihi", "tarih", Yazilabilir: false)
         });
 
     // --------------------------------------------------------------- proje ----

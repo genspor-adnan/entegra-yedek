@@ -488,4 +488,8 @@ export interface PanelYaniti {
   sonBelgeler: PanelSatiri[];
   kritikStok: PanelSatiri[];
   buyukBakiyeler: PanelSatiri[];
+  /** Kullanicinin bitmemis gorevleri - once GECIKENLER. */
+  gorevler: PanelSatiri[];
+  /** Onumuzdeki 14 gunun takvimi (baslangici olan kayitlar). */
+  takvim: PanelSatiri[];
 }
