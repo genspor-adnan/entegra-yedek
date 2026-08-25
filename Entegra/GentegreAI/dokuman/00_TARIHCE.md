@@ -2832,5 +2832,20 @@ satış faturası (cari · belge no · e-Belge / temsilci · tarih · kapanma / 
 vade · döviz), stok transferi (çıkış+giriş deposu, teslim eden/alan; cari, vade,
 döviz yok) ve giriş fişi (fiş tipi hücresi cari yerinde, tek depo).
 
+### Refaktör: kart grup sekmesi ayrıldı
+
+**`GenForm.tsx` 1033 → 692 satır.** Katalogdaki alan gruplarının (Genel,
+İletişim, Notlar…) mockup düzenine göre çizimi
+`bilesenler/kart/KartGrupSekmesi.tsx`'e (396) taşındı — kaynağa özel
+yerleşimlerin tamamı orada: cari/aday iletişim kutusuna gömülü adres, kişi
+kartının üst satırı, personel/hasta kimlik özeti ve gömülü gridleri (eğitim,
+acil kişiler), ilgili kişiler, resim kutusu. GenForm artık veri akışı:
+yükleme, kaydetme, sekme seçimi, çakışma/kapatma yönetimi.
+
+Doğrulama: `tsc -b` + prod derleme temiz. Ekrandan üç ayrı yerleşim: cari
+(İletişim · Tanımlama · Resim + İlgili Kişiler), personel (Kimlik Bilgileri ·
+Fotoğraf · Eğitim/Sertifika gridi · Özet) ve stok (Tanım/Sınıflandırma · Vergi &
+Ana Birim · Diğer'de ikili onay kutuları · Resim).
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).
