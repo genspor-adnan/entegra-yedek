@@ -174,6 +174,10 @@ return {
     //   (yoksa dip toplam vergili cikip muhasebe matrahini sisirir).
     kdv: stokFisiMi ? 0 : Number(s.kdv.replace(',', '.')) || 0,
     aciklama: s.aciklama,
+    // IADE satiri kaynak fatura satirina baglanir (kaynak_tur 30): iade edilen
+    //   miktar bu bagdan turetilir, ayni kalem iki kez iade edilemez (132).
+    kaynakTur: s.kaynakSatirId ? 30 : undefined,
+    kaynakId: s.kaynakSatirId,
     izlemeKodu: s.izlemeKodu,
     izleme: s.izleme || (s.izlemeKodu ? 1 : 0),
     // Lot dagilimi: bos dizi gonderilmez - izlemsiz stokta sunucu hata verir.

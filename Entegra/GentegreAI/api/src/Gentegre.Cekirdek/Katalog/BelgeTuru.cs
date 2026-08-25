@@ -44,6 +44,17 @@ public static class BelgeTuru
     /// </summary>
     public static bool CikisMi(int tur) => CikisTurleri.Contains(tur);
 
+    /// <summary>
+    /// IADE YONU TERSTIR: satis faturasi stoktan duser ve cariyi borclandirir;
+    /// satis IADESI (tipi = 2) ayni turde ama mal geri GIRER, cari ALACAKLANIR.
+    /// Yon hesabinin tek yeri burasi - stok ve cari hareketi ayni karari kullanir.
+    /// </summary>
+    public static bool CikisMi(int tur, int tipi) =>
+        tipi == IadeTipi ? !CikisMi(tur) : CikisMi(tur);
+
+    /// <summary>belge.tipi = 2 -> iade (130 kod listesinde de ayni numara).</summary>
+    public const int IadeTipi = 2;
+
     public static bool TransferMi(int tur) => tur == Transfer;
 
     public static bool TalepMi(int tur) => tur == Talep;

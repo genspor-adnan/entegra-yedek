@@ -241,6 +241,16 @@ export const api = {
     istek<{ belgeler: Record<string, unknown>[] }>(`/api/belge/${id}/donusumler`)
       .then(y => y.belgeler),
 
+  /**
+   * IADE faturasinda secilebilecek "onceki alinanlar" (132): carinin kesin
+   * fatura satirlari, iade edilmis miktar dusulmus olarak.
+   */
+  iadeSatirlari: (tarafId: number, belgeId?: number, ara?: string) =>
+    istek<{ satirlar: Record<string, unknown>[] }>(
+      `/api/belge/iade-satirlari?tarafId=${tarafId}`
+      + (belgeId ? `&belgeId=${belgeId}` : '')
+      + (ara ? `&ara=${encodeURIComponent(ara)}` : '')).then(y => y.satirlar),
+
   /** Siparis -> irsaliye -> fatura. Miktar KISMI olabilir; kalan kaynakta durur. */
   belgeDonustur: (id: number, hedefTur: number,
                   satirlar: { satirId: number; miktar: number }[],

@@ -270,12 +270,14 @@ public sealed partial class BelgeDeposu
             var (stokEtkiler, cariEtkiler) = etki;
 
             if (stokEtkiler)
-                await StokDurumGuncelleAsync(baglanti, islem, belgeId, tur, secenekler.StokKontrolu, uyarilar, iptal);
+                await StokDurumGuncelleAsync(baglanti, islem, belgeId, tur, Sayi(belge, "tipi"),
+                                             secenekler.StokKontrolu, uyarilar, iptal);
             // cariAtla: kaynak belge (irsaliye) cariyi ZATEN borclandirdi - ondan
             //   turetilen fatura ikinci kez yazarsa cari bakiye ikiye katlanir.
             //   Stok tarafinda ayni koruma satir bazinda (stok_durum_degis=0) var.
             if (cariEtkiler && !cariAtla)
-                await MaliHareketYazAsync(baglanti, islem, belgeId, tur, tarafId, baglam, iptal);
+                await MaliHareketYazAsync(baglanti, islem, belgeId, tur, Sayi(belge, "tipi"),
+                                          tarafId, baglam, iptal);
 
             // ------------------------------------------------------- 7) belge NUMARASI ----
             // EN SON: buraya kadar her sey basarili. Satir kilidi altinda, BOSLUKSUZ.
@@ -485,6 +487,50 @@ public sealed partial class BelgeDeposu
              where v.belge_id = @p0 order by v.sira
             """, baglanti);
         komut.Parameters.AddWithValue("p0", belgeId);
+
+        var liste = new List<IDictionary<string, object?>>();
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        while (await o.ReadAsync(iptal)) liste.Add(Satir(o));
+        return liste;
+    }
+
+    /// <summary>
+    /// IADE EDILEBILIR SATIRLAR (132) - iade faturasinda "onceki alinanlar".
+    ///
+    /// Carinin kesin fatura/fis satirlari; miktar, iade edilmis miktar ve
+    /// kaynaktan gelen fiyat/iskonto/KDV ile birlikte. Tamami iade edilmis
+    /// satirlar DUSER (kalan = 0), boylece ayni kalem iki kez iade edilemez.
+    /// belgeId verilirse yalniz o belgenin satirlari (belge uzerinden iade).
+    /// </summary>
+    public async Task<List<IDictionary<string, object?>>> IadeSatirlariAsync(
+        int tarafId, int? belgeId, string? ara, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = new NpgsqlCommand("""
+            select v.satir_id as "satirId", v.belge_id as "belgeId",
+                   v.belge_tur as "belgeTur", v.belge_no as "belgeNo",
+                   v.belge_tarihi as "belgeTarihi", v.taraf_id as "tarafId",
+                   v.taraf_unvan as "tarafUnvan", v.sira,
+                   v.satir_tur as "satirTur", v.stok_id as "stokId",
+                   v.stok_kodu as "stokKodu", v.stok_adi as "stokAdi",
+                   v.hizmet_id as "hizmetId", v.aciklama,
+                   v.miktar, v.iade_miktar as "iadeMiktar",
+                   (v.miktar - v.iade_miktar) as "kalanMiktar",
+                   v.birim, v.birim_fiyat as "birimFiyat", v.iskonto, v.kdv,
+                   v.doviz_cinsi as "dovizCinsi", v.izleme, v.izleme_kodu as "izlemeKodu"
+              from public.v_iade_edilebilir_satir v
+             where (@p0 <= 0 or v.taraf_id = @p0)
+               and (@p1 <= 0 or v.belge_id = @p1)
+               and (v.miktar - v.iade_miktar) > 0
+               and (@p2 = '' or v.stok_kodu ilike '%' || @p2 || '%'
+                             or v.stok_adi  ilike '%' || @p2 || '%'
+                             or v.belge_no  ilike '%' || @p2 || '%')
+             order by v.belge_tarihi desc, v.belge_id desc, v.sira
+             limit 200
+            """, baglanti);
+        komut.Parameters.AddWithValue("p0", tarafId);
+        komut.Parameters.AddWithValue("p1", belgeId ?? 0);
+        komut.Parameters.AddWithValue("p2", ara ?? "");
 
         var liste = new List<IDictionary<string, object?>>();
         await using var o = await komut.ExecuteReaderAsync(iptal);

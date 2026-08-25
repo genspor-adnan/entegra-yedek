@@ -202,7 +202,7 @@ public sealed partial class BelgeDeposu
     }
 
     private async Task MaliHareketYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
-        int belgeId, int tur, int tarafId, YazmaBaglami baglam, CancellationToken iptal)
+        int belgeId, int tur, int tipi, int tarafId, YazmaBaglami baglam, CancellationToken iptal)
     {
         // Bacak duzeni (080 gocu ile gelen K2 kurali):
         //   doviz_cinsi = bacagin KENDI para birimi (belgenin dovizi)
@@ -228,7 +228,8 @@ public sealed partial class BelgeDeposu
               from public.belge b where b.id = @p3
             """, baglanti, islem);
         komut.Parameters.AddWithValue("p0", (short)tur);
-        komut.Parameters.AddWithValue("p1", BelgeTuru.CikisMi(tur));
+        // IADEDE YON TERS: satis iadesi cariyi ALACAKLANDIRIR (132).
+        komut.Parameters.AddWithValue("p1", BelgeTuru.CikisMi(tur, tipi));
         komut.Parameters.AddWithValue("p2", baglam.KullaniciId);
         komut.Parameters.AddWithValue("p3", belgeId);
         await komut.ExecuteNonQueryAsync(iptal);

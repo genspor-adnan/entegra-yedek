@@ -395,9 +395,11 @@ public sealed partial class BelgeDeposu
     }
 
     private async Task StokDurumGuncelleAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
-        int belgeId, int tur, bool stokKontrolu, List<string> uyarilar, CancellationToken iptal)
+        int belgeId, int tur, int tipi, bool stokKontrolu, List<string> uyarilar,
+        CancellationToken iptal)
     {
-        var cikis = BelgeTuru.CikisMi(tur);
+        // IADEDE YON TERS: satis iadesinde mal depoya GERI GIRER (132).
+        var cikis = BelgeTuru.CikisMi(tur, tipi);
         var transfer = BelgeTuru.TransferMi(tur);
         // Ayar belge basina BIR KEZ okunur (60 sn onbellekli) - satir basina degil.
         var negatifDavranis = await AyarDeposu.SayiAsync(baglanti, islem,

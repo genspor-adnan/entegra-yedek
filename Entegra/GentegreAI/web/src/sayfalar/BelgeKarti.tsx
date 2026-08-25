@@ -21,6 +21,7 @@ import {
   TasiyiciSekmesi, EBelgeSekmesi, FaturalamaSekmesi,
 } from '../bilesenler/belge/BelgeSekmeleri';
 import { KalemSekmesi, TahsilatSekmesi } from '../bilesenler/belge/KalemSekmesi';
+import { IadeSatirPenceresi } from '../bilesenler/belge/IadeSatirPenceresi';
 import { BelgeAracCubugu } from '../bilesenler/belge/BelgeAracCubugu';
 import { BelgeBaslik } from '../bilesenler/belge/BelgeBaslik';
 
@@ -153,6 +154,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   /** Ardisik giris: stok arama penceresi acik mi. Kalem eklendikten sonra
       KAPANMAZ - kullanici arka arkaya satir girer, isi bitince Kapat der. */
   const [stokArama, setStokArama] = useState(false);
+  /** IADE faturasi (tipi 2): kalem eklemede stok arama yerine "onceki alinanlar". */
+  const [iadeArama, setIadeArama] = useState(false);
   /** Cari secim modali. YENI belgede acilista kendiliginden acilir: belgenin
       ilk sorusu "kime?" - kullaniciyi bos formda birakip aramaya zorlamak yerine
       dogrudan secim ekrani gelir (kisi kartindaki "Cariye Bağla" deseni). */
@@ -167,6 +170,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [senaryo, setSenaryo] = useState(0);
   /** FATURA TIPI (130): faturanin cinsi - belge.tipi alaninda tutulur. */
   const [faturaTipi, setFaturaTipi] = useState(1);
+  /** IADE faturasi mi - kalem secimi "onceki alinanlar"dan yapilir (132). */
+  const iadeMi = faturaTipi === 2;
   /** Bu belgeye baglanmis kasa islemleri (Tahsilat sekmesi). */
   const [tahsilatlar, setTahsilatlar] = useState<ListeSatiri[]>([]);
   /** Acik tahsilat modalinin TURU (null = kapali) - fatura arkada acik kalir. */
@@ -660,7 +665,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             kilitli={kilitli} bilgi={bilgi} onizleme={onizleme} sonuc={sonuc}
             transferBaslikEksigi={transferBaslikEksigi}
             depoBelgesi={depoBelgesi} stokFisiMi={stokFisiMi} talepMi={talepMi}
-            setStokArama={setStokArama} setKalem={setKalem} seciliSil={seciliSil}
+            setStokArama={iadeMi ? setIadeArama : setStokArama}
+            setKalem={setKalem} seciliSil={seciliSil}
             satirTikla={satirTikla} sonTiklanan={sonTiklanan} secimDegis={secimDegis}
           />
         )}
@@ -772,6 +778,43 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             setPersonelArama(null);
           }}
         />
+
+        {/* IADE (tipi 2): kalem stok aramadan degil, carinin ONCEKI faturalarindan
+               secilir - fiyat/iskonto/KDV kaynaktan gelir ve ayni kalem iki kez
+               iade edilemez (132). */}
+        {iadeArama && cari && (
+          <IadeSatirPenceresi
+            tarafId={cari.id}
+            tarafUnvan={cari.unvan}
+            onKapat={() => setIadeArama(false)}
+            onSec={secilenler => {
+              let anahtar = Math.max(0, ...satirlar.map(x => x.anahtar));
+              const yeniler = secilenler.map(r => {
+                anahtar += 1;
+                return {
+                  ...bosSatir(anahtar),
+                  satirTur: r.hizmetId ? 2 : 1,
+                  stokId: r.stokId ?? null,
+                  hizmetId: r.hizmetId ?? null,
+                  stokKodu: String(r.stokKodu ?? ''),
+                  stokAdi: String(r.stokAdi ?? r.aciklama ?? ''),
+                  adet: String(r.secilenMiktar ?? r.kalanMiktar),
+                  birimFiyat: String(r.birimFiyat),
+                  dovizFiyat: String(r.birimFiyat),
+                  iskonto: String(r.iskonto ?? 0),
+                  kdv: String(r.kdv ?? 0),
+                  izleme: Number(r.izleme ?? 0),
+                  izlemeKodu: String(r.izlemeKodu ?? ''),
+                  // Kaynak satir bagi: iade edilen miktar bu bagdan hesaplanir.
+                  kaynakSatirId: r.satirId,
+                  aciklama: `İade — ${r.belgeNo}`,
+                };
+              });
+              setSatirlar(s => [...s, ...yeniler]);
+              setIadeArama(false);
+            }}
+          />
+        )}
 
         {/* 1) Stok/hizmet arama - satir eklemenin BASLANGICI. Secim yapilinca
                kapanmaz; kalem penceresi ustune acilir, o kapaninca buraya donulur

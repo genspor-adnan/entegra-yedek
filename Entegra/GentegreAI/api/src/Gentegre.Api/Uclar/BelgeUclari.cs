@@ -77,6 +77,22 @@ public static class BelgeUclari
             });
         });
 
+        // GET /api/belge/iade-satirlari - iade faturasinda "onceki alinanlar" (132).
+        //   Cari zorunlu: iade her zaman BIR CARIYE kesilir, tum firmanin gecmisi
+        //   listelenmez. belgeId verilirse yalniz o belgeden iade edilir.
+        grup.MapGet("/iade-satirlari", async (
+            int tarafId, int? belgeId, string? ara,
+            BaglamCozucu cozucu, BelgeDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+            return Results.Ok(new
+            {
+                satirlar = await depo.IadeSatirlariAsync(tarafId, belgeId, ara, iptal),
+                izlemeNo = baglam.IzlemeNo
+            });
+        });
+
         // POST /api/belge/{id}/donustur - siparis -> irsaliye -> fatura
         grup.MapPost("/{id:int}/donustur", async (
             int id, DonusumIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,

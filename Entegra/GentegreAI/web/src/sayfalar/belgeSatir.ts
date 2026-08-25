@@ -41,6 +41,11 @@ export interface SatirDurumu {
   paket?: boolean;
   /** Icerik satirinda: bagli oldugu paket satirinin anahtari. */
   paketAnahtar?: number;
+  /**
+   * IADE satirinda kaynak fatura satiri (belge_satir.id). Iade edilen miktar
+   * bu bagdan hesaplanir (132) - kolon degil, tureme.
+   */
+  kaynakSatirId?: number;
   /** Kalemin lot/seri dagilimi - bir kalem 1:n lottan gelebilir (db/114). */
   izlemler: IzlemSatiri[];
 }
