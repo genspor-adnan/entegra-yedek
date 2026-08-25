@@ -226,7 +226,8 @@ public sealed partial class BelgeDeposu
 
     /// <summary>Kaynak satiri hedef satir JSON'una cevirir (fiyat/iskonto/KDV aynen tasinir).</summary>
     private static Dictionary<string, JsonElement> SatirJson(
-        IDictionary<string, object?> k, decimal miktar, int kaynakSatirId, int stokDurumDegis)
+        IDictionary<string, object?> k, decimal miktar, int kaynakSatirId, int stokDurumDegis,
+        IReadOnlyList<object>? izlemler = null)
     {
         var govde = new Dictionary<string, object?>
         {
@@ -255,6 +256,9 @@ public sealed partial class BelgeDeposu
             ["stokDurumDegis"] = stokDurumDegis,
             ["kaynakTur"] = 30,
             ["kaynakId"] = kaynakSatirId,
+            // Izlemli stokta cikisa donusumde lotlar FIFO ile burada tahsis
+            //   edilir (kaynak siparis stok dusurmedigi icin lot tasimaz).
+            ["izlemler"] = izlemler,
         };
 
         var json = JsonSerializer.SerializeToElement(govde);

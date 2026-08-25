@@ -12,23 +12,44 @@ import { para, say4 } from './bicim';
  */
 const DIS_NUMARALI = new Set([11]);
 
-/** Kaynak turden hangi hedeflere donusulebilir (belge turu kod uzayi, 073 katalogu). */
+/**
+ * Kaynak turden hangi hedeflere donusulebilir (belge turu kod uzayi, 073
+ * katalogu).
+ *
+ * Siparis ve irsaliye YALNIZ faturaya/irsaliyeye degil; FIS ve TAHAKKUK da
+ * hedef olabilir (kullanici):
+ *   - Fis (12/16): fatura kesilmeden stok/cari hareketi yazilan ic belge
+ *     (perakende satis, numune cikisi gibi) - e-Belge'ye gitmez.
+ *   - Tahakkuk (13/17): mal hareketi olmayan alacak/borc kaydi; siparis ya da
+ *     irsaliye tutari faturalanmadan cari hesaba islenmek istendiginde.
+ * Yon KAYNAKTAN gelir: alis zincirinde alis hedefleri, satista satis.
+ */
 const HEDEFLER: Record<number, { kod: number; ad: string }[]> = {
-  // Alis siparisi -> alis irsaliyesi / alis faturasi
-  9:  [{ kod: 10, ad: 'Alış İrsaliyesi' }, { kod: 11, ad: 'Alış Faturası' }],
-  // Satis siparisi -> satis irsaliyesi / satis faturasi
-  19: [{ kod: 14, ad: 'Satış İrsaliyesi' }, { kod: 15, ad: 'Satış Faturası' }],
-  // Irsaliyeler -> fatura
-  10: [{ kod: 11, ad: 'Alış Faturası' }],
-  14: [{ kod: 15, ad: 'Satış Faturası' }],
-  // Konsinye -> fatura
-  109: [{ kod: 11, ad: 'Alış Faturası' }],
-  119: [{ kod: 15, ad: 'Satış Faturası' }],
+  // Alis siparisi
+  9:  [{ kod: 10, ad: 'Alış İrsaliyesi' }, { kod: 11, ad: 'Alış Faturası' },
+       { kod: 12, ad: 'Alış Fişi' }, { kod: 17, ad: 'Borç Tahakkuku' }],
+  // Satis siparisi
+  19: [{ kod: 14, ad: 'Satış İrsaliyesi' }, { kod: 15, ad: 'Satış Faturası' },
+       { kod: 16, ad: 'Satış Fişi' }, { kod: 13, ad: 'Alacak Tahakkuku' }],
+  // Irsaliyeler (konsinye dahil): mal zaten cikti/girdi, sirada belgelenmesi var
+  10:  [{ kod: 11, ad: 'Alış Faturası' }, { kod: 12, ad: 'Alış Fişi' },
+        { kod: 17, ad: 'Borç Tahakkuku' }],
+  14:  [{ kod: 15, ad: 'Satış Faturası' }, { kod: 16, ad: 'Satış Fişi' },
+        { kod: 13, ad: 'Alacak Tahakkuku' }],
+  109: [{ kod: 11, ad: 'Alış Faturası' }, { kod: 12, ad: 'Alış Fişi' },
+        { kod: 17, ad: 'Borç Tahakkuku' }],
+  119: [{ kod: 15, ad: 'Satış Faturası' }, { kod: 16, ad: 'Satış Fişi' },
+        { kod: 13, ad: 'Alacak Tahakkuku' }],
 };
 
 interface Props {
   belgeId: number;
   belgeTur: number;
+  /**
+   * Arac cubugundaki dugmenin sectigi hedef ("İrsaliyeye Dönüştür" -> 14).
+   * Listede yoksa ya da 0 ise ilk hedefe duser; kullanici combodan degistirir.
+   */
+  varsayilanHedef?: number;
   onKapat(): void;
   /** Donusum bittiginde cagrilir - cagiran yalnizca grid'i tazeler. */
   onTamam(yeni: BelgeYaniti): void;
@@ -41,18 +62,25 @@ interface Props {
  * kalan kaynak belgede durur. Miktar kontrolu SUNUCUDA yapilir (kaynak satirlar
  * kilitlenerek) - buradaki sinir yalnizca kullaniciyi erken uyarmak icindir.
  */
-export function BelgeDonusumModali({ belgeId, belgeTur, onKapat, onTamam }: Props) {
+export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, onKapat, onTamam }: Props) {
   const [satirlar, setSatirlar] = useState<AcikSatir[]>([]);
   const [miktarlar, setMiktarlar] = useState<Record<number, string>>({});
   const [secili, setSecili] = useState<Record<number, boolean>>({});
-  const [hedefTur, setHedefTur] = useState<number>(HEDEFLER[belgeTur]?.[0]?.kod ?? 0);
+  const [hedefTur, setHedefTur] = useState<number>(() => {
+    const liste = HEDEFLER[belgeTur] ?? [];
+    return liste.some(h => h.kod === varsayilanHedef)
+      ? varsayilanHedef! : (liste[0]?.kod ?? 0);
+  });
   const [tarih, setTarih] = useState(new Date().toISOString().slice(0, 10));
   const [belgeNo, setBelgeNo] = useState('');
-  const [taslak, setTaslak] = useState(false);
+  /* Taslak kutusu kaldirildi (kullanici) - donusum hep KESIN belge uretir. */
+  const taslak = false;
   const [yukleniyor, setYukleniyor] = useState(true);
   const [calisiyor, setCalisiyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const [sonuc, setSonuc] = useState<BelgeYaniti | null>(null);
+  /** Uretilen belgenin turu - basari kutusunda yazar (combo sonradan degisebilir). */
+  const [sonucAd, setSonucAd] = useState('');
 
   useEffect(() => {
     void (async () => {
@@ -101,6 +129,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, onKapat, onTamam }: Prop
       const yeni = await api.belgeDonustur(belgeId, hedefTur, gonderilecek, tarih, taslak,
                                            disNumarali ? belgeNo.trim() : undefined);
       setSonuc(yeni);
+      setSonucAd(hedefler.find(h => h.kod === hedefTur)?.ad ?? 'Belge');
       setBelgeNo('');
       // Kalan satirlari tazele: ayni siparisten ikinci bir belge kesilebilir.
       setSatirlar(await api.belgeAcikSatirlar(belgeId));
@@ -126,10 +155,16 @@ export function BelgeDonusumModali({ belgeId, belgeTur, onKapat, onTamam }: Prop
     >
       {hata && <div className="hata-kutusu">{hata}</div>}
 
-      {sonuc && (
+      {/* Hata varken ONCEKI basari kutusu gizlenir: iki kutu yan yana durunca
+          "hem oldu hem olmadi" gibi okunuyordu (yesil kutu bir onceki
+          donusumun sonucu). */}
+      {sonuc && !hata && (
         <div className="bilgi-kutusu">
-          <b>{hedefler.find(h => h.kod === hedefTur)?.ad ?? 'Belge'} oluşturuldu.</b>{' '}
-          No: <b>{String(sonuc.belge.belgeNo || '(taslak — numara verilmedi)')}</b> ·
+          {/* Hedef adi DONUSUM ANINDA sabitlenir: combo sonradan degistirilince
+              "Satış Fişi oluşturuldu" yazip aslinda tahakkuk uretmis gibi
+              gorunuyordu. */}
+          <b>{sonucAd || 'Belge'} oluşturuldu.</b>{' '}
+          No: <b>{String(sonuc.belge.belgeNo || '—')}</b> ·
           Genel toplam: <b>{para.format(Number(sonuc.belge.genelToplam))}</b>
           {sonuc.uyarilar && sonuc.uyarilar.length > 0 && (
             <ul className="uyari-liste">{sonuc.uyarilar.map((u, i) => <li key={i}>{u}</li>)}</ul>
@@ -153,9 +188,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, onKapat, onTamam }: Prop
               {/* Alis faturasinda numara TEDARIKCININ - sayac uretmez, sorulur. */}
               {disNumarali && (
                 <label className="alan">
-                  <span className={`etiket${taslak ? '' : ' zorunlu-isaret'}`}>
-                    Tedarikçi Fatura No
-                  </span>
+                  <span className="etiket zorunlu-isaret">Tedarikçi Fatura No</span>
                   <input value={belgeNo} maxLength={20} placeholder="örn. ABC2026000001234"
                          onChange={e => setBelgeNo(e.target.value)} />
                 </label>
@@ -164,14 +197,8 @@ export function BelgeDonusumModali({ belgeId, belgeTur, onKapat, onTamam }: Prop
                 <span className="etiket">Belge Tarihi</span>
                 <input type="date" value={tarih} onChange={e => setTarih(e.target.value)} />
               </label>
-              <label className="alan">
-                <span className="etiket">&nbsp;</span>
-                <span className="satir-ici">
-                  <input type="checkbox" checked={taslak}
-                         onChange={e => setTaslak(e.target.checked)} />
-                  Taslak (numara tüketmez)
-                </span>
-              </label>
+              {/* TASLAK kutusu KALKTI (kullanici): donusumden cikan belge de
+                  kesindir - kart tarafinda da ayni kural. */}
             </div>
           </div>
 

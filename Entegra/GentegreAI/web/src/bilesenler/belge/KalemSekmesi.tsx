@@ -112,9 +112,11 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         <th style={{ width: 110 }}>Kod</th>
         <th>Stok / Hizmet</th>
         {aciklamaVar && <th style={{ width: 200 }}>Açıklama</th>}
-        <th className="hiza-sag" style={{ width: 90 }}>Miktar</th>
-        {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 80 }}>İskonto %</th>}
-        {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 70 }}>KDV %</th>}
+        {/* Miktar / iskonto / KDV DAR (kullanici): ikisi de en fazla birkac
+            hane; genis birakinca stok adi sikisiyordu. */}
+        <th className="hiza-sag" style={{ width: 60 }}>Miktar</th>
+        {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 56 }}>İskonto %</th>}
+        {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 46 }}>KDV %</th>}
         {/* Transferde FIYAT YOK: mal satilmiyor, depo degistiriyor. */}
         {bilgi.kalem !== 'miktar' && (
           <th className="hiza-sag" style={{ width: 110 }}>Birim Fiyat ({yerelPara})</th>

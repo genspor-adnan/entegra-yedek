@@ -7,7 +7,7 @@
  * hangi turde ne yapilabilecegi tek bakista okunsun.
  */
 export function BelgeAracCubugu({
-  mevcutBelge, duzenlenebilir, sonuc, kaydediyor, kilitli, taslak, setTaslak,
+  mevcutBelge, duzenlenebilir, sonuc, kaydediyor, kilitli,
   iadeKutusu, iade, setIade,
   siparisMi, irsaliyeMi, alisMi, eBelgeYok, kayitliId, cari,
   kes, yeniBelge, kapat, setDonusum, tahsilatAc,
@@ -18,12 +18,7 @@ export function BelgeAracCubugu({
   sonuc: unknown;
   kaydediyor: boolean;
   kilitli: boolean;
-  taslak: boolean;
-  setTaslak(v: boolean): void;
-  /**
-   * Taslak yerine IADE kutusu gosterilsin mi (irsaliye pilotu, kullanici).
-   * Irsaliyede taslak kavrami islevsiz kaldi; anlamli tek secim "iade mi".
-   */
+  /** IADE kutusu gosterilsin mi - mal geri donusu olabilen turlerde. */
   iadeKutusu?: boolean;
   iade: boolean;
   setIade(v: boolean): void;
@@ -38,7 +33,8 @@ export function BelgeAracCubugu({
   kes(): Promise<void>;
   yeniBelge(): void;
   kapat(): void;
-  setDonusum(v: boolean): void;
+  /** Donusum modalini acar; deger = ON SECILI hedef tur (0 = ilk hedef). */
+  setDonusum(v: number | null): void;
   tahsilatAc(tur: number): void;
 }) {
   return (
@@ -69,14 +65,17 @@ export function BelgeAracCubugu({
       <button className="d bir" disabled title="Stok rezervasyonu henüz bağlanmadı.">
         🔒 Rezervasyon Yap
       </button>
+      {/* Dugmeler modali ON SECILI hedefle acar; modaldaki combodan fis ya da
+          tahakkuka cevrilebilir (kullanici). */}
       <button className="d" disabled={!kayitliId}
               title={kayitliId ? 'Seçili satırları irsaliyeye aktar' : 'Önce siparişi kaydedin.'}
-              onClick={() => setDonusum(true)}>
+              onClick={() => setDonusum(alisMi ? 10 : 14)}>
         🚚 İrsaliyeye Dönüştür
       </button>
       <button className="d" disabled={!kayitliId}
-              title={kayitliId ? 'Seçili satırları faturaya aktar' : 'Önce siparişi kaydedin.'}
-              onClick={() => setDonusum(true)}>
+              title={kayitliId ? 'Seçili satırları faturaya / fişe / tahakkuka aktar'
+                               : 'Önce siparişi kaydedin.'}
+              onClick={() => setDonusum(alisMi ? 11 : 15)}>
         🧾 Faturaya Dönüştür
       </button>
       <button className="d" disabled title="Üretim emri henüz bağlanmadı.">🏭 Üretime Aktar</button>
@@ -105,8 +104,9 @@ export function BelgeAracCubugu({
         </button>
       )}
       <button className="d" disabled={!kayitliId}
-              title={kayitliId ? 'Sevk edilen satırları faturaya aktar' : 'Önce irsaliyeyi kaydedin.'}
-              onClick={() => setDonusum(true)}>
+              title={kayitliId ? 'Sevk edilen satırları faturaya / fişe / tahakkuka aktar'
+                               : 'Önce irsaliyeyi kaydedin.'}
+              onClick={() => setDonusum(alisMi ? 11 : 15)}>
         🧾 Faturaya Dönüştür
       </button>
       <button className="d" disabled title="Sevk fişi yazdırma henüz bağlanmadı.">
@@ -146,17 +146,16 @@ export function BelgeAracCubugu({
 
   <button className="d kapat-dugmesi" onClick={kapat}>✖ Kapat</button>
 
-  {iadeKutusu ? (
+  {/* TASLAK KUTUSU KALDIRILDI (kullanici): belge kaydedilince kesindir.
+      Numara tuketmeyen "taslak" hali kullanilmiyordu, arac cubugunda yer
+      kapliyor ve yanlislikla isaretlenince belge numarasiz kaliyordu.
+      Sunucu tarafi duruyor (durum 1) - liste cipleri ve gocten gelen eski
+      taslaklar icin gerekli. */}
+  {iadeKutusu && (
     <label className="satir-ici" title="İade: mal geri gelir - stok girer, cari alacaklanır.">
       <input type="checkbox" checked={iade} disabled={kilitli}
              onChange={e => setIade(e.target.checked)} />
       İade
-    </label>
-  ) : (
-    <label className="satir-ici">
-      <input type="checkbox" checked={taslak} disabled={kilitli}
-             onChange={e => setTaslak(e.target.checked)} />
-      Taslak (numara tüketmez)
     </label>
   )}
 </>

@@ -350,6 +350,62 @@ public sealed partial class BelgeDeposu
     /// <summary>Stok kartindaki izleme turu (0 = izlemsiz).</summary>
 
     /// <summary>Stok kartindaki izleme turu (0 = izlemsiz).</summary>
+    /// <summary>
+    /// DONUSUMDE otomatik lot tahsisi (kullanici karari: "FIFO otomatik").
+    ///
+    /// Siparis stok dusurmedigi icin satirinda lot YOKTUR; irsaliye/fatura/fise
+    /// donusturulurken cikacak lotun secilmesi gerekir. Kullaniciya sormak yerine
+    /// depodaki lotlar SKT sirasiyla (yoksa uretim tarihi, yoksa lot kimligi)
+    /// tuketilir - once suresi yaklasan mal cikar.
+    ///
+    /// Yalnizca ONERI uretir: gercek dusum ve bakiye kilidi LottanDusAsync'te,
+    /// ayni transaction icinde yapilir. Bakiye yetmezse burada erken ve okunur
+    /// bir hata verilir (yoksa kullanici "lot secilmeli" gibi yaniltici bir
+    /// dogrulama hatasi aliyordu).
+    /// </summary>
+    private static async Task<List<object>> FifoLotTahsisAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction islem, int stokId, int? depoId, decimal miktar, int sira,
+        CancellationToken iptal)
+    {
+        if (depoId is not { } depo || depo <= 0)
+            throw GentegreHatasi.IsKurali(
+                $"{sira}. satırdaki stok lot/seri izlemli - dönüşüm için çıkış deposu belirtilmeli.");
+
+        var secim = new List<object>();
+        var kalanIstek = miktar;
+
+        await using var komut = new NpgsqlCommand("""
+            select d.seri_lot_id, d.kalan
+              from public.stok_lot_durum d
+              left join public.stok_seri_lot sl on sl.id = d.seri_lot_id
+             where d.stok_id = @p0 and d.depo_id = @p1 and d.kalan > 0
+             order by sl.son_kullanma_tarihi nulls last,
+                      sl.uretim_tarihi nulls last,
+                      d.seri_lot_id
+            """, baglanti, islem);
+        komut.Parameters.AddWithValue("p0", stokId);
+        komut.Parameters.AddWithValue("p1", depo);
+
+        await using (var o = await komut.ExecuteReaderAsync(iptal))
+        {
+            while (await o.ReadAsync(iptal) && kalanIstek > 0)
+            {
+                var lotId = o.GetInt32(0);
+                var eldeki = o.GetDecimal(1);
+                var alinan = Math.Min(eldeki, kalanIstek);
+                secim.Add(new { seriLotId = lotId, miktar = alinan });
+                kalanIstek -= alinan;
+            }
+        }
+
+        if (kalanIstek > 0.0001m)
+            throw GentegreHatasi.IsKurali(
+                $"{sira}. satırda lot bakiyesi yetersiz: {miktar - kalanIstek:0.####} tahsis edildi, "
+                + $"{kalanIstek:0.####} eksik.");
+
+        return secim;
+    }
+
     private static async Task<int> StokIzlemeTuruAsync(NpgsqlConnection baglanti,
         NpgsqlTransaction islem, int stokId, CancellationToken iptal)
     {

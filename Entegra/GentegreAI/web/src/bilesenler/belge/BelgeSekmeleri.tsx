@@ -193,14 +193,15 @@ export function EBelgeSekmesi({
 export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum }: {
   donusumler: Record<string, unknown>[];
   kayitliId: number;
-  setDonusum(v: boolean): void;
+  /** Donusum modalini acar; 0 = hedefi modal secsin (ilk hedef). */
+  setDonusum(v: number | null): void;
 }) {
   return (
   <div className="kagrup">
     <h6>
       Faturalama
       {kayitliId > 0 && (
-        <button type="button" className="d bir" onClick={() => setDonusum(true)}>
+        <button type="button" className="d bir" onClick={() => setDonusum(0)}>
           🧾 Faturaya Dönüştür
         </button>
       )}

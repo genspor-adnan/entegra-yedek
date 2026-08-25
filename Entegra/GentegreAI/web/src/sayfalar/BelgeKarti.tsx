@@ -140,14 +140,18 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [aracPlaka, setAracPlaka] = useState('');
   const [soforAd, setSoforAd] = useState('');
   const [teslimEden, setTeslimEden] = useState<{ id: number; ad: string } | null>(null);
-  const [taslak, setTaslak] = useState(false);
+  /* TASLAK kutusu arac cubugundan KALKTI (kullanici): kart kaydedince belge
+     kesindir. Sunucu tarafi (durum 1) duruyor - gocten gelen eski taslaklar
+     ve liste cipleri icin gerekli, ama kart artik hep KESIN yazar. */
+  const taslak = false;
   // Yeni belge BOS grid ile acilir: "(stok seçilmedi)" yazan sahte satir
   //   kullaniciyi "burasi nasil doldurulur" diye ariyordu; satir "＋" ile eklenir.
   const [satirlar, setSatirlar] = useState<SatirDurumu[]>([]);
 
   const [kaydediyor, setKaydediyor] = useState(false);
   const [aciliyor, setAciliyor] = useState(!!belgeId);
-  const [donusum, setDonusum] = useState(false);
+  /** Donusum modali: null = kapali, sayi = ON SECILI hedef tur (0 = ilk hedef). */
+  const [donusum, setDonusum] = useState<number | null>(null);
   const [aktifSekme, setAktifSekme] = useState('kalem');
   /** Grid satir secimi (kirmizi Sil dugmesi bunlari siler). */
   const [seciliSatirlar, setSeciliSatirlar] = useState<Set<number>>(new Set());
@@ -677,7 +681,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         <BelgeAracCubugu
           mevcutBelge={mevcutBelge} duzenlenebilir={duzenlenebilir}
           sonuc={sonuc} kaydediyor={kaydediyor}
-          kilitli={kilitli} taslak={taslak} setTaslak={setTaslak}
+          kilitli={kilitli}
           iadeKutusu={irsaliyePilot} iade={iadeMi}
           setIade={v => setFaturaTipi(v ? 2 : 1)}
           siparisMi={siparisMi} irsaliyeMi={irsaliyeMi} alisMi={alisMi}
@@ -956,11 +960,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
         {/* Donusum modali bu kartin USTUNDE acilir: hedef turu ve satir miktarlari
             orada secilir, kalan bu belgede kalir (F8). */}
-        {donusum && kayitliId > 0 && (
+        {donusum !== null && kayitliId > 0 && (
           <BelgeDonusumModali
             belgeId={kayitliId}
             belgeTur={tur}
-            onKapat={() => setDonusum(false)}
+            varsayilanHedef={donusum}
+            onKapat={() => setDonusum(null)}
             onTamam={() => onKaydedildi?.()}
           />
         )}

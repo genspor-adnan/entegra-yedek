@@ -547,8 +547,27 @@ public sealed partial class BelgeDeposu
                                 && Convert.ToInt32(kaynak["tur"]) is var kt2
                                 && await StokEtkilerMiAsync(baglanti, islem, kt2, iptal);
 
+            var stokDusecek = hedefEtki.Stok && !kaynakDusurdu;
+
+            // Izlemli stokta CIKISA donusum: kaynakta lot yok (siparis stok
+            //   dusurmez), hedef ise lot ister. Lotlar FIFO ile otomatik tahsis
+            //   edilir (kullanici karari) - kullanici isterse olusan belgeyi
+            //   acip degistirir.
+            IReadOnlyList<object>? izlemler = null;
+            var stokId = ks2["stok_id"] is { } sid and not DBNull ? Convert.ToInt32(sid) : 0;
+            if (stokDusecek && stokId > 0
+                && BelgeTuru.CikisMi(hedefTur, Convert.ToInt32(kaynak["tipi"] ?? 0))
+                && await StokIzlemeTuruAsync(baglanti, islem, stokId, iptal) > 0)
+            {
+                var cikisDepo = ks2["cikis_depo_id"] is { } sd and not DBNull ? Convert.ToInt32(sd)
+                              : kaynak["cikis_depo_id"] is { } bd and not DBNull ? Convert.ToInt32(bd)
+                              : (int?)null;
+                izlemler = await FifoLotTahsisAsync(baglanti, islem, stokId, cikisDepo, miktar,
+                                                    satirlar.Count + 1, iptal);
+            }
+
             satirlar.Add(SatirJson(ks2, miktar, satirId,
-                stokDurumDegis: hedefEtki.Stok && !kaynakDusurdu ? 1 : 0));
+                stokDurumDegis: stokDusecek ? 1 : 0, izlemler));
         }
 
         // --------------------------------------------------- 3) hedef baslik ----

@@ -13,9 +13,17 @@ namespace Gentegre.Cekirdek.Katalog;
 public static class BelgeTuru
 {
     // ------------------------------------------------------------- gruplar ---
-    /// <summary>Stok CIKISI yonundeki turler.</summary>
+    /// <summary>
+    /// Stok CIKISI yonundeki turler. Cari tarafi olan turlerde ayni liste
+    /// "satis mi" sorusunu da cevaplar (cari BORCLANIR).
+    ///
+    /// 13 (Alacak Tahakkuku) stok ETKILEMEZ ama SATIS tarafindadir: musteri
+    /// borclanir. Listede olmadigi icin alis gibi davranip cariyi
+    /// ALACAKLANDIRIYORDU - bakiye ters cikiyordu (17 Borc Tahakkuku alis
+    /// tarafinda oldugu icin dogru sekilde disarida).
+    /// </summary>
     private static readonly HashSet<int> CikisTurleri =
-        new() { 14, 15, 16, 119, 29, 105, 133, 4 };
+        new() { 13, 14, 15, 16, 119, 29, 105, 133, 4 };
 
     /// <summary>Depolar arasi transfer: TEK satir iki depoyu birden oynatir.</summary>
     public const int Transfer = 20;

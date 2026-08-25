@@ -3087,5 +3087,55 @@ Giriş Deposu* | Teslim Alan), talep (İstenen Depo* | Talep No | Tarih | Teslim
 Deposu · Talep Eden), çıkış fişi (Tipi | Fiş No | Tarih | Sorumlu · Çıkış
 Deposu*). Transferde döviz kutusu yok (para yok), fişte var (muhasebe matrahı).
 
+### Dönüşüm hedefleri genişledi: fiş ve tahakkuk + FIFO lot
+
+Sipariş ve irsaliye artık yalnız irsaliye/faturaya değil, **fişe ve tahakkuka**
+da dönüşüyor (kullanıcı). Yön kaynaktan gelir:
+
+| Kaynak | Hedefler |
+|---|---|
+| Alış siparişi (9) | Alış İrsaliyesi · Alış Faturası · Alış Fişi · Borç Tahakkuku |
+| Satış siparişi (19) | Satış İrsaliyesi · Satış Faturası · Satış Fişi · Alacak Tahakkuku |
+| İrsaliye / konsinye (10/14/109/119) | Fatura · Fiş · Tahakkuk (kendi yönünde) |
+
+Araç çubuğundaki düğmeler modalı **ön seçili hedefle** açıyor ("İrsaliyeye
+Dönüştür" → İrsaliye); combodan fiş/tahakkuka çevrilebilir.
+
+**FIFO otomatik lot** (kullanıcı kararı): sipariş stok düşürmediği için satırında
+lot yoktur, çıkış hedefi ise lot ister — dönüşüm "1. satır için lot seçilmeli"
+diye reddediyordu. Artık `FifoLotTahsisAsync` depodaki lotları **SKT sırasıyla**
+(yoksa üretim tarihi, yoksa lot kimliği) tahsis ediyor; bakiye yetmezse okunur
+bir hata verir ("0 tahsis edildi, 10 eksik"). Gerçek düşüm ve kilit yine
+`LottanDusAsync`'te, aynı transaction içinde.
+
+Doğrulama: ÜA0001 (2 lot) siparişi → irsaliye 000104164; SKT'si eski lot (781,
+KP01210226, SKT 1990-01-01) seçildi, bakiyesi 286.401 → 286.391 düştü.
+
+### Cari ekstreye ne girer: fiş / fatura / tahakkuk
+
+Kullanıcı kuralı: **cari ekstreye belge olarak fiş, fatura ve tahakkuk gelir.**
+Katalogda irsaliye ve konsinye de `cari_etkiler=1` idi; sonuç: ekstrede fatura
+yerine irsaliye görünüyor, irsaliyeden türeyen fatura ise (çift sayımı önlemek
+için) cari hiç yazmıyordu — resmi belge ekstrede yoktu.
+
+`db/136`: 10/14/109/119 türleri için `cari_etkiler` / `cari_ekstre` /
+`bakiye_dahil` = 0. Mevcut 5 satır iki dallı onarıldı — irsaliyeden **belge
+türetilmişse** cari satırı hedef belgeye taşındı (1 satır: alış irsaliyesi →
+alış faturası, bakiye korundu), türetilmemişse yedeklenip silindi (4 satır: mal
+çıktı, faturası kesilmedi → henüz cari borç yok). Yedek:
+`mali_hareket_irsaliye_yedek_136`.
+
+Yan hata: **Alacak Tahakkuku (13) cariyi ters yazıyordu.** Tür stok
+etkilemediği için `BelgeTuru.CikisTurleri` listesinde değildi, dolayısıyla alış
+gibi davranıp müşteriyi *alacaklandırıyordu*. 13 listeye eklendi (17 Borç
+Tahakkuku alış tarafında olduğu için doğruydu); `db/137` yanlış yönle yazılmış
+satırları çevirdi (iade tahakkukları hariç — orada yön zaten ters).
+
+Doğrulama: cari ekstrede Alacak Tahakkuku 000000002 · **Borç 2.040,00** ·
+bakiye 2.040,00; aynı cariye kesilen irsaliye ekstrede görünmüyor.
+
+Ayrıca: belge kartlarındaki **Taslak kutusu kaldırıldı** (kaydedilen belge
+kesindir), kalem gridinde **Miktar / İskonto / KDV kolonları daraltıldı**.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).
