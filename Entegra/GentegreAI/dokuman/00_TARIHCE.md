@@ -2742,5 +2742,25 @@ Doğrulama: `tsc -b` + prod derleme temiz; menü grupları, satış irsaliyesi l
 (çipler + toplam serisi) ve bir irsaliyenin Kalemler / Taşıyıcı / e-Belge
 sekmeleri ekrandan kontrol edildi.
 
+### Refaktör: belge kartı kalem/tahsilat sekmeleri, kasa deposu partial
+
+- **`BelgeKarti.tsx` 1543 → 1271 satır.** Kalemler sekmesi (satır gridi + lot
+  master-detail + dip toplam panosu) ve Tahsilat sekmesi
+  `bilesenler/belge/KalemSekmesi.tsx`'e çıktı. Kart artık başlık alanları,
+  yükleme/kaydetme akışı ve sekme yönlendirmesinden ibaret.
+- **`KasaDeposu.cs` 810 → 478 satır.** Yazma adımları (başlık ekle/güncelle,
+  bacaklar, taraf snapshot'ı, döviz doldurma) `.Yazma.cs`'e; okuma/dönüşüm
+  yardımcıları `.Deger.cs`'e.
+
+Doğrulama: `dotnet build` + `tsc -b` + prod derleme temiz. Ekrandan: 104155 no'lu
+irsaliyede kalem gridi ve lot detayı (Sİİ001 / si004) açıldı; Nakit Tahsilat
+kartından 500 TL taslak kaydedildi — bacaklar sunucuda üretildi (TL KASASI borç
+500 / cari alacak 500, "dengeli") ve kayıt silinerek geri alındı.
+
+Not: `POST /api/kasa-islem`'e elle bacak göndermek `42P08 could not determine
+data type of parameter` ile düşüyor. Refaktör öncesi sürümde de aynı davranış
+görüldü (stash ile doğrulandı) — arayüz bacakları sunucuya bıraktığı için ekran
+akışını etkilemiyor; ayrı bir iş olarak ele alınacak.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).
