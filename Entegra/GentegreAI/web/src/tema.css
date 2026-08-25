@@ -712,8 +712,14 @@ input.skt-gecmis {
 .kagov > .katab { margin: 0 -14px 10px }
 /* Baslikta etiket EDITIN USTUNDE (mockup .fld deseni) - alan-izgara'nin
    varsayilani 84px etiket + input yan yana; burada dikey. */
-.belge-hdr-sar .alan { display: flex; flex-direction: column; align-items: stretch; gap: 2px }
-.belge-hdr-sar .alan .etiket { text-align: left; font-size: 10.5px }
+/* Kural IZGARA sinifina bagli (.belge-hdr), sarmalayiciya degil: tahsilat/kasa
+   kartinin basligi da ayni duzeni kullaniyor ama gradient seride sarilmiyor. */
+.belge-hdr-sar .alan,
+.alan-izgara.belge-hdr .alan {
+  display: flex; flex-direction: column; align-items: stretch; gap: 2px;
+}
+.belge-hdr-sar .alan .etiket,
+.alan-izgara.belge-hdr .alan .etiket { text-align: left; font-size: 10.5px }
 
 /* Belge karti basligi: mockup (.hdr) 3 sutunlu izgara. */
 .alan-izgara.uc-sutun { grid-template-columns: repeat(3, minmax(0, 1fr)) }
