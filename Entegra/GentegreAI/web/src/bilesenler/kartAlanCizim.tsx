@@ -127,8 +127,12 @@ export function alanCizici(b: AlanCizimBaglami) {
           // Tarih alani TAKVIM kutusu olur; deger ham ISO gelir ("2026-08-24T00:00:00")
           //   ve type=date bunu GOSTEREMEZ - 10 karaktere kirpilir. Eskiden duz metin
           //   kutusuydu ve kullanici ISO damgasini goruyordu.
-          type={a.tip === 'tarih' ? 'date' : EPOSTA_ALANLARI.has(a.ad) ? 'email' : 'text'}
+          // "zaman" = tarih + SAAT (151): kiymetin/kaydin gun ici sirasi onemli
+          //   oldugu alanlarda kullanilir; "tarih" yalniz gun sorar.
+          type={a.tip === 'tarih' ? 'date' : a.tip === 'zaman' ? 'datetime-local'
+                : EPOSTA_ALANLARI.has(a.ad) ? 'email' : 'text'}
           value={a.tip === 'tarih' ? String(deger[a.ad] ?? '').slice(0, 10)
+                : a.tip === 'zaman' ? String(deger[a.ad] ?? '').slice(0, 16)
                                    : String(deger[a.ad] ?? '')}
           maxLength={a.enFazlaUzunluk ?? undefined}
           disabled={salt || !a.yazilabilir}

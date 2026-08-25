@@ -7,6 +7,7 @@ import {
 } from '../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, bosDetay, detayFarki } from './GenDetayTablo';
 import { Modal } from './Modal';
+import { yerelAnMetni } from '../sayfalar/belgeSabitleri';
 import { PaketSekmesi } from './PaketSekmesi';
 import { KartGrupSekmesi } from './kart/KartGrupSekmesi';
 import { alanCizici, type Deger } from './kartAlanCizim';
@@ -142,7 +143,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         // ONCE katalog varsayilanlari (sunucudan), SONRA ekrana ozel olanlar -
         //   ekran (or. Cek Listesi'nden "Yeni" -> tur=1) katalogu ezebilsin.
         Object.entries(m.varsayilanlar ?? {}).forEach(([ad, deger]) => {
-          baslangic[ad] = deger as Deger;
+          // "@simdi" DINAMIK varsayilan (151): kart o anki tarih+saatle acilir.
+          //   Sunucu ayni isareti kayitta cozer - istemci saati bozuksa bile
+          //   kaydedilen deger kurulus saatinden gelir.
+          baslangic[ad] = deger === '@simdi' ? yerelAnMetni(new Date()) : deger as Deger;
         });
         if (yeniKayitVarsayilanlari) {
           Object.entries(yeniKayitVarsayilanlari).forEach(([ad, deger]) => { baslangic[ad] = deger });

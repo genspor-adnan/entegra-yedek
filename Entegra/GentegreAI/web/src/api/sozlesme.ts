@@ -135,7 +135,7 @@ export interface PaketIcerikSatiri {
 export interface KolonMeta {
   ad: string;
   baslik: string;
-  tip: 'metin' | 'sayi' | 'para' | 'tarih' | 'kod' | 'mantik';
+  tip: 'metin' | 'sayi' | 'para' | 'tarih' | 'zaman' | 'kod' | 'mantik';
   hizalama: 'sol' | 'orta' | 'sag';
   bicim?: string | null;
   varsayilan: boolean;
@@ -225,7 +225,7 @@ export interface KartYazmaIstegi {
 export interface KartAlanMeta {
   ad: string;
   baslik: string;
-  tip: 'metin' | 'sayi' | 'para' | 'tarih' | 'kod' | 'mantik';
+  tip: 'metin' | 'sayi' | 'para' | 'tarih' | 'zaman' | 'kod' | 'mantik';
   grup?: string | null;
   altGrup?: string | null;
   eslesAlan?: string | null;

@@ -62,7 +62,9 @@ public static class DegerCevirici
     private static object? MetinCevir(string s, string tip, string alanAdi, string alanBasligi)
         => tip switch
         {
-            "tarih" => string.IsNullOrWhiteSpace(s)
+            // "zaman" = tarih + SAAT (datetime-local). Cozumleme "tarih" ile
+            //   aynidir - fark yalnizca EKRANDA: hangi girdi kutusu cizilecegi.
+            "tarih" or "zaman" => string.IsNullOrWhiteSpace(s)
                        ? null
                        : DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.None, out var t)
                          ? t

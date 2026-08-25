@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Npgsql;
@@ -296,7 +297,11 @@ public sealed class KartDeposu
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
         foreach (var (ad, deger) in tanim.YeniKayitVarsayilanlari ?? new Dictionary<string, object?>())
-            if (!degerler.ContainsKey(ad)) degerler[ad] = deger;
+            if (!degerler.ContainsKey(ad))
+                // "@simdi" DINAMIK varsayilan (151): sabit bir tarih yazilamaz,
+                //   isaret kayit aninda kurulus saatiyle cozulur. Kart da ayni
+                //   isareti anlar ve formu o anla acar.
+                degerler[ad] = deger as string == "@simdi" ? Saat.Simdi : deger;
 
         // Kayit AKTIF SUBEYE yazilir. "subeId" yazilabilir olan kartlarda
         //   (Personel: "Çalıştığı Şube") kullanici deger yollamis olabilir - o zaman

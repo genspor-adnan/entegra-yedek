@@ -114,8 +114,12 @@ public static partial class KartKatalogu
         Tablo: "public.cek_senet",
         LogTabloId: 910,
         SubeKolonu: "sube_id",
+        // "@simdi" DINAMIK varsayilan (151): yeni kiymet acilinca tarih alani
+        //   o anki tarih+saatle gelir. Sabit bir deger yazilamazdi; isaret hem
+        //   kartta (form acilisinda) hem sunucuda (kayitta) cozulur.
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
             { ["durum"] = (short)10, ["tur"] = (short)1, ["yon"] = (short)1,
+              ["tarih"] = "@simdi",
               ["dovizCinsi"] = "TL", ["dovizKuru"] = 1m },
         // Yeni cek/senette ilk is kimin kagidi oldugunu secmektir.
         AcilistaTarafSecimi: "tarafId",
@@ -147,7 +151,10 @@ public static partial class KartKatalogu
             //   grup sirasi alan sirasindan turer. Basligi ekranda GIZLI
             //   (KartGrupSekmesi), yalniz cercevesi kalir: iki kisa alan icin
             //   ayrica "Tutar / Vade" yazmak gereksiz gorunuyordu.
-            new("tarih",         "tarih",           "tarih", Zorunlu: true, Baslik: "Tarih", Grup: "Genel", AltGrup: "Tutar / Vade"),
+            new("tarih",         "tarih",           "zaman", Zorunlu: true, Baslik: "Tarih / Saat", Grup: "Genel", AltGrup: "Tutar / Vade"),
+            // Seri No tarihin HEMEN ALTINDA (kullanici): kagidin uzerindeki
+            //   iki bilgi (ne zaman, hangi numara) birlikte okunuyor.
+            new("seriNo",        "seri_no",         "metin", EnFazlaUzunluk: 30, Baslik: "Seri No", Grup: "Genel", AltGrup: "Tutar / Vade"),
             new("dovizKuru",     "doviz_kuru",      "para",  Baslik: "Kur", Grup: "Genel", AltGrup: "Tutar / Vade"),
             // Yerel karsilik SUNUCUDA hesaplanir (tutar x kur) - kullanici
             //   yazamaz; yoksa kurla tutarsiz bir yerel tutar kaydedilebilirdi.
@@ -158,9 +165,6 @@ public static partial class KartKatalogu
             new("bankaSubeId",   "banka_sube_id",   "kod",   KodTablosu: "public.v_banka_sube_lookup", BagliAlan: "bankaId", Baslik: "Şube", Grup: "Genel", AltGrup: "Banka"),
             new("hesapNo",       "hesap_no",        "metin", EnFazlaUzunluk: 30, Baslik: "Hesap No", Grup: "Genel", AltGrup: "Banka"),
             new("hesapId",       "hesap_id",        "kod",   Yazilabilir: false, KodTablosu: "public.v_hesap_lookup", Baslik: "Bulunduğu Hesap", Grup: "Genel", AltGrup: "Banka"),
-            // Seri No "Diğer"de (kullanici): kagidin uzerindeki numara kimlik
-            //   seridinde degil, ayrinti bolumunde okunuyor.
-            new("seriNo",        "seri_no",         "metin", EnFazlaUzunluk: 30, Baslik: "Seri No", Grup: "Genel", AltGrup: "Diğer"),
             new("projeId",       "proje_id",        "kod",   KodTablosu: "public.v_proje_lookup", Baslik: "Proje", Grup: "Genel", AltGrup: "Diğer"),
             new("makbuzNo",      "makbuz_no",       "metin", EnFazlaUzunluk: 30, Baslik: "Makbuz No", Grup: "Genel", AltGrup: "Diğer"),
             new("aciklama",      "aciklama",        "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama", Grup: "Genel", AltGrup: "Diğer"),
