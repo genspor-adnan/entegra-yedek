@@ -2724,5 +2724,23 @@ geliyor; satış faturası taslak (240,00 önizleme) ve kesin kayıt (numara ver
 stok 258,93 → 256,93, cari borç 240 TL) çalıştı — test belgeleri ve stok etkisi
 geri alındı.
 
+### Refaktör: liste tanımları, grid yardımcıları ve belge kartı sekmeleri ayrıldı
+
+- **`Liste.tsx` 1028 → 343 satır.** Menü/rota/grid'i besleyen tanım tablosu
+  (`ListeTanimi`, `LISTELER`, çip kümeleri, kasa araç menüsü) veri dosyası
+  `listeTanimlari.ts`'e taşındı; `Liste.tsx` yalnız ekran. Dışarıdan alışılmış
+  yol bozulmasın diye `LISTELER` buradan da dışa aktarılıyor.
+- **`GenGrid.tsx` 1002 → 870 satır.** Gridin durumuna dokunmayan biçimleyiciler
+  (durum rozeti, JSON/log gövdesi çözümleme, "eski → yeni" ayırma, görünüm
+  şeridi) `gridHucre.tsx`'e.
+- **`BelgeKarti.tsx` 1812 → 1543 satır.** Sabit tablolar (senaryo, teslim şekli,
+  fiş tipleri, sekme listesi, ayar varsayılanları) `belgeSabitleri.ts`'e; Taşıyıcı,
+  e-Belge ve Faturalama sekmeleri `bilesenler/belge/BelgeSekmeleri.tsx`'e üç
+  bileşen olarak çıktı (props açık; kayıtlı belge tek `belge` prop'uyla geçiyor).
+
+Doğrulama: `tsc -b` + prod derleme temiz; menü grupları, satış irsaliyesi listesi
+(çipler + toplam serisi) ve bir irsaliyenin Kalemler / Taşıyıcı / e-Belge
+sekmeleri ekrandan kontrol edildi.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).
