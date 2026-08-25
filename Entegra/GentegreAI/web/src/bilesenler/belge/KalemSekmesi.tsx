@@ -112,6 +112,11 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         <th style={{ width: 110 }}>Kod</th>
         <th>Stok / Hizmet</th>
         {aciklamaVar && <th style={{ width: 200 }}>Açıklama</th>}
+        {/* TESLIM TARIHI (140) miktarin SOLUNDA, yalniz sipariste: satirin
+            termini - "ne kadar"dan once "ne zaman" okunuyor. */}
+        {bilgi.siparis && (
+          <th className="hiza-orta" style={{ width: 92 }}>Teslim Tarihi</th>
+        )}
         {/* Miktar / iskonto / KDV DAR (kullanici): ikisi de en fazla birkac
             hane; genis birakinca stok adi sikisiyordu. */}
         <th className="hiza-sag" style={{ width: 60 }}>Miktar</th>
@@ -135,10 +140,6 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
           <th className="hiza-sag" style={{ width: 120 }}>
             Döviz Tutar{dovizAdi ? ` (${dovizAdi})` : ''}
           </th>
-        )}
-        {/* TESLIM TARIHI (140) EN SONDA, yalniz sipariste: satirin termini. */}
-        {bilgi.siparis && (
-          <th className="hiza-orta" style={{ width: 92 }}>Teslim Tarihi</th>
         )}
       </tr>
     </thead>
@@ -194,6 +195,13 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
               {r.stokAdi || <span className="sonuk">(stok seçilmedi)</span>}
             </td>
             {aciklamaVar && <td className="sonuk">{r.aciklama}</td>}
+            {bilgi.siparis && (
+              <td className="hiza-orta">
+                {r.teslimTarihi
+                  ? r.teslimTarihi.split('-').reverse().join('.')
+                  : <span className="sonuk">—</span>}
+              </td>
+            )}
             <td className="hiza-sag">{adet.toLocaleString('tr-TR')}</td>
             {/* Iki iskonto varsa ikisi de gorunsun: "%10 + %5". */}
             {bilgi.kalem === 'tam' && <td className="hiza-sag">{iskonatoMetni(r)}</td>}
@@ -209,13 +217,6 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                 </>
               );
             })()}
-            {bilgi.siparis && (
-              <td className="hiza-orta">
-                {r.teslimTarihi
-                  ? r.teslimTarihi.split('-').reverse().join('.')
-                  : <span className="sonuk">—</span>}
-              </td>
-            )}
           </tr>
           {/* DETAY: kalemin lot dagilimi. Kalem satirinin bir parcasi -
               ayri kolon basligi yok, kendi mini basligiyla gelir. */}

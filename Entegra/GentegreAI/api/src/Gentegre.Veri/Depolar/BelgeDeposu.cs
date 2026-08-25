@@ -632,6 +632,85 @@ public sealed partial class BelgeDeposu
         return (yeniId, uyarilar);
     }
 
+    /// <summary>
+    /// TERMIN GUNCELLEME (140): satirlarin teslim tarihini toplu degistirir.
+    ///
+    /// Belgeyi YENIDEN YAZMAZ. Termin ne stok ne cari ne de tutar etkiler; bu
+    /// yuzden "kayitli belge duzenleme" kilidine (135) de takilmaz - e-Belgesi
+    /// gonderilmis ya da faturalanmis bir siparisin kalan kalemleri icin de
+    /// yeni tarih verilebilir. Tedarikci gecikince siparisi iptal edip yeniden
+    /// kesmek yerine tarih guncellenir: numara, fiyat ve donusum zinciri kalir.
+    ///
+    /// Bos tarih = termin KALDIRILDI (belirsiz). Yalniz belgenin KENDI satirlari
+    /// guncellenir - baska belgenin satir kimligi gonderilirse sessizce atlanmaz,
+    /// 404 verir.
+    /// </summary>
+    public async Task<int> TerminGuncelleAsync(
+        int belgeId, IReadOnlyList<(int SatirId, DateTime? Tarih)> satirlar,
+        YazmaBaglami baglam, CancellationToken iptal = default)
+    {
+        if (satirlar.Count == 0)
+            throw GentegreHatasi.Dogrulama("Güncellenecek satır yok.",
+                new AlanHatasi("satirlar", "Boş bırakılamaz."));
+
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+        IDictionary<string, object?> belge;
+        await using (var komut = new NpgsqlCommand(
+            "select id, tur, durum, sube_id, taraf_id, belge_no from public.belge where id = @p0",
+            baglanti, islem))
+        {
+            komut.Parameters.AddWithValue("p0", belgeId);
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            if (!await o.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi();
+            belge = Satir(o);
+        }
+
+        if (baglam.SubeId is { } sube && belge["sube_id"] is { } bs
+            && Convert.ToInt32(bs) != sube)
+            throw GentegreHatasi.Bulunamadi();
+
+        if (Convert.ToInt32(belge["durum"]) == 2)
+            throw GentegreHatasi.IsKurali("İptal edilmiş belgede termin güncellenemez.");
+
+        var degisen = 0;
+        foreach (var (satirId, tarih) in satirlar)
+        {
+            await using var komut = new NpgsqlCommand("""
+                update public.belge_satir
+                   set teslim_tarihi = @p2, degistiren = @p3
+                 where id = @p0 and belge_id = @p1
+                """, baglanti, islem);
+            komut.Parameters.AddWithValue("p0", satirId);
+            komut.Parameters.AddWithValue("p1", belgeId);
+            komut.Parameters.AddWithValue("p2", (object?)tarih ?? DBNull.Value);
+            komut.Parameters.AddWithValue("p3", baglam.KullaniciId);
+            var etkilenen = await komut.ExecuteNonQueryAsync(iptal);
+            if (etkilenen == 0)
+                throw GentegreHatasi.Bulunamadi($"Satır bu belgeye ait değil: {satirId}");
+            degisen += etkilenen;
+        }
+
+        await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloBelge, belgeId,
+            baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+            new Dictionary<string, string>
+            {
+                ["aksiyon"] = "termin",
+                ["satirAdedi"] = degisen.ToString(CultureInfo.InvariantCulture),
+                // En ileri tarih ozet olarak yeterli: "termin nereye cekildi".
+                ["yeniTermin"] = satirlar.Where(s => s.Tarih is not null)
+                    .Select(s => s.Tarih!.Value)
+                    .DefaultIfEmpty()
+                    .Max()
+                    .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
+            },
+            tarafId: SayiNull(belge, "taraf_id"), iptal: iptal);
+
+        await islem.CommitAsync(iptal);
+        return degisen;
+    }
+
     /// <summary>Acik (kalani olan) satirlar - donusum ekraninin kaynagi.</summary>
     public async Task<List<IDictionary<string, object?>>> AcikSatirlarAsync(
         int belgeId, CancellationToken iptal = default)

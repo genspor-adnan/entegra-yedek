@@ -126,6 +126,35 @@ public static class BelgeUclari
             });
         });
 
+        // POST /api/belge/{id}/termin - satirlarin teslim tarihini guncelle (140)
+        grup.MapPost("/{id:int}/termin", async (
+            int id, TerminIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            // Termin degisikligi tutar/stok/cari etkilemez: belgeyi DEGISTIRME
+            //   yetkisi yeterli, ayri bir aksiyon istenmiyor.
+            baglam.YetkiIste("belge", Islem.Degistir);
+
+            var secilen = (istek?.Satirlar ?? new List<TerminSatiri>())
+                .Where(s => s.SatirId > 0)
+                .Select(s => (s.SatirId, s.TeslimTarihi))
+                .ToList();
+
+            var adet = await depo.TerminGuncelleAsync(id, secilen,
+                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+
+            var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
+            return Results.Ok(new BelgeYaniti
+            {
+                Belge = kayit.Belge,
+                Satirlar = kayit.Satirlar,
+                DipToplam = kayit.DipToplam,
+                Uyarilar = new[] { $"{adet} satırın teslim tarihi güncellendi." },
+                IzlemeNo = baglam.IzlemeNo
+            });
+        });
+
         // POST /api/belge/{id}/donustur - siparis -> irsaliye -> fatura
         grup.MapPost("/{id:int}/donustur", async (
             int id, DonusumIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
@@ -200,6 +229,19 @@ public static class BelgeUclari
     {
         public int SatirId { get; set; }
         public decimal Miktar { get; set; }
+    }
+
+    /// <summary>Termin (teslim tarihi) guncelleme istegi - 140.</summary>
+    public sealed class TerminIstegi
+    {
+        public List<TerminSatiri>? Satirlar { get; set; }
+    }
+
+    public sealed class TerminSatiri
+    {
+        public int SatirId { get; set; }
+        /// <summary>Bos (null) = termin kaldirildi, tarih belirsiz.</summary>
+        public DateTime? TeslimTarihi { get; set; }
     }
 
     /// <summary>

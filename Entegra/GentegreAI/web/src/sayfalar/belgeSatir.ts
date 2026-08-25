@@ -43,6 +43,11 @@ export interface SatirDurumu {
    * zaman cikacagi, o paranin ne zaman odenecegi.
    */
   teslimTarihi?: string;
+  /**
+   * KAYITLI satirin sunucudaki kimligi (belge_satir.id). Yeni satirda YOKTUR -
+   * termin guncelleme gibi satir bazli islemler yalniz kayitli satirda calisir.
+   */
+  satirId?: number;
   /** Bu satir bir PAKET mi (124) - altina icerik satirlari acilir. */
   paket?: boolean;
   /** Icerik satirinda: bagli oldugu paket satirinin anahtari. */

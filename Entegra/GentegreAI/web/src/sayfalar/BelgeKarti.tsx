@@ -17,6 +17,7 @@ import {
   YEREL_PARA_VARSAYILAN, GERIYE_GUN_VARSAYILAN, yerelAnMetni, KAPANMA_ETIKET,
 } from './belgeSabitleri';
 import { KalemPenceresi } from '../bilesenler/belge/KalemPenceresi';
+import { TerminModali } from '../bilesenler/belge/TerminModali';
 import {
   TasiyiciSekmesi, EBelgeSekmesi, FaturalamaSekmesi,
 } from '../bilesenler/belge/BelgeSekmeleri';
@@ -152,6 +153,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [aciliyor, setAciliyor] = useState(!!belgeId);
   /** Donusum modali: null = kapali, sayi = ON SECILI hedef tur (0 = ilk hedef). */
   const [donusum, setDonusum] = useState<number | null>(null);
+  /** Termin (teslim tarihi) modali - siparis satirlarinin taahhudu (140). */
+  const [terminAcik, setTerminAcik] = useState(false);
   const [aktifSekme, setAktifSekme] = useState('kalem');
   /** Grid satir secimi (kirmizi Sil dugmesi bunlari siler). */
   const [seciliSatirlar, setSeciliSatirlar] = useState<Set<number>>(new Set());
@@ -377,6 +380,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           ? { id: Number(y.belge.teslimAlanId), ad: String(y.belge.teslimAlanAdi ?? '') } : null);
         setSatirlar((y.satirlar ?? []).map((r, i) => ({
           anahtar: i + 1,
+          // Sunucudaki satir kimligi: termin guncelleme gibi satir bazli
+          //   islemler bunu kullanir (140).
+          satirId: r.id ? Number(r.id) : undefined,
           satirTur: Number(r.tur ?? 1),
           stokId: r.stokId ? Number(r.stokId) : null,
           hizmetId: r.hizmetId ? Number(r.hizmetId) : null,
@@ -717,7 +723,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           siparisMi={siparisMi} irsaliyeMi={irsaliyeMi} faturaMi={faturaMi} alisMi={alisMi}
           eBelgeYok={eBelgeYok} kayitliId={kayitliId}
           kes={kes} yeniBelge={yeniBelge} kapat={kapat}
-          setDonusum={setDonusum}
+          setDonusum={setDonusum} setTerminAcik={setTerminAcik}
         />
       }
     >
@@ -995,6 +1001,27 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
         {/* Donusum modali bu kartin USTUNDE acilir: hedef turu ve satir miktarlari
             orada secilir, kalan bu belgede kalir (F8). */}
+        {/* Termin modali (140): satirlarin teslim tarihini toplu gunceller.
+            Sunucu belgeyi yeniden yazmaz - yalniz tarih kolonu degisir. */}
+        {terminAcik && kayitliId > 0 && (
+          <TerminModali
+            belgeId={kayitliId}
+            satirlar={satirlar}
+            onKapat={() => setTerminAcik(false)}
+            onTamam={y => {
+              setSonuc(y);
+              // Gridin termin kolonu tazelensin: satirlar sunucudan geldi.
+              setSatirlar(s => s.map(x => {
+                const yeni = (y.satirlar ?? []).find(r => Number(r.id) === x.satirId);
+                return yeni
+                  ? { ...x, teslimTarihi: String(yeni.teslimTarihi ?? '').slice(0, 10) }
+                  : x;
+              }));
+              onKaydedildi?.();
+            }}
+          />
+        )}
+
         {donusum !== null && kayitliId > 0 && (
           <BelgeDonusumModali
             belgeId={kayitliId}

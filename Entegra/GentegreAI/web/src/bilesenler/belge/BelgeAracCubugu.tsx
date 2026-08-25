@@ -12,7 +12,7 @@ export function BelgeAracCubugu({
   mevcutBelge, duzenlenebilir, sonuc, kaydediyor, kilitli,
   iadeKutusu, iade, setIade, faturaTipi, setFaturaTipi,
   siparisMi, irsaliyeMi, faturaMi, alisMi, eBelgeYok, kayitliId,
-  kes, yeniBelge, kapat, setDonusum,
+  kes, yeniBelge, kapat, setDonusum, setTerminAcik,
 }: {
   mevcutBelge: boolean;
   /** Kayitli belge degistirilebilir mi (135). */
@@ -40,6 +40,8 @@ export function BelgeAracCubugu({
   kapat(): void;
   /** Donusum modalini acar; deger = ON SECILI hedef tur (0 = ilk hedef). */
   setDonusum(v: number | null): void;
+  /** Termin (teslim tarihi) modalini acar - 140. */
+  setTerminAcik(v: boolean): void;
   /* TAHSILAT arac cubugundan kalkti - tahsilat kendi sekmesinden aciliyor. */
 }) {
   return (
@@ -88,7 +90,15 @@ export function BelgeAracCubugu({
       {/* ON ODEME dugmesi kalkti (kullanici): avans/on odeme artik siparisin
           kendi Tahsilat sekmesinden giriliyor - fatura kartiyla ayni yer,
           arac (nakit/banka/POS/çek/senet) orada secilir. */}
-      <button className="d" disabled title="Termin güncelleme henüz bağlanmadı.">📅 Termin Güncelle</button>
+      {/* TERMIN (140): satirlarin teslim tarihini toplu gunceller. Tutar/stok/
+          cari etkilemedigi icin KESIN sipariste de calisir - gecikince siparisi
+          iptal edip yeniden kesmeye gerek yok. */}
+      <button className="d" disabled={!kayitliId}
+              title={kayitliId ? 'Satırların teslim tarihini güncelle'
+                               : 'Önce siparişi kaydedin.'}
+              onClick={() => setTerminAcik(true)}>
+        📅 Termin Güncelle
+      </button>
       <button className="d" disabled title="Yazdırma henüz bağlanmadı.">🖨️ Yazdır</button>
     </>
   )}

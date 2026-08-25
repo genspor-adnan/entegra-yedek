@@ -257,6 +257,10 @@ export const api = {
       + (turler?.length ? `&turler=${turler.join(',')}` : '')).then(y => y.satirlar),
 
   /** Siparis -> irsaliye -> fatura. Miktar KISMI olabilir; kalan kaynakta durur. */
+  /** Termin (teslim tarihi) guncelleme - 140. Tarih null = termin kaldirildi. */
+  belgeTermin: (id: number, satirlar: { satirId: number; teslimTarihi: string | null }[]) =>
+    gonder<BelgeYaniti>(`/api/belge/${id}/termin`, { satirlar }),
+
   belgeDonustur: (id: number, hedefTur: number,
                   satirlar: { satirId: number; miktar: number }[],
                   belgeTarihi?: string, taslak = false, belgeNo?: string) =>

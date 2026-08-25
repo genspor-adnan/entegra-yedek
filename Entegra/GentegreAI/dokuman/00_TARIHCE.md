@@ -3171,5 +3171,24 @@ Kasa/tahsilat kartı kullanıcı isteğiyle sadeleşti:
   adlarıyla zaten gösteriyor.
 - **Taslak Kaydet kalktı**, "Kaydet ve Kesinleştir" → **Kaydet**.
 
+### Termin: satır bazlı teslim tarihi ve toplu güncelleme
+
+Sipariş kaleminin "ne zaman teslim edilecek" sözü artık kayıtlı. **Başlıkta
+değil satırda** (`db/140`): aynı siparişin kalemleri farklı günlerde sevk
+edilebilir — stoktaki hemen, üretilecek olan haftalar sonra. `vade_gun` ile
+karıştırılmamalı; o *ödeme* vadesi, bu *teslim* tarihi.
+
+Kalem penceresinde tarih alanı, kalem gridinde **Miktar'ın solunda** Teslim
+Tarihi kolonu (kullanıcı) — ikisi de yalnız siparişte, boş bırakılabilir.
+
+Araç çubuğundaki **Termin Güncelle** düğmesi bağlandı (`POST /api/belge/{id}/
+termin`): satırları listeleyen bir pencere, üstte "Hepsine Uygula" tarihi,
+altında satır satır düzeltme. Sunucu belgeyi **yeniden yazmaz**, yalnız tarih
+kolonunu günceller — termin tutar/stok/cari etkilemediği için kayıtlı belge
+düzenleme kilidine (135) de takılmaz: e-Belgesi gönderilmiş ya da kısmen
+faturalanmış bir siparişin kalan kalemleri için de yeni tarih verilebilir.
+Gecikmede siparişi iptal edip yeniden kesmeye gerek yok; numara, fiyatlar ve
+dönüşüm zinciri korunur. Değişiklik `islem_log`'a `aksiyon=termin` ile düşer.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet portföy aksiyonları (tahsile
 ver, ciro, karşılıksız), F6 kredi/kupon, F7 belge fişleme.
