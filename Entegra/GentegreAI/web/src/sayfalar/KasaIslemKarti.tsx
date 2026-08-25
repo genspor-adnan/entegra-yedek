@@ -11,7 +11,7 @@ import { useOturum } from '../kimlik/OturumBaglami';
 import { Modal } from '../bilesenler/GenForm';
 import { para } from '../bilesenler/bicim';
 import {
-  DOVIZ_KODLARI, YEREL_PARA_VARSAYILAN, yerelAnMetni, sayiOku as sayi,
+  DOVIZ_KODLARI, YEREL_PARA_VARSAYILAN, yerelAnMetni, sayiOku as sayi, tutarMetni,
 } from './belgeSabitleri';
 import { kasaDogrula, kasaGovdesi, kasaTurBilgisi, type KasaGirdisi } from './kasaKaydet';
 
@@ -43,11 +43,6 @@ const GRUP_ADI: Record<string, string> = {
  * bicim bekler - cevirmezsek sayi() noktayi binlik ayraci sanip 1.457.997
  * yaziyordu (gercek vaka).
  */
-const hamTutar = (ham: string | undefined | null): string => {
-  if (!ham) return '';
-  const n = Number(String(ham).replace(',', '.'));
-  return Number.isFinite(n) ? n.toFixed(2).replace('.', ',') : '';
-};
 
 interface HesapSecimi { id: number; ad: string; doviz: string }
 interface CariSecimi { id: number; unvan: string }
@@ -109,7 +104,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const [doviz, setDoviz] = useState(YEREL_PARA_VARSAYILAN);
   /** Cari hesaba hangi dovizde islenecek (139): islem dovizi ya da yerel para. */
   const [ekstreDovizi, setEkstreDovizi] = useState(YEREL_PARA_VARSAYILAN);
-  const [tutar, setTutar] = useState(hamTutar(acilis?.tutar ?? sorgu.get('tutar')));
+  const [tutar, setTutar] = useState(tutarMetni(acilis?.tutar ?? sorgu.get('tutar')));
   /** Tahsilatin kapatacagi belge (kasa_islem.belge_id). */
   const belgeBagi = acilis?.belgeId ?? (Number(sorgu.get('belgeId')) || 0);
   const [kur, setKur] = useState('1');
@@ -185,13 +180,16 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     setTur(Number(i.tur));
     if (i.islemTarihi) setTarih(String(i.islemTarihi).slice(0, 16));
     setPlanTarihi(i.planTarihi ? String(i.planTarihi).slice(0, 10) : '');
-    setTutar(String(i.tutar ?? ''));
+    // Sunucu ham ondalik gonderir ("1234.5600"); ekran Turkce bicim bekler -
+    //   cevrilmezse kayit yeniden kaydedilince sayiOku noktayi binlik sanip
+    //   tutari 100 katina cikariyordu.
+    setTutar(tutarMetni(i.tutar as string));
     setKur(String(i.dovizKuru ?? 1));
     setDoviz(String(i.dovizCinsi ?? YEREL_PARA_VARSAYILAN) || YEREL_PARA_VARSAYILAN);
     setEkstreDovizi(String(i.ekstreDovizi ?? '') ||
                     String(i.dovizCinsi ?? YEREL_PARA_VARSAYILAN) || YEREL_PARA_VARSAYILAN);
-    setKarsiTutar(Number(i.karsiTutar) ? String(i.karsiTutar) : '');
-    setMasrafTutar(Number(i.masrafTutar) ? String(i.masrafTutar) : '');
+    setKarsiTutar(Number(i.karsiTutar) ? tutarMetni(i.karsiTutar as string) : '');
+    setMasrafTutar(Number(i.masrafTutar) ? tutarMetni(i.masrafTutar as string) : '');
     setAciklama(String(i.aciklama ?? ''));
     setCari(i.tarafId ? { id: Number(i.tarafId), unvan: String(i.tarafUnvan ?? '') } : null);
     setKarsiCari(i.karsiTarafId ? { id: Number(i.karsiTarafId), unvan: '' } : null);
@@ -203,7 +201,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
       doviz: String(i.karsiDovizCinsi || 'TL'),
     } : null);
     setProje(i.projeId ? { id: Number(i.projeId), ad: String(i.projeAdi ?? '') } : null);
-    setGTutar(Number(i.kalanTutar) ? String(i.kalanTutar) : '');
+    setGTutar(Number(i.kalanTutar) ? tutarMetni(i.kalanTutar as string) : '');
   }, []);
 
   // Mevcut kaydi ac

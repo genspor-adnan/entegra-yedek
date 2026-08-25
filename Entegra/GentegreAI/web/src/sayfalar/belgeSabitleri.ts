@@ -146,10 +146,23 @@ export const SEKMELER: {
 ];
 
 /**
- * Kullanicinin girdigi sayiyi cozer: "1.234,56" ve "1234.56" ikisini de kabul
- * eder. Ekran Turkce bicim yazar, JSON nokta ondalikli gonderir - iki bicimi
- * ayni yerde okumazsak nokta binlik ayraci sanilip 1.457.997 gibi tutarlar
- * cikiyordu (gercek vaka).
+ * EKRANDAN girilen sayiyi cozer - TURKCE bicim: nokta binlik ayraci, virgul
+ * ondalik ("1.234,56" -> 1234.56).
+ *
+ * DIKKAT: JSON'dan gelen ham deger ("1234.56") buraya DOGRUDAN VERILEMEZ -
+ * nokta binlik sayilir ve 123456 cikar (gercek vaka: kayitli kasa islemi
+ * acilip yeniden kaydedilince tutar 100 katina ciktiyordu). Ham degeri once
+ * `tutarMetni` ile ekran bicimine cevirin.
  */
 export const sayiOku = (metin: string) =>
   Number(metin.replace(/\./g, '').replace(',', '.')) || 0;
+
+/**
+ * Ham/JSON tutari EKRAN bicimine cevirir ("1234.5600" -> "1234,56").
+ * `sayiOku`nun tersi: ikisi bir arada gidip gelen deger bozulmasin.
+ */
+export const tutarMetni = (ham: string | number | undefined | null): string => {
+  if (ham === null || ham === undefined || ham === '') return '';
+  const n = Number(String(ham).replace(',', '.'));
+  return Number.isFinite(n) ? n.toFixed(2).replace('.', ',') : '';
+};

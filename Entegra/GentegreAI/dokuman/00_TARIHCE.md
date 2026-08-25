@@ -3252,5 +3252,36 @@ ortak olanla değiştirildi.
 sırasına düşüyordu — üç nokta menüsündeki ↑/↓ ile yapılan taşıma sayfa
 yenilenince kayboluyordu. Artık saklanan dizinin sırası geçerli.
 
+### Yayın ve doğrulama (26.08.2026)
+
+Sunucuya yayınlandı (`yayin\yayinla.ps1`): göç **148–151** uygulandı (kasa
+işlemi düzeltme, `kasa.duzenleme_gun`, tahakkuk adları, `cek_senet.tarih`
+saatli), web + API yenilendi.
+
+Refaktörün bir şeyi bozmadığı iki yoldan doğrulandı:
+
+1. **C# tarafı satır satır birebir.** Refaktör öncesi dosyalarla yeni
+   parçalar karşılaştırıldı: `BelgeDeposu` 0 kayıp / 0 yeni, `KasaDeposu` 0/0,
+   `KartDeposu` yalnız `sealed class` → `sealed partial class`. Taşıma dışında
+   tek satır değişmemiş.
+2. **Otomatik test geldi** (`web/src/test/`, **vitest**, `npm test`). Projede
+   ilk test altyapısı; 96 test, hepsi geçiyor. Kapsam çıkarılan saf mantık:
+   `kasaKaydet` (gövde + doğrulama), `kartDegisim` (değişmeden kapatınca soru
+   sorma kuralının bütün sahte-fark vakaları), `belgeKalem` (paket içeriği,
+   iade satırı, stok seçimi), `yanittanSatirlar`, `gridMenuOgeleri` (pasiflik
+   sebepleri, ↑/↓ sınırları), biçim yardımcıları.
+
+**Testin bulduğu gerçek hata — tutar 100 katına çıkıyordu.** `sayiOku` EKRAN
+biçimini çözer (nokta = binlik ayracı). Kart açılışta ham JSON değerini
+`hamTutar` ile çeviriyordu ama **sunucu yanıtı okunurken çevirmiyordu**:
+`setTutar(String(i.tutar))` → `"1234.56"` → kaydederken `1234.56` yerine
+**123456**. Kayıtlı bir kasa işlemini açıp yeniden kaydeden (148 ile gelen
+düzenleme) ondalıklı tutarı şişiriyordu. `hamTutar` → `belgeSabitleri.tutarMetni`
+olarak ortaklaştı, yanıt okunan dört yer (tutar, karşı tutar, masraf, plan
+kalanı) çevrimden geçiyor; gidiş-dönüş testle sabitlendi.
+
+Tarayıcıda uçtan uca test **yapılamadı**: sunucu nginx basic-auth arkasında ve
+Chrome otomasyonu bu profilde her sayfada "error page" veriyor.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet portföy aksiyonları (tahsile
 ver, ciro, karşılıksız), F6 kredi/kupon, F7 belge fişleme.
