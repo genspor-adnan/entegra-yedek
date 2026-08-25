@@ -121,13 +121,21 @@ public sealed partial class BelgeDeposu
         var iskonto2   = JsonOndalik(satir, "iskonto2", 0);
         var kdv        = (int)JsonSayi(satir, "kdv", 0);
 
-        // Doviz: satirin kuru yoksa belgenin kuru. TL islemde de kur = 1 (026).
-        var kur = JsonOndalik(satir, "dovizKuru", 0);
-        if (kur <= 0) kur = Ondalik(belge, "dovizKuru");
-        if (kur <= 0) kur = 1m;
+        // SATIR BAZLI DOVIZ: bir kalem 100 USD, otekisi 100 TL olabilir.
         var dovizCinsi = JsonMetin(satir, "dovizCinsi");
         if (dovizCinsi.Length == 0) dovizCinsi = Metin(belge, "belgeDovizi");
         if (dovizCinsi.Length == 0) dovizCinsi = "TL";
+
+        // Kur: satirin kuru yoksa belgeninki. Satir BELGE PARA BIRIMINDE ise
+        //   kur HER ZAMAN 1 - belgenin rapor kuru buraya sizarsa yerel fiyat
+        //   bolunup sacma bir "doviz" fiyati uretiliyordu (100 TL -> 2,08).
+        var belgeDovizi = Metin(belge, "belgeDovizi");
+        var kur = JsonOndalik(satir, "dovizKuru", 0);
+        if (kur <= 0) kur = Ondalik(belge, "dovizKuru");
+        if (kur <= 0) kur = 1m;
+        if (belgeDovizi.Length > 0
+            && dovizCinsi.Equals(belgeDovizi, StringComparison.OrdinalIgnoreCase))
+            kur = 1m;
 
         // Birim fiyat doviz uzerinden verildiyse yerel karsiligi turetilir
         //   (Delphi: BIRIMFIYAT = DOVIZ_BIRIMFIYAT * DOVIZKURDEGERI).
@@ -214,7 +222,26 @@ public sealed partial class BelgeDeposu
         var kdv    = Topla(DipToplamTuru.KdvToplam);
         var ek     = Topla(DipToplamTuru.EkVergi) + Topla(DipToplamTuru.Stopaj);
         var genel  = Topla(DipToplamTuru.GenelToplam);
+        // DOVIZ KARSILIGI (134): tutarlar YEREL parada tutulur; rapor dovizi
+        //   yerel paradan farkliysa karsilik genel toplamin KURA BOLUNMESIDIR.
         var dovizGenel = dip.Where(d => d.Tur == DipToplamTuru.GenelToplam).Sum(d => d.DovizTutari);
+        await using (var kurKomut = new NpgsqlCommand(
+            "select coalesce(nullif(btrim(rapor_dovizi), ''), ''), " +
+            "coalesce(nullif(btrim(belge_dovizi), ''), ''), coalesce(doviz_kuru, 1) " +
+            "from public.belge where id = @p0", baglanti, islem))
+        {
+            kurKomut.Parameters.AddWithValue("p0", belgeId);
+            await using var o = await kurKomut.ExecuteReaderAsync(iptal);
+            if (await o.ReadAsync(iptal))
+            {
+                var rapor = o.GetString(0);
+                var belgeDoviz = o.GetString(1);
+                var kur = o.GetDecimal(2);
+                if (rapor.Length > 0
+                    && !rapor.Equals(belgeDoviz, StringComparison.OrdinalIgnoreCase) && kur > 0)
+                    dovizGenel = Math.Round(genel / kur, 2, MidpointRounding.ToEven);
+            }
+        }
 
         await using var komut = new NpgsqlCommand("""
             update public.belge

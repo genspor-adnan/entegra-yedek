@@ -3018,5 +3018,44 @@ borç 600 → 240, numara 000104161 korundu; e-Belge işaretli ve 7 günden eski
 belgede düzenleme reddedildi. Hizmetli irsaliyede kod/ad ekranda göründü
 (679.01.015 · ANTALYA 17-20 KASIM STANT KURULUM BEDELİ).
 
+### Kalem gridinde döviz kolonları + yeni başlık düzeninin yayılması
+
+Döviz gösteriminin yönü **tersti**: satır TL fiyatı kurla çarpılıyordu. Doğrusu
+tutarların yerel parada tutulup **kura bölünmesi** (kullanıcı: "TL tutar fiyatı
+kura bölüp yazmalıydı"). Sunucuda da `genel_toplam / kur`.
+
+Kalem gridi kolon kuralları (kullanıcı senaryoları):
+- Hiç döviz yoksa **her şey yerel**; döviz kolonları çizilmez.
+- Döviz kolonları **yalnız rapor dövizi seçilince** görünür:
+  `Miktar | Birim Fiyat (TL) | Tutar (TL) | Döviz Birim (USD) | Döviz Tutar (USD)`.
+- Dövizli fiyatlı kalem eklenince **rapor dövizi ilk girilen dövize** ayarlanır,
+  kur da o kalemden gelir.
+- Tüm satırlarda açıklama boşsa **Açıklama kolonu hiç çizilmez**.
+- Dip toplamda solda TL, sağda döviz; izlem (lot) satırları varsayılan kapalı.
+
+Satır bazlı döviz: satırın para birimi belge para birimiyle aynıysa kur zorla 1
+(yoksa TL satır 2,08 gibi sahte döviz fiyatı üretiyordu).
+
+**Bayat dip toplam**: satır silinince toplam duruyordu — sunucudan gelen `sonuc`
+hâlâ eski belgeyi taşıyordu. Kart artık `kalemDegisti` bayrağıyla kalem
+değiştiğinde önizleme toplamını gösteriyor (0 kalem → 0,00).
+
+Kalem penceresinde **para birimi seçilebilir** oldu (salt-okunur etiket yerine
+liste): yerel paraya dönüşte kur 1'e sabitlenir, dövize geçişte döviz fiyatı
+yerel/kur olarak hesaplanır. **Seri / Lot alanı kaldırıldı** (kullanıcı): izlemli
+stokta lot kendi dağıtım ekranında giriliyor, izlemsiz stokta serbest metin lot
+ikinci ve tutarsız bir kayıt üretiyordu.
+
+**Yeni başlık düzeni** (irsaliyede pilot edilip onaylanan 4 sütunlu ızgara +
+döviz kutusunun grid altına inmesi) **tüm carili belgelere** yayıldı: fatura,
+sipariş, konsinye, tahakkuk. Dışarıda kalanlar transfer / talep / stok fişi
+(cari yok, kendi alanları var). Fatura ve tahakkukta "Kapanma" hücresi
+çizilmiyor — zincirin sonu, "Faturalanmadı" yazması yanlıştı.
+
+Doğrulama: 1.000 USD'lik kalem → Birim Fiyat 47.897,00 TL / Döviz Birim 1.000,00
+USD, rapor dövizi kendiliğinden USD ve kur 47,897; satır silinince toplam 0,00;
+fatura/sipariş/konsinye/tahakkuk kartlarında yeni başlık ve grid altındaki
+Rapor/Ekstre Dövizi kutuları yerinde.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).

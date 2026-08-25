@@ -5,13 +5,13 @@ import { para } from '../bicim';
 import {
   type SatirDurumu, satirTutari, adetKaydir, KDV_ORANLARI,
 } from '../../sayfalar/belgeSatir';
+import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
 import { IzlemPenceresi } from './IzlemPenceresi';
 
-export function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, yerelPara,
+export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara,
                          girisIzlemi, cikisIzlemi, cikisDepoId, belgeTarihi,
                          onKapat, onKaydet }: {
   satir: SatirDurumu;
-  irsaliyeMi: boolean;
   /** Mal DEPOYA giriyor: izlemli stokta fiyattan sonra lot GIRIS ekrani acilir. */
   girisIzlemi: boolean;
   /** Mal DEPODAN cikiyor: izlemli stokta lot SECIM ekrani acilir. */
@@ -132,7 +132,29 @@ export function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, yerelP
                 <input className="hiza-sag"
                        value={dovizli ? r.dovizFiyat : r.birimFiyat} onKeyDown={tus}
                        onChange={e => degis(dovizli ? 'dovizFiyat' : 'birimFiyat', e.target.value)} />
-                <input className="birim" value={r.fiyatDovizi || yerelPara} readOnly tabIndex={-1} />
+                {/* Para birimi SECILEBILIR (kullanici): stok kartindan gelen doviz
+                    degistirilebilmeli - ayni urun bir belgede USD, otekinde TL
+                    fiyatlanabiliyor. Yerel paraya donunce kur 1'e cekilir. */}
+                <select className="birim" value={r.fiyatDovizi || yerelPara}
+                        onChange={e => {
+                          const yeniCins = e.target.value;
+                          kurElle.current = false;
+                          if (yeniCins === yerelPara) {
+                            // Yerel paraya donus: o anki YEREL fiyat korunur.
+                            setR(x => ({ ...x, fiyatDovizi: yeniCins, kur: '1',
+                                         dovizFiyat: x.birimFiyat }));
+                          } else {
+                            // Dovize gecis: yerel fiyat kur ile boluner (kur
+                            //   birazdan gunluk kurla guncellenir).
+                            const k = Number(String(r.kur).replace(',', '.')) || 1;
+                            const yerel = Number(String(r.birimFiyat).replace(',', '.')) || 0;
+                            setR(x => ({ ...x, fiyatDovizi: yeniCins,
+                                         dovizFiyat: k > 0 ? String(yerel / k) : x.dovizFiyat }));
+                          }
+                        }}>
+                  {[yerelPara, ...DOVIZ_KODLARI.filter(k => k !== yerelPara)]
+                    .map(k => <option key={k} value={k}>{k}</option>)}
+                </select>
                 {dovizli && (
                   <input className="hiza-sag kur" value={r.kur} onKeyDown={tus}
                          title="Günlük kur — değiştirilebilir"
@@ -183,16 +205,10 @@ export function KalemPenceresi({ satir, irsaliyeMi, transferMi, vergisiz, yerelP
             </label>
             )}
 
-            {/* Duz metin "Seri / Lot": yalniz IZLEMSIZ stokta. Izlemli stokta
-                dagitim lot ekraninda yapilir - iki ayri yerde lot tutmak
-                birbirini tutmayan iki kayit uretirdi. */}
-            {(irsaliyeMi || transferMi) && !izlemGerekli && (
-              <label className="alan">
-                <span className="etiket">Seri / Lot</span>
-                <input value={r.izlemeKodu} placeholder="LOT / seri" onKeyDown={tus}
-                       onChange={e => degis('izlemeKodu', e.target.value)} />
-              </label>
-            )}
+            {/* Duz metin "Seri / Lot" alani kaldirildi (kullanici): izlemli
+                stokta lot dagitimi kendi ekraninda yapiliyor, izlemsiz stokta
+                da serbest metin lot iki ayri yerde tutulan, birbirini tutmayan
+                kayit uretiyordu. */}
 
             <label className="alan">
               <span className="etiket">Açıklama</span>

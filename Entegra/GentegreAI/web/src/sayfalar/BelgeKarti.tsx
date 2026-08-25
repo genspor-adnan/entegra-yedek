@@ -155,6 +155,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       kullanici bakmak icin ayrica tiklamasin; isteyen oku ile kapatir. */
   /** Lot/izlem detayi ACIK olan kalemler - varsayilan KAPALI (kullanici). */
   const [acikLotlar, setAcikLotlar] = useState<Set<number>>(new Set());
+  /**
+   * Kayitli belgede kalem DEGISTIRILDI mi (ekleme/silme/duzenleme). Dip toplam
+   * sunucudan gelen degeri gosterir; kalem degisince o deger BAYATLAR -
+   * kullanici satiri silince toplam eski haliyle duruyordu. Degisiklikten
+   * sonra onizlemeye donulur, kaydedince yeniden sunucu degeri gecerlidir.
+   */
+  const [kalemDegisti, setKalemDegisti] = useState(false);
   /** Shift ile ARALIK secimi icin son tiklanan satirin sirasi. */
   const sonTiklanan = useRef<number | null>(null);
   /** Acik kalem penceresi (adet / fiyat). Stok zaten secilmis olarak gelir. */
@@ -342,6 +349,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setRaporDovizi(String(y.belge.raporDovizi ?? y.belge.belgeDovizi ?? '') || yerelPara);
         setEkstreDovizi(String(y.belge.ekstreDovizi ?? y.belge.raporDovizi ?? '') || yerelPara);
         setBelgeKuru(String(y.belge.dovizKuru ?? 1));
+        setKalemDegisti(false);
         setTeslimAlan(y.belge.teslimAlanId
           ? { id: Number(y.belge.teslimAlanId), ad: String(y.belge.teslimAlanAdi ?? '') } : null);
         setSatirlar((y.satirlar ?? []).map((r, i) => ({
@@ -358,11 +366,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           izlemeKodu: String(r.izlemeKodu ?? ''),
           adet: String(r.miktar ?? r.adet ?? 0),
           birimFiyat: String(r.birimFiyat ?? 0),
-          // Kayitli satir belgenin dovizinde saklanir; satir bazinda doviz/kur
-          //   tutulmuyor - kalem yeniden acilirsa yerel giris olarak gelir.
-          fiyatDovizi: yerelPara,
-          dovizFiyat: String(r.birimFiyat ?? 0),
-          kur: '1',
+          // SATIR BAZLI DOVIZ (kullanici): kalem kendi para biriminde girilmis
+          //   olabilir - kayitli satirdan geri yuklenir, yoksa yerel sayilir.
+          fiyatDovizi: String(r.dovizCinsi ?? '') || yerelPara,
+          dovizFiyat: String(r.dovizBirimFiyat ?? r.birimFiyat ?? 0),
+          kur: String(r.dovizKuru ?? 1),
           iskonto: String(r.iskonto ?? 0),
           iskonto2: String(r.iskonto2 ?? 0),
           kdv: String(r.kdv ?? 0),
@@ -470,6 +478,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     setSatirlar(s => s.some(x => x.anahtar === yazilacak.anahtar)
       ? s.map(x => (x.anahtar === yazilacak.anahtar ? yazilacak : x))
       : [...s, yazilacak]);
+    setKalemDegisti(true);
+
+    // RAPOR DOVIZI ILK DOVIZLI KALEMDEN gelir (kullanici): dovizli fiyatla
+    //   kalem eklenince belge o dovizde raporlanir, kur da kalemin kurudur.
+    //   Sonraki kalemler rapor dovizini DEGISTIRMEZ - kullanici isterse
+    //   asagidaki kutudan kendisi secer.
+    if (satir.fiyatDovizi && satir.fiyatDovizi !== yerelPara && raporDovizi === yerelPara) {
+      setRaporDovizi(satir.fiyatDovizi);
+      const k = Number(String(satir.kur).replace(',', '.')) || 0;
+      if (k > 0) setBelgeKuru(String(k));
+    }
 
     if (!satir.paket || !satir.stokId) return;
     const adet = Number(satir.adet.replace(',', '.')) || 1;
@@ -516,6 +535,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       !seciliSatirlar.has(x.anahtar)
       && !(x.paketAnahtar !== undefined && seciliSatirlar.has(x.paketAnahtar))));
     setSeciliSatirlar(new Set());
+    setKalemDegisti(true);
   };
 
   /**
@@ -550,7 +570,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     //   (belgeKaydet.ts) - ekran yalniz sonucu gosterir.
     const girdi: BelgeGirdisi = {
       tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun, faturaTipi,
-      raporDovizi, ekstreDovizi, belgeKuru,
+      raporDovizi, ekstreDovizi, belgeKuru, yerelPara,
       senaryo, satici, depo, girisDepo, teslimEden, teslimAlan, tasiyici,
       aracPlaka, soforAd, soforTckn, sevkTarihi, teslimSekli, fisTipi, satirlar,
       subeId: kullanici?.subeId ?? undefined,
@@ -712,7 +732,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             satirlar={satirlar}
             seciliSatirlar={seciliSatirlar} setSeciliSatirlar={setSeciliSatirlar}
             acikLotlar={acikLotlar} setAcikLotlar={setAcikLotlar}
-            kilitli={kilitli} bilgi={bilgi} onizleme={onizleme} sonuc={sonuc}
+            kilitli={kilitli} bilgi={bilgi} onizleme={onizleme}
+            sonuc={kalemDegisti ? null : sonuc}
             transferBaslikEksigi={transferBaslikEksigi}
             depoBelgesi={depoBelgesi} stokFisiMi={stokFisiMi} talepMi={talepMi}
             setStokArama={iadeMi ? setIadeArama : setStokArama}
@@ -921,7 +942,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         {kalem !== null && (
           <KalemPenceresi
             satir={kalem}
-            irsaliyeMi={bilgi.kalem !== 'tam'}
             transferMi={bilgi.kalem === 'miktar'}
             vergisiz={bilgi.kalem === 'sade' && stokFisiMi}
             yerelPara={yerelPara}

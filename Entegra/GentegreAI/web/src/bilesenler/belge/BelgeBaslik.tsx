@@ -30,8 +30,17 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     eBelgeYok,
   } = p;
 
-  // PILOT: yeni 4 sutunlu duzen SIMDILIK yalniz (konsinye olmayan) irsaliyede.
-  const irsaliyeDuzeni = irsaliyeMi && !depoBelgesi && !stokFisiMi && !konsinyeMi;
+  /**
+   * YENI DUZEN (kullanici): 4 sutunlu baslik + doviz kutusu grid altinda.
+   * Irsaliyede denendi, TUM CARILI belgelere yayildi - fatura, siparis,
+   * konsinye, tahakkuk. Disarida kalanlar: transfer / talep / stok fisi
+   *   (cari yok, iki depo ya da fis tipi gibi kendi alanlari var).
+   */
+  const yeniDuzen = !depoBelgesi && !stokFisiMi;
+
+  /** Belge turunun adi - "İrsaliye No" / "Fatura No" / "Sipariş No". */
+  const belgeSozu = irsaliyeMi ? 'İrsaliye' : siparisMi ? 'Sipariş'
+                  : tahakkukMu ? 'Tahakkuk' : 'Fatura';
 
   return (
   <>
@@ -50,7 +59,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       Tip basliktan CIKTI: irsaliyede tek anlamli secim "iade mi" - o da arac
       cubugundaki IADE kutusu (kullanici).
       Basarili olursa diger belge turlerine de yayilacak; o yuzden ayri blok. */}
-  {irsaliyeDuzeni ? (
+  {yeniDuzen ? (
   <div className="alan-izgara dort-sutun belge-hdr">
     <TarafAlani
       etiket="Müşteri (Cari)"
@@ -63,7 +72,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     />
 
     <label className="alan">
-      <span className="etiket">İrsaliye No</span>
+      <span className="etiket">{belgeSozu} No</span>
       {disNumarali && !kilitli ? (
         <input className="one-cikan" value={belgeNo} maxLength={20}
                onChange={e => setBelgeNo(e.target.value)} />
@@ -76,22 +85,27 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     </label>
 
     <label className="alan">
-      <span className="etiket">İrsaliye Tarihi</span>
+      <span className="etiket">{belgeSozu} Tarihi</span>
       <input type="datetime-local" value={tarih} disabled={baslikKilitli}
              max={tarihEnGec} min={tarihEnErken}
              onChange={e => setTarih(e.target.value)} />
       {alanHatalari.belgeTarihi && <span className="alan-hata">{alanHatalari.belgeTarihi}</span>}
     </label>
 
+    {/* e-Belge KAVRAMI OLMAYAN turlerde (siparis, tahakkuk) hucre CIZILMEZ. */}
+    {!eBelgeYok && (
     <label className="alan">
       <span className="etiket">e-Belge</span>
       <span className="deger-serit">
-        <span className="rozet bilgi">{konsinyeMi ? 'e-İrsaliye (konsinye)' : 'e-İrsaliye'}</span>
+        <span className="rozet bilgi">
+          {konsinyeMi ? 'e-İrsaliye (konsinye)' : irsaliyeMi ? 'e-İrsaliye' : 'e-Fatura'}
+        </span>
         {Number(sonuc?.belge.efaturaDurum ?? 0) > 0
           ? <span className="rozet olumlu">✓ Gönderildi</span>
           : <span className="rozet">gönderilmedi</span>}
       </span>
     </label>
+    )}
 
     <TarafAlani
       etiket={alisMi ? 'Sorumlu' : 'Satış Temsilcisi'}
@@ -101,15 +115,42 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       onAc={() => setSaticiArama(true)}
     />
 
+    {/* Tahakkukta depo YOK (mal hareketi yok). */}
+    {!tahakkukMu && (
     <GenLookup
       kaynak="depo"
-      etiket={alisMi ? 'Giriş Deposu' : 'Çıkış Deposu'}
+      etiket={siparisMi ? 'Depo' : alisMi ? 'Giriş Deposu' : 'Çıkış Deposu'}
       sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
       alanlar={LOOKUP_DEPO}
       deger={depo?.ad}
       saltOkunur={kilitli}
       onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
     />
+    )}
+
+    {/* FATURA TIPI (130) yalniz faturada - irsaliyede iade arac cubugundaki
+        kutuyla secilir, siparis/tahakkukta tip kavrami yok. */}
+    {faturaMi && (
+      <label className="alan">
+        <span className="etiket">Fatura Tipi</span>
+        <select value={faturaTipi} disabled={kilitli}
+                onChange={e => setFaturaTipi(Number(e.target.value))}>
+          {FATURA_TIPLERI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
+          {!FATURA_TIPLERI.some(t => t.deger === faturaTipi) && (
+            <option value={faturaTipi}>Tanımsız ({faturaTipi})</option>
+          )}
+        </select>
+      </label>
+    )}
+
+    {/* Vade: faturada / tahakkukta anlamli (irsaliyede mal cikis tarihi esas). */}
+    {bilgi.vade && (
+      <label className="alan">
+        <span className="etiket">Vade (gün)</span>
+        <input className="hiza-sag" value={vadeGun} disabled={kilitli}
+               onChange={e => setVadeGun(e.target.value)} />
+      </label>
+    )}
 
     {/* DOVIZ / KUR BASLIKTAN CIKTI (kullanici): kalem gridinin altindaki
         "Rapor Dövizi" kutusunda hem secim hem kur var - iki yerde gostermek
@@ -117,7 +158,10 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     {/* Bagli Siparis, Faturalama Durumu'nun SOLUNDA (kullanici). */}
     {bagliSiparisAlani}
 
-    {kapanmaAlani}
+    {/* Kapanma = "bu belgeden ne kadari faturalandi": faturada ve tahakkukta
+        anlamsiz (zincirin sonu, Faturalama sekmesi de bu turlerde gizli) -
+        hucre hic cizilmez, yoksa faturanin ustunde "Faturalanmadı" yazardi. */}
+    {!(faturaMi || tahakkukMu) && kapanmaAlani}
   </div>
   ) : (
   <div className="alan-izgara uc-sutun belge-hdr">

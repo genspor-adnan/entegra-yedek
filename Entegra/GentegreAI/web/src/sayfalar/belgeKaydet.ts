@@ -37,6 +37,8 @@ export interface BelgeGirdisi {
   raporDovizi: string;
   ekstreDovizi: string;
   belgeKuru: string;
+  /** Yerel (defter) para birimi - tutarlarin girildigi birim. */
+  yerelPara: string;
   satirlar: SatirDurumu[];
   subeId?: number;
   // belgeTuru.ts davranis bayraklari
@@ -115,7 +117,7 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
 export function belgeGovdesi(g: BelgeGirdisi, dolu: SatirDurumu[], taslak: boolean) {
   const { tur, cari, tarih, depoBelgesi, stokFisiMi, seri, disNumarali, belgeNo,
           vadeGun, subeId, fisCikisMi, depo, girisDepo, alisMi, faturaMi, fisTipi, faturaTipi,
-          raporDovizi, ekstreDovizi, belgeKuru, satici,
+          raporDovizi, ekstreDovizi, belgeKuru, yerelPara, satici,
           senaryo, irsaliyeMi, teslimSekli, aracPlaka, soforAd, sevkTarihi,
           soforTckn, tasiyici, transferMi, teslimEden, teslimAlan } = g;
 
@@ -129,8 +131,10 @@ return {
     belgeSeri: depoBelgesi || stokFisiMi ? '' : seri,
     // Alis faturasinda numara tedarikciden gelir; digerlerinde sunucu verir.
     belgeNo: disNumarali ? belgeNo.trim() : undefined,
-    // Belge tutarlari RAPOR DOVIZINDE; kur yerel paraya cevrim (134).
-    belgeDovizi: raporDovizi,
+    // TUTARLAR YEREL PARADA yazilir (kalem fiyatlari yerel girilir): belge
+    //   dovizi yerel, RAPOR DOVIZI ayri kolon. Kur = 1 rapor dovizi kac yerel
+    //   para eder; doviz karsiligi sunucuda genel_toplam / kur olarak hesaplanir.
+    belgeDovizi: yerelPara,
     raporDovizi,
     ekstreDovizi,
     dovizKuru: Number(String(belgeKuru).replace(',', '.')) || 1,
@@ -176,6 +180,16 @@ return {
     adet: Number(s.adet.replace(',', '.')) || 0,
     miktar: Number(s.adet.replace(',', '.')) || 0,
     birimFiyat: Number(s.birimFiyat.replace(',', '.')) || 0,
+    // SATIR BAZLI DOVIZ: bir kalem 100 USD, digeri 100 TL olabilir (kullanici).
+    //   Yerel birim fiyat her zaman yazilir; doviz alanlari yalniz satir kendi
+    //   para biriminde girildiyse gider (sunucu ikisini birbirinden turetiyor).
+    dovizCinsi: s.fiyatDovizi || undefined,
+    dovizBirimFiyat: s.fiyatDovizi && s.fiyatDovizi !== yerelPara
+      ? Number(String(s.dovizFiyat).replace(',', '.')) || 0
+      : undefined,
+    dovizKuru: s.fiyatDovizi && s.fiyatDovizi !== yerelPara
+      ? Number(String(s.kur).replace(',', '.')) || 1
+      : undefined,
     iskonto: stokFisiMi ? 0 : Number(s.iskonto.replace(',', '.')) || 0,
     iskonto2: stokFisiMi ? 0 : Number(s.iskonto2.replace(',', '.')) || 0,
     // Stok fisi vergi dogurmaz: stok kartindan gelen KDV/iskonto sifirlanir

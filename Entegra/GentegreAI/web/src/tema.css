@@ -447,6 +447,8 @@ table.grid tr.flt input {
 }
 /* Kur kutusu (birim fiyatin saginda) - dar ve okunakli. */
 .alan .ikili input.kur { flex: none; width: 84px }
+/* Kalem penceresinde para birimi SECIMI - salt okunur kutuyla ayni genislikte. */
+.alan .ikili select.birim { flex: none; width: 72px; text-align: center }
 /* Miktar +/- dugmeleri edit yuksekliginde. */
 /* Iki onay kutusu yan yana - her biri kendi adiyla (İnternet Satış | Paket). */
 .ikili-mantik { display: flex; align-items: center; gap: 18px }

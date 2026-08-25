@@ -20,11 +20,43 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     setStokArama, setKalem, seciliSil, satirTikla, sonTiklanan, secimDegis, doviz,
   } = p;
 
-  // Dovizli belgede dip toplamin YANINDA yerel karsilik kolonu cikar.
-  const yerelKolon = doviz && doviz.raporDovizi !== doviz.yerelPara
-    ? { kur: Number(String(doviz.kur).replace(',', '.')) || 0,
-        raporDovizi: doviz.raporDovizi, yerelPara: doviz.yerelPara }
-    : null;
+  const sayi = (m: unknown) => Number(String(m ?? '').replace(',', '.')) || 0;
+  const yerelPara = doviz?.yerelPara ?? 'TL';
+
+  /**
+   * DOVIZ KOLONLARI (kullanici kurali):
+   *   1) Tum satirlar yerel parada VE rapor dovizi yerel ise kolonlar GIZLI.
+   *   2) Rapor dovizi secilince gorunur - yerel tutar KURA BOLUNEREK gosterilir.
+   *   3) Bir satir kendi dovizinde girildiyse (100 USD) o satirda kendi
+   *      degerleri; yerel karsiligi zaten "Birim Fiyat (TL)" kolonunda.
+   */
+  const raporKur = sayi(doviz?.kur);
+  const raporDovizli = !!doviz && doviz.raporDovizi !== yerelPara && raporKur > 0;
+  //   Kolonlar YALNIZ rapor dovizi secilince cikar (kullanici): hic doviz
+  //   girilmemisse her sey yerel paradadir, fazladan kolon gosterilmez.
+  //   Dovizli fiyatli bir kalem eklenince rapor dovizi ZATEN otomatik o doviz
+  //   olur (BelgeKarti.kalemKaydet), yani kolonlar kendiliginden gelir.
+  const dovizKolon = raporDovizli;
+  const dovizAdi = raporDovizli ? doviz!.raporDovizi : '';
+
+  /** Bir satirin doviz karsiligi: kendi dovizi varsa o, yoksa rapor kuruyla. */
+  const satirDoviz = (r: SatirDurumu, yerelTutar: number, yerelFiyat: number) => {
+    if (r.fiyatDovizi && r.fiyatDovizi !== yerelPara) {
+      const birim = sayi(r.dovizFiyat);
+      return { cins: r.fiyatDovizi, birim,
+               tutar: satirTutari(sayi(r.adet), birim, r.iskonto, r.iskonto2) };
+    }
+    if (raporDovizli)
+      return { cins: doviz!.raporDovizi, birim: yerelFiyat / raporKur, tutar: yerelTutar / raporKur };
+    return null;
+  };
+
+  /** Hicbir satirda aciklama yoksa kolon HIC cizilmez (kullanici) - bos bir
+   *  sutun gridi daraltiyordu. */
+  const aciklamaVar = satirlar.some(x => String(x.aciklama ?? '').trim() !== '');
+
+  /** Dip toplam / TOPLAM satiri icin yerel -> rapor dovizi. */
+  const dovizeCevir = (yerel: number) => (raporDovizli ? yerel / raporKur : yerel);
   return (
     <>
 <div className="kagrup">
@@ -79,20 +111,28 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         <th style={{ width: 34 }} className="hiza-orta">Tip</th>
         <th style={{ width: 110 }}>Kod</th>
         <th>Stok / Hizmet</th>
-        <th style={{ width: 200 }}>Açıklama</th>
+        {aciklamaVar && <th style={{ width: 200 }}>Açıklama</th>}
         <th className="hiza-sag" style={{ width: 90 }}>Miktar</th>
         {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 80 }}>İskonto %</th>}
         {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 70 }}>KDV %</th>}
         {/* Transferde FIYAT YOK: mal satilmiyor, depo degistiriyor. */}
-        {bilgi.kalem !== 'miktar' && <th className="hiza-sag" style={{ width: 100 }}>Br. Fiyat</th>}
         {bilgi.kalem !== 'miktar' && (
+          <th className="hiza-sag" style={{ width: 110 }}>Birim Fiyat ({yerelPara})</th>
+        )}
+        {bilgi.kalem !== 'miktar' && (
+          <th className="hiza-sag" style={{ width: 120 }}>Tutar ({yerelPara})</th>
+        )}
+        {/* Doviz kolonlari: satir kendi dovizinde girildiyse ya da rapor dovizi
+            secildiyse cizilir; hepsi yerel ve rapor yoksa GIZLI. */}
+        {bilgi.kalem !== 'miktar' && dovizKolon && (
           <th className="hiza-sag" style={{ width: 120 }}>
-            {yerelKolon ? `Tutar (${yerelKolon.raporDovizi})` : 'Tutar'}
+            Döviz Birim{dovizAdi ? ` (${dovizAdi})` : ''}
           </th>
         )}
-        {/* Dovizli belgede satirda da YEREL karsilik kolonu (kullanici). */}
-        {bilgi.kalem !== 'miktar' && yerelKolon && (
-          <th className="hiza-sag" style={{ width: 120 }}>Tutar ({yerelKolon.yerelPara})</th>
+        {bilgi.kalem !== 'miktar' && dovizKolon && (
+          <th className="hiza-sag" style={{ width: 120 }}>
+            Döviz Tutar{dovizAdi ? ` (${dovizAdi})` : ''}
+          </th>
         )}
       </tr>
     </thead>
@@ -109,7 +149,8 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         //   listesi kisa kalsin, isteyen okla acsin.
         const acik = lotlar.length > 0 && acikLotlar.has(r.anahtar);
         const kolonSayisi = (bilgi.kalem === 'miktar' ? 6 : bilgi.kalem === 'sade' ? 8 : 10)
-                          + (yerelKolon && bilgi.kalem !== 'miktar' ? 1 : 0);
+                          - (aciklamaVar ? 0 : 1)
+                          + (dovizKolon && bilgi.kalem !== 'miktar' ? 2 : 0);
         return (
           <Fragment key={r.anahtar}>
           <tr className={secili ? 'secili' : ''}
@@ -145,16 +186,22 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
               )}
               {r.stokAdi || <span className="sonuk">(stok seçilmedi)</span>}
             </td>
-            <td className="sonuk">{r.aciklama}</td>
+            {aciklamaVar && <td className="sonuk">{r.aciklama}</td>}
             <td className="hiza-sag">{adet.toLocaleString('tr-TR')}</td>
             {/* Iki iskonto varsa ikisi de gorunsun: "%10 + %5". */}
             {bilgi.kalem === 'tam' && <td className="hiza-sag">{iskonatoMetni(r)}</td>}
             {bilgi.kalem === 'tam' && <td className="hiza-sag">%{r.kdv}</td>}
             {bilgi.kalem !== 'miktar' && <td className="hiza-sag">{para.format(fiyat)}</td>}
             {bilgi.kalem !== 'miktar' && <td className="hiza-sag"><b>{para.format(tutar)}</b></td>}
-            {bilgi.kalem !== 'miktar' && yerelKolon && (
-              <td className="hiza-sag sonuk">{para.format(tutar * (yerelKolon.kur || 1))}</td>
-            )}
+            {bilgi.kalem !== 'miktar' && dovizKolon && (() => {
+              const d = satirDoviz(r, tutar, fiyat);
+              return (
+                <>
+                  <td className="hiza-sag sonuk">{d ? para.format(d.birim) : '—'}</td>
+                  <td className="hiza-sag sonuk">{d ? para.format(d.tutar) : '—'}</td>
+                </>
+              );
+            })()}
           </tr>
           {/* DETAY: kalemin lot dagilimi. Kalem satirinin bir parcasi -
               ayri kolon basligi yok, kendi mini basligiyla gelir. */}
@@ -194,7 +241,8 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
       })}
       {satirlar.length === 0 && (
         <tr><td colSpan={(bilgi.kalem === 'miktar' ? 6 : bilgi.kalem === 'sade' ? 8 : 10)
-                       + (yerelKolon && bilgi.kalem !== 'miktar' ? 1 : 0)} className="bos">
+                       + (bilgi.kalem !== 'miktar' ? 1 : 0)
+                          + (dovizKolon && bilgi.kalem !== 'miktar' ? 2 : 0)} className="bos">
           {transferBaslikEksigi
             ? `Kalem eklemek için önce başlıkta ${transferBaslikEksigi} seçin.`
             : 'Kalem yok — “＋” ile ekleyin.'}
@@ -203,15 +251,22 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     </tbody>
     <tfoot>
       <tr className="genel">
-        <td colSpan={5} className="hiza-sag">TOPLAM</td>
+        <td colSpan={aciklamaVar ? 5 : 4} className="hiza-sag">TOPLAM</td>
         <td className="hiza-sag">
           {satirlar.reduce((t, r) => t + (Number(r.adet.replace(',', '.')) || 0), 0)
                    .toLocaleString('tr-TR')}
         </td>
         {bilgi.kalem !== 'miktar' && <td colSpan={bilgi.kalem === 'sade' ? 1 : 3} />}
         {bilgi.kalem !== 'miktar' && <td className="hiza-sag">{para.format(onizleme.matrah)}</td>}
-        {bilgi.kalem !== 'miktar' && yerelKolon && (
-          <td className="hiza-sag">{para.format(onizleme.matrah * (yerelKolon.kur || 1))}</td>
+        {bilgi.kalem !== 'miktar' && dovizKolon && <td />}
+        {bilgi.kalem !== 'miktar' && dovizKolon && (
+          <td className="hiza-sag">
+            {para.format(satirlar.reduce((t, r) => {
+              const f = sayi(r.birimFiyat);
+              const d = satirDoviz(r, satirTutari(sayi(r.adet), f, r.iskonto, r.iskonto2), f);
+              return t + (d?.tutar ?? 0);
+            }, 0))}
+          </td>
         )}
       </tr>
     </tfoot>
@@ -260,8 +315,8 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     </div>
     {doviz.raporDovizi !== doviz.yerelPara && (
       <div className="not">
-        Tutarlar {doviz.raporDovizi} cinsindendir; dip toplamda {doviz.yerelPara}
-        karşılığı kur ile hesaplanır. Cari hesaba <b>{doviz.ekstreDovizi}</b> işlenir.
+        Tutarlar {doviz.yerelPara} girilir; {doviz.raporDovizi} karşılığı kura
+        bölünerek gösterilir. Cari hesaba <b>{doviz.ekstreDovizi}</b> işlenir.
       </div>
     )}
   </div>
@@ -273,10 +328,11 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
       oldugunu soyluyor; "Dip Toplam" satiri yer kapliyordu. */}
   {sonuc ? (
     <table className="dip-tablo">
-      {yerelKolon && (
+      {raporDovizli && (
         <thead>
-          <tr><th /><th className="hiza-sag">{yerelKolon.raporDovizi}</th>
-              <th className="hiza-sag">{yerelKolon.yerelPara}</th></tr>
+          {/* Dip toplamda SOLDA yerel, SAGDA doviz (kullanici). */}
+          <tr><th /><th className="hiza-sag">{yerelPara}</th>
+              <th className="hiza-sag">{doviz!.raporDovizi}</th></tr>
         </thead>
       )}
       <tbody>
@@ -285,8 +341,8 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             <td>{d.aciklama}</td>
             <td className="hiza-sag">{para.format(d.deger)}</td>
             {/* Dovizli belgede IKINCI kolon: kur ile yerel karsilik (kullanici). */}
-            {yerelKolon && (
-              <td className="hiza-sag sonuk">{para.format(d.deger * (yerelKolon.kur || 1))}</td>
+            {raporDovizli && (
+              <td className="hiza-sag sonuk">{para.format(dovizeCevir(d.deger))}</td>
             )}
           </tr>
         ))}
@@ -294,24 +350,25 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     </table>
   ) : (
     <table className="dip-tablo">
-      {yerelKolon && (
+      {raporDovizli && (
         <thead>
-          <tr><th /><th className="hiza-sag">{yerelKolon.raporDovizi}</th>
-              <th className="hiza-sag">{yerelKolon.yerelPara}</th></tr>
+          {/* Dip toplamda SOLDA yerel, SAGDA doviz (kullanici). */}
+          <tr><th /><th className="hiza-sag">{yerelPara}</th>
+              <th className="hiza-sag">{doviz!.raporDovizi}</th></tr>
         </thead>
       )}
       <tbody>
         <tr>
           <td>Ara Toplam</td><td className="hiza-sag">{para.format(onizleme.matrah)}</td>
-          {yerelKolon && <td className="hiza-sag sonuk">{para.format(onizleme.matrah * (yerelKolon.kur || 1))}</td>}
+          {raporDovizli && <td className="hiza-sag sonuk">{para.format(dovizeCevir(onizleme.matrah))}</td>}
         </tr>
         <tr>
           <td>KDV</td><td className="hiza-sag">{para.format(onizleme.kdv)}</td>
-          {yerelKolon && <td className="hiza-sag sonuk">{para.format(onizleme.kdv * (yerelKolon.kur || 1))}</td>}
+          {raporDovizli && <td className="hiza-sag sonuk">{para.format(dovizeCevir(onizleme.kdv))}</td>}
         </tr>
         <tr className="genel">
           <td>Genel Toplam</td><td className="hiza-sag">{para.format(onizleme.genel)}</td>
-          {yerelKolon && <td className="hiza-sag sonuk">{para.format(onizleme.genel * (yerelKolon.kur || 1))}</td>}
+          {raporDovizli && <td className="hiza-sag sonuk">{para.format(dovizeCevir(onizleme.genel))}</td>}
         </tr>
       </tbody>
     </table>
