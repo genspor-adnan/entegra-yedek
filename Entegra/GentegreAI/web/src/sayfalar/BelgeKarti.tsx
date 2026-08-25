@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru, type ListeSatiri } from '../api/sozlesme';
-import { GenLookup } from '../bilesenler/GenLookup';
 import { Modal } from '../bilesenler/Modal';
 import { StokAramaPenceresi } from '../bilesenler/StokAramaPenceresi';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
@@ -15,8 +14,7 @@ import { para } from '../bilesenler/bicim';
 import { type SatirDurumu, bosSatir, satirTutari } from './belgeSatir';
 import { belgeDogrula, belgeGovdesi, doluSatirlar, type BelgeGirdisi } from './belgeKaydet';
 import {
-  YEREL_PARA_VARSAYILAN, GERIYE_GUN_VARSAYILAN, yerelAnMetni,
-  LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, KAPANMA_ETIKET, SEKMELER,
+  YEREL_PARA_VARSAYILAN, GERIYE_GUN_VARSAYILAN, yerelAnMetni, KAPANMA_ETIKET,
 } from './belgeSabitleri';
 import { KalemPenceresi } from '../bilesenler/belge/KalemPenceresi';
 import {
@@ -24,6 +22,7 @@ import {
 } from '../bilesenler/belge/BelgeSekmeleri';
 import { KalemSekmesi, TahsilatSekmesi } from '../bilesenler/belge/KalemSekmesi';
 import { BelgeAracCubugu } from '../bilesenler/belge/BelgeAracCubugu';
+import { BelgeBaslik } from '../bilesenler/belge/BelgeBaslik';
 
 /**
  * TarafArama ile doldurulan baslik alani (cari, satis temsilcisi...).
@@ -31,7 +30,7 @@ import { BelgeAracCubugu } from '../bilesenler/belge/BelgeAracCubugu';
  * GenLookup DEGIL: secim her yerde AYNI arama ekranindan yapilsin diye alan
  * kendisi salt okunur, tiklayinca (ya da "…" dugmesiyle) modali cagirir.
  */
-function TarafAlani({ etiket, deger, kilitli, ipucu, zorunlu, hata, onAc }: {
+export function TarafAlani({ etiket, deger, kilitli, ipucu, zorunlu, hata, onAc }: {
   etiket: string;
   deger?: string;
   kilitli: boolean;
@@ -623,262 +622,28 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         </div>
       )}
 
-        <div className="belge-hdr-sar">
-          {/* Alan duzeni: Ekranlar/satis_irsaliye_karti.html .hdr + kullanici
-              sirasi. BASLIKSIZ 3 sutunlu izgara; her alanda etiket EDITIN
-              USTUNDE. Satirlar:
-                1) Musteri . Belge No . e-Belge
-                2) Vade . Belge Tarihi . Kapanma
-                3) Satis Temsilcisi . Cikis Deposu . Doviz/Kur */}
-          <div className="alan-izgara uc-sutun belge-hdr">
-            {/* --- 1. satir --- */}
-            {/* Cari alani GenLookup DEGIL: secim ayni TarafArama modalindan yapilir
-                ki "yeni belge" akisiyla ayni ekran olsun (iki farkli cari secme
-                bicimi kullaniciyi sasirtiyordu). */}
-            {/* Transferde CARI YOK: mal firmanin kendi depolari arasinda gezer.
-                Cari hucresinin yerini CIKIS DEPOSU alir, alt satirda giris deposu. */}
-            {stokFisiMi ? (
-              /* Fisin SEBEBI: muhasebe hesabini bu belirleyecek (F7), o yuzden
-                 cari hucresinin yerinde ve zorunlu. */
-              <label className="alan">
-                <span className="etiket zorunlu-isaret">Tipi</span>
-                {/* Yeni fiste ILK SORULAN budur (cari yok): kart acilinca imlec
-                    burada, kullanici listeyi klavyeden acip secebilir. */}
-                <select value={fisTipi} disabled={baslikKilitli}
-                        autoFocus={!kilitli && !fisTipi}
-                        onChange={e => setFisTipi(Number(e.target.value))}>
-                  <option value={0}>Seçiniz…</option>
-                  {(fisCikisMi ? CIKIS_FIS_TIPLERI : GIRIS_FIS_TIPLERI)
-                    .map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
-                </select>
-                {alanHatalari.tipi && <span className="alan-hata">{alanHatalari.tipi}</span>}
-              </label>
-            ) : depoBelgesi ? (
-              <GenLookup
-                kaynak="depo"
-                etiket={talepMi ? 'İstenen Depo' : 'Çıkış Deposu'}
-                zorunlu
-                sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
-                alanlar={LOOKUP_DEPO}
-                deger={depo?.ad}
-                saltOkunur={baslikKilitli}
-                hata={alanHatalari.cikisDepoId}
-                onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
-              />
-            ) : (
-            <TarafAlani
-              etiket={alisMi ? 'Tedarikçi (Cari)'
-                    : siparisMi || irsaliyeMi ? 'Müşteri (Cari)' : 'Cari'}
-              zorunlu
-              deger={cari?.unvan}
-              kilitli={kilitli}
-              ipucu="Cari ara"
-              onAc={() => setCariArama(true)}
-              hata={alanHatalari.tarafId}
-            />
-            )}
-
-            {/* Alis faturasinda numara TEDARIKCININ: sayacimiz uretemez (harf
-                icerebilir, bizim seriyle iliskisi yok), kullanici girer. Diger
-                turlerde numarayi kayitta sunucu verir - alan salt-okunur. */}
-            <label className="alan">
-              <span className={`etiket${disNumarali && !kilitli ? ' zorunlu-isaret' : ''}`}>
-                {disNumarali ? 'Tedarikçi Fatura No' : `${belgeAdi} No`}
-              </span>
-              {disNumarali && !kilitli ? (
-                <input className="one-cikan" value={belgeNo} maxLength={20}
-                       placeholder="örn. ABC2026000001234"
-                       onChange={e => setBelgeNo(e.target.value)} />
-              ) : (
-                <input className="one-cikan"
-                       value={String(sonuc?.belge.belgeNo ?? '') || (kilitli ? '' : '(kaydedince verilir)')}
-                       readOnly />
-              )}
-              {alanHatalari.belgeNo && <span className="alan-hata">{alanHatalari.belgeNo}</span>}
-            </label>
-
-            {!eBelgeYok && (
-            <label className="alan">
-              <span className="etiket">e-Belge</span>
-              <span className="deger-serit">
-                <span className="rozet bilgi">
-                  {konsinyeMi ? 'e-İrsaliye (konsinye)' : irsaliyeMi ? 'e-İrsaliye' : 'e-Fatura'}
-                </span>
-                {Number(sonuc?.belge.efaturaDurum ?? 0) > 0
-                  ? <span className="rozet olumlu">✓ Gönderildi</span>
-                  : <span className="rozet">gönderilmedi</span>}
-              </span>
-            </label>
-            )}
-            {/* e-Belge hucresi kalkinca 3 sutunlu izgara KAYIYORDU (Satis
-                Temsilcisi 1. satirin 3. hucresine dusuyordu). Bos yer tutucu
-                sutun duzenini korur: sol sutun Cari > Temsilci > Depo. */}
-            {/* Transferde 3. sutun: Teslim Eden, altinda Teslim Alan (sorumluluk devri). */}
-            {eBelgeYok && (stokFisiMi ? (
-              <TarafAlani
-                etiket="Sorumlu"
-                deger={satici?.ad}
-                kilitli={baslikKilitli}
-                ipucu="Personel ara"
-                onAc={() => setSaticiArama(true)}
-              />
-            ) : talepMi ? <span className="alan" aria-hidden />
-              : transferMi ? (
-              <TarafAlani
-                etiket="Teslim Eden"
-                zorunlu
-                deger={teslimEden?.ad}
-                kilitli={baslikKilitli}
-                ipucu="Personel ara"
-                onAc={() => setPersonelArama('eden')}
-                hata={alanHatalari.teslimEdenId}
-              />
-            ) : kapanmaAlani)}
-
-            {/* --- 2. satir: Satis Temsilcisi cari'nin ALTINDA --- */}
-            {/* Satis temsilcisi PERSONEL'dir (cari degil) ve secim cari ile ayni
-                TarafArama ekranindan yapilir - tek arama bicimi. */}
-            {stokFisiMi ? (
-              <GenLookup
-                kaynak="depo"
-                etiket={fisCikisMi ? 'Çıkış Deposu' : 'Giriş Deposu'}
-                zorunlu
-                sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
-                alanlar={LOOKUP_DEPO}
-                deger={depo?.ad}
-                saltOkunur={baslikKilitli}
-                hata={alanHatalari.cikisDepoId ?? alanHatalari.girisDepoId}
-                onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
-              />
-            ) : depoBelgesi ? (
-              <GenLookup
-                kaynak="depo"
-                etiket={talepMi ? 'Teslim Deposu' : 'Giriş Deposu'}
-                zorunlu={!talepMi}
-                sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
-                alanlar={LOOKUP_DEPO}
-                deger={girisDepo?.ad}
-                saltOkunur={baslikKilitli}
-                hata={alanHatalari.girisDepoId}
-                onSec={x => setGirisDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
-              />
-            ) : (
-            <TarafAlani
-              etiket={alisMi ? 'Sorumlu' : 'Satış Temsilcisi'}
-              deger={satici?.ad}
-              kilitli={kilitli}
-              ipucu="Personel ara"
-              onAc={() => setSaticiArama(true)}
-            />
-            )}
-
-            <label className="alan">
-              <span className="etiket zorunlu-isaret">{belgeAdi} Tarihi</span>
-              <input type="datetime-local" value={tarih} disabled={baslikKilitli}
-                     min={tarihEnErken} max={tarihEnGec}
-                     onChange={e => setTarih(e.target.value)} />
-              {alanHatalari.belgeTarihi && (
-                <span className="alan-hata">{alanHatalari.belgeTarihi}</span>
-              )}
-            </label>
-
-            {stokFisiMi ? <span className="alan" aria-hidden />
-              : depoBelgesi ? (
-              <TarafAlani
-                etiket={talepMi ? 'Talep Eden' : 'Teslim Alan'}
-                zorunlu
-                deger={teslimAlan?.ad}
-                kilitli={baslikKilitli}
-                ipucu="Personel ara"
-                onAc={() => setPersonelArama('alan')}
-                hata={alanHatalari.teslimAlanId}
-              />
-            ) : eBelgeYok ? bagliSiparisAlani : kapanmaAlani}
-
-            {/* --- 3. satir: Cikis Deposu temsilcinin ALTINDA ---
-                Tahakkukta depo YOK: stok etkilemez (kasa_islem_turu.stok_etkiler=0). */}
-            {!tahakkukMu && !depoBelgesi && !stokFisiMi && (
-            <GenLookup
-              kaynak="depo"
-              etiket={siparisMi ? 'Depo' : alisMi ? 'Giriş Deposu' : 'Çıkış Deposu'}
-              // Pasif depo secilemez: kapatilmis depoya belge kesilmesin.
-              sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
-              alanlar={LOOKUP_DEPO}
-              deger={depo?.ad}
-              saltOkunur={kilitli}
-              onSec={s => setDepo(s ? { id: Number(s.id), ad: String(s.ad ?? '') } : null)}
-            />
-            )}
-            {/* 3. satirin sutun duzeni korunsun: depo yoksa (tahakkuk) bos hucre.
-                TRANSFERDE ayni yeri sorumluluk devri alanlari doldurur. */}
-            {eBelgeYok && tahakkukMu && <span className="alan" aria-hidden />}
-
-            {/* Irsaliyede/konsinyede Vade YOK (mal cikis tarihi belge tarihidir);
-                e-Belgesiz turlerde yerine bos hucre - Doviz/Kur sag sutunda kalsin. */}
-            {eBelgeYok && irsaliyeMi && !depoBelgesi && <span className="alan" aria-hidden />}
-            {bilgi.vade && (
-              <label className="alan">
-                <span className="etiket">Vade (gün)</span>
-                <input className="hiza-sag" value={vadeGun} disabled={kilitli}
-                       onChange={e => setVadeGun(e.target.value)} />
-              </label>
-            )}
-
-            {bilgi.doviz && (
-            <label className="alan">
-              <span className="etiket">Döviz / Kur</span>
-              <input value={`${String(sonuc?.belge.belgeDovizi ?? 'TL')} · ${
-                Number(sonuc?.belge.dovizKuru ?? 1).toLocaleString('tr-TR', { minimumFractionDigits: 6 })}`}
-                     readOnly />
-            </label>
-            )}
-
-            {/* Adres BASLIKTAN CIKTI: e-Belge sekmesinde (XML'e giden alanlarla
-                birlikte) duruyor. Seri de basliktan kaldirildi - kullanici
-                girmiyor, numara serisi zaten e-Belge sekmesinde gorunuyor.
-
-                Vergi Dairesi/VKN kartta gosterilmiyor: cari kartindan gelen ve
-                belgeye DONDURULAN bir bilgi, e-Belge XML'ine oradan gidiyor. */}
-            {!eBelgeYok && bagliSiparisAlani}
-
-            {/* Belge turu SECICISI YOK: tur ekranin kendisinden gelir (Siparisler
-                19, Irsaliyeler 14, Faturalar 15) ve pencere basliginda zaten yazili.
-                Kartta degistirilebilir olmasi, kaydedilen belgenin hangi listede
-                cikacagini belirsizlestiriyordu. */}
-          </div>
-        </div>
-
-        {/* Sekmeler BASLIK ALANLARININ ALTINDA, grid'in hemen ustunde -
-            mockup duzeni (toolbar > hdr > tabs > pane). Tasiyici ve Imza/Teslim
-            yalniz irsaliyede anlamli, o yuzden suzuluyor. */}
-        <div className="katab">
-          {SEKMELER
-            .filter(x => (!x.irsaliye || irsaliyeMi)
-                      && (!x.faturaYok || !(faturaMi || tahakkukMu))
-                      // Tahsilat: fatura/fis VE tahakkuk (tahakkuk da tahsil edilir).
-                      && (!x.faturaMi || faturaMi || tahakkukMu)
-                      // Tahakkuk e-Belge DEGIL: GIB'e giden bir belge degil,
-                      //   ic muhasebe/cari ara kaydi.
-                      && !(eBelgeYok && x.anahtar === 'ebelge')
-                      // Transferde cari/fatura zinciri yok: yalniz Kalemler + Yorum.
-                      // "Faturalama" = bu belgeden turetilenler. Fatura zincirin
-                      //   sonu (faturaYok), depo belgesi ve stok fisi ise hic
-                      //   donusmez. Irsaliyede GORUNUR - kalem bicimine bakmak
-                      //   yanlisti, irsaliyeyi de gizliyordu.
-                      && !((bilgi.depoBelgesi || bilgi.stokFisi) && x.anahtar === 'fatura'))
-            .map(x => (
-            <div key={x.anahtar}
-                 className={`kat${x.anahtar === aktifSekme ? ' on' : ''}`}
-                 onClick={() => setAktifSekme(x.anahtar)}>
-              {x.anahtar === 'tahsilat' && alisMi ? 'Ödeme' : x.baslik}
-              {x.anahtar === 'kalem' && <span className="b">{satirlar.length}</span>}
-              {x.anahtar === 'fatura' && donusumler.length > 0 && (
-                <span className="b">{donusumler.length}</span>
-              )}
-            </div>
-          ))}
-        </div>
-
+        <BelgeBaslik
+          aktifSekme={aktifSekme ?? ''} setAktifSekme={setAktifSekme}
+          alanHatalari={alanHatalari} bilgi={bilgi} sonuc={sonuc}
+          kilitli={kilitli} baslikKilitli={baslikKilitli} belgeAdi={belgeAdi}
+          belgeNo={belgeNo} setBelgeNo={setBelgeNo}
+          tarih={tarih} setTarih={setTarih}
+          tarihEnGec={tarihEnGec} tarihEnErken={tarihEnErken}
+          vadeGun={vadeGun} setVadeGun={setVadeGun}
+          cari={cari} satici={satici}
+          depo={depo} setDepo={setDepo} girisDepo={girisDepo} setGirisDepo={setGirisDepo}
+          teslimEden={teslimEden} teslimAlan={teslimAlan}
+          fisTipi={fisTipi} setFisTipi={setFisTipi}
+          satirlar={satirlar} donusumler={donusumler}
+          setCariArama={setCariArama} setSaticiArama={setSaticiArama}
+          setPersonelArama={setPersonelArama}
+          kapanmaAlani={kapanmaAlani} bagliSiparisAlani={bagliSiparisAlani}
+          alisMi={alisMi} irsaliyeMi={irsaliyeMi} faturaMi={faturaMi}
+          siparisMi={siparisMi} konsinyeMi={konsinyeMi} tahakkukMu={tahakkukMu}
+          depoBelgesi={depoBelgesi} stokFisiMi={stokFisiMi} fisCikisMi={fisCikisMi}
+          transferMi={transferMi} talepMi={talepMi} disNumarali={disNumarali}
+          eBelgeYok={eBelgeYok}
+        />
         {aktifSekme === 'kalem' && (
           <KalemSekmesi
             satirlar={satirlar}

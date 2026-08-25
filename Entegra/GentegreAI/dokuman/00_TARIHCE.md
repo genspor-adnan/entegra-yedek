@@ -2818,5 +2818,19 @@ seçilmeli." alan uyarısı; ardından cari + kalem (250,00) ile taslak kaydedil
 sunucu dip toplamı 250,00 döndü, araç çubuğu "＋ Yeni Belge"ye geçti, Tahsilat
 etkinleşti. Test belgesi silindi, stok etkilenmedi.
 
+### Refaktör: belge kartı başlığı ayrıldı
+
+**`BelgeKarti.tsx` 1068 → 833 satır.** Başlık ızgarası ve sekme şeridi
+`bilesenler/belge/BelgeBaslik.tsx`'e (342) çıktı: cari/fiş tipi hücresi, belge
+no, e-Belge rozeti, tarih, depo(lar), vade, döviz, teslim eden/alan, bağlı
+sipariş ve kapanma durumu — hangi türde hangi hücrenin görüneceği artık tek
+dosyada okunuyor. Kart yalnız veri akışını (yükleme, kaydetme, sekme
+yönlendirme) tutuyor.
+
+Doğrulama: `tsc -b` + prod derleme temiz. Ekrandan üç farklı başlık düzeni:
+satış faturası (cari · belge no · e-Belge / temsilci · tarih · kapanma / depo ·
+vade · döviz), stok transferi (çıkış+giriş deposu, teslim eden/alan; cari, vade,
+döviz yok) ve giriş fişi (fiş tipi hücresi cari yerinde, tek depo).
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).
