@@ -482,19 +482,17 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
    * yerden hepsine ulasabilsin diye - menu "gridin ayar penceresi" gibi calisir.
    */
   type MenuOgesi = { ik: string; ad: string; secili?: boolean; devre?: string; ayrac?: boolean; fn(): void };
+  /**
+   * UC NOKTA menusu YALNIZ GRIDLE ilgili islemleri tasir (kullanici): yenile,
+   * disa aktar, satir filtresi, siralama, secim, sayfa boyu, kolonlar.
+   *
+   * Gorunum (Liste / Grup / Analiz) ve arama gorunumu (Tüm / Son / Sık) BURADA
+   * DEGIL: ikisi de arac cubugunda kendi dugmeleriyle duruyor ve menude
+   * tekrarlaniyordu - ayni ayari iki yerden degistirmek, hangisinin gecerli
+   * oldugu sorusunu doguruyordu.
+   */
   const gridMenuOgeleri: MenuOgesi[] = [
-    ...GORUNUMLER.map(g => ({
-      ik: g.ik, ad: g.ad, secili: gorunum === g.v, fn: () => setGorunum(g.v),
-    })),
-
-    { ik: '☰', ad: 'Tüm Liste', secili: aramaGorunumu === 'tum', ayrac: true,
-      fn: () => setAramaGorunumu('tum') },
-    { ik: '🕓', ad: 'Son Aranan', secili: aramaGorunumu === 'son',
-      fn: () => setAramaGorunumu('son') },
-    { ik: '⭐', ad: 'Sık Aranan', secili: aramaGorunumu === 'sik',
-      fn: () => setAramaGorunumu('sik') },
-
-    { ik: '⟳', ad: 'Yenile', ayrac: true, fn: () => { void yukle() } },
+    { ik: '⟳', ad: 'Yenile', fn: () => { void yukle() } },
     { ik: '📄', ad: 'CSV Kaydet', devre: satirlar.length ? undefined : 'Kayit yok',
       fn: () => { void csvIndir() } },
 
