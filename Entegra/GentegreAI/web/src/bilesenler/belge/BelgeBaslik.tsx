@@ -1,8 +1,7 @@
 import { GenLookup } from '../GenLookup';
 import { TarafAlani } from '../../sayfalar/BelgeKarti';
 import {
-  LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, FATURA_TIPLERI,
-  SEKMELER,
+  LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, SEKMELER,
 } from '../../sayfalar/belgeSabitleri';
 import type { SatirDurumu } from '../../sayfalar/belgeSatir';
 import type { Secim } from '../../sayfalar/belgeKaydet';
@@ -42,7 +41,6 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     aktifSekme, setAktifSekme, alanHatalari, bilgi, sonuc, kilitli, baslikKilitli, belgeAdi,
     belgeNo, setBelgeNo, tarih, setTarih, tarihEnGec, tarihEnErken, vadeGun, setVadeGun,
     cari, satici, depo, setDepo, girisDepo, setGirisDepo, teslimEden, teslimAlan, fisTipi,
-    faturaTipi, setFaturaTipi,
     setFisTipi, satirlar, donusumler, setCariArama, setSaticiArama, setPersonelArama,
     kapanmaAlani, bagliSiparisAlani, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
     tahakkukMu, depoBelgesi, stokFisiMi, fisCikisMi, transferMi, talepMi, disNumarali,
@@ -244,26 +242,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       />
     )}
 
-    {/* --- 8) FATURA TIPI (130) ---
-        Yalniz faturada: faturanin cinsi hem muhasebe fisini hem e-Belge
-        senaryosunu etkiler, belge.tipi alaninda tutulur (iade zaten 2 idi).
-        Irsaliyede tek anlamli secim "iade mi" - o da arac cubugundaki IADE
-        kutusu (kullanici); siparis/tahakkukta tip kavrami yok. */}
-    {faturaMi && (
-      <label className="alan">
-        <span className="etiket">Fatura Tipi</span>
-        <select value={faturaTipi} disabled={kilitli}
-                onChange={e => setFaturaTipi(Number(e.target.value))}>
-          {FATURA_TIPLERI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
-          {/* Gocten gelen tanimsiz tip (or. 17) listede yok: secenek olarak
-              EKLENIR, yoksa kart acilinca ilk tipe duser ve kaydedince
-              belgenin gercek tipi sessizce degisirdi. */}
-          {!FATURA_TIPLERI.some(t => t.deger === faturaTipi) && (
-            <option value={faturaTipi}>Tanımsız ({faturaTipi})</option>
-          )}
-        </select>
-      </label>
-    )}
+    {/* --- 8) FATURA TIPI (130) BASLIKTAN CIKTI (kullanici): arac cubugunda,
+        dugmelerin saginda duruyor - irsaliyedeki IADE kutusuyla ayni yerde. */}
 
     {/* --- 9) VADE ---
         Faturada / tahakkukta anlamli (irsaliyede mal cikis tarihi esas). */}

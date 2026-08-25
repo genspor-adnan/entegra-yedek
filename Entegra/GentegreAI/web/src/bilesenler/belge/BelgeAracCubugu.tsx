@@ -1,3 +1,5 @@
+import { FATURA_TIPLERI } from '../../sayfalar/belgeSabitleri';
+
 /**
  * BELGE KARTI ARAC CUBUGU - Kaydet / Sil ve ture ozel eylemler (siparisten
  * aktar, faturaya donustur, e-Belge gonder, tahsilat, sevk fisi...).
@@ -8,8 +10,8 @@
  */
 export function BelgeAracCubugu({
   mevcutBelge, duzenlenebilir, sonuc, kaydediyor, kilitli,
-  iadeKutusu, iade, setIade,
-  siparisMi, irsaliyeMi, alisMi, eBelgeYok, kayitliId, cari,
+  iadeKutusu, iade, setIade, faturaTipi, setFaturaTipi,
+  siparisMi, irsaliyeMi, faturaMi, alisMi, eBelgeYok, kayitliId, cari,
   kes, yeniBelge, kapat, setDonusum, tahsilatAc,
 }: {
   mevcutBelge: boolean;
@@ -22,8 +24,12 @@ export function BelgeAracCubugu({
   iadeKutusu?: boolean;
   iade: boolean;
   setIade(v: boolean): void;
+  /** Fatura tipi (130) - yalniz faturada, dugmelerin saginda. */
+  faturaTipi: number;
+  setFaturaTipi(v: number): void;
   siparisMi: boolean;
   irsaliyeMi: boolean;
+  faturaMi: boolean;
   alisMi: boolean;
   /** e-Belge (fatura/irsaliye) kavrami olmayan turler: fis, transfer, talep. */
   eBelgeYok: boolean;
@@ -134,18 +140,10 @@ export function BelgeAracCubugu({
               title={kayitliId ? 'e-Belge gönderimi henüz bağlanmadı.' : 'Önce belgeyi kaydedin.'}>
         📤 e‑Fatura Gönder
       </button>
-      {/* Kayitli olma sarti YOK (kullanici): kaydedilmemis belgede once kayit
-          yapilir, sonra tahsilat acilir. Eksik olan tek sey CARI - tahsilat
-          kimden alinacagi bilinmeden acilamaz. */}
-      <button className="d" disabled={!cari || kaydediyor}
-              title={cari
-                ? (kayitliId ? 'Bu belge için tahsilat işlemi aç'
-                             : 'Belge kaydedilip tahsilat işlemi açılır')
-                : 'Önce cari seçin.'}
-              onClick={() => void tahsilatAc(21)}>
-        💵 {alisMi ? 'Ödeme' : 'Tahsilat'}
-      </button>
-      <button className="d" disabled title="İade belgesi henüz bağlanmadı.">↩ İade</button>
+      {/* TAHSILAT ve IADE dugmeleri arac cubugundan KALKTI (kullanici):
+          tahsilat kendi SEKMESINDEN aciliyor (Nakit / Banka / POS / Çek /
+          Senet dugmeleriyle, arac aracina gore), iade ise faturanin TIPI -
+          sagdaki "Fatura Tipi" listesinden secilir. */}
       <button className="d" disabled title="Yazdırma henüz bağlanmadı.">🖨️ Yazdır</button>
     </>
   )}
@@ -153,6 +151,26 @@ export function BelgeAracCubugu({
   <span className="ayrac" />
 
   <button className="d kapat-dugmesi" onClick={kapat}>✖ Kapat</button>
+
+  {/* FATURA TIPI (130) burada, DUGMELERIN SAGINDA (kullanici): basliktan
+      alindi - irsaliyedeki IADE kutusuyla ayni yeri kullanir. Faturanin cinsi
+      hem muhasebe fisini hem e-Belge senaryosunu etkiler; belge.tipi alaninda
+      tutulur (iade zaten 2 idi). */}
+  {faturaMi && (
+    <label className="satir-ici" title="Faturanın cinsi (e-Belge senaryosu ve muhasebe fişi buna bağlı)">
+      Fatura Tipi
+      <select value={faturaTipi} disabled={kilitli} style={{ width: 150 }}
+              onChange={e => setFaturaTipi(Number(e.target.value))}>
+        {FATURA_TIPLERI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
+        {/* Gocten gelen tanimsiz tip (or. 17) listede yok: secenek olarak
+            EKLENIR, yoksa kart acilinca ilk tipe duser ve kaydedince belgenin
+            gercek tipi sessizce degisirdi. */}
+        {!FATURA_TIPLERI.some(t => t.deger === faturaTipi) && (
+          <option value={faturaTipi}>Tanımsız ({faturaTipi})</option>
+        )}
+      </select>
+    </label>
+  )}
 
   {/* TASLAK KUTUSU KALDIRILDI (kullanici): belge kaydedilince kesindir.
       Numara tuketmeyen "taslak" hali kullanilmiyordu, arac cubugunda yer

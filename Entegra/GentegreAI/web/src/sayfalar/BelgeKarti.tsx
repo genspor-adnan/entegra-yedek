@@ -701,7 +701,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           kilitli={kilitli}
           iadeKutusu={irsaliyePilot} iade={iadeMi}
           setIade={v => setFaturaTipi(v ? 2 : 1)}
-          siparisMi={siparisMi} irsaliyeMi={irsaliyeMi} alisMi={alisMi}
+          faturaTipi={faturaTipi} setFaturaTipi={setFaturaTipi}
+          siparisMi={siparisMi} irsaliyeMi={irsaliyeMi} faturaMi={faturaMi} alisMi={alisMi}
           eBelgeYok={eBelgeYok} kayitliId={kayitliId} cari={cari}
           kes={kes} yeniBelge={yeniBelge} kapat={kapat}
           setDonusum={setDonusum} tahsilatAc={tahsilatAc}
