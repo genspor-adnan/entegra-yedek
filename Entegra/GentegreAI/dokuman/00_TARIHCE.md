@@ -2762,5 +2762,26 @@ data type of parameter` ile düşüyor. Refaktör öncesi sürümde de aynı dav
 görüldü (stash ile doğrulandı) — arayüz bacakları sunucuya bıraktığı için ekran
 akışını etkilemiyor; ayrı bir iş olarak ele alınacak.
 
+### Düzeltme: tipsiz NULL parametresi (42P08)
+
+Kolon listesi çalışma anında kurulan yazmalarda (kasa işlemi bacağı, belge/kart
+başlığı) bir alan NULL geldiğinde `AddWithValue(ad, DBNull.Value)` parametreye
+**hiç tip vermiyordu**; PostgreSQL de ifadeden tip çıkaramayınca
+`42P08 could not determine data type of parameter $n` ile bütün isteği
+reddediyordu. En belirgin hâli: `POST /api/kasa-islem`'e hesapsız (cari) bacak
+gönderen her istek 500 alıyordu — arayüz bacakları sunucuya ürettirdiği için
+ekranda görünmüyor, API'yi doğrudan çağıran istemci her seferinde takılıyordu.
+
+Çözüm iki katmanlı: yeni `Gentegre.Veri/Parametre.cs` NULL'ları `unknown`
+tipiyle gönderir (PostgreSQL hedef kolona göre çözer) ve dört dinamik komut
+kurucusu (VeriKaynagi, KartDeposu, BelgeDeposu, KasaDeposu) bunu kullanır;
+`case when @p is not null` gibi `unknown`'ın da yetmediği yerde kimlik
+parametreleri **açık `integer`** tipiyle eklenir (`KasaDeposu.Kimlik`).
+
+Doğrulama: aynı istek artık 201 dönüyor (iki bacak yazıldı, hesapsız bacak
+dahil). Regresyon: 12 liste, 4 kart okuma, kart yazma+silme (null alanlarla),
+belge taslağı ve kasa listesi ekranı — hepsi çalışıyor, test kayıtları geri
+alındı.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).

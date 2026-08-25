@@ -619,9 +619,9 @@ public sealed partial class BelgeDeposu
         string sql, IReadOnlyList<object?> parametreler)
     {
         var komut = new NpgsqlCommand(sql, baglanti, islem);
-        for (var i = 0; i < parametreler.Count; i++)
-            komut.Parameters.AddWithValue("p" + i.ToString(CultureInfo.InvariantCulture),
-                parametreler[i] ?? DBNull.Value);
+        // NULL parametreler TIPLI (Parametre.Ekle) - dinamik kolon listesinde
+        //   tipsiz NULL'i PG 42P08 ile reddediyor.
+        Parametre.Ekle(komut, parametreler);
         return komut;
     }
 }

@@ -75,8 +75,9 @@ public sealed partial class KasaDeposu
                                        string sql, IReadOnlyList<object?> par)
     {
         var komut = new NpgsqlCommand(sql, baglanti, tx);
-        for (var i = 0; i < par.Count; i++)
-            komut.Parameters.AddWithValue("p" + i, par[i] ?? DBNull.Value);
+        // NULL parametreler TIPLI gonderilir (Parametre.Ekle): dinamik kolon
+        //   listesinde PG tipi cikaramiyor ve 42P08 ile reddediyordu.
+        Parametre.Ekle(komut, par);
         return komut;
     }
 

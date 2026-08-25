@@ -27,11 +27,9 @@ public sealed class VeriKaynagi : IAsyncDisposable
     public NpgsqlCommand Komut(NpgsqlConnection baglanti, string sql, IReadOnlyList<object?>? par)
     {
         var komut = new NpgsqlCommand(sql, baglanti);
-        if (par is not null)
-        {
-            for (var i = 0; i < par.Count; i++)
-                komut.Parameters.AddWithValue("p" + i, par[i] ?? DBNull.Value);
-        }
+        // NULL parametreler TIPLI gonderilir (Parametre.Ekle): tipsiz NULL'i
+        //   PostgreSQL cikaramadigi baglamlarda 42P08 ile reddediyor.
+        if (par is not null) Parametre.Ekle(komut, par);
         return komut;
     }
 

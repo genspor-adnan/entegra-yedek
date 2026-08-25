@@ -158,18 +158,24 @@ public sealed partial class KasaDeposu
             komut.Parameters.AddWithValue("p0", id);
             komut.Parameters.AddWithValue("p1", (short)sira);
             komut.Parameters.AddWithValue("p2", JsonMetin(bacak, "rol"));
-            komut.Parameters.AddWithValue("p3", (object?)hesapId ?? DBNull.Value);
+            // NULL olabilen kimlik parametreleri ACIK TIPLE eklenir: hesapsiz
+            //   (cari/masraf) bacakta hesapId null geliyor ve tipsiz NULL'i PG
+            //   "42P08 could not determine data type of parameter" ile reddedip
+            //   butun istegi 500'e dusuruyordu. Arayuz bacaklari sunucuya
+            //   urettirdigi icin ekranda gorunmuyor, API'yi dogrudan cagiran
+            //   her istemci takiliyordu.
+            Kimlik(komut, "p3", hesapId);
             komut.Parameters.AddWithValue("p4", hesapTuru);
-            komut.Parameters.AddWithValue("p5", (object?)tarafId ?? DBNull.Value);
+            Kimlik(komut, "p5", tarafId);
             komut.Parameters.AddWithValue("p6", borc);
             komut.Parameters.AddWithValue("p7", alacak);
             komut.Parameters.AddWithValue("p8", yon == "borc" ? yerel : 0m);
             komut.Parameters.AddWithValue("p9", yon == "alacak" ? yerel : 0m);
             komut.Parameters.AddWithValue("p10", doviz);
             komut.Parameters.AddWithValue("p11", kur);
-            komut.Parameters.AddWithValue("p12", (object?)masrafId ?? DBNull.Value);
-            komut.Parameters.AddWithValue("p13", (object?)hizmetId ?? DBNull.Value);
-            komut.Parameters.AddWithValue("p14", (object?)JsonSayiNull(bacak, "projeId") ?? DBNull.Value);
+            Kimlik(komut, "p12", masrafId);
+            Kimlik(komut, "p13", hizmetId);
+            Kimlik(komut, "p14", JsonSayiNull(bacak, "projeId"));
             komut.Parameters.AddWithValue("p15", Kirp(JsonMetin(bacak, "aciklama"), 100));
             komut.Parameters.AddWithValue("p16", baglam.KullaniciId);
 
@@ -261,4 +267,14 @@ public sealed partial class KasaDeposu
         if (karsiTutar > 0 && Ondalik(islem, "karsiKur") <= 0)
             islem["karsiKur"] = KasaHesap.CaprazKur(KasaHesap.YerelTutar(tutar, kur), karsiTutar);
     }
+
+    /// <summary>
+    /// NULL olabilen kimlik (id) parametresi - tipi ACIK verilir. Tipsiz NULL'i
+    /// PostgreSQL cozemiyor (42P08); AddWithValue(DBNull) tam olarak bunu uretir.
+    /// </summary>
+    private static void Kimlik(NpgsqlCommand komut, string ad, int? deger)
+        => komut.Parameters.Add(new NpgsqlParameter(ad, NpgsqlTypes.NpgsqlDbType.Integer)
+        {
+            Value = (object?)deger ?? DBNull.Value,
+        });
 }
