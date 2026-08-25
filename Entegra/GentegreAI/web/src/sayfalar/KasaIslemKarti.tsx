@@ -137,7 +137,14 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const secili = useMemo(() => turler.find(t => t.kod === tur), [turler, tur]);
   const grup = secili?.grup ?? 'tahsilat';
   const durum = sonuc ? Number(sonuc.islem.durum ?? 0) : null;
-  const kilitli = durum !== null && durum >= 2;      // gerceklesmis / iptal: salt gorunum
+  /**
+   * SALT GORUNUM yalniz IPTAL edilmis islemde (durum 3). Gerceklesmis
+   * islem (2) artik DUZELTILEBILIR (148): sunucu eski bacaklari ve fis
+   * satirlarini silip yeniden yaziyor, fis numarasi korunuyor - belge
+   * tarafindaki kararla (135) ayni. Iptal edilenin ters kaydi var,
+   * duzeltilmez.
+   */
+  const kilitli = durum === 3;
   const planMi = grup === 'plan';
   const karsiHesapli = grup === 'virman' || grup === 'doviz';
   const donusum = grup === 'doviz';
@@ -358,8 +365,13 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                 ? <button className="d bir" disabled={calisiyor} onClick={() => void kaydet(false, true)}>
                     {calisiyor ? 'Kaydediliyor…' : 'Planı Kaydet'}
                   </button>
-                : <button className="d bir" disabled={calisiyor} onClick={() => void kaydet(false, false)}>
-                    {calisiyor ? 'Kaydediliyor…' : 'Kaydet'}
+                : <button className="d bir" disabled={calisiyor}
+                          title={durum === 2
+                            ? 'Değişiklikler kaydedilir; muhasebe fişi yeniden yazılır (fiş no korunur).'
+                            : undefined}
+                          onClick={() => void kaydet(false, false)}>
+                    {calisiyor ? 'Kaydediliyor…'
+                     : durum === 2 ? 'Değişiklikleri Kaydet' : 'Kaydet'}
                   </button>
             )}
             {kayitId !== null && durum === 0 && (

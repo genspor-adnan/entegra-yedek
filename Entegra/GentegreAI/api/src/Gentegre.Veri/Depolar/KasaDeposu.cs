@@ -169,9 +169,22 @@ public sealed partial class KasaDeposu
         if (!string.IsNullOrEmpty(surum) && surum != mevcutSurum)
             throw GentegreHatasi.Cakisma(new { id, surum = mevcutSurum });
 
-        if (durum >= KasaDurum.Gerceklesti)
+        if (durum == KasaDurum.Iptal)
             throw GentegreHatasi.IsKurali(
-                "Gerçekleşmiş işlem değiştirilemez - İptal edip yeniden girin.");
+                "İptal edilmiş işlem değiştirilemez - yeni işlem girin.");
+
+        // GERCEKLESMIS ISLEM DUZELTILEBILIR (148) - belge tarafindaki kararla
+        //   (135) ayni: kullanici bir tahsilatin tutarini duzeltmek icin islemi
+        //   iptal edip bastan girmek zorunda kalmasin. Sunucu eski etkiyi geri
+        //   alir: bacaklar ve fis SATIRLARI silinir, durum taslaga cekilir;
+        //   asagidaki normal akis yeniden uretir. Fis NUMARASI korunur -
+        //   yevmiye sirasi bozulmasin. Kapanmis donem motorda reddedilir.
+        if (durum >= KasaDurum.Gerceklesti)
+        {
+            await MotorAsync(baglanti, tx, "select public.fn_kasa_islem_duzelt_hazirla(@p0)",
+                             new object?[] { id }, iptal);
+            uyarilar.Add("Gerçekleşmiş işlem düzeltildi: muhasebe fişi yeniden yazıldı.");
+        }
 
         await TarafSnapshotAsync(baglanti, tx, islem, iptal);
         await DovizDoldurAsync(baglanti, tx, islem, secenekler, uyarilar, iptal);

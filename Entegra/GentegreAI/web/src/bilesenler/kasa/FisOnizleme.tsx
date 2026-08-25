@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { FisOzeti } from '../../api/sozlesme';
 import { para } from '../bicim';
 
@@ -15,10 +16,16 @@ const FIS_DURUM: Record<number, string> = {
  */
 export function FisOnizleme({ fis }: { fis: FisOzeti }) {
   const dengeli = Math.round(fis.toplamBorc * 100) === Math.round(fis.toplamAlacak * 100);
+  /* VARSAYILAN KAPALI (kullanici): fis satirlari gunluk tahsilat isinde
+     gerekmiyor; basligi (fis no + denge rozeti) gormek yetiyor, ayrinti
+     isteyen okla aciyor. */
+  const [acik, setAcik] = useState(false);
 
   return (
     <div className="kagrup">
-      <h6>
+      <h6 style={{ cursor: 'pointer' }} onClick={() => setAcik(a => !a)}
+          title={acik ? 'Fiş satırlarını gizle' : 'Fiş satırlarını göster'}>
+        <span className="sonuk" style={{ marginRight: 4 }}>{acik ? '▾' : '▸'}</span>
         Muhasebe Fişi
         <span className="rozet">{FIS_TURU[fis.tur] ?? fis.tur}</span>
         {fis.fisNo && <span className="rozet bir">{fis.fisNo}</span>}
@@ -28,6 +35,7 @@ export function FisOnizleme({ fis }: { fis: FisOzeti }) {
         </span>
       </h6>
 
+      {acik && (
       <table className="detay-tablo">
         <thead>
           <tr>
@@ -64,6 +72,7 @@ export function FisOnizleme({ fis }: { fis: FisOzeti }) {
           </tr>
         </tfoot>
       </table>
+      )}
     </div>
   );
 }
