@@ -437,7 +437,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   //   sabit filtre tur=1 / tur=2. Ikisi ayni tabloda durur cunku portfoy,
   //   ciro ve tahsil akislari birebir aynidir - degisen yalnizca kagit turu.
   {
-    kaynak: 'cek-senet', rota: 'cek', baslik: 'Çekler', yol: 'Kasa › Çekler',
+    kaynak: 'cek-senet', rota: 'cek', baslik: 'Çekler', yol: 'Banka › Çekler',
     // kartYolu ROTA ile ayni olmali: kart rotasi `/${rota}/:id` uretiliyor.
     //   '/cek-senet' yazilinca "Ekle" tanimsiz rotaya gidip panele dusuyordu.
     kartYolu: '/cek', aksiyonEkrani: 'cek-senet-liste',
@@ -451,10 +451,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Kapanan', filtre: { alan: 'durum', op: 'icinde', deger: [50, 70] } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Kasa', menuAd: 'Çek Listesi', ic: '📃', yetkiKodu: 'cek_senet',
+    menuGrup: 'Banka', menuAd: 'Çek Listesi', ic: '📃', yetkiKodu: 'cek_senet',
   },
   {
-    kaynak: 'cek-senet', rota: 'senet', baslik: 'Senetler', yol: 'Kasa › Senetler',
+    kaynak: 'cek-senet', rota: 'senet', baslik: 'Senetler', yol: 'Banka › Senetler',
     kartYolu: '/senet', aksiyonEkrani: 'cek-senet-liste',
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 2 },
     yeniKayitVarsayilanlari: { tur: 2 },
@@ -466,7 +466,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Kapanan', filtre: { alan: 'durum', op: 'icinde', deger: [50, 70] } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Kasa', menuAd: 'Senet Listesi', ic: '🧾', yetkiKodu: 'cek_senet',
+    menuGrup: 'Banka', menuAd: 'Senet Listesi', ic: '🧾', yetkiKodu: 'cek_senet',
   },
   {
     // Yuruyen bakiyeli ekstre: hesap secimi URL'den gelir (?hesapId=), grid

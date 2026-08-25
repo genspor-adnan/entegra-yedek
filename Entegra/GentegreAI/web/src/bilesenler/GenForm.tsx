@@ -339,9 +339,42 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
   }, [meta, deger, ilkDeger, yeniMi, yeniKayitVarsayilanlari]);
 
   const kaydedilmemisDegisiklikVar = useMemo(() => {
+    /**
+     * GENEL KURAL (kullanici): hicbir sey degistirmeden kapatan kullaniciya
+     * "kaydedilsin mi?" SORULMAZ. Katı (!==) karsilastirma bunu yapamiyordu -
+     * ayni deger farkli YAZIMLARLA geliyor ve sahte fark uretiyordu:
+     *
+     *   kur      sunucudan "1.000000", ekranda '1'      (doviz efekti yazar)
+     *   tutar    "1500.0000" vs "1500"
+     *   kod      sayi 1 vs metin "1"
+     *   bos alan null / undefined / ''
+     *
+     * Bu yuzden karsilastirma NORMALIZE edilir: sayisal alanlarda sayi degeri,
+     * mantikta boolean, digerlerinde kirpilmis metin.
+     */
+    const esitMi = (a: { tip: string }, x: unknown, y: unknown) => {
+      if (a.tip === 'mantik') return Boolean(x) === Boolean(y);
+      const bos = (v: unknown) => v === null || v === undefined || v === '';
+      if (bos(x) && bos(y)) return true;
+      if (bos(x) !== bos(y)) return false;
+      if (a.tip === 'sayi' || a.tip === 'para' || a.tip === 'kod') {
+        const sx = Number(String(x).replace(',', '.'));
+        const sy = Number(String(y).replace(',', '.'));
+        // Kod alanlari HARF de tasiyabilir ('K'/'B'); sayi degilse metne duser.
+        if (Number.isFinite(sx) && Number.isFinite(sy)) return sx === sy;
+      }
+      if (a.tip === 'tarih' || a.tip === 'zaman') {
+        // "2026-08-25T00:00:00" ile "2026-08-25" ayni gunu anlatir; zaman
+        //   alaninda dakikaya kadar bakilir.
+        const n = a.tip === 'zaman' ? 16 : 10;
+        return String(x).slice(0, n) === String(y).slice(0, n);
+      }
+      return String(x).trim() === String(y).trim();
+    };
+
     const kartDegisti = meta?.alanlar.some(a => {
       if (!a.yazilabilir || a.ad === 'id') return false;
-      return deger[a.ad] !== ilkDeger[a.ad];
+      return !esitMi(a, deger[a.ad], ilkDeger[a.ad]);
     }) ?? false;
     if (kartDegisti) return true;
 
