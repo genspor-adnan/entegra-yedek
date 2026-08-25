@@ -2941,5 +2941,24 @@ iade edilebilir satır "miktar 3 · iade 2 · kalan 1". Ekranda: Fatura Tipi = �
 100,00 / KDV %20 olarak eklendi, kayıt sonrası kart kapandı. Test verisi geri
 alındı.
 
+### İade irsaliyesi
+
+İade yalnız faturayla olmuyor: mal irsaliye ile çıkıp irsaliye ile geri gelebilir
+(fatura sonra kesilir ya da hiç kesilmez). İrsaliye kartında da üst başlıkta
+**İrsaliye Tipi** var — Normal / İade (aynı `belge.tipi` alanı, aynı iade
+numarası 2). Fatura tiplerinin çoğu irsaliyede anlamsız olduğu için liste kısa.
+
+- `db/133`: `v_iade_edilebilir_satir` irsaliye türlerini de (10 alış / 14 satış +
+  konsinye) kapsıyor.
+- **Kaynak eşleşmesi ekranda ayrılır**: iade FATURASI fatura satırlarını, iade
+  İRSALİYESİ irsaliye satırlarını görür (uçtaki `turler` süzgeci) — yoksa aynı
+  mal hem irsaliyeden hem faturadan iade edilip iki kez sayılırdı.
+- Yön kuralı ortak: `BelgeTuru.CikisMi(tur, tipi)` irsaliyede de geçerli.
+
+Doğrulama: satış irsaliyesi 5 adet → stok 258,93 → 253,93, cari borç 600; iade
+irsaliyesi 2 adet → stok **255,93**, cari **alacak 240**, kalan iade edilebilir
+3. Ekranda İrsaliye Tipi = İade seçilince pencere yalnız irsaliye satırını
+(000104159 · miktar 5 · iade 2 · kalan 3) listeledi. Test verisi geri alındı.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).

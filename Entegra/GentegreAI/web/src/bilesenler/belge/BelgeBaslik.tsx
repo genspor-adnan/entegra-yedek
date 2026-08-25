@@ -1,7 +1,8 @@
 import { GenLookup } from '../GenLookup';
 import { TarafAlani } from '../../sayfalar/BelgeKarti';
 import {
-  LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, FATURA_TIPLERI, SEKMELER,
+  LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, FATURA_TIPLERI, IRSALIYE_TIPLERI,
+  SEKMELER,
 } from '../../sayfalar/belgeSabitleri';
 import type { SatirDurumu } from '../../sayfalar/belgeSatir';
 import type { Secim } from '../../sayfalar/belgeKaydet';
@@ -145,16 +146,17 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     {/* FATURA TIPI (130) - yalniz faturada, ust baslikta (kullanici). Faturanin
         cinsi hem muhasebe fisini hem e-Belge senaryosunu etkiler; belge.tipi
         alaninda tutulur (iade zaten 2 idi). */}
-    {faturaMi && (
+    {(faturaMi || irsaliyeMi) && (
       <label className="alan">
-        <span className="etiket">Fatura Tipi</span>
+        <span className="etiket">{irsaliyeMi ? 'İrsaliye Tipi' : 'Fatura Tipi'}</span>
         <select value={faturaTipi} disabled={kilitli}
                 onChange={e => setFaturaTipi(Number(e.target.value))}>
-          {FATURA_TIPLERI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
+          {(irsaliyeMi ? IRSALIYE_TIPLERI : FATURA_TIPLERI)
+            .map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
           {/* Gocten gelen tanimsiz tip (or. 17) listede yok: secenek olarak
               EKLENIR, yoksa kart acilinca ilk tipe duser ve kaydedince
               belgenin gercek tipi sessizce degisirdi. */}
-          {!FATURA_TIPLERI.some(t => t.deger === faturaTipi) && (
+          {!(irsaliyeMi ? IRSALIYE_TIPLERI : FATURA_TIPLERI).some(t => t.deger === faturaTipi) && (
             <option value={faturaTipi}>Tanımsız ({faturaTipi})</option>
           )}
         </select>

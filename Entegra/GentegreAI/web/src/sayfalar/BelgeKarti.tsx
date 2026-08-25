@@ -786,6 +786,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           <IadeSatirPenceresi
             tarafId={cari.id}
             tarafUnvan={cari.unvan}
+            /* Iade IRSALIYESI irsaliyelerden, iade FATURASI faturalardan (133). */
+            turler={irsaliyeMi ? (alisMi ? [10, 109] : [14, 119])
+                               : (alisMi ? [11, 12] : [15, 16])}
             onKapat={() => setIadeArama(false)}
             onSec={secilenler => {
               let anahtar = Math.max(0, ...satirlar.map(x => x.anahtar));

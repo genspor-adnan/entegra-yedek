@@ -503,7 +503,8 @@ public sealed partial class BelgeDeposu
     /// belgeId verilirse yalniz o belgenin satirlari (belge uzerinden iade).
     /// </summary>
     public async Task<List<IDictionary<string, object?>>> IadeSatirlariAsync(
-        int tarafId, int? belgeId, string? ara, CancellationToken iptal = default)
+        int tarafId, int? belgeId, string? ara, IReadOnlyList<int>? turler = null,
+        CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = new NpgsqlCommand("""
@@ -521,6 +522,9 @@ public sealed partial class BelgeDeposu
               from public.v_iade_edilebilir_satir v
              where (@p0 <= 0 or v.taraf_id = @p0)
                and (@p1 <= 0 or v.belge_id = @p1)
+               -- Iade FATURASINDA fatura, iade IRSALIYESINDE irsaliye satirlari
+               --   (133): ayni mal iki kaynaktan iade edilip cift sayilmasin.
+               and (cardinality(@p3::int[]) = 0 or v.belge_tur = any(@p3::int[]))
                and (v.miktar - v.iade_miktar) > 0
                and (@p2 = '' or v.stok_kodu ilike '%' || @p2 || '%'
                              or v.stok_adi  ilike '%' || @p2 || '%'
@@ -531,6 +535,7 @@ public sealed partial class BelgeDeposu
         komut.Parameters.AddWithValue("p0", tarafId);
         komut.Parameters.AddWithValue("p1", belgeId ?? 0);
         komut.Parameters.AddWithValue("p2", ara ?? "");
+        komut.Parameters.AddWithValue("p3", (turler ?? Array.Empty<int>()).ToArray());
 
         var liste = new List<IDictionary<string, object?>>();
         await using var o = await komut.ExecuteReaderAsync(iptal);

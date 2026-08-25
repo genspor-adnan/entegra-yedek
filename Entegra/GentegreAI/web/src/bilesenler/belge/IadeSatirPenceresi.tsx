@@ -40,11 +40,17 @@ export interface IadeSatiri {
  * Kismi iade dogal: satirdaki miktar kalanina kadar degistirilebilir; kalan
  * sunucuda (v_iade_edilebilir_satir) her zaman yeniden hesaplanir.
  */
-export function IadeSatirPenceresi({ tarafId, tarafUnvan, belgeId, onSec, onKapat }: {
+export function IadeSatirPenceresi({ tarafId, tarafUnvan, belgeId, turler, onSec, onKapat }: {
   tarafId: number;
   tarafUnvan: string;
   /** Belge uzerinden iade: yalniz o belgenin satirlari listelenir. */
   belgeId?: number;
+  /**
+   * Hangi belge turlerinden iade edilebilir: iade FATURASI fatura satirlarini,
+   * iade IRSALIYESI irsaliye satirlarini gorur (133) - ayni mal iki kaynaktan
+   * iade edilip cift sayilmasin.
+   */
+  turler?: number[];
   onSec(satirlar: IadeSatiri[]): void;
   onKapat(): void;
 }) {
@@ -55,17 +61,22 @@ export function IadeSatirPenceresi({ tarafId, tarafUnvan, belgeId, onSec, onKapa
   const [hata, setHata] = useState<string | null>(null);
   const zamanlayici = useRef<number | undefined>(undefined);
 
+  // Tur listesi her render'da yeni DIZI olarak geliyor; bagimlilikta referans
+  //   yerine metin kullanilir - yoksa yukle surekli yeniden kurulup donerdi.
+  const turAnahtar = (turler ?? []).join(',');
+
   const yukle = useCallback(async (metin: string) => {
     setYukleniyor(true);
     setHata(null);
     try {
-      const y = await api.iadeSatirlari(tarafId, belgeId, metin.trim() || undefined);
+      const y = await api.iadeSatirlari(tarafId, belgeId, metin.trim() || undefined,
+                                        turAnahtar ? turAnahtar.split(',').map(Number) : undefined);
       setSatirlar(y as unknown as IadeSatiri[]);
     } catch (h) {
       setHata(h instanceof ApiHatasi ? h.message : String(h));
       setSatirlar([]);
     } finally { setYukleniyor(false) }
-  }, [tarafId, belgeId]);
+  }, [tarafId, belgeId, turAnahtar]);
 
   useEffect(() => { void yukle('') }, [yukle]);
 

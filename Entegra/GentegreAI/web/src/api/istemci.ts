@@ -245,11 +245,12 @@ export const api = {
    * IADE faturasinda secilebilecek "onceki alinanlar" (132): carinin kesin
    * fatura satirlari, iade edilmis miktar dusulmus olarak.
    */
-  iadeSatirlari: (tarafId: number, belgeId?: number, ara?: string) =>
+  iadeSatirlari: (tarafId: number, belgeId?: number, ara?: string, turler?: number[]) =>
     istek<{ satirlar: Record<string, unknown>[] }>(
       `/api/belge/iade-satirlari?tarafId=${tarafId}`
       + (belgeId ? `&belgeId=${belgeId}` : '')
-      + (ara ? `&ara=${encodeURIComponent(ara)}` : '')).then(y => y.satirlar),
+      + (ara ? `&ara=${encodeURIComponent(ara)}` : '')
+      + (turler?.length ? `&turler=${turler.join(',')}` : '')).then(y => y.satirlar),
 
   /** Siparis -> irsaliye -> fatura. Miktar KISMI olabilir; kalan kaynakta durur. */
   belgeDonustur: (id: number, hedefTur: number,

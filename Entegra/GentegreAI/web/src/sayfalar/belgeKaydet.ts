@@ -138,10 +138,10 @@ return {
     girisDepoId: stokFisiMi ? (fisCikisMi ? null : depo?.id ?? null)
                : depoBelgesi ? girisDepo?.id ?? null
                : alisMi ? depo?.id ?? null : null,
-    // belge.tipi IKI anlamda kullanilir: stok fisinde fisin SEBEBI, faturada
-    //   FATURA TIPI (130). Diger turlerde (irsaliye, siparis, transfer, talep)
-    //   anlami yok - gonderilmez, alan 0 kalir.
-    tipi: stokFisiMi ? fisTipi : faturaMi ? faturaTipi : undefined,
+    // belge.tipi UC anlamda kullanilir: stok fisinde fisin SEBEBI, faturada
+    //   FATURA TIPI (130), irsaliyede NORMAL/IADE (133). Siparis, transfer ve
+    //   talepte anlami yok - gonderilmez, alan 0 kalir.
+    tipi: stokFisiMi ? fisTipi : (faturaMi || irsaliyeMi) ? faturaTipi : undefined,
     // satici_id NOT NULL default 0 - "secilmedi" burada null degil 0
     //   (null gonderince sunucu "saticiId bos birakilamaz" ile reddediyordu).
     saticiId: satici?.id ?? 0,

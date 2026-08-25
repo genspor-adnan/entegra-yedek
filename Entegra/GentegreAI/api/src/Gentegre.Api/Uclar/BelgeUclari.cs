@@ -81,14 +81,20 @@ public static class BelgeUclari
         //   Cari zorunlu: iade her zaman BIR CARIYE kesilir, tum firmanin gecmisi
         //   listelenmez. belgeId verilirse yalniz o belgeden iade edilir.
         grup.MapGet("/iade-satirlari", async (
-            int tarafId, int? belgeId, string? ara,
+            int tarafId, int? belgeId, string? ara, string? turler,
             BaglamCozucu cozucu, BelgeDeposu depo, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Gor);
+            // turler: "14,119" gibi virgullu liste - iade IRSALIYESI yalniz
+            //   irsaliye satirlarini, iade FATURASI fatura satirlarini gorsun.
+            var turDizi = (turler ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(x => int.TryParse(x, out var n) ? n : 0)
+                .Where(x => x > 0).ToArray();
             return Results.Ok(new
             {
-                satirlar = await depo.IadeSatirlariAsync(tarafId, belgeId, ara, iptal),
+                satirlar = await depo.IadeSatirlariAsync(tarafId, belgeId, ara, turDizi, iptal),
                 izlemeNo = baglam.IzlemeNo
             });
         });

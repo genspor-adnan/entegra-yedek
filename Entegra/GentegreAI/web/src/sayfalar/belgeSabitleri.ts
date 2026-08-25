@@ -53,6 +53,16 @@ export const FATURA_TIPLERI: { deger: number; ad: string }[] = [
   { deger: 26, ad: 'İhracat' },
 ];
 
+/**
+ * IRSALIYE TIPI - irsaliyede fatura tiplerinin cogu anlamsiz (fiyat farki,
+ * tevkifat, SGK...); mal ya gider ya GERI GELIR. Ayni alan (belge.tipi) ve ayni
+ * iade numarasi (2) kullanilir.
+ */
+export const IRSALIYE_TIPLERI: { deger: number; ad: string }[] = [
+  { deger: 1, ad: 'Normal' },
+  { deger: 2, ad: 'İade' },
+];
+
 /** Senaryo comboSU - SENARYO_ADI ile ayni kodlar, GIB profil sirasinda. */
 export const SENARYO_SECENEK = [
   { deger: 1, ad: 'Temel Fatura' },
