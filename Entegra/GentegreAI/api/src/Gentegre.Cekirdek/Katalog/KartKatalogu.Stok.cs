@@ -33,6 +33,10 @@ public static partial class KartKatalogu
             new("anaBirim",      "ana_birim",       "kod",   KodListesi: "stok.ana_birim",  Baslik: "Ana Birim",AltGrup: "Vergi & Ana Birim"),
             new("kdv",           "kdv",             "kod",   Zorunlu: true, SabitKodlar: KdvKodlari, Baslik: "KDV %", AltGrup: "Vergi & Ana Birim"),
             new("otvYuzde",      "otv_yuzde",       "para", Baslik: "OTV %",  AltGrup: "Vergi & Ana Birim"),
+            // FATURADAKI AD vergi bolumunun EN ALTINDA (kullanici): belgeye
+            //   basilacak ad vergi/birim bilgileriyle birlikte okunuyor.
+            new("faturaStokAdi", "fatura_stok_adi", "metin", EnFazlaUzunluk: 200,
+                                                     Baslik: "Faturadaki Ad", AltGrup: "Vergi & Ana Birim"),
             new("internetSatis", "internet_satis",  "mantik", Baslik: "İnternet Satış", AltGrup: "Diğer",
                                                      EslesAlan: "paket"),
             // PAKET (124): isaretlenince kartta "Paket" sekmesi acilir, icerik
@@ -59,7 +63,6 @@ public static partial class KartKatalogu
             new("yenidenKullanilir", "yeniden_kullanilir", "mantik",
                                                      Baslik: "Yeniden Kullanılabilir", AltGrup: "Diğer"),
             new("ozelKod",       "ozel_kod",        "metin", EnFazlaUzunluk: 20, AltGrup: "Diğer"),
-            new("faturaStokAdi", "fatura_stok_adi", "metin", EnFazlaUzunluk: 200, Baslik: "Faturadaki Ad", AltGrup: "Diğer"),
             new("durum",         "durum",           "kod",   Zorunlu: true, SabitKodlar: DurumKodlari, Grup: "Kimlik"),
             new("subeId",        "sube_id",         "sayi",  Yazilabilir: false),
             new("eklemeTarihi",  "ekleme_tarihi",   "tarih", Yazilabilir: false)
