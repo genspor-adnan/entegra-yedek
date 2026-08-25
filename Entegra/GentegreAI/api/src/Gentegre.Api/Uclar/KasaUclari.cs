@@ -263,14 +263,15 @@ public static class KasaUclari
 
         "islemTarihi" or "planTarihi" => "tarih",
 
-        "makbuzNo" or "dovizCinsi" or "karsiDovizCinsi" or "tarafUnvan" or "aciklama" => "metin",
+        "makbuzNo" or "dovizCinsi" or "karsiDovizCinsi" or "ekstreDovizi" or
+        "tarafUnvan" or "aciklama" => "metin",
 
         _ => null
     };
 
     private static int? Uzunluk(string ad) => ad switch
     {
-        "dovizCinsi" or "karsiDovizCinsi" => 6,
+        "dovizCinsi" or "karsiDovizCinsi" or "ekstreDovizi" => 6,
         "makbuzNo" => 30,
         "tarafUnvan" or "aciklama" => 200,
         _ => null

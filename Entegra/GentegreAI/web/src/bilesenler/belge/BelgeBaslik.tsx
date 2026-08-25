@@ -271,8 +271,10 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   {SEKMELER
     .filter(x => (!x.irsaliye || irsaliyeMi)
               && (!x.faturaYok || !(faturaMi || tahakkukMu))
-              // Tahsilat: fatura/fis VE tahakkuk (tahakkuk da tahsil edilir).
-              && (!x.faturaMi || faturaMi || tahakkukMu)
+              // Tahsilat: fatura/fis, tahakkuk VE SIPARIS (kullanici) - siparis
+              //   avansi/on odemesi de bu sekmeden girilir, fatura kartindaki
+              //   Nakit / Banka / POS / Çek / Senet dugmeleriyle ayni.
+              && (!x.faturaMi || faturaMi || tahakkukMu || siparisMi)
               // Tahakkuk e-Belge DEGIL: GIB'e giden bir belge degil,
               //   ic muhasebe/cari ara kaydi.
               && !(eBelgeYok && x.anahtar === 'ebelge')

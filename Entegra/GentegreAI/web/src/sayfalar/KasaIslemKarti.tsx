@@ -11,6 +11,7 @@ import { FisOnizleme } from '../bilesenler/kasa/FisOnizleme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { Modal } from '../bilesenler/GenForm';
 import { para } from '../bilesenler/bicim';
+import { DOVIZ_KODLARI, YEREL_PARA_VARSAYILAN } from './belgeSabitleri';
 
 
 const LOOKUP_HESAP = [
@@ -98,6 +99,10 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const [karsiCari, setKarsiCari] = useState<CariSecimi | null>(null);
   const [hesap, setHesap] = useState<HesapSecimi | null>(null);
   const [karsiHesap, setKarsiHesap] = useState<HesapSecimi | null>(null);
+  /** Islemin para birimi - hesap secilince onun dovizine gecer, elle degisir. */
+  const [doviz, setDoviz] = useState(YEREL_PARA_VARSAYILAN);
+  /** Cari hesaba hangi dovizde islenecek (139): islem dovizi ya da yerel para. */
+  const [ekstreDovizi, setEkstreDovizi] = useState(YEREL_PARA_VARSAYILAN);
   const [tutar, setTutar] = useState(hamTutar(acilis?.tutar ?? sorgu.get('tutar')));
   /** Tahsilatin kapatacagi belge (kasa_islem.belge_id). */
   const belgeBagi = acilis?.belgeId ?? (Number(sorgu.get('belgeId')) || 0);
@@ -139,7 +144,13 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const senetMi = tur === 24 || tur === 34;
   // Cek/senette hesap SECILMEZ: kiymet portfoye girer (sanal hesap), para
   //   bankaya ancak tahsil edilince gecer. Doviz o yuzden basliktan gelir.
-  const anaDoviz = hesap?.doviz ?? (planMi ? 'TL' : 'TL');
+  /**
+   * PARA BIRIMI SECILEBILIR (kullanici). Hesap secilince hesabin dovizine
+   * gecer - dovizli kasadan TL tahsilat yazilmasin; ama kullanici sonradan
+   * degistirebilir (cek/senette hesap yok, kiymet USD olabilir). Uyusmazlik
+   * SUNUCUDA denetlenir; burada engellemek dogru kaydi da imkansiz kilardi.
+   */
+  const anaDoviz = doviz;
   const dovizli = anaDoviz !== 'TL';
   const ekleyebilir = yetki('kasa_islem', 'ekle');
 
@@ -161,6 +172,9 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     setPlanTarihi(i.planTarihi ? String(i.planTarihi).slice(0, 10) : '');
     setTutar(String(i.tutar ?? ''));
     setKur(String(i.dovizKuru ?? 1));
+    setDoviz(String(i.dovizCinsi ?? YEREL_PARA_VARSAYILAN) || YEREL_PARA_VARSAYILAN);
+    setEkstreDovizi(String(i.ekstreDovizi ?? '') ||
+                    String(i.dovizCinsi ?? YEREL_PARA_VARSAYILAN) || YEREL_PARA_VARSAYILAN);
     setKarsiTutar(Number(i.karsiTutar) ? String(i.karsiTutar) : '');
     setMasrafTutar(Number(i.masrafTutar) ? String(i.masrafTutar) : '');
     setAciklama(String(i.aciklama ?? ''));
@@ -214,6 +228,9 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
         karsiHesapId: karsiHesapli ? karsiHesap?.id ?? null : null,
         tutar: sayi(tutar),
         dovizCinsi: anaDoviz,
+        // Ekstre dovizi (139): yerel islemde anlamsiz - bos gider, sunucu islem
+        //   dovizini kullanir.
+        ekstreDovizi: dovizli ? ekstreDovizi : '',
         dovizKuru: Number(kur.replace(',', '.')) || 1,
         karsiDovizCinsi: donusum ? karsiHesap?.doviz ?? '' : '',
         karsiTutar: donusum ? sayi(karsiTutar) : 0,
@@ -404,11 +421,48 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                 <span className="ikili">
                   <input className="hiza-sag" value={tutar} disabled={kilitli}
                          onChange={e => setTutar(e.target.value)} />
-                  <input className="birim" value={anaDoviz} readOnly
-                         title="Para birimi hesaptan gelir" />
+                  {/* Para birimi SECILEBILIR (kullanici): hesap secilince onun
+                      dovizi gelir, gerekirse degistirilir (cek/senette hesap
+                      yok - kiymet dovizli olabilir). */}
+                  <select className="birim" value={anaDoviz} disabled={kilitli}
+                          title="İşlemin para birimi"
+                          onChange={e => setDoviz(e.target.value)}>
+                    {DOVIZ_KODLARI.map(k => <option key={k} value={k}>{k}</option>)}
+                    {!DOVIZ_KODLARI.includes(anaDoviz as typeof DOVIZ_KODLARI[number]) && (
+                      <option value={anaDoviz}>{anaDoviz}</option>
+                    )}
+                  </select>
                 </span>
                 {alanHatalari.tutar && <span className="alan-hata">{alanHatalari.tutar}</span>}
               </label>
+
+              {/* DOVIZLI islemde kur ve YEREL KARSILIGI (kullanici): kur ustte,
+                  hemen altinda yerel para tutari - girilen dovizin ne ettigi
+                  ayni hucrede gorunsun. Yanindaki combo EKSTRE DOVIZI: cari
+                  hesaba hangi birimde islenecegi (139); secenekler islem dovizi
+                  ve yerel para. */}
+              {dovizli && (
+                <>
+                  <label className="alan">
+                    <span className="etiket">Kur</span>
+                    <input className="hiza-sag" value={kur} disabled={kilitli}
+                           onChange={e => setKur(e.target.value)} />
+                    <input className="hiza-sag onizleme" readOnly
+                           title={`${anaDoviz} tutarın ${YEREL_PARA_VARSAYILAN} karşılığı`}
+                           value={`${para.format(yerelOnizleme)} ${YEREL_PARA_VARSAYILAN}`} />
+                  </label>
+                  <label className="alan">
+                    <span className="etiket">Ekstre Dövizi</span>
+                    <select value={ekstreDovizi} disabled={kilitli}
+                            title="Cari hesaba hangi para biriminde işlenecek"
+                            onChange={e => setEkstreDovizi(e.target.value)}>
+                      {[...new Set([anaDoviz, YEREL_PARA_VARSAYILAN])].map(k => (
+                        <option key={k} value={k}>{k}</option>
+                      ))}
+                    </select>
+                  </label>
+                </>
+              )}
 
               {!planMi && !cariVirman && !cekSenetMi && (
                 <GenLookup
@@ -422,9 +476,16 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                   deger={hesap?.ad}
                   hata={alanHatalari.hesapId}
                   saltOkunur={kilitli}
-                  onSec={(s: ListeSatiri | null) => setHesap(s ? {
-                    id: Number(s.id), ad: String(s.ad ?? ''), doviz: String(s.dovizCinsi ?? 'TL'),
-                  } : null)}
+                  onSec={(s: ListeSatiri | null) => {
+                    const h = s ? {
+                      id: Number(s.id), ad: String(s.ad ?? ''),
+                      doviz: String(s.dovizCinsi ?? 'TL'),
+                    } : null;
+                    setHesap(h);
+                    // Hesabin dovizi isleme tasinir: TL kasadan USD tahsilat
+                    //   yazilmasin. Kullanici gerekirse combodan degistirir.
+                    if (h) setDoviz(h.doviz);
+                  }}
                 />
               )}
 

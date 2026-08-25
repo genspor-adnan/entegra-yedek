@@ -19,6 +19,7 @@ public sealed partial class KasaDeposu
         ["tarafId"] = "taraf_id", ["karsiTarafId"] = "karsi_taraf_id",
         ["tarafUnvan"] = "taraf_unvan", ["hesapId"] = "hesap_id",
         ["karsiHesapId"] = "karsi_hesap_id", ["dovizCinsi"] = "doviz_cinsi",
+        ["ekstreDovizi"] = "ekstre_dovizi",
         ["tutar"] = "tutar", ["dovizKuru"] = "doviz_kuru", ["yerelTutar"] = "yerel_tutar",
         ["karsiDovizCinsi"] = "karsi_doviz_cinsi", ["karsiTutar"] = "karsi_tutar",
         ["karsiKur"] = "karsi_kur", ["masrafTutar"] = "masraf_tutar",
