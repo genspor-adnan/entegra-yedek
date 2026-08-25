@@ -211,6 +211,9 @@ public sealed partial class BelgeDeposu
         if (kur <= 0) { kur = 1m; belge["dovizKuru"] = kur; }
         if (Metin(belge, "kur").Length == 0) belge["kur"] = belgeDovizi;
         if (Metin(belge, "raporDovizi").Length == 0) belge["raporDovizi"] = belgeDovizi;
+        // Ekstre dovizi verilmediyse rapor doviziyle ayni (134).
+        if (Metin(belge, "ekstreDovizi").Length == 0)
+            belge["ekstreDovizi"] = Metin(belge, "raporDovizi");
         if (Metin(belge, "kdvDurum").Length == 0) belge["kdvDurum"] = "Hariç";
 
         // ------------------------------------------------- 3) belge NUMARASI kimin ----

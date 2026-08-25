@@ -29,6 +29,10 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     tahakkukMu, depoBelgesi, stokFisiMi, fisCikisMi, transferMi, talepMi, disNumarali,
     eBelgeYok,
   } = p;
+
+  // PILOT: yeni 4 sutunlu duzen SIMDILIK yalniz (konsinye olmayan) irsaliyede.
+  const irsaliyeDuzeni = irsaliyeMi && !depoBelgesi && !stokFisiMi && !konsinyeMi;
+
   return (
   <>
 <div className="belge-hdr-sar">
@@ -38,6 +42,84 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         1) Musteri . Belge No . e-Belge
         2) Vade . Belge Tarihi . Kapanma
         3) Satis Temsilcisi . Cikis Deposu . Doviz/Kur */}
+  {/* IRSALIYE DUZENI (kullanici, pilot): 4 sutunlu izgara -
+        1) Cari . Irsaliye No . Irsaliye Tarihi . e-Belge
+        2) Temsilci . Cikis Deposu . Bagli Siparis . Faturalama Durumu
+      Izgara 5 sutunlu: baslik IKI satira iner, Bagli Siparis fatura durumunun
+      SAGINDA kalir (kullanici) - alt satira dusmez.
+      Tip basliktan CIKTI: irsaliyede tek anlamli secim "iade mi" - o da arac
+      cubugundaki IADE kutusu (kullanici).
+      Basarili olursa diger belge turlerine de yayilacak; o yuzden ayri blok. */}
+  {irsaliyeDuzeni ? (
+  <div className="alan-izgara dort-sutun belge-hdr">
+    <TarafAlani
+      etiket="Müşteri (Cari)"
+      deger={cari?.unvan}
+      kilitli={kilitli}
+      zorunlu
+      ipucu="Cari ara"
+      hata={alanHatalari.tarafId}
+      onAc={() => setCariArama(true)}
+    />
+
+    <label className="alan">
+      <span className="etiket">İrsaliye No</span>
+      {disNumarali && !kilitli ? (
+        <input className="one-cikan" value={belgeNo} maxLength={20}
+               onChange={e => setBelgeNo(e.target.value)} />
+      ) : (
+        <input className="one-cikan"
+               value={String(sonuc?.belge.belgeNo ?? '') || (kilitli ? '' : '(kaydedince verilir)')}
+               readOnly />
+      )}
+      {alanHatalari.belgeNo && <span className="alan-hata">{alanHatalari.belgeNo}</span>}
+    </label>
+
+    <label className="alan">
+      <span className="etiket">İrsaliye Tarihi</span>
+      <input type="datetime-local" value={tarih} disabled={baslikKilitli}
+             max={tarihEnGec} min={tarihEnErken}
+             onChange={e => setTarih(e.target.value)} />
+      {alanHatalari.belgeTarihi && <span className="alan-hata">{alanHatalari.belgeTarihi}</span>}
+    </label>
+
+    <label className="alan">
+      <span className="etiket">e-Belge</span>
+      <span className="deger-serit">
+        <span className="rozet bilgi">{konsinyeMi ? 'e-İrsaliye (konsinye)' : 'e-İrsaliye'}</span>
+        {Number(sonuc?.belge.efaturaDurum ?? 0) > 0
+          ? <span className="rozet olumlu">✓ Gönderildi</span>
+          : <span className="rozet">gönderilmedi</span>}
+      </span>
+    </label>
+
+    <TarafAlani
+      etiket={alisMi ? 'Sorumlu' : 'Satış Temsilcisi'}
+      deger={satici?.ad}
+      kilitli={kilitli}
+      ipucu="Personel ara"
+      onAc={() => setSaticiArama(true)}
+    />
+
+    <GenLookup
+      kaynak="depo"
+      etiket={alisMi ? 'Giriş Deposu' : 'Çıkış Deposu'}
+      sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
+      alanlar={LOOKUP_DEPO}
+      deger={depo?.ad}
+      saltOkunur={kilitli}
+      onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
+    />
+
+    {/* DOVIZ / KUR BASLIKTAN CIKTI (kullanici): kalem gridinin altindaki
+        "Rapor Dövizi" kutusunda hem secim hem kur var - iki yerde gostermek
+        tekrar oluyordu. */}
+    {/* Bagli Siparis, Faturalama Durumu'nun SOLUNDA (kullanici). */}
+    {bagliSiparisAlani}
+
+    {kapanmaAlani}
+  </div>
+  ) : (
   <div className="alan-izgara uc-sutun belge-hdr">
     {/* --- 1. satir --- */}
     {/* Cari alani GenLookup DEGIL: secim ayni TarafArama modalindan yapilir
@@ -274,6 +356,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         Kartta degistirilebilir olmasi, kaydedilen belgenin hangi listede
         cikacagini belirsizlestiriyordu. */}
   </div>
+  )}
 </div>
 
 {/* Sekmeler BASLIK ALANLARININ ALTINDA, grid'in hemen ustunde -

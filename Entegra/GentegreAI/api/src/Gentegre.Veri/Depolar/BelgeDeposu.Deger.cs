@@ -106,6 +106,7 @@ public sealed partial class BelgeDeposu
                    b.gonderici_unvan as "gondericiUnvan", b.gonderici_vkno as "gondericiVkno",
                    b.matrah, b.kdv_tutari as "kdvTutari", b.ek_vergi as "ekVergi",
                    b.genel_toplam as "genelToplam", b.belge_dovizi as "belgeDovizi",
+                   b.rapor_dovizi as "raporDovizi", b.ekstre_dovizi as "ekstreDovizi",
                    b.doviz_tutari as "dovizTutari", b.doviz_kuru as "dovizKuru",
                    b.kdv_durum as "kdvDurum", b.durum, b.sube_id as "subeId",
                    -- Irsaliye/siparis kartinin baslik alanlari (mockup ile birebir)

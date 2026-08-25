@@ -217,7 +217,7 @@ public static class BelgeUclari
 
         "tarafUnvan" or "tarafVkno" or "tarafVd" or "tarafAdres" or "tarafIlce" or "tarafIl" or
         "belgeSeri" or "belgeNo" or "irsaliyeNo" or "kdvDurum" or "belgeDovizi" or
-        "dovizCinsi" or "kur" or "raporDovizi" or "aciklama" or "ozelKod" or
+        "dovizCinsi" or "kur" or "raporDovizi" or "ekstreDovizi" or "aciklama" or "ozelKod" or
         "gondericiUnvan" or "gondericiVkno" or "gondericiAlias" or
         "aracPlaka" or "soforAd" or "soforTckn" => "metin",
 
@@ -227,7 +227,7 @@ public static class BelgeUclari
     /// <summary>Belge basligindaki metin alanlarinin DB uzunluklari.</summary>
     private static int? Uzunluk(string ad) => ad switch
     {
-        "belgeSeri" or "belgeDovizi" or "kur" or "raporDovizi" or "kdvDurum" => 5,
+        "belgeSeri" or "belgeDovizi" or "kur" or "raporDovizi" or "ekstreDovizi" or "kdvDurum" => 5,
         "dovizCinsi" => 6,
         "belgeNo" or "irsaliyeNo" or "tarafVkno" => 20,
         "tarafIlce" or "tarafIl" or "tarafVd" or "gondericiVkno" => 60,

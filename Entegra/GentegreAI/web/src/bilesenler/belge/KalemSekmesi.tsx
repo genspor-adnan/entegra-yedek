@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import { para } from '../bicim';
 import { iskonatoMetni, satirTutari, tarihSaat, type SatirDurumu } from '../../sayfalar/belgeSatir';
+import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
 import type { BelgeYaniti } from '../../api/sozlesme';
 
 /**
@@ -13,11 +14,17 @@ import type { BelgeYaniti } from '../../api/sozlesme';
  */
 export function KalemSekmesi(p: KalemSekmesiProps) {
   const {
-    satirlar, seciliSatirlar, setSeciliSatirlar, kapaliLotlar, setKapaliLotlar,
+    satirlar, seciliSatirlar, setSeciliSatirlar, acikLotlar, setAcikLotlar,
     kilitli, bilgi, onizleme, sonuc, transferBaslikEksigi,
     depoBelgesi, stokFisiMi, talepMi,
-    setStokArama, setKalem, seciliSil, satirTikla, sonTiklanan, secimDegis,
+    setStokArama, setKalem, seciliSil, satirTikla, sonTiklanan, secimDegis, doviz,
   } = p;
+
+  // Dovizli belgede dip toplamin YANINDA yerel karsilik kolonu cikar.
+  const yerelKolon = doviz && doviz.raporDovizi !== doviz.yerelPara
+    ? { kur: Number(String(doviz.kur).replace(',', '.')) || 0,
+        raporDovizi: doviz.raporDovizi, yerelPara: doviz.yerelPara }
+    : null;
   return (
     <>
 <div className="kagrup">
@@ -78,7 +85,15 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 70 }}>KDV %</th>}
         {/* Transferde FIYAT YOK: mal satilmiyor, depo degistiriyor. */}
         {bilgi.kalem !== 'miktar' && <th className="hiza-sag" style={{ width: 100 }}>Br. Fiyat</th>}
-        {bilgi.kalem !== 'miktar' && <th className="hiza-sag" style={{ width: 120 }}>Tutar</th>}
+        {bilgi.kalem !== 'miktar' && (
+          <th className="hiza-sag" style={{ width: 120 }}>
+            {yerelKolon ? `Tutar (${yerelKolon.raporDovizi})` : 'Tutar'}
+          </th>
+        )}
+        {/* Dovizli belgede satirda da YEREL karsilik kolonu (kullanici). */}
+        {bilgi.kalem !== 'miktar' && yerelKolon && (
+          <th className="hiza-sag" style={{ width: 120 }}>Tutar ({yerelKolon.yerelPara})</th>
+        )}
       </tr>
     </thead>
     <tbody>
@@ -90,8 +105,11 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         // Izlemli kalemin lotlari ALTINDA acilir (master-detail):
         //   hangi lottan kac adet oldugu kalemi acmadan gorunsun.
         const lotlar = r.izlemler ?? [];
-        const acik = lotlar.length > 0 && !kapaliLotlar.has(r.anahtar);
-        const kolonSayisi = bilgi.kalem === 'miktar' ? 6 : bilgi.kalem === 'sade' ? 8 : 10;
+        // IZLEM (lot/seri) satirlari VARSAYILAN KAPALI (kullanici): kalem
+        //   listesi kisa kalsin, isteyen okla acsin.
+        const acik = lotlar.length > 0 && acikLotlar.has(r.anahtar);
+        const kolonSayisi = (bilgi.kalem === 'miktar' ? 6 : bilgi.kalem === 'sade' ? 8 : 10)
+                          + (yerelKolon && bilgi.kalem !== 'miktar' ? 1 : 0);
         return (
           <Fragment key={r.anahtar}>
           <tr className={secili ? 'secili' : ''}
@@ -116,7 +134,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                         title={acik ? 'Lotları gizle' : 'Lotları göster'}
                         onClick={e => {
                           e.stopPropagation();
-                          setKapaliLotlar(k => {
+                          setAcikLotlar(k => {
                             const y = new Set(k);
                             if (y.has(r.anahtar)) y.delete(r.anahtar); else y.add(r.anahtar);
                             return y;
@@ -134,6 +152,9 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             {bilgi.kalem === 'tam' && <td className="hiza-sag">%{r.kdv}</td>}
             {bilgi.kalem !== 'miktar' && <td className="hiza-sag">{para.format(fiyat)}</td>}
             {bilgi.kalem !== 'miktar' && <td className="hiza-sag"><b>{para.format(tutar)}</b></td>}
+            {bilgi.kalem !== 'miktar' && yerelKolon && (
+              <td className="hiza-sag sonuk">{para.format(tutar * (yerelKolon.kur || 1))}</td>
+            )}
           </tr>
           {/* DETAY: kalemin lot dagilimi. Kalem satirinin bir parcasi -
               ayri kolon basligi yok, kendi mini basligiyla gelir. */}
@@ -172,7 +193,8 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         );
       })}
       {satirlar.length === 0 && (
-        <tr><td colSpan={bilgi.kalem === 'miktar' ? 6 : bilgi.kalem === 'sade' ? 8 : 10} className="bos">
+        <tr><td colSpan={(bilgi.kalem === 'miktar' ? 6 : bilgi.kalem === 'sade' ? 8 : 10)
+                       + (yerelKolon && bilgi.kalem !== 'miktar' ? 1 : 0)} className="bos">
           {transferBaslikEksigi
             ? `Kalem eklemek için önce başlıkta ${transferBaslikEksigi} seçin.`
             : 'Kalem yok — “＋” ile ekleyin.'}
@@ -188,6 +210,9 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         </td>
         {bilgi.kalem !== 'miktar' && <td colSpan={bilgi.kalem === 'sade' ? 1 : 3} />}
         {bilgi.kalem !== 'miktar' && <td className="hiza-sag">{para.format(onizleme.matrah)}</td>}
+        {bilgi.kalem !== 'miktar' && yerelKolon && (
+          <td className="hiza-sag">{para.format(onizleme.matrah * (yerelKolon.kur || 1))}</td>
+        )}
       </tr>
     </tfoot>
   </table>
@@ -199,31 +224,102 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
   )}
 </div>
 
-{/* Transferde dip toplam YOK: para degil miktar hareketi. */}
+{/* Doviz kutusu SOLDA, dip toplam SAGDA - ayni hizada (kullanici). */}
 {bilgi.kalem !== 'miktar' && (
+<div className="grid-alt-serit">
+{doviz && (
+  /* RAPOR / EKSTRE DOVIZI (134) - gridin ALTINDA SOLDA (kullanici).
+     Rapor dovizi yerel para disindaysa yaninda KUR editi cikar ve dip toplam
+     ikinci bir kolonda yerel karsiligiyla gosterilir. Ekstre dovizi cari
+     hesaba hangi dovizde islenecegidir: rapor dovizi ya da yerel para. */
+  <div className="kagrup belge-doviz">
+    <div className="alan-izgara tek-sutun">
+      <label className="alan">
+        <span className="etiket">Rapor Dövizi</span>
+        <div className="ikili">
+          <select value={doviz.raporDovizi} disabled={kilitli}
+                  onChange={e => doviz.setRaporDovizi(e.target.value)}>
+            {DOVIZ_KODLARI.map(k => <option key={k} value={k}>{k}</option>)}
+          </select>
+          {doviz.raporDovizi !== doviz.yerelPara && (
+            <input className="kur hiza-sag" value={doviz.kur} disabled={kilitli}
+                   title={`1 ${doviz.raporDovizi} = ? ${doviz.yerelPara}`}
+                   onChange={e => doviz.setKur(e.target.value)} />
+          )}
+        </div>
+      </label>
+      <label className="alan">
+        <span className="etiket">Ekstre Dövizi</span>
+        <select value={doviz.ekstreDovizi} disabled={kilitli}
+                onChange={e => doviz.setEkstreDovizi(e.target.value)}>
+          {/* Rapor dovizi + yerel para (ayni ise tek secenek). */}
+          {[...new Set([doviz.raporDovizi, doviz.yerelPara])]
+            .map(k => <option key={k} value={k}>{k}</option>)}
+        </select>
+      </label>
+    </div>
+    {doviz.raporDovizi !== doviz.yerelPara && (
+      <div className="not">
+        Tutarlar {doviz.raporDovizi} cinsindendir; dip toplamda {doviz.yerelPara}
+        karşılığı kur ile hesaplanır. Cari hesaba <b>{doviz.ekstreDovizi}</b> işlenir.
+      </div>
+    )}
+  </div>
+)}
+
+{(
 <div className="kagrup dip-toplam">
-  <h6>{sonuc ? 'Dip Toplam (sunucu)' : 'Dip Toplam (önizleme)'}</h6>
+  {/* BASLIK YOK (kullanici): cerceve ve kolon basliklari zaten neyin ne
+      oldugunu soyluyor; "Dip Toplam" satiri yer kapliyordu. */}
   {sonuc ? (
     <table className="dip-tablo">
+      {yerelKolon && (
+        <thead>
+          <tr><th /><th className="hiza-sag">{yerelKolon.raporDovizi}</th>
+              <th className="hiza-sag">{yerelKolon.yerelPara}</th></tr>
+        </thead>
+      )}
       <tbody>
         {sonuc.dipToplam.map((d, i) => (
           <tr key={i} className={d.tur === 20 ? 'genel' : ''}>
             <td>{d.aciklama}</td>
             <td className="hiza-sag">{para.format(d.deger)}</td>
+            {/* Dovizli belgede IKINCI kolon: kur ile yerel karsilik (kullanici). */}
+            {yerelKolon && (
+              <td className="hiza-sag sonuk">{para.format(d.deger * (yerelKolon.kur || 1))}</td>
+            )}
           </tr>
         ))}
       </tbody>
     </table>
   ) : (
     <table className="dip-tablo">
+      {yerelKolon && (
+        <thead>
+          <tr><th /><th className="hiza-sag">{yerelKolon.raporDovizi}</th>
+              <th className="hiza-sag">{yerelKolon.yerelPara}</th></tr>
+        </thead>
+      )}
       <tbody>
-        <tr><td>Ara Toplam</td><td className="hiza-sag">{para.format(onizleme.matrah)}</td></tr>
-        <tr><td>KDV</td><td className="hiza-sag">{para.format(onizleme.kdv)}</td></tr>
-        <tr className="genel"><td>Genel Toplam</td><td className="hiza-sag">{para.format(onizleme.genel)}</td></tr>
+        <tr>
+          <td>Ara Toplam</td><td className="hiza-sag">{para.format(onizleme.matrah)}</td>
+          {yerelKolon && <td className="hiza-sag sonuk">{para.format(onizleme.matrah * (yerelKolon.kur || 1))}</td>}
+        </tr>
+        <tr>
+          <td>KDV</td><td className="hiza-sag">{para.format(onizleme.kdv)}</td>
+          {yerelKolon && <td className="hiza-sag sonuk">{para.format(onizleme.kdv * (yerelKolon.kur || 1))}</td>}
+        </tr>
+        <tr className="genel">
+          <td>Genel Toplam</td><td className="hiza-sag">{para.format(onizleme.genel)}</td>
+          {yerelKolon && <td className="hiza-sag sonuk">{para.format(onizleme.genel * (yerelKolon.kur || 1))}</td>}
+        </tr>
       </tbody>
     </table>
   )}
-  {!kilitli && <div className="not">Kesin tutar sunucuda hesaplanır; buradaki değerler önizlemedir.</div>}
+  {/* "Kesin tutar sunucuda hesaplanir" notu kaldirildi (kullanici): kayittan
+      sonra zaten sunucunun dondurdugu tutar gosteriliyor. */}
+</div>
+)}
 </div>
 )}
     </>
@@ -234,9 +330,9 @@ export interface KalemSekmesiProps {
   satirlar: SatirDurumu[];
   seciliSatirlar: Set<number>;
   setSeciliSatirlar(v: Set<number>): void;
-  /** Lot detayi KAPALI olan kalemler (varsayilan acik). */
-  kapaliLotlar: Set<number>;
-  setKapaliLotlar(v: Set<number> | ((o: Set<number>) => Set<number>)): void;
+  /** Lot detayi ACIK olan kalemler (varsayilan KAPALI). */
+  acikLotlar: Set<number>;
+  setAcikLotlar(v: Set<number> | ((o: Set<number>) => Set<number>)): void;
   kilitli: boolean;
   /** belgeTuru.ts davranis tablosu: kalem bicimi (tam | sade | miktar) vb. */
   bilgi: { kalem: 'tam' | 'sade' | 'miktar'; alis: boolean };
@@ -255,6 +351,16 @@ export interface KalemSekmesiProps {
   /** Son tiklanan satirin SIRASI - Shift araligi bunun uzerinden hesaplanir. */
   sonTiklanan: React.MutableRefObject<number | null>;
   secimDegis(anahtar: number): void;
+  /** Rapor / ekstre dovizi kutusu (134). Verilmezse kutu cizilmez. */
+  doviz?: {
+    raporDovizi: string;
+    setRaporDovizi(v: string): void;
+    ekstreDovizi: string;
+    setEkstreDovizi(v: string): void;
+    kur: string;
+    setKur(v: string): void;
+    yerelPara: string;
+  };
 }
 
 /**

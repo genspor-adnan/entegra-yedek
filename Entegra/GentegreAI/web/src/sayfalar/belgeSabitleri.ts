@@ -63,6 +63,9 @@ export const IRSALIYE_TIPLERI: { deger: number; ad: string }[] = [
   { deger: 2, ad: 'İade' },
 ];
 
+/** Belge dovizi secenekleri (kart komboları). */
+export const DOVIZ_KODLARI = ['TL', 'USD', 'EUR', 'GBP'];
+
 /** Senaryo comboSU - SENARYO_ADI ile ayni kodlar, GIB profil sirasinda. */
 export const SENARYO_SECENEK = [
   { deger: 1, ad: 'Temel Fatura' },

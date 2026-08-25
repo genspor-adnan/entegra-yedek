@@ -112,6 +112,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [geriGun, setGeriGun] = useState(GERIYE_GUN_VARSAYILAN);
   /** Ayardan gelen yerel (defter) para birimi. */
   const [yerelPara, setYerelPara] = useState(YEREL_PARA_VARSAYILAN);
+  /**
+   * RAPOR / EKSTRE DOVIZI (134): belge hangi para biriminde duzenlendi ve cari
+   * hesaba hangi dovizde islenecek. Kur rapor dovizinden yerel paraya cevrimdir.
+   */
+  const [raporDovizi, setRaporDovizi] = useState(YEREL_PARA_VARSAYILAN);
+  const [ekstreDovizi, setEkstreDovizi] = useState(YEREL_PARA_VARSAYILAN);
+  const [belgeKuru, setBelgeKuru] = useState('1');
   /** Yalniz dis numarali turde (alis faturasi) kullanilir - tedarikcinin no'su. */
   const [belgeNo, setBelgeNo] = useState('');
   const [vadeGun, setVadeGun] = useState('30');
@@ -146,7 +153,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [seciliSatirlar, setSeciliSatirlar] = useState<Set<number>>(new Set());
   /** Lot detayi KAPATILMIS kalemler. Lotlu kalem varsayilan ACIK gelir -
       kullanici bakmak icin ayrica tiklamasin; isteyen oku ile kapatir. */
-  const [kapaliLotlar, setKapaliLotlar] = useState<Set<number>>(new Set());
+  /** Lot/izlem detayi ACIK olan kalemler - varsayilan KAPALI (kullanici). */
+  const [acikLotlar, setAcikLotlar] = useState<Set<number>>(new Set());
   /** Shift ile ARALIK secimi icin son tiklanan satirin sirasi. */
   const sonTiklanan = useRef<number | null>(null);
   /** Acik kalem penceresi (adet / fiyat). Stok zaten secilmis olarak gelir. */
@@ -170,8 +178,22 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [senaryo, setSenaryo] = useState(0);
   /** FATURA TIPI (130): faturanin cinsi - belge.tipi alaninda tutulur. */
   const [faturaTipi, setFaturaTipi] = useState(1);
-  /** IADE faturasi mi - kalem secimi "onceki alinanlar"dan yapilir (132). */
+  /** IADE mi - kalem secimi "onceki alinanlar"dan yapilir (132/133). */
   const iadeMi = faturaTipi === 2;
+  /** Rapor dovizi yerel disindaysa BELGE TARIHININ kuru cekilir; kullanici
+   *  elle degistirebilir (kur pazarlikli olabiliyor). */
+  const kurElleRef = useRef(false);
+  useEffect(() => {
+    if (raporDovizi === yerelPara) return;
+    if (kurElleRef.current) return;
+    void (async () => {
+      try {
+        const y = await api.dovizKur(raporDovizi, tarih.slice(0, 10));
+        if (y?.kur) setBelgeKuru(String(y.kur));
+      } catch { /* kur yoksa kullanici elle girer */ }
+    })();
+  }, [raporDovizi, tarih, yerelPara]);
+
   /** Bu belgeye baglanmis kasa islemleri (Tahsilat sekmesi). */
   const [tahsilatlar, setTahsilatlar] = useState<ListeSatiri[]>([]);
   /** Acik tahsilat modalinin TURU (null = kapali) - fatura arkada acik kalir. */
@@ -208,6 +230,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     talep: talepMi, stokFisi: stokFisiMi, depoBelgesi,
     ad: belgeAdi, disNumara: disNumarali,
   } = bilgi;
+
+  /**
+   * IRSALIYE PILOTU (kullanici): 4 sutunlu baslik + arac cubugunda Taslak
+   * yerine IADE kutusu. Basarili olursa diger turlere yayilacak.
+   */
+  const irsaliyePilot = irsaliyeMi && !depoBelgesi && !stokFisiMi && !konsinyeMi;
   const fisCikisMi = tur === 4;      // cikis fisi: stok DUSER, tip listesi ayri
 
   /**
@@ -303,6 +331,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         // Faturada ayni alan FATURA TIPI'dir (130); eski kayitlarda 0 ise
         //   varsayilan "Alış / Satış" (1) gosterilir.
         setFaturaTipi(Number(y.belge.tipi) || 1);
+        setRaporDovizi(String(y.belge.raporDovizi ?? y.belge.belgeDovizi ?? '') || yerelPara);
+        setEkstreDovizi(String(y.belge.ekstreDovizi ?? y.belge.raporDovizi ?? '') || yerelPara);
+        setBelgeKuru(String(y.belge.dovizKuru ?? 1));
         setTeslimAlan(y.belge.teslimAlanId
           ? { id: Number(y.belge.teslimAlanId), ad: String(y.belge.teslimAlanAdi ?? '') } : null);
         setSatirlar((y.satirlar ?? []).map((r, i) => ({
@@ -508,6 +539,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     //   (belgeKaydet.ts) - ekran yalniz sonucu gosterir.
     const girdi: BelgeGirdisi = {
       tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun, faturaTipi,
+      raporDovizi, ekstreDovizi, belgeKuru,
       senaryo, satici, depo, girisDepo, teslimEden, teslimAlan, tasiyici,
       aracPlaka, soforAd, soforTckn, sevkTarihi, teslimSekli, fisTipi, satirlar,
       subeId: kullanici?.subeId ?? undefined,
@@ -610,6 +642,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         <BelgeAracCubugu
           mevcutBelge={mevcutBelge} sonuc={sonuc} kaydediyor={kaydediyor}
           kilitli={kilitli} taslak={taslak} setTaslak={setTaslak}
+          iadeKutusu={irsaliyePilot} iade={iadeMi}
+          setIade={v => setFaturaTipi(v ? 2 : 1)}
           siparisMi={siparisMi} irsaliyeMi={irsaliyeMi} alisMi={alisMi}
           eBelgeYok={eBelgeYok} kayitliId={kayitliId} cari={cari}
           kes={kes} yeniBelge={yeniBelge} kapat={kapat}
@@ -661,13 +695,26 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           <KalemSekmesi
             satirlar={satirlar}
             seciliSatirlar={seciliSatirlar} setSeciliSatirlar={setSeciliSatirlar}
-            kapaliLotlar={kapaliLotlar} setKapaliLotlar={setKapaliLotlar}
+            acikLotlar={acikLotlar} setAcikLotlar={setAcikLotlar}
             kilitli={kilitli} bilgi={bilgi} onizleme={onizleme} sonuc={sonuc}
             transferBaslikEksigi={transferBaslikEksigi}
             depoBelgesi={depoBelgesi} stokFisiMi={stokFisiMi} talepMi={talepMi}
             setStokArama={iadeMi ? setIadeArama : setStokArama}
             setKalem={setKalem} seciliSil={seciliSil}
             satirTikla={satirTikla} sonTiklanan={sonTiklanan} secimDegis={secimDegis}
+            doviz={{
+              raporDovizi, setRaporDovizi: yeni => {
+                setRaporDovizi(yeni);
+                // Ekstre dovizi yalniz "rapor dovizi + yerel" olabilir: rapor
+                //   degisince gecersiz kalmasin.
+                setEkstreDovizi(e => (e === yerelPara ? e : yeni));
+                if (yeni === yerelPara) setBelgeKuru('1');
+              },
+              ekstreDovizi, setEkstreDovizi,
+              kur: belgeKuru,
+              setKur: v => { kurElleRef.current = true; setBelgeKuru(v) },
+              yerelPara,
+            }}
           />
         )}
 

@@ -674,6 +674,11 @@ input.skt-gecmis {
 .tam-ekran-bilgi { display: grid; place-items: center; min-height: 100vh; color: var(--soluk) }
 .yukleniyor-satir { padding: 24px; text-align: center; color: var(--soluk) }
 .dip-toplam { max-width: 400px; margin-left: auto }
+/* Kalem gridinin ALTI: doviz kutusu solda, dip toplam sagda - ayni hizada. */
+.grid-alt-serit { display: flex; align-items: flex-start; gap: 16px; justify-content: space-between }
+.grid-alt-serit > .kagrup { margin: 0 }
+.grid-alt-serit > .dip-toplam { flex: 0 0 400px }
+.dip-tablo thead th { padding: 4px 10px; font-size: 11px; color: var(--soluk); font-weight: 600 }
 .dip-tablo { width: 100%; border-collapse: collapse; font-size: 12px }
 .dip-tablo td { padding: 6px 10px; border-bottom: 1px solid var(--cizgi2) }
 .dip-tablo tr.genel td { font-weight: 700; border-top: 2px solid var(--cizgi); border-bottom: 0 }
@@ -705,6 +710,20 @@ input.skt-gecmis {
 
 /* Belge karti basligi: mockup (.hdr) 3 sutunlu izgara. */
 .alan-izgara.uc-sutun { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+/* Rapor / ekstre dovizi kutusu: kalem gridinin ALTINDA SOLDA, dip toplamin
+   yaninda (dip-toplam saga yaslidir). */
+.kagrup.belge-doviz { max-width: 340px }
+.kagrup.belge-doviz .alan { grid-template-columns: 96px auto }
+.kagrup.belge-doviz .ikili select { flex: 1; min-width: 0 }
+.kagrup.belge-doviz .ikili input.kur { flex: none; width: 96px }
+
+/* Belge basliginda 4 sutun (irsaliye pilotu): baslik IKI satira iner -
+   1) Cari . No . Tarih . e-Belge
+   2) Temsilci . Depo . Fat.Durumu . Bagli Siparis
+   (Doviz/Kur grid altindaki kutuda.) */
+.alan-izgara.dort-sutun { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 14px }
+.alan-izgara.dort-sutun .genis-2 { grid-column: span 2 }
+@media (max-width: 1000px) { .alan-izgara.dort-sutun { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
 .alan-izgara.uc-sutun .genis-2 { grid-column: span 2 }
 @media (max-width: 900px) { .alan-izgara.uc-sutun { grid-template-columns: 1fr } }
 /* Belge/irsaliye numarasi one cikar (mockup .inp.big). */

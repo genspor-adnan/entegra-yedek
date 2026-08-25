@@ -25,7 +25,8 @@ public sealed partial class BelgeDeposu
         ["cikisDepoId"] = "cikis_depo_id", ["subeId"] = "sube_id", ["projeId"] = "proje_id",
         ["kdvDurum"] = "kdv_durum", ["belgeDovizi"] = "belge_dovizi",
         ["dovizCinsi"] = "doviz_cinsi", ["dovizKuru"] = "doviz_kuru", ["kur"] = "kur",
-        ["raporDovizi"] = "rapor_dovizi", ["vadeGun"] = "vade_gun", ["durum"] = "durum",
+        ["raporDovizi"] = "rapor_dovizi", ["ekstreDovizi"] = "ekstre_dovizi",
+        ["vadeGun"] = "vade_gun", ["durum"] = "durum",
         ["aciklama"] = "aciklama", ["ozelKod"] = "ozel_kod", ["senaryo"] = "senaryo",
         ["gondericiUnvan"] = "gonderici_unvan", ["gondericiVkno"] = "gonderici_vkno",
         ["gondericiAlias"] = "gonderici_alias", ["saticiId"] = "satici_id",
@@ -222,7 +223,10 @@ public sealed partial class BelgeDeposu
                    case when @p1 then 0 else coalesce(nullif(b.doviz_tutari, 0), b.genel_toplam) end,
                    case when @p1 then b.genel_toplam else 0 end,
                    case when @p1 then 0 else b.genel_toplam end,
-                   coalesce(nullif(btrim(b.belge_dovizi), ''), 'TL'),
+                   -- EKSTRE DOVIZI (134): cari hesaba hangi dovizde islenecek.
+                   --   Bos ise belgenin kendi dovizi kullanilir.
+                   coalesce(nullif(btrim(b.ekstre_dovizi), ''),
+                            nullif(btrim(b.belge_dovizi), ''), 'TL'),
                    case when coalesce(b.doviz_kuru, 0) > 0 then b.doviz_kuru else 1 end,
                    b.taraf_unvan, b.sube_id, @p2
               from public.belge b where b.id = @p3

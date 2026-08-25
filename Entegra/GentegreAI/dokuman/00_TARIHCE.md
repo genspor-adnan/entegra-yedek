@@ -2960,5 +2960,35 @@ irsaliyesi 2 adet → stok **255,93**, cari **alacak 240**, kalan iade edilebili
 3. Ekranda İrsaliye Tipi = İade seçilince pencere yalnız irsaliye satırını
 (000104159 · miktar 5 · iade 2 · kalan 3) listeledi. Test verisi geri alındı.
 
+### İrsaliye kartı düzeni + rapor/ekstre dövizi (pilot)
+
+Satış/alış irsaliyesinde kart düzeni kullanıcıyla birlikte yeniden kuruldu.
+Başarılı olursa diğer belge türlerine yayılacak; bu yüzden `BelgeBaslik` içinde
+ayrı bir blok (`irsaliyePilot`).
+
+- **Başlık 4 sütun, 2 satır**: Cari · İrsaliye No · İrsaliye Tarihi · e-Belge /
+  Temsilci · Çıkış Deposu · Bağlı Sipariş · Faturalama Durumu. Döviz/Kur
+  başlıktan çıktı (aşağıdaki kutuda), İrsaliye Tipi de kalktı.
+- **Araç çubuğu**: Taslak kutusu yerine **☐ İade** — irsaliyede anlamlı tek
+  seçim buydu. "GİB Durum Sorgula" ve "İade İrsaliyesi" düğmeleri kaldırıldı
+  (biri bağlanmamış, öteki artık İade kutusuyla yapılıyor).
+- **Grid altı, yan yana**: solda **Rapor Dövizi** (yerel para dışında seçilince
+  yanında kur editi çıkar, kur belge tarihinden otomatik gelir, elle
+  değiştirilebilir) ve **Ekstre Dövizi** (seçenekler: rapor dövizi + yerel para —
+  cari hesaba hangi dövizde işleneceği); sağda dip toplam çerçevesi. Dip toplam
+  başlığı ve "kesin tutar sunucuda" notu kaldırıldı.
+- **Dövizli belgede ikinci tutar kolonu**: hem kalem gridinde (`Tutar (USD)` /
+  `Tutar (TL)`) hem dip toplamda, kur ile hesaplanır.
+- **İzlem/lot detayı artık varsayılan KAPALI** (tüm belge türlerinde): kalem
+  listesi kısa kalsın, isteyen satır başındaki okla açsın.
+
+`db/134`: `belge.ekstre_dovizi` kolonu; göçten sembol gelen `rapor_dovizi`
+ISO koda çevrildi (454 satır: TL/USD/EUR); cari hareket artık ekstre dövizini
+kullanıyor (boşsa belge dövizi).
+
+Doğrulama: USD seçilince kur 47,897 otomatik geldi; 100 USD'lik kalemde dip
+toplam iki kolon — 120,00 USD / 5.747,64 TL (120 × 47,897 ✓). İzlemli irsaliye
+(104151) kapalı açıldı.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).

@@ -33,6 +33,10 @@ export interface BelgeGirdisi {
   fisTipi: number;
   /** Fatura tipi (130) - faturada belge.tipi olarak gider. */
   faturaTipi: number;
+  /** Rapor dovizi (belgenin duzenlendigi birim) ve yerel paraya kur (134). */
+  raporDovizi: string;
+  ekstreDovizi: string;
+  belgeKuru: string;
   satirlar: SatirDurumu[];
   subeId?: number;
   // belgeTuru.ts davranis bayraklari
@@ -110,7 +114,8 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
 /** API §4 istek govdesi. `dolu` = stok/hizmet secilmis satirlar. */
 export function belgeGovdesi(g: BelgeGirdisi, dolu: SatirDurumu[], taslak: boolean) {
   const { tur, cari, tarih, depoBelgesi, stokFisiMi, seri, disNumarali, belgeNo,
-          vadeGun, subeId, fisCikisMi, depo, girisDepo, alisMi, faturaMi, fisTipi, faturaTipi, satici,
+          vadeGun, subeId, fisCikisMi, depo, girisDepo, alisMi, faturaMi, fisTipi, faturaTipi,
+          raporDovizi, ekstreDovizi, belgeKuru, satici,
           senaryo, irsaliyeMi, teslimSekli, aracPlaka, soforAd, sevkTarihi,
           soforTckn, tasiyici, transferMi, teslimEden, teslimAlan } = g;
 
@@ -124,8 +129,11 @@ return {
     belgeSeri: depoBelgesi || stokFisiMi ? '' : seri,
     // Alis faturasinda numara tedarikciden gelir; digerlerinde sunucu verir.
     belgeNo: disNumarali ? belgeNo.trim() : undefined,
-    belgeDovizi: 'TL',
-    dovizKuru: 1,
+    // Belge tutarlari RAPOR DOVIZINDE; kur yerel paraya cevrim (134).
+    belgeDovizi: raporDovizi,
+    raporDovizi,
+    ekstreDovizi,
+    dovizKuru: Number(String(belgeKuru).replace(',', '.')) || 1,
     vadeGun: Number(vadeGun) || 0,
     subeId,
     // Depo ALANI ture gore: alista giris, satista cikis (stok yonu buradan).

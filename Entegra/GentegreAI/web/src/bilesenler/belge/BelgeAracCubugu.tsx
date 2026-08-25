@@ -8,6 +8,7 @@
  */
 export function BelgeAracCubugu({
   mevcutBelge, sonuc, kaydediyor, kilitli, taslak, setTaslak,
+  iadeKutusu, iade, setIade,
   siparisMi, irsaliyeMi, alisMi, eBelgeYok, kayitliId, cari,
   kes, yeniBelge, kapat, setDonusum, tahsilatAc,
 }: {
@@ -17,6 +18,13 @@ export function BelgeAracCubugu({
   kilitli: boolean;
   taslak: boolean;
   setTaslak(v: boolean): void;
+  /**
+   * Taslak yerine IADE kutusu gosterilsin mi (irsaliye pilotu, kullanici).
+   * Irsaliyede taslak kavrami islevsiz kaldi; anlamli tek secim "iade mi".
+   */
+  iadeKutusu?: boolean;
+  iade: boolean;
+  setIade(v: boolean): void;
   siparisMi: boolean;
   irsaliyeMi: boolean;
   alisMi: boolean;
@@ -103,14 +111,10 @@ export function BelgeAracCubugu({
               title="Siparişten aktarım için Siparişler listesinden ilgili siparişi açıp Dönüştür deyin.">
         📋 Siparişten Aktar
       </button>
-      {!eBelgeYok && (
-        <button className="d" disabled title="GİB durum sorgusu henüz bağlanmadı.">
-          ⟳ GİB Durum Sorgula
-        </button>
-      )}
-      <button className="d" disabled title="İade irsaliyesi henüz bağlanmadı.">
-        ↩ İade İrsaliyesi
-      </button>
+      {/* GIB DURUM SORGULA kaldirildi (kullanici): gonderim ucu baglanana kadar
+          arac cubugunda yer kapliyordu; durum e-Belge sekmesinde zaten yazili.
+          IADE IRSALIYESI dugmesi de kalkti - iade artik arac cubugundaki
+          "İade" kutusuyla ayni kart uzerinden kesiliyor (133). */}
     </>
   )}
 
@@ -136,11 +140,19 @@ export function BelgeAracCubugu({
 
   <button className="d kapat-dugmesi" onClick={kapat}>✖ Kapat</button>
 
-  <label className="satir-ici">
-    <input type="checkbox" checked={taslak} disabled={kilitli}
-           onChange={e => setTaslak(e.target.checked)} />
-    Taslak (numara tüketmez)
-  </label>
+  {iadeKutusu ? (
+    <label className="satir-ici" title="İade: mal geri gelir - stok girer, cari alacaklanır.">
+      <input type="checkbox" checked={iade} disabled={kilitli}
+             onChange={e => setIade(e.target.checked)} />
+      İade
+    </label>
+  ) : (
+    <label className="satir-ici">
+      <input type="checkbox" checked={taslak} disabled={kilitli}
+             onChange={e => setTaslak(e.target.checked)} />
+      Taslak (numara tüketmez)
+    </label>
+  )}
 </>
   );
 }
