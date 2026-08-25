@@ -313,7 +313,11 @@ public static partial class KaynakKatalogu
             // Cift tik hedefi (gizli): satiri ureten kasa islemi / belge.
             new("kasaIslemId",  "e.kasa_islem_id","sayi",  "Kasa Islem Id", Varsayilan: false),
             new("belgeId",      "e.belge_id",     "sayi",  "Belge Id", Varsayilan: false),
-            new("tarafUnvan",   "e.taraf_unvan",  "metin", "Cari", Genislik: 220),
+            // CARI kolonu VARSAYILAN DEGIL (kullanici): ekstre tek cari icin
+            //   alinir, her satirda ayni unvani tekrarlamak yer kapliyordu.
+            //   Kolon secicide duruyor - tum carilerin hareketi listelenmek
+            //   istendiginde acilabilir.
+            new("tarafUnvan",   "e.taraf_unvan",  "metin", "Cari", Genislik: 220, Varsayilan: false),
             new("islemTarihi",  "e.islem_tarihi", "tarih", "Tarih", Hizalama: "orta", Bicim: "dd.MM.yyyy"),
             new("turAdi",       "e.tur_adi",      "metin", "Islem"),
             new("islemNo",      "e.islem_no",     "metin", "Makbuz No", Varsayilan: false),
