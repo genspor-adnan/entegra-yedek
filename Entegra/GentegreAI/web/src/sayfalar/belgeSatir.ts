@@ -156,6 +156,62 @@ export function satirTutari(adet: number, fiyat: number, iskonto: string, iskont
 }
 
 /**
+ * Sunucudan gelen belge satirlarini kart durumuna cevirir.
+ *
+ * SAF fonksiyon: BelgeKarti'nin acilis efektinde 45 satir suren bu esleme,
+ * kartin geri kalaniyla hicbir sey paylasmiyordu. Alan adlari sunucu
+ * sozlesmesine bagli oldugu icin degistigi yer tek olsun.
+ */
+export function yanittanSatirlar(
+  satirlar: readonly Record<string, unknown>[] | undefined,
+  yerelPara: string,
+): SatirDurumu[] {
+  return (satirlar ?? []).map((r, i) => ({
+    anahtar: i + 1,
+    // Sunucudaki satir kimligi: termin guncelleme gibi satir bazli islemler
+    //   bunu kullanir (140).
+    satirId: r.id ? Number(r.id) : undefined,
+    satirTur: Number(r.tur ?? 1),
+    stokId: r.stokId ? Number(r.stokId) : null,
+    hizmetId: r.hizmetId ? Number(r.hizmetId) : null,
+    stokKodu: String(r.stokKodu ?? ''),
+    // "??" DEGIL "||": sunucu bos alani '' donduruyor ve nullish operatoru bos
+    //   string'i gecerli sayip yedege dusmuyordu - hizmet satirinda kod/ad bos
+    //   gorunuyordu (kullanici).
+    stokAdi: String(r.stokAdi || r.hizmetAdi || r.masrafAdi || r.aciklama || ''),
+    aciklama: String(r.aciklama ?? ''),
+    izlemeKodu: String(r.izlemeKodu ?? ''),
+    // Termin (140): sunucu tam tarih doner, ekran gun bekliyor.
+    teslimTarihi: String(r.teslimTarihi ?? '').slice(0, 10),
+    // Ambalaj (143): GIRILEN miktar `adet`tir; `miktar` ana birim karsiligidir
+    //   (2 kutu / 24 adet) - kart girileni gosterir.
+    birim: Number(r.birim ?? 0),
+    birimCarpan: Number(r.birimCarpan ?? 1) || 1,
+    adet: String(r.adet ?? r.miktar ?? 0),
+    birimFiyat: String(r.birimFiyat ?? 0),
+    // SATIR BAZLI DOVIZ (kullanici): kalem kendi para biriminde girilmis
+    //   olabilir - kayitli satirdan geri yuklenir, yoksa yerel sayilir.
+    fiyatDovizi: String(r.dovizCinsi ?? '') || yerelPara,
+    dovizFiyat: String(r.dovizBirimFiyat ?? r.birimFiyat ?? 0),
+    kur: String(r.dovizKuru ?? 1),
+    iskonto: String(r.iskonto ?? 0),
+    iskonto2: String(r.iskonto2 ?? 0),
+    kdv: String(r.kdv ?? 0),
+    // Kayitli kalemin lot dagilimi (db/114) - kalem yeniden acilinca kullanici
+    //   hangi lottan kac adet girdigini gormeli.
+    izleme: Number(r.izleme ?? 0),
+    izlemler: ((r.izlemler ?? []) as Record<string, unknown>[]).map(z => ({
+      lotNo: String(z.lotNo ?? ''),
+      seriNo: String(z.seriNo ?? ''),
+      uretimTarihi: String(z.uretimTarihi ?? '').slice(0, 10),
+      sonKullanmaTarihi: String(z.sonKullanmaTarihi ?? '').slice(0, 10),
+      durum: Number(z.durum ?? 0),
+      miktar: String(z.miktar ?? 0),
+    })),
+  }));
+}
+
+/**
  * Adet / birim fiyat penceresi. Kalemler gridi SALT GORUNUM oldugu icin
  * ekleme/duzenleme buradan yapilir - hucre ici duzenlemede satir yanlislikla
  * ustune yaziliyor ve uzun stok adlari okunmuyordu.

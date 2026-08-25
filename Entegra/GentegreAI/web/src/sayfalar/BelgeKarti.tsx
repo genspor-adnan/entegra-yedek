@@ -1,18 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
-import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru, type ListeSatiri } from '../api/sozlesme';
+import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { StokAramaPenceresi } from '../bilesenler/StokAramaPenceresi';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { TarafArama } from '../bilesenler/TarafArama';
 import { belgeTuruBilgisi, GIRILEBILIR_TURLER, VARSAYILAN_TUR } from './belgeTuru';
 import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
-import { KasaIslemKarti } from './KasaIslemKarti';
-import { GenForm } from '../bilesenler/GenForm';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { para } from '../bilesenler/bicim';
-import { type SatirDurumu, bosSatir, satirTutari } from './belgeSatir';
+import { type SatirDurumu, satirTutari, yanittanSatirlar } from './belgeSatir';
 import { belgeDogrula, belgeGovdesi, doluSatirlar, type BelgeGirdisi } from './belgeKaydet';
 import {
   YEREL_PARA_VARSAYILAN, GERIYE_GUN_VARSAYILAN, yerelAnMetni, KAPANMA_ETIKET,
@@ -26,6 +24,11 @@ import { KalemSekmesi, TahsilatSekmesi } from '../bilesenler/belge/KalemSekmesi'
 import { IadeSatirPenceresi } from '../bilesenler/belge/IadeSatirPenceresi';
 import { BelgeAracCubugu } from '../bilesenler/belge/BelgeAracCubugu';
 import { BelgeBaslik } from '../bilesenler/belge/BelgeBaslik';
+import { useBelgeTahsilat } from './belgeTahsilat';
+import {
+  iadeSatirlari, paketIcerigiUygula, sonAnahtar, stokSecimindenKalem,
+} from './belgeKalem';
+import { BelgeTahsilatModallari } from '../bilesenler/belge/BelgeTahsilatModallari';
 
 /**
  * TarafArama ile doldurulan baslik alani (cari, satis temsilcisi...).
@@ -158,18 +161,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [terminAcik, setTerminAcik] = useState(false);
   /** Rezervasyon (142) islemi surerken dugme bekler. */
   const [rezerveCalisiyor, setRezerveCalisiyor] = useState(false);
-  /** Cek/senet ile tahsilatta once acilan JENERIK kiymet karti (tur + belge). */
-  const [cekTuru, setCekTuru] = useState<{ tur: number; belgeId: number } | null>(null);
-  /** Kiymet kaydedildikten sonra acilan kasa islemi (ayni kiymete bagli). */
-  const [tahsilatAcilis, setTahsilatAcilis] = useState<{
-    tur: number; tarafId?: number; tarafUnvan?: string; belgeId?: number;
-    tutar?: string; cekSenetId?: number;
-  } | null>(null);
-  /** Tahsilat listesinde secili kasa islemi (duzelt/sil dugmeleri bunu kullanir). */
-  const [seciliTahsilat, setSeciliTahsilat] = useState<number | null>(null);
-  /** DUZELTME icin acilan MEVCUT kasa islemi - yeni tahsilattan ayri state:
-      biri tur ile acar, oteki kayit kimligiyle. */
-  const [tahsilatKayitId, setTahsilatKayitId] = useState<number | null>(null);
   const [aktifSekme, setAktifSekme] = useState('kalem');
   /** Grid satir secimi (kirmizi Sil dugmesi bunlari siler). */
   const [seciliSatirlar, setSeciliSatirlar] = useState<Set<number>>(new Set());
@@ -223,12 +214,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     })();
   }, [raporDovizi, tarih, yerelPara]);
 
-  /** Bu belgeye baglanmis kasa islemleri (Tahsilat sekmesi). */
-  const [tahsilatlar, setTahsilatlar] = useState<ListeSatiri[]>([]);
-  /** Acik tahsilat modalinin TURU (null = kapali) - fatura arkada acik kalir. */
-  const [tahsilatAcik, setTahsilatAcik] = useState<number | null>(null);
-  /** Tahsilat kaydedilince listeyi tazelemek icin sayac. */
-  const [tahsilatYenile, setTahsilatYenile] = useState(0);
   const [donusumler, setDonusumler] = useState<Record<string, unknown>[]>([]);
   const [sonuc, setSonuc] = useState<BelgeYaniti | null>(null);
   const [hata, setHata] = useState<string | null>(null);
@@ -353,23 +338,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     } finally { setRezerveCalisiyor(false) }
   };
 
-  /**
-   * Secili kasa islemini siler. GERCEKLESMIS islem silinemez - sunucu
-   * "İptal kullanın" der ve mesaj oldugu gibi gosterilir; kart burada
-   * ikinci bir kural uydurmaz.
-   */
-  const tahsilatSil = async (id: number) => {
-    if (!window.confirm('Seçili tahsilat/ödeme silinecek. Onaylıyor musunuz?')) return;
-    setHata(null);
-    try {
-      await api.kasaSil(id);
-      setSeciliTahsilat(null);
-      setTahsilatYenile(t => t + 1);
-      onKaydedildi?.();
-    } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
-    }
-  };
+  // Tahsilat sekmesinin tum durumu ve akisi ayri dosyada (belgeTahsilat.ts):
+  //   liste, cek/senet karti, kasa islemi acilislari ve silme.
+  const tahsilat = useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, setHata });
+  const { tahsilatAdimi } = tahsilat;
 
   const tahsilatAc = async (tahsilatTuru = 21) => {
     if (kayitliId) { tahsilatAdimi(tahsilatTuru, kayitliId); return }
@@ -385,46 +357,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     const id = await kes(false);
     if (!id) return;
     tahsilatAdimi(tahsilatTuru, id);
-  };
-
-  /**
-   * Tahsilat aracina gore ikinci adim. CEK/SENET (23/24/33/34) once JENERIK
-   * KIYMET KARTINI acar (kasa listesindeki akisin aynisi): banka, sube,
-   * kesideci, seri no, vade... kasa kartinda sorulamayacak kadar cok alan var.
-   * Diger araclar (nakit/banka/POS) dogrudan kasa kartini acar.
-   */
-  const tahsilatAdimi = (tahsilatTuru: number, id: number) => {
-    if (tahsilatTuru === 23 || tahsilatTuru === 24
-        || tahsilatTuru === 33 || tahsilatTuru === 34) {
-      setCekTuru({ tur: tahsilatTuru, belgeId: id });
-      return;
-    }
-    setTahsilatAcik(tahsilatTuru);
-  };
-
-  /**
-   * Kiymet karti kaydedildi: kasa islemini ayni kiymete BAGLAYARAK ac. Kart
-   * sunucudan yeniden okunur - tutar/cari kullanicinin kartta biraktigi son
-   * hali olsun.
-   */
-  const cekKartKaydedildi = async (tur: number, belge: number, csId: number) => {
-    setCekTuru(null);
-    try {
-      const k = await api.kartOku('cek-senet', csId);
-      const kart = k.kart as Record<string, unknown>;
-      setTahsilatAcilis({
-        tur,
-        tarafId: Number(kart.tarafId) || cari?.id,
-        tarafUnvan: cari?.unvan ?? '',
-        belgeId: belge,
-        tutar: String(kart.tutar ?? ''),
-        cekSenetId: csId,
-      });
-    } catch {
-      // Kiymet kaydedildi ama okunamadi: kullaniciyi bos kartla bas basa
-      //   birakmak yerine tahsilat listesini tazele - kagit portfoyde duruyor.
-      setTahsilatYenile(t => t + 1);
-    }
   };
 
   // Mevcut belgeyi ac: baslik + satirlar + dip toplam sunucudan gelir.
@@ -468,49 +400,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setKalemDegisti(false);
         setTeslimAlan(y.belge.teslimAlanId
           ? { id: Number(y.belge.teslimAlanId), ad: String(y.belge.teslimAlanAdi ?? '') } : null);
-        setSatirlar((y.satirlar ?? []).map((r, i) => ({
-          anahtar: i + 1,
-          // Sunucudaki satir kimligi: termin guncelleme gibi satir bazli
-          //   islemler bunu kullanir (140).
-          satirId: r.id ? Number(r.id) : undefined,
-          satirTur: Number(r.tur ?? 1),
-          stokId: r.stokId ? Number(r.stokId) : null,
-          hizmetId: r.hizmetId ? Number(r.hizmetId) : null,
-          stokKodu: String(r.stokKodu ?? ''),
-          // "??" DEGIL "||": sunucu bos alani '' donduruyor ve nullish operatoru
-          //   bos string'i gecerli sayip yedege dusmuyordu - hizmet satirinda
-          //   kod/ad bos gorunuyordu (kullanici).
-          stokAdi: String(r.stokAdi || r.hizmetAdi || r.masrafAdi || r.aciklama || ''),
-          aciklama: String(r.aciklama ?? ''),
-          izlemeKodu: String(r.izlemeKodu ?? ''),
-          // Termin (140): sunucu tam tarih doner, ekran gun bekliyor.
-          teslimTarihi: String(r.teslimTarihi ?? '').slice(0, 10),
-          // Ambalaj (143): GIRILEN miktar `adet`tir; `miktar` ana birim
-          //   karsiligidir (2 kutu / 24 adet) - kart girileni gosterir.
-          birim: Number(r.birim ?? 0),
-          birimCarpan: Number(r.birimCarpan ?? 1) || 1,
-          adet: String(r.adet ?? r.miktar ?? 0),
-          birimFiyat: String(r.birimFiyat ?? 0),
-          // SATIR BAZLI DOVIZ (kullanici): kalem kendi para biriminde girilmis
-          //   olabilir - kayitli satirdan geri yuklenir, yoksa yerel sayilir.
-          fiyatDovizi: String(r.dovizCinsi ?? '') || yerelPara,
-          dovizFiyat: String(r.dovizBirimFiyat ?? r.birimFiyat ?? 0),
-          kur: String(r.dovizKuru ?? 1),
-          iskonto: String(r.iskonto ?? 0),
-          iskonto2: String(r.iskonto2 ?? 0),
-          kdv: String(r.kdv ?? 0),
-          // Kayitli kalemin lot dagilimi (db/114) - kalem yeniden acilinca
-          //   kullanici hangi lottan kac adet girdigini gormeli.
-          izleme: Number(r.izleme ?? 0),
-          izlemler: ((r.izlemler ?? []) as Record<string, unknown>[]).map(z => ({
-            lotNo: String(z.lotNo ?? ''),
-            seriNo: String(z.seriNo ?? ''),
-            uretimTarihi: String(z.uretimTarihi ?? '').slice(0, 10),
-            sonKullanmaTarihi: String(z.sonKullanmaTarihi ?? '').slice(0, 10),
-            durum: Number(z.durum ?? 0),
-            miktar: String(z.miktar ?? 0),
-          })),
-        })));
+        setSatirlar(yanittanSatirlar(y.satirlar, yerelPara));
       } catch (h) {
         setHata(h instanceof ApiHatasi ? h.message : String(h));
       } finally { setAciliyor(false) }
@@ -536,28 +426,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       } catch { /* varsayilan depo yoksa alan bos kalir - engelleyici degil */ }
     })();
   }, [belgeId]);
-
-  // Tahsilat sekmesi: bu belgeye bagli kasa islemleri (kasa_islem.belge_id).
-  //   Iptal edilenler (durum 3) haric - odenmis gibi gorunmesinler.
-  useEffect(() => {
-    if (!kayitliId || aktifSekme !== 'tahsilat') return;
-    void (async () => {
-      try {
-        const y = await api.liste('kasa-islem', {
-          sayfa: 1, boyut: 50,
-          // Iptal edilen islem (durum 3) ve onun TERS kaydi listeye girmez -
-          //   ikisi de iptalIslemId tasir, toplami sisirmesinler.
-          filtre: { op: 'and', kosullar: [
-            { alan: 'belgeId', op: 'esit', deger: kayitliId },
-            { alan: 'durum', op: 'esitDegil', deger: 3 },
-            // Kolon NULL olabiliyor - '= 0' eslesmiyordu, 'bos' dogru kosul.
-            { alan: 'iptalIslemId', op: 'bos' },
-          ] },
-        });
-        setTahsilatlar(y.satirlar);
-      } catch { setTahsilatlar([]) }
-    })();
-  }, [kayitliId, aktifSekme, tahsilatYenile]);
 
   // Faturalama sekmesi: bu belgeden turetilmis belgeler (F8 zinciri).
   useEffect(() => {
@@ -616,37 +484,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     }
 
     if (!satir.paket || !satir.stokId) return;
-    const adet = Number(satir.adet.replace(',', '.')) || 1;
     void api.paketIcerigi(satir.stokId, bilgi.alis)
       .then(icerik => {
         if (icerik.length === 0) return;
-        setSatirlar(s => {
-          // Ayni paketin ONCEKI icerik satirlari temizlenir (miktar degisince
-          //   yeniden uretilir), sonra guncel icerik eklenir.
-          const temiz = s.filter(x => x.paketAnahtar !== satir.anahtar);
-          let anahtar = Math.max(0, ...temiz.map(x => x.anahtar));
-          const yeniler = icerik.map(i => ({
-            ...bosSatir(++anahtar),
-            satirTur: 1,
-            stokId: i.stokId,
-            stokKodu: i.kod,
-            stokAdi: i.ad,
-            adet: String(i.adet * adet),
-            kdv: String(i.kdv ?? 0),
-            izleme: i.izleme ?? 0,
-            // FIYAT: pakette girilmisse o, girilmemisse stogun kendi kart
-            //   fiyati (sunucu karar verir - belge yonune gore alis/satis).
-            birimFiyat: String(i.fiyat ?? 0),
-            dovizFiyat: String(i.fiyat ?? 0),
-            aciklama: `${satir.stokKodu} paketi içeriği`,
-            paketAnahtar: satir.anahtar,
-          }));
-          // Icerik, paket satirinin HEMEN ALTINA girer.
-          const yer = temiz.findIndex(x => x.anahtar === satir.anahtar);
-          return yer < 0
-            ? [...temiz, ...yeniler]
-            : [...temiz.slice(0, yer + 1), ...yeniler, ...temiz.slice(yer + 1)];
-        });
+        setSatirlar(s => paketIcerigiUygula(s, satir, icerik));
       })
       .catch(h => setHata(h instanceof ApiHatasi ? h.message : String(h)));
   };
@@ -924,11 +765,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           />
         )}
         {aktifSekme === 'tahsilat' && (
-          <TahsilatSekmesi sonuc={sonuc} tahsilatlar={tahsilatlar}
+          <TahsilatSekmesi sonuc={sonuc} tahsilatlar={tahsilat.tahsilatlar}
                            kayitliId={kayitliId} alisMi={alisMi} tahsilatAc={tahsilatAc}
-                           secili={seciliTahsilat} setSecili={setSeciliTahsilat}
-                           tahsilatAcKart={setTahsilatKayitId}
-                           tahsilatSil={tahsilatSil} />
+                           secili={tahsilat.seciliTahsilat}
+                           setSecili={tahsilat.setSeciliTahsilat}
+                           tahsilatAcKart={tahsilat.setTahsilatKayitId}
+                           tahsilatSil={tahsilat.tahsilatSil} />
         )}
         {/* ============================================= IMZA / TESLIM ==== */}
         {aktifSekme === 'imza' && (
@@ -966,54 +808,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           }}
         />
 
-        {/* Tahsilat karti MODAL: cari, tutar ve belge bagi onyuklu gelir. */}
-        {/* MEVCUT tahsilati duzeltme (cift tik / ✎): kasa karti kayit kimligiyle
-            acilir. Gerceklesmis islemi kart zaten salt gorunum yapar. */}
-        {tahsilatKayitId !== null && (
-          <KasaIslemKarti
-            kayitIdProp={tahsilatKayitId}
-            onKapat={() => { setTahsilatKayitId(null); setTahsilatYenile(t => t + 1) }}
-          />
-        )}
-
-        {/* CEK/SENET: jenerik kiymet karti (kasa listesindeki akisla ayni).
-            Cari ve tutar belgeden onyuklenir - kullanici ayni bilgiyi ikinci
-            kez girmesin. */}
-        {cekTuru !== null && (
-          <GenForm
-            kaynak="cek-senet"
-            id="yeni"
-            baslik={cekTuru.tur === 24 || cekTuru.tur === 34 ? 'Senet' : 'Çek'}
-            yeniKayitVarsayilanlari={{
-              tur: cekTuru.tur === 24 || cekTuru.tur === 34 ? 2 : 1,
-              yon: cekTuru.tur === 33 || cekTuru.tur === 34 ? 2 : 1,
-              ...(cari ? { tarafId: cari.id } : {}),
-              ...(sonuc?.belge.genelToplam ? { tutar: Number(sonuc.belge.genelToplam) } : {}),
-            }}
-            onKapat={() => setCekTuru(null)}
-            onKaydedildi={csId => { void cekKartKaydedildi(cekTuru.tur, cekTuru.belgeId, csId) }}
-          />
-        )}
-
-        {tahsilatAcilis !== null && (
-          <KasaIslemKarti
-            acilis={tahsilatAcilis}
-            onKapat={() => { setTahsilatAcilis(null); setTahsilatYenile(t => t + 1) }}
-          />
-        )}
-
-        {tahsilatAcik !== null && (
-          <KasaIslemKarti
-            acilis={{
-              tur: tahsilatAcik,
-              tarafId: cari?.id,
-              tarafUnvan: cari?.unvan,
-              belgeId: kayitliId,
-              tutar: String(sonuc?.belge.genelToplam ?? ''),
-            }}
-            onKapat={() => { setTahsilatAcik(null); setTahsilatYenile(t => t + 1) }}
-          />
-        )}
+        {/* Tahsilat pencereleri (duzeltme · cek/senet · dogrudan kasa islemi)
+            ayri dosyada: BelgeTahsilatModallari. */}
+        <BelgeTahsilatModallari
+          tahsilat={tahsilat} cari={cari} genelToplam={sonuc?.belge.genelToplam}
+        />
 
         {/* 0b) Satis temsilcisi - ayni ekran, kaynak personel. */}
         <TarafArama
@@ -1053,28 +852,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                                : (alisMi ? [11, 12] : [15, 16])}
             onKapat={() => setIadeArama(false)}
             onSec={secilenler => {
-              let anahtar = Math.max(0, ...satirlar.map(x => x.anahtar));
-              const yeniler = secilenler.map(r => {
-                anahtar += 1;
-                return {
-                  ...bosSatir(anahtar),
-                  satirTur: r.hizmetId ? 2 : 1,
-                  stokId: r.stokId ?? null,
-                  hizmetId: r.hizmetId ?? null,
-                  stokKodu: String(r.stokKodu ?? ''),
-                  stokAdi: String(r.stokAdi ?? r.aciklama ?? ''),
-                  adet: String(r.secilenMiktar ?? r.kalanMiktar),
-                  birimFiyat: String(r.birimFiyat),
-                  dovizFiyat: String(r.birimFiyat),
-                  iskonto: String(r.iskonto ?? 0),
-                  kdv: String(r.kdv ?? 0),
-                  izleme: Number(r.izleme ?? 0),
-                  izlemeKodu: String(r.izlemeKodu ?? ''),
-                  // Kaynak satir bagi: iade edilen miktar bu bagdan hesaplanir.
-                  kaynakSatirId: r.satirId,
-                  aciklama: `İade — ${r.belgeNo}`,
-                };
-              });
+              const yeniler = iadeSatirlari(secilenler, sonAnahtar(satirlar));
               setSatirlar(s => [...s, ...yeniler]);
               setIadeArama(false);
             }}
@@ -1093,34 +871,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             yon={depoBelgesi || stokFisiMi ? undefined : alisMi ? 'alis' : 'satis'}
             onKapat={() => setStokArama(false)}
             onSec={sec => {
-              const hizmet = sec.tip === 'hizmet';
               // Secim "Son / Sik Aranan" sayacina islensin - listede oldugu gibi.
-              void api.aramaIsaretle(hizmet ? 'hizmet' : 'stok', Number(sec.id));
-              setKalem({
-                ...bosSatir(Math.max(0, ...satirlar.map(x => x.anahtar)) + 1),
-                satirTur: hizmet ? 2 : 1,
-                stokId: hizmet ? null : Number(sec.id),
-                hizmetId: hizmet ? Number(sec.id) : null,
-                stokKodu: String(sec.kod ?? ''),
-                stokAdi: String(sec.ad ?? ''),
-                // Stok LOT/SERI izlemli mi - kalem penceresi buna gore izlem
-                //   ekranini acar (db/114).
-                izleme: hizmet ? 0 : Number(sec.izleme ?? 0),
-                // Ambalaj (143): kalem ANA BIRIMLE acilir; kullanici pencerede
-                //   kutu/koli secerse carpan oradan gelir.
-                birim: hizmet ? 0 : Number(sec.anaBirimKod ?? 0),
-                birimCarpan: 1,
-                birimAdi: hizmet ? '' : String(sec.anaBirim ?? ''),
-                // Paket (124): kalem kaydedilince icerigi de belgeye eklenir.
-                paket: !hizmet && Number(sec.paket ?? 0) === 1,
-                kdv: sec.kdv !== undefined && sec.kdv !== null ? String(sec.kdv) : '20',
-                // Kart fiyati onyuklenir - kullanici zaten listede gorup seciyor;
-                //   pencerede degistirebilir. Fiyatin PARA BIRIMI de gelir: yerel
-                //   degilse kalem penceresi kur + yerel karsilik satirini acar.
-                fiyatDovizi: String(sec.fiyatDovizi ?? yerelPara) || yerelPara,
-                dovizFiyat: sec.fiyat ? String(sec.fiyat) : '',
-                birimFiyat: sec.fiyat ? String(sec.fiyat) : '',
-              });
+              void api.aramaIsaretle(
+                sec.tip === 'hizmet' ? 'hizmet' : 'stok', Number(sec.id));
+              setKalem(stokSecimindenKalem(sec, sonAnahtar(satirlar) + 1, yerelPara));
             }}
           />
         )}
