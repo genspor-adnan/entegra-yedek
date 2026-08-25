@@ -155,6 +155,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [donusum, setDonusum] = useState<number | null>(null);
   /** Termin (teslim tarihi) modali - siparis satirlarinin taahhudu (140). */
   const [terminAcik, setTerminAcik] = useState(false);
+  /** Rezervasyon (142) islemi surerken dugme bekler. */
+  const [rezerveCalisiyor, setRezerveCalisiyor] = useState(false);
   const [aktifSekme, setAktifSekme] = useState('kalem');
   /** Grid satir secimi (kirmizi Sil dugmesi bunlari siler). */
   const [seciliSatirlar, setSeciliSatirlar] = useState<Set<number>>(new Set());
@@ -322,6 +324,22 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * adim tek dugmede yapilir. Kart ACIK kalir - tahsilat kapaninca belgeye
    * donulur. Kaydetme basarisizsa (dogrulama hatasi) tahsilat acilmaz.
    */
+  /** Sipariste rezerve edilmis satir var mi (142) - dugme metnini belirler. */
+  const rezerveVar = (sonuc?.satirlar ?? []).some(r => Number(r.rezerve ?? 0) > 0);
+
+  /** Rezervasyonu ac/kapat; sunucu satirlari ve stok toplamini gunceller. */
+  const rezerveDegistir = async (ac: boolean) => {
+    if (!kayitliId) return;
+    setHata(null);
+    setRezerveCalisiyor(true);
+    try {
+      setSonuc(await api.belgeRezerve(kayitliId, ac));
+      onKaydedildi?.();
+    } catch (h) {
+      setHata(h instanceof ApiHatasi ? `${h.hata.kod}: ${h.message}` : String(h));
+    } finally { setRezerveCalisiyor(false) }
+  };
+
   const tahsilatAc = async (tahsilatTuru = 21) => {
     if (kayitliId) { setTahsilatAcik(tahsilatTuru); return }
 
@@ -724,6 +742,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           eBelgeYok={eBelgeYok} kayitliId={kayitliId}
           kes={kes} yeniBelge={yeniBelge} kapat={kapat}
           setDonusum={setDonusum} setTerminAcik={setTerminAcik}
+          rezerveVar={rezerveVar} rezerveCalisiyor={rezerveCalisiyor}
+          rezerveDegistir={rezerveDegistir}
         />
       }
     >

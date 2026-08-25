@@ -126,6 +126,31 @@ public static class BelgeUclari
             });
         });
 
+        // POST /api/belge/{id}/rezerve - siparis satirlarini depoda ayir (142)
+        grup.MapPost("/{id:int}/rezerve", async (
+            int id, RezerveIstegi? istek, BaglamCozucu cozucu, BelgeDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            // Rezervasyon stok/cari YAZMAZ, yalniz "soz verildi" isareti koyar:
+            //   belgeyi degistirme yetkisi yeterli.
+            baglam.YetkiIste("belge", Islem.Degistir);
+
+            var ac = istek?.Ac ?? true;
+            var adet = await depo.RezerveAsync(id, ac,
+                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+
+            var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
+            return Results.Ok(new BelgeYaniti
+            {
+                Belge = kayit.Belge,
+                Satirlar = kayit.Satirlar,
+                DipToplam = kayit.DipToplam,
+                Uyarilar = new[] { ac ? $"{adet} satır rezerve edildi." : "Rezervasyon kaldırıldı." },
+                IzlemeNo = baglam.IzlemeNo
+            });
+        });
+
         // POST /api/belge/{id}/termin - satirlarin teslim tarihini guncelle (140)
         grup.MapPost("/{id:int}/termin", async (
             int id, TerminIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
@@ -229,6 +254,12 @@ public static class BelgeUclari
     {
         public int SatirId { get; set; }
         public decimal Miktar { get; set; }
+    }
+
+    /// <summary>Rezervasyon istegi - 142. Ac=false rezervi kaldirir.</summary>
+    public sealed class RezerveIstegi
+    {
+        public bool Ac { get; set; } = true;
     }
 
     /// <summary>Termin (teslim tarihi) guncelleme istegi - 140.</summary>

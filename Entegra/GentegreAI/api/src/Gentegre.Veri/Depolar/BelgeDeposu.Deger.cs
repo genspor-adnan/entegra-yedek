@@ -180,7 +180,7 @@ public sealed partial class BelgeDeposu
                    coalesce(hz.ad, '')  as "hizmetAdi", coalesce(ms.ad, '') as "masrafAdi",
                    s.kapatilan_miktar as "kapatilanMiktar", s.kalan_miktar as "kalanMiktar",
                    s.kaynak_tur as "kaynakTur", s.kaynak_id as "kaynakId",
-                   s.teslim_tarihi as "teslimTarihi"
+                   s.teslim_tarihi as "teslimTarihi", s.rezerve
               from public.belge_satir s
               left join public.stok   st on st.id = s.stok_id
               left join public.hizmet hz on hz.id = s.hizmet_id

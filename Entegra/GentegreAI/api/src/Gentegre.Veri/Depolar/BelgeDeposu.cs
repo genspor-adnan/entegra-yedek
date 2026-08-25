@@ -711,6 +711,59 @@ public sealed partial class BelgeDeposu
         return degisen;
     }
 
+    /// <summary>
+    /// SIPARIS REZERVASYONU (142): satirlarin KALAN miktarini depoda ayirir
+    /// (ac=true) ya da birakir (ac=false).
+    ///
+    /// Stok DUSMEZ - o irsaliyede olur; yalniz "soz verilmis" miktar isaretlenir
+    /// ve stok aramasinda kullanilabilir (kalan - rezerve) olarak gorunur.
+    /// Kural motorda (fn_belge_rezerve): yalniz kesin SIPARISTE calisir, sevk
+    /// edildikce rezerv kendiliginden cozulur.
+    /// </summary>
+    public async Task<int> RezerveAsync(int belgeId, bool ac,
+        YazmaBaglami baglam, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+        if (baglam.SubeId is { } sube)
+        {
+            await using var kontrol = new NpgsqlCommand(
+                "select sube_id from public.belge where id = @p0", baglanti, islem);
+            kontrol.Parameters.AddWithValue("p0", belgeId);
+            var bs = await kontrol.ExecuteScalarAsync(iptal);
+            if (bs is null) throw GentegreHatasi.Bulunamadi();
+            if (bs is not DBNull && Convert.ToInt32(bs) != sube) throw GentegreHatasi.Bulunamadi();
+        }
+
+        int adet;
+        await using (var komut = new NpgsqlCommand(
+            "select public.fn_belge_rezerve(@p0, @p1)", baglanti, islem))
+        {
+            komut.Parameters.AddWithValue("p0", belgeId);
+            komut.Parameters.AddWithValue("p1", ac);
+            try
+            {
+                adet = Convert.ToInt32(await komut.ExecuteScalarAsync(iptal));
+            }
+            catch (PostgresException h) when (h.SqlState == "GK422")
+            {
+                throw GentegreHatasi.IsKurali(h.MessageText);
+            }
+        }
+
+        await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloBelge, belgeId,
+            baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+            new Dictionary<string, string>
+            {
+                ["aksiyon"] = ac ? "rezerve" : "rezerve-kaldir",
+                ["satirAdedi"] = adet.ToString(CultureInfo.InvariantCulture)
+            }, iptal: iptal);
+
+        await islem.CommitAsync(iptal);
+        return adet;
+    }
+
     /// <summary>Acik (kalani olan) satirlar - donusum ekraninin kaynagi.</summary>
     public async Task<List<IDictionary<string, object?>>> AcikSatirlarAsync(
         int belgeId, CancellationToken iptal = default)

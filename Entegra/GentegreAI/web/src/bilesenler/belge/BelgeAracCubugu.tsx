@@ -13,6 +13,7 @@ export function BelgeAracCubugu({
   iadeKutusu, iade, setIade, faturaTipi, setFaturaTipi,
   siparisMi, irsaliyeMi, faturaMi, alisMi, eBelgeYok, kayitliId,
   kes, yeniBelge, kapat, setDonusum, setTerminAcik,
+  rezerveVar, rezerveCalisiyor, rezerveDegistir,
 }: {
   mevcutBelge: boolean;
   /** Kayitli belge degistirilebilir mi (135). */
@@ -42,6 +43,11 @@ export function BelgeAracCubugu({
   setDonusum(v: number | null): void;
   /** Termin (teslim tarihi) modalini acar - 140. */
   setTerminAcik(v: boolean): void;
+  /** Sipariste rezerve edilmis satir var mi (142). */
+  rezerveVar: boolean;
+  rezerveCalisiyor: boolean;
+  /** true = rezerve et, false = birak. */
+  rezerveDegistir(ac: boolean): Promise<void>;
   /* TAHSILAT arac cubugundan kalkti - tahsilat kendi sekmesinden aciliyor. */
 }) {
   return (
@@ -69,8 +75,16 @@ export function BelgeAracCubugu({
   {/* ---------------------------------------------------- SIPARIS ---- */}
   {siparisMi && (
     <>
-      <button className="d bir" disabled title="Stok rezervasyonu henüz bağlanmadı.">
-        🔒 Rezervasyon Yap
+      {/* REZERVASYON (142): satirlarin KALAN miktarini depoda ayirir - stok
+          dusmez, ama stok aramasinda "kullanilabilir" miktardan dusulur, ayni
+          mal ikinci musteriye satilamaz. Sevk edildikce kendiliginden cozulur. */}
+      <button className="d bir" disabled={!kayitliId || rezerveCalisiyor}
+              title={kayitliId
+                ? (rezerveVar ? 'Ayrılan miktarı serbest bırak'
+                              : 'Kalan miktarı depoda ayır (stok düşmez)')
+                : 'Önce siparişi kaydedin.'}
+              onClick={() => void rezerveDegistir(!rezerveVar)}>
+        {rezerveCalisiyor ? '⏳ İşleniyor…' : rezerveVar ? '🔓 Rezervi Kaldır' : '🔒 Rezervasyon Yap'}
       </button>
       {/* Dugmeler modali ON SECILI hedefle acar; modaldaki combodan fis ya da
           tahakkuka cevrilebilir (kullanici). */}
