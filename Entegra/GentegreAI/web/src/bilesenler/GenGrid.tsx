@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
 import { ApiHatasi, type KolonMeta, type Kosul, type ListeSatiri, type ListeYaniti,
@@ -7,7 +7,8 @@ import { bicimle } from './bicim';
 import { GenKomutPaleti, GenSagTus, GenToolbar, hedefte, useAksiyonlar,
          type AltSecenek } from './Aksiyonlar';
 import { Modal } from './Modal';
-import { durumRozeti, LogTablosu, GORUNUMLER } from './gridHucre';
+import { LogTablosu, GORUNUMLER } from './gridHucre';
+import { GridTablo } from './grid/GridTablo';
 import {
   aramaKosulu, filtreSatiriKosulu, tarihKosulu, filtreBirlestir,
 } from './gridSorgu';
@@ -97,6 +98,8 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   useEffect(() => { void ayarSayi('liste.sayfa_boyu', 50).then(setAyarBoyut) }, []);
 
   const [kolonlar, setKolonlar] = useState<KolonMeta[]>([]);
+  /** Katalogdaki BUTUN kolonlar - uc nokta menusundeki kolon secici icin. */
+  const [tumKolonlar, setTumKolonlar] = useState<KolonMeta[]>([]);
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [toplamKayit, setToplamKayit] = useState(0);
   const [toplamlar, setToplamlar] = useState<Record<string, unknown> | undefined>();
@@ -194,9 +197,21 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
           const i = kolonSirasi?.indexOf(ad) ?? -1;
           return i < 0 ? 900 : i;
         };
+        setTumKolonlar(y.kolonlar.filter(k => !gizli.has(k.ad)));
+        // Kullanicinin kendi kolon secimi (uc nokta > Kolonlar) varsa o gecerli:
+        //   ekran varsayilanini EZER, tarayicida kaynak basina saklanir.
+        const secimAnahtari = `grid.kolon.${kaynak}`;
+        let secim: string[] | null = null;
+        try {
+          const ham = localStorage.getItem(secimAnahtari);
+          if (ham) secim = JSON.parse(ham) as string[];
+        } catch { secim = null }
+        const temel = secim
+          ? y.kolonlar.filter(k => secim.includes(k.ad) && !gizli.has(k.ad))
+          : gorunen;
         setKolonlar(kolonSirasi?.length
-          ? [...gorunen].sort((a, b) => sira(a.ad) - sira(b.ad))
-          : gorunen);
+          ? [...temel].sort((a, b) => sira(a.ad) - sira(b.ad))
+          : temel);
       })
       .catch((h: ApiHatasi) => { if (!iptal) setHata(h.message) });
     return () => { iptal = true };
@@ -438,16 +453,53 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
     return () => { window.removeEventListener('click', kapat); window.removeEventListener('scroll', kapat, true) };
   }, [gridMenuKonum]);
 
-  const gridMenuOgeleri: { ik: string; ad: string; secili?: boolean; devre?: string; fn(): void }[] = [
-    { ik: '☑', ad: 'Tumunu Sec (bu sayfa)', devre: satirlar.length ? undefined : 'Kayit yok', fn: () => secimiUygula(new Set(sayfaIdleri())) },
-    { ik: '☐', ad: 'Secimi Temizle', devre: secili.size ? undefined : 'Secili kayit yok', fn: () => secimiUygula(new Set()) },
-    { ik: '⇄', ad: 'Secimi Tersine Cevir', devre: satirlar.length ? undefined : 'Kayit yok', fn: () => {
-      const yeni = new Set(secili);
-      sayfaIdleri().forEach(id => { yeni.has(id) ? yeni.delete(id) : yeni.add(id) });
-      secimiUygula(yeni);
-    } },
+  /** Kolon gorunurlugu: secim tarayicida kaynak basina saklanir. */
+  const kolonDegistir = (kolon: KolonMeta) => {
+    const yeniAdlar = kolonlar.some(k => k.ad === kolon.ad)
+      ? kolonlar.filter(k => k.ad !== kolon.ad).map(k => k.ad)
+      : [...kolonlar.map(k => k.ad), kolon.ad];
+    if (yeniAdlar.length === 0) return;          // en az bir kolon kalsin
+    const sirali = tumKolonlar.filter(k => yeniAdlar.includes(k.ad));
+    setKolonlar(sirali);
+    try { localStorage.setItem(`grid.kolon.${kaynak}`, JSON.stringify(yeniAdlar)) } catch { /* yoksay */ }
+  };
+
+  const kolonlariSifirla = () => {
+    try { localStorage.removeItem(`grid.kolon.${kaynak}`) } catch { /* yoksay */ }
+    const gizli = new Set(gizliKolonlar ?? []);
+    const zorunlu = new Set(kolonSirasi ?? []);
+    setKolonlar(tumKolonlar.filter(k => (k.varsayilan || zorunlu.has(k.ad)) && !gizli.has(k.ad)));
+  };
+
+  const filtreVar = arama.trim() !== '' || Object.values(filtreDeger).some(v => v.trim() !== '');
+
+  /**
+   * UC NOKTA MENUSU - gridle ilgili NE varsa burada (kullanici istegi).
+   *
+   * Bolumler ayracla ayrilir: gorunum · kayit kumesi · tazeleme/disa aktarma ·
+   * filtre & siralama · secim · sayfa boyu · kolonlar. Cip seridinde de bulunan
+   * secenekler (gorunum, Son/Sik Aranan) burada TEKRAR durur: kullanici tek
+   * yerden hepsine ulasabilsin diye - menu "gridin ayar penceresi" gibi calisir.
+   */
+  type MenuOgesi = { ik: string; ad: string; secili?: boolean; devre?: string; ayrac?: boolean; fn(): void };
+  const gridMenuOgeleri: MenuOgesi[] = [
+    ...GORUNUMLER.map(g => ({
+      ik: g.ik, ad: g.ad, secili: gorunum === g.v, fn: () => setGorunum(g.v),
+    })),
+
+    { ik: '☰', ad: 'Tüm Liste', secili: aramaGorunumu === 'tum', ayrac: true,
+      fn: () => setAramaGorunumu('tum') },
+    { ik: '🕓', ad: 'Son Aranan', secili: aramaGorunumu === 'son',
+      fn: () => setAramaGorunumu('son') },
+    { ik: '⭐', ad: 'Sık Aranan', secili: aramaGorunumu === 'sik',
+      fn: () => setAramaGorunumu('sik') },
+
+    { ik: '⟳', ad: 'Yenile', ayrac: true, fn: () => { void yukle() } },
+    { ik: '📄', ad: 'CSV Kaydet', devre: satirlar.length ? undefined : 'Kayit yok',
+      fn: () => { void csvIndir() } },
+
     {
-      ik: '🔎', ad: 'Satir Filtreleme', secili: filtreAcik,
+      ik: '🔎', ad: 'Satir Filtreleme', secili: filtreAcik, ayrac: true,
       // Kapatinca filtre TEMIZLENIR - yoksa satir gizliyken suzgec sessizce etkin kalir,
       //   "liste birden azaldi" gibi anlasilmaz bir goruntu birakir.
       fn: () => setFiltreAcik(acikMi => {
@@ -455,6 +507,38 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
         return !acikMi;
       }),
     },
+    { ik: '✖', ad: 'Filtreleri Temizle', devre: filtreVar ? undefined : 'Etkin filtre yok',
+      fn: () => { setArama(''); setFiltreDeger({}); setSayfa(1) } },
+    { ik: '↕', ad: 'Sıralamayı Temizle', devre: sirala.length ? undefined : 'Siralama yok',
+      fn: () => { setSirala([]); setSayfa(1) } },
+
+    { ik: '☑', ad: 'Tumunu Sec (bu sayfa)', ayrac: true,
+      devre: satirlar.length ? undefined : 'Kayit yok',
+      fn: () => secimiUygula(new Set(sayfaIdleri())) },
+    { ik: '☐', ad: 'Secimi Temizle', devre: secili.size ? undefined : 'Secili kayit yok',
+      fn: () => secimiUygula(new Set()) },
+    { ik: '⇄', ad: 'Secimi Tersine Cevir', devre: satirlar.length ? undefined : 'Kayit yok',
+      fn: () => {
+        const yeni = new Set(secili);
+        sayfaIdleri().forEach(id => { yeni.has(id) ? yeni.delete(id) : yeni.add(id) });
+        secimiUygula(yeni);
+      } },
+
+    // Sayfa boyu: ekran disaridan boyut verdiyse (or. gomulu grid) degistirilemez.
+    ...[25, 50, 100, 200].map((n, i) => ({
+      ik: '≡', ad: `Sayfada ${n} kayıt`, secili: sayfaBoyu === n, ayrac: i === 0,
+      devre: boyut ? 'Bu ekranda sayfa boyu sabit' : undefined,
+      fn: () => { setAyarBoyut(n); setSayfa(1) },
+    })),
+
+    // Kolon gorunurlugu - secim tarayicida saklanir, "Varsayılan Kolonlar" geri alir.
+    ...tumKolonlar.map((k, i) => ({
+      ik: kolonlar.some(x => x.ad === k.ad) ? '☑' : '☐',
+      ad: k.baslik, secili: kolonlar.some(x => x.ad === k.ad), ayrac: i === 0,
+      fn: () => kolonDegistir(k),
+    })),
+    { ik: '↺', ad: 'Varsayılan Kolonlar', devre: tumKolonlar.length ? undefined : 'Kolon yok',
+      fn: kolonlariSifirla },
   ];
 
   return (
@@ -610,163 +694,22 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
         <div className="kutu dolgusuz">
           <div className="gridwrap">
             <div className="gridkaydir">
-              <table className="grid">
-                <colgroup>
-                  <col style={{ width: 34 }} />
-                  {kolonlar.map(k => <col key={k.ad} style={k.genislik ? { width: k.genislik } : undefined} />)}
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th className="cbk">
-                      <input
-                        ref={hepsiRef}
-                        type="checkbox"
-                        className="grid-cb"
-                        checked={hepsiSecili}
-                        onChange={() => secimiUygula(hepsiSecili ? new Set() : new Set(sayfaIdleri()))}
-                        title="Bu sayfadaki tumunu sec"
-                      />
-                      <button
-                        type="button"
-                        className={`grid-noktalar${gridMenuKonum ? ' on' : ''}`}
-                        title="Grid menusu"
-                        onClick={e => {
-                          e.stopPropagation();
-                          const r = e.currentTarget.getBoundingClientRect();
-                          setGridMenuKonum(gridMenuKonum ? null : { x: r.left, y: r.bottom + 4 });
-                        }}
-                      >
-                        ⋮
-                      </button>
-                    </th>
-                    {kolonlar.map(k => (
-                      <th
-                        key={k.ad}
-                        className={`hiza-${k.hizalama} ${k.siralanabilir ? 'siralanir' : ''}`}
-                        onClick={() => siralamaDegistir(k)}
-                      >
-                        {k.baslik}{siraIsareti(k.ad)}
-                      </th>
-                    ))}
-                  </tr>
-                  {filtreAcik && (
-                    <tr className="flt">
-                      <th className="cbk" />
-                      {kolonlar.map(k => (
-                        <th key={k.ad}>
-                          {(k.tip === 'metin' || k.tip === 'kod') && k.filtrelenebilir && (
-                            <input
-                              placeholder="icerir…"
-                              onChange={e => filtreSatiriDegisti(k.ad, e.target.value)}
-                            />
-                          )}
-                        </th>
-                      ))}
-                    </tr>
-                  )}
-                </thead>
-                <tbody>
-                  {satirlar.map((satir, i) => {
-                    const id = String(satir.id ?? i);
-                    // ---- GRUPLU LISTE (ekstre: para birimi basina) ----------
-                    //   Grup basligi obegin ilk satirindan ONCE, ara toplam SON
-                    //   satirindan SONRA. Obek sayfa sonunda BOLUNDUYSE ara toplam
-                    //   yazilmaz - yarim toplam gostermek yaniltir; obek bitince
-                    //   (sonraki sayfada) yazilir.
-                    const grupDeger = grupKolonu ? String(satir[grupKolonu] ?? '') : null;
-                    const oncekiGrup = i > 0 && grupKolonu
-                      ? String(satirlar[i - 1][grupKolonu] ?? '') : null;
-                    const sonrakiGrup = i + 1 < satirlar.length && grupKolonu
-                      ? String(satirlar[i + 1][grupKolonu] ?? '') : null;
-                    const grupBasliyor = grupDeger !== null && (i === 0 || oncekiGrup !== grupDeger);
-                    const grupBitiyor = grupDeger !== null &&
-                      (sonrakiGrup !== null ? sonrakiGrup !== grupDeger : sayfa >= sonSayfa);
-                    const ozet = grupDeger !== null
-                      ? gruplar?.find(g => g.anahtar === grupDeger) : undefined;
-
-                    return (
-                      <Fragment key={`gr-${id}`}>
-                      {grupBasliyor && (
-                        <tr className="grup-bas">
-                          <td className="cbk" />
-                          <td colSpan={kolonlar.length}>
-                            <b>{grupDeger || '—'}</b>
-                            {ozet && <span className="sonuk"> · {ozet.adet} hareket</span>}
-                            {oncekiGrup !== null && oncekiGrup !== grupDeger && ''}
-                          </td>
-                        </tr>
-                      )}
-                      <tr
-                        key={id}
-                        className={satirSinifi(satir)}
-                        onMouseDown={e => { if (e.shiftKey) e.preventDefault() }}
-                        onClick={e => satirTiklandi(e, id, i)}
-                        onDoubleClick={() => satirTiklaninca(satir)}
-                        onContextMenu={e => {
-                          if (!aksiyonEkrani) return;
-                          e.preventDefault();
-                          setSeciliSatir(satir);
-                          setSagTusKonumu({ x: e.clientX, y: e.clientY });
-                        }}
-                      >
-                        <td className="cbk">
-                          <input
-                            type="checkbox"
-                            className="grid-cb"
-                            checked={secili.has(id)}
-                            onClick={e => e.stopPropagation()}
-                            onChange={() => satirSecimiDegistir(id, i)}
-                          />
-                        </td>
-                        {kolonlar.map(k => (
-                          <td key={k.ad} className={`hiza-${k.hizalama}`}
-                            style={k.genislik ? {
-                              maxWidth: k.genislik, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                            } : undefined}
-                            title={k.genislik ? String(satir[k.ad] ?? '') : undefined}
-                          >
-                            {durumRozeti(satir[k.ad], k) ?? bicimle(satir[k.ad], k)}
-                          </td>
-                        ))}
-                      </tr>
-                      {grupBitiyor && ozet && (
-                        <tr className="grup-toplam">
-                          <td className="cbk" />
-                          {kolonlar.map((k, ki) => {
-                            const t = ozet.toplamlar?.[k.ad];
-                            return (
-                              <td key={k.ad} className={`hiza-${k.hizalama}`}>
-                                {t !== undefined && t !== null ? bicimle(t, k)
-                                  : ki === 0 ? `${grupDeger} toplamı` : ''}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      )}
-                      </Fragment>
-                    );
-                  })}
-                  {!yukleniyor && satirlar.length === 0 && (
-                    <tr><td colSpan={kolonlar.length + 1} className="bos">Kayit yok</td></tr>
-                  )}
-                </tbody>
-                {toplamSeridiVar && (
-                  <tfoot>
-                    <tr>
-                      <td className="cbk" />
-                      {kolonlar.map((k, i) => {
-                        const t = gorunenToplamlar.find(([ad]) => ad === k.ad);
-                        return (
-                          <td key={k.ad} className={`hiza-${k.hizalama}`}>
-                            {t ? bicimle(t[1], k)
-                               : (i === 0 ? (grupKolonu ? 'GENEL TOPLAM' : 'Toplam') : '')}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  </tfoot>
-                )}
-              </table>
+              <GridTablo
+                kolonlar={kolonlar} satirlar={satirlar} yukleniyor={yukleniyor}
+                gruplar={gruplar} grupKolonu={grupKolonu}
+                gorunenToplamlar={gorunenToplamlar} toplamSeridiVar={toplamSeridiVar}
+                sayfa={sayfa} sonSayfa={sonSayfa}
+                secili={secili} sayfaIdleri={sayfaIdleri} secimiUygula={secimiUygula}
+                satirSecimiDegistir={satirSecimiDegistir}
+                hepsiSecili={hepsiSecili} hepsiRef={hepsiRef}
+                satirTiklandi={satirTiklandi} satirTiklaninca={satirTiklaninca}
+                satirSinifi={satirSinifi} setSeciliSatir={setSeciliSatir}
+                setSagTusKonumu={setSagTusKonumu}
+                siraIsareti={siraIsareti} siralamaDegistir={siralamaDegistir}
+                filtreAcik={filtreAcik} filtreSatiriDegisti={filtreSatiriDegisti}
+                gridMenuKonum={gridMenuKonum} setGridMenuKonum={setGridMenuKonum}
+                aksiyonEkrani={aksiyonEkrani}
+              />
             </div>
             {yukleniyor && <div className="yukleniyor">Yukleniyor…</div>}
           </div>
@@ -790,9 +733,9 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
 
       {gridMenuKonum && (
         <div className="sag-tus" style={{ left: gridMenuKonum.x, top: gridMenuKonum.y }} onClick={e => e.stopPropagation()}>
-          {gridMenuOgeleri.map((o, i) => (
+          {gridMenuOgeleri.map(o => (
             <div key={o.ad}>
-              {i === 3 && <div className="ayr" />}
+              {o.ayrac && <div className="ayr" />}
               <button
                 disabled={!!o.devre}
                 title={o.devre ?? ''}

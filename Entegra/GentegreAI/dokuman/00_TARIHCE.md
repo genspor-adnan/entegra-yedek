@@ -2847,5 +2847,21 @@ Doğrulama: `tsc -b` + prod derleme temiz. Ekrandan üç ayrı yerleşim: cari
 Fotoğraf · Eğitim/Sertifika gridi · Özet) ve stok (Tanım/Sınıflandırma · Vergi &
 Ana Birim · Diğer'de ikili onay kutuları · Resim).
 
+### Refaktör: grid tablosu ayrıldı + üç nokta menüsü gridin ayar penceresi oldu
+
+- **`GenGrid.tsx` 844 → 787 satır** (tablo çıktı, menü büyüdü). Başlık satırı
+  (sıralama + kolon filtresi), veri satırları, grup ara toplamları ve alt toplam
+  şeridi `bilesenler/grid/GridTablo.tsx`'e (218) taşındı — yalnız çizim; veri
+  çekme, sayfalama ve seçim GenGrid'de kaldı.
+- **Üç nokta menüsü** artık gridle ilgili her şeyi taşıyor (kullanıcı isteği):
+  görünüm (Liste/Grup/Analiz) · kayıt kümesi (Tüm Liste/Son Aranan/Sık Aranan) ·
+  Yenile · CSV Kaydet · Satır Filtreleme · Filtreleri Temizle · Sıralamayı
+  Temizle · seçim üçlüsü · sayfa boyu (25/50/100/200) · **kolon görünürlüğü**
+  (tek tek aç/kapa, seçim tarayıcıda kaynak başına saklanır) · Varsayılan
+  Kolonlar. Bölümler ayraçla ayrıldı, menü 70vh'yi aşınca kendi içinde kayıyor.
+
+Doğrulama: `tsc -b` + prod derleme temiz; menü stok listesinde açılıp bölümler
+ve işaretli seçenekler (Liste ✓, Tüm Liste ✓) görüldü.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).

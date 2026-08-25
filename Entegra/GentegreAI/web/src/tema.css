@@ -628,6 +628,9 @@ input.skt-gecmis {
 .sag-tus {
   position: fixed; z-index: 30; background: var(--yuz); border: 1px solid var(--cizgi);
   border-radius: var(--r); box-shadow: 0 14px 36px rgba(20, 40, 70, .18); padding: 4px; min-width: 210px;
+  /* Grid (uc nokta) menusu gorunum + kolon listesiyle uzayabilir: ekrandan
+     tasmasin, kendi icinde kaysin. */
+  max-height: 70vh; overflow-y: auto;
 }
 .sag-tus button {
   display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 12px;
