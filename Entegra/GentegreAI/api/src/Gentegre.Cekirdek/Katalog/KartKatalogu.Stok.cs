@@ -44,15 +44,15 @@ public static partial class KartKatalogu
             new("satilan",       "satilan",         "mantik", Baslik: "Satılan", AltGrup: "Diğer",
                                                      EslesAlan: "alinan"),
             new("alinan",        "alinan",          "mantik", Baslik: "Alınan", AltGrup: "Diğer"),
+            // Satılan/Alınan'in ALTINDA (kullanici): Internet Satis + Paket ayni
+            //   satirda. PAKET (124) isaretlenince kartta "Paket" sekmesi acilir.
+            new("internetSatis", "internet_satis",  "mantik", Baslik: "İnternet Satış", AltGrup: "Diğer",
+                                                     EslesAlan: "paket"),
+            new("paket",         "paket",           "mantik", Baslik: "Paket", AltGrup: "Diğer"),
             // Kiralik/demirbas gibi geri donup TEKRAR cikabilen kiymet; normal
             //   ticari mal tuketilir, o yuzden varsayilan isaretsiz.
             new("yenidenKullanilir", "yeniden_kullanilir", "mantik",
-                                                     Baslik: "Yeniden Kullanılabilir", AltGrup: "Diğer"),
-            new("internetSatis", "internet_satis",  "mantik", Baslik: "İnternet Satış", AltGrup: "Diğer",
-                                                     EslesAlan: "paket"),
-            // PAKET (124): isaretlenince kartta "Paket" sekmesi acilir, icerik
-            //   orada tanimlanir. Internet Satis'in SAGINDA (ayni satirda).
-            new("paket",         "paket",           "mantik", Baslik: "Paket", AltGrup: "Diğer"),
+                                                     Baslik: "Reuse", AltGrup: "Diğer"),
             // Mockup'ta 3. kutu "Resim" - bu alanlarin orada karsiligi yok, ust-satirin
             //   ALTINDA adsiz/duz bolum olarak kalsinlar (kasira'nin 2 kutusunu bozmasin).
             new("rafKonum",      "raf_konum",       "metin", EnFazlaUzunluk: 30, Baslik: "Raf / Konum",         AltGrup: "Diğer"),
@@ -74,7 +74,8 @@ public static partial class KartKatalogu
             //   yerde anlatiyordu. Barkod zaten BIRIME aittir - kutunun barkodu
             //   ile adedin barkodu farklidir - dolayisiyla dogru yeri ambalaj
             //   birimi satiridir. Eski kayitlar (1419 barkod) oraya tasindi;
-            //   `stok_barkod` tablosu veri olarak duruyor, karttan kalkti.
+            //   `stok_barkod` tablosu 145'te dusuruldu (yedegi
+            //   stok_barkod_yedek_145'te).
 
             // AMBALAJ BIRIMLERI (143): "1 kutu = 12 adet". Bakiye ANA BIRIMDE
             //   tutulur; buradaki carpan yalnizca belgeye giris bicimidir -

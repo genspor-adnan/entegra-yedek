@@ -34,13 +34,8 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> KdvKodlari =
         new() { ["0"] = "0", ["1"] = "1", ["8"] = "8", ["10"] = "10", ["18"] = "18", ["20"] = "20" };
 
-    // STOKBARKOD.BARKOD_TIPI - GENINI degil, Delphi'de sabit 2 secenek + BARKODAYARLAR
-    //   (kullanici tanimli, migrate edilmedi - bkz. Utablo.pas:14136).
-
-    // STOKBARKOD.BARKOD_TIPI - GENINI degil, Delphi'de sabit 2 secenek + BARKODAYARLAR
-    //   (kullanici tanimli, migrate edilmedi - bkz. Utablo.pas:14136).
-    private static readonly Dictionary<string, string> BarkodTipiKodlari =
-        new() { ["0"] = "Kullanıcı", ["100"] = "Karekod" };
+    // BARKOD TIPI kod listesi KALKTI (145): stok_barkod tablosu dusuruldu,
+    //   barkod artik ambalaj birimi satirinin bir alani (stok_birim.barkod).
 
     // TARAF_ADRES.TUR - yeni tablo (GENINI karsiligi yok), 001_sema_taraf.sql check kisitindan.
 
