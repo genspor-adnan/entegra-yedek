@@ -191,6 +191,11 @@ table.grid th {
 table.grid th.siralanir { cursor: pointer; user-select: none }
 table.grid th.siralanir:hover { color: var(--mor) }
 table.grid td { padding: 4px 14px; border-bottom: 1px solid var(--cizgi2); border-right: 1px solid var(--cizgi2); white-space: nowrap }
+/* SATIR YUKSEKLIGI (uc nokta > Satır Yüksekliği): uzun listede daha cok satir
+   gormek isteyen ile okunakli aralik isteyen ayni ekrani paylasiyor. Yalniz
+   DIKEY dolgu degisir - yatay hizalama ve kolon genislikleri sabit kalir. */
+table.grid.boy-sik   td { padding-top: 1px; padding-bottom: 1px }
+table.grid.boy-genis td { padding-top: 9px; padding-bottom: 9px }
 table.grid tbody tr:hover td { background: #f2f7fd }
 table.grid tbody tr.secili td { background: var(--mor2) }
 table.grid tr.log-bolum-satiri td {
@@ -233,6 +238,16 @@ table.grid th.cbk, table.grid td.cbk { width: 34px; padding: 4px; text-align: ce
 }
 .grid-noktalar:hover, .grid-noktalar.on { background: var(--mor2); color: var(--mor) }
 .sag-tus .tk { margin-left: auto; color: var(--mor); font-weight: 700 }
+/* Kolon sirasi oklari - menu satirinin sagi. Ikisi de kucuk ve sessiz durur;
+   asil eylem (goster/gizle) satirin kendisidir. */
+.sag-tus .yan-eylem { margin-left: auto; display: flex; gap: 2px }
+.sag-tus .yan-eylem button {
+  width: 20px; height: 20px; padding: 0; justify-content: center;
+  border: 1px solid var(--cizgi); background: var(--yuz2); border-radius: 3px;
+  font-size: 11px; color: var(--soluk);
+}
+.sag-tus .yan-eylem button:hover:not(:disabled) { background: var(--mor2); color: var(--mor) }
+.sag-tus .yan-eylem button:disabled { opacity: .35 }
 .sag-tus .ayr { height: 1px; background: var(--cizgi2); margin: 4px 6px }
 table.grid tr.flt th { padding: 5px 8px; background: var(--yuz2) }
 table.grid tr.flt input {

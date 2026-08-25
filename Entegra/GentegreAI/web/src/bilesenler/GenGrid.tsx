@@ -107,6 +107,28 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const [gruplar, setGruplar] = useState<ListeYaniti['gruplar']>();
   /** Satirlarin hangi kolona gore obeklendigi (sunucudan; yoksa gruplama yok). */
   const [grupKolonu, setGrupKolonu] = useState<string | null>(null);
+  /**
+   * KULLANICI GRUPLAMASI (uc nokta > Gruplama). Sunucudan gelen `grupKolonu`
+   * kaynagin KENDI gruplamasidir (ör. ekstrede para birimi); kullanici secince
+   * onun yerine bu gecer. Gruplanan kolon ayni zamanda ILK SIRALAMA olur -
+   * yoksa ayni grubun satirlari listeye dagilir ve baslik defalarca cizilir.
+   */
+  const [kullaniciGrup, setKullaniciGrup] = useState<string | null>(null);
+  /**
+   * SATIR YUKSEKLIGI: sik / normal / genis. Uzun listelerde daha cok satir
+   * gormek isteyen ile okunakli aralik isteyen kullanici ayni ekrani paylasiyor;
+   * secim tarayicida saklanir (kaynak farketmeksizin tek tercih).
+   */
+  const [satirBoyu, setSatirBoyu] = useState<'sik' | 'normal' | 'genis'>(() => {
+    try {
+      const v = localStorage.getItem('grid.satirBoyu');
+      return v === 'sik' || v === 'genis' ? v : 'normal';
+    } catch { return 'normal' }
+  });
+  const satirBoyuSec = (v: 'sik' | 'normal' | 'genis') => {
+    setSatirBoyu(v);
+    try { localStorage.setItem('grid.satirBoyu', v) } catch { /* gizli sekme */ }
+  };
   const [sayfa, setSayfa] = useState(1);
   const [sirala, setSirala] = useState<Siralama[]>([]);
   const [arama, setArama] = useState('');
@@ -462,6 +484,22 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
     return () => { window.removeEventListener('click', kapat); window.removeEventListener('scroll', kapat, true) };
   }, [gridMenuKonum]);
 
+  /**
+   * KOLON YERINI DEGISTIR (uc nokta > Kolon Sırası). Gorunur kolonlar arasinda
+   * tasir; secim kolon gorunurlugu ile ayni yerde saklanir. Sunucudaki katalog
+   * sirasi bozulmaz - bu yalniz KULLANICININ ekranidir.
+   */
+  const kolonTasi = (ad: string, yon: -1 | 1) => {
+    const i = kolonlar.findIndex(k => k.ad === ad);
+    const j = i + yon;
+    if (i < 0 || j < 0 || j >= kolonlar.length) return;
+    const yeni = [...kolonlar];
+    [yeni[i], yeni[j]] = [yeni[j], yeni[i]];
+    setKolonlar(yeni);
+    try { localStorage.setItem(`grid.kolon.${kaynak}`, JSON.stringify(yeni.map(k => k.ad))) }
+    catch { /* gizli sekme */ }
+  };
+
   /** Kolon gorunurlugu: secim tarayicida kaynak basina saklanir. */
   const kolonDegistir = (kolon: KolonMeta) => {
     const yeniAdlar = kolonlar.some(k => k.ad === kolon.ad)
@@ -490,7 +528,12 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
    * secenekler (gorunum, Son/Sik Aranan) burada TEKRAR durur: kullanici tek
    * yerden hepsine ulasabilsin diye - menu "gridin ayar penceresi" gibi calisir.
    */
-  type MenuOgesi = { ik: string; ad: string; secili?: boolean; devre?: string; ayrac?: boolean; fn(): void };
+  type MenuOgesi = {
+    ik: string; ad: string; secili?: boolean; devre?: string; ayrac?: boolean; fn(): void;
+    /** Satirin sagindaki kucuk dugmeler (kolon sirasi: yukari/asagi). Menu
+        bunlara basilinca KAPANMAZ - ust uste tasima yapilabilsin. */
+    yan?: { ik: string; ipucu: string; devre?: boolean; fn(): void }[];
+  };
   /**
    * UC NOKTA menusu YALNIZ GRIDLE ilgili islemleri tasir (kullanici): yenile,
    * disa aktar, satir filtresi, siralama, secim, sayfa boyu, kolonlar.
@@ -538,14 +581,47 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       fn: () => { setAyarBoyut(n); setSayfa(1) },
     })),
 
-    // Kolon gorunurlugu - secim tarayicida saklanir, "Varsayılan Kolonlar" geri alir.
-    ...tumKolonlar.map((k, i) => ({
-      ik: kolonlar.some(x => x.ad === k.ad) ? '☑' : '☐',
-      ad: k.baslik, secili: kolonlar.some(x => x.ad === k.ad), ayrac: i === 0,
-      fn: () => kolonDegistir(k),
+    // GRUPLAMA (kullanici): secilen kolon ayni zamanda ILK SIRALAMA olur -
+    //   yoksa ayni grubun satirlari listeye dagilir, baslik defalarca cizilir.
+    //   Gruplanabilir kolonlar: siralanabilir olanlar (sunucu o alana gore
+    //   siralayabiliyorsa gruplama da anlamlidir).
+    { ik: '⊟', ad: 'Gruplama Yok', secili: !kullaniciGrup, ayrac: true,
+      fn: () => { setKullaniciGrup(null); setSirala([]); setSayfa(1) } },
+    ...kolonlar.filter(k => k.siralanabilir !== false).map(k => ({
+      ik: '⊞', ad: `Grupla: ${k.baslik}`, secili: kullaniciGrup === k.ad,
+      fn: () => {
+        setKullaniciGrup(k.ad);
+        setSirala([{ alan: k.ad, yon: 'asc' as const }]);
+        setSayfa(1);
+      },
     })),
+
+    // SATIR YUKSEKLIGI - tercih tarayicida, tum gridler icin ortak.
+    { ik: '≡', ad: 'Satır: Sık', secili: satirBoyu === 'sik', ayrac: true,
+      fn: () => satirBoyuSec('sik') },
+    { ik: '≡', ad: 'Satır: Normal', secili: satirBoyu === 'normal',
+      fn: () => satirBoyuSec('normal') },
+    { ik: '≡', ad: 'Satır: Geniş', secili: satirBoyu === 'genis',
+      fn: () => satirBoyuSec('genis') },
+
+    // Kolon gorunurlugu - secim tarayicida saklanir, "Varsayılan Kolonlar" geri alir.
+    //   Gorunur kolonlarda ayrica ↑ / ↓ ile SIRA degistirilir (kullanici).
+    ...tumKolonlar.map((k, i) => {
+      const gorunur = kolonlar.some(x => x.ad === k.ad);
+      const sira = kolonlar.findIndex(x => x.ad === k.ad);
+      return {
+        ik: gorunur ? '☑' : '☐',
+        ad: k.baslik, secili: gorunur, ayrac: i === 0,
+        fn: () => kolonDegistir(k),
+        yan: gorunur ? [
+          { ik: '↑', ipucu: 'Sola al', devre: sira <= 0, fn: () => kolonTasi(k.ad, -1) },
+          { ik: '↓', ipucu: 'Sağa al', devre: sira < 0 || sira >= kolonlar.length - 1,
+            fn: () => kolonTasi(k.ad, 1) },
+        ] : undefined,
+      };
+    }),
     { ik: '↺', ad: 'Varsayılan Kolonlar', devre: tumKolonlar.length ? undefined : 'Kolon yok',
-      fn: kolonlariSifirla },
+      fn: () => { kolonlariSifirla(); setKullaniciGrup(null) } },
   ];
 
   return (
@@ -703,7 +779,8 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
             <div className="gridkaydir">
               <GridTablo
                 kolonlar={kolonlar} satirlar={satirlar} yukleniyor={yukleniyor}
-                gruplar={gruplar} grupKolonu={grupKolonu}
+                gruplar={gruplar} grupKolonu={kullaniciGrup ?? grupKolonu}
+                satirBoyu={satirBoyu}
                 gorunenToplamlar={gorunenToplamlar} toplamSeridiVar={toplamSeridiVar}
                 sayfa={sayfa} sonSayfa={sonSayfa}
                 secili={secili} sayfaIdleri={sayfaIdleri} secimiUygula={secimiUygula}
@@ -752,6 +829,17 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
               >
                 <span>{o.ik} {o.ad}</span>
                 {o.secili && <span className="tk">✓</span>}
+                {/* Kolon sirasi oklari: menu KAPANMAZ, ust uste tasima yapilir. */}
+                {o.yan && (
+                  <span className="yan-eylem" onClick={e => e.stopPropagation()}>
+                    {o.yan.map(y => (
+                      <button key={y.ik} type="button" title={y.ipucu} disabled={y.devre}
+                              onClick={e => { e.stopPropagation(); if (!y.devre) y.fn() }}>
+                        {y.ik}
+                      </button>
+                    ))}
+                  </span>
+                )}
               </button>
             </div>
           ))}

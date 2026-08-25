@@ -12,14 +12,14 @@ import type { KolonMeta, ListeSatiri, ListeYaniti } from '../../api/sozlesme';
  */
 export function GridTablo(p: GridTabloProps) {
   const {
-    kolonlar, satirlar, yukleniyor, gruplar, grupKolonu, gorunenToplamlar,
+    kolonlar, satirlar, yukleniyor, gruplar, grupKolonu, gorunenToplamlar, satirBoyu,
     toplamSeridiVar, sayfa, sonSayfa, secili, sayfaIdleri, secimiUygula,
     satirSecimiDegistir, hepsiSecili, hepsiRef, satirTiklandi, satirTiklaninca,
     satirSinifi, setSeciliSatir, setSagTusKonumu, siraIsareti, siralamaDegistir,
     filtreAcik, filtreSatiriDegisti, gridMenuKonum, setGridMenuKonum, aksiyonEkrani,
   } = p;
   return (
-<table className="grid">
+<table className={`grid boy-${satirBoyu ?? 'normal'}`}>
   <colgroup>
     <col style={{ width: 34 }} />
     {kolonlar.map(k => <col key={k.ad} style={k.genislik ? { width: k.genislik } : undefined} />)}
@@ -186,6 +186,8 @@ export interface GridTabloProps {
   /** Sunucudan gelen grup ozetleri (grupli listelerde ara toplam satirlari). */
   gruplar: ListeYaniti['gruplar'];
   grupKolonu: string | null;
+  /** Satir yuksekligi tercihi (uc nokta menusu) - tabloya sinif olarak gecer. */
+  satirBoyu?: 'sik' | 'normal' | 'genis';
   /** Alt toplam seridi: gorunen toplam degerleri ve seridin cizilip cizilmeyecegi. */
   /** [kolon adi, deger] ciftleri - alt toplam seridi. */
   gorunenToplamlar: [string, unknown][];
