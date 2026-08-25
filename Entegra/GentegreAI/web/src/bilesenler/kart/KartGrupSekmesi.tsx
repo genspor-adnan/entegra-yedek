@@ -41,14 +41,7 @@ const adsiz = (gruplanmis.find(([b]) => !b)?.[1] ?? []).filter(a => !gizli.has(a
 // Cari'ya ozel: Iletisim + Notlar ayni (sol) sutunda ust-alt, Tanımlama sagda.
 const iletisim = adli.find(([b]) => b === 'İletişim');
 const notlar = adli.find(([b]) => b === 'Notlar');
-/* Cek/senede ozel (kullanici): TARIH kutusu ve TARAF ayni sol sutunda ust-alt.
-   Ikisi de kisa; yan yana konunca sag tarafta Banka/Diğer ile birlikte dort
-   dar kutu olup satir kirilliyordu. */
-const csTarih = kaynak === 'cek-senet' ? adli.find(([b]) => b === 'Tutar / Vade') : undefined;
-const csTaraf = kaynak === 'cek-senet' ? adli.find(([b]) => b === 'Taraf') : undefined;
-const digerAdli = adli.filter(([b]) =>
-  b !== 'İletişim' && b !== 'Notlar'
-  && !(csTarih && b === 'Tutar / Vade') && !(csTaraf && b === 'Taraf'));
+const digerAdli = adli.filter(([b]) => b !== 'İletişim' && b !== 'Notlar');
 const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
 const acilDetay = meta.detaylar.find(d => d.ad === 'acilKisiler');
 const iletisimAlanAdlari = new Set(['telefon', 'cepTel', 'eposta', 'epostaWeb']);
@@ -96,22 +89,6 @@ const adliBlok = (
         adli.length===0 oldugu icin butun kasira hic acilmiyordu). */}
     {(adli.length > 0 || personelGibiKart) && (
       <div className="kasira">
-        {(csTarih || csTaraf) && (
-          <div className="kasutun">
-            {csTarih && (
-              <div className="kagrup">
-                {/* Baslik gizli (kullanici) - cerceve kaliyor. */}
-                <div className="alan-izgara tek-sutun">{renderAlanListesi(csTarih[1])}</div>
-              </div>
-            )}
-            {csTaraf && (
-              <div className="kagrup">
-                <h6>{csTaraf[0]}</h6>
-                <div className="alan-izgara tek-sutun">{renderAlanListesi(csTaraf[1])}</div>
-              </div>
-            )}
-          </div>
-        )}
         {iletisim && (
           <div className="kasutun">
             <div className="kagrup">
@@ -164,13 +141,9 @@ const adliBlok = (
           const hastaVergiNoAlan = kaynak === 'hasta' && aktif.baslik === 'Fatura Bilgileri' && altBaslik === 'Fatura / Vergi Kimligi'
             ? meta.alanlar.find(a => a.ad === 'vkno')
             : undefined;
-          /* CEK/SENET: "Tutar / Vade" kutusunun BASLIGI gizli, cercevesi
-             kalir (kullanici) - iki kisa alan icin ayrica baslik yazmak
-             gereksiz gorunuyordu. */
-          const baslikGizli = kaynak === 'cek-senet' && altBaslik === 'Tutar / Vade';
           return (
             <div className="kagrup" key={altBaslik}>
-              {!baslikGizli && <h6>{altBaslik}</h6>}
+              <h6>{altBaslik}</h6>
               <div className="alan-izgara tek-sutun">
                 {ciftliAlanlar.map((cift, i) => cift.length > 0 && (
                   <div className="adres-satir" key={i}>{renderAlanListesi(cift)}</div>
