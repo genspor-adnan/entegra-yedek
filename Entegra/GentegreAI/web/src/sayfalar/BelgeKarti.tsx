@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru, type ListeSatiri } from '../api/sozlesme';
@@ -12,7 +12,7 @@ import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { KasaIslemKarti } from './KasaIslemKarti';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { para } from '../bilesenler/bicim';
-import { type SatirDurumu, bosSatir, tarihSaat, iskonatoMetni, satirTutari } from './belgeSatir';
+import { type SatirDurumu, bosSatir, satirTutari } from './belgeSatir';
 import {
   YEREL_PARA_VARSAYILAN, GERIYE_GUN_VARSAYILAN, yerelAnMetni,
   LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, KAPANMA_ETIKET, SEKMELER,
@@ -21,6 +21,7 @@ import { KalemPenceresi } from '../bilesenler/belge/KalemPenceresi';
 import {
   TasiyiciSekmesi, EBelgeSekmesi, FaturalamaSekmesi,
 } from '../bilesenler/belge/BelgeSekmeleri';
+import { KalemSekmesi, TahsilatSekmesi } from '../bilesenler/belge/KalemSekmesi';
 
 /**
  * TarafArama ile doldurulan baslik alani (cari, satis temsilcisi...).
@@ -1082,214 +1083,16 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         </div>
 
         {aktifSekme === 'kalem' && (
-        <>
-        <div className="kagrup">
-          <h6>
-            Kalemler
-            {/* Ekle / Duzenle / Sil - YALNIZ IKON (yer kazanmak icin), ne
-                yaptiklari title'da. Dugmeler kesin belgede de GORUNUR, yalnizca
-                pasif: kaybolunca kullanici "nereye gitti" diye ariyordu. */}
-            <button type="button" className="d bir ikon"
-                    disabled={kilitli || transferBaslikEksigi !== null}
-                    title={kilitli ? 'Kesin belgeye satır eklenemez (İptal edip yeniden kesin).'
-                          : transferBaslikEksigi
-                          ? `Önce başlıkta ${transferBaslikEksigi} seçin.`
-                          : 'Satır ekle'}
-                    onClick={() => setStokArama(true)}>
-              ＋
-            </button>
-            <button type="button" className="d ikon"
-                    disabled={kilitli || seciliSatirlar.size !== 1}
-                    title={kilitli ? 'Kesin belge satırı düzenlenemez.'
-                          : seciliSatirlar.size === 0 ? 'Önce bir satır seçin'
-                          : seciliSatirlar.size > 1 ? 'Tek satır seçin' : 'Seçili satırı düzenle'}
-                    onClick={() => {
-                      const anahtar = [...seciliSatirlar][0];
-                      const satir = satirlar.find(x => x.anahtar === anahtar);
-                      if (satir) setKalem(satir);
-                    }}>
-              ✎
-            </button>
-            <button type="button" className="d teh ikon"
-                    disabled={kilitli || seciliSatirlar.size === 0}
-                    title={kilitli ? 'Kesin belgeden satır silinemez.'
-                          : seciliSatirlar.size === 0 ? 'Önce satır seçin'
-                          : `Seçili ${seciliSatirlar.size} satırı sil`}
-                    onClick={seciliSil}>
-              🗑
-            </button>
-          </h6>
-
-          {/* Grid SALT GORUNUM (mockup deseni): hucre ici input yok, satir secimi
-              onay kutusuyla, ekleme/duzenleme ayri kalem penceresinde. Boylece
-              satirlar okunakli kalir ve yanlislikla ustune yazilmaz. */}
-          <table className="detay-tablo secilebilir">
-            <thead>
-              <tr>
-                <th style={{ width: 30 }} className="hiza-orta">
-                  <input type="checkbox"
-                         checked={satirlar.length > 0 && seciliSatirlar.size === satirlar.length}
-                         onChange={e => setSeciliSatirlar(
-                           e.target.checked ? new Set(satirlar.map(x => x.anahtar)) : new Set())} />
-                </th>
-                <th style={{ width: 34 }} className="hiza-orta">Tip</th>
-                <th style={{ width: 110 }}>Kod</th>
-                <th>Stok / Hizmet</th>
-                <th style={{ width: 200 }}>Açıklama</th>
-                <th className="hiza-sag" style={{ width: 90 }}>Miktar</th>
-                {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 80 }}>İskonto %</th>}
-                {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 70 }}>KDV %</th>}
-                {/* Transferde FIYAT YOK: mal satilmiyor, depo degistiriyor. */}
-                {bilgi.kalem !== 'miktar' && <th className="hiza-sag" style={{ width: 100 }}>Br. Fiyat</th>}
-                {bilgi.kalem !== 'miktar' && <th className="hiza-sag" style={{ width: 120 }}>Tutar</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {satirlar.map((r, sira) => {
-                const adet = Number(r.adet.replace(',', '.')) || 0;
-                const fiyat = Number(r.birimFiyat.replace(',', '.')) || 0;
-                const tutar = satirTutari(adet, fiyat, r.iskonto, r.iskonto2);
-                const secili = seciliSatirlar.has(r.anahtar);
-                // Izlemli kalemin lotlari ALTINDA acilir (master-detail):
-                //   hangi lottan kac adet oldugu kalemi acmadan gorunsun.
-                const lotlar = r.izlemler ?? [];
-                const acik = lotlar.length > 0 && !kapaliLotlar.has(r.anahtar);
-                const kolonSayisi = bilgi.kalem === 'miktar' ? 6 : bilgi.kalem === 'sade' ? 8 : 10;
-                return (
-                  <Fragment key={r.anahtar}>
-                  <tr className={secili ? 'secili' : ''}
-                      onClick={e => satirTikla(sira, e)}
-                      onDoubleClick={() => !kilitli && setKalem(r)}>
-                    <td className="hiza-orta">
-                      {/* Onay kutusu TEK satiri ekler/cikarir - satir tiklamasi
-                          (duz tik = yalniz o satir) tetiklenmesin. */}
-                      <input type="checkbox" checked={secili}
-                             onClick={e => e.stopPropagation()}
-                             onChange={() => { sonTiklanan.current = sira; secimDegis(r.anahtar) }} />
-                    </td>
-                    {/* Tip IKON: metin kolonu yer kapliyordu, anlami title'da. */}
-                    <td className="hiza-orta" title={r.satirTur === 2 ? 'Hizmet' : 'Stok'}>
-                      {r.satirTur === 2 ? '🛠️' : '📦'}
-                    </td>
-                    <td><code>{r.stokKodu}</code></td>
-                    <td>
-                      {/* Lotlu kalemde ac/kapa oku - detay satirlari onun altinda. */}
-                      {lotlar.length > 0 && (
-                        <button type="button" className="lot-ok"
-                                title={acik ? 'Lotları gizle' : 'Lotları göster'}
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  setKapaliLotlar(k => {
-                                    const y = new Set(k);
-                                    if (y.has(r.anahtar)) y.delete(r.anahtar); else y.add(r.anahtar);
-                                    return y;
-                                  });
-                                }}>
-                          {acik ? '▾' : '▸'}
-                        </button>
-                      )}
-                      {r.stokAdi || <span className="sonuk">(stok seçilmedi)</span>}
-                    </td>
-                    <td className="sonuk">{r.aciklama}</td>
-                    <td className="hiza-sag">{adet.toLocaleString('tr-TR')}</td>
-                    {/* Iki iskonto varsa ikisi de gorunsun: "%10 + %5". */}
-                    {bilgi.kalem === 'tam' && <td className="hiza-sag">{iskonatoMetni(r)}</td>}
-                    {bilgi.kalem === 'tam' && <td className="hiza-sag">%{r.kdv}</td>}
-                    {bilgi.kalem !== 'miktar' && <td className="hiza-sag">{para.format(fiyat)}</td>}
-                    {bilgi.kalem !== 'miktar' && <td className="hiza-sag"><b>{para.format(tutar)}</b></td>}
-                  </tr>
-                  {/* DETAY: kalemin lot dagilimi. Kalem satirinin bir parcasi -
-                      ayri kolon basligi yok, kendi mini basligiyla gelir. */}
-                  {acik && lotlar.length > 0 && (
-                    <tr className="lot-detay">
-                      <td />
-                      <td colSpan={kolonSayisi - 1}>
-                        <table className="lot-tablo">
-                          <thead>
-                            <tr>
-                              <th>Lot No</th>
-                              <th>Seri No</th>
-                              <th>Ürt. Tarihi</th>
-                              <th>SKT</th>
-                              <th className="hiza-sag">Miktar</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {lotlar.map((z, li) => (
-                              <tr key={z.seriLotId ?? li}>
-                                <td><code>{z.lotNo || '—'}</code></td>
-                                <td>{z.seriNo || '—'}</td>
-                                <td>{z.uretimTarihi ? z.uretimTarihi.split('-').reverse().join('.') : '—'}</td>
-                                <td>{z.sonKullanmaTarihi ? z.sonKullanmaTarihi.split('-').reverse().join('.') : '—'}</td>
-                                <td className="hiza-sag">
-                                  {(Number(String(z.miktar).replace(',', '.')) || 0).toLocaleString('tr-TR')}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </td>
-                    </tr>
-                  )}
-                  </Fragment>
-                );
-              })}
-              {satirlar.length === 0 && (
-                <tr><td colSpan={bilgi.kalem === 'miktar' ? 6 : bilgi.kalem === 'sade' ? 8 : 10} className="bos">
-                  {transferBaslikEksigi
-                    ? `Kalem eklemek için önce başlıkta ${transferBaslikEksigi} seçin.`
-                    : 'Kalem yok — “＋” ile ekleyin.'}
-                </td></tr>
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="genel">
-                <td colSpan={5} className="hiza-sag">TOPLAM</td>
-                <td className="hiza-sag">
-                  {satirlar.reduce((t, r) => t + (Number(r.adet.replace(',', '.')) || 0), 0)
-                           .toLocaleString('tr-TR')}
-                </td>
-                {bilgi.kalem !== 'miktar' && <td colSpan={bilgi.kalem === 'sade' ? 1 : 3} />}
-                {bilgi.kalem !== 'miktar' && <td className="hiza-sag">{para.format(onizleme.matrah)}</td>}
-              </tr>
-            </tfoot>
-          </table>
-          {!kilitli && satirlar.length > 0 && (
-            <div className="not">
-              Satırı düzenlemek için çift tıklayın.
-              {(depoBelgesi || stokFisiMi) && ` Kalem eklendiği için başlık (${stokFisiMi ? 'tip, depo' : talepMi ? 'depolar, talep eden' : 'depolar, teslim eden/alan'}, tarih) kilitlendi — değiştirmek için kalemleri silin.`}
-            </div>
-          )}
-        </div>
-
-        {/* Transferde dip toplam YOK: para degil miktar hareketi. */}
-        {bilgi.kalem !== 'miktar' && (
-        <div className="kagrup dip-toplam">
-          <h6>{sonuc ? 'Dip Toplam (sunucu)' : 'Dip Toplam (önizleme)'}</h6>
-          {sonuc ? (
-            <table className="dip-tablo">
-              <tbody>
-                {sonuc.dipToplam.map((d, i) => (
-                  <tr key={i} className={d.tur === 20 ? 'genel' : ''}>
-                    <td>{d.aciklama}</td>
-                    <td className="hiza-sag">{para.format(d.deger)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <table className="dip-tablo">
-              <tbody>
-                <tr><td>Ara Toplam</td><td className="hiza-sag">{para.format(onizleme.matrah)}</td></tr>
-                <tr><td>KDV</td><td className="hiza-sag">{para.format(onizleme.kdv)}</td></tr>
-                <tr className="genel"><td>Genel Toplam</td><td className="hiza-sag">{para.format(onizleme.genel)}</td></tr>
-              </tbody>
-            </table>
-          )}
-          {!kilitli && <div className="not">Kesin tutar sunucuda hesaplanır; buradaki değerler önizlemedir.</div>}
-        </div>
-        )}
-        </>
+          <KalemSekmesi
+            satirlar={satirlar}
+            seciliSatirlar={seciliSatirlar} setSeciliSatirlar={setSeciliSatirlar}
+            kapaliLotlar={kapaliLotlar} setKapaliLotlar={setKapaliLotlar}
+            kilitli={kilitli} bilgi={bilgi} onizleme={onizleme} sonuc={sonuc}
+            transferBaslikEksigi={transferBaslikEksigi}
+            depoBelgesi={depoBelgesi} stokFisiMi={stokFisiMi} talepMi={talepMi}
+            setStokArama={setStokArama} setKalem={setKalem} seciliSil={seciliSil}
+            satirTikla={satirTikla} sonTiklanan={sonTiklanan} secimDegis={secimDegis}
+          />
         )}
 
         {/* ========================================= TASIYICI / SEVKIYAT ==== */}
@@ -1320,85 +1123,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             donusumler={donusumler} kayitliId={kayitliId} setDonusum={setDonusum}
           />
         )}
-        {aktifSekme === 'tahsilat' && (() => {
-          const genel = Number(sonuc?.belge.genelToplam ?? 0);
-          const tahsil = tahsilatlar.reduce((t, k) => t + (Number(k.yerelTutar ?? k.tutar ?? 0) || 0), 0);
-          const kalan = Math.round((genel - tahsil) * 100) / 100;
-          return (
-            <div className="kagrup">
-              {/* Tahsilat araclari: Nakit 21 / Banka 22 / POS 25 - hepsi ayni
-                  modali (kasa karti) cari + tutar onyuklu acar. Cek/Senet kasa
-                  planinin F5 fazinda (cek_senet tablosu) baglanacak. */}
-              <div className="katoolbar" style={{ margin: 10 }}>
-                {/* Tahsilat ARACI adiyla: yanindaki POS / Cek-Senet ile ayni
-                    dizide - bu dugme NAKIT tahsilat (tur 21) acar. */}
-                {/* Alista ODEME turleri (31/32/35), satista tahsilat (21/22/25). */}
-                <button className="d bir" disabled={!kayitliId}
-                        title={kayitliId ? `Nakit ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç` : 'Önce belgeyi kaydedin.'}
-                        onClick={() => tahsilatAc(alisMi ? 31 : 21)}>
-                  💵 Nakit
-                </button>
-                <button className="d bir" disabled={!kayitliId}
-                        title={kayitliId ? `Banka (havale/EFT) ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç` : 'Önce belgeyi kaydedin.'}
-                        onClick={() => tahsilatAc(alisMi ? 32 : 22)}>
-                  🏦 Banka
-                </button>
-                <button className="d bir" disabled={!kayitliId}
-                        title={kayitliId ? `Kredi kartı / POS ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç` : 'Önce belgeyi kaydedin.'}
-                        onClick={() => tahsilatAc(alisMi ? 35 : 25)}>
-                  💳 POS
-                </button>
-                <button className="d" disabled title="Çek/senet girişi F5'te bağlanacak">🧾 Çek/Senet Al</button>
-              </div>
-              <table className="detay-tablo">
-                <thead>
-                  <tr>
-                    <th style={{ width: 140 }}>Tarih / Saat</th>
-                    <th style={{ width: 120 }}>Makbuz No</th>
-                    <th style={{ width: 180 }}>Tür</th>
-                    <th>Kasa / Banka</th>
-                    <th className="hiza-sag" style={{ width: 130 }}>Tutar</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tahsilatlar.map((k, i) => (
-                    <tr key={i}>
-                      {/* Tarih + saat: ayni gun birden fazla tahsilat olunca
-                          sira ancak saatle anlasiliyordu. */}
-                      <td>{tarihSaat(k.islemTarihi)}</td>
-                      <td>{String(k.islemNo ?? '')}</td>
-                      <td>{String(k.turAdi ?? '')}</td>
-                      <td>{String(k.hesapAdi ?? '') || <span className="sonuk">—</span>}</td>
-                      <td className="hiza-sag">{para.format(Number(k.yerelTutar ?? k.tutar ?? 0))}</td>
-                    </tr>
-                  ))}
-                  {tahsilatlar.length === 0 && (
-                    <tr><td colSpan={5} className="bos">
-                      {kayitliId > 0
-                        ? `Bu belgeye bağlı ${alisMi ? 'ödeme' : 'tahsilat'} yok.`
-                        : 'Önce belgeyi kaydedin.'}
-                    </td></tr>
-                  )}
-                </tbody>
-                <tfoot>
-                  <tr className="genel">
-                    <td colSpan={4} className="hiza-sag">
-                      {alisMi ? 'Ödenen / Kalan' : 'Tahsil Edilen / Kalan'}
-                    </td>
-                    <td className="hiza-sag">
-                      {para.format(tahsil)} /{' '}
-                      <b style={{ color: kalan > 0 ? 'var(--hata)' : 'var(--ok)' }}>
-                        {para.format(kalan)}
-                      </b>
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-
-            </div>
-          );
-        })()}
-
+        {aktifSekme === 'tahsilat' && (
+          <TahsilatSekmesi sonuc={sonuc} tahsilatlar={tahsilatlar}
+                           kayitliId={kayitliId} alisMi={alisMi} tahsilatAc={tahsilatAc} />
+        )}
         {/* ============================================= IMZA / TESLIM ==== */}
         {aktifSekme === 'imza' && (
           <div className="kagrup">
