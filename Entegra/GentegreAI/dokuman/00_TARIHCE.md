@@ -2783,5 +2783,21 @@ dahil). Regresyon: 12 liste, 4 kart okuma, kart yazma+silme (null alanlarla),
 belge taslağı ve kasa listesi ekranı — hepsi çalışıyor, test kayıtları geri
 alındı.
 
+### Refaktör: kart sekme hesabı / doğrulama, grid sorgu kuralları
+
+- **`GenForm.tsx` 1143 → 1033 satır.** Alan gruplama ve sekme kurma
+  (`alanGruplari`, `sekmeleriKur` + sekme tipi/anahtar yardımcıları)
+  `kartSekmeleri.ts`'e; kaydetme öncesi alan kontrolleri (e-posta, ekrana özel
+  zorunluluk, telefon) `kartDogrulama.ts`'e — üçü sıradan `if` bloklarıyken tek
+  saf fonksiyon oldu, ilk hatayı döndürüyor, kart yalnız gösteriyor.
+- **`GenGrid.tsx` 870 → 844 satır.** Koşul kurma `gridSorgu.ts`'e: hızlı arama,
+  filtre satırı, tarih aralığı ve AND birleştirme. Tarih koşulu ile birleştirme
+  listeleme ve CSV dışa aktarma yollarında **kopyalanmıştı**; artık tek yerde —
+  dışa aktarılan liste ekranda görünenle aynı koşulları kullanıyor.
+
+Doğrulama: `tsc -b` + prod derleme temiz. Ekrandan: kişi kartında geçersiz
+e-posta ile Kaydet → alan altında uyarı ve kayıt engellendi; stok listesinde
+hızlı arama 4.902 → 505 kayıt.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).

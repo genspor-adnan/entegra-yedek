@@ -8,6 +8,9 @@ import { GenKomutPaleti, GenSagTus, GenToolbar, hedefte, useAksiyonlar,
          type AltSecenek } from './Aksiyonlar';
 import { Modal } from './Modal';
 import { durumRozeti, LogTablosu, GORUNUMLER } from './gridHucre';
+import {
+  aramaKosulu, filtreSatiriKosulu, tarihKosulu, filtreBirlestir,
+} from './gridSorgu';
 
 interface Props {
   /** Liste kaynagi: 'cari', 'belge', 'stok' ... */
@@ -199,46 +202,23 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
     return () => { iptal = true };
   }, [kaynak]);
 
-  /** Hizli arama: metin kolonlarinda 'icerir' (sunucuda pg_trgm indeksli, Turkce duyarsiz). */
-  const aramaFiltresi = useCallback((): Kosul | undefined => {
-    const metin = arama.trim();
-    if (!metin) return undefined;
-    const hedefler = kolonlar.filter(k => k.tip === 'metin' && k.filtrelenebilir);
-    if (hedefler.length === 0) return undefined;
-    return { op: 'or', kosullar: hedefler.map(k => ({ alan: k.ad, op: 'icerir', deger: metin })) };
-  }, [arama, kolonlar]);
-
-  /** Sutun basligi altindaki filtre satiri — su an icin metin/kod kolonlarinda "icerir". */
-  const filtreSatiriFiltresi = useCallback((): Kosul | undefined => {
-    const kosullar: Kosul[] = [];
-    kolonlar.forEach(k => {
-      if (k.tip !== 'metin' && k.tip !== 'kod') return;
-      const v = (filtreDeger[k.ad] ?? '').trim();
-      if (v) kosullar.push({ alan: k.ad, op: 'icerir', deger: v });
-    });
-    return kosullar.length ? { op: 'and', kosullar } : undefined;
-  }, [filtreDeger, kolonlar]);
+  // Kosul kurma SAF fonksiyonlarda (gridSorgu): listeleme ve disa aktarma ayni
+  //   mantigi kullansin diye tek yerde.
+  const aramaFiltresi = useCallback(
+    () => aramaKosulu(arama, kolonlar), [arama, kolonlar]);
+  const filtreSatiriFiltresi = useCallback(
+    () => filtreSatiriKosulu(filtreDeger, kolonlar), [filtreDeger, kolonlar]);
 
   const yukle = useCallback(async () => {
     if (kolonlar.length === 0) return;
     setYukleniyor(true);
     setHata(null);
     try {
-      // Tarih araligi: iki uc da doluysa 'arasinda' (ust sinir gun sonuna kadar),
-      //   tek uc verilirse >= / <= olarak uygulanir.
-      const tarihFiltresi: Kosul | undefined =
-        !tarihAlani ? undefined
-        : tarihBas && tarihBit ? { alan: tarihAlani, op: 'arasinda', deger: [tarihBas, tarihBit] }
-        : tarihBas ? { alan: tarihAlani, op: 'buyukEsit', deger: tarihBas }
-        : tarihBit ? { alan: tarihAlani, op: 'kucukEsit', deger: tarihBit }
-        : undefined;
-
-      const parcalar = [sabitFiltre, cipler?.[cipIndeks]?.filtre, tarihFiltresi,
-                        aramaFiltresi(), filtreSatiriFiltresi()]
-        .filter(Boolean) as Kosul[];
-      const filtre = parcalar.length === 0 ? undefined
-        : parcalar.length === 1 ? parcalar[0]
-        : { op: 'and' as const, kosullar: parcalar };
+      const filtre = filtreBirlestir([
+        sabitFiltre, cipler?.[cipIndeks]?.filtre,
+        tarihKosulu(tarihAlani, tarihBas, tarihBit),
+        aramaFiltresi(), filtreSatiriFiltresi(),
+      ]);
 
       const gorunum = aramaGorunumu === 'tum' ? undefined : aramaGorunumu;
       const yanit = await api.liste(kaynak, { sayfa, boyut: sayfaBoyu, sirala, filtre, toplam, gorunum });
@@ -391,18 +371,12 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const csvIndir = useCallback(async () => {
     setYukleniyor(true);
     try {
-      const parcalar = [sabitFiltre, cipler?.[cipIndeks]?.filtre, aramaFiltresi(), filtreSatiriFiltresi()]
-        .filter(Boolean) as Kosul[];
-      const tarihFiltresi: Kosul | undefined =
-        !tarihAlani ? undefined
-        : tarihBas && tarihBit ? { alan: tarihAlani, op: 'arasinda', deger: [tarihBas, tarihBit] }
-        : tarihBas ? { alan: tarihAlani, op: 'buyukEsit', deger: tarihBas }
-        : tarihBit ? { alan: tarihAlani, op: 'kucukEsit', deger: tarihBit }
-        : undefined;
-      if (tarihFiltresi) parcalar.push(tarihFiltresi);
-      const filtre = parcalar.length === 0 ? undefined
-        : parcalar.length === 1 ? parcalar[0]
-        : { op: 'and' as const, kosullar: parcalar };
+      // Listeleme ile AYNI kosullar (gridSorgu): disa aktarilan ne gorunuyorsa odur.
+      const filtre = filtreBirlestir([
+        sabitFiltre, cipler?.[cipIndeks]?.filtre,
+        aramaFiltresi(), filtreSatiriFiltresi(),
+        tarihKosulu(tarihAlani, tarihBas, tarihBit),
+      ]);
 
       const gorunum = aramaGorunumu === 'tum' ? undefined : aramaGorunumu;
       const tumu: ListeSatiri[] = [];
