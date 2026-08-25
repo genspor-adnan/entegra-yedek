@@ -164,7 +164,11 @@ public static partial class KartKatalogu
             new("bankaId",       "banka_id",        "kod",   KodTablosu: "public.v_banka_lookup", Baslik: "Banka", Grup: "Genel", AltGrup: "Banka"),
             new("bankaSubeId",   "banka_sube_id",   "kod",   KodTablosu: "public.v_banka_sube_lookup", BagliAlan: "bankaId", Baslik: "Şube", Grup: "Genel", AltGrup: "Banka"),
             new("hesapNo",       "hesap_no",        "metin", EnFazlaUzunluk: 30, Baslik: "Hesap No", Grup: "Genel", AltGrup: "Banka"),
-            new("hesapId",       "hesap_id",        "kod",   Yazilabilir: false, KodTablosu: "public.v_hesap_lookup", Baslik: "Bulunduğu Hesap", Grup: "Genel", AltGrup: "Banka"),
+            // "Bulunduğu Hesap" KARTTAN KALKTI (kullanici): kiymetin hangi
+            //   hesapta oldugu ELLE girilmez, portfoy aksiyonlariyla (tahsile
+            //   ver / bozdur / ciro) degisir. Kolon veri olarak duruyor -
+            //   liste ve portfoy raporu okumaya devam eder.
+            new("hesapId",       "hesap_id",        "kod",   Yazilabilir: false, KodTablosu: "public.v_hesap_lookup", Baslik: "Bulunduğu Hesap", Gizli: true),
             new("projeId",       "proje_id",        "kod",   KodTablosu: "public.v_proje_lookup", Baslik: "Proje", Grup: "Genel", AltGrup: "Diğer"),
             new("makbuzNo",      "makbuz_no",       "metin", EnFazlaUzunluk: 30, Baslik: "Makbuz No", Grup: "Genel", AltGrup: "Diğer"),
             new("aciklama",      "aciklama",        "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama", Grup: "Genel", AltGrup: "Diğer"),
