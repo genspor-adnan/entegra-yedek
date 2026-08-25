@@ -156,7 +156,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         sonKurAnahtari.current = null;   // yeni kartta kur cekilsin
         // Katalog istiyorsa (cek/senet) kart acilir acilmaz CARI secimi gelsin -
         //   yeni kayitta ilk is odur; kullanici kapatip alandan da secebilir.
-        if (m.acilistaTarafSecimi) setTarafSecimAcik(true);
+        // Cari ZATEN geldiyse (belge kartindan acilan cek/senet: siparisin
+        //   carisi onyuklu) secim ekrani ACILMAZ - kullaniciya bildigi seyi
+        //   ikinci kez sormak akisi kesiyordu.
+        if (m.acilistaTarafSecimi
+            && !(baslangic[m.acilistaTarafSecimi] as Deger | undefined))
+          setTarafSecimAcik(true);
         setSurum(undefined);
         setDetaylar(bosDetaylar);
       } else {
