@@ -168,8 +168,16 @@ export function alanCizici(b: AlanCizimBaglami) {
      */
     const renderAlanListesi = (alanlar: KartAlanMeta[]) => {
       const eslesenler = new Set(alanlar.map(a => a.eslesAlan).filter(Boolean));
+      /* DOVIZLI DEGILSE kur ve yerel karsilik CIZILMEZ (kullanici, tahsilat
+         ekranindaki davranisin aynisi): TL bir cekte "Kur 1" ve "Yerel Tutar"
+         alanlari bilgi tasimadan yer kapliyordu. Doviz secilince ikisi de
+         kendiliginden gelir. */
+      const yerelMi = !doviz
+        || String(deger[doviz.cinsAlani] ?? doviz.yerelPara) === doviz.yerelPara;
       return alanlar
         .filter(a => !eslesenler.has(a.ad))
+        .filter(a => !(yerelMi && doviz
+                       && (a.ad === doviz.kurAlani || a.ad === doviz.yerelAlani)))
         .map(a => {
           const hedef = a.eslesAlan ? alanlar.find(x => x.ad === a.eslesAlan) : undefined;
           if (!hedef) return renderAlan(a);

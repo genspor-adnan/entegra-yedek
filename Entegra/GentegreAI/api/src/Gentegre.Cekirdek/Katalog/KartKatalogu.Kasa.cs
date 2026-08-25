@@ -143,13 +143,17 @@ public static partial class KartKatalogu
             // Tür ARKA PLANDA: hangi listeden gelindiyse o deger yazilir (Cek/Senet
             //   listesi varsayilani), ekranda hic gorunmez.
             new("tur",           "tur",             "kod",   Zorunlu: true, SabitKodlar: CekSenetTurKodlari, Baslik: "Tür", Gizli: true),
-            new("kesideci",      "kesideci",        "metin", EnFazlaUzunluk: 150, Baslik: "Keşideci", Grup: "Genel", AltGrup: "Taraf"),
-            new("ciroTarafId",   "ciro_taraf_id",   "kod",   Yazilabilir: false, KodTablosu: "public.v_cari_lookup", Baslik: "Ciro Edilen", Grup: "Genel", AltGrup: "Taraf"),
+            // Tarih / Kur / Yerel karsilik kutusu TARAF'IN USTUNDE (kullanici) -
+            //   grup sirasi alan sirasindan turer. Basligi ekranda GIZLI
+            //   (KartGrupSekmesi), yalniz cercevesi kalir: iki kisa alan icin
+            //   ayrica "Tutar / Vade" yazmak gereksiz gorunuyordu.
             new("tarih",         "tarih",           "tarih", Zorunlu: true, Baslik: "Tarih", Grup: "Genel", AltGrup: "Tutar / Vade"),
             new("dovizKuru",     "doviz_kuru",      "para",  Baslik: "Kur", Grup: "Genel", AltGrup: "Tutar / Vade"),
             // Yerel karsilik SUNUCUDA hesaplanir (tutar x kur) - kullanici
             //   yazamaz; yoksa kurla tutarsiz bir yerel tutar kaydedilebilirdi.
             new("yerelTutar",    "yerel_tutar",     "para",  Yazilabilir: false, Baslik: "Yerel Tutar", Grup: "Genel", AltGrup: "Tutar / Vade"),
+            new("kesideci",      "kesideci",        "metin", EnFazlaUzunluk: 150, Baslik: "Keşideci", Grup: "Genel", AltGrup: "Taraf"),
+            new("ciroTarafId",   "ciro_taraf_id",   "kod",   Yazilabilir: false, KodTablosu: "public.v_cari_lookup", Baslik: "Ciro Edilen", Grup: "Genel", AltGrup: "Taraf"),
             new("bankaId",       "banka_id",        "kod",   KodTablosu: "public.v_banka_lookup", Baslik: "Banka", Grup: "Genel", AltGrup: "Banka"),
             new("bankaSubeId",   "banka_sube_id",   "kod",   KodTablosu: "public.v_banka_sube_lookup", BagliAlan: "bankaId", Baslik: "Şube", Grup: "Genel", AltGrup: "Banka"),
             new("hesapNo",       "hesap_no",        "metin", EnFazlaUzunluk: 30, Baslik: "Hesap No", Grup: "Genel", AltGrup: "Banka"),

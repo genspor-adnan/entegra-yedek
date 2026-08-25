@@ -141,9 +141,13 @@ const adliBlok = (
           const hastaVergiNoAlan = kaynak === 'hasta' && aktif.baslik === 'Fatura Bilgileri' && altBaslik === 'Fatura / Vergi Kimligi'
             ? meta.alanlar.find(a => a.ad === 'vkno')
             : undefined;
+          /* CEK/SENET: "Tutar / Vade" kutusunun BASLIGI gizli, cercevesi
+             kalir (kullanici) - iki kisa alan icin ayrica baslik yazmak
+             gereksiz gorunuyordu. */
+          const baslikGizli = kaynak === 'cek-senet' && altBaslik === 'Tutar / Vade';
           return (
             <div className="kagrup" key={altBaslik}>
-              <h6>{altBaslik}</h6>
+              {!baslikGizli && <h6>{altBaslik}</h6>}
               <div className="alan-izgara tek-sutun">
                 {ciftliAlanlar.map((cift, i) => cift.length > 0 && (
                   <div className="adres-satir" key={i}>{renderAlanListesi(cift)}</div>
