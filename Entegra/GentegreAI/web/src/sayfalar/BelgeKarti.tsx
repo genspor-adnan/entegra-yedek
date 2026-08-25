@@ -953,6 +953,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         {stokArama && (
           <StokAramaPenceresi
             etkin={kalem === null}
+            // Belgenin yonu (141): satista yalniz "Satılan", alista yalniz
+            //   "Alınan" isaretli stoklar listelenir. Transfer/talep gibi
+            //   yonsuz belgelerde suzme yok.
+            yon={depoBelgesi || stokFisiMi ? undefined : alisMi ? 'alis' : 'satis'}
             onKapat={() => setStokArama(false)}
             onSec={sec => {
               const hizmet = sec.tip === 'hizmet';

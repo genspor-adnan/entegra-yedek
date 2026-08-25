@@ -135,10 +135,12 @@ export const SEKMELER: {
   { anahtar: 'kalem',    baslik: 'Kalemler' },
   { anahtar: 'tasiyici', baslik: 'Taşıyıcı / Sevkiyat', irsaliye: true },
   { anahtar: 'ebelge',   baslik: 'e-Belge' },
-  // Faturada "Faturalama" (bu belgeden turetilenler) anlamsiz - fatura zincirin
-  //   SONU. Mockup'ta (satis_faturasi.html) onun yerinde TAHSILAT var.
-  { anahtar: 'fatura',   baslik: 'Faturalama', faturaYok: true },
+  // TAHSILAT, Faturalama'nin SOLUNDA (kullanici): siparis once tahsil edilir
+  //   (avans), sonra faturalanir - sekme sirasi bu akisi izlesin.
+  //   Faturada "Faturalama" (bu belgeden turetilenler) zaten anlamsiz - fatura
+  //   zincirin SONU (faturaYok).
   { anahtar: 'tahsilat', baslik: 'Tahsilat',   faturaMi: true },   // alista "Ödeme" olur
+  { anahtar: 'fatura',   baslik: 'Faturalama', faturaYok: true },
   { anahtar: 'imza',     baslik: 'İmza / Teslim', irsaliye: true },
   { anahtar: 'yorum',    baslik: 'Yorum / Medya' },
 ];

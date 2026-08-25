@@ -12,7 +12,7 @@ import { para } from './bicim';
  * o kapaninca kullanici buradan siradaki stogu secer. Boylece on kalemlik bir
  * irsaliye tek arama penceresiyle girilir.
  */
-export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok }: {
+export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yon }: {
   /** Ustunde kalem penceresi acikken false olur; true'ya donunce arama
       kutusuna odak GERI GELIR (ardisik girişte fare gerekmesin). */
   etkin: boolean;
@@ -20,6 +20,14 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok }: {
   onKapat(): void;
   /** Yalniz STOK aranir (paket icerigi gibi hizmet kabul etmeyen yerler). */
   yalnizStok?: boolean;
+  /**
+   * BELGENIN YONU (141): 'satis' ise yalniz `satilan`, 'alis' ise yalniz
+   * `alinan` isaretli stoklar listelenir - kendi urettigimiz mamul alis
+   * siparisinde, satin alinan ambalaj satis faturasinda cikmasin. Verilmezse
+   * (stok karti icerigi, transfer gibi yonsuz yerler) suzme YOK.
+   * HIZMETLERE uygulanmaz: hizmetin alis/satis ayrimi yok.
+   */
+  yon?: 'satis' | 'alis';
 }) {
   const [arama, setArama] = useState('');
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
@@ -38,15 +46,25 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok }: {
     setYukleniyor(true);
     setHata(null);
     try {
-      const filtre = metin.trim()
+      const metinFiltresi = metin.trim()
         ? { op: 'or' as const, kosullar: ['kod', 'ad'].map(alan => ({
             alan, op: 'icerir' as const, deger: metin.trim() })) }
         : undefined;
+      // Hizmet aramasinda metin filtresi AYNEN kullanilir; stok tarafinda
+      //   belgenin yonune gore satilan/alinan bayragi eklenir (141).
+      const filtre = metinFiltresi;
+      const yonKosulu = yon
+        ? { alan: yon === 'alis' ? 'alinan' : 'satilan', op: 'esit' as const, deger: 1 }
+        : null;
+      const stokFiltresi = yonKosulu
+        ? { op: 'and' as const,
+            kosullar: metinFiltresi ? [metinFiltresi, yonKosulu] : [yonKosulu] }
+        : metinFiltresi;
 
       // gorunum: Son/Sik Aranan sunucuda kullanici_arama ile suzulur+siralanir.
       const gorunum = gorunumSecimi === 'tum' ? undefined : gorunumSecimi;
       const [stoklar, hizmetler] = await Promise.all([
-        api.liste('stok',   { sayfa: 1, boyut: 25, filtre, gorunum }),
+        api.liste('stok',   { sayfa: 1, boyut: 25, filtre: stokFiltresi, gorunum }),
         yalnizStok ? Promise.resolve({ satirlar: [] as ListeSatiri[] })
                    : api.liste('hizmet', { sayfa: 1, boyut: 25, filtre, gorunum }),
       ]);
@@ -62,7 +80,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok }: {
       setHata(h instanceof ApiHatasi ? h.message : String(h));
       setSatirlar([]);
     } finally { setYukleniyor(false) }
-  }, [yalnizStok]);
+  }, [yalnizStok, yon]);
 
   useEffect(() => { void ara(arama, aramaGorunumu) }, [ara, aramaGorunumu]);  // eslint-disable-line react-hooks/exhaustive-deps
 

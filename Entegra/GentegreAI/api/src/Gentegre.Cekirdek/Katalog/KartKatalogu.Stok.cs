@@ -48,6 +48,16 @@ public static partial class KartKatalogu
             //   ayni urunun ana depodaki ve konsinye depodaki esigi ayni olmaz.
             //   Kolon veri olarak duruyor; eski degerler panel kritik listesinde
             //   depo esigi tanimlanmamis stoklar icin yedek olarak kullanilir.
+            // SATILIR / ALINIR (141): stogun hangi belge yonunde ARANABILECEGI.
+            //   Kendi urettigimiz mamul alis siparisinde, satin alinan ambalaj
+            //   satis faturasinda listelenmesin. Ikisi de varsayilan ISARETLI.
+            new("satilan",       "satilan",         "mantik", Baslik: "Satılan", AltGrup: "Diğer",
+                                                     EslesAlan: "alinan"),
+            new("alinan",        "alinan",          "mantik", Baslik: "Alınan", AltGrup: "Diğer"),
+            // Kiralik/demirbas gibi geri donup TEKRAR cikabilen kiymet; normal
+            //   ticari mal tuketilir, o yuzden varsayilan isaretsiz.
+            new("yenidenKullanilir", "yeniden_kullanilir", "mantik",
+                                                     Baslik: "Yeniden Kullanılabilir", AltGrup: "Diğer"),
             new("ozelKod",       "ozel_kod",        "metin", EnFazlaUzunluk: 20, AltGrup: "Diğer"),
             new("faturaStokAdi", "fatura_stok_adi", "metin", EnFazlaUzunluk: 200, Baslik: "Faturadaki Ad", AltGrup: "Diğer"),
             new("durum",         "durum",           "kod",   Zorunlu: true, SabitKodlar: DurumKodlari, Grup: "Kimlik"),
