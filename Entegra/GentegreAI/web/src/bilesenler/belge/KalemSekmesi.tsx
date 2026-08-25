@@ -304,7 +304,11 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         </div>
       </label>
       <label className="alan">
-        <span className="etiket">Ekstre Dövizi</span>
+        {/* "Ekstre Dövizi" = cari hesaba hangi dovizde islenecegi. SIPARISTE
+            cari hareketi YOK (henuz mal/fatura cikmadi), o yuzden orada alan
+            "Sipariş Dövizi" adiyla cikar (kullanici) - siparis onaylanip
+            irsaliye/faturaya donunce ekstre dovizi olarak tasinir. */}
+        <span className="etiket">{bilgi.siparis ? 'Sipariş Dövizi' : 'Ekstre Dövizi'}</span>
         <select value={doviz.ekstreDovizi} disabled={kilitli}
                 onChange={e => doviz.setEkstreDovizi(e.target.value)}>
           {/* Rapor dovizi + yerel para (ayni ise tek secenek). */}
@@ -316,7 +320,10 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     {doviz.raporDovizi !== doviz.yerelPara && (
       <div className="not">
         Tutarlar {doviz.yerelPara} girilir; {doviz.raporDovizi} karşılığı kura
-        bölünerek gösterilir. Cari hesaba <b>{doviz.ekstreDovizi}</b> işlenir.
+        bölünerek gösterilir.
+        {/* Siparis cari hesabi ETKILEMEZ - "cari hesaba islenir" cumlesi orada
+            yaniltici olurdu. */}
+        {!bilgi.siparis && <> Cari hesaba <b>{doviz.ekstreDovizi}</b> işlenir.</>}
       </div>
     )}
   </div>
@@ -392,7 +399,7 @@ export interface KalemSekmesiProps {
   setAcikLotlar(v: Set<number> | ((o: Set<number>) => Set<number>)): void;
   kilitli: boolean;
   /** belgeTuru.ts davranis tablosu: kalem bicimi (tam | sade | miktar) vb. */
-  bilgi: { kalem: 'tam' | 'sade' | 'miktar'; alis: boolean };
+  bilgi: { kalem: 'tam' | 'sade' | 'miktar'; alis: boolean; siparis: boolean };
   onizleme: { matrah: number; kdv: number; genel: number };
   sonuc: BelgeYaniti | null;
   /** Transferde eksik baslik alani (varsa kalem eklenemez). */

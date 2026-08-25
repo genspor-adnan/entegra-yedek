@@ -58,6 +58,13 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
                   : irsaliyeMi ? 'İrsaliye' : siparisMi ? 'Sipariş'
                   : tahakkukMu ? 'Tahakkuk' : 'Fatura';
 
+  /**
+   * Kapanma ("bu belgeden ne kadari faturalandi") hangi turde ANLAMLI:
+   * faturada ve tahakkukta zincirin sonundayiz, depo belgesi ve stok fisi ise
+   * fatura zincirinde hic degil.
+   */
+  const kapanmaGoster = !faturaMi && !tahakkukMu && !depoBelgesi && !stokFisiMi;
+
   return (
   <>
 <div className="belge-hdr-sar">
@@ -139,7 +146,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         hucre cizilmez. Adres ve seri de basliktan cikti: e-Belge sekmesinde,
         XML'e giden alanlarla birlikte duruyorlar. Vergi Dairesi/VKN kartta
         gosterilmiyor - cari kartindan gelip belgeye DONDURULAN bilgi. */}
-    {!eBelgeYok && (
+    {!eBelgeYok ? (
     <label className="alan">
       <span className="etiket">e-Belge</span>
       <span className="deger-serit">
@@ -151,6 +158,11 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
           : <span className="rozet">gönderilmedi</span>}
       </span>
     </label>
+    ) : depoBelgesi || stokFisiMi ? null : kapanmaGoster ? kapanmaAlani : (
+      /* e-Belgesi de kapanmasi da olmayan tur (tahakkuk): hucre BOS BIRAKILIR.
+         Yoksa temsilci yukari, 1. satirin sonuna kayardi - kullanici temsilciyi
+         her turde CARININ ALTINDA istiyor. */
+      <span className="alan" aria-hidden />
     )}
 
     {/* --- 5) KISI-1 ---
@@ -265,11 +277,10 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
 
     {/* --- 10-11) ZINCIR HUCRELERI ---
         Bagli Siparis, Faturalama Durumu'nun SOLUNDA (kullanici).
-        Kapanma = "bu belgeden ne kadari faturalandi": faturada ve tahakkukta
-        anlamsiz (zincirin sonu, Faturalama sekmesi de bu turlerde gizli).
-        Depo belgesi ve stok fisi fatura zincirinde degil - ikisi de yok. */}
+        Kapanma burada YALNIZ e-Belgeli turlerde: e-Belgesizde 4. hucreyi zaten
+        o dolduruyor (temsilci carinin altina insin diye). */}
     {!depoBelgesi && !stokFisiMi && bagliSiparisAlani}
-    {!depoBelgesi && !stokFisiMi && !faturaMi && !tahakkukMu && kapanmaAlani}
+    {!eBelgeYok && kapanmaGoster && kapanmaAlani}
   </div>
 </div>
 
