@@ -11,8 +11,8 @@ import { FATURA_TIPLERI } from '../../sayfalar/belgeSabitleri';
 export function BelgeAracCubugu({
   mevcutBelge, duzenlenebilir, sonuc, kaydediyor, kilitli,
   iadeKutusu, iade, setIade, faturaTipi, setFaturaTipi,
-  siparisMi, irsaliyeMi, faturaMi, alisMi, eBelgeYok, kayitliId, cari,
-  kes, yeniBelge, kapat, setDonusum, tahsilatAc,
+  siparisMi, irsaliyeMi, faturaMi, alisMi, eBelgeYok, kayitliId,
+  kes, yeniBelge, kapat, setDonusum,
 }: {
   mevcutBelge: boolean;
   /** Kayitli belge degistirilebilir mi (135). */
@@ -34,16 +34,13 @@ export function BelgeAracCubugu({
   /** e-Belge (fatura/irsaliye) kavrami olmayan turler: fis, transfer, talep. */
   eBelgeYok: boolean;
   kayitliId: number;
-  /** Cari secili mi - tahsilat/e-Belge dugmeleri carisiz calismaz. */
-  cari: unknown;
   /** Belgeyi kaydeder; kaydedilen id'yi doner (0 = kaydedilemedi). */
   kes(): Promise<number>;
   yeniBelge(): void;
   kapat(): void;
   /** Donusum modalini acar; deger = ON SECILI hedef tur (0 = ilk hedef). */
   setDonusum(v: number | null): void;
-  /** Tahsilat penceresini acar; belge kayitli degilse ONCE kaydeder. */
-  tahsilatAc(tur: number): Promise<void>;
+  /* TAHSILAT arac cubugundan kalkti - tahsilat kendi sekmesinden aciliyor. */
 }) {
   return (
   <>
@@ -88,13 +85,9 @@ export function BelgeAracCubugu({
       </button>
       <button className="d" disabled title="Üretim emri henüz bağlanmadı.">🏭 Üretime Aktar</button>
       <span className="ayrac" />
-      <button className="d" disabled={!cari || kaydediyor}
-              title={cari
-                ? `Bu sipariş için ön ödeme (${alisMi ? 'ödeme' : 'tahsilat'}) işlemi aç`
-                : 'Önce cari seçin.'}
-              onClick={() => void tahsilatAc(alisMi ? 31 : 21)}>
-        💵 {alisMi ? 'Ön Ödeme Yap' : 'Ön Ödeme Al'}
-      </button>
+      {/* ON ODEME dugmesi kalkti (kullanici): avans/on odeme artik siparisin
+          kendi Tahsilat sekmesinden giriliyor - fatura kartiyla ayni yer,
+          arac (nakit/banka/POS/çek/senet) orada secilir. */}
       <button className="d" disabled title="Termin güncelleme henüz bağlanmadı.">📅 Termin Güncelle</button>
       <button className="d" disabled title="Yazdırma henüz bağlanmadı.">🖨️ Yazdır</button>
     </>

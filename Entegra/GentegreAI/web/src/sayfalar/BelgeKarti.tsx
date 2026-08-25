@@ -320,7 +320,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * donulur. Kaydetme basarisizsa (dogrulama hatasi) tahsilat acilmaz.
    */
   const tahsilatAc = async (tahsilatTuru = 21) => {
-    const id = kayitliId || await kes(false);
+    if (kayitliId) { setTahsilatAcik(tahsilatTuru); return }
+
+    // Belge kaydedilecegi icin KALEM sart. Kaydetmeye birakirsak kullanici
+    //   "En az bir satırda stok ya da hizmet seçilmeli." gibi tahsilatla
+    //   ilgisiz gorunen bir hata aliyordu - sebebini burada soyluyoruz.
+    if (satirlar.filter(s => s.stokId || s.hizmetId).length === 0) {
+      setHata('Tahsilat belgeye bağlanır: önce en az bir kalem ekleyin, '
+            + 'belge kaydedilip tahsilat açılsın.');
+      return;
+    }
+    const id = await kes(false);
     if (id) setTahsilatAcik(tahsilatTuru);
   };
 
@@ -703,9 +713,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           setIade={v => setFaturaTipi(v ? 2 : 1)}
           faturaTipi={faturaTipi} setFaturaTipi={setFaturaTipi}
           siparisMi={siparisMi} irsaliyeMi={irsaliyeMi} faturaMi={faturaMi} alisMi={alisMi}
-          eBelgeYok={eBelgeYok} kayitliId={kayitliId} cari={cari}
+          eBelgeYok={eBelgeYok} kayitliId={kayitliId}
           kes={kes} yeniBelge={yeniBelge} kapat={kapat}
-          setDonusum={setDonusum} tahsilatAc={tahsilatAc}
+          setDonusum={setDonusum}
         />
       }
     >
@@ -727,7 +737,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       )}
 
         <BelgeBaslik
-          aktifSekme={aktifSekme ?? ''} setAktifSekme={setAktifSekme}
+          aktifSekme={aktifSekme ?? ''}
+          /* Sekme degisince onceki hata kutusu TEMIZLENIR: kalemsiz kartta
+             Tahsilat'a basip hata alan kullanici, sekme degistirince ayni
+             kutuyu gorunce hatanin o sekmeden geldigini saniyordu. */
+          setAktifSekme={s => { setHata(null); setAlanHatalari({}); setAktifSekme(s) }}
           alanHatalari={alanHatalari} bilgi={bilgi} sonuc={sonuc}
           kilitli={kilitli} baslikKilitli={baslikKilitli} belgeAdi={belgeAdi}
           belgeNo={belgeNo} setBelgeNo={setBelgeNo}
