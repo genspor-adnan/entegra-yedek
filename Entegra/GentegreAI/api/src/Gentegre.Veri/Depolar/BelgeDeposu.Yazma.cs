@@ -188,7 +188,7 @@ public sealed partial class BelgeDeposu
             (int)JsonSayi(satir, "kaynakTur", 0), JsonSayi(satir, "kaynakId", 0),
             JsonSayiNull(satir, "projeId") ?? SayiNull(belge, "projeId"),
             JsonTarih(satir, "teslimTarihi"),
-            (short)(baglam.SubeId ?? 0), baglam.KullaniciId
+            (short)baglam.SubeZorunlu(), baglam.KullaniciId
         };
 
         var yerTutucular = Enumerable.Range(0, parametreler.Count)

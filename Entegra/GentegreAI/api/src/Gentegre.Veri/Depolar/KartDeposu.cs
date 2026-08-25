@@ -8,7 +8,25 @@ using Npgsql;
 namespace Gentegre.Veri.Depolar;
 
 /// <summary>Kart yazma islemi icin cagirandan gelen baglam (kim, hangi sube, hangi IP).</summary>
-public sealed record YazmaBaglami(int KullaniciId, int? SubeId, string Ip);
+public sealed record YazmaBaglami(int KullaniciId, int? SubeId, string Ip)
+{
+    /// <summary>
+    /// SUBE ZORUNLU olan kayitlar (belge, kasa islemi, cek/senet...) icin sube
+    /// kimligi. Kullaniciya sube tanimlanmamissa `sube_id` 0 yaziliyor ve kayit
+    /// veritabaninda FK ihlaliyle patliyordu:
+    ///
+    ///     fk_kasa_islem_sube - Key (sube_id)=(0) is not present in table "sube"
+    ///
+    /// Kullanici bunu "Beklenmeyen bir hata oluştu" olarak goruyordu; oysa
+    /// eksik olan sey belli ve duzeltmesi yoneticinin elinde. Artik ne yapmasi
+    /// gerektigini soyleyen bir DOGRULAMA hatasi doner.
+    /// </summary>
+    public int SubeZorunlu()
+        => SubeId ?? throw GentegreHatasi.Dogrulama(
+               "Kullanıcınıza şube tanımlı değil - bu kayıt bir şubeye bağlanmalı. "
+             + "Yönetim > Kullanıcılar ekranından şube yetkisi verin.",
+               new AlanHatasi("subeId", "Kullanıcının şubesi yok."));
+}
 
 /// <summary>
 /// Kart okuma / yazma / silme. Tum yazmalar TEK TRANSACTION - kart, detaylar ve

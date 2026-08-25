@@ -58,7 +58,11 @@ public sealed partial class KasaDeposu
             ?? throw GentegreHatasi.Dogrulama($"Bilinmeyen işlem türü: {tur}",
                    new AlanHatasi("tur", "Katalogda yok."));
 
-        if (baglam.SubeId is { } sube) islem["subeId"] = sube;
+        // Kasa islemi bir SUBEYE baglanir (kasa/banka hesabi da subelidir).
+        //   Sube yoksa `sube_id` 0 yazilip veritabaninda FK ihlaliyle
+        //   patliyordu - kullanici "Beklenmeyen bir hata" goruyordu. Artik ne
+        //   yapilmasi gerektigini soyleyen dogrulama hatasi doner.
+        islem["subeId"] = baglam.SubeZorunlu();
 
         IleriTarihKontrol(islem);
 

@@ -99,7 +99,7 @@ public sealed partial class KasaDeposu
             Metin(islem, "dovizCinsi") is { Length: > 0 } d ? d : KasaHesap.YerelDoviz,
             kur, KasaHesap.YerelTutar(tutar, kur), Kirp(giris.SeriNo, 30),
             Kirp(giris.BankaAdi, 60), Kirp(giris.BankaSubesi, 60), Kirp(giris.HesapNo, 30),
-            SayiNull(islem, "projeId"), baglam.SubeId ?? 0, Kirp(giris.Aciklama, 200),
+            SayiNull(islem, "projeId"), baglam.SubeZorunlu(), Kirp(giris.Aciklama, 200),
             baglam.KullaniciId,
         });
 

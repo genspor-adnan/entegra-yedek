@@ -446,7 +446,8 @@ export interface KalemSekmesiProps {
  * TAHSILAT SEKMESI - belgeye bagli kasa islemleri ve kalan bakiye.
  * Kayit YOK: tahsilat kasa ekranindan girilir, burasi ozet gosterir.
  */
-export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsilatAc }: {
+export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsilatAc,
+                                  secili, setSecili, tahsilatAcKart, tahsilatSil }: {
   sonuc: BelgeYaniti | null;
   tahsilatlar: Record<string, unknown>[];
   kayitliId: number;
@@ -455,6 +456,13 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
   /** Kasa islem kartini acar (tur: tahsilat 21 / odeme 31); belge kayitli
       degilse ONCE kaydeder. */
   tahsilatAc(tur: number): Promise<void>;
+  /** Listede secili kasa isleminin kimligi (satir onay kutusu). */
+  secili: number | null;
+  setSecili(v: number | null): void;
+  /** MEVCUT kasa islemini duzeltmek icin karti acar (cift tik da bunu cagirir). */
+  tahsilatAcKart(id: number): void;
+  /** Secili kasa islemini siler - gerceklesmisse sunucu "İptal kullanın" der. */
+  tahsilatSil(id: number): Promise<void>;
 }) {
 const genel = Number(sonuc?.belge.genelToplam ?? 0);
 const tahsil = tahsilatlar.reduce((t, k) => t + (Number(k.yerelTutar ?? k.tutar ?? 0) || 0), 0);
@@ -500,10 +508,20 @@ return (
               onClick={() => void tahsilatAc(alisMi ? 34 : 24)}>
         📜 Senet
       </button>
+      <span className="ayrac" />
+      {/* Secili satir uzerinde islem - kalem gridiyle ayni desen: yalniz ikon,
+          secim yoksa pasif. Cift tik da duzeltmeyi acar. */}
+      <button className="d" disabled={!secili}
+              title={secili ? 'Seçili işlemi düzelt' : 'Önce satır seçin'}
+              onClick={() => secili && tahsilatAcKart(secili)}>✎</button>
+      <button className="d teh" disabled={!secili}
+              title={secili ? 'Seçili işlemi sil' : 'Önce satır seçin'}
+              onClick={() => secili && void tahsilatSil(secili)}>🗑</button>
     </div>
     <table className="detay-tablo">
       <thead>
         <tr>
+          <th className="check" />
           <th style={{ width: 140 }}>Tarih / Saat</th>
           <th style={{ width: 120 }}>Makbuz No</th>
           <th style={{ width: 180 }}>Tür</th>
@@ -512,8 +530,16 @@ return (
         </tr>
       </thead>
       <tbody>
-        {tahsilatlar.map((k, i) => (
-          <tr key={i}>
+        {tahsilatlar.map((k, i) => {
+          const kid = Number(k.id ?? 0);
+          return (
+          <tr key={i} className={kid && kid === secili ? 'secili' : ''}
+              onClick={() => setSecili(kid || null)}
+              onDoubleClick={() => kid && tahsilatAcKart(kid)}>
+            <td className="check" onClick={e => e.stopPropagation()}>
+              <input type="checkbox" checked={kid === secili} disabled={!kid}
+                     onChange={() => setSecili(kid === secili ? null : kid)} />
+            </td>
             {/* Tarih + saat: ayni gun birden fazla tahsilat olunca
                 sira ancak saatle anlasiliyordu. */}
             <td>{tarihSaat(k.islemTarihi)}</td>
@@ -522,9 +548,10 @@ return (
             <td>{String(k.hesapAdi ?? '') || <span className="sonuk">—</span>}</td>
             <td className="hiza-sag">{para.format(Number(k.yerelTutar ?? k.tutar ?? 0))}</td>
           </tr>
-        ))}
+          );
+        })}
         {tahsilatlar.length === 0 && (
-          <tr><td colSpan={5} className="bos">
+          <tr><td colSpan={6} className="bos">
             {kayitliId > 0
               ? `Bu belgeye bağlı ${alisMi ? 'ödeme' : 'tahsilat'} yok.`
               : 'Önce belgeyi kaydedin.'}
@@ -533,7 +560,7 @@ return (
       </tbody>
       <tfoot>
         <tr className="genel">
-          <td colSpan={4} className="hiza-sag">
+          <td colSpan={5} className="hiza-sag">
             {alisMi ? 'Ödenen / Kalan' : 'Tahsil Edilen / Kalan'}
           </td>
           <td className="hiza-sag">

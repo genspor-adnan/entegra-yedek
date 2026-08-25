@@ -322,8 +322,10 @@ public sealed partial class BelgeDeposu
 
         // -------------------------------------- 2) gonderici (sube) kimligini DONDUR ----
         // 022 karari: her subenin kendi VKN/VD'si olabilir, belge o kimlikle gider.
-        if (baglam.SubeId is { } subeId)
+        // Sube ZORUNLU: yoksa `sube_id` 0 yazilip FK ihlaliyle patliyordu -
+        //   kullanici "Beklenmeyen bir hata" goruyordu (bkz. YazmaBaglami).
         {
+            var subeId = baglam.SubeZorunlu();
             await using var komut = new NpgsqlCommand("""
                 select coalesce(nullif(unvan, ''), ad) as unvan, vkno, efatura_alias, ebelge_seri
                   from public.sube where id = @p0

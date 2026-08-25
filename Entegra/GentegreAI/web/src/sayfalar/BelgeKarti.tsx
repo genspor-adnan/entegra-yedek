@@ -157,6 +157,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [terminAcik, setTerminAcik] = useState(false);
   /** Rezervasyon (142) islemi surerken dugme bekler. */
   const [rezerveCalisiyor, setRezerveCalisiyor] = useState(false);
+  /** Tahsilat listesinde secili kasa islemi (duzelt/sil dugmeleri bunu kullanir). */
+  const [seciliTahsilat, setSeciliTahsilat] = useState<number | null>(null);
+  /** DUZELTME icin acilan MEVCUT kasa islemi - yeni tahsilattan ayri state:
+      biri tur ile acar, oteki kayit kimligiyle. */
+  const [tahsilatKayitId, setTahsilatKayitId] = useState<number | null>(null);
   const [aktifSekme, setAktifSekme] = useState('kalem');
   /** Grid satir secimi (kirmizi Sil dugmesi bunlari siler). */
   const [seciliSatirlar, setSeciliSatirlar] = useState<Set<number>>(new Set());
@@ -338,6 +343,24 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     } catch (h) {
       setHata(h instanceof ApiHatasi ? `${h.hata.kod}: ${h.message}` : String(h));
     } finally { setRezerveCalisiyor(false) }
+  };
+
+  /**
+   * Secili kasa islemini siler. GERCEKLESMIS islem silinemez - sunucu
+   * "İptal kullanın" der ve mesaj oldugu gibi gosterilir; kart burada
+   * ikinci bir kural uydurmaz.
+   */
+  const tahsilatSil = async (id: number) => {
+    if (!window.confirm('Seçili tahsilat/ödeme silinecek. Onaylıyor musunuz?')) return;
+    setHata(null);
+    try {
+      await api.kasaSil(id);
+      setSeciliTahsilat(null);
+      setTahsilatYenile(t => t + 1);
+      onKaydedildi?.();
+    } catch (h) {
+      setHata(h instanceof ApiHatasi ? h.message : String(h));
+    }
   };
 
   const tahsilatAc = async (tahsilatTuru = 21) => {
@@ -853,7 +876,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         )}
         {aktifSekme === 'tahsilat' && (
           <TahsilatSekmesi sonuc={sonuc} tahsilatlar={tahsilatlar}
-                           kayitliId={kayitliId} alisMi={alisMi} tahsilatAc={tahsilatAc} />
+                           kayitliId={kayitliId} alisMi={alisMi} tahsilatAc={tahsilatAc}
+                           secili={seciliTahsilat} setSecili={setSeciliTahsilat}
+                           tahsilatAcKart={setTahsilatKayitId}
+                           tahsilatSil={tahsilatSil} />
         )}
         {/* ============================================= IMZA / TESLIM ==== */}
         {aktifSekme === 'imza' && (
@@ -892,6 +918,15 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         />
 
         {/* Tahsilat karti MODAL: cari, tutar ve belge bagi onyuklu gelir. */}
+        {/* MEVCUT tahsilati duzeltme (cift tik / ✎): kasa karti kayit kimligiyle
+            acilir. Gerceklesmis islemi kart zaten salt gorunum yapar. */}
+        {tahsilatKayitId !== null && (
+          <KasaIslemKarti
+            kayitIdProp={tahsilatKayitId}
+            onKapat={() => { setTahsilatKayitId(null); setTahsilatYenile(t => t + 1) }}
+          />
+        )}
+
         {tahsilatAcik !== null && (
           <KasaIslemKarti
             acilis={{
