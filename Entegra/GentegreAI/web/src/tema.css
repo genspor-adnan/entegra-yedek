@@ -429,6 +429,11 @@ table.grid tr.flt input {
 .alan { display: grid; grid-template-columns: 84px 1fr; column-gap: 8px; align-items: center }
 .alan .etiket { grid-column: 1; font-size: 11px; color: var(--soluk); text-align: left }
 .alan .zorunlu { color: var(--hata) }
+/* Zorunlu alan yildizi. GenLookup etikete <b class="zorunlu"> * </b> koyuyordu,
+   TarafAlani/fis tipi/tedarikci fatura no ise `zorunlu-isaret` sinifi veriyordu -
+   ama sinifin CSS karsiligi YOKTU: cari zorunlu oldugu halde yildizsiz cikiyor,
+   ayni izgarada bazi alanlar yildizli bazilari degil gorunuyordu. */
+.alan .etiket.zorunlu-isaret::after { content: ' *'; color: var(--hata) }
 .alan input, .alan select, .inp {
   grid-column: 2; border: 1px solid var(--cizgi); border-radius: 2px; background: var(--yuz);
   height: 23px; padding: 0 6px; font-size: 12px; width: 100%; color: var(--yazi);

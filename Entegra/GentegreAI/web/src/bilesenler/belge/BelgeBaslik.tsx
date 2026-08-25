@@ -1,7 +1,7 @@
 import { GenLookup } from '../GenLookup';
 import { TarafAlani } from '../../sayfalar/BelgeKarti';
 import {
-  LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, FATURA_TIPLERI, IRSALIYE_TIPLERI,
+  LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, FATURA_TIPLERI,
   SEKMELER,
 } from '../../sayfalar/belgeSabitleri';
 import type { SatirDurumu } from '../../sayfalar/belgeSatir';
@@ -10,13 +10,32 @@ import type { BelgeYaniti } from '../../api/sozlesme';
 import type { BelgeTuruBilgisi } from '../../sayfalar/belgeTuru';
 
 /**
- * BELGE KARTI BASLIGI - mockup'taki .hdr izgarasi: cari/tip, belge no, e-Belge,
- * tarih, depo(lar), vade, doviz ve tur ozel alanlar (fis tipi, teslim eden/alan,
- * bagli siparis, kapanma durumu).
+ * BELGE KARTI BASLIGI - TEK 4 SUTUNLU izgara (kullanici). Once satis
+ * irsaliyesinde denendi, sonra tum carili belgelere (fatura, siparis,
+ * konsinye, tahakkuk), en son depo belgeleri ve stok fislerine yayildi -
+ * artik her belge turu ayni duzeni kullaniyor.
  *
- * Alan SIRASI ve hangi turde hangi hucrenin gorunecegi burada; kartin veri
- * akisiyla ilgisi yok. 250 satirlik bu izgara kart govdesinde dururken
- * kaydetme/yukleme mantigini okumak zorlasiyordu.
+ * Hucre SIRASI sabit; bir tur icin anlamsiz olan hucre CIZILMEZ ve izgara
+ * kendiliginden sarar (eski 3 sutunlu duzende sutun hizasini korumak icin
+ * bos yer tutucu hucreler gerekiyordu, hepsi kalkti):
+ *
+ *   1) Kimlik  - cari / cikis deposu (depo belgesi) / fis tipi (stok fisi)
+ *   2) Belge No
+ *   3) Belge Tarihi
+ *   4) e-Belge rozeti (kavrami olan turlerde)
+ *   5) Kisi-1   - Satis Temsilcisi / Sorumlu / Teslim Eden
+ *   6) Depo-2   - Giris Deposu / Teslim Deposu / fisin deposu
+ *   7) Kisi-2   - Teslim Alan / Talep Eden (depo belgeleri)
+ *   8) Fatura Tipi (yalniz fatura)
+ *   9) Vade (gun)
+ *  10) Bagli Siparis / Kaynak Belge
+ *  11) Faturalama Durumu (kapanma)
+ *
+ * Doviz/Kur BASLIKTA DEGIL: kalem gridinin altindaki "Rapor Dövizi" kutusunda
+ * hem secim hem kur var - iki yerde gostermek tekrar oluyordu (kullanici).
+ * Belge turu SECICISI de yok: tur ekranin kendisinden gelir ve pencere
+ * basliginda yazili; kartta degistirilebilmesi belgenin hangi listede
+ * cikacagini belirsizlestiriyordu.
  */
 export function BelgeBaslik(p: BelgeBaslikProps) {
   const {
@@ -31,153 +50,28 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   } = p;
 
   /**
-   * YENI DUZEN (kullanici): 4 sutunlu baslik + doviz kutusu grid altinda.
-   * Irsaliyede denendi, TUM CARILI belgelere yayildi - fatura, siparis,
-   * konsinye, tahakkuk. Disarida kalanlar: transfer / talep / stok fisi
-   *   (cari yok, iki depo ya da fis tipi gibi kendi alanlari var).
+   * Belge turunun adi - "İrsaliye No" / "Fatura No" / "Sipariş No". Depo
+   * belgesi ve stok fisinde kartin kendi adi (Transfer, Talep, Giriş Fişi...)
+   * kullanilir; `belgeAdi` zaten tur katalogundan geliyor.
    */
-  const yeniDuzen = !depoBelgesi && !stokFisiMi;
-
-  /** Belge turunun adi - "İrsaliye No" / "Fatura No" / "Sipariş No". */
-  const belgeSozu = irsaliyeMi ? 'İrsaliye' : siparisMi ? 'Sipariş'
+  const belgeSozu = depoBelgesi || stokFisiMi ? belgeAdi
+                  : irsaliyeMi ? 'İrsaliye' : siparisMi ? 'Sipariş'
                   : tahakkukMu ? 'Tahakkuk' : 'Fatura';
 
   return (
   <>
 <div className="belge-hdr-sar">
-  {/* Alan duzeni: Ekranlar/satis_irsaliye_karti.html .hdr + kullanici
-      sirasi. BASLIKSIZ 3 sutunlu izgara; her alanda etiket EDITIN
-      USTUNDE. Satirlar:
-        1) Musteri . Belge No . e-Belge
-        2) Vade . Belge Tarihi . Kapanma
-        3) Satis Temsilcisi . Cikis Deposu . Doviz/Kur */}
-  {/* IRSALIYE DUZENI (kullanici, pilot): 4 sutunlu izgara -
-        1) Cari . Irsaliye No . Irsaliye Tarihi . e-Belge
-        2) Temsilci . Cikis Deposu . Bagli Siparis . Faturalama Durumu
-      Izgara 5 sutunlu: baslik IKI satira iner, Bagli Siparis fatura durumunun
-      SAGINDA kalir (kullanici) - alt satira dusmez.
-      Tip basliktan CIKTI: irsaliyede tek anlamli secim "iade mi" - o da arac
-      cubugundaki IADE kutusu (kullanici).
-      Basarili olursa diger belge turlerine de yayilacak; o yuzden ayri blok. */}
-  {yeniDuzen ? (
   <div className="alan-izgara dort-sutun belge-hdr">
-    <TarafAlani
-      etiket="Müşteri (Cari)"
-      deger={cari?.unvan}
-      kilitli={kilitli}
-      zorunlu
-      ipucu="Cari ara"
-      hata={alanHatalari.tarafId}
-      onAc={() => setCariArama(true)}
-    />
-
-    <label className="alan">
-      <span className="etiket">{belgeSozu} No</span>
-      {disNumarali && !kilitli ? (
-        <input className="one-cikan" value={belgeNo} maxLength={20}
-               onChange={e => setBelgeNo(e.target.value)} />
-      ) : (
-        <input className="one-cikan"
-               value={String(sonuc?.belge.belgeNo ?? '') || (kilitli ? '' : '(kaydedince verilir)')}
-               readOnly />
-      )}
-      {alanHatalari.belgeNo && <span className="alan-hata">{alanHatalari.belgeNo}</span>}
-    </label>
-
-    <label className="alan">
-      <span className="etiket">{belgeSozu} Tarihi</span>
-      <input type="datetime-local" value={tarih} disabled={baslikKilitli}
-             max={tarihEnGec} min={tarihEnErken}
-             onChange={e => setTarih(e.target.value)} />
-      {alanHatalari.belgeTarihi && <span className="alan-hata">{alanHatalari.belgeTarihi}</span>}
-    </label>
-
-    {/* e-Belge KAVRAMI OLMAYAN turlerde (siparis, tahakkuk) hucre CIZILMEZ. */}
-    {!eBelgeYok && (
-    <label className="alan">
-      <span className="etiket">e-Belge</span>
-      <span className="deger-serit">
-        <span className="rozet bilgi">
-          {konsinyeMi ? 'e-İrsaliye (konsinye)' : irsaliyeMi ? 'e-İrsaliye' : 'e-Fatura'}
-        </span>
-        {Number(sonuc?.belge.efaturaDurum ?? 0) > 0
-          ? <span className="rozet olumlu">✓ Gönderildi</span>
-          : <span className="rozet">gönderilmedi</span>}
-      </span>
-    </label>
-    )}
-
-    <TarafAlani
-      etiket={alisMi ? 'Sorumlu' : 'Satış Temsilcisi'}
-      deger={satici?.ad}
-      kilitli={kilitli}
-      ipucu="Personel ara"
-      onAc={() => setSaticiArama(true)}
-    />
-
-    {/* Tahakkukta depo YOK (mal hareketi yok). */}
-    {!tahakkukMu && (
-    <GenLookup
-      kaynak="depo"
-      etiket={siparisMi ? 'Depo' : alisMi ? 'Giriş Deposu' : 'Çıkış Deposu'}
-      sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
-      alanlar={LOOKUP_DEPO}
-      deger={depo?.ad}
-      saltOkunur={kilitli}
-      onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
-    />
-    )}
-
-    {/* FATURA TIPI (130) yalniz faturada - irsaliyede iade arac cubugundaki
-        kutuyla secilir, siparis/tahakkukta tip kavrami yok. */}
-    {faturaMi && (
-      <label className="alan">
-        <span className="etiket">Fatura Tipi</span>
-        <select value={faturaTipi} disabled={kilitli}
-                onChange={e => setFaturaTipi(Number(e.target.value))}>
-          {FATURA_TIPLERI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
-          {!FATURA_TIPLERI.some(t => t.deger === faturaTipi) && (
-            <option value={faturaTipi}>Tanımsız ({faturaTipi})</option>
-          )}
-        </select>
-      </label>
-    )}
-
-    {/* Vade: faturada / tahakkukta anlamli (irsaliyede mal cikis tarihi esas). */}
-    {bilgi.vade && (
-      <label className="alan">
-        <span className="etiket">Vade (gün)</span>
-        <input className="hiza-sag" value={vadeGun} disabled={kilitli}
-               onChange={e => setVadeGun(e.target.value)} />
-      </label>
-    )}
-
-    {/* DOVIZ / KUR BASLIKTAN CIKTI (kullanici): kalem gridinin altindaki
-        "Rapor Dövizi" kutusunda hem secim hem kur var - iki yerde gostermek
-        tekrar oluyordu. */}
-    {/* Bagli Siparis, Faturalama Durumu'nun SOLUNDA (kullanici). */}
-    {bagliSiparisAlani}
-
-    {/* Kapanma = "bu belgeden ne kadari faturalandi": faturada ve tahakkukta
-        anlamsiz (zincirin sonu, Faturalama sekmesi de bu turlerde gizli) -
-        hucre hic cizilmez, yoksa faturanin ustunde "Faturalanmadı" yazardi. */}
-    {!(faturaMi || tahakkukMu) && kapanmaAlani}
-  </div>
-  ) : (
-  <div className="alan-izgara uc-sutun belge-hdr">
-    {/* --- 1. satir --- */}
-    {/* Cari alani GenLookup DEGIL: secim ayni TarafArama modalindan yapilir
-        ki "yeni belge" akisiyla ayni ekran olsun (iki farkli cari secme
-        bicimi kullaniciyi sasirtiyordu). */}
-    {/* Transferde CARI YOK: mal firmanin kendi depolari arasinda gezer.
-        Cari hucresinin yerini CIKIS DEPOSU alir, alt satirda giris deposu. */}
+    {/* --- 1) KIMLIK --- */}
+    {/* Transferde/talepte CARI YOK: mal firmanin kendi depolari arasinda
+        gezer, cari hucresinin yerini cikis deposu alir. Stok fisinde ise
+        fisin SEBEBI (tipi) ilk sorulan sey - muhasebe hesabini o belirleyecek
+        (F7). Carili turlerde secim GenLookup degil TarafArama modali: "yeni
+        belge" akisiyla ayni ekran olsun (iki farkli cari secme bicimi
+        kullaniciyi sasirtiyordu). */}
     {stokFisiMi ? (
-      /* Fisin SEBEBI: muhasebe hesabini bu belirleyecek (F7), o yuzden
-         cari hucresinin yerinde ve zorunlu. */
       <label className="alan">
         <span className="etiket zorunlu-isaret">Tipi</span>
-        {/* Yeni fiste ILK SORULAN budur (cari yok): kart acilinca imlec
-            burada, kullanici listeyi klavyeden acip secebilir. */}
         <select value={fisTipi} disabled={baslikKilitli}
                 autoFocus={!kilitli && !fisTipi}
                 onChange={e => setFisTipi(Number(e.target.value))}>
@@ -200,24 +94,24 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
       />
     ) : (
-    <TarafAlani
-      etiket={alisMi ? 'Tedarikçi (Cari)'
-            : siparisMi || irsaliyeMi ? 'Müşteri (Cari)' : 'Cari'}
-      zorunlu
-      deger={cari?.unvan}
-      kilitli={kilitli}
-      ipucu="Cari ara"
-      onAc={() => setCariArama(true)}
-      hata={alanHatalari.tarafId}
-    />
+      <TarafAlani
+        etiket={alisMi ? 'Tedarikçi (Cari)' : 'Müşteri (Cari)'}
+        deger={cari?.unvan}
+        kilitli={kilitli}
+        zorunlu
+        ipucu="Cari ara"
+        hata={alanHatalari.tarafId}
+        onAc={() => setCariArama(true)}
+      />
     )}
 
-    {/* Alis faturasinda numara TEDARIKCININ: sayacimiz uretemez (harf
+    {/* --- 2) BELGE NO ---
+        Alis faturasinda numara TEDARIKCININ: sayacimiz uretemez (harf
         icerebilir, bizim seriyle iliskisi yok), kullanici girer. Diger
         turlerde numarayi kayitta sunucu verir - alan salt-okunur. */}
     <label className="alan">
       <span className={`etiket${disNumarali && !kilitli ? ' zorunlu-isaret' : ''}`}>
-        {disNumarali ? 'Tedarikçi Fatura No' : `${belgeAdi} No`}
+        {disNumarali ? 'Tedarikçi Fatura No' : `${belgeSozu} No`}
       </span>
       {disNumarali && !kilitli ? (
         <input className="one-cikan" value={belgeNo} maxLength={20}
@@ -231,6 +125,20 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       {alanHatalari.belgeNo && <span className="alan-hata">{alanHatalari.belgeNo}</span>}
     </label>
 
+    {/* --- 3) TARIH --- */}
+    <label className="alan">
+      <span className="etiket">{belgeSozu} Tarihi</span>
+      <input type="datetime-local" value={tarih} disabled={baslikKilitli}
+             max={tarihEnGec} min={tarihEnErken}
+             onChange={e => setTarih(e.target.value)} />
+      {alanHatalari.belgeTarihi && <span className="alan-hata">{alanHatalari.belgeTarihi}</span>}
+    </label>
+
+    {/* --- 4) e-BELGE ---
+        Kavrami OLMAYAN turlerde (siparis, tahakkuk, depo belgesi, stok fisi)
+        hucre cizilmez. Adres ve seri de basliktan cikti: e-Belge sekmesinde,
+        XML'e giden alanlarla birlikte duruyorlar. Vergi Dairesi/VKN kartta
+        gosterilmiyor - cari kartindan gelip belgeye DONDURULAN bilgi. */}
     {!eBelgeYok && (
     <label className="alan">
       <span className="etiket">e-Belge</span>
@@ -244,20 +152,13 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       </span>
     </label>
     )}
-    {/* e-Belge hucresi kalkinca 3 sutunlu izgara KAYIYORDU (Satis
-        Temsilcisi 1. satirin 3. hucresine dusuyordu). Bos yer tutucu
-        sutun duzenini korur: sol sutun Cari > Temsilci > Depo. */}
-    {/* Transferde 3. sutun: Teslim Eden, altinda Teslim Alan (sorumluluk devri). */}
-    {eBelgeYok && (stokFisiMi ? (
-      <TarafAlani
-        etiket="Sorumlu"
-        deger={satici?.ad}
-        kilitli={baslikKilitli}
-        ipucu="Personel ara"
-        onAc={() => setSaticiArama(true)}
-      />
-    ) : talepMi ? <span className="alan" aria-hidden />
-      : transferMi ? (
+
+    {/* --- 5) KISI-1 ---
+        Transferde sorumluluk devri: Teslim Eden (zorunlu). Talepte bu hucre
+        yok - talebi acan kisi 7. hucrede "Talep Eden" olarak sorulur.
+        Satis temsilcisi PERSONEL'dir (cari degil) ve secim cari ile ayni
+        TarafArama ekranindan yapilir - tek arama bicimi. */}
+    {transferMi ? (
       <TarafAlani
         etiket="Teslim Eden"
         zorunlu
@@ -267,31 +168,20 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         onAc={() => setPersonelArama('eden')}
         hata={alanHatalari.teslimEdenId}
       />
-    ) : kapanmaAlani)}
-
-    {/* FATURA TIPI (130) - yalniz faturada, ust baslikta (kullanici). Faturanin
-        cinsi hem muhasebe fisini hem e-Belge senaryosunu etkiler; belge.tipi
-        alaninda tutulur (iade zaten 2 idi). */}
-    {(faturaMi || irsaliyeMi) && (
-      <label className="alan">
-        <span className="etiket">{irsaliyeMi ? 'İrsaliye Tipi' : 'Fatura Tipi'}</span>
-        <select value={faturaTipi} disabled={kilitli}
-                onChange={e => setFaturaTipi(Number(e.target.value))}>
-          {(irsaliyeMi ? IRSALIYE_TIPLERI : FATURA_TIPLERI)
-            .map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
-          {/* Gocten gelen tanimsiz tip (or. 17) listede yok: secenek olarak
-              EKLENIR, yoksa kart acilinca ilk tipe duser ve kaydedince
-              belgenin gercek tipi sessizce degisirdi. */}
-          {!(irsaliyeMi ? IRSALIYE_TIPLERI : FATURA_TIPLERI).some(t => t.deger === faturaTipi) && (
-            <option value={faturaTipi}>Tanımsız ({faturaTipi})</option>
-          )}
-        </select>
-      </label>
+    ) : talepMi ? null : (
+      <TarafAlani
+        etiket={stokFisiMi || alisMi ? 'Sorumlu' : 'Satış Temsilcisi'}
+        deger={satici?.ad}
+        kilitli={stokFisiMi ? baslikKilitli : kilitli}
+        ipucu="Personel ara"
+        onAc={() => setSaticiArama(true)}
+      />
     )}
 
-    {/* --- 2. satir: Satis Temsilcisi cari'nin ALTINDA --- */}
-    {/* Satis temsilcisi PERSONEL'dir (cari degil) ve secim cari ile ayni
-        TarafArama ekranindan yapilir - tek arama bicimi. */}
+    {/* --- 6) DEPO-2 ---
+        Depo belgesinde malin GITTIGI depo, stok fisinde fisin tek deposu,
+        carili belgelerde mal cikis/giris deposu. Tahakkukta depo YOK: stok
+        etkilemez (kasa_islem_turu.stok_etkiler=0). */}
     {stokFisiMi ? (
       <GenLookup
         kaynak="depo"
@@ -316,28 +206,21 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         hata={alanHatalari.girisDepoId}
         onSec={x => setGirisDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
       />
-    ) : (
-    <TarafAlani
-      etiket={alisMi ? 'Sorumlu' : 'Satış Temsilcisi'}
-      deger={satici?.ad}
-      kilitli={kilitli}
-      ipucu="Personel ara"
-      onAc={() => setSaticiArama(true)}
-    />
-    )}
+    ) : !tahakkukMu ? (
+      <GenLookup
+        kaynak="depo"
+        etiket={siparisMi ? 'Depo' : alisMi ? 'Giriş Deposu' : 'Çıkış Deposu'}
+        // Pasif depo secilemez: kapatilmis depoya belge kesilmesin.
+        sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
+        alanlar={LOOKUP_DEPO}
+        deger={depo?.ad}
+        saltOkunur={kilitli}
+        onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
+      />
+    ) : null}
 
-    <label className="alan">
-      <span className="etiket zorunlu-isaret">{belgeAdi} Tarihi</span>
-      <input type="datetime-local" value={tarih} disabled={baslikKilitli}
-             min={tarihEnErken} max={tarihEnGec}
-             onChange={e => setTarih(e.target.value)} />
-      {alanHatalari.belgeTarihi && (
-        <span className="alan-hata">{alanHatalari.belgeTarihi}</span>
-      )}
-    </label>
-
-    {stokFisiMi ? <span className="alan" aria-hidden />
-      : depoBelgesi ? (
+    {/* --- 7) KISI-2 (yalniz depo belgeleri) --- */}
+    {depoBelgesi && (
       <TarafAlani
         etiket={talepMi ? 'Talep Eden' : 'Teslim Alan'}
         zorunlu
@@ -347,29 +230,31 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         onAc={() => setPersonelArama('alan')}
         hata={alanHatalari.teslimAlanId}
       />
-    ) : eBelgeYok ? bagliSiparisAlani : kapanmaAlani}
-
-    {/* --- 3. satir: Cikis Deposu temsilcinin ALTINDA ---
-        Tahakkukta depo YOK: stok etkilemez (kasa_islem_turu.stok_etkiler=0). */}
-    {!tahakkukMu && !depoBelgesi && !stokFisiMi && (
-    <GenLookup
-      kaynak="depo"
-      etiket={siparisMi ? 'Depo' : alisMi ? 'Giriş Deposu' : 'Çıkış Deposu'}
-      // Pasif depo secilemez: kapatilmis depoya belge kesilmesin.
-      sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
-      alanlar={LOOKUP_DEPO}
-      deger={depo?.ad}
-      saltOkunur={kilitli}
-      onSec={s => setDepo(s ? { id: Number(s.id), ad: String(s.ad ?? '') } : null)}
-    />
     )}
-    {/* 3. satirin sutun duzeni korunsun: depo yoksa (tahakkuk) bos hucre.
-        TRANSFERDE ayni yeri sorumluluk devri alanlari doldurur. */}
-    {eBelgeYok && tahakkukMu && <span className="alan" aria-hidden />}
 
-    {/* Irsaliyede/konsinyede Vade YOK (mal cikis tarihi belge tarihidir);
-        e-Belgesiz turlerde yerine bos hucre - Doviz/Kur sag sutunda kalsin. */}
-    {eBelgeYok && irsaliyeMi && !depoBelgesi && <span className="alan" aria-hidden />}
+    {/* --- 8) FATURA TIPI (130) ---
+        Yalniz faturada: faturanin cinsi hem muhasebe fisini hem e-Belge
+        senaryosunu etkiler, belge.tipi alaninda tutulur (iade zaten 2 idi).
+        Irsaliyede tek anlamli secim "iade mi" - o da arac cubugundaki IADE
+        kutusu (kullanici); siparis/tahakkukta tip kavrami yok. */}
+    {faturaMi && (
+      <label className="alan">
+        <span className="etiket">Fatura Tipi</span>
+        <select value={faturaTipi} disabled={kilitli}
+                onChange={e => setFaturaTipi(Number(e.target.value))}>
+          {FATURA_TIPLERI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
+          {/* Gocten gelen tanimsiz tip (or. 17) listede yok: secenek olarak
+              EKLENIR, yoksa kart acilinca ilk tipe duser ve kaydedince
+              belgenin gercek tipi sessizce degisirdi. */}
+          {!FATURA_TIPLERI.some(t => t.deger === faturaTipi) && (
+            <option value={faturaTipi}>Tanımsız ({faturaTipi})</option>
+          )}
+        </select>
+      </label>
+    )}
+
+    {/* --- 9) VADE ---
+        Faturada / tahakkukta anlamli (irsaliyede mal cikis tarihi esas). */}
     {bilgi.vade && (
       <label className="alan">
         <span className="etiket">Vade (gün)</span>
@@ -378,29 +263,14 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       </label>
     )}
 
-    {bilgi.doviz && (
-    <label className="alan">
-      <span className="etiket">Döviz / Kur</span>
-      <input value={`${String(sonuc?.belge.belgeDovizi ?? 'TL')} · ${
-        Number(sonuc?.belge.dovizKuru ?? 1).toLocaleString('tr-TR', { minimumFractionDigits: 6 })}`}
-             readOnly />
-    </label>
-    )}
-
-    {/* Adres BASLIKTAN CIKTI: e-Belge sekmesinde (XML'e giden alanlarla
-        birlikte) duruyor. Seri de basliktan kaldirildi - kullanici
-        girmiyor, numara serisi zaten e-Belge sekmesinde gorunuyor.
-
-        Vergi Dairesi/VKN kartta gosterilmiyor: cari kartindan gelen ve
-        belgeye DONDURULAN bir bilgi, e-Belge XML'ine oradan gidiyor. */}
-    {!eBelgeYok && bagliSiparisAlani}
-
-    {/* Belge turu SECICISI YOK: tur ekranin kendisinden gelir (Siparisler
-        19, Irsaliyeler 14, Faturalar 15) ve pencere basliginda zaten yazili.
-        Kartta degistirilebilir olmasi, kaydedilen belgenin hangi listede
-        cikacagini belirsizlestiriyordu. */}
+    {/* --- 10-11) ZINCIR HUCRELERI ---
+        Bagli Siparis, Faturalama Durumu'nun SOLUNDA (kullanici).
+        Kapanma = "bu belgeden ne kadari faturalandi": faturada ve tahakkukta
+        anlamsiz (zincirin sonu, Faturalama sekmesi de bu turlerde gizli).
+        Depo belgesi ve stok fisi fatura zincirinde degil - ikisi de yok. */}
+    {!depoBelgesi && !stokFisiMi && bagliSiparisAlani}
+    {!depoBelgesi && !stokFisiMi && !faturaMi && !tahakkukMu && kapanmaAlani}
   </div>
-  )}
 </div>
 
 {/* Sekmeler BASLIK ALANLARININ ALTINDA, grid'in hemen ustunde -

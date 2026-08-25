@@ -3057,5 +3057,35 @@ USD, rapor dövizi kendiliğinden USD ve kur 47,897; satır silinince toplam 0,0
 fatura/sipariş/konsinye/tahakkuk kartlarında yeni başlık ve grid altındaki
 Rapor/Ekstre Dövizi kutuları yerinde.
 
+### Tek başlık ızgarası — 4 sütun, bütün belge türlerinde
+
+Başlıkta **iki ayrı ızgara** vardı: yeni 4 sütunlu düzen (carili belgeler) ve
+eski 3 sütunlu düzen (transfer, talep, stok fişi). İkisi de aynı alanları farklı
+sırayla çiziyor, eski blok sütun hizasını korumak için boş yer tutucu hücreler
+taşıyordu. Kullanıcı "bu yöntemi diğer belgelere de uygula" deyince ikinci blok
+tamamen kaldırıldı — `BelgeBaslik.tsx` artık **tek ızgara**, ~490 → 330 satır.
+
+Hücre sırası sabit; türü ilgilendirmeyen hücre **çizilmez**, ızgara kendiliğinden
+sarar (yer tutucu hücrelere gerek kalmadı):
+
+1. Kimlik — cari / çıkış deposu (depo belgesi) / fiş tipi (stok fişi)
+2. Belge No · 3) Tarih · 4) e-Belge rozeti
+5. Kişi-1 — Satış Temsilcisi / Sorumlu / Teslim Eden
+6. Depo-2 — Giriş Deposu / Teslim Deposu / fişin deposu
+7. Kişi-2 — Teslim Alan / Talep Eden (depo belgeleri)
+8. Fatura Tipi · 9) Vade · 10) Bağlı Sipariş · 11) Faturalama Durumu
+
+Yan düzeltme: **zorunlu yıldızı iki mekanizmaya bölünmüştü**. `GenLookup`
+etikete `<b class="zorunlu"> *</b>` koyuyordu, `TarafAlani` / fiş tipi /
+tedarikçi fatura no ise `zorunlu-isaret` sınıfı veriyordu — ama sınıfın CSS
+karşılığı yoktu. Aynı ızgarada depo yıldızlı, cari yıldızsız görünüyordu.
+`tema.css`'e tek kural eklendi (`.etiket.zorunlu-isaret::after`).
+
+Doğrulama (dokuz tür ekrandan): satış/alış faturası, sipariş, satış irsaliyesi,
+konsinye, tahakkuk, transfer (Çıkış Deposu* | Transfer No | Tarih | Teslim Eden ·
+Giriş Deposu* | Teslim Alan), talep (İstenen Depo* | Talep No | Tarih | Teslim
+Deposu · Talep Eden), çıkış fişi (Tipi | Fiş No | Tarih | Sorumlu · Çıkış
+Deposu*). Transferde döviz kutusu yok (para yok), fişte var (muhasebe matrahı).
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).
