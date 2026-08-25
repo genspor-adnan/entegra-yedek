@@ -80,6 +80,7 @@ public static partial class KaynakKatalogu
         Ekle(Kisi());
         Ekle(Belge());
         Ekle(Stok());
+        Ekle(StokBirim());
         Ekle(Personel());
         Ekle(Hasta());
         Ekle(Hizmet());

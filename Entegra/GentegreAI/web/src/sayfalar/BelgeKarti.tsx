@@ -413,7 +413,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           izlemeKodu: String(r.izlemeKodu ?? ''),
           // Termin (140): sunucu tam tarih doner, ekran gun bekliyor.
           teslimTarihi: String(r.teslimTarihi ?? '').slice(0, 10),
-          adet: String(r.miktar ?? r.adet ?? 0),
+          // Ambalaj (143): GIRILEN miktar `adet`tir; `miktar` ana birim
+          //   karsiligidir (2 kutu / 24 adet) - kart girileni gosterir.
+          birim: Number(r.birim ?? 0),
+          birimCarpan: Number(r.birimCarpan ?? 1) || 1,
+          adet: String(r.adet ?? r.miktar ?? 0),
           birimFiyat: String(r.birimFiyat ?? 0),
           // SATIR BAZLI DOVIZ (kullanici): kalem kendi para biriminde girilmis
           //   olabilir - kayitli satirdan geri yuklenir, yoksa yerel sayilir.
@@ -992,6 +996,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 // Stok LOT/SERI izlemli mi - kalem penceresi buna gore izlem
                 //   ekranini acar (db/114).
                 izleme: hizmet ? 0 : Number(sec.izleme ?? 0),
+                // Ambalaj (143): kalem ANA BIRIMLE acilir; kullanici pencerede
+                //   kutu/koli secerse carpan oradan gelir.
+                birim: hizmet ? 0 : Number(sec.anaBirimKod ?? 0),
+                birimCarpan: 1,
+                birimAdi: hizmet ? '' : String(sec.anaBirim ?? ''),
                 // Paket (124): kalem kaydedilince icerigi de belgeye eklenir.
                 paket: !hizmet && Number(sec.paket ?? 0) === 1,
                 kdv: sec.kdv !== undefined && sec.kdv !== null ? String(sec.kdv) : '20',
@@ -1012,6 +1021,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             satir={kalem}
             transferMi={bilgi.kalem === 'miktar'}
             siparisMi={siparisMi}
+            anaBirimKod={kalem?.birim ?? 0}
+            anaBirimAdi={kalem?.birimAdi ?? ''}
             vergisiz={bilgi.kalem === 'sade' && stokFisiMi}
             yerelPara={yerelPara}
             girisIzlemi={bilgi.girisIzlemi}

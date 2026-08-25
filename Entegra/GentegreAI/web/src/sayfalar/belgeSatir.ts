@@ -48,6 +48,15 @@ export interface SatirDurumu {
    * termin guncelleme gibi satir bazli islemler yalniz kayitli satirda calisir.
    */
   satirId?: number;
+  /** Girilen birim (kod_liste 'stok.ana_birim' degeri) - 143. */
+  birim?: number;
+  /**
+   * Girilen birimin ANA BIRIM carpani (1 kutu = 12 adet -> 12). Stok her zaman
+   * ana birimde hareket eder: miktar = adet x birimCarpan.
+   */
+  birimCarpan?: number;
+  /** Stok kartinin ana birim adi - gridde "2 Kutu" yazabilmek icin. */
+  birimAdi?: string;
   /** Bu satir bir PAKET mi (124) - altina icerik satirlari acilir. */
   paket?: boolean;
   /** Icerik satirinda: bagli oldugu paket satirinin anahtari. */

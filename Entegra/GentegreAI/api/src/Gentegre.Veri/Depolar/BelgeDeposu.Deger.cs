@@ -164,6 +164,7 @@ public sealed partial class BelgeDeposu
         await using (var komut = new NpgsqlCommand("""
             select s.id, s.sira, s.tur, s.stok_id as "stokId", s.hizmet_id as "hizmetId",
                    s.masraf_id as "masrafId", s.aciklama, s.adet, s.miktar, s.birim,
+                   s.birim_carpan as "birimCarpan",
                    s.birim_fiyat as "birimFiyat", s.iskonto, s.iskonto2, s.kdv,
                    s.otv_yuzde as "otvYuzde", s.otv_miktar as "otvMiktar", s.tutar,
                    s.doviz_cinsi as "dovizCinsi", s.doviz_birim_fiyat as "dovizBirimFiyat",

@@ -177,8 +177,10 @@ return {
     tur: s.satirTur,
     stokId: s.stokId,
     hizmetId: s.hizmetId,
+    // `adet` GIRILEN miktardir (2 kutu); ANA BIRIM karsiligini (24 adet)
+    //   sunucu carpandan hesaplar - iki yerde hesaplamak iki farkli sonuc
+    //   demekti, o yuzden `miktar` GONDERILMEZ (143).
     adet: Number(s.adet.replace(',', '.')) || 0,
-    miktar: Number(s.adet.replace(',', '.')) || 0,
     birimFiyat: Number(s.birimFiyat.replace(',', '.')) || 0,
     // SATIR BAZLI DOVIZ: bir kalem 100 USD, digeri 100 TL olabilir (kullanici).
     //   Yerel birim fiyat her zaman yazilir; doviz alanlari yalniz satir kendi
@@ -204,6 +206,10 @@ return {
     izleme: s.izleme || (s.izlemeKodu ? 1 : 0),
     // Termin (140): bos string DEGIL null gider - sunucu tarih bekliyor.
     teslimTarihi: s.teslimTarihi || null,
+    // Ambalaj birimi (143): girilen birim + ana birim carpani. Sunucu
+    //   miktar = adet x carpan hesaplar; stok ANA BIRIMDE hareket eder.
+    birim: s.birim ?? 0,
+    birimCarpan: s.birimCarpan ?? 1,
     // Lot dagilimi: bos dizi gonderilmez - izlemsiz stokta sunucu hata verir.
     izlemler: s.izlemler.length > 0
       ? s.izlemler.map(z => ({

@@ -472,9 +472,19 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                   etiket={anaEtiket}
                   zorunlu
                   alanlar={LOOKUP_HESAP}
-                  sabitFiltre={secili?.anaHesapTuru
-                    ? { alan: 'tur', op: 'esit', deger: secili.anaHesapTuru }
-                    : undefined}
+                  // Hesap listesi hem TURE hem PARA BIRIMINE gore suzulur
+                  //   (kullanici): USD tahsilatta yalniz USD banka/kasa cikar -
+                  //   TL kasaya USD yazip sonra "hesabin dovizi tutmuyor"
+                  //   hatasi almak yerine dogru secenek bastan gorunur.
+                  sabitFiltre={{
+                    op: 'and',
+                    kosullar: [
+                      ...(secili?.anaHesapTuru
+                        ? [{ alan: 'tur', op: 'esit' as const, deger: secili.anaHesapTuru }]
+                        : []),
+                      { alan: 'dovizCinsi', op: 'esit' as const, deger: anaDoviz },
+                    ],
+                  }}
                   deger={hesap?.ad}
                   hata={alanHatalari.hesapId}
                   saltOkunur={kilitli}
@@ -565,19 +575,8 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                 </label>
               )}
 
-              {dovizli && (
-                <>
-                  <label className="alan">
-                    <span className="etiket">Kur</span>
-                    <input className="hiza-sag" value={kur} disabled={kilitli}
-                           onChange={e => setKur(e.target.value)} />
-                  </label>
-                  <label className="alan">
-                    <span className="etiket">TL Karşılığı (önizleme)</span>
-                    <input className="hiza-sag onizleme" value={para.format(yerelOnizleme)} readOnly />
-                  </label>
-                </>
-              )}
+              {/* Kur ve TL karsiligi BASLIKTA, tutarin altinda (kullanici) -
+                  burada ikinci kez gostermek tekrar oluyordu. */}
 
               {donusum && (
                 <>

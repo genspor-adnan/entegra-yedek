@@ -82,6 +82,33 @@ public static partial class KaynakKatalogu
             new("subeId",    "s.sube_id",   "sayi",  "Sube",     Varsayilan: false)
         });
 
+    /// <summary>
+    /// AMBALAJ BIRIMLERI (143) - kalem penceresi stok secilince bunu okur:
+    /// "1 Kutu = 12 Adet". Ana birim bu listede YOKTUR (carpani 1, kartta zaten
+    /// secili); arayuz onu listenin basina kendisi ekler.
+    /// </summary>
+    private static KaynakTanimi StokBirim() => new(
+            Ad: "stok-birim",
+            YetkiKodu: "stok",
+            Kaynak: "public.stok_birim sb",
+            VarsayilanSirala: "sb.carpan asc, sb.id asc",
+            Kolonlar: new KolonTanimi[]
+            {
+                new("id",       "sb.id",       "sayi",  "Id", Varsayilan: false),
+                new("stokId",   "sb.stok_id",  "sayi",  "Stok", Varsayilan: false),
+                new("birim",    "sb.birim",    "sayi",  "Birim Kodu", Varsayilan: false),
+                new("birimAdi",
+                    "(select kd.ad from public.kod_deger kd" +
+                    "   join public.kod_liste kl on kl.id = kd.liste_id" +
+                    "  where kl.kod = 'stok.ana_birim' and kd.deger = sb.birim)",
+                                               "metin", "Birim"),
+                new("carpan",   "sb.carpan",   "para",  "Ana Birim Karşılığı", Hizalama: "sag"),
+                new("barkod",   "sb.barkod",   "metin", "Barkod", Varsayilan: false),
+                new("varsayilanAlis",  "sb.varsayilan_alis",  "mantik", "Alışta", Varsayilan: false),
+                new("varsayilanSatis", "sb.varsayilan_satis", "mantik", "Satışta", Varsayilan: false),
+                new("durum",    "sb.durum",    "kod",   "Durum", Hizalama: "orta", Varsayilan: false)
+            });
+
     // ============================================================ KASA ====
 
     // --------------------------------------------------------------- hesap ----

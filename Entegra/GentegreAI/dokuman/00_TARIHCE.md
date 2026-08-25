@@ -3190,5 +3190,41 @@ faturalanmış bir siparişin kalan kalemleri için de yeni tarih verilebilir.
 Gecikmede siparişi iptal edip yeniden kesmeye gerek yok; numara, fiyatlar ve
 dönüşüm zinciri korunur. Değişiklik `islem_log`'a `aksiyon=termin` ile düşer.
 
+### Rezervasyon, ambalaj birimleri, stok yön bayrakları
+
+**Sipariş rezervasyonu** (`db/142`) bağlandı: düğme siparişin *kalan*
+miktarlarını depoda ayırıyor. Stok **düşmüyor** — o irsaliyede olur; yalnız
+"söz verilmiş" miktar işaretleniyor: `kullanılabilir = kalan − rezerve`
+(`v_stok_kullanilabilir`). Kritik nokta, çözülmenin **kendiliğinden** olması:
+kırpma, kapatma sayacını süren `fn_belge_satir_kapatma_tazele` içine kondu —
+uygulama koduna bırakılsa dönüşüm/silme/iptal yollarından biri unutulur ve
+rezerve stokta asılı kalırdı.
+
+**Ambalaj birimleri** (`db/143`) — kullanıcı: "1 kutu = 12 adet tanımlayıp
+belgeye kutu girip adet çıkarabilmeliyim". Karar: **bakiye her zaman ana
+birimde**; ambalaj yalnızca giriş biçimi. Belge satırında ayrım:
+
+| alan | anlam | örnek |
+|---|---|---|
+| `adet` | kullanıcının girdiği miktar | 2 |
+| `birim` + `birim_carpan` | girilen birim ve ana birim karşılığı | Kutu, 12 |
+| `miktar` | **ana birim** miktarı, stok bunu okur | 24 |
+
+Çarpan satırda saklanıyor: kartaki tanım sonradan değişse bile eski belge kendi
+çarpanıyla okunur. Lot dağıtımı da ana birimde (24 adet, "2 kutu" değil). Fiyat
+**girilen birime** ait (1 kutu = 120 TL), tutar `adet × birim_fiyat`. Stok
+kartına "Ambalaj Birimleri" sekmesi, kalem penceresine birim seçici ve
+"= 24 Adet" önizlemesi geldi.
+
+**Stok yön bayrakları** (`db/141`): `satilan` / `alinan` — satış belgelerinin
+aramasında yalnız satılan, alışta yalnız alınan stoklar çıkıyor (kendi
+ürettiğimiz mamul satın alma siparişinde, satın alınan ambalaj satış
+faturasında listelenmesin). İkisi de varsayılan 1, yoksa bütün arama ekranları
+boşalırdı. Ayrıca `yeniden_kullanilir` (kiralık/demirbaş).
+
+Kasa kartı: hesap listesi artık **para birimine göre de** süzülüyor — USD
+tahsilatta yalnız USD kasa/banka çıkıyor; "hesabın dövizi tutmuyor" hatasını
+sonradan almak yerine doğru seçenek baştan görünüyor.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet portföy aksiyonları (tahsile
 ver, ciro, karşılıksız), F6 kredi/kupon, F7 belge fişleme.

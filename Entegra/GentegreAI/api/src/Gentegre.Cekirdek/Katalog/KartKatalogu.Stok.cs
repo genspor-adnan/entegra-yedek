@@ -83,6 +83,24 @@ public static partial class KartKatalogu
                                                                                    // (GENINI -11110: Stok Barkod)
                Baslik: "Birim / Barkod"),                                         // mockup: "Birim / Barkod" sekmesi
 
+            // AMBALAJ BIRIMLERI (143): "1 kutu = 12 adet". Bakiye ANA BIRIMDE
+            //   tutulur; buradaki carpan yalnizca belgeye giris bicimidir -
+            //   kullanici "2 kutu" yazar, stok 24 adet duser.
+            new DetayTanimi("birimler", "public.stok_birim", "stok_id", new KartAlani[]
+            {
+                new("id",              "id",               "sayi", Yazilabilir: false),
+                new("birim",           "birim",            "kod", Zorunlu: true,
+                    KodListesi: "stok.ana_birim", Baslik: "Birim"),
+                // 1 <birim> kac ANA BIRIM eder. Ana birimin kendisi eklenmez -
+                //   o zaten kartta secili ve carpani 1'dir.
+                new("carpan",          "carpan",           "para", Zorunlu: true,
+                    Baslik: "Ana Birim Karşılığı"),
+                new("barkod",          "barkod",           "metin", EnFazlaUzunluk: 30),
+                new("varsayilanAlis",  "varsayilan_alis",  "mantik", Baslik: "Alışta Varsayılan"),
+                new("varsayilanSatis", "varsayilan_satis", "mantik", Baslik: "Satışta Varsayılan"),
+                new("durum",           "durum",            "kod", SabitKodlar: DurumKodlari)
+            }, Sirala: "carpan, id", SubeKolonu: null, LogTabloId: 347, Baslik: "Ambalaj Birimleri"),
+
             new DetayTanimi("fiyatlar", "public.stok_fiyat", "stok_id", new KartAlani[]
             {
                 new("id",          "id",           "sayi", Yazilabilir: false),

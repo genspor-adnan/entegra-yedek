@@ -9,6 +9,7 @@ import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
 import { IzlemPenceresi } from './IzlemPenceresi';
 
 export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi,
+                         anaBirimKod = 0, anaBirimAdi = '',
                          girisIzlemi, cikisIzlemi, cikisDepoId, belgeTarihi,
                          onKapat, onKaydet }: {
   satir: SatirDurumu;
@@ -26,6 +27,9 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   transferMi: boolean;
   /** Siparis: satira TESLIM TARIHI (termin) sorulur (140). */
   siparisMi: boolean;
+  /** Stok kartinin ANA BIRIMI (143) - ambalaj listesinin ilk ogesi, carpan 1. */
+  anaBirimKod?: number;
+  anaBirimAdi?: string;
   /** Kur bu tarihten okunur (belge tarihi) - bugunun kuru degil. */
   belgeTarihi: string;
   onKapat(): void;
@@ -38,8 +42,37 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   /** Kur kutusu kullanici tarafindan degistirildi mi - degistiyse ustune yazma. */
   const kurElle = useRef(false);
 
-  const degis = (alan: keyof SatirDurumu, deger: string) =>
+  const degis = (alan: keyof SatirDurumu, deger: string | number) =>
     setR(x => ({ ...x, [alan]: deger }));
+
+  /**
+   * AMBALAJ BIRIMLERI (143). Liste her zaman ANA BIRIMLE baslar (carpan 1),
+   * ardindan stogun tanimli ambalajlari gelir. Ambalaj yoksa liste tek ogeli
+   * kalir ve secici hic cizilmez - eski davranis aynen surer.
+   */
+  const [birimler, setBirimler] = useState<{ birim: number; ad: string; carpan: number }[]>([]);
+  useEffect(() => {
+    if (!r.stokId) { setBirimler([]); return }
+    void (async () => {
+      const ana = { birim: anaBirimKod, ad: anaBirimAdi, carpan: 1 };
+      try {
+        const y = await api.liste('stok-birim', {
+          sayfa: 1, boyut: 20,
+          filtre: { op: 'and', kosullar: [
+            { alan: 'stokId', op: 'esit', deger: r.stokId },
+            { alan: 'durum', op: 'esit', deger: 1 },
+          ] },
+        });
+        setBirimler([ana, ...y.satirlar
+          .filter(s => Number(s.birim) !== anaBirimKod)
+          .map(s => ({
+            birim: Number(s.birim),
+            ad: String(s.birimAdi ?? ''),
+            carpan: Number(s.carpan) || 1,
+          }))]);
+      } catch { setBirimler([ana]) }
+    })();
+  }, [r.stokId, anaBirimKod, anaBirimAdi]);
 
   /** Enter = Tamam: adet/fiyat yazip Enter'a basinca satir gride eklenir. */
   const tus = (e: React.KeyboardEvent) => {
@@ -61,6 +94,11 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   }, [dovizli, r.fiyatDovizi, belgeTarihi]);
 
   const adet = Number(r.adet.replace(',', '.')) || 0;
+  /** Ana birim karsiligi: "2 Kutu = 24 Adet". Ana birim seciliyse gosterilmez. */
+  const seciliCarpan = Number(r.birimCarpan ?? 1) || 1;
+  const anaBirimMiktar = seciliCarpan !== 1 && adet > 0
+    ? Math.round(adet * seciliCarpan * 1e6) / 1e6
+    : null;
   const kur = dovizli ? (Number(r.kur.replace(',', '.')) || 0) : 1;
   const dovizFiyat = Number(r.dovizFiyat.replace(',', '.')) || 0;
   // Yerel birim fiyat: dovizli kalemde doviz fiyati x kur, degilse dogrudan girilen.
@@ -120,7 +158,31 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                         onClick={() => degis('adet', adetKaydir(r.adet, -1))}>−</button>
                 <button type="button" className="mini" title="Artır"
                         onClick={() => degis('adet', adetKaydir(r.adet, +1))}>+</button>
+                {/* AMBALAJ BIRIMI (143): stogun tanimli birimleri. Secilen birim
+                    yalnizca GIRIS bicimidir - stok her zaman ANA BIRIMDE hareket
+                    eder, carpim asagida gosterilir. Tek birim varsa (ambalaj
+                    tanimlanmamis) liste cizilmez. */}
+                {birimler.length > 1 && (
+                  <select className="birim" value={String(r.birim ?? 0)}
+                          title="Giriş birimi"
+                          onChange={e => {
+                            const b = birimler.find(x => String(x.birim) === e.target.value);
+                            degis('birim', Number(e.target.value));
+                            degis('birimCarpan', b?.carpan ?? 1);
+                          }}>
+                    {birimler.map(b => (
+                      <option key={b.birim} value={b.birim}>{b.ad}</option>
+                    ))}
+                  </select>
+                )}
               </span>
+              {/* Ana birim karsiligi: "2 Kutu = 24 Adet". Kullanici ne kadar mal
+                  cikacagini kaydetmeden gorur. */}
+              {anaBirimMiktar !== null && (
+                <span className="alan-notu">
+                  = {anaBirimMiktar.toLocaleString('tr-TR')} {anaBirimAdi}
+                </span>
+              )}
             </label>
 
             {/* Birim fiyat KARTIN para biriminde girilir (stok arama ekraninda

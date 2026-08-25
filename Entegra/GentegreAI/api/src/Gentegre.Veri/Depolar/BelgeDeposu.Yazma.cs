@@ -116,7 +116,16 @@ public sealed partial class BelgeDeposu
                 new AlanHatasi($"satirlar[{sira - 1}].tur", "tur=1 stok, 2 hizmet, 3 masraf."));
 
         var adet       = JsonOndalik(satir, "adet", JsonOndalik(satir, "miktar", 0));
-        var miktar     = JsonOndalik(satir, "miktar", adet);
+
+        // AMBALAJ BIRIMI (143): kullanici "2 kutu" girer, stok ANA BIRIMDE
+        //   (24 adet) hareket eder. Carpan satirda SAKLANIR - stok kartindaki
+        //   tanim sonradan degisse bile eski belge kendi carpaniyla okunur.
+        //   Carpan gelmezse 1: birimsiz/ambalajsiz satir eskisi gibi calisir.
+        var birimCarpan = JsonOndalik(satir, "birimCarpan", 1);
+        if (birimCarpan <= 0) birimCarpan = 1;
+        // `miktar` acikca gonderildiyse ona dokunulmaz (donusum kaynaktan
+        //   kopyalar); yoksa girilen adetten ANA BIRIME cevrilir.
+        var miktar     = JsonOndalik(satir, "miktar", adet * birimCarpan);
         var iskonto    = JsonOndalik(satir, "iskonto", 0);
         var iskonto2   = JsonOndalik(satir, "iskonto2", 0);
         var kdv        = (int)JsonSayi(satir, "kdv", 0);
@@ -153,7 +162,7 @@ public sealed partial class BelgeDeposu
         var kolonlar = new List<string>
         {
             "belge_id", "sira", "tur", "stok_id", "hizmet_id", "masraf_id", "aciklama",
-            "adet", "miktar", "birim", "birim_fiyat", "iskonto", "iskonto2", "kdv",
+            "adet", "miktar", "birim", "birim_carpan", "birim_fiyat", "iskonto", "iskonto2", "kdv",
             "otv_yuzde", "otv_miktar", "kdv_muafiyeti", "tutar",
             "doviz_cinsi", "doviz_birim_fiyat", "doviz_tutari", "doviz_kuru",
             "giris_depo_id", "cikis_depo_id", "izleme", "izleme_kodu", "stok_durum_degis",
@@ -167,7 +176,8 @@ public sealed partial class BelgeDeposu
         var parametreler = new List<object?>
         {
             belgeId, sira, tur, stokId, hizmetId, masrafId, JsonMetin(satir, "aciklama"),
-            adet, miktar, (int)JsonSayi(satir, "birim", 0), birimFiyat, iskonto, iskonto2, (short)kdv,
+            adet, miktar, (int)JsonSayi(satir, "birim", 0), birimCarpan,
+            birimFiyat, iskonto, iskonto2, (short)kdv,
             (short)JsonSayi(satir, "otvYuzde", 0), JsonOndalik(satir, "otvMiktar", 0),
             (short)JsonSayi(satir, "kdvMuafiyeti", 0), tutar,
             dovizCinsi, dovizBirimFiyat, dovizTutar, kur,
@@ -191,9 +201,11 @@ public sealed partial class BelgeDeposu
             satirId = Convert.ToInt32(await komut.ExecuteScalarAsync(iptal));
 
         // Lot / seri izlemi: stok izlemliyse satirin miktari lotlara dagitilir.
+        //   ANA BIRIM miktari (`miktar`) verilir - lot bakiyesi de stok bakiyesi
+        //   gibi ana birimde tutulur; "2 kutu" degil "24 adet" dagitilir (143).
         if (stokId is { } sid)
             await IzlemYazAsync(baglanti, islem, belgeId, satirId, sid, sira,
-                                Sayi(belge, "tur"), adet, satir, belge, turStokEtkiler,
+                                Sayi(belge, "tur"), miktar, satir, belge, turStokEtkiler,
                                 uyarilar, iptal);
     }
 
