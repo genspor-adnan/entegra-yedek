@@ -572,7 +572,9 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
               )}
           </div>
 
-          <div className="kagrup">
+          {/* Baslik izgarasindan biraz ARALIKLI (kullanici): iki blok bitisik
+              olunca tek uzun form gibi gorunuyordu. */}
+          <div className="kagrup" style={{ marginTop: 14 }}>
             <h6>Bilgiler</h6>
             <div className="alan-izgara">
               {planMi && (

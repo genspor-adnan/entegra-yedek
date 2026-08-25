@@ -129,7 +129,7 @@ export function GenLookup({
               kutusu. Ayni is (listeden secim) her ekranda ayni gorunsun -
               hesap/depo/proje aramasi ayri bir bicimdeydi. */}
           <div className="lookup-pencere" onKeyDown={tus}>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div className="lookup-cubuk">
               <button type="button" className="d bir" disabled={!satirlar[secili]}
                       onClick={() => satirlar[secili] && sec(satirlar[secili])}>
                 Seç

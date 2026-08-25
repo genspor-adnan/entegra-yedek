@@ -154,7 +154,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
       <div className="lookup-pencere taraf-arama" onKeyDown={tus} style={{ width: 'min(880px, 92vw)', zIndex: 401 }}>
         {/* Ust arac cubugu (cari-liste ile ayni desen): Yeni/Duzenle sadece tek-kaynakli
             aramada (kaynaklar.length===1) - kullanici hangi TIP olusturulacagini secemez. */}
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div className="lookup-cubuk">
           {kaynaklar.length === 1 && (
             <>
               <button type="button" className="d" onClick={() => setKartAcik({ kaynak: kaynaklar[0], id: 'yeni' })}>
