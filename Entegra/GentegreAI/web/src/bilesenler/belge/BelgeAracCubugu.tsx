@@ -161,7 +161,13 @@ export function BelgeAracCubugu({
       Fatura Tipi
       <select value={faturaTipi} disabled={kilitli} style={{ width: 150 }}
               onChange={e => setFaturaTipi(Number(e.target.value))}>
-        {FATURA_TIPLERI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
+        {/* Tip 1 KATALOGTA "Alış / Satış" (tek kod, iki yon): ekranda belgenin
+            kendi yonuyle yazilir - satis faturasinda "Satış", alista "Alış". */}
+        {FATURA_TIPLERI.map(t => (
+          <option key={t.deger} value={t.deger}>
+            {t.deger === 1 ? (alisMi ? 'Alış' : 'Satış') : t.ad}
+          </option>
+        ))}
         {/* Gocten gelen tanimsiz tip (or. 17) listede yok: secenek olarak
             EKLENIR, yoksa kart acilinca ilk tipe duser ve kaydedince belgenin
             gercek tipi sessizce degisirdi. */}
