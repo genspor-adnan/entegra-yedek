@@ -433,35 +433,37 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                     )}
                   </select>
                 </span>
-                {alanHatalari.tutar && <span className="alan-hata">{alanHatalari.tutar}</span>}
-              </label>
 
-              {/* DOVIZLI islemde kur ve YEREL KARSILIGI (kullanici): kur ustte,
-                  hemen altinda yerel para tutari - girilen dovizin ne ettigi
-                  ayni hucrede gorunsun. Yanindaki combo EKSTRE DOVIZI: cari
-                  hesaba hangi birimde islenecegi (139); secenekler islem dovizi
-                  ve yerel para. */}
-              {dovizli && (
-                <>
-                  <label className="alan">
-                    <span className="etiket">Kur</span>
-                    <input className="hiza-sag" value={kur} disabled={kilitli}
-                           onChange={e => setKur(e.target.value)} />
+                {/* DOVIZ SECILINCE ikinci satir (kullanici): para birimi
+                    combosunun TAM ALTINDA kur, kurun SOLUNDA yerel karsilik -
+                    ust satirla ayni hizada, ne girildigi ve ne ettigi tek
+                    hucrede okunur. */}
+                {dovizli && (
+                  <span className="ikili">
                     <input className="hiza-sag onizleme" readOnly
                            title={`${anaDoviz} tutarın ${YEREL_PARA_VARSAYILAN} karşılığı`}
                            value={`${para.format(yerelOnizleme)} ${YEREL_PARA_VARSAYILAN}`} />
-                  </label>
-                  <label className="alan">
-                    <span className="etiket">Ekstre Dövizi</span>
-                    <select value={ekstreDovizi} disabled={kilitli}
-                            title="Cari hesaba hangi para biriminde işlenecek"
-                            onChange={e => setEkstreDovizi(e.target.value)}>
-                      {[...new Set([anaDoviz, YEREL_PARA_VARSAYILAN])].map(k => (
-                        <option key={k} value={k}>{k}</option>
-                      ))}
-                    </select>
-                  </label>
-                </>
+                    <input className="hiza-sag birim-alti" value={kur} disabled={kilitli}
+                           title={`1 ${anaDoviz} = ? ${YEREL_PARA_VARSAYILAN}`}
+                           onChange={e => setKur(e.target.value)} />
+                  </span>
+                )}
+                {alanHatalari.tutar && <span className="alan-hata">{alanHatalari.tutar}</span>}
+              </label>
+
+              {/* EKSTRE DOVIZI: cari hesaba hangi birimde islenecegi (139);
+                  secenekler islem dovizi ve yerel para. */}
+              {dovizli && (
+                <label className="alan">
+                  <span className="etiket">Ekstre Dövizi</span>
+                  <select value={ekstreDovizi} disabled={kilitli}
+                          title="Cari hesaba hangi para biriminde işlenecek"
+                          onChange={e => setEkstreDovizi(e.target.value)}>
+                    {[...new Set([anaDoviz, YEREL_PARA_VARSAYILAN])].map(k => (
+                      <option key={k} value={k}>{k}</option>
+                    ))}
+                  </select>
+                </label>
               )}
 
               {!planMi && !cariVirman && !cekSenetMi && (
