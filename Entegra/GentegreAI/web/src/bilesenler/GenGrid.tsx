@@ -445,9 +445,18 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const hepsiRef = useRef<HTMLInputElement | null>(null);
   useEffect(() => { if (hepsiRef.current) hepsiRef.current.indeterminate = bazisiSecili }, [bazisiSecili]);
 
+  /** Uc nokta menusunun kendisi - disari tiklama/kaydirma ayirt edilsin. */
+  const gridMenuRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     if (!gridMenuKonum) return;
-    const kapat = () => setGridMenuKonum(null);
+    // Menu SAYFA kaydirilinca kapanir (konumu sabit, yerinde asili kalirdi) ama
+    //   KENDI icinde kaydirilinca KAPANMAZ: capture fazindaki dinleyici menunun
+    //   kendi scroll'unu da yakaliyor ve kullanici kolon listesine inemiyordu.
+    const kapat = (e: Event) => {
+      if (e.target instanceof Node && gridMenuRef.current?.contains(e.target)) return;
+      setGridMenuKonum(null);
+    };
     window.addEventListener('click', kapat);
     window.addEventListener('scroll', kapat, true);
     return () => { window.removeEventListener('click', kapat); window.removeEventListener('scroll', kapat, true) };
@@ -730,7 +739,9 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       </div>
 
       {gridMenuKonum && (
-        <div className="sag-tus" style={{ left: gridMenuKonum.x, top: gridMenuKonum.y }} onClick={e => e.stopPropagation()}>
+        <div ref={gridMenuRef} className="sag-tus"
+             style={{ left: gridMenuKonum.x, top: gridMenuKonum.y }}
+             onClick={e => e.stopPropagation()}>
           {gridMenuOgeleri.map(o => (
             <div key={o.ad}>
               {o.ayrac && <div className="ayr" />}
