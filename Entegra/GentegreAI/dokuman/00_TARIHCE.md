@@ -2799,5 +2799,24 @@ Doğrulama: `tsc -b` + prod derleme temiz. Ekrandan: kişi kartında geçersiz
 e-posta ile Kaydet → alan altında uyarı ve kayıt engellendi; stok listesinde
 hızlı arama 4.902 → 505 kayıt.
 
+### Refaktör: belge kaydetme mantığı ve araç çubuğu ayrıldı
+
+**`BelgeKarti.tsx` 1271 → 1068 satır.**
+
+- `sayfalar/belgeKaydet.ts` (193): kart durumu tek nesnede (`BelgeGirdisi`),
+  üstünde iki **saf** fonksiyon — `belgeDogrula()` (cari/depo/tarih penceresi/
+  transfer sorumluluk devri/dış numara/en az bir kalem; alan adı → mesaj döner)
+  ve `belgeGovdesi()` (API §4 istek gövdesi: tür bazlı depo yönü, seri/numara,
+  irsaliye UBL alanları, satır ve lot dağılımı). Ekran artık yalnız sonucu
+  gösteriyor.
+- `bilesenler/belge/BelgeAracCubugu.tsx` (146): Kaydet/Sil ve türe özel eylemler
+  (siparişten aktar, faturaya dönüştür, e-Belge gönder, tahsilat, sevk fişi).
+  Düğmelerin etkin/pasif kuralları tek bakışta okunur hâlde.
+
+Doğrulama: `tsc -b` + prod derleme temiz. Ekrandan: carisiz Kaydet → "Cari
+seçilmeli." alan uyarısı; ardından cari + kalem (250,00) ile taslak kaydedildi —
+sunucu dip toplamı 250,00 döndü, araç çubuğu "＋ Yeni Belge"ye geçti, Tahsilat
+etkinleşti. Test belgesi silindi, stok etkilenmedi.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).

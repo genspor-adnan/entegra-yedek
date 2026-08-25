@@ -13,6 +13,7 @@ import { KasaIslemKarti } from './KasaIslemKarti';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { para } from '../bilesenler/bicim';
 import { type SatirDurumu, bosSatir, satirTutari } from './belgeSatir';
+import { belgeDogrula, belgeGovdesi, doluSatirlar, type BelgeGirdisi } from './belgeKaydet';
 import {
   YEREL_PARA_VARSAYILAN, GERIYE_GUN_VARSAYILAN, yerelAnMetni,
   LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, KAPANMA_ETIKET, SEKMELER,
@@ -22,6 +23,7 @@ import {
   TasiyiciSekmesi, EBelgeSekmesi, FaturalamaSekmesi,
 } from '../bilesenler/belge/BelgeSekmeleri';
 import { KalemSekmesi, TahsilatSekmesi } from '../bilesenler/belge/KalemSekmesi';
+import { BelgeAracCubugu } from '../bilesenler/belge/BelgeAracCubugu';
 
 /**
  * TarafArama ile doldurulan baslik alani (cari, satis temsilcisi...).
@@ -493,129 +495,26 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     setAlanHatalari({});
     setSonuc(null);
 
-    // Transferde cari YOK (sunucu da katalogtan ayni karari veriyor).
-    if (!cari && !depoBelgesi && !stokFisiMi) {
-      setAlanHatalari({ tarafId: 'Cari seçilmeli.' }); return;
+    // Kart durumu tek nesnede: dogrulama ve istek govdesi SAF fonksiyonlarda
+    //   (belgeKaydet.ts) - ekran yalniz sonucu gosterir.
+    const girdi: BelgeGirdisi = {
+      tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun,
+      senaryo, satici, depo, girisDepo, teslimEden, teslimAlan, tasiyici,
+      aracPlaka, soforAd, soforTckn, sevkTarihi, teslimSekli, fisTipi, satirlar,
+      subeId: kullanici?.subeId ?? undefined,
+      alisMi, irsaliyeMi, depoBelgesi, stokFisiMi, fisCikisMi, transferMi,
+      talepMi, disNumarali,
+    };
+    const hatalar = belgeDogrula(girdi);
+    if (hatalar) {
+      if (hatalar.genel) setHata(hatalar.genel);
+      else setAlanHatalari(hatalar);
+      return;
     }
-    if (stokFisiMi) {
-      if (!fisTipi) { setAlanHatalari({ tipi: 'Fiş tipi seçilmeli.' }); return }
-      if (!depo) {
-        setAlanHatalari({ [fisCikisMi ? 'cikisDepoId' : 'girisDepoId']: 'Depo seçilmeli.' }); return;
-      }
-    }
-    // Tarih penceresi (tum belge turleri): ileri tarih ve 7 gunden eski yasak.
-    if (tarih > tarihEnGec) {
-      setAlanHatalari({ belgeTarihi: 'Belge ileri tarihli olamaz.' }); return;
-    }
-    if (tarihEnErken && tarih < tarihEnErken) {
-      setAlanHatalari({ belgeTarihi: `Belge tarihi ${geriGun} günden eski olamaz.` }); return;
-    }
-    if (talepMi) {
-      if (!depo) { setAlanHatalari({ cikisDepoId: 'İstenen depo seçilmeli.' }); return }
-      if (!teslimAlan) { setAlanHatalari({ teslimAlanId: 'Talep eden seçilmeli.' }); return }
-      if (girisDepo && girisDepo.id === depo.id) {
-        setAlanHatalari({ girisDepoId: 'Teslim deposu istenen depo ile aynı olamaz.' }); return;
-      }
-    }
-    if (transferMi) {
-      if (!depo || !girisDepo) {
-        setAlanHatalari({ [!depo ? 'cikisDepoId' : 'girisDepoId']: 'Depo seçilmeli.' }); return;
-      }
-      if (depo.id === girisDepo.id) {
-        setAlanHatalari({ girisDepoId: 'Çıkış ve giriş deposu aynı olamaz.' }); return;
-      }
-      // Sorumluluk devri: mali kim verdi, kim aldi (sunucu da ayni kontrolu yapar).
-      if (!teslimEden || !teslimAlan) {
-        setAlanHatalari(!teslimEden
-          ? { teslimEdenId: 'Teslim eden seçilmeli.' }
-          : { teslimAlanId: 'Teslim alan seçilmeli.' }); return;
-      }
-      if (teslimEden.id === teslimAlan.id) {
-        setAlanHatalari({ teslimAlanId: 'Teslim eden ve teslim alan aynı kişi olamaz.' }); return;
-      }
-    }
-    if (disNumarali && belgeNo.trim() === '') {
-      setAlanHatalari({ belgeNo: 'Tedarikçinin fatura numarası girilmeli.' }); return;
-    }
-    const dolu = satirlar.filter(s => s.stokId || s.hizmetId);
-    if (dolu.length === 0) { setHata('En az bir satırda stok ya da hizmet seçilmeli.'); return }
-
+    const dolu = doluSatirlar(satirlar);
     setKaydediyor(true);
     try {
-      const govde = {
-        belge: {
-          tur,
-          tarafId: cari?.id ?? 0,
-          belgeTarihi: tarih,
-          // Seri e-Belge kavrami: transferde YOK - yoksa numara "T20|SWEB" gibi
-          //   ayri bir sayactan gelir ve eski transferlerle ayni seride olmaz.
-          belgeSeri: depoBelgesi || stokFisiMi ? '' : seri,
-          // Alis faturasinda numara tedarikciden gelir; digerlerinde sunucu verir.
-          belgeNo: disNumarali ? belgeNo.trim() : undefined,
-          belgeDovizi: 'TL',
-          dovizKuru: 1,
-          vadeGun: Number(vadeGun) || 0,
-          subeId: kullanici?.subeId ?? undefined,
-          // Depo ALANI ture gore: alista giris, satista cikis (stok yonu buradan).
-          //   TRANSFERDE IKISI DE dolu - tek satir iki depoyu oynatir.
-          // Stok fisinde depo yonu TURDEN gelir: giris fisi girise, cikis fisi
-          //   cikisa yazar (cari yok, tek depo alani var).
-          cikisDepoId: stokFisiMi ? (fisCikisMi ? depo?.id ?? null : null)
-                     : depoBelgesi ? depo?.id ?? null
-                     : alisMi ? null : depo?.id ?? null,
-          girisDepoId: stokFisiMi ? (fisCikisMi ? null : depo?.id ?? null)
-                     : depoBelgesi ? girisDepo?.id ?? null
-                     : alisMi ? depo?.id ?? null : null,
-          tipi: stokFisiMi ? fisTipi : undefined,
-          // satici_id NOT NULL default 0 - "secilmedi" burada null degil 0
-          //   (null gonderince sunucu "saticiId bos birakilamaz" ile reddediyordu).
-          saticiId: satici?.id ?? 0,
-          senaryo,
-          // Teslim sekli e-Irsaliye'de GIB'in bekledigi alan.
-          teslimSekli: irsaliyeMi ? teslimSekli : undefined,
-          aracPlaka: irsaliyeMi ? aracPlaka : undefined,
-          soforAd: irsaliyeMi ? soforAd : undefined,
-          // Tasiyici / Sevkiyat sekmesindeki ek UBL alanlari
-          irsaliyeTarihi: irsaliyeMi && sevkTarihi ? sevkTarihi : undefined,
-          soforTckn: irsaliyeMi ? soforTckn : undefined,
-          tasiyiciId: irsaliyeMi ? tasiyici?.id ?? null : undefined,
-          // Teslim eden irsaliyede opsiyonel, TRANSFERDE zorunlu; teslim alan
-          //   yalniz transferde var (sorumluluk devri).
-          teslimEdenId: irsaliyeMi || transferMi ? teslimEden?.id ?? null : undefined,
-          teslimAlanId: depoBelgesi ? teslimAlan?.id ?? null : undefined,
-
-        },
-        satirlar: dolu.map((s, i) => ({
-          sira: i + 1,
-          tur: s.satirTur,
-          stokId: s.stokId,
-          hizmetId: s.hizmetId,
-          adet: Number(s.adet.replace(',', '.')) || 0,
-          miktar: Number(s.adet.replace(',', '.')) || 0,
-          birimFiyat: Number(s.birimFiyat.replace(',', '.')) || 0,
-          iskonto: stokFisiMi ? 0 : Number(s.iskonto.replace(',', '.')) || 0,
-          iskonto2: stokFisiMi ? 0 : Number(s.iskonto2.replace(',', '.')) || 0,
-          // Stok fisi vergi dogurmaz: stok kartindan gelen KDV/iskonto sifirlanir
-          //   (yoksa dip toplam vergili cikip muhasebe matrahini sisirir).
-          kdv: stokFisiMi ? 0 : Number(s.kdv.replace(',', '.')) || 0,
-          aciklama: s.aciklama,
-          izlemeKodu: s.izlemeKodu,
-          izleme: s.izleme || (s.izlemeKodu ? 1 : 0),
-          // Lot dagilimi: bos dizi gonderilmez - izlemsiz stokta sunucu hata verir.
-          izlemler: s.izlemler.length > 0
-            ? s.izlemler.map(z => ({
-                seriLotId: z.seriLotId,
-                lotNo: z.lotNo.trim(),
-                seriNo: z.seriNo.trim(),
-                uretimTarihi: z.uretimTarihi || null,
-                sonKullanmaTarihi: z.sonKullanmaTarihi || null,
-                durum: z.durum,
-                miktar: Number(z.miktar.replace(',', '.')) || 0,
-              }))
-            : undefined,
-        })),
-        secenekler: { taslak, stokKontrolu: true },
-      };
+      const govde = belgeGovdesi(girdi, dolu, taslak);
 
       const yanit = await api.belgeEkle(govde);
       setSonuc(yanit);
@@ -697,116 +596,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       // Ucu henuz olmayan islemler GORUNUR ama PASIF ve title'inda sebebi yazili -
       //   kullanici neyin gelecegini gorur, tikladiginda sessiz kalmaz.
       alt={
-        <>
-          {mevcutBelge
-            ? <button className="d onay" disabled
-                      title="Kesin belge düzenlenemez; değişiklik için iptal edip yeniden kesin (F7).">
-                💾 Kaydet
-              </button>
-            : sonuc
-              ? <button className="d onay" onClick={yeniBelge}>＋ Yeni Belge</button>
-              : <button className="d onay" disabled={kaydediyor} onClick={() => void kes()}>
-                  {kaydediyor ? '💾 Kaydediliyor…' : '💾 Kaydet'}
-                </button>}
-          <button className="d teh" disabled title="Belge iptali henüz bağlanmadı (F7).">
-            🗑 Sil
-          </button>
-
-          <span className="ayrac" />
-
-          {/* ---------------------------------------------------- SIPARIS ---- */}
-          {siparisMi && (
-            <>
-              <button className="d bir" disabled title="Stok rezervasyonu henüz bağlanmadı.">
-                🔒 Rezervasyon Yap
-              </button>
-              <button className="d" disabled={!kayitliId}
-                      title={kayitliId ? 'Seçili satırları irsaliyeye aktar' : 'Önce siparişi kaydedin.'}
-                      onClick={() => setDonusum(true)}>
-                🚚 İrsaliyeye Dönüştür
-              </button>
-              <button className="d" disabled={!kayitliId}
-                      title={kayitliId ? 'Seçili satırları faturaya aktar' : 'Önce siparişi kaydedin.'}
-                      onClick={() => setDonusum(true)}>
-                🧾 Faturaya Dönüştür
-              </button>
-              <button className="d" disabled title="Üretim emri henüz bağlanmadı.">🏭 Üretime Aktar</button>
-              <span className="ayrac" />
-              <button className="d" disabled={!kayitliId || !cari}
-                      title={kayitliId
-                        ? `Bu sipariş için ön ödeme (${alisMi ? 'ödeme' : 'tahsilat'}) işlemi aç`
-                        : 'Önce siparişi kaydedin.'}
-                      onClick={() => tahsilatAc(alisMi ? 31 : 21)}>
-                💵 {alisMi ? 'Ön Ödeme Yap' : 'Ön Ödeme Al'}
-              </button>
-              <button className="d" disabled title="Termin güncelleme henüz bağlanmadı.">📅 Termin Güncelle</button>
-              <button className="d" disabled title="Yazdırma henüz bağlanmadı.">🖨️ Yazdır</button>
-            </>
-          )}
-
-          {/* --------------------------------------------------- IRSALIYE ---- */}
-          {irsaliyeMi && (
-            <>
-              {/* Konsinyede e-Belge YOK: mal birakma GIB'e gitmez, faturasi
-                  satildikca ayri kesilir. */}
-              {!eBelgeYok && (
-                <button className="d bir" disabled={!kayitliId}
-                        title={kayitliId ? 'e-İrsaliye gönderimi henüz bağlanmadı.' : 'Önce irsaliyeyi kaydedin.'}>
-                  ✉ e‑İrsaliye Gönder
-                </button>
-              )}
-              <button className="d" disabled={!kayitliId}
-                      title={kayitliId ? 'Sevk edilen satırları faturaya aktar' : 'Önce irsaliyeyi kaydedin.'}
-                      onClick={() => setDonusum(true)}>
-                🧾 Faturaya Dönüştür
-              </button>
-              <button className="d" disabled title="Sevk fişi yazdırma henüz bağlanmadı.">
-                🖨️ Sevk Fişi Yazdır
-              </button>
-              <span className="ayrac" />
-              <button className="d" disabled
-                      title="Siparişten aktarım için Siparişler listesinden ilgili siparişi açıp Dönüştür deyin.">
-                📋 Siparişten Aktar
-              </button>
-              {!eBelgeYok && (
-                <button className="d" disabled title="GİB durum sorgusu henüz bağlanmadı.">
-                  ⟳ GİB Durum Sorgula
-                </button>
-              )}
-              <button className="d" disabled title="İade irsaliyesi henüz bağlanmadı.">
-                ↩ İade İrsaliyesi
-              </button>
-            </>
-          )}
-
-          {/* ----------------------------------------------------- FATURA ---- */}
-          {/* e-Belge olmayan turlerde (fis/konsinye/tahakkuk) gonderim dugmeleri YOK. */}
-          {!siparisMi && !irsaliyeMi && !eBelgeYok && (
-            <>
-              <button className="d bir" disabled={!kayitliId}
-                      title={kayitliId ? 'e-Belge gönderimi henüz bağlanmadı.' : 'Önce belgeyi kaydedin.'}>
-                📤 e‑Fatura Gönder
-              </button>
-              <button className="d" disabled={!kayitliId || !cari}
-                      title={kayitliId ? 'Bu belge için tahsilat işlemi aç' : 'Önce belgeyi kaydedin.'}
-                      onClick={() => tahsilatAc(21)}>
-                💵 {alisMi ? 'Ödeme' : 'Tahsilat'}
-              </button>
-              <button className="d" disabled title="İade belgesi henüz bağlanmadı.">↩ İade</button>
-              <button className="d" disabled title="Yazdırma henüz bağlanmadı.">🖨️ Yazdır</button>
-            </>
-          )}
-
-          <span className="ayrac" />
-
-          <button className="d kapat-dugmesi" onClick={kapat}>✖ Kapat</button>
-
-          <label className="satir-ici">
-            <input type="checkbox" checked={taslak} disabled={kilitli}
-                   onChange={e => setTaslak(e.target.checked)} />
-            Taslak (numara tüketmez)
-          </label>
-        </>
+        <BelgeAracCubugu
+          mevcutBelge={mevcutBelge} sonuc={sonuc} kaydediyor={kaydediyor}
+          kilitli={kilitli} taslak={taslak} setTaslak={setTaslak}
+          siparisMi={siparisMi} irsaliyeMi={irsaliyeMi} alisMi={alisMi}
+          eBelgeYok={eBelgeYok} kayitliId={kayitliId} cari={cari}
+          kes={kes} yeniBelge={yeniBelge} kapat={kapat}
+          setDonusum={setDonusum} tahsilatAc={tahsilatAc}
+        />
       }
     >
       <>
