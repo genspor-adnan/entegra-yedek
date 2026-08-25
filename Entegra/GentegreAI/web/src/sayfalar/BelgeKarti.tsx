@@ -9,6 +9,7 @@ import { TarafArama } from '../bilesenler/TarafArama';
 import { belgeTuruBilgisi, GIRILEBILIR_TURLER, VARSAYILAN_TUR } from './belgeTuru';
 import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { KasaIslemKarti } from './KasaIslemKarti';
+import { GenForm } from '../bilesenler/GenForm';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { para } from '../bilesenler/bicim';
 import { type SatirDurumu, bosSatir, satirTutari } from './belgeSatir';
@@ -157,6 +158,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [terminAcik, setTerminAcik] = useState(false);
   /** Rezervasyon (142) islemi surerken dugme bekler. */
   const [rezerveCalisiyor, setRezerveCalisiyor] = useState(false);
+  /** Cek/senet ile tahsilatta once acilan JENERIK kiymet karti (tur + belge). */
+  const [cekTuru, setCekTuru] = useState<{ tur: number; belgeId: number } | null>(null);
+  /** Kiymet kaydedildikten sonra acilan kasa islemi (ayni kiymete bagli). */
+  const [tahsilatAcilis, setTahsilatAcilis] = useState<{
+    tur: number; tarafId?: number; tarafUnvan?: string; belgeId?: number;
+    tutar?: string; cekSenetId?: number;
+  } | null>(null);
   /** Tahsilat listesinde secili kasa islemi (duzelt/sil dugmeleri bunu kullanir). */
   const [seciliTahsilat, setSeciliTahsilat] = useState<number | null>(null);
   /** DUZELTME icin acilan MEVCUT kasa islemi - yeni tahsilattan ayri state:
@@ -364,7 +372,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   };
 
   const tahsilatAc = async (tahsilatTuru = 21) => {
-    if (kayitliId) { setTahsilatAcik(tahsilatTuru); return }
+    if (kayitliId) { tahsilatAdimi(tahsilatTuru, kayitliId); return }
 
     // Belge kaydedilecegi icin KALEM sart. Kaydetmeye birakirsak kullanici
     //   "En az bir satırda stok ya da hizmet seçilmeli." gibi tahsilatla
@@ -375,7 +383,48 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       return;
     }
     const id = await kes(false);
-    if (id) setTahsilatAcik(tahsilatTuru);
+    if (!id) return;
+    tahsilatAdimi(tahsilatTuru, id);
+  };
+
+  /**
+   * Tahsilat aracina gore ikinci adim. CEK/SENET (23/24/33/34) once JENERIK
+   * KIYMET KARTINI acar (kasa listesindeki akisin aynisi): banka, sube,
+   * kesideci, seri no, vade... kasa kartinda sorulamayacak kadar cok alan var.
+   * Diger araclar (nakit/banka/POS) dogrudan kasa kartini acar.
+   */
+  const tahsilatAdimi = (tahsilatTuru: number, id: number) => {
+    if (tahsilatTuru === 23 || tahsilatTuru === 24
+        || tahsilatTuru === 33 || tahsilatTuru === 34) {
+      setCekTuru({ tur: tahsilatTuru, belgeId: id });
+      return;
+    }
+    setTahsilatAcik(tahsilatTuru);
+  };
+
+  /**
+   * Kiymet karti kaydedildi: kasa islemini ayni kiymete BAGLAYARAK ac. Kart
+   * sunucudan yeniden okunur - tutar/cari kullanicinin kartta biraktigi son
+   * hali olsun.
+   */
+  const cekKartKaydedildi = async (tur: number, belge: number, csId: number) => {
+    setCekTuru(null);
+    try {
+      const k = await api.kartOku('cek-senet', csId);
+      const kart = k.kart as Record<string, unknown>;
+      setTahsilatAcilis({
+        tur,
+        tarafId: Number(kart.tarafId) || cari?.id,
+        tarafUnvan: cari?.unvan ?? '',
+        belgeId: belge,
+        tutar: String(kart.tutar ?? ''),
+        cekSenetId: csId,
+      });
+    } catch {
+      // Kiymet kaydedildi ama okunamadi: kullaniciyi bos kartla bas basa
+      //   birakmak yerine tahsilat listesini tazele - kagit portfoyde duruyor.
+      setTahsilatYenile(t => t + 1);
+    }
   };
 
   // Mevcut belgeyi ac: baslik + satirlar + dip toplam sunucudan gelir.
@@ -924,6 +973,32 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           <KasaIslemKarti
             kayitIdProp={tahsilatKayitId}
             onKapat={() => { setTahsilatKayitId(null); setTahsilatYenile(t => t + 1) }}
+          />
+        )}
+
+        {/* CEK/SENET: jenerik kiymet karti (kasa listesindeki akisla ayni).
+            Cari ve tutar belgeden onyuklenir - kullanici ayni bilgiyi ikinci
+            kez girmesin. */}
+        {cekTuru !== null && (
+          <GenForm
+            kaynak="cek-senet"
+            id="yeni"
+            baslik={cekTuru.tur === 24 || cekTuru.tur === 34 ? 'Senet' : 'Çek'}
+            yeniKayitVarsayilanlari={{
+              tur: cekTuru.tur === 24 || cekTuru.tur === 34 ? 2 : 1,
+              yon: cekTuru.tur === 33 || cekTuru.tur === 34 ? 2 : 1,
+              ...(cari ? { tarafId: cari.id } : {}),
+              ...(sonuc?.belge.genelToplam ? { tutar: Number(sonuc.belge.genelToplam) } : {}),
+            }}
+            onKapat={() => setCekTuru(null)}
+            onKaydedildi={csId => { void cekKartKaydedildi(cekTuru.tur, cekTuru.belgeId, csId) }}
+          />
+        )}
+
+        {tahsilatAcilis !== null && (
+          <KasaIslemKarti
+            acilis={tahsilatAcilis}
+            onKapat={() => { setTahsilatAcilis(null); setTahsilatYenile(t => t + 1) }}
           />
         )}
 
