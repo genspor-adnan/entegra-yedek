@@ -70,7 +70,10 @@ interface CariSecimi { id: number; unvan: string }
  * girer.
  */
 export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
-  acilis?: { tur?: number; tarafId?: number; tarafUnvan?: string; belgeId?: number; tutar?: string };
+  acilis?: { tur?: number; tarafId?: number; tarafUnvan?: string; belgeId?: number;
+             tutar?: string;
+             /** MEVCUT kiymete baglanma (kasa listesinde once cek karti acilir). */
+             cekSenetId?: number };
   /** MODAL kullanimda MEVCUT kaydi acmak icin (ör. ekstre satirina cift tik).
       Rota kullanimda id URL'den gelir. */
   kayitIdProp?: number;
@@ -151,6 +154,8 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const cariVirman = tur === 49;
   /** Cek/senet ile tahsilat-odeme: kiymet kaydi da acilir (23/24 al, 33/34 ver). */
   const cekSenetMi = tur === 23 || tur === 24 || tur === 33 || tur === 34;
+  /** Kart disaridan MEVCUT bir kiymetle acildi (kasa listesi akisi). */
+  const mevcutKiymet = acilis?.cekSenetId ?? 0;
   const senetMi = tur === 24 || tur === 34;
   // Cek/senette hesap SECILMEZ: kiymet portfoye girer (sanal hesap), para
   //   bankaya ancak tahsil edilince gecer. Doviz o yuzden basliktan gelir.
@@ -250,10 +255,14 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
         masrafId: kalem?.id ?? null,
         projeId: proje?.id ?? null,
         aciklama,
+        ...(mevcutKiymet ? { cekSenetId: mevcutKiymet } : {}),
       },
       // Cek/senet turlerinde kiymetin kendisi de gonderilir: sunucu once
       //   cek_senet kaydini acar, kimligini basliga baglar (tek cagri).
-      ...(cekSenetMi ? {
+      //   MEVCUT kiymete baglaniyorsak (kart onceden dolduruldu) yeni kayit
+      //   ACILMAZ - yalnizca kimlik gider, yoksa ayni cek iki kez portfoye
+      //   girerdi.
+      ...(cekSenetMi && !mevcutKiymet ? {
         cekSenet: {
           vade: csVade || null,
           tarih: tarih,
@@ -277,7 +286,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
 
     const hatalar: Record<string, string> = {};
     if (!planMi && !cariVirman && !cekSenetMi && !hesap) hatalar.hesapId = 'Hesap seçilmeli.';
-    if (cekSenetMi && !csVade) hatalar['cekSenet.vade'] = 'Vade zorunlu.';
+    if (cekSenetMi && !mevcutKiymet && !csVade) hatalar['cekSenet.vade'] = 'Vade zorunlu.';
     if (karsiHesapli && !karsiHesap) hatalar.karsiHesapId = 'Karşı hesap seçilmeli.';
     if (cariVirman && !karsiCari) hatalar.karsiTarafId = 'Karşı cari seçilmeli.';
     if (sayi(tutar) <= 0) hatalar.tutar = 'Sıfırdan büyük olmalı.';
@@ -548,7 +557,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
 
               {/* CEK / SENET (23/24/33/34): kiymetin kendisi. Vade zorunlu -
                   portfoy ve vade raporlarinin tasiyicisi odur. */}
-              {cekSenetMi && (
+              {cekSenetMi && !mevcutKiymet && (
                 <>
                   <label className="alan">
                     <span className="etiket zorunlu-isaret">Vade</span>

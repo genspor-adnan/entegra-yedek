@@ -141,8 +141,19 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",          "c.id",           "sayi",  "Id",     Varsayilan: false),
-            new("tur",         "c.tur",          "kod",   "Tur",    Hizalama: "orta"),
-            new("yon",         "c.yon",          "kod",   "Yon",    Hizalama: "orta"),
+            new("tur",         "c.tur",          "kod",   "Tur",    Hizalama: "orta", Varsayilan: false),
+            // YON ve DURUM rozet olarak (kullanici): ham kod ("1", "10") hicbir
+            //   sey soylemiyordu. Metin SQL'de uretilir, rengi istemci secer
+            //   (gridHucre.rozetHucre) - iki yerde ayni eslemeyi tutmamak icin.
+            new("yon",
+                "case c.yon when 1 then 'Alınan' when 2 then 'Verilen' else '' end",
+                                              "metin", "Yön",    Hizalama: "orta", Bicim: "rozet"),
+            new("durum",
+                "case c.durum when 10 then 'Portföyde' when 20 then 'Ciro Edildi'" +
+                " when 30 then 'Tahsilde' when 40 then 'Teminatta'" +
+                " when 50 then 'Tahsil Edildi' when 60 then 'Karşılıksız'" +
+                " when 70 then 'İade' when 0 then 'İptal' else '' end",
+                                              "metin", "Durum",  Hizalama: "orta", Bicim: "rozet"),
             new("seriNo",      "c.seri_no",      "metin", "Seri No"),
             new("tarafUnvan",  "t.unvan",        "metin", "Cari",   Genislik: 200),
             new("kesideci",    "c.kesideci",     "metin", "Kesideci", Varsayilan: false),
@@ -153,7 +164,6 @@ public static partial class KaynakKatalogu
             new("yerelTutar",  "c.yerel_tutar",  "para",  "TL Tutar", Hizalama: "sag", Bicim: "#,##0.00", Varsayilan: false),
             new("bankaAdi",    "c.banka_adi",    "metin", "Banka",  Varsayilan: false),
             new("hesapAdi",    "h.ad",           "metin", "Bulundugu Hesap", Varsayilan: false),
-            new("durum",       "c.durum",        "kod",   "Durum",  Hizalama: "orta"),
             new("subeId",      "c.sube_id",      "sayi",  "Sube",   Varsayilan: false)
         });
 

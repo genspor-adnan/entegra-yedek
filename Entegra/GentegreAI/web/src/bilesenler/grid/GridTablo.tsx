@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { bicimle } from '../bicim';
-import { durumRozeti } from '../gridHucre';
+import { durumRozeti, rozetHucre } from '../gridHucre';
 import type { KolonMeta, ListeSatiri, ListeYaniti } from '../../api/sozlesme';
 
 /**
@@ -134,7 +134,7 @@ export function GridTablo(p: GridTabloProps) {
               } : undefined}
               title={k.genislik ? String(satir[k.ad] ?? '') : undefined}
             >
-              {durumRozeti(satir[k.ad], k) ?? bicimle(satir[k.ad], k)}
+              {rozetHucre(satir[k.ad], k) ?? durumRozeti(satir[k.ad], k) ?? bicimle(satir[k.ad], k)}
             </td>
           ))}
         </tr>

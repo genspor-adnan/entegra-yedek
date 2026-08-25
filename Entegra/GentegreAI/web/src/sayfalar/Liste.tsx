@@ -54,6 +54,37 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [kasaTuru, setKasaTuru] = useState<number | null>(null);
   // Ekstre satirindan acilan MEVCUT kasa islemi (salt gorunum/duzenleme).
   const [acikKasaId, setAcikKasaId] = useState<number | null>(null);
+  /** Cek/senet ile tahsilat-odemede once acilan KIYMET KARTININ turu (23/24/33/34). */
+  const [cekTuru, setCekTuru] = useState<number | null>(null);
+  /** Kiymet kaydedildikten sonra acilan kasa islemi (ayni kiymete bagli). */
+  const [kasaAcilis, setKasaAcilis] = useState<{
+    tur: number; tarafId?: number; tarafUnvan?: string; tutar?: string; cekSenetId?: number;
+  } | null>(null);
+
+  /**
+   * Kiymet karti kaydedildi: ayni bilgilerle kasa islemini ac. Kart SUNUCUDAN
+   * yeniden okunur - tutar/cari/doviz kullanicinin kartta girdigi son hali
+   * olsun (formdaki ara degerler degil).
+   */
+  async function cekKartKaydedildi(tur: number, id: number) {
+    setCekTuru(null);
+    setYenile(t => t + 1);
+    try {
+      const k = await api.kartOku('cek-senet', id);
+      const kart = k.kart as Record<string, unknown>;
+      setKasaAcilis({
+        tur,
+        tarafId: Number(kart.tarafId) || undefined,
+        tarafUnvan: String(k.kodAd?.tarafId?.[String(kart.tarafId)] ?? ''),
+        tutar: String(kart.tutar ?? ''),
+        cekSenetId: id,
+      });
+    } catch {
+      // Kiymet kaydedildi ama okunamadi: kasa islemi kartini bos acmaktansa
+      //   kullaniciyi listeye birak - kiymet portfoyde duruyor.
+      setKasaTuru(tur);
+    }
+  }
   // "Ekstre" modu (A secenegi): ayni grid ekstre kaynagina doner. null = liste.
   const [ekstre, setEkstre] = useState<{ id: number; ad: string } | null>(null);
   // Ekstre dugmesinin aktifligi icin gridden gelen secili satir.
@@ -164,7 +195,16 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       }
 
       // Alt menuden gelen arac secimi: "kasa.yeni.22" -> tur 22 ile modal.
-      if (kod.startsWith('kasa.yeni.')) { setKasaTuru(Number(kod.slice(10))); return }
+      if (kod.startsWith('kasa.yeni.')) {
+        const t = Number(kod.slice(10));
+        // CEK / SENET (23/24/33/34): once KIYMET KARTI acilir (kullanici) -
+        //   banka, sube, kesideci, seri no, vade... kasa kartinda sorulamayacak
+        //   kadar cok alan var. Kart kaydedilince kasa islemi o kiymete
+        //   BAGLANARAK olusturulur (asagida cekKartKaydedildi).
+        if (t === 23 || t === 24 || t === 33 || t === 34) { setCekTuru(t); return }
+        setKasaTuru(t);
+        return;
+      }
 
       if (kod.endsWith('.yeni') && tanim.kartYolu) git(`${tanim.kartYolu}/yeni`);
       // SIL gercekten SILER: eskiden karti aciyordu ve kullanici "sildim" sanip
@@ -287,10 +327,34 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       />
     )}
 
+    {/* CEK/SENET: kiymet karti. Kaydedilince ayni bilgilerle kasa islemi
+        (23/24/33/34) acilir ve kiymete baglanir - cari o anda alacaklanir /
+        borclanir, kagit portfoye girer. */}
+    {cekTuru !== null && (
+      <GenForm
+        kaynak="cek-senet"
+        id="yeni"
+        baslik={cekTuru === 24 || cekTuru === 34 ? 'Senet' : 'Çek'}
+        yeniKayitVarsayilanlari={{
+          tur: cekTuru === 24 || cekTuru === 34 ? 2 : 1,
+          yon: cekTuru === 33 || cekTuru === 34 ? 2 : 1,
+        }}
+        onKapat={() => setCekTuru(null)}
+        onKaydedildi={id => { void cekKartKaydedildi(cekTuru, id) }}
+      />
+    )}
+
     {kasaTuru !== null && (
       <KasaIslemKarti
         acilis={{ tur: kasaTuru }}
         onKapat={() => { setKasaTuru(null); setYenile(t => t + 1) }}
+      />
+    )}
+
+    {kasaAcilis !== null && (
+      <KasaIslemKarti
+        acilis={kasaAcilis}
+        onKapat={() => { setKasaAcilis(null); setYenile(t => t + 1) }}
       />
     )}
 

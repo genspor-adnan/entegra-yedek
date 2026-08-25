@@ -36,6 +36,29 @@ export function durumRozeti(deger: unknown, kolon: KolonMeta) {
   );
 }
 
+/**
+ * ROZET BICIMLI kolon (Bicim: "rozet"): sunucu METNI doner (SQL case ile),
+ * burada yalnizca RENK secilir. Cek/senet gibi cok degerli durum/yon
+ * kolonlari icin - `durumRozeti` yalniz 0/1 (Aktif/Pasif) kalibini bilir.
+ *
+ * Renk anlama gore: olumlu biten haller yesil, sorunlu kirmizi, kapanmis gri,
+ * digerleri notr. Eslesmeyen metin notr rozet olur - yeni bir durum kodu
+ * eklenince ekran bozulmaz, yalnizca rengi notr kalir.
+ */
+const ROZET_SINIFI: Record<string, string> = {
+  'Alınan': 'ok', 'Verilen': 'uyari',
+  'Portföyde': 'bilgi', 'Ciro Edildi': 'uyari', 'Tahsilde': 'bilgi',
+  'Teminatta': 'bilgi', 'Tahsil Edildi': 'ok', 'Ödendi': 'ok',
+  'Karşılıksız': 'hata', 'İade': 'uyari', 'İptal': 'gri',
+};
+
+export function rozetHucre(deger: unknown, kolon: KolonMeta) {
+  if (kolon.bicim !== 'rozet') return null;
+  const metin = String(deger ?? '').trim();
+  if (metin === '') return null;
+  return <span className={`rozet ${ROZET_SINIFI[metin] ?? ''}`}>{metin}</span>;
+}
+
 /** "İçerik" penceresi (ör. islem-log > bilgi) - JSON ise okunakli bicimde, degilse duz metin. */
 export function icerikMetni(deger: unknown): string {
   if (deger === null || deger === undefined || deger === '') return 'İçerik yok.';

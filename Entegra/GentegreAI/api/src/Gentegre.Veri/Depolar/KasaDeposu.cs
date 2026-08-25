@@ -81,12 +81,24 @@ public sealed partial class KasaDeposu
         var cekSenetId = 0;
         if (KasaHesap.CekSenetTuru(tur))
         {
-            if (cekSenet is null)
-                throw GentegreHatasi.Dogrulama(
-                    "Çek/senet bilgileri girilmeli (vade zorunlu).",
-                    new AlanHatasi("cekSenet", "Zorunlu."));
-            cekSenetId = await CekSenetEkleAsync(baglanti, tx, tur, cekSenet, islem, baglam, iptal);
-            islem["cekSenetId"] = cekSenetId;
+            // MEVCUT kiymete baglanma: kullanici cek/senet KARTINI doldurmus ve
+            //   kaydetmis olabilir (kasa listesindeki "Çek" secimi o karti acar).
+            //   O zaman burada yeni kayit ACILMAZ, gelen kimlik kullanilir -
+            //   yoksa ayni cek iki kez portfoye girerdi.
+            var mevcut = (int)Sayi(islem, "cekSenetId");
+            if (mevcut > 0)
+            {
+                cekSenetId = mevcut;
+            }
+            else
+            {
+                if (cekSenet is null)
+                    throw GentegreHatasi.Dogrulama(
+                        "Çek/senet bilgileri girilmeli (vade zorunlu).",
+                        new AlanHatasi("cekSenet", "Zorunlu."));
+                cekSenetId = await CekSenetEkleAsync(baglanti, tx, tur, cekSenet, islem, baglam, iptal);
+                islem["cekSenetId"] = cekSenetId;
+            }
         }
 
         var id = await BaslikEkleAsync(baglanti, tx, islem, baglam, iptal);
