@@ -50,6 +50,9 @@ const ROZET_SINIFI: Record<string, string> = {
   'Portföyde': 'bilgi', 'Ciro Edildi': 'uyari', 'Tahsilde': 'bilgi',
   'Teminatta': 'bilgi', 'Tahsil Edildi': 'ok', 'Ödendi': 'ok',
   'Karşılıksız': 'hata', 'İade': 'uyari', 'İptal': 'gri',
+  // Kasa islemi durumlari (KasaDurum): taslak/planli henuz kesinlesmemis,
+  //   gerceklesti tamam, iptal ters kayitli, plan kapandi bitmis.
+  'Taslak': 'gri', 'Planlı': 'bilgi', 'Gerçekleşti': 'ok', 'Plan Kapandı': 'gri',
 };
 
 export function rozetHucre(deger: unknown, kolon: KolonMeta) {

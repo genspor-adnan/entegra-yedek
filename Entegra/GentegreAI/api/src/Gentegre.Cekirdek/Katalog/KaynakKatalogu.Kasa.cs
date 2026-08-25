@@ -394,7 +394,16 @@ public static partial class KaynakKatalogu
             new("kalanTutar",    "ki.kalan_tutar",       "para",  "Kalan",     Hizalama: "sag", Bicim: "#,##0.00", Varsayilan: false),
             new("fisNo",         "f.fis_no",             "metin", "Fiş No",    Varsayilan: false),
             new("muhasebeFisId", "ki.muhasebe_fis_id",   "sayi",  "Fiş Id",    Varsayilan: false),
-            new("durum",         "ki.durum",             "kod",   "Durum",     Hizalama: "orta"),
+            // Durum ROZET (kullanici): ham kod ("2") hicbir sey soylemiyordu.
+            //   Metin SQL'de uretilir, rengi istemci secer (gridHucre).
+            new("durumAdi",
+                "case ki.durum when 0 then 'Taslak' when 1 then 'Planlı'" +
+                " when 2 then 'Gerçekleşti' when 3 then 'İptal'" +
+                " when 4 then 'Plan Kapandı' else '' end",
+                                                     "metin", "Durum",     Hizalama: "orta", Bicim: "rozet"),
+            // Kod kolonu GIZLI ama duruyor: cipler ve belge kartinin tahsilat
+            //   listesi bununla suzuyor (durum <> 3 gibi).
+            new("durum",         "ki.durum",             "kod",   "Durum Kodu", Hizalama: "orta", Varsayilan: false),
             new("aciklama",      "ki.aciklama",          "metin", "Açıklama",  Genislik: 240),
             new("iptalIslemId",  "ki.iptal_islem_id",    "sayi",  "Ters İşlem", Varsayilan: false),
             // Belge kartinin "Tahsilat" sekmesi bu kolonla suzuyor (belge basina
