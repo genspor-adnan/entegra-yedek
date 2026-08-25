@@ -2691,5 +2691,21 @@ Doğrulama: `tsc -b` + prod derleme temiz; stok listesi fiyat kolonları ve pake
 içeriği uçları refaktör öncesiyle birebir aynı değerleri döndürdü; satış
 faturasında kalem → lot seçimi akışı ekrandan denendi.
 
+### Refaktör: katalog konu dosyalarına, kart formu alan çiziminden ayrıldı
+
+- **`KaynakKatalogu.cs` 1389 → 120 satır.** Sınıf `partial` oldu; 38 liste
+  tanımı konu başına beş dosyaya taşındı: `.Cari` (cari/kişi/fırsat/görev/
+  personel/hasta/rol), `.Stok`, `.Belge`, `.Kasa`, `.Log`. Sözlük, `Bul`/`Tumu`
+  ve kayıt sırası ana dosyada kaldı. Taşıma mekanik: eski dosyayla üye üye
+  karşılaştırıldı — 38/38 üye, kod gövdelerinde fark yok.
+- **`GenForm.tsx` 1380 → 1143 satır.** Resim kutusu `KartResimKutusu.tsx`'e;
+  alan çizimi (`renderGirdi`/`renderAlan`/`renderAlanListesi`/`altGruplaVar`)
+  `kartAlanCizim.tsx`'teki `alanCizici()` fabrikasına çıktı — çağrı biçimi
+  değişmedi, JSX aynı.
+
+Doğrulama: `dotnet build` ve `tsc -b` + prod derleme temiz; stok kartı (gruplar,
+ikili onay kutuları, raf ömrü ikilisi) ve kişi kartı (Bağlı Cari salt-okunur
+render, telefon kutuları, adres) ekrandan açılıp kontrol edildi.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).
