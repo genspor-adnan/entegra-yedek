@@ -116,6 +116,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           if (satir) git(`/kasa-islem/${satir.id}`);
           return;
         case 'kasa.ac':
+          // MODAL acilir (kullanici): kart kaydin KENDI turuyle gelir
+          //   (tahsilat / odeme / cek / virman...) ve liste arkada kalir -
+          //   tam sayfaya gidince kullanici listedeki yerini kaybediyordu.
+          if (satir) setAcikKasaId(Number(satir.id));
+          return;
         case 'kasa.fis-gor':
           if (satir) git(`/kasa-islem/${satir.id}`);
           return;
@@ -296,6 +301,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
             || tanim.kaynak === 'stok-transfer' || tanim.kaynak === 'stok-talep'
             || tanim.kaynak === 'giris-fis' || tanim.kaynak === 'cikis-fis')
           setAcikBelgeId(Number(satir.id));
+        // Kasa islemi de MODAL (kullanici) - "Aç" aksiyonuyla ayni davranis.
+        else if (tanim.kaynak === 'kasa-islem') setAcikKasaId(Number(satir.id));
         else if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`);
       }}
       onAksiyon={(kod, satir) => { void aksiyon(kod, satir) }}
@@ -323,7 +330,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     {acikKasaId !== null && (
       <KasaIslemKarti
         kayitIdProp={acikKasaId}
-        onKapat={() => setAcikKasaId(null)}
+        onKapat={() => { setAcikKasaId(null); setYenile(t => t + 1) }}
       />
     )}
 
