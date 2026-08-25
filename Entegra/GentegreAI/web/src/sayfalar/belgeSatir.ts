@@ -37,6 +37,12 @@ export interface SatirDurumu {
   izlemeKodu: string;
   /** Stok kartindaki izleme turu: 0 yok · 1 Seri · 2 Lot · 3 SKT · 5 Lot+SKT · 6 Seri+Lot. */
   izleme: number;
+  /**
+   * Satirin TESLIM (termin) tarihi - siparislerde (140). Bos = termin
+   * verilmemis. Odeme vadesiyle (baslikta `vadeGun`) ilgisi yok: bu malin ne
+   * zaman cikacagi, o paranin ne zaman odenecegi.
+   */
+  teslimTarihi?: string;
   /** Bu satir bir PAKET mi (124) - altina icerik satirlari acilir. */
   paket?: boolean;
   /** Icerik satirinda: bagli oldugu paket satirinin anahtari. */

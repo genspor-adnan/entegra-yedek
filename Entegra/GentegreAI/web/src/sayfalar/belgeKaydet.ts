@@ -202,6 +202,8 @@ return {
     kaynakId: s.kaynakSatirId,
     izlemeKodu: s.izlemeKodu,
     izleme: s.izleme || (s.izlemeKodu ? 1 : 0),
+    // Termin (140): bos string DEGIL null gider - sunucu tarih bekliyor.
+    teslimTarihi: s.teslimTarihi || null,
     // Lot dagilimi: bos dizi gonderilmez - izlemsiz stokta sunucu hata verir.
     izlemler: s.izlemler.length > 0
       ? s.izlemler.map(z => ({

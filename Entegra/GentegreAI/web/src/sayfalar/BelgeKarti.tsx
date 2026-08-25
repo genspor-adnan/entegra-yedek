@@ -387,6 +387,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           stokAdi: String(r.stokAdi || r.hizmetAdi || r.masrafAdi || r.aciklama || ''),
           aciklama: String(r.aciklama ?? ''),
           izlemeKodu: String(r.izlemeKodu ?? ''),
+          // Termin (140): sunucu tam tarih doner, ekran gun bekliyor.
+          teslimTarihi: String(r.teslimTarihi ?? '').slice(0, 10),
           adet: String(r.miktar ?? r.adet ?? 0),
           birimFiyat: String(r.birimFiyat ?? 0),
           // SATIR BAZLI DOVIZ (kullanici): kalem kendi para biriminde girilmis
@@ -979,6 +981,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           <KalemPenceresi
             satir={kalem}
             transferMi={bilgi.kalem === 'miktar'}
+            siparisMi={siparisMi}
             vergisiz={bilgi.kalem === 'sade' && stokFisiMi}
             yerelPara={yerelPara}
             girisIzlemi={bilgi.girisIzlemi}

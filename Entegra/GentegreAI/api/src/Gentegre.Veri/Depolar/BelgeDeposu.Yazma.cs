@@ -160,6 +160,8 @@ public sealed partial class BelgeDeposu
             // Donusum bagi (F8): kaynak_tur=30 -> kaynak belge_satir. Kapatma
             //   sayacini bu iki alan uzerinden DB trigger'i surer.
             "kaynak_tur", "kaynak_id", "proje_id",
+            // Satir bazli TESLIM TARIHI (140) - siparis termini. Bos gecilebilir.
+            "teslim_tarihi",
             "sube_id", "ekleyen"
         };
         var parametreler = new List<object?>
@@ -175,6 +177,7 @@ public sealed partial class BelgeDeposu
             (short)(turStokEtkiler ? JsonSayi(satir, "stokDurumDegis", 1) : 0),
             (int)JsonSayi(satir, "kaynakTur", 0), JsonSayi(satir, "kaynakId", 0),
             JsonSayiNull(satir, "projeId") ?? SayiNull(belge, "projeId"),
+            JsonTarih(satir, "teslimTarihi"),
             (short)(baglam.SubeId ?? 0), baglam.KullaniciId
         };
 

@@ -456,7 +456,10 @@ table.grid tr.flt input {
 .alan .ikili select.birim { flex: none; width: 72px; text-align: center }
 /* Para birimi combosunun ALTINDAKI kur kutusu (kasa karti): ayni genislikte
    olmali ki iki satir hizalansin - tutar | birim / yerel karsilik | kur. */
-.alan .ikili input.birim-alti { flex: none; width: 72px }
+.alan .ikili input.birim-alti,
+.alan .ikili select.birim-alti { flex: none; width: 72px; text-align: center }
+/* Ucuncu satirdaki kucuk aciklama (ör. "Ekstre dövizi") - kutu degil, etiket. */
+.alan .ikili .alan-notu { flex: 1; align-self: center; margin: 0 }
 /* Miktar +/- dugmeleri edit yuksekliginde. */
 /* Iki onay kutusu yan yana - her biri kendi adiyla (İnternet Satış | Paket). */
 .ikili-mantik { display: flex; align-items: center; gap: 18px }

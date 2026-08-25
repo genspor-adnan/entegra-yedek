@@ -136,6 +136,10 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             Döviz Tutar{dovizAdi ? ` (${dovizAdi})` : ''}
           </th>
         )}
+        {/* TESLIM TARIHI (140) EN SONDA, yalniz sipariste: satirin termini. */}
+        {bilgi.siparis && (
+          <th className="hiza-orta" style={{ width: 92 }}>Teslim Tarihi</th>
+        )}
       </tr>
     </thead>
     <tbody>
@@ -152,7 +156,8 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         const acik = lotlar.length > 0 && acikLotlar.has(r.anahtar);
         const kolonSayisi = (bilgi.kalem === 'miktar' ? 6 : bilgi.kalem === 'sade' ? 8 : 10)
                           - (aciklamaVar ? 0 : 1)
-                          + (dovizKolon && bilgi.kalem !== 'miktar' ? 2 : 0);
+                          + (dovizKolon && bilgi.kalem !== 'miktar' ? 2 : 0)
+                          + (bilgi.siparis ? 1 : 0);   // teslim tarihi (140)
         return (
           <Fragment key={r.anahtar}>
           <tr className={secili ? 'secili' : ''}
@@ -204,6 +209,13 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                 </>
               );
             })()}
+            {bilgi.siparis && (
+              <td className="hiza-orta">
+                {r.teslimTarihi
+                  ? r.teslimTarihi.split('-').reverse().join('.')
+                  : <span className="sonuk">—</span>}
+              </td>
+            )}
           </tr>
           {/* DETAY: kalemin lot dagilimi. Kalem satirinin bir parcasi -
               ayri kolon basligi yok, kendi mini basligiyla gelir. */}

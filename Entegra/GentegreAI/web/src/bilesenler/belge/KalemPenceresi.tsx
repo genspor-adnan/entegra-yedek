@@ -8,7 +8,7 @@ import {
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
 import { IzlemPenceresi } from './IzlemPenceresi';
 
-export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara,
+export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi,
                          girisIzlemi, cikisIzlemi, cikisDepoId, belgeTarihi,
                          onKapat, onKaydet }: {
   satir: SatirDurumu;
@@ -24,6 +24,8 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara,
   vergisiz: boolean;
   /** Depo transferi: para yok - yalniz miktar, seri/lot ve aciklama sorulur. */
   transferMi: boolean;
+  /** Siparis: satira TESLIM TARIHI (termin) sorulur (140). */
+  siparisMi: boolean;
   /** Kur bu tarihten okunur (belge tarihi) - bugunun kuru degil. */
   belgeTarihi: string;
   onKapat(): void;
@@ -209,6 +211,17 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara,
                 stokta lot dagitimi kendi ekraninda yapiliyor, izlemsiz stokta
                 da serbest metin lot iki ayri yerde tutulan, birbirini tutmayan
                 kayit uretiyordu. */}
+
+            {/* TESLIM TARIHI (140) yalniz SIPARISTE: satirin termini. Ayni
+                siparisin kalemleri farkli gunlerde sevk edilebilir - stokta
+                olan hemen, uretilecek olan haftalar sonra. Bos = termin yok. */}
+            {siparisMi && (
+              <label className="alan">
+                <span className="etiket">Teslim Tarihi</span>
+                <input type="date" value={r.teslimTarihi ?? ''} onKeyDown={tus}
+                       onChange={e => degis('teslimTarihi', e.target.value)} />
+              </label>
+            )}
 
             <label className="alan">
               <span className="etiket">Açıklama</span>
