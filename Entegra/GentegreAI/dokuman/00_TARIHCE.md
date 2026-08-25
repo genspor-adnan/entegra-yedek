@@ -2891,5 +2891,30 @@ Doğrulama: satış faturası kartında Fatura Tipi göründü, kalem girilip Ka
 basıldı — kart kapandı, listede kayıt **25.08.2026 12:55** (yerel saat) olarak
 göründü, `belge.tipi = 1` yazıldı. Test belgesi silindi.
 
+### Fatura tipi: varsayılan 1, yalnız faturada yazılır
+
+Fatura tipinin (130) bugünkü işlevi test edildi: **liste çipleri** onun üzerinden
+çalışıyor — Satış/Alış Faturaları ve Satış Fişleri listelerinde "Fatura"
+(`tipi <> 2`) / "İade" (`tipi = 2`) süzgeci; ayrıca belge dönüşümünde kaynağın
+tipi kopyalanıyor ve kart yeniden açılınca seçili geliyor. Muhasebe fişi ve
+e-Belge senaryosu (F7) bu alanı temel alacak.
+
+Düzeltmeler:
+
+- `belge.tipi` artık **yalnız fatura türlerinde** fatura tipi olarak yazılıyor;
+  irsaliye/sipariş/transfer/talep gönderilmiyor (stok fişinde anlamı fişin
+  sebebi olmayı sürdürüyor). İlk eklemede her belgeye 1 yazılıyordu.
+- Varsayılan **1 (Alış / Satış)**: kart yeni açılışta 1 gelir, `db/131` ile kolon
+  varsayılanı da 1 yapıldı ve tip kavramından önce girilmiş **4 fatura** 0'dan
+  1'e çekildi (yedek: `belge_tipi_yedek_131`). Diğer tipler (2 iade, 22
+  tevkifatlı, 24 KDV istisna, 26 ihracat…) korundu.
+- Göçten gelen ve listede karşılığı olmayan tip (mevcut veride bir belgede 17)
+  kartta "Tanımsız (17)" seçeneği olarak gösteriliyor — aksi hâlde kart açılınca
+  ilk tipe düşüp kaydedince belgenin gerçek tipi sessizce değişirdi.
+
+Doğrulama: API'den tipi 1 ve 2 ile iki fatura kaydedildi, İade çipi yalnız
+tipi=2 olanları getirdi (ekranda da), test belgeleri silindi. Mevcut veri
+dağılımı: 344 × tip 1, 10 × 22, 2 × 24, 1 × 26, 1 × 17.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).

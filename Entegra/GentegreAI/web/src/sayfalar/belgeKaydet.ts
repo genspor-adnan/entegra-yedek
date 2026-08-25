@@ -38,6 +38,8 @@ export interface BelgeGirdisi {
   // belgeTuru.ts davranis bayraklari
   alisMi: boolean;
   irsaliyeMi: boolean;
+  /** Fatura (ya da tahakkuk) mu - fatura tipi yalniz bu turlerde yazilir. */
+  faturaMi: boolean;
   depoBelgesi: boolean;
   stokFisiMi: boolean;
   fisCikisMi: boolean;
@@ -108,7 +110,7 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
 /** API §4 istek govdesi. `dolu` = stok/hizmet secilmis satirlar. */
 export function belgeGovdesi(g: BelgeGirdisi, dolu: SatirDurumu[], taslak: boolean) {
   const { tur, cari, tarih, depoBelgesi, stokFisiMi, seri, disNumarali, belgeNo,
-          vadeGun, subeId, fisCikisMi, depo, girisDepo, alisMi, fisTipi, faturaTipi, satici,
+          vadeGun, subeId, fisCikisMi, depo, girisDepo, alisMi, faturaMi, fisTipi, faturaTipi, satici,
           senaryo, irsaliyeMi, teslimSekli, aracPlaka, soforAd, sevkTarihi,
           soforTckn, tasiyici, transferMi, teslimEden, teslimAlan } = g;
 
@@ -136,8 +138,10 @@ return {
     girisDepoId: stokFisiMi ? (fisCikisMi ? null : depo?.id ?? null)
                : depoBelgesi ? girisDepo?.id ?? null
                : alisMi ? depo?.id ?? null : null,
-    // Fis sebebi (stok fisi) ya da FATURA TIPI (130) - ikisi de belge.tipi.
-    tipi: stokFisiMi ? fisTipi : faturaTipi,
+    // belge.tipi IKI anlamda kullanilir: stok fisinde fisin SEBEBI, faturada
+    //   FATURA TIPI (130). Diger turlerde (irsaliye, siparis, transfer, talep)
+    //   anlami yok - gonderilmez, alan 0 kalir.
+    tipi: stokFisiMi ? fisTipi : faturaMi ? faturaTipi : undefined,
     // satici_id NOT NULL default 0 - "secilmedi" burada null degil 0
     //   (null gonderince sunucu "saticiId bos birakilamaz" ile reddediyordu).
     saticiId: satici?.id ?? 0,

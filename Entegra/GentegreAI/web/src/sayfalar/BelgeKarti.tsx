@@ -506,7 +506,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       senaryo, satici, depo, girisDepo, teslimEden, teslimAlan, tasiyici,
       aracPlaka, soforAd, soforTckn, sevkTarihi, teslimSekli, fisTipi, satirlar,
       subeId: kullanici?.subeId ?? undefined,
-      alisMi, irsaliyeMi, depoBelgesi, stokFisiMi, fisCikisMi, transferMi,
+      alisMi, irsaliyeMi, faturaMi, depoBelgesi, stokFisiMi, fisCikisMi, transferMi,
       talepMi, disNumarali,
     };
     const hatalar = belgeDogrula(girdi);

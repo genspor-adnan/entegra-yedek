@@ -151,6 +151,12 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         <select value={faturaTipi} disabled={kilitli}
                 onChange={e => setFaturaTipi(Number(e.target.value))}>
           {FATURA_TIPLERI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
+          {/* Gocten gelen tanimsiz tip (or. 17) listede yok: secenek olarak
+              EKLENIR, yoksa kart acilinca ilk tipe duser ve kaydedince
+              belgenin gercek tipi sessizce degisirdi. */}
+          {!FATURA_TIPLERI.some(t => t.deger === faturaTipi) && (
+            <option value={faturaTipi}>Tanımsız ({faturaTipi})</option>
+          )}
         </select>
       </label>
     )}
