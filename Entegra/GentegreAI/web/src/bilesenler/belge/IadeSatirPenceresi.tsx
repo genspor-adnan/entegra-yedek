@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal } from '../Modal';
 import { api } from '../../api/istemci';
-import { ApiHatasi } from '../../api/sozlesme';
+import { hataMetni } from '../../api/sozlesme';
 import { para } from '../bicim';
 
 /** Iade edilebilir bir gecmis fatura satiri (v_iade_edilebilir_satir). */
@@ -73,7 +73,7 @@ export function IadeSatirPenceresi({ tarafId, tarafUnvan, belgeId, turler, onSec
                                         turAnahtar ? turAnahtar.split(',').map(Number) : undefined);
       setSatirlar(y as unknown as IadeSatiri[]);
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
       setSatirlar([]);
     } finally { setYukleniyor(false) }
   }, [tarafId, belgeId, turAnahtar]);

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { api } from '../api/istemci';
-import { ApiHatasi, type ListeSatiri } from '../api/sozlesme';
+import { type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
@@ -41,7 +41,7 @@ export function StokAyarlar() {
           return;
       }
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     }
   }
 

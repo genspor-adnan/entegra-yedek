@@ -114,3 +114,31 @@ export function bicimle(deger: unknown, kolon: KolonMeta): string {
       return String(deger);
   }
 }
+
+/**
+ * Ise giris tarihinden KIDEM metni: "3 yıl 2 ay".
+ *
+ * Ay farki gun duzeltmesiyle: ayin gunu henuz gelmediyse o ay SAYILMAZ
+ * (25.03 girisli personel 10.06'da 2 ay kidemlidir, 3 degil).
+ * Iki ekranda (PersonelKimlikOzet, TekOzluk) birebir ayni kod duruyordu.
+ */
+export function kidemMetni(tarihStr: string): string | null {
+  if (!tarihStr) return null;
+  const giris = new Date(tarihStr);
+  if (Number.isNaN(giris.getTime())) return null;
+  const simdi = new Date();
+  let ay = (simdi.getFullYear() - giris.getFullYear()) * 12
+         + (simdi.getMonth() - giris.getMonth());
+  if (simdi.getDate() < giris.getDate()) ay -= 1;
+  if (ay < 0) return null;
+  const yil = Math.floor(ay / 12);
+  const kalanAy = ay % 12;
+  return yil > 0 ? `${yil} yıl ${kalanAy} ay` : `${kalanAy} ay`;
+}
+
+/**
+ * "2026-08-25T14:05:00" -> "25.08.2026". METINDEN keser, `new Date` ile
+ * cevirmez: saat dilimi kaymasi gunu bir gun oteye atabiliyordu.
+ */
+export const gunMetni = (t?: string | null) =>
+  (t ? t.slice(0, 10).split('-').reverse().join('.') : '—');

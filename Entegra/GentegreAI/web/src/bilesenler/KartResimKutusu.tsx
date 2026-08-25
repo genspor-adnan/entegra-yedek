@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../api/istemci';
-import { ApiHatasi, type DokumanSatiri } from '../api/sozlesme';
+import { type DokumanSatiri, hataMetni } from '../api/sozlesme';
 
 export function KartResimKutusu({ kartAdi, kaynakId, saltOkunur, baslik = 'Resim' }: {
   kartAdi: string;
@@ -54,7 +54,7 @@ export function KartResimKutusu({ kartAdi, kaynakId, saltOkunur, baslik = 'Resim
       const resim = resimler.find(s => s.varsayilan) ?? resimler[0];
       setUrl(resim ? await api.dokumanIcerikUrl(resim.id) : null);
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     } finally {
       setYukleniyor(false);
     }

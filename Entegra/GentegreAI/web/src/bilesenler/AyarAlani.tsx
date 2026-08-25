@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { ayarOnbellegiTemizle } from '../api/ayarlar';
-import { ApiHatasi, type AyarSatiri } from '../api/sozlesme';
+import { type AyarSatiri, hataMetni } from '../api/sozlesme';
 import { YardimIkonu } from './YardimIkonu';
 
 /**
@@ -20,7 +20,7 @@ export function useAyarlar() {
       setAyarlar(await api.ayarlar());
       setHata(null);
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     } finally { setYukleniyor(false) }
   }, []);
 
@@ -37,7 +37,7 @@ export function useAyarlar() {
       // ONCE tazele, SONRA hatayi yaz: yukle() basarida setHata(null) yaptigi
       //   icin ters sirada mesaj aninda siliniyordu.
       await yukle();
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     }
   }, [yukle]);
 

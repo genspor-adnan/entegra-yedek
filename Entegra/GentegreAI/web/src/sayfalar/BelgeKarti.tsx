@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
-import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru } from '../api/sozlesme';
+import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { StokAramaPenceresi } from '../bilesenler/StokAramaPenceresi';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
@@ -334,7 +334,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       setSonuc(await api.belgeRezerve(kayitliId, ac));
       onKaydedildi?.();
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? `${h.hata.kod}: ${h.message}` : String(h));
+      setHata(hataMetni(h, true));
     } finally { setRezerveCalisiyor(false) }
   };
 
@@ -402,7 +402,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           ? { id: Number(y.belge.teslimAlanId), ad: String(y.belge.teslimAlanAdi ?? '') } : null);
         setSatirlar(yanittanSatirlar(y.satirlar, yerelPara));
       } catch (h) {
-        setHata(h instanceof ApiHatasi ? h.message : String(h));
+        setHata(hataMetni(h));
       } finally { setAciliyor(false) }
     })();
   }, [belgeId]);
@@ -489,7 +489,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         if (icerik.length === 0) return;
         setSatirlar(s => paketIcerigiUygula(s, satir, icerik));
       })
-      .catch(h => setHata(h instanceof ApiHatasi ? h.message : String(h)));
+      .catch(h => setHata(hataMetni(h)));
   };
 
   /** Secili satirlari siler - grid salt gorunum oldugu icin satir ici silme yok. */

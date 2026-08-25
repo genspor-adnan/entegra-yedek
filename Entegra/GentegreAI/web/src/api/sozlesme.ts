@@ -31,6 +31,18 @@ export class ApiHatasi extends Error {
   get cakismaMi()   { return this.hata.kod === 'CAKISMA' }
 }
 
+/**
+ * Yakalanan hatayi EKRANA yazilacak metne cevirir.
+ *
+ * Ayni ifade 24 dosyada tekrarliyordu; sunucu mesaji varsa oldugu gibi
+ * gosterilir (kullaniciya donuk, Turkce), yoksa hatanin kendisi yazilir -
+ * "[object Object]" cikmasin. `kodlu` hata kodunu one ekler (BELGE_KURALI: ...).
+ */
+export function hataMetni(h: unknown, kodlu = false): string {
+  if (h instanceof ApiHatasi) return kodlu ? `${h.hata.kod}: ${h.message}` : h.message;
+  return h instanceof Error ? h.message : String(h);
+}
+
 // --------------------------------------------------------------- kimlik ----
 export interface SubeOzeti { id: number; ad: string; varsayilan: boolean; yazma: boolean }
 

@@ -1,5 +1,6 @@
 import type { DetayDurumu, Satir } from './GenDetayTablo';
 import type { KartDetayMeta } from '../api/sozlesme';
+import { kidemMetni } from './bicim';
 
 interface Props {
   meta: KartDetayMeta;
@@ -9,18 +10,6 @@ interface Props {
 }
 
 /** "01.09.2019" -> "6 yıl 11 ay" (ik_karti.html mockup "Kıdem" - hesaplanan, saklanmaz). */
-function kidemHesapla(tarihStr: string): string | null {
-  if (!tarihStr) return null;
-  const giris = new Date(tarihStr);
-  if (Number.isNaN(giris.getTime())) return null;
-  const simdi = new Date();
-  let ay = (simdi.getFullYear() - giris.getFullYear()) * 12 + (simdi.getMonth() - giris.getMonth());
-  if (simdi.getDate() < giris.getDate()) ay -= 1;
-  if (ay < 0) return null;
-  const yil = Math.floor(ay / 12);
-  const kalanAy = ay % 12;
-  return yil > 0 ? `${yil} yıl ${kalanAy} ay` : `${kalanAy} ay`;
-}
 
 /**
  * Personel kartı "Özlük Bilgileri" sekmesi (ik_karti.html mockup) — personel_ozluk 1:1
@@ -44,7 +33,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis }: Props) {
   const denemeSuresiAlan = alan('denemeSuresi');
   const yoneticiAlan = alan('yoneticiId');
 
-  const kidem = kidemHesapla(String(satir.iseGirisTarihi ?? ''));
+  const kidem = kidemMetni(String(satir.iseGirisTarihi ?? ''));
 
   return (
     <div className="kasira">

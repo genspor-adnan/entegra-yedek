@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import type { YetkiSatiri } from '../api/sozlesme';
-import { ApiHatasi } from '../api/sozlesme';
+import { hataMetni } from '../api/sozlesme';
 
 type Sutun = 'gor' | 'ekle' | 'degistir' | 'sil';
 const SUTUNLAR: { ad: Sutun; baslik: string }[] = [
@@ -29,7 +29,7 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
     setHata(null);
     api.rolYetkileri(rolId)
       .then(setSatirlar)
-      .catch(h => setHata(h instanceof ApiHatasi ? h.message : String(h)))
+      .catch(h => setHata(hataMetni(h)))
       .finally(() => setYukleniyor(false));
   }, [rolId]);
 
@@ -56,7 +56,7 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
       setSatirlar(guncel);
       setBilgi('Yetki matrisi kaydedildi.');
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     } finally {
       setKaydediyor(false);
     }

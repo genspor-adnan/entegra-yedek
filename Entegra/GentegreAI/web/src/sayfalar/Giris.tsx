@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { api } from '../api/istemci';
-import { ApiHatasi, type SubeOzeti } from '../api/sozlesme';
+import { type SubeOzeti, hataMetni } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
 
 /**
@@ -37,7 +37,7 @@ export function Giris() {
         await girisYap(kod, parola, subeId ?? undefined);
       }
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
       setSubeler(null);
     } finally {
       setBekliyor(false);

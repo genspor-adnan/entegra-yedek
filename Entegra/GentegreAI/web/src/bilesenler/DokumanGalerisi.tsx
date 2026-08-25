@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { api } from '../api/istemci';
-import { ApiHatasi, type DokumanSatiri } from '../api/sozlesme';
+import { type DokumanSatiri, hataMetni } from '../api/sozlesme';
 import { tarihYaz } from './bicim';
 
 const boyutYaz = (b: number) => b < 1024 ? `${b} B` : b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
@@ -95,7 +95,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
     try {
       setSatirlar(await fn());
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     }
   };
 
@@ -125,7 +125,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
   const yenile = () => {
     api.dokumanlar(kartAdi, kaynakId)
       .then(setSatirlar)
-      .catch(h => setHata(h instanceof ApiHatasi ? h.message : String(h)));
+      .catch(h => setHata(hataMetni(h)));
   };
 
   useEffect(() => { yenile() }, [kartAdi, kaynakId]);
@@ -164,7 +164,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
       a.download = satir.ad;
       a.click();
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     }
   };
 
@@ -172,7 +172,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
     try {
       window.open(await icerikUrl(satir.id), '_blank');
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     }
   };
 
@@ -203,7 +203,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
         setPaylasimMesaji(url);
       }
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     }
   };
 
@@ -220,7 +220,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
       setSatirlar(liste);
       setSecili(new Set());
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     }
   };
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
-import { ApiHatasi, type AcikSatir, type BelgeYaniti } from '../api/sozlesme';
+import { type AcikSatir, type BelgeYaniti, hataMetni } from '../api/sozlesme';
 import { Modal } from './GenForm';
 import { para, say4 } from './bicim';
 
@@ -90,7 +90,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, onKapat
         setSecili(Object.fromEntries(s.map(x => [x.satirId, true])));
         setMiktarlar(Object.fromEntries(s.map(x => [x.satirId, String(x.kalanMiktar)])));
       } catch (h) {
-        setHata(h instanceof ApiHatasi ? h.message : String(h));
+        setHata(hataMetni(h));
       } finally { setYukleniyor(false) }
     })();
   }, [belgeId]);
@@ -135,7 +135,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, onKapat
       setSatirlar(await api.belgeAcikSatirlar(belgeId));
       onTamam(yeni);
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     } finally { setCalisiyor(false) }
   }
 

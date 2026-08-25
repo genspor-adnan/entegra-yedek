@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
-import { ApiHatasi, type PanelYaniti } from '../api/sozlesme';
+import { type PanelYaniti, hataMetni } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
+import { para } from '../bilesenler/bicim';
 
-const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const sayi = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 });
 
 /** Gunun saatine gore selam - mockup'taki "İyi çalışmalar, <ad>" seridi. */
@@ -47,7 +47,7 @@ export function Panel() {
   useEffect(() => {
     void api.panel()
       .then(setVeri)
-      .catch(h => setHata(h instanceof ApiHatasi ? h.message : String(h)))
+      .catch(h => setHata(hataMetni(h)))
       .finally(() => setYukleniyor(false));
   }, []);
 

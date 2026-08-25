@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal } from './Modal';
 import { api } from '../api/istemci';
-import { ApiHatasi, type ListeSatiri } from '../api/sozlesme';
+import { type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { para } from './bicim';
 
 
@@ -77,7 +77,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yon }: {
       setSatirlar(birlesik);
       setSecili(0);
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
       setSatirlar([]);
     } finally { setYukleniyor(false) }
   }, [yalnizStok, yon]);

@@ -3226,5 +3226,31 @@ Kasa kartı: hesap listesi artık **para birimine göre de** süzülüyor — US
 tahsilatta yalnız USD kasa/banka çıkıyor; "hesabın dövizi tutmuyor" hatasını
 sonradan almak yerine doğru seçenek baştan görünüyor.
 
+## Refaktör turu (26.08.2026)
+
+Ekran ve depo dosyaları büyümüştü; davranış değiştirmeden konu başına bölündü.
+Kural: **karar saf fonksiyonda, ekran yalnız uygular** — zaten `belgeKaydet.ts`
+ile kurulmuş olan desen kasaya ve karta da yayıldı.
+
+| Dosya | Önce | Sonra | Çıkanlar |
+|---|---|---|---|
+| `BelgeKarti.tsx` | 1183 | 936 | `belgeTahsilat.ts` (tahsilat/çek akışı), `belgeKalem.ts` (stok/paket/iade satır üreticileri), `yanittanSatirlar`, `BelgeTahsilatModallari` |
+| `GenGrid.tsx` | 884 | 706 | `grid/GridMenu.tsx`, `grid/kolonTercihi.ts` |
+| `BelgeDeposu.cs` | 979 | 552 | `.Donusum.cs`, `.Satir.cs` |
+| `KartDeposu.cs` | 761 | 344 | `.Okuma.cs`, `.Detay.cs` |
+| `KasaDeposu.cs` | 582 | 382 | `.Okuma.cs` |
+| `KasaIslemKarti.tsx` | 768 | 724 | `kasaKaydet.ts` (doğrula + gövde + tür bilgisi) |
+| `GenForm.tsx` | 752 | 695 | `kartDegisim.ts` (değişti mi + gönderilecek alanlar) |
+
+Tekrar temizliği: `h instanceof ApiHatasi ? h.message : String(h)` **24 dosyada
+43 kez** yazılmıştı → `hataMetni(h)`. `kidemHesapla` iki ekranda birebir
+kopyaydı → `bicim.kidemMetni`; iki farklı `gun` → `gunMetni` (metinden keser,
+saat dilimi günü kaydırmasın); `Panel.tsx`'in kendi `para` biçimlendiricisi
+ortak olanla değiştirildi.
+
+**Yan fayda (gerçek kusur):** saklanan kolon **sırası** okunurken katalog
+sırasına düşüyordu — üç nokta menüsündeki ↑/↓ ile yapılan taşıma sayfa
+yenilenince kayboluyordu. Artık saklanan dizinin sırası geçerli.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet portföy aksiyonları (tahsile
 ver, ciro, karşılıksız), F6 kredi/kupon, F7 belge fişleme.

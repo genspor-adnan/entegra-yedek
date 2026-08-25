@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Modal } from '../Modal';
 import { api } from '../../api/istemci';
-import { ApiHatasi } from '../../api/sozlesme';
+import { ApiHatasi, hataMetni } from '../../api/sozlesme';
 import {
   type IzlemSatiri, bosIzlem, izlemKurali, tariheEkle, bugunIso, RAF_BIRIM,
 } from '../../sayfalar/belgeSatir';
@@ -112,7 +112,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
           }));
         });
       })
-      .catch(h => setHata(h instanceof ApiHatasi ? h.message : String(h)))
+      .catch(h => setHata(hataMetni(h)))
       .finally(() => { if (!iptal) setYukleniyor(false) });
     return () => { iptal = true };
   }, [cikis, stokId, depoId]);

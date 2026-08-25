@@ -3,7 +3,8 @@ import type { DetayDurumu, Satir } from './GenDetayTablo';
 import type { KartAlanMeta, KartDetayMeta } from '../api/sozlesme';
 import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 import { api } from '../api/istemci';
-import { ApiHatasi } from '../api/sozlesme';
+import { hataMetni } from '../api/sozlesme';
+import { kidemMetni } from './bicim';
 
 interface Props {
   kartAdi?: string;
@@ -28,18 +29,6 @@ interface Props {
 }
 
 /** "01.09.2019" -> "6 yıl 11 ay" */
-function kidemHesapla(tarihStr: string): string | null {
-  if (!tarihStr) return null;
-  const giris = new Date(tarihStr);
-  if (Number.isNaN(giris.getTime())) return null;
-  const simdi = new Date();
-  let ay = (simdi.getFullYear() - giris.getFullYear()) * 12 + (simdi.getMonth() - giris.getMonth());
-  if (simdi.getDate() < giris.getDate()) ay -= 1;
-  if (ay < 0) return null;
-  const yil = Math.floor(ay / 12);
-  const kalanAy = ay % 12;
-  return yil > 0 ? `${yil} yıl ${kalanAy} ay` : `${kalanAy} ay`;
-}
 
 /** "14.06.1992" -> "33 yaş" */
 function yasHesapla(tarihStr: string): string | null {
@@ -91,7 +80,7 @@ export function PersonelKimlikOzet({
       const varsayilan = satirlar.find(s => s.varsayilan && s.contentType.startsWith('image/'));
       if (varsayilan) setResimUrl(await api.dokumanIcerikUrl(varsayilan.id));
     } catch (h) {
-      setResimHata(h instanceof ApiHatasi ? h.message : String(h));
+      setResimHata(hataMetni(h));
     } finally {
       setResimYukleniyor(false);
     }
@@ -111,7 +100,7 @@ export function PersonelKimlikOzet({
   const kanGrubuAlan = alan('kanGrubu');
   const meslekAlan = alan('meslek');
 
-  const kidem = kidemHesapla(String(satir.iseGirisTarihi ?? ''));
+  const kidem = kidemMetni(String(satir.iseGirisTarihi ?? ''));
   const yas = yasHesapla(String(satir.dogumTarihi ?? ''));
 
   return (

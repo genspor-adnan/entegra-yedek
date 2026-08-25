@@ -1,11 +1,10 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
-import { ApiHatasi, type StokDurumYaniti, type StokLotSatiri } from '../api/sozlesme';
-import { say4 } from './bicim';
+import { type StokDurumYaniti, type StokLotSatiri, hataMetni } from '../api/sozlesme';
+import { say4, gunMetni } from './bicim';
 
 
 /** "2027-06-30T00:00:00" -> "30.06.2027"; bos ise tire. */
-const gun = (t?: string | null) => (t ? t.slice(0, 10).split('-').reverse().join('.') : '—');
 
 /**
  * Depo satirinin altindaki lot dokumu (master-detail). Eskiden karttaki ayri
@@ -29,8 +28,8 @@ function lotTablosu(satirlar: StokLotSatiri[]) {
           <tr key={`${l.seriLotId}-${l.depoId ?? 0}`}>
             <td><code>{l.lotNo || '—'}</code></td>
             <td>{l.seriNo || '—'}</td>
-            <td>{gun(l.uretimTarihi)}</td>
-            <td>{gun(l.sonKullanmaTarihi)}</td>
+            <td>{gunMetni(l.uretimTarihi)}</td>
+            <td>{gunMetni(l.sonKullanmaTarihi)}</td>
             <td className="hiza-sag">{say4.format(Number(l.kalan))}</td>
           </tr>
         ))}
@@ -80,7 +79,7 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
       setVeri(await api.stokDurum(stokId));
       setHata(null);
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     } finally { setYukleniyor(false) }
   }, [stokId]);
 
@@ -109,7 +108,7 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
         hangi === 'max' ? yeni : satir.maxStok ?? null));
       setHata(null);
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
       void yukle();
     }
   }

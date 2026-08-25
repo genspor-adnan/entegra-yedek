@@ -3,8 +3,7 @@ import { api, oturum } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import {
   ApiHatasi,
-  type KartMetaYaniti, type KartYetkisi,
-} from '../api/sozlesme';
+  type KartMetaYaniti, type KartYetkisi, hataMetni } from '../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, bosDetay, detayFarki } from './GenDetayTablo';
 import { Modal } from './Modal';
 import { yerelAnMetni } from '../sayfalar/belgeSabitleri';
@@ -12,6 +11,9 @@ import { PaketSekmesi } from './PaketSekmesi';
 import { KartGrupSekmesi } from './kart/KartGrupSekmesi';
 import { alanCizici, type Deger } from './kartAlanCizim';
 import { kartDogrula } from './kartDogrulama';
+import {
+  degisenAlanlar as degisenAlanlarHesapla, kartDegistiMi,
+} from './kartDegisim';
 import {
   alanGruplari, sekmeleriKur, detaySekmeAnahtari, grupSekmeAnahtari,
   KIMLIK_GRUP, TEK_SUTUN_KARTLAR, type SekmeTanimi,
@@ -188,7 +190,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
         setDetaylar(bosDetaylar);
       }
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     } finally {
       setYukleniyor(false);
     }
@@ -303,84 +305,24 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
     return grup === KIMLIK_GRUP ? null : grupSekmeAnahtari(grup);
   }, [meta, kaynak, personelGibiKart]);
 
-  /**
-   * Yalniz DEGISEN alanlar gonderilir (§3.2: alan gondermemek "degistirme" demektir).
-   *
-   * YENI kayitta bos birakilan alan HIC GONDERILMEZ - null gondermek NOT NULL +
-   * varsayilanli kolonlarda (durum, bayraklar) kaydi patlatiyordu. Bos gonderilmeyince
-   * veritabani varsayilani devreye girer.
-   * DUZENLEMEDE ise bos deger anlamlidir: kullanici alani temizlemis olabilir -> null.
-   */
-  const degisenAlanlar = useCallback(() => {
-    const govde: Record<string, unknown> = {};
-    meta?.alanlar.forEach(a => {
-      if (!a.yazilabilir || a.ad === 'id') return;
-      const yeni = deger[a.ad];
-
-      if (yeniMi) {
-        if (a.tip === 'mantik') {
-          if (yeni) { govde[a.ad] = true; return }
-          // EKRAN varsayilani alani acikca FALSE yaptiysa bunu SUNUCUYA SOYLE:
-          //   sessizce atlanirsa katalog varsayilani devreye girer ve Aday
-          //   Musterisi "musteri" olarak, Tedarikci de "musteri+tedarikci"
-          //   olarak kaydedilirdi (rol bayraklari birbirine karisiyordu).
-          if (yeniKayitVarsayilanlari && a.ad in yeniKayitVarsayilanlari) govde[a.ad] = false;
-          return;
-        }
-        if (yeni === '' || yeni === null || yeni === undefined) return;
-        govde[a.ad] = yeni;
-        return;
-      }
-
-      if (yeni === ilkDeger[a.ad]) return;
-      govde[a.ad] = a.tip === 'mantik' ? Boolean(yeni) : (yeni === '' ? null : yeni);
-    });
-    return govde;
-  }, [meta, deger, ilkDeger, yeniMi, yeniKayitVarsayilanlari]);
+  // Govde ve "degisti mi" karari saf fonksiyonlarda (kartDegisim.ts).
+  const degisenAlanlar = useCallback(
+    () => degisenAlanlarHesapla({
+      alanlar: meta?.alanlar, deger, ilkDeger, yeniMi,
+      varsayilanlar: yeniKayitVarsayilanlari,
+    }),
+    [meta, deger, ilkDeger, yeniMi, yeniKayitVarsayilanlari]);
 
   const kaydedilmemisDegisiklikVar = useMemo(() => {
-    /**
-     * GENEL KURAL (kullanici): hicbir sey degistirmeden kapatan kullaniciya
-     * "kaydedilsin mi?" SORULMAZ. Katı (!==) karsilastirma bunu yapamiyordu -
-     * ayni deger farkli YAZIMLARLA geliyor ve sahte fark uretiyordu:
-     *
-     *   kur      sunucudan "1.000000", ekranda '1'      (doviz efekti yazar)
-     *   tutar    "1500.0000" vs "1500"
-     *   kod      sayi 1 vs metin "1"
-     *   bos alan null / undefined / ''
-     *
-     * Bu yuzden karsilastirma NORMALIZE edilir: sayisal alanlarda sayi degeri,
-     * mantikta boolean, digerlerinde kirpilmis metin.
-     */
-    const esitMi = (a: { tip: string }, x: unknown, y: unknown) => {
-      if (a.tip === 'mantik') return Boolean(x) === Boolean(y);
-      const bos = (v: unknown) => v === null || v === undefined || v === '';
-      if (bos(x) && bos(y)) return true;
-      if (bos(x) !== bos(y)) return false;
-      if (a.tip === 'sayi' || a.tip === 'para' || a.tip === 'kod') {
-        const sx = Number(String(x).replace(',', '.'));
-        const sy = Number(String(y).replace(',', '.'));
-        // Kod alanlari HARF de tasiyabilir ('K'/'B'); sayi degilse metne duser.
-        if (Number.isFinite(sx) && Number.isFinite(sy)) return sx === sy;
-      }
-      if (a.tip === 'tarih' || a.tip === 'zaman') {
-        // "2026-08-25T00:00:00" ile "2026-08-25" ayni gunu anlatir; zaman
-        //   alaninda dakikaya kadar bakilir.
-        const n = a.tip === 'zaman' ? 16 : 10;
-        return String(x).slice(0, n) === String(y).slice(0, n);
-      }
-      return String(x).trim() === String(y).trim();
-    };
-
-    const kartDegisti = meta?.alanlar.some(a => {
-      if (!a.yazilabilir || a.ad === 'id') return false;
-      return !esitMi(a, deger[a.ad], ilkDeger[a.ad]);
-    }) ?? false;
-    if (kartDegisti) return true;
+    // GENEL KURAL (kullanici): hicbir sey degistirmeden kapatan kullaniciya
+    //   "kaydedilsin mi?" sorulmaz - karsilastirma alan tipine gore normalize
+    //   edilir (kartDegisim.alanEsit), yoksa "1.000000" ile '1' fark sayilirdi.
+    if (kartDegistiMi(meta?.alanlar, deger, ilkDeger)) return true;
 
     return Object.values(detaylar).some(durum => {
       const fark = detayFarki(durum);
-      return (fark.eklenen?.length ?? 0) + (fark.degisen?.length ?? 0) + (fark.silinen?.length ?? 0) > 0;
+      return (fark.eklenen?.length ?? 0) + (fark.degisen?.length ?? 0)
+           + (fark.silinen?.length ?? 0) > 0;
     });
   }, [meta, deger, ilkDeger, detaylar]);
 

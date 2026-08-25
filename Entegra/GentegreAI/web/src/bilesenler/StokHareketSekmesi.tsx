@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
-import { ApiHatasi, type StokHareketYaniti } from '../api/sozlesme';
-import { say4 } from './bicim';
+import { type StokHareketYaniti, hataMetni } from '../api/sozlesme';
+import { say4, gunMetni } from './bicim';
 
-const gun = (t: string) => new Date(t).toLocaleDateString('tr-TR');
 
 /** Belge türünden liste/kart yolu - hareket satırına çift tıklayınca oraya gidilir. */
 const BELGE_YOLU: Record<number, string> = {
@@ -47,7 +46,7 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
       setVeri(await api.stokHareket(stokId, bas, bit, depoId));
       setHata(null);
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     } finally { setYukleniyor(false) }
   }, [stokId, bas, bit, depoId]);
 
@@ -56,7 +55,7 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
   function csvIndir() {
     const basliklar = ['Tarih', 'Belge', 'Belge No', 'Cari', 'Depo', 'Giriş', 'Çıkış', 'Kalan', 'Açıklama'];
     const satirlar = (veri?.satirlar ?? []).map(s => [
-      gun(s.tarih), s.belgeTurAdi, s.belgeNo, s.tarafUnvan, s.depo,
+      gunMetni(s.tarih), s.belgeTurAdi, s.belgeNo, s.tarafUnvan, s.depo,
       s.giris ? say4.format(s.giris) : '', s.cikis ? say4.format(s.cikis) : '',
       say4.format(s.kalan), s.aciklama,
     ]);
@@ -120,7 +119,7 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
                 <tr key={`${s.belgeId}:${i}`}
                     onDoubleClick={() => { const y = BELGE_YOLU[s.belgeTur]; if (y) git(`${y}/${s.belgeId}`) }}
                     title="Çift tıkla: belgeyi aç">
-                  <td>{gun(s.tarih)}</td>
+                  <td>{gunMetni(s.tarih)}</td>
                   <td>{s.belgeTurAdi} <b>{s.belgeNo}</b></td>
                   <td>
                     <span className={`rozet ${s.yon === 'giris' ? 'ok'

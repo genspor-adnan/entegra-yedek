@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
-import { ApiHatasi, type Kosul, type ListeSatiri } from '../api/sozlesme';
+import { type Kosul, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { BelgeKarti } from './BelgeKarti';
@@ -178,7 +178,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
                   kart: { musteri: true, aday: false } });
               setYenile(y => y + 1);
             } catch (h) {
-              alert(h instanceof ApiHatasi ? h.message : String(h));
+              alert(hataMetni(h));
             }
           })();
           return;
@@ -227,7 +227,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         kartaGit(satir.id);
       else if (satir) alert(`"${kod}" aksiyonu henuz baglanmadi.`);
     } catch (h) {
-      alert(h instanceof ApiHatasi ? h.message : String(h));
+      alert(hataMetni(h));
     }
   }
 

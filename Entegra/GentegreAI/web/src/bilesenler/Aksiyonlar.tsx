@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
-import { ApiHatasi, type AksiyonYaniti } from '../api/sozlesme';
+import { type AksiyonYaniti, hataMetni } from '../api/sozlesme';
 
 /**
  * Aksiyon katalogu (API §7). Arac cubugu, sag tus menusu ve komut paleti AYNI
@@ -20,7 +20,7 @@ export function useAksiyonlar(ekran: string, kayitId?: number | null) {
       setAksiyonlar(yanit.aksiyonlar);
       setHata(null);
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
       setAksiyonlar([]);
     }
   }, [ekran, kayitId]);

@@ -3,8 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import {
   ApiHatasi, KASA_DURUM,
-  type KasaIslemTuru, type KasaIslemYaniti, type ListeSatiri,
-} from '../api/sozlesme';
+  type KasaIslemTuru, type KasaIslemYaniti, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { GenLookup } from '../bilesenler/GenLookup';
 import { TarafSecici } from '../bilesenler/TarafArama';
 import { FisOnizleme } from '../bilesenler/kasa/FisOnizleme';
@@ -174,7 +173,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   useEffect(() => {
     void (async () => {
       try { setTurler(await api.kasaIslemTurleri()) }
-      catch (h) { setHata(h instanceof ApiHatasi ? h.message : String(h)) }
+      catch (h) { setHata(hataMetni(h)) }
     })();
   }, []);
 
@@ -212,7 +211,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     if (kayitId === null) return;
     void (async () => {
       try { yaniti(await api.kasaOku(kayitId)) }
-      catch (h) { setHata(h instanceof ApiHatasi ? h.message : String(h)) }
+      catch (h) { setHata(hataMetni(h)) }
     })();
   }, [kayitId, yaniti]);
 

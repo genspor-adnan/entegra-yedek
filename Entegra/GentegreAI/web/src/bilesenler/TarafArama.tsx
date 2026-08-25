@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../api/istemci';
-import { ApiHatasi, type ListeSatiri } from '../api/sozlesme';
+import { type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { GenForm } from './GenForm';
 
 interface TarafSatiri {
@@ -88,7 +88,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
       setSatirlar(yanitlar.flatMap((y, i) => y.satirlar.map(s => satiraCevir(kaynaklar[i], s))));
       setSecili(0);
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
       setSatirlar([]);
     } finally {
       setYukleniyor(false);

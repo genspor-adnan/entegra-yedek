@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../api/istemci';
-import { ApiHatasi, type Kosul, type ListeSatiri } from '../api/sozlesme';
+import { type Kosul, type ListeSatiri, hataMetni } from '../api/sozlesme';
 
 interface Props {
   /** Liste kaynagi: 'cari', 'stok' ... */
@@ -58,7 +58,7 @@ export function GenLookup({
       setSatirlar(yanit.satirlar);
       setSecili(0);
     } catch (h) {
-      setListeHatasi(h instanceof ApiHatasi ? h.message : String(h));
+      setListeHatasi(hataMetni(h));
       setSatirlar([]);
     } finally {
       setYukleniyor(false);

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
-import { ApiHatasi, type KolonMeta, type Kosul, type ListeSatiri, type ListeYaniti,
-         type Siralama } from '../api/sozlesme';
+import { type KolonMeta, type Kosul, type ListeSatiri, type ListeYaniti,
+         type Siralama, hataMetni } from '../api/sozlesme';
 import { bicimle } from './bicim';
 import { GenKomutPaleti, GenSagTus, GenToolbar, hedefte, useAksiyonlar,
          type AltSecenek } from './Aksiyonlar';
@@ -234,7 +234,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       setGrupKolonu(yanit.grupKolonu ?? null);
       setSureMs(yanit.sureMs);
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? `${h.hata.kod}: ${h.message}` : String(h));
+      setHata(hataMetni(h, true));
       setSatirlar([]);
     } finally {
       setYukleniyor(false);
@@ -407,7 +407,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       bag.click();
       URL.revokeObjectURL(bag.href);
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     } finally { setYukleniyor(false) }
   }, [kaynak, baslik, kolonlar, sabitFiltre, cipler, cipIndeks, aramaFiltresi, filtreSatiriFiltresi,
       sirala, aramaGorunumu, tarihAlani, tarihBas, tarihBit]);

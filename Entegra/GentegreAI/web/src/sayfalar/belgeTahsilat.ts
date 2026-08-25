@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
-import { ApiHatasi, type ListeSatiri } from '../api/sozlesme';
+import { type ListeSatiri, hataMetni } from '../api/sozlesme';
 
 /**
  * BELGE TAHSILAT SEKMESI - durum ve akis.
@@ -87,7 +87,7 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
       tazele();
       onKaydedildi?.();
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     }
   };
 

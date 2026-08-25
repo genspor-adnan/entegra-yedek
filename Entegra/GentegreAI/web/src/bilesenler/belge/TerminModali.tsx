@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { api } from '../../api/istemci';
-import { ApiHatasi, type BelgeYaniti } from '../../api/sozlesme';
+import { type BelgeYaniti, hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import type { SatirDurumu } from '../../sayfalar/belgeSatir';
 
@@ -47,7 +47,7 @@ export function TerminModali({ belgeId, satirlar, onKapat, onTamam }: {
       onTamam(yeni);
       onKapat();
     } catch (h) {
-      setHata(h instanceof ApiHatasi ? h.message : String(h));
+      setHata(hataMetni(h));
     } finally { setCalisiyor(false) }
   }
 
