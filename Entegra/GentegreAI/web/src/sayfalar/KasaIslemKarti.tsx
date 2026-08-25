@@ -419,7 +419,11 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                   deger={cari?.unvan}
                   hata={alanHatalari.tarafId}
                   kilitli={kilitli}
-                  yerTutucu="Müşteri / tedarikçi ara…"
+                  // PERSONEL de taraf olabilir (kullanici): is avansi, maas
+                  //   odemesi, harcirah... Muhasebe tarafi zaten hazir -
+                  //   fn_muh_hesap_coz personeli 335/196'ya yaziyor.
+                  kaynaklar={['cari', 'personel']}
+                  yerTutucu="Müşteri / tedarikçi / personel ara…"
                   onSec={sec => setCari({ id: sec.id, unvan: sec.unvan })}
                   onTemizle={() => setCari(null)}
                 />
@@ -432,7 +436,8 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                   deger={karsiCari?.unvan}
                   hata={alanHatalari.karsiTarafId}
                   kilitli={kilitli}
-                  yerTutucu="Müşteri / tedarikçi ara…"
+                  kaynaklar={['cari', 'personel']}
+                  yerTutucu="Müşteri / tedarikçi / personel ara…"
                   onSec={sec => setKarsiCari({ id: sec.id, unvan: sec.unvan })}
                   onTemizle={() => setKarsiCari(null)}
                 />
