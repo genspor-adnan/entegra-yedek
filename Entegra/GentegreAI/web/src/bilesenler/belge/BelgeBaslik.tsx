@@ -1,7 +1,7 @@
 import { GenLookup } from '../GenLookup';
 import { TarafAlani } from '../../sayfalar/BelgeKarti';
 import {
-  LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, SEKMELER,
+  LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, FATURA_TIPLERI, SEKMELER,
 } from '../../sayfalar/belgeSabitleri';
 import type { SatirDurumu } from '../../sayfalar/belgeSatir';
 import type { Secim } from '../../sayfalar/belgeKaydet';
@@ -22,6 +22,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     aktifSekme, setAktifSekme, alanHatalari, bilgi, sonuc, kilitli, baslikKilitli, belgeAdi,
     belgeNo, setBelgeNo, tarih, setTarih, tarihEnGec, tarihEnErken, vadeGun, setVadeGun,
     cari, satici, depo, setDepo, girisDepo, setGirisDepo, teslimEden, teslimAlan, fisTipi,
+    faturaTipi, setFaturaTipi,
     setFisTipi, satirlar, donusumler, setCariArama, setSaticiArama, setPersonelArama,
     kapanmaAlani, bagliSiparisAlani, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
     tahakkukMu, depoBelgesi, stokFisiMi, fisCikisMi, transferMi, talepMi, disNumarali,
@@ -140,6 +141,19 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         hata={alanHatalari.teslimEdenId}
       />
     ) : kapanmaAlani)}
+
+    {/* FATURA TIPI (130) - yalniz faturada, ust baslikta (kullanici). Faturanin
+        cinsi hem muhasebe fisini hem e-Belge senaryosunu etkiler; belge.tipi
+        alaninda tutulur (iade zaten 2 idi). */}
+    {faturaMi && (
+      <label className="alan">
+        <span className="etiket">Fatura Tipi</span>
+        <select value={faturaTipi} disabled={kilitli}
+                onChange={e => setFaturaTipi(Number(e.target.value))}>
+          {FATURA_TIPLERI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
+        </select>
+      </label>
+    )}
 
     {/* --- 2. satir: Satis Temsilcisi cari'nin ALTINDA --- */}
     {/* Satis temsilcisi PERSONEL'dir (cari degil) ve secim cari ile ayni
@@ -316,6 +330,9 @@ export interface BelgeBaslikProps {
   teslimAlan: Secim | null;
   fisTipi: number;
   setFisTipi(v: number): void;
+  /** Fatura tipi (130) - yalniz faturada gorunur. */
+  faturaTipi: number;
+  setFaturaTipi(v: number): void;
   satirlar: SatirDurumu[];
   donusumler: Record<string, unknown>[];
   /** Secim modallarini acan tetikleyiciler (kartta yasiyor). */

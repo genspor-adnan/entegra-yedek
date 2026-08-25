@@ -165,6 +165,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [saticiArama, setSaticiArama] = useState(false);
   /** e-Fatura senaryosu (belge.senaryo) - GIB profilini belirler. */
   const [senaryo, setSenaryo] = useState(0);
+  /** FATURA TIPI (130): faturanin cinsi - belge.tipi alaninda tutulur. */
+  const [faturaTipi, setFaturaTipi] = useState(1);
   /** Bu belgeye baglanmis kasa islemleri (Tahsilat sekmesi). */
   const [tahsilatlar, setTahsilatlar] = useState<ListeSatiri[]>([]);
   /** Acik tahsilat modalinin TURU (null = kapali) - fatura arkada acik kalir. */
@@ -293,6 +295,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setTeslimEden(y.belge.teslimEdenId
           ? { id: Number(y.belge.teslimEdenId), ad: String(y.belge.teslimEdenAdi ?? '') } : null);
         setFisTipi(Number(y.belge.tipi ?? 0));
+        // Faturada ayni alan FATURA TIPI'dir (130); eski kayitlarda 0 ise
+        //   varsayilan "Alış / Satış" (1) gosterilir.
+        setFaturaTipi(Number(y.belge.tipi) || 1);
         setTeslimAlan(y.belge.teslimAlanId
           ? { id: Number(y.belge.teslimAlanId), ad: String(y.belge.teslimAlanAdi ?? '') } : null);
         setSatirlar((y.satirlar ?? []).map((r, i) => ({
@@ -497,7 +502,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     // Kart durumu tek nesnede: dogrulama ve istek govdesi SAF fonksiyonlarda
     //   (belgeKaydet.ts) - ekran yalniz sonucu gosterir.
     const girdi: BelgeGirdisi = {
-      tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun,
+      tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun, faturaTipi,
       senaryo, satici, depo, girisDepo, teslimEden, teslimAlan, tasiyici,
       aracPlaka, soforAd, soforTckn, sevkTarihi, teslimSekli, fisTipi, satirlar,
       subeId: kullanici?.subeId ?? undefined,
@@ -518,10 +523,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       const yanit = await api.belgeEkle(govde);
       setSonuc(yanit);
       onKaydedildi?.();
-      // TRANSFERDE kayittan sonra kartta yapilacak is yok (e-Belge, tahsilat,
-      //   donusum yok) - kart kapanir, kullanici listeye doner. Diger belgelerde
-      //   kart acik kalir: numara/e-Belge/tahsilat oradan surdurulur.
-      if (bilgi.kaydedinceKapan) { kapat(); return }
+      // GENEL KURAL (kullanici): Kaydet'e basilinca form KAPANIR. Belgeye sonradan
+      //   yapilacak isler (e-Belge gonderimi, tahsilat, donusum) listeden belge
+      //   yeniden acilarak surdurulur - kart acik birakmak "kaydettim mi?"
+      //   belirsizligi yaratiyordu.
+      kapat();
+      return;
     } catch (h) {
       if (h instanceof ApiHatasi) {
         if (h.dogrulamaMi && h.hata.alanlar)
@@ -634,6 +641,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           depo={depo} setDepo={setDepo} girisDepo={girisDepo} setGirisDepo={setGirisDepo}
           teslimEden={teslimEden} teslimAlan={teslimAlan}
           fisTipi={fisTipi} setFisTipi={setFisTipi}
+          faturaTipi={faturaTipi} setFaturaTipi={setFaturaTipi}
           satirlar={satirlar} donusumler={donusumler}
           setCariArama={setCariArama} setSaticiArama={setSaticiArama}
           setPersonelArama={setPersonelArama}

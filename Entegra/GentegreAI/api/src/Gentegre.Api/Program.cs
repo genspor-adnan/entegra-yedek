@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Gentegre.Cekirdek;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Gentegre.Api.AraKatman;
@@ -106,6 +107,10 @@ kurucu.Services.AddCors(o => o.AddDefaultPolicy(p => p
     .AllowAnyHeader()
     .AllowAnyMethod()));
 
+// Kurulus saat dilimi: konteyner UTC calissa da "simdi" Turkiye saatidir
+//   (appsettings > Kurulus:SaatDilimi ile degistirilebilir).
+Saat.DilimAyarla(kurucu.Configuration["Kurulus:SaatDilimi"]);
+
 var uygulama = kurucu.Build();
 
 // ------------------------------------------------------------------- boru hatti ----
@@ -124,7 +129,7 @@ uygulama.MapGet("/api/saglik", async (VeriKaynagi veri, CancellationToken iptal)
     {
         durum = "ayakta",
         veritabani = surum,
-        zaman = DateTime.Now
+        zaman = Saat.Simdi
     });
 }).AllowAnonymous().WithTags("Saglik");
 

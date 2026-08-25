@@ -1,3 +1,4 @@
+using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
@@ -53,7 +54,7 @@ public sealed class KimlikServisi
             throw GentegreHatasi.Yetkisiz("Bu kullanici pasif durumda.");
         }
 
-        if (kullanici.KilitBitis is { } kilit && kilit > DateTime.Now)
+        if (kullanici.KilitBitis is { } kilit && kilit > Saat.Simdi)
         {
             await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, false, "kilitli", iptal);
             throw GentegreHatasi.Yetkisiz(
@@ -139,7 +140,7 @@ public sealed class KimlikServisi
             throw GentegreHatasi.Yetkisiz("Oturum guvenlik nedeniyle sonlandirildi, yeniden giris yapin.");
         }
 
-        if (oturum.BitisTarihi <= DateTime.Now)
+        if (oturum.BitisTarihi <= Saat.Simdi)
             throw GentegreHatasi.Yetkisiz("Oturum suresi doldu.");
 
         var kullanici = await _kullanicilar.IdIleBulAsync(oturum.KullaniciId, iptal);
@@ -210,7 +211,7 @@ public sealed class KimlikServisi
             subeId, subeler.Select(s => s.Id), dakika);
 
         var (refresh, hash) = JwtUretici.RefreshUret();
-        var refreshBitis = DateTime.Now.AddDays(gun);
+        var refreshBitis = Saat.Simdi.AddDays(gun);
 
         await _oturumlar.AcAsync(kullanici.TarafId, hash, refreshBitis, aileId, oncekiId,
             subeId, ip, istemci, iptal);

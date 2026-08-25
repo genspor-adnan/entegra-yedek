@@ -237,9 +237,10 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
         ? await api.kasaEkle(govde(taslak, plan))
         : await api.kasaGuncelle(kayitId, { ...govde(taslak, plan), surum: String(sonuc?.islem.surum ?? '') });
       yaniti(y);
-      // Modalde rota DEGISMEZ: kasa karti fatura kartinin ustunde acik kalir
-      //   (rotayi degistirmek arkadaki faturayi kapatiyordu).
-      if (kayitId === null && !modalMi) git(`/kasa-islem/${y.islem.id}`, { replace: true });
+      // GENEL KURAL (kullanici): Kaydet'e basilinca form KAPANIR. Modalde cagiran
+      //   kapatir (belge kartinin Tahsilat sekmesi), tam sayfada listeye donulur.
+      if (modalMi) onKapat?.();
+      else git('/kasa-islem');
     } catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
   }
 
@@ -247,7 +248,11 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     if (!kayitId) return;
     setHata(null);
     setCalisiyor(true);
-    try { yaniti(await api.kasaKesinlestir(kayitId)) }
+    try {
+      yaniti(await api.kasaKesinlestir(kayitId));
+      // Kesinlestirme de bir "kaydet": islem bitti, form kapanir.
+      if (modalMi) onKapat?.(); else git('/kasa-islem');
+    }
     catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
   }
 

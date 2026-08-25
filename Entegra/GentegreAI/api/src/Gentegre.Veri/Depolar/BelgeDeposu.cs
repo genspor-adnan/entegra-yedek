@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Npgsql;
@@ -413,7 +414,7 @@ public sealed partial class BelgeDeposu
             ["tarafVkno"] = kaynak["taraf_vkno"],
             ["tarafVd"] = kaynak["taraf_vd"],
             ["tarafAdresId"] = kaynak["taraf_adres_id"],
-            ["belgeTarihi"] = belgeTarihi ?? DateTime.Now,
+            ["belgeTarihi"] = belgeTarihi ?? Saat.Simdi,
             ["belgeDovizi"] = kaynak["belge_dovizi"],
             ["dovizKuru"] = kaynak["doviz_kuru"],
             ["kdvDurum"] = kaynak["kdv_durum"],
@@ -561,7 +562,9 @@ public sealed partial class BelgeDeposu
                 return;
         }
 
-        var simdi = DateTime.Now;
+        // Kurulus saat dilimi (Saat.Simdi): konteyner UTC calisirken kullanicinin
+        //   yerel saatini "ileri tarihli" saymasin.
+        var simdi = Saat.Simdi;
         // Ayni dakikadaki saat farki (istemci saati birkac saniye ileri olabilir)
         //   hata sayilmasin diye 5 dakikalik pay birakilir.
         if (tarih > simdi.AddMinutes(5))

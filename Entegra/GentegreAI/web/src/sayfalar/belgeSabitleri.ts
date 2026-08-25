@@ -32,6 +32,27 @@ export const yerelAnMetni = (d: Date) => {
        + `T${p(d.getHours())}:${p(d.getMinutes())}`;
 };
 
+/**
+ * FATURA TIPI (db/130 kod listesi belge.fatura_tipi) - faturanin cinsi.
+ * Kodlar GIB / muhasebe alisilmis numaralariyla birebir; iade (2) zaten
+ * belge.tipi'nde bu numarayla tutuluyordu.
+ */
+export const FATURA_TIPLERI: { deger: number; ad: string }[] = [
+  { deger: 1,  ad: 'Alış / Satış' },
+  { deger: 2,  ad: 'İade' },
+  { deger: 3,  ad: 'Fiyat Farkı' },
+  { deger: 4,  ad: 'S. Meslek Makbuzu' },
+  { deger: 5,  ad: 'Kur Farkı' },
+  { deger: 6,  ad: 'İthalat' },
+  { deger: 7,  ad: 'Kira' },
+  { deger: 8,  ad: 'Gider Pusulası' },
+  { deger: 9,  ad: 'İhraç Kayıtlı' },
+  { deger: 22, ad: 'Tevkifatlı' },
+  { deger: 24, ad: 'KDV İstisna' },
+  { deger: 25, ad: 'SGK' },
+  { deger: 26, ad: 'İhracat' },
+];
+
 /** Senaryo comboSU - SENARYO_ADI ile ayni kodlar, GIB profil sirasinda. */
 export const SENARYO_SECENEK = [
   { deger: 1, ad: 'Temel Fatura' },

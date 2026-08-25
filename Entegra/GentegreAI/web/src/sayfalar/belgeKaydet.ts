@@ -31,6 +31,8 @@ export interface BelgeGirdisi {
   sevkTarihi: string;
   teslimSekli: number;
   fisTipi: number;
+  /** Fatura tipi (130) - faturada belge.tipi olarak gider. */
+  faturaTipi: number;
   satirlar: SatirDurumu[];
   subeId?: number;
   // belgeTuru.ts davranis bayraklari
@@ -106,7 +108,7 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
 /** API §4 istek govdesi. `dolu` = stok/hizmet secilmis satirlar. */
 export function belgeGovdesi(g: BelgeGirdisi, dolu: SatirDurumu[], taslak: boolean) {
   const { tur, cari, tarih, depoBelgesi, stokFisiMi, seri, disNumarali, belgeNo,
-          vadeGun, subeId, fisCikisMi, depo, girisDepo, alisMi, fisTipi, satici,
+          vadeGun, subeId, fisCikisMi, depo, girisDepo, alisMi, fisTipi, faturaTipi, satici,
           senaryo, irsaliyeMi, teslimSekli, aracPlaka, soforAd, sevkTarihi,
           soforTckn, tasiyici, transferMi, teslimEden, teslimAlan } = g;
 
@@ -134,7 +136,8 @@ return {
     girisDepoId: stokFisiMi ? (fisCikisMi ? null : depo?.id ?? null)
                : depoBelgesi ? girisDepo?.id ?? null
                : alisMi ? depo?.id ?? null : null,
-    tipi: stokFisiMi ? fisTipi : undefined,
+    // Fis sebebi (stok fisi) ya da FATURA TIPI (130) - ikisi de belge.tipi.
+    tipi: stokFisiMi ? fisTipi : faturaTipi,
     // satici_id NOT NULL default 0 - "secilmedi" burada null degil 0
     //   (null gonderince sunucu "saticiId bos birakilamaz" ile reddediyordu).
     saticiId: satici?.id ?? 0,

@@ -2863,5 +2863,33 @@ Ana Birim · Diğer'de ikili onay kutuları · Resim).
 Doğrulama: `tsc -b` + prod derleme temiz; menü stok listesinde açılıp bölümler
 ve işaretli seçenekler (Liste ✓, Tüm Liste ✓) görüldü.
 
+### Kaydet kapatır · yerel saat · fatura tipi
+
+Üç kullanıcı isteği bir arada:
+
+- **Genel kural: Kaydet'e basılınca form kapanır.** Kart formları (GenForm)
+  zaten kapanıyordu; belge kartı ve kasa işlem kartı da artık kaydetten
+  (ve kasa işleminde kesinleştirmeden) sonra kapanıyor. Belgeye sonradan
+  yapılacak işler (e-Belge, tahsilat, dönüşüm) listeden yeniden açılarak
+  sürdürülür — kart açık kalması "kaydettim mi?" belirsizliği yaratıyordu.
+- **Yerel saat.** API konteyneri ve PostgreSQL UTC çalışıyordu: kullanıcı 12:04'te
+  fatura keserken sunucu 09:04 görüp "3 saat ileri tarihli" diye reddediyordu
+  ("saati geri alırsam ekleniyor"). İki katman düzeltildi — `Cekirdek/Saat.cs`
+  UTC'den **kuruluş saat dilimine** (varsayılan Europe/Istanbul, ayar
+  `Kurulus:SaatDilimi`) çevirir ve `DateTime.Now` kullanan yerler buna geçti;
+  `db/129` veritabanı oturum dilimini Europe/Istanbul yapar (artık `now()`
+  yerel). Geçmiş damgalar dokunulmadan bırakıldı.
+- **Belge listelerinde tarih + saat**: fatura/irsaliye/sipariş/açık satır
+  listelerinde belge tarihi `dd.MM.yyyy HH:mm` biçiminde.
+- **Fatura Tipi** (`db/130`, kod listesi `belge.fatura_tipi`): fatura kartının
+  üst başlığında seçilir, `belge.tipi` alanında tutulur — 1 Alış/Satış · 2 İade ·
+  3 Fiyat Farkı · 4 S. Meslek Makbuzu · 5 Kur Farkı · 6 İthalat · 7 Kira ·
+  8 Gider Pusulası · 9 İhraç Kayıtlı · 22 Tevkifatlı · 24 KDV İstisna · 25 SGK ·
+  26 İhracat.
+
+Doğrulama: satış faturası kartında Fatura Tipi göründü, kalem girilip Kaydet'e
+basıldı — kart kapandı, listede kayıt **25.08.2026 12:55** (yerel saat) olarak
+göründü, `belge.tipi = 1` yazıldı. Test belgesi silindi.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).

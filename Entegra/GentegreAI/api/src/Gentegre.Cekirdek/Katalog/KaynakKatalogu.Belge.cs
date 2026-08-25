@@ -30,7 +30,7 @@ public static partial class KaynakKatalogu
             new("tipi",          "b.tipi",           "kod",   "Tipi",        Hizalama: "orta", Varsayilan: false),
             new("belgeSeri",     "b.belge_seri",     "metin", "Seri",        Varsayilan: false),
             new("belgeNo",       "b.belge_no",       "metin", "Belge No"),
-            new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",       Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",       Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm"),
             new("tarafId",       "b.taraf_id",       "sayi",  "Cari Id",     Varsayilan: false),
             new("tarafUnvan",    "b.taraf_unvan",    "metin", "Cari"),
             // KAYNAK / HEDEF: donusum zincirinin iki ucu (irsaliye listesindeki
@@ -103,7 +103,7 @@ public static partial class KaynakKatalogu
             //   satirda ayni kisaltmayi tekrarlamanin bilgi degeri de yoktu.
             new("tipi",          "b.tipi",           "sayi",  "Tip Kodu",  Hizalama: "orta", Varsayilan: false),
             new("belgeNo",       "b.belge_no",       "metin", "İrsaliye No"),
-            new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",     Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",     Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm"),
             new("tarafUnvan",    "b.taraf_unvan",    "metin", "Müşteri",   Genislik: 220),
             new("cikisDepo",     "cd.ad",            "metin", "Çıkış Deposu"),
             // KAYNAK / HEDEF: F8 donusum zincirinin iki ucu. Kaynak baslik bagindan
@@ -235,7 +235,7 @@ public static partial class KaynakKatalogu
             new("belgeTurAdi",     "a.belge_tur_adi",    "metin", "Belge Türü"),
             new("belgeTur",        "a.belge_tur",        "sayi",  "Tür Kodu", Hizalama: "orta", Varsayilan: false),
             new("belgeNo",         "a.belge_no",         "metin", "Belge No"),
-            new("belgeTarihi",     "a.belge_tarihi",     "tarih", "Tarih",    Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("belgeTarihi",     "a.belge_tarihi",     "tarih", "Tarih",    Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm"),
             new("tarafUnvan",      "a.taraf_unvan",      "metin", "Cari",     Genislik: 220),
             new("stokKodu",        "a.stok_kodu",        "metin", "Stok Kodu"),
             new("stokAdi",         "a.stok_adi",         "metin", "Stok",     Genislik: 240),
