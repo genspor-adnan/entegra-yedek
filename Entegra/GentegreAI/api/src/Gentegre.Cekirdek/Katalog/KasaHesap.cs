@@ -39,4 +39,12 @@ public static class KasaHesap
     public static bool YerelMi(string? dovizCinsi)
         => string.IsNullOrWhiteSpace(dovizCinsi) ||
            string.Equals(dovizCinsi.Trim(), YerelDoviz, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Cek/senet ile tahsilat-odeme turleri: 23 cek ile tahsilat, 24 senet ile
+    /// tahsilat, 33 cek ile odeme, 34 senet ile odeme. Bu turlerde islem bir
+    /// KIYMETIN el degistirmesidir - `cek_senet` kaydi olmadan bacak uretilemez
+    /// (076 motoru 422 verir).
+    /// </summary>
+    public static bool CekSenetTuru(int tur) => tur is 23 or 24 or 33 or 34;
 }

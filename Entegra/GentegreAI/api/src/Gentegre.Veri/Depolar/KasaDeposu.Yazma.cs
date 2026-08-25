@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Npgsql;
@@ -49,6 +50,90 @@ public sealed partial class KasaDeposu
 
         await using var komut = Komut(baglanti, tx, sql, parametreler);
         return Convert.ToInt32(await CalistirAsync(komut, iptal));
+    }
+
+    /// <summary>
+    /// CEK/SENET GIRISI (072): kiymetin kendisini acar ve kimligini doner.
+    ///
+    /// Tur ve yon ISLEM TURUNDEN turetilir - istemcinin ayrica gondermesi iki
+    /// dogruluk kaynagi olurdu: 23/33 cek, 24/34 senet; tahsilat ALINAN (yon 1),
+    /// odeme VERILEN (yon 2). Tutar/doviz/kur basliktan gelir; kiymetin tutari
+    /// islemin tutarindan farkli olamaz.
+    ///
+    /// Portfoy durumu 10 (portfoyde) baslar; alinan cek tahsile verilince ya da
+    /// ciro edilince kendi aksiyonlariyla ilerler (F5). Hareket gecmisine de
+    /// giris satiri (islem 130) yazilir - "bu kiymet nereden geldi" sorusunun
+    /// cevabi.
+    /// </summary>
+    private async Task<int> CekSenetEkleAsync(NpgsqlConnection baglanti, NpgsqlTransaction tx,
+        int tur, CekSenetGirisi giris, IDictionary<string, object?> islem,
+        YazmaBaglami baglam, CancellationToken iptal)
+    {
+        if (giris.Vade is not { } vade)
+            throw GentegreHatasi.Dogrulama("Çek/senet vadesi girilmeli.",
+                new AlanHatasi("cekSenet.vade", "Zorunlu."));
+
+        var tarafId = SayiNull(islem, "tarafId")
+            ?? throw GentegreHatasi.Dogrulama("Çek/senet işleminde cari zorunlu.",
+                   new AlanHatasi("tarafId", "Zorunlu."));
+
+        var kiymetTuru = tur is 24 or 34 ? 2 : 1;          // 1 cek, 2 senet
+        var yon        = tur is 33 or 34 ? 2 : 1;          // 1 alinan, 2 verilen
+        var tutar      = Ondalik(islem, "tutar");
+        var kur        = Ondalik(islem, "dovizKuru");
+        if (kur <= 0) kur = 1m;
+
+        await using var komut = Komut(baglanti, tx, """
+            insert into public.cek_senet
+                (tur, yon, durum, taraf_id, kesideci, tarih, vade, tutar,
+                 doviz_cinsi, doviz_kuru, yerel_tutar, seri_no, banka_adi,
+                 banka_subesi, hesap_no, proje_id, sube_id, aciklama, ekleyen)
+            values (@p0, @p1, 10, @p2, @p3, @p4, @p5, @p6,
+                    @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17)
+            returning id
+            """, new object?[]
+        {
+            (short)kiymetTuru, (short)yon, tarafId, Kirp(giris.Kesideci, 150),
+            giris.Tarih ?? Tarih(islem, "islemTarihi") ?? Saat.Bugun, vade, tutar,
+            Metin(islem, "dovizCinsi") is { Length: > 0 } d ? d : KasaHesap.YerelDoviz,
+            kur, KasaHesap.YerelTutar(tutar, kur), Kirp(giris.SeriNo, 30),
+            Kirp(giris.BankaAdi, 60), Kirp(giris.BankaSubesi, 60), Kirp(giris.HesapNo, 30),
+            SayiNull(islem, "projeId"), baglam.SubeId ?? 0, Kirp(giris.Aciklama, 200),
+            baglam.KullaniciId,
+        });
+
+        return Convert.ToInt32(await CalistirAsync(komut, iptal));
+    }
+
+    /// <summary>Kiymetin gecmisine GIRIS satiri (islem 130) + kasa islem bagi.</summary>
+    private static async Task CekSenetBaglaAsync(NpgsqlConnection baglanti, NpgsqlTransaction tx,
+        int cekSenetId, int kasaIslemId, IDictionary<string, object?> islem,
+        YazmaBaglami baglam, CancellationToken iptal)
+    {
+        await using (var komut = new NpgsqlCommand(
+            "update public.cek_senet set giris_kasa_islem_id = @p1 where id = @p0", baglanti, tx))
+        {
+            komut.Parameters.AddWithValue("p0", cekSenetId);
+            komut.Parameters.AddWithValue("p1", kasaIslemId);
+            await komut.ExecuteNonQueryAsync(iptal);
+        }
+
+        await using (var komut = new NpgsqlCommand("""
+            insert into public.cek_senet_hareket
+                (cek_senet_id, islem, tarih, eski_durum, yeni_durum, taraf_id,
+                 kasa_islem_id, aciklama, ekleyen)
+            values (@p0, 130, @p1, 0, 10, @p2, @p3, 'Portföye giriş', @p4)
+            """, baglanti, tx))
+        {
+            komut.Parameters.AddWithValue("p0", cekSenetId);
+            komut.Parameters.AddWithValue("p1",
+                Tarih(islem, "islemTarihi") ?? Saat.Bugun);
+            komut.Parameters.AddWithValue("p2",
+                (object?)SayiNull(islem, "tarafId") ?? DBNull.Value);
+            komut.Parameters.AddWithValue("p3", kasaIslemId);
+            komut.Parameters.AddWithValue("p4", baglam.KullaniciId);
+            await komut.ExecuteNonQueryAsync(iptal);
+        }
     }
 
     private async Task BaslikGuncelleAsync(NpgsqlConnection baglanti, NpgsqlTransaction tx,

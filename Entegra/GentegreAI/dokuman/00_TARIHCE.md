@@ -3137,5 +3137,39 @@ bakiye 2.040,00; aynı cariye kesilen irsaliye ekstrede görünmüyor.
 Ayrıca: belge kartlarındaki **Taslak kutusu kaldırıldı** (kaydedilen belge
 kesindir), kalem gridinde **Miktar / İskonto / KDV kolonları daraltıldı**.
 
-**Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
-(giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).
+### Çek / senet ile tahsilat-ödeme + tahsilat kartının sadeleşmesi
+
+Belgenin Tahsilat sekmesinde tek pasif "Çek/Senet Al" düğmesi vardı; kullanıcı
+**iki ayrı düğme** istedi (Çek · Senet). Türler katalogda zaten duruyordu
+(23/24 tahsilat, 33/34 ödeme) ama bağlamak yetmedi — motor çek/senet bacağı için
+`cek_senet_id` istiyor, kıymeti açan bir yol yoktu:
+
+- **Sözleşme** `CekSenetGirisi` (vade zorunlu, seri no, keşideci, banka/şube).
+  Tür ve yön **işlem türünden türetilir** — istemcinin ayrıca göndermesi ikinci
+  bir doğruluk kaynağı olurdu: 23/33 çek, 24/34 senet; tahsilat *alınan* (1),
+  ödeme *verilen* (2).
+- `KasaDeposu`: kıymet **başlıktan önce** açılır (motor bacak üretirken hazır
+  olmalı), `cek_senet_id` başlığa bağlanır, geçmişe giriş satırı (`islem 130`)
+  yazılır — hepsi aynı transaction'da. Kıymetsiz gelen çek/senet türü erken ve
+  okunur biter.
+- `db/138`: **çözücüde çek/senet dalı yoktu.** Eşleştirme kuralları 074'te
+  seed'liydi (alınan çek 101, verilen çek 103, alacak senedi 121, borç senedi
+  321) ama `fn_muh_hesap_coz` onları hiç sorgulamıyordu; çek ile tahsilat
+  *"Muhasebe eşlemesi bulunamadı (hesap türü E, rol ceksenet)"* ile
+  kesinleşemiyordu. Dal, kıymetin tür/yönünü okuyacak şekilde eklendi.
+
+Doğrulama (DB, geri alındı): 1.500 TL çek ile tahsilat → bacaklar `E` borç /
+`C` alacak, fiş **101 ALINAN ÇEKLER 1.500 B / 120.3861 MEHMET AKYÜZ 1.500 A**.
+
+Kasa/tahsilat kartı kullanıcı isteğiyle sadeleşti:
+- **Tür şeridi kalktı** — türü kartı açan düğme belirliyor (Nakit/Banka/POS/
+  Çek/Senet) ve pencere başlığında yazılı.
+- **Başlık fatura kartıyla aynı düzende**: 4 sütun — Cari · Tutar (+ para
+  birimi) · Tahsil Hesabı · İşlem Tarihi. Çek/senette hesap sorulmaz (kıymet
+  portföye girer), yerine vade/no/keşideci/banka gelir.
+- **Hareket Bacakları bölümü kalktı** — fiş önizlemesi aynı bilgiyi hesap
+  adlarıyla zaten gösteriyor.
+- **Taslak Kaydet kalktı**, "Kaydet ve Kesinleştir" → **Kaydet**.
+
+**Sırada:** F4 kapatma + kur farkı, F5 çek/senet portföy aksiyonları (tahsile
+ver, ciro, karşılıksız), F6 kredi/kupon, F7 belge fişleme.

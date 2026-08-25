@@ -7,7 +7,6 @@ import {
 } from '../api/sozlesme';
 import { GenLookup } from '../bilesenler/GenLookup';
 import { TarafSecici } from '../bilesenler/TarafArama';
-import { BacakListesi } from '../bilesenler/kasa/BacakSatiri';
 import { FisOnizleme } from '../bilesenler/kasa/FisOnizleme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { Modal } from '../bilesenler/GenForm';
@@ -109,6 +108,14 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const [proje, setProje] = useState<{ id: number; ad: string } | null>(null);
   const [aciklama, setAciklama] = useState('');
 
+  // Cek / senet (23/24/33/34): kiymetin kendisi. Vade ZORUNLU - portfoyun ve
+  //   vade raporunun tasiyicisi odur; digerleri kiymetin uzerindeki bilgiler.
+  const [csVade, setCsVade] = useState('');
+  const [csSeriNo, setCsSeriNo] = useState('');
+  const [csKesideci, setCsKesideci] = useState('');
+  const [csBanka, setCsBanka] = useState('');
+  const [csSube, setCsSube] = useState('');
+
   // Plan gerceklestirme paneli
   const [gHesap, setGHesap] = useState<HesapSecimi | null>(null);
   const [gTutar, setGTutar] = useState('');
@@ -127,6 +134,11 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const karsiHesapli = grup === 'virman' || grup === 'doviz';
   const donusum = grup === 'doviz';
   const cariVirman = tur === 49;
+  /** Cek/senet ile tahsilat-odeme: kiymet kaydi da acilir (23/24 al, 33/34 ver). */
+  const cekSenetMi = tur === 23 || tur === 24 || tur === 33 || tur === 34;
+  const senetMi = tur === 24 || tur === 34;
+  // Cek/senette hesap SECILMEZ: kiymet portfoye girer (sanal hesap), para
+  //   bankaya ancak tahsil edilince gecer. Doviz o yuzden basliktan gelir.
   const anaDoviz = hesap?.doviz ?? (planMi ? 'TL' : 'TL');
   const dovizli = anaDoviz !== 'TL';
   const ekleyebilir = yetki('kasa_islem', 'ekle');
@@ -210,6 +222,19 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
         projeId: proje?.id ?? null,
         aciklama,
       },
+      // Cek/senet turlerinde kiymetin kendisi de gonderilir: sunucu once
+      //   cek_senet kaydini acar, kimligini basliga baglar (tek cagri).
+      ...(cekSenetMi ? {
+        cekSenet: {
+          vade: csVade || null,
+          tarih: tarih,
+          seriNo: csSeriNo,
+          kesideci: csKesideci || cari?.unvan || '',
+          bankaAdi: senetMi ? '' : csBanka,
+          bankaSubesi: senetMi ? '' : csSube,
+          aciklama,
+        },
+      } : {}),
       // belgeId: tahsilat bu belgeyi kapatir (kasa_islem.belge_id) - belge
       //   kartinin Tahsilat sekmesi bu bagla listeliyor.
       secenekler: { taslak, plan, kurKontrolu: true,
@@ -222,7 +247,8 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     setAlanHatalari({});
 
     const hatalar: Record<string, string> = {};
-    if (!planMi && !cariVirman && !hesap) hatalar.hesapId = 'Hesap seçilmeli.';
+    if (!planMi && !cariVirman && !cekSenetMi && !hesap) hatalar.hesapId = 'Hesap seçilmeli.';
+    if (cekSenetMi && !csVade) hatalar['cekSenet.vade'] = 'Vade zorunlu.';
     if (karsiHesapli && !karsiHesap) hatalar.karsiHesapId = 'Karşı hesap seçilmeli.';
     if (cariVirman && !karsiCari) hatalar.karsiTarafId = 'Karşı cari seçilmeli.';
     if (sayi(tutar) <= 0) hatalar.tutar = 'Sıfırdan büyük olmalı.';
@@ -290,7 +316,6 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   if (!ekleyebilir && kayitId === null)
     return <div className="sahne"><div className="hata-kutusu">Kasa işlemi ekleme yetkiniz yok.</div></div>;
 
-  const gruptakiTurler = turler.filter(t => t.grup === grup);
   const anaEtiket = grup === 'odeme' ? 'Ödenen Hesap'
                   : grup === 'virman' || grup === 'doviz' ? 'Kaynak Hesap'
                   : 'Tahsil Edilen Hesap';
@@ -303,19 +328,17 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
               : <button className="d" onClick={() => git(planMi ? '/plan-vade' : '/kasa-islem')}>
                   Listeye Dön
                 </button>}
+            {/* TASLAK KAYDET KALKTI (kullanici): kasa islemi kaydedilince
+                kesindir - belge kartindaki kuralla ayni. Taslak (durum 0)
+                sunucuda duruyor, gocten gelen kayitlar ve API icin. */}
             {!kilitli && durum !== 1 && (
-              <>
-                <button className="d" disabled={calisiyor} onClick={() => void kaydet(true, false)}>
-                  Taslak Kaydet
-                </button>
-                {planMi
-                  ? <button className="d bir" disabled={calisiyor} onClick={() => void kaydet(false, true)}>
-                      {calisiyor ? 'Kaydediliyor…' : 'Planı Kaydet'}
-                    </button>
-                  : <button className="d bir" disabled={calisiyor} onClick={() => void kaydet(false, false)}>
-                      {calisiyor ? 'Kaydediliyor…' : 'Kaydet ve Kesinleştir'}
-                    </button>}
-              </>
+              planMi
+                ? <button className="d bir" disabled={calisiyor} onClick={() => void kaydet(false, true)}>
+                    {calisiyor ? 'Kaydediliyor…' : 'Planı Kaydet'}
+                  </button>
+                : <button className="d bir" disabled={calisiyor} onClick={() => void kaydet(false, false)}>
+                    {calisiyor ? 'Kaydediliyor…' : 'Kaydet'}
+                  </button>
             )}
             {kayitId !== null && durum === 0 && (
               <button className="d bir" disabled={calisiyor} onClick={() => void kesinlestir()}>
@@ -338,79 +361,14 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
         ) : null}
 
         <div className="kutu" style={{ padding: 14 }}>
-          {/* Tur seridi: yalniz AKTIF GRUP. Kaydedildikten sonra tur degistirilemez -
-              bacak sablonu ve fis buna baglidir. */}
-          <div className="kagrup">
-            <h6>{GRUP_ADI[grup] ?? grup} Türü</h6>
-            <div className="cip-serit">
-              {gruptakiTurler.map(t => (
-                <button
-                  key={t.kod}
-                  type="button"
-                  className={`cip ${t.kod === tur ? 'secili' : ''}`}
-                  disabled={sonuc !== null}
-                  onClick={() => setTur(t.kod)}
-                >
-                  {t.ad}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* TUR SERIDI KALKTI (kullanici): islem turu zaten bu karti acan
+              dugmeden gelir (Nakit / Banka / POS / Çek / Senet) ve pencere
+              basliginda yazili; kartta ikinci kez sormak gereksizdi. */}
 
-          <div className="kagrup">
-            <h6>Bilgiler</h6>
-            <div className="alan-izgara">
-              <label className="alan">
-                <span className="etiket">İşlem Tarihi</span>
-                <input type="date" value={tarih} disabled={kilitli}
-                       onChange={e => setTarih(e.target.value)} />
-              </label>
-
-              {planMi && (
-                <label className="alan">
-                  <span className="etiket">Vade *</span>
-                  <input type="date" value={planTarihi} disabled={kilitli || durum === 1}
-                         onChange={e => setPlanTarihi(e.target.value)} />
-                  {alanHatalari.planTarihi && <span className="alan-hata">{alanHatalari.planTarihi}</span>}
-                </label>
-              )}
-
-              {!planMi && !cariVirman && (
-                <GenLookup
-                  kaynak="hesap"
-                  etiket={anaEtiket}
-                  zorunlu
-                  alanlar={LOOKUP_HESAP}
-                  sabitFiltre={secili?.anaHesapTuru
-                    ? { alan: 'tur', op: 'esit', deger: secili.anaHesapTuru }
-                    : undefined}
-                  deger={hesap?.ad}
-                  hata={alanHatalari.hesapId}
-                  saltOkunur={kilitli}
-                  onSec={(s: ListeSatiri | null) => setHesap(s ? {
-                    id: Number(s.id), ad: String(s.ad ?? ''), doviz: String(s.dovizCinsi ?? 'TL'),
-                  } : null)}
-                />
-              )}
-
-              {karsiHesapli && (
-                <GenLookup
-                  kaynak="hesap"
-                  etiket="Hedef Hesap"
-                  zorunlu
-                  alanlar={LOOKUP_HESAP}
-                  sabitFiltre={secili?.karsiHesapTuru
-                    ? { alan: 'tur', op: 'esit', deger: secili.karsiHesapTuru }
-                    : undefined}
-                  deger={karsiHesap?.ad}
-                  hata={alanHatalari.karsiHesapId}
-                  saltOkunur={kilitli}
-                  onSec={s => setKarsiHesap(s ? {
-                    id: Number(s.id), ad: String(s.ad ?? ''), doviz: String(s.dovizCinsi ?? 'TL'),
-                  } : null)}
-                />
-              )}
-
+          {/* BASLIK - fatura kartiyla AYNI duzen (kullanici): 4 sutunlu izgara,
+              sirasiyla Cari · Tutar (+ para birimi) · Tahsil Hesabi · Islem
+              Tarihi. Kalan alanlar (masraf, proje, aciklama) altta akar. */}
+          <div className="alan-izgara dort-sutun belge-hdr">
               {secili?.cariZorunlu !== -1 && (
                 <TarafSecici
                   etiket={cariVirman ? 'Kaynak Cari' : 'Cari'}
@@ -437,14 +395,112 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                 />
               )}
 
+              {/* Tutar ve PARA BIRIMI yan yana: para birimi hesabin dovizidir,
+                  hesap secilince kilitlenir - kasa TL ise USD tahsilat olamaz. */}
               <label className="alan">
-                <span className="etiket">
-                  {donusum ? `Verilen Tutar (${anaDoviz})` : `Tutar${dovizli ? ` (${anaDoviz})` : ''}`}
+                <span className="etiket zorunlu-isaret">
+                  {donusum ? 'Verilen Tutar' : 'Tutar'}
                 </span>
-                <input className="hiza-sag" value={tutar} disabled={kilitli}
-                       onChange={e => setTutar(e.target.value)} />
+                <span className="ikili">
+                  <input className="hiza-sag" value={tutar} disabled={kilitli}
+                         onChange={e => setTutar(e.target.value)} />
+                  <input className="birim" value={anaDoviz} readOnly
+                         title="Para birimi hesaptan gelir" />
+                </span>
                 {alanHatalari.tutar && <span className="alan-hata">{alanHatalari.tutar}</span>}
               </label>
+
+              {!planMi && !cariVirman && !cekSenetMi && (
+                <GenLookup
+                  kaynak="hesap"
+                  etiket={anaEtiket}
+                  zorunlu
+                  alanlar={LOOKUP_HESAP}
+                  sabitFiltre={secili?.anaHesapTuru
+                    ? { alan: 'tur', op: 'esit', deger: secili.anaHesapTuru }
+                    : undefined}
+                  deger={hesap?.ad}
+                  hata={alanHatalari.hesapId}
+                  saltOkunur={kilitli}
+                  onSec={(s: ListeSatiri | null) => setHesap(s ? {
+                    id: Number(s.id), ad: String(s.ad ?? ''), doviz: String(s.dovizCinsi ?? 'TL'),
+                  } : null)}
+                />
+              )}
+
+              <label className="alan">
+                <span className="etiket">İşlem Tarihi</span>
+                <input type="date" value={tarih} disabled={kilitli}
+                       onChange={e => setTarih(e.target.value)} />
+              </label>
+
+              {karsiHesapli && (
+                <GenLookup
+                  kaynak="hesap"
+                  etiket="Hedef Hesap"
+                  zorunlu
+                  alanlar={LOOKUP_HESAP}
+                  sabitFiltre={secili?.karsiHesapTuru
+                    ? { alan: 'tur', op: 'esit', deger: secili.karsiHesapTuru }
+                    : undefined}
+                  deger={karsiHesap?.ad}
+                  hata={alanHatalari.karsiHesapId}
+                  saltOkunur={kilitli}
+                  onSec={s => setKarsiHesap(s ? {
+                    id: Number(s.id), ad: String(s.ad ?? ''), doviz: String(s.dovizCinsi ?? 'TL'),
+                  } : null)}
+                />
+              )}
+
+              {/* CEK / SENET (23/24/33/34): kiymetin kendisi. Vade zorunlu -
+                  portfoy ve vade raporlarinin tasiyicisi odur. */}
+              {cekSenetMi && (
+                <>
+                  <label className="alan">
+                    <span className="etiket zorunlu-isaret">Vade</span>
+                    <input type="date" value={csVade} disabled={kilitli}
+                           onChange={e => setCsVade(e.target.value)} />
+                    {alanHatalari['cekSenet.vade'] && (
+                      <span className="alan-hata">{alanHatalari['cekSenet.vade']}</span>
+                    )}
+                  </label>
+                  <label className="alan">
+                    <span className="etiket">{senetMi ? 'Senet No' : 'Çek No'}</span>
+                    <input value={csSeriNo} maxLength={30} disabled={kilitli}
+                           onChange={e => setCsSeriNo(e.target.value)} />
+                  </label>
+                  <label className="alan">
+                    <span className="etiket">Keşideci</span>
+                    <input value={csKesideci} maxLength={150} disabled={kilitli}
+                           placeholder={cari?.unvan ?? ''}
+                           onChange={e => setCsKesideci(e.target.value)} />
+                  </label>
+                  {!senetMi && (
+                    <label className="alan">
+                      <span className="etiket">Banka / Şube</span>
+                      <span className="ikili">
+                        <input value={csBanka} maxLength={60} disabled={kilitli}
+                               placeholder="Banka" onChange={e => setCsBanka(e.target.value)} />
+                        <input value={csSube} maxLength={60} disabled={kilitli}
+                               placeholder="Şube" onChange={e => setCsSube(e.target.value)} />
+                      </span>
+                    </label>
+                  )}
+                </>
+              )}
+          </div>
+
+          <div className="kagrup">
+            <h6>Bilgiler</h6>
+            <div className="alan-izgara">
+              {planMi && (
+                <label className="alan">
+                  <span className="etiket">Vade *</span>
+                  <input type="date" value={planTarihi} disabled={kilitli || durum === 1}
+                         onChange={e => setPlanTarihi(e.target.value)} />
+                  {alanHatalari.planTarihi && <span className="alan-hata">{alanHatalari.planTarihi}</span>}
+                </label>
+              )}
 
               {dovizli && (
                 <>
@@ -556,17 +612,14 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
             </div>
           )}
 
-          {/* Bacaklar: sunucunun urettigi muhasebe kaydinin ham hali. */}
-          <div className="kagrup">
-            <h6>Hareket Bacakları</h6>
-            <BacakListesi bacaklar={sonuc?.bacaklar ?? []} dovizCinsi={anaDoviz} />
-          </div>
-
+          {/* HAREKET BACAKLARI BOLUMU KALKTI (kullanici): muhasebe kaydinin ham
+              hali gunluk tahsilat ekraninda yer kapliyordu. Fis onizlemesi
+              (asagida) zaten ayni bilgiyi hesap adlariyla gosteriyor. */}
           {sonuc?.fis && <FisOnizleme fis={sonuc.fis} />}
 
           {!kilitli && (
             <div className="not">
-              Bacaklar ve muhasebe fişi sunucuda işlem türünün şablonundan üretilir;
+              Muhasebe kaydı sunucuda işlem türünün şablonundan üretilir;
               buradaki TL karşılığı yalnızca önizlemedir.
               {donusum && ' Verilen ve alınan tutarın TL karşılığı tutmazsa fark kambiyo kâr/zararı olarak yazılır.'}
             </div>

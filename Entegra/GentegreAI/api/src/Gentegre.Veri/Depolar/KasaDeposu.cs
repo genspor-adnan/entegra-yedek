@@ -41,7 +41,8 @@ public sealed partial class KasaDeposu
         List<Dictionary<string, JsonElement>>? bacaklar,
         KasaSecenekleri secenekler,
         YazmaBaglami baglam,
-        CancellationToken iptal = default)
+        CancellationToken iptal = default,
+        CekSenetGirisi? cekSenet = null)
     {
         var uyarilar = new List<string>();
 
@@ -66,7 +67,25 @@ public sealed partial class KasaDeposu
         islem["islemNo"] = "";
         if (secenekler.BelgeId is { } bId) islem["belgeId"] = bId;
 
+        // CEK/SENET: kiymet basliktan ONCE acilir - motor bacagi uretirken
+        //   cek_senet_id'yi hazir bulmali (yoksa 422 "kiymet secilmeli").
+        //   Plan/taslak dahil her durumda acilir: plan da belirli bir cekin
+        //   vadesidir. Kiymetsiz gelen cek/senet turu erken ve okunur biter.
+        var cekSenetId = 0;
+        if (KasaHesap.CekSenetTuru(tur))
+        {
+            if (cekSenet is null)
+                throw GentegreHatasi.Dogrulama(
+                    "Çek/senet bilgileri girilmeli (vade zorunlu).",
+                    new AlanHatasi("cekSenet", "Zorunlu."));
+            cekSenetId = await CekSenetEkleAsync(baglanti, tx, tur, cekSenet, islem, baglam, iptal);
+            islem["cekSenetId"] = cekSenetId;
+        }
+
         var id = await BaslikEkleAsync(baglanti, tx, islem, baglam, iptal);
+
+        if (cekSenetId > 0)
+            await CekSenetBaglaAsync(baglanti, tx, cekSenetId, id, islem, baglam, iptal);
 
         // Bacaklar: istemci vermediyse sablondan uretilir (normal akis).
         if (bacaklar is { Count: > 0 })

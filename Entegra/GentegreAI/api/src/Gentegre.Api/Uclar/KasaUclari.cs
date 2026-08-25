@@ -62,7 +62,8 @@ public static class KasaUclari
 
             var (id, uyarilar) = await depo.KaydetAsync(
                 BaslikDegerleri(istek.Islem), istek.Bacaklar, istek.Secenekler,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal,
+                istek.CekSenet);
 
             var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
             kayit.Uyarilar = uyarilar;

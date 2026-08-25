@@ -19,7 +19,33 @@ public sealed class KasaIslemYazmaIstegi
     public string? Surum { get; set; }
     public Dictionary<string, JsonElement>? Islem { get; set; }
     public List<Dictionary<string, JsonElement>>? Bacaklar { get; set; }
+    /// <summary>
+    /// Cek/senet ile tahsilat-odemede (23/24/33/34) kiymetin KENDISI. Motor
+    /// bacagi portfoy sanal hesabina yazar ve `cek_senet_id` ister; kayit
+    /// yoksa 422 doner. Sunucu bu nesneden cek_senet satirini acar, kimligini
+    /// basliga baglar - istemci iki ayri cagri yapmaz (kiymetsiz kasa islemi
+    /// ya da islemsiz kiymet olusamaz).
+    /// </summary>
+    public CekSenetGirisi? CekSenet { get; set; }
     public KasaSecenekleri Secenekler { get; set; } = new();
+}
+
+/// <summary>
+/// Cek/senet girisi (072 semasi). `Tur` ve `Yon` GONDERILMEZ: islem turunden
+/// turetilir - 23/33 cek, 24/34 senet; tahsilat ALINAN (1), odeme VERILEN (2).
+/// </summary>
+public sealed class CekSenetGirisi
+{
+    /// <summary>Vade - cek/senedin odenecegi gun (zorunlu).</summary>
+    public DateTime? Vade { get; set; }
+    /// <summary>Kiymetin uzerindeki tarih; bos ise islem tarihi kullanilir.</summary>
+    public DateTime? Tarih { get; set; }
+    public string SeriNo { get; set; } = "";
+    public string Kesideci { get; set; } = "";
+    public string BankaAdi { get; set; } = "";
+    public string BankaSubesi { get; set; } = "";
+    public string HesapNo { get; set; } = "";
+    public string Aciklama { get; set; } = "";
 }
 
 public sealed class KasaSecenekleri

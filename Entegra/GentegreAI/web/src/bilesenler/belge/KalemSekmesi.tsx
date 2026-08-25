@@ -475,7 +475,18 @@ return (
               onClick={() => void tahsilatAc(alisMi ? 35 : 25)}>
         💳 POS
       </button>
-      <button className="d" disabled title="Çek/senet girişi F5'te bağlanacak">🧾 Çek/Senet Al</button>
+      {/* CEK ve SENET ayri dugme (kullanici): ikisi ayri kasa islem turu
+          (23/24 tahsilat, 33/34 odeme) ve portfoyde ayri izlenir. */}
+      <button className="d bir"
+              title={`Çek ile ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç`}
+              onClick={() => void tahsilatAc(alisMi ? 33 : 23)}>
+        🧾 Çek
+      </button>
+      <button className="d bir"
+              title={`Senet ile ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç`}
+              onClick={() => void tahsilatAc(alisMi ? 34 : 24)}>
+        📜 Senet
+      </button>
     </div>
     <table className="detay-tablo">
       <thead>
