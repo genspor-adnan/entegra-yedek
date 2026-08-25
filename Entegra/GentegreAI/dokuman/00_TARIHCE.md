@@ -2707,5 +2707,22 @@ Doğrulama: `dotnet build` ve `tsc -b` + prod derleme temiz; stok kartı (grupla
 ikili onay kutuları, raf ömrü ikilisi) ve kişi kartı (Bağlı Cari salt-okunur
 render, telefon kutuları, adres) ekrandan açılıp kontrol edildi.
 
+### Refaktör: kart kataloğu ve belge deposu partial dosyalara
+
+- **`KartKatalogu.cs` 1241 → 167 satır.** 30 sabit kod listesi `.Kodlar.cs`'e;
+  kart tanımları `.Cari` (cari/kişi/personel/hasta/rol), `.Stok` (stok/depo),
+  `.Kasa` (hesap/banka/çek-senet/proje/görev/fırsat/masraf merkezi/hesap planı)
+  dosyalarına.
+- **`BelgeDeposu.cs` 1536 → 627 satır.** Kaydetme akışı (`KaydetIcAsync`,
+  `DonusturAsync`, okuma, dip toplam, doğrulamalar) ana dosyada kaldı; tek tek
+  yazma adımları `.Yazma.cs`'e (başlık/satır/toplam/numara/cari hareket), stok
+  ve lot işleri `.Izlem.cs`'e, tip dönüşümleri `.Deger.cs`'e ayrıldı.
+
+Doğrulama: üye üye karşılaştırma — KartKatalogu 53/53, BelgeDeposu 41/41 üye,
+kod gövdelerinde fark yok. `dotnet build` temiz. Uçtan: 15 kartın alan metası
+geliyor; satış faturası taslak (240,00 önizleme) ve kesin kayıt (numara verildi,
+stok 258,93 → 256,93, cari borç 240 TL) çalıştı — test belgeleri ve stok etkisi
+geri alındı.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).
