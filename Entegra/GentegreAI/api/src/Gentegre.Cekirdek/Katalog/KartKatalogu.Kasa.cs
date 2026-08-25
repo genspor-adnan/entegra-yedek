@@ -129,9 +129,16 @@ public static partial class KartKatalogu
             // TUR kimlik seridinde DEGIL (kullanici karari): kagidin cek mi senet mi
             //   oldugu zaten hangi listeden gelindigiyle belli - seride kimin
             //   kagidi oldugu (CARI) daha degerli. Alan yine var, "Genel"de.
+            // KIMLIK SERIDI (kullanici sirasi): Cari . Tutar . Para Birimi . Vade -
+            //   "kimin kagidi, ne kadar, ne zaman" bir bakista okunsun.
             new("tarafId",       "taraf_id",        "kod",   KodTablosu: "public.v_cari_lookup", Baslik: "Cari", Grup: "Kimlik"),
-            new("yon",           "yon",             "kod",   Zorunlu: true, SabitKodlar: CekSenetYonKodlari, Baslik: "Yön", Grup: "Kimlik"),
-            new("seriNo",        "seri_no",         "metin", EnFazlaUzunluk: 30, Baslik: "Seri No", Grup: "Kimlik"),
+            new("tutar",         "tutar",           "para",  Zorunlu: true, Baslik: "Tutar", Grup: "Kimlik", EslesAlan: "dovizCinsi"),
+            new("dovizCinsi",    "doviz_cinsi",     "kod",   SabitKodlar: DovizKodlari, Baslik: "Para Birimi", Grup: "Kimlik"),
+            new("vade",          "vade",            "tarih", Zorunlu: true, Baslik: "Vade", Grup: "Kimlik"),
+            // YON arac cubugunda, Kaydet'in saginda (kullanici) - kagidin alinan
+            //   mi verilen mi oldugu tek secim, seritte yer kaplamasin. Alan
+            //   burada GIZLI: degeri yine kaydedilir.
+            new("yon",           "yon",             "kod",   Zorunlu: true, SabitKodlar: CekSenetYonKodlari, Baslik: "Yön", Gizli: true),
             new("durum",         "durum",           "kod",   Yazilabilir: false, SabitKodlar: CekSenetDurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
             // Tür ARKA PLANDA: hangi listeden gelindiyse o deger yazilir (Cek/Senet
             //   listesi varsayilani), ekranda hic gorunmez.
@@ -139,9 +146,6 @@ public static partial class KartKatalogu
             new("kesideci",      "kesideci",        "metin", EnFazlaUzunluk: 150, Baslik: "Keşideci", Grup: "Genel", AltGrup: "Taraf"),
             new("ciroTarafId",   "ciro_taraf_id",   "kod",   Yazilabilir: false, KodTablosu: "public.v_cari_lookup", Baslik: "Ciro Edilen", Grup: "Genel", AltGrup: "Taraf"),
             new("tarih",         "tarih",           "tarih", Zorunlu: true, Baslik: "Tarih", Grup: "Genel", AltGrup: "Tutar / Vade"),
-            new("vade",          "vade",            "tarih", Zorunlu: true, Baslik: "Vade", Grup: "Genel", AltGrup: "Tutar / Vade"),
-            new("tutar",         "tutar",           "para",  Zorunlu: true, Baslik: "Tutar", Grup: "Genel", AltGrup: "Tutar / Vade"),
-            new("dovizCinsi",    "doviz_cinsi",     "kod",   SabitKodlar: DovizKodlari, Baslik: "Para Birimi", Grup: "Genel", AltGrup: "Tutar / Vade"),
             new("dovizKuru",     "doviz_kuru",      "para",  Baslik: "Kur", Grup: "Genel", AltGrup: "Tutar / Vade"),
             // Yerel karsilik SUNUCUDA hesaplanir (tutar x kur) - kullanici
             //   yazamaz; yoksa kurla tutarsiz bir yerel tutar kaydedilebilirdi.
@@ -150,6 +154,9 @@ public static partial class KartKatalogu
             new("bankaSubeId",   "banka_sube_id",   "kod",   KodTablosu: "public.v_banka_sube_lookup", BagliAlan: "bankaId", Baslik: "Şube", Grup: "Genel", AltGrup: "Banka"),
             new("hesapNo",       "hesap_no",        "metin", EnFazlaUzunluk: 30, Baslik: "Hesap No", Grup: "Genel", AltGrup: "Banka"),
             new("hesapId",       "hesap_id",        "kod",   Yazilabilir: false, KodTablosu: "public.v_hesap_lookup", Baslik: "Bulunduğu Hesap", Grup: "Genel", AltGrup: "Banka"),
+            // Seri No "Diğer"de (kullanici): kagidin uzerindeki numara kimlik
+            //   seridinde degil, ayrinti bolumunde okunuyor.
+            new("seriNo",        "seri_no",         "metin", EnFazlaUzunluk: 30, Baslik: "Seri No", Grup: "Genel", AltGrup: "Diğer"),
             new("projeId",       "proje_id",        "kod",   KodTablosu: "public.v_proje_lookup", Baslik: "Proje", Grup: "Genel", AltGrup: "Diğer"),
             new("makbuzNo",      "makbuz_no",       "metin", EnFazlaUzunluk: 30, Baslik: "Makbuz No", Grup: "Genel", AltGrup: "Diğer"),
             new("aciklama",      "aciklama",        "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama", Grup: "Genel", AltGrup: "Diğer"),

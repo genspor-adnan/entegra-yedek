@@ -515,6 +515,20 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
           {kaynak === 'kisi' && !salt && !cariyeBaglaGizli && !deger.bagId && (
             <button className="d" onClick={() => setCariyeBaglaAcik(true)}>🔗 Cariye Bağla</button>
           )}
+          {/* Cek/senede ozel: YON (alinan / verilen) arac cubugunda, Kaydet'in
+              saginda (kullanici). Tek secimlik ve kagidin tum anlamini
+              belirleyen alan - kimlik seridinde yer kaplamasin diye buraya
+              alindi; karttaki alan Gizli, deger buradan yazilir. */}
+          {kaynak === 'cek-senet' && meta.alanlar.some(a => a.ad === 'yon') && (
+            <label className="satir-ici" title="Alınan: müşteriden geldi · Verilen: tedarikçiye verildi">
+              Yön
+              <select value={String(deger.yon ?? 1)} disabled={salt} style={{ width: 110 }}
+                      onChange={e => setDeger(d => ({ ...d, yon: Number(e.target.value) }))}>
+                <option value={1}>Alınan</option>
+                <option value={2}>Verilen</option>
+              </select>
+            </label>
+          )}
           <button className="d kapat-dugmesi" onClick={kapatIstendi}>Kapat</button>
           {/* Cari'ye ozel: Musteri/Tedarikci rolleri hizlı erisim icin arac cubuguna,
               Kaydet/Sil ile ayni satira, saga yanasik olarak da tasindi (Roller sekmesindeki
