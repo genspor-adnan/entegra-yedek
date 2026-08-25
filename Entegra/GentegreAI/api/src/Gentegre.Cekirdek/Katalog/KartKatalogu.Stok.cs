@@ -37,6 +37,17 @@ public static partial class KartKatalogu
             //   basilacak ad vergi/birim bilgileriyle birlikte okunuyor.
             new("faturaStokAdi", "fatura_stok_adi", "metin", EnFazlaUzunluk: 200,
                                                      Baslik: "Faturadaki Ad", AltGrup: "Vergi & Ana Birim"),
+            // SATILIR / ALINIR (141) "Diğer" bolumunun EN USTUNDE (kullanici):
+            //   stogun hangi belge yonunde ARANABILECEGINI belirler - kendi
+            //   urettigimiz mamul alis siparisinde, satin alinan ambalaj satis
+            //   faturasinda listelenmesin. Ikisi de varsayilan ISARETLI.
+            new("satilan",       "satilan",         "mantik", Baslik: "Satılan", AltGrup: "Diğer",
+                                                     EslesAlan: "alinan"),
+            new("alinan",        "alinan",          "mantik", Baslik: "Alınan", AltGrup: "Diğer"),
+            // Kiralik/demirbas gibi geri donup TEKRAR cikabilen kiymet; normal
+            //   ticari mal tuketilir, o yuzden varsayilan isaretsiz.
+            new("yenidenKullanilir", "yeniden_kullanilir", "mantik",
+                                                     Baslik: "Yeniden Kullanılabilir", AltGrup: "Diğer"),
             new("internetSatis", "internet_satis",  "mantik", Baslik: "İnternet Satış", AltGrup: "Diğer",
                                                      EslesAlan: "paket"),
             // PAKET (124): isaretlenince kartta "Paket" sekmesi acilir, icerik
@@ -52,16 +63,6 @@ public static partial class KartKatalogu
             //   ayni urunun ana depodaki ve konsinye depodaki esigi ayni olmaz.
             //   Kolon veri olarak duruyor; eski degerler panel kritik listesinde
             //   depo esigi tanimlanmamis stoklar icin yedek olarak kullanilir.
-            // SATILIR / ALINIR (141): stogun hangi belge yonunde ARANABILECEGI.
-            //   Kendi urettigimiz mamul alis siparisinde, satin alinan ambalaj
-            //   satis faturasinda listelenmesin. Ikisi de varsayilan ISARETLI.
-            new("satilan",       "satilan",         "mantik", Baslik: "Satılan", AltGrup: "Diğer",
-                                                     EslesAlan: "alinan"),
-            new("alinan",        "alinan",          "mantik", Baslik: "Alınan", AltGrup: "Diğer"),
-            // Kiralik/demirbas gibi geri donup TEKRAR cikabilen kiymet; normal
-            //   ticari mal tuketilir, o yuzden varsayilan isaretsiz.
-            new("yenidenKullanilir", "yeniden_kullanilir", "mantik",
-                                                     Baslik: "Yeniden Kullanılabilir", AltGrup: "Diğer"),
             new("ozelKod",       "ozel_kod",        "metin", EnFazlaUzunluk: 20, AltGrup: "Diğer"),
             new("durum",         "durum",           "kod",   Zorunlu: true, SabitKodlar: DurumKodlari, Grup: "Kimlik"),
             new("subeId",        "sube_id",         "sayi",  Yazilabilir: false),
@@ -69,22 +70,11 @@ public static partial class KartKatalogu
         },
         Detaylar: new[]
         {
-            new DetayTanimi("barkodlar", "public.stok_barkod", "stok_id", new KartAlani[]
-            {
-                new("id",           "id",             "sayi", Yazilabilir: false),
-                new("barkod",       "barkod",         "metin", Zorunlu: true, EnFazlaUzunluk: 50),
-                // GENINI degil - Delphi kaynaginda BILE yorumlu ("tipleri programa gomdum"),
-                //   asil kaynak BARKODAYARLAR (kullanici tanimli, bize hic migrate edilmedi,
-                //   BILIM'de de bos) + 2 sabit secenek. O ikisi kondu, kullanici-tanimli
-                //   tipler (nadir - 1419 satirin 1'i) EKLENMEDI.
-                new("barkodTipi",   "barkod_tipi",    "kod", SabitKodlar: BarkodTipiKodlari, Baslik: "Barkod Tipi"),
-                // Ayri GENINI bolumu yok - barkod_birimi/stok_fiyat.birim stok.ana_birim ile
-                //   AYNI birim listesini paylasiyor (veride dogrulandi: 12=Gun,51=Adet,57=Kg...).
-                new("barkodBirimi", "barkod_birimi",  "kod", KodListesi: "stok.ana_birim", Baslik: "Birim"),
-                new("varsayilan",   "varsayilan",     "mantik")
-            }, Sirala: "varsayilan desc, id", SubeKolonu: null, LogTabloId: 340,   // stok_barkodta sube_id YOK
-                                                                                   // (GENINI -11110: Stok Barkod)
-               Baslik: "Birim / Barkod"),                                         // mockup: "Birim / Barkod" sekmesi
+            // "BIRIM / BARKOD" SEKMESI KALKTI (kullanici, 144): ayni seyi iki
+            //   yerde anlatiyordu. Barkod zaten BIRIME aittir - kutunun barkodu
+            //   ile adedin barkodu farklidir - dolayisiyla dogru yeri ambalaj
+            //   birimi satiridir. Eski kayitlar (1419 barkod) oraya tasindi;
+            //   `stok_barkod` tablosu veri olarak duruyor, karttan kalkti.
 
             // AMBALAJ BIRIMLERI (143): "1 kutu = 12 adet". Bakiye ANA BIRIMDE
             //   tutulur; buradaki carpan yalnizca belgeye giris bicimidir -
