@@ -27,19 +27,19 @@ const DIS_NUMARALI = new Set([11]);
 const HEDEFLER: Record<number, { kod: number; ad: string }[]> = {
   // Alis siparisi
   9:  [{ kod: 10, ad: 'Alış İrsaliyesi' }, { kod: 11, ad: 'Alış Faturası' },
-       { kod: 12, ad: 'Alış Fişi' }, { kod: 17, ad: 'Borç Tahakkuku' }],
+       { kod: 12, ad: 'Alış Fişi' }, { kod: 17, ad: 'Alış Tahakkuku' }],
   // Satis siparisi
   19: [{ kod: 14, ad: 'Satış İrsaliyesi' }, { kod: 15, ad: 'Satış Faturası' },
-       { kod: 16, ad: 'Satış Fişi' }, { kod: 13, ad: 'Alacak Tahakkuku' }],
+       { kod: 16, ad: 'Satış Fişi' }, { kod: 13, ad: 'Satış Tahakkuku' }],
   // Irsaliyeler (konsinye dahil): mal zaten cikti/girdi, sirada belgelenmesi var
   10:  [{ kod: 11, ad: 'Alış Faturası' }, { kod: 12, ad: 'Alış Fişi' },
-        { kod: 17, ad: 'Borç Tahakkuku' }],
+        { kod: 17, ad: 'Alış Tahakkuku' }],
   14:  [{ kod: 15, ad: 'Satış Faturası' }, { kod: 16, ad: 'Satış Fişi' },
-        { kod: 13, ad: 'Alacak Tahakkuku' }],
+        { kod: 13, ad: 'Satış Tahakkuku' }],
   109: [{ kod: 11, ad: 'Alış Faturası' }, { kod: 12, ad: 'Alış Fişi' },
-        { kod: 17, ad: 'Borç Tahakkuku' }],
+        { kod: 17, ad: 'Alış Tahakkuku' }],
   119: [{ kod: 15, ad: 'Satış Faturası' }, { kod: 16, ad: 'Satış Fişi' },
-        { kod: 13, ad: 'Alacak Tahakkuku' }],
+        { kod: 13, ad: 'Satış Tahakkuku' }],
 };
 
 interface Props {

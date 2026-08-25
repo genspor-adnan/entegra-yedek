@@ -6,6 +6,7 @@ import { BelgeKarti } from './sayfalar/BelgeKarti';
 import { KasaIslemKarti } from './sayfalar/KasaIslemKarti';
 import { Liste, LISTELER } from './sayfalar/Liste';
 import { StokAyarlar } from './sayfalar/StokAyarlar';
+import { KasaAyarlar } from './sayfalar/KasaAyarlar';
 import { GenelAyarlar } from './sayfalar/GenelAyarlar';
 import { Panel } from './sayfalar/Panel';
 
@@ -51,6 +52,7 @@ function Yollar() {
         {/* Ayar ekranlari liste degil (ozelSayfa) - rotalari burada. */}
         {yetki('ayar') && <Route path="/genel-ayarlar" element={<GenelAyarlar />} />}
         {yetki('stok') && <Route path="/stok-ayarlar" element={<StokAyarlar />} />}
+        {yetki('kasa_islem') && <Route path="/kasa-ayarlar" element={<KasaAyarlar />} />}
 
         <Route path="*" element={<Navigate to="/panel" replace />} />
       </Route>

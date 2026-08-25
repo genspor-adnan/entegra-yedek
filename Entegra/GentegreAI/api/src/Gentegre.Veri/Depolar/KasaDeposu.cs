@@ -141,6 +141,36 @@ public sealed partial class KasaDeposu
         }
     }
 
+    /// <summary>
+    /// DUZELTME SINIRI (149): gerceklesmis islem `kasa.duzenleme_gun` gun sonra
+    /// KILITLENIR - gecmis ay kasasi geriye donuk oynanmasin.
+    ///
+    ///     0  duzeltme kapali (eski davranis: iptal edip yeniden gir)
+    ///     N  islem tarihinden N gun sonra kilit
+    ///    -1  sinirsiz (yalniz donem kilidi ve iptal engeli)
+    ///
+    /// Ayar Yönetim > Ayarlar > Kasa Ayarlari ekranindan degistirilir.
+    /// </summary>
+    private static async Task DuzeltmeSiniriKontrolAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction tx, int id, CancellationToken iptal)
+    {
+        var gun = await AyarDeposu.SayiAsync(baglanti, tx, "kasa.duzenleme_gun", iptal);
+        if (gun < 0) return;                                   // sinirsiz
+        if (gun == 0)
+            throw GentegreHatasi.IsKurali(
+                "Gerçekleşmiş işlem düzeltme kapalı (Ayarlar > Kasa > düzeltme gün sayısı) - "
+              + "İptal edip yeniden girin.");
+
+        await using var komut = new NpgsqlCommand(
+            "select islem_tarihi from public.kasa_islem where id = @p0", baglanti, tx);
+        komut.Parameters.AddWithValue("p0", id);
+        if (await komut.ExecuteScalarAsync(iptal) is not DateTime tarih) return;
+
+        if (Saat.Bugun > tarih.Date.AddDays(gun))
+            throw GentegreHatasi.IsKurali(
+                $"İşlem tarihinden {gun} gün geçti; kayıt kilitlendi - İptal edip yeniden girin.");
+    }
+
     /// <summary>Taslak/plan duzenleme. Gerceklesmis islem degistirilemez - iptal edilir.</summary>
     public async Task<List<string>> GuncelleAsync(
         int id, IDictionary<string, object?> islem,
@@ -181,6 +211,7 @@ public sealed partial class KasaDeposu
         //   yevmiye sirasi bozulmasin. Kapanmis donem motorda reddedilir.
         if (durum >= KasaDurum.Gerceklesti)
         {
+            await DuzeltmeSiniriKontrolAsync(baglanti, tx, id, iptal);
             await MotorAsync(baglanti, tx, "select public.fn_kasa_islem_duzelt_hazirla(@p0)",
                              new object?[] { id }, iptal);
             uyarilar.Add("Gerçekleşmiş işlem düzeltildi: muhasebe fişi yeniden yazıldı.");

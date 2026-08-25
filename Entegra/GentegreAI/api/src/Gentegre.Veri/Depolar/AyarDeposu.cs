@@ -57,6 +57,8 @@ public sealed class AyarDeposu
     private static readonly Dictionary<string, int> Varsayilan = new()
     {
         ["belge.geri_gun_siniri"] = 7,
+        // Tahsilat/odeme kac gun sonra kilitlensin (149): 0 kapali, -1 sinirsiz.
+        ["kasa.duzenleme_gun"] = 7,
         ["liste.sayfa_boyu"] = 50,
         ["stok.negatif_davranis"] = 1,
         ["guvenlik.jwt_dakika"] = 30,

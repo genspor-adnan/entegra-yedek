@@ -21,11 +21,17 @@ export const KASA_ARAC_MENUSU: Record<string, { kod: string; ad: string }[]> = {
     { kod: 'kasa.yeni.21', ad: '💵 Nakit' },
     { kod: 'kasa.yeni.22', ad: '🏦 Banka' },
     { kod: 'kasa.yeni.25', ad: '💳 POS' },
+    // Cek/senet ayri turlerdir (23/24) ve portfoyde ayri izlenir; belge
+    //   kartinin Tahsilat sekmesinde de ayni iki dugme var.
+    { kod: 'kasa.yeni.23', ad: '🧾 Çek' },
+    { kod: 'kasa.yeni.24', ad: '📜 Senet' },
   ],
   'kasa.odeme.yeni': [
     { kod: 'kasa.yeni.31', ad: '💵 Nakit' },
     { kod: 'kasa.yeni.32', ad: '🏦 Banka' },
     { kod: 'kasa.yeni.35', ad: '💳 POS / Kredi Kartı' },
+    { kod: 'kasa.yeni.33', ad: '🧾 Çek' },
+    { kod: 'kasa.yeni.34', ad: '📜 Senet' },
   ],
 };
 
@@ -695,5 +701,12 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ozelSayfa: true,
     menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Stok Ayarları',
     ic: '📦', yetkiKodu: 'stok',
+  },
+  {
+    // Kasa modulu ayarlari (149) - simdilik tek sekme: duzeltme gun siniri.
+    kaynak: 'kasa-ayarlar', baslik: 'Kasa Ayarları', yol: 'Yonetim › Ayarlar › Kasa',
+    ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Kasa',
+    ic: '💵', yetkiKodu: 'kasa_islem',
   },
 ];
