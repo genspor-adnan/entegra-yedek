@@ -2916,5 +2916,30 @@ Doğrulama: API'den tipi 1 ve 2 ile iki fatura kaydedildi, İade çipi yalnız
 tipi=2 olanları getirdi (ekranda da), test belgeleri silindi. Mevcut veri
 dağılımı: 344 × tip 1, 10 × 22, 2 × 24, 1 × 26, 1 × 17.
 
+### İade faturası akışı
+
+Fatura tipi "İade" seçilince kart iade kipine geçer:
+
+- **Kalem "önceki alınanlar"dan seçilir** (kullanıcı): stok arama yerine
+  `bilesenler/belge/IadeSatirPenceresi.tsx` açılır — carinin kesin fatura
+  satırları, her satırın **iade edilmiş** ve **kalan** miktarıyla listelenir.
+  Seçilen satır kaleme dönerken fiyat, iskonto ve KDV **kaynak faturadan** gelir
+  (elle girilen fiyat cari bakiyeyi ve KDV'yi tutarsız bırakırdı). Kısmi iade
+  doğal: miktar kalana kadar değiştirilebilir.
+- **Kaynak bağı**: iade satırı `belge_satir.kaynak_tur = 30, kaynak_id = kaynak
+  satır` ile bağlanır; iade edilen miktar `db/132` görünümünde bu bağdan
+  **türetilir** — yeni kolon yok, aynı kalem iki kez iade edilemez.
+  `kapatilan_miktar`'a dokunulmadı (o sipariş→irsaliye zincirinin sayacı).
+- **YÖN TERS**: `BelgeTuru.CikisMi(tur, tipi)` — satış iadesinde mal depoya geri
+  girer ve cari **alacaklanır**. Önceden iade de satış gibi stoktan düşüp cariyi
+  borçlandırıyordu; stok ve cari hareketi artık aynı kararı tek yerden alıyor.
+
+Doğrulama (uçtan ve ekrandan): satış 3 adet → stok 258,93 → 255,93, cari borç
+360; iade 2 adet → stok 257,93, cari **alacak 240**, kaynak bağ `30 / 3557736`,
+iade edilebilir satır "miktar 3 · iade 2 · kalan 1". Ekranda: Fatura Tipi = İade
+→ "＋" iade penceresini açtı, kalem "İade — 2025000000707" açıklamasıyla fiyat
+100,00 / KDV %20 olarak eklendi, kayıt sonrası kart kapandı. Test verisi geri
+alındı.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).
