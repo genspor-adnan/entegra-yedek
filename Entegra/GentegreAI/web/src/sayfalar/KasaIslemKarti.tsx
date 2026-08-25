@@ -11,7 +11,10 @@ import { FisOnizleme } from '../bilesenler/kasa/FisOnizleme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { Modal } from '../bilesenler/GenForm';
 import { para } from '../bilesenler/bicim';
-import { DOVIZ_KODLARI, YEREL_PARA_VARSAYILAN, yerelAnMetni } from './belgeSabitleri';
+import {
+  DOVIZ_KODLARI, YEREL_PARA_VARSAYILAN, yerelAnMetni, sayiOku as sayi,
+} from './belgeSabitleri';
+import { kasaDogrula, kasaGovdesi, kasaTurBilgisi, type KasaGirdisi } from './kasaKaydet';
 
 
 const LOOKUP_HESAP = [
@@ -34,8 +37,6 @@ const GRUP_ADI: Record<string, string> = {
   ceksenet: 'Çek / Senet', kredi: 'Kredi', kupon: 'Kupon', kurfarki: 'Kur Farkı',
 };
 
-/** Sayi girisi: "1.234,56" ve "1234.56" ikisini de kabul eder. */
-const sayi = (metin: string) => Number(metin.replace(/\./g, '').replace(',', '.')) || 0;
 
 /**
  * Disaridan (URL / belge karti) gelen HAM tutari ekran bicimine cevirir.
@@ -148,15 +149,13 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
    * duzeltilmez.
    */
   const kilitli = durum === 3;
-  const planMi = grup === 'plan';
-  const karsiHesapli = grup === 'virman' || grup === 'doviz';
-  const donusum = grup === 'doviz';
-  const cariVirman = tur === 49;
-  /** Cek/senet ile tahsilat-odeme: kiymet kaydi da acilir (23/24 al, 33/34 ver). */
-  const cekSenetMi = tur === 23 || tur === 24 || tur === 33 || tur === 34;
+  // Turun sekil kurallari (plan mi, karsi hesapli mi, cek/senet mi...) kaydetme
+  //   mantigiyla ayni yerden gelir: kasaKaydet.kasaTurBilgisi.
+  const { planMi, karsiHesapli, donusum, cariVirman, cekSenetMi } =
+    kasaTurBilgisi(tur, grup);
   /** Kart disaridan MEVCUT bir kiymetle acildi (kasa listesi akisi). */
   const mevcutKiymet = acilis?.cekSenetId ?? 0;
-  const senetMi = tur === 24 || tur === 34;
+  const senetMi = kasaTurBilgisi(tur, grup).senetMi;
   // Cek/senette hesap SECILMEZ: kiymet portfoye girer (sanal hesap), para
   //   bankaya ancak tahsil edilince gecer. Doviz o yuzden basliktan gelir.
   /**
@@ -233,73 +232,30 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   // Doviz donusumunde efektif kur: verilen yerel tutar / alinan doviz tutari.
   const caprazKur = donusum && sayi(karsiTutar) > 0 ? yerelOnizleme / sayi(karsiTutar) : 0;
 
-  function govde(taslak: boolean, plan: boolean) {
-    return {
-      islem: {
-        tur,
-        islemTarihi: tarih,
-        planTarihi: plan && planTarihi ? planTarihi : null,
-        tarafId: cari?.id ?? null,
-        karsiTarafId: cariVirman ? karsiCari?.id ?? null : null,
-        hesapId: hesap?.id ?? null,
-        karsiHesapId: karsiHesapli ? karsiHesap?.id ?? null : null,
-        tutar: sayi(tutar),
-        dovizCinsi: anaDoviz,
-        // Ekstre dovizi (139): yerel islemde anlamsiz - bos gider, sunucu islem
-        //   dovizini kullanir.
-        ekstreDovizi: dovizli ? ekstreDovizi : '',
-        dovizKuru: Number(kur.replace(',', '.')) || 1,
-        karsiDovizCinsi: donusum ? karsiHesap?.doviz ?? '' : '',
-        karsiTutar: donusum ? sayi(karsiTutar) : 0,
-        masrafTutar: sayi(masrafTutar),
-        masrafId: kalem?.id ?? null,
-        projeId: proje?.id ?? null,
-        aciklama,
-        ...(mevcutKiymet ? { cekSenetId: mevcutKiymet } : {}),
-      },
-      // Cek/senet turlerinde kiymetin kendisi de gonderilir: sunucu once
-      //   cek_senet kaydini acar, kimligini basliga baglar (tek cagri).
-      //   MEVCUT kiymete baglaniyorsak (kart onceden dolduruldu) yeni kayit
-      //   ACILMAZ - yalnizca kimlik gider, yoksa ayni cek iki kez portfoye
-      //   girerdi.
-      ...(cekSenetMi && !mevcutKiymet ? {
-        cekSenet: {
-          vade: csVade || null,
-          tarih: tarih,
-          seriNo: csSeriNo,
-          kesideci: csKesideci || cari?.unvan || '',
-          bankaAdi: senetMi ? '' : csBanka,
-          bankaSubesi: senetMi ? '' : csSube,
-          aciklama,
-        },
-      } : {}),
-      // belgeId: tahsilat bu belgeyi kapatir (kasa_islem.belge_id) - belge
-      //   kartinin Tahsilat sekmesi bu bagla listeliyor.
-      secenekler: { taslak, plan, kurKontrolu: true,
-                    ...(belgeBagi ? { belgeId: belgeBagi } : {}) },
-    };
-  }
+  /** Kart durumunu saf govde/dogrulama fonksiyonlarina veren tek nesne. */
+  const girdi = (): KasaGirdisi => ({
+    tur, grup, tarih, planTarihi, cari, karsiCari, hesap, karsiHesap,
+    tutar, doviz: anaDoviz, ekstreDovizi, kur, karsiTutar, masrafTutar,
+    kalem, proje, aciklama,
+    csVade, csSeriNo, csKesideci, csBanka, csSube,
+    mevcutKiymet, belgeBagi, cariZorunlu: secili?.cariZorunlu,
+  });
 
   async function kaydet(taslak: boolean, plan = planMi) {
     setHata(null);
     setAlanHatalari({});
 
-    const hatalar: Record<string, string> = {};
-    if (!planMi && !cariVirman && !cekSenetMi && !hesap) hatalar.hesapId = 'Hesap seçilmeli.';
-    if (cekSenetMi && !mevcutKiymet && !csVade) hatalar['cekSenet.vade'] = 'Vade zorunlu.';
-    if (karsiHesapli && !karsiHesap) hatalar.karsiHesapId = 'Karşı hesap seçilmeli.';
-    if (cariVirman && !karsiCari) hatalar.karsiTarafId = 'Karşı cari seçilmeli.';
-    if (sayi(tutar) <= 0) hatalar.tutar = 'Sıfırdan büyük olmalı.';
-    if (donusum && sayi(karsiTutar) <= 0) hatalar.karsiTutar = 'Sıfırdan büyük olmalı.';
-    if (secili?.cariZorunlu === 1 && !cari) hatalar.tarafId = 'Cari zorunlu.';
-    if (plan && !planTarihi) hatalar.planTarihi = 'Vade zorunlu.';
+    const hatalar = kasaDogrula(girdi(), plan);
     if (Object.keys(hatalar).length) { setAlanHatalari(hatalar); return }
 
     setCalisiyor(true);
     try {
       const y = kayitId === null
-        ? await api.kasaEkle(govde(taslak, plan))
-        : await api.kasaGuncelle(kayitId, { ...govde(taslak, plan), surum: String(sonuc?.islem.surum ?? '') });
+        ? await api.kasaEkle(kasaGovdesi(girdi(), taslak, plan))
+        : await api.kasaGuncelle(kayitId, {
+            ...kasaGovdesi(girdi(), taslak, plan),
+            surum: String(sonuc?.islem.surum ?? ''),
+          });
       yaniti(y);
       // GENEL KURAL (kullanici): Kaydet'e basilinca form KAPANIR. Modalde cagiran
       //   kapatir (belge kartinin Tahsilat sekmesi), tam sayfada listeye donulur.

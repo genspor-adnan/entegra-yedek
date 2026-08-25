@@ -144,3 +144,12 @@ export const SEKMELER: {
   { anahtar: 'imza',     baslik: 'İmza / Teslim', irsaliye: true },
   { anahtar: 'yorum',    baslik: 'Yorum / Medya' },
 ];
+
+/**
+ * Kullanicinin girdigi sayiyi cozer: "1.234,56" ve "1234.56" ikisini de kabul
+ * eder. Ekran Turkce bicim yazar, JSON nokta ondalikli gonderir - iki bicimi
+ * ayni yerde okumazsak nokta binlik ayraci sanilip 1.457.997 gibi tutarlar
+ * cikiyordu (gercek vaka).
+ */
+export const sayiOku = (metin: string) =>
+  Number(metin.replace(/\./g, '').replace(',', '.')) || 0;
