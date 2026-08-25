@@ -7,12 +7,14 @@
  * hangi turde ne yapilabilecegi tek bakista okunsun.
  */
 export function BelgeAracCubugu({
-  mevcutBelge, sonuc, kaydediyor, kilitli, taslak, setTaslak,
+  mevcutBelge, duzenlenebilir, sonuc, kaydediyor, kilitli, taslak, setTaslak,
   iadeKutusu, iade, setIade,
   siparisMi, irsaliyeMi, alisMi, eBelgeYok, kayitliId, cari,
   kes, yeniBelge, kapat, setDonusum, tahsilatAc,
 }: {
   mevcutBelge: boolean;
+  /** Kayitli belge degistirilebilir mi (135). */
+  duzenlenebilir: boolean;
   sonuc: unknown;
   kaydediyor: boolean;
   kilitli: boolean;
@@ -42,10 +44,14 @@ export function BelgeAracCubugu({
   return (
   <>
   {mevcutBelge
-    ? <button className="d onay" disabled
-              title="Kesin belge düzenlenemez; değişiklik için iptal edip yeniden kesin (F7).">
-        💾 Kaydet
-      </button>
+    ? (duzenlenebilir
+        ? <button className="d onay" disabled={kaydediyor} onClick={() => void kes()}>
+            {kaydediyor ? '💾 Kaydediliyor…' : '💾 Değişiklikleri Kaydet'}
+          </button>
+        : <button className="d onay" disabled
+                  title="e-Belge gönderilmiş ya da faturalanmış belge değiştirilemez; iptal edip yeniden kesin.">
+            💾 Kaydet
+          </button>)
     : sonuc
       ? <button className="d onay" onClick={yeniBelge}>＋ Yeni Belge</button>
       : <button className="d onay" disabled={kaydediyor} onClick={() => void kes()}>

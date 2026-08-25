@@ -2990,5 +2990,33 @@ Doğrulama: USD seçilince kur 47,897 otomatik geldi; 100 USD'lik kalemde dip
 toplam iki kolon — 120,00 USD / 5.747,64 TL (120 × 47,897 ✓). İzlemli irsaliye
 (104151) kapalı açıldı.
 
+### Belge düzenleme + hizmet satırında kod/ad
+
+**Kayıtlı belge artık düzenlenebilir** (kullanıcı kararı). Eskiden kesin belge
+salt okunurdu; düzeltmek için iptal + yeni belge gerekiyordu.
+
+Kaydederken `BelgeDeposu.GuncelleAsync` eski etkiyi **geri alır** (stok hareketi
+ters çevrilir — lot bakiyeleri dahil, cari bacağı silinir), satırları siler,
+yeni haliyle yazar ve etkiyi yeniden uygular. **Belge numarası korunur**; yeni
+numara tüketilmez (`KaydetIcAsync` artık `mevcutId` ile güncelleme kipinde
+çalışıyor).
+
+Kilit — üçü de sunucuda doğrulanır:
+- e-Belge gönderilmiş (`efatura_durum > 0`),
+- belgeden fatura türetilmiş (`kapanma_durum > 0`),
+- belge tarihinden `belge.duzenleme_gun` gün geçmiş (`db/135`, varsayılan **7**;
+  `0` = düzenleme kapalı, `-1` = sınırsız).
+
+Yan düzeltme: **hizmet satırında kod ve ad boş görünüyordu**. İki katmanlı hata —
+sunucu hizmet satırında `stokKodu`/`stokAdi` alanlarını boş string döndürüyordu,
+arayüz de `??` (nullish) kullandığı için boş string'i geçerli sayıp yedeğe
+düşmüyordu. Sunucu artık kodu/adı stok → hizmet → masraf sırasıyla dolduruyor,
+arayüz `||` ile yedeğe düşüyor.
+
+Doğrulama: 5 adetlik irsaliye 2 adete düzenlendi — stok 253,93 → 256,93, cari
+borç 600 → 240, numara 000104161 korundu; e-Belge işaretli ve 7 günden eski
+belgede düzenleme reddedildi. Hizmetli irsaliyede kod/ad ekranda göründü
+(679.01.015 · ANTALYA 17-20 KASIM STANT KURULUM BEDELİ).
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).

@@ -241,6 +241,10 @@ export const api = {
     istek<{ belgeler: Record<string, unknown>[] }>(`/api/belge/${id}/donusumler`)
       .then(y => y.belgeler),
 
+  /** Kayitli belgeyi duzenler (135) - numara korunur, stok/cari yeniden yazilir. */
+  belgeGuncelle: (id: number, govde: unknown) =>
+    gonder<BelgeYaniti>(`/api/belge/${id}`, govde, 'PUT'),
+
   /**
    * IADE faturasinda secilebilecek "onceki alinanlar" (132): carinin kesin
    * fatura satirlari, iade edilmis miktar dusulmus olarak.

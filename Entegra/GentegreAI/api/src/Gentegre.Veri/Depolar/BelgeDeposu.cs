@@ -71,6 +71,142 @@ public sealed partial class BelgeDeposu
     }
 
     /// <summary>
+    /// BELGE DUZENLEME (135) - kayitli belgeyi yeniden yazar.
+    ///
+    /// Kesin belge numara tuketmis, stok dusmus ve cari islenmis olur; duzenleme
+    /// bu uc izi de tutarli birakmali. Yol: ESKI ETKIYI GERI AL (stok hareketini
+    /// ters cevir, cari bacagini sil), satirlari sil, yeni satirlari yaz ve
+    /// etkiyi yeniden uygula. Belge NUMARASI ve kimligi korunur.
+    ///
+    /// KILIT (degistirilemez):
+    ///   - e-Belge gonderilmis (efatura_durum > 0),
+    ///   - belgeden fatura turetilmis (kapanma_durum > 0),
+    ///   - belge tarihinden `belge.duzenleme_gun` gun gecmis (0 = duzenleme
+    ///     kapali, -1 = sinirsiz).
+    /// </summary>
+    public async Task<(int Id, List<string> Uyarilar)> GuncelleAsync(
+        int belgeId,
+        IDictionary<string, object?> belge,
+        List<Dictionary<string, JsonElement>> satirlar,
+        BelgeSecenekleri secenekler,
+        YazmaBaglami baglam,
+        CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+        // --------------------------------------------------- 1) kilit kontrolu ----
+        int tur, tipi, eskiDurum, efaturaDurum, kapanma;
+        DateTime belgeTarihi;
+        string belgeNo, belgeSeri;
+        await using (var komut = new NpgsqlCommand("""
+            select tur, coalesce(tipi, 0), durum, coalesce(efatura_durum, 0),
+                   coalesce(kapanma_durum, 0), belge_tarihi,
+                   coalesce(belge_no, ''), coalesce(belge_seri, '')
+              from public.belge where id = @p0 for update
+            """, baglanti, islem))
+        {
+            komut.Parameters.AddWithValue("p0", belgeId);
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            if (!await o.ReadAsync(iptal))
+                throw GentegreHatasi.Bulunamadi("Belge bulunamadi.");
+            tur = o.GetInt32(0); tipi = o.GetInt32(1); eskiDurum = o.GetInt32(2);
+            efaturaDurum = o.GetInt32(3); kapanma = o.GetInt32(4);
+            belgeTarihi = o.GetDateTime(5); belgeNo = o.GetString(6); belgeSeri = o.GetString(7);
+        }
+
+        var duzenlemeGun = await AyarDeposu.SayiAsync(baglanti, islem, "belge.duzenleme_gun", iptal);
+        if (duzenlemeGun == 0)
+            throw GentegreHatasi.IsKurali(
+                "Belge duzenleme kapali (Ayarlar > belge.duzenleme_gun).");
+        if (efaturaDurum > 0)
+            throw GentegreHatasi.IsKurali(
+                "e-Belge gonderilmis belge degistirilemez; iptal edip yeniden kesin.");
+        if (kapanma > 0)
+            throw GentegreHatasi.IsKurali(
+                "Bu belgeden fatura turetilmis; once turetilen belgeyi iptal edin.");
+        if (duzenlemeGun > 0 && Saat.Bugun > belgeTarihi.Date.AddDays(duzenlemeGun))
+            throw GentegreHatasi.IsKurali(
+                $"Belge tarihinden {duzenlemeGun} gun gecti; kayit kilitlendi.");
+
+        // --------------------------------- 2) eski etkiyi geri al (stok + cari) ----
+        var uyarilar = new List<string>();
+        if (eskiDurum == 0)                            // taslak stok/cari yazmaz
+        {
+            await StokDurumGeriAlAsync(baglanti, islem, belgeId, tur, tipi, iptal);
+            await using var sil = new NpgsqlCommand(
+                "delete from public.mali_hareket where belge_id = @p0", baglanti, islem);
+            sil.Parameters.AddWithValue("p0", belgeId);
+            await sil.ExecuteNonQueryAsync(iptal);
+        }
+
+        await using (var sil = new NpgsqlCommand("""
+            delete from public.stok_izleme where belge_id = @p0;
+            delete from public.belge_satir  where belge_id = @p0;
+            """, baglanti, islem))
+        {
+            sil.Parameters.AddWithValue("p0", belgeId);
+            await sil.ExecuteNonQueryAsync(iptal);
+        }
+
+        // ------------------------------------------- 3) yeni haliyle yeniden yaz ----
+        // Numara ve seri KORUNUR: duzenleme yeni belge degildir.
+        belge["belgeNo"] = belgeNo;
+        belge["belgeSeri"] = belgeSeri;
+        belge["id"] = belgeId;
+        var (_, yeniUyarilar) = await KaydetIcAsync(baglanti, islem, belge, satirlar,
+                                                    secenekler, baglam, iptal, belgeId);
+        uyarilar.AddRange(yeniUyarilar);
+
+        await islem.CommitAsync(iptal);
+        return (belgeId, uyarilar);
+    }
+
+    /// <summary>
+    /// Belgenin stok etkisini TERS cevirir (duzenleme / iptal): giren miktar
+    /// cikar, cikan miktar girer. Lot bakiyeleri stok_izleme uzerinden ayni
+    /// yolla geri alinir.
+    /// </summary>
+    private static async Task StokDurumGeriAlAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction islem, int belgeId, int tur, int tipi, CancellationToken iptal)
+    {
+        var cikis = BelgeTuru.CikisMi(tur, tipi);
+        await using var komut = new NpgsqlCommand("""
+            update public.stok_durum d
+               set giren = d.giren - case when @p1 then 0 else k.miktar end,
+                   cikan = d.cikan - case when @p1 then k.miktar else 0 end,
+                   kalan = d.kalan + case when @p1 then k.miktar else -k.miktar end
+              from (select s.stok_id,
+                           coalesce(s.cikis_depo_id, s.giris_depo_id,
+                                    b.cikis_depo_id, b.giris_depo_id) as depo_id,
+                           sum(s.miktar) as miktar
+                      from public.belge_satir s
+                      join public.belge b on b.id = s.belge_id
+                     where s.belge_id = @p0 and s.stok_id is not null
+                     group by 1, 2) k
+             where d.stok_id = k.stok_id and d.depo_id = k.depo_id
+            """, baglanti, islem);
+        komut.Parameters.AddWithValue("p0", belgeId);
+        komut.Parameters.AddWithValue("p1", cikis);
+        await komut.ExecuteNonQueryAsync(iptal);
+
+        // Lot bakiyeleri: belgenin izlem satirlari ters isaretle geri alinir.
+        await using var lot = new NpgsqlCommand("""
+            update public.stok_lot_durum l
+               set kalan = l.kalan + case when @p1 then i.miktar else -i.miktar end
+              from (select stok_id, depo_id, seri_lot_id, sum(adet) as miktar
+                      from public.stok_izleme
+                     where belge_id = @p0 and seri_lot_id is not null
+                     group by 1, 2, 3) i
+             where l.stok_id = i.stok_id and l.depo_id = i.depo_id
+               and l.seri_lot_id = i.seri_lot_id
+            """, baglanti, islem);
+        lot.Parameters.AddWithValue("p0", belgeId);
+        lot.Parameters.AddWithValue("p1", cikis);
+        await lot.ExecuteNonQueryAsync(iptal);
+    }
+
+    /// <summary>
     /// Kaydetmenin TRANSACTION ICI cekirdegi. Donusum (F8) kaynak satirlari
     /// kilitledikten SONRA ayni transaction'da buraya girer - yoksa iki es
     /// zamanli donusum ayni kalani iki kez tuketirdi.
@@ -82,6 +218,7 @@ public sealed partial class BelgeDeposu
         BelgeSecenekleri secenekler,
         YazmaBaglami baglam,
         CancellationToken iptal,
+        int mevcutId = 0,
         bool cariAtla = false)
     {
         var uyarilar = new List<string>();
@@ -240,7 +377,11 @@ public sealed partial class BelgeDeposu
         }
 
         belge["durum"] = secenekler.Taslak ? 1 : 0;
-        var belgeId = await BelgeEkleAsync(baglanti, islem, belge, baglam, iptal);
+        // DUZENLEME (135): mevcut belge yeniden yazilir - yeni kayit acilmaz,
+        //   numara ve kimlik korunur.
+        var belgeId = mevcutId > 0
+            ? await BelgeGuncelleAsync(baglanti, islem, mevcutId, belge, baglam, iptal)
+            : await BelgeEkleAsync(baglanti, islem, belge, baglam, iptal);
 
         // ------------------------------------------------------ 4) satirlar INSERT ----
         // Tur etkisi satirlardan ONCE okunur: stogu etkilemeyen bir belgede
@@ -285,7 +426,8 @@ public sealed partial class BelgeDeposu
             // ------------------------------------------------------- 7) belge NUMARASI ----
             // EN SON: buraya kadar her sey basarili. Satir kilidi altinda, BOSLUKSUZ.
             // Dis numarali belgede (alis faturasi) numara kullanicidan geldi.
-            if (!disNumara)
+            //   Duzenlemede numara ZATEN VAR - yeniden uretilmez.
+            if (!disNumara && mevcutId == 0)
                 await NumaraVerAsync(baglanti, islem, belgeId, tur, Metin(belge, "belgeSeri"), baglam.SubeId, iptal);
         }
 

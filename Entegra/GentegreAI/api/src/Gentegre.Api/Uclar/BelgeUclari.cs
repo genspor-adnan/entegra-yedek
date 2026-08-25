@@ -77,6 +77,33 @@ public static class BelgeUclari
             });
         });
 
+        // PUT /api/belge/{id} - kayitli belgeyi duzenler (135). Kilit kurallari
+        //   depoda: e-Belge gonderilmis / faturalanmis / duzenleme suresi gecmis.
+        grup.MapPut("/{id:int}", async (
+            int id, BelgeYazmaIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Degistir);
+
+            var belge = BaslikDegerleri(istek.Belge);
+            var satirlar = istek.Satirlar ?? new List<Dictionary<string, JsonElement>>();
+
+            var (belgeId, uyarilar) = await depo.GuncelleAsync(id, belge, satirlar,
+                istek.Secenekler, new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)),
+                iptal);
+
+            var kayit = await depo.OkuAsync(belgeId, iptal) ?? throw GentegreHatasi.Bulunamadi();
+            return Results.Ok(new BelgeYaniti
+            {
+                Belge = kayit.Belge,
+                Satirlar = kayit.Satirlar,
+                DipToplam = kayit.DipToplam,
+                Uyarilar = uyarilar,
+                IzlemeNo = baglam.IzlemeNo,
+            });
+        });
+
         // GET /api/belge/iade-satirlari - iade faturasinda "onceki alinanlar" (132).
         //   Cari zorunlu: iade her zaman BIR CARIYE kesilir, tum firmanin gecmisi
         //   listelenmez. belgeId verilirse yalniz o belgeden iade edilir.

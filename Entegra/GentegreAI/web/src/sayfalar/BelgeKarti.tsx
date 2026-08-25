@@ -218,7 +218,15 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const seciliTurAdi = turAdi(tur);
   /** Mevcut belge SALT GORUNUM: duzenleme ucu (PUT /api/belge/{id}) henuz yok. */
   const mevcutBelge = !!belgeId;
-  const kilitli = mevcutBelge || !!sonuc;
+  /**
+   * DUZENLEME (135): kayitli belge, e-Belge GONDERILMEMIS ve faturalanmamissa
+   * degistirilebilir (kullanici). Sunucu ayni kurallari + sure sinirini
+   * (belge.duzenleme_gun) yeniden dogrular - burasi yalniz ekrani acar.
+   */
+  const eBelgeGonderildi = Number(sonuc?.belge.efaturaDurum ?? 0) > 0;
+  const faturalandi = Number(sonuc?.belge.kapanmaDurum ?? 0) > 0;
+  const duzenlenebilir = mevcutBelge && !!sonuc && !eBelgeGonderildi && !faturalandi;
+  const kilitli = (mevcutBelge && !duzenlenebilir) || (!mevcutBelge && !!sonuc);
   // Turun EKRAN DAVRANISI tek yerden gelir (belgeTuru.ts): hangi alan cizilir,
   //   kalem satiri nasil gorunur, kayittan sonra ne olur. Eskiden bu kararlar
   //   dosyaya dagilmis "tur === 20" gibi 12 ayri bayraktaydi ve her yeni tur
@@ -342,7 +350,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           stokId: r.stokId ? Number(r.stokId) : null,
           hizmetId: r.hizmetId ? Number(r.hizmetId) : null,
           stokKodu: String(r.stokKodu ?? ''),
-          stokAdi: String(r.stokAdi ?? r.hizmetAdi ?? r.aciklama ?? ''),
+          // "??" DEGIL "||": sunucu bos alani '' donduruyor ve nullish operatoru
+          //   bos string'i gecerli sayip yedege dusmuyordu - hizmet satirinda
+          //   kod/ad bos gorunuyordu (kullanici).
+          stokAdi: String(r.stokAdi || r.hizmetAdi || r.masrafAdi || r.aciklama || ''),
           aciklama: String(r.aciklama ?? ''),
           izlemeKodu: String(r.izlemeKodu ?? ''),
           adet: String(r.miktar ?? r.adet ?? 0),
@@ -557,7 +568,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     try {
       const govde = belgeGovdesi(girdi, dolu, taslak);
 
-      const yanit = await api.belgeEkle(govde);
+      // DUZENLEME (135): kayitli belge PUT ile yeniden yazilir - numara korunur,
+      //   eski stok/cari etkisi sunucuda geri alinip yenisi uygulanir.
+      const yanit = duzenlenebilir && belgeId
+        ? await api.belgeGuncelle(belgeId, govde)
+        : await api.belgeEkle(govde);
       setSonuc(yanit);
       onKaydedildi?.();
       // GENEL KURAL (kullanici): Kaydet'e basilinca form KAPANIR. Belgeye sonradan
@@ -640,7 +655,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       //   kullanici neyin gelecegini gorur, tikladiginda sessiz kalmaz.
       alt={
         <BelgeAracCubugu
-          mevcutBelge={mevcutBelge} sonuc={sonuc} kaydediyor={kaydediyor}
+          mevcutBelge={mevcutBelge} duzenlenebilir={duzenlenebilir}
+          sonuc={sonuc} kaydediyor={kaydediyor}
           kilitli={kilitli} taslak={taslak} setTaslak={setTaslak}
           iadeKutusu={irsaliyePilot} iade={iadeMi}
           setIade={v => setFaturaTipi(v ? 2 : 1)}

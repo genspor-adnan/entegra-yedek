@@ -64,6 +64,35 @@ public sealed partial class BelgeDeposu
         return Convert.ToInt32(await komut.ExecuteScalarAsync(iptal));
     }
 
+    /// <summary>
+    /// DUZENLEMEDE (135) mevcut belge basligini yeniden yazar. Kolon listesi
+    /// eklemeyle AYNI beyaz listeden gelir; id, numara ve seri korunur.
+    /// </summary>
+    private async Task<int> BelgeGuncelleAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int belgeId, IDictionary<string, object?> belge, YazmaBaglami baglam,
+        CancellationToken iptal)
+    {
+        var atamalar = new List<string>();
+        var parametreler = new List<object?> { belgeId };
+
+        foreach (var (ad, deger) in belge)
+        {
+            if (ad is "id" or "belgeNo" or "belgeSeri") continue;   // korunur
+            if (!BelgeKolonlari.TryGetValue(ad, out var kolon)) continue;
+            parametreler.Add(deger);
+            atamalar.Add($"{kolon} = @p{parametreler.Count - 1}");
+        }
+        parametreler.Add(baglam.KullaniciId);
+        atamalar.Add($"degistiren = @p{parametreler.Count - 1}");
+        atamalar.Add("degistirme_tarihi = now()::timestamp");
+
+        await using var komut = Komut(baglanti, islem,
+            $"update public.belge set {string.Join(", ", atamalar)} where id = @p0",
+            parametreler);
+        await komut.ExecuteNonQueryAsync(iptal);
+        return belgeId;
+    }
+
     private async Task SatirEkleAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, int sira, Dictionary<string, JsonElement> satir,
         IDictionary<string, object?> belge, YazmaBaglami baglam, bool turStokEtkiler,

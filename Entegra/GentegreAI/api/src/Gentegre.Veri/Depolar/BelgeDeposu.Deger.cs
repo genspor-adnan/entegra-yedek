@@ -170,8 +170,13 @@ public sealed partial class BelgeDeposu
                    s.doviz_tutari as "dovizTutari", s.doviz_kuru as "dovizKuru",
                    s.giris_depo_id as "girisDepoId", s.cikis_depo_id as "cikisDepoId",
                    s.izleme_kodu as "izlemeKodu",
-                   -- Kart satiri stok ADINI gosterir; id'yi ekranda kimse okuyamaz.
-                   coalesce(st.kod, '') as "stokKodu", coalesce(st.ad, '') as "stokAdi",
+                   -- Kart satiri KOD ve AD gosterir; id'yi ekranda kimse okuyamaz.
+                   --   Satir hizmet ya da masraf olabilir: kod/ad hangisi doluysa
+                   --   ondan gelir (hizmet satirinda stok bos, kart bos gorunuyordu).
+                   coalesce(nullif(st.kod, ''), nullif(hz.kod, ''),
+                            nullif(ms.kod, ''), '') as "stokKodu",
+                   coalesce(nullif(st.ad, ''), nullif(hz.ad, ''),
+                            nullif(ms.ad, ''), '') as "stokAdi",
                    coalesce(hz.ad, '')  as "hizmetAdi", coalesce(ms.ad, '') as "masrafAdi",
                    s.kapatilan_miktar as "kapatilanMiktar", s.kalan_miktar as "kalanMiktar",
                    s.kaynak_tur as "kaynakTur", s.kaynak_id as "kaynakId"
