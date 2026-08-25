@@ -311,8 +311,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   /** Bu belge icin tahsilat islemi ac (cari ve tutar onyuklu). */
   /** Tahsilat MODAL acilir - belge kartindan cikmadan (kullanici istegi).
       Tur: 21 nakit, 22 banka/havale (modal icinden de degistirilebilir). */
-  const tahsilatAc = (tahsilatTuru = 21) => {
-    if (kayitliId) setTahsilatAcik(tahsilatTuru);
+  /**
+   * KAYDEDILMEMIS belgede once KAYDEDER, sonra tahsilati acar (kullanici:
+   * "yeni fatura actim, kalem ekledim, tahsilat ekleyemiyorum - disabled").
+   * Tahsilat kasa islemi belgeye baglanir, dolayisiyla belge id'si sart;
+   * kullaniciyi "once kaydet, listeden tekrar ac" dongusune sokmak yerine iki
+   * adim tek dugmede yapilir. Kart ACIK kalir - tahsilat kapaninca belgeye
+   * donulur. Kaydetme basarisizsa (dogrulama hatasi) tahsilat acilmaz.
+   */
+  const tahsilatAc = async (tahsilatTuru = 21) => {
+    const id = kayitliId || await kes(false);
+    if (id) setTahsilatAcik(tahsilatTuru);
   };
 
   // Mevcut belgeyi ac: baslik + satirlar + dip toplam sunucudan gelir.
@@ -565,7 +574,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       return y;
     });
 
-  async function kes() {
+  /**
+   * Belgeyi kaydeder ve kaydedilen belgenin id'sini doner (0 = kaydedilemedi).
+   *
+   * `kapatilsin=false` yalnizca "kaydet ve devam et" akislarinda kullanilir
+   * (Tahsilat dugmesi): kart acik kalir ki acilan tahsilat penceresi kapaninca
+   * kullanici belgeye geri donsun.
+   */
+  async function kes(kapatilsin = true): Promise<number> {
     setHata(null);
     setAlanHatalari({});
     setSonuc(null);
@@ -585,7 +601,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     if (hatalar) {
       if (hatalar.genel) setHata(hatalar.genel);
       else setAlanHatalari(hatalar);
-      return;
+      return 0;
     }
     const dolu = doluSatirlar(satirlar);
     setKaydediyor(true);
@@ -600,11 +616,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       setSonuc(yanit);
       onKaydedildi?.();
       // GENEL KURAL (kullanici): Kaydet'e basilinca form KAPANIR. Belgeye sonradan
-      //   yapilacak isler (e-Belge gonderimi, tahsilat, donusum) listeden belge
-      //   yeniden acilarak surdurulur - kart acik birakmak "kaydettim mi?"
-      //   belirsizligi yaratiyordu.
-      kapat();
-      return;
+      //   yapilacak isler (e-Belge gonderimi, donusum) listeden belge yeniden
+      //   acilarak surdurulur - kart acik birakmak "kaydettim mi?" belirsizligi
+      //   yaratiyordu. Tek istisna "kaydet ve devam et" (kapatilsin=false).
+      if (kapatilsin) kapat();
+      return Number(yanit.belge.id ?? 0);
     } catch (h) {
       if (h instanceof ApiHatasi) {
         if (h.dogrulamaMi && h.hata.alanlar)
@@ -614,6 +630,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     } finally {
       setKaydediyor(false);
     }
+    return 0;
   }
 
   function yeniBelge() {

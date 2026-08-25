@@ -30,12 +30,14 @@ export function BelgeAracCubugu({
   kayitliId: number;
   /** Cari secili mi - tahsilat/e-Belge dugmeleri carisiz calismaz. */
   cari: unknown;
-  kes(): Promise<void>;
+  /** Belgeyi kaydeder; kaydedilen id'yi doner (0 = kaydedilemedi). */
+  kes(): Promise<number>;
   yeniBelge(): void;
   kapat(): void;
   /** Donusum modalini acar; deger = ON SECILI hedef tur (0 = ilk hedef). */
   setDonusum(v: number | null): void;
-  tahsilatAc(tur: number): void;
+  /** Tahsilat penceresini acar; belge kayitli degilse ONCE kaydeder. */
+  tahsilatAc(tur: number): Promise<void>;
 }) {
   return (
   <>
@@ -80,11 +82,11 @@ export function BelgeAracCubugu({
       </button>
       <button className="d" disabled title="Üretim emri henüz bağlanmadı.">🏭 Üretime Aktar</button>
       <span className="ayrac" />
-      <button className="d" disabled={!kayitliId || !cari}
-              title={kayitliId
+      <button className="d" disabled={!cari || kaydediyor}
+              title={cari
                 ? `Bu sipariş için ön ödeme (${alisMi ? 'ödeme' : 'tahsilat'}) işlemi aç`
-                : 'Önce siparişi kaydedin.'}
-              onClick={() => tahsilatAc(alisMi ? 31 : 21)}>
+                : 'Önce cari seçin.'}
+              onClick={() => void tahsilatAc(alisMi ? 31 : 21)}>
         💵 {alisMi ? 'Ön Ödeme Yap' : 'Ön Ödeme Al'}
       </button>
       <button className="d" disabled title="Termin güncelleme henüz bağlanmadı.">📅 Termin Güncelle</button>
@@ -132,9 +134,15 @@ export function BelgeAracCubugu({
               title={kayitliId ? 'e-Belge gönderimi henüz bağlanmadı.' : 'Önce belgeyi kaydedin.'}>
         📤 e‑Fatura Gönder
       </button>
-      <button className="d" disabled={!kayitliId || !cari}
-              title={kayitliId ? 'Bu belge için tahsilat işlemi aç' : 'Önce belgeyi kaydedin.'}
-              onClick={() => tahsilatAc(21)}>
+      {/* Kayitli olma sarti YOK (kullanici): kaydedilmemis belgede once kayit
+          yapilir, sonra tahsilat acilir. Eksik olan tek sey CARI - tahsilat
+          kimden alinacagi bilinmeden acilamaz. */}
+      <button className="d" disabled={!cari || kaydediyor}
+              title={cari
+                ? (kayitliId ? 'Bu belge için tahsilat işlemi aç'
+                             : 'Belge kaydedilip tahsilat işlemi açılır')
+                : 'Önce cari seçin.'}
+              onClick={() => void tahsilatAc(21)}>
         💵 {alisMi ? 'Ödeme' : 'Tahsilat'}
       </button>
       <button className="d" disabled title="İade belgesi henüz bağlanmadı.">↩ İade</button>

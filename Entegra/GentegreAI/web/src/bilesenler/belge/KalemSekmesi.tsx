@@ -439,8 +439,9 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
   kayitliId: number;
   /** Alis belgesinde "Tahsilat" degil "Ödeme" yazar. */
   alisMi: boolean;
-  /** Kasa islem kartini acar (tur: tahsilat 21 / odeme 31). */
-  tahsilatAc(tur: number): void;
+  /** Kasa islem kartini acar (tur: tahsilat 21 / odeme 31); belge kayitli
+      degilse ONCE kaydeder. */
+  tahsilatAc(tur: number): Promise<void>;
 }) {
 const genel = Number(sonuc?.belge.genelToplam ?? 0);
 const tahsil = tahsilatlar.reduce((t, k) => t + (Number(k.yerelTutar ?? k.tutar ?? 0) || 0), 0);
@@ -454,19 +455,24 @@ return (
       {/* Tahsilat ARACI adiyla: yanindaki POS / Cek-Senet ile ayni
           dizide - bu dugme NAKIT tahsilat (tur 21) acar. */}
       {/* Alista ODEME turleri (31/32/35), satista tahsilat (21/22/25). */}
-      <button className="d bir" disabled={!kayitliId}
-              title={kayitliId ? `Nakit ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç` : 'Önce belgeyi kaydedin.'}
-              onClick={() => tahsilatAc(alisMi ? 31 : 21)}>
+      {/* Kayitli olma sarti YOK: kaydedilmemis belgede kart once KAYDEDER,
+          sonra tahsilati acar (tahsilatAc). */}
+      <button className="d bir"
+              title={kayitliId ? `Nakit ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç`
+                               : `Belge kaydedilip nakit ${alisMi ? 'ödeme' : 'tahsilat'} açılır`}
+              onClick={() => void tahsilatAc(alisMi ? 31 : 21)}>
         💵 Nakit
       </button>
-      <button className="d bir" disabled={!kayitliId}
-              title={kayitliId ? `Banka (havale/EFT) ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç` : 'Önce belgeyi kaydedin.'}
-              onClick={() => tahsilatAc(alisMi ? 32 : 22)}>
+      <button className="d bir"
+              title={kayitliId ? `Banka (havale/EFT) ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç`
+                               : 'Belge kaydedilip banka işlemi açılır'}
+              onClick={() => void tahsilatAc(alisMi ? 32 : 22)}>
         🏦 Banka
       </button>
-      <button className="d bir" disabled={!kayitliId}
-              title={kayitliId ? `Kredi kartı / POS ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç` : 'Önce belgeyi kaydedin.'}
-              onClick={() => tahsilatAc(alisMi ? 35 : 25)}>
+      <button className="d bir"
+              title={kayitliId ? `Kredi kartı / POS ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç`
+                               : 'Belge kaydedilip POS işlemi açılır'}
+              onClick={() => void tahsilatAc(alisMi ? 35 : 25)}>
         💳 POS
       </button>
       <button className="d" disabled title="Çek/senet girişi F5'te bağlanacak">🧾 Çek/Senet Al</button>
