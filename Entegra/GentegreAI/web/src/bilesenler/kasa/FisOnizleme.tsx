@@ -1,6 +1,6 @@
 import type { FisOzeti } from '../../api/sozlesme';
+import { para } from '../bicim';
 
-const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const FIS_TURU: Record<number, string> = {
   1: 'Mahsup', 2: 'Tahsil', 3: 'Tediye', 4: 'Açılış', 5: 'Kapanış',

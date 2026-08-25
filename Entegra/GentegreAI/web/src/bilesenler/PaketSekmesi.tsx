@@ -3,9 +3,8 @@ import { Modal } from './Modal';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
 import type { DetayDurumu, Satir } from './GenDetayTablo';
 import type { KartDetayMeta, ListeSatiri } from '../api/sozlesme';
+import { para } from './bicim';
 
-/** Tutar bicimi - grid hucrelerinde iki hane. */
-const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 
 /**

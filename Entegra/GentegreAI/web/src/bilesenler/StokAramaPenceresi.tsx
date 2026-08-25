@@ -2,9 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal } from './Modal';
 import { api } from '../api/istemci';
 import { ApiHatasi, type ListeSatiri } from '../api/sozlesme';
+import { para } from './bicim';
 
-/** Tutar bicimi - liste hucrelerinde iki hane. */
-const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 /**
  * Stok / hizmet arama penceresi - satir eklemenin ilk adimi.

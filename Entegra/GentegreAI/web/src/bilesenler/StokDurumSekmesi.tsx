@@ -1,8 +1,8 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { ApiHatasi, type StokDurumYaniti, type StokLotSatiri } from '../api/sozlesme';
+import { say4 } from './bicim';
 
-const say = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 4 });
 
 /** "2027-06-30T00:00:00" -> "30.06.2027"; bos ise tire. */
 const gun = (t?: string | null) => (t ? t.slice(0, 10).split('-').reverse().join('.') : '—');
@@ -31,7 +31,7 @@ function lotTablosu(satirlar: StokLotSatiri[]) {
             <td>{l.seriNo || '—'}</td>
             <td>{gun(l.uretimTarihi)}</td>
             <td>{gun(l.sonKullanmaTarihi)}</td>
-            <td className="hiza-sag">{say.format(Number(l.kalan))}</td>
+            <td className="hiza-sag">{say4.format(Number(l.kalan))}</td>
           </tr>
         ))}
       </tbody>
@@ -41,7 +41,7 @@ function lotTablosu(satirlar: StokLotSatiri[]) {
 
 /** Bos hucre "0" degil TIRE gosterir - "tanimlanmamis" ile "sifir" ayri seylerdir. */
 const limitMetni = (d: number | null | undefined) =>
-  d === null || d === undefined ? '' : say.format(Number(d));
+  d === null || d === undefined ? '' : say4.format(Number(d));
 
 const sayiCoz = (m: string): number | null => {
   const t = m.trim();
@@ -141,22 +141,22 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
       <div className="kpi-serit">
         <div className="kpi">
           <div className="k">Toplam Stok</div>
-          <div className="v">{say.format(Number(o?.toplam ?? 0))}{birim}</div>
+          <div className="v">{say4.format(Number(o?.toplam ?? 0))}{birim}</div>
           <div className="s">{o?.depoSayisi ?? 0} depoda</div>
         </div>
         <div className="kpi">
           <div className="k">Rezerve</div>
-          <div className="v uyari">{say.format(Number(o?.rezerve ?? 0))}{birim}</div>
+          <div className="v uyari">{say4.format(Number(o?.rezerve ?? 0))}{birim}</div>
           <div className="s">açık siparişler</div>
         </div>
         <div className="kpi">
           <div className="k">Kullanılabilir</div>
-          <div className="v olumlu">{say.format(Number(o?.kullanilabilir ?? 0))}{birim}</div>
+          <div className="v olumlu">{say4.format(Number(o?.kullanilabilir ?? 0))}{birim}</div>
           <div className="s">satışa hazır</div>
         </div>
         <div className="kpi">
           <div className="k">Yoldaki (Sipariş)</div>
-          <div className="v">{say.format(Number(o?.yolda ?? 0))}{birim}</div>
+          <div className="v">{say4.format(Number(o?.yolda ?? 0))}{birim}</div>
           <div className="s">açık alış siparişleri</div>
         </div>
       </div>
@@ -203,10 +203,10 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
                     <span className="sonuk"> · {depoLotlari.length} lot</span>
                   )}
                 </td>
-                <td className="hiza-sag"><b>{say.format(Number(s.miktar))}</b></td>
-                <td className="hiza-sag">{Number(s.rezerve) ? say.format(Number(s.rezerve)) : ''}</td>
-                <td className="hiza-sag">{say.format(Number(s.kullanilabilir))}</td>
-                <td className="hiza-sag">{Number(s.yolda) ? say.format(Number(s.yolda)) : ''}</td>
+                <td className="hiza-sag"><b>{say4.format(Number(s.miktar))}</b></td>
+                <td className="hiza-sag">{Number(s.rezerve) ? say4.format(Number(s.rezerve)) : ''}</td>
+                <td className="hiza-sag">{say4.format(Number(s.kullanilabilir))}</td>
+                <td className="hiza-sag">{Number(s.yolda) ? say4.format(Number(s.yolda)) : ''}</td>
                 {limitHucre(s.depoId, 'min', s.minStok)}
                 {limitHucre(s.depoId, 'max', s.maxStok)}
                 <td className="hiza-orta">

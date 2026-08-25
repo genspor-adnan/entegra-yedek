@@ -2670,5 +2670,26 @@ adet/fiyat satıra tıklayınca açılan küçük pencerede değişir. Sekmede b
 Yan düzeltme: eşleşen iki onay kutusu (İnternet Satış | Paket) tek etiket altında
 çiziliyor ve **Paket kutusunun adı görünmüyordu**; her kutu artık kendi adını taşır.
 
+### Refaktör: belge kartı bölündü, biçim ve fiyat kuralı tek yerde
+
+Üç tekrar temizlendi, davranış aynı kaldı:
+
+- **BelgeKarti.tsx 2478 → 1812 satır.** Kalem penceresi ve lot penceresi kendi
+  dosyalarına çıktı (`bilesenler/belge/KalemPenceresi.tsx`,
+  `IzlemPenceresi.tsx`); ortak tip ve hesaplar (`SatirDurumu`, `IzlemSatiri`,
+  `satirTutari`, `izlemKurali`, `tariheEkle`, `adetKaydir`, `KDV_ORANLARI`…)
+  `sayfalar/belgeSatir.ts`'te toplandı. Stok/hizmet arama penceresi ve `Modal`
+  zaten paket sekmesi için ortak dosyaya alınmıştı.
+- **Sayı biçimi tek kaynak.** Dokuz dosya kendi `Intl.NumberFormat`'ını
+  kuruyordu; `bilesenler/bicim.ts` artık `para` (2 hane), `say4` (miktar) ve
+  `sayi` export ediyor.
+- **"Stoğun kart fiyatı" kuralı SQL'de tek yerde** (`db/128`,
+  `fn_stok_kart_fiyat(stok_id, satis)`): stok listesinin satış/alış fiyat ve
+  döviz kolonları ile paket içeriği çağrısı aynı şartı beş kez kopyalıyordu.
+
+Doğrulama: `tsc -b` + prod derleme temiz; stok listesi fiyat kolonları ve paket
+içeriği uçları refaktör öncesiyle birebir aynı değerleri döndürdü; satış
+faturasında kalem → lot seçimi akışı ekrandan denendi.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet, F6 kredi/kupon, F7 belge fişleme
 (giriş/çıkış fişlerinin muhasebe bayrağı hazır bekliyor).

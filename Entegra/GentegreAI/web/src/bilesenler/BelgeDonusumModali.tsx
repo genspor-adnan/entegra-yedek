@@ -2,9 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import { ApiHatasi, type AcikSatir, type BelgeYaniti } from '../api/sozlesme';
 import { Modal } from './GenForm';
+import { para, say4 } from './bicim';
 
-const say = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 4 });
-const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 /**
  * Numarasi KARSI TARAFTA uretilen belgeler: alis faturasinin numarasi
@@ -210,9 +209,9 @@ export function BelgeDonusumModali({ belgeId, belgeTur, onKapat, onTamam }: Prop
                       <td>
                         {s.stokKodu ? <><code>{s.stokKodu}</code> {s.stokAdi}</> : s.aciklama}
                       </td>
-                      <td className="hiza-sag">{say.format(Number(s.miktar))}</td>
-                      <td className="hiza-sag">{say.format(Number(s.kapatilanMiktar))}</td>
-                      <td className="hiza-sag"><b>{say.format(Number(s.kalanMiktar))}</b></td>
+                      <td className="hiza-sag">{say4.format(Number(s.miktar))}</td>
+                      <td className="hiza-sag">{say4.format(Number(s.kapatilanMiktar))}</td>
+                      <td className="hiza-sag"><b>{say4.format(Number(s.kalanMiktar))}</b></td>
                       <td>
                         <input
                           className="hiza-sag"

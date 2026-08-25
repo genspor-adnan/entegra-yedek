@@ -1,6 +1,6 @@
 import type { KasaBacagi } from '../../api/sozlesme';
+import { para } from '../bicim';
 
-const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const ROL_ADI: Record<string, string> = {
   ana: 'Hesap',

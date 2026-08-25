@@ -542,6 +542,15 @@ public static class KaynakKatalogu
         });
 
     // --------------------------------------------------------------- stok ----
+    /// <summary>
+    /// Stok kart fiyati kolonu (128). Kural fn_stok_kart_fiyat'ta; burada yalniz
+    /// hangi alanin (fiyat / doviz) ve hangi listenin (satis / alis) istendigi
+    /// secilir - dort kolon ayni sarti kopyalamasin.
+    /// </summary>
+    private static string StokFiyatSql(bool satis, bool doviz = false)
+        => $"(select {(doviz ? "doviz_cinsi" : "fiyat")} " +
+           $"from public.fn_stok_kart_fiyat(s.id, {(satis ? 1 : 0)}::smallint))";
+
     private static KaynakTanimi Stok() => new(
         Ad: "stok",
         YetkiKodu: "stok",
@@ -586,30 +595,18 @@ public static class KaynakKatalogu
             // PAKET (124): belge kalemi secimde bunu okur ve paketi ICERIGIYLE
             //   birlikte ekler.
             new("paket",     "s.paket",     "mantik","Paket",     Hizalama: "orta", Varsayilan: false),
-            // Fiyat: stok_fiyat'ta satis/alis AYRI kayittir ve -1 "fiyat girilmemis"
-            //   demektir; en dusuk fiyat_adi (ana liste) alinir.
-            new("fiyat",
-                "(select f.fiyat from public.stok_fiyat f " +
-                " where f.stok_id = s.id and f.satis = 1 and f.fiyat > 0 " +
-                " order by f.fiyat_adi limit 1)",
+            // Fiyat: kural TEK YERDE - fn_stok_kart_fiyat (128). Alis/satis ayri
+            //   satirdir, -1 "girilmemis" demektir, en dusuk fiyat_adi esastir.
+            new("fiyat",       StokFiyatSql(satis: true),
                                             "para",  "Fiyat",    Hizalama: "sag", Bicim: "#,##0.00",
                                             Siralanabilir: false, Filtrelenebilir: false),
-            new("fiyatDovizi",
-                "public.fn_doviz_iso((select f.doviz_cinsi from public.stok_fiyat f " +
-                " where f.stok_id = s.id and f.satis = 1 and f.fiyat > 0 " +
-                " order by f.fiyat_adi limit 1))",
+            new("fiyatDovizi", $"public.fn_doviz_iso({StokFiyatSql(satis: true, doviz: true)})",
                                             "metin", "Döviz",    Hizalama: "orta",
                                             Siralanabilir: false, Filtrelenebilir: false),
-            new("alisFiyat",
-                "(select f.fiyat from public.stok_fiyat f " +
-                " where f.stok_id = s.id and f.satis = 0 and f.fiyat > 0 " +
-                " order by f.fiyat_adi limit 1)",
+            new("alisFiyat",   StokFiyatSql(satis: false),
                                             "para",  "Alış Fiyatı", Hizalama: "sag", Bicim: "#,##0.00",
                                             Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
-            new("alisDovizi",
-                "(select f.doviz_cinsi from public.stok_fiyat f " +
-                " where f.stok_id = s.id and f.satis = 0 and f.fiyat > 0 " +
-                " order by f.fiyat_adi limit 1)",
+            new("alisDovizi",  StokFiyatSql(satis: false, doviz: true),
                                             "metin", "Alış Dövizi", Hizalama: "orta",
                                             Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
             new("minStok",   "s.min_stok",  "sayi",  "Min. Stok",Hizalama: "sag", Varsayilan: false),

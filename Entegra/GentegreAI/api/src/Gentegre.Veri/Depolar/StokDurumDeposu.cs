@@ -454,14 +454,11 @@ public sealed class StokDurumDeposu
                    case when p.birim > 0 then p.birim else s.ana_birim end as birim,
                    p.adet, s.kdv, s.izleme,
                    -- FIYAT: pakette girilmisse O, girilmemisse stogun KENDI kart
-                   --   fiyati (belge yonune gore alis ya da satis listesi).
-                   --   stok_fiyat'ta -1 "fiyat girilmemis" demektir.
+                   --   fiyati. Kart fiyati kurali fn_stok_kart_fiyat'ta (128) -
+                   --   liste kolonlariyla ayni yerden okunur.
                    case when p.birim_fiyat > 0 then p.birim_fiyat
-                        else coalesce((select f.fiyat from public.stok_fiyat f
-                                        where f.stok_id = s.id
-                                          and f.satis = case when @p1 then 0 else 1 end
-                                          and f.fiyat > 0
-                                        order by f.fiyat_adi limit 1), 0)
+                        else coalesce((select fiyat from public.fn_stok_kart_fiyat(
+                                         s.id, (case when @p1 then 0 else 1 end)::smallint)), 0)
                    end as fiyat
               from public.stok_paket p
               join public.stok s on s.id = p.icerik_stok_id

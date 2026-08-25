@@ -11,8 +11,8 @@ import { BacakListesi } from '../bilesenler/kasa/BacakSatiri';
 import { FisOnizleme } from '../bilesenler/kasa/FisOnizleme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { Modal } from '../bilesenler/GenForm';
+import { para } from '../bilesenler/bicim';
 
-const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const LOOKUP_HESAP = [
   { ad: 'kod', baslik: 'Kod' },

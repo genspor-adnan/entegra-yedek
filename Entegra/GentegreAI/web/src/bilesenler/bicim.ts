@@ -1,7 +1,16 @@
 import type { KolonMeta } from '../api/sozlesme';
 
-const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const sayi = new Intl.NumberFormat('tr-TR');
+/**
+ * TEK BICIM KAYNAGI: tutar / miktar bicimleri butun ekranlarda ayni olmali.
+ *   para  - iki hane, tutar kolonlari
+ *   say4  - dorde kadar hane, MIKTAR (0,5 adet / 12,375 kg)
+ *   sayi  - tam sayi
+ * Onceden her dosya kendi Intl.NumberFormat'ini kuruyordu (8 kopya); biri
+ * degistiginde otekiler geride kaliyordu.
+ */
+export const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+export const say4 = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 4 });
+export const sayi = new Intl.NumberFormat('tr-TR');
 const tarih = new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 const tarihSaat = new Intl.DateTimeFormat('tr-TR', {
   day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',

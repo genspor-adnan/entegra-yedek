@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { ApiHatasi, type StokHareketYaniti } from '../api/sozlesme';
+import { say4 } from './bicim';
 
-const say = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 4 });
 const gun = (t: string) => new Date(t).toLocaleDateString('tr-TR');
 
 /** Belge türünden liste/kart yolu - hareket satırına çift tıklayınca oraya gidilir. */
@@ -57,8 +57,8 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
     const basliklar = ['Tarih', 'Belge', 'Belge No', 'Cari', 'Depo', 'Giriş', 'Çıkış', 'Kalan', 'Açıklama'];
     const satirlar = (veri?.satirlar ?? []).map(s => [
       gun(s.tarih), s.belgeTurAdi, s.belgeNo, s.tarafUnvan, s.depo,
-      s.giris ? say.format(s.giris) : '', s.cikis ? say.format(s.cikis) : '',
-      say.format(s.kalan), s.aciklama,
+      s.giris ? say4.format(s.giris) : '', s.cikis ? say4.format(s.cikis) : '',
+      say4.format(s.kalan), s.aciklama,
     ]);
     // Excel-TR: ayirac ";" ve UTF-8 BOM (yoksa Turkce karakterler bozuluyor).
     const metin = '﻿' + [basliklar, ...satirlar]
@@ -92,8 +92,8 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
             </select>
           </label>
           <span className="hareket-ozet">
-            Devir: <b>{say.format(Number(veri?.devir ?? 0))}</b> ·
-            Kapanış: <b>{say.format(Number(veri?.kapanis ?? 0))}{birim}</b>
+            Devir: <b>{say4.format(Number(veri?.devir ?? 0))}</b> ·
+            Kapanış: <b>{say4.format(Number(veri?.kapanis ?? 0))}{birim}</b>
           </span>
         </div>
 
@@ -113,7 +113,7 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
             <tbody>
               <tr className="devir-satiri">
                 <td colSpan={6}><i>Devir (aralıktan önce)</i></td>
-                <td className="hiza-sag"><b>{say.format(Number(veri?.devir ?? 0))}</b></td>
+                <td className="hiza-sag"><b>{say4.format(Number(veri?.devir ?? 0))}</b></td>
               </tr>
               {(veri?.satirlar ?? []).map((s, i) => (
                 // Cift tik: hareketi ureten belgeyi ac (ekstre satirlarindaki kural).
@@ -129,9 +129,9 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
                     </span>
                   </td>
                   <td>{s.depo}{s.tarafUnvan ? <span className="soluk"> · {s.tarafUnvan}</span> : null}</td>
-                  <td className="hiza-sag">{s.giris ? say.format(s.giris) : ''}</td>
-                  <td className="hiza-sag">{s.cikis ? say.format(s.cikis) : ''}</td>
-                  <td className="hiza-sag">{say.format(s.kalan)}</td>
+                  <td className="hiza-sag">{s.giris ? say4.format(s.giris) : ''}</td>
+                  <td className="hiza-sag">{s.cikis ? say4.format(s.cikis) : ''}</td>
+                  <td className="hiza-sag">{say4.format(s.kalan)}</td>
                 </tr>
               ))}
               {(veri?.satirlar ?? []).length === 0 && (
@@ -141,9 +141,9 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
             <tfoot>
               <tr className="genel">
                 <td colSpan={4}>{(veri?.satirlar ?? []).length} hareket</td>
-                <td className="hiza-sag">{say.format((veri?.satirlar ?? []).reduce((t, s) => t + Number(s.giris), 0))}</td>
-                <td className="hiza-sag">{say.format((veri?.satirlar ?? []).reduce((t, s) => t + Number(s.cikis), 0))}</td>
-                <td className="hiza-sag"><b>{say.format(Number(veri?.kapanis ?? 0))}</b></td>
+                <td className="hiza-sag">{say4.format((veri?.satirlar ?? []).reduce((t, s) => t + Number(s.giris), 0))}</td>
+                <td className="hiza-sag">{say4.format((veri?.satirlar ?? []).reduce((t, s) => t + Number(s.cikis), 0))}</td>
+                <td className="hiza-sag"><b>{say4.format(Number(veri?.kapanis ?? 0))}</b></td>
               </tr>
             </tfoot>
           </table>
