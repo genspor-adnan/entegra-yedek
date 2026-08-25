@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Npgsql;
@@ -59,6 +60,8 @@ public sealed partial class KasaDeposu
 
         if (baglam.SubeId is { } sube) islem["subeId"] = sube;
 
+        IleriTarihKontrol(islem);
+
         await TarafSnapshotAsync(baglanti, tx, islem, iptal);
         await DovizDoldurAsync(baglanti, tx, islem, secenekler, uyarilar, iptal);
 
@@ -114,6 +117,26 @@ public sealed partial class KasaDeposu
         return (id, uyarilar);
     }
 
+    /// <summary>
+    /// ILERI TARIH YASAGI (146): para henuz el degistirmeden tahsilat yazilamaz.
+    /// Saat de denetlenir - `islem_tarihi` artik timestamp. Kuruluşun saat
+    /// dilimi esas alinir (Saat.Simdi); sunucunun UTC saati degil, yoksa
+    /// Turkiye'de ogleden sonra girilen tahsilat "ileri tarihli" sayilirdi.
+    ///
+    /// PLAN tarihi bunun DISINDA: plan zaten gelecege yazilir.
+    /// </summary>
+    private static void IleriTarihKontrol(IDictionary<string, object?> islem)
+    {
+        if (islem.TryGetValue("islemTarihi", out var ham) && ham is DateTime t)
+        {
+            // Dakika toleransi: istemcinin saati birkac saniye ileri olabilir.
+            if (t > Saat.Simdi.AddMinutes(1))
+                throw GentegreHatasi.Dogrulama(
+                    "İleri tarihli işlem kaydedilemez.",
+                    new AlanHatasi("islemTarihi", "Bugünden ileri olamaz."));
+        }
+    }
+
     /// <summary>Taslak/plan duzenleme. Gerceklesmis islem degistirilemez - iptal edilir.</summary>
     public async Task<List<string>> GuncelleAsync(
         int id, IDictionary<string, object?> islem,
@@ -150,6 +173,8 @@ public sealed partial class KasaDeposu
         await DovizDoldurAsync(baglanti, tx, islem, secenekler, uyarilar, iptal);
         islem.Remove("durum");
         islem.Remove("islemNo");
+
+        IleriTarihKontrol(islem);
 
         await BaslikGuncelleAsync(baglanti, tx, id, islem, baglam, iptal);
 

@@ -11,7 +11,7 @@ import { FisOnizleme } from '../bilesenler/kasa/FisOnizleme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { Modal } from '../bilesenler/GenForm';
 import { para } from '../bilesenler/bicim';
-import { DOVIZ_KODLARI, YEREL_PARA_VARSAYILAN } from './belgeSabitleri';
+import { DOVIZ_KODLARI, YEREL_PARA_VARSAYILAN, yerelAnMetni } from './belgeSabitleri';
 
 
 const LOOKUP_HESAP = [
@@ -88,7 +88,10 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const [turler, setTurler] = useState<KasaIslemTuru[]>([]);
   const [tur, setTur] = useState<number>(
     acilis?.tur ?? (Number(sorgu.get('tur')) || 21));
-  const [tarih, setTarih] = useState(new Date().toISOString().slice(0, 10));
+  // Islem tarihi SAATIYLE birlikte (146): gun icinde hangi tahsilatin once
+  //   alindigi kasa sayiminda ve ekstre siralamasinda onemli. Yerel an -
+  //   toISOString() UTC verir, aksam saatlerinde bir sonraki gunu yazardi.
+  const [tarih, setTarih] = useState(yerelAnMetni(new Date()));
   const [planTarihi, setPlanTarihi] = useState('');
   // Belgeden gelen cari/tutar onyuklenir - kullanici ayni bilgiyi ikinci kez
   //   girmesin (URL parametreleri tam sayfa acilista ayni isi gorur).
@@ -150,6 +153,8 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
    * degistirebilir (cek/senette hesap yok, kiymet USD olabilir). Uyusmazlik
    * SUNUCUDA denetlenir; burada engellemek dogru kaydi da imkansiz kilardi.
    */
+  /** Ileri tarih yasagi icin ust sinir - dakikada bir tazelenmesine gerek yok. */
+  const enGecAn = yerelAnMetni(new Date());
   const anaDoviz = doviz;
   const dovizli = anaDoviz !== 'TL';
   const ekleyebilir = yetki('kasa_islem', 'ekle');
@@ -168,7 +173,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     onKaydedildi?.();
     const i = y.islem;
     setTur(Number(i.tur));
-    if (i.islemTarihi) setTarih(String(i.islemTarihi).slice(0, 10));
+    if (i.islemTarihi) setTarih(String(i.islemTarihi).slice(0, 16));
     setPlanTarihi(i.planTarihi ? String(i.planTarihi).slice(0, 10) : '');
     setTutar(String(i.tutar ?? ''));
     setKur(String(i.dovizKuru ?? 1));
@@ -503,7 +508,11 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
 
               <label className="alan">
                 <span className="etiket">İşlem Tarihi</span>
-                <input type="date" value={tarih} disabled={kilitli}
+                {/* ILERI TARIH YASAK (kullanici): para el degistirmeden tahsilat
+                    yazilamaz. `max` tarayicida engeller, sunucu da ayrica
+                    dogrular (KasaDeposu.IleriTarihKontrol). */}
+                <input type="datetime-local" value={tarih} disabled={kilitli}
+                       max={enGecAn}
                        onChange={e => setTarih(e.target.value)} />
               </label>
 
