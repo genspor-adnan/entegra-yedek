@@ -135,7 +135,7 @@ public static partial class KartKatalogu
             //   kagidi oldugu (CARI) daha degerli. Alan yine var, "Genel"de.
             // KIMLIK SERIDI (kullanici sirasi): Cari . Tutar . Para Birimi . Vade -
             //   "kimin kagidi, ne kadar, ne zaman" bir bakista okunsun.
-            new("tarafId",       "taraf_id",        "kod",   KodTablosu: "public.v_cari_lookup", Baslik: "Cari", Grup: "Kimlik"),
+            new("tarafId",       "taraf_id",        "kod",   Zorunlu: true, KodTablosu: "public.v_cari_lookup", Baslik: "Cari", Grup: "Kimlik"),
             new("tutar",         "tutar",           "para",  Zorunlu: true, Baslik: "Tutar", Grup: "Kimlik", EslesAlan: "dovizCinsi"),
             new("dovizCinsi",    "doviz_cinsi",     "kod",   SabitKodlar: DovizKodlari, Baslik: "Para Birimi", Grup: "Kimlik"),
             new("vade",          "vade",            "tarih", Zorunlu: true, Baslik: "Vade", Grup: "Kimlik"),
@@ -153,7 +153,7 @@ public static partial class KartKatalogu
             new("tarih",         "tarih",           "zaman", Zorunlu: true, Baslik: "Tarih / Saat", Grup: "Genel", AltGrup: "Belge"),
             // Seri No tarihin HEMEN ALTINDA (kullanici): kagidin uzerindeki
             //   iki bilgi (ne zaman, hangi numara) birlikte okunuyor.
-            new("seriNo",        "seri_no",         "metin", EnFazlaUzunluk: 30, Baslik: "Seri No", Grup: "Genel", AltGrup: "Belge"),
+            new("seriNo",        "seri_no",         "metin", Zorunlu: true, EnFazlaUzunluk: 30, Baslik: "Seri No", Grup: "Genel", AltGrup: "Belge"),
             new("dovizKuru",     "doviz_kuru",      "para",  Baslik: "Kur", Grup: "Genel", AltGrup: "Belge"),
             // Yerel karsilik SUNUCUDA hesaplanir (tutar x kur) - kullanici
             //   yazamaz; yoksa kurla tutarsiz bir yerel tutar kaydedilebilirdi.

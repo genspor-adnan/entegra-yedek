@@ -524,9 +524,13 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
               belirleyen alan - kimlik seridinde yer kaplamasin diye buraya
               alindi; karttaki alan Gizli, deger buradan yazilir. */}
           {kaynak === 'cek-senet' && meta.alanlar.some(a => a.ad === 'yon') && (
-            <label className="satir-ici" title="Alınan: müşteriden geldi · Verilen: tedarikçiye verildi">
+            <label className="satir-ici" style={{ fontSize: 13, gap: 8 }}
+                   title="Alınan: müşteriden geldi · Verilen: tedarikçiye verildi">
               Yön
-              <select value={String(deger.yon ?? 1)} disabled={salt} style={{ width: 110 }}
+              {/* Arac cubugundaki tek secim - kutu ve yazi biraz daha buyuk
+                  (kullanici): kagidin yonunu belirleyen alan goze carpsin. */}
+              <select value={String(deger.yon ?? 1)} disabled={salt}
+                      style={{ width: 150, height: 28, fontSize: 13 }}
                       onChange={e => setDeger(d => ({ ...d, yon: Number(e.target.value) }))}>
                 <option value={1}>Alınan</option>
                 <option value={2}>Verilen</option>
