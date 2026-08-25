@@ -124,21 +124,47 @@ export function GenLookup({
       {acik && (
         <>
           <div className="perde" onClick={() => setAcik(false)} />
+          {/* Pencere duzeni CARI/STOK ARAMASIYLA AYNI (kullanici): sol ustte
+              Seç, sag ustte Kapat, arama kutusu oval, satir basinda isaret
+              kutusu. Ayni is (listeden secim) her ekranda ayni gorunsun -
+              hesap/depo/proje aramasi ayri bir bicimdeydi. */}
           <div className="lookup-pencere" onKeyDown={tus}>
-            <input
-              ref={kutu}
-              className="arama"
-              placeholder={`${kaynak} ara…`}
-              defaultValue=""
-              onChange={e => yaz(e.target.value)}
-            />
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button type="button" className="d bir" disabled={!satirlar[secili]}
+                      onClick={() => satirlar[secili] && sec(satirlar[secili])}>
+                Seç
+              </button>
+              <span style={{ flex: 1 }} />
+              <button type="button" className="d kapat-dugmesi"
+                      onClick={() => setAcik(false)}>Kapat</button>
+            </div>
+
+            <div className="cipler" style={{ margin: 0 }}>
+              <div className="ara" style={{
+                maxWidth: 260, margin: 0, height: 23, borderRadius: 12,
+                background: 'var(--yuz)', color: 'var(--yazi)', border: '1px solid var(--cizgi)',
+              }}>
+                <span>🔍</span>
+                <input
+                  ref={kutu}
+                  style={{ border: 0, background: 'transparent', outline: 'none',
+                           width: '100%', color: 'inherit' }}
+                  placeholder="Ara…"
+                  defaultValue=""
+                  onChange={e => yaz(e.target.value)}
+                />
+              </div>
+            </div>
 
             {listeHatasi && <div className="hata-kutusu">{listeHatasi}</div>}
 
             <div className="lookup-liste">
               <table>
                 <thead>
-                  <tr>{alanlar.map(a => <th key={a.ad} className={a.genis ? 'genis' : ''}>{a.baslik}</th>)}</tr>
+                  <tr>
+                    <th className="check" />
+                    {alanlar.map(a => <th key={a.ad} className={a.genis ? 'genis' : ''}>{a.baslik}</th>)}
+                  </tr>
                 </thead>
                 <tbody>
                   {satirlar.map((satir, i) => (
@@ -148,20 +174,25 @@ export function GenLookup({
                       onMouseEnter={() => setSecili(i)}
                       onClick={() => sec(satir)}
                     >
+                      {/* Isaret kutusu SECILI SATIRI gosterir; tikla = sec
+                          (cari aramasindaki davranisin aynisi). */}
+                      <td className="hiza-orta" onClick={e => e.stopPropagation()}>
+                        <input type="checkbox" checked={i === secili} readOnly
+                               onChange={() => sec(satir)} />
+                      </td>
                       {alanlar.map(a => <td key={a.ad}>{String(satir[a.ad] ?? '')}</td>)}
                     </tr>
                   ))}
                   {!yukleniyor && satirlar.length === 0 && (
-                    <tr><td colSpan={alanlar.length} className="bos">Kayit yok</td></tr>
+                    <tr><td colSpan={alanlar.length + 1} className="bos">Kayıt yok</td></tr>
                   )}
                 </tbody>
               </table>
-              {yukleniyor && <div className="yukleniyor">Araniyor…</div>}
+              {yukleniyor && <div className="yukleniyor">Aranıyor…</div>}
             </div>
 
             <div className="lookup-alt">
-              <span>↑↓ gez · Enter sec · Esc kapat</span>
-              <button type="button" onClick={() => setAcik(false)}>Kapat</button>
+              <span>↑↓ gez · Enter seç · Esc kapat</span>
             </div>
           </div>
         </>

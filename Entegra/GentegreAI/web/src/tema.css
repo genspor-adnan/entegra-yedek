@@ -625,8 +625,10 @@ input.skt-gecmis {
    kolonu genisletmeye devam ediyordu. Tip/Kod/Gorev-Rol DAR (kisa icerik), Unvan/Bagli
    Kurum GENIS (uzun ad) - toplam modal genisligine (880px) sigacak sekilde px ile sabit. */
 .taraf-arama .lookup-liste table { table-layout: fixed }
-.taraf-arama .lookup-liste th.check { width: 28px }
-.taraf-arama .lookup-liste td.check { text-align: center }
+/* Isaret kutusu kolonu TUM secim pencerelerinde ayni (cari/stok aramasi ve
+   GenLookup) - kural artik .taraf-arama'ya bagli degil. */
+.lookup-liste th.check { width: 28px }
+.lookup-liste td.check { text-align: center }
 .taraf-arama .lookup-liste th.dar { width: 80px }
 .taraf-arama .lookup-liste th.genis { width: 280px }
 .taraf-arama .lookup-liste th.bagli-kurum { width: 260px }

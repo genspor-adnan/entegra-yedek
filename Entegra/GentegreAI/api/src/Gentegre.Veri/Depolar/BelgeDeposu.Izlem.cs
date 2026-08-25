@@ -467,26 +467,36 @@ public sealed partial class BelgeDeposu
         await using var oku = new NpgsqlCommand("""
             select s.stok_id, s.miktar, s.adet,
                    coalesce(s.cikis_depo_id, b.cikis_depo_id) as cikis_depo_id,
-                   coalesce(s.giris_depo_id, b.giris_depo_id) as giris_depo_id
+                   coalesce(s.giris_depo_id, b.giris_depo_id) as giris_depo_id,
+                   coalesce(st.yeniden_kullanilir, 0) as yeniden_kullanilir
               from public.belge_satir s
               join public.belge b on b.id = s.belge_id
+              left join public.stok st on st.id = s.stok_id
              where s.belge_id = @p0 and s.tur = 1 and s.stok_id is not null
                and s.stok_durum_degis = 1
             """, baglanti, islem);
         oku.Parameters.AddWithValue("p0", belgeId);
 
-        var hareketler = new List<(int StokId, decimal Miktar, int? CikisDepo, int? GirisDepo)>();
+        var hareketler = new List<(int StokId, decimal Miktar, int? CikisDepo, int? GirisDepo,
+                                   bool Reuse)>();
         await using (var okuyucu = await oku.ExecuteReaderAsync(iptal))
             while (await okuyucu.ReadAsync(iptal))
             {
                 var miktar = okuyucu.GetDecimal(okuyucu.GetOrdinal("miktar"));
                 if (miktar == 0) miktar = okuyucu.GetDecimal(okuyucu.GetOrdinal("adet"));
                 hareketler.Add((okuyucu.Sayi("stok_id"), miktar,
-                                okuyucu.SayiNull("cikis_depo_id"), okuyucu.SayiNull("giris_depo_id")));
+                                okuyucu.SayiNull("cikis_depo_id"), okuyucu.SayiNull("giris_depo_id"),
+                                okuyucu.Sayi("yeniden_kullanilir") == 1));
             }
 
-        foreach (var (stokId, miktar, cikisDepo, girisDepo) in hareketler)
+        foreach (var (stokId, miktar, cikisDepo, girisDepo, reuse) in hareketler)
         {
+            // REUSE stok (141): kiralik/demirbas gibi geri donup tekrar cikan
+            //   kiymet - satista "elimde kac tane var" sinirlamasi anlamsizdir,
+            //   ayni ekipman ay boyunca defalarca cikip girer. Bakiye yine
+            //   yazilir (kimde/nerede oldugu izlenebilsin) ama YETERSIZLIK
+            //   kontrolu uygulanmaz.
+            var satirKontrolu = stokKontrolu && !reuse;
             if (transfer)
             {
                 if (cikisDepo is null || girisDepo is null)
@@ -496,9 +506,9 @@ public sealed partial class BelgeDeposu
                     throw GentegreHatasi.IsKurali("Çıkış ve giriş deposu aynı olamaz.");
 
                 await DepoyaYazAsync(baglanti, islem, stokId, cikisDepo.Value, 0m, miktar,
-                                     stokKontrolu, negatifDavranis, uyarilar, iptal);
+                                     satirKontrolu, negatifDavranis, uyarilar, iptal);
                 await DepoyaYazAsync(baglanti, islem, stokId, girisDepo.Value, miktar, 0m,
-                                     stokKontrolu, negatifDavranis, uyarilar, iptal);
+                                     satirKontrolu, negatifDavranis, uyarilar, iptal);
                 continue;
             }
 
@@ -508,7 +518,7 @@ public sealed partial class BelgeDeposu
 
             await DepoyaYazAsync(baglanti, islem, stokId, depoId.Value,
                                  cikis ? 0m : miktar, cikis ? miktar : 0m,
-                                 stokKontrolu, negatifDavranis, uyarilar, iptal);
+                                 satirKontrolu, negatifDavranis, uyarilar, iptal);
         }
     }
 
