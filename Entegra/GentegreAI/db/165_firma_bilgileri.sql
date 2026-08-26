@@ -13,13 +13,12 @@
 --  adresi ve gonderici etiketi gider. Tek subeli kurulumda Merkez tek kayittir
 --  ve "firma bilgileri" odur - ayri bir firma tablosu acilmadi.
 --
---  MOCKUP'TAKI EK ALANLAR: firma kimligi (tur, NACE, kurulus, sermaye, oda),
---  faaliyet (sektor, calisan, SGK) ve iletisim (KEP, GSM, 2. telefon).
---  KEP e-Belge ile dogrudan ilgili; digerleri firma kartinin kendi bilgisi.
+--  MOCKUP'TAKI EK ALANLAR: firma kimligi (tur, NACE, kurulus, sermaye, oda) ve
+--  iletisim (KEP, GSM, 2. telefon). KEP e-Belge ile dogrudan ilgili.
 --
---  MOCKUP'TA OLUP BURADA OLMAYAN: "Yetkili / İmza" ve "Sevkiyat / Fatura
---  Adresleri" gridleri kendi tablolarini ister (bir subede n yetkili, n adres);
---  bu dosyada YOK - ihtiyac dogunca ayri numarayla gelir.
+--  MOCKUP'TA OLUP BILEREK ALINMAYANLAR (kullanici karari): "Yetkili / İmza",
+--  "Faaliyet" (sektor/SGK/calisan), "Kayıt Bilgisi" ve "Sevkiyat / Fatura
+--  Adresleri" bloklari.
 -- ============================================================================
 \set ON_ERROR_STOP on
 
@@ -31,13 +30,6 @@ alter table public.sube
     add column if not exists sermaye          numeric(18,2) not null default 0,
     add column if not exists ticaret_odasi    varchar(120) not null default '',
     add column if not exists oda_sicil_no     varchar(40)  not null default '';
-
--- ------------------------------------------------------------ faaliyet -----
-alter table public.sube
-    add column if not exists sektor           varchar(120) not null default '',
-    add column if not exists faaliyet_konusu  varchar(300) not null default '',
-    add column if not exists calisan_sayisi   integer      not null default 0,
-    add column if not exists sgk_sicil_no     varchar(40)  not null default '';
 
 -- ------------------------------------------------------------ iletisim -----
 alter table public.sube

@@ -109,14 +109,21 @@ public static partial class KaynakKatalogu
             new("vd",       "s.vd",       "metin", "Vergi Dairesi", Varsayilan: false),
             new("il",       "s.il",       "metin", "İl", Hizalama: "orta"),
             new("efaturaAlias", "s.efatura_alias", "metin", "Gönderici Etiketi", Varsayilan: false),
+            // Sube kendi kimligiyle mi merkezin kimligiyle mi gonderiyor (169).
+            new("ebelgeKimlikAdi",
+                """
+                case s.ebelge_kimlik when 2 then 'Merkez'
+                                     when 3 then 'Merkez kimliği + şube adresi'
+                                     else 'Kendi' end
+                """,                      "metin", "Gönderici Kimliği",
+                                          Genislik: 190, Filtrelenebilir: false),
             // e-Belge gonderimi icin gereken alanlar tam mi - eksikse gonderim
-            //   dogrulamasi durur, sebebi listede bir bakista gorunsun.
+            //   dogrulamasi durur, sebebi listede bir bakista gorunsun. Merkez
+            //   kimligi kullanan sube kendi VKN'si olmadan da "Tamam" olabilir,
+            //   o yuzden kontrol gorunumden (169) gelir.
             new("ebelgeHazir",
                 """
-                case when coalesce(btrim(s.unvan), '') <> '' and coalesce(btrim(s.vkno), '') <> ''
-                       and coalesce(btrim(s.vd), '') <> '' and coalesce(btrim(s.adres), '') <> ''
-                       and coalesce(btrim(s.il), '') <> ''
-                     then 'Tamam' else 'Eksik' end
+                case when public.fn_sube_ebelge_hazir(s.id) then 'Tamam' else 'Eksik' end
                 """,                      "metin", "e-Belge Bilgileri",
                                           Hizalama: "orta", Bicim: "rozet", Genislik: 130,
                                           Siralanabilir: false, Filtrelenebilir: false),

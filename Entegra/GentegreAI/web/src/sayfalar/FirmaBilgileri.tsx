@@ -155,7 +155,11 @@ export function FirmaBilgileri() {
               ))}
             </tbody>
           </table>
-          <div className="not">Satıra çift tıklayınca şube bilgileri açılır.</div>
+          <div className="not">
+            Satıra çift tıklayınca şube bilgileri açılır. <b>Gönderici Kimliği</b>
+            “Merkez” ise şubenin faturası merkezin ünvanı ve VKN’siyle gider;
+            “Merkez kimliği + şube adresi”nde ünvan/VKN merkezin, adres şubenindir.
+          </div>
         </div>
       )}
 
