@@ -921,11 +921,15 @@ input.skt-gecmis {
 @media (max-width: 1100px) { .numaralama-izgara { grid-template-columns: 1fr } }
 
 /* Baslik ve "Yeni" dugmesi ayni satirda. */
-.numaralama-bas { display: flex; align-items: center; justify-content: space-between; gap: 8px }
-.numaralama-bas h6 { margin: 0 }
-/* Basliklar 11px ile okunmuyordu (kullanici): bu ekranda bolum basligi ve
-   grid kolon basliklari bir tik buyuk ve daha koyu. */
-.numaralama-izgara .kagrup > h6 { font-size: 13px; color: var(--yazi) }
+/* Grid basligi + "Yeni" dugmesi. Basliklar 11px ile okunmuyordu (kullanici);
+   DIKKAT: h6 bu sarmalayicinin icinde - `.kagrup > h6` seciciyle YAKALANMAZ,
+   ilk denemede bu yuzden kucuk kalmisti. */
+.numaralama-bas {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 6px 10px; background: linear-gradient(#f0f5fa, #e6eef6);
+  border-bottom: 1px solid var(--cizgi2);
+}
+.numaralama-bas h6 { margin: 0; font-size: 13px; color: var(--yazi); font-weight: 700 }
 .numaralama-izgara table.grid th { font-size: 12px; color: #24405e }
 .numaralama-bas .d.mini { padding: 2px 8px; font-size: 11px; line-height: 18px }
 
