@@ -923,4 +923,8 @@ input.skt-gecmis {
 /* Baslik ve "Yeni" dugmesi ayni satirda. */
 .numaralama-bas { display: flex; align-items: center; justify-content: space-between; gap: 8px }
 .numaralama-bas h6 { margin: 0 }
+/* Basliklar 11px ile okunmuyordu (kullanici): bu ekranda bolum basligi ve
+   grid kolon basliklari bir tik buyuk ve daha koyu. */
+.numaralama-izgara .kagrup > h6 { font-size: 13px; color: var(--yazi) }
+.numaralama-izgara table.grid th { font-size: 12px; color: #24405e }
 .numaralama-bas .d.mini { padding: 2px 8px; font-size: 11px; line-height: 18px }

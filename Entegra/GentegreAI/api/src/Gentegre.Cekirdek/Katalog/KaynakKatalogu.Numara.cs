@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// NUMARALAMA (152) - Genel Ayarlar › Numaralama ekranindaki dort grid.
@@ -23,7 +23,9 @@ public static partial class KaynakKatalogu
         //   varsayilan kolonlarda degil.
         new("hane",          "n.hane",            "sayi",  "Hane", Hizalama: "orta", Varsayilan: false),
         new("subeAdi",       "s.ad",              "metin", "Şube", Varsayilan: false),
-        new("durum",         "n.durum",           "kod",   "Durum", Hizalama: "orta", Varsayilan: false)
+        // SON SUTUN: durum rozeti (kullanici). "kod" tipli 0/1 kolonu gridHucre
+        //   otomatik yesil "Aktif" / kirmizi "Pasif" olarak cizer.
+        new("durum",         "n.durum",           "kod",   "Durum", Hizalama: "orta")
     ];
 
     /// <summary>

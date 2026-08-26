@@ -4,7 +4,7 @@ import { NumaralamaSekmesi } from '../bilesenler/NumaralamaSekmesi';
 
 const SEKMELER = [
   { anahtar: 'genel',      baslik: 'Genel' },
-  { anahtar: 'numaralama', baslik: 'Numaralama' },
+  { anahtar: 'numaralama', baslik: 'Belge No' },
   { anahtar: 'guvenlik',   baslik: 'Güvenlik' },
 ] as const;
 

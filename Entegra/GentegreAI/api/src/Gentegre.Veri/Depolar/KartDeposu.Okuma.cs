@@ -167,6 +167,9 @@ public sealed partial class KartDeposu
             "public.v_banka_lookup", "public.v_banka_sube_lookup",
             // ÜTS mensei ulkesi (119), firsat urun satirinda stok secimi (121).
             "public.v_ulke_lookup", "public.v_stok_lookup",
+            // Numaralama (152) - dort gridin tur secim listeleri.
+            "public.v_numara_turu_satis", "public.v_numara_turu_alis",
+            "public.v_numara_turu_tahsilat", "public.v_numara_turu_odeme",
         };
 
     private static string KodTablosuDogrula(string tablo)

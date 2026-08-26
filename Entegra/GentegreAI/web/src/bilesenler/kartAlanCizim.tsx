@@ -99,15 +99,21 @@ export function alanCizici(b: AlanCizimBaglami) {
             disabled={salt || !a.yazilabilir || ustBos}
             onChange={e => alanDegistir(a.ad, e.target.value)}
           >
-            {/* Bos secenek yalniz ZORUNLU OLMAYAN alanlarda: zorunlu bir kod alaninda
-                (ör. Depo > Durum) "—" secilebilir gorunmesi yaniltici. */}
-            {!a.zorunlu && (
-              <option value="">
+            {/* Bos secenek ZORUNLU OLMAYAN alanlarda her zaman var ("—" ile
+                temizlenebilsin). ZORUNLU alanda ise yalnizca DEGER BOSKEN, ve
+                SECILEMEZ olarak: yoksa select ilk secenegi GOSTERIYOR ama state
+                bos kaliyordu - kullanici "Satış Faturası" yazisini gorup
+                kaydediyor, sunucu "Satış Belgesi Türü boş bırakılamaz" diyordu
+                (gercek vaka). Secili degeri olan zorunlu alanda bos secenek
+                cizilmez: geri "—" yapilamasin. */}
+            {(!a.zorunlu || String(deger[a.ad] ?? '') === '') && (
+              <option value="" disabled={a.zorunlu}>
                 {/* Bagli listede bos secenek NEDEN bos oldugunu soylesin: kullanici
                     "sube gelmedi" diye ariyordu - once banka secilmesi ya da o
                     bankaya hic sube girilmemis olmasi bilgisi ekranda yok. */}
                 {ustBos ? `— önce ${meta?.alanlar.find(x => x.ad === a.bagliAlan)?.baslik ?? 'üst'} seçin`
                   : a.bagliAlan && secenekler.length === 0 ? '— tanımlı kayıt yok'
+                  : a.zorunlu ? '— seçiniz'
                   : '—'}
               </option>
             )}

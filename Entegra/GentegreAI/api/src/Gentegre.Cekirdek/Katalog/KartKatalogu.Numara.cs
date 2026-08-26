@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// NUMARA SABLONU KARTI (152) - Genel Ayarlar › Numaralama.
@@ -25,7 +25,7 @@ public static partial class KartKatalogu
         SubeKolonu: null,
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
-            ["durum"] = (short)0,
+            ["durum"] = (short)1,       // 1 = Aktif (154)
             ["baslamaTarihi"] = "@simdi",
             ["baslamaNo"] = "000001",
         },
