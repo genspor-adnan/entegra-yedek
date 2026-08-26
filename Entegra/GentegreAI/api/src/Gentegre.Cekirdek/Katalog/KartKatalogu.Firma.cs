@@ -41,7 +41,7 @@ public static partial class KartKatalogu
 
             // ------------------------------------------- Kimlik / Firma Kimliği
             // Mockup sirasi: Ünvan · Kısa Ad · Firma Türü · VKN · Vergi Dairesi ·
-            //   Ticaret Sicil · Mersis · NACE · Oda · Oda Sicil.
+            //   Ticaret Sicil · Oda · Oda Sicil; Mersis ve NACE "Kayıt" altinda.
             // UNVAN e-Belgede gorunen resmi addir; "ad" ic kullanim icin kisa ad.
             new("unvan", "unvan", "metin", Zorunlu: true, EnFazlaUzunluk: 200,
                 Baslik: "Ünvan", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
@@ -59,10 +59,6 @@ public static partial class KartKatalogu
             //   degil): ikisi de firmanin resmi kimligi, e-Belge onlari kullanir.
             new("ticaretSicilNo", "ticaret_sicil_no", "metin", EnFazlaUzunluk: 30,
                 Baslik: "Ticaret Sicil No", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
-            new("mersisNo",       "mersis_no",        "metin", EnFazlaUzunluk: 20,
-                Baslik: "Mersis No", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
-            new("naceKodu",      "nace_kodu",      "metin", EnFazlaUzunluk: 20,
-                Baslik: "NACE Kodu", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
             new("ticaretOdasi",  "ticaret_odasi",  "metin", EnFazlaUzunluk: 120,
                 Baslik: "Ticaret Odası", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
             new("odaSicilNo",    "oda_sicil_no",   "metin", EnFazlaUzunluk: 40,
@@ -74,6 +70,12 @@ public static partial class KartKatalogu
             //   karariyla ALINMADI.
             new("kod",   "kod",   "metin", EnFazlaUzunluk: 20,
                 Baslik: "Firma Kodu", Grup: "Kimlik", AltGrup: "Kayıt"),
+            // Mersis ve NACE resmi SICIL bilgisi: unvan/VKN gibi her belgede
+            //   kullanilmaz, kayit bilgisiyle birlikte durur (kullanici).
+            new("mersisNo", "mersis_no", "metin", EnFazlaUzunluk: 20,
+                Baslik: "Mersis No", Grup: "Kimlik", AltGrup: "Kayıt"),
+            new("naceKodu", "nace_kodu", "metin", EnFazlaUzunluk: 20,
+                Baslik: "NACE Kodu", Grup: "Kimlik", AltGrup: "Kayıt"),
             new("varsayilan", "varsayilan", "mantik",
                 Baslik: "Varsayılan Şube", Grup: "Kimlik", AltGrup: "Kayıt"),
             new("aktif",      "aktif",      "kod", SabitKodlar: DurumKodlari,
