@@ -79,7 +79,7 @@ export function GenelAyarlar() {
           <>
             <div className="kagrup">
               <h6>Oturum</h6>
-              <div className="alan-izgara tek-sutun ayar-formu">
+              <div className="alan-izgara ayar-formu">
                 {alan('guvenlik.jwt_dakika', 'Oturum süresi (dakika)')}
                 {alan('guvenlik.refresh_gun', 'Oturumu açık tutma (gün)')}
                 {/* Etiket KISA: uzun cumle satiri dagitiyordu, ayrinti "?" ikonunda. */}
@@ -89,7 +89,7 @@ export function GenelAyarlar() {
 
             <div className="kagrup">
               <h6>Parola ve Kilit</h6>
-              <div className="alan-izgara tek-sutun ayar-formu">
+              <div className="alan-izgara ayar-formu">
                 {alan('guvenlik.parola_min_uzunluk', 'En az parola uzunluğu')}
                 {alan('guvenlik.hatali_giris_siniri', 'Kaç hatalı girişten sonra kilitlensin')}
                 {alan('guvenlik.kilit_dakika', 'Kilit süresi (dakika)')}
