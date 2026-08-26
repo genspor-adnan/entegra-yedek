@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using Gentegre.Cekirdek.Sozlesme;
@@ -164,8 +164,15 @@ public sealed class SorguUretici
             parcalar.Add("(" + _kaynak.SabitKosul + ")");
 
         // Sube filtresi SUNUCUDA eklenir - istekte gelmez (API §8).
-        if (_kaynak.SubeKolonu is { } sk && subeId is { } sid)
-            parcalar.Add($"{sk} = {Ekle(sid)}");
+        //   Ozel kosul (SubeKosulu) varsa duz esitligin yerine gecer: "{sube}"
+        //   parametreyle degistirilir, deger yine baglanir (SQL'e gomulmez).
+        if (subeId is { } sid)
+        {
+            if (_kaynak.SubeKosulu is { } skos)
+                parcalar.Add("(" + skos.Replace("{sube}", Ekle(sid)) + ")");
+            else if (_kaynak.SubeKolonu is { } sk)
+                parcalar.Add($"{sk} = {Ekle(sid)}");
+        }
 
         // Kayit kapsami (eski YETKIALANI): satir varsa yalniz o kayitlar gorunur.
         if (kapsamTarafIdleri is { Count: > 0 } && _kaynak.KapsamKolonu is { } kk)

@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// Liste sorgusunun BEYAZ LISTESI. Istekten gelen hicbir metin SQL'e gecmez;
@@ -42,6 +42,11 @@ public sealed record KaynakTanimi(
     string Kaynak,                 // FROM ifadesi: "public.taraf t"
     IReadOnlyList<KolonTanimi> Kolonlar,
     string? SubeKolonu = null,     // "b.sube_id"
+    // Sube filtresi duz esitlikten farkliysa: "{sube}" yer tutuculu SQL ifadesi.
+    //   Depo boyle - sube kendi depolarina ek olarak MERKEZIN depolarini da
+    //   gorebiliyor (173), tek kolonla anlatilamiyor. Doluysa SubeKolonu yerine
+    //   bu kullanilir.
+    string? SubeKosulu = null,
     string? SabitKosul = null,     // "t.musteri = 1 or t.tedarikci = 1"
     string VarsayilanSirala = "id desc",
     string? KapsamKolonu = null,   // kullanici_kapsam (tur=1) suzmesi icin taraf id kolonu

@@ -10,6 +10,11 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> DurumKodlari =
         new() { ["1"] = "Aktif", ["0"] = "Pasif" };
 
+    /// <summary>Depo tipi - liste kaynagindaki CASE ile ayni kodlar (173).</summary>
+    private static readonly Dictionary<string, string> DepoTipleri =
+        new() { ["1"] = "Merkez", ["2"] = "Demirbaş",
+                ["3"] = "Konsinye Alış", ["4"] = "Konsinye Satış" };
+
     /// <summary>e-Belge senaryosu (156). 0 = kural her senaryoda gecerli.</summary>
     private static readonly Dictionary<string, string> EBelgeSenaryoKodlari =
         new() { ["0"] = "(farketmez)", ["1"] = "Temel", ["2"] = "Ticari", ["8"] = "İlaç / Tıbbi Cihaz" };

@@ -105,6 +105,9 @@ export function sekmeleriKur(secenek: {
     // Personel'de acil kişiler ik_karti.html mockup'ta İletişim sekmesinin altında
     // gömülü grid; ayrı sekme açılmasın.
     if (personelGibiKart && d.ad === 'acilKisiler') return;
+    // Sube kartinda depolar "Depolar" GRUP sekmesine gomulu cizilir (merkez
+    //   deposu kutusuyla birlikte, 173) - ayni adla iki sekme acilmasin.
+    if (kaynak === 'sube' && d.ad === 'depolar') return;
     s.push({ tur: 'detay', anahtar: detaySekmeAnahtari(d.ad), baslik: d.baslik, detay: d });
   });
   (yerTutucuSekmeler ?? []).forEach(baslik => {

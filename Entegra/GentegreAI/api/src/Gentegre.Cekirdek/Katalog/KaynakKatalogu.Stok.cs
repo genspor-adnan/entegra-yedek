@@ -128,7 +128,9 @@ public static partial class KaynakKatalogu
         Ad: "depo",
         YetkiKodu: "stok",
         Kaynak: "public.depo d",
-        SubeKolonu: "d.sube_id",
+        // Sube kendi depolarina EK OLARAK merkezin depolarini da gorebilir
+        //   (sube.merkez_depo_kullan, 173) - duz "sube_id = X" yetmiyor.
+        SubeKosulu: "d.sube_id = any(public.fn_sube_depo_subeleri({sube}))",
         VarsayilanSirala: "d.ad asc",
         // Tipi ve Durum METIN olarak uretilir: liste katmani kod listesi cozmuyor
         //   (kart cozuyor), ham kod gosterirsek kullanici sayi gorur. Ham kodlar

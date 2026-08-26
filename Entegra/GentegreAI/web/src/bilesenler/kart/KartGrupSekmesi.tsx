@@ -312,6 +312,33 @@ return (
         ekranlarda adres kendi sekmesinde, kisiler tek basina. */}
     {/* Adres artik İletişim kutusunun icinde (yukarida) - burada yalniz
         kisi gridi, tam genislikte. */}
+    {/* Sube kartinda depolar, "Merkez deposunu da kullan" kutusuyla AYNI
+        sekmede (kullanici): kutu "hangi depolari gorurum" sorusunun cevabi,
+        listenin hemen ustunde durmasi gerekiyor. Yeni subede henuz id yok -
+        once kaydedilmeli. */}
+    {kaynak === 'sube' && aktif.baslik === 'Depolar' && (() => {
+      const depoDetay = meta.detaylar.find(d => d.ad === 'depolar');
+      if (!depoDetay) return null;
+      if (yeniMi) {
+        return (
+          <div className="kagrup">
+            <h6>Depolar</h6>
+            <div className="not" style={{ padding: 10 }}>
+              Şube kaydedildikten sonra buradan depo eklenebilir.
+            </div>
+          </div>
+        );
+      }
+      return (
+        <GenDetayTablo
+          meta={depoDetay}
+          durum={detaylar[depoDetay.ad] ?? bosDetay()}
+          saltOkunur={salt || depoDetay.saltOkunur}
+          hatalar={alanHatalari}
+          onDegis={yeni => setDetaylar(t => ({ ...t, [depoDetay.ad]: yeni }))}
+        />
+      );
+    })()}
     {kaynak === 'cari' && aktif.baslik === 'Genel' && !yeniMi
       && gizliSekmeler?.includes('Fatura Bilgileri') && (
       <IlgiliKisiler tarafId={id as number} saltOkunur={salt} />

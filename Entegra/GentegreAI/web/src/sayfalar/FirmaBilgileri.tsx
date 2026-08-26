@@ -7,9 +7,10 @@ import { SeriKurallari } from '../bilesenler/ebelge/SeriKurallari';
 import { XsltSablonlari } from '../bilesenler/ebelge/XsltSablonlari';
 import { TurAyarlari, type EBelgeTuru } from '../bilesenler/ebelge/TurAyarlari';
 
+// Depolar SAYFADA DEGIL, subenin KARTINDA (kullanici): depo subeye ait, hangi
+//   subenin deposu oldugu ancak kartin icinde belli oluyor.
 const SEKMELER = [
   { anahtar: 'subeler', baslik: 'Şube Tanımları' },
-  { anahtar: 'depolar', baslik: 'Depolar' },
 ] as const;
 
 /**
@@ -54,7 +55,6 @@ const SERIT_ALANLARI = ['unvan', 'ad', 'aktif'];
 export function FirmaBilgileri() {
   const [aktif, setAktif] = useState<Sekme>('subeler');
   const [subeler, setSubeler] = useState<ListeSatiri[]>([]);
-  const [depolar, setDepolar] = useState<ListeSatiri[]>([]);
   /** Karti acan kayit: sayi = duzenle, 'yeni' = ekle, null = kart kapali. */
   const [kart, setKart] = useState<number | 'yeni' | null>(null);
   /** e-Belge sekmesinin acik alt sekmesi (kart her acildiginda Genel'den baslar). */
@@ -65,12 +65,10 @@ export function FirmaBilgileri() {
   const yukle = useCallback(async () => {
     setYukleniyor(true);
     try {
-      const [s, d] = await Promise.all([
-        api.liste('sube', { boyut: 200, sirala: [{ alan: 'varsayilan', yon: 'desc' }] }),
-        api.liste('depo', { boyut: 200 }),
-      ]);
+      const s = await api.liste('sube', {
+        boyut: 200, sirala: [{ alan: 'varsayilan', yon: 'desc' }],
+      });
       setSubeler(s.satirlar);
-      setDepolar(d.satirlar);
       setHata(null);
     } catch (h) {
       setHata(hataMetni(h));
@@ -203,32 +201,6 @@ export function FirmaBilgileri() {
             “Merkez” ise şubenin faturası merkezin ünvanı ve VKN’siyle gider;
             “Merkez kimliği + şube adresi”nde ünvan/VKN merkezin, adres şubenindir.
           </div>
-        </div>
-      )}
-
-      {!yukleniyor && aktif === 'depolar' && (
-        <div className="kagrup">
-          <h6>Depolar</h6>
-          <table className="grid">
-            <thead>
-              <tr><th>Depo Adı</th><th>Tipi</th><th style={{ textAlign: 'center' }}>Durum</th></tr>
-            </thead>
-            <tbody>
-              {depolar.map(d => (
-                <tr key={String(d.id)}>
-                  <td>{String(d.ad ?? '')}</td>
-                  <td>{String(d.tipAdi ?? '')}</td>
-                  <td style={{ textAlign: 'center' }}>
-                    <span className={`rozet ${String(d.durumAdi) === 'Aktif' ? 'ok' : 'gri'}`}>
-                      {String(d.durumAdi ?? '')}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {/* Depo BAKIMI Stok menusunde; burasi mockup'taki gibi yalniz gorunum. */}
-          <div className="not">Depo tanımları Stok &amp; Hizmet › Depolar ekranından yönetilir.</div>
         </div>
       )}
 

@@ -105,6 +105,13 @@ public static partial class KartKatalogu
             new("web",       "web",        "metin", EnFazlaUzunluk: 200,
                 Baslik: "Web Sitesi", Grup: "Adres", AltGrup: "İletişim"),
 
+            // -------------------------------------------------------- Depolar
+            // Bayrak SUBEDE, depoda degil: "bu sube merkezin depolarini da
+            //   gorsun" karari subenin ozelligi. Depoya koysaydik her yeni
+            //   subede tum depolari tek tek isaretlemek gerekirdi (173).
+            new("merkezDepoKullan", "merkez_depo_kullan", "mantik",
+                Baslik: "Merkez deposunu da kullan", Grup: "Depolar"),
+
             // --------------------------------------------------------- e-Belge
             // Alias gonderici etiketidir, mukellef bayraklari hangi belgeyi
             //   kesebilecegimizi soyler.
@@ -148,6 +155,31 @@ public static partial class KartKatalogu
             //   belirler (172): mukellefi olmadigimiz turun ayarlari cizilmez.
             new("esmmMukellef",      "esmm_mukellef",       "mantik",
                 Baslik: "e-SMM Mükellefi", Grup: "e-Belge", AltGrup: "Mükellefiyet")
+        },
+        // Subenin depolari - kartin "Depolar" sekmesinde, bayrakla ayni yerde
+        //   (kullanici). Depo bakimi Stok menusunde de duruyor; burasi subeye
+        //   ait olanlari gosterir ve yenisini buradan acmayi saglar.
+        Detaylar: new[]
+        {
+            new DetayTanimi(
+                Ad: "depolar",
+                Tablo: "public.depo",
+                UstKolon: "sube_id",
+                Baslik: "Depolar",
+                LogTabloId: 925,
+                // Depo kaydinin sube kolonu ZATEN ust bagdir; ikinci kez yazilmaz.
+                SubeKolonu: null,
+                Sirala: "ad",
+                Alanlar: new KartAlani[]
+                {
+                    new("id", "id", "sayi", Yazilabilir: false),
+                    new("ad",  "ad",  "metin", Zorunlu: true, EnFazlaUzunluk: 50, Baslik: "Depo Adı"),
+                    new("tip", "tip", "kod", SabitKodlar: DepoTipleri, Baslik: "Tipi"),
+                    new("varsayilan", "varsayilan", "mantik", Baslik: "Varsayılan"),
+                    new("maliyetiEtkilesin", "maliyeti_etkilesin", "mantik",
+                        Baslik: "Maliyeti Etkilesin"),
+                    new("durum", "durum", "kod", SabitKodlar: DurumKodlari, Baslik: "Durum")
+                })
         },
         SilmeEngelleri: new[]
         {
