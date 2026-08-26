@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Modal } from './Modal';
 import type { DetayFarki, KartDetayMeta } from '../api/sozlesme';
 import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 import { TelefonGirdi } from './TelefonGirdi';
@@ -61,10 +63,15 @@ interface Props {
   saltOkunur: boolean;
   hatalar: Record<string, string>;
   onDegis(yeni: DetayDurumu): void;
-  /** Baslik ve satir eylemleri IKON olarak cizilir (＋ / 🗑) - seri ve XSLT
+  /** Baslik ve satir eylemleri IKON olarak cizilir (＋ / ✎ / 🗑) - seri ve XSLT
       gridleriyle ayni gorunum (kullanici). Metin dugmeler dar gridlerde
       satiri tasiriyordu. */
   ikonlu?: boolean;
+  /** GRID SALT GORUNUM, duzenleme MODALDE (kullanici). Satir ici duzenlemede
+      hangi hucrenin degistigi kaybolabiliyordu; modal alanlari etiketleriyle
+      birlikte gosterir. Veri akisi degismez - degisiklik yine kartin
+      Kaydet'iyle gider. */
+  modalDuzenle?: boolean;
 }
 
 // Adresler grid'ine ozel kolon genislikleri (kullanici: "Adres geniş, İl/İlçe aynı
@@ -89,12 +96,40 @@ const EGITIM_GECERLILIK = ['Süresiz', 'Süreli'];
 
 const tarihYilTemizle = (deger: string) => deger.replace(/[^0-9./-]/g, '').slice(0, 10);
 
-export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu }: Props) {
+export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
+                               modalDuzenle }: Props) {
   const alanlar = meta.alanlar.filter(a => a.ad !== 'id');
   const yerler = useYerler(meta.ad === 'adresler');
   const adresGrid = meta.ad === 'adresler';
   const acilKisiGrid = meta.ad === 'acilKisiler';
   const ilAdIdHarita = new Map((yerler?.iller ?? []).map(i => [i.ad, i.id]));
+
+  /** Modalde acik satirin indeksi ("yeni" = eklenecek satir). */
+  const [modalSatir, setModalSatir] = useState<number | 'yeni' | null>(null);
+  /** Modalde duzenlenen taslak - Tamam'a basilana kadar tabloya yazilmaz. */
+  const [taslak, setTaslak] = useState<Record<string, unknown>>({});
+
+  /** Salt gorunum hucresi: kod alani etiketiyle, mantik ✓ ile gosterilir. */
+  const gorunum = (satir: Record<string, unknown>, a: typeof alanlar[number]) => {
+    const d = satir[a.ad];
+    if (a.tip === 'mantik') return Number(d) === 1 || d === true ? '✓' : '';
+    if (a.kodlar) return a.kodlar[String(d ?? '')] ?? '';
+    return String(d ?? '');
+  };
+
+  const modalAc = (i: number | 'yeni') => {
+    setTaslak(i === 'yeni' ? bosSatir() : { ...durum.guncel[i] });
+    setModalSatir(i);
+  };
+
+  const modalKaydet = () => {
+    if (modalSatir === null) return;
+    const guncel = modalSatir === 'yeni'
+      ? [...durum.guncel, taslak]
+      : durum.guncel.map((s, i) => (i === modalSatir ? taslak : s));
+    onDegis({ ...durum, guncel });
+    setModalSatir(null);
+  };
 
   const hucreDegis = (satirIndeks: number, alan: string, deger: unknown) => {
     const guncel = durum.guncel.map((s, i) => {
@@ -110,6 +145,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   // "adres te fatura tipi seçilmeden yeni satır açılmasın" - Adres Tipi kastediliyor).
   const acikAdresSatiriVar = adresGrid && durum.guncel.some(s => !s.tur);
   const satirEklenebilir = !saltOkunur && !acikAdresSatiriVar;
+
+  /** Yeni satirin baslangic degerleri - satir ici ve modal ekleme ayni kumeyi kullanir. */
+  const bosSatir = (): Record<string, unknown> => Object.fromEntries(
+    alanlar.map(a => [a.ad, a.tip === 'mantik' ? 0 : '']));
 
   const satirEkle = () => {
     if (acikAdresSatiriVar) return;
@@ -153,7 +192,8 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           ikonlu ? (
             <span className="baslik-eylem">
               <button type="button" className="d bir ikon-dugme" title="Yeni satır"
-                      disabled={!satirEklenebilir} onClick={satirEkle}>＋</button>
+                      disabled={!satirEklenebilir}
+                      onClick={() => (modalDuzenle ? modalAc('yeni') : satirEkle())}>＋</button>
             </span>
           ) : (
             <button type="button" className="d bir" disabled={!satirEklenebilir} onClick={satirEkle}>
@@ -179,7 +219,12 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
         <tbody>
           {durum.guncel.map((satir, i) => (
             <tr key={satir.id ?? `yeni-${i}`}>
-              {alanlar.map(a => (
+              {modalDuzenle && alanlar.map(a => (
+                <td key={a.ad} className={a.tip === 'mantik' ? 'hiza-orta' : undefined}>
+                  {gorunum(satir, a)}
+                </td>
+              ))}
+              {!modalDuzenle && alanlar.map(a => (
                 <td key={a.ad}>
                   {/* TELEFON her yerde ayni (genel kural): gride de ulke kodlu,
                       gruplu kutu gelir; gecersiz numara kirmizi cerceve alir. */}
@@ -294,9 +339,15 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               ))}
               {!saltOkunur && (
                 <td className="hiza-orta">
-                  <button type="button" className={`d teh${ikonlu ? ' ikon-dugme' : ''}`}
-                          title={ikonlu ? 'Satırı sil' : undefined}
-                          onClick={() => satirSil(i)}>{ikonlu ? '🗑' : '×'}</button>
+                  <span className="baslik-eylem">
+                    {modalDuzenle && (
+                      <button type="button" className="d ikon-dugme" title="Satırı düzenle"
+                              onClick={() => modalAc(i)}>✎</button>
+                    )}
+                    <button type="button" className={`d teh${ikonlu ? ' ikon-dugme' : ''}`}
+                            title={ikonlu ? 'Satırı sil' : undefined}
+                            onClick={() => satirSil(i)}>{ikonlu ? '🗑' : '×'}</button>
+                  </span>
                 </td>
               )}
             </tr>
@@ -306,6 +357,58 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           )}
         </tbody>
       </table>
+
+      {/* Satir duzenleme modali: alanlar etiketleriyle alt alta. "Tamam" yalniz
+          TABLOYA yazar - kayit kartin kendi Kaydet'iyle sunucuya gider. */}
+      {modalSatir !== null && (
+        <Modal
+          baslik={modalSatir === 'yeni' ? `${meta.baslik} — Yeni` : meta.baslik}
+          dar
+          onKapat={() => setModalSatir(null)}
+          alt={<>
+            <button type="button" className="d kapat-dugmesi"
+                    onClick={() => setModalSatir(null)}>Vazgeç</button>
+            <button type="button" className="d bir" onClick={modalKaydet}>Tamam</button>
+          </>}
+        >
+          <div className="kagrup">
+            <div className="alan-izgara tek-sutun ayar-formu">
+              {alanlar.map(a => (
+                <label className={`alan${a.tip === 'mantik' ? ' ayar-onay' : ''}`} key={a.ad}>
+                  {a.tip === 'mantik' ? (
+                    <>
+                      <input type="checkbox" disabled={!a.yazilabilir}
+                             checked={Number(taslak[a.ad]) === 1 || taslak[a.ad] === true}
+                             onChange={e => setTaslak(t => ({ ...t, [a.ad]: e.target.checked ? 1 : 0 }))} />
+                      <span className="etiket">{a.baslik}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className={`etiket${a.zorunlu ? ' zorunlu-isaret' : ''}`}>{a.baslik}</span>
+                      <span className="ikili">
+                        {a.kodlar ? (
+                          <select value={String(taslak[a.ad] ?? '')} disabled={!a.yazilabilir}
+                                  onChange={e => setTaslak(t => ({ ...t, [a.ad]: e.target.value }))}>
+                            <option value="">—</option>
+                            {Object.entries(a.kodlar).map(([k, v]) => (
+                              <option key={k} value={k}>{v}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input className="genis-deger" value={String(taslak[a.ad] ?? '')}
+                                 maxLength={a.enFazlaUzunluk ?? undefined}
+                                 disabled={!a.yazilabilir}
+                                 onChange={e => setTaslak(t => ({ ...t, [a.ad]: e.target.value }))} />
+                        )}
+                      </span>
+                    </>
+                  )}
+                </label>
+              ))}
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

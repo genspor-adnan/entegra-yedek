@@ -350,6 +350,7 @@ return (
           hatalar={alanHatalari}
           onDegis={yeni => setDetaylar(t => ({ ...t, [depoDetay.ad]: yeni }))}
           ikonlu
+          modalDuzenle
         />
       );
     })()}
