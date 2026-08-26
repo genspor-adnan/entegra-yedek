@@ -49,7 +49,7 @@ const ROZET_SINIFI: Record<string, string> = {
   'Alınan': 'ok', 'Verilen': 'uyari',
   'Portföyde': 'bilgi', 'Ciro Edildi': 'uyari', 'Tahsilde': 'bilgi',
   'Teminatta': 'bilgi', 'Tahsil Edildi': 'ok', 'Ödendi': 'ok',
-  'Karşılıksız': 'hata', 'İade': 'uyari', 'İptal': 'gri',
+  'Karşılıksız': 'hata', 'İade': 'uyari', 'İptal': 'hata',
   // Kasa islemi durumlari (KasaDurum): taslak/planli henuz kesinlesmemis,
   //   gerceklesti tamam, iptal ters kayitli, plan kapandi bitmis.
   'Taslak': 'gri', 'Planlı': 'bilgi', 'Gerçekleşti': 'ok', 'Plan Kapandı': 'gri',
@@ -63,6 +63,12 @@ const ROZET_SINIFI: Record<string, string> = {
   // Irsaliye listesi: e-Belge hic hazirlanmamis belge KAGIT (notr gri),
   //   GIB yaniti gelenler kabul/red (yesil/kirmizi).
   'Kağıt': 'gri', 'Kabul': 'ok', 'Red': 'hata',
+  // Belge durumu (0 kesin / 1 taslak / 2 iptal), donusum ve odeme kapanisi.
+  'Kesin': 'ok',
+  'Açık': 'bilgi', 'Kısmi': 'uyari', 'Kapandı': 'gri', 'Kapalı': 'gri',
+  // Fatura tipleri (satis fatura listesi).
+  'Tevkifatlı': 'uyari', 'KDV İstisna': 'bilgi', 'İhraç Kayıtlı': 'bilgi',
+  'Fiyat Farkı': 'gri', 'Kur Farkı': 'gri', 'SGK': 'bilgi', 'İhracat': 'bilgi',
   'Bilinmiyor': 'hata',
 };
 

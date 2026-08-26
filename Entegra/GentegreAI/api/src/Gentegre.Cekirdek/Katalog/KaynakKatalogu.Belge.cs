@@ -16,7 +16,8 @@ public static partial class KaynakKatalogu
                 "left join public.kasa_islem_turu bt on bt.kod = b.tur " +
                 // F8 donusum zinciri: kaynak baslik bagindan okunur.
                 "left join public.belge kb on kb.id = b.kaynak_id and b.kaynak_tur = 30 " +
-                "left join public.kasa_islem_turu kt2 on kt2.kod = kb.tur",
+                "left join public.kasa_islem_turu kt2 on kt2.kod = kb.tur " +
+                "left join public.sube sb on sb.id = b.sube_id",
         SubeKolonu: "b.sube_id",
         VarsayilanSirala: "b.belge_tarihi desc, b.id desc",
         KapsamKolonu: "b.taraf_id",
@@ -29,7 +30,15 @@ public static partial class KaynakKatalogu
                                                                             Genislik: 70, Varsayilan: false),
             new("turAdi",        "bt.ad",            "metin", "Belge Türü",  Genislik: 130),
             // F8: siparis/irsaliye ne kadari donusturuldu (0 acik / 1 kismi / 2 kapandi)
-            new("kapanmaDurum",  "b.kapanma_durum",  "kod",   "Kapanma",     Hizalama: "orta", Varsayilan: false),
+            new("kapanmaAdi",
+                """
+                case coalesce(b.kapanma_durum, 0)
+                     when 0 then 'Açık' when 1 then 'Kısmi' when 2 then 'Kapandı'
+                     else '' end
+                """,                             "metin", "Kapanma", Hizalama: "orta",
+                                                 Bicim: "rozet", Genislik: 100,
+                                                 Varsayilan: false, Filtrelenebilir: false),
+            new("kapanmaDurum",  "b.kapanma_durum",  "kod",   "Kapanma Kodu",Hizalama: "orta", Varsayilan: false),
             new("belgeSeri",     "b.belge_seri",     "metin", "Seri",        Genislik: 70, Varsayilan: false),
             new("belgeNo",       "b.belge_no",       "metin", "Belge No",    Genislik: 155),
             // e-BELGE DURUMU ROZET: ham kod (0/1/11/51...) listede hicbir sey
@@ -101,8 +110,23 @@ public static partial class KaynakKatalogu
                                                                 Bicim: "#,##0.00", Genislik: 110),
             new("genelToplam",   "b.genel_toplam",   "para",  "Genel Toplam",Hizalama: "sag",
                                                                 Bicim: "#,##0.00", Genislik: 130),
-            new("acikKapali",    "b.acik_kapali",    "kod",   "Acik/Kapali", Hizalama: "orta", Varsayilan: false),
-            new("durum",         "b.durum",          "kod",   "Durum",       Hizalama: "orta", Genislik: 90),
+            new("acikKapaliAdi",
+                "case when coalesce(b.acik_kapali, 0) = 1 then 'Kapalı' else 'Açık' end",
+                                                  "metin", "Açık / Kapalı", Hizalama: "orta",
+                                                  Bicim: "rozet", Genislik: 110,
+                                                  Varsayilan: false, Filtrelenebilir: false),
+            new("acikKapali",    "b.acik_kapali",    "kod",   "Açık/Kapalı Kodu", Hizalama: "orta",
+                                                                            Varsayilan: false),
+            new("durumAdi",
+                """
+                case coalesce(b.durum, 0)
+                     when 0 then 'Kesin' when 1 then 'Taslak' when 2 then 'İptal'
+                     else 'Bilinmiyor' end
+                """,                             "metin", "Durum", Hizalama: "orta",
+                                                 Bicim: "rozet", Genislik: 100,
+                                                 Filtrelenebilir: false),
+            new("durum",         "b.durum",          "kod",   "Durum Kodu",  Hizalama: "orta",
+                                                                            Varsayilan: false),
             new("vadeGun",       "b.vade_gun",       "sayi",  "Vade",        Hizalama: "sag", Genislik: 80,
                                                                 Varsayilan: false),
             new("aciklama",      "b.aciklama",       "metin", "Açıklama",    Genislik: 240, Varsayilan: false),
@@ -110,7 +134,9 @@ public static partial class KaynakKatalogu
             //   bu kolon yanittan CIKARILIR ve /kolonlar listesinde de gorunmez.
             new("maliyetOrt",    "b.maliyet_ort",    "para",  "Ort. Maliyet",Hizalama: "sag",
                                                                             Bicim: "#,##0.0000", Varsayilan: false),
-            new("subeId",        "b.sube_id",        "sayi",  "Sube",        Varsayilan: false)
+            new("subeAdi",       "coalesce(sb.ad, '')", "metin", "Şube",     Genislik: 120,
+                                                                            Varsayilan: false),
+            new("subeId",        "b.sube_id",        "sayi",  "Şube Kodu",   Varsayilan: false)
         });
 
     // ----------------------------------------------------------- personel ----
