@@ -953,3 +953,8 @@ input.skt-gecmis {
 .baslik-eylem { display: inline-flex; gap: 4px; flex: none }
 /* Eylem ikonlari basligin HEMEN saginda dursun (saga yaslanmasin). */
 .numaralama-bas.bitisik { justify-content: flex-start; gap: 10px }
+
+/* Sayfa icine gomulu kart (Firma Bilgileri): kawin ile ayni ic duzen,
+   perde ve pencere cercevesi olmadan. */
+.kagomulu { background: var(--yuz); border: 1px solid var(--cizgi); border-radius: 8px; overflow: hidden }
+.kagomulu > .kagov { max-height: none }

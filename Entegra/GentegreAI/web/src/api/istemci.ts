@@ -10,6 +10,7 @@ import {
   type StokDurumYaniti, type StokHareketYaniti, type StokLotSatiri, type PaketIcerikSatiri,
   type AyarSatiri, type YardimKaydi,
   type PanelYaniti,
+  type EntegratorSecenegi,
 } from './sozlesme';
 
 const TABAN = import.meta.env.VITE_API ?? 'http://localhost:5180';
@@ -168,6 +169,10 @@ export const api = {
   aramaIsaretle: (kaynak: string, id: number) =>
     gonder<{ isaretlendi: boolean }>(`/api/liste/${kaynak}/${id}/isaretle`, {})
       .catch(() => ({ isaretlendi: false })),
+
+  /** e-Belge entegrator secenekleri - katalogdan (167). */
+  entegratorler: () =>
+    istek<{ entegratorler: EntegratorSecenegi[] }>('/api/ayar/ebelge-entegratorler'),
 
   kaynaklar: () => istek<{ kaynaklar: { ad: string; yetkiKodu: string }[] }>('/api/liste'),
 

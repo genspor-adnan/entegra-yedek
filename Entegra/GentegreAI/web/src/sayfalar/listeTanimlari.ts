@@ -690,6 +690,17 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Yönetim', menuAd: 'Roller', ic: '🛡️', yetkiKodu: 'rol',
   },
   {
+    // FIRMA / SUBE BILGILERI - mockup: Ekranlar/firma_bilgileri.html.
+    //   e-Belgede GONDERICI TARAF buradan okunur (unvan, VKN, vergi dairesi,
+    //   adres, gonderici etiketi). Cok subeli firmada fatura hangi subeden
+    //   kesildiyse ONUN bilgileri gider.
+    //   Duz liste DEGIL (ozelSayfa): ekran tek firmayi anlatir, subeler onun
+    //   altinda bir tablodur (165 / FirmaBilgileri.tsx).
+    kaynak: 'sube', baslik: 'Firma Bilgileri', yol: 'Yonetim › Firma Bilgileri',
+    ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAd: 'Firma Bilgileri', ic: '🏢', yetkiKodu: 'sube',
+  },
+  {
     // Firma geneli DAVRANIS ayarlari (public.referans). Liste degil (ozelSayfa).
     kaynak: 'genel-ayarlar', baslik: 'Genel Ayarlar', yol: 'Yonetim › Ayarlar › Genel',
     ozelSayfa: true,

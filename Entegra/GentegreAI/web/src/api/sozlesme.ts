@@ -91,6 +91,19 @@ export interface Kosul {
 
 export interface Siralama { alan: string; yon: 'asc' | 'desc' }
 
+/**
+ * e-Belge entegratoru (167). `gonderilebilir` false ise entegrator TANINIR
+ * (kimlik/URL ayarlari tutulur) ama gonderim govdesi ureteci henuz yoktur.
+ */
+export interface EntegratorSecenegi {
+  kod: string;
+  ad: string;
+  /** 1 JSON (REST), 2 UBL-XML (SOAP). */
+  bicim: number;
+  gonderilebilir: boolean;
+  aciklama: string;
+}
+
 export interface ListeIstegi {
   sayfa?: number;
   boyut?: number;

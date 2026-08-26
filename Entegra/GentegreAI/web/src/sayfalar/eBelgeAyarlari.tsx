@@ -1,10 +1,10 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AyarAlani } from '../bilesenler/AyarAlani';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
 import { Modal } from '../bilesenler/Modal';
 import { api } from '../api/istemci';
-import { hataMetni, type AyarSatiri, type ListeSatiri } from '../api/sozlesme';
+import { hataMetni, type AyarSatiri, type EntegratorSecenegi, type ListeSatiri } from '../api/sozlesme';
 
 /**
  * e-BELGE AYARLARI (Yönetim › Ayarlar › Satış Belgeleri › e-Belge).
@@ -57,6 +57,13 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
   );
 
   const [bolum, setBolum] = useState<string>('baglanti');
+  /** Entegrator listesi KATALOGDAN gelir (167) - ekrana gomulu liste tutulmaz. */
+  const [entegratorler, setEntegratorler] = useState<EntegratorSecenegi[]>([]);
+  useEffect(() => {
+    api.entegratorler().then(y => setEntegratorler(y.entegratorler)).catch(() => {});
+  }, []);
+  const seciliEntegrator = entegratorler.find(
+    e => e.kod === ayarlar.find(a => a.anahtar === 'ebelge.entegrator')?.deger);
   /**
    * ANA SALTER (kullanici): `ebelge.aktif` kapaliyken hicbir belge GIB'e
    * gitmez - alt sekmelerdeki adresler, seriler ve tur bayraklari yazilabilir
@@ -202,8 +209,20 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
           <div className="kagrup">
             <div className="alan-izgara tek-sutun ayar-formu">
               {alan('ebelge.aktif', 'e-Belge kullanımda', { tip: 'mantik' })}
-              {alan('ebelge.entegrator', 'Entegratör', { tip: 'metin', genis: true })}
+              {alan('ebelge.entegrator', 'Entegratör', {
+                tip: 'secenek',
+                secenekler: entegratorler.map(e => ({ deger: e.kod, ad: e.ad })),
+              })}
             </div>
+            {/* Secili entegratorun gonderim ureteci yoksa bunu KAYIT ANINDA soyle:
+                yoksa kullanici tum ayarlari doldurup gonderimde ogrenir. */}
+            {seciliEntegrator && !seciliEntegrator.gonderilebilir && (
+              <div className="hata-kutusu">
+                {seciliEntegrator.ad} için gönderim gövdesi üreteci henüz yazılmadı.
+                Ayarlar ve seriler kaydedilir, belge hazırlanır; gönderim adımı
+                bu entegratör için çalışmaz.
+              </div>
+            )}
           </div>
 
           {/* Mükellef ve Test Ortamı YAN YANA, esit hizada (kullanici):
