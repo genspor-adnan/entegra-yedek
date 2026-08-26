@@ -85,15 +85,9 @@ update public.ebelge_entegrator
        uretim_url = coalesce(nullif(uretim_url, ''), 'https://api.izibiz.com.tr')
  where kod = 'izibiz';
 
--- Ayar ekraninin combo kaynagi (kod tablosu sozlesmesi: id / ad / aktif).
---   DUSUR+KUR: 171 bu gorunumu sayisal id ile yeniden kuruyor; `create or
---   replace` kolon tipini degistiremedigi icin dosya tek basina calistirilinca
---   patliyordu.
-drop view if exists public.v_ebelge_entegrator_lookup;
-create view public.v_ebelge_entegrator_lookup as
-    select e.kod as id, e.ad, e.aktif
-      from public.ebelge_entegrator e
-     order by e.sira, e.ad;
+-- NOT: kart combo'sunun kaynagi olan `v_ebelge_entegrator_lookup` 171'de
+--   kurulur (sayisal id ile). Burada KURULMAZ: ayni gorunumu iki dosyanin
+--   farkli tiple kurmasi, bu dosya tek basina calistirilinca combo'yu bozuyordu.
 
 -- --------------------------------------------------- ayar degerini koda cevir
 -- BILIM'den tasinirken serbest metin gelmisti ("İzibiz"). Kod uzayina cekilir;

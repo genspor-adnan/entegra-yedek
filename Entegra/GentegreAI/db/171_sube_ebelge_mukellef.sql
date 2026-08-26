@@ -53,7 +53,9 @@ comment on column public.ebelge_entegrator.id is
 --   DUSURULUP kurulur: 167'de id kolonu metin kodtu, tip degisiyor.
 drop view if exists public.v_ebelge_entegrator_lookup;
 create view public.v_ebelge_entegrator_lookup as
-    select e.id, e.ad, e.aktif
+    -- id INTEGER: kod tablosu okuyucusu GetInt32 kullanir; smallint ya da
+    --   varchar donen gorunum kart acilisinda 500 veriyor (153 ile ayni tuzak).
+    select e.id::int as id, e.ad, e.aktif
       from public.ebelge_entegrator e
      where e.id is not null
      order by e.sira, e.ad;
