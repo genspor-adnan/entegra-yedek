@@ -121,8 +121,25 @@ public static partial class KaynakKatalogu
             //   belgesiz. Ekran zaten YALNIZ satis irsaliyelerini gosterdigi icin her
             //   satirda ayni kisaltmayi tekrarlamanin bilgi degeri de yoktu.
             new("tipi",          "b.tipi",           "sayi",  "Tip Kodu",  Hizalama: "orta", Varsayilan: false),
-            new("belgeNo",       "b.belge_no",       "metin", "İrsaliye No"),
-            new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",     Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm"),
+            new("belgeNo",       "b.belge_no",       "metin", "İrsaliye No", Genislik: 155),
+            // e-IRSALIYE DURUMU (kullanici: "irsaliye no saginda gidip gitmedigini
+            //   anlayayim"). Kodlar e-Belge turune gore ayri: e-Irsaliye 51
+            //   hazirlandi / 52 gonderildi. Eskiden burada FATURA kodlari (1/2/3/4)
+            //   yaziyordu - hazirlanmis irsaliye "Kağıt" gorunuyordu.
+            new("eIrsaliye",
+                """
+                case coalesce(b.efatura_durum, 0)
+                     when 0  then 'Kağıt'
+                     when 51 then 'e-İrsaliye'
+                     when 52 then 'e-İrsaliye ✓'
+                     when 53 then 'Kabul'
+                     when 54 then 'Red'
+                     else 'Bilinmiyor' end
+                """,                                 "metin", "e-İrsaliye", Hizalama: "orta",
+                                                      Bicim: "rozet", Genislik: 120,
+                                                      Siralanabilir: false, Filtrelenebilir: false),
+            new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",     Hizalama: "orta",
+                                                      Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
             new("tarafUnvan",    "b.taraf_unvan",    "metin", "Müşteri",   Genislik: 220),
             new("cikisDepo",     "cd.ad",            "metin", "Çıkış Deposu"),
             // KAYNAK / HEDEF: F8 donusum zincirinin iki ucu. Kaynak baslik bagindan
@@ -163,13 +180,6 @@ public static partial class KaynakKatalogu
                                                       "metin", "Faturalama", Hizalama: "orta",
                                                       Varsayilan: false),
             new("kapanmaDurum",  "b.kapanma_durum",  "sayi",  "Faturalama Kodu", Hizalama: "orta", Varsayilan: false),
-            new("eIrsaliye",
-                "case when coalesce(b.efatura_durum, 0) = 0 then 'Kağıt' " +
-                "when b.efatura_durum = 1 then 'Hazırlandı' when b.efatura_durum = 2 then 'Gönderildi' " +
-                "when b.efatura_durum = 3 then 'Kabul' when b.efatura_durum = 4 then 'Red' else 'Bilinmiyor' end",
-                                                      "metin", "e-İrsaliye", Hizalama: "orta",
-                                                      // Kullanici: listede gereksiz - kolon secicide duruyor.
-                                                      Varsayilan: false),
             new("efaturaDurum",  "b.efatura_durum",  "sayi",  "e-Belge Kodu", Hizalama: "orta", Varsayilan: false),
             // Miktar GIZLI: satir-basi alt sorgu (her satirda bir belge_satir taramasi)
             //   ve irsaliyede farkli birimler (adet/kg/metre) toplanip tek sayi olarak
