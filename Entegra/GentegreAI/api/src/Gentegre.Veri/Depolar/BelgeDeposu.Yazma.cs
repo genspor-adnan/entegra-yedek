@@ -290,17 +290,31 @@ public sealed partial class BelgeDeposu
                  borc, alacak, yerel_borc, yerel_alacak,
                  doviz_cinsi, doviz_kuru, aciklama, sube_id, ekleyen)
             select @p0, 'C', b.taraf_id, b.id, b.belge_no, b.belge_tarihi,
-                   case when @p1 then coalesce(nullif(b.doviz_tutari, 0), b.genel_toplam) else 0 end,
-                   case when @p1 then 0 else coalesce(nullif(b.doviz_tutari, 0), b.genel_toplam) end,
+                   case when @p1 then d.tutar else 0 end,
+                   case when @p1 then 0 else d.tutar end,
                    case when @p1 then b.genel_toplam else 0 end,
                    case when @p1 then 0 else b.genel_toplam end,
-                   -- EKSTRE DOVIZI (134): cari hesaba hangi dovizde islenecek.
-                   --   Bos ise belgenin kendi dovizi kullanilir.
-                   coalesce(nullif(btrim(b.ekstre_dovizi), ''),
-                            nullif(btrim(b.belge_dovizi), ''), 'TL'),
-                   case when coalesce(b.doviz_kuru, 0) > 0 then b.doviz_kuru else 1 end,
+                   d.cins, d.kur,
                    b.taraf_unvan, b.sube_id, @p2
-              from public.belge b where b.id = @p3
+              from public.belge b
+              cross join lateral (
+                  -- EKSTRE DOVIZI (134): cari hesaba hangi dovizde islenecek.
+                  --   TUTAR ILE CINS AYNI DOVIZDE OLMALI: `doviz_tutari` RAPOR
+                  --   dovizinde hesaplanir; ekstre dovizi ondan farkliysa (or.
+                  --   rapor EUR, ekstre TL) tutar EUR kalip etiketi TL oluyordu
+                  --   ve ekstrede "480 TL" gorunuyordu (gercek vaka).
+                  select ekstre.cins,
+                         case when ekstre.cins = rapor.cins and coalesce(b.doviz_tutari, 0) > 0
+                              then b.doviz_tutari else b.genel_toplam end as tutar,
+                         case when ekstre.cins = rapor.cins and coalesce(b.doviz_kuru, 0) > 0
+                              then b.doviz_kuru else 1 end as kur
+                    from (select coalesce(nullif(btrim(b.ekstre_dovizi), ''),
+                                          nullif(btrim(b.rapor_dovizi), ''),
+                                          nullif(btrim(b.belge_dovizi), ''), 'TL') as cins) ekstre,
+                         (select coalesce(nullif(btrim(b.rapor_dovizi), ''),
+                                          nullif(btrim(b.belge_dovizi), ''), 'TL') as cins) rapor
+              ) d
+             where b.id = @p3
             """, baglanti, islem);
         komut.Parameters.AddWithValue("p0", (short)tur);
         // IADEDE YON TERS: satis iadesi cariyi ALACAKLANDIRIR (132).

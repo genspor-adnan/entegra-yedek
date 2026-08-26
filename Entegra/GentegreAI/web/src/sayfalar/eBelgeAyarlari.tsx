@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { AyarAlani } from '../bilesenler/AyarAlani';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
+import { Modal } from '../bilesenler/Modal';
 import { api } from '../api/istemci';
 import { hataMetni, type AyarSatiri, type ListeSatiri } from '../api/sozlesme';
 
@@ -73,9 +74,16 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
   /** XSLT: sablonlar `dokuman` deposunda (160) - ayri tablo yok. */
   const [xsltYenile, setXsltYenile] = useState(0);
   const [seciliXslt, setSeciliXslt] = useState<ListeSatiri | null>(null);
-  /** Yeni sablon hangi tur + yon icin yuklenecek. */
-  const [xsltTur, setXsltTur] = useState(1);
-  const [xsltYon, setXsltYon] = useState(2);
+  /**
+   * EKLEME FORMU (kullanici): "+ ya basinca klasorden dokuman secsin, adini ad
+   * olarak kullansin ve ekleme formunu acsin; bilgileri orada girip kaydet
+   * deyince bir satir olarak eklesin."
+   *
+   * Tur/yon secicileri baslikta DEGIL formda: yukleme oradan yapiliyor,
+   * baslikta durmalari "hangi secim neyi etkiliyor" belirsizligi yaratiyordu.
+   */
+  const [xsltForm, setXsltForm] = useState<
+    { dosya: File; ad: string; tur: number; yon: number; varsayilan: boolean } | null>(null);
   const dosyaGirdisi = useRef<HTMLInputElement | null>(null);
 
   const xsltSil = async () => {
@@ -89,12 +97,24 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
     } catch (h) { setSeriHata(hataMetni(h)) }
   };
 
-  /** Klasorden secilen dosya: ADI sablon adi olur, icerigi depoya gider. */
-  const xsltYukle = async (dosya: File | undefined) => {
+  /** Klasorden dosya secildi: formu DOSYA ADIYLA doldurup ac - kayit sonra. */
+  const xsltDosyaSecildi = (dosya: File | undefined) => {
     if (!dosya) return;
     setSeriHata(null);
+    setXsltForm({ dosya, ad: dosya.name, tur: 1, yon: 2, varsayilan: false });
+  };
+
+  /** Formdaki bilgilerle tek satir olarak ekle. */
+  const xsltKaydet = async () => {
+    if (!xsltForm) return;
+    setSeriHata(null);
     try {
-      await api.dokumanYukle('ebelge-xslt', xsltTur, dosya, false, xsltYon);
+      // Ad degistirildiyse dosyayi o adla gonder - satirin adi dosya adindan gelir.
+      const dosya = xsltForm.ad.trim() && xsltForm.ad !== xsltForm.dosya.name
+        ? new File([xsltForm.dosya], xsltForm.ad.trim(), { type: xsltForm.dosya.type })
+        : xsltForm.dosya;
+      await api.dokumanYukle('ebelge-xslt', xsltForm.tur, dosya, xsltForm.varsayilan, xsltForm.yon);
+      setXsltForm(null);
       setXsltYenile(t => t + 1);
     } catch (h) { setSeriHata(hataMetni(h)) }
   };
@@ -254,27 +274,14 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
           <div className="numaralama-bas bitisik">
             <h6>XSLT Şablonları</h6>
             <span className="baslik-eylem">
-              {/* Yeni sablon HANGI tur+yon icin yuklenecek. */}
-              <select className="birim" value={xsltTur} title="e-Belge türü"
-                      onChange={e => setXsltTur(Number(e.target.value))}>
-                <option value={1}>e-Fatura</option>
-                <option value={2}>e-Arşiv</option>
-                <option value={7}>e-İrsaliye</option>
-                <option value={8}>e-SMM</option>
-              </select>
-              <select className="birim" value={xsltYon} title="Yön"
-                      onChange={e => setXsltYon(Number(e.target.value))}>
-                <option value={2}>Giden</option>
-                <option value={1}>Gelen</option>
-              </select>
               {/* Dosya secici gizli: "＋" ona basar, secilen DOSYANIN ADI
-                  sablon adi olur. */}
+                  forma ad olarak dolar. */}
               <input ref={dosyaGirdisi} type="file" accept=".xsl,.xslt,.xml" hidden
                      onChange={e => {
-                       void xsltYukle(e.target.files?.[0]);
+                       xsltDosyaSecildi(e.target.files?.[0]);
                        e.target.value = '';        // ayni dosya tekrar secilebilsin
                      }} />
-              <button className="d bir ikon-dugme" title="Klasörden şablon yükle"
+              <button className="d bir ikon-dugme" title="Klasörden şablon seç"
                       onClick={() => dosyaGirdisi.current?.click()}>＋</button>
               <button className="d teh ikon-dugme" disabled={!seciliXslt}
                       title={seciliXslt ? 'Seçili şablonu sil' : 'Önce satır seçin'}
@@ -300,6 +307,61 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
             <b> bir</b> şablon varsayılan olabilir.
           </div>
         </div>
+      )}
+
+      {xsltForm && (
+        <Modal
+          baslik="XSLT Şablonu Ekle"
+          onKapat={() => setXsltForm(null)}
+          alt={<>
+            <button className="d kapat-dugmesi" onClick={() => setXsltForm(null)}>Vazgeç</button>
+            <button className="d bir" disabled={!xsltForm.ad.trim()}
+                    onClick={() => { void xsltKaydet() }}>Kaydet</button>
+          </>}
+        >
+          <div className="kagrup">
+            <div className="alan-izgara tek-sutun ayar-formu">
+              <label className="alan">
+                <span className="etiket zorunlu-isaret">Şablon Adı</span>
+                <span className="ikili">
+                  <input className="genis-deger" value={xsltForm.ad}
+                         onChange={e => setXsltForm({ ...xsltForm, ad: e.target.value })} />
+                </span>
+              </label>
+              <label className="alan">
+                <span className="etiket">e-Belge Türü</span>
+                <span className="ikili">
+                  <select value={xsltForm.tur}
+                          onChange={e => setXsltForm({ ...xsltForm, tur: Number(e.target.value) })}>
+                    <option value={1}>e-Fatura</option>
+                    <option value={2}>e-Arşiv</option>
+                    <option value={7}>e-İrsaliye</option>
+                    <option value={8}>e-SMM</option>
+                  </select>
+                </span>
+              </label>
+              <label className="alan">
+                <span className="etiket">Yön</span>
+                <span className="ikili">
+                  <select value={xsltForm.yon}
+                          onChange={e => setXsltForm({ ...xsltForm, yon: Number(e.target.value) })}>
+                    <option value={2}>Giden</option>
+                    <option value={1}>Gelen</option>
+                  </select>
+                </span>
+              </label>
+              <label className="alan ayar-onay">
+                <input type="checkbox" checked={xsltForm.varsayilan}
+                       onChange={e => setXsltForm({ ...xsltForm, varsayilan: e.target.checked })} />
+                <span className="etiket">Bu tür ve yön için varsayılan olsun</span>
+              </label>
+            </div>
+            <div className="not">
+              Dosya: <b>{xsltForm.dosya.name}</b> · {Math.round(xsltForm.dosya.size / 1024)} KB.
+              Adı değiştirirseniz satır o adla eklenir.
+            </div>
+          </div>
+        </Modal>
       )}
 
       {bolum === 'efatura' && (

@@ -51,6 +51,7 @@ public sealed partial class BelgeDeposu
         await using (var komut = new NpgsqlCommand("""
             select b.id, b.tur, b.tipi, b.taraf_id, b.taraf_unvan, b.taraf_vkno, b.taraf_vd,
                    b.taraf_adres_id, b.belge_dovizi, b.doviz_kuru, b.kdv_durum, b.durum,
+                   b.rapor_dovizi, b.ekstre_dovizi,
                    b.proje_id, b.sube_id, b.vade_gun, b.giris_depo_id, b.cikis_depo_id,
                    b.satici_id, b.ozel_kod, b.aciklama, b.belge_no, kt.ad as tur_adi
               from public.belge b
@@ -156,6 +157,11 @@ public sealed partial class BelgeDeposu
             ["belgeTarihi"] = belgeTarihi ?? Saat.Simdi,
             ["belgeDovizi"] = kaynak["belge_dovizi"],
             ["dovizKuru"] = kaynak["doviz_kuru"],
+            // RAPOR ve EKSTRE DOVIZI de kopyalanir: yalniz KUR tasinip doviz
+            //   TL'ye dusunce belge "480 TL" gibi gorunuyordu - tutar EUR
+            //   cinsinden hesaplanmis ama etiketi TL kalmisti (gercek vaka).
+            ["raporDovizi"] = kaynak["rapor_dovizi"],
+            ["ekstreDovizi"] = kaynak["ekstre_dovizi"],
             ["kdvDurum"] = kaynak["kdv_durum"],
             ["projeId"] = kaynak["proje_id"],
             ["vadeGun"] = kaynak["vade_gun"],
