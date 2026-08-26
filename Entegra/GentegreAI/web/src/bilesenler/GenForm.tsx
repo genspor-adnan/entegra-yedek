@@ -34,8 +34,6 @@ interface Props {
   id: number | 'yeni';
   baslik?: string;
   onKapat?(): void;
-  /** Kart SAYFANIN KENDISI ise modal degil, sayfa icinde cizilir (Firma Bilgileri). */
-  gomulu?: boolean;
   /** Ust seritte kalacak alan adlari. Verilmezse "Kimlik" grubunun TAMAMI seritte
       (varsayilan davranis). Verilirse serit bunlarla sinirlanir, grubun kalani
       "Kimlik" sekmesine duser - kimlik alani cok olan kartlarda serit sismesin. */
@@ -85,7 +83,7 @@ interface Props {
  *  - Alan hatalari (`alanlar[]`) ilgili girdinin altina yazilir.
  *  - Detaylar FARK olarak gonderilir (eklenen / degisen / silinen), tam liste degil.
  */
-export function GenForm({ kaynak, id, baslik, onKapat, gomulu, seritAlanlari, onKaydedildi, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, onKaydedildi, yerTutucuSekmeler,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
   const { kullanici } = useOturum();
@@ -445,14 +443,14 @@ export function GenForm({ kaynak, id, baslik, onKapat, gomulu, seritAlanlari, on
 
   if (yukleniyor)
     return (
-      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} gomulu={gomulu} alt={gomulu ? null : <button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
+      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} alt={<button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
         <div className="yukleniyor-satir">Yukleniyor…</div>
       </Modal>
     );
 
   if (!meta)
     return (
-      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} gomulu={gomulu} alt={gomulu ? null : <button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
+      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} alt={<button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
         <div className="hata-kutusu">{hata}</div>
       </Modal>
     );
@@ -471,7 +469,6 @@ export function GenForm({ kaynak, id, baslik, onKapat, gomulu, seritAlanlari, on
     <Modal
       baslik={`${baslik ?? kaynak} ${yeniMi ? '— Yeni' : `#${id}`}`}
       dar={TEK_SUTUN_KARTLAR.has(kaynak)}
-      gomulu={gomulu}
       ustBilgi={
         <>
           {surum && <span className="rozet gri">surum {surum}</span>}
@@ -536,7 +533,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, gomulu, seritAlanlari, on
               </select>
             </label>
           )}
-          {!gomulu && <button className="d kapat-dugmesi" onClick={kapatIstendi}>Kapat</button>}
+          <button className="d kapat-dugmesi" onClick={kapatIstendi}>Kapat</button>
           {/* Cari'ye ozel: Musteri/Tedarikci rolleri hizlı erisim icin arac cubuguna,
               Kaydet/Sil ile ayni satira, saga yanasik olarak da tasindi (Roller sekmesindeki
               alanlarla AYNI deger - ikisi de senkron, tekrar degil). */}

@@ -6,7 +6,7 @@ import { useEffect } from 'react';
  * kullanip GenForm tarafindan da cizildigi icin, ayni dosyada kalsa
  * dairesel import olurdu.
  */
-export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, gomulu, onKapat, children }: {
+export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, onKapat, children }: {
   baslik: string;
   ustBilgi?: React.ReactNode;
   ustSerit?: React.ReactNode;
@@ -14,31 +14,14 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, gomulu, 
   alt: React.ReactNode;
   /** Az alanli kartlar icin yarim genislik (1080 -> 560): bos beyaz alan kalmasin. */
   dar?: boolean;
-  /** SAYFA ICINDE ciz (perde/pencere yok): Firma Bilgileri gibi kartin ekranin
-      KENDISI oldugu yerlerde. Modal olarak cizilirse acilir acilmaz kapanmayan
-      bir pencere olur - kapatinca gidecek bir sayfa yoktur. */
-  gomulu?: boolean;
   onKapat?(): void;
   children: React.ReactNode;
 }) {
   useEffect(() => {
-    // Gomulu kipte Esc kapatmaz: kapatilacak pencere yok.
-    if (gomulu) return;
     const tus = (e: KeyboardEvent) => { if (e.key === 'Escape') onKapat?.() };
     window.addEventListener('keydown', tus);
     return () => window.removeEventListener('keydown', tus);
-  }, [onKapat, gomulu]);
-
-  if (gomulu) {
-    return (
-      <div className="kagomulu">
-        <div className="katoolbar">{alt}</div>
-        {ustSerit}
-        {sekmeBar}
-        <div className="kagov">{children}</div>
-      </div>
-    );
-  }
+  }, [onKapat]);
 
   return (
     <div className="kaperde" onMouseDown={e => { if (e.target === e.currentTarget) onKapat?.() }}>
