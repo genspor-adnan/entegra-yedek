@@ -66,6 +66,12 @@ interface Props {
   seritGizli?: boolean;
   /** Gomulu gridin arac cubugu saga degil SOLA yaslanir (gridin sol ust kosesi). */
   aracCubuguSol?: boolean;
+  /**
+   * DOVIZSIZ EKRANDA GIZLENECEK kolonlar (ekstreler): yuklenen satirlarin
+   * hicbirinde doviz hareketi yoksa (kur her satirda 1) bu kolonlar cizilmez -
+   * "Borç" ile "Yerel Borç" ayni sayiyi iki kez gosteriyordu.
+   */
+  dovizsizGizle?: string[];
   /** Degisince (kart kaydedilince - ekleme ya da duzenleme) grid yeniden yuklenir. */
   yenile?: number;
   /** Degisince (yeni kart EKLENINCE) gorunum "Son Aranan"a gecer - yeni kayit sunucu
@@ -89,6 +95,7 @@ interface Props {
  */
 export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSatirAc,
                           aksiyonEkrani, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
+                          dovizsizGizle,
                           gizliKolonlar, kolonSirasi, altSecenekler, tarihAlani, tarihVarsayilan,
                           seciliBaslangicId, cipSonu, cipBaslangic,
                           onCipSecildi, onSecimDegisti, yenile, odaklaSonEklenen,
@@ -101,6 +108,15 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
 
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [toplamKayit, setToplamKayit] = useState(0);
+
+  /**
+   * Ekranda doviz hareketi var mi (kur 1'den farkli tek satir yeter). Yoksa
+   * `dovizsizGizle` kolonlari cizilmez - yerel karsilik kolonu, ana tutarin
+   * birebir kopyasi olurdu.
+   */
+  const dovizVarMi = useMemo(
+    () => satirlar.some(s => Number(s.dovizKuru ?? 1) !== 1),
+    [satirlar]);
   const [toplamlar, setToplamlar] = useState<Record<string, unknown> | undefined>();
   /** Gruplu liste (ekstre): para birimi basina ozet - sunucudan, TUM kume icin. */
   const [gruplar, setGruplar] = useState<ListeYaniti['gruplar']>();
@@ -629,7 +645,10 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
           <div className="gridwrap">
             <div className="gridkaydir">
               <GridTablo
-                kolonlar={kolonlar} satirlar={satirlar} yukleniyor={yukleniyor}
+                kolonlar={dovizsizGizle?.length && !dovizVarMi
+                  ? kolonlar.filter(k => !dovizsizGizle.includes(k.ad))
+                  : kolonlar}
+                satirlar={satirlar} yukleniyor={yukleniyor}
                 gruplar={gruplar} grupKolonu={kullaniciGrup ?? grupKolonu}
                 satirBoyu={satirBoyu}
                 gorunenToplamlar={gorunenToplamlar} toplamSeridiVar={toplamSeridiVar}

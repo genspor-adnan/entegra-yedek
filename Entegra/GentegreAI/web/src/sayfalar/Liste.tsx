@@ -242,6 +242,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         baslik={`${tanim.ekstre.baslik} — ${ekstre.ad}`}
         yol={tanim.yol}
         sabitFiltre={{ alan: tanim.ekstre.alan, op: 'esit', deger: ekstre.id }}
+        // DOVIZSIZ ekstrede yerel karsilik kolonlari CIZILMEZ (kullanici):
+        //   hepsi TL ise "Borç" ile "Yerel Borç" ayni sayiyi iki kez gosterir.
+        //   Kur kolonu da ayni sebeple gizlenir (her satirda 1).
+        dovizsizGizle={['dovizKuru', 'yerelBorc', 'yerelAlacak', 'yerelBakiye']}
         // Cari ekstresinde kolonlar borc/alacak, hesap ekstresinde giris/cikis;
         //   ikisinin de yerel karsiligi toplanir (genel toplam yerel parada).
         toplam={tanim.ekstre.kaynak === 'cari-ekstre'
