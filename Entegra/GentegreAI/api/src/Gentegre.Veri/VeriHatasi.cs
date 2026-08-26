@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Sozlesme;
+﻿using Gentegre.Cekirdek.Sozlesme;
 using Npgsql;
 
 namespace Gentegre.Veri;
@@ -64,7 +64,10 @@ public static class VeriHatasi
         ["ck_stok_paket_adet"]    = "Paket içeriğinde adet sıfırdan büyük olmalı.",
         ["ck_firsat_olasilik"]    = "Olasılık 0 ile 100 arasında olmalı.",
         ["ck_cek_senet_kur"]      = "Kur sıfırdan büyük olmalı.",
-        ["ck_gorev_ilerleme"]     = "İlerleme 0 ile 100 arasında olmalı."
+        ["ck_gorev_ilerleme"]     = "İlerleme 0 ile 100 arasında olmalı.",
+        // 175'te kaldirildi; eski kurulumda hala olabilir - ham kisit adi yerine
+        //   ne yapilmasi gerektigini soyler.
+        ["ck_sube_efatura"]       = "e-Fatura mükellefi şubede VKN ve gönderici etiketi dolu olmalı."
     };
 
     private static string KuralMesaji(PostgresException h)
