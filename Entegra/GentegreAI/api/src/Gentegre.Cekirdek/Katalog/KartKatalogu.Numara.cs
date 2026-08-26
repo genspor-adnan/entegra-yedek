@@ -90,39 +90,6 @@ public static partial class KartKatalogu
                 Baslik: "Durum", Grup: "Seri")
         });
 
-    /// <summary>
-    /// e-BELGE XSLT SABLONU (159). Icerik (XSLT metni) kartta DUZENLENMEZ:
-    /// 100 KB - 1,3 MB'lik XML'i form alanina koymak ekrani kilitler; sablon
-    /// disaridan hazirlanip yuklenir. Kart tanimlamayi yonetir: hangi belge
-    /// turunun hangi yonu, hangi sablon varsayilan.
-    /// </summary>
-    private static KartTanimi EBelgeXslt() => new(
-        Ad: "ebelge-xslt",
-        YetkiKodu: "ebelge_xslt",
-        Tablo: "public.ebelge_xslt",
-        LogTabloId: 920,
-        SubeKolonu: null,
-        YeniKayitVarsayilanlari: new Dictionary<string, object?>
-        {
-            ["durum"] = (short)1,
-            ["yon"] = (short)2,
-            ["varsayilan"] = (short)0,
-        },
-        Alanlar: new KartAlani[]
-        {
-            new("id", "id", "sayi", Yazilabilir: false),
-            new("belgeTuru", "belge_turu", "kod", Zorunlu: true,
-                KodTablosu: "public.v_ebelge_turu_lookup", Baslik: "e-Belge Türü", Grup: "Şablon"),
-            new("yon", "yon", "kod", Zorunlu: true,
-                KodTablosu: "public.v_ebelge_yon_lookup", Baslik: "Yön", Grup: "Şablon"),
-            new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 120,
-                Baslik: "Şablon Adı", Grup: "Şablon"),
-            new("varsayilan", "varsayilan", "mantik", Baslik: "Varsayılan", Grup: "Şablon"),
-            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
-                Baslik: "Açıklama", Grup: "Şablon"),
-            new("durum", "durum", "kod", SabitKodlar: DurumKodlari, Baslik: "Durum", Grup: "Şablon")
-        });
-
     private static KartTanimi NumaraSatis() =>
         NumaraKarti("numara-satis", "public.v_numara_turu_satis", "Satış Belgesi Türü");
     private static KartTanimi NumaraAlis() =>

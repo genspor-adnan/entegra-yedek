@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using Gentegre.Cekirdek.Sozlesme;
 using Npgsql;
 
@@ -27,6 +27,10 @@ public sealed class DokumanDeposu
         "application/vnd.ms-excel",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "text/plain",
+        // e-Belge XSLT sablonlari (160). Tarayici .xsl/.xslt icin cogunlukla
+        //   "text/xml" gonderir, bazen hic gondermez - ucta bos tip XSLT'ye
+        //   sabitleniyor.
+        "application/xslt+xml", "text/xml", "application/xml",
     };
 
     private const int AzamiBoyut = 5 * 1024 * 1024; // 5 MB
@@ -61,8 +65,11 @@ public sealed class DokumanDeposu
         return sonuc;
     }
 
+    /// <param name="yon">0 uygulanmaz · 1 gelen · 2 giden (160). e-Belge XSLT
+    /// sablonlarinda gelen/giden ayrimi; diger kaynaklarda 0 kalir.</param>
     public async Task<IReadOnlyList<DokumanSatiri>> EkleAsync(string kaynak, long kaynakId, string ad,
-        string contentType, byte[] veri, bool varsayilanIstendi, YazmaBaglami baglam, CancellationToken iptal = default)
+        string contentType, byte[] veri, bool varsayilanIstendi, YazmaBaglami baglam,
+        CancellationToken iptal = default, short yon = 0)
     {
         KaynakDogrula(kaynak);
         if (!IcerikTipiBeyazListe.Contains(contentType))
@@ -98,7 +105,7 @@ public sealed class DokumanDeposu
         var varsayilanOlacak = resimMi && (varsayilanIstendi || !mevcutResimVarMi);
 
         if (varsayilanOlacak)
-            await VarsayilaniKaldirAsync(baglanti, islem, kaynak, kaynakId, baglam.KullaniciId, iptal);
+            await VarsayilaniKaldirAsync(baglanti, islem, kaynak, kaynakId, baglam.KullaniciId, iptal, yon);
 
         // İçerik dedup: aynı hash zaten varsa bytea'yı tekrar yazmadan referans_sayisi'ni
         // artır, yoksa yeni içerik satırı aç (059_dokuman_dedup.sql).
@@ -116,8 +123,8 @@ public sealed class DokumanDeposu
         }
 
         await using (var ekle = new NpgsqlCommand("""
-            insert into public.dokuman (kaynak, kaynak_id, ad, content_type, boyut, hash, varsayilan, sube_id, ekleyen)
-            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8)
+            insert into public.dokuman (kaynak, kaynak_id, ad, content_type, boyut, hash, varsayilan, sube_id, ekleyen, yon)
+            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)
             """, baglanti, islem))
         {
             ekle.Parameters.AddWithValue("p0", kaynak);
@@ -127,8 +134,10 @@ public sealed class DokumanDeposu
             ekle.Parameters.AddWithValue("p4", veri.Length);
             ekle.Parameters.AddWithValue("p5", hash);
             ekle.Parameters.AddWithValue("p6", (short)(varsayilanOlacak ? 1 : 0));
+            // p9 asagida: yon (0 uygulanmaz / 1 gelen / 2 giden).
             ekle.Parameters.AddWithValue("p7", baglam.SubeId ?? 1);
             ekle.Parameters.AddWithValue("p8", baglam.KullaniciId);
+            ekle.Parameters.AddWithValue("p9", yon);
             await ekle.ExecuteNonQueryAsync(iptal);
         }
 
@@ -168,14 +177,18 @@ public sealed class DokumanDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-        var (kaynak, kaynakId, contentType) = await SatirBulAsync(baglanti, islem,
-            "select kaynak, kaynak_id, content_type from public.dokuman where id = @p0", dokumanId,
-            r => (r.GetString(0), r.GetInt32(1), r.GetString(2)), iptal);
-        if (!contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+        var (kaynak, kaynakId, contentType, yon) = await SatirBulAsync(baglanti, islem,
+            "select kaynak, kaynak_id, content_type, yon from public.dokuman where id = @p0", dokumanId,
+            r => (r.GetString(0), r.GetInt32(1), r.GetString(2), r.GetInt16(3)), iptal);
+        // "Varsayilan" kartlarda ANA GORSEL demek - resim olmayan dosyanin
+        //   varsayilan olmasi anlamsizdi. e-Belge XSLT'sinde ise anlami baska:
+        //   "bu tur+yon icin kullanilacak sablon" (160) - orada resim sarti yok.
+        if (kaynak != "ebelge-xslt"
+            && !contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
             throw GentegreHatasi.Dogrulama("Sadece resim varsayılan yapılabilir.",
                 new AlanHatasi("dosya", "Bu doküman resim değil."));
 
-        await VarsayilaniKaldirAsync(baglanti, islem, kaynak, kaynakId, baglam.KullaniciId, iptal);
+        await VarsayilaniKaldirAsync(baglanti, islem, kaynak, kaynakId, baglam.KullaniciId, iptal, yon);
         await using (var guncelle = new NpgsqlCommand(
             "update public.dokuman set varsayilan = 1, degistiren = @p0 where id = @p1", baglanti, islem))
         {
@@ -319,15 +332,22 @@ public sealed class DokumanDeposu
         return oku(okuyucu);
     }
 
+    /// <summary>
+    /// Ayni kaynagin onceki varsayilanini birakir. YONE DUYARLI (160): varsayilan
+    /// kisiti (kaynak, kaynak_id, yon) uzerinde - gelen sablonu varsayilan
+    /// yapmak, gidenin varsayilanini dusurmemeli.
+    /// </summary>
     private static async Task VarsayilaniKaldirAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
-        string kaynak, long kaynakId, int kullaniciId, CancellationToken iptal)
+        string kaynak, long kaynakId, int kullaniciId, CancellationToken iptal, short yon = 0)
     {
-        await using var komut = new NpgsqlCommand(
-            "update public.dokuman set varsayilan = 0, degistiren = @p0 where kaynak = @p1 and kaynak_id = @p2 and varsayilan = 1",
-            baglanti, islem);
+        await using var komut = new NpgsqlCommand("""
+            update public.dokuman set varsayilan = 0, degistiren = @p0
+             where kaynak = @p1 and kaynak_id = @p2 and yon = @p3 and varsayilan = 1
+            """, baglanti, islem);
         komut.Parameters.AddWithValue("p0", kullaniciId);
         komut.Parameters.AddWithValue("p1", kaynak);
         komut.Parameters.AddWithValue("p2", kaynakId);
+        komut.Parameters.AddWithValue("p3", yon);
         await komut.ExecuteNonQueryAsync(iptal);
     }
 }

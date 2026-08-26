@@ -4,11 +4,14 @@
 #      powershell -File db\araclar\xslt_aktar.ps1
 #      powershell -File db\araclar\xslt_aktar.ps1 -PgHost 46.36.201.170
 #
-#  NEDEN AYRI BETIK: sablonlar 106 KB - 1,3 MB (toplam ~3,5 MB). Migration'a
-#  gomulseler depo sisirdi ve her yayinda tekrar tasinirlardi. Tablo db/159'da
-#  kurulur; icerikler buradan gelir.
+#  NEDEN AYRI BETIK: sablonlar 106 KB - 1,3 MB (toplam ~3,7 MB). Migration'a
+#  gomulseler depo sisirdi ve her yayinda tekrar tasinirlardi.
 #
-#  TEKRAR CALISTIRILABILIR: eslesme DOKUMLER.ID uzerinden (kaynak_id); ayni
+#  HEDEF (160): ayri tablo YOK - merkezi `dokuman` deposu.
+#      kaynak='ebelge-xslt' · kaynak_id=belge turu · yon 1 gelen / 2 giden
+#  Icerik `dokuman_icerik`e hash ile (dedup) yazilir.
+#
+#  TEKRAR CALISTIRILABILIR: eslesme (kaynak_id + yon + ad) uzerinden; ayni
 #  sablon ikinci kez eklenmez, icerigi guncellenir.
 #
 #  KAYNAK: BILIM.dbo.DOKUMLER, GRUBU = 'XSLT'. RAPORID belge turu + yonu tek
@@ -99,21 +102,46 @@ try {
 
     $sql = @"
 create temporary table gecici_xslt (
-    kaynak_id integer, belge_turu smallint, yon smallint,
-    ad varchar(120), varsayilan smallint, durum smallint, icerik text);
-\copy gecici_xslt from '$kapsayiciYol' with (format text, delimiter E'\t');
+    kaynak_id2 integer, belge_turu2 smallint, yon2 smallint,
+    ad2 varchar(200), varsayilan2 smallint, durum2 smallint, icerik2 text);
+\copy gecici_xslt from '$kapsayiciYol' with (format text, delimiter E'	');
 
-insert into public.ebelge_xslt (kaynak_id, belge_turu, yon, ad, varsayilan, durum, icerik, aciklama)
-select g.kaynak_id, g.belge_turu, g.yon, g.ad, g.varsayilan, g.durum, g.icerik, 'BILIM aktarımı'
+-- Icerik once merkezi depoya (hash ile dedup), sonra dokuman satiri.
+insert into public.dokuman_icerik (hash, icerik, content_type, boyut, referans_sayisi)
+select encode(sha256(convert_to(g.icerik2, 'UTF8')), 'hex'),
+       convert_to(g.icerik2, 'UTF8'), 'application/xslt+xml',
+       octet_length(convert_to(g.icerik2, 'UTF8')), 1
   from gecici_xslt g
-on conflict (kaynak_id) where kaynak_id > 0 do update
-   set ad = excluded.ad, belge_turu = excluded.belge_turu, yon = excluded.yon,
-       varsayilan = excluded.varsayilan, durum = excluded.durum,
-       icerik = excluded.icerik, degistirme_tarihi = now()::timestamp;
+on conflict (hash) do nothing;
 
-select belge_turu, yon, count(*) as sablon,
-       sum(varsayilan) as varsayilan, sum(length(icerik)) as toplam_boy
-  from public.ebelge_xslt group by belge_turu, yon order by belge_turu, yon;
+-- Ayni sablon (tur + yon + ad) varsa GUNCELLE, yoksa ekle.
+update public.dokuman d
+   set hash = encode(sha256(convert_to(g.icerik2, 'UTF8')), 'hex'),
+       boyut = octet_length(convert_to(g.icerik2, 'UTF8')),
+       varsayilan = g.varsayilan2, durum = g.durum2,
+       degistirme_tarihi = now()::timestamp
+  from gecici_xslt g
+ where d.kaynak = 'ebelge-xslt' and d.kaynak_id = g.belge_turu2
+   and d.yon = g.yon2 and d.ad = g.ad2;
+
+insert into public.dokuman (kaynak, kaynak_id, ad, content_type, boyut, hash,
+                            sira, varsayilan, yon, belge_turu, durum, sube_id, ekleyen)
+select 'ebelge-xslt', g.belge_turu2, g.ad2, 'application/xslt+xml',
+       octet_length(convert_to(g.icerik2, 'UTF8')),
+       encode(sha256(convert_to(g.icerik2, 'UTF8')), 'hex'),
+       0, g.varsayilan2, g.yon2,
+       case g.belge_turu2 when 1 then 'e-Fatura' when 2 then 'e-Arşiv'
+                          when 7 then 'e-İrsaliye' when 8 then 'e-SMM' else '' end,
+       g.durum2, (select min(id) from public.sube), 0
+  from gecici_xslt g
+ where not exists (select 1 from public.dokuman d
+                    where d.kaynak = 'ebelge-xslt' and d.kaynak_id = g.belge_turu2
+                      and d.yon = g.yon2 and d.ad = g.ad2);
+
+select belge_turu, yon, count(*) as sablon, sum(varsayilan) as varsayilan,
+       sum(boyut) as toplam_boy
+  from public.dokuman where kaynak = 'ebelge-xslt'
+ group by belge_turu, yon order by belge_turu, yon;
 "@
     $sqlDosya = Join-Path $gecici 'aktar.sql'
     [IO.File]::WriteAllText($sqlDosya, $sql, [Text.UTF8Encoding]::new($false))

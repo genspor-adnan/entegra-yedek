@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri.Depolar;
@@ -36,13 +36,21 @@ public static class DokumanUclari
             var dosya = form.Files.GetFile("dosya")
                 ?? throw GentegreHatasi.Dogrulama("Dosya gerekli.", new AlanHatasi("dosya", "Dosya seçilmedi."));
             var varsayilanIstendi = form["varsayilan"].ToString() == "true";
+            // 160: gelen/giden ayrimi (e-Belge XSLT). Verilmezse 0 = uygulanmaz.
+            _ = short.TryParse(form["yon"].ToString(), out var yon);
 
             using var akis = new MemoryStream();
             await dosya.CopyToAsync(akis, iptal);
 
+            // Tarayici .xsl/.xslt icin cogunlukla bos ya da genel tip gonderir;
+            //   XSLT kaynaginda tipi biz sabitliyoruz - beyaz listeye takilmasin.
+            var tip = kartAdi == "ebelge-xslt" && (string.IsNullOrWhiteSpace(dosya.ContentType)
+                        || dosya.ContentType == "application/octet-stream")
+                      ? "application/xslt+xml" : dosya.ContentType;
+
             var liste = await depo.EkleAsync(FizikselKaynak(kartAdi), kaynakId, dosya.FileName,
-                dosya.ContentType, akis.ToArray(), varsayilanIstendi,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                tip, akis.ToArray(), varsayilanIstendi,
+                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal, yon);
             return Results.Ok(liste);
         });
 

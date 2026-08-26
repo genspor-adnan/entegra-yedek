@@ -62,32 +62,32 @@ public static partial class KaynakKatalogu
     /// ortada yalniz basina duruyordu.
     /// </summary>
     /// <summary>
-    /// e-BELGE XSLT SABLONLARI (159). Belge XML'ine gomulen goruntuleme
-    /// sablonu. ICERIK KOLONU LISTEDE YOK: sablonlar 100 KB - 1,3 MB; her
-    /// listede tasinsa grid agirlasirdi - yerine BOYUT gosterilir.
+    /// e-BELGE XSLT SABLONLARI (160). Ayri tablo YOK: sablonlar merkezi
+    /// `dokuman` deposunda durur - ad, boyut, hash, varsayilan, audit ve dosya
+    /// yukleme/indirme altyapisi orada hazir.
+    ///
+    ///     kaynak = 'ebelge-xslt' · kaynak_id = belge turu kodu · yon 1/2
     /// </summary>
     private static KaynakTanimi EBelgeXslt() => new(
         Ad: "ebelge-xslt",
         YetkiKodu: "ebelge_xslt",
-        Kaynak: "public.ebelge_xslt x",
-        VarsayilanSirala: "x.belge_turu asc, x.yon asc, x.varsayilan desc, x.ad asc",
+        Kaynak: "public.dokuman d",
+        SabitKosul: "d.kaynak = 'ebelge-xslt'",
+        VarsayilanSirala: "d.kaynak_id asc, d.yon asc, d.varsayilan desc, d.ad asc",
         Kolonlar: new KolonTanimi[]
         {
-            new("id",        "x.id",     "sayi",  "Id", Varsayilan: false),
-            new("belgeTuru", """
-                case x.belge_turu when 1 then 'e-Fatura' when 2 then 'e-Arşiv'
-                                  when 7 then 'e-İrsaliye' when 8 then 'e-SMM' else '' end
-                """,                     "metin", "e-Belge Türü",
-                                         Hizalama: "orta", Bicim: "rozet", Genislik: SeriKolonEni),
-            new("yon",       "case x.yon when 1 then 'Gelen' else 'Giden' end",
-                                         "metin", "Yön", Hizalama: "orta", Genislik: SeriDarKolon),
-            new("ad",        "x.ad",     "metin", "Şablon Adı", Genislik: 260),
-            new("varsayilan","x.varsayilan", "mantik", "Varsayılan", Hizalama: "orta",
-                                         Genislik: SeriDarKolon),
-            // Icerigin KENDISI degil boyu: sablonun dolu olup olmadigi bir bakista gorunur.
-            new("boyut",     "length(x.icerik)", "sayi", "Boyut", Hizalama: "sag",
-                                         Genislik: SeriDarKolon, Filtrelenebilir: false),
-            new("durum",     "x.durum",  "kod",   "Durum", Hizalama: "orta", Genislik: SeriDarKolon)
+            new("id",        "d.id",         "sayi",  "Id", Varsayilan: false),
+            // Turun okunur adi dokumanda saklı; rozet olarak cizilir.
+            new("belgeTuru", "d.belge_turu", "metin", "e-Belge Türü",
+                                             Hizalama: "orta", Bicim: "rozet", Genislik: SeriKolonEni),
+            new("yon",       "case d.yon when 1 then 'Gelen' else 'Giden' end",
+                                             "metin", "Yön", Hizalama: "orta", Genislik: SeriDarKolon),
+            new("ad",        "d.ad",         "metin", "Şablon Adı", Genislik: 260),
+            new("varsayilan","d.varsayilan", "mantik","Varsayılan", Hizalama: "orta",
+                                             Genislik: SeriDarKolon),
+            new("boyut",     "d.boyut",      "sayi",  "Boyut", Hizalama: "sag",
+                                             Genislik: SeriDarKolon),
+            new("turKodu",   "d.kaynak_id",  "sayi",  "Tür Kodu", Varsayilan: false)
         });
 
     private const int SeriKolonEni = 140;

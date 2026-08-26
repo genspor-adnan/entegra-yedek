@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { AyarAlani } from '../bilesenler/AyarAlani';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
@@ -70,18 +70,53 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
   const [seciliSeri, setSeciliSeri] = useState<ListeSatiri | null>(null);
   const [seriHata, setSeriHata] = useState<string | null>(null);
   /** XSLT sablonlari - seri kurallariyla ayni desen. */
-  const [xsltKart, setXsltKart] = useState<number | 'yeni' | null>(null);
+  /** XSLT: sablonlar `dokuman` deposunda (160) - ayri tablo yok. */
   const [xsltYenile, setXsltYenile] = useState(0);
   const [seciliXslt, setSeciliXslt] = useState<ListeSatiri | null>(null);
+  /** Yeni sablon hangi tur + yon icin yuklenecek. */
+  const [xsltTur, setXsltTur] = useState(1);
+  const [xsltYon, setXsltYon] = useState(2);
+  const dosyaGirdisi = useRef<HTMLInputElement | null>(null);
 
   const xsltSil = async () => {
     if (!seciliXslt) return;
     if (!window.confirm(`"${seciliXslt.ad ?? ''}" şablonu silinecek. Onaylıyor musunuz?`)) return;
     setSeriHata(null);
     try {
-      await api.kartSil('ebelge-xslt', Number(seciliXslt.id));
+      await api.dokumanSil('ebelge-xslt', Number(seciliXslt.turKodu ?? 0), Number(seciliXslt.id));
       setSeciliXslt(null);
       setXsltYenile(t => t + 1);
+    } catch (h) { setSeriHata(hataMetni(h)) }
+  };
+
+  /** Klasorden secilen dosya: ADI sablon adi olur, icerigi depoya gider. */
+  const xsltYukle = async (dosya: File | undefined) => {
+    if (!dosya) return;
+    setSeriHata(null);
+    try {
+      await api.dokumanYukle('ebelge-xslt', xsltTur, dosya, false, xsltYon);
+      setXsltYenile(t => t + 1);
+    } catch (h) { setSeriHata(hataMetni(h)) }
+  };
+
+  /**
+   * Secili sablonu diske kaydet. Icerik yetkili istekle cekilir (blob URL);
+   * dosya adi sablonun adidir, uzantisi yoksa .xslt eklenir.
+   */
+  const xsltIndir = async () => {
+    if (!seciliXslt) return;
+    setSeriHata(null);
+    try {
+      const url = await api.dokumanIcerikUrl(Number(seciliXslt.id));
+      const ad = String(seciliXslt.ad ?? 'sablon');
+      const bag = document.createElement('a');
+      bag.href = url;
+      bag.download = /\.(xsl|xslt|xml)$/i.test(ad) ? ad : `${ad}.xslt`;
+      document.body.appendChild(bag);
+      bag.click();
+      bag.remove();
+      // Blob URL'i birak - yoksa sekme kapanana kadar bellekte kalir.
+      setTimeout(() => URL.revokeObjectURL(url), 10_000);
     } catch (h) { setSeriHata(hataMetni(h)) }
   };
 
@@ -214,20 +249,39 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
 
       {bolum === 'xslt' && (
         <div className="kagrup">
-          {/* Belge XML'ine gomulen goruntuleme sablonlari (159). Icerik burada
-              duzenlenmez - 100 KB - 1,3 MB'lik XSLT'yi form alanina koymak
-              ekrani kilitler; kart yalniz tanimlamayi yonetir. */}
+          {/* Sablonlar merkezi `dokuman` deposunda (160): ad, boyut, hash,
+              varsayilan ve yukleme/indirme altyapisi orada hazir. */}
           <div className="numaralama-bas bitisik">
             <h6>XSLT Şablonları</h6>
             <span className="baslik-eylem">
-              <button className="d bir ikon-dugme" title="Yeni şablon"
-                      onClick={() => setXsltKart('yeni')}>＋</button>
-              <button className="d ikon-dugme" disabled={!seciliXslt}
-                      title={seciliXslt ? 'Seçili şablonu düzenle' : 'Önce satır seçin'}
-                      onClick={() => seciliXslt && setXsltKart(Number(seciliXslt.id))}>✎</button>
+              {/* Yeni sablon HANGI tur+yon icin yuklenecek. */}
+              <select className="birim" value={xsltTur} title="e-Belge türü"
+                      onChange={e => setXsltTur(Number(e.target.value))}>
+                <option value={1}>e-Fatura</option>
+                <option value={2}>e-Arşiv</option>
+                <option value={7}>e-İrsaliye</option>
+                <option value={8}>e-SMM</option>
+              </select>
+              <select className="birim" value={xsltYon} title="Yön"
+                      onChange={e => setXsltYon(Number(e.target.value))}>
+                <option value={2}>Giden</option>
+                <option value={1}>Gelen</option>
+              </select>
+              {/* Dosya secici gizli: "＋" ona basar, secilen DOSYANIN ADI
+                  sablon adi olur. */}
+              <input ref={dosyaGirdisi} type="file" accept=".xsl,.xslt,.xml" hidden
+                     onChange={e => {
+                       void xsltYukle(e.target.files?.[0]);
+                       e.target.value = '';        // ayni dosya tekrar secilebilsin
+                     }} />
+              <button className="d bir ikon-dugme" title="Klasörden şablon yükle"
+                      onClick={() => dosyaGirdisi.current?.click()}>＋</button>
               <button className="d teh ikon-dugme" disabled={!seciliXslt}
                       title={seciliXslt ? 'Seçili şablonu sil' : 'Önce satır seçin'}
                       onClick={() => { void xsltSil() }}>🗑</button>
+              <button className="d ikon-dugme" disabled={!seciliXslt}
+                      title={seciliXslt ? 'Seçili şablonu dosyaya kaydet' : 'Önce satır seçin'}
+                      onClick={() => { void xsltIndir() }}>💾</button>
             </span>
           </div>
           <GenGrid
@@ -236,26 +290,16 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
             gomulu
             seritGizli
             boyut={25}
-            onSatirAc={satir => setXsltKart(Number(satir.id))}
             onSecimDegisti={setSeciliXslt}
           />
           <div className="not">
-            Belge GİB'e XML olarak gider; insanın gördüğü fatura görüntüsü bu
-            şablon uygulanarak üretilir ve gönderimde XML'in <b>içine gömülür</b>.
-            Her belge türü ve yön için <b>bir</b> şablon varsayılan olabilir.
-            <b> Boyut</b> sıfırsa şablonun içeriği henüz yüklenmemiştir.
+            Belge GİB'e XML olarak gider; insanın gördüğü görüntü bu şablon
+            uygulanarak üretilir ve gönderimde XML'in <b>içine gömülür</b>.
+            <b> ＋</b> ile klasörden seçtiğiniz dosyanın adı şablon adı olur;
+            <b> 💾</b> seçili şablonu diske kaydeder. Her belge türü ve yön için
+            <b> bir</b> şablon varsayılan olabilir.
           </div>
         </div>
-      )}
-
-      {xsltKart !== null && (
-        <GenForm
-          kaynak="ebelge-xslt"
-          id={xsltKart}
-          baslik="XSLT Şablonu"
-          onKapat={() => setXsltKart(null)}
-          onKaydedildi={() => { setXsltKart(null); setXsltYenile(t => t + 1) }}
-        />
       )}
 
       {bolum === 'efatura' && (

@@ -203,10 +203,12 @@ export const api = {
   // ------------------------------------------------------------- dokuman ----
   dokumanlar: (kartAdi: string, kaynakId: number) =>
     istek<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}`),
-  dokumanYukle: (kartAdi: string, kaynakId: number, dosya: File, varsayilan: boolean) => {
+  // yon: 0 uygulanmaz · 1 gelen · 2 giden (e-Belge XSLT sablonlari, 160).
+  dokumanYukle: (kartAdi: string, kaynakId: number, dosya: File, varsayilan: boolean, yon = 0) => {
     const form = new FormData();
     form.append('dosya', dosya);
     form.append('varsayilan', varsayilan ? 'true' : 'false');
+    if (yon) form.append('yon', String(yon));
     return dosyaYukle<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}`, form);
   },
   dokumanVarsayilanYap: (kartAdi: string, kaynakId: number, dokumanId: number) =>
