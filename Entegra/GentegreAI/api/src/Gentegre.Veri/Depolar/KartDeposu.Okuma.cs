@@ -170,6 +170,8 @@ public sealed partial class KartDeposu
             // Numaralama (152) - dort gridin tur secim listeleri.
             "public.v_numara_turu_satis", "public.v_numara_turu_alis",
             "public.v_numara_turu_tahsilat", "public.v_numara_turu_odeme",
+            // e-Belge seri kurallari (156).
+            "public.v_ebelge_turu_lookup", "public.v_kullanici_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

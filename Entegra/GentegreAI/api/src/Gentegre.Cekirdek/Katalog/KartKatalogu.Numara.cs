@@ -53,6 +53,43 @@ public static partial class KartKatalogu
                 Baslik: "Durum", Grup: "Numaralama")
         });
 
+    /// <summary>
+    /// e-BELGE SERI KURALI (156). Delphi'deki "Seri Bilgileri" grid satiri.
+    /// Senaryo ve Kullanici BOS birakilabilir: 0 = "farketmez / tum
+    /// kullanicilar" demektir, kural o zaman genel gecerli olur.
+    /// </summary>
+    private static KartTanimi EBelgeSeri() => new(
+        Ad: "ebelge-seri",
+        YetkiKodu: "ebelge_seri",
+        Tablo: "public.ebelge_seri",
+        LogTabloId: 919,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["durum"] = (short)1,
+            ["senaryo"] = (short)0,
+            ["kullaniciId"] = 0,
+            ["sira"] = (short)0,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("belgeTuru", "belge_turu", "kod", Zorunlu: true,
+                KodTablosu: "public.v_ebelge_turu_lookup",
+                Baslik: "e-Belge Türü", Grup: "Seri"),
+            new("seri", "seri", "metin", Zorunlu: true, EnFazlaUzunluk: 10,
+                Baslik: "Seri", Grup: "Seri"),
+            new("senaryo", "senaryo", "kod", SabitKodlar: EBelgeSenaryoKodlari,
+                Baslik: "Senaryo", Grup: "Seri"),
+            new("kullaniciId", "kullanici_id", "kod", KodTablosu: "public.v_kullanici_lookup",
+                Baslik: "Kullanıcı", Grup: "Seri"),
+            new("sira", "sira", "sayi", Baslik: "Sıra", Grup: "Seri"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
+                Baslik: "Açıklama", Grup: "Seri"),
+            new("durum", "durum", "kod", SabitKodlar: DurumKodlari,
+                Baslik: "Durum", Grup: "Seri")
+        });
+
     private static KartTanimi NumaraSatis() =>
         NumaraKarti("numara-satis", "public.v_numara_turu_satis", "Satış Belgesi Türü");
     private static KartTanimi NumaraAlis() =>

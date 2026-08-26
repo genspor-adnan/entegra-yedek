@@ -162,6 +162,7 @@ public static partial class KartKatalogu
         Ekle(NumaraAlis());
         Ekle(NumaraTahsilat());
         Ekle(NumaraOdeme());
+        Ekle(EBelgeSeri());
         Ekle(CekSenet());
         Ekle(Depo());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.

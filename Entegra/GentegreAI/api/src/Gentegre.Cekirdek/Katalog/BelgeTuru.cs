@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// BELGE TURU DAVRANISI — sunucu tarafinin tek dogruluk kaynagi.
@@ -30,6 +30,12 @@ public static class BelgeTuru
 
     /// <summary>Stoktan talep: stok/cari ETKILEMEZ, karsilanmasi transferle olur.</summary>
     public const int Talep = 105;
+
+    /// <summary>e-Fatura / e-Arsiv olarak GIDEN satis faturasi.</summary>
+    public const int SatisFaturasi = 15;
+
+    /// <summary>e-Irsaliye olarak GIDEN satis irsaliyesi.</summary>
+    public const int SatisIrsaliyesi = 14;
 
     /// <summary>Stok fisleri: 3 giris / 4 cikis - carisiz, muhasebe fisi uretir.</summary>
     private static readonly HashSet<int> StokFisleri = new() { 3, 4 };

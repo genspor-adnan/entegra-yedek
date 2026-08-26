@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { AyarAlani } from '../bilesenler/AyarAlani';
+import { GenGrid } from '../bilesenler/GenGrid';
+import { GenForm } from '../bilesenler/GenForm';
 import type { AyarSatiri } from '../api/sozlesme';
 
 /**
@@ -31,6 +33,9 @@ import type { AyarSatiri } from '../api/sozlesme';
 const BOLUMLER = [
   { anahtar: 'baglanti',  baslik: 'Entegratör' },
   { anahtar: 'test',      baslik: 'Test Ortamı' },
+  // Seri bilgileri belge turlerinin SOLUNDA (kullanici): once "hangi seriyle
+  //   kesilecek", sonra tur bazli servis ayarlari.
+  { anahtar: 'seri',      baslik: 'Seri Bilgileri' },
   { anahtar: 'efatura',   baslik: 'e-Fatura' },
   { anahtar: 'earsiv',    baslik: 'e-Arşiv' },
   { anahtar: 'eirsaliye', baslik: 'e-İrsaliye' },
@@ -47,6 +52,9 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
   );
 
   const [bolum, setBolum] = useState<string>('baglanti');
+  /** Acik seri kurali karti ("yeni" = ekleme). */
+  const [seriKart, setSeriKart] = useState<number | 'yeni' | null>(null);
+  const [seriYenile, setSeriYenile] = useState(0);
 
   return (
     <>
@@ -91,6 +99,41 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
             Canlıya geçerken bu kutuyu kapatmayı unutmayın.
           </div>
         </div>
+      )}
+
+      {bolum === 'seri' && (
+        <div className="kagrup">
+          {/* Delphi'deki "Seri Bilgileri" gridi (UOpsiyonFatura > TabSeri).
+              Belgenin IC numarasi degil, GIB'e giden SERI kodu. */}
+          <div className="numaralama-bas">
+            <h6>Seri Kuralları</h6>
+            <button className="d bir mini" onClick={() => setSeriKart('yeni')}>＋ Yeni</button>
+          </div>
+          <GenGrid
+            key={`ebelge-seri-${seriYenile}`}
+            kaynak="ebelge-seri"
+            gomulu
+            seritGizli
+            boyut={25}
+            onSatirAc={satir => setSeriKart(Number(satir.id))}
+          />
+          <div className="not">
+            Belge gönderilirken bu kurallardan <b>uyanı</b> seçilir: önce
+            kullanıcıya özel, sonra senaryoya özel, sonra genel kural; eşitlikte
+            <b> Sıra</b> küçük olan kazanır. Senaryo ve Kullanıcı boş bırakılırsa
+            kural her senaryoda / her kullanıcıda geçerlidir.
+          </div>
+        </div>
+      )}
+
+      {seriKart !== null && (
+        <GenForm
+          kaynak="ebelge-seri"
+          id={seriKart}
+          baslik="e-Belge Seri Kuralı"
+          onKapat={() => setSeriKart(null)}
+          onKaydedildi={() => { setSeriKart(null); setSeriYenile(t => t + 1) }}
+        />
       )}
 
       {bolum === 'efatura' && (

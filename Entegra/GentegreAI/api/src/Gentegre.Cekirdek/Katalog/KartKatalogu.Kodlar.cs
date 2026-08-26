@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// Kart alanlarinda kullanilan SABIT kod listeleri - kod_liste'de karsiligi olmayan, uygulamaya gomulu kucuk kumeler (durum, KDV, cinsiyet, cek/senet yonu...).
@@ -9,6 +9,10 @@ public static partial class KartKatalogu
     //   Sema yorumu tersini soyluyordu; verinin 2.487'si 1, 229'u 0 - yani 1 aktif.
     private static readonly Dictionary<string, string> DurumKodlari =
         new() { ["1"] = "Aktif", ["0"] = "Pasif" };
+
+    /// <summary>e-Belge senaryosu (156). 0 = kural her senaryoda gecerli.</summary>
+    private static readonly Dictionary<string, string> EBelgeSenaryoKodlari =
+        new() { ["0"] = "(farketmez)", ["1"] = "Temel", ["2"] = "Ticari", ["8"] = "İlaç / Tıbbi Cihaz" };
 
     // STOKLAR.BILDIRIM - GENINI kod listesi degil, sabit 2 secenek (BILIM verisi: 0=3614, 2=1468, 1=1 stray).
 

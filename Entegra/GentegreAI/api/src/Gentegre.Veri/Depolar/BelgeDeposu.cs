@@ -54,6 +54,35 @@ public sealed partial class BelgeDeposu
                 $"Bu cariden \"{belgeNo}\" numarali belge zaten kayitli (#{varOlan}).");
     }
 
+    /// <summary>
+    /// Numarasi ENTEGRATORDEN gelecek belge mi (155 ayarlari)?
+    ///
+    /// Satis faturasi e-Fatura/e-Arsiv olarak, satis irsaliyesi e-Irsaliye
+    /// olarak gider. `ebelge.aktif` ANA SALTER: kapaliyken hicbir belge GIB'e
+    /// gitmez, dolayisiyla numarayi yine biz veririz - yoksa gonderilemeyen
+    /// belge numarasiz kalirdi.
+    /// </summary>
+    private static async Task<bool> EBelgeNumaraliMiAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction islem, int tur, CancellationToken iptal)
+    {
+        if (tur != BelgeTuru.SatisFaturasi && tur != BelgeTuru.SatisIrsaliyesi) return false;
+        if (await AyarDeposu.SayiAsync(baglanti, islem, "ebelge.aktif", iptal) != 1) return false;
+        return tur == BelgeTuru.SatisFaturasi
+            || await AyarDeposu.SayiAsync(baglanti, islem, "eirsaliye.aktif", iptal) == 1;
+    }
+
+    /// <summary>e-Belge bekleyen belgede numara alani "0" kalir.</summary>
+    private static async Task NumaraSifirlaAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction islem, int belgeId, CancellationToken iptal)
+    {
+        await using var komut = new NpgsqlCommand("""
+            update public.belge set belge_no = '0'
+             where id = @p0 and coalesce(belge_no, '') = ''
+            """, baglanti, islem);
+        komut.Parameters.AddWithValue("p0", belgeId);
+        await komut.ExecuteNonQueryAsync(iptal);
+    }
+
     public async Task<(int Id, List<string> Uyarilar)> KaydetAsync(
         IDictionary<string, object?> belge,
         List<Dictionary<string, JsonElement>> satirlar,
@@ -430,7 +459,18 @@ public sealed partial class BelgeDeposu
             // Dis numarali belgede (alis faturasi) numara kullanicidan geldi.
             //   Duzenlemede numara ZATEN VAR - yeniden uretilmez.
             if (!disNumara && mevcutId == 0)
-                await NumaraVerAsync(baglanti, islem, belgeId, tur, Metin(belge, "belgeSeri"), baglam.SubeId, iptal);
+            {
+                // e-BELGE NUMARAYI BIZ VERMEYIZ (kullanici): e-Fatura/e-Arsiv ya da
+                //   e-Irsaliye acikken numara ENTEGRATORDEN gelir; kendi sayacimizi
+                //   harcarsak ayni belge iki numara tasir ve seri bosluklu kalir.
+                //   Numara alani "0" ile birakilir, gonderim sonucu gercek numarayi
+                //   yazar (Delphi'de de FATURANO = 0 bekliyor).
+                if (await EBelgeNumaraliMiAsync(baglanti, islem, tur, iptal))
+                    await NumaraSifirlaAsync(baglanti, islem, belgeId, iptal);
+                else
+                    await NumaraVerAsync(baglanti, islem, belgeId, tur,
+                                         Metin(belge, "belgeSeri"), baglam.SubeId, iptal);
+            }
         }
 
         // ------------------------------------------------------------------ 8) log ----
