@@ -104,6 +104,8 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const acilKisiGrid = meta.ad === 'acilKisiler';
   const ilAdIdHarita = new Map((yerler?.iller ?? []).map(i => [i.ad, i.id]));
 
+  /** Secili satir (modalDuzenle kipinde): ustteki ✎ / 🗑 buna uygulanir. */
+  const [secili, setSecili] = useState<number | null>(null);
   /** Modalde acik satirin indeksi ("yeni" = eklenecek satir). */
   const [modalSatir, setModalSatir] = useState<number | 'yeni' | null>(null);
   /** Modalde duzenlenen taslak - Tamam'a basilana kadar tabloya yazilmaz. */
@@ -194,6 +196,19 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               <button type="button" className="d bir ikon-dugme" title="Yeni satır"
                       disabled={!satirEklenebilir}
                       onClick={() => (modalDuzenle ? modalAc('yeni') : satirEkle())}>＋</button>
+              {/* Duzenle / Sil USTTE (kullanici): satir sonunda her satirda
+                  tekrar edip gridi kalabaliklastiriyordu. Secim yoksa pasif ve
+                  sebebi title'da - seri/XSLT gridleriyle ayni desen. */}
+              {modalDuzenle && (
+                <>
+                  <button type="button" className="d ikon-dugme" disabled={secili === null}
+                          title={secili === null ? 'Önce satır seçin' : 'Seçili satırı düzenle'}
+                          onClick={() => secili !== null && modalAc(secili)}>✎</button>
+                  <button type="button" className="d teh ikon-dugme" disabled={secili === null}
+                          title={secili === null ? 'Önce satır seçin' : 'Seçili satırı sil'}
+                          onClick={() => { if (secili !== null) { satirSil(secili); setSecili(null); } }}>🗑</button>
+                </>
+              )}
             </span>
           ) : (
             <button type="button" className="d bir" disabled={!satirEklenebilir} onClick={satirEkle}>
@@ -212,13 +227,24 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
         )}
         <thead>
           <tr>
+            {modalDuzenle && !saltOkunur && <th style={{ width: 30 }} />}
             {alanlar.map(a => <th key={a.ad}>{a.baslik}{a.zorunlu && ' *'}</th>)}
-            {!saltOkunur && <th />}
+            {!modalDuzenle && !saltOkunur && <th />}
           </tr>
         </thead>
         <tbody>
           {durum.guncel.map((satir, i) => (
-            <tr key={satir.id ?? `yeni-${i}`}>
+            <tr key={satir.id ?? `yeni-${i}`}
+                className={modalDuzenle && secili === i ? 'secili' : undefined}
+                onDoubleClick={() => modalDuzenle && !saltOkunur && modalAc(i)}>
+              {/* Tek satir secimi: yeni kutu isaretlenince oncekinin isareti kalkar -
+                  duzenle/sil tek satira uygulanir. */}
+              {modalDuzenle && !saltOkunur && (
+                <td className="hiza-orta">
+                  <input type="checkbox" checked={secili === i}
+                         onChange={e => setSecili(e.target.checked ? i : null)} />
+                </td>
+              )}
               {modalDuzenle && alanlar.map(a => (
                 <td key={a.ad} className={a.tip === 'mantik' ? 'hiza-orta' : undefined}>
                   {gorunum(satir, a)}
@@ -337,23 +363,17 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                   )}
                 </td>
               ))}
-              {!saltOkunur && (
+              {!modalDuzenle && !saltOkunur && (
                 <td className="hiza-orta">
-                  <span className="baslik-eylem">
-                    {modalDuzenle && (
-                      <button type="button" className="d ikon-dugme" title="Satırı düzenle"
-                              onClick={() => modalAc(i)}>✎</button>
-                    )}
-                    <button type="button" className={`d teh${ikonlu ? ' ikon-dugme' : ''}`}
-                            title={ikonlu ? 'Satırı sil' : undefined}
-                            onClick={() => satirSil(i)}>{ikonlu ? '🗑' : '×'}</button>
-                  </span>
+                  <button type="button" className={`d teh${ikonlu ? ' ikon-dugme' : ''}`}
+                          title={ikonlu ? 'Satırı sil' : undefined}
+                          onClick={() => satirSil(i)}>{ikonlu ? '🗑' : '×'}</button>
                 </td>
               )}
             </tr>
           ))}
           {durum.guncel.length === 0 && (
-            <tr><td colSpan={alanlar.length + 1} className="bos">Satir yok</td></tr>
+            <tr><td colSpan={alanlar.length + 1} className="bos">Satır yok</td></tr>
           )}
         </tbody>
       </table>
