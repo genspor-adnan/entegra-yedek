@@ -34,8 +34,7 @@ alter table public.sube
 alter table public.sube
     add column if not exists gsm              varchar(30)  not null default '',
     -- KEP: e-Belge ve resmi yazismada kullanilan kayitli elektronik posta.
-    add column if not exists kep_adresi       varchar(120) not null default '',
-    add column if not exists bolge            varchar(60)  not null default '';
+    add column if not exists kep_adresi       varchar(120) not null default '';
 
 comment on column public.sube.kep_adresi is
   'Kayitli Elektronik Posta - resmi bildirim adresi (165).';

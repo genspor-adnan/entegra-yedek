@@ -92,8 +92,6 @@ public static partial class KartKatalogu
                 Baslik: "Ülke", Grup: "Adres", AltGrup: "Merkez Adresi"),
             new("postaKodu",  "posta_kodu", "metin", EnFazlaUzunluk: 10,
                 Baslik: "Posta Kodu", Grup: "Adres", AltGrup: "Merkez Adresi"),
-            new("bolge",      "bolge",      "metin", EnFazlaUzunluk: 60,
-                Baslik: "Bölge", Grup: "Adres", AltGrup: "Merkez Adresi"),
 
             new("telefon", "telefon", "metin", EnFazlaUzunluk: 30,
                 Baslik: "Telefon", Grup: "Adres", AltGrup: "İletişim"),
