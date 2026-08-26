@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// Cari, kisi, personel, hasta ve rol kartlari.
@@ -33,7 +33,13 @@ public static partial class KartKatalogu
             // ADAY (122): henuz musteri olmayan firma. Anlasma saglaninca
             //   musteri=1 / aday=0 olur - AYNI kayit, gecmisi (firsat, gorev,
             //   adres, ilgili kisi) yerinde kalir.
-            new("aday",        "aday",         "mantik", Baslik: "Aday"),
+            // ADAY kutusu kartta CIZILMEZ (kullanici): adaylik durumu listeden
+            //   ("Müşteriye Dönüştür" aksiyonu) yonetilir, kartta elle
+            //   isaretlenecek bir sey degil. Alan SILINMEDI, GIZLI: Aday
+            //   Musteriler listesi yeni kayitta aday=true gonderiyor ve alan
+            //   metadan cikarsa o deger hic yazilmaz - yeni aday, aday
+            //   listesinde gorunmezdi.
+            new("aday",        "aday",         "mantik", Baslik: "Aday", Gizli: true),
             new("kisi",        "kisi",         "mantik", Baslik: "Kisi"),
             // "Mali" -> "Fatura Bilgileri" (mockup adi birebir; AltGrup ile mockup'un iki
             //   kutusuna ayrildi: Fatura / Vergi Kimligi + e-Belge Ayarlari. Mockup'taki XSLT/
