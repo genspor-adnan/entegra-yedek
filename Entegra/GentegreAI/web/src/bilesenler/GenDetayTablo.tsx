@@ -61,6 +61,10 @@ interface Props {
   saltOkunur: boolean;
   hatalar: Record<string, string>;
   onDegis(yeni: DetayDurumu): void;
+  /** Baslik ve satir eylemleri IKON olarak cizilir (＋ / 🗑) - seri ve XSLT
+      gridleriyle ayni gorunum (kullanici). Metin dugmeler dar gridlerde
+      satiri tasiriyordu. */
+  ikonlu?: boolean;
 }
 
 // Adresler grid'ine ozel kolon genislikleri (kullanici: "Adres geniş, İl/İlçe aynı
@@ -85,7 +89,7 @@ const EGITIM_GECERLILIK = ['Süresiz', 'Süreli'];
 
 const tarihYilTemizle = (deger: string) => deger.replace(/[^0-9./-]/g, '').slice(0, 10);
 
-export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Props) {
+export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu }: Props) {
   const alanlar = meta.alanlar.filter(a => a.ad !== 'id');
   const yerler = useYerler(meta.ad === 'adresler');
   const adresGrid = meta.ad === 'adresler';
@@ -146,9 +150,16 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Pro
       <h6>
         {meta.baslik}
         {!saltOkunur && (
-          <button type="button" className="d bir" disabled={!satirEklenebilir} onClick={satirEkle}>
-            {acilKisiGrid ? '＋ Kişi Ekle' : '+ Satir'}
-          </button>
+          ikonlu ? (
+            <span className="baslik-eylem">
+              <button type="button" className="d bir ikon-dugme" title="Yeni satır"
+                      disabled={!satirEklenebilir} onClick={satirEkle}>＋</button>
+            </span>
+          ) : (
+            <button type="button" className="d bir" disabled={!satirEklenebilir} onClick={satirEkle}>
+              {acilKisiGrid ? '＋ Kişi Ekle' : '+ Satir'}
+            </button>
+          )
         )}
       </h6>
 
@@ -283,7 +294,9 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis }: Pro
               ))}
               {!saltOkunur && (
                 <td className="hiza-orta">
-                  <button type="button" className="d teh" onClick={() => satirSil(i)}>×</button>
+                  <button type="button" className={`d teh${ikonlu ? ' ikon-dugme' : ''}`}
+                          title={ikonlu ? 'Satırı sil' : undefined}
+                          onClick={() => satirSil(i)}>{ikonlu ? '🗑' : '×'}</button>
                 </td>
               )}
             </tr>

@@ -319,6 +319,19 @@ return (
     {kaynak === 'sube' && aktif.baslik === 'Depolar' && (() => {
       const depoDetay = meta.detaylar.find(d => d.ad === 'depolar');
       if (!depoDetay) return null;
+      // Merkez deposu kullaniliyorsa subenin KENDI depo listesi yok (174):
+      //   grid cizilseydi "burada da depo tanimlayabilirim" izlenimi verirdi.
+      if (deger.merkezDepoKullan) {
+        return (
+          <div className="kagrup">
+            <h6>Depolar</h6>
+            <div className="not" style={{ padding: 10 }}>
+              Bu şube <b>merkezin depolarını</b> kullanıyor; kendi deposu tutulmaz.
+              Kendi depolarını tanımlamak için yukarıdaki kutunun işaretini kaldırın.
+            </div>
+          </div>
+        );
+      }
       if (yeniMi) {
         return (
           <div className="kagrup">
@@ -336,6 +349,7 @@ return (
           saltOkunur={salt || depoDetay.saltOkunur}
           hatalar={alanHatalari}
           onDegis={yeni => setDetaylar(t => ({ ...t, [depoDetay.ad]: yeni }))}
+          ikonlu
         />
       );
     })()}

@@ -106,11 +106,12 @@ public static partial class KartKatalogu
                 Baslik: "Web Sitesi", Grup: "Adres", AltGrup: "İletişim"),
 
             // -------------------------------------------------------- Depolar
-            // Bayrak SUBEDE, depoda degil: "bu sube merkezin depolarini da
-            //   gorsun" karari subenin ozelligi. Depoya koysaydik her yeni
-            //   subede tum depolari tek tek isaretlemek gerekirdi (173).
+            // Bayrak SUBEDE, depoda degil: "bu sube hangi depolari kullanir"
+            //   karari subenin ozelligi. Isaretliyse sube KENDI depolarini
+            //   tutmaz, merkezinkileri kullanir (174) - depo listesi de
+            //   gosterilmez.
             new("merkezDepoKullan", "merkez_depo_kullan", "mantik",
-                Baslik: "Merkez deposunu da kullan", Grup: "Depolar"),
+                Baslik: "Merkez deposunu kullan", Grup: "Depolar"),
 
             // --------------------------------------------------------- e-Belge
             // Alias gonderici etiketidir, mukellef bayraklari hangi belgeyi
