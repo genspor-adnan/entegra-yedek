@@ -111,6 +111,11 @@ kurucu.Services.AddCors(o => o.AddDefaultPolicy(p => p
 //   (appsettings > Kurulus:SaatDilimi ile degistirilebilir).
 Saat.DilimAyarla(kurucu.Configuration["Kurulus:SaatDilimi"]);
 
+// e-Belge gonderimi entegratore HTTP ile gider: named client, makul zaman asimi
+//   (gonderim entegratorde 1-2 dakika surebiliyor).
+kurucu.Services.AddHttpClient("ebelge", i => i.Timeout = TimeSpan.FromMinutes(2));
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.EBelgeGonderimi>();
+
 var uygulama = kurucu.Build();
 
 // ------------------------------------------------------------------- boru hatti ----

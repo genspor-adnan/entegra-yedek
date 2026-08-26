@@ -167,6 +167,21 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           } catch (h) { alert(hataMetni(h)) }
           return;
         }
+        // e-BELGE GONDER: GERI ALINAMAZ, bu yuzden onay metni acik yazilir -
+        //   GIB'e giden belge iptal edilmez, yalniz iade faturasiyla duzeltilir.
+        case 'ebelge.gonder': {
+          if (!satir) return;
+          const no = String(satir.belgeNo ?? satir.id);
+          if (!confirm(`"${no}" entegratöre GÖNDERİLECEK.\n\n`
+                     + 'Gönderilen belge geri alınamaz; düzeltme ancak iade '
+                     + 'faturasıyla yapılır. Onaylıyor musunuz?')) return;
+          try {
+            const y = await api.belgeEBelgeGonder(Number(satir.id));
+            alert((y.uyarilar ?? []).join(' • ') || 'Gönderildi.');
+            setYenile(t => t + 1);
+          } catch (h) { alert(hataMetni(h)) }
+          return;
+        }
         // e-Belge menusunun oteki adimlari (164): seri degistir ve sifirla.
         case 'ebelge.seri': {
           if (!satir) return;

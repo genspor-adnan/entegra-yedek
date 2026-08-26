@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Gentegre.Api.AraKatman;
+using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -174,6 +175,32 @@ public static class BelgeUclari
                 DipToplam = kayit.DipToplam,
                 Uyarilar = mesajlar,
                 IzlemeNo = baglam.IzlemeNo
+            });
+        });
+
+        // POST /api/belge/{id}/ebelge-gonder - hazirlanmis belgeyi entegratore yolla
+        //   Yetki: DEGISTIR yetmez - gonderim GERI ALINAMAZ (GIB'e giden belge
+        //   iptal edilmez, yalniz iade faturasiyla duzeltilir).
+        grup.MapPost("/{id:int}/ebelge-gonder", async (
+            int id, BaglamCozucu cozucu, BelgeDeposu depo, EBelgeGonderimi gonderim,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Degistir);
+
+            var sonuc = await gonderim.GonderAsync(id, baglam.KullaniciId, iptal);
+
+            var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
+            var mesajlar = new List<string>
+            {
+                $"Gönderildi — {sonuc.BelgeNo} ({sonuc.Entegrator}, HTTP {sonuc.HttpKodu}). {sonuc.Mesaj}"
+            };
+            if (!string.IsNullOrWhiteSpace(sonuc.Uuid)) mesajlar.Add($"UUID: {sonuc.Uuid}");
+
+            return Results.Ok(new BelgeYaniti
+            {
+                Belge = kayit.Belge, Satirlar = kayit.Satirlar, DipToplam = kayit.DipToplam,
+                Uyarilar = mesajlar, IzlemeNo = baglam.IzlemeNo
             });
         });
 

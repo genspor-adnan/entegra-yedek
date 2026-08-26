@@ -270,6 +270,13 @@ export const api = {
   belgeEBelgeHazirla: (id: number) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/ebelge-hazirla`, {}),
 
+  /**
+   * e-BELGE GONDER: hazirlanmis belgeyi entegratore yollar. GERI ALINAMAZ -
+   * GIB'e giden belge iptal edilmez, yalniz iade faturasiyla duzeltilir.
+   */
+  belgeEBelgeGonder: (id: number) =>
+    gonder<BelgeYaniti>(`/api/belge/${id}/ebelge-gonder`, {}),
+
   /** e-Belgeyi geri al (164): kayit silinir, belge yeniden hazirlanabilir. */
   belgeEBelgeSifirla: (id: number) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/ebelge-sifirla`, {}),
