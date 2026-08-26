@@ -132,16 +132,45 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
 
   if (!acik) return null;
 
-  // Kart acikken (Yeni/Duzenle) arama penceresi GIZLI ama state korunuyor - kart kapaninca
-  // (Kaydet/Kapat) ayni aramaya donulur + liste yenilenir (yeni/degisen kayit gorunsun).
+  /**
+   * Kart penceresinden YENI kayit kaydedildi: aramaya geri donmek yerine o
+   * kaydi DOGRUDAN SEC (kullanici: "yeni cari olusturduysam onu baz alip arama
+   * listesi kapanmalidir"). Aradigini bulamayip yeni acan kullanici, kaydettigi
+   * kaydi ikinci kez aramak zorunda kaliyordu.
+   *
+   * DUZENLEMEDE secim yapilmaz - kullanici belki baska bir kaydi arayacaktir;
+   * yalniz liste tazelenir.
+   */
+  const kartKaydedildi = async (kaynak: string, yeniMi: boolean, id: number) => {
+    setKartAcik(null);
+    if (!yeniMi || !id) { void ara(arama); return }
+    try {
+      const y = await api.kartOku(kaynak, id);
+      const kart = y.kart as Record<string, unknown>;
+      // Cari/kisi kartinda ad alani "unvan"; bos donerse aramaya duseriz.
+      const unvan = String(kart.unvan ?? kart.ad ?? '').trim();
+      if (unvan === '') { void ara(arama); return }
+      // Listeden secmekle ayni: kayit "Son / Sik Aranan" sayacina islensin.
+      void api.aramaIsaretle(kaynak, id);
+      onSec({ kaynak, id, unvan });
+    } catch {
+      // Kayit olustu ama okunamadi: kullaniciyi bos birakma, aramaya don.
+      void ara(arama);
+    }
+  };
+
+  // Kart acikken (Yeni/Duzenle) arama penceresi GIZLI ama state korunuyor - kart
+  // KAPATILIRSA ayni aramaya donulur + liste yenilenir (degisen kayit gorunsun).
   if (kartAcik) {
+    const yeniMi = kartAcik.id === 'yeni';
+    const kaynak = kartAcik.kaynak;
     return (
       <GenForm
-        kaynak={kartAcik.kaynak}
+        kaynak={kaynak}
         id={kartAcik.id}
         cariyeBaglaGizli
         onKapat={() => { setKartAcik(null); void ara(arama) }}
-        onKaydedildi={() => { setKartAcik(null); void ara(arama) }}
+        onKaydedildi={id => { void kartKaydedildi(kaynak, yeniMi, id) }}
       />
     );
   }
