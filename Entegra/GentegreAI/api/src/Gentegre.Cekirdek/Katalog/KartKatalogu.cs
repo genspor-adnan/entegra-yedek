@@ -163,6 +163,7 @@ public static partial class KartKatalogu
         Ekle(NumaraTahsilat());
         Ekle(NumaraOdeme());
         Ekle(EBelgeSeri());
+        Ekle(Sube());
         Ekle(CekSenet());
         Ekle(Depo());
         Ekle(Hizmet());

@@ -217,6 +217,16 @@ public static class AksiyonKatalogu
             },
 
             // Stok Ayarlari > Depolar sekmesi.
+            ["sube-liste"] = new AksiyonTanimi[]
+            {
+                new("sube.yeni",    "＋ Ekle",   "sube", Kisayol: "Ctrl+N",
+                    KaynakKodu: "sube", Islem: Islem.Ekle, Sira: 10),
+                new("sube.duzenle", "✎ Düzenle", "sube", Kisayol: "Enter",
+                    KaynakKodu: "sube", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("sube.sil",     "🗑 Sil",    "sube", Kisayol: "Del",
+                    KaynakKodu: "sube", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+            },
+
             ["hizmet-liste"] = new AksiyonTanimi[]
             {
                 new("hizmet.yeni",    "＋ Ekle",   "hizmet", Kisayol: "Ctrl+N",

@@ -90,6 +90,40 @@ public static partial class KaynakKatalogu
             new("turKodu",   "d.kaynak_id",  "sayi",  "Tür Kodu", Varsayilan: false)
         });
 
+    /// <summary>
+    /// FIRMA / SUBE listesi - e-Belgede gonderici taraf (KartKatalogu.Firma).
+    /// e-Belge icin ZORUNLU alanlarin dolu olup olmadigi listede gorunur.
+    /// </summary>
+    private static KaynakTanimi Sube() => new(
+        Ad: "sube",
+        YetkiKodu: "sube",
+        Kaynak: "public.sube s",
+        VarsayilanSirala: "s.varsayilan desc, s.ad asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",       "s.id",       "sayi",  "Id", Varsayilan: false),
+            new("kod",      "s.kod",      "metin", "Kod", Genislik: 80),
+            new("ad",       "s.ad",       "metin", "Şube", Genislik: 160),
+            new("unvan",    "s.unvan",    "metin", "Resmî Unvan", Genislik: 260),
+            new("vkno",     "s.vkno",     "metin", "VKN / TCKN", Hizalama: "orta"),
+            new("vd",       "s.vd",       "metin", "Vergi Dairesi", Varsayilan: false),
+            new("il",       "s.il",       "metin", "İl", Hizalama: "orta"),
+            new("efaturaAlias", "s.efatura_alias", "metin", "Gönderici Etiketi", Varsayilan: false),
+            // e-Belge gonderimi icin gereken alanlar tam mi - eksikse gonderim
+            //   dogrulamasi durur, sebebi listede bir bakista gorunsun.
+            new("ebelgeHazir",
+                """
+                case when coalesce(btrim(s.unvan), '') <> '' and coalesce(btrim(s.vkno), '') <> ''
+                       and coalesce(btrim(s.vd), '') <> '' and coalesce(btrim(s.adres), '') <> ''
+                       and coalesce(btrim(s.il), '') <> ''
+                     then 'Tamam' else 'Eksik' end
+                """,                      "metin", "e-Belge Bilgileri",
+                                          Hizalama: "orta", Bicim: "rozet", Genislik: 130,
+                                          Siralanabilir: false, Filtrelenebilir: false),
+            new("varsayilan","s.varsayilan","mantik","Varsayılan", Hizalama: "orta", Varsayilan: false),
+            new("aktif",    "s.aktif",    "kod",   "Durum", Hizalama: "orta")
+        });
+
     private const int SeriKolonEni = 140;
     private const int SeriDarKolon = 70;
 

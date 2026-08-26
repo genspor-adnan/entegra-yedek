@@ -25,6 +25,10 @@ public sealed record YardimKaydi(string Anahtar, string Baslik, string Metin);
 /// sayisal ayarlar 60 saniyelik bellek onbelleginde tutulur (ayar yazilinca
 /// onbellek hemen dusurulur).
 /// </summary>
+/// <summary>Ayar ekranindaki entegrator secimi (167).</summary>
+public sealed record EntegratorSecenegi(string Kod, string Ad, short Bicim,
+                                        bool Gonderilebilir, string Aciklama);
+
 public sealed class AyarDeposu
 {
     private readonly VeriKaynagi _veri;
@@ -233,6 +237,31 @@ public sealed class AyarDeposu
     /// Tek bir yardim metni (public.help). Ayar disindaki ekranlar da ayni ucu
     /// kullanir - anahtar duzeni "kart.&lt;kart&gt;.&lt;alan&gt;" gibi genisler.
     /// </summary>
+    /// <summary>
+    /// e-Belge ENTEGRATOR listesi (167). Ayar ekranindaki secim bu katalogdan
+    /// beslenir; secenekleri arayuze gomseydik katalogla ayrisirdi ve
+    /// "govde ureteci var mi" bilgisi kullaniciya hic ulasmazdi.
+    /// </summary>
+    public async Task<IReadOnlyList<EntegratorSecenegi>> EntegratorlerAsync(
+        CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = new NpgsqlCommand("""
+            select e.kod, e.ad, e.gonderim_bicimi,
+                   (coalesce(btrim(e.govde_fn), '') <> '') as gonderilebilir,
+                   e.aciklama
+              from public.ebelge_entegrator e
+             where e.aktif = 1
+             order by e.sira, e.ad
+            """, baglanti);
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        var liste = new List<EntegratorSecenegi>();
+        while (await o.ReadAsync(iptal))
+            liste.Add(new EntegratorSecenegi(o.GetString(0), o.GetString(1),
+                                             o.GetInt16(2), o.GetBoolean(3), o.GetString(4)));
+        return liste;
+    }
+
     public async Task<YardimKaydi?> YardimAsync(string anahtar, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
