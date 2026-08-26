@@ -56,6 +56,14 @@ public static partial class KaynakKatalogu
     /// e-BELGE SERI KURALLARI (156) - Delphi'deki "Seri Bilgileri" gridi.
     /// Belgenin IC numarasi degil, GIB'e giden SERI kodu.
     /// </summary>
+    /// <summary>
+    /// Seri kurallari gridinde kolon enleri (kullanici): tur/seri/senaryo/kullanici
+    /// AYNI ende, Sira ve Durum DAR - ikisi de kisa deger tasiyor, genis kolonda
+    /// ortada yalniz basina duruyordu.
+    /// </summary>
+    private const int SeriKolonEni = 140;
+    private const int SeriDarKolon = 70;
+
     private static KaynakTanimi EBelgeSeri() => new(
         Ad: "ebelge-seri",
         YetkiKodu: "ebelge_seri",
@@ -70,18 +78,19 @@ public static partial class KaynakKatalogu
             new("belgeTuru", """
                 case e.belge_turu when 1 then 'e-Fatura' when 2 then 'e-Arşiv'
                                   when 7 then 'e-İrsaliye' else '' end
-                """,                           "metin", "e-Belge Türü", Genislik: 130),
-            new("seri",      "e.seri",         "metin", "Seri", Hizalama: "orta", Genislik: 80),
+                """,                           "metin", "e-Belge Türü",
+                                               Hizalama: "orta", Bicim: "rozet", Genislik: SeriKolonEni),
+            new("seri",      "e.seri",         "metin", "Seri", Hizalama: "orta", Genislik: SeriKolonEni),
             // 0 = farketmez: senaryo ayrimi olmayan kural her senaryoda gecerli.
             new("senaryo",   """
                 case e.senaryo when 1 then 'Temel' when 2 then 'Ticari'
                                when 8 then 'İlaç / Tıbbi' else '(farketmez)' end
-                """,                           "metin", "Senaryo", Genislik: 120),
+                """,                           "metin", "Senaryo", Genislik: SeriKolonEni),
             new("kullaniciAdi",
                 "coalesce(nullif(k.ad, ''), '(tüm kullanıcılar)')",
-                                               "metin", "Kullanıcı", Genislik: 160),
-            new("sira",      "e.sira",         "sayi",  "Sıra", Hizalama: "orta"),
-            new("durum",     "e.durum",        "kod",   "Durum", Hizalama: "orta")
+                                               "metin", "Kullanıcı", Genislik: SeriKolonEni),
+            new("sira",      "e.sira",         "sayi",  "Sıra", Hizalama: "orta", Genislik: SeriDarKolon),
+            new("durum",     "e.durum",        "kod",   "Durum", Hizalama: "orta", Genislik: SeriDarKolon)
         });
 
     private static KaynakTanimi NumaraSatis()    => NumaraKaynagi("numara-satis", NumaraSatisTurleri);

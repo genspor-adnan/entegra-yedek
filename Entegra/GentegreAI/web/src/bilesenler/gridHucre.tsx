@@ -53,6 +53,10 @@ const ROZET_SINIFI: Record<string, string> = {
   // Kasa islemi durumlari (KasaDurum): taslak/planli henuz kesinlesmemis,
   //   gerceklesti tamam, iptal ters kayitli, plan kapandi bitmis.
   'Taslak': 'gri', 'Planlı': 'bilgi', 'Gerçekleşti': 'ok', 'Plan Kapandı': 'gri',
+  // e-Belge turleri (156): seri kurallari gridinde tur bir bakista ayirt
+  //   edilsin - ucu de ayni renkteyken hangi satirin hangi belgeye ait oldugu
+  //   ancak okunarak anlasiliyordu.
+  'e-Fatura': 'ok', 'e-Arşiv': 'bilgi', 'e-İrsaliye': 'uyari',
 };
 
 export function rozetHucre(deger: unknown, kolon: KolonMeta) {
