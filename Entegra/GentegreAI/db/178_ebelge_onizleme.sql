@@ -88,11 +88,7 @@ begin
 '<h1>' || v_tur || '</h1>' ||
 '<div class="muted">Belge No: ' || coalesce(nullif(e.belge_no, ''), coalesce(b.belge_no, '-')) ||
 '  ·  ETTN: ' || coalesce(nullif(e.uuid, ''), '-') ||
-'  ·  Durum: ' || case coalesce(b.efatura_durum, 0)
-                       when 0 then 'Hazırlanmadı' when 1 then 'Hazırlandı (e-Fatura)'
-                       when 2 then 'Gönderildi (e-Fatura)' when 11 then 'Hazırlandı (e-Arşiv)'
-                       when 12 then 'Gönderildi (e-Arşiv)' when 51 then 'Hazırlandı (e-İrsaliye)'
-                       when 52 then 'Gönderildi (e-İrsaliye)' else '?' end || '</div>' ||
+'  ·  Durum: ' || public.fn_ebelge_durum_aciklama(b.efatura_durum) || '</div>' ||
 '<div class="iki">' ||
   '<div class="kutu"><b>SATICI</b><br>' || coalesce(g.unvan, '') ||
   '<br>VKN/TCKN: ' || coalesce(g.vkno, '') || '  ·  VD: ' || coalesce(g.vergi_dairesi, '') ||

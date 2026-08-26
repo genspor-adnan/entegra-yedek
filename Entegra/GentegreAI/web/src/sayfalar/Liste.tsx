@@ -5,6 +5,7 @@ import { GenForm } from '../bilesenler/GenForm';
 import { type EBelgeMesaji, type Kosul, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
+import { ebelgeCiktisi } from './ebelgeIslem';
 import { Modal } from '../bilesenler/Modal';
 import { BelgeKarti } from './BelgeKarti';
 import { KasaIslemKarti } from './KasaIslemKarti';
@@ -20,21 +21,6 @@ export type { ListeTanimi };
  * sunucudan geldigi icin ekran basina kod yazmaya gerek yok — yeni bir liste
  * eklemek katalogda kaynak tanimlamak + burada bir satir demek.
  */
-/**
- * Metni dosya olarak indirir. Blob URL kisa omurlu - birakilmazsa sekme
- * kapanana kadar bellekte kalir.
- */
-function dosyaIndir(icerik: string, ad: string, tip: string) {
-  const url = URL.createObjectURL(new Blob([icerik], { type: tip }));
-  const bag = document.createElement('a');
-  bag.href = url;
-  bag.download = ad;
-  document.body.appendChild(bag);
-  bag.click();
-  bag.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 10_000);
-}
-
 export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const git = useNavigate();
   const { id } = useParams();
@@ -120,6 +106,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     const kartaGit = (kayitId: unknown) => git(`${tanim.kartYolu}/${kayitId}`);
 
     try {
+      // e-BELGE CIKTILARI (Ön İzle / PDF / HTML / XML / Mesaj Geçmişi) ayri
+      //   modulde (180 refaktor): hepsi tek belge id'si alip cikti uretiyor,
+      //   listeden bagimsiz. Ele aldiysa switch'e hic girmeyiz.
+      if (satir && await ebelgeCiktisi(kod, satir, setEBelgeMesajlari)) return;
+
       switch (kod) {
         // Grup basina bir giris: kart tur seridini o grubun turleriyle acar.
         // Tahsilat/odeme dugmeleri ARAC (nakit/banka/pos/cek/senet) menusu acar;
@@ -183,56 +174,6 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
             const y = await api.belgeEBelgeHazirla(Number(satir.id));
             alert((y.uyarilar ?? []).join(' • ') || 'e-Belge hazırlandı.');
             setYenile(t => t + 1);
-          } catch (h) { alert(hataMetni(h)) }
-          return;
-        }
-        // ON IZLE (178): belgenin HTML gorunumu yeni sekmede acilir. Gonderim
-        //   gerekmez - "ne gidecek" gondermeden gorulsun. Resmi goruntu
-        //   entegratordeki XSLT ile uretilir, bu onizlemedir.
-        case 'ebelge.onizle':
-        case 'ebelge.pdf': {
-          if (!satir) return;
-          try {
-            const y = await api.belgeEBelgeOnizle(Number(satir.id));
-            const pencere = window.open('', '_blank');
-            if (!pencere) { alert('Tarayıcı yeni sekmeyi engelledi; açılır pencere iznini verin.'); return }
-            pencere.document.write(y.html);
-            pencere.document.close();
-            // PDF: ayri bir PDF motoru yerine tarayicinin yazdirma penceresi -
-            //   kullanici "PDF olarak kaydet"i oradan secer.
-            if (kod === 'ebelge.pdf') pencere.setTimeout(() => pencere.print(), 400);
-          } catch (h) { alert(hataMetni(h)) }
-          return;
-        }
-        // HTML KAYDET: ayni onizleme icerigi dosya olarak iner.
-        case 'ebelge.html': {
-          if (!satir) return;
-          try {
-            const y = await api.belgeEBelgeOnizle(Number(satir.id));
-            const ad = String(satir.belgeNo ?? satir.id);
-            dosyaIndir(y.html, `${ad}.html`, 'text/html;charset=utf-8');
-          } catch (h) { alert(hataMetni(h)) }
-          return;
-        }
-        // XML KAYDET: entegratore giden GOVDE. izibiz JSON tabanli oldugu icin
-        //   elimizdeki resmi icerik gonderim govdesidir - UBL'i entegrator kurar,
-        //   uzanti da bicime gore secilir (bicim 2 = UBL-XML uretecleri icin).
-        case 'ebelge.xml': {
-          if (!satir) return;
-          try {
-            const y = await api.belgeEBelgeGovde(Number(satir.id));
-            const uzanti = y.bicim === 2 ? 'xml' : 'json';
-            dosyaIndir(y.govde, `${y.dosyaAdi}.${uzanti}`,
-                       y.bicim === 2 ? 'application/xml' : 'application/json');
-          } catch (h) { alert(hataMetni(h)) }
-          return;
-        }
-        // MESAJ GECMISI: hazirlama, gonderim ve GIB yanitlari tek pencerede.
-        case 'ebelge.mesajlar': {
-          if (!satir) return;
-          try {
-            const y = await api.belgeEBelgeMesajlar(Number(satir.id));
-            setEBelgeMesajlari({ belgeNo: String(satir.belgeNo ?? satir.id), satirlar: y.mesajlar });
           } catch (h) { alert(hataMetni(h)) }
           return;
         }

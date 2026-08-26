@@ -340,27 +340,11 @@ begin
     end if;
 
     -- --------------------------------------------------------------- taraflar
-    v_supplier := jsonb_build_object(
-        'name',       g.unvan,
-        'identifier', g.vkno,
-        'schemeId',   public.fn_ebelge_kimlik_semasi(g.vkno),
-        'address',    jsonb_strip_nulls(jsonb_build_object(
-            -- GIB ulke KODU ister ('TR'); sube kaydindaki "Türkiye" adi gitmez.
-            'country',    'TR',
-            'city',       nullif(g.il, ''),
-            'subCity',    nullif(g.ilce, ''),
-            'streetName', nullif(g.adres, ''),
-            'postalCode', nullif(g.posta_kodu, ''),
-            'email',      nullif(g.eposta, ''),
-            'telephone',  nullif(g.telefon, ''),
-            'webSite',    nullif(g.web, ''))))
-        || case when g.vergi_dairesi <> '' then jsonb_build_object('taxOffice', g.vergi_dairesi) else '{}'::jsonb end;
-
-    -- Sahis firmasi (TCKN) gondericide GIB ad/soyad ister - unvan yetmez.
-    if public.fn_ebelge_kimlik_semasi(g.vkno) = 'TCKN' then
-        v_supplier := v_supplier || (select jsonb_build_object('firstName', a.ad, 'lastName', a.soyad)
-                                       from public.fn_ad_soyad_ayir(g.unvan) a);
-    end if;
+    -- Gonderici ve alici AYNI kaliptan (180): kimlik semasi, TCKN'de ad/soyad,
+    --   adres, vergi dairesi. Tek fark ek alanlar - onlar asagida eklenir.
+    v_supplier := public.fn_ebelge_taraf_json(
+        g.unvan, g.vkno, g.vergi_dairesi,
+        g.adres, g.ilce, g.il, g.posta_kodu, g.eposta, g.telefon, g.web);
 
     -- Mersis / ticaret sicil: izibiz `identifications` dizisinde tasir; GIB
     --   ticari faturada bu iki numarayi arar.
@@ -375,25 +359,9 @@ begin
                   else '[]'::jsonb end));
     end if;
 
-    v_customer := jsonb_build_object(
-        'identifier', regexp_replace(b.taraf_vkno, '\D', '', 'g'),
-        'schemeId',   public.fn_ebelge_kimlik_semasi(b.taraf_vkno),
-        'address',    jsonb_strip_nulls(jsonb_build_object(
-            'country',    'TR',
-            'city',       nullif(btrim(coalesce(b.taraf_il, '')), ''),
-            'subCity',    nullif(btrim(coalesce(b.taraf_ilce, '')), ''),
-            'streetName', nullif(btrim(coalesce(b.taraf_adres, '')), ''))));
-
-    -- Gercek kisi alicida GIB ad/soyad ister, unvan DEGIL.
-    if public.fn_ebelge_kimlik_semasi(b.taraf_vkno) = 'TCKN' then
-        v_customer := v_customer || (select jsonb_build_object('firstName', a.ad, 'lastName', a.soyad)
-                                       from public.fn_ad_soyad_ayir(b.taraf_unvan) a);
-    else
-        v_customer := v_customer || jsonb_build_object('name', b.taraf_unvan);
-    end if;
-    if coalesce(btrim(b.taraf_vd), '') <> '' then
-        v_customer := v_customer || jsonb_build_object('taxOffice', btrim(b.taraf_vd));
-    end if;
+    v_customer := public.fn_ebelge_taraf_json(
+        b.taraf_unvan, b.taraf_vkno, b.taraf_vd,
+        b.taraf_adres, b.taraf_ilce, b.taraf_il);
 
     -- e-Arsivde belge alicinin E-POSTASIYLA iletilir: adres bloguna yazilir.
     v_mail := coalesce(nullif(btrim(b.alici_alias), ''), nullif(btrim(b.taraf_eposta), ''), '');
