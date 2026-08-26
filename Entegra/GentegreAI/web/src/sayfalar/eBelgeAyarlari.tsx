@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { AyarAlani } from '../bilesenler/AyarAlani';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
-import type { AyarSatiri } from '../api/sozlesme';
+import { api } from '../api/istemci';
+import { hataMetni, type AyarSatiri, type ListeSatiri } from '../api/sozlesme';
 
 /**
  * e-BELGE AYARLARI (Yönetim › Ayarlar › Satış Belgeleri › e-Belge).
@@ -62,6 +63,21 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
   /** Acik seri kurali karti ("yeni" = ekleme). */
   const [seriKart, setSeriKart] = useState<number | 'yeni' | null>(null);
   const [seriYenile, setSeriYenile] = useState(0);
+  /** Gridde secili kural - Duzenle/Sil bunu kullanir. */
+  const [seciliSeri, setSeciliSeri] = useState<ListeSatiri | null>(null);
+  const [seriHata, setSeriHata] = useState<string | null>(null);
+
+  const seriSil = async () => {
+    if (!seciliSeri) return;
+    const ad = `${seciliSeri.seri ?? ''}`.trim();
+    if (!window.confirm(`"${ad}" seri kuralı silinecek. Onaylıyor musunuz?`)) return;
+    setSeriHata(null);
+    try {
+      await api.kartSil('ebelge-seri', Number(seciliSeri.id));
+      setSeciliSeri(null);
+      setSeriYenile(t => t + 1);
+    } catch (h) { setSeriHata(hataMetni(h)) }
+  };
 
   return (
     <>
@@ -123,8 +139,21 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
               Belgenin IC numarasi degil, GIB'e giden SERI kodu. */}
           <div className="numaralama-bas">
             <h6>Seri Kuralları</h6>
-            <button className="d bir mini" onClick={() => setSeriKart('yeni')}>＋ Yeni</button>
+            {/* Ekle / Duzenle / Sil - baslik seridinin saginda, yalniz IKON
+                (kullanici). Duzenle ve Sil satir secimi ister; secim yokken
+                pasif ve sebebi title'da. */}
+            <span className="baslik-eylem">
+              <button className="d bir ikon-dugme" title="Yeni seri kuralı"
+                      onClick={() => setSeriKart('yeni')}>＋</button>
+              <button className="d ikon-dugme" disabled={!seciliSeri}
+                      title={seciliSeri ? 'Seçili kuralı düzenle' : 'Önce satır seçin'}
+                      onClick={() => seciliSeri && setSeriKart(Number(seciliSeri.id))}>✎</button>
+              <button className="d teh ikon-dugme" disabled={!seciliSeri}
+                      title={seciliSeri ? 'Seçili kuralı sil' : 'Önce satır seçin'}
+                      onClick={() => { void seriSil() }}>🗑</button>
+            </span>
           </div>
+          {seriHata && <div className="hata-kutusu">{seriHata}</div>}
           <GenGrid
             key={`ebelge-seri-${seriYenile}`}
             kaynak="ebelge-seri"
@@ -132,6 +161,7 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
             seritGizli
             boyut={25}
             onSatirAc={satir => setSeriKart(Number(satir.id))}
+            onSecimDegisti={setSeciliSeri}
           />
           <div className="not">
             Belge gönderilirken bu kurallardan <b>uyanı</b> seçilir: önce

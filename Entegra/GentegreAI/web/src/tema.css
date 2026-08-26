@@ -948,3 +948,6 @@ input.skt-gecmis {
 /* (?) ikonu edit/kutunun SOLUNDA ve alanlar arasinda ayni hizada dursun. */
 .alan-izgara.ayar-formu .alan > .ikili > .yardim-sar,
 .alan-izgara.ayar-formu .alan.ayar-onay > .yardim-sar { flex: none; order: -1 }
+
+/* Kutu basligindaki eylem ikonlari (Seri Kurallari: ekle/duzenle/sil). */
+.baslik-eylem { display: inline-flex; gap: 4px; flex: none }
