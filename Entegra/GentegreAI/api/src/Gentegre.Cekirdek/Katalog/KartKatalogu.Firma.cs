@@ -112,19 +112,38 @@ public static partial class KartKatalogu
             //   kimligiyle mi. Alias ve Mersis/sicil de bu secimi izler - GIB posta
             //   kutusu VKN'ye bagli oldugu icin ikisi ayrilamaz.
             new("ebelgeKimlik", "ebelge_kimlik", "kod", KodListesi: "sube.ebelge_kimlik",
-                Baslik: "Gönderici Kimliği", Grup: "e-Belge"),
+                Baslik: "Gönderici Kimliği", Grup: "e-Belge", AltGrup: "Gönderici"),
             new("ustSubeId",    "ust_sube_id",   "kod", KodTablosu: "public.sube",
-                Baslik: "Bağlı Olduğu Merkez", Grup: "e-Belge"),
+                Baslik: "Bağlı Olduğu Merkez", Grup: "e-Belge", AltGrup: "Gönderici"),
+            // MUKELLEF HESABI (171): entegrator baglantisi mukellefe aittir -
+            //   ayri VKN'li sube ayri kullanici/sifre ile baglanir. Onceden firma
+            //   geneli ayardaydi, cok mukellefli kurulum mumkun degildi.
+            new("entegratorId",  "entegrator_id", "kod",
+                KodTablosu: "public.v_ebelge_entegrator_lookup",
+                Baslik: "Entegratör", Grup: "e-Belge", AltGrup: "Mükellef Hesabı"),
+            new("entegratorKullanici", "entegrator_kullanici", "metin", EnFazlaUzunluk: 120,
+                Baslik: "Kullanıcı", Grup: "e-Belge", AltGrup: "Mükellef Hesabı"),
+            new("entegratorSifre",     "entegrator_sifre",     "metin", EnFazlaUzunluk: 200,
+                Baslik: "Şifre", Grup: "e-Belge", AltGrup: "Mükellef Hesabı"),
+            // Test ortami SUBE BAZLI: bir mukellef canliya gecmisken yeni acilan
+            //   sube hala testte olabilir.
+            new("testOrtami",    "test_ortami",    "mantik",
+                Baslik: "Test Ortamı", Grup: "e-Belge", AltGrup: "Test Ortamı"),
+            new("testKullanici", "test_kullanici", "metin", EnFazlaUzunluk: 120,
+                Baslik: "Test Kullanıcısı", Grup: "e-Belge", AltGrup: "Test Ortamı"),
+            new("testSifre",     "test_sifre",     "metin", EnFazlaUzunluk: 200,
+                Baslik: "Test Şifresi", Grup: "e-Belge", AltGrup: "Test Ortamı"),
+
             new("efaturaAlias",      "efatura_alias",       "metin", EnFazlaUzunluk: 500,
-                Baslik: "e-Fatura Gönderici Etiketi", Grup: "e-Belge"),
+                Baslik: "e-Fatura Gönderici Etiketi", Grup: "e-Belge", AltGrup: "Gönderici"),
             new("ebelgeSeri",        "ebelge_seri",         "metin", EnFazlaUzunluk: 3,
-                Baslik: "Varsayılan Seri", Grup: "e-Belge"),
+                Baslik: "Varsayılan Seri", Grup: "e-Belge", AltGrup: "Gönderici"),
             new("efaturaMukellef",   "efatura_mukellef",    "mantik",
-                Baslik: "e-Fatura Mükellefi", Grup: "e-Belge"),
+                Baslik: "e-Fatura Mükellefi", Grup: "e-Belge", AltGrup: "Mükellefiyet"),
             new("earsivMukellef",    "earsiv_mukellef",     "mantik",
-                Baslik: "e-Arşiv Mükellefi", Grup: "e-Belge"),
+                Baslik: "e-Arşiv Mükellefi", Grup: "e-Belge", AltGrup: "Mükellefiyet"),
             new("eirsaliyeMukellef", "eirsaliye_mukellef",  "mantik",
-                Baslik: "e-İrsaliye Mükellefi", Grup: "e-Belge")
+                Baslik: "e-İrsaliye Mükellefi", Grup: "e-Belge", AltGrup: "Mükellefiyet")
         },
         SilmeEngelleri: new[]
         {

@@ -38,16 +38,6 @@ public static class AyarUclari
             return y is null ? Results.NotFound() : Results.Ok(y);
         }).WithTags("Ayar").RequireAuthorization();
 
-        // e-Belge entegrator secenekleri (167). Yetki ISTEMEZ - ayar ekraninin
-        //   kendisi gibi okuma serbest; yazma "ayar" yetkisinde.
-        grup.MapGet("/ebelge-entegratorler", async (
-            BaglamCozucu cozucu, AyarDeposu depo, HttpContext ctx, CancellationToken iptal) =>
-        {
-            var baglam = await cozucu.CozAsync(ctx, iptal);
-            return Results.Ok(new { entegratorler = await depo.EntegratorlerAsync(iptal),
-                                    izlemeNo = baglam.IzlemeNo });
-        });
-
         grup.MapPut("/{anahtar}", async (
             string anahtar, AyarIstegi istek, BaglamCozucu cozucu, AyarDeposu depo,
             HttpContext ctx, CancellationToken iptal) =>

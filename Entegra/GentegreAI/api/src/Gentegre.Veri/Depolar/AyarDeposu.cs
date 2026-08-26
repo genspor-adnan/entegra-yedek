@@ -25,10 +25,6 @@ public sealed record YardimKaydi(string Anahtar, string Baslik, string Metin);
 /// sayisal ayarlar 60 saniyelik bellek onbelleginde tutulur (ayar yazilinca
 /// onbellek hemen dusurulur).
 /// </summary>
-/// <summary>Ayar ekranindaki entegrator secimi (167).</summary>
-public sealed record EntegratorSecenegi(string Kod, string Ad, short Bicim,
-                                        bool Gonderilebilir, string Aciklama);
-
 public sealed class AyarDeposu
 {
     private readonly VeriKaynagi _veri;
@@ -53,11 +49,10 @@ public sealed class AyarDeposu
         //   karsiligi; ayni ayarin satis ve alista farkli degeri olabilir.
         "belge.satis.vade_gun", "belge.satis.varsayilan_seri",
         "belge.alis.vade_gun",  "belge.alis.varsayilan_seri",
-        // e-Belge (155): entegrator baglantisi TUM belge turleri icin ortak,
-        //   geri kalani belge turu basina. Delphi GENINI -24030..-24118.
-        "ebelge.aktif", "ebelge.entegrator", "ebelge.vkn",
-        "ebelge.kullanici", "ebelge.sifre",
-        "ebelge.test_aktif", "ebelge.test_kullanici", "ebelge.test_sifre",
+        // e-Belge (155): ANA SALTER firma geneli; mukellef hesabi (VKN, entegrator,
+        //   kullanici/sifre, test ortami) 171'de SUBE kaydina tasindi - entegrator
+        //   hesabi mukellefe aittir. Geri kalani belge turu basina davranis ayari.
+        "ebelge.aktif",
         "efatura.gelen_al", "efatura.senaryo", "efatura.ihracat_gonder",
         "efatura.uretim_url", "efatura.test_url", "efatura.sabit_notlar",
         "earsiv.aktif", "earsiv.uretim_url", "earsiv.gelen_url",
@@ -73,12 +68,6 @@ public sealed class AyarDeposu
         ["genel.yerel_para"] = 5,        // ISO kodu: TL, USD, EUR...
         ["belge.satis.varsayilan_seri"] = 10,
         ["belge.alis.varsayilan_seri"] = 10,
-        ["ebelge.entegrator"] = 60,
-        ["ebelge.vkn"] = 11,
-        ["ebelge.kullanici"] = 60,
-        ["ebelge.sifre"] = 100,
-        ["ebelge.test_kullanici"] = 60,
-        ["ebelge.test_sifre"] = 100,
         ["efatura.uretim_url"] = 250,
         ["efatura.test_url"] = 250,
         ["efatura.sabit_notlar"] = 1000,
@@ -115,7 +104,6 @@ public sealed class AyarDeposu
         // e-Belge bayraklari KAPALI baslar: acik varsayilan, kurulumu
         //   yapilmamis bir sistemde belgeleri GIB'e gondermeye calisirdi.
         ["ebelge.aktif"] = 0,
-        ["ebelge.test_aktif"] = 0,
         ["efatura.gelen_al"] = 0,
         ["efatura.senaryo"] = 1,          // Temel
         ["efatura.ihracat_gonder"] = 0,
@@ -238,30 +226,6 @@ public sealed class AyarDeposu
     /// kullanir - anahtar duzeni "kart.&lt;kart&gt;.&lt;alan&gt;" gibi genisler.
     /// </summary>
     /// <summary>
-    /// e-Belge ENTEGRATOR listesi (167). Ayar ekranindaki secim bu katalogdan
-    /// beslenir; secenekleri arayuze gomseydik katalogla ayrisirdi ve
-    /// "govde ureteci var mi" bilgisi kullaniciya hic ulasmazdi.
-    /// </summary>
-    public async Task<IReadOnlyList<EntegratorSecenegi>> EntegratorlerAsync(
-        CancellationToken iptal = default)
-    {
-        await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand("""
-            select e.kod, e.ad, e.gonderim_bicimi,
-                   (coalesce(btrim(e.govde_fn), '') <> '') as gonderilebilir,
-                   e.aciklama
-              from public.ebelge_entegrator e
-             where e.aktif = 1
-             order by e.sira, e.ad
-            """, baglanti);
-        await using var o = await komut.ExecuteReaderAsync(iptal);
-        var liste = new List<EntegratorSecenegi>();
-        while (await o.ReadAsync(iptal))
-            liste.Add(new EntegratorSecenegi(o.GetString(0), o.GetString(1),
-                                             o.GetInt16(2), o.GetBoolean(3), o.GetString(4)));
-        return liste;
-    }
-
     public async Task<YardimKaydi?> YardimAsync(string anahtar, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);

@@ -97,7 +97,10 @@ public static partial class KaynakKatalogu
     private static KaynakTanimi Sube() => new(
         Ad: "sube",
         YetkiKodu: "sube",
-        Kaynak: "public.sube s",
+        Kaynak: """
+            public.sube s
+              left join public.ebelge_entegrator ent on ent.id = s.entegrator_id
+            """,
         VarsayilanSirala: "s.varsayilan desc, s.ad asc",
         Kolonlar: new KolonTanimi[]
         {
@@ -127,6 +130,11 @@ public static partial class KaynakKatalogu
                 """,                      "metin", "e-Belge Bilgileri",
                                           Hizalama: "orta", Bicim: "rozet", Genislik: 130,
                                           Siralanabilir: false, Filtrelenebilir: false),
+            // Mukellef hesabi (171): hangi entegrator, hangi ortam.
+            new("entegratorAdi", "coalesce(ent.ad, '')", "metin", "Entegratör",
+                                          Genislik: 140, Filtrelenebilir: false),
+            new("testOrtami",    "s.test_ortami",        "kod",   "Test Ortamı",
+                                          Hizalama: "orta", Varsayilan: false),
             new("varsayilan","s.varsayilan","mantik","Varsayılan", Hizalama: "orta", Varsayilan: false),
             new("aktif",    "s.aktif",    "kod",   "Durum", Hizalama: "orta")
         });

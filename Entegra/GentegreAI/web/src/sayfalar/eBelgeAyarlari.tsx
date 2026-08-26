@@ -4,7 +4,7 @@ import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
 import { Modal } from '../bilesenler/Modal';
 import { api } from '../api/istemci';
-import { hataMetni, type AyarSatiri, type EntegratorSecenegi, type ListeSatiri } from '../api/sozlesme';
+import { hataMetni, type AyarSatiri, type ListeSatiri } from '../api/sozlesme';
 
 /**
  * e-BELGE AYARLARI (Yönetim › Ayarlar › Satış Belgeleri › e-Belge).
@@ -57,13 +57,14 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
   );
 
   const [bolum, setBolum] = useState<string>('baglanti');
-  /** Entegrator listesi KATALOGDAN gelir (167) - ekrana gomulu liste tutulmaz. */
-  const [entegratorler, setEntegratorler] = useState<EntegratorSecenegi[]>([]);
+  /** Hangi subenin hangi entegratorle/ortamla gonderdigi - salt gorunum (171).
+      Duzenleme sube kartinda; burada ozet olmasa kullanici ayar ekranina gelip
+      "e-Belge nerede kuruluyor" sorusuna cevap bulamazdi. */
+  const [mukellefOzet, setMukellefOzet] = useState<ListeSatiri[]>([]);
   useEffect(() => {
-    api.entegratorler().then(y => setEntegratorler(y.entegratorler)).catch(() => {});
+    api.liste('sube', { boyut: 100, sirala: [{ alan: 'varsayilan', yon: 'desc' }] })
+       .then(y => setMukellefOzet(y.satirlar)).catch(() => {});
   }, []);
-  const seciliEntegrator = entegratorler.find(
-    e => e.kod === ayarlar.find(a => a.anahtar === 'ebelge.entegrator')?.deger);
   /**
    * ANA SALTER (kullanici): `ebelge.aktif` kapaliyken hicbir belge GIB'e
    * gitmez - alt sekmelerdeki adresler, seriler ve tur bayraklari yazilabilir
@@ -209,49 +210,45 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
           <div className="kagrup">
             <div className="alan-izgara tek-sutun ayar-formu">
               {alan('ebelge.aktif', 'e-Belge kullanımda', { tip: 'mantik' })}
-              {alan('ebelge.entegrator', 'Entegratör', {
-                tip: 'secenek',
-                secenekler: entegratorler.map(e => ({ deger: e.kod, ad: e.ad })),
-              })}
             </div>
-            {/* Secili entegratorun gonderim ureteci yoksa bunu KAYIT ANINDA soyle:
-                yoksa kullanici tum ayarlari doldurup gonderimde ogrenir. */}
-            {seciliEntegrator && !seciliEntegrator.gonderilebilir && (
-              <div className="hata-kutusu">
-                {seciliEntegrator.ad} için gönderim gövdesi üreteci henüz yazılmadı.
-                Ayarlar ve seriler kaydedilir, belge hazırlanır; gönderim adımı
-                bu entegratör için çalışmaz.
-              </div>
-            )}
           </div>
 
-          {/* Mükellef ve Test Ortamı YAN YANA, esit hizada (kullanici):
-              "hangi kimlikle" ve "hangi ortama" birlikte okunur. */}
-          <div className="kasira">
-            <div className="kagrup">
-              <h6>Mükellef</h6>
-              <div className="alan-izgara tek-sutun ayar-formu">
-                {alan('ebelge.vkn', 'Vergi / kimlik no', { tip: 'metin' })}
-                {alan('ebelge.kullanici', 'Kullanıcı', { tip: 'metin' })}
-                {alan('ebelge.sifre', 'Şifre', { tip: 'parola' })}
-              </div>
-              <div className="not">
-                Şifre sunucuda <b>düz metin</b> saklanır; yalnızca ekranda gizlenir.
-              </div>
+          {/* MUKELLEF BILGILERI SUBEDE (171): entegrator hesabi mukellefe aittir,
+              ayri VKN'li sube ayri kullanici/sifre ile baglanir. Burada firma
+              geneli tek hesap tutulsaydi cok mukellefli kurulum imkansizdi.
+              Ana salter burada kaliyor: e-Belge'yi tumden acip kapatir. */}
+          <div className="kagrup">
+            <h6>Mükellef Hesabı</h6>
+            <div className="not">
+              Entegratör, kullanıcı/şifre, test ortamı ve mükellefiyet bilgileri
+              artık <b>şube kaydında</b> tutuluyor:
+              <b> Yönetim › Firma Bilgileri</b> → şubeyi açın →
+              <b> e-Belge</b> sekmesi. Böylece ayrı VKN’li şube kendi entegratör
+              hesabıyla, merkezin kimliğini kullanan şube merkezin hesabıyla gönderir.
             </div>
-
-            <div className="kagrup">
-              <h6>Test Ortamı</h6>
-              <div className="alan-izgara tek-sutun ayar-formu">
-                {/* Test aciksa belgeler GIB'e degil entegratorun test servisine gider. */}
-                {alan('ebelge.test_aktif', 'Test ortamı aktif', { tip: 'mantik' })}
-                {alan('ebelge.test_kullanici', 'Test kullanıcı', { tip: 'metin' })}
-                {alan('ebelge.test_sifre', 'Test şifre', { tip: 'parola' })}
-              </div>
-              <div className="not">
-                Test açıkken kesilen belgeler <b>resmî değildir</b> — GİB'e ulaşmaz.
-              </div>
-            </div>
+            {mukellefOzet.length > 0 && (
+              <table className="grid" style={{ marginTop: 8 }}>
+                <thead>
+                  <tr><th>Şube</th><th>Ünvan</th><th>VKN</th><th>Entegratör</th>
+                      <th style={{ textAlign: 'center' }}>Ortam</th></tr>
+                </thead>
+                <tbody>
+                  {mukellefOzet.map(m => (
+                    <tr key={String(m.id)}>
+                      <td>{String(m.ad ?? '')}</td>
+                      <td>{String(m.unvan ?? '')}</td>
+                      <td>{String(m.vkno ?? '')}</td>
+                      <td>{String(m.entegratorAdi ?? '—')}</td>
+                      <td style={{ textAlign: 'center' }}>
+                        <span className={`rozet ${Number(m.testOrtami) === 1 ? 'uyari' : 'ok'}`}>
+                          {Number(m.testOrtami) === 1 ? 'TEST' : 'Üretim'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </>
       )}

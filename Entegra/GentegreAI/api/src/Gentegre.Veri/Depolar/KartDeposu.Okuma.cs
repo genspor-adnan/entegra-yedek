@@ -169,6 +169,8 @@ public sealed partial class KartDeposu
             "public.v_ulke_lookup", "public.v_stok_lookup",
             // Numaralama (152) - dort gridin tur secim listeleri.
             "public.v_numara_turu_satis", "public.v_numara_turu_alis",
+            // e-Belge entegrator secimi (171) - firma/sube kartinda.
+            "public.v_ebelge_entegrator_lookup",
             "public.v_numara_turu_tahsilat", "public.v_numara_turu_odeme",
             // e-Belge seri kurallari (156).
             "public.v_ebelge_turu_lookup", "public.v_kullanici_lookup",
