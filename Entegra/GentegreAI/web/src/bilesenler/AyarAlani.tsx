@@ -81,14 +81,25 @@ export function AyarAlani({ anahtar, etiket, tip = 'sayi', secenekler, ayarlar, 
     if (v.trim() !== kayitliDeger) void onYaz(anahtar, v.trim());
   };
 
+  // ONAY KUTUSU AYRI DUZEN (kullanici): kutu SOLDA, etiketi saginda. Diger
+  //   alanlarda etiket ustte durur ama onay kutusunda bu, kutuyu etiketten
+  //   koparip hangi ayara ait oldugunu belirsizlestiriyordu.
+  if (tip === 'mantik') {
+    return (
+      <label className="alan ayar-onay">
+        <input type="checkbox" checked={deger === '1'}
+               onChange={e => { setTaslak(null); void onYaz(anahtar, e.target.checked ? '1' : '0') }} />
+        <span className="etiket">{etiket}</span>
+        {yardim}
+      </label>
+    );
+  }
+
   return (
     <label className="alan">
       <span className="etiket">{etiket}</span>
       <span className="ikili">
-        {tip === 'mantik' ? (
-          <input type="checkbox" checked={deger === '1'}
-                 onChange={e => { setTaslak(null); void onYaz(anahtar, e.target.checked ? '1' : '0') }} />
-        ) : tip === 'secenek' ? (
+        {tip === 'secenek' ? (
           <select value={deger}
                   onChange={e => { setTaslak(null); void onYaz(anahtar, e.target.value) }}>
             {(secenekler ?? []).map(s => <option key={s.deger} value={s.deger}>{s.ad}</option>)}

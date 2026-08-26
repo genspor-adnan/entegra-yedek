@@ -933,3 +933,10 @@ input.skt-gecmis {
    karismasin diye daha kucuk ve duz zeminde. */
 .katab.alt { background: transparent; border-bottom: 1px solid var(--cizgi2); padding: 0 4px }
 .katab.alt .kat { padding: 5px 11px; font-size: 11px; margin-top: 4px }
+
+/* Ayar ekranlarinda ONAY KUTUSU: kutu solda, etiket saginda tek satir. */
+.alan-izgara.ayar-formu .alan.ayar-onay {
+  flex-direction: row; align-items: center; gap: 8px; padding: 2px 0;
+}
+.alan-izgara.ayar-formu .alan.ayar-onay .etiket { width: auto; flex: 1 }
+.alan-izgara.ayar-formu .alan.ayar-onay input[type="checkbox"] { margin: 0; flex: none }
