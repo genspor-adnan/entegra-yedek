@@ -147,14 +147,16 @@ input, select { font: inherit; color: inherit }
   height: 27px; border: 1px solid var(--cizgi); border-radius: var(--r); padding: 0 10px;
   font-size: 11.5px; background: var(--yuz); color: var(--yazi); width: 300px;
 }
-/* e-Belge kutusu (179): Tümü/Sık/Son cipleriyle AYNI hizada ve boyutta -
-   aksiyon kutusundan daha kucuk, cip seridine ait gorunsun. */
-.cipsag .ebk {
-  height: 22px; border: 1px solid var(--cizgi); border-radius: 11px;
-  padding: 0 10px; font-size: 11.5px; background: var(--yuz); color: var(--yazi);
-  width: 190px;
+/* e-Belge kutusu (179): Tüm Liste / Son / Sık dugmeleriyle AYNI seritte, ayni
+   yukseklikte ve SAGA YANASIK. Serit normalde `fit-content`; kutu varken
+   `.genis` ile tam genislige acilir ki `margin-left:auto` calissin. */
+.durumseg.genis { width: 100% }
+.durumseg .ebk {
+  margin-left: auto; height: 24px; border: 1px solid var(--cizgi); border-radius: var(--r);
+  padding: 0 8px; font-size: 11.5px; background: var(--yuz); color: var(--yazi);
+  width: 200px;
 }
-.cipsag .ebk:hover { background: var(--yuz2) }
+.durumseg .ebk:hover { background: var(--yuz2) }
 
 .cipsag .uygd {
   height: 27px; padding: 0 13px; border-radius: var(--r); border: 1px solid #2f6db3;

@@ -222,11 +222,20 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   //   dokuz adimi genel listeye karisinca "Aç / Yeni / Sil" arasinda kayboluyordu.
   //   e-Belge kutusu, sunucu bu aksiyonlari donduruyorsa cizilir - donmesi
   //   subenin e-Fatura mukellefiyetine bagli (179).
-  const ebelgeGrubu = (a: AksiyonYaniti) => a.grup === 'ebelge';
+  // AYRI KUTU YALNIZ SATIS FATURA LISTESINDE (kullanici): e-Belge menusunun
+  //   dokuz adimi orada anlamli. Diger ekranlarda (or. irsaliye listesindeki tek
+  //   "e-İrsaliye Gönder") aksiyon ayni yerde kalir - tek maddelik ikinci bir
+  //   kutu acmak yer israfi olurdu.
+  const ebelgeKutusuVar = aksiyonEkrani === 'belge-liste';
+  const ebelgeGrubu = (a: AksiyonYaniti) => ebelgeKutusuVar && a.grup === 'ebelge';
   const aksiyonKombo = useMemo(
-    () => aksiyonlar.filter(a => hedefte(a, 'sagtus') && !ebelgeGrubu(a)), [aksiyonlar]);
+    () => aksiyonlar.filter(a => hedefte(a, 'sagtus') && !ebelgeGrubu(a)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [aksiyonlar, ebelgeKutusuVar]);
   const ebelgeKombo = useMemo(
-    () => aksiyonlar.filter(a => hedefte(a, 'sagtus') && ebelgeGrubu(a)), [aksiyonlar]);
+    () => aksiyonlar.filter(a => hedefte(a, 'sagtus') && ebelgeGrubu(a)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [aksiyonlar, ebelgeKutusuVar]);
   const [ebelgeSecim, setEbelgeSecim] = useState('');
   useEffect(() => { if (!aksiyonKombo.some(a => a.kod === aksiyonSecim)) setAksiyonSecim('') }, [aksiyonKombo, aksiyonSecim]);
   const secilenAksiyon = aksiyonKombo.find(a => a.kod === aksiyonSecim);
@@ -572,33 +581,6 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
             </>
           )}
 
-          {/* e-BELGE KUTUSU: yalniz sunucu bu aksiyonlari donduruyorsa cizilir
-              (sube e-Fatura mukellefi degilse hic gelmez, 179). Secilen islem
-              ANINDA calisir - kutu sonra bosalir ki yanlislikla ikinci kez
-              tetiklenmesin. Ayrac satirlari secilemez cizgidir. */}
-          {aksiyonEkrani && ebelgeKombo.length > 0 && (
-            <select
-              className="ebk"
-              value={ebelgeSecim}
-              onChange={e => {
-                const kod = e.target.value;
-                setEbelgeSecim('');
-                if (!kod) return;
-                const a = ebelgeKombo.find(x => x.kod === kod);
-                if (!a) return;
-                if (!a.aktif) { alert(a.pasifSebep ?? 'Bu işlem şu an yapılamaz.'); return }
-                aksiyonCalistir(kod);
-              }}
-            >
-              <option value="">— E-Fatura —</option>
-              {ebelgeKombo.map(a => (
-                a.kod.includes('.ayrac')
-                  ? <option key={a.kod} value="" disabled>──────────</option>
-                  : <option key={a.kod} value={a.kod}>{a.ad}</option>
-              ))}
-            </select>
-          )}
-
           {icerikAlani && (
             <button
               type="button"
@@ -617,8 +599,10 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       <div className="sahne">
         {hata && <div className="hata-kutusu">{hata}</div>}
 
-        {cipler && cipler.length > 0 && (
-          <div className="durumseg">
+        {((cipler && cipler.length > 0) || ebelgeKombo.length > 0) && (
+          // Kutu varken serit tam genislik: `width: fit-content` saga yanasmayi
+          //   engelliyordu (kullanici: "Tümü/Sık/Son hizasinda saga yanasik").
+          <div className={`durumseg${ebelgeKombo.length > 0 ? ' genis' : ''}`}>
             {/* Delphi'deki "Tum Liste / Son Aranan / Sik Aranan" (KULLANICI_ARAMA) -
                 kart acilis/ekleme sikligina gore sunucuda filtrelenir+siralanir. */}
             <button
@@ -643,7 +627,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
               ⭐
             </button>
             <span className="durumseg-ayrac" />
-            {cipler.map((c, i) => (
+            {(cipler ?? []).map((c, i) => (
               <button
                 key={c.ad}
                 className={i === cipIndeks ? 'on' : ''}
@@ -652,6 +636,33 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                 {c.ad}
               </button>
             ))}
+            {/* e-BELGE KUTUSU: Tüm Liste / Son / Sık dugmeleriyle AYNI seritte,
+                saga yanasik (kullanici). Yalniz sunucu bu aksiyonlari
+                donduruyorsa cizilir - sube e-Fatura mukellefi degilse hic
+                gelmez (179). Secilen islem ANINDA calisir; kutu sonra bosalir
+                ki yanlislikla ikinci kez tetiklenmesin. */}
+            {aksiyonEkrani && ebelgeKombo.length > 0 && (
+              <select
+                className="ebk"
+                value={ebelgeSecim}
+                onChange={e => {
+                  const kod = e.target.value;
+                  setEbelgeSecim('');
+                  if (!kod) return;
+                  const a = ebelgeKombo.find(x => x.kod === kod);
+                  if (!a) return;
+                  if (!a.aktif) { alert(a.pasifSebep ?? 'Bu işlem şu an yapılamaz.'); return }
+                  aksiyonCalistir(kod);
+                }}
+              >
+                <option value="">— E-Fatura —</option>
+                {ebelgeKombo.map(a => (
+                  a.kod.includes('.ayrac')
+                    ? <option key={a.kod} value="" disabled>──────────</option>
+                    : <option key={a.kod} value={a.kod}>{a.ad}</option>
+                ))}
+              </select>
+            )}
             {tarihAlani && (
               <>
                 <span className="durumseg-ayrac" />
