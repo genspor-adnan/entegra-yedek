@@ -153,8 +153,8 @@ input, select { font: inherit; color: inherit }
 .durumseg.genis { width: 100% }
 .durumseg .ebk {
   margin-left: auto; height: 24px; border: 1px solid var(--cizgi); border-radius: var(--r);
-  padding: 0 8px; font-size: 11.5px; background: var(--yuz); color: var(--yazi);
-  width: 200px;
+  padding: 0 6px; font-size: 11.5px; background: var(--yuz); color: var(--yazi);
+  width: 132px;
 }
 .durumseg .ebk:hover { background: var(--yuz2) }
 

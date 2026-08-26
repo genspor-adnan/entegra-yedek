@@ -413,6 +413,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       cipler={tanim.cipler}
       sabitFiltre={sabitFiltre}
       aksiyonEkrani={tanim.aksiyonEkrani}
+      ebelgeMenusu={tanim.ebelgeMenusu}
       gizliKolonlar={tanim.gizliKolonlar}
       kolonSirasi={tanim.kolonSirasi}
       altSecenekler={KASA_ARAC_MENUSU}

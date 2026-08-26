@@ -28,6 +28,8 @@ interface Props {
   onSatirAc?(satir: ListeSatiri): void;
   /** Aksiyon katalogu ekrani ("cari-liste"); verilirse arac cubugu + sag tus + palet gelir. */
   aksiyonEkrani?: string;
+  /** e-Belge menusu AYRI kutuda cizilsin mi (yalniz satis fatura listesi, 179). */
+  ebelgeMenusu?: boolean;
   onAksiyon?(kod: string, satir: ListeSatiri | null): void;
   /** Ust cip filtreleri: { ad, filtre } — mockup'taki "Aktif / Pasif / Tumu" seridi. */
   cipler?: { ad: string; filtre?: Kosul }[];
@@ -94,7 +96,7 @@ interface Props {
  * arayuzde gizleme mantigi YOKTUR. Filtre, siralama ve sayfalama da sunucuda calisir.
  */
 export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSatirAc,
-                          aksiyonEkrani, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
+                          aksiyonEkrani, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
                           dovizsizGizle,
                           gizliKolonlar, kolonSirasi, altSecenekler, tarihAlani, tarihVarsayilan,
                           seciliBaslangicId, cipSonu, cipBaslangic,
@@ -223,10 +225,11 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   //   e-Belge kutusu, sunucu bu aksiyonlari donduruyorsa cizilir - donmesi
   //   subenin e-Fatura mukellefiyetine bagli (179).
   // AYRI KUTU YALNIZ SATIS FATURA LISTESINDE (kullanici): e-Belge menusunun
-  //   dokuz adimi orada anlamli. Diger ekranlarda (or. irsaliye listesindeki tek
-  //   "e-İrsaliye Gönder") aksiyon ayni yerde kalir - tek maddelik ikinci bir
-  //   kutu acmak yer israfi olurdu.
-  const ebelgeKutusuVar = aksiyonEkrani === 'belge-liste';
+  //   dokuz adimi orada anlamli. Ekran ADI yetmez - 'belge-liste' satis fisi,
+  //   tahakkuk ve alis faturasi listelerinde de kullaniliyor; karari liste
+  //   tanimi verir. Diger ekranlarda (or. irsaliye listesindeki tek
+  //   "e-İrsaliye Gönder") aksiyon genel kutuda kalir.
+  const ebelgeKutusuVar = ebelgeMenusu === true;
   const ebelgeGrubu = (a: AksiyonYaniti) => ebelgeKutusuVar && a.grup === 'ebelge';
   const aksiyonKombo = useMemo(
     () => aksiyonlar.filter(a => hedefte(a, 'sagtus') && !ebelgeGrubu(a)),

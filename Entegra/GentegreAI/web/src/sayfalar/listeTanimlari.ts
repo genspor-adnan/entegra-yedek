@@ -42,6 +42,10 @@ export interface ListeTanimi {
   /** Kart ekrani olan kaynaklarda cift tik karta gider. */
   kartYolu?: string;
   aksiyonEkrani?: string;
+  /** e-Belge menusu KUTUSU bu listede cizilsin mi (yalniz satis faturalari).
+      Ekran adi ayirt etmiyor: 'belge-liste' satis fisi / tahakkuk / alis
+      faturasi listelerinde de kullaniliyor. */
+  ebelgeMenusu?: boolean;
   toplam?: string[];
   cipler?: { ad: string; filtre?: Kosul }[];
   /** Mockup'ta olup backend'i henuz olmayan kart sekmeleri (or. stok: "ÜTS Bilgileri"). */
@@ -269,7 +273,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   gostermeli (irsaliye/alis karisinca kullanici hangi ekranda oldugunu
     //   kaybediyordu) ve baslik menu adiyla ayni olmali.
     kaynak: 'belge', baslik: 'Satış Faturaları', yol: 'Satis › Satış Faturaları',
-    aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 15,
+    aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 15, ebelgeMenusu: true,
     // Tur / Belge Turu kolonlari bu ekranda ayni degeri tekrarliyor (hepsi
     //   satis faturasi) - iade ayrimi cip seridinde zaten var.
     gizliKolonlar: ['tur', 'turAdi'],
