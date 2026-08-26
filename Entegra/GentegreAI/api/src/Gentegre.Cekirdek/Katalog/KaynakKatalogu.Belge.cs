@@ -23,11 +23,13 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",            "b.id",             "sayi",  "Id",          Varsayilan: false),
-            new("tur",           "b.tur",            "kod",   "Tur",         Hizalama: "orta", Genislik: 70),
+            // Ham TUR kodu gizli: "Belge Türü" zaten adini gosteriyor, ikisi
+            //   yan yana ayni bilgiyi tekrarliyordu (cip/filtre ham kodu kullanir).
+            new("tur",           "b.tur",            "kod",   "Tür Kodu",    Hizalama: "orta",
+                                                                            Genislik: 70, Varsayilan: false),
             new("turAdi",        "bt.ad",            "metin", "Belge Türü",  Genislik: 130),
             // F8: siparis/irsaliye ne kadari donusturuldu (0 acik / 1 kismi / 2 kapandi)
             new("kapanmaDurum",  "b.kapanma_durum",  "kod",   "Kapanma",     Hizalama: "orta", Varsayilan: false),
-            new("tipi",          "b.tipi",           "kod",   "Tipi",        Hizalama: "orta", Varsayilan: false),
             new("belgeSeri",     "b.belge_seri",     "metin", "Seri",        Genislik: 70, Varsayilan: false),
             new("belgeNo",       "b.belge_no",       "metin", "Belge No",    Genislik: 155),
             // e-BELGE DURUMU ROZET: ham kod (0/1/11/51...) listede hicbir sey
@@ -44,6 +46,31 @@ public static partial class KaynakKatalogu
                 """,                             "metin", "e-Fatura", Hizalama: "orta",
                                                  Bicim: "rozet", Genislik: 110,
                                                  Siralanabilir: false, Filtrelenebilir: false),
+            // Senaryo ve fatura tipi e-Fatura durumunun SAGINDA (kullanici):
+            //   "hangi belge, hangi senaryoda, ne tipte" ucu yan yana okunur.
+            //   Liste katmani kod listesi cozmez; metin SQL'de uretilir.
+            new("senaryoAdi",
+                """
+                case coalesce(b.senaryo, 0)
+                     when 1 then 'Temel'   when 2 then 'Ticari'
+                     when 3 then 'İhracat' when 7 then 'Kamu'
+                     when 8 then 'İlaç / Tıbbi Cihaz'
+                     else '' end
+                """,                             "metin", "Senaryo", Hizalama: "orta",
+                                                 Genislik: 130, Filtrelenebilir: false),
+            new("tipiAdi",
+                """
+                case coalesce(b.tipi, 0)
+                     when 2  then 'İade'          when 3  then 'Fiyat Farkı'
+                     when 5  then 'Kur Farkı'     when 9  then 'İhraç Kayıtlı'
+                     when 22 then 'Tevkifatlı'    when 24 then 'KDV İstisna'
+                     when 25 then 'SGK'           when 26 then 'İhracat'
+                     else '' end
+                """,                             "metin", "Tipi", Hizalama: "orta",
+                                                 Bicim: "rozet", Genislik: 120,
+                                                 Filtrelenebilir: false),
+            new("tipi",          "b.tipi",           "sayi",  "Tip Kodu",    Hizalama: "orta", Varsayilan: false),
+            new("senaryo",       "b.senaryo",        "sayi",  "Senaryo Kodu",Hizalama: "orta", Varsayilan: false),
             new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",       Hizalama: "orta",
                                                                 Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
             new("tarafId",       "b.taraf_id",       "sayi",  "Cari Id",     Varsayilan: false),
