@@ -135,6 +135,9 @@ public static partial class KaynakKatalogu
                                           Genislik: 140, Filtrelenebilir: false),
             new("testOrtami",    "s.test_ortami",        "kod",   "Test Ortamı",
                                           Hizalama: "orta", Varsayilan: false),
+            // ANA SALTER (179): isaretli degilse o subeden e-Belge cikmaz.
+            new("efaturaMukellef", "s.efatura_mukellef", "mantik", "e-Fatura Mükellefi",
+                                          Hizalama: "orta", Genislik: 130),
             new("varsayilan","s.varsayilan","mantik","Varsayılan", Hizalama: "orta", Varsayilan: false),
             new("aktif",    "s.aktif",    "kod",   "Durum", Hizalama: "orta")
         });

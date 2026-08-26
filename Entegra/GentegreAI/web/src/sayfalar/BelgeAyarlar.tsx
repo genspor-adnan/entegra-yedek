@@ -63,7 +63,7 @@ export function BelgeAyarlar({ yon }: { yon: 'satis' | 'alis' }) {
           </div>
         ) : (
           // Delphi'deki "Opsiyonlar > Fatura > E-Belge" sekmesinin karsiligi.
-          <EBelgeAyarlari ayarlar={ayarlar} yaz={yaz} />
+          <EBelgeAyarlari />
         )}
       </div>
     </>

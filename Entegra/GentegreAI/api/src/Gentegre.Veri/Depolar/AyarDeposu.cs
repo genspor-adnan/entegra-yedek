@@ -49,10 +49,9 @@ public sealed class AyarDeposu
         //   karsiligi; ayni ayarin satis ve alista farkli degeri olabilir.
         "belge.satis.vade_gun", "belge.satis.varsayilan_seri",
         "belge.alis.vade_gun",  "belge.alis.varsayilan_seri",
-        // e-Belge (155): ANA SALTER firma geneli; mukellef hesabi (VKN, entegrator,
-        //   kullanici/sifre, test ortami) 171'de SUBE kaydina tasindi - entegrator
-        //   hesabi mukellefe aittir. Geri kalani belge turu basina davranis ayari.
-        "ebelge.aktif",
+        // e-Belge: ANA SALTER de (179) sube kaydina tasindi - "e-Fatura Mükellefi"
+        //   kutusu. Burada yalniz belge turu basina DAVRANIS ayarlari kaldi
+        //   (servis adresleri, sabit notlar, gelen belge alma).
         "efatura.gelen_al", "efatura.senaryo", "efatura.ihracat_gonder",
         "efatura.uretim_url", "efatura.test_url", "efatura.sabit_notlar",
         "earsiv.uretim_url", "earsiv.gelen_url",
@@ -103,7 +102,6 @@ public sealed class AyarDeposu
         ["belge.alis.vade_gun"] = 30,
         // e-Belge bayraklari KAPALI baslar: acik varsayilan, kurulumu
         //   yapilmamis bir sistemde belgeleri GIB'e gondermeye calisirdi.
-        ["ebelge.aktif"] = 0,
         ["efatura.gelen_al"] = 0,
         ["efatura.senaryo"] = 1,          // Temel
         ["efatura.ihracat_gonder"] = 0,

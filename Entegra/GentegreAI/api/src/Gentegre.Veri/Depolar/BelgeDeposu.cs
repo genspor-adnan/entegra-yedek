@@ -59,10 +59,11 @@ public sealed partial class BelgeDeposu
     ///
     /// Satis faturasi e-Fatura/e-Arsiv olarak, satis irsaliyesi e-Irsaliye
     /// olarak gider. Iki kosul birlikte aranir:
-    ///   1. `ebelge.aktif` ANA SALTER (firma geneli) - kapaliyken hicbir belge
-    ///      GIB'e gitmez, numarayi yine biz veririz;
-    ///   2. BELGENIN SUBESI o turde MUKELLEF mi (172). Mukellefiyet GIB kaydidir
-    ///      ve VKN'ye baglidir; merkezin kimligiyle gonderen sube merkezin
+    ///   1. ANA SALTER = subenin e-Fatura MUKELLEFIYETI (179). Ayri bir
+    ///      "e-Belge kullanimda" ayari YOK - ayni soruyu iki yerden sormak
+    ///      (ayar + bayrak) tutarsizlik uretiyordu;
+    ///   2. BELGENIN TURUNDE de mukellef mi (172). Mukellefiyet GIB kaydidir ve
+    ///      VKN'ye baglidir; merkezin kimligiyle gonderen sube merkezin
     ///      mukellefiyetini kullanir (fn_ebelge_mukellef_mi bunu cozer).
     ///
     /// Mukellefiyet KONTROL EDILMEZSE: mukellef olmayan firmada belge "0"
@@ -76,15 +77,15 @@ public sealed partial class BelgeDeposu
         NpgsqlTransaction islem, int tur, int? subeId, CancellationToken iptal)
     {
         if (tur != BelgeTuru.SatisFaturasi && tur != BelgeTuru.SatisIrsaliyesi) return false;
-        if (await AyarDeposu.SayiAsync(baglanti, islem, "ebelge.aktif", iptal) != 1) return false;
 
         await using var komut = new NpgsqlCommand(
             tur == BelgeTuru.SatisFaturasi
                 ? """
-                  select public.fn_ebelge_mukellef_mi(@p0, 1)
-                      or public.fn_ebelge_mukellef_mi(@p0, 2)
+                  select public.fn_ebelge_acik(@p0)
+                     and (public.fn_ebelge_mukellef_mi(@p0, 1)
+                       or public.fn_ebelge_mukellef_mi(@p0, 2))
                   """
-                : "select public.fn_ebelge_mukellef_mi(@p0, 7)",
+                : "select public.fn_ebelge_acik(@p0) and public.fn_ebelge_mukellef_mi(@p0, 7)",
             baglanti, islem);
         // Sube bilinmiyorsa (oturum sube secmemis) varsayilan sube kullanilir -
         //   fonksiyon null'i boyle cozer.

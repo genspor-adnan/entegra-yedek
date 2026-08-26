@@ -449,21 +449,15 @@ public sealed partial class BelgeDeposu
     }
 
     /// <summary>
-    /// Bu subede e-Belge KULLANILIYOR mu: ana salter (ebelge.aktif) acik VE
-    /// sube (ya da kimligini kullandigi merkez) en az bir turde mukellef.
-    /// Menu gorunurlugu buna bagli - mukellef olmayan firmada e-Belge maddeleri
-    /// hic cizilmez.
+    /// Bu subede e-Belge KULLANILIYOR mu: ANA SALTER subenin (ya da kimligini
+    /// kullandigi merkezin) e-Fatura mukellefiyetidir (179). Menu gorunurlugu
+    /// buna bagli - mukellef olmayan firmada e-Belge maddeleri hic cizilmez.
     /// </summary>
     public async Task<bool> EBelgeKullanimdaAsync(int? subeId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = new NpgsqlCommand("""
-            select coalesce((select r.deger from public.referans r
-                              where r.anahtar = 'ebelge.aktif'), '0') = '1'
-               and (public.fn_ebelge_mukellef_mi(@p0, 1)
-                 or public.fn_ebelge_mukellef_mi(@p0, 2)
-                 or public.fn_ebelge_mukellef_mi(@p0, 7)
-                 or public.fn_ebelge_mukellef_mi(@p0, 8))
+            select public.fn_ebelge_acik(@p0)
             """, baglanti);
         komut.Parameters.AddWithValue("p0", (object?)subeId ?? DBNull.Value);
         return await komut.ExecuteScalarAsync(iptal) is bool b && b;

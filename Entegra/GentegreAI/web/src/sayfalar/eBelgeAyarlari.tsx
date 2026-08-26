@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { AyarAlani } from '../bilesenler/AyarAlani';
 import { api } from '../api/istemci';
-import { type AyarSatiri, type ListeSatiri } from '../api/sozlesme';
+import { type ListeSatiri } from '../api/sozlesme';
 
 /**
  * e-BELGE AYARLARI (Yönetim › Ayarlar › Satış Belgeleri › e-Belge).
@@ -25,20 +24,12 @@ import { type AyarSatiri, type ListeSatiri } from '../api/sozlesme';
  *   - "Seri Kurallari" ve "Alan Eslestirme" gridleri - satirli tanimlar,
  *     ayar degil; kendi kartlarini isterler.
  *
- * ARTIK YALNIZ ANA SALTER: entegrator hesabi, seri kurallari, XSLT ve tur
- * ayarlarinin tamami sube kartinin e-Belge sekmesine tasindi (kullanici) -
- * e-Belge kurulumu tek yerde toplandi. Burada kalan `ebelge.aktif` firma
- * genelidir: kapaliyken hicbir belge GIB'e gitmez.
+ * ARTIK YALNIZ OZET: entegrator hesabi, seri kurallari, XSLT, tur ayarlari VE
+ * ana salter (179: "e-Fatura Mükellefi" kutusu) sube kartina tasindi -
+ * e-Belge kurulumu tek yerde toplandi. Bu ekran hangi subenin hangi
+ * entegratorle/ortamla gonderdigini gosterir, duzenleme kartta yapilir.
  */
-export function EBelgeAyarlari({ ayarlar, yaz }: {
-  ayarlar: AyarSatiri[];
-  yaz(anahtar: string, deger: string): void | Promise<void>;
-}) {
-  const alan = (anahtar: string, etiket: string,
-                ek?: Partial<Parameters<typeof AyarAlani>[0]>) => (
-    <AyarAlani anahtar={anahtar} etiket={etiket} ayarlar={ayarlar} onYaz={yaz} {...ek} />
-  );
-
+export function EBelgeAyarlari() {
   /** Hangi subenin hangi entegratorle/ortamla gonderdigi - salt gorunum (171).
       Duzenleme sube kartinda; burada ozet olmasa kullanici ayar ekranina gelip
       "e-Belge nerede kuruluyor" sorusuna cevap bulamazdi. */
@@ -47,31 +38,22 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
     api.liste('sube', { boyut: 100, sirala: [{ alan: 'varsayilan', yon: 'desc' }] })
        .then(y => setMukellefOzet(y.satirlar)).catch(() => {});
   }, []);
-  /**
-   * ANA SALTER (kullanici): `ebelge.aktif` kapaliyken hicbir belge GIB'e
-   * gitmez - sube kartindaki hesaplar, seriler ve tur bayraklari yazilabilir
-   * ama HIC BIRI islemez. Kullanici saatlerce ayar doldurup "neden
-   * gonderilmiyor" diye aramasin diye durum ustte yazili.
-   */
-  const anaSalter = ayarlar.find(a => a.anahtar === 'ebelge.aktif')?.deger === '1';
+  /** ANA SALTER artik subede (179): e-Fatura mukellefi olan sube var mi. */
+  const anaSalter = mukellefOzet.some(m => Number(m.efaturaMukellef) === 1);
   return (
     <>
       {!anaSalter && (
         <div className="bilgi-kutusu" style={{ marginTop: 8 }}>
-          <b>e-Belge kapalı.</b> Aşağıdaki ayarlar kaydedilir ama hiçbir belge
-          GİB'e gönderilmez ve fatura/irsaliye numarası her zaman
-          <b> Belge No</b> şablonundan verilir. Açmak için aşağıdaki
-          “e-Belge kullanımda” kutusunu işaretleyin.
+          <b>e-Belge kapalı.</b> Hiçbir şubede <b>e-Fatura Mükellefi</b> işaretli
+          değil; belge GİB'e gönderilmez ve fatura/irsaliye numarası her zaman
+          <b> Belge No</b> şablonundan verilir. Açmak için
+          <b> Yönetim › Firma Bilgileri</b> → şubeyi açın →
+          <b> e-Belge › Genel</b> sekmesinde <b>e-Fatura Mükellefi</b> kutusunu
+          işaretleyin.
         </div>
       )}
 
       <>
-          <div className="kagrup">
-            <div className="alan-izgara tek-sutun ayar-formu">
-              {alan('ebelge.aktif', 'e-Belge kullanımda', { tip: 'mantik' })}
-            </div>
-          </div>
-
           {/* MUKELLEF BILGILERI SUBEDE (171): entegrator hesabi mukellefe aittir,
               ayri VKN'li sube ayri kullanici/sifre ile baglanir. Burada firma
               geneli tek hesap tutulsaydi cok mukellefli kurulum imkansizdi.
@@ -89,6 +71,7 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
               <table className="grid" style={{ marginTop: 8 }}>
                 <thead>
                   <tr><th>Şube</th><th>Ünvan</th><th>VKN</th><th>Entegratör</th>
+                      <th style={{ textAlign: 'center' }}>e-Fatura Mük.</th>
                       <th style={{ textAlign: 'center' }}>Ortam</th></tr>
                 </thead>
                 <tbody>
@@ -98,6 +81,12 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
                       <td>{String(m.unvan ?? '')}</td>
                       <td>{String(m.vkno ?? '')}</td>
                       <td>{String(m.entegratorAdi ?? '—')}</td>
+                      {/* ANA SALTER (179): isaretli degilse o subeden e-Belge cikmaz. */}
+                      <td style={{ textAlign: 'center' }}>
+                        <span className={`rozet ${Number(m.efaturaMukellef) === 1 ? 'ok' : 'gri'}`}>
+                          {Number(m.efaturaMukellef) === 1 ? 'Açık' : 'Kapalı'}
+                        </span>
+                      </td>
                       <td style={{ textAlign: 'center' }}>
                         <span className={`rozet ${Number(m.testOrtami) === 1 ? 'uyari' : 'ok'}`}>
                           {Number(m.testOrtami) === 1 ? 'TEST' : 'Üretim'}

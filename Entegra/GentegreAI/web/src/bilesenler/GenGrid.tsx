@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
-import { type KolonMeta, type Kosul, type ListeSatiri, type ListeYaniti,
+import { type AksiyonYaniti, type KolonMeta, type Kosul, type ListeSatiri, type ListeYaniti,
          type Siralama, hataMetni } from '../api/sozlesme';
 import { bicimle } from './bicim';
 import { GenKomutPaleti, GenSagTus, GenToolbar, hedefte, useAksiyonlar,
@@ -218,8 +218,18 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   // Mockup'taki "Aksiyon Sec + Uygula" (cip seridiyle ayni satir, saga yanasik) -
   //   sag tus menusuyle AYNI katalog seti (ayni ekranda iki farkli tetikleme yolu).
   const [aksiyonSecim, setAksiyonSecim] = useState('');
-  const aksiyonKombo = useMemo(() => aksiyonlar.filter(a => hedefte(a, 'sagtus')), [aksiyonlar]);
+  // GENEL aksiyonlar ile e-BELGE menusu AYRI kutularda (kullanici): e-Belge'nin
+  //   dokuz adimi genel listeye karisinca "Aç / Yeni / Sil" arasinda kayboluyordu.
+  //   e-Belge kutusu, sunucu bu aksiyonlari donduruyorsa cizilir - donmesi
+  //   subenin e-Fatura mukellefiyetine bagli (179).
+  const ebelgeGrubu = (a: AksiyonYaniti) => a.grup === 'ebelge';
+  const aksiyonKombo = useMemo(
+    () => aksiyonlar.filter(a => hedefte(a, 'sagtus') && !ebelgeGrubu(a)), [aksiyonlar]);
+  const ebelgeKombo = useMemo(
+    () => aksiyonlar.filter(a => hedefte(a, 'sagtus') && ebelgeGrubu(a)), [aksiyonlar]);
+  const [ebelgeSecim, setEbelgeSecim] = useState('');
   useEffect(() => { if (!aksiyonKombo.some(a => a.kod === aksiyonSecim)) setAksiyonSecim('') }, [aksiyonKombo, aksiyonSecim]);
+  const secilenAksiyon = aksiyonKombo.find(a => a.kod === aksiyonSecim);
   const aramaZamanlayici = useRef<number | undefined>(undefined);
 
   // Kosul kurma SAF fonksiyonlarda (gridSorgu): listeleme ve disa aktarma ayni
@@ -540,33 +550,55 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
         <span className="cipsag">
           {aksiyonEkrani && aksiyonKombo.length > 0 && (
             <>
-              {/* ANINDA UYGULA (kullanici): secilen islem hemen calisir, ayri
-                  "Uygula" adimi yok. Secim sonrasi kutu bosalir ki ayni islem
-                  ikinci kez calistirilmak istenirse yeniden secilsin (yanlislikla
-                  tekrar tetiklenmesin). Pasif aksiyon secilirse sebebi soylenir. */}
               <select
                 className="aksk"
                 value={aksiyonSecim}
-                onChange={e => {
-                  const kod = e.target.value;
-                  setAksiyonSecim('');
-                  if (!kod) return;
-                  const a = aksiyonKombo.find(x => x.kod === kod);
-                  if (!a) return;
-                  if (!a.aktif) { alert(a.pasifSebep ?? 'Bu işlem şu an yapılamaz.'); return }
-                  aksiyonCalistir(kod);
-                }}
+                onChange={e => setAksiyonSecim(e.target.value)}
               >
                 <option value="">— Aksiyon Seç —</option>
                 {aksiyonKombo.map(a => (
-                  // AYRAC: katalogdaki "*.ayrac*" satirlari secilemez cizgidir.
-                  a.kod.includes('.ayrac')
-                    ? <option key={a.kod} value="" disabled>──────────</option>
-                    : <option key={a.kod} value={a.kod}>{a.ad}</option>
+                  <option key={a.kod} value={a.kod}>{a.ad}</option>
                 ))}
               </select>
+              <button
+                type="button"
+                className="uygd"
+                disabled={!secilenAksiyon || !secilenAksiyon.aktif}
+                title={secilenAksiyon && !secilenAksiyon.aktif ? (secilenAksiyon.pasifSebep ?? '') : ''}
+                onClick={() => { if (secilenAksiyon?.aktif) aksiyonCalistir(secilenAksiyon.kod) }}
+              >
+                Uygula
+              </button>
             </>
           )}
+
+          {/* e-BELGE KUTUSU: yalniz sunucu bu aksiyonlari donduruyorsa cizilir
+              (sube e-Fatura mukellefi degilse hic gelmez, 179). Secilen islem
+              ANINDA calisir - kutu sonra bosalir ki yanlislikla ikinci kez
+              tetiklenmesin. Ayrac satirlari secilemez cizgidir. */}
+          {aksiyonEkrani && ebelgeKombo.length > 0 && (
+            <select
+              className="aksk"
+              value={ebelgeSecim}
+              onChange={e => {
+                const kod = e.target.value;
+                setEbelgeSecim('');
+                if (!kod) return;
+                const a = ebelgeKombo.find(x => x.kod === kod);
+                if (!a) return;
+                if (!a.aktif) { alert(a.pasifSebep ?? 'Bu işlem şu an yapılamaz.'); return }
+                aksiyonCalistir(kod);
+              }}
+            >
+              <option value="">— E-Fatura —</option>
+              {ebelgeKombo.map(a => (
+                a.kod.includes('.ayrac')
+                  ? <option key={a.kod} value="" disabled>──────────</option>
+                  : <option key={a.kod} value={a.kod}>{a.ad}</option>
+              ))}
+            </select>
+          )}
+
           {icerikAlani && (
             <button
               type="button"
