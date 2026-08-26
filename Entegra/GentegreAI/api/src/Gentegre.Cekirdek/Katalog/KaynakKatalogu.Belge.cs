@@ -30,6 +30,20 @@ public static partial class KaynakKatalogu
             new("tipi",          "b.tipi",           "kod",   "Tipi",        Hizalama: "orta", Varsayilan: false),
             new("belgeSeri",     "b.belge_seri",     "metin", "Seri",        Varsayilan: false),
             new("belgeNo",       "b.belge_no",       "metin", "Belge No"),
+            // e-BELGE DURUMU ROZET: ham kod (0/1/11/51...) listede hicbir sey
+            //   anlatmiyordu. Metin hem TURU hem ASAMAYI soyler; gonderilmis
+            //   belge "✓" ile ve yesil rozetle ayrilir (163/164 kodlari).
+            new("efaturaDurum",
+                """
+                case coalesce(b.efatura_durum, 0)
+                     when 0  then ''
+                     when 1  then 'e-Fatura'    when 2  then 'e-Fatura ✓'
+                     when 11 then 'e-Arşiv'     when 12 then 'e-Arşiv ✓'
+                     when 51 then 'e-İrsaliye'  when 52 then 'e-İrsaliye ✓'
+                     else 'Bilinmiyor' end
+                """,                             "metin", "e-Fatura", Hizalama: "orta",
+                                                 Bicim: "rozet", Genislik: 110,
+                                                 Siralanabilir: false, Filtrelenebilir: false),
             new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",       Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm"),
             new("tarafId",       "b.taraf_id",       "sayi",  "Cari Id",     Varsayilan: false),
             new("tarafUnvan",    "b.taraf_unvan",    "metin", "Cari"),
@@ -56,20 +70,6 @@ public static partial class KaynakKatalogu
             new("matrah",        "b.matrah",         "para",  "Matrah",      Hizalama: "sag", Bicim: "#,##0.00"),
             new("kdvTutari",     "b.kdv_tutari",     "para",  "KDV",         Hizalama: "sag", Bicim: "#,##0.00"),
             new("genelToplam",   "b.genel_toplam",   "para",  "Genel Toplam",Hizalama: "sag", Bicim: "#,##0.00"),
-            // e-BELGE DURUMU ROZET: ham kod (0/1/11/51...) listede hicbir sey
-            //   anlatmiyordu. Metin hem TURU hem ASAMAYI soyler; gonderilmis
-            //   belge "✓" ile ve yesil rozetle ayrilir (163/164 kodlari).
-            new("efaturaDurum",
-                """
-                case coalesce(b.efatura_durum, 0)
-                     when 0  then ''
-                     when 1  then 'e-Fatura'    when 2  then 'e-Fatura ✓'
-                     when 11 then 'e-Arşiv'     when 12 then 'e-Arşiv ✓'
-                     when 51 then 'e-İrsaliye'  when 52 then 'e-İrsaliye ✓'
-                     else 'Bilinmiyor' end
-                """,                             "metin", "e-Fatura", Hizalama: "orta",
-                                                 Bicim: "rozet", Genislik: 110,
-                                                 Siralanabilir: false, Filtrelenebilir: false),
             new("acikKapali",    "b.acik_kapali",    "kod",   "Acik/Kapali", Hizalama: "orta", Varsayilan: false),
             new("durum",         "b.durum",          "kod",   "Durum",       Hizalama: "orta"),
             new("vadeGun",       "b.vade_gun",       "sayi",  "Vade",        Hizalama: "sag", Varsayilan: false),
