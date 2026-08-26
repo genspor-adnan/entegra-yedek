@@ -66,7 +66,8 @@ public static partial class KaynakKatalogu
                      when 8 then 'İlaç / Tıbbi Cihaz'
                      else '' end
                 """,                             "metin", "Senaryo", Hizalama: "orta",
-                                                 Genislik: 130, Filtrelenebilir: false),
+                                                 Bicim: "rozet", Genislik: 130,
+                                                 Filtrelenebilir: false),
             new("tipiAdi",
                 """
                 case coalesce(b.tipi, 0)

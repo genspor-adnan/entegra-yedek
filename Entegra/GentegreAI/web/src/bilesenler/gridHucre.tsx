@@ -66,9 +66,13 @@ const ROZET_SINIFI: Record<string, string> = {
   // Belge durumu (0 kesin / 1 taslak / 2 iptal), donusum ve odeme kapanisi.
   'Kesin': 'ok',
   'Açık': 'bilgi', 'Kısmi': 'uyari', 'Kapandı': 'gri', 'Kapalı': 'gri',
+  // e-Belge SENARYOLARI: Temel notr, Ticari (yanit bekleyen akis) sari,
+  //   Ihracat/Kamu/Ilac ozel akislar - bir bakista ayrilsinlar.
+  'Temel': 'gri', 'Ticari': 'uyari', 'İhracat': 'mor', 'Kamu': 'mor',
+  'İlaç / Tıbbi Cihaz': 'bilgi',
   // Fatura tipleri (satis fatura listesi).
   'Tevkifatlı': 'uyari', 'KDV İstisna': 'bilgi', 'İhraç Kayıtlı': 'bilgi',
-  'Fiyat Farkı': 'gri', 'Kur Farkı': 'gri', 'SGK': 'bilgi', 'İhracat': 'bilgi',
+  'Fiyat Farkı': 'gri', 'Kur Farkı': 'gri', 'SGK': 'bilgi',
   'Bilinmiyor': 'hata',
 };
 
