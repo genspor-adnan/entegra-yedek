@@ -55,20 +55,41 @@ public sealed partial class BelgeDeposu
     }
 
     /// <summary>
-    /// Numarasi ENTEGRATORDEN gelecek belge mi (155 ayarlari)?
+    /// Numarasi ENTEGRATORDEN gelecek belge mi?
     ///
     /// Satis faturasi e-Fatura/e-Arsiv olarak, satis irsaliyesi e-Irsaliye
-    /// olarak gider. `ebelge.aktif` ANA SALTER: kapaliyken hicbir belge GIB'e
-    /// gitmez, dolayisiyla numarayi yine biz veririz - yoksa gonderilemeyen
-    /// belge numarasiz kalirdi.
+    /// olarak gider. Iki kosul birlikte aranir:
+    ///   1. `ebelge.aktif` ANA SALTER (firma geneli) - kapaliyken hicbir belge
+    ///      GIB'e gitmez, numarayi yine biz veririz;
+    ///   2. BELGENIN SUBESI o turde MUKELLEF mi (172). Mukellefiyet GIB kaydidir
+    ///      ve VKN'ye baglidir; merkezin kimligiyle gonderen sube merkezin
+    ///      mukellefiyetini kullanir (fn_ebelge_mukellef_mi bunu cozer).
+    ///
+    /// Mukellefiyet KONTROL EDILMEZSE: mukellef olmayan firmada belge "0"
+    /// numarayla kalir, hazirlama da "mukellef degilsiniz" diye reddeder ve
+    /// belge numarasiz kilitlenirdi.
+    ///
+    /// Faturada e-Fatura YA DA e-Arsiv yeterli: alici GIB mukellefi ise
+    /// e-Fatura, degilse e-Arsiv kesilir - hangisi olacagi hazirlamada belli olur.
     /// </summary>
     private static async Task<bool> EBelgeNumaraliMiAsync(NpgsqlConnection baglanti,
-        NpgsqlTransaction islem, int tur, CancellationToken iptal)
+        NpgsqlTransaction islem, int tur, int? subeId, CancellationToken iptal)
     {
         if (tur != BelgeTuru.SatisFaturasi && tur != BelgeTuru.SatisIrsaliyesi) return false;
         if (await AyarDeposu.SayiAsync(baglanti, islem, "ebelge.aktif", iptal) != 1) return false;
-        return tur == BelgeTuru.SatisFaturasi
-            || await AyarDeposu.SayiAsync(baglanti, islem, "eirsaliye.aktif", iptal) == 1;
+
+        await using var komut = new NpgsqlCommand(
+            tur == BelgeTuru.SatisFaturasi
+                ? """
+                  select public.fn_ebelge_mukellef_mi(@p0, 1)
+                      or public.fn_ebelge_mukellef_mi(@p0, 2)
+                  """
+                : "select public.fn_ebelge_mukellef_mi(@p0, 7)",
+            baglanti, islem);
+        // Sube bilinmiyorsa (oturum sube secmemis) varsayilan sube kullanilir -
+        //   fonksiyon null'i boyle cozer.
+        komut.Parameters.AddWithValue("p0", (object?)subeId ?? DBNull.Value);
+        return await komut.ExecuteScalarAsync(iptal) is bool b && b;
     }
 
     /// <summary>e-Belge bekleyen belgede numara alani "0" kalir.</summary>
@@ -465,7 +486,7 @@ public sealed partial class BelgeDeposu
                 //   harcarsak ayni belge iki numara tasir ve seri bosluklu kalir.
                 //   Numara alani "0" ile birakilir, gonderim sonucu gercek numarayi
                 //   yazar (Delphi'de de FATURANO = 0 bekliyor).
-                if (await EBelgeNumaraliMiAsync(baglanti, islem, tur, iptal))
+                if (await EBelgeNumaraliMiAsync(baglanti, islem, tur, baglam.SubeId, iptal))
                     await NumaraSifirlaAsync(baglanti, islem, belgeId, iptal);
                 else
                     await NumaraVerAsync(baglanti, islem, belgeId, tur,

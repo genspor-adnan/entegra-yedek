@@ -55,11 +55,11 @@ public sealed class AyarDeposu
         "ebelge.aktif",
         "efatura.gelen_al", "efatura.senaryo", "efatura.ihracat_gonder",
         "efatura.uretim_url", "efatura.test_url", "efatura.sabit_notlar",
-        "earsiv.aktif", "earsiv.uretim_url", "earsiv.gelen_url",
+        "earsiv.uretim_url", "earsiv.gelen_url",
         "earsiv.test_url", "earsiv.sabit_notlar",
-        "eirsaliye.aktif", "eirsaliye.gelen_al", "eirsaliye.gib_alias",
+        "eirsaliye.gelen_al", "eirsaliye.gib_alias",
         "eirsaliye.uretim_url", "eirsaliye.test_url", "eirsaliye.sabit_notlar",
-        "esmm.aktif", "esmm.uretim_url", "esmm.test_url", "esmm.sabit_notlar",
+        "esmm.uretim_url", "esmm.test_url", "esmm.sabit_notlar",
     };
 
     /// <summary>Metin (sayi olmayan) ayarlar - uzunluk disinda bicim serbest.</summary>
@@ -107,10 +107,7 @@ public sealed class AyarDeposu
         ["efatura.gelen_al"] = 0,
         ["efatura.senaryo"] = 1,          // Temel
         ["efatura.ihracat_gonder"] = 0,
-        ["earsiv.aktif"] = 0,
-        ["eirsaliye.aktif"] = 0,
         ["eirsaliye.gelen_al"] = 0,
-        ["esmm.aktif"] = 0,
     };
 
     /// <summary>Sayisal ayarlarin kabul araligi (yoksa yalniz "0 veya buyuk" kurali).</summary>
