@@ -40,15 +40,13 @@ public static partial class KartKatalogu
             new("id", "id", "sayi", Yazilabilir: false),
 
             // ------------------------------------------- Kimlik / Firma Kimliği
-            // Mockup sirasi: Ünvan · Kısa Ad · Firma Türü · VKN · Vergi Dairesi ·
+            // Mockup sirasi: Ünvan · Kısa Ad · VKN · Vergi Dairesi ·
             //   Ticaret Sicil · Oda · Oda Sicil; Mersis ve NACE "Kayıt" altinda.
             // UNVAN e-Belgede gorunen resmi addir; "ad" ic kullanim icin kisa ad.
             new("unvan", "unvan", "metin", Zorunlu: true, EnFazlaUzunluk: 200,
                 Baslik: "Ünvan", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
             new("ad",    "ad",    "metin", Zorunlu: true, EnFazlaUzunluk: 60,
                 Baslik: "Kısa Ad", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
-            new("firmaTuru", "firma_turu", "kod", KodListesi: "sube.firma_turu",
-                Baslik: "Firma Türü", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
             // VKN ZORUNLU (mockup'ta kirmizi cerceve): e-Belge, tahakkuk ve resmi
             //   yazismalarin tamami buna bagli.
             new("vkno",  "vkno",  "metin", Zorunlu: true, EnFazlaUzunluk: 11,
@@ -68,6 +66,8 @@ public static partial class KartKatalogu
             // Kartin kendi kayit alanlari. Mockup'taki "Kayıt Bilgisi" kutusu
             //   (kayit tarihi / doluluk cubugu) ve "Faaliyet" kutusu kullanici
             //   karariyla ALINMADI.
+            new("firmaTuru", "firma_turu", "kod", KodListesi: "sube.firma_turu",
+                Baslik: "Firma Türü", Grup: "Kimlik", AltGrup: "Kayıt"),
             new("kod",   "kod",   "metin", EnFazlaUzunluk: 20,
                 Baslik: "Firma Kodu", Grup: "Kimlik", AltGrup: "Kayıt"),
             // Mersis ve NACE resmi SICIL bilgisi: unvan/VKN gibi her belgede
