@@ -249,6 +249,10 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 35),
                 new("belge.iptal", "Belgeyi Iptal Et", "belge", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "belge.iptal", KayitGerekir: true, Sira: 40),
+                // HAZIRLA once, GONDER sonra (Delphi menu sirasiyla ayni):
+                //   hazirlama numara/seri verir ve belgeyi kuyruga alir.
+                new("ebelge.hazirla", "e-Fatura Hazırla", "ebelge", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 45),
                 new("ebelge.gonder", "e-Fatura Gonder", "ebelge", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 50),
                 new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",

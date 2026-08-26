@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
@@ -147,6 +147,32 @@ public static class BelgeUclari
                 Satirlar = kayit.Satirlar,
                 DipToplam = kayit.DipToplam,
                 Uyarilar = new[] { ac ? $"{adet} satır rezerve edildi." : "Rezervasyon kaldırıldı." },
+                IzlemeNo = baglam.IzlemeNo
+            });
+        });
+
+        // POST /api/belge/{id}/ebelge-hazirla - belgeyi e-Belge kuyruguna al (163)
+        grup.MapPost("/{id:int}/ebelge-hazirla", async (
+            int id, BaglamCozucu cozucu, BelgeDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Degistir);
+
+            var (eBelgeId, tur, no, seri, uyari) = await depo.EBelgeHazirlaAsync(id,
+                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+
+            var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
+            var turAdi = tur switch { 1 => "e-Fatura", 2 => "e-Arşiv", 7 => "e-İrsaliye", _ => "e-Belge" };
+            var mesajlar = new List<string> { $"{turAdi} hazırlandı — {seri} / {no} (kayıt #{eBelgeId})." };
+            if (!string.IsNullOrWhiteSpace(uyari)) mesajlar.Add(uyari);
+
+            return Results.Ok(new BelgeYaniti
+            {
+                Belge = kayit.Belge,
+                Satirlar = kayit.Satirlar,
+                DipToplam = kayit.DipToplam,
+                Uyarilar = mesajlar,
                 IzlemeNo = baglam.IzlemeNo
             });
         });

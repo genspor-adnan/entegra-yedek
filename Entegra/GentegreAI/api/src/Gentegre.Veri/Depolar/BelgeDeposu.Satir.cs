@@ -17,6 +17,49 @@ namespace Gentegre.Veri.Depolar;
 /// </summary>
 public sealed partial class BelgeDeposu
 {
+    /// <summary>
+    /// e-BELGE HAZIRLA (163) - Delphi `TEBelgeOlusturucu.MenuHazirla` karsiligi.
+    ///
+    /// Is kurallari SUNUCUDA (fn_ebelge_hazirla): dogrulama, belge turu karari
+    /// (e-Fatura / e-Arsiv / e-Irsaliye), seri secimi, numara uretimi ve
+    /// e_belge satirinin acilmasi tek transaction icinde olur - Delphi'deki
+    /// "dogrulama en basta, numara en son" sirasi orada korunuyor.
+    ///
+    /// UBL/XML BU ADIMDA URETILMEZ; belge kuyruga alinir, gonderim asamasi
+    /// XML'i sonra kurar.
+    /// </summary>
+    public async Task<(long EBelgeId, int BelgeTuru, string BelgeNo, string Seri, string Uyari)>
+        EBelgeHazirlaAsync(int belgeId, YazmaBaglami baglam, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+        await using var komut = new NpgsqlCommand(
+            "select * from public.fn_ebelge_hazirla(@p0, @p1)", baglanti, islem);
+        komut.Parameters.AddWithValue("p0", belgeId);
+        komut.Parameters.AddWithValue("p1", baglam.KullaniciId);
+
+        long eBelgeId; int tur; string no, seri, uyari;
+        await using (var okuyucu = await komut.ExecuteReaderAsync(iptal))
+        {
+            if (!await okuyucu.ReadAsync(iptal))
+                throw GentegreHatasi.IsKurali("e-Belge hazırlanamadı.");
+            eBelgeId = okuyucu.GetInt64(0);
+            tur      = okuyucu.GetInt16(1);
+            no       = okuyucu.GetString(2);
+            seri     = okuyucu.GetString(3);
+            uyari    = okuyucu.IsDBNull(4) ? "" : okuyucu.GetString(4);
+        }
+
+        await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloBelge, belgeId,
+            baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+            new Dictionary<string, string> { ["eBelgeHazirla"] = $"{seri} / {no}" },
+            iptal: iptal);
+
+        await islem.CommitAsync(iptal);
+        return (eBelgeId, tur, no, seri, uyari);
+    }
+
 
     /// <summary>
     /// TERMIN GUNCELLEME (140): satirlarin teslim tarihini toplu degistirir.

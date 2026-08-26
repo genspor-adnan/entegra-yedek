@@ -152,6 +152,21 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         case 'belge.ac':
           if (satir) setAcikBelgeId(Number(satir.id));
           return;
+        // e-BELGE HAZIRLA (163): numara/seri verir ve kuyruga alir. Sonuc
+        //   mesaji sunucudan gelir (hangi tur, hangi numara) - istemci karar
+        //   uretmez, yalniz gosterir.
+        case 'ebelge.hazirla': {
+          if (!satir) return;
+          const belgeNo = String(satir.belgeNo ?? satir.id);
+          if (!confirm(`"${belgeNo}" için e-Belge hazırlansın mı? `
+                     + 'Belgeye seri ve e-Belge numarası verilir.')) return;
+          try {
+            const y = await api.belgeEBelgeHazirla(Number(satir.id));
+            alert((y.uyarilar ?? []).join(' • ') || 'e-Belge hazırlandı.');
+            setYenile(t => t + 1);
+          } catch (h) { alert(hataMetni(h)) }
+          return;
+        }
         case 'belge.donustur':
           if (!satir) return;
           setDonusum({ belgeId: Number(satir.id), belgeTur: Number(satir.tur) });

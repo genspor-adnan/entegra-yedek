@@ -263,6 +263,13 @@ export const api = {
       + (turler?.length ? `&turler=${turler.join(',')}` : '')).then(y => y.satirlar),
 
   /** Siparis -> irsaliye -> fatura. Miktar KISMI olabilir; kalan kaynakta durur. */
+  /**
+   * e-BELGE HAZIRLA (163): belgeyi kuyruga alir - dogrular, e-Fatura/e-Arsiv/
+   * e-Irsaliye kararini verir, seri ve numara atar. XML gonderim asamasinda.
+   */
+  belgeEBelgeHazirla: (id: number) =>
+    gonder<BelgeYaniti>(`/api/belge/${id}/ebelge-hazirla`, {}),
+
   /** Siparis rezervasyonu - 142. ac=false rezervi kaldirir. */
   belgeRezerve: (id: number, ac: boolean) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/rezerve`, { ac }),
