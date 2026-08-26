@@ -57,13 +57,23 @@ export function sekmeleriKur(secenek: {
   personelGibiKart: boolean;
   yerTutucuSekmeler?: string[];
   gizliSekmeler?: string[];
+  /** Ust seritte kalacak alanlar (bkz. GenForm.seritAlanlari). Verilirse "Kimlik"
+      grubunun GERI KALANI normal bir sekme olur - Firma Bilgileri'nde serit
+      yalniz ünvan/kısa ad/durum tasir, kimligin geri kalani kendi sekmesinde. */
+  seritAlanlari?: string[];
 }): SekmeTanimi[] {
   const { gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
-          yerTutucuSekmeler, gizliSekmeler } = secenek;
+          yerTutucuSekmeler, gizliSekmeler, seritAlanlari } = secenek;
   const dokumanliKart = personelGibiKart || kaynak === 'kisi' || kaynak === 'cari' || kaynak === 'stok';
   const yorumMedyaSekmesiVar = (yerTutucuSekmeler ?? []).includes('Yorum / Medya');
   const s: SekmeTanimi[] = gruplar
-    .filter(([ad]) => ad !== KIMLIK_GRUP)
+    // Serit alanlari acikca verilmisse Kimlik grubu sekme olarak da cizilir;
+    //   verilmemisse eski davranis (tum grup serittedir, sekmesi yoktur).
+    .map(([ad, alanlar]): [string, KartAlanMeta[]] =>
+      ad === KIMLIK_GRUP && seritAlanlari
+        ? [ad, alanlar.filter(a => !seritAlanlari.includes(a.ad))]
+        : [ad, alanlar])
+    .filter(([ad, alanlar]) => ad !== KIMLIK_GRUP || (!!seritAlanlari && alanlar.length > 0))
     // Ekrana ozel sekme gizleme (ör. Aday kartinda "Fatura Bilgileri").
     .filter(([ad]) => !gizliSekmeler?.includes(ad))
     .filter(([ad]) => !(kaynak === 'hasta' && ad === 'İletişim'))

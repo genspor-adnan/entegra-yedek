@@ -36,6 +36,10 @@ interface Props {
   onKapat?(): void;
   /** Kart SAYFANIN KENDISI ise modal degil, sayfa icinde cizilir (Firma Bilgileri). */
   gomulu?: boolean;
+  /** Ust seritte kalacak alan adlari. Verilmezse "Kimlik" grubunun TAMAMI seritte
+      (varsayilan davranis). Verilirse serit bunlarla sinirlanir, grubun kalani
+      "Kimlik" sekmesine duser - kimlik alani cok olan kartlarda serit sismesin. */
+  seritAlanlari?: string[];
   onKaydedildi?(id: number): void;
   /** Mockup'ta olup backend'i henuz olmayan sekmeler (or. "UTS Bilgileri") - "yakinda" gosterilir. */
   yerTutucuSekmeler?: string[];
@@ -81,7 +85,7 @@ interface Props {
  *  - Alan hatalari (`alanlar[]`) ilgili girdinin altina yazilir.
  *  - Detaylar FARK olarak gonderilir (eklenen / degisen / silinen), tam liste degil.
  */
-export function GenForm({ kaynak, id, baslik, onKapat, gomulu, onKaydedildi, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, gomulu, seritAlanlari, onKaydedildi, yerTutucuSekmeler,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
   const { kullanici } = useOturum();
@@ -278,15 +282,22 @@ export function GenForm({ kaynak, id, baslik, onKapat, gomulu, onKaydedildi, yer
    * sabit gorunur (kod/unvan/durum gibi karti tanimlayan alanlar).
    */
   const kimlikAlanlari = useMemo(
-    () => gruplar.find(([ad]) => ad === KIMLIK_GRUP)?.[1] ?? [],
-    [gruplar],
+    () => {
+      const grup = gruplar.find(([ad]) => ad === KIMLIK_GRUP)?.[1] ?? [];
+      // Serit listesi verildiyse SIRA da ondan gelir (unvan, kisa ad, durum).
+      return seritAlanlari
+        ? seritAlanlari.map(ad => grup.find(a => a.ad === ad)).filter(Boolean) as typeof grup
+        : grup;
+    },
+    [gruplar, seritAlanlari],
   );
 
   /** Mockup'taki gibi sekmeli kart: Kimlik disindaki her alan grubu + her detay tablosu ayri sekme. */
   const sekmeler = useMemo<SekmeTanimi[]>(
     () => sekmeleriKur({ gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
-                         yerTutucuSekmeler, gizliSekmeler }),
-    [gruplar, meta, kaynak, deger, yeniMi, personelGibiKart, yerTutucuSekmeler, gizliSekmeler]);
+                         yerTutucuSekmeler, gizliSekmeler, seritAlanlari }),
+    [gruplar, meta, kaynak, deger, yeniMi, personelGibiKart, yerTutucuSekmeler,
+     gizliSekmeler, seritAlanlari]);
 
   const [aktifSekme, setAktifSekme] = useState<string | null>(null);
   const kayitAnahtari = `${kaynak}:${id}`;

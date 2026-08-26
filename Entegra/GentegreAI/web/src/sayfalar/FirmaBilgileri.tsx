@@ -12,6 +12,10 @@ const SEKMELER = [
 
 type Sekme = typeof SEKMELER[number]['anahtar'];
 
+/** Ust seritte kalan alanlar (kullanici): ünvan, kısa ad, durum. Kimligin geri
+    kalani "Kimlik" sekmesinde - serit karti TANIMLAR, doldurmaz. */
+const SERIT_ALANLARI = ['unvan', 'ad', 'aktif'];
+
 /**
  * FIRMA BILGILERI (Yonetim › Firma Bilgileri) — mockup: Ekranlar/firma_bilgileri.html
  *
@@ -111,6 +115,7 @@ export function FirmaBilgileri() {
               )}
               <GenForm key={`${seciliId}-${tazele}`}
                        kaynak="sube" id={seciliId} gomulu
+                       seritAlanlari={SERIT_ALANLARI}
                        onKaydedildi={() => { setTazele(t => t + 1); void yukle(); }} />
             </>
           )
