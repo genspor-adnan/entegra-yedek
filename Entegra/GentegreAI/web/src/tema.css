@@ -951,3 +951,5 @@ input.skt-gecmis {
 
 /* Kutu basligindaki eylem ikonlari (Seri Kurallari: ekle/duzenle/sil). */
 .baslik-eylem { display: inline-flex; gap: 4px; flex: none }
+/* Eylem ikonlari basligin HEMEN saginda dursun (saga yaslanmasin). */
+.numaralama-bas.bitisik { justify-content: flex-start; gap: 10px }

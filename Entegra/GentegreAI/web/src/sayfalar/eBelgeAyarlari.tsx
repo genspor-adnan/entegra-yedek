@@ -137,7 +137,10 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
         <div className="kagrup">
           {/* Delphi'deki "Seri Bilgileri" gridi (UOpsiyonFatura > TabSeri).
               Belgenin IC numarasi degil, GIB'e giden SERI kodu. */}
-          <div className="numaralama-bas">
+          {/* Ikonlar basligin HEMEN saginda (kullanici) - saga yaslanmis
+              halde baslikla arasindaki bosluk ikisini ayri iki ogeye
+              cevirmisti. */}
+          <div className="numaralama-bas bitisik">
             <h6>Seri Kuralları</h6>
             {/* Ekle / Duzenle / Sil - baslik seridinin saginda, yalniz IKON
                 (kullanici). Duzenle ve Sil satir secimi ister; secim yokken
