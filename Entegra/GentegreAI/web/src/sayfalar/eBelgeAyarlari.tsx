@@ -52,6 +52,13 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
   );
 
   const [bolum, setBolum] = useState<string>('baglanti');
+  /**
+   * ANA SALTER (kullanici): `ebelge.aktif` kapaliyken hicbir belge GIB'e
+   * gitmez - alt sekmelerdeki adresler, seriler ve tur bayraklari yazilabilir
+   * ama HIC BIRI islemez. Kullanici saatlerce ayar doldurup "neden
+   * gonderilmiyor" diye aramasin diye durum ustte yazili.
+   */
+  const anaSalter = ayarlar.find(a => a.anahtar === 'ebelge.aktif')?.deger === '1';
   /** Acik seri kurali karti ("yeni" = ekleme). */
   const [seriKart, setSeriKart] = useState<number | 'yeni' | null>(null);
   const [seriYenile, setSeriYenile] = useState(0);
@@ -69,6 +76,15 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
           </div>
         ))}
       </div>
+
+      {!anaSalter && (
+        <div className="bilgi-kutusu" style={{ marginTop: 8 }}>
+          <b>e-Belge kapalı.</b> Aşağıdaki ayarlar kaydedilir ama hiçbir belge
+          GİB'e gönderilmez ve fatura/irsaliye numarası her zaman
+          <b> Belge No</b> şablonundan verilir. Açmak için <b>Entegratör</b>
+          sekmesindeki “e-Belge kullanımda” kutusunu işaretleyin.
+        </div>
+      )}
 
       {bolum === 'baglanti' && (
         <div className="kagrup">
