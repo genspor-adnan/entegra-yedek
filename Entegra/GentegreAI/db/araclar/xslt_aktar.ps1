@@ -101,6 +101,10 @@ try {
     docker cp $veri "${PgKapsayici}:$kapsayiciYol" | Out-Null
 
     $sql = @"
+-- TSV UTF-8 yazildi; psql varsayilan istemci kodlamasiyla (WIN1252) okursa
+--   Turkce harfler bozulur ("e-Arşiv" -> "e-ArÅŸiv", gercek vaka).
+set client_encoding = 'UTF8';
+
 create temporary table gecici_xslt (
     kaynak_id2 integer, belge_turu2 smallint, yon2 smallint,
     ad2 varchar(200), varsayilan2 smallint, durum2 smallint, icerik2 text);

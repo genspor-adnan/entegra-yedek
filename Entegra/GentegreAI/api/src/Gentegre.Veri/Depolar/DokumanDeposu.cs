@@ -41,6 +41,16 @@ public sealed class DokumanDeposu
 
     public DokumanDeposu(VeriKaynagi veri) => _veri = veri;
 
+    /// <summary>e-Belge tur kodu -> okunur ad (156/160 ile ayni kodlar).</summary>
+    private static string EBelgeTuruAdi(int kod) => kod switch
+    {
+        1 => "e-Fatura",
+        2 => "e-Arşiv",
+        7 => "e-İrsaliye",
+        8 => "e-SMM",
+        _ => "",
+    };
+
     private static string KaynakDogrula(string kaynak)
         => KaynakBeyazListe.Contains(kaynak) ? kaynak : throw new InvalidOperationException($"Bilinmeyen kaynak: {kaynak}");
 
@@ -125,8 +135,9 @@ public sealed class DokumanDeposu
         }
 
         await using (var ekle = new NpgsqlCommand("""
-            insert into public.dokuman (kaynak, kaynak_id, ad, content_type, boyut, hash, varsayilan, sube_id, ekleyen, yon)
-            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)
+            insert into public.dokuman (kaynak, kaynak_id, ad, content_type, boyut, hash,
+                                        varsayilan, sube_id, ekleyen, yon, belge_turu)
+            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10)
             """, baglanti, islem))
         {
             ekle.Parameters.AddWithValue("p0", kaynak);
@@ -140,6 +151,11 @@ public sealed class DokumanDeposu
             ekle.Parameters.AddWithValue("p7", baglam.SubeId ?? 1);
             ekle.Parameters.AddWithValue("p8", baglam.KullaniciId);
             ekle.Parameters.AddWithValue("p9", yon);
+            // BELGE TURU: XSLT kaynaginda tur kodundan okunur adi turetilir
+            //   (kaynak_id = 1 e-Fatura ...). Kart dokumanlarinda kullanici
+            //   yazar; ekleme aninda bos kalir, duzenlemeden girilir.
+            ekle.Parameters.AddWithValue("p10", kaynak == "ebelge-xslt"
+                ? EBelgeTuruAdi((int)kaynakId) : "");
             await ekle.ExecuteNonQueryAsync(iptal);
         }
 
@@ -147,8 +163,15 @@ public sealed class DokumanDeposu
         return await ListeleAsync(kaynak, kaynakId, iptal);
     }
 
+    /// <summary>
+    /// Dokuman bilgilerini duzenler. Kart dokumaninda yalniz AD ve belge turu
+    /// anlamlidir; e-Belge XSLT sablonunda (160) ayrica hangi belge turune ait
+    /// oldugu (kaynak_id), yonu ve varsayilanligi da degistirilebilir - orada
+    /// bunlar dosyanin kimligidir, sonradan duzeltilebilmeli.
+    /// </summary>
     public async Task<IReadOnlyList<DokumanSatiri>> DuzenleAsync(int dokumanId, string yeniAd, string? yeniBelgeTuru,
-        YazmaBaglami baglam, CancellationToken iptal = default)
+        YazmaBaglami baglam, CancellationToken iptal = default,
+        int? yeniKaynakId = null, short? yeniYon = null, bool? yeniVarsayilan = null)
     {
         if (string.IsNullOrWhiteSpace(yeniAd))
             throw GentegreHatasi.Dogrulama("Ad boş olamaz.", new AlanHatasi("ad", "Ad girilmeli."));
@@ -156,22 +179,42 @@ public sealed class DokumanDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-        var (kaynak, kaynakId) = await SatirBulAsync(baglanti, islem,
-            "select kaynak, kaynak_id from public.dokuman where id = @p0", dokumanId,
-            r => (r.GetString(0), r.GetInt32(1)), iptal);
+        var (kaynak, kaynakId, mevcutYon) = await SatirBulAsync(baglanti, islem,
+            "select kaynak, kaynak_id, yon from public.dokuman where id = @p0", dokumanId,
+            r => (r.GetString(0), r.GetInt32(1), r.GetInt16(2)), iptal);
 
-        await using (var guncelle = new NpgsqlCommand(
-            "update public.dokuman set ad = @p0, belge_turu = @p1, degistiren = @p2 where id = @p3", baglanti, islem))
+        var hedefKaynakId = yeniKaynakId ?? kaynakId;
+        var hedefYon = yeniYon ?? mevcutYon;
+
+        // Varsayilan yapiliyorsa ONCE ayni tur+yondeki eskisi birakilir -
+        //   kismi tekil indeks (kaynak, kaynak_id, yon) iki varsayilana izin vermez.
+        if (yeniVarsayilan == true)
+            await VarsayilaniKaldirAsync(baglanti, islem, kaynak, hedefKaynakId,
+                                         baglam.KullaniciId, iptal, hedefYon);
+
+        await using (var guncelle = new NpgsqlCommand("""
+            update public.dokuman
+               set ad = @p0, belge_turu = @p1, kaynak_id = @p4, yon = @p5,
+                   varsayilan = coalesce(@p6, varsayilan), degistiren = @p2
+             where id = @p3
+            """, baglanti, islem))
         {
             guncelle.Parameters.AddWithValue("p0", yeniAd.Trim());
-            guncelle.Parameters.AddWithValue("p1", (yeniBelgeTuru ?? "").Trim());
+            // XSLT'de belge turu ADI kod'dan turetilir - kullanicidan gelmez.
+            guncelle.Parameters.AddWithValue("p1", kaynak == "ebelge-xslt"
+                ? EBelgeTuruAdi(hedefKaynakId) : (yeniBelgeTuru ?? "").Trim());
             guncelle.Parameters.AddWithValue("p2", baglam.KullaniciId);
             guncelle.Parameters.AddWithValue("p3", dokumanId);
+            guncelle.Parameters.AddWithValue("p4", hedefKaynakId);
+            guncelle.Parameters.AddWithValue("p5", hedefYon);
+            guncelle.Parameters.AddWithValue("p6",
+                yeniVarsayilan is null ? DBNull.Value : (short)(yeniVarsayilan.Value ? 1 : 0));
             await guncelle.ExecuteNonQueryAsync(iptal);
         }
 
         await islem.CommitAsync(iptal);
-        return await ListeleAsync(kaynak, kaynakId, iptal);
+        // Tur degistiyse liste HEDEF turden okunur - kayit artik orada.
+        return await ListeleAsync(kaynak, hedefKaynakId, iptal);
     }
 
     public async Task<IReadOnlyList<DokumanSatiri>> VarsayilanYapAsync(int dokumanId, YazmaBaglami baglam, CancellationToken iptal = default)

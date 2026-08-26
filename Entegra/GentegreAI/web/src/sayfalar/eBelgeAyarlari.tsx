@@ -83,7 +83,8 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
    * baslikta durmalari "hangi secim neyi etkiliyor" belirsizligi yaratiyordu.
    */
   const [xsltForm, setXsltForm] = useState<
-    { dosya: File; ad: string; tur: number; yon: number; varsayilan: boolean } | null>(null);
+    { dosya?: File; id?: number; eskiTur?: number;
+      ad: string; tur: number; yon: number; varsayilan: boolean } | null>(null);
   const dosyaGirdisi = useRef<HTMLInputElement | null>(null);
 
   const xsltSil = async () => {
@@ -104,17 +105,38 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
     setXsltForm({ dosya, ad: dosya.name, tur: 1, yon: 2, varsayilan: false });
   };
 
-  /** Formdaki bilgilerle tek satir olarak ekle. */
+  /** Secili satiri formda ac - dosya degismez, yalniz bilgileri duzenlenir. */
+  const xsltDuzenle = () => {
+    if (!seciliXslt) return;
+    const tur = Number(seciliXslt.turKodu ?? 0);
+    setSeriHata(null);
+    setXsltForm({
+      id: Number(seciliXslt.id), eskiTur: tur,
+      ad: String(seciliXslt.ad ?? ''),
+      tur: tur || 1,
+      yon: String(seciliXslt.yon) === 'Gelen' ? 1 : 2,
+      varsayilan: Boolean(seciliXslt.varsayilan),
+    });
+  };
+
+  /** Yeni sablonu ekler ya da acik satiri gunceller. */
   const xsltKaydet = async () => {
     if (!xsltForm) return;
     setSeriHata(null);
     try {
-      // Ad degistirildiyse dosyayi o adla gonder - satirin adi dosya adindan gelir.
-      const dosya = xsltForm.ad.trim() && xsltForm.ad !== xsltForm.dosya.name
-        ? new File([xsltForm.dosya], xsltForm.ad.trim(), { type: xsltForm.dosya.type })
-        : xsltForm.dosya;
-      await api.dokumanYukle('ebelge-xslt', xsltForm.tur, dosya, xsltForm.varsayilan, xsltForm.yon);
+      if (xsltForm.id) {
+        await api.dokumanDuzenle('ebelge-xslt', xsltForm.eskiTur ?? xsltForm.tur, xsltForm.id,
+          xsltForm.ad.trim(), '',
+          { kaynakId: xsltForm.tur, yon: xsltForm.yon, varsayilan: xsltForm.varsayilan });
+      } else if (xsltForm.dosya) {
+        // Ad degistirildiyse dosyayi o adla gonder - satirin adi dosya adindan gelir.
+        const dosya = xsltForm.ad.trim() && xsltForm.ad !== xsltForm.dosya.name
+          ? new File([xsltForm.dosya], xsltForm.ad.trim(), { type: xsltForm.dosya.type })
+          : xsltForm.dosya;
+        await api.dokumanYukle('ebelge-xslt', xsltForm.tur, dosya, xsltForm.varsayilan, xsltForm.yon);
+      }
       setXsltForm(null);
+      setSeciliXslt(null);
       setXsltYenile(t => t + 1);
     } catch (h) { setSeriHata(hataMetni(h)) }
   };
@@ -283,6 +305,9 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
                      }} />
               <button className="d bir ikon-dugme" title="Klasörden şablon seç"
                       onClick={() => dosyaGirdisi.current?.click()}>＋</button>
+              <button className="d ikon-dugme" disabled={!seciliXslt}
+                      title={seciliXslt ? 'Seçili şablonun bilgilerini düzenle' : 'Önce satır seçin'}
+                      onClick={xsltDuzenle}>✎</button>
               <button className="d teh ikon-dugme" disabled={!seciliXslt}
                       title={seciliXslt ? 'Seçili şablonu sil' : 'Önce satır seçin'}
                       onClick={() => { void xsltSil() }}>🗑</button>
@@ -298,6 +323,16 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
             seritGizli
             boyut={25}
             onSecimDegisti={setSeciliXslt}
+            onSatirAc={satir => {
+              setSeciliXslt(satir);
+              const tur = Number(satir.turKodu ?? 0);
+              setXsltForm({
+                id: Number(satir.id), eskiTur: tur,
+                ad: String(satir.ad ?? ''), tur: tur || 1,
+                yon: String(satir.yon) === 'Gelen' ? 1 : 2,
+                varsayilan: Boolean(satir.varsayilan),
+              });
+            }}
           />
           <div className="not">
             Belge GİB'e XML olarak gider; insanın gördüğü görüntü bu şablon
@@ -311,7 +346,7 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
 
       {xsltForm && (
         <Modal
-          baslik="XSLT Şablonu Ekle"
+          baslik={xsltForm.id ? "XSLT Şablonu" : "XSLT Şablonu Ekle"}
           dar
           onKapat={() => setXsltForm(null)}
           alt={<>

@@ -10,7 +10,10 @@ namespace Gentegre.Api.Uclar;
 /// "cari", "kisi", "stok"), hem yetki kontrolü hem fiziksel `dokuman.kaynak` değerine
 /// çevirmek için kullanılır (cari/kisi/personel hepsi `taraf` satırı - tek fiziksel kaynak).
 /// </summary>
-public sealed record DuzenleIstegi(string Ad, string? BelgeTuru);
+// KaynakId/Yon/Varsayilan yalniz e-Belge XSLT sablonlarinda kullanilir (160);
+// kart dokumanlarinda gonderilmez ve mevcut deger korunur.
+public sealed record DuzenleIstegi(string Ad, string? BelgeTuru,
+    int? KaynakId = null, short? Yon = null, bool? Varsayilan = null);
 
 public static class DokumanUclari
 {
@@ -74,7 +77,8 @@ public static class DokumanUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
             var liste = await depo.DuzenleAsync(dokumanId, istek.Ad, istek.BelgeTuru,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal,
+                istek.KaynakId, istek.Yon, istek.Varsayilan);
             return Results.Ok(liste);
         });
 

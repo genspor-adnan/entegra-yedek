@@ -213,8 +213,12 @@ export const api = {
   },
   dokumanVarsayilanYap: (kartAdi: string, kaynakId: number, dokumanId: number) =>
     gonder<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}/${dokumanId}/varsayilan`, {}),
-  dokumanDuzenle: (kartAdi: string, kaynakId: number, dokumanId: number, ad: string, belgeTuru: string) =>
-    istek<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}/${dokumanId}`, { method: 'PUT', body: JSON.stringify({ ad, belgeTuru }) }),
+  // kaynakId/yon/varsayilan yalniz e-Belge XSLT sablonlarinda gonderilir (160):
+  //   orada belge turu ve yon dosyanin kimligidir, sonradan duzeltilebilmeli.
+  dokumanDuzenle: (kartAdi: string, kaynakId: number, dokumanId: number, ad: string,
+                   belgeTuru: string, ek?: { kaynakId?: number; yon?: number; varsayilan?: boolean }) =>
+    istek<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}/${dokumanId}`,
+      { method: 'PUT', body: JSON.stringify({ ad, belgeTuru, ...ek }) }),
   dokumanSil: (kartAdi: string, kaynakId: number, dokumanId: number) =>
     istek<DokumanSatiri[]>(`/api/dokuman/${kartAdi}/${kaynakId}/${dokumanId}`, { method: 'DELETE' }),
   dokumanIcerikUrl: (dokumanId: number) => dosyaIndir(`/api/dokuman-icerik/${dokumanId}`),
