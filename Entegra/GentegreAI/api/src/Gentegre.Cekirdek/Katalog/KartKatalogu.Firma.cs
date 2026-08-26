@@ -41,7 +41,7 @@ public static partial class KartKatalogu
 
             // ------------------------------------------- Kimlik / Firma Kimliği
             // Mockup sirasi: Ünvan · Kısa Ad · Firma Türü · VKN · Vergi Dairesi ·
-            //   Ticaret Sicil · Mersis · NACE · Kuruluş · Sermaye · Oda · Oda Sicil.
+            //   Ticaret Sicil · Mersis · NACE · Oda · Oda Sicil.
             // UNVAN e-Belgede gorunen resmi addir; "ad" ic kullanim icin kisa ad.
             new("unvan", "unvan", "metin", Zorunlu: true, EnFazlaUzunluk: 200,
                 Baslik: "Ünvan", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
@@ -63,10 +63,6 @@ public static partial class KartKatalogu
                 Baslik: "Mersis No", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
             new("naceKodu",      "nace_kodu",      "metin", EnFazlaUzunluk: 20,
                 Baslik: "NACE Kodu", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
-            new("kurulusTarihi", "kurulus_tarihi", "tarih",
-                Baslik: "Kuruluş Tarihi", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
-            new("sermaye",       "sermaye",        "para",
-                Baslik: "Sermaye", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
             new("ticaretOdasi",  "ticaret_odasi",  "metin", EnFazlaUzunluk: 120,
                 Baslik: "Ticaret Odası", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
             new("odaSicilNo",    "oda_sicil_no",   "metin", EnFazlaUzunluk: 40,

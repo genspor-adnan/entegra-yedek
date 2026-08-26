@@ -13,7 +13,7 @@
 --  adresi ve gonderici etiketi gider. Tek subeli kurulumda Merkez tek kayittir
 --  ve "firma bilgileri" odur - ayri bir firma tablosu acilmadi.
 --
---  MOCKUP'TAKI EK ALANLAR: firma kimligi (tur, NACE, kurulus, sermaye, oda) ve
+--  MOCKUP'TAKI EK ALANLAR: firma kimligi (tur, NACE, oda) ve
 --  iletisim (KEP, GSM). KEP e-Belge ile dogrudan ilgili; telefon tek alan
 --  + GSM yeterli (kullanici).
 --
@@ -27,8 +27,6 @@
 alter table public.sube
     add column if not exists firma_turu       varchar(40)  not null default '',
     add column if not exists nace_kodu        varchar(20)  not null default '',
-    add column if not exists kurulus_tarihi   date         null,
-    add column if not exists sermaye          numeric(18,2) not null default 0,
     add column if not exists ticaret_odasi    varchar(120) not null default '',
     add column if not exists oda_sicil_no     varchar(40)  not null default '';
 
