@@ -928,3 +928,8 @@ input.skt-gecmis {
 .numaralama-izgara .kagrup > h6 { font-size: 13px; color: var(--yazi) }
 .numaralama-izgara table.grid th { font-size: 12px; color: #24405e }
 .numaralama-bas .d.mini { padding: 2px 8px; font-size: 11px; line-height: 18px }
+
+/* Ikinci seviye sekme (e-Belge > Entegratör / e-Fatura / ...): ust seviyeyle
+   karismasin diye daha kucuk ve duz zeminde. */
+.katab.alt { background: transparent; border-bottom: 1px solid var(--cizgi2); padding: 0 4px }
+.katab.alt .kat { padding: 5px 11px; font-size: 11px; margin-top: 4px }
