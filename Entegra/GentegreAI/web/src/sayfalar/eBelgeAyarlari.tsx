@@ -32,8 +32,10 @@ import { hataMetni, type AyarSatiri, type ListeSatiri } from '../api/sozlesme';
  * bilgisi ve test ortami ayri, cunku ikisi TUM turler icin ortaktir.
  */
 const BOLUMLER = [
+  // Test ortami AYRI SEKME DEGIL (kullanici): Mükellef bilgisinin yanindaki
+  //   kutuda duruyor - ikisi birlikte "hangi kimlikle, hangi ortama" sorusunu
+  //   cevapliyor, ayri sekmelerde bakmak gerekiyordu.
   { anahtar: 'baglanti',  baslik: 'Entegratör' },
-  { anahtar: 'test',      baslik: 'Test Ortamı' },
   // Seri bilgileri belge turlerinin SOLUNDA (kullanici): once "hangi seriyle
   //   kesilecek", sonra tur bazli servis ayarlari.
   { anahtar: 'seri',      baslik: 'Seri Bilgileri' },
@@ -103,34 +105,43 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
       )}
 
       {bolum === 'baglanti' && (
-        <div className="kagrup">
-          <div className="alan-izgara tek-sutun ayar-formu">
-            {alan('ebelge.aktif', 'e-Belge kullanımda', { tip: 'mantik' })}
-            {alan('ebelge.entegrator', 'Entegratör', { tip: 'metin', genis: true })}
-            {alan('ebelge.vkn', 'Vergi / kimlik no', { tip: 'metin' })}
-            {alan('ebelge.kullanici', 'Kullanıcı', { tip: 'metin' })}
-            {alan('ebelge.sifre', 'Şifre', { tip: 'parola' })}
+        <>
+          <div className="kagrup">
+            <div className="alan-izgara tek-sutun ayar-formu">
+              {alan('ebelge.aktif', 'e-Belge kullanımda', { tip: 'mantik' })}
+              {alan('ebelge.entegrator', 'Entegratör', { tip: 'metin', genis: true })}
+            </div>
           </div>
-          <div className="not">
-            Şifre sunucuda <b>düz metin</b> saklanır; yalnızca ekranda gizlenir.
-            Bu hesabın e-Belge dışında bir yetkisi olmamalı.
-          </div>
-        </div>
-      )}
 
-      {bolum === 'test' && (
-        <div className="kagrup">
-          <div className="alan-izgara tek-sutun ayar-formu">
-            {/* Test aciksa belgeler GIB'e degil entegratorun test servisine gider. */}
-            {alan('ebelge.test_aktif', 'Test ortamı aktif', { tip: 'mantik' })}
-            {alan('ebelge.test_kullanici', 'Test kullanıcı', { tip: 'metin' })}
-            {alan('ebelge.test_sifre', 'Test şifre', { tip: 'parola' })}
+          {/* Mükellef ve Test Ortamı YAN YANA, esit hizada (kullanici):
+              "hangi kimlikle" ve "hangi ortama" birlikte okunur. */}
+          <div className="kasira">
+            <div className="kagrup">
+              <h6>Mükellef</h6>
+              <div className="alan-izgara tek-sutun ayar-formu">
+                {alan('ebelge.vkn', 'Vergi / kimlik no', { tip: 'metin' })}
+                {alan('ebelge.kullanici', 'Kullanıcı', { tip: 'metin' })}
+                {alan('ebelge.sifre', 'Şifre', { tip: 'parola' })}
+              </div>
+              <div className="not">
+                Şifre sunucuda <b>düz metin</b> saklanır; yalnızca ekranda gizlenir.
+              </div>
+            </div>
+
+            <div className="kagrup">
+              <h6>Test Ortamı</h6>
+              <div className="alan-izgara tek-sutun ayar-formu">
+                {/* Test aciksa belgeler GIB'e degil entegratorun test servisine gider. */}
+                {alan('ebelge.test_aktif', 'Test ortamı aktif', { tip: 'mantik' })}
+                {alan('ebelge.test_kullanici', 'Test kullanıcı', { tip: 'metin' })}
+                {alan('ebelge.test_sifre', 'Test şifre', { tip: 'parola' })}
+              </div>
+              <div className="not">
+                Test açıkken kesilen belgeler <b>resmî değildir</b> — GİB'e ulaşmaz.
+              </div>
+            </div>
           </div>
-          <div className="not">
-            Test açıkken kesilen belgeler <b>resmî değildir</b> — GİB'e ulaşmaz.
-            Canlıya geçerken bu kutuyu kapatmayı unutmayın.
-          </div>
-        </div>
+        </>
       )}
 
       {bolum === 'seri' && (
