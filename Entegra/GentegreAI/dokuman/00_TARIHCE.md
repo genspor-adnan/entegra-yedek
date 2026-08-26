@@ -3283,5 +3283,43 @@ kalanı) çevrimden geçiyor; gidiş-dönüş testle sabitlendi.
 Tarayıcıda uçtan uca test **yapılamadı**: sunucu nginx basic-auth arkasında ve
 Chrome otomasyonu bu profilde her sayfada "error page" veriyor.
 
+## Numaralama (26.08.2026, `db/152`)
+
+Kullanıcı: "Genel Ayarlar'da Numaralama sekmesi; dört grid — Satış Belgeleri,
+Alış Belgeleri, Tahsilat Türleri, Ödeme Türleri. Her satırda Tür + Başlama
+(tarih) + Ön Ek + Başlama No." ve "satırdaki tarihten sonra bu numaralama
+geçerli".
+
+**Model:** bir satır = (tür, şube, başlama tarihi). Belge kesilirken **belgenin
+tarihine** uyan en yeni satır seçilir — 1 Eylül'den itibaren `B-` serisi
+tanımlansa bile Ağustos tarihli belge eski seriyi korur. Geçmiş yeniden
+yazılmaz.
+
+**Başlama No iki bilgi taşır** (kullanıcı kararı): `00000100` hem nereden
+başlanacağını (100) hem kaç hane yazılacağını (8) söyler. İkisi de türetilmiş
+kolon — ayrıca "hane" sormak aynı bilgiyi iki kez sormak olurdu.
+
+**Sayaç şablona bağlı** (`|N<id>`): yeni şablon = yeni sayaç, önek değişince
+numara eski sayacın kaldığı yerden devam etmez; sayacın ilk değeri
+`başlangıç-1`, yani ilk numara tam olarak kullanıcının yazdığı sayıdır.
+Boşluksuzluk ve satır kilidi kuralları değişmedi (025 + 087).
+
+**Geriye uyum:** şablon tanımlanmamışsa eski davranış aynen sürer (belgede
+seri + hane, kasada `makbuz_seri`). Şablon opsiyoneldir.
+
+`fn_belge_no_uret` ve `fn_kasa_islem_no_uret` imzalarına tarih eklendi
+(sonda, varsayılanlı); ortak gövde `fn_numara_sirada`'ya çıkarıldı.
+Kesinleştirme/iptal fonksiyonları numara üretecini tarihsiz çağırıyordu —
+şablon seçimi yıl başına düşerdi; iki çağrıya işlem tarihi eklendi.
+
+**Düzeltme — "Bilinmeyen alan: satilan":** stok yön bayrakları (141) tabloya
+eklenmiş ama liste **kaynağına** eklenmemişti; kalem arama penceresi
+`satilan`/`alinan` ile süzdüğü için sipariş kartında ürün eklenemiyordu.
+Katalog filtre alanını kendi kolon listesinden doğruluyor — iki kolon
+`KaynakKatalogu.Stok`'a eklendi.
+
+Ayrıca `@simdi` varsayılanı tarih tipli alanlarda güne kırpılıyor:
+`input[type=date]` dakikalı değeri kabul etmediği için alan boş görünüyordu.
+
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet portföy aksiyonları (tahsile
 ver, ciro, karşılıksız), F6 kredi/kupon, F7 belge fişleme.

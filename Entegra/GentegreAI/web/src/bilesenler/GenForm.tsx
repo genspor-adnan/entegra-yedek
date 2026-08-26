@@ -148,7 +148,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, onKaydedildi, yerTutucuSe
           // "@simdi" DINAMIK varsayilan (151): kart o anki tarih+saatle acilir.
           //   Sunucu ayni isareti kayitta cozer - istemci saati bozuksa bile
           //   kaydedilen deger kurulus saatinden gelir.
-          baslangic[ad] = deger === '@simdi' ? yerelAnMetni(new Date()) : deger as Deger;
+          // TARIH alaninda gune kirpilir: input[type=date] dakikali degeri
+          //   kabul etmez, alan BOS gorunurdu.
+          const tamAn = yerelAnMetni(new Date());
+          const an = m.alanlar.find(a => a.ad === ad)?.tip === 'tarih'
+            ? tamAn.slice(0, 10) : tamAn;
+          baslangic[ad] = deger === '@simdi' ? an : deger as Deger;
         });
         if (yeniKayitVarsayilanlari) {
           Object.entries(yeniKayitVarsayilanlari).forEach(([ad, deger]) => { baslangic[ad] = deger });

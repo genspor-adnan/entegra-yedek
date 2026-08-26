@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
@@ -313,9 +313,12 @@ public sealed partial class BelgeDeposu
     private async Task NumaraVerAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, int tur, string seri, int? subeId, CancellationToken iptal)
     {
+        // Numara sablonu (152) BELGE TARIHINE gore secilir: "1 Eylul'den itibaren
+        //   B- serisi" denince Agustos tarihli belge eski seriyi korumali. Tarih
+        //   belgenin kendisinden okunur - cagiran ayrica tasimasin.
         await using var komut = new NpgsqlCommand("""
             update public.belge
-               set belge_no = public.fn_belge_no_uret(@p1, @p2, @p3)
+               set belge_no = public.fn_belge_no_uret(@p1, @p2, @p3, 9, belge_tarihi::date)
              where id = @p0 and coalesce(belge_no, '') = ''
             """, baglanti, islem);
         komut.Parameters.AddWithValue("p0", belgeId);

@@ -908,3 +908,19 @@ input.skt-gecmis {
 /* Marka (logo + ad) ana sayfaya goturur - imlec bunu belli etsin. */
 .marka-bag { cursor: pointer }
 .marka-bag:hover { opacity: .85 }
+
+/* ---------------------------------------------------- Numaralama (152) ---- */
+/* Dort grid: solda satis/alis belgeleri, sagda tahsilat/odeme turleri.
+   Dar ekranda tek sutuna duser - grid zaten kendi icinde yatay kayar. */
+.numaralama-izgara {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14px;
+  align-items: start;
+}
+@media (max-width: 1100px) { .numaralama-izgara { grid-template-columns: 1fr } }
+
+/* Baslik ve "Yeni" dugmesi ayni satirda. */
+.numaralama-bas { display: flex; align-items: center; justify-content: space-between; gap: 8px }
+.numaralama-bas h6 { margin: 0 }
+.numaralama-bas .d.mini { padding: 2px 8px; font-size: 11px; line-height: 18px }

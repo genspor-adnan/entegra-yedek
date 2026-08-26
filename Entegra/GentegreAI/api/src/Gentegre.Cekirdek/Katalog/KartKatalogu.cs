@@ -156,6 +156,12 @@ public static partial class KartKatalogu
         Ekle(Banka());
         Ekle(MasrafMerkezi());
         Ekle(HesapPlani());
+
+        // Numaralama (152): Genel Ayarlar > Numaralama ekranindaki dort grid.
+        Ekle(NumaraSatis());
+        Ekle(NumaraAlis());
+        Ekle(NumaraTahsilat());
+        Ekle(NumaraOdeme());
         Ekle(CekSenet());
         Ekle(Depo());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.

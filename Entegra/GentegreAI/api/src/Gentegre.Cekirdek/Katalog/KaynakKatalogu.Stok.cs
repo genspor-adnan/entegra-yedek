@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// Stok, depo ve stok belgesi listeleri.
@@ -54,6 +54,12 @@ public static partial class KaynakKatalogu
             // Birim KODU (gizli): secim pencerelerinden gelen satirda birimi
             //   yazabilmek icin gerekli - ad ile kod eslestirmek kirilgan olurdu.
             new("anaBirimKod","s.ana_birim","sayi",  "Birim Kodu", Hizalama: "orta", Varsayilan: false),
+            // YON BAYRAKLARI (141): satis belgesinde yalniz "satilan", alista
+            //   yalniz "alinan" stoklar aranir. Kolon KAYNAKTA yoksa arama
+            //   penceresi "Bilinmeyen alan: satilan" hatasi veriyordu - katalog
+            //   filtre alanini kendi kolon listesinden dogruluyor.
+            new("satilan", "s.satilan", "mantik", "Satilan", Hizalama: "orta", Varsayilan: false),
+            new("alinan",  "s.alinan",  "mantik", "Alinan",  Hizalama: "orta", Varsayilan: false),
             new("izlemeAdi",
                 "case s.izleme when 1 then 'Seri No' when 2 then 'Lot No' when 3 then 'SKT' " +
                 "when 4 then 'Karekod' when 5 then 'Lot No + SKT' when 6 then 'Seri + Lot' else 'Yok' end",

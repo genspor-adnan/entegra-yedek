@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
+import { NumaralamaSekmesi } from '../bilesenler/NumaralamaSekmesi';
 
 const SEKMELER = [
-  { anahtar: 'genel',    baslik: 'Genel' },
-  { anahtar: 'guvenlik', baslik: 'Güvenlik' },
+  { anahtar: 'genel',      baslik: 'Genel' },
+  { anahtar: 'numaralama', baslik: 'Numaralama' },
+  { anahtar: 'guvenlik',   baslik: 'Güvenlik' },
 ] as const;
 
 type Sekme = typeof SEKMELER[number]['anahtar'];
@@ -70,6 +72,9 @@ export function GenelAyarlar() {
               </div>
             </div>
           </>
+        ) : aktif === 'numaralama' ? (
+          // Belge / tahsilat / odeme numaralandirmasi (152) - dort grid.
+          <NumaralamaSekmesi />
         ) : (
           <>
             <div className="kagrup">

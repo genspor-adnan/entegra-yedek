@@ -97,6 +97,12 @@ public static partial class KaynakKatalogu
         Ekle(BankaListesi());
         Ekle(MasrafMerkezi());
         Ekle(HesapPlani());
+
+        // Numaralama (152): Genel Ayarlar > Numaralama ekranindaki dort grid.
+        Ekle(NumaraSatis());
+        Ekle(NumaraAlis());
+        Ekle(NumaraTahsilat());
+        Ekle(NumaraOdeme());
         Ekle(KasaIslemTuru());
         Ekle(Firsat());
         Ekle(HesapEkstre());
