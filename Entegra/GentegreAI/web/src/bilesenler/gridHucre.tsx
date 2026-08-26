@@ -56,7 +56,11 @@ const ROZET_SINIFI: Record<string, string> = {
   // e-Belge turleri (156): seri kurallari gridinde tur bir bakista ayirt
   //   edilsin - ucu de ayni renkteyken hangi satirin hangi belgeye ait oldugu
   //   ancak okunarak anlasiliyordu.
-  'e-Fatura': 'ok', 'e-Arşiv': 'bilgi', 'e-İrsaliye': 'uyari', 'e-SMM': 'gri',
+  'e-Fatura': 'bilgi', 'e-Arşiv': 'bilgi', 'e-İrsaliye': 'uyari', 'e-SMM': 'gri',
+  // HAZIRLANDI mavi/sari (henuz gonderilmedi), GONDERILDI yesil: belge
+  //   listesinde asama bir bakista ayrilsin (163/164).
+  'e-Fatura ✓': 'ok', 'e-Arşiv ✓': 'ok', 'e-İrsaliye ✓': 'ok',
+  'Bilinmiyor': 'hata',
 };
 
 export function rozetHucre(deger: unknown, kolon: KolonMeta) {

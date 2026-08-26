@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// Fatura / irsaliye / e-Belge listeleri ve belge donusumu.
@@ -56,7 +56,20 @@ public static partial class KaynakKatalogu
             new("matrah",        "b.matrah",         "para",  "Matrah",      Hizalama: "sag", Bicim: "#,##0.00"),
             new("kdvTutari",     "b.kdv_tutari",     "para",  "KDV",         Hizalama: "sag", Bicim: "#,##0.00"),
             new("genelToplam",   "b.genel_toplam",   "para",  "Genel Toplam",Hizalama: "sag", Bicim: "#,##0.00"),
-            new("efaturaDurum",  "b.efatura_durum",  "kod",   "e-Fatura",    Hizalama: "orta"),
+            // e-BELGE DURUMU ROZET: ham kod (0/1/11/51...) listede hicbir sey
+            //   anlatmiyordu. Metin hem TURU hem ASAMAYI soyler; gonderilmis
+            //   belge "✓" ile ve yesil rozetle ayrilir (163/164 kodlari).
+            new("efaturaDurum",
+                """
+                case coalesce(b.efatura_durum, 0)
+                     when 0  then ''
+                     when 1  then 'e-Fatura'    when 2  then 'e-Fatura ✓'
+                     when 11 then 'e-Arşiv'     when 12 then 'e-Arşiv ✓'
+                     when 51 then 'e-İrsaliye'  when 52 then 'e-İrsaliye ✓'
+                     else 'Bilinmiyor' end
+                """,                             "metin", "e-Fatura", Hizalama: "orta",
+                                                 Bicim: "rozet", Genislik: 110,
+                                                 Siralanabilir: false, Filtrelenebilir: false),
             new("acikKapali",    "b.acik_kapali",    "kod",   "Acik/Kapali", Hizalama: "orta", Varsayilan: false),
             new("durum",         "b.durum",          "kod",   "Durum",       Hizalama: "orta"),
             new("vadeGun",       "b.vade_gun",       "sayi",  "Vade",        Hizalama: "sag", Varsayilan: false),
