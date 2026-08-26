@@ -52,12 +52,6 @@ export function KasaAyarlar() {
                        etiket="Tahsilat / ödeme kilitlenme gün sayısı"
                        tip="sayi"
                        ayarlar={ayarlar} onYaz={yaz} />
-            <div className="not">
-              Gerçekleşmiş tahsilat/ödeme, işlem tarihinden bu kadar gün sonra
-              kilitlenir ve düzeltilemez; düzeltme yerine iptal edilip yeniden
-              girilir. <b>0</b> = düzeltme tamamen kapalı, <b>-1</b> = süre sınırı yok
-              (kapanmış muhasebe dönemi yine kilitlidir).
-            </div>
           </div>
         </div>
         )

@@ -87,10 +87,13 @@ export function AyarAlani({ anahtar, etiket, tip = 'sayi', secenekler, ayarlar, 
   if (tip === 'mantik') {
     return (
       <label className="alan ayar-onay">
+        {/* (?) EN SOLDA (kullanici): isaretler kutunun/editin SOLUNDA hizali
+            durur - saga koyulunca uzun etiketlerde saga savruluyor ve alanlar
+            arasinda dikey hizasi kayboluyordu. */}
+        {yardim}
         <input type="checkbox" checked={deger === '1'}
                onChange={e => { setTaslak(null); void onYaz(anahtar, e.target.checked ? '1' : '0') }} />
         <span className="etiket">{etiket}</span>
-        {yardim}
       </label>
     );
   }
@@ -99,6 +102,7 @@ export function AyarAlani({ anahtar, etiket, tip = 'sayi', secenekler, ayarlar, 
     <label className="alan">
       <span className="etiket">{etiket}</span>
       <span className="ikili">
+        {yardim}
         {tip === 'secenek' ? (
           <select value={deger}
                   onChange={e => { setTaslak(null); void onYaz(anahtar, e.target.value) }}>
@@ -123,7 +127,6 @@ export function AyarAlani({ anahtar, etiket, tip = 'sayi', secenekler, ayarlar, 
                  onBlur={e => bitir(e.target.value)}
                  onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />
         )}
-        {yardim}
       </span>
     </label>
   );

@@ -60,11 +60,6 @@ export function BelgeAyarlar({ yon }: { yon: 'satis' | 'alis' }) {
               {alan(`belge.${yon}.vade_gun`, 'Varsayılan vade (gün)', { tip: 'sayi' })}
               {alan(`belge.${yon}.varsayilan_seri`, 'Varsayılan seri', { tip: 'metin' })}
             </div>
-            <div className="not">
-              Numaralandırma (ön ek, başlangıç numarası, hane) burada değil —
-              <b> Genel Ayarlar › Belge No</b> ekranında, belge türü bazında
-              tanımlanır.
-            </div>
           </div>
         ) : (
           // Delphi'deki "Opsiyonlar > Fatura > E-Belge" sekmesinin karsiligi.
