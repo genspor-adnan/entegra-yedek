@@ -113,6 +113,7 @@ export function GenSagTus({ aksiyonlar, calistir, konum, onKapat }: SagTusProps)
   }, [konum, onKapat]);
 
   if (!konum) return null;
+  // Ayrac satirlari ("*.ayrac*") menude CIZGI olarak cizilir - tiklanamaz.
   const gorunen = aksiyonlar.filter(a => hedefte(a, 'sagtus'));
   if (gorunen.length === 0) return null;
 

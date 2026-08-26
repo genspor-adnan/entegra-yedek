@@ -147,6 +147,15 @@ input, select { font: inherit; color: inherit }
   height: 27px; border: 1px solid var(--cizgi); border-radius: var(--r); padding: 0 10px;
   font-size: 11.5px; background: var(--yuz); color: var(--yazi); width: 300px;
 }
+/* e-Belge kutusu (179): Tümü/Sık/Son cipleriyle AYNI hizada ve boyutta -
+   aksiyon kutusundan daha kucuk, cip seridine ait gorunsun. */
+.cipsag .ebk {
+  height: 22px; border: 1px solid var(--cizgi); border-radius: 11px;
+  padding: 0 10px; font-size: 11.5px; background: var(--yuz); color: var(--yazi);
+  width: 190px;
+}
+.cipsag .ebk:hover { background: var(--yuz2) }
+
 .cipsag .uygd {
   height: 27px; padding: 0 13px; border-radius: var(--r); border: 1px solid #2f6db3;
   background: linear-gradient(#4d8fd6, #2f6db3); color: #fff; font-size: 11.5px; font-weight: 700; cursor: pointer;

@@ -578,7 +578,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
               tetiklenmesin. Ayrac satirlari secilemez cizgidir. */}
           {aksiyonEkrani && ebelgeKombo.length > 0 && (
             <select
-              className="aksk"
+              className="ebk"
               value={ebelgeSecim}
               onChange={e => {
                 const kod = e.target.value;
