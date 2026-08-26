@@ -91,6 +91,16 @@ export interface Kosul {
 
 export interface Siralama { alan: string; yon: 'asc' | 'desc' }
 
+/** Belgenin e-Belge gecmisi satiri (178). */
+export interface EBelgeMesaji {
+  sira: number;
+  tarih: string | null;
+  olay: string;
+  durum: string;
+  kod: string;
+  aciklama: string;
+}
+
 export interface ListeIstegi {
   sayfa?: number;
   boyut?: number;

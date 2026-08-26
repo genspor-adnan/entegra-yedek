@@ -10,6 +10,7 @@ import {
   type StokDurumYaniti, type StokHareketYaniti, type StokLotSatiri, type PaketIcerikSatiri,
   type AyarSatiri, type YardimKaydi,
   type PanelYaniti,
+  type EBelgeMesaji,
 } from './sozlesme';
 
 const TABAN = import.meta.env.VITE_API ?? 'http://localhost:5180';
@@ -276,6 +277,18 @@ export const api = {
    */
   belgeEBelgeGonder: (id: number) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/ebelge-gonder`, {}),
+
+  /** Onizleme HTML'i (178) - gonderim gerekmez. */
+  belgeEBelgeOnizle: (id: number) =>
+    istek<{ html: string }>(`/api/belge/${id}/ebelge-onizle`),
+
+  /** Gonderim govdesi (XML Kaydet): bicim 1 JSON / 2 UBL-XML. */
+  belgeEBelgeGovde: (id: number) =>
+    istek<{ bicim: number; govde: string; dosyaAdi: string }>(`/api/belge/${id}/ebelge-govde`),
+
+  /** e-Belge gecmisi: hazirlama, gonderim, GIB yaniti (178). */
+  belgeEBelgeMesajlar: (id: number) =>
+    istek<{ mesajlar: EBelgeMesaji[] }>(`/api/belge/${id}/ebelge-mesajlar`),
 
   /** e-Belgeyi geri al (164): kayit silinir, belge yeniden hazirlanabilir. */
   belgeEBelgeSifirla: (id: number) =>

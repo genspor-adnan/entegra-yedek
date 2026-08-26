@@ -388,4 +388,84 @@ public sealed partial class BelgeDeposu
         while (await o.ReadAsync(iptal)) liste.Add(Satir(o));
         return liste;
     }
+
+    /// <summary>Onizleme HTML'i (178). Belge hazirlanmamis olsa da uretilir.</summary>
+    public async Task<string> EBelgeHtmlAsync(int belgeId, CancellationToken iptal = default)
+        => await IsKuraliCevirAsync(async () =>
+        {
+            await using var baglanti = await _veri.AcAsync(iptal);
+            await using var komut = new NpgsqlCommand(
+                "select public.fn_ebelge_html(@p0)", baglanti);
+            komut.Parameters.AddWithValue("p0", belgeId);
+            return (await komut.ExecuteScalarAsync(iptal))?.ToString() ?? "";
+        });
+
+    /// <summary>
+    /// Gonderim govdesi + onerilen dosya adi. Bicim 1 JSON / 2 UBL-XML
+    /// (entegratore gore, 167) - dosya uzantisi buna gore secilir.
+    /// </summary>
+    public async Task<(short Bicim, string Govde, string DosyaAdi)> EBelgeGovdeAsync(
+        int belgeId, CancellationToken iptal = default)
+        => await IsKuraliCevirAsync(async () =>
+        {
+            await using var baglanti = await _veri.AcAsync(iptal);
+            await using var komut = new NpgsqlCommand("""
+                select g.bicim, g.govde::text,
+                       coalesce(nullif(e.belge_no, ''), 'belge-' || @p0::text)
+                  from public.fn_ebelge_gonderim_govdesi(@p0) g
+                  left join lateral (select e2.belge_no from public.e_belge e2
+                                      where e2.belge_id = @p0 order by e2.id desc limit 1) e on true
+                """, baglanti);
+            komut.Parameters.AddWithValue("p0", belgeId);
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            if (!await o.ReadAsync(iptal))
+                throw GentegreHatasi.IsKurali("Gönderim gövdesi üretilemedi.");
+            return (o.GetInt16(0), o.GetString(1), o.GetString(2));
+        });
+
+    public sealed record EBelgeMesaji(int Sira, DateTime? Tarih, string Olay,
+                                      string Durum, string Kod, string Aciklama);
+
+    /// <summary>Belgenin e-Belge gecmisi: hazirlama, gonderim, GIB yaniti (178).</summary>
+    public async Task<IReadOnlyList<EBelgeMesaji>> EBelgeMesajlarAsync(
+        int belgeId, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = new NpgsqlCommand(
+            "select sira, tarih, olay, durum, kod, aciklama from public.fn_ebelge_mesajlar(@p0)",
+            baglanti);
+        komut.Parameters.AddWithValue("p0", belgeId);
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        var liste = new List<EBelgeMesaji>();
+        while (await o.ReadAsync(iptal))
+            liste.Add(new EBelgeMesaji(
+                o.GetInt32(0),
+                o.IsDBNull(1) ? null : o.GetDateTime(1),
+                o.IsDBNull(2) ? "" : o.GetString(2),
+                o.IsDBNull(3) ? "" : o.GetString(3),
+                o.IsDBNull(4) ? "" : o.GetString(4),
+                o.IsDBNull(5) ? "" : o.GetString(5)));
+        return liste;
+    }
+
+    /// <summary>
+    /// Bu subede e-Belge KULLANILIYOR mu: ana salter (ebelge.aktif) acik VE
+    /// sube (ya da kimligini kullandigi merkez) en az bir turde mukellef.
+    /// Menu gorunurlugu buna bagli - mukellef olmayan firmada e-Belge maddeleri
+    /// hic cizilmez.
+    /// </summary>
+    public async Task<bool> EBelgeKullanimdaAsync(int? subeId, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = new NpgsqlCommand("""
+            select coalesce((select r.deger from public.referans r
+                              where r.anahtar = 'ebelge.aktif'), '0') = '1'
+               and (public.fn_ebelge_mukellef_mi(@p0, 1)
+                 or public.fn_ebelge_mukellef_mi(@p0, 2)
+                 or public.fn_ebelge_mukellef_mi(@p0, 7)
+                 or public.fn_ebelge_mukellef_mi(@p0, 8))
+            """, baglanti);
+        komut.Parameters.AddWithValue("p0", (object?)subeId ?? DBNull.Value);
+        return await komut.ExecuteScalarAsync(iptal) is bool b && b;
+    }
 }

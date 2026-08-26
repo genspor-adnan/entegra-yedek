@@ -259,18 +259,33 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 35),
                 new("belge.iptal", "Belgeyi Iptal Et", "belge", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "belge.iptal", KayitGerekir: true, Sira: 40),
-                // HAZIRLA once, GONDER sonra (Delphi menu sirasiyla ayni):
-                //   hazirlama numara/seri verir ve belgeyi kuyruga alir.
-                new("ebelge.hazirla", "e-Fatura Hazırla", "ebelge", Hedef: "sagtus,palet",
+                // e-BELGE MENUSU (Delphi menu sirasiyla ayni, kullanici istegi):
+                //   Hazırla · Ön İzle · Gönder | Seri Değiştir · Hazırı Geri Al |
+                //   PDF / HTML / XML Kaydet | Mesaj Geçmişi.
+                //   AYRAC: kodu "ebelge.ayrac*" olan satirlar - combo'da cizgi
+                //   olarak cizilir, secilemez. Sira degerleri bosluklu ki araya
+                //   yeni adim girerse numaralar yeniden yazilmasin.
+                new("ebelge.hazirla", "Hazırla", "ebelge", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 41),
+                new("ebelge.onizle", "Ön İzle", "ebelge", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 42),
+                new("ebelge.gonder", "Gönder", "ebelge", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 43),
+                new("ebelge.ayrac1", "─", "ebelge", Hedef: "palet", Sira: 44),
+                new("ebelge.seri", "Seri Değiştir", "ebelge", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 45),
-                new("ebelge.gonder", "e-Fatura Gonder", "ebelge", Hedef: "sagtus,palet",
-                    AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 50),
-                // Delphi menusunun oteki adimlari (MenuSeriDegistir / MenuSifirla).
-                //   Onizle ve HTML/XML/PDF kaydet UBL istiyor - o gelince eklenir.
-                new("ebelge.seri", "e-Belge Seri Değiştir", "ebelge", Hedef: "sagtus,palet",
-                    AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 55),
-                new("ebelge.sifirla", "e-Belge Sıfırla", "ebelge", Hedef: "sagtus,palet",
-                    AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 60),
+                new("ebelge.sifirla", "Hazırı Geri Al", "ebelge", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 46),
+                new("ebelge.ayrac2", "─", "ebelge", Hedef: "palet", Sira: 47),
+                new("ebelge.pdf", "PDF Kaydet", "ebelge", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", KayitGerekir: true, Sira: 48),
+                new("ebelge.html", "HTML Kaydet", "ebelge", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", KayitGerekir: true, Sira: 49),
+                new("ebelge.xml", "XML Kaydet", "ebelge", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", KayitGerekir: true, Sira: 50),
+                new("ebelge.ayrac3", "─", "ebelge", Hedef: "palet", Sira: 51),
+                new("ebelge.mesajlar", "Mesaj Geçmişini Göster", "ebelge", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 52),
                 new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },

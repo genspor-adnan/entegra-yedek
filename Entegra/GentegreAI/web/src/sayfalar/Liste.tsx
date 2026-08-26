@@ -2,9 +2,10 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
-import { type Kosul, type ListeSatiri, hataMetni } from '../api/sozlesme';
+import { type EBelgeMesaji, type Kosul, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
+import { Modal } from '../bilesenler/Modal';
 import { BelgeKarti } from './BelgeKarti';
 import { KasaIslemKarti } from './KasaIslemKarti';
 import { KASA_ARAC_MENUSU, LISTELER, type ListeTanimi } from './listeTanimlari';
@@ -19,6 +20,21 @@ export type { ListeTanimi };
  * sunucudan geldigi icin ekran basina kod yazmaya gerek yok — yeni bir liste
  * eklemek katalogda kaynak tanimlamak + burada bir satir demek.
  */
+/**
+ * Metni dosya olarak indirir. Blob URL kisa omurlu - birakilmazsa sekme
+ * kapanana kadar bellekte kalir.
+ */
+function dosyaIndir(icerik: string, ad: string, tip: string) {
+  const url = URL.createObjectURL(new Blob([icerik], { type: tip }));
+  const bag = document.createElement('a');
+  bag.href = url;
+  bag.download = ad;
+  document.body.appendChild(bag);
+  bag.click();
+  bag.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
 export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const git = useNavigate();
   const { id } = useParams();
@@ -45,6 +61,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   //   az once ekledigi kaydi listede otomatik en ustte gorsun.
   const [odaklaSonEklenen, setOdaklaSonEklenen] = useState(0);
   // Donusum modali (F8): siparis/irsaliye satirlarindan yeni belge uretir.
+  /** Mesaj gecmisi penceresi (178) - null iken kapali. */
+  const [eBelgeMesajlari, setEBelgeMesajlari] =
+    useState<{ belgeNo: string; satirlar: EBelgeMesaji[] } | null>(null);
   const [donusum, setDonusum] = useState<{ belgeId: number; belgeTur: number } | null>(null);
   // Belge (fatura/siparis) karti da MODAL: liste arkada kalir, rota degismez.
   const [yeniBelgeTuru, setYeniBelgeTuru] = useState<number | null>(null);
@@ -164,6 +183,56 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
             const y = await api.belgeEBelgeHazirla(Number(satir.id));
             alert((y.uyarilar ?? []).join(' • ') || 'e-Belge hazırlandı.');
             setYenile(t => t + 1);
+          } catch (h) { alert(hataMetni(h)) }
+          return;
+        }
+        // ON IZLE (178): belgenin HTML gorunumu yeni sekmede acilir. Gonderim
+        //   gerekmez - "ne gidecek" gondermeden gorulsun. Resmi goruntu
+        //   entegratordeki XSLT ile uretilir, bu onizlemedir.
+        case 'ebelge.onizle':
+        case 'ebelge.pdf': {
+          if (!satir) return;
+          try {
+            const y = await api.belgeEBelgeOnizle(Number(satir.id));
+            const pencere = window.open('', '_blank');
+            if (!pencere) { alert('Tarayıcı yeni sekmeyi engelledi; açılır pencere iznini verin.'); return }
+            pencere.document.write(y.html);
+            pencere.document.close();
+            // PDF: ayri bir PDF motoru yerine tarayicinin yazdirma penceresi -
+            //   kullanici "PDF olarak kaydet"i oradan secer.
+            if (kod === 'ebelge.pdf') pencere.setTimeout(() => pencere.print(), 400);
+          } catch (h) { alert(hataMetni(h)) }
+          return;
+        }
+        // HTML KAYDET: ayni onizleme icerigi dosya olarak iner.
+        case 'ebelge.html': {
+          if (!satir) return;
+          try {
+            const y = await api.belgeEBelgeOnizle(Number(satir.id));
+            const ad = String(satir.belgeNo ?? satir.id);
+            dosyaIndir(y.html, `${ad}.html`, 'text/html;charset=utf-8');
+          } catch (h) { alert(hataMetni(h)) }
+          return;
+        }
+        // XML KAYDET: entegratore giden GOVDE. izibiz JSON tabanli oldugu icin
+        //   elimizdeki resmi icerik gonderim govdesidir - UBL'i entegrator kurar,
+        //   uzanti da bicime gore secilir (bicim 2 = UBL-XML uretecleri icin).
+        case 'ebelge.xml': {
+          if (!satir) return;
+          try {
+            const y = await api.belgeEBelgeGovde(Number(satir.id));
+            const uzanti = y.bicim === 2 ? 'xml' : 'json';
+            dosyaIndir(y.govde, `${y.dosyaAdi}.${uzanti}`,
+                       y.bicim === 2 ? 'application/xml' : 'application/json');
+          } catch (h) { alert(hataMetni(h)) }
+          return;
+        }
+        // MESAJ GECMISI: hazirlama, gonderim ve GIB yanitlari tek pencerede.
+        case 'ebelge.mesajlar': {
+          if (!satir) return;
+          try {
+            const y = await api.belgeEBelgeMesajlar(Number(satir.id));
+            setEBelgeMesajlari({ belgeNo: String(satir.belgeNo ?? satir.id), satirlar: y.mesajlar });
           } catch (h) { alert(hataMetni(h)) }
           return;
         }
@@ -431,6 +500,45 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         onKapat={() => setYeniBelgeTuru(null)}
         onKaydedildi={() => setYenile(t => t + 1)}
       />
+    )}
+
+    {/* MESAJ GECMISI (178): belgenin e-Belge yolculugu - hazirlama, gonderim
+        denemeleri ve GIB yanitlari tek pencerede. */}
+    {eBelgeMesajlari && (
+      <Modal
+        baslik={`e-Belge Mesaj Geçmişi — ${eBelgeMesajlari.belgeNo}`}
+        onKapat={() => setEBelgeMesajlari(null)}
+        alt={<button className="d kapat-dugmesi"
+                     onClick={() => setEBelgeMesajlari(null)}>Kapat</button>}
+      >
+        <div className="kagrup">
+          {eBelgeMesajlari.satirlar.length === 0 ? (
+            <div className="not" style={{ padding: 10 }}>
+              Bu belge için henüz e-Belge işlemi yapılmamış.
+            </div>
+          ) : (
+            <table className="grid">
+              <thead>
+                <tr><th style={{ width: 40 }}>#</th><th style={{ width: 140 }}>Tarih</th>
+                    <th>Olay</th><th>Durum</th><th style={{ width: 90 }}>Kod</th>
+                    <th>Açıklama</th></tr>
+              </thead>
+              <tbody>
+                {eBelgeMesajlari.satirlar.map(m => (
+                  <tr key={m.sira}>
+                    <td>{m.sira}</td>
+                    <td>{m.tarih ? new Date(m.tarih).toLocaleString('tr-TR') : '—'}</td>
+                    <td>{m.olay}</td>
+                    <td>{m.durum}</td>
+                    <td>{m.kod}</td>
+                    <td>{m.aciklama}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </Modal>
     )}
 
     {donusum && (

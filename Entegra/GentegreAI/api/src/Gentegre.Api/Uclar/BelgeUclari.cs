@@ -178,6 +178,43 @@ public static class BelgeUclari
             });
         });
 
+        // GET /api/belge/{id}/ebelge-onizle - onizleme HTML'i (178).
+        //   Gonderim GEREKMEZ: kullanici "ne gidecek" sorusunu gondermeden
+        //   gormek istiyor. Resmi goruntu entegratordeki XSLT ile uretilir.
+        grup.MapGet("/{id:int}/ebelge-onizle", async (
+            int id, BaglamCozucu cozucu, BelgeDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+            var html = await depo.EBelgeHtmlAsync(id, iptal);
+            return Results.Ok(new { html, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // GET /api/belge/{id}/ebelge-govde - gonderilecek/gonderilen GOVDE.
+        //   "XML Kaydet" bunu kullanir: izibiz JSON tabanli calistigi icin
+        //   elimizdeki resmi icerik gonderim govdesidir (UBL'i entegrator kurar).
+        grup.MapGet("/{id:int}/ebelge-govde", async (
+            int id, BaglamCozucu cozucu, BelgeDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+            var (bicim, govde, ad) = await depo.EBelgeGovdeAsync(id, iptal);
+            return Results.Ok(new { bicim, govde, dosyaAdi = ad, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // GET /api/belge/{id}/ebelge-mesajlar - hazirlama/gonderim/GIB gecmisi (178).
+        grup.MapGet("/{id:int}/ebelge-mesajlar", async (
+            int id, BaglamCozucu cozucu, BelgeDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+            return Results.Ok(new { mesajlar = await depo.EBelgeMesajlarAsync(id, iptal),
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
         // POST /api/belge/{id}/ebelge-gonder - hazirlanmis belgeyi entegratore yolla
         //   Yetki: DEGISTIR yetmez - gonderim GERI ALINAMAZ (GIB'e giden belge
         //   iptal edilmez, yalniz iade faturasiyla duzeltilir).
