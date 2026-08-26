@@ -165,6 +165,7 @@ public static partial class KartKatalogu
         Ekle(EBelgeSeri());
         Ekle(CekSenet());
         Ekle(Depo());
+        Ekle(Hizmet());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
 

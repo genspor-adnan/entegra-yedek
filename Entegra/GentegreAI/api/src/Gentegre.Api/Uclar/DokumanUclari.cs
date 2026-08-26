@@ -132,6 +132,8 @@ public static class DokumanUclari
     {
         "cari" or "kisi" or "personel" or "hasta" => "taraf",
         "stok" => "stok",
+        // e-Belge XSLT sablonlari (160): kart degil ama ayni depoyu kullanir.
+        "ebelge-xslt" => "ebelge-xslt",
         _ => throw new InvalidOperationException($"Bilinmeyen kart: {kartAdi}"),
     };
 
@@ -140,6 +142,7 @@ public static class DokumanUclari
     {
         "kisi" => "cari",
         "hasta" => "personel",
+        "ebelge-xslt" => "ebelge_xslt",
         _ => kartAdi
     };
 

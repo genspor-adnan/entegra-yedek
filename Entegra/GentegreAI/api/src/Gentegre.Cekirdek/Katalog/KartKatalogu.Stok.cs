@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// Stok ve depo kartlari (fiyat / barkod / ÜTS / paket detaylari dahil).
@@ -177,6 +177,62 @@ public static partial class KartKatalogu
     // Stok Ayarlari ekraninin "Depolar" sekmesi. Varsayilan depo TEKTIR
     //   (ux_depo_varsayilan); ikinci bir depo varsayilan yapilinca eskisini
     //   trg_depo_varsayilan_tek (db/090) birakir - kart ozel kod tasimaz.
+    /// <summary>
+    /// HIZMET KARTI - belgede satilan hizmet kalemi (nakliye, montaj, danismanlik).
+    /// Stok kartinin sade hali: depo/izleme/ambalaj yok, fiyat listesi var.
+    ///
+    /// `grubu` ve `tur` kolonlari kartta YOK: ikisi de bugun her kayitta 0 ve
+    /// kod listeleri tanimli degil - bos bir secim kutusu gostermek yerine
+    /// listeler geldiginde eklenir.
+    /// </summary>
+    private static KartTanimi Hizmet() => new(
+        Ad: "hizmet",
+        YetkiKodu: "hizmet",
+        Tablo: "public.hizmet",
+        LogTabloId: 921,
+        SubeKolonu: "sube_id",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+            { ["durum"] = (short)1, ["kdv"] = (short)20, ["birim"] = (short)51 },
+        Alanlar: new KartAlani[]
+        {
+            new("id",       "id",       "sayi",  Yazilabilir: false),
+            new("kod",      "kod",      "metin", EnFazlaUzunluk: 40, Baslik: "Kod", Grup: "Genel"),
+            new("ad",       "ad",       "metin", Zorunlu: true, EnFazlaUzunluk: 200,
+                Baslik: "Hizmet Adı", Grup: "Genel"),
+            new("kdv",      "kdv",      "sayi",  Baslik: "KDV %", Grup: "Genel"),
+            // Hizmet birimi stogunkiyle AYNI listeden (51 Adet, 57 Kg...).
+            new("birim",    "birim",    "kod",   KodListesi: "stok.ana_birim",
+                Baslik: "Birim", Grup: "Genel"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 80,
+                Baslik: "Açıklama", Grup: "Genel"),
+            new("durum",    "durum",    "kod",   SabitKodlar: DurumKodlari,
+                Baslik: "Durum", Grup: "Genel"),
+
+            new("muhKodu",  "muh_kodu",  "metin", EnFazlaUzunluk: 20,
+                Baslik: "Muhasebe Kodu", Grup: "Genel", AltGrup: "Kodlar"),
+            new("ozelKod",  "ozel_kod",  "metin", EnFazlaUzunluk: 40,
+                Baslik: "Özel Kod", Grup: "Genel", AltGrup: "Kodlar"),
+            new("barkod",   "barkod",    "metin", EnFazlaUzunluk: 30,
+                Baslik: "Barkod", Grup: "Genel", AltGrup: "Kodlar")
+        },
+        Detaylar: new[]
+        {
+            // Hizmette satis/alis ayrimi yok - tek fiyat listesi (stok_fiyat deseni).
+            new DetayTanimi("fiyatlar", "public.hizmet_fiyat", "hizmet_id", new KartAlani[]
+            {
+                new("id",         "id",          "sayi", Yazilabilir: false),
+                new("fiyatAdi",   "fiyat_adi",   "kod",  Baslik: "Fiyat Adı"),
+                new("fiyat",      "fiyat",       "para", Zorunlu: true, Baslik: "Fiyat"),
+                new("dovizCinsi", "doviz_cinsi", "kod",  Baslik: "Döviz"),
+                new("kdvDurum",   "kdv_durum",   "kod",  Baslik: "KDV Durumu")
+            }, Sirala: "fiyat_adi, id", SubeKolonu: null, LogTabloId: 922, Baslik: "Fiyatlar")
+        },
+        SilmeEngelleri: new[]
+        {
+            new SilmeEngeli("public.belge_satir", "hizmet_id",
+                            "Bu hizmet belgelerde kullanılmış, silinemez.")
+        });
+
     private static KartTanimi Depo() => new(
         Ad: "depo",
         YetkiKodu: "stok",

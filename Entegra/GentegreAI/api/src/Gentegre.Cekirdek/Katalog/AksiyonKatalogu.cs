@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Yetki;
+﻿using Gentegre.Cekirdek.Yetki;
 
 namespace Gentegre.Cekirdek.Katalog;
 
@@ -217,6 +217,16 @@ public static class AksiyonKatalogu
             },
 
             // Stok Ayarlari > Depolar sekmesi.
+            ["hizmet-liste"] = new AksiyonTanimi[]
+            {
+                new("hizmet.yeni",    "＋ Ekle",   "hizmet", Kisayol: "Ctrl+N",
+                    KaynakKodu: "hizmet", Islem: Islem.Ekle, Sira: 10),
+                new("hizmet.duzenle", "✎ Düzenle", "hizmet", Kisayol: "Enter",
+                    KaynakKodu: "hizmet", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("hizmet.sil",     "🗑 Sil",    "hizmet", Kisayol: "Del",
+                    KaynakKodu: "hizmet", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+            },
+
             ["depo-liste"] = new AksiyonTanimi[]
             {
                 new("depo.yeni",    "＋ Ekle",   "depo", Kisayol: "Ctrl+N",

@@ -17,7 +17,9 @@ public sealed record DokumanIcerik(byte[] Veri, string ContentType, string Ad);
 public sealed class DokumanDeposu
 {
     private static readonly HashSet<string> KaynakBeyazListe =
-        new(StringComparer.Ordinal) { "taraf", "stok" };
+        // "ebelge-xslt" (160): kart degil, e-Belge goruntuleme sablonlari -
+        //   kaynak_id belge turu kodudur (1 e-Fatura, 2 e-Arsiv...).
+        new(StringComparer.Ordinal) { "taraf", "stok", "ebelge-xslt" };
 
     private static readonly HashSet<string> IcerikTipiBeyazListe = new(StringComparer.OrdinalIgnoreCase)
     {

@@ -312,6 +312,7 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
       {xsltForm && (
         <Modal
           baslik="XSLT Şablonu Ekle"
+          dar
           onKapat={() => setXsltForm(null)}
           alt={<>
             <button className="d kapat-dugmesi" onClick={() => setXsltForm(null)}>Vazgeç</button>
@@ -355,10 +356,6 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
                        onChange={e => setXsltForm({ ...xsltForm, varsayilan: e.target.checked })} />
                 <span className="etiket">Bu tür ve yön için varsayılan olsun</span>
               </label>
-            </div>
-            <div className="not">
-              Dosya: <b>{xsltForm.dosya.name}</b> · {Math.round(xsltForm.dosya.size / 1024)} KB.
-              Adı değiştirirseniz satır o adla eklenir.
             </div>
           </div>
         </Modal>
