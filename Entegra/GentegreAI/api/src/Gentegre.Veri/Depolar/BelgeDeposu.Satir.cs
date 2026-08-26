@@ -18,6 +18,64 @@ namespace Gentegre.Veri.Depolar;
 public sealed partial class BelgeDeposu
 {
     /// <summary>
+    /// e-BELGE SIFIRLA (164) - Delphi `MenuSifirla`. Hazirlanmis belgeyi geri
+    /// alir; GONDERILMIS belgede calismaz (numarasi GIB'e gitmistir).
+    /// </summary>
+    public async Task<string> EBelgeSifirlaAsync(int belgeId, YazmaBaglami baglam,
+        CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+        await using var komut = new NpgsqlCommand(
+            "select public.fn_ebelge_sifirla(@p0, @p1)", baglanti, islem);
+        komut.Parameters.AddWithValue("p0", belgeId);
+        komut.Parameters.AddWithValue("p1", baglam.KullaniciId);
+        var mesaj = (await komut.ExecuteScalarAsync(iptal))?.ToString() ?? "";
+
+        await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloBelge, belgeId,
+            baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+            new Dictionary<string, string> { ["eBelgeSifirla"] = mesaj }, iptal: iptal);
+
+        await islem.CommitAsync(iptal);
+        return mesaj;
+    }
+
+    /// <summary>
+    /// e-BELGE SERI DEGISTIR (164) - Delphi `MenuSeriDegistir`. Seri
+    /// verilmezse siradaki kurala gecer; yeni numara uretilir.
+    /// </summary>
+    public async Task<(string Numara, string Seri)> EBelgeSeriDegistirAsync(int belgeId,
+        string? seri, YazmaBaglami baglam, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+        await using var komut = new NpgsqlCommand(
+            "select * from public.fn_ebelge_seri_degistir(@p0, @p1, @p2)", baglanti, islem);
+        komut.Parameters.AddWithValue("p0", belgeId);
+        komut.Parameters.AddWithValue("p1", baglam.KullaniciId);
+        komut.Parameters.AddWithValue("p2",
+            string.IsNullOrWhiteSpace(seri) ? DBNull.Value : seri.Trim());
+
+        string no, yeniSeri;
+        await using (var okuyucu = await komut.ExecuteReaderAsync(iptal))
+        {
+            if (!await okuyucu.ReadAsync(iptal))
+                throw GentegreHatasi.IsKurali("Seri değiştirilemedi.");
+            no = okuyucu.GetString(0);
+            yeniSeri = okuyucu.GetString(1);
+        }
+
+        await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloBelge, belgeId,
+            baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+            new Dictionary<string, string> { ["eBelgeSeri"] = $"{yeniSeri} / {no}" }, iptal: iptal);
+
+        await islem.CommitAsync(iptal);
+        return (no, yeniSeri);
+    }
+
+    /// <summary>
     /// e-BELGE HAZIRLA (163) - Delphi `TEBelgeOlusturucu.MenuHazirla` karsiligi.
     ///
     /// Is kurallari SUNUCUDA (fn_ebelge_hazirla): dogrulama, belge turu karari

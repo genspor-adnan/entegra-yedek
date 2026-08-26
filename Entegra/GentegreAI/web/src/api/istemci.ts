@@ -270,6 +270,14 @@ export const api = {
   belgeEBelgeHazirla: (id: number) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/ebelge-hazirla`, {}),
 
+  /** e-Belgeyi geri al (164): kayit silinir, belge yeniden hazirlanabilir. */
+  belgeEBelgeSifirla: (id: number) =>
+    gonder<BelgeYaniti>(`/api/belge/${id}/ebelge-sifirla`, {}),
+
+  /** e-Belge serisini degistir (164). Seri bos ise siradaki kurala gecer. */
+  belgeEBelgeSeri: (id: number, seri?: string) =>
+    gonder<BelgeYaniti>(`/api/belge/${id}/ebelge-seri`, { seri: seri ?? null }),
+
   /** Siparis rezervasyonu - 142. ac=false rezervi kaldirir. */
   belgeRezerve: (id: number, ac: boolean) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/rezerve`, { ac }),

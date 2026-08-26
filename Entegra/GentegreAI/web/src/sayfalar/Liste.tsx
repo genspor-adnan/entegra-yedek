@@ -167,6 +167,28 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           } catch (h) { alert(hataMetni(h)) }
           return;
         }
+        // e-Belge menusunun oteki adimlari (164): seri degistir ve sifirla.
+        case 'ebelge.seri': {
+          if (!satir) return;
+          const seri = prompt('Yeni seri (boş bırakırsanız sıradaki seriye geçilir):', '') ?? undefined;
+          try {
+            const y = await api.belgeEBelgeSeri(Number(satir.id), seri?.trim() || undefined);
+            alert((y.uyarilar ?? []).join(' • ') || 'Seri değişti.');
+            setYenile(t => t + 1);
+          } catch (h) { alert(hataMetni(h)) }
+          return;
+        }
+        case 'ebelge.sifirla': {
+          if (!satir) return;
+          if (!confirm('e-Belge geri alınacak; belge yeniden hazırlanabilir hale gelir. '
+                     + 'Numara boşa düşer. Onaylıyor musunuz?')) return;
+          try {
+            const y = await api.belgeEBelgeSifirla(Number(satir.id));
+            alert((y.uyarilar ?? []).join(' • ') || 'e-Belge geri alındı.');
+            setYenile(t => t + 1);
+          } catch (h) { alert(hataMetni(h)) }
+          return;
+        }
         case 'belge.donustur':
           if (!satir) return;
           setDonusum({ belgeId: Number(satir.id), belgeTur: Number(satir.tur) });

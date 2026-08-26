@@ -255,6 +255,12 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 45),
                 new("ebelge.gonder", "e-Fatura Gonder", "ebelge", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 50),
+                // Delphi menusunun oteki adimlari (MenuSeriDegistir / MenuSifirla).
+                //   Onizle ve HTML/XML/PDF kaydet UBL istiyor - o gelince eklenir.
+                new("ebelge.seri", "e-Belge Seri Değiştir", "ebelge", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 55),
+                new("ebelge.sifirla", "e-Belge Sıfırla", "ebelge", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 60),
                 new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },

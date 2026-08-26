@@ -177,6 +177,45 @@ public static class BelgeUclari
             });
         });
 
+        // POST /api/belge/{id}/ebelge-sifirla - hazirlanmis e-Belgeyi geri al (164)
+        grup.MapPost("/{id:int}/ebelge-sifirla", async (
+            int id, BaglamCozucu cozucu, BelgeDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Degistir);
+
+            var mesaj = await depo.EBelgeSifirlaAsync(id,
+                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+
+            var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
+            return Results.Ok(new BelgeYaniti
+            {
+                Belge = kayit.Belge, Satirlar = kayit.Satirlar, DipToplam = kayit.DipToplam,
+                Uyarilar = new[] { mesaj }, IzlemeNo = baglam.IzlemeNo
+            });
+        });
+
+        // POST /api/belge/{id}/ebelge-seri - baska seriye tasi (164)
+        grup.MapPost("/{id:int}/ebelge-seri", async (
+            int id, EBelgeSeriIstegi? istek, BaglamCozucu cozucu, BelgeDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Degistir);
+
+            var (no, seri) = await depo.EBelgeSeriDegistirAsync(id, istek?.Seri,
+                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+
+            var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
+            return Results.Ok(new BelgeYaniti
+            {
+                Belge = kayit.Belge, Satirlar = kayit.Satirlar, DipToplam = kayit.DipToplam,
+                Uyarilar = new[] { $"Seri {seri} olarak değişti — yeni numara {no}." },
+                IzlemeNo = baglam.IzlemeNo
+            });
+        });
+
         // POST /api/belge/{id}/termin - satirlarin teslim tarihini guncelle (140)
         grup.MapPost("/{id:int}/termin", async (
             int id, TerminIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
@@ -286,6 +325,12 @@ public static class BelgeUclari
     public sealed class RezerveIstegi
     {
         public bool Ac { get; set; } = true;
+    }
+
+    /// <summary>e-Belge seri degistirme istegi - 164. Seri bos ise siradaki kural.</summary>
+    public sealed class EBelgeSeriIstegi
+    {
+        public string? Seri { get; set; }
     }
 
     /// <summary>Termin (teslim tarihi) guncelleme istegi - 140.</summary>
