@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gentegre AI Projesi Değerlendirme</title>
+  <style>
+    :root {
+      --bg: #eef1f5;
+      --card: #ffffff;
+      --line: #d8e0ea;
+      --line2: #edf1f6;
+      --ink: #1f2937;
+      --muted: #667085;
+      --blue: #1f5f9f;
+      --blue2: #eaf3ff;
+      --green: #247a4d;
+      --warn: #9a6a0b;
+      --red: #b42318;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 13px/1.55 "Trebuchet MS", "Segoe UI", Tahoma, Arial, sans-serif;
+      padding: 18px;
+    }
+
+    .page {
+      max-width: 1160px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      box-shadow: 0 8px 26px rgba(31, 41, 55, .12);
+      overflow: hidden;
+    }
+
+    .title {
+      background: linear-gradient(#2d669e, #214b7a);
+      color: #fff;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .title .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #8dc5ff;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.25) inset;
+    }
+
+    .title .meta {
+      margin-left: auto;
+      font-weight: 400;
+      font-size: 12px;
+      opacity: .86;
+    }
+
+    .body { padding: 16px; }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      color: #17385f;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 22px 0 8px;
+      font-size: 15px;
+      color: #17385f;
+      border-bottom: 2px solid var(--line2);
+      padding-bottom: 5px;
+    }
+
+    p { margin: 8px 0; }
+
+    .lead {
+      color: var(--muted);
+      max-width: 900px;
+      margin-bottom: 14px;
+    }
+
+    .note {
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--blue);
+      background: #f7fbff;
+      border-radius: 4px;
+      padding: 10px 12px;
+      margin: 12px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 9px 0 14px;
+      table-layout: fixed;
+    }
+
+    th {
+      background: linear-gradient(#f5f8fc, #eaf0f7);
+      border: 1px solid var(--line);
+      text-align: left;
+      padding: 7px 8px;
+      color: #344a64;
+      font-size: 12px;
+    }
+
+    td {
+      border: 1px solid var(--line2);
+      padding: 7px 8px;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td { background: #fbfcfe; }
+
+    ul {
+      margin: 8px 0 14px;
+      padding-left: 22px;
+    }
+
+    li { margin: 4px 0; }
+
+    code {
+      background: #eef3f8;
+      border: 1px solid #dce5ef;
+      border-radius: 3px;
+      padding: 0 4px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+      color: #244e78;
+    }
+
+    pre {
+      background: #f4f7fb;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      padding: 10px 12px;
+      overflow: auto;
+      color: #26384d;
+      font: 12px/1.45 Consolas, "Courier New", monospace;
+    }
+
+    .pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid;
+    }
+
+    .ok { color: var(--green); background: #e9f7ef; border-color: #cbead7; }
+    .warn { color: var(--warn); background: #fff5df; border-color: #ecd9aa; }
+    .risk { color: var(--red); background: #fdebea; border-color: #f2c7c3; }
+
+    .status {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 8px 16px;
+      background: #f3f6fa;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .page { box-shadow: none; border: 0; max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="title">
+      <span class="dot"></span>
+      Gentegre AI Projesi Değerlendirme
+      <span class="meta">15.08.2026 · Ekranlar klasörü</span>
+    </div>
+
+    <section class="body">
+      <h1>Gentegre ERP'nin Web'e Geçiş Değerlendirmesi</h1>
+      <p class="lead">
+        Bu değerlendirme, <code>gentegre_ai_proje_dosyasi.html</code> ve <code>gentegre_v4_web.html</code>
+        mockup/kabuk dosyaları incelenerek hazırlanmıştır.
+      </p>
+
+      <div class="note">
+        <b>Genel kanaat:</b> Yön doğru. Proje artık "Delphi ekranını web'e boyamak" seviyesinde değil;
+        ERP'nin çalışma modelini web, mobil, PostgreSQL ve AI destekli yeni bir ürüne taşıma seviyesine gelmiş.
+      </div>
+
+      <h2>Teknoloji Kararları</h2>
+      <table>
+        <tr><th style="width:210px">Konu</th><th>Değerlendirme</th></tr>
+        <tr><td><code>C# / ASP.NET Core</code></td><td>Gentegre için doğru seçim. Delphi'den gelen ekip için C# zihinsel olarak yakın, para hesaplarında <code>decimal</code>, raporda FastReport .NET avantaj.</td></tr>
+        <tr><td><code>React + TypeScript</code></td><td>97 ekranlık ERP'de düz JavaScript yeterli olmaz. TypeScript şart.</td></tr>
+        <tr><td><code>DevExtreme React</code></td><td>DevExpress/VCL geçmişi olan bir ERP için en mantıklı başlangıç. Grid, pivot, tree ve adaptive davranış hazır.</td></tr>
+        <tr><td><code>PostgreSQL</code></td><td>Doğru hedef; fakat SP ve iş kuralı göçü projenin en sert kısmı. Sadece tablo taşımak yetmez.</td></tr>
+        <tr><td><code>PWA → Capacitor</code></td><td>İyi karar. Mobil için ayrı React Native veya MAUI kod tabanı açmak bu ölçekte yük bindirir.</td></tr>
+        <tr><td><code>gentegre_v4_web.html</code></td><td>Kabuk hissi iyi: sol modül menüsü, komut paleti, iframe ile ekran yükleme, koyu tema ve kart modalı demo/şartname için başarılı.</td></tr>
+      </table>
+
+      <h2>En Önemli Mimari Not</h2>
+      <p>
+        <code>gentegre_v4_web.html</code> içindeki iframe yaklaşımı mockup galerisi için çok iyi,
+        ancak üretim mimarisi bu olmamalı. Gerçek üründe her ekran React route/component olmalı.
+      </p>
+
+      <pre>Mockup:
+gentegre_v4_web.html
+  iframe -> stok_listesi.html
+  iframe -> cari_liste_ekrani_Ver2.html
+
+Gerçek ürün:
+&lt;AppShell&gt;
+  &lt;Route path="/stok/kartlar" element={&lt;StokListe /&gt;} /&gt;
+  &lt;Route path="/cari/kartlar" element={&lt;CariListe /&gt;} /&gt;
+&lt;/AppShell&gt;</pre>
+
+      <h2>Önerilen Uygulama Sırası</h2>
+      <ol>
+        <li>Faz 0'da önce "ERP sözleşmesi" çıkarılmalı: liste API standardı, kart kayıt standardı, yetki, log, hata formatı, para/tarih formatı, dosya sistemi ve rapor çağrısı.</li>
+        <li>İlk gerçek prototip basit ekran olmamalı. <code>Cari + Stok + Satış Faturası</code> üçlüsü seçilmeli.</li>
+        <li>SQL Server SP envanteri çıkarılmalı ve PG karşılıkları P1/P2/P3 olarak ayrılmalı.</li>
+        <li>Listeleme PG function olabilir; fakat fatura kaydetme, stok hareketi, cari hareket, belge no ve loglama gibi işler C# servis katmanında transaction ile yönetilmeli.</li>
+        <li>AI sağ panel/dock asistan olarak konumlanmalı: "Bu cariyi özetle", "Bu faturada hata var mı?", "Bu listeyi yorumla" gibi bağlamlı komutlar desteklenmeli.</li>
+      </ol>
+
+      <h2>Riskler</h2>
+      <table>
+        <tr><th style="width:260px">Risk</th><th>Öneri</th><th style="width:90px">Seviye</th></tr>
+        <tr><td>Eski program daha hızlıydı algısı</td><td>İlk günden server-side paging, virtual grid ve lazy detail yükleme.</td><td><span class="pill risk">Yüksek</span></td></tr>
+        <tr><td>SP göçünün büyümesi</td><td>Önce envanter, sonra P1/P2/P3 port listesi.</td><td><span class="pill risk">Yüksek</span></td></tr>
+        <tr><td>Para/yuvarlama farkları</td><td>Tüm hesaplar backend <code>decimal</code> + PG <code>numeric</code>; frontend sadece gösterir.</td><td><span class="pill risk">Yüksek</span></td></tr>
+        <tr><td>DevExtreme'e kilitlenme</td><td><code>GntGrid</code>, <code>GntForm</code>, <code>GntLookup</code>, <code>GntToolbar</code> wrapper katmanı.</td><td><span class="pill warn">Orta</span></td></tr>
+        <tr><td>97 ekranı aynı anda taşıma isteği</td><td>Dikey dilim: Cari + Stok + Satış Faturası + Rapor + Yetki.</td><td><span class="pill risk">Yüksek</span></td></tr>
+      </table>
+
+      <h2>Sonuç</h2>
+      <p>
+        Proje dosyası sağlam bir başlangıç dokümanı olmuş. Özellikle grid deneyimi, SP göçü,
+        para farkı, mockup'ların şartname olarak kullanılması ve mikroservise erken kaçmama kararları doğru.
+      </p>
+      <p>
+        Net düzeltme önerisi: Faz 1 sadece <b>Cari + Stok</b> değil,
+        <b>Cari + Stok + Satış Faturası mini akışı</b> olmalı. ERP mimarisinin gerçek sınavı orada.
+      </p>
+    </section>
+
+    <div class="status">
+      <span>Dosya: <b>gentegre_ai_projesi_degerlendirme.html</b></span>
+      <span>Durum: <b>Kaydedildi</b></span>
+      <span>Karar: <b>Web mimarisi doğru yönde</b></span>
+    </div>
+  </main>
+</body>
+</html>

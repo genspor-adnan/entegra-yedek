@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gentegre AI - ChatGPT API Özellik Önerileri</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --ink: #1f2933;
+      --muted: #667085;
+      --line: #d7dde5;
+      --brand: #2563eb;
+      --brand-soft: #eaf1ff;
+      --ok: #0f766e;
+      --warn: #b45309;
+      --hard: #b42318;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 13px/1.45 "Segoe UI", Tahoma, Arial, sans-serif;
+    }
+
+    .page {
+      max-width: 1240px;
+      margin: 24px auto;
+      padding: 0 20px 32px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-end;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 22px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      max-width: 760px;
+    }
+
+    .meta {
+      color: var(--muted);
+      white-space: nowrap;
+      font-size: 12px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .summary-item {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .summary-item b {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 2px;
+    }
+
+    .summary-item span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .table-wrap {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #eef3f8;
+      color: #344054;
+      border-bottom: 1px solid var(--line);
+      padding: 9px 8px;
+      text-align: left;
+      font-weight: 650;
+      font-size: 12px;
+    }
+
+    tbody td {
+      border-bottom: 1px solid #edf1f5;
+      padding: 9px 8px;
+      vertical-align: top;
+    }
+
+    tbody tr:hover { background: #f8fbff; }
+
+    .col-priority { width: 76px; }
+    .col-feature { width: 190px; }
+    .col-api { width: 185px; }
+    .col-diff { width: 86px; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .p1 { color: var(--ok); background: #e7f8f4; }
+    .p2 { color: var(--brand); background: var(--brand-soft); }
+    .p3 { color: var(--warn); background: #fff3e6; }
+    .easy { color: var(--ok); background: #e7f8f4; }
+    .mid { color: var(--warn); background: #fff3e6; }
+    .hard { color: var(--hard); background: #fee4e2; }
+
+    .notes {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .note {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+
+    .note h2 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+
+    .note ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .note li { margin: 5px 0; }
+
+    @media (max-width: 980px) {
+      .header { display: block; }
+      .meta { margin-top: 8px; }
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .notes { grid-template-columns: 1fr; }
+      .table-wrap { overflow-x: auto; }
+      table { min-width: 1120px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="header">
+      <div>
+        <h1>Gentegre AI için ChatGPT API Özellik Önerileri</h1>
+        <p class="lead">Müşterinin günlük işini hızlandıracak, Gentegre ekranlarına gömülebilecek ve kontrollü yetki modeliyle uygulanabilecek yapay zeka fikirleri.</p>
+      </div>
+      <div class="meta">Hazırlanma tarihi: 15.08.2026</div>
+    </section>
+
+    <section class="summary" aria-label="Özet">
+      <div class="summary-item"><b>22</b><span>özellik fikri</span></div>
+      <div class="summary-item"><b>5</b><span>ilk paket önerisi</span></div>
+      <div class="summary-item"><b>3</b><span>API kullanım tipi</span></div>
+      <div class="summary-item"><b>1</b><span>temel güvenlik kuralı: onaylı işlem</span></div>
+    </section>
+
+    <section class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-priority">Öncelik</th>
+            <th class="col-feature">Özellik</th>
+            <th>Müşteriye Kolaylık</th>
+            <th>Gentegre'de Bağlanacağı Yer</th>
+            <th class="col-api">ChatGPT API Yaklaşımı</th>
+            <th class="col-diff">Zorluk</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag p1">P1</span></td>
+            <td>Doğal dille ERP sorgusu</td>
+            <td>Kullanıcı "Bu ay tahsilatı geciken cariler kim?" gibi sorar, hazır rapor cevabı alır.</td>
+            <td>Cari, fatura, kasa, banka, stok raporları</td>
+            <td>Responses API + kontrollü function calling</td>
+            <td><span class="tag mid">Orta</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p1">P1</span></td>
+            <td>Cari akıllı özet</td>
+            <td>Cari kart açıldığında risk, bakiye, son satış, ödeme alışkanlığı ve notlar kısa özetlenir.</td>
+            <td>CariWizard, cari liste, CRM</td>
+            <td>Function calling + kısa özet üretimi</td>
+            <td><span class="tag easy">Kolay</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p1">P1</span></td>
+            <td>E-posta / WhatsApp metni hazırlama</td>
+            <td>Tahsilat hatırlatma, teklif gönderimi, sevkiyat bildirimi gibi metinleri otomatik hazırlar.</td>
+            <td>Cari, teklif, fatura, irsaliye ekranları</td>
+            <td>Metin üretimi + şablon parametreleri</td>
+            <td><span class="tag easy">Kolay</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p1">P1</span></td>
+            <td>e-Belge hata açıklayıcı</td>
+            <td>GİB/e-Fatura hata kodlarını kullanıcı dilinde açıklar ve olası çözüm adımlarını listeler.</td>
+            <td>e-Fatura, e-Arşiv, e-İrsaliye akışları</td>
+            <td>RAG / dosya arama + hata bağlamı</td>
+            <td><span class="tag easy">Kolay</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p1">P1</span></td>
+            <td>Gentegre yardım asistanı</td>
+            <td>Kullanıcı "fiyat farkı faturası nasıl kesilir?" diye sorar, ilgili ekran ve adımlar gösterilir.</td>
+            <td>Yardım, tüm modüller</td>
+            <td>File Search / RAG + ekran aksiyon linkleri</td>
+            <td><span class="tag mid">Orta</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p1">P1</span></td>
+            <td>CRM görüşme özeti</td>
+            <td>Uzun müşteri notlarını toparlar, aksiyon maddesi ve takip tarihi önerir.</td>
+            <td>CRM, sosyal kayıt, cari notları</td>
+            <td>Metin özetleme + görev önerisi</td>
+            <td><span class="tag easy">Kolay</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p2">P2</span></td>
+            <td>Fatura / fiş görüntüsünden veri çıkarma</td>
+            <td>PDF veya görsel faturadan satıcı, tarih, tutar, KDV ve satırları ön doldurur.</td>
+            <td>Alış faturası, gider, belge depolama</td>
+            <td>Vision + yapılandırılmış çıktı</td>
+            <td><span class="tag hard">Zor</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p2">P2</span></td>
+            <td>Semantik belge arama</td>
+            <td>"Geçen yıl garantiyle ilgili gelen yazışma" gibi kelime birebir tutmasa da belge bulur.</td>
+            <td>Belge takip, IMAJ/DOSYA yapısı</td>
+            <td>Embeddings / file search</td>
+            <td><span class="tag mid">Orta</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p2">P2</span></td>
+            <td>Sesle sipariş / not girişi</td>
+            <td>Saha ekibi konuşarak sipariş, tahsilat notu veya servis açıklaması oluşturur.</td>
+            <td>Sipariş, CRM, servis modülleri</td>
+            <td>Speech-to-text + function calling</td>
+            <td><span class="tag mid">Orta</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p2">P2</span></td>
+            <td>Doğal dille rapor taslağı</td>
+            <td>"İl bazında son 6 ay satış trendi" isteğinden filtre ve kolon önerisi üretir.</td>
+            <td>Liste ekranları, raporlar, dashboard</td>
+            <td>Function calling + güvenli rapor fonksiyonları</td>
+            <td><span class="tag mid">Orta</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p2">P2</span></td>
+            <td>Tahsilat asistanı</td>
+            <td>Geciken alacakları sınıflar, uygun iletişim tonu ve takip planı önerir.</td>
+            <td>Cari hesap, kasa/banka, CRM görevleri</td>
+            <td>Analiz + metin üretimi</td>
+            <td><span class="tag mid">Orta</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p2">P2</span></td>
+            <td>Teklif asistanı</td>
+            <td>Geçmiş satış, cari iskonto ve stok durumuna göre teklif açıklaması ve alternatif ürün önerir.</td>
+            <td>Teklif, stok, cari satış geçmişi</td>
+            <td>Function calling + öneri metni</td>
+            <td><span class="tag mid">Orta</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p2">P2</span></td>
+            <td>Toplantı kaydı çözümleme</td>
+            <td>Satış görüşmesi sesini yazıya çevirir, kararları ve yapılacak işleri CRM'e taslak girer.</td>
+            <td>CRM, görevler, cari aktiviteler</td>
+            <td>Transcription + özetleme</td>
+            <td><span class="tag mid">Orta</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p2">P2</span></td>
+            <td>Ürün açıklaması üretimi</td>
+            <td>E-ticaret veya teklif için stok kartından profesyonel açıklama üretir.</td>
+            <td>Stok kartı, e-ticaret entegrasyonları</td>
+            <td>Metin üretimi</td>
+            <td><span class="tag easy">Kolay</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p2">P2</span></td>
+            <td>Çeviri ve ton düzenleme</td>
+            <td>Teklif, e-posta, ürün açıklaması ve servis metinlerini farklı dillere çevirir.</td>
+            <td>Teklif, CRM, stok, belge ekranları</td>
+            <td>Metin dönüşümü</td>
+            <td><span class="tag easy">Kolay</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p3">P3</span></td>
+            <td>Excel/CSV içe aktarma eşleştirici</td>
+            <td>Kolonları otomatik tanır, hatalı satırları açıklar, içe aktarma öncesi düzeltme önerir.</td>
+            <td>Aktarım ekranları, cari/stok/fatura import</td>
+            <td>Yapılandırılmış çıktı + validasyon</td>
+            <td><span class="tag mid">Orta</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p3">P3</span></td>
+            <td>Servis kayıt asistanı</td>
+            <td>Arıza açıklamasından kategori, öncelik ve olası çözüm önerisi çıkarır.</td>
+            <td>Servis, görev, proje modülleri</td>
+            <td>Sınıflandırma + öneri</td>
+            <td><span class="tag mid">Orta</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p3">P3</span></td>
+            <td>Stok yenileme önerisi</td>
+            <td>Satış hızı, minimum stok ve teslim sürelerine göre satın alma önerisi üretir.</td>
+            <td>Stok, satın alma, depo</td>
+            <td>Veri analizi + açıklanabilir öneri</td>
+            <td><span class="tag hard">Zor</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p3">P3</span></td>
+            <td>Satış fırsatı skorlama</td>
+            <td>Carileri potansiyel, kayıp riski veya çapraz satış olasılığına göre işaretler.</td>
+            <td>CRM, cari, satış geçmişi</td>
+            <td>Analiz + sınıflandırma</td>
+            <td><span class="tag hard">Zor</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p3">P3</span></td>
+            <td>Yönetici günlük özeti</td>
+            <td>Günlük satış, tahsilat, kritik stok, bekleyen e-belge ve riskli carileri tek özet yapar.</td>
+            <td>Ana sayfa, dashboard, bildirim</td>
+            <td>Function calling + zamanlanmış özet</td>
+            <td><span class="tag mid">Orta</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p3">P3</span></td>
+            <td>Otomatik görev taslağı</td>
+            <td>Konuşma, cari hareket veya e-belge sonucundan takip görevi önerir.</td>
+            <td>GörevFrame, CRM, e-Belge</td>
+            <td>Function calling + kullanıcı onayı</td>
+            <td><span class="tag mid">Orta</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag p3">P3</span></td>
+            <td>Anomali uyarıları</td>
+            <td>Alışılmadık iskonto, tutar, stok çıkışı veya cari risk artışını açık dille bildirir.</td>
+            <td>Fatura, stok, cari, loglama</td>
+            <td>Analiz + kural motoru destekli açıklama</td>
+            <td><span class="tag hard">Zor</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="notes">
+      <article class="note">
+        <h2>İlk Paket Önerisi</h2>
+        <ul>
+          <li>Cari akıllı özet</li>
+          <li>E-posta / WhatsApp metni hazırlama</li>
+          <li>e-Belge hata açıklayıcı</li>
+          <li>CRM görüşme özeti</li>
+          <li>Gentegre yardım asistanı</li>
+        </ul>
+      </article>
+      <article class="note">
+        <h2>Mimari Not</h2>
+        <ul>
+          <li>Model doğrudan SQL'e bağlanmamalı; sadece izinli fonksiyonlar üzerinden veri almalı.</li>
+          <li>Kayıt değiştiren işlemler taslak üretmeli, kullanıcı onayı olmadan post/delete/update çalışmamalı.</li>
+          <li>Firma, kullanıcı, şube ve yetki filtreleri API katmanında uygulanmalı.</li>
+          <li>Prompt, araç çağrısı, sonuç ve kullanıcı onayı loglanmalı.</li>
+        </ul>
+      </article>
+    </section>
+  </main>
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

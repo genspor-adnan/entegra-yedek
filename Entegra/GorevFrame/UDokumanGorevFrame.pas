@@ -1,4 +1,4 @@
-ï»¿unit UDokumanGorevFrame;
+unit UDokumanGorevFrame;
 
 { Bu kod Sablon Duzenleyici tarafindan uretildi
  Tarih : 25/01/2010 11:04:25 }
@@ -8,17 +8,17 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus,
-  cxLookAndFeelPainters, cxButtons, JvExControls, JvButton, JvNavigationPane,
+  cxLookAndFeelPainters, cxButtons,
   ImgList, PngImageList, CategoryButtons, ExtCtrls, System.ImageList;           {Symbols}
 
 type
   TDokumanGorevFrame = class(TFrame)
-    btnHesapKarti: TJvNavPanelButton;
+    btnHesapKarti: TcxButton;
     PngImageList1: TPngImageList;
-    BtnKalite: TJvNavPanelButton;
+    BtnKalite: TcxButton;
     Panel3: TPanel;
-    JvNavPanelButton2: TJvNavPanelButton;
-    btnDokumler: TJvNavPanelButton;
+    JvNavPanelButton2: TcxButton;
+    btnDokumler: TcxButton;
     procedure btnHesapKartiClick(Sender: TObject);
     procedure BtnKaliteClick(Sender: TObject);
     procedure btnDokumlerMouseDown(Sender: TObject; Button: TMouseButton;
@@ -51,7 +51,7 @@ begin
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=0
    else
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;
-   TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TJVNavPanelButton(Sender).Tag;
+   TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TcxButton(Sender).Tag;
    TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'O';
    btnUpAndDown(Sender);
 end;
@@ -66,7 +66,7 @@ end;
 
 procedure TDokumanGorevFrame.BtnKaliteClick(Sender: TObject);
 begin
-  with TDokumanListeFrame(FFrameBilgi.IcerikGit('Kalite YÃ¶netim Listeleri').Ornek) do begin
+  with TDokumanListeFrame(FFrameBilgi.IcerikGit('Kalite Yönetim Listeleri').Ornek) do begin
 
   end;
   btnUpAndDown(Sender);
@@ -92,18 +92,16 @@ end;
 
 procedure TDokumanGorevFrame.btnUpAndDown(Sender: TObject);
 begin
-  btnHesapKarti.Down := False;
-  BtnKalite.Down := False;
-  btnDokumler.Down := False;
-  JvNavPanelButton2.Down := False;
-  if (Sender<>nil)and(Sender.ClassName = 'TJvNavPanelButton') then
-    (Sender as TJvNavPanelButton).Down := True;
+  // Tek buton aktif: frame'deki TUM TcxButton'lar tek elden yonetilir.
+  // (Eskiden sabit bir buton listesi sifirlaniyordu; listede olmayan butonlar
+  //  basili kaldigi icin ayni anda birden fazla buton aktif gorunuyordu.)
+  GorevTusuSec(Self, Sender);
 end;
 
 procedure TDokumanGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   btnHesapKarti.Visible := Tablo.YetkiVarmi(3202,YetkiTur_Gorme);
   BtnKalite.Visible := Tablo.YetkiVarmi(3203,YetkiTur_Gorme);
   btnDokumler.Visible := Tablo.YetkiVarmi(3299,YetkiTur_Gorme);
@@ -114,3 +112,5 @@ end;
 initialization
   RegisterClass(TDokumanGorevFrame);
 end.
+
+

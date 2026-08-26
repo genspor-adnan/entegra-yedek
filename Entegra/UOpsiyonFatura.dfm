@@ -15,13 +15,13 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
   OnShow = FormShow
   TextHeight = 13
   object PageControl1: TPageControl
-    Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 501
     Height = 492
     ActivePage = TabSheetGenel
     Align = alClient
+    Images = Tablo.PNGImageList2
     TabOrder = 0
     OnChange = PageControl1Change
     object TabSheetGenel: TTabSheet
@@ -975,13 +975,13 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         Left = 0
         Top = 0
         Width = 493
-        Height = 464
+        Height = 463
         Align = alClient
         TabOrder = 0
         Properties.ActivePage = TabGenel
         Properties.CustomButtons.Buttons = <>
         Properties.Style = 8
-        ClientRectBottom = 464
+        ClientRectBottom = 463
         ClientRectRight = 493
         ClientRectTop = 24
         object TabGenel: TcxTabSheet
@@ -1343,7 +1343,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
             Left = 0
             Top = 29
             Width = 493
-            Height = 411
+            Height = 410
             Align = alClient
             TabOrder = 0
             object GridAlanEslemeView: TcxGridDBTableView
@@ -1973,13 +1973,13 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         Left = 0
         Top = 73
         Width = 493
-        Height = 391
+        Height = 390
         Align = alClient
         TabOrder = 0
         Properties.ActivePage = SheetAlinanSip
         Properties.CustomButtons.Buttons = <>
         OnPageChanging = PCSiparisPageChanging
-        ClientRectBottom = 387
+        ClientRectBottom = 386
         ClientRectLeft = 4
         ClientRectRight = 489
         ClientRectTop = 24
@@ -1995,7 +1995,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
             Left = 0
             Top = 0
             Width = 485
-            Height = 363
+            Height = 362
             Align = alClient
             PopupMenu = PopupDurumBglanti
             TabOrder = 0
@@ -2306,8 +2306,8 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
   end
   object DtsDurumBaglanti: TDataSource
     DataSet = TabDurumBaglanti
-    Left = 64
-    Top = 96
+    Left = 40
+    Top = 80
   end
   object TabEFaturaSeriKurallari: TFDQuery
     AfterOpen = TabEFaturaSeriKurallariAfterOpen

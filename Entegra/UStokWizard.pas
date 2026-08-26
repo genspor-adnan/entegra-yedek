@@ -1145,6 +1145,8 @@ begin
 end;
 
 procedure TStokWizardDlg.CheckPaketPropertiesEditValueChanged(Sender: TObject);
+var
+  LAnaBirim : Integer;
 begin
   if CheckPaket.Checked then begin
     PaketEkr.Enabled := True;
@@ -1154,7 +1156,15 @@ begin
     DokumanEkr.VisibleButtons := [bkBack,bkNext,bkFinish,bkCancel];
     if DtsStok.State <> dsBrowse then begin
 
-      Tablo.TablodanSorguAc(1,'delete from PAKETDETAY where PAKETID='+IntToStr(StokID)+' and URUNID='+IntToStr(StokID)+' insert into PAKETDETAY(PAKETID,URUNID,BIRIM,ADET,STOK,SUBEID) values('+IntToStr(StokID)+','+IntToStr(StokID)+','+TabStok.FieldByName('ANABIRIM').AsString+',1,1,'+IntToStr(SubeId)+') select scope_identity()');
+      LAnaBirim := TabStok.FieldByName('ANABIRIM').AsInteger;
+      if LAnaBirim <= 0 then
+        LAnaBirim := AdetBirimi;
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'delete from PAKETDETAY where PAKETID=&PaketID and URUNID=&UrunID ' +
+        'insert into PAKETDETAY(PAKETID,URUNID,BIRIM,ADET,STOK,SUBEID) ' +
+        'values(&PaketID,&UrunID,&Birim,1,1,&SubeID)',
+        ['&PaketID', '&UrunID', '&Birim', '&SubeID'],
+        [StokID, StokID, LAnaBirim, SubeId]);
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'UPDATE STOKFIYAT SET PAKETID=STOKID WHERE STOKID=&StokID',['&StokID'],[StokID]);
     end;
   end else begin
@@ -3462,7 +3472,6 @@ begin
 end;
 
 end.
-
 
 
 

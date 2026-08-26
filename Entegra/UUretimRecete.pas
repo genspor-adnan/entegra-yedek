@@ -1089,8 +1089,12 @@ begin
   eskiReceteID := TabRecete.FieldByName('ID').AsInteger;
 //  yeniReceteId:=Tablo.SQLSatiriKopyala('URETIMRECETE',eskiReceteID,['STOKID','KOD','AD','EKLEYEN','EKLEMETARIHI','DEGISTIREN','DEGISTIRMETARIHI'],
 //      [StokID,RecKod,RecAd,Kullanan,Tablo.GENINI.BugunTrhSaat,Kullanan,Tablo.GENINI.BugunTrhSaat]);
-  yeniReceteId:=Tablo.SQLSatiriKopyala('URETIMRECETE',eskiReceteID,['ID','EKLEYEN','EKLEMETARIHI','DEGISTIREN','DEGISTIRMETARIHI'],
-      [StokID,Kullanan,Tablo.GENINI.BugunTrhSaat,Kullanan,Tablo.GENINI.BugunTrhSaat]);
+  // Kopyanin bagli oldugu stok DEGISIR: alan adi 'STOKID' olmali. Once yanlislikla 'ID'
+  //   yaziliyordu -> kopyalama "Field 'ID' cannot be modified" ile patliyor, ayrica
+  //   yeni recete eski stokta kaliyordu. KOD/AD da secilen stoktan alinir (yukarida
+  //   hesaplaniyor), aksi halde kopya eski recetenin kod/adiyla mukerrer gorunuyordu.
+  yeniReceteId:=Tablo.SQLSatiriKopyala('URETIMRECETE',eskiReceteID,['STOKID','KOD','AD','EKLEYEN','EKLEMETARIHI','DEGISTIREN','DEGISTIRMETARIHI'],
+      [StokID,RecKod,RecAd,Kullanan,Tablo.GENINI.BugunTrhSaat,Kullanan,Tablo.GENINI.BugunTrhSaat]);
   TabReceteDetay.First;
   while not TabReceteDetay.Eof do begin
     DetayReceteId:=Tablo.SQLSatiriKopyala('URETIMRECETEDETAY',TabReceteDetay.FieldByName('ID').AsInteger,['URETIMRECETEID','EKLEYEN','EKLEMETARIHI','DEGISTIREN','DEGISTIRMETARIHI'],[yeniReceteId,Kullanan,Tablo.GENINI.BugunTrhSaat,Kullanan,Tablo.GENINI.BugunTrhSaat]);

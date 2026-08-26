@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gider Pusulası — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* satir renkleri */
+    --s-yok:#f7cfcf; --s-yok-t:#7d1f1f;   /* odenmemis / red     */
+    --s-kri:#fbe6ae; --s-kri-t:#7a5407;   /* bekleyen / taslak   */
+    --s-skt:#f6d9c0; --s-skt-t:#8a4a12;   /* muhasebelesmemis    */
+    --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;   /* iptal               */
+    --tus-pas:#9c71ad; --tus-sec:#1f6fbe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1180px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#8a5a1e,#6d4718);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#e6bd8f;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.9;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#8a5a1e;background:linear-gradient(#b5811f,#8a5a1e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.efat{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2b6b41;background:linear-gradient(#4fa26a,#2e7d46);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+
+  /* BASLIK ALANI */
+  .hdr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 14px;padding:12px;
+    background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}.fld .req::after{content:" *";color:var(--req)}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .chip.efat{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}
+  .chip.gelen{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .chip.ok{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}
+
+  .wrap{display:grid;grid-template-columns:1fr 252px;gap:0}
+  .center{min-width:0;display:flex;flex-direction:column}
+  .gorev{background:#f4f7fa;border-right:1px solid var(--line2);padding:6px 6px 10px}
+  .ltabs{display:flex;gap:2px;margin:-6px -6px 8px;padding:6px 6px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .agrid{display:grid;grid-template-columns:70px 1fr;gap:5px 6px;align-items:center}
+  .agrid label{font-size:10.5px;color:var(--muted);text-align:right}
+  .filtre{display:flex;gap:5px;padding:8px 10px 7px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line2);background:#fbfcfe}
+
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+
+  /* GRID */
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.s-yok td{background:var(--s-yok);color:var(--s-yok-t)}
+  .dg tr.s-kri td{background:var(--s-kri);color:var(--s-kri-t)}
+  .dg tr.s-skt td{background:var(--s-skt);color:var(--s-skt-t)}
+  .dg tr.s-pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .dg tr.s-pas td.ad{text-decoration:line-through}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .uyari{border:1px solid #eeddb4;background:#fdf6e3;color:#7a5407;border-radius:4px;padding:9px 11px;
+    font-size:11px;line-height:1.5;margin-top:10px}
+  .bilgi{border:1px solid #c6d7ef;background:#eef4fc;color:#2b5c95;border-radius:4px;padding:9px 11px;
+    font-size:11px;line-height:1.5}
+  .banner{background:#fdf6e9;border:1px solid #f0dcbb;color:#8a5a1e;border-radius:5px;padding:7px 10px;
+    font-size:11.5px;margin-bottom:10px;display:flex;gap:8px;align-items:center}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-izl{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .tip{display:inline-block;min-width:30px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;padding:1px 5px;border:1px solid}
+  .t-hrd{background:#eef1f4;border-color:#dbe1e8;color:#55606c}
+  .t-nak{background:#e5ecf8;border-color:#c6d7ef;color:#2b5c95}
+  .t-tam{background:#fdf1e2;border-color:#f0dcbd;color:#96651a}
+  .t-isc{background:#e3f0e6;border-color:#c3e0cb;color:#2e7d46}
+  .bar{height:9px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:54px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+
+  /* SEKMELER */
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:7px 14px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+  .gridtb{display:flex;gap:4px;padding:6px 0;align-items:center;flex-wrap:wrap}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px}
+
+  /* GRUP KUTUSU + TOPLAM BLOGU */
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);
+    border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;gap:8px}
+  .grp>h4 .tag{margin-left:auto;font-size:9.5px;font-weight:bold;background:#eaf1f8;color:#3d6294;
+    border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grp .body{padding:10px}
+  .grid2{display:grid;grid-template-columns:130px 1fr;gap:8px 10px;align-items:center}
+  .grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .foot{display:flex;gap:14px;margin-top:6px;align-items:flex-start}
+  .notes{flex:1}
+  .notes textarea{width:100%;height:112px;border:1px solid var(--line);border-radius:3px;padding:6px;
+    font-family:inherit;font-size:12px;resize:none}
+  .totals{width:330px;border:1px solid var(--line2);border-radius:5px;background:linear-gradient(#fff,#f6f9fc);padding:8px 10px}
+  .totals .r{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px dashed var(--line2)}
+  .totals .r.g{border-bottom:none;border-top:2px solid #cdd6e0;margin-top:4px;padding-top:6px;font-weight:bold;font-size:14px;color:var(--navy)}
+  .totals .r span:last-child{font-family:"Segoe UI",Tahoma}
+  .totals .r.kes span:last-child{color:#b23b3b}
+
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;color:var(--ink);
+    display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.big{height:26px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .inp.pas{background:#eef1f4;color:var(--muted)}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:5px;top:3px;color:var(--muted);font-size:10px}
+
+  /* SAG OZET */
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:8px 0}
+  .side h5{margin:0;padding:7px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11px;padding:3px 12px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .tvsep{height:1px;background:var(--line2);margin:7px 10px}
+  .sidebtns{display:flex;flex-direction:column;gap:4px;padding:4px 10px}
+  .depo{display:flex;align-items:center;gap:7px;padding:3px 12px;font-size:11px}
+  .depo .ad{width:78px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+  .depo .mk{width:56px;text-align:right;font-family:"Segoe UI",Tahoma}
+
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Gider Pusulası — Düzenle
+    <span class="sp">IcerikFrame\UGiderPusulaFrame · GIDERPUSULA.ID 41207 · GDP.2026/0031</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn efat">📤 e-Pusula Gönder</div>
+    <div class="btn">💸 Ödeme Yap</div>
+    <div class="btn ok">⚙ Muhasebeleştir</div>
+    <div class="btn">🖨️ Yazdır</div>
+    <div class="sepv"></div>
+    <div class="btn">✖ Kapat</div>
+  </div>
+
+  <div class="hdr">
+    <div class="fld"><label class="req">Pusula No</label><div class="inp big">GDP.2026/0031</div></div>
+    <div class="fld"><label class="req">Ad Soyad (Satıcı Kişi)</label><div class="inp big">Hüseyin Aktaş</div></div>
+    <div class="fld"><label>e-Gider Pusulası</label>
+      <div class="inp"><span class="chip gelen">e-Arşiv · Taslak</span>
+        <span class="chip efat" style="margin-left:4px">Gönderilmedi</span></div></div>
+
+    <div class="fld"><label class="req">Pusula Tarihi</label><div class="inp">14.08.2026</div></div>
+    <div class="fld"><label class="req">TC Kimlik No</label><div class="inp">123*****456 <span class="chip ok" style="margin-left:6px">✓ Doğrulandı</span></div></div>
+    <div class="fld"><label>Mükellefiyet</label><div class="inp pas">Vergi mükellefi değil (GVK 94)</div></div>
+
+    <div class="fld"><label class="req">Alım Konusu</label><div class="inp combo">Hurda alımı</div></div>
+    <div class="fld"><label class="req">Stopaj Oranı</label><div class="inp combo">%2 — Mal alımı / hurda</div></div>
+    <div class="fld"><label class="req">Ödeme Şekli</label><div class="inp combo">Nakit (Kasa — Merkez)</div></div>
+
+    <div class="fld"><label>Teslim Yeri / Depo</label><div class="inp combo">Merkez Depo</div></div>
+    <div class="fld"><label>Şube</label><div class="inp combo">Merkez</div></div>
+    <div class="fld"><label>Düzenleyen</label><div class="inp pas">Mehmet Yıldız · 14.08.2026 09:22</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="kalem">Kişi &amp; Kalemler <span class="b">3</span></div>
+    <div class="tab" data-t="odeme">Ödeme</div>
+    <div class="tab" data-t="muhasebe">Muhasebe Fişi <span class="b">3</span></div>
+    <div class="tab" data-t="epusula">e-Gider Pusulası</div>
+    <div class="tab" data-t="yorum">Yorum / Medya <span class="b">2</span></div>
+    <div class="tab" data-t="ek">Ek Alanlar</div>
+  </div>
+
+  <div class="wrap">
+    <div class="center">
+      <!-- KISI & KALEMLER -->
+      <div class="pane active" data-p="kalem">
+        <div class="banner">🧮 <b>Gider pusulası</b>, vergi mükellefi olmayan kişilerden yapılan alımlarda düzenlenir.
+          Brüt tutar üzerinden <b>gelir vergisi stopajı</b> kesilir, <b>net</b> tutar kişiye ödenir. KDV hesaplanmaz.</div>
+
+        <div class="grp">
+          <h4>Kişi Bilgileri <span class="tag">GIDERPUSULA · REHBER (KISI)</span></h4>
+          <div class="body">
+            <div class="grid2" style="grid-template-columns:130px 1fr 110px 1fr">
+              <label class="req">Ad Soyad</label><div class="inp">Hüseyin Aktaş</div>
+              <label class="req">TC Kimlik No</label><div class="inp">123*****456</div>
+              <label>Baba Adı</label><div class="inp">Mustafa</div>
+              <label>Doğum Yeri / Yılı</label><div class="inp">Antalya / 1978</div>
+              <label>Telefon</label><div class="inp">0532 *** 41 07</div>
+              <label>e-Posta</label><div class="inp">—</div>
+              <label>Adres</label><div class="inp">Yenidoğan Mah. 1453 Sok. No:12/A Kepez / ANTALYA</div>
+              <label>IBAN</label><div class="inp">TR59 0006 2000 1234 5678 9012 34</div>
+              <label>Kimlik Belgesi</label><div class="inp">📎 nufus_cuzdani.jpg (fotokopi alındı)</div>
+              <label>Kayıt Durumu</label><div class="inp"><span class="pill p-ok">Mükellef değil</span>
+                <span class="pill p-izl" style="margin-left:5px">3. pusula (2026)</span></div>
+            </div>
+            <div class="hint">Aynı kişiye yıl içinde <b>süreklilik arz eden</b> ödeme yapılıyorsa sistem uyarır —
+              GIDERPUSULA.TCKIMLIK üzerinden yıl bazlı sayaç (<b>3 pusula · 51.200,00 ₺</b>) tutulur.</div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Alım Açıklaması <span class="tag">GIDERPUSULA.ACIKLAMA</span></h4>
+          <div class="body">
+            <div class="grid2">
+              <label>Alım Konusu</label><div class="inp combo">Hurda alımı</div>
+              <label>Açıklama</label><div class="inp">Merkez Depo kantarında tartılan metal korniş, alüminyum profil firesi ve karton hurdası alımı</div>
+              <label>Referans Belge</label><div class="inp">KNT-2026/0448 (kantar fişi) · Proje: PRJ-2026-04</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dg">
+          <table>
+            <tr><th class="c" style="width:38px">SIRA</th><th style="width:100px">STOK / GİDER KODU</th><th>AÇIKLAMA</th>
+                <th class="r" style="width:86px">MİKTAR</th><th class="c" style="width:48px">BİRİM</th>
+                <th class="r" style="width:96px">BİRİM FİYAT</th><th class="r" style="width:110px">TUTAR</th>
+                <th style="width:120px">MUHASEBE HESABI</th></tr>
+            <tr class="foc"><td class="c">1</td><td>STK.90104</td><td class="ad"><b>Metal korniş hurdası</b></td>
+                <td class="r">850,00</td><td class="c">KG</td><td class="r">22,00</td><td class="r">18.700,00</td>
+                <td>153.01.006</td></tr>
+            <tr><td class="c">2</td><td>STK.90107</td><td class="ad">Alüminyum profil firesi</td>
+                <td class="r">210,00</td><td class="c">KG</td><td class="r">20,00</td><td class="r">4.200,00</td>
+                <td>153.01.006</td></tr>
+            <tr><td class="c">3</td><td>STK.90112</td><td class="ad">Karton / ambalaj hurdası</td>
+                <td class="r">400,00</td><td class="c">KG</td><td class="r">4,00</td><td class="r">1.600,00</td>
+                <td>153.01.006</td></tr>
+            <tfoot><tr><td colspan="3" style="text-align:right">BRÜT TOPLAM (3 kalem)</td>
+                <td class="r">1.460,00</td><td class="c">KG</td><td class="r"></td>
+                <td class="r">24.500,00</td><td></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="gridtb">
+          <span class="minibtn">＋ Satır Ekle</span><span class="minibtn">🗑 Satır Sil</span>
+          <span class="minibtn">🔗 Stok Seç</span><span class="minibtn">⚖ Kantar Fişinden Getir</span>
+          <span class="minibtn">📥 Depoya Giriş Yap</span>
+        </div>
+
+        <div class="foot">
+          <div class="notes">
+            <label style="font-size:11px;color:var(--muted)">Açıklama / Not</label>
+            <textarea readonly>Hurda tartımı 14.08.2026 saat 08:40'ta Merkez Depo kantarında Serkan Öz gözetiminde yapıldı.
+Kişi vergi mükellefi değildir; kimlik fotokopisi ve kantar fişi eke bağlandı.
+Stopaj oranı %2 (mal alımı) seçildiği için net ödenecek tutar 24.010,00 ₺ olarak hesaplandı.
+Ödeme nakit yapılacak — kasa çıkışı için Ayşe Demir onayı bekleniyor.</textarea>
+          </div>
+          <div class="totals">
+            <div class="r"><span>Brüt Tutar (kalem toplamı)</span><span>₺ 24.500,00</span></div>
+            <div class="r"><span>Stopaj Oranı</span><span>%2 ▾</span></div>
+            <div class="r kes"><span>Gelir Vergisi Stopajı (360.01)</span><span>− ₺ 490,00</span></div>
+            <div class="r"><span>KDV (uygulanmaz)</span><span>₺ 0,00</span></div>
+            <div class="r"><span>Diğer Kesinti</span><span>− ₺ 0,00</span></div>
+            <div class="r g"><span>Net Ödenecek</span><span>₺ 24.010,00</span></div>
+            <div class="hint" style="margin-top:6px">Oran değişince <b>net</b> anında yeniden hesaplanır:
+              %2 → 24.010,00 · %5 → 23.275,00 · %10 → 22.050,00 · %20 → 19.600,00 ₺</div>
+          </div>
+        </div>
+
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-yok)"></span>Ödenmemiş / reddedilmiş satır</span>
+          <span><span class="sw" style="background:var(--s-kri)"></span>Gönderilmeyi bekleyen (taslak)</span>
+          <span><span class="sw" style="background:var(--s-skt)"></span>Muhasebeleşmemiş</span>
+          <span><span class="sw" style="background:var(--s-pas)"></span>İptal — <b>en sonda</b>, açıklaması üstü çizili</span>
+        </div>
+      </div>
+
+      <!-- ODEME -->
+      <div class="pane" data-p="odeme">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Ödemeler <span class="tag">KASA (1:N) · 100 / 102</span></h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <tr><th style="width:88px">TARİH</th><th style="width:130px">TÜR</th><th>KASA / BANKA</th>
+                    <th style="width:150px">ALICI</th><th style="width:120px">BELGE</th>
+                    <th class="r" style="width:110px">TUTAR</th></tr>
+                <tr class="s-yok"><td>—</td><td>Henüz ödeme yok</td>
+                    <td class="ad">Kasa — Merkez (100.01.001)</td><td class="ad">Hüseyin Aktaş</td>
+                    <td>—</td><td class="r">0,00</td></tr>
+                <tfoot><tr><td colspan="5" style="text-align:right">ÖDENEN / KALAN</td>
+                    <td class="r">0,00 / <span style="color:#b23b3b">24.010,00</span></td></tr></tfoot>
+              </table>
+            </div>
+            <div class="gridtb"><span class="minibtn on">💸 Ödeme Ekle</span><span class="minibtn">🏦 Havale / EFT</span>
+              <span class="minibtn">🧾 Makbuz Yazdır</span></div>
+            <div class="uyari">⚠ Net tutar <b>7.000 ₺</b> üzerindeyse tevsik zorunluluğu gereği ödeme
+              <b>banka / IBAN</b> ile yapılmalıdır. Nakit seçili — kaydederken onay istenecek.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MUHASEBE -->
+      <div class="pane" data-p="muhasebe">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Muhasebe Fiş Satırları (önizleme) <span class="tag">MUHFIS · MUHFISDETAY</span></h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <tr><th style="width:110px">HESAP KODU</th><th>HESAP ADI</th>
+                    <th class="r" style="width:118px">BORÇ</th><th class="r" style="width:118px">ALACAK</th>
+                    <th style="width:230px">AÇIKLAMA</th></tr>
+                <tr class="foc"><td>153.01.006</td><td class="ad">Ticari Mallar — Hurda / Fire</td>
+                    <td class="r">24.500,00</td><td class="r">—</td>
+                    <td class="ad">GDP.2026/0031 brüt tutar (mal alımı)</td></tr>
+                <tr class="s-skt"><td>770.01.008</td><td class="ad">Genel Yönetim Gideri — Tamir / Hizmet</td>
+                    <td class="r">0,00</td><td class="r">—</td>
+                    <td class="ad">Hizmet alımlarında 153 yerine bu hesap çalışır</td></tr>
+                <tr><td>360.01.001</td><td class="ad">Ödenecek Gelir Vergisi Stopajı (%2)</td>
+                    <td class="r">—</td><td class="r">490,00</td>
+                    <td class="ad">Muhtasar 08/2026 dönemine taşınır</td></tr>
+                <tr class="s-kri"><td>100.01.001</td><td class="ad">Kasa — Merkez</td>
+                    <td class="r">—</td><td class="r">24.010,00</td>
+                    <td class="ad">Net ödeme — ödeme yapılınca kesinleşir</td></tr>
+                <tr class="s-pas"><td>102.01.002</td><td class="ad">Bankalar — Ziraat / TR59…9034</td>
+                    <td class="r">—</td><td class="r">0,00</td>
+                    <td class="ad">Ödeme şekli "Banka / IBAN" seçilirse 100 yerine çalışır</td></tr>
+                <tfoot><tr><td colspan="2" style="text-align:right">TOPLAM</td>
+                    <td class="r">24.500,00</td><td class="r">24.500,00</td><td></td></tr></tfoot>
+              </table>
+            </div>
+            <div class="gridtb"><span class="minibtn">⚙ Fişi Oluştur</span><span class="minibtn">👁 Fişi Aç</span>
+              <span class="minibtn">🔄 Hesap Eşlemesini Yenile</span>
+              <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">MUHFIS: (oluşmadı) · Tarih 14.08.2026</span></div>
+            <div class="hint">Borç/alacak dengesi <b>24.500,00 = 24.500,00</b>. Stopaj <b>360.01</b> hesabında
+              birikir, muhtasar beyanname döneminde <b>360 → 100/102</b> ile kapatılır.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- E-PUSULA -->
+      <div class="pane" data-p="epusula">
+        <div class="grp" style="margin-bottom:0">
+          <h4>e-Gider Pusulası Zarfı <span class="tag">EBELGE · e-Arşiv · UEBelgeGonder</span></h4>
+          <div class="body">
+            <div class="grid2" style="grid-template-columns:130px 1fr 110px 1fr">
+              <label>Senaryo</label><div class="inp">e-Gider Pusulası (e-Arşiv)</div>
+              <label>Seri</label><div class="inp">GDP · 2026</div>
+              <label>ETTN</label><div class="inp">9c3d5f11-4b8e-47a2-9f60-2c71b0d4a742</div>
+              <label>Zarf No</label><div class="inp pas">—</div>
+              <label>Durum</label><div class="inp"><span class="pill p-kri">Taslak — gönderilmedi</span></div>
+              <label>GİB Durumu</label><div class="inp pas">Sorgulanmadı</div>
+              <label>Gönderim</label><div class="inp pas">—</div>
+              <label>Teslim Şekli</label><div class="inp combo">Kağıt çıktı (alıcı mükellef değil)</div>
+            </div>
+            <div class="dg" style="margin-top:10px">
+              <table>
+                <tr><th style="width:130px">TARİH</th><th style="width:120px">İŞLEM</th><th style="width:130px">DURUM</th>
+                    <th style="width:200px">ETTN / ZARF</th><th>MESAJ</th></tr>
+                <tr class="s-kri"><td>14.08.2026 09:22</td><td>Hazırla</td>
+                    <td><span class="pill p-kri">Taslak</span></td><td>9c3d5f11-…-a742</td>
+                    <td class="ad">Belge XML'i oluşturuldu, imzalanmadı</td></tr>
+                <tr><td>—</td><td>Gönder</td><td><span class="pill p-pas">Bekliyor</span></td><td>—</td>
+                    <td class="ad">"e-Pusula Gönder" ile entegratör kuyruğuna alınır</td></tr>
+                <tr><td>—</td><td>Durum sorgu</td><td><span class="pill p-pas">—</span></td><td>—</td>
+                    <td class="ad">Zarf kabulünden sonra periyodik sorgulanır</td></tr>
+              </table>
+            </div>
+            <div class="gridtb"><span class="minibtn on">📤 Gönder</span><span class="minibtn">👁 Önizle (PDF)</span>
+              <span class="minibtn">⬇ XML Kaydet</span><span class="minibtn">↩ Taslağa Al</span></div>
+            <div class="bilgi">ℹ Stopaj tutarı e-Gider Pusulası XML'inde <b>WithholdingTaxTotal</b> alanına yazılır;
+              net tutar <b>PayableAmount</b> olarak gider.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- YORUM -->
+      <div class="pane" data-p="yorum">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Yorum / Medya <span class="tag">GOREVYORUM + IMAJ → GENDEPO.DOSYA</span></h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <tr><th style="width:130px">KULLANICI</th><th style="width:130px">TARİH</th><th>YORUM</th>
+                    <th class="c" style="width:70px">EK</th></tr>
+                <tr><td>Mehmet Yıldız</td><td>14.08.2026 09:30</td>
+                    <td class="ad">Kantar fişi ve kimlik fotokopisi eklendi. Tartım Merkez Depo kantarında yapıldı.</td>
+                    <td class="c">📎 2</td></tr>
+                <tr><td>Ayşe Demir</td><td>14.08.2026 11:05</td>
+                    <td class="ad">Nakit ödeme için kasa çıkış onayı Serkan Öz'e iletildi.</td><td class="c">—</td></tr>
+              </table>
+            </div>
+            <div class="gridtb"><span class="minibtn">➕ Yorum Ekle</span><span class="minibtn">📎 Klasörden</span>
+              <span class="minibtn">🖨️ Tarayıcıdan</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EK ALANLAR -->
+      <div class="pane" data-p="ek">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Ek Alanlar <span class="tag">REHBERBILGI / EAV</span></h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <tr><th style="width:190px">ETİKET</th><th>DEĞER</th></tr>
+                <tr><td>Kantar Fiş No</td><td>KNT-2026/0448</td></tr>
+                <tr class="foc"><td>Proje Kodu</td><td>PRJ-2026-04</td></tr>
+                <tr><td>Masraf Merkezi</td><td>MM.01 — Merkez Depo</td></tr>
+                <tr><td>Muhtasar Dönemi</td><td>08/2026</td></tr>
+              </table>
+            </div>
+            <div class="gridtb"><span class="minibtn">＋ Alan Ekle</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAG OZET -->
+    <div class="side">
+      <h5>Pusula Özeti</h5>
+      <div class="kv"><span>Pusula No</span><b>GDP.2026/0031</b></div>
+      <div class="kv"><span>Tarih</span><b>14.08.2026</b></div>
+      <div class="kv"><span>Konu</span><b><span class="tip t-hrd">HRD</span> Hurda alımı</b></div>
+      <div class="kv"><span>Kişi</span><b>Hüseyin Aktaş</b></div>
+      <div class="kv"><span>TC Kimlik</span><b>123*****456</b></div>
+      <div class="kv"><span>Teslim yeri</span><b>Merkez Depo</b></div>
+
+      <div class="tvsep"></div>
+      <h5>Hesap</h5>
+      <div class="kv"><span>Brüt</span><b>24.500,00 ₺</b></div>
+      <div class="kv"><span>Stopaj oranı</span><b>%2</b></div>
+      <div class="kv"><span>Stopaj</span><b>490,00 ₺</b></div>
+      <div class="kv"><span>Net ödenecek</span><b>24.010,00 ₺</b></div>
+
+      <div class="tvsep"></div>
+      <h5>Kalem Dağılımı</h5>
+      <div class="depo"><span class="ad">Korniş</span>
+        <div class="bar" style="flex:1"><span class="ok" style="width:100%"></span></div><span class="mk">18.700</span></div>
+      <div class="depo"><span class="ad">Profil</span>
+        <div class="bar" style="flex:1"><span class="ok" style="width:23%"></span></div><span class="mk">4.200</span></div>
+      <div class="depo"><span class="ad">Karton</span>
+        <div class="bar" style="flex:1"><span class="kri" style="width:9%"></span></div><span class="mk">1.600</span></div>
+
+      <div class="tvsep"></div>
+      <h5>Durum</h5>
+      <div class="kv"><span>e-Pusula</span><b><span class="pill p-kri">Taslak</span></b></div>
+      <div class="kv"><span>Ödeme</span><b><span class="pill p-yok">Ödenmedi</span></b></div>
+      <div class="kv"><span>Muhasebe</span><b><span class="pill p-yok">Bekliyor</span></b></div>
+      <div class="kv"><span>Muhtasar</span><b>08/2026</b></div>
+
+      <div class="tvsep"></div>
+      <h5>İşlemler</h5>
+      <div class="sidebtns">
+        <span class="minibtn">📤 e-Pusula Gönder</span>
+        <span class="minibtn">💸 Ödeme Yap</span>
+        <span class="minibtn">⚙ Muhasebeleştir</span>
+        <span class="minibtn">🖨️ Yazdır</span>
+        <span class="minibtn">📄 Kopyala (yeni pusula)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow"><b>Veri modeli:</b>
+    <span>Başlık → <b>GIDERPUSULA</b> (PUSULANO · TCKIMLIK · KONU · BRUT · STOPAJORAN · STOPAJ · NET)</span>·
+    <span>Kalem → <b>GIDERPUSULASATIR</b></span>·
+    <span>Stok girişi → <b>STOKDURUM (trigger)</b></span>·
+    <span>Ödeme → <b>KASA</b></span>·
+    <span>Muhasebe → <b>MUHFIS</b> (153/770 · 360.01 · 100/102)</span>·
+    <span>e-Belge → <b>EBELGE</b> (e-Arşiv · ETTN)</span>
+  </div>
+
+  <div class="hint" style="padding:8px 12px;margin:0;border-top:1px solid var(--line2);background:#fbfcfe">
+    <b>Delphi eşlemesi:</b> Kart → <code>IcerikFrame\UGiderPusulaFrame</code> ·
+    Liste → <code>ListeFrame\UGiderPusulaListeDlg · GIDERPUSULA</code> ·
+    Stopaj oranı combosu <b>cxLookupComboBox</b> (GENKOD -24180) → <code>OnPropertiesChange → HesaplaNet</code> ile
+    <b>Net Ödenecek</b> alanını yeniden hesaplar · Kaydet → <code>sp_Prog_GiderPusula_Kaydet</code> ·
+    Muhasebeleştir → <code>sp_Prog_MuhFis_Olustur (KAYNAK='GDP')</code> ·
+    e-Pusula gönder → <code>UEBelgeGonder.GiderPusulaGonder(ETTN)</code>.
+  </div>
+
+  <div class="statusbar">
+    <span>Yön: <b style="color:#8a5a1e">GİDER (Alım)</b></span>
+    <span>Kişi: Hüseyin Aktaş · Mükellef değil</span>
+    <span>Brüt / Stopaj / Net: <b>24.500,00 · 490,00 · 24.010,00 ₺</b></span>
+    <span style="margin-left:auto">Kaydeden: Mehmet Yıldız · 14.08.2026</span>
+  </div>
+</div>
+
+<script>
+  var tabs=document.querySelectorAll('.tab'),panes=document.querySelectorAll('.pane');
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('active')});
+    panes.forEach(function(x){x.classList.remove('active')});
+    t.classList.add('active');
+    var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+    if(p) p.classList.add('active');
+  });});
+</script>
+
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>.gmzgizle{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>.gmzgizle{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+/* === GN-KARTMOD: kart penceresinde tam genislik === */
+body.kartmod{padding:0!important;margin:0!important;background:#fff!important}
+body.kartmod .win,body.kartmod .app{max-width:none!important;width:auto!important;
+  margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+body.koyu.kartmod{background:#12171e!important}
+/* === GN-KARTMOD son === */
+/* === GN-KOYU-GRPBAS: grup basligi koyu tema === */
+body.koyu .grp>h4{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-bottom-color:#2c3542!important}
+body.koyu .grp{background:#1b222c!important;border-color:#2c3542!important}
+body.koyu .grp .tag{background:#2c3a4b!important;color:#9fc0e0!important}
+body.koyu .imgbox{background:linear-gradient(135deg,#222b37,#1b232d)!important;
+  border-color:#3b4a5c!important;color:#7f8fa1!important}
+body.koyu .imgthumbs .t{border-color:#33404f!important}
+/* === GN-KOYU-GRPBAS son === */
+</style>
+<script>(function(){
+function solMenuMu(e){
+  if(!e||e.nodeType!==1) return false;
+  if(/(^|\s)(gorev|solmenu|gtusgrup)(\s|$)/.test(e.className||"")) return true;
+  /* gorev tuslari / sekmeli sol sutun: .gtus veya .ltabs iceriyorsa gizlenir */
+  return !!e.querySelector(".gtus, .ltabs, .lpane");
+}
+function g(){
+  if(location.hash.indexOf("gomulu")>=0){
+    document.body.classList.add("gomulu");
+    [".wrap",".work"].forEach(function(sel){
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(w){
+        var ilk=w.firstElementChild;
+        if(ilk) ilk.classList.toggle("gmzgizle", solMenuMu(ilk));
+      });
+    });
+  } else document.body.classList.remove("gomulu");
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",g); else g();
+addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();
+/* --- GN-KARTMOD: kabuk kartlari "#kart-..." ile acar; genisligi ac --- */
+(function(){
+  function kartModu(){
+    document.body.classList.toggle('kartmod', /(^|[#&])kart(-|\b)/.test(location.hash || ''));
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kartModu);
+  else kartModu();
+  addEventListener('hashchange', kartModu);
+})();
+</script>
+
+<style id="gnPanoCss">
+.gnpk{position:absolute;z-index:40;width:22px;height:46px;
+  border:1px solid var(--line,#d8e0ea);border-radius:6px;
+  background:linear-gradient(#fff,#eef3f9);color:#2f6db3;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+  box-shadow:0 0 6px rgba(20,32,50,.10);user-select:none}
+.gnpk:hover{background:linear-gradient(#fff,#dce8f6);color:#14406f}
+.gnpk.sag{left:-11px;top:14px;border-right:0;border-radius:6px 0 0 6px}
+.gnpk.sol{right:-11px;top:14px;border-left:0;border-radius:0 6px 6px 0}
+.gnpanokap{position:relative}
+.gnpanokap.kapali{width:0!important;min-width:0!important;flex:none!important;
+  padding-left:0!important;padding-right:0!important;
+  border-left-width:0!important;border-right-width:0!important;overflow:visible!important}
+.gnpanokap.kapali>*:not(.gnpk){display:none!important}
+.gnpanokap.kapali .gnpk.sag{left:-23px;border-right:1px solid var(--line,#d8e0ea);border-radius:6px}
+.gnpanokap.kapali .gnpk.sol{right:-23px;border-left:1px solid var(--line,#d8e0ea);border-radius:6px}
+/* koyu tema */
+body.koyu .gnpk{background:linear-gradient(#26313f,#1f2836)!important;border-color:#33404f!important;color:#7fb2e6!important}
+body.koyu .gnpk:hover{background:linear-gradient(#2c3a4b,#242f3e)!important;color:#cfe0f4!important}
+</style>
+<script>
+/* ---- GN_PANO_AC_KAPA — SOL (klasor/arama) ve SAG (bilgi/icerik) panolari ---- */
+(function(){
+  function bul(){
+    var kap = document.querySelector('.wrap') || document.querySelector('.govde') || document.body;
+    var yanlar = [].slice.call(kap.children).filter(function(e){
+      return /\b(gorev|side|yan|nav)\b/.test(e.className || '');
+    });
+    var orta = kap.querySelector(':scope > .center, :scope > .main, :scope > .work');
+    var sol = null, sag = null;
+    yanlar.forEach(function(e){
+      if (/\bright\b/.test(e.className)) { sag = e; return; }
+      if (orta && e.compareDocumentPosition(orta) & Node.DOCUMENT_POSITION_FOLLOWING) sol = sol || e;
+      else if (orta) sag = sag || e;
+      else if (!sol) sol = e; else sag = sag || e;
+    });
+    return {sol: sol, sag: sag};
+  }
+
+  function tak(p, taraf, anahtar, ad){
+    if (!p || p.querySelector(':scope > .gnpk')) return;
+    p.classList.add('gnpanokap');
+    p.style.position = 'relative';
+    var d = document.createElement('div');
+    /* dugme SOL panonun SAG kenarinda, SAG panonun SOL kenarinda durur */
+    d.className = 'gnpk ' + (taraf === 'sol' ? 'sol' : 'sag');
+    function ciz(){
+      var k = p.classList.contains('kapali');
+      d.textContent = taraf === 'sol' ? (k ? '›' : '‹') : (k ? '‹' : '›');
+      d.title = (k ? ad + ' panosunu aç' : ad + ' panosunu kapat');
+    }
+    function uygula(kapali){
+      if (kapali){
+        p.classList.add('kapali');
+        ['width','min-width','max-width','flex-basis','padding-left','padding-right',
+         'border-left-width','border-right-width'].forEach(function(a){
+          p.style.setProperty(a, '0', 'important');
+        });
+        p.style.setProperty('flex', 'none', 'important');
+        p.style.setProperty('overflow', 'visible', 'important');
+      } else {
+        p.classList.remove('kapali');
+        p.style.cssText = '';
+      }
+      p.style.position = 'relative';
+      ciz();
+    }
+    d.addEventListener('click', function(){
+      var k = !p.classList.contains('kapali');
+      uygula(k);
+      try { sessionStorage.setItem(anahtar, k ? '1' : '0'); } catch(e){}
+    });
+    p.appendChild(d);
+    var bas = false;
+    try { bas = sessionStorage.getItem(anahtar) === '1'; } catch(e){}
+    uygula(bas);
+  }
+
+  function kur(){
+    var p = bul();
+    tak(p.sol, 'sol', 'gnPanoSol', 'Klasör / arama');
+    tak(p.sag, 'sag', 'gnPano',    'Bilgi');
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur);
+  else kur();
+})();
+</script>
+</body>
+</html>

@@ -309,6 +309,17 @@ type
     class function Yukle(ABilgi: TXMLItem): TFramePropertyBaglamaBilgisi;
   end;
 
+const
+  // Gorev (sag panel) frame'lerindeki menu butonlarinin renkleri.
+  clGorevTusuSecili = TColor($00BE6F1F);   // RGB(31,111,190) - aktif buton
+  clGorevTusuPasif  = TColor($009C71AD);   // DFM varsayilani (10252717)
+
+// Gorev frame'lerinde "tek buton aktif" davranisi.
+// Butonlar farkli parent'lar altinda (frame + alt paneller) durdugu icin
+// SpeedButtonOptions.GroupIndex tek basina yetmez: grup davranisi yalnizca AYNI Parent
+// icindeki butonlari kapsar -> her panelden birer buton ayni anda basili kalabiliyordu.
+// Bu yordam kapsayicidaki TUM TcxButton'lari tek elden yonetir: yalnizca ATus aktif kalir.
+procedure GorevTusuSec(AKapsayici: TComponent; ATus: TObject);
 
 implementation
 uses
@@ -320,6 +331,34 @@ var
 function FrameIcinAdDegistirici(const Name: string): Boolean;
 begin
   Result := GeciciOwner.FindComponent(Name) = nil;
+end;
+
+procedure GorevTusuSec(AKapsayici: TComponent; ATus: TObject);
+var
+  i, LGrup: Integer;
+  LTus: TcxButton;
+begin
+  if AKapsayici = nil then
+    Exit;
+  // 1) Once TUM butonlar birakilir. Bir buton grup icindeyken (GroupIndex <> 0) basili
+  //    durumu programatik olarak temizlenemez; GroupIndex gecici olarak 0'a cekilince
+  //    Down zorla False olur. Hatanin asil kaynagi buydu.
+  for i := 0 to AKapsayici.ComponentCount - 1 do
+    if AKapsayici.Components[i] is TcxButton then
+    begin
+      LTus := TcxButton(AKapsayici.Components[i]);
+      LGrup := LTus.SpeedButtonOptions.GroupIndex;
+      LTus.SpeedButtonOptions.GroupIndex := 0;
+      LTus.Down := False;
+      LTus.SpeedButtonOptions.GroupIndex := LGrup;
+      LTus.Colors.Default := clGorevTusuPasif;
+    end;
+  // 2) Sadece tiklanan buton aktif (renkli) kalir.
+  if (ATus <> nil) and (ATus is TcxButton) then
+  begin
+    TcxButton(ATus).Down := True;
+    TcxButton(ATus).Colors.Default := clGorevTusuSecili;
+  end;
 end;
 
 { TAnaFrameYoneticisi }

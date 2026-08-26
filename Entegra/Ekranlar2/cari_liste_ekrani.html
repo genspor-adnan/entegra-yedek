@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cari Liste Ekranı — Mockup (yeniden tasarım)</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#d2dae3;--line2:#e6ebf1;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;--accent:#2f6db3;
+    --sel:#dcebfb;--selbd:#9cc4ee;--head:#f1f5f9;--head2:#e7eef5;--btnfrom:#ffffff;--btnto:#eef2f7;--ok:#2e7d46;--warn:#b5731a;--red:#b23b3b;}
+  *{box-sizing:border-box}
+  body{margin:0;background:#dfe4ea;color:var(--ink);font-family:"Segoe UI","Trebuchet MS",Tahoma,sans-serif;font-size:12px;padding:12px;}
+  .app{max-width:1360px;margin:0 auto;background:var(--bg);border:1px solid #b9c3ce;border-radius:8px;overflow:hidden;box-shadow:0 10px 30px rgba(20,40,70,.18);display:flex;flex-direction:column;height:760px}
+  /* title bar */
+  .titlebar{height:34px;background:linear-gradient(#2b5c95,#1c4374);color:#fff;display:flex;align-items:center;gap:8px;padding:0 10px;font-weight:600;font-size:12.5px}
+  .titlebar .logo{width:16px;height:16px;border-radius:3px;background:#7fb2e6}
+  .titlebar .wc{margin-left:auto;display:flex;gap:14px;opacity:.9}
+  /* menu */
+  .menubar{height:26px;background:#f4f6f9;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:0 12px;font-size:12px;color:#33465c}
+  .menubar b{font-weight:600}
+  /* module ribbon */
+  .ribbon{display:flex;gap:2px;background:linear-gradient(#e9eef4,#dde5ee);border-bottom:1px solid var(--line);padding:6px 8px 0}
+  .mod{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:78px;padding:6px 8px 7px;border:1px solid transparent;border-bottom:none;border-radius:6px 6px 0 0;color:#3f5165;font-size:11px;cursor:default}
+  .mod .mi{font-size:17px;line-height:1}
+  .mod:hover{background:#eef3f9}
+  .mod.active{background:#fff;border-color:var(--line);color:var(--navy);font-weight:600;box-shadow:0 -2px 0 var(--accent) inset}
+  /* body */
+  .work{flex:1;display:flex;min-height:0;background:#fff}
+  /* left filter panel */
+  .side{width:236px;flex:none;border-right:1px solid var(--line);background:#f7f9fc;display:flex;flex-direction:column;min-height:0}
+  .side .sh{display:flex;align-items:center;gap:8px;padding:10px 12px;background:linear-gradient(#fff5e6,#ffe9c9);border-bottom:1px solid #f0d9b0}
+  .side .sh .ic{font-size:20px}
+  .side .sh b{color:#8a5a1e;font-size:12.5px}
+  .side .subbtns{display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line2)}
+  .side .subbtns .b{flex:1;text-align:center;border:1px solid var(--line);background:linear-gradient(#fff,#eef2f7);border-radius:5px;padding:6px;font-size:11.5px;color:#3f5165}
+  .side .body{padding:10px;overflow:auto;flex:1}
+  .seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:10px}
+  .seg .s{flex:1;text-align:center;padding:5px;font-size:11.5px;color:var(--muted);background:#fff;border-right:1px solid var(--line2)}
+  .seg .s:last-child{border-right:none}
+  .seg .s.on{background:var(--accent);color:#fff;font-weight:600}
+  .srch{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:#fff;padding:4px 8px;margin-bottom:10px}
+  .srch input{border:none;outline:none;flex:1;font-size:12px;font-family:inherit}
+  .frow{display:flex;flex-direction:column;gap:2px;margin-bottom:7px}
+  .frow label{font-size:10.5px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:4px;background:#fff;height:24px;padding:0 6px;font-size:12px;display:flex;align-items:center;color:var(--ink)}
+  .inp.combo{position:relative}.inp.combo::after{content:"▾";position:absolute;right:6px;color:var(--muted);font-size:10px}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#3f5165;margin:4px 0}
+  .chk input{accent-color:var(--accent)}
+  .side .foot{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--line2)}
+  .side .foot .b{flex:1;text-align:center;border-radius:6px;padding:7px;font-size:12px;font-weight:600}
+  .side .foot .b.pri{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border:1px solid #2f6db3}
+  .side .foot .b.sec{background:linear-gradient(#fff,#eef2f7);color:#3f5165;border:1px solid var(--line)}
+  /* main */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .crumb{padding:7px 12px;border-bottom:1px solid var(--line2);color:var(--muted);font-size:11.5px;background:#fafbfd}
+  .crumb b{color:var(--navy)}
+  .toolbar{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);background:linear-gradient(#fff,#f4f7fb)}
+  .tb{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:6px;padding:6px 11px;font-size:12px;color:#33465c}
+  .tb:hover{border-color:var(--selbd)}
+  .tb.pri{background:linear-gradient(#5cb370,#2e7d46);border-color:#2e7d46;color:#fff;font-weight:600}
+  .tb.del{background:linear-gradient(#e0605c,#c0413d);border-color:#b23b3b;color:#fff;font-weight:600}
+  .tb .i{font-size:13px}
+  .toolbar .right{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .gsearch{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:#fff;padding:4px 8px;width:210px}
+  .gsearch input{border:none;outline:none;flex:1;font-size:12px;font-family:inherit}
+  /* grid */
+  .gridwrap{flex:1;display:flex;flex-direction:column;min-height:0;border-bottom:1px solid var(--line)}
+  .groupbar{padding:6px 12px;background:#eef2f7;border-bottom:1px solid var(--line2);color:#8595a6;font-size:11px;font-style:italic}
+  .gridscroll{flex:1;overflow:auto}
+  table.grid{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}
+  table.grid th{position:sticky;top:0;background:linear-gradient(#f3f7fb,#e6edf5);border-bottom:2px solid #cfdae6;border-right:1px solid var(--line2);text-align:left;padding:7px 9px;color:#3a5573;font-weight:600;white-space:nowrap;z-index:1}
+  table.grid td{border-bottom:1px solid #eef2f6;border-right:1px solid #f1f4f8;padding:6px 9px;white-space:nowrap}
+  table.grid tbody tr:nth-child(even) td{background:#fafcfe}
+  table.grid tbody tr:hover td{background:#f2f8ff}
+  table.grid tbody tr.sel td{background:var(--sel);box-shadow:inset 0 0 0 9999px rgba(47,109,179,.06)}
+  .amt{text-align:right;font-variant-numeric:tabular-nums}
+  .pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:600}
+  .pill.ok{background:#e7f5ec;color:#2e7d46;border:1px solid #c4e6d0}
+  .pill.red{background:#fdecec;color:#b23b3b;border:1px solid #f2c9c9}
+  .pill.gray{background:#eef1f4;color:#6b7a8b;border:1px solid #dbe1e8}
+  .bd{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10.5px;font-weight:600}
+  .bd.sat{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .bd.al{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}
+  .bd.bayi{background:#f0ecfb;color:#6b4bb0;border:1px solid #ddd2f0}
+  .kod{font-variant-numeric:tabular-nums;color:#4a5c70}
+  .gridfoot{display:flex;align-items:center;gap:14px;padding:5px 12px;background:#f4f7fb;border-top:1px solid var(--line2);font-size:11.5px;color:var(--muted)}
+  .gridfoot b{color:var(--navy)}
+  /* detail (master-detail) */
+  .detail{height:230px;flex:none;display:flex;flex-direction:column;background:#fff}
+  .dtabs{display:flex;gap:2px;padding:0 8px;background:#eaf0f6;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .dtab{padding:6px 12px;font-size:11.5px;background:#e2e9f1;border:1px solid var(--line);border-bottom:none;border-radius:5px 5px 0 0;margin-top:5px;color:var(--muted);position:relative;top:1px}
+  .dtab.active{background:#fff;color:var(--navy);font-weight:600}
+  .subtabs{display:flex;gap:6px;padding:6px 10px;border-bottom:1px solid var(--line2);background:#f7f9fc;flex-wrap:wrap}
+  .subtab{font-size:11.5px;color:#3f5165;border:1px solid var(--line);background:#fff;border-radius:14px;padding:3px 11px}
+  .subtab.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+  .dscroll{flex:1;overflow:auto}
+  .statusbar{height:24px;background:linear-gradient(#eef2f7,#e4eaf1);border-top:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:0 12px;font-size:11px;color:#4a5c70}
+  .statusbar .r{margin-left:auto}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- title -->
+  <div class="titlebar"><span class="logo"></span> Gentegre ERP 26.8.10.2 <span class="wc"><span>—</span><span>▢</span><span>✕</span></span></div>
+  <!-- menu -->
+  <div class="menubar"><b>Gen</b><b>Seçenekler</b><b>Yardım</b><span style="margin-left:auto;color:#8595a6">🔔  🔄</span></div>
+  <!-- module ribbon -->
+  <div class="ribbon">
+    <div class="mod"><span class="mi">🧭</span>CRM</div>
+    <div class="mod active"><span class="mi">👥</span>Cari</div>
+    <div class="mod"><span class="mi">💵</span>Kasa</div>
+    <div class="mod"><span class="mi">🛒</span>Alış/Satış</div>
+    <div class="mod"><span class="mi">🏦</span>Banka</div>
+    <div class="mod"><span class="mi">📦</span>Stok</div>
+    <div class="mod"><span class="mi">⚙️</span>Üretim</div>
+    <div class="mod"><span class="mi">🧑‍💼</span>IK</div>
+    <div class="mod"><span class="mi">🖥️</span>Demirbaş</div>
+    <div class="mod"><span class="mi">📄</span>Teklif</div>
+    <div class="mod"><span class="mi">🔧</span>Servis</div>
+    <div class="mod"><span class="mi">🗂️</span>Doküman</div>
+  </div>
+
+  <div class="work">
+    <!-- LEFT: filter panel -->
+    <div class="side">
+      <div class="sh"><span class="ic">👤</span><b>Cari Hesap Kartı</b></div>
+      <div class="subbtns"><div class="b">🖨 Dökümler</div><div class="b">⚙ Özel</div></div>
+      <div class="body">
+        <div class="srch">🔎&nbsp;<input placeholder="Hızlı ara (ünvan, kod, VKN)…"></div>
+        <div class="seg"><div class="s on">Tüm</div><div class="s">Son</div><div class="s">Sık</div></div>
+        <div class="frow"><label>Ünvan</label><div class="inp"></div></div>
+        <div class="frow"><label>İlgili</label><div class="inp"></div></div>
+        <div class="frow"><label>Kod</label><div class="inp"></div></div>
+        <div class="frow"><label>Grup</label><div class="inp combo">Tümü</div></div>
+        <div class="frow"><label>Kategori</label><div class="inp combo">Tümü</div></div>
+        <div class="frow"><label>Sınıf</label><div class="inp combo">Tümü</div></div>
+        <div class="frow"><label>Özel Kod</label><div class="inp"></div></div>
+        <div class="frow"><label>Analiz</label><div class="inp combo">Seçiniz</div></div>
+        <div style="height:8px"></div>
+        <label class="chk"><input type="checkbox"> Detay göster</label>
+        <label class="chk"><input type="checkbox"> Pasifleri de göster</label>
+        <label class="chk"><input type="checkbox"> Potansiyelde de ara</label>
+      </div>
+      <div class="foot"><div class="b pri">Filtrele</div><div class="b sec">Temizle</div></div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+      <div class="crumb">Cari › <b>Cari Hesap Kartı</b> · Liste</div>
+      <div class="toolbar">
+        <div class="tb pri"><span class="i">＋</span> Yeni</div>
+        <div class="tb del"><span class="i">🗑</span> Sil</div>
+        <div class="tb"><span class="i">✎</span> Düzenle</div>
+        <span style="width:1px;height:22px;background:var(--line);margin:0 2px"></span>
+        <div class="tb"><span class="i">📋</span> İş Listesi</div>
+        <div class="tb"><span class="i">🧭</span> CRM</div>
+        <div class="tb"><span class="i">▶</span> Aksiyon</div>
+        <div class="right">
+          <div class="gsearch">🔎&nbsp;<input placeholder="Listede ara…"></div>
+          <div class="tb"><span class="i">▦</span> Kolonlar</div>
+          <div class="tb"><span class="i">⬇</span> Excel</div>
+        </div>
+      </div>
+
+      <div class="gridwrap">
+        <div class="groupbar">⬇ Gruplamak istediğiniz kolonu buraya sürükleyin</div>
+        <div class="gridscroll">
+          <table class="grid">
+            <thead><tr>
+              <th style="width:60px">ID</th><th style="width:90px">Sınıf</th><th style="width:90px">Grup</th><th style="width:90px">Kategori</th>
+              <th style="width:80px">Sektör</th><th style="width:110px">Kod</th><th>Ünvan</th><th style="width:140px">Resmi Ad</th>
+              <th style="width:110px">İlgili</th><th class="amt" style="width:120px">Bakiye</th><th style="width:80px">Özel Kod</th><th style="width:80px">Durum</th>
+            </tr></thead>
+            <tbody>
+              <tr><td class="kod">1247</td><td><span class="bd sat">Satıcılar</span></td><td>—</td><td>A</td><td>Kaplama</td><td class="kod">320.02.010</td><td>OERLIKON BALZERS COATING</td><td>Oerlikon</td><td></td><td class="amt">−12.400,00</td><td></td><td><span class="pill ok">Aktif</span></td></tr>
+              <tr><td class="kod">1105</td><td><span class="bd bayi">Bayi</span></td><td>Alıcılar</td><td>B</td><td>Mühendislik</td><td class="kod">120.01.005</td><td>NAZORATİ MÜHENDİSLİK</td><td>Nazorati Müh.</td><td></td><td class="amt">84.900,00</td><td>NZR</td><td><span class="pill ok">Aktif</span></td></tr>
+              <tr><td class="kod">1125</td><td><span class="bd al">Alıcılar</span></td><td>Alıcılar</td><td>A</td><td>—</td><td class="kod">120.01.051</td><td>ZAFER TUNA</td><td></td><td></td><td class="amt">3.250,00</td><td></td><td><span class="pill red">Yasak</span></td></tr>
+              <tr class="sel"><td class="kod">1126</td><td><span class="bd al">Alıcılar</span></td><td>Alıcılar</td><td>A</td><td>Tekstil</td><td class="kod">120.01.052</td><td>BEETHOVEN GİYİM DIŞ TİC.</td><td>Beethoven</td><td></td><td class="amt">172.320,50</td><td>BTV</td><td><span class="pill ok">Aktif</span></td></tr>
+              <tr><td class="kod">4</td><td><span class="bd sat">Satıcılar</span></td><td>—</td><td>—</td><td>—</td><td class="kod">320.01.000</td><td>CARİ HESAP TUTULMAYAN</td><td></td><td>mehmet det</td><td class="amt">0,00</td><td></td><td><span class="pill ok">Aktif</span></td></tr>
+              <tr><td class="kod">1187</td><td><span class="bd sat">Satıcılar</span></td><td>—</td><td>C</td><td>Makine</td><td class="kod">320.01.109</td><td>ADMEN ENDÜSTRİYEL MAK.</td><td>Admen</td><td></td><td class="amt">−45.100,00</td><td></td><td><span class="pill ok">Aktif</span></td></tr>
+              <tr><td class="kod">1137</td><td><span class="bd al">Alıcılar</span></td><td>Alıcılar</td><td>B</td><td>—</td><td class="kod">120.01.001</td><td>VOLKAN ŞİRİNBAY</td><td></td><td></td><td class="amt">9.800,00</td><td></td><td><span class="pill ok">Aktif</span></td></tr>
+              <tr><td class="kod">1301</td><td><span class="bd al">Alıcılar</span></td><td>Alıcılar</td><td>A</td><td>Bilişim</td><td class="kod">120.01.052</td><td>GRANİT BİLGİSAYAR LTD.</td><td>Granit Bilg.</td><td>Ahmet K.</td><td class="amt">172.320,50</td><td>BLG</td><td><span class="pill ok">Aktif</span></td></tr>
+              <tr><td class="kod">988</td><td><span class="bd sat">Satıcılar</span></td><td>—</td><td>A</td><td>Teknoloji</td><td class="kod">320.02.044</td><td>MNG TEKNOLOJİ A.Ş.</td><td>MNG Tekno.</td><td>Elif D.</td><td class="amt">−958.200,00</td><td>MNG</td><td><span class="pill ok">Aktif</span></td></tr>
+              <tr><td class="kod">742</td><td><span class="bd al">Alıcılar</span></td><td>Alıcılar</td><td>C</td><td>—</td><td class="kod">120.02.210</td><td>ESKİ MÜŞTERİ TİC.</td><td></td><td></td><td class="amt">0,00</td><td></td><td><span class="pill gray">Pasif</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gridfoot"><span>Kayıt: <b>100</b></span><span>Seçili: <b>BEETHOVEN GİYİM DIŞ TİC.</b> (1126)</span><span class="r">Toplam Bakiye (filtre): <b>−1.520.900,00 ₺</b></span></div>
+      </div>
+
+      <!-- MASTER-DETAIL -->
+      <div class="detail">
+        <div class="dtabs">
+          <div class="dtab">İletişim</div><div class="dtab">İlgililer</div><div class="dtab">Ticari Bilgiler</div>
+          <div class="dtab active">Alış/Satış</div><div class="dtab">Ekstre</div><div class="dtab">CRM</div>
+          <div class="dtab">Teklif</div><div class="dtab">Servis</div><div class="dtab">Yorum/Medya</div>
+        </div>
+        <div class="subtabs">
+          <div class="subtab active">Alış Sipariş</div><div class="subtab">Alış İrsaliye</div><div class="subtab">Alış Konsinye</div>
+          <div class="subtab">Satış Sipariş</div><div class="subtab">Satış İrsaliye</div><div class="subtab">Satış Konsinye</div>
+        </div>
+        <div class="dscroll">
+          <table class="grid">
+            <thead><tr><th style="width:130px">Tarih</th><th style="width:90px">Belge No</th><th style="width:60px">Seri</th><th>Açıklama</th><th class="amt" style="width:90px">Matrah</th><th class="amt" style="width:80px">KDV</th><th class="amt" style="width:90px">Tutar</th><th style="width:50px">Kur</th><th style="width:90px">Vade</th><th style="width:100px">Kaynak</th><th style="width:80px">Hedef</th><th style="width:90px">Depo</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td>09.08.2026 12:10:59</td><td class="kod">20241375</td><td></td><td>000508 nolu belgeden</td><td class="amt">0,00</td><td class="amt">0,00</td><td class="amt">0,00</td><td>TL</td><td></td><td>Talepten</td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>Kullanıcı: <b>Mehmet Yıldız</b></span><span>Şube: Merkez</span><span>Motor: MSSQL · BILIM</span><span class="r">Gentegre ERP · 12.08.2026 15:20</span></div>
+</div>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

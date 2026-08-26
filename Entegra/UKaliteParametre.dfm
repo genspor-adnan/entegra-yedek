@@ -659,7 +659,7 @@ object KaliteParametreDlg: TKaliteParametreDlg
     object TabSablonDetayTOLERANSDEGERI: TBCDField
       FieldName = 'TOLERANSDEGERI'
       Precision = 12
-      Size = 2
+      Size = 4
     end
     object TabSablonDetayEKLEYEN: TIntegerField
       FieldName = 'EKLEYEN'
@@ -676,7 +676,7 @@ object KaliteParametreDlg: TKaliteParametreDlg
     object TabSablonDetayMIKTAR: TBCDField
       FieldName = 'MIKTAR'
       Precision = 12
-      Size = 2
+      Size = 4
     end
     object TabSablonDetayBIRIM: TSmallintField
       FieldName = 'BIRIM'

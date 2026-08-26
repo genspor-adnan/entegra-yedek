@@ -25,8 +25,9 @@
 --  fonksiyonu cagirir - iki farkli "gercek" olusmaz.
 --
 --  DELPHI'DE OLUP BURADA OLMAYAN (bizde veri karsiligi yok):
---    tevkifat, ihracat/gumruk, KAMU odeme hesabi, SGK donem/referanslari,
+--    ihracat/gumruk, KAMU odeme hesabi, SGK donem/referanslari,
 --    ilac-tibbi cihaz kimlikleri, sofor/tasiyici detaylari.
+--  TEVKIFAT, KDV ISTISNASI ve IADE REFERANSI 176'da eklendi.
 --  Bunlarin hepsi ILGILI SENARYODA devreye girer; senaryo secilirse fonksiyon
 --  bugun sessizce eksik JSON uretmesin diye ACIK HATA verir (asagida).
 --
@@ -108,6 +109,9 @@ declare
     v_matrah     numeric := 0;   -- NET (iskonto sonrasi) toplam
     v_kdv        numeric := 0;
     v_iskonto    numeric := 0;
+    v_tevkifat   numeric := 0;
+    v_tevk_alt   jsonb;
+    v_iade_ref   jsonb;
     v_mail       text;
 begin
     select bl.*, e.id as e_belge_id, e.belge_turu as e_tur, e.belge_no as e_no,
@@ -146,10 +150,15 @@ begin
                     when v_arsiv    then 'EARSIVFATURA'
                     when coalesce(b.senaryo, 0) = 2 then 'TICARIFATURA'
                     else 'TEMELFATURA' end;
+    -- Delphi FaturaTipKodu ile ayni esleme; tevkifatli faturada belge tipi
+    --   TEVKIFAT olmali, yoksa GIB "tevkifat var ama tip SATIS" der.
     v_belge_tipi := case
                         when v_irsaliye then 'SEVK'
                         when coalesce(b.tipi, 0) = 2 then 'IADE'
+                        when coalesce(b.tipi, 0) = 22 then 'TEVKIFAT'
                         when coalesce(b.tipi, 0) = 24 then 'ISTISNA'
+                        when coalesce(b.tipi, 0) = 9 then 'IHRACKAYITLI'
+                        when coalesce(b.tipi, 0) = 25 then 'SGK'
                         else 'SATIS' end;
 
     -- ------------------------------------------------------------ satirlar --
@@ -161,6 +170,15 @@ begin
                round(bs.miktar * bs.birim_fiyat, 2)                       as brut,
                round(bs.miktar * bs.birim_fiyat, 2) - bs.tutar            as isk_tutar,
                round(bs.tutar * coalesce(bs.kdv, 0) / 100.0, 2)           as kdv_tutar,
+               -- TEVKIFAT: KDV'nin bir kismi alicida kalir. Oran KODDAN gelir -
+               --   elle girilen oran koda uymazsa GIB sematronu reddeder (176).
+               coalesce(nullif(bs.tevkifat_orani, 0),
+                        public.fn_tevkifat_orani(bs.tevkifat_kodu))          as tevk_oran,
+               round(round(bs.tutar * coalesce(bs.kdv, 0) / 100.0, 2)
+                     * coalesce(nullif(bs.tevkifat_orani, 0),
+                                public.fn_tevkifat_orani(bs.tevkifat_kodu)) / 100.0, 2)
+                                                                             as tevk_tutar,
+               btrim(coalesce(bs.tevkifat_kodu, ''))                         as tevk_kod,
                -- Satir NUMARASI burada uretilir: jsonb_agg icinde pencere
                --   fonksiyonu cagrilamiyor (toplama + pencere ayni ifadede yasak).
                row_number() over (order by bs.sira, bs.id)                 as satir_no
@@ -187,6 +205,24 @@ begin
                          'baseAmount', s.brut)))
                  else '{}'::jsonb end
               -- e-Irsaliyede vergi YOK; para birimi satirda tasinir.
+              -- Satir tevkifati: izibiz SATIRDA 'withholdingTaxTotal' bekler
+              --   (fatura duzeyinde 'withHoldingTax'). Matrah = KDV TUTARI,
+              --   net degil - izibiz sematron kurali (Delphi'de dogrulanmis).
+              || case when s.tevk_tutar > 0.0001 and not v_irsaliye then
+                     jsonb_build_object('withholdingTaxTotal', jsonb_build_object(
+                         'taxAmount', s.tevk_tutar,
+                         'taxSubTotal', jsonb_build_array(jsonb_build_object(
+                             'taxableAmount', s.kdv_tutar,
+                             'taxAmount', s.tevk_tutar,
+                             -- izibiz sematron 856: sira numarasi bos olamaz.
+                             'calculationSequenceNumeric', 1,
+                             -- TAM SAYI: izibiz "50.00" reddediyor, "50" kabul
+                             --   ediyor (Delphi de Round ile gonderiyor).
+                             'percent', round(s.tevk_oran)::int,
+                             'taxScheme', jsonb_build_object(
+                                 'name', 'KDV TEVKIFATI',
+                                 'typeCode', s.tevk_kod)))))
+                 else '{}'::jsonb end
               || case when v_irsaliye then jsonb_build_object('currencyId', v_para)
                  else jsonb_build_object('taxTotal', jsonb_build_object(
                         'taxAmount', s.kdv_tutar,
@@ -214,8 +250,9 @@ begin
              ) order by s.sira, s.id),
            coalesce(sum(s.tutar), 0),
            coalesce(sum(s.kdv_tutar), 0),
-           coalesce(sum(greatest(s.isk_tutar, 0)), 0)
-      into v_satirlar, v_matrah, v_kdv, v_iskonto
+           coalesce(sum(greatest(s.isk_tutar, 0)), 0),
+           coalesce(sum(s.tevk_tutar), 0)
+      into v_satirlar, v_matrah, v_kdv, v_iskonto, v_tevkifat
       from s;
 
     if v_satirlar is null then
@@ -253,13 +290,45 @@ begin
                  where bs.belge_id = p_belge_id
                  group by coalesce(bs.kdv, 0)) x;
 
+        -- FATURA DUZEYI TEVKIFAT: izibiz 'withHoldingTax' anahtarini bekler
+        --   (satirdaki 'withholdingTaxTotal' ile karistirilmamali; yanlis anahtar
+        --   "satirda tevkifat yok" sematron hatasi verir).
+        if v_tevkifat > 0.0001 then
+            select jsonb_build_object(
+                     'taxAmount', round(v_tevkifat, 2),
+                     'taxSubTotal', jsonb_agg(jsonb_build_object(
+                         'taxableAmount', x.kdv,
+                         'taxAmount', x.tevkifat,
+                         'calculationSequenceNumeric', 1,
+                         'percent', round(x.oran)::int,
+                         'taxScheme', jsonb_build_object(
+                             'name', 'KDV TEVKIFATI', 'typeCode', x.kod))
+                       order by x.oran))
+              into v_tevk_alt
+              from (select coalesce(nullif(bs.tevkifat_orani, 0),
+                                    public.fn_tevkifat_orani(bs.tevkifat_kodu)) as oran,
+                           max(btrim(coalesce(bs.tevkifat_kodu, '')))           as kod,
+                           sum(round(bs.tutar * coalesce(bs.kdv, 0) / 100.0, 2)) as kdv,
+                           sum(round(round(bs.tutar * coalesce(bs.kdv, 0) / 100.0, 2)
+                               * coalesce(nullif(bs.tevkifat_orani, 0),
+                                          public.fn_tevkifat_orani(bs.tevkifat_kodu)) / 100.0, 2))
+                                                                                as tevkifat
+                      from public.belge_satir bs
+                     where bs.belge_id = p_belge_id
+                       and coalesce(nullif(bs.tevkifat_orani, 0),
+                                    public.fn_tevkifat_orani(bs.tevkifat_kodu)) > 0
+                     group by 1) x;
+        end if;
+
         -- lineExtensionAmount = BRUT (iskonto oncesi), taxExclusive = NET.
         --   Delphi'deki ayrimin aynisi; GIB "Mal Hizmet Toplam Tutari"ni brut ister.
         v_toplam := jsonb_build_object(
             'lineExtensionAmount', round(v_matrah + v_iskonto, 2),
             'taxExclusiveAmount',  round(v_matrah, 2),
             'taxInclusiveAmount',  round(v_matrah + v_kdv, 2),
-            'payableAmount',       round(coalesce(b.genel_toplam, v_matrah + v_kdv), 2))
+            -- Odenecek = matrah + KDV - TEVKIFAT (tevkifat kismini alici
+            --   dogrudan devlete oder, satici tahsil etmez).
+            'payableAmount',       round(v_matrah + v_kdv - v_tevkifat, 2))
             || case when v_iskonto > 0.0001
                     then jsonb_build_object('allowanceTotalAmount', round(v_iskonto, 2))
                     else '{}'::jsonb end;
@@ -392,6 +461,28 @@ begin
     if not v_irsaliye then
         v_content := v_content || jsonb_build_object('taxTotal', v_vergi,
                                                      'legalMonetaryTotal', v_toplam);
+        if v_tevk_alt is not null then
+            v_content := v_content || jsonb_build_object('withHoldingTax', v_tevk_alt);
+        end if;
+
+        -- IADE (tipi=2): iade edilen ORIJINAL belgenin referansi. GIB schematron
+        --   10003 bunu 16 haneli numara + documentTypeCode=IADE ile ZORUNLU
+        --   tutar; yoksa belge reddedilir (176 iade_belge_id).
+        if coalesce(b.tipi, 0) = 2 then
+            select jsonb_agg(jsonb_build_object(
+                       'id', coalesce(nullif(btrim(o.belge_no), ''), ''),
+                       'issueDate', to_char(o.belge_tarihi, 'YYYY-MM-DD'),
+                       'documentTypeCode', 'IADE',
+                       'documentType', 'İade Edilen Fatura'))
+              into v_iade_ref
+              from public.belge o
+             where o.id = b.iade_belge_id;
+
+            if v_iade_ref is null then
+                raise exception 'İade faturasında hangi faturanın iade edildiği seçilmemiş; GİB referanssız iade belgesini reddeder.';
+            end if;
+            v_content := v_content || jsonb_build_object('billingReference', v_iade_ref);
+        end if;
         -- Faturaya kaynaklik eden irsaliye referansi (GIB ister).
         if coalesce(btrim(b.irsaliye_no), '') <> '' then
             v_content := v_content || jsonb_build_object('despatchDocumentReference',

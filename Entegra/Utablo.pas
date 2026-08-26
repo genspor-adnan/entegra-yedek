@@ -1,4 +1,4 @@
-﻿unit Utablo;
+﻿unit  Utablo;
 
 interface
 
@@ -29,7 +29,7 @@ uses Windows, DB, System.JSON, xmldom, XMLIntf, dxSkinsCore,dxSkinLondonLiquidSk
   System.Net.URLClient, cxImageList, System.ImageList, cxGenYazilim_RepoClasses, frCoreClasses,
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf,
   FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async,
-  FireDAC.Phys, FireDAC.VCLUI.Wait, FireDAC.Comp.Client, FireDAC.Phys.MSSQLDef,
+  FireDAC.Phys, FireDAC.VCLUI.Wait, FireDAC.Comp.Client, FireDAC.Comp.Script, FireDAC.Phys.MSSQLDef,
   FireDAC.Phys.ODBCBase, FireDAC.Phys.MSSQL, FireDAC.Stan.Param, FireDAC.DatS,
   FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet, UFDCompatHelpers,
   IdCTypes, IdSSLOpenSSLHeaders;
@@ -123,6 +123,7 @@ uses Windows, DB, System.JSON, xmldom, XMLIntf, dxSkinsCore,dxSkinLondonLiquidSk
     FSiralamaKullanici: Boolean; // siralamayi KULLANICI mi yapti (kayitli grid ayari degil)
     FOtoBuyutme: Integer;        // ardisik OTOMATIK sayfa buyutme sayaci (zincir freni)
     FDegerListesiKuruluyor: Boolean;  // FiltreDegerListesi re-Load reentrancy guard'i
+    FSessizBitis: UInt64;        // yukleme sonrasi scroll tetigini yok sayma damgasi (GetTickCount64)
     FSerit: TPanel;              // "kismi liste" uyari seridi (grid'in altinda, lazy olusur)
     FSeritYazi: TLabel;
     FSeritTus: TButton;
@@ -2111,6 +2112,11 @@ begin
    end;
               //TabNo_DONUSUM_STOKTALEP_TRANSFER
   KocanNo := KocannoBul(BaslikTur);
+  if ((BaslikTur = KasaTur_SatisFaturasi) and (EFaturaKullanimda > 0)) or
+     ((BaslikTur = KasaTur_SatisIrsaliyesi) and EIrsaliyeKullanimda) then begin
+    KocanNo := 0;
+    BelgeNo.BelgeNo := '0';
+  end;
   if DonusTuru=TabNo_DONUSUM_SATINALMATALEP_SIPARIS then begin
     Tablo.Query1.Close;
     var LSipKol: string := 'INSERT INTO SIPARIS (TUR,TIPI,REHBERID,PROJEID,AKTIVITEID,SIPARISTARIH,TARIH,KOCANNO,SIPARISNO, ACIKLAMA,'+
@@ -3215,6 +3221,15 @@ function TTablo.BelgeDonustur(DonusTuru, KaynakBaslikId: integer; HedefBasID:int
 // Belge donusumunun TEK giris noktasi. Isin tamami sunucuda
 //   (sp_Prog_BelgeDonusum_Uygula_Json2); burada yalnizca arayuz isi kalir.
 //   Eski Pascal uygulamasi 08.08.2026'da kaldirildi - asagiya bak.
+  procedure EIrsaliyeTaslakNoDuzelt(AFatBaslikID: Integer);
+  begin
+    if (AFatBaslikID > 0) and EIrsaliyeKullanimda then
+      Veritabani.BasitKomutÇalıştır(FDCnn,
+        'update FATBASLIK set FATURANO=''0'', KOCANNO=0 ' +
+        'where ID=&ID and TUR=&TUR and ltrim(rtrim(coalesce(FATURANO,'''')))<>''0''',
+        ['&ID', '&TUR'], [AFatBaslikID, KasaTur_SatisIrsaliyesi]);
+  end;
+
   // Sunucunun bu rotayi isleyip islemedigi rota matrisinden okunur.
   function SunucuDestekli: Boolean;
   var
@@ -3253,6 +3268,7 @@ begin
 
     if LId > 0 then
     begin
+      EIrsaliyeTaslakNoDuzelt(LId);
       Result := LId;
       Exit;
     end;
@@ -3266,6 +3282,7 @@ begin
         LId := BelgeDonusumUygula(DonusTuru, KaynakBaslikId, HedefBasID, True, False, LSonuc);
         if LId > 0 then
         begin
+          EIrsaliyeTaslakNoDuzelt(LId);
           Result := LId;
           Exit;
         end;
@@ -3301,6 +3318,7 @@ begin
                                 LSonuc, LSatirlar);
       if LId > 0 then
       begin
+        EIrsaliyeTaslakNoDuzelt(LId);
         Result := LId;
         Exit;
       end;
@@ -5691,7 +5709,12 @@ begin
   else
   begin
     FATBASLIK.FieldByName('FATURANO').AsString := belgeno.belgeno; // FatNo;
-    FATBASLIK.FieldByName('KOCANNO').AsInteger := KocannoBul(Tur); // KOCAN numarası
+    // KOCAN numarasi: sp_BelgeNoGetir'in COZDUGU kocan yazilmali. KocannoBul 0/-99
+    //   dondugunde (kocan ayari bu tur icin yuklenmemis/tanimsiz) SP kocani
+    //   KOCANAYARLARI'ndan bulup numarayi ONA gore uretiyor; belgeye 0 yazilirsa bir
+    //   sonraki numara MAX(FATURANO) filtresine takilmayip hep basa donuyordu.
+    FATBASLIK.FieldByName('KOCANNO').AsInteger :=
+      StrToIntDef(belgeno.KocanNo, KocannoBul(Tur));
   end;
 end;
 
@@ -8053,6 +8076,11 @@ var
     K: Integer;
   begin
     Result := -1;
+    // ID ASLA disaridan yazilmaz: yeni satirin anahtari MSSQL'de IDENTITY, PG'de
+    //   max(ID)+1 ile uretilir. Cagiran yanlislikla 'ID' gecerse (or. 'STOKID' yerine)
+    //   MSSQL'de "Field 'ID' cannot be modified", PG'de "column ID specified more than
+    //   once" aliniyordu -> listede olsa bile yok say.
+    if SameText(AlanAdi, 'ID') then Exit;
     for K := 0 to Length(VarsAlanlar) - 1 do
       if SameText(VarsAlanlar[K], AlanAdi) then
         Exit(K);
@@ -8127,12 +8155,14 @@ begin
   for I := 0 to Tablo.Query1.FieldCount - 1 do
   begin
     listedevar := False;
-    for j := 0 to length(VarsAlanlar) - 1 do begin
-      if VarsAlanlar[j] = Tablo.Query1.Fields[i].FieldName then begin
-        listedevar := True;
-        Tablo.Query2.Fields[i].Value := VarsDegerler[j];
+    // ID disaridan YAZILMAZ (bkz. DegerAlanIndex): anahtar IDENTITY tarafindan uretilir.
+    if not SameText(Tablo.Query1.Fields[i].FieldName, 'ID') then
+      for j := 0 to length(VarsAlanlar) - 1 do begin
+        if VarsAlanlar[j] = Tablo.Query1.Fields[i].FieldName then begin
+          listedevar := True;
+          Tablo.Query2.Fields[i].Value := VarsDegerler[j];
+        end;
       end;
-    end;
     if not listedevar then begin
       if (Tablo.Query1.Fields[i].FieldName <> 'ID') and
         (Tablo.Query1.Fields[i].FieldName <> 'EKLEMETARIHI') and
@@ -10716,6 +10746,8 @@ End;
 procedure TTablo.GuncellemeSatiriCalistir(SQLText:String; var AltHataSay:integer);
 var
  SqlSonuc,KalanStr,GidenStr:string;
+ LScript: TFDScript;
+ LKomut: TStringList;
 begin
   AltHataSay := 0;
   SqlSonuc := SQLText;
@@ -10761,8 +10793,20 @@ begin
         //Tablo.Query2.SQL.Text:= GidenStr;
         //Tablo.Query2.ExecSQL;
 
-        ADOCommand1.CommandText.Text := GidenStr;
-        ADOCommand1.Execute;
+        // GenUpdate komutlari bazen SELECT/OUTPUT sonuc seti dondurur.
+        // TFDCommand.Execute bu durumda MSSQL -310 ile durur. TFDScript
+        // result-set ureten ve uretmeyen guncelleme batch'lerini ayni yoldan
+        // calistirir; eski ADO davranisina en yakin merkezi yol bu.
+        LScript := TFDScript.Create(nil);
+        LKomut := TStringList.Create;
+        try
+          LScript.Connection := FDCnn;
+          LKomut.Text := GidenStr;
+          LScript.ExecuteScript(LKomut);
+        finally
+          LKomut.Free;
+          LScript.Free;
+        end;
       except on e: Exception do begin
         UyariGoster(Uyari,e.Message,1);
         Inc(AltHataSay);
@@ -13371,6 +13415,12 @@ begin
   kocannumaralari.satisirsfat := KocannumaraGetir(222);
   kocannumaralari.dokuman := KocannumaraGetir(250);
   kocannumaralari.transfer := KocannumaraGetir(20);
+  // Alis irsaliyesi (10) ve uretim emri (166) BURADA DOLDURULMUYORDU -> record alani 0
+  //   kalip FATBASLIK.KOCANNO=0 yaziliyordu; sp_BelgeNoGetir ise numarayi
+  //   "WHERE KOCANNO=<gercek kocan>" ile aradigi icin hicbir kayit bulamayip her defasinda
+  //   KOCANAYARLARI.BASLANGICNO'yu donduruyordu (numara artmiyordu).
+  kocannumaralari.AlisIrsaliye := KocannumaraGetir(10);
+  kocannumaralari.UretimEmri := KocannumaraGetir(166);
   kocannumaralari.AlisSiparis := KocannumaraGetir(9);
   kocannumaralari.SatisSiparis := KocannumaraGetir(19);
   kocannumaralari.giderpusulasi := KocannumaraGetir(8);
@@ -15941,6 +15991,12 @@ begin
 
   if LArkaPlan then begin
     LRenk := TControlSkinAccess(AControl).Color;
+    // SKINDEN SKINE GECIS: onceki skin bu kontrolun rengini zaten ezdiyse mevcut
+    //   renk artik notr degildir (or. koyu RGB) -> asagidaki NotrRenk kontrolu
+    //   tutmaz ve kontrol ESKI SKININ rengiyle (siyah/koyu) kalirdi. Karari her
+    //   zaman DFM'deki ORIJINAL renge gore ver.
+    if DegerOku('C', LDeger) then
+      LRenk := TColor(LDeger);
     if NötrRenk(LRenk) then begin
       DegerKaydet('C', Integer(LRenk));
       DegerKaydet('PC', Ord(TControlSkinAccess(AControl).ParentColor));
@@ -15956,6 +16012,10 @@ begin
 
   if LYazi then begin
     LYaziRengi := TControlSkinAccess(AControl).Font.Color;
+    // Ayni gerekce (bkz. yukarisi): koyu skinde beyaza cevrilen yazi, acik skine
+    //   gecince NotrYazi kontrolune takilmayip beyaz kaliyordu (okunmaz).
+    if DegerOku('F', LDeger) then
+      LYaziRengi := TColor(LDeger);
     if NötrYazi(LYaziRengi) then begin
       DegerKaydet('F', Integer(LYaziRengi));
       DegerKaydet('PF', Ord(TControlSkinAccess(AControl).ParentFont));
@@ -15970,6 +16030,7 @@ procedure TTablo.SkinStilUygula(AStyle: TcxStyle; AGeriAl: Boolean);
 var
   LAnahtar: string;
   LDeger, LIndex: Integer;
+  LKararRenk: TColor;      // karar verilirken kullanilan ORIJINAL renk (skin-skin gecisi)
   LOrtakListeStili: Boolean;
   LSahip: TComponent;
 
@@ -16006,6 +16067,12 @@ begin
   // zemin ve metin rengini aktif DevExpress skin'inden alir. Renkli durum
   // stillerine (uyari, onay vb.) dokunulmaz.
   LIndex := FSkinOrijinaller.IndexOfName(LAnahtar + '|C');
+  // SKINDEN SKINE GECIS: onceki skin bu stili ezdiyse (or. Blueprint acik mavi
+  //   zemin yazdiysa) mevcut renk artik notr degildir; karar ORIJINAL renge gore
+  //   verilmeli, yoksa yeni skinde eski skinin zemini kalir.
+  LKararRenk := AStyle.Color;
+  if DegerOku('|CV', LDeger) then
+    LKararRenk := TColor(LDeger);
   if AGeriAl then begin
     if LIndex >= 0 then begin
       if DegerOku('|CV', LDeger) then
@@ -16014,22 +16081,29 @@ begin
     end;
   end else if SameText(FKullaniciSkinAdi, 'Blueprint') and
     (LOrtakListeStili or
-     (AStyle.Color = clWindow) or (AStyle.Color = clWhite) or
-     (AStyle.Color = clBtnFace) or (AStyle.Color = clInactiveBorder)) then begin
+     (LKararRenk = clWindow) or (LKararRenk = clWhite) or
+     (LKararRenk = clBtnFace) or (LKararRenk = clInactiveBorder)) then begin
     DegerKaydet('|C', 1);
     DegerKaydet('|CV', Integer(AStyle.Color));
     AStyle.AssignedValues := AStyle.AssignedValues + [cxStyles.svColor];
     AStyle.Color := RGB(231, 239, 252);
   end else if (cxStyles.svColor in AStyle.AssignedValues) and
     (LOrtakListeStili or
-     (AStyle.Color = clWindow) or (AStyle.Color = clWhite) or
-     (AStyle.Color = clBtnFace) or (AStyle.Color = clInactiveBorder)) then begin
+     (LKararRenk = clWindow) or (LKararRenk = clWhite) or
+     (LKararRenk = clBtnFace) or (LKararRenk = clInactiveBorder)) then begin
+    // Blueprint'ten baska skine geciyorsak once ORIJINAL rengi geri koy; ardindan
+    //   svColor'i birak ki grid zeminini aktif DevExpress skin'i belirlesin.
+    if DegerOku('|CV', LDeger) then
+      AStyle.Color := TColor(LDeger);
     if LIndex < 0 then
       FSkinOrijinaller.Add(LAnahtar + '|C=1');
     AStyle.AssignedValues := AStyle.AssignedValues - [cxStyles.svColor];
   end;
 
   LIndex := FSkinOrijinaller.IndexOfName(LAnahtar + '|T');
+  LKararRenk := AStyle.TextColor;              // karar ORIJINAL yazi rengine gore (bkz. yukarisi)
+  if DegerOku('|TV', LDeger) then
+    LKararRenk := TColor(LDeger);
   if AGeriAl then begin
     if LIndex >= 0 then begin
       if DegerOku('|TV', LDeger) then
@@ -16037,15 +16111,17 @@ begin
       AStyle.AssignedValues := AStyle.AssignedValues + [cxStyles.svTextColor];
     end;
   end else if SameText(FKullaniciSkinAdi, 'Blueprint') and
-    ((AStyle.TextColor = clBlack) or (AStyle.TextColor = clWindowText) or
-     (AStyle.TextColor = clBtnText)) then begin
+    ((LKararRenk = clBlack) or (LKararRenk = clWindowText) or
+     (LKararRenk = clBtnText)) then begin
     DegerKaydet('|T', 1);
     DegerKaydet('|TV', Integer(AStyle.TextColor));
     AStyle.AssignedValues := AStyle.AssignedValues + [cxStyles.svTextColor];
     AStyle.TextColor := RGB(30, 45, 65);
   end else if (cxStyles.svTextColor in AStyle.AssignedValues) and
-    ((AStyle.TextColor = clBlack) or (AStyle.TextColor = clWindowText) or
-     (AStyle.TextColor = clBtnText)) then begin
+    ((LKararRenk = clBlack) or (LKararRenk = clWindowText) or
+     (LKararRenk = clBtnText)) then begin
+    if DegerOku('|TV', LDeger) then
+      AStyle.TextColor := TColor(LDeger);
     if LIndex < 0 then
       FSkinOrijinaller.Add(LAnahtar + '|T=1');
     AStyle.AssignedValues := AStyle.AssignedValues - [cxStyles.svTextColor];
@@ -16618,6 +16694,12 @@ end;
 
 procedure TSayfaliListe.YuklemeSonrasi;
 begin
+  // SESSIZ PENCERE: yukleme bittikten hemen sonra grid kendini yeniden cizer ve
+  //   ListeSPJson'un Locate'i / kayitli grid duzeninin geri yuklenmesi TopRecordIndex'i
+  //   oynatir. Bu KULLANICI scroll'u DEGILDIR; sona yakin bir konuma dusuldugunde
+  //   ScrollDegisti "sonraki sayfa" istiyor ve liste kullanici hic kaydirmadan
+  //   buyuyordu (sayfa boyu 300 iken 600 kayit). Kisa sure tetigi yok say.
+  FSessizBitis := GetTickCount64 + 500;
   SeritGuncelle;   // "kismi liste" uyari seridi (dip toplamlar kismi olabilir)
   if (not FAktif) or FTamListe then Exit;
   // Yeni arama KISMI geldi ama siralama/filtre hala aktif -> kismi liste yaniltir,
@@ -16651,6 +16733,8 @@ var
 begin
   if Assigned(FEskiScroll) then FEskiScroll(Sender);
   if FYukleniyor or (not FAktif) or FTamListe then Exit;
+  // Yukleme sonrasi cizim/Locate kaynakli sahte scroll olaylari (bkz. YuklemeSonrasi).
+  if (FSessizBitis <> 0) and (GetTickCount64 < FSessizBitis) then Exit;
   if (FTab = nil) or (not FTab.Active) then Exit;
   LToplam := FGrid.DataController.RecordCount;
   if LToplam <= 0 then Exit;
@@ -16717,6 +16801,7 @@ begin
     //   yukleme bittikten SONRA (paint sirasinda) gelir ve "son satira gelindi" sanilip
     //   yeni sayfa istenir -> sonsuz zincir (izlemede 34 ardisik sorgu). Yukleme anini
     //   damgaliyoruz; ScrollDegisti kisa sessiz pencere icindeki olaylari yok sayar.
+    FSessizBitis := GetTickCount64 + 500;
   end;
   SeritGuncelle;   // yeni sayfa geldi -> serit metni/gorunurlugu tazelensin
 end;
@@ -17045,8 +17130,6 @@ begin
 end;
 
 end.
-
-
 
 
 

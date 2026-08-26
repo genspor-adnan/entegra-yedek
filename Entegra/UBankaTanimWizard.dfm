@@ -48,8 +48,6 @@ object BankaTanimWizardDlg: TBankaTanimWizardDlg
     ShowRouteMap = False
     OnFinishButtonClick = WizardKontrolFinishButtonClick
     OnCancelButtonClick = WizardKontrolCancelButtonClick
-    ExplicitWidth = 958
-    ExplicitHeight = 544
     DesignSize = (
       962
       545)
@@ -73,8 +71,6 @@ object BankaTanimWizardDlg: TBankaTanimWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkFinish, bkCancel]
       Color = 11776947
-      ExplicitWidth = 958
-      ExplicitHeight = 502
       object LabelHesapKodu: TcxLabel
         Left = 171
         Top = 169
@@ -412,6 +408,15 @@ object BankaTanimWizardDlg: TBankaTanimWizardDlg
           TabOrder = 12
           Transparent = True
         end
+        object CheckVarsayilan: TcxDBCheckBox
+          Left = 238
+          Top = 80
+          Caption = 'Varsay'#305'lan'
+          DataBinding.DataField = 'VARSAYILAN'
+          DataBinding.DataSource = DtsBankaHesaplar
+          TabOrder = 14
+          Transparent = True
+        end
       end
       object cxDBCurrencyEdit1: TcxDBCurrencyEdit
         Left = 497
@@ -485,7 +490,6 @@ object BankaTanimWizardDlg: TBankaTanimWizardDlg
   end
   object TabBankalar: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select BS.BANKAKODU, BANKAADI,SUBEKODU,SUBEADI,LOGO'
       '   from BANKASUBELER BS '
@@ -505,7 +509,6 @@ object BankaTanimWizardDlg: TBankaTanimWizardDlg
     Top = 17
   end
   object TabBankaHesaplar: TFDQuery
-    Connection = Tablo.FDCnn
     BeforeEdit = TabBankaHesaplarBeforeEdit
     BeforePost = TabBankaHesaplarBeforePost
     AfterPost = TabBankaHesaplarAfterPost
@@ -513,7 +516,7 @@ object BankaTanimWizardDlg: TBankaTanimWizardDlg
     AfterDelete = TabBankaHesaplarAfterDelete
     AfterScroll = TabBankaHesaplarAfterScroll
     OnNewRecord = TabBankaHesaplarNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from BANKAHESAPLAR where ID=:PId')
     Left = 508
@@ -521,8 +524,8 @@ object BankaTanimWizardDlg: TBankaTanimWizardDlg
   end
   object CariHesapEkstresi1: TPopupMenu
     Images = Tablo.PNGImageList2
-    Left = 409
-    Top = 13
+    Left = 345
+    Top = 29
     object AcilisKaydiMenu: TMenuItem
       Tag = 1
       Caption = 'A'#231#305'l'#305#351' Fi'#351'i Gir'
@@ -562,4 +565,3 @@ object BankaTanimWizardDlg: TBankaTanimWizardDlg
     end
   end
 end
-

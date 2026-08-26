@@ -86,7 +86,11 @@ update public.ebelge_entegrator
  where kod = 'izibiz';
 
 -- Ayar ekraninin combo kaynagi (kod tablosu sozlesmesi: id / ad / aktif).
-create or replace view public.v_ebelge_entegrator_lookup as
+--   DUSUR+KUR: 171 bu gorunumu sayisal id ile yeniden kuruyor; `create or
+--   replace` kolon tipini degistiremedigi icin dosya tek basina calistirilinca
+--   patliyordu.
+drop view if exists public.v_ebelge_entegrator_lookup;
+create view public.v_ebelge_entegrator_lookup as
     select e.kod as id, e.ad, e.aktif
       from public.ebelge_entegrator e
      order by e.sira, e.ad;
@@ -201,8 +205,16 @@ begin
         raise exception 'Bu senaryo (%) için gönderim gövdesi henüz üretilmiyor (ihracat / kamu / ilaç-tıbbi cihaz).',
                         b.senaryo;
     end if;
-    if coalesce(b.tipi, 0) = 22 then
-        raise exception 'Tevkifatlı fatura için gönderim gövdesi henüz üretilmiyor.';
+    -- Tevkifat 176'da desteklendi; burada engel YOK. Tevkifat kodu/orani
+    --   eksikse gövde ureticisi zaten oran 0 hesaplar ve fatura tevkifatsiz
+    --   gider - sessiz yanlis olmasin diye kod girilmis ama oran cozulemiyorsa
+    --   asagida uyarilir.
+    if coalesce(b.tipi, 0) = 22
+       and not exists (select 1 from public.belge_satir s
+                        where s.belge_id = p_belge_id
+                          and coalesce(nullif(s.tevkifat_orani, 0),
+                                       public.fn_tevkifat_orani(s.tevkifat_kodu)) > 0) then
+        raise exception 'Tevkifatlı fatura seçildi ama hiçbir kalemde tevkifat kodu/oranı yok.';
     end if;
 
     select * into g from public.v_ebelge_gonderici
@@ -216,6 +228,14 @@ begin
 
     if coalesce(btrim(b.taraf_vkno), '') = '' then
         raise exception 'Alıcının vergi/kimlik numarası yok; e-Belge gönderilemez.';
+    end if;
+    -- HANE KONTROLU (kullanici testinde yakalandi): 14 haneli "VKN" ile
+    --   gonderilen belge entegratorden schematron 816 ("gecersiz taraf bilgisi
+    --   tipi") ile doner. Hatayi GIB-den once burada yakalamak, numarayi
+    --   harcamadan duzeltme sansi verir.
+    if length(regexp_replace(b.taraf_vkno, '\D', '', 'g')) not in (10, 11) then
+        raise exception 'Alıcının vergi/kimlik numarası % hane ("%"); VKN 10, TCKN 11 hane olmalı.',
+              length(regexp_replace(b.taraf_vkno, '\D', '', 'g')), btrim(b.taraf_vkno);
     end if;
     if not exists (select 1 from public.belge_satir s where s.belge_id = p_belge_id) then
         raise exception 'Belgede kalem yok.';

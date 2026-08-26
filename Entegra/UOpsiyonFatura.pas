@@ -340,6 +340,7 @@ type
   private
     DoChange:boolean;
     FSeriKurallari: TFDMemTable;
+    FStilSeriFatura, FStilSeriArsiv, FStilSeriIrsaliye, FStilSeriPasif: TcxStyle;
     FAlanEslemeleri: TFDMemTable;
     FAlanEslemeDts: TDataSource;
     FAlanEslemeTab: TcxTabSheet;
@@ -350,6 +351,9 @@ type
     procedure SeriKurallariDatasetHazirla;
     procedure SeriKurallariYukle;
     procedure SeriKurallariKaydet;
+    procedure SeriKurallariBeforeDelete(DataSet: TDataSet);
+    procedure GridSeriGetContentStyle(Sender: TcxCustomGridTableView;
+      ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
     procedure AlanEslemeGridOlustur;
     procedure AlanEslemeDatasetHazirla;
     procedure AlanEslemeYukle;
@@ -370,7 +374,8 @@ var
 
 implementation
 
-uses UCombo, Utablo, URehberAyar, UGirisKutusuEx,UExcelKolonAyar, UGenSifre,PrjConst,LocOnFly,UEBelgeKimlik,UVeriMotor;
+uses UCombo, Utablo, URehberAyar, UGirisKutusuEx,UExcelKolonAyar, UGenSifre,PrjConst,LocOnFly,UEBelgeKimlik,UVeriMotor,
+     UEBelgeSeri;
 
 
 {$R *.dfm}
@@ -509,6 +514,28 @@ begin
   GridEFaturaSeriKurallariView.OptionsData.Editing := True;
   GridEFaturaSeriKurallariView.OptionsData.Inserting := True;
   GridEFaturaSeriKurallariViewDEGER.RepositoryItem := Tablo.RepSenaryo;
+  if GridEFaturaSeriKurallariView.GetColumnByFieldName('AKTIF') = nil then
+  begin
+    var  LColAktif: TcxGridDBColumn := GridEFaturaSeriKurallariView.CreateColumn;
+    LColAktif.Caption := 'Aktif';
+    LColAktif.DataBinding.FieldName := 'AKTIF';
+    LColAktif.PropertiesClass := TcxCheckBoxProperties;
+    LColAktif.Width := 46;
+  end;
+  // Seri gridi satir renkleri: zemin + yazi rengi birlikte -> belge turu tek bakista ayirt edilir.
+  FStilSeriFatura := TcxStyle.Create(Self);
+  FStilSeriFatura.Color := RGB(190, 218, 246);      // e-Fatura   - mavi
+  FStilSeriFatura.TextColor := RGB(16, 48, 92);
+  FStilSeriArsiv := TcxStyle.Create(Self);
+  FStilSeriArsiv.Color := RGB(190, 232, 203);       // e-Arsiv    - yesil
+  FStilSeriArsiv.TextColor := RGB(19, 74, 41);
+  FStilSeriIrsaliye := TcxStyle.Create(Self);
+  FStilSeriIrsaliye.Color := RGB(251, 219, 176);    // e-Irsaliye - turuncu
+  FStilSeriIrsaliye.TextColor := RGB(120, 68, 10);
+  FStilSeriPasif := TcxStyle.Create(Self);
+  FStilSeriPasif.Color := RGB(214, 214, 214);       // pasif satirlar (tur renginin onune gecer)
+  FStilSeriPasif.TextColor := RGB(122, 122, 122);
+  GridEFaturaSeriKurallariView.Styles.OnGetContentStyle := GridSeriGetContentStyle;
   FAlanEslemeView.Navigator.Visible := True;
   FAlanEslemeView.OptionsData.Appending := True;
   FAlanEslemeView.OptionsData.Deleting := True;
@@ -1403,6 +1430,30 @@ begin
     DataSet.FieldByName('SIRA').AsInteger := DataSet.RecNo;
 end;
 
+// ANAHTAR ayristirma/yazma UEBelgeSeri unitindedir (SeriAnahtarCoz / SeriAnahtarYaz).
+
+function SeriTuruKosulu(ABolum: Integer): string;
+begin
+  // BOLUM -> FATBASLIK tur/durum kosulu (hazirlanmis veya gonderilmis).
+  if ABolum = Ops_FaturaOpsiyon_EArsivSeriKurallari then
+    Result := 'TUR=15 and EFATURADURUM in (11,12)'
+  else if ABolum = Ops_FaturaOpsiyon_EIrsaliyeSeriKurallari then
+    Result := 'TUR=14 and EFATURADURUM in (51,52)'
+  else
+    Result := 'TUR=15 and EFATURADURUM in (1,2)';
+end;
+
+function SeriKullanimda(ABolum: Integer; const ASeri: string): Boolean;
+begin
+  Result := False;
+  if Trim(ASeri) = '' then
+    Exit;
+  Result := Veritabani.VeriVarMi(Tablo.FDCnn,
+    'select 1 from FATBASLIK where ' + SeriTuruKosulu(ABolum) +
+    ' and (FATURASERI=&S or left(FATURANO,3)=&S)',
+    ['&S'], [Trim(ASeri)]);
+end;
+
 procedure TOpsiyonFaturaDlg.SeriKurallariDatasetHazirla;
 begin
   if FSeriKurallari <> nil then
@@ -1417,58 +1468,59 @@ begin
   FSeriKurallari.FieldDefs.Add('SIRA', ftInteger);
   FSeriKurallari.FieldDefs.Add('DEGER', ftInteger);
   FSeriKurallari.FieldDefs.Add('DIL', ftInteger);
+  FSeriKurallari.FieldDefs.Add('AKTIF', ftBoolean);
   FSeriKurallari.CreateDataSet;
+  // Not: Siralama FireDAC index'i ile DEGIL, SeriKurallariYukle icinde kayitlar
+  // istenen sirada eklenerek yapilir (bkz. CBolumSirasi). Boylece duzenleme sirasinda
+  // satirlar yer degistirmez.
   FSeriKurallari.OnNewRecord := TabEFaturaSeriKurallariNewRecord;
   FSeriKurallari.BeforePost := TabEFaturaSeriKurallariBeforePost;
+  FSeriKurallari.BeforeDelete := SeriKurallariBeforeDelete;
 end;
 
 procedure TOpsiyonFaturaDlg.SeriKurallariYukle;
+const
+  // Gorunum sirasi: e-Fatura -> e-Arsiv -> e-Irsaliye
+  CBolumSirasi: array[0..2] of Integer =
+    (Ops_FaturaOpsiyon_EFaturaSeriKurallari,
+     Ops_FaturaOpsiyon_EArsivSeriKurallari,
+     Ops_FaturaOpsiyon_EIrsaliyeSeriKurallari);
 var
-  LKullaniciID: Integer;
+  LKurallar: TSeriKurallari;
+  LAktifGrup, LBolumSira, i: Integer;
 begin
   SeriKurallariDatasetHazirla;
-  if TabEFaturaSeriKurallari.Active then
-    TabEFaturaSeriKurallari.Close;
-  if AktifVeriMotor = vmPG then
-    // PG-native: try_convert + parsename (MSSQL) PG'de YOK -> "column int does not exist" (int'i kolon sanar).
-    //   parsename(replace(ANAHTAR,',','.'),N) = ANAHTAR'in SAGDAN N. virgul-parcasi -> virgul-say ile split_part;
-    //   try_convert(int,x) = regex-guard'li ::int (sayisal degilse NULL, MSSQL try_convert gibi).
-    TabEFaturaSeriKurallari.SQL.Text :=
-      'select *,' +
-      ' case BOLUM when -24130 then ' + #39'E-Fatura'#39 +
-      ' when -24131 then ' + #39'E-Arşiv'#39 +
-      ' when -24133 then ' + #39'E-İrsaliye'#39 +
-      ' else ' + #39#39 + ' end as BELGETURU,' +
-      ' left(ANAHTAR, strpos(ANAHTAR||' + #39','#39 + ', ' + #39','#39 + ')-1) as SERI,' +
-      ' (case when split_part(ANAHTAR,' + #39','#39 + ', char_length(ANAHTAR)-char_length(replace(ANAHTAR,' + #39','#39 + ',' + #39#39 + '))) ~ ' + #39'^-?\d+$'#39 +
-      '   then split_part(ANAHTAR,' + #39','#39 + ', char_length(ANAHTAR)-char_length(replace(ANAHTAR,' + #39','#39 + ',' + #39#39 + ')))::int else null end) as SENARYO,' +
-      ' (case when split_part(ANAHTAR,' + #39','#39 + ', char_length(ANAHTAR)-char_length(replace(ANAHTAR,' + #39','#39 + ',' + #39#39 + '))+1) ~ ' + #39'^-?\d+$'#39 +
-      '   then split_part(ANAHTAR,' + #39','#39 + ', char_length(ANAHTAR)-char_length(replace(ANAHTAR,' + #39','#39 + ',' + #39#39 + '))+1)::int else null end) as KULLANICIID' +
-      ' from GENINI where BOLUM in (-24130,-24131,-24133) and DIL=-1';
-  TabEFaturaSeriKurallari.Open;
+  // Okuma ve ayristirma tek yerde: UEBelgeSeri.SeriKurallariOku
+  // (belge keserken seri secen kod da ayni yordami kullanir).
+  LKurallar := SeriKurallariOku(Tablo.FDCnn, CBolumSirasi);
 
   FSeriKurallari.DisableControls;
   try
     FSeriKurallari.BeforePost := nil;
     FSeriKurallari.EmptyDataSet;
-    TabEFaturaSeriKurallari.First;
-    while not TabEFaturaSeriKurallari.Eof do begin
-      LKullaniciID := TabEFaturaSeriKurallari.FieldByName('KULLANICIID').AsInteger;
-      if Trim(TabEFaturaSeriKurallari.FieldByName('SERI').AsString) <> '' then begin
-        FSeriKurallari.Append;
-        FSeriKurallari.FieldByName('BOLUM').AsInteger := TabEFaturaSeriKurallari.FieldByName('BOLUM').AsInteger;
-        FSeriKurallari.FieldByName('SERI').AsString := TabEFaturaSeriKurallari.FieldByName('SERI').AsString;
-        FSeriKurallari.FieldByName('SENARYO').AsInteger := TabEFaturaSeriKurallari.FieldByName('SENARYO').AsInteger;
-        FSeriKurallari.FieldByName('KULLANICIID').AsInteger := LKullaniciID;
-        if LKullaniciID > 0 then
-          FSeriKurallari.FieldByName('KULLANICI').AsString := Tablo.AciklamaGetir('REHBER', 'FIRMA', LKullaniciID);
-        FSeriKurallari.FieldByName('SIRA').AsInteger := TabEFaturaSeriKurallari.FieldByName('SIRA').AsInteger;
-        FSeriKurallari.FieldByName('DEGER').AsInteger := TabEFaturaSeriKurallari.FieldByName('DEGER').AsInteger;
-        FSeriKurallari.FieldByName('DIL').AsInteger := -1;
-        FSeriKurallari.Post;
-      end;
-      TabEFaturaSeriKurallari.Next;
-    end;
+    // Once AKTIF kayitlar belge turu sirasiyla, sonra ayni sirayla PASIF kayitlar
+    // -> pasifler her zaman listenin en altinda.
+    for LAktifGrup := 0 to 1 do
+      for LBolumSira := Low(CBolumSirasi) to High(CBolumSirasi) do
+        for i := Low(LKurallar) to High(LKurallar) do
+          if (LKurallar[i].Seri <> '') and
+             (LKurallar[i].Bolum = CBolumSirasi[LBolumSira]) and
+             (LKurallar[i].Aktif = (LAktifGrup = 0)) then begin
+            FSeriKurallari.Append;
+            FSeriKurallari.FieldByName('BOLUM').AsInteger       := LKurallar[i].Bolum;
+            FSeriKurallari.FieldByName('SERI').AsString         := LKurallar[i].Seri;
+            FSeriKurallari.FieldByName('SENARYO').AsInteger     := LKurallar[i].Senaryo;
+            FSeriKurallari.FieldByName('KULLANICIID').AsInteger := LKurallar[i].KullaniciID;
+            if LKurallar[i].KullaniciID > 0 then
+              FSeriKurallari.FieldByName('KULLANICI').AsString :=
+                Tablo.AciklamaGetir('REHBER', 'FIRMA', LKurallar[i].KullaniciID);
+            FSeriKurallari.FieldByName('SIRA').AsInteger  := LKurallar[i].Sira;
+            FSeriKurallari.FieldByName('DEGER').AsInteger := LKurallar[i].Deger;
+            FSeriKurallari.FieldByName('DIL').AsInteger   := -1;
+            FSeriKurallari.FieldByName('AKTIF').AsBoolean := LKurallar[i].Aktif;
+            FSeriKurallari.Post;
+          end;
+    FSeriKurallari.First;
   finally
     FSeriKurallari.BeforePost := TabEFaturaSeriKurallariBeforePost;
     FSeriKurallari.EnableControls;
@@ -1479,6 +1531,7 @@ procedure TOpsiyonFaturaDlg.SeriKurallariKaydet;
 var
   LQry : TFDQuery;
   LDeger: Integer;
+  LKural: TSeriKurali;
 begin
   SeriKurallariDatasetHazirla;
   if (FSeriKurallari.State = dsInsert) and (Trim(FSeriKurallari.FieldByName('SERI').AsString) = '') then
@@ -1501,10 +1554,12 @@ begin
     while not FSeriKurallari.Eof do begin
       if Trim(FSeriKurallari.FieldByName('SERI').AsString) <> '' then begin
         LQry.ParamByName('BOLUM').AsInteger := FSeriKurallari.FieldByName('BOLUM').AsInteger;
-        LQry.ParamByName('ANAHTAR').AsString :=
-          Trim(FSeriKurallari.FieldByName('SERI').AsString) + ',' +
-          IntToStr(FSeriKurallari.FieldByName('SENARYO').AsInteger) + ',' +
-          IntToStr(FSeriKurallari.FieldByName('KULLANICIID').AsInteger);
+        LKural := Default(TSeriKurali);
+        LKural.Seri        := Trim(FSeriKurallari.FieldByName('SERI').AsString);
+        LKural.Senaryo     := FSeriKurallari.FieldByName('SENARYO').AsInteger;
+        LKural.KullaniciID := FSeriKurallari.FieldByName('KULLANICIID').AsInteger;
+        LKural.Aktif       := FSeriKurallari.FieldByName('AKTIF').AsBoolean;
+        LQry.ParamByName('ANAHTAR').AsString := SeriAnahtarYaz(LKural);
         LQry.ParamByName('DEGER').AsInteger := LDeger;
         LQry.ParamByName('SIRA').AsInteger := FSeriKurallari.FieldByName('SIRA').AsInteger;
         LQry.ExecSQL;
@@ -1524,6 +1579,7 @@ begin
   DataSet.FieldByName('SENARYO').AsInteger := 0;
   DataSet.FieldByName('KULLANICIID').AsInteger := 0;
   DataSet.FieldByName('SIRA').AsInteger := DataSet.RecordCount + 1;
+  DataSet.FieldByName('AKTIF').AsBoolean := True;
 end;
 
 procedure TOpsiyonFaturaDlg.TabEFaturaSeriKurallariAfterOpen(DataSet: TDataSet);
@@ -1542,9 +1598,25 @@ end;
 procedure TOpsiyonFaturaDlg.TabEFaturaSeriKurallariBeforePost(DataSet: TDataSet);
 var
   LDeger: Integer;
+  LEskiSeri: string;
+  LKimlikDegisti: Boolean;
 begin
   if Trim(DataSet.FieldByName('SERI').AsString) = '' then
     raise Exception.Create('Seri boş olamaz.');
+
+  // Kullanimdaki seride yalnizca SERI KODU degistirilemez (belge numaralari o kodu tasir).
+  // Senaryo / Kullanici / Aktif birer YONLENDIRME kuralidir, kesilmis belgeleri etkilemez;
+  // bunlarin kilitlenmesi yanlis girilmis bir kuralin duzeltilmesini de imkansiz kiliyordu.
+  if DataSet.State = dsEdit then
+  begin
+    LEskiSeri := Trim(VarToStr(DataSet.FieldByName('SERI').OldValue));
+    LKimlikDegisti := not SameText(LEskiSeri, Trim(DataSet.FieldByName('SERI').AsString));
+    if LKimlikDegisti and
+       SeriKullanimda(DataSet.FieldByName('BOLUM').AsInteger, LEskiSeri) then
+      raise Exception.Create(
+        'Bu seri ile hazırlanmış/gönderilmiş belge bulunduğu için seri kodu değiştirilemez.' + sLineBreak +
+        'Seriyi kullanımdan kaldırmak için "Aktif" işaretini kaldırıp pasife alın.');
+  end;
 
   if (DataSet.FieldByName('BOLUM').AsInteger <> Ops_FaturaOpsiyon_EFaturaSeriKurallari) and
      (DataSet.FieldByName('BOLUM').AsInteger <> Ops_FaturaOpsiyon_EArsivSeriKurallari) and
@@ -1559,6 +1631,44 @@ begin
   end;
   if DataSet.FieldByName('SIRA').AsInteger = 0 then
     DataSet.FieldByName('SIRA').AsInteger := DataSet.FieldByName('DEGER').AsInteger;
+end;
+
+procedure TOpsiyonFaturaDlg.SeriKurallariBeforeDelete(DataSet: TDataSet);
+begin
+  if SeriKullanimda(DataSet.FieldByName('BOLUM').AsInteger,
+       Trim(DataSet.FieldByName('SERI').AsString)) then
+    raise Exception.Create(
+      'Bu seri ile hazırlanmış/gönderilmiş belge bulunduğu için silinemez.' + sLineBreak +
+      'Seriyi kullanımdan kaldırmak için "Aktif" işaretini kaldırıp pasife alın.');
+end;
+
+procedure TOpsiyonFaturaDlg.GridSeriGetContentStyle(Sender: TcxCustomGridTableView;
+  ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+var
+  LBolum: Integer;
+  LAktifCol: TcxGridDBColumn;
+  LAktif: Boolean;
+begin
+  AStyle := nil;
+  if (ARecord = nil) or
+     VarIsNull(ARecord.Values[GridEFaturaSeriKurallariViewBOLUM.Index]) then
+    Exit;
+  LAktif := True;
+  LAktifCol := TcxGridDBTableView(Sender).GetColumnByFieldName('AKTIF');
+  if (LAktifCol <> nil) and (not VarIsNull(ARecord.Values[LAktifCol.Index])) then
+    LAktif := ARecord.Values[LAktifCol.Index] <> False;
+  if not LAktif then
+  begin
+    AStyle := FStilSeriPasif;
+    Exit;
+  end;
+  LBolum := ARecord.Values[GridEFaturaSeriKurallariViewBOLUM.Index];
+  if LBolum = Ops_FaturaOpsiyon_EArsivSeriKurallari then
+    AStyle := FStilSeriArsiv
+  else if LBolum = Ops_FaturaOpsiyon_EIrsaliyeSeriKurallari then
+    AStyle := FStilSeriIrsaliye
+  else
+    AStyle := FStilSeriFatura;
 end;
 
 procedure TOpsiyonFaturaDlg.SeriKuraliKullaniciYaz(AKullaniciID: Integer);

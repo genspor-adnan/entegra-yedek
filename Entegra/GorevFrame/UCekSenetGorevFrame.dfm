@@ -14,7 +14,7 @@ object CekSenetGorevFrame: TCekSenetGorevFrame
   ParentColor = False
   ParentFont = False
   TabOrder = 0
-  object btnCekSenet: TJvNavPanelButton
+  object btnCekSenet: TcxButton
     Left = 0
     Top = 0
     Width = 451
@@ -26,27 +26,20 @@ object CekSenetGorevFrame: TCekSenetGorevFrame
     Font.Height = -13
     Font.Name = 'Trebuchet MS'
     Font.Style = [fsBold]
-    GroupIndex = 1
-    HotTrack = False
-    HotTrackFont.Charset = TURKISH_CHARSET
-    HotTrackFont.Color = clWindowText
-    HotTrackFont.Height = -13
-    HotTrackFont.Name = 'Trebuchet MS'
-    HotTrackFont.Style = [fsBold]
+    SpeedButtonOptions.GroupIndex = 1
     ParentFont = False
-    Colors.ButtonColorFrom = 15395562
-    Colors.ButtonColorTo = 12566463
-    Colors.ButtonHotColorFrom = 1953255
-    Colors.ButtonHotColorTo = 1489617
-    Colors.ButtonSelectedColorFrom = 1953255
-    Colors.ButtonSelectedColorTo = 1489617
-    ParentStyleManager = False
-    ImageIndex = 0
-    Images = PngImageList1
+    OptionsImage.ImageIndex = 0
+    OptionsImage.Images = PngImageList1
     OnClick = btnCekSenetClick
     ExplicitTop = -1
+    OptionsImage.Margin = 8
+    Colors.Default = 10252717
+    Colors.Hot = 12158835
+    Colors.Pressed = 7814707
+    LookAndFeel.Kind = lfOffice11
+    LookAndFeel.NativeStyle = False
   end
-  object btnDokumler: TJvNavPanelButton
+  object btnDokumler: TcxButton
     Left = 0
     Top = 104
     Width = 451
@@ -58,28 +51,21 @@ object CekSenetGorevFrame: TCekSenetGorevFrame
     Font.Height = -13
     Font.Name = 'Trebuchet MS'
     Font.Style = [fsBold]
-    GroupIndex = 1
-    HotTrack = False
-    HotTrackFont.Charset = TURKISH_CHARSET
-    HotTrackFont.Color = clWindowText
-    HotTrackFont.Height = -13
-    HotTrackFont.Name = 'Trebuchet MS'
-    HotTrackFont.Style = [fsBold]
+    SpeedButtonOptions.GroupIndex = 1
     ParentFont = False
-    Colors.ButtonColorFrom = 15395562
-    Colors.ButtonColorTo = 12566463
-    Colors.ButtonHotColorFrom = 1953255
-    Colors.ButtonHotColorTo = 1489617
-    Colors.ButtonSelectedColorFrom = 1953255
-    Colors.ButtonSelectedColorTo = 1489617
-    ParentStyleManager = False
-    ImageIndex = 1
-    Images = PngImageList1
+    OptionsImage.ImageIndex = 1
+    OptionsImage.Images = PngImageList1
     OnClick = btnDokumlerClick
     ExplicitLeft = 1
     ExplicitTop = 52
+    OptionsImage.Margin = 8
+    Colors.Default = 10252717
+    Colors.Hot = 12158835
+    Colors.Pressed = 7814707
+    LookAndFeel.Kind = lfOffice11
+    LookAndFeel.NativeStyle = False
   end
-  object btnSenet: TJvNavPanelButton
+  object btnSenet: TcxButton
     Left = 0
     Top = 52
     Width = 451
@@ -91,24 +77,17 @@ object CekSenetGorevFrame: TCekSenetGorevFrame
     Font.Height = -13
     Font.Name = 'Trebuchet MS'
     Font.Style = [fsBold]
-    GroupIndex = 1
-    HotTrack = False
-    HotTrackFont.Charset = TURKISH_CHARSET
-    HotTrackFont.Color = clWindowText
-    HotTrackFont.Height = -13
-    HotTrackFont.Name = 'Trebuchet MS'
-    HotTrackFont.Style = [fsBold]
+    SpeedButtonOptions.GroupIndex = 1
     ParentFont = False
-    Colors.ButtonColorFrom = 15395562
-    Colors.ButtonColorTo = 12566463
-    Colors.ButtonHotColorFrom = 1953255
-    Colors.ButtonHotColorTo = 1489617
-    Colors.ButtonSelectedColorFrom = 1953255
-    Colors.ButtonSelectedColorTo = 1489617
-    ParentStyleManager = False
-    ImageIndex = 0
-    Images = PngImageList1
+    OptionsImage.ImageIndex = 0
+    OptionsImage.Images = PngImageList1
     ExplicitTop = 8
+    OptionsImage.Margin = 8
+    Colors.Default = 10252717
+    Colors.Hot = 12158835
+    Colors.Pressed = 7814707
+    LookAndFeel.Kind = lfOffice11
+    LookAndFeel.NativeStyle = False
   end
   object PngImageList1: TPngImageList
     Height = 48

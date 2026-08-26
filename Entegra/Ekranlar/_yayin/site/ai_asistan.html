@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gentegre Yapay Zeka — AI (Mockup)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#d2dae3; --line2:#e6ebf1; --ink:#1f2d3a; --muted:#6b7a8b;
+    --navy:#14315a; --accent:#2f6db3; --sel:#dcebfb; --selbd:#9cc4ee; --head:#f1f5f9; --head2:#e7eef5;
+    --btnfrom:#fff; --btnto:#eef2f7; --ok:#2e7d46; --uyari:#b5731a; --hata:#b23b3b;
+    --ai:#6d4bb8; --aiZem:#f1ecfb; --aiKenar:#ddd0f2;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:#dfe4ea;color:var(--ink);font-family:"Segoe UI",Tahoma,sans-serif;
+    font-size:12.5px;padding:12px}
+  .win{max-width:1480px;height:calc(100vh - 24px);margin:0 auto;background:var(--card);
+    border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 26px rgba(20,40,70,.16);
+    overflow:hidden;display:flex;flex-direction:column}
+  .title{background:linear-gradient(#4b3a86,#372a63);color:#fff;padding:7px 12px;display:flex;
+    align-items:center;gap:8px;font-weight:600;font-size:12.5px;flex:none}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#b9a4ec}
+  .title .sp{margin-left:auto;font-weight:400;opacity:.85;font-size:11px}
+  .toolbar{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);
+    background:linear-gradient(#fff,#f4f7fb);flex:none;flex-wrap:wrap}
+  .tb{display:flex;align-items:center;gap:6px;border:1px solid var(--line);
+    background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:6px;padding:6px 11px;color:#33465c}
+  .tb:hover{border-color:var(--selbd)}
+  .tb.ai{background:linear-gradient(#7d5cc9,#5f42a8);border-color:#5f42a8;color:#fff;font-weight:600}
+  .ayr{width:1px;height:22px;background:var(--line);margin:0 3px}
+
+  .wrap{flex:1;display:flex;min-height:0}
+
+  /* ---------- SOL: gecmis + hazir komutlar ---------- */
+  .sol{width:250px;flex:none;border-right:1px solid var(--line);background:#f7f9fc;display:flex;
+    flex-direction:column;min-height:0}
+  .sol .bs{padding:8px 10px;border-bottom:1px solid var(--line2);background:var(--head2);
+    font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .yeni{margin:9px 10px;border:1px solid #5f42a8;background:linear-gradient(#7d5cc9,#5f42a8);color:#fff;
+    border-radius:7px;padding:9px;text-align:center;font-weight:600;font-size:12.5px}
+  .gec{flex:1;overflow:auto;padding:2px 6px 10px}
+  .gs{padding:8px 9px;border-radius:6px;margin-bottom:2px;font-size:12px;color:#33475c}
+  .gs:hover{background:#eaf0f7}
+  .gs.on{background:var(--aiZem);color:var(--ai);font-weight:600}
+  .gs .zt{display:block;font-size:10.5px;color:var(--muted);font-weight:400;margin-top:1px}
+  .oner{padding:8px 10px 12px;border-top:1px solid var(--line2)}
+  .ok2{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#fff;
+    border-radius:7px;padding:8px 10px;font-size:11.5px;color:#33475c;margin-bottom:6px;font-family:inherit}
+  .ok2:hover{border-color:var(--ai);color:var(--ai);background:var(--aiZem)}
+
+  /* ---------- ORTA: sohbet ---------- */
+  .orta{flex:1;min-width:0;display:flex;flex-direction:column;background:#fbfcfe}
+  .akis{flex:1;overflow:auto;padding:16px 18px 8px}
+  .msj{display:flex;gap:11px;margin-bottom:16px;max-width:900px}
+  .msj .av{width:30px;height:30px;border-radius:8px;flex:none;display:flex;align-items:center;
+    justify-content:center;font-size:14px;background:#e5ecf5;color:#3a5573}
+  .msj.ai .av{background:linear-gradient(#7d5cc9,#5f42a8);color:#fff}
+  .msj .gv{flex:1;min-width:0}
+  .msj .kim{font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .msj .kim b{color:var(--ink);font-weight:600;font-size:12px}
+  .balon{background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 13px;line-height:1.6}
+  .msj.ben .balon{background:var(--sel);border-color:var(--selbd)}
+  .balon p{margin:0 0 8px}.balon p:last-child{margin:0}
+  .balon ul{margin:6px 0;padding-left:18px}.balon li{margin:3px 0}
+
+  /* arac cagrisi kartlari */
+  .arac{border:1px solid var(--line2);background:#f6f8fb;border-radius:8px;padding:8px 11px;margin:8px 0;
+    font-size:11.5px;color:var(--muted)}
+  .arac .ust{display:flex;align-items:center;gap:8px;color:#3a5573}
+  .arac code{font-family:Consolas,monospace;font-size:11px;background:#fff;border:1px solid var(--line2);
+    border-radius:4px;padding:1px 6px;color:var(--ai)}
+  .arac .sure{margin-left:auto;font-size:10.5px}
+  .arac .cikti{margin-top:6px;font-family:Consolas,monospace;font-size:11px;color:#4a5c70;
+    background:#fff;border:1px solid var(--line2);border-radius:5px;padding:6px 8px;white-space:pre-wrap}
+
+  .dg{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:9px 0;background:#fff}
+  .dg table{border-collapse:collapse;width:100%;font-size:11.5px}
+  .dg th{background:linear-gradient(#f3f7fb,#e6edf5);border-bottom:1px solid var(--line);
+    text-align:left;padding:6px 8px;color:#3a5573;font-weight:600;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);padding:5px 8px;white-space:nowrap}
+  .dg .r{text-align:right;font-variant-numeric:tabular-nums}
+  .dg tr.k td{background:#fdecec;color:#b23b3b}
+  .dg tr.s td{background:#fdf6e3;color:#a9791a}
+
+  /* onay gerektiren aksiyon */
+  .onay{border:1px solid var(--aiKenar);background:var(--aiZem);border-radius:9px;padding:11px 13px;margin:10px 0}
+  .onay .bs2{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--ai);margin-bottom:7px}
+  .onay .bs2 .rz{margin-left:auto;font-size:10.5px;font-weight:600;background:#fff;border:1px solid var(--aiKenar);
+    color:var(--ai);border-radius:10px;padding:2px 9px}
+  .onay .tas{background:#fff;border:1px solid var(--line2);border-radius:7px;padding:10px 12px;
+    font-size:12px;line-height:1.65;white-space:pre-wrap}
+  .onay .dgm{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
+  .db{border:1px solid var(--line);background:#fff;border-radius:6px;padding:6px 12px;font-size:12px;color:#33465c;font-family:inherit}
+  .db:hover{border-color:var(--ai);color:var(--ai)}
+  .db.on2{background:linear-gradient(#3d9e5f,#2e7d46);border-color:#2e7d46;color:#fff;font-weight:600}
+  .db.kap{background:#fff;color:var(--hata);border-color:#e6c3c3}
+  .onay.onayli{border-color:#c4e2cd;background:#eef8f1}
+  .onay.onayli .bs2{color:var(--ok)}
+
+  .kaynak{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .kn{font-size:10.5px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:2px 9px;color:#4a5c70}
+  .kn:hover{border-color:var(--accent);color:var(--accent)}
+  .msjalt{display:flex;gap:12px;margin-top:7px;font-size:10.5px;color:var(--muted);align-items:center}
+  .msjalt span:hover{color:var(--accent)}
+
+  .yaziyor{display:flex;gap:5px;align-items:center;color:var(--muted);font-size:11.5px;padding:0 0 10px 41px}
+  .yaziyor i{width:6px;height:6px;border-radius:50%;background:var(--ai);display:block;animation:zp 1.2s infinite}
+  .yaziyor i:nth-child(2){animation-delay:.15s}.yaziyor i:nth-child(3){animation-delay:.3s}
+  @keyframes zp{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+  .yaz{flex:none;border-top:1px solid var(--line);background:#fff;padding:10px 14px 12px}
+  .cipler{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+  .cip{border:1px solid var(--line);background:#f7f9fc;border-radius:14px;padding:4px 11px;font-size:11.5px;color:#4a5c70}
+  .cip:hover{border-color:var(--ai);color:var(--ai);background:var(--aiZem)}
+  .kutu{display:flex;align-items:flex-end;gap:8px;border:1px solid var(--line);border-radius:10px;
+    padding:8px 10px;background:#fff}
+  .kutu:focus-within{border-color:var(--ai)}
+  .kutu textarea{flex:1;border:0;outline:0;resize:none;font-family:inherit;font-size:13px;
+    line-height:1.5;height:38px;background:transparent;color:var(--ink)}
+  .kutu .ik{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+    color:var(--muted);font-size:15px;flex:none}
+  .kutu .ik:hover{background:#eef2f7;color:var(--ink)}
+  .kutu .gon{background:linear-gradient(#7d5cc9,#5f42a8);color:#fff;border-radius:8px;width:36px;height:32px;
+    display:flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+  .yazalt{display:flex;gap:14px;margin-top:7px;font-size:10.5px;color:var(--muted);align-items:center}
+  .yazalt .sag{margin-left:auto}
+
+  /* ---------- SAG: baglam / guvenlik ---------- */
+  .sag2{width:290px;flex:none;border-left:1px solid var(--line);background:#f7f9fc;overflow:auto}
+  .sag2 h5{margin:0;padding:10px 13px 6px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11.5px;padding:4px 13px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .sep{height:1px;background:var(--line2);margin:8px 12px}
+  .ark{display:flex;align-items:center;gap:9px;padding:7px 13px;font-size:11.5px}
+  .ark .sw{width:30px;height:17px;border-radius:9px;background:#cfd8e3;position:relative;flex:none}
+  .ark .sw::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff}
+  .ark.acik .sw{background:var(--ok)}
+  .ark.acik .sw::after{left:auto;right:2px}
+  .ark .yaz2{flex:1;min-width:0}
+  .ark .yaz2 span{display:block;font-size:10.5px;color:var(--muted)}
+  .uyari-kutu{margin:9px 12px;padding:9px 11px;border-radius:8px;background:#fff8ea;border:1px solid #f0dfc0;
+    font-size:11px;color:#8a6417;line-height:1.55}
+  .log{font-size:10.5px;color:var(--muted);padding:4px 13px;line-height:1.5}
+  .log b{color:#3a5573}
+
+  .maprow{display:flex;gap:8px;flex-wrap:wrap;padding:7px 12px;background:#fbfcfd;
+    border-top:1px solid var(--line2);font-size:10px;color:var(--muted);flex:none}
+  .maprow b{color:#3d6294}
+  .statusbar{height:25px;flex:none;background:linear-gradient(#eef2f7,#e4eaf1);border-top:1px solid var(--line);
+    display:flex;align-items:center;gap:16px;padding:0 12px;font-size:11px;color:#4a5c70}
+  .statusbar b{color:var(--navy)}
+  .statusbar .r{margin-left:auto}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Gentegre Yapay Zeka
+    <span class="sp">AI\UAsistanFrame · AILOG · AIARAC · model: gpt · Şube: Merkez · 15.08.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="tb ai">✨ Yeni Sohbet</div>
+    <div class="tb">📋 Geçmiş</div>
+    <div class="tb">🧩 İzinli Fonksiyonlar</div>
+    <div class="ayr"></div>
+    <div class="tb">📊 Kullanım / Maliyet</div>
+    <div class="tb">🛡 Güvenlik Kuralları</div>
+    <div class="tb">📜 AI Log</div>
+    <div class="tb" style="margin-left:auto">⚙ Ayarlar</div>
+  </div>
+
+  <div class="wrap">
+    <!-- ============ SOL ============ -->
+    <div class="sol">
+      <div class="yeni">✨ Yeni Sohbet</div>
+      <div class="bs">Son sohbetler</div>
+      <div class="gec">
+        <div class="gs on">Geciken tahsilatlar<span class="zt">Bugün 09:41 · 6 mesaj</span></div>
+        <div class="gs">Granit Bilgisayar özeti<span class="zt">Bugün 08:55</span></div>
+        <div class="gs">e-Fatura 5003 hatası<span class="zt">Dün 16:20</span></div>
+        <div class="gs">Otel görüşme notu özeti<span class="zt">Dün 14:02</span></div>
+        <div class="gs">Fiyat farkı faturası nasıl?<span class="zt">13.08.2026</span></div>
+        <div class="gs">Kritik stok listesi<span class="zt">12.08.2026</span></div>
+      </div>
+      <div class="oner">
+        <div class="bs" style="padding:0 0 7px;background:none;border:0">Hazır komutlar</div>
+        <button class="ok2">👥 Bu cariyi özetle</button>
+        <button class="ok2">✉️ Tahsilat hatırlatma metni yaz</button>
+        <button class="ok2">🧾 e-Belge hatasını açıkla</button>
+        <button class="ok2">📝 Görüşme notunu özetle</button>
+        <button class="ok2">❓ Bu ekranda ne yapabilirim?</button>
+      </div>
+    </div>
+
+    <!-- ============ ORTA ============ -->
+    <div class="orta">
+      <div class="akis" id="akis">
+
+        <!-- kullanici -->
+        <div class="msj ben">
+          <div class="av">AD</div>
+          <div class="gv">
+            <div class="kim"><b>Ayşe Demir</b> · 09:41</div>
+            <div class="balon">Bu ay tahsilatı geciken cariler kim? Tutarı yüksekten sırala,
+              en riskli 3 tanesine hatırlatma metni de hazırla.</div>
+          </div>
+        </div>
+
+        <!-- asistan -->
+        <div class="msj ai">
+          <div class="av">✨</div>
+          <div class="gv">
+            <div class="kim"><b>Gentegre Yapay Zeka</b> · 09:41 · <span style="color:var(--ai)">2 fonksiyon çağrısı</span></div>
+            <div class="balon">
+              <div class="arac">
+                <div class="ust">🧩 <code>cari_vadesi_gecen_listele(sube:"Merkez", donem:"2026-08")</code>
+                  <span class="sure">318 ms · 5 kayıt</span></div>
+                <div class="cikti">SELECT ... FROM CARIHAREKET ... /* yetki: KULLANICI=AysD, SUBE=Merkez */</div>
+              </div>
+              <div class="arac">
+                <div class="ust">🧩 <code>cari_risk_skoru(cari_id:[1301,1126,988])</code>
+                  <span class="sure">96 ms · 3 kayıt</span></div>
+              </div>
+
+              <p>Merkez şubesinde <b>vadesi geçmiş 5 cari</b> var, toplam <b>69.500,00 ₺</b>.
+                90+ gün grubunda 13.050,00 ₺ birikmiş — asıl risk burada.</p>
+
+              <div class="dg">
+                <table>
+                  <tr><th>CARİ</th><th class="r">GECİKEN</th><th class="r">EN ESKİ</th><th>RİSK</th><th>ÖNERİ</th></tr>
+                  <tr class="k"><td>VOLKAN ŞİRİNBAY</td><td class="r">9.800,00</td><td class="r">92 gün</td><td>Yüksek</td><td>Telefon + resmi yazı</td></tr>
+                  <tr class="k"><td>ZAFER TUNA</td><td class="r">3.250,00</td><td class="r">88 gün</td><td>Yüksek</td><td>Hesap kapama görüşmesi</td></tr>
+                  <tr class="s"><td>BEETHOVEN GİYİM</td><td class="r">32.320,50</td><td class="r">74 gün</td><td>Orta</td><td>Nazik hatırlatma</td></tr>
+                  <tr><td>GRANİT BİLGİSAYAR</td><td class="r">52.320,50</td><td class="r">45 gün</td><td>Düşük</td><td>Vade planı teyidi</td></tr>
+                  <tr><td>NAZORATİ MÜH.</td><td class="r">0,00</td><td class="r">—</td><td>Düşük</td><td>Aksiyon gerekmiyor</td></tr>
+                </table>
+              </div>
+
+              <p>Not: BEETHOVEN limitinin <b>%86</b>'sını kullanmış durumda — yeni sipariş onayında uyarı çıkacaktır.</p>
+
+              <div class="kaynak">
+                <span class="kn">📄 CARİHAREKET · 5 kayıt</span>
+                <span class="kn">📄 CARI.RISKLIMIT</span>
+                <span class="kn">🔗 Cari Listesi'nde aç</span>
+              </div>
+              <div class="msjalt"><span>👍</span><span>👎</span><span>⧉ Kopyala</span><span>↻ Yeniden üret</span>
+                <span>📊 Excel'e aktar</span><span style="margin-left:auto">1.284 token · ~0,004 $</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- onay gerektiren aksiyon -->
+        <div class="msj ai">
+          <div class="av">✨</div>
+          <div class="gv">
+            <div class="kim"><b>Gentegre Yapay Zeka</b> · 09:42 · <span style="color:var(--ai)">onay bekliyor</span></div>
+            <div class="balon">
+              <p>En riskli 3 cari için hatırlatma metinlerini hazırladım. <b>Gönderim yapmadım</b> —
+                onaylarsan e-posta taslağı olarak oluştururum.</p>
+
+              <div class="onay">
+                <div class="bs2">✉️ Taslak — VOLKAN ŞİRİNBAY (92 gün)
+                  <span class="rz">Onay gerekli</span></div>
+                <div class="tas">Sayın Volkan Şirinbay,
+
+Hesabınızda 9.800,00 ₺ tutarında ve vadesi 92 gün geçmiş bakiye görünmektedir.
+Ödemenizi 20.08.2026 tarihine kadar tamamlamanızı rica ederiz.
+
+Detaylı hesap ekstrenizi ekte bulabilirsiniz. Ödemeyi yaptıysanız
+dekontu iletmeniz yeterlidir.
+
+Saygılarımızla,
+Ayşe Demir · Genoproje A.Ş. · Muhasebe</div>
+                <div class="dgm">
+                  <button class="db on2" data-onay>✔ Onayla ve Taslak Oluştur</button>
+                  <button class="db">✎ Düzenle</button>
+                  <button class="db">🔄 Tonu yumuşat</button>
+                  <button class="db">💬 WhatsApp metnine çevir</button>
+                  <button class="db kap">✖ İptal</button>
+                </div>
+              </div>
+
+              <div class="onay onayli">
+                <div class="bs2">📝 Görev taslağı — Zafer Tuna hesap kapama görüşmesi
+                  <span class="rz" style="border-color:#c4e2cd;color:var(--ok)">Onaylandı · 09:43</span></div>
+                <div class="tas">GOREVLER kaydı oluşturuldu: "Zafer Tuna ile hesap kapama görüşmesi"
+Atanan: Ayşe Demir · Termin: 18.08.2026 · İlgili cari: 120.01.051</div>
+              </div>
+
+              <div class="msjalt"><span>👍</span><span>👎</span><span>⧉ Kopyala</span>
+                <span style="margin-left:auto">2.106 token · ~0,007 $</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="yaziyor"><i></i><i></i><i></i> Asistan yazıyor…</div>
+      </div>
+
+      <div class="yaz">
+        <div class="cipler">
+          <span class="cip">📎 Ekran bağlamını ekle (Cari Listesi)</span>
+          <span class="cip">📄 Belge ekle</span>
+          <span class="cip">🎤 Sesli sor</span>
+          <span class="cip">🧩 Fonksiyon seç</span>
+          <span class="cip">🌐 TR → EN</span>
+        </div>
+        <div class="kutu">
+          <span class="ik">📎</span>
+          <textarea placeholder="Gentegre'ye sor… (ör. &quot;STK.10248'i kim ne zaman satmış?&quot; · &quot;bu teklife açıklama yaz&quot;)"></textarea>
+          <span class="ik">🎤</span>
+          <span class="gon">➤</span>
+        </div>
+        <div class="yazalt">
+          <span>Model: <b>gpt · dengeli</b></span>
+          <span>Bağlam: <b>Cari Listesi · 5 kayıt</b></span>
+          <span>Yetki: <b>Ayşe Demir · Merkez</b></span>
+          <span class="sag">Yazan işlem yapılmaz — sadece taslak üretir, onayı sen verirsin</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SAG ============ -->
+    <div class="sag2">
+      <h5>Bağlam</h5>
+      <div class="kv"><span>Açık ekran</span><b>Cari Listesi</b></div>
+      <div class="kv"><span>Seçili kayıt</span><b>GRANİT BİLGİSAYAR</b></div>
+      <div class="kv"><span>Şube / dönem</span><b>Merkez · 2026</b></div>
+      <div class="kv"><span>Kullanıcı</span><b>Ayşe Demir (Yönetici)</b></div>
+
+      <div class="sep"></div>
+      <h5>İzinli fonksiyonlar</h5>
+      <div class="ark acik"><span class="sw"></span><span class="yaz2">Okuma — cari / stok / fatura
+        <span>SELECT, yetki filtresiyle</span></span></div>
+      <div class="ark acik"><span class="sw"></span><span class="yaz2">Metin üretimi
+        <span>e-posta, WhatsApp, ürün açıklaması</span></span></div>
+      <div class="ark acik"><span class="sw"></span><span class="yaz2">Doküman arama (RAG)
+        <span>GENDEPO.DOSYA · e-Belge kılavuzları</span></span></div>
+      <div class="ark"><span class="sw"></span><span class="yaz2">Kayıt oluşturma
+        <span>Görev / teklif taslağı — onaylı</span></span></div>
+      <div class="ark"><span class="sw"></span><span class="yaz2">Kayıt güncelleme / silme
+        <span>Kapalı — hiçbir rolde açılmıyor</span></span></div>
+
+      <div class="uyari-kutu"><b>Kural:</b> Model veritabanına doğrudan bağlanmaz. Yalnızca izinli
+        fonksiyonlar üzerinden veri okur; yazan her işlem <b>taslak</b> üretir ve kullanıcı onayı olmadan
+        kaydedilmez. Firma, şube ve kullanıcı yetkisi API katmanında uygulanır.</div>
+
+      <div class="sep"></div>
+      <h5>Bu sohbette</h5>
+      <div class="kv"><span>Fonksiyon çağrısı</span><b>2</b></div>
+      <div class="kv"><span>Okunan kayıt</span><b>8</b></div>
+      <div class="kv"><span>Üretilen taslak</span><b>3</b></div>
+      <div class="kv"><span>Onaylanan</span><b>1</b></div>
+      <div class="kv"><span>Token</span><b>3.390</b></div>
+      <div class="kv"><span>Tahmini maliyet</span><b>~0,011 $</b></div>
+
+      <div class="sep"></div>
+      <h5>AI log (son)</h5>
+      <div class="log"><b>09:43</b> Görev taslağı onaylandı → GOREVLER.ID 8841</div>
+      <div class="log"><b>09:42</b> 3 e-posta taslağı üretildi (gönderilmedi)</div>
+      <div class="log"><b>09:41</b> cari_risk_skoru çağrıldı · 3 kayıt</div>
+      <div class="log"><b>09:41</b> cari_vadesi_gecen_listele çağrıldı · 5 kayıt</div>
+      <div class="log" style="padding-top:8px"><b>ISLEMLOG</b> ve <b>AILOG</b>'a çift kayıt düşer;
+        prompt, araç çağrısı, sonuç ve onay birlikte saklanır.</div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Sohbet → <b>AISOHBET</b> (KULLANICIID · BASLIK · BAGLAM · TARIH)</span>·
+    <span>Mesaj → <b>AIMESAJ</b> (ROL · METIN · TOKEN · MODEL)</span>·
+    <span>Araç → <b>AIARAC</b> (FONKSIYON · YETKI · SEMA) + <b>AIARACLOG</b> (PARAM · SONUC · SURE)</span>·
+    <span>Onay → <b>AITASLAK</b> (TIP · ICERIK · DURUM · ONAYLAYAN) → GOREVLER / DOKUMAN / TEKLIF</span>·
+    <span>Denetim → <b>AILOG</b> + <b>GENDEPO.ISLEMLOG</b></span>·
+    <span>Ayar → <b>AIAYAR</b> (MODEL · LIMIT · ROLYETKI)</span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Model: <b>gpt · dengeli</b></span>
+    <span>Aylık kullanım: <b>1,84 M token</b> · limit 5 M</span>
+    <span>Onay bekleyen taslak: <b>2</b></span>
+    <span class="r">Kullanıcı: <b>Ayşe Demir</b> · Merkez</span>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.gs').forEach(function(g){
+    g.addEventListener('click',function(){
+      document.querySelectorAll('.gs').forEach(function(x){x.classList.remove('on')});
+      g.classList.add('on');
+    });
+  });
+  document.querySelectorAll('.ark').forEach(function(a){
+    a.addEventListener('click',function(){ a.classList.toggle('acik'); });
+  });
+  document.querySelectorAll('[data-onay]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var k=b.closest('.onay');
+      k.classList.add('onayli');
+      k.querySelector('.rz').textContent='Onaylandı · şimdi';
+      k.querySelector('.rz').style.borderColor='#c4e2cd';
+      k.querySelector('.rz').style.color='#2e7d46';
+      k.querySelector('.dgm').innerHTML='<button class="db">📤 E-postayı Aç</button>'+
+        '<button class="db">📄 Taslağı Görüntüle</button><button class="db">↩ Geri Al</button>';
+    });
+  });
+</script>
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>.gmzgizle{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>.gmzgizle{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+</style>
+<script>(function(){
+function solMenuMu(e){
+  if(!e||e.nodeType!==1) return false;
+  if(/(^|\s)(gorev|solmenu|gtusgrup)(\s|$)/.test(e.className||"")) return true;
+  /* gorev tuslari / sekmeli sol sutun: .gtus veya .ltabs iceriyorsa gizlenir */
+  return !!e.querySelector(".gtus, .ltabs, .lpane");
+}
+function g(){
+  if(location.hash.indexOf("gomulu")>=0){
+    document.body.classList.add("gomulu");
+    [".wrap",".work"].forEach(function(sel){
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(w){
+        var ilk=w.firstElementChild;
+        if(ilk) ilk.classList.toggle("gmzgizle", solMenuMu(ilk));
+      });
+    });
+  } else document.body.classList.remove("gomulu");
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",g); else g();
+addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

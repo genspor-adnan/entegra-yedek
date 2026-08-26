@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Satış Tahakkuku — Mockup</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;
+    --sel:#d7e7fb;--selbd:#98c2ee;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--grpbg:#fbfcfd;--accent:#2e7d46;
+    /* tahakkuk satir renkleri */
+    --s-yok:#f7cfcf;--s-yok-t:#7d1f1f;   /* donemi gecti — faturalanmadi        */
+    --s-kri:#fbe6ae;--s-kri-t:#7a5407;   /* cari donem / zam donemi             */
+    --s-skt:#f6d9c0;--s-skt-t:#8a4a12;   /* faturalandi — muhasebelesmedi       */
+    --s-pas:#dcdcdc;--s-pas-t:#7a7a7a;}  /* iptal donem                         */
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1040px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2e7d46,#245e36);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#9ad9ab;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.9;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.efat{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px}
+  .hdr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 14px;padding:12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}.fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;color:var(--ink);display:flex;align-items:center}
+  .inp.big{height:26px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .inp.pas{background:#eef1f4;color:var(--muted)}
+  .combo{position:relative}.combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .chip.efat{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}.chip.ok{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}
+  .chip.bek{background:#fdf6e3;color:#a9791a;border:1px solid #eeddb4}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-bek{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}
+  .tip{display:inline-block;min-width:30px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;padding:1px 5px;border:1px solid}
+  .t-bak{background:#e5ecf8;border-color:#c6d7ef;color:#2b5c95}
+  .t-kir{background:#e3f0e6;border-color:#c3e0cb;color:#2e7d46}
+  .t-kom{background:#fdf1e2;border-color:#f0dcbd;color:#96651a}
+  .t-abn{background:#f0e9f8;border-color:#ded0ee;color:#7a4fb0}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:7px 14px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:12px}.pane.active{display:block}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 7px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 7px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg tr.sel td{background:var(--sel)}.dg tr:hover td{filter:brightness(.98)}
+  .dg .c{text-align:center}.dg .r,.amt{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.s-yok td{background:var(--s-yok);color:var(--s-yok-t)}
+  .dg tr.s-kri td{background:var(--s-kri);color:var(--s-kri-t)}
+  .dg tr.s-skt td{background:var(--s-skt);color:var(--s-skt-t)}
+  .dg tr.s-pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .dg tr.s-pas td.ad{text-decoration:line-through}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .gridtb{display:flex;gap:4px;padding:6px 0;flex-wrap:wrap}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px;display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .foot{display:flex;gap:14px;margin-top:6px;flex-wrap:wrap}
+  .notes{flex:1;min-width:280px}.notes textarea{width:100%;height:96px;border:1px solid var(--line);border-radius:3px;padding:6px;font-family:inherit;font-size:12px;resize:none}
+  .totals{width:330px;border:1px solid var(--line2);border-radius:5px;background:linear-gradient(#fff,#f6f9fc);padding:8px 10px}
+  .totals .r{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px dashed var(--line2)}
+  .totals .r.g{border-bottom:none;border-top:2px solid #cdd6e0;margin-top:4px;padding-top:6px;font-weight:bold;font-size:14px;color:var(--navy)}
+  .totals .r span:last-child{font-family:"Segoe UI",Tahoma}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;gap:8px}
+  .grp>h4 .tag{margin-left:auto;font-size:9.5px;font-weight:bold;background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grp .body{padding:10px}
+  .grid2{display:grid;grid-template-columns:150px 1fr;gap:8px 10px;align-items:center}.grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .kv{display:flex;font-size:11.5px;padding:3px 0;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .bar{height:9px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:54px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}.maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Satış Tahakkuku — Düzenle
+    <span class="sp">IcerikFrame\UTahakkukFrame · TAHAKKUK.ID 40922 · Gelir Tahakkuku</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn efat">🧾 Faturala</div>
+    <div class="btn">📒 Muhasebeleştir</div>
+    <div class="btn">🔁 Tekrar Planı Üret</div>
+    <div class="btn">🔒 Dönem Kapat</div>
+    <div class="btn">🖨 Yazdır</div>
+    <div class="sepv"></div>
+    <div class="btn">✖ Kapat</div>
+  </div>
+
+  <div class="hdr">
+    <div class="fld"><label class="req">Tahakkuk No</label><div class="inp big">STH.2026/0092</div></div>
+    <div class="fld"><label class="req">Gelir Türü</label><div class="inp combo">Bakım Sözleşmesi</div></div>
+    <div class="fld"><label>Faturalama Durumu</label><div class="inp">
+      <span class="tip t-bak">BKM</span> <span class="chip bek" style="margin-left:4px">Faturalanmadı</span></div></div>
+
+    <div class="fld"><label class="req">Müşteri (Cari)</label><div class="inp big">GRAND OTEL LARA</div></div>
+    <div class="fld"><label class="req">Tahakkuk Tarihi</label><div class="inp">01.08.2026</div></div>
+    <div class="fld"><label class="req">Dönem</label><div class="inp combo">Ağustos 2026</div></div>
+
+    <div class="fld"><label>Dönem Aralığı</label><div class="inp">01.08.2026 – 31.08.2026</div></div>
+    <div class="fld"><label>Sözleşme No</label><div class="inp combo">SZL.2024/018</div></div>
+    <div class="fld"><label>Periyot</label><div class="inp combo">Aylık</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="genel">Tahakkuk Detayı</div>
+    <div class="tab" data-t="sozlesme">Sözleşme</div>
+    <div class="tab" data-t="plan">Tekrar Planı <span class="b">6</span></div>
+    <div class="tab" data-t="muh">Muhasebe Fişi <span class="b">4</span></div>
+    <div class="tab" data-t="fatura">Fatura / Tahsilat</div>
+  </div>
+
+  <!-- TAHAKKUK DETAYI -->
+  <div class="pane active" data-p="genel">
+    <div class="dg"><table>
+      <thead><tr><th class="c" style="width:28px">#</th><th>Gelir Kalemi</th><th style="width:130px">Hizmet Kodu</th>
+        <th class="amt" style="width:70px">Miktar</th><th style="width:70px">Birim</th>
+        <th class="amt" style="width:110px">Br. Fiyat</th><th class="amt" style="width:52px">KDV</th>
+        <th class="amt" style="width:110px">Tutar</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td class="c">1</td><td class="ad">Perde-stor periyodik bakım — 120 ünite</td><td>HZM.0210</td>
+          <td class="amt">1,00</td><td>Dönem</td><td class="amt">18.000,00</td><td class="amt">%20</td><td class="amt">18.000,00</td></tr>
+        <tr><td class="c">2</td><td class="ad">Mekanizma yedek parça havuzu</td><td>HZM.0212</td>
+          <td class="amt">1,00</td><td>Dönem</td><td class="amt">4.500,00</td><td class="amt">%20</td><td class="amt">4.500,00</td></tr>
+        <tr><td class="c">3</td><td class="ad">Yerinde müdahale (ayda 2 çağrı dahil)</td><td>HZM.0215</td>
+          <td class="amt">2,00</td><td>Çağrı</td><td class="amt">750,00</td><td class="amt">%20</td><td class="amt">1.500,00</td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="7" style="text-align:right">DÖNEM MATRAHI</td><td class="amt">24.000,00</td></tr></tfoot>
+    </table></div>
+    <div class="gridtb"><span class="minibtn">＋ Kalem Ekle</span><span class="minibtn">🔎 Hizmet Seç</span>
+      <span class="minibtn">🗑 Satır Sil</span><span class="minibtn">📄 Sözleşmeden Getir</span></div>
+
+    <div class="foot">
+      <div class="notes">
+        <label style="font-size:11px;color:var(--muted)">Açıklama / Not</label>
+        <textarea readonly>Ağustos 2026 bakım tahakkuku. Otel muhasebesi faturanın ay sonunda (31.08.2026) kesilmesini talep etti.
+Gelirin 6.000,00 ₺'lik kısmı Eylül dönemine sarkmakta; 380.01 hesabında izlenecek.</textarea>
+      </div>
+      <div class="totals">
+        <div class="r"><span>Dönem Matrahı</span><span>₺ 24.000,00</span></div>
+        <div class="r"><span>KDV %20</span><span>₺ 4.800,00</span></div>
+        <div class="r g"><span>Tahakkuk Tutarı</span><span>₺ 28.800,00</span></div>
+        <div class="r" style="border-top:1px dashed var(--line2);margin-top:4px"><span>Faturalanan</span><span>₺ 0,00</span></div>
+        <div class="r"><span>Faturalanacak</span><span style="color:#b23b3b">₺ 28.800,00</span></div>
+        <div class="r"><span>Sözleşme kalan dönem</span><span>13 ay</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOZLESME -->
+  <div class="pane" data-p="sozlesme">
+    <div class="grp">
+      <h4>Sözleşme Bilgisi <span class="tag">SOZLESME · SOZLESMEDONEM</span></h4>
+      <div class="body">
+        <div style="display:flex;gap:14px;flex-wrap:wrap">
+          <div class="grid2" style="flex:1;min-width:330px">
+            <label>Sözleşme No</label><div class="inp">SZL.2024/018</div>
+            <label>Konu</label><div class="inp">Perde-stor periyodik bakım hizmeti</div>
+            <label>Başlangıç</label><div class="inp">01.09.2024</div>
+            <label>Bitiş</label><div class="inp">31.08.2027</div>
+            <label>Periyot</label><div class="inp combo">Aylık</div>
+            <label>Fiyat Artışı</label><div class="inp combo">TÜFE · her yıl Ocak</div>
+            <label>Sorumlu</label><div class="inp combo">Mehmet Yıldız</div>
+            <label>Fatura Kesim Günü</label><div class="inp combo">Ay sonu (31)</div>
+          </div>
+          <div style="width:320px">
+            <div class="kv"><span>Sözleşme süresi</span><b>36 ay</b></div>
+            <div class="kv"><span>Tamamlanan</span><b>23 ay</b></div>
+            <div class="bar"><span class="ok" style="width:64%"></span></div>
+            <div class="kv" style="margin-top:6px"><span>Kalan</span><b>13 ay</b></div>
+            <div class="kv"><span>Toplam sözleşme bedeli</span><b>864.000,00 ₺</b></div>
+            <div class="kv"><span>Bugüne kadar faturalanan</span><b>552.000,00 ₺</b></div>
+            <div class="kv"><span>Aylık tutar (KDV hariç)</span><b>24.000,00 ₺</b></div>
+          </div>
+        </div>
+        <div class="gridtb" style="padding-top:10px"><span class="minibtn">📄 Sözleşmeyi Aç</span>
+          <span class="minibtn">📎 Ek Dosyalar</span><span class="minibtn">📈 Zam Uygula</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEKRAR PLANI -->
+  <div class="pane" data-p="plan">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Tekrar Planı — Sonraki 6 Dönem <span class="tag">TAHAKKUK.PERIYOT · OTOMATIKURET</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:130px">Dönem</th><th style="width:120px">Tahakkuk Tarihi</th>
+            <th style="width:130px">Tahakkuk No</th><th class="amt" style="width:110px">Matrah</th>
+            <th class="amt" style="width:100px">KDV</th><th class="amt" style="width:110px">Tutar</th>
+            <th class="c" style="width:120px">Durum</th><th>Not</th></tr></thead>
+          <tbody>
+            <tr class="s-kri"><td>Ağustos 2026</td><td>01.08.2026</td><td>STH.2026/0092</td>
+              <td class="amt">24.000,00</td><td class="amt">4.800,00</td><td class="amt">28.800,00</td>
+              <td class="c"><span class="pill p-kri">Faturalanmadı</span></td><td class="ad">Cari dönem — bu kart</td></tr>
+            <tr><td>Eylül 2026</td><td>01.09.2026</td><td>—</td>
+              <td class="amt">24.000,00</td><td class="amt">4.800,00</td><td class="amt">28.800,00</td>
+              <td class="c"><span class="pill p-bek">Planlandı</span></td><td class="ad">Otomatik üretilecek (gece işi)</td></tr>
+            <tr><td>Ekim 2026</td><td>01.10.2026</td><td>—</td>
+              <td class="amt">24.000,00</td><td class="amt">4.800,00</td><td class="amt">28.800,00</td>
+              <td class="c"><span class="pill p-bek">Planlandı</span></td><td class="ad">—</td></tr>
+            <tr><td>Kasım 2026</td><td>01.11.2026</td><td>—</td>
+              <td class="amt">24.000,00</td><td class="amt">4.800,00</td><td class="amt">28.800,00</td>
+              <td class="c"><span class="pill p-bek">Planlandı</span></td><td class="ad">—</td></tr>
+            <tr class="s-skt"><td>Aralık 2026</td><td>01.12.2026</td><td>—</td>
+              <td class="amt">24.000,00</td><td class="amt">4.800,00</td><td class="amt">28.800,00</td>
+              <td class="c"><span class="pill p-kri">Yıl sonu</span></td><td class="ad">Dönem kapanışında muhasebeleştirme zorunlu</td></tr>
+            <tr class="s-kri"><td>Ocak 2027</td><td>01.01.2027</td><td>—</td>
+              <td class="amt">27.600,00</td><td class="amt">5.520,00</td><td class="amt">33.120,00</td>
+              <td class="c"><span class="pill p-kri">Zam dönemi</span></td><td class="ad">TÜFE artışı %11,5 (tahmini)</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="5" style="text-align:right">6 DÖNEM TOPLAMI</td>
+            <td class="amt">177.120,00</td><td class="c"></td><td></td></tr></tfoot>
+        </table></div>
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-yok)"></span>Gecikmiş — faturalanmadı veya tahsil edilmedi</span>
+          <span><span class="sw" style="background:var(--s-kri)"></span>Cari dönem / zam dönemi</span>
+          <span><span class="sw" style="background:var(--s-skt)"></span>Faturalandı — muhasebeleşmedi</span>
+          <span><span class="sw" style="background:var(--s-pas)"></span>İptal dönem — <b>en sonda</b>, üstü çizili</span>
+        </div>
+        <div class="gridtb"><span class="minibtn on">🔁 Planı Yeniden Üret</span>
+          <span class="minibtn">📅 Periyot Değiştir</span><span class="minibtn">🚫 Sonraki Dönemleri Durdur</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MUHASEBE FISI -->
+  <div class="pane" data-p="muh">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Muhasebe Fişi Önizlemesi <span class="tag">MUHFIS / MUHFISSATIR</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:110px">Hesap Kodu</th><th>Hesap Adı</th><th class="amt" style="width:120px">Borç</th>
+            <th class="amt" style="width:120px">Alacak</th><th style="width:230px">Açıklama</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td>120.01</td><td class="ad">Alıcılar — GRAND OTEL LARA</td>
+              <td class="amt">28.800,00</td><td class="amt">—</td><td class="ad">Ağustos 2026 bakım tahakkuku</td></tr>
+            <tr><td>600.01</td><td class="ad">Yurtiçi Satışlar — Bakım Geliri</td>
+              <td class="amt">—</td><td class="amt">18.000,00</td><td class="ad">Cari döneme isabet eden kısım</td></tr>
+            <tr><td>380.01</td><td class="ad">Gelecek Aylara Ait Gelirler</td>
+              <td class="amt">—</td><td class="amt">6.000,00</td><td class="ad">Eylül dönemine sarkan kısım</td></tr>
+            <tr><td>391.01</td><td class="ad">Hesaplanan KDV %20</td>
+              <td class="amt">—</td><td class="amt">4.800,00</td><td class="ad">Fatura kesiminde tahakkuk eder</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="2" style="text-align:right">FİŞ TOPLAMI</td>
+            <td class="amt">28.800,00</td><td class="amt">28.800,00</td><td>Denk ✔</td></tr></tfoot>
+        </table></div>
+        <div class="gridtb"><span class="minibtn on">📒 Muhasebeleştir</span>
+          <span class="minibtn">👁 Fişi Önizle</span><span class="minibtn">↩ Muhasebeyi Geri Al</span></div>
+        <div class="hint">Fiş yalnızca önizlemedir; kayıt <b>Muhasebeleştir</b> ile oluşur.
+          380.01 kırılımı sözleşmenin "hizmet dönemi" ayarına göre <b>fn_Api_Tahakkuk_DonemDagit</b> ile hesaplanır.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FATURA / TAHSILAT -->
+  <div class="pane" data-p="fatura">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Fatura ve Tahsilat <span class="tag">FATBASLIK (TUR 15) · KASA</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:130px">Dönem</th><th style="width:150px">Fatura No</th><th style="width:110px">Tarih</th>
+            <th class="amt" style="width:120px">Tutar</th><th class="c" style="width:120px">Durum</th><th>Tahsilat</th></tr></thead>
+          <tbody>
+            <tr class="s-kri"><td>Ağustos 2026</td><td>—</td><td>—</td><td class="amt">28.800,00</td>
+              <td class="c"><span class="pill p-kri">Faturalanmadı</span></td><td class="ad">Kesim günü 31.08.2026</td></tr>
+            <tr><td>Temmuz 2026</td><td>SFT.2026/0316</td><td>31.07.2026</td><td class="amt">28.800,00</td>
+              <td class="c"><span class="pill p-ok">Faturalandı</span></td><td class="ad">Havale · 08.08.2026 · tahsil edildi</td></tr>
+            <tr><td>Haziran 2026</td><td>SFT.2026/0287</td><td>30.06.2026</td><td class="amt">28.800,00</td>
+              <td class="c"><span class="pill p-ok">Faturalandı</span></td><td class="ad">Havale · 09.07.2026 · tahsil edildi</td></tr>
+            <tr class="s-yok"><td>Nisan 2026</td><td>SFT.2026/0221</td><td>30.04.2026</td><td class="amt">28.800,00</td>
+              <td class="c"><span class="pill p-yok">Tahsil edilmedi</span></td><td class="ad">106 gün gecikme · icra öncesi ihtar hazırlanıyor</td></tr>
+            <tr class="s-pas"><td>Mayıs 2026</td><td>SFT.2026/0254</td><td>31.05.2026</td><td class="amt">28.800,00</td>
+              <td class="c"><span class="pill p-pas">İptal</span></td><td class="ad">Hatalı cari — yeniden kesildi</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="3" style="text-align:right">FATURALANAN / BEKLEYEN</td>
+            <td class="amt">86.400,00 / 28.800,00</td><td class="c"></td><td></td></tr></tfoot>
+        </table></div>
+        <div class="gridtb"><span class="minibtn on">🧾 Faturala</span><span class="minibtn">💵 Tahsilat Ekle</span>
+          <span class="minibtn">📅 Tahsilat Planla</span><span class="minibtn">👁 Faturayı Aç</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow"><b>Veri modeli:</b>
+    <span>Başlık → <b>TAHAKKUK</b> (GELIRTURU · DONEM · PERIYOT · DURUM)</span>·
+    <span>Kalem → <b>TAHAKKUKSATIR → HIZMET</b></span>·
+    <span>Sözleşme → <b>SOZLESME · SOZLESMEDONEM</b></span>·
+    <span>Faturalama → <b>FATBASLIK (TUR 15)</b></span>·
+    <span>Muhasebe → <b>MUHFIS / MUHFISSATIR</b> (120 · 600 · 380 · 391)</span>
+  </div>
+  <div class="statusbar"><span>Yön: <b style="color:#2e7d46">GELİR TAHAKKUKU</b></span>
+    <span>Dönem: Ağustos 2026 (açık) · bugün 14.08.2026</span><span>Durum: Faturalanmadı · 28.800,00 ₺</span>
+    <span style="margin-left:auto">Oluşturan: Zeynep Korkmaz · 01.08.2026</span></div>
+
+  <div style="padding:0 12px 12px">
+    <div class="hint"><b>Delphi eşlemesi:</b> <b>IcerikFrame\UTahakkukFrame</b> — başlık alanları <b>TAHAKKUK</b>,
+      kalem grid'i <b>TAHAKKUKSATIR</b>, tekrar planı <b>sp_Prog_Tahakkuk_PlanUret</b> ile üretilir.
+      "Faturala" <b>sp_Prog_Tahakkuk_Faturala</b> çağırıp <b>TAHAKKUK.FATURAID</b> alanını doldurur;
+      "Muhasebeleştir" <b>MUHFIS</b> kaydı açar. Kapat düğmesi <b>Vazgeç</b> davranışıyla formu kapatır.</div>
+  </div>
+</div>
+<script>
+  var tabs=document.querySelectorAll('.tab'),panes=document.querySelectorAll('.pane');
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('active')});
+    panes.forEach(function(x){x.classList.remove('active')});
+    t.classList.add('active');
+    var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]'); if(p) p.classList.add('active');});});
+</script>
+
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

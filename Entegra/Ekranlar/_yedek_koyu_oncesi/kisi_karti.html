@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kişi Kartı — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* satir renkleri (izin / gecmis kayitlari) */
+    --s-yok:#f7cfcf; --s-yok-t:#7d1f1f;   /* izin yok / suresi dolmus */
+    --s-kri:#fbe6ae; --s-kri-t:#7a5407;   /* suresi yaklasan / eksik  */
+    --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;   /* gecersiz / eski kayit    */
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1040px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.danger:hover{background:linear-gradient(#e0605c,#c0413d)}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .idstrip{display:grid;gap:10px;padding:10px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .idstrip2{border-bottom:1px solid var(--line2);background:linear-gradient(#fbfcfe,#f2f6fa)}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted);letter-spacing:.2px}
+  .fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-family:inherit;font-size:12px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .lnk{font-size:10.5px;color:var(--accent);text-decoration:underline;cursor:pointer;white-space:nowrap}
+  .chip{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:bold}
+  .chip.on{background:#e2f3e8;color:var(--ok);border:1px solid #bfe3cb}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);margin-top:2px;flex-wrap:wrap}
+  .tab{padding:7px 14px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;
+    font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:14px}
+  .pane.active{display:block}
+  .row{display:flex;gap:14px}
+  .col{flex:1;min-width:0}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);
+    border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;letter-spacing:.3px;margin-left:auto;
+    background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grid2{display:grid;grid-template-columns:120px 1fr;gap:8px 10px;align-items:center}
+  .grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .grid2 label.req::after{content:" *";color:var(--req)}
+  .full{grid-column:1 / -1}
+  textarea.inp{height:52px;padding:5px 6px;resize:none;line-height:1.35}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{white-space:normal}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{background:#f2f7fd}
+  .dg tr.s-yok td{background:var(--s-yok);color:var(--s-yok-t)}
+  .dg tr.s-kri td{background:var(--s-kri);color:var(--s-kri-t)}
+  .dg tr.s-pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .dg tr.s-pas td.ad{text-decoration:line-through}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .star{color:#e0a400;font-size:13px}
+  .gridtb{display:flex;gap:4px;padding:5px 0 0;flex-wrap:wrap;align-items:center}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .req-note{color:var(--req)}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-izl{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .p-gor{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}
+  /* rol rozetleri */
+  .tip{display:inline-block;min-width:30px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;padding:1px 5px;border:1px solid}
+  .t-kar{background:#fbe4e4;border-color:#efc4c4;color:#a5322f}
+  .t-etk{background:#f5edfb;border-color:#e3d3f0;color:#7a4fb0}
+  .t-kul{background:#e5ecf8;border-color:#c6d7ef;color:#2b5c95}
+  .t-muh{background:#e3f0e6;border-color:#c3e0cb;color:#2e7d46}
+  .t-tek{background:#fdf1e2;border-color:#f0dcbd;color:#96651a}
+  /* mini bar */
+  .bar{height:12px;border-radius:6px;background:#e7edf3;overflow:hidden;display:flex;border:1px solid var(--line2)}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+  .amt{text-align:right;font-family:"Segoe UI",Tahoma}
+  /* sag panel (foto + etiket) */
+  .side{width:196px;flex:none;border:1px solid var(--line2);border-radius:4px;background:#f8fafc;padding:8px 0}
+  .side h5{margin:0;padding:5px 10px 4px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11px;padding:3px 10px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .tvsep{height:1px;background:var(--line2);margin:7px 8px}
+  .foto{margin:0 10px;height:120px;border:1px solid var(--line);border-radius:4px;background:linear-gradient(#fff,#f2f6fa);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:40px;color:#9fb3c8}
+  .foto span.t{font-size:10px;color:var(--muted);margin-top:4px}
+  .etiketler{display:flex;gap:4px;flex-wrap:wrap;padding:4px 10px}
+  .sidebtns{display:flex;flex-direction:column;gap:4px;padding:4px 10px}
+  .thumb{width:74px;height:56px;border:1px solid var(--line);border-radius:4px;background:#eef3f8;
+    display:flex;align-items:center;justify-content:center;font-size:10px;color:#5c7189;position:relative;overflow:hidden}
+  .thumb .ic{font-size:20px}
+  .thumb .lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(20,40,70,.62);color:#fff;font-size:9px;padding:1px 3px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .thumb.img1{background:linear-gradient(135deg,#cfe0f3,#9dc0e6)}
+  .thumb.img2{background:linear-gradient(135deg,#f3dfc7,#e6bd8f)}
+  .media{display:flex;gap:7px;flex-wrap:wrap}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Kişi Kartı — Düzenle
+    <span class="sp">KISI.ID 184 · KOD: KSI.00184 · Gentegre Perde &amp; Mefruşat A.Ş. · 14.08.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn">＋ Yeni</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">📞 Ara</div>
+    <div class="btn">✉ E-posta</div>
+    <div class="btn">📅 Aktivite Ekle</div>
+    <div class="btn">🔗 Cariye Bağla</div>
+    <div class="sepv"></div>
+    <div class="btn">🖨 Yazdır</div>
+    <div class="btn">✖ Kapat</div>
+  </div>
+
+  <div class="idstrip" style="grid-template-columns:120px 1fr 1fr 1.2fr 1fr">
+    <div class="fld"><label class="req">Kişi Kodu</label><div class="inp big">KSI.00184</div></div>
+    <div class="fld"><label class="req">Ad</label><div class="inp big">Kemal</div></div>
+    <div class="fld"><label class="req">Soyad</label><div class="inp big">Aydın</div></div>
+    <div class="fld"><label class="req">Ünvan / Görev</label><div class="inp">Satınalma Müdürü</div></div>
+    <div class="fld"><label>Departman</label><div class="inp combo">Satınalma</div></div>
+  </div>
+
+  <div class="idstrip idstrip2" style="grid-template-columns:1.6fr 1fr 1.1fr 1.1fr 110px">
+    <div class="fld">
+      <label>Bağlı Cari <span class="lnk">↗ Cari Kartını Aç</span></label>
+      <div class="inp combo">ÖZKAN İNŞAAT TAAH. LTD. ŞTİ. · 120.01.184</div>
+    </div>
+    <div class="fld"><label class="req">Rol</label><div class="inp combo"><span class="tip t-kar">KARAR VERİCİ</span></div></div>
+    <div class="fld"><label>Yetki Seviyesi</label><div class="inp combo">Bütçe onayı — 1.500.000,00 ₺</div></div>
+    <div class="fld"><label>Raporladığı Kişi</label><div class="inp combo">Hakan Toprak (Genel Md.)</div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="chip on">● Aktif</span></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="genel">Genel</div>
+    <div class="tab" data-t="iletisim">İletişim Geçmişi <span class="b">8</span></div>
+    <div class="tab" data-t="ilgili">İlgili Kayıtlar <span class="b">5</span></div>
+    <div class="tab" data-t="kvkk">KVKK / İzinler</div>
+    <div class="tab" data-t="notlar">Notlar &amp; Ekler <span class="b">2</span></div>
+  </div>
+
+  <!-- ============== GENEL ============== -->
+  <div class="pane active" data-p="genel">
+    <div class="row">
+      <div class="col">
+        <div class="grp">
+          <h4>İletişim <span class="tag">KISIILETISIM (1:N)</span></h4>
+          <div class="body grid2">
+            <label class="req">Cep</label><div class="inp">0532 418 77 20 <span class="pill p-ok" style="margin-left:auto">Tercih ★</span></div>
+            <label>İş Telefonu</label><div class="inp">0242 345 60 00 <span style="color:var(--muted);margin-left:6px">Dahili: 118</span></div>
+            <label class="req">E-posta</label><div class="inp">k.aydin@ozkaninsaat.com.tr</div>
+            <label>2. E-posta</label><div class="inp">kemalaydin79@gmail.com</div>
+            <label>LinkedIn</label><div class="inp">linkedin.com/in/kemal-aydin-satinalma</div>
+            <label>Tercih Edilen Kanal</label><div class="inp combo">Telefon (cep) · ikincil: WhatsApp</div>
+            <label>En Uygun Saat</label><div class="inp">09:00 – 11:00 (hafta içi)</div>
+          </div>
+        </div>
+
+        <div class="grp" style="margin-bottom:0">
+          <h4>Adres <span class="tag">KISI + IL/ILCE (FK)</span></h4>
+          <div class="body grid2">
+            <label>İş Adresi</label><div class="inp">Fener Mah. Tekelioğlu Cad. No:58 Kat:4</div>
+            <label>İlçe / İl</label><div class="inp combo">Muratpaşa / ANTALYA</div>
+            <label>Posta Kodu</label><div class="inp" style="max-width:120px">07160</div>
+            <label>Ülke</label><div class="inp combo">Türkiye</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col" style="max-width:330px">
+        <div class="grp">
+          <h4>Kişisel <span class="tag">KISI</span></h4>
+          <div class="body grid2" style="grid-template-columns:104px 1fr">
+            <label>Doğum Tarihi</label><div class="inp">12.05.1979 <span style="color:var(--muted);margin-left:auto;font-size:10.5px">47 yaş</span></div>
+            <label>Cinsiyet</label><div class="inp combo">Erkek</div>
+            <label>Medeni Durum</label><div class="inp combo">Evli</div>
+            <label>Dil</label><div class="inp combo">Türkçe (İngilizce — orta)</div>
+            <label>İlk Kayıt</label><div class="inp">04.02.2024</div>
+          </div>
+        </div>
+        <div class="grp" style="margin-bottom:0">
+          <h4>İlişki Gücü <span class="tag">KISIAKTIVITE (90 gün)</span></h4>
+          <div class="body">
+            <div class="bar"><span class="ok" style="width:78%"></span></div>
+            <div style="display:flex;gap:12px;margin-top:6px;font-size:10.5px;color:var(--muted)">
+              <span>Skor: <b style="color:var(--navy)">%78</b></span>
+              <span>Temas: <b style="color:var(--navy)">11</b></span>
+              <span>Son: <b style="color:var(--navy)">12.08.2026</b> (2 g)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="side">
+        <h5>Fotoğraf</h5>
+        <div class="foto">👤<span class="t">foto yok — yükle</span></div>
+        <div class="gridtb" style="padding:6px 10px 0"><span class="minibtn">📷 Yükle</span><span class="minibtn">🗑 Kaldır</span></div>
+
+        <div class="tvsep"></div>
+        <h5>Etiketler</h5>
+        <div class="etiketler">
+          <span class="pill p-yok">VIP</span>
+          <span class="pill p-gor">Proje Müşterisi</span>
+          <span class="pill p-izl">Fuar 2026</span>
+        </div>
+        <div class="gridtb" style="padding:6px 10px 0"><span class="minibtn">🏷 Etiket Ekle</span></div>
+
+        <div class="tvsep"></div>
+        <h5>Hızlı Bilgi</h5>
+        <div class="kv"><span>Rol</span><b><span class="tip t-kar">KARAR</span></b></div>
+        <div class="kv"><span>Şehir</span><b>Antalya</b></div>
+        <div class="kv"><span>KVKK</span><b><span class="pill p-ok">İzin Var ✔</span></b></div>
+        <div class="kv"><span>Açık teklif</span><b>1</b></div>
+        <div class="kv"><span>Açık fırsat</span><b>1</b></div>
+
+        <div class="tvsep"></div>
+        <div class="sidebtns">
+          <span class="minibtn">📞 Ara</span>
+          <span class="minibtn">💬 WhatsApp</span>
+          <span class="minibtn">📇 vCard Aktar</span>
+        </div>
+      </div>
+    </div>
+    <div class="hint">Ad/soyad, görev, rol ve durum <b>KISI</b> tablosunda; her iletişim kanalı <b>KISIILETISIM</b>'de ayrı satırdır
+      (TIP · DEGER · TERCIH). Tercih edilen kanal ★ ile işaretlenir ve toplu iletişim ekranları bu kanalı önerir.</div>
+  </div>
+
+  <!-- ============== ILETISIM GECMISI ============== -->
+  <div class="pane" data-p="iletisim">
+    <div class="grp">
+      <h4>İletişim Geçmişi <span class="tag">KISIAKTIVITE (1:N) → GOREVLER</span></h4>
+      <div class="body">
+        <div class="gridtb" style="padding:0 0 7px">
+          <span class="minibtn on">Tümü</span><span class="minibtn">Telefon</span><span class="minibtn">E-posta</span>
+          <span class="minibtn">Ziyaret</span><span class="minibtn">WhatsApp</span><span class="minibtn">Toplantı</span>
+          <span class="sepv" style="height:18px"></span>
+          <span class="minibtn">➕ Aktivite Ekle</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Son 90 gün · 11 kayıt (8 gösteriliyor)</span>
+        </div>
+        <div class="dg">
+          <table>
+            <thead><tr>
+              <th style="width:118px">TARİH-SAAT</th><th style="width:86px">KANAL</th><th class="c" style="width:56px">YÖN</th>
+              <th>KONU</th><th class="c" style="width:60px">SÜRE</th><th style="width:180px">SONUÇ</th><th style="width:112px">KAYDEDEN</th>
+            </tr></thead>
+            <tbody>
+              <tr class="foc"><td>12.08.2026 10:28</td><td>E-posta</td><td class="c">Giden</td>
+                <td class="ad">TKF.2026/0453 teklif gönderimi</td><td class="c">—</td>
+                <td class="ad">Okundu · bütçe onayı bekliyor</td><td>Mehmet Yıldız</td></tr>
+              <tr><td>11.08.2026 09:05</td><td>Telefon</td><td class="c">Gelen</td>
+                <td class="ad">Teklif kalemleri hakkında soru</td><td class="c">6 dk</td>
+                <td class="ad">Bilgi verildi · revize istenmedi</td><td>Mehmet Yıldız</td></tr>
+              <tr><td>10.08.2026 14:00</td><td>Toplantı</td><td class="c">—</td>
+                <td class="ad">Lara Rezidans — ihtiyaç analizi</td><td class="c">75 dk</td>
+                <td class="ad">Olumlu · 3 yıl garanti şartı</td><td>Mehmet Yıldız</td></tr>
+              <tr><td>05.08.2026 11:25</td><td>Telefon</td><td class="c">Giden</td>
+                <td class="ad">Kumaş numunesi talebi</td><td class="c">4 dk</td>
+                <td class="ad">Ulaşıldı · numune kargolandı</td><td>Ayşe Demir</td></tr>
+              <tr><td>28.07.2026 09:40</td><td>Ziyaret</td><td class="c">—</td>
+                <td class="ad">Şantiye keşfi (Lara B Blok)</td><td class="c">140 dk</td>
+                <td class="ad">Ölçü alındı · 240 pencere</td><td>Burak Şen</td></tr>
+              <tr><td>21.07.2026 16:10</td><td>WhatsApp</td><td class="c">Gelen</td>
+                <td class="ad">Blackout kumaş kodu sorusu</td><td class="c">—</td>
+                <td class="ad">Yanıtlandı · GNT-BL-118</td><td>Mehmet Yıldız</td></tr>
+              <tr class="s-kri"><td>09.07.2026 15:30</td><td>Telefon</td><td class="c">Giden</td>
+                <td class="ad">Sipariş teslim planı teyidi</td><td class="c">—</td>
+                <td class="ad">Ulaşılamadı · mesaj bırakıldı</td><td>Ayşe Demir</td></tr>
+              <tr><td>25.06.2026 10:15</td><td>E-posta</td><td class="c">Giden</td>
+                <td class="ad">GNT.2026/0561 fatura gönderimi</td><td class="c">—</td>
+                <td class="ad">Teslim edildi · muhasebeye iletildi</td><td>Osman Türkmen</td></tr>
+            </tbody>
+            <tfoot><tr>
+              <td colspan="4" style="text-align:right">TOPLAM (8 kayıt · 4 giden · 2 gelen · 2 yüz yüze)</td>
+              <td class="c">225 dk</td><td colspan="2"></td>
+            </tr></tfoot>
+          </table>
+        </div>
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-kri)"></span>Ulaşılamadı / yanıtsız temas</span>
+          <span><span class="sw" style="background:var(--s-yok)"></span>Başarısız — geçersiz numara / geri dönen e-posta</span>
+          <span><span class="sw" style="background:var(--s-pas)"></span>İptal edilmiş kayıt — <b>en sonda</b>, konusu üstü çizili</span>
+        </div>
+        <div class="hint">Aktivite satırları <b>KISIAKTIVITE</b>'de; planlanan (gelecek tarihli) kayıtlar aynı anda
+          <b>GOREVLER</b>'e yazılır. Liste ekranındaki "SON TEMAS" bu tablodaki en büyük <b>TARIH</b> değeridir.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== ILGILI KAYITLAR ============== -->
+  <div class="pane" data-p="ilgili">
+    <div class="row">
+      <div class="col">
+        <div class="grp">
+          <h4>Teklifler <span class="tag">TEKLIF.KISIID</span></h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <thead><tr><th style="width:130px">TEKLİF NO</th><th class="c" style="width:80px">TARİH</th>
+                  <th class="r" style="width:120px">TUTAR</th><th class="c" style="width:80px">DURUM</th></tr></thead>
+                <tbody>
+                  <tr class="foc"><td>TKF.2026/0453</td><td class="c">12.08.2026</td>
+                    <td class="r"><b>1.050.000,00 ₺</b></td><td class="c"><span class="pill p-kri">Onayda</span></td></tr>
+                  <tr><td>TKF.2026/0311</td><td class="c">14.06.2026</td>
+                    <td class="r">412.500,00 ₺</td><td class="c"><span class="pill p-ok">Kabul</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="gridtb"><span class="minibtn">👁 Aç</span><span class="minibtn">📄 Yeni Teklif</span><span class="minibtn">📧 Yeniden Gönder</span></div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Fırsatlar <span class="tag">FIRSAT.KISIID</span></h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <thead><tr><th style="width:130px">FIRSAT NO</th><th>KONU</th>
+                  <th class="c" style="width:70px">OLASILIK</th><th class="r" style="width:120px">TAHMİNİ</th></tr></thead>
+                <tbody>
+                  <tr class="foc"><td>FRS.2026/0088</td><td class="ad">Lara Rezidans B Blok — mefruşat paketi</td>
+                    <td class="c"><span class="pill p-gor">%60</span></td><td class="r">780.000,00 ₺</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="gridtb"><span class="minibtn">👁 Aç</span><span class="minibtn">🎯 Yeni Fırsat</span><span class="minibtn">⏩ Aşama İlerlet</span></div>
+          </div>
+        </div>
+
+        <div class="grp" style="margin-bottom:0">
+          <h4>Siparişler <span class="tag">SIPARIS.KISIID</span></h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <thead><tr><th style="width:130px">SİPARİŞ NO</th><th class="c" style="width:80px">TARİH</th>
+                  <th class="r" style="width:120px">TUTAR</th><th class="c" style="width:80px">DURUM</th></tr></thead>
+                <tbody>
+                  <tr><td>SPS.2026/0834</td><td class="c">18.06.2026</td>
+                    <td class="r">412.500,00 ₺</td><td class="c"><span class="pill p-ok">Teslim</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="gridtb"><span class="minibtn">👁 Aç</span><span class="minibtn">🚚 İrsaliye</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="grp">
+          <h4>Servis Kayıtları <span class="tag">SERVIS.KISIID</span></h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <thead><tr><th style="width:130px">SERVİS NO</th><th>KONU</th>
+                  <th class="c" style="width:80px">TARİH</th><th class="c" style="width:78px">DURUM</th></tr></thead>
+                <tbody>
+                  <tr><td>SRV.2026/0212</td><td class="ad">Motorlu perde kumanda arızası — 4 adet</td>
+                    <td class="c">02.07.2026</td><td class="c"><span class="pill p-ok">Kapandı</span></td></tr>
+                  <tr class="s-kri"><td>SRV.2026/0258</td><td class="ad">Stor mekanizma ayarı — ofis katı</td>
+                    <td class="c">07.08.2026</td><td class="c"><span class="pill p-kri">Açık</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="gridtb"><span class="minibtn">👁 Aç</span><span class="minibtn">🔧 Yeni Servis</span></div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Faturalar <span class="tag">FATBASLIK.KISIID</span></h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <thead><tr><th style="width:130px">FATURA NO</th><th class="c" style="width:80px">TARİH</th>
+                  <th class="r" style="width:120px">TUTAR</th><th class="c" style="width:80px">DURUM</th></tr></thead>
+                <tbody>
+                  <tr><td>GNT.2026/0561</td><td class="c">25.06.2026</td>
+                    <td class="r">412.500,00 ₺</td><td class="c"><span class="pill p-ok">Tahsil</span></td></tr>
+                  <tr><td>GNT.2025/1184</td><td class="c">03.11.2025</td>
+                    <td class="r">96.740,00 ₺</td><td class="c"><span class="pill p-ok">Tahsil</span></td></tr>
+                </tbody>
+                <tfoot><tr><td colspan="2" style="text-align:right">TOPLAM</td>
+                  <td class="r">509.240,00 ₺</td><td class="c"></td></tr></tfoot>
+              </table>
+            </div>
+            <div class="gridtb"><span class="minibtn">👁 Aç</span><span class="minibtn">🧾 Ekstre</span></div>
+          </div>
+        </div>
+
+        <div class="grp" style="margin-bottom:0">
+          <h4>Özet <span class="tag">hesaplanan</span></h4>
+          <div class="body grid2" style="grid-template-columns:130px 1fr">
+            <label>Açık teklif</label><div class="inp">1 adet · 1.050.000,00 ₺</div>
+            <label>Açık fırsat</label><div class="inp">1 adet · 780.000,00 ₺ (ağırlıklı 468.000,00 ₺)</div>
+            <label>Toplam ciro</label><div class="inp">509.240,00 ₺ (2 fatura)</div>
+            <label>Açık servis</label><div class="inp">1 adet — SRV.2026/0258</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hint">İlgili kayıtlar belge tablolarındaki <b>KISIID</b> alanı ile bağlanır; cari bazlı görünüm için
+      <b>CARIID</b> filtresi kullanılır. Kişi başka bir cariye taşınırsa geçmiş belgeler <u>taşınmaz</u> (snapshot mantığı).</div>
+  </div>
+
+  <!-- ============== KVKK / IZINLER ============== -->
+  <div class="pane" data-p="kvkk">
+    <div class="row">
+      <div class="col">
+        <div class="grp">
+          <h4>Aydınlatma &amp; Açık Rıza <span class="tag">KISIIZIN</span></h4>
+          <div class="body grid2" style="grid-template-columns:170px 1fr">
+            <label>Aydınlatma Metni Onayı</label><div class="inp"><span class="pill p-ok">Onaylandı</span>
+              <span style="margin-left:auto;color:var(--muted);font-size:10.5px">12.03.2025</span></div>
+            <label>Metin Sürümü</label><div class="inp">AYD-2025.1</div>
+            <label>Açık Rıza — Pazarlama E-postası</label><div class="inp"><b style="color:#2e7d46">✔ İzin Var</b></div>
+            <label>Açık Rıza — SMS</label><div class="inp"><b style="color:#2e7d46">✔ İzin Var</b></div>
+            <label>Açık Rıza — Arama</label><div class="inp"><b style="color:#b23b3b">✖ İzin Yok</b></div>
+            <label>İzin Kaynağı</label><div class="inp combo">Web formu (gentegre.com.tr/iletisim)</div>
+            <label>İzin Tarihi</label><div class="inp">12.03.2025 14:06</div>
+            <label>Saklama Süresi</label><div class="inp">10 yıl (12.03.2035'e kadar)</div>
+            <label>"Verilerimi Sil" Talebi</label><div class="inp"><span class="pill p-pas">Talep yok</span></div>
+            <label>Veri Sorumlusu</label><div class="inp">Gentegre Perde &amp; Mefruşat A.Ş.</div>
+          </div>
+        </div>
+      </div>
+      <div class="col" style="max-width:300px">
+        <div class="grp" style="margin-bottom:0">
+          <h4>İzin Durumu <span class="tag">özet</span></h4>
+          <div class="body">
+            <div class="bar"><span class="ok" style="width:67%"></span><span class="yok" style="width:33%"></span></div>
+            <div style="display:flex;gap:12px;margin-top:6px;font-size:10.5px;color:var(--muted)">
+              <span style="color:#2e7d46">■ 2 kanal izinli</span><span style="color:#b23b3b">■ 1 kanal kapalı</span>
+            </div>
+            <div class="kv" style="padding:8px 0 2px"><span>Toplu e-postaya dahil</span><b><span class="pill p-ok">Evet</span></b></div>
+            <div class="kv" style="padding:2px 0"><span>Otomatik aramaya dahil</span><b><span class="pill p-yok">Hayır</span></b></div>
+            <div class="kv" style="padding:2px 0"><span>İzin yenileme</span><b>12.03.2027</b></div>
+            <div class="gridtb"><span class="minibtn">📧 İzin Yenile</span><span class="minibtn">🖨 İzin Belgesi</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp" style="margin-bottom:0">
+      <h4>İzin Kaydı Geçmişi <span class="tag">KISIIZIN (log · değiştirilemez)</span></h4>
+      <div class="body">
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:118px">TARİH</th><th style="width:150px">İŞLEM</th><th style="width:110px">KANAL</th>
+              <th class="c" style="width:74px">DURUM</th><th style="width:170px">KAYNAK</th><th>AÇIKLAMA</th><th style="width:110px">KAYDEDEN</th></tr></thead>
+            <tbody>
+              <tr class="foc"><td>12.03.2025 14:06</td><td>Açık rıza alındı</td><td>E-posta · SMS</td>
+                <td class="c"><span class="pill p-ok">Aktif</span></td><td>Web formu</td>
+                <td class="ad">IP 88.246.x.x · KVKK metni AYD-2025.1 onaylandı.</td><td>Sistem</td></tr>
+              <tr><td>12.03.2025 14:06</td><td>Açık rıza reddi</td><td>Arama</td>
+                <td class="c"><span class="pill p-yok">Kapalı</span></td><td>Web formu</td>
+                <td class="ad">Pazarlama araması için onay verilmedi.</td><td>Sistem</td></tr>
+              <tr class="s-pas"><td>08.02.2024 11:20</td><td>Aydınlatma onayı</td><td>—</td>
+                <td class="c"><span class="pill p-pas">Eski</span></td><td>Fuar formu (kağıt)</td>
+                <td class="ad">AYD-2023.2 sürümü — 2025 yenilemesi ile geçersiz kaldı.</td><td>Ayşe Demir</td></tr>
+              <tr class="s-yok"><td>04.02.2024 09:15</td><td>Kayıt oluşturuldu</td><td>—</td>
+                <td class="c"><span class="pill p-yok">İzinsiz</span></td><td>Manuel giriş</td>
+                <td class="ad">Kartvizitten girildi; izin alınana kadar pazarlama iletişimi kapalıydı.</td><td>Mehmet Yıldız</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-yok)"></span>İzin yok / süresi dolmuş — iletişim kapalı</span>
+          <span><span class="sw" style="background:var(--s-kri)"></span>Süresi yaklaşıyor / eksik belge</span>
+          <span><span class="sw" style="background:var(--s-pas)"></span>Eski sürüm — <b>en sonda</b>, açıklaması üstü çizili</span>
+        </div>
+        <div class="hint">İzin kayıtları <b>KISIIZIN</b>'de append-only tutulur; güncelleme yerine yeni satır yazılır.
+          Toplu e-posta / SMS ekranları yalnızca <b>en güncel</b> satırdaki izinli kanalları kullanır. Silme talebi geldiğinde
+          kişi <b>anonimleştirilir</b> (KISI.DURUM = 'Silindi'), belge geçmişi kayıt bütünlüğü için korunur.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== NOTLAR & EKLER ============== -->
+  <div class="pane" data-p="notlar">
+    <div class="grp">
+      <h4>Serbest Not <span class="tag">KISI.NOTLAR</span></h4>
+      <div class="body">
+        <textarea class="inp" style="width:100%;height:64px">Kışın Antalya'da değil, mart-ekim arası ulaşılabilir. Fiyattan çok termine hassas.</textarea>
+        <div class="gridtb"><span class="minibtn">💾 Notu Kaydet</span><span class="minibtn">➕ Zaman Damgalı Not</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Son güncelleme: 12.08.2026 10:40 · Mehmet Yıldız</span></div>
+      </div>
+    </div>
+
+    <div class="grp" style="margin-bottom:0">
+      <h4>Ek Dosyalar <span class="tag">IMAJ → GENDEPO.DOSYA (hash-dedup)</span></h4>
+      <div class="body">
+        <div class="media" style="margin-bottom:9px">
+          <div class="thumb img1"><span class="lbl">kartvizit.jpg</span></div>
+          <div class="thumb"><span class="ic">📄</span><span class="lbl">sözleşme-taslak.pdf</span></div>
+        </div>
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:190px">DOSYA</th><th style="width:80px">TÜR</th><th class="r" style="width:80px">BOYUT</th>
+              <th class="c" style="width:96px">TARİH</th><th style="width:120px">YÜKLEYEN</th><th>AÇIKLAMA</th></tr></thead>
+            <tbody>
+              <tr class="foc"><td>kartvizit.jpg</td><td>Görsel</td><td class="r">318 KB</td>
+                <td class="c">28.07.2026</td><td>Ayşe Demir</td><td class="ad">Fuar 2026 standında tarandı.</td></tr>
+              <tr><td>sözleşme-taslak.pdf</td><td>Belge</td><td class="r">1,2 MB</td>
+                <td class="c">10.08.2026</td><td>Mehmet Yıldız</td><td class="ad">Lara Rezidans çerçeve sözleşme taslağı — imza bekliyor.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gridtb"><span class="minibtn">📎 Dosya Ekle</span><span class="minibtn">👁 Önizle</span>
+          <span class="minibtn">⬇ İndir</span><span class="minibtn">🗑 Sil</span></div>
+        <div class="hint">Aynı dosya birden çok kişi/caride tek kez saklanır (hash-dedup, FILESTREAM);
+          kartvizit görselleri OCR ile <b>KISI</b> alanlarına önerilebilir.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Genel → <b>KISI</b> (KISIID · CARIID · AD · SOYAD · GOREV · ROL · EPOSTA · CEP · DURUM)</span>·
+    <span>Kanallar → <b>KISIILETISIM</b> (TIP · DEGER · TERCIH)</span>·
+    <span>İletişim geçmişi → <b>KISIAKTIVITE → GOREVLER</b></span>·
+    <span>KVKK → <b>KISIIZIN</b> (AYDINLATMA · ACIKRIZA · KANAL · KAYNAK · BITIS)</span>·
+    <span>Firma → <b>CARI</b> (CARIID üzerinden 1:N)</span>·
+    <span>Belgeler → <b>TEKLIF · FIRSAT · SIPARIS · SERVIS · FATBASLIK</b> (KISIID)</span>·
+    <span>Not / ek → <b>GOREVYORUM · IMAJ → GENDEPO.DOSYA</b></span>·
+    <span>Denetim → <b>GENDEPO.ISLEMLOG</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Kayıt 184 / 1.240</span>
+    <span>Rol: <b>Karar Verici</b> (KISI.ROL)</span>
+    <span>Cari: <b>ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.</b></span>
+    <span class="req-note">* zorunlu alanlar</span>
+    <span style="margin-left:auto">Oluşturan: Mehmet Yıldız · 04.02.2024 · Son değişiklik: 12.08.2026</span>
+  </div>
+
+  <div class="hint" style="padding:8px 12px 10px;margin-top:0;border-top:1px solid var(--line2)">
+    <b>IcerikFrame\UKisiFrame · KISI (KISIID · CARIID · AD · SOYAD · GOREV · ROL · EPOSTA · CEP · DURUM) · KISIAKTIVITE · KISIIZIN (KVKK)</b>
+    — MS Dynamics CRM "Contact" karşılığı; cari (firma) ile <b>CARIID</b> üzerinden 1:N, cariden bağımsız (serbest / potansiyel) kişilerde <b>CARIID NULL</b>.
+  </div>
+</div>
+
+<script>
+  var tabs=document.querySelectorAll('.tab'), panes=document.querySelectorAll('.pane');
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('active')});
+    panes.forEach(function(x){x.classList.remove('active')});
+    t.classList.add('active');
+    var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+    if(p) p.classList.add('active');
+  });});
+  document.querySelectorAll('.minibtn').forEach(function(b){
+    b.addEventListener('click',function(){
+      var g=b.parentElement;
+      if(!g||!g.classList.contains('gridtb')) return;
+      if(!/Tümü|Telefon|E-posta|Ziyaret|WhatsApp|Toplantı/.test(b.textContent)) return;
+      g.querySelectorAll('.minibtn').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');
+    });
+  });
+</script>
+
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>.gmzgizle{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>.gmzgizle{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+</style>
+<script>(function(){
+function solMenuMu(e){
+  if(!e||e.nodeType!==1) return false;
+  if(/(^|\s)(gorev|solmenu|gtusgrup)(\s|$)/.test(e.className||"")) return true;
+  return !!e.querySelector(".gtus, .ltabs, .lpane");
+}
+function g(){
+  if(location.hash.indexOf("gomulu")>=0){
+    document.body.classList.add("gomulu");
+    [".wrap",".work"].forEach(function(sel){
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(w){
+        var ilk=w.firstElementChild;
+        if(ilk) ilk.classList.toggle("gmzgizle", solMenuMu(ilk));
+      });
+    });
+  } else document.body.classList.remove("gomulu");
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",g); else g();
+addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+
+<style id="gnPanoCss">
+.gnpk{position:absolute;left:-11px;top:14px;z-index:40;width:22px;height:46px;
+  border:1px solid var(--line,#d8e0ea);border-right:0;border-radius:6px 0 0 6px;
+  background:linear-gradient(#fff,#eef3f9);color:#2f6db3;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+  box-shadow:-2px 0 6px rgba(20,32,50,.07);user-select:none}
+.gnpk:hover{background:linear-gradient(#fff,#dce8f6);color:#14406f}
+.gnpanokap{position:relative}
+.gnpanokap.kapali{width:0!important;min-width:0!important;flex:none!important;
+  padding-left:0!important;padding-right:0!important;border-left-width:0!important;overflow:visible!important}
+.gnpanokap.kapali>*:not(.gnpk){display:none!important}
+.gnpanokap.kapali .gnpk{left:-23px;border-right:1px solid var(--line,#d8e0ea);border-radius:6px}
+</style>
+<script>
+/* ---- GN_PANO_AC_KAPA — sağdaki bilgi/içerik panosu aç-kapa ---- */
+(function(){
+  function kur(){
+    var p = document.querySelector('.wrap > .side, .govde > .yan, .work > .side, .center ~ .side');
+    if(!p) p = document.querySelector('.side, .yan');
+    if(!p || p.querySelector('.gnpk')) return;
+    p.classList.add('gnpanokap');
+    var d = document.createElement('div');
+    d.className = 'gnpk';
+    function ciz(){
+      var k = p.classList.contains('kapali');
+      d.textContent = k ? '‹' : '›';
+      d.title = k ? 'Bilgi panosunu aç' : 'Bilgi panosunu kapat';
+    }
+    function uygula(kapali){
+      if(kapali){
+        p.classList.add('kapali');
+        ['width','minWidth','maxWidth','flexBasis','paddingLeft','paddingRight','borderLeftWidth']
+          .forEach(function(a){ p.style.setProperty(
+            a.replace(/[A-Z]/g, function(c){ return '-'+c.toLowerCase(); }), '0', 'important'); });
+        p.style.setProperty('flex','none','important');
+        p.style.setProperty('overflow','visible','important');
+      } else {
+        p.classList.remove('kapali');
+        p.style.cssText = '';
+        p.style.position = 'relative';
+      }
+      ciz();
+    }
+    d.addEventListener('click', function(){
+      var k = !p.classList.contains('kapali');
+      uygula(k);
+      try{ sessionStorage.setItem('gnPano', k ? '1' : '0'); }catch(e){}
+    });
+    p.appendChild(d);
+    p.style.position = 'relative';
+    var bas = false;
+    try{ bas = sessionStorage.getItem('gnPano') === '1'; }catch(e){}
+    uygula(bas);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur);
+  else kur();
+})();
+</script>
+</body>
+</html>

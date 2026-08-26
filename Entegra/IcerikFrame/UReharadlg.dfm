@@ -928,9 +928,9 @@ object RehberAraDlg: TRehberAraDlg
       PopupMenu = PopupIlgililer
       object cxGrid2: TcxGrid
         Left = 0
-        Top = 30
+        Top = 26
         Width = 459
-        Height = 198
+        Height = 202
         Align = alLeft
         TabOrder = 0
         LookAndFeel.Kind = lfOffice11
@@ -1024,16 +1024,16 @@ object RehberAraDlg: TRehberAraDlg
       end
       object Panel2: TPanel
         Left = 459
-        Top = 30
+        Top = 26
         Width = 577
-        Height = 198
+        Height = 202
         Align = alClient
         TabOrder = 1
         object GridPerIlet: TcxGrid
           Left = 1
           Top = 25
           Width = 352
-          Height = 172
+          Height = 176
           Align = alLeft
           BevelEdges = []
           BevelInner = bvNone
@@ -1150,7 +1150,7 @@ object RehberAraDlg: TRehberAraDlg
           Style.Color = clBtnFace
           Style.Edges = []
           TabOrder = 2
-          Height = 172
+          Height = 176
           Width = 223
         end
       end
@@ -1163,7 +1163,6 @@ object RehberAraDlg: TRehberAraDlg
         Caption = 'Panel9'
         TabOrder = 2
         object ToolBar2: TToolBar
-          ButtonHeight = 22
           Left = 1
           Top = 1
           Width = 206
@@ -1232,7 +1231,7 @@ object RehberAraDlg: TRehberAraDlg
           Left = 207
           Top = 1
           Width = 828
-          Height = 28
+          Height = 24
           Align = alClient
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWhite
@@ -1244,7 +1243,6 @@ object RehberAraDlg: TRehberAraDlg
           ColorTo = 11776947
           ImageIndex = 0
           object IlgiliAraEdit: TcxTextEdit
-            Height = 17
             Left = 80
             Top = 3
             ParentFont = False
@@ -1285,8 +1283,8 @@ object RehberAraDlg: TRehberAraDlg
         Align = alClient
         TabOrder = 0
         Properties.ActivePage = cxTabSheet1
-        Properties.Images = Tablo.PNGImageList2
         Properties.CustomButtons.Buttons = <>
+        Properties.Images = Tablo.PNGImageList2
         Properties.Style = 8
         ClientRectBottom = 228
         ClientRectRight = 1036
@@ -1301,7 +1299,7 @@ object RehberAraDlg: TRehberAraDlg
             Width = 1030
             Height = 24
             Margins.Bottom = 0
-            ButtonWidth = 100
+            ButtonWidth = 99
             Caption = 'AletCubugu'
             Color = clTeal
             DockSite = True
@@ -1968,7 +1966,7 @@ object RehberAraDlg: TRehberAraDlg
         Height = 228
         Align = alClient
         TabOrder = 0
-        Properties.ActivePage = TabSheetAlisSip
+        Properties.ActivePage = TabSheetSatisSip
         Properties.CustomButtons.Buttons = <>
         Properties.Images = Tablo.PNGImageList2
         Properties.Style = 8
@@ -1976,6 +1974,21 @@ object RehberAraDlg: TRehberAraDlg
         ClientRectBottom = 228
         ClientRectRight = 1036
         ClientRectTop = 27
+        object TabSheetSatisSip: TcxTabSheet
+          Tag = 19
+          Caption = 'Sat'#305#351' Sipari'#351
+          ImageIndex = 4
+        end
+        object TabSheetSatisIrs: TcxTabSheet
+          Tag = 14
+          Caption = 'Sat'#305#351' '#304'rsaliye'
+          ImageIndex = 19
+        end
+        object TabSheetSatisKons: TcxTabSheet
+          Tag = 119
+          Caption = 'Sat'#305#351' Konsinye'
+          ImageIndex = 12
+        end
         object TabSheetAlisSip: TcxTabSheet
           Tag = 9
           Caption = 'Al'#305#351' Sipari'#351
@@ -1991,16 +2004,15 @@ object RehberAraDlg: TRehberAraDlg
             object GridCariBelgeView: TcxGridDBTableView
               Navigator.Buttons.CustomButtons = <>
               ScrollbarAnnotations.CustomAnnotations = <>
+              OnCanFocusRecord = GridCariBelgeViewCanFocusRecord
+              OnCellDblClick = GridCariBelgeViewCellDblClick
               DataController.DataSource = DtsCariBelge
               DataController.Summary.DefaultGroupSummaryItems = <>
               DataController.Summary.FooterSummaryItems = <>
               DataController.Summary.SummaryGroups = <>
-              OnCanFocusRecord = GridCariBelgeViewCanFocusRecord
               OptionsData.Deleting = False
               OptionsData.Editing = False
               OptionsData.Inserting = False
-              OptionsView.ColumnAutoWidth = False
-              OptionsView.ScrollBars = ssBoth
               OptionsView.GroupByBox = False
               object GridCariBelgeViewTARIH: TcxGridDBColumn
                 Caption = 'Tarih'
@@ -2008,53 +2020,59 @@ object RehberAraDlg: TRehberAraDlg
                 DataBinding.IsNullValueType = True
                 Width = 110
               end
+              object GridCariBelgeViewDURUM: TcxGridDBColumn
+                Caption = 'Durum'
+                DataBinding.FieldName = 'DURUM'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxImageComboBoxProperties'
+                Properties.Items = <
+                  item
+                    Description = 'Yap'#305'lmad'#305
+                    ImageIndex = 0
+                    Value = 0
+                  end
+                  item
+                    Description = 'K'#305'smi'
+                    Tag = 1
+                    Value = 1
+                  end
+                  item
+                    Description = #304'ptal'
+                    Tag = 6
+                    Value = 6
+                  end
+                  item
+                    Description = 'Tamam'
+                    Tag = 9
+                    Value = 9
+                  end>
+                Width = 70
+              end
               object GridCariBelgeViewBELGENO: TcxGridDBColumn
                 Caption = 'Belge No'
                 DataBinding.FieldName = 'FATURANO'
                 DataBinding.IsNullValueType = True
                 Width = 90
               end
-              object GridCariBelgeViewSERI: TcxGridDBColumn
-                Caption = 'Seri'
-                DataBinding.FieldName = 'FATURASERI'
+              object GridCariBelgeViewSATICIADI: TcxGridDBColumn
+                Caption = 'Sat'#305'c'#305
+                DataBinding.FieldName = 'SATICIADI'
                 DataBinding.IsNullValueType = True
-                Width = 60
+                Width = 120
               end
-              object GridCariBelgeViewACIKLAMA: TcxGridDBColumn
-                Caption = 'A'#231#305'klama'
-                DataBinding.FieldName = 'ACIKLAMA'
+              object GridCariBelgeViewSANAL: TcxGridDBColumn
+                Caption = 'Sanal'
+                DataBinding.FieldName = 'SANAL'
                 DataBinding.IsNullValueType = True
-                Width = 160
-              end
-              object GridCariBelgeViewMATRAH: TcxGridDBColumn
-                Caption = 'Matrah'
-                DataBinding.FieldName = 'FATURA_MATRAHI'
-                DataBinding.IsNullValueType = True
-                Width = 100
-              end
-              object GridCariBelgeViewKDV: TcxGridDBColumn
-                Caption = 'KDV'
-                DataBinding.FieldName = 'KDV_TUTARI'
-                DataBinding.IsNullValueType = True
-                Width = 90
-              end
-              object GridCariBelgeViewTUTAR: TcxGridDBColumn
-                Caption = 'Tutar'
-                DataBinding.FieldName = 'FATURA_TUTARI'
-                DataBinding.IsNullValueType = True
-                Width = 110
-              end
-              object GridCariBelgeViewKUR: TcxGridDBColumn
-                Caption = 'Kur'
-                DataBinding.FieldName = 'KUR'
-                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxCheckBoxProperties'
+                Properties.NullStyle = nssUnchecked
                 Width = 50
               end
-              object GridCariBelgeViewVADE: TcxGridDBColumn
-                Caption = 'Vade'
-                DataBinding.FieldName = 'VADETARIH'
+              object GridCariBelgeViewOZELKOD: TcxGridDBColumn
+                Caption = #214'zel Kod'
+                DataBinding.FieldName = 'OZELKOD'
                 DataBinding.IsNullValueType = True
-                Width = 100
+                Width = 80
               end
               object GridCariBelgeViewKAYNAK: TcxGridDBColumn
                 Caption = 'Kaynak'
@@ -2074,6 +2092,74 @@ object RehberAraDlg: TRehberAraDlg
                 DataBinding.IsNullValueType = True
                 Width = 120
               end
+              object GridCariBelgeViewMATRAH: TcxGridDBColumn
+                Caption = 'Tutar(KDV Hari'#231')'
+                DataBinding.FieldName = 'FATURA_MATRAHI'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.RepCurrencyGenel
+                Width = 91
+              end
+              object GridCariBelgeViewKDV: TcxGridDBColumn
+                Caption = 'KDV'
+                DataBinding.FieldName = 'KDV_TUTARI'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.RepCurrencyGenel
+                Width = 58
+              end
+              object GridCariBelgeViewTUTAR: TcxGridDBColumn
+                Caption = 'Tutar(KDV Dahil)'
+                DataBinding.FieldName = 'FATURA_TUTARI'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.RepCurrencyGenel
+                Width = 88
+              end
+              object GridCariBelgeViewKUR: TcxGridDBColumn
+                Caption = 'P.Birimi'
+                DataBinding.FieldName = 'KUR'
+                DataBinding.IsNullValueType = True
+                Width = 45
+              end
+              object GridCariBelgeViewDOVIZMATRAH: TcxGridDBColumn
+                Caption = 'D'#246'viz Tutar(KDV Hari'#231')'
+                DataBinding.FieldName = 'DOVIZ_FATURA_MATRAHI'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.RepCurrencyGenel
+                Width = 139
+              end
+              object GridCariBelgeViewDOVIZKDV: TcxGridDBColumn
+                Caption = 'D'#246'viz KDV'
+                DataBinding.FieldName = 'DOVIZ_KDV_TUTARI'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.RepCurrencyGenel
+                Width = 73
+              end
+              object GridCariBelgeViewDOVIZTUTAR: TcxGridDBColumn
+                Caption = 'D'#246'viz Tutar(KDV Dahil)'
+                DataBinding.FieldName = 'DOVIZ_TUTARI'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.RepCurrencyGenel
+                Width = 119
+              end
+              object GridCariBelgeViewDOVIZCINSI: TcxGridDBColumn
+                Caption = 'D'#246'viz Birimi'
+                DataBinding.FieldName = 'DOVIZ_CINSI'
+                DataBinding.IsNullValueType = True
+                Width = 67
+              end
+              object GridCariBelgeViewDOVIZKUR: TcxGridDBColumn
+                Caption = 'D'#246'viz Kuru'
+                DataBinding.FieldName = 'DOVIZKUR'
+                DataBinding.IsNullValueType = True
+                RepositoryItem = Tablo.RepCurrencyGenel
+                Width = 70
+              end
+              object GridCariBelgeViewACIKLAMA: TcxGridDBColumn
+                Caption = 'Notlar'
+                DataBinding.FieldName = 'ACIKLAMA'
+                DataBinding.IsNullValueType = True
+                PropertiesClassName = 'TcxTextEditProperties'
+                Width = 148
+              end
             end
             object GridCariBelgeLevel1: TcxGridLevel
               GridView = GridCariBelgeView
@@ -2090,21 +2176,6 @@ object RehberAraDlg: TRehberAraDlg
           Caption = 'Al'#305#351' Konsinye'
           ImageIndex = 12
         end
-        object TabSheetSatisSip: TcxTabSheet
-          Tag = 19
-          Caption = 'Sat'#305#351' Sipari'#351
-          ImageIndex = 4
-        end
-        object TabSheetSatisIrs: TcxTabSheet
-          Tag = 14
-          Caption = 'Sat'#305#351' '#304'rsaliye'
-          ImageIndex = 19
-        end
-        object TabSheetSatisKons: TcxTabSheet
-          Tag = 119
-          Caption = 'Sat'#305#351' Konsinye'
-          ImageIndex = 12
-        end
       end
     end
     object TabSheetEkstre: TcxTabSheet
@@ -2112,9 +2183,9 @@ object RehberAraDlg: TRehberAraDlg
       ImageIndex = 32
       object GridCariEkstre: TcxGrid
         Left = 0
-        Top = 30
+        Top = 26
         Width = 1036
-        Height = 198
+        Height = 202
         Align = alClient
         Font.Charset = TURKISH_CHARSET
         Font.Color = clWindowText
@@ -2423,7 +2494,6 @@ object RehberAraDlg: TRehberAraDlg
         Caption = 'Panel8'
         TabOrder = 1
         object ToolBar11: TToolBar
-          ButtonHeight = 22
           Left = 1
           Top = 1
           Width = 140
@@ -2484,7 +2554,7 @@ object RehberAraDlg: TRehberAraDlg
           Left = 141
           Top = 1
           Width = 894
-          Height = 28
+          Height = 24
           Align = alClient
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWhite
@@ -2510,7 +2580,6 @@ object RehberAraDlg: TRehberAraDlg
             OnClick = Label1Click
           end
           object CalendarEkstreBas: TcxDateEdit
-            Height = 17
             Left = 60
             Top = 3
             ParentFont = False
@@ -2539,7 +2608,6 @@ object RehberAraDlg: TRehberAraDlg
             Transparent = True
           end
           object CalendarEkstreBit: TcxDateEdit
-            Height = 17
             Left = 223
             Top = 3
             ParentFont = False
@@ -2555,7 +2623,6 @@ object RehberAraDlg: TRehberAraDlg
             Width = 121
           end
           object CheckDetayli: TcxCheckBox
-            Height = 17
             Left = 350
             Top = 3
             Caption = 'Detayl'#305' Ekstre G'#246'ster'
@@ -2574,7 +2641,6 @@ object RehberAraDlg: TRehberAraDlg
             Transparent = True
           end
           object CheckPlan: TcxCheckBox
-            Height = 17
             Left = 510
             Top = 3
             Caption = 'Planlar'#305' G'#246'ster'
@@ -5376,8 +5442,8 @@ object RehberAraDlg: TRehberAraDlg
     Top = 121
   end
   object cxStyleRepository1: TcxStyleRepository
-    Left = 114
-    Top = 117
+    Left = 146
+    Top = 77
     PixelsPerInch = 96
     object cxStyle1: TcxStyle
       AssignedValues = [svColor, svFont, svTextColor]
@@ -5901,7 +5967,7 @@ object RehberAraDlg: TRehberAraDlg
     OwnerDraw = True
     OnPopup = PopupMenuREHBERPopup
     Left = 41
-    Top = 50
+    Top = 34
     object info1: TMenuItem
       Caption = 'info'
       ImageIndex = 22

@@ -54,7 +54,6 @@ object FiyatSorDlg: TFiyatSorDlg
     end
   end
   object cxPageControl1: TcxPageControl
-    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 46
     Width = 467
@@ -64,12 +63,13 @@ object FiyatSorDlg: TFiyatSorDlg
     TabStop = False
     Properties.ActivePage = SheetFiyatlandirma
     Properties.CustomButtons.Buttons = <>
+    Properties.Images = Tablo.PNGImageList2
     Properties.Style = 10
     Properties.TabSlants.Kind = skCutCorner
     OnPageChanging = cxPageControl1PageChanging
     ClientRectBottom = 458
     ClientRectRight = 467
-    ClientRectTop = 19
+    ClientRectTop = 21
     object SheetFiyatlandirma: TcxTabSheet
       Caption = '  Fiyatland'#305'rma  '
       ImageIndex = 34
@@ -1470,7 +1470,7 @@ object FiyatSorDlg: TFiyatSorDlg
         Left = 0
         Top = 0
         Width = 467
-        Height = 439
+        Height = 437
         Align = alClient
         TabOrder = 0
         LevelTabs.CaptionAlignment = taLeftJustify
@@ -1480,15 +1480,15 @@ object FiyatSorDlg: TFiyatSorDlg
         RootLevelOptions.DetailTabsPosition = dtpTop
         OnActiveTabChanged = cxGrid1ActiveTabChanged
         object cxGrid1DBTableViewDurum: TcxGridDBTableView
-          OptionsData.Deleting = False
-          OptionsData.Editing = False
-          OptionsData.Inserting = False
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsStokDurumDetay
           DataController.Summary.DefaultGroupSummaryItems = <>
           DataController.Summary.FooterSummaryItems = <>
           DataController.Summary.SummaryGroups = <>
+          OptionsData.Deleting = False
+          OptionsData.Editing = False
+          OptionsData.Inserting = False
           OptionsView.GroupByBox = False
           Styles.Inactive = Tablo.cxstSecili
           object cxGrid1DBTableViewDurumTIP: TcxGridDBColumn
@@ -1513,9 +1513,6 @@ object FiyatSorDlg: TFiyatSorDlg
           end
         end
         object cxGrid1DBCardViewAlislar: TcxGridDBCardView
-          OptionsData.Deleting = False
-          OptionsData.Editing = False
-          OptionsData.Inserting = False
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsSonAlislar
@@ -1523,6 +1520,9 @@ object FiyatSorDlg: TFiyatSorDlg
           DataController.Summary.FooterSummaryItems = <>
           DataController.Summary.SummaryGroups = <>
           LayoutDirection = ldVertical
+          OptionsData.Deleting = False
+          OptionsData.Editing = False
+          OptionsData.Inserting = False
           OptionsSelection.CellSelect = False
           OptionsSelection.CardBorderSelection = False
           OptionsSelection.HideSelection = True
@@ -1602,9 +1602,6 @@ object FiyatSorDlg: TFiyatSorDlg
           end
         end
         object cxGrid1DBCardViewSatislar: TcxGridDBCardView
-          OptionsData.Deleting = False
-          OptionsData.Editing = False
-          OptionsData.Inserting = False
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsSonSatislar
@@ -1612,6 +1609,9 @@ object FiyatSorDlg: TFiyatSorDlg
           DataController.Summary.FooterSummaryItems = <>
           DataController.Summary.SummaryGroups = <>
           LayoutDirection = ldVertical
+          OptionsData.Deleting = False
+          OptionsData.Editing = False
+          OptionsData.Inserting = False
           OptionsSelection.CellSelect = False
           OptionsSelection.CardBorderSelection = False
           OptionsSelection.HideSelection = True
@@ -1748,15 +1748,15 @@ object FiyatSorDlg: TFiyatSorDlg
           end
         end
         object cxGrid1DBTableViewUretim: TcxGridDBTableView
-          OptionsData.Deleting = False
-          OptionsData.Editing = False
-          OptionsData.Inserting = False
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsUretim
           DataController.Summary.DefaultGroupSummaryItems = <>
           DataController.Summary.FooterSummaryItems = <>
           DataController.Summary.SummaryGroups = <>
+          OptionsData.Deleting = False
+          OptionsData.Editing = False
+          OptionsData.Inserting = False
           OptionsView.GroupByBox = False
           object cxGrid1DBTableViewUretimKOD: TcxGridDBColumn
             Caption = 'Kod'
@@ -1782,15 +1782,15 @@ object FiyatSorDlg: TFiyatSorDlg
           end
         end
         object cxGrid1DBTableViewTeklif: TcxGridDBTableView
-          OptionsData.Deleting = False
-          OptionsData.Editing = False
-          OptionsData.Inserting = False
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = DtsSonTeklifler
           DataController.Summary.DefaultGroupSummaryItems = <>
           DataController.Summary.FooterSummaryItems = <>
           DataController.Summary.SummaryGroups = <>
+          OptionsData.Deleting = False
+          OptionsData.Editing = False
+          OptionsData.Inserting = False
           OptionsView.GroupByBox = False
           object cxGrid1DBTableViewTeklifColumnBASLIK: TcxGridDBColumn
             Caption = 'Cari'
@@ -2014,8 +2014,8 @@ object FiyatSorDlg: TFiyatSorDlg
   end
   object DtsSonSatislar: TDataSource
     DataSet = TabSonSatislar
-    Left = 135
-    Top = 4
+    Left = 127
+    Top = 52
   end
   object TabSonAlislar: TFDQuery
     Connection = Tablo.FDCnn

@@ -1,4 +1,4 @@
-ï»¿unit UFaturaGorevFrame;
+unit UFaturaGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -8,7 +8,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus,
-  cxLookAndFeelPainters, cxButtons, JvExControls, JvButton, JvNavigationPane,
+  cxLookAndFeelPainters, cxButtons,
   ImgList, PngImageList, ExtCtrls, UMaliyetlerListeFrame,
   cxGraphics, cxLookAndFeels, dxSkinsCore, dxSkinLiquidSky,
   dxSkinLondonLiquidSky, dxSkinBlue, dxSkinBlueprint, dxSkinDevExpressDarkStyle,
@@ -23,12 +23,12 @@ uses
 type
   TFaturaGorevFrame = class(TFrame)
     PNGImageList1: TPngImageList;
-    BtnMaliyetler: TJvNavPanelButton;
+    BtnMaliyetler: TcxButton;
     Panel3: TPanel;
-    btnOzelDokumler: TJvNavPanelButton;
-    btnDokumler: TJvNavPanelButton;
+    btnOzelDokumler: TcxButton;
+    btnDokumler: TcxButton;
     PanelAlisBelgeleri: TPanel;
-    btnAlisFaturalari: TJvNavPanelButton;
+    btnAlisFaturalari: TcxButton;
     btnSatinalmaTalepleri: TcxButton;
     btnVerilenSiparisler: TcxButton;
     btnIrsaliyeler: TcxButton;
@@ -38,7 +38,7 @@ type
     btnGiderPusulalari: TcxButton;
     btnKonsinyeler: TcxButton;
     PanelSatisBelgeleri: TPanel;
-    btnSatisFaturalari: TJvNavPanelButton;
+    btnSatisFaturalari: TcxButton;
     btAlinanSiparisler: TcxButton;
     btIrsaliyeler: TcxButton;
     btFaturalar: TcxButton;
@@ -60,7 +60,7 @@ type
     procedure SetFrameBilgi(const Value: TAnaFrameBilgi);
     procedure TumKucukResimleriDuzenle;
   public
-    FMenuTur : SmallInt; //Tur: Giren:0,Ã‡Ä±kan:1  AltTur: sipariÅŸ:0,irsaliye:1,Fat:2,fiÅŸ:3,Tahakkuk:4,TÃ¼mÃ¼:-1
+    FMenuTur : SmallInt; //Tur: Giren:0,Çýkan:1  AltTur: sipariþ:0,irsaliye:1,Fat:2,fiþ:3,Tahakkuk:4,Tümü:-1
     FAltTur : SmallInt;
     { Public declarations }
   published
@@ -82,13 +82,13 @@ uses JvJVCLUtils, UFaturalar, FetaKurulusSiniflari, UGenelGirisSayfasiFrame,
 
 procedure TFaturaGorevFrame.btnAlisFaturalariClick(Sender: TObject);
 begin
-//kapalÄ± boy 54
-//aÃ§Ä±k boy 222
+//kapalý boy 54
+//açýk boy 222
 //her bir buton 24
-  //baÅŸlangÄ±Ã§ta panel boyutlarÄ± 54 olmalÄ±dÄ±r!!
+  //baþlangýçta panel boyutlarý 54 olmalýdýr!!
 
   TumKucukResimleriDuzenle;
-  if (sender as TJvNavPanelButton).tag = 2 then begin
+  if (sender as TcxButton).tag = 2 then begin
     if PanelAlisBelgeleri.height = 54 then begin
       PanelAlisBelgeleri.height := 54+(24*PanelAlisBelgeleri.Tag);
       PanelSatisBelgeleri.height := 54;
@@ -98,7 +98,7 @@ begin
     with FFrameBilgi.IcerikGit(TGenelGirisSayfasiFrame) do begin
       //InitIslemler;
     end;
-  end else if (sender as TJvNavPanelButton).tag = 3 then begin
+  end else if (sender as TcxButton).tag = 3 then begin
     if PanelSatisBelgeleri.height = 54 then begin
       PanelAlisBelgeleri.height := 54;
       PanelSatisBelgeleri.height := 54+(24*PanelSatisBelgeleri.Tag);
@@ -112,7 +112,7 @@ begin
     PanelAlisBelgeleri.height := 54;
     PanelSatisBelgeleri.height := 54;
   end;
-  if Sender.ClassName='TJvNavPanelButton' then begin
+  if Sender is TcxButton then begin
     Tablo.FBtnIndex := -1;
     FAltTur := -1;
   end;
@@ -121,13 +121,10 @@ end;
 
 procedure TFaturaGorevFrame.btnUpAndDown(Sender: TObject);
 begin
-  btnAlisFaturalari.Down := False;
-  btnSatisFaturalari.Down := False;
-  BtnMaliyetler.Down := False;
-  btnDokumler.Down := False;
-  btnOzelDokumler.Down := False;
-  if Sender.ClassName = 'TJvNavPanelButton' then
-    (Sender as TJvNavPanelButton).Down := True;
+  // Tek buton aktif: frame'deki TUM TcxButton'lar tek elden yonetilir.
+  // (Eskiden sabit bir buton listesi sifirlaniyordu; listede olmayan butonlar
+  //  basili kaldigi icin ayni anda birden fazla buton aktif gorunuyordu.)
+  GorevTusuSec(Self, Sender);
 end;
 
 procedure TFaturaGorevFrame.btnDokumlerMouseDown(Sender: TObject;
@@ -137,7 +134,7 @@ begin
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=0
    else
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;
-  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TJVNavPanelButton(Sender).Tag;
+  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TcxButton(Sender).Tag;
   TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'F';
   btnUpAndDown(Sender);
 end;
@@ -189,7 +186,7 @@ begin
             FMenuTur := 0
           else
             FMenuTur := 1;
-          SQLEk := ' and F.TUR ='+IntToStr((sender as TcxButton).Tag); //arama buna gÃ¶re yapÄ±lacak..
+          SQLEk := ' and F.TUR ='+IntToStr((sender as TcxButton).Tag); //arama buna göre yapýlacak..
           InitIslemler;
         end;
       end;
@@ -201,12 +198,12 @@ var
   VisibleCount:integer;
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   PanelAlisBelgeleri.Visible := Tablo.YetkiVarmi(2401,YetkiTur_Gorme);
   PanelSatisBelgeleri.Visible := Tablo.YetkiVarmi(2411,YetkiTur_Gorme);
   Panel3.Visible := Tablo.YetkiVarmi(2499,YetkiTur_Gorme);
 
-  //alÄ±ÅŸ belgeleri
+  //alýþ belgeleri
   VisibleCount := 0;
   btnSatinalmaTalepleri.visible := Tablo.YetkiVarmi(240111,YetkiTur_Gorme);
   if btnSatinalmaTalepleri.visible then
@@ -232,12 +229,12 @@ begin
   btnKonsinyeler.visible := Tablo.YetkiVarmi(240171,YetkiTur_Gorme); //eklenecek
   if btnKonsinyeler.visible then
      VisibleCount:=VisibleCount+1;
-  btnGirisFisi.visible := False;//Tablo.YetkiVarmi(2712,YetkiTur_Gorme); //giriÅŸ fiÅŸi
+  btnGirisFisi.visible := False;//Tablo.YetkiVarmi(2712,YetkiTur_Gorme); //giriþ fiþi
   if btnGirisFisi.visible then
      VisibleCount:=VisibleCount+1;
   PanelAlisBelgeleri.Tag := VisibleCount;
   VisibleCount := 0;
-  //satÄ±ÅŸ belgeleri
+  //satýþ belgeleri
   btAlinanSiparisler.visible := Tablo.YetkiVarmi(241111,YetkiTur_Gorme);
   if btAlinanSiparisler.visible then
      VisibleCount:=VisibleCount+1;
@@ -272,3 +269,5 @@ end;
 initialization
   RegisterClass(TFaturaGorevFrame);
 end.
+
+

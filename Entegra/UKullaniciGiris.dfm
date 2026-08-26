@@ -26,8 +26,6 @@ object KullaniciGirisDlg: TKullaniciGirisDlg
     BevelInner = bvLowered
     BevelKind = bkSoft
     TabOrder = 0
-    ExplicitLeft = 336
-    ExplicitHeight = 288
     DesignSize = (
       168
       285)
@@ -484,7 +482,6 @@ object KullaniciGirisDlg: TKullaniciGirisDlg
       Anchors = [akLeft, akBottom]
       Caption = #350'ifre'
       Transparent = True
-      ExplicitTop = 10
     end
     object edPassword: TcxTextEdit
       Left = 35
@@ -505,8 +502,6 @@ object KullaniciGirisDlg: TKullaniciGirisDlg
     TabOrder = 1
     LookAndFeel.Kind = lfStandard
     LookAndFeel.NativeStyle = True
-    ExplicitWidth = 336
-    ExplicitHeight = 288
     object cxGridKulDBCardView1: TcxGridDBCardView
       OnDblClick = btnLoginClick
       Navigator.Buttons.CustomButtons = <>
@@ -552,7 +547,6 @@ object KullaniciGirisDlg: TKullaniciGirisDlg
   end
   object TabKullanici: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       'select K.*,R.FIRMA,R.KOD,'
       
@@ -569,4 +563,3 @@ object KullaniciGirisDlg: TKullaniciGirisDlg
     Top = 147
   end
 end
-

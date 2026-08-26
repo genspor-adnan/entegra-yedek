@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gentegre · Modern Cari Kart Sihirbazı</title>
+  <style>
+    :root {
+      --bg: #eef3f8;
+      --surface: #ffffff;
+      --surface-soft: #f7f9fc;
+      --text: #162033;
+      --muted: #6d7788;
+      --line: #dfe6ee;
+      --primary: #3157d5;
+      --primary-strong: #2444af;
+      --primary-soft: #edf1ff;
+      --cyan: #08a9bf;
+      --green: #1b9a6b;
+      --green-soft: #e9f8f1;
+      --orange: #e78b2f;
+      --orange-soft: #fff4e8;
+      --red: #d85656;
+      --shadow: 0 24px 70px rgba(34, 52, 82, .14);
+      --shadow-soft: 0 10px 28px rgba(34, 52, 82, .08);
+      --radius-lg: 22px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 6% 0%, rgba(49, 87, 213, .12), transparent 30%),
+        radial-gradient(circle at 100% 100%, rgba(8, 169, 191, .08), transparent 28%),
+        var(--bg);
+      font-family: "Trebuchet MS", Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { color: inherit; }
+
+    .page-shell {
+      min-height: 100vh;
+      padding: 28px;
+      display: grid;
+      place-items: center;
+    }
+
+    .app-window {
+      width: min(1460px, 100%);
+      min-height: min(900px, calc(100vh - 56px));
+      background: var(--surface);
+      border: 1px solid rgba(193, 205, 221, .8);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: block;
+    }
+
+    .sidebar {
+      padding: 26px 20px 22px;
+      background: linear-gradient(180deg, #15284e 0%, #172e58 57%, #10233f 100%);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar::after {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      right: -120px;
+      bottom: -80px;
+      background: rgba(91, 129, 255, .12);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      padding: 0 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, #6b83ff, #21b8ce);
+      font-size: 21px;
+      font-weight: 900;
+      box-shadow: 0 8px 24px rgba(60, 101, 255, .34);
+    }
+
+    .brand strong { display: block; font-size: 16px; letter-spacing: .2px; }
+    .brand small { display: block; margin-top: 2px; color: #9eb0cf; font-size: 11px; }
+
+    .sidebar-label {
+      margin: 0 12px 10px;
+      color: #8399bd;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.35px;
+      text-transform: uppercase;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: #aebed8;
+      display: grid;
+      grid-template-columns: 36px minmax(0, 1fr) 18px;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: .2s ease;
+    }
+
+    .step-button:hover { background: rgba(255,255,255,.06); color: #fff; }
+    .step-button.active { background: rgba(108, 132, 255, .18); color: #fff; }
+
+    .step-icon {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(255,255,255,.07);
+      color: #b7c8e2;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .step-button.active .step-icon {
+      color: white;
+      background: linear-gradient(145deg, #6279f6, #3d59d4);
+      box-shadow: 0 8px 18px rgba(32, 55, 145, .45);
+    }
+
+    .step-copy strong { display: block; font-size: 13px; font-weight: 700; }
+    .step-copy small { display: block; margin-top: 2px; color: #8296b6; font-size: 10px; }
+    .step-button.active .step-copy small { color: #b8c6e4; }
+    .step-check { color: #57d2ae; opacity: 0; font-weight: 900; }
+    .step-button.done .step-check { opacity: 1; }
+
+    .sidebar-note {
+      margin-top: auto;
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      background: rgba(255,255,255,.055);
+      position: relative;
+      z-index: 1;
+    }
+
+    .sidebar-note .note-row { display: flex; justify-content: space-between; align-items: center; }
+    .sidebar-note strong { font-size: 12px; }
+    .sidebar-note span { color: #67dcba; font-size: 11px; font-weight: 800; }
+    .progress { height: 5px; margin: 10px 0 8px; border-radius: 20px; background: rgba(255,255,255,.1); overflow: hidden; }
+    .progress i { display: block; width: 82%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #56d0ae, #61a6ff); }
+    .sidebar-note p { margin: 0; color: #93a8c9; font-size: 10px; line-height: 1.45; }
+
+    .main {
+      min-width: 0;
+      background: var(--surface-soft);
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      min-height: min(900px, calc(100vh - 56px));
+    }
+
+    .topbar {
+      min-height: 82px;
+      padding: 0 30px;
+      background: #17243a;
+      color: white;
+      border-bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      backdrop-filter: blur(12px);
+    }
+
+    .breadcrumb { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+    .breadcrumb b { color: white; }
+    .breadcrumb .crumb-separator { color: #60708a; }
+
+    .workspace-brand { display: flex; align-items: center; gap: 13px; }
+    .workspace-brand .brand-mark { width: 40px; height: 40px; flex: 0 0 auto; }
+    .workspace-brand-copy strong { display: block; font-size: 15px; letter-spacing: -.1px; }
+    .workspace-brand-copy small { display: flex; align-items: center; gap: 7px; margin-top: 4px; color: #92a2ba; font-size: 10px; }
+    .workspace-brand-copy small i { width: 4px; height: 4px; border-radius: 50%; background: #52647e; }
+
+    .top-actions { display: flex; align-items: center; gap: 9px; }
+    .save-state { display: flex; align-items: center; gap: 7px; color: #a6b3c7; font-size: 11px; margin-right: 7px; }
+    .save-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px var(--green-soft); }
+
+    .icon-button, .soft-button, .primary-button, .danger-button {
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+
+    .icon-button:hover, .soft-button:hover, .primary-button:hover, .danger-button:hover { transform: translateY(-1px); }
+    .icon-button { width: 38px; height: 38px; display: grid; place-items: center; background: rgba(255,255,255,.09); color: #dbe5f4; font-size: 16px; }
+    .soft-button { min-height: 38px; padding: 0 14px; background: #eef2f7; color: #455166; font-weight: 700; }
+    .primary-button { min-height: 40px; padding: 0 18px; background: linear-gradient(135deg, var(--primary), #476cea); color: white; font-weight: 800; box-shadow: 0 8px 18px rgba(49,87,213,.22); }
+    .danger-button { min-height: 38px; padding: 0 14px; background: #fff0f0; color: var(--red); font-weight: 800; }
+
+    .tab-stage {
+      padding: 18px 30px 0;
+      background: white;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .record-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 17px;
+    }
+
+    .record-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .record-avatar { width: 46px; height: 46px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 14px; color: white; background: linear-gradient(145deg, #725be6, #3157d5); font-size: 14px; font-weight: 900; box-shadow: 0 8px 18px rgba(76,70,190,.2); }
+    .record-title { min-width: 0; }
+    .record-title h2 { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 17px; letter-spacing: -.25px; }
+    .record-title p { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 5px 0 0; color: var(--muted); font-size: 10px; }
+    .record-title p i { width: 3px; height: 3px; border-radius: 50%; background: #aab4c1; }
+    .record-side { display: flex; align-items: center; gap: 8px; }
+    .record-status { padding: 8px 11px; border-radius: 10px; color: var(--green); background: var(--green-soft); font-size: 10px; font-weight: 900; }
+
+    .workspace-tabs {
+      display: flex;
+      align-items: end;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .step-button {
+      width: auto;
+      min-width: 150px;
+      color: #6e7a8c;
+      display: flex;
+      grid-template-columns: none;
+      gap: 9px;
+      padding: 12px 15px 14px;
+      border-radius: 12px 12px 0 0;
+      border-bottom: 3px solid transparent;
+      position: relative;
+      white-space: nowrap;
+    }
+
+    .step-button:hover { color: var(--text); background: #f6f8fb; }
+    .step-button.active { color: var(--primary); background: #f4f6ff; border-bottom-color: var(--primary); }
+    .step-icon { width: 28px; height: 28px; border-radius: 8px; color: #758296; background: #edf1f5; font-size: 10px; }
+    .step-button.active .step-icon { color: white; background: var(--primary); box-shadow: 0 5px 12px rgba(49,87,213,.23); }
+    .step-copy strong { font-size: 11px; }
+    .step-copy small { margin-top: 2px; color: #929cac; font-size: 8px; }
+    .step-button.active .step-copy small { color: #7f8dc1; }
+    .step-check { display: none; }
+
+    .content {
+      min-width: 0;
+      padding: 27px 30px 30px;
+      overflow: auto;
+      max-height: calc(100vh - 270px);
+    }
+
+    .screen { display: none; animation: enter .24s ease; }
+    .screen.active { display: block; }
+
+    @keyframes enter {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .page-heading h1 { margin: 0 0 6px; font-size: 25px; letter-spacing: -.6px; }
+    .page-heading p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .heading-badge { padding: 8px 12px; border-radius: 20px; background: var(--green-soft); color: var(--green); font-size: 11px; font-weight: 800; white-space: nowrap; }
+
+    .identity-card {
+      margin-bottom: 18px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #fff 55%, #f1f4ff);
+      display: grid;
+      grid-template-columns: 74px minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .company-logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 18px;
+      background: linear-gradient(145deg, #3157d5, #18a8bd);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 25px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      box-shadow: 0 10px 24px rgba(49,87,213,.22);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .company-logo::after { content: "+"; position: absolute; right: -5px; bottom: -5px; width: 23px; height: 23px; display: grid; place-items: center; border-radius: 50%; background: white; color: var(--primary); border: 1px solid var(--line); font-size: 15px; }
+    .identity-copy h2 { margin: 0 0 5px; font-size: 18px; }
+    .identity-copy p { margin: 0; color: var(--muted); font-size: 11px; }
+    .identity-meta { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border-radius: 20px; font-size: 10px; font-weight: 800; }
+    .pill.green { color: var(--green); background: var(--green-soft); }
+    .pill.blue { color: var(--primary); background: var(--primary-soft); }
+    .pill.orange { color: var(--orange); background: var(--orange-soft); }
+    .pill.gray { color: #657184; background: #edf1f5; }
+    .identity-side { text-align: right; }
+    .identity-side strong { display: block; font-size: 19px; }
+    .identity-side span { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+
+    .layout-two {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(260px, .65fr);
+      gap: 18px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      box-shadow: 0 5px 18px rgba(34,52,82,.04);
+    }
+
+    .card + .card { margin-top: 16px; }
+    .card-header { min-height: 54px; padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .card-header h3 { margin: 0; font-size: 13px; }
+    .card-header p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+    .card-body { padding: 18px; }
+
+    .form-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px; }
+    .field { grid-column: span 4; min-width: 0; }
+    .field.span-6 { grid-column: span 6; }
+    .field.span-8 { grid-column: span 8; }
+    .field.span-12 { grid-column: span 12; }
+    .field label { display: flex; justify-content: space-between; margin: 0 0 7px; color: #4c586b; font-size: 10px; font-weight: 800; }
+    .field label em { color: var(--red); font-style: normal; }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      min-height: 42px;
+      padding: 10px 12px;
+      color: var(--text);
+      border: 1px solid #d8e0ea;
+      border-radius: 9px;
+      outline: 0;
+      background: white;
+      transition: .18s ease;
+    }
+
+    .field textarea { min-height: 84px; resize: vertical; line-height: 1.45; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: #8398ec; box-shadow: 0 0 0 3px var(--primary-soft); }
+    .field input[readonly] { background: #f3f5f8; color: #788395; }
+    .field-help { margin-top: 5px; color: #8a95a6; font-size: 9px; }
+
+    .switch-row { min-height: 44px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .switch-copy strong { display: block; font-size: 11px; }
+    .switch-copy small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+    .toggle { width: 36px; height: 20px; padding: 2px; border: 0; border-radius: 20px; background: #cad3df; cursor: pointer; transition: .2s ease; flex: 0 0 auto; }
+    .toggle::before { content: ""; display: block; width: 16px; height: 16px; border-radius: 50%; background: white; box-shadow: 0 2px 5px rgba(0,0,0,.15); transition: .2s ease; }
+    .toggle.on { background: var(--green); }
+    .toggle.on::before { transform: translateX(16px); }
+
+    .stat-list { display: grid; gap: 11px; }
+    .stat-row { padding: 12px; border-radius: 11px; background: var(--surface-soft); display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; }
+    .stat-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; background: white; color: var(--primary); font-weight: 900; box-shadow: 0 3px 10px rgba(34,52,82,.07); }
+    .stat-row strong { display: block; font-size: 11px; }
+    .stat-row small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+    .stat-value { color: var(--text); font-size: 12px; font-weight: 900; }
+
+    .mini-map {
+      min-height: 152px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      background:
+        linear-gradient(33deg, transparent 45%, rgba(99,121,148,.15) 46%, rgba(99,121,148,.15) 49%, transparent 50%),
+        linear-gradient(-27deg, transparent 43%, rgba(99,121,148,.12) 44%, rgba(99,121,148,.12) 47%, transparent 48%),
+        #edf4ef;
+    }
+    .mini-map::before { content: ""; position: absolute; inset: 32px -20px 52px 48px; border: 9px solid rgba(78,160,207,.3); border-left: 0; border-right: 0; transform: rotate(-8deg); }
+    .map-pin { position: absolute; left: 56%; top: 48%; transform: translate(-50%, -50%); width: 28px; height: 28px; border-radius: 50% 50% 50% 4px; background: var(--primary); transform-origin: center; rotate: -45deg; box-shadow: 0 7px 14px rgba(49,87,213,.25); }
+    .map-pin::after { content: ""; position: absolute; width: 8px; height: 8px; border-radius: 50%; background: white; left: 10px; top: 10px; }
+    .map-caption { position: absolute; left: 12px; bottom: 11px; padding: 6px 9px; border-radius: 8px; background: rgba(255,255,255,.92); color: #526174; font-size: 9px; font-weight: 800; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .search-box { min-width: 240px; min-height: 40px; padding: 0 13px; border: 1px solid var(--line); border-radius: 10px; background: white; display: flex; align-items: center; gap: 9px; }
+    .search-box span { color: #8792a3; }
+    .search-box input { width: 100%; border: 0; outline: 0; color: var(--text); background: transparent; font-size: 11px; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 680px; }
+    th { padding: 11px 13px; color: #7a8698; background: #f5f7fa; border-bottom: 1px solid var(--line); text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: .6px; }
+    td { padding: 14px 13px; border-bottom: 1px solid #edf0f4; font-size: 11px; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #fafbfe; }
+    .table-primary { font-weight: 800; }
+    .table-secondary { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+    .tiny-button { width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 8px; background: white; cursor: pointer; color: #657184; }
+
+    .contact-overview { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 17px; }
+    .contact-tile { padding: 14px; border: 1px solid var(--line); border-radius: 13px; background: white; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 10px; align-items: center; }
+    .contact-tile .tile-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; background: var(--primary-soft); color: var(--primary); font-size: 11px; font-weight: 900; }
+    .contact-tile strong { display: block; overflow: hidden; text-overflow: ellipsis; font-size: 10px; }
+    .contact-tile small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; }
+
+    .money-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 17px; }
+    .money-card { padding: 16px; border-radius: 14px; color: white; min-height: 104px; position: relative; overflow: hidden; }
+    .money-card::after { content: ""; position: absolute; width: 86px; height: 86px; border-radius: 50%; background: rgba(255,255,255,.1); right: -25px; top: -28px; }
+    .money-card.blue { background: linear-gradient(135deg, #3358d4, #4f75ea); }
+    .money-card.cyan { background: linear-gradient(135deg, #078da2, #17b5c9); }
+    .money-card.dark { background: linear-gradient(135deg, #26364d, #41536d); }
+    .money-card span { display: block; color: rgba(255,255,255,.72); font-size: 9px; text-transform: uppercase; letter-spacing: .65px; }
+    .money-card strong { display: block; margin: 10px 0 4px; font-size: 20px; }
+    .money-card small { color: rgba(255,255,255,.68); font-size: 9px; }
+
+    .people-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
+    .person-card { padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: white; position: relative; }
+    .person-head { display: flex; align-items: center; gap: 10px; margin-bottom: 13px; }
+    .avatar { width: 40px; height: 40px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 13px; background: linear-gradient(145deg, #e8edff, #dff6f7); color: var(--primary); font-size: 12px; font-weight: 900; }
+    .person-head strong { display: block; font-size: 11px; }
+    .person-head small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .person-lines { display: grid; gap: 7px; color: #556276; font-size: 9px; }
+    .person-line { display: flex; gap: 7px; align-items: center; }
+    .default-tag { position: absolute; right: 12px; top: 12px; padding: 4px 7px; border-radius: 10px; background: var(--green-soft); color: var(--green); font-size: 8px; font-weight: 900; }
+    .add-person { min-height: 170px; border: 1px dashed #bfcadb; background: #f9fbfd; display: grid; place-items: center; text-align: center; cursor: pointer; color: var(--muted); }
+    .add-person b { display: grid; place-items: center; margin: 0 auto 8px; width: 38px; height: 38px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); font-size: 20px; }
+    .add-person strong { display: block; color: #516075; font-size: 10px; }
+
+    .media-layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr); gap: 17px; }
+    .timeline { display: grid; gap: 0; }
+    .timeline-item { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 11px; position: relative; padding-bottom: 18px; }
+    .timeline-item:not(:last-child)::before { content: ""; position: absolute; left: 16px; top: 34px; bottom: 0; width: 1px; background: var(--line); }
+    .timeline-dot { width: 33px; height: 33px; border-radius: 10px; display: grid; place-items: center; background: var(--primary-soft); color: var(--primary); font-size: 10px; font-weight: 900; z-index: 1; }
+    .timeline-content { padding: 10px 12px; border: 1px solid var(--line); border-radius: 11px; background: #fbfcfe; }
+    .timeline-content .timeline-meta { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+    .timeline-content strong { font-size: 10px; }
+    .timeline-content time { color: var(--muted); font-size: 8px; }
+    .timeline-content p { margin: 0; color: #566276; font-size: 10px; line-height: 1.55; }
+    .comment-box { margin-top: 4px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; display: grid; grid-template-columns: 32px 1fr auto; align-items: end; gap: 9px; }
+    .comment-box textarea { min-height: 38px; max-height: 110px; padding: 10px; border: 0; outline: 0; resize: vertical; background: transparent; font-size: 10px; }
+
+    .dropzone { min-height: 150px; border: 1px dashed #b9c6d7; border-radius: 13px; background: #f8fafc; display: grid; place-items: center; text-align: center; color: var(--muted); cursor: pointer; }
+    .dropzone strong { display: block; color: #4f5c70; font-size: 11px; }
+    .dropzone small { display: block; margin-top: 5px; font-size: 9px; }
+    .drop-icon { width: 42px; height: 42px; display: grid; place-items: center; margin: 0 auto 9px; border-radius: 13px; background: var(--primary-soft); color: var(--primary); font-weight: 900; }
+    .file-list { display: grid; gap: 9px; margin-top: 13px; }
+    .file-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 9px; align-items: center; padding: 10px; border: 1px solid var(--line); border-radius: 10px; }
+    .file-type { width: 33px; height: 33px; display: grid; place-items: center; border-radius: 8px; background: #fff0f0; color: #c84d4d; font-size: 8px; font-weight: 900; }
+    .file-row strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px; }
+    .file-row small { display: block; margin-top: 3px; color: var(--muted); font-size: 8px; }
+
+    .crm-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 17px; }
+    .crm-stat { padding: 14px; border: 1px solid var(--line); border-radius: 13px; background: white; }
+    .crm-stat span { display: block; color: var(--muted); font-size: 9px; }
+    .crm-stat strong { display: block; margin: 8px 0 5px; font-size: 18px; }
+    .trend-up { color: var(--green); font-size: 8px; font-weight: 800; }
+    .trend-flat { color: var(--orange); font-size: 8px; font-weight: 800; }
+
+    .chart {
+      height: 154px;
+      padding: 17px 14px 10px;
+      display: flex;
+      align-items: end;
+      gap: 12px;
+      border-top: 1px solid #edf1f5;
+      background: repeating-linear-gradient(to top, #f2f4f7 0, #f2f4f7 1px, transparent 1px, transparent 38px);
+    }
+    .bar-group { flex: 1; min-width: 24px; height: 100%; display: flex; align-items: end; justify-content: center; gap: 4px; position: relative; }
+    .bar { width: 10px; border-radius: 5px 5px 2px 2px; background: linear-gradient(180deg, #7188f1, #3157d5); }
+    .bar.alt { background: linear-gradient(180deg, #52c9d7, #0a9daf); }
+    .bar-group label { position: absolute; bottom: -18px; color: var(--muted); font-size: 8px; }
+
+    .footer-bar {
+      min-height: 72px;
+      padding: 0 28px;
+      background: white;
+      border-top: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 -8px 20px rgba(34,52,82,.035);
+    }
+    .footer-left, .footer-right { display: flex; align-items: center; gap: 9px; }
+    .keyboard-hint { color: #8a95a5; font-size: 9px; }
+    .keyboard-hint kbd { padding: 3px 6px; border: 1px solid #d5dce6; border-bottom-width: 2px; border-radius: 5px; background: #f8fafc; color: #657184; font-size: 8px; }
+    .finish-button { display: none; }
+
+    .footer-save { display: inline-flex; }
+    .footer-record-info { display: flex; align-items: center; gap: 9px; color: #7d8899; font-size: 10px; }
+    .footer-record-info i { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+
+    .toast {
+      position: fixed;
+      right: 30px;
+      top: 30px;
+      z-index: 20;
+      min-width: 270px;
+      padding: 14px 16px;
+      border-radius: 13px;
+      background: #172942;
+      color: white;
+      box-shadow: 0 18px 45px rgba(13,28,49,.28);
+      transform: translateY(-20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: .25s ease;
+      font-size: 11px;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast strong { display: block; margin-bottom: 3px; font-size: 12px; }
+    .toast span { color: #b9c8dc; }
+
+    @media (max-width: 1100px) {
+      .page-shell { padding: 0; }
+      .app-window { min-height: 100vh; border-radius: 0; border: 0; }
+      .main { min-height: 100vh; }
+      .layout-two, .media-layout { grid-template-columns: 1fr; }
+      .content { max-height: calc(100vh - 260px); }
+      .contact-overview, .crm-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .people-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .money-summary { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .app-window { display: block; }
+      .main { min-height: 100vh; }
+      .topbar { padding: 0 16px; min-height: 66px; }
+      .workspace-brand-copy small, .save-state { display: none; }
+      .tab-stage { padding: 13px 14px 0; }
+      .record-strip { margin-bottom: 12px; }
+      .record-side { display: none; }
+      .record-avatar { width: 40px; height: 40px; }
+      .workspace-tabs { gap: 2px; }
+      .step-button { min-width: auto; padding: 9px 11px 11px; }
+      .step-copy small { display: none; }
+      .step-copy strong { display: block; }
+      .step-icon { display: none; }
+      .content { padding: 18px 15px; max-height: none; }
+      .footer-bar { padding: 12px 15px; min-height: 66px; }
+      .keyboard-hint, #cancelButton { display: none; }
+      .identity-card { grid-template-columns: 58px 1fr; }
+      .identity-side { display: none; }
+      .company-logo { width: 56px; height: 56px; border-radius: 15px; font-size: 18px; }
+      .field, .field.span-6, .field.span-8 { grid-column: span 12; }
+      .contact-overview, .people-grid, .crm-stats { grid-template-columns: 1fr; }
+      .page-heading { display: block; }
+      .heading-badge { display: inline-flex; margin-top: 10px; }
+      .toolbar { align-items: stretch; flex-direction: column; }
+      .search-box { min-width: 0; }
+      .top-actions .soft-button { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <div class="app-window">
+      <main class="main">
+        <header class="topbar">
+          <div class="workspace-brand">
+            <div class="brand-mark">G</div>
+            <div class="workspace-brand-copy"><strong>Cari çalışma alanı</strong><small><span>Gentegre ERP</span><i></i><span>Cari Yönetimi</span><i></i><span>CAR-000842</span></small></div>
+          </div>
+          <div class="top-actions">
+            <div class="save-state"><i class="save-dot"></i><span id="saveStateText">Tüm değişiklikler kaydedildi</span></div>
+            <button class="icon-button" id="helpButton" title="Yardım" aria-label="Yardım">?</button>
+            <button class="soft-button" id="draftButton">Taslak kaydet</button>
+          </div>
+        </header>
+
+        <section class="tab-stage">
+          <div class="record-strip">
+            <div class="record-main">
+              <div class="record-avatar">AK</div>
+              <div class="record-title">
+                <h2>Atlas Kimya Sanayi A.Ş.</h2>
+                <p><span>Kurumsal müşteri</span><i></i><span>İstanbul Avrupa</span><i></i><span>Selin Yılmaz</span></p>
+              </div>
+            </div>
+            <div class="record-side"><span class="pill blue">E-Fatura</span><span class="record-status">● Aktif</span><button class="icon-button" style="background:#f1f4f8;color:#5d697a" title="Diğer işlemler">•••</button></div>
+          </div>
+          <nav class="workspace-tabs" aria-label="Cari kart sekmeleri" role="tablist">
+            <button class="step-button active" data-step="0" role="tab"><span class="step-icon">01</span><span class="step-copy"><strong>Genel</strong><small>Kimlik ve sınıflandırma</small></span></button>
+            <button class="step-button" data-step="1" role="tab"><span class="step-icon">02</span><span class="step-copy"><strong>İletişim</strong><small>Telefon, e-posta, adres</small></span></button>
+            <button class="step-button" data-step="2" role="tab"><span class="step-icon">03</span><span class="step-copy"><strong>Ticari</strong><small>Limit, vade ve banka</small></span></button>
+            <button class="step-button" data-step="3" role="tab"><span class="step-icon">04</span><span class="step-copy"><strong>İlgililer</strong><small>Yetkili ve çalışanlar</small></span></button>
+            <button class="step-button" data-step="4" role="tab"><span class="step-icon">05</span><span class="step-copy"><strong>Notlar &amp; Dosyalar</strong><small>Yorum ve dokümanlar</small></span></button>
+            <button class="step-button" data-step="5" role="tab"><span class="step-icon">06</span><span class="step-copy"><strong>CRM</strong><small>Aktivite ve hareketler</small></span></button>
+          </nav>
+        </section>
+
+        <div class="content">
+          <section class="screen active" data-screen="0">
+            <div class="page-heading">
+              <div><h1>Cari kart bilgileri</h1><p>Firma veya kişiye ait temel tanımları girin. Zorunlu alanlar yıldızla işaretlenmiştir.</p></div>
+              <span class="heading-badge">● Aktif cari</span>
+            </div>
+
+            <div class="layout-two">
+              <div>
+                <div class="card">
+                  <div class="card-header"><div><h3>Genel bilgiler</h3><p>Cari kartın kimlik ve sınıflandırma bilgileri</p></div><span class="pill blue">Zorunlu</span></div>
+                  <div class="card-body">
+                    <div class="form-grid">
+                      <div class="field"><label>Grup <em>*</em></label><select><option>Kurumsal Müşteri</option><option>Bireysel Müşteri</option><option>Tedarikçi</option></select></div>
+                      <div class="field"><label>Cari kodu</label><input value="CAR-000842" readonly><div class="field-help">Kod ağacından otomatik üretildi</div></div>
+                      <div class="field"><label>Durum</label><select><option>Aktif</option><option>Pasif</option><option>Riskli</option></select></div>
+                      <div class="field span-8"><label>Ünvan <em>*</em></label><input value="Atlas Kimya Sanayi A.Ş."></div>
+                      <div class="field"><label>Şube</label><select><option>Merkez</option><option>Ankara Şube</option><option>İzmir Şube</option></select></div>
+                      <div class="field"><label>Kategori</label><select><option>A Sınıfı Müşteri</option><option>B Sınıfı Müşteri</option></select></div>
+                      <div class="field"><label>Sınıf</label><select><option>Stratejik</option><option>Standart</option><option>Potansiyel</option></select></div>
+                      <div class="field"><label>Özel kod</label><input value="KMY-IST-08"></div>
+                      <div class="field"><label>Sektör</label><select><option>Kimya Sanayi</option><option>Üretim</option></select></div>
+                      <div class="field"><label>Alt sektör</label><select><option>Endüstriyel Temizlik</option><option>Laboratuvar</option></select></div>
+                      <div class="field"><label>İlk temas</label><input type="date" value="2026-08-04"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div class="card-header"><div><h3>Organizasyon ve satış</h3><p>Bölge, temsilci ve ziyaret planlaması</p></div></div>
+                  <div class="card-body">
+                    <div class="form-grid">
+                      <div class="field"><label>Bölge</label><select><option>Marmara</option><option>İç Anadolu</option></select></div>
+                      <div class="field"><label>Alt bölge</label><select><option>İstanbul Avrupa</option><option>İstanbul Anadolu</option></select></div>
+                      <div class="field"><label>Temsilci</label><select><option>Selin Yılmaz</option><option>Murat Kaya</option></select></div>
+                      <div class="field"><label>Ziyaret frekansı</label><select><option>2 ayda bir</option><option>Her ay</option><option>3 ayda bir</option></select></div>
+                      <div class="field"><label>Muhasebe kodu</label><input value="120.01.0842"></div>
+                      <div class="field"><label>Personel kartı</label><div class="switch-row"><div class="switch-copy"><strong>Personel olarak işaretle</strong><small>Cari personel listesinde görünür</small></div><button class="toggle" aria-label="Personel kartı"></button></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="card">
+                  <div class="card-header"><div><h3>Hızlı görünüm</h3><p>Kart özeti</p></div></div>
+                  <div class="card-body">
+                    <div class="stat-list">
+                      <div class="stat-row"><span class="stat-icon">₺</span><div><strong>Risk limiti</strong><small>Kullanılabilir limit</small></div><span class="stat-value">₺1,2 Mn</span></div>
+                      <div class="stat-row"><span class="stat-icon">V</span><div><strong>Ortalama vade</strong><small>Standart ödeme planı</small></div><span class="stat-value">45 gün</span></div>
+                      <div class="stat-row"><span class="stat-icon">T</span><div><strong>Son temas</strong><small>Telefon görüşmesi</small></div><span class="stat-value">Dün</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div class="card-header"><div><h3>Konum</h3><p>İkitelli OSB, Başakşehir</p></div><button class="tiny-button" title="Haritada aç">↗</button></div>
+                  <div class="card-body"><div class="mini-map"><i class="map-pin"></i><span class="map-caption">Atlas Kimya · Merkez</span></div></div>
+                </div>
+
+                <div class="card">
+                  <div class="card-header"><div><h3>Dijital belgeler</h3><p>Elektronik belge tercihleri</p></div></div>
+                  <div class="card-body">
+                    <div class="switch-row"><div class="switch-copy"><strong>E-Fatura mükellefi</strong><small>GİB kaydı doğrulandı</small></div><button class="toggle on" aria-label="E-Fatura"></button></div>
+                    <div class="switch-row" style="margin-top:9px"><div class="switch-copy"><strong>E-İrsaliye kullanır</strong><small>Sevk belgesi elektronik gönderilir</small></div><button class="toggle on" aria-label="E-İrsaliye"></button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="screen" data-screen="1">
+            <div class="page-heading"><div><h1>İletişim bilgileri</h1><p>Telefon, e-posta, web ve adres bilgilerini tek merkezden yönetin.</p></div><span class="heading-badge">4 kayıt</span></div>
+            <div class="contact-overview">
+              <div class="contact-tile"><span class="tile-icon">TEL</span><div><strong>+90 212 555 28 42</strong><small>Santral · Varsayılan</small></div></div>
+              <div class="contact-tile"><span class="tile-icon">E</span><div><strong>info@atlaskimya.com.tr</strong><small>Genel e-posta</small></div></div>
+              <div class="contact-tile"><span class="tile-icon">WEB</span><div><strong>atlaskimya.com.tr</strong><small>Kurumsal web sitesi</small></div></div>
+              <div class="contact-tile"><span class="tile-icon">ADR</span><div><strong>İkitelli OSB</strong><small>Başakşehir · İstanbul</small></div></div>
+            </div>
+            <div class="toolbar">
+              <div class="search-box"><span>⌕</span><input placeholder="İletişim bilgisinde ara..."></div>
+              <button class="primary-button" data-add-row="contact">+ Yeni iletişim bilgisi</button>
+            </div>
+            <div class="card">
+              <div class="table-wrap">
+                <table id="contactTable">
+                  <thead><tr><th>Etiket</th><th>Bilgi</th><th>Tür</th><th>Durum</th><th style="text-align:right">İşlem</th></tr></thead>
+                  <tbody>
+                    <tr><td class="table-primary">Santral<span class="table-secondary">Firma ana hattı</span></td><td>+90 212 555 28 42</td><td>Telefon</td><td><span class="pill green">Varsayılan</span></td><td><div class="row-actions"><button class="tiny-button">✎</button><button class="tiny-button">⋯</button></div></td></tr>
+                    <tr><td class="table-primary">Genel e-posta<span class="table-secondary">Kurumsal iletişim</span></td><td>info@atlaskimya.com.tr</td><td>E-posta</td><td><span class="pill blue">Aktif</span></td><td><div class="row-actions"><button class="tiny-button">✎</button><button class="tiny-button">⋯</button></div></td></tr>
+                    <tr><td class="table-primary">Merkez adresi<span class="table-secondary">Fatura ve sevk</span></td><td>İkitelli OSB, Başakşehir / İstanbul</td><td>Adres</td><td><span class="pill green">Varsayılan</span></td><td><div class="row-actions"><button class="tiny-button">✎</button><button class="tiny-button">⋯</button></div></td></tr>
+                    <tr><td class="table-primary">Web sitesi<span class="table-secondary">Kurumsal</span></td><td>www.atlaskimya.com.tr</td><td>Web</td><td><span class="pill blue">Aktif</span></td><td><div class="row-actions"><button class="tiny-button">✎</button><button class="tiny-button">⋯</button></div></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section class="screen" data-screen="2">
+            <div class="page-heading"><div><h1>Ticari bilgiler</h1><p>Ödeme, risk, vergi ve banka tercihlerini düzenleyin.</p></div><span class="heading-badge">Finansal profil güncel</span></div>
+            <div class="money-summary">
+              <div class="money-card blue"><span>Risk limiti</span><strong>₺ 1.200.000</strong><small>Kullanılan: ₺ 284.650</small></div>
+              <div class="money-card cyan"><span>Açık hesap bakiyesi</span><strong>₺ 184.320</strong><small>3 açık fatura</small></div>
+              <div class="money-card dark"><span>Ortalama vade</span><strong>45 gün</strong><small>Son ödeme: 11 Ağustos 2026</small></div>
+            </div>
+            <div class="layout-two">
+              <div>
+                <div class="card">
+                  <div class="card-header"><div><h3>Satış ve ödeme koşulları</h3><p>Cariye özel varsayılan ticari tanımlar</p></div></div>
+                  <div class="card-body"><div class="form-grid">
+                    <div class="field span-6"><label>Ödeme şekli</label><select><option>Açık Hesap</option><option>Havale / EFT</option><option>Kredi Kartı</option></select></div>
+                    <div class="field span-6"><label>Vade planı</label><select><option>45 Gün Vade</option><option>30 Gün Vade</option><option>Peşin</option></select></div>
+                    <div class="field"><label>Para birimi</label><select><option>TRY · Türk Lirası</option><option>USD · Dolar</option><option>EUR · Euro</option></select></div>
+                    <div class="field"><label>Risk limiti</label><input value="1.200.000,00"></div>
+                    <div class="field"><label>İskonto oranı</label><input value="8,50 %"></div>
+                    <div class="field span-6"><label>Fiyat listesi</label><select><option>Kurumsal A Fiyat Listesi</option><option>Standart Satış</option></select></div>
+                    <div class="field span-6"><label>Satış elemanı</label><select><option>Selin Yılmaz</option><option>Murat Kaya</option></select></div>
+                  </div></div>
+                </div>
+                <div class="card">
+                  <div class="card-header"><div><h3>Banka bilgileri</h3><p>Ödeme ve tahsilat hesabı</p></div></div>
+                  <div class="card-body"><div class="form-grid">
+                    <div class="field span-6"><label>Banka</label><select><option>Türkiye İş Bankası</option><option>Garanti BBVA</option></select></div>
+                    <div class="field span-6"><label>Şube</label><input value="İkitelli Ticari Şube"></div>
+                    <div class="field span-12"><label>IBAN</label><input value="TR12 0006 4000 0011 2456 7890 12"></div>
+                  </div></div>
+                </div>
+              </div>
+              <div>
+                <div class="card">
+                  <div class="card-header"><div><h3>Vergi bilgileri</h3><p>Fatura mükellef bilgileri</p></div></div>
+                  <div class="card-body"><div class="form-grid">
+                    <div class="field span-12"><label>Vergi dairesi</label><input value="İkitelli Vergi Dairesi"></div>
+                    <div class="field span-12"><label>Vergi numarası</label><input value="123 456 7890"></div>
+                    <div class="field span-12"><label>Fatura senaryosu</label><select><option>Ticari Fatura</option><option>Temel Fatura</option></select></div>
+                  </div></div>
+                </div>
+                <div class="card">
+                  <div class="card-header"><div><h3>Kontroller</h3><p>Ticari kart güvenlik tercihleri</p></div></div>
+                  <div class="card-body">
+                    <div class="switch-row"><div class="switch-copy"><strong>Risk limiti kontrolü</strong><small>Limit aşımında işlemi durdur</small></div><button class="toggle on"></button></div>
+                    <div class="switch-row" style="margin-top:9px"><div class="switch-copy"><strong>Vadesi geçmiş borç kontrolü</strong><small>Yeni satışta uyarı göster</small></div><button class="toggle on"></button></div>
+                    <div class="switch-row" style="margin-top:9px"><div class="switch-copy"><strong>Otomatik mutabakat</strong><small>Aylık e-posta gönder</small></div><button class="toggle"></button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="screen" data-screen="3">
+            <div class="page-heading"><div><h1>İlgili kişiler</h1><p>Firma içindeki yetkili ve temas kişilerini yönetin.</p></div><span class="heading-badge">3 aktif ilgili</span></div>
+            <div class="toolbar"><div class="search-box"><span>⌕</span><input placeholder="Ad, görev veya e-posta ile ara..."></div><button class="primary-button" id="addPersonButton">+ Yeni ilgili</button></div>
+            <div class="people-grid" id="peopleGrid">
+              <div class="person-card"><span class="default-tag">Varsayılan</span><div class="person-head"><div class="avatar">EA</div><div><strong>Emre Aksoy</strong><small>Satınalma Müdürü</small></div></div><div class="person-lines"><div class="person-line">T&nbsp; +90 532 421 18 09</div><div class="person-line">E&nbsp; emre.aksoy@atlaskimya.com.tr</div><div class="person-line">D&nbsp; 14 Ağustos · Doğum günü</div></div></div>
+              <div class="person-card"><div class="person-head"><div class="avatar">BK</div><div><strong>Burcu Kılıç</strong><small>Finans Sorumlusu</small></div></div><div class="person-lines"><div class="person-line">T&nbsp; +90 533 210 42 56</div><div class="person-line">E&nbsp; burcu.kilic@atlaskimya.com.tr</div><div class="person-line">N&nbsp; E-Fatura süreç yetkilisi</div></div></div>
+              <div class="person-card"><div class="person-head"><div class="avatar">OT</div><div><strong>Onur Tekin</strong><small>Üretim Planlama</small></div></div><div class="person-lines"><div class="person-line">T&nbsp; +90 535 880 12 44</div><div class="person-line">E&nbsp; onur.tekin@atlaskimya.com.tr</div><div class="person-line">N&nbsp; Teknik konular için aranacak</div></div></div>
+              <button class="person-card add-person" id="addPersonCard"><span><b>+</b><strong>Yeni ilgili ekle</strong><small>Yetkili veya çalışan bilgisi oluştur</small></span></button>
+            </div>
+          </section>
+
+          <section class="screen" data-screen="4">
+            <div class="page-heading"><div><h1>Yorum ve medya</h1><p>Cari hakkındaki notları, görüşmeleri ve belgeleri kart üzerinde saklayın.</p></div><span class="heading-badge">12 hareket</span></div>
+            <div class="media-layout">
+              <div class="card">
+                <div class="card-header"><div><h3>Yorum akışı</h3><p>Ekip içi notlar ve dosya paylaşımları</p></div><button class="tiny-button">⋯</button></div>
+                <div class="card-body">
+                  <div class="timeline" id="commentTimeline">
+                    <div class="timeline-item"><div class="timeline-dot">SY</div><div class="timeline-content"><div class="timeline-meta"><strong>Selin Yılmaz · Satış</strong><time>Bugün, 10:24</time></div><p>Eylül dönemi fiyat listesi görüşüldü. Yeni teklifin cuma gününe kadar iletilmesini bekliyorlar.</p></div></div>
+                    <div class="timeline-item"><div class="timeline-dot">BK</div><div class="timeline-content"><div class="timeline-meta"><strong>Burak Koç · Finans</strong><time>Dün, 16:05</time></div><p>Ağustos mutabakatı tamamlandı. Açık bakiye müşteri tarafından teyit edildi.</p></div></div>
+                    <div class="timeline-item"><div class="timeline-dot">SD</div><div class="timeline-content"><div class="timeline-meta"><strong>Sistem · Doküman</strong><time>10 Ağustos, 14:32</time></div><p>“2026_Cerceve_Sozlesme.pdf” belge arşivine eklendi.</p></div></div>
+                  </div>
+                  <div class="comment-box"><div class="avatar" style="width:32px;height:32px;border-radius:10px">AY</div><textarea id="commentInput" placeholder="Ekibiniz için bir not yazın..."></textarea><button class="primary-button" id="sendCommentButton">Gönder</button></div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header"><div><h3>Belgeler</h3><p>Sözleşme, görsel ve diğer dosyalar</p></div><span class="pill gray">3 dosya</span></div>
+                <div class="card-body">
+                  <div class="dropzone" id="dropzone"><span><i class="drop-icon">↑</i><strong>Dosyaları buraya sürükleyin</strong><small>veya bilgisayarınızdan seçmek için tıklayın</small></span></div>
+                  <div class="file-list">
+                    <div class="file-row"><span class="file-type">PDF</span><div><strong>2026_Cerceve_Sozlesme.pdf</strong><small>2,4 MB · 10 Ağustos 2026</small></div><button class="tiny-button">⋯</button></div>
+                    <div class="file-row"><span class="file-type" style="background:#eaf4ff;color:#3e79bd">XLS</span><div><strong>Fiyat_Listesi_Agustos.xlsx</strong><small>680 KB · 8 Ağustos 2026</small></div><button class="tiny-button">⋯</button></div>
+                    <div class="file-row"><span class="file-type" style="background:#eef0ff;color:#5b62b7">IMG</span><div><strong>Magaza_Konum_Fotografi.jpg</strong><small>1,1 MB · 4 Ağustos 2026</small></div><button class="tiny-button">⋯</button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="screen" data-screen="5">
+            <div class="page-heading"><div><h1>CRM özeti</h1><p>Cariyle ilgili son aktiviteler, satış potansiyeli ve aksiyonlar.</p></div><span class="heading-badge">Son 90 gün</span></div>
+            <div class="crm-stats">
+              <div class="crm-stat"><span>Toplam aktivite</span><strong>28</strong><small class="trend-up">↑ %12 geçen döneme göre</small></div>
+              <div class="crm-stat"><span>Açık fırsat</span><strong>4</strong><small class="trend-up">₺ 840.000 potansiyel</small></div>
+              <div class="crm-stat"><span>Bekleyen aksiyon</span><strong>3</strong><small class="trend-flat">2 tanesi bu hafta</small></div>
+              <div class="crm-stat"><span>Son görüşme</span><strong>1 gün</strong><small class="trend-up">Selin Yılmaz tarafından</small></div>
+            </div>
+            <div class="layout-two">
+              <div>
+                <div class="card">
+                  <div class="card-header"><div><h3>Aktivite yoğunluğu</h3><p>Son 6 ay görüşme ve teklif hareketleri</p></div><span class="pill blue">2026</span></div>
+                  <div class="card-body" style="padding-bottom:28px"><div class="chart">
+                    <div class="bar-group"><i class="bar" style="height:42%"></i><i class="bar alt" style="height:28%"></i><label>Mar</label></div>
+                    <div class="bar-group"><i class="bar" style="height:55%"></i><i class="bar alt" style="height:34%"></i><label>Nis</label></div>
+                    <div class="bar-group"><i class="bar" style="height:48%"></i><i class="bar alt" style="height:45%"></i><label>May</label></div>
+                    <div class="bar-group"><i class="bar" style="height:66%"></i><i class="bar alt" style="height:50%"></i><label>Haz</label></div>
+                    <div class="bar-group"><i class="bar" style="height:75%"></i><i class="bar alt" style="height:62%"></i><label>Tem</label></div>
+                    <div class="bar-group"><i class="bar" style="height:88%"></i><i class="bar alt" style="height:72%"></i><label>Ağu</label></div>
+                  </div></div>
+                </div>
+                <div class="card">
+                  <div class="card-header"><div><h3>Son hareketler</h3><p>Tüm modüllerden birleştirilmiş cari geçmişi</p></div><button class="soft-button">Tümünü gör</button></div>
+                  <div class="table-wrap"><table><thead><tr><th>Tarih</th><th>Modül</th><th>Açıklama</th><th>Durum</th><th>Tutar</th></tr></thead><tbody>
+                    <tr><td>12.08.2026</td><td><span class="pill blue">Teklif</span></td><td class="table-primary">TKL-2026-01842<span class="table-secondary">Endüstriyel temizlik ürünleri</span></td><td><span class="pill orange">Bekliyor</span></td><td>₺ 325.400</td></tr>
+                    <tr><td>11.08.2026</td><td><span class="pill gray">Tahsilat</span></td><td class="table-primary">THS-2026-00681<span class="table-secondary">Havale ile tahsilat</span></td><td><span class="pill green">Tamamlandı</span></td><td>₺ 184.750</td></tr>
+                    <tr><td>08.08.2026</td><td><span class="pill blue">Görüşme</span></td><td class="table-primary">Fiyat revizyonu<span class="table-secondary">Telefon görüşmesi · 18 dk.</span></td><td><span class="pill green">Tamamlandı</span></td><td>—</td></tr>
+                  </tbody></table></div>
+                </div>
+              </div>
+              <div>
+                <div class="card">
+                  <div class="card-header"><div><h3>Sıradaki aksiyonlar</h3><p>Planlanan görüşme ve görevler</p></div><button class="tiny-button">+</button></div>
+                  <div class="card-body"><div class="timeline">
+                    <div class="timeline-item"><div class="timeline-dot" style="background:#fff1e4;color:#da7a23">14</div><div class="timeline-content"><div class="timeline-meta"><strong>Teklif takibi</strong><time>14 Ağu · 10:00</time></div><p>Emre Aksoy ile fiyat teklifi değerlendirmesi.</p></div></div>
+                    <div class="timeline-item"><div class="timeline-dot">18</div><div class="timeline-content"><div class="timeline-meta"><strong>Müşteri ziyareti</strong><time>18 Ağu · 14:30</time></div><p>İkitelli tesisinde dönemsel planlama toplantısı.</p></div></div>
+                    <div class="timeline-item"><div class="timeline-dot" style="background:#e8f8f1;color:#16865d">31</div><div class="timeline-content"><div class="timeline-meta"><strong>Mutabakat</strong><time>31 Ağu</time></div><p>Aylık cari mutabakat gönderimi.</p></div></div>
+                  </div></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <footer class="footer-bar">
+          <div class="footer-left"><span class="footer-record-info"><i></i>Son düzenleme: bugün 14:32 · Ahmet Yılmaz</span></div>
+          <div class="footer-right"><button class="soft-button" id="cancelButton">Kapat</button><button class="primary-button footer-save" id="finishButton">✓ Değişiklikleri kaydet</button></div>
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"><strong id="toastTitle">İşlem tamamlandı</strong><span id="toastText">Değişiklikler taslağa kaydedildi.</span></div>
+
+  <script>
+    (() => {
+      const steps = [...document.querySelectorAll('.step-button')];
+      const screens = [...document.querySelectorAll('.screen')];
+      const finishButton = document.getElementById('finishButton');
+      const toast = document.getElementById('toast');
+      const toastTitle = document.getElementById('toastTitle');
+      const toastText = document.getElementById('toastText');
+      const saveStateText = document.getElementById('saveStateText');
+      let currentStep = 0;
+      let toastTimer;
+
+      function showToast(title, text) {
+        toastTitle.textContent = title;
+        toastText.textContent = text;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+      }
+
+      function showStep(index) {
+        currentStep = Math.max(0, Math.min(index, screens.length - 1));
+        steps.forEach((step, i) => {
+          step.classList.toggle('active', i === currentStep);
+          step.setAttribute('aria-selected', i === currentStep ? 'true' : 'false');
+          step.setAttribute('tabindex', i === currentStep ? '0' : '-1');
+        });
+        screens.forEach((screen, i) => screen.classList.toggle('active', i === currentStep));
+        document.querySelector('.content').scrollTop = 0;
+      }
+
+      steps.forEach(step => step.addEventListener('click', () => showStep(Number(step.dataset.step))));
+
+      document.querySelectorAll('.toggle').forEach(toggle => {
+        toggle.addEventListener('click', () => {
+          toggle.classList.toggle('on');
+          saveStateText.textContent = 'Değişiklik kaydediliyor...';
+          setTimeout(() => saveStateText.textContent = 'Tüm değişiklikler kaydedildi', 650);
+        });
+      });
+
+      document.querySelectorAll('input, select, textarea').forEach(input => {
+        input.addEventListener('change', () => {
+          saveStateText.textContent = 'Değişiklik kaydediliyor...';
+          setTimeout(() => saveStateText.textContent = 'Tüm değişiklikler kaydedildi', 650);
+        });
+      });
+
+      document.getElementById('draftButton').addEventListener('click', () => showToast('Taslak kaydedildi', 'Cari kart üzerindeki son değişiklikler güvenle saklandı.'));
+      document.getElementById('helpButton').addEventListener('click', () => showToast('Kısayol', 'Bölümler arasında üst sekmelerden veya klavyenin sağ/sol oklarıyla geçebilirsiniz.'));
+      document.getElementById('cancelButton').addEventListener('click', () => showToast('Mockup modu', 'Gerçek uygulamada burada kaydedilmemiş değişiklik uyarısı gösterilir.'));
+      finishButton.addEventListener('click', () => showToast('Değişiklikler kaydedildi', 'Atlas Kimya Sanayi A.Ş. kartı güncellendi.'));
+
+      document.querySelector('[data-add-row="contact"]').addEventListener('click', () => {
+        const tbody = document.querySelector('#contactTable tbody');
+        const row = document.createElement('tr');
+        row.innerHTML = '<td class="table-primary">Mobil telefon<span class="table-secondary">Yeni iletişim</span></td><td>+90 532 000 00 00</td><td>Telefon</td><td><span class="pill orange">Yeni</span></td><td><div class="row-actions"><button class="tiny-button">✎</button><button class="tiny-button">⋯</button></div></td>';
+        tbody.appendChild(row);
+        showToast('İletişim satırı eklendi', 'Mockup için örnek bir mobil telefon kaydı oluşturuldu.');
+      });
+
+      function addPerson() {
+        const grid = document.getElementById('peopleGrid');
+        const addCard = document.getElementById('addPersonCard');
+        const card = document.createElement('div');
+        card.className = 'person-card';
+        card.innerHTML = '<div class="person-head"><div class="avatar">YK</div><div><strong>Yeni Kişi</strong><small>Görev bilgisi bekleniyor</small></div></div><div class="person-lines"><div class="person-line">T&nbsp; +90 5__ ___ __ __</div><div class="person-line">E&nbsp; e-posta bilgisi girilmedi</div><div class="person-line">N&nbsp; Yeni ilgili kaydı</div></div>';
+        grid.insertBefore(card, addCard);
+        showToast('Yeni ilgili eklendi', 'Kişi kartı düzenlenmeye hazır.');
+      }
+
+      document.getElementById('addPersonButton').addEventListener('click', addPerson);
+      document.getElementById('addPersonCard').addEventListener('click', addPerson);
+
+      document.getElementById('sendCommentButton').addEventListener('click', () => {
+        const input = document.getElementById('commentInput');
+        if (!input.value.trim()) {
+          showToast('Yorum boş', 'Göndermeden önce kısa bir not yazın.');
+          return;
+        }
+        const item = document.createElement('div');
+        item.className = 'timeline-item';
+        item.innerHTML = '<div class="timeline-dot">AY</div><div class="timeline-content"><div class="timeline-meta"><strong>Ahmet Yılmaz · Şimdi</strong><time>Az önce</time></div><p></p></div>';
+        item.querySelector('p').textContent = input.value.trim();
+        document.getElementById('commentTimeline').prepend(item);
+        input.value = '';
+        showToast('Yorum eklendi', 'Not ekip akışında yayınlandı.');
+      });
+
+      document.getElementById('dropzone').addEventListener('click', () => showToast('Dosya seçimi', 'Gerçek uygulamada dosya seçme penceresi burada açılır.'));
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'ArrowRight' && !['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) showStep(currentStep + 1);
+        if (event.key === 'ArrowLeft' && !['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) showStep(currentStep - 1);
+        if (event.key === 'Escape') showToast('Çıkış kısayolu', 'Mockup kapatılmadı; gerçek ekranda iptal onayı gösterilir.');
+      });
+
+      showStep(0);
+    })();
+  </script>
+</body>
+</html>

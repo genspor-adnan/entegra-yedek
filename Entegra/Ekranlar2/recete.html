@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reçete — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* recete satir renkleri */
+    --r-urn:#bedaf6; --r-urn-t:#10305c;   /* uretilen urun (grup basligi) */
+    --r-yar:#e0d3f2; --r-yar-t:#4b2c70;   /* yari mamul - kendi recetesi var */
+    --r-eks:#f7cfcf; --r-eks-t:#7d1f1f;   /* stok yetersiz                 */
+    --r-kri:#fbe6ae; --r-kri-t:#7a5407;   /* kritik seviyeye duser         */
+    --r-pas:#dcdcdc; --r-pas-t:#7a7a7a;   /* pasif bilesen                 */
+    --tus-pas:#9c71ad; --tus-sec:#1f6fbe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+
+  .wrap{display:grid;grid-template-columns:252px 1fr 240px;gap:0}
+
+  /* SOL: recete listesi */
+  .gorev{background:#f4f7fa;border-right:1px solid var(--line2);padding:6px 6px 10px}
+  .gorev h5{margin:6px 4px 4px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .ltabs{display:flex;gap:2px;margin:-6px -6px 8px;padding:6px 6px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .ltab{flex:1;text-align:center;padding:6px 8px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);
+    border-bottom:none;border-radius:3px 3px 0 0;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .ltab.active{background:#f4f7fa;color:var(--navy);font-weight:bold}
+  .lpane{display:none}.lpane.active{display:block}
+  .rli{display:flex;flex-direction:column;gap:1px;padding:5px 7px;font-size:11px;border:1px solid transparent;
+    border-radius:3px;cursor:default}
+  .rli:hover{background:#eef4fb}
+  .rli.on{background:var(--sel);border-color:var(--selbd)}
+  .rli .k{display:flex;gap:6px;align-items:center}
+  .rli .k b{color:var(--navy)}
+  .rli .k i{margin-left:auto;font-style:normal;font-size:10px;color:var(--muted)}
+  .rli .m{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .agrid{display:grid;grid-template-columns:72px 1fr;gap:5px 6px;align-items:center}
+  .agrid label{font-size:10.5px;color:var(--muted);text-align:right}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px}
+
+  /* ORTA */
+  .center{min-width:0;display:flex;flex-direction:column}
+  .baslik{display:grid;grid-template-columns:repeat(4,1fr);gap:7px 12px;padding:10px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;
+    display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .inp.ro{background:#f4f6f9;color:var(--muted)}
+  .inp.r{justify-content:flex-end;font-family:"Segoe UI",Tahoma}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:3px;color:var(--muted);font-size:10px}
+
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 13px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+  .gridtb{display:flex;gap:4px;padding:0 0 7px;align-items:center;flex-wrap:wrap}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.r-urn td{background:var(--r-urn);color:var(--r-urn-t);font-weight:bold}
+  .dg tr.r-yar td{background:var(--r-yar);color:var(--r-yar-t)}
+  .dg tr.r-eks td{background:var(--r-eks);color:var(--r-eks-t)}
+  .dg tr.r-kri td{background:var(--r-kri);color:var(--r-kri-t)}
+  .dg tr.r-pas td{background:var(--r-pas);color:var(--r-pas-t)}
+  .dg tr.r-pas td.ad{text-decoration:line-through}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .lv1{padding-left:20px !important}
+  .lv2{padding-left:36px !important}
+  .agac{color:#8aa0b5;font-style:normal;margin-right:3px}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-yar{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+
+  /* SAG */
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:8px 0}
+  .side h5{margin:0;padding:7px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11px;padding:3px 12px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .kv.big b{font-size:13px}
+  .tvsep{height:1px;background:var(--line2);margin:7px 10px}
+  .sidebtns{display:flex;flex-direction:column;gap:4px;padding:4px 10px}
+  .mline{display:flex;align-items:center;gap:7px;padding:3px 12px;font-size:11px}
+  .mline .ad{width:66px;color:var(--muted)}
+  .mline .mk{width:52px;text-align:right;font-family:"Segoe UI",Tahoma}
+  .bar{height:9px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;flex:1}
+  .bar>span{display:block;height:100%}
+  .bar .mal{background:#4a7fb5}.bar .isc{background:#5aa06f}.bar .gid{background:#d8a013}.bar .fas{background:#a06fb0}
+
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Reçete
+    <span class="sp">UUretimRecete · URETIMRECETE · STOKLAR · Şube: Merkez · 14.08.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni Sarf</div>
+    <div class="btn">📦 Yeni Ürün</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="btn">💾 Kaydet</div>
+    <div class="btn">↩ İptal</div>
+    <div class="sepv"></div>
+    <div class="btn">🧮 Hesapla</div>
+    <div class="btn">💰 Maliyetleri Hesapla</div>
+    <div class="sepv"></div>
+    <div class="btn">📥 Excelden Reçete Verisi Al</div>
+    <div class="btn">🖨 Yazdır</div>
+  </div>
+
+  <div class="wrap">
+    <!-- ============ SOL: REÇETELİ ÜRÜNLER / ARAMA ============ -->
+    <div class="gorev">
+      <div class="ltabs">
+        <div class="ltab active" data-l="liste">📋 Reçeteler</div>
+        <div class="ltab" data-l="arama">🔎 Arama</div>
+      </div>
+
+      <div class="lpane active" data-lp="liste">
+        <div style="display:flex;gap:4px;margin-bottom:7px">
+          <span class="minibtn" style="flex:1;justify-content:center">➕ Yeni</span>
+          <span class="minibtn" style="flex:1;justify-content:center">🗑 Sil</span>
+          <span class="minibtn" style="flex:1;justify-content:center">✔ Seç</span>
+        </div>
+        <div class="rli on">
+          <div class="k"><b>STK.90010</b> <i>Kar %36,5</i></div>
+          <div class="m">Hazır perde takımı — 280 cm</div>
+        </div>
+        <div class="rli">
+          <div class="k"><b>STK.90014</b> <i>Kar %28,0</i></div>
+          <div class="m">Stor perde — zincir mekanizmalı</div>
+        </div>
+        <div class="rli">
+          <div class="k"><b>STK.90021</b> <i>Kar %41,2</i></div>
+          <div class="m">Blackout perde takımı — antrasit</div>
+        </div>
+        <div class="rli">
+          <div class="k"><b>STK.90033</b> <i>Kar %19,8</i></div>
+          <div class="m">Yarı mamul — dikilmiş kumaş paneli</div>
+        </div>
+        <div class="rli">
+          <div class="k"><b>STK.90040</b> <i>Kar %33,1</i></div>
+          <div class="m">Montaj seti — komple</div>
+        </div>
+        <div class="hint" style="padding:8px 4px 0">Seçili reçete sağda düzenlenir.
+          <b>Geçmiş reçete</b> seçilirse alanlar salt-okunur açılır.</div>
+      </div>
+
+      <div class="lpane" data-lp="arama">
+        <div class="agrid">
+          <label>Ara</label><div class="inp">perde</div>
+          <label>Tür</label><div class="inp combo">(tümü)</div>
+          <label>Kategori</label><div class="inp combo">Mamul</div>
+        </div>
+        <label class="chk" style="margin-top:7px"><input type="checkbox"> Pasifleri de göster</label>
+        <label class="chk"><input type="checkbox"> Geçmiş reçete göster</label>
+        <div class="agrid" style="margin-top:5px">
+          <label>Geçmiş Tarih</label><div class="inp">01.01.2026</div>
+        </div>
+        <div style="display:flex;gap:5px;margin-top:8px">
+          <span class="minibtn on" style="flex:1;justify-content:center">🔎 Ara</span>
+          <span class="minibtn" style="flex:1;justify-content:center">↩ Temizle</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ORTA: REÇETE KARTI ============ -->
+    <div class="center">
+      <div class="baslik">
+        <div class="fld"><label>Üretim Fiş No</label><div class="inp">URT2026000000118</div></div>
+        <div class="fld"><label>Üretim Fiş Tarihi</label><div class="inp">14.08.2026</div></div>
+        <div class="fld"><label>Kod</label><div class="inp big">STK.90010</div></div>
+        <div class="fld"><label>Tür</label><div class="inp combo">Mamul</div></div>
+
+        <div class="fld" style="grid-column:1 / 3"><label>Ad</label>
+          <div class="inp big">Hazır perde takımı — 280 cm (jakarlı + tül + korniş)</div></div>
+        <div class="fld"><label>Liste Fiyatı</label><div class="inp r">1.450,00</div></div>
+        <div class="fld"><label>Tavsiye Liste Fiyatı</label><div class="inp r ro">1.412,60</div></div>
+
+        <div class="fld"><label>Tavsiye %</label><div class="inp r">35,00</div></div>
+        <div class="fld"><label>Kar %</label><div class="inp r" style="color:#2e7d46;font-weight:bold">36,50</div></div>
+        <div class="fld"><label>Üretim Miktarı (parti)</label><div class="inp r">10,00 AD</div></div>
+        <div class="fld"><label>&nbsp;</label>
+          <label class="chk"><input type="checkbox" checked> KDV Hariç</label></div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" data-t="malzeme">Malzeme <span class="b">7</span></div>
+        <div class="tab" data-t="operasyon">Operasyon Konu <span class="b">4</span></div>
+        <div class="tab" data-t="kalite">Kalite Şablonu <span class="b">3</span></div>
+        <div class="tab" data-t="maliyet">Maliyet Özeti</div>
+        <div class="tab" data-t="gecmis">Sürüm Geçmişi</div>
+      </div>
+
+      <!-- MALZEME -->
+      <div class="pane active" data-p="malzeme">
+        <div class="gridtb">
+          <span class="minibtn">➕ Yeni Sarf</span>
+          <span class="minibtn">📦 Yeni Ürün</span>
+          <span class="minibtn">🗑 Sil</span>
+          <span class="minibtn">💾 Kaydet</span>
+          <span class="minibtn">↩ İptal</span>
+          <span class="sepv" style="height:20px"></span>
+          <span class="minibtn">🌳 Alt reçeteleri aç</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Parti: 10 AD · birim maliyetler 1 AD içindir</span>
+        </div>
+
+        <div class="dg">
+          <table>
+            <tr>
+              <th class="c" style="width:38px">SIRA</th>
+              <th style="width:92px">ÜRÜN KODU</th>
+              <th>ÜRÜN ADI</th>
+              <th class="r" style="width:70px">GRUP ADET</th>
+              <th class="r" style="width:70px">BİRİM ADET</th>
+              <th class="c" style="width:46px">BİRİM</th>
+              <th class="r" style="width:76px">ALIŞ SON</th>
+              <th class="r" style="width:82px">ORT.BR.MAL.</th>
+              <th class="r" style="width:88px">ORT.TOP.MAL.</th>
+              <th class="r" style="width:52px">ORT %</th>
+              <th class="c" style="width:74px">STOK</th>
+            </tr>
+
+            <tr class="r-urn">
+              <td class="c">—</td><td>STK.90010</td>
+              <td class="ad"><span class="agac">▾</span> Hazır perde takımı — 280 cm <span class="pill p-ok">ÜRÜN</span></td>
+              <td class="r">10,00</td><td class="r">1,00</td><td class="c">AD</td>
+              <td class="r">—</td><td class="r">—</td><td class="r">920,40</td><td class="r">100,0</td>
+              <td class="c">—</td>
+            </tr>
+
+            <tr class="foc">
+              <td class="c">1</td><td class="lv1">STK.10248</td>
+              <td class="ad lv1"><span class="agac">├</span> Perde kumaşı — jakarlı, 280 cm</td>
+              <td class="r">48,00</td><td class="r">4,80</td><td class="c">MT</td>
+              <td class="r">44,20</td><td class="r">45,80</td><td class="r">219,84</td><td class="r">23,9</td>
+              <td class="c"><span class="pill p-kri">Kritik</span></td>
+            </tr>
+            <tr>
+              <td class="c">2</td><td class="lv1">STK.10311</td>
+              <td class="ad lv1"><span class="agac">├</span> Tül perde — bambu desen</td>
+              <td class="r">36,00</td><td class="r">3,60</td><td class="c">MT</td>
+              <td class="r">26,00</td><td class="r">26,40</td><td class="r">95,04</td><td class="r">10,3</td>
+              <td class="c"><span class="pill p-kri">Kritik</span></td>
+            </tr>
+            <tr class="r-yar">
+              <td class="c">3</td><td class="lv1">STK.90033</td>
+              <td class="ad lv1"><span class="agac">├▾</span> Yarı mamul — dikilmiş kumaş paneli
+                <span class="pill p-yar">REÇETELİ</span></td>
+              <td class="r">10,00</td><td class="r">1,00</td><td class="c">AD</td>
+              <td class="r">—</td><td class="r">312,00</td><td class="r">312,00</td><td class="r">33,9</td>
+              <td class="c"><span class="pill p-yar">Üretilir</span></td>
+            </tr>
+            <tr>
+              <td class="c">3.1</td><td class="lv2">STK.30011</td>
+              <td class="ad lv2"><span class="agac">│ ├</span> Dikiş ipliği — polyester</td>
+              <td class="r">2,00</td><td class="r">0,20</td><td class="c">KG</td>
+              <td class="r">180,00</td><td class="r">182,50</td><td class="r">36,50</td><td class="r">4,0</td>
+              <td class="c"><span class="pill p-ok">Yeterli</span></td>
+            </tr>
+            <tr class="r-eks">
+              <td class="c">3.2</td><td class="lv2">STK.10402</td>
+              <td class="ad lv2"><span class="agac">│ └</span> Korniş seti — alüminyum 3 m</td>
+              <td class="r">10,00</td><td class="r">1,00</td><td class="c">AD</td>
+              <td class="r">28,50</td><td class="r">29,10</td><td class="r">291,00</td><td class="r">31,6</td>
+              <td class="c"><span class="pill p-yok">Stok yok</span></td>
+            </tr>
+            <tr>
+              <td class="c">4</td><td class="lv1">HZM.0004</td>
+              <td class="ad lv1"><span class="agac">├</span> Montaj ve işçilik <span class="pill p-ok">HİZMET</span></td>
+              <td class="r">10,00</td><td class="r">1,00</td><td class="c">AD</td>
+              <td class="r">—</td><td class="r">150,00</td><td class="r">150,00</td><td class="r">16,3</td>
+              <td class="c">—</td>
+            </tr>
+            <tr class="r-pas">
+              <td class="c">5</td><td class="lv1">STK.10077</td>
+              <td class="ad lv1"><span class="agac">└</span> Eski model korniş (üretimden kalktı)</td>
+              <td class="r">0,00</td><td class="r">0,00</td><td class="c">AD</td>
+              <td class="r">21,00</td><td class="r">21,00</td><td class="r">0,00</td><td class="r">0,0</td>
+              <td class="c"><span class="pill p-pas">Pasif</span></td>
+            </tr>
+
+            <tfoot>
+              <tr>
+                <td colspan="8" style="text-align:right">MALZEME TOPLAMI (1 adet için)</td>
+                <td class="r">920,40</td><td class="r">100,0</td><td class="c"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--r-urn)"></span>Üretilen ürün (reçete başı)</span>
+          <span><span class="sw" style="background:var(--r-yar)"></span>Yarı mamul — kendi reçetesi var</span>
+          <span><span class="sw" style="background:var(--r-eks)"></span>Stok yok</span>
+          <span><span class="sw" style="background:var(--r-kri)"></span>Kritik seviyeye düşer</span>
+          <span><span class="sw" style="background:var(--r-pas)"></span>Pasif bileşen — <b>en sonda</b>, adı üstü çizili</span>
+        </div>
+        <div class="hint">
+          <b>Grup Adet</b> parti miktarı (10 AD) için, <b>Birim Adet</b> 1 adet için gereken miktardır; ikisi
+          <b>Hesapla</b> ile senkron tutulur. Reçeteli bileşen (mor) genişletilince kendi alt kalemlerini gösterir —
+          maliyet <b>aşağıdan yukarı</b> toplanır, bu yüzden alt reçete değişince üst ürünün maliyeti de değişir.
+          Stok sütunu <b>STOKDURUM</b>'dan gelir; parti miktarı için yetmeyen bileşenler kırmızı/sarı boyanır.
+        </div>
+      </div>
+
+      <!-- OPERASYON -->
+      <div class="pane" data-p="operasyon">
+        <div class="gridtb">
+          <span class="minibtn">➕ Yeni</span><span class="minibtn">🗑 Sil</span>
+          <span class="minibtn">💾 Kaydet</span><span class="minibtn">↩ İptal</span>
+          <span class="minibtn" style="margin-left:auto">📥 Excelden Operasyon Konu Al</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th class="c" style="width:44px">SIRA</th><th>KONUSU</th><th style="width:120px">KAYNAK</th>
+                <th>KAYNAK ADI</th><th class="r" style="width:78px">SÜRE (dk)</th><th class="c" style="width:64px">KALİTE</th></tr>
+            <tr><td class="c">1</td><td class="ad">Kumaş kesim</td><td>MAK-01</td><td class="ad">Otomatik kesim makinesi</td><td class="r">18,00</td><td class="c">✔</td></tr>
+            <tr><td class="c">2</td><td class="ad">Dikim</td><td>MAK-04</td><td class="ad">Overlok — 4 iplik</td><td class="r">42,00</td><td class="c">✔</td></tr>
+            <tr><td class="c">3</td><td class="ad">Ütü / son işlem</td><td>IST-02</td><td class="ad">Ütü istasyonu</td><td class="r">12,00</td><td class="c"></td></tr>
+            <tr><td class="c">4</td><td class="ad">Paketleme</td><td>IST-05</td><td class="ad">Paketleme bandı</td><td class="r">8,00</td><td class="c">✔</td></tr>
+            <tfoot><tr><td colspan="4" style="text-align:right">TOPLAM SÜRE (1 adet)</td><td class="r">80,00</td><td class="c"></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="hint">Operasyon konuları üretim emri açılırken <b>"Reçeteden Konuları Ekle"</b> ile iş emrine kopyalanır;
+          süre × kaynak saat ücreti işçilik maliyetini verir.</div>
+      </div>
+
+      <!-- KALITE -->
+      <div class="pane" data-p="kalite">
+        <div class="gridtb"><span class="minibtn">➕ Yeni</span><span class="minibtn">🗑 Sil</span>
+          <span class="minibtn">💾 Kaydet</span><span class="minibtn">📋 Buraya Test Kopyala</span></div>
+        <div class="dg">
+          <table>
+            <tr><th class="c" style="width:44px">SIRA</th><th>TEST</th><th class="r" style="width:74px">NOMİNAL</th>
+                <th class="r" style="width:78px">ALT TOL.</th><th class="r" style="width:78px">ÜST TOL.</th>
+                <th class="c" style="width:52px">BİRİM</th><th class="c" style="width:64px">TİP</th>
+                <th style="width:120px">ÖLÇÜ ALETİ</th><th class="c" style="width:56px">GİRİŞ</th></tr>
+            <tr><td class="c">1</td><td class="ad">Panel genişliği</td><td class="r">280,0</td><td class="r">-1,5</td><td class="r">+1,5</td>
+                <td class="c">cm</td><td class="c">± Değer</td><td>Şerit metre</td><td class="c">Zorunlu</td></tr>
+            <tr><td class="c">2</td><td class="ad">Dikiş mukavemeti</td><td class="r">120,0</td><td class="r">-10,0</td><td class="r">—</td>
+                <td class="c">N</td><td class="c">Alt limit</td><td>Dinamometre</td><td class="c">Zorunlu</td></tr>
+            <tr><td class="c">3</td><td class="ad">Renk uygunluğu</td><td class="r">—</td><td class="r">—</td><td class="r">—</td>
+                <td class="c">—</td><td class="c">Görsel</td><td>Renk kartelası</td><td class="c">Opsiyonel</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- MALIYET -->
+      <div class="pane" data-p="maliyet">
+        <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
+          <div style="flex:1;min-width:320px">
+            <div class="dg">
+              <table>
+                <tr><th>TİP</th><th class="r" style="width:110px">BİRİM MALİYET</th>
+                    <th class="r" style="width:110px">PARTİ (10 AD)</th><th class="r" style="width:64px">%</th></tr>
+                <tr><td>Malzeme (sarf)</td><td class="r">608,40</td><td class="r">6.084,00</td><td class="r">57,4</td></tr>
+                <tr class="r-yar"><td>Yarı mamul (alt reçete)</td><td class="r">312,00</td><td class="r">3.120,00</td><td class="r">29,4</td></tr>
+                <tr><td>İşçilik (operasyon)</td><td class="r">120,00</td><td class="r">1.200,00</td><td class="r">11,3</td></tr>
+                <tr><td>Genel gider (%2)</td><td class="r">20,80</td><td class="r">208,00</td><td class="r">1,9</td></tr>
+                <tr><td>Fason</td><td class="r">0,00</td><td class="r">0,00</td><td class="r">0,0</td></tr>
+                <tr class="r-urn"><td>TOPLAM MALİYET</td><td class="r">1.061,20</td><td class="r">10.612,00</td><td class="r">100,0</td></tr>
+              </table>
+            </div>
+            <div class="hint">Ort. ve Son maliyet iki ayrı sütun olarak tutulur: <b>Ort.</b> hareketli ortalamayı,
+              <b>Son</b> en güncel alış fiyatını yansıtır. Tavsiye liste fiyatı <b>Son</b> maliyet üzerinden hesaplanır —
+              fiyat listesi güncellenirken hangisinin kullanıldığı Belge Opsiyonları'ndan seçilir.</div>
+          </div>
+          <div style="width:330px">
+            <div class="dg">
+              <table>
+                <tr><th>FİYATLANDIRMA</th><th class="r" style="width:110px">DEĞER</th></tr>
+                <tr><td>Toplam maliyet (1 AD)</td><td class="r">1.061,20</td></tr>
+                <tr><td>Tavsiye % (35)</td><td class="r">371,42</td></tr>
+                <tr><td>Tavsiye liste fiyatı</td><td class="r">1.412,60</td></tr>
+                <tr class="r-urn"><td>Güncel liste fiyatı</td><td class="r">1.450,00</td></tr>
+                <tr><td>Gerçekleşen kar %</td><td class="r" style="color:#2e7d46">36,5</td></tr>
+              </table>
+            </div>
+            <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap">
+              <span class="minibtn on">💰 Maliyetleri Hesapla</span>
+              <span class="minibtn">🏷 Liste Fiyatını Tavsiyeye Eşitle</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GECMIS -->
+      <div class="pane" data-p="gecmis">
+        <div class="dg">
+          <table>
+            <tr><th class="c" style="width:60px">SÜRÜM</th><th style="width:96px">TARİH</th><th style="width:130px">DEĞİŞTİREN</th>
+                <th class="r" style="width:110px">BİRİM MALİYET</th><th>DEĞİŞİKLİK</th></tr>
+            <tr class="r-urn"><td class="c"><b>4</b></td><td>14.08.2026</td><td>Mehmet Yıldız</td><td class="r">1.061,20</td>
+                <td class="ad">Yarı mamul STK.90033 eklendi, korniş alt reçeteye taşındı</td></tr>
+            <tr><td class="c">3</td><td>02.07.2026</td><td>Üretim Sorumlusu</td><td class="r">1.004,80</td>
+                <td class="ad">Kumaş sarfiyatı 5,00 → 4,80 MT</td></tr>
+            <tr><td class="c">2</td><td>11.03.2026</td><td>Mehmet Yıldız</td><td class="r">968,00</td>
+                <td class="ad">Paketleme operasyonu eklendi</td></tr>
+            <tr><td class="c">1</td><td>08.01.2026</td><td>Üretim Sorumlusu</td><td class="r">941,50</td>
+                <td class="ad">İlk sürüm</td></tr>
+          </table>
+        </div>
+        <div class="hint">"Geçmiş reçete göster" seçilip tarih verilirse, o tarihte yürürlükte olan sürüm
+          <b>salt-okunur</b> açılır — geçmiş üretim fişlerinin maliyeti hangi reçeteyle hesaplandığı böyle doğrulanır.</div>
+      </div>
+    </div>
+
+    <!-- ============ SAG: ÖZET ============ -->
+    <div class="side">
+      <h5>Reçete Özeti</h5>
+      <div class="kv"><span>Ürün</span><b>STK.90010</b></div>
+      <div class="kv"><span>Sürüm</span><b>4 · 14.08.2026</b></div>
+      <div class="kv"><span>Bileşen</span><b>7 kalem</b></div>
+      <div class="kv"><span>Operasyon</span><b>4 · 80 dk</b></div>
+      <div class="kv"><span>Seviye</span><b>2 (alt reçeteli)</b></div>
+
+      <div class="tvsep"></div>
+      <h5>Maliyet Dağılımı</h5>
+      <div class="mline"><span class="ad">Malzeme</span>
+        <div class="bar"><span class="mal" style="width:57%"></span></div><span class="mk">57,4%</span></div>
+      <div class="mline"><span class="ad">Yarı mamul</span>
+        <div class="bar"><span class="fas" style="width:29%"></span></div><span class="mk">29,4%</span></div>
+      <div class="mline"><span class="ad">İşçilik</span>
+        <div class="bar"><span class="isc" style="width:11%"></span></div><span class="mk">11,3%</span></div>
+      <div class="mline"><span class="ad">Genel gid.</span>
+        <div class="bar"><span class="gid" style="width:2%"></span></div><span class="mk">1,9%</span></div>
+
+      <div class="tvsep"></div>
+      <h5>Fiyat</h5>
+      <div class="kv big"><span>Maliyet</span><b>1.061,20</b></div>
+      <div class="kv"><span>Tavsiye</span><b>1.412,60</b></div>
+      <div class="kv"><span>Liste</span><b>1.450,00</b></div>
+      <div class="kv"><span>Kar</span><b style="color:#2e7d46">%36,5</b></div>
+
+      <div class="tvsep"></div>
+      <h5>Uyarılar</h5>
+      <div class="kv"><span><span class="pill p-yok">1</span> Stok yok</span><b>STK.10402</b></div>
+      <div class="kv"><span><span class="pill p-kri">2</span> Kritik</span><b>kumaş, tül</b></div>
+      <div class="kv"><span><span class="pill p-pas">1</span> Pasif kalem</span><b>STK.10077</b></div>
+
+      <div class="tvsep"></div>
+      <h5>İşlemler</h5>
+      <div class="sidebtns">
+        <span class="minibtn">🏭 Üretim Emri Aç</span>
+        <span class="minibtn">📋 Başka Stoktan Kopyala</span>
+        <span class="minibtn">🛒 Gereksinime Göre Satınalma Talebi</span>
+        <span class="minibtn">📦 Stoktan Talep Oluştur</span>
+        <span class="minibtn">🖨 Reçete Föyü Yazdır</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Reçete → <b>URETIMRECETE</b> (URUNID · SIRA · KOD · ADET · ADETHESAP · BIRIM · MALIYETORT/SON)</span>·
+    <span>Ürün → <b>STOKLAR</b> (RECETEVAR)</span>·
+    <span>Operasyon → <b>URETIMKONU</b> (KONUSU · SURE · KAYNAK)</span>·
+    <span>Kalite → <b>KALITESABLON</b> (NOMINAL · LIMITALT/UST · TOLERANS)</span>·
+    <span>Stok → <b>STOKDURUM</b></span>·
+    <span>Üretim → <b>FATBASLIK (üretim fişi) → FATDETAY</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Reçete: <b>STK.90010</b> · sürüm 4</span>
+    <span>Parti: <b>10 AD</b></span>
+    <span>Birim maliyet: <b>1.061,20 TL</b></span>
+    <span style="margin-left:auto">1 bileşen stoksuz — üretim emri açılırsa eksik listeye düşer</span>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.ltab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.ltab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.lpane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.lpane[data-lp="'+t.dataset.l+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.rli').forEach(function(r){
+    r.addEventListener('click',function(){
+      document.querySelectorAll('.rli').forEach(function(x){x.classList.remove('on')});
+      r.classList.add('on');
+    });
+  });
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

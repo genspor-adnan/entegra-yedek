@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dökümler — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5;--card:#fff;--line:#d2dae3;--line2:#e6ebf1;--ink:#1f2d3a;--muted:#6b7a8b;
+    --navy:#14315a;--accent:#2f6db3;--sel:#dcebfb;--selbd:#9cc4ee;--head:#f1f5f9;--head2:#e7eef5;
+    --btnfrom:#ffffff;--btnto:#eef2f7;--ok:#2e7d46;--warn:#b5731a;--red:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:#dfe4ea;color:var(--ink);
+    font-family:"Segoe UI","Trebuchet MS",Tahoma,sans-serif;font-size:12px;padding:12px}
+  .win{max-width:1480px;height:calc(100vh - 24px);margin:0 auto;background:var(--card);
+    border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 26px rgba(20,40,70,.16);
+    overflow:hidden;display:flex;flex-direction:column}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;
+    align-items:center;gap:8px;font-weight:600;font-size:12.5px;flex:none}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6}
+  .title .sp{margin-left:auto;font-weight:400;opacity:.85;font-size:11px}
+  .toolbar{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);
+    background:linear-gradient(#fff,#f4f7fb);flex:none;flex-wrap:wrap}
+  .tb{display:flex;align-items:center;gap:6px;border:1px solid var(--line);
+    background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:6px;padding:6px 11px;
+    font-size:12px;color:#33465c;cursor:default}
+  .tb:hover{border-color:var(--selbd);background:linear-gradient(#fff,#e4eefa)}
+  .tb.pri{background:linear-gradient(#5cb370,#2e7d46);border-color:#2e7d46;color:#fff;font-weight:600}
+  .ayr{width:1px;height:22px;background:var(--line);margin:0 3px}
+
+  /* ---- govde: rapor agaci + calisma alani ---- */
+  .dwrap{flex:1;display:flex;min-height:0}
+
+  .agac{width:238px;flex:none;border-right:1px solid var(--line);background:#f7f9fc;
+    display:flex;flex-direction:column;min-height:0}
+  .agacust{display:flex;gap:5px;padding:7px 8px;border-bottom:1px solid var(--line2);background:var(--head2);flex:none}
+  .agacust .b{flex:1;text-align:center;border:1px solid var(--line);background:linear-gradient(#fff,#eef2f7);
+    border-radius:5px;padding:5px;font-size:11.5px;color:#3f5165}
+  .agacust .b.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:600}
+  .arama{padding:7px 8px;border-bottom:1px solid var(--line2);flex:none}
+  .arama input{width:100%;border:1px solid var(--line);border-radius:5px;height:24px;padding:0 8px;
+    font-size:12px;font-family:inherit;outline:none}
+  .agacgovde{flex:1;overflow:auto;padding:5px 6px 12px}
+  .grp{margin-bottom:3px}
+  .grph{display:flex;align-items:center;gap:6px;padding:5px 6px;font-size:11.5px;font-weight:600;color:#42607f;cursor:default}
+  .grph:hover{background:#e9eff6;border-radius:4px}
+  .grph .pm{width:13px;height:13px;border:1px solid #a9bacb;border-radius:2px;background:#fff;
+    display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#42607f;line-height:1}
+  .grpb{padding:2px 0 4px}
+  .grp.kapali .grpb{display:none}
+  .rp{display:block;padding:5px 9px;margin:2px 2px;font-size:11.5px;color:#33475c;cursor:default;
+    border:1px solid var(--line);background:linear-gradient(#fff,#f3f6fa);border-radius:5px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rp:hover{border-color:var(--selbd);background:linear-gradient(#fff,#e2eefb)}
+  .rp.on{background:linear-gradient(#dcebfb,#c3ddf7);border-color:#8ab6e6;color:var(--navy);font-weight:700}
+  .agacalt{border-top:1px solid var(--line2);padding:6px 9px;font-size:10px;color:var(--muted);background:var(--head2);flex:none}
+
+  .cal{flex:1;min-width:0;display:flex;flex-direction:column;background:#fff}
+  .rbas{display:flex;align-items:center;gap:9px;padding:8px 12px;border-bottom:1px solid var(--line2);
+    background:linear-gradient(#fbfcfe,#f2f6fb);flex:none}
+  .rbas .ic{font-size:17px}
+  .rbas b{font-size:13px;color:var(--navy)}
+  .rbas .alt{font-size:10.5px;color:var(--muted)}
+  .rbas .sag{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:5px;
+    padding:4px 10px;font-size:11.5px;display:inline-flex;align-items:center;gap:5px;color:#33465c}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:600}
+
+  .parm{padding:10px 12px;border-bottom:1px solid var(--line);background:#fafbfd;flex:none}
+  .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:7px 14px}
+  .prow{display:grid;grid-template-columns:98px 34px 1fr;align-items:center;gap:6px}
+  .prow label{font-size:11px;color:var(--muted);text-align:right}
+  .prow .op{font-size:11px;color:#8595a6;text-align:center}
+  .inp{border:1px solid var(--line);border-radius:4px;background:#fff;height:24px;padding:0 6px;
+    font-size:12px;display:flex;align-items:center;color:var(--ink);min-width:0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.combo,.inp.tar{position:relative;padding-right:18px}
+  .inp.combo::after{content:"▾";position:absolute;right:6px;color:var(--muted);font-size:10px}
+  .inp.tar::after{content:"▾";position:absolute;right:6px;color:var(--muted);font-size:10px}
+  .inp.uc{position:relative;padding-right:26px}
+  .inp.uc::after{content:"…";position:absolute;right:4px;top:-1px;width:18px;height:22px;
+    border:1px solid var(--line);border-radius:3px;background:linear-gradient(#fff,#eef2f7);
+    display:flex;align-items:center;justify-content:center;color:#33465c;font-size:12px}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#3f5165}
+  .chk input{accent-color:var(--accent)}
+
+  .splitter{height:7px;flex:none;background:linear-gradient(#eef2f7,#e2e8f0);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;gap:3px}
+  .splitter i{width:26px;height:3px;border-radius:2px;background:#c2ced c;background:#c2cedc;display:block}
+
+  .grupbar{padding:6px 12px;background:#eef2f7;border-bottom:1px solid var(--line2);
+    color:#8595a6;font-size:11px;font-style:italic;flex:none}
+  .gridscroll{flex:1;overflow:auto;min-height:0}
+  table.grid{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}
+  table.grid th{position:sticky;top:0;background:linear-gradient(#f3f7fb,#e6edf5);border-bottom:2px solid #cfdae6;
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;color:#3a5573;font-weight:600;
+    white-space:nowrap;z-index:1}
+  table.grid td{border-bottom:1px solid #eef2f6;border-right:1px solid #f1f4f8;padding:5px 8px;white-space:nowrap}
+  table.grid tbody tr:nth-child(even) td{background:#fafcfe}
+  table.grid tbody tr:hover td{background:#f2f8ff}
+  table.grid tbody tr.sel td{background:var(--sel)}
+  table.grid tbody tr.gr td{background:linear-gradient(#eef4fa,#e4ecf5);font-weight:600;color:var(--navy)}
+  table.grid tbody tr.neg td.amt{color:#b23b3b}
+  table.grid tfoot td{position:sticky;bottom:0;background:linear-gradient(#eef4fa,#e0e9f3);
+    border-top:1px solid var(--line);font-weight:700;color:var(--navy);padding:6px 8px}
+  .amt{text-align:right;font-variant-numeric:tabular-nums}
+  .ctr{text-align:center}
+  .kod{font-variant-numeric:tabular-nums;color:#4a5c70}
+  .pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:600}
+  .pill.ok{background:#e7f5ec;color:#2e7d46;border:1px solid #c4e6d0}
+  .pill.red{background:#fdecec;color:#b23b3b;border:1px solid #f2c9c9}
+  .pill.gray{background:#eef1f4;color:#6b7a8b;border:1px solid #dbe1e8}
+  .pill.warn{background:#fdf4e3;color:#a9791a;border:1px solid #eeddb4}
+
+  .gridfoot{display:flex;align-items:center;gap:16px;padding:5px 12px;background:#f4f7fb;
+    border-top:1px solid var(--line2);font-size:11.5px;color:var(--muted);flex:none}
+  .gridfoot b{color:var(--navy)}
+  .gridfoot .sayac{border:1px solid var(--line);background:#fff;border-radius:4px;padding:1px 12px;
+    font-variant-numeric:tabular-nums;color:#33465c}
+  .gridfoot .r{margin-left:auto}
+  .statusbar{height:25px;flex:none;background:linear-gradient(#eef2f7,#e4eaf1);border-top:1px solid var(--line);
+    display:flex;align-items:center;gap:16px;padding:0 12px;font-size:11px;color:#4a5c70}
+  .statusbar .r{margin-left:auto}
+  .maprow{display:flex;gap:8px;flex-wrap:wrap;padding:7px 12px;background:#fbfcfd;
+    border-top:1px solid var(--line2);font-size:10px;color:var(--muted);flex:none}
+  .maprow b{color:#3d6294}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Dökümler
+    <span class="sp" id="titleYol">DokumFrame\UDokumListeFrame · GENDOKUM · Şube: Merkez · 14.08.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="tb pri"><span>▶</span> Listele</div>
+    <div class="tb"><span>🖨</span> Yazdır</div>
+    <div class="tb"><span>⬇</span> Excel</div>
+    <span class="ayr"></span>
+    <div class="tb"><span>⚙</span> Döküm Tasarla</div>
+    <div class="tb"><span>📁</span> Özel Dökümler</div>
+  </div>
+
+  <div class="dwrap">
+    <!-- ============ SOL: RAPOR AGACI ============ -->
+    <div class="agac">
+      <div class="agacust">
+        <div class="b on" data-kip="genel">📄 Dökümler</div>
+        <div class="b" data-kip="ozel">⭐ Özel</div>
+      </div>
+      <div class="arama"><input id="rq" placeholder="🔎 Döküm ara…"></div>
+      <div class="agacgovde" id="agacGovde"></div>
+      <div class="agacalt">Ağaç <b>GENDOKUM</b> tablosundan kurulur ·
+        özel dökümler <b>GENDEPO.DOSYA</b>'da (FastReport .fr3) saklanır.</div>
+    </div>
+
+    <!-- ============ SAG: PARAMETRE + SONUC ============ -->
+    <div class="cal">
+      <div class="rbas">
+        <span class="ic" id="rIc">💵</span>
+        <div>
+          <b id="rAd">Aylık Kasa Durum</b>
+          <div class="alt" id="rAlt">Genel · KASA / KASAHAREKET · aylık tahsil-ödeme ve devreden bakiye</div>
+        </div>
+        <div class="sag">
+          <span class="minibtn on">▤ Liste</span>
+          <span class="minibtn">▦ Grup</span>
+          <span class="minibtn">📊 Grafik</span>
+          <span class="minibtn">👁 Ön İzleme</span>
+        </div>
+      </div>
+
+      <div class="parm">
+        <div class="pgrid" id="parmAlan"></div>
+        <div style="display:flex;gap:14px;align-items:center;margin-top:9px;flex-wrap:wrap">
+          <label class="chk"><input type="checkbox" checked> Sıfır bakiyeleri gizle</label>
+          <label class="chk"><input type="checkbox"> Alt toplam satırları</label>
+          <label class="chk"><input type="checkbox" checked> Şube kırılımı</label>
+          <span style="margin-left:auto;display:flex;gap:6px">
+            <span class="minibtn on">▶ Listele</span>
+            <span class="minibtn">↩ Temizle</span>
+            <span class="minibtn">💾 Parametreleri Kaydet</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="splitter"><i></i><i></i><i></i></div>
+
+      <div class="grupbar">⬇ Gruplamak istediğiniz kolonu buraya sürükleyin</div>
+      <div class="gridscroll">
+        <table class="grid">
+          <thead id="gHead"></thead>
+          <tbody id="gBody"></tbody>
+          <tfoot id="gFoot"></tfoot>
+        </table>
+      </div>
+      <div class="gridfoot">
+        <span class="sayac" id="sayac">0</span>
+        <span>Döküm: <b id="fAd">—</b></span>
+        <span class="r" id="fOzet">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Ağaç → <b>GENDOKUM</b> (DOKUMADI · GRUBU · MODUL · SIRA · SQLMETIN · FR3)</span>·
+    <span>Parametre → <b>GENDOKUMPARAM</b> (ALAN · TIP · OPERATOR · VARSAYILAN)</span>·
+    <span>Sonuç → dinamik <b>SQL / SP</b> → cxGrid</span>·
+    <span>Tasarım → <b>GENDEPO.DOSYA</b> (FastReport .fr3)</span>·
+    <span>Yetki → <b>KULLANICIYETKI</b> (döküm bazlı)</span>
+  </div>
+
+  <div class="statusbar">
+    <span>Sistem Yöneticisi (2)</span>
+    <span>DESKTOP-HL3J3AS\SQLEXPRESS / BILIM / BILIM_GENDEPO</span>
+    <span>Ver.: 26.8.10.2</span>
+    <span class="r">SPID: 52</span>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   DOKUM KATALOGU — modul → grup → dokumler
+   ===================================================================== */
+var P = {
+  kasa:   {l:'Kasa Adı',      t:'uc'},
+  bas:    {l:'Başlama',       t:'tar', op:'>=', v:'01.01.2026'},
+  bit:    {l:'Bitiş',         t:'tar', op:'<=', v:'31.12.2026'},
+  sube:   {l:'Şube',          t:'combo', v:'Merkez'},
+  pb:     {l:'Para Birimi',   t:'combo', v:'(tümü)'},
+  cari:   {l:'Cari',          t:'uc'},
+  stok:   {l:'Stok',          t:'uc'},
+  depo:   {l:'Depo',          t:'combo', v:'(tümü)'},
+  banka:  {l:'Banka',         t:'combo', v:'(tümü)'},
+  temsil: {l:'Temsilci',      t:'combo', v:'(tümü)'},
+  durum:  {l:'Durum',         t:'combo', v:'(tümü)'},
+  grup:   {l:'Grup',          t:'combo', v:'(tümü)'},
+  dept:   {l:'Departman',     t:'combo', v:'(tümü)'},
+  tekn:   {l:'Teknisyen',     t:'combo', v:'(tümü)'},
+  mamul:  {l:'Mamul / Reçete',t:'uc'}
+};
+function p(k,ek){ var o={}, s=P[k]; for(var i in s) o[i]=s[i]; if(ek) for(var j in ek) o[j]=ek[j]; return o; }
+
+/* kolon: [baslik, genislik, hiza]  hiza: '' | 'amt' | 'ctr' */
+var KATALOG = {
+kasa:[
+ {g:'Genel', r:[
+  {id:'aylik_kasa_durum', ad:'Aylık Kasa Durum', ic:'💵',
+   alt:'KASA / KASAHAREKET · aylık tahsil-ödeme ve devreden bakiye',
+   pr:['kasa','bas','bit','sube'],
+   kol:[['KASAKODU',110],['KASA',200],['AY',130],['TAHSİL',110,'amt'],['ÖDEME',110,'amt'],['BAKİYE',120,'amt']],
+   sat:[
+    ['100.01.001','TL KASASI','2026 - OCAK','1.030,00','5.309,36','-15.540,01'],
+    ['100.01.001','TL KASASI','2026 - OCAK','2.850,00','0,00','-15.540,01'],
+    ['100.01.001','TL KASASI','2026 - ŞUBAT','3.497,00','8.310,00','-14.412,77'],
+    ['100.01.001','TL KASASI','2026 - ŞUBAT','3.719,00','0,00','-14.412,77'],
+    ['100.01.001','TL KASASI','2026 - MART','3.850,00','0,00','-308,12'],
+    ['100.01.001','TL KASASI','2026 - MART','0,00','3.048,00','-308,12'],
+    ['100.01.001','TL KASASI','2026 - MART','1.025,00','885,00','-308,12'],
+    ['100.01.001','TL KASASI','2026 - NİSAN','5.169,00','8.161,00','-7.329,85'],
+    ['100.01.001','TL KASASI','2026 - NİSAN','1.630,00','0,00','-7.329,85'],
+    ['100.01.001','TL KASASI','2026 - MAYIS','2.484,50','0,00','-4.144,42'],
+    ['100.01.001','TL KASASI','2026 - MAYIS','0,00','1.129,50','-4.144,42'],
+    ['100.01.001','TL KASASI','2026 - MAYIS','2.400,00','1.610,00','-4.144,42'],
+    ['100.01.001','TL KASASI','2026 - HAZİRAN','2.067,00','11.790,00','-8.783,20'],
+    ['100.01.002','SHOWROOM KASA','2026 - TEMMUZ','18.420,00','12.100,00','6.320,00'],
+    ['100.01.002','SHOWROOM KASA','2026 - AĞUSTOS','9.780,50','4.260,00','11.840,50'],
+    ['100.02.001','USD KASASI','2026 - AĞUSTOS','2.400,00','1.150,00','1.250,00'],
+    ['100.03.001','EUR KASASI','2026 - AĞUSTOS','1.800,00','950,00','850,00']
+   ], tp:[3,4,5], ozet:'17 satır · 4 kasa · 2026 dönemi'},
+
+  {id:'aylik_kasa_ozet', ad:'Aylık Kasa Raporu - Özet', ic:'📊',
+   alt:'Kasa bazında aylık net hareket özeti', pr:['bas','bit','sube','pb'],
+   kol:[['KASA',210],['PB',60,'ctr'],['DEVİR',120,'amt'],['TAHSİLAT',120,'amt'],['ÖDEME',120,'amt'],['NET',120,'amt'],['KAPANIŞ',130,'amt']],
+   sat:[
+    ['TL KASASI','TL','-15.540,01','48.502,50','52.245,86','-3.743,36','-19.283,37'],
+    ['SHOWROOM KASA','TL','4.120,00','128.940,50','121.220,00','7.720,50','11.840,50'],
+    ['ŞUBE-2 KASA','TL','2.850,00','64.310,00','61.980,00','2.330,00','5.180,00'],
+    ['USD KASASI','USD','1.000,00','2.400,00','1.150,00','1.250,00','2.250,00'],
+    ['EUR KASASI','EUR','650,00','1.800,00','950,00','850,00','1.500,00']
+   ], tp:[2,3,4,5,6], ozet:'5 kasa · 3 para birimi'},
+
+  {id:'devirli_kasa', ad:'Devirli Kasa Raporu', ic:'🔁',
+   alt:'Açılış devri + hareket + kapanış', pr:['kasa','bas','bit'],
+   kol:[['TARİH',100],['FİŞ NO',130],['AÇIKLAMA',300],['TAHSİL',110,'amt'],['ÖDEME',110,'amt'],['YÜRÜYEN BAKİYE',140,'amt']],
+   sat:[
+    ['01.08.2026','—','Açılış devri','—','—','4.120,00'],
+    ['03.08.2026','KAS2026000341','Perakende satış tahsilatı','12.480,00','0,00','16.600,00'],
+    ['05.08.2026','KAS2026000352','Kırtasiye gideri','0,00','1.240,00','15.360,00'],
+    ['08.08.2026','KAS2026000368','Granit Bilgisayar tahsilat','24.000,00','0,00','39.360,00'],
+    ['11.08.2026','KAS2026000377','Personel avans ödemesi','0,00','8.000,00','31.360,00'],
+    ['13.08.2026','KAS2026000390','Bankaya yatırılan','0,00','20.000,00','11.360,00'],
+    ['14.08.2026','KAS2026000401','Perakende satış tahsilatı','480,50','0,00','11.840,50']
+   ], tp:[3,4], ozet:'7 hareket · kapanış 11.840,50 TL'},
+
+  {id:'gunluk_kasa', ad:'Günlük Kasa Rapor', ic:'📅',
+   alt:'Gün sonu kasa sayım ve fark raporu', pr:['kasa','bas','sube'],
+   kol:[['TARİH',100],['KASA',180],['AÇILIŞ',110,'amt'],['TAHSİL',110,'amt'],['ÖDEME',110,'amt'],['HESAP',110,'amt'],['SAYIM',110,'amt'],['FARK',100,'amt']],
+   sat:[
+    ['12.08.2026','SHOWROOM KASA','8.240,00','14.600,00','6.100,00','16.740,00','16.740,00','0,00'],
+    ['13.08.2026','SHOWROOM KASA','16.740,00','9.320,00','20.400,00','5.660,00','5.610,00','-50,00'],
+    ['14.08.2026','SHOWROOM KASA','5.610,00','6.710,50','480,00','11.840,50','—','—'],
+    ['13.08.2026','TL KASASI','-14.412,77','3.719,00','0,00','-10.693,77','-10.693,77','0,00'],
+    ['14.08.2026','TL KASASI','-10.693,77','2.067,00','11.790,00','-20.416,77','—','—']
+   ], tp:[], ozet:'2 kasa sayımı yapılmadı · 1 fark -50,00 TL'},
+
+  {id:'nakit_akis', ad:'Takvim / Nakit Akışı', ic:'📈',
+   alt:'Vadeli giriş-çıkış projeksiyonu (30 gün)', pr:['bas','bit','sube'],
+   kol:[['VADE',100],['KAYNAK',170],['AÇIKLAMA',280],['GİRİŞ',120,'amt'],['ÇIKIŞ',120,'amt'],['KÜMÜLE',130,'amt']],
+   sat:[
+    ['15.08.2026','Kredi taksiti','KRD.2025/014 · 17. taksit','0,00','167.630,68','-167.630,68'],
+    ['18.08.2026','POS valör','Garanti BBVA · 3 gün valör','86.400,00','0,00','-81.230,68'],
+    ['20.08.2026','Cari tahsilat','GRANİT BİLGİSAYAR LTD.','172.320,50','0,00','91.089,82'],
+    ['25.08.2026','Kredi kartı','İş Bankası kurumsal kart','0,00','118.240,00','-27.150,18'],
+    ['28.08.2026','Alınan çek','GRT-0088471 tahsil','64.500,00','0,00','37.349,82'],
+    ['05.09.2026','Verilen senet','BSN-2026/0042','0,00','31.200,00','6.149,82'],
+    ['12.09.2026','Cari tahsilat','META MEFRUŞAT A.Ş.','14.700,00','0,00','20.849,82']
+   ], tp:[3,4], ozet:'30 günlük net: +20.849,82 TL'},
+
+  {id:'kasa_ekstre', ad:'Kasa Ekstre', ic:'🧾',
+   alt:'Seçili kasanın hareket dökümü', pr:['kasa','bas','bit'],
+   kol:[['TARİH',100],['FİŞ',120],['TÜR',110],['CARİ / AÇIKLAMA',300],['BORÇ',110,'amt'],['ALACAK',110,'amt'],['BAKİYE',120,'amt']],
+   sat:[
+    ['03.08.2026','KAS2026000341','Tahsilat','Perakende satış','12.480,00','0,00','16.600,00'],
+    ['05.08.2026','KAS2026000352','Gider','Kırtasiye — ofis','0,00','1.240,00','15.360,00'],
+    ['08.08.2026','KAS2026000368','Tahsilat','GRANİT BİLGİSAYAR LTD.','24.000,00','0,00','39.360,00'],
+    ['11.08.2026','KAS2026000377','Ödeme','Personel avansı — A. Kaya','0,00','8.000,00','31.360,00'],
+    ['13.08.2026','KAS2026000390','Virman','Bankaya yatırılan — İş Bankası','0,00','20.000,00','11.360,00']
+   ], tp:[4,5], ozet:'5 hareket · bakiye 11.360,00 TL'},
+
+  {id:'mizan', ad:'Mizan', ic:'🧮',
+   alt:'Hesap planı bazında borç/alacak mizanı', pr:['bas','bit','sube'],
+   kol:[['HESAP KODU',120],['HESAP ADI',260],['BORÇ',130,'amt'],['ALACAK',130,'amt'],['BORÇ BAK.',130,'amt'],['ALACAK BAK.',130,'amt']],
+   sat:[
+    ['100.01.001','TL KASASI','48.502,50','52.245,86','0,00','3.743,36'],
+    ['100.01.002','SHOWROOM KASA','128.940,50','121.220,00','7.720,50','0,00'],
+    ['101.01','ALINAN ÇEKLER','423.300,00','238.800,00','184.500,00','0,00'],
+    ['102.01','BANKALAR','1.284.600,00','1.190.240,00','94.360,00','0,00'],
+    ['120.01','ALICILAR','2.480.900,00','1.960.400,00','520.500,00','0,00'],
+    ['320.01','SATICILAR','1.120.400,00','1.435.700,00','0,00','315.300,00'],
+    ['300.01','BANKA KREDİLERİ','2.140.000,00','28.202.270,96','0,00','26.062.270,96']
+   ], tp:[2,3,4,5], ozet:'7 hesap · mizan dengede'},
+
+  {id:'mizan_cek', ad:'Mizan Çek Detay K', ic:'📜',
+   alt:'Çek/senet kırılımlı mizan detayı', pr:['bas','bit','banka'],
+   kol:[['PORTFÖY',150],['ÇEK/SENET NO',150],['KEŞİDECİ',220],['VADE',100],['TUTAR',120,'amt'],['DURUM',110,'ctr']],
+   sat:[
+    ['Portföyde','GRT-0088471','Granit Bilgisayar Ltd.','15.10.2026','64.500,00','<span class="pill ok">Portföyde</span>'],
+    ['Portföyde','HLK-0033017','Kimpa Kimya A.Ş.','05.11.2026','120.000,00','<span class="pill ok">Portföyde</span>'],
+    ['Tahsilde','İŞB-0091334','Anadolu Kağıt ve Amb.','14.08.2026','92.400,00','<span class="pill warn">Tahsilde</span>'],
+    ['Teminatta','SNT-2026/0117','Artline Aksesuar','30.09.2026','27.850,00','<span class="pill warn">Teminatta</span>'],
+    ['Karşılıksız','ZR-0044218','Demir İnşaat Ltd.','05.08.2026','38.750,00','<span class="pill red">Karşılıksız</span>'],
+    ['Karşılıksız','SNT-2026/0093','Ergün Yapı San.','10.08.2026','15.600,00','<span class="pill red">Protestolu</span>']
+   ], tp:[4], ozet:'6 kıymet · 2 karşılıksız (54.350,00 TL)'},
+
+  {id:'srm_detay', ad:'Sorumluluk Merkez Detay', ic:'🏢',
+   alt:'Masraf merkezi bazında gider detayı', pr:['bas','bit','dept'],
+   kol:[['MERKEZ',180],['HESAP',210],['BELGE',140],['TARİH',100],['TUTAR',130,'amt']],
+   sat:[
+    ['Üretim','Elektrik gideri','FTR-2026/1180','05.08.2026','48.200,00'],
+    ['Üretim','Bakım-onarım','SRV-2026/0448','09.08.2026','12.400,00'],
+    ['Satış','Araç yakıt','FTR-2026/1204','07.08.2026','8.640,00'],
+    ['Satış','Temsil-ağırlama','FTR-2026/1219','11.08.2026','3.180,00'],
+    ['Yönetim','Kırtasiye','KAS2026000352','05.08.2026','1.240,00'],
+    ['Yönetim','Danışmanlık','FTR-2026/1231','12.08.2026','24.000,00']
+   ], tp:[4], ozet:'3 merkez · 6 kayıt'},
+
+  {id:'srm_mizan', ad:'Sorumluluk Merkezi Mizan', ic:'📋',
+   alt:'Masraf merkezi mizanı ve bütçe karşılaştırması', pr:['bas','bit','dept'],
+   kol:[['MERKEZ',180],['BÜTÇE',130,'amt'],['GERÇEKLEŞEN',130,'amt'],['FARK',130,'amt'],['GERÇ. %',90,'ctr']],
+   sat:[
+    ['Üretim','720.000,00','604.800,00','115.200,00','%84'],
+    ['Satış','380.000,00','412.600,00','-32.600,00','%109'],
+    ['Yönetim','240.000,00','198.400,00','41.600,00','%83'],
+    ['Ar-Ge','160.000,00','96.200,00','63.800,00','%60']
+   ], tp:[1,2,3], ozet:'4 merkez · 1 merkez bütçe aşımında'}
+ ]},
+ {g:'Bilanço', r:[
+  {id:'bilanco', ad:'Bilanço', ic:'⚖', alt:'Özet bilanço (aktif / pasif)', pr:['bas','bit','sube'],
+   kol:[['KOD',90],['KALEM',300],['CARİ DÖNEM',150,'amt'],['ÖNCEKİ DÖNEM',150,'amt'],['DEĞİŞİM %',110,'ctr']],
+   sat:[
+    ['1','DÖNEN VARLIKLAR','4.284.600,00','3.720.400,00','%15'],
+    ['10','Hazır Değerler','431.318,25','386.200,00','%12'],
+    ['12','Ticari Alacaklar','2.480.900,00','2.104.300,00','%18'],
+    ['15','Stoklar','1.372.381,75','1.229.900,00','%12'],
+    ['2','DURAN VARLIKLAR','2.956.400,00','3.104.800,00','%-5'],
+    ['3','KISA VADELİ YAB. KAYNAK','1.892.400,00','1.640.200,00','%15'],
+    ['4','UZUN VADELİ YAB. KAYNAK','26.062.270,96','24.180.000,00','%8']
+   ], tp:[2,3], ozet:'Aktif = Pasif · 2026 dönemi'},
+  {id:'gelir_tablosu', ad:'Gelir Tablosu', ic:'📈', alt:'Dönemsel kâr-zarar', pr:['bas','bit','sube'],
+   kol:[['KALEM',320],['TUTAR',150,'amt'],['ORAN %',100,'ctr']],
+   sat:[
+    ['Brüt Satışlar','8.412.600,00','%100'],
+    ['Satış İadeleri (-)','-124.300,00','%-1,5'],
+    ['Net Satışlar','8.288.300,00','%98,5'],
+    ['Satılan Malın Maliyeti (-)','-5.940.200,00','%-70,6'],
+    ['BRÜT SATIŞ KÂRI','2.348.100,00','%27,9'],
+    ['Faaliyet Giderleri (-)','-1.215.400,00','%-14,4'],
+    ['FAALİYET KÂRI','1.132.700,00','%13,5'],
+    ['Finansman Giderleri (-)','-624.180,00','%-7,4'],
+    ['DÖNEM KÂRI','508.520,00','%6,0']
+   ], tp:[1], ozet:'Dönem kârı 508.520,00 TL · net marj %6,0'}
+ ]},
+ {g:'Borç-Alacak', r:[
+  {id:'alacak_yaslandirma', ad:'Alacak Yaşlandırma', ic:'⏳', alt:'Vade gruplarına göre alacaklar', pr:['cari','bit','temsil'],
+   kol:[['CARİ',260],['TOPLAM',130,'amt'],['0-30 G',120,'amt'],['31-60 G',120,'amt'],['61-90 G',120,'amt'],['90+ G',120,'amt']],
+   sat:[
+    ['GRANİT BİLGİSAYAR LTD.','172.320,50','120.000,00','52.320,50','0,00','0,00'],
+    ['BEETHOVEN GİYİM DIŞ TİC.','172.320,50','80.000,00','60.000,00','32.320,50','0,00'],
+    ['META MEFRUŞAT A.Ş.','98.400,00','14.700,00','0,00','24.000,00','59.700,00'],
+    ['NAZORATİ MÜHENDİSLİK','84.900,00','84.900,00','0,00','0,00','0,00'],
+    ['VOLKAN ŞİRİNBAY','9.800,00','0,00','0,00','0,00','9.800,00']
+   ], tp:[1,2,3,4,5], ozet:'5 cari · 90+ gün: 69.500,00 TL'},
+  {id:'borc_yaslandirma', ad:'Borç Yaşlandırma', ic:'⌛', alt:'Vade gruplarına göre borçlar', pr:['cari','bit'],
+   kol:[['CARİ',260],['TOPLAM',130,'amt'],['0-30 G',120,'amt'],['31-60 G',120,'amt'],['60+ G',120,'amt']],
+   sat:[
+    ['MNG TEKNOLOJİ A.Ş.','958.200,00','420.000,00','338.200,00','200.000,00'],
+    ['ADMEN ENDÜSTRİYEL MAK.','45.100,00','45.100,00','0,00','0,00'],
+    ['OERLIKON BALZERS COATING','12.400,00','0,00','12.400,00','0,00']
+   ], tp:[1,2,3,4], ozet:'3 satıcı · toplam 1.015.700,00 TL'}
+ ]}
+],
+
+banka:[{g:'Genel', r:[
+  {id:'banka_ekstre', ad:'Banka Ekstre', ic:'🏦', alt:'BANKAHESAP / BANKAHAREKET', pr:['banka','bas','bit'],
+   kol:[['TARİH',100],['BANKA / HESAP',220],['AÇIKLAMA',300],['GİRİŞ',120,'amt'],['ÇIKIŞ',120,'amt'],['BAKİYE',130,'amt']],
+   sat:[
+    ['03.08.2026','İş Bankası · TL','POS hesaba geçen (valör)','86.400,00','0,00','248.400,00'],
+    ['08.08.2026','İş Bankası · TL','Granit Bilgisayar havale','172.320,50','0,00','420.720,50'],
+    ['13.08.2026','İş Bankası · TL','Kasadan yatırılan','20.000,00','0,00','440.720,50'],
+    ['15.08.2026','İş Bankası · TL','Kredi taksiti (KRD.2025/014)','0,00','167.630,68','273.089,82'],
+    ['14.08.2026','Garanti BBVA · USD','İhracat bedeli','0,00','0,00','12.400,00']
+   ], tp:[3,4], ozet:'2 hesap · 5 hareket'},
+  {id:'kredi_odeme_plani', ad:'Kredi Ödeme Planları', ic:'📉', alt:'KREDI / KREDITAKSIT', pr:['banka','bas','bit'],
+   kol:[['KREDİ NO',130],['BANKA',160],['TAKSİT',80,'ctr'],['VADE',100],['ANAPARA',120,'amt'],['FAİZ',110,'amt'],['TAKSİT TUTARI',130,'amt'],['DURUM',100,'ctr']],
+   sat:[
+    ['KRD.2025/014','Türkiye İş Bankası','17 / 24','15.08.2026','120.056,44','45.308,80','167.630,68','<span class="pill warn">Ödenecek</span>'],
+    ['KRD.2025/009','Halkbank','11 / 18','20.08.2026','62.400,00','18.240,00','80.640,00','<span class="pill red">Gecikmiş</span>'],
+    ['KRD.2024/031','Vakıfbank','21 / 36','10.09.2026','14.820,00','5.180,00','20.000,00','<span class="pill ok">Ödendi</span>'],
+    ['LSN.2025/004','QNB Fin. Kiralama','15 / 36','20.09.2026','1.980,00','420,00','2.400,00','<span class="pill ok">Ödendi</span>']
+   ], tp:[4,5,6], ozet:'4 kredi · 1 gecikmiş taksit'},
+  {id:'cek_portfoy', ad:'Çek / Senet Portföy Dökümü', ic:'📜', alt:'CEKSENET · portföy durumu', pr:['banka','bas','bit','durum'],
+   kol:[['TÜR',70,'ctr'],['NO',140],['KEŞİDECİ',230],['VADE',100],['TUTAR',130,'amt'],['DURUM',120,'ctr']],
+   sat:[
+    ['ÇEK','GRT-0088471','Granit Bilgisayar Ltd.','15.10.2026','64.500,00','<span class="pill ok">Portföyde</span>'],
+    ['ÇEK','HLK-0033017','Kimpa Kimya A.Ş.','05.11.2026','120.000,00','<span class="pill ok">Portföyde</span>'],
+    ['SNT','SNT-2026/0117','Artline Aksesuar','30.09.2026','27.850,00','<span class="pill warn">Teminatta</span>'],
+    ['ÇEK','ZR-0044218','Demir İnşaat Ltd.','05.08.2026','38.750,00','<span class="pill red">Karşılıksız</span>']
+   ], tp:[4], ozet:'4 kıymet · portföy 184.500,00 TL'},
+  {id:'pos_mutabakat', ad:'POS Mutabakat Raporu', ic:'🖲', alt:'POSHAREKET · valör ve komisyon', pr:['banka','bas','bit'],
+   kol:[['BANKA / POS',200],['İŞLEM',90,'ctr'],['BRÜT',130,'amt'],['KOMİSYON',120,'amt'],['NET',130,'amt'],['VALÖR',100],['DURUM',110,'ctr']],
+   sat:[
+    ['Garanti BBVA · Fiziki','128','186.400,00','3.355,20','183.044,80','18.08.2026','<span class="pill warn">Bekliyor</span>'],
+    ['İş Bankası · Sanal','96','142.800,00','2.856,00','139.944,00','17.08.2026','<span class="pill warn">Bekliyor</span>'],
+    ['Yapı Kredi · Fiziki','54','84.100,00','1.070,57','83.029,43','16.08.2026','<span class="pill ok">Geçti</span>'],
+    ['Akbank · Fiziki','12','86.400,00','—','86.400,00','11.08.2026','<span class="pill red">Geçmedi</span>']
+   ], tp:[2,3,4], ozet:'4 POS · bekleyen 406.000,50 TL'}
+ ]}],
+
+cari:[{g:'Genel', r:[
+  {id:'cari_ekstre', ad:'Cari Ekstre', ic:'👥', alt:'CARIHAREKET · borç/alacak dökümü', pr:['cari','bas','bit','sube'],
+   kol:[['TARİH',100],['BELGE',150],['TÜR',110],['AÇIKLAMA',280],['BORÇ',120,'amt'],['ALACAK',120,'amt'],['BAKİYE',130,'amt']],
+   sat:[
+    ['02.08.2026','DEF2026000000008','Satış Fat.','40 adet notebook','1.076.190,48','0,00','1.076.190,48'],
+    ['08.08.2026','TAH-2026/0441','Tahsilat','Havale — İş Bankası','0,00','903.869,98','172.320,50'],
+    ['12.08.2026','DEF2026000000012','Satış Fat.','Kurulum + garanti','14.700,00','0,00','187.020,50'],
+    ['14.08.2026','CEK-0088471','Çek','GRT-0088471 alındı','0,00','64.500,00','122.520,50']
+   ], tp:[4,5], ozet:'GRANİT BİLGİSAYAR LTD. · bakiye 122.520,50 TL'},
+  {id:'cari_bakiye', ad:'Cari Bakiye Listesi', ic:'📋', alt:'Bakiye ve risk özeti', pr:['grup','temsil','sube'],
+   kol:[['KOD',120],['ÜNVAN',280],['SINIF',110,'ctr'],['BAKİYE',140,'amt'],['LİMİT',130,'amt'],['RİSK %',90,'ctr']],
+   sat:[
+    ['120.01.052','GRANİT BİLGİSAYAR LTD.','Alıcı','172.320,50','500.000,00','%34'],
+    ['120.01.052','BEETHOVEN GİYİM DIŞ TİC.','Alıcı','172.320,50','200.000,00','%86'],
+    ['320.02.044','MNG TEKNOLOJİ A.Ş.','Satıcı','-958.200,00','—','—'],
+    ['120.01.005','NAZORATİ MÜHENDİSLİK','Bayi','84.900,00','150.000,00','%57'],
+    ['320.01.109','ADMEN ENDÜSTRİYEL MAK.','Satıcı','-45.100,00','—','—']
+   ], tp:[3], ozet:'5 cari · 1 cari limit riskinde'}
+ ]}],
+
+stok:[{g:'Genel', r:[
+  {id:'stok_degerleme', ad:'Stok Değerleme', ic:'📦', alt:'STOKDURUM · maliyet bazlı değerleme', pr:['stok','depo','bit'],
+   kol:[['KOD',110],['STOK ADI',280],['DEPO',150],['MİKTAR',110,'amt'],['BİRİM',70,'ctr'],['B.MALİYET',120,'amt'],['DEĞER',140,'amt']],
+   sat:[
+    ['STK.10248','Perde kumaşı — jakarlı, 280 cm','Merkez Depo','78,00','MT','45,80','3.572,40'],
+    ['STK.10248','Perde kumaşı — jakarlı, 280 cm','Showroom','40,00','MT','45,80','1.832,00'],
+    ['STK.10520','Blackout kumaş — antrasit','Merkez Depo','1.240,00','MT','58,20','72.168,00'],
+    ['STK.10604','Stor perde mekanizması — 25 mm','Merkez Depo','612,00','AD','88,40','54.100,80'],
+    ['STK.20114','Yapıştırıcı — 5 kg','Merkez Depo','340,00','KG','18,75','6.375,00'],
+    ['STK.14-0088','Lenovo ThinkPad E14 G5','Merkez Depo','88,00','AD','21.400,00','1.883.200,00']
+   ], tp:[3,6], ozet:'6 satır · toplam değer 2.021.248,20 TL'},
+  {id:'kritik_seviye', ad:'Kritik Seviye Raporu', ic:'⚠', alt:'Kritik / stoksuz ürünler', pr:['depo','grup'],
+   kol:[['KOD',110],['STOK ADI',300],['KALAN',110,'amt'],['KRİTİK',110,'amt'],['MİN',110,'amt'],['ÖNERİ',120,'amt'],['DURUM',110,'ctr']],
+   sat:[
+    ['STK.10402','Korniş seti — alüminyum 3 m','0,00','25,00','25,00','50,00','<span class="pill red">Stok yok</span>'],
+    ['STK.10248','Perde kumaşı — jakarlı, 280 cm','118,00','250,00','200,00','400,00','<span class="pill warn">Kritik</span>'],
+    ['STK.10311','Tül perde — bambu desen','76,00','120,00','100,00','200,00','<span class="pill warn">Kritik</span>']
+   ], tp:[2], ozet:'3 ürün · 1 stoksuz'},
+  {id:'stok_hareket', ad:'Stok Hareket Dökümü', ic:'🔄', alt:'Giriş / çıkış / transfer hareketleri', pr:['stok','depo','bas','bit'],
+   kol:[['TARİH',100],['BELGE',150],['OLAY',110],['CARİ / DEPO',230],['GİREN',110,'amt'],['ÇIKAN',110,'amt'],['KALAN',110,'amt']],
+   sat:[
+    ['10.08.2026','A-2026/004417','Alış','ANADOLU KAĞIT VE AMB.','400,00','—','518,00'],
+    ['12.08.2026','DEF2026000000011','Satış','GRANİT BİLGİSAYAR LTD.','—','280,00','238,00'],
+    ['13.08.2026','TRF2026000000021','Transfer','Merkez → Showroom','40,00','40,00','238,00'],
+    ['14.08.2026','DEF2026000000012','Satış','META MEFRUŞAT A.Ş.','—','120,00','118,00']
+   ], tp:[4,5], ozet:'4 hareket · kalan 118,00 MT'}
+ ]}],
+
+alissatis:[{g:'Genel', r:[
+  {id:'satis_analizi', ad:'Satış Analizi', ic:'📈', alt:'FATBASLIK / FATDETAY · dönemsel satış', pr:['bas','bit','temsil','sube'],
+   kol:[['DÖNEM',120],['BELGE ADEDİ',110,'ctr'],['MATRAH',150,'amt'],['KDV',130,'amt'],['TOPLAM',150,'amt'],['ORT. SEPET',130,'amt']],
+   sat:[
+    ['2026 - MAYIS','182','1.204.800,00','240.960,00','1.445.760,00','7.943,74'],
+    ['2026 - HAZİRAN','214','1.386.400,00','277.280,00','1.663.680,00','7.774,21'],
+    ['2026 - TEMMUZ','198','1.298.200,00','259.640,00','1.557.840,00','7.868,89'],
+    ['2026 - AĞUSTOS','96','642.900,00','128.580,00','771.480,00','8.036,25']
+   ], tp:[2,3,4], ozet:'690 belge · toplam 5.438.760,00 TL'},
+  {id:'kdv_ozet', ad:'KDV Özeti', ic:'🧮', alt:'Oran bazında hesaplanan / indirilecek KDV', pr:['bas','bit','sube'],
+   kol:[['ORAN',80,'ctr'],['SATIŞ MATRAH',150,'amt'],['HESAPLANAN',140,'amt'],['ALIŞ MATRAH',150,'amt'],['İNDİRİLECEK',140,'amt'],['FARK',140,'amt']],
+   sat:[
+    ['%20','4.532.300,00','906.460,00','3.180.400,00','636.080,00','270.380,00'],
+    ['%10','284.600,00','28.460,00','196.200,00','19.620,00','8.840,00'],
+    ['%1','62.400,00','624,00','48.900,00','489,00','135,00'],
+    ['%0 (İstisna)','124.300,00','0,00','0,00','0,00','0,00']
+   ], tp:[1,2,3,4,5], ozet:'Ödenecek KDV: 279.355,00 TL'},
+  {id:'fatura_dokumu', ad:'Fatura Dökümü', ic:'🧾', alt:'Belge listesi (alış / satış)', pr:['cari','bas','bit','durum'],
+   kol:[['TARİH',100],['BELGE NO',170],['TÜR',110,'ctr'],['CARİ',260],['TUTAR',140,'amt'],['e-BELGE',110,'ctr']],
+   sat:[
+    ['12.08.2026','DEF2026000000012','Satış','META MEFRUŞAT A.Ş.','14.700,00','<span class="pill ok">Gönderildi</span>'],
+    ['12.08.2026','GNT2026000000056','Satış','GRANİT BİLGİSAYAR LTD.','1.260.000,00','<span class="pill ok">Gönderildi</span>'],
+    ['10.08.2026','A-2026/004417','Alış','ANADOLU KAĞIT VE AMB.','17.680,00','<span class="pill gray">—</span>'],
+    ['09.08.2026','DEF2026000000011','Satış','GRANİT BİLGİSAYAR LTD.','17.500,00','<span class="pill warn">Hazırlandı</span>']
+   ], tp:[4], ozet:'4 belge · 1.309.880,00 TL'}
+ ]}],
+
+teklif:[{g:'Genel', r:[
+  {id:'teklif_durum', ad:'Teklif Durum Raporu', ic:'📑', alt:'TEKLIF · durum ve geçerlilik', pr:['cari','temsil','bas','bit'],
+   kol:[['TEKLİF NO',140],['MÜŞTERİ',250],['TEMSİLCİ',150],['TARİH',100],['GEÇERLİLİK',110],['TUTAR',140,'amt'],['DURUM',110,'ctr']],
+   sat:[
+    ['TKF.2026/0231','Beyaz Yapı İnşaat','Selin Kara','01.08.2026','16.08.2026','742.800,00','<span class="pill warn">Süre doluyor</span>'],
+    ['TKF.2026/0244','Blue Bay Resort','Burak Şen','05.08.2026','05.09.2026','42.000,00','<span class="pill ok">Açık</span>'],
+    ['TKF.2026/0453','Granit Bilgisayar Ltd.','Mehmet Yıldız','12.08.2026','12.09.2026','1.050.000,00','<span class="pill ok">Onayda</span>'],
+    ['TKF.2026/0198','Grand Marin Otel','Ayşe Demir','20.07.2026','20.08.2026','1.850.000,00','<span class="pill warn">Pazarlık</span>']
+   ], tp:[5], ozet:'4 teklif · 3.684.800,00 TL'},
+  {id:'donusum', ad:'Teklif Dönüşüm Analizi', ic:'🎯', alt:'Teklif → sipariş / fatura dönüşümü', pr:['temsil','bas','bit'],
+   kol:[['TEMSİLCİ',180],['TEKLİF',90,'ctr'],['KAZANILAN',110,'ctr'],['KAYBEDİLEN',110,'ctr'],['DÖNÜŞÜM %',110,'ctr'],['CİRO',150,'amt']],
+   sat:[
+    ['Ayşe Demir','24','11','6','%46','2.184.600,00'],
+    ['Mehmet Yıldız','18','9','4','%50','1.640.200,00'],
+    ['Selin Kara','16','5','8','%31','842.400,00'],
+    ['Burak Şen','12','4','3','%33','486.900,00']
+   ], tp:[5], ozet:'70 teklif · ortalama dönüşüm %41'}
+ ]}],
+
+servis:[{g:'Genel', r:[
+  {id:'servis_dokum', ad:'Servis Fiş Dökümü', ic:'🔧', alt:'SERVIS · açık/kapalı fişler', pr:['cari','tekn','bas','bit','durum'],
+   kol:[['FİŞ NO',130],['MÜŞTERİ',230],['CİHAZ',200],['TEKNİSYEN',150],['AÇILIŞ',100],['TERMİN',100],['DURUM',110,'ctr']],
+   sat:[
+    ['SRV.2026/0448','Kimpa Kimya A.Ş.','Forklift · 8FG25','Serkan Öz','09.08.2026','14.08.2026','<span class="pill warn">Bugün</span>'],
+    ['SRV.2026/0451','Granit Bilgisayar Ltd.','Sunucu · HP DL380','Ahmet Kaya','11.08.2026','13.08.2026','<span class="pill red">Gecikmiş</span>'],
+    ['SRV.2026/0455','Meta Mefruşat A.Ş.','Klima · MSZ-AP71','Murat Aydın','12.08.2026','18.08.2026','<span class="pill ok">Açık</span>'],
+    ['SRV.2026/0441','Beyaz Yapı İnşaat','Jeneratör · APD 100 A','Serkan Öz','04.08.2026','08.08.2026','<span class="pill gray">Teslim</span>']
+   ], tp:[], ozet:'4 fiş · 1 gecikmiş'},
+  {id:'teknisyen_perf', ad:'Teknisyen Performansı', ic:'🛠', alt:'Kapanan fiş / süre / ciro', pr:['tekn','bas','bit'],
+   kol:[['TEKNİSYEN',180],['FİŞ',80,'ctr'],['ORT. SÜRE',110,'ctr'],['SLA UYUM',110,'ctr'],['PARÇA',130,'amt'],['İŞÇİLİK',130,'amt']],
+   sat:[
+    ['Serkan Öz','42','1,8 gün','%92','128.400,00','86.200,00'],
+    ['Ahmet Kaya','36','2,4 gün','%81','94.600,00','72.400,00'],
+    ['Murat Aydın','28','1,6 gün','%96','61.200,00','54.800,00']
+   ], tp:[4,5], ozet:'106 fiş · ortalama SLA uyumu %90'}
+ ]}],
+
+crm:[{g:'Genel', r:[
+  {id:'huni_raporu', ad:'Satış Hunisi Raporu', ic:'🎯', alt:'FIRSAT · aşama bazında huni', pr:['temsil','bas','bit'],
+   kol:[['AŞAMA',180],['FIRSAT',90,'ctr'],['TAHMİNİ',150,'amt'],['ORT. OLASILIK',120,'ctr'],['AĞIRLIKLI',150,'amt']],
+   sat:[
+    ['Yeni','3','3.150.000,00','%15','472.500,00'],
+    ['İlk Görüşme','2','2.580.000,00','%30','774.000,00'],
+    ['İhtiyaç Analizi','2','2.020.000,00','%45','909.000,00'],
+    ['Teklif','2','1.510.000,00','%65','981.500,00'],
+    ['Pazarlık','1','910.000,00','%80','728.000,00'],
+    ['Kazanıldı','1','780.000,00','%100','780.000,00']
+   ], tp:[1,2,4], ozet:'11 fırsat · ağırlıklı 5.081.500,00 TL'},
+  {id:'aktivite_dokum', ad:'Aktivite Dökümü', ic:'📞', alt:'FIRSATAKTIVITE / GOREVLER', pr:['temsil','bas','bit'],
+   kol:[['TARİH',110],['TÜR',110],['TEMSİLCİ',150],['MÜŞTERİ',230],['SONUÇ',280],['DURUM',100,'ctr']],
+   sat:[
+    ['12.08.2026 10:28','Teklif','Mehmet Yıldız','Granit Bilgisayar Ltd.','TKL.2026-0453 gönderildi','<span class="pill warn">Devam</span>'],
+    ['10.08.2026 14:00','Toplantı','Mehmet Yıldız','Granit Bilgisayar Ltd.','İhtiyaç analizi tamamlandı','<span class="pill ok">Bitti</span>'],
+    ['07.08.2026 11:25','Telefon','Mehmet Yıldız','Granit Bilgisayar Ltd.','İlk temas — 40 adet notebook','<span class="pill ok">Bitti</span>'],
+    ['05.08.2026 09:10','Kayıt','Ayşe Demir','Grand Marin Otel','Fuar temasından dönüş','<span class="pill ok">Bitti</span>']
+   ], tp:[], ozet:'4 aktivite · 1 devam eden'}
+ ]}],
+
+demirbas:[{g:'Genel', r:[
+  {id:'amortisman', ad:'Amortisman Tablosu', ic:'📉', alt:'DEMIRBASTAKIP · yıllık amortisman', pr:['grup','bas','bit'],
+   kol:[['DEMİRBAŞ NO',120],['DEMİRBAŞ',260],['ALIŞ',100],['ALIŞ BEDELİ',140,'amt'],['ORAN',80,'ctr'],['BİRİKMİŞ',140,'amt'],['NET DEĞER',140,'amt']],
+   sat:[
+    ['DMB.0342','Dizüstü Bilgisayar — Dell E5540','15.01.2025','42.000,00','%25','21.000,00','21.000,00'],
+    ['DMB.0118','Forklift — Toyota 8FG25','22.06.2022','685.000,00','%20','548.000,00','137.000,00'],
+    ['DMB.0203','Binek Araç — Ford Focus','10.03.2024','1.245.000,00','%20','622.500,00','622.500,00'],
+    ['DMB.0091','Jeneratör — Aksa APD 100 A','18.09.2023','425.000,00','%10','127.500,00','297.500,00']
+   ], tp:[3,5,6], ozet:'4 demirbaş · net defter değeri 1.078.000,00 TL'},
+  {id:'zimmet_dokum', ad:'Zimmet Dökümü', ic:'🧑‍💼', alt:'DEMIRBAS_TUTANAK · personel zimmetleri', pr:['dept','bit'],
+   kol:[['PERSONEL',180],['DEPARTMAN',160],['DEMİRBAŞ NO',120],['DEMİRBAŞ',260],['VERİLİŞ',100],['TUTANAK',140]],
+   sat:[
+    ['Elif Şahin','Bilgi İşlem','DMB.0342','Dizüstü Bilgisayar — Dell E5540','10.03.2026','TUT.2026-0088'],
+    ['Hasan Demir','Sevkiyat','DMB.0118','Forklift — Toyota 8FG25','22.06.2022','TUT.2022-0014'],
+    ['Murat Aydın','Saha Operasyon','DMB.0203','Binek Araç — Ford Focus','10.03.2024','TUT.2024-0102'],
+    ['Zeynep Korkmaz','Bilgi İşlem','DMB.0510','Çok Fonksiyonlu Yazıcı','02.11.2025','TUT.2025-0331']
+   ], tp:[], ozet:'4 zimmet · 3 departman'}
+ ]}],
+
+ik:[{g:'Genel', r:[
+  {id:'personel_liste', ad:'Personel Listesi', ic:'🧑‍💼', alt:'PERSONEL · kadro dökümü', pr:['dept','durum'],
+   kol:[['SİCİL',90],['AD SOYAD',200],['DEPARTMAN',170],['GÖREV',180],['GİRİŞ',100],['DURUM',110,'ctr']],
+   sat:[
+    ['P.0014','Ayşe Demir','Satış','Satış Müdürü','01.02.2019','<span class="pill ok">Çalışıyor</span>'],
+    ['P.0028','Mehmet Yıldız','Satış','Satış Temsilcisi','15.09.2021','<span class="pill ok">Çalışıyor</span>'],
+    ['P.0041','Serkan Öz','Teknik Servis','Teknisyen','03.03.2022','<span class="pill ok">Çalışıyor</span>'],
+    ['P.0052','Elif Şahin','Bilgi İşlem','Sistem Uzmanı','12.01.2024','<span class="pill ok">Çalışıyor</span>'],
+    ['P.0009','Ahmet Kaya','Saha Operasyon','Teknisyen','20.06.2018','<span class="pill gray">İzinde</span>']
+   ], tp:[], ozet:'5 personel · 1 izinde'},
+  {id:'puantaj', ad:'Puantaj Dökümü', ic:'🗓', alt:'Aylık çalışma / mesai / izin', pr:['dept','bas','bit'],
+   kol:[['AD SOYAD',200],['ÇALIŞILAN',110,'ctr'],['MESAİ (sa)',110,'ctr'],['İZİN',90,'ctr'],['RAPOR',90,'ctr'],['DEVAMSIZ',100,'ctr']],
+   sat:[
+    ['Ayşe Demir','22','6','0','0','0'],
+    ['Mehmet Yıldız','21','12','1','0','0'],
+    ['Serkan Öz','22','24','0','0','0'],
+    ['Ahmet Kaya','16','0','5','1','0']
+   ], tp:[], ozet:'Ağustos 2026 · 4 personel'}
+ ]}],
+
+uretim:[{g:'Genel', r:[
+  {id:'uretim_fis_dokum', ad:'Üretim Fiş Dökümü', ic:'🏭', alt:'URETIMFIS · sarf ve mamul girişi', pr:['mamul','depo','bas','bit'],
+   kol:[['FİŞ NO',140],['İŞ EMRİ',130],['MAMUL',250],['ÜRETİLEN',110,'amt'],['SARF TUTARI',140,'amt'],['FİRE',100,'amt'],['TARİH',100]],
+   sat:[
+    ['URT2026000112','IE-2026/0044','Stor perde — 180x200 blackout','120,00','86.400,00','2,4','12.08.2026'],
+    ['URT2026000113','IE-2026/0045','Tül perde — bambu desen','340,00','42.800,00','1,8','13.08.2026'],
+    ['URT2026000114','IE-2026/0046','Korniş seti — alüminyum 3 m','80,00','21.600,00','0,9','14.08.2026']
+   ], tp:[3,4], ozet:'3 fiş · toplam sarf 150.800,00 TL'},
+  {id:'recete_maliyet', ad:'Reçete Maliyet Analizi', ic:'⚗', alt:'URETIMRECETE · standart vs gerçekleşen', pr:['mamul','bas','bit'],
+   kol:[['MAMUL',260],['STANDART',140,'amt'],['GERÇEKLEŞEN',140,'amt'],['FARK',130,'amt'],['SAPMA %',100,'ctr']],
+   sat:[
+    ['Stor perde — 180x200 blackout','700,00','720,00','-20,00','%2,9'],
+    ['Tül perde — bambu desen','118,00','125,88','-7,88','%6,7'],
+    ['Korniş seti — alüminyum 3 m','282,00','270,00','12,00','%-4,3']
+   ], tp:[1,2,3], ozet:'3 mamul · 2 mamulde maliyet sapması'}
+ ]}],
+
+dokuman:[{g:'Genel', r:[
+  {id:'dokuman_dokum', ad:'Doküman Dökümü', ic:'🗂', alt:'DOKUMAN · klasör bazında evrak listesi', pr:['grup','bas','bit'],
+   kol:[['KLASÖR',180],['DOKÜMAN',280],['TÜR',100,'ctr'],['EKLEYEN',150],['TARİH',110],['BOYUT',100,'amt']],
+   sat:[
+    ['Sözleşmeler','Granit Bilgisayar — bayilik sözleşmesi','PDF','Ayşe Demir','12.08.2026','1,4 MB'],
+    ['Sözleşmeler','İş Bankası kredi sözleşmesi','PDF','Mehmet Yıldız','15.03.2025','2,8 MB'],
+    ['Teknik','Stor perde montaj kılavuzu','DOCX','Serkan Öz','04.07.2026','640 KB'],
+    ['Kalite','ISO 9001 denetim raporu','PDF','Elif Şahin','22.05.2026','3,1 MB']
+   ], tp:[], ozet:'4 doküman · 3 klasör'}
+ ]}],
+
+giris:[{g:'Genel', r:[
+  {id:'gunluk_ozet', ad:'Günlük Özet Raporu', ic:'📊', alt:'Tüm modüllerin gün sonu özeti', pr:['bas','sube'],
+   kol:[['MODÜL',170],['GÖSTERGE',280],['DEĞER',150,'amt'],['DURUM',110,'ctr']],
+   sat:[
+    ['Satış','Günlük ciro','402.105,50','<span class="pill ok">▲ %12,4</span>'],
+    ['Kasa','Kasa + banka toplamı','431.318,25','<span class="pill ok">Normal</span>'],
+    ['Çek/Senet','Portföydeki kıymet','184.500,00','<span class="pill warn">2 karşılıksız</span>'],
+    ['Kredi','Kalan kredi borcu','26.062.270,96','<span class="pill red">3 gecikmiş</span>'],
+    ['Stok','Kritik / stoksuz ürün','3','<span class="pill warn">İncele</span>'],
+    ['Servis','Gecikmiş servis fişi','1','<span class="pill red">Aksiyon</span>']
+   ], tp:[], ozet:'14.08.2026 · gün sonu özeti'}
+ ]}]
+};
+
+/* modul yoksa genel katalog */
+function modulAl(){
+  var h=location.hash||'';
+  var m=h.match(/mod=([a-z]+)/i);
+  var id=m?m[1]:'kasa';
+  return KATALOG[id]?id:'kasa';
+}
+
+var aktifModul=modulAl(), aktifRapor=null, kip='genel';
+
+function el(t,c,h){var d=document.createElement(t);if(c)d.className=c;if(h!=null)d.innerHTML=h;return d;}
+function tumRaporlar(){
+  var l=[]; (KATALOG[aktifModul]||[]).forEach(function(g){ g.r.forEach(function(r){ l.push(r); }); }); return l;
+}
+
+/* ---------------- AGAC ---------------- */
+function kurAgac(filtre){
+  var kap=document.getElementById('agacGovde'); kap.innerHTML='';
+  var f=(filtre||'').toLocaleLowerCase('tr');
+  var gruplar=KATALOG[aktifModul]||[];
+  if(kip==='ozel'){
+    kap.appendChild(el('div','agacalt','<b>Özel dökümler</b> — kullanıcının FastReport ile tasarladığı '+
+      '.fr3 şablonları burada listelenir. Bu mockupta örnek olarak boş bırakıldı.'));
+    return;
+  }
+  gruplar.forEach(function(g,gi){
+    var list=g.r.filter(function(r){ return !f || (r.ad+' '+(r.alt||'')).toLocaleLowerCase('tr').indexOf(f)>=0; });
+    if(!list.length) return;
+    var kapali = f ? false : (gi>0);
+    var grp=el('div','grp'+(kapali?' kapali':''));
+    var h=el('div','grph','<span class="pm">'+(kapali?'+':'−')+'</span> '+g.g);
+    h.addEventListener('click',function(){
+      grp.classList.toggle('kapali');
+      h.querySelector('.pm').textContent=grp.classList.contains('kapali')?'+':'−';
+    });
+    grp.appendChild(h);
+    var b=el('div','grpb');
+    list.forEach(function(r){
+      var it=el('div','rp'+(aktifRapor&&r.id===aktifRapor.id?' on':''),r.ad);
+      it.title=r.ad;
+      it.addEventListener('click',function(){ raporSec(r.id); });
+      b.appendChild(it);
+    });
+    grp.appendChild(b); kap.appendChild(grp);
+  });
+}
+document.getElementById('rq').addEventListener('input',function(){ kurAgac(this.value); });
+document.querySelectorAll('.agacust .b').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.agacust .b').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on'); kip=b.dataset.kip; kurAgac(document.getElementById('rq').value);
+  });
+});
+
+/* ---------------- RAPOR SEC ---------------- */
+function raporSec(id){
+  var r=null; tumRaporlar().forEach(function(x){ if(x.id===id) r=x; });
+  if(!r) return;
+  aktifRapor=r;
+  document.getElementById('rIc').textContent=r.ic||'📄';
+  document.getElementById('rAd').textContent=r.ad;
+  document.getElementById('rAlt').textContent=r.alt||'';
+  document.getElementById('fAd').textContent=r.ad;
+  document.getElementById('titleYol').textContent='DokumFrame\\UDokumListeFrame · GENDOKUM · '+r.ad+' · 14.08.2026';
+
+  /* parametreler */
+  var pk=document.getElementById('parmAlan'); pk.innerHTML='';
+  (r.pr||['bas','bit']).forEach(function(k){
+    var s=P[k]; if(!s) return;
+    var row=el('div','prow');
+    row.appendChild(el('label',null,s.l));
+    row.appendChild(el('div','op',s.op||''));
+    var sinif='inp'+(s.t==='combo'?' combo':s.t==='tar'?' tar':s.t==='uc'?' uc':'');
+    row.appendChild(el('div',sinif,s.v||''));
+    pk.appendChild(row);
+  });
+
+  /* grid */
+  var th=el('tr');
+  r.kol.forEach(function(k){
+    var t=el('th',k[2]==='amt'?'amt':k[2]==='ctr'?'ctr':null,k[0]);
+    if(k[1]) t.style.width=k[1]+'px';
+    th.appendChild(t);
+  });
+  var gh=document.getElementById('gHead'); gh.innerHTML=''; gh.appendChild(th);
+
+  var gb=document.getElementById('gBody'); gb.innerHTML='';
+  r.sat.forEach(function(s,i){
+    var tr=el('tr',i===0?'sel':null);
+    s.forEach(function(v,j){
+      var k=r.kol[j]||[];
+      var td=el('td',(k[2]==='amt'?'amt':k[2]==='ctr'?'ctr':(j===0?'kod':null)),v);
+      if(k[2]==='amt' && /^-/.test(String(v))) td.style.color='#b23b3b';
+      tr.appendChild(td);
+    });
+    gb.appendChild(tr);
+  });
+
+  /* toplam satiri */
+  var gf=document.getElementById('gFoot'); gf.innerHTML='';
+  if(r.tp && r.tp.length){
+    var ft=el('tr');
+    r.kol.forEach(function(k,j){
+      if(j===0){ ft.appendChild(el('td',null,'TOPLAM ('+r.sat.length+' satır)')); return; }
+      if(r.tp.indexOf(j)>=0){
+        var t=0, ok=true;
+        r.sat.forEach(function(s){
+          var n=String(s[j]||'').replace(/[^\d,\-]/g,'').replace(/\./g,'').replace(',','.');
+          var f=parseFloat(n); if(isNaN(f)) ok=false; else t+=f;
+        });
+        ft.appendChild(el('td','amt', ok? t.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—'));
+      }else ft.appendChild(el('td',k[2]==='amt'?'amt':k[2]==='ctr'?'ctr':null,''));
+    });
+    gf.appendChild(ft);
+  }
+
+  document.getElementById('sayac').textContent=r.sat.length;
+  document.getElementById('fOzet').textContent=r.ozet||'';
+  kurAgac(document.getElementById('rq').value);
+
+  /* ust kabuga bildir (gentegre.html basligi guncellesin) */
+  try{ if(parent&&parent!==window) parent.postMessage({gentegre:'dokum', ad:r.ad},'*'); }catch(e){}
+}
+
+/* ---------------- BASLANGIC ---------------- */
+(function(){
+  var ilk=tumRaporlar()[0];
+  if(ilk) raporSec(ilk.id); else kurAgac('');
+  addEventListener('hashchange',function(){
+    var m=modulAl();
+    if(m!==aktifModul){ aktifModul=m; aktifRapor=null; var f=tumRaporlar()[0]; if(f) raporSec(f.id); }
+  });
+})();
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:100vh!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+if(window.parent&&window.parent!==window){
+  function hazir(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+  hazir(); addEventListener("load",hazir);
+}
+})();</script>
+</body>
+</html>

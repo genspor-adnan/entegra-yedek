@@ -1,4 +1,4 @@
-﻿unit URehAraDlg;
+﻿unit  URehAraDlg;
 
 interface
 
@@ -435,18 +435,26 @@ type
     GridCariBelge: TcxGrid;
     GridCariBelgeView: TcxGridDBTableView;
     GridCariBelgeLevel1: TcxGridLevel;
+    // Kolon SIRASI ve ADEDI Dosya\SatisSiparis.xlsx ile birebir (18 kolon).
     GridCariBelgeViewTARIH: TcxGridDBColumn;
+    GridCariBelgeViewDURUM: TcxGridDBColumn;
     GridCariBelgeViewBELGENO: TcxGridDBColumn;
-    GridCariBelgeViewSERI: TcxGridDBColumn;
-    GridCariBelgeViewACIKLAMA: TcxGridDBColumn;
+    GridCariBelgeViewSATICIADI: TcxGridDBColumn;
+    GridCariBelgeViewSANAL: TcxGridDBColumn;
+    GridCariBelgeViewOZELKOD: TcxGridDBColumn;
+    GridCariBelgeViewKAYNAK: TcxGridDBColumn;
+    GridCariBelgeViewHEDEF: TcxGridDBColumn;
+    GridCariBelgeViewDEPO: TcxGridDBColumn;
     GridCariBelgeViewMATRAH: TcxGridDBColumn;
     GridCariBelgeViewKDV: TcxGridDBColumn;
     GridCariBelgeViewTUTAR: TcxGridDBColumn;
     GridCariBelgeViewKUR: TcxGridDBColumn;
-    GridCariBelgeViewVADE: TcxGridDBColumn;
-    GridCariBelgeViewKAYNAK: TcxGridDBColumn;
-    GridCariBelgeViewHEDEF: TcxGridDBColumn;
-    GridCariBelgeViewDEPO: TcxGridDBColumn;
+    GridCariBelgeViewDOVIZMATRAH: TcxGridDBColumn;
+    GridCariBelgeViewDOVIZKDV: TcxGridDBColumn;
+    GridCariBelgeViewDOVIZTUTAR: TcxGridDBColumn;
+    GridCariBelgeViewDOVIZCINSI: TcxGridDBColumn;
+    GridCariBelgeViewDOVIZKUR: TcxGridDBColumn;
+    GridCariBelgeViewACIKLAMA: TcxGridDBColumn;
     TabCariBelge: TFDQuery;
     DtsCariBelge: TDataSource;
     TabSheetGorev: TcxTabSheet;
@@ -771,6 +779,9 @@ type
     procedure AlisSatisAltSekmeYenile;
     procedure GridCariBelgeViewCanFocusRecord(Sender: TcxCustomGridTableView;
       ARecord: TcxCustomGridRecord; var AAllow: Boolean);
+    procedure GridCariBelgeViewCellDblClick(Sender: TcxCustomGridTableView;
+      ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+      AShift: TShiftState; var AHandled: Boolean);
     function AlisSatisGridAyarAdi: string;
     procedure IlgiliEkleTusClick(Sender: TObject);
     procedure IlgiliSilTusClick(Sender: TObject);
@@ -959,6 +970,9 @@ type
     FCariSonMod: SmallInt;   // son Liste_SP_Cagir modu (sayfa buyutme requery'si ayni modla)
     { IBilgiFrame ?yeleri            }
     FFrameBilgi : TIcerikFrameBilgi;
+    function SeciliCariSistemKaydiMi: Boolean;
+    function NormalCariAksiyonAktif: Boolean;
+    function NormalCariAksiyonGerekli: Boolean;
     procedure KurumXSLTSec(ABolum, ARaporID: Integer; AEdit: TcxButtonEdit; AButtonIndex: Integer);
     procedure KurumXSLTYukle;
     procedure GorunurOlacak;
@@ -1052,6 +1066,30 @@ begin
   end
    else
     buttonSocialMedya.Visible := False;
+end;
+
+function TRehberAraDlg.SeciliCariSistemKaydiMi: Boolean;
+begin
+  Result := False;
+  if (not REHBER.Active) or REHBER.IsEmpty then
+    Exit;
+  Result := REHBER.FieldByName('ID').AsInteger < 0;
+end;
+
+function TRehberAraDlg.NormalCariAksiyonAktif: Boolean;
+begin
+  Result := False;
+  if (not REHBER.Active) or REHBER.IsEmpty then
+    Exit;
+  Result := (REHBER.FieldByName('ID').AsInteger > 0) and
+    (REHBER.FieldByName('DURUM').AsInteger > 0);
+end;
+
+function TRehberAraDlg.NormalCariAksiyonGerekli: Boolean;
+begin
+  Result := NormalCariAksiyonAktif;
+  if not Result then
+    ShowMessage('Sistem cari kayitlarina belge, tahsilat/odeme veya aksiyon girilemez. Banka bilgisi Ticari sekmesinden girilebilir.');
 end;
 
 function TRehberAraDlg.EkranAdiAl: string;
@@ -1229,6 +1267,10 @@ end;
 
 procedure TRehberAraDlg.SilTusClick(Sender: TObject);
 begin
+  if SeciliCariSistemKaydiMi then begin
+    ShowMessage('Sistem cari kaydi silinemez.');
+    Exit;
+  end;
   if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
      // SILME logu artik BURADA YAZILMIYOR: Tablo.CariSil kart + tum detaylari SILMEDEN
      //   ONCE ve TABLODAN logluyor (LogKayitSil('REHBER',...)). Buradaki eski
@@ -1353,19 +1395,22 @@ begin
 end;
 
 procedure TRehberAraDlg.REHBERAfterOpen(DataSet: TDataSet);
+var
+  LNormalCari: Boolean;
 begin
    rehberdetayaktif:=True;
+   LNormalCari := (not REHBER.IsEmpty) and (REHBER.FieldByName('ID').AsInteger > 0);
    DegisTus.Visible :=  (not REHBER.IsEmpty) and (Tablo.YetkiVarmi(2201,YetkiTur_Degistirme));
-   SilTus.Visible :=  (DegisTus.Visible) and (Tablo.YetkiVarmi(2201,YetkiTur_Silme));
+   SilTus.Visible :=  LNormalCari and (DegisTus.Visible) and (Tablo.YetkiVarmi(2201,YetkiTur_Silme));
 
 
    if BtnCRM.Tag<>99 then
-      BtnCRM.Visible := DegisTus.Visible;
+      BtnCRM.Visible := LNormalCari and DegisTus.Visible;
    if AksiyonEkleTus.Tag<>99 then
-      AksiyonEkleTus.Visible := DegisTus.Visible;
-   SilMenu.Visible:=DegisTus.Visible;
-   GorMenu.Visible := DegisTus.Visible;
-   N18.Visible := DegisTus.Visible;
+      AksiyonEkleTus.Visible := LNormalCari and DegisTus.Visible;
+   SilMenu.Visible:= LNormalCari and DegisTus.Visible;
+   GorMenu.Visible := LNormalCari and DegisTus.Visible;
+   N18.Visible := LNormalCari and DegisTus.Visible;
    //ExcelKolonAyarlar1.Visible := DegisTus.Visible;
    N19.Visible := DegisTus.Visible;
    PageControlSekme.Visible := not REHBER.IsEmpty;
@@ -1415,6 +1460,7 @@ end;
 
 procedure TRehberAraDlg.TeklifEkleClick(Sender: TObject);
 begin
+   if not NormalCariAksiyonGerekli then Exit;
    if Tablo.TeklifSihirbazBaslat('E',80,0,-1,REHBER.Fields[0].AsInteger,-1) > 0 then
      PageControlSekmeChange(Self);
 end;
@@ -2847,6 +2893,7 @@ var Tur, Tipi, ID : Integer;
     HesapTuru : Char;
     DateSaat:TDateTime;
 begin
+  if not NormalCariAksiyonGerekli then Exit;
 
   Tur := TMenuItem(Sender).Tag;
   //Uyar? kontrol?
@@ -2933,6 +2980,7 @@ end;
 
 procedure TRehberAraDlg.FirsatEkleTusClick(Sender: TObject);
 begin
+   if not NormalCariAksiyonGerekli then Exit;
    if Tablo.FirsatSihirbazBaslat('E',-1,REHBER.Fields[0].AsInteger, Tablo.GENINI.BugunTrh) > 0 then
       PageControlSekmeChange(Self);
 end;
@@ -2947,6 +2995,7 @@ end;
 
 procedure TRehberAraDlg.AcilisiFisiMenuClick(Sender: TObject);
 begin
+   if not NormalCariAksiyonGerekli then Exit;
    if Tablo.AcilisiFisiEkraniBaslat(1,TMenuItem(Sender).Tag, REHBER.FieldByname('ID').AsString,REHBER.FieldByname('KOD').AsString,REHBER.FieldByname('FIRMA').AsString,'', 0,Tablo.GENINI.BugunTrhSaat) then
       PageControlSekmeChange(Self);
 end;
@@ -3221,6 +3270,7 @@ var
     GorevId : Integer;
     GorevDlg1:TGorevDlg;
 begin
+     if not NormalCariAksiyonGerekli then Exit;
      GorevId := Tablo.GorevOlustur('', Masaustu,0, 0, 0, REHBER.Fields[0].AsInteger, 0, 0, 0,
                                    0, 0, Tablo.GENINI.BugunTrhSaat,Tablo.GENINI.BugunTrhSaat);
 
@@ -3411,7 +3461,7 @@ begin
   //
 //  TabSheetEkstre.TabVisible := Tablo.YetkiVarmi(220150000+REHBER.FieldByName('GRUP').AsInteger,YetkiTur_Gorme,False) ;
 //  AksiyonEkleTus.Visible := TabSheetEkstre.TabVisible;
-  AksiyonEkleTus.Enabled := REHBER.FieldByName('DURUM').AsInteger>0;
+  AksiyonEkleTus.Enabled := NormalCariAksiyonAktif;
 //  if rehberdetayaktif then
   if REHBER.Active then
      PageControlSekmeChange(Self);
@@ -3804,6 +3854,7 @@ end;
 
 procedure TRehberAraDlg.KurFarkGeliri1Click(Sender: TObject);
 begin
+   if not NormalCariAksiyonGerekli then Exit;
    Tablo.NakitSihirbazBaslat('-','E', TMenuItem(Sender).Tag,4, -1,REHBER.Fields[0].AsInteger , Tablo.GENINI.BugunTrhSaat, '-1',False,0);
    PageControlSekmeChange(Self);
 end;
@@ -3859,6 +3910,7 @@ end;
 procedure TRehberAraDlg.MutabakatKaydiEkleMenuClick(Sender: TObject);
 begin
 //
+  if not NormalCariAksiyonGerekli then Exit;
   if Tablo.AcilisiFisiEkraniBaslat(1,TMenuItem(Sender).Tag, REHBER.FieldByname('ID').AsString,REHBER.FieldByname('KOD').AsString,REHBER.FieldByname('FIRMA').AsString,'', 0,Tablo.GENINI.BugunTrhSaat) then
      PageControlSekmeChange(Self);
 end;
@@ -3939,6 +3991,7 @@ end;
 
 procedure TRehberAraDlg.OdemeTahsilatYapMenuClick(Sender: TObject);
 begin
+   if not NormalCariAksiyonGerekli then Exit;
    if Tablo.TahsilatIslemi(TabCariListe.FieldByName('TUR').AsInteger,REHBER.FieldByname('ID').AsInteger,TabCariListe.FieldByName('MASRAFID').AsInteger,
       Abs(TabCariListe.FieldByName('BORC').AsCurrency-TabCariListe.FieldByName('ALACAK').AsCurrency),
               TabCariListe.FieldByName('KUR').AsString,TabCariListe.FieldByName('ACIKLAMA').AsString, Tablo.GENINI.BugunTrhSaat) then
@@ -4252,6 +4305,27 @@ begin
   AlisSatisAltSekmeYenile;
 end;
 
+procedure TRehberAraDlg.GridCariBelgeViewCellDblClick(Sender: TcxCustomGridTableView;
+  ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+  AShift: TShiftState; var AHandled: Boolean);
+// Alis/Satis alt sekmesindeki belge gridinde CIFT TIK -> ilgili belge kartini acar.
+//   Tur kolonu SP'den geliyor (siparis 9/19/101, irsaliye/fatura/konsinye 10/11/14/15/109/119);
+//   dogru sihirbaz secimi tek merkezde: AnaForm.GormeDialogCagir.
+begin
+  if AButton <> mbLeft then Exit;
+  if (TabCariBelge = nil) or (not TabCariBelge.Active) or TabCariBelge.IsEmpty then Exit;
+  if TabCariBelge.FieldByName('ID').AsInteger <= 0 then Exit;
+  AHandled := True;   // grid kendi duzenleme/genisletme davranisina girmesin
+  AnaForm.GormeDialogCagir(
+    TabCariBelge.FieldByName('ID').AsInteger,
+    TabCariBelge.FieldByName('TUR').AsInteger,
+    REHBER.FieldByName('ID').AsInteger,
+    0,
+    TabCariBelge.FieldByName('FATURATARIH').AsDateTime,
+    TabCariBelge.FieldByName('FATURANO').AsString);
+  AlisSatisAltSekmeYenile;   // kart kapaninca liste tazelensin (tutar/durum degismis olabilir)
+end;
+
 procedure TRehberAraDlg.PageControlSekmeChange(Sender: TObject);
 var AcKapa:String[1];
     GunSay : Smallint;
@@ -4335,8 +4409,16 @@ begin
 end;
 
 procedure TRehberAraDlg.PopupMenuREHBERPopup(Sender: TObject);
+var
+  LNormalCari: Boolean;
+  LGrup: Integer;
 begin
-  BorcAlacakKapamaMenu.Enabled :=(REHBER.Active)and(not REHBER.IsEmpty)and(REHBER.FieldByName('GRUP').AsInteger<>1) ;
+  LNormalCari := NormalCariAksiyonAktif;
+  LGrup := 0;
+  if REHBER.Active then
+    if not REHBER.IsEmpty then
+      LGrup := REHBER.FieldByName('GRUP').AsInteger;
+  BorcAlacakKapamaMenu.Enabled := LNormalCari and (LGrup<>1) ;
   GorMenu.Enabled := BorcAlacakKapamaMenu.Enabled;
   AcilisiFisiMenu.Enabled := BorcAlacakKapamaMenu.Enabled;
   DevirFisiMenu.Enabled := BorcAlacakKapamaMenu.Enabled;
@@ -4346,8 +4428,16 @@ begin
 end;
 
 procedure TRehberAraDlg.PopupMenuYeniPopup(Sender: TObject);
+var
+  LNormalCari: Boolean;
+  LGrup: Integer;
 begin
-   AlisBelgesiMenu.visible := REHBER.FieldByName('GRUP').AsInteger<>1;
+   LNormalCari := NormalCariAksiyonAktif;
+   LGrup := 0;
+   if REHBER.Active then
+     if not REHBER.IsEmpty then
+       LGrup := REHBER.FieldByName('GRUP').AsInteger;
+   AlisBelgesiMenu.visible := LNormalCari and (LGrup<>1);
    SatisBelgesiMenu.visible := AlisBelgesiMenu.visible;
    AcilisFisiGirMenu.visible := AlisBelgesiMenu.visible;
    CariOdemeMenu.visible := AlisBelgesiMenu.visible;
@@ -4357,7 +4447,7 @@ begin
    MasrafOdemeMenu.visible := AlisBelgesiMenu.visible;
    GelirTahsilatMenu.visible := AlisBelgesiMenu.visible;
    PotansiyelListesineGonderMenu.visible := AlisBelgesiMenu.visible;
-   MusteriListesineEkleMenu.visible := not AlisBelgesiMenu.visible;
+   MusteriListesineEkleMenu.visible := LNormalCari and (not AlisBelgesiMenu.visible);
 
    if AlisBelgesiMenu.visible then begin
        AlisBelgesiMenu.Enabled := REHBER.FieldByName('DURUM').AsInteger in [1,2];
@@ -4419,6 +4509,7 @@ end;
 
 procedure TRehberAraDlg.ProjeEkleTusClick(Sender: TObject);
 begin
+  if not NormalCariAksiyonGerekli then Exit;
   if PageControlSekme.ActivePage=TabSheetFirsat then begin
    if Tablo.FirsatSihirbazBaslat('E',-1,
             REHBER.Fields[0].AsInteger, Tablo.GENINI.BugunTrh) > 0 then
@@ -4461,12 +4552,4 @@ end.
 	--LOKASYON = (select top 1 BILGI from REHBERBILGI RB inner join  REHBERAYAR RA on RB.ETIKET=RA.ETIKET and RB.YERI=RA.YERI
 -- and RB.SIRA=RA.SIRA and RA.VARSAYILAN=88 and RB.YER_ID=RP.ID ),
 }
-
-
-
-
-
-
-
-
 

@@ -1,4 +1,4 @@
-﻿unit UDemirbasGorevFrame;
+unit UDemirbasGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -8,16 +8,16 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus,
-  cxLookAndFeelPainters, cxButtons, JvExControls, JvButton, JvNavigationPane,
+  cxLookAndFeelPainters, cxButtons,
   ImgList, PngImageList, Vcl.ExtCtrls;           {Symbols}
 
 type
   TDemirbasGorevFrame = class(TFrame)
-    btnHesapKarti: TJvNavPanelButton;
+    btnHesapKarti: TcxButton;
     PngImageList1: TPngImageList;
     PanelDokumler: TPanel;
-    JvNavPanelButton2: TJvNavPanelButton;
-    btnDokumler: TJvNavPanelButton;
+    JvNavPanelButton2: TcxButton;
+    btnDokumler: TcxButton;
     procedure btnHesapKartiClick(Sender: TObject);
     procedure btnUpAndDown(Sender: TObject);
     procedure btnDokumlerMouseDown(Sender: TObject; Button: TMouseButton;
@@ -49,8 +49,8 @@ begin
    if Button = mbRight then
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=0
    else
-      TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TJVNavPanelButton(Sender).Tag;
-  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TJVNavPanelButton(Sender).Tag;
+      TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TcxButton(Sender).Tag;
+  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TcxButton(Sender).Tag;
   TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'D';
   btnUpAndDown(Sender);
 end;
@@ -65,11 +65,10 @@ end;
 
 procedure TDemirbasGorevFrame.btnUpAndDown(Sender: TObject);
 begin
-  btnHesapKarti.Down := False;
-  btnDokumler.Down := False;
-  JvNavPanelButton2.Down := False;
-  if (Sender<>nil)and(Sender.ClassName = 'TJvNavPanelButton') then
-    (Sender as TJvNavPanelButton).Down := True;
+  // Tek buton aktif: frame'deki TUM TcxButton'lar tek elden yonetilir.
+  // (Eskiden sabit bir buton listesi sifirlaniyordu; listede olmayan butonlar
+  //  basili kaldigi icin ayni anda birden fazla buton aktif gorunuyordu.)
+  GorevTusuSec(Self, Sender);
 end;
 
 procedure TDemirbasGorevFrame.FrameAktifOlacak(Sender: TObject);
@@ -92,7 +91,7 @@ end;
 procedure TDemirbasGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
   btnHesapKarti.Visible := Tablo.YetkiVarmi(2801,YetkiTur_Gorme);
   PanelDokumler.Visible := Tablo.YetkiVarmi(2899,YetkiTur_Gorme);
   Value.AnaFrameYoneticisi.OnFrameAktifOlacak.Add(FrameAktifOlacak);
@@ -102,3 +101,5 @@ end;
 initialization
   RegisterClass(TDemirbasGorevFrame);
 end.
+
+

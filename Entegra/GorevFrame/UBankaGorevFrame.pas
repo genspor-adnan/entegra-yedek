@@ -1,4 +1,4 @@
-ï»¿unit UBankaGorevFrame;
+unit UBankaGorevFrame;
  
 { Bu kod Sablon Duzenleyici tarafindan uretildi }
 { Tarih : 25/01/2010 11:04:25}
@@ -8,23 +8,23 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus,
-  cxLookAndFeelPainters, cxButtons, JvExControls, JvButton, JvNavigationPane,
-  CategoryButtons, ExtCtrls, ImgList, PngImageList;
+  cxLookAndFeelPainters, cxButtons,
+  CategoryButtons, ExtCtrls, ImgList, PngImageList, cxGraphics, cxLookAndFeels;
 
 type
   TBankaGorevFrame = class(TFrame)
-    btnBankaTanimlari: TJvNavPanelButton;
-    btnBankaKredileri: TJvNavPanelButton;
-    BtnKrediler: TJvNavPanelButton;
+    btnBankaTanimlari: TcxButton;
+    btnBankaKredileri: TcxButton;
+    BtnKrediler: TcxButton;
     PanelCek: TPanel;
-    btnVerilenCek: TJvNavPanelButton;
-    btnAlinanCek: TJvNavPanelButton;
+    btnVerilenCek: TcxButton;
+    btnAlinanCek: TcxButton;
     PanelSenet: TPanel;
-    btnVerilenSenet: TJvNavPanelButton;
-    btnAlinanSenet: TJvNavPanelButton;
+    btnVerilenSenet: TcxButton;
+    btnAlinanSenet: TcxButton;
     Panel3: TPanel;
-    JvNavPanelButton2: TJvNavPanelButton;
-    btnDokumler: TJvNavPanelButton;
+    JvNavPanelButton2: TcxButton;
+    btnDokumler: TcxButton;
     procedure btnBankaTanimlariClick(Sender: TObject);
     procedure btnBankaKredileriClick(Sender: TObject);
     procedure BtnKredilerClick(Sender: TObject);
@@ -55,8 +55,8 @@ uses UBankaKredileriListeFrame, UTeminatMektuplariListeFrame,UPOSListeFrame, UKr
 
 procedure TBankaGorevFrame.btnBankaKredileriClick(Sender: TObject);
 begin
-  // Navigasyon (bos 'with .Ornek' gÃ¶vdesi yerine): sekme yoksa IcerikGit nil-guard ile no-op, AV yok.
-  FFrameBilgi.IcerikGit('Banka Kredileri TanÄ±mlama');
+  // Navigasyon (bos 'with .Ornek' gövdesi yerine): sekme yoksa IcerikGit nil-guard ile no-op, AV yok.
+  FFrameBilgi.IcerikGit('Banka Kredileri Tanýmlama');
   btnUpAndDown(Sender);
 end;
 
@@ -76,30 +76,22 @@ begin
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=0
    else
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;
-  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TJVNavPanelButton(Sender).Tag;
+  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TcxButton(Sender).Tag;
   TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'B';
   btnUpAndDown(Sender);
 end;
 
 procedure TBankaGorevFrame.btnUpAndDown(Sender: TObject);
 begin
-  btnBankaTanimlari.Down := False;
-  //BtnTalimatlar.Down := False;
-  BtnKrediler.Down := False;
-  btnAlinanCek.Down := False;
-  btnVerilenCek.Down := False;
-  btnAlinanSenet.Down := False;
-  btnVerilenSenet.Down := False;
-  btnBankaKredileri.Down := False;
-  btnDokumler.Down := False;
-  JvNavPanelButton2.Down := False;
-  if Sender.ClassName = 'TJvNavPanelButton' then
-    (Sender as TJvNavPanelButton).Down := True;
+  // Tek buton aktif: frame'deki TUM TcxButton'lar tek elden yonetilir.
+  // (Eskiden sabit bir buton listesi sifirlaniyordu; listede olmayan butonlar
+  //  basili kaldigi icin ayni anda birden fazla buton aktif gorunuyordu.)
+  GorevTusuSec(Self, Sender);
 end;
 
 procedure TBankaGorevFrame.BtnKredilerClick(Sender: TObject);
 begin
-  {BurasÄ± Talimat Ã‡aÄŸÄ±rma bÃ¶lÃ¼mÃ¼ idi
+  {Burasý Talimat Çaðýrma bölümü idi
 
   with FFrameBilgi.IcerikGit(TTalimatlarListeFrame).Ornek as TTalimatlarListeFrame do begin
   end;
@@ -119,16 +111,16 @@ begin
        CekTur := 140;
     //SQLEk := ' and C.TUR='+inttoStr(TComponent(Sender).Tag)+' ';
     if POS('Cek', TComponent(Sender).Name)>0 then
-       CekTurAd:='Ã‡ek'
+       CekTurAd:='Çek'
     else
        CekTurAd:='Senet';
 
-    Arama.SheetAlinanCekler.Caption := 'AlÄ±nan '+CekTurAd+'ler';
+    Arama.SheetAlinanCekler.Caption := 'Alýnan '+CekTurAd+'ler';
     Arama.SheetVerilenCekler.Caption := 'Verilen '+CekTurAd+'ler';
-    SheetHesapListe.Caption := CekTurAd+' HesaplarÄ±';
+    SheetHesapListe.Caption := CekTurAd+' Hesaplarý';
 
     case CekTur of
-     130 : begin  //alÄ±nan Ã§ek / senet
+     130 : begin  //alýnan çek / senet
        GridTviewDURUM.RepositoryItem := Tablo.RepCekDurum_Alinan;
        TabloNo := TabNo_CEKLER_Alinan;
        Arama.SheetAlinanCekler.Visible := True;
@@ -138,7 +130,7 @@ begin
        Arama.SheetVerilenCekler.Visible := False;
        Arama.SheetVerilenCekler.TabVisible := False;
     end;
-    140 : begin //verilen Ã§ek / senet
+    140 : begin //verilen çek / senet
       GridTviewDURUM.RepositoryItem := Tablo.RepCekDurum_Verilen;
       TabloNo := TabNo_CEKLER_Verilen;
       Arama.SheetVerilenCekler.Visible := True;
@@ -158,7 +150,7 @@ end;
 procedure TBankaGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   //BtnTalimatlar.Visible := Tablo.YetkiVarmi(2511,YetkiTur_Gorme);
   BtnKrediler.Visible := Tablo.YetkiVarmi(253120,YetkiTur_Gorme);
   PanelCek.Visible := Tablo.YetkiVarmi(2551,YetkiTur_Gorme);
@@ -169,3 +161,5 @@ end;
 initialization
   RegisterClass(TBankaGorevFrame);
 end.
+
+

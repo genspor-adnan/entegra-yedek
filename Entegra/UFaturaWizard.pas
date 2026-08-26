@@ -745,6 +745,7 @@ type
     function TamIskontoSatiriVar: Boolean;
     function KDVMuafiyetSatiriVar: Boolean;
     function TamIskontoNedeniSor: Boolean;
+    function KDVIstisnaNedeniSorulmaliMi: Boolean;
     procedure IletisimEkleClick(Sender: TObject);
     procedure FaturaTipiDuzenle;
     procedure FaturadanSatirGetir(Sender: TObject);
@@ -1144,6 +1145,22 @@ begin
   end;
 end;
 
+{ %0 KDV / muafiyetli satir icin ISTISNA NEDENI yalnizca SATIS FATURASINDA sorulur.
+  Istisna kodu (GENINI BOLUM=Ops_KDVIstisnaNedeni) giden e-Fatura / e-Arsiv UBL'ine
+  yazilir; alis belgelerinde (TUR 10/11/12/109) karsiligi yoktur, sorulmasi anlamsiz.
+  Kapsam genisletilecekse satis irsaliyesi (14) ve satis fisi (16) asagiya eklenir. }
+function TFaturaWizardDlg.KDVIstisnaNedeniSorulmaliMi: Boolean;
+const
+  CSorulacakTurler = [15];   // 15 = Satis Faturasi (bkz EkranAdiAl)
+var
+  LTur: Integer;
+begin
+  LTur := Tur;
+  if TabFatbaslik.Active and (not TabFatbaslik.FieldByName('TUR').IsNull) then
+    LTur := TabFatbaslik.FieldByName('TUR').AsInteger;
+  Result := LTur in CSorulacakTurler;
+end;
+
 function TFaturaWizardDlg.TamIskontoNedeniSor: Boolean;
 var
   LIstisnaNedeni: Variant;
@@ -1154,6 +1171,10 @@ var
 begin
   Result := True;
   if EFaturaKullanimda <= 0 then
+    Exit;
+
+  // Yalnizca satis faturasinda sorulur - alis belgelerinde istisna nedeni istenmez.
+  if not KDVIstisnaNedeniSorulmaliMi then
     Exit;
 
   if not (TamIskontoSatiriVar or KDVMuafiyetSatiriVar) then
@@ -1222,6 +1243,7 @@ begin
   Tablo.UserDataSourceKaydet(TFaturaWizardDlg(Self), 'FATBASLIK_USER');
   if TabFatura.State in [dsInsert, dsEdit] then
      TabFatura.Post;
+  FaturaTutarHesapla(True);
   // BELGE KAYDEDILDI -> "Son Aranan" listesine yaz. Yeni belgede ID ancak burada olusur;
   //   kullanici listeye gectiginde az once kestigi belgeyi gorsun.
   Tablo.BelgeAramaKaydet(TabFatbaslik.FieldByName('TUR').AsInteger,
@@ -1752,7 +1774,9 @@ begin
       Exit;
    end;
 
-   if (EFaturaKullanimda > 0) and (not IptalSecildi) and TabFatbaslik.Active and (TamIskontoSatiriVar or KDVMuafiyetSatiriVar)
+   // %0 KDV / muafiyetli satir kontrolu yalnizca satis faturasi icin (bkz KDVIstisnaNedeniSorulmaliMi).
+   if (EFaturaKullanimda > 0) and (not IptalSecildi) and TabFatbaslik.Active
+      and KDVIstisnaNedeniSorulmaliMi and (TamIskontoSatiriVar or KDVMuafiyetSatiriVar)
       and (TabFatbaslik.FieldByName('PLANID').IsNull or (TabFatbaslik.FieldByName('PLANID').AsInteger = 0)) then begin
       Application.MessageBox(PChar('%0 KDV / muafiyetli satır için istisna nedeni seçmelisiniz.'),
         PChar(Uyari), MB_OK or MB_ICONWARNING);
@@ -2194,6 +2218,7 @@ var
   BelNo : Variant;
   i: integer;
   Vars : string[5];
+  DepoKosul : string;   // depo combosu WHERE parcasi (konsinye depolarini eler)
   NewItem:  TcxImageComboBoxItem;
 begin
   LogAlindi := False;
@@ -2293,12 +2318,20 @@ begin
     else
        Vars:='5';
 
+    // Giris Fisi (3) / Cikis Fisi (4) / Uretim Fisi (6): konsinye depolarinin HICBIRI
+    //   secilemez (5=Konsinye Alis, 7=Konsinye Satis/Cikis). Konsinye stogu yalniz
+    //   konsinye belgeleriyle hareket gormeli; onceden bu fislerde 7 listeleniyordu.
+    if Tur in [3,4,6] then
+       DepoKosul := 'VARSAYILAN not in (5,7)'
+    else
+       DepoKosul := 'VARSAYILAN<>'+Vars;
+
     //?nce bakal?m bu kullan?c? i?in depo yetkisi var m? (hi? yoksa hepsi gelecek)
     if (TamYetkili=False)and(Veritabani.VeriVarMi(Tablo.FDCnn,'select * from  YETKI where ROLID ='+RolID+' and LEN(MODULID)>4 and MODULID like ''2470%'' ',[],[])) then
        cbStokDepo.Properties.items := Tablo.imgComboboxInit('select D.ID, D.DEPOADI from DEPOLAR D inner join YETKI Y on Y.MODULID=''2470''+cast(D.ID as VARCHAR(20))'+
-        'where D.DURUM=1 and D.VARSAYILAN<>'+Vars+' and (Y.ROLID ='+RolID+' or -1='+RolID+')' ).items
+        'where D.DURUM=1 and D.'+DepoKosul+' and (Y.ROLID ='+RolID+' or -1='+RolID+')' ).items
      else
-       cbStokDepo.Properties.items := Tablo.imgComboboxInit( 'select ID,DEPOADI from DEPOLAR where DURUM=1 and VARSAYILAN<>'+Vars).items;
+       cbStokDepo.Properties.items := Tablo.imgComboboxInit( 'select ID,DEPOADI from DEPOLAR where DURUM=1 and '+DepoKosul).items;
   end
   else
     cbStokDepo.RepositoryItem:=Tablo.RepStokDepolarTumu;  //Eski faturada pasif depolar da olabilir
@@ -5178,10 +5211,12 @@ where FB.ID=2269
 end}
    end;
 begin
-   if TabFatura.State in [dsInsert, dsEdit] then
-     TabFatura.Post;
+   // Baslik once post edilmeli; detay AfterPost toplam yazdiktan sonra eski baslik buffer'i
+   // FATBASLIK.FATURA_TUTARI/DOVIZ_TUTARI alanlarini tekrar 0/NULL'a ezmesin.
    if TabFatbaslik.State in [dsInsert, dsEdit] then
      TabFatbaslik.Post;
+   if TabFatura.State in [dsInsert, dsEdit] then
+     TabFatura.Post;
 
    if not TamIskontoNedeniSor then
       Abort;
@@ -5950,9 +5985,6 @@ end.
       Precision = 12
       Size = 6
     end}
-
-
-
 
 
 

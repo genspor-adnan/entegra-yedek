@@ -2865,7 +2865,7 @@ begin
     ACanvas.Font.Color := clMaroon;
   end else begin
     ACanvas.Font.Style := [];
-    ACanvas.Font.Color := clBlack;
+    // Rengi grid painter belirlesin; clBlack koyu skin'de okunmuyordu.
   end;
 end;
 
@@ -2913,7 +2913,6 @@ begin
 end;
 
 end.
-
 
 
 

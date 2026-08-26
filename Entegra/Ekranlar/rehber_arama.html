@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rehber Arama — Kurum / Kişi (Mockup)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* kisi satir renkleri */
+    --s-yok:#f7cfcf; --s-yok-t:#7d1f1f;   /* KVKK izni yok / suresi dolmus */
+    --s-kri:#fbe6ae; --s-kri-t:#7a5407;   /* serbest / potansiyel — cari yok */
+    --s-skt:#f6d9c0; --s-skt-t:#8a4a12;   /* 90+ gundur temas edilmemis     */
+    --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;   /* pasif / ayrilmis               */
+    /* gorev butonu (Delphi clGorevTusuSecili / Pasif) */
+    --tus-pas:#9c71ad; --tus-sec:#1f6fbe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+
+  .wrap{display:grid;grid-template-columns:222px 1fr 236px;gap:0}
+
+  /* SOL: Menu / Arama */
+  .gorev{background:#f4f7fa;border-right:1px solid var(--line2);padding:6px 6px 10px}
+  .gorev h5{margin:6px 4px 4px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .ltabs{display:flex;gap:2px;margin:-6px -6px 8px;padding:6px 6px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .ltab{flex:1;text-align:center;padding:6px 8px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);
+    border-bottom:none;border-radius:3px 3px 0 0;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .ltab.active{background:#f4f7fa;color:var(--navy);font-weight:bold}
+  .lpane{display:none}.lpane.active{display:block}
+  .gtus{display:flex;align-items:center;gap:8px;color:#fff;font-weight:bold;font-size:11.5px;
+    background:var(--tus-pas);border:1px solid rgba(0,0,0,.12);border-radius:3px;padding:8px 9px;margin-bottom:3px;cursor:default}
+  .gtus:hover{filter:brightness(1.06)}
+  .gtus.on{background:var(--tus-sec);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+  .gtus .ic{font-size:14px;width:18px;text-align:center}
+  .achips{display:flex;gap:4px;margin-bottom:8px}
+  .achips .minibtn{flex:1;justify-content:center}
+  .agrid{display:grid;grid-template-columns:70px 1fr;gap:5px 6px;align-items:center}
+  .agrid label{font-size:10.5px;color:var(--muted);text-align:right}
+  .gorev .minibtn{white-space:nowrap}
+
+  /* ORTA */
+  .center{min-width:0;display:flex;flex-direction:column}
+  .filtre{display:flex;gap:5px;padding:8px 10px 7px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line2);background:#fbfcfe}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.s-yok td{background:var(--s-yok);color:var(--s-yok-t)}
+  .dg tr.s-kri td{background:var(--s-kri);color:var(--s-kri-t)}
+  .dg tr.s-skt td{background:var(--s-skt);color:var(--s-skt-t)}
+  .dg tr.s-pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .dg tr.s-pas td.ad{text-decoration:line-through}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-izl{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .p-yen{background:#eef1f5;color:#54657a;border-color:#d7dee6}
+  .p-gor{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}
+  /* rol rozetleri */
+  .tip{display:inline-block;min-width:30px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;padding:1px 5px;border:1px solid}
+  .t-kar{background:#fbe4e4;border-color:#efc4c4;color:#a5322f}   /* Karar Verici */
+  .t-etk{background:#f5edfb;border-color:#e3d3f0;color:#7a4fb0}   /* Etkileyen    */
+  .t-kul{background:#e5ecf8;border-color:#c6d7ef;color:#2b5c95}   /* Kullanici    */
+  .t-muh{background:#e3f0e6;border-color:#c3e0cb;color:#2e7d46}   /* Muhasebe     */
+  .t-tek{background:#fdf1e2;border-color:#f0dcbd;color:#96651a}   /* Teknik       */
+  /* bas harf rozeti (foto yer tutucu) */
+  .av{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+    color:#fff;font-size:9.5px;font-weight:bold;letter-spacing:.2px;border:1px solid rgba(0,0,0,.12)}
+  /* mini bar */
+  .bar{height:9px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:54px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+
+  /* alt detay */
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 12px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+  .gridtb{display:flex;gap:4px;padding:0 0 7px;align-items:center;flex-wrap:wrap}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px}
+  .kutu{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);padding:8px 10px}
+  .kutu h6{margin:0 0 6px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3;font-weight:bold}
+
+  /* SAG */
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:8px 0}
+  .side h5{margin:0;padding:7px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11px;padding:3px 12px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .tvsep{height:1px;background:var(--line2);margin:7px 10px}
+  .sidebtns{display:flex;flex-direction:column;gap:4px;padding:4px 10px}
+  .urun{margin:0 10px;border:1px solid var(--line);border-radius:4px;background:#fff;padding:9px;text-align:center}
+  .urun .foto{height:82px;border:1px solid var(--line2);border-radius:3px;background:linear-gradient(#fff,#f2f6fa);
+    display:flex;align-items:center;justify-content:center;font-size:30px;color:#9fb3c8}
+  .urun .nm{font-size:11.5px;font-weight:bold;color:var(--navy);margin-top:7px;line-height:1.35}
+  .urun .mt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .depo{display:flex;align-items:center;gap:7px;padding:3px 12px;font-size:11px}
+  .depo .ad{width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+  .depo .mk{width:44px;text-align:right;font-family:"Segoe UI",Tahoma}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:22px;padding:0 6px;font-size:11.5px;
+    display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:5px;top:2px;color:var(--muted);font-size:10px}
+
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+
+  /* ===== REHBER ARAMA'YA OZEL EKLER ===== */
+  .wrap.iki{grid-template-columns:1fr 302px}
+  /* buyuk arama blogu */
+  .arama{background:linear-gradient(#f7fafd,#eef3f9);border-bottom:1px solid var(--line);padding:10px 10px 4px}
+  .asatir{display:flex;gap:6px;align-items:center}
+  .aq{flex:1;border:1px solid #9fb8d4;border-radius:3px;background:#fff;height:32px;padding:0 10px;font-size:14px;
+    font-family:inherit;color:var(--ink);outline:none;box-shadow:inset 0 1px 2px rgba(20,40,70,.08)}
+  .aq:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(47,109,179,.16)}
+  .abtn{height:32px;padding:0 16px;font-size:12.5px}
+  select.inp{padding:0 4px;font-family:inherit;font-size:11px;color:var(--ink);height:22px}
+  .filtre.a2{background:transparent;border-bottom:1px dashed var(--line2);padding:7px 0 6px}
+  .filtre.a3{background:transparent;border-bottom:none;padding:6px 0 2px}
+  .etk{font-size:10.5px;color:#7b8ea3;margin-right:2px;letter-spacing:.3px;text-transform:uppercase}
+  mark{background:#ffe9a0;color:inherit;padding:0 1px;border-radius:2px}
+  /* tip rozetleri (KURUM / KISI / PERSONEL) */
+  .t-kur{background:#e3edfa;border-color:#c2d8f1;color:#1f4d86}
+  .t-kis{background:#f3edfa;border-color:#ddd0ef;color:#6b45a6}
+  .t-per{background:#e4f1e7;border-color:#c4e0cc;color:#2b6f42}
+  .dg tr[data-tip]{cursor:default}
+  /* sag panel mini liste */
+  .mini{display:flex;align-items:center;gap:7px;padding:4px 12px;font-size:11px;cursor:default}
+  .mini:hover{background:#eef4fb}
+  .mini .m1{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--navy);font-weight:bold}
+  .mini .m2{color:var(--muted);font-size:10.5px;white-space:nowrap}
+  /* mukerrer uyari satiri */
+  .dg tr.mk td{background:#fbe9e9;color:#7d1f1f}
+  /* alt buton cubugu */
+  .altbar{display:flex;gap:6px;align-items:center;padding:7px 10px;background:var(--head);border-top:1px solid var(--line);flex-wrap:wrap}
+  .ksy{font-size:10.5px;color:var(--muted)}
+  .ksy kbd{background:#fff;border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;padding:0 4px;
+    font-family:inherit;font-size:10px;color:#3a5573}
+  /* secildi bildirimi */
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:99998;display:none;
+    background:linear-gradient(#4fae68,#2e7d46);color:#fff;border-radius:20px;padding:8px 16px;font-size:12px;
+    box-shadow:0 6px 20px rgba(10,45,25,.32)}
+  .toast.on{display:block}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Rehber Arama — Kurum / Kişi
+    <span class="sp">URehberAramaEkrani · CARI + KISI (birleşik arama) · Şube: Merkez · 14.08.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni Kurum</div>
+    <div class="btn">＋ Yeni Kişi</div>
+    <div class="btn">👁 Kartı Aç</div>
+    <div class="sepv"></div>
+    <div class="btn" id="tbYeniArama">🔎 Yeni Arama (F3)</div>
+    <div class="btn" id="tbTemizle">↩ Süzgeçleri Temizle</div>
+    <div class="sepv"></div>
+    <div class="btn">📇 vCard</div>
+    <div class="btn">📊 Excel</div>
+    <span class="sp" style="margin-left:auto;font-size:10.5px;color:var(--muted)">
+      Modal lookup · çağıran ekran: <b>Satış Faturası → Cari Seç</b> · ModalResult=mrOk</span>
+  </div>
+
+  <!-- ============ ARAMA BLOGU ============ -->
+  <div class="arama">
+    <div class="asatir">
+      <input id="q" class="aq" value="özkan" spellcheck="false"
+             placeholder="Ünvan, kişi adı, kod, VKN/TC, telefon, e-posta, IBAN ya da etiket yaz…">
+      <div class="btn primary abtn" id="btnAra">🔎 Ara</div>
+    </div>
+
+    <div class="filtre a2">
+      <span class="etk">Kapsam</span>
+      <span class="minibtn kap on" data-kap="hepsi">Hepsi</span>
+      <span class="minibtn kap" data-kap="kurum">🏢 Kurum</span>
+      <span class="minibtn kap" data-kap="kisi">🧑 Kişi</span>
+      <span class="sepv" style="height:18px"></span>
+      <span class="etk">Hızlı süzgeç</span>
+      <span class="minibtn hz" data-tur="musteri">Müşteri</span>
+      <span class="minibtn hz" data-tur="tedarikci">Tedarikçi</span>
+      <span class="minibtn hz" data-tur="potansiyel">Potansiyel</span>
+      <span class="minibtn hz" data-tur="personel">Personel</span>
+      <span class="minibtn on" id="pasDahil">Pasifler dahil</span>
+      <span style="margin-left:auto;display:flex;gap:6px;align-items:center">
+        <span class="etk">Son aramalar</span>
+        <select class="inp" id="sonAramalar" style="width:132px">
+          <option value="">(son aramalar)</option>
+          <option>özkan</option>
+          <option>deniz tekstil</option>
+          <option>0532 418</option>
+          <option>granit</option>
+        </select>
+        <span class="minibtn">⚙ Gelişmiş…</span>
+      </span>
+    </div>
+
+    <div class="filtre a3">
+      <span class="etk">Aramada kullanılacak alanlar</span>
+      <label class="chk"><input type="checkbox" class="alan" data-f="unvan" checked> Ünvan/Ad</label>
+      <label class="chk"><input type="checkbox" class="alan" data-f="kod" checked> Kod</label>
+      <label class="chk"><input type="checkbox" class="alan" data-f="vkn" checked> VKN/TC</label>
+      <label class="chk"><input type="checkbox" class="alan" data-f="tel" checked> Telefon</label>
+      <label class="chk"><input type="checkbox" class="alan" data-f="eposta" checked> E-posta</label>
+      <label class="chk"><input type="checkbox" class="alan" data-f="adres"> Adres</label>
+      <label class="chk"><input type="checkbox" class="alan" data-f="etiket"> Etiket</label>
+      <label class="chk"><input type="checkbox" class="alan" data-f="iban"> IBAN</label>
+    </div>
+
+    <div class="hint" style="margin:2px 0 8px">
+      Boşlukla ayrılan her kelime ayrı aranır (AND). Yıldız (*) ile başlayan aramalar içinde geçen olarak çalışır —
+      CONTAINS / LIKE '%…%'. En az 2 karakter.
+    </div>
+  </div>
+
+  <div class="wrap iki">
+    <!-- ============ ORTA: SONUC LISTESI ============ -->
+    <div class="center">
+      <div class="filtre">
+        <span style="font-size:10.5px;color:var(--muted)">Sıralama: <b>skor ↓</b> · eşleşme türü · pasifler en sonda</span>
+        <span class="sepv" style="height:18px"></span>
+        <span class="minibtn">▦ Kolonlar</span>
+        <span class="minibtn">🔀 Skoru Göster</span>
+        <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">
+          fn_Api_RehberAra(@metin='özkan', @kapsam='HEPSI', @sube=1) · ilk 200 kayıt</span>
+      </div>
+
+      <div style="padding:10px 10px 0">
+        <div class="dg">
+          <table style="min-width:1560px" id="grid">
+            <thead>
+            <tr>
+              <th class="c" style="width:70px">TİP</th>
+              <th style="width:96px">KOD</th>
+              <th style="width:230px">ÜNVAN / AD SOYAD</th>
+              <th style="width:186px">BAĞLI KURUM</th>
+              <th style="width:158px">GÖREV / TÜR</th>
+              <th style="width:104px">VKN / TC</th>
+              <th style="width:114px">TELEFON</th>
+              <th style="width:208px">E-POSTA</th>
+              <th style="width:78px">ŞEHİR</th>
+              <th class="r" style="width:134px">BAKİYE</th>
+              <th class="c" style="width:98px">DURUM</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <tr class="foc" data-id="k1" data-tip="kurum" data-tur="musteri" data-durum="aktif"
+                data-f-unvan="ÖZKAN İNŞAAT TAAH. LTD. ŞTİ. Özkan İnşaat" data-f-kod="120.01.184"
+                data-f-vkn="6540318827" data-f-tel="0242 345 60 00 0532 418 77 20"
+                data-f-eposta="info@ozkaninsaat.com.tr" data-f-adres="Fener Mah. Tekelioğlu Cad. No:41/A Muratpaşa Antalya"
+                data-f-etiket="VIP Proje Müşterisi İnşaat" data-f-iban="TR33 0006 1005 1978 6457 8413 26">
+              <td class="c"><span class="tip t-kur">🏢 KURUM</span></td>
+              <td>120.01.184</td>
+              <td class="ad hv"><b>ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.</b></td>
+              <td class="ad">—</td>
+              <td class="ad">Müşteri · Kurumsal</td>
+              <td>6540318827</td><td>0242 345 60 00</td>
+              <td class="ad">info@ozkaninsaat.com.tr</td><td>Antalya</td>
+              <td class="r">1.687.720,60 ₺ <b>B</b></td>
+              <td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+
+            <tr data-id="p1" data-tip="kisi" data-tur="musteri" data-durum="aktif"
+                data-f-unvan="Kemal Aydın ÖZKAN İNŞAAT TAAH. LTD. ŞTİ." data-f-kod="KSI.00184" data-f-vkn="3210*****18"
+                data-f-tel="0532 418 77 20" data-f-eposta="k.aydin@ozkaninsaat.com.tr"
+                data-f-adres="Muratpaşa Antalya" data-f-etiket="Karar Verici Fuar 2026" data-f-iban="">
+              <td class="c"><span class="tip t-kis">🧑 KİŞİ</span></td>
+              <td>KSI.00184</td>
+              <td class="ad hv"><b>Kemal Aydın</b></td>
+              <td class="ad">ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.</td>
+              <td class="ad">Satınalma Müdürü <span class="tip t-kar">KARAR</span></td>
+              <td>3210*****18</td><td>0532 418 77 20</td>
+              <td class="ad">k.aydin@ozkaninsaat.com.tr</td><td>Antalya</td>
+              <td class="r">—</td>
+              <td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+
+            <tr data-id="p2" data-tip="kisi" data-tur="musteri" data-durum="aktif"
+                data-f-unvan="Hakan Toprak ÖZKAN İNŞAAT TAAH. LTD. ŞTİ." data-f-kod="KSI.00171" data-f-vkn="1980*****44"
+                data-f-tel="0532 418 77 01" data-f-eposta="h.toprak@ozkaninsaat.com.tr"
+                data-f-adres="Muratpaşa Antalya" data-f-etiket="Karar Verici Yönetim" data-f-iban="">
+              <td class="c"><span class="tip t-kis">🧑 KİŞİ</span></td>
+              <td>KSI.00171</td>
+              <td class="ad hv"><b>Hakan Toprak</b></td>
+              <td class="ad">ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.</td>
+              <td class="ad">Genel Müdür <span class="tip t-kar">KARAR</span></td>
+              <td>1980*****44</td><td>0532 418 77 01</td>
+              <td class="ad">h.toprak@ozkaninsaat.com.tr</td><td>Antalya</td>
+              <td class="r">—</td>
+              <td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+
+            <tr data-id="k2" data-tip="kurum" data-tur="potansiyel" data-durum="aktif"
+                data-f-unvan="ÖZKAN GRUP HOLDİNG A.Ş." data-f-kod="120.01.190" data-f-vkn="6540319005"
+                data-f-tel="0242 345 60 90" data-f-eposta="bilgi@ozkangrup.com.tr"
+                data-f-adres="Lara Cad. No:118 Muratpaşa Antalya" data-f-etiket="Holding Grup Şirketi"
+                data-f-iban="TR12 0006 2000 1180 0006 6217 34">
+              <td class="c"><span class="tip t-kur">🏢 KURUM</span></td>
+              <td>120.01.190</td>
+              <td class="ad hv"><b>ÖZKAN GRUP HOLDİNG A.Ş.</b></td>
+              <td class="ad">— <span style="color:var(--muted)">(grup şirketi)</span></td>
+              <td class="ad">Potansiyel · Holding</td>
+              <td>6540319005</td><td>0242 345 60 90</td>
+              <td class="ad">bilgi@ozkangrup.com.tr</td><td>Antalya</td>
+              <td class="r">0,00 ₺</td>
+              <td class="c"><span class="pill p-izl">Aday</span></td>
+            </tr>
+
+            <tr data-id="k3" data-tip="kurum" data-tur="tedarikci" data-durum="aktif"
+                data-f-unvan="DENİZ TEKSTİL San. Tic." data-f-kod="320.02.045" data-f-vkn="2760114093"
+                data-f-tel="0258 371 22 40" data-f-eposta="info@deniztekstil.com.tr"
+                data-f-adres="OSB 3. Cad. No:12 Merkezefendi Denizli" data-f-etiket="Kumaş Tedarikçi"
+                data-f-iban="TR55 0001 0009 8712 3456 7890 11">
+              <td class="c"><span class="tip t-kur">🏢 KURUM</span></td>
+              <td>320.02.045</td>
+              <td class="ad hv"><b>DENİZ TEKSTİL San. Tic.</b></td>
+              <td class="ad">—</td>
+              <td class="ad">Tedarikçi · Kurumsal</td>
+              <td>2760114093</td><td>0258 371 22 40</td>
+              <td class="ad">info@deniztekstil.com.tr</td><td>Denizli</td>
+              <td class="r">246.980,00 ₺ <b>A</b></td>
+              <td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+
+            <tr data-id="p3" data-tip="kisi" data-tur="tedarikci" data-durum="aktif"
+                data-f-unvan="Osman Türkmen DENİZ TEKSTİL San. Tic." data-f-kod="KSI.00092" data-f-vkn="4471*****26"
+                data-f-tel="0532 664 19 03" data-f-eposta="osman.turkmen@deniztekstil.com.tr"
+                data-f-adres="Merkezefendi Denizli" data-f-etiket="Muhasebe Mutabakat" data-f-iban="">
+              <td class="c"><span class="tip t-kis">🧑 KİŞİ</span></td>
+              <td>KSI.00092</td>
+              <td class="ad hv"><b>Osman Türkmen</b></td>
+              <td class="ad">DENİZ TEKSTİL San. Tic.</td>
+              <td class="ad">Muhasebe Müdürü <span class="tip t-muh">MUHS</span></td>
+              <td>4471*****26</td><td>0532 664 19 03</td>
+              <td class="ad">osman.turkmen@deniztekstil.com.tr</td><td>Denizli</td>
+              <td class="r">—</td>
+              <td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+
+            <tr data-id="k4" data-tip="kurum" data-tur="musteri" data-durum="aktif"
+                data-f-unvan="Antalya Perde Evi Ltd." data-f-kod="120.01.077" data-f-vkn="0730448215"
+                data-f-tel="0242 244 18 60" data-f-eposta="satis@antalyaperdeevi.com"
+                data-f-adres="Şirinyalı Mah. 1487 Sok. No:6 Muratpaşa Antalya" data-f-etiket="Bayi Perakende"
+                data-f-iban="TR64 0006 4000 0011 2233 4455 66">
+              <td class="c"><span class="tip t-kur">🏢 KURUM</span></td>
+              <td>120.01.077</td>
+              <td class="ad hv"><b>Antalya Perde Evi Ltd.</b></td>
+              <td class="ad">—</td>
+              <td class="ad">Müşteri · Bayi</td>
+              <td>0730448215</td><td>0242 244 18 60</td>
+              <td class="ad">satis@antalyaperdeevi.com</td><td>Antalya</td>
+              <td class="r">128.450,00 ₺ <b>B</b></td>
+              <td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+
+            <tr data-id="p4" data-tip="kisi" data-tur="musteri" data-durum="aktif"
+                data-f-unvan="Selin Yalçın Antalya Perde Evi Ltd." data-f-kod="KSI.00133" data-f-vkn="5590*****07"
+                data-f-tel="0533 207 61 45" data-f-eposta="selin@antalyaperdeevi.com"
+                data-f-adres="Muratpaşa Antalya" data-f-etiket="İç Mimar Tasarım" data-f-iban="">
+              <td class="c"><span class="tip t-kis">🧑 KİŞİ</span></td>
+              <td>KSI.00133</td>
+              <td class="ad hv"><b>Selin Yalçın</b></td>
+              <td class="ad">Antalya Perde Evi Ltd.</td>
+              <td class="ad">İç Mimar <span class="tip t-etk">ETKİ</span></td>
+              <td>5590*****07</td><td>0533 207 61 45</td>
+              <td class="ad">selin@antalyaperdeevi.com</td><td>Antalya</td>
+              <td class="r">—</td>
+              <td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+
+            <tr class="s-yok" data-id="k5" data-tip="kurum" data-tur="musteri" data-durum="aktif"
+                data-f-unvan="GRAND OTEL LARA Turizm A.Ş." data-f-kod="120.01.203" data-f-vkn="3980627714"
+                data-f-tel="0242 352 90 00" data-f-eposta="muhasebe@grandotellara.com"
+                data-f-adres="Lara Turizm Bölgesi Kemerağzı Aksu Antalya" data-f-etiket="Otel Proje VIP"
+                data-f-iban="TR90 0004 6000 8888 0000 1234 56">
+              <td class="c"><span class="tip t-kur">🏢 KURUM</span></td>
+              <td>120.01.203</td>
+              <td class="ad hv"><b>GRAND OTEL LARA Turizm A.Ş.</b></td>
+              <td class="ad">—</td>
+              <td class="ad">Müşteri · Kurumsal</td>
+              <td>3980627714</td><td>0242 352 90 00</td>
+              <td class="ad">muhasebe@grandotellara.com</td><td>Antalya</td>
+              <td class="r">942.300,00 ₺ <b>B</b></td>
+              <td class="c"><span class="pill p-yok">Risk Aşımı</span></td>
+            </tr>
+
+            <tr class="s-kri" data-id="p5" data-tip="kisi" data-tur="potansiyel" data-durum="aktif"
+                data-f-unvan="Merve Aksoy" data-f-kod="KSI.00210" data-f-vkn="2210*****39"
+                data-f-tel="0542 337 41 09" data-f-eposta="merve.aksoy@gmail.com"
+                data-f-adres="Konyaaltı Antalya" data-f-etiket="Mimar Serbest Fuar 2026" data-f-iban="">
+              <td class="c"><span class="tip t-kis">🧑 KİŞİ</span></td>
+              <td>KSI.00210</td>
+              <td class="ad hv"><b>Merve Aksoy</b></td>
+              <td class="ad">— (serbest / potansiyel)</td>
+              <td class="ad">Mimar <span class="tip t-etk">ETKİ</span></td>
+              <td>2210*****39</td><td>0542 337 41 09</td>
+              <td class="ad">merve.aksoy@gmail.com</td><td>Antalya</td>
+              <td class="r">—</td>
+              <td class="c"><span class="pill p-izl">Aday</span></td>
+            </tr>
+
+            <tr data-id="k6" data-tip="kurum" data-tur="tedarikci" data-durum="aktif"
+                data-f-unvan="KİMPA Kimya San." data-f-kod="320.01.118" data-f-vkn="5041228806"
+                data-f-tel="0262 641 30 70" data-f-eposta="info@kimpakimya.com.tr"
+                data-f-adres="Gebze OSB 1600. Sok. No:9 Kocaeli" data-f-etiket="Kimya Tedarikçi"
+                data-f-iban="TR47 0001 2009 4520 0058 0012 90">
+              <td class="c"><span class="tip t-kur">🏢 KURUM</span></td>
+              <td>320.01.118</td>
+              <td class="ad hv"><b>KİMPA Kimya San.</b></td>
+              <td class="ad">—</td>
+              <td class="ad">Tedarikçi · Kurumsal</td>
+              <td>5041228806</td><td>0262 641 30 70</td>
+              <td class="ad">info@kimpakimya.com.tr</td><td>Kocaeli</td>
+              <td class="r">84.120,00 ₺ <b>A</b></td>
+              <td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+
+            <tr data-id="p6" data-tip="kisi" data-tur="personel" data-durum="aktif"
+                data-f-unvan="Mehmet Yıldız Gentegre Perde &amp; Mefruşat A.Ş." data-f-kod="KSI.00003" data-f-vkn="1150*****72"
+                data-f-tel="0532 118 44 90" data-f-eposta="mehmet.yildiz@gentegre.com.tr"
+                data-f-adres="Kepez Antalya" data-f-etiket="Personel Satış Temsilcisi" data-f-iban="">
+              <td class="c"><span class="tip t-per">🧑 PERSONEL</span></td>
+              <td>KSI.00003</td>
+              <td class="ad hv"><b>Mehmet Yıldız</b></td>
+              <td class="ad">Gentegre Perde &amp; Mefruşat A.Ş.</td>
+              <td class="ad">Satış Temsilcisi · Personel</td>
+              <td>1150*****72</td><td>0532 118 44 90</td>
+              <td class="ad">mehmet.yildiz@gentegre.com.tr</td><td>Antalya</td>
+              <td class="r">—</td>
+              <td class="c"><span class="pill p-gor">Personel</span></td>
+            </tr>
+
+            <tr data-id="k7" data-tip="kurum" data-tur="musteri" data-durum="aktif"
+                data-f-unvan="Granit Bilgisayar Ltd." data-f-kod="120.01.052" data-f-vkn="3910557428"
+                data-f-tel="0212 465 77 10" data-f-eposta="info@granitbilgisayar.com"
+                data-f-adres="Maslak Mah. Büyükdere Cad. No:255 Sarıyer İstanbul" data-f-etiket="Bilişim Donanım"
+                data-f-iban="TR18 0001 5001 5800 7290 4611 03">
+              <td class="c"><span class="tip t-kur">🏢 KURUM</span></td>
+              <td>120.01.052</td>
+              <td class="ad hv"><b>Granit Bilgisayar Ltd.</b></td>
+              <td class="ad">—</td>
+              <td class="ad">Müşteri · Kurumsal</td>
+              <td>3910557428</td><td>0212 465 77 10</td>
+              <td class="ad">info@granitbilgisayar.com</td><td>İstanbul</td>
+              <td class="r">172.320,50 ₺ <b>B</b></td>
+              <td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+
+            <tr class="s-pas" data-id="k8" data-tip="kurum" data-tur="musteri" data-durum="pasif"
+                data-f-unvan="ESKİ MEFRUŞAT LTD." data-f-kod="120.02.210" data-f-vkn="4620117739"
+                data-f-tel="0242 000 00 00" data-f-eposta="—" data-f-adres="Kepez Antalya"
+                data-f-etiket="Kapandı" data-f-iban="">
+              <td class="c"><span class="tip t-kur">🏢 KURUM</span></td>
+              <td>120.02.210</td>
+              <td class="ad hv"><b>ESKİ MEFRUŞAT LTD.</b></td>
+              <td class="ad">—</td>
+              <td class="ad">Müşteri · kapandı 12.03.2025</td>
+              <td>4620117739</td><td>—</td>
+              <td class="ad">—</td><td>Antalya</td>
+              <td class="r">0,00 ₺</td>
+              <td class="c"><span class="pill p-pas">Pasif</span></td>
+            </tr>
+
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" style="text-align:right">SONUÇ ÖZETİ</td>
+                <td colspan="2" id="ftAd">8 kurum · 6 kişi</td>
+                <td colspan="4" id="ftBilgi">FULLTEXT CONTAINS + LIKE · skor eşiği 0,35</td>
+                <td class="r">Σ 3.261.891,10 ₺</td>
+                <td class="c">1 pasif</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-yok)"></span>Risk limiti aşımı / borç kilidi — seçilse de belge kesilemez</span>
+          <span><span class="sw" style="background:var(--s-kri)"></span>Serbest / potansiyel — cariye bağlı değil</span>
+          <span><span class="sw" style="background:var(--s-pas)"></span>Pasif / kapanmış — <b>en sonda</b>, ünvanı üstü çizili</span>
+          <span style="margin-left:auto;color:var(--navy);font-weight:bold" id="say">14 sonuç (8 kurum · 6 kişi) · 42 ms</span>
+        </div>
+      </div>
+
+      <!-- ALT SEKMELER -->
+      <div class="tabs" style="margin-top:12px">
+        <div class="tab active" data-t="islem">Son İşlemler <span class="b">5</span></div>
+        <div class="tab" data-t="kisiler">İlgili Kişiler <span class="b">3</span></div>
+        <div class="tab" data-t="adres">Adresler <span class="b">3</span></div>
+        <div class="tab" data-t="mukerrer">Mükerrer Kontrolü <span class="b">2</span></div>
+      </div>
+
+      <div class="pane active" data-p="islem">
+        <div class="gridtb">
+          <span class="minibtn">👁 Belgeyi Aç</span>
+          <span class="minibtn">📄 Ekstre</span>
+          <span class="minibtn">🧾 Cari Hareket</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Bağlam: <b class="ctx">120.01.184 — ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.</b></span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:96px">TÜR</th><th style="width:150px">BELGE NO</th><th>KONU</th>
+                <th class="c" style="width:96px">TARİH</th><th class="r" style="width:140px">TUTAR</th>
+                <th class="c" style="width:104px">DURUM</th></tr>
+            <tr class="foc"><td>Fatura</td><td>GNT.2026/0712</td><td class="ad">Lara Rezidans A Blok — stor perde montajı</td>
+                <td class="c">12.08.2026</td><td class="r"><b>486.900,00 ₺</b></td>
+                <td class="c"><span class="pill p-kri">Vadesi Geldi</span></td></tr>
+            <tr><td>Teklif</td><td>TKF.2026/0453</td><td class="ad">240 daire perde &amp; tül paketi</td>
+                <td class="c">12.08.2026</td><td class="r">1.050.000,00 ₺</td>
+                <td class="c"><span class="pill p-kri">Onayda</span></td></tr>
+            <tr><td>Sipariş</td><td>SPS.2026/0834</td><td class="ad">Ofis katı stor perde (peşin)</td>
+                <td class="c">18.06.2026</td><td class="r">412.500,00 ₺</td>
+                <td class="c"><span class="pill p-ok">Teslim</span></td></tr>
+            <tr><td>Tahsilat</td><td>THS.2026/0311</td><td class="ad">Havale — Yapı Kredi / Antalya Şb.</td>
+                <td class="c">02.07.2026</td><td class="r">300.000,00 ₺</td>
+                <td class="c"><span class="pill p-ok">Kapandı</span></td></tr>
+            <tr><td>Fatura</td><td>GNT.2026/0561</td><td class="ad">SPS.2026/0834 sipariş faturası</td>
+                <td class="c">25.06.2026</td><td class="r">412.500,00 ₺</td>
+                <td class="c"><span class="pill p-ok">Tahsil</span></td></tr>
+          </table>
+        </div>
+        <div class="hint">Son işlemler <b>FATBASLIK · TEKLIF · SIPARIS · CARIHAREKET</b> tablolarından
+          <b>CARIID</b> (kişi seçiliyse <b>KISIID</b>) üzerinden okunur — yalnızca son 5 belge gösterilir.</div>
+      </div>
+
+      <div class="pane" data-p="kisiler">
+        <div class="gridtb">
+          <span class="minibtn">＋ Kişi Ekle</span><span class="minibtn">📞 Ara</span><span class="minibtn">✉ E-posta</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Bağlam: <b class="ctx">120.01.184 — ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.</b></span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:150px">AD SOYAD</th><th style="width:150px">GÖREV</th><th class="c" style="width:82px">ROL</th>
+                <th style="width:128px">TELEFON</th><th>E-POSTA</th><th class="c" style="width:118px">SON TEMAS</th>
+                <th class="c" style="width:80px">DURUM</th></tr>
+            <tr class="foc"><td><b>Kemal Aydın</b></td><td>Satınalma Müdürü</td><td class="c"><span class="tip t-kar">KARAR</span></td>
+                <td>0532 418 77 20</td><td class="ad">k.aydin@ozkaninsaat.com.tr</td>
+                <td class="c">12.08.2026 <span style="color:var(--muted)">(2 g)</span></td>
+                <td class="c"><span class="pill p-ok">Aktif</span></td></tr>
+            <tr><td><b>Hakan Toprak</b></td><td>Genel Müdür</td><td class="c"><span class="tip t-kar">KARAR</span></td>
+                <td>0532 418 77 01</td><td class="ad">h.toprak@ozkaninsaat.com.tr</td>
+                <td class="c">10.08.2026 <span style="color:var(--muted)">(4 g)</span></td>
+                <td class="c"><span class="pill p-ok">Aktif</span></td></tr>
+            <tr class="s-pas"><td class="ad"><b>İbrahim Sarı</b></td><td>Satınalma Şefi</td><td class="c"><span class="tip t-kul">KULL</span></td>
+                <td>0532 418 77 05</td><td class="ad">eski.yetkili@ozkaninsaat.com.tr</td>
+                <td class="c">27.02.2026 <span>(168 g)</span></td>
+                <td class="c"><span class="pill p-pas">Pasif</span></td></tr>
+          </table>
+        </div>
+        <div class="hint">Kişiler <b>KISI</b> tablosunda <b>CARIID</b> ile bağlıdır (1:N). Rehberde kişi satırına çift tıklamak
+          <b>KISIID</b> + bağlı <b>CARIID</b>'yi birlikte döndürür — fatura ekranı hem cariyi hem ilgili kişiyi doldurur.</div>
+      </div>
+
+      <div class="pane" data-p="adres">
+        <div class="gridtb">
+          <span class="minibtn">＋ Adres Ekle</span><span class="minibtn">🗺 Haritada Göster</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Bağlam: <b class="ctx">120.01.184 — ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.</b></span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:110px">TÜR</th><th style="width:130px">BAŞLIK</th><th>ADRES</th>
+                <th style="width:110px">İLÇE / İL</th><th style="width:120px">TELEFON</th><th class="c" style="width:80px">VARSAYILAN</th></tr>
+            <tr class="foc"><td>Fatura</td><td>Merkez Ofis</td>
+                <td class="ad">Fener Mah. Tekelioğlu Cad. No:41/A Kat:5</td><td>Muratpaşa / Antalya</td>
+                <td>0242 345 60 00</td><td class="c"><span class="pill p-ok">✔</span></td></tr>
+            <tr><td>Sevk</td><td>Lara Şantiye</td>
+                <td class="ad">Kemerağzı Mah. Lara Turizm Bl. 3. Etap</td><td>Aksu / Antalya</td>
+                <td>0532 418 77 20</td><td class="c"><span class="pill p-pas">—</span></td></tr>
+            <tr><td>Sevk</td><td>Kepez Depo</td>
+                <td class="ad">Ahatlı Mah. 3021 Sok. No:14 Depo B</td><td>Kepez / Antalya</td>
+                <td>0242 345 60 18</td><td class="c"><span class="pill p-pas">—</span></td></tr>
+          </table>
+        </div>
+        <div class="hint">Adresler <b>CARIADRES</b> (TIP: FATURA / SEVK · VARSAYILAN) tablosundan gelir; irsaliye kesiminde
+          sevk adresi varsayılan olarak <b>VARSAYILAN=1</b> satırından doldurulur.</div>
+      </div>
+
+      <div class="pane" data-p="mukerrer">
+        <div class="gridtb">
+          <span class="minibtn on">⚠ Benzerleri Göster</span><span class="minibtn">🔗 Birleştir</span>
+          <span class="minibtn">🚫 Mükerrer Değil (işaretle)</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Benzerlik eşiği: <b>%80</b> · algoritma: Jaro-Winkler + VKN eşitliği</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:96px">KOD</th><th style="width:250px">ÜNVAN</th><th style="width:104px">VKN</th>
+                <th style="width:78px">ŞEHİR</th><th class="c" style="width:92px">BENZERLİK</th>
+                <th class="r" style="width:130px">BAKİYE</th><th style="width:104px">SON İŞLEM</th>
+                <th class="c" style="width:96px">DURUM</th><th class="c" style="width:96px">İŞLEM</th></tr>
+            <tr class="foc"><td>120.01.184</td><td class="ad"><b>ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.</b> <span style="color:var(--muted)">(seçili)</span></td>
+                <td>6540318827</td><td>Antalya</td><td class="c">—</td>
+                <td class="r">1.687.720,60 ₺</td><td>12.08.2026</td>
+                <td class="c"><span class="pill p-ok">Aktif</span></td><td class="c">—</td></tr>
+            <tr class="mk"><td>120.01.512</td><td class="ad"><b>ÖZKAN İNŞ. TAAH. LTD.</b></td>
+                <td><b>6540318827</b></td><td>Antalya</td><td class="c"><b>%92</b></td>
+                <td class="r">12.400,00 ₺</td><td>19.11.2025</td>
+                <td class="c"><span class="pill p-yok">Mükerrer?</span></td>
+                <td class="c"><span class="minibtn" style="padding:1px 7px">🔗 Birleştir</span></td></tr>
+            <tr><td>120.01.190</td><td class="ad">ÖZKAN GRUP HOLDİNG A.Ş.</td>
+                <td>6540319005</td><td>Antalya</td><td class="c">%74</td>
+                <td class="r">0,00 ₺</td><td>—</td>
+                <td class="c"><span class="pill p-izl">Grup şirketi</span></td><td class="c">—</td></tr>
+          </table>
+        </div>
+        <div class="hint"><b>VKN aynı</b> olduğu için 120.01.512 kaydı kırmızı işaretlendi — birleştirme
+          <b>sp_CariBirlestir(@hedefCariId, @kaynakCariId)</b> ile yapılır; hareketler hedefe taşınır, kaynak
+          <b>DURUM='M'</b> (mükerrer) olarak kapatılır ve <b>GENDEPO.ISLEMLOG</b>'a yazılır.</div>
+      </div>
+    </div>
+
+    <!-- ============ SAG: ONIZLEME ============ -->
+    <div class="side">
+      <h5 id="sideBaslik">Seçili Kayıt — Kurum</h5>
+      <div class="urun">
+        <div class="foto" id="pFoto">🏢</div>
+        <div class="nm" id="pAd">ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.</div>
+        <div class="mt" id="pAlt1">120.01.184 · Müşteri · Kurumsal</div>
+        <div class="mt" id="pAlt2">Antalya / Muratpaşa</div>
+        <div style="display:flex;gap:5px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn">📞 Ara</span><span class="minibtn">✉ E-posta</span><span class="minibtn">🗺 Harita</span>
+        </div>
+      </div>
+
+      <div class="tvsep"></div>
+      <h5 id="pKimlikH">Kimlik / İletişim</h5>
+      <div id="pKimlik"></div>
+
+      <div class="tvsep"></div>
+      <h5 id="pDurumH">Hesap Durumu</h5>
+      <div id="pDurum"></div>
+
+      <div class="tvsep"></div>
+      <h5 id="pBarH">Risk Kullanımı</h5>
+      <div id="pBar"></div>
+
+      <div class="tvsep"></div>
+      <h5 id="pMiniH">Bu kurumdaki kişiler (3)</h5>
+      <div id="pMini"></div>
+
+      <div class="tvsep"></div>
+      <h5>İşlemler</h5>
+      <div class="sidebtns">
+        <span class="btn primary" id="btnSecKapat" style="justify-content:center">✔ Seç ve Kapat</span>
+        <span class="btn" id="btnKart" style="justify-content:center">👁 Kartı Aç</span>
+        <span class="btn" style="justify-content:center">＋ Yeni Kurum</span>
+        <span class="btn" style="justify-content:center">＋ Yeni Kişi</span>
+      </div>
+      <div class="hint" style="padding:2px 12px 4px">Seçim, çağıran ekrana <b>CARIID</b> / <b>KISIID</b> olarak döner
+        (<b>ModalResult = mrOk</b>).</div>
+    </div>
+  </div>
+
+  <!-- ============ ALT BUTON CUBUGU ============ -->
+  <div class="altbar">
+    <span class="ksy"><kbd>⏎</kbd> Enter ile seç · <kbd>↑</kbd><kbd>↓</kbd> gezin · <kbd>Esc</kbd> kapat ·
+      <kbd>F3</kbd> yeni arama · <kbd>Çift tık</kbd> seç ve kapat</span>
+    <span style="margin-left:auto;display:flex;gap:6px">
+      <span class="btn ok" id="btnSec">✔ Seç</span>
+      <div class="btn">✖ Kapat</div>
+    </span>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Kurum → <b>CARI</b> (CARIID · KOD · UNVAN · VKN · TIP · DURUM)</span>·
+    <span>Kişi → <b>KISI</b> (KISIID · CARIID · AD · SOYAD · GOREV · ROL)</span>·
+    <span>Ortak arama görünümü → <b>vw_Rehber</b></span>·
+    <span>Adres → <b>CARIADRES</b></span>·
+    <span>Bakiye → <b>CARIHAREKET</b></span>·
+    <span>Mükerrer → <b>sp_CariBirlestir</b> → <b>GENDEPO.ISLEMLOG</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Rehber: <b>1.240 kişi</b> · <b>3.418 kurum</b></span>
+    <span>Sonuç: <b id="sbSonuc">14</b></span>
+    <span>Kapsam: <b id="sbKapsam">Hepsi</b></span>
+    <span>Süre: <b>42 ms</b></span>
+    <span style="margin-left:auto">Seçili: <b id="sbSecili">120.01.184 — ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.</b></span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  /* ---------- kayit detaylari (sag onizleme paneli icin) ---------- */
+  var KAYIT = {
+    k1:{tip:"kurum",ad:"ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.",kod:"120.01.184",bh:"Öİ",renk:"#2f6db3",
+        alt1:"120.01.184 · Müşteri · Kurumsal",alt2:"Antalya / Muratpaşa",
+        kimlik:[["Vergi No","6540318827"],["Vergi dairesi","Antalya Kurumsal"],
+                ["Adres","Fener Mah. Tekelioğlu Cad. No:41/A"],["İlçe / İl","Muratpaşa / Antalya"],
+                ["Telefon","0242 345 60 00"],["E-posta","info@ozkaninsaat.com.tr"],
+                ["Etiketler","VIP · Proje Müşterisi"]],
+        durum:[["Bakiye","1.687.720,60 ₺ (B)"],["Risk limiti","2.500.000,00 ₺"],
+               ["Vade ortalaması","62 gün"],["Açık teklif","2 adet · 1.830.000,00 ₺"],
+               ["Son işlem tarihi","12.08.2026"],["Temsilci","Mehmet Yıldız"]],
+        bar:{h:"Risk Kullanımı",ad:"Limit",yuzde:67,cls:"kri",
+             not:"1.687.720,60 ₺ / 2.500.000,00 ₺ · kalan <b>812.279,40 ₺</b>"},
+        mini:{h:"Bu kurumdaki kişiler (3)",l:[
+             {id:"p1",ad:"Kemal Aydın",bilgi:"Satınalma Müdürü · KARAR"},
+             {id:"p2",ad:"Hakan Toprak",bilgi:"Genel Müdür · KARAR"},
+             {id:"pX",ad:"İbrahim Sarı",bilgi:"Satınalma Şefi · pasif"}]}},
+
+    k2:{tip:"kurum",ad:"ÖZKAN GRUP HOLDİNG A.Ş.",kod:"120.01.190",bh:"ÖG",renk:"#7a4fb0",
+        alt1:"120.01.190 · Potansiyel · Holding",alt2:"Antalya / Muratpaşa",
+        kimlik:[["Vergi No","6540319005"],["Vergi dairesi","Antalya Kurumsal"],
+                ["Adres","Lara Cad. No:118"],["İlçe / İl","Muratpaşa / Antalya"],
+                ["Telefon","0242 345 60 90"],["E-posta","bilgi@ozkangrup.com.tr"],
+                ["Etiketler","Holding · Grup şirketi"]],
+        durum:[["Bakiye","0,00 ₺"],["Risk limiti","tanımsız"],["Vade ortalaması","—"],
+               ["Açık teklif","1 adet · 280.000,00 ₺"],["Son işlem tarihi","—"],["Temsilci","Ayşe Demir"]],
+        bar:{h:"Risk Kullanımı",ad:"Limit",yuzde:0,cls:"ok",
+             not:"Potansiyel cari — limit tanımlanmadan <b>belge kesilemez</b>."},
+        mini:{h:"Bu kurumdaki kişiler (1)",l:[{id:"pX",ad:"Nurten Özkan",bilgi:"Yön. Kur. Üyesi · KARAR"}]}},
+
+    k3:{tip:"kurum",ad:"DENİZ TEKSTİL San. Tic.",kod:"320.02.045",bh:"DT",renk:"#2e7d46",
+        alt1:"320.02.045 · Tedarikçi · Kurumsal",alt2:"Denizli / Merkezefendi",
+        kimlik:[["Vergi No","2760114093"],["Vergi dairesi","Denizli Saraylar"],
+                ["Adres","OSB 3. Cad. No:12"],["İlçe / İl","Merkezefendi / Denizli"],
+                ["Telefon","0258 371 22 40"],["E-posta","info@deniztekstil.com.tr"],
+                ["Etiketler","Kumaş · Ana tedarikçi"]],
+        durum:[["Bakiye","246.980,00 ₺ (A)"],["Risk limiti","500.000,00 ₺"],
+               ["Vade ortalaması","45 gün"],["Açık sipariş","3 adet · 318.400,00 ₺"],
+               ["Son işlem tarihi","08.08.2026"],["Temsilci","Ayşe Demir"]],
+        bar:{h:"Risk Kullanımı",ad:"Limit",yuzde:49,cls:"ok",
+             not:"246.980,00 ₺ / 500.000,00 ₺ · alacaklı (A) bakiye"},
+        mini:{h:"Bu kurumdaki kişiler (1)",l:[{id:"p3",ad:"Osman Türkmen",bilgi:"Muhasebe Müdürü · MUHS"}]}},
+
+    k4:{tip:"kurum",ad:"Antalya Perde Evi Ltd.",kod:"120.01.077",bh:"AP",renk:"#96651a",
+        alt1:"120.01.077 · Müşteri · Bayi",alt2:"Antalya / Muratpaşa",
+        kimlik:[["Vergi No","0730448215"],["Vergi dairesi","Antalya Muratpaşa"],
+                ["Adres","Şirinyalı Mah. 1487 Sok. No:6"],["İlçe / İl","Muratpaşa / Antalya"],
+                ["Telefon","0242 244 18 60"],["E-posta","satis@antalyaperdeevi.com"],
+                ["Etiketler","Bayi · Perakende"]],
+        durum:[["Bakiye","128.450,00 ₺ (B)"],["Risk limiti","250.000,00 ₺"],
+               ["Vade ortalaması","30 gün"],["Açık teklif","1 adet · 96.000,00 ₺"],
+               ["Son işlem tarihi","11.08.2026"],["Temsilci","Burak Şen"]],
+        bar:{h:"Risk Kullanımı",ad:"Limit",yuzde:51,cls:"ok",
+             not:"128.450,00 ₺ / 250.000,00 ₺ · kalan <b>121.550,00 ₺</b>"},
+        mini:{h:"Bu kurumdaki kişiler (1)",l:[{id:"p4",ad:"Selin Yalçın",bilgi:"İç Mimar · ETKİ"}]}},
+
+    k5:{tip:"kurum",ad:"GRAND OTEL LARA Turizm A.Ş.",kod:"120.01.203",bh:"GL",renk:"#b23b3b",
+        alt1:"120.01.203 · Müşteri · Kurumsal",alt2:"Aksu / Antalya",
+        kimlik:[["Vergi No","3980627714"],["Vergi dairesi","Antalya Kurumsal"],
+                ["Adres","Kemerağzı Mah. Lara Turizm Bölgesi"],["İlçe / İl","Aksu / Antalya"],
+                ["Telefon","0242 352 90 00"],["E-posta","muhasebe@grandotellara.com"],
+                ["Etiketler","Otel · Proje · VIP"]],
+        durum:[["Bakiye","942.300,00 ₺ (B)"],["Risk limiti","800.000,00 ₺"],
+               ["Vade ortalaması","78 gün"],["Açık teklif","1 adet · 540.000,00 ₺"],
+               ["Son işlem tarihi","05.08.2026"],["Temsilci","Mehmet Yıldız"]],
+        bar:{h:"Risk Kullanımı",ad:"Limit",yuzde:100,cls:"yok",
+             not:"<b style='color:#b23b3b'>Limit aşıldı (%118)</b> — 142.300,00 ₺ aşım; yeni belge yönetici onayı ister."},
+        mini:{h:"Bu kurumdaki kişiler (1)",l:[{id:"pX",ad:"Ayla Genç",bilgi:"Şantiye Şefi · KULL"}]}},
+
+    k6:{tip:"kurum",ad:"KİMPA Kimya San.",kod:"320.01.118",bh:"KK",renk:"#2b5c95",
+        alt1:"320.01.118 · Tedarikçi · Kurumsal",alt2:"Gebze / Kocaeli",
+        kimlik:[["Vergi No","5041228806"],["Vergi dairesi","Gebze"],
+                ["Adres","Gebze OSB 1600. Sok. No:9"],["İlçe / İl","Gebze / Kocaeli"],
+                ["Telefon","0262 641 30 70"],["E-posta","info@kimpakimya.com.tr"],
+                ["Etiketler","Kimya · Yardımcı malzeme"]],
+        durum:[["Bakiye","84.120,00 ₺ (A)"],["Risk limiti","150.000,00 ₺"],
+               ["Vade ortalaması","60 gün"],["Açık sipariş","1 adet · 42.000,00 ₺"],
+               ["Son işlem tarihi","24.07.2026"],["Temsilci","Ayşe Demir"]],
+        bar:{h:"Risk Kullanımı",ad:"Limit",yuzde:56,cls:"ok",
+             not:"84.120,00 ₺ / 150.000,00 ₺"},
+        mini:{h:"Bu kurumdaki kişiler (1)",l:[{id:"pX",ad:"Tolga Kaya",bilgi:"Depo Sorumlusu · KULL"}]}},
+
+    k7:{tip:"kurum",ad:"Granit Bilgisayar Ltd.",kod:"120.01.052",bh:"GB",renk:"#1f6fbe",
+        alt1:"120.01.052 · Müşteri · Kurumsal",alt2:"Sarıyer / İstanbul",
+        kimlik:[["Vergi No","3910557428"],["Vergi dairesi","Maslak"],
+                ["Adres","Maslak Mah. Büyükdere Cad. No:255"],["İlçe / İl","Sarıyer / İstanbul"],
+                ["Telefon","0212 465 77 10"],["E-posta","info@granitbilgisayar.com"],
+                ["Etiketler","Bilişim · Donanım"]],
+        durum:[["Bakiye","172.320,50 ₺ (B)"],["Risk limiti","500.000,00 ₺"],
+               ["Vade ortalaması","41 gün"],["Açık teklif","—"],
+               ["Son işlem tarihi","07.08.2026"],["Temsilci","Selin Kara"]],
+        bar:{h:"Risk Kullanımı",ad:"Limit",yuzde:34,cls:"ok",
+             not:"172.320,50 ₺ / 500.000,00 ₺ · kalan <b>327.679,50 ₺</b>"},
+        mini:{h:"Bu kurumdaki kişiler (1)",l:[{id:"pX",ad:"Erhan Bulut",bilgi:"Teknik Müdür · TEKN"}]}},
+
+    k8:{tip:"kurum",ad:"ESKİ MEFRUŞAT LTD.",kod:"120.02.210",bh:"EM",renk:"#7a7a7a",
+        alt1:"120.02.210 · Müşteri · PASİF",alt2:"Kepez / Antalya",
+        kimlik:[["Vergi No","4620117739"],["Vergi dairesi","Kepez"],
+                ["Adres","Ahatlı Mah. 3021 Sok. No:14"],["İlçe / İl","Kepez / Antalya"],
+                ["Telefon","—"],["E-posta","—"],["Etiketler","Kapandı"]],
+        durum:[["Bakiye","0,00 ₺"],["Risk limiti","0,00 ₺"],["Vade ortalaması","—"],
+               ["Açık teklif","—"],["Son işlem tarihi","12.03.2025"],["Kapanış","12.03.2025 · ticareti terk"]],
+        bar:{h:"Risk Kullanımı",ad:"Limit",yuzde:0,cls:"ok",
+             not:"Pasif cari — <b>seçilebilir ancak belge kesilemez</b> (DURUM='P')."},
+        mini:{h:"Bu kurumdaki kişiler (0)",l:[]}},
+
+    p1:{tip:"kisi",ad:"Kemal Aydın",kod:"KSI.00184",bh:"KA",renk:"#2f6db3",
+        alt1:"KSI.00184 · Satınalma Müdürü",alt2:"ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.",
+        rol:'<span class="tip t-kar">KARAR VERİCİ</span>',
+        kimlik:[["Cep","0532 418 77 20"],["İş telefonu","0242 345 60 00 / 118"],
+                ["E-posta","k.aydin@ozkaninsaat.com.tr"],["Departman","Satınalma"],
+                ["Şehir","Antalya / Muratpaşa"],["Etiketler","VIP · Fuar 2026"]],
+        durum:[["Tercih edilen kanal","Telefon (cep)"],["En uygun saat","09:00 – 11:00"],
+               ["İkincil kanal","WhatsApp"],["Son temas","12.08.2026 (2 gün)"],
+               ["Açık kayıt","1 teklif · 1 fırsat"],["Yetki","Bütçe onayı — 1.500.000,00 ₺"]],
+        kvkk:[["Aydınlatma","Onaylı"],["Açık rıza","İzin Var ✔"],["İzin tarihi","12.03.2025"]],
+        bar:{h:"İlişki Gücü",ad:"Genel",yuzde:78,cls:"ok",
+             not:"Son 90 günde <b>11 temas</b> · ort. yanıt süresi <b>6 saat</b>."},
+        mini:{h:"Bağlı kurum",l:[{id:"k1",ad:"ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.",bilgi:"120.01.184 · kuruma geç →"}]}},
+
+    p2:{tip:"kisi",ad:"Hakan Toprak",kod:"KSI.00171",bh:"HT",renk:"#a5322f",
+        alt1:"KSI.00171 · Genel Müdür",alt2:"ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.",
+        rol:'<span class="tip t-kar">KARAR VERİCİ</span>',
+        kimlik:[["Cep","0532 418 77 01"],["İş telefonu","0242 345 60 00 / 101"],
+                ["E-posta","h.toprak@ozkaninsaat.com.tr"],["Departman","Yönetim"],
+                ["Şehir","Antalya / Muratpaşa"],["Etiketler","VIP · Nihai onay"]],
+        durum:[["Tercih edilen kanal","E-posta"],["En uygun saat","14:00 – 17:00"],
+               ["İkincil kanal","Randevulu ziyaret"],["Son temas","10.08.2026 (4 gün)"],
+               ["Açık kayıt","1 teklif"],["Yetki","Sınırsız imza"]],
+        kvkk:[["Aydınlatma","Onaylı"],["Açık rıza","İzin Var ✔"],["İzin tarihi","12.03.2025"]],
+        bar:{h:"İlişki Gücü",ad:"Genel",yuzde:64,cls:"kri",
+             not:"Son 90 günde <b>5 temas</b> · yalnızca teklif aşamasında devreye giriyor."},
+        mini:{h:"Bağlı kurum",l:[{id:"k1",ad:"ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.",bilgi:"120.01.184 · kuruma geç →"}]}},
+
+    p3:{tip:"kisi",ad:"Osman Türkmen",kod:"KSI.00092",bh:"OT",renk:"#2e7d46",
+        alt1:"KSI.00092 · Muhasebe Müdürü",alt2:"DENİZ TEKSTİL San. Tic.",
+        rol:'<span class="tip t-muh">MUHASEBE</span>',
+        kimlik:[["Cep","0532 664 19 03"],["İş telefonu","0258 371 22 40 / 12"],
+                ["E-posta","osman.turkmen@deniztekstil.com.tr"],["Departman","Mali İşler"],
+                ["Şehir","Denizli / Merkezefendi"],["Etiketler","Mutabakat"]],
+        durum:[["Tercih edilen kanal","E-posta"],["En uygun saat","09:00 – 12:00"],
+               ["İkincil kanal","Telefon"],["Son temas","06.08.2026 (8 gün)"],
+               ["Açık kayıt","—"],["Yetki","Cari mutabakat"]],
+        kvkk:[["Aydınlatma","Onaylı"],["Açık rıza","İzin Var ✔"],["İzin tarihi","04.09.2024"]],
+        bar:{h:"İlişki Gücü",ad:"Genel",yuzde:71,cls:"ok",
+             not:"Ay sonu mutabakat yazışmaları düzenli · <b>7 temas</b> / 90 gün."},
+        mini:{h:"Bağlı kurum",l:[{id:"k3",ad:"DENİZ TEKSTİL San. Tic.",bilgi:"320.02.045 · kuruma geç →"}]}},
+
+    p4:{tip:"kisi",ad:"Selin Yalçın",kod:"KSI.00133",bh:"SY",renk:"#7a4fb0",
+        alt1:"KSI.00133 · İç Mimar",alt2:"Antalya Perde Evi Ltd.",
+        rol:'<span class="tip t-etk">ETKİLEYEN</span>',
+        kimlik:[["Cep","0533 207 61 45"],["İş telefonu","0242 244 18 60"],
+                ["E-posta","selin@antalyaperdeevi.com"],["Departman","Tasarım"],
+                ["Şehir","Antalya / Muratpaşa"],["Etiketler","Tasarım · Numune"]],
+        durum:[["Tercih edilen kanal","WhatsApp"],["En uygun saat","11:00 – 18:00"],
+               ["İkincil kanal","E-posta"],["Son temas","11.08.2026 (3 gün)"],
+               ["Açık kayıt","2 fırsat"],["Yetki","Ürün seçimi (onay yok)"]],
+        kvkk:[["Aydınlatma","Onaylı"],["Açık rıza","İzin Var ✔"],["İzin tarihi","20.01.2026"]],
+        bar:{h:"İlişki Gücü",ad:"Genel",yuzde:83,cls:"ok",
+             not:"Numune taleplerinin <b>%80</b>'i bu kişiden geliyor."},
+        mini:{h:"Bağlı kurum",l:[{id:"k4",ad:"Antalya Perde Evi Ltd.",bilgi:"120.01.077 · kuruma geç →"}]}},
+
+    p5:{tip:"kisi",ad:"Merve Aksoy",kod:"KSI.00210",bh:"MA",renk:"#7a5407",
+        alt1:"KSI.00210 · Mimar (serbest)",alt2:"— cariye bağlı değil",
+        rol:'<span class="tip t-etk">ETKİLEYEN</span>',
+        kimlik:[["Cep","0542 337 41 09"],["İş telefonu","—"],
+                ["E-posta","merve.aksoy@gmail.com"],["Departman","—"],
+                ["Şehir","Antalya / Konyaaltı"],["Etiketler","Serbest · Fuar 2026"]],
+        durum:[["Tercih edilen kanal","WhatsApp"],["En uygun saat","10:00 – 19:00"],
+               ["İkincil kanal","Telefon"],["Son temas","13.08.2026 (1 gün)"],
+               ["Açık kayıt","1 fırsat"],["Uyarı","Cariye bağlı değil — belge kesilemez"]],
+        kvkk:[["Aydınlatma","Onaylı"],["Açık rıza","İzin Yok"],["İzin tarihi","—"]],
+        bar:{h:"İlişki Gücü",ad:"Genel",yuzde:42,cls:"kri",
+             not:"Potansiyel — seçmeden önce <b>＋ Yeni Kurum</b> ile cari açılması önerilir."},
+        mini:{h:"Bağlı kurum",l:[]}},
+
+    p6:{tip:"kisi",ad:"Mehmet Yıldız",kod:"KSI.00003",bh:"MY",renk:"#2b6f42",
+        alt1:"KSI.00003 · Satış Temsilcisi (personel)",alt2:"Gentegre Perde & Mefruşat A.Ş.",
+        rol:'<span class="tip t-per">PERSONEL</span>',
+        kimlik:[["Cep","0532 118 44 90"],["Dahili","0242 500 10 00 / 214"],
+                ["E-posta","mehmet.yildiz@gentegre.com.tr"],["Departman","Satış"],
+                ["Şehir","Antalya / Kepez"],["Sicil no","PRS.00003"]],
+        durum:[["Tercih edilen kanal","Dahili telefon"],["Çalışma saati","08:30 – 18:00"],
+               ["İkincil kanal","Kurumsal WhatsApp"],["Son temas","14.08.2026 (bugün)"],
+               ["Portföy","46 cari · 12 açık teklif"],["Not","Kendi personelimiz — cari değildir"]],
+        kvkk:[["Aydınlatma","Personel sözleşmesi"],["Açık rıza","Kapsam dışı"],["İzin tarihi","01.02.2021"]],
+        bar:{h:"Hedef Gerçekleşme",ad:"2026/8",yuzde:74,cls:"ok",
+             not:"Aylık hedef <b>1.500.000,00 ₺</b> · gerçekleşen <b>1.110.000,00 ₺</b>."},
+        mini:{h:"Bağlı kurum (kendi firmamız)",l:[
+             {id:"pX",ad:"Gentegre Perde & Mefruşat A.Ş.",bilgi:"FIRMA · cari kartı yok"}]}}
+  };
+
+  var $  = function(s,k){ return (k||document).querySelector(s); };
+  var $$ = function(s,k){ return [].slice.call((k||document).querySelectorAll(s)); };
+
+  /* ---------- Turkce kucultme ---------- */
+  function nrm(s){
+    return (s||"").replace(/İ/g,"i").replace(/I/g,"ı").toLocaleLowerCase("tr")
+                  .replace(/\s+/g," ").trim();
+  }
+
+  var gridBody = $("#grid tbody");
+  var satirlar = $$("tr[data-id]", gridBody);
+  var q        = $("#q");
+  var kapsam   = "hepsi";
+  var turler   = {};              /* acik hizli suzgecler */
+  var pasifDahil = true;
+
+  /* ilk yuklemede unvan hucrelerinin ham metnini sakla */
+  satirlar.forEach(function(tr){
+    var c = $("td.hv", tr);
+    if(c) c.setAttribute("data-raw", c.textContent.replace(/\s+/g," ").trim());
+  });
+
+  /* ---------- arama metni (secili alanlara gore) ---------- */
+  function alanlar(){
+    return $$(".alan").filter(function(c){ return c.checked; })
+                      .map(function(c){ return c.dataset.f; });
+  }
+  function samanlik(tr){
+    var a = alanlar(), s = [];
+    for(var i=0;i<a.length;i++) s.push(tr.getAttribute("data-f-"+a[i])||"");
+    return " " + nrm(s.join(" ")) + " ";
+  }
+  function parcala(metin){
+    var t = nrm(metin);
+    if(t.length < 2) return [];
+    return t.split(" ").filter(function(p){ return p.replace(/\*/g,"").length >= 1; });
+  }
+  function uyar(hay, parca){
+    for(var i=0;i<parca.length;i++){
+      var p = parca[i], ic = false;
+      if(p.charAt(0)==="*"){ p = p.substring(1); ic = true; }
+      if(!p) continue;
+      var bulundu = ic ? (hay.indexOf(p) >= 0)
+                       : (hay.indexOf(" "+p) >= 0 || hay.indexOf("."+p) >= 0 ||
+                          hay.indexOf("@"+p) >= 0 || hay.indexOf("/"+p) >= 0);
+      if(!bulundu) return false;
+    }
+    return true;
+  }
+
+  /* ---------- <mark> ile vurgulama ---------- */
+  function kacir(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function vurgula(hucre, parca){
+    var ham = hucre.getAttribute("data-raw")||"";
+    if(!parca.length){ hucre.innerHTML = "<b>"+kacir(ham)+"</b>"; return; }
+    var n = nrm(ham.replace(/\s+/g," ")), isaret = new Array(ham.length);
+    /* nrm uzunlugu korur (tek karakter -> tek karakter) */
+    parca.forEach(function(p){
+      if(p.charAt(0)==="*") p = p.substring(1);
+      if(p.length < 2) return;
+      var i = n.indexOf(p);
+      while(i >= 0){
+        for(var j=i;j<i+p.length && j<ham.length;j++) isaret[j] = 1;
+        i = n.indexOf(p, i+p.length);
+      }
+    });
+    var out = "", acik = false;
+    for(var k=0;k<ham.length;k++){
+      if(isaret[k] && !acik){ out += "<mark>"; acik = true; }
+      if(!isaret[k] && acik){ out += "</mark>"; acik = false; }
+      out += kacir(ham.charAt(k));
+    }
+    if(acik) out += "</mark>";
+    hucre.innerHTML = "<b>"+out+"</b>";
+  }
+
+  /* ---------- ana arama / suzme ---------- */
+  function ara(suzsun){
+    var parca = parcala(q.value), kur = 0, kis = 0, gor = 0;
+    satirlar.forEach(function(tr){
+      var g = true;
+      if(suzsun){
+        if(!uyar(samanlik(tr), parca)) g = false;
+        if(g && kapsam !== "hepsi"){
+          var t = tr.dataset.tip;
+          if(kapsam === "kisi"  && t !== "kisi")  g = false;
+          if(kapsam === "kurum" && t !== "kurum") g = false;
+        }
+        var acikTur = Object.keys(turler).filter(function(k){ return turler[k]; });
+        if(g && acikTur.length && acikTur.indexOf(tr.dataset.tur) < 0) g = false;
+        if(g && !pasifDahil && tr.dataset.durum === "pasif") g = false;
+      }
+      tr.style.display = g ? "" : "none";
+      if(g){ gor++; if(tr.dataset.tip === "kurum") kur++; else kis++; }
+      var c = $("td.hv", tr); if(c) vurgula(c, parca);
+    });
+    var ms = (28 + (gor*1.1)).toFixed(0);
+    $("#say").innerHTML = gor + " sonuç (" + kur + " kurum · " + kis + " kişi) · " + ms + " ms";
+    $("#sbSonuc").textContent = gor;
+    $("#ftAd").textContent = kur + " kurum · " + kis + " kişi";
+    $("#sbKapsam").textContent = kapsam === "hepsi" ? "Hepsi" : (kapsam === "kurum" ? "Kurum" : "Kişi");
+    return gor;
+  }
+
+  /* ---------- sag onizleme paneli ---------- */
+  function kvSatir(l){
+    return l.map(function(p){
+      return '<div class="kv"><span>'+p[0]+'</span><b>'+p[1]+'</b></div>';
+    }).join("");
+  }
+  function panel(id){
+    var r = KAYIT[id]; if(!r) return;
+    $("#sideBaslik").textContent = "Seçili Kayıt — " + (r.tip==="kurum" ? "Kurum" : "Kişi");
+    $("#pFoto").innerHTML   = '<span class="av" style="width:46px;height:46px;font-size:16px;background:'+r.renk+'">'+r.bh+'</span>';
+    $("#pAd").textContent   = r.ad;
+    $("#pAlt1").textContent = r.alt1;
+    $("#pAlt2").innerHTML   = (r.tip==="kisi" && r.rol ? r.rol+" · " : "") + r.alt2;
+
+    $("#pKimlikH").textContent = r.tip==="kurum" ? "Kimlik / İletişim" : "Kişi Bilgileri";
+    $("#pKimlik").innerHTML    = kvSatir(r.kimlik);
+
+    $("#pDurumH").textContent  = r.tip==="kurum" ? "Hesap Durumu" : "İletişim Tercihi / Temas";
+    var d = kvSatir(r.durum);
+    if(r.tip==="kisi" && r.kvkk){
+      d += '<div class="tvsep"></div><h5 style="padding-left:12px">KVKK Durumu</h5>' + kvSatir(r.kvkk);
+    }
+    $("#pDurum").innerHTML = d;
+
+    $("#pBarH").textContent = r.bar.h;
+    $("#pBar").innerHTML =
+      '<div class="depo"><span class="ad">'+r.bar.ad+'</span>'+
+      '<div class="bar" style="flex:1"><span class="'+r.bar.cls+'" style="width:'+r.bar.yuzde+'%"></span></div>'+
+      '<span class="mk">%'+r.bar.yuzde+'</span></div>'+
+      '<div class="hint" style="padding:2px 12px 0">'+r.bar.not+'</div>';
+
+    $("#pMiniH").textContent = r.mini.h;
+    $("#pMini").innerHTML = r.mini.l.length
+      ? r.mini.l.map(function(m){
+          return '<div class="mini" data-git="'+m.id+'"><span class="av" style="width:18px;height:18px;font-size:8.5px;background:'+
+                 (m.id.charAt(0)==="k" ? "#2f6db3" : "#7a4fb0")+'">'+
+                 m.ad.replace(/[^A-Za-zÇĞİÖŞÜçğıöşü ]/g,"").split(" ").filter(function(x){return x;})
+                     .slice(0,2).map(function(x){return x.charAt(0);}).join("").toLocaleUpperCase("tr")+
+                 '</span><span class="m1">'+m.ad+'</span><span class="m2">'+m.bilgi+'</span></div>';
+        }).join("")
+      : '<div class="hint" style="padding:2px 12px 0">Bağlı kayıt yok.</div>';
+
+    $$(".mini", $("#pMini")).forEach(function(m){
+      m.addEventListener("click", function(){
+        var hedef = m.dataset.git;
+        var tr = gridBody.querySelector('tr[data-id="'+hedef+'"]');
+        if(tr){ sec(tr); }
+        else  { bildir("Bu kayıt geçerli sonuç listesinde yok — <b>tam rehberde</b> aranacak."); }
+      });
+    });
+
+    $$(".ctx").forEach(function(c){ c.textContent = r.kod + " — " + r.ad; });
+    $("#sbSecili").textContent = r.kod + " — " + r.ad;
+  }
+
+  /* ---------- satir secimi ---------- */
+  function sec(tr){
+    satirlar.forEach(function(x){ x.classList.remove("foc"); });
+    tr.classList.add("foc");
+    panel(tr.dataset.id);
+  }
+  function gorunur(){ return satirlar.filter(function(t){ return t.style.display !== "none"; }); }
+
+  satirlar.forEach(function(tr){
+    tr.addEventListener("click", function(){ sec(tr); });
+    tr.addEventListener("dblclick", function(){
+      sec(tr);
+      var r = KAYIT[tr.dataset.id];
+      bildir("✔ Seçildi: <b>"+r.kod+" — "+r.ad+"</b> · çağıran ekrana "+
+             (r.tip==="kurum" ? "CARIID" : "KISIID + CARIID")+" döndü (ModalResult=mrOk)");
+    });
+  });
+
+  /* ---------- bildirim ---------- */
+  var tmr = null;
+  function bildir(html){
+    var t = $("#toast");
+    t.innerHTML = html; t.classList.add("on");
+    clearTimeout(tmr); tmr = setTimeout(function(){ t.classList.remove("on"); }, 3200);
+  }
+
+  /* ---------- olaylar ---------- */
+  q.addEventListener("input", function(){ ara(true); });
+  q.addEventListener("keydown", function(e){ if(e.key === "Enter") ara(true); });
+  $("#btnAra").addEventListener("click", function(){ ara(true); });
+
+  $$(".kap").forEach(function(b){
+    b.addEventListener("click", function(){
+      $$(".kap").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on"); kapsam = b.dataset.kap; ara(true);
+    });
+  });
+  $$(".hz").forEach(function(b){
+    b.addEventListener("click", function(){
+      b.classList.toggle("on");
+      turler[b.dataset.tur] = b.classList.contains("on");
+      ara(true);
+    });
+  });
+  $("#pasDahil").addEventListener("click", function(){
+    this.classList.toggle("on"); pasifDahil = this.classList.contains("on"); ara(true);
+  });
+  $$(".alan").forEach(function(c){ c.addEventListener("change", function(){ ara(true); }); });
+  $("#sonAramalar").addEventListener("change", function(){
+    if(this.value){ q.value = this.value; ara(true); }
+  });
+  $("#tbYeniArama").addEventListener("click", function(){ q.value = ""; q.focus(); ara(true); });
+  $("#tbTemizle").addEventListener("click", function(){
+    $$(".hz").forEach(function(x){ x.classList.remove("on"); });
+    turler = {}; kapsam = "hepsi";
+    $$(".kap").forEach(function(x){ x.classList.toggle("on", x.dataset.kap === "hepsi"); });
+    $("#pasDahil").classList.add("on"); pasifDahil = true;
+    ara(true);
+  });
+
+  function secildiBildir(){
+    var tr = gridBody.querySelector("tr.foc"); if(!tr) return;
+    var r = KAYIT[tr.dataset.id];
+    bildir("✔ Seçildi: <b>"+r.kod+" — "+r.ad+"</b> · çağıran ekrana "+
+           (r.tip==="kurum" ? "CARIID" : "KISIID + CARIID")+" döndü (ModalResult=mrOk)");
+  }
+  $("#btnSec").addEventListener("click", secildiBildir);
+  $("#btnSecKapat").addEventListener("click", secildiBildir);
+  $("#btnKart").addEventListener("click", function(){
+    var tr = gridBody.querySelector("tr.foc"); if(!tr) return;
+    var r = KAYIT[tr.dataset.id];
+    bildir("👁 Kart açılıyor: <b>"+(r.tip==="kurum" ? "UCariKarti" : "UKisiKarti")+"</b> · "+r.kod);
+  });
+
+  /* sekmeler */
+  $$(".tab").forEach(function(t){
+    t.addEventListener("click", function(){
+      $$(".tab").forEach(function(x){ x.classList.remove("active"); });
+      $$(".pane").forEach(function(p){ p.classList.remove("active"); });
+      t.classList.add("active");
+      var p = document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+      if(p) p.classList.add("active");
+    });
+  });
+
+  /* klavye: yukari / asagi / Enter / F3 */
+  document.addEventListener("keydown", function(e){
+    if(e.key === "F3"){ e.preventDefault(); q.value = ""; q.focus(); ara(true); return; }
+    if(e.target === q && e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    var g = gorunur(); if(!g.length) return;
+    var i = g.indexOf(gridBody.querySelector("tr.foc"));
+    if(e.key === "ArrowDown"){ e.preventDefault(); sec(g[Math.min(i+1, g.length-1) < 0 ? 0 : Math.min(i+1, g.length-1)]); }
+    else if(e.key === "ArrowUp"){ e.preventDefault(); sec(g[Math.max(i-1, 0)]); }
+    else if(e.key === "Enter" && e.target !== q){ e.preventDefault(); secildiBildir(); }
+  });
+
+  /* ilk durum: "özkan" aranmis gibi — vurgu var, suzme yok */
+  ara(false);
+  panel("k1");
+})();
+</script>
+
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>.gmzgizle{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>.gmzgizle{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+</style>
+<script>(function(){
+function solMenuMu(e){
+  if(!e||e.nodeType!==1) return false;
+  if(/(^|\s)(gorev|solmenu|gtusgrup)(\s|$)/.test(e.className||"")) return true;
+  return !!e.querySelector(".gtus, .ltabs, .lpane");
+}
+function g(){
+  if(location.hash.indexOf("gomulu")>=0){
+    document.body.classList.add("gomulu");
+    [".wrap",".work"].forEach(function(sel){
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(w){
+        var ilk=w.firstElementChild;
+        if(ilk) ilk.classList.toggle("gmzgizle", solMenuMu(ilk));
+      });
+    });
+  } else document.body.classList.remove("gomulu");
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",g); else g();
+addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+
+<style id="gnPanoCss">
+.gnpk{position:absolute;z-index:40;width:22px;height:46px;
+  border:1px solid var(--line,#d8e0ea);border-radius:6px;
+  background:linear-gradient(#fff,#eef3f9);color:#2f6db3;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+  box-shadow:0 0 6px rgba(20,32,50,.10);user-select:none}
+.gnpk:hover{background:linear-gradient(#fff,#dce8f6);color:#14406f}
+.gnpk.sag{left:-11px;top:14px;border-right:0;border-radius:6px 0 0 6px}
+.gnpk.sol{right:-11px;top:14px;border-left:0;border-radius:0 6px 6px 0}
+.gnpanokap{position:relative}
+.gnpanokap.kapali{width:0!important;min-width:0!important;flex:none!important;
+  padding-left:0!important;padding-right:0!important;
+  border-left-width:0!important;border-right-width:0!important;overflow:visible!important}
+.gnpanokap.kapali>*:not(.gnpk){display:none!important}
+.gnpanokap.kapali .gnpk.sag{left:-23px;border-right:1px solid var(--line,#d8e0ea);border-radius:6px}
+.gnpanokap.kapali .gnpk.sol{right:-23px;border-left:1px solid var(--line,#d8e0ea);border-radius:6px}
+/* koyu tema */
+body.koyu .gnpk{background:linear-gradient(#26313f,#1f2836)!important;border-color:#33404f!important;color:#7fb2e6!important}
+body.koyu .gnpk:hover{background:linear-gradient(#2c3a4b,#242f3e)!important;color:#cfe0f4!important}
+</style>
+<script>
+/* ---- GN_PANO_AC_KAPA — SOL (klasor/arama) ve SAG (bilgi/icerik) panolari ---- */
+(function(){
+  function bul(){
+    var kap = document.querySelector('.wrap') || document.querySelector('.govde') || document.body;
+    var yanlar = [].slice.call(kap.children).filter(function(e){
+      return /\b(gorev|side|yan|nav)\b/.test(e.className || '');
+    });
+    var orta = kap.querySelector(':scope > .center, :scope > .main, :scope > .work');
+    var sol = null, sag = null;
+    yanlar.forEach(function(e){
+      if (/\bright\b/.test(e.className)) { sag = e; return; }
+      if (orta && e.compareDocumentPosition(orta) & Node.DOCUMENT_POSITION_FOLLOWING) sol = sol || e;
+      else if (orta) sag = sag || e;
+      else if (!sol) sol = e; else sag = sag || e;
+    });
+    return {sol: sol, sag: sag};
+  }
+
+  function tak(p, taraf, anahtar, ad){
+    if (!p || p.querySelector(':scope > .gnpk')) return;
+    p.classList.add('gnpanokap');
+    p.style.position = 'relative';
+    var d = document.createElement('div');
+    /* dugme SOL panonun SAG kenarinda, SAG panonun SOL kenarinda durur */
+    d.className = 'gnpk ' + (taraf === 'sol' ? 'sol' : 'sag');
+    function ciz(){
+      var k = p.classList.contains('kapali');
+      d.textContent = taraf === 'sol' ? (k ? '›' : '‹') : (k ? '‹' : '›');
+      d.title = (k ? ad + ' panosunu aç' : ad + ' panosunu kapat');
+    }
+    function uygula(kapali){
+      if (kapali){
+        p.classList.add('kapali');
+        ['width','min-width','max-width','flex-basis','padding-left','padding-right',
+         'border-left-width','border-right-width'].forEach(function(a){
+          p.style.setProperty(a, '0', 'important');
+        });
+        p.style.setProperty('flex', 'none', 'important');
+        p.style.setProperty('overflow', 'visible', 'important');
+      } else {
+        p.classList.remove('kapali');
+        p.style.cssText = '';
+      }
+      p.style.position = 'relative';
+      ciz();
+    }
+    d.addEventListener('click', function(){
+      var k = !p.classList.contains('kapali');
+      uygula(k);
+      try { sessionStorage.setItem(anahtar, k ? '1' : '0'); } catch(e){}
+    });
+    p.appendChild(d);
+    var bas = false;
+    try { bas = sessionStorage.getItem(anahtar) === '1'; } catch(e){}
+    uygula(bas);
+  }
+
+  function kur(){
+    var p = bul();
+    tak(p.sol, 'sol', 'gnPanoSol', 'Klasör / arama');
+    tak(p.sag, 'sag', 'gnPano',    'Bilgi');
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur);
+  else kur();
+})();
+</script>
+</body>
+</html>

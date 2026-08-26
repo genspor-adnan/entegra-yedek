@@ -914,6 +914,8 @@ begin
    20 : kocannumaralari.transfer := tabKocanAyarlari.FieldByName('KOCANNO').AsInteger;
    19 : kocannumaralari.SatisSiparis := tabKocanAyarlari.FieldByName('KOCANNO').AsInteger;
    9  : kocannumaralari.AlisSiparis := tabKocanAyarlari.FieldByName('KOCANNO').AsInteger;
+   10 : kocannumaralari.AlisIrsaliye := tabKocanAyarlari.FieldByName('KOCANNO').AsInteger;  // eksikti
+   166: kocannumaralari.UretimEmri := tabKocanAyarlari.FieldByName('KOCANNO').AsInteger;    // eksikti
    8  : kocannumaralari.giderpusulasi := tabKocanAyarlari.FieldByName('KOCANNO').AsInteger;
    39 : kocannumaralari.iadecekiverilen := tabKocanAyarlari.FieldByName('KOCANNO').AsInteger;
    83 : kocannumaralari.Servis := tabKocanAyarlari.FieldByName('KOCANNO').AsInteger;
@@ -1212,6 +1214,11 @@ var i,j : SmallInt;
     nod : TTreeNode;
 begin
    if AktifVeriMotor = vmPG then PgTumSorgulariCevir(Self);   // DFM-kaynakli sorgu SQL'leri (tab* + param-bagli) bir kez PG diyalektine
+
+   tabKocanAyarlari.UpdateOptions.UpdateTableName := 'KOCANAYARLARI';
+   tabKocanAyarlari.UpdateOptions.KeyFields := 'ID';
+   tabKocanAyarlari.UpdateOptions.AutoIncFields := 'ID';
+   tabKocanAyarlari.UpdateOptions.UpdateMode := upWhereKeyOnly;
 
    Tablo.GridTurkcelestir;
    if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.

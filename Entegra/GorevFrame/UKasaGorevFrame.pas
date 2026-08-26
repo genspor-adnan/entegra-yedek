@@ -1,4 +1,4 @@
-ï»¿unit UKasaGorevFrame;
+unit UKasaGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -8,26 +8,26 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus, JclSysInfo,
-  cxLookAndFeelPainters, cxButtons, JvExControls, JvButton, JvNavigationPane,
+  cxLookAndFeelPainters, cxButtons,
   ImgList, PngImageList,UKasa,UTakvim, ExtCtrls, CategoryButtons, cxCustomData,
-  System.ImageList;
+  System.ImageList, cxGraphics, cxLookAndFeels;
 
 type
   TKasaGorevFrame = class(TFrame)
-    btnKasaTanimlari: TJvNavPanelButton;
+    btnKasaTanimlari: TcxButton;
     PngImageList1: TPngImageList;
     Panel1: TPanel;
-    btnFinansListe: TJvNavPanelButton;
-    btnFinansTakvim: TJvNavPanelButton;
+    btnFinansListe: TcxButton;
+    btnFinansTakvim: TcxButton;
     PanelGiderBelge: TPanel;
     ListelerMenuGider: TCategoryButtons;
-    btnSorumlulukMaliyetleme: TJvNavPanelButton;
+    btnSorumlulukMaliyetleme: TcxButton;
     PanelGelirBelge: TPanel;
     ListelerMenuGelir: TCategoryButtons;
-    btnGelirMerkeziTanimlari: TJvNavPanelButton;
+    btnGelirMerkeziTanimlari: TcxButton;
     Panel2: TPanel;
-    btnOzelDokumler: TJvNavPanelButton;
-    btnDokumler: TJvNavPanelButton;
+    btnOzelDokumler: TcxButton;
+    btnDokumler: TcxButton;
     procedure btnKasaTanimlariClick(Sender: TObject);
     procedure btnSorumlulukMaliyetlemeClick(Sender: TObject);
     procedure btnGelirMerkeziTanimlariClick(Sender: TObject);
@@ -48,7 +48,7 @@ type
     procedure TumTusResimleriniDegistir(Menu: TCategoryButtons; ImajIndex: Integer);
   public
     { Public declarations }
-    FAltTur : SmallInt;    //AltTur: MasrafKalemleri:3,Sorumluluk Merkezleri:4,DaÄŸÄ±tÄ±mAnahtarÄ±:5
+    FAltTur : SmallInt;    //AltTur: MasrafKalemleri:3,Sorumluluk Merkezleri:4,DaðýtýmAnahtarý:5
   published
     property FrameBilgi : TAnaFrameBilgi read FFrameBilgi write SetFrameBilgi;
   end;
@@ -91,16 +91,10 @@ end;
 
 procedure TKasaGorevFrame.btnUpAndDown(Sender: TObject);
 begin
-  if (Sender<>nil)and(Sender.ClassName='TJvNavPanelButton') then begin
-    btnFinansListe.Down := False;
-    btnFinansTakvim.Down := False;
-    btnKasaTanimlari.Down := False;
-    btnSorumlulukMaliyetleme.Down := False;
-    btnGelirMerkeziTanimlari.Down := False;
-    btnDokumler.Down := False;
-    btnOzelDokumler.Down := False;
-    (Sender as TJvNavPanelButton).Down := True;
-  end;
+  // Tek buton aktif: frame'deki TUM TcxButton'lar tek elden yonetilir.
+  // (Eskiden sabit bir buton listesi sifirlaniyordu; listede olmayan butonlar
+  //  basili kaldigi icin ayni anda birden fazla buton aktif gorunuyordu.)
+  GorevTusuSec(Self, Sender);
 end;
 
 procedure TKasaGorevFrame.ListelerMenuGiderCategoryCollapase(Sender: TObject; const Category: TButtonCategory);
@@ -133,7 +127,7 @@ begin
    if Button = mbRight then
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=0
    else
-      TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TJVNavPanelButton(Sender).Tag;
+      TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TcxButton(Sender).Tag;
   TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'K';
   btnUpAndDown(Sender);
 
@@ -209,7 +203,7 @@ begin
   btnUpAndDown(Sender);
 
     with FFrameBilgi.IcerikGit(TMasrafGelirDlg) do begin
-        if Sender.ClassName='TJvNavPanelButton' then begin
+        if Sender is TcxButton then begin
           Tablo.FBtnIndex := -1;
           FAltTur := -1;
           TumTusResimleriniDegistir(ListelerMenuGider,10);
@@ -313,7 +307,7 @@ end;
 procedure TKasaGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   Value.IcerikFrameYoneticisi.OnMesaj.Add(MesajAlindi);
   btnKasaTanimlari.Visible := Tablo.YetkiVarmi(2301,YetkiTur_Gorme);
   //btnMasrafMerkeziTanimlari.Visible := Tablo.YetkiVarmi(2311,YetkiTur_Gorme);
@@ -329,9 +323,9 @@ begin
 
   if not Tablo.YetkiVarmi(2313,YetkiTur_Gorme) then begin
       ListelerMenuGider.Categories[0].items[2].Free; //
-      ListelerMenuGider.Categories[0].items[1].Free; //DaÄŸÄ±tÄ±m
+      ListelerMenuGider.Categories[0].items[1].Free; //Daðýtým
       ListelerMenuGelir.Categories[0].items[2].Free; //
-      ListelerMenuGelir.Categories[0].items[1].Free; //DaÄŸÄ±tÄ±m
+      ListelerMenuGelir.Categories[0].items[1].Free; //Daðýtým
   end;
 
 end;
@@ -339,3 +333,5 @@ end;
 initialization
   RegisterClass(TKasaGorevFrame);
 end.
+
+

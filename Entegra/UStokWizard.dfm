@@ -278,7 +278,6 @@ object StokWizardDlg: TStokWizardDlg
       ExplicitWidth = 0
       ExplicitHeight = 0
       object PageControlUst: TcxPageControl
-        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 70
         Width = 916
@@ -287,6 +286,7 @@ object StokWizardDlg: TStokWizardDlg
         TabOrder = 0
         Properties.ActivePage = TabSeetGenelBilgiler
         Properties.CustomButtons.Buttons = <>
+        Properties.Images = Tablo.PNGImageList2
         OnChange = TabStokKartChange
         ClientRectBottom = 463
         ClientRectLeft = 4
@@ -1164,10 +1164,6 @@ object StokWizardDlg: TStokWizardDlg
             object TabSheetCevrim: TcxTabSheet
               Caption = #199'evrimler'
               ImageIndex = 19
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object ToolBar12: TToolBar
                 AlignWithMargins = True
                 Left = 3
@@ -1346,10 +1342,6 @@ object StokWizardDlg: TStokWizardDlg
             object TabSheetYDil: TcxTabSheet
               Caption = 'Yabanc'#305' Dil'
               ImageIndex = 19
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object ToolBar4: TToolBar
                 AlignWithMargins = True
                 Left = 3
@@ -2296,10 +2288,6 @@ object StokWizardDlg: TStokWizardDlg
         object TabSheetMuhasebeHesaplari: TcxTabSheet
           Caption = 'Muhasebe Hesaplar'#305
           ImageIndex = 19
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object v: TcxGrid
             Left = 0
             Top = 24
@@ -2516,8 +2504,6 @@ object StokWizardDlg: TStokWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'Barkod Tan'#305'mlar'#305
       OnEnterPage = BarkodEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar5: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -2990,8 +2976,6 @@ object StokWizardDlg: TStokWizardDlg
       Font.Name = 'Trebuchet MS'
       Font.Style = []
       OnEnterPage = FiyatEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object PnlFiyat: TPanel
         Left = 0
         Top = 70
@@ -3517,8 +3501,6 @@ object StokWizardDlg: TStokWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnEnterPage = PaketEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel2: TPanel
         Left = 469
         Top = 70
@@ -4137,8 +4119,6 @@ object StokWizardDlg: TStokWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'KotaEkr'
       OnEnterPage = KotaEkrEnterPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar10: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -4268,8 +4248,6 @@ object StokWizardDlg: TStokWizardDlg
       Header.Subtitle.Text = ''
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       Caption = 'Boyut Ekran'#305
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel5: TPanel
         Left = 0
         Top = 70
@@ -4751,8 +4729,8 @@ object StokWizardDlg: TStokWizardDlg
   end
   object DtsStokUser: TDataSource
     DataSet = TabStokUser
-    Left = 112
-    Top = 9
+    Left = 144
+    Top = 33
   end
   object DtsFiyat: TDataSource
     DataSet = TabFiyat
@@ -4800,7 +4778,7 @@ object StokWizardDlg: TStokWizardDlg
       ''
       ''
       'order by 1 desc, 4')
-    Left = 617
+    Left = 705
     Top = 130
   end
   object DtsPaketKartlar: TDataSource
@@ -5176,8 +5154,8 @@ object StokWizardDlg: TStokWizardDlg
   end
   object PopupStokCevrim: TPopupMenu
     Images = Tablo.PNGImageList2
-    Left = 492
-    Top = 129
+    Left = 572
+    Top = 81
     object BakaKarttanKopyala1: TMenuItem
       Caption = 'Ba'#351'ka Karttan Kopyala'
       ImageIndex = 10

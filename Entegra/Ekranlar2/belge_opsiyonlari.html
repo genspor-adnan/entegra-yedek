@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Belge Opsiyonları — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    --warn:#b5731a;
+    /* Delphi GridSeriGetContentStyle karsiliklari */
+    --seri-fat:#bedaf6;   /* RGB(190,218,246) e-Fatura   */
+    --seri-ars:#bee8cb;   /* RGB(190,232,203) e-Arsiv    */
+    --seri-irs:#fbdbb0;   /* RGB(251,219,176) e-Irsaliye */
+    --seri-pas:#d6d6d6;   /* RGB(214,214,214) pasif      */
+    --seri-fat-t:#10305c; --seri-ars-t:#134a29; --seri-irs-t:#78440a; --seri-pas-t:#7a7a7a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1080px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .ara{margin-left:auto;border:1px solid var(--line);border-radius:3px;background:#fff;height:24px;
+    padding:0 8px;font-size:11.5px;color:var(--muted);display:flex;align-items:center;min-width:190px}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;
+    display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;
+    font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:14px}
+  .pane.active{display:block}
+  .row{display:flex;gap:14px;align-items:flex-start}
+  .col{flex:1;min-width:0}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);
+    border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;letter-spacing:.3px;margin-left:auto;
+    background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grid2{display:grid;grid-template-columns:170px 1fr;gap:8px 10px;align-items:center}
+  .grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .grid2 label.req::after{content:" *";color:var(--req)}
+  .full{grid-column:1 / -1}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;color:var(--ink);display:flex;align-items:center;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.ro{background:#f4f6f9;color:var(--muted)}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:3px;color:var(--muted);font-size:10px}
+  .chk{display:flex;align-items:center;gap:7px;font-size:11.5px;padding:3px 0}
+  .chks3{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 12px}
+  .chks2{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 12px}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}
+  .dg tr:hover td{background:#f2f7fd}
+  .dg .c{text-align:center}
+  /* seri gridi satir renkleri (Delphi ile birebir) */
+  .dg tr.r-fat td{background:var(--seri-fat);color:var(--seri-fat-t)}
+  .dg tr.r-ars td{background:var(--seri-ars);color:var(--seri-ars-t)}
+  .dg tr.r-irs td{background:var(--seri-irs);color:var(--seri-irs-t)}
+  .dg tr.r-pas td{background:var(--seri-pas);color:var(--seri-pas-t)}
+  .dg tr.r-fat:hover td,.dg tr.r-ars:hover td,.dg tr.r-irs:hover td{filter:brightness(.97)}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .gridtb{display:flex;gap:4px;padding:0 0 6px;align-items:center;flex-wrap:wrap}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .pill{font-size:10px;padding:1px 7px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-off{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-y{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-b{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}
+  .p-o{background:#fdf1e2;color:#b5731a;border-color:#f2ddbf}
+  .lgnd{display:flex;gap:12px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .subtabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:12px;flex-wrap:wrap}
+  .stab{padding:5px 11px;font-size:11.5px;background:#eef3f8;border:1px solid var(--line);border-bottom:none;
+    border-radius:3px 3px 0 0;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .stab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .spane{display:none}.spane.active{display:block}
+  .code{font-family:Consolas,"Courier New",monospace;font-size:11px;background:#fff;border:1px solid var(--line);
+    border-radius:3px;padding:7px 9px;color:#33475c;white-space:pre;overflow:auto}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Belge Opsiyonları
+    <span class="sp">UOpsiyonFatura · GENINI · Alış/Satış modülü</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn">✖ Kapat</div>
+    <div class="sepv"></div>
+    <div class="btn">🧪 Bağlantı Testi</div>
+    <div class="btn">📤 e-Belge Kuyruğu</div>
+    <div class="ara">🔎 Ayarlarda ara… (ör. "seri", "XSLT")</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="genel">⚙ Genel</div>
+    <div class="tab" data-t="gelen">📥 Gelen Fatura</div>
+    <div class="tab" data-t="giden">📤 Giden Fatura</div>
+    <div class="tab" data-t="ebelge">🧾 e-Belge <span class="b">7</span></div>
+    <div class="tab" data-t="siparis">📦 Sipariş</div>
+  </div>
+
+  <!-- ================= GENEL ================= -->
+  <div class="pane active" data-p="genel">
+    <div class="row">
+      <div class="col">
+        <div class="grp">
+          <h4>Varsayılan Klasörler <span class="tag">GENINI</span></h4>
+          <div class="body grid2">
+            <label>Fatura Varsayılan Klasör</label><div class="inp combo">Satış Belgeleri</div>
+            <label>Sipariş Varsayılan Klasör</label><div class="inp combo">Açık Siparişler</div>
+            <div class="full"><label class="chk"><input type="checkbox" checked> Tüm faturalara ödeme planı oluşturmayı zorunlu tut</label></div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Vade Kullanımı</h4>
+          <div class="body">
+            <label class="chk"><input type="radio" name="vade"> Her satırda kullan</label>
+            <label class="chk"><input type="radio" name="vade" checked> Başlıkta kullan</label>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Ondalık Basamak Sayısı</h4>
+          <div class="body grid2" style="grid-template-columns:110px 70px 110px 70px">
+            <label>Tutar</label><div class="inp">2</div>
+            <label>Birim Fiyat</label><div class="inp">4</div>
+            <label>Miktar</label><div class="inp">2</div>
+            <div></div><div></div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Boşluk Kontrolleri <span class="tag">kayıt öncesi uyarı</span></h4>
+          <div class="body chks3">
+            <label class="chk"><input type="checkbox" checked> Başlık</label>
+            <label class="chk"><input type="checkbox" checked> Adres</label>
+            <label class="chk"><input type="checkbox"> İl</label>
+            <label class="chk"><input type="checkbox"> İlçe</label>
+            <label class="chk"><input type="checkbox" checked> Vergi No</label>
+            <label class="chk"><input type="checkbox" checked> Vergi Dairesi</label>
+            <label class="chk"><input type="checkbox"> Fiyat Adı</label>
+            <label class="chk"><input type="checkbox" checked> Depo</label>
+            <label class="chk"><input type="checkbox" checked> Vade</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="grp">
+          <h4>Belge Davranışı</h4>
+          <div class="body">
+            <div class="grid2" style="margin-bottom:6px">
+              <label>Belge Oluşum Şekli</label><div class="inp combo">Kaydederken oluştur</div>
+              <label>Proje / Fırsat Seçimi</label><div class="inp combo">Proje veya Fırsat</div>
+              <label>Poz No otomatik. Aralık</label><div class="inp" style="max-width:90px">10</div>
+            </div>
+            <label class="chk"><input type="checkbox" checked> Stok eklerken varsayılan olarak kalmayanları da göster</label>
+            <label class="chk"><input type="checkbox" checked> Alış/Satış belgelerinde dövizli fiyat bilgisi bulunsun</label>
+            <label class="chk"><input type="checkbox" checked> Dönüşüm bilgileri listelerde gözüksün</label>
+            <label class="chk"><input type="checkbox" checked> Fişlerde ücret girerken otomatik "KDV dahil" işaretli olsun</label>
+            <label class="chk"><input type="checkbox"> Eksi iskontoya izin ver</label>
+            <label class="chk"><input type="checkbox" checked> Proje bilgileri fatura ve tahakkukta gözüksün</label>
+            <label class="chk"><input type="checkbox"> Demirbaş bilgileri fatura ve tahakkukta gözüksün</label>
+            <label class="chk"><input type="checkbox"> En × Boy yüzey bilgileri girilebilsin</label>
+            <label class="chk"><input type="checkbox"> Başlıkta hasta bilgisi sekmesi</label>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Özelkod Giriş Seçimi</h4>
+          <div class="body grid2">
+            <label>Özelkod 1</label>
+            <div style="display:flex;gap:6px"><div class="inp combo" style="flex:1">Proje Kodu</div><span class="minibtn">Liste Gir…</span></div>
+            <label>Özelkod 2</label>
+            <div style="display:flex;gap:6px"><div class="inp combo" style="flex:1">Masraf Merkezi</div><span class="minibtn">Liste Gir…</span></div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Tanım Ekranları</h4>
+          <div class="body" style="display:flex;gap:6px;flex-wrap:wrap">
+            <span class="minibtn">📊 Excel Kolon Ayarla</span>
+            <span class="minibtn">💸 İskonto Yetkileri</span>
+            <span class="minibtn">✉ Mail Şablonu</span>
+            <span class="minibtn">🧮 Tevkifat Oranları</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= GELEN FATURA ================= -->
+  <div class="pane" data-p="gelen">
+    <div class="row">
+      <div class="col">
+        <div class="grp">
+          <h4>Listeleri Ayarlama <span class="tag">KULLANICI_ARAMA.MODUL</span></h4>
+          <div class="body grid2">
+            <label>Bölüm</label><div class="inp combo">Gelen Fatura Listesi</div>
+            <label>Varsayılan Tarih Aralığı</label><div class="inp combo">Son 30 gün</div>
+            <label>Sayfa başına kayıt</label><div class="inp" style="max-width:90px">200</div>
+            <div class="full"><label class="chk"><input type="checkbox" checked> "Tümünü Yükle" seçeneği görünsün (TopN = 0)</label></div>
+            <div class="hint full">TopN = 0 ⇒ sorguda TOP/LIMIT uygulanmaz. Liste SP'leri
+              <b>sp_Prog_GelenFatura_Liste_Json2</b> / <b>fn_prog_gelenfatura_liste_json2</b> bunu koşullu kurgular.</div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Detay</h4>
+          <div class="body">
+            <label class="chk"><input type="checkbox" checked> Detay satırlarını açılışta göster</label>
+            <label class="chk"><input type="checkbox" checked> Eşleşmeyen stokları kırmızı göster</label>
+            <label class="chk"><input type="checkbox"> Gelen faturayı otomatik projeye bağla</label>
+            <div class="gridtb" style="margin-top:8px">
+              <span class="minibtn">🔗 Projeye Bağla</span>
+              <span class="minibtn">✎ Detay Düzelt</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Stopaj Hesapları <span class="tag">HESAPPLANI</span></h4>
+          <div class="body grid2">
+            <label>S. Meslek Stopajı</label><div class="inp combo">360.01.001</div>
+            <label>Kira Stopajı</label><div class="inp combo">360.01.002</div>
+            <label>Gider Pusulası Stopajı</label><div class="inp combo">360.01.003</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="grp">
+          <h4>Gelen Fatura Ek Alanları <span class="tag">FATBASLIK ek alan</span></h4>
+          <div class="body">
+            <div class="gridtb"><span class="minibtn">➕ Ekle</span><span class="minibtn">🗑 Sil</span><span class="minibtn">⬆</span><span class="minibtn">⬇</span></div>
+            <div class="dg">
+              <table>
+                <tr><th style="width:36px">#</th><th>Alan Adı</th><th>Tip</th><th class="c">Zorunlu</th><th class="c">Görünür</th></tr>
+                <tr><td class="c">1</td><td>Sevkiyat No</td><td>Metin (30)</td><td class="c"></td><td class="c">✔</td></tr>
+                <tr><td class="c">2</td><td>Gümrük Beyanname No</td><td>Metin (25)</td><td class="c"></td><td class="c">✔</td></tr>
+                <tr><td class="c">3</td><td>Onaylayan</td><td>Kullanıcı</td><td class="c">✔</td><td class="c">✔</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Gelen Sipariş Ek Alanları</h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <tr><th style="width:36px">#</th><th>Alan Adı</th><th>Tip</th><th class="c">Zorunlu</th><th class="c">Görünür</th></tr>
+                <tr><td class="c">1</td><td>Müşteri Sipariş No</td><td>Metin (30)</td><td class="c">✔</td><td class="c">✔</td></tr>
+                <tr><td class="c">2</td><td>Termin Tarihi</td><td>Tarih</td><td class="c"></td><td class="c">✔</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= GIDEN FATURA ================= -->
+  <div class="pane" data-p="giden">
+    <div class="row">
+      <div class="col">
+        <div class="grp">
+          <h4>Listeleri Ayarlama <span class="tag">KULLANICI_ARAMA.MODUL</span></h4>
+          <div class="body grid2">
+            <label>Bölüm</label><div class="inp combo">Giden Fatura Listesi</div>
+            <label>Varsayılan Tarih Aralığı</label><div class="inp combo">İçinde bulunulan ay</div>
+            <label>Sayfa başına kayıt</label><div class="inp" style="max-width:90px">200</div>
+            <div class="full"><label class="chk"><input type="checkbox" checked> Detay filtresi kullanılmadıkça detay JOIN'i çalıştırma</label></div>
+            <div class="hint full">Müşteriler SQL Server Express kullandığı için koşulsuz <b>DISTINCT</b> + geniş detay JOIN'i
+              büyük memory grant istiyor ve liste <b>RESOURCE_SEMAPHORE</b>'da bekliyor. JOIN, onu gerektiren filtreye bağlı.</div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Detay</h4>
+          <div class="body">
+            <label class="chk"><input type="checkbox" checked> Kapanan belgeleri soluk göster</label>
+            <label class="chk"><input type="checkbox" checked> e-Belge durumunu listede rozet olarak göster</label>
+            <label class="chk"><input type="checkbox"> Ödeme planını detayda aç</label>
+            <div class="gridtb" style="margin-top:8px">
+              <span class="minibtn">🔗 Projeye Bağla</span>
+              <span class="minibtn">✎ Detay Düzelt</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grp">
+          <h4>Giden Fatura Ek Alanları</h4>
+          <div class="body">
+            <div class="gridtb"><span class="minibtn">➕ Ekle</span><span class="minibtn">🗑 Sil</span><span class="minibtn">⬆</span><span class="minibtn">⬇</span></div>
+            <div class="dg">
+              <table>
+                <tr><th style="width:36px">#</th><th>Alan Adı</th><th>Tip</th><th class="c">Zorunlu</th><th class="c">Görünür</th></tr>
+                <tr><td class="c">1</td><td>Sevk Aracı Plaka</td><td>Metin (15)</td><td class="c"></td><td class="c">✔</td></tr>
+                <tr><td class="c">2</td><td>Teslim Şartı</td><td>Liste</td><td class="c"></td><td class="c">✔</td></tr>
+                <tr><td class="c">3</td><td>İhracat Ülke</td><td>Liste</td><td class="c"></td><td class="c">✔</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="grp">
+          <h4>Giden Sipariş Ek Alanları</h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <tr><th style="width:36px">#</th><th>Alan Adı</th><th>Tip</th><th class="c">Zorunlu</th><th class="c">Görünür</th></tr>
+                <tr><td class="c">1</td><td>Tedarikçi Ref.</td><td>Metin (30)</td><td class="c"></td><td class="c">✔</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= E-BELGE ================= -->
+  <div class="pane" data-p="ebelge">
+    <div class="subtabs">
+      <div class="stab active" data-s="e1">Genel</div>
+      <div class="stab" data-s="e2">Seri Bilgileri</div>
+      <div class="stab" data-s="e3">Alan Eşleştirme</div>
+      <div class="stab" data-s="e4">e-Fatura</div>
+      <div class="stab" data-s="e5">e-Arşiv Fatura</div>
+      <div class="stab" data-s="e6">e-SMM</div>
+      <div class="stab" data-s="e7">e-İrsaliye</div>
+    </div>
+
+    <!-- e-Belge / Genel -->
+    <div class="spane active" data-sp="e1">
+      <div class="row">
+        <div class="col">
+          <div class="grp">
+            <h4>Bağlantı <span class="tag">Entegratör</span></h4>
+            <div class="body grid2">
+              <label class="req">Entegratör</label><div class="inp combo">İzibiz</div>
+              <label class="req">Kullanıcı</label><div class="inp">firma_ws</div>
+              <label class="req">Şifre</label><div class="inp">••••••••••</div>
+              <label class="req">Vergi / Kimlik No</label><div class="inp">1234567890</div>
+              <div class="full" style="display:flex;gap:8px;align-items:center">
+                <label class="chk"><input type="checkbox" checked> e-Fatura Aktif</label>
+                <label class="chk"><input type="checkbox" checked> Test ortamı</label>
+                <span class="minibtn" style="margin-left:auto">🧪 Bağlantıyı Test Et</span>
+                <span class="pill p-ok">● Bağlantı başarılı</span>
+              </div>
+            </div>
+          </div>
+          <div class="grp">
+            <h4>Sorgular</h4>
+            <div class="body grid2">
+              <label>Başlık SQL Sorgusu</label><div class="inp ro">sp_Prog_EBelge_Baslik_Json2</div>
+              <label>Detay SQL Sorgusu</label><div class="inp ro">sp_Prog_EBelge_Detay_Json2</div>
+              <div class="hint full">MSSQL'de SP, PG'de <b>fn_prog_ebelge_*_json2</b> çağrılır; seçim <b>AktifVeriMotor</b>'a göre yapılır.</div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="grp">
+            <h4>XSLT Listesi <span class="tag">EBELGEXSLT</span></h4>
+            <div class="body">
+              <div class="gridtb">
+                <span class="minibtn">📂 Dosyadan XSLT Yükle</span>
+                <span class="minibtn">💾 XSLT'yi Dosyaya Kaydet</span>
+              </div>
+              <div class="dg">
+                <table>
+                  <tr><th>Türü</th><th>Adı</th><th class="c">Versiyon</th><th class="c">İçerik</th></tr>
+                  <tr><td>e-Fatura</td><td>Ekspert_general.xslt</td><td class="c">1.4</td><td class="c">📄 42 KB</td></tr>
+                  <tr><td>e-Arşiv</td><td>Ekspert_general_earsiv.xslt</td><td class="c">1.2</td><td class="c">📄 38 KB</td></tr>
+                  <tr><td>e-İrsaliye</td><td>Ekspert_general_dmo.xslt</td><td class="c">1.0</td><td class="c">📄 31 KB</td></tr>
+                  <tr><td>e-SMM</td><td>smm_default.xslt</td><td class="c">1.0</td><td class="c">📄 22 KB</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- e-Belge / Seri Bilgileri  -->
+    <div class="spane" data-sp="e2">
+      <div class="grp">
+        <h4>Seri Kuralları <span class="tag">GENINI · BOLUM = e-Belge türü</span></h4>
+        <div class="body">
+          <div class="gridtb">
+            <span class="minibtn">➕ Ekle</span><span class="minibtn">🗑 Sil</span>
+            <span class="minibtn">💾 Kaydet</span><span class="minibtn">↩ İptal</span>
+            <span class="minibtn">👤 Kullanıcı Seç…</span>
+            <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Satır rengi = e-Belge türü · gri = pasif</span>
+          </div>
+          <div class="dg">
+            <table>
+              <tr><th style="width:130px">e-Belge Türü</th><th style="width:80px">Seri</th><th>Senaryo</th>
+                  <th>Kullanıcı</th><th class="c" style="width:60px">Sıra</th><th class="c" style="width:60px">Aktif</th></tr>
+              <tr class="r-fat foc"><td>e-Fatura</td><td><b>GNT</b></td><td>Ticari</td><td>(tümü)</td><td class="c">1</td><td class="c">✔</td></tr>
+              <tr class="r-fat"><td>e-Fatura</td><td><b>GNY</b></td><td>Temel</td><td>Mehmet Yıldız</td><td class="c">2</td><td class="c">✔</td></tr>
+              <tr class="r-fat"><td>e-Fatura</td><td><b>GEE</b></td><td>İhracat</td><td>(tümü)</td><td class="c">3</td><td class="c">✔</td></tr>
+              <tr class="r-ars"><td>e-Arşiv</td><td><b>GEN</b></td><td>Normal</td><td>(tümü)</td><td class="c">1</td><td class="c">✔</td></tr>
+              <tr class="r-ars"><td>e-Arşiv</td><td><b>EKA</b></td><td>İnternet Satış</td><td>Elif Aksoy</td><td class="c">2</td><td class="c">✔</td></tr>
+              <tr class="r-irs"><td>e-İrsaliye</td><td><b>GIR</b></td><td>Temel</td><td>(tümü)</td><td class="c">1</td><td class="c">✔</td></tr>
+              <tr class="r-irs"><td>e-İrsaliye</td><td><b>DEP</b></td><td>Depolar arası</td><td>Depo Sorumlusu</td><td class="c">2</td><td class="c">✔</td></tr>
+              <tr class="r-pas"><td>e-Fatura</td><td><b>DEF</b></td><td>Ticari</td><td>(tümü)</td><td class="c">9</td><td class="c">—</td></tr>
+              <tr class="r-pas"><td>e-Arşiv</td><td><b>MNG</b></td><td>Normal</td><td>(tümü)</td><td class="c">9</td><td class="c">—</td></tr>
+            </table>
+          </div>
+
+          <div class="lgnd">
+            <span><span class="sw" style="background:var(--seri-fat)"></span>e-Fatura · RGB(190,218,246)</span>
+            <span><span class="sw" style="background:var(--seri-ars)"></span>e-Arşiv · RGB(190,232,203)</span>
+            <span><span class="sw" style="background:var(--seri-irs)"></span>e-İrsaliye · RGB(251,219,176)</span>
+            <span><span class="sw" style="background:var(--seri-pas)"></span>Pasif · RGB(214,214,214) + gri yazı — <b>en sonda</b></span>
+          </div>
+
+          <div class="hint">
+            Sıralama: <b>AKTIF ↓ · BOLUM ↓ · SIRA · SERI</b> (FDMemTable <i>idxSeriSirala</i>) — aktifler belge türüne göre
+            e-Fatura → e-Arşiv → e-İrsaliye, pasifler en altta.<br>
+            Kayıt biçimi <b>ANAHTAR = 'SERI,SENARYO,KULLANICIID[,AKTIF]'</b> — 4. alan yoksa (eski kayıt) satır aktif sayılır.
+            Kullanımdaki bir seri silinemez; <b>FATBASLIK</b>'ta belge varsa yalnızca "Aktif" işareti kaldırılıp pasife alınabilir.
+          </div>
+          <div class="code" style="margin-top:8px">GridSeriGetContentStyle(...)
+  AKTIF = False           → FStilSeriPasif    (gri zemin + clGray yazı)
+  BOLUM = EArsivSeri…     → FStilSeriArsiv
+  BOLUM = EIrsaliyeSeri…  → FStilSeriIrsaliye
+  aksi halde              → FStilSeriFatura</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alan Eslestirme -->
+    <div class="spane" data-sp="e3">
+      <div class="grp">
+        <h4>Alan Eşleştirme <span class="tag">UBL alan → kaynak</span></h4>
+        <div class="body">
+          <div class="gridtb">
+            <span class="minibtn">➕ Ekle</span><span class="minibtn">🗑 Sil</span>
+            <span class="minibtn">⚡ Alan Doldur</span><span class="minibtn">💾 Kaydet</span>
+          </div>
+          <div class="dg">
+            <table>
+              <tr><th>Belge Türü</th><th>Cari Özel Kod</th><th>Alan Tipi</th><th>UBL Alanı</th><th>Kaynak</th><th>Varsayılan</th><th class="c">Aktif</th></tr>
+              <tr class="r-fat"><td>e-Fatura</td><td>(tümü)</td><td>Başlık</td><td>cbc:Note</td><td>FATBASLIK.ACIKLAMA</td><td>—</td><td class="c">✔</td></tr>
+              <tr class="r-fat"><td>e-Fatura</td><td>İHR</td><td>Başlık</td><td>cac:Delivery/cbc:ID</td><td>FATBASLIK.SEVKNO</td><td>—</td><td class="c">✔</td></tr>
+              <tr class="r-ars"><td>e-Arşiv</td><td>(tümü)</td><td>Satır</td><td>cbc:Name</td><td>STOK.ADI</td><td>—</td><td class="c">✔</td></tr>
+              <tr class="r-irs"><td>e-İrsaliye</td><td>(tümü)</td><td>Başlık</td><td>cac:Shipment/cbc:ID</td><td>FATBASLIK.PLAKA</td><td>34ABC123</td><td class="c">✔</td></tr>
+              <tr class="r-pas"><td>e-Fatura</td><td>ESK</td><td>Başlık</td><td>cbc:CustomizationID</td><td>—</td><td>TR1.2</td><td class="c">—</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- e-Fatura -->
+    <div class="spane" data-sp="e4">
+      <div class="row">
+        <div class="col">
+          <div class="grp">
+            <h4>Gönderim <span class="tag">EBELGE · REHBERALIAS</span></h4>
+            <div class="body grid2">
+              <label>Varsayılan Senaryo</label><div class="inp combo">Ticari (TICARIFATURA)</div>
+              <label>Giden e-Fatura XSLT</label><div class="inp combo">Ekspert_general.xslt</div>
+              <label>Gelen e-Fatura XSLT</label><div class="inp combo">Ekspert_general.xslt</div>
+              <label>Cari Eklerken Kod</label><div class="inp combo">Vergi No'dan üret</div>
+              <div class="full">
+                <label class="chk"><input type="checkbox" checked> İhracat faturaları da gönderilsin</label>
+                <label class="chk"><input type="checkbox" checked> Gelen faturayı al</label>
+              </div>
+            </div>
+          </div>
+          <div class="grp">
+            <h4>Sabit Notlar</h4>
+            <div class="body">
+              <div class="inp" style="height:auto;min-height:52px;align-items:flex-start;padding:6px;line-height:1.5">
+                Bu fatura 6102 sayılı TTK kapsamında düzenlenmiştir.<br>
+                Ödemeler yalnızca firma banka hesaplarına yapılır.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="grp">
+            <h4>Servis Adresleri</h4>
+            <div class="body grid2" style="grid-template-columns:120px 1fr">
+              <label>Test Servis URL</label><div class="inp">https://efaturatest.izibiz.com.tr/EInvoiceWS</div>
+              <label>Üretim Servis URL</label><div class="inp">https://efatura.izibiz.com.tr/EInvoiceWS</div>
+            </div>
+          </div>
+          <div class="grp">
+            <h4>Durum Özeti <span class="tag">son 30 gün</span></h4>
+            <div class="body">
+              <div class="dg">
+                <table>
+                  <tr><th>Durum</th><th class="c">Adet</th></tr>
+                  <tr><td><span class="pill p-ok">Onaylandı</span></td><td class="c">1.284</td></tr>
+                  <tr><td><span class="pill p-y">Bekliyor</span></td><td class="c">37</td></tr>
+                  <tr><td><span class="pill p-b">Gönderildi</span></td><td class="c">96</td></tr>
+                  <tr><td><span class="pill p-off">Reddedildi</span></td><td class="c">4</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- e-Arsiv -->
+    <div class="spane" data-sp="e5">
+      <div class="row">
+        <div class="col">
+          <div class="grp">
+            <h4>e-Arşiv Fatura</h4>
+            <div class="body grid2">
+              <label>Giden e-Arşiv XSLT</label><div class="inp combo">Ekspert_general_earsiv.xslt</div>
+              <label>Gelen e-Arşiv XSLT</label><div class="inp combo">Ekspert_general_earsiv.xslt</div>
+              <div class="full"><label class="chk"><input type="checkbox" checked> Gelen e-Arşivi al</label></div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="grp">
+            <h4>Servis Adresleri</h4>
+            <div class="body grid2" style="grid-template-columns:120px 1fr">
+              <label>Test Giden URL</label><div class="inp">https://earsivtest.izibiz.com.tr/EArchiveWS</div>
+              <label>Üretim Giden URL</label><div class="inp">https://earsiv.izibiz.com.tr/EArchiveWS</div>
+              <label>Üretim Gelen URL</label><div class="inp">https://earsiv.izibiz.com.tr/EArchiveInbox</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- e-SMM -->
+    <div class="spane" data-sp="e6">
+      <div class="grp">
+        <h4>e-SMM (Serbest Meslek Makbuzu)</h4>
+        <div class="body grid2">
+          <label>Giden e-SMM XSLT</label><div class="inp combo">smm_default.xslt</div>
+          <label>Varsayılan Stopaj Oranı</label><div class="inp" style="max-width:90px">%20</div>
+          <div class="full"><label class="chk"><input type="checkbox"> e-SMM aktif</label></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- e-Irsaliye -->
+    <div class="spane" data-sp="e7">
+      <div class="row">
+        <div class="col">
+          <div class="grp">
+            <h4>e-İrsaliye</h4>
+            <div class="body grid2">
+              <label>Giden e-İrsaliye XSLT</label><div class="inp combo">Ekspert_general_dmo.xslt</div>
+              <label>Gelen e-İrsaliye XSLT</label><div class="inp combo">Ekspert_general_dmo.xslt</div>
+              <div class="full">
+                <label class="chk"><input type="checkbox" checked> e-İrsaliyeyi aktif et</label>
+                <label class="chk"><input type="checkbox" checked> Gelen e-İrsaliyeyi al</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="grp">
+            <h4>Portal</h4>
+            <div class="body grid2" style="grid-template-columns:120px 1fr">
+              <label>GİB Portal Adresi</label><div class="inp">https://portal.efatura.gov.tr</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SIPARIS ================= -->
+  <div class="pane" data-p="siparis">
+    <div class="subtabs">
+      <div class="stab active" data-s="s1">Alınan Sipariş Durum Bağlantıları</div>
+      <div class="stab" data-s="s2">Verilen Sipariş Durum Bağlantıları</div>
+    </div>
+
+    <div class="spane active" data-sp="s1">
+      <div class="grp">
+        <h4>Durum Akışı <span class="tag">SIPARISDURUM</span></h4>
+        <div class="body">
+          <div class="gridtb">
+            <span class="minibtn">➕ Ekle</span><span class="minibtn">🗑 Sil</span>
+            <span class="minibtn">🧩 Eksik Bağlantıları Oluştur</span>
+            <span class="minibtn">🧹 Kopmuş Bağlantıları Temizle</span>
+            <span class="minibtn">✎ Alınan Sipariş Durumlar…</span>
+          </div>
+          <div class="dg">
+            <table>
+              <tr><th class="c" style="width:46px">Aktif</th><th>Kaynak</th><th>Hedef</th>
+                  <th class="c">Bildirim (iç)</th><th class="c">Bildirim (dış)</th>
+                  <th class="c">Açılış</th><th class="c">Kapanış</th><th class="c">Kaynak Kapat</th><th class="c">Tarihe Zorla</th></tr>
+              <tr><td class="c">✔</td><td>Teklif Aşaması</td><td>Onaylandı</td><td class="c">✔</td><td class="c"></td><td class="c">✔</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+              <tr><td class="c">✔</td><td>Onaylandı</td><td>Üretimde</td><td class="c">✔</td><td class="c">✔</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c">✔</td></tr>
+              <tr><td class="c">✔</td><td>Üretimde</td><td>Sevke Hazır</td><td class="c">✔</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+              <tr><td class="c">✔</td><td>Sevke Hazır</td><td>Sevk Edildi</td><td class="c">✔</td><td class="c">✔</td><td class="c"></td><td class="c">✔</td><td class="c">✔</td><td class="c">✔</td></tr>
+              <tr><td class="c"></td><td>Onaylandı</td><td>İptal</td><td class="c">✔</td><td class="c"></td><td class="c"></td><td class="c">✔</td><td class="c">✔</td><td class="c"></td></tr>
+            </table>
+          </div>
+          <div class="hint">"Kaynak Kapat" işaretli geçişlerde kaynak sipariş kapanır; "Tarihe Zorla" hedef durumun tarihini
+            geçiş anına sabitler. Bildirimler <b>UMultiCastEvent</b> üzerinden ilgili modüllere yayılır.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spane" data-sp="s2">
+      <div class="grp">
+        <h4>Durum Akışı <span class="tag">SIPARISDURUM (verilen)</span></h4>
+        <div class="body">
+          <div class="gridtb">
+            <span class="minibtn">➕ Ekle</span><span class="minibtn">🗑 Sil</span>
+            <span class="minibtn">✎ Verilen Sipariş Durumlar…</span>
+          </div>
+          <div class="dg">
+            <table>
+              <tr><th class="c" style="width:46px">Aktif</th><th>Kaynak</th><th>Hedef</th>
+                  <th class="c">Bildirim (iç)</th><th class="c">Bildirim (dış)</th>
+                  <th class="c">Açılış</th><th class="c">Kapanış</th><th class="c">Kaynak Kapat</th><th class="c">Tarihe Zorla</th></tr>
+              <tr><td class="c">✔</td><td>Talep</td><td>Sipariş Verildi</td><td class="c">✔</td><td class="c">✔</td><td class="c">✔</td><td class="c"></td><td class="c">✔</td><td class="c"></td></tr>
+              <tr><td class="c">✔</td><td>Sipariş Verildi</td><td>Kısmi Teslim</td><td class="c">✔</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c">✔</td></tr>
+              <tr><td class="c">✔</td><td>Kısmi Teslim</td><td>Teslim Alındı</td><td class="c">✔</td><td class="c"></td><td class="c"></td><td class="c">✔</td><td class="c">✔</td><td class="c">✔</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h4>Diğer</h4>
+      <div class="body" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <label class="chk"><input type="checkbox"> Başlıkta hasta bilgisi sekmesi</label>
+        <span class="minibtn" style="margin-left:auto">🔧 Servis Durumlarını Düzenle</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Ayarlar → <b>GENINI</b> (BOLUM · ANAHTAR · DEGER)</span>·
+    <span>Seri kuralı → <b>GENINI.ANAHTAR = 'SERI,SENARYO,KULLANICIID,AKTIF'</b></span>·
+    <span>Belge → <b>FATBASLIK.TUR</b> · <b>EBELGE.BELGETURU</b> · <b>REHBERALIAS</b></span>·
+    <span>Koçan → <b>KOCAN</b></span>·
+    <span>Log → <b>ISLEMLOG</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Entegratör: <b>İzibiz</b> (test)</span>
+    <span>Aktif seri: <b>GNT</b> · e-Fatura / Ticari</span>
+    <span style="margin-left:auto">Kuyrukta 37 belge</span>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.stab').forEach(function(t){
+    t.addEventListener('click',function(){
+      var scope=t.closest('.pane');
+      scope.querySelectorAll('.stab').forEach(function(x){x.classList.remove('active')});
+      scope.querySelectorAll('.spane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=scope.querySelector('.spane[data-sp="'+t.dataset.s+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

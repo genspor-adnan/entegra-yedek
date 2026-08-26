@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cari Kart v3 · Kompakt DevExpress Mockup</title>
+  <style>
+    :root {
+      --bg: #e8edf3;
+      --panel: #ffffff;
+      --soft: #f5f7fa;
+      --line: #d8dee7;
+      --line-strong: #c6cfdb;
+      --text: #202a38;
+      --muted: #6f7a89;
+      --primary: #2557a7;
+      --primary-dark: #1a437f;
+      --primary-soft: #eaf1fc;
+      --green: #18815a;
+      --green-soft: #e5f5ee;
+      --orange: #b96b17;
+      --orange-soft: #fff2df;
+      --red: #b94444;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      color: var(--text);
+      background: linear-gradient(145deg, #e5ebf1, #f2f5f8);
+      font: 12px "Trebuchet MS", "Segoe UI", sans-serif;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .window {
+      width: min(1120px, 100%);
+      height: min(700px, calc(100vh - 32px));
+      min-height: 610px;
+      display: grid;
+      grid-template-rows: 42px 62px 36px minmax(0, 1fr) 45px;
+      overflow: hidden;
+      border: 1px solid #aeb9c7;
+      border-radius: 7px;
+      background: var(--panel);
+      box-shadow: 0 18px 48px rgba(34, 48, 67, .18);
+    }
+
+    .titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px 0 14px;
+      color: white;
+      background: linear-gradient(180deg, #233d61, #1a3253);
+    }
+
+    .title-left, .title-actions, .record-main, .record-meta,
+    .toolbar, .footer, .footer-actions { display: flex; align-items: center; }
+
+    .app-mark {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      margin-right: 9px;
+      border-radius: 5px;
+      background: #4b79bc;
+      font-weight: 900;
+    }
+
+    .titlebar strong { font-size: 13px; }
+    .titlebar small { margin-left: 8px; color: #aebed2; font-size: 10px; }
+    .window-button { width: 29px; height: 25px; border: 0; border-radius: 4px; color: #dbe5f2; background: transparent; }
+    .window-button:hover { background: rgba(255,255,255,.1); }
+
+    .recordbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      margin-right: 10px;
+      color: white;
+      border-radius: 6px;
+      background: linear-gradient(145deg, #3672c5, #214f90);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .record-name h1 { margin: 0 0 4px; font-size: 15px; line-height: 1; }
+    .record-meta { gap: 7px; color: var(--muted); font-size: 10px; }
+    .dot { width: 3px; height: 3px; border-radius: 50%; background: #9ca7b5; }
+    .badge { padding: 3px 7px; border-radius: 10px; font-size: 9px; font-weight: 700; }
+    .badge.green { color: var(--green); background: var(--green-soft); }
+    .badge.blue { color: var(--primary); background: var(--primary-soft); }
+    .badge.orange { color: var(--orange); background: var(--orange-soft); }
+
+    .quick-data { display: flex; align-items: stretch; gap: 1px; border: 1px solid var(--line); border-radius: 5px; background: var(--line); overflow: hidden; }
+    .quick-item { min-width: 104px; padding: 6px 10px; text-align: right; background: white; }
+    .quick-item span { display: block; margin-bottom: 2px; color: var(--muted); font-size: 8px; text-transform: uppercase; }
+    .quick-item strong { font-size: 11px; }
+
+    .tabs {
+      display: flex;
+      align-items: end;
+      gap: 1px;
+      padding: 3px 10px 0;
+      border-bottom: 1px solid #bfc9d6;
+      background: linear-gradient(#eef2f6, #e1e7ed);
+      overflow-x: auto;
+    }
+
+    .tab {
+      height: 32px;
+      min-width: 102px;
+      padding: 0 12px;
+      border: 1px solid transparent;
+      border-bottom: 0;
+      border-radius: 5px 5px 0 0;
+      color: #526073;
+      background: transparent;
+      font-size: 11px;
+    }
+
+    .tab:hover { color: var(--primary); background: rgba(255,255,255,.5); }
+    .tab.active { height: 33px; color: var(--primary-dark); border-color: #bfc9d6; background: white; font-weight: 700; }
+    .tab i { display: inline-grid; place-items: center; width: 16px; height: 16px; margin-right: 5px; border-radius: 3px; color: #718097; background: #dbe2ea; font-size: 8px; font-style: normal; }
+    .tab.active i { color: white; background: var(--primary); }
+
+    .content {
+      min-height: 0;
+      padding: 9px 10px 10px;
+      overflow: auto;
+      background: #f6f7f9;
+    }
+
+    .page { display: none; height: 100%; }
+    .page.active { display: block; animation: show .12s ease; }
+    @keyframes show { from { opacity: .65; } to { opacity: 1; } }
+
+    .general-layout {
+      height: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 278px;
+      gap: 9px;
+    }
+
+    .stack { min-height: 0; display: grid; gap: 9px; align-content: start; }
+
+    .group {
+      min-width: 0;
+      border: 1px solid var(--line-strong);
+      border-radius: 5px;
+      background: white;
+    }
+
+    .group-title {
+      height: 29px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 9px;
+      border-bottom: 1px solid var(--line);
+      color: #34435a;
+      background: linear-gradient(#fbfcfd, #f0f3f6);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .group-body { padding: 9px; }
+    .form-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 6px 9px; }
+    .field { grid-column: span 3; min-width: 0; }
+    .field.s4 { grid-column: span 4; }
+    .field.s5 { grid-column: span 5; }
+    .field.s6 { grid-column: span 6; }
+    .field.s8 { grid-column: span 8; }
+    .field.s9 { grid-column: span 9; }
+    .field.s12 { grid-column: span 12; }
+    .field label { display: block; margin-bottom: 3px; color: #4d596a; font-size: 10px; }
+    .field label b { color: var(--red); }
+
+    input, select, textarea {
+      width: 100%;
+      height: 29px;
+      padding: 3px 7px;
+      border: 1px solid #bec9d6;
+      border-radius: 3px;
+      outline: 0;
+      color: var(--text);
+      background: white;
+      font-size: 11px;
+    }
+
+    input:focus, select:focus, textarea:focus { border-color: #5482bd; box-shadow: 0 0 0 2px #e5eef9; }
+    input[readonly] { color: #687586; background: #edf1f5; }
+    textarea { height: 48px; resize: none; line-height: 1.35; }
+    .input-button { display: grid; grid-template-columns: 1fr 28px; }
+    .input-button input { border-radius: 3px 0 0 3px; }
+    .input-button button { border: 1px solid #bec9d6; border-left: 0; border-radius: 0 3px 3px 0; color: var(--primary); background: #f3f6f9; font-weight: 900; }
+
+    .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .check-row { height: 31px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 7px; border: 1px solid var(--line); border-radius: 4px; background: #fafbfc; }
+    .check-row span { font-size: 10px; }
+    .switch { width: 30px; height: 16px; padding: 2px; border: 0; border-radius: 12px; background: #b8c2ce; }
+    .switch::after { content: ""; display: block; width: 12px; height: 12px; border-radius: 50%; background: white; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: .15s; }
+    .switch.on { background: #28845f; }
+    .switch.on::after { transform: translateX(14px); }
+
+    .summary-logo { display: grid; grid-template-columns: 58px 1fr; gap: 9px; align-items: center; }
+    .photo { width: 58px; height: 58px; display: grid; place-items: center; border: 1px dashed #91a1b5; border-radius: 4px; color: #758399; background: #f3f6f9; font-size: 9px; text-align: center; }
+    .summary-lines { display: grid; gap: 5px; }
+    .summary-line { display: flex; justify-content: space-between; gap: 8px; padding-bottom: 4px; border-bottom: 1px dotted #d7dde5; font-size: 9px; }
+    .summary-line span { color: var(--muted); }
+
+    .notice { margin-top: 8px; padding: 7px 8px; border-left: 3px solid #d58a2b; color: #74521e; background: #fff7e9; font-size: 9px; line-height: 1.35; }
+
+    .toolbar { min-height: 34px; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
+    .toolbar-left, .toolbar-right { display: flex; align-items: center; gap: 5px; }
+    .button { height: 27px; padding: 0 10px; border: 1px solid #b8c3d0; border-radius: 3px; color: #344256; background: linear-gradient(#fff, #e9edf2); font-size: 10px; }
+    .button:hover { border-color: #7894b8; background: #f3f7fc; }
+    .button.primary { color: white; border-color: #1d4a88; background: linear-gradient(#3b72ba, #25579a); }
+    .button.danger { color: #a33e3e; }
+    .filter { width: 190px; height: 27px; }
+
+    .grid-box { height: calc(100% - 41px); overflow: auto; border: 1px solid var(--line-strong); background: white; }
+    table { width: 100%; border-collapse: collapse; min-width: 680px; }
+    th { position: sticky; top: 0; z-index: 1; height: 27px; padding: 0 7px; border-right: 1px solid #d6dde5; border-bottom: 1px solid #bcc7d4; color: #3f4d60; background: linear-gradient(#f9fafb, #e7ebf0); text-align: left; font-size: 9px; font-weight: 700; }
+    td { height: 30px; padding: 3px 7px; border-right: 1px solid #edf0f3; border-bottom: 1px solid #e2e6eb; font-size: 10px; }
+    tbody tr:nth-child(even) { background: #fafbfd; }
+    tbody tr:hover { background: #edf4fd; }
+    tbody tr.selected { color: #153e73; background: #dceafd; }
+    .cell-muted { color: var(--muted); }
+    .cell-right { text-align: right; }
+
+    .split-page { height: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 9px; }
+    .side-detail { display: grid; align-content: start; gap: 9px; }
+    .person-card { display: grid; grid-template-columns: 38px 1fr; gap: 8px; align-items: center; padding: 7px; border: 1px solid var(--line); border-radius: 4px; background: #fafbfc; }
+    .avatar { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; color: var(--primary); background: var(--primary-soft); font-size: 10px; font-weight: 700; }
+    .person-card strong { display: block; font-size: 10px; }
+    .person-card small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+
+    .note-layout { height: 100%; display: grid; grid-template-columns: 1fr 340px; gap: 9px; }
+    .note-feed { height: calc(100% - 45px); padding: 8px; overflow: auto; border: 1px solid var(--line); background: white; }
+    .note-item { display: grid; grid-template-columns: 30px 1fr; gap: 7px; padding: 7px 0; border-bottom: 1px solid #e8ecf1; }
+    .note-item:last-child { border-bottom: 0; }
+    .note-content strong { font-size: 10px; }
+    .note-content time { float: right; color: var(--muted); font-size: 8px; }
+    .note-content p { margin: 4px 0 0; color: #526073; font-size: 10px; line-height: 1.4; }
+    .compose { height: 40px; display: grid; grid-template-columns: 1fr 62px; gap: 5px; padding-top: 6px; }
+    .compose input { height: 30px; }
+
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 8px; }
+    .kpi { padding: 8px 9px; border: 1px solid var(--line); border-radius: 4px; background: white; }
+    .kpi span { display: block; color: var(--muted); font-size: 8px; text-transform: uppercase; }
+    .kpi strong { display: block; margin-top: 4px; font-size: 14px; }
+    .crm-grid { height: calc(100% - 57px); overflow: auto; border: 1px solid var(--line-strong); background: white; }
+
+    .footer {
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 10px;
+      border-top: 1px solid #bdc7d3;
+      background: linear-gradient(#f6f8fa, #e6ebf0);
+    }
+
+    .status { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 9px; }
+    .status i { width: 6px; height: 6px; border-radius: 50%; background: #27855f; }
+    .footer-actions { gap: 6px; }
+    .footer .button { min-width: 72px; height: 29px; }
+
+    .toast { position: fixed; right: 20px; bottom: 20px; padding: 9px 13px; border-radius: 4px; color: white; background: #26374e; box-shadow: 0 8px 20px rgba(0,0,0,.2); opacity: 0; transform: translateY(8px); pointer-events: none; transition: .18s; font-size: 10px; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 800px) {
+      body { padding: 0; }
+      .window { width: 100%; height: 100vh; min-height: 560px; border: 0; border-radius: 0; }
+      .quick-data { display: none; }
+      .tab { min-width: 88px; }
+      .general-layout, .split-page, .note-layout { grid-template-columns: 1fr; }
+      .general-layout { height: auto; }
+      .content { overflow: auto; }
+      .field, .field.s4, .field.s5 { grid-column: span 6; }
+      .field.s6, .field.s8, .field.s9 { grid-column: span 12; }
+      .side-detail { display: none; }
+      .record-name h1 { max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <section class="window" aria-label="Cari kart penceresi">
+    <header class="titlebar">
+      <div class="title-left"><span class="app-mark">G</span><strong>Cari Kart</strong><small>CAR-000842</small></div>
+      <div class="title-actions"><button class="window-button" title="Yardım">?</button><button class="window-button" title="Kapat">×</button></div>
+    </header>
+
+    <div class="recordbar">
+      <div class="record-main">
+        <div class="logo">AK</div>
+        <div class="record-name">
+          <h1>Atlas Kimya Sanayi A.Ş.</h1>
+          <div class="record-meta"><span>Kurumsal Müşteri</span><i class="dot"></i><span>Marmara / İstanbul Avrupa</span><span class="badge green">Aktif</span><span class="badge blue">E-Fatura</span></div>
+        </div>
+      </div>
+      <div class="quick-data">
+        <div class="quick-item"><span>Bakiye</span><strong>₺184.320</strong></div>
+        <div class="quick-item"><span>Risk / Limit</span><strong>₺284B / ₺1,2M</strong></div>
+        <div class="quick-item"><span>Son hareket</span><strong>12.08.2026</strong></div>
+      </div>
+    </div>
+
+    <nav class="tabs" role="tablist" aria-label="Cari kart sekmeleri">
+      <button class="tab active" data-tab="0" role="tab"><i>01</i>Genel</button>
+      <button class="tab" data-tab="1" role="tab"><i>02</i>İletişim</button>
+      <button class="tab" data-tab="2" role="tab"><i>03</i>Ticari</button>
+      <button class="tab" data-tab="3" role="tab"><i>04</i>İlgililer</button>
+      <button class="tab" data-tab="4" role="tab"><i>05</i>Not / Medya</button>
+      <button class="tab" data-tab="5" role="tab"><i>06</i>CRM</button>
+    </nav>
+
+    <main class="content">
+      <section class="page active" data-page="0">
+        <div class="general-layout">
+          <div class="stack">
+            <div class="group">
+              <div class="group-title"><span>Kimlik ve sınıflandırma</span><span class="badge blue">Temel bilgiler</span></div>
+              <div class="group-body">
+                <div class="form-grid">
+                  <div class="field"><label>Grup <b>*</b></label><select><option>Kurumsal Müşteri</option><option>Tedarikçi</option></select></div>
+                  <div class="field"><label>Cari kodu</label><div class="input-button"><input value="CAR-000842" readonly><button>…</button></div></div>
+                  <div class="field s6"><label>Ünvan <b>*</b></label><input value="Atlas Kimya Sanayi A.Ş."></div>
+                  <div class="field"><label>Kategori</label><div class="input-button"><input value="A Sınıfı"><button>…</button></div></div>
+                  <div class="field"><label>Sınıf</label><select><option>Stratejik</option><option>Standart</option></select></div>
+                  <div class="field"><label>Özel kod</label><input value="KMY-IST-08"></div>
+                  <div class="field"><label>Durum</label><select><option>Aktif</option><option>Pasif</option></select></div>
+                  <div class="field s4"><label>Sektör</label><div class="input-button"><input value="Kimya Sanayi"><button>…</button></div></div>
+                  <div class="field s4"><label>Alt sektör</label><div class="input-button"><input value="Endüstriyel Temizlik"><button>…</button></div></div>
+                  <div class="field s4"><label>Şube</label><select><option>Merkez</option><option>Ankara</option></select></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="group">
+              <div class="group-title"><span>Satış organizasyonu</span></div>
+              <div class="group-body">
+                <div class="form-grid">
+                  <div class="field"><label>Bölge</label><select><option>Marmara</option><option>İç Anadolu</option></select></div>
+                  <div class="field"><label>Alt bölge</label><select><option>İstanbul Avrupa</option><option>İstanbul Anadolu</option></select></div>
+                  <div class="field s4"><label>Temsilci</label><div class="input-button"><input value="Selin Yılmaz"><button>…</button></div></div>
+                  <div class="field"><label>Ziyaret sıklığı</label><select><option>2 ayda bir</option><option>Her ay</option></select></div>
+                  <div class="field"><label>İlk temas</label><input type="date" value="2026-08-04"></div>
+                  <div class="field s4"><label>Muhasebe kodu</label><input value="120.01.0842"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="group">
+              <div class="group-title"><span>Not / Uyarı</span></div>
+              <div class="group-body"><textarea>Teklif ve siparişlerde teslim tarihi mutlaka satınalma yetkilisi ile teyit edilecek.</textarea></div>
+            </div>
+          </div>
+
+          <aside class="stack">
+            <div class="group">
+              <div class="group-title"><span>Kart özeti</span></div>
+              <div class="group-body">
+                <div class="summary-logo">
+                  <div class="photo">LOGO<br>EKLE</div>
+                  <div class="summary-lines">
+                    <div class="summary-line"><span>ID</span><strong>842</strong></div>
+                    <div class="summary-line"><span>Oluşturan</span><strong>A. Yılmaz</strong></div>
+                    <div class="summary-line"><span>Kayıt</span><strong>04.08.2026</strong></div>
+                  </div>
+                </div>
+                <div class="notice">Kart doluluk oranı %84. Vergi ve varsayılan adres bilgisi eksik.</div>
+              </div>
+            </div>
+
+            <div class="group">
+              <div class="group-title"><span>Kart seçenekleri</span></div>
+              <div class="group-body">
+                <div class="checks">
+                  <div class="check-row"><span>E-Fatura</span><button class="switch on"></button></div>
+                  <div class="check-row"><span>E-İrsaliye</span><button class="switch on"></button></div>
+                  <div class="check-row"><span>Personel</span><button class="switch"></button></div>
+                  <div class="check-row"><span>Risk kontrolü</span><button class="switch on"></button></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="group">
+              <div class="group-title"><span>Hızlı iletişim</span><button class="button" style="height:22px;padding:0 6px">Düzenle</button></div>
+              <div class="group-body summary-lines">
+                <div class="summary-line"><span>Telefon</span><strong>0212 555 28 42</strong></div>
+                <div class="summary-line"><span>E-posta</span><strong>info@atlaskimya.com.tr</strong></div>
+                <div class="summary-line"><span>Yetkili</span><strong>Emre Aksoy</strong></div>
+                <div class="summary-line"><span>Adres</span><strong>İkitelli OSB</strong></div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="page" data-page="1">
+        <div class="split-page">
+          <div>
+            <div class="toolbar"><div class="toolbar-left"><button class="button primary" data-add="contact">＋ Yeni</button><button class="button">Düzenle</button><button class="button danger">Sil</button><button class="button">Varsayılan yap</button></div><div class="toolbar-right"><input class="filter" placeholder="İletişimde ara..."></div></div>
+            <div class="grid-box"><table id="contactGrid"><thead><tr><th style="width:110px">Etiket</th><th>Bilgi</th><th style="width:90px">Tür</th><th style="width:90px">Kullanım</th><th style="width:70px">Durum</th></tr></thead><tbody>
+              <tr class="selected"><td>Santral</td><td>+90 212 555 28 42</td><td>Telefon</td><td>Genel</td><td><span class="badge green">Vars.</span></td></tr>
+              <tr><td>Genel E-posta</td><td>info@atlaskimya.com.tr</td><td>E-posta</td><td>Genel</td><td><span class="badge green">Aktif</span></td></tr>
+              <tr><td>Merkez Adresi</td><td>İkitelli OSB, Başakşehir / İstanbul</td><td>Adres</td><td>Fatura</td><td><span class="badge green">Vars.</span></td></tr>
+              <tr><td>Web</td><td>www.atlaskimya.com.tr</td><td>Web</td><td>Genel</td><td><span class="badge green">Aktif</span></td></tr>
+            </tbody></table></div>
+          </div>
+          <aside class="side-detail">
+            <div class="group"><div class="group-title"><span>Seçili kayıt</span></div><div class="group-body form-grid"><div class="field s12"><label>Etiket</label><input value="Santral"></div><div class="field s12"><label>Telefon</label><input value="+90 212 555 28 42"></div><div class="field s6"><label>Tür</label><select><option>Telefon</option></select></div><div class="field s6"><label>Kullanım</label><select><option>Genel</option></select></div></div></div>
+            <div class="group"><div class="group-title"><span>Adres özeti</span></div><div class="group-body summary-lines"><div class="summary-line"><span>İl</span><strong>İstanbul</strong></div><div class="summary-line"><span>İlçe</span><strong>Başakşehir</strong></div><div class="summary-line"><span>Posta kodu</span><strong>34490</strong></div></div></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="page" data-page="2">
+        <div class="general-layout">
+          <div class="stack">
+            <div class="group"><div class="group-title"><span>Satış ve ödeme koşulları</span></div><div class="group-body form-grid">
+              <div class="field s4"><label>Ödeme şekli</label><select><option>Açık Hesap</option></select></div><div class="field s4"><label>Vade planı</label><select><option>45 Gün</option></select></div><div class="field s4"><label>Para birimi</label><select><option>TRY</option><option>USD</option></select></div>
+              <div class="field s4"><label>Risk limiti</label><input value="1.200.000,00"></div><div class="field s4"><label>İskonto %</label><input value="8,50"></div><div class="field s4"><label>Fiyat listesi</label><select><option>Kurumsal A</option></select></div>
+            </div></div>
+            <div class="group"><div class="group-title"><span>Vergi ve e-Belge</span></div><div class="group-body form-grid"><div class="field s4"><label>Vergi dairesi</label><input value="İkitelli"></div><div class="field s4"><label>Vergi numarası</label><input value="1234567890"></div><div class="field s4"><label>Fatura senaryosu</label><select><option>Ticari</option></select></div></div></div>
+            <div class="group"><div class="group-title"><span>Banka</span></div><div class="group-body form-grid"><div class="field s4"><label>Banka</label><select><option>Türkiye İş Bankası</option></select></div><div class="field s8"><label>IBAN</label><input value="TR12 0006 4000 0011 2456 7890 12"></div></div></div>
+          </div>
+          <aside class="stack">
+            <div class="group"><div class="group-title"><span>Finans özeti</span></div><div class="group-body summary-lines"><div class="summary-line"><span>Açık bakiye</span><strong>₺184.320</strong></div><div class="summary-line"><span>Risk kullanımı</span><strong>%23,7</strong></div><div class="summary-line"><span>Ort. vade</span><strong>45 gün</strong></div><div class="summary-line"><span>Geciken</span><strong>₺0,00</strong></div></div></div>
+            <div class="group"><div class="group-title"><span>Kontroller</span></div><div class="group-body checks" style="grid-template-columns:1fr"><div class="check-row"><span>Risk limiti kontrolü</span><button class="switch on"></button></div><div class="check-row"><span>Vadesi geçmiş borç uyarısı</span><button class="switch on"></button></div><div class="check-row"><span>Otomatik mutabakat</span><button class="switch"></button></div></div></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="page" data-page="3">
+        <div class="split-page">
+          <div><div class="toolbar"><div class="toolbar-left"><button class="button primary" data-add="person">＋ Yeni ilgili</button><button class="button">Düzenle</button><button class="button danger">Sil</button><button class="button">Varsayılan yap</button></div><input class="filter" placeholder="İlgililerde ara..."></div><div class="grid-box"><table id="peopleGrid"><thead><tr><th>Adı Soyadı</th><th>Görevi</th><th>Telefon</th><th>E-posta</th><th style="width:70px">Durum</th></tr></thead><tbody><tr class="selected"><td>Emre Aksoy</td><td>Satınalma Müdürü</td><td>0532 421 18 09</td><td>emre.aksoy@atlaskimya.com.tr</td><td><span class="badge green">Vars.</span></td></tr><tr><td>Burcu Kılıç</td><td>Finans Sorumlusu</td><td>0533 210 42 56</td><td>burcu.kilic@atlaskimya.com.tr</td><td>Aktif</td></tr><tr><td>Onur Tekin</td><td>Üretim Planlama</td><td>0535 880 12 44</td><td>onur.tekin@atlaskimya.com.tr</td><td>Aktif</td></tr></tbody></table></div></div>
+          <aside class="side-detail"><div class="group"><div class="group-title"><span>İlgili özeti</span><span class="badge green">Varsayılan</span></div><div class="group-body"><div class="person-card"><div class="avatar">EA</div><div><strong>Emre Aksoy</strong><small>Satınalma Müdürü</small></div></div><div class="summary-lines" style="margin-top:9px"><div class="summary-line"><span>Telefon</span><strong>0532 421 18 09</strong></div><div class="summary-line"><span>E-posta</span><strong>emre.aksoy@…</strong></div><div class="summary-line"><span>Son temas</span><strong>12.08.2026</strong></div></div></div></div><div class="group"><div class="group-title"><span>İlgili notu</span></div><div class="group-body"><textarea>Tüm tekliflerde kopyaya eklenecek.</textarea></div></div></aside>
+        </div>
+      </section>
+
+      <section class="page" data-page="4">
+        <div class="note-layout">
+          <div><div class="toolbar"><div class="toolbar-left"><button class="button primary">＋ Yorum</button><button class="button">Düzenle</button><button class="button danger">Sil</button></div><select class="filter"><option>Tüm yorumlar</option></select></div><div class="note-feed" id="noteFeed"><div class="note-item"><div class="avatar" style="width:28px;height:28px">SY</div><div class="note-content"><strong>Selin Yılmaz · Satış</strong><time>Bugün 10:24</time><p>Eylül dönemi fiyat listesi görüşüldü. Yeni teklif cuma gününe kadar iletilecek.</p></div></div><div class="note-item"><div class="avatar" style="width:28px;height:28px">BK</div><div class="note-content"><strong>Burak Koç · Finans</strong><time>Dün 16:05</time><p>Ağustos mutabakatı tamamlandı. Açık bakiye müşteri tarafından teyit edildi.</p></div></div><div class="note-item"><div class="avatar" style="width:28px;height:28px">S</div><div class="note-content"><strong>Sistem</strong><time>10.08.2026</time><p>2026_Cerceve_Sozlesme.pdf belge arşivine eklendi.</p></div></div></div><div class="compose"><input id="noteInput" placeholder="Kısa bir not yazın..."><button class="button primary" id="sendNote">Gönder</button></div></div>
+          <aside class="side-detail"><div class="group"><div class="group-title"><span>Dokümanlar</span><button class="button" style="height:22px;padding:0 6px">＋ Ekle</button></div><div class="group-body"><table style="min-width:0"><tbody><tr><td style="width:42px"><span class="badge orange">PDF</span></td><td>Çerçeve Sözleşme</td><td class="cell-right">2,4 MB</td></tr><tr><td><span class="badge blue">XLS</span></td><td>Fiyat Listesi</td><td class="cell-right">680 KB</td></tr><tr><td><span class="badge green">JPG</span></td><td>Konum Fotoğrafı</td><td class="cell-right">1,1 MB</td></tr></tbody></table></div></div></aside>
+        </div>
+      </section>
+
+      <section class="page" data-page="5">
+        <div class="kpi-row"><div class="kpi"><span>Toplam aktivite</span><strong>28</strong></div><div class="kpi"><span>Açık fırsat</span><strong>4</strong></div><div class="kpi"><span>Bekleyen aksiyon</span><strong>3</strong></div><div class="kpi"><span>Fırsat tutarı</span><strong>₺840.000</strong></div></div>
+        <div class="toolbar"><div class="toolbar-left"><button class="button primary">＋ Aktivite</button><button class="button">Detay</button><button class="button">Yazdır</button></div><div class="toolbar-right"><select class="filter"><option>Son 90 gün</option><option>Bu yıl</option></select></div></div>
+        <div class="crm-grid"><table><thead><tr><th style="width:90px">Tarih</th><th style="width:90px">Modül</th><th style="width:110px">No</th><th>Açıklama</th><th style="width:100px">Aksiyon</th><th style="width:80px">Durum</th><th style="width:110px">Tutar</th></tr></thead><tbody><tr class="selected"><td>12.08.2026</td><td>Teklif</td><td>TKL-2026-01842</td><td>Endüstriyel temizlik ürünleri</td><td>14.08.2026</td><td><span class="badge orange">Bekliyor</span></td><td class="cell-right">₺325.400</td></tr><tr><td>11.08.2026</td><td>Tahsilat</td><td>THS-2026-00681</td><td>Havale ile tahsilat</td><td>—</td><td><span class="badge green">Tamamlandı</span></td><td class="cell-right">₺184.750</td></tr><tr><td>08.08.2026</td><td>Görüşme</td><td>CRM-2026-00324</td><td>Fiyat revizyonu telefon görüşmesi</td><td>12.08.2026</td><td><span class="badge green">Tamamlandı</span></td><td class="cell-right">—</td></tr><tr><td>04.08.2026</td><td>Fırsat</td><td>FRS-2026-00118</td><td>Yeni ürün grubu satış fırsatı</td><td>18.08.2026</td><td><span class="badge blue">Açık</span></td><td class="cell-right">₺514.600</td></tr></tbody></table></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="status"><i></i><span id="saveState">Hazır · Son kayıt bugün 14:32</span></div>
+      <div class="footer-actions"><button class="button">İptal</button><button class="button">Uygula</button><button class="button primary" id="saveButton">Kaydet ve Kapat</button></div>
+    </footer>
+  </section>
+
+  <div class="toast" id="toast">İşlem tamamlandı.</div>
+
+  <script>
+    (() => {
+      const tabs = [...document.querySelectorAll('.tab')];
+      const pages = [...document.querySelectorAll('.page')];
+      const toast = document.getElementById('toast');
+      const saveState = document.getElementById('saveState');
+      let toastTimer;
+
+      function activate(index) {
+        tabs.forEach((tab, i) => {
+          tab.classList.toggle('active', i === index);
+          tab.setAttribute('aria-selected', i === index ? 'true' : 'false');
+        });
+        pages.forEach((page, i) => page.classList.toggle('active', i === index));
+      }
+
+      function notify(text) {
+        toast.textContent = text;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+      }
+
+      tabs.forEach((tab, i) => tab.addEventListener('click', () => activate(i)));
+      document.querySelectorAll('.switch').forEach(button => button.addEventListener('click', () => button.classList.toggle('on')));
+
+      document.querySelectorAll('input, select, textarea').forEach(control => {
+        control.addEventListener('change', () => {
+          saveState.textContent = 'Değişiklik var · Kaydedilmedi';
+          saveState.previousElementSibling.style.background = '#c47a22';
+        });
+      });
+
+      document.getElementById('saveButton').addEventListener('click', () => {
+        saveState.textContent = 'Kaydedildi · Az önce';
+        saveState.previousElementSibling.style.background = '#27855f';
+        notify('Cari kart kaydedildi.');
+      });
+
+      document.querySelector('[data-add="contact"]').addEventListener('click', () => {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td>Yeni kayıt</td><td>Düzenlenmedi</td><td>Telefon</td><td>Genel</td><td><span class="badge orange">Yeni</span></td>';
+        document.querySelector('#contactGrid tbody').appendChild(row);
+        notify('Yeni iletişim satırı eklendi.');
+      });
+
+      document.querySelector('[data-add="person"]').addEventListener('click', () => {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td>Yeni ilgili</td><td>Görev girilmedi</td><td>—</td><td>—</td><td><span class="badge orange">Yeni</span></td>';
+        document.querySelector('#peopleGrid tbody').appendChild(row);
+        notify('Yeni ilgili satırı eklendi.');
+      });
+
+      document.getElementById('sendNote').addEventListener('click', () => {
+        const input = document.getElementById('noteInput');
+        if (!input.value.trim()) return notify('Önce bir not yazın.');
+        const item = document.createElement('div');
+        item.className = 'note-item';
+        item.innerHTML = '<div class="avatar" style="width:28px;height:28px">AY</div><div class="note-content"><strong>Ahmet Yılmaz</strong><time>Az önce</time><p></p></div>';
+        item.querySelector('p').textContent = input.value.trim();
+        document.getElementById('noteFeed').prepend(item);
+        input.value = '';
+        notify('Not eklendi.');
+      });
+
+      document.addEventListener('keydown', event => {
+        if (event.ctrlKey && event.key.toLowerCase() === 's') {
+          event.preventDefault();
+          document.getElementById('saveButton').click();
+        }
+      });
+
+      activate(0);
+    })();
+  </script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

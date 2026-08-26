@@ -405,7 +405,12 @@ begin
   Tablo.RepStokDepolarTumu.Properties.Items := Tablo.imgComboboxInit('select ID,DEPOADI from DEPOLAR').Items;//and SUBEID='+IntToStr(SubeId)
   Tablo.RepStokUretimDepolar.Properties.Items := Tablo.imgComboboxInit('select ID,DEPOADI from DEPOLAR where DURUM=1 and VARSAYILAN=9').Items;
     if Tablo.RepStokUretimDepolar.Properties.Items.Count=0 then
-       Tablo.RepStokUretimDepolar.Properties.Items.assign(Tablo.RepStokDepolarAktif.Properties.Items);
+       // Uretim deposu tanimlanmamis -> tum aktif depolar, ANCAK konsinye cikis deposu
+       //   (VARSAYILAN=7) uretim fisinde secilemez. Once RepStokDepolarAktif kopyalaniyordu,
+       //   o liste konsinye cikisi da tasiyordu.
+       Tablo.RepStokUretimDepolar.Properties.Items := Tablo.imgComboboxInit(
+         'select 0 AS ID,'''' AS DEPOADI union all '+
+         'select ID,DEPOADI from DEPOLAR where DURUM=1 and (VARSAYILAN is null or VARSAYILAN<>7)').Items;
 
   Kapat := True;
   if (TabKullanici.Locate('FIRMA', ComboAd.text, []))and(Sifre = TabKullanici.FieldByName('SIFRE').AsString) then begin

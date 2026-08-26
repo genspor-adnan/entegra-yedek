@@ -515,7 +515,7 @@ resourcestring
                        'VergiDai,VergiNo,IsTel, Faks, CepTel,	Eposta, Web, Adres,PK, Ilce, Il, Ulke,PostaDgt,EPostaDgt,Vade,Notlar, Firma ÜTS No, Firma Resmi Ad" şeklinde olmalıdır..';
 
     StokAktarimkosullari='Aktarılacak kolonlar sırasıyla "Kod,Ad,Kategori,Tipi,Barkod,Marka,Model,Grubu, Ozellik, AnaBirim,Birim2,Birim2Carpan,KDV,OTV_Katsayi, OTV_Yuzde,Izleme,KulSekli,'+
-                'Garanti, Web, OzelKod,Ekipman, Notlar, Fiyat, ParaBirimi, FiyatAdi, Ürün No" şeklinde olmalıdır..';
+                'Garanti, Web, OzelKod,Ekipman, Notlar, Fiyat, ParaBirimi, FiyatAdi, Ürün No, Bildirim" şeklinde olmalıdır..';
 
     UTSUrunAktarimkosullari='Aktarılacak kolonlar sırasıyla'+#13+#10+
       '"KURUM_ADI,KURUM_UTS_NO,STOKKOD,URUNNO,'+#13+#10+
@@ -1287,6 +1287,7 @@ resourcestring
     FTWCikisDeposuBosOlamaz = 'Çıkış Deposu boş olamaz';
     FTWDepolarAyniOlamaz = 'Giriş Çıkış Depoları aynı olamaz';
     FTWIleriTarihOlamaz = 'Stok transferi ileri tarihe kaydedilemez. Transfer tarihi bugünden sonra olamaz.';
+    FTWGecmisTarihOlamaz = 'Stok transferi geriye dönük en fazla %d gün öncesine kaydedilebilir.';
     STWIleriTarihOlamaz = 'Stok talebi ileri tarihe kaydedilemez. Talep tarihi bugünden sonra olamaz.';
     FTWTarihKucukOlamaz = 'Başlama bitişten sonra olamaz';
     FTWTarihUzakOlamaz = 'Verdiğiniz tarih o kadar uzak olamaz';

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Satış Fırsatı Kartı — Mockup</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;
+    --sel:#d7e7fb;--selbd:#98c2ee;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--grpbg:#fbfcfd;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:970px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .btn.lost{border-color:#a3312f;background:linear-gradient(#e0605c,#c0413d);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px}
+  .idstrip{display:grid;grid-template-columns:110px 1fr 160px 140px;gap:10px;padding:10px 12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}.fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;color:var(--ink);display:flex;align-items:center}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative}.combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .chip.acik{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);margin-top:2px;flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:14px}.pane.active{display:block}
+  .row{display:flex;gap:14px}.col{flex:1;min-width:0}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;margin-left:auto;background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grid2{display:grid;grid-template-columns:120px 1fr;gap:8px 10px;align-items:center}
+  .grid2 label{font-size:11px;color:var(--muted);text-align:right}.grid2 label.req::after{content:" *";color:var(--req)}
+  .full{grid-column:1 / -1}
+  textarea.inp{height:56px;padding:5px 6px;resize:none;line-height:1.4}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}
+  .dg tr.sel td{background:var(--sel)}.dg tr:hover td{background:#f2f7fd}
+  .dg .c{text-align:center}.amt{text-align:right;font-family:"Segoe UI",Tahoma}
+  .gridtb{display:flex;gap:4px;padding:5px 0 0}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px}
+  .badge{font-size:10px;padding:1px 7px;border-radius:3px;font-weight:bold}
+  .badge.gorusme{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}.badge.teklif{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .badge.on{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}.badge.bek{background:#fdf6e3;color:#a9791a;border:1px solid #eeddb4}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}.maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}.req-note{color:var(--req)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+  .kpi{border:1px solid var(--line2);border-radius:4px;background:linear-gradient(#fff,#f6f9fc);padding:9px 11px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}.kpi .v{font-size:16px;font-weight:bold;color:var(--navy);margin-top:3px;font-family:"Segoe UI",Tahoma}
+  .kpi .v.pos{color:#2e7d46}.kpi .s{font-size:10px;color:var(--muted);margin-top:2px}
+  .av{width:24px;height:24px;border-radius:50%;color:#fff;font-weight:bold;display:inline-flex;align-items:center;justify-content:center;font-size:10px;vertical-align:middle}
+  /* pipeline stepper */
+  .pipe{display:flex;gap:0;margin:2px 0 14px;border:1px solid var(--line2);border-radius:6px;overflow:hidden}
+  .pipe .st{flex:1;text-align:center;padding:8px 4px;font-size:11px;color:var(--muted);background:#f4f7fb;border-right:1px solid var(--line2);position:relative}
+  .pipe .st:last-child{border-right:none}
+  .pipe .st.done{background:#dcecdd;color:#3f8a4e;font-weight:bold}
+  .pipe .st.cur{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .pipe .st small{display:block;font-size:9px;opacity:.85;font-weight:normal}
+  .feed{display:flex;flex-direction:column;gap:10px}
+  .newc{border:1px solid var(--line2);border-radius:5px;background:#fff;padding:8px}
+  .newc textarea{width:100%;border:1px solid var(--line);border-radius:3px;height:38px;padding:6px;font-family:inherit;font-size:12px;resize:none}
+  .newc .act{display:flex;gap:6px;margin-top:6px;align-items:center}
+  .cmt{border:1px solid var(--line2);border-radius:5px;background:#fff;padding:9px 10px;display:flex;gap:10px}
+  .avb{width:30px;height:30px;border-radius:50%;flex:none;color:#fff;font-weight:bold;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .cmt .cx{flex:1}.cmt .hd{font-size:11px;color:var(--muted)}.cmt .hd b{color:var(--navy)}.cmt .tx{font-size:12px;margin:3px 0 0;line-height:1.45}
+  .sysline{font-size:11px;color:var(--muted);padding:2px 4px}.sysline b{color:#3d6294}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Satış Fırsatı — Düzenle <span class="sp">FIRSAT.ID 771 · No: FRS.2026-0221</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn ok">🏆 Kazanıldı</div>
+    <div class="btn lost">✖ Kaybedildi</div>
+    <div class="btn">📄 Teklif Oluştur</div>
+    <div class="btn">＋ Aktivite</div>
+    <div class="sepv"></div>
+    <div class="btn">✖ Kapat</div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label class="req">Fırsat No</label><div class="inp big">FRS.2026-0221</div></div>
+    <div class="fld"><label class="req">Konu</label><div class="inp big">Granit Bilgisayar — 40 adet notebook + kurulum</div></div>
+    <div class="fld"><label>Aşama</label><div class="inp"><span class="chip acik">Teklif</span></div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="chip acik">● Açık</span></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="genel">Genel</div>
+    <div class="tab" data-t="urun">Ürünler <span class="b">3</span></div>
+    <div class="tab" data-t="aktivite">Aktiviteler <span class="b">4</span></div>
+    <div class="tab" data-t="teklif">Teklifler <span class="b">2</span></div>
+    <div class="tab" data-t="yorum">Yorum / Medya <span class="b">3</span></div>
+    <div class="tab" data-t="ek">Ek Alanlar <span class="b">2</span></div>
+  </div>
+
+  <!-- GENEL -->
+  <div class="pane active" data-p="genel">
+    <div class="kpis">
+      <div class="kpi"><div class="k">Tahmini Tutar</div><div class="v">₺ 1.050.000</div><div class="s">KDV hariç</div></div>
+      <div class="kpi"><div class="k">Olasılık</div><div class="v">%70</div><div class="s">aşama: Teklif</div></div>
+      <div class="kpi"><div class="k">Ağırlıklı Değer</div><div class="v pos">₺ 735.000</div><div class="s">tutar × olasılık</div></div>
+      <div class="kpi"><div class="k">Beklenen Kapanış</div><div class="v">25.08.2026</div><div class="s">13 gün</div></div>
+    </div>
+
+    <div class="pipe">
+      <div class="st done">Yeni<small>05.08</small></div>
+      <div class="st done">İletişim<small>07.08</small></div>
+      <div class="st done">İhtiyaç Analizi<small>10.08</small></div>
+      <div class="st cur">Teklif<small>bugün · %70</small></div>
+      <div class="st">Müzakere</div>
+      <div class="st">Kapanış</div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Fırsat Bilgileri <span class="tag">FIRSAT</span></h4>
+          <div class="body grid2">
+            <label class="req">Müşteri / Aday</label><div class="inp combo">Granit Bilgisayar Ltd.</div>
+            <label>Kaynak</label><div class="inp combo">Mevcut Müşteri / Tekrar Satış</div>
+            <label>Tür</label><div class="inp combo">Donanım Satışı</div>
+            <label>Aşama</label><div class="inp combo">Teklif</div>
+            <label>Öncelik</label><div class="inp combo">Yüksek</div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Değer & Zaman <span class="tag">FIRSAT</span></h4>
+          <div class="body grid2">
+            <label class="req">Tahmini Tutar</label><div class="inp">₺ 1.050.000,00</div>
+            <label>Para Birimi</label><div class="inp combo">TL</div>
+            <label>Olasılık %</label><div class="inp">70</div>
+            <label>Beklenen Kapanış</label><div class="inp">25.08.2026</div>
+            <label>Sorumlu</label><div class="inp combo"><span class="av" style="background:#2f6db3">MY</span>&nbsp;Mehmet Yıldız</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grp" style="margin-top:12px;margin-bottom:0">
+      <h4>Açıklama <span class="tag">FIRSAT.ACIKLAMA</span></h4>
+      <div class="body"><textarea class="inp" style="width:100%" readonly>Müşteri 40 adet ThinkPad E14 + kurulum/kablolama talep ediyor. Bütçe onayı beklendiği için olasılık %70. Teklif gönderildi, müzakere aşamasına geçmesi bekleniyor.</textarea></div>
+    </div>
+  </div>
+
+  <!-- URUNLER -->
+  <div class="pane" data-p="urun">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Fırsat Kalemleri <span class="tag">FIRSATDETAY (1:N)</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th>Ürün / Hizmet</th><th class="amt" style="width:70px">Miktar</th><th class="amt" style="width:100px">Br. Fiyat</th><th class="amt" style="width:70px">İsk.</th><th class="amt" style="width:120px">Tutar</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td>Lenovo ThinkPad E14 G5</td><td class="amt">40</td><td class="amt">22.500</td><td class="amt">%3</td><td class="amt">873.000</td></tr>
+            <tr><td>Kurulum / Kablolama (Hizmet)</td><td class="amt">1</td><td class="amt">120.000</td><td class="amt">—</td><td class="amt">120.000</td></tr>
+            <tr><td>3 Yıl Yerinde Garanti</td><td class="amt">40</td><td class="amt">1.425</td><td class="amt">—</td><td class="amt">57.000</td></tr>
+          </tbody>
+          <tfoot><tr><th colspan="4" style="text-align:right">Tahmini Toplam (KDV hariç)</th><th class="amt">₺ 1.050.000</th></tr></tfoot>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">＋ Kalem Ekle</span><span class="minibtn">✎ Düzenle</span><span class="minibtn">🗑 Sil</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AKTIVITELER -->
+  <div class="pane" data-p="aktivite">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Aktiviteler / Görevler <span class="tag">GOREVLER (fırsat bağlı)</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:100px">Tür</th><th>Konu</th><th style="width:120px">Sorumlu</th><th style="width:90px">Tarih</th><th class="c" style="width:90px">Durum</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge gorusme">Telefon</span></td><td>İlk temas, ihtiyaç öğrenildi</td><td>Mehmet Yıldız</td><td>07.08</td><td class="c"><span class="badge on">Bitti</span></td></tr>
+            <tr><td><span class="badge gorusme">Toplantı</span></td><td>İhtiyaç analizi görüşmesi</td><td>Mehmet Yıldız</td><td>10.08</td><td class="c"><span class="badge on">Bitti</span></td></tr>
+            <tr class="sel"><td><span class="badge teklif">Teklif</span></td><td>Teklif gönderildi, takip</td><td>Mehmet Yıldız</td><td>12.08</td><td class="c"><span class="badge bek">Devam</span></td></tr>
+            <tr><td><span class="badge gorusme">Toplantı</span></td><td>Müzakere / kapanış görüşmesi</td><td>Mehmet Yıldız</td><td>20.08</td><td class="c"><span class="badge bek">Açık</span></td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">＋ Aktivite Ekle</span><span class="minibtn">📞 Ara</span><span class="minibtn">📅 Toplantı</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEKLIFLER -->
+  <div class="pane" data-p="teklif">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Bağlı Teklifler <span class="tag">TEKLIF (1:N)</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:140px">Teklif No</th><th style="width:100px">Tarih</th><th class="amt" style="width:130px">Tutar</th><th style="width:80px">Geçerlilik</th><th class="c" style="width:100px">Durum</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td>TKL.2026-0453</td><td>12.08.2026</td><td class="amt">1.050.000,00</td><td>25.08</td><td class="c"><span class="badge bek">Gönderildi</span></td></tr>
+            <tr><td>TKL.2026-0448</td><td>08.08.2026</td><td class="amt">1.098.000,00</td><td>18.08</td><td class="c"><span class="badge">Revize</span></td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">＋ Teklif Oluştur</span><span class="minibtn">👁 Aç</span><span class="minibtn">🔄 Siparişe Çevir</span></div>
+        <div class="hint">Kazanıldığında teklif → sipariş/faturaya dönüştürülebilir (belge dönüşümü).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- YORUM -->
+  <div class="pane" data-p="yorum">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Yorum / Medya / Aktivite <span class="tag">GOREVYORUM + IMAJ</span></h4>
+      <div class="body">
+        <div class="feed">
+          <div class="newc"><textarea placeholder="Yorum yaz…"></textarea><div class="act"><span class="minibtn">📎 Dosya</span><span class="minibtn">@ Etiketle</span><span class="btn primary" style="margin-left:auto">Gönder</span></div></div>
+          <div class="sysline">🔄 <b>Mehmet Yıldız</b> aşamayı <b>İhtiyaç Analizi → Teklif</b> yaptı · 12.08.2026 10:30</div>
+          <div class="cmt"><div class="avb" style="background:#2f6db3">MY</div><div class="cx"><div class="hd"><b>Mehmet Yıldız</b> · 12.08.2026 10:28</div><div class="tx">Teklif gönderildi. Müşteri bütçe onayı için 1 hafta istedi, olasılığı %70'e çektim.</div></div></div>
+          <div class="sysline">➕ <b>Mehmet Yıldız</b> fırsatı oluşturdu · 05.08.2026 09:10</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EK -->
+  <div class="pane" data-p="ek">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Ek Alanlar <span class="tag">REHBERBILGI/EAV</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:180px">Etiket</th><th>Değer</th><th style="width:120px">Modül</th></tr></thead>
+          <tbody><tr><td>Rakip</td><td>X Bilişim</td><td>Fırsat</td></tr><tr class="sel"><td>Bütçe Onayı</td><td>Bekleniyor</td><td>Fırsat</td></tr></tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">＋ Alan Ekle</span><span class="minibtn">🗑 Sil</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli:</b>
+    <span>Genel → <b>FIRSAT</b></span>· <span>Ürünler → <b>FIRSATDETAY</b></span>· <span>Aktiviteler → <b>GOREVLER</b></span>·
+    <span>Teklifler → <b>TEKLIF</b></span>· <span>Yorum → <b>GOREVYORUM+IMAJ</b></span>· <span>Ek → <b>REHBERBILGI</b></span>
+  </div>
+  <div class="statusbar"><span>Kayıt: 221 / 1840</span><span>Sorumlu: <b>Mehmet Yıldız</b></span><span class="req-note">* zorunlu</span><span style="margin-left:auto">Son değişiklik: 12.08.2026 · Mehmet Yıldız</span></div>
+</div>
+<script>
+  var tabs=document.querySelectorAll('.tab'),panes=document.querySelectorAll('.pane');
+  tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('active')});panes.forEach(function(x){x.classList.remove('active')});t.classList.add('active');document.querySelector('.pane[data-p="'+t.dataset.t+'"]').classList.add('active');});});
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

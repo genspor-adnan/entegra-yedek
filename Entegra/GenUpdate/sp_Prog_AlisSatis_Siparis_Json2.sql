@@ -60,7 +60,12 @@ DURUMNEREDEN = case     when (F.TUR=9)and(412 in
 SONERISIM = (SELECT MAX(KA.DEGISTIRMETARIHI) FROM KULLANICI_ARAMA KA
               WHERE KA.KAYITID = F.ID AND KA.MODUL = @Modul AND KA.KULID = @Kul),
 ERISIMSAY = (SELECT MAX(KA.SAY) FROM KULLANICI_ARAMA KA
-              WHERE KA.KAYITID = F.ID AND KA.MODUL = @Modul AND KA.KULID = @Kul) ';
+              WHERE KA.KAYITID = F.ID AND KA.MODUL = @Modul AND KA.KULID = @Kul),
+-- SANAL: SIPARIS tablosunda YOK (yalniz FATBASLIK''ta var). Cari ekranindaki Alis/Satis
+--   gridi TEK grid olup iki SP''yi de besliyor -> ayni kolon adi burada da donmeli,
+--   yoksa siparis alt sekmelerinde "Sanal" kolonu alansiz kalir. Sabit 0.
+--   Kolon SIRASI icin EN SONA eklendi (pozisyonel erisim: Fields[0] = F.ID).
+SANAL = CAST(0 AS bit) ';
 
     -- SIPARISDETAY/STOKLAR JOIN'i YALNIZ stok filtresi icin gerekli (SD./ST. baska yerde
     -- kullanilmiyor). Kosulsuz join baslik basina detay sayisi kadar satir uretiyor,

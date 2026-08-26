@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Servis Listesi — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* servis satir renkleri */
+    --s-gec:#f7cfcf; --s-gec-t:#7d1f1f;   /* termin gecti / SLA asildi   */
+    --s-bug:#fbe6ae; --s-bug-t:#7a5407;   /* bugun teslim / acil          */
+    --s-ony:#f6d9c0; --s-ony-t:#8a4a12;   /* garanti disi - onay bekliyor */
+    --s-kap:#dcdcdc; --s-kap-t:#7a7a7a;   /* kapatildi / iptal            */
+    /* gorev butonu (Delphi clGorevTusuSecili / Pasif) */
+    --tus-pas:#9c71ad; --tus-sec:#1f6fbe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+
+  .wrap{display:grid;grid-template-columns:222px 1fr 236px;gap:0}
+
+  /* SOL: Menu / Arama */
+  .gorev{background:#f4f7fa;border-right:1px solid var(--line2);padding:6px 6px 10px}
+  .gorev h5{margin:6px 4px 4px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .ltabs{display:flex;gap:2px;margin:-6px -6px 8px;padding:6px 6px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .ltab{flex:1;text-align:center;padding:6px 8px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);
+    border-bottom:none;border-radius:3px 3px 0 0;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .ltab.active{background:#f4f7fa;color:var(--navy);font-weight:bold}
+  .lpane{display:none}.lpane.active{display:block}
+  .gtus{display:flex;align-items:center;gap:8px;color:#fff;font-weight:bold;font-size:11.5px;
+    background:var(--tus-pas);border:1px solid rgba(0,0,0,.12);border-radius:3px;padding:8px 9px;margin-bottom:3px;cursor:default}
+  .gtus:hover{filter:brightness(1.06)}
+  .gtus.on{background:var(--tus-sec);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+  .gtus .ic{font-size:14px;width:18px;text-align:center}
+  .achips{display:flex;gap:4px;margin-bottom:8px}
+  .achips .minibtn{flex:1;justify-content:center}
+  .agrid{display:grid;grid-template-columns:70px 1fr;gap:5px 6px;align-items:center}
+  .agrid label{font-size:10.5px;color:var(--muted);text-align:right}
+  .gorev .minibtn{white-space:nowrap}
+
+  /* ORTA */
+  .center{min-width:0;display:flex;flex-direction:column}
+  .filtre{display:flex;gap:5px;padding:8px 10px 7px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line2);background:#fbfcfe}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.s-gec td{background:var(--s-gec);color:var(--s-gec-t)}
+  .dg tr.s-bug td{background:var(--s-bug);color:var(--s-bug-t)}
+  .dg tr.s-ony td{background:var(--s-ony);color:var(--s-ony-t)}
+  .dg tr.s-kap td{background:var(--s-kap);color:var(--s-kap-t)}
+  .dg tr.s-kap td.ad{text-decoration:line-through}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-dev{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-gec{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-acik{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}
+  .p-ony{background:#fdeee0;color:#a2560f;border-color:#f2d7bb}
+  .p-gar{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .tip{display:inline-block;min-width:30px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;padding:1px 5px;border:1px solid}
+  .t-acl{background:#fbe0e0;border-color:#f0bcbc;color:#a12a2a}
+  .t-yuk{background:#fdf1e2;border-color:#f0dcbd;color:#96651a}
+  .t-nrm{background:#e5ecf8;border-color:#c6d7ef;color:#2b5c95}
+  .t-dsk{background:#eef1f4;border-color:#d8dfe6;color:#6b7a8b}
+  /* mini bar */
+  .bar{height:9px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:54px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+
+  /* alt detay */
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 12px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+  .gridtb{display:flex;gap:4px;padding:0 0 7px;align-items:center;flex-wrap:wrap}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px}
+
+  /* SAG */
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:8px 0}
+  .side h5{margin:0;padding:7px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11px;padding:3px 12px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .tvsep{height:1px;background:var(--line2);margin:7px 10px}
+  .sidebtns{display:flex;flex-direction:column;gap:4px;padding:4px 10px}
+  .urun{margin:0 10px;border:1px solid var(--line);border-radius:4px;background:#fff;padding:9px;text-align:center}
+  .urun .foto{height:82px;border:1px solid var(--line2);border-radius:3px;background:linear-gradient(#fff,#f2f6fa);
+    display:flex;align-items:center;justify-content:center;font-size:30px;color:#9fb3c8}
+  .urun .nm{font-size:11.5px;font-weight:bold;color:var(--navy);margin-top:7px;line-height:1.35}
+  .urun .mt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .depo{display:flex;align-items:center;gap:7px;padding:3px 12px;font-size:11px}
+  .depo .ad{width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+  .depo .mk{width:44px;text-align:right;font-family:"Segoe UI",Tahoma}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:22px;padding:0 6px;font-size:11.5px;
+    display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:5px;top:2px;color:var(--muted);font-size:10px}
+
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Servis Listesi
+    <span class="sp">ListeFrame\UServisListeDlg · SERVIS · SERVISHAREKET · Şube: Merkez · 14.08.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni Servis Fişi</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">👷 Teknisyen Ata</div>
+    <div class="btn">🔄 Durum Değiştir</div>
+    <div class="btn">🖨 Servis Formu Yazdır</div>
+    <div class="sepv"></div>
+    <div class="btn ok">🧾 Faturaya Aktar</div>
+    <div class="btn">🔧 Yedek Parça Çıkışı</div>
+    <div class="sepv"></div>
+    <div class="btn">📤 Excel</div>
+    <div class="btn">🖨 Yazdır</div>
+  </div>
+
+  <div class="wrap">
+    <!-- ============ SOL: MENU / ARAMA ============ -->
+    <div class="gorev">
+      <div class="ltabs">
+        <div class="ltab active" data-l="menu">☰ Menü</div>
+        <div class="ltab" data-l="arama">🔎 Arama</div>
+      </div>
+
+      <div class="lpane active" data-lp="menu">
+        <h5>Servis</h5>
+        <div class="gtus on"><span class="ic">🛠</span> Servis Fişi</div>
+        <div class="gtus"><span class="ic">📥</span> Cihaz Kabul</div>
+        <div class="gtus"><span class="ic">🗓</span> Teknisyen Planı</div>
+        <div class="gtus"><span class="ic">🔧</span> Yedek Parça</div>
+        <div class="gtus"><span class="ic">🔁</span> Periyodik Bakım</div>
+        <h5>Diğer</h5>
+        <div class="gtus"><span class="ic">📁</span> Dökümler</div>
+        <div class="gtus"><span class="ic">📂</span> Özel Dökümler</div>
+        <div class="hint" style="padding:6px 4px 0">Tek buton aktif — <b>GorevTusuSec</b>;
+          seçili olan mavi.</div>
+      </div>
+
+      <div class="lpane" data-lp="arama">
+        <div class="achips">
+          <span class="minibtn on">Tüm</span><span class="minibtn">Son</span><span class="minibtn">Sık</span>
+        </div>
+        <div class="agrid">
+          <label>Servis No</label><div class="inp">SRV.2026</div>
+          <label>Cari / Müşteri</label><div class="inp"></div>
+          <label>Cihaz / Seri No</label><div class="inp"></div>
+          <label>Marka-Model</label><div class="inp combo">(tümü)</div>
+          <label>Arıza Tipi</label><div class="inp combo">(tümü)</div>
+          <label>Teknisyen</label><div class="inp combo">(tümü)</div>
+          <label>Durum</label><div class="inp combo">Açık + Devam</div>
+          <label>Öncelik</label><div class="inp combo">(tümü)</div>
+          <label>Şube</label><div class="inp combo">Merkez</div>
+        </div>
+        <div class="agrid" style="grid-template-columns:70px 1fr 1fr;margin-top:5px">
+          <label>Geliş Tar.</label><div class="inp">01.07.2026</div><div class="inp">14.08.2026</div>
+          <label>Termin</label><div class="inp">(boş)</div><div class="inp">31.08.2026</div>
+        </div>
+        <label class="chk" style="margin-top:6px"><input type="checkbox" checked> Kapananları gizle</label>
+        <label class="chk"><input type="checkbox"> Sadece garanti kapsamı</label>
+        <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn on" style="flex:1;justify-content:center">🔎 Ara</span>
+          <span class="minibtn" style="flex:1;justify-content:center">↩ Temizle</span>
+          <span class="minibtn" style="flex-basis:100%;justify-content:center">💾 Aramayı Kaydet</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ORTA: LISTE ============ -->
+    <div class="center">
+      <div class="filtre">
+        <span class="minibtn">Açık</span>
+        <span class="minibtn on">Devam Eden</span>
+        <span class="minibtn">Onay Bekleyen</span>
+        <span class="minibtn">Tamamlanan</span>
+        <span class="minibtn">Tümü</span>
+        <span class="sepv" style="height:20px"></span>
+        <span class="minibtn">👷 Teknisyen: (tümü)</span>
+        <span class="minibtn">▲ Öncelik: (tümü)</span>
+        <span class="minibtn">🏢 Şube: Merkez</span>
+        <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">
+          Sıralama: kapananlar en sonda · termin ↑</span>
+      </div>
+
+      <div style="padding:10px 10px 0">
+        <div class="dg">
+          <table>
+            <tr>
+              <th class="c" style="width:40px">ÖNC.</th>
+              <th style="width:104px">SERVİS NO</th>
+              <th style="width:74px">TARİH</th>
+              <th style="width:150px">MÜŞTERİ</th>
+              <th style="width:160px">CİHAZ</th>
+              <th style="width:96px">SERİ NO</th>
+              <th>ARIZA</th>
+              <th style="width:88px">TEKNİSYEN</th>
+              <th style="width:74px">TERMİN</th>
+              <th class="c" style="width:78px">GEÇEN SÜRE</th>
+              <th class="r" style="width:78px">İŞÇİLİK</th>
+              <th class="r" style="width:82px">PARÇA</th>
+              <th class="r" style="width:88px">TUTAR</th>
+              <th class="c" style="width:88px">DURUM</th>
+            </tr>
+
+            <tr class="s-gec">
+              <td class="c"><span class="tip t-acl">ACL</span></td><td>SRV.2026-0764</td><td>05.08.2026</td>
+              <td class="ad">DENİZ TİCARET — Arçelik Bayi</td>
+              <td class="ad"><b>Kombi — Vaillant TurboTec 24</b></td><td>VT24-88214</td>
+              <td class="ad">Ateşleme yapmıyor, hata F.28</td><td>Serkan Öz</td><td><b>11.08.2026</b></td>
+              <td class="c"><div class="bar"><span class="yok" style="width:100%"></span></div></td>
+              <td class="r">1.500,00</td><td class="r">2.480,00</td><td class="r"><b>4.776,00</b></td>
+              <td class="c"><span class="pill p-gec">3 gün gecikti</span></td>
+            </tr>
+            <tr class="s-gec foc">
+              <td class="c"><span class="tip t-yuk">YÜK</span></td><td>SRV.2026-0771</td><td>08.08.2026</td>
+              <td class="ad">GRANİT BİLGİSAYAR LTD. ŞTİ.</td>
+              <td class="ad"><b>Lenovo ThinkPad E14 G5</b></td><td>PF3A8821K</td>
+              <td class="ad">Anakart güç devresi arızalı + RAM temassızlığı</td><td>Serkan Öz</td><td><b>13.08.2026</b></td>
+              <td class="c"><div class="bar"><span class="yok" style="width:100%"></span></div></td>
+              <td class="r">2.750,00</td><td class="r">6.920,00</td><td class="r"><b>11.604,00</b></td>
+              <td class="c"><span class="pill p-gec">1 gün gecikti</span></td>
+            </tr>
+            <tr class="s-bug">
+              <td class="c"><span class="tip t-acl">ACL</span></td><td>SRV.2026-0778</td><td>12.08.2026</td>
+              <td class="ad">META MEFRUŞAT A.Ş.</td>
+              <td class="ad">Klima — Mitsubishi MSZ-AP35</td><td>MSZ35-2214</td>
+              <td class="ad">Periyodik bakım + gaz dolumu (4 iç ünite)</td><td>Emre Aydın</td><td>14.08.2026</td>
+              <td class="c"><div class="bar"><span class="kri" style="width:88%"></span></div></td>
+              <td class="r">950,00</td><td class="r">420,00</td><td class="r">1.644,00</td>
+              <td class="c"><span class="pill p-dev">Bugün teslim</span></td>
+            </tr>
+            <tr class="s-bug">
+              <td class="c"><span class="tip t-nrm">NRM</span></td><td>SRV.2026-0781</td><td>13.08.2026</td>
+              <td class="ad">ANADOLU KAĞIT VE AMB.</td>
+              <td class="ad">Forklift — Linde H25 Dizel</td><td>H25-771204</td>
+              <td class="ad">500 saat periyodik bakım, hidrolik kaçak</td><td>Hakan Duru</td><td>14.08.2026</td>
+              <td class="c"><div class="bar"><span class="kri" style="width:92%"></span></div></td>
+              <td class="r">3.200,00</td><td class="r">5.640,00</td><td class="r">10.608,00</td>
+              <td class="c"><span class="pill p-dev">Bugün teslim</span></td>
+            </tr>
+            <tr class="s-ony">
+              <td class="c"><span class="tip t-yuk">YÜK</span></td><td>SRV.2026-0769</td><td>07.08.2026</td>
+              <td class="ad">ÖZTÜRK OTOMOTİV SAN.</td>
+              <td class="ad">Jeneratör — Aksa APD 33</td><td>APD33-5512</td>
+              <td class="ad">Alternatör sargı arızası — garanti dışı, teklif verildi</td><td>Hakan Duru</td><td>18.08.2026</td>
+              <td class="c"><div class="bar"><span class="ok" style="width:45%"></span></div></td>
+              <td class="r">4.500,00</td><td class="r">18.750,00</td><td class="r">27.900,00</td>
+              <td class="c"><span class="pill p-ony">Onay bekliyor</span></td>
+            </tr>
+            <tr class="s-ony">
+              <td class="c"><span class="tip t-nrm">NRM</span></td><td>SRV.2026-0775</td><td>11.08.2026</td>
+              <td class="ad">KİMPA KİMYA LTD.</td>
+              <td class="ad">Yazıcı — HP LaserJet M428fdw</td><td>VNC4K21093</td>
+              <td class="ad">Fuser ünitesi değişimi — ücretli onarım</td><td>Emre Aydın</td><td>20.08.2026</td>
+              <td class="c"><div class="bar"><span class="ok" style="width:30%"></span></div></td>
+              <td class="r">600,00</td><td class="r">3.150,00</td><td class="r">4.500,00</td>
+              <td class="c"><span class="pill p-ony">Onay bekliyor</span></td>
+            </tr>
+            <tr>
+              <td class="c"><span class="tip t-nrm">NRM</span></td><td>SRV.2026-0783</td><td>13.08.2026</td>
+              <td class="ad">DENİZ TEKSTİL A.Ş.</td>
+              <td class="ad">Dikiş makinesi — Juki DDL-9000C</td><td>JK9000-4471</td>
+              <td class="ad">Devir motoru değişimi — <b>garanti kapsamı</b></td><td>Serkan Öz</td><td>21.08.2026</td>
+              <td class="c"><div class="bar"><span class="ok" style="width:18%"></span></div></td>
+              <td class="r">0,00</td><td class="r">0,00</td><td class="r">0,00</td>
+              <td class="c"><span class="pill p-gar">Garanti</span></td>
+            </tr>
+            <tr>
+              <td class="c"><span class="tip t-dsk">DÜŞ</span></td><td>SRV.2026-0785</td><td>14.08.2026</td>
+              <td class="ad">GRANİT BİLGİSAYAR LTD. ŞTİ.</td>
+              <td class="ad">Barkod yazıcı — Zebra ZD421</td><td>ZD421-90233</td>
+              <td class="ad">Kafa temizliği ve kalibrasyon talebi</td><td>— (atanmadı)</td><td>25.08.2026</td>
+              <td class="c"><div class="bar"><span class="ok" style="width:4%"></span></div></td>
+              <td class="r">0,00</td><td class="r">0,00</td><td class="r">0,00</td>
+              <td class="c"><span class="pill p-acik">Açık</span></td>
+            </tr>
+            <tr class="s-kap">
+              <td class="c"><span class="tip t-nrm">NRM</span></td><td>SRV.2026-0758</td><td>01.08.2026</td>
+              <td class="ad">ARTLİNE MOBİLYA SAN.</td>
+              <td class="ad">Klima — Daikin FTXF35</td><td>FTXF-330091</td>
+              <td class="ad">İç ünite drenaj tıkanıklığı — temizlik yapıldı</td><td>Emre Aydın</td><td>06.08.2026</td>
+              <td class="c"><div class="bar"><span class="ok" style="width:100%"></span></div></td>
+              <td class="r">750,00</td><td class="r">180,00</td><td class="r">1.116,00</td>
+              <td class="c"><span class="pill p-ok">Tamamlandı</span></td>
+            </tr>
+            <tr class="s-kap">
+              <td class="c"><span class="tip t-dsk">DÜŞ</span></td><td>SRV.2026-0752</td><td>28.07.2026</td>
+              <td class="ad">MEFRUŞAT SANAYİ A.Ş.</td>
+              <td class="ad">Su arıtma — Aquapro RO 5'li</td><td>AQ-11228</td>
+              <td class="ad">Müşteri vazgeçti, cihaz iade edildi</td><td>—</td><td>—</td>
+              <td class="c">—</td>
+              <td class="r">0,00</td><td class="r">0,00</td><td class="r">0,00</td>
+              <td class="c"><span class="pill p-pas">İptal</span></td>
+            </tr>
+
+            <tfoot>
+              <tr>
+                <td colspan="10" style="text-align:right">TOPLAM (10 fiş · 8 açık / 2 geciken)</td>
+                <td class="r">14.250,00</td><td class="r">37.540,00</td><td class="r">62.148,00</td>
+                <td class="c"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-gec)"></span>Termin geçti / SLA aşıldı</span>
+          <span><span class="sw" style="background:var(--s-bug)"></span>Bugün teslim — acil</span>
+          <span><span class="sw" style="background:var(--s-ony)"></span>Garanti dışı, ücret onayı bekliyor</span>
+          <span><span class="sw" style="background:var(--s-kap)"></span>Kapatıldı / iptal — <b>en sonda</b>, arıza metni üstü çizili</span>
+        </div>
+        <div class="hint">
+          Satır rengi <b>Styles.OnGetContentStyle</b> ile; öncelik <b>Kapalı → Termin geçti → Bugün teslim → Onay bekliyor → Normal</b>.
+          "Geçen süre" çubuğu <b>geliş tarihi → termin</b> arasındaki SLA doluluğudur; %100 dolan satır kırmızıya döner.
+          Tutar = (işçilik + parça − indirim) × KDV; garanti kapsamındaki fişlerde ücretlendirme yapılmaz.
+        </div>
+      </div>
+
+      <!-- ALT DETAY -->
+      <div class="tabs" style="margin-top:12px">
+        <div class="tab active" data-t="ariza">Arıza / Yapılan İşlem</div>
+        <div class="tab" data-t="parca">Kullanılan Parçalar <span class="b">3</span></div>
+        <div class="tab" data-t="iscilik">İşçilik &amp; Süre <span class="b">4</span></div>
+        <div class="tab" data-t="hareket">Teknisyen Hareketleri <span class="b">6</span></div>
+        <div class="tab" data-t="garanti">Garanti &amp; Sözleşme</div>
+        <div class="tab" data-t="dokuman">Doküman / Fotoğraf <span class="b">4</span></div>
+        <div class="tab" data-t="yorum">Yorum</div>
+      </div>
+
+      <div class="pane active" data-p="ariza">
+        <div class="gridtb">
+          <span class="minibtn">✎ Tespiti Düzenle</span>
+          <span class="minibtn">📋 Şablondan Doldur</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">SRV.2026-0771 · Serkan Öz · son güncelleme 14.08.2026 09:40</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:150px">BAŞLIK</th><th>AÇIKLAMA</th><th style="width:110px">KAYDEDEN</th><th style="width:120px">TARİH</th></tr>
+            <tr><td><b>Müşteri Şikayeti</b></td>
+                <td class="ad">Cihaz açılmıyor, şarj ışığı yanıp sönüyor. Ara sıra mavi ekran veriyordu.</td>
+                <td>Ahmet Kaya</td><td>08.08.2026 14:20</td></tr>
+            <tr><td><b>Ön İnceleme</b></td>
+                <td class="ad">Adaptör sağlam, cihaz güç almıyor. Yedekleme alındı (harici disk), müşteri şifresi teslim edildi.</td>
+                <td>Serkan Öz</td><td>08.08.2026 14:30</td></tr>
+            <tr><td><b>Arıza Tespiti</b></td>
+                <td class="ad">Anakart güç devresi arızalı; RAM yuvasında temassızlık. Anakart değişimi gerekli.</td>
+                <td>Serkan Öz</td><td>09.08.2026 10:15</td></tr>
+            <tr class="s-bug"><td><b>Yapılan İşlem</b></td>
+                <td class="ad">Anakart değiştirildi, RAM yeniden takıldı, termal macun yenilendi. 24 saat yük testi sürüyor.</td>
+                <td>Serkan Öz</td><td>12.08.2026 15:40</td></tr>
+          </table>
+        </div>
+        <div class="hint">Şikayet ve tespit metinleri <b>SERVIS</b> kartındaki alanlardır; ara adımlar
+          <b>SERVISHAREKET</b> satırı olarak tutulur ve servis formuna basılır.</div>
+      </div>
+
+      <div class="pane" data-p="parca">
+        <div class="gridtb">
+          <span class="minibtn">➕ Parça Ekle</span><span class="minibtn">🔎 Stoktan Seç</span><span class="minibtn">🗑 Sil</span>
+          <label class="chk" style="margin-left:8px"><input type="checkbox" checked> Stoktan düşülsün</label>
+          <span style="margin-left:auto;font-size:11px;color:var(--muted)">Depo:</span>
+          <div class="inp combo" style="width:130px">Servis Deposu</div>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:96px">STOK KODU</th><th>PARÇA / MALZEME</th><th style="width:104px">DEPO</th>
+                <th class="c" style="width:56px">BİRİM</th><th class="r" style="width:64px">MİKTAR</th>
+                <th class="r" style="width:92px">BR. FİYAT</th><th class="c" style="width:52px">KDV</th>
+                <th class="r" style="width:96px">TUTAR</th><th class="c" style="width:80px">ÇIKIŞ</th></tr>
+            <tr class="foc"><td>STK.30412</td><td class="ad"><b>Anakart — E14 G5 uyumlu</b></td><td>Servis Deposu</td>
+                <td class="c">AD</td><td class="r">1,00</td><td class="r">6.800,00</td><td class="c">%20</td>
+                <td class="r">6.800,00</td><td class="c"><span class="pill p-ok">Yapıldı</span></td></tr>
+            <tr><td>STK.30877</td><td class="ad">Termal macun — Arctic MX-6 4 g</td><td>Servis Deposu</td>
+                <td class="c">AD</td><td class="r">1,00</td><td class="r">120,00</td><td class="c">%20</td>
+                <td class="r">120,00</td><td class="c"><span class="pill p-ok">Yapıldı</span></td></tr>
+            <tr class="s-ony"><td>STK.30215</td><td class="ad">Klavye modülü — TR Q (yedek talep)</td><td>Merkez Depo</td>
+                <td class="c">AD</td><td class="r">1,00</td><td class="r">1.450,00</td><td class="c">%20</td>
+                <td class="r">1.450,00</td><td class="c"><span class="pill p-ony">Bekliyor</span></td></tr>
+            <tfoot><tr><td colspan="7" style="text-align:right">PARÇA TOPLAMI (KDV hariç · onaylı satırlar)</td>
+                <td class="r">6.920,00</td><td class="c"></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="hint">Onaylanan parçalar <b>STOKLAR</b>'dan servis çıkış fişiyle düşülür; bekleyen satır
+          stok hareketi oluşturmaz, sadece teklife girer.</div>
+      </div>
+
+      <div class="pane" data-p="iscilik">
+        <div class="gridtb">
+          <span class="minibtn">➕ İşçilik Ekle</span><span class="minibtn">⏱ Süre Başlat</span><span class="minibtn">🗑 Sil</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Saat ücreti: 1.000,00 TL · Yol bedeli ayrı satır</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:100px">TARİH</th><th>İŞÇİLİK</th><th style="width:110px">TEKNİSYEN</th>
+                <th class="c" style="width:62px">TİP</th><th class="r" style="width:64px">SÜRE</th>
+                <th class="r" style="width:88px">BR. FİYAT</th><th class="r" style="width:92px">TUTAR</th></tr>
+            <tr><td>08.08.2026</td><td class="ad">Cihaz kabul, ön inceleme ve yedekleme</td><td>Serkan Öz</td>
+                <td class="c">Atölye</td><td class="r">0,50</td><td class="r">1.000,00</td><td class="r">500,00</td></tr>
+            <tr><td>09.08.2026</td><td class="ad">Arıza tespiti — güç devresi ölçümü</td><td>Serkan Öz</td>
+                <td class="c">Atölye</td><td class="r">0,75</td><td class="r">1.000,00</td><td class="r">750,00</td></tr>
+            <tr class="foc"><td>12.08.2026</td><td class="ad">Anakart değişimi + termal uygulama</td><td>Serkan Öz</td>
+                <td class="c">Atölye</td><td class="r">1,50</td><td class="r">1.000,00</td><td class="r">1.500,00</td></tr>
+            <tr class="s-bug"><td>14.08.2026</td><td class="ad">Yük testi ve teslim hazırlığı (devam ediyor)</td><td>Serkan Öz</td>
+                <td class="c">Atölye</td><td class="r">0,00</td><td class="r">1.000,00</td><td class="r">0,00</td></tr>
+            <tfoot><tr><td colspan="4" style="text-align:right">TOPLAM</td><td class="r">2,75 sa</td>
+                <td class="r"></td><td class="r">2.750,00</td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="pane" data-p="hareket">
+        <div class="gridtb">
+          <span style="font-size:11px;color:var(--muted)">Başlama:</span><div class="inp" style="width:92px">01.08.2026</div>
+          <span style="font-size:11px;color:var(--muted)">Bitiş:</span><div class="inp" style="width:92px">14.08.2026</div>
+          <span class="minibtn" style="margin-left:auto">🕓 Durum Geçmişini Yazdır</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:120px">TARİH / SAAT</th><th style="width:110px">KULLANICI</th>
+                <th style="width:112px">ESKİ DURUM</th><th style="width:112px">YENİ DURUM</th>
+                <th style="width:112px">TEKNİSYEN</th><th>AÇIKLAMA</th></tr>
+            <tr><td>08.08.2026 14:20</td><td>Ahmet Kaya</td><td>—</td>
+                <td><span class="pill p-acik">Açık</span></td><td>—</td>
+                <td class="ad">Servis fişi açıldı, cihaz teslim alındı</td></tr>
+            <tr><td>08.08.2026 14:35</td><td>Ahmet Kaya</td><td><span class="pill p-acik">Açık</span></td>
+                <td><span class="pill p-acik">Açık</span></td><td>Serkan Öz</td>
+                <td class="ad">Teknisyen atandı — atölye kuyruğu</td></tr>
+            <tr><td>09.08.2026 10:15</td><td>Serkan Öz</td><td><span class="pill p-acik">Açık</span></td>
+                <td><span class="pill p-dev">Devam Eden</span></td><td>Serkan Öz</td>
+                <td class="ad">Arıza tespiti tamamlandı</td></tr>
+            <tr class="s-ony"><td>09.08.2026 16:05</td><td>Serkan Öz</td><td><span class="pill p-dev">Devam Eden</span></td>
+                <td><span class="pill p-ony">Onay Bekliyor</span></td><td>Serkan Öz</td>
+                <td class="ad">Garanti dışı — müşteriye 11.604,00 TL teklif iletildi</td></tr>
+            <tr><td>12.08.2026 11:40</td><td>Ahmet Kaya</td><td><span class="pill p-ony">Onay Bekliyor</span></td>
+                <td><span class="pill p-dev">Devam Eden</span></td><td>Serkan Öz</td>
+                <td class="ad">Müşteri onayı alındı (telefon · kayıt no 4417)</td></tr>
+            <tr class="s-gec foc"><td>13.08.2026 18:00</td><td>SİSTEM</td><td><span class="pill p-dev">Devam Eden</span></td>
+                <td><span class="pill p-gec">Gecikti</span></td><td>Serkan Öz</td>
+                <td class="ad">Termin tarihi aşıldı — otomatik uyarı, sorumluya e-posta</td></tr>
+          </table>
+        </div>
+        <div class="hint">Durum geçişleri <b>GENDEPO.ISLEMLOG</b>'a da düşer (<b>ULog.LogKartDegisti</b>); buradaki liste
+          servis fişine özel <b>SERVISHAREKET</b> okumasıdır.</div>
+      </div>
+
+      <div class="pane" data-p="garanti">
+        <div class="gridtb">
+          <span class="minibtn">➕ Sözleşme Bağla</span><span class="minibtn">🛡 Garanti Sorgula</span>
+          <span style="margin-left:auto"><span class="pill p-gec">Bu fiş garanti DIŞI</span></span>
+        </div>
+        <div class="dg" style="max-width:820px">
+          <table>
+            <tr><th style="width:170px">BİLGİ</th><th>DEĞER</th><th style="width:150px">KAYNAK</th></tr>
+            <tr><td>Satış Faturası</td><td>DEF2026000000004 · 15.01.2024</td><td>FATBASLIK</td></tr>
+            <tr><td>Garanti Başlangıcı</td><td>15.01.2024</td><td>SERVIS</td></tr>
+            <tr class="s-gec"><td>Garanti Bitişi</td><td><b>15.01.2026</b> — 211 gün önce doldu</td><td>SERVIS</td></tr>
+            <tr><td>Garanti Durumu</td><td><span class="pill p-gec">Garanti Dışı</span> — işçilik ve parça ücretlendirilir</td><td>hesaplanan</td></tr>
+            <tr><td>Bakım Sözleşmesi</td><td>Yok — müşteri yıllık bakım paketi almadı</td><td>SERVIS</td></tr>
+            <tr><td>Ücretlendirme</td><td>Ücretli (müşteri onaylı · 12.08.2026)</td><td>SERVIS</td></tr>
+          </table>
+        </div>
+        <div class="hint">Sözleşmeli müşterilerde SLA süresi sözleşmeden gelir ve termin otomatik hesaplanır;
+          garanti kapsamındaki fişlerde tutar kolonları <b>0,00</b> yazılır, parçalar yine stoktan düşülür.</div>
+      </div>
+
+      <div class="pane" data-p="dokuman">
+        <div class="gridtb"><span class="minibtn">📎 Klasörden</span><span class="minibtn">🖨 Tarayıcıdan</span>
+          <span class="minibtn">📋 Yapıştır</span><span class="minibtn">🖼 Dosyadan</span>
+          <span class="minibtn" style="margin-left:auto">👁 Önizle</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:230px">DOSYA ADI</th><th style="width:130px">TÜR</th><th>AÇIKLAMA</th>
+                <th style="width:120px">EKLEYEN</th><th style="width:120px">TARİH</th><th class="r" style="width:74px">BOYUT</th></tr>
+            <tr><td class="ad">cihaz_kabul_tutanagi.pdf</td><td>Kabul Tutanağı</td>
+                <td class="ad">Müşteri imzalı, aksesuar listesi dahil</td><td>Ahmet Kaya</td><td>08.08.2026 14:25</td><td class="r">248 KB</td></tr>
+            <tr><td class="ad">anakart_ariza_01.jpg</td><td>Arıza Fotoğrafı</td>
+                <td class="ad">Güç devresi yanık izi — makro çekim</td><td>Serkan Öz</td><td>09.08.2026 10:40</td><td class="r">1,8 MB</td></tr>
+            <tr><td class="ad">anakart_ariza_02.jpg</td><td>Arıza Fotoğrafı</td>
+                <td class="ad">RAM yuvası oksitlenme</td><td>Serkan Öz</td><td>09.08.2026 10:42</td><td class="r">1,6 MB</td></tr>
+            <tr class="foc"><td class="ad">musteri_onay_formu.pdf</td><td>Onay Formu</td>
+                <td class="ad">Ücretli onarım onayı — 11.604,00 TL</td><td>Ahmet Kaya</td><td>12.08.2026 11:45</td><td class="r">96 KB</td></tr>
+          </table>
+        </div>
+        <div class="hint">İçerik <b>GENDEPO.DOSYA</b>'da (FILESTREAM, hash-dedup) tutulur; metadata
+          <b>IMAJ</b>, bağlantı <b>DOKUMAN</b> üzerindendir.</div>
+      </div>
+
+      <div class="pane" data-p="yorum">
+        <div class="gridtb"><span class="minibtn">➕ Yorum Ekle</span>
+          <label class="chk" style="margin-left:8px"><input type="checkbox" checked> Sistem satırlarını göster</label></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:130px">KULLANICI</th><th style="width:130px">TARİH</th><th>YORUM</th><th class="c" style="width:70px">EK</th></tr>
+            <tr><td>Ahmet Kaya</td><td>09.08.2026 16:10</td>
+                <td class="ad">Müşteri fiyat için düşünecek, cuma günü tekrar aranacak.</td><td class="c">—</td></tr>
+            <tr><td>Serkan Öz</td><td>11.08.2026 09:05</td>
+                <td class="ad">Anakart tedarikçiden geldi, stok girişi yapıldı (STK.30412).</td><td class="c">📎 1</td></tr>
+            <tr><td>SİSTEM</td><td>12.08.2026 11:40</td>
+                <td class="ad">Durum "Onay Bekliyor" → "Devam Eden" olarak değiştirildi.</td><td class="c">—</td></tr>
+            <tr class="s-gec"><td>Ahmet Kaya</td><td>14.08.2026 09:40</td>
+                <td class="ad">Müşteri teslim için arıyor — test bitince aynı gün kargolanacak.</td><td class="c">—</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SAG: SECILI SERVIS FISI ============ -->
+    <div class="side">
+      <h5>Seçili Servis Fişi</h5>
+      <div class="urun">
+        <div class="foto">💻</div>
+        <div class="nm">SRV.2026-0771<br>Lenovo ThinkPad E14 G5</div>
+        <div class="mt">GRANİT BİLGİSAYAR LTD. ŞTİ.<br>Seri: PF3A8821K</div>
+        <div style="display:flex;gap:5px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn">👁 Kart</span><span class="minibtn">🏢 Cari</span><span class="minibtn">🕓 Geçmiş</span>
+        </div>
+      </div>
+
+      <div class="tvsep"></div>
+      <h5>Durum</h5>
+      <div class="kv"><span>Açılış tarihi</span><b>08.08.2026 14:20</b></div>
+      <div class="kv"><span>Termin</span><b>13.08.2026</b></div>
+      <div class="kv"><span>Kalan süre</span><b style="color:#b23b3b">−1 gün (gecikti)</b></div>
+      <div class="kv"><span>Öncelik</span><b><span class="tip t-yuk">YÜKSEK</span></b></div>
+      <div class="kv"><span>Garanti</span><b><span class="pill p-gec">Dışı</span></b></div>
+      <div class="kv"><span>Ücretlendirme</span><b>Ücretli · onaylı</b></div>
+      <div class="kv"><span>Durum</span><b><span class="pill p-gec">Gecikti</span></b></div>
+
+      <div class="tvsep"></div>
+      <h5>Tutar Özeti</h5>
+      <div class="kv"><span>İşçilik (2,75 sa)</span><b>2.750,00</b></div>
+      <div class="kv"><span>Parça (2 kalem)</span><b>6.920,00</b></div>
+      <div class="kv"><span>İndirim</span><b>0,00</b></div>
+      <div class="kv"><span>Ara toplam</span><b>9.670,00</b></div>
+      <div class="kv"><span>KDV %20</span><b>1.934,00</b></div>
+      <div class="kv"><span>Genel toplam</span><b style="color:#2e7d46">11.604,00 TL</b></div>
+
+      <div class="tvsep"></div>
+      <h5>Teknisyen Doluluk</h5>
+      <div class="depo"><span class="ad">Serkan Öz</span>
+        <div class="bar" style="flex:1"><span class="yok" style="width:95%"></span></div><span class="mk">4 fiş</span></div>
+      <div class="depo"><span class="ad">Emre Aydın</span>
+        <div class="bar" style="flex:1"><span class="kri" style="width:62%"></span></div><span class="mk">3 fiş</span></div>
+      <div class="depo"><span class="ad">Hakan Duru</span>
+        <div class="bar" style="flex:1"><span class="ok" style="width:44%"></span></div><span class="mk">2 fiş</span></div>
+      <div class="depo"><span class="ad">Atanmamış</span>
+        <div class="bar" style="flex:1"><span class="ok" style="width:12%"></span></div><span class="mk">1 fiş</span></div>
+
+      <div class="tvsep"></div>
+      <h5>İşlemler</h5>
+      <div class="sidebtns">
+        <span class="minibtn">🧾 Faturala</span>
+        <span class="minibtn">👷 Teknisyen Ata</span>
+        <span class="minibtn">🔧 Parça Çıkışı</span>
+        <span class="minibtn">✉ Müşteriye SMS / E-posta</span>
+        <span class="minibtn">🖨 Servis Formu</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Fiş → <b>SERVIS</b> (SERVISNO · CARIID · URUNID · SERINO · GELISTARIHI · TERMIN · TEKNISYEN · ONCELIK · DURUM · GARANTI)</span>·
+    <span>İşlem / parça / süre → <b>SERVISHAREKET</b> (1:N)</span>·
+    <span>Müşteri → <b>CARI</b></span>·
+    <span>Cihaz &amp; parça → <b>STOKLAR</b> (+ stok çıkışı)</span>·
+    <span>Faturala → <b>FATBASLIK (TUR 15)</b></span>·
+    <span>Yorum → <b>GOREVYORUM</b></span>·
+    <span>Ek → <b>DOKUMAN → IMAJ → GENDEPO.DOSYA</b></span>·
+    <span>Ek alanlar → <b>REHBERBILGI</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Liste: <b>Devam Eden</b> · 10 fiş</span>
+    <span>Açık fiş: <b>8</b></span>
+    <span>Geciken: <b style="color:#b23b3b">2</b></span>
+    <span>Toplam tutar: <b>62.148,00 TL</b></span>
+    <span style="margin-left:auto">Seçili: SRV.2026-0771</span>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.ltab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.ltab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.lpane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.lpane[data-lp="'+t.dataset.l+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.gtus').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.gtus').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');
+    });
+  });
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

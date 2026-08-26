@@ -1,4 +1,4 @@
-﻿unit UFaturalar;
+﻿unit  UFaturalar;
 
 interface
 
@@ -289,6 +289,7 @@ type
     MenuTasnifDisinaTasi: TMenuItem;
     MenuSistemeTasi: TMenuItem;
     MenuGelenKutusunaTasi: TMenuItem;
+    SGK1: TMenuItem;
     procedure MenuEslesmeTablosunuAcClick(Sender: TObject);
     procedure MenuUrunEslestirClick(Sender: TObject);
     procedure GridFatViewCellClick(Sender: TcxCustomGridTableView;
@@ -2836,6 +2837,10 @@ begin
   if gf.FAltTur = 10 then LTur := 10 else LTur := 11;
   LFiltreEk := '';
   if FArama <> nil then begin
+    if FArama.CheckTarihAralik.Checked then
+      LFiltreEk := LFiltreEk +
+        ' AND F.FATURATARIH>=''' + FormatDateTime('yyyy-mm-dd 00:00', FArama.Calendar1.Date) + '''' +
+        ' AND F.FATURATARIH<=''' + FormatDateTime('yyyy-mm-dd 23:59:59', FArama.Calendar2.Date) + '''';
     if Trim(FArama.AraKod.Text) <> '' then
       LFiltreEk := LFiltreEk + ' AND (R.KOD LIKE ''%' +
         StringReplace(Trim(FArama.AraKod.Text), '''', '''''', [rfReplaceAll]) +
@@ -2869,13 +2874,13 @@ begin
   FATBASLIK.Open;
   FATBASLIK.Filter := '';
   FATBASLIK.Filtered := False;
-  // Sol arama paneli aktif kalsin (sadece tarih araligi devre disi).
+  // Sol arama paneli aktif kalsin; tarih araligi gelen fatura SQL'ine de uygulanir.
   if FArama <> nil then begin
     FArama.Enabled := True;
-    FArama.CheckTarihAralik.Enabled := False;
-    FArama.Calendar1.Enabled := False;
-    FArama.Calendar2.Enabled := False;
-    FArama.Panel1.Enabled := False;
+    FArama.CheckTarihAralik.Enabled := True;
+    FArama.Calendar1.Enabled := True;
+    FArama.Calendar2.Enabled := True;
+    FArama.Panel1.Enabled := True;
   end;
   _KayitSayisiGuncelle;
 end;
@@ -3300,7 +3305,6 @@ end;
 initialization
   Classes.RegisterClass(TFaturalarDlg);
 end.
-
 
 
 

@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gentegre AI 26.8.10.2</title>
+<style>
+  /* Mesajlar / Yapay Zeka gibi ekranlar kabugun ust seridini kullanmaz */
+  body.sadeust .crumb, body.sadeust #toolbar, body.sadeust #vtabs{display:none!important}
+
+  :root{
+    --bg:#eef1f5;--card:#fff;--line:#d2dae3;--line2:#e6ebf1;--ink:#1f2d3a;--muted:#6b7a8b;
+    --navy:#14315a;--accent:#2f6db3;--sel:#dcebfb;--selbd:#9cc4ee;--head:#f1f5f9;--head2:#e7eef5;
+    --btnfrom:#ffffff;--btnto:#eef2f7;--ok:#2e7d46;--warn:#b5731a;--red:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:#dfe4ea;color:var(--ink);
+    font-family:"Segoe UI","Trebuchet MS",Tahoma,sans-serif;font-size:12px;
+    height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+  /* ============ BASLIK ============ */
+  .titlebar{height:32px;flex:none;background:linear-gradient(#fdfdfe,#eef1f5);border-bottom:1px solid #c9d2dc;
+    display:flex;align-items:center;gap:8px;padding:0 4px 0 10px;font-size:12.5px;color:#2b3d51}
+  .titlebar .logo{width:15px;height:15px;border-radius:3px;background:linear-gradient(#4d8fd6,#22548f)}
+  .titlebar b{font-weight:600}
+  .titlebar .wc{margin-left:auto;display:flex}
+  .titlebar .wc span{width:42px;height:31px;display:flex;align-items:center;justify-content:center;color:#4a5c70;font-size:12px}
+  .titlebar .wc span:hover{background:#dde5ee}
+  .titlebar .wc span.x:hover{background:#d9534f;color:#fff}
+
+  /* ============ MENU + 4 NOKTA ============ */
+  .menubar{height:27px;flex:none;background:#f4f6f9;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:14px;padding:0 10px;font-size:12px;color:#33465c}
+  .menubar .mi{display:flex;align-items:center;gap:5px;padding:2px 6px;border-radius:3px}
+  .menubar .mi:hover{background:var(--sel)}
+  /* 4 nokta (panel ac/kapa) */
+  .dots{width:22px;height:20px;flex:none;display:grid;grid-template-columns:repeat(2,5px);grid-template-rows:repeat(2,5px);
+    gap:3px;align-content:center;justify-content:center;border:1px solid transparent;border-radius:4px;cursor:default}
+  .dots i{width:5px;height:5px;border-radius:50%;background:#5a708a;display:block}
+  .dots:hover{background:#e2eaf3;border-color:var(--selbd)}
+  .dots.on,.dots.acik{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3}
+  .dots.on i,.dots.acik i{background:#fff}
+  .hzmenu{display:none;position:absolute;top:59px;left:6px;width:436px;background:#fff;
+    border:1px solid var(--line);border-radius:6px;box-shadow:0 14px 34px rgba(16,32,52,.28);z-index:150;overflow:hidden}
+  .hzmenu.on{display:block}
+  .hzmenu h4{margin:0;padding:7px 11px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#3a5573;
+    background:linear-gradient(#f3f7fb,#e6edf5);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px}
+  .hzmenu h4 .sy{margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px}
+  .hzgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:9px}
+  .hzt{border:1px solid var(--line);border-radius:6px;background:linear-gradient(#fff,#eef2f7);
+    padding:9px 5px;text-align:center;cursor:default}
+  .hzt:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dfeafa)}
+  .hzt .ic{font-size:19px;display:block;line-height:1.2}
+  .hzt .nm{font-size:10px;color:#33475c;margin-top:4px;line-height:1.25;display:block}
+  .hzalt{display:flex;gap:6px;padding:8px 9px;border-top:1px solid var(--line2);background:#f7f9fc}
+  .hzalt .b{flex:1;text-align:center;border:1px solid var(--line);border-radius:6px;padding:6px;
+    font-size:11.5px;color:#33465c;background:linear-gradient(#fff,#eef2f7)}
+  .hzalt .b:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .menubar .sag{margin-left:auto;color:#8595a6;display:flex;gap:12px;align-items:center}
+
+  /* ============ MODUL SEKMELERI (ust serit) ============ */
+  .modbar{flex:none;display:flex;align-items:flex-end;gap:2px;padding:5px 8px 0;
+    background:linear-gradient(#e7edf4,#d9e2ec);border-bottom:1px solid #b9c6d4;overflow-x:auto}
+  .mod{display:flex;align-items:center;gap:7px;padding:7px 14px 8px;font-size:12px;color:#33465c;white-space:nowrap;
+    background:linear-gradient(#fcfdfe,#e3ebf4);border:1px solid #b9c6d4;border-bottom:none;
+    border-radius:5px 5px 0 0;cursor:default;position:relative;top:1px}
+  .mod .ri{font-size:15px;line-height:1}
+  .mod:hover{background:linear-gradient(#fff,#dce8f6)}
+  .mod.active{background:#f7f9fc;color:var(--navy);font-weight:700;padding-bottom:10px;top:0;
+    box-shadow:inset 0 3px 0 var(--accent)}
+
+  /* ============ GOVDE ============ */
+  .shell{flex:1;display:flex;min-height:0;background:#f7f9fc}
+
+  /* SOL BOLUM PANELI */
+  .side{width:246px;flex:none;border-right:1px solid var(--line);background:#f7f9fc;
+    display:flex;flex-direction:column;min-height:0;transition:margin-left .16s ease}
+  .side.gizli{margin-left:-247px}
+  .bolumler{padding:8px;overflow:auto;flex:none;max-height:56%}
+  .blgrp{display:flex;align-items:center;gap:7px;margin:9px 0 4px;padding:6px 9px;
+    background:linear-gradient(#fde9c8,#f7c874);border:1px solid #e0a94e;border-radius:4px;
+    font:700 11.5px/1 'Segoe UI',sans-serif;color:#6b4a12;letter-spacing:.2px}
+  .blgrp:first-child{margin-top:0}
+  .blgrp .gi{font-size:14px}
+  .bl.ic{margin-left:8px}
+
+  .bl{display:flex;align-items:center;gap:10px;padding:9px 10px;margin-bottom:6px;font-size:12.5px;color:#2f4257;
+    background:linear-gradient(#ffffff,#eef2f7);border:1px solid var(--line);border-radius:7px;cursor:default}
+  .bl .bi{font-size:21px;width:26px;text-align:center;line-height:1}
+  .bl:hover{border-color:var(--selbd);background:linear-gradient(#fff,#e2eefb)}
+  .bl.on{background:linear-gradient(#dcebfb,#c3ddf7);border-color:#8ab6e6;color:var(--navy);font-weight:700;
+    box-shadow:inset 0 0 0 1px #fff}
+  .bl .bs{margin-left:auto;font-size:9.5px;color:#8aa0b5;border:1px solid #d5dee7;border-radius:8px;padding:0 6px;background:#fff}
+  .bl.on .bs{color:#2f6db3;border-color:#a9cbee;background:#fff}
+
+  .arama{border-top:1px solid var(--line);background:#f2f6fa;flex:1;min-height:0;display:flex;flex-direction:column}
+  .arama .ab{display:flex;align-items:center;gap:6px;padding:6px 10px;font-size:11px;color:#7b8ea3;
+    letter-spacing:.4px;text-transform:uppercase;background:#e9eff6;border-bottom:1px solid var(--line2)}
+  .arama .ab .ok2{margin-left:auto}
+  .arama .abody{padding:9px 10px;overflow:auto;flex:1}
+  .seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:9px;background:#fff}
+  .seg .s{flex:1;text-align:center;padding:5px;font-size:11.5px;color:var(--muted);border-right:1px solid var(--line2)}
+  .seg .s:last-child{border-right:none}
+  .seg .s.on{background:var(--accent);color:#fff;font-weight:600}
+  .frow{display:flex;flex-direction:column;gap:2px;margin-bottom:7px}
+  .frow label{font-size:10.5px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:4px;background:#fff;height:24px;padding:0 6px;font-size:12px;
+    display:flex;align-items:center;color:var(--ink);font-family:inherit;width:100%}
+  .inp.combo{position:relative}.inp.combo::after{content:"▾";position:absolute;right:6px;color:var(--muted);font-size:10px}
+  .ikili{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#3f5165;margin:5px 0}
+  .chk input{accent-color:var(--accent)}
+  .arama .foot{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--line2);flex:none;background:#eef3f8}
+  .arama .foot .b{flex:1;text-align:center;border-radius:6px;padding:7px;font-size:12px;font-weight:600}
+  .arama .foot .b.pri{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border:1px solid #2f6db3}
+  .arama .foot .b.sec{background:linear-gradient(#fff,#eef2f7);color:#3f5165;border:1px solid var(--line)}
+
+  /* TUTAMAK (panel ac/kapa) */
+  .grip{width:11px;flex:none;background:linear-gradient(#eef2f7,#e3e9f1);border-right:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;color:#7b8ea3;font-size:9px;cursor:default}
+  .grip:hover{background:#dce8f6;color:var(--accent)}
+
+  /* SAG: CALISMA ALANI */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;background:#fff}
+  .crumb{padding:6px 12px;border-bottom:1px solid var(--line2);color:var(--muted);font-size:11.5px;background:#fafbfd;flex:none;
+    display:flex;align-items:center;gap:8px}
+  .crumb b{color:var(--navy)}
+  .crumb .yol{margin-left:auto;font-size:10.5px;color:#93a3b4}
+  .toolbar{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);
+    background:linear-gradient(#fff,#f4f7fb);flex:none;flex-wrap:wrap}
+  .tb{display:flex;align-items:center;gap:6px;border:1px solid var(--line);
+    background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:6px;padding:6px 11px;font-size:12px;color:#33465c;cursor:default}
+  .tb:hover{border-color:var(--selbd);background:linear-gradient(#fff,#e4eefa)}
+  .tb.pri{background:linear-gradient(#5cb370,#2e7d46);border-color:#2e7d46;color:#fff;font-weight:600}
+  .tb.pri:hover{background:linear-gradient(#6cc481,#358f50)}
+  .tb.del{background:linear-gradient(#e0605c,#c0413d);border-color:#b23b3b;color:#fff;font-weight:600}
+  .tb.del:hover{background:linear-gradient(#ea6f6b,#cf4a46)}
+  .tb .i{font-size:13px}
+  .toolbar .ayr{width:1px;height:22px;background:var(--line);margin:0 2px}
+  .toolbar .right{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .gsearch{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:6px;background:#fff;padding:4px 8px;width:190px}
+  .gsearch input{border:none;outline:none;flex:1;font-size:12px;font-family:inherit;min-width:0;background:transparent;color:var(--ink)}
+  .gsearch .say{font-size:10.5px;color:var(--accent);font-weight:700;white-space:nowrap}
+  .arama .foot .b.pri{cursor:default}
+
+  .vtabs{display:flex;gap:3px;padding:5px 10px 0;background:#f4f7fb;border-bottom:1px solid var(--line);flex:none}
+  .vt{display:flex;align-items:center;gap:5px;padding:4px 12px;font-size:11.5px;background:#e6ecf3;
+    border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;color:var(--muted);position:relative;top:1px}
+  .vt.on{background:#fff;color:var(--navy);font-weight:600}
+  .vt.yok{opacity:.4}
+
+  .stage{flex:1;min-height:0;position:relative;background:#eef1f5}
+  .sheet{position:absolute;inset:0;display:none}
+  .sheet.on{display:block}
+  .sheet iframe{width:100%;height:100%;border:0;display:block;background:#fff}
+
+  /* ============ DASHBOARD ============ */
+  .dash{position:absolute;inset:0;overflow:auto;padding:12px 14px 18px;background:var(--bg)}
+  .dhead{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+  .dhead h1{margin:0;font-size:16px;color:var(--navy)}
+  .dhead .alt{font-size:11px;color:var(--muted)}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(186px,1fr));gap:9px;margin-bottom:12px}
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:6px;padding:9px 11px}
+  .kpi .t{font-size:10px;letter-spacing:.3px;text-transform:uppercase;color:#7b8ea3}
+  .kpi .v{font-size:17px;font-weight:700;color:var(--navy);margin-top:3px}
+  .kpi .s{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kpi .s.up{color:#2e7d46}.kpi .s.dn{color:#b23b3b}
+  .kpi.al{border-left:3px solid #c0504d}.kpi.uy{border-left:3px solid #d8a013}.kpi.iy{border-left:3px solid #5aa06f}
+  .cols{display:grid;grid-template-columns:1.4fr 1fr;gap:10px;align-items:start}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:10px}
+  .panel>h3{margin:0;padding:6px 10px;font-size:11px;letter-spacing:.3px;text-transform:uppercase;color:#3a5573;
+    background:linear-gradient(#f3f7fb,#e6edf5);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px}
+  .panel>h3 .sag2{margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0;font-size:10.5px;color:var(--muted)}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f3f7fb,#e6edf5);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 7px;font-size:10.5px;color:#3a5573;font-weight:700;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #f1f4f8;padding:4px 7px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}.dg .r{text-align:right;font-variant-numeric:tabular-nums}
+  .dg tr.u td{background:#f7cfcf;color:#7d1f1f}
+  .dg tr.d td{background:#fbe6ae;color:#7a5407}
+  .dg tr.b td{background:#f6d9c0;color:#8a4a12}
+  .git{color:#2f6db3;text-decoration:underline}
+  .pill{font-size:9.5px;padding:1px 7px;border-radius:10px;font-weight:700;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-inf{background:#e5ecf8;color:#2b5c95;border-color:#c6d7ef}
+  .bar{height:9px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:54px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .inf{background:#4d8fd6}
+  .kv{display:flex;font-size:11px;padding:3px 10px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .huni{padding:8px 10px}
+  .hrow{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11px}
+  .hrow .ad{width:98px;color:var(--muted)}
+  .hrow .mk{width:92px;text-align:right;font-variant-numeric:tabular-nums}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:7px;padding:9px}
+  .tile{border:1px solid var(--line);border-radius:6px;background:linear-gradient(#fff,#eef2f7);padding:9px 7px;text-align:center}
+  .tile:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dfeafa)}
+  .tile .ic{font-size:20px;display:block}
+  .tile .nm{font-size:10.5px;color:#33475c;margin-top:4px;line-height:1.3}
+  .hint{font-size:10.5px;color:var(--muted);padding:7px 10px;line-height:1.5;background:#fbfcfd;border-top:1px solid var(--line2)}
+
+  /* ============ KART PENCERESI (kartin kendi ekrani — ek kabuk yok) ============ */
+  .perde{position:fixed;inset:0;background:rgba(16,32,52,.42);display:none;z-index:200}
+  .perde.on{display:block}
+  .kartwin{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(1300px,96vw);height:calc(100vh - 30px);
+    max-height:calc(100vh - 30px);background:#fff;border:1px solid #22406b;border-radius:5px;
+    box-shadow:0 18px 50px rgba(10,25,45,.45);overflow:hidden;transition:width .12s ease,height .12s ease}
+  .kartwin iframe{width:100%;height:100%;border:0;display:block}
+  .yukhata{position:absolute;inset:0;background:#fff;padding:40px 34px;text-align:center;
+    color:#4a5c70;font-size:12.5px;line-height:1.8;z-index:3}
+  .yukhata .kt{font-size:15px;font-weight:700;color:#b23b3b;margin-bottom:10px}
+  .yukhata .ip{font-size:11.5px;color:var(--muted);margin-top:10px;max-width:720px;margin-left:auto;margin-right:auto}
+  .yukhata .ln{color:#2f6db3;text-decoration:underline;cursor:default}
+  .kyok{padding:34px 28px;text-align:center;color:var(--muted);font-size:12px;line-height:1.75}
+  .kyok .bk{font-size:38px;display:block;margin-bottom:8px;color:#9fb3c8}
+
+  /* ============ DURUM CUBUGU ============ */
+  .statusbar{height:25px;flex:none;background:linear-gradient(#eef2f7,#e4eaf1);border-top:1px solid var(--line);
+    display:flex;align-items:center;gap:16px;padding:0 12px;font-size:11px;color:#4a5c70}
+  .statusbar b{color:var(--navy)}
+  .statusbar .r{margin-left:auto}
+  .statusbar .bel{background:#b83b37;color:#fff;border-radius:9px;padding:0 6px;font-size:10px;font-weight:700}
+</style>
+</head>
+<body>
+
+<!-- ================= BASLIK ================= -->
+<div class="titlebar">
+  <span class="logo"></span> <b>Gentegre AI 26.8.10.2</b>
+  <span class="wc"><span>—</span><span>▢</span><span class="x">✕</span></span>
+</div>
+
+<!-- ================= MENU + 4 NOKTA ================= -->
+<div class="menubar">
+  <div class="dots on" id="dots" title="Bölüm panelini aç / kapat"><i></i><i></i><i></i><i></i></div>
+  <span class="mi">🔵 <b>Gen</b></span>
+  <span class="mi">⚙ Seçenekler</span>
+  <span class="mi">❓ Yardım</span>
+  <span class="sag"><span>🔔</span><span>🔄</span></span>
+</div>
+
+<div class="hzmenu" id="hzmenu">
+  <h4>⚡ Hızlı Erişim <span class="sy">sık kullanılan ekranlar</span></h4>
+  <div class="hzgrid" id="hzgrid"></div>
+  <div class="hzalt">
+    <div class="b" id="hzPanel">◧ Bölüm Panelini Gizle</div>
+    <div class="b" id="hzHome">🏠 Ana Sayfa</div>
+  </div>
+</div>
+
+<!-- ================= MODUL SEKMELERI ================= -->
+<div class="modbar" id="modbar"></div>
+
+<!-- ================= GOVDE ================= -->
+<div class="shell">
+  <!-- SOL: BOLUM BUTONLARI + ARAMA -->
+  <div class="side" id="side">
+    <div class="bolumler" id="bolumler"></div>
+    <div class="arama">
+      <div class="ab">🔎 Arama <span class="ok2">▾</span></div>
+      <div class="abody">
+        <div class="seg"><div class="s on">Tüm</div><div class="s">Son</div><div class="s">Sık</div></div>
+        <div id="aramaAlan"></div>
+        <label class="chk"><input type="checkbox"> Pasifleri de göster</label>
+        <label class="chk"><input type="checkbox"> Kapalı kayıtları da göster</label>
+      </div>
+      <div class="foot"><div class="b pri" id="btnFiltrele">Filtrele</div><div class="b sec" id="btnTemizle">Temizle</div></div>
+    </div>
+  </div>
+  <div class="grip" id="grip" title="Paneli aç / kapat">◀</div>
+
+  <!-- SAG: CALISMA ALANI -->
+  <div class="main">
+    <div class="crumb"><span id="crumb">Giriş › <b>Ana Sayfa</b></span><span class="yol" id="yol">—</span></div>
+    <div class="toolbar" id="toolbar"></div>
+    <div class="vtabs" id="vtabs"><div class="vt on" data-vw="liste">▤ Liste</div><div class="vt" data-vw="grup">▦ Grup</div><div class="vt" data-vw="analiz">📊 Analiz</div></div>
+
+    <div class="stage" id="stage">
+      <!-- ---------- ANA SAYFA ---------- -->
+      <div class="sheet on" data-sheet="home">
+        <div class="dash">
+          <div class="dhead">
+            <h1>Günaydın Ayşe 👋</h1>
+            <span class="alt">Merkez şubesi · 2026 mali dönemi · 14.08.2026 Cuma · son giriş 13.08.2026 18:42</span>
+          </div>
+          <div class="kpis">
+            <div class="kpi iy"><div class="t">Bugünkü Ciro</div><div class="v">402.105,50 ₺</div><div class="s up">▲ %12,4 · dün 357.700,00 ₺</div></div>
+            <div class="kpi"><div class="t">Açık Teklif</div><div class="v">3.184.200,00 ₺</div><div class="s">18 teklif · 4'ü bu hafta doluyor</div></div>
+            <div class="kpi"><div class="t">Huni (ağırlıklı)</div><div class="v">5.081.500,00 ₺</div><div class="s">11 fırsat · toplam 12.950.000,00 ₺</div></div>
+            <div class="kpi"><div class="t">Kasa + Banka</div><div class="v">431.318,25 ₺</div><div class="s">9 kasa · 3 para birimi</div></div>
+            <div class="kpi uy"><div class="t">Portföydeki Çek</div><div class="v">184.500,00 ₺</div><div class="s">11 kıymet · 2 karşılıksız</div></div>
+            <div class="kpi al"><div class="t">Kredi Borcu (kalan)</div><div class="v">26.062.270,96 ₺</div><div class="s dn">3 gecikmiş taksit · 246.960,00 ₺</div></div>
+            <div class="kpi"><div class="t">POS Bekleyen Bakiye</div><div class="v">406.000,50 ₺</div><div class="s">valör ort. 1,4 gün</div></div>
+            <div class="kpi uy"><div class="t">Kredi Kartı Borcu</div><div class="v">318.740,00 ₺</div><div class="s">2 kart son ödemeye 3 gün</div></div>
+          </div>
+
+          <div class="cols">
+            <div>
+              <div class="panel">
+                <h3>⚠ Dikkat Gerektirenler <span class="sag2">satıra tıkla → ilgili bölüm açılır</span></h3>
+                <div class="dg"><table>
+                  <tr><th style="width:104px">MODÜL</th><th>UYARI</th><th class="c" style="width:52px">ADET</th>
+                      <th class="r" style="width:118px">TUTAR</th><th class="c" style="width:62px">AÇ</th></tr>
+                  <tr class="u" data-git="banka|krediler_listesi"><td>Krediler</td><td class="ad">Gecikmiş kredi taksiti — vade geçti, ödenmedi</td><td class="c">3</td><td class="r">246.960,00</td><td class="c"><span class="git">▸</span></td></tr>
+                  <tr class="u" data-git="banka|cek_senet_listesi"><td>Çek / Senet</td><td class="ad">Karşılıksız / protestolu kıymet — icra takibinde</td><td class="c">2</td><td class="r">54.350,00</td><td class="c"><span class="git">▸</span></td></tr>
+                  <tr class="u" data-git="kasa|pos_listesi"><td>POS</td><td class="ad">Valörü geçtiği halde hesaba geçmeyen tutar</td><td class="c">1</td><td class="r">86.400,00</td><td class="c"><span class="git">▸</span></td></tr>
+                  <tr class="d" data-git="banka|kredi_karti_listesi"><td>Kredi Kartı</td><td class="ad">Son ödeme tarihine 3 gün veya daha az kalan kart</td><td class="c">2</td><td class="r">118.240,00</td><td class="c"><span class="git">▸</span></td></tr>
+                  <tr class="d" data-git="teklif|teklif_listesi"><td>Teklif</td><td class="ad">Geçerlilik süresi bu hafta dolan teklif</td><td class="c">4</td><td class="r">742.800,00</td><td class="c"><span class="git">▸</span></td></tr>
+                  <tr class="d" data-git="servis|servis_listesi"><td>Servis</td><td class="ad">Termini geçmiş / bugün teslim edilecek servis fişi</td><td class="c">5</td><td class="r">18.940,00</td><td class="c"><span class="git">▸</span></td></tr>
+                  <tr class="d" data-git="stok|stok_listesi"><td>Stok</td><td class="ad">Kritik seviyenin altında / stoksuz ürün</td><td class="c">3</td><td class="r">—</td><td class="c"><span class="git">▸</span></td></tr>
+                  <tr class="b" data-git="demirbas|demirbas_listesi"><td>Demirbaş</td><td class="ad">Bakım / kalibrasyon tarihi geçmiş, garantisi bitiyor</td><td class="c">4</td><td class="r">—</td><td class="c"><span class="git">▸</span></td></tr>
+                  <tr class="b" data-git="crm|firsat_listesi"><td>Fırsat</td><td class="ad">30+ gündür temas edilmemiş açık fırsat</td><td class="c">3</td><td class="r">2.480.000,00</td><td class="c"><span class="git">▸</span></td></tr>
+                  <tr data-git="kasa|kasa_listesi"><td>Kasa</td><td class="ad">Gün sonu sayımı yapılmamış kasa</td><td class="c">2</td><td class="r">—</td><td class="c"><span class="git">▸</span></td></tr>
+                </table></div>
+                <div class="hint">Her satır, ilgili modülün liste ekranındaki <b>Styles.OnGetContentStyle</b> renk kuralının özetidir.</div>
+              </div>
+
+              <div class="panel">
+                <h3>📅 Bugünün İşleri <span class="sag2">GOREVLER · atanan: Ayşe Demir</span></h3>
+                <div class="dg"><table>
+                  <tr><th style="width:58px">SAAT</th><th style="width:76px">TÜR</th><th>KONU</th><th style="width:126px">İLGİLİ</th><th class="c" style="width:70px">DURUM</th></tr>
+                  <tr class="d"><td>09:30</td><td>Görüşme</td><td class="ad">Otel perde yenileme — teknik şartname sunumu</td><td class="ad">FIR.2026/014</td><td class="c"><span class="pill p-kri">Şimdi</span></td></tr>
+                  <tr><td>11:00</td><td>Teklif</td><td class="ad">Plaza mefruşat teklifi revizesi gönderilecek</td><td class="ad">TKF.2026/0231</td><td class="c"><span class="pill p-inf">Bekliyor</span></td></tr>
+                  <tr><td>14:00</td><td>Ödeme</td><td class="ad">İş Bankası 24 ay kredi — 17. taksit (15.08)</td><td class="ad">KRD.2025/014</td><td class="c"><span class="pill p-inf">Bekliyor</span></td></tr>
+                  <tr><td>15:30</td><td>Servis</td><td class="ad">Forklift periyodik bakım — teknisyen dönüşü</td><td class="ad">SRV.2026/0448</td><td class="c"><span class="pill p-inf">Bekliyor</span></td></tr>
+                  <tr><td>17:00</td><td>Gün sonu</td><td class="ad">Kasa sayımı ve POS mutabakatı</td><td class="ad">Merkez / Showroom</td><td class="c"><span class="pill p-inf">Bekliyor</span></td></tr>
+                </table></div>
+              </div>
+
+              <div class="panel">
+                <h3>🕒 Son İşlemler <span class="sag2">GENDEPO.ISLEMLOG</span></h3>
+                <div class="dg"><table>
+                  <tr><th style="width:70px">SAAT</th><th style="width:110px">KULLANICI</th><th style="width:88px">MODÜL</th><th>İŞLEM</th><th class="c" style="width:62px">TİP</th></tr>
+                  <tr><td>10:42</td><td>Ayşe Demir</td><td>Fatura</td><td class="ad">DEF2026000000012 satış faturası kesildi</td><td class="c"><span class="pill p-ok">Ekle</span></td></tr>
+                  <tr><td>10:18</td><td>Mehmet Yıldız</td><td>Stok</td><td class="ad">STK.10248 kritik seviye 250'ye çekildi</td><td class="c"><span class="pill p-inf">Değiş</span></td></tr>
+                  <tr><td>09:55</td><td>Serkan Öz</td><td>Servis</td><td class="ad">SRV.2026/0451 teknisyen ataması yapıldı</td><td class="c"><span class="pill p-inf">Değiş</span></td></tr>
+                  <tr><td>09:30</td><td>Ayşe Demir</td><td>Çek/Senet</td><td class="ad">GRT-0088471 portföye alındı</td><td class="c"><span class="pill p-ok">Ekle</span></td></tr>
+                  <tr><td>08:30</td><td>Sistem (Görev)</td><td>Kredi</td><td class="ad">KRD.2025/014 faiz tahakkuku işlendi</td><td class="c"><span class="pill p-inf">Otom.</span></td></tr>
+                </table></div>
+              </div>
+            </div>
+
+            <div>
+
+              <div class="panel">
+                <h3>🎯 Satış Hunisi <span class="sag2">FIRSAT · açık 11 kayıt</span></h3>
+                <div class="huni">
+                  <div class="hrow"><span class="ad">Yeni</span><div class="bar" style="flex:1"><span class="inf" style="width:100%"></span></div><span class="mk">3.150.000</span></div>
+                  <div class="hrow"><span class="ad">İlk Görüşme</span><div class="bar" style="flex:1"><span class="inf" style="width:82%"></span></div><span class="mk">2.580.000</span></div>
+                  <div class="hrow"><span class="ad">İhtiyaç Analizi</span><div class="bar" style="flex:1"><span class="inf" style="width:64%"></span></div><span class="mk">2.020.000</span></div>
+                  <div class="hrow"><span class="ad">Teklif</span><div class="bar" style="flex:1"><span class="kri" style="width:48%"></span></div><span class="mk">1.510.000</span></div>
+                  <div class="hrow"><span class="ad">Pazarlık</span><div class="bar" style="flex:1"><span class="kri" style="width:29%"></span></div><span class="mk">910.000</span></div>
+                  <div class="hrow"><span class="ad">Kazanıldı</span><div class="bar" style="flex:1"><span class="ok" style="width:24%"></span></div><span class="mk">780.000</span></div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <h3>💸 30 Günlük Vade Takvimi</h3>
+                <div class="kv"><span>Kredi taksitleri</span><b>1.041.280,42 ₺</b></div>
+                <div class="kv"><span>Kredi kartı ödemeleri</span><b>318.740,00 ₺</b></div>
+                <div class="kv"><span>Verilen çek / senet</span><b>110.950,00 ₺</b></div>
+                <div class="kv"><span style="color:#b23b3b">Toplam çıkış</span><b style="color:#b23b3b">1.470.970,42 ₺</b></div>
+                <div class="kv" style="border-top:1px solid var(--line2);margin-top:5px;padding-top:6px"><span>Alınan çek tahsilatı</span><b>312.350,00 ₺</b></div>
+                <div class="kv"><span>POS hesaba geçecek</span><b>406.000,50 ₺</b></div>
+                <div class="kv"><span>Cari tahsilat (vadesi gelen)</span><b>1.284.600,00 ₺</b></div>
+                <div class="kv"><span style="color:#2e7d46">Toplam giriş</span><b style="color:#2e7d46">2.002.950,50 ₺</b></div>
+                <div class="kv" style="border-top:1px solid var(--line2);margin-top:5px;padding-top:6px"><span><b>Net nakit</b></span><b style="color:#2e7d46">+531.980,08 ₺</b></div>
+              </div>
+
+              <div class="panel">
+                <h3>🖥 Sistem</h3>
+                <div class="kv"><span>Veritabanı</span><b>BILIM (MSSQL)</b></div>
+                <div class="kv"><span>Sürüm</span><b>Gentegre AI 26.8.10.2</b></div>
+                <div class="kv"><span>GenUpdate</span><b>Update_SQL_170 · güncel</b></div>
+                <div class="kv"><span>e-Belge servisi</span><b><span class="pill p-ok">Bağlı</span></b></div>
+                <div class="kv"><span>Son yedek</span><b>14.08.2026 03:00</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DURUM CUBUGU ================= -->
+<div class="statusbar">
+  <span>Kullanıcı: <b>Ayşe Demir</b> · Yönetici</span>
+  <span>Şube: <b>Merkez</b></span>
+  <span>Dönem: <b>2026</b></span>
+  <span>Motor: MSSQL · <b>BILIM</b></span>
+  <span id="sbEkran">Ekran: <b>Ana Sayfa</b></span>
+  <span class="r">🔔 <span class="bel">3</span></span>
+  <span>Gentegre AI · 14.08.2026 10:47</span>
+</div>
+
+<!-- ================= KART PENCERESI ================= -->
+<div class="perde" id="perde">
+  <div class="kartwin" id="kartwin">
+  </div>
+</div>
+
+<script src="gentegre_data.js"></script>
+<script>
+/* =====================================================================
+   MODULLER  →  BOLUMLER  →  EKRAN (iframe)  →  KART
+   ===================================================================== */
+var VARSAYILAN_ARAMA = [
+  {l:'Tarih',       t:'ikili', v:['01.01.2026','14.08.2026']},
+  {l:'Sorumlu',     t:'combo', v:'(tümü)'},
+  {l:'Adı / Konusu',t:'text',  v:''},
+  {l:'Türü',        t:'combo', v:'(tümü)'},
+  {l:'Durum',       t:'combo', v:'(tümü)'},
+  {l:'Kod',         t:'text',  v:''}
+];
+
+function el(t,c,h){var d=document.createElement(t);if(c)d.className=c;if(h!=null)d.innerHTML=h;return d;}
+function MOD(id){for(var i=0;i<MODULLER.length;i++)if(MODULLER[i].id===id)return MODULLER[i];return null;}
+function BOL(m,id){var x=MOD(m);if(!x)return null;for(var i=0;i<x.bolumler.length;i++)if(x.bolumler[i].id===id)return x.bolumler[i];return null;}
+
+var aktifModul='giris', aktifBolum='home';
+
+/* ---------- UST MODUL SEKMELERI ---------- */
+(function(){
+  var bar=document.getElementById('modbar');
+  MODULLER.forEach(function(m){
+    var d=el('div','mod'+(m.id===aktifModul?' active':''),'<span class="ri">'+m.ic+'</span>'+m.ad);
+    d.dataset.mod=m.id;
+    d.addEventListener('click',function(){ modulSec(m.id); });
+    bar.appendChild(d);
+  });
+})();
+
+/* ---------- MODUL SEC → SOLDA BOLUMLER, SAGDA ILK LISTE ---------- */
+function modulSec(mid, bid){
+  aktifModul=mid;
+  var m=MOD(mid);
+  document.querySelectorAll('.mod').forEach(function(x){ x.classList.toggle('active', x.dataset.mod===mid); });
+  kurBolumler(m);
+  var hedef = bid || (m.bolumler.filter(function(b){return b.tur==='liste';})[0] || m.bolumler[0]).id;
+  bolumSec(hedef);
+  if(document.getElementById('side').classList.contains('gizli')) panelAc(true);
+}
+
+function kurBolumler(m){
+  var kap=document.getElementById('bolumler'); kap.innerHTML='';
+  var sonGrup=null;
+  m.bolumler.forEach(function(b){
+    if(b.grup && b.grup!==sonGrup){
+      sonGrup=b.grup;
+      kap.appendChild(el('div','blgrp','<span class="gi">'+(b.gic||'📁')+'</span><span>'+b.grup+'</span>'));
+    }
+    var etiket = b.tur==='liste'?'liste' : b.tur==='islem'?'işlem' : b.tur==='ayar'?'ayar' : b.tur==='dokum'?'döküm':'panel';
+    var d=el('div','bl'+(b.grup?' ic':'')+(b.id===aktifBolum?' on':''),
+      '<span class="bi">'+b.ic+'</span><span>'+b.ad+'</span><span class="bs">'+etiket+'</span>');
+    d.dataset.bol=b.id;
+    d.addEventListener('click',function(){ bolumSec(b.id); });
+    kap.appendChild(d);
+  });
+}
+
+/* ---------- EKRAN DOSYASI YUKLENDI MI? ----------
+   Ekran dosyalari gomulu acilinca kabuga "hazir" mesaji yollar.
+   Gelmezse dosya bulunamamistir (ornegin gentegre.html Ekranlar klasoru disinda acilmistir). */
+var bekleyen=[];
+function izleBaslat(sheet, b){
+  var kayit={sheet:sheet, ok:false};
+  bekleyen.push(kayit);
+  setTimeout(function(){
+    if(kayit.ok) return;
+    var fr=sheet.querySelector('iframe');
+    var uy=el('div','yukhata',
+      '<div class="kt">⚠ Ekran dosyası açılamadı</div>'+
+      '<div><b>'+b.dosya+'</b> bulunamadı ya da tarayıcı yerel dosyayı çerçevede açmayı engelledi.</div>'+
+      '<div class="ip">En sık sebep: <b>gentegre.html</b>\'i <b>Ekranlar</b> klasörü dışından (indirilenler, geçici klasör) açmak. '+
+      'Tüm ekran dosyaları <b>aynı klasörde</b> olmalı — dosyayı <b>C:\\Users\\HP\\Entegra\\Entegra\\Ekranlar\\gentegre.html</b> '+
+      'yolundan açın.</div>'+
+      '<div class="ip">Dosyayı ayrı pencerede denemek için: <span class="ln">'+b.dosya+'</span></div>');
+    uy.querySelector('.ln').addEventListener('click',function(){ window.open(b.dosya,'_blank'); });
+    sheet.appendChild(uy);
+    if(fr) fr.style.opacity=.15;
+  },2500);
+}
+function hazirGeldi(kaynak){
+  bekleyen.forEach(function(k){
+    var fr=k.sheet.querySelector('iframe');
+    if(fr && fr.contentWindow===kaynak){
+      k.ok=true;
+      var uy=k.sheet.querySelector('.yukhata'); if(uy) uy.remove();
+      fr.style.opacity='';
+    }
+  });
+}
+
+/* ---------- BOLUM SEC → SAGDA LISTE ---------- */
+function bolumSec(bid){
+  var b=BOL(aktifModul,bid); if(!b) return;
+  aktifBolum=bid;
+  document.body.classList.toggle('sadeust', !!b.sade);
+  document.querySelectorAll('.bl').forEach(function(x){ x.classList.toggle('on', x.dataset.bol===bid); });
+
+  /* sahne */
+  var anahtar=aktifModul+'|'+bid;
+  document.querySelectorAll('.sheet').forEach(function(s){ s.classList.remove('on'); });
+  if(bid==='home'){
+    document.querySelector('.sheet[data-sheet="home"]').classList.add('on');
+  }else if(b.dosya){
+    var s=document.querySelector('.sheet[data-sheet="'+anahtar+'"]');
+    if(!s){
+      s=el('div','sheet'); s.dataset.sheet=anahtar;
+      var fr=document.createElement('iframe');
+      fr.src=b.dosya+'#gomulu'+(b.ek||''); fr.title=b.ad;
+      izleBaslat(s,b);
+      s.appendChild(fr);
+      document.getElementById('stage').appendChild(s);
+    }
+    s.classList.add('on');
+  }else{
+    var s2=document.querySelector('.sheet[data-sheet="'+anahtar+'"]');
+    if(!s2){
+      s2=el('div','sheet'); s2.dataset.sheet=anahtar;
+      var ic = (b.tur==='dokum')
+        ? '<span class="bk">🖨</span><b>'+b.ad+'</b><br>Bu bölüm <b>FastReport</b> döküm tasarımlarını listeler — mockup kapsamı dışında.'
+        : '<span class="bk">'+b.ic+'</span><b>'+b.ad+'</b> ekranı henüz tasarlanmadı.<br>'+
+          'Delphi karşılığı: <b>'+(b.yol||'')+'</b><br>'+
+          '<span style="font-size:11px">Araç çubuğu ve arama paneli bu bölüm için hazır — liste tasarlanınca '+
+          'buraya <b>'+(b.id)+'.html</b> olarak bağlanır.</span>';
+      s2.appendChild(el('div','kyok',ic));
+      s2.style.background='#fff'; s2.style.paddingTop='40px';
+      document.getElementById('stage').appendChild(s2);
+    }
+    s2.classList.add('on');
+  }
+
+  kurAracCubugu(b);
+  kurArama(b);
+  if(!aramaMetni[anahtarAl()]) listedeAra('');
+  document.querySelector('.arama').style.display=(b.tur==='dokum')?'none':'';
+  var m=MOD(aktifModul);
+  document.getElementById('crumb').innerHTML=(m.ad==='Gen'?'Genel':m.ad)+' › <b>'+b.ad+'</b>'+
+    (b.tur==='liste'?' · Liste':'');
+  document.getElementById('yol').textContent=b.yol||'';
+  document.getElementById('sbEkran').innerHTML='Ekran: <b>'+b.ad+'</b>';
+  kurGorunum();
+}
+
+/* ---------- LISTE ARAC CUBUGU (Yeni → kart acar) ---------- */
+function kurAracCubugu(b){
+  var t=document.getElementById('toolbar'); t.innerHTML='';
+  if(b.tur==='dokum'){
+    t.appendChild(el('div','tb pri','<span class="i">▶</span> Listele'));
+    t.appendChild(el('div','tb','<span class="i">🖨</span> Yazdır'));
+    t.appendChild(el('div','tb','<span class="i">⬇</span> Excel'));
+    t.appendChild(el('span','ayr'));
+    t.appendChild(el('div','tb','<span class="i">⚙</span> Döküm Tasarla'));
+    t.appendChild(el('div','tb','<span class="i">📁</span> Özel Dökümler'));
+    var r0=el('div','right'); r0.appendChild(el('div','tb','<span class="i">👁</span> Ön İzleme'));
+    t.appendChild(r0);
+    return;
+  }
+  var liste = (b.tur==='liste');
+  var k = b.kart ? KARTLAR[b.kart] : null;
+
+  var yeni=el('div','tb pri','<span class="i">＋</span> Yeni');
+  var sil =el('div','tb del','<span class="i">🗑</span> Sil');
+  var duz =el('div','tb','<span class="i">✎</span> Düzenle');
+  if(liste){
+    yeni.addEventListener('click',function(){ kartAc(b,'yeni'); });
+    duz .addEventListener('click',function(){ kartAc(b,'duzenle'); });
+  }else{
+    [yeni,sil,duz].forEach(function(x){ x.style.opacity=.45; });
+  }
+  t.appendChild(yeni); t.appendChild(sil); t.appendChild(duz);
+  t.appendChild(el('span','ayr'));
+  (b.arac||[]).forEach(function(a){ t.appendChild(el('div','tb','<span class="i">▸</span> '+a)); });
+
+  var r=el('div','right');
+  var gs=el('div','gsearch','🔎 <input placeholder="Listede ara…"><span class="say" id="araSay"></span>');
+  var gi=gs.querySelector('input');
+  gi.value = aramaMetni[anahtarAl()]||'';
+  gi.addEventListener('input',function(){ listedeAra(gi.value); });
+  gi.addEventListener('keydown',function(e){ if(e.key==='Escape'){ gi.value=''; listedeAra(''); } });
+  r.appendChild(gs);
+  r.appendChild(el('div','tb','<span class="i">▦</span> Kolonlar'));
+  r.appendChild(el('div','tb','<span class="i">⬇</span> Excel'));
+  r.appendChild(el('div','tb','<span class="i">🖨</span> Yazdır'));
+  t.appendChild(r);
+}
+
+/* ---------- LISTE / GRUP / ANALIZ GORUNUMLERI ----------
+   Ekran destekliyorsa kabuga "gorunumDestek" yollar; sekmeler o zaman aktiflesir. */
+var gorunumDestek={}, gorunumSecim={};
+function anahtarAl(){ return aktifModul+'|'+aktifBolum; }
+function kurGorunum(){
+  var a=anahtarAl(), d=!!gorunumDestek[a], sec=gorunumSecim[a]||'liste';
+  document.querySelectorAll('.vt').forEach(function(t){
+    t.classList.toggle('yok', !d);
+    t.classList.toggle('on', t.dataset.vw===(d?sec:'liste'));
+    t.title = d ? '' : 'Bu ekran için grup / analiz görünümü henüz tanımlanmadı';
+  });
+}
+function gorunumSec(ad){
+  var a=anahtarAl(); if(!gorunumDestek[a]) return;
+  gorunumSecim[a]=ad; kurGorunum();
+  var sh=document.querySelector('.sheet[data-sheet="'+a+'"]');
+  var fr=sh?sh.querySelector('iframe'):null;
+  if(fr&&fr.contentWindow) fr.contentWindow.postMessage({gentegre:'gorunum', ad:ad},'*');
+}
+document.querySelectorAll('.vt').forEach(function(t){
+  t.addEventListener('click',function(){ gorunumSec(t.dataset.vw); });
+});
+function destekGeldi(kaynak){
+  document.querySelectorAll('.sheet').forEach(function(sh){
+    var fr=sh.querySelector('iframe');
+    if(fr && fr.contentWindow===kaynak){ gorunumDestek[sh.dataset.sheet]=true; }
+  });
+  kurGorunum();
+}
+
+/* ---------- LISTEDE ARAMA (hizli) ----------
+   Kabuktaki kutu, aktif ekrana postMessage ile sorguyu yollar; ekran satirlari filtreler. */
+var aramaMetni={};
+function listedeAra(q){
+  var a=anahtarAl(); aramaMetni[a]=q;
+  var fr=document.querySelector('.sheet[data-sheet="'+a+'"] iframe');
+  if(fr&&fr.contentWindow) fr.contentWindow.postMessage({gentegre:'ara', q:q},'*');
+  if(!q){ var s2=document.getElementById('araSay'); if(s2) s2.textContent=''; }
+}
+
+/* ---------- SOL ARAMA PANELI ---------- */
+function kurArama(b){
+  var kap=document.getElementById('aramaAlan'); kap.innerHTML='';
+  (b.arama||VARSAYILAN_ARAMA).forEach(function(f){
+    var row=el('div','frow','<label>'+f.l+'</label>');
+    if(f.t==='ikili'){
+      var g=el('div','ikili');
+      g.appendChild(el('div','inp',(f.v&&f.v[0])||''));
+      g.appendChild(el('div','inp',(f.v&&f.v[1])||''));
+      row.appendChild(g);
+    }else if(f.t==='combo'){
+      row.appendChild(el('div','inp combo', f.v||''));
+    }else{
+      var inp=document.createElement('input');
+      inp.className='inp'; inp.type='text'; inp.value=f.v||''; inp.placeholder='';
+      inp.addEventListener('keydown',function(e){ if(e.key==='Enter') detayliAra(); });
+      row.appendChild(inp);
+    }
+    kap.appendChild(row);
+  });
+}
+
+/* ---------- KART PENCERESI ---------- */
+/* ---------- DETAYLI ARAMA (sol panel) ----------
+   Doldurulan alanlar birlestirilip ayni hizli arama motoruna gonderilir.
+   Gercek uygulamada bu alanlar WHERE kosuluna cevrilir (bkz. .maprow). */
+function detayliAra(){
+  var q=[];
+  document.querySelectorAll('#aramaAlan input').forEach(function(i){ if(i.value.trim()) q.push(i.value.trim()); });
+  var metin=q.join(' ');
+  var gi=document.querySelector('.gsearch input'); if(gi) gi.value=metin;
+  listedeAra(metin);
+}
+document.getElementById('btnFiltrele').addEventListener('click',detayliAra);
+document.getElementById('btnTemizle').addEventListener('click',function(){
+  document.querySelectorAll('#aramaAlan input').forEach(function(i){ i.value=''; });
+  var gi=document.querySelector('.gsearch input'); if(gi) gi.value='';
+  listedeAra('');
+});
+
+var perde=document.getElementById('perde'), kartwin=document.getElementById('kartwin');
+var kartGenislikSabit=false, kartSonBoy=0;
+
+/* Kart, kendi ekrani olarak acilir — uzerine ikinci bir form kabugu giydirilmez.
+   Kartin kendi "Kapat / Vazgec" dugmesi postMessage ile bu pencereyi kapatir. */
+function kartAc(b, mod){
+  var k = b.kart ? KARTLAR[b.kart] : null;
+  kartwin.querySelectorAll('iframe,.kyok').forEach(function(x){ x.remove(); });
+  /* olcum icin sabit baslangic genisligi — geri besleme (surekli daralma) olmasin */
+  kartGenislikSabit=false; kartSonBoy=0;
+  kartwin.style.width =Math.round(Math.min(1500, innerWidth*0.96))+'px';
+  kartwin.style.height=(innerHeight-30)+'px';
+  if(k&&k.dosya){
+    var fr=document.createElement('iframe');
+    fr.src=k.dosya+'#kart-'+(mod==='yeni'?'yeni':'duzenle');
+    fr.title=k.ad;
+    kartwin.appendChild(fr);
+    izleBaslat(kartwin,{dosya:k.dosya});
+  }else{
+    kartwin.appendChild(el('div','kyok','<span class="bk">🗂</span><b>'+b.ad+'</b> için ayrı bir kart ekranı henüz tasarlanmadı.'+
+      '<br>Gerçek uygulamada bu buton <b>'+(b.yol||'')+'</b> listesinin <b>Yeni</b> aksiyonunu tetikler ve ilgili '+
+      '<b>IcerikFrame</b> kartı bu pencerede açılır.<br><span style="font-size:11px">Esc veya sağ üstteki ✕ ile kapatılır.</span>'));
+  }
+  perde.classList.add('on');
+}
+function kartKapat(){
+  perde.classList.remove('on');
+  kartwin.querySelectorAll('iframe,.kyok').forEach(function(x){ x.remove(); });
+  kartwin.style.width=''; kartwin.style.height='';
+}
+document.querySelectorAll('[data-kapat]').forEach(function(x){ x.addEventListener('click',kartKapat); });
+perde.addEventListener('click',function(e){ if(e.target===perde) kartKapat(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&perde.classList.contains('on')) kartKapat(); });
+/* kartin ic ekranindan gelen kapatma sinyali */
+addEventListener('message',function(e){
+  var d=e.data; if(!d||!d.gentegre) return;
+  if(d.gentegre==='hazir'){ hazirGeldi(e.source); return; }
+  if(d.gentegre==='gorunumDestek'){ destekGeldi(e.source); return; }
+  if(d.gentegre==='aramaSonuc'){
+    var s3=document.getElementById('araSay');
+    if(s3) s3.textContent = d.q ? (d.bulunan+' / '+d.toplam) : '';
+    return;
+  }
+  if(d.gentegre==='dokum'){
+    var m=MOD(aktifModul);
+    document.getElementById('crumb').innerHTML=(m.ad==='Gen'?'Genel':m.ad)+' › <b>Dökümler</b> · '+d.ad;
+    document.getElementById('sbEkran').innerHTML='Ekran: <b>'+d.ad+'</b>';
+    return;
+  }
+  if(d.gentegre==='kapat'){ kartKapat(); return; }
+  /* kart kendi olcusunu bildirdi — pencereyi karta gore daralt */
+  if(d.gentegre==='olcu' && perde.classList.contains('on')){
+    /* genislik yalnizca ilk olcumde ayarlanir; aksi halde her olcum pencereyi biraz daha daraltir */
+    if(!kartGenislikSabit){
+      kartGenislikSabit=true;
+      kartwin.style.width=Math.max(560,Math.min(d.w+2, Math.round(innerWidth*0.96)))+'px';
+    }
+    var yeni=Math.max(320,Math.min(d.h+2, innerHeight-30));
+    if(Math.abs(yeni-kartSonBoy)>3){ kartSonBoy=yeni; kartwin.style.height=yeni+'px'; }
+  }
+});
+
+/* ---------- 4 NOKTA: SOL PANEL AC / KAPA ---------- */
+function panelAc(ac){
+  var s=document.getElementById('side'), d=document.getElementById('dots'), g=document.getElementById('grip');
+  var gizli = (ac===undefined) ? !s.classList.contains('gizli') : !ac;
+  s.classList.toggle('gizli', gizli);
+  d.classList.toggle('on', !gizli);
+  g.textContent = gizli ? '▶' : '◀';
+}
+document.getElementById('grip').addEventListener('click',function(){ panelAc(); });
+
+/* ---------- 4 NOKTA → HIZLI ERISIM MENUSU ---------- */
+var hzmenu=document.getElementById('hzmenu');
+function hzKur(){
+  var g=document.getElementById('hzgrid'); g.innerHTML='';
+  HIZLI.forEach(function(pr){
+    var b=BOL(pr[0],pr[1]); if(!b) return;
+    var d=el('div','hzt','<span class="ic">'+b.ic+'</span><span class="nm">'+b.ad+'</span>');
+    d.addEventListener('click',function(){ hzKapat(); modulSec(pr[0],pr[1]); });
+    g.appendChild(d);
+  });
+}
+function hzAc(){ hzmenu.classList.add('on'); document.getElementById('dots').classList.add('acik');
+  document.getElementById('hzPanel').textContent =
+    document.getElementById('side').classList.contains('gizli') ? '◧ Bölüm Panelini Göster' : '◧ Bölüm Panelini Gizle'; }
+function hzKapat(){ hzmenu.classList.remove('on'); document.getElementById('dots').classList.remove('acik'); }
+document.getElementById('dots').addEventListener('click',function(ev){
+  ev.stopPropagation();
+  if(hzmenu.classList.contains('on')) hzKapat(); else hzAc();
+});
+document.addEventListener('click',function(ev){
+  if(!hzmenu.contains(ev.target) && ev.target.id!=='dots') hzKapat();
+});
+document.getElementById('hzPanel').addEventListener('click',function(){ panelAc(); hzKapat(); });
+document.getElementById('hzHome').addEventListener('click',function(){ hzKapat(); modulSec('giris','home'); });
+hzKur();
+
+/* ---------- DASHBOARD KISAYOLLARI ---------- */
+document.addEventListener('click',function(ev){
+  var tr=ev.target.closest('[data-git]'); if(!tr) return;
+  var p=tr.dataset.git.split('|'); modulSec(p[0],p[1]);
+});
+
+
+/* ---------- BASLANGIC ---------- */
+modulSec('giris','home');
+</script>
+</body>
+</html>

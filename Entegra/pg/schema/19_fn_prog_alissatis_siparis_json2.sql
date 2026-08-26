@@ -19,7 +19,11 @@ RETURNS TABLE(
     doviz_kdv_tutari double precision, girisdepo smallint, cikisdepo smallint, cikisdepoadi varchar, irsaliyeno varchar,
     saticikodu integer, detaybolumu varchar, saticiadi varchar, vade smallint, vadetarih timestamp,
     durumnereden text, durumnereye text, teslimtarihi timestamp, fatura_gon_tarihi timestamp, zarfid integer, zarf varchar,
-    isemridurum integer, yazdirildi smallint, onaylayacak integer, onaylayan integer, efaturadurum smallint
+    isemridurum integer, yazdirildi smallint, onaylayacak integer, onaylayan integer, efaturadurum smallint,
+    -- SANAL: SIPARIS tablosunda YOK (yalniz FATBASLIK'ta). Cari ekranindaki Alis/Satis gridi
+    --   TEK grid olup iki SP'yi de besliyor -> ayni kolon adi burada da donmeli. Sabit 0.
+    --   EN SONA eklendi (pozisyonel erisim: Fields[0] = F.ID). MSSQL bit -> PG smallint.
+    sanal smallint
 )
 LANGUAGE plpgsql STABLE AS $$
 #variable_conflict use_column
@@ -78,7 +82,8 @@ BEGIN
         (select min(TESLIMTARIHI) from SIPARISDETAY where SIPARISID=F.ID)::timestamp,
         NULL::timestamp, NULL::integer, NULL::varchar,
         COALESCE((select I.DURUM from ISEMRI I where I.YERI=F.TUR and I.YERID=F.ID),-1)::integer,
-        F.YAZDIRILDI::smallint, F.ONAYLAYACAK::integer, F.ONAYLAYAN::integer, 0::smallint
+        F.YAZDIRILDI::smallint, F.ONAYLAYACAK::integer, F.ONAYLAYAN::integer, 0::smallint,
+        0::smallint          -- SANAL (SIPARIS''te yok; grid kolon adi icin sabit)
     FROM SIPARIS F
         INNER JOIN REHBER R ON R.ID = F.REHBERID
         LEFT OUTER JOIN REHBER SATICIBILGI ON F.SATICIKODU = SATICIBILGI.ID

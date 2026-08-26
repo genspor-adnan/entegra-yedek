@@ -1848,6 +1848,155 @@ begin
   if Result = nil then Result := AObj.GetValue(UpperCase(AKey));
 end;
 
+// Detay JSON'unda kart ID'sine esit olan bag kolonunu bulur (STOKFIYAT -> STOKID,
+// STOKBARKOD -> STOKID, REHBERBILGI -> REHBERID...). Sadece '...ID' ile biten (ve 'ID'
+// olmayan) kolonlar aday; bulunamazsa ''.
+function _UstKolonBul(const AJSON: string; AUstKayitID: Int64): string;
+var
+  LParsed: TJSONValue;
+  LPair: TJSONPair;
+  LAd: string;
+begin
+  Result := '';
+  LParsed := TJSONObject.ParseJSONValue(AJSON);
+  if not (LParsed is TJSONObject) then
+  begin
+    LParsed.Free;
+    Exit;
+  end;
+  try
+    for LPair in TJSONObject(LParsed) do
+    begin
+      LAd := UpperCase(LPair.JsonString.Value);
+      if (LAd = 'ID') or (Length(LAd) < 3) or (Copy(LAd, Length(LAd) - 1, 2) <> 'ID') then
+        Continue;
+      if StrToInt64Def(Trim(GeriJsonDeger(LPair.JsonValue)), -1) = AUstKayitID then
+        Exit(LPair.JsonString.Value);
+    end;
+  finally
+    LParsed.Free;
+  end;
+end;
+
+// Kart INSERT'i tetikleri calistirabilir: ör. TG_StokFiyatEkle, STOKLAR'a satir eklenince
+// varsayilan STOKFIYAT satirlarini YENI ID'lerle yazar. Bu satirlari GeriKayitVarMi (ID
+// bazli kontrol) goremez; log'daki orijinal detay INSERT edilince benzersiz indeks patlar
+// ("Cannot insert duplicate key row ... 'STOKFIYAT_Unique'"). Kart bu islemde yeni
+// dirildigine gore ona bagli olup log'da OLMAYAN satirlar tetik urunudur -> silinir.
+// SADECE benzersiz-indeks hatasi alan tablo icin cagrilir (korumasiz genel temizlik,
+// IMAJ.YERID gibi (YERI,YERID) bilesik bagli tablolarda ilgisiz kayit silerdi).
+// True: temizlik yapildi, INSERT tekrar denenebilir.
+function _TetikDetaylariTemizle(const ATabloAdi: string; AList: TList<TGeriKayit>;
+  AUstKayitID: Int64; ABaslangic: Integer): Boolean;
+var
+  j: Integer;
+  LUstKolon, LIDler: string;
+begin
+  Result := False;
+  if Trim(ATabloAdi) = '' then Exit;
+
+  // Ayni fiziksel tabloya dusen TUM log satirlarinin ID'leri korunur (mantiksal TABLOID'ler
+  // ayni tabloya eslenebiliyor - bkz. GeriTabloAdiGetir). Bag kolonu ilk satirdan bulunur.
+  LUstKolon := '';
+  LIDler := '';
+  for j := ABaslangic to AList.Count - 1 do
+    if (AList[j].TabloID <> TabNo_BLOBYEDEK) and
+       SameText(GeriTabloAdiGetir(AList[j].TabloID), ATabloAdi) then
+    begin
+      if LUstKolon = '' then
+        LUstKolon := _UstKolonBul(AList[j].JSON, AUstKayitID);
+      if LIDler <> '' then LIDler := LIDler + ',';
+      LIDler := LIDler + IntToStr(AList[j].KayitID);
+    end;
+  if (LUstKolon = '') or (LIDler = '') then Exit;
+
+  // ID kolonu olmayan (bilesik anahtarli) tabloda "log'da olmayan" ayrimi yapilamaz -> atla.
+  if not Veritabani.VeriVarMi(Tablo.FDCnn,
+       'select 1 from INFORMATION_SCHEMA.COLUMNS ' +
+       'where UPPER(TABLE_NAME)=UPPER(&T) and UPPER(COLUMN_NAME)=''ID''',
+       ['&T'], [ATabloAdi]) then
+    Exit;
+
+  try
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'delete from ' + ATabloAdi + ' where ' + LUstKolon + '=&U and ID not in (' + LIDler + ')',
+      ['&U'], [AUstKayitID]);
+    Result := True;
+  except
+    Result := False;   // temizlik basarisizsa asil INSERT hatasi kullaniciya bildirilir
+  end;
+end;
+
+// Benzersiz anahtar ihlali mi? (iki motor: MSSQL "duplicate key", PG "duplicate key value
+// violates unique constraint" / SQLSTATE 23505)
+function _BenzersizIhlaliMi(const AHata: string): Boolean;
+begin
+  Result := (Pos('duplicate key', LowerCase(AHata)) > 0) or
+            (Pos('unique index', LowerCase(AHata)) > 0) or
+            (Pos('unique constraint', LowerCase(AHata)) > 0) or
+            (Pos('23505', AHata) > 0);
+end;
+
+// STOKFIYAT geri alinirken kart INSERT tetigi varsayilan fiyat satirlarini yeni ID ile
+// olusturabilir. O zaman eski log satirinin ID'si yoktur ama benzersiz anahtari zaten
+// vardir: (STOKID, FIYATADI, BIRIM, PAKETID, SATIS). Bu durumda detay semantik olarak
+// geri gelmistir; tekrar INSERT denenirse STOKFIYAT_Unique patlar.
+function _StokFiyatUniqueVarMi(const AJSON: string): Boolean;
+var
+  LParsed: TJSONValue;
+  LObj: TJSONObject;
+  LStokID, LFiyatAdi, LBirim, LPaketID, LSatis: Int64;
+begin
+  Result := False;
+  LParsed := TJSONObject.ParseJSONValue(AJSON);
+  if not (LParsed is TJSONObject) then
+  begin
+    LParsed.Free;
+    Exit;
+  end;
+  try
+    LObj := TJSONObject(LParsed);
+    LStokID   := StrToInt64Def(GeriJsonDeger(JGetCI(LObj, 'STOKID')), 0);
+    LFiyatAdi := StrToInt64Def(GeriJsonDeger(JGetCI(LObj, 'FIYATADI')), 0);
+    LBirim    := StrToInt64Def(GeriJsonDeger(JGetCI(LObj, 'BIRIM')), 0);
+    LPaketID  := StrToInt64Def(GeriJsonDeger(JGetCI(LObj, 'PAKETID')), 0);
+    LSatis    := StrToInt64Def(GeriJsonDeger(JGetCI(LObj, 'SATIS')), 0);
+  finally
+    LParsed.Free;
+  end;
+
+  if (LStokID = 0) or (LBirim = 0) then Exit;
+  Result := Veritabani.VeriVarMi(Tablo.FDCnn,
+    'select 1 from STOKFIYAT where STOKID=&STOKID and FIYATADI=&FIYATADI ' +
+    'and BIRIM=&BIRIM and PAKETID=&PAKETID and SATIS=&SATIS',
+    ['&STOKID','&FIYATADI','&BIRIM','&PAKETID','&SATIS'],
+    [LStokID, LFiyatAdi, LBirim, LPaketID, LSatis]);
+end;
+
+// Eski/bozuk loglarda STOKBARKOD detay satiri BARKOD degeri olmadan gelebiliyor.
+// STOKBARKOD.BARKOD NOT NULL oldugu icin bu satir geri-yuklenebilir veri degildir.
+function _StokBarkodBosMu(const AJSON: string): Boolean;
+var
+  LParsed: TJSONValue;
+  LObj: TJSONObject;
+  LBarkod: string;
+begin
+  Result := False;
+  LParsed := TJSONObject.ParseJSONValue(AJSON);
+  if not (LParsed is TJSONObject) then
+  begin
+    LParsed.Free;
+    Exit;
+  end;
+  try
+    LObj := TJSONObject(LParsed);
+    LBarkod := Trim(GeriJsonDeger(JGetCI(LObj, 'BARKOD')));
+  finally
+    LParsed.Free;
+  end;
+  Result := LBarkod = '';
+end;
+
 // TabNo_BLOBYEDEK satirindan blob'u kayda geri yazar (Geri Al icinde cagrilir).
 // True: yazildi/atlandi (hata degil). Icerik DOSYA'dan okunur, hedef kolona parametreyle
 // yazilir -> cross-DB tip donusumu ve motor farki sorun cikarmaz.
@@ -2771,7 +2920,7 @@ begin
     end;
 
     if LList.Count = 0 then
-      Exit('Bu silme islemine ait geri alinacak kayit bulunamadi.');
+       Exit('Bu silme islemine ait geri alinacak kayit bulunamadi.');
 
     // b. KART cakisma kontrolu (ANA DB): kart ID'si su an kullaniliyorsa hicbir sey ekleme.
     LKartTabloAdi := GeriTabloAdiGetir(AUstTabloID);
@@ -2812,7 +2961,23 @@ begin
         Continue;
       end;
 
+      // STOKFIYAT'ta kart INSERT tetigi ayni fiyat satirini yeni ID ile olusturmus olabilir.
+      // ID farkli olsa da unique anahtar ayniysa detay zaten geri gelmistir; hata uretme.
+      if SameText(LTabloAdi, 'STOKFIYAT') and _StokFiyatUniqueVarMi(LRec.JSON) then
+        Continue;
+
+      // Bozuk/eski log: barkod degeri yoksa STOKBARKOD geri yuklenemez (BARKOD NOT NULL).
+      // UI zaten bos barkod kaydini engeller; geri-alda bu detayi atla, karti bozma.
+      if SameText(LTabloAdi, 'STOKBARKOD') and _StokBarkodBosMu(LRec.JSON) then
+        Continue;
+
       LHata := GeriKayitEkle(LTabloAdi, LRec.JSON);
+      // Kart dirilirken tetiklerin urettigi otomatik detaylar (TG_StokFiyatEkle ->
+      // varsayilan STOKFIYAT satirlari) ID'de degil BENZERSIZ INDEKS'te catisir; onlari
+      // temizleyip bir kez daha dene. (Log'daki ID'ler korunur.)
+      if (LHata <> '') and (not LKart) and _BenzersizIhlaliMi(LHata) and
+         _TetikDetaylariTemizle(LTabloAdi, LList, AUstKayitID, 0) then
+        LHata := GeriKayitEkle(LTabloAdi, LRec.JSON);
       if LHata <> '' then
       begin
         if LKart then

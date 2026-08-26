@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gentegre — Kabuk Konseptleri Karşılaştırma</title>
+<style>
+  :root{--zem:#eef1f5;--yuz:#fff;--yuz2:#f5f7fa;--cizgi:#dbe2ea;--yazi:#1f2d3a;--soluk:#66798c;
+    --vurgu:#2f6db3;--vurgu2:#e3eefb;--ok:#2e7d46;--uyari:#b5731a;--hata:#b23b3b}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--zem);color:var(--yazi);font-family:"Segoe UI",Tahoma,sans-serif;
+    font-size:13px;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  .ust{flex:none;background:linear-gradient(#22375a,#16273f);color:#fff;padding:12px 18px;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .ust h1{margin:0;font-size:16px;font-weight:650;letter-spacing:-.2px}
+  .ust .alt{font-size:12px;opacity:.75}
+  .ust .sag{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .md{border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.1);color:#fff;
+    border-radius:8px;padding:6px 12px;font-size:12.5px;cursor:default}
+  .md:hover{background:rgba(255,255,255,.2)}
+  .md.on{background:#fff;color:#16273f;font-weight:650;border-color:#fff}
+
+  .sek{flex:none;display:flex;gap:8px;padding:10px 18px;background:var(--yuz);border-bottom:1px solid var(--cizgi);
+    align-items:center;flex-wrap:wrap}
+  .kk{display:flex;align-items:center;gap:9px;border:1px solid var(--cizgi);border-radius:10px;
+    padding:7px 13px;background:var(--yuz2);cursor:default;min-width:0}
+  .kk:hover{border-color:var(--vurgu)}
+  .kk.on{background:var(--vurgu2);border-color:var(--vurgu)}
+  .kk .no{width:22px;height:22px;border-radius:7px;background:var(--vurgu);color:#fff;font-size:11px;
+    display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+  .kk .ad{font-weight:650;font-size:12.5px}
+  .kk .ac{font-size:11.5px;color:var(--soluk)}
+  .sek .sag{margin-left:auto;font-size:11.5px;color:var(--soluk)}
+
+  .govde{flex:1;display:flex;min-height:0}
+  .sahne{flex:1;min-width:0;padding:12px;display:grid;gap:12px;overflow:auto}
+  .sahne.tek{grid-template-columns:1fr}
+  .sahne.ikili{grid-template-columns:1fr 1fr}
+  .sahne.dortlu{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+  .sahne.tumu{grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr}
+  .cerceve{background:var(--yuz);border:1px solid var(--cizgi);border-radius:10px;overflow:hidden;
+    display:flex;flex-direction:column;min-height:0;box-shadow:0 2px 10px rgba(20,40,70,.07)}
+  .cerceve .cb{flex:none;display:flex;align-items:center;gap:9px;padding:8px 12px;background:var(--yuz2);
+    border-bottom:1px solid var(--cizgi);font-size:12px}
+  .cerceve .cb .no{width:20px;height:20px;border-radius:6px;background:var(--vurgu);color:#fff;font-size:10.5px;
+    display:flex;align-items:center;justify-content:center;font-weight:700}
+  .cerceve .cb b{font-weight:650}
+  .cerceve .cb .ac{color:var(--soluk)}
+  .cerceve .cb .sag{margin-left:auto;display:flex;gap:6px}
+  .mini{border:1px solid var(--cizgi);background:var(--yuz);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--soluk)}
+  .mini:hover{border-color:var(--vurgu);color:var(--vurgu)}
+  .cerceve iframe{flex:1;width:100%;border:0;display:block;background:#fff;min-height:0}
+
+  .notlar{width:340px;flex:none;background:var(--yuz);border-left:1px solid var(--cizgi);overflow:auto;padding:14px 16px 24px}
+  .notlar.gizli{display:none}
+  .notlar h2{margin:0 0 4px;font-size:14px;font-weight:650}
+  .notlar .ust2{font-size:12px;color:var(--soluk);margin-bottom:14px}
+  .kart{border:1px solid var(--cizgi);border-radius:10px;padding:12px 13px;margin-bottom:11px;background:var(--yuz2)}
+  .kart h3{margin:0 0 7px;font-size:13px;font-weight:650;display:flex;align-items:center;gap:8px}
+  .kart h3 .no{width:20px;height:20px;border-radius:6px;background:var(--vurgu);color:#fff;font-size:10.5px;
+    display:flex;align-items:center;justify-content:center;font-weight:700}
+  .kart p{margin:0 0 8px;font-size:12px;line-height:1.55;color:var(--soluk)}
+  .kart ul{margin:0;padding-left:16px;font-size:12px;line-height:1.6}
+  .kart li{margin-bottom:3px}
+  .art{color:var(--ok)}.eksi{color:var(--hata)}
+  .tablo{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px}
+  .tablo th,.tablo td{border:1px solid var(--cizgi);padding:5px 7px;text-align:left}
+  .tablo th{background:var(--yuz2);font-weight:650;color:var(--soluk)}
+  .tablo td.c{text-align:center}
+  .ip{font-size:11.5px;color:var(--soluk);line-height:1.6;background:#fffdf3;border:1px solid #f0e4c0;
+    border-radius:9px;padding:10px 12px}
+  body.koyu{--zem:#0e1319;--yuz:#161c25;--yuz2:#1c232e;--cizgi:#2a3341;--yazi:#e2e8f0;--soluk:#93a1b1;--vurgu2:#1c3a5c}
+  body.koyu .ip{background:#26210f;border-color:#453a17;color:#d8c88f}
+</style>
+</head>
+<body>
+
+<div class="ust">
+  <div>
+    <h1>Gentegre — kabuk konseptleri</h1>
+    <div class="alt">Beşi de aynı 50 ekranı açar · aynı veri modeli (gentegre_data.js) · açık/koyu tema</div>
+  </div>
+  <div class="sag">
+    <span class="md on" data-md="tek">◻ Tek ekran</span>
+    <span class="md" data-md="ikili">◫ 2'li</span>
+    <span class="md" data-md="tumu">▦ Tümü</span>
+    <span class="md" id="notDugme">📝 Notlar</span>
+    <span class="md" id="temaDugme">🌙</span>
+  </div>
+</div>
+
+<div class="sek" id="sekmeler"></div>
+
+<div class="govde">
+  <div class="sahne tek" id="sahne"></div>
+  <div class="notlar" id="notlar">
+    <h2>Hangisi size uyar?</h2>
+    <div class="ust2">Beş kabuk da birebir aynı ekranları açtığı için karar tamamen <b>gezinme biçimi</b> ve <b>görsel dil</b> meselesi.</div>
+
+    <div class="kart">
+      <h3><span class="no">0</span> Mevcut — Delphi sadık</h3>
+      <p>Bugünkü Gentegre'nin birebir modernize hâli: üstte modül sekmeleri, solda bölüm butonları + arama, klasik grid.</p>
+      <ul>
+        <li class="art">Mevcut kullanıcı hiç eğitim almadan kullanır</li>
+        <li class="art">Ekranda maksimum kayıt — en yoğun bilgi</li>
+        <li class="eksi">Görsel olarak en "eski" duran seçenek</li>
+        <li class="eksi">Modül sayısı arttıkça üst şerit sıkışır</li>
+      </ul>
+    </div>
+
+    <div class="kart">
+      <h3><span class="no">A</span> Komut paleti + ikon rail</h3>
+      <p>Solda dar ikon şeridi, menü yerine <b>Ctrl+K</b> komut paleti. "yeni fatura", "kritik stok", "DÖF aç" yazıp Enter.</p>
+      <ul>
+        <li class="art">Klavyeyle en hızlı kullanım — fare gerekmez</li>
+        <li class="art">50+ ekran menüde kaybolmaz, arayarak bulunur</li>
+        <li class="art">En sade, en modern görünüm</li>
+        <li class="eksi">Keşfedilebilirlik düşük — kullanıcı ne yazacağını bilmeli</li>
+        <li class="eksi">Yaşlı/klasik kullanıcı için alışma süresi var</li>
+      </ul>
+    </div>
+
+    <div class="kart">
+      <h3><span class="no">B</span> Ribbon (Office / Dynamics)</h3>
+      <p>Üstte sekmeli şerit: Giriş / Kayıtlar / İşlemler / Raporlar / Görünüm / Yönetim. Aksiyonlar büyük ikonlarla gruplanır.</p>
+      <ul>
+        <li class="art">Keşfedilebilirlik en yüksek — her aksiyon görünür</li>
+        <li class="art">Office alışkanlığı olan kullanıcıya çok tanıdık</li>
+        <li class="art">Bağlama göre değişen şerit (seçili ekranın aksiyonları)</li>
+        <li class="eksi">Dikeyde ~95 px yer yer — grid alanı azalır (katlanabilir)</li>
+        <li class="eksi">Küçük ekranda sıkışır</li>
+      </ul>
+    </div>
+
+    <div class="kart">
+      <h3><span class="no">C</span> Modern web app</h3>
+      <p>Odoo/Notion çizgisi: üstte merkezi arama, solda akordeon menü, sayfa başlığı + birincil aksiyon, çip filtreler, yuvarlak kartlar.</p>
+      <ul>
+        <li class="art">En çağdaş görünüm — web/mobil ürünlere benzer</li>
+        <li class="art">Yeni kullanıcı için en kolay öğrenilen</li>
+        <li class="art">Ekran satmak/demo için en gösterişli</li>
+        <li class="eksi">Ferah tipografi → ekranda daha az satır</li>
+        <li class="eksi">Delphi'de birebir uygulanması en zor olanı</li>
+      </ul>
+    </div>
+
+    <div class="kart">
+      <h3><span class="no">W</span> Windows 11 / Fluent</h3>
+      <p>Windows'un bugünkü kendi çizgisi: solda <b>NavigationView</b> (daraltılınca ikon rail), üstte ince
+        <b>command bar</b>, <b>InfoBar</b> uyarı şeritleri, <b>pivot</b> sekmeler, Mica benzeri arka plan,
+        Segoe UI Variable, sistem vurgu rengi. Ctrl+K de var.</p>
+      <ul>
+        <li class="art">Windows 11'de "yerli" duran tek konsept</li>
+        <li class="art">Her öğenin DevExpress VCL karşılığı hazır (🔧 düğmesiyle listelenir)</li>
+        <li class="art">Klasik kullanıcı da kaybolmuyor — menü hâlâ solda ve görünür</li>
+        <li class="art">Koyu tema Windows'un kendi koyu paletiyle birebir</li>
+        <li class="eksi">Ribbon'a alışmış kullanıcı "aksiyonlar nerede" diyebilir (⋯ altında)</li>
+        <li class="eksi">Mica/yuvarlak köşe efektleri Win10'da düşer (zararsız)</li>
+      </ul>
+    </div>
+
+    <div class="kart">
+      <h3>Kıyas</h3>
+      <table class="tablo">
+        <tr><th>Ölçüt</th><th class="c">Mevcut</th><th class="c">A</th><th class="c">B</th><th class="c">C</th><th class="c">W</th></tr>
+        <tr><td>Öğrenme kolaylığı</td><td class="c">●●●●</td><td class="c">●●</td><td class="c">●●●●</td><td class="c">●●●●●</td><td class="c">●●●●</td></tr>
+        <tr><td>Hız (deneyimli)</td><td class="c">●●●</td><td class="c">●●●●●</td><td class="c">●●●</td><td class="c">●●●</td><td class="c">●●●●</td></tr>
+        <tr><td>Ekran verimi</td><td class="c">●●●●●</td><td class="c">●●●●</td><td class="c">●●●</td><td class="c">●●</td><td class="c">●●●●</td></tr>
+        <tr><td>Modern görünüm</td><td class="c">●●</td><td class="c">●●●●●</td><td class="c">●●●</td><td class="c">●●●●●</td><td class="c">●●●●●</td></tr>
+        <tr><td>Delphi'de uygulanabilirlik</td><td class="c">●●●●●</td><td class="c">●●●</td><td class="c">●●●●</td><td class="c">●●</td><td class="c">●●●●●</td></tr>
+        <tr><td>Windows'a uygunluk</td><td class="c">●●●●</td><td class="c">●●●</td><td class="c">●●●●</td><td class="c">●●</td><td class="c">●●●●●</td></tr>
+      </table>
+    </div>
+
+    <div class="ip">
+      <b>Windows tabanlı öneri: W.</b> Windows 11'in kendi deseni (NavigationView + ince command bar +
+      arama) — DevExpress'te hepsi hazır bileşen, üstüne üç DWM çağrısıyla koyu pencere çerçevesi,
+      yuvarlak köşe ve Mica eklenir. Ribbon isteyen kullanıcı için B'nin şeridi "Görünüm → Gelişmiş mod"
+      olarak ikinci seçenek sunulabilir; ikisi aynı BarManager'ı paylaşır.
+    </div>
+  </div>
+</div>
+
+<script>
+var KONSEPT=[
+  {no:'0', ad:'Mevcut', ac:'Delphi sadık · modül sekmeleri', dosya:'gentegre.html'},
+  {no:'A', ad:'Komut paleti', ac:'ikon rail · Ctrl+K', dosya:'gentegre_v2_komut.html'},
+  {no:'B', ad:'Ribbon', ac:'Office / Dynamics şeridi', dosya:'gentegre_v3_ribbon.html'},
+  {no:'C', ad:'Modern web', ac:'Odoo / Notion çizgisi', dosya:'gentegre_v4_web.html'},
+  {no:'W', ad:'Windows 11', ac:'Fluent · NavigationView · Ctrl+K', dosya:'gentegre_v5_fluent.html'}
+];
+var mod='tek', secili=1;
+function el(t,c,h){var d=document.createElement(t);if(c)d.className=c;if(h!=null)d.innerHTML=h;return d;}
+
+function kurSekmeler(){
+  var s=document.getElementById('sekmeler'); s.innerHTML='';
+  KONSEPT.forEach(function(k,i){
+    var d=el('div','kk'+(i===secili&&mod==='tek'?' on':''),
+      '<span class="no">'+k.no+'</span><span><span class="ad">'+k.ad+'</span> '+
+      '<span class="ac">· '+k.ac+'</span></span>');
+    d.addEventListener('click',function(){ secili=i; mod='tek'; kur(); });
+    s.appendChild(d);
+  });
+  s.appendChild(el('span','sag', mod==='tek'
+    ? 'Konsepti seç · üstten 2\'li veya 4\'lü karşılaştırmaya geç'
+    : 'Karşılaştırma modu · her çerçeve bağımsız çalışır'));
+}
+
+function cerceve(k){
+  var c=el('div','cerceve');
+  var b=el('div','cb','<span class="no">'+k.no+'</span><b>'+k.ad+'</b><span class="ac">'+k.ac+'</span>');
+  var sag=el('div','sag');
+  var y=el('span','mini','⟳ Yenile'); var t=el('span','mini','↗ Ayrı pencere');
+  sag.appendChild(y); sag.appendChild(t); b.appendChild(sag);
+  var f=document.createElement('iframe'); f.src=k.dosya; f.title=k.ad;
+  y.addEventListener('click',function(){ f.src=f.src; });
+  t.addEventListener('click',function(){ window.open(k.dosya,'_blank'); });
+  c.appendChild(b); c.appendChild(f);
+  return c;
+}
+
+function kur(){
+  var s=document.getElementById('sahne');
+  s.className='sahne '+mod; s.innerHTML='';
+  if(mod==='tek') s.appendChild(cerceve(KONSEPT[secili]));
+  else if(mod==='ikili'){ s.appendChild(cerceve(KONSEPT[secili])); s.appendChild(cerceve(KONSEPT[(secili+1)%KONSEPT.length])); }
+  else KONSEPT.forEach(function(k){ s.appendChild(cerceve(k)); });
+  kurSekmeler();
+}
+
+document.querySelectorAll('.md[data-md]').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.md[data-md]').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); mod=b.dataset.md; kur();
+  });
+});
+document.getElementById('notDugme').addEventListener('click',function(){
+  document.getElementById('notlar').classList.toggle('gizli');
+  this.classList.toggle('on');
+});
+document.getElementById('temaDugme').addEventListener('click',function(){
+  document.body.classList.toggle('koyu');
+  this.textContent=document.body.classList.contains('koyu')?'☀':'🌙';
+});
+kur();
+</script>
+</body>
+</html>

@@ -8,39 +8,31 @@ object FaturaGorevFrame: TFaturaGorevFrame
   ParentBackground = False
   ParentColor = False
   TabOrder = 0
-  object BtnMaliyetler: TJvNavPanelButton
+  object BtnMaliyetler: TcxButton
     Left = 0
     Top = 108
     Width = 451
     Height = 52
     Align = alTop
-    AllowAllUp = True
     Caption = 'Maliyet - K'#226'rl'#305'l'#305'k'
     Font.Charset = TURKISH_CHARSET
     Font.Color = clWhite
     Font.Height = -13
     Font.Name = 'Trebuchet MS'
     Font.Style = [fsBold]
-    GroupIndex = 1
-    HotTrack = False
-    HotTrackFont.Charset = TURKISH_CHARSET
-    HotTrackFont.Color = clWindowText
-    HotTrackFont.Height = -13
-    HotTrackFont.Name = 'Trebuchet MS'
-    HotTrackFont.Style = [fsBold]
+    SpeedButtonOptions.GroupIndex = 1
     ParentFont = False
-    Colors.ButtonColorFrom = 15395562
-    Colors.ButtonColorTo = 12566463
-    Colors.ButtonHotColorFrom = clGreen
-    Colors.ButtonHotColorTo = 10147359
-    Colors.ButtonSelectedColorFrom = clGreen
-    Colors.ButtonSelectedColorTo = clLime
-    ParentStyleManager = False
-    ImageIndex = 4
-    Images = PNGImageList1
+    OptionsImage.ImageIndex = 4
+    OptionsImage.Images = PNGImageList1
     OnClick = BtnMaliyetlerClick
     ExplicitLeft = 3
     ExplicitTop = 97
+    OptionsImage.Margin = 8
+    Colors.Default = 10252717
+    Colors.Hot = 12158835
+    Colors.Pressed = 7814707
+    LookAndFeel.Kind = lfOffice11
+    LookAndFeel.NativeStyle = False
   end
   object Panel3: TPanel
     Left = 0
@@ -50,74 +42,57 @@ object FaturaGorevFrame: TFaturaGorevFrame
     Align = alTop
     Caption = 'Panel1'
     TabOrder = 0
-    object btnOzelDokumler: TJvNavPanelButton
+    object btnOzelDokumler: TcxButton
       Left = 400
       Top = 1
       Width = 50
       Height = 50
       Align = alRight
-      AllowAllUp = True
       Caption = #214'zel'
       Font.Charset = TURKISH_CHARSET
       Font.Color = clWhite
       Font.Height = -13
       Font.Name = 'Trebuchet MS'
       Font.Style = [fsBold]
-      GroupIndex = 1
-      HotTrack = False
-      HotTrackFont.Charset = TURKISH_CHARSET
-      HotTrackFont.Color = clWindowText
-      HotTrackFont.Height = -13
-      HotTrackFont.Name = 'Trebuchet MS'
-      HotTrackFont.Style = [fsBold]
+      SpeedButtonOptions.GroupIndex = 1
       ParentFont = False
-      WordWrap = True
-      Colors.ButtonColorFrom = 15395562
-      Colors.ButtonColorTo = 12566463
-      Colors.ButtonHotColorFrom = clGreen
-      Colors.ButtonHotColorTo = 10147359
-      Colors.ButtonSelectedColorFrom = clGreen
-      Colors.ButtonSelectedColorTo = clLime
-      ParentStyleManager = False
-      ImageIndex = -1
+      OptionsImage.ImageIndex = -1
       OnClick = btnAlisFaturalariClick
       OnMouseDown = btnDokumlerMouseDown
       ExplicitLeft = 406
+      OptionsImage.Margin = 8
+      Colors.Default = 10252717
+      Colors.Hot = 12158835
+      Colors.Pressed = 7814707
+      LookAndFeel.Kind = lfOffice11
+      LookAndFeel.NativeStyle = False
     end
-    object btnDokumler: TJvNavPanelButton
+    object btnDokumler: TcxButton
       Tag = 1
       Left = 1
       Top = 1
       Width = 399
       Height = 50
       Align = alClient
-      AllowAllUp = True
       Caption = 'D'#246'k'#252'mler'
       Font.Charset = TURKISH_CHARSET
       Font.Color = clWhite
       Font.Height = -13
       Font.Name = 'Trebuchet MS'
       Font.Style = [fsBold]
-      GroupIndex = 1
-      HotTrack = False
-      HotTrackFont.Charset = TURKISH_CHARSET
-      HotTrackFont.Color = clWindowText
-      HotTrackFont.Height = -13
-      HotTrackFont.Name = 'Trebuchet MS'
-      HotTrackFont.Style = [fsBold]
+      SpeedButtonOptions.GroupIndex = 1
       ParentFont = False
-      Colors.ButtonColorFrom = 15395562
-      Colors.ButtonColorTo = 12566463
-      Colors.ButtonHotColorFrom = clGreen
-      Colors.ButtonHotColorTo = 10147359
-      Colors.ButtonSelectedColorFrom = clGreen
-      Colors.ButtonSelectedColorTo = clLime
-      ParentStyleManager = False
-      ImageIndex = 2
-      Images = PNGImageList1
+      OptionsImage.ImageIndex = 2
+      OptionsImage.Images = PNGImageList1
       OnClick = btnAlisFaturalariClick
       OnMouseDown = btnDokumlerMouseDown
       ExplicitLeft = -5
+      OptionsImage.Margin = 8
+      Colors.Default = 10252717
+      Colors.Hot = 12158835
+      Colors.Pressed = 7814707
+      LookAndFeel.Kind = lfOffice11
+      LookAndFeel.NativeStyle = False
     end
   end
   object PanelAlisBelgeleri: TPanel
@@ -128,38 +103,30 @@ object FaturaGorevFrame: TFaturaGorevFrame
     Height = 54
     Align = alTop
     TabOrder = 1
-    object btnAlisFaturalari: TJvNavPanelButton
+    object btnAlisFaturalari: TcxButton
       Tag = 2
       Left = 1
       Top = 1
       Width = 449
       Height = 52
       Align = alTop
-      AllowAllUp = True
       Caption = 'Al'#305#351' Belgeleri'
       Font.Charset = TURKISH_CHARSET
       Font.Color = clWhite
       Font.Height = -13
       Font.Name = 'Trebuchet MS'
       Font.Style = [fsBold]
-      GroupIndex = 1
-      HotTrack = False
-      HotTrackFont.Charset = TURKISH_CHARSET
-      HotTrackFont.Color = clWindowText
-      HotTrackFont.Height = -13
-      HotTrackFont.Name = 'Trebuchet MS'
-      HotTrackFont.Style = [fsBold]
+      SpeedButtonOptions.GroupIndex = 1
       ParentFont = False
-      Colors.ButtonColorFrom = 15395562
-      Colors.ButtonColorTo = 12566463
-      Colors.ButtonHotColorFrom = clGreen
-      Colors.ButtonHotColorTo = 10147359
-      Colors.ButtonSelectedColorFrom = clGreen
-      Colors.ButtonSelectedColorTo = clLime
-      ParentStyleManager = False
-      ImageIndex = 5
-      Images = PNGImageList1
+      OptionsImage.ImageIndex = 5
+      OptionsImage.Images = PNGImageList1
       OnClick = btnAlisFaturalariClick
+      OptionsImage.Margin = 8
+      Colors.Default = 10252717
+      Colors.Hot = 12158835
+      Colors.Pressed = 7814707
+      LookAndFeel.Kind = lfOffice11
+      LookAndFeel.NativeStyle = False
     end
     object btnSatinalmaTalepleri: TcxButton
       Tag = 101
@@ -305,39 +272,31 @@ object FaturaGorevFrame: TFaturaGorevFrame
     Height = 54
     Align = alTop
     TabOrder = 2
-    object btnSatisFaturalari: TJvNavPanelButton
+    object btnSatisFaturalari: TcxButton
       Tag = 3
       Left = 1
       Top = 1
       Width = 449
       Height = 52
       Align = alTop
-      AllowAllUp = True
       Caption = 'Sat'#305#351' Belgeleri'
       Font.Charset = TURKISH_CHARSET
       Font.Color = clWhite
       Font.Height = -13
       Font.Name = 'Trebuchet MS'
       Font.Style = [fsBold]
-      GroupIndex = 1
-      HotTrack = False
-      HotTrackFont.Charset = TURKISH_CHARSET
-      HotTrackFont.Color = clWindowText
-      HotTrackFont.Height = -13
-      HotTrackFont.Name = 'Trebuchet MS'
-      HotTrackFont.Style = [fsBold]
+      SpeedButtonOptions.GroupIndex = 1
       ParentFont = False
-      Colors.ButtonColorFrom = 15395562
-      Colors.ButtonColorTo = 12566463
-      Colors.ButtonHotColorFrom = clGreen
-      Colors.ButtonHotColorTo = 10147359
-      Colors.ButtonSelectedColorFrom = clGreen
-      Colors.ButtonSelectedColorTo = clLime
-      ParentStyleManager = False
-      ImageIndex = 1
-      Images = PNGImageList1
+      OptionsImage.ImageIndex = 1
+      OptionsImage.Images = PNGImageList1
       OnClick = btnAlisFaturalariClick
       ExplicitTop = -4
+      OptionsImage.Margin = 8
+      Colors.Default = 10252717
+      Colors.Hot = 12158835
+      Colors.Pressed = 7814707
+      LookAndFeel.Kind = lfOffice11
+      LookAndFeel.NativeStyle = False
     end
     object btAlinanSiparisler: TcxButton
       Tag = 19

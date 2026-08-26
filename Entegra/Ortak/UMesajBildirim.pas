@@ -89,7 +89,7 @@ procedure TMesajBildirimFormu.CreateParams(var Params: TCreateParams);
 //   (ShowInTaskBar/TShowInTaskbar bu birimde gorunmuyor; dogrusu zaten pencere
 //     stilini dogrudan vermek.)
 begin
-  inherited   CreateParams(Params);
+  inherited  CreateParams(Params);
   Params.ExStyle  := Params.ExStyle or WS_EX_TOOLWINDOW or WS_EX_NOACTIVATE;
   Params.WndParent := 0;
 end;

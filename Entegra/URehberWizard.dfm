@@ -78,8 +78,6 @@ object RehberWizardDlg: TRehberWizardDlg
       OnPage = GirisEkrPage
       OnNextButtonClick = GirisEkrNextButtonClick
       WaterMark.Visible = False
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel1: TPanel
         Left = 0
         Top = 70
@@ -677,7 +675,6 @@ object RehberWizardDlg: TRehberWizardDlg
         end
       end
       object CariPageControl: TcxPageControl
-        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 361
         Width = 755
@@ -687,6 +684,7 @@ object RehberWizardDlg: TRehberWizardDlg
         TabOrder = 1
         Properties.ActivePage = SheetNotlar
         Properties.CustomButtons.Buttons = <>
+        Properties.Images = Tablo.PNGImageList2
         ClientRectBottom = 167
         ClientRectLeft = 4
         ClientRectRight = 751
@@ -694,10 +692,6 @@ object RehberWizardDlg: TRehberWizardDlg
         object SheetNotlar: TcxTabSheet
           Caption = 'Not / Uyar'#305
           ImageIndex = 19
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object CariGridNotlar: TcxGrid
             Left = 0
             Top = 27
@@ -754,7 +748,7 @@ object RehberWizardDlg: TRehberWizardDlg
             Height = 24
             Margins.Bottom = 0
             AutoSize = True
-            ButtonWidth = 66
+            ButtonWidth = 51
             Caption = 'AletCubugu'
             Color = clTeal
             DockSite = True
@@ -809,10 +803,6 @@ object RehberWizardDlg: TRehberWizardDlg
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 19
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
@@ -850,8 +840,6 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = IletisimEkrEnterPage
       OnPage = IletisimEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar3: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1160,8 +1148,6 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = TicariEkrEnterPage
       OnPage = TicariEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar4: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1358,8 +1344,6 @@ object RehberWizardDlg: TRehberWizardDlg
       Enabled = False
       OnEnterPage = PersonelIletisimEkrEnterPage
       OnPage = PersonelIletisimEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar2: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1662,8 +1646,6 @@ object RehberWizardDlg: TRehberWizardDlg
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
       OnPage = DokumanEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 491
@@ -1724,7 +1706,6 @@ object RehberWizardDlg: TRehberWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
-        ExplicitTop = 470
         AnchorX = 755
       end
       object GridYorum: TcxGrid
@@ -1826,8 +1807,6 @@ object RehberWizardDlg: TRehberWizardDlg
       Caption = 'CRMEkstreEkr'
       OnEnterPage = CRMEkstreEkrEnterPage
       OnPage = CRMEkstreEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar7: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -2214,6 +2193,166 @@ object RehberWizardDlg: TRehberWizardDlg
         Width = 443
       end
     end
+    object BankaEkr: TJvWizardInteriorPage
+      Header.ParentFont = False
+      Header.Title.Color = clNone
+      Header.Title.Text = 'Banka Bilgileri'
+      Header.Title.Anchors = [akLeft, akTop, akRight]
+      Header.Title.Font.Charset = TURKISH_CHARSET
+      Header.Title.Font.Color = clWindowText
+      Header.Title.Font.Height = -16
+      Header.Title.Font.Name = 'Trebuchet MS'
+      Header.Title.Font.Style = [fsBold]
+      Header.Subtitle.Color = clNone
+      Header.Subtitle.Text = 'Cari banka hesaplari'
+      Header.Subtitle.Anchors = [akLeft, akTop, akRight, akBottom]
+      Header.Subtitle.Font.Charset = TURKISH_CHARSET
+      Header.Subtitle.Font.Color = clWindowText
+      Header.Subtitle.Font.Height = -11
+      Header.Subtitle.Font.Name = 'Trebuchet MS'
+      Header.Subtitle.Font.Style = []
+      VisibleButtons = [bkBack, bkFinish, bkCancel]
+      Caption = 'BankaEkr'
+      OnEnterPage = BankaEkrEnterPage
+      OnPage = BankaEkrPage
+      object ToolBarBanka: TToolBar
+        AlignWithMargins = True
+        Left = 3
+        Top = 73
+        Width = 749
+        Height = 24
+        Margins.Bottom = 0
+        AutoSize = True
+        ButtonWidth = 66
+        Caption = 'AletCubugu'
+        Color = clTeal
+        DrawingStyle = dsGradient
+        EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+        EdgeInner = esLowered
+        EdgeOuter = esNone
+        Font.Charset = TURKISH_CHARSET
+        Font.Color = clBlack
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        GradientEndColor = 11776947
+        GradientStartColor = 14540253
+        HotTrackColor = 65408
+        Images = Tablo.PNGImageList2
+        List = True
+        ParentColor = False
+        ParentFont = False
+        ShowCaptions = True
+        TabOrder = 0
+        Transparent = True
+        object BankaEkleTus: TToolButton
+          Left = 0
+          Top = 0
+          Caption = 'Yeni'
+          ImageIndex = 0
+          ImageName = 'PngImage0'
+          OnClick = BankaEkleTusClick
+        end
+        object BankaSilTus: TToolButton
+          Left = 66
+          Top = 0
+          Caption = 'Sil'
+          ImageIndex = 1
+          ImageName = 'PngImage1'
+          OnClick = BankaSilTusClick
+        end
+        object BankaAyirTus: TToolButton
+          Left = 132
+          Top = 0
+          Width = 8
+          Style = tbsSeparator
+        end
+        object BankaDuzenleTus: TToolButton
+          Left = 140
+          Top = 0
+          Caption = 'Duzenle'
+          ImageIndex = 7
+          ImageName = 'PngImage7'
+          OnClick = BankaDuzenleTusClick
+        end
+      end
+      object GridBanka: TcxGrid
+        Left = 0
+        Top = 97
+        Width = 755
+        Height = 435
+        Align = alClient
+        TabOrder = 1
+        LookAndFeel.Kind = lfOffice11
+        LookAndFeel.NativeStyle = True
+        object GridBankaView: TcxGridDBTableView
+          OnDblClick = BankaDuzenleTusClick
+          Navigator.Buttons.CustomButtons = <>
+          ScrollbarAnnotations.CustomAnnotations = <>
+          DataController.DataSource = DtsBankaHesaplar
+          DataController.Summary.DefaultGroupSummaryItems = <>
+          DataController.Summary.FooterSummaryItems = <>
+          DataController.Summary.SummaryGroups = <>
+          OptionsCustomize.ColumnsQuickCustomization = True
+          OptionsData.Deleting = False
+          OptionsData.Editing = False
+          OptionsData.Inserting = False
+          OptionsView.GroupByBox = False
+          OptionsView.Indicator = True
+          object GridBankaViewVARSAYILAN: TcxGridDBColumn
+            Caption = 'Var.'
+            DataBinding.FieldName = 'VARSAYILAN'
+            DataBinding.IsNullValueType = True
+            PropertiesClassName = 'TcxCheckBoxProperties'
+            Width = 35
+          end
+          object GridBankaViewBANKAADI: TcxGridDBColumn
+            Caption = 'Banka'
+            DataBinding.FieldName = 'BANKAADI'
+            DataBinding.IsNullValueType = True
+            Width = 120
+          end
+          object GridBankaViewSUBEADI: TcxGridDBColumn
+            Caption = 'Sube'
+            DataBinding.FieldName = 'SUBEADI'
+            DataBinding.IsNullValueType = True
+            Width = 120
+          end
+          object GridBankaViewHESAPNO: TcxGridDBColumn
+            Caption = 'Hesap No'
+            DataBinding.FieldName = 'HESAPNO'
+            DataBinding.IsNullValueType = True
+            Width = 95
+          end
+          object GridBankaViewHESAPADI: TcxGridDBColumn
+            Caption = 'Hesap Adi'
+            DataBinding.FieldName = 'HESAPADI'
+            DataBinding.IsNullValueType = True
+            Width = 130
+          end
+          object GridBankaViewIBAN: TcxGridDBColumn
+            DataBinding.FieldName = 'IBAN'
+            DataBinding.IsNullValueType = True
+            Width = 210
+          end
+          object GridBankaViewKUR: TcxGridDBColumn
+            Caption = 'P.Birimi'
+            DataBinding.FieldName = 'KUR'
+            DataBinding.IsNullValueType = True
+            Width = 65
+          end
+          object GridBankaViewDURUM: TcxGridDBColumn
+            Caption = 'Durum'
+            DataBinding.FieldName = 'DURUM'
+            DataBinding.IsNullValueType = True
+            Width = 55
+          end
+        end
+        object GridBankaLevel: TcxGridLevel
+          GridView = GridBankaView
+        end
+      end
+    end
     object cxImageComboBox1: TcxImageComboBox
       Left = 128
       Top = 277
@@ -2247,7 +2386,7 @@ object RehberWizardDlg: TRehberWizardDlg
     object BtnDokuman: TcxButton
       Tag = 4
       Left = 7
-      Top = 242
+      Top = 277
       Width = 83
       Height = 29
       Caption = 'Yorum/Medya'
@@ -2263,7 +2402,7 @@ object RehberWizardDlg: TRehberWizardDlg
     object BtnKisiBilgiFormu: TcxButton
       Tag = 3
       Left = 7
-      Top = 207
+      Top = 242
       Width = 83
       Height = 29
       Caption = #304'lgililer'
@@ -2309,10 +2448,25 @@ object RehberWizardDlg: TRehberWizardDlg
       WordWrap = True
       OnClick = btnCariKartClick
     end
+    object BtnBanka: TcxButton
+      Left = 7
+      Top = 207
+      Width = 83
+      Height = 29
+      Caption = 'Banka'
+      TabOrder = 6
+      Font.Charset = TURKISH_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Trebuchet MS'
+      Font.Style = []
+      ParentFont = False
+      OnClick = BankaButonClick
+    end
     object BtnCRM: TcxButton
       Tag = 5
       Left = 7
-      Top = 320
+      Top = 355
       Width = 83
       Height = 29
       Caption = 'CRM'
@@ -2407,8 +2561,8 @@ object RehberWizardDlg: TRehberWizardDlg
     SQL.Strings = (
       'select  * from REHBER'
       'where ID=:PAR')
-    Left = 239
-    Top = 24
+    Left = 263
+    Top = 16
     ParamData = <
       item
         Name = 'PAR'
@@ -2509,8 +2663,8 @@ object RehberWizardDlg: TRehberWizardDlg
   end
   object PopupIlgili: TPopupMenu
     Images = Tablo.PNGImageList2
-    Left = 25
-    Top = 15
+    Left = 129
+    Top = 7
     object lgiliKurumdanAyrld1: TMenuItem
       Caption = #304'lgilinin durumunu '#39'Ayr'#305'ld'#305#39' olarak '
       ImageIndex = 10
@@ -2556,8 +2710,8 @@ object RehberWizardDlg: TRehberWizardDlg
       'from REHBERILETISIM'
       'where REHBERID=:PID '
       'Order by VARSAYILAN  desc')
-    Left = 540
-    Top = 131
+    Left = 548
+    Top = 115
   end
   object PopupIletisim: TPopupMenu
     Images = Tablo.PNGImageList2
@@ -2706,5 +2860,30 @@ object RehberWizardDlg: TRehberWizardDlg
       ImageIndex = 16
       OnClick = MenuTarayacidanEkleClick
     end
+  end
+  object TabBankaHesaplar: TFDQuery
+    AfterOpen = TabBankaHesaplarAfterOpen
+    SQL.Strings = (
+      'SELECT '
+      'BH.ID,BH.VARSAYILAN,BS.BANKAKODU,B.BANKAADI,'
+      'BS.SUBEKODU,BS.SUBEADI,BH.HESAPNO,BH.HESAPADI,'
+      'BH.IBAN,BH.KUR,BH.TIPI,BH.HESAPACIKLAMA,BH.DURUM'
+      'FROM BANKAHESAPLAR BH'
+      'LEFT JOIN BANKASUBELER BS ON BS.ID=BH.BANKASUBELERID'
+      'LEFT JOIN BANKALAR B ON B.BANKAKODU=BS.BANKAKODU'
+      'WHERE BH.REHBERID=:REHBERID'
+      'ORDER BY BH.VARSAYILAN DESC, BH.ID')
+    Left = 688
+    Top = 248
+    ParamData = <
+      item
+        Name = 'REHBERID'
+        ParamType = ptInput
+      end>
+  end
+  object DtsBankaHesaplar: TDataSource
+    DataSet = TabBankaHesaplar
+    Left = 688
+    Top = 304
   end
 end

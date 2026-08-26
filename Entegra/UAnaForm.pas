@@ -605,8 +605,10 @@ begin
   //   Eskiden TJvTimer varsayilan 1000 ms ile acilistan itibaren donuyordu.
   ChatTimer.Enabled := True;
 
-  if Tablo.Yetkivarmi(1801,YetkiTur_Gorme) then
-    KasiyerMenuClick(Self);
+  // KASIYER (hizli giris) ekrani ARTIK ACILISTA OTOMATIK ACILMAZ (kullanici karari):
+  //   1801 yetkili kullanicida acilista KasiyerMenuClick cagriliyordu. Kasiyer menusu
+  //   de ana menude gizlendigi icin (bkz. FormCreate) bu ekran artik hic acilmaz.
+  //   Geri istenirse: if Tablo.Yetkivarmi(1801,YetkiTur_Gorme) then KasiyerMenuClick(Self);
 
   // Ilk pencereyi hizli gostermek icin agir acilis islerini bir tik erteliyoruz.
   if Tablo.GENINI.ReadBoolean(Ops_Kasiyer_PerakendeyeSatis, False) then
@@ -1591,8 +1593,11 @@ begin
   N1.Visible := Tablo.YetkiVarmi(1001, YetkiTur_Gorme);
   Seenekler1.Visible := Tablo.YetkiVarmi(1002, YetkiTur_Gorme);
   Yardm1.Visible := Tablo.YetkiVarmi(1003, YetkiTur_Gorme);
-  if N1.Visible then
-  KasiyerMenu.Visible := Tablo.YetkiVarmi(18, YetkiTur_Gorme);
+  // KASIYER menusu ana menude HIC GORUNMEZ (kullanici karari, 18 nolu yetkiden bagimsiz).
+  //   DFM'de de Visible=False; burada yetkiye gore aciliyordu.
+  //   NOT: 1801 yetkili kullanicida acilista otomatik acilan hizli giris ekrani
+  //   (FormShow icindeki KasiyerMenuClick) DEGISMEDI.
+  KasiyerMenu.Visible := False;
   CafeRestMenu.Visible := (Sektor in [Sektor_Firin_Cafe, Sektor_Cafe, Sektor_Rest])
     and (Tablo.YetkiVarmi(180216, YetkiTur_Gorme));
 

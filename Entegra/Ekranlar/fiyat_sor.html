@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fiyat Bilgisi — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1180px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+
+  /* stok adi seridi — Delphi: PanelStokAdi (AltPanelStokAdi) */
+  .stokbar{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--head);
+    border-bottom:1px solid var(--line)}
+  .stokbar .kod{font-size:11px;color:var(--muted);background:#fff;border:1px solid var(--line);
+    border-radius:4px;padding:2px 8px}
+  .stokbar .ad{font-weight:bold;font-size:14px;color:var(--navy)}
+  .stokbar .sag{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .rz{font-size:10.5px;border-radius:9px;padding:2px 8px;border:1px solid}
+  .r-stok{background:#e7f5ec;border-color:#a8d8bb;color:#256b42}
+  .r-kri{background:#fdf6e3;border-color:#e6cf94;color:#8a6212}
+  .r-doviz{background:#eef4ff;border-color:#b9cdf0;color:#2b4f8e}
+
+  /* sekmeler — Delphi: cxPageControl1 */
+  .tabs{display:flex;gap:2px;padding:8px 10px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .tab{padding:6px 14px;border:1px solid var(--line);border-bottom:0;border-radius:4px 4px 0 0;
+    background:linear-gradient(var(--btnfrom),var(--btnto));cursor:pointer;font-size:11.5px;color:var(--muted)}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+
+  .kutu{border:1px solid var(--line);border-radius:4px;background:var(--grpbg);margin-bottom:10px}
+  .kutu>h6{margin:0;padding:5px 10px;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;
+    color:var(--muted);background:var(--head);border-bottom:1px solid var(--line2);font-weight:bold}
+  .kutu .icerik{padding:10px}
+
+  .satir{display:grid;grid-template-columns:118px 1fr;gap:7px 10px;align-items:center}
+  .satir.dar{grid-template-columns:118px 150px}
+  label{color:var(--muted);font-size:11.5px}
+  .inp{height:26px;border:1px solid var(--line);border-radius:3px;background:#fff;
+    display:flex;align-items:center;padding:0 7px;font-size:12px;min-width:0}
+  .inp.r{justify-content:flex-end;font-family:"Segoe UI",Tahoma;font-weight:bold}
+  .inp.ro{background:#f3f5f8;color:var(--muted)}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted);font-size:10px}
+  .inp.btn2::after{content:"⋯";margin-left:auto;color:var(--accent);font-weight:bold}
+  .satirlar{display:flex;gap:6px;align-items:center}
+  .mini{height:26px;min-width:26px;border:1px solid var(--line);border-radius:3px;
+    background:linear-gradient(var(--btnfrom),var(--btnto));display:flex;align-items:center;
+    justify-content:center;cursor:pointer;font-size:13px;color:var(--navy);user-select:none;padding:0 6px}
+  .mini:hover{border-color:var(--accent);background:linear-gradient(#fff,#dce8f6)}
+  .chk{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink);cursor:pointer;white-space:nowrap}
+  .birim{font-size:11px;color:var(--muted);min-width:34px}
+  .iki{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .uc{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+  /* toplam vurgu */
+  .toplam .inp{height:32px;font-size:15px;font-weight:bold;color:var(--navy);background:#f7fbff;border-color:var(--selbd)}
+
+  /* urun bilgisi gridleri */
+  .gtabs{display:flex;gap:2px;margin-bottom:8px;flex-wrap:wrap}
+  .gt{padding:4px 11px;border:1px solid var(--line);border-radius:3px;font-size:11px;cursor:pointer;
+    background:linear-gradient(var(--btnfrom),var(--btnto));color:var(--muted)}
+  .gt.on{background:linear-gradient(#3d7fc4,#2b5c95);border-color:#2b5c95;color:#fff;font-weight:bold}
+  .gpane{display:none}.gpane.on{display:block}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:5px 7px;font-size:11px;
+    color:#3a5573;font-weight:bold;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 7px;font-size:11.5px;white-space:nowrap}
+  td.r,th.r{text-align:right}
+  td.c,th.c{text-align:center}
+  tbody tr:hover td{background:#f6f9fd}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:auto;max-height:280px}
+
+  .hint{font-size:10.5px;color:var(--muted);line-height:1.6;padding:7px 2px 0}
+  .altbar{display:flex;gap:6px;align-items:center;padding:9px 12px;background:var(--head);
+    border-top:1px solid var(--line)}
+  .btn{height:28px;padding:0 16px;border:1px solid var(--line);border-radius:3px;
+    background:linear-gradient(var(--btnfrom),var(--btnto));cursor:pointer;font-size:12px;
+    display:flex;align-items:center;gap:5px}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:linear-gradient(#3d7fc4,#2b5c95);border-color:#2b5c95;color:#fff;font-weight:bold}
+  .maprow{max-width:1180px;margin:10px auto 0;font-size:10.5px;color:var(--muted);line-height:1.8}
+  .maprow b{color:var(--navy)}
+
+  /* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+  body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+    --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+    --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+  body.koyu .win{background:#1b222c!important;border-color:#2c3542!important;box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+  body.koyu .title{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+  body.koyu .stokbar,body.koyu .tabs,body.koyu .altbar{background:#1e2632!important;border-color:#2c3542!important}
+  body.koyu .stokbar .kod,body.koyu .inp{background:#1c242f!important;border-color:#33404f!important;color:#dfe6ee!important}
+  body.koyu .inp.ro{background:#212a36!important;color:#93a1b1!important}
+  body.koyu .kutu{background:#1e2632!important;border-color:#2c3542!important}
+  body.koyu .kutu>h6{background:#222b38!important;border-color:#2c3542!important;color:#8fa6bd!important}
+  body.koyu .tab,body.koyu .mini,body.koyu .btn,body.koyu .gt{background:linear-gradient(#26313f,#1f2836)!important;
+    border-color:#33404f!important;color:#dfe6ee!important}
+  body.koyu .tab.active{background:#1b222c!important;color:#cfe0f4!important}
+  body.koyu .gt.on,body.koyu .btn.primary{background:linear-gradient(#3d7fc4,#2b5c95)!important;border-color:#2b5c95!important;color:#fff!important}
+  body.koyu th{background:linear-gradient(#26313f,#1f2836)!important;color:#a8c0d8!important;border-color:#2c3542!important}
+  body.koyu td{border-color:#242c37!important;color:#dbe3ec!important}
+  body.koyu tbody tr:hover td{background:#243040!important}
+  body.koyu .dg{border-color:#2c3542!important}
+  body.koyu .toplam .inp{background:#1e3a56!important;border-color:#3d6ea8!important;color:#cfe0f4!important}
+  body.koyu .r-stok{background:#14311f!important;border-color:#2b6b45!important;color:#7fd6a1!important}
+  body.koyu .r-kri{background:#463714!important;border-color:#8a6b1f!important;color:#ffdf9b!important}
+  body.koyu .r-doviz{background:#182a45!important;border-color:#33547f!important;color:#9dc3f2!important}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Fiyat Bilgisi
+    <span class="sp">UFiyatSor · TFiyatSorDlg · STOKLAR · FATDETAY · SIPSATIR · TEKLIFSATIR</span>
+  </div>
+
+  <!-- ===== Delphi: PanelStokAdi ===== -->
+  <div class="stokbar">
+    <span class="kod">STK.001248</span>
+    <span class="ad">Blackout Karartma Perde Kumaşı — GNT-BL-118 / Antrasit</span>
+    <span class="sag">
+      <span class="rz r-stok">Depoda 1.842,50 m²</span>
+      <span class="rz r-kri">Rezerve 240,00</span>
+      <span class="rz r-doviz">USD/TRY 34,02</span>
+    </span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="fiyat">Fiyatlandırma</div>
+    <div class="tab" data-t="detay">Detay</div>
+    <div class="tab" data-t="bilgi">Ürün Bilgisi</div>
+  </div>
+
+  <!-- ================= FİYATLANDIRMA ================= -->
+  <div class="pane active" data-p="fiyat">
+    <div class="iki">
+      <div>
+        <div class="kutu">
+          <h6>Miktar ve Birim Fiyat</h6>
+          <div class="icerik">
+            <div class="satir">
+              <label>Miktar</label>
+              <div class="satirlar">
+                <div class="mini" id="azalt">−</div>
+                <div class="inp r" style="flex:1;max-width:150px"><span id="miktar">120,00</span></div>
+                <div class="mini" id="artir">+</div>
+                <span class="birim" id="birim">m²</span>
+              </div>
+
+              <label>Birim Fiyat</label>
+              <div class="satirlar">
+                <label class="chk"><input type="checkbox" id="cBirim" checked></label>
+                <div class="inp r" style="flex:1;max-width:150px"><span id="birimFiyat">385,00</span></div>
+                <span class="birim">₺</span>
+              </div>
+
+              <label>KDV</label>
+              <div class="satirlar">
+                <label class="chk"><input type="checkbox" id="cKdvDahil"> KDV Dahil</label>
+                <div class="inp combo" style="width:90px"><span id="kdv">20</span></div>
+                <span class="birim">%</span>
+              </div>
+
+              <label>İskonto %</label>
+              <div class="satirlar">
+                <div class="inp r" style="width:88px"><span id="isk1">5,00</span></div>
+                <span class="birim">+</span>
+                <div class="inp r" style="width:88px"><span id="isk2">2,50</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kutu">
+          <h6>Döviz</h6>
+          <div class="icerik">
+            <div class="satir">
+              <label>P.Birimi</label><div class="inp combo" style="max-width:150px">USD</div>
+              <label>Kur</label>
+              <div class="satirlar">
+                <label class="chk"><input type="checkbox" id="cKur"></label>
+                <div class="inp r ro" style="width:120px"><span id="kur">34,0200</span></div>
+              </div>
+              <label>Döviz Birim Fiyat</label>
+              <div class="satirlar">
+                <label class="chk"><input type="checkbox" id="cDoviz"></label>
+                <div class="inp r ro" style="width:120px"><span id="dovizFiyat">11,3169</span></div>
+                <span class="birim">$</span>
+              </div>
+            </div>
+            <div class="hint">Kur ve döviz birim fiyat alanları <b>yalnızca yanındaki kutu işaretliyse</b>
+              elle değiştirilebilir (Delphi: <b>AcKapa</b>). Cari dövizi TL olduğunda döviz satırları gizlenir.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="kutu toplam">
+          <h6>Toplam</h6>
+          <div class="icerik">
+            <div class="satir">
+              <label>Toplam Tutar</label>
+              <div class="satirlar">
+                <label class="chk"><input type="checkbox" id="cToplam"> Aktif</label>
+                <div class="inp r" style="flex:1"><span id="toplam">42.771,75</span></div>
+                <span class="birim">₺</span>
+              </div>
+            </div>
+            <div class="hint">
+              <b>Aktif</b> işaretliyse hesap <b>tersine</b> çalışır: girilen toplam tutardan
+              iskontolar geri alınarak birim fiyat bulunur —
+              <code>BF = (Toplam ÷ Miktar) ÷ (1−İsk2) ÷ (1−İsk1)</code>.
+              İşaretsizken <code>Toplam = BF × Miktar × (1−İsk1) × (1−İsk2)</code>.
+            </div>
+          </div>
+        </div>
+
+        <div class="kutu">
+          <h6>İlişkilendirme</h6>
+          <div class="icerik">
+            <div class="satir">
+              <label>Açıklama</label><div class="inp btn2">Lara Rezidans B Blok — salon</div>
+              <label>Personel</label><div class="inp btn2">Mehmet Yıldız</div>
+              <label>Proje</label><div class="inp btn2">PRJ.2026/018 — Lara Rezidans</div>
+              <label>Teslim Tarihi</label><div class="inp combo" style="max-width:150px">28.08.2026</div>
+            </div>
+            <div class="hint" style="padding-top:9px">
+              <span style="color:var(--accent);cursor:pointer;text-decoration:underline">Çoklu Proje / Masraf</span>
+              — tek satır birden çok projeye/masraf merkezine paylaştırılabilir.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DETAY ================= -->
+  <div class="pane" data-p="detay">
+    <div class="iki">
+      <div>
+        <div class="kutu">
+          <h6>Ticari</h6>
+          <div class="icerik">
+            <div class="satir">
+              <label>Vade</label>
+              <div class="satirlar"><div class="inp r" style="width:88px">45</div><span class="birim">gün</span></div>
+              <label>Kampanya</label><div class="inp btn2">YAZ2026 — %3 ek iskonto</div>
+              <label>Tevkifat Oranı</label><div class="inp combo" style="max-width:180px">Yok</div>
+              <label>Stok</label>
+              <div class="satirlar"><label class="chk"><input type="checkbox" checked> Stoktan Düşsün</label></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kutu">
+          <h6>Muhasebe / Maliyet</h6>
+          <div class="icerik">
+            <div class="satir">
+              <label>Masraf Merkezi</label><div class="inp btn2">MM-210 Perde Üretim</div>
+              <label>Masraf Kalemi</label><div class="inp btn2">MK-04 Kumaş</div>
+              <label>Ekipman</label><div class="inp btn2">—</div>
+              <label>Poz No</label><div class="inp r" style="max-width:120px">14</div>
+              <label>Özel Kod</label><div class="inp">ANTRASIT</div>
+              <label>Özel Kod 2</label><div class="inp">B-BLOK</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="kutu">
+          <h6>Yüzey Hesabı</h6>
+          <div class="icerik">
+            <div class="satir">
+              <label>EN</label>
+              <div class="satirlar"><div class="inp r" style="width:110px"><span id="en">2.400</span></div><span class="birim">mm</span></div>
+              <label>BOY</label>
+              <div class="satirlar"><div class="inp r" style="width:110px"><span id="boy">2.500</span></div><span class="birim">mm</span></div>
+              <label>Yüzey</label>
+              <div class="satirlar"><div class="inp r ro" style="width:110px"><span id="yuzey">6,0000</span></div><span class="birim">m²</span></div>
+              <label>Sayı</label>
+              <div class="satirlar"><div class="inp r" style="width:110px"><span id="sayi">20</span></div><span class="birim">#</span></div>
+            </div>
+            <div class="hint"><code>Yüzey = (EN × BOY) ÷ 1.000.000</code> · <code>Miktar = Yüzey × Sayı</code>.
+              EN/BOY girildiğinde <b>Miktar alanı otomatik dolar</b> (Delphi: <b>EditENKeyUp</b>).</div>
+          </div>
+        </div>
+
+        <div class="kutu">
+          <h6>Görsel</h6>
+          <div class="icerik">
+            <div class="satirlar" style="flex-wrap:wrap">
+              <label class="chk"><input type="checkbox" checked> Resim Göster</label>
+              <label class="chk" style="margin-left:14px"><input type="checkbox"> Medya Ekle</label>
+            </div>
+            <div class="hint">Resim <b>IMAJ → GENDEPO.DOSYA</b>'dan okunur; "Medya Ekle" satıra
+              belge/fotoğraf iliştirir ve teklif çıktısında gösterilir.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ÜRÜN BİLGİSİ ================= -->
+  <div class="pane" data-p="bilgi">
+    <div class="gtabs">
+      <div class="gt on" data-g="depo">Depo Durumu</div>
+      <div class="gt" data-g="alis">Son Alışlar</div>
+      <div class="gt" data-g="satis">Son Satışlar</div>
+      <div class="gt" data-g="maliyet">Maliyetler</div>
+      <div class="gt" data-g="uretim">Üretim</div>
+      <div class="gt" data-g="teklif">Teklifler</div>
+    </div>
+
+    <div class="gpane on" data-gp="depo">
+      <div class="dg"><table>
+        <thead><tr><th>TİP</th><th class="r" style="width:130px">MİKTAR</th><th class="c" style="width:70px">BİRİM</th></tr></thead>
+        <tbody>
+          <tr><td>Merkez Depo</td><td class="r">1.842,50</td><td class="c">m²</td></tr>
+          <tr><td>Showroom</td><td class="r">126,00</td><td class="c">m²</td></tr>
+          <tr><td>Rezerve (açık sipariş)</td><td class="r">-240,00</td><td class="c">m²</td></tr>
+          <tr><td>Yolda (verilen sipariş)</td><td class="r">600,00</td><td class="c">m²</td></tr>
+          <tr><td><b>Kullanılabilir</b></td><td class="r"><b>1.728,50</b></td><td class="c">m²</td></tr>
+        </tbody>
+      </table></div>
+      <div class="hint">Kaynak <b>TabStokDurumDetay</b> · depo bazlı <b>STOKHAREKET</b> toplamı;
+        rezerve miktarlar <b>SIPSATIR</b>'daki açık satırlardan gelir.</div>
+    </div>
+
+    <div class="gpane" data-gp="alis">
+      <div class="dg"><table>
+        <thead><tr><th style="width:240px">CARİ</th><th class="c" style="width:88px">TARİH</th>
+          <th class="r" style="width:100px">MİKTAR</th><th class="r" style="width:110px">BİRİM TUTAR</th>
+          <th class="c" style="width:70px">P.BİRİMİ</th><th class="r" style="width:110px">DÖVİZ B.TUTAR</th>
+          <th class="r" style="width:90px">DÖVİZ KUR</th></tr></thead>
+        <tbody>
+          <tr><td>KİMPA KİMYA SAN. LTD. ŞTİ.</td><td class="c">28.07.2026</td><td class="r">1.200,00</td>
+              <td class="r">268,40</td><td class="c">TL</td><td class="r">7,89</td><td class="r">34,0200</td></tr>
+          <tr><td>ANADOLU KAĞIT VE AMB. A.Ş.</td><td class="c">11.06.2026</td><td class="r">800,00</td>
+              <td class="r">254,10</td><td class="c">TL</td><td class="r">7,72</td><td class="r">32,9100</td></tr>
+          <tr><td>KİMPA KİMYA SAN. LTD. ŞTİ.</td><td class="c">02.04.2026</td><td class="r">1.500,00</td>
+              <td class="r">241,80</td><td class="c">TL</td><td class="r">7,64</td><td class="r">31,6500</td></tr>
+        </tbody>
+      </table></div>
+      <div class="hint">Son 3 alış — <b>TabSonAlislar</b> (FATBASLIK/FATDETAY, alış). Delphi'de kart görünümü
+        (<b>cxGridDBCardView</b>) ile gösterilir.</div>
+    </div>
+
+    <div class="gpane" data-gp="satis">
+      <div class="dg"><table>
+        <thead><tr><th style="width:240px">CARİ</th><th class="c" style="width:88px">TARİH</th>
+          <th class="r" style="width:100px">MİKTAR</th><th class="r" style="width:110px">BİRİM TUTAR</th>
+          <th class="c" style="width:70px">P.BİRİMİ</th><th class="r" style="width:110px">DÖVİZ B.TUTAR</th>
+          <th class="r" style="width:90px">DÖVİZ KUR</th></tr></thead>
+        <tbody>
+          <tr><td>GRAND OTEL LARA TURİZM A.Ş.</td><td class="c">12.08.2026</td><td class="r">420,00</td>
+              <td class="r">385,00</td><td class="c">TL</td><td class="r">11,32</td><td class="r">34,0200</td></tr>
+          <tr><td>ÖZKAN İNŞAAT TAAH. LTD. ŞTİ.</td><td class="c">18.06.2026</td><td class="r">240,00</td>
+              <td class="r">372,50</td><td class="c">TL</td><td class="r">11,32</td><td class="r">32,9100</td></tr>
+          <tr><td>BEYAZ YAPI İNŞAAT A.Ş.</td><td class="c">05.05.2026</td><td class="r">160,00</td>
+              <td class="r">368,00</td><td class="c">TL</td><td class="r">11,63</td><td class="r">31,6500</td></tr>
+        </tbody>
+      </table></div>
+      <div class="hint">Son 3 satış — <b>TabSonSatislar</b>. Fiyat verirken <b>en son satış fiyatı</b>
+        referans alınır; iskonto sonrası net fiyat karşılaştırılır.</div>
+    </div>
+
+    <div class="gpane" data-gp="maliyet">
+      <div class="dg"><table>
+        <thead><tr><th style="width:260px">TÜR</th><th class="r" style="width:130px">MALİYET</th>
+          <th class="c" style="width:80px">P.BİRİMİ</th></tr></thead>
+        <tbody>
+          <tr><td>Son alış fiyatı</td><td class="r">268,40</td><td class="c">TL</td></tr>
+          <tr><td>Ağırlıklı ortalama</td><td class="r">254,92</td><td class="c">TL</td></tr>
+          <tr><td>FIFO</td><td class="r">241,80</td><td class="c">TL</td></tr>
+          <tr><td>Standart maliyet</td><td class="r">260,00</td><td class="c">TL</td></tr>
+          <tr><td><b>Kâr marjı (girilen fiyata göre)</b></td><td class="r"><b>%39,7</b></td><td class="c">—</td></tr>
+        </tbody>
+      </table></div>
+      <div class="hint">Kaynak <b>tabMaliyetler</b>. Marj, ekranda girilen <b>net birim fiyat</b>
+        (iskontolar düşülmüş) ile seçili maliyet yöntemi arasındaki farktan hesaplanır.</div>
+    </div>
+
+    <div class="gpane" data-gp="uretim">
+      <div class="dg"><table>
+        <thead><tr><th style="width:120px">KOD</th><th>AD</th>
+          <th class="r" style="width:110px">GEREKEN</th><th class="r" style="width:110px">KALAN</th></tr></thead>
+        <tbody>
+          <tr><td>HAM-0042</td><td>Blackout ham kumaş (300 cm)</td><td class="r">126,00</td><td class="r">418,00</td></tr>
+          <tr><td>HAM-0118</td><td>Astar kumaş</td><td class="r">126,00</td><td class="r">92,00</td></tr>
+          <tr><td>YRD-0031</td><td>Perde şeridi 8 cm</td><td class="r">240,00</td><td class="r">1.260,00</td></tr>
+          <tr><td>YRD-0077</td><td>Dikiş ipliği (kon)</td><td class="r">4,00</td><td class="r">36,00</td></tr>
+        </tbody>
+      </table></div>
+      <div class="hint">Reçeteye göre <b>TabUretim</b> — bu miktar için gereken bileşenler ve depodaki kalan.
+        <b>Kalan &lt; Gereken</b> olan satır üretim planlamasında uyarı üretir (HAM-0118).</div>
+    </div>
+
+    <div class="gpane" data-gp="teklif">
+      <div class="dg"><table>
+        <thead><tr><th style="width:240px">CARİ</th><th class="c" style="width:88px">TARİH</th>
+          <th class="r" style="width:100px">MİKTAR</th><th class="r" style="width:110px">BİRİM TUTAR</th>
+          <th class="r" style="width:90px">KUR</th><th class="r" style="width:120px">DÖVİZ B.TUTAR</th>
+          <th class="r" style="width:90px">DÖVİZ KUR</th></tr></thead>
+        <tbody>
+          <tr><td>GRAND OTEL LARA TURİZM A.Ş.</td><td class="c">12.08.2026</td><td class="r">240,00</td>
+              <td class="r">385,00</td><td class="r">34,0200</td><td class="r">11,32</td><td class="r">34,0200</td></tr>
+          <tr><td>MARMARA ÖZEL SAĞLIK</td><td class="c">09.07.2026</td><td class="r">180,00</td>
+              <td class="r">392,00</td><td class="r">33,4100</td><td class="r">11,73</td><td class="r">33,4100</td></tr>
+          <tr><td>DENİZ TEKSTİL SAN. TİC.</td><td class="c">21.05.2026</td><td class="r">560,00</td>
+              <td class="r">361,00</td><td class="r">32,1000</td><td class="r">11,25</td><td class="r">32,1000</td></tr>
+        </tbody>
+      </table></div>
+      <div class="hint">Son teklifler — <b>TabSonTeklifler</b> (TEKLIFBASLIK/TEKLIFSATIR).
+        Aynı müşteriye verilen önceki fiyat, yeni teklifte tutarlılık için gösterilir.</div>
+    </div>
+  </div>
+
+  <div class="altbar">
+    <div class="btn primary" id="tamam">✔ Tamam</div>
+    <div class="btn" id="iptal">✖ İptal</div>
+    <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">
+      Net birim fiyat <b id="netFiyat">356,73</b> ₺ · KDV hariç toplam <b id="netToplam">42.771,75</b> ₺ ·
+      KDV %<span id="kdvOran">20</span> <b id="kdvTutar">8.554,35</b> ₺ ·
+      genel toplam <b id="genelToplam">51.326,10</b> ₺
+    </span>
+  </div>
+</div>
+
+<div class="maprow">
+  <b>Veri modeli (kroki):</b>
+  <span>Ekran → <b>UFiyatSor · TFiyatSorDlg</b> (belge satırı girilirken açılır)</span>·
+  <span>Ürün → <b>STOKLAR</b> (KOD · AD · BIRIM · KDVORAN)</span>·
+  <span>Depo → <b>STOKHAREKET</b> (depo bazlı miktar) · rezerve <b>SIPSATIR</b></span>·
+  <span>Alış/Satış → <b>FATBASLIK · FATDETAY</b></span>·
+  <span>Maliyet → <b>STOKMALIYET</b> (son alış · ağırlıklı ort. · FIFO · standart)</span>·
+  <span>Üretim → <b>RECETE · RECETESATIR</b></span>·
+  <span>Teklif → <b>TEKLIFBASLIK · TEKLIFSATIR</b></span>·
+  <span>Kur → <b>DOVIZKUR</b></span>·
+  <span>Sonuç → çağıran belgenin <b>satırına</b> yazılır (SIPSATIR / FATDETAY / TEKLIFSATIR)</span>
+</div>
+
+<script>
+/* ==========================================================================
+   Delphi karsiligi: TFiyatSorDlg.Hesapla + AcKapa + EditENKeyUp
+   ========================================================================== */
+(function(){
+  function sayi(t){ return parseFloat(String(t).replace(/\./g,'').replace(',','.')) || 0; }
+  function yaz(n, hane){ return (n||0).toLocaleString('tr-TR',
+    {minimumFractionDigits: hane===undefined?2:hane, maximumFractionDigits: hane===undefined?2:hane}); }
+  function E(id){ return document.getElementById(id); }
+
+  function hesapla(){
+    var miktar = sayi(E('miktar').textContent),
+        isk1   = sayi(E('isk1').textContent),
+        isk2   = sayi(E('isk2').textContent),
+        kur    = sayi(E('kur').textContent),
+        kdv    = sayi(E('kdv').textContent),
+        bf     = sayi(E('birimFiyat').textContent),
+        toplam = sayi(E('toplam').textContent);
+
+    if (E('cToplam').checked){
+      /* TERS hesap — Delphi: CheckTutar.Checked dali */
+      if (miktar > 0){
+        bf = (toplam / miktar) / ((100 - isk2)/100) / ((100 - isk1)/100);
+        E('birimFiyat').textContent = yaz(bf);
+      }
+    } else {
+      toplam = (bf * miktar) * ((100 - isk1)/100) * ((100 - isk2)/100);
+      E('toplam').textContent = yaz(toplam);
+    }
+    if (kur > 0) E('dovizFiyat').textContent = yaz(bf / kur, 4);
+
+    var net = bf * ((100 - isk1)/100) * ((100 - isk2)/100);
+    E('netFiyat').textContent   = yaz(net);
+    E('netToplam').textContent  = yaz(toplam);
+    E('kdvOran').textContent    = kdv;
+    E('kdvTutar').textContent   = yaz(toplam * kdv/100);
+    E('genelToplam').textContent= yaz(toplam * (1 + kdv/100));
+  }
+
+  /* AcKapa: yanindaki kutu isaretli degilse alan salt okunur */
+  function acKapa(){
+    [['cKur','kur'],['cDoviz','dovizFiyat'],['cBirim','birimFiyat']].forEach(function(p){
+      var k = E(p[0]).checked, a = E(p[1]).parentElement;
+      a.classList.toggle('ro', !k);
+    });
+  }
+  ['cKur','cDoviz','cBirim'].forEach(function(id){
+    E(id).addEventListener('change', acKapa);
+  });
+  E('cToplam').addEventListener('change', hesapla);
+  E('cKdvDahil').addEventListener('change', hesapla);
+
+  /* ArtirTus / AzaltTus */
+  E('artir').addEventListener('click', function(){
+    E('miktar').textContent = yaz(sayi(E('miktar').textContent) + 1); hesapla(); });
+  E('azalt').addEventListener('click', function(){
+    E('miktar').textContent = yaz(Math.max(0, sayi(E('miktar').textContent) - 1)); hesapla(); });
+
+  /* sekmeler */
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('active')});
+      t.classList.add('active');
+      var p = document.querySelector('.pane[data-p="'+t.dataset.t+'"]'); if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.gt').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.gt').forEach(function(x){x.classList.remove('on')});
+      document.querySelectorAll('.gpane').forEach(function(x){x.classList.remove('on')});
+      t.classList.add('on');
+      var p = document.querySelector('.gpane[data-gp="'+t.dataset.g+'"]'); if(p) p.classList.add('on');
+    });
+  });
+
+  acKapa(); hesapla();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle('koyu', ad === 'koyu'); }
+  addEventListener('message', function(e){ if(e.data && e.data.gentegre === 'tema') tema(e.data.ad); });
+  (function(){ var m = (location.hash||'').match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+})();
+</script>
+
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win{max-width:none!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+body.gomulu .title{display:none!important}
+body.gomulu .maprow{max-width:none!important;padding:0 12px 12px}
+</style>
+<script>
+(function(){
+  if((location.hash||'').indexOf('gomulu') >= 0) document.body.classList.add('gomulu');
+  function boy(){ try{ parent.postMessage({gentegre:'olcu', yukseklik: document.documentElement.scrollHeight}, '*'); }catch(e){} }
+  addEventListener('load', boy); setTimeout(boy, 300);
+  try{ parent.postMessage({gentegre:'hazir'}, '*'); }catch(e){}
+})();
+</script>
+</body>
+</html>

@@ -105,7 +105,16 @@ begin
       result := '0'
    else begin
       Result := Iniden_Deger_Getir(Id, Bilgi);
-      if Result='0' then begin  //yoksa ekleyelim
+      // "Result='0' ise sozlukte YOK" VARSAYIMI HATALIYDI: Iniden_Deger_Getir bulamadiginda
+      //   da '0' donuyor, ama DEGERI 0 OLAN GECERLI anahtarlar var (or. Stok Izleme
+      //   BOLUM=-2706 'Yok' = 0). Boyle bir deger her aktarimda "yok" sanilip sozluge
+      //   MUKERRER ekleniyor (max(DEGER)+1) ve stok kartina 7, 8, 9... gibi SAHTE kodlar
+      //   yaziliyordu ("Izleme: Yok" yazan exceli aktarinca kartta degisik rakamlar).
+      //   Artik varlik ANAHTAR uzerinden kontrol edilir; deger 0 olsa bile eklenmez.
+      if (Result='0') and
+         (not Veritabani.VeriVarMi(Tablo.FDCnn,
+            'select 1 from GENINI where BOLUM=&B and ANAHTAR=&A and DIL=-1',
+            ['&B','&A'], [Id, Bilgi])) then begin  //yoksa ekleyelim
          Tablo.TablodanSorguAc(1,'Select isnull(max(DEGER),0)+1 from GENINI where BOLUM='+IntToStr(Id)+' and DIL=-1');
          Result := Tablo.Query1.Fields[0].AsString;
          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into GENINI (BOLUM,ANAHTAR,DEGER,DIL,SIRA)values('+IntToStr(Id)+','''+Bilgi+''','+Result+',-1,0)',[],[]);
@@ -944,7 +953,7 @@ var
     i,RehID:integer;
 
     procedure StokEkle(Kontrol:Boolean;Kod,Ad,Kategori,Tipi,Barkod,Marka,Model,Grubu, Ozellik, AnaBirim,Birim2,Birim2Carpan,KDV,OTV_Katsayi, OTV_Yuzde,Izleme,KulSekli,
-                Garanti, Web, OzelKod,Ekipman, Notlar, Fiyat, ParaBirimi, FiyatAdi, UrunNo : String);
+                Garanti, Web, OzelKod,Ekipman, Notlar, Fiyat, ParaBirimi, FiyatAdi, UrunNo, Bildirim : String);
     var StokID, FiyatID : Integer;
         MarkaId, ModelId, KategoriID,TipiID,GrubuID, OzellikID, AnaBirimID,Birim2ID,IzlemeID,FiyatAdiID, OTVSec : String[20];
 
@@ -971,6 +980,7 @@ var
           if KDV='' then HataDosyaOlustur(2,'KDV boş');
           if (OTV_Katsayi<>'')and(OTV_Yuzde<>'') then HataDosyaOlustur(2,'Aynı anda hem ÖTV(KATSAYI),	ÖTV(YÜZDE) dolu olamaz');
           if (Fiyat<>'')and(not FiyatGecerli(Fiyat))  then HataDosyaOlustur(2,'  Fiyat Hatalı');
+          if (Bildirim<>'')and(not ((Bildirim='0')or(Bildirim='2'))) then HataDosyaOlustur(2,'Bildirim 0 veya 2 olmalı');
           //if (((Fiyat='')and(FiyatAdi<>''))or((Fiyat<>'')and(FiyatAdi='')))  then HataDosyaOlustur(2,'Varsa Fiyat ve Fiyat Adı Birlikte Dolu Olmalı');
         end;
         
@@ -990,10 +1000,10 @@ var
 
               inc(AktarSay);
               StokID := Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'INSERT INTO STOKLAR (KOD,STOKADI,KATEGORI,TIPI,MARKA,MODEL,GRUBU,OZELLIK,OZELKOD '+
-                           ',ANABIRIM, BIRIM2, BIRIM2MIKTAR, KDV, OTVYUZDE, OTVMIKTAR, IZLEME, KULLANIM, GARANTISURESI, EKIPMAN, INTERNET_SATIS,NOTLAR, DURUM,SUBEID,URUNNO) '+
+                           ',ANABIRIM, BIRIM2, BIRIM2MIKTAR, KDV, OTVYUZDE, OTVMIKTAR, IZLEME, KULLANIM, GARANTISURESI, EKIPMAN, INTERNET_SATIS,NOTLAR, DURUM,SUBEID,URUNNO,BILDIRIM) '+
                            'VALUES ('''+Kod+''','''+Ad+''','+KategoriID+','+TipiID+','+MarkaId+','+ModelId+','+GrubuID+','+OzellikID+','''+OzelKod+''','+
                             AnaBirimID+','+Birim2ID+','+DegerYoksa(Birim2Carpan,'1')+','+DegerYoksa(KDV,'18')+','+OTVSec+','+DegerYoksa(OTV_Katsayi,'0')+','+
-                            IzlemeID+',0,'+ DegerYoksa(Garanti,'0')+','+VarYokGecerli(Ekipman)+','+VarYokGecerli(Web)+','''+Notlar+''',1,-1, '''+UrunNo+''')select SCOPE_IDENTITY() ',[],[],True);
+                            IzlemeID+',0,'+ DegerYoksa(Garanti,'0')+','+VarYokGecerli(Ekipman)+','+VarYokGecerli(Web)+','''+Notlar+''',1,-1, '''+UrunNo+''','+DegerYoksa(Bildirim,'0')+')select SCOPE_IDENTITY() ',[],[],True);
 
               if Barkod<>'' then
                  VeriTabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into STOKBARKOD(BARKOD,STOKID,BARKODTIPI,BARKODBIRIMI,VARSAYILAN,EKLEYEN)'+
@@ -1037,7 +1047,7 @@ var
                           Trim(VarToStr(sheet.cells[satir,13])),Trim(VarToStr(sheet.cells[satir,14])),Trim(VarToStr(sheet.cells[satir,15])),Trim(VarToStr(sheet.cells[satir,16])),
                           Trim(VarToStr(sheet.cells[satir,17])),Trim(VarToStr(sheet.cells[satir,18])),Trim(VarToStr(sheet.cells[satir,19])),
                           Trim(VarToStr(sheet.cells[satir,20])),Trim(VarToStr(sheet.cells[satir,21])),Trim(VarToStr(sheet.cells[satir,22])),Trim(VarToStr(sheet.cells[satir,23])),
-                          Trim(VarToStr(sheet.cells[satir,24])),Trim(VarToStr(sheet.cells[satir,25])),Trim(VarToStr(sheet.cells[satir,26])));//,Trim(VarToStr(sheet.cells[satir,23]))  );
+                          Trim(VarToStr(sheet.cells[satir,24])),Trim(VarToStr(sheet.cells[satir,25])),Trim(VarToStr(sheet.cells[satir,26])),Trim(VarToStr(sheet.cells[satir,27])));//,Trim(VarToStr(sheet.cells[satir,23]))  );
       end;
     end;
 begin

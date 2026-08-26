@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gentegre AI — Uygulama Planı</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --head2:#e8eef5; --ok:#2e7d46; --uy:#a9791a; --teh:#b23b3b; --ai:#7a4fb0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:13px;padding:16px;line-height:1.55}
+  .win{max-width:1200px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:9px 14px;
+    display:flex;align-items:center;gap:9px;font-weight:bold;font-size:14px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11.5px}
+
+  .kunye{display:flex;flex-wrap:wrap;background:var(--head);border-bottom:1px solid var(--line);padding:9px 14px}
+  .kunye .k{flex:1;min-width:160px;padding:2px 10px 2px 0}
+  .kunye .t{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#7b8ea3}
+  .kunye .v{font-size:12.5px;font-weight:bold;color:var(--navy)}
+
+  .toc{background:#f8fafc;border-bottom:1px solid var(--line2);padding:11px 14px;display:flex;flex-wrap:wrap;gap:5px}
+  .toc a{font-size:11.5px;text-decoration:none;color:var(--navy);border:1px solid var(--line);
+    background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px}
+  .toc a:hover{border-color:#98c2ee;background:linear-gradient(#fff,#dce8f6)}
+
+  h2{font-size:15px;color:var(--navy);margin:26px 14px 8px;padding-bottom:5px;border-bottom:2px solid var(--head2);
+    display:flex;align-items:center;gap:8px}
+  h2 .no{background:var(--navy);color:#fff;border-radius:3px;font-size:11px;padding:2px 7px;font-weight:bold}
+  h3{font-size:13px;color:#2b4a6b;margin:16px 14px 6px}
+  h4{font-size:12px;color:#3a5573;margin:12px 14px 4px}
+  p,ul,ol{margin:7px 14px}
+  ul,ol{padding-left:22px}
+  li{margin:3px 0}
+  code{background:#eef2f7;border:1px solid #dde5ee;border-radius:2px;padding:0 4px;font-size:11.5px;
+    font-family:Consolas,"Courier New",monospace;color:#2b4a6b}
+  pre{background:#f4f7fb;border:1px solid var(--line);border-radius:4px;padding:10px 12px;margin:8px 14px;
+    overflow-x:auto;font:11.5px/1.5 Consolas,"Courier New",monospace;color:#26384d}
+  pre .c{color:#7b8ea3}
+  pre .k{color:#b23b3b}
+  pre .s{color:#2e7d46}
+
+  table{border-collapse:collapse;width:calc(100% - 28px);margin:9px 14px;font-size:12px}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line);text-align:left;
+    padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold}
+  td{border:1px solid var(--line2);padding:5px 8px;vertical-align:top}
+  tr:nth-child(even) td{background:#fbfcfd}
+  td.c{text-align:center}td.r{text-align:right}
+  .pill{font-size:10px;padding:1px 7px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap;display:inline-block}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-uy{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-teh{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-gor{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}
+  .p-ai{background:#f5edfb;color:#7a4fb0;border-color:#e3d3f0}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+
+  .kutu{margin:10px 14px;border:1px solid var(--line);border-left:4px solid var(--accent);
+    border-radius:3px;background:#f7fafd;padding:9px 12px;font-size:12px}
+  .kutu.uy{border-left-color:#d8a013;background:#fdf9ef}
+  .kutu.teh{border-left-color:#c0504d;background:#fdf2f2}
+  .kutu.ok{border-left-color:#2e7d46;background:#f3faf5}
+  .kutu.ai{border-left-color:#7a4fb0;background:#faf7fd}
+  .kutu b.bs{display:block;margin-bottom:3px;color:var(--navy)}
+
+  .ip{margin:10px 14px;border:1px solid var(--line2);border-radius:4px;overflow:hidden}
+  .ip .bs{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line2);
+    padding:7px 11px;font-weight:bold;color:var(--navy);font-size:12.5px;display:flex;gap:9px;align-items:center}
+  .ip .bs .kod{background:var(--navy);color:#fff;border-radius:3px;font-size:10.5px;padding:1px 7px}
+  .ip .bs .sr{margin-left:auto;font-weight:normal;font-size:11px;color:var(--muted)}
+  .ip .gv{padding:9px 13px;font-size:12px}
+  .ip .gv ul{margin:5px 0}
+  .kbl{margin:7px 0 0;padding:7px 10px;background:#f3faf5;border:1px solid #cbe7d3;border-radius:3px;font-size:11.5px}
+  .kbl b{color:#2e7d46}
+
+  .gbild{display:flex;gap:9px;margin:8px 14px;padding:8px 11px;border:1px solid var(--line2);border-radius:3px;background:#fbfcfd}
+  .gbild .n{flex:none;width:34px;height:34px;border-radius:4px;background:#7a4fb0;color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px}
+  .gbild .g{flex:1}
+  .gbild .bs{font-weight:bold;color:var(--navy);font-size:12.5px}
+  .gbild .ac{font-size:11.5px;color:var(--muted)}
+
+  .hint{font-size:11px;color:var(--muted);margin:8px 14px;line-height:1.5}
+  .statusbar{display:flex;gap:14px;padding:7px 14px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11.5px;color:var(--muted);flex-wrap:wrap}
+  @media print{ body{background:#fff;padding:0} .win{box-shadow:none;border:0;max-width:none} .toc{display:none} }
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Gentegre AI — Uygulama Planı
+    <span class="sp">Plan modu · Sürüm 1.0 · 15.08.2026 · henüz kod yazılmadı</span>
+  </div>
+
+  <div class="kunye">
+    <div class="k"><div class="t">Belge türü</div><div class="v">Uygulama planı (plan modu)</div></div>
+    <div class="k"><div class="t">Girdi</div><div class="v">Proje Dosyası v1.0 + Değerlendirme</div></div>
+    <div class="k"><div class="t">Faz 1 kapsamı</div><div class="v">Cari + Stok + Satış Faturası</div></div>
+    <div class="k"><div class="t">Durum</div><div class="v"><span class="pill p-gor">Onay bekliyor</span></div></div>
+  </div>
+
+  <div class="toc">
+    <a href="#b0">0 · Bu belge nasıl kullanılır</a>
+    <a href="#b1">1 · Değerlendirmenin plana yansıması</a>
+    <a href="#b2">2 · Başarı ölçütleri</a>
+    <a href="#b3">3 · Faz 0 — ERP Sözleşmeleri</a>
+    <a href="#b4">4 · Teknik iskelet</a>
+    <a href="#b5">5 · Gen* bileşen katmanı</a>
+    <a href="#b6">6 · Faz 1 — dikey dilim</a>
+    <a href="#b7">7 · SP envanteri ve PG göçü</a>
+    <a href="#b8">8 · Faz 2–5</a>
+    <a href="#b9">9 · İş paketleri</a>
+    <a href="#b10">10 · Tamamlandı tanımı</a>
+    <a href="#b11">11 · Performans bütçesi</a>
+    <a href="#b12">12 · Test stratejisi</a>
+    <a href="#b13">13 · Kapılar ve riskler</a>
+    <a href="#b14">14 · Yeni kararlar</a>
+  </div>
+
+  <!-- ============================================================ 0 -->
+  <h2 id="b0"><span class="no">0</span> Bu Belge Nasıl Kullanılır</h2>
+  <p>Bu bir <b>plan</b>; kod yazımı başlamadan önce üzerinde anlaşılması gereken şeyleri içerir.
+  Proje Dosyası "ne ve neden"i, bu belge "nasıl ve hangi sırayla"yı anlatır.</p>
+  <table>
+    <tr><th style="width:130px">Bölüm</th><th>Ne zaman okunur</th></tr>
+    <tr><td>§3 Sözleşmeler</td><td>Kod yazımından <b>önce</b>. Bu bölüm onaylanmadan hiçbir ekran yazılmaz.</td></tr>
+    <tr><td>§4–5 İskelet</td><td>Faz 0 başlarken. Klasör düzeni ve bileşen adları burada sabitlenir.</td></tr>
+    <tr><td>§6 Faz 1</td><td>İlk dikey dilimin iş listesi ve kabul ölçütleri.</td></tr>
+    <tr><td>§9–10 İş paketi / DoD</td><td>Her iterasyonun başında ve sonunda.</td></tr>
+    <tr><td>§13 Kapılar</td><td>Faz geçişlerinde — kapı açılmadan sonraki faza geçilmez.</td></tr>
+  </table>
+  <div class="kutu uy">
+    <b class="bs">Plan modu ne demek</b>
+    Buradaki hiçbir madde "yapıldı" değil. Her iş paketinin bir <b>kabul ölçütü</b> var; ölçüt yazılıyken
+    kimse "bitti mi" diye tartışmasın diye ölçülebilir yazıldı. Tahmini süre bilinçli olarak konulmadı —
+    ekip büyüklüğü netleşince §9'a eklenecek.
+  </div>
+
+  <!-- ============================================================ 1 -->
+  <h2 id="b1"><span class="no">1</span> Değerlendirmenin Plana Yansıması</h2>
+  <p>15.08.2026 tarihli <code>gentegre_ai_projesi_degerlendirme.html</code> belgesindeki düzeltmeler
+  bu plana şu şekilde işlendi:</p>
+
+  <div class="gbild"><div class="n">D1</div><div class="g">
+    <div class="bs">"Faz 0'da önce ERP sözleşmesi çıkarılmalı"</div>
+    <div class="ac">Kabul edildi. <b>§3</b> bu belgenin en uzun bölümü oldu — 10 sözleşme, örnek JSON'larla.
+      Faz 0'ın çıktısı artık "iskelet" değil, <b>imzalanmış sözleşmeler + iskelet</b>.</div>
+  </div></div>
+
+  <div class="gbild"><div class="n">D2</div><div class="g">
+    <div class="bs">"İlk prototip Cari + Stok + Satış Faturası olmalı"</div>
+    <div class="ac">Kabul edildi. Proje Dosyası'ndaki "Faz 1 = Cari + Stok" tanımı değişti;
+      <b>§6</b>'da Faz 1 artık satış faturası mini akışını da içeriyor: cari seç → stok seç → fatura kes →
+      stok düş → cari hareket → belge no → döküm → log. ERP mimarisinin gerçek sınavı burası.</div>
+  </div></div>
+
+  <div class="gbild"><div class="n">D3</div><div class="g">
+    <div class="bs">"SP envanteri çıkarılmalı, P1/P2/P3 ayrılmalı"</div>
+    <div class="ac">Kabul edildi. <b>§7</b> envanter çıkarma yöntemini, sınıflandırma kurallarını ve
+      "hangi iş PG function kalır, hangisi C# transaction'a taşınır" ayrımını tanımlıyor.
+      Envanter Faz 0'ın çıktısı — Faz 1 başlamadan elde olacak.</div>
+  </div></div>
+
+  <div class="gbild"><div class="n">D4</div><div class="g">
+    <div class="bs">"Listeleme PG function olabilir; kayıt işlemleri C# transaction'da yönetilmeli"</div>
+    <div class="ac">Kabul edildi ve kural hâline getirildi — <b>§7.3</b>. Okuma tarafı veritabanına yakın,
+      yazma tarafı uygulama katmanında. Belge no, stok hareketi, cari hareket ve log tek transaction'da.</div>
+  </div></div>
+
+  <div class="gbild"><div class="n">D5</div><div class="g">
+    <div class="bs">"iframe mimarisi üretimde olmamalı"</div>
+    <div class="ac">Zaten planlıydı, artık açıkça yazıldı — <b>§4.3</b>. iframe yalnız mockup galerisinin
+      tekniğidir; üretimde her ekran React route + component'tir. Bu maddeyi ihlal eden hiçbir PR birleştirilmez.</div>
+  </div></div>
+
+  <div class="gbild"><div class="n">D6</div><div class="g">
+    <div class="bs">Sarmalayıcı bileşen adları <code>Gen*</code> olsun</div>
+    <div class="ac">Kabul edildi. Proje Dosyası'ndaki <code>Gn*</code> öneki <b>§5</b>'te <code>Gen*</code>
+      olarak güncellendi: <code>GenGrid</code>, <code>GenForm</code>, <code>GenLookup</code>, <code>GenToolbar</code>…</div>
+  </div></div>
+
+  <div class="gbild"><div class="n">D7</div><div class="g">
+    <div class="bs">"AI sağ panel/dock asistan olarak konumlanmalı, bağlamlı komutlar"</div>
+    <div class="ac">Kabul edildi. Mockup'ta zaten böyle çalışıyor (v5 dock). <b>§3.10</b> AI fonksiyon
+      sözleşmesini, <b>§8</b> Faz 4'ü tanımlıyor. Bağlam (modül/ekran/seçili kayıt) her çağrıda zorunlu parametre.</div>
+  </div></div>
+
+  <div class="kutu ok">
+    <b class="bs">Bir de plan tarafından eklenen madde</b>
+    Sağ tuş menüsü / araç çubuğu / komut paleti / AI fonksiyon listesi <b>tek bir aksiyon kataloğundan</b>
+    üretilecek (<b>§3.9</b>). Bu, fatura ekranlarındaki sağ tuş prototipiyle doğrulandı ve mimarinin
+    kalıcı bir parçası olarak plana alındı.
+  </div>
+
+  <!-- ============================================================ 2 -->
+  <h2 id="b2"><span class="no">2</span> Başarı Ölçütleri</h2>
+  <p>Proje "bitti" demek için değil, <b>doğru gidiyor</b> demek için ölçülecek şeyler:</p>
+  <table>
+    <tr><th style="width:250px">Ölçüt</th><th>Hedef</th><th style="width:120px">Ne zaman ölçülür</th></tr>
+    <tr><td>Liste açılış süresi (10.000 kayıtlı stok)</td><td>ilk boya &lt; 1,2 sn · etkileşime hazır &lt; 2 sn</td><td>Faz 1 sonu</td></tr>
+    <tr><td>Klavyeyle fatura kesme süresi</td><td>Delphi sürümünün en fazla %120'si</td><td>Faz 1 sonu</td></tr>
+    <tr><td>Tutar farkı (eski ↔ yeni, aynı veri)</td><td><b>0,00 ₺</b> — tolerans yok</td><td>Faz 1 ve Faz 2</td></tr>
+    <tr><td>Ekran başına ortalama kod satırı</td><td>&lt; 400 satır (fazlası sarmalayıcı katmanın eksik olduğunu gösterir)</td><td>Her iterasyon</td></tr>
+    <tr><td>Yeni ekran ekleme süresi (şablondan)</td><td>Faz 3'te &lt; 1 gün / liste</td><td>Faz 3</td></tr>
+    <tr><td>Mobil kullanılabilirlik</td><td>Faz 1 ekranları telefonda kart düzeninde çalışır</td><td>Faz 1 sonu</td></tr>
+  </table>
+
+  <!-- ============================================================ 3 -->
+  <h2 id="b3"><span class="no">3</span> Faz 0 — ERP Sözleşmeleri</h2>
+  <div class="kutu teh">
+    <b class="bs">Kural</b>
+    Bu bölüm onaylanmadan <b>hiçbir ekran</b> yazılmaz. Sözleşmeler sonradan değişirse 97 ekran değişir;
+    şimdi bir hafta tartışmak, sonra üç ay düzeltmekten ucuzdur.
+  </div>
+
+  <h3>3.1 Liste API sözleşmesi</h3>
+  <p>Tüm listeler <b>tek bir istek/yanıt şekline</b> uyar. Ekrana özel uç nokta yazılmaz; yalnız kaynak adı değişir.</p>
+  <pre><span class="c">// POST /api/liste/{kaynak}        kaynak: stok | cari | satis-faturasi ...</span>
+{
+  "sayfa": 1, "boyut": 100,
+  "sirala": [ { "alan": "belgeTarihi", "yon": "desc" } ],
+  "filtre": {                      <span class="c">// ağaç yapı — AND/OR/NOT iç içe</span>
+    "op": "and",
+    "kosullar": [
+      { "alan": "cariKod", "op": "esit",    "deger": "CH.000142" },
+      { "alan": "tarih",   "op": "arasinda","deger": ["2026-01-01","2026-08-14"] },
+      { "alan": "unvan",   "op": "icerir",  "deger": "granit" }
+    ]
+  },
+  "grup":   [ "eFaturaDurumu" ],   <span class="c">// opsiyonel</span>
+  "toplam": [ "kdvHaric", "kdvDahil" ],
+  "gorunum": "varsayilan"          <span class="c">// kaydedilmiş kolon düzeni</span>
+}</pre>
+  <pre><span class="c">// Yanıt</span>
+{
+  "satirlar": [ { "id": 114080, "belgeNo": "GNT2026000000056", "kdvDahil": "1260000.00", ... } ],
+  "toplamKayit": 9412,
+  "toplamlar": { "kdvHaric": "84120500.00", "kdvDahil": "100944600.00" },
+  "gruplar":   [ { "anahtar": "Gönderildi", "adet": 8210 } ],
+  "sure_ms": 42
+}</pre>
+  <ul>
+    <li><b>Operatörler sabit listedir:</b> <code>esit, esitDegil, icerir, baslar, biter, buyuk, kucuk, arasinda, bos, bosDegil, icinde</code>. Serbest SQL parçası istemciden gelmez.</li>
+    <li>Tutarlar <b>string</b> taşınır (<code>"1260000.00"</code>) — JSON sayı tipine düşürülmez.</li>
+    <li>Sayfa boyutu üst sınırı <code>500</code>; Excel dışa aktarımı ayrı uç noktadan akış (stream) ile.</li>
+    <li>Yetki filtresi (firma/şube/kullanıcı) <b>sunucuda eklenir</b>, istekte yer almaz.</li>
+  </ul>
+  <div class="kbl"><b>Kabul ölçütü:</b> Aynı sözleşmeyle stok, cari ve fatura listesi çalışıyor;
+  istemci tarafında hiçbir ekrana özel istek gövdesi yok.</div>
+
+  <h3>3.2 Kart (kayıt) sözleşmesi</h3>
+  <pre><span class="c">GET    /api/kart/{kaynak}/{id}         → kayıt + satırlar + surum</span>
+<span class="c">POST   /api/kart/{kaynak}              → yeni kayıt</span>
+<span class="c">PUT    /api/kart/{kaynak}/{id}         → güncelle (surum zorunlu)</span>
+<span class="c">DELETE /api/kart/{kaynak}/{id}</span>
+<span class="c">POST   /api/kart/{kaynak}/dogrula      → kaydetmeden doğrula</span>
+
+{
+  "id": 114080, "surum": "2026-08-12T09:41:22.881Z",   <span class="c">// eşzamanlılık damgası</span>
+  "baslik": { "belgeNo": "GNT2026000000056", "cariId": 318, ... },
+  "satirlar": [ { "sira": 1, "stokId": 10248, "miktar": "40.00", ... } ],
+  "hesaplananlar": { "araToplam": "1076190.48", "kdv": "210000.00", "genelToplam": "1260000.00" }
+}</pre>
+  <ul>
+    <li><b>Eşzamanlılık:</b> <code>surum</code> uyuşmazsa <code>409 Conflict</code> + karşı tarafın değerleri döner. "Son kaydeden kazanır" yok.</li>
+    <li><b>Hesaplanan alanlar istemciden gelmez</b> — sunucu hesaplar, yanıtta döner. İstemci yalnız gösterir.</li>
+    <li>Taslak kayıt ile kesinleşmiş kayıt farkı <code>durum</code> alanıyla; silme yalnız taslakta.</li>
+  </ul>
+  <div class="kbl"><b>Kabul ölçütü:</b> İki tarayıcıda aynı fatura açılıp ikisi de kaydedildiğinde
+  ikincisi 409 alıyor ve kullanıcıya çakışan alanlar gösteriliyor.</div>
+
+  <h3>3.3 Yetki sözleşmesi</h3>
+  <pre><span class="c">GET /api/yetki/oturum   → oturum açılışında bir kez</span>
+{
+  "kullanici": "AysD", "firmaId": 1, "subeId": 1, "subeler": [1,2,3],
+  "roller": ["SATIS_YONETICI"],
+  "yetkiler": { "FATURA.OKU":1, "FATURA.YAZ":1, "FATURA.SIL":0, "FATURA.GONDER":1, ... },
+  "alanYetki": { "STOK.MALIYET": 0 }          <span class="c">// alan bazlı gizleme</span>
+}</pre>
+  <ul>
+    <li>İstemci yetkiyi <b>yalnız görsel filtre</b> için kullanır (menüde gösterme/gizleme).</li>
+    <li><b>Sunucu her çağrıda yeniden kontrol eder.</b> İstemci filtresi güvenlik değildir.</li>
+    <li>Yetkisiz işlem menüde <b>hiç görünmez</b>; gri gösterip "yetkiniz yok" demek yok.</li>
+    <li>Alan bazlı yetki: maliyet/kâr gibi alanlar yanıttan <b>çıkarılır</b>, gizlenmez.</li>
+  </ul>
+
+  <h3>3.4 Hata formatı</h3>
+  <p>Tek biçim — <code>application/problem+json</code> üzerine Gentegre alanları:</p>
+  <pre>{
+  "durum": 422,
+  "kod": "FATURA.KDV_ORANI_GECERSIZ",
+  "mesaj": "KDV oranı stok kartındaki oranla uyuşmuyor.",
+  "detay": "STK.10248 için tanımlı oran %20, gelen %10.",
+  "alan": "satirlar[0].kdvOrani",
+  "izlemeNo": "7f3a1c94",                <span class="c">// log ile eşleşir</span>
+  "cozum": "Stok kartından oranı güncelleyin ya da satır oranını %20 yapın."
+}</pre>
+  <ul>
+    <li><code>kod</code> makine tarafından okunur ve <b>sabittir</b> — mesaj metni değişebilir, kod değişmez.</li>
+    <li><code>alan</code> doluysa istemci ilgili giriş kutusuna odaklanır ve hatayı orada gösterir.</li>
+    <li>Beklenmeyen hata: <code>500</code> + yalnız <code>izlemeNo</code>. Yığın izi kullanıcıya gösterilmez.</li>
+  </ul>
+
+  <h3>3.5 Log / denetim sözleşmesi</h3>
+  <table>
+    <tr><th style="width:150px">Olay</th><th>Yazılan</th></tr>
+    <tr><td>Kayıt açma</td><td>kullanıcı, kaynak, id, zaman, IP — yalnız hassas kaynaklarda</td></tr>
+    <tr><td>Kayıt değişikliği</td><td><b>alan bazlı eski → yeni</b> (Log Info ekranındaki "Değişiklik Detayı")</td></tr>
+    <tr><td>Silme</td><td>kaydın tam kopyası (geri alınabilirlik için)</td></tr>
+    <tr><td>Yetki reddi</td><td>hangi yetki, hangi kaynak, hangi işlem</td></tr>
+    <tr><td>e-Belge / dış servis</td><td>istek, yanıt, süre, durum kodu</td></tr>
+    <tr><td>AI çağrısı</td><td>prompt özeti, fonksiyon, parametre, sonuç boyutu, token, maliyet, onay</td></tr>
+  </table>
+  <ul>
+    <li>Log yazımı <b>iş transaction'ının içinde</b> — işlem geri alınırsa log da geri alınır (yetki reddi hariç).</li>
+    <li>Her isteğe bir <code>izlemeNo</code> atanır; hata mesajı, log ve sunucu günlüğü bu numarayla eşleşir.</li>
+  </ul>
+
+  <h3>3.6 Para, tarih, sayı sözleşmesi</h3>
+  <table>
+    <tr><th style="width:150px">Konu</th><th>Kural</th></tr>
+    <tr><td>Para tipi</td><td>C# <code>decimal</code> ↔ PG <code>numeric(19,4)</code>; JSON'da <b>string</b></td></tr>
+    <tr><td>Hesaplama yeri</td><td><b>Yalnız sunucu.</b> İstemcide toplama/çarpma yapılmaz</td></tr>
+    <tr><td>Yuvarlama</td><td>Satır: 2 hane; ara toplam ve KDV: 2 hane, <code>MidpointRounding.AwayFromZero</code>. Kural tek bir <code>Para</code> sınıfında</td></tr>
+    <tr><td>Döviz</td><td>Tutar + para birimi + kur birlikte saklanır; TL karşılığı hesaplanıp <b>yazılır</b>, sonradan türetilmez</td></tr>
+    <tr><td>Tarih taşıma</td><td>ISO-8601 UTC (<code>2026-08-14T00:00:00Z</code>)</td></tr>
+    <tr><td>Tarih gösterim</td><td><code>gg.aa.yyyy</code>; saat <code>ss:dd</code></td></tr>
+    <tr><td>Sayı gösterim</td><td><code>Intl.NumberFormat('tr-TR')</code> — 1.234,56</td></tr>
+    <tr><td>Belge tarihi</td><td>Saat bilgisi taşımaz (<code>date</code>); işlem zamanı ayrı alandır</td></tr>
+  </table>
+
+  <h3>3.7 Dosya / ek sözleşmesi</h3>
+  <pre><span class="c">POST /api/dosya            → { "dosyaId": "9f2c...", "ad": "kartvizit.jpg", "boyut": 184320 }</span>
+<span class="c">POST /api/dosya/bagla      → { "dosyaId", "kaynak": "fatura", "kayitId": 114080 }</span>
+<span class="c">GET  /api/dosya/{id}       → imzalı, süreli indirme bağlantısı</span></pre>
+  <ul>
+    <li>Dosya önce yüklenir, <b>sonra</b> kayda bağlanır — kayıt kaydedilmeden ek eklenebilsin.</li>
+    <li>Bağlanmamış dosyalar 24 saat sonra temizlenir (zamanlanmış iş).</li>
+    <li>e-Belge XML'leri ve imzalı PDF'ler aynı depoda ama <b>değiştirilemez</b> işaretli.</li>
+    <li>Depo soyutlaması tek arayüz: yerel dosya sistemi ya da S3 uyumlu — kod değişmez.</li>
+  </ul>
+
+  <h3>3.8 Rapor / döküm sözleşmesi</h3>
+  <pre><span class="c">POST /api/dokum/{dokumKodu}</span>
+{ "parametreler": { "tarihBas":"2026-08-01", "tarihBit":"2026-08-14", "subeId":1 },
+  "bicim": "pdf",            <span class="c">// pdf | xlsx | html | veri</span>
+  "kanal": "indir" }         <span class="c">// indir | eposta | onizle</span>
+<span class="c">→ 202 Accepted + { "isId": "..." }  (uzun süren dökümler kuyruğa girer)</span>
+<span class="c">→ GET /api/is/{isId} ile durum, bitince dosyaId</span></pre>
+  <ul>
+    <li>Kısa dökümler eşzamanlı, uzun olanlar kuyrukta — <b>istemci iki durumu da destekler</b>.</li>
+    <li>Döküm parametre ekranı <code>dokumler.html</code> mockup'ındaki yapıdan üretilir; parametre tanımı veritabanında (<code>GENDOKUM</code>).</li>
+    <li><code>"bicim":"veri"</code> ham veri döndürür — AI ve analiz ekranları bunu kullanır, aynı raporu iki kez yazmayalım.</li>
+  </ul>
+
+  <h3>3.9 Aksiyon kataloğu sözleşmesi</h3>
+  <div class="kutu">
+    <b class="bs">Tek kaynak, dört tüketici</b>
+    Her ekranın bir aksiyon kataloğu vardır. <b>Araç çubuğu</b>, <b>sağ tuş menüsü</b>,
+    <b>Ctrl+K komut paleti</b> ve <b>AI'ın izinli fonksiyon listesi</b> bu katalogdan üretilir.
+    Yeni bir işlem eklendiğinde dördü birden güncellenir. Bu yapı fatura ekranlarındaki
+    prototiple doğrulandı.
+  </div>
+  <pre>{
+  id: 'fatura.gonder',
+  ad: 'e-Fatura Gönder',  ikon: 'send',  kisayol: 'Ctrl+G',
+  kapsam: ['satir','coklu'],          <span class="c">// satir | coklu | baslik | hucre | kalem | alan</span>
+  yetki:  'FATURA.GONDER',
+  aiCagrilabilir: true,               <span class="c">// AI bu fonksiyonu çağırabilir mi</span>
+  aiOnayGerekir: true,                <span class="c">// çağırırsa taslak üretir, kullanıcı onaylar</span>
+  etiket: b =&gt; b.adet &gt; 1 ? `${b.adet} faturayı gönder` : 'e-Fatura Gönder',
+  aktif:  b =&gt; b.hepsiGonderilebilir ? true : 'Seçimde gönderilemeyecek belge var',
+  calistir: b =&gt; api.post('/api/fatura/gonder', { idler: b.idler })
+}</pre>
+  <ul>
+    <li><code>aktif</code> <b>true değilse sebebini döner</b> — kullanıcı neden yapamadığını görür. Kuralı öğreten en ucuz yer burasıdır.</li>
+    <li>Yetkisiz aksiyon katalogdan tamamen <b>düşer</b>.</li>
+    <li><code>aiCagrilabilir</code> işaretli aksiyonlar AI fonksiyon kataloğuna otomatik girer — ikinci bir liste tutulmaz.</li>
+  </ul>
+
+  <h3>3.10 AI fonksiyon sözleşmesi</h3>
+  <pre><span class="c">POST /api/ai/sohbet</span>
+{ "soru": "bu ay geciken tahsilatlar kimde",
+  "baglam": { "modul":"cari", "ekran":"cari_liste", "seciliId": 318, "sube": 1 },
+  "sohbetId": "..." }
+
+<span class="c">Yanıt akışı: metin → araç çağrısı → sonuç → metin → (varsa) onay kartı</span>
+{ "tip":"aracCagrisi", "fonksiyon":"cari_geciken_tahsilat",
+  "parametre":{"sube":1,"gunSayisi":30}, "sure_ms":402 }
+{ "tip":"onay", "aksiyon":"cari.hatirlatmaGonder", "taslak":{...},
+  "aciklama":"14 cariye hatırlatma e-postası taslağı hazırlandı." }</pre>
+  <ul>
+    <li><b>Model doğrudan SQL çalıştırmaz.</b> Yalnız katalogdaki <code>aiCagrilabilir</code> fonksiyonlar.</li>
+    <li>Firma/şube/kullanıcı filtresi <b>API katmanında eklenir</b> — modelin parametresine bırakılmaz.</li>
+    <li>Yazma işlemi daima <code>onay</code> tipi döndürür; kullanıcı onaylamadan hiçbir kayıt değişmez.</li>
+    <li>Her adım <code>AILOG</code>'a yazılır: prompt, fonksiyon, parametre, sonuç boyutu, token, maliyet, onay kararı.</li>
+    <li>Maliyet tavanı kullanıcı ve firma bazında; aşılırsa çağrı reddedilir.</li>
+  </ul>
+
+  <div class="kbl" style="margin:12px 14px"><b>Faz 0 sözleşme çıktısı:</b> her sözleşme için
+  bir OpenAPI parçası + bir örnek istek/yanıt + bir kabul testi. Onay alındıktan sonra kilitlenir;
+  değişiklik yeni sürüm numarasıyla yapılır.</div>
+
+  <!-- ============================================================ 4 -->
+  <h2 id="b4"><span class="no">4</span> Teknik İskelet</h2>
+
+  <h3>4.1 Çözüm yapısı (backend)</h3>
+  <pre>Gentegre.Ai.sln
+├─ src/
+│  ├─ Gentegre.Api            <span class="c">— uç noktalar, kimlik, yetki, hata biçimi</span>
+│  ├─ Gentegre.Cekirdek       <span class="c">— Para, Tarih, BelgeNo, Sonuc&lt;T&gt;, ortak kurallar</span>
+│  ├─ Gentegre.Moduller/
+│  │   ├─ Cari/               <span class="c">— her modül: Servis + Sorgu + Model + Kural</span>
+│  │   ├─ Stok/
+│  │   ├─ AlisSatis/
+│  │   └─ ...
+│  ├─ Gentegre.Veri           <span class="c">— Dapper sorguları, PG erişimi, göç betikleri</span>
+│  ├─ Gentegre.Entegrasyon/   <span class="c">— eBelge, ITS, Banka, TCMB</span>
+│  ├─ Gentegre.Rapor          <span class="c">— FastReport .NET sarmalayıcı</span>
+│  ├─ Gentegre.Ai             <span class="c">— fonksiyon kataloğu, sohbet, AILOG</span>
+│  └─ Gentegre.Isler          <span class="c">— Hangfire zamanlanmış işler</span>
+└─ test/
+   ├─ Gentegre.BirimTest
+   ├─ Gentegre.EntegrasyonTest   <span class="c">— gerçek PG (Testcontainers)</span>
+   └─ Gentegre.MutabakatTest     <span class="c">— eski sistemle tutar karşılaştırma</span></pre>
+  <div class="kutu uy">
+    <b class="bs">Modül sınırı kuralı</b>
+    Bir modül başka modülün <b>veri katmanına</b> erişemez; yalnız servis arayüzünden çağırır.
+    Bu kural şimdi bedava, sonra mikroservise ayırmak gerekirse hayat kurtarır.
+    Derleme zamanında mimari testle kontrol edilir.
+  </div>
+
+  <h3>4.2 Ön yüz yapısı</h3>
+  <pre>gentegre-web/
+├─ src/
+│  ├─ kabuk/          <span class="c">— AppShell, gezinme, tema, komut paleti, AI dock</span>
+│  ├─ ortak/
+│  │   ├─ gen/        <span class="c">— GenGrid, GenForm, GenLookup, GenToolbar … (§5)</span>
+│  │   ├─ api/        <span class="c">— istemci, OpenAPI'dan üretilen tipler</span>
+│  │   ├─ bicim/      <span class="c">— para, tarih, sayı biçimleyicileri</span>
+│  │   └─ aksiyon/    <span class="c">— katalog motoru (menü + palet + AI)</span>
+│  ├─ moduller/
+│  │   ├─ cari/       <span class="c">— CariListe.tsx, CariKart.tsx, cariAksiyon.ts, cariApi.ts</span>
+│  │   ├─ stok/
+│  │   └─ alissatis/
+│  └─ yonlendirme.ts
+└─ test/</pre>
+
+  <h3>4.3 iframe kuralı</h3>
+  <div class="kutu teh">
+    <b class="bs">Üretimde iframe yok</b>
+    <code>gentegre_v4_web.html</code> ve diğer kabuklardaki iframe + <code>postMessage</code> yaklaşımı
+    <b>yalnız mockup galerisinin tekniğidir</b> — 97 bağımsız HTML dosyasını tek kabukta gösterebilmek için.
+    Üretimde her ekran bir React route ve component'tir:
+  </div>
+  <pre><span class="c">Mockup (bugün)                    Üretim (hedef)</span>
+kabuk → iframe stok_listesi.html   &lt;Route path="/stok/kartlar"      element={&lt;StokListe/&gt;} /&gt;
+kabuk → iframe cari_liste.html     &lt;Route path="/cari/kartlar"      element={&lt;CariListe/&gt;} /&gt;
+modal kart penceresi               &lt;Route path="/stok/kartlar/:kod" element={&lt;StokKart/&gt;} /&gt;</pre>
+  <p>Kart artık modal değil, kendi adresi olan sayfadır — geri tuşu, yer imi ve bağlantı paylaşımı çalışsın.
+  Modal yalnız gerçek lookup diyalogları için (<code>rehber_arama</code> gibi).</p>
+
+  <!-- ============================================================ 5 -->
+  <h2 id="b5"><span class="no">5</span> Gen* Bileşen Katmanı</h2>
+  <p>Ekranlar DevExtreme'i (ya da hangi kütüphane seçilirse onu) <b>doğrudan çağırmaz</b>.
+  Araya bu katman girer — kütüphane değişirse 97 ekran değil bu katman değişir.</p>
+  <table>
+    <tr><th style="width:150px">Bileşen</th><th>Sorumluluk</th><th style="width:230px">İçerdiği ortak kural</th></tr>
+    <tr><td><code>GenGrid</code></td><td>Liste görünümü</td><td>Sunucu tarafı sayfalama, satır rengi kuralı, kolon önceliği ve mobil kart düzeni, sağ tuş kataloğu, boş/yükleniyor/hata durumları</td></tr>
+    <tr><td><code>GenForm</code></td><td>Kart formu</td><td>Alan yerleşimi, zorunlu alan işareti, doğrulama hatası gösterimi, kirli-kayıt uyarısı, eşzamanlılık çakışması</td></tr>
+    <tr><td><code>GenLookup</code></td><td>Cari/stok/kişi seçici</td><td>Rehber arama diyaloğu, son kullanılanlar, yeni kayıt açma, klavye gezinmesi</td></tr>
+    <tr><td><code>GenToolbar</code></td><td>Komut çubuğu</td><td>Aksiyon kataloğundan üretim, yetki filtresi, daralınca taşma menüsü</td></tr>
+    <tr><td><code>GenKalemGrid</code></td><td>Belge kalemleri</td><td>Satır içi düzenleme, klavye akışı (Tab/Enter), otomatik yeni satır, sunucudan gelen toplamlar</td></tr>
+    <tr><td><code>GenParaGiris</code></td><td>Tutar girişi</td><td>tr-TR biçim, ondalık kuralı, negatif gösterimi, para birimi rozeti</td></tr>
+    <tr><td><code>GenTarihAralik</code></td><td>Tarih / aralık</td><td>gg.aa.yyyy, hızlı seçimler (bu ay, geçen ay, yılbaşından bugüne)</td></tr>
+    <tr><td><code>GenDurumRozeti</code></td><td>Durum gösterimi</td><td>Renk + metin birlikte (yalnız renge dayanmaz), tutarlı sözlük</td></tr>
+    <tr><td><code>GenSekme</code></td><td>Kart sekmeleri</td><td>Rozet sayacı, tembel yükleme, URL'de sekme durumu</td></tr>
+    <tr><td><code>GenSihirbaz</code></td><td>Adımlı akış</td><td>Adım listesi, ilerleme, geri/ileri, adım doğrulama</td></tr>
+    <tr><td><code>GenDokumPanel</code></td><td>Döküm parametre + sonuç</td><td>Parametre üretimi, eşzamanlı/kuyruklu iki mod</td></tr>
+    <tr><td><code>GenAiDock</code></td><td>AI sağ paneli</td><td>Bağlam aktarımı, araç çağrısı kartı, onay kartı, AILOG bilgisi</td></tr>
+  </table>
+  <div class="kbl"><b>Kabul ölçütü:</b> Faz 1 ekranlarında DevExtreme <code>import</code>'u yalnız
+  <code>src/ortak/gen/</code> altında görünüyor. Modül klasörlerinde kütüphane adı geçmiyor —
+  derleme kuralıyla (lint) zorlanır.</div>
+
+  <!-- ============================================================ 6 -->
+  <h2 id="b6"><span class="no">6</span> Faz 1 — Dikey Dilim: Cari + Stok + Satış Faturası</h2>
+  <div class="kutu ok">
+    <b class="bs">Neden bu üçlü</b>
+    Değerlendirmenin en yerinde uyarısı: sadece Cari + Stok "liste ve kart yazdık" demektir, mimariyi sınamaz.
+    Satış faturası eklendiğinde <b>işin gerçeği</b> devreye girer: çoklu tablo yazan tek transaction,
+    belge numaralama, stok düşümü, cari hareket, döviz, yuvarlama, e-belge, döküm ve log — hepsi aynı anda.
+  </div>
+
+  <h3>6.1 Kapsanacak akış</h3>
+  <pre>Cari listesi → cari seç → Cari kartı (bakiye, risk)
+                    ↓
+Stok listesi → stok durumu (depo bazlı)
+                    ↓
+Yeni Satış Faturası
+  → GenLookup ile cari seç
+  → GenKalemGrid'de stok seç, miktar/fiyat/iskonto gir
+  → sunucu hesaplar: ara toplam, iskonto, matrah, KDV, genel toplam
+  → Kaydet  ⇒ TEK TRANSACTION:
+       belge no üret · fatura başlık + satır yaz · stok hareketi yaz
+       · stok durumu güncelle · cari hareket yaz · log yaz
+  → Fatura dökümü (PDF)
+  → e-Fatura gönder (kuyruk + durum sorgu)
+  → Cari ekstresinde ve stok hareketlerinde görünür</pre>
+
+  <h3>6.2 İş paketleri ve kabul ölçütleri</h3>
+
+  <div class="ip">
+    <div class="bs"><span class="kod">F1-01</span> Cari listesi <span class="sr">liste sözleşmesinin ilk gerçek kullanımı</span></div>
+    <div class="gv">
+      <ul><li>Sunucu tarafı sayfalama, sıralama, filtre satırı, arama paneli</li>
+        <li>Grup ve Analiz görünümleri</li>
+        <li>Kolon seçici + kaydedilmiş görünüm</li>
+        <li>Sağ tuş menüsü (aksiyon kataloğundan)</li>
+        <li>Mobilde kart düzeni</li></ul>
+      <div class="kbl"><b>Kabul:</b> 25.000 cari kayıtta liste &lt; 1,2 sn açılıyor; kolon düzeni
+      kişisel görünüm olarak kaydedilip geri yükleniyor; telefonda kolonlar kart olarak diziliyor.</div>
+    </div>
+  </div>
+
+  <div class="ip">
+    <div class="bs"><span class="kod">F1-02</span> Cari kartı</div>
+    <div class="gv">
+      <ul><li>Sekmeler: Genel, Adresler, Kişiler, Hareketler, Risk/Limit, Belgeler</li>
+        <li>Eşzamanlılık damgası ve 409 çakışma ekranı</li>
+        <li>Alan bazlı doğrulama, hata odaklanması</li>
+        <li>Kişiler sekmesi <code>KISI</code> ile 1:N</li></ul>
+      <div class="kbl"><b>Kabul:</b> İki oturumda aynı cari düzenlendiğinde ikinci kaydeden
+      çakışan alanları görüyor; VKN doğrulaması sunucuda çalışıyor.</div>
+    </div>
+  </div>
+
+  <div class="ip">
+    <div class="bs"><span class="kod">F1-03</span> Stok listesi + stok durumu</div>
+    <div class="gv">
+      <ul><li>Depo bazlı kalan, rezerve, kullanılabilir</li>
+        <li>Kritik/stok yok satır renkleri (kural sunucudan gelen alanla, istemcide hesaplanmaz)</li>
+        <li>Barkodla arama</li></ul>
+      <div class="kbl"><b>Kabul:</b> Stok durumu değerleri Delphi sürümüyle birebir aynı;
+      10.000 kalemde sanal kaydırma takılmıyor.</div>
+    </div>
+  </div>
+
+  <div class="ip">
+    <div class="bs"><span class="kod">F1-04</span> Stok kartı</div>
+    <div class="gv">
+      <ul><li>Genel, Birim/Barkod, Fiyatlar, Stok Durumu, Seri/Lot, Hareketler</li>
+        <li>Maliyet alanı <code>alanYetki</code> ile yanıttan çıkarılıyor</li></ul>
+      <div class="kbl"><b>Kabul:</b> Maliyet yetkisi olmayan kullanıcının ağ yanıtında maliyet alanı
+      <b>yok</b> — gizlenmiş değil.</div>
+    </div>
+  </div>
+
+  <div class="ip">
+    <div class="bs"><span class="kod">F1-05</span> Satış faturası kartı <span class="sr">planın kalbi</span></div>
+    <div class="gv">
+      <ul><li><code>GenKalemGrid</code> ile satır içi düzenleme; Tab/Enter akışı Delphi'deki gibi</li>
+        <li>Stok ve cari seçimi <code>GenLookup</code> + Rehber Arama</li>
+        <li>Fiyat/iskonto/KDV kuralları sunucuda; istemci yalnız gösterir</li>
+        <li>Döviz ve kur; TL karşılığı kayıtta saklanır</li>
+        <li>Kaydet → tek transaction (bkz. §6.1)</li>
+        <li>Sağ tuş menüsü: kalem ve alan bağlamları</li></ul>
+      <div class="kbl"><b>Kabul:</b> Aynı fatura Delphi'de ve web'de kesildiğinde
+      <b>ara toplam, iskonto, matrah, KDV ve genel toplam kuruşu kuruşuna aynı</b>;
+      transaction ortasında hata verildiğinde stok ve cari hareket <b>geri alınıyor</b>.</div>
+    </div>
+  </div>
+
+  <div class="ip">
+    <div class="bs"><span class="kod">F1-06</span> Belge numaralama</div>
+    <div class="gv">
+      <ul><li>Seri + yıl + sıra; eşzamanlı iki kayıt aynı numarayı almaz</li>
+        <li>Numara transaction içinde ve <b>boşluksuz</b> üretilir (e-belge zorunluluğu)</li>
+        <li>Taslak kayıt numara tüketmez</li></ul>
+      <div class="kbl"><b>Kabul:</b> 50 eşzamanlı kaydetme isteğinde 50 farklı ve boşluksuz numara üretiliyor
+      (yük testi ile doğrulanır).</div>
+    </div>
+  </div>
+
+  <div class="ip">
+    <div class="bs"><span class="kod">F1-07</span> Fatura listesi</div>
+    <div class="gv">
+      <ul><li>e-Belge durum kolonları ve satır renkleri</li>
+        <li>Çoklu seçim + toplu işlem (gönder, yazdır, muhasebeleştir)</li>
+        <li>Aksiyon kataloğu ile sağ tuş + araç çubuğu tek kaynaktan</li></ul>
+      <div class="kbl"><b>Kabul:</b> Menüde görünen her işlem gerçekten çalışıyor ya da
+      pasifse sebebini gösteriyor; yetkisiz işlem hiç görünmüyor.</div>
+    </div>
+  </div>
+
+  <div class="ip">
+    <div class="bs"><span class="kod">F1-08</span> Fatura dökümü <span class="sr">FastReport .NET</span></div>
+    <div class="gv">
+      <ul><li>Mevcut <code>.fr3</code> şablonunun .NET'e taşınması (pilot)</li>
+        <li>PDF ve Excel çıktısı, önizleme</li></ul>
+      <div class="kbl"><b>Kabul:</b> Aynı faturanın Delphi ve web çıktısı görsel olarak eşdeğer;
+      şablon taşıma süresi ölçülüp kalan raporlar için tahmin çıkarıldı.</div>
+    </div>
+  </div>
+
+  <div class="ip">
+    <div class="bs"><span class="kod">F1-09</span> e-Fatura gönderimi</div>
+    <div class="gv">
+      <ul><li>UBL-TR üretimi, imzalama, entegratöre iletim (test ortamı)</li>
+        <li>Kuyruk + durum sorgulama + hata yeniden deneme</li></ul>
+      <div class="kbl"><b>Kabul:</b> Test ortamında uçtan uca bir fatura gönderilip
+      GİB durumu "kabul"e dönüyor; hata senaryosunda kullanıcıya anlaşılır mesaj + izleme no.</div>
+    </div>
+  </div>
+
+  <div class="ip">
+    <div class="bs"><span class="kod">F1-10</span> Yetki, log ve mobil doğrulama</div>
+    <div class="gv">
+      <ul><li>Üç farklı rolle (satış temsilcisi, muhasebe, yönetici) uçtan uca deneme</li>
+        <li>Log Info ekranında alan bazlı değişiklik görünüyor</li>
+        <li>Faz 1 ekranlarının telefonda gözden geçirilmesi</li></ul>
+      <div class="kbl"><b>Kabul:</b> Satış temsilcisi rolüyle maliyet görünmüyor, fatura silinemiyor,
+      başka şubenin verisi listelenmiyor; tüm bunlar <b>sunucu tarafından</b> engelleniyor.</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ 7 -->
+  <h2 id="b7"><span class="no">7</span> SP Envanteri ve PostgreSQL Göçü</h2>
+
+  <h3>7.1 Envanter çıkarma (Faz 0 çıktısı)</h3>
+  <pre><span class="c">-- MSSQL: tüm yordam ve fonksiyonlar, boyut ve bağımlılıkla</span>
+SELECT o.name, o.type_desc,
+       LEN(m.definition)                       AS uzunluk,
+       (SELECT COUNT(*) FROM sys.sql_expression_dependencies d
+         WHERE d.referencing_id = o.object_id)  AS bagimlilik
+FROM sys.sql_modules m
+JOIN sys.objects o ON o.object_id = m.object_id
+ORDER BY uzunluk DESC;</pre>
+  <p>Çıktı bir tabloya dökülür ve her satıra <b>çağıran ekran</b>, <b>iş kritikliği</b> ve
+  <b>sınıf</b> (P1/P2/P3) elle işlenir. Bu, tek seferlik ama atlanamaz bir analiz işidir.</p>
+
+  <h3>7.2 Sınıflandırma kuralı</h3>
+  <table>
+    <tr><th style="width:70px" class="c">Sınıf</th><th style="width:230px">Tanım</th><th>Ne yapılır</th></tr>
+    <tr><td class="c"><span class="pill p-teh">P1</span></td><td>Faz 1 akışının çalışması için şart</td>
+      <td>Faz 1 içinde taşınır. Yazma mantığı içeriyorsa <b>C# servisine</b> alınır, yalnız okuma ise PG fonksiyonu olur.</td></tr>
+    <tr><td class="c"><span class="pill p-uy">P2</span></td><td>Diğer modüller için gerekli, iş kritik</td>
+      <td>İlgili modülün fazında taşınır. Taşımadan önce <b>mutabakat testi</b> yazılır.</td></tr>
+    <tr><td class="c"><span class="pill p-pas">P3</span></td><td>Nadir kullanılan, tek seferlik ya da ölü kod</td>
+      <td>Kullanım logu ile doğrulanır; kullanılmıyorsa <b>taşınmaz</b>. Envanterin şaşırtıcı biçimde büyük kısmı buradadır.</td></tr>
+  </table>
+
+  <h3>7.3 Okuma / yazma ayrımı <span class="pill p-gor">değerlendirmeden gelen kural</span></h3>
+  <table>
+    <tr><th style="width:270px">İş</th><th style="width:150px">Nerede</th><th>Gerekçe</th></tr>
+    <tr><td>Liste sorgusu, mizan, stok durumu, ekstre, döküm verisi</td><td><b>PG fonksiyonu / görünüm</b></td>
+      <td>Küme işlemi; veriye yakın olması hem hızlı hem doğal</td></tr>
+    <tr><td>Fatura kaydetme, stok hareketi, cari hareket, belge no, log</td><td><b>C# servis + transaction</b></td>
+      <td>Çok adımlı iş kuralı, hata yönetimi, test edilebilirlik, izlenebilirlik</td></tr>
+    <tr><td>e-Belge üretimi ve gönderimi</td><td><b>C# servis</b></td><td>Dış servis, kuyruk, yeniden deneme</td></tr>
+    <tr><td>Toplu güncelleme (fiyat listesi, yeniden değerleme)</td><td>Duruma göre</td>
+      <td>Milyon satırda PG'de küme işlemi; kural karmaşıksa C#'ta parça parça</td></tr>
+  </table>
+  <div class="kutu uy">
+    <b class="bs">Sınama sorusu</b>
+    "Bu yordam bir hata durumunda kullanıcıya ne söyleyecek?" — cevabı karmaşıksa iş kuralıdır,
+    C#'a taşınır. "Bu yordam yalnız veri döndürüyor" ise PG'de kalabilir.
+  </div>
+
+  <h3>7.4 Mutabakat testi</h3>
+  <p>Her taşınan hesaplama için aynı girdiyle eski ve yeni sistemi çalıştırıp sonucu karşılaştıran otomatik test:</p>
+  <ul>
+    <li>Mizan toplamları, cari bakiyeler, stok durumu, fatura toplamları</li>
+    <li>Fark toleransı <b>0,00</b>; fark varsa test kırmızı</li>
+    <li>Gerçek müşteri verisinin anonimleştirilmiş kopyası üzerinde çalışır</li>
+  </ul>
+
+  <!-- ============================================================ 8 -->
+  <h2 id="b8"><span class="no">8</span> Faz 2–5 Özeti</h2>
+  <table>
+    <tr><th style="width:80px">Faz</th><th style="width:250px">Kapsam</th><th>Çıkış kapısı</th></tr>
+    <tr><td><b>Faz 2</b></td><td>Alış/Satış belge zinciri: talep → sipariş → irsaliye → fatura; fişler, tahakkuk, gider pusulası, konsinye; alış tarafı</td>
+      <td>Belge dönüşümleri kayıpsız; e-İrsaliye çalışıyor; mutabakat testleri yeşil</td></tr>
+    <tr><td><b>Faz 3</b></td><td>Banka (çek/senet, kredi, POS), Kasa, Teklif, Servis, CRM, Proje, Üretim, İK, Demirbaş, Doküman, Kalite, Yönetim</td>
+      <td>Şablon oturmuş: yeni liste &lt; 1 gün; ekran başına ortalama kod &lt; 400 satır</td></tr>
+    <tr><td><b>Faz 4</b></td><td>AI katmanı: fonksiyon kataloğu, onay akışı, AILOG, dock ve tam ekran asistan; ilk paket 5 özellik</td>
+      <td>Yazma işlemi onaysız gerçekleşmiyor; her çağrı loglanıyor; maliyet tavanı çalışıyor</td></tr>
+    <tr><td><b>Faz 5</b></td><td>Mobil: PWA → Capacitor; barkod, sayım, onaylar, saha servis, çevrimdışı kuyruk</td>
+      <td>Çevrimdışı girilen sayım bağlantı gelince kayıpsız senkronize oluyor</td></tr>
+  </table>
+
+  <!-- ============================================================ 9 -->
+  <h2 id="b9"><span class="no">9</span> İş Paketleri — Faz 0</h2>
+  <table>
+    <tr><th style="width:70px">Kod</th><th style="width:250px">İş</th><th>Çıktı</th><th style="width:110px">Bağımlılık</th></tr>
+    <tr><td>F0-01</td><td>Sözleşmelerin yazılması ve onayı (§3)</td><td>OpenAPI parçaları + örnekler + kabul testleri</td><td>—</td></tr>
+    <tr><td>F0-02</td><td>SP envanteri ve P1/P2/P3 sınıflandırması</td><td>Envanter tablosu, P1 listesi</td><td>—</td></tr>
+    <tr><td>F0-03</td><td>PG şema taslağı (Faz 1 tabloları) + collation/arama ayarları</td><td>Göç betikleri, <code>tr-TR-x-icu</code> doğrulaması</td><td>F0-02</td></tr>
+    <tr><td>F0-04</td><td>Çözüm iskeleti, CI, ortamlar (geliştirme/test)</td><td>Derlenen boş uygulama, Docker Compose</td><td>—</td></tr>
+    <tr><td>F0-05</td><td>Kimlik, yetki, hata biçimi, log altyapısı</td><td>Çalışan giriş + yetki uç noktası</td><td>F0-01</td></tr>
+    <tr><td>F0-06</td><td><code>Gen*</code> bileşen katmanının ilk sürümü</td><td>GenGrid, GenForm, GenToolbar, GenLookup</td><td>F0-01</td></tr>
+    <tr><td>F0-07</td><td>Aksiyon kataloğu motoru (menü + palet + sağ tuş)</td><td>Fatura mockup'ındaki davranışın React karşılığı</td><td>F0-06</td></tr>
+    <tr><td>F0-08</td><td>Rapor motoru bağlantısı, bir <code>.fr3</code> pilot taşıma</td><td>PDF üreten uç nokta</td><td>F0-04</td></tr>
+    <tr><td>F0-09</td><td>Mutabakat test altyapısı</td><td>Eski↔yeni karşılaştırma çatısı</td><td>F0-03</td></tr>
+    <tr><td>F0-10</td><td>Performans ölçüm düzeneği</td><td>§11'deki bütçelerin otomatik ölçümü</td><td>F0-04</td></tr>
+  </table>
+  <div class="hint">Süre tahminleri bilinçli olarak boş — ekip büyüklüğü ve tam zamanlı/yarı zamanlı
+  dağılımı netleştiğinde bu tabloya iki kolon eklenecek (tahmin, sorumlu).</div>
+
+  <!-- ============================================================ 10 -->
+  <h2 id="b10"><span class="no">10</span> Tamamlandı Tanımı (DoD)</h2>
+  <p>Bir ekran "bitti" sayılması için:</p>
+  <ol>
+    <li>Liste ve kart sözleşmelere uygun; ekrana özel uç nokta yok</li>
+    <li>Yetki üç rolle denendi; yetkisiz işlem <b>sunucuda</b> engelleniyor</li>
+    <li>Aksiyon kataloğu tanımlı; araç çubuğu, sağ tuş ve komut paleti aynı kaynaktan üretiliyor</li>
+    <li>Hatalar sözleşme biçiminde; kullanıcıya anlaşılır mesaj + izleme no</li>
+    <li>Log yazılıyor (değişiklikte alan bazlı)</li>
+    <li>Tutar içeren ekranda mutabakat testi yeşil</li>
+    <li>Performans bütçesi (§11) sağlanıyor</li>
+    <li>Telefon genişliğinde kullanılabilir</li>
+    <li>Klavyeyle uçtan uca kullanılabilir (fare olmadan)</li>
+    <li>DevExtreme <code>import</code>'u yalnız <code>gen/</code> altında</li>
+    <li>Playwright ile bir "mutlu yol" testi yazıldı</li>
+    <li>Mockup ile karşılaştırıldı; bilinçli sapmalar not edildi</li>
+  </ol>
+
+  <!-- ============================================================ 11 -->
+  <h2 id="b11"><span class="no">11</span> Performans Bütçesi</h2>
+  <div class="kutu teh">
+    <b class="bs">En büyük algı riski</b>
+    "Eski program daha hızlıydı." Bu risk sonradan düzeltilemez — bütçe <b>ilk günden</b> ölçülür,
+    aşan PR birleştirilmez.
+  </div>
+  <table>
+    <tr><th style="width:290px">Ölçüm</th><th style="width:120px">Bütçe</th><th>Not</th></tr>
+    <tr><td>Liste ilk boya (100 satır, 10.000 kayıtlı tablo)</td><td>&lt; 1,2 sn</td><td>Sunucu &lt; 300 ms</td></tr>
+    <tr><td>Liste sayfa değiştirme</td><td>&lt; 400 ms</td><td>—</td></tr>
+    <tr><td>Kart açılış</td><td>&lt; 800 ms</td><td>Sekmeler tembel yüklenir</td></tr>
+    <tr><td>Kalem satırı ekleme (klavye)</td><td>&lt; 80 ms</td><td>Yerel; sunucuya gitmez</td></tr>
+    <tr><td>Fatura kaydetme (10 kalem)</td><td>&lt; 900 ms</td><td>Transaction dâhil</td></tr>
+    <tr><td>Uygulama ilk yükleme (JS paketi)</td><td>&lt; 900 KB gzip</td><td>Modüller ayrı yüklenir</td></tr>
+    <tr><td>Klavyeyle fatura kesme (uçtan uca)</td><td>Delphi'nin ≤ %120'si</td><td>Aynı kullanıcı, aynı fatura, kronometreyle</td></tr>
+  </table>
+
+  <!-- ============================================================ 12 -->
+  <h2 id="b12"><span class="no">12</span> Test Stratejisi</h2>
+  <table>
+    <tr><th style="width:180px">Katman</th><th style="width:150px">Araç</th><th>Kapsam</th></tr>
+    <tr><td>Birim</td><td>xUnit</td><td>Para/yuvarlama, belge no, iş kuralları — <b>en yüksek öncelik</b></td></tr>
+    <tr><td>Entegrasyon</td><td>xUnit + Testcontainers (gerçek PG)</td><td>Transaction bütünlüğü, eşzamanlılık, yetki filtreleri</td></tr>
+    <tr><td>Mutabakat</td><td>Özel çatı</td><td>Eski ↔ yeni tutar karşılaştırması, tolerans 0,00</td></tr>
+    <tr><td>Sözleşme</td><td>OpenAPI doğrulama</td><td>Yanıtlar sözleşmeden sapmıyor</td></tr>
+    <tr><td>Ön yüz birim</td><td>Vitest</td><td>Biçimleyiciler, aksiyon kataloğu kuralları</td></tr>
+    <tr><td>Uçtan uca</td><td>Playwright</td><td>Mutlu yollar + yetki senaryoları; mockup testlerinden devralınan düzen</td></tr>
+    <tr><td>Performans</td><td>k6 + Lighthouse</td><td>§11 bütçeleri, her gece</td></tr>
+  </table>
+
+  <!-- ============================================================ 13 -->
+  <h2 id="b13"><span class="no">13</span> Kapılar ve Riskler</h2>
+  <h3>13.1 Faz geçiş kapıları</h3>
+  <table>
+    <tr><th style="width:130px">Kapı</th><th>Açılma şartı</th></tr>
+    <tr><td><b>K-0 → 1</b></td><td>Sözleşmeler onaylı · SP envanteri hazır · Gen* ilk sürüm çalışıyor · performans ölçüm düzeneği kurulu</td></tr>
+    <tr><td><b>K-1 → 2</b></td><td>Fatura mini akışı uçtan uca · tutar farkı 0,00 · performans bütçesi sağlanıyor · üç rolle yetki testi geçti · <b>gerçek bir kullanıcı bir gün boyunca web'de fatura kesti</b></td></tr>
+    <tr><td><b>K-2 → 3</b></td><td>Belge zinciri kayıpsız · e-Belge canlıya yakın test ortamında çalışıyor · P1+P2 yordamların tamamı taşındı</td></tr>
+    <tr><td><b>K-3 → 4</b></td><td>Tüm modüller kullanılabilir · Delphi kesme tarihi kararı verildi</td></tr>
+  </table>
+
+  <h3>13.2 Güncellenmiş risk tablosu</h3>
+  <table>
+    <tr><th style="width:250px">Risk</th><th class="c" style="width:70px">Seviye</th><th>Önlem (plandaki karşılığı)</th></tr>
+    <tr><td>"Eski program daha hızlıydı"</td><td class="c"><span class="pill p-teh">Yüksek</span></td><td>§11 bütçesi, ilk günden ölçüm, K-1 kapısında gerçek kullanıcı denemesi</td></tr>
+    <tr><td>SP göçünün büyümesi</td><td class="c"><span class="pill p-teh">Yüksek</span></td><td>§7 envanter + P1/P2/P3; P3'ün taşınmaması</td></tr>
+    <tr><td>Para/yuvarlama farkı</td><td class="c"><span class="pill p-teh">Yüksek</span></td><td>§3.6 tek <code>Para</code> sınıfı, §7.4 mutabakat testi, tolerans 0,00</td></tr>
+    <tr><td>97 ekranı aynı anda taşıma isteği</td><td class="c"><span class="pill p-teh">Yüksek</span></td><td>Faz kapıları; K-1 açılmadan Faz 2 işine başlanmaz</td></tr>
+    <tr><td>Bileşen kütüphanesine kilitlenme</td><td class="c"><span class="pill p-uy">Orta</span></td><td>§5 <code>Gen*</code> katmanı + lint kuralı</td></tr>
+    <tr><td>Sözleşmelerin sonradan değişmesi</td><td class="c"><span class="pill p-uy">Orta</span></td><td>Faz 0'da kilitleme; değişiklik sürüm numarasıyla ve etki analiziyle</td></tr>
+    <tr><td>İki ürünün paralel yaşaması</td><td class="c"><span class="pill p-uy">Orta</span></td><td>Delphi'de yalnız hata düzeltme; kesme tarihi K-3'te</td></tr>
+    <tr><td>e-Belge entegrasyonu</td><td class="c"><span class="pill p-uy">Orta</span></td><td>F1-09 ile <b>erken</b> denenir, sona bırakılmaz</td></tr>
+  </table>
+
+  <!-- ============================================================ 14 -->
+  <h2 id="b14"><span class="no">14</span> Proje Dosyası'na Eklenecek Yeni Kararlar</h2>
+  <p>Bu plan onaylanırsa <code>gentegre_ai_proje_dosyasi.html</code> §13 karar günlüğüne şunlar eklenecek:</p>
+  <table>
+    <tr><th style="width:70px" class="c">No</th><th style="width:300px">Karar</th><th>Gerekçe</th></tr>
+    <tr><td class="c"><b>K11</b></td><td>Faz 0'ın çıktısı sözleşmelerdir; onaylanmadan ekran yazılmaz</td><td>Değerlendirme D1</td></tr>
+    <tr><td class="c"><b>K12</b></td><td>Faz 1 = Cari + Stok + <b>Satış Faturası mini akışı</b></td><td>Değerlendirme D2 — mimarinin gerçek sınavı</td></tr>
+    <tr><td class="c"><b>K13</b></td><td>Okuma PG fonksiyonu olabilir; <b>yazma daima C# transaction</b></td><td>Değerlendirme D4</td></tr>
+    <tr><td class="c"><b>K14</b></td><td>Sarmalayıcı bileşen öneki <code>Gen</code></td><td>Değerlendirme D6 + kullanıcı kararı — isim birliği</td></tr>
+    <tr><td class="c"><b>K15</b></td><td>Aksiyon kataloğu tek kaynak: araç çubuğu + sağ tuş + palet + AI</td><td>Fatura prototipinde doğrulandı</td></tr>
+    <tr><td class="c"><b>K16</b></td><td>Performans bütçesi bağlayıcıdır; aşan değişiklik birleştirilmez</td><td>En büyük algı riski</td></tr>
+    <tr><td class="c"><b>K17</b></td><td>Üretimde iframe kullanılmaz; her ekran route + component</td><td>Değerlendirme D5</td></tr>
+  </table>
+
+  <div class="hint" style="margin-top:20px">
+    <b>İlgili belgeler:</b> <code>gentegre_ai_proje_dosyasi.html</code> (ne ve neden) ·
+    <code>gentegre_ai_projesi_degerlendirme.html</code> (bağımsız değerlendirme) ·
+    <code>gentegre_data.js</code> (modül/rota haritası) ·
+    <code>gentegre-chatgpt-api-ozellikleri.html</code> (AI tasarımı) ·
+    <code>Ekranlar\</code> klasöründeki 98 ekran mockup'ı (fonksiyonel şartname).
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre AI — Uygulama Planı</span>
+    <span>Sürüm: <b>1.0</b></span>
+    <span>Tarih: <b>15.08.2026</b></span>
+    <span>Sözleşme: <b>10</b></span>
+    <span>Faz 1 iş paketi: <b>10</b></span>
+    <span>Yeni karar: <b>K11–K17</b></span>
+    <span style="margin-left:auto">Durum: <b>onay bekliyor</b></span>
+  </div>
+</div>
+
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>.gmzgizle{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>.gmzgizle{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+</style>
+<script>(function(){
+function solMenuMu(e){
+  if(!e||e.nodeType!==1) return false;
+  if(/(^|\s)(gorev|solmenu|gtusgrup)(\s|$)/.test(e.className||"")) return true;
+  return !!e.querySelector(".gtus, .ltabs, .lpane");
+}
+function g(){
+  if(location.hash.indexOf("gomulu")>=0){
+    document.body.classList.add("gomulu");
+    [".wrap",".work"].forEach(function(sel){
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(w){
+        var ilk=w.firstElementChild;
+        if(ilk) ilk.classList.toggle("gmzgizle", solMenuMu(ilk));
+      });
+    });
+  } else document.body.classList.remove("gomulu");
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",g); else g();
+addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

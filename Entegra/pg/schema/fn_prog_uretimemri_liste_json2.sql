@@ -77,7 +77,14 @@ BEGIN
     ELSIF v_mod = 3 THEN ordr := 'ka.say DESC';
     ELSE ordr := v_orderby; END IF;
 
-    q := 'SELECT u.*,
+    q := 'SELECT u.id, u.bastar, u.bittar, u.onay, u.aciklama,
+            u.durum, u.ozelkod, u.yetkikodu, u.ekleyen, u.eklemetarihi,
+            u.degistiren, u.degistirmetarihi, u.yeri, u.yerid, u.subeid,
+            u.miktar, u.onaylayan, u.stokid, u.adet, u.birim,
+            u.receteid, u.maliyethesaplama, u.uretimplanid, u.uretimplandetayid,
+            u.onaylayacak, u.projeid, u.emirno, u.emirturu, u.talepeden,
+            u.taleptarihi, u.anakaynak, u.termintarihi, u.kocanno::varchar(10),
+            u.serino::varchar(10), u.rehberid, u.rehberiletid, u.siparis_no::varchar(20),
             s.kod::varchar AS stokkodu, s.stokadi::varchar AS stokadi, s.urunno::varchar AS urunno,
             p.projekodu::varchar AS projekodu, l.aciklama::varchar AS anakaynakad, r.firma::varchar AS firmaad
           FROM uretimemri u

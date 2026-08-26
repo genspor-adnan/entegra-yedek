@@ -225,7 +225,7 @@ type
 implementation
 
 uses ULog, UAnaForm,FetaKurulusSiniflari, FetaClassExtensions,  UKasaTanimWizard,
-  UKasaWizard, PrjConst, UFastRap, URaporAraclari, UGenelAnaSekmeFrame,LocOnFly, UVeriMotor, System.JSON;
+     UKasaWizard, PrjConst, UFastRap, URaporAraclari, UGenelAnaSekmeFrame,LocOnFly, UVeriMotor, System.JSON;
 
 {$R *.dfm}
 

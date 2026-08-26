@@ -1,4 +1,4 @@
-﻿unit UIKGorevFrame;
+unit UIKGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -8,19 +8,19 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus,
-  cxLookAndFeelPainters, cxButtons, JvExControls, JvButton, JvNavigationPane,
+  cxLookAndFeelPainters, cxButtons,
   ImgList, PngImageList, Vcl.ExtCtrls, PrjConst;           {Symbols}
 
 type
   TIKGorevFrame = class(TFrame)
-    btnHesapKarti: TJvNavPanelButton;
+    btnHesapKarti: TcxButton;
     PngImageList1: TPngImageList;
     PanelDokum: TPanel;
-    btnDokumlerOzel: TJvNavPanelButton;
-    btnDokumler: TJvNavPanelButton;
-    btnMaasIslemleri: TJvNavPanelButton;
-    BtnGenelPDKS: TJvNavPanelButton;
-    btnAdayPersonel: TJvNavPanelButton;
+    btnDokumlerOzel: TcxButton;
+    btnDokumler: TcxButton;
+    btnMaasIslemleri: TcxButton;
+    BtnGenelPDKS: TcxButton;
+    btnAdayPersonel: TcxButton;
     procedure btnHesapKartiClick(Sender: TObject);
     procedure BtnGenelPDKSClick(Sender: TObject);
     procedure btnMaasIslemleriClick(Sender: TObject);
@@ -78,7 +78,7 @@ begin
   else
     DokumFrame.Durum := 9;
 
-  DokumFrame.Standart := TJvNavPanelButton(Sender).Tag;
+  DokumFrame.Standart := TcxButton(Sender).Tag;
   DokumFrame.DokumEkranAdi := 'P';
   btnUpAndDown(Sender);
 end;
@@ -98,13 +98,10 @@ end;
 
 procedure TIKGorevFrame.btnUpAndDown(Sender: TObject);
 begin
-  btnHesapKarti.Down := False;
-  BtnGenelPDKS.Down := False;
-  btnMaasIslemleri.Down := False;
-  btnDokumler.Down := False;
-  btnDokumlerOzel.Down := False;
-  if (Sender<>nil)and(Sender.ClassName = 'TJvNavPanelButton') then
-    (Sender as TJvNavPanelButton).Down := True;
+  // Tek buton aktif: frame'deki TUM TcxButton'lar tek elden yonetilir.
+  // (Eskiden sabit bir buton listesi sifirlaniyordu; listede olmayan butonlar
+  //  basili kaldigi icin ayni anda birden fazla buton aktif gorunuyordu.)
+  GorevTusuSec(Self, Sender);
 end;
 
 procedure TIKGorevFrame.btnHesapKartiClick(Sender: TObject);
@@ -140,7 +137,7 @@ end;
 procedure TIKGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
 
   btnHesapKarti.Visible := Tablo.YetkiVarmi(3401,YetkiTur_Gorme);
   BtnGenelPDKS.Visible := Tablo.YetkiVarmi(3402,YetkiTur_Gorme);
@@ -161,3 +158,5 @@ end;
 initialization
   RegisterClass(TIKGorevFrame);
 end.
+
+

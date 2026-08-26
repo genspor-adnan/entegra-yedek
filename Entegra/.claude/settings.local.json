@@ -12,5 +12,9 @@
       "Skill(simplify)",
       "Skill(update-config)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "mssql-bilim"
+  ],
+  "enableAllProjectMcpServers": true
 }

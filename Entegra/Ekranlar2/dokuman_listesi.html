@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Doküman Listesi — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* dokuman durum renkleri */
+    --d-tas:#dfe6ee; --d-tas-t:#41525f;   /* taslak            */
+    --d-ony:#fbe6ae; --d-ony-t:#7a5407;   /* onay bekliyor     */
+    --d-onl:#bee8cb; --d-onl-t:#134a29;   /* onaylı / yürürlük */
+    --d-sur:#f7cfcf; --d-sur-t:#7d1f1f;   /* arşiv süresi doldu*/
+    --d-pas:#dcdcdc; --d-pas-t:#7a7a7a;   /* pasif / geri dön. */
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1330px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .ara{margin-left:auto;border:1px solid var(--line);border-radius:3px;background:#fff;height:24px;
+    padding:0 8px;font-size:11.5px;color:var(--muted);display:flex;align-items:center;min-width:210px}
+
+  .wrap{display:grid;grid-template-columns:236px 1fr 250px;gap:0}
+  .side{border-right:1px solid var(--line2);background:#f8fafc}
+  .side.right{border-right:none;border-left:1px solid var(--line2);padding:8px 0}
+  .side h5{margin:0;padding:7px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .sidetabs{display:flex;gap:2px;padding:5px 6px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .sidetab{flex:1;text-align:center;padding:5px 8px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);
+    border-bottom:none;border-radius:3px 3px 0 0;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .sidetab.active{background:#f8fafc;color:var(--navy);font-weight:bold}
+  .sidepane{display:none;padding:6px 0}
+  .sidepane.active{display:block}
+  .tvi{display:flex;align-items:center;gap:6px;font-size:11.5px;padding:3px 12px;cursor:default;border-left:3px solid transparent}
+  .tvi:hover{background:#eef4fb}
+  .tvi.on{background:var(--sel);border-left-color:var(--accent);font-weight:bold;color:var(--navy)}
+  .tvi .n{margin-left:auto;font-size:10px;color:#5c7189;background:#e6edf5;border:1px solid #d5e0eb;border-radius:9px;padding:0 6px}
+  .tvi.on .n{background:#fff}
+  .tvsep{height:1px;background:var(--line2);margin:6px 10px}
+  .ktb{display:flex;gap:3px;padding:4px 10px 6px;flex-wrap:wrap}
+
+  .center{min-width:0;display:flex;flex-direction:column}
+  .gridtb{display:flex;gap:4px;padding:8px 12px 7px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line2)}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 7px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 7px;font-size:11.5px}
+  .dg td.ad{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.d-tas td{background:var(--d-tas);color:var(--d-tas-t)}
+  .dg tr.d-ony td{background:var(--d-ony);color:var(--d-ony-t)}
+  .dg tr.d-onl td{background:var(--d-onl);color:var(--d-onl-t)}
+  .dg tr.d-sur td{background:var(--d-sur);color:var(--d-sur-t)}
+  .dg tr.d-pas td{background:var(--d-pas);color:var(--d-pas-t)}
+  .dg tr.d-pas td.ad{text-decoration:line-through}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .lgnd{display:flex;gap:12px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .pill{font-size:10px;padding:1px 7px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-tas{background:#eef2f6;color:#41525f;border-color:#d8e0e8}
+  .p-ony{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-onl{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-sur{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-giz{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .ext{display:inline-block;min-width:34px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;
+    padding:1px 4px;border:1px solid}
+  .e-pdf{background:#fae3e3;border-color:#eec2c2;color:#a33}
+  .e-doc{background:#e2ecfa;border-color:#c3d8f2;color:#2b5c95}
+  .e-xls{background:#e3f3e7;border-color:#c2e2cd;color:#2e7d46}
+  .e-img{background:#f6eefb;border-color:#e4d3f0;color:#7a4fb0}
+  .e-xml{background:#fdf0e0;border-color:#f0dcbd;color:#96651a}
+
+  /* alt detay sekmeleri */
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+  .grid2{display:grid;grid-template-columns:110px 1fr;gap:7px 9px;align-items:center}
+  .grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .full{grid-column:1 / -1}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;
+    display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.ro{background:#f4f6f9;color:var(--muted)}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:3px;color:var(--muted);font-size:10px}
+  .chk{display:flex;align-items:center;gap:7px;font-size:11.5px;padding:3px 0}
+  .row{display:flex;gap:14px;align-items:flex-start}
+  .col{flex:1;min-width:0}
+  /* onizleme */
+  .prev{border:1px solid var(--line);border-radius:4px;background:#fff;margin:0 10px;padding:10px;text-align:center}
+  .prev .sheet{height:132px;border:1px solid var(--line2);border-radius:3px;background:
+    linear-gradient(#fff,#f6f9fc);display:flex;align-items:center;justify-content:center;font-size:34px;color:#a33}
+  .prev .nm{font-size:11.5px;font-weight:bold;color:var(--navy);margin-top:7px;word-break:break-word}
+  .prev .mt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kv{display:flex;font-size:11px;padding:3px 12px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Doküman Listesi
+    <span class="sp">UDokumanListeFrame · DOKUMAN → IMAJ → GENDEPO.DOSYA · Kullanıcı: Mehmet Yıldız</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni</div>
+    <div class="btn">🖨 Tara</div>
+    <div class="btn">👁 Gör</div>
+    <div class="btn">✎ Değiştir</div>
+    <div class="btn">📂 Form Aç</div>
+    <div class="sepv"></div>
+    <div class="btn">✂ Kes</div>
+    <div class="btn">⧉ Kopyala</div>
+    <div class="btn">📋 Yapıştır</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">📤 Ver (Export)</div>
+    <div class="btn">✉ E-Posta</div>
+    <div class="btn">🔐 Yetkilendirme</div>
+    <div class="ara">🔎 Doküman adı, konu veya anahtar kelime…</div>
+  </div>
+
+  <div class="wrap">
+    <!-- ============ SOL: KLASOR / ARAMA ============ -->
+    <div class="side">
+      <div class="sidetabs">
+        <div class="sidetab active" data-s="klasor">Klasörler</div>
+        <div class="sidetab" data-s="arama">Arama</div>
+      </div>
+
+      <div class="sidepane active" data-sp="klasor">
+        <div class="ktb">
+          <span class="minibtn">➕</span><span class="minibtn">🗑</span><span class="minibtn">✎</span>
+          <span class="minibtn">✂</span><span class="minibtn">📋</span><span class="minibtn">🌳</span>
+          <span class="minibtn">↩</span>
+        </div>
+        <div class="tvi">📁 Kalite Yönetimi <span class="n">42</span></div>
+        <div class="tvi" style="padding-left:24px">📁 Prosedürler <span class="n">14</span></div>
+        <div class="tvi on" style="padding-left:24px">📂 Talimatlar <span class="n">11</span></div>
+        <div class="tvi" style="padding-left:24px">📁 Formlar <span class="n">17</span></div>
+        <div class="tvi">📁 İnsan Kaynakları <span class="n">28</span></div>
+        <div class="tvi">📁 Sözleşmeler <span class="n">36</span></div>
+        <div class="tvi" style="padding-left:24px">📁 Müşteri <span class="n">21</span></div>
+        <div class="tvi" style="padding-left:24px">📁 Tedarikçi <span class="n">15</span></div>
+        <div class="tvi">📁 Teknik Dokümanlar <span class="n">63</span></div>
+        <div class="tvi">📁 e-Belge Arşivi <span class="n">1.284</span></div>
+        <div class="tvi">🔗 Kısayollarım <span class="n">5</span></div>
+        <div class="tvsep"></div>
+        <div class="tvi">♻ Geri Dönüşüm Kutusu <span class="n">7</span></div>
+        <div style="padding:6px 12px;font-size:10.5px;color:var(--muted)">"Ana Klasör" yapmak için buraya tıklayın</div>
+      </div>
+
+      <div class="sidepane" data-sp="arama">
+        <div class="ktb">
+          <span class="minibtn on">Tüm</span><span class="minibtn">Son</span><span class="minibtn">Sık</span>
+        </div>
+        <div style="padding:2px 12px 10px">
+          <div class="grid2" style="grid-template-columns:70px 1fr">
+            <label>Doküman Ad</label><div class="inp"></div>
+            <label>Konusu</label><div class="inp"></div>
+            <label>Anahtar</label><div class="inp">ISO 9001</div>
+            <label>Kategori</label><div class="inp combo">(tümü)</div>
+            <label>Modül</label><div class="inp combo">Kalite</div>
+            <label>Bölümü</label><div class="inp combo">(tümü)</div>
+            <label>Kurum</label><div class="inp combo">(tümü)</div>
+            <label>Sorumlusu</label><div class="inp combo">(tümü)</div>
+            <label>Lokasyon</label><div class="inp combo">(tümü)</div>
+          </div>
+          <div style="margin-top:8px">
+            <label class="chk"><input type="checkbox" checked> Tarih</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:4px">
+              <div class="inp" style="font-size:11px">01.01.2026</div>
+              <div class="inp" style="font-size:11px">14.08.2026</div>
+            </div>
+            <label class="chk" style="margin-top:6px"><input type="checkbox"> Pasifleri de göster</label>
+          </div>
+          <div style="display:flex;gap:5px;margin-top:9px">
+            <span class="minibtn on">🔎 Ara</span><span class="minibtn">↩ Temizle</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ORTA: LISTE + DETAY ============ -->
+    <div class="center">
+      <div class="gridtb">
+        <span class="minibtn on">Yürürlükte</span>
+        <span class="minibtn">Onay Bekleyen</span>
+        <span class="minibtn">Taslak</span>
+        <span class="minibtn">Tümü</span>
+        <span class="sepv" style="height:20px"></span>
+        <span class="minibtn">🏷 Kategori</span>
+        <span class="minibtn">🧭 Yön: (tümü)</span>
+        <span class="minibtn">🔒 Gizlilik: (tümü)</span>
+        <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Klasör: <b>Kalite Yönetimi \ Talimatlar</b> · 11 kayıt</span>
+      </div>
+
+      <div style="padding:10px 12px 0">
+        <div class="dg">
+          <table>
+            <tr>
+              <th class="c" style="width:40px">Tipi</th>
+              <th>DÖKÜMAN ADI</th>
+              <th style="width:96px">DOKÜMAN NO</th>
+              <th class="c" style="width:52px">SÜRÜM</th>
+              <th style="width:110px">KATEGORİ</th>
+              <th style="width:96px">SORUMLU</th>
+              <th class="c" style="width:92px">DURUM</th>
+              <th class="r" style="width:74px">BOYUT (KB)</th>
+              <th style="width:78px">TARİH</th>
+            </tr>
+            <tr class="d-sur">
+              <td class="c"><span class="ext e-doc">DOC</span></td>
+              <td class="ad"><b>Sevkiyat ve Teslimat Talimatı</b></td>
+              <td>TAL-004</td><td class="c">1.2</td><td>Talimat</td><td>Elif Aksoy</td>
+              <td class="c"><span class="pill p-sur">Süresi doldu</span></td><td class="r">248</td><td>12.02.2024</td>
+            </tr>
+            <tr class="d-ony">
+              <td class="c"><span class="ext e-pdf">PDF</span></td>
+              <td class="ad">Depo Giriş–Çıkış Talimatı <span class="pill p-giz" style="margin-left:6px">Gizli</span></td>
+              <td>TAL-011</td><td class="c">3.0</td><td>Talimat</td><td>Depo Sorumlusu</td>
+              <td class="c"><span class="pill p-ony">Onayda</span></td><td class="r">512</td><td>11.08.2026</td>
+            </tr>
+            <tr class="d-ony">
+              <td class="c"><span class="ext e-xls">XLS</span></td>
+              <td class="ad">Kalibrasyon Takip Talimatı — ek çizelge</td>
+              <td>TAL-009</td><td class="c">2.1</td><td>Talimat</td><td>Burak Şen</td>
+              <td class="c"><span class="pill p-ony">Onayda</span></td><td class="r">96</td><td>10.08.2026</td>
+            </tr>
+            <tr class="d-onl foc">
+              <td class="c"><span class="ext e-pdf">PDF</span></td>
+              <td class="ad"><b>e-Fatura Kesim ve Seri Kullanım Talimatı</b></td>
+              <td>TAL-021</td><td class="c">4.0</td><td>Talimat</td><td>Mehmet Yıldız</td>
+              <td class="c"><span class="pill p-onl">Yürürlükte</span></td><td class="r">1.204</td><td>14.08.2026</td>
+            </tr>
+            <tr class="d-onl">
+              <td class="c"><span class="ext e-pdf">PDF</span></td>
+              <td class="ad">Stok Sayım Talimatı</td>
+              <td>TAL-006</td><td class="c">2.0</td><td>Talimat</td><td>Depo Sorumlusu</td>
+              <td class="c"><span class="pill p-onl">Yürürlükte</span></td><td class="r">640</td><td>02.07.2026</td>
+            </tr>
+            <tr class="d-onl">
+              <td class="c"><span class="ext e-doc">DOC</span></td>
+              <td class="ad">Müşteri Şikâyeti Değerlendirme Talimatı</td>
+              <td>TAL-013</td><td class="c">1.4</td><td>Talimat</td><td>Elif Aksoy</td>
+              <td class="c"><span class="pill p-onl">Yürürlükte</span></td><td class="r">318</td><td>19.05.2026</td>
+            </tr>
+            <tr class="d-onl">
+              <td class="c"><span class="ext e-img">JPG</span></td>
+              <td class="ad">Depo yerleşim planı (fotoğraf)</td>
+              <td>TAL-006-EK1</td><td class="c">1.0</td><td>Ek</td><td>Depo Sorumlusu</td>
+              <td class="c"><span class="pill p-onl">Yürürlükte</span></td><td class="r">2.860</td><td>02.07.2026</td>
+            </tr>
+            <tr class="d-tas">
+              <td class="c"><span class="ext e-doc">DOC</span></td>
+              <td class="ad">İş Güvenliği Talimatı — revizyon çalışması</td>
+              <td>TAL-018</td><td class="c">0.3</td><td>Talimat</td><td>Mehmet Yıldız</td>
+              <td class="c"><span class="pill p-tas">Taslak</span></td><td class="r">184</td><td>13.08.2026</td>
+            </tr>
+            <tr class="d-tas">
+              <td class="c"><span class="ext e-xml">XML</span></td>
+              <td class="ad">UBL şablon örneği (referans)</td>
+              <td>TAL-021-EK2</td><td class="c">0.1</td><td>Ek</td><td>Burak Şen</td>
+              <td class="c"><span class="pill p-tas">Taslak</span></td><td class="r">42</td><td>13.08.2026</td>
+            </tr>
+            <tr class="d-pas">
+              <td class="c"><span class="ext e-doc">DOC</span></td>
+              <td class="ad">Eski Fatura Kesim Talimatı (2024)</td>
+              <td>TAL-021</td><td class="c">3.2</td><td>Talimat</td><td>Mehmet Yıldız</td>
+              <td class="c"><span class="pill p-pas">Pasif</span></td><td class="r">1.020</td><td>08.01.2024</td>
+            </tr>
+            <tr class="d-pas">
+              <td class="c"><span class="ext e-pdf">PDF</span></td>
+              <td class="ad">Kapatılan şube arşiv talimatı</td>
+              <td>TAL-002</td><td class="c">1.0</td><td>Talimat</td><td>—</td>
+              <td class="c"><span class="pill p-pas">Geri dönüşümde</span></td><td class="r">274</td><td>15.03.2023</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--d-sur)"></span>Arşiv süresi dolmuş</span>
+          <span><span class="sw" style="background:var(--d-ony)"></span>Onay bekliyor</span>
+          <span><span class="sw" style="background:var(--d-onl)"></span>Yürürlükte</span>
+          <span><span class="sw" style="background:var(--d-tas)"></span>Taslak</span>
+          <span><span class="sw" style="background:var(--d-pas)"></span>Pasif / geri dönüşümde — <b>en sonda</b>, adı üstü çizili</span>
+        </div>
+        <div class="hint">
+          Satır rengi <b>Styles.OnGetContentStyle</b> ile veriliyor; öncelik <b>Pasif → Süresi dolmuş → Onayda → Yürürlükte → Taslak</b>.
+          Sıralama <b>PASIF ↑ · DURUM · TARIH ↓</b> — kapatılanlar listenin altına iner.
+          İçerik <b>GENDEPO.DOSYA</b> (FILESTREAM, hash-dedup) üzerinden okunur; eski kayıtlarda <b>IMAJ.BELGE</b> fallback'i devrede.
+        </div>
+      </div>
+
+      <!-- ALT DETAY SEKMELERI -->
+      <div class="tabs" style="margin-top:12px">
+        <div class="tab active" data-t="genel">Genel</div>
+        <div class="tab" data-t="revize">Revize <span class="b">4</span></div>
+        <div class="tab" data-t="ilgili">İlgili Doküman <span class="b">3</span></div>
+        <div class="tab" data-t="yetki">Yetkilendirme</div>
+      </div>
+
+      <div class="pane active" data-p="genel">
+        <div class="row">
+          <div class="col">
+            <div class="grid2">
+              <label>Doküman Adı</label><div class="inp">e-Fatura Kesim ve Seri Kullanım Talimatı</div>
+              <label>Konusu</label><div class="inp">Seri seçimi, senaryo ve koçan kullanımı</div>
+              <label>Doküman No</label><div class="inp">TAL-021</div>
+              <label>Sürümü</label><div class="inp" style="max-width:80px">4.0</div>
+              <label>Yönü</label><div class="inp combo">İç Doküman</div>
+              <label>Kategori</label><div class="inp combo">Talimat</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="grid2">
+              <label>Kurum</label><div class="inp combo">Feta Bilgisayar</div>
+              <label>Departman</label><div class="inp combo">Muhasebe</div>
+              <label>Lokasyon</label><div class="inp combo">Merkez / Arşiv-2</div>
+              <label>Sorumlusu</label><div class="inp combo">Mehmet Yıldız</div>
+              <label>Gizlilik Derecesi</label><div class="inp combo">Firma İçi</div>
+              <label>Arşiv Süresi</label><div class="inp" style="max-width:110px">10 yıl</div>
+            </div>
+          </div>
+        </div>
+        <div class="grid2" style="grid-template-columns:110px 1fr;margin-top:9px">
+          <label>Anahtar Kelimeler</label><div class="inp">e-fatura; seri; senaryo; koçan; GİB</div>
+          <label>Boyut (KB)</label><div class="inp ro" style="max-width:110px">1.204</div>
+        </div>
+      </div>
+
+      <div class="pane" data-p="revize">
+        <div class="dg">
+          <table>
+            <tr><th class="c" style="width:60px">SÜRÜM</th><th style="width:88px">TARİH</th><th style="width:120px">SORUMLU</th>
+                <th style="width:120px">ONAYLAYACAK</th><th style="width:120px">ONAYLAYAN</th><th>AÇIKLAMA</th></tr>
+            <tr class="d-onl"><td class="c"><b>4.0</b></td><td>14.08.2026</td><td>Mehmet Yıldız</td><td>Kalite Sorumlusu</td><td>Kalite Sorumlusu</td>
+                <td>Seri kuralları ekranı ve pasif seri mantığı eklendi</td></tr>
+            <tr><td class="c">3.2</td><td>08.01.2024</td><td>Mehmet Yıldız</td><td>Kalite Sorumlusu</td><td>Kalite Sorumlusu</td>
+                <td>e-Arşiv senaryoları güncellendi</td></tr>
+            <tr><td class="c">3.0</td><td>22.06.2023</td><td>Elif Aksoy</td><td>Kalite Sorumlusu</td><td>Kalite Sorumlusu</td>
+                <td>İhracat faturası bölümü eklendi</td></tr>
+            <tr><td class="c">2.0</td><td>05.02.2022</td><td>Elif Aksoy</td><td>Kalite Sorumlusu</td><td>Kalite Sorumlusu</td>
+                <td>İlk yayın sonrası kapsamlı revizyon</td></tr>
+          </table>
+        </div>
+        <div class="hint">Her revize <b>IMAJ</b> tarafında ayrı satırdır; içerik aynı ise <b>GENDEPO.DOSYA</b> hash-dedup sayesinde
+          tek kopya tutulur, yalnızca referans sayacı artar.</div>
+      </div>
+
+      <div class="pane" data-p="ilgili">
+        <div class="gridtb" style="border:none;padding:0 0 7px">
+          <span class="minibtn">➕ İlgili Ekle</span><span class="minibtn">🗑 Çıkar</span><span class="minibtn">👁 Gör</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th class="c" style="width:44px">Tipi</th><th>AD</th><th style="width:240px">KLASÖR</th><th class="c" style="width:60px">SÜRÜM</th></tr>
+            <tr><td class="c"><span class="ext e-pdf">PDF</span></td><td>Fatura Kesim Prosedürü</td><td>Kalite Yönetimi \ Prosedürler</td><td class="c">2.0</td></tr>
+            <tr><td class="c"><span class="ext e-xls">XLS</span></td><td>Koçan Tanım Çizelgesi</td><td>Kalite Yönetimi \ Formlar</td><td class="c">1.1</td></tr>
+            <tr><td class="c"><span class="ext e-xml">XML</span></td><td>UBL şablon örneği (referans)</td><td>Kalite Yönetimi \ Talimatlar</td><td class="c">0.1</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="pane" data-p="yetki">
+        <div class="gridtb" style="border:none;padding:0 0 7px">
+          <span class="minibtn">➕ Ekle</span><span class="minibtn">🗑 Sil</span><span class="minibtn">💾 Kaydet</span>
+          <span class="minibtn">📁 Klasörden Devral</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:110px">TÜR</th><th>KULLANICI / GRUP</th>
+                <th class="c" style="width:70px">GÖRME</th><th class="c" style="width:70px">REVİZE</th>
+                <th class="c" style="width:88px">DEĞİŞTİRME</th><th class="c" style="width:70px">SİLME</th></tr>
+            <tr><td>Grup</td><td>Muhasebe</td><td class="c">✔</td><td class="c">✔</td><td class="c"></td><td class="c"></td></tr>
+            <tr><td>Grup</td><td>Kalite</td><td class="c">✔</td><td class="c">✔</td><td class="c">✔</td><td class="c"></td></tr>
+            <tr><td>Kullanıcı</td><td>Mehmet Yıldız (sorumlu)</td><td class="c">✔</td><td class="c">✔</td><td class="c">✔</td><td class="c">✔</td></tr>
+            <tr class="d-pas"><td>Grup</td><td>Depo</td><td class="c">✔</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+          </table>
+        </div>
+        <div class="hint">Yetki satırı yoksa klasör yetkisi geçerlidir. Gizlilik derecesi "Gizli" olan dokümanlar,
+          yetkisi olmayan kullanıcıya listede <b>hiç</b> görünmez.</div>
+      </div>
+    </div>
+
+    <!-- ============ SAG: ONIZLEME ============ -->
+    <div class="side right">
+      <h5>Önizleme</h5>
+      <div class="prev">
+        <div class="sheet">📕</div>
+        <div class="nm">e-Fatura Kesim ve Seri Kullanım Talimatı</div>
+        <div class="mt">TAL-021 · sürüm 4.0 · PDF · 1.204 KB</div>
+        <div style="display:flex;gap:5px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn">👁 Gör</span><span class="minibtn">📤 Ver</span><span class="minibtn">✉ Gönder</span>
+        </div>
+      </div>
+
+      <div class="tvsep"></div>
+      <h5>Bilgi</h5>
+      <div class="kv"><span>Durum</span><b><span class="pill p-onl">Yürürlükte</span></b></div>
+      <div class="kv"><span>Gizlilik</span><b>Firma İçi</b></div>
+      <div class="kv"><span>Ekleyen</span><b>Mehmet Yıldız</b></div>
+      <div class="kv"><span>Ekleme</span><b>12.02.2022</b></div>
+      <div class="kv"><span>Değiştiren</span><b>Mehmet Yıldız</b></div>
+      <div class="kv"><span>Değiştirme</span><b>14.08.2026 10:32</b></div>
+      <div class="kv"><span>Onaylayan</span><b>Kalite Sorumlusu</b></div>
+      <div class="kv"><span>Arşiv bitiş</span><b>14.08.2036</b></div>
+      <div class="kv"><span>Depolama</span><b>GENDEPO.DOSYA</b></div>
+      <div class="kv"><span>Referans</span><b>3 kayıt (dedup)</b></div>
+
+      <div class="tvsep"></div>
+      <h5>Bağlantılar</h5>
+      <div class="kv"><span>🔗 Modül</span><b>Kalite</b></div>
+      <div class="kv"><span>🔗 İş</span><b>2 açık iş</b></div>
+      <div class="kv"><span>🔗 Duyuru</span><b>1 yayın</b></div>
+      <div style="padding:8px 12px;display:flex;gap:5px;flex-wrap:wrap">
+        <span class="minibtn">📢 Duyuru Yap</span><span class="minibtn">🔗 Kısayol</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Kart → <b>DOKUMAN</b> (AD · BELGENO · SURUM · KLASOR · KATEGORI · SORUMLU · GIZLILIK · ARSIVSURESI)</span>·
+    <span>Ek/ilişki → <b>IMAJ</b> (YERI=1 · YER_ID · DOSYAID)</span>·
+    <span>İçerik → <b>GENDEPO.DOSYA</b> (FILESTREAM · hash-dedup), eski: IMAJ.BELGE / .OBJ</span>·
+    <span>Yetki → <b>DOKUMANYETKI</b></span>·
+    <span>Log → <b>ISLEMLOG</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Klasör: <b>Kalite Yönetimi \ Talimatlar</b> · 11 kayıt</span>
+    <span>Depolama: <b>FILESTREAM</b> · dedup açık</span>
+    <span style="margin-left:auto">Seçili: TAL-021 sürüm 4.0</span>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.sidetab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.sidetab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.sidepane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.sidepane[data-sp="'+t.dataset.s+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.side .tvi').forEach(function(i){
+    i.addEventListener('click',function(){
+      document.querySelectorAll('.side .tvi').forEach(function(x){x.classList.remove('on')});
+      i.classList.add('on');
+    });
+  });
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

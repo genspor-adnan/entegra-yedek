@@ -14,119 +14,90 @@ object CariGorevFrame: TCariGorevFrame
   ParentColor = False
   ParentFont = False
   TabOrder = 0
-  object btnHesapKarti: TJvNavPanelButton
+  object btnHesapKarti: TcxButton
     Tag = 1
     Left = 0
     Top = 0
     Width = 451
     Height = 52
     Align = alTop
-    AllowAllUp = True
     Caption = 'Cari Hesap Kart'#305
+    Colors.Default = 10252717
+    Colors.Hot = 12158835
+    Colors.Pressed = 7814707
+    LookAndFeel.Kind = lfOffice11
+    LookAndFeel.NativeStyle = False
+    OptionsImage.ImageIndex = 0
+    OptionsImage.Images = PngImageList1
+    OptionsImage.Margin = 8
+    SpeedButtonOptions.GroupIndex = 1
+    TabOrder = 1
     Font.Charset = TURKISH_CHARSET
     Font.Color = clWhite
     Font.Height = -13
     Font.Name = 'Trebuchet MS'
     Font.Style = [fsBold]
-    GroupIndex = 1
-    HotTrack = False
-    HotTrackFont.Charset = TURKISH_CHARSET
-    HotTrackFont.Color = clWindowText
-    HotTrackFont.Height = -13
-    HotTrackFont.Name = 'Trebuchet MS'
-    HotTrackFont.Style = [fsBold]
     ParentFont = False
-    Colors.ButtonColorFrom = 15395562
-    Colors.ButtonColorTo = 12566463
-    Colors.ButtonHotColorFrom = 7286540
-    Colors.ButtonHotColorTo = 16032864
-    Colors.ButtonSelectedColorFrom = 7286540
-    Colors.ButtonSelectedColorTo = 16032864
-    ParentStyleManager = False
-    ImageIndex = 0
-    Images = PngImageList1
     OnClick = btnHesapKartiClick
-    ExplicitLeft = -1
-    ExplicitTop = -5
   end
-  object PanelDokum: TJvPanel
+  object PanelDokum: TPanel
     Left = 0
     Top = 52
     Width = 451
     Height = 52
     Align = alTop
     TabOrder = 0
-    ExplicitTop = 104
-    object btnDokumler: TJvNavPanelButton
+    object btnDokumler: TcxButton
       Tag = 1
       Left = 1
       Top = 1
       Width = 398
       Height = 50
       Align = alClient
-      AllowAllUp = True
       Caption = 'D'#246'k'#252'mler'
+      Colors.Default = 10252717
+      Colors.Hot = 12158835
+      Colors.Pressed = 7814707
+      LookAndFeel.Kind = lfOffice11
+      LookAndFeel.NativeStyle = False
+      OptionsImage.ImageIndex = 1
+      OptionsImage.Images = PngImageList1
+      OptionsImage.Margin = 8
+      SpeedButtonOptions.GroupIndex = 1
+      TabOrder = 0
       Font.Charset = TURKISH_CHARSET
       Font.Color = clWhite
       Font.Height = -13
       Font.Name = 'Trebuchet MS'
       Font.Style = [fsBold]
-      GroupIndex = 1
-      HotTrack = False
-      HotTrackFont.Charset = TURKISH_CHARSET
-      HotTrackFont.Color = clWindowText
-      HotTrackFont.Height = -13
-      HotTrackFont.Name = 'Trebuchet MS'
-      HotTrackFont.Style = [fsBold]
       ParentFont = False
-      Colors.ButtonColorFrom = 15395562
-      Colors.ButtonColorTo = 12566463
-      Colors.ButtonHotColorFrom = 7286540
-      Colors.ButtonHotColorTo = 16032864
-      Colors.ButtonSelectedColorFrom = 7286540
-      Colors.ButtonSelectedColorTo = 16032864
-      ParentStyleManager = False
-      ImageIndex = 1
-      Images = PngImageList1
       OnClick = btnDokumlerClick
       OnMouseDown = btnDokumlerMouseDown
-      ExplicitLeft = -5
-      ExplicitTop = 6
     end
-    object btnDokumlerOzel: TJvNavPanelButton
+    object btnDokumlerOzel: TcxButton
       Left = 399
       Top = 1
       Width = 51
       Height = 50
       Align = alRight
-      AllowAllUp = True
       Caption = #214'zel'
+      Colors.Default = 10252717
+      Colors.Hot = 12158835
+      Colors.Pressed = 7814707
+      LookAndFeel.Kind = lfOffice11
+      LookAndFeel.NativeStyle = False
+      OptionsImage.ImageIndex = 2
+      OptionsImage.Margin = 8
+      SpeedButtonOptions.GroupIndex = 1
+      TabOrder = 1
       Font.Charset = TURKISH_CHARSET
       Font.Color = clWhite
       Font.Height = -13
       Font.Name = 'Trebuchet MS'
       Font.Style = [fsBold]
-      GroupIndex = 1
-      HotTrack = False
-      HotTrackFont.Charset = TURKISH_CHARSET
-      HotTrackFont.Color = clWindowText
-      HotTrackFont.Height = -13
-      HotTrackFont.Name = 'Trebuchet MS'
-      HotTrackFont.Style = [fsBold]
       ParentFont = False
-      Colors.ButtonColorFrom = 15395562
-      Colors.ButtonColorTo = 12566463
-      Colors.ButtonHotColorFrom = 7286540
-      Colors.ButtonHotColorTo = 16032864
-      Colors.ButtonSelectedColorFrom = 7286540
-      Colors.ButtonSelectedColorTo = 16032864
-      ParentStyleManager = False
-      ImageIndex = 2
       OnClick = btnDokumlerOzelClick
       OnMouseDown = btnDokumlerMouseDown
-      ExplicitLeft = 400
-      ExplicitTop = 104
-      ExplicitHeight = 200
     end
   end
   object PngImageList1: TPngImageList
@@ -134,6 +105,8 @@ object CariGorevFrame: TCariGorevFrame
     Width = 48
     PngImages = <
       item
+        Background = clWindow
+        Name = 'PngImage0'
         PngImage.Data = {
           89504E470D0A1A0A0000000D4948445200000030000000300802000000D8606E
           D00000001974455874536F6674776172650041646F626520496D616765526561
@@ -220,10 +193,10 @@ object CariGorevFrame: TCariGorevFrame
           828D4B1DA1D0D68F3E2A282820D3E5234E92EFD42CE7008EBEA4AD3F76D3D746
           681128503ECA977C8C460EC922E10F07A46F80105646F95FC7FF7DFB1F4A4641
           BC26421ADE0000000049454E44AE426082}
-        Name = 'PngImage0'
-        Background = clWindow
       end
       item
+        Background = clWindow
+        Name = 'PngImage1'
         PngImage.Data = {
           89504E470D0A1A0A0000000D49484452000000300000003008060000005702F9
           870000002A744558744372656174696F6E2054696D650053612038204D727A20
@@ -326,11 +299,8 @@ object CariGorevFrame: TCariGorevFrame
           435A2B42EE5F066BCF843724585781B525DE0F2027D6F63BACED9B65ED9B4E40
           6DF0C8FDB0F4425C66C3CACD18F700F81F972C597253FF33E37F46E056B6AF08
           DCEAF6A527F06F225EFCB882BFCCA30000000049454E44AE426082}
-        Name = 'PngImage1'
-        Background = clWindow
       end>
     Left = 241
     Top = 147
-    Bitmap = {}
   end
 end

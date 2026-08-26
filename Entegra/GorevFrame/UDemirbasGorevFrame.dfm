@@ -8,13 +8,12 @@ object DemirbasGorevFrame: TDemirbasGorevFrame
   ParentBackground = False
   ParentColor = False
   TabOrder = 0
-  object btnHesapKarti: TJvNavPanelButton
+  object btnHesapKarti: TcxButton
     Left = 0
     Top = 0
     Width = 451
     Height = 52
     Align = alTop
-    AllowAllUp = True
     Caption = 'Demirba'#351' Kart'#305
     Down = True
     Font.Charset = TURKISH_CHARSET
@@ -22,26 +21,19 @@ object DemirbasGorevFrame: TDemirbasGorevFrame
     Font.Height = -13
     Font.Name = 'Trebuchet MS'
     Font.Style = [fsBold]
-    GroupIndex = 1
-    HotTrack = False
-    HotTrackFont.Charset = TURKISH_CHARSET
-    HotTrackFont.Color = clWindowText
-    HotTrackFont.Height = -13
-    HotTrackFont.Name = 'Trebuchet MS'
-    HotTrackFont.Style = [fsBold]
+    SpeedButtonOptions.GroupIndex = 1
     ParentFont = False
-    Colors.ButtonColorFrom = 15395562
-    Colors.ButtonColorTo = 12566463
-    Colors.ButtonHotColorFrom = 8454295
-    Colors.ButtonHotColorTo = 6488417
-    Colors.ButtonSelectedColorFrom = 8454295
-    Colors.ButtonSelectedColorTo = 6488417
-    ParentStyleManager = False
-    ImageIndex = 0
-    Images = PngImageList1
+    OptionsImage.ImageIndex = 0
+    OptionsImage.Images = PngImageList1
     OnClick = btnHesapKartiClick
     ExplicitLeft = 1
     ExplicitTop = -5
+    OptionsImage.Margin = 8
+    Colors.Default = 10252717
+    Colors.Hot = 12158835
+    Colors.Pressed = 7814707
+    LookAndFeel.Kind = lfOffice11
+    LookAndFeel.NativeStyle = False
   end
   object PanelDokumler: TPanel
     Left = 0
@@ -51,75 +43,58 @@ object DemirbasGorevFrame: TDemirbasGorevFrame
     Align = alTop
     Caption = 'Panel1'
     TabOrder = 0
-    object JvNavPanelButton2: TJvNavPanelButton
+    object JvNavPanelButton2: TcxButton
       Left = 400
       Top = 1
       Width = 50
       Height = 50
       Align = alRight
-      AllowAllUp = True
       Caption = #214'zel'
       Font.Charset = TURKISH_CHARSET
       Font.Color = clWhite
       Font.Height = -13
       Font.Name = 'Trebuchet MS'
       Font.Style = [fsBold]
-      GroupIndex = 1
-      HotTrack = False
-      HotTrackFont.Charset = TURKISH_CHARSET
-      HotTrackFont.Color = clWindowText
-      HotTrackFont.Height = -13
-      HotTrackFont.Name = 'Trebuchet MS'
-      HotTrackFont.Style = [fsBold]
+      SpeedButtonOptions.GroupIndex = 1
       ParentFont = False
-      WordWrap = True
-      Colors.ButtonColorFrom = 15395562
-      Colors.ButtonColorTo = 12566463
-      Colors.ButtonHotColorFrom = 8454295
-      Colors.ButtonHotColorTo = 6488417
-      Colors.ButtonSelectedColorFrom = 8454295
-      Colors.ButtonSelectedColorTo = 6488417
-      ParentStyleManager = False
-      ImageIndex = -1
+      OptionsImage.ImageIndex = -1
       OnClick = btnUpAndDown
       OnMouseDown = btnDokumlerMouseDown
+      OptionsImage.Margin = 8
+      Colors.Default = 10252717
+      Colors.Hot = 12158835
+      Colors.Pressed = 7814707
+      LookAndFeel.Kind = lfOffice11
+      LookAndFeel.NativeStyle = False
     end
-    object btnDokumler: TJvNavPanelButton
+    object btnDokumler: TcxButton
       Tag = 1
       Left = 1
       Top = 1
       Width = 399
       Height = 50
       Align = alClient
-      AllowAllUp = True
       Caption = 'D'#246'k'#252'mler'
       Font.Charset = TURKISH_CHARSET
       Font.Color = clWhite
       Font.Height = -13
       Font.Name = 'Trebuchet MS'
       Font.Style = [fsBold]
-      GroupIndex = 1
-      HotTrack = False
-      HotTrackFont.Charset = TURKISH_CHARSET
-      HotTrackFont.Color = clWindowText
-      HotTrackFont.Height = -13
-      HotTrackFont.Name = 'Trebuchet MS'
-      HotTrackFont.Style = [fsBold]
+      SpeedButtonOptions.GroupIndex = 1
       ParentFont = False
-      Colors.ButtonColorFrom = 15395562
-      Colors.ButtonColorTo = 12566463
-      Colors.ButtonHotColorFrom = 8454295
-      Colors.ButtonHotColorTo = 6488417
-      Colors.ButtonSelectedColorFrom = 8454295
-      Colors.ButtonSelectedColorTo = 6488417
-      ParentStyleManager = False
-      ImageIndex = 1
-      Images = PngImageList1
+      OptionsImage.ImageIndex = 1
+      OptionsImage.Images = PngImageList1
       OnClick = btnUpAndDown
       OnMouseDown = btnDokumlerMouseDown
       ExplicitTop = 0
       ExplicitWidth = 521
       ExplicitHeight = 52
+      OptionsImage.Margin = 8
+      Colors.Default = 10252717
+      Colors.Hot = 12158835
+      Colors.Pressed = 7814707
+      LookAndFeel.Kind = lfOffice11
+      LookAndFeel.NativeStyle = False
     end
   end
   object PngImageList1: TPngImageList

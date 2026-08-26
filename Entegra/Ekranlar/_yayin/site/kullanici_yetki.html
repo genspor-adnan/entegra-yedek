@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kullanıcı Düzenleme ve Yetkilendirme — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    --rolsec:#b23b3b;                 /* Delphi'de secili rol satiri kirmizi yazilir */
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1560px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{height:26px;padding:0 10px;border:1px solid var(--line);border-radius:3px;
+    background:linear-gradient(var(--btnfrom),var(--btnto));cursor:pointer;font-size:11.5px;
+    display:flex;align-items:center;gap:5px;white-space:nowrap}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:linear-gradient(#3d7fc4,#2b5c95);border-color:#2b5c95;color:#fff;font-weight:bold}
+  .btn.danger{background:linear-gradient(#d06a66,#b8433f);border-color:#b8433f;color:#fff}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 3px}
+
+  /* ---------- 4 sutunlu govde: roller | kullanicilar | yetki agaci | detay ---------- */
+  .wrap{display:flex;align-items:stretch;min-height:560px}
+  .sut{display:flex;flex-direction:column;min-width:0;border-right:1px solid var(--line);position:relative}
+  .sut:last-child{border-right:0}
+  .s-rol{width:436px;flex:none}
+  .s-kul{width:270px;flex:none}
+  .s-yet{flex:1;min-width:280px}
+  .s-det{width:250px;flex:none}
+
+  .sbas{display:flex;align-items:center;gap:6px;padding:6px 9px;background:var(--head2);
+    border-bottom:1px solid var(--line);font-weight:bold;font-size:11.5px;color:var(--navy)}
+  .sbas .ic{font-size:13px}
+  .salet{display:flex;gap:4px;padding:5px 7px;background:var(--head);border-bottom:1px solid var(--line2)}
+  .mini{height:23px;padding:0 8px;border:1px solid var(--line);border-radius:3px;
+    background:linear-gradient(var(--btnfrom),var(--btnto));cursor:pointer;font-size:11px;
+    display:inline-flex;align-items:center;gap:4px;white-space:nowrap;color:var(--ink)}
+  .mini:hover{border-color:var(--accent)}
+  .sgov{flex:1;overflow:auto;min-height:0}
+
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:5px 7px;font-size:11px;
+    color:#3a5573;font-weight:bold;white-space:nowrap;position:sticky;top:0;z-index:2}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:3px 7px;
+    font-size:11.5px;white-space:nowrap}
+  td.c,th.c{text-align:center}
+  tbody tr{cursor:default}
+  tbody tr:hover td{background:#f6f9fd}
+  tbody tr.sec td{background:var(--sel)!important;box-shadow:inset 0 0 0 1px var(--selbd)}
+  /* Delphi'de rol satirlari kirmizi yazilir; secili olan kalin */
+  .s-rol tbody td.rol{color:var(--rolsec)}
+  .s-rol tbody tr.sec td.rol{font-weight:bold}
+
+  /* agac girintisi */
+  .ag{cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:5px}
+  .ag .ok{width:11px;height:11px;border:1px solid #9bb0c6;border-radius:2px;background:#fff;
+    display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#3a5573;flex:none}
+  .ag .bos{width:11px;flex:none}
+  .d1{padding-left:2px}.d2{padding-left:18px}.d3{padding-left:34px}
+
+  /* onay kutusu */
+  .cb{width:13px;height:13px;border:1px solid #90a4b8;border-radius:2px;background:#fff;
+    display:inline-block;position:relative;cursor:pointer;vertical-align:-2px}
+  .cb.on{background:#2f6db3;border-color:#2f6db3}
+  .cb.on::after{content:"";position:absolute;left:4px;top:1px;width:3px;height:7px;
+    border:solid #fff;border-width:0 2px 2px 0;transform:rotate(42deg)}
+
+  /* sag detay */
+  .kut{border-bottom:1px solid var(--line)}
+  .kut>h6{margin:0;padding:5px 9px;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;
+    color:var(--navy);background:#cfe0f4;border-bottom:1px solid var(--line);font-weight:bold}
+  .kut .ic2{padding:8px 9px}
+  .memo{width:100%;height:150px;border:1px solid var(--line);border-radius:2px;background:#fff;
+    font:inherit;font-size:11.5px;padding:5px;resize:vertical}
+  .hak{display:flex;align-items:center;gap:7px;padding:4px 2px;font-size:12px;cursor:pointer}
+  .stab{display:flex;gap:2px;padding:5px 6px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .st{padding:4px 10px;border:1px solid var(--line);border-bottom:0;border-radius:3px 3px 0 0;
+    background:linear-gradient(var(--btnfrom),var(--btnto));cursor:pointer;font-size:11px;color:var(--muted)}
+  .st.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .spane{display:none;padding:8px 9px}.spane.on{display:block}
+  .rd{display:flex;align-items:center;gap:7px;padding:3px 2px;font-size:11.5px;cursor:pointer}
+  .rd input{margin:0}
+
+  .hint{font-size:10.5px;color:var(--muted);line-height:1.6;padding:7px 9px;background:var(--grpbg);
+    border-top:1px solid var(--line2)}
+  .statusbar{display:flex;gap:16px;padding:5px 10px;background:var(--head);border-top:1px solid var(--line);
+    font-size:10.5px;color:var(--muted)}
+  .statusbar b{color:var(--navy)}
+  .maprow{max-width:1560px;margin:10px auto 0;font-size:10.5px;color:var(--muted);line-height:1.8}
+  .maprow b{color:var(--navy)}
+
+  /* ===== KOYU TEMA ===== */
+  body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+    --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+    --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;--rolsec:#ff9a9a;
+    background:#12171e!important;color:#dfe6ee!important}
+  body.koyu .win{background:#1b222c!important;border-color:#2c3542!important;box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+  body.koyu .title{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+  body.koyu .toolbar,body.koyu .salet,body.koyu .sbas,body.koyu .stab,body.koyu .statusbar{
+    background:#1e2632!important;border-color:#2c3542!important}
+  body.koyu .btn,body.koyu .mini,body.koyu .st{background:linear-gradient(#26313f,#1f2836)!important;
+    border-color:#33404f!important;color:#dfe6ee!important}
+  body.koyu .btn.primary{background:linear-gradient(#3d7fc4,#2b5c95)!important;border-color:#2b5c95!important;color:#fff!important}
+  body.koyu .btn.danger{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+  body.koyu .st.on{background:#1b222c!important;color:#cfe0f4!important}
+  body.koyu th{background:linear-gradient(#26313f,#1f2836)!important;color:#a8c0d8!important;border-color:#2c3542!important}
+  body.koyu td{border-color:#242c37!important;color:#dbe3ec!important}
+  body.koyu tbody tr:hover td{background:#243040!important}
+  body.koyu tbody tr.sec td{background:#1e3a56!important}
+  body.koyu .kut{border-color:#2c3542!important}
+  body.koyu .kut>h6{background:#24405f!important;color:#cfe0f4!important;border-color:#2c3542!important}
+  body.koyu .memo,body.koyu .cb,body.koyu .ag .ok{background:#1c242f!important;border-color:#33404f!important;color:#dfe6ee!important}
+  body.koyu .cb.on{background:#2f6db3!important;border-color:#2f6db3!important}
+  body.koyu .hint{background:#1e2632!important;border-color:#2c3542!important}
+  body.koyu .sut{border-color:#2c3542!important}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Kullanıcı Düzenleme ve Yetkilendirme Ekranı
+    <span class="sp">UKullaniciYetki · TKullaniciYetkiDlg · ROLLER · YETKI · YETKIEK · REHBER</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="sepv"></div>
+    <div class="btn">☑ Tüm Grubu Seç</div>
+    <div class="btn">☐ Tüm Grubu Kaldır</div>
+    <div class="sepv"></div>
+    <div class="btn">⧉ Başka Bir Rolden Yetki Kopyala</div>
+    <div class="sepv"></div>
+    <div class="btn">🏢 Departman Listesi Düzenle</div>
+    <div class="btn">🧑‍💼 Görev Listesi Düzenle</div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- ============ 1) ORGANİZASYON / ROLLER ============ -->
+    <div class="sut s-rol">
+      <div class="sbas"><span class="ic">🗂</span> Organizasyon / Roller</div>
+      <div class="salet">
+        <span class="mini">➕ Yeni</span><span class="mini">🗑 Sil</span><span class="mini">✎ Düzenle</span>
+      </div>
+      <div class="sgov">
+        <table>
+          <thead><tr>
+            <th style="width:106px">ŞUBE</th>
+            <th style="width:98px">DEPARTMAN</th>
+            <th>GÖREV / ROL</th>
+            <th class="c" style="width:30px" title="Tüm yetki">TY</th>
+          </tr></thead>
+          <tbody id="rolGovde">
+            <tr class="sec"><td>Gentegre Merkez</td><td>Bilgi İşlem</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>CRM Uzmanı</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>Yönetim</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>Yönetici</span></td>
+                <td class="c"><span class="cb on"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>İş Sağlığı ve Güvenliği</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>Doktor</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>Sekreterlik</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>Sekreter</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>Üretim</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>CNC Operatörü</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>Depo</td>
+                <td class="rol"><span class="ag"><span class="ok">−</span>Depo Sorumlusu</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>Depo</td>
+                <td class="rol d2"><span class="ag"><span class="bos"></span>Depo Elemanı</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>İdari ve Mali İşler</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>İdari ve Mali İşler Sorumlusu</span></td>
+                <td class="c"><span class="cb on"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>İdari ve Mali İşler</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>Muhasebe Personeli</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>Kalite Kontrol</td>
+                <td class="rol"><span class="ag"><span class="ok">+</span>Ürün Kalite Kontrol</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>Kalite Kontrol</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>Genel Müdür</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>Montaj ve Paketleme</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>Montaj ve Paketleme</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>Satın Alma &amp; İK</td>
+                <td class="rol"><span class="ag"><span class="ok">+</span>Müşteri Yönetimi, Satın Alma</span></td>
+                <td class="c"><span class="cb on"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>Satın Alma &amp; İK</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>Müşteri Temsilcisi</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Antalya</td><td>Satış</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>Satış Sorumlusu</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Antalya</td><td>Satış</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>Grup Direktörü</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>Yemekhane</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>Yemekhane Sorumlusu</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>Kalite Yönetimi</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>Kalite Yönetim</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>Kalite Yönetimi</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>Kanal Yöneticisi</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>Grafik</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>Grafik Tasarım</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+            <tr><td>Gentegre Merkez</td><td>ArGe</td>
+                <td class="rol"><span class="ag"><span class="bos"></span>Ar-Ge Sorumlusu</span></td>
+                <td class="c"><span class="cb"></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="hint"><b>TY</b> = tüm yetki. İşaretliyse rol, aşağıdaki ağaçtaki
+        <b>bütün modüllere</b> tam yetkili sayılır ve tek tek işaretleme gerekmez.
+        Ağaç <b>ROLLER.USTID</b> ile kurulur — alt roller üstünün yetkilerini devralır.</div>
+    </div>
+
+    <!-- ============ 2) ROLDEKİ KULLANICILAR ============ -->
+    <div class="sut s-kul">
+      <div class="sbas"><span class="ic">👤</span> Roldeki Kullanıcılar</div>
+      <div class="salet"><span class="mini">✎ Düzenle</span></div>
+      <div class="sgov">
+        <table>
+          <thead><tr>
+            <th>AD SOYAD</th><th style="width:74px">KOD</th>
+            <th class="c" style="width:48px">AKTİF</th>
+          </tr></thead>
+          <tbody>
+            <tr class="sec"><td>▸ Mehmet Yıldız</td><td>m.yildiz</td><td class="c"><span class="cb on"></span></td></tr>
+            <tr><td>Ayşe Demir</td><td>a.demir</td><td class="c"><span class="cb on"></span></td></tr>
+            <tr><td>Cenk Doğan</td><td>c.dogan</td><td class="c"><span class="cb on"></span></td></tr>
+            <tr><td>Selin Kara</td><td>s.kara</td><td class="c"><span class="cb"></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="hint">Kullanıcılar <b>REHBER</b>'den gelir; role bağlanma
+        <b>KULLANICI.ROLID</b> üzerindendir. <b>Aktif</b> kaldırılırsa kullanıcı
+        rolün yetkilerini kaybeder ama kaydı silinmez.</div>
+    </div>
+
+    <!-- ============ 3) ROLÜN YETKİLERİ ============ -->
+    <div class="sut s-yet">
+      <div class="sbas"><span class="ic">🔑</span> Rolün Yetkileri</div>
+      <div class="salet">
+        <span class="mini">⊞ Tümünü Aç</span><span class="mini">⊟ Tümünü Kapat</span>
+        <span class="mini">☑ Tüm Grubu Seç</span><span class="mini">☐ Tüm Grubu Kaldır</span>
+      </div>
+      <div class="sgov">
+        <table>
+          <thead><tr><th>MODÜL ADI</th><th class="c" style="width:60px">KOD</th></tr></thead>
+          <tbody id="yetkiGovde"></tbody>
+        </table>
+      </div>
+      <div class="hint">Ağaç <b>YETKI</b> tablosundaki modül kayıtlarıdır;
+        role özel işaretler <b>YETKIEK</b>'te (<b>ROLID · MODULID · GOR · EKLE · DEGISTIR · SIL</b>)
+        tutulur. Bir üst düğüm işaretlenince altındakiler de işaretlenir.</div>
+    </div>
+
+    <!-- ============ 4) DETAY ============ -->
+    <div class="sut s-det">
+      <div class="kut">
+        <h6>Açıklama</h6>
+        <div class="ic2">
+          <textarea class="memo" placeholder="Seçili modül / yetki için not…">Stok Listesi ekranında yalnız kendi şubesinin stoklarını görür; miktar düzeltmesi yapamaz.</textarea>
+        </div>
+      </div>
+
+      <div class="kut">
+        <h6>Temel Haklar</h6>
+        <div class="ic2">
+          <label class="hak"><span class="cb on"></span> Görsün</label>
+          <label class="hak"><span class="cb on"></span> Eklesin</label>
+          <label class="hak"><span class="cb on"></span> Değiştirsin</label>
+          <label class="hak"><span class="cb"></span> Silsin</label>
+        </div>
+      </div>
+
+      <div class="kut" style="flex:1">
+        <div class="stab">
+          <div class="st on" data-s="secim">Seçim</div>
+          <div class="st" data-s="demirbas">Demirbaş Kategori</div>
+        </div>
+        <div class="spane on" data-sp="secim">
+          <label class="rd"><input type="radio" name="kapsam"> Sadece Kendisinin</label>
+          <label class="rd"><input type="radio" name="kapsam"> Kendi Departmanındaki Herkesin</label>
+          <label class="rd"><input type="radio" name="kapsam" checked> Kendi Şubesindeki Herkesin</label>
+          <label class="rd"><input type="radio" name="kapsam"> Tüm Şubelerde Herkesin</label>
+          <div class="hint" style="background:none;border:0;padding:8px 0 0">
+            Kayıt kapsamı — ekranın <b>hangi kayıtları</b> göstereceğini belirler.
+            "Sadece Kendisinin" seçilirse liste <b>EKLEYEN = kullanıcı</b> ile süzülür.
+          </div>
+        </div>
+        <div class="spane" data-sp="demirbas">
+          <label class="rd"><input type="radio" name="dmb" checked> Tümünü Görsün</label>
+          <label class="rd"><input type="radio" name="dmb"> Hiç Görmesin</label>
+          <label class="rd"><input type="radio" name="dmb"> Seçilenleri Görsün</label>
+          <div style="display:flex;gap:5px;margin-top:7px">
+            <span class="mini">🔎 Seç</span>
+            <span class="mini">Yetkili oldukları</span>
+            <span class="mini">Tümü</span>
+          </div>
+          <div class="hint" style="background:none;border:0;padding:8px 0 0">
+            Demirbaş kategorisi bazlı kısıt — yalnızca <b>Demirbaş</b> modülündeki
+            düğümlerde etkindir.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Seçili rol: <b>CRM Uzmanı</b> (Bilgi İşlem)</span>
+    <span>Roldeki kullanıcı: <b>4</b> · aktif <b>3</b></span>
+    <span>İşaretli yetki: <b>38</b> / 214 düğüm</span>
+    <span style="margin-left:auto">Değişiklikler <b>Kaydet</b> ile yazılır</span>
+  </div>
+</div>
+
+<div class="maprow">
+  <b>Veri modeli (kroki):</b>
+  <span>Ekran → <b>UKullaniciYetki · TKullaniciYetkiDlg</b></span>·
+  <span>Organizasyon → <b>ROLLER</b> (ID · USTID · SUBE · DEPARTMAN · GOREVID · TY)</span>·
+  <span>Modül ağacı → <b>YETKI</b> (MODULID · MODULADI · USTID)</span>·
+  <span>Rol yetkisi → <b>YETKIEK</b> (ROLID · MODULID · GOR · EKLE · DEGISTIR · SIL · KAPSAM)</span>·
+  <span>Kullanıcılar → <b>REHBER</b> + <b>KULLANICI.ROLID</b></span>·
+  <span>Seçenekler → <b>GENINI</b></span>·
+  <span>Denetim → <b>GENDEPO.ISLEMLOG</b></span>
+</div>
+
+<script>
+/* ==========================================================================
+   Modul yetki agaci — Delphi'de cxDBTreeList1 (YETKI tablosu)
+   ========================================================================== */
+(function(){
+  var AGAC = [
+    ['Görev Menüsü', 'GRV', []],
+    ['Genel Ayarlar', 'GNL', []],
+    ['Kasiyer', 'KSR', []],
+    ['Pano', 'PNO', []],
+    ['CRM', 'CRM', []],
+    ['Cari', 'CAR', []],
+    ['Kasa', 'KSA', [
+      ['Kasa Listesi', 'KSA01', true],
+      ['Aksiyonlar Liste', 'KSA02', true],
+      ['Aksiyonlar Takvim', 'KSA03'],
+      ['Masraf Merkezi Tanımları', 'KSA04'],
+      ['Masraf Merkezi / Dağıtım', 'KSA05'],
+      ['Bütçe', 'KSA06'],
+      ['Gelir Merkezi Tanımları', 'KSA07'],
+      ['Şube Yetkileri', 'KSA08', true],
+      ['Kasa Dökümleri', 'KSA09', true]
+    ]],
+    ['Alış Satış', 'ALS', []],
+    ['Banka', 'BNK', []],
+    ['Stok', 'STK', [
+      ['Stok Listesi', 'STK01', true],
+      ['Stoktan Talep', 'STK02'],
+      ['Transferler', 'STK03'],
+      ['Stok Giriş Fişi', 'STK04'],
+      ['Stok Çıkış Fişi', 'STK05'],
+      ['Stok Sayım Fişi', 'STK06'],
+      ['ÜTS Bildirim', 'STK07'],
+      ['Şube Yetkileri', 'STK08', true],
+      ['Stok Dökümler', 'STK09', true]
+    ]],
+    ['Üretim', 'URT', []],
+    ['İK', 'IKR', []],
+    ['Demirbaş', 'DMB', []],
+    ['Teklif', 'TKF', []],
+    ['Servis', 'SRV', []],
+    ['Doküman', 'DKM', []],
+    ['Kalite', 'KLT', []],
+    ['Yönetim', 'YON', []]
+  ];
+
+  var govde = document.getElementById('yetkiGovde');
+  /* varsayilan olarak Kasa ve Stok acik gelir (ekran goruntusundeki gibi) */
+  var acik = {KSA:true, STK:true};
+
+  function ciz(){
+    govde.innerHTML = '';
+    AGAC.forEach(function(m){
+      var ad = m[0], kod = m[1], alt = m[2] || [];
+      var tr = document.createElement('tr');
+      var isaret = alt.length ? (acik[kod] ? '−' : '+') : '+';
+      tr.innerHTML = '<td class="d1"><span class="ag" data-k="' + kod + '">' +
+        '<span class="ok">' + isaret + '</span>' + ad + '</span></td>' +
+        '<td class="c">' + kod + '</td>';
+      govde.appendChild(tr);
+      if (!acik[kod]) return;
+      alt.forEach(function(a){
+        var t2 = document.createElement('tr');
+        var dallı = a[2];
+        t2.innerHTML = '<td class="d2"><span class="ag">' +
+          (dallı ? '<span class="ok">+</span>' : '<span class="bos"></span>') +
+          '<span style="color:var(--accent)">' + a[0] + '</span></span></td>' +
+          '<td class="c">' + a[1] + '</td>';
+        if (a[0] === 'Stok Listesi') t2.className = 'sec';
+        govde.appendChild(t2);
+      });
+    });
+  }
+
+  govde.addEventListener('click', function(e){
+    var a = e.target.closest('.ag[data-k]');
+    if (!a) return;
+    var k = a.dataset.k;
+    acik[k] = !acik[k];
+    ciz();
+  });
+
+  ciz();
+
+  /* rol satiri secimi */
+  document.getElementById('rolGovde').addEventListener('click', function(e){
+    var tr = e.target.closest('tr'); if (!tr) return;
+    if (e.target.classList.contains('cb')) { e.target.classList.toggle('on'); return; }
+    [].forEach.call(this.querySelectorAll('tr'), function(x){ x.classList.remove('sec'); });
+    tr.classList.add('sec');
+  });
+
+  /* onay kutulari */
+  document.addEventListener('click', function(e){
+    if (e.target.classList && e.target.classList.contains('cb')) e.target.classList.toggle('on');
+  });
+
+  /* Secim / Demirbas Kategori sekmeleri */
+  document.querySelectorAll('.st').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.st').forEach(function(x){ x.classList.remove('on'); });
+      document.querySelectorAll('.spane').forEach(function(x){ x.classList.remove('on'); });
+      t.classList.add('on');
+      var p = document.querySelector('.spane[data-sp="' + t.dataset.s + '"]');
+      if (p) p.classList.add('on');
+    });
+  });
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle('koyu', ad === 'koyu'); }
+  addEventListener('message', function(e){ if (e.data && e.data.gentegre === 'tema') tema(e.data.ad); });
+  (function(){ var m = (location.hash||'').match(/tema=([a-z]+)/i); if (m) tema(m[1]); })();
+})();
+</script>
+
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win{max-width:none!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+body.gomulu .title{display:none!important}
+body.gomulu .maprow{max-width:none!important;padding:0 12px 12px}
+</style>
+<script>
+(function(){
+  if ((location.hash||'').indexOf('gomulu') >= 0) document.body.classList.add('gomulu');
+  function boy(){ try{ parent.postMessage({gentegre:'olcu', yukseklik: document.documentElement.scrollHeight}, '*'); }catch(e){} }
+  addEventListener('load', boy); setTimeout(boy, 300);
+  try{ parent.postMessage({gentegre:'hazir'}, '*'); }catch(e){}
+})();
+</script>
+</body>
+</html>

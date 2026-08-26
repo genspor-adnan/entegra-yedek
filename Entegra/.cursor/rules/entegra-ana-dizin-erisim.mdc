@@ -1,0 +1,12 @@
+---
+description: Entegra ana dizininde dosya erişimi ve düzenleme izni
+alwaysApply: true
+---
+
+# Entegra Ana Dizin Izni
+
+- Kullanici, `C:\Users\HP\Entegra\Entegra` ana dizini altindaki tum proje dosyalarina gorev gerektirdiginde okuma ve degistirme izni verdigini belirtmistir.
+- Bu izin, proje uzerinde agent olarak calisirken gerekli dosyalari incelemek, duzenlemek, derlemek ve dogrulamak icin varsayilan kabul edilir.
+- Ilgisiz kullanici degisiklikleri geri alinmaz; mevcut calismalarla uyumlu ilerlenir.
+- Yikici islemler, toplu silme, reset, checkout veya geri alma gibi riskli komutlar kullanicinin acik istegi olmadan uygulanmaz.
+- Codex ortaminda ek guvenlik/izin penceresi cikarsa, bu kural kullanicinin niyetini belirtir ancak sistem izin mekanizmasinin yerine gecmez.

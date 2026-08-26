@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stok Giriş Fişi Sihirbazı — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* satir renkleri */
+    --s-yok:#f7cfcf; --s-yok-t:#7d1f1f;   /* eksik / zorunlu bilgi yok */
+    --s-kri:#fbe6ae; --s-kri-t:#7a5407;   /* uyari / sinirda           */
+    --s-skt:#f6d9c0; --s-skt-t:#8a4a12;   /* SKT yakin parti           */
+    --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;   /* izleme gerektirmiyor      */
+    /* gorev butonu (Delphi clGorevTusuSecili / Pasif) */
+    --tus-pas:#9c71ad; --tus-sec:#1f6fbe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2b6b41;background:linear-gradient(#4fa26a,#2e7d46);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45;pointer-events:none}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+
+  /* SIHIRBAZ IKI SUTUN — sol adim listesi + sag govde */
+  .wrap{display:grid;grid-template-columns:268px 1fr;gap:0;min-height:520px}
+
+  /* SOL: ADIM LISTESI (JvWizard sol seridi) */
+  .wsol{background:#f4f7fa;border-right:1px solid var(--line2);padding:10px 8px 12px}
+  .wsol h5{margin:2px 6px 8px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .wadim{display:flex;gap:9px;align-items:flex-start;border:1px solid transparent;border-radius:4px;
+    padding:8px 9px;margin-bottom:3px;cursor:pointer}
+  .wadim:hover{background:#e9f0f8}
+  .wadim .no{width:20px;height:20px;flex:none;border-radius:50%;background:#dbe3ec;color:#5a6b7d;
+    display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:bold;border:1px solid #c6d1dc}
+  .wadim .tx{min-width:0}
+  .wadim .ad{font-size:11.5px;font-weight:bold;color:var(--ink);line-height:1.3}
+  .wadim .ac{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.35}
+  .wadim.bitti .no{background:#e9f6ed;color:#2e7d46;border-color:#bfe0cb}
+  .wadim.bitti .ad{color:var(--muted)}
+  .wadim.on{background:#fff;border-color:var(--selbd);box-shadow:0 1px 5px rgba(30,70,120,.10)}
+  .wadim.on .no{background:var(--tus-sec);color:#fff;border-color:#1a5c9f}
+  .wadim.on .ad{color:var(--navy)}
+  .wsep{height:1px;background:var(--line2);margin:9px 8px}
+
+  /* SAG: AKTIF ADIM GOVDESI */
+  .center{min-width:0;display:flex;flex-direction:column}
+  .wbas{padding:12px 14px 9px;border-bottom:1px solid var(--line2);background:#fbfcfe}
+  .wbas .h{font-size:14px;font-weight:bold;color:var(--navy)}
+  .wbas .s{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .pane{display:none;padding:14px}
+  .pane.active{display:block}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);padding:10px 12px 12px;margin-bottom:12px}
+  .grp>h4{margin:0 0 9px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3;font-weight:bold}
+  .agrid{display:grid;grid-template-columns:118px 1fr 118px 1fr;gap:7px 8px;align-items:center}
+  .agrid label{font-size:10.5px;color:var(--muted);text-align:right}
+  .agrid label .rq{color:var(--req);font-weight:bold}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:22px;padding:0 6px;font-size:11.5px;
+    display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.pas{background:#eef1f4;color:var(--muted)}
+  .inp.multi{height:auto;min-height:52px;padding:5px 6px;white-space:normal;align-items:flex-start;line-height:1.45}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:5px;top:2px;color:var(--muted);font-size:10px}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px;cursor:default}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .gridtb{display:flex;gap:4px;padding:0 0 7px;align-items:center;flex-wrap:wrap}
+
+  /* grid */
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.s-yok td{background:var(--s-yok);color:var(--s-yok-t)}
+  .dg tr.s-kri td{background:var(--s-kri);color:var(--s-kri-t)}
+  .dg tr.s-skt td{background:var(--s-skt);color:var(--s-skt-t)}
+  .dg tr.s-pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .uyari{border:1px solid #eeddb4;background:#fdf6e3;color:#7a5407;border-radius:4px;padding:9px 11px;
+    font-size:11px;line-height:1.5;margin-top:10px}
+  .uyari b{color:#8a4a12}
+  .bilgi{border:1px solid #c6d7ef;background:#eef4fc;color:#2b5c95;border-radius:4px;padding:9px 11px;
+    font-size:11px;line-height:1.5}
+
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-izl{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .tip{display:inline-block;min-width:30px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;padding:1px 5px;border:1px solid}
+  .t-sat{background:#e5ecf8;border-color:#c6d7ef;color:#2b5c95}   /* Satin alma      */
+  .t-iad{background:#fbe2e2;border-color:#eec0c0;color:#a02c2c}   /* Iade girisi     */
+  .t-urt{background:#e3f0e6;border-color:#c3e0cb;color:#2e7d46}   /* Uretimden giris */
+  .t-sym{background:#fdf1e2;border-color:#f0dcbd;color:#96651a}   /* Sayim fazlasi   */
+  .t-dvr{background:#eef1f4;border-color:#dbe1e8;color:#6b7a8b}   /* Devir           */
+  /* fis turu secim rozetleri */
+  .oncsec{display:flex;gap:6px;flex-wrap:wrap}
+  .oncsec .o{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;
+    padding:3px 10px;font-size:11px;display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+  .oncsec .o.on{border-color:#2f6db3;background:linear-gradient(#dce8f6,#c6dcf3);color:#1c4374;font-weight:bold}
+
+  /* mini bar */
+  .bar{height:9px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:54px}
+  .bar>span{display:block;height:100%;transition:width .18s}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+
+  /* sekme sozlugu (bu ekranda kullanilmiyor ama sozluk korunuyor) */
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 12px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+
+  /* ozet paneli */
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:8px 0}
+  .side h5{margin:0;padding:7px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11px;padding:3px 12px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .tvsep{height:1px;background:var(--line2);margin:7px 10px}
+  .sidebtns{display:flex;flex-direction:column;gap:4px;padding:4px 10px}
+  .ozet{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .ozet .kutu{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:8px 0 10px}
+  .ozet .kutu h5{margin:0;padding:6px 12px 6px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .olus{display:flex;gap:8px;align-items:flex-start;padding:5px 12px;font-size:11px;line-height:1.45}
+  .olus .ic{width:16px;flex:none;text-align:center;color:#2e7d46}
+
+  /* ALT SIHIRBAZ CUBUGU */
+  .wfoot{display:flex;gap:10px;align-items:center;padding:9px 12px;background:var(--head2);
+    border-top:1px solid var(--line);flex-wrap:wrap}
+  .wfoot .ilr{display:flex;align-items:center;gap:9px;min-width:250px}
+  .wfoot .ilr .t{font-size:11.5px;font-weight:bold;color:var(--navy);white-space:nowrap}
+  .wfoot .dg2{margin-left:auto;display:flex;gap:5px;align-items:center}
+
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .statusbar .deg{color:#a9791a;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Stok Giriş Fişi Sihirbazı
+    <span class="sp">Stok\UStokGirisWizard (JvWizard) · STOKFIS.ID (yeni) · GRS.2026/0412 · Şube: Merkez · 15.08.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-kayit="1">💾 Taslak Kaydet</div>
+    <div class="btn" data-kayit="1">↺ Formu Temizle</div>
+    <div class="sepv"></div>
+    <div class="btn">📋 İrsaliyeden Doldur</div>
+    <div class="btn">🕘 Önceki Fişten Kopyala</div>
+    <div class="sepv"></div>
+    <div class="btn">❓ Yardım</div>
+    <div class="btn danger" style="margin-left:auto">✖ Kapat</div>
+  </div>
+
+  <div class="wrap">
+    <!-- ============ SOL: ADIM LISTESI ============ -->
+    <div class="wsol">
+      <h5>Sihirbaz Adımları</h5>
+
+      <div class="wadim on" data-a="1">
+        <div class="no">1</div>
+        <div class="tx"><div class="ad">Fiş Bilgileri</div>
+          <div class="ac">Fiş no, tarih, fiş türü, cari, belge ve depo</div></div>
+      </div>
+      <div class="wadim" data-a="2">
+        <div class="no">2</div>
+        <div class="tx"><div class="ad">Kalemler</div>
+          <div class="ac">Girecek stoklar, miktar, fiyat ve yeni kalan</div></div>
+      </div>
+      <div class="wadim" data-a="3">
+        <div class="no">3</div>
+        <div class="tx"><div class="ad">Seri / Lot &amp; SKT</div>
+          <div class="ac">İzlemeli kalemler için lot, üretim ve SKT bilgisi</div></div>
+      </div>
+      <div class="wadim" data-a="4">
+        <div class="no">4</div>
+        <div class="tx"><div class="ad">Maliyet &amp; Muhasebe</div>
+          <div class="ac">Ek maliyet dağıtımı, maliyet yöntemi, hesaplar</div></div>
+      </div>
+      <div class="wadim" data-a="5">
+        <div class="no">5</div>
+        <div class="tx"><div class="ad">Özet &amp; Tamamla</div>
+          <div class="ac">Kontrol et, oluşacak kayıtları gör, işle</div></div>
+      </div>
+
+      <div class="wsep"></div>
+      <h5>Kayıt</h5>
+      <div class="kv"><span>Fiş No</span><b>GRS.2026/0412</b></div>
+      <div class="kv"><span>Mod</span><b>Yeni kayıt</b></div>
+      <div class="kv"><span>Fiş türü</span><b><span class="tip t-sat">SAT</span> Satın alma</b></div>
+      <div class="kv"><span>Kalem</span><b id="ozKalem">4</b></div>
+      <div class="kv"><span>Genel toplam</span><b>65.358,00 ₺</b></div>
+      <div class="hint" style="padding:4px 8px 0">
+        Adımlar arasında sol listeye tıklayarak da geçebilirsiniz;
+        zorunlu alanlar (<span style="color:var(--req);font-weight:bold">*</span>) boşsa
+        <b>OnNextButtonClick</b> ileri geçişi durdurur.
+      </div>
+    </div>
+
+    <!-- ============ SAG: AKTIF ADIM ============ -->
+    <div class="center">
+      <div class="wbas">
+        <div class="h" id="wbasH">1. Fiş Bilgileri</div>
+        <div class="s" id="wbasS">Girişin türünü, hangi cariden/kaynaktan ve hangi belgeyle geldiğini girin. Yıldızlı alanlar zorunludur.</div>
+      </div>
+
+      <!-- ---------- ADIM 1 ---------- -->
+      <div class="pane active" data-p="1">
+        <div class="grp">
+          <h4>Fiş Türü</h4>
+          <div class="oncsec">
+            <span class="o on" data-cari="1"><span class="tip t-sat">SAT</span> Satın alma</span>
+            <span class="o" data-cari="1"><span class="tip t-iad">İAD</span> İade girişi</span>
+            <span class="o" data-cari="0"><span class="tip t-urt">ÜRT</span> Üretimden giriş</span>
+            <span class="o" data-cari="0"><span class="tip t-sym">SYM</span> Sayım fazlası</span>
+            <span class="o" data-cari="0"><span class="tip t-dvr">DVR</span> Devir</span>
+          </div>
+          <div class="bilgi" id="turBilgi" style="margin-top:9px">
+            ℹ️ <b>Satın alma</b> seçildi — <b>Cari zorunlu</b>. Belge no (irsaliye) girilmezse
+            fatura eşleşmesi otomatik yapılamaz, fiş listede kırmızı görünür.
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Genel</h4>
+          <div class="agrid">
+            <label>Fiş No</label><div class="inp pas">GRS.2026/0412 (otomatik)</div>
+            <label>Tarih <span class="rq">*</span></label><div class="inp">14.08.2026</div>
+
+            <label>Cari / Tedarikçi <span class="rq" id="rqCari">*</span></label>
+            <div class="inp combo" id="inpCari">ANADOLU KAĞIT VE AMB. A.Ş.</div>
+            <label>Cari Kodu</label><div class="inp pas">320.01.0117</div>
+
+            <label>Belge No</label><div class="inp">İRS-2026/88410</div>
+            <label>Belge Tarihi</label><div class="inp">14.08.2026</div>
+
+            <label>Depo <span class="rq">*</span></label><div class="inp combo">Merkez Depo</div>
+            <label>Şube</label><div class="inp combo">Merkez</div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Açıklama</h4>
+          <div class="agrid" style="grid-template-columns:118px 1fr">
+            <label>Açıklama</label>
+            <div class="inp multi">18.08.2026'da başlayacak otel perde partisi için kumaş ve mekanizma alımı.
+              Mal kabul 14.08.2026 11:20'de yapıldı, 2 top kumaşta kenar eziği tespit edildi —
+              tedarikçiye bildirildi, iskonto talebi fatura aşamasında görüşülecek.</div>
+          </div>
+          <label class="chk" style="margin-top:8px"><input type="checkbox" checked> Fiş işlendiğinde depo sorumlusunu bilgilendir</label>
+          <label class="chk"><input type="checkbox"> Bu fişi mal kabul kontrolüne (karantina) al</label>
+        </div>
+      </div>
+
+      <!-- ---------- ADIM 2 ---------- -->
+      <div class="pane" data-p="2">
+        <div class="gridtb">
+          <span class="minibtn on">🔎 Stok Seç</span>
+          <span class="minibtn">🏷 Barkodla Ekle</span>
+          <span class="minibtn">📄 Siparişten Aktar</span>
+          <span class="minibtn">🚚 İrsaliyeden Aktar</span>
+          <span class="minibtn">📥 Excelden</span>
+          <span class="sepv" style="height:20px"></span>
+          <span class="minibtn">🗑 Satırı Sil</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Mevcut kalan, <b>Merkez Depo</b> için <b>STOKDURUM.KALAN</b> değeridir</span>
+        </div>
+
+        <div class="dg">
+          <table>
+            <tr>
+              <th class="c" style="width:38px">SIRA</th>
+              <th style="width:96px">STOK KODU</th>
+              <th>STOK ADI</th>
+              <th class="r" style="width:84px">MİKTAR</th>
+              <th class="c" style="width:48px">BİRİM</th>
+              <th class="r" style="width:88px">BİRİM FİYAT</th>
+              <th class="r" style="width:70px">İSKONTO %</th>
+              <th class="r" style="width:60px">KDV %</th>
+              <th class="r" style="width:96px">TUTAR</th>
+              <th class="c" style="width:150px">MEVCUT KALAN → YENİ KALAN</th>
+            </tr>
+            <tr class="foc">
+              <td class="c">1</td><td>STK.10248</td><td class="ad"><b>Perde kumaşı — jakarlı, 280 cm</b></td>
+              <td class="r"><b>600,00</b></td><td class="c">MT</td><td class="r">44,20</td>
+              <td class="r">0</td><td class="r">20</td><td class="r">26.520,00</td>
+              <td class="c">118,00 → <b style="color:#2e7d46">718,00</b></td>
+            </tr>
+            <tr>
+              <td class="c">2</td><td>STK.10520</td><td class="ad">Blackout kumaş — antrasit</td>
+              <td class="r">500,00</td><td class="c">MT</td><td class="r">41,50</td>
+              <td class="r">0</td><td class="r">20</td><td class="r">20.750,00</td>
+              <td class="c">1.240,00 → <b style="color:#2e7d46">1.740,00</b></td>
+            </tr>
+            <tr>
+              <td class="c">3</td><td>STK.10604</td><td class="ad">Stor perde mekanizması — 25 mm</td>
+              <td class="r">100,00</td><td class="c">AD</td><td class="r">57,70</td>
+              <td class="r">0</td><td class="r">20</td><td class="r">5.770,00</td>
+              <td class="c">612,00 → <b style="color:#2e7d46">712,00</b></td>
+            </tr>
+            <tr class="s-kri">
+              <td class="c">4</td><td>STK.20114</td><td class="ad">Yapıştırıcı — 5 kg (SKT izlemeli)</td>
+              <td class="r">80,00</td><td class="c">KG</td><td class="r">18,75</td>
+              <td class="r">5</td><td class="r">20</td><td class="r">1.425,00</td>
+              <td class="c">340,00 → <b style="color:#a9791a">420,00</b></td>
+            </tr>
+            <tfoot>
+              <tr>
+                <td colspan="3" style="text-align:right">TOPLAM (4 kalem · 3'ü izlemeli)</td>
+                <td class="r">1.280,00</td><td class="c"></td><td class="r"></td>
+                <td class="r">75,00</td><td class="r">10.893,00</td><td class="r">54.465,00</td>
+                <td class="c"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="grp" style="margin-top:12px">
+          <h4>Fiş Toplamları</h4>
+          <div class="agrid" style="grid-template-columns:118px 1fr 118px 1fr">
+            <label>Ara toplam</label><div class="inp pas">54.540,00 ₺</div>
+            <label>İskonto</label><div class="inp pas">-75,00 ₺</div>
+            <label>KDV (%20)</label><div class="inp pas">10.893,00 ₺</div>
+            <label>Genel toplam</label><div class="inp pas"><b>65.358,00 ₺</b></div>
+          </div>
+        </div>
+
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-kri)"></span>Kalemde iskonto var veya maksimum stok seviyesi aşılıyor</span>
+        </div>
+        <div class="hint">Yeni kalan yalnızca <b>önizlemedir</b>; gerçek artış fiş <b>İşle ve Kapat</b> ile
+          işlendiğinde <b>STOKDURUM.GIREN</b> üzerinden uygulanır.</div>
+      </div>
+
+      <!-- ---------- ADIM 3 ---------- -->
+      <div class="pane" data-p="3">
+        <div class="gridtb">
+          <span class="minibtn on">🎲 Lot No Otomatik Üret</span>
+          <span class="minibtn">➕ Parti Böl</span>
+          <span class="minibtn">📥 Barkoddan Oku</span>
+          <span class="minibtn">🏷 Etiket Önizle</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">İzlemeli kalem: <b>3</b> · Toplam parti: <b>4</b></span>
+        </div>
+
+        <div class="dg">
+          <table>
+            <tr>
+              <th class="c" style="width:38px">SIRA</th>
+              <th style="width:96px">STOK KODU</th>
+              <th>STOK ADI</th>
+              <th class="c" style="width:74px">İZLEME</th>
+              <th style="width:126px">SERİ NO</th>
+              <th style="width:126px">LOT NO</th>
+              <th style="width:88px">ÜRETİM</th>
+              <th style="width:88px">SKT</th>
+              <th class="r" style="width:84px">MİKTAR</th>
+            </tr>
+            <tr class="foc">
+              <td class="c">1</td><td>STK.10248</td><td class="ad"><b>Perde kumaşı — jakarlı, 280 cm</b></td>
+              <td class="c"><span class="pill p-izl">Lot</span></td>
+              <td>—</td><td><b>LOT-2608-A</b></td><td>08.08.2026</td><td>08.08.2028</td><td class="r">400,00</td>
+            </tr>
+            <tr>
+              <td class="c">1</td><td>STK.10248</td><td class="ad">Perde kumaşı — jakarlı, 280 cm <i>(2. parti)</i></td>
+              <td class="c"><span class="pill p-izl">Lot</span></td>
+              <td>—</td><td><b>LOT-2608-B</b></td><td>09.08.2026</td><td>09.08.2028</td><td class="r">200,00</td>
+            </tr>
+            <tr>
+              <td class="c">3</td><td>STK.10604</td><td class="ad">Stor perde mekanizması — 25 mm</td>
+              <td class="c"><span class="pill p-izl">Seri</span></td>
+              <td><b>SR-104-2608</b></td><td>—</td><td>01.08.2026</td><td>—</td><td class="r">100,00</td>
+            </tr>
+            <tr class="s-skt">
+              <td class="c">4</td><td>STK.20114</td><td class="ad">Yapıştırıcı — 5 kg</td>
+              <td class="c"><span class="pill p-izl">Seri+SKT</span></td>
+              <td>SR-201-2607</td><td><b>LOT-2607-K</b></td><td>20.07.2026</td><td><b>10.01.2027</b></td><td class="r">80,00</td>
+            </tr>
+            <tr class="s-pas">
+              <td class="c">2</td><td>STK.10520</td><td class="ad">Blackout kumaş — antrasit</td>
+              <td class="c"><span class="pill p-pas">Yok</span></td>
+              <td>—</td><td>—</td><td>—</td><td>—</td><td class="r">500,00</td>
+            </tr>
+            <tfoot>
+              <tr>
+                <td colspan="8" style="text-align:right">İZLEMELİ TOPLAM (3 kalem · 4 parti)</td>
+                <td class="r">780,00</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-skt)"></span>SKT'si 6 aydan yakın parti</span>
+          <span><span class="sw" style="background:var(--s-pas)"></span>İzleme gerektirmiyor — satır pasif</span>
+        </div>
+
+        <div class="uyari">
+          ⚠ <b>STK.20114 / LOT-2607-K</b> partisinin son kullanma tarihi <b>10.01.2027</b> —
+          bugünden itibaren <b>149 gün</b> (6 aydan yakın). Bu parti depoda <b>FIFO</b> sırasında
+          öne alınır ve <b>SKT yakın</b> uyarısıyla listede turuncu boyanır.
+        </div>
+
+        <div class="bilgi" style="margin-top:10px">
+          ℹ️ <b>STK.10520 — Blackout kumaş</b> için <b>STOKLAR.STOKIZLEME = Yok</b>; bu kalem için
+          seri/lot girilmez ve <b>STOKDURUMIZLEME</b> kaydı oluşmaz. İzlemeli kalemlerde parti miktarları
+          toplamı kalem miktarına eşit değilse <b>OnNextButtonClick</b> ileri geçişi engeller.
+        </div>
+      </div>
+
+      <!-- ---------- ADIM 4 ---------- -->
+      <div class="pane" data-p="4">
+        <div class="grp">
+          <h4>Ek Maliyetler</h4>
+          <div class="gridtb">
+            <span class="minibtn">➕ Masraf Ekle</span><span class="minibtn">🗑 Sil</span>
+            <span class="minibtn on">⚖ Kalemlere Dağıt</span>
+            <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Ek maliyet toplamı: <b>7.000,00 ₺</b></span>
+          </div>
+          <div class="dg">
+            <table>
+              <tr><th style="width:130px">MASRAF TÜRÜ</th><th>TEDARİKÇİ / BELGE</th>
+                  <th class="r" style="width:100px">TUTAR</th><th style="width:150px">DAĞITIM YÖNTEMİ</th>
+                  <th class="c" style="width:96px">KDV DAHİL</th></tr>
+              <tr><td><b>Nakliye</b></td><td class="ad">HIZLI LOJİSTİK LTD. · NKL-2026/1188</td>
+                  <td class="r">4.200,00</td><td class="combo" style="position:relative">Miktara göre</td>
+                  <td class="c">Hayır</td></tr>
+              <tr><td><b>Gümrük</b></td><td class="ad">— (yurt içi alım, vekalet ücreti)</td>
+                  <td class="r">1.950,00</td><td class="combo" style="position:relative">Tutara göre</td>
+                  <td class="c">Hayır</td></tr>
+              <tr><td><b>Sigorta</b></td><td class="ad">ANKA SİGORTA A.Ş. · SGR-2026/0442</td>
+                  <td class="r">850,00</td><td class="combo" style="position:relative">Ağırlığa göre</td>
+                  <td class="c">Evet</td></tr>
+              <tfoot><tr><td colspan="2" style="text-align:right">TOPLAM</td>
+                  <td class="r">7.000,00</td><td></td><td class="c"></td></tr></tfoot>
+            </table>
+          </div>
+          <div class="hint">Dağıtım yöntemi kalem bazında ağırlık üretir: <b>Tutara göre</b> → net tutar oranı ·
+            <b>Miktara göre</b> → miktar oranı · <b>Ağırlığa göre</b> → STOKLAR.BIRIMAGIRLIK × miktar.</div>
+        </div>
+
+        <div class="grp">
+          <h4>Maliyet &amp; Muhasebe Ayarları</h4>
+          <div class="agrid">
+            <label>Maliyet Yöntemi <span class="rq">*</span></label><div class="inp combo">Ortalama</div>
+            <label>Alternatif</label><div class="inp pas">FIFO (depo bazında tanımlı değil)</div>
+            <label>Stok Hesabı <span class="rq">*</span></label><div class="inp combo">153.01.001 — Ticari Mallar</div>
+            <label>KDV Hesabı</label><div class="inp combo">191.01.001 — İndirilecek KDV</div>
+            <label>Cari Hesap</label><div class="inp pas">320.01.0117 — ANADOLU KAĞIT VE AMB. A.Ş.</div>
+            <label>Masraf Hesabı</label><div class="inp combo">159.01.002 — Verilen Sipariş Avansları</div>
+          </div>
+          <label class="chk" style="margin-top:8px"><input type="checkbox" checked> <b>Muhasebe fişi otomatik oluşsun</b>
+            <span style="color:var(--muted)">(MUHFIS · tarih = fiş tarihi)</span></label>
+          <label class="chk"><input type="checkbox" checked> Ek maliyetler stok maliyetine eklensin (aktifleştirilsin)</label>
+          <label class="chk"><input type="checkbox"> Fatura eşleşene kadar maliyeti geçici say</label>
+        </div>
+
+        <div class="grp">
+          <h4>Dağıtım Sonrası Birim Maliyet Önizlemesi</h4>
+          <div class="dg">
+            <table>
+              <tr><th style="width:96px">STOK KODU</th><th>STOK ADI</th>
+                  <th class="r" style="width:84px">MİKTAR</th>
+                  <th class="r" style="width:96px">MAL BEDELİ</th>
+                  <th class="r" style="width:92px">PAY EDİLEN</th>
+                  <th class="r" style="width:104px">TOPLAM MALİYET</th>
+                  <th class="r" style="width:84px">ESKİ B.MAL.</th>
+                  <th class="r" style="width:84px">YENİ B.MAL.</th></tr>
+              <tr><td>STK.10248</td><td class="ad">Perde kumaşı — jakarlı, 280 cm</td>
+                  <td class="r">600,00</td><td class="r">26.520,00</td><td class="r">3.332,13</td>
+                  <td class="r">29.852,13</td><td class="r">44,20</td><td class="r"><b>49,75</b></td></tr>
+              <tr><td>STK.10520</td><td class="ad">Blackout kumaş — antrasit</td>
+                  <td class="r">500,00</td><td class="r">20.750,00</td><td class="r">2.707,37</td>
+                  <td class="r">23.457,37</td><td class="r">41,50</td><td class="r"><b>46,91</b></td></tr>
+              <tr><td>STK.10604</td><td class="ad">Stor perde mekanizması — 25 mm</td>
+                  <td class="r">100,00</td><td class="r">5.770,00</td><td class="r">624,76</td>
+                  <td class="r">6.394,76</td><td class="r">57,70</td><td class="r"><b>63,95</b></td></tr>
+              <tr class="s-kri"><td>STK.20114</td><td class="ad">Yapıştırıcı — 5 kg</td>
+                  <td class="r">80,00</td><td class="r">1.425,00</td><td class="r">335,74</td>
+                  <td class="r">1.760,74</td><td class="r">17,81</td><td class="r"><b>22,01</b></td></tr>
+              <tfoot><tr><td colspan="3" style="text-align:right">TOPLAM</td>
+                  <td class="r">54.465,00</td><td class="r">7.000,00</td><td class="r">61.465,00</td>
+                  <td class="r"></td><td class="r"></td></tr></tfoot>
+            </table>
+          </div>
+          <div class="hint"><b>STK.20114</b> birim maliyeti %23,6 artıyor — ek maliyet payı miktara göre
+            dağıtıldığı için düşük tutarlı kalemde etki yüksek. Yöntem <b>Tutara göre</b> seçilirse pay 0,86 ₺/KG'ye düşer.</div>
+        </div>
+      </div>
+
+      <!-- ---------- ADIM 5 ---------- -->
+      <div class="pane" data-p="5">
+        <div class="ozet">
+          <div>
+            <div class="kutu">
+              <h5>Fiş Bilgileri</h5>
+              <div class="kv"><span>Fiş No</span><b>GRS.2026/0412</b></div>
+              <div class="kv"><span>Tarih</span><b>14.08.2026</b></div>
+              <div class="kv"><span>Fiş türü</span><b><span class="tip t-sat">SAT</span> Satın alma</b></div>
+              <div class="kv"><span>Cari</span><b>ANADOLU KAĞIT VE AMB. A.Ş.</b></div>
+              <div class="kv"><span>Belge no / tarih</span><b>İRS-2026/88410 · 14.08.2026</b></div>
+              <div class="kv"><span>Depo / Şube</span><b>Merkez Depo · Merkez</b></div>
+              <div class="kv"><span>Giriş yapan</span><b>Mehmet Yıldız</b></div>
+            </div>
+            <div class="kutu" style="margin-top:12px">
+              <h5>Kalemler &amp; Tutar</h5>
+              <div class="kv"><span>Kalem sayısı</span><b>4</b></div>
+              <div class="kv"><span>Toplam miktar</span><b>1.280,00</b></div>
+              <div class="kv"><span>Ara toplam</span><b>54.540,00 ₺</b></div>
+              <div class="kv"><span>İskonto</span><b>-75,00 ₺</b></div>
+              <div class="kv"><span>KDV (%20)</span><b>10.893,00 ₺</b></div>
+              <div class="kv"><span>Genel toplam</span><b>65.358,00 ₺</b></div>
+              <div class="kv"><span>Ek maliyet</span><b>7.000,00 ₺</b></div>
+              <div class="kv"><span>Aktifleşen stok maliyeti</span><b>61.465,00 ₺</b></div>
+            </div>
+            <div class="kutu" style="margin-top:12px">
+              <h5>İzleme &amp; Maliyet</h5>
+              <div class="kv"><span>İzlemeli kalem</span><b>3 / 4</b></div>
+              <div class="kv"><span>Parti (lot/seri) sayısı</span><b>4</b></div>
+              <div class="kv"><span>SKT uyarısı</span><b><span class="pill p-kri">1 parti yakın</span></b></div>
+              <div class="kv"><span>Maliyet yöntemi</span><b>Ortalama</b></div>
+              <div class="kv"><span>Muhasebe fişi</span><b><span class="pill p-ok">Otomatik</span></b></div>
+              <div class="kv"><span>Fatura eşleşme</span><b><span class="pill p-yok">Bekliyor</span></b></div>
+              <div style="padding:6px 12px 2px">
+                <div class="bar" style="height:14px"><span class="ok" style="width:80%"></span></div>
+                <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:3px">
+                  <span>Fiş tamamlanma oranı</span><b>%80 — fatura bekleniyor</b></div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="kutu">
+              <h5>Tamamlandığında Oluşacak Kayıtlar</h5>
+              <div class="olus"><span class="ic">✔</span><span><b>STOKFIS</b> — 1 başlık kaydı
+                (GRS.2026/0412 · TUR=Giris · Durum: <b>İşlendi</b>)</span></div>
+              <div class="olus"><span class="ic">✔</span><span><b>STOKFISDETAY</b> — <b>4</b> kalem satırı
+                (STK.10248 · STK.10520 · STK.10604 · STK.20114)</span></div>
+              <div class="olus"><span class="ic">✔</span><span><b>STOKDURUM</b> — 4 depo satırında <b>GIREN artışı</b>
+                (+1.280,00 birim, Merkez Depo) ve ortalama maliyet güncellemesi</span></div>
+              <div class="olus"><span class="ic">✔</span><span><b>STOKDURUMIZLEME</b> — <b>4</b> lot/seri kaydı
+                (LOT-2608-A, LOT-2608-B, SR-104-2608, LOT-2607-K)</span></div>
+              <div class="olus"><span class="ic">✔</span><span><b>MUHFIS</b> — 1 muhasebe fişi
+                (153 / 191 borç · 320 alacak · 65.358,00 ₺)</span></div>
+              <div class="olus"><span class="ic">✔</span><span><b>MALIYETDAGITIM</b> — 3 ek masraf satırı,
+                4 kaleme pay edildi (7.000,00 ₺)</span></div>
+              <div class="olus"><span class="ic">✔</span><span><b>ISLEMLOG</b> — 1 iz kaydı
+                (Mehmet Yıldız · 14.08.2026 · "Giriş fişi işlendi")</span></div>
+            </div>
+
+            <div class="kutu" style="margin-top:12px">
+              <h5>Kaydetmeden Önce</h5>
+              <div class="kv"><span>Zorunlu alanlar</span><b><span class="pill p-ok">Tamam</span></b></div>
+              <div class="kv"><span>Kalem / miktar tutarlılığı</span><b><span class="pill p-ok">Tamam</span></b></div>
+              <div class="kv"><span>Seri / lot bütünlüğü</span><b><span class="pill p-ok">4 parti tam</span></b></div>
+              <div class="kv"><span>SKT kontrolü</span><b><span class="pill p-kri">1 parti 6 aydan yakın</span></b></div>
+              <div class="kv"><span>Maliyet dağıtımı</span><b><span class="pill p-ok">Dağıtıldı</span></b></div>
+              <div class="kv"><span>Fatura eşleşme</span><b><span class="pill p-yok">Yapılmadı</span></b></div>
+            </div>
+
+            <div class="uyari">
+              ⚠ <b>Dikkat:</b> <b>İşle ve Kapat</b> dendiğinde stok miktarı <b>anında artar</b> ve geri alınamaz —
+              düzeltme ancak ters fişle yapılır. Fatura henüz bağlanmadığı için maliyet <b>kesinleşmemiş</b>
+              sayılır; fiş listede kırmızı görünür ve <b>Faturasız Girişler</b> sayacına düşer.
+            </div>
+
+            <div class="sidebtns" style="padding:10px 0 0">
+              <div class="btn ok" data-kayit="1" style="justify-content:center;padding:8px 12px">✔ İşle ve Kapat</div>
+              <div class="btn" data-kayit="1" style="justify-content:center">💾 Taslak Kaydet</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---------- ALT SIHIRBAZ CUBUGU ---------- -->
+      <div class="wfoot">
+        <div class="ilr">
+          <span class="t" id="adimYazi">Adım 1 / 5</span>
+          <div class="bar" style="flex:1;height:12px"><span class="ok" id="ilerBar" style="width:20%"></span></div>
+        </div>
+        <div class="dg2">
+          <div class="btn pas" id="btnGeri">↩ Geri</div>
+          <div class="btn primary" id="btnIleri">İleri ▶</div>
+          <div class="btn ok" id="btnTamam" data-kayit="1" style="display:none">✔ Tamamla</div>
+          <div class="btn danger">✖ İptal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Adım 1 → <b>STOKFIS</b> (FISNO · TUR=Giris · FISTURU · CARIID · BELGENO · BELGETARIH · DEPOID · SUBEID · DURUM)</span>·
+    <span>Adım 2 → <b>STOKFISDETAY</b> (STOKID · MIKTAR · BIRIM · BIRIMFIYAT · ISKONTO · KDV · TUTAR)</span>·
+    <span>Adım 2 kontrol → <b>STOKDURUM</b> (KALAN önizleme · GIREN artışı)</span>·
+    <span>Adım 3 → <b>STOKDURUMIZLEME</b> (SERINO · LOTNO · URT · SKT · MIKTAR)</span>·
+    <span>Adım 4 → <b>MALIYETDAGITIM</b> + <b>MUHFIS</b> (153 / 191 / 320)</span>·
+    <span>Sonrası → <b>FATBASLIK</b> eşleşmesi · <b>ISLEMLOG</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Mod: <b>Yeni kayıt</b></span>
+    <span id="sbAdim">Adım: <b>1 / 5 — Fiş Bilgileri</b></span>
+    <span>Depo: <b>Merkez Depo</b> · Kalem: <b>4</b></span>
+    <span>Kullanıcı: <b>Mehmet Yıldız</b> (Satın Alma)</span>
+    <span class="deg" style="margin-left:auto">● Kaydedilmemiş değişiklik var</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  var TOPLAM = 5;
+  var basliklar = [
+    ["1. Fiş Bilgileri",
+     "Girişin türünü, hangi cariden/kaynaktan ve hangi belgeyle geldiğini girin. Yıldızlı alanlar zorunludur."],
+    ["2. Kalemler",
+     "Girecek stokları ekleyin. Her satırda deponun mevcut kalanı ve fiş işlendiğinde oluşacak yeni kalan gösterilir."],
+    ["3. Seri / Lot &amp; SKT",
+     "İzlemeli kalemler için lot / seri numarası, üretim ve son kullanma tarihi girin. SKT'si yakın partiler turuncu boyanır."],
+    ["4. Maliyet &amp; Muhasebe",
+     "Nakliye, gümrük ve sigorta gibi ek maliyetleri kalemlere dağıtın; maliyet yöntemi ve muhasebe hesaplarını belirleyin."],
+    ["5. Özet &amp; Tamamla",
+     "Girilen bilgileri son kez kontrol edin; işlediğinizde oluşacak kayıtlar sağda listelenmiştir."]
+  ];
+  var adimAdi = ["Fiş Bilgileri","Kalemler","Seri / Lot & SKT","Maliyet & Muhasebe","Özet & Tamamla"];
+
+  var aktif = 1;
+  var solLst   = document.querySelectorAll('.wadim');
+  var panes    = document.querySelectorAll('.pane');
+  var btnGeri  = document.getElementById('btnGeri');
+  var btnIleri = document.getElementById('btnIleri');
+  var btnTamam = document.getElementById('btnTamam');
+
+  function git(n){
+    if(n < 1) n = 1;
+    if(n > TOPLAM) n = TOPLAM;
+    aktif = n;
+
+    /* paneller */
+    panes.forEach(function(p){ p.classList.toggle('active', p.dataset.p === String(n)); });
+
+    /* sol adim listesi: tamamlanan = bitti (✓), aktif = on */
+    solLst.forEach(function(s){
+      var i  = parseInt(s.dataset.a,10);
+      var no = s.querySelector('.no');
+      s.classList.remove('on','bitti');
+      if(i < n){ s.classList.add('bitti'); no.textContent = '✓'; }
+      else { no.textContent = i; if(i === n) s.classList.add('on'); }
+    });
+
+    /* baslik seridi */
+    document.getElementById('wbasH').innerHTML = basliklar[n-1][0];
+    document.getElementById('wbasS').innerHTML = basliklar[n-1][1];
+
+    /* alt cubuk */
+    document.getElementById('adimYazi').textContent = 'Adım ' + n + ' / ' + TOPLAM;
+    document.getElementById('ilerBar').style.width = Math.round(n / TOPLAM * 100) + '%';
+    document.getElementById('sbAdim').innerHTML = 'Adım: <b>' + n + ' / ' + TOPLAM + ' — ' + adimAdi[n-1] + '</b>';
+
+    btnGeri.classList.toggle('pas', n === 1);
+    btnIleri.style.display = (n === TOPLAM) ? 'none' : 'flex';
+    btnTamam.style.display = (n === TOPLAM) ? 'flex' : 'none';
+
+    try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){}
+  }
+
+  solLst.forEach(function(s){
+    s.addEventListener('click', function(){ git(parseInt(s.dataset.a,10)); });
+  });
+  btnGeri.addEventListener('click', function(){ git(aktif - 1); });
+  btnIleri.addEventListener('click', function(){ git(aktif + 1); });
+
+  /* fis turu rozeti secimi — "Cari zorunlu / Cari gerekmez" bilgi satirini gunceller */
+  var bilgiMetin = {
+    "Satın alma":  ["1","<b>Satın alma</b> seçildi — <b>Cari zorunlu</b>. Belge no (irsaliye) girilmezse "+
+                        "fatura eşleşmesi otomatik yapılamaz, fiş listede kırmızı görünür."],
+    "İade girişi": ["1","<b>İade girişi</b> seçildi — <b>Cari zorunlu</b> (iadeyi yapan müşteri). "+
+                        "İlgili satış faturası seçilirse birim fiyatlar otomatik gelir."],
+    "Üretimden giriş":["0","<b>Üretimden giriş</b> seçildi — <b>Cari gerekmez</b>. Kaynak, iş emri "+
+                        "(<b>URETIM.ISEMRI</b>) olarak yazılır; maliyet reçete maliyetinden gelir."],
+    "Sayım fazlası":["0","<b>Sayım fazlası</b> seçildi — <b>Cari gerekmez</b>. Kaynak sayım fişidir; "+
+                        "birim maliyet olarak deponun mevcut ortalama maliyeti kullanılır."],
+    "Devir":       ["0","<b>Devir</b> seçildi — <b>Cari gerekmez</b>. Açılış devri KDV'siz işlenir ve "+
+                        "muhasebe fişi oluşturulmaz."]
+  };
+  document.querySelectorAll('.oncsec .o').forEach(function(o){
+    o.addEventListener('click', function(){
+      document.querySelectorAll('.oncsec .o').forEach(function(x){ x.classList.remove('on'); });
+      o.classList.add('on');
+      var ad = (o.textContent||"").replace(/^\s*\S+\s*/,"").trim();
+      var m  = bilgiMetin[ad];
+      if(!m) return;
+      document.getElementById('turBilgi').innerHTML = 'ℹ️ ' + m[1];
+      var rq = document.getElementById('rqCari');
+      var ic = document.getElementById('inpCari');
+      if(m[0] === "1"){ rq.style.display='inline'; ic.classList.remove('pas'); ic.classList.add('combo'); }
+      else{ rq.style.display='none'; ic.classList.add('pas'); ic.classList.remove('combo'); }
+    });
+  });
+
+  /* sekme sozlugu korunuyor — varsa calissin */
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      t.classList.add('active');
+    });
+  });
+
+  git(1);
+})();
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>.wsol{width:250px!important;flex:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .wbas,body.koyu .wfoot,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .oncsec .o,body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu .btn.ok{background:linear-gradient(#3f8c58,#2b6b41)!important;border-color:#2b6b41!important;color:#fff!important}
+body.koyu .oncsec .o.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .inp.pas{background:#232b36!important;color:#8e99a6!important}
+body.koyu .dg,body.koyu table.grid{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .wsol,body.koyu .gorev,body.koyu .nav{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .wadim:hover{background:#222c39!important}
+body.koyu .wadim .ad{color:#dfe6ee!important}
+body.koyu .wadim.on{background:#1e2836!important;border-color:#3d6ea8!important}
+body.koyu .wadim.on .ad{color:#cfe0f4!important}
+body.koyu .wadim .no{background:#2a3441!important;color:#a8b8c8!important;border-color:#3a4756!important}
+body.koyu .wadim.bitti .no{background:#22402c!important;color:#8fd6a5!important;border-color:#356b45!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .work,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .grp,body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .tile{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu h5,body.koyu .grp>h4,body.koyu .kutu h5{color:#8fa6bd!important;background:transparent!important}
+body.koyu .kv b,body.koyu .side h5,body.koyu .wbas .h{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .wbas .s{color:#93a1b1!important;background:transparent!important}
+body.koyu .bilgi{background:#1c2c40!important;border-color:#2f537d!important;color:#a8c8ea!important}
+body.koyu .uyari{background:#33290f!important;border-color:#5c4a1c!important;color:#ffdf9b!important}
+body.koyu .uyari b{color:#ffd0a6!important}
+body.koyu .bar{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .tvsep,body.koyu .wsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+/* === GN-KARTMOD: kart penceresinde tam genislik === */
+body.kartmod{padding:0!important;margin:0!important;background:#fff!important}
+body.kartmod .win,body.kartmod .app{max-width:none!important;width:auto!important;
+  margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+body.koyu.kartmod{background:#12171e!important}
+/* === GN-KARTMOD son === */
+</style>
+<script>(function(){
+function solMenuMu(e){
+  if(!e||e.nodeType!==1) return false;
+  if(/(^|\s)(gorev|solmenu|gtusgrup)(\s|$)/.test(e.className||"")) return true;
+  /* gorev tuslari / sekmeli sol sutun: .gtus veya .ltabs iceriyorsa gizlenir */
+  return !!e.querySelector(".gtus, .ltabs, .lpane");
+}
+function g(){
+  if(location.hash.indexOf("gomulu")>=0){
+    document.body.classList.add("gomulu");
+    [".wrap",".work"].forEach(function(sel){
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(w){
+        var ilk=w.firstElementChild;
+        if(ilk) ilk.classList.toggle("gmzgizle", solMenuMu(ilk));
+      });
+    });
+  } else document.body.classList.remove("gomulu");
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",g); else g();
+addEventListener("hashchange",g);
+
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/İ/g,"i").replace(/I/g,"ı").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='🔎 <b>'+bulunan+'</b> / '+toplam+' kayıt · "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="✕"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      /* kayit dugmeleri pencereyi kapatmaz */
+      if(el.dataset&&el.dataset.kayit==="1") return;
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazgeç|çık|iptal)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();
+/* --- GN-KARTMOD: kabuk kartlari "#kart-..." ile acar; genisligi ac --- */
+(function(){
+  function kartModu(){
+    document.body.classList.toggle('kartmod', /(^|[#&])kart(-|\b)/.test(location.hash || ''));
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kartModu);
+  else kartModu();
+  addEventListener('hashchange', kartModu);
+})();
+</script>
+<style id="gnPanoCss">
+.gnpk{position:absolute;z-index:40;width:22px;height:46px;
+  border:1px solid var(--line,#d8e0ea);border-radius:6px;
+  background:linear-gradient(#fff,#eef3f9);color:#2f6db3;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+  box-shadow:0 0 6px rgba(20,32,50,.10);user-select:none}
+.gnpk:hover{background:linear-gradient(#fff,#dce8f6);color:#14406f}
+.gnpk.sag{left:-11px;top:14px;border-right:0;border-radius:6px 0 0 6px}
+.gnpk.sol{right:-11px;top:14px;border-left:0;border-radius:0 6px 6px 0}
+.gnpanokap{position:relative}
+.gnpanokap.kapali{width:0!important;min-width:0!important;flex:none!important;
+  padding-left:0!important;padding-right:0!important;
+  border-left-width:0!important;border-right-width:0!important;overflow:visible!important}
+.gnpanokap.kapali>*:not(.gnpk){display:none!important}
+.gnpanokap.kapali .gnpk.sag{left:-23px;border-right:1px solid var(--line,#d8e0ea);border-radius:6px}
+.gnpanokap.kapali .gnpk.sol{right:-23px;border-left:1px solid var(--line,#d8e0ea);border-radius:6px}
+/* koyu tema */
+body.koyu .gnpk{background:linear-gradient(#26313f,#1f2836)!important;border-color:#33404f!important;color:#7fb2e6!important}
+body.koyu .gnpk:hover{background:linear-gradient(#2c3a4b,#242f3e)!important;color:#cfe0f4!important}
+</style>
+<script>
+/* ---- GN_PANO_AC_KAPA — SOL (klasor/arama) ve SAG (bilgi/icerik) panolari ---- */
+(function(){
+  function bul(){
+    var kap = document.querySelector('.wrap') || document.querySelector('.govde') || document.body;
+    var yanlar = [].slice.call(kap.children).filter(function(e){
+      return /\b(gorev|side|yan|nav)\b/.test(e.className || '');
+    });
+    var orta = kap.querySelector(':scope > .center, :scope > .main, :scope > .work');
+    var sol = null, sag = null;
+    yanlar.forEach(function(e){
+      if (/\bright\b/.test(e.className)) { sag = e; return; }
+      if (orta && e.compareDocumentPosition(orta) & Node.DOCUMENT_POSITION_FOLLOWING) sol = sol || e;
+      else if (orta) sag = sag || e;
+      else if (!sol) sol = e; else sag = sag || e;
+    });
+    return {sol: sol, sag: sag};
+  }
+
+  function tak(p, taraf, anahtar, ad){
+    if (!p || p.querySelector(':scope > .gnpk')) return;
+    p.classList.add('gnpanokap');
+    p.style.position = 'relative';
+    var d = document.createElement('div');
+    /* dugme SOL panonun SAG kenarinda, SAG panonun SOL kenarinda durur */
+    d.className = 'gnpk ' + (taraf === 'sol' ? 'sol' : 'sag');
+    function ciz(){
+      var k = p.classList.contains('kapali');
+      d.textContent = taraf === 'sol' ? (k ? '›' : '‹') : (k ? '‹' : '›');
+      d.title = (k ? ad + ' panosunu aç' : ad + ' panosunu kapat');
+    }
+    function uygula(kapali){
+      if (kapali){
+        p.classList.add('kapali');
+        ['width','min-width','max-width','flex-basis','padding-left','padding-right',
+         'border-left-width','border-right-width'].forEach(function(a){
+          p.style.setProperty(a, '0', 'important');
+        });
+        p.style.setProperty('flex', 'none', 'important');
+        p.style.setProperty('overflow', 'visible', 'important');
+      } else {
+        p.classList.remove('kapali');
+        p.style.cssText = '';
+      }
+      p.style.position = 'relative';
+      ciz();
+    }
+    d.addEventListener('click', function(){
+      var k = !p.classList.contains('kapali');
+      uygula(k);
+      try { sessionStorage.setItem(anahtar, k ? '1' : '0'); } catch(e){}
+    });
+    p.appendChild(d);
+    var bas = false;
+    try { bas = sessionStorage.getItem(anahtar) === '1'; } catch(e){}
+    uygula(bas);
+  }
+
+  function kur(){
+    var p = bul();
+    tak(p.sol, 'sol', 'gnPanoSol', 'Klasör / arama');
+    tak(p.sag, 'sag', 'gnPano',    'Bilgi');
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur);
+  else kur();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eğitim Kartı — Mockup</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;
+    --sel:#d7e7fb;--selbd:#98c2ee;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--grpbg:#fbfcfd;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1080px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2f7d6b,#1e5849);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#8fd3c1;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.9;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f7d6b;background:linear-gradient(#43a189,#2f7d6b);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .btn.pasif{opacity:.55}
+  .sepv{width:1px;background:var(--line);margin:2px 3px}
+  .idstrip{display:grid;gap:10px;padding:10px 12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .idstrip+.idstrip{padding-top:0;background:#f5f8fb}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted)}.fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative;padding-right:16px}.combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .chip.acik{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}.chip.islem{background:#fdf6e3;color:#a9791a;border:1px solid #eeddb4}.chip.bitti{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}
+  .chip.p-yuksek{background:#fdecec;color:#b23b3b;border:1px solid #f2c9c9}
+  .chip.gec{background:#fbe9e9;color:#b23b3b;border:1px solid #f0c9c9}
+  .chip.pas{background:#f0f2f4;color:#7b8794;border:1px solid #dfe4e9}
+  .chip.mor{background:#f0e9f8;color:#7a4fb0;border:1px solid #ded0ee}
+  .chip.turuncu{background:#fdeee2;color:#a35b18;border:1px solid #f2d6bd}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);margin-top:2px;flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:14px}.pane.active{display:block}
+  .row{display:flex;gap:14px}.col{flex:1;min-width:0}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;margin-left:auto;background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grid2{display:grid;grid-template-columns:130px 1fr;gap:8px 10px;align-items:center}.grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .full{grid-column:1 / -1}
+  textarea.inp{height:56px;padding:5px 6px;resize:none;line-height:1.4;white-space:normal;font-family:inherit;color:var(--ink)}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}
+  .dg tr.sel td{background:var(--sel)}.dg tr:hover td{background:#f2f7fd}
+  .dg tr.maj td{background:#f7cfcf;color:#7d1f1f}.dg tr.maj:hover td{background:#f4c4c4}
+  .dg tr.min td{background:#fbe6ae;color:#7a5407}.dg tr.min:hover td{background:#f8e0a0}
+  .dg tr.kap td{background:#dcdcdc;color:#7a7a7a}.dg tr.kap:hover td{background:#d5d5d5}
+  .dg .c{text-align:center}.amt{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .gridtb{display:flex;gap:4px;padding:5px 0 0;flex-wrap:wrap;align-items:center}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px;display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .badge{font-size:10px;padding:1px 7px;border-radius:3px;font-weight:bold}
+  .badge.on{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}.badge.dev{background:#fdf6e3;color:#a9791a;border:1px solid #eeddb4}
+  .badge.no{background:#fbe9e9;color:#b23b3b;border:1px solid #f0c9c9}
+  .badge.nd{background:#f0f2f4;color:#7b8794;border:1px solid #dfe4e9}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}.maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}.req-note{color:var(--req)}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}
+  .kpi{border:1px solid var(--line2);border-radius:4px;background:linear-gradient(#fff,#f6f9fc);padding:9px 11px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}.kpi .v{font-size:16px;font-weight:bold;color:var(--navy);margin-top:3px;font-family:"Segoe UI",Tahoma}
+  .kpi .v.pos{color:#2e7d46}.kpi .v.neg{color:#b23b3b}.kpi .v.uyar{color:#a9791a}.kpi .s{font-size:10px;color:var(--muted);margin-top:2px}
+  .banner{background:#fdf6e9;border:1px solid #f0dcbb;color:#8a5a1e;border-radius:5px;padding:7px 10px;font-size:11.5px;margin-bottom:10px;display:flex;gap:8px;align-items:center}
+  .banner.g{background:#eef7ee;border-color:#cfe8cf;color:#2e7d46}
+  .banner.k{background:#fbeaea;border-color:#f0c9c9;color:#a33232}
+  .foot{display:flex;gap:14px;margin-top:6px}.notes{flex:1}.notes textarea{width:100%;height:80px;border:1px solid var(--line);border-radius:3px;padding:6px;font-family:inherit;font-size:12px;resize:none}
+  .totals{width:320px;border:1px solid var(--line2);border-radius:5px;background:linear-gradient(#fff,#f6f9fc);padding:8px 10px}
+  .totals .r{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px dashed var(--line2)}
+  .totals .r.g{border-bottom:none;border-top:2px solid #cdd6e0;margin-top:4px;padding-top:6px;font-weight:bold;font-size:14px;color:var(--navy)}
+  .av{width:24px;height:24px;border-radius:50%;color:#fff;font-weight:bold;display:inline-flex;align-items:center;justify-content:center;font-size:10px;vertical-align:middle}
+  .bar{height:10px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:60px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Eğitim — Düzenle
+    <span class="sp">Kalite\UEgitimFrame · KALEGITIM.ID 2261 · EGT.2026/0044</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">👥 Katılımcı Ekle</div>
+    <div class="btn">✔ Yoklama Al</div>
+    <div class="btn">🎓 Sertifika Yazdır</div>
+    <div class="btn ok pasif" data-kayit="1">🔒 Eğitimi Kapat</div>
+    <div class="sepv"></div>
+    <div class="btn">✖ Kapat</div>
+  </div>
+
+  <div class="idstrip" style="grid-template-columns:130px 1fr 130px 110px 180px 170px">
+    <div class="fld"><label class="req">Eğitim Kodu</label><div class="inp big">EGT.2026/0044</div></div>
+    <div class="fld"><label class="req">Eğitim Adı</label><div class="inp big">İş sağlığı ve güvenliği temel eğitimi (yenileme)</div></div>
+    <div class="fld"><label>Tür</label><div class="inp combo">İSG (Zorunlu)</div></div>
+    <div class="fld"><label>Kaynak</label><div class="inp combo">Dış kurum</div></div>
+    <div class="fld"><label class="req">Eğitmen</label><div class="inp combo"><span class="av" style="background:#2f7d6b">MK</span>&nbsp;Murat Kaya</div></div>
+    <div class="fld"><label>Kurum</label><div class="inp combo">ORTAK OSGB LTD. ŞTİ.</div></div>
+  </div>
+
+  <div class="idstrip" style="grid-template-columns:105px 130px 80px 1fr 90px 110px 110px 150px">
+    <div class="fld"><label class="req">Tarih</label><div class="inp">12.08.2026</div></div>
+    <div class="fld"><label>Başlangıç – Bitiş</label><div class="inp">09:00 – 17:00</div></div>
+    <div class="fld"><label>Süre (saat)</label><div class="inp amt" style="justify-content:flex-end">16,0</div></div>
+    <div class="fld"><label>Yer</label><div class="inp combo">Eğitim Salonu (A Blok) + üretim sahası</div></div>
+    <div class="fld"><label>Geçerlilik (ay)</label><div class="inp amt" style="justify-content:flex-end">12</div></div>
+    <div class="fld"><label>Yenileme Tarihi</label><div class="inp">12.08.2027</div></div>
+    <div class="fld"><label>Maliyet (TL)</label><div class="inp amt" style="justify-content:flex-end">23.100,00</div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="chip bitti">● Yapıldı</span>
+      <span class="chip turuncu" style="margin-left:auto">Sertifika bekliyor</span></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="genel">Genel</div>
+    <div class="tab" data-t="katilimci">Katılımcılar <span class="b">42</span></div>
+    <div class="tab" data-t="icerik">İçerik / Program <span class="b">6</span></div>
+    <div class="tab" data-t="deger">Değerlendirme</div>
+    <div class="tab" data-t="sertifika">Sertifikalar <span class="b">36</span></div>
+    <div class="tab" data-t="dokuman">Doküman / Sunum <span class="b">4</span></div>
+    <div class="tab" data-t="yorum">Yorum <span class="b">3</span></div>
+    <div class="tab" data-t="ek">Ek Alanlar</div>
+  </div>
+
+  <!-- GENEL -->
+  <div class="pane active" data-p="genel">
+    <div class="banner">🎓 Eğitim yapıldı, <b>4 personel katılmadı</b> — telafi grubu için "Yenileme Planla" kullanılabilir.
+      Sertifikalar OSGB'den geldiğinde <b>Eğitimi Kapat</b> aktifleşir.</div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="k">Katılım</div><div class="v pos">%90,5</div><div class="s">38 / 42 kişi</div></div>
+      <div class="kpi"><div class="k">Ortalama Puan</div><div class="v">82 / 100</div><div class="s">geçme notu 70</div></div>
+      <div class="kpi"><div class="k">Kişi Başı Maliyet</div><div class="v">607,89 ₺</div><div class="s">23.100,00 / 38</div></div>
+      <div class="kpi"><div class="k">Toplam Adam·Saat</div><div class="v">592</div><div class="s">38 kişi × 16 saat</div></div>
+      <div class="kpi"><div class="k">Sertifika</div><div class="v uyar">36 / 38</div><div class="s">2 telafi sınavında</div></div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Amaç ve Kapsam <span class="tag">KALEGITIM</span></h4>
+          <div class="body grid2">
+            <label>Eğitim Amacı</label>
+            <textarea class="inp full" style="grid-column:2/-1" readonly>6331 sayılı İSG Kanunu gereği "az tehlikeli" sınıfta çalışanlara verilmesi zorunlu temel eğitimin yenilenmesi; çalışanların tehlike kaynaklarını tanıması, KKD kullanımı ve acil durum davranışlarının tazelenmesi.</textarea>
+            <label>Kapsam</label>
+            <textarea class="inp full" style="grid-column:2/-1" readonly>Üretim (kesim, dikim, montaj), depo, kalite kontrol ve idari işler bölümlerinde çalışan tüm personel. Sahaya girmeyen uzaktan çalışanlar kapsam dışıdır.</textarea>
+            <label>Hedef Kitle</label><div class="inp combo">Tüm saha personeli (42 kişi) · 4 departman</div>
+            <label>Ön Koşul</label><div class="inp">Oryantasyon eğitimini tamamlamış olmak</div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Kazanımlar &amp; Planlama <span class="tag">KALEGITIM</span></h4>
+          <div class="body grid2">
+            <label>Kazanımlar</label>
+            <textarea class="inp full" style="grid-column:2/-1" readonly>Tehlike ve risk kavramlarını ayırt eder · KKD'yi doğru seçer ve kullanır · Ramak kala bildirimi yapar · Acil durumda tahliye planına uygun davranır · Yangın söndürücüyü kullanabilir.</textarea>
+            <label>Yıllık Plan</label><div class="inp combo">2026 Eğitim Planı — sıra 9/14</div>
+            <label>Önceki Eğitim</label><div class="inp">EGT.2025/0093 — 05.08.2025 <span class="chip gec" style="margin-left:auto">süresi doldu</span></div>
+            <label>Talep / Kaynak</label><div class="inp">Yasal zorunluluk · İSG Kurulu kararı 2026/03</div>
+            <label>Eğitim Yöntemi</label><div class="inp combo">Yüz yüze · uygulamalı · sınavlı</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <div class="col"><div class="grp" style="margin-bottom:0"><h4>Eğitmen Bilgisi <span class="tag">KALEGITIM.EGITMEN</span></h4>
+        <div class="body grid2">
+          <label>Eğitmen</label><div class="inp">Murat Kaya — A Sınıfı İş Güvenliği Uzmanı</div>
+          <label>Belge No</label><div class="inp">İGU-A-14872 · geçerli 30.04.2029</div>
+          <label>Yardımcı Eğitmen</label><div class="inp">Selda Arı (İşyeri Hemşiresi)</div>
+          <label>İletişim</label><div class="inp">0312 XXX XX XX · egitim@ortakosgb.com.tr</div>
+        </div></div></div>
+      <div class="col"><div class="grp" style="margin-bottom:0"><h4>Genel Değerlendirme <span class="tag">KALEGITIM.ACIKLAMA</span></h4>
+        <div class="body"><textarea class="inp" style="width:100%;height:98px" readonly>Eğitim planlanan içerikle ve süreyle tamamlandı. Katılım oranı %90,5 ile hedefin (%85) üzerinde gerçekleşti. Depo bölümünde vardiya nedeniyle kısmi katılım yaşandı; 4 personel için telafi grubu 09.09.2026 tarihine planlandı. Sınav ortalaması 82; 3 katılımcı 70 puanın altında kalarak telafi sınavına kaldı.</textarea></div></div></div>
+    </div>
+  </div>
+
+  <!-- KATILIMCILAR -->
+  <div class="pane" data-p="katilimci">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Katılımcılar <span class="tag">KALEGITIMKATILIMCI (1:N) · PERSONEL</span></h4>
+      <div class="body">
+        <div class="gridtb" style="padding:0 0 7px">
+          <span style="font-size:11px;color:var(--muted)">Personel:</span>
+          <div class="inp combo" style="width:190px">— seçiniz —</div>
+          <span style="font-size:11px;color:var(--muted)">Departman:</span>
+          <div class="inp combo" style="width:130px">(tümü)</div>
+          <span class="minibtn">➕ Ekle</span>
+          <span class="minibtn">👥 Departmandan Toplu Ekle</span>
+          <span class="minibtn">🗑 Çıkar</span>
+          <span class="minibtn" style="margin-left:auto">🖨 İmza Listesi</span>
+        </div>
+        <div class="dg"><table>
+          <thead><tr><th style="width:76px">Sicil</th><th style="width:150px">Ad Soyad</th><th style="width:110px">Departman</th>
+            <th style="width:110px">Görev</th><th class="c" style="width:56px">Davet</th><th class="c" style="width:74px">Katılım</th>
+            <th class="amt" style="width:60px">Süre</th><th class="amt" style="width:60px">Puan</th>
+            <th style="width:120px">Sertifika No</th><th class="c" style="width:54px">İmza</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td>PRS.0104</td><td><span class="av" style="background:#2f6db3">MA</span>&nbsp;<b>Mert Aslan</b></td><td>Üretim</td><td>Üretim Müdürü</td>
+              <td class="c">✔</td><td class="c"><span class="badge on">Katıldı</span></td><td class="amt">16,0</td><td class="amt">92</td><td>İSG-2026-0441</td><td class="c">✔</td></tr>
+            <tr><td>PRS.0118</td><td>Osman Çelik</td><td>Üretim</td><td>Vardiya Amiri</td>
+              <td class="c">✔</td><td class="c"><span class="badge on">Katıldı</span></td><td class="amt">16,0</td><td class="amt">85</td><td>İSG-2026-0442</td><td class="c">✔</td></tr>
+            <tr><td>PRS.0126</td><td>Fatma Demir</td><td>Üretim</td><td>Operatör</td>
+              <td class="c">✔</td><td class="c"><span class="badge on">Katıldı</span></td><td class="amt">16,0</td><td class="amt">78</td><td>İSG-2026-0443</td><td class="c">✔</td></tr>
+            <tr><td>PRS.0142</td><td>Zeynep Arslan</td><td>Kalite</td><td>Kalite Uzmanı</td>
+              <td class="c">✔</td><td class="c"><span class="badge on">Katıldı</span></td><td class="amt">16,0</td><td class="amt">95</td><td>İSG-2026-0444</td><td class="c">✔</td></tr>
+            <tr><td>PRS.0155</td><td>Ayşe Yılmaz</td><td>İdari İşler</td><td>İK Uzmanı</td>
+              <td class="c">✔</td><td class="c"><span class="badge on">Katıldı</span></td><td class="amt">16,0</td><td class="amt">88</td><td>İSG-2026-0445</td><td class="c">✔</td></tr>
+            <tr class="min"><td>PRS.0131</td><td>Serkan Öz</td><td>Depo</td><td>Depo Sorumlusu</td>
+              <td class="c">✔</td><td class="c"><span class="badge dev">Kısmi</span></td><td class="amt">8,0</td><td class="amt">64</td><td>—</td><td class="c">✔</td></tr>
+            <tr class="min"><td>PRS.0147</td><td>Gülsüm Er</td><td>Üretim</td><td>Operatör</td>
+              <td class="c">✔</td><td class="c"><span class="badge on">Katıldı</span></td><td class="amt">16,0</td><td class="amt">66</td><td>—</td><td class="c">✔</td></tr>
+            <tr class="maj"><td>PRS.0163</td><td>Hüseyin Kılıç</td><td>Depo</td><td>Forklift Operatörü</td>
+              <td class="c">✔</td><td class="c"><span class="badge no">Katılmadı</span></td><td class="amt">0,0</td><td class="amt">—</td><td>—</td><td class="c">—</td></tr>
+            <tr class="maj"><td>PRS.0170</td><td>Emre Doğan</td><td>Üretim</td><td>Operatör</td>
+              <td class="c">✔</td><td class="c"><span class="badge no">Katılmadı</span></td><td class="amt">0,0</td><td class="amt">—</td><td>—</td><td class="c">—</td></tr>
+            <tr class="kap"><td>PRS.0182</td><td>Canan Şimşek</td><td>İdari İşler</td><td>Muhasebe (izinli)</td>
+              <td class="c">✔</td><td class="c"><span class="badge nd">Mazeretli</span></td><td class="amt">0,0</td><td class="amt">—</td><td>—</td><td class="c">—</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="4" style="text-align:right">42 kayıtlı · 38 katıldı · 4 katılmadı</td>
+            <td class="c">42</td><td class="c">%90,5</td><td class="amt">592,0</td><td class="amt">ort. 82</td>
+            <td>36 sertifika</td><td class="c">38</td></tr></tfoot>
+        </table></div>
+        <div class="hint">Katılım "Katılmadı" işaretlenen personelin <b>KALYETKINLIK</b> kaydı güncellenmez;
+          zorunlu eğitimlerde bu kişiler için telafi grubu açılması önerilir. Devam oranı <b>%80</b>'in altındaki
+          katılımcıya sertifika basılamaz.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ICERIK / PROGRAM -->
+  <div class="pane" data-p="icerik">
+    <div class="grp" style="margin-bottom:0">
+      <h4>İçerik / Program <span class="tag">KALEGITIMPROGRAM (1:N)</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th class="c" style="width:120px">Saat</th><th style="width:280px">Konu</th>
+            <th style="width:140px">Eğitmen</th><th class="amt" style="width:60px">Süre</th><th>Yöntem / Materyal</th></tr></thead>
+          <tbody>
+            <tr><td class="c">1. gün 09:00 – 10:30</td><td>İSG mevzuatı ve yasal yükümlülükler</td><td>Murat Kaya</td><td class="amt">1,5</td><td>Sunum · mevzuat özeti</td></tr>
+            <tr><td class="c">1. gün 10:45 – 12:00</td><td>Risk analizi ve tehlike kaynakları</td><td>Murat Kaya</td><td class="amt">1,25</td><td>Sunum · saha fotoğrafları</td></tr>
+            <tr class="sel"><td class="c">1. gün 13:00 – 14:30</td><td><b>Kişisel koruyucu donanım kullanımı</b></td><td>Selda Arı</td><td class="amt">1,5</td><td>Uygulamalı gösterim · KKD seti</td></tr>
+            <tr><td class="c">1. gün 14:45 – 17:00</td><td>Elektrik, makine ve kimyasal güvenliği</td><td>Murat Kaya</td><td class="amt">3,0</td><td>Sunum · video</td></tr>
+            <tr><td class="c">2. gün 09:00 – 12:00</td><td>Ergonomi, sağlık gözetimi ve meslek hastalıkları</td><td>Selda Arı</td><td class="amt">3,0</td><td>Sunum · uygulama</td></tr>
+            <tr><td class="c">2. gün 13:00 – 15:00</td><td>Acil durum planı, tahliye ve yangın</td><td>Murat Kaya</td><td class="amt">2,0</td><td>Tatbikat senaryosu</td></tr>
+            <tr class="min"><td class="c">2. gün 15:00 – 16:00</td><td>Ölçme değerlendirme sınavı (25 soru · çoktan seçmeli)</td><td>Murat Kaya</td><td class="amt">1,0</td><td>Yazılı sınav · optik form</td></tr>
+            <tr><td class="c">2. gün 16:00 – 17:00</td><td>Değerlendirme, soru-cevap ve kapanış</td><td>Murat Kaya</td><td class="amt">2,75</td><td>Anket formu</td></tr>
+          </tbody>
+          <tfoot><tr><td class="c">TOPLAM</td><td colspan="2">Teorik 10,0 sa · Uygulama 6,0 sa</td><td class="amt">16,0</td><td>Yasal asgari: 16 saat</td></tr></tfoot>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">➕ Satır Ekle</span><span class="minibtn">🗑 Sil</span>
+          <span class="minibtn">📋 Şablondan Yükle</span><span class="minibtn">🖨 Programı Yazdır</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEGERLENDIRME -->
+  <div class="pane" data-p="deger">
+    <div class="row">
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Eğitmen ve İçerik Puanlaması <span class="tag">KALEGITIMANKET · 38 anket</span></h4>
+          <div class="body">
+            <div class="dg"><table>
+              <thead><tr><th style="width:200px">Başlık</th><th class="amt" style="width:56px">Puan</th>
+                <th class="c" style="width:110px">Dağılım</th><th class="amt" style="width:56px">Hedef</th></tr></thead>
+              <tbody>
+                <tr><td>Eğitmen yeterliliği / anlatım</td><td class="amt"><b>88</b></td>
+                  <td class="c"><div class="bar"><span class="ok" style="width:88%"></span></div></td><td class="amt">80</td></tr>
+                <tr class="min"><td>İçerik ve materyal kalitesi</td><td class="amt"><b>79</b></td>
+                  <td class="c"><div class="bar"><span class="kri" style="width:79%"></span></div></td><td class="amt">80</td></tr>
+                <tr><td>Süre / tempo uygunluğu</td><td class="amt"><b>81</b></td>
+                  <td class="c"><div class="bar"><span class="ok" style="width:81%"></span></div></td><td class="amt">80</td></tr>
+                <tr><td>Ortam ve organizasyon</td><td class="amt"><b>84</b></td>
+                  <td class="c"><div class="bar"><span class="ok" style="width:84%"></span></div></td><td class="amt">80</td></tr>
+                <tr class="sel"><td><b>Genel memnuniyet</b></td><td class="amt"><b>83</b></td>
+                  <td class="c"><div class="bar"><span class="ok" style="width:83%"></span></div></td><td class="amt">80</td></tr>
+              </tbody>
+            </table></div>
+            <div class="gridtb"><span class="minibtn">📝 Değerlendirme Gir</span><span class="minibtn">📊 Anket Sonuçları</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Sınav Sonuçları <span class="tag">KALEGITIMKATILIMCI.PUAN</span></h4>
+          <div class="body">
+            <div class="dg"><table>
+              <thead><tr><th style="width:130px">Puan Aralığı</th><th class="amt" style="width:60px">Kişi</th>
+                <th class="c" style="width:110px">Dağılım</th><th>Sonuç</th></tr></thead>
+              <tbody>
+                <tr><td>90 – 100</td><td class="amt">11</td><td class="c"><div class="bar"><span class="ok" style="width:29%"></span></div></td><td>Başarılı</td></tr>
+                <tr><td>80 – 89</td><td class="amt">15</td><td class="c"><div class="bar"><span class="ok" style="width:39%"></span></div></td><td>Başarılı</td></tr>
+                <tr><td>70 – 79</td><td class="amt">9</td><td class="c"><div class="bar"><span class="ok" style="width:24%"></span></div></td><td>Başarılı</td></tr>
+                <tr class="maj"><td>70 altı</td><td class="amt">3</td><td class="c"><div class="bar"><span class="yok" style="width:8%"></span></div></td><td>Telafi sınavı — 21.08.2026</td></tr>
+              </tbody>
+              <tfoot><tr><td>Sınava giren</td><td class="amt">38</td><td class="c">ort. 82</td><td>Başarı oranı %92,1</td></tr></tfoot>
+            </table></div>
+            <div class="hint">Geçme notu <b>70</b>; altında kalan katılımcıya sertifika basılmaz, telafi sınavı planlanır.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp" style="margin-top:12px;margin-bottom:0">
+      <h4>Etkinlik Ölçümü (eğitim sonrası performans) <span class="tag">KALEGITIMETKINLIK</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:250px">Gösterge</th><th class="amt" style="width:90px">Öncesi</th>
+            <th class="amt" style="width:90px">Sonrası</th><th class="c" style="width:100px">Değişim</th>
+            <th class="c" style="width:100px">Ölçüm Tarihi</th><th>Yöntem / Kaynak</th></tr></thead>
+          <tbody>
+            <tr><td>Ramak kala bildirim sayısı (aylık)</td><td class="amt">4</td><td class="amt">11</td>
+              <td class="c" style="color:#2e7d46"><b>+175%</b></td><td class="c">01.09.2026</td><td>İSG bildirim formu</td></tr>
+            <tr><td>İş kazası sayısı (3 aylık)</td><td class="amt">3</td><td class="amt">1</td>
+              <td class="c" style="color:#2e7d46"><b>−67%</b></td><td class="c">01.09.2026</td><td>Kaza kayıt defteri</td></tr>
+            <tr><td>KKD kullanım denetim skoru</td><td class="amt">%68</td><td class="amt">%91</td>
+              <td class="c" style="color:#2e7d46"><b>+23 puan</b></td><td class="c">28.08.2026</td><td>Saha denetim çetelesi</td></tr>
+            <tr class="min"><td>Uygulama gözlem skoru (3. ay)</td><td class="amt">—</td><td class="amt">bekliyor</td>
+              <td class="c">—</td><td class="c">12.11.2026</td><td>Amir gözlem formu · GOREVLER hatırlatması</td></tr>
+          </tbody>
+        </table></div>
+        <div class="hint">Etkinlik ölçümü sonucu <b>yetersiz</b> işaretlenirse eğitim "tekrar edilmeli" duruma düşer
+          ve yenileme planına otomatik eklenir.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SERTIFIKALAR -->
+  <div class="pane" data-p="sertifika">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Sertifikalar &amp; Geçerlilik <span class="tag">KALEGITIMKATILIMCI.SERTIFIKANO · KALYETKINLIK</span></h4>
+      <div class="body">
+        <div class="gridtb" style="padding:0 0 7px">
+          <span class="minibtn">🎓 Sertifika Yazdır</span><span class="minibtn">📤 Toplu PDF</span>
+          <span class="minibtn">🔁 Yenileme Planla</span><span class="minibtn">✉ Personele Gönder</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Son geçerlilik = Veriliş + Geçerlilik (ay)</span>
+        </div>
+        <div class="dg"><table>
+          <thead><tr><th style="width:76px">Sicil</th><th style="width:150px">Ad Soyad</th><th style="width:130px">Sertifika No</th>
+            <th style="width:160px">Veren Kurum</th><th class="c" style="width:88px">Veriliş</th>
+            <th class="c" style="width:70px">Geçerlilik</th><th class="c" style="width:96px">Son Geçerlilik</th>
+            <th class="c" style="width:120px">Durum</th></tr></thead>
+          <tbody>
+            <tr><td>PRS.0104</td><td>Mert Aslan</td><td>İSG-2026-0441</td><td>ORTAK OSGB LTD. ŞTİ.</td>
+              <td class="c">13.08.2026</td><td class="c">12 ay</td><td class="c">13.08.2027</td><td class="c"><span class="badge on">Geçerli</span></td></tr>
+            <tr><td>PRS.0118</td><td>Osman Çelik</td><td>İSG-2026-0442</td><td>ORTAK OSGB LTD. ŞTİ.</td>
+              <td class="c">13.08.2026</td><td class="c">12 ay</td><td class="c">13.08.2027</td><td class="c"><span class="badge on">Geçerli</span></td></tr>
+            <tr class="min"><td>PRS.0126</td><td>Fatma Demir</td><td>—</td><td>ORTAK OSGB LTD. ŞTİ.</td>
+              <td class="c">—</td><td class="c">12 ay</td><td class="c">—</td><td class="c"><span class="badge dev">Basım bekliyor</span></td></tr>
+            <tr><td>PRS.0142</td><td>Zeynep Arslan</td><td>İSG-2026-0444</td><td>ORTAK OSGB LTD. ŞTİ.</td>
+              <td class="c">13.08.2026</td><td class="c">12 ay</td><td class="c">13.08.2027</td><td class="c"><span class="badge on">Geçerli</span></td></tr>
+            <tr class="maj"><td>PRS.0163</td><td>Hüseyin Kılıç</td><td>—</td><td>—</td>
+              <td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c"><span class="badge no">Katılmadı</span></td></tr>
+            <tr class="kap"><td>PRS.0182</td><td>Canan Şimşek</td><td>—</td><td>—</td>
+              <td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c"><span class="badge nd">Mazeretli</span></td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="4" style="text-align:right">36 sertifika basılacak · 2 telafi sınavı bekliyor</td>
+            <td class="c">13.08.2026</td><td class="c">12 ay</td><td class="c">13.08.2027</td><td class="c">4 kişi kapsam dışı</td></tr></tfoot>
+        </table></div>
+        <div class="hint">Sertifika basıldığında ilgili personelin <b>KALYETKINLIK</b> kaydı güncellenir ve
+          yenileme tarihi için <b>GOREVLER</b>'e 30 gün önceden hatırlatma açılır.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOKUMAN -->
+  <div class="pane" data-p="dokuman">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Doküman / Sunum <span class="tag">DOKUMAN → IMAJ → GENDEPO.DOSYA</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:220px">Dosya</th><th style="width:140px">Tür</th><th style="width:130px">Ekleyen</th>
+            <th class="c" style="width:100px">Tarih</th><th>Açıklama</th></tr></thead>
+          <tbody>
+            <tr><td>isg_temel_sunum_rev4.pdf</td><td>Sunum</td><td>Murat Kaya</td><td class="c">11.08.2026</td><td>16 saatlik program sunumu · 128 slayt</td></tr>
+            <tr class="sel"><td>yoklama_12082026.pdf</td><td>Yoklama / imza</td><td>Ayşe Yılmaz</td><td class="c">13.08.2026</td><td>Islak imzalı, taranmış (2 sayfa)</td></tr>
+            <tr><td>sinav_optik_sonuc.xlsx</td><td>Sınav sonucu</td><td>Ayşe Yılmaz</td><td class="c">13.08.2026</td><td>42 kişilik optik döküm</td></tr>
+            <tr><td>osgb_teklif_fatura.pdf</td><td>Fatura / teklif</td><td>Muhasebe</td><td class="c">14.08.2026</td><td>23.100,00 TL · KDV hariç</td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">📎 Klasörden</span><span class="minibtn">🖨 Tarayıcıdan</span>
+          <span class="minibtn">📋 Yapıştır</span><span class="minibtn">🖼 Dosyadan</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- YORUM -->
+  <div class="pane" data-p="yorum">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Yorum / Akış <span class="tag">GOREVYORUM + IMAJ</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:150px">Kullanıcı</th><th style="width:140px">Tarih</th><th>Yorum</th><th class="c" style="width:60px">Ek</th></tr></thead>
+          <tbody>
+            <tr><td>Ayşe Yılmaz</td><td>13.08.2026 17:40</td><td>Yoklama tarandı; katılmayan 4 kişi için telafi grubu 09.09.2026'ya planlanacak.</td><td class="c">📎 1</td></tr>
+            <tr><td>Elif Şahin</td><td>14.08.2026 08:55</td><td>Sertifikalar OSGB'den 5 iş günü içinde gelecek, geldiğinde eğitim kapatılabilir.</td><td class="c">—</td></tr>
+            <tr class="kap"><td>Sistem</td><td>14.08.2026 09:00</td><td>Durum değişti: Yoklama Alındı → Yapıldı</td><td class="c">—</td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">➕ Yorum Ekle</span><span class="minibtn">📎 Ek</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EK ALANLAR -->
+  <div class="pane" data-p="ek">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Ek Alanlar <span class="tag">REHBERBILGI/EAV</span></h4>
+      <div class="body"><div class="dg"><table><thead><tr><th style="width:200px">Etiket</th><th>Değer</th></tr></thead>
+        <tbody>
+          <tr><td>Yasal Dayanak</td><td>6331 sayılı Kanun · Çalışanların İSG Eğitimleri Yönetmeliği</td></tr>
+          <tr><td>Tehlike Sınıfı</td><td>Az tehlikeli — yenileme periyodu 3 yıl (kurum içi politika: 1 yıl)</td></tr>
+          <tr class="sel"><td>Telafi Grubu</td><td>09.09.2026 · 4 kişi (2 depo · 2 üretim)</td></tr>
+          <tr><td>Bütçe Kalemi</td><td>2026 Eğitim Bütçesi — 760.05.02 · kalan 148.900,00 TL</td></tr>
+          <tr><td>Sözleşme No</td><td>OSGB-2026-011 (yıllık hizmet sözleşmesi)</td></tr>
+        </tbody></table></div>
+        <div class="gridtb"><span class="minibtn">➕ Alan Ekle</span></div></div>
+    </div>
+  </div>
+
+  <div class="maprow"><b>Veri modeli:</b>
+    <span>Başlık → <b>KALEGITIM</b> (EGITIMKODU · ADI · TUR · KAYNAK · EGITMEN · KURUM · TARIH · SURE · GECERLILIK · YENILEMETARIH · MALIYET · DURUM)</span>·
+    <span>Katılım → <b>KALEGITIMKATILIMCI</b> (PERSONELID · KATILIM · PUAN · SERTIFIKANO)</span>·
+    <span>Program → <b>KALEGITIMPROGRAM</b></span>·
+    <span>Kişi → <b>PERSONEL</b></span>·
+    <span>Yetkinlik → <b>KALYETKINLIK</b></span>·
+    <span>Ek → <b>DOKUMAN → IMAJ</b> · <b>REHBERBILGI</b></span>·
+    <span>Hatırlatma → <b>GOREVLER</b></span>
+  </div>
+  <div class="statusbar">
+    <span>Durum: <b style="color:#2e7d46">Yapıldı</b></span>
+    <span>Katılım: <b style="color:#2e7d46">%90,5</b> (38 / 42)</span>
+    <span>Ortalama puan: <b>82 / 100</b></span>
+    <span>Yenileme tarihi: <b style="color:#a9791a">12.08.2027</b></span>
+    <span class="req-note">* zorunlu alan</span>
+    <span style="margin-left:auto">Oluşturma: 24.07.2026 · Ayşe Yılmaz</span>
+  </div>
+</div>
+<script>
+  var tabs=document.querySelectorAll('.tab'),panes=document.querySelectorAll('.pane');
+  tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('active')});panes.forEach(function(x){x.classList.remove('active')});t.classList.add('active');document.querySelector('.pane[data-p="'+t.dataset.t+'"]').classList.add('active');});});
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      /* kayit uzerinde islem yapan dugmeler (Egitimi Kapat) pencereyi kapatmaz */
+      if(el.getAttribute&&el.getAttribute("data-kayit")) return;
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazgeç|çık)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

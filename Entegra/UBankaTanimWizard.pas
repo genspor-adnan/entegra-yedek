@@ -17,7 +17,10 @@ uses
   cxButtons, cxImage, cxDBEdit, cxLabel, cxDBLabel, cxSpinEdit, cxCurrencyEdit,
   cxImageComboBox, cxCheckBox, cxMaskEdit, cxDropDownEdit, cxControls,
   cxContainer, cxEdit, cxTextEdit, JvWizard, JvExControls, DB, SqlExpr, FireDAC.Comp.Client,
-  ExtCtrls, dxSkinLondonLiquidSky, cxLookAndFeels, dxSkinLiquidSky;
+  ExtCtrls, dxSkinLondonLiquidSky, cxLookAndFeels, dxSkinLiquidSky,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TBankaTanimWizardDlg = class(TForm)
@@ -79,6 +82,7 @@ type
     ComboSube: TcxDBImageComboBox;
     cxLabel1: TcxLabel;
     cxDBCheckBox4: TcxDBCheckBox;
+    CheckVarsayilan: TcxDBCheckBox;
     procedure TabBankaHesaplarAfterPost(DataSet: TDataSet);
     procedure FormShow(Sender: TObject);
     procedure TabBankaHesaplarBeforePost(DataSet: TDataSet);
@@ -253,6 +257,12 @@ end;
 
 procedure TBankaTanimWizardDlg.TabBankaHesaplarAfterPost(DataSet: TDataSet);
 begin
+  if AlanTamsayi(TabBankaHesaplar.FieldByName('VARSAYILAN')) = 1 then
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'update BANKAHESAPLAR set VARSAYILAN=0 where REHBERID=&rehberid and ID<> &id',
+      ['&rehberid', '&id'],
+      [TabBankaHesaplar.FieldByName('REHBERID').AsInteger, TabBankaHesaplar.FieldByName('ID').AsInteger]);
+
   case islemOp of
     'D' : begin
              if TabBankaHesaplar.FieldByName('ILETREHBERID').AsString <> '' then begin
@@ -335,7 +345,10 @@ begin
   TabBankaHesaplar.FieldByName('KUR').AsString := CariDoviz;
 
   AlanBoolYaz(TabBankaHesaplar.FieldByName('DURUM'), True);//DURUM smallint (PG) -> .AsBoolean patlar
-  AlanBoolYaz(TabBankaHesaplar.FieldByName('VARSAYILAN'), TabBankaHesaplar.RecordCount<1);  // VARSAYILAN smallint (PG) -> .AsBoolean patlar
+  AlanBoolYaz(TabBankaHesaplar.FieldByName('VARSAYILAN'),
+    not Veritabani.VeriVarMi(Tablo.FDCnn,
+      'select ID from BANKAHESAPLAR where REHBERID=&rehberid',
+      ['&rehberid'], [RehberId]));  // VARSAYILAN smallint (PG) -> .AsBoolean patlar
   AlanBoolYaz(TabBankaHesaplar.FieldByName('CEKHESABI'), False);
   AlanBoolYaz(TabBankaHesaplar.FieldByName('KREDILIHESAP'), False);
   AlanBoolYaz(TabBankaHesaplar.FieldByName('KREDIKARTI'), False);

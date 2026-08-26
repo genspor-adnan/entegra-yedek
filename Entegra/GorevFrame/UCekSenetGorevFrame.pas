@@ -1,4 +1,4 @@
-ï»¿unit UCekSenetGorevFrame;
+unit UCekSenetGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -8,15 +8,15 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus,
-  cxLookAndFeelPainters, cxButtons, JvExControls, JvButton, JvNavigationPane,
+  cxLookAndFeelPainters, cxButtons,
   ImgList, PngImageList;
 
 type
   TCekSenetGorevFrame = class(TFrame)
-    btnCekSenet: TJvNavPanelButton;
-    btnDokumler: TJvNavPanelButton;
+    btnCekSenet: TcxButton;
+    btnDokumler: TcxButton;
     PngImageList1: TPngImageList;
-    btnSenet: TJvNavPanelButton;
+    btnSenet: TcxButton;
     procedure btnCekSenetClick(Sender: TObject);
     procedure btnDokumlerClick(Sender: TObject);
   private
@@ -41,17 +41,19 @@ procedure TCekSenetGorevFrame.btnCekSenetClick(Sender: TObject);
 begin
   with FFrameBilgi.IcerikGit(TCekListeFrame).Ornek as TCekListeFrame do begin
   end;
+  GorevTusuSec(Self, Sender);   // tek buton aktif (renkli)
 end;
 
 procedure TCekSenetGorevFrame.btnDokumlerClick(Sender: TObject);
 begin
-  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'Ã‡';
+  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'Ç';
+  GorevTusuSec(Self, Sender);   // tek buton aktif (renkli)
 end;
 
 procedure TCekSenetGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   btnCekSenet.Visible := Tablo.YetkiVarmi(255101,YetkiTur_Gorme);
   btnSenet.Visible := Tablo.YetkiVarmi(255111,YetkiTur_Gorme);
   btnDokumler.Visible := Tablo.YetkiVarmi(255199,YetkiTur_Gorme);
@@ -61,3 +63,5 @@ end;
 initialization
   RegisterClass(TCekSenetGorevFrame);
 end.
+
+

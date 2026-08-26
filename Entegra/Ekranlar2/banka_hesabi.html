@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Banka Hesabı — Mockup</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;--sel:#d7e7fb;--selbd:#98c2ee;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--grpbg:#fbfcfd;}
+  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:970px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}.title .sp{margin-left:auto;font-weight:normal;opacity:.9;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}.btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px}
+  .idstrip{display:grid;grid-template-columns:1fr 1.4fr 150px 130px;gap:10px;padding:10px 12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}.fld label{font-size:10.5px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;color:var(--ink);display:flex;align-items:center}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}.combo{position:relative}.combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}.chip.on{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);margin-top:2px;flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}.tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:14px}.pane.active{display:block}.row{display:flex;gap:14px}.col{flex:1;min-width:0}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}.grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;gap:8px}.grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;margin-left:auto;background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grid2{display:grid;grid-template-columns:130px 1fr;gap:8px 10px;align-items:center}.grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}.dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}.dg tr.sel td{background:var(--sel)}.dg tr:hover td{background:#f2f7fd}.dg .c{text-align:center}.amt{text-align:right;font-family:"Segoe UI",Tahoma}.neg{color:#b23b3b}.pos{color:#2e7d46}
+  .gridtb{display:flex;gap:4px;padding:5px 0 0}.minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}.kpi{border:1px solid var(--line2);border-radius:4px;background:linear-gradient(#fff,#f6f9fc);padding:9px 11px}.kpi .k{font-size:10.5px;color:var(--muted)}.kpi .v{font-size:16px;font-weight:bold;color:var(--navy);margin-top:3px;font-family:"Segoe UI",Tahoma}.kpi .v.pos{color:#2e7d46}.kpi .s{font-size:10px;color:var(--muted);margin-top:2px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}.maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style></head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Banka Hesabı — Düzenle <span class="sp">BANKAHESAPLAR.ID 12</span></div>
+  <div class="toolbar"><div class="btn primary">💾 Kaydet</div><div class="btn danger">🗑 Sil</div><div class="sepv"></div><div class="btn">🏦 Havale/EFT</div><div class="btn">🔄 Virman</div><div class="btn">📥 Ekstre Al (Banka)</div><div class="btn">🖨 Yazdır</div><div class="sepv"></div><div class="btn">✖ Kapat</div></div>
+  <div class="idstrip">
+    <div class="fld"><label>Hesap Adı</label><div class="inp big">Garanti — Vadesiz TL</div></div>
+    <div class="fld"><label>IBAN</label><div class="inp big">TR33 0006 2000 1420 0006 2957 41</div></div>
+    <div class="fld"><label>Döviz</label><div class="inp combo">TL</div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="chip on">● Aktif</span></div></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-t="genel">Genel</div><div class="tab" data-t="hareket">Hareketler / Ekstre</div><div class="tab" data-t="talimat">Talimatlar</div><div class="tab" data-t="belge">Belgeler</div><div class="tab" data-t="ek">Ek Alanlar</div>
+  </div>
+  <div class="pane active" data-p="genel">
+    <div class="kpis">
+      <div class="kpi"><div class="k">Güncel Bakiye</div><div class="v pos">₺ 486.200,00</div><div class="s">12.08 itibarıyla</div></div>
+      <div class="kpi"><div class="k">Bloke</div><div class="v">₺ 25.000,00</div><div class="s">1 talimat</div></div>
+      <div class="kpi"><div class="k">Kullanılabilir</div><div class="v pos">₺ 461.200,00</div></div>
+      <div class="kpi"><div class="k">Bugünkü Hareket</div><div class="v">3 işlem</div><div class="s">+₺40.000 / −₺12.400</div></div>
+    </div>
+    <div class="row">
+      <div class="col"><div class="grp" style="margin-bottom:0"><h4>Hesap Bilgileri <span class="tag">BANKAHESAPLAR</span></h4>
+        <div class="body grid2">
+          <label>Banka</label><div class="inp combo">Garanti BBVA</div>
+          <label>Şube</label><div class="inp">Kadıköy (204)</div>
+          <label>Hesap No</label><div class="inp">6295741</div>
+          <label>IBAN</label><div class="inp">TR33 0006 2000 1420 0006 2957 41</div>
+          <label>Döviz</label><div class="inp combo">TL</div>
+        </div></div></div>
+      <div class="col"><div class="grp" style="margin-bottom:0"><h4>Muhasebe & Limit <span class="tag">BANKAHESAPLAR</span></h4>
+        <div class="body grid2">
+          <label>Muhasebe Kodu</label><div class="inp">102.01.001</div>
+          <label>Bağlı Kasa</label><div class="inp combo">Merkez Kasa</div>
+          <label>KMH / Limit</label><div class="inp">₺ 100.000,00</div>
+          <label>Açılış Bakiyesi</label><div class="inp">₺ 250.000,00</div>
+          <label>Sorumlu</label><div class="inp combo">Elif Demir</div>
+        </div></div></div>
+    </div>
+  </div>
+  <div class="pane" data-p="hareket">
+    <div class="grp" style="margin-bottom:0"><h4>Hesap Hareketleri (Ekstre) <span class="tag">KASA (banka) / BANKAHAREKET</span></h4>
+      <div class="body">
+        <div style="display:flex;gap:8px;margin-bottom:8px;font-size:11px;color:var(--muted)"><span class="minibtn">📅 01.08 – 12.08.2026</span><span style="margin-left:auto">Devir: <b>₺ 458.600</b> · Kapanış: <b>₺ 486.200</b></span></div>
+        <div class="dg"><table><thead><tr><th style="width:90px">Tarih</th><th>Açıklama</th><th style="width:120px">Karşı Cari</th><th class="amt" style="width:100px">Borç</th><th class="amt" style="width:100px">Alacak</th><th class="amt" style="width:110px">Bakiye</th></tr></thead>
+          <tbody>
+            <tr><td>08.08</td><td>Gelen EFT — Granit tahsilat</td><td>Granit Bilg.</td><td class="amt"></td><td class="amt pos">40.000,00</td><td class="amt">498.600,00</td></tr>
+            <tr class="sel"><td>10.08</td><td>Giden Havale — MNG ödeme</td><td>MNG Tekno.</td><td class="amt neg">12.400,00</td><td class="amt"></td><td class="amt">486.200,00</td></tr>
+            <tr><td>11.08</td><td>Banka masrafı / EFT ücreti</td><td>—</td><td class="amt neg">45,00</td><td class="amt"></td><td class="amt">486.155,00</td></tr>
+          </tbody></table></div>
+        <div class="gridtb"><span class="minibtn">＋ Hareket</span><span class="minibtn">🔗 Cari Eşle</span><span class="minibtn">📥 MT940 İçe Aktar</span><span class="minibtn">📊 Excel</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="pane" data-p="talimat"><div class="grp" style="margin-bottom:0"><h4>Otomatik Ödeme / Talimatlar <span class="tag">TALIMAT</span></h4>
+    <div class="body"><div class="dg"><table><thead><tr><th>Talimat</th><th style="width:100px">Periyot</th><th class="amt" style="width:110px">Tutar</th><th style="width:100px">Sonraki</th><th class="c" style="width:80px">Durum</th></tr></thead>
+      <tbody><tr class="sel"><td>Kira Ödemesi</td><td>Aylık</td><td class="amt">25.000,00</td><td>01.09.2026</td><td class="c"><span class="chip on">Aktif</span></td></tr><tr><td>Sigorta Primi</td><td>Aylık</td><td class="amt">4.200,00</td><td>05.09.2026</td><td class="c"><span class="chip on">Aktif</span></td></tr></tbody></table></div>
+      <div class="gridtb"><span class="minibtn">＋ Talimat</span><span class="minibtn">🗑 Sil</span></div></div></div></div>
+  <div class="pane" data-p="belge"><div class="grp" style="margin-bottom:0"><h4>Belgeler <span class="tag">DOKUMAN/IMAJ</span></h4><div class="body"><div class="hint">Hesap sözleşmesi, imza sirküleri, banka ekstresi PDF'leri eklenir.</div></div></div></div>
+  <div class="pane" data-p="ek"><div class="grp" style="margin-bottom:0"><h4>Ek Alanlar <span class="tag">REHBERBILGI/EAV</span></h4><div class="body"><div class="dg"><table><thead><tr><th style="width:180px">Etiket</th><th>Değer</th></tr></thead><tbody><tr><td>SWIFT</td><td>TGBATRIS</td></tr><tr class="sel"><td>İnternet Bankacılığı</td><td>Aktif</td></tr></tbody></table></div><div class="gridtb"><span class="minibtn">＋ Alan Ekle</span></div></div></div></div>
+  <div class="maprow"><b>Veri modeli:</b> <span>Genel → <b>BANKAHESAPLAR</b> (BANKALAR)</span>· <span>Hareketler → <b>KASA/BANKAHAREKET</b></span>· <span>Talimat → <b>TALIMAT</b></span>· <span>Belgeler → <b>DOKUMAN/IMAJ</b></span></div>
+  <div class="statusbar"><span>Bakiye: <b style="color:#2e7d46">₺ 486.200</b></span><span>Banka: Garanti BBVA · Kadıköy</span><span style="margin-left:auto">Son mutabakat: 31.07.2026</span></div>
+</div>
+<script>var tabs=document.querySelectorAll('.tab'),panes=document.querySelectorAll('.pane');tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('active')});panes.forEach(function(x){x.classList.remove('active')});t.classList.add('active');document.querySelector('.pane[data-p="'+t.dataset.t+'"]').classList.add('active');});});</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body></html>

@@ -4,7 +4,7 @@
 interface
 
 const
-  KomutNo  =  32958; // 17733;
+  KomutNo   =  32984; // 17733;
 
 var
   // SmallInt DEGIL: komut numaralari 32767'yi asti (32953...), SmallInt'e atarken
@@ -67,7 +67,7 @@ begin
   GResult:=Guncelleme.guncelleme(1,Tablo.Query1.FieldByName('DEGER').AsInteger+1,KomutNo);
 
   for i := 0 to Length(GResult) - 1 do begin
-    AltSorguHataSay := 0;
+    AltSorguHataSay  := 0;
     // Komut hangi motora ait? ACIKLAMA'da '#pg'/'#PG' -> PG komutu; yoksa MSSQL/varsayilan komut.
     // Yalniz aktif motora uyan komut calistirilir; uyumsuz olan ATLANIR (versiyon no yine ilerler).
     LPgKomut := ContainsText(GResult[i].ACIKLAMA, '#pg');
@@ -76,7 +76,7 @@ begin
       // Komut calistirma da zinciri kirmasin: tek bir bozuk komut yuzunden kalan
       //   guncellemeler uygulanmadan kalmamali (hata sayilir, versiyon ilerler).
       try
-         Tablo.GuncellemeSatiriCalistir(GResult[i].KOMUT,AltSorguHataSay);
+          Tablo.GuncellemeSatiriCalistir(GResult[i].KOMUT,AltSorguHataSay);
       except
         on E: Exception do
         begin

@@ -166,16 +166,17 @@ object AnaForm: TAnaForm
       object KasiyerMenu: TMenuItem
         Caption = 'Kasiyer'
         ImageIndex = 34
+        Visible = False
         OnClick = KasiyerMenuClick
       end
       object CafeRestMenu: TMenuItem
         Caption = 'Cafe / Rest'
         ImageIndex = 34
+        Visible = False
         OnClick = CafeRestMenuClick
       end
       object N4: TMenuItem
         Caption = '-'
-        Visible = False
       end
       object k1: TMenuItem
         Caption = #199#305'k'#305#351
@@ -223,10 +224,11 @@ object AnaForm: TAnaForm
       end
       object Opsiyonlar1: TMenuItem
         Caption = 'Opsiyonlar'
+        SubMenuImages = Tablo.PNGImageList1
         ImageIndex = 11
         object GenelOpsMenu: TMenuItem
           Caption = 'Genel'
-          ImageIndex = 11
+          ImageIndex = 23
           OnClick = GenelOpsMenuClick
         end
         object N3: TMenuItem
@@ -234,67 +236,67 @@ object AnaForm: TAnaForm
         end
         object CRMOpsMenu: TMenuItem
           Caption = 'CRM'
-          ImageIndex = 36
+          ImageIndex = 57
           OnClick = CRMOpsMenuClick
         end
         object CariOpsMenu: TMenuItem
           Caption = 'Cari'
-          ImageIndex = 35
+          ImageIndex = 2
           OnClick = CariOpsMenuClick
         end
         object KasaOpsMenu: TMenuItem
           Caption = 'Kasa'
-          ImageIndex = 34
+          ImageIndex = 56
           OnClick = KasaOpsMenuClick
         end
         object KasiyerOpsMenu: TMenuItem
           Caption = 'Kasiyer'
-          ImageIndex = 34
+          ImageIndex = 3
           OnClick = KasiyerOpsMenuClick
         end
         object BankaOpsMenu: TMenuItem
           Caption = 'Banka'
-          ImageIndex = 34
+          ImageIndex = 5
           OnClick = BankaOpsMenuClick
         end
         object FaturaOpsMenu: TMenuItem
           Caption = 'Al'#305#351' Sat'#305#351
-          ImageIndex = 34
+          ImageIndex = 54
           OnClick = FaturaOpsMenuClick
         end
         object CekSenetOpsMenu: TMenuItem
           Caption = #199'ek Senet'
-          ImageIndex = 34
+          ImageIndex = 48
           OnClick = CekSenetOpsMenuClick
         end
         object StokOpsMenu: TMenuItem
           Caption = 'Stok'
-          ImageIndex = 12
+          ImageIndex = 29
           OnClick = StokOpsMenuClick
         end
         object UretimOpsMenu: TMenuItem
           Caption = #220'retim'
-          ImageIndex = 12
+          ImageIndex = 45
           OnClick = UretimOpsMenuClick
         end
         object IKOpsMenu: TMenuItem
           Caption = #304'K'
-          ImageIndex = 35
+          ImageIndex = 44
           OnClick = IKOpsMenuClick
         end
         object DemirbasOpsMenu: TMenuItem
           Caption = 'Demirba'#351
-          ImageIndex = 12
+          ImageIndex = 32
           OnClick = DemirbasOpsMenuClick
         end
         object TeklifOpsMenu: TMenuItem
           Caption = 'Teklif'
-          ImageIndex = 4
+          ImageIndex = 30
           OnClick = TeklifOpsMenuClick
         end
         object ServisOpsMenu: TMenuItem
           Caption = 'Servis'
-          ImageIndex = 7
+          ImageIndex = 9
           OnClick = ServisOpsMenuClick
         end
         object DokumanOpsMenu: TMenuItem
@@ -304,7 +306,7 @@ object AnaForm: TAnaForm
         end
         object KaliteOpsMenu: TMenuItem
           Caption = 'Kalite'
-          ImageIndex = 23
+          ImageIndex = 11
           OnClick = KaliteOpsMenuClick
         end
       end

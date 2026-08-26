@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Denetim Kartı — Mockup</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;
+    --sel:#d7e7fb;--selbd:#98c2ee;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--grpbg:#fbfcfd;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1080px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2f7d6b,#1e5849);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#8fd3c1;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.9;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f7d6b;background:linear-gradient(#43a189,#2f7d6b);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .btn.pasif{opacity:.55}
+  .sepv{width:1px;background:var(--line);margin:2px 3px}
+  .idstrip{display:grid;gap:10px;padding:10px 12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .idstrip+.idstrip{padding-top:0;background:#f5f8fb}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted)}.fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative;padding-right:16px}.combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .chip.acik{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}.chip.islem{background:#fdf6e3;color:#a9791a;border:1px solid #eeddb4}.chip.bitti{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}
+  .chip.p-yuksek{background:#fdecec;color:#b23b3b;border:1px solid #f2c9c9}
+  .chip.gec{background:#fbe9e9;color:#b23b3b;border:1px solid #f0c9c9}
+  .chip.pas{background:#f0f2f4;color:#7b8794;border:1px solid #dfe4e9}
+  .chip.mor{background:#f0e9f8;color:#7a4fb0;border:1px solid #ded0ee}
+  .chip.turuncu{background:#fdeee2;color:#a35b18;border:1px solid #f2d6bd}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);margin-top:2px;flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:14px}.pane.active{display:block}
+  .row{display:flex;gap:14px}.col{flex:1;min-width:0}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;margin-left:auto;background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grid2{display:grid;grid-template-columns:130px 1fr;gap:8px 10px;align-items:center}.grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .full{grid-column:1 / -1}
+  textarea.inp{height:56px;padding:5px 6px;resize:none;line-height:1.4;white-space:normal;font-family:inherit;color:var(--ink)}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}
+  .dg tr.sel td{background:var(--sel)}.dg tr:hover td{background:#f2f7fd}
+  .dg tr.maj td{background:#f7cfcf;color:#7d1f1f}.dg tr.maj:hover td{background:#f4c4c4}
+  .dg tr.min td{background:#fbe6ae;color:#7a5407}.dg tr.min:hover td{background:#f8e0a0}
+  .dg tr.kap td{background:#dcdcdc;color:#7a7a7a}.dg tr.kap:hover td{background:#d5d5d5}
+  .dg .c{text-align:center}.amt{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .gridtb{display:flex;gap:4px;padding:5px 0 0;flex-wrap:wrap;align-items:center}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px;display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .badge{font-size:10px;padding:1px 7px;border-radius:3px;font-weight:bold}
+  .badge.on{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}.badge.dev{background:#fdf6e3;color:#a9791a;border:1px solid #eeddb4}
+  .badge.no{background:#fbe9e9;color:#b23b3b;border:1px solid #f0c9c9}
+  .badge.nd{background:#f0f2f4;color:#7b8794;border:1px solid #dfe4e9}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}.maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}.req-note{color:var(--req)}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}
+  .kpi{border:1px solid var(--line2);border-radius:4px;background:linear-gradient(#fff,#f6f9fc);padding:9px 11px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}.kpi .v{font-size:16px;font-weight:bold;color:var(--navy);margin-top:3px;font-family:"Segoe UI",Tahoma}
+  .kpi .v.pos{color:#2e7d46}.kpi .v.neg{color:#b23b3b}.kpi .v.uyar{color:#a9791a}.kpi .s{font-size:10px;color:var(--muted);margin-top:2px}
+  .banner{background:#fdf6e9;border:1px solid #f0dcbb;color:#8a5a1e;border-radius:5px;padding:7px 10px;font-size:11.5px;margin-bottom:10px;display:flex;gap:8px;align-items:center}
+  .banner.g{background:#eef7ee;border-color:#cfe8cf;color:#2e7d46}
+  .banner.k{background:#fbeaea;border-color:#f0c9c9;color:#a33232}
+  .foot{display:flex;gap:14px;margin-top:6px}.notes{flex:1}.notes textarea{width:100%;height:80px;border:1px solid var(--line);border-radius:3px;padding:6px;font-family:inherit;font-size:12px;resize:none}
+  .totals{width:320px;border:1px solid var(--line2);border-radius:5px;background:linear-gradient(#fff,#f6f9fc);padding:8px 10px}
+  .totals .r{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px dashed var(--line2)}
+  .totals .r.g{border-bottom:none;border-top:2px solid #cdd6e0;margin-top:4px;padding-top:6px;font-weight:bold;font-size:14px;color:var(--navy)}
+  .av{width:24px;height:24px;border-radius:50%;color:#fff;font-weight:bold;display:inline-flex;align-items:center;justify-content:center;font-size:10px;vertical-align:middle}
+  .bar{height:10px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:60px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Denetim — Düzenle
+    <span class="sp">Kalite\UDenetimFrame · KALDENETIM.ID 507 · DNT.2026/07 (İç Denetim)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">🔎 Bulgu Gir</div>
+    <div class="btn">📋 Soru Listesi</div>
+    <div class="btn">🛠 DÖF Aç</div>
+    <div class="btn">📄 Rapor Üret</div>
+    <div class="btn ok pasif" data-kayit="1">✔ Denetimi Kapat</div>
+    <div class="sepv"></div>
+    <div class="btn">✖ Kapat</div>
+  </div>
+
+  <div class="idstrip" style="grid-template-columns:130px 120px 115px 1fr 190px 160px">
+    <div class="fld"><label class="req">Denetim No</label><div class="inp big">DNT.2026/07</div></div>
+    <div class="fld"><label>Tür</label><div class="inp combo">İç Denetim</div></div>
+    <div class="fld"><label>Standart</label><div class="inp combo">ISO 9001:2015</div></div>
+    <div class="fld"><label class="req">Konu</label><div class="inp big">Üretim süreçleri iç denetimi</div></div>
+    <div class="fld"><label class="req">Denetlenen Bölüm / Firma</label><div class="inp combo">Üretim (Kesim · Dikim · Montaj)</div></div>
+    <div class="fld"><label class="req">Baş Denetçi</label><div class="inp combo"><span class="av" style="background:#2f7d6b">EŞ</span>&nbsp;Elif Şahin</div></div>
+  </div>
+
+  <div class="idstrip" style="grid-template-columns:1fr 115px 125px 90px 150px 130px">
+    <div class="fld"><label>Ekip</label><div class="inp">Hakan Aydın, Zeynep Arslan <span class="chip acik" style="margin-left:auto">3 kişi</span></div></div>
+    <div class="fld"><label class="req">Plan Tarihi</label><div class="inp">10.08.2026</div></div>
+    <div class="fld"><label>Gerçekleşen Tarih</label><div class="inp">12.08.2026</div></div>
+    <div class="fld"><label>Süre (gün)</label><div class="inp amt" style="justify-content:flex-end">2</div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="chip turuncu">● Bulgu Girildi</span></div></div>
+    <div class="fld"><label>Uygunluk %</label><div class="inp"><b style="color:#a9791a">%78</b>
+      <div class="bar" style="flex:1;margin-left:7px"><span class="kri" style="width:78%"></span></div></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="genel">Genel</div>
+    <div class="tab" data-t="soru">Soru Listesi <span class="b">52</span></div>
+    <div class="tab" data-t="bulgu">Bulgular <span class="b">6</span></div>
+    <div class="tab" data-t="program">Program / Saha Planı</div>
+    <div class="tab" data-t="ekip">Ekip <span class="b">3</span></div>
+    <div class="tab" data-t="dokuman">Doküman &amp; Kanıt <span class="b">5</span></div>
+    <div class="tab" data-t="rapor">Rapor</div>
+    <div class="tab" data-t="yorum">Yorum <span class="b">3</span></div>
+    <div class="tab" data-t="ek">Ek Alanlar</div>
+  </div>
+
+  <!-- GENEL -->
+  <div class="pane active" data-p="genel">
+    <div class="banner k">⚠ <b>1 majör uygunsuzluk</b> açık (BLG-01 · madde 8.5.1 · DOF.2026/0031 — termin 26.08.2026).
+      Majör bulgu kapanmadan denetim <b>kapatılamaz</b>.</div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="k">Uygunluk</div><div class="v uyar">%78</div><div class="s">hedef %90</div></div>
+      <div class="kpi"><div class="k">Cevaplanan Soru</div><div class="v">52 / 52</div><div class="s">3 uygulanabilir değil</div></div>
+      <div class="kpi"><div class="k">Majör</div><div class="v neg">1</div><div class="s">açık</div></div>
+      <div class="kpi"><div class="k">Minör</div><div class="v uyar">3</div><div class="s">2 aksiyonda</div></div>
+      <div class="kpi"><div class="k">Gözlem</div><div class="v">2</div><div class="s">1 kapandı</div></div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Amaç ve Kapsam <span class="tag">KALDENETIM</span></h4>
+          <div class="body grid2">
+            <label>Denetim Amacı</label>
+            <textarea class="inp full" style="grid-column:2/-1" readonly>Kalite yönetim sisteminin üretim süreçlerinde ISO 9001:2015 şartlarına uygunluğunun ve etkinliğinin doğrulanması; 2026 yılı denetim programının 3. denetimi.</textarea>
+            <label>Kapsam</label>
+            <textarea class="inp full" style="grid-column:2/-1" readonly>Kesim, dikim ve montaj hatları; ölçüm ekipmanları yönetimi; ürün izlenebilirliği; uygun olmayan çıktı kontrolü. Satış ve muhasebe süreçleri kapsam dışıdır.</textarea>
+            <label>Denetim Kriterleri</label><div class="inp">ISO 9001:2015 · Kalite El Kitabı rev.5 · Prosedürler</div>
+            <label>Referans Doküman</label><div class="inp combo">KEK-01 · PRS-08 · TLM-14 · FRM-KK-08</div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Planlama &amp; Toplantılar <span class="tag">KALDENETIM</span></h4>
+          <div class="body grid2">
+            <label>Yıllık Plan</label><div class="inp combo">2026 Denetim Programı — sıra 3/6</div>
+            <label>Bildirim Tarihi</label><div class="inp">05.08.2026 <span class="chip bitti" style="margin-left:auto">Bölümlere iletildi</span></div>
+            <label>Açılış Toplantısı</label><div class="inp">12.08.2026 09:00 · 7 katılımcı</div>
+            <label>Kapanış Toplantısı</label><div class="inp">12.08.2026 16:30 · 9 katılımcı</div>
+            <label>Rapor Tarihi</label><div class="inp">13.08.2026 <span class="chip islem" style="margin-left:auto">Taslak</span></div>
+            <label>Bir Sonraki</label><div class="inp">Şubat 2027 (takip denetimi)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <div class="col"><div class="grp" style="margin-bottom:0"><h4>Genel Değerlendirme <span class="tag">KALDENETIM.DEGERLENDIRME</span></h4>
+        <div class="body"><textarea class="inp" style="width:100%;height:74px" readonly>Üretim süreçleri genel olarak tanımlı prosedürlere uygun yürütülmektedir. Ölçüm ekipmanı yönetiminde sistemsel bir zayıflık tespit edilmiş, kalibrasyon takibi majör uygunsuzluk olarak sınıflandırılmıştır. İzlenebilirlik etiketleme uygulaması vardiya bazında farklılık göstermektedir.</textarea></div></div></div>
+      <div class="col"><div class="grp" style="margin-bottom:0"><h4>Sonuç / Karar <span class="tag">KALDENETIM.SONUC</span></h4>
+        <div class="body"><textarea class="inp" style="width:100%;height:74px" readonly>Sistem şartlı olarak etkin bulunmuştur. Majör uygunsuzluk için 14 gün içinde kök neden analizi ve düzeltici faaliyet planı beklenmektedir. Takip denetimi 27.08.2026 tarihinde ölçüm ekipmanları kapsamında yapılacaktır.</textarea></div></div></div>
+    </div>
+  </div>
+
+  <!-- SORU LISTESI -->
+  <div class="pane" data-p="soru">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Soru Listesi / Kontrol Listesi <span class="tag">KALDENETIMSORU (1:N)</span></h4>
+      <div class="body">
+        <div class="gridtb" style="padding:0 0 7px">
+          <span class="minibtn">📋 Şablondan Yükle</span><span class="minibtn">➕ Soru Ekle</span><span class="minibtn">🗑 Sil</span>
+          <span class="minibtn">🧮 Uygunluk Hesapla</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">U = Uygun · UD = Uygulanabilir değil · UY = Uygunsuz</span>
+        </div>
+        <div class="dg"><table>
+          <thead><tr><th style="width:70px">Madde</th><th>Soru</th><th class="c" style="width:60px">Cevap</th>
+            <th class="amt" style="width:56px">Puan</th><th style="width:210px">Kanıt</th></tr></thead>
+          <tbody>
+            <tr><td>4.1</td><td>Kuruluş bağlamı, iç ve dış hususlar güncel mi?</td><td class="c"><span class="badge on">U</span></td><td class="amt">10</td><td>BGL-01 rev.3</td></tr>
+            <tr><td>5.1</td><td>Üst yönetim liderlik taahhüdünü kanıtlarla gösteriyor mu?</td><td class="c"><span class="badge on">U</span></td><td class="amt">10</td><td>YGG tutanağı 02.2026</td></tr>
+            <tr><td>6.1</td><td>Risk ve fırsatlara yönelik faaliyetler izleniyor mu?</td><td class="c"><span class="badge on">U</span></td><td class="amt">8</td><td>Risk tablosu 2026</td></tr>
+            <tr class="maj"><td>7.1.5</td><td><b>Ölçüm ekipmanları kalibrasyon planına uygun mu?</b></td><td class="c"><span class="badge no">UY</span></td><td class="amt">0</td><td>Kumpas KP-14 / KP-22 etiketi</td></tr>
+            <tr class="min"><td>7.2</td><td>Personel yetkinliği ve eğitim kayıtları tam mı?</td><td class="c"><span class="badge no">UY</span></td><td class="amt">0</td><td>İK eğitim dosyası (2 kişi eksik)</td></tr>
+            <tr class="maj"><td>8.5.1</td><td><b>Üretim kontrollü koşullar altında gerçekleştiriliyor mu?</b></td><td class="c"><span class="badge no">UY</span></td><td class="amt">0</td><td>Hat gözlem formu · 4 fotoğraf</td></tr>
+            <tr class="min"><td>8.5.2</td><td>Ürün izlenebilirliği tüm aşamalarda sağlanıyor mu?</td><td class="c"><span class="badge no">UY</span></td><td class="amt">0</td><td>Palet fotoğrafları (3 adet)</td></tr>
+            <tr><td>8.6</td><td>Ürün serbest bırakma kayıtları mevcut mu?</td><td class="c"><span class="badge on">U</span></td><td class="amt">10</td><td>FRM-KK-08 formları</td></tr>
+            <tr class="sel"><td>8.7</td><td>Uygun olmayan çıktı kontrolü tanımlı ve uygulanıyor mu?</td><td class="c"><span class="badge on">U</span></td><td class="amt">8</td><td>Karantina alanı gözlemi</td></tr>
+            <tr><td>9.1.3</td><td>Veri analizi ve değerlendirme yapılıyor mu?</td><td class="c"><span class="badge on">U</span></td><td class="amt">8</td><td>Aylık kalite raporu</td></tr>
+            <tr class="kap"><td>7.5.3</td><td>Dış kaynaklı doküman kontrolü (bu bölüm için geçerli değil)</td><td class="c"><span class="badge nd">UD</span></td><td class="amt">—</td><td>—</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="2" style="text-align:right">Cevaplanan 52 / 52 · U: 38 · UY: 11 · UD: 3</td>
+            <td class="c">%78</td><td class="amt">380</td><td>Uygunluk = 38 / (52 − 3)</td></tr></tfoot>
+        </table></div>
+        <div class="hint">Soru listesi standart bazlı şablondan yüklenir (<b>KALSORULISTE</b>); "UY" işaretlenen her satırdan
+          tek tıkla bulgu oluşturulabilir — madde no ve kanıt otomatik taşınır.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BULGULAR -->
+  <div class="pane" data-p="bulgu">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Bulgular / Uygunsuzluklar <span class="tag">KALDENETIMBULGU (1:N) · KALDOF</span></h4>
+      <div class="body">
+        <div class="gridtb" style="padding:0 0 7px">
+          <span class="minibtn">➕ Bulgu Ekle</span><span class="minibtn">✎ Düzenle</span><span class="minibtn">🗑 Sil</span>
+          <span class="minibtn">🛠 Seçiliden DÖF Aç</span><span class="minibtn">🖨 Bulgu Formu</span>
+        </div>
+        <div class="dg"><table>
+          <thead><tr><th style="width:70px">Bulgu No</th><th class="c" style="width:64px">Sınıf</th><th style="width:64px">Madde</th>
+            <th>Açıklama</th><th style="width:150px">Kanıt</th><th style="width:110px">Sorumlu</th>
+            <th class="c" style="width:84px">Termin</th><th style="width:112px">DÖF</th></tr></thead>
+          <tbody>
+            <tr class="maj"><td><b>BLG-01</b></td><td class="c"><span class="badge no">Majör</span></td><td>8.5.1</td>
+              <td>Üretim hattında kalibrasyon süresi geçmiş 2 adet kumpas kullanımda; ölçüm sonuçlarının güvenilirliği doğrulanamıyor.</td>
+              <td>Foto KP-14, KP-22</td><td>Mert Aslan</td><td class="c">26.08.2026</td><td>DOF.2026/0031</td></tr>
+            <tr class="min"><td>BLG-02</td><td class="c"><span class="badge dev">Minör</span></td><td>7.1.5.2</td>
+              <td>Kalibrasyon takip çizelgesi 2 aydır güncellenmemiş; sonraki kalibrasyon tarihleri izlenmiyor.</td>
+              <td>Çizelge çıktısı</td><td>Zeynep Arslan</td><td class="c">05.09.2026</td><td>DOF.2026/0032</td></tr>
+            <tr class="min"><td>BLG-03</td><td class="c"><span class="badge dev">Minör</span></td><td>8.5.2</td>
+              <td>Yarı mamul raflarında izlenebilirlik etiketi eksik (3 palet tespit edildi).</td>
+              <td>Palet fotoğrafı ×3</td><td>Mert Aslan</td><td class="c">29.08.2026</td><td>—</td></tr>
+            <tr class="min"><td>BLG-04</td><td class="c"><span class="badge dev">Minör</span></td><td>7.2</td>
+              <td>Yeni işe başlayan 2 operatörün yetkinlik / eğitim kaydı bulunamadı.</td>
+              <td>İK dosya incelemesi</td><td>Ayşe Yılmaz</td><td class="c">12.09.2026</td><td>—</td></tr>
+            <tr class="kap"><td>BLG-05</td><td class="c"><span class="badge nd">Gözlem</span></td><td>8.7</td>
+              <td>Uygunsuz ürün alanı sarı bantla ayrılmış, tanımlayıcı tabela yok. (Denetim sırasında giderildi.)</td>
+              <td>Saha gözlemi</td><td>Mert Aslan</td><td class="c">—</td><td>—</td></tr>
+            <tr><td>BLG-06</td><td class="c"><span class="badge nd">Gözlem</span></td><td>9.1.3</td>
+              <td>Hurda oranı analizi üç aylık yapılıyor; aylık izlemeye geçilmesi önerilir.</td>
+              <td>Kalite raporu</td><td>Elif Şahin</td><td class="c">—</td><td>—</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="2" style="text-align:right">TOPLAM</td><td colspan="2">1 majör · 3 minör · 2 gözlem — 4 bulgu açık</td>
+            <td colspan="3"></td><td>2 DÖF</td></tr></tfoot>
+        </table></div>
+        <div class="hint">Sınıf <b>Majör</b> seçildiğinde DÖF açılışı zorunludur ve denetim listede kırmızı boyanır.
+          Termin dolduğunda DÖF kartı gecikmeye düşer.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRAM / SAHA PLANI -->
+  <div class="pane" data-p="program">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Program / Saha Planı <span class="tag">KALDENETIMPROGRAM</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th class="c" style="width:110px">Saat</th><th style="width:190px">Bölüm / Alan</th>
+            <th style="width:170px">Görüşülen Kişi</th><th style="width:130px">Denetçi</th><th>Kapsam / Madde</th></tr></thead>
+          <tbody>
+            <tr><td class="c">09:00 – 09:30</td><td>Açılış Toplantısı</td><td>Mert Aslan (Üretim Md.)</td><td>Elif Şahin</td><td>Plan, kapsam, kriterler, gizlilik</td></tr>
+            <tr><td class="c">09:30 – 11:00</td><td>Kesim Hattı</td><td>Osman Çelik (Vardiya Amiri)</td><td>Hakan Aydın</td><td>8.5.1 · 8.5.2 · 7.1.5</td></tr>
+            <tr><td class="c">11:00 – 12:30</td><td>Dikim Hattı</td><td>Fatma Demir</td><td>Hakan Aydın</td><td>8.5.1 · 7.2</td></tr>
+            <tr class="sel"><td class="c">13:30 – 15:00</td><td>Kalite Kontrol Laboratuvarı</td><td>Zeynep Arslan</td><td>Elif Şahin</td><td>7.1.5 · 8.6 · 9.1.3</td></tr>
+            <tr><td class="c">15:00 – 16:00</td><td>Montaj / Sevkiyat Hazırlık</td><td>Serkan Öz</td><td>Zeynep Arslan</td><td>8.5.2 · 8.7</td></tr>
+            <tr><td class="c">16:00 – 16:30</td><td>Ekip Değerlendirmesi</td><td>— (denetim ekibi)</td><td>Elif Şahin</td><td>Bulguların sınıflandırılması</td></tr>
+            <tr><td class="c">16:30 – 17:15</td><td>Kapanış Toplantısı</td><td>Genel Müdür + bölüm sorumluları</td><td>Elif Şahin</td><td>Bulguların sunumu, terminler</td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">➕ Satır Ekle</span><span class="minibtn">🖨 Programı Yazdır</span>
+          <span class="minibtn">✉ Bölümlere Bildir</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EKIP -->
+  <div class="pane" data-p="ekip">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Denetim Ekibi <span class="tag">KALDENETIMEKIP · PERSONEL</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:170px">Personel</th><th style="width:140px">Rol</th><th style="width:140px">Bölümü</th>
+            <th style="width:150px">Denetçi Belgesi</th><th class="c" style="width:100px">Geçerlilik</th><th>Atandığı Alanlar</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td><span class="av" style="background:#2f7d6b">EŞ</span>&nbsp;<b>Elif Şahin</b></td><td>Baş Denetçi</td><td>Kalite Yönetim</td>
+              <td>ISO 9001 Baş Denetçi</td><td class="c">14.03.2028</td><td>Açılış/kapanış, yönetim, satın alma</td></tr>
+            <tr><td><span class="av" style="background:#2f6db3">HA</span>&nbsp;Hakan Aydın</td><td>Denetçi</td><td>Kalite Kontrol</td>
+              <td>ISO 9001 İç Denetçi</td><td class="c">02.11.2027</td><td>Kesim, dikim, ölçüm ekipmanları</td></tr>
+            <tr><td><span class="av" style="background:#7a4fb0">ZA</span>&nbsp;Zeynep Arslan</td><td>Denetçi / Gözlemci</td><td>Çevre &amp; İSG</td>
+              <td>ISO 14001 İç Denetçi</td><td class="c">20.05.2027</td><td>Montaj hattı, atık alanı</td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">➕ Ekip Üyesi Ekle</span><span class="minibtn">🗑 Çıkar</span></div>
+        <div class="hint">Bağımsızlık kuralı: denetçi kendi bölümünü denetleyemez — kayıt sırasında kontrol edilir.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOKUMAN -->
+  <div class="pane" data-p="dokuman">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Doküman &amp; Kanıt <span class="tag">DOKUMAN → IMAJ → GENDEPO.DOSYA</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:210px">Dosya</th><th style="width:140px">Tür</th><th style="width:130px">Ekleyen</th>
+            <th class="c" style="width:100px">Tarih</th><th>Açıklama</th></tr></thead>
+          <tbody>
+            <tr><td>DNT-2026-07_plan.pdf</td><td>Denetim planı</td><td>Elif Şahin</td><td class="c">05.08.2026</td><td>Onaylı yıllık plandan türetildi</td></tr>
+            <tr><td>soru_listesi_9001.xlsx</td><td>Soru listesi</td><td>Elif Şahin</td><td class="c">08.08.2026</td><td>52 soruluk şablon, rev.4</td></tr>
+            <tr class="sel"><td>kumpas_KP14.jpg</td><td>Kanıt fotoğraf</td><td>Hakan Aydın</td><td class="c">12.08.2026</td><td>Kalibrasyon etiketi süresi geçmiş</td></tr>
+            <tr><td>palet_etiket_3adet.jpg</td><td>Kanıt fotoğraf</td><td>Hakan Aydın</td><td class="c">12.08.2026</td><td>İzlenebilirlik etiketi eksik</td></tr>
+            <tr><td>kapanis_tutanak.pdf</td><td>Tutanak</td><td>Elif Şahin</td><td class="c">12.08.2026</td><td>Katılımcı imzaları dahil</td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">📎 Klasörden</span><span class="minibtn">🖨 Tarayıcıdan</span>
+          <span class="minibtn">📋 Yapıştır</span><span class="minibtn">🖼 Dosyadan</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAPOR -->
+  <div class="pane" data-p="rapor">
+    <div class="banner">📄 Rapor <b>taslak</b> durumda — 13.08.2026 tarihinde üretildi, dağıtımı yapılmadı.</div>
+    <div class="foot">
+      <div class="notes"><label style="font-size:11px;color:var(--muted)">Rapor Özeti</label>
+        <textarea readonly>ISO 9001:2015 kapsamında yürütülen iç denetimde 6 bulgu tespit edilmiştir: 1 majör, 3 minör, 2 gözlem. Uygunluk oranı %78 olup hedefin (%90) altındadır. Majör uygunsuzluk ölçüm ekipmanı kalibrasyon yönetiminden kaynaklanmakta olup DOF.2026/0031 ile takip edilmektedir. Takip denetimi 27.08.2026 tarihinde planlanmıştır.</textarea>
+        <div class="gridtb"><span class="minibtn">📄 Rapor Üret</span><span class="minibtn">🖨 Yazdır / PDF</span>
+          <span class="minibtn">✉ Dağıtım Listesine Gönder</span><span class="minibtn">🔒 Raporu Onayla</span></div>
+      </div>
+      <div class="totals">
+        <div class="r"><span>Toplam soru</span><span>52</span></div>
+        <div class="r"><span>Uygun (U)</span><span>38</span></div>
+        <div class="r"><span>Uygunsuz (UY)</span><span style="color:#b23b3b">11</span></div>
+        <div class="r"><span>Uygulanabilir değil (UD)</span><span>3</span></div>
+        <div class="r"><span>Majör / Minör / Gözlem</span><span>1 / 3 / 2</span></div>
+        <div class="r"><span>Açılan DÖF</span><span>2</span></div>
+        <div class="r g"><span>Uygunluk</span><span style="color:#a9791a">%78</span></div>
+      </div>
+    </div>
+    <div class="hint">Rapor onaylandığında durum <b>Raporlandı</b> olur; tüm bulgular kapandığında "Denetimi Kapat" aktifleşir.</div>
+  </div>
+
+  <!-- YORUM -->
+  <div class="pane" data-p="yorum">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Yorum / Akış <span class="tag">GOREVYORUM + IMAJ</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:150px">Kullanıcı</th><th style="width:140px">Tarih</th><th>Yorum</th><th class="c" style="width:60px">Ek</th></tr></thead>
+          <tbody>
+            <tr><td>Elif Şahin</td><td>12.08.2026 17:30</td><td>Kapanış toplantısı yapıldı; majör bulgu için 14 gün termin verildi.</td><td class="c">📎 1</td></tr>
+            <tr><td>Mert Aslan</td><td>13.08.2026 09:10</td><td>Kumpaslar kalibrasyona gönderildi, yedek set devreye alındı.</td><td class="c">—</td></tr>
+            <tr class="kap"><td>Sistem</td><td>13.08.2026 09:12</td><td>Durum değişti: Sahada → Bulgu Girildi</td><td class="c">—</td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">➕ Yorum Ekle</span><span class="minibtn">📎 Ek</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EK ALANLAR -->
+  <div class="pane" data-p="ek">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Ek Alanlar <span class="tag">REHBERBILGI/EAV</span></h4>
+      <div class="body"><div class="dg"><table><thead><tr><th style="width:200px">Etiket</th><th>Değer</th></tr></thead>
+        <tbody>
+          <tr><td>Denetim Yöntemi</td><td>Yerinde (saha) · doküman incelemesi · görüşme</td></tr>
+          <tr class="sel"><td>Vardiya</td><td>1. vardiya (08:00 – 16:00)</td></tr>
+          <tr><td>Önceki Denetim</td><td>DNT.2025/09 — uygunluk %88, kapandı</td></tr>
+          <tr><td>Takip Denetimi</td><td>27.08.2026 (ölçüm ekipmanları)</td></tr>
+        </tbody></table></div>
+        <div class="gridtb"><span class="minibtn">➕ Alan Ekle</span></div></div>
+    </div>
+  </div>
+
+  <div class="maprow"><b>Veri modeli:</b>
+    <span>Başlık → <b>KALDENETIM</b> (DENETIMNO · TUR · STANDART · BOLUM · BASDENETCI · PLANTARIH · DURUM)</span>·
+    <span>Sorular → <b>KALDENETIMSORU</b> (1:N)</span>·
+    <span>Bulgular → <b>KALDENETIMBULGU</b> (SINIF · MADDE · SORUMLU · DOFNO)</span>·
+    <span>DÖF → <b>KALDOF</b></span>·
+    <span>Ekip → <b>PERSONEL</b></span>·
+    <span>Ek → <b>DOKUMAN → IMAJ</b> · <b>REHBERBILGI</b></span>
+  </div>
+  <div class="statusbar">
+    <span>Durum: <b style="color:#a35b18">Bulgu Girildi</b></span>
+    <span>Uygunluk: <b style="color:#a9791a">%78</b></span>
+    <span>Majör / Minör / Gözlem: <b>1 / 3 / 2</b></span>
+    <span>Açık DÖF: <b style="color:#b23b3b">2</b></span>
+    <span class="req-note">* zorunlu alan</span>
+    <span style="margin-left:auto">Oluşturma: 05.08.2026 · Elif Şahin</span>
+  </div>
+</div>
+<script>
+  var tabs=document.querySelectorAll('.tab'),panes=document.querySelectorAll('.pane');
+  tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('active')});panes.forEach(function(x){x.classList.remove('active')});t.classList.add('active');document.querySelector('.pane[data-p="'+t.dataset.t+'"]').classList.add('active');});});
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      /* kayit uzerinde islem yapan dugmeler (Denetimi Kapat) pencereyi kapatmaz */
+      if(el.getAttribute&&el.getAttribute("data-kayit")) return;
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazgeç|çık)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

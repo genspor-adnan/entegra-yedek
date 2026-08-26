@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proje Kartı — Mockup</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;
+    --sel:#d7e7fb;--selbd:#98c2ee;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--grpbg:#fbfcfd;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:970px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px}
+  .idstrip{display:grid;grid-template-columns:120px 1fr 150px 150px;gap:10px;padding:10px 12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}.fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;color:var(--ink);display:flex;align-items:center}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative}.combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .chip.on{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}.chip.dev{background:#fdf6e3;color:#a9791a;border:1px solid #eeddb4}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);margin-top:2px;flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:14px}.pane.active{display:block}
+  .row{display:flex;gap:14px}.col{flex:1;min-width:0}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;margin-left:auto;background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grid2{display:grid;grid-template-columns:120px 1fr;gap:8px 10px;align-items:center}
+  .grid2 label{font-size:11px;color:var(--muted);text-align:right}.grid2 label.req::after{content:" *";color:var(--req)}
+  .full{grid-column:1 / -1}
+  textarea.inp{height:56px;padding:5px 6px;resize:none;line-height:1.4}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}
+  .dg tr.sel td{background:var(--sel)}.dg tr:hover td{background:#f2f7fd}.dg tr.done td{color:#7d8b98}
+  .dg .c{text-align:center}.amt{text-align:right;font-family:"Segoe UI",Tahoma}.neg{color:#b23b3b}.pos{color:#2e7d46}
+  .gridtb{display:flex;gap:4px;padding:5px 0 0}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px}
+  .badge{font-size:10px;padding:1px 7px;border-radius:3px;font-weight:bold}
+  .badge.gelir{background:#eef7ee;color:#3f8a4e;border:1px solid #cfe8cf}.badge.gider{background:#fdecec;color:#b23b3b;border:1px solid #f2c9c9}
+  .badge.on{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}.badge.dev{background:#fdf6e3;color:#a9791a;border:1px solid #eeddb4}.badge.bek{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}.maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}.req-note{color:var(--req)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+  .kpi{border:1px solid var(--line2);border-radius:4px;background:linear-gradient(#fff,#f6f9fc);padding:9px 11px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}.kpi .v{font-size:16px;font-weight:bold;color:var(--navy);margin-top:3px;font-family:"Segoe UI",Tahoma}
+  .kpi .v.pos{color:#2e7d46}.kpi .v.neg{color:#b23b3b}.kpi .s{font-size:10px;color:var(--muted);margin-top:2px}
+  .bar{height:14px;border-radius:7px;background:#e7edf3;overflow:hidden;display:flex;border:1px solid var(--line2)}.bar>span{display:block;height:100%}
+  .barwrap{display:flex;align-items:center;gap:8px}.barwrap .pct{font-weight:bold;color:var(--navy);font-size:12px;min-width:36px}
+  .av{width:24px;height:24px;border-radius:50%;color:#fff;font-weight:bold;display:inline-flex;align-items:center;justify-content:center;font-size:10px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Proje Kartı — Düzenle <span class="sp">PROJELER.ID 318 · Kod: PRJ.2026-014</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">＋ Görev Ekle</div>
+    <div class="btn">💰 Bütçe</div>
+    <div class="btn">📊 Rapor</div>
+    <div class="btn">🖨️ Yazdır</div>
+    <div class="sepv"></div>
+    <div class="btn">✖ Kapat</div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label class="req">Proje Kodu</label><div class="inp big">PRJ.2026-014</div></div>
+    <div class="fld"><label class="req">Proje Adı</label><div class="inp big">Granit Bilgisayar — 2026 Bayi Yenileme</div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="chip dev">● Devam Ediyor</span></div></div>
+    <div class="fld"><label>İlerleme</label><div class="inp"><div class="bar" style="width:100%"><span style="width:62%;background:linear-gradient(#4d8fd6,#2f6db3)"></span></div></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="genel">Genel</div>
+    <div class="tab" data-t="ekip">Ekip <span class="b">4</span></div>
+    <div class="tab" data-t="butce">Bütçe</div>
+    <div class="tab" data-t="gorev">Görevler <span class="b">8</span></div>
+    <div class="tab" data-t="asama">Aşamalar <span class="b">4</span></div>
+    <div class="tab" data-t="belge">Belgeler <span class="b">5</span></div>
+    <div class="tab" data-t="ek">Ek Alanlar <span class="b">2</span></div>
+  </div>
+
+  <!-- GENEL -->
+  <div class="pane active" data-p="genel">
+    <div class="row">
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Proje Bilgileri <span class="tag">PROJELER</span></h4>
+          <div class="body grid2">
+            <label>Tür</label><div class="inp combo">Müşteri Projesi</div>
+            <label>Kategori</label><div class="inp combo">Satış / Bayilik</div>
+            <label>Durum</label><div class="inp combo">Devam Ediyor</div>
+            <label>Öncelik</label><div class="inp combo">Yüksek</div>
+            <label class="full" style="text-align:left;color:var(--muted)">İlerleme</label>
+            <div class="full barwrap"><div class="bar" style="flex:1"><span style="width:62%;background:linear-gradient(#4d8fd6,#2f6db3)"></span></div><span class="pct">%62</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Taraflar & Zaman <span class="tag">PROJELER</span></h4>
+          <div class="body grid2">
+            <label>Proje Müdürü</label><div class="inp combo"><span class="av" style="background:#2f6db3">MY</span>&nbsp;Mehmet Yıldız</div>
+            <label>Müşteri</label><div class="inp combo">Granit Bilgisayar Ltd.</div>
+            <label class="req">Başlangıç</label><div class="inp">01.07.2026</div>
+            <label>Planlanan Bitiş</label><div class="inp">30.09.2026</div>
+            <label>Sözleşme Tutarı</label><div class="inp">₺ 1.250.000,00</div>
+            <label>Bütçe Kullanımı</label><div class="inp">%54 <span class="badge on" style="margin-left:auto">Sağlıklı</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grp" style="margin-top:12px;margin-bottom:0">
+      <h4>Açıklama <span class="tag">PROJELER.ACIKLAMA</span></h4>
+      <div class="body"><textarea class="inp" style="width:100%" readonly>Bayi ağının 2026 yenileme projesi: yeni fiyat listeleri, hedef ciro anlaşmaları ve e-belge geçiş desteği. 3 aşamada, Q3 sonunda tamamlanması planlanıyor.</textarea></div>
+    </div>
+  </div>
+
+  <!-- EKIP -->
+  <div class="pane" data-p="ekip">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Proje Ekibi <span class="tag">PROJEKULLANICI (1:N)</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:26px" class="c">★</th><th>Kişi</th><th style="width:150px">Rol</th><th style="width:100px" class="c">Doluluk</th><th style="width:100px">Atanma</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td class="c">★</td><td><span class="av" style="background:#2f6db3">MY</span>&nbsp;Mehmet Yıldız</td><td>Proje Müdürü</td><td class="c">%40</td><td>01.07.2026</td></tr>
+            <tr><td class="c"></td><td><span class="av" style="background:#8a5cc0">ED</span>&nbsp;Elif Demir</td><td>Mali / Bütçe</td><td class="c">%25</td><td>01.07.2026</td></tr>
+            <tr><td class="c"></td><td><span class="av" style="background:#3f8a4e">AK</span>&nbsp;Ahmet Kaya</td><td>Saha / Satış</td><td class="c">%60</td><td>05.07.2026</td></tr>
+            <tr><td class="c"></td><td><span class="av" style="background:#b5731a">SÖ</span>&nbsp;Serkan Öz</td><td>Teknik Destek</td><td class="c">%20</td><td>10.07.2026</td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">＋ Üye Ekle</span><span class="minibtn">✎ Rol/Doluluk</span><span class="minibtn">🗑 Çıkar</span><span class="minibtn">★ Müdür Yap</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUTCE -->
+  <div class="pane" data-p="butce">
+    <div class="kpis">
+      <div class="kpi"><div class="k">Bütçe (Planlanan)</div><div class="v">₺ 980.000</div><div class="s">gider planı</div></div>
+      <div class="kpi"><div class="k">Harcanan</div><div class="v neg">₺ 529.000</div><div class="s">%54 kullanıldı</div></div>
+      <div class="kpi"><div class="k">Kalan</div><div class="v pos">₺ 451.000</div></div>
+      <div class="kpi"><div class="k">Tahmini Kâr</div><div class="v pos">₺ 270.000</div><div class="s">marj %21,6</div></div>
+    </div>
+    <div class="grp" style="margin-bottom:0">
+      <h4>Bütçe Kalemleri <span class="tag">PROJEBUTCE (1:N)</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th>Kalem</th><th style="width:70px">Tür</th><th class="amt" style="width:110px">Planlanan</th><th class="amt" style="width:110px">Gerçekleşen</th><th class="amt" style="width:100px">Fark</th></tr></thead>
+          <tbody>
+            <tr><td>Sözleşme Geliri</td><td><span class="badge gelir">Gelir</span></td><td class="amt">1.250.000</td><td class="amt pos">750.000</td><td class="amt">-500.000</td></tr>
+            <tr><td>Personel / Mesai</td><td><span class="badge gider">Gider</span></td><td class="amt">420.000</td><td class="amt neg">248.000</td><td class="amt pos">172.000</td></tr>
+            <tr class="sel"><td>Yazılım / Lisans</td><td><span class="badge gider">Gider</span></td><td class="amt">310.000</td><td class="amt neg">190.000</td><td class="amt pos">120.000</td></tr>
+            <tr><td>Seyahat / Saha</td><td><span class="badge gider">Gider</span></td><td class="amt">120.000</td><td class="amt neg">61.000</td><td class="amt pos">59.000</td></tr>
+            <tr><td>Diğer</td><td><span class="badge gider">Gider</span></td><td class="amt">130.000</td><td class="amt neg">30.000</td><td class="amt pos">100.000</td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">＋ Kalem Ekle</span><span class="minibtn">✎ Düzenle</span><span class="minibtn">🗑 Sil</span><span class="minibtn">🔗 Faturaları Eşle</span></div>
+        <div class="hint">Gerçekleşen tutarlar bağlı fatura/masraf kayıtlarından beslenir (salt‑okunur). Fark = Planlanan − Gerçekleşen.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOREVLER -->
+  <div class="pane" data-p="gorev">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Proje Görevleri <span class="tag">GOREVLER (proje bağlı)</span></h4>
+      <div class="body">
+        <div class="barwrap" style="margin-bottom:8px"><div class="bar" style="flex:1"><span style="width:62%;background:linear-gradient(#5aa06a,#3f8a4e)"></span></div><span class="pct">5/8</span></div>
+        <div class="dg"><table>
+          <thead><tr><th>Görev</th><th style="width:130px">Sorumlu</th><th style="width:90px">Termin</th><th class="c" style="width:90px">Durum</th><th class="c" style="width:70px">%</th></tr></thead>
+          <tbody>
+            <tr class="done"><td>Bayi listesi ve segmentasyon</td><td>Ahmet Kaya</td><td>08.07</td><td class="c"><span class="badge on">Bitti</span></td><td class="c">100</td></tr>
+            <tr class="done"><td>Fiyat listeleri güncellendi</td><td>Elif Demir</td><td>18.07</td><td class="c"><span class="badge on">Bitti</span></td><td class="c">100</td></tr>
+            <tr class="done"><td>e-Belge geçiş eğitimi</td><td>Serkan Öz</td><td>28.07</td><td class="c"><span class="badge on">Bitti</span></td><td class="c">100</td></tr>
+            <tr class="sel"><td>Sözleşme yenileme görüşmeleri</td><td>Mehmet Yıldız</td><td>14.08</td><td class="c"><span class="badge dev">Devam</span></td><td class="c">60</td></tr>
+            <tr><td>Hedef ciro anlaşmaları</td><td>Mehmet Yıldız</td><td>05.09</td><td class="c"><span class="badge bek">Açık</span></td><td class="c">0</td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">＋ Görev Ekle</span><span class="minibtn">👁 Aç</span><span class="minibtn">📅 Gantt</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASAMALAR -->
+  <div class="pane" data-p="asama">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Aşamalar / Kilometre Taşları <span class="tag">PROJEASAMA (1:N)</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:26px" class="c">#</th><th>Aşama</th><th style="width:100px">Başlangıç</th><th style="width:100px">Bitiş</th><th class="c" style="width:100px">Durum</th></tr></thead>
+          <tbody>
+            <tr class="done"><td class="c">1</td><td>Hazırlık & Analiz</td><td>01.07</td><td>15.07</td><td class="c"><span class="badge on">Tamam</span></td></tr>
+            <tr class="done"><td class="c">2</td><td>Fiyat & Eğitim</td><td>16.07</td><td>31.07</td><td class="c"><span class="badge on">Tamam</span></td></tr>
+            <tr class="sel"><td class="c">3</td><td>Görüşme & Yenileme</td><td>01.08</td><td>10.09</td><td class="c"><span class="badge dev">Devam</span></td></tr>
+            <tr><td class="c">4</td><td>Kapanış & Raporlama</td><td>11.09</td><td>30.09</td><td class="c"><span class="badge bek">Bekliyor</span></td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">＋ Aşama Ekle</span><span class="minibtn">✎ Düzenle</span><span class="minibtn">🗑 Sil</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BELGELER -->
+  <div class="pane" data-p="belge">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Proje Belgeleri <span class="tag">DOKUMAN · IMAJ → GENDEPO.DOSYA</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:150px">Tür</th><th>Ad</th><th style="width:70px" class="c">Boyut</th><th style="width:100px">Tarih</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td>📝 Sözleşme</td><td>bayi_sozlesme_2026.pdf</td><td class="c">312 KB</td><td>01.07.2026</td></tr>
+            <tr><td>📊 Bütçe Planı</td><td>butce_plani.xlsx</td><td class="c">88 KB</td><td>03.07.2026</td></tr>
+            <tr><td>📄 Fiyat Listesi</td><td>bayi_fiyat_2026.pdf</td><td class="c">140 KB</td><td>18.07.2026</td></tr>
+            <tr><td>📈 Durum Raporu Q3</td><td>durum_raporu_agustos.pdf</td><td class="c">61 KB</td><td>05.08.2026</td></tr>
+            <tr><td>🖼 Sunum</td><td>proje_sunum.pptx</td><td class="c">2.1 MB</td><td>10.07.2026</td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">＋ Belge Ekle</span><span class="minibtn">👁 Aç</span><span class="minibtn">⬇ İndir</span><span class="minibtn">🗑 Sil</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EK ALANLAR -->
+  <div class="pane" data-p="ek">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Ek Alanlar <span class="tag">REHBERBILGI/EAV</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:180px">Etiket</th><th>Değer</th><th style="width:120px">Modül</th></tr></thead>
+          <tbody>
+            <tr><td>Sözleşme No</td><td>SZL-2026-448</td><td>Proje</td></tr>
+            <tr class="sel"><td>Risk Seviyesi</td><td>Düşük</td><td>Proje</td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">＋ Alan Ekle</span><span class="minibtn">✎ Düzenle</span><span class="minibtn">🗑 Sil</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli:</b>
+    <span>Genel → <b>PROJELER</b></span>· <span>Ekip → <b>PROJEKULLANICI</b></span>· <span>Bütçe → <b>PROJEBUTCE</b></span>·
+    <span>Görevler → <b>GOREVLER</b> (proje bağlı)</span>· <span>Aşamalar → <b>PROJEASAMA</b></span>· <span>Belgeler → <b>DOKUMAN/IMAJ</b></span>· <span>Ek → <b>REHBERBILGI</b></span>
+  </div>
+  <div class="statusbar"><span>Kayıt: 14 / 96</span><span>Müdür: <b>Mehmet Yıldız</b> · Müşteri: Granit Bilgisayar</span><span class="req-note">* zorunlu</span><span style="margin-left:auto">Son değişiklik: 12.08.2026 · Elif Demir</span></div>
+</div>
+<script>
+  var tabs=document.querySelectorAll('.tab'),panes=document.querySelectorAll('.pane');
+  tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('active')});panes.forEach(function(x){x.classList.remove('active')});t.classList.add('active');document.querySelector('.pane[data-p="'+t.dataset.t+'"]').classList.add('active');});});
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>.gmzgizle{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>.gmzgizle{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+/* === GN-KARTMOD: kart penceresinde tam genislik === */
+body.kartmod{padding:0!important;margin:0!important;background:#fff!important}
+body.kartmod .win,body.kartmod .app{max-width:none!important;width:auto!important;
+  margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+body.koyu.kartmod{background:#12171e!important}
+/* === GN-KARTMOD son === */
+/* === GN-KOYU-GRPBAS: grup basligi koyu tema === */
+body.koyu .grp>h4{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-bottom-color:#2c3542!important}
+body.koyu .grp{background:#1b222c!important;border-color:#2c3542!important}
+body.koyu .grp .tag{background:#2c3a4b!important;color:#9fc0e0!important}
+body.koyu .imgbox{background:linear-gradient(135deg,#222b37,#1b232d)!important;
+  border-color:#3b4a5c!important;color:#7f8fa1!important}
+body.koyu .imgthumbs .t{border-color:#33404f!important}
+/* === GN-KOYU-GRPBAS son === */
+</style>
+<script>(function(){
+function solMenuMu(e){
+  if(!e||e.nodeType!==1) return false;
+  if(/(^|\s)(gorev|solmenu|gtusgrup)(\s|$)/.test(e.className||"")) return true;
+  /* gorev tuslari / sekmeli sol sutun: .gtus veya .ltabs iceriyorsa gizlenir */
+  return !!e.querySelector(".gtus, .ltabs, .lpane");
+}
+function g(){
+  if(location.hash.indexOf("gomulu")>=0){
+    document.body.classList.add("gomulu");
+    [".wrap",".work"].forEach(function(sel){
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(w){
+        var ilk=w.firstElementChild;
+        if(ilk) ilk.classList.toggle("gmzgizle", solMenuMu(ilk));
+      });
+    });
+  } else document.body.classList.remove("gomulu");
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",g); else g();
+addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();
+/* --- GN-KARTMOD: kabuk kartlari "#kart-..." ile acar; genisligi ac --- */
+(function(){
+  function kartModu(){
+    document.body.classList.toggle('kartmod', /(^|[#&])kart(-|\b)/.test(location.hash || ''));
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kartModu);
+  else kartModu();
+  addEventListener('hashchange', kartModu);
+})();
+</script>
+</body>
+</html>

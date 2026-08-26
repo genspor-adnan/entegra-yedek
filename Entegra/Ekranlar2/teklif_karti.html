@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teklif Kartı — Mockup</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;
+    --sel:#d7e7fb;--selbd:#98c2ee;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--grpbg:#fbfcfd;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:980px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.9;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px}
+  .hdr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 14px;padding:12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}.fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;color:var(--ink);display:flex;align-items:center}
+  .inp.big{height:26px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative}.combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .chip.gonder{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}.chip.ok{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}.chip.rev{background:#fdf6e3;color:#a9791a;border:1px solid #eeddb4}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:7px 14px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:12px}.pane.active{display:block}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 7px;font-size:11px;color:#3a5573;font-weight:bold}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 7px;font-size:11.5px}
+  .dg tr.sel td{background:var(--sel)}.dg tr:hover td{background:#f2f7fd}
+  .dg .c{text-align:center}.amt{text-align:right;font-family:"Segoe UI",Tahoma}
+  .gridtb{display:flex;gap:4px;padding:6px 0}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px}
+  .foot{display:flex;gap:14px;margin-top:6px}
+  .notes{flex:1}.notes textarea{width:100%;height:96px;border:1px solid var(--line);border-radius:3px;padding:6px;font-family:inherit;font-size:12px;resize:none}
+  .totals{width:320px;border:1px solid var(--line2);border-radius:5px;background:linear-gradient(#fff,#f6f9fc);padding:8px 10px}
+  .totals .r{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px dashed var(--line2)}
+  .totals .r.g{border-bottom:none;border-top:2px solid #cdd6e0;margin-top:4px;padding-top:6px;font-weight:bold;font-size:14px;color:var(--navy)}
+  .totals .r span:last-child{font-family:"Segoe UI",Tahoma}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;gap:8px}
+  .grp>h4 .tag{margin-left:auto;font-size:9.5px;font-weight:bold;background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grp .body{padding:10px}
+  .grid2{display:grid;grid-template-columns:150px 1fr;gap:8px 10px;align-items:center}.grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}.maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .ribbon{display:flex;align-items:center;gap:10px;background:#eef5fb;border:1px solid #cfe0f4;color:#2f6db3;border-radius:5px;padding:7px 10px;font-size:11.5px;margin-bottom:10px}
+  .ribbon b{color:var(--navy)}
+  .av{width:24px;height:24px;border-radius:50%;color:#fff;font-weight:bold;display:inline-flex;align-items:center;justify-content:center;font-size:10px;vertical-align:middle}
+  .badge{font-size:10px;padding:1px 7px;border-radius:3px;font-weight:bold}
+  .badge.cur{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}.badge.old{background:#eef1f4;color:#6b7a8b;border:1px solid #dbe1e8}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Teklif Kartı — Düzenle <span class="sp">TEKLIF.ID 1204 · Rev. R2</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">📤 Gönder (PDF/e‑posta)</div>
+    <div class="btn ok">✔ Kabul</div>
+    <div class="btn">✎ Revize Et</div>
+    <div class="btn">🔄 Siparişe Çevir</div>
+    <div class="btn">🖨 Yazdır</div>
+    <div class="sepv"></div>
+    <div class="btn">✖ Kapat</div>
+  </div>
+
+  <div class="hdr">
+    <div class="fld"><label class="req">Teklif No</label><div class="inp big">TKL.2026-0453</div></div>
+    <div class="fld"><label class="req">Müşteri (Cari)</label><div class="inp big">Granit Bilgisayar Ltd. Şti.</div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="chip gonder">● Gönderildi</span> <span class="chip rev" style="margin-left:4px">Rev. R2</span></div></div>
+
+    <div class="fld"><label class="req">Teklif Tarihi</label><div class="inp">12.08.2026</div></div>
+    <div class="fld"><label class="req">Geçerlilik</label><div class="inp">25.08.2026 <span class="chip rev" style="margin-left:auto">13 gün</span></div></div>
+    <div class="fld"><label>Döviz</label><div class="inp combo">TL</div></div>
+
+    <div class="fld"><label>Sorumlu</label><div class="inp combo"><span class="av" style="background:#2f6db3">MY</span>&nbsp;Mehmet Yıldız</div></div>
+    <div class="fld"><label>İlgili Fırsat</label><div class="inp combo">FRS.2026-0221</div></div>
+    <div class="fld"><label>Teklif Tasarımı</label><div class="inp combo">Standart Teklif Formu</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="kalem">Kalemler <span class="b">3</span></div>
+    <div class="tab" data-t="sartlar">Şartlar / Koşullar</div>
+    <div class="tab" data-t="revizyon">Revizyonlar <span class="b">3</span></div>
+    <div class="tab" data-t="yorum">Yorum / Medya</div>
+    <div class="tab" data-t="ek">Ek Alanlar</div>
+  </div>
+
+  <!-- KALEMLER -->
+  <div class="pane active" data-p="kalem">
+    <div class="ribbon">📄 Bu teklif bir <b>satış fırsatından</b> (FRS.2026‑0221) oluşturuldu. Kabul edilirse tek tıkla <b>siparişe/faturaya</b> dönüştürülür.</div>
+    <div class="dg"><table>
+      <thead><tr><th style="width:28px" class="c">#</th><th>Ürün / Hizmet</th><th class="amt" style="width:60px">Miktar</th><th style="width:60px">Birim</th><th class="amt" style="width:100px">Br. Fiyat</th><th class="amt" style="width:55px">İsk.%</th><th class="amt" style="width:55px">KDV</th><th class="amt" style="width:120px">Tutar</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td class="c">1</td><td>Lenovo ThinkPad E14 G5 i5</td><td class="amt">40</td><td>Adet</td><td class="amt">22.500,00</td><td class="amt">3</td><td class="amt">%20</td><td class="amt">873.000,00</td></tr>
+        <tr><td class="c">2</td><td>Kurulum / Kablolama Hizmeti</td><td class="amt">1</td><td>Adet</td><td class="amt">120.000,00</td><td class="amt">—</td><td class="amt">%20</td><td class="amt">120.000,00</td></tr>
+        <tr><td class="c">3</td><td>3 Yıl Yerinde Garanti</td><td class="amt">40</td><td>Adet</td><td class="amt">1.425,00</td><td class="amt">—</td><td class="amt">%20</td><td class="amt">57.000,00</td></tr>
+      </tbody>
+    </table></div>
+    <div class="gridtb"><span class="minibtn">＋ Satır Ekle</span><span class="minibtn">🔎 Stok Seç</span><span class="minibtn">🗑 Satır Sil</span><span class="minibtn">%  Toplu İskonto</span><span class="minibtn">📋 Şablondan Getir</span></div>
+
+    <div class="foot">
+      <div class="notes">
+        <label style="font-size:11px;color:var(--muted)">Müşteriye Not (teklifte görünür)</label>
+        <textarea readonly>Fiyatlarımız 25.08.2026 tarihine kadar geçerlidir. Teslimat sözleşme imzasından sonra 10 iş günüdür. Kurulum bedeli fiyata dahildir.</textarea>
+      </div>
+      <div class="totals">
+        <div class="r"><span>Ara Toplam</span><span>₺ 1.076.190,48</span></div>
+        <div class="r"><span>İskonto</span><span>− ₺ 26.190,48</span></div>
+        <div class="r"><span>Matrah</span><span>₺ 1.050.000,00</span></div>
+        <div class="r"><span>KDV %20</span><span>₺ 210.000,00</span></div>
+        <div class="r g"><span>Genel Toplam</span><span>₺ 1.260.000,00</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SARTLAR -->
+  <div class="pane" data-p="sartlar">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Şartlar & Koşullar <span class="tag">TEKLIF</span></h4>
+      <div class="body grid2">
+        <label>Teslim Süresi</label><div class="inp">Sözleşme imzasından 10 iş günü</div>
+        <label>Teslim Yeri</label><div class="inp combo">Müşteri Adresi (Kadıköy)</div>
+        <label>Ödeme Koşulu</label><div class="inp combo">%30 peşin, kalan 45 gün vade</div>
+        <label>Garanti</label><div class="inp">Üretici 2 yıl + 1 yıl ek yerinde</div>
+        <label>Geçerlilik</label><div class="inp">25.08.2026 (13 gün)</div>
+        <label>Nakliye</label><div class="inp combo">Satıcıya ait</div>
+        <label class="full" style="grid-column:1;text-align:right;align-self:start">Özel Şartlar</label>
+        <textarea class="inp" style="height:60px;grid-column:2">Fiyatlar döviz kuru %5'ten fazla değişirse revize edilebilir. Kurulum mesai saatleri içinde yapılır.</textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIZYONLAR -->
+  <div class="pane" data-p="revizyon">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Revizyon Geçmişi <span class="tag">TEKLIF (revizyon zinciri)</span></h4>
+      <div class="body">
+        <div class="dg"><table>
+          <thead><tr><th style="width:60px" class="c">Rev.</th><th style="width:100px">Tarih</th><th class="amt" style="width:130px">Tutar</th><th>Değişiklik</th><th class="c" style="width:90px">Durum</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td class="c"><span class="badge cur">R2</span></td><td>12.08.2026</td><td class="amt">1.260.000,00</td><td>Kurulum eklendi, %3 iskonto</td><td class="c"><span class="chip gonder">Güncel</span></td></tr>
+            <tr><td class="c"><span class="badge old">R1</span></td><td>10.08.2026</td><td class="amt">1.317.600,00</td><td>Garanti 3 yıla çıkarıldı</td><td class="c"><span class="chip old" style="background:#eef1f4;color:#6b7a8b;border:1px solid #dbe1e8">Eski</span></td></tr>
+            <tr><td class="c"><span class="badge old">R0</span></td><td>08.08.2026</td><td class="amt">1.098.000,00</td><td>İlk teklif</td><td class="c"><span class="chip old" style="background:#eef1f4;color:#6b7a8b;border:1px solid #dbe1e8">Eski</span></td></tr>
+          </tbody>
+        </table></div>
+        <div class="gridtb"><span class="minibtn">✎ Yeni Revizyon</span><span class="minibtn">👁 Karşılaştır (R1↔R2)</span><span class="minibtn">🖨 Rev. Yazdır</span></div>
+        <div class="hint">Her "Revize Et" yeni bir sürüm oluşturur; eski revizyonlar salt‑okunur saklanır. Güncel revizyon müşteriye gönderilen ve dönüştürülecek olandır.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- YORUM -->
+  <div class="pane" data-p="yorum">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Yorum / Medya <span class="tag">GOREVYORUM + IMAJ</span></h4>
+      <div class="body"><div class="hint">Teklife not, gönderim kaydı (e‑posta/PDF), müşteri geri bildirimi eklenir. Durum değişiklikleri (Gönderildi/Kabul/Revize) sistem satırı olarak akışa düşer.</div></div>
+    </div>
+  </div>
+
+  <!-- EK -->
+  <div class="pane" data-p="ek">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Ek Alanlar <span class="tag">REHBERBILGI/EAV</span></h4>
+      <div class="body"><div class="dg"><table><thead><tr><th style="width:180px">Etiket</th><th>Değer</th></tr></thead>
+        <tbody><tr><td>Rakip Teklif</td><td>X Bilişim — ₺1.32M</td></tr><tr class="sel"><td>Karar Verici</td><td>Genel Müdür (Zeynep Ak)</td></tr></tbody></table></div>
+        <div class="gridtb"><span class="minibtn">＋ Alan Ekle</span></div></div>
+    </div>
+  </div>
+
+  <div class="maprow"><b>Veri modeli:</b>
+    <span>Başlık → <b>TEKLIF</b></span>· <span>Kalemler → <b>TEKLIFDETAY</b></span>· <span>Toplam → <b>SP_PRG_Teklif_DipToplami</b></span>·
+    <span>Fırsat bağı → <b>FIRSAT</b></span>· <span>Revizyon → <b>TEKLIF (zincir)</b></span>· <span>Dönüşüm → <b>Sipariş/Fatura (412/413…)</b></span>
+  </div>
+  <div class="statusbar"><span>Durum: <b style="color:#2f6db3">Gönderildi · R2</b></span><span>Müşteri: Granit Bilgisayar</span><span style="margin-left:auto">Hazırlayan: Mehmet Yıldız · 12.08.2026</span></div>
+</div>
+<script>
+  var tabs=document.querySelectorAll('.tab'),panes=document.querySelectorAll('.pane');
+  tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('active')});panes.forEach(function(x){x.classList.remove('active')});t.classList.add('active');document.querySelector('.pane[data-p="'+t.dataset.t+'"]').classList.add('active');});});
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

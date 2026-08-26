@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teklif Listesi — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* teklif satir renkleri */
+    --s-sur:#f7cfcf; --s-sur-t:#7d1f1f;   /* gecerlilik suresi dolmus    */
+    --s-yak:#fbe6ae; --s-yak-t:#7a5407;   /* bugun / 3 gun icinde dolacak*/
+    --s-rev:#f6d9c0; --s-rev-t:#8a4a12;   /* revize / onay bekliyor      */
+    --s-ipt:#dcdcdc; --s-ipt-t:#7a7a7a;   /* kaybedilen - iptal          */
+    /* gorev butonu (Delphi clGorevTusuSecili / Pasif) */
+    --tus-pas:#9c71ad; --tus-sec:#1f6fbe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+
+  .wrap{display:grid;grid-template-columns:222px 1fr 236px;gap:0}
+
+  /* SOL: Menu / Arama */
+  .gorev{background:#f4f7fa;border-right:1px solid var(--line2);padding:6px 6px 10px}
+  .gorev h5{margin:6px 4px 4px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .ltabs{display:flex;gap:2px;margin:-6px -6px 8px;padding:6px 6px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .ltab{flex:1;text-align:center;padding:6px 8px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);
+    border-bottom:none;border-radius:3px 3px 0 0;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .ltab.active{background:#f4f7fa;color:var(--navy);font-weight:bold}
+  .lpane{display:none}.lpane.active{display:block}
+  .gtus{display:flex;align-items:center;gap:8px;color:#fff;font-weight:bold;font-size:11.5px;
+    background:var(--tus-pas);border:1px solid rgba(0,0,0,.12);border-radius:3px;padding:8px 9px;margin-bottom:3px;cursor:default}
+  .gtus:hover{filter:brightness(1.06)}
+  .gtus.on{background:var(--tus-sec);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+  .gtus .ic{font-size:14px;width:18px;text-align:center}
+  .achips{display:flex;gap:4px;margin-bottom:8px}
+  .achips .minibtn{flex:1;justify-content:center}
+  .agrid{display:grid;grid-template-columns:70px 1fr;gap:5px 6px;align-items:center}
+  .agrid label{font-size:10.5px;color:var(--muted);text-align:right}
+  .gorev .minibtn{white-space:nowrap}
+
+  /* ORTA */
+  .center{min-width:0;display:flex;flex-direction:column}
+  .filtre{display:flex;gap:5px;padding:8px 10px 7px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line2);background:#fbfcfe}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.s-sur td{background:var(--s-sur);color:var(--s-sur-t)}
+  .dg tr.s-yak td{background:var(--s-yak);color:var(--s-yak-t)}
+  .dg tr.s-rev td{background:var(--s-rev);color:var(--s-rev-t)}
+  .dg tr.s-ipt td{background:var(--s-ipt);color:var(--s-ipt-t)}
+  .dg tr.s-ipt td.ad{text-decoration:line-through}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-izl{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .p-gon{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}
+  .tip{display:inline-block;min-width:30px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;padding:1px 5px;border:1px solid}
+  .t-mal{background:#e5ecf8;border-color:#c6d7ef;color:#2b5c95}
+  .t-hzm{background:#e3f0e6;border-color:#c3e0cb;color:#2e7d46}
+  .t-sar{background:#fdf1e2;border-color:#f0dcbd;color:#96651a}
+  .t-ihr{background:#f0e9f8;border-color:#ded0ee;color:#7a4fb0}
+  /* mini bar */
+  .bar{height:9px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:54px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+
+  /* alt detay */
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 12px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+  .gridtb{display:flex;gap:4px;padding:0 0 7px;align-items:center;flex-wrap:wrap}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px}
+
+  /* SAG */
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:8px 0}
+  .side h5{margin:0;padding:7px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11px;padding:3px 12px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .tvsep{height:1px;background:var(--line2);margin:7px 10px}
+  .sidebtns{display:flex;flex-direction:column;gap:4px;padding:4px 10px}
+  .urun{margin:0 10px;border:1px solid var(--line);border-radius:4px;background:#fff;padding:9px;text-align:center}
+  .urun .foto{height:82px;border:1px solid var(--line2);border-radius:3px;background:linear-gradient(#fff,#f2f6fa);
+    display:flex;align-items:center;justify-content:center;font-size:30px;color:#9fb3c8}
+  .urun .nm{font-size:11.5px;font-weight:bold;color:var(--navy);margin-top:7px;line-height:1.35}
+  .urun .mt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .depo{display:flex;align-items:center;gap:7px;padding:3px 12px;font-size:11px}
+  .depo .ad{width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+  .depo .mk{width:44px;text-align:right;font-family:"Segoe UI",Tahoma}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:22px;padding:0 6px;font-size:11.5px;
+    display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:5px;top:2px;color:var(--muted);font-size:10px}
+
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Teklif Listesi
+    <span class="sp">ListeFrame\UTeklifListeDlg · TEKLIF · TEKLIFDETAY · Şube: Merkez · 14.08.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni Teklif</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">✎ Revize Et</div>
+    <div class="btn">⧉ Kopyala</div>
+    <div class="sepv"></div>
+    <div class="btn">🔄 Siparişe Dönüştür</div>
+    <div class="btn">🧾 Faturaya Dönüştür</div>
+    <div class="btn ok">✔ Onaya Gönder</div>
+    <div class="sepv"></div>
+    <div class="btn">📤 PDF / E-posta</div>
+    <div class="btn">📊 Excel</div>
+    <div class="btn">🖨 Yazdır</div>
+  </div>
+
+  <div class="wrap">
+    <!-- ============ SOL: MENU / ARAMA ============ -->
+    <div class="gorev">
+      <div class="ltabs">
+        <div class="ltab active" data-l="menu">☰ Menü</div>
+        <div class="ltab" data-l="arama">🔎 Arama</div>
+      </div>
+
+      <div class="lpane active" data-lp="menu">
+        <h5>Teklif</h5>
+        <div class="gtus on"><span class="ic">📄</span> Teklif Kartı</div>
+        <div class="gtus"><span class="ic">✎</span> Revizyonlar</div>
+        <div class="gtus"><span class="ic">🔄</span> Siparişe Dönüşenler</div>
+        <div class="gtus"><span class="ic">✔</span> Onay Bekleyenler</div>
+        <div class="gtus"><span class="ic">🎯</span> Fırsatlar</div>
+        <h5>Diğer</h5>
+        <div class="gtus"><span class="ic">📁</span> Dökümler</div>
+        <div class="gtus"><span class="ic">📂</span> Özel Dökümler</div>
+        <div class="hint" style="padding:6px 4px 0">Tek buton aktif — <b>GorevTusuSec</b>;
+          seçili olan mavi.</div>
+      </div>
+
+      <div class="lpane" data-lp="arama">
+        <div class="achips">
+          <span class="minibtn on">Tüm</span><span class="minibtn">Son</span><span class="minibtn">Sık</span>
+        </div>
+        <div class="agrid">
+          <label>Teklif No</label><div class="inp">TKL.2026</div>
+          <label>Cari / Müşteri</label><div class="inp"></div>
+          <label>Yetkili</label><div class="inp"></div>
+          <label>Konu</label><div class="inp"></div>
+          <label>Temsilci</label><div class="inp combo">(tümü)</div>
+          <label>Durum</label><div class="inp combo">Açık teklifler</div>
+          <label>Para Birimi</label><div class="inp combo">(tümü)</div>
+          <label>Şube</label><div class="inp combo">Merkez</div>
+          <label>Proje</label><div class="inp combo">(tümü)</div>
+        </div>
+        <div class="agrid" style="grid-template-columns:70px 1fr 1fr;margin-top:5px">
+          <label>Tutar</label><div class="inp">0,00</div><div class="inp">0,00</div>
+          <label>Teklif Tar.</label><div class="inp">01.07.2026</div><div class="inp">14.08.2026</div>
+          <label>Geçerlilik</label><div class="inp">01.08.2026</div><div class="inp">30.09.2026</div>
+        </div>
+        <label class="chk" style="margin-top:6px"><input type="checkbox" checked> İptalleri gizle</label>
+        <label class="chk"><input type="checkbox"> Sadece benim tekliflerim</label>
+        <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn on" style="flex:1;justify-content:center">🔎 Ara</span>
+          <span class="minibtn" style="flex:1;justify-content:center">↩ Temizle</span>
+          <span class="minibtn" style="flex-basis:100%;justify-content:center">💾 Aramayı Kaydet</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ORTA: LISTE ============ -->
+    <div class="center">
+      <div class="filtre">
+        <span class="minibtn">Taslak</span>
+        <span class="minibtn">Gönderildi</span>
+        <span class="minibtn">Onay Bekliyor</span>
+        <span class="minibtn">Kazanıldı</span>
+        <span class="minibtn">Kaybedildi</span>
+        <span class="minibtn on">Tümü</span>
+        <span class="sepv" style="height:20px"></span>
+        <span class="minibtn">👤 Temsilci: (tümü)</span>
+        <span class="minibtn">💱 Para birimi: (tümü)</span>
+        <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">
+          Sıralama: iptaller en sonda · geçerlilik ↑</span>
+      </div>
+
+      <div style="padding:10px 10px 0">
+        <div class="dg">
+          <table>
+            <tr>
+              <th class="c" style="width:38px">TİP</th>
+              <th style="width:104px">TEKLİF NO</th>
+              <th class="c" style="width:34px">REV</th>
+              <th style="width:76px">TARİH</th>
+              <th style="width:82px">GEÇERLİLİK</th>
+              <th style="width:170px">MÜŞTERİ (CARİ)</th>
+              <th>KONU</th>
+              <th style="width:80px">TEMSİLCİ</th>
+              <th class="r" style="width:44px">KALEM</th>
+              <th class="r" style="width:96px">ARA TOPLAM</th>
+              <th class="r" style="width:80px">İSKONTO</th>
+              <th class="r" style="width:86px">KDV</th>
+              <th class="r" style="width:106px">GENEL TOPLAM</th>
+              <th class="c" style="width:36px">PB</th>
+              <th class="r" style="width:60px">KUR</th>
+              <th class="c" style="width:74px">DÖNÜŞÜM</th>
+              <th class="c" style="width:88px">DURUM</th>
+            </tr>
+
+            <tr class="s-sur">
+              <td class="c"><span class="tip t-sar">PRJ</span></td><td><b>TKL.2026-0418</b></td>
+              <td class="c">R1</td><td>02.07.2026</td><td><b>01.08.2026</b></td>
+              <td class="ad">META MEFRUŞAT A.Ş.</td>
+              <td class="ad">Otel projesi — perde &amp; tül yenileme (3 kat)</td>
+              <td>A. Kaya</td><td class="r">12</td>
+              <td class="r">486.000,00</td><td class="r">36.000,00</td><td class="r">90.000,00</td>
+              <td class="r"><b>540.000,00</b></td><td class="c">TL</td><td class="r">1,0000</td>
+              <td class="c"><div class="bar"><span class="yok" style="width:15%"></span></div></td>
+              <td class="c"><span class="pill p-yok">Süre doldu</span></td>
+            </tr>
+
+            <tr class="s-yak">
+              <td class="c"><span class="tip t-mal">SAT</span></td><td><b>TKL.2026-0441</b></td>
+              <td class="c">R0</td><td>05.08.2026</td><td><b>14.08.2026</b></td>
+              <td class="ad">DENİZ TEKSTİL SAN. TİC. LTD.</td>
+              <td class="ad">Blackout kumaş — toptan sevkiyat 800 mt</td>
+              <td>S. Demir</td><td class="r">4</td>
+              <td class="r">128.500,00</td><td class="r">8.500,00</td><td class="r">24.000,00</td>
+              <td class="r"><b>144.000,00</b></td><td class="c">TL</td><td class="r">1,0000</td>
+              <td class="c"><div class="bar"><span class="kri" style="width:55%"></span></div></td>
+              <td class="c"><span class="pill p-gon">Gönderildi</span></td>
+            </tr>
+
+            <tr class="s-yak">
+              <td class="c"><span class="tip t-mal">SAT</span></td><td><b>TKL.2026-0447</b></td>
+              <td class="c">R2</td><td>08.08.2026</td><td><b>16.08.2026</b></td>
+              <td class="ad">ARTLINE YAPI MALZ. LTD.</td>
+              <td class="ad">Stor perde mekanizması + montaj ve işçilik</td>
+              <td>M. Yıldız</td><td class="r">6</td>
+              <td class="r">92.400,00</td><td class="r">2.400,00</td><td class="r">18.000,00</td>
+              <td class="r"><b>108.000,00</b></td><td class="c">TL</td><td class="r">1,0000</td>
+              <td class="c"><div class="bar"><span class="kri" style="width:45%"></span></div></td>
+              <td class="c"><span class="pill p-gon">Gönderildi</span></td>
+            </tr>
+
+            <tr class="s-rev">
+              <td class="c"><span class="tip t-sar">PRJ</span></td><td><b>TKL.2026-0451</b></td>
+              <td class="c">R1</td><td>11.08.2026</td><td>20.08.2026</td>
+              <td class="ad">ANADOLU İNŞAAT A.Ş.</td>
+              <td class="ad">Ofis kat perdeleme — 3 blok, proje bazlı</td>
+              <td>A. Kaya</td><td class="r">18</td>
+              <td class="r">268.000,00</td><td class="r">18.000,00</td><td class="r">50.000,00</td>
+              <td class="r"><b>300.000,00</b></td><td class="c">TL</td><td class="r">1,0000</td>
+              <td class="c"><div class="bar"><span class="kri" style="width:40%"></span></div></td>
+              <td class="c"><span class="pill p-kri">Revize bekliyor</span></td>
+            </tr>
+
+            <tr class="s-rev foc">
+              <td class="c"><span class="tip t-mal">SAT</span></td><td><b>TKL.2026-0453</b></td>
+              <td class="c">R2</td><td>12.08.2026</td><td>25.08.2026</td>
+              <td class="ad">GRANİT BİLGİSAYAR LTD. ŞTİ.</td>
+              <td class="ad">40 adet dizüstü + kurulum + 3 yıl garanti</td>
+              <td>M. Yıldız</td><td class="r">3</td>
+              <td class="r">1.077.000,00</td><td class="r">27.000,00</td><td class="r">210.000,00</td>
+              <td class="r"><b>1.260.000,00</b></td><td class="c">TL</td><td class="r">1,0000</td>
+              <td class="c"><div class="bar"><span class="kri" style="width:65%"></span></div></td>
+              <td class="c"><span class="pill p-kri">Onay bekliyor</span></td>
+            </tr>
+
+            <tr>
+              <td class="c"><span class="tip t-hzm">HZM</span></td><td><b>TKL.2026-0454</b></td>
+              <td class="c">R0</td><td>13.08.2026</td><td>27.08.2026</td>
+              <td class="ad">KİMPA KİMYA SAN. LTD.</td>
+              <td class="ad">Yıllık bakım + montaj/işçilik sözleşmesi</td>
+              <td>S. Demir</td><td class="r">2</td>
+              <td class="r">64.800,00</td><td class="r">4.800,00</td><td class="r">12.000,00</td>
+              <td class="r"><b>72.000,00</b></td><td class="c">TL</td><td class="r">1,0000</td>
+              <td class="c"><div class="bar"><span class="kri" style="width:30%"></span></div></td>
+              <td class="c"><span class="pill p-pas">Taslak</span></td>
+            </tr>
+
+            <tr>
+              <td class="c"><span class="tip t-ihr">İHR</span></td><td><b>TKL.2026-0455</b></td>
+              <td class="c">R0</td><td>13.08.2026</td><td>12.09.2026</td>
+              <td class="ad">VIENNA HOME TEXTILE GmbH</td>
+              <td class="ad">İhracat — jakarlı perde kumaşı 5.000 mt</td>
+              <td>A. Kaya</td><td class="r">5</td>
+              <td class="r">32.500,00</td><td class="r">2.500,00</td><td class="r">6.000,00</td>
+              <td class="r"><b>36.000,00</b></td><td class="c">EUR</td><td class="r">47,2150</td>
+              <td class="c"><div class="bar"><span class="ok" style="width:70%"></span></div></td>
+              <td class="c"><span class="pill p-gon">Gönderildi</span></td>
+            </tr>
+
+            <tr>
+              <td class="c"><span class="tip t-mal">SAT</span></td><td><b>TKL.2026-0446</b></td>
+              <td class="c">R1</td><td>30.07.2026</td><td>29.08.2026</td>
+              <td class="ad">MEFRUŞAT DÜNYASI TİC. A.Ş.</td>
+              <td class="ad">Showroom vitrin perdeleri — montaj dahil</td>
+              <td>M. Yıldız</td><td class="r">9</td>
+              <td class="r">215.000,00</td><td class="r">15.000,00</td><td class="r">40.000,00</td>
+              <td class="r"><b>240.000,00</b></td><td class="c">TL</td><td class="r">1,0000</td>
+              <td class="c"><div class="bar"><span class="ok" style="width:100%"></span></div></td>
+              <td class="c"><span class="pill p-ok">Kazanıldı</span></td>
+            </tr>
+
+            <tr class="s-ipt">
+              <td class="c"><span class="tip t-ihr">İHR</span></td><td><b>TKL.2026-0449</b></td>
+              <td class="c">R0</td><td>04.08.2026</td><td>18.08.2026</td>
+              <td class="ad">GLOBAL TRADE LLC</td>
+              <td class="ad">Aksesuar seti ihracat — korniş &amp; mekanizma</td>
+              <td>S. Demir</td><td class="r">7</td>
+              <td class="r">18.400,00</td><td class="r">400,00</td><td class="r">3.600,00</td>
+              <td class="r"><b>21.600,00</b></td><td class="c">USD</td><td class="r">40,8600</td>
+              <td class="c"><div class="bar"><span class="yok" style="width:0%"></span></div></td>
+              <td class="c"><span class="pill p-yok">Kaybedildi</span></td>
+            </tr>
+
+            <tr class="s-ipt">
+              <td class="c"><span class="tip t-sar">PRJ</span></td><td><b>TKL.2026-0444</b></td>
+              <td class="c">R2</td><td>01.08.2026</td><td>15.08.2026</td>
+              <td class="ad">YILDIZ OTELCİLİK A.Ş.</td>
+              <td class="ad">Otel lobi mefruşat yenileme (müşteri iptal etti)</td>
+              <td>A. Kaya</td><td class="r">14</td>
+              <td class="r">45.600,00</td><td class="r">600,00</td><td class="r">9.000,00</td>
+              <td class="r"><b>54.000,00</b></td><td class="c">TL</td><td class="r">1,0000</td>
+              <td class="c"><div class="bar"><span class="yok" style="width:0%"></span></div></td>
+              <td class="c"><span class="pill p-pas">İptal</span></td>
+            </tr>
+
+            <tfoot>
+              <tr>
+                <td colspan="9" style="text-align:right">TOPLAM — 10 teklif · 5 açık · <span style="font-weight:normal">TL karşılığı</span></td>
+                <td class="r">4.663.611,50</td><td class="r">246.681,50</td><td class="r">883.386,00</td>
+                <td class="r">5.300.316,00</td><td class="c">TL</td><td class="r"></td>
+                <td class="c"><div class="bar"><span class="kri" style="width:42%"></span></div></td>
+                <td class="c"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-sur)"></span>Geçerlilik süresi dolmuş</span>
+          <span><span class="sw" style="background:var(--s-yak)"></span>Bugün / 3 gün içinde dolacak</span>
+          <span><span class="sw" style="background:var(--s-rev)"></span>Revize bekleyen · onay bekleyen</span>
+          <span><span class="sw" style="background:var(--s-ipt)"></span>Kaybedilen / iptal — <b>en sonda</b>, konusu üstü çizili</span>
+        </div>
+        <div class="hint">
+          Satır rengi <b>Styles.OnGetContentStyle</b> ile; öncelik <b>İptal/Kayıp → Süre doldu → 3 gün → Revize/Onay → Normal</b>.
+          Kalan gün <b>TEKLIF.GECERLILIK − bugün</b> üzerinden Pascal tarafında hesaplanır (<b>IncDay</b>),
+          SQL'e <b>DATEDIFF</b> gömülmez. Yabancı para tekliflerde TL karşılığı <b>TEKLIF.KUR</b> ile bulunur;
+          liste <b>sp_Prog_Teklif_Liste_Json2</b> / <b>fn_prog_teklif_liste_json2</b> üzerinden gelir.
+        </div>
+      </div>
+
+      <!-- ALT DETAY -->
+      <div class="tabs" style="margin-top:12px">
+        <div class="tab active" data-t="kalem">Teklif Kalemleri <span class="b">3</span></div>
+        <div class="tab" data-t="revizyon">Revizyon Geçmişi <span class="b">3</span></div>
+        <div class="tab" data-t="onay">Onay Akışı <span class="b">4</span></div>
+        <div class="tab" data-t="donusum">Dönüşüm</div>
+        <div class="tab" data-t="sart">Notlar &amp; Şartlar</div>
+        <div class="tab" data-t="dokuman">Doküman / E-posta <span class="b">5</span></div>
+        <div class="tab" data-t="yorum">Yorum</div>
+      </div>
+
+      <!-- KALEMLER -->
+      <div class="pane active" data-p="kalem">
+        <div class="gridtb">
+          <span class="minibtn">➕ Satır Ekle</span>
+          <span class="minibtn">🔎 Stok Seç</span>
+          <span class="minibtn">🗑 Satır Sil</span>
+          <span class="minibtn">% Toplu İskonto</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">TKL.2026-0453 · R2 · TL</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th class="c" style="width:30px">#</th><th style="width:96px">STOK KODU</th><th>ÜRÜN / HİZMET</th>
+                <th class="r" style="width:64px">MİKTAR</th><th class="c" style="width:52px">BİRİM</th>
+                <th class="r" style="width:100px">BR. FİYAT</th><th class="r" style="width:56px">İSK.%</th>
+                <th class="r" style="width:78px">İSKONTO</th><th class="c" style="width:52px">KDV</th>
+                <th class="r" style="width:118px">TUTAR</th></tr>
+            <tr class="foc"><td class="c">1</td><td>STK.30110</td><td class="ad"><b>Lenovo ThinkPad E14 G5 i5</b></td>
+                <td class="r">40,00</td><td class="c">AD</td><td class="r">22.500,00</td><td class="r">3,00</td>
+                <td class="r">27.000,00</td><td class="c">%20</td><td class="r"><b>873.000,00</b></td></tr>
+            <tr><td class="c">2</td><td>HZM.0011</td><td class="ad">Kurulum / kablolama hizmeti</td>
+                <td class="r">1,00</td><td class="c">AD</td><td class="r">120.000,00</td><td class="r">—</td>
+                <td class="r">—</td><td class="c">%20</td><td class="r">120.000,00</td></tr>
+            <tr><td class="c">3</td><td>HZM.0025</td><td class="ad">3 yıl yerinde garanti</td>
+                <td class="r">40,00</td><td class="c">AD</td><td class="r">1.425,00</td><td class="r">—</td>
+                <td class="r">—</td><td class="c">%20</td><td class="r">57.000,00</td></tr>
+            <tfoot><tr>
+              <td colspan="7" style="text-align:right">ARA TOPLAM 1.077.000,00 · İSKONTO 27.000,00 · MATRAH 1.050.000,00 · KDV 210.000,00</td>
+              <td class="r"></td><td class="c">GENEL</td><td class="r">1.260.000,00</td>
+            </tr></tfoot>
+          </table>
+        </div>
+        <div class="hint">Kalemler <b>TEKLIFDETAY</b>; dip toplam <b>SP_PRG_Teklif_DipToplami</b> ile hesaplanır —
+          grid'de yeniden toplanmaz, satır iskontosu ile dip iskonto ayrı yürür.</div>
+      </div>
+
+      <!-- REVIZYON -->
+      <div class="pane" data-p="revizyon">
+        <div class="gridtb"><span class="minibtn">✎ Yeni Revizyon</span><span class="minibtn">👁 Karşılaştır (R1↔R2)</span>
+          <span class="minibtn">🖨 Rev. Yazdır</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Eski revizyonlar salt-okunur</span></div>
+        <div class="dg">
+          <table>
+            <tr><th class="c" style="width:48px">REV</th><th style="width:88px">TARİH</th>
+                <th class="r" style="width:126px">GENEL TOPLAM</th><th class="r" style="width:96px">FARK</th>
+                <th>DEĞİŞİKLİK</th><th style="width:110px">HAZIRLAYAN</th><th class="c" style="width:76px">DURUM</th></tr>
+            <tr class="foc"><td class="c"><b>R2</b></td><td>12.08.2026</td><td class="r"><b>1.260.000,00</b></td>
+                <td class="r">−57.600,00</td><td class="ad">Kurulum kalemi eklendi, %3 satır iskontosu uygulandı</td>
+                <td>Mehmet Yıldız</td><td class="c"><span class="pill p-gon">Güncel</span></td></tr>
+            <tr><td class="c">R1</td><td>10.08.2026</td><td class="r">1.317.600,00</td>
+                <td class="r">+219.600,00</td><td class="ad">Garanti 3 yıla çıkarıldı</td>
+                <td>Mehmet Yıldız</td><td class="c"><span class="pill p-pas">Eski</span></td></tr>
+            <tr><td class="c">R0</td><td>08.08.2026</td><td class="r">1.098.000,00</td>
+                <td class="r">—</td><td class="ad">İlk teklif (FRS.2026-0221 fırsatından oluşturuldu)</td>
+                <td>Mehmet Yıldız</td><td class="c"><span class="pill p-pas">Eski</span></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- ONAY AKISI -->
+      <div class="pane" data-p="onay">
+        <div class="gridtb"><span class="minibtn">✔ Onayla</span><span class="minibtn">✖ Reddet</span>
+          <span class="minibtn">↪ Yönlendir</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Limit üstü iskonto → Satış Müdürü onayı zorunlu</span></div>
+        <div class="dg">
+          <table>
+            <tr><th class="c" style="width:36px">SIRA</th><th style="width:150px">ONAYCI</th><th style="width:130px">ROL</th>
+                <th style="width:120px">TARİH / SAAT</th><th class="c" style="width:96px">SONUÇ</th><th>AÇIKLAMA</th></tr>
+            <tr><td class="c">1</td><td>Mehmet Yıldız</td><td>Satış Temsilcisi</td><td>12.08.2026 10:14</td>
+                <td class="c"><span class="pill p-ok">Onaya gönderdi</span></td><td class="ad">R2 hazırlandı, müşteriye iletildi</td></tr>
+            <tr><td class="c">2</td><td>Ayşe Kaya</td><td>Satış Şefi</td><td>12.08.2026 14:02</td>
+                <td class="c"><span class="pill p-ok">Onayladı</span></td><td class="ad">İskonto oranı sınır içinde</td></tr>
+            <tr class="s-rev foc"><td class="c">3</td><td>Zeynep Ak</td><td>Satış Müdürü</td><td>—</td>
+                <td class="c"><span class="pill p-kri">Bekliyor</span></td><td class="ad">1.000.000 TL üstü teklif — müdür onayı gerekli</td></tr>
+            <tr><td class="c">4</td><td>Muhasebe</td><td>Finans Kontrol</td><td>—</td>
+                <td class="c"><span class="pill p-pas">Sırada</span></td><td class="ad">Cari risk limiti kontrolü yapılacak</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- DONUSUM -->
+      <div class="pane" data-p="donusum">
+        <div class="gridtb"><span class="minibtn">🔄 Siparişe Dönüştür</span><span class="minibtn">🧾 Faturaya Dönüştür</span>
+          <span class="minibtn">👁 Belgeyi Aç</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Kısmi dönüşüm destekli</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:90px">TÜR</th><th style="width:160px">BELGE NO</th><th style="width:88px">TARİH</th>
+                <th class="r" style="width:64px">MİKTAR</th><th class="r" style="width:120px">TUTAR</th>
+                <th class="c" style="width:78px">ORAN</th><th>AÇIKLAMA</th></tr>
+            <tr><td>Fırsat</td><td>FRS.2026-0221</td><td>05.08.2026</td><td class="r">—</td><td class="r">1.098.000,00</td>
+                <td class="c">Kaynak</td><td class="ad">Teklifin doğduğu satış fırsatı</td></tr>
+            <tr class="foc"><td><b>Sipariş</b></td><td>SIP2026000000318</td><td>13.08.2026</td><td class="r">10,00</td>
+                <td class="r">315.000,00</td>
+                <td class="c"><div class="bar"><span class="kri" style="width:25%"></span></div></td>
+                <td class="ad">Pilot parti — 10 adet, kalan 30 adet onay sonrası</td></tr>
+            <tr><td>Fatura</td><td>—</td><td>—</td><td class="r">—</td><td class="r">—</td>
+                <td class="c">%0</td><td class="ad">Sipariş sevk edilince oluşacak</td></tr>
+            <tr><td>İrsaliye</td><td>—</td><td>—</td><td class="r">—</td><td class="r">—</td>
+                <td class="c">%0</td><td class="ad">—</td></tr>
+          </table>
+        </div>
+        <div class="hint">Dönüşüm bağı <b>TEKLIFDETAY.KAYNAKID</b> üzerinden kurulur; kısmi dönüşümde kalan miktar
+          teklifte açık kalır ve listedeki <b>DÖNÜŞÜM</b> çubuğu bu orana göre dolar.</div>
+      </div>
+
+      <!-- NOTLAR & SARTLAR -->
+      <div class="pane" data-p="sart">
+        <div class="dg" style="max-width:760px">
+          <table>
+            <tr><th style="width:170px">BAŞLIK</th><th>DEĞER</th></tr>
+            <tr><td>Ödeme Koşulu</td><td class="ad">%30 peşin, kalan 45 gün vade</td></tr>
+            <tr><td>Teslim Süresi</td><td class="ad">Sözleşme imzasından 10 iş günü</td></tr>
+            <tr><td>Teslim Yeri</td><td class="ad">Müşteri adresi — Kadıköy / İstanbul</td></tr>
+            <tr><td>Nakliye</td><td class="ad">Satıcıya ait</td></tr>
+            <tr><td>Garanti</td><td class="ad">Üretici 2 yıl + 1 yıl ek yerinde servis</td></tr>
+            <tr class="s-rev"><td>Geçerlilik</td><td class="ad"><b>25.08.2026</b> — 11 gün kaldı</td></tr>
+            <tr><td>Özel Şart</td><td class="ad">Döviz kuru %5'ten fazla değişirse fiyatlar revize edilebilir</td></tr>
+            <tr><td>Müşteriye Not</td><td class="ad">Kurulum bedeli fiyata dahildir; mesai saatleri içinde yapılır.</td></tr>
+          </table>
+        </div>
+        <div class="hint">Şartlar teklif çıktısında (FastReport <b>Standart Teklif Formu</b>) basılır;
+          varsayılanlar <b>GENINI</b> opsiyonlarından gelir, teklif bazında ezilebilir.</div>
+      </div>
+
+      <!-- DOKUMAN / E-POSTA -->
+      <div class="pane" data-p="dokuman">
+        <div class="gridtb"><span class="minibtn">📎 Klasörden</span><span class="minibtn">🖨 Tarayıcıdan</span>
+          <span class="minibtn">📤 Yeniden Gönder</span><span class="minibtn">👁 Aç</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:92px">TÜR</th><th style="width:120px">TARİH / SAAT</th><th style="width:210px">ALICI / DOSYA</th>
+                <th style="width:120px">KULLANICI</th><th class="c" style="width:86px">DURUM</th><th>AÇIKLAMA</th></tr>
+            <tr><td>PDF</td><td>08.08.2026 11:40</td><td class="ad">TKL-2026-0453-R0.pdf</td><td>Mehmet Yıldız</td>
+                <td class="c"><span class="pill p-ok">Oluştu</span></td><td class="ad">İlk teklif çıktısı</td></tr>
+            <tr><td>E-posta</td><td>08.08.2026 11:52</td><td class="ad">satinalma@granitbilgisayar.com</td><td>Mehmet Yıldız</td>
+                <td class="c"><span class="pill p-ok">Gönderildi</span></td><td class="ad">R0 iletildi</td></tr>
+            <tr><td>E-posta</td><td>10.08.2026 09:18</td><td class="ad">satinalma@granitbilgisayar.com</td><td>Mehmet Yıldız</td>
+                <td class="c"><span class="pill p-ok">Okundu</span></td><td class="ad">R1 — garanti güncellemesi</td></tr>
+            <tr class="foc"><td>PDF</td><td>12.08.2026 10:12</td><td class="ad"><b>TKL-2026-0453-R2.pdf</b></td><td>Mehmet Yıldız</td>
+                <td class="c"><span class="pill p-ok">Oluştu</span></td><td class="ad">Güncel revizyon çıktısı</td></tr>
+            <tr class="s-yak"><td>Ek Belge</td><td>12.08.2026 16:30</td><td class="ad">Rakip_teklif_karsilastirma.xlsx</td><td>Ayşe Kaya</td>
+                <td class="c"><span class="pill p-kri">İç kullanım</span></td><td class="ad">Müşteriye gönderilmez</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- YORUM -->
+      <div class="pane" data-p="yorum">
+        <div class="gridtb"><span class="minibtn">➕ Yorum Ekle</span><span class="minibtn">📎 Klasörden</span>
+          <span class="minibtn">📋 Yapıştır</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:130px">KULLANICI</th><th style="width:120px">TARİH</th><th>YORUM</th><th class="c" style="width:60px">EK</th></tr>
+            <tr><td>Mehmet Yıldız</td><td>10.08.2026 09:20</td><td class="ad">Müşteri 3 yıl garanti istedi, R1 hazırlandı.</td><td class="c">—</td></tr>
+            <tr><td>Ayşe Kaya</td><td>12.08.2026 16:35</td><td class="ad">Rakip X Bilişim 1,32 M TL vermiş; iskonto ile öne geçiyoruz.</td><td class="c">📎 1</td></tr>
+            <tr class="foc"><td>Mehmet Yıldız</td><td>14.08.2026 08:45</td><td class="ad">Karar verici Genel Müdür (Zeynep Ak) — bu hafta içinde dönüş sözü verildi.</td><td class="c">—</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SAG: SECILI TEKLIF ============ -->
+    <div class="side">
+      <h5>Seçili Teklif</h5>
+      <div class="urun">
+        <div class="foto">📄</div>
+        <div class="nm">TKL.2026-0453 · R2</div>
+        <div class="mt">Granit Bilgisayar Ltd. Şti.</div>
+        <div class="mt">Temsilci: Mehmet Yıldız</div>
+        <div style="display:flex;gap:5px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn">👁 Kart</span><span class="minibtn">✎ Revize</span><span class="minibtn">📤 Gönder</span>
+        </div>
+      </div>
+
+      <div class="tvsep"></div>
+      <h5>Özet</h5>
+      <div class="kv"><span>Ara toplam</span><b>1.077.000,00</b></div>
+      <div class="kv"><span>İskonto</span><b>− 27.000,00</b></div>
+      <div class="kv"><span>Matrah</span><b>1.050.000,00</b></div>
+      <div class="kv"><span>KDV %20</span><b>210.000,00</b></div>
+      <div class="kv"><span>Genel toplam</span><b style="font-size:12.5px">1.260.000,00 ₺</b></div>
+      <div class="kv"><span>PB / Kur</span><b>TL · 1,0000</b></div>
+      <div class="kv"><span>Geçerlilik</span><b>25.08.2026</b></div>
+      <div class="kv"><span>Kalan gün</span><b style="color:#a9791a">11 gün</b></div>
+      <div class="kv"><span>Kâr marjı</span><b style="color:#2e7d46">%22,4</b></div>
+      <div class="kv"><span>Durum</span><b><span class="pill p-kri">Onay bekliyor</span></b></div>
+
+      <div class="tvsep"></div>
+      <h5>Kazanma Olasılığı</h5>
+      <div class="depo"><span class="ad">Tahmin</span>
+        <div class="bar" style="flex:1"><span class="kri" style="width:65%"></span></div><span class="mk">%65</span></div>
+      <div class="depo"><span class="ad">Dönüşen</span>
+        <div class="bar" style="flex:1"><span class="kri" style="width:25%"></span></div><span class="mk">%25</span></div>
+      <div class="hint" style="padding:0 12px">Fırsat: <b>FRS.2026-0221</b> · Aşama: Teklif/Müzakere</div>
+
+      <div class="tvsep"></div>
+      <h5>Müşteri Geçmişi</h5>
+      <div class="kv"><span>Son 3 teklif</span><b>2 / 3 kazanıldı</b></div>
+      <div class="depo"><span class="ad">Kazanma</span>
+        <div class="bar" style="flex:1"><span class="ok" style="width:67%"></span></div><span class="mk">%67</span></div>
+      <div class="kv"><span>Ort. kapanış</span><b>9 gün</b></div>
+      <div class="kv"><span>Açık bakiye</span><b>128.400,00 ₺</b></div>
+      <div class="kv"><span>Risk limiti</span><b style="color:#2e7d46">Uygun</b></div>
+
+      <div class="tvsep"></div>
+      <h5>İşlemler</h5>
+      <div class="sidebtns">
+        <span class="minibtn">✔ Onaya Gönder</span>
+        <span class="minibtn">✎ Revize Et</span>
+        <span class="minibtn">🔄 Siparişe Dönüştür</span>
+        <span class="minibtn">🧾 Faturaya Dönüştür</span>
+        <span class="minibtn">📤 PDF / E-posta Gönder</span>
+        <span class="minibtn">🎯 Fırsata Bağla</span>
+        <span class="minibtn">✖ Kaybedildi İşaretle</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Başlık → <b>TEKLIF</b> (TEKLIFNO · REVNO · TARIH · GECERLILIK · CARIID · KONU · TEMSILCI · PARABIRIMI · KUR · DURUM)</span>·
+    <span>Kalemler → <b>TEKLIFDETAY</b> (STOKID · MIKTAR · BIRIMFIYAT · ISKONTO · KDVORAN · TUTAR · KAYNAKID)</span>·
+    <span>Müşteri → <b>CARI</b></span>·
+    <span>Ürün → <b>STOKLAR</b></span>·
+    <span>Fırsat → <b>FIRSAT</b></span>·
+    <span>Dip toplam → <b>SP_PRG_Teklif_DipToplami</b></span>·
+    <span>Liste → <b>sp_Prog_Teklif_Liste_Json2</b></span>·
+    <span>Ek → <b>DOKUMAN → IMAJ → GENDEPO.DOSYA</b></span>·
+    <span>Yorum → <b>GOREVYORUM</b></span>·
+    <span>Denetim → <b>GENDEPO.ISLEMLOG</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Liste: <b>Tümü</b> · 10 teklif</span>
+    <span>Açık teklif tutarı: <b>1.884.000,00 ₺</b></span>
+    <span>Kazanma oranı: <b>%38,5</b></span>
+    <span>Toplam (TL karşılığı): <b>5.300.316,00 ₺</b></span>
+    <span style="margin-left:auto">Seçili: TKL.2026-0453 · R2</span>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.ltab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.ltab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.lpane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.lpane[data-lp="'+t.dataset.l+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.gtus').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.gtus').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');
+    });
+  });
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

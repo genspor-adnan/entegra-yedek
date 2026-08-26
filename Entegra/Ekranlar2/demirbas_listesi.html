@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demirbaş Listesi — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* demirbas satir renkleri */
+    --s-yok:#f7cfcf; --s-yok-t:#7d1f1f;   /* hurdaya ayrilan / imha edilen   */
+    --s-kri:#fbe6ae; --s-kri-t:#7a5407;   /* bakim / muayene tarihi gecmis   */
+    --s-skt:#f6d9c0; --s-skt-t:#8a4a12;   /* garanti veya sigorta bitmek uzere */
+    --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;   /* pasif — kullanim disi           */
+    /* gorev butonu (Delphi clGorevTusuSecili / Pasif) */
+    --tus-pas:#9c71ad; --tus-sec:#1f6fbe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+
+  .wrap{display:grid;grid-template-columns:222px 1fr 236px;gap:0}
+
+  /* SOL: Menu / Arama */
+  .gorev{background:#f4f7fa;border-right:1px solid var(--line2);padding:6px 6px 10px}
+  .gorev h5{margin:6px 4px 4px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .ltabs{display:flex;gap:2px;margin:-6px -6px 8px;padding:6px 6px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .ltab{flex:1;text-align:center;padding:6px 8px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);
+    border-bottom:none;border-radius:3px 3px 0 0;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .ltab.active{background:#f4f7fa;color:var(--navy);font-weight:bold}
+  .lpane{display:none}.lpane.active{display:block}
+  .gtus{display:flex;align-items:center;gap:8px;color:#fff;font-weight:bold;font-size:11.5px;
+    background:var(--tus-pas);border:1px solid rgba(0,0,0,.12);border-radius:3px;padding:8px 9px;margin-bottom:3px;cursor:default}
+  .gtus:hover{filter:brightness(1.06)}
+  .gtus.on{background:var(--tus-sec);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+  .gtus .ic{font-size:14px;width:18px;text-align:center}
+  .achips{display:flex;gap:4px;margin-bottom:8px}
+  .achips .minibtn{flex:1;justify-content:center}
+  .agrid{display:grid;grid-template-columns:70px 1fr;gap:5px 6px;align-items:center}
+  .agrid label{font-size:10.5px;color:var(--muted);text-align:right}
+  .gorev .minibtn{white-space:nowrap}
+
+  /* ORTA */
+  .center{min-width:0;display:flex;flex-direction:column}
+  .filtre{display:flex;gap:5px;padding:8px 10px 7px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line2);background:#fbfcfe}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.s-yok td{background:var(--s-yok);color:var(--s-yok-t)}
+  .dg tr.s-kri td{background:var(--s-kri);color:var(--s-kri-t)}
+  .dg tr.s-skt td{background:var(--s-skt);color:var(--s-skt-t)}
+  .dg tr.s-pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .dg tr.s-pas td.ad{text-decoration:line-through}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-izl{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .tip{display:inline-block;min-width:30px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;padding:1px 5px;border:1px solid}
+  .t-mal{background:#e5ecf8;border-color:#c6d7ef;color:#2b5c95}
+  .t-hzm{background:#e3f0e6;border-color:#c3e0cb;color:#2e7d46}
+  .t-sar{background:#fdf1e2;border-color:#f0dcbd;color:#96651a}
+  .t-tes{background:#f0e9f8;border-color:#ded0ee;color:#7a4fb0}
+  /* mini bar */
+  .bar{height:9px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:54px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+
+  /* alt detay */
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 12px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+  .gridtb{display:flex;gap:4px;padding:0 0 7px;align-items:center;flex-wrap:wrap}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px}
+
+  /* SAG */
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:8px 0}
+  .side h5{margin:0;padding:7px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11px;padding:3px 12px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .tvsep{height:1px;background:var(--line2);margin:7px 10px}
+  .sidebtns{display:flex;flex-direction:column;gap:4px;padding:4px 10px}
+  .urun{margin:0 10px;border:1px solid var(--line);border-radius:4px;background:#fff;padding:9px;text-align:center}
+  .urun .foto{height:82px;border:1px solid var(--line2);border-radius:3px;background:linear-gradient(#fff,#f2f6fa);
+    display:flex;align-items:center;justify-content:center;font-size:30px;color:#9fb3c8}
+  .urun .nm{font-size:11.5px;font-weight:bold;color:var(--navy);margin-top:7px;line-height:1.35}
+  .urun .mt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .depo{display:flex;align-items:center;gap:7px;padding:3px 12px;font-size:11px}
+  .depo .ad{width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+  .depo .mk{width:44px;text-align:right;font-family:"Segoe UI",Tahoma}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:22px;padding:0 6px;font-size:11.5px;
+    display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:5px;top:2px;color:var(--muted);font-size:10px}
+
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Demirbaş Listesi
+    <span class="sp">ListeFrame\UDemirbasListeDlg · DEMIRBAS · DEMIRBASTAKIP · Şube: Merkez · 14.08.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">👤 Zimmet Ver</div>
+    <div class="btn">↩ Zimmet İade</div>
+    <div class="btn">🔧 Bakım Kaydı</div>
+    <div class="btn">📉 Amortisman Hesapla</div>
+    <div class="sepv"></div>
+    <div class="btn">🏷 Etiket / Barkod Yazdır</div>
+    <div class="btn">📤 Excel'e Aktar</div>
+    <div class="btn">🖨 Yazdır</div>
+  </div>
+
+  <div class="wrap">
+    <!-- ============ SOL: MENU / ARAMA ============ -->
+    <div class="gorev">
+      <div class="ltabs">
+        <div class="ltab active" data-l="menu">☰ Menü</div>
+        <div class="ltab" data-l="arama">🔎 Arama</div>
+      </div>
+
+      <div class="lpane active" data-lp="menu">
+        <h5>Demirbaş</h5>
+        <div class="gtus on"><span class="ic">🗄</span> Demirbaş Kartı</div>
+        <div class="gtus"><span class="ic">👤</span> Zimmet İşlemleri</div>
+        <div class="gtus"><span class="ic">🔧</span> Bakım / Servis</div>
+        <div class="gtus"><span class="ic">📉</span> Amortisman</div>
+        <div class="gtus"><span class="ic">📋</span> Sayım</div>
+        <h5>Diğer</h5>
+        <div class="gtus"><span class="ic">📁</span> Dökümler</div>
+        <div class="gtus"><span class="ic">📂</span> Özel Dökümler</div>
+        <div class="hint" style="padding:6px 4px 0">Tek buton aktif — <b>GorevTusuSec</b>;
+          seçili olan mavi.</div>
+      </div>
+
+      <div class="lpane" data-lp="arama">
+        <div class="achips">
+          <span class="minibtn on">Tüm</span><span class="minibtn">Son</span><span class="minibtn">Sık</span>
+        </div>
+        <div class="agrid">
+          <label>Demirbaş Adı</label><div class="inp"></div>
+          <label>No / Kod</label><div class="inp">DMB.03</div>
+          <label>Seri No</label><div class="inp"></div>
+          <label>Grup</label><div class="inp combo">(tümü)</div>
+          <label>Marka</label><div class="inp combo">(tümü)</div>
+          <label>Model</label><div class="inp"></div>
+          <label>Şube</label><div class="inp combo">Merkez</div>
+          <label>Lokasyon</label><div class="inp combo">(tümü)</div>
+          <label>Zimmetli</label><div class="inp combo">(tümü)</div>
+          <label>Durum</label><div class="inp combo">Aktif + Zimmetli</div>
+        </div>
+        <div class="agrid" style="grid-template-columns:70px 1fr 1fr;margin-top:5px">
+          <label>Alım Tarihi</label><div class="inp">01.01.2018</div><div class="inp">14.08.2026</div>
+          <label>Bedel (₺)</label><div class="inp">0,00</div><div class="inp">0,00</div>
+        </div>
+        <label class="chk" style="margin-top:6px"><input type="checkbox"> Pasifleri de göster</label>
+        <label class="chk"><input type="checkbox" checked> Hurdaya ayrılanlar hariç</label>
+        <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn on" style="flex:1;justify-content:center">🔎 Ara</span>
+          <span class="minibtn" style="flex:1;justify-content:center">↩ Temizle</span>
+          <span class="minibtn" style="flex-basis:100%;justify-content:center">💾 Aramayı Kaydet</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ORTA: LISTE ============ -->
+    <div class="center">
+      <div class="filtre">
+        <span class="minibtn on">Aktif</span>
+        <span class="minibtn">Zimmetli</span>
+        <span class="minibtn">Bakımı Gelen</span>
+        <span class="minibtn">Hurda</span>
+        <span class="minibtn">Tümü</span>
+        <span class="sepv" style="height:20px"></span>
+        <span class="minibtn">🗂 Grup: (tümü)</span>
+        <span class="minibtn">📍 Lokasyon: (tümü)</span>
+        <span class="minibtn">👤 Zimmetli: (tümü)</span>
+        <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">
+          Sıralama: hurda/pasifler en sonda · demirbaş no ↑</span>
+      </div>
+
+      <div style="padding:10px 10px 0">
+        <div class="dg">
+          <table>
+            <tr>
+              <th class="c" style="width:38px">TİP</th>
+              <th style="width:80px">DEMİRBAŞ NO</th>
+              <th>DEMİRBAŞ ADI</th>
+              <th style="width:92px">GRUP</th>
+              <th style="width:130px">MARKA / MODEL</th>
+              <th style="width:120px">SERİ NO</th>
+              <th style="width:118px">LOKASYON</th>
+              <th style="width:104px">ZİMMETLİ</th>
+              <th class="c" style="width:76px">ALIM TARİHİ</th>
+              <th class="r" style="width:96px">ALIŞ BEDELİ</th>
+              <th class="r" style="width:96px">BİRİKMİŞ AMORT.</th>
+              <th class="r" style="width:96px">NET DEĞER</th>
+              <th class="c" style="width:78px">SONRAKİ BAKIM</th>
+              <th class="c" style="width:88px">DURUM</th>
+            </tr>
+
+            <tr class="foc">
+              <td class="c"><span class="tip t-mal">BİL</span></td><td>DMB.0342</td>
+              <td class="ad"><b>Dizüstü Bilgisayar — Dell Latitude 5540</b></td><td>Bilgi İşlem</td><td>Dell / Latitude 5540</td>
+              <td>DL5540-2026-0198</td><td>Ofis — 3. Kat</td><td>Elif Şahin</td>
+              <td class="c">15.01.2025</td>
+              <td class="r">42.000,00</td><td class="r">21.000,00</td><td class="r"><b>21.000,00</b></td>
+              <td class="c">12.02.2027</td><td class="c"><span class="pill p-izl">Zimmetli</span></td>
+            </tr>
+
+            <tr class="s-kri">
+              <td class="c"><span class="tip t-sar">MKN</span></td><td>DMB.0118</td>
+              <td class="ad"><b>Forklift — Toyota 8FG25 (2,5 ton)</b></td><td>İş Makinesi</td><td>Toyota / 8FG25</td>
+              <td>8FG25-11402</td><td>Sevkiyat Deposu</td><td>Hasan Demir</td>
+              <td class="c">22.06.2022</td>
+              <td class="r">685.000,00</td><td class="r">411.000,00</td><td class="r"><b>274.000,00</b></td>
+              <td class="c"><b>30.06.2026</b></td><td class="c"><span class="pill p-kri">Bakım gecikti</span></td>
+            </tr>
+
+            <tr class="s-skt">
+              <td class="c"><span class="tip t-hzm">TŞT</span></td><td>DMB.0203</td>
+              <td class="ad">Binek Araç — Ford Focus 1.5 EcoBlue (34 FBK 512)</td><td>Taşıt</td><td>Ford / Focus</td>
+              <td>WF0PXXGCHP-8841</td><td>Merkez — Otopark</td><td>Murat Aydın</td>
+              <td class="c">10.03.2024</td>
+              <td class="r">1.245.000,00</td><td class="r">498.000,00</td><td class="r"><b>747.000,00</b></td>
+              <td class="c">12.09.2026</td><td class="c"><span class="pill p-kri">Sigorta bitiyor</span></td>
+            </tr>
+
+            <tr>
+              <td class="c"><span class="tip t-tes">TSS</span></td><td>DMB.0455</td>
+              <td class="ad">Klima — Mitsubishi 24.000 BTU salon tipi</td><td>Tesis / Bina</td><td>Mitsubishi / MSZ-AP71</td>
+              <td>MSZ-2025-7741</td><td>Merkez — 2. Kat</td><td>— (ortak)</td>
+              <td class="c">05.05.2025</td>
+              <td class="r">68.500,00</td><td class="r">20.550,00</td><td class="r"><b>47.950,00</b></td>
+              <td class="c">01.04.2027</td><td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+
+            <tr class="s-skt">
+              <td class="c"><span class="tip t-tes">TSS</span></td><td>DMB.0091</td>
+              <td class="ad">Jeneratör — Aksa APD 100 A (100 kVA)</td><td>Tesis / Bina</td><td>Aksa / APD 100 A</td>
+              <td>AKS-100-2231</td><td>Fabrika — Trafo Bin.</td><td>— (ortak)</td>
+              <td class="c">18.09.2023</td>
+              <td class="r">425.000,00</td><td class="r">170.000,00</td><td class="r"><b>255.000,00</b></td>
+              <td class="c">18.09.2026</td><td class="c"><span class="pill p-kri">Garanti bitiyor</span></td>
+            </tr>
+
+            <tr>
+              <td class="c"><span class="tip t-mal">BİL</span></td><td>DMB.0510</td>
+              <td class="ad">Çok Fonksiyonlu Yazıcı — Canon iR 2630i</td><td>Bilgi İşlem</td><td>Canon / iR 2630i</td>
+              <td>CNR-2630-0887</td><td>Muhasebe — 1. Kat</td><td>Zeynep Korkmaz</td>
+              <td class="c">02.11.2025</td>
+              <td class="r">74.500,00</td><td class="r">14.900,00</td><td class="r"><b>59.600,00</b></td>
+              <td class="c">02.11.2026</td><td class="c"><span class="pill p-izl">Zimmetli</span></td>
+            </tr>
+
+            <tr class="s-kri">
+              <td class="c"><span class="tip t-sar">MKN</span></td><td>DMB.0276</td>
+              <td class="ad">Kaynak Makinesi — Magmaweld ID 400 M</td><td>Makine / Ekipman</td><td>Magmaweld / ID 400 M</td>
+              <td>MW400-2024-115</td><td>Üretim — Kaynakhane</td><td>Serkan Öz</td>
+              <td class="c">14.07.2024</td>
+              <td class="r">96.000,00</td><td class="r">38.400,00</td><td class="r"><b>57.600,00</b></td>
+              <td class="c"><b>20.01.2026</b></td><td class="c"><span class="pill p-kri">Kalibrasyon doldu</span></td>
+            </tr>
+
+            <tr>
+              <td class="c"><span class="tip t-sar">MKN</span></td><td>DMB.0602</td>
+              <td class="ad">Vidalı Kompresör — Dalgakıran DKC 15</td><td>Makine / Ekipman</td><td>Dalgakıran / DKC 15</td>
+              <td>DKC15-2024-0774</td><td>Üretim — Makine Dai.</td><td>— (ortak)</td>
+              <td class="c">28.03.2024</td>
+              <td class="r">154.000,00</td><td class="r">46.200,00</td><td class="r"><b>107.800,00</b></td>
+              <td class="c">28.03.2027</td><td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+
+            <tr class="s-yok">
+              <td class="c"><span class="tip t-mal">BİL</span></td><td>DMB.0044</td>
+              <td class="ad">Sunucu — HP ProLiant DL380 G9 (hurdaya ayrıldı)</td><td>Bilgi İşlem</td><td>HP / DL380 G9</td>
+              <td>HP-DL380-0044</td><td>Hurda Deposu</td><td>—</td>
+              <td class="c">08.04.2018</td>
+              <td class="r">138.000,00</td><td class="r">138.000,00</td><td class="r"><b>0,00</b></td>
+              <td class="c">—</td><td class="c"><span class="pill p-yok">Hurda</span></td>
+            </tr>
+
+            <tr class="s-pas">
+              <td class="c"><span class="tip t-mal">OFS</span></td><td>DMB.0157</td>
+              <td class="ad">Projeksiyon Cihazı — Epson EB-2247U (kullanım dışı)</td><td>Ofis / Mefruşat</td><td>Epson / EB-2247U</td>
+              <td>EPS-2247-0331</td><td>Depo — Arşiv</td><td>—</td>
+              <td class="c">12.02.2021</td>
+              <td class="r">28.400,00</td><td class="r">28.400,00</td><td class="r"><b>0,00</b></td>
+              <td class="c">—</td><td class="c"><span class="pill p-pas">Pasif</span></td>
+            </tr>
+
+            <tfoot>
+              <tr>
+                <td colspan="9" style="text-align:right">TOPLAM (10 demirbaş · 2 bakım gecikmesi / 2 süre bitiyor)</td>
+                <td class="r">2.956.400,00</td><td class="r">1.386.450,00</td><td class="r">1.569.950,00</td>
+                <td class="c"></td><td class="c"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-yok)"></span>Hurdaya ayrılan / imha edilen</span>
+          <span><span class="sw" style="background:var(--s-kri)"></span>Bakım / muayene / kalibrasyon tarihi geçmiş</span>
+          <span><span class="sw" style="background:var(--s-skt)"></span>Garantisi veya sigortası bitmek üzere (≤ 60 gün)</span>
+          <span><span class="sw" style="background:var(--s-pas)"></span>Pasif — <b>en sonda</b>, adı üstü çizili</span>
+        </div>
+        <div class="hint">
+          Satır rengi <b>Styles.OnGetContentStyle</b> ile; öncelik <b>Pasif → Hurda → Bakım gecikti → Süre bitiyor → Normal</b>.
+          Net değer <b>DEMIRBASTAKIP</b>'ten (işlenmiş yıl kayıtlarının birikmişi) gelir, listede anlık hesaplanmaz;
+          "Sonraki bakım" <b>KALIBRASYON</b> kayıtlarının geçerlilik tarihinin en erken olanıdır.
+        </div>
+      </div>
+
+      <!-- ALT DETAY -->
+      <div class="tabs" style="margin-top:12px">
+        <div class="tab active" data-t="zimmet">Zimmet Geçmişi <span class="b">4</span></div>
+        <div class="tab" data-t="bakim">Bakım / Servis Kayıtları <span class="b">3</span></div>
+        <div class="tab" data-t="amort">Amortisman Tablosu</div>
+        <div class="tab" data-t="garanti">Garanti &amp; Sigorta</div>
+        <div class="tab" data-t="parca">Parça / Alt Demirbaşlar <span class="b">3</span></div>
+        <div class="tab" data-t="dokuman">Doküman / Fotoğraf <span class="b">4</span></div>
+        <div class="tab" data-t="yorum">Yorum</div>
+      </div>
+
+      <div class="pane active" data-p="zimmet">
+        <div class="gridtb">
+          <span class="minibtn">👤 Zimmetle (Veriş)</span>
+          <span class="minibtn">↩ İade Al</span>
+          <span class="minibtn">🖨 Tutanak Yazdır</span>
+          <label class="chk" style="margin-left:auto"><input type="checkbox" checked> İadeleri de göster</label>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:86px">TARİH</th><th class="c" style="width:64px">TİP</th><th style="width:140px">PERSONEL</th>
+                <th style="width:120px">DEPARTMAN</th><th style="width:140px">LOKASYON</th><th style="width:120px">TUTANAK NO</th>
+                <th>AÇIKLAMA</th><th class="c" style="width:70px">İMZA</th></tr>
+            <tr class="foc"><td>10.03.2026</td><td class="c"><span class="pill p-izl">Veriş</span></td><td>Elif Şahin</td>
+                <td>Bilgi İşlem</td><td>Ofis — 3. Kat</td><td>TUT.2026-0088</td>
+                <td class="ad">Yeni görev ataması ile zimmetlendi.</td><td class="c">✔</td></tr>
+            <tr><td>05.03.2026</td><td class="c"><span class="pill p-ok">İade</span></td><td>Ahmet Kaya</td>
+                <td>Saha Operasyon</td><td>Depo</td><td>TUT.2026-0081</td>
+                <td class="ad">Görev değişikliği, cihaz depoya teslim edildi.</td><td class="c">✔</td></tr>
+            <tr><td>18.08.2025</td><td class="c"><span class="pill p-izl">Devir</span></td><td>Ahmet Kaya</td>
+                <td>Saha Operasyon</td><td>Saha</td><td>TUT.2025-0655</td>
+                <td class="ad">Şube-2'den merkeze devir.</td><td class="c">✔</td></tr>
+            <tr><td>01.02.2025</td><td class="c"><span class="pill p-izl">Veriş</span></td><td>Ahmet Kaya</td>
+                <td>Saha Operasyon</td><td>Saha</td><td>TUT.2025-0402</td>
+                <td class="ad">İlk zimmet — alım sonrası.</td><td class="c">✔</td></tr>
+          </table>
+        </div>
+        <div class="hint">Her hareket bir <b>tutanak</b> üretir (imzalı çıktı). Güncel zimmet = son <b>Veriş</b>/<b>Devir</b>
+          kaydındaki kişi; ardından <b>İade</b> geldiyse demirbaş "Depoda" sayılır.</div>
+      </div>
+
+      <div class="pane" data-p="bakim">
+        <div class="gridtb">
+          <span class="minibtn">➕ Bakım / Kalibrasyon Kaydı</span>
+          <span class="minibtn">⏰ Hatırlatma Kur</span>
+          <span class="minibtn">📎 Sertifika Ekle</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Geçerliliği dolan kayıtlar sarı</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:92px">TİP</th><th style="width:86px">TARİH</th><th style="width:96px">GEÇERLİLİK</th>
+                <th style="width:170px">YAPAN / FİRMA</th><th style="width:130px">SERTİFİKA</th>
+                <th class="r" style="width:90px">MALİYET</th><th>AÇIKLAMA</th></tr>
+            <tr class="foc"><td>Periyodik Bakım</td><td>12.02.2026</td><td>12.02.2027</td><td>İç Ekip — Serkan Öz</td>
+                <td>—</td><td class="r">0,00</td><td class="ad">Termal macun yenilendi, disk sağlık testi yapıldı.</td></tr>
+            <tr><td>Onarım</td><td>03.11.2025</td><td>—</td><td>MNG Teknoloji A.Ş.</td>
+                <td>SRV-2025-3390</td><td class="r">2.450,00</td><td class="ad">Klavye değişimi — garanti dışı.</td></tr>
+            <tr class="s-kri"><td>Kalibrasyon</td><td>20.01.2025</td><td><b>20.01.2026</b></td><td>TSE</td>
+                <td>KAL-2025-118.pdf</td><td class="r">1.200,00</td><td class="ad">Süresi doldu — yenilenmesi gerekiyor.</td></tr>
+            <tfoot><tr><td colspan="5" style="text-align:right">TOPLAM BAKIM MALİYETİ</td>
+                <td class="r">3.650,00</td><td></td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="pane" data-p="amort">
+        <div class="gridtb">
+          <span style="font-size:11px;color:var(--muted)">Yöntem:</span><div class="inp combo" style="width:150px">Normal (Doğrusal)</div>
+          <span style="font-size:11px;color:var(--muted)">Oran / Ömür:</span><div class="inp" style="width:96px">%25 · 4 yıl</div>
+          <span style="font-size:11px;color:var(--muted)">Başlangıç:</span><div class="inp" style="width:92px">01.02.2025</div>
+          <span class="minibtn" style="margin-left:auto">📉 Yılı Hesapla / İşle</span>
+          <span class="minibtn">↩ Yılı Geri Al</span>
+        </div>
+        <div class="dg" style="max-width:720px">
+          <table>
+            <tr><th style="width:60px">YIL</th><th class="r" style="width:110px">AMORTİSMAN</th>
+                <th class="r" style="width:110px">BİRİKMİŞ</th><th class="r" style="width:110px">NET DEĞER</th>
+                <th class="c" style="width:90px">DURUM</th><th style="width:96px">İŞLEM TARİHİ</th><th>AÇIKLAMA</th></tr>
+            <tr><td>2025</td><td class="r">10.500,00</td><td class="r">10.500,00</td><td class="r">31.500,00</td>
+                <td class="c"><span class="pill p-ok">İşlendi</span></td><td>31.12.2025</td><td class="ad">Yıl sonu kapanışı</td></tr>
+            <tr class="foc"><td><b>2026</b></td><td class="r">10.500,00</td><td class="r">21.000,00</td><td class="r"><b>21.000,00</b></td>
+                <td class="c"><span class="pill p-kri">Kısmi</span></td><td>30.06.2026</td><td class="ad">6 aylık ara dönem işlendi</td></tr>
+            <tr><td>2027</td><td class="r">10.500,00</td><td class="r">31.500,00</td><td class="r">10.500,00</td>
+                <td class="c"><span class="pill p-pas">Bekliyor</span></td><td>—</td><td class="ad">—</td></tr>
+            <tr><td>2028</td><td class="r">10.500,00</td><td class="r">42.000,00</td><td class="r">0,00</td>
+                <td class="c"><span class="pill p-pas">Bekliyor</span></td><td>—</td><td class="ad">Faydalı ömür sonu</td></tr>
+            <tfoot><tr><td style="text-align:right">TOPLAM</td><td class="r">42.000,00</td>
+                <td class="r">42.000,00</td><td class="r">0,00</td><td class="c"></td><td></td><td></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="hint">Tablo <b>DEMIRBASTAKIP</b>'te yıl bazlı tutulur; "İşlendi" satırlar muhasebe fişine bağlanır ve
+          geri alınmadan yeniden hesaplanamaz. Amortisman grubu: <b>Demirbaş (255)</b>.</div>
+      </div>
+
+      <div class="pane" data-p="garanti">
+        <div class="gridtb"><span class="minibtn">➕ Poliçe / Garanti Ekle</span><span class="minibtn">⏰ Bitiş Hatırlatması</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">60 günden yakın bitişler turuncu</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:110px">TÜR</th><th style="width:190px">SAĞLAYAN / SİGORTA</th><th style="width:140px">POLİÇE / BELGE NO</th>
+                <th style="width:86px">BAŞLANGIÇ</th><th style="width:86px">BİTİŞ</th>
+                <th class="r" style="width:100px">BEDEL</th><th class="c" style="width:80px">DURUM</th><th>KAPSAM</th></tr>
+            <tr><td>Üretici Garantisi</td><td>Dell Türkiye</td><td>GAR-DL-5540-0198</td>
+                <td>15.01.2025</td><td>15.01.2028</td><td class="r">0,00</td>
+                <td class="c"><span class="pill p-ok">Geçerli</span></td><td class="ad">3 yıl yerinde servis (NBD)</td></tr>
+            <tr><td>Ek Servis Paketi</td><td>MNG Teknoloji A.Ş.</td><td>SRV-PKT-2025-0441</td>
+                <td>15.01.2025</td><td>15.01.2027</td><td class="r">4.800,00</td>
+                <td class="c"><span class="pill p-ok">Geçerli</span></td><td class="ad">Kaza sonucu hasar dahil</td></tr>
+            <tr class="s-skt"><td>Sigorta</td><td>Anadolu Sigorta</td><td>PLC-2025-778341</td>
+                <td>01.10.2025</td><td><b>01.10.2026</b></td><td class="r">1.950,00</td>
+                <td class="c"><span class="pill p-kri">48 gün</span></td><td class="ad">Elektronik cihaz — hırsızlık / yangın</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="pane" data-p="parca">
+        <div class="gridtb"><span class="minibtn">➕ Alt Demirbaş Bağla</span><span class="minibtn">🔗 Bağı Kaldır</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Ana demirbaş: DMB.0342</span></div>
+        <div class="dg">
+          <table>
+            <tr><th class="c" style="width:38px">TİP</th><th style="width:88px">DEMİRBAŞ NO</th><th>ADI</th>
+                <th style="width:130px">MARKA / MODEL</th><th style="width:130px">SERİ NO</th>
+                <th class="c" style="width:80px">ALIM TARİHİ</th><th class="r" style="width:96px">ALIŞ BEDELİ</th>
+                <th class="c" style="width:80px">DURUM</th></tr>
+            <tr><td class="c"><span class="tip t-mal">BİL</span></td><td>DMB.0343</td>
+                <td class="ad">Dell Docking Station WD19S</td><td>Dell / WD19S</td><td>WD19S-2025-0447</td>
+                <td class="c">15.01.2025</td><td class="r">6.200,00</td><td class="c"><span class="pill p-izl">Zimmetli</span></td></tr>
+            <tr><td class="c"><span class="tip t-mal">BİL</span></td><td>DMB.0344</td>
+                <td class="ad">Monitör — Dell P2422H 24"</td><td>Dell / P2422H</td><td>P2422H-2025-1180</td>
+                <td class="c">15.01.2025</td><td class="r">8.900,00</td><td class="c"><span class="pill p-izl">Zimmetli</span></td></tr>
+            <tr class="s-pas"><td class="c"><span class="tip t-mal">BİL</span></td><td>DMB.0345</td>
+                <td class="ad">Yedek Batarya — 4 hücreli (şişme)</td><td>Dell / DJ1J0</td><td>DJ1J0-2025-0092</td>
+                <td class="c">15.01.2025</td><td class="r">2.400,00</td><td class="c"><span class="pill p-pas">Pasif</span></td></tr>
+            <tfoot><tr><td colspan="6" style="text-align:right">ALT DEMİRBAŞ TOPLAMI (3)</td>
+                <td class="r">17.500,00</td><td class="c"></td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="pane" data-p="dokuman">
+        <div class="gridtb"><span class="minibtn">📎 Klasörden</span><span class="minibtn">🖨 Tarayıcıdan</span>
+          <span class="minibtn">📋 Yapıştır</span><span class="minibtn">🖼 Dosyadan</span>
+          <span class="minibtn" style="margin-left:auto">👁 Aç</span><span class="minibtn">🗑 Sil</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:150px">TÜR</th><th>DOSYA ADI</th><th style="width:130px">EKLEYEN</th>
+                <th style="width:104px">TARİH</th><th class="c" style="width:70px">BOYUT</th><th class="c" style="width:70px">YERİ</th></tr>
+            <tr class="foc"><td>🧾 Alış Faturası</td><td class="ad">mng_fatura_441.pdf</td><td>Muhasebe</td>
+                <td>15.01.2025</td><td class="c">120 KB</td><td class="c">DOSYA</td></tr>
+            <tr><td>🛡 Garanti Belgesi</td><td class="ad">dell_garanti_5540.pdf</td><td>Bilgi İşlem</td>
+                <td>15.01.2025</td><td class="c">90 KB</td><td class="c">DOSYA</td></tr>
+            <tr><td>📄 Zimmet Tutanağı</td><td class="ad">tutanak_2026_0088.pdf</td><td>İnsan Kaynakları</td>
+                <td>10.03.2026</td><td class="c">60 KB</td><td class="c">DOSYA</td></tr>
+            <tr><td>📷 Demirbaş Fotoğrafı</td><td class="ad">dmb0342_etiket.jpg</td><td>Depo Sorumlusu</td>
+                <td>11.03.2026</td><td class="c">340 KB</td><td class="c">DOSYA</td></tr>
+          </table>
+        </div>
+        <div class="hint">İçerik <b>GENDEPO.DOSYA</b>'da (FILESTREAM, hash ile tekilleştirilmiş);
+          <b>IMAJ.YERI</b> hangi ekranın eki olduğunu tutar.</div>
+      </div>
+
+      <div class="pane" data-p="yorum">
+        <div class="gridtb"><span class="minibtn">➕ Yorum Ekle</span><span class="minibtn">🗑 Sil</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:140px">KULLANICI</th><th style="width:130px">TARİH</th><th>YORUM</th><th class="c" style="width:70px">EK</th></tr>
+            <tr><td>Serkan Öz</td><td>12.02.2026 11:40</td><td class="ad">Periyodik bakım yapıldı, fan sesi normal seviyeye indi.</td><td class="c">📎 1</td></tr>
+            <tr><td>Elif Şahin</td><td>10.03.2026 09:15</td><td class="ad">Cihaz teslim alındı, tutanak imzalanıp İK'ya iletildi.</td><td class="c">—</td></tr>
+            <tr><td>Bilgi İşlem</td><td>14.08.2026 08:50</td><td class="ad">Sigorta poliçesi 01.10.2026'da bitiyor — yenileme talebi açıldı.</td><td class="c">—</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SAG: SECILI DEMIRBAS ============ -->
+    <div class="side">
+      <h5>Seçili Demirbaş</h5>
+      <div class="urun">
+        <div class="foto">💻</div>
+        <div class="nm">Dizüstü Bilgisayar — Dell Latitude 5540</div>
+        <div class="mt">DMB.0342 · Seri: DL5540-2026-0198</div>
+        <div style="display:flex;gap:5px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn">👁 Kart</span><span class="minibtn">🏷 Etiket</span><span class="minibtn">📉 Amort.</span>
+        </div>
+      </div>
+
+      <div class="tvsep"></div>
+      <h5>Durum</h5>
+      <div class="kv"><span>Alış bedeli</span><b>42.000,00 ₺</b></div>
+      <div class="kv"><span>Birikmiş amort.</span><b>21.000,00 ₺</b></div>
+      <div class="kv"><span>Net defter değeri</span><b style="color:#2e7d46">21.000,00 ₺</b></div>
+      <div class="kv"><span>Oran / yöntem</span><b>%25 · Normal</b></div>
+      <div class="kv"><span>Kalan ömür</span><b>2 yıl 5 ay</b></div>
+      <div class="kv"><span>Durum</span><b><span class="pill p-izl">Zimmetli</span></b></div>
+
+      <div class="tvsep"></div>
+      <h5>Zimmet</h5>
+      <div class="kv"><span>Personel</span><b>Elif Şahin</b></div>
+      <div class="kv"><span>Departman</span><b>Bilgi İşlem</b></div>
+      <div class="kv"><span>Lokasyon</span><b>Ofis — 3. Kat</b></div>
+      <div class="kv"><span>Tutanak</span><b>TUT.2026-0088</b></div>
+      <div class="kv"><span>Veriliş</span><b>10.03.2026</b></div>
+
+      <div class="tvsep"></div>
+      <h5>Bakım &amp; Süreler</h5>
+      <div class="depo"><span class="ad">Garanti</span>
+        <div class="bar" style="flex:1"><span class="ok" style="width:53%"></span></div><span class="mk">%53</span></div>
+      <div class="depo"><span class="ad">Faydalı ömür</span>
+        <div class="bar" style="flex:1"><span class="kri" style="width:50%"></span></div><span class="mk">%50</span></div>
+      <div class="depo"><span class="ad">Sigorta</span>
+        <div class="bar" style="flex:1"><span class="yok" style="width:13%"></span></div><span class="mk">48 g</span></div>
+      <div class="kv" style="margin-top:4px"><span>Son bakım</span><b>12.02.2026</b></div>
+      <div class="kv"><span>Sonraki bakım</span><b>12.02.2027</b></div>
+      <div class="kv"><span>Kalibrasyon</span><b style="color:#a9791a">20.01.2026 doldu</b></div>
+
+      <div class="tvsep"></div>
+      <h5>İşlemler</h5>
+      <div class="sidebtns">
+        <span class="minibtn">👤 Zimmet Ver / Devret</span>
+        <span class="minibtn">↩ Zimmet İade Al</span>
+        <span class="minibtn">🔧 Servise Gönder</span>
+        <span class="minibtn">📉 Amortisman İşle</span>
+        <span class="minibtn">♻ Hurdaya Ayır</span>
+        <span class="minibtn">🖨 Tutanak / Etiket Yazdır</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Kart → <b>DEMIRBAS</b> (DEMIRBASNO · ADI · KATEGORI · MARKA · MODEL · SERINO · LOKASYON · SUBE · ALISTARIHI · ALISTUTARI · GARANTIBITIS · DURUM)</span>·
+    <span>Zimmet → <b>DEMIRBAS_TUTANAK</b> (+ <b>_DETAY</b>: TARIH · TIP · PERSONEL · LOKASYON · TUTANAKNO)</span>·
+    <span>Bakım → <b>KALIBRASYON</b> (TIP · TARIH · GECERLILIK · YAPAN · SERTIFIKA)</span>·
+    <span>Amortisman → <b>DEMIRBASTAKIP</b> (YIL · AMORTISMAN · BIRIKMIS · NETDEGER · DURUM)</span>·
+    <span>Ek alan → <b>REHBERBILGI</b></span>·
+    <span>Belge → <b>DOKUMAN → IMAJ → GENDEPO.DOSYA</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Liste: <b>Tüm gruplar</b> · 10 demirbaş</span>
+    <span>Bakımı geçen / süresi bitecek: <b>4</b></span>
+    <span>Toplam net değer: <b>1.569.950,00 ₺</b></span>
+    <span style="margin-left:auto">Seçili: DMB.0342</span>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.ltab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.ltab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.lpane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.lpane[data-lp="'+t.dataset.l+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.gtus').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.gtus').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');
+    });
+  });
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

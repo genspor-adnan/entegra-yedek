@@ -294,7 +294,6 @@ object KullaniciDuzenleDlg: TKullaniciDuzenleDlg
     Properties.Items = <
       item
         Description = 'Mevcut g'#246'r'#252'n'#252'm'
-        Value = Null
       end
       item
         Description = 'Blue'

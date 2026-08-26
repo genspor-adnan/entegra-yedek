@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POS Listesi — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* pos satir renkleri */
+    --s-yok:#f7cfcf; --s-yok-t:#7d1f1f;   /* valor gecti, hesaba gecmedi (bloke) */
+    --s-kri:#fbe6ae; --s-kri-t:#7a5407;   /* bugun valorlu / bekleyen bakiye     */
+    --s-skt:#f6d9c0; --s-skt-t:#8a4a12;   /* komisyon sozlesme ustu / mut. farki */
+    --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;   /* pasif - kapatilmis POS              */
+    /* gorev butonu (Delphi clGorevTusuSecili / Pasif) */
+    --tus-pas:#9c71ad; --tus-sec:#1f6fbe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+
+  .wrap{display:grid;grid-template-columns:222px 1fr 236px;gap:0}
+
+  /* SOL: Menu / Arama */
+  .gorev{background:#f4f7fa;border-right:1px solid var(--line2);padding:6px 6px 10px}
+  .gorev h5{margin:6px 4px 4px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .ltabs{display:flex;gap:2px;margin:-6px -6px 8px;padding:6px 6px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .ltab{flex:1;text-align:center;padding:6px 8px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);
+    border-bottom:none;border-radius:3px 3px 0 0;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .ltab.active{background:#f4f7fa;color:var(--navy);font-weight:bold}
+  .lpane{display:none}.lpane.active{display:block}
+  .gtus{display:flex;align-items:center;gap:8px;color:#fff;font-weight:bold;font-size:11.5px;
+    background:var(--tus-pas);border:1px solid rgba(0,0,0,.12);border-radius:3px;padding:8px 9px;margin-bottom:3px;cursor:default}
+  .gtus:hover{filter:brightness(1.06)}
+  .gtus.on{background:var(--tus-sec);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+  .gtus .ic{font-size:14px;width:18px;text-align:center}
+  .achips{display:flex;gap:4px;margin-bottom:8px}
+  .achips .minibtn{flex:1;justify-content:center}
+  .agrid{display:grid;grid-template-columns:70px 1fr;gap:5px 6px;align-items:center}
+  .agrid label{font-size:10.5px;color:var(--muted);text-align:right}
+  .gorev .minibtn{white-space:nowrap}
+
+  /* ORTA */
+  .center{min-width:0;display:flex;flex-direction:column}
+  .filtre{display:flex;gap:5px;padding:8px 10px 7px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line2);background:#fbfcfe}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.s-yok td{background:var(--s-yok);color:var(--s-yok-t)}
+  .dg tr.s-kri td{background:var(--s-kri);color:var(--s-kri-t)}
+  .dg tr.s-skt td{background:var(--s-skt);color:var(--s-skt-t)}
+  .dg tr.s-pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .dg tr.s-pas td.ad{text-decoration:line-through}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-izl{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .tip{display:inline-block;min-width:30px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;padding:1px 5px;border:1px solid}
+  .t-mal{background:#e5ecf8;border-color:#c6d7ef;color:#2b5c95}
+  .t-hzm{background:#e3f0e6;border-color:#c3e0cb;color:#2e7d46}
+  .t-sar{background:#fdf1e2;border-color:#f0dcbd;color:#96651a}
+  /* mini bar */
+  .bar{height:9px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:54px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+
+  /* alt detay */
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 12px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+  .gridtb{display:flex;gap:4px;padding:0 0 7px;align-items:center;flex-wrap:wrap}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px}
+
+  /* SAG */
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:8px 0}
+  .side h5{margin:0;padding:7px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11px;padding:3px 12px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .tvsep{height:1px;background:var(--line2);margin:7px 10px}
+  .sidebtns{display:flex;flex-direction:column;gap:4px;padding:4px 10px}
+  .urun{margin:0 10px;border:1px solid var(--line);border-radius:4px;background:#fff;padding:9px;text-align:center}
+  .urun .foto{height:82px;border:1px solid var(--line2);border-radius:3px;background:linear-gradient(#fff,#f2f6fa);
+    display:flex;align-items:center;justify-content:center;font-size:30px;color:#9fb3c8}
+  .urun .nm{font-size:11.5px;font-weight:bold;color:var(--navy);margin-top:7px;line-height:1.35}
+  .urun .mt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .depo{display:flex;align-items:center;gap:7px;padding:3px 12px;font-size:11px}
+  .depo .ad{width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+  .depo .mk{width:44px;text-align:right;font-family:"Segoe UI",Tahoma}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:22px;padding:0 6px;font-size:11.5px;
+    display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:5px;top:2px;color:var(--muted);font-size:10px}
+
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> POS Listesi
+    <span class="sp">ListeFrame\UPosListeDlg · POS · POSHAREKET · POSTAKSIT · Şube: Merkez · 14.08.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni POS</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">📊 Taksit &amp; Komisyon Tablosu</div>
+    <div class="btn">💳 Slip / İşlem Girişi</div>
+    <div class="btn">🏦 Hesaba Geçen Tutar Kaydet</div>
+    <div class="sepv"></div>
+    <div class="btn">⚖ Mutabakat</div>
+    <div class="btn">📥 Banka Ekstresi Aktar</div>
+    <div class="btn">📤 Excel</div>
+    <div class="btn">🖨 Yazdır</div>
+  </div>
+
+  <div class="wrap">
+    <!-- ============ SOL: MENU / ARAMA ============ -->
+    <div class="gorev">
+      <div class="ltabs">
+        <div class="ltab active" data-l="menu">☰ Menü</div>
+        <div class="ltab" data-l="arama">🔎 Arama</div>
+      </div>
+
+      <div class="lpane active" data-lp="menu">
+        <h5>POS</h5>
+        <div class="gtus on"><span class="ic">💳</span> POS Tanımı</div>
+        <div class="gtus"><span class="ic">🧾</span> POS İşlemleri</div>
+        <div class="gtus"><span class="ic">📊</span> Taksit / Komisyon</div>
+        <div class="gtus"><span class="ic">⚖</span> Valör &amp; Mutabakat</div>
+        <div class="gtus"><span class="ic">🌐</span> Sanal POS</div>
+        <h5>Diğer</h5>
+        <div class="gtus"><span class="ic">📁</span> Dökümler</div>
+        <div class="gtus"><span class="ic">📂</span> Özel Dökümler</div>
+        <div class="hint" style="padding:6px 4px 0">Tek buton aktif — <b>GorevTusuSec</b>;
+          seçili olan mavi.</div>
+      </div>
+
+      <div class="lpane" data-lp="arama">
+        <div class="achips">
+          <span class="minibtn on">Tüm</span><span class="minibtn">Son</span><span class="minibtn">Sık</span>
+        </div>
+        <div class="agrid">
+          <label>POS Adı</label><div class="inp"></div>
+          <label>Terminal No</label><div class="inp">VP0012</div>
+          <label>Üye İşyeri No</label><div class="inp"></div>
+          <label>Banka</label><div class="inp combo">(tümü)</div>
+          <label>Bağlı Hesap</label><div class="inp combo">(tümü)</div>
+          <label>POS Tipi</label><div class="inp combo">Fiziki</div>
+          <label>Şube</label><div class="inp combo">Merkez</div>
+          <label>Durum</label><div class="inp combo">Aktif</div>
+        </div>
+        <div class="agrid" style="grid-template-columns:70px 1fr 1fr;margin-top:5px">
+          <label>Komisyon %</label><div class="inp">0,00</div><div class="inp">5,00</div>
+          <label>Başlama</label><div class="inp">01.08.2026</div><div class="inp">14.08.2026</div>
+          <label>Valör Gün</label><div class="inp">0</div><div class="inp combo">Tümü</div>
+        </div>
+        <label class="chk" style="margin-top:6px"><input type="checkbox"> Pasifleri de göster</label>
+        <label class="chk"><input type="checkbox" checked> Sadece bekleyen bakiyesi olanlar</label>
+        <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn on" style="flex:1;justify-content:center">🔎 Ara</span>
+          <span class="minibtn" style="flex:1;justify-content:center">↩ Temizle</span>
+          <span class="minibtn" style="flex-basis:100%;justify-content:center">💾 Aramayı Kaydet</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ORTA: LISTE ============ -->
+    <div class="center">
+      <div class="filtre">
+        <span class="minibtn on">Aktif</span>
+        <span class="minibtn">Fiziki</span>
+        <span class="minibtn">Sanal</span>
+        <span class="minibtn">Bekleyen Bakiye</span>
+        <span class="minibtn">Mutabakatsız</span>
+        <span class="minibtn">Tümü</span>
+        <span class="sepv" style="height:20px"></span>
+        <span class="minibtn">🏦 Banka: (tümü)</span>
+        <span class="minibtn">🏢 Şube: Merkez</span>
+        <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">
+          Sıralama: pasifler en sonda · bekleyen bakiye ↓</span>
+      </div>
+
+      <div style="padding:10px 10px 0">
+        <div class="dg">
+          <table>
+            <tr>
+              <th class="c" style="width:38px">TİP</th>
+              <th style="width:74px">POS KODU</th>
+              <th>POS ADI</th>
+              <th style="width:104px">BANKA</th>
+              <th style="width:104px">ÜYE İŞYERİ NO</th>
+              <th style="width:88px">TERMİNAL NO</th>
+              <th style="width:108px">BAĞLI HESAP</th>
+              <th style="width:64px">ŞUBE</th>
+              <th class="c" style="width:52px">MAKS TAK.</th>
+              <th class="r" style="width:64px">PEŞİN KOM. %</th>
+              <th class="r" style="width:52px">BUGÜN ADET</th>
+              <th class="r" style="width:88px">BUGÜN CİRO</th>
+              <th class="r" style="width:92px">BEKLEYEN BAKİYE</th>
+              <th class="r" style="width:80px">KOMİSYON TUTARI</th>
+              <th class="c" style="width:46px">VALÖR</th>
+              <th class="c" style="width:78px">MUTABAKAT</th>
+              <th class="c" style="width:76px">DURUM</th>
+            </tr>
+
+            <tr class="s-yok">
+              <td class="c"><span class="tip t-mal">FZK</span></td><td>POS.005</td>
+              <td class="ad"><b>Ziraat — Şube POS (Tahsilat)</b></td><td>T.C. Ziraat Bank.</td>
+              <td>000000554120</td><td>ZRT-TRM-14</td><td>TR12 …9930</td><td>Şube-2</td>
+              <td class="c">6</td><td class="r">1,80</td>
+              <td class="r">6</td><td class="r">22.800,00</td>
+              <td class="r"><b>48.650,00</b></td><td class="r">410,40</td>
+              <td class="c">3</td>
+              <td class="c"><div class="bar"><span class="yok" style="width:71%"></span></div></td>
+              <td class="c"><span class="pill p-yok">Eksik yatan</span></td>
+            </tr>
+            <tr class="s-yok">
+              <td class="c"><span class="tip t-hzm">SNL</span></td><td>POS.006</td>
+              <td class="ad">Vakıfbank — Sanal POS (Mobil)</td><td>VakıfBank</td>
+              <td>000000771045</td><td>VKF-SNL-02</td><td>TR55 …6104</td><td>Merkez</td>
+              <td class="c">12</td><td class="r">2,00</td>
+              <td class="r">15</td><td class="r">33.150,00</td>
+              <td class="r"><b>71.320,00</b></td><td class="r">663,00</td>
+              <td class="c">2</td>
+              <td class="c"><div class="bar"><span class="yok" style="width:64%"></span></div></td>
+              <td class="c"><span class="pill p-yok">Blokede</span></td>
+            </tr>
+            <tr class="s-kri foc">
+              <td class="c"><span class="tip t-mal">FZK</span></td><td>POS.001</td>
+              <td class="ad"><b>Garanti — Mağaza POS 1</b></td><td>Garanti BBVA</td>
+              <td>000000123456</td><td>VP001234</td><td>TR33 …4471</td><td>Merkez</td>
+              <td class="c">9</td><td class="r">1,50</td>
+              <td class="r">12</td><td class="r">84.300,00</td>
+              <td class="r"><b>84.300,00</b></td><td class="r">1.264,50</td>
+              <td class="c">1</td>
+              <td class="c"><div class="bar"><span class="ok" style="width:100%"></span></div></td>
+              <td class="c"><span class="pill p-kri">Bugün valörlü</span></td>
+            </tr>
+            <tr class="s-kri">
+              <td class="c"><span class="tip t-hzm">SNL</span></td><td>POS.002</td>
+              <td class="ad">İş Bankası — Sanal POS (Web Sipariş)</td><td>Türkiye İş Bank.</td>
+              <td>000000987321</td><td>ISB-SNL-01</td><td>TR64 …8802</td><td>Merkez</td>
+              <td class="c">12</td><td class="r">1,79</td>
+              <td class="r">27</td><td class="r">146.920,50</td>
+              <td class="r"><b>146.920,50</b></td><td class="r">2.629,88</td>
+              <td class="c">1</td>
+              <td class="c"><div class="bar"><span class="ok" style="width:100%"></span></div></td>
+              <td class="c"><span class="pill p-kri">Bugün valörlü</span></td>
+            </tr>
+            <tr class="s-skt">
+              <td class="c"><span class="tip t-sar">QR</span></td><td>POS.003</td>
+              <td class="ad">Yapı Kredi — QR Ödeme (Kasa Önü)</td><td>Yapı ve Kredi B.</td>
+              <td>000000640877</td><td>YKB-QR-007</td><td>TR91 …2215</td><td>Merkez</td>
+              <td class="c">Peşin</td><td class="r"><b>2,45</b></td>
+              <td class="r">41</td><td class="r">38.475,00</td>
+              <td class="r">12.150,00</td><td class="r">942,64</td>
+              <td class="c">1</td>
+              <td class="c"><div class="bar"><span class="kri" style="width:96%"></span></div></td>
+              <td class="c"><span class="pill p-kri">Kom. sözl. üstü</span></td>
+            </tr>
+            <tr class="s-skt">
+              <td class="c"><span class="tip t-mal">FZK</span></td><td>POS.004</td>
+              <td class="ad">Akbank — Showroom POS</td><td>Akbank T.A.Ş.</td>
+              <td>000000318802</td><td>AKB-TRM-33</td><td>TR07 …5540</td><td>Merkez</td>
+              <td class="c">9</td><td class="r">1,80</td>
+              <td class="r">9</td><td class="r">61.200,00</td>
+              <td class="r">27.400,00</td><td class="r">1.101,60</td>
+              <td class="c">2</td>
+              <td class="c"><div class="bar"><span class="kri" style="width:88%"></span></div></td>
+              <td class="c"><span class="pill p-kri">Mut. farkı</span></td>
+            </tr>
+            <tr>
+              <td class="c"><span class="tip t-hzm">SNL</span></td><td>POS.007</td>
+              <td class="ad">Denizbank — Link ile Ödeme</td><td>DenizBank</td>
+              <td>000000902334</td><td>DNZ-LNK-05</td><td>TR40 …7781</td><td>Merkez</td>
+              <td class="c">6</td><td class="r">1,95</td>
+              <td class="r">4</td><td class="r">9.860,00</td>
+              <td class="r">9.860,00</td><td class="r">172,55</td>
+              <td class="c">1</td>
+              <td class="c"><div class="bar"><span class="ok" style="width:100%"></span></div></td>
+              <td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+            <tr>
+              <td class="c"><span class="tip t-mal">FZK</span></td><td>POS.008</td>
+              <td class="ad">QNB Finansbank — Depo / Teslimat POS</td><td>QNB Finansbank</td>
+              <td>000000445019</td><td>QNB-TRM-02</td><td>TR18 …3366</td><td>Şube-2</td>
+              <td class="c">3</td><td class="r">1,80</td>
+              <td class="r">2</td><td class="r">5.400,00</td>
+              <td class="r">5.400,00</td><td class="r">97,20</td>
+              <td class="c">1</td>
+              <td class="c"><div class="bar"><span class="ok" style="width:100%"></span></div></td>
+              <td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+            <tr class="s-pas">
+              <td class="c"><span class="tip t-mal">FZK</span></td><td>POS.009</td>
+              <td class="ad">Halkbank — Eski Mağaza POS (sözleşme feshi)</td><td>Türkiye Halk B.</td>
+              <td>000000210554</td><td>HLK-TRM-01</td><td>TR29 …1187</td><td>Merkez</td>
+              <td class="c">—</td><td class="r">2,10</td>
+              <td class="r">0</td><td class="r">0,00</td>
+              <td class="r">0,00</td><td class="r">0,00</td>
+              <td class="c">—</td>
+              <td class="c">—</td>
+              <td class="c"><span class="pill p-pas">Kapatıldı</span></td>
+            </tr>
+            <tr class="s-pas">
+              <td class="c"><span class="tip t-hzm">SNL</span></td><td>POS.010</td>
+              <td class="ad">Garanti — Eski Sanal POS (3D v1)</td><td>Garanti BBVA</td>
+              <td>000000123456</td><td>VP009911</td><td>TR33 …4471</td><td>Merkez</td>
+              <td class="c">—</td><td class="r">1,65</td>
+              <td class="r">0</td><td class="r">0,00</td>
+              <td class="r">0,00</td><td class="r">0,00</td>
+              <td class="c">—</td>
+              <td class="c">—</td>
+              <td class="c"><span class="pill p-pas">Pasif</span></td>
+            </tr>
+
+            <tfoot>
+              <tr>
+                <td colspan="10" style="text-align:right">TOPLAM (10 POS · 8 aktif / 2 pasif · 4 sorunlu)</td>
+                <td class="r">116</td>
+                <td class="r">402.105,50</td>
+                <td class="r">406.000,50</td>
+                <td class="r">7.281,77</td>
+                <td class="c">—</td><td class="c">%89</td><td class="c"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-yok)"></span>Valör geçmiş, hesaba geçmemiş — bloke / eksik yatan</span>
+          <span><span class="sw" style="background:var(--s-kri)"></span>Bugün valörlü / bekleyen bakiye var</span>
+          <span><span class="sw" style="background:var(--s-skt)"></span>Komisyon oranı sözleşme üstü veya mutabakat farkı</span>
+          <span><span class="sw" style="background:var(--s-pas)"></span>Pasif / kapatılmış POS — <b>en sonda</b>, adı üstü çizili</span>
+        </div>
+        <div class="hint">
+          Satır rengi <b>Styles.OnGetContentStyle</b> ile; öncelik <b>Pasif → Eksik yatan → Komisyon/Mutabakat farkı → Bugün valörlü → Normal</b>.
+          Bekleyen bakiye <b>POSHAREKET</b>'te <b>HESABAGECEN = 0</b> olan satırların net toplamıdır; valör tarihi
+          <b>POS.VALORGUN</b> + iş günü kaydırması ile hesaplanır. Mutabakat oranı, banka ekstresinden aktarılan
+          satırların eşleşme yüzdesidir.
+        </div>
+      </div>
+
+      <!-- ALT DETAY -->
+      <div class="tabs" style="margin-top:12px">
+        <div class="tab active" data-t="islem">POS İşlemleri <span class="b">6</span></div>
+        <div class="tab" data-t="taksit">Taksit &amp; Komisyon Oranları <span class="b">6</span></div>
+        <div class="tab" data-t="valor">Valör &amp; Hesaba Geçenler</div>
+        <div class="tab" data-t="mutabakat">Mutabakat <span class="b">2</span></div>
+        <div class="tab" data-t="hesap">Bağlı Banka Hesabı &amp; Muhasebe</div>
+        <div class="tab" data-t="dokuman">Doküman <span class="b">3</span></div>
+        <div class="tab" data-t="yorum">Yorum</div>
+      </div>
+
+      <div class="pane active" data-p="islem">
+        <div class="gridtb">
+          <span style="font-size:11px;color:var(--muted)">Başlama:</span><div class="inp" style="width:92px">01.08.2026</div>
+          <span style="font-size:11px;color:var(--muted)">Bitiş:</span><div class="inp" style="width:92px">14.08.2026</div>
+          <label class="chk" style="margin-left:8px"><input type="checkbox" checked> Sadece hesaba geçmeyenler</label>
+          <span class="minibtn" style="margin-left:auto">💳 İşlem Gir</span>
+          <span class="minibtn">🔗 Faturaya Bağla</span>
+          <span class="minibtn">↩ İptal / İade</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:92px">TARİH</th><th style="width:110px">SLİP / İŞLEM NO</th>
+                <th style="width:120px">KART (İLK-SON 4)</th><th>MÜŞTERİ / AÇIKLAMA</th>
+                <th class="c" style="width:56px">TAKSİT</th><th class="r" style="width:92px">BRÜT TUTAR</th>
+                <th class="r" style="width:80px">KOMİSYON</th><th class="r" style="width:92px">NET</th>
+                <th style="width:88px">VALÖR TARİHİ</th><th class="c" style="width:92px">DURUM</th></tr>
+            <tr><td>12.08.2026</td><td>SLP-2026-004471</td><td>5528 08** **** 4471</td>
+                <td class="ad">Perakende satış — Fiş 4471</td><td class="c">Peşin</td>
+                <td class="r">18.400,00</td><td class="r">276,00</td><td class="r">18.124,00</td>
+                <td>13.08.2026</td><td class="c"><span class="pill p-ok">Hesaba geçti</span></td></tr>
+            <tr><td>12.08.2026</td><td>SLP-2026-004472</td><td>4355 08** **** 9014</td>
+                <td class="ad">GRANİT BİLGİSAYAR LTD. — kapora</td><td class="c">3</td>
+                <td class="r">36.000,00</td><td class="r">792,00</td><td class="r">35.208,00</td>
+                <td>13.08.2026</td><td class="c"><span class="pill p-ok">Hesaba geçti</span></td></tr>
+            <tr class="s-yok"><td>12.08.2026</td><td>SLP-2026-004473</td><td>5406 67** **** 2210</td>
+                <td class="ad">META MEFRUŞAT A.Ş. — mobilya teslim</td><td class="c">6</td>
+                <td class="r">24.750,00</td><td class="r">767,25</td><td class="r">23.982,75</td>
+                <td><b>13.08.2026</b></td><td class="c"><span class="pill p-yok">Geçmedi</span></td></tr>
+            <tr class="s-kri foc"><td>14.08.2026</td><td>SLP-2026-004488</td><td>5528 08** **** 4471</td>
+                <td class="ad">Perakende satış — Fiş 4488</td><td class="c">Peşin</td>
+                <td class="r">42.100,00</td><td class="r">631,50</td><td class="r">41.468,50</td>
+                <td>15.08.2026</td><td class="c"><span class="pill p-kri">Bekliyor</span></td></tr>
+            <tr class="s-kri"><td>14.08.2026</td><td>SLP-2026-004489</td><td>4508 34** **** 7761</td>
+                <td class="ad">AYDIN DEKORASYON — perde montaj</td><td class="c">9</td>
+                <td class="r">42.200,00</td><td class="r">1.688,00</td><td class="r">40.512,00</td>
+                <td>15.08.2026</td><td class="c"><span class="pill p-kri">Bekliyor</span></td></tr>
+            <tr><td>13.08.2026</td><td>SLP-2026-004480</td><td>5528 08** **** 4471</td>
+                <td class="ad">Yanlış çekim iadesi — Fiş 4479</td><td class="c">Peşin</td>
+                <td class="r">-2.400,00</td><td class="r">0,00</td><td class="r">-2.400,00</td>
+                <td>14.08.2026</td><td class="c"><span class="pill p-pas">İptal / İade</span></td></tr>
+            <tfoot><tr><td colspan="5" style="text-align:right">TOPLAM (6 işlem)</td>
+                <td class="r">161.050,00</td><td class="r">4.154,75</td><td class="r">156.895,25</td>
+                <td></td><td class="c">3 bekliyor</td></tr></tfoot>
+          </table>
+        </div>
+        <div class="hint">Kırmızı satır = valör tarihi geçmiş ama <b>POSHAREKET.HESABAGECEN</b> hâlâ 0.
+          "Hesaba Geçen Tutar Kaydet" bu satırları toplu işaretler ve <b>BANKAHESAP</b> hareketi üretir.</div>
+      </div>
+
+      <div class="pane" data-p="taksit">
+        <div class="gridtb"><span class="minibtn">➕ Oran Ekle</span><span class="minibtn">✎ Düzenle</span>
+          <span class="minibtn">🗑 Sil</span>
+          <span style="font-size:11px;color:var(--muted);margin-left:8px">Sözleşme:</span>
+          <div class="inp combo" style="width:170px">Garanti BBVA — 2026/Q3</div>
+          <span class="minibtn" style="margin-left:auto">📋 Bankadan Getir</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:110px">TAKSİT ADEDİ</th><th class="r" style="width:90px">ORAN %</th>
+                <th class="r" style="width:110px">SÖZLEŞME %</th><th class="r" style="width:100px">VADE FARKI %</th>
+                <th class="c" style="width:150px">MÜŞTERİYE YANSITMA</th>
+                <th class="c" style="width:70px">VALÖR</th><th>AÇIKLAMA</th></tr>
+            <tr><td>Peşin (Tek Çekim)</td><td class="r"><b>1,50</b></td><td class="r">1,50</td><td class="r">0,00</td>
+                <td class="c">Yansıtılmaz</td><td class="c">1 gün</td><td class="ad">Standart perakende</td></tr>
+            <tr><td>2 Taksit</td><td class="r">1,90</td><td class="r">1,90</td><td class="r">0,00</td>
+                <td class="c">Yansıtılmaz</td><td class="c">1 gün</td><td class="ad">—</td></tr>
+            <tr><td>3 Taksit</td><td class="r">2,20</td><td class="r">2,20</td><td class="r">0,70</td>
+                <td class="c">Kısmi (%50)</td><td class="c">1 gün</td><td class="ad">Kampanya dışı</td></tr>
+            <tr><td>6 Taksit</td><td class="r">3,10</td><td class="r">3,10</td><td class="r">1,60</td>
+                <td class="c">Tam yansıtılır</td><td class="c">1 gün</td><td class="ad">Fatura tutarına eklenir</td></tr>
+            <tr class="s-skt"><td>9 Taksit</td><td class="r"><b>4,00</b></td><td class="r">3,60</td><td class="r">2,50</td>
+                <td class="c">Tam yansıtılır</td><td class="c">1 gün</td><td class="ad"><b>Oran sözleşme üstü — kontrol edin</b></td></tr>
+            <tr class="s-pas"><td>12 Taksit</td><td class="r">4,85</td><td class="r">4,85</td><td class="r">3,40</td>
+                <td class="c">Tam yansıtılır</td><td class="c">1 gün</td><td class="ad">Bu POS'ta kapalı</td></tr>
+            <tfoot><tr><td style="text-align:right">ORTALAMA</td><td class="r">2,93</td><td class="r">2,78</td>
+                <td class="r">1,37</td><td class="c"></td><td class="c"></td><td></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="hint">Oranlar <b>POSTAKSIT</b>'te POS bazında tutulur; fatura/tahsilat ekranı taksit seçildiğinde
+          buradaki oranı okuyup komisyonu hesaplar. Sözleşme oranıyla fark oluşan satır turuncu boyanır.</div>
+      </div>
+
+      <div class="pane" data-p="valor">
+        <div class="gridtb">
+          <span style="font-size:11px;color:var(--muted)">Dönem:</span><div class="inp combo" style="width:120px">Ağustos 2026</div>
+          <label class="chk" style="margin-left:8px"><input type="checkbox" checked> Farkı olanları vurgula</label>
+          <span class="minibtn" style="margin-left:auto">🏦 Hesaba Geçen Tutar Kaydet</span>
+          <span class="minibtn">📥 Banka Ekstresi Aktar</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:96px">VALÖR TARİHİ</th><th style="width:96px">İŞLEM TARİHİ</th>
+                <th class="c" style="width:60px">ADET</th><th class="r" style="width:110px">BEKLENEN</th>
+                <th class="r" style="width:110px">HESABA GEÇEN</th><th class="r" style="width:100px">FARK</th>
+                <th style="width:150px">BANKA HESABI</th><th class="c" style="width:96px">DURUM</th></tr>
+            <tr><td>11.08.2026</td><td>10.08.2026</td><td class="c">14</td>
+                <td class="r">96.420,00</td><td class="r">96.420,00</td><td class="r">0,00</td>
+                <td>Garanti — Vadesiz TL</td><td class="c"><span class="pill p-ok">Tam</span></td></tr>
+            <tr><td>12.08.2026</td><td>11.08.2026</td><td class="c">18</td>
+                <td class="r">110.620,00</td><td class="r">110.620,00</td><td class="r">0,00</td>
+                <td>Garanti — Vadesiz TL</td><td class="c"><span class="pill p-ok">Tam</span></td></tr>
+            <tr class="s-yok"><td><b>13.08.2026</b></td><td>12.08.2026</td><td class="c">12</td>
+                <td class="r">83.035,25</td><td class="r">59.052,50</td><td class="r"><b>-23.982,75</b></td>
+                <td>Garanti — Vadesiz TL</td><td class="c"><span class="pill p-yok">Eksik yatan</span></td></tr>
+            <tr class="s-kri"><td>15.08.2026</td><td>14.08.2026</td><td class="c">2</td>
+                <td class="r">81.980,50</td><td class="r">0,00</td><td class="r">-81.980,50</td>
+                <td>Garanti — Vadesiz TL</td><td class="c"><span class="pill p-kri">Bekliyor</span></td></tr>
+            <tfoot><tr><td colspan="3" style="text-align:right">TOPLAM</td>
+                <td class="r">372.055,75</td><td class="r">266.092,50</td><td class="r">-105.963,25</td>
+                <td></td><td class="c"></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="hint">Fark negatifse banka beklenenden az yatırmıştır (blokaj, ters ibraz veya komisyon farkı).
+          "Hesaba Geçen Tutar Kaydet" ile girilen tutar <b>POSHAREKET.HESABAGECEN</b> alanına yazılır ve
+          <b>BANKAHESAP</b> tarafında karşılık hareketi oluşur.</div>
+      </div>
+
+      <div class="pane" data-p="mutabakat">
+        <div class="gridtb"><span class="minibtn">📥 Banka Ekstresi Aktar</span>
+          <span class="minibtn">⚖ Otomatik Eşleştir</span><span class="minibtn">🔗 Manuel Eşle</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Eşleşme: 10 / 12 satır · %88</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:88px">TARİH</th><th style="width:130px">EKSTRE AÇIKLAMA</th>
+                <th class="r" style="width:100px">EKSTRE TUTAR</th><th style="width:120px">SİSTEM SLİP NO</th>
+                <th class="r" style="width:100px">SİSTEM TUTAR</th><th class="r" style="width:90px">FARK</th>
+                <th class="c" style="width:100px">EŞLEŞME</th><th>NOT</th></tr>
+            <tr><td>13.08.2026</td><td class="ad">POS ALACAK 4471</td><td class="r">18.124,00</td>
+                <td>SLP-2026-004471</td><td class="r">18.124,00</td><td class="r">0,00</td>
+                <td class="c"><span class="pill p-ok">Eşleşti</span></td><td class="ad">Otomatik</td></tr>
+            <tr><td>13.08.2026</td><td class="ad">POS ALACAK 4472</td><td class="r">35.208,00</td>
+                <td>SLP-2026-004472</td><td class="r">35.208,00</td><td class="r">0,00</td>
+                <td class="c"><span class="pill p-ok">Eşleşti</span></td><td class="ad">Otomatik</td></tr>
+            <tr class="s-skt"><td>13.08.2026</td><td class="ad">POS KOMİSYON DÜZELTME</td><td class="r">-1.048,60</td>
+                <td>—</td><td class="r">-942,64</td><td class="r"><b>-105,96</b></td>
+                <td class="c"><span class="pill p-kri">Tutar farkı</span></td><td class="ad">Komisyon oranı 2,45 → sözleşme 1,95</td></tr>
+            <tr class="s-yok"><td>13.08.2026</td><td class="ad">— (ekstrede yok)</td><td class="r">0,00</td>
+                <td>SLP-2026-004473</td><td class="r">23.982,75</td><td class="r"><b>-23.982,75</b></td>
+                <td class="c"><span class="pill p-yok">Eşleşmedi</span></td><td class="ad">Bankaya sorulacak — blokaj olabilir</td></tr>
+            <tfoot><tr><td colspan="2" style="text-align:right">TOPLAM</td><td class="r">52.283,40</td>
+                <td></td><td class="r">76.372,11</td><td class="r">-24.088,71</td>
+                <td class="c">%88</td><td></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="hint">Ekstre satırları <b>POSHAREKET</b> ile slip no + tutar + tarih üçlüsüyle eşleştirilir;
+          eşleşmeyenler mutabakat oranını düşürür ve ana listede satırı turuncu/kırmızı yapar.</div>
+      </div>
+
+      <div class="pane" data-p="hesap">
+        <div class="gridtb"><span class="minibtn">🏦 Banka Hesabına Bağla</span>
+          <span class="minibtn">📒 Muhasebe Kodu Ata</span></div>
+        <div class="dg" style="max-width:760px">
+          <table>
+            <tr><th style="width:170px">ALAN</th><th>DEĞER</th><th style="width:150px">KAYNAK TABLO</th></tr>
+            <tr><td>Bağlı Banka Hesabı</td><td><b>Garanti BBVA — Vadesiz TL</b></td><td>BANKAHESAP</td></tr>
+            <tr><td>IBAN</td><td>TR33 0006 2000 1234 0006 2944 71</td><td>BANKAHESAP</td></tr>
+            <tr><td>Bağlı Kasa</td><td>Mağaza Kasa</td><td>KASA</td></tr>
+            <tr><td>POS Alacak Hesabı</td><td>108.01.003 — POS Alacakları</td><td>MUHFIS</td></tr>
+            <tr><td>Komisyon Gider Hesabı</td><td>780.01.007 — Banka POS Komisyonu</td><td>MUHFIS</td></tr>
+            <tr><td>Cari Karşılığı</td><td>Otomatik — tahsilatta CARİ kapatılır</td><td>CARIHAREKET</td></tr>
+            <tr class="s-kri"><td>Valör (gün)</td><td><b>1 gün</b> (iş günü kaydırmalı)</td><td>POS</td></tr>
+            <tr><td>Blokaj</td><td>Yok</td><td>POS</td></tr>
+            <tr><td>Sorumlu</td><td>Ahmet Kaya</td><td>KULLANICI</td></tr>
+          </table>
+        </div>
+        <div class="hint">Tahsilat kaydedildiğinde: <b>POSHAREKET</b> (brüt/komisyon/net) → valör tarihinde
+          <b>BANKAHESAP</b> girişi + <b>MUHFIS</b> komisyon gider fişi; müşteri tahsilatıysa
+          <b>CARIHAREKET</b> kapama satırı üretilir.</div>
+      </div>
+
+      <div class="pane" data-p="dokuman">
+        <div class="gridtb"><span class="minibtn">📎 Klasörden</span><span class="minibtn">🖨 Tarayıcıdan</span>
+          <span class="minibtn">📋 Yapıştır</span><span class="minibtn">🗑 Sil</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:180px">BELGE ADI</th><th style="width:120px">TÜR</th>
+                <th style="width:120px">TARİH</th><th style="width:130px">EKLEYEN</th>
+                <th class="r" style="width:80px">BOYUT</th><th>AÇIKLAMA</th></tr>
+            <tr><td>POS Üye İşyeri Sözleşmesi</td><td>PDF</td><td>04.01.2026</td><td>Ahmet Kaya</td>
+                <td class="r">1,4 MB</td><td class="ad">Garanti BBVA — 2026 yılı sözleşmesi</td></tr>
+            <tr><td>Komisyon Oran Eki</td><td>PDF</td><td>01.07.2026</td><td>Ahmet Kaya</td>
+                <td class="r">312 KB</td><td class="ad">2026/Q3 revize oranlar</td></tr>
+            <tr><td>Cihaz Teslim Tutanağı</td><td>JPG</td><td>04.01.2026</td><td>Mehmet Yıldız</td>
+                <td class="r">840 KB</td><td class="ad">PAX A920 seri no PAX-A920-4471</td></tr>
+          </table>
+        </div>
+        <div class="hint">Belge içeriği <b>IMAJ → GENDEPO.DOSYA</b> üzerinde saklanır; <b>IMAJ.YERI</b> POS bağlamını taşır.</div>
+      </div>
+
+      <div class="pane" data-p="yorum">
+        <div class="gridtb"><span class="minibtn">➕ Yorum Ekle</span><span class="minibtn">🗑 Sil</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:130px">KULLANICI</th><th style="width:130px">TARİH</th><th>YORUM</th><th class="c" style="width:70px">EK</th></tr>
+            <tr><td>Ahmet Kaya</td><td>13.08.2026 17:40</td>
+                <td class="ad">13.08 valöründe 23.982,75 TL eksik yattı, banka müşteri temsilcisine soruldu.</td><td class="c">📎 1</td></tr>
+            <tr><td>Ayşe Demir</td><td>14.08.2026 09:15</td>
+                <td class="ad">9 taksit oranı bankada 4,00 görünüyor, sözleşme eki 3,60. Revize talep edildi.</td><td class="c">—</td></tr>
+            <tr><td>Mehmet Yıldız</td><td>14.08.2026 11:02</td>
+                <td class="ad">Kasa 1'deki cihazın yazıcı kağıdı bitti, yedek kutu depoya bırakıldı.</td><td class="c">—</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SAG: SECILI POS ============ -->
+    <div class="side">
+      <h5>Seçili POS</h5>
+      <div class="urun">
+        <div class="foto">💳</div>
+        <div class="nm">Garanti — Mağaza POS 1</div>
+        <div class="mt">POS.001 · VP001234 · Garanti BBVA</div>
+        <div style="display:flex;gap:5px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn">👁 Kart</span><span class="minibtn">🧾 İşlemler</span><span class="minibtn">⚖ Mutabakat</span>
+        </div>
+      </div>
+
+      <div class="tvsep"></div>
+      <h5>Bugün</h5>
+      <div class="kv"><span>Bugün ciro</span><b>84.300,00 TL</b></div>
+      <div class="kv"><span>İşlem adedi</span><b>12</b></div>
+      <div class="kv"><span>Ortalama sepet</span><b>7.025,00 TL</b></div>
+      <div class="kv"><span>Bekleyen bakiye</span><b style="color:#a9791a">84.300,00 TL</b></div>
+      <div class="kv"><span>Toplam komisyon</span><b style="color:#b23b3b">1.264,50 TL</b></div>
+
+      <div class="tvsep"></div>
+      <h5>Sözleşme</h5>
+      <div class="kv"><span>Peşin komisyon %</span><b>1,50</b></div>
+      <div class="kv"><span>Maks taksit</span><b>9</b></div>
+      <div class="kv"><span>Valör gün</span><b>1 gün</b></div>
+      <div class="kv"><span>Durum</span><b><span class="pill p-kri">Bugün valörlü</span></b></div>
+
+      <div class="tvsep"></div>
+      <h5>Taksit Dağılımı</h5>
+      <div class="depo"><span class="ad">Peşin</span>
+        <div class="bar" style="flex:1"><span class="ok" style="width:58%"></span></div><span class="mk">%58</span></div>
+      <div class="depo"><span class="ad">3 Taksit</span>
+        <div class="bar" style="flex:1"><span class="ok" style="width:22%"></span></div><span class="mk">%22</span></div>
+      <div class="depo"><span class="ad">6 Taksit</span>
+        <div class="bar" style="flex:1"><span class="kri" style="width:12%"></span></div><span class="mk">%12</span></div>
+      <div class="depo"><span class="ad">9-12 Taksit</span>
+        <div class="bar" style="flex:1"><span class="yok" style="width:8%"></span></div><span class="mk">%8</span></div>
+
+      <div class="tvsep"></div>
+      <h5>İşlemler</h5>
+      <div class="sidebtns">
+        <span class="minibtn">💳 İşlem Gir</span>
+        <span class="minibtn">⚖ Mutabakat Yap</span>
+        <span class="minibtn">📥 Ekstre Aktar</span>
+        <span class="minibtn">📊 Komisyon Tablosu</span>
+        <span class="minibtn">🏦 Banka Hesabına Bağla</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Kart → <b>POS</b> (POSADI · BANKAID · UYEISYERINO · TERMINALNO · POSTIPI · VALORGUN · MAKSTAKSIT · DURUM)</span>·
+    <span>İşlem → <b>POSHAREKET</b> (SLIPNO · TAKSIT · BRUTTUTAR · KOMISYON · NET · VALORTARIH · HESABAGECEN)</span>·
+    <span>Oranlar → <b>POSTAKSIT</b> (TAKSITADEDI · ORAN · VADEFARKI)</span>·
+    <span>Hesap → <b>BANKAHESAP</b></span>·
+    <span>Cari kapama → <b>CARIHAREKET</b></span>·
+    <span>Muhasebe → <b>MUHFIS</b></span>·
+    <span>Ek → <b>IMAJ → GENDEPO.DOSYA</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Aktif POS: <b>8</b> / 10</span>
+    <span>Bugünkü ciro: <b>402.105,50</b></span>
+    <span>Bekleyen bakiye: <b style="color:#a9791a">406.000,50</b></span>
+    <span>Komisyon: <b style="color:#b23b3b">7.281,77</b></span>
+    <span style="margin-left:auto">Seçili: POS.001 — Garanti Mağaza POS 1</span>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.ltab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.ltab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.lpane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.lpane[data-lp="'+t.dataset.l+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.gtus').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.gtus').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');
+    });
+  });
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

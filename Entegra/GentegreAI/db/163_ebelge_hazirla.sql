@@ -152,9 +152,13 @@ begin
     v_no := public.fn_ebelge_no_uret(v_seri, extract(year from b.belge_tarihi)::integer);
 
     -- 8) e_belge satiri + belgenin durumu.
+    -- UUID (ETTN) BURADA uretilir ve saklanir: belgenin kimligi hazirlamada
+    --   kesinlesir. Gonderim govdesinde uretilseydi (stable fonksiyon yazamaz)
+    --   her denemede baska ETTN cikar, entegrator ayni belgeyi iki kayit sanardi.
     insert into public.e_belge (belge_id, taraf_id, belge_turu, yon, belge_no,
-                                alici_alias, durum, ekleyen)
-    values (b.id, b.taraf_id, v_tur, 1, v_no, '', 1, p_kullanici)
+                                uuid, alici_alias, durum, ekleyen)
+    values (b.id, b.taraf_id, v_tur, 1, v_no,
+            gen_random_uuid()::text, '', 1, p_kullanici)
     returning id into v_id;
 
     -- ALIAS ZORUNLU: ciplak `belge_no` PL/pgSQL'de fonksiyonun cikis kolonuyla

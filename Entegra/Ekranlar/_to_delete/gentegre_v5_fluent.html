@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gentegre AI — Konsept W · Windows 11 / Fluent</title>
+<style>
+  body.sadeust #kirin, body.sadeust .basrow, body.sadeust #komutCubugu, body.sadeust #pivot{display:none!important}
+  body.sadeust .sahne{margin-top:6px}
+
+  :root{
+    /* Windows 11 acik tema (Light) */
+    --mica:#f3f3f3; --mica2:#eaeaea;
+    --yuzey:#ffffff; --yuzey2:#f9f9f9; --yuzey3:#f3f3f3;
+    --cizgi:#e5e5e5; --cizgi2:#ededed; --kenar:rgba(0,0,0,.0578);
+    --yazi:#1b1b1b; --yazi2:#424242; --soluk:#5d5d5d; --pasif:#9a9a9a;
+    --accent:#0067c0; --accent2:#005fb8; --accentZem:#eff6fc; --accentKenar:#cce4f7;
+    --ok:#0f7b0f; --uyari:#9d5d00; --hata:#c42b1c;
+    --golge:0 1px 2px rgba(0,0,0,.05), 0 2px 8px rgba(0,0,0,.05);
+    --golge2:0 8px 24px rgba(0,0,0,.12);
+    --r:8px;
+  }
+  body.koyu{
+    --mica:#202020; --mica2:#1c1c1c;
+    --yuzey:#2b2b2b; --yuzey2:#272727; --yuzey3:#323232;
+    --cizgi:#3d3d3d; --cizgi2:#343434; --kenar:rgba(255,255,255,.07);
+    --yazi:#ffffff; --yazi2:#e0e0e0; --soluk:#c5c5c5; --pasif:#7a7a7a;
+    --accent:#4cc2ff; --accent2:#60cdff; --accentZem:#1c3a4d; --accentKenar:#2d5c78;
+    --ok:#6ccb5f; --uyari:#fce100; --hata:#ff99a4;
+    --golge:0 1px 2px rgba(0,0,0,.3), 0 2px 8px rgba(0,0,0,.25);
+    --golge2:0 8px 24px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;color:var(--yazi);
+    font-family:"Segoe UI Variable Text","Segoe UI Variable","Segoe UI",system-ui,Tahoma,sans-serif;
+    font-size:14px;line-height:1.45;height:100vh;overflow:hidden;display:flex;flex-direction:column;
+    background:
+      radial-gradient(1200px 600px at 12% -10%, rgba(0,103,192,.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(120,80,200,.08), transparent 55%),
+      var(--mica);
+  }
+  body.koyu{background:
+      radial-gradient(1200px 600px at 12% -10%, rgba(76,194,255,.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(140,110,220,.10), transparent 55%),
+      var(--mica);}
+  ::selection{background:var(--accent);color:#fff}
+
+  /* ================= PENCERE BASLIGI (title bar) ================= */
+  .tb{height:32px;flex:none;display:flex;align-items:center;gap:10px;padding:0 0 0 12px;
+    -webkit-app-region:drag;font-size:12px;color:var(--yazi2)}
+  .tb .lg{width:16px;height:16px;border-radius:4px;background:linear-gradient(135deg,#0078d4,#005a9e)}
+  .tb .wc{margin-left:auto;display:flex;height:32px}
+  .tb .wc span{width:46px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--yazi2)}
+  .tb .wc span:hover{background:rgba(0,0,0,.05)}
+  body.koyu .tb .wc span:hover{background:rgba(255,255,255,.06)}
+  .tb .wc span.x:hover{background:#c42b1c;color:#fff}
+
+  /* ================= GOVDE ================= */
+  .govde{flex:1;display:flex;min-height:0;padding:0 8px 8px;gap:0}
+
+  /* --------- NavigationView (sol) --------- */
+  .nav{width:264px;flex:none;display:flex;flex-direction:column;min-height:0;
+    transition:width .18s cubic-bezier(.2,.8,.2,1)}
+  .nav.dar{width:52px}
+  .navust{display:flex;align-items:center;gap:4px;padding:2px 4px 5px}
+  .ib{width:40px;height:36px;border-radius:5px;display:flex;align-items:center;justify-content:center;
+    color:var(--yazi);font-size:15px;cursor:default;flex:none}
+  .ib:hover{background:rgba(0,0,0,.045)}
+  body.koyu .ib:hover{background:rgba(255,255,255,.06)}
+  .navara{flex:1;display:flex;align-items:center;gap:9px;height:32px;padding:0 10px;border-radius:5px;
+    background:var(--yuzey);border:1px solid var(--cizgi);color:var(--soluk);font-size:13px;
+    min-width:0;overflow:hidden;cursor:default}
+  .navara:hover{border-color:var(--accent)}
+  .nav.dar .navara{display:none}
+  .navliste{flex:1;overflow:auto;padding:0 4px 8px}
+  .navliste::-webkit-scrollbar{width:6px}
+  .navliste::-webkit-scrollbar-thumb{background:rgba(0,0,0,.18);border-radius:3px}
+  .nbas{font-size:10.5px;color:var(--soluk);padding:4px 10px 3px;font-weight:600;letter-spacing:.2px}
+  .nav.dar .nbas{display:none}
+  .ni{display:flex;align-items:center;gap:11px;height:31px;padding:0 10px;border-radius:5px;
+    color:var(--yazi);cursor:default;position:relative;margin-bottom:0;font-size:13px}
+  .ni:hover{background:rgba(0,0,0,.037)}
+  body.koyu .ni:hover{background:rgba(255,255,255,.05)}
+  .ni.on{background:var(--yuzey);box-shadow:var(--golge)}
+  .ni.on::before{content:"";position:absolute;left:0;top:7px;width:3px;height:17px;border-radius:2px;background:var(--accent)}
+  .ni .ic{font-size:15px;width:19px;text-align:center;flex:none}
+  .ni .ad{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .nav.dar .ni .ad,.nav.dar .ni .ok,.nav.dar .ni .rz{display:none}
+  .ni .ok{font-size:10px;color:var(--soluk);transition:transform .15s}
+  .ngrp.acik>.ni .ok{transform:rotate(90deg)}
+  .nalt{display:none;padding-left:10px;padding-bottom:3px}
+  .ngrp.acik .nalt{display:block}
+  .nav.dar .nalt{display:none}
+  .agrp{display:flex;align-items:center;gap:6px;margin:5px 4px 2px;padding:3px 7px;border-radius:4px;
+    background:var(--yuzey3);border:1px solid var(--cizgi);font:700 10px/1 'Segoe UI',sans-serif;
+    color:var(--soluk);letter-spacing:.3px;text-transform:uppercase}
+  .agrp:first-child{margin-top:1px}
+  .ai.ic{padding-left:19px}
+
+  .ai{display:flex;align-items:center;gap:9px;height:27px;padding:0 10px;border-radius:4px;
+    color:var(--yazi2);cursor:default;font-size:12.5px;position:relative;margin-bottom:0}
+  .ai:hover{background:rgba(0,0,0,.037)}
+  body.koyu .ai:hover{background:rgba(255,255,255,.05)}
+  .ai.on{background:var(--yuzey);color:var(--yazi);font-weight:600;box-shadow:var(--golge)}
+  .ai.on::before{content:"";position:absolute;left:0;top:5px;width:3px;height:16px;border-radius:2px;background:var(--accent)}
+  .ai .rz{margin-left:auto;font-size:9.5px;color:var(--pasif)}
+  .navalt{padding:6px 4px 2px;border-top:1px solid var(--kenar)}
+  .hesap{display:flex;align-items:center;gap:12px;height:44px;padding:0 10px;border-radius:5px;cursor:default}
+  .hesap:hover{background:rgba(0,0,0,.037)}
+  body.koyu .hesap:hover{background:rgba(255,255,255,.05)}
+  .hesap .av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0078d4,#00509e);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex:none}
+  .hesap .bl{min-width:0}
+  .hesap .bl b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hesap .bl span{display:block;font-size:11.5px;color:var(--soluk)}
+  .nav.dar .hesap .bl{display:none}
+
+  /* --------- Icerik --------- */
+  body.dockac .ana{margin-right:390px}
+  @media(max-width:1200px){ body.dockac .ana{margin-right:0} }
+  .ana{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--yuzey2);transition:margin-right .18s ease;
+    border:1px solid var(--kenar);border-radius:var(--r);overflow:hidden;box-shadow:var(--golge)}
+  .kirin{flex:none;display:flex;align-items:center;gap:8px;padding:14px 20px 2px;font-size:12.5px;color:var(--soluk)}
+  .kirin b{color:var(--yazi);font-weight:400}
+  .basrow{flex:none;display:flex;align-items:center;gap:14px;padding:0 20px 4px;flex-wrap:wrap}
+  .basrow h1{margin:0;font-size:24px;font-weight:600;letter-spacing:-.2px;
+    font-family:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif}
+  .basrow .yol{font-size:11.5px;color:var(--pasif)}
+
+  /* CommandBar */
+  .cb{flex:none;display:flex;align-items:center;gap:4px;padding:8px 16px 8px 14px;flex-wrap:wrap;
+    border-bottom:1px solid var(--kenar)}
+  .cd{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 11px;border-radius:5px;
+    color:var(--yazi);font-size:13.5px;cursor:default;border:1px solid transparent;background:transparent;white-space:nowrap}
+  .cd:hover{background:rgba(0,0,0,.045)}
+  body.koyu .cd:hover{background:rgba(255,255,255,.06)}
+  .cd .ic{font-size:14px;color:var(--accent)}
+  .cd.bir{background:var(--accent);color:#fff;border-color:transparent;font-weight:600;
+    box-shadow:0 1px 2px rgba(0,0,0,.12)}
+  .cd.bir .ic{color:#fff}
+  .cd.bir:hover{background:var(--accent2)}
+  .cd.pas{opacity:.4}
+  .cbayr{width:1px;height:20px;background:var(--kenar);margin:0 5px}
+  .cb .sag{margin-left:auto;display:flex;align-items:center;gap:6px}
+  .gara{display:flex;align-items:center;gap:8px;height:32px;padding:0 11px;border-radius:5px;
+    background:var(--yuzey);border:1px solid var(--cizgi);width:250px;
+    box-shadow:inset 0 -1px 0 var(--cizgi)}
+  .gara:focus-within{border-color:var(--accent);box-shadow:inset 0 -2px 0 var(--accent)}
+  .gara input{border:0;outline:0;flex:1;min-width:0;font-size:13.5px;font-family:inherit;
+    background:transparent;color:var(--yazi)}
+  .gara .say{font-size:11.5px;color:var(--accent);font-weight:600;white-space:nowrap}
+
+  /* Pivot (Liste / Grup / Analiz) */
+  .pivot{flex:none;display:flex;align-items:center;gap:2px;padding:6px 18px 0;border-bottom:1px solid var(--kenar)}
+  .pv{position:relative;padding:8px 12px 10px;font-size:13.5px;color:var(--soluk);cursor:default}
+  .pv:hover{color:var(--yazi)}
+  .pv.on{color:var(--yazi);font-weight:600}
+  .pv.on::after{content:"";position:absolute;left:12px;right:12px;bottom:0;height:3px;border-radius:2px;background:var(--accent)}
+  .pv.yok{opacity:.35}
+  .pivot .sag{margin-left:auto;display:flex;gap:6px;align-items:center;padding-bottom:6px}
+  .cip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:14px;
+    border:1px solid var(--cizgi);background:var(--yuzey);color:var(--yazi2);font-size:12.5px;cursor:default}
+  .cip:hover{border-color:var(--accent);color:var(--accent)}
+
+  .sahne{flex:1;min-height:0;position:relative;background:var(--yuzey)}
+  .sf{position:absolute;inset:0;display:none}
+  .sf.on{display:block}
+  .sf iframe{width:100%;height:100%;border:0;display:block}
+
+
+  /* ================= SAĞ DOCK: Asistan / Mesajlar ================= */
+  .dock{position:absolute;top:0;right:0;bottom:0;width:390px;background:var(--yuzey);
+    border-left:1px solid var(--cizgi);box-shadow:-8px 0 28px rgba(0,0,0,.10);z-index:120;
+    display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+  .dock.on{transform:none}
+  body.koyu .dock{box-shadow:-8px 0 28px rgba(0,0,0,.4)}
+  .dock .db2{flex:none;display:flex;align-items:center;gap:9px;padding:12px 12px 10px 15px;border-bottom:1px solid var(--kenar)}
+  .dock .db2 b{font-size:15px;font-weight:650;flex:1;min-width:0}
+  .dock .db2 .mi2{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+    color:var(--soluk);font-size:13px}
+  .dock .db2 .mi2:hover{background:var(--yuzey2);color:var(--yazi)}
+  .dock .gv2{flex:1;overflow-y:auto;padding:12px 14px}
+  .dock .alt3{flex:none;border-top:1px solid var(--kenar);padding:10px 12px 12px}
+  .baglam{font-size:11.5px;color:var(--soluk);background:var(--yuzey2);border:1px solid var(--kenar);
+    border-radius:7px;padding:7px 10px;margin-bottom:11px}
+  .baglam b{color:var(--yazi)}
+  .oneri{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .oneri .o{border:1px solid var(--cizgi);background:var(--yuzey);border-radius:16px;padding:6px 12px;
+    font-size:12.5px;color:var(--yazi2);cursor:default}
+  .oneri .o:hover{border-color:var(--accent);color:var(--accent);background:var(--accentZem)}
+  .sm{display:flex;gap:9px;margin-bottom:13px}
+  .sm .av2{width:26px;height:26px;border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;
+    font-size:12px;background:var(--yuzey2);color:var(--soluk)}
+  .sm.ai .av2{background:linear-gradient(135deg,#7d5cc9,#5f42a8);color:#fff}
+  .sm .bl2{flex:1;min-width:0;font-size:13px;line-height:1.55}
+  .sm .bal{background:var(--yuzey2);border:1px solid var(--kenar);border-radius:10px;padding:9px 11px}
+  .sm.ben2 .bal{background:var(--accentZem);border-color:var(--accentKenar)}
+  .sm .bal p{margin:0 0 7px}.sm .bal p:last-child{margin:0}
+  .arac2{font-size:11px;color:var(--soluk);background:var(--yuzey);border:1px solid var(--kenar);
+    border-radius:6px;padding:6px 9px;margin:7px 0}
+  .arac2 code{font-family:Consolas,monospace;font-size:10.5px;color:#7d5cc9}
+  body.koyu .arac2 code{color:#b9a4ec}
+  .onay2{border:1px solid var(--accentKenar);background:var(--accentZem);border-radius:9px;padding:10px 11px;margin-top:8px}
+  .onay2 .b3{font-size:12px;font-weight:650;margin-bottom:6px;display:flex;align-items:center;gap:7px}
+  .onay2 .b3 .rz2{margin-left:auto;font-size:10.5px;background:var(--yuzey);border:1px solid var(--accentKenar);
+    border-radius:10px;padding:1px 8px;font-weight:600}
+  .onay2 .tsl{background:var(--yuzey);border:1px solid var(--kenar);border-radius:7px;padding:9px 10px;
+    font-size:12px;line-height:1.6;white-space:pre-wrap}
+  .onay2 .dg2{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .onay2.tamam{border-color:#b7e0c2;background:#eef8f1}
+  body.koyu .onay2.tamam{border-color:#2d5230;background:#14301a}
+  .mini2{border:1px solid var(--cizgi);background:var(--yuzey);border-radius:6px;padding:5px 11px;
+    font-size:12px;color:var(--yazi2);font-family:inherit}
+  .mini2:hover{border-color:var(--accent);color:var(--accent)}
+  .mini2.on3{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:600}
+  .yzr{display:flex;gap:4px;align-items:center;color:var(--soluk);font-size:12px;padding:2px 0 10px 35px}
+  .yzr i{width:5px;height:5px;border-radius:50%;background:var(--accent);display:block;animation:zp2 1.2s infinite}
+  .yzr i:nth-child(2){animation-delay:.15s}.yzr i:nth-child(3){animation-delay:.3s}
+  @keyframes zp2{0%,60%,100%{opacity:.25}30%{opacity:1}}
+  .gir2{display:flex;align-items:flex-end;gap:7px;border:1px solid var(--cizgi);border-radius:10px;
+    padding:7px 9px;background:var(--yuzey)}
+  .gir2:focus-within{border-color:var(--accent)}
+  .gir2 textarea{flex:1;border:0;outline:0;resize:none;font-family:inherit;font-size:13px;height:34px;
+    background:transparent;color:var(--yazi)}
+  .gir2 .gn{background:var(--accent);color:#fff;border-radius:7px;width:32px;height:30px;flex:none;
+    display:flex;align-items:center;justify-content:center;font-size:14px}
+  .dnot{font-size:11px;color:var(--soluk);margin-top:7px;line-height:1.5}
+  /* mesaj listesi */
+  .msat{display:flex;gap:11px;padding:11px 12px;border-radius:9px;cursor:default}
+  .msat:hover{background:var(--yuzey2)}
+  .msat .av3{width:38px;height:38px;border-radius:11px;flex:none;display:flex;align-items:center;
+    justify-content:center;font-size:13px;font-weight:700;color:#fff}
+  .msat .bl3{flex:1;min-width:0}
+  .msat .ad3{font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:7px}
+  .msat .ad3 .sa{margin-left:auto;font-size:11px;color:var(--soluk);font-weight:400}
+  .msat .oz{font-size:12.5px;color:var(--soluk);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .msat .ok3{min-width:19px;height:19px;border-radius:10px;background:var(--accent);color:#fff;font-size:10.5px;
+    font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;flex:none}
+  .msat.okundu .ad3{font-weight:500}
+  .cd .bel2{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;background:#c42b1c;
+    color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+  .cd.ikon2{position:relative;width:34px;padding:0;justify-content:center}
+
+  /* ================= InfoBar ================= */
+  .infobar{display:flex;align-items:flex-start;gap:12px;margin:0 0 14px;padding:12px 14px;border-radius:var(--r);
+    background:var(--accentZem);border:1px solid var(--accentKenar)}
+  .infobar.uyari{background:#fff9f0;border-color:#f0dcc0}
+  .infobar.hata{background:#fdf0ef;border-color:#f2cfcb}
+  body.koyu .infobar.uyari{background:#3a2f14;border-color:#5a4a20}
+  body.koyu .infobar.hata{background:#442726;border-color:#6b3b38}
+  .infobar .ic{font-size:16px;line-height:1.3}
+  .infobar .mt{flex:1;min-width:0;font-size:13.5px}
+  .infobar .mt b{display:block;margin-bottom:2px}
+  .infobar .mt span{color:var(--soluk);font-size:13px}
+  .infobar .kap{color:var(--soluk);font-size:12px;cursor:default;padding:2px 6px;border-radius:4px}
+  .infobar .kap:hover{background:rgba(0,0,0,.06)}
+
+  /* ================= Ana sayfa ================= */
+  .dash{position:absolute;inset:0;overflow:auto;padding:18px 20px 24px}
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:12px;margin-bottom:14px}
+  .kart{background:var(--yuzey2);border:1px solid var(--kenar);border-radius:var(--r);box-shadow:var(--golge)}
+  .kpi .k{padding:16px 18px;background:var(--yuzey2);border:1px solid var(--kenar);border-radius:var(--r);
+    box-shadow:var(--golge)}
+  .kpi .t{font-size:12.5px;color:var(--soluk);display:flex;align-items:center;gap:8px}
+  .kpi .v{font-size:26px;font-weight:600;letter-spacing:-.5px;margin-top:8px;
+    font-family:"Segoe UI Variable Display","Segoe UI",sans-serif}
+  .kpi .s{font-size:12.5px;color:var(--soluk);margin-top:3px}
+  .kpi .s.up{color:var(--ok)}.kpi .s.dn{color:var(--hata)}
+  .ikili{display:grid;grid-template-columns:1.42fr 1fr;gap:14px;align-items:start}
+  .kart h3{margin:0;padding:15px 18px 10px;font-size:15px;font-weight:600;display:flex;align-items:center;gap:9px;
+    font-family:"Segoe UI Variable Display","Segoe UI",sans-serif}
+  .kart h3 .sg{margin-left:auto;font-weight:400;font-size:12.5px;color:var(--soluk)}
+  .sat{display:flex;align-items:center;gap:13px;padding:11px 18px;border-top:1px solid var(--kenar);font-size:13.5px;cursor:default}
+  .sat:hover{background:rgba(0,0,0,.028)}
+  body.koyu .sat:hover{background:rgba(255,255,255,.04)}
+  .sat .nk{width:10px;height:10px;border-radius:50%;flex:none}
+  .nk.k{background:var(--hata)}.nk.s{background:#f7a600}.nk.y{background:var(--ok)}.nk.m{background:var(--accent)}
+  .sat .ad{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sat .ad small{display:block;color:var(--soluk);font-size:12px}
+  .sat .tt{font-variant-numeric:tabular-nums;font-weight:600}
+  .rz{padding:3px 10px;border-radius:12px;font-size:11.5px;font-weight:600;border:1px solid transparent}
+  .rz.k{background:#fdf0ef;color:#c42b1c;border-color:#f2cfcb}
+  .rz.s{background:#fff9f0;color:#9d5d00;border-color:#f0dcc0}
+  .rz.y{background:#f0f9f0;color:#0f7b0f;border-color:#cfe8cf}
+  .rz.m{background:var(--accentZem);color:var(--accent);border-color:var(--accentKenar)}
+  body.koyu .rz.k{background:#442726;color:#ff99a4;border-color:#6b3b38}
+  body.koyu .rz.s{background:#3a2f14;color:#fce100;border-color:#5a4a20}
+  body.koyu .rz.y{background:#1c3320;color:#6ccb5f;border-color:#2d5230}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;padding:14px 18px 18px}
+  .tl{border:1px solid var(--kenar);border-radius:var(--r);padding:15px 8px;text-align:center;background:var(--yuzey);
+    cursor:default;box-shadow:var(--golge)}
+  .tl:hover{background:var(--accentZem);border-color:var(--accentKenar)}
+  .tl .ic{font-size:22px;display:block}
+  .tl .nm{font-size:12px;color:var(--yazi2);margin-top:7px;display:block;line-height:1.35}
+  .cbar{height:6px;border-radius:3px;background:var(--yuzey3);overflow:hidden;flex:1;min-width:60px}
+  .cbar>span{display:block;height:100%;background:var(--accent);border-radius:3px}
+
+  /* ================= Komut paleti ================= */
+  .perde{position:fixed;inset:0;background:rgba(0,0,0,.3);display:none;z-index:300}
+  .perde.on{display:block}
+  .kp{position:absolute;top:76px;left:50%;transform:translateX(-50%);width:min(620px,92vw);
+    background:var(--yuzey);border:1px solid var(--cizgi);border-radius:var(--r);overflow:hidden;box-shadow:var(--golge2)}
+  .kp .gir{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--kenar)}
+  .kp input{flex:1;border:0;outline:0;font-size:15px;background:transparent;color:var(--yazi);font-family:inherit}
+  .kpl{max-height:400px;overflow:auto;padding:6px}
+  .kpb{padding:9px 12px 4px;font-size:11.5px;color:var(--soluk);font-weight:600}
+  .kps{display:flex;align-items:center;gap:13px;padding:9px 12px;border-radius:5px;font-size:14px;cursor:default}
+  .kps .ic{width:20px;text-align:center;font-size:15px}
+  .kps .yn{margin-left:auto;font-size:12px;color:var(--soluk)}
+  .kps.sec{background:var(--accentZem);color:var(--accent)}
+  .kps.sec .yn{color:var(--accent)}
+  .kpalt{display:flex;gap:16px;padding:9px 15px;border-top:1px solid var(--kenar);background:var(--yuzey2);
+    font-size:11.5px;color:var(--soluk)}
+
+  /* ================= ContentDialog (kart) ================= */
+  .kperde{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;z-index:280}
+  .kperde.on{display:block}
+  .kwin{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(1300px,96vw);
+    height:calc(100vh - 48px);background:var(--yuzey);border:1px solid var(--cizgi);border-radius:var(--r);
+    overflow:hidden;box-shadow:var(--golge2)}
+  .kwin iframe{width:100%;height:100%;border:0;display:block}
+  .kyok,.yukhata{padding:46px 32px;text-align:center;color:var(--soluk);line-height:1.85;font-size:13.5px}
+  .yukhata{position:absolute;inset:0;background:var(--yuzey);z-index:3}
+  .yukhata .kt{font-size:16px;font-weight:600;color:var(--hata);margin-bottom:10px}
+  .kyok .bk{font-size:42px;display:block;margin-bottom:12px;opacity:.4}
+
+  /* ================= Delphi eşleşme paneli ================= */
+  .dp{position:fixed;right:16px;bottom:16px;width:390px;max-height:76vh;overflow:auto;z-index:250;
+    background:var(--yuzey);border:1px solid var(--cizgi);border-radius:var(--r);box-shadow:var(--golge2);display:none}
+  .dp.on{display:block}
+  .dp h4{margin:0;padding:14px 16px 10px;font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:9px;
+    border-bottom:1px solid var(--kenar)}
+  .dp h4 .kap{margin-left:auto;color:var(--soluk);font-size:13px;padding:2px 7px;border-radius:4px}
+  .dp h4 .kap:hover{background:rgba(0,0,0,.06)}
+  .dp table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .dp td{padding:8px 16px;border-bottom:1px solid var(--kenar);vertical-align:top}
+  .dp td:first-child{color:var(--soluk);width:44%}
+  .dp td b{color:var(--yazi);font-weight:600}
+  .dp code{font-family:Consolas,"Cascadia Mono",monospace;font-size:11.5px;background:var(--yuzey3);
+    padding:1px 5px;border-radius:3px;color:var(--accent)}
+  .dp .not{padding:11px 16px;font-size:12px;color:var(--soluk);line-height:1.6;background:var(--yuzey2)}
+
+  /* toast */
+  .toast{position:fixed;right:16px;bottom:16px;z-index:260;background:var(--yuzey);border:1px solid var(--cizgi);
+    border-radius:var(--r);box-shadow:var(--golge2);padding:13px 15px;display:none;align-items:flex-start;gap:12px;
+    max-width:340px;font-size:13px}
+  .toast.on{display:flex}
+  .toast .ic{font-size:16px}
+  .toast b{display:block;font-size:13.5px;margin-bottom:2px}
+  .toast span{color:var(--soluk)}
+</style>
+</head>
+<body>
+
+<div class="tb">
+  <span class="lg"></span> Gentegre AI 26.8.10.2 — Merkez · 2026
+  <span class="wc"><span>—</span><span>▢</span><span class="x">✕</span></span>
+</div>
+
+<div class="govde">
+  <!-- ============ NavigationView ============ -->
+  <div class="nav" id="nav">
+    <div class="navust">
+      <span class="ib" id="navDugme" title="Gezinme bölmesini daralt/genişlet">☰</span>
+      <div class="navara" id="araAc">🔎 <span>Ara</span> <span style="margin-left:auto;font-size:11px;color:var(--pasif)">Ctrl+K</span></div>
+    </div>
+    <div class="navliste" id="navliste"></div>
+    <div class="navalt">
+      <div class="hesap" title="Ayşe Demir · Yönetici">
+        <span class="av">AD</span>
+        <span class="bl"><b>Ayşe Demir</b><span>Yönetici · Merkez</span></span>
+      </div>
+      <div class="ni" id="temaDugme"><span class="ic">🌙</span><span class="ad">Koyu tema</span></div>
+      <div class="ni" id="delphiDugme"><span class="ic">🔧</span><span class="ad">Delphi karşılıkları</span></div>
+    </div>
+  </div>
+
+  <!-- ============ Icerik ============ -->
+  <div class="ana">
+    <div class="kirin" id="kirin"><b>Genel</b></div>
+    <div class="basrow"><h1 id="sayfaAd">Ana Sayfa</h1><span class="yol" id="delphiYol"></span></div>
+    <div class="cb" id="komutCubugu"></div>
+    <div class="pivot" id="pivot"></div>
+
+    <div class="sahne" id="sahne">
+      <div class="sf on" data-sf="home">
+        <div class="dash">
+          <div class="infobar hata">
+            <span class="ic">⛔</span>
+            <span class="mt"><b>3 kredi taksiti gecikmiş — 246.960,00 ₺</b>
+              <span>İş Bankası KRD.2025/014 · Halkbank KRD.2025/009 · vade geçti, ödeme kaydı yok.</span></span>
+            <span class="kap" data-git="banka|krediler_listesi">Krediler'i aç</span>
+          </div>
+          <div class="infobar uyari">
+            <span class="ic">⚠</span>
+            <span class="mt"><b>Bugün kapanması gereken 9 kayıt var</b>
+              <span>4 teklif geçerliliği doluyor · 5 servis fişi termini bugün.</span></span>
+            <span class="kap" data-git="teklif|teklif_listesi">Teklifler</span>
+          </div>
+
+          <div class="kpi">
+            <div class="k"><div class="t">💰 Bugünkü ciro</div><div class="v">402.105 ₺</div><div class="s up">▲ %12,4 · dün 357.700 ₺</div></div>
+            <div class="k"><div class="t">📑 Açık teklif</div><div class="v">3.184.200 ₺</div><div class="s">18 teklif · 4'ü bu hafta doluyor</div></div>
+            <div class="k"><div class="t">🎯 Huni (ağırlıklı)</div><div class="v">5.081.500 ₺</div><div class="s">11 açık fırsat</div></div>
+            <div class="k"><div class="t">🏦 Kredi borcu</div><div class="v">26,06 M ₺</div><div class="s dn">3 gecikmiş taksit</div></div>
+          </div>
+
+          <div class="ikili">
+            <div>
+              <div class="kart" style="margin-bottom:14px">
+                <h3>⚠ Dikkat gerektirenler <span class="sg">satıra tıkla → ilgili ekran</span></h3>
+                <div id="uyariListe"></div>
+              </div>
+              <div class="kart">
+                <h3>📅 Bugün <span class="sg">Ayşe Demir</span></h3>
+                <div class="sat"><span class="nk s"></span><span class="ad">Otel perde yenileme — teknik şartname sunumu<small>09:30 · Görüşme · FIR.2026/014</small></span><span class="rz s">Şimdi</span></div>
+                <div class="sat"><span class="nk m"></span><span class="ad">Plaza mefruşat teklifi revizesi<small>11:00 · Teklif · TKF.2026/0231</small></span><span class="rz m">Bekliyor</span></div>
+                <div class="sat"><span class="nk m"></span><span class="ad">İş Bankası kredi 17. taksit<small>14:00 · Ödeme · KRD.2025/014</small></span><span class="rz m">Bekliyor</span></div>
+                <div class="sat"><span class="nk y"></span><span class="ad">Kasa sayımı ve POS mutabakatı<small>17:00 · Gün sonu</small></span><span class="rz m">Bekliyor</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="kart">
+                <h3>🎯 Satış hunisi</h3>
+                <div style="padding:8px 18px 18px">
+                  <div class="sat" style="border:0;padding:7px 0"><span style="width:110px;color:var(--soluk)">Yeni</span><span class="cbar"><span style="width:100%"></span></span><span class="tt" style="width:84px;text-align:right">3.150.000</span></div>
+                  <div class="sat" style="border:0;padding:7px 0"><span style="width:110px;color:var(--soluk)">İlk görüşme</span><span class="cbar"><span style="width:82%"></span></span><span class="tt" style="width:84px;text-align:right">2.580.000</span></div>
+                  <div class="sat" style="border:0;padding:7px 0"><span style="width:110px;color:var(--soluk)">İhtiyaç analizi</span><span class="cbar"><span style="width:64%"></span></span><span class="tt" style="width:84px;text-align:right">2.020.000</span></div>
+                  <div class="sat" style="border:0;padding:7px 0"><span style="width:110px;color:var(--soluk)">Teklif</span><span class="cbar"><span style="width:48%"></span></span><span class="tt" style="width:84px;text-align:right">1.510.000</span></div>
+                  <div class="sat" style="border:0;padding:7px 0"><span style="width:110px;color:var(--soluk)">Kazanıldı</span><span class="cbar"><span style="width:24%;background:var(--ok)"></span></span><span class="tt" style="width:84px;text-align:right">780.000</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- komut paleti -->
+<div class="perde" id="kpPerde">
+  <div class="kp">
+    <div class="gir"><span style="font-size:16px;color:var(--soluk)">🔎</span>
+      <input id="kpGiris" placeholder="Ekran, kayıt ya da komut ara…" autocomplete="off"></div>
+    <div class="kpl" id="kpListe"></div>
+    <div class="kpalt"><span>↑↓ gez</span><span>↵ aç</span><span>Esc kapat</span>
+      <span style="margin-left:auto">Windows 11'deki arama kutusuyla aynı mantık</span></div>
+  </div>
+</div>
+
+<!-- kart penceresi -->
+<div class="kperde" id="kartPerde"><div class="kwin" id="kartWin"></div></div>
+
+
+<!-- ================= SAĞ DOCK: Asistan / Mesajlar ================= -->
+<div class="dock" id="dock">
+  <div class="db2">
+    <b id="dockAd">✨ Gentegre Yapay Zeka</b>
+    <span class="mi2" id="dockTam" title="Tam ekranda aç">⤢</span>
+    <span class="mi2" id="dockKapat" title="Kapat">✕</span>
+  </div>
+  <div class="gv2" id="dockGovde"></div>
+  <div class="alt3" id="dockAlt"></div>
+</div>
+
+<!-- Delphi eşleşme paneli -->
+<div class="dp" id="delphiPanel">
+  <h4>🔧 Delphi / DevExpress karşılıkları <span class="kap" id="dpKapat">✕</span></h4>
+  <table>
+    <tr><td>Sol gezinme bölmesi</td><td><b>TdxNavBar</b> <code>Office Navigation Pane</code> — daraltılınca ikon rail</td></tr>
+    <tr><td>Üstteki komut çubuğu</td><td><b>TdxBarManager</b> (ribbon değil, ince bar) + <code>TdxBarButton</code></td></tr>
+    <tr><td>Ctrl+K komut paleti</td><td>Özel form + <code>TcxTextEdit</code> + <code>TcxListBox</code>; komutlar <code>BarManager.Items</code>'tan beslenir</td></tr>
+    <tr><td>Liste / Grup / Analiz</td><td><b>TcxGridTableView</b> · GroupByBox · <b>TcxGridChartView</b> / <b>TdxPivotGrid</b></td></tr>
+    <tr><td>Listede arama + sayaç</td><td><b>View.FindPanel</b> (hazır) veya <code>DataController.Filter</code> + <code>foLike</code></td></tr>
+    <tr><td>Kolon filtresi</td><td><code>Column.Options.Filtering</code> · Excel tarzı filtre popup'ı</td></tr>
+    <tr><td>Satır renk kuralları</td><td><code>Styles.OnGetContentStyle</code></td></tr>
+    <tr><td>InfoBar (üstteki uyarı şeridi)</td><td><b>TdxLayoutControl</b> + <code>TcxLabel</code>, ya da <b>TdxAlertWindow</b></td></tr>
+    <tr><td>KPI kutuları</td><td><b>TdxTileControl</b> / <b>TdxLayoutControl</b> + <code>TcxProgressBar</code></td></tr>
+    <tr><td>Kart penceresi</td><td><code>TfrmKart.ShowModal</code> — kartın kendi Kapat'ı</td></tr>
+    <tr><td>Koyu tema</td><td><b>TdxSkinController</b> · <code>Office2019Black</code> vb.</td></tr>
+    <tr><td>Koyu pencere çerçevesi</td><td><code>DwmSetWindowAttribute</code> + <code>DWMWA_USE_IMMERSIVE_DARK_MODE</code></td></tr>
+    <tr><td>Yuvarlak pencere köşesi</td><td><code>DWMWA_WINDOW_CORNER_PREFERENCE</code> (Win11)</td></tr>
+    <tr><td>Mica arka plan</td><td><code>DWMWA_SYSTEMBACKDROP_TYPE</code> (Win11 22H2+)</td></tr>
+    <tr><td>Vurgu rengi</td><td>Sistem accent: <code>DwmGetColorizationColor</code> / <code>UISettings</code></td></tr>
+    <tr><td>Bildirim (toast)</td><td><b>TdxAlertWindow</b> ya da Windows toast API</td></tr>
+    <tr><td>İkonlar</td><td><b>TdxSVGImageCollection</b> (HighDPI, skin uyumlu)</td></tr>
+    <tr><td>Ekranların yüklenmesi</td><td>Bu mockup'taki iframe = <b>TFrame</b> · <code>UFrameYoneticisi</code></td></tr>
+  </table>
+  <div class="not">Bu konseptteki her öğe DevExpress VCL'de hazır bileşenle karşılanıyor.
+    Sadece komut paleti ve InfoBar için ~1-2 günlük özel form yazımı gerekiyor; Win11 pencere efektleri
+    (koyu çerçeve, yuvarlak köşe, Mica) üç DWM çağrısıyla ekleniyor.</div>
+</div>
+
+<div class="toast" id="toast">
+  <span class="ic">🔎</span>
+  <span><b id="toastB">Arama</b><span id="toastS"></span></span>
+</div>
+
+<script src="gentegre_data.js"></script>
+<script>
+if(typeof MODULLER==='undefined'){
+  document.body.innerHTML='<div style="padding:60px;text-align:center;font-family:Segoe UI">'+
+    '<h2 style="color:#c42b1c">gentegre_data.js yüklenemedi</h2>'+
+    '<p>Bu dosyayı <b>Ekranlar</b> klasöründen aç — tüm ekran dosyaları aynı klasörde olmalı.</p></div>';
+}else{
+function el(t,c,h){var d=document.createElement(t);if(c)d.className=c;if(h!=null)d.innerHTML=h;return d;}
+function MOD(i){for(var x=0;x<MODULLER.length;x++)if(MODULLER[x].id===i)return MODULLER[x];return null;}
+function BOL(m,b){var x=MOD(m);if(!x)return null;for(var i=0;i<x.bolumler.length;i++)if(x.bolumler[i].id===b)return x.bolumler[i];return null;}
+var aktifModul='giris', aktifBolum='home', tema='acik';
+function anahtar(){ return aktifModul+'|'+aktifBolum; }
+
+/* ---------- NavigationView ---------- */
+function kurNav(){
+  var kap=document.getElementById('navliste'); kap.innerHTML='';
+  kap.appendChild(el('div','nbas','Çalışma alanı'));
+  MODULLER.forEach(function(m){
+    var g=el('div','ngrp'+(m.id===aktifModul?' acik':''));
+    var h=el('div','ni'+(m.id===aktifModul&&aktifBolum==='home'?' on':''),
+      '<span class="ic">'+m.ic+'</span><span class="ad">'+(m.ad==='Gen'?'Genel':m.ad)+'</span><span class="ok">›</span>');
+    h.title=m.ad;
+    h.addEventListener('click',function(){
+      if(document.getElementById('nav').classList.contains('dar')){ modulSec(m.id); return; }
+      if(m.id===aktifModul) g.classList.toggle('acik'); else modulSec(m.id);
+    });
+    g.appendChild(h);
+    var a=el('div','nalt');
+    var sonGrup=null;
+    m.bolumler.forEach(function(b){
+      if(b.grup && b.grup!==sonGrup){
+        sonGrup=b.grup;
+        a.appendChild(el('div','agrp','<span>'+(b.gic||'📁')+'</span><span>'+b.grup+'</span>'));
+      }
+      var rz=b.tur==='liste'?'liste':b.tur==='dokum'?'döküm':b.tur==='ayar'?'ayar':b.tur==='islem'?'işlem':'';
+      var it=el('div','ai'+(b.grup?' ic':'')+(m.id===aktifModul&&b.id===aktifBolum?' on':''),
+        '<span class="ic" style="font-size:14px">'+b.ic+'</span><span class="ad">'+b.ad+'</span><span class="rz">'+rz+'</span>');
+      it.addEventListener('click',function(){ if(m.id!==aktifModul) modulSec(m.id,b.id); else bolumSec(b.id); });
+      a.appendChild(it);
+    });
+    g.appendChild(a); kap.appendChild(g);
+  });
+}
+function modulSec(mid,bid){
+  aktifModul=mid; var m=MOD(mid);
+  bolumSec(bid||(m.bolumler.filter(function(b){return b.tur==='liste';})[0]||m.bolumler[0]).id);
+}
+function bolumSec(bid){
+  var b=BOL(aktifModul,bid); if(!b) return;
+  aktifBolum=bid;
+  document.body.classList.toggle('sadeust', !!b.sade);
+  var a=anahtar(), m=MOD(aktifModul);
+  document.querySelectorAll('.sf').forEach(function(s){ s.classList.remove('on'); });
+  if(bid==='home') document.querySelector('.sf[data-sf="home"]').classList.add('on');
+  else{
+    var sh=document.querySelector('.sf[data-sf="'+a+'"]');
+    if(!sh){
+      sh=el('div','sf'); sh.dataset.sf=a;
+      if(b.dosya){
+        var fr=document.createElement('iframe');
+        fr.src=b.dosya+'#gomulu'+(b.ek||'')+(tema==='koyu'?'&tema=koyu':'');
+        fr.title=b.ad; sh.appendChild(fr); izle(sh,b);
+      }else sh.appendChild(el('div','kyok','<span class="bk">'+b.ic+'</span><b>'+b.ad+'</b> ekranı henüz tasarlanmadı.<br>'+
+        '<span style="font-size:12.5px">Delphi karşılığı: '+(b.yol||'')+'</span>'));
+      document.getElementById('sahne').appendChild(sh);
+    }
+    sh.classList.add('on');
+  }
+  document.getElementById('kirin').innerHTML='<b>'+(m.ad==='Gen'?'Genel':m.ad)+'</b> <span>›</span> <span>'+b.ad+'</span>';
+  document.getElementById('sayfaAd').textContent=b.ad;
+  document.getElementById('delphiYol').textContent=b.yol||'';
+  kurNav(); kurKomut(b); kurPivot(b);
+}
+
+/* ---------- CommandBar ---------- */
+function kurKomut(b){
+  var c=document.getElementById('komutCubugu'); c.innerHTML='';
+  var liste=(b.tur==='liste');
+  if(b.tur==='dokum'){
+    c.appendChild(el('div','cd bir','<span class="ic">▶</span> Listele'));
+    c.appendChild(el('div','cd','<span class="ic">🖨</span> Yazdır'));
+    c.appendChild(el('div','cd','<span class="ic">⬇</span> Excel'));
+    c.appendChild(el('div','cd','<span class="ic">⚙</span> Döküm Tasarla'));
+    var sagD=el('div','sag');
+    var dA2=el('div','cd ikon2','<span class="ic">✨</span>'); dA2.addEventListener('click',function(){ dockAc('ai'); });
+    var dM2=el('div','cd ikon2','<span class="ic">💬</span>'+(okunmamis?'<span class="bel2">'+okunmamis+'</span>':''));
+    dM2.addEventListener('click',function(){ dockAc('msj'); });
+    sagD.appendChild(dA2); sagD.appendChild(dM2); c.appendChild(sagD);
+  }else{
+    var yeni=el('div','cd bir'+(liste?'':' pas'),'<span class="ic">＋</span> Yeni');
+    var duz=el('div','cd'+(liste?'':' pas'),'<span class="ic">✎</span> Düzenle');
+    var sil=el('div','cd'+(liste?'':' pas'),'<span class="ic">🗑</span> Sil');
+    if(liste){ yeni.addEventListener('click',function(){ kartAc(b,'yeni'); });
+               duz.addEventListener('click',function(){ kartAc(b,'duzenle'); }); }
+    c.appendChild(yeni); c.appendChild(duz); c.appendChild(sil);
+    c.appendChild(el('span','cbayr'));
+    (b.arac||[]).slice(0,3).forEach(function(a){ c.appendChild(el('div','cd','<span class="ic">▸</span> '+a)); });
+    if((b.arac||[]).length>3) c.appendChild(el('div','cd','⋯ Daha fazla'));
+  }
+  var sag=el('div','sag');
+  var gs=el('div','gara','🔎 <input placeholder="Listede ara…"><span class="say"></span>');
+  var gi=gs.querySelector('input'); gi.value=aramaMetni[anahtar()]||'';
+  gi.addEventListener('input',function(){ listedeAra(gi.value); });
+  gi.addEventListener('keydown',function(e){ if(e.key==='Escape'){ gi.value=''; listedeAra(''); } });
+  sag.appendChild(gs);
+  var dAI=el('div','cd ikon2','<span class="ic">✨</span>'); dAI.title='Gentegre Yapay Zeka';
+  dAI.addEventListener('click',function(){ dockAc('ai'); });
+  var dMS=el('div','cd ikon2','<span class="ic">💬</span>'+(okunmamis?'<span class="bel2">'+okunmamis+'</span>':''));
+  dMS.title='Mesajlar'; dMS.addEventListener('click',function(){ dockAc('msj'); });
+  sag.appendChild(dAI); sag.appendChild(dMS);
+  sag.appendChild(el('div','cd','<span class="ic">▦</span>'));
+  sag.appendChild(el('div','cd','<span class="ic">⬇</span>'));
+  c.appendChild(sag);
+}
+
+/* ---------- Pivot ---------- */
+function kurPivot(b){
+  var p=document.getElementById('pivot'); p.innerHTML='';
+  ['liste|Liste','grup|Grup','analiz|Analiz'].forEach(function(x){
+    var q=x.split('|'), d=el('div','pv'+(q[0]==='liste'?' on':''),q[1]);
+    d.dataset.vw=q[0];
+    d.addEventListener('click',function(){ gorunumSec(q[0]); });
+    p.appendChild(d);
+  });
+  var sag=el('div','sag');
+  if(b.arac&&b.arac.length>3) b.arac.slice(3,6).forEach(function(a){ sag.appendChild(el('div','cip','▸ '+a)); });
+  p.appendChild(sag);
+  kurGorunum();
+}
+
+/* ---------- görünüm ---------- */
+var destek={}, secim={};
+function kurGorunum(){
+  var a=anahtar(), d=!!destek[a], s=secim[a]||'liste';
+  document.querySelectorAll('.pv').forEach(function(x){
+    x.classList.toggle('yok',!d); x.classList.toggle('on', x.dataset.vw===(d?s:'liste'));
+  });
+}
+function gorunumSec(ad){
+  var a=anahtar(); if(!destek[a]) return;
+  secim[a]=ad; kurGorunum();
+  var fr=document.querySelector('.sf[data-sf="'+a+'"] iframe');
+  if(fr&&fr.contentWindow) fr.contentWindow.postMessage({gentegre:'gorunum',ad:ad},'*');
+}
+
+/* ---------- listede arama ---------- */
+var aramaMetni={};
+function listedeAra(q){
+  var a=anahtar(); aramaMetni[a]=q;
+  var fr=document.querySelector('.sf[data-sf="'+a+'"] iframe');
+  if(fr&&fr.contentWindow) fr.contentWindow.postMessage({gentegre:'ara',q:q},'*');
+  if(!q){ var s=document.querySelector('.gara .say'); if(s) s.textContent=''; toastGizle(); }
+}
+var toastZ=null;
+function toastGoster(b,s){
+  document.getElementById('toastB').textContent=b;
+  document.getElementById('toastS').textContent=s;
+  document.getElementById('toast').classList.add('on');
+  clearTimeout(toastZ); toastZ=setTimeout(toastGizle,2600);
+}
+function toastGizle(){ document.getElementById('toast').classList.remove('on'); }
+
+/* ---------- yükleme kontrolü + mesajlar ---------- */
+var bekle=[];
+function izle(sh,b){
+  var k={sh:sh,ok:false}; bekle.push(k);
+  setTimeout(function(){ if(k.ok) return;
+    sh.appendChild(el('div','yukhata','<div class="kt">⚠ Ekran dosyası açılamadı</div>'+
+      '<div><b>'+b.dosya+'</b> bulunamadı.</div>'+
+      '<div style="font-size:12.5px;margin-top:10px">Bu kabuğu <b>Ekranlar</b> klasöründen aç.</div>'));
+  },2500);
+}
+addEventListener('message',function(e){
+  var d=e.data; if(!d||!d.gentegre) return;
+  if(d.gentegre==='hazir') bekle.forEach(function(k){ var fr=k.sh.querySelector('iframe');
+    if(fr&&fr.contentWindow===e.source){ k.ok=true; var u=k.sh.querySelector('.yukhata'); if(u)u.remove(); } });
+  if(d.gentegre==='gorunumDestek'){ document.querySelectorAll('.sf').forEach(function(sh){
+    var fr=sh.querySelector('iframe'); if(fr&&fr.contentWindow===e.source) destek[sh.dataset.sf]=true; }); kurGorunum(); }
+  if(d.gentegre==='aramaSonuc'){
+    var s=document.querySelector('.gara .say');
+    if(s) s.textContent=d.q?(d.bulunan+' / '+d.toplam):'';
+    if(d.q) toastGoster('Arama: "'+d.q+'"', d.bulunan+' kayıt bulundu · toplam '+d.toplam);
+  }
+  if(d.gentegre==='dokum') document.getElementById('sayfaAd').textContent='Dökümler · '+d.ad;
+  if(d.gentegre==='ekranAc'){ for(var mi=0;mi<MODULLER.length;mi++){ var bs=MODULLER[mi].bolumler||[];
+    for(var bi=0;bi<bs.length;bi++) if(bs[bi].id===d.id){ modulSec(MODULLER[mi].id, d.id); return; } } }
+  if(d.gentegre==='kapat') kartKapat();
+});
+
+/* ---------- kart (ContentDialog) ---------- */
+var kperde=document.getElementById('kartPerde'), kwin=document.getElementById('kartWin');
+function kartAc(b,mod){
+  var K=b.kart?KARTLAR[b.kart]:null;
+  kwin.innerHTML='';
+  if(K&&K.dosya){ var fr=document.createElement('iframe');
+    fr.src=K.dosya+'#kart-'+mod+(tema==='koyu'?'&tema=koyu':''); kwin.appendChild(fr); }
+  else kwin.appendChild(el('div','kyok','<span class="bk">🗂</span><b>'+b.ad+'</b> için kart ekranı henüz tasarlanmadı.<br>'+
+    '<span style="font-size:12.5px">'+(b.yol||'')+' · Esc ile kapat</span>'));
+  kperde.classList.add('on');
+}
+function kartKapat(){ kperde.classList.remove('on'); kwin.innerHTML=''; }
+kperde.addEventListener('click',function(e){ if(e.target===kperde) kartKapat(); });
+
+/* ---------- komut paleti ---------- */
+var kpPerde=document.getElementById('kpPerde'), kpG=document.getElementById('kpGiris'),
+    kpL=document.getElementById('kpListe'), kpS=0, kpK=[];
+function komutlar(){
+  var l=[];
+  MODULLER.forEach(function(m){ m.bolumler.forEach(function(b){
+    l.push({tip:'Ekran',ic:b.ic,ad:b.ad,yn:(m.ad==='Gen'?'Genel':m.ad),mod:m.id,bol:b.id}); }); });
+  [['➕','Yeni cari kartı','cari','musteriler'],['➕','Yeni stok kartı','stok','stok_listesi'],
+   ['➕','Yeni satış faturası','alissatis','fatura_satis_listesi'],['➕','Yeni teklif','teklif','teklif_listesi'],
+   ['➕','Yeni servis fişi','servis','servis_listesi'],['➕','Yeni DÖF','kalite','kalite_dof']
+  ].forEach(function(a){ l.push({tip:'Aksiyon',ic:a[0],ad:a[1],yn:'kart aç',mod:a[2],bol:a[3],yeni:1}); });
+  l.push({tip:'Aksiyon',ic:'✨',ad:'Asistanı aç (Alt+A)',yn:'AI',dock:'ai'});
+  l.push({tip:'Aksiyon',ic:'💬',ad:'Mesajları aç (Alt+M)',yn:'sohbet',dock:'msj'});
+  l.push({tip:'Ayar',ic:'🌙',ad:'Temayı değiştir (açık / koyu)',yn:'görünüm',tema:1});
+  l.push({tip:'Ayar',ic:'🔧',ad:'Delphi karşılıklarını göster',yn:'geliştirici',dp:1});
+  return l;
+}
+function kpKur(q){
+  q=(q||'').toLocaleLowerCase('tr');
+  kpK=komutlar().filter(function(x){ return !q||(x.ad+' '+x.yn).toLocaleLowerCase('tr').indexOf(q)>=0; }).slice(0,40);
+  kpS=0; kpL.innerHTML=''; var son=null;
+  kpK.forEach(function(x,i){
+    if(x.tip!==son){ kpL.appendChild(el('div','kpb',x.tip==='Ekran'?'Ekranlar':x.tip==='Aksiyon'?'Aksiyonlar':'Ayarlar')); son=x.tip; }
+    var d=el('div','kps'+(i===0?' sec':''),'<span class="ic">'+x.ic+'</span><span>'+x.ad+'</span><span class="yn">'+x.yn+'</span>');
+    d.dataset.i=i; d.addEventListener('click',function(){ kpCalistir(i); }); kpL.appendChild(d);
+  });
+}
+function kpCalistir(i){
+  var x=kpK[i]; if(!x) return; kpKapat();
+  if(x.tema){ temaAyar(tema==='acik'?'koyu':'acik'); return; }
+  if(x.dock){ dockAc(x.dock); return; }
+  if(x.dp){ document.getElementById('delphiPanel').classList.add('on'); return; }
+  modulSec(x.mod,x.bol);
+  if(x.yeni){ var b=BOL(x.mod,x.bol); if(b) setTimeout(function(){ kartAc(b,'yeni'); },250); }
+}
+function kpAc(){ kpPerde.classList.add('on'); kpG.value=''; kpKur(''); setTimeout(function(){ kpG.focus(); },30); }
+function kpKapat(){ kpPerde.classList.remove('on'); }
+document.getElementById('araAc').addEventListener('click',kpAc);
+kpG.addEventListener('input',function(){ kpKur(this.value); });
+kpPerde.addEventListener('click',function(e){ if(e.target===kpPerde) kpKapat(); });
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){ e.preventDefault(); kpAc(); return; }
+  if(e.key==='Escape'){ if(kpPerde.classList.contains('on')) kpKapat(); else kartKapat(); return; }
+  if(!kpPerde.classList.contains('on')) return;
+  if(e.key==='ArrowDown'){ e.preventDefault(); kpS=Math.min(kpS+1,kpK.length-1); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); kpS=Math.max(kpS-1,0); }
+  else if(e.key==='Enter'){ e.preventDefault(); kpCalistir(kpS); return; }
+  else return;
+  kpL.querySelectorAll('.kps').forEach(function(x){ x.classList.toggle('sec',+x.dataset.i===kpS); });
+  var s=kpL.querySelector('.kps.sec'); if(s) s.scrollIntoView({block:'nearest'});
+});
+
+/* ---------- tema / bölme / delphi paneli ---------- */
+function temaAyar(t){
+  tema=t; document.body.classList.toggle('koyu',t==='koyu');
+  var d=document.getElementById('temaDugme');
+  d.querySelector('.ic').textContent = t==='koyu'?'☀':'🌙';
+  d.querySelector('.ad').textContent = t==='koyu'?'Açık tema':'Koyu tema';
+  document.querySelectorAll('.sf iframe,.kwin iframe').forEach(function(fr){
+    try{ fr.contentWindow.postMessage({gentegre:'tema',ad:t},'*'); }catch(x){}
+  });
+}
+document.getElementById('temaDugme').addEventListener('click',function(){ temaAyar(tema==='acik'?'koyu':'acik'); });
+document.getElementById('navDugme').addEventListener('click',function(){
+  document.getElementById('nav').classList.toggle('dar');
+});
+document.getElementById('delphiDugme').addEventListener('click',function(){
+  document.getElementById('delphiPanel').classList.toggle('on');
+});
+document.getElementById('dpKapat').addEventListener('click',function(){
+  document.getElementById('delphiPanel').classList.remove('on');
+});
+
+
+/* ================= SAĞ DOCK: Asistan / Mesajlar ================= */
+var okunmamis=7, dockKip=null;
+var SOHBETLER=[
+ {a:'Mehmet Yıldız',r:'#0067c0',k:'MY',o:'Granit teklifini revize ettim, iskonto %8\'e çıktı — kontrol eder misin?',s:'09:52',ok:2,
+  ce:['Granit teklifini revize ettim, iskonto %8\'e çıktı.','TKF.2026/0453 · 1.050.000,00 ₺ — onayına düştü']},
+ {a:'📦 Depo Ekibi',r:'#6d4bb8',k:'DE',o:'Hasan Demir: Forklift bakımı bitti, fişi kapattım',s:'10:04',ok:3,
+  ce:['Hasan Demir: Forklift bakımı bitti, fişi kapattım','Serkan Öz: Yedek filtre stoğu 2 adete düştü','TRF.2026/0087 showroom\'a çıktı']},
+ {a:'🤖 Gentegre Bildirim',r:'#c42b1c',k:'GB',o:'STK.10248 kritik seviyenin altına düştü (118 / 250 MT)',s:'10:12',ok:2,
+  ce:['STK.10248 kritik seviyenin altına düştü (118 / 250 MT)','KRD.2025/014 · 17. taksit yarın (167.630,68 ₺)']},
+ {a:'Serkan Öz',r:'#0f7b0f',k:'SÖ',o:'Servis formunu müşteriye ilettim.',s:'09:38',ok:0,ce:['Servis formunu müşteriye ilettim.']},
+ {a:'Zeynep Korkmaz',r:'#9d5d00',k:'ZK',o:'Teklifin son halini bekliyorum.',s:'09:12',ok:0,ce:['Teklifin son halini bekliyorum.']}
+];
+var ONERILER={
+  liste:['Bu listeyi özetle','Kritik satırları açıkla','Neden kırmızı?','Excel raporu öner','Bu ekranda ne yapabilirim?'],
+  dokum:['Bu dökümü yorumla','Sapmaları özetle','Yönetici özeti çıkar'],
+  genel:['Bugün nelere bakmalıyım?','Geciken tahsilatlar','Kritik stoklar','Bu hafta dolan teklifler']
+};
+var CEVAP={
+  'Bu listeyi özetle':{
+    arac:'liste_ozetle(ekran:"{EKRAN}", filtre:"aktif")',sure:'212 ms · 8 kayıt',
+    metin:'<p><b>{EKRAN}</b> ekranında 8 kayıt var. 3 tanesi dikkat gerektiriyor: 1 kayıt kritik eşiğin altında, '+
+      '1 kayıt sıfırlanmış, 1 kayıtta süre/vade riski var. Kalan 5 kayıt normal aralıkta.</p>'+
+      '<p>En büyük risk <b>STK.10402</b> — kalan 0, kritik seviye 25. Açık siparişi de yok.</p>',
+    onay:null},
+  'Kritik satırları açıkla':{
+    arac:'kural_aciklamasi(ekran:"{EKRAN}", renk:"kirmizi,sari")',sure:'104 ms',
+    metin:'<p>Kırmızı satırlar <b>kalan ≤ 0</b>, sarı satırlar <b>kritik seviyenin altı</b> kuralından geliyor '+
+      '(Styles.OnGetContentStyle). Öncelik sırası: Pasif → Stok yok → Kritik → SKT → Normal.</p>'+
+      '<p>Kritik seviyeler depo bazlı tutulur; listedeki değer seçili depo filtresinin toplamıdır.</p>',
+    onay:null},
+  'Neden kırmızı?':{
+    arac:'satir_analizi(kayit:"STK.10402")',sure:'88 ms',
+    metin:'<p><b>STK.10402 — Korniş seti</b> kırmızı çünkü kalan miktar <b>0,00</b> ve kritik seviye 25,00. '+
+      'Son 30 günde 45 adet çıkış olmuş, açık satın alma siparişi yok.</p>',
+    onay:{b:'📝 Satın alma talebi taslağı',t:'TALEP oluşturulacak\nStok: STK.10402 — Korniş seti — alüminyum 3 m\nMiktar: 50 Adet · Depo: Merkez\nGerekçe: kalan 0, son 30 günde 45 adet çıkış'}},
+  'Excel raporu öner':{
+    arac:'rapor_taslagi(ekran:"{EKRAN}")',sure:'156 ms',
+    metin:'<p>Bu ekran için üç kolon seti öneriyorum: <b>Kod · Ad · Kalan · Kritik · Son hareket</b> (operasyon), '+
+      '<b>Kod · Ad · Kalan · Maliyet · Değer</b> (mali), <b>Depo · Kalan · Kritik · Fark</b> (depo kırılımı).</p>',
+    onay:null},
+  'Bu ekranda ne yapabilirim?':{
+    arac:'yardim_ara(ekran:"{EKRAN}")',sure:'240 ms · 4 belge',
+    metin:'<p>Bu ekranda kayıt açabilir (<b>Yeni</b>), listeyi filtreleyip gruplayabilir, seçili kaydın '+
+      'kartını açabilir ve dökümünü alabilirsin. Sağdaki panel seçili kaydın özetini gösterir.</p>'+
+      '<p>Sık kullanılan: <b>Ctrl+K</b> komut paleti · <b>Listede ara</b> kutusu · Liste/Grup/Analiz görünümleri.</p>',
+    onay:null},
+  'Bugün nelere bakmalıyım?':{
+    arac:'gunluk_ozet(kullanici:"AysD", sube:"Merkez")',sure:'402 ms · 6 modül',
+    metin:'<p>Üç şey acil: <b>3 gecikmiş kredi taksiti</b> (246.960 ₺), <b>2 karşılıksız çek</b> (54.350 ₺), '+
+      '<b>1 POS valörü geçmiş</b> (86.400 ₺). Bugün ayrıca 4 teklifin geçerliliği doluyor ve 5 servis fişinin termini var.</p>'+
+      '<p>Ciro dünden %12,4 yukarıda — tahsilat tarafı zayıf, nakit için önce çek/POS bacağına bakmanı öneririm.</p>',
+    onay:null},
+  'Geciken tahsilatlar':{
+    arac:'cari_vadesi_gecen_listele(sube:"Merkez")',sure:'318 ms · 5 kayıt',
+    metin:'<p>Vadesi geçmiş 5 cari, toplam <b>69.500,00 ₺</b>. 90+ gün grubunda 13.050,00 ₺ var — '+
+      'VOLKAN ŞİRİNBAY (9.800 ₺ · 92 gün) ve ZAFER TUNA (3.250 ₺ · 88 gün).</p>',
+    onay:{b:'✉️ Hatırlatma e-postası taslağı',t:'Sayın Volkan Şirinbay,\n\nHesabınızda 9.800,00 ₺ tutarında ve vadesi 92 gün geçmiş bakiye görünmektedir.\nÖdemenizi 20.08.2026 tarihine kadar tamamlamanızı rica ederiz.\n\nSaygılarımızla,\nAyşe Demir · Muhasebe'}},
+  'Kritik stoklar':{
+    arac:'stok_kritik_listele(depo:"tümü")',sure:'190 ms · 3 kayıt',
+    metin:'<p>3 ürün kritik seviyenin altında: <b>STK.10402</b> (0 / 25), <b>STK.10248</b> (118 / 250), '+
+      '<b>STK.10311</b> (76 / 120). Perde kumaşında sezon yaklaşıyor, en riskli kalem o.</p>',
+    onay:null},
+  'Bu hafta dolan teklifler':{
+    arac:'teklif_gecerlilik(gun:7)',sure:'128 ms · 4 kayıt',
+    metin:'<p>4 teklifin geçerliliği bu hafta doluyor, toplam <b>742.800,00 ₺</b>. En büyüğü '+
+      'TKF.2026/0231 (Beyaz Yapı İnşaat · 16.08).</p>',
+    onay:{b:'📞 Takip görevi taslağı',t:'GOREVLER kaydı\nKonu: Süresi dolan 4 teklif için müşteri araması\nAtanan: Ayşe Demir · Termin: 16.08.2026'}}
+};
+
+function dockAc(kip){
+  dockKip=kip;
+  var d=document.getElementById('dock');
+  d.classList.add('on'); document.body.classList.add('dockac');
+  if(kip==='ai') aiKur(); else msjKur();
+}
+function dockKapat(){ document.getElementById('dock').classList.remove('on'); document.body.classList.remove('dockac'); dockKip=null; }
+document.getElementById('dockKapat').addEventListener('click',dockKapat);
+document.getElementById('dockTam').addEventListener('click',function(){
+  var k=dockKip; dockKapat(); modulSec('iletisim', k==='msj'?'umesajlar':'ai_asistan');
+});
+
+/* ---------- ASİSTAN ---------- */
+function aiKur(){
+  document.getElementById('dockAd').innerHTML='✨ Gentegre Yapay Zeka';
+  var b=BOL(aktifModul,aktifBolum)||{}, m=MOD(aktifModul);
+  var ekran=b.ad||'Ana Sayfa';
+  var set=(b.tur==='liste')?ONERILER.liste:(b.tur==='dokum')?ONERILER.dokum:ONERILER.genel;
+  var g=document.getElementById('dockGovde');
+  g.innerHTML='<div class="baglam">Bağlam: <b>'+(m?m.ad:'')+' › '+ekran+'</b>'+
+    (b.yol?'<br><span style="font-size:10.5px">'+b.yol+'</span>':'')+'</div>'+
+    '<div class="oneri">'+set.map(function(o){return '<span class="o">'+o+'</span>';}).join('')+'</div>'+
+    '<div id="aiAkis"></div>';
+  g.querySelectorAll('.oneri .o').forEach(function(o){
+    o.addEventListener('click',function(){ aiSor(o.textContent, ekran); });
+  });
+  document.getElementById('dockAlt').innerHTML=
+    '<div class="gir2"><textarea placeholder="Gentegre\'ye sor…"></textarea><span class="gn">➤</span></div>'+
+    '<div class="dnot">🛡 Yazan işlem yapılmaz — taslak üretir, onayı sen verirsin. '+
+    'Tüm çağrılar <b>AILOG</b>\'a yazılır.</div>';
+  var ta=document.querySelector('#dockAlt textarea');
+  document.querySelector('#dockAlt .gn').addEventListener('click',function(){
+    if(ta.value.trim()){ aiSor(ta.value.trim(), ekran); ta.value=''; }
+  });
+  ta.addEventListener('keydown',function(e){
+    if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); if(ta.value.trim()){ aiSor(ta.value.trim(), ekran); ta.value=''; } }
+  });
+}
+function aiSor(soru, ekran){
+  var a=document.getElementById('aiAkis'); if(!a) return;
+  a.insertAdjacentHTML('beforeend',
+    '<div class="sm ben2"><span class="av2">AD</span><div class="bl2"><div class="bal">'+soru+'</div></div></div>');
+  var yz=el('div','yzr','<i></i><i></i><i></i> Asistan yazıyor…');
+  a.appendChild(yz); a.scrollIntoView({block:'end'});
+  document.getElementById('dockGovde').scrollTop=99999;
+  setTimeout(function(){
+    yz.remove();
+    var c=CEVAP[soru];
+    var h='<div class="sm ai"><span class="av2">✨</span><div class="bl2"><div class="bal">';
+    if(c){
+      h+='<div class="arac2">🧩 <code>'+c.arac.replace('{EKRAN}',ekran)+'</code> · '+c.sure+'</div>';
+      h+=c.metin.replace(/\{EKRAN\}/g,ekran);
+      if(c.onay){
+        h+='<div class="onay2"><div class="b3">'+c.onay.b+'<span class="rz2">Onay gerekli</span></div>'+
+           '<div class="tsl">'+c.onay.t+'</div>'+
+           '<div class="dg2"><button class="mini2 on3" data-ok>✔ Onayla</button>'+
+           '<button class="mini2">✎ Düzenle</button><button class="mini2">✖ İptal</button></div></div>';
+      }
+    }else{
+      h+='<div class="arac2">🧩 <code>dogal_dil_sorgu(soru:"'+soru.substring(0,40)+'…")</code> · 264 ms</div>'+
+         '<p>Bu soruyu <b>'+ekran+'</b> bağlamında yanıtlayabilmem için izinli fonksiyonlardan veri okumam gerekiyor. '+
+         'Mockup sürümünde hazır yanıt kümesi sınırlı — soldaki önerilerden birini deneyebilirsin.</p>';
+    }
+    h+='</div></div></div>';
+    a.insertAdjacentHTML('beforeend',h);
+    a.querySelectorAll('[data-ok]').forEach(function(btn){
+      if(btn.dataset.bagli) return; btn.dataset.bagli=1;
+      btn.addEventListener('click',function(){
+        var k=btn.closest('.onay2'); k.classList.add('tamam');
+        k.querySelector('.rz2').textContent='Onaylandı · şimdi';
+        k.querySelector('.dg2').innerHTML='<button class="mini2">📄 Kaydı Aç</button><button class="mini2">↩ Geri Al</button>';
+      });
+    });
+    document.getElementById('dockGovde').scrollTop=99999;
+  },700);
+}
+
+/* ---------- MESAJLAR ---------- */
+function msjKur(){
+  document.getElementById('dockAd').innerHTML='💬 Mesajlar';
+  var g=document.getElementById('dockGovde');
+  g.innerHTML='<div class="baglam">'+okunmamis+' okunmamış mesaj · 4 kişi çevrimiçi</div><div id="msjListe"></div>';
+  var l=document.getElementById('msjListe');
+  SOHBETLER.forEach(function(sh,i){
+    var d=el('div','msat'+(sh.ok?'':' okundu'),
+      '<span class="av3" style="background:'+sh.r+'">'+sh.k+'</span>'+
+      '<span class="bl3"><span class="ad3">'+sh.a+'<span class="sa">'+sh.s+'</span></span>'+
+      '<span class="oz">'+sh.o+'</span></span>'+(sh.ok?'<span class="ok3">'+sh.ok+'</span>':''));
+    d.addEventListener('click',function(){ msjAc(i); });
+    l.appendChild(d);
+  });
+  document.getElementById('dockAlt').innerHTML=
+    '<button class="mini2" style="width:100%;height:36px" id="tumMesaj">💬 Tüm mesajları aç</button>'+
+    '<div class="dnot">Kayıt iliştirme, görev ve onay istekleri tam ekranda kullanılabilir.</div>';
+  document.getElementById('tumMesaj').addEventListener('click',function(){
+    dockKapat(); modulSec('iletisim','umesajlar');
+  });
+}
+function msjAc(i){
+  var sh=SOHBETLER[i];
+  if(sh.ok){ okunmamis=Math.max(0,okunmamis-sh.ok); sh.ok=0; kurKomut(BOL(aktifModul,aktifBolum)||{}); }
+  document.getElementById('dockAd').innerHTML='💬 '+sh.a;
+  var g=document.getElementById('dockGovde');
+  g.innerHTML='<div class="baglam">'+(sh.a.indexOf('📦')>=0?'Grup · 8 katılımcı':'çevrimiçi')+
+    ' · <b>Sohbeti tam ekranda aç</b></div>'+
+    sh.ce.map(function(m,j){
+      return '<div class="sm'+(j%2?' ben2':'')+'"><span class="av2">'+(j%2?'AD':sh.k)+'</span>'+
+        '<div class="bl2"><div class="bal">'+m+'</div></div></div>';
+    }).join('');
+  document.getElementById('dockAlt').innerHTML=
+    '<div class="gir2"><textarea placeholder="Mesaj yaz…"></textarea><span class="gn">➤</span></div>'+
+    '<div class="dnot"><span id="msjGeri" style="color:var(--accent)">‹ Sohbet listesi</span> · '+
+    'ataç ile kayıt iliştirilebilir</div>';
+  document.getElementById('msjGeri').addEventListener('click',msjKur);
+  document.querySelector('#dockAlt .gn').addEventListener('click',function(){
+    var ta=document.querySelector('#dockAlt textarea');
+    if(!ta.value.trim()) return;
+    g.insertAdjacentHTML('beforeend','<div class="sm ben2"><span class="av2">AD</span><div class="bl2">'+
+      '<div class="bal">'+ta.value+'</div></div></div>');
+    ta.value=''; g.scrollTop=99999;
+  });
+}
+
+/* kısayollar: Alt+A asistan, Alt+M mesajlar */
+document.addEventListener('keydown',function(e){
+  if(e.altKey && e.key.toLowerCase()==='a'){ e.preventDefault(); dockAc('ai'); }
+  if(e.altKey && e.key.toLowerCase()==='m'){ e.preventDefault(); dockAc('msj'); }
+});
+
+/* ---------- ana sayfa ---------- */
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-git]'); if(!t) return;
+  var p=t.dataset.git.split('|'); modulSec(p[0],p[1]);
+});
+(function(){
+  var uy=[['k','Krediler','Gecikmiş kredi taksiti — vade geçti','3','246.960 ₺','banka','krediler_listesi'],
+          ['k','Çek / Senet','Karşılıksız / protestolu kıymet','2','54.350 ₺','banka','cek_senet_listesi'],
+          ['k','POS','Valörü geçtiği halde hesaba geçmeyen','1','86.400 ₺','kasa','pos_listesi'],
+          ['s','Teklif','Geçerliliği bu hafta dolan','4','742.800 ₺','teklif','teklif_listesi'],
+          ['s','Servis','Termini geçmiş / bugün teslim','5','18.940 ₺','servis','servis_listesi'],
+          ['s','Stok','Kritik seviyenin altında / stoksuz','3','—','stok','stok_listesi'],
+          ['m','Kalite','Açık DÖF ve sapma kaydı','7','—','kalite','kalite_dof'],
+          ['m','Demirbaş','Bakım / kalibrasyon tarihi geçmiş','4','—','demirbas','demirbas_listesi']];
+  var k=document.getElementById('uyariListe');
+  uy.forEach(function(u){
+    var d=el('div','sat','<span class="nk '+u[0]+'"></span><span class="ad">'+u[2]+'<small>'+u[1]+'</small></span>'+
+      '<span class="rz '+u[0]+'">'+u[3]+'</span><span class="tt" style="width:96px;text-align:right">'+u[4]+'</span>');
+    d.addEventListener('click',function(){ modulSec(u[5],u[6]); });
+    k.appendChild(d);
+  });
+
+})();
+
+kurNav(); bolumSec('home');
+}
+</script>
+</body>
+</html>

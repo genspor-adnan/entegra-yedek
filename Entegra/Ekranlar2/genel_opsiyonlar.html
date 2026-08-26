@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genel Opsiyonlar — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    --warn:#b5731a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1080px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .ara{margin-left:auto;border:1px solid var(--line);border-radius:3px;background:#fff;height:24px;
+    padding:0 8px;font-size:11.5px;color:var(--muted);display:flex;align-items:center;min-width:190px}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;
+    display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;
+    font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:14px}
+  .pane.active{display:block}
+  .row{display:flex;gap:14px;align-items:flex-start}
+  .col{flex:1;min-width:0}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);
+    border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;letter-spacing:.3px;margin-left:auto;
+    background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grid2{display:grid;grid-template-columns:150px 1fr;gap:8px 10px;align-items:center}
+  .grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .grid3{display:grid;grid-template-columns:150px 1fr 150px 1fr;gap:8px 10px;align-items:center}
+  .grid3 label{font-size:11px;color:var(--muted);text-align:right}
+  .full{grid-column:1 / -1}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;color:var(--ink);display:flex;align-items:center;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.ro{background:#f4f6f9;color:var(--muted)}
+  .inp.sm{max-width:110px}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:3px;color:var(--muted);font-size:10px}
+  .chk{display:flex;align-items:center;gap:7px;font-size:11.5px;padding:3px 0}
+  .chk input{vertical-align:-1px}
+  .chks{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 12px}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr:hover td{background:#f2f7fd}
+  .dg .c{text-align:center}
+  .gridtb{display:flex;gap:4px;padding:0 0 6px}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .pill{font-size:10px;padding:1px 7px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-off{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-y{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-r{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .subtabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:12px;flex-wrap:wrap}
+  .stab{padding:5px 11px;font-size:11.5px;background:#eef3f8;border:1px solid var(--line);border-bottom:none;
+    border-radius:3px 3px 0 0;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .stab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .spane{display:none}.spane.active{display:block}
+  .swatch{width:34px;height:14px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-2px}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Genel Opsiyonlar
+    <span class="sp">UOpsDlg · GENINI (BOLUM/ANAHTAR/DEGER) · Kullanıcı: Mehmet Yıldız (yönetici)</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn">✖ Kapat</div>
+    <div class="sepv"></div>
+    <div class="btn">↩ Varsayılana Dön</div>
+    <div class="btn">📋 Ayarları Dışa Aktar</div>
+    <div class="ara">🔎 Ayarlarda ara… (ör. "koçan", "proxy")</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="genel">🏠 Genel Ayarlar</div>
+    <div class="tab" data-t="uyari">🔔 Uyarılar</div>
+    <div class="tab" data-t="stil">🎨 Stiller <span class="b">6</span></div>
+    <div class="tab" data-t="kocan">🧾 Koçan Ayarları <span class="b">13</span></div>
+    <div class="tab" data-t="bildirim">📨 Bildirim</div>
+    <div class="tab" data-t="liste">📋 Listeler</div>
+    <div class="tab" data-t="kilit">🔒 Kilitleme</div>
+    <div class="tab" data-t="secenek">⚙ Seçenekler</div>
+  </div>
+
+  <!-- ================= GENEL AYARLAR ================= -->
+  <div class="pane active" data-p="genel">
+    <div class="row">
+      <div class="col">
+        <div class="grp">
+          <h4>Para / Döviz <span class="tag">GENINI · DOVIZ</span></h4>
+          <div class="body grid2">
+            <label>Varsayılan Para Birimi</label><div class="inp combo">TL — Türk Lirası</div>
+            <label>Varsayılan Döviz Birimi</label><div class="inp combo">USD — Amerikan Doları</div>
+            <div class="full">
+              <label class="chk"><input type="checkbox" checked> Günlük döviz kurları kasa ekranında görünsün</label>
+              <label class="chk"><input type="checkbox" checked> Program açılışında döviz kurlarını otomatik olarak güncelle</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Seyir Defteri (Log) <span class="tag">ISLEMLOG · LOG&lt;yyyy&gt;</span></h4>
+          <div class="body">
+            <div class="grid2" style="margin-bottom:8px">
+              <label>Son</label>
+              <div style="display:flex;align-items:center;gap:7px">
+                <div class="inp sm" style="width:70px">180</div>
+                <span style="font-size:11px;color:var(--muted)">günün bilgileri tutulsun</span>
+              </div>
+            </div>
+            <div class="chks">
+              <label class="chk"><input type="checkbox" checked> Ekleme</label>
+              <label class="chk"><input type="checkbox" checked> Silme</label>
+              <label class="chk"><input type="checkbox" checked> Değiştirme</label>
+            </div>
+            <div class="hint">Kayıtlar yıllık <b>GENDEPO.LOG&lt;yyyy&gt;</b> tablolarına yazılır, <b>ISLEMLOG</b> görünümü üzerinden okunur.
+              Silme kaydı SQL DELETE'ten <u>önce</u> loglanır (Geri Al bu kayda dayanır).</div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Doküman Dizini <span class="tag">IMAJ → GENDEPO.DOSYA</span></h4>
+          <div class="body grid2">
+            <label>Dizin</label><div class="inp">\\SRV01\Gentegre\Dokuman</div>
+            <div class="full"><label class="chk"><input type="checkbox"> Klasöre kayıt yetkisi ver</label></div>
+            <div class="full"><span class="pill p-ok">● FILESTREAM aktif</span>
+              <span style="font-size:10.5px;color:var(--muted);margin-left:6px">Yeni belgeler hash-dedup ile GENDEPO.DOSYA'ya yazılıyor</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="grp">
+          <h4>Program 'Exe'si Güncelleme <span class="tag">GenUpdate WS</span></h4>
+          <div class="body grid2">
+            <label>Adresi</label><div class="inp">https://update.genyazilim.com/GenUpdate</div>
+            <label>Versiyon No</label><div class="inp ro">2026.8.60</div>
+            <div class="full"><span class="pill p-y">⟳ 3 yeni komut bekliyor</span>
+              <span class="pill p-off" style="margin-left:6px">#pg etiketli 1 komut atlanacak</span></div>
+            <div class="hint full" style="margin-top:2px">Motor etiketi uymayan komutlar çalıştırılmaz, versiyon no yine de ilerler.</div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Program İçi Mesajlaşma <span class="tag">MESAJ</span></h4>
+          <div class="body grid2">
+            <label>Portu</label><div class="inp sm" style="width:90px">1278</div>
+            <div class="full">
+              <label class="chk"><input type="checkbox" checked> Duyuru Bilgilendirme E-Posta</label>
+              <label class="chk"><input type="checkbox"> Duyuru Bilgilendirme SMS</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Proxy Ayar</h4>
+          <div class="body grid3">
+            <label>Sunucu</label><div class="inp">proxy.firma.local</div>
+            <label>Port</label><div class="inp">8080</div>
+            <label>Kullanıcı</label><div class="inp">gentegre</div>
+            <label>Şifre</label><div class="inp">••••••••</div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Oturum / Liste</h4>
+          <div class="body grid3">
+            <label>Kullanıcı şifre kullanımı</label><div class="inp combo">Zorunlu</div>
+            <label>Şifre süresi (ay)</label><div class="inp">6</div>
+            <label>Liste sayfa uzunluğu</label><div class="inp">200</div>
+            <label>Üst sınır</label><div class="inp">5.000</div>
+            <label>Diller</label><div class="inp combo">Türkçe (varsayılan)</div>
+            <label>2. Depo DB Adı</label><div class="inp">GENDEPO2</div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Bakım İşlemleri</h4>
+          <div class="body" style="display:flex;gap:6px;flex-wrap:wrap">
+            <span class="minibtn">📅 Yıl Sonu Devir İşlemleri</span>
+            <span class="minibtn">🔗 Entegrasyon Eşleştirme</span>
+            <span class="minibtn">🛢 Bağlantı Bilgilerini Düzenle</span>
+            <span class="minibtn">🏢 Gentegre Bilgilerini Ayarlama</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= UYARILAR ================= -->
+  <div class="pane" data-p="uyari">
+    <div class="row">
+      <div class="col" style="flex:1.2">
+        <div class="grp">
+          <h4>Uyarı Ağacı <span class="tag">UYARIAYAR</span></h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <tr><th style="width:34px"></th><th>Kod</th><th>Açıklama</th><th class="c" style="width:110px">Gün</th></tr>
+                <tr><td class="c">▾</td><td><b>CARI</b></td><td><b>Cari Uyarıları</b></td><td class="c">—</td></tr>
+                <tr><td></td><td style="padding-left:22px">CARI.RISK</td><td>Risk limiti aşan cariler</td><td class="c">0</td></tr>
+                <tr class="sel"><td></td><td style="padding-left:22px">CARI.VADE</td><td>Vadesi gelen cari bakiyeleri</td><td class="c">3</td></tr>
+                <tr><td class="c">▾</td><td><b>FATURA</b></td><td><b>Belge Uyarıları</b></td><td class="c">—</td></tr>
+                <tr><td></td><td style="padding-left:22px">FAT.EBELGE</td><td>Gönderilemeyen e-Belgeler</td><td class="c">1</td></tr>
+                <tr><td></td><td style="padding-left:22px">FAT.KOCAN</td><td>Koçan bitmek üzere</td><td class="c">7</td></tr>
+                <tr><td class="c">▾</td><td><b>STOK</b></td><td><b>Stok Uyarıları</b></td><td class="c">—</td></tr>
+                <tr><td></td><td style="padding-left:22px">STK.MIN</td><td>Kritik seviye altındaki stoklar</td><td class="c">0</td></tr>
+              </table>
+            </div>
+            <div class="hint">Ağaçtaki her düğüm kullanıcı bazında açılıp kapatılabilir; işaretli uyarılar iş listesi panosunda toplanır.</div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grp">
+          <h4>Çalışma Parametreleri</h4>
+          <div class="body grid2">
+            <div class="full"><label class="chk"><input type="checkbox" checked> İş Listesine Yazılan Uyarılar Aktif</label></div>
+            <label>Yenileme Süresi (sn)</label><div class="inp sm" style="width:90px">120</div>
+            <label>Yeni Aktiviteler (gün)</label><div class="inp sm" style="width:90px">7</div>
+            <label>Panoda kaç gün öncesi görünmesin</label><div class="inp sm" style="width:90px">30</div>
+            <label>Önceden uyarılarda görünsün</label><div class="inp sm" style="width:90px">3</div>
+          </div>
+        </div>
+        <div class="grp">
+          <h4>Önizleme</h4>
+          <div class="body">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;gap:8px;align-items:center"><span class="pill p-r">5</span><span>Gönderilemeyen e-Belge</span></div>
+              <div style="display:flex;gap:8px;align-items:center"><span class="pill p-y">12</span><span>Vadesi gelen cari</span></div>
+              <div style="display:flex;gap:8px;align-items:center"><span class="pill p-ok">0</span><span>Kritik stok</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= STILLER ================= -->
+  <div class="pane" data-p="stil">
+    <div class="subtabs">
+      <div class="stab active" data-s="s1">Stiller</div>
+      <div class="stab" data-s="s2">Stil Kullanımı</div>
+    </div>
+
+    <div class="spane active" data-sp="s1">
+      <div class="gridtb">
+        <span class="minibtn">➕ Ekle</span><span class="minibtn">🗑 Sil</span>
+        <span class="minibtn">💾 Kaydet</span><span class="minibtn">↩ İptal</span>
+      </div>
+      <div class="dg">
+        <table>
+          <tr><th style="width:44px">Id</th><th>Stil Adı</th><th>Font</th><th class="c">Punto</th>
+              <th class="c">Bold</th><th class="c">İtalik</th><th class="c">Alt Çizgi</th><th>Font Rengi</th><th>Arka Plan Rengi</th></tr>
+          <tr><td>1</td><td>Vadesi Geçmiş</td><td>Trebuchet MS</td><td class="c">9</td><td class="c">✔</td><td class="c"></td><td class="c"></td>
+              <td><span class="swatch" style="background:#b23b3b"></span> clMaroon</td><td><span class="swatch" style="background:#fbe9e9"></span> #FBE9E9</td></tr>
+          <tr class="sel"><td>2</td><td>Kapanmış Belge</td><td>Trebuchet MS</td><td class="c">9</td><td class="c"></td><td class="c">✔</td><td class="c"></td>
+              <td><span class="swatch" style="background:#7b8794"></span> clGray</td><td><span class="swatch" style="background:#eeeeee"></span> #EEEEEE</td></tr>
+          <tr><td>3</td><td>Onaylı Sipariş</td><td>Trebuchet MS</td><td class="c">9</td><td class="c"></td><td class="c"></td><td class="c"></td>
+              <td><span class="swatch" style="background:#2e7d46"></span> clGreen</td><td><span class="swatch" style="background:#e9f6ed"></span> #E9F6ED</td></tr>
+          <tr><td>4</td><td>e-Fatura Satırı</td><td>Trebuchet MS</td><td class="c">9</td><td class="c"></td><td class="c"></td><td class="c"></td>
+              <td><span class="swatch" style="background:#14315a"></span> clNavy</td><td><span class="swatch" style="background:#e6f0fb"></span> #E6F0FB</td></tr>
+          <tr><td>5</td><td>e-Arşiv Satırı</td><td>Trebuchet MS</td><td class="c">9</td><td class="c"></td><td class="c"></td><td class="c"></td>
+              <td><span class="swatch" style="background:#14315a"></span> clNavy</td><td><span class="swatch" style="background:#e9f6ed"></span> #E9F6ED</td></tr>
+          <tr><td>6</td><td>e-İrsaliye Satırı</td><td>Trebuchet MS</td><td class="c">9</td><td class="c"></td><td class="c"></td><td class="c"></td>
+              <td><span class="swatch" style="background:#14315a"></span> clNavy</td><td><span class="swatch" style="background:#fdf1e2"></span> #FDF1E2</td></tr>
+        </table>
+      </div>
+      <div class="hint">Stiller <b>STILLER</b> tablosunda tutulur; grid'lere <b>KOSULLAR</b> üzerinden bağlanır.</div>
+    </div>
+
+    <div class="spane" data-sp="s2">
+      <div class="gridtb">
+        <span class="minibtn">➕ Ekle</span><span class="minibtn">🗑 Sil</span>
+        <span class="minibtn">💾 Kaydet</span><span class="minibtn">↩ İptal</span>
+      </div>
+      <div class="dg">
+        <table>
+          <tr><th style="width:44px">Id</th><th>Uygulanacak Stil Adı</th><th>Grid Adı</th><th>Alan Adı</th><th>Tür</th><th class="c">Alt Değer</th><th class="c">Üst Değer</th></tr>
+          <tr><td>1</td><td>Vadesi Geçmiş</td><td>GridFaturalarView</td><td>VADETARIHI</td><td>Tarih &lt;</td><td class="c">Bugün</td><td class="c">—</td></tr>
+          <tr class="sel"><td>2</td><td>Kapanmış Belge</td><td>GridFaturalarView</td><td>KAPANDI</td><td>Eşit</td><td class="c">1</td><td class="c">1</td></tr>
+          <tr><td>3</td><td>Onaylı Sipariş</td><td>GridSiparislerView</td><td>DURUM</td><td>Aralık</td><td class="c">20</td><td class="c">29</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= KOCAN ================= -->
+  <div class="pane" data-p="kocan">
+    <div class="row">
+      <div class="col" style="flex:1.55">
+        <div class="grp">
+          <h4>Koçan Tanımları <span class="tag">KOCAN</span></h4>
+          <div class="body">
+            <div class="gridtb">
+              <span class="minibtn">➕ Ekle</span><span class="minibtn">🗑 Sil</span>
+              <span class="minibtn">💾 Kaydet</span><span class="minibtn">↩ İptal</span>
+              <span class="minibtn">🧩 Eksik Koçan tanımlarını tamamla…</span>
+            </div>
+            <div class="dg">
+              <table>
+                <tr><th style="width:56px">Koçan No</th><th>Tür</th><th>Kullanım</th><th>Başlangıç Tarihi</th>
+                    <th>SeriNo-Ön Ek</th><th class="c">Başlangıç No</th><th>Sıfırlama</th><th>Şube</th></tr>
+                <tr class="sel"><td class="c">1</td><td>Satış Faturası</td><td>e-Fatura</td><td>01.01.2026</td><td><b>GNT</b></td><td class="c">000000001</td><td>Yıllık</td><td>Merkez</td></tr>
+                <tr><td class="c">2</td><td>Satış Faturası</td><td>e-Arşiv</td><td>01.01.2026</td><td><b>GEN</b></td><td class="c">000000001</td><td>Yıllık</td><td>Merkez</td></tr>
+                <tr><td class="c">3</td><td>İrsaliye</td><td>e-İrsaliye</td><td>01.01.2026</td><td><b>GIR</b></td><td class="c">000000001</td><td>Yıllık</td><td>Merkez</td></tr>
+                <tr><td class="c">4</td><td>Satış Faturası</td><td>Kağıt</td><td>01.01.2026</td><td>A</td><td class="c">000001</td><td>Yok</td><td>Şube-2</td></tr>
+                <tr><td class="c">5</td><td>Tahsilat Makbuzu</td><td>Kağıt</td><td>01.01.2026</td><td>TH</td><td class="c">000001</td><td>Yıllık</td><td>Merkez</td></tr>
+              </table>
+            </div>
+            <div style="margin-top:8px"><label class="chk"><input type="checkbox" checked> Bu bilgisayarda bu koçanı kullan</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grp">
+          <h4>Bu Bilgisayarın Aktif Koçanları <span class="tag">GENINI + Makine</span></h4>
+          <div class="body grid2" style="grid-template-columns:1fr 1fr;gap:6px 10px">
+            <label style="text-align:left">Fatura</label><div class="inp combo">1 — GNT</div>
+            <label style="text-align:left">Alış Siparişi</label><div class="inp combo">7 — ASP</div>
+            <label style="text-align:left">Fiş</label><div class="inp combo">9 — FIS</div>
+            <label style="text-align:left">Satış Siparişi</label><div class="inp combo">8 — SSP</div>
+            <label style="text-align:left">İrsaliye</label><div class="inp combo">3 — GIR</div>
+            <label style="text-align:left">Gider Pusulası</label><div class="inp combo">11 — GP</div>
+            <label style="text-align:left">İrsaliyeli Fatura</label><div class="inp combo">12 — IRF</div>
+            <label style="text-align:left">Transfer Fişi</label><div class="inp combo">13 — TRF</div>
+            <label style="text-align:left">Servis Fişi</label><div class="inp combo">14 — SRV</div>
+            <label style="text-align:left">Alınan Teklif</label><div class="inp combo">15 — ATK</div>
+            <label style="text-align:left">Verilen Teklif</label><div class="inp combo">16 — VTK</div>
+            <label style="text-align:left">Tahsilat Makbuzu</label><div class="inp combo">5 — TH</div>
+            <label style="text-align:left">Tediye Makbuzu</label><div class="inp combo">6 — TD</div>
+            <label style="text-align:left">Virman Makbuzu</label><div class="inp combo">17 — VR</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= BILDIRIM ================= -->
+  <div class="pane" data-p="bildirim">
+    <div class="subtabs">
+      <div class="stab active" data-s="b1">SMS</div>
+      <div class="stab" data-s="b2">E-Posta</div>
+      <div class="stab" data-s="b3">ITS</div>
+      <div class="stab" data-s="b4">Google Takvim</div>
+    </div>
+
+    <div class="spane active" data-sp="b1">
+      <div class="grp">
+        <h4>SMS Hesapları <span class="tag">SMSHESAP</span></h4>
+        <div class="body">
+          <div class="gridtb"><span class="minibtn">➕ Ekle</span><span class="minibtn">🗑 Sil</span><span class="minibtn">💾 Kaydet</span><span class="minibtn">↩ İptal</span></div>
+          <div class="dg">
+            <table>
+              <tr><th>Servis</th><th>Kullanıcı Adı</th><th>Şifre</th><th>Başlık</th><th class="c">Durum</th><th>Açıklama</th><th class="c">Varsayılan</th></tr>
+              <tr class="sel"><td>NetGSM</td><td>8503021234</td><td>••••••</td><td>GENTEGRE</td><td class="c"><span class="pill p-ok">Aktif</span></td><td>Genel gönderim</td><td class="c">✔</td></tr>
+              <tr><td>İletimerkezi</td><td>firma_api</td><td>••••••</td><td>FETA</td><td class="c"><span class="pill p-off">Pasif</span></td><td>Yedek hat</td><td class="c"></td></tr>
+            </table>
+          </div>
+          <div style="margin-top:8px">
+            <label class="chk"><input type="checkbox" checked> SMS Gönderimleri için bu hesabı kullan</label>
+            <label class="chk"><input type="checkbox"> Aktiviteler İçin SMS Bildirimini Kullan</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spane" data-sp="b2">
+      <div class="grp">
+        <h4>EPosta Hesapları <span class="tag">EPOSTAHESAP</span></h4>
+        <div class="body">
+          <div class="gridtb"><span class="minibtn">➕ Ekle</span><span class="minibtn">🗑 Sil</span><span class="minibtn">💾 Kaydet</span><span class="minibtn">↩ İptal</span></div>
+          <div class="dg">
+            <table>
+              <tr><th>Gönderen</th><th>EPosta Adresi</th><th>Sunucu</th><th class="c">Port</th><th class="c">Kimlik Doğrulama</th><th class="c">Şifreleme</th><th class="c">Varsayılan</th></tr>
+              <tr class="sel"><td>Gentegre Bildirim</td><td>bildirim@firma.com</td><td>smtp.firma.com</td><td class="c">587</td><td class="c">✔</td><td class="c">STARTTLS</td><td class="c">✔</td></tr>
+              <tr><td>Muhasebe</td><td>muhasebe@firma.com</td><td>smtp.firma.com</td><td class="c">465</td><td class="c">✔</td><td class="c">SSL</td><td class="c"></td></tr>
+            </table>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <div class="col">
+              <label class="chk"><input type="checkbox" checked> Eposta Gönderimleri için bu hesabı kullan</label>
+              <label class="chk"><input type="checkbox" checked> Aktiviteler İçin Eposta Bildirimini Kullan</label>
+            </div>
+            <div class="col">
+              <div class="grid2">
+                <label>E-Posta Gönderim Şekli</label>
+                <div style="display:flex;gap:14px;align-items:center">
+                  <label class="chk"><input type="radio" name="gs"> Outlook Üzerinden</label>
+                  <label class="chk"><input type="radio" name="gs" checked> Kendi Hesabımdan</label>
+                </div>
+                <label>Şablonlar</label><div><span class="minibtn">✉ E-Posta Şablonları…</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spane" data-sp="b3">
+      <div class="grp">
+        <h4>ITS / PTS Hesapları <span class="tag">ITSHESAP</span></h4>
+        <div class="body">
+          <div class="dg">
+            <table>
+              <tr><th>Servis</th><th>Kullanıcı Adı</th><th>Şifre</th><th>GLN</th><th class="c">Durum</th><th class="c">Varsayılan</th></tr>
+              <tr class="sel"><td>ITS (İlaç)</td><td>8680000000001</td><td>••••••</td><td>8680000000001</td><td class="c"><span class="pill p-ok">Aktif</span></td><td class="c">✔</td></tr>
+              <tr><td>PTS (Ürün)</td><td>8680000000002</td><td>••••••</td><td>8680000000002</td><td class="c"><span class="pill p-off">Pasif</span></td><td class="c"></td></tr>
+            </table>
+          </div>
+          <div style="margin-top:8px"><label class="chk"><input type="checkbox" checked> ITS Gönderimleri için bu hesabı kullan</label></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spane" data-sp="b4">
+      <div class="grp">
+        <h4>Google Takvim <span class="tag">GOOGLETAKVIMHESAPLARI</span></h4>
+        <div class="body">
+          <div class="dg">
+            <table>
+              <tr><th>Kullanıcı</th><th>Google Kullanıcı</th><th>Takvim Id</th><th>P12 Dosya</th><th class="c">Durum</th></tr>
+              <tr class="sel"><td>Mehmet Yıldız</td><td>m.yildiz@firma.com</td><td>primary</td><td>gentegre-svc.p12</td><td class="c"><span class="pill p-ok">Bağlı</span></td></tr>
+              <tr><td>Elif Aksoy</td><td>e.aksoy@firma.com</td><td>primary</td><td>gentegre-svc.p12</td><td class="c"><span class="pill p-y">Yetki bekliyor</span></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LISTELER ================= -->
+  <div class="pane" data-p="liste">
+    <div class="row">
+      <div class="col" style="flex:.8">
+        <div class="grp">
+          <h4>Bölüm <span class="tag">GENINI (DEGER -24xx)</span></h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <tr><th>Liste</th><th class="c">Kayıt</th></tr>
+                <tr><td>Cari Grupları</td><td class="c">12</td></tr>
+                <tr class="sel"><td>Belge Türleri</td><td class="c">9</td></tr>
+                <tr><td>Ödeme Şekilleri</td><td class="c">7</td></tr>
+                <tr><td>Sektörler</td><td class="c">24</td></tr>
+                <tr><td>Teslim Şartları</td><td class="c">6</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grp">
+          <h4>Belge Türleri — Değerler</h4>
+          <div class="body">
+            <div class="gridtb"><span class="minibtn">➕ Ekle</span><span class="minibtn">🗑 Sil</span><span class="minibtn">⬆</span><span class="minibtn">⬇</span></div>
+            <div class="dg">
+              <table>
+                <tr><th style="width:70px">Değer</th><th>Açıklama</th><th class="c" style="width:70px">Sıra</th><th class="c" style="width:60px">Aktif</th></tr>
+                <tr><td>-2401</td><td>Satış Faturası</td><td class="c">1</td><td class="c">✔</td></tr>
+                <tr class="sel"><td>-2402</td><td>Alış Faturası</td><td class="c">2</td><td class="c">✔</td></tr>
+                <tr><td>-2403</td><td>İade Faturası</td><td class="c">3</td><td class="c">✔</td></tr>
+                <tr><td>-2404</td><td>Tevkifatlı Fatura</td><td class="c">4</td><td class="c">✔</td></tr>
+                <tr><td>-2405</td><td>İhracat Faturası</td><td class="c">5</td><td class="c"></td></tr>
+              </table>
+            </div>
+            <div class="hint">Listeler dil bazlıdır (<b>GENINI.DIL</b>); pasif değerler eski kayıtlarda görünmeye devam eder, yeni seçimde listelenmez.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= KILITLEME ================= -->
+  <div class="pane" data-p="kilit">
+    <div class="grp">
+      <h4>Dönem Kilitleri <span class="tag">KILITLER</span></h4>
+      <div class="body">
+        <div class="gridtb">
+          <span class="minibtn">☑ Tümünü Seç</span><span class="minibtn">☐ Tümünü Kaldır</span>
+          <span class="minibtn">📅 Seçilenlere Tarih Ata</span><span class="minibtn">⏱ Seçilenlere Otomatik Gün Ata</span>
+          <span class="minibtn">🔓 Kilit Aç</span><span class="minibtn">🔒 Kilit Kapat</span>
+          <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+            <span style="font-size:11px;color:var(--muted)">Şube</span><div class="inp combo" style="width:130px">Merkez</div>
+          </div>
+        </div>
+        <div class="subtabs">
+          <div class="stab active" data-s="k1">Yeni Kayıt Girişi</div>
+          <div class="stab" data-s="k2">Güncelleme (Değişiklik, Silme)</div>
+        </div>
+        <div class="spane active" data-sp="k1">
+          <div class="dg">
+            <table>
+              <tr><th class="c" style="width:40px">Seç</th><th>Tür</th><th>Son Kilit Tarihi</th><th class="c">Oto. Kilitleme (gün)</th><th class="c">Durum</th></tr>
+              <tr class="sel"><td class="c">✔</td><td>Fatura</td><td>31.07.2026</td><td class="c">15</td><td class="c"><span class="pill p-ok">Aktif</span></td></tr>
+              <tr><td class="c">✔</td><td>Fiş / Kasa</td><td>31.07.2026</td><td class="c">15</td><td class="c"><span class="pill p-ok">Aktif</span></td></tr>
+              <tr><td class="c"></td><td>Stok Hareketi</td><td>30.06.2026</td><td class="c">30</td><td class="c"><span class="pill p-ok">Aktif</span></td></tr>
+              <tr><td class="c"></td><td>Banka</td><td>—</td><td class="c">0</td><td class="c"><span class="pill p-off">Pasif</span></td></tr>
+              <tr><td class="c"></td><td>Çek / Senet</td><td>—</td><td class="c">0</td><td class="c"><span class="pill p-off">Pasif</span></td></tr>
+            </table>
+          </div>
+          <div class="hint">Oto. kilitleme &gt; 0 olan türlerde kilit tarihi her gün <b>bugün − gün</b> değerine çekilir.</div>
+        </div>
+        <div class="spane" data-sp="k2">
+          <div class="dg">
+            <table>
+              <tr><th class="c" style="width:40px">Seç</th><th>Tür</th><th>Son Kilit Tarihi</th><th class="c">Oto. Kilitleme (gün)</th><th class="c">Durum</th></tr>
+              <tr><td class="c">✔</td><td>Fatura</td><td>30.06.2026</td><td class="c">45</td><td class="c"><span class="pill p-ok">Aktif</span></td></tr>
+              <tr class="sel"><td class="c">✔</td><td>Fiş / Kasa</td><td>30.06.2026</td><td class="c">45</td><td class="c"><span class="pill p-ok">Aktif</span></td></tr>
+              <tr><td class="c"></td><td>Stok Hareketi</td><td>31.05.2026</td><td class="c">60</td><td class="c"><span class="pill p-ok">Aktif</span></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SECENEKLER ================= -->
+  <div class="pane" data-p="secenek">
+    <div class="row">
+      <div class="col">
+        <div class="grp">
+          <h4>Tarih Kontrolleri</h4>
+          <div class="body grid2">
+            <label>Bugünden sonraki tarihe kayıt</label><div class="inp combo">Uyar, izin ver</div>
+            <label>Geçmiş yıla kayıt</label><div class="inp combo">Engelle</div>
+            <label>Tarih Farkı Formatı</label><div class="inp combo">gg gün</div>
+          </div>
+        </div>
+        <div class="grp">
+          <h4>Tatil Günleri <span class="tag">TATILGUNLERI</span></h4>
+          <div class="body">
+            <div class="gridtb">
+              <span class="minibtn">🌙 Ramazan Bayramı Ekle</span>
+              <span class="minibtn">🐑 Kurban Bayramı Ekle</span>
+              <span class="minibtn">➕ Diğer Tatil Günü Ekle</span>
+              <span class="minibtn">🗑 Diğer Tatil Günü Sil</span>
+            </div>
+            <div class="dg">
+              <table>
+                <tr><th>Tarih</th><th>Açıklama</th><th class="c">Tür</th></tr>
+                <tr><td>30.08.2026</td><td>Zafer Bayramı</td><td class="c">Resmi</td></tr>
+                <tr class="sel"><td>29.10.2026</td><td>Cumhuriyet Bayramı</td><td class="c">Resmi</td></tr>
+                <tr><td>24.12.2026</td><td>Yıl sonu kapanış (yarım gün)</td><td class="c">Firma</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grp">
+          <h4>Toplu İşlemler</h4>
+          <div class="body" style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <span class="minibtn">☑ Tümünü Seç</span><span class="minibtn">☐ Tümünü Kaldır</span>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <span class="minibtn">Seçilenlerin Kilidini <b>Aktif Ata</b></span>
+              <span class="minibtn">Seçilenlerin Kilidini <b>Pasif Ata</b></span>
+            </div>
+            <div class="hint">Bu ekrandaki tüm değişiklikler tek transaction içinde <b>GENINI</b>'ye yazılır;
+              hata durumunda rollback edilir ve hiçbir ayar yarım kalmaz.</div>
+          </div>
+        </div>
+        <div class="grp">
+          <h4>Değişiklik Özeti <span class="tag">kaydedilmemiş</span></h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <tr><th>Ayar</th><th>Eski</th><th>Yeni</th></tr>
+                <tr><td>Seyir defteri gün</td><td>90</td><td><b>180</b></td></tr>
+                <tr><td>Liste sayfa uzunluğu</td><td>100</td><td><b>200</b></td></tr>
+                <tr><td>Geçmiş yıla kayıt</td><td>Uyar</td><td><b>Engelle</b></td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Tüm ayarlar → <b>GENINI</b> (BOLUM · ANAHTAR · DEGER · DIL · KULLANICI)</span>·
+    <span>Koçan → <b>KOCAN</b></span>·
+    <span>Stil → <b>STILLER · KOSULLAR</b></span>·
+    <span>Bildirim → <b>SMSHESAP · EPOSTAHESAP · ITSHESAP · GOOGLETAKVIMHESAPLARI</b></span>·
+    <span>Kilit → <b>KILITLER</b></span>·
+    <span>Log → <b>GENDEPO.LOG&lt;yyyy&gt; → ISLEMLOG</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Bağlantı: <b>BILIM</b> (SQLEXPRESS)</span>
+    <span>Motor: <b>MSSQL</b> · PG uyumlu</span>
+    <span style="margin-left:auto">3 ayar değişti — kaydedilmedi</span>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.stab').forEach(function(t){
+    t.addEventListener('click',function(){
+      var scope=t.closest('.pane');
+      scope.querySelectorAll('.stab').forEach(function(x){x.classList.remove('active')});
+      scope.querySelectorAll('.spane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=scope.querySelector('.spane[data-sp="'+t.dataset.s+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

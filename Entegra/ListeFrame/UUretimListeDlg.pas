@@ -1,4 +1,4 @@
-﻿unit UUretimListeDlg;
+﻿unit  UUretimListeDlg;
 
 { Bu kod Sablon Duzenleyici tarafindan uretildi }
 { Tarih :   04/12/2010 11:54:17}
@@ -337,7 +337,7 @@ procedure TUretimListeDlg.KaynakBelgeyiAcMenuClick(Sender: TObject);
 // Donusum zincirinde gezinme TEK YERDE: Tablo.DonusumBelgeAc (rota matrisi
 //   tabanli sp_Prog_Donusum_KaynakBelge/_HedefBelge - GenDepoUpdate128).
 begin
-    Tablo.DonusumBelgeAc('KAYNAK', 'FATBASLIK', TabUretimListe.FieldByName('ID').AsInteger);
+   Tablo.DonusumBelgeAc('KAYNAK', 'FATBASLIK', TabUretimListe.FieldByName('ID').AsInteger);
 end;
 
 procedure TUretimListeDlg.GridUretimViewCanFocusRecord(

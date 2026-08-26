@@ -88,7 +88,7 @@ var
 
 
 implementation
-Uses UAnaForm,UFastRap,UGenelAnaSekmeFrame,URaporAraclari,FetaClassExtensions,LocOnFly,PrjConst,UVeriMotor;
+Uses UAnaForm, UFastRap,UGenelAnaSekmeFrame,URaporAraclari,FetaClassExtensions,LocOnFly,PrjConst,UVeriMotor;
 
 
 

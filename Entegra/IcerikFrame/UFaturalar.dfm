@@ -672,10 +672,6 @@
     object SheetDetay: TcxTabSheet
       Caption = 'Detay'
       ImageIndex = 22
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 103
@@ -1030,10 +1026,6 @@
     object TabYorumMedya: TcxTabSheet
       Caption = 'Yorum / Medya'
       ImageIndex = 38
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel2: TPanel
         Left = 0
         Top = 151
@@ -1094,7 +1086,6 @@
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
-        ExplicitTop = 193
         AnchorX = 1223
       end
       object GridYorum: TcxGrid
@@ -1186,7 +1177,6 @@
     HotZoneClassName = 'TcxMediaPlayer8Style'
     AlignSplitter = salBottom
     Control = cxPageControl1
-    ExplicitWidth = 8
   end
   object PanelKayitSayisi: TPanel
     Left = 0
@@ -1277,7 +1267,7 @@
       #9'inner join REHBER R on R.ID = F.REHBERID'
       'where '
       #9'TUR <> 20 and TUR= :Par')
-    Left = 227
+    Left = 179
     Top = 60
     ParamData = <
       item
@@ -1519,8 +1509,8 @@
   object pmBelgeDonustur: TPopupMenu
     Images = Tablo.PNGImageList1
     OnPopup = pmBelgeDonusturPopup
-    Left = 85
-    Top = 22
+    Left = 37
+    Top = 54
     object infoMenu: TMenuItem
       Caption = 'info'
       ImageIndex = 53
@@ -2201,6 +2191,12 @@
       Tag = 5
       Caption = 'Kur Fark'#305
       ImageIndex = 34
+      OnClick = AlSat1Click
+    end
+    object SGK1: TMenuItem
+      Tag = 25
+      Caption = 'SGK'
+      ImageIndex = 45
       OnClick = AlSat1Click
     end
     object IthalatMenu: TMenuItem

@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gentegre AI — Proje Dosyası</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    --s-yok:#f7cfcf; --s-yok-t:#7d1f1f;
+    --s-kri:#fbe6ae; --s-kri-t:#7a5407;
+    --s-skt:#f6d9c0; --s-skt-t:#8a4a12;
+    --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;
+    --ai:#7a4fb0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:13px;padding:16px;line-height:1.55}
+  .win{max-width:1180px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:9px 14px;
+    display:flex;align-items:center;gap:9px;font-weight:bold;font-size:14px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11.5px}
+
+  .kunye{display:flex;gap:0;flex-wrap:wrap;background:var(--head);border-bottom:1px solid var(--line);padding:9px 14px}
+  .kunye .k{flex:1;min-width:150px;padding:2px 10px 2px 0}
+  .kunye .t{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#7b8ea3}
+  .kunye .v{font-size:12.5px;font-weight:bold;color:var(--navy)}
+
+  .icerik{padding:0 0 18px}
+  .toc{background:#f8fafc;border-bottom:1px solid var(--line2);padding:11px 14px;display:flex;flex-wrap:wrap;gap:5px}
+  .toc a{font-size:11.5px;text-decoration:none;color:var(--navy);border:1px solid var(--line);
+    background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px}
+  .toc a:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+
+  h2{font-size:15px;color:var(--navy);margin:26px 14px 8px;padding-bottom:5px;border-bottom:2px solid var(--head2);
+    display:flex;align-items:center;gap:8px}
+  h2 .no{background:var(--navy);color:#fff;border-radius:3px;font-size:11px;padding:2px 7px;font-weight:bold}
+  h3{font-size:13px;color:#2b4a6b;margin:16px 14px 6px}
+  p,ul,ol{margin:7px 14px}
+  ul,ol{padding-left:22px}
+  li{margin:3px 0}
+  code{background:#eef2f7;border:1px solid #dde5ee;border-radius:2px;padding:0 4px;font-size:11.5px;
+    font-family:Consolas,"Courier New",monospace;color:#2b4a6b}
+
+  table{border-collapse:collapse;width:calc(100% - 28px);margin:9px 14px;font-size:12px}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line);text-align:left;
+    padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold}
+  td{border:1px solid var(--line2);padding:5px 8px;vertical-align:top}
+  tr:nth-child(even) td{background:#fbfcfd}
+  td.c{text-align:center}td.r{text-align:right}
+  .pill{font-size:10px;padding:1px 7px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap;display:inline-block}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-gor{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-ai{background:#f5edfb;color:#7a4fb0;border-color:#e3d3f0}
+
+  .kutu{margin:10px 14px;border:1px solid var(--line);border-left:4px solid var(--accent);
+    border-radius:3px;background:#f7fafd;padding:9px 12px;font-size:12px}
+  .kutu.uy{border-left-color:#d8a013;background:#fdf9ef}
+  .kutu.teh{border-left-color:#c0504d;background:#fdf2f2}
+  .kutu.ok{border-left-color:#2e7d46;background:#f3faf5}
+  .kutu b.bs{display:block;margin-bottom:3px;color:var(--navy)}
+
+  .karar{display:flex;gap:9px;margin:8px 14px;padding:8px 11px;border:1px solid var(--line2);border-radius:3px;background:#fbfcfd}
+  .karar .n{flex:none;width:38px;height:38px;border-radius:4px;background:var(--navy);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px}
+  .karar .g{flex:1}
+  .karar .bs{font-weight:bold;color:var(--navy);font-size:12.5px}
+  .karar .ac{font-size:11.5px;color:var(--muted)}
+
+  .mim{margin:10px 14px;border:1px solid var(--line);border-radius:4px;background:#fbfcfe;padding:12px;overflow-x:auto}
+  .kat{display:flex;align-items:stretch;gap:8px;margin-bottom:8px;min-width:640px}
+  .kat .et{flex:none;width:96px;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;color:#7b8ea3;
+    display:flex;align-items:center;font-weight:bold}
+  .kat .kt{flex:1;border:1px solid var(--line);border-radius:3px;background:#fff;padding:7px 9px}
+  .kat .kt .bs{font-weight:bold;color:var(--navy);font-size:12px}
+  .kat .kt .ac{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kat .kt.ai{border-color:#ded0ee;background:#faf7fd}
+  .kat .kt.db{border-color:#cbe7d3;background:#f5fbf7}
+  .ok2{text-align:center;color:var(--muted);font-size:14px;margin:-4px 0 4px}
+
+  .faz{margin:9px 14px;border:1px solid var(--line2);border-radius:3px;overflow:hidden}
+  .faz .bs{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line2);
+    padding:6px 10px;font-weight:bold;color:var(--navy);font-size:12.5px;display:flex;gap:8px;align-items:center}
+  .faz .bs .sr{margin-left:auto;font-weight:normal;font-size:11px;color:var(--muted)}
+  .faz .gv{padding:8px 12px;font-size:12px}
+  .faz ul{margin:4px 0}
+
+  .bar{height:10px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:70px;display:inline-block;vertical-align:-2px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+
+  .hint{font-size:11px;color:var(--muted);margin:8px 14px;line-height:1.5}
+  .statusbar{display:flex;gap:14px;padding:7px 14px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11.5px;color:var(--muted);flex-wrap:wrap}
+  @media print{ body{background:#fff;padding:0} .win{box-shadow:none;border:0;max-width:none} .toc{display:none} }
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Gentegre AI — Proje Dosyası
+    <span class="sp">Mimari ve teknoloji kararları · Sürüm 1.0 · 15.08.2026</span>
+  </div>
+
+  <div class="kunye">
+    <div class="k"><div class="t">Proje</div><div class="v">Gentegre AI</div></div>
+    <div class="k"><div class="t">Mevcut Ürün</div><div class="v">Gentegre ERP 26.8.10.2 (Delphi)</div></div>
+    <div class="k"><div class="t">Hedef</div><div class="v">Web tabanlı ERP + mobil</div></div>
+    <div class="k"><div class="t">Karar</div><div class="v"><span class="pill p-ok">Web — kesinleşti</span></div></div>
+    <div class="k"><div class="t">Doküman Durumu</div><div class="v"><span class="pill p-gor">Taslak / yaşayan belge</span></div></div>
+  </div>
+
+  <div class="toc">
+    <a href="#a1">1 · Amaç</a>
+    <a href="#a2">2 · Mevcut Durum</a>
+    <a href="#a3">3 · Hedef Mimari</a>
+    <a href="#a4">4 · Teknoloji Kararları</a>
+    <a href="#a5">5 · Bileşen Seti</a>
+    <a href="#a6">6 · Delphi → Web Eşleştirme</a>
+    <a href="#a7">7 · Modül Envanteri</a>
+    <a href="#a8">8 · MSSQL → PostgreSQL</a>
+    <a href="#a9">9 · AI Mimarisi</a>
+    <a href="#a10">10 · Mobil</a>
+    <a href="#a11">11 · Yol Haritası</a>
+    <a href="#a12">12 · Riskler</a>
+    <a href="#a13">13 · Karar Günlüğü</a>
+    <a href="#a14">14 · Açık Konular</a>
+  </div>
+
+  <div class="icerik">
+
+  <!-- ============================================================ 1 -->
+  <h2 id="a1"><span class="no">1</span> Amaç ve Kapsam</h2>
+  <p>Gentegre ERP'nin Delphi/VCL masaüstü sürümünü, aynı iş kurallarını ve veri modelini koruyarak
+  <b>web tabanlı</b> bir ürüne taşımak; ardından aynı kod tabanından <b>mobil</b> sürümü çıkarmak.
+  Sunucu tarafı hem <b>Windows</b> hem <b>Linux</b> üzerinde çalışacak, veritabanı <b>PostgreSQL</b> olacak.
+  Arayüz <b>responsive</b> olacak — aynı ekran masaüstünde grid, dar ekranda kart düzeninde çalışacak.</p>
+
+  <div class="kutu">
+    <b class="bs">Kapsam dışı (şimdilik)</b>
+    Delphi sürümünün geliştirilmesinin durdurulması, çoklu kiracı (multi-tenant) mimari,
+    mikroservis ayrıştırması, mevcut müşteri verisinin taşınma planı (ayrı bir göç projesi).
+  </div>
+
+  <!-- ============================================================ 2 -->
+  <h2 id="a2"><span class="no">2</span> Mevcut Durum</h2>
+  <table>
+    <tr><th style="width:180px">Konu</th><th>Durum</th></tr>
+    <tr><td>Uygulama</td><td>Delphi + DevExpress VCL, Windows masaüstü, MDI/Frame mimarisi</td></tr>
+    <tr><td>Veritabanı</td><td>MSSQL (BILIM), saklı yordam ağırlıklı iş mantığı</td></tr>
+    <tr><td>Raporlama</td><td>FastReport (<code>.fr3</code> şablonları)</td></tr>
+    <tr><td>Entegrasyonlar</td><td>e-Fatura / e-Arşiv / e-İrsaliye / e-Defter, ÜTS-İTS, banka MT940, TCMB kur</td></tr>
+    <tr><td>Tasarım varlığı</td><td><b>97 ekran mockup'ı</b> (HTML) + ortak veri modeli <code>gentegre_data.js</code> + 5 kabuk konsepti</td></tr>
+    <tr><td>Yapay zekâ</td><td>Fonksiyon çağrılı asistan mimarisi tasarlandı (22 özellik önerisi, 5'i ilk pakette)</td></tr>
+  </table>
+
+  <div class="kutu ok">
+    <b class="bs">Mockup'ların değeri</b>
+    Mockup'lar Delphi'yi taklit etsin diye tasarlandı ama içerdikleri <b>alan listeleri, kolon setleri,
+    sekme yapıları, iş kuralları ve tablo eşleşmeleri</b> teknolojiden bağımsız. Web projesinde bunlar
+    <b>fonksiyonel şartname</b> olarak kullanılacak. Kabaca: analiz işinin büyük bölümü hazır,
+    ön yüz kodlama işi sıfırdan.
+  </div>
+
+  <!-- ============================================================ 3 -->
+  <h2 id="a3"><span class="no">3</span> Hedef Mimari</h2>
+  <div class="mim">
+    <div class="kat">
+      <div class="et">İstemci</div>
+      <div class="kt"><div class="bs">Web — React + TypeScript (SPA)</div>
+        <div class="ac">Responsive; masaüstünde yoğun grid, dar ekranda kart düzeni</div></div>
+      <div class="kt"><div class="bs">Mobil — aynı kod + Capacitor</div>
+        <div class="ac">Kamera/barkod, bildirim, çevrimdışı kuyruk</div></div>
+    </div>
+    <div class="ok2">▼ HTTPS · REST + OpenAPI · JWT</div>
+    <div class="kat">
+      <div class="et">Uygulama</div>
+      <div class="kt"><div class="bs">ASP.NET Core (C#) — modüler tek servis</div>
+        <div class="ac">Windows ve Linux'ta aynı ikili; Docker ya da self-contained yayın</div></div>
+      <div class="kt ai"><div class="bs">AI Katmanı — izinli fonksiyon API'si</div>
+        <div class="ac">Model asla SQL görmez; yalnız beyaz listedeki fonksiyonlar</div></div>
+    </div>
+    <div class="ok2">▼</div>
+    <div class="kat">
+      <div class="et">Yan servisler</div>
+      <div class="kt"><div class="bs">Rapor — FastReport .NET</div><div class="ac">Mevcut <code>.fr3</code> birikimi taşınır</div></div>
+      <div class="kt"><div class="bs">Zamanlanmış işler — Hangfire</div><div class="ac">Kur çekme, e-belge kuyruğu, yedek, replikasyon</div></div>
+      <div class="kt"><div class="bs">e-Belge / İTS / Banka</div><div class="ac">Entegratör SDK'ları, UBL-TR, MT940</div></div>
+    </div>
+    <div class="ok2">▼</div>
+    <div class="kat">
+      <div class="et">Veri</div>
+      <div class="kt db"><div class="bs">PostgreSQL</div>
+        <div class="ac">Windows / Linux · <code>tr-TR-x-icu</code> collation · <code>numeric</code> para tipi · <code>tsvector</code> arama</div></div>
+      <div class="kt db"><div class="bs">Nesne depolama (dosya/ek)</div>
+        <div class="ac">Belge, imaj, e-belge XML'leri — dosya sistemi ya da S3 uyumlu</div></div>
+    </div>
+  </div>
+
+  <div class="kutu uy">
+    <b class="bs">Mimari kural</b>
+    Başlangıçta <b>mikroservis yok</b>. Tek servis, ama modül sınırları klasör/proje düzeyinde net.
+    Büyüdüğünde ayrıştırılır. İki farklı dilde backend yazılmaz.
+  </div>
+
+  <!-- ============================================================ 4 -->
+  <h2 id="a4"><span class="no">4</span> Teknoloji Kararları</h2>
+  <table>
+    <tr><th style="width:120px">Katman</th><th style="width:190px">Seçim</th><th>Gerekçe</th><th style="width:180px">Değerlendirilen alternatif</th></tr>
+    <tr>
+      <td>Backend dili</td>
+      <td><b>C# / .NET (ASP.NET Core)</b> <span class="pill p-ok">karar</span></td>
+      <td>Object Pascal'dan geçişte en küçük zihinsel sıçrama; Windows+Linux tek kod tabanı;
+        <code>decimal</code> dilin parçası (ERP'de para aritmetiği için kritik); FastReport .NET ile mevcut rapor birikimi korunur;
+        e-Belge/UBL-TR ekosistemi olgun. LTS sürüm hattında kalınacak.</td>
+      <td>Node/NestJS — para aritmetiği (IEEE 754), e-belge imzalama ve raporlama zayıf.<br>Java/Spring — güçlü ama ekibe uzak.</td>
+    </tr>
+    <tr>
+      <td>Veri erişimi</td>
+      <td><b>Dapper</b> ağırlıklı, basit CRUD'da EF Core</td>
+      <td>Mevcut <code>TFDQuery</code> + elle SQL alışkanlığına en yakın. Mizan, maliyet, stok durumu gibi ağır sorgular elle yazılır.</td>
+      <td>Salt EF Core — karmaşık ERP sorgularında öngörülemez SQL üretir.</td>
+    </tr>
+    <tr>
+      <td>Frontend dili</td>
+      <td><b>TypeScript</b> <span class="pill p-ok">karar</span></td>
+      <td>97 ekran ve yüzlerce alanla düz JS'te refactor yönetilemez. TS = JS + tip; çalışma zamanında sıfır maliyet.
+        Backend OpenAPI çıktısından tipler otomatik üretilir, alan değişince ön yüz derlenmez.</td>
+      <td>Düz JavaScript — mockup ölçeğinde yeterli, ürün ölçeğinde değil.</td>
+    </tr>
+    <tr>
+      <td>Frontend çatısı</td>
+      <td><b>React</b> + Vite</td>
+      <td>En geniş bileşen/grid ekosistemi; Capacitor ile mobile aynı kodla geçiş.</td>
+      <td>Vue (dengi, ekosistem biraz dar) · Blazor (tek dil cazip ama Blazor Server sürekli bağlantı ister, WASM ilk yükleme ağır — responsive/mobil hedefiyle çelişir).</td>
+    </tr>
+    <tr>
+      <td>Bileşen seti</td>
+      <td><b>DevExtreme React</b> (bkz. §5)</td>
+      <td>Delphi/DevExpress bileşenleriyle bire bir kavram eşleşmesi; Türkçe yerelleştirme hazır; grid'in adaptive modu responsive gereksinimini kutudan karşılar.</td>
+      <td>AG Grid Enterprise + shadcn/ui — teknik olarak güçlü, görsel kontrol tam; entegrasyon maliyeti yüksek.</td>
+    </tr>
+    <tr>
+      <td>Veritabanı</td>
+      <td><b>PostgreSQL</b> <span class="pill p-ok">karar</span></td>
+      <td>Lisans maliyeti yok, Windows ve Linux'ta aynı; <code>numeric</code> ile <code>decimal</code> birebir eşleşir.</td>
+      <td>MSSQL'de kalmak — Linux hedefi ve lisans maliyeti nedeniyle elendi.</td>
+    </tr>
+    <tr>
+      <td>Mobil</td>
+      <td><b>PWA → Capacitor</b></td>
+      <td>Web responsive yazıldığında mobilin büyük bölümü hazır; Capacitor native kamera/barkod/bildirim verir, tek kod tabanı kalır.</td>
+      <td>React Native / .NET MAUI — ayrı kod tabanı, ayrı ekip yükü.</td>
+    </tr>
+  </table>
+
+  <!-- ============================================================ 5 -->
+  <h2 id="a5"><span class="no">5</span> Bileşen Seti</h2>
+
+  <h3>5.1 Seçimi belirleyen grid gereksinimleri</h3>
+  <p>Aşağıdaki listeyi karşılamayan hafif tablo kütüphaneleri (tek başına TanStack Table, PrimeReact DataTable,
+  ücretsiz MUI DataGrid) baştan elendi:</p>
+  <table>
+    <tr><th style="width:290px">Gereksinim</th><th>Gentegre'de nerede</th></tr>
+    <tr><td>Satır bazlı koşullu renklendirme</td><td>Tüm listeler — <code>Styles.OnGetContentStyle</code> karşılığı</td></tr>
+    <tr><td>Gruplama</td><td>Liste / <b>Grup</b> / Analiz şeridi</td></tr>
+    <tr><td>Pivot</td><td><b>Analiz</b> sekmesi</td></tr>
+    <tr><td>Ağaç grid</td><td>Hesap Planı, Dökümler ağacı, stok kategori ağacı</td></tr>
+    <tr><td>Master-detail</td><td>Her listenin altındaki detay sekmeleri</td></tr>
+    <tr><td>Satır içi düzenleme</td><td>Fatura / sipariş / irsaliye kalemleri</td></tr>
+    <tr><td>Dondurulmuş kolon + alt toplam satırı</td><td>Tüm belge listeleri</td></tr>
+    <tr><td>Filtre satırı, kolon seçici, Excel dışa aktarım</td><td>Her listede</td></tr>
+    <tr><td>Sanal kaydırma + sunucu tarafı sayfalama</td><td>Stok, cari, hareket listeleri (10.000+ satır)</td></tr>
+    <tr><td><b>Responsive kolon düşürme / karta dönüşme</b></td><td>Yeni gereksinim — mobil ve tablet</td></tr>
+  </table>
+
+  <h3>5.2 Ana set — DevExtreme React</h3>
+  <table>
+    <tr><th style="width:300px">Delphi / DevExpress VCL</th><th>DevExtreme React</th><th style="width:230px">Kullanıldığı ekran</th></tr>
+    <tr><td><code>TcxGridDBTableView</code></td><td><code>DataGrid</code></td><td>55 liste ekranı</td></tr>
+    <tr><td><code>TcxDBTreeList</code></td><td><code>TreeList</code></td><td>Hesap Planı, Dökümler</td></tr>
+    <tr><td><code>TdxPivotGrid</code></td><td><code>PivotGrid</code></td><td>Analiz sekmeleri</td></tr>
+    <tr><td><code>TcxGridChartView</code></td><td><code>Chart</code> / <code>PieChart</code></td><td>Giriş sayfası, analiz</td></tr>
+    <tr><td><code>TdxLayoutControl</code></td><td><code>Form</code></td><td>38 kart ekranı</td></tr>
+    <tr><td><code>TdxBarManager</code> / araç çubuğu</td><td><code>Toolbar</code></td><td>Tüm ekranlar</td></tr>
+    <tr><td><code>TdxAlertWindow</code></td><td><code>Toast</code> / <code>Notify</code></td><td>Bildirimler</td></tr>
+    <tr><td><code>TcxScheduler</code></td><td><code>Scheduler</code></td><td>Servis planlama, üretim takvimi</td></tr>
+    <tr><td><code>JvWizard</code></td><td>Adım bileşeni (kendi sarmalayıcımız)</td><td>Stok sihirbazları, Veri Al</td></tr>
+    <tr><td>FindPanel</td><td><code>searchPanel</code></td><td>Liste aramaları</td></tr>
+    <tr><td><code>DataController.Filter</code> + <code>foLike</code></td><td><code>filterRow</code> / <code>filterBuilder</code></td><td>Arama panelleri</td></tr>
+  </table>
+  <div class="kutu uy">
+    <b class="bs">DevExtreme'in bilinen zayıf yanları</b>
+    Paket boyutu büyük; API'si React'in doğal tasarımı değil (eski çekirdeğin üzerine sarmalayıcı);
+    tema özelleştirmesi kendi theme builder'ı üzerinden yürür — Tailwind ile serbest biçimlendirme beklenmemeli.
+    Kabul ediliyor; karşılığında kavram eşleşmesi ve hız kazanılıyor.
+  </div>
+
+  <h3>5.3 Setin geri kalanı</h3>
+  <table>
+    <tr><th style="width:190px">İhtiyaç</th><th style="width:220px">Seçim</th><th>Not</th></tr>
+    <tr><td>Derleme</td><td>Vite</td><td>Hızlı geliştirme sunucusu, TS desteği hazır</td></tr>
+    <tr><td>Yönlendirme</td><td>React Router / TanStack Router</td><td>Her kart kendi URL'inde: <code>/stok/kartlar/STK.10248</code></td></tr>
+    <tr><td>Sunucu verisi</td><td><b>TanStack Query</b></td><td>Önbellek, yeniden getirme, iyimser güncelleme. Bu olmadan listeler gereksiz istek atar</td></tr>
+    <tr><td>Form</td><td>React Hook Form + <b>Zod</b></td><td>Zod şemaları OpenAPI çıktısından üretilir</td></tr>
+    <tr><td>API tipleri</td><td><code>openapi-typescript</code> / NSwag</td><td>Backend sözleşmesi tek kaynak</td></tr>
+    <tr><td>Tarih</td><td>Day.js (<code>tr</code>)</td><td>gg.aa.yyyy biçimi tek yerden</td></tr>
+    <tr><td>Para</td><td><code>Intl.NumberFormat('tr-TR')</code></td><td><b>İstemcide para aritmetiği yapılmaz</b> — toplamlar sunucudan gelir, <code>decimal</code> string olarak taşınır</td></tr>
+    <tr><td>İkon</td><td>Lucide (+ DevExtreme kendi seti)</td><td>—</td></tr>
+    <tr><td>Grafik</td><td>DevExtreme Charts</td><td>Bağımsızlık istenirse ECharts</td></tr>
+    <tr><td>Global durum</td><td>Gerekirse Zustand</td><td>Çoğu ekran TanStack Query + URL parametreleriyle çözülür</td></tr>
+    <tr><td>Çok dillilik</td><td>i18next</td><td>Türkçe temel, İngilizce ikincil</td></tr>
+    <tr><td>Test</td><td>Vitest + Playwright</td><td>Mockup'lar zaten Playwright ile test ediliyor</td></tr>
+  </table>
+
+  <h3>5.4 Kendi sarmalayıcı katmanımız</h3>
+  <p>Ekranlar bileşen kütüphanesini <b>doğrudan çağırmaz</b>. Araya 8–10 bileşenlik kendi katmanımız girer:</p>
+  <p><code>&lt;GnListe&gt;</code> · <code>&lt;GnKart&gt;</code> · <code>&lt;GnSekme&gt;</code> · <code>&lt;GnAramaPaneli&gt;</code> ·
+  <code>&lt;GnDurumRozeti&gt;</code> · <code>&lt;GnParaGiris&gt;</code> · <code>&lt;GnTarihAralik&gt;</code> ·
+  <code>&lt;GnAracCubugu&gt;</code> · <code>&lt;GnSihirbaz&gt;</code> · <code>&lt;GnYanPanel&gt;</code></p>
+  <div class="kutu ok">
+    <b class="bs">Neden</b>
+    Bir gün grid kütüphanesi değişirse 97 ekran değil 1 bileşen değişir. Ayrıca satır rengi kuralı,
+    para biçimi, yetki kontrolü, boş kayıt görünümü gibi kurallar tek yerde toplanır.
+  </div>
+
+  <!-- ============================================================ 6 -->
+  <h2 id="a6"><span class="no">6</span> Delphi → Web Eşleştirme (arayüz davranışı)</h2>
+  <table>
+    <tr><th style="width:330px">Mockup'ta (Delphi taklidi)</th><th>Web'de olması gereken</th></tr>
+    <tr><td>Kart modal pencere olarak açılıyor</td><td>Kendi URL'i olan sayfa — geri tuşu, yer imi, link paylaşımı çalışsın. Modal yalnız <b>Rehber Arama</b> gibi gerçek lookup'lar için</td></tr>
+    <tr><td>Her ekranın kendi başlık/araç/durum çubuğu</td><td>Uygulama kabuğunda tek sefer; ekran sadece içeriği verir (gömülü mod bu davranışın provası)</td></tr>
+    <tr><td>Ekran içindeki sol görev tuşları</td><td>Yok — gezinme tamamen kabukta</td></tr>
+    <tr><td>11 px yazı, 22 px satır, 1480 px sabit genişlik</td><td>13 px, 32–36 px satır, akışkan genişlik → ekranda daha az satır → <b>sunucu tarafı sayfalama zorunlu</b></td></tr>
+    <tr><td>Tüm satırlar tek seferde yüklü</td><td>50–100'lük sayfalar; filtre ve sıralama sunucuda</td></tr>
+    <tr><td>F3, Enter, ↑↓ ile klavyeden yönetim</td><td>Masaüstünde korunur, tek yol olamaz; dokunmatik hedefler eklenir</td></tr>
+    <tr><td>Sabit kolon düzeni</td><td>Kolon önceliği: dar ekranda kolonlar düşer, satır karta dönüşür</td></tr>
+    <tr><td>Satır rengiyle durum anlatımı</td><td>Masaüstünde hafif zemin + <b>durum kolonu</b>; mobilde renkli rozet (yalnız renge dayanmak erişilebilirlik açısından yetersiz)</td></tr>
+    <tr><td>iframe + postMessage kabuk</td><td>Gerçek router + bileşen ağacı</td></tr>
+  </table>
+  <div class="kutu">
+    <b class="bs">Zaten web'e uygun olan mockup'lar</b>
+    <code>gentegre_v4_web.html</code> (web kabuğu için doğru başlangıç — <code>v5_fluent</code> bilinçli olarak Windows 11 taklidi),
+    <code>gentegre_mobil.html</code> (mobil referansı), <code>umesajlar.html</code>, <code>ai_asistan.html</code>,
+    <code>veri_al_import.html</code> ve stok sihirbazları.
+  </div>
+
+  <!-- ============================================================ 7 -->
+  <h2 id="a7"><span class="no">7</span> Modül Envanteri</h2>
+  <p>Kaynak: <code>gentegre_data.js</code> — bu dosya web projesinde <b>rota tablosu ve gezinme yapılandırması</b> olarak doğrudan kullanılacak.</p>
+  <table>
+    <tr><th style="width:170px">Modül</th><th class="c" style="width:70px">Bölüm</th><th>Kapsam</th></tr>
+    <tr><td>İletişim &amp; AI</td><td class="c">2</td><td>Mesajlar (kurum içi sohbet), Gentegre Yapay Zeka</td></tr>
+    <tr><td>Gen</td><td class="c">5</td><td>Ana sayfa, giriş sayfası, genel/belge opsiyonları, modül ikonları</td></tr>
+    <tr><td>CRM</td><td class="c">5</td><td>Potansiyel müşteriler, fırsatlar, projeler, iş listesi, dökümler</td></tr>
+    <tr><td>Cari</td><td class="c">4</td><td>Cari hesap kartı, kişiler (Contact), rehber arama, dökümler</td></tr>
+    <tr><td>Kasa</td><td class="c">3</td><td>Kasalar, hızlı satış (POS), dökümler</td></tr>
+    <tr><td><b>Alış/Satış</b></td><td class="c">15</td><td>Alış belgeleri (8) + satış belgeleri (6) + dökümler — <b>en karmaşık modül</b></td></tr>
+    <tr><td>Banka</td><td class="c">9</td><td>Banka hesapları, krediler, kredi kartları, POS, alınan/verilen çek ve senetler</td></tr>
+    <tr><td>Stok</td><td class="c">6</td><td>Stok kartları, talepler, transferler, giriş/çıkış fişleri, dökümler</td></tr>
+    <tr><td>Üretim</td><td class="c">4</td><td>Reçete, üretim fişleri, dökümler</td></tr>
+    <tr><td>İK</td><td class="c">3</td><td>Personel kartı, dökümler</td></tr>
+    <tr><td>Demirbaş</td><td class="c">2</td><td>Demirbaş listesi ve kartı</td></tr>
+    <tr><td>Teklif</td><td class="c">2</td><td>Teklif listesi ve kartı</td></tr>
+    <tr><td>Servis</td><td class="c">2</td><td>Servis listesi ve kartı</td></tr>
+    <tr><td>Doküman</td><td class="c">2</td><td>Doküman listesi ve kartı</td></tr>
+    <tr><td>Kalite</td><td class="c">6</td><td>Sapma/olay, DÖF, denetim, eğitim, toplantı</td></tr>
+    <tr><td>Yönetim</td><td class="c">12</td><td>Tanımlar (hesap planı, firma, döviz, banka) + sistem (kullanıcı, opsiyonlar, replikasyon, İTS, veri al, yedekleme, log)</td></tr>
+    <tr style="font-weight:bold"><td>TOPLAM</td><td class="c">82</td><td>97 benzersiz ekran dosyası · 55 liste · 38 kart · 14 döküm · 6 ayar · 5 işlem/sihirbaz</td></tr>
+  </table>
+
+  <!-- ============================================================ 8 -->
+  <h2 id="a8"><span class="no">8</span> MSSQL → PostgreSQL Geçiş Notları</h2>
+  <table>
+    <tr><th style="width:250px">Konu</th><th>Yapılacak</th><th class="c" style="width:80px">Risk</th></tr>
+    <tr><td><b>Türkçe sıralama ve İ/ı</b></td><td><code>tr-TR-x-icu</code> collation. Büyük/küçük harf duyarsız arama için <code>citext</code> ya da <code>lower()</code> üzerinde indeks. Rehber Arama'daki normalize mantığı veritabanı tarafında da aynı olmalı, yoksa "İZMİR" ile "izmir" tutmaz</td><td class="c"><span class="pill p-yok">Yüksek</span></td></tr>
+    <tr><td>Tam metin arama</td><td><code>CONTAINS</code> → <code>tsvector</code> + GIN indeks; <code>fn_Api_RehberAra</code> bunun üzerine kurulur</td><td class="c"><span class="pill p-kri">Orta</span></td></tr>
+    <tr><td>Saklı yordamlar</td><td>T-SQL → PL/pgSQL elle çevrilir. <b>Fırsat:</b> iş kuralı mümkün olduğunca uygulama katmanına alınır, veritabanında yalnız küme işlemleri kalır</td><td class="c"><span class="pill p-yok">Yüksek</span></td></tr>
+    <tr><td>Rekürsif sorgular</td><td>Hesap planı ağacı → <code>WITH RECURSIVE</code> (zaten CTE kullanılıyorsa sorunsuz)</td><td class="c"><span class="pill p-ok">Düşük</span></td></tr>
+    <tr><td>Tip ve sözdizimi</td><td><code>IDENTITY</code> → <code>GENERATED ALWAYS AS IDENTITY</code> · <code>NVARCHAR</code> → <code>text</code> · <code>MERGE</code> → <code>INSERT … ON CONFLICT</code> · <code>GETDATE()</code> → <code>now()</code> · <code>money/decimal</code> → <code>numeric</code></td><td class="c"><span class="pill p-ok">Düşük</span></td></tr>
+    <tr><td>Yedekleme / replikasyon</td><td><code>BACKUP DATABASE</code> → <code>pg_dump</code> / PITR · MSSQL merge replication → logical replication ya da uygulama seviyesinde kuyruk (mevcut Replikasyon ekranı bu modele göre tasarlandı)</td><td class="c"><span class="pill p-kri">Orta</span></td></tr>
+  </table>
+
+  <!-- ============================================================ 9 -->
+  <h2 id="a9"><span class="no">9</span> AI Mimarisi — Değişmez Kurallar</h2>
+  <p>Bu kurallar <code>gentegre-chatgpt-api-ozellikleri.html</code> dosyasındaki tasarımdan gelir ve web sürümünde
+  aynen korunacaktır:</p>
+  <ol>
+    <li><b>Model doğrudan veritabanına bağlanmaz.</b> Yalnızca API katmanında tanımlı, beyaz listeye alınmış fonksiyonları çağırabilir.</li>
+    <li><b>Yazma işlemleri taslak üretir.</b> Kayıt oluşturma/güncelleme önerisi kullanıcı onayı olmadan işlenmez.</li>
+    <li><b>Yetki API katmanında uygulanır.</b> Firma, şube, kullanıcı ve rol filtreleri fonksiyon çağrısında zorunludur — modelin isteğine bırakılmaz.</li>
+    <li><b>Her şey loglanır.</b> Prompt, çağrılan fonksiyon, parametreler, dönen sonuç, onay kararı ve maliyet <code>AILOG</code>'a yazılır.</li>
+    <li><b>Bağlam ekrandan gelir.</b> Asistan hangi modül/ekran/kayıt üzerinde olduğunu bilir; öneriler bağlama göre değişir.</li>
+  </ol>
+  <div class="kutu">
+    <b class="bs">Web'de teknik karşılık</b>
+    AI katmanı ayrı bir uç nokta grubu (<code>/api/ai/*</code>) olarak ASP.NET Core içinde kalabilir;
+    ayrı servis istenirse Python + FastAPI rahat bir seçim olur — ancak <b>zorunlu değil</b>.
+    Sağ panel (dock) ve tam ekran asistan mockup'ları hazır: <code>ai_asistan.html</code>, <code>gentegre_v5_fluent.html</code> içindeki dock.
+  </div>
+
+  <!-- ============================================================ 10 -->
+  <h2 id="a10"><span class="no">10</span> Mobil Strateji</h2>
+  <ul>
+    <li><b>Aşama 1 — PWA.</b> Web responsive yazıldığı için ek geliştirme minimum; telefon tarayıcısından çalışır, ana ekrana eklenir.</li>
+    <li><b>Aşama 2 — Capacitor.</b> Aynı React kodu native kabuğa sarılır; kamera/barkod, push bildirim, dosya erişimi, biyometrik giriş gelir.</li>
+    <li><b>Çevrimdışı.</b> Depo sayımı ve saha servis formu çevrimdışı kuyrukla çalışır (IndexedDB), bağlantı gelince senkronize olur. <code>gentegre_mobil.html</code> bu akışı gösteriyor.</li>
+    <li>Ayrı bir React Native / MAUI kod tabanı <b>açılmayacak</b>.</li>
+  </ul>
+
+  <!-- ============================================================ 11 -->
+  <h2 id="a11"><span class="no">11</span> Yol Haritası</h2>
+
+  <div class="faz">
+    <div class="bs"><span class="pill p-gor">Faz 0</span> Temel altyapı <span class="sr">tek seferlik — 97 ekran bunun üstüne oturur</span></div>
+    <div class="gv"><ul>
+      <li>Proje iskeleti: .NET çözümü, React+Vite uygulaması, OpenAPI → tip üretimi zinciri</li>
+      <li>Kimlik doğrulama, yetkilendirme, firma/şube/kullanıcı bağlamı</li>
+      <li>Sarmalayıcı bileşen katmanı (<code>GnListe</code>, <code>GnKart</code>, …) ve tasarım belirteçleri</li>
+      <li>Liste altyapısı: sunucu tarafı sayfalama, filtre, sıralama, gruplama, Excel dışa aktarım</li>
+      <li>Rapor motoru (FastReport .NET) ve döküm ekranı altyapısı</li>
+      <li>PostgreSQL şeması ve göç aracı iskeleti</li>
+    </ul></div>
+  </div>
+
+  <div class="faz">
+    <div class="bs"><span class="pill p-gor">Faz 1</span> Dikey dilim — Cari + Stok <span class="sr">mimariyi uçtan uca doğrular</span></div>
+    <div class="gv"><ul>
+      <li>Cari hesap kartı, Kişiler, Rehber Arama</li>
+      <li>Stok kartları, stok durumu, dökümler</li>
+      <li>Liste → kart → kaydet → döküm → yetki zinciri eksiksiz çalışsın</li>
+      <li>Responsive doğrulama: aynı ekranlar telefonda kart düzeninde</li>
+    </ul></div>
+  </div>
+
+  <div class="faz">
+    <div class="bs"><span class="pill p-kri">Faz 2</span> Alış/Satış belgeleri <span class="sr">en riskli kısım — öne alınıyor</span></div>
+    <div class="gv"><ul>
+      <li>Talep → sipariş → irsaliye → fatura zinciri ve belge dönüşümleri</li>
+      <li>Kalem tabloları, satır içi düzenleme, stok/rezerve etkileşimi</li>
+      <li>e-Fatura / e-Arşiv / e-İrsaliye entegrasyonu</li>
+      <li>Fişler, tahakkuklar, gider pusulası, konsinye</li>
+    </ul></div>
+  </div>
+
+  <div class="faz">
+    <div class="bs"><span class="pill p-kri">Faz 3</span> Kalan modüller <span class="sr">şablon oturduktan sonra hızlanır</span></div>
+    <div class="gv"><ul>
+      <li>Banka (çek/senet, kredi, POS), Kasa, Teklif, Servis, CRM, Proje</li>
+      <li>Üretim, İK, Demirbaş, Doküman, Kalite</li>
+      <li>Yönetim: hesap planı, opsiyonlar, kullanıcı yetkileri, log, yedekleme</li>
+    </ul></div>
+  </div>
+
+  <div class="faz">
+    <div class="bs"><span class="pill p-ai">Faz 4</span> AI katmanı <span class="sr">§9 kurallarına göre</span></div>
+    <div class="gv"><ul>
+      <li>İzinli fonksiyon kataloğu, onay akışı, AILOG</li>
+      <li>Bağlam duyarlı asistan paneli (dock) ve tam ekran asistan</li>
+      <li>İlk paket: günlük özet, doğal dil sorgu, liste özeti, açıklama üretimi, anomali uyarısı</li>
+    </ul></div>
+  </div>
+
+  <div class="faz">
+    <div class="bs"><span class="pill p-ok">Faz 5</span> Mobil <span class="sr">PWA → Capacitor</span></div>
+    <div class="gv"><ul>
+      <li>Barkodla stok sorgu, depo sayımı, onaylar, saha servis formu, cari bakiye</li>
+      <li>Çevrimdışı kuyruk ve senkronizasyon</li>
+    </ul></div>
+  </div>
+
+  <div class="kutu uy">
+    <b class="bs">Sıralama gerekçesi</b>
+    Alış/Satış bilinçli olarak <b>öne</b> alındı. En çok kolonu, en karmaşık belge dönüşümlerini ve
+    en sıkı entegrasyonları o modül barındırıyor; mimari orada ayakta kalıyorsa kalan modüller şablon işi olur.
+    Kolay modüllerle başlayıp zoru sona bırakmak, yanlış mimarinin geç fark edilmesi demektir.
+  </div>
+
+  <!-- ============================================================ 12 -->
+  <h2 id="a12"><span class="no">12</span> Riskler ve Önlemler</h2>
+  <table>
+    <tr><th style="width:250px">Risk</th><th class="c" style="width:70px">Etki</th><th>Önlem</th></tr>
+    <tr><td>Yoğun grid deneyiminin web'de bozulması — kullanıcı "eski program daha hızlıydı" der</td><td class="c"><span class="pill p-yok">Yüksek</span></td><td>Klavye kısayolları korunacak, sunucu tarafı sayfalama ve sanal kaydırma Faz 0'da çözülecek, Faz 1 sonunda gerçek kullanıcıyla ölçüm yapılacak</td></tr>
+    <tr><td>Saklı yordam göçünün tahminden uzun sürmesi</td><td class="c"><span class="pill p-yok">Yüksek</span></td><td>Yordam envanteri Faz 0'da çıkarılacak; iş kuralı uygulama katmanına taşınacak, birebir çeviri yapılmayacak</td></tr>
+    <tr><td>Para/yuvarlama farkları — eski ve yeni sistem farklı tutar üretir</td><td class="c"><span class="pill p-yok">Yüksek</span></td><td>Tüm tutar hesabı sunucuda <code>decimal</code>/<code>numeric</code> ile; istemci yalnız biçimlendirir. Faz 2'de eski sistemle karşılaştırmalı test</td></tr>
+    <tr><td>e-Belge entegrasyonunun yeniden yazılması</td><td class="c"><span class="pill p-kri">Orta</span></td><td>Entegratör SDK'sı .NET'te; mevcut XML üretim mantığı referans alınacak</td></tr>
+    <tr><td>Bileşen seti kilidi (DevExtreme bağımlılığı)</td><td class="c"><span class="pill p-kri">Orta</span></td><td>Sarmalayıcı bileşen katmanı (§5.4) — değişim maliyeti 97 ekrandan 1 bileşene iner</td></tr>
+    <tr><td>İki ürünün paralel yaşaması (Delphi + web)</td><td class="c"><span class="pill p-kri">Orta</span></td><td>Delphi sürümünde yalnız hata düzeltme; yeni özellik web'de. Kesme tarihi Faz 2 sonunda belirlenecek</td></tr>
+    <tr><td>Ekibin React/TS öğrenme süresi</td><td class="c"><span class="pill p-ok">Düşük</span></td><td>TS, tipli dilden gelen ekip için kolay. Faz 0'da bir kişi altyapıyı kurarken diğerleri mockup'ları React'e çevirerek pratik yapar</td></tr>
+  </table>
+
+  <!-- ============================================================ 13 -->
+  <h2 id="a13"><span class="no">13</span> Karar Günlüğü</h2>
+
+  <div class="karar"><div class="n">K1</div><div class="g">
+    <div class="bs">Ürün web tabanlı olacak <span class="pill p-ok">kesinleşti</span></div>
+    <div class="ac">Masaüstü Delphi sürümü yerine tarayıcı tabanlı, responsive bir ERP. Mobil bunun üzerine gelecek.</div>
+  </div></div>
+
+  <div class="karar"><div class="n">K2</div><div class="g">
+    <div class="bs">Arayüz responsive olacak <span class="pill p-ok">kesinleşti</span></div>
+    <div class="ac">Aynı ekran masaüstünde grid, dar ekranda kart düzeninde çalışacak. Bu karar bileşen seti seçimini doğrudan belirledi.</div>
+  </div></div>
+
+  <div class="karar"><div class="n">K3</div><div class="g">
+    <div class="bs">Backend C# / ASP.NET Core</div>
+    <div class="ac">Delphi ekibine en yakın dil; Windows+Linux tek kod tabanı; <code>decimal</code> para tipi; FastReport .NET ile rapor birikiminin korunması. Node ve Java değerlendirildi, elendi.</div>
+  </div></div>
+
+  <div class="karar"><div class="n">K4</div><div class="g">
+    <div class="bs">Frontend TypeScript + React</div>
+    <div class="ac">Düz JavaScript 97 ekranlık ölçekte yönetilemez; TS derleme anında hata yakalar ve backend sözleşmesiyle senkron kalır. Blazor değerlendirildi — responsive/mobil hedefiyle uyumsuzluğu nedeniyle ikinci sıraya alındı.</div>
+  </div></div>
+
+  <div class="karar"><div class="n">K5</div><div class="g">
+    <div class="bs">Bileşen seti DevExtreme React <span class="pill p-kri">öneri — onay bekliyor</span></div>
+    <div class="ac">Delphi/DevExpress ile bire bir kavram eşleşmesi, Türkçe yerelleştirme, adaptive grid. Alternatif: AG Grid Enterprise + shadcn/ui. Karar, lisans maliyeti ve bir prototip sonrası netleşecek.</div>
+  </div></div>
+
+  <div class="karar"><div class="n">K6</div><div class="g">
+    <div class="bs">Veritabanı PostgreSQL</div>
+    <div class="ac">Lisans maliyeti yok, Linux hedefiyle uyumlu, <code>numeric</code> ile para tipi birebir eşleşiyor.</div>
+  </div></div>
+
+  <div class="karar"><div class="n">K7</div><div class="g">
+    <div class="bs">Mobil için ayrı kod tabanı açılmayacak</div>
+    <div class="ac">PWA → Capacitor. React Native ve .NET MAUI değerlendirildi, iki kod tabanı yükü nedeniyle elendi.</div>
+  </div></div>
+
+  <div class="karar"><div class="n">K8</div><div class="g">
+    <div class="bs">Mikroservis mimarisi başlangıçta kullanılmayacak</div>
+    <div class="ac">Modül sınırları net olan tek servis. Ölçek gerektirdiğinde ayrıştırılır.</div>
+  </div></div>
+
+  <div class="karar"><div class="n">K9</div><div class="g">
+    <div class="bs">Mockup'lar şartname olarak kullanılacak, dönüştürülmeyecek</div>
+    <div class="ac">97 HTML dosyası dosya dosya çevrilmeyecek; her ekran açılıp yeni bileşen katmanıyla yeniden ifade edilecek.</div>
+  </div></div>
+
+  <div class="karar"><div class="n">K10</div><div class="g">
+    <div class="bs">Web kabuğu referansı <code>gentegre_v4_web.html</code></div>
+    <div class="ac"><code>v5_fluent</code> bilinçli olarak Windows 11 taklidiydi; web ürününde v4 konsepti temel alınacak, mobil referansı <code>gentegre_mobil.html</code>.</div>
+  </div></div>
+
+  <!-- ============================================================ 14 -->
+  <h2 id="a14"><span class="no">14</span> Açık Konular</h2>
+  <table>
+    <tr><th style="width:44px" class="c">#</th><th>Konu</th><th style="width:180px">Karar için gereken</th></tr>
+    <tr><td class="c">1</td><td>DevExtreme mi, AG Grid + shadcn mi? (K5)</td><td>Bir ekranın her iki setle prototipi + lisans maliyeti</td></tr>
+    <tr><td class="c">2</td><td>Ekip büyüklüğü ve süre tahmini</td><td>Faz 0 kapsamının netleşmesi</td></tr>
+    <tr><td class="c">3</td><td>Mevcut müşteri verisinin taşınma planı</td><td>Ayrı göç projesi tanımı</td></tr>
+    <tr><td class="c">4</td><td>Çoklu kiracı mı, müşteri başına kurulum mu?</td><td>Ticari model kararı — şema tasarımını etkiler</td></tr>
+    <tr><td class="c">5</td><td>Delphi sürümünün kesme tarihi</td><td>Faz 2 sonunda değerlendirilecek</td></tr>
+    <tr><td class="c">6</td><td>AI için model sağlayıcı ve maliyet tavanı</td><td>Faz 4 öncesi</td></tr>
+    <tr><td class="c">7</td><td>Barındırma: müşteri sunucusu mu, bulut mu?</td><td>Yedekleme ve replikasyon tasarımını etkiler</td></tr>
+  </table>
+
+  <div class="hint" style="margin-top:20px">
+    <b>Bu doküman yaşayan bir belgedir.</b> Her yeni karar §13'e numaralı olarak eklenir, ilgili bölüm güncellenir
+    ve sürüm numarası artırılır. Kaynak varlıklar: <code>Ekranlar\\</code> klasöründeki 97 ekran mockup'ı,
+    <code>gentegre_data.js</code> (modül/rota haritası), <code>gentegre-chatgpt-api-ozellikleri.html</code> (AI tasarımı),
+    <code>gentegre_tasinabilir.html</code> (tüm ekranlar tek dosyada, çevrimdışı inceleme için).
+  </div>
+
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre AI — Proje Dosyası</span>
+    <span>Sürüm: <b>1.0</b></span>
+    <span>Tarih: <b>15.08.2026</b></span>
+    <span>Durum: <b>Faz 0 öncesi</b></span>
+    <span style="margin-left:auto">Kararlar: 10 · Açık konu: 7 · Risk: 7</span>
+  </div>
+</div>
+
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>.gmzgizle{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>.gmzgizle{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+</style>
+<script>(function(){
+function solMenuMu(e){
+  if(!e||e.nodeType!==1) return false;
+  if(/(^|\s)(gorev|solmenu|gtusgrup)(\s|$)/.test(e.className||"")) return true;
+  return !!e.querySelector(".gtus, .ltabs, .lpane");
+}
+function g(){
+  if(location.hash.indexOf("gomulu")>=0){
+    document.body.classList.add("gomulu");
+    [".wrap",".work"].forEach(function(sel){
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(w){
+        var ilk=w.firstElementChild;
+        if(ilk) ilk.classList.toggle("gmzgizle", solMenuMu(ilk));
+      });
+    });
+  } else document.body.classList.remove("gomulu");
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",g); else g();
+addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

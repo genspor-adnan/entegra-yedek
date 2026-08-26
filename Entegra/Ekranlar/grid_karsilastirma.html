@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GenGrid ↔ AG Grid — Karşılaştırma</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* firsat satir renkleri */
+    --s-gec:#f7cfcf; --s-gec-t:#7d1f1f;   /* tah. kapanis tarihi gecmis      */
+    --s-yak:#fbe6ae; --s-yak-t:#7a5407;   /* 7 gun icinde kapanis / aksiyon gecikti */
+    --s-tem:#f6d9c0; --s-tem-t:#8a4a12;   /* 30+ gundur temas edilmemis      */
+    --s-kyb:#dcdcdc; --s-kyb-t:#7a7a7a;   /* kaybedildi / iptal              */
+    /* gorev butonu (Delphi clGorevTusuSecili / Pasif) */
+    --tus-pas:#9c71ad; --tus-sec:#1f6fbe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .btn.lost{border-color:#7b8794;background:linear-gradient(#98a3ae,#77828d);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+
+  .wrap{display:grid;grid-template-columns:222px 1fr 236px;gap:0}
+
+  /* SOL: Menu / Arama */
+  .gorev{background:#f4f7fa;border-right:1px solid var(--line2);padding:6px 6px 10px}
+  .gorev h5{margin:6px 4px 4px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .ltabs{display:flex;gap:2px;margin:-6px -6px 8px;padding:6px 6px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .ltab{flex:1;text-align:center;padding:6px 8px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);
+    border-bottom:none;border-radius:3px 3px 0 0;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .ltab.active{background:#f4f7fa;color:var(--navy);font-weight:bold}
+  .lpane{display:none}.lpane.active{display:block}
+  .gtus{display:flex;align-items:center;gap:8px;color:#fff;font-weight:bold;font-size:11.5px;
+    background:var(--tus-pas);border:1px solid rgba(0,0,0,.12);border-radius:3px;padding:8px 9px;margin-bottom:3px;cursor:default}
+  .gtus:hover{filter:brightness(1.06)}
+  .gtus.on{background:var(--tus-sec);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+  .gtus .ic{font-size:14px;width:18px;text-align:center}
+  .achips{display:flex;gap:4px;margin-bottom:8px}
+  .achips .minibtn{flex:1;justify-content:center}
+  .agrid{display:grid;grid-template-columns:70px 1fr;gap:5px 6px;align-items:center}
+  .agrid label{font-size:10.5px;color:var(--muted);text-align:right}
+  .gorev .minibtn{white-space:nowrap}
+
+  /* ORTA */
+  .center{min-width:0;display:flex;flex-direction:column}
+  .filtre{display:flex;gap:5px;padding:8px 10px 7px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line2);background:#fbfcfe}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.s-gec td{background:var(--s-gec);color:var(--s-gec-t)}
+  .dg tr.s-yak td{background:var(--s-yak);color:var(--s-yak-t)}
+  .dg tr.s-tem td{background:var(--s-tem);color:var(--s-tem-t)}
+  .dg tr.s-kyb td{background:var(--s-kyb);color:var(--s-kyb-t)}
+  .dg tr.s-kyb td.ad{text-decoration:line-through}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-izl{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .p-yen{background:#eef1f5;color:#54657a;border-color:#d7dee6}
+  .p-gor{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}
+  .p-iht{background:#e8f2fa;color:#2a6a8d;border-color:#c9e2f0}
+  .p-tek{background:#fdf1e2;color:#b5731a;border-color:#f2ddbf}
+  .p-paz{background:#f5edfb;color:#7a4fb0;border-color:#e3d3f0}
+  .tip{display:inline-block;min-width:30px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;padding:1px 5px;border:1px solid}
+  .t-yuk{background:#fbe4e4;border-color:#efc4c4;color:#a5322f}
+  .t-ort{background:#fdf1e2;border-color:#f0dcbd;color:#96651a}
+  .t-dus{background:#e5ecf8;border-color:#c6d7ef;color:#2b5c95}
+  /* mini bar */
+  .bar{height:9px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:54px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+
+  /* alt detay */
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 12px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+  .gridtb{display:flex;gap:4px;padding:0 0 7px;align-items:center;flex-wrap:wrap}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px}
+
+  /* SAG */
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:8px 0}
+  .side h5{margin:0;padding:7px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11px;padding:3px 12px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .tvsep{height:1px;background:var(--line2);margin:7px 10px}
+  .sidebtns{display:flex;flex-direction:column;gap:4px;padding:4px 10px}
+  .urun{margin:0 10px;border:1px solid var(--line);border-radius:4px;background:#fff;padding:9px;text-align:center}
+  .urun .foto{height:82px;border:1px solid var(--line2);border-radius:3px;background:linear-gradient(#fff,#f2f6fa);
+    display:flex;align-items:center;justify-content:center;font-size:30px;color:#9fb3c8}
+  .urun .nm{font-size:11.5px;font-weight:bold;color:var(--navy);margin-top:7px;line-height:1.35}
+  .urun .mt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .depo{display:flex;align-items:center;gap:7px;padding:3px 12px;font-size:11px}
+  .depo .ad{width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+  .depo .mk{width:44px;text-align:right;font-family:"Segoe UI",Tahoma}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:22px;padding:0 6px;font-size:11.5px;
+    display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:5px;top:2px;color:var(--muted);font-size:10px}
+
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+<style>
+  body{font-size:13px;line-height:1.55}
+  .win{max-width:1220px}
+  h2{font-size:15px;color:var(--navy);margin:24px 14px 8px;padding-bottom:5px;border-bottom:2px solid var(--head2);
+     display:flex;align-items:center;gap:8px}
+  h2 .no{background:var(--navy);color:#fff;border-radius:3px;font-size:11px;padding:2px 7px;font-weight:bold}
+  h3{font-size:13px;color:#2b4a6b;margin:15px 14px 5px}
+  p,ul,ol{margin:7px 14px}ul,ol{padding-left:22px}li{margin:3px 0}
+  code{background:#eef2f7;border:1px solid #dde5ee;border-radius:2px;padding:0 4px;font-size:11.5px;
+    font-family:Consolas,monospace;color:#2b4a6b}
+  table.krs{border-collapse:collapse;width:calc(100% - 28px);margin:9px 14px;font-size:12px}
+  table.krs th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line);text-align:left;
+    padding:6px 8px;font-size:11px;color:#3a5573}
+  table.krs td{border:1px solid var(--line2);padding:5px 8px;vertical-align:top}
+  table.krs tr:nth-child(even) td{background:#fbfcfd}
+  table.krs td.n{text-align:right;font-family:"Segoe UI",Tahoma;white-space:nowrap}
+  table.krs .kaz{background:#eaf7ef!important;font-weight:bold;color:#1f6b3d}
+  table.krs .kyb{color:#8a4a4a}
+  table.krs th.g{background:linear-gradient(#e6f0fb,#d3e4f7);color:#14315a}
+  table.krs th.a{background:linear-gradient(#f2ebfa,#e4d6f3);color:#5b3a86}
+  .kutu{margin:10px 14px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:3px;
+    background:#f7fafd;padding:9px 12px;font-size:12.5px}
+  .kutu.uy{border-left-color:#d8a013;background:#fdf9ef}
+  .kutu.teh{border-left-color:#c0504d;background:#fdf2f2}
+  .kutu.ok{border-left-color:#2e7d46;background:#f3faf5}
+  .kutu b.bs{display:block;margin-bottom:3px;color:var(--navy)}
+  .bar2{height:16px;border-radius:3px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;
+    display:flex;min-width:150px}
+  .bar2 span{display:block;height:100%;font-size:9.5px;color:#fff;text-align:right;padding-right:4px;line-height:16px}
+  .bg{background:#2f6db3}.ba{background:#7a4fb0}
+  .karo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 14px}
+  .kk{border:1px solid var(--line);border-radius:5px;padding:11px 13px;background:#fbfcfd}
+  .kk.g{border-top:3px solid #2f6db3}.kk.a{border-top:3px solid #7a4fb0}
+  .kk h4{margin:0 0 6px;font-size:13px;color:var(--navy)}
+  .kk ul{margin:5px 0 0;padding-left:18px;font-size:12px}
+  .kk .rk{font-size:10px;font-weight:bold;border-radius:3px;padding:1px 7px;border:1px solid;display:inline-block;margin-bottom:5px}
+  .kk.g .rk{background:#e6f0fb;border-color:#cfe0f4;color:#2f6db3}
+  .kk.a .rk{background:#f5edfb;border-color:#e3d3f0;color:#7a4fb0}
+  .senaryo{margin:9px 14px;border:1px solid var(--line2);border-radius:4px;overflow:hidden}
+  .senaryo .b{background:linear-gradient(#f4f7fb,#e7eef6);padding:6px 10px;font-weight:bold;font-size:12.5px;
+    color:var(--navy);border-bottom:1px solid var(--line2);display:flex;gap:8px;align-items:center}
+  .senaryo .b .sec{margin-left:auto;font-size:11px;padding:1px 9px;border-radius:10px;font-weight:bold;border:1px solid}
+  .senaryo .b .sec.g{background:#e6f0fb;border-color:#cfe0f4;color:#2f6db3}
+  .senaryo .b .sec.a{background:#f5edfb;border-color:#e3d3f0;color:#7a4fb0}
+  .senaryo .b .sec.i{background:#e9f6ed;border-color:#cbe7d3;color:#2e7d46}
+  .senaryo .g2{padding:8px 12px;font-size:12px}
+  .canli{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 14px}
+  .canli .c{border:1px solid var(--line);border-radius:5px;overflow:hidden;background:#fff}
+  .canli .c .bh{padding:6px 10px;font-weight:bold;font-size:12px;color:#fff}
+  .canli .c.g .bh{background:linear-gradient(#2f6db3,#1f5187)}
+  .canli .c.a .bh{background:linear-gradient(#7a4fb0,#5b3a86)}
+  .canli iframe{width:100%;height:440px;border:0;display:block}
+  .hint{font-size:11px;color:var(--muted);margin:8px 14px;line-height:1.5}
+  .statusbar{display:flex;gap:14px;padding:7px 14px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11.5px;color:var(--muted);flex-wrap:wrap}
+  @media print{body{background:#fff;padding:0}.win{box-shadow:none;border:0;max-width:none}.canli{display:none}}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> GenGrid ↔ AG Grid Enterprise — Karşılaştırma
+    <span class="sp">Aynı ekran, aynı veri · ölçümler Chromium 1400×800 · 15.08.2026</span>
+  </div>
+
+  <div class="kutu">
+    <b class="bs">Yöntem</b>
+    Alış Faturası izlem girişi ekranı <b>iki kez</b> yazıldı — biri kendi <code>GenGrid</code>'imizle,
+    biri AG Grid Enterprise 36.1 ile. Aynı veri, aynı kolonlar, aynı master-detail, aynı doğrulama kuralları.
+    Aşağıdaki sayıların hepsi <b>çalıştırılarak ölçüldü</b>; tahmin ya da üretici iddiası değil.
+  </div>
+
+  <!-- =========================================================== 1 -->
+  <h2 id="k1"><span class="no">1</span> Özet</h2>
+  <div class="karo">
+    <div class="kk g"><span class="rk">A · GenGrid</span>
+      <h4>Kendi sarmalayıcımız</h4>
+      <ul>
+        <li><b>412 satır</b> kod · 13 KB</li>
+        <li>Ekran dosyası <b>52 KB</b></li>
+        <li>Dış bağımlılık <b>yok</b>, lisans <b>yok</b></li>
+        <li>1.000 satıra kadar <b>daha hızlı</b> açılıyor</li>
+        <li>Tam görsel kontrol — Gentegre görünümü birebir</li>
+        <li class="kyb">10.000 satırda <b>çöküyor</b> (sanal kaydırma yok)</li>
+        <li class="kyb">Gruplama, pivot, dondurulmuş kolon yok</li>
+      </ul>
+    </div>
+    <div class="kk a"><span class="rk">B · AG Grid Enterprise</span>
+      <h4>Ticari kütüphane</h4>
+      <ul>
+        <li>Motor <b>3,18 MB</b> · ekran dosyası <b>3,21 MB</b></li>
+        <li>Satır sayısından <b>bağımsız</b> performans</li>
+        <li>Gruplama, pivot, araç paneli, dondurulmuş kolon hazır</li>
+        <li>Erişilebilirlik ve klavye desteği olgun</li>
+        <li class="kyb">İlk açılış <b>~410 ms</b> sabit maliyet</li>
+        <li class="kyb">Lisans: geliştirici başına yıllık</li>
+        <li class="kyb">Lisanssız kullanımda <b>filigran</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- =========================================================== 2 -->
+  <h2 id="k2"><span class="no">2</span> Ölçüm — satır sayısına göre</h2>
+  <p>Değerler milisaniye; <b>düşük olan iyi</b>. Yeşil hücre o testin kazananı.</p>
+
+  <h3>100 satır — tipik sayfa boyutu</h3>
+  <table class="krs">
+    <tr><th style="width:230px">Ölçüm</th><th class="g" style="width:110px">GenGrid</th>
+      <th class="a" style="width:110px">AG Grid</th><th>Yorum</th></tr>
+    <tr><td>Sayfa açılışı (toplam)</td><td class="n kaz">138</td><td class="n">429</td>
+      <td>3,18 MB kütüphaneyi ayrıştırma maliyeti</td></tr>
+    <tr><td>Grid ilk çizim</td><td class="n kaz">21,8</td><td class="n">151,9</td><td>—</td></tr>
+    <tr><td>Metin sıralama</td><td class="n kaz">15,1</td><td class="n">36,4</td><td>ikisi de anında</td></tr>
+    <tr><td>Filtre uygula</td><td class="n kaz">2,7</td><td class="n">10,0</td><td>—</td></tr>
+    <tr><td>Kolon gizle</td><td class="n kaz">14,9</td><td class="n">22,6</td><td>—</td></tr>
+    <tr><td>Tümünü seç</td><td class="n">9,4</td><td class="n kaz">1,3</td><td>—</td></tr>
+    <tr><td>DOM düğüm sayısı</td><td class="n">1.248</td><td class="n kaz">931</td><td>—</td></tr>
+    <tr><td>JS bellek</td><td class="n kaz">10 MB</td><td class="n">15 MB</td><td>—</td></tr>
+  </table>
+  <div class="kutu ok"><b class="bs">100 satırda kullanıcı farkı hissetmez</b>
+  Hatta GenGrid <b>3 kat hızlı açılıyor</b> — çünkü indirilecek 3 MB kütüphane yok.</div>
+
+  <h3>500 satır</h3>
+  <table class="krs">
+    <tr><th style="width:230px">Ölçüm</th><th class="g" style="width:110px">GenGrid</th>
+      <th class="a" style="width:110px">AG Grid</th><th>Yorum</th></tr>
+    <tr><td>Sayfa açılışı</td><td class="n kaz">218</td><td class="n">408</td><td>—</td></tr>
+    <tr><td>Grid ilk çizim</td><td class="n kaz">57,7</td><td class="n">142,7</td><td>—</td></tr>
+    <tr><td>Metin sıralama</td><td class="n">63,1</td><td class="n kaz">31,0</td><td>makas kapanmaya başlıyor</td></tr>
+    <tr><td>Kolon gizle</td><td class="n">47,8</td><td class="n kaz">26,5</td><td>—</td></tr>
+    <tr><td>DOM düğüm sayısı</td><td class="n">6.048</td><td class="n kaz">931</td><td><b>sabit kalıyor</b></td></tr>
+  </table>
+
+  <h3>1.000 satır</h3>
+  <table class="krs">
+    <tr><th style="width:230px">Ölçüm</th><th class="g" style="width:110px">GenGrid</th>
+      <th class="a" style="width:110px">AG Grid</th><th>Yorum</th></tr>
+    <tr><td>Sayfa açılışı</td><td class="n">561</td><td class="n kaz">434</td><td>denge noktası burası</td></tr>
+    <tr><td>Grid ilk çizim</td><td class="n kaz">127,4</td><td class="n">147,7</td><td>—</td></tr>
+    <tr><td>Metin sıralama</td><td class="n">146,2</td><td class="n kaz">40,4</td><td>3,6× fark</td></tr>
+    <tr><td>Tutar sıralama</td><td class="n">162,2</td><td class="n kaz">40,5</td><td>4× fark</td></tr>
+    <tr><td>Kolon gizle</td><td class="n">95,8</td><td class="n kaz">36,5</td><td>—</td></tr>
+    <tr><td>Tümünü seç</td><td class="n">104,3</td><td class="n kaz">4,2</td><td>25× fark</td></tr>
+    <tr><td>DOM düğüm sayısı</td><td class="n">12.048</td><td class="n kaz">931</td><td>—</td></tr>
+  </table>
+  <div class="kutu uy"><b class="bs">1.000 satır kırılma noktası</b>
+  GenGrid hâlâ kullanılabilir (en yavaş işlem 162 ms) ama fark açılmaya başladı.
+  Bunun üstünde AG Grid'in sabit maliyeti kendini amorti ediyor.</div>
+
+  <h3>10.000 satır</h3>
+  <table class="krs">
+    <tr><th style="width:230px">Ölçüm</th><th class="g" style="width:110px">GenGrid</th>
+      <th class="a" style="width:110px">AG Grid</th><th>Fark</th></tr>
+    <tr><td>Sayfa açılışı</td><td class="n kyb">3.948</td><td class="n kaz">414</td><td class="n">9,5×</td></tr>
+    <tr><td>Grid ilk çizim</td><td class="n kyb">1.238,5</td><td class="n kaz">153,8</td><td class="n">8×</td></tr>
+    <tr><td>Metin sıralama</td><td class="n kyb">854,3</td><td class="n kaz">57,3</td><td class="n">15×</td></tr>
+    <tr><td>Tutar sıralama</td><td class="n kyb">1.302,1</td><td class="n kaz">47,3</td><td class="n">27×</td></tr>
+    <tr><td>Filtre temizle</td><td class="n kyb">974,7</td><td class="n kaz">29,2</td><td class="n">33×</td></tr>
+    <tr><td><b>Kolon gizle</b></td><td class="n kyb">3.625</td><td class="n kaz">38,7</td><td class="n"><b>94×</b></td></tr>
+    <tr><td>Tümünü seç</td><td class="n kyb">1.121,6</td><td class="n kaz">18</td><td class="n">62×</td></tr>
+    <tr><td>DOM düğüm sayısı</td><td class="n kyb">120.048</td><td class="n kaz">931</td><td class="n">129×</td></tr>
+    <tr><td>Ekranda çizilen satır</td><td class="n kyb">10.000</td><td class="n kaz">21</td><td class="n">—</td></tr>
+    <tr><td>JS bellek</td><td class="n">17 MB</td><td class="n">22 MB</td><td class="n">—</td></tr>
+  </table>
+  <div class="kutu teh"><b class="bs">50.000 satır: GenGrid tarayıcıyı kilitliyor</b>
+  90 saniyede sayfa açılmadı, test iptal edildi. AG Grid aynı veride <b>414 ms</b>'de açıldı.
+  Sebep tek: GenGrid her satırı DOM'a çiziyor, AG Grid yalnız <b>ekranda görünen 21 satırı</b> çiziyor
+  (sanal kaydırma). DOM düğüm sayısının 931'de sabit kalması bunun kanıtı.</div>
+
+  <h3>Görsel özet — 10.000 satırda toplam işlem süresi</h3>
+  <div style="margin:9px 14px">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:5px">
+      <span style="width:74px;font-size:11.5px">GenGrid</span>
+      <span class="bar2" style="flex:1"><span class="bg" style="width:100%">13.075 ms</span></span></div>
+    <div style="display:flex;align-items:center;gap:9px">
+      <span style="width:74px;font-size:11.5px">AG Grid</span>
+      <span class="bar2" style="flex:1"><span class="ba" style="width:5.5%">759 ms</span></span></div>
+  </div>
+
+  <!-- =========================================================== 3 -->
+  <h2 id="k3"><span class="no">3</span> Özellik karşılaştırması</h2>
+  <table class="krs">
+    <tr><th style="width:250px">Özellik</th><th class="g" style="width:90px">GenGrid</th>
+      <th class="a" style="width:90px">AG Grid</th><th>Not</th></tr>
+    <tr><td>İlk kolon onay kutusu (kural)</td><td class="kaz">✔ yerleşik</td><td>✔ ayarla</td>
+      <td>GenGrid'de kural, AG'de <code>rowSelection</code> ayarı</td></tr>
+    <tr><td>Sıralama · çoklu kolon</td><td>✔</td><td>✔</td><td>Türkçe sıralama ikisinde de doğru</td></tr>
+    <tr><td>Filtre satırı</td><td>✔</td><td>✔</td><td>AG'de tip başına hazır filtre bileşeni</td></tr>
+    <tr><td>Set filtresi (değer listesinden seç)</td><td>✗</td><td class="kaz">✔</td><td>~90 satır iş</td></tr>
+    <tr><td>Filtre oluşturucu (AND/OR ağacı)</td><td>✗</td><td class="kaz">✔</td><td>~250 satır iş</td></tr>
+    <tr><td>Kolon gizle / göster</td><td>✔</td><td>✔</td><td>—</td></tr>
+    <tr><td>Kolon sırası değiştirme</td><td>✔ (panelde sürükle)</td><td class="kaz">✔ (başlıktan sürükle)</td>
+      <td>AG'de başlığı doğrudan sürüklüyorsun</td></tr>
+    <tr><td>Kolon genişliği sürükleme</td><td>✗</td><td class="kaz">✔</td><td>~60 satır iş</td></tr>
+    <tr><td>Master-detail</td><td>✔</td><td>✔</td><td>ikisi de aynı detay HTML'ini kullanıyor</td></tr>
+    <tr><td>Alt toplam satırı</td><td>✔</td><td>✔</td><td>—</td></tr>
+    <tr><td>Seçim · Ctrl / Shift / klavye</td><td>✔</td><td>✔</td><td>—</td></tr>
+    <tr><td><b>Sanal kaydırma</b></td><td class="kyb">✗</td><td class="kaz">✔</td><td><b>en kritik fark</b> · ~200 satır iş</td></tr>
+    <tr><td>Gruplama (grup kutusu)</td><td class="kyb">✗</td><td class="kaz">✔</td><td>~350 satır iş</td></tr>
+    <tr><td>Pivot</td><td class="kyb">✗</td><td class="kaz">✔</td><td>~800+ satır iş — pratikte yazılmaz</td></tr>
+    <tr><td>Dondurulmuş kolon</td><td>✗</td><td class="kaz">✔</td><td>~120 satır iş</td></tr>
+    <tr><td>Araç paneli (yan panel)</td><td>✗ (açılır pencere)</td><td class="kaz">✔</td><td>—</td></tr>
+    <tr><td>Satır içi düzenleme (hücre/satır/toplu)</td><td>✗</td><td class="kaz">✔</td><td>~300 satır iş</td></tr>
+    <tr><td>Excel dışa aktarım (biçimli)</td><td>✗</td><td class="kaz">✔</td><td>—</td></tr>
+    <tr><td>Kolon düzeni kaydetme</td><td>kısmi</td><td class="kaz">✔</td><td>—</td></tr>
+    <tr><td>Erişilebilirlik (ekran okuyucu, ARIA)</td><td>zayıf</td><td class="kaz">✔ olgun</td><td>küçümsenmemeli</td></tr>
+    <tr><td>Türkçe yerelleştirme</td><td class="kaz">✔ doğuştan</td><td>✔ sözlükle</td><td>—</td></tr>
+    <tr><td>Görsel uyum (Gentegre görünümü)</td><td class="kaz">✔ birebir</td><td>tema ile yaklaşık</td><td>—</td></tr>
+    <tr><td>Dosya boyutu</td><td class="kaz">13 KB</td><td>3,18 MB</td><td>245×</td></tr>
+    <tr><td>Lisans maliyeti</td><td class="kaz">yok</td><td>geliştirici/yıl</td><td>—</td></tr>
+    <tr><td>Hata çıkarsa kim düzeltir</td><td>biz</td><td class="kaz">üretici</td><td>iki tarafı da var</td></tr>
+  </table>
+
+  <!-- =========================================================== 4 -->
+  <h2 id="k4"><span class="no">4</span> Kırılma noktası ve bizim gerçeğimiz</h2>
+  <div class="kutu"><b class="bs">Kritik soru: istemciye kaç satır geliyor?</b>
+  Uygulama Planı §3.1 liste sözleşmesi <b>sunucu tarafı sayfalama</b> diyor:
+  varsayılan 100, üst sınır 500 satır. Filtre ve sıralama da sunucuda.
+  Bu doğruysa <b>istemci hiçbir zaman 10.000 satır görmeyecek</b> — ve yukarıdaki
+  felaket tablosu hiç yaşanmayacak.</div>
+
+  <table class="krs">
+    <tr><th style="width:200px">Ekran türü</th><th style="width:120px">Tipik satır</th>
+      <th style="width:130px">GenGrid yeter mi</th><th>Neden</th></tr>
+    <tr><td>Liste ekranları (55 adet)</td><td class="n">100 – 500</td><td class="kaz">✔ evet</td>
+      <td>sunucu sayfalıyor</td></tr>
+    <tr><td>Belge kalemleri (fatura, sipariş)</td><td class="n">1 – 200</td><td class="kaz">✔ evet</td>
+      <td>zaten az satır</td></tr>
+    <tr><td>İzlem / lot satırları</td><td class="n">1 – 50</td><td class="kaz">✔ evet</td><td>—</td></tr>
+    <tr><td>Hesap planı ağacı</td><td class="n">200 – 2.000</td><td>⚠ sınırda</td>
+      <td>ağaç kapalıyken az, tümü açıkken çok</td></tr>
+    <tr><td>Döküm sonucu / rapor önizleme</td><td class="n">1.000 – 50.000</td><td class="kyb">✗ hayır</td>
+      <td>tüm sonucu göstermek isteniyor</td></tr>
+    <tr><td>Analiz / pivot sekmesi</td><td class="n">—</td><td class="kyb">✗ hayır</td>
+      <td>pivot yazmak mantıksız</td></tr>
+    <tr><td>Excel'e aktarmadan önce "tümünü göster"</td><td class="n">10.000+</td><td class="kyb">✗ hayır</td>
+      <td>—</td></tr>
+  </table>
+
+  <!-- =========================================================== 5 -->
+  <h2 id="k5"><span class="no">5</span> Senaryolar — hangisi ne zaman</h2>
+
+  <div class="senaryo"><div class="b">Senaryo 1 — Yalnız GenGrid
+    <span class="sec g">maliyet: 0 · risk: orta</span></div>
+    <div class="g2">Tüm ekranlar kendi gridimizle. Eksik kalan sanal kaydırma (~200 satır),
+      dondurulmuş kolon (~120), kolon genişliği (~60) sonradan yazılır — toplam <b>~400 satır</b> ek iş.
+      Pivot ve gruplama için ayrı çözüm gerekir: <b>Analiz sekmesi sunucuda üretilen tabloyu gösterir</b>
+      (zaten §3.8'de "bicim: veri" var). Döküm sonuçları da sunucuda sayfalanır.
+      <br><b>Riski:</b> ileride "şu grid özelliği lazım" dedikçe kendi kütüphanemizi yazmaya başlarız.</div></div>
+
+  <div class="senaryo"><div class="b">Senaryo 2 — Yalnız AG Grid
+    <span class="sec a">maliyet: lisans · risk: düşük</span></div>
+    <div class="g2">Her ekran AG Grid. Grid tarafında bir daha hiçbir şey yazmayız, her özellik hazır.
+      <br><b>Bedeli:</b> her ekranda 3,18 MB (önbelleğe alınır, bir kez iner), her açılışta ~410 ms sabit maliyet,
+      geliştirici başına yıllık lisans, ve görsel olarak "AG Grid gibi görünen" bir ERP.
+      <br><b>Riski:</b> düşük — ama bağımlılık ve maliyet kalıcı.</div></div>
+
+  <div class="senaryo"><div class="b">Senaryo 3 — GenGrid varsayılan, AG Grid ağır ekranlarda
+    <span class="sec i">önerilen</span></div>
+    <div class="g2">Ekranların <b>%90'ı</b> (liste, kalem, izlem, kart içi tablolar) GenGrid ile —
+      hafif, hızlı, bizim görünümümüzde. <b>Analiz/pivot, döküm sonucu ve hesap planı ağacı</b> gibi
+      birkaç ekran AG Grid ile. Sarmalayıcı katman zaten bunu mümkün kılıyor:
+      <code>&lt;GenGrid motor="ag"&gt;</code> — ekran kodu değişmez, içeride hangi motorun
+      çalıştığını bilmez.
+      <br><b>Bedeli:</b> iki motoru da bakmak; AG Grid yalnız o ekranlarda yükleneceği için
+      ana paket şişmez (kod bölme ile ayrı yüklenir).
+      <br><b>Lisans:</b> yine gerekir — AG Grid'i tek ekranda da kullansan lisanslısın.</div></div>
+
+  <div class="kutu uy"><b class="bs">Lisans kararı senaryodan bağımsız</b>
+  AG Grid'i tek bir ekranda bile kullanacaksan Enterprise lisansı almak zorundasın.
+  Yani Senaryo 3'ün lisans maliyeti Senaryo 2 ile <b>aynı</b>. Senaryo 3'ün kazancı maliyette değil,
+  <b>performans ve görsel tutarlılıkta</b>.</div>
+
+  <!-- =========================================================== 6 -->
+  <h2 id="k6"><span class="no">6</span> Benim okumam</h2>
+  <p>Ölçümler tek bir şeyi net söylüyor: <b>sanal kaydırma</b>. Diğer her farkın bir fiyatı var ve
+  makul; sanal kaydırmanın yokluğu ise 10.000 satırda ürünü kullanılamaz hâle getiriyor.</p>
+  <ul>
+    <li><b>Sunucu sayfalaması kararında ısrar edilirse</b> (§3.1), GenGrid'in eksiği pratikte
+      yalnız <b>pivot</b> olarak kalır — o da Analiz sekmesini sunucuda üretmekle çözülür.</li>
+    <li><b>Sayfalamadan taviz verilirse</b> — "kullanıcı tüm listeyi görmek istiyor" denirse —
+      GenGrid'e sanal kaydırma yazmak <b>zorunlu</b> hâle gelir (~200 satır, orta zorluk).</li>
+    <li>Kararı asıl belirleyecek olan <b>pivot ve gruplama</b> ihtiyacının ne kadar gerçek olduğu.
+      Bugün 55 listenin hepsinde "Grup" ve "Analiz" sekmesi çizili — ama bunların kaçı gerçekten
+      kullanılıyor, Delphi sürümünün kullanım logundan çıkarılabilir. <b>Bu veri kararı tek başına verir.</b></li>
+  </ul>
+
+  <div class="kutu ok"><b class="bs">Önerim</b>
+  Faz 1'e <b>GenGrid ile</b> başlayın. Cari + Stok + Satış Faturası dikey dilimi 500 satırın altında
+  çalışır, ölçümler bunu gösteriyor. Faz 1 sonunda gerçek kullanıcıyla <b>K-1 kapısı</b> testi yapılırken
+  "liste yavaş mı" sorusunun cevabı elde olur. Lisans kararı o zaman verilir — <b>şimdi vermek zorunda değilsiniz</b>,
+  ve sarmalayıcı katman sayesinde geç kalmış olmazsınız.</div>
+
+  <!-- =========================================================== 7 -->
+  <h2 id="k7"><span class="no">7</span> Canlı — iki sürüm yan yana</h2>
+  <div class="canli">
+    <div class="c g"><div class="bh">A · GenGrid — 52 KB</div>
+      <iframe src="alis_izlem_gen.html#gomulu" title="GenGrid"></iframe></div>
+    <div class="c a"><div class="bh">B · AG Grid Enterprise — 3,21 MB</div>
+      <iframe src="alis_izlem_ag.html#gomulu" title="AG Grid"></iframe></div>
+  </div>
+  <div class="hint">Çerçeveler dar olduğu için kolonlar sıkışık görünür — tam deneyim için ekranları
+  ayrı ayrı açın: <code>alis_izlem_gen.html</code> ve <code>alis_izlem_ag.html</code>.
+  AG Grid sürümünde sağ altta <b>"For Trial Use Only"</b> filigranı görünür; lisans alınmadan üründe kullanılamaz.</div>
+
+  <div class="statusbar">
+    <span>GenGrid ↔ AG Grid karşılaştırması</span>
+    <span>Ölçüm: <b>Chromium · 1400×800</b></span>
+    <span>AG Grid: <b>36.1.0 Enterprise (deneme)</b></span>
+    <span>GenGrid: <b>412 satır</b></span>
+    <span style="margin-left:auto">İlgili karar: <b>K5</b> — açık</span>
+  </div>
+</div>
+
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>.gmzgizle{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>.gmzgizle{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+</style>
+<script>(function(){
+function solMenuMu(e){
+  if(!e||e.nodeType!==1) return false;
+  if(/(^|\s)(gorev|solmenu|gtusgrup)(\s|$)/.test(e.className||"")) return true;
+  return !!e.querySelector(".gtus, .ltabs, .lpane");
+}
+function g(){
+  if(location.hash.indexOf("gomulu")>=0){
+    document.body.classList.add("gomulu");
+    [".wrap",".work"].forEach(function(sel){
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(w){
+        var ilk=w.firstElementChild;
+        if(ilk) ilk.classList.toggle("gmzgizle", solMenuMu(ilk));
+      });
+    });
+  } else document.body.classList.remove("gomulu");
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",g); else g();
+addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

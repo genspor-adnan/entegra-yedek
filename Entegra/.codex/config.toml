@@ -1,0 +1,19 @@
+[mcp_servers.mssql-bilim]
+command = "cmd"
+args = [
+    "/c",
+    "npx",
+    "-y",
+    "@executeautomation/database-server",
+    "--sqlserver",
+    "--server",
+    'localhost\SQLEXPRESS',
+    "--database",
+    "BILIM",
+    "--user",
+    "sa",
+    "--password",
+    "FETAGEN",
+    "--trustServerCertificate",
+    "true",
+]

@@ -25,13 +25,13 @@ object OpsiyonDlg: TOpsiyonDlg
     Caption = 'Label1'
   end
   object PageControl1: TPageControl
-    Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 706
     Height = 540
     ActivePage = TabSheet1
     Align = alClient
+    Images = Tablo.PNGImageList2
     TabOrder = 0
     OnChange = PageControl1Change
     object TabSheet1: TTabSheet
@@ -533,23 +533,23 @@ object OpsiyonDlg: TOpsiyonDlg
       object cxLabelTamListeSinir: TcxLabel
         Left = 583
         Top = 454
-        Hint =
-          'T'#252'm'#252'n'#252' Y'#252'kle / filtre-s'#305'ralama i'#231'in '#231'ekilecek en fazla kay'#305't. 0 = s' +
-          #305'n'#305'rs'#305'z (SQL Express'#39'te '#246'nerilmez).'
+        Hint = 
+          'T'#252'm'#252'n'#252' Y'#252'kle / filtre-s'#305'ralama i'#231'in '#231'ekilecek en fazla kay'#305't. 0 ' +
+          '= s'#305'n'#305'rs'#305'z (SQL Express'#39'te '#246'nerilmez).'
+        Caption = #220'st s'#305'n'#305'r'
         ParentShowHint = False
         ShowHint = True
-        Caption = #220'st s'#305'n'#305'r'
       end
       object SpinTamListeSinir: TcxSpinEdit
         Left = 640
         Top = 452
-        Hint =
-          'T'#252'm'#252'n'#252' Y'#252'kle / filtre-s'#305'ralama i'#231'in '#231'ekilecek en fazla kay'#305't. 0 = s' +
-          #305'n'#305'rs'#305'z (SQL Express'#39'te '#246'nerilmez).'
+        Hint = 
+          'T'#252'm'#252'n'#252' Y'#252'kle / filtre-s'#305'ralama i'#231'in '#231'ekilecek en fazla kay'#305't. 0 ' +
+          '= s'#305'n'#305'rs'#305'z (SQL Express'#39'te '#246'nerilmez).'
         ParentShowHint = False
-        ShowHint = True
+        Properties.AssignedValues.MinValue = True
         Properties.MaxValue = 1000000.000000000000000000
-        Properties.MinValue = 0.000000000000000000
+        ShowHint = True
         TabOrder = 29
         Value = 5000
         Width = 55
@@ -2849,8 +2849,8 @@ object OpsiyonDlg: TOpsiyonDlg
   object dtsStilKosul: TDataSource
     DataSet = tabStilKosul
     OnStateChange = dtsStilKosulStateChange
-    Left = 52
-    Top = 79
+    Left = 132
+    Top = 71
   end
   object tabStilKosul: TFDQuery
     BeforeOpen = tabStilKosulBeforeOpen

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sapma / Olay Kartı — Mockup</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;
+    --sel:#d7e7fb;--selbd:#98c2ee;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--grpbg:#fbfcfd;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1010px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#b23b3b,#8a2828);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#f0a8a8;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.9;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#b23b3b;background:linear-gradient(#d05f5f,#b23b3b);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px}
+  .idstrip{display:grid;grid-template-columns:132px 100px 1fr 132px 132px;gap:10px;padding:10px 12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .idstrip.alt{grid-template-columns:repeat(5,1fr);background:linear-gradient(#fbfcfe,#f2f6fa)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}.fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;color:var(--ink);display:flex;align-items:center}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative}.combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .chip.acik{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}.chip.islem{background:#fdf6e3;color:#a9791a;border:1px solid #eeddb4}.chip.bitti{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}
+  .chip.p-yuksek{background:#fdecec;color:#b23b3b;border:1px solid #f2c9c9}
+  .chip.tekrar{background:#fdeede;color:#8a4a12;border:1px solid #f0d3b3}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);margin-top:2px;flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:14px}.pane.active{display:block}
+  .row{display:flex;gap:14px}.col{flex:1;min-width:0}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;margin-left:auto;background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grid2{display:grid;grid-template-columns:120px 1fr;gap:8px 10px;align-items:center}.grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .full{grid-column:1 / -1}
+  textarea.inp{height:52px;padding:5px 6px;resize:none;line-height:1.4}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}
+  .dg tr.sel td{background:var(--sel)}.dg tr:hover td{background:#f2f7fd}
+  .dg .c{text-align:center}.amt{text-align:right;font-family:"Segoe UI",Tahoma}
+  .gridtb{display:flex;gap:4px;padding:5px 0 0;flex-wrap:wrap}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px}
+  .minibtn.on{background:linear-gradient(#d05f5f,#b23b3b);color:#fff;border-color:#b23b3b;font-weight:bold}
+  .badge{font-size:10px;padding:1px 7px;border-radius:3px;font-weight:bold}
+  .badge.on{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}.badge.dev{background:#fdf6e3;color:#a9791a;border:1px solid #eeddb4}
+  .badge.no{background:#fdecec;color:#b23b3b;border:1px solid #f2c9c9}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}.maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}.req-note{color:var(--req)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+  .kpi{border:1px solid var(--line2);border-radius:4px;background:linear-gradient(#fff,#f6f9fc);padding:9px 11px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}.kpi .v{font-size:16px;font-weight:bold;color:var(--navy);margin-top:3px;font-family:"Segoe UI",Tahoma}
+  .kpi .v.pos{color:#2e7d46}.kpi .v.neg{color:#b23b3b}.kpi .s{font-size:10px;color:var(--muted);margin-top:2px}
+  .banner{background:#fdf6e9;border:1px solid #f0dcbb;color:#8a5a1e;border-radius:5px;padding:7px 10px;font-size:11.5px;margin-bottom:10px;display:flex;gap:8px;align-items:center}
+  .banner.g{background:#eef7ee;border-color:#cfe8cf;color:#2e7d46}
+  .banner.r{background:#fdeeee;border-color:#f0cccc;color:#b23b3b}
+  .foot{display:flex;gap:14px;margin-top:6px}.notes{flex:1}.notes textarea{width:100%;height:80px;border:1px solid var(--line);border-radius:3px;padding:6px;font-family:inherit;font-size:12px;resize:none}
+  .totals{width:320px;border:1px solid var(--line2);border-radius:5px;background:linear-gradient(#fff,#f6f9fc);padding:8px 10px}
+  .totals .r{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px dashed var(--line2)}
+  .totals .r.g{border-bottom:none;border-top:2px solid #cdd6e0;margin-top:4px;padding-top:6px;font-weight:bold;font-size:14px;color:var(--navy)}
+  .av{width:24px;height:24px;border-radius:50%;color:#fff;font-weight:bold;display:inline-flex;align-items:center;justify-content:center;font-size:10px;vertical-align:middle}
+  .nedenler{display:flex;flex-direction:column;gap:6px}
+  .neden{display:flex;gap:9px;align-items:center;border:1px solid var(--line2);border-radius:4px;background:#fff;padding:6px 9px}
+  .neden .n{width:74px;font-size:10.5px;font-weight:bold;color:#b23b3b;white-space:nowrap}
+  .neden .t{flex:1;font-size:11.5px}
+  .neden.kok{border-color:#f0cccc;background:#fdf4f4}
+  .neden.kok .t{font-weight:bold;color:#8a2828}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Sapma / Olay — Düzenle <span class="sp">KALSAPMA.ID 3184 · SPM.2026/0042</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">🛠 DÖF Aç</div>
+    <div class="btn">🐟 Kök Neden</div>
+    <div class="btn ok" data-kayitkapat="1">✔ Sapmayı Kapat</div>
+    <div class="btn">🖨️ Yazdır</div>
+    <div class="sepv"></div>
+    <div class="btn">✖ Kapat</div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label class="req">Sapma No</label><div class="inp big">SPM.2026/0042</div></div>
+    <div class="fld"><label class="req">Tarih</label><div class="inp">12.08.2026</div></div>
+    <div class="fld"><label class="req">Konu</label><div class="inp big">Hatalı ölçüde perde teslimi — Kadıköy şantiyesi</div></div>
+    <div class="fld"><label>Önem</label><div class="inp"><span class="chip p-yuksek">▲ Kritik</span></div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="chip acik">● Açık</span></div></div>
+  </div>
+
+  <div class="idstrip alt">
+    <div class="fld"><label>Kaynak</label><div class="inp combo">Müşteri şikayeti</div></div>
+    <div class="fld"><label>Süreç / Bölüm</label><div class="inp combo">Satış / Montaj</div></div>
+    <div class="fld"><label>Tespit Eden</label><div class="inp combo"><span class="av" style="background:#2f6db3">ED</span>&nbsp;Elif Demir</div></div>
+    <div class="fld"><label>Sorumlu</label><div class="inp combo"><span class="av" style="background:#b23b3b">SÖ</span>&nbsp;Serkan Öz</div></div>
+    <div class="fld"><label>Termin</label><div class="inp">20.08.2026 <span class="chip islem" style="margin-left:auto">6 gün</span></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="genel">Genel</div>
+    <div class="tab" data-t="koknd">Kök Neden <span class="b">6</span></div>
+    <div class="tab" data-t="aksiyon">Aksiyonlar / DÖF <span class="b">4</span></div>
+    <div class="tab" data-t="etkilenen">Etkilenen Kayıtlar <span class="b">5</span></div>
+    <div class="tab" data-t="dokuman">Doküman / Fotoğraf <span class="b">3</span></div>
+    <div class="tab" data-t="yorum">Yorum <span class="b">3</span></div>
+    <div class="tab" data-t="ek">Ek Alanlar</div>
+  </div>
+
+  <!-- GENEL -->
+  <div class="pane active" data-p="genel">
+    <div class="banner r">🔁 <b>Tekrar eden sapma</b> · Aynı süreçte (Satış / Montaj — ölçü hatası) son 12 ayda <b>2</b> kayıt:
+      SPM.2026/0019 (18.03.2026) · SPM.2026/0042. Önceki DÖF etkinlik doğrulamasında <b>yetersiz</b> bulundu — DÖF açılması zorunludur.</div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="k">Maliyet Etkisi</div><div class="v neg">₺ 18.450</div><div class="s">6 kalem · KALSAPMADETAY</div></div>
+      <div class="kpi"><div class="k">Açık Gün</div><div class="v neg">2</div><div class="s">12.08.2026'dan beri</div></div>
+      <div class="kpi"><div class="k">Termine Kalan</div><div class="v">6 gün</div><div class="s">20.08.2026</div></div>
+      <div class="kpi"><div class="k">Tekrar</div><div class="v neg">2</div><div class="s">son 12 ay · aynı süreç</div></div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Olay Anlatımı <span class="tag">KALSAPMA</span></h4>
+          <div class="body">
+            <textarea class="inp" style="width:100%;height:74px" readonly>Kadıköy şantiyesi 3. kat teslimatında salon, yatak odası ve çocuk odası perdeleri 8-12 cm kısa geldi. Montaj ekibinin sahada aldığı revize ölçü, ölçü formuna işlendiği hâlde onaylanmadan üretime aktarılmadı; iş emri eski ölçülerle açıldı. Müşteri montaj sırasında durumu bildirdi (12.08.2026 11:40).</textarea>
+            <div class="grid2" style="margin-top:10px">
+              <label>Tespit Yöntemi</label><div class="inp combo">Müşteri bildirimi (telefon)</div>
+              <label>Tespit Yeri</label><div class="inp">Kadıköy / müşteri sahası</div>
+              <label>Olay Saati</label><div class="inp">12.08.2026 11:40</div>
+              <label>Sınıflandırma</label><div class="inp"><span class="chip p-yuksek">Ürün uygunsuzluğu</span>&nbsp;<span class="chip tekrar">Tekrarlı</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Acil (Düzeltici) Önlem <span class="tag">KALSAPMA</span></h4>
+          <div class="body">
+            <textarea class="inp" style="width:100%;height:74px" readonly>Montaj durduruldu, hatalı perdeler geri alındı. Kumaş stoktan ayrıldı (LOT-2608-A · 42,00 MT), 3 perde yeniden dikime verildi. Yeni montaj randevusu 16.08.2026 olarak planlandı. Müşteriye %10 iskonto uygulandı ve yazılı bilgilendirme yapıldı.</textarea>
+            <div class="grid2" style="margin-top:10px">
+              <label>Önlem Tarihi</label><div class="inp">12.08.2026</div>
+              <label>Uygulayan</label><div class="inp combo"><span class="av" style="background:#b23b3b">SÖ</span>&nbsp;Serkan Öz</div>
+              <label>Müşteri Onayı</label><div class="inp"><span class="chip bitti">Alındı — 13.08.2026</span></div>
+              <label>Ürün Durumu</label><div class="inp combo">Yeniden işlem (rework)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Etkilenen Ürün / Hizmet <span class="tag">STOKLAR</span></h4>
+          <div class="body grid2">
+            <label>Ürün</label><div class="inp combo">STK.10248 · Perde kumaşı — jakarlı, 280 cm</div>
+            <label>Lot / Seri</label><div class="inp">LOT-2608-A</div>
+            <label>Miktar</label><div class="inp">42,00 MT</div>
+            <label>Hizmet</label><div class="inp combo">HZM.0004 · Montaj ve işçilik</div>
+            <label>Etkilenen Adet</label><div class="inp">3 perde · 6 mekanizma</div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Müşteri Bilgisi <span class="tag">CARILER · FATBASLIK</span></h4>
+          <div class="body grid2">
+            <label>Cari</label><div class="inp combo">Granit Bilgisayar Ltd. Şti.</div>
+            <label>Sipariş</label><div class="inp">SPS.2026/0771 · 28.07.2026</div>
+            <label>Fatura</label><div class="inp">DEF2026000000012 · 12.08.2026</div>
+            <label>İlgili Kişi</label><div class="inp">Nihal Aydın · 0532 *** 44 18</div>
+            <label>Şikâyet Kanalı</label><div class="inp combo">Telefon</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp" style="margin-top:12px;margin-bottom:0">
+      <h4>Maliyet Etkisi <span class="tag">KALSAPMADETAY (1:N)</span></h4>
+      <div class="body">
+        <div class="foot" style="margin-top:0">
+          <div class="notes">
+            <label style="font-size:11px;color:var(--muted)">Maliyet Notu</label>
+            <textarea readonly>Kumaş firesi ortalama maliyet (45,80 ₺/MT) üzerinden, işçilik standart saat ücretiyle hesaplandı. Ciro kaybı, faturadan kısmi iade edilen kalemin net tutarıdır. Tutarlar sapma kapatılırken kalite müdürü onayına düşer.</textarea>
+          </div>
+          <div class="totals">
+            <div class="r"><span>Kumaş firesi (42,00 MT × 45,80)</span><span>₺ 1.923,60</span></div>
+            <div class="r"><span>Yeniden dikim işçiliği</span><span>₺ 3.850,00</span></div>
+            <div class="r"><span>Yeniden montaj (SRV.2026-0788)</span><span>₺ 1.750,00</span></div>
+            <div class="r"><span>Hurda mekanizma (6,00 AD × 96,40)</span><span>₺ 578,40</span></div>
+            <div class="r"><span>Ek nakliye / ekip</span><span>₺ 1.250,00</span></div>
+            <div class="r"><span>Müşteri iskontosu (%10)</span><span>₺ 2.480,00</span></div>
+            <div class="r"><span>Ciro kaybı (kısmi iade)</span><span>₺ 6.618,00</span></div>
+            <div class="r g"><span>Toplam Maliyet Etkisi</span><span>₺ 18.450,00</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KOK NEDEN -->
+  <div class="pane" data-p="koknd">
+    <div class="grp">
+      <h4>Balık Kılçığı — Kategori Seçimi <span class="tag">KALSAPMADETAY.KATEGORI</span></h4>
+      <div class="body">
+        <div class="gridtb" style="padding:0">
+          <span class="minibtn on">🧭 Yöntem</span>
+          <span class="minibtn on">👤 İnsan</span>
+          <span class="minibtn">⚙ Makine</span>
+          <span class="minibtn">🧵 Malzeme</span>
+          <span class="minibtn on">📏 Ölçüm</span>
+          <span class="minibtn on">🌡 Çevre</span>
+          <span class="minibtn" style="margin-left:auto">➕ Neden Ekle</span>
+          <span class="minibtn">🗑 Sil</span>
+        </div>
+        <div class="dg" style="margin-top:9px">
+          <table>
+            <thead><tr><th style="width:88px">Kategori</th><th style="width:76px">5N1K</th><th>Tespit</th>
+              <th style="width:120px">Giren</th><th class="c" style="width:84px">Kök mü?</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td>Yöntem</td><td>Ne</td><td>Revize ölçü formu üretime aktarılmadan iş emri açıldı</td>
+                <td>Mehmet Yıldız</td><td class="c"><span class="badge no">Evet</span></td></tr>
+              <tr><td>İnsan</td><td>Kim</td><td>Montaj ekibi ölçü formunu imzalamadan sahadan ayrıldı</td>
+                <td>Mehmet Yıldız</td><td class="c"><span class="badge dev">Kısmen</span></td></tr>
+              <tr><td>Ölçüm</td><td>Nasıl</td><td>Ölçü lazermetre ile alındı, ikinci kontrol (çift ölçüm) yapılmadı</td>
+                <td>Zeynep Ak</td><td class="c"><span class="badge dev">Kısmen</span></td></tr>
+              <tr><td>Çevre</td><td>Neden</td><td>Sezon yoğunluğu — montaj ekibi günde 6 randevu (standart 4)</td>
+                <td>Serkan Öz</td><td class="c"><span class="badge dev">Kısmen</span></td></tr>
+              <tr><td>Makine</td><td>Nerede</td><td>Kesim makinesi ayarı uygun, ilgili tarihte arıza kaydı yok</td>
+                <td>Hakan Şen</td><td class="c"><span class="badge on">Hayır</span></td></tr>
+              <tr><td>Malzeme</td><td>Ne zaman</td><td>LOT-2608-A çekme oranı %1,2 — tolerans içinde</td>
+                <td>Ayşe Yılmaz</td><td class="c"><span class="badge on">Hayır</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp" style="margin-bottom:0">
+      <h4>5 Neden Zinciri <span class="tag">KALSAPMADETAY.KOKNEDEN</span></h4>
+      <div class="body">
+        <div class="nedenler">
+          <div class="neden"><span class="n">Neden 1</span><span class="t">Perdeler 8-12 cm kısa geldi.</span></div>
+          <div class="neden"><span class="n">Neden 2</span><span class="t">Üretime eski (revize edilmemiş) ölçü gitti.</span></div>
+          <div class="neden"><span class="n">Neden 3</span><span class="t">Sahada alınan revize ölçü sisteme girildi ancak iş emrine yansımadı.</span></div>
+          <div class="neden"><span class="n">Neden 4</span><span class="t">Ölçü formunun onay adımı yok; imzasız form da iş emri açabiliyor.</span></div>
+          <div class="neden kok"><span class="n">Neden 5 · KÖK</span><span class="t">Satış/Montaj sürecinde ölçü onayı zorunlu adım olarak tanımlanmamış (süreç tasarımı eksikliği).</span></div>
+        </div>
+        <div class="gridtb"><span class="minibtn">➕ Neden Ekle</span><span class="minibtn">🐟 Kılçık Diyagramı</span>
+          <span class="minibtn">📄 Kök Neden Raporu</span></div>
+        <div class="hint">Kök neden işaretlenmeden sapma <b>kapatılamaz</b>; kök neden girildiğinde ilgili DÖF konusu
+          otomatik önerilir.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AKSIYONLAR / DOF -->
+  <div class="pane" data-p="aksiyon">
+    <div class="grp">
+      <h4>İlgili DÖF'ler <span class="tag">KALDOF</span></h4>
+      <div class="body"><div class="dg"><table>
+        <thead><tr><th style="width:124px">DÖF No</th><th style="width:84px">Açılış</th><th style="width:80px">Tür</th>
+          <th>Konu</th><th style="width:110px">Sorumlu</th><th style="width:84px">Termin</th><th class="c" style="width:88px">Durum</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td><b>DOF.2026/0118</b></td><td>12.08.2026</td><td>Düzeltici</td>
+            <td>Ölçü formuna zorunlu onay adımı eklenmesi</td><td>Mehmet Yıldız</td><td>20.08.2026</td>
+            <td class="c"><span class="badge dev">Açık</span></td></tr>
+          <tr><td>DOF.2026/0091</td><td>18.03.2026</td><td>Önleyici</td>
+            <td>Montaj ölçü kontrol listesi uygulaması (etkinlik: yetersiz)</td><td>Serkan Öz</td><td>10.04.2026</td>
+            <td class="c"><span class="badge on">Kapandı</span></td></tr>
+        </tbody>
+      </table></div>
+      <div class="gridtb"><span class="minibtn">🛠 DÖF Aç</span><span class="minibtn">👁 DÖF Kartı</span><span class="minibtn">🔗 Bağ Kaldır</span></div>
+      </div>
+    </div>
+
+    <div class="grp" style="margin-bottom:0">
+      <h4>Aksiyonlar <span class="tag">GOREVLER (1:N)</span></h4>
+      <div class="body"><div class="dg"><table>
+        <thead><tr><th class="c" style="width:36px">#</th><th>Aksiyon</th><th style="width:84px">Tür</th>
+          <th style="width:110px">Sorumlu</th><th style="width:84px">Termin</th><th class="amt" style="width:58px">%</th>
+          <th class="c" style="width:92px">Durum</th></tr></thead>
+        <tbody>
+          <tr><td class="c">1</td><td>3 perdenin yeniden dikimi ve montaj randevusu</td><td>Acil</td>
+            <td>Serkan Öz</td><td>16.08.2026</td><td class="amt">80</td><td class="c"><span class="badge dev">Devam</span></td></tr>
+          <tr class="sel"><td class="c">2</td><td>Ölçü formuna e-imza / onay adımı tanımlanması</td><td>Düzeltici</td>
+            <td>Mehmet Yıldız</td><td>20.08.2026</td><td class="amt">35</td><td class="c"><span class="badge dev">Devam</span></td></tr>
+          <tr><td class="c">3</td><td>Montaj ekibine ölçü alma eğitimi (2 saat)</td><td>Önleyici</td>
+            <td>Zeynep Ak</td><td>29.08.2026</td><td class="amt">0</td><td class="c"><span class="badge no">Başlamadı</span></td></tr>
+          <tr><td class="c">4</td><td>Müşteriye bilgilendirme ve iskonto onayı</td><td>Acil</td>
+            <td>Elif Demir</td><td>13.08.2026</td><td class="amt">100</td><td class="c"><span class="badge on">Tamam</span></td></tr>
+        </tbody>
+        <tfoot><tr><th colspan="5" style="text-align:right">Ortalama tamamlanma</th><th class="amt">%53,8</th><th></th></tr></tfoot>
+      </table></div>
+      <div class="gridtb"><span class="minibtn">➕ Aksiyon Ekle</span><span class="minibtn">👤 Sorumlu Ata</span>
+        <span class="minibtn">✔ Tamamla</span><span class="minibtn">🔔 Hatırlat</span></div>
+      <div class="hint">Aksiyonlar <b>GOREVLER</b> tablosunda görev olarak açılır; sorumlusuna görev listesinde düşer.
+        Tüm aksiyonlar %100 olmadan sapma kapatılamaz.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ETKILENEN KAYITLAR -->
+  <div class="pane" data-p="etkilenen">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Etkilenen Kayıtlar <span class="tag">KALSAPMADETAY · FATBASLIK · SERVIS · STOKLAR</span></h4>
+      <div class="body"><div class="dg"><table>
+        <thead><tr><th style="width:84px">Tür</th><th style="width:170px">Belge / Kayıt</th><th style="width:84px">Tarih</th>
+          <th>Açıklama</th><th class="amt" style="width:104px">Tutar / Miktar</th><th class="c" style="width:84px">Etki</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td>Fatura</td><td>DEF2026000000012</td><td>12.08.2026</td>
+            <td>Granit Bilgisayar Ltd. — perde satışı, kısmi iade + iskonto</td><td class="amt">7.500,00</td>
+            <td class="c"><span class="badge no">İade</span></td></tr>
+          <tr><td>Sipariş</td><td>SPS.2026/0771</td><td>28.07.2026</td>
+            <td>3 oda perde + montaj — ölçüler revize edildi</td><td class="amt">24.800,00</td>
+            <td class="c"><span class="badge dev">Revize</span></td></tr>
+          <tr><td>Servis</td><td>SRV.2026-0788</td><td>13.08.2026</td>
+            <td>Yeniden montaj iş emri (müşteriye ücretsiz)</td><td class="amt">1.750,00</td>
+            <td class="c"><span class="badge dev">Maliyet</span></td></tr>
+          <tr><td>Stok</td><td>STK.10248 · LOT-2608-A</td><td>13.08.2026</td>
+            <td>Yeniden dikim için kumaş çıkışı</td><td class="amt">42,00 MT</td>
+            <td class="c"><span class="badge no">Fire</span></td></tr>
+          <tr><td>Stok</td><td>STK.10604</td><td>13.08.2026</td>
+            <td>Stor perde mekanizması — hurdaya ayrıldı</td><td class="amt">6,00 AD</td>
+            <td class="c"><span class="badge no">Hurda</span></td></tr>
+        </tbody>
+        <tfoot><tr><th colspan="4" style="text-align:right">Maliyet Etkisi Toplamı</th><th class="amt">₺ 18.450,00</th><th></th></tr></tfoot>
+      </table></div>
+      <div class="gridtb"><span class="minibtn">🔗 Kayıt Bağla</span><span class="minibtn">👁 Belgeyi Aç</span>
+        <span class="minibtn">🗑 Bağı Kaldır</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOKUMAN / FOTOGRAF -->
+  <div class="pane" data-p="dokuman">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Doküman / Fotoğraf <span class="tag">DOKUMAN → IMAJ → GENDEPO.DOSYA</span></h4>
+      <div class="body"><div class="dg"><table>
+        <thead><tr><th class="c" style="width:48px">Tür</th><th>Dosya Adı</th><th style="width:130px">Ekleyen</th>
+          <th style="width:140px">Tarih</th><th class="amt" style="width:80px">Boyut</th></tr></thead>
+        <tbody>
+          <tr><td class="c">📷</td><td>montaj_olcu_farki_01.jpg</td><td>Serkan Öz</td><td>12.08.2026 12:05</td><td class="amt">2,4 MB</td></tr>
+          <tr><td class="c">📷</td><td>montaj_olcu_farki_02.jpg</td><td>Serkan Öz</td><td>12.08.2026 12:06</td><td class="amt">2,1 MB</td></tr>
+          <tr class="sel"><td class="c">📄</td><td>olcu_formu_imzasiz.pdf</td><td>Elif Demir</td><td>12.08.2026 14:30</td><td class="amt">318 KB</td></tr>
+        </tbody>
+      </table></div>
+      <div class="gridtb"><span class="minibtn">📎 Klasörden</span><span class="minibtn">🖨️ Tarayıcıdan</span>
+        <span class="minibtn">📷 Fotoğraf Ekle</span><span class="minibtn">📋 Yapıştır</span><span class="minibtn">🗑 Sil</span></div>
+      <div class="hint">Fotoğraflar olay anına ait kanıt niteliğindedir; sapma kapatıldıktan sonra silinemez, yalnızca arşivlenir.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- YORUM -->
+  <div class="pane" data-p="yorum">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Yorum <span class="tag">GOREVYORUM + ISLEMLOG</span></h4>
+      <div class="body"><div class="dg"><table>
+        <thead><tr><th style="width:140px">Kullanıcı</th><th style="width:140px">Tarih</th><th>Yorum</th><th class="c" style="width:60px">Ek</th></tr></thead>
+        <tbody>
+          <tr><td><span class="av" style="background:#2f6db3">ED</span>&nbsp;Elif Demir</td><td>12.08.2026 11:55</td>
+            <td>Müşteri aradı, montaj durduruldu. Sahadan fotoğraf isteniyor.</td><td class="c">—</td></tr>
+          <tr><td><span class="av" style="background:#b23b3b">SÖ</span>&nbsp;Serkan Öz</td><td>12.08.2026 12:10</td>
+            <td>Ölçüler yerinde tekrar alındı; fark 8-12 cm. Fotoğraflar eklendi.</td><td class="c">📎 2</td></tr>
+          <tr class="sel"><td><span class="av" style="background:#2e7d46">MY</span>&nbsp;Mehmet Yıldız</td><td>13.08.2026 09:20</td>
+            <td>DÖF açıldı. Onay adımı devreye girmeden iş emri kapatılamayacak.</td><td class="c">—</td></tr>
+        </tbody>
+      </table></div>
+      <div class="gridtb"><span class="minibtn">➕ Yorum Ekle</span><span class="minibtn">🔔 Sorumluya Bildir</span></div>
+      <div class="hint">Durum, önem ve sorumlu değişiklikleri sistem satırı olarak akışa düşer (ISLEMLOG).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EK ALANLAR -->
+  <div class="pane" data-p="ek">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Ek Alanlar <span class="tag">REHBERBILGI/EAV</span></h4>
+      <div class="body"><div class="dg"><table>
+        <thead><tr><th style="width:200px">Etiket</th><th>Değer</th></tr></thead>
+        <tbody>
+          <tr><td>ISO 9001 Madde</td><td>8.5.1 — Üretim ve hizmet sunumunun kontrolü</td></tr>
+          <tr class="sel"><td>Müşteriye Bildirildi</td><td>Evet — 13.08.2026 (yazılı)</td></tr>
+          <tr><td>Denetim Bulgusu mu?</td><td>Hayır</td></tr>
+          <tr><td>Yönetim Gözden Geçirme</td><td>2026/3. çeyrek gündemine alındı</td></tr>
+        </tbody>
+      </table></div>
+      <div class="gridtb"><span class="minibtn">➕ Alan Ekle</span><span class="minibtn">🗑 Sil</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow"><b>Kalite\USapmaFrame · KALSAPMA</b>· <b>Veri modeli:</b>
+    <span>Genel → <b>KALSAPMA</b> (SAPMANO · TARIH · KAYNAK · SUREC · ONEM · DURUM)</span>·
+    <span>Kök neden / maliyet → <b>KALSAPMADETAY</b> (1:N)</span>·
+    <span>DÖF → <b>KALDOF</b></span>·
+    <span>Aksiyon → <b>GOREVLER</b></span>·
+    <span>Etkilenen → <b>FATBASLIK · SERVIS · STOKLAR</b></span>·
+    <span>Ek → <b>DOKUMAN → IMAJ</b> · <b>REHBERBILGI</b></span>·
+    <span>İz → <b>ISLEMLOG</b></span>
+  </div>
+  <div class="statusbar">
+    <span>Durum: <b style="color:#2f6db3">Açık</b></span>
+    <span>Önem: <b style="color:#b23b3b">Kritik</b></span>
+    <span>Sorumlu: <b>Serkan Öz</b></span>
+    <span>Termin: <b>20.08.2026 (6 gün)</b></span>
+    <span class="req-note">* zorunlu alan</span>
+    <span style="margin-left:auto">Açılış: 12.08.2026 · Elif Demir</span>
+  </div>
+</div>
+<script>
+  var tabs=document.querySelectorAll('.tab'),panes=document.querySelectorAll('.pane');
+  tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('active')});panes.forEach(function(x){x.classList.remove('active')});t.classList.add('active');document.querySelector('.pane[data-p="'+t.dataset.t+'"]').classList.add('active');});});
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>.gmzgizle{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>.gmzgizle{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+/* === GN-KARTMOD: kart penceresinde tam genislik === */
+body.kartmod{padding:0!important;margin:0!important;background:#fff!important}
+body.kartmod .win,body.kartmod .app{max-width:none!important;width:auto!important;
+  margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+body.koyu.kartmod{background:#12171e!important}
+/* === GN-KARTMOD son === */
+/* === GN-KOYU-GRPBAS: grup basligi koyu tema === */
+body.koyu .grp>h4{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-bottom-color:#2c3542!important}
+body.koyu .grp{background:#1b222c!important;border-color:#2c3542!important}
+body.koyu .grp .tag{background:#2c3a4b!important;color:#9fc0e0!important}
+body.koyu .imgbox{background:linear-gradient(135deg,#222b37,#1b232d)!important;
+  border-color:#3b4a5c!important;color:#7f8fa1!important}
+body.koyu .imgthumbs .t{border-color:#33404f!important}
+/* === GN-KOYU-GRPBAS son === */
+</style>
+<script>(function(){
+function solMenuMu(e){
+  if(!e||e.nodeType!==1) return false;
+  if(/(^|\s)(gorev|solmenu|gtusgrup)(\s|$)/.test(e.className||"")) return true;
+  /* gorev tuslari / sekmeli sol sutun: .gtus veya .ltabs iceriyorsa gizlenir */
+  return !!e.querySelector(".gtus, .ltabs, .lpane");
+}
+function g(){
+  if(location.hash.indexOf("gomulu")>=0){
+    document.body.classList.add("gomulu");
+    [".wrap",".work"].forEach(function(sel){
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(w){
+        var ilk=w.firstElementChild;
+        if(ilk) ilk.classList.toggle("gmzgizle", solMenuMu(ilk));
+      });
+    });
+  } else document.body.classList.remove("gomulu");
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",g); else g();
+addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      /* "Sapmayi Kapat" gibi KAYIT kapatma dugmeleri pencereyi kapatmaz */
+      if(el.getAttribute&&el.getAttribute("data-kayitkapat")) return;
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazgeç|çık)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();
+/* --- GN-KARTMOD: kabuk kartlari "#kart-..." ile acar; genisligi ac --- */
+(function(){
+  function kartModu(){
+    document.body.classList.toggle('kartmod', /(^|[#&])kart(-|\b)/.test(location.hash || ''));
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kartModu);
+  else kartModu();
+  addEventListener('hashchange', kartModu);
+})();
+</script>
+</body>
+</html>

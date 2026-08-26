@@ -1,4 +1,4 @@
-﻿unit UCariGorevFrame;
+unit UCariGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -8,17 +8,17 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus,
-  cxLookAndFeelPainters, cxButtons, JvExControls, JvButton, JvNavigationPane,
-  ImgList, PngImageList, Vcl.ExtCtrls, PrjConst, JvExExtCtrls, JvExtComponent,
-  JvPanel, System.ImageList;           {Symbols}
+  cxLookAndFeelPainters, cxButtons,
+  ImgList, PngImageList, Vcl.ExtCtrls, PrjConst,
+  System.ImageList, cxGraphics, cxLookAndFeels;           {Symbols}
 
 type
   TCariGorevFrame = class(TFrame)
-    btnHesapKarti: TJvNavPanelButton;
+    btnHesapKarti: TcxButton;
     PngImageList1: TPngImageList;
-    PanelDokum: TJvPanel;
-    btnDokumler: TJvNavPanelButton;
-    btnDokumlerOzel: TJvNavPanelButton;
+    PanelDokum: TPanel;
+    btnDokumler: TcxButton;
+    btnDokumlerOzel: TcxButton;
     procedure btnHesapKartiClick(Sender: TObject);
     procedure btnDokumlerMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -50,11 +50,10 @@ uses UReharadlg,URehberAramaFrame, FetaClassExtensions, UDokum, UDokumGirisFrame
 { TCariGorevFrame }
 procedure TCariGorevFrame.btnUpAndDown(Sender: TObject);
 begin
-  btnHesapKarti.Down := False;
-  btnDokumler.Down := False;
-  btnDokumlerOzel.Down := False;
-  if (Sender<>nil)and(Sender.ClassName = 'TJvNavPanelButton') then
-    (Sender as TJvNavPanelButton).Down := True;
+  // Tek buton aktif: frame'deki TUM TcxButton'lar tek elden yonetilir.
+  // (Eskiden sabit bir buton listesi sifirlaniyordu; listede olmayan butonlar
+  //  basili kaldigi icin ayni anda birden fazla buton aktif gorunuyordu.)
+  GorevTusuSec(Self, Sender);
 end;
 
 procedure TCariGorevFrame.btnDokumlerClick(Sender: TObject);
@@ -69,7 +68,7 @@ begin
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=0
    else
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;
-   TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TJVNavPanelButton(Sender).Tag;
+   TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TcxButton(Sender).Tag;
    TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'C';
 end;
 
@@ -115,7 +114,7 @@ begin
   if FIlkBaslatma and (FFrameBilgi.IcerikFrameYoneticisi.AktifFrame.Ornek.ClassName='TGenelGirisSayfasiFrame') then begin
      FIlkBaslatma := False;
      btnHesapKartiClick(nil);
-     btnHesapKarti.Down := True;
+     GorevTusuSec(Self, btnHesapKarti);   // renkli aktif gorunum icin
   end;
 end;
 
@@ -126,7 +125,7 @@ end;
 procedure TCariGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
   btnHesapKarti.Visible := Tablo.YetkiVarmi(2201,YetkiTur_Gorme);
 
 //  btnDokumlerOzel.Visible := Tablo.YetkiVarmi(2298,YetkiTur_Gorme);
@@ -142,3 +141,6 @@ end;
 initialization
   RegisterClass(TCariGorevFrame);
 end.
+
+
+

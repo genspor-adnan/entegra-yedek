@@ -12,7 +12,7 @@ type
     /// Bu metotlar menunun is mantigini tasir; ekran tarafinda sadece cagri ve
     /// grid yenileme kalir.
     class function MenuHazirla(AConnection: TFDConnection;
-      AFatBaslikID: Integer): Boolean; static;
+      AFatBaslikID: Integer; ATaslakSeriDegistir: Boolean = False): Boolean; static;
     class function MenuOnizle(AConnection: TFDConnection;
       AFatBaslikID: Integer): Boolean; static;
     class function MenuSifirla(AConnection: TFDConnection;
@@ -66,9 +66,12 @@ uses
   System.JSON, System.NetEncoding, System.IOUtils, System.Variants,
   System.DateUtils, Data.DB, Vcl.Dialogs, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls,
   System.StrUtils, ComObj, Utablo, PrjConst, FetaKurulusSiniflari,
-  UEBelgeAliasServis, UEBelgeKimlik, UIzibizRest, UGirisKutusuEx, UVeriMotor, Fetautil;
+  UEBelgeAliasServis, UEBelgeKimlik, UIzibizRest, UGirisKutusuEx, UVeriMotor, Fetautil,
+  UEBelgeSeri;
 
 type
+  TSGKRefTipi = (srtMukellefKodu, srtMukellefAdi, srtDosyaNo);
+
   // Iade faturasi (Tipi=2): iade edilen orijinal fatura referansi (cac:BillingReference)
   TEBelgeIadeRef = record
     FaturaNo: string;
@@ -92,6 +95,8 @@ type
     FaturaNo: string;
     IrsaliyeNo: string;
     IrsaliyeTarih: TDateTime;
+    SiparisNo: string;
+    SiparisTarih: TDateTime;
     Aciklama: string;
     Aciklama2: string;
     Adres: string;
@@ -118,6 +123,12 @@ type
     KapCinsiKodu: string;      // paket/kap kodu (CT, BX...) - packagingTypeCode
     FOBDeger: Currency;        // freeOnBoardValueAmount
     KapAdedi: Integer;         // actualPackage.quantity
+    SGKIlaveTipi: string;      // cbc:AccountingCost
+    SGKMukellefKodu: string;   // AdditionalDocumentReference / MUKELLEF_KODU
+    SGKMukellefAdi: string;    // AdditionalDocumentReference / MUKELLEF_ADI
+    SGKDosyaNo: string;        // AdditionalDocumentReference / DOSYA_NO
+    SGKDonemBas: TDateTime;    // cac:InvoicePeriod/cbc:StartDate
+    SGKDonemBit: TDateTime;    // cac:InvoicePeriod/cbc:EndDate
     // Iade faturasi (Tipi=2): iade edilen orijinal fatura(lar) -> cac:BillingReference
     IadeReferanslari: TArray<TEBelgeIadeRef>;
   end;
@@ -167,6 +178,15 @@ type
     MersisNo: string;
     TicaretSicilNo: string;
   end;
+
+  TEBelgeOdemeHesabi = record
+    IBAN: string;
+    Kur: string;
+    BankaAdi: string;
+    SubeAdi: string;
+    HesapAdi: string;
+  end;
+
   TSevkBilgisi = record
     TasiyanTipi: string;
     TasiyiciID: Integer;
@@ -388,6 +408,144 @@ begin
     Result := 'TRY';
 end;
 
+function BizimTarafGetir(const AVergiNo, AUnvan: string): TEBelgeTaraf; forward;
+
+function KamuFaturasiMi(const ABaslik: TEBelgeBaslik): Boolean;
+begin
+  Result := (ABaslik.Tur = EBelgeTuruEFatura) and (not ABaslik.EArsivMi) and
+    (ABaslik.Senaryo = 7);
+end;
+
+function IBANTemizle(const ADeger: string): string;
+var
+  I: Integer;
+  C: Char;
+begin
+  Result := '';
+  for I := 1 to Length(ADeger) do begin
+    C := UpCase(ADeger[I]);
+    if CharInSet(C, ['A'..'Z', '0'..'9']) then
+      Result := Result + C;
+  end;
+end;
+
+function TRIBANGecerliMi(const ADeger: string): Boolean;
+var
+  LIban, LKontrol: string;
+  I, LDeger, LMod: Integer;
+  C: Char;
+begin
+  LIban := IBANTemizle(ADeger);
+  Result := False;
+  if (Length(LIban) <> 26) or (Copy(LIban, 1, 2) <> 'TR') then
+    Exit;
+
+  LKontrol := Copy(LIban, 5, MaxInt) + Copy(LIban, 1, 4);
+  LMod := 0;
+  for I := 1 to Length(LKontrol) do begin
+    C := LKontrol[I];
+    if CharInSet(C, ['0'..'9']) then
+      LMod := (LMod * 10 + Ord(C) - Ord('0')) mod 97
+    else if CharInSet(C, ['A'..'Z']) then begin
+      LDeger := Ord(C) - Ord('A') + 10;
+      LMod := (LMod * 100 + LDeger) mod 97;
+    end else
+      Exit;
+  end;
+  Result := LMod = 1;
+end;
+
+function KamuOdemeHesabiGetir(out AHesap: TEBelgeOdemeHesabi): Boolean;
+var
+  LQ: TFDQuery;
+  LIBAN: string;
+begin
+  Result := False;
+  AHesap := Default(TEBelgeOdemeHesabi);
+  LQ := TFDQuery.Create(nil);
+  try
+    LQ.Connection := Tablo.FDCnn;
+    LQ.SQL.Text :=
+      'select '+DbUst(50)+'BH.IBAN, coalesce(nullif(BH.KUR,''''),''TL'') as KUR, ' +
+      'coalesce(B.BANKAADI,'''') as BANKAADI, coalesce(BS.SUBEADI,'''') as SUBEADI, ' +
+      'coalesce(BH.HESAPADI,'''') as HESAPADI ' +
+      'from BANKAHESAPLAR BH ' +
+      'left join BANKASUBELER BS on BS.ID=BH.BANKASUBELERID ' +
+      'left join BANKALAR B on B.BANKAKODU=BS.BANKAKODU ' +
+      'where BH.REHBERID=-1 and coalesce(BH.DURUM,1)=1 and coalesce(BH.IBAN,'''')<>'''' ' +
+      'order by case when coalesce(BH.KUR,''TL'') in (''TL'',''TRY'') then 0 else 1 end, ' +
+      'case when coalesce(BH.VARSAYILAN,0)=1 then 0 else 1 end, BH.ID '+DbSinir(50);
+    LQ.Open;
+    while not LQ.Eof do begin
+      LIBAN := IBANTemizle(AlanStr(LQ, 'IBAN'));
+      if TRIBANGecerliMi(LIBAN) then begin
+        AHesap.IBAN := LIBAN;
+        AHesap.Kur := ParaBirimiNormallestir(AlanStr(LQ, 'KUR'));
+        AHesap.BankaAdi := Trim(AlanStr(LQ, 'BANKAADI'));
+        AHesap.SubeAdi := Trim(AlanStr(LQ, 'SUBEADI'));
+        AHesap.HesapAdi := Trim(AlanStr(LQ, 'HESAPADI'));
+        Result := True;
+        Exit;
+      end;
+      LQ.Next;
+    end;
+  finally
+    LQ.Free;
+  end;
+end;
+
+procedure KamuOdemeHesabiZorunlu(const ABaslik: TEBelgeBaslik;
+  out AHesap: TEBelgeOdemeHesabi);
+begin
+  AHesap := Default(TEBelgeOdemeHesabi);
+  if not KamuFaturasiMi(ABaslik) then
+    Exit;
+  if not KamuOdemeHesabiGetir(AHesap) then
+    raise Exception.Create('Kamu faturasi icin gecerli Türkiye IBAN numarali firma banka hesabi bulunamadi. ' +
+      'Cari kartta firma (-1) banka hesaplarindan aktif ve gecerli TR IBAN tanimlayin.');
+end;
+
+procedure KamuFaturaHazirlikDogrula(const ABaslik: TEBelgeBaslik);
+var
+  LHesap: TEBelgeOdemeHesabi;
+  LGonderici: TEBelgeTaraf;
+  LEksik: TStringList;
+begin
+  if not KamuFaturasiMi(ABaslik) then
+    Exit;
+
+  LEksik := TStringList.Create;
+  try
+    if VergiNoTemizle(ABaslik.VergiNo) = '' then
+      LEksik.Add('- Kamu kurumu VKN/TCKN');
+    if Trim(ABaslik.Baslik) = '' then
+      LEksik.Add('- Kamu kurumu unvani');
+    if Trim(ABaslik.Adres) = '' then
+      LEksik.Add('- Kamu kurumu adresi');
+    if Trim(ABaslik.Il) = '' then
+      LEksik.Add('- Kamu kurumu ili');
+
+    LGonderici := BizimTarafGetir('', '');
+    if VergiNoTemizle(LGonderici.VergiNo) = '' then
+      LEksik.Add('- Firma VKN/TCKN');
+    if Trim(LGonderici.Unvan) = '' then
+      LEksik.Add('- Firma fatura unvani');
+
+    try
+      KamuOdemeHesabiZorunlu(ABaslik, LHesap);
+    except
+      on E: Exception do
+        LEksik.Add('- ' + E.Message);
+    end;
+
+    if LEksik.Count > 0 then
+      raise Exception.Create('Kamu faturasi hazirlanamaz. Eksik/hatalı bilgiler:' +
+        sLineBreak + LEksik.Text);
+  finally
+    LEksik.Free;
+  end;
+end;
+
 function KimlikSemasi(const AVergiNo: string): string;
 begin
   // Uzunluk RAKAM sayisina gore belirlenir: kartta "12 23 545 871" gibi bosluklu/
@@ -396,6 +554,22 @@ begin
     Result := 'TCKN'
   else
     Result := 'VKN';
+end;
+
+procedure KisiAdSoyadAyir(const AUnvan: string; out AAd, ASoyad: string);
+var
+  LTrimmed: string;
+  LBosluk: Integer;
+begin
+  LTrimmed := Trim(AUnvan);
+  LBosluk := LastDelimiter(' ', LTrimmed);
+  if LBosluk > 0 then begin
+    AAd := Trim(Copy(LTrimmed, 1, LBosluk - 1));
+    ASoyad := Trim(Copy(LTrimmed, LBosluk + 1, MaxInt));
+  end else begin
+    AAd := LTrimmed;
+    ASoyad := LTrimmed;
+  end;
 end;
 
 function FaturaTipKodu(const ABaslik: TEBelgeBaslik): string;
@@ -410,6 +584,8 @@ begin
     Result := 'TEVKIFAT'
   else if ABaslik.Tipi = 24 then
     Result := 'ISTISNA'
+  else if ABaslik.Tipi = 25 then
+    Result := 'SGK'
   else
     Result := 'SATIS';
 end;
@@ -1143,6 +1319,142 @@ begin
   Tablo.Query3.Close;
 end;
 
+function SGKFaturasiMi(const ABaslik: TEBelgeBaslik): Boolean;
+begin
+  Result := (ABaslik.Tur = EBelgeTuruEFatura) and (ABaslik.Tipi = 25);
+end;
+
+function SGKSaglikTipiMi(const ATip: string): Boolean;
+begin
+  Result := MatchText(Trim(ATip),
+    ['SAGLIK_ECZ', 'SAGLIK_HAS', 'SAGLIK_OPT', 'SAGLIK_MED']);
+end;
+
+procedure SGKBilgisiOku(AFatBasID: Integer; var ABaslik: TEBelgeBaslik);
+begin
+  if not SGKFaturasiMi(ABaslik) then
+    Exit;
+
+  Tablo.TablodanSorguAc(3,
+    'select SGK_ILAVE_TIPI, SGK_MUKELLEF_KODU, SGK_MUKELLEF_ADI, ' +
+    'SGK_DOSYA_NO, SGK_DONEM_BAS, SGK_DONEM_BIT ' +
+    'from FATBASLIK_USER where ID=' + IntToStr(AFatBasID));
+  if not Tablo.Query3.Eof then begin
+    ABaslik.SGKIlaveTipi := UpperCase(Trim(AlanStr(Tablo.Query3, 'SGK_ILAVE_TIPI')));
+    ABaslik.SGKMukellefKodu := Trim(AlanStr(Tablo.Query3, 'SGK_MUKELLEF_KODU'));
+    ABaslik.SGKMukellefAdi := Trim(AlanStr(Tablo.Query3, 'SGK_MUKELLEF_ADI'));
+    ABaslik.SGKDosyaNo := Trim(AlanStr(Tablo.Query3, 'SGK_DOSYA_NO'));
+    ABaslik.SGKDonemBas := AlanTarih(Tablo.Query3, 'SGK_DONEM_BAS');
+    ABaslik.SGKDonemBit := AlanTarih(Tablo.Query3, 'SGK_DONEM_BIT');
+  end;
+  Tablo.Query3.Close;
+end;
+
+procedure SGKFaturaHazirlikDogrula(const ABaslik: TEBelgeBaslik);
+var
+  LEksik: TStringList;
+begin
+  if not SGKFaturasiMi(ABaslik) then
+    Exit;
+
+  LEksik := TStringList.Create;
+  try
+    if ABaslik.Senaryo <> 1 then
+      LEksik.Add('- SGK faturada senaryo TEMEL olmalidir.');
+    if not MatchText(ABaslik.SGKIlaveTipi,
+      ['SAGLIK_ECZ', 'SAGLIK_HAS', 'SAGLIK_OPT', 'SAGLIK_MED',
+       'ABONELIK', 'MAL_HIZMET', 'DIGER']) then
+      LEksik.Add('- SGK ilave fatura tipi');
+
+    if SGKSaglikTipiMi(ABaslik.SGKIlaveTipi) then begin
+      if ABaslik.SGKMukellefKodu = '' then
+        LEksik.Add('- SGK mukellef kodu');
+      if ABaslik.SGKMukellefAdi = '' then
+        LEksik.Add('- SGK mukellef adi');
+      if ABaslik.SGKDosyaNo = '' then
+        LEksik.Add('- SGK dosya no');
+      if ABaslik.SGKDonemBas <= 0 then
+        LEksik.Add('- SGK donem baslangici');
+      if ABaslik.SGKDonemBit <= 0 then
+        LEksik.Add('- SGK donem bitisi');
+    end else if SameText(ABaslik.SGKIlaveTipi, 'ABONELIK') then begin
+      if ABaslik.SGKDosyaNo = '' then
+        LEksik.Add('- SGK abonelik dosya/abone no');
+      if ABaslik.SGKDonemBas <= 0 then
+        LEksik.Add('- SGK donem baslangici');
+      if ABaslik.SGKDonemBit <= 0 then
+        LEksik.Add('- SGK donem bitisi');
+    end else if SameText(ABaslik.SGKIlaveTipi, 'MAL_HIZMET') then begin
+      if ABaslik.SGKDosyaNo = '' then
+        LEksik.Add('- SGK harcama referans/birim no');
+    end;
+
+    if (ABaslik.SGKDonemBas > 0) and (ABaslik.SGKDonemBit > 0) and
+       (ABaslik.SGKDonemBit < ABaslik.SGKDonemBas) then
+      LEksik.Add('- SGK donem bitisi baslangictan once olamaz');
+
+    if LEksik.Count > 0 then
+      raise Exception.Create('SGK faturasi hazirlanamaz. Eksik/hatalı bilgiler:' +
+        sLineBreak + LEksik.Text);
+  finally
+    LEksik.Free;
+  end;
+end;
+
+procedure KaynakBelgeReferanslariDoldur(AFatBasID: Integer;
+  var ABaslik: TEBelgeBaslik);
+var
+  LSQL: string;
+begin
+  if ABaslik.Tur = EBelgeTuruEIrsaliye then
+    Exit;
+
+  if Trim(ABaslik.IrsaliyeNo) = '' then begin
+    LSQL :=
+      'select ' + DbUst(1) + ' FB.FATURANO, FB.FATURATARIH ' +
+      'from FATURA F ' +
+      'inner join FATURA IF2 on IF2.ID=F.YERID ' +
+      'inner join FATBASLIK FB on FB.ID=IF2.FATBASID ' +
+      'where F.FATBASID=' + IntToStr(AFatBasID) +
+      ' and F.YERI in (408,411)' +
+      ' and COALESCE(FB.FATURANO,'''')<>'''' ' +
+      'order by FB.FATURATARIH, FB.ID ' + DbSinir(1);
+    Tablo.TablodanSorguAc(3, LSQL);
+    if not Tablo.Query3.Eof then begin
+      ABaslik.IrsaliyeNo := AlanStr(Tablo.Query3, 'FATURANO');
+      ABaslik.IrsaliyeTarih := AlanTarih(Tablo.Query3, 'FATURATARIH');
+    end;
+    Tablo.Query3.Close;
+  end;
+
+  LSQL :=
+    'select ' + DbUst(1) + ' X.SIPARISNO, X.SIPARISTARIH from (' +
+    'select S.SIPARISNO, S.SIPARISTARIH, S.ID ' +
+    'from FATURA F ' +
+    'inner join SIPARISDETAY SD on SD.ID=F.YERID ' +
+    'inner join SIPARIS S on S.ID=SD.SIPARISID ' +
+    'where F.FATBASID=' + IntToStr(AFatBasID) +
+    ' and F.YERI in (406,407,409,410,473)' +
+    ' and COALESCE(S.SIPARISNO,'''')<>'''' ' +
+    'union all ' +
+    'select S.SIPARISNO, S.SIPARISTARIH, S.ID ' +
+    'from FATURA F ' +
+    'inner join FATURA IF2 on IF2.ID=F.YERID ' +
+    'inner join SIPARISDETAY SD on SD.ID=IF2.YERID ' +
+    'inner join SIPARIS S on S.ID=SD.SIPARISID ' +
+    'where F.FATBASID=' + IntToStr(AFatBasID) +
+    ' and F.YERI in (408,411)' +
+    ' and IF2.YERI in (406,409)' +
+    ' and COALESCE(S.SIPARISNO,'''')<>'''' ' +
+    ') X order by X.SIPARISTARIH, X.ID ' + DbSinir(1);
+  Tablo.TablodanSorguAc(3, LSQL);
+  if not Tablo.Query3.Eof then begin
+    ABaslik.SiparisNo := AlanStr(Tablo.Query3, 'SIPARISNO');
+    ABaslik.SiparisTarih := AlanTarih(Tablo.Query3, 'SIPARISTARIH');
+  end;
+  Tablo.Query3.Close;
+end;
+
 procedure VerileriOku(AFatBaslikID: Integer; out ABaslik: TEBelgeBaslik;
   out ASatirlar: TEBelgeSatirlar);
 var
@@ -1187,6 +1499,7 @@ begin
   ABaslik.FaturaNo := AlanStr(Tablo.Query1, 'FATURANO');
   ABaslik.IrsaliyeNo := AlanStr(Tablo.Query1, 'IRSALIYENO');
   ABaslik.IrsaliyeTarih := AlanTarih(Tablo.Query1, 'IRSALIYETARIH');
+  KaynakBelgeReferanslariDoldur(AFatBaslikID, ABaslik);
   ABaslik.Aciklama := AlanStr(Tablo.Query1, 'ACIKLAMA');
   ABaslik.Aciklama2 := AlanStr(Tablo.Query1, 'ACIKLAMA2');
   ABaslik.Adres := AlanStr(Tablo.Query1, 'ADRES');
@@ -1205,6 +1518,7 @@ begin
   // sarti, tasima, kap, FOB, kap adedi oku (JSON delivery/shipment icin).
   if ABaslik.Senaryo = 3 then
     IhracatBilgisiOku(AFatBaslikID, ABaslik);
+  SGKBilgisiOku(AFatBaslikID, ABaslik);
 
   Tablo.TablodanSorguAc(1, EBelgeGidenDetaySQL(AFatBaslikID));
   try
@@ -1281,12 +1595,16 @@ begin
   end;
 end;
 
-function PartyXML(const ARol: string; const ATaraf: TEBelgeTaraf): string;
+function PartyXML(const ARol: string; const ATaraf: TEBelgeTaraf;
+  AAliciTaraf: Boolean = False): string;
 var
   LXML: TStringBuilder;
+  LAd, LSoyad: string;
+  LSahis: Boolean;
 begin
   LXML := TStringBuilder.Create;
   try
+    LSahis := SameText(KimlikSemasi(ATaraf.VergiNo), 'TCKN');
     LXML.AppendLine('<cac:' + ARol + '>');
     LXML.AppendLine('<cac:Party>');
     if Trim(ATaraf.Web) <> '' then
@@ -1305,8 +1623,9 @@ begin
     if Trim(ATaraf.TicaretSicilNo) <> '' then
       LXML.AppendLine('<cac:PartyIdentification><cbc:ID schemeID="TICARETSICILNO">' +
         XMLEscape(ATaraf.TicaretSicilNo) + '</cbc:ID></cac:PartyIdentification>');
-    LXML.AppendLine('<cac:PartyName><cbc:Name>' + XMLEscape(ATaraf.Unvan) +
-      '</cbc:Name></cac:PartyName>');
+    if not (AAliciTaraf and LSahis) then
+      LXML.AppendLine('<cac:PartyName><cbc:Name>' + XMLEscape(ATaraf.Unvan) +
+        '</cbc:Name></cac:PartyName>');
     LXML.AppendLine('<cac:PostalAddress>');
     if Trim(ATaraf.Adres) <> '' then
       LXML.AppendLine('<cbc:StreetName>' + XMLEscape(ATaraf.Adres) +
@@ -1347,12 +1666,138 @@ begin
           '</cbc:ElectronicMail>');
       LXML.AppendLine('</cac:Contact>');
     end;
+    if LSahis then begin
+      KisiAdSoyadAyir(ATaraf.Unvan, LAd, LSoyad);
+      LXML.AppendLine('<cac:Person>');
+      LXML.AppendLine('<cbc:FirstName>' + XMLEscape(LAd) + '</cbc:FirstName>');
+      LXML.AppendLine('<cbc:FamilyName>' + XMLEscape(LSoyad) + '</cbc:FamilyName>');
+      LXML.AppendLine('</cac:Person>');
+    end;
     LXML.AppendLine('</cac:Party>');
     LXML.AppendLine('</cac:' + ARol + '>');
     Result := LXML.ToString;
   finally
     LXML.Free;
   end;
+end;
+
+function KamuPaymentMeansXML(const AHesap: TEBelgeOdemeHesabi): string;
+var
+  LXML: TStringBuilder;
+begin
+  LXML := TStringBuilder.Create;
+  try
+    LXML.AppendLine('<cac:PaymentMeans>');
+    LXML.AppendLine('<cbc:PaymentMeansCode>46</cbc:PaymentMeansCode>');
+    LXML.AppendLine('<cac:PayeeFinancialAccount>');
+    LXML.AppendLine('<cbc:ID>' + XMLEscape(AHesap.IBAN) + '</cbc:ID>');
+    LXML.AppendLine('<cbc:CurrencyCode>' + XMLEscape(AHesap.Kur) + '</cbc:CurrencyCode>');
+    if Trim(AHesap.HesapAdi) <> '' then
+      LXML.AppendLine('<cbc:PaymentNote>' + XMLEscape(AHesap.HesapAdi) + '</cbc:PaymentNote>');
+    if (Trim(AHesap.BankaAdi) <> '') or (Trim(AHesap.SubeAdi) <> '') then begin
+      LXML.AppendLine('<cac:FinancialInstitutionBranch>');
+      if Trim(AHesap.SubeAdi) <> '' then
+        LXML.AppendLine('<cbc:Name>' + XMLEscape(AHesap.SubeAdi) + '</cbc:Name>');
+      if Trim(AHesap.BankaAdi) <> '' then begin
+        LXML.AppendLine('<cac:FinancialInstitution>');
+        LXML.AppendLine('<cbc:Name>' + XMLEscape(AHesap.BankaAdi) + '</cbc:Name>');
+        LXML.AppendLine('</cac:FinancialInstitution>');
+      end;
+      LXML.AppendLine('</cac:FinancialInstitutionBranch>');
+    end;
+    LXML.AppendLine('</cac:PayeeFinancialAccount>');
+    LXML.AppendLine('</cac:PaymentMeans>');
+    Result := LXML.ToString;
+  finally
+    LXML.Free;
+  end;
+end;
+
+function SGKRefKod(ATip: TSGKRefTipi): string;
+begin
+  case ATip of
+    srtMukellefKodu: Result := 'MUKELLEF_KODU';
+    srtMukellefAdi: Result := 'MUKELLEF_ADI';
+  else
+    Result := 'DOSYA_NO';
+  end;
+end;
+
+function SGKRefAciklama(const ABaslik: TEBelgeBaslik; ATip: TSGKRefTipi): string;
+begin
+  case ATip of
+    srtMukellefKodu:
+      if SameText(ABaslik.SGKIlaveTipi, 'SAGLIK_ECZ') then
+        Result := 'Eczane Sicil Numarası'
+      else if SameText(ABaslik.SGKIlaveTipi, 'SAGLIK_HAS') then
+        Result := 'Sağlık Tesis Kodu'
+      else if SameText(ABaslik.SGKIlaveTipi, 'SAGLIK_OPT') then
+        Result := 'Optisyenlik Müessesesi Tesis Kodu'
+      else if SameText(ABaslik.SGKIlaveTipi, 'SAGLIK_MED') then
+        Result := 'Satış Merkezi Kodu'
+      else
+        Result := 'Mükellef Kodu';
+    srtMukellefAdi:
+      if SameText(ABaslik.SGKIlaveTipi, 'SAGLIK_ECZ') then
+        Result := 'Eczane Adı'
+      else if SameText(ABaslik.SGKIlaveTipi, 'SAGLIK_HAS') then
+        Result := 'Sağlık Tesisi Adı'
+      else if SameText(ABaslik.SGKIlaveTipi, 'SAGLIK_OPT') then
+        Result := 'Optisyenlik Müessesesi Adı'
+      else if SameText(ABaslik.SGKIlaveTipi, 'SAGLIK_MED') then
+        Result := 'Satış Merkezi Adı'
+      else
+        Result := 'Mükellef Adı';
+  else
+    if SameText(ABaslik.SGKIlaveTipi, 'ABONELIK') then
+      Result := 'Abone No'
+    else if SameText(ABaslik.SGKIlaveTipi, 'MAL_HIZMET') then
+      Result := 'Harcama Referans/Birim No'
+    else
+      Result := 'Evrak No';
+  end;
+end;
+
+function SGKRefDeger(const ABaslik: TEBelgeBaslik; ATip: TSGKRefTipi): string;
+begin
+  case ATip of
+    srtMukellefKodu: Result := ABaslik.SGKMukellefKodu;
+    srtMukellefAdi: Result := ABaslik.SGKMukellefAdi;
+  else
+    Result := ABaslik.SGKDosyaNo;
+  end;
+end;
+
+procedure SGKAdditionalRefXMLAppend(LXML: TStringBuilder;
+  const ABaslik: TEBelgeBaslik; ATip: TSGKRefTipi);
+var
+  LDeger: string;
+begin
+  LDeger := Trim(SGKRefDeger(ABaslik, ATip));
+  if LDeger = '' then
+    Exit;
+  LXML.AppendLine('<cac:AdditionalDocumentReference>');
+  LXML.AppendLine('<cbc:ID>' + XMLEscape(IfThen(Trim(ABaslik.FaturaNo) <> '',
+    ABaslik.FaturaNo, ABaslik.UUID)) + '</cbc:ID>');
+  LXML.AppendLine('<cbc:IssueDate>' + FormatDateTime('yyyy-mm-dd',
+    ABaslik.Tarih) + '</cbc:IssueDate>');
+  LXML.AppendLine('<cbc:DocumentTypeCode>' + SGKRefKod(ATip) +
+    '</cbc:DocumentTypeCode>');
+  LXML.AppendLine('<cbc:DocumentType>' + XMLEscape(LDeger) +
+    '</cbc:DocumentType>');
+  LXML.AppendLine('<cbc:DocumentDescription>' +
+    XMLEscape(SGKRefAciklama(ABaslik, ATip)) + '</cbc:DocumentDescription>');
+  LXML.AppendLine('</cac:AdditionalDocumentReference>');
+end;
+
+procedure SGKAdditionalRefsXMLAppend(LXML: TStringBuilder;
+  const ABaslik: TEBelgeBaslik);
+begin
+  if not SGKFaturasiMi(ABaslik) then
+    Exit;
+  SGKAdditionalRefXMLAppend(LXML, ABaslik, srtMukellefKodu);
+  SGKAdditionalRefXMLAppend(LXML, ABaslik, srtMukellefAdi);
+  SGKAdditionalRefXMLAppend(LXML, ABaslik, srtDosyaNo);
 end;
 
 type
@@ -1756,6 +2201,7 @@ var
     LSatirNotu, LSatirIstisnaXml: string;
   LGonderici, LAlici, LTasiyici: TEBelgeTaraf;
   LSevk: TSevkBilgisi;
+  LOdemeHesabi: TEBelgeOdemeHesabi;
   LTevkifatVar, LOranIslendi: Boolean;
   LSabitNotlar: TArray<string>;
   LNotlar: TArray<string>;
@@ -1793,6 +2239,7 @@ begin
   // e-Arsiv: alici e-postasi (REHBERALIAS 150) -> Contact/ElectronicMail
   if ABaslik.EArsivMi then
     LAlici.EPosta := AliciEArsivEPostaGetir(ABaslik.RehberID);
+  KamuOdemeHesabiZorunlu(ABaslik, LOdemeHesabi);
   LTevkifatVar := (ABaslik.Tipi = 22) or SatirlardaTevkifatVar(ASatirlar);
   if LTevkifatVar then
     TevkifatNedeniKontrolEt(ABaslik, ASatirlar);
@@ -1889,8 +2336,34 @@ begin
     if ABaslik.Tur <> EBelgeTuruEIrsaliye then
       LXML.AppendLine('<cbc:DocumentCurrencyCode>' +
         XMLEscape(ABaslik.ParaBirimi) + '</cbc:DocumentCurrencyCode>');
+    if SGKFaturasiMi(ABaslik) then
+      LXML.AppendLine('<cbc:AccountingCost>' +
+        XMLEscape(ABaslik.SGKIlaveTipi) + '</cbc:AccountingCost>');
     LXML.AppendLine('<cbc:LineCountNumeric>' + IntToStr(Length(ASatirlar)) +
       '</cbc:LineCountNumeric>');
+
+    if SGKFaturasiMi(ABaslik) and (ABaslik.SGKDonemBas > 0) and
+      (ABaslik.SGKDonemBit > 0) then begin
+      LXML.AppendLine('<cac:InvoicePeriod>');
+      LXML.AppendLine('<cbc:StartDate>' + FormatDateTime('yyyy-mm-dd',
+        ABaslik.SGKDonemBas) + '</cbc:StartDate>');
+      LXML.AppendLine('<cbc:EndDate>' + FormatDateTime('yyyy-mm-dd',
+        ABaslik.SGKDonemBit) + '</cbc:EndDate>');
+      LXML.AppendLine('</cac:InvoicePeriod>');
+    end;
+
+    if (ABaslik.Tur <> EBelgeTuruEIrsaliye) and
+      (Trim(ABaslik.SiparisNo) <> '') then begin
+      LXML.AppendLine('<cac:OrderReference>');
+      LXML.AppendLine('<cbc:ID>' + XMLEscape(ABaslik.SiparisNo) + '</cbc:ID>');
+      if ABaslik.SiparisTarih > 0 then
+        LXML.AppendLine('<cbc:IssueDate>' + FormatDateTime('yyyy-mm-dd',
+          ABaslik.SiparisTarih) + '</cbc:IssueDate>')
+      else
+        LXML.AppendLine('<cbc:IssueDate>' + FormatDateTime('yyyy-mm-dd',
+          ABaslik.Tarih) + '</cbc:IssueDate>');
+      LXML.AppendLine('</cac:OrderReference>');
+    end;
 
     // Iade (Tipi=2) referansi: e-FATURA -> cac:BillingReference (DespatchAdvice'ta GECERSIZ).
     //   e-Irsaliye -> asagida cac:DespatchDocumentReference (irsaliye dalinda).
@@ -1959,6 +2432,7 @@ begin
             ABaslik.Tarih) + '</cbc:IssueDate>');
         LXML.AppendLine('</cac:DespatchDocumentReference>');
       end;
+      SGKAdditionalRefsXMLAppend(LXML, ABaslik);
       if ABaslik.EArsivMi then begin
         LXML.AppendLine('<cac:AdditionalDocumentReference>');
         LXML.AppendLine('<cbc:ID>1</cbc:ID>');
@@ -1993,7 +2467,7 @@ begin
 
     if ABaslik.Tur = EBelgeTuruEIrsaliye then begin
       LXML.Append(PartyXML('DespatchSupplierParty', LGonderici));
-      LXML.Append(PartyXML('DeliveryCustomerParty', LAlici));
+      LXML.Append(PartyXML('DeliveryCustomerParty', LAlici, True));
       LXML.AppendLine('<cac:Shipment>');
       LXML.AppendLine('<cbc:ID />');
       LXML.AppendLine('<cac:GoodsItem><cbc:ValueAmount currencyID="' +
@@ -2047,9 +2521,14 @@ begin
       LXML.Append(PartyXML('AccountingSupplierParty', LGonderici));
       if LProfil = 'IHRACAT' then begin
         LXML.Append(GumrukPartyXML('AccountingCustomerParty'));
-        LXML.Append(PartyXML('BuyerCustomerParty', LAlici));
-      end else
-        LXML.Append(PartyXML('AccountingCustomerParty', LAlici));
+        LXML.Append(PartyXML('BuyerCustomerParty', LAlici, True));
+      end else begin
+        LXML.Append(PartyXML('AccountingCustomerParty', LAlici, True));
+        if LProfil = 'KAMU' then begin
+          LXML.Append(PartyXML('BuyerCustomerParty', LGonderici));
+          LXML.Append(KamuPaymentMeansXML(LOdemeHesabi));
+        end;
+      end;
       if LToplamIskonto > 0.0001 then begin
         LXML.AppendLine('<cac:AllowanceCharge>');
         LXML.AppendLine('<cbc:ChargeIndicator>false</cbc:ChargeIndicator>');
@@ -2211,10 +2690,6 @@ begin
         LXML.AppendLine('<cac:SellersItemIdentification><cbc:ID>' +
           XMLEscape(SatirSaticiKimlik(ASatirlar[I])) +
           '</cbc:ID></cac:SellersItemIdentification>');
-        if Trim(ASatirlar[I].SutKodu) <> '' then
-          LXML.AppendLine('<cac:ManufacturersItemIdentification><cbc:ID>' +
-            XMLEscape(ASatirlar[I].SutKodu) +
-            '</cbc:ID></cac:ManufacturersItemIdentification>');
         // GTIN (URUNNO -> BARKOD) fatura/arsiv ile ayni sekilde irsaliyede de
         if Trim(ASatirlar[I].Barkod) <> '' then
           LXML.AppendLine('<cac:StandardItemIdentification><cbc:ID schemeID="GTIN">' +
@@ -2340,10 +2815,6 @@ begin
       LXML.AppendLine('<cac:SellersItemIdentification><cbc:ID>' +
         XMLEscape(SatirSaticiKimlik(ASatirlar[I])) +
         '</cbc:ID></cac:SellersItemIdentification>');
-      if Trim(ASatirlar[I].SutKodu) <> '' then
-        LXML.AppendLine('<cac:ManufacturersItemIdentification><cbc:ID>' +
-          XMLEscape(ASatirlar[I].SutKodu) +
-          '</cbc:ID></cac:ManufacturersItemIdentification>');
       if Trim(ASatirlar[I].Barkod) <> '' then
         LXML.AppendLine('<cac:StandardItemIdentification><cbc:ID schemeID="GTIN">' +
           XMLEscape(ASatirlar[I].Barkod) +
@@ -3095,6 +3566,9 @@ begin
   end;
 end;
 
+// Seri kurallarinin ayristirilmasi/onceliklendirilmesi UEBelgeSeri unitindedir.
+// Burada yalnizca "kural yoksa eski duz seri listesine dus" davranisi kalir.
+
 function EBelgeSerileri(ATur, ABelgeTuru: Integer): string;
 begin
   if ATur = EBelgeTuruEIrsaliye then
@@ -3105,122 +3579,56 @@ begin
     Result := Trim(EFaturaSerileri);
 end;
 
-function EBelgeSeriKuralBolumu(ATur, ABelgeTuru: Integer): Integer;
-begin
-  if ATur = EBelgeTuruEIrsaliye then
-    Result := Ops_FaturaOpsiyon_EIrsaliyeSeriKurallari
-  else if ABelgeTuru = RAlias_EArsiv then
-    Result := Ops_FaturaOpsiyon_EArsivSeriKurallari
-  else
-    Result := Ops_FaturaOpsiyon_EFaturaSeriKurallari;
-end;
-
-function EBelgeSerileriYeni(AConnection: TFDConnection; ATur, ABelgeTuru,
-  ASenaryo, AKullaniciID: Integer): string;
+// Kullanilabilir seriler, oncelik sirasiyla.
+// Once GENINI seri kurallari; hic kural yoksa opsiyon ekranindaki duz seri
+// listesine (EFaturaSerileri / EArsivFaturaSerileri / EIrsaliyeSerileri) dusulur.
+function KullanilabilirSeriler(AConnection: TFDConnection; ATur, ABelgeTuru,
+  ASenaryo, AKullaniciID: Integer): TArray<string>;
 var
-  LQ: TFDQuery;
-  LListe, LParcalar: TStringList;
-  LSeri: string;
-  LSatirSenaryo, LSatirKullaniciID: Integer;
+  LListe: TStringList;
+  i: Integer;
 begin
-  Result := '';
+  Result := UygunSeriler(AConnection, ATur, ABelgeTuru, ASenaryo, AKullaniciID);
+  if Length(Result) > 0 then
+    Exit;
+
   LListe := TStringList.Create;
-  LParcalar := TStringList.Create;
-  LQ := TFDQuery.Create(nil);
   try
-    LParcalar.StrictDelimiter := True;
-    LParcalar.Delimiter := ',';
-    LQ.Connection := AConnection;
-    if AktifVeriMotor = vmPG then
-      LQ.SQL.Text :=
-        'select ANAHTAR, SIRA from GENINI where BOLUM=' +
-        IntToStr(EBelgeSeriKuralBolumu(ATur, ABelgeTuru)) +
-        ' and DIL=-1 order by coalesce(SIRA,0), ANAHTAR'
-    else
-      LQ.SQL.Text :=
-        'with K as (' +
-        'select SERI=left(ANAHTAR, charindex('','', ANAHTAR+'','')-1), ' +
-        'SENARYO=try_convert(int, parsename(replace(ANAHTAR,'','',''.''),2)), ' +
-        'KULLANICIID=try_convert(int, parsename(replace(ANAHTAR,'','',''.''),1)), ' +
-        'SIRA ' +
-        'from GENINI where BOLUM=:BOLUM and DIL=-1) ' +
-        'select SERI from K ' +
-        'where isnull(SERI,'''')<>'''' ' +
-        'and isnull(SENARYO,0) in (0,:SENARYO) ' +
-        'and isnull(KULLANICIID,0) in (0,:KULLANICIID) ' +
-        'order by case ' +
-        'when SENARYO=:SENARYO and KULLANICIID=:KULLANICIID then 1 ' +
-        'when SENARYO=0 and KULLANICIID=:KULLANICIID then 2 ' +
-        'when SENARYO=:SENARYO and KULLANICIID=0 then 3 ' +
-        'else 4 end, isnull(SIRA,0), SERI';
-    if AktifVeriMotor <> vmPG then begin
-      LQ.ParamByName('BOLUM').AsInteger := EBelgeSeriKuralBolumu(ATur, ABelgeTuru);
-      LQ.ParamByName('SENARYO').AsInteger := ASenaryo;
-      LQ.ParamByName('KULLANICIID').AsInteger := AKullaniciID;
-    end;
-    LQ.Open;
-    while not LQ.Eof do begin
-      if AktifVeriMotor = vmPG then begin
-        LParcalar.DelimitedText := LQ.FieldByName('ANAHTAR').AsString;
-        LSeri := '';
-        LSatirSenaryo := 0;
-        LSatirKullaniciID := 0;
-        if LParcalar.Count > 0 then
-           LSeri := Trim(LParcalar[0]);
-        if LParcalar.Count > 1 then
-           LSatirSenaryo := StrToIntDef(Trim(LParcalar[1]), 0);
-        if LParcalar.Count > 2 then
-           LSatirKullaniciID := StrToIntDef(Trim(LParcalar[2]), 0);
-        if not ((LSatirSenaryo in [0, ASenaryo]) and
-          (LSatirKullaniciID in [0, AKullaniciID])) then begin
-          LQ.Next;
-          Continue;
-        end;
-      end else
-        LSeri := Trim(LQ.FieldByName('SERI').AsString);
-      if (LSeri <> '') and (LListe.IndexOf(LSeri) < 0) then
-        LListe.Add(LSeri);
-      LQ.Next;
-    end;
-    if LListe.Count > 0 then
-      Result := LListe.CommaText
-    else
-      Result := EBelgeSerileri(ATur, ABelgeTuru);
+    LListe.StrictDelimiter := True;
+    LListe.Delimiter := ',';
+    LListe.DelimitedText := EBelgeSerileri(ATur, ABelgeTuru);
+    for i := 0 to LListe.Count - 1 do
+      if Trim(LListe[i]) <> '' then
+        Result := Result + [Trim(LListe[i])];
   finally
-    LQ.Free;
-    LParcalar.Free;
     LListe.Free;
   end;
 end;
 
+// Seri secim diyalogu. AExcludeSeri doluysa (Seri Degistir) o seri listeden cikarilir.
 function SeriSecimi(AConnection: TFDConnection; ATur, ABelgeTuru, ASenaryo,
   AKullaniciID: Integer; const AExcludeSeri: string; out AYeniSeri: string): Boolean;
 var
   i: Integer;
-  LSeriler: string;
+  LSeriler: TArray<string>;
   LListe: TStringList;
   LCtrls: TGirdiDenetimleri;
   LVarSecim: Variant;
 begin
   Result := False;
   AYeniSeri := '';
-  LSeriler := EBelgeSerileriYeni(AConnection, ATur, ABelgeTuru, ASenaryo, AKullaniciID);
-  if LSeriler = '' then begin
-    ShowMessage('Bu belge turu icin seri tanimi bulunamadi (Opsiyon ekranindan tanimlayin).');
+  LSeriler := KullanilabilirSeriler(AConnection, ATur, ABelgeTuru, ASenaryo, AKullaniciID);
+  if Length(LSeriler) = 0 then begin
+    ShowMessage('Bu belge turu icin seri tanimi bulunamadi (Opsiyon ekranindan tanimlayin).' +
+      sLineBreak + sLineBreak + SeriTanisi);
     Exit;
   end;
 
   LListe := TStringList.Create;
   try
-    LListe.Delimiter := ',';
-    LListe.StrictDelimiter := True;
-    LListe.DelimitedText := LSeriler;
-    for i := LListe.Count - 1 downto 0 do begin
-      LListe[i] := Trim(LListe[i]);
-      if (LListe[i] = '') or
-         ((AExcludeSeri <> '') and SameText(LListe[i], AExcludeSeri)) then
-        LListe.Delete(i);
-    end;
+    for i := Low(LSeriler) to High(LSeriler) do
+      if (AExcludeSeri = '') or (not SameText(LSeriler[i], AExcludeSeri)) then
+        LListe.Add(LSeriler[i]);
 
     if LListe.Count = 0 then begin
       if AExcludeSeri <> '' then
@@ -3240,8 +3648,8 @@ begin
       AYeniSeri := Trim(VarToStrDef(LVarSecim, ''));
     end;
 
-    if Length(AYeniSeri) <> 3 then begin
-      ShowMessage('Seri 3 karakter olmalidir.');
+    if Length(AYeniSeri) <> SeriKarakterSayisi then begin
+      ShowMessage(Format('Seri %d karakter olmalidir.', [SeriKarakterSayisi]));
       Exit;
     end;
     Result := True;
@@ -3470,18 +3878,6 @@ begin
       ShowMessage('Gonderilmis belge uzerinde islem yapilamaz.');
 end;
 
-// Virgullu seri listesinden ILK seriyi dondurur ('GNT,GNY' -> 'GNT').
-function IlkSeri(const ASeriler: string): string;
-var
-  P: Integer;
-begin
-  P := Pos(',', ASeriler);
-  if P > 0 then
-    Result := Trim(Copy(ASeriler, 1, P - 1))
-  else
-    Result := Trim(ASeriler);
-end;
-
 // 16 karakterlik belge no: SERI(3) + YIL(4) + 9 haneli sira numarasi.
 function BelgeNoUret(const ASeri: string; AYil: Integer; ASiraNo: Int64): string;
 var
@@ -3494,7 +3890,7 @@ begin
 end;
 
 class function TEBelgeOlusturucu.MenuHazirla(AConnection: TFDConnection;
-  AFatBaslikID: Integer): Boolean;
+  AFatBaslikID: Integer; ATaslakSeriDegistir: Boolean): Boolean;
 var
   LBaslik: TEBelgeMenuBaslik;
   LSeri, LNumara, LAlias, LVergiNo,
@@ -3507,6 +3903,7 @@ var
   LOnBaslik: TEBelgeBaslik;
   LOnSatirlar: TEBelgeSatirlar;
   LOnSevkHata: string;
+  LSeriler: TArray<string>;
 begin
   Result := False;
   if not MenuBaslikOku(AConnection, AFatBaslikID, LBaslik) then
@@ -3531,6 +3928,8 @@ begin
     if (LOnBaslik.Tipi = 22) or SatirlardaTevkifatVar(LOnSatirlar) then
       TevkifatNedeniKontrolEt(LOnBaslik, LOnSatirlar);
     TamIskontoNedeniKontrolEt(LOnBaslik, LOnSatirlar);
+    KamuFaturaHazirlikDogrula(LOnBaslik);
+    SGKFaturaHazirlikDogrula(LOnBaslik);
 
     // TEVKIFAT faturasi (Tipi=22): en az bir satirda GECERLI tevkifat (>0) olmali.
     // Satirin KDV orani 0 ise tevkifat tutari da 0 olur (tevkifat = KDV'nin yuzdesi)
@@ -3616,10 +4015,21 @@ begin
     LAliasUyari := LAliasSonuc.Mesaj;
 
     if Trim(LBaslik.FaturaNo) = '0' then begin
-      LSeri := IlkSeri(EBelgeSerileriYeni(AConnection, LBaslik.Tur,
-        LAliasSonuc.BelgeTuru, LOnBaslik.Senaryo, StrToIntDef(Kullanan, 0)));
-      if Length(LSeri) <> 3 then begin
-        ShowMessage('Bu belge turu icin gecerli ilk seri tanimi yok (3 karakter olmali).');
+      // Normal hazirlama ilk seriyi kullanir. Taslak belge uzerinden
+      // "Seri Degistir" cagrildiginda ilk/default seri yerine varsa ikinci
+      // uygun seriyle baslanir; tek seri varsa yine o seri kullanilir.
+      LSeriler := KullanilabilirSeriler(AConnection, LBaslik.Tur,
+        LAliasSonuc.BelgeTuru, LOnBaslik.Senaryo, StrToIntDef(Kullanan, 0));
+      if ATaslakSeriDegistir and (Length(LSeriler) > 1) then
+        LSeri := LSeriler[1]
+      else if Length(LSeriler) > 0 then
+        LSeri := LSeriler[0]
+      else
+        LSeri := '';
+      if Length(LSeri) <> SeriKarakterSayisi then begin
+        ShowMessage(Format('Bu belge turu icin gecerli ilk seri tanimi yok (%d karakter olmali).',
+            [SeriKarakterSayisi]) + sLineBreak +
+          'Bulunan: [' + LSeri + ']' + sLineBreak + sLineBreak + SeriTanisi);
         Exit;
       end;
 
@@ -3769,21 +4179,10 @@ var
   LYil, LBelgeTuru: Integer;
   LMevcutSeri, LYeniSeri, LYeniNo, LFatNo: string;
   LSonrakiSeq: Int64;
-  LFatNoYok: Boolean;
 begin
   Result := False;
   if not MenuBaslikOku(AConnection, AFatBaslikID, LBaslik) then
     Exit;
-
-  LFatNo := Trim(LBaslik.FaturaNo);
-  LYil := YearOf(LBaslik.FaturaTarih);
-  LFatNoYok := LFatNo = '0';
-  case LBaslik.EFaturaDurum of
-    11, 12: LBelgeTuru := RAlias_EArsiv;
-    51, 52: LBelgeTuru := RAlias_EIrsaliyeKendi;
-  else
-    LBelgeTuru := RAlias_EFatura;
-  end;
 
   if not (LBaslik.Tur in [EBelgeTuruEIrsaliye, EBelgeTuruEFatura]) then begin
     ShowMessage('Bu islem yalnizca e-Fatura/e-Irsaliye belgeleri icin kullanilabilir.');
@@ -3792,10 +4191,27 @@ begin
   if GonderilmisEngeli(LBaslik.EFaturaDurum) then
     Exit;
 
-  if LFatNoYok then
-    LMevcutSeri := IlkSeri(EBelgeSerileriYeni(AConnection, LBaslik.Tur,
-      LBelgeTuru, LBaslik.Senaryo, StrToIntDef(Kullanan, 0)))
-  else if Length(LFatNo) >= 3 then
+  // Henuz hazirlanmamissa hazirlama akisi belge turunu dogru cozer.
+  // Seri Degistir cagrisi icin varsa ikinci uygun seri secilir; tek seri varsa
+  // ayni seriyle belge olusturulur.
+  if LBaslik.EFaturaDurum = 0 then begin
+    Result := MenuHazirla(AConnection, AFatBaslikID, True);
+    Exit;
+  end;
+
+  LFatNo := Trim(LBaslik.FaturaNo);
+  LYil := YearOf(LBaslik.FaturaTarih);
+
+  // Hazirlamadan sonra EFATURADURUM belge turunu dogru veriyor.
+  case LBaslik.EFaturaDurum of
+    11, 12: LBelgeTuru := RAlias_EArsiv;
+     1,  2: LBelgeTuru := RAlias_EFatura;
+    51, 52: LBelgeTuru := RAlias_EIrsaliyeKendi;
+  else
+    LBelgeTuru := RAlias_EFatura;
+  end;
+
+  if Length(LFatNo) >= 3 then
     LMevcutSeri := Copy(LFatNo, 1, 3)
   else
     LMevcutSeri := Trim(LBaslik.FaturaSeri);
@@ -3812,12 +4228,8 @@ begin
     'update FATBASLIK set FATURANO=&NO, FATURASERI=&SERI where ID=&ID',
     ['&NO', '&SERI', '&ID'], [LYeniNo, LYeniSeri, LBaslik.ID]);
 
-  if LFatNoYok then
-    Result := MenuHazirla(AConnection, AFatBaslikID)
-  else begin
-    ShowMessage('Yeni Belge No: ' + LYeniNo);
-    Result := True;
-  end;
+  ShowMessage('Yeni Belge No: ' + LYeniNo);
+  Result := True;
 end;
 
 // Kuyruk kaydini hataya (DURUM=9) ceker, 5 dk sonraya erteler; FATBASLIK
@@ -4462,6 +4874,60 @@ begin
   Result.AddPair('address', LAdr);
 end;
 
+function KamuBuyerCustomerPartyOlustur(const ATaraf: TEBelgeTaraf): TJSONObject;
+var
+  LAdr: TJSONObject;
+begin
+  Result := TJSONObject.Create;
+  Result.AddPair('schemeId', KimlikSemasi(ATaraf.VergiNo));
+  Result.AddPair('identifier', VergiNoTemizle(ATaraf.VergiNo));
+  Result.AddPair('name', ATaraf.Unvan);
+  if Trim(ATaraf.VergiDairesi) <> '' then
+    Result.AddPair('taxOffice', ATaraf.VergiDairesi);
+  LAdr := TJSONObject.Create;
+  LAdr.AddPair('country', 'TR');
+  if Trim(ATaraf.Il) <> '' then
+    LAdr.AddPair('city', ATaraf.Il);
+  if Trim(ATaraf.Ilce) <> '' then
+    LAdr.AddPair('subCity', ATaraf.Ilce);
+  if Trim(ATaraf.Adres) <> '' then
+    LAdr.AddPair('streetName', ATaraf.Adres);
+  if Trim(ATaraf.PostaKodu) <> '' then
+    LAdr.AddPair('postalCode', ATaraf.PostaKodu);
+  if Trim(ATaraf.EPosta) <> '' then
+    LAdr.AddPair('email', ATaraf.EPosta);
+  if Trim(ATaraf.Telefon) <> '' then
+    LAdr.AddPair('telephone', ATaraf.Telefon);
+  Result.AddPair('address', LAdr);
+end;
+
+function KamuPaymentMeansOlustur(const AHesap: TEBelgeOdemeHesabi): TJSONArray;
+var
+  LMeans, LAccount, LBranch, LBank: TJSONObject;
+begin
+  Result := TJSONArray.Create;
+  LMeans := TJSONObject.Create;
+  LMeans.AddPair('paymentCode', '46');
+  LAccount := TJSONObject.Create;
+  LAccount.AddPair('id', AHesap.IBAN);
+  LAccount.AddPair('currencyCode', AHesap.Kur);
+  if Trim(AHesap.HesapAdi) <> '' then
+    LAccount.AddPair('paymentNote', AHesap.HesapAdi);
+  if (Trim(AHesap.BankaAdi) <> '') or (Trim(AHesap.SubeAdi) <> '') then begin
+    LBranch := TJSONObject.Create;
+    if Trim(AHesap.SubeAdi) <> '' then
+      LBranch.AddPair('name', AHesap.SubeAdi);
+    if Trim(AHesap.BankaAdi) <> '' then begin
+      LBank := TJSONObject.Create;
+      LBank.AddPair('id', AHesap.BankaAdi);
+      LBranch.AddPair('financialInstitution', LBank);
+    end;
+    LAccount.AddPair('financialInstitutionBranch', LBranch);
+  end;
+  LMeans.AddPair('payeeFinancialAccount', LAccount);
+  Result.AddElement(LMeans);
+end;
+
 function GumrukPartyXML(const ARol: string): string;
 var
   LXML: TStringBuilder;
@@ -4629,7 +5095,7 @@ var
   LNotes, LLines, LTaxSubArr, LLineTaxSubArr, LAddRefs,
     LWithholdingSubArr: TJSONArray;
   LAddRefSend: TJSONObject;
-  i, J, LBosluk: Integer;
+  i, J: Integer;
   LToplamMatrah, LToplamKDV, LToplamTevkifat, LGrupMatrah, LGrupVergi,
     LGrupTevkifat, LSatirVergi, LSatirTevkifat: Currency;
   LSatir: TEBelgeSatir;
@@ -4638,6 +5104,7 @@ var
   LSabitNotlar: TArray<string>;
   LSevk: TSevkBilgisi;
   LTasiyici: TEBelgeTaraf;
+  LOdemeHesabi: TEBelgeOdemeHesabi;
 begin
   LIsIrsaliye := ABaslik.Tur = EBelgeTuruEIrsaliye;
   LIsArsiv := ABaslik.EArsivMi;
@@ -4652,6 +5119,7 @@ begin
   // (belge tipi ISTISNA, senaryo/profil IHRACAT). Belge tipi zaten ISTISNA degilse ISTISNA'ya cek.
   if (LProfil = 'IHRACAT') and (LDocTypeCode <> 'ISTISNA') then
     LDocTypeCode := 'ISTISNA';
+  KamuOdemeHesabiZorunlu(ABaslik, LOdemeHesabi);
   LTevkifatVar := (not LIsIrsaliye) and
     ((ABaslik.Tipi = 22) or SatirlardaTevkifatVar(ASatirlar));
   if LTevkifatVar then
@@ -4733,11 +5201,75 @@ begin
       LNotes.Add(LTrimmed);
     LContent.AddPair('currencyCode', IfThen(Trim(ABaslik.ParaBirimi) = '', 'TRY', ABaslik.ParaBirimi));
 
+    if SGKFaturasiMi(ABaslik) then begin
+      LContent.AddPair('accountingCost', ABaslik.SGKIlaveTipi);
+      if (ABaslik.SGKDonemBas > 0) and (ABaslik.SGKDonemBit > 0) then begin
+        var LInvoicePeriod: TJSONObject := TJSONObject.Create;
+        LInvoicePeriod.AddPair('startDate',
+          FormatDateTime('yyyy-mm-dd', ABaslik.SGKDonemBas));
+        LInvoicePeriod.AddPair('endDate',
+          FormatDateTime('yyyy-mm-dd', ABaslik.SGKDonemBit));
+        LContent.AddPair('invoicePeriod', LInvoicePeriod);
+      end;
+    end;
+
+    if (not LIsIrsaliye) and (Trim(ABaslik.SiparisNo) <> '') then begin
+      var LOrderRef: TJSONObject := TJSONObject.Create;
+      LOrderRef.AddPair('id', ABaslik.SiparisNo);
+      if ABaslik.SiparisTarih > 0 then
+        LOrderRef.AddPair('issueDate',
+          FormatDateTime('yyyy-mm-dd', ABaslik.SiparisTarih))
+      else
+        LOrderRef.AddPair('issueDate',
+          FormatDateTime('yyyy-mm-dd', ABaslik.Tarih));
+      LContent.AddPair('orderReference', LOrderRef);
+    end;
+
+    if (not LIsIrsaliye) and (Trim(ABaslik.IrsaliyeNo) <> '') then begin
+      var LDespatchRefs: TJSONArray := TJSONArray.Create;
+      var LDespatchRef: TJSONObject := TJSONObject.Create;
+      LDespatchRef.AddPair('id', ABaslik.IrsaliyeNo);
+      if ABaslik.IrsaliyeTarih > 0 then
+        LDespatchRef.AddPair('issueDate',
+          FormatDateTime('yyyy-mm-dd', ABaslik.IrsaliyeTarih))
+      else
+        LDespatchRef.AddPair('issueDate',
+          FormatDateTime('yyyy-mm-dd', ABaslik.Tarih));
+      LDespatchRefs.AddElement(LDespatchRef);
+      LContent.AddPair('despatchDocumentReference', LDespatchRefs);
+    end;
+
+    if SGKFaturasiMi(ABaslik) then begin
+      if LAddRefs = nil then
+        LAddRefs := TJSONArray.Create;
+      for var LRefTip := Low(TSGKRefTipi) to High(TSGKRefTipi) do begin
+        var LRefDeger := Trim(SGKRefDeger(ABaslik, LRefTip));
+        if LRefDeger = '' then
+          Continue;
+        var LSGKRef: TJSONObject := TJSONObject.Create;
+        LSGKRef.AddPair('id', IfThen(Trim(ABaslik.FaturaNo) <> '',
+          ABaslik.FaturaNo, ABaslik.UUID));
+        LSGKRef.AddPair('issueDate', FormatDateTime('yyyy-mm-dd', ABaslik.Tarih));
+        LSGKRef.AddPair('documentTypeCode', SGKRefKod(LRefTip));
+        LSGKRef.AddPair('documentType', LRefDeger);
+        LSGKRef.AddPair('documentDescription',
+          SGKRefAciklama(ABaslik, LRefTip));
+        LAddRefs.AddElement(LSGKRef);
+      end;
+      if LContent.GetValue('additionalReferences') = nil then
+        LContent.AddPair('additionalReferences', LAddRefs);
+    end;
+
     // Supplier (gonderici = bizim firma)
     LSupplier := TJSONObject.Create;
     LSupplier.AddPair('name', AGondericiTaraf.Unvan);
     LSupplier.AddPair('identifier', VergiNoTemizle(AGondericiTaraf.VergiNo));
     LSupplier.AddPair('schemeId', KimlikSemasi(AGondericiTaraf.VergiNo));
+    if SameText(KimlikSemasi(AGondericiTaraf.VergiNo), 'TCKN') then begin
+      KisiAdSoyadAyir(AGondericiTaraf.Unvan, LAd, LSoyad);
+      LSupplier.AddPair('firstName', LAd);
+      LSupplier.AddPair('lastName', LSoyad);
+    end;
     if Trim(AGondericiTaraf.VergiDairesi) <> '' then
       LSupplier.AddPair('taxOffice', AGondericiTaraf.VergiDairesi);
     LSupplierAdr := TJSONObject.Create;
@@ -4879,42 +5411,18 @@ begin
       LCustomer.AddPair('schemeId', LCustSeli);
       LCustomer.AddPair('identifier', VergiNoTemizle(ABaslik.VergiNo));
     end;
-    if SameText(LCustSeli, 'TCKN') and (LIsArsiv or LIsIrsaliye) then begin
+    if SameText(LCustSeli, 'TCKN') then begin
       // Baslik'tan ad/soyad ayir: SON kelime SOYAD, oncesi AD (orn "Mehmet Ali Ay" -> Ad="Mehmet Ali", Soyad="Ay")
-      LTrimmed := Trim(ABaslik.Baslik);
-      LBosluk := LastDelimiter(' ', LTrimmed);
-      if LBosluk > 0 then begin
-        LAd := Trim(Copy(LTrimmed, 1, LBosluk - 1));
-        LSoyad := Trim(Copy(LTrimmed, LBosluk + 1, MaxInt));
-      end else begin
-        LAd := LTrimmed;
-        LSoyad := LTrimmed;
-      end;
+      KisiAdSoyadAyir(ABaslik.Baslik, LAd, LSoyad);
       LCustomer.AddPair('firstName', LAd);
       LCustomer.AddPair('lastName', LSoyad);
+      if Trim(ABaslik.VergiDairesi) <> '' then
+        LCustomer.AddPair('taxOffice', ABaslik.VergiDairesi);
     end else begin
       LCustomer.AddPair('name', ABaslik.Baslik);
       // EIrsaliye taxOffice'i de gonderebilir
       if Trim(ABaslik.VergiDairesi) <> '' then
         LCustomer.AddPair('taxOffice', ABaslik.VergiDairesi);
-      // Sahis firma (TCKN=11 hane) e-Fatura: GIB kilavuzu (2.2.13) alicinin sahis
-      // olmasi durumunda cac:Person (Ad/Soyad) ister. izibiz JSON-native'de
-      // firstName/lastName yoksa "Belge gönderici/alıcı Ad boş olamaz" (kod 816).
-      // name (unvan->PartyName) + taxOffice (vergi dairesi->TaxScheme) yaninda Person
-      // de gonder (ornek: YILDIRIM ALÜMİNYUM XML, schemeID=TCKN + PartyName + TaxScheme).
-      if SameText(LCustSeli, 'TCKN') then begin
-        LTrimmed := Trim(ABaslik.Baslik);
-        LBosluk := LastDelimiter(' ', LTrimmed);  // SON kelime = soyad, oncesi = ad
-        if LBosluk > 0 then begin
-          LAd := Trim(Copy(LTrimmed, 1, LBosluk - 1));
-          LSoyad := Trim(Copy(LTrimmed, LBosluk + 1, MaxInt));
-        end else begin
-          LAd := LTrimmed;
-          LSoyad := LTrimmed;
-        end;
-        LCustomer.AddPair('firstName', LAd);
-        LCustomer.AddPair('lastName', LSoyad);
-      end;
     end;
     // Address ? Postman ornegine gore VARSAYILAN olarak gonderilir (Izibiz NPE atmasin)
     var LCustomerAdr: TJSONObject := TJSONObject.Create;
@@ -4945,8 +5453,14 @@ begin
       // = Gumruk ve Ticaret Bakanligi (GIB kurali, VKN 1460415308).
       LContent.AddPair('buyerCustomerParty', LCustomer);
       LContent.AddPair('customerParty', GumrukCustomerPartyOlustur);
-    end else
+    end else begin
       LContent.AddPair('customerParty', LCustomer);
+      if LProfil = 'KAMU' then begin
+        LContent.AddPair('buyerCustomerParty',
+          KamuBuyerCustomerPartyOlustur(AGondericiTaraf));
+        LContent.AddPair('paymentMeans', KamuPaymentMeansOlustur(LOdemeHesabi));
+      end;
+    end;
 
     // Tax / Monetary ? sadece fatura/arsiv icin (irsaliyede yok)
     if not LIsIrsaliye then begin
@@ -5539,10 +6053,3 @@ begin
 end;
 
 end.
-
-
-
-
-
-
-

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İş Listesi — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    --warn:#b5731a;
+    /* is listesi satir renkleri */
+    --r-gec:#f7cfcf;  --r-gec-t:#7d1f1f;   /* gecikmis      */
+    --r-bug:#c9deF6;  --r-bug-t:#10305c;   /* bugun         */
+    --r-bay:#fbe6ae;  --r-bay-t:#7a5407;   /* bayrakli      */
+    --r-tam:#dcdcdc;  --r-tam-t:#7a7a7a;   /* tamamlanmis   */
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1330px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .ara{margin-left:auto;border:1px solid var(--line);border-radius:3px;background:#fff;height:24px;
+    padding:0 8px;font-size:11.5px;color:var(--muted);display:flex;align-items:center;min-width:200px}
+
+  .wrap{display:grid;grid-template-columns:214px 1fr 230px;gap:0}
+  .side{border-right:1px solid var(--line2);background:#f8fafc;padding:8px 0}
+  .side.right{border-right:none;border-left:1px solid var(--line2)}
+  .side h5{margin:0;padding:6px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .tvi{display:flex;align-items:center;gap:7px;padding:4px 12px;font-size:11.5px;cursor:default;border-left:3px solid transparent}
+  .tvi:hover{background:#eef4fb}
+  .tvi.on{background:var(--sel);border-left-color:var(--accent);font-weight:bold;color:var(--navy)}
+  .tvi .n{margin-left:auto;font-size:10px;color:#5c7189;background:#e6edf5;border:1px solid #d5e0eb;border-radius:9px;padding:0 6px}
+  .tvi.on .n{background:#fff}
+  .tvi .n.red{background:#fbe0e0;border-color:#f0c4c4;color:#a53535}
+  .tvsep{height:1px;background:var(--line2);margin:6px 10px}
+
+  .center{min-width:0;display:flex;flex-direction:column}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 7px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 7px;font-size:11.5px}
+  .dg td.kon{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg tr.r-gec td{background:var(--r-gec);color:var(--r-gec-t)}
+  .dg tr.r-bug td{background:var(--r-bug);color:var(--r-bug-t)}
+  .dg tr.r-bay td{background:var(--r-bay);color:var(--r-bay-t)}
+  .dg tr.r-tam td{background:var(--r-tam);color:var(--r-tam-t)}
+  .dg tr.r-tam td.kon{text-decoration:line-through}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);
+    border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;letter-spacing:.3px;margin-left:auto;
+    background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .gridtb{display:flex;gap:4px;padding:0 0 7px;align-items:center;flex-wrap:wrap}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .lgnd{display:flex;gap:12px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .pill{font-size:10px;padding:1px 7px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-yeni{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}
+  .p-dev{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-onay{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .p-tam{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-red{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .flag{color:#d8a013}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;
+    display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:3px;color:var(--muted);font-size:10px}
+  .grid2{display:grid;grid-template-columns:96px 1fr;gap:7px 9px;align-items:center}
+  .grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .full{grid-column:1 / -1}
+  .av{width:26px;height:26px;border-radius:50%;color:#fff;font-weight:bold;font-size:10.5px;flex:none;
+    display:flex;align-items:center;justify-content:center}
+  /* yorum akisi */
+  .feed{display:flex;flex-direction:column;gap:9px}
+  .cmt{border:1px solid var(--line2);border-radius:5px;background:#fff;padding:8px 10px;display:flex;gap:9px}
+  .cmt .cx{flex:1;min-width:0}
+  .cmt .hd{font-size:10.5px;color:var(--muted)}
+  .cmt .hd b{color:var(--navy)}
+  .cmt .tx{font-size:11.5px;margin:3px 0 5px;line-height:1.45}
+  .thumb{width:70px;height:52px;border:1px solid var(--line);border-radius:4px;background:#eef3f8;
+    display:flex;align-items:center;justify-content:center;font-size:16px;color:#5c7189}
+  .newc{border:1px solid var(--line2);border-radius:5px;background:#fff;padding:8px}
+  .newc .box{border:1px solid var(--line);border-radius:3px;height:42px;padding:6px;color:var(--muted);font-size:11.5px}
+  .newc .act{display:flex;gap:6px;margin-top:6px;align-items:center}
+  /* takvim */
+  .cal{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .cal table{border-collapse:collapse;width:100%;table-layout:fixed}
+  .cal th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line2);padding:4px;font-size:10.5px;color:#3a5573}
+  .cal td{border:1px solid #edf1f6;height:34px;vertical-align:top;padding:2px;font-size:10.5px}
+  .cal td.now{background:#f4f9ff}
+  .ev{border-radius:3px;padding:1px 5px;font-size:10px;margin-bottom:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border:1px solid}
+  .ev.b{background:#cfe2f8;border-color:#a9c8ea;color:#16406f}
+  .ev.g{background:#cdeed9;border-color:#a6d8b8;color:#1c5c34}
+  .ev.o{background:#fbe3bd;border-color:#e9c58c;color:#7a5407}
+  .ev.r{background:#f8d2d2;border-color:#e8adad;color:#8a2727}
+  .calbar{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;align-items:center}
+  /* saga hizli ekleme */
+  .quick{padding:8px 10px}
+  .quick .box{border:1px solid var(--line);border-radius:3px;background:#fff;height:44px;padding:6px;color:var(--muted);font-size:11.5px}
+  .prow{display:flex;align-items:center;gap:7px;padding:3px 12px;font-size:11.5px}
+  .prow input{vertical-align:-1px}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> İş Listesi
+    <span class="sp">UGorevListeDlg · GOREVLER · Kullanıcı: Mehmet Yıldız · 14.08.2026 Cuma</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn">⟳ Yenile</div>
+    <div class="btn primary">➕ Yeni</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">✔ Tamamlandı</div>
+    <div class="btn">🚩 Bayrak</div>
+    <div class="btn">👥 Atama Yap</div>
+    <div class="btn">📅 Tarihi Bugün</div>
+    <div class="sepv"></div>
+    <div class="btn">✉ E-Posta Gönder</div>
+    <div class="ara">🔎 Konu, cari veya kişi ara…</div>
+  </div>
+
+  <div class="wrap">
+    <!-- ============ SOL: LISTE AGACI ============ -->
+    <div class="side">
+      <h5>Klasörler</h5>
+      <div class="tvi">🖥 Masaüstü <span class="n">6</span></div>
+      <div class="tvi on">📌 Bugün <span class="n">9</span></div>
+      <div class="tvi">✅ Onayla <span class="n red">3</span></div>
+      <div class="tvi">📥 Bana Atananlar <span class="n red">12</span></div>
+      <div class="tvi">📤 Atadıklarım <span class="n">8</span></div>
+      <div class="tvi">❔ Atanmamışlar <span class="n">4</span></div>
+      <div class="tvi">🚩 Bayraklı <span class="n">5</span></div>
+      <div class="tvsep"></div>
+      <div class="tvi">👥 Toplantılar <span class="n">2</span></div>
+      <div class="tvi">🔧 Servis <span class="n">7</span></div>
+      <div class="tvi">🗄 Demirbaş <span class="n">1</span></div>
+      <div class="tvsep"></div>
+      <h5>Kendi Listelerim</h5>
+      <div class="tvi">📁 Yıl Sonu Devir <span class="n">11</span></div>
+      <div class="tvi">📁 e-Belge Geçiş <span class="n">6</span></div>
+      <div class="tvi">📁 PG Migrasyon <span class="n">14</span></div>
+      <div class="tvsep"></div>
+      <div class="tvi">🗂 Tüm Liste <span class="n">128</span></div>
+      <div style="padding:8px 12px"><span class="minibtn">➕ Yeni Liste</span></div>
+    </div>
+
+    <!-- ============ ORTA ============ -->
+    <div class="center">
+      <div class="tabs">
+        <div class="tab active" data-t="liste">📋 Liste <span class="b">9</span></div>
+        <div class="tab" data-t="icerik">📝 İçerik</div>
+        <div class="tab" data-t="grup">🗃 Grup</div>
+        <div class="tab" data-t="takvim">📅 Takvim</div>
+      </div>
+
+      <!-- LISTE -->
+      <div class="pane active" data-p="liste">
+        <div class="gridtb">
+          <span class="minibtn on">Açık</span>
+          <span class="minibtn">Tamamlanan</span>
+          <span class="minibtn">Tümü</span>
+          <span class="sepv" style="height:20px"></span>
+          <span class="minibtn">👤 Atanan: (tümü)</span>
+          <span class="minibtn">🏷 Tür: (tümü)</span>
+          <span class="minibtn">📅 Tarih: Bu hafta</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Sıralama: gecikmiş → bugün → bayraklı → diğer, tamamlananlar en sonda</span>
+        </div>
+
+        <div class="dg">
+          <table>
+            <tr>
+              <th class="c" style="width:26px">✔</th>
+              <th class="c" style="width:26px">🚩</th>
+              <th>KONUSU</th>
+              <th style="width:80px">TÜRÜ</th>
+              <th style="width:132px">CARİ AD</th>
+              <th style="width:104px">ATANAN</th>
+              <th style="width:92px">DURUM</th>
+              <th class="c" style="width:34px">📝</th>
+              <th class="c" style="width:34px">💬</th>
+              <th style="width:74px">BAŞLAMA</th>
+              <th style="width:74px">BİTİŞ</th>
+            </tr>
+            <tr class="r-gec">
+              <td class="c">☐</td><td class="c"></td>
+              <td class="kon"><b>e-Fatura seri tanımları gözden geçirilecek</b></td>
+              <td>Görev</td><td>—</td><td>Mehmet Yıldız</td>
+              <td><span class="pill p-dev">Devam</span></td><td class="c">📝</td><td class="c">3</td>
+              <td>10.08.2026</td><td><b>12.08.2026</b></td>
+            </tr>
+            <tr class="r-gec">
+              <td class="c">☐</td><td class="c"><span class="flag">🚩</span></td>
+              <td class="kon">Granit Bilgisayar — iade faturası mutabakatı</td>
+              <td>Cari İşi</td><td>GRANİT BİLGİSAYAR LTD.</td><td>Elif Aksoy</td>
+              <td><span class="pill p-yeni">Yeni</span></td><td class="c"></td><td class="c">1</td>
+              <td>11.08.2026</td><td><b>13.08.2026</b></td>
+            </tr>
+            <tr class="r-bug foc">
+              <td class="c">☐</td><td class="c"></td>
+              <td class="kon"><b>Koçan tanımları 2026 kontrolü</b></td>
+              <td>Görev</td><td>—</td><td>Mehmet Yıldız</td>
+              <td><span class="pill p-dev">Devam</span></td><td class="c">📝</td><td class="c">5</td>
+              <td>14.08.2026</td><td>14.08.2026</td>
+            </tr>
+            <tr class="r-bug">
+              <td class="c">☐</td><td class="c"></td>
+              <td class="kon">MEFRUŞAT A.Ş. — teklif revizesi</td>
+              <td>Teklif</td><td>META MEFRUŞAT A.Ş.</td><td>Burak Şen</td>
+              <td><span class="pill p-onay">Onayda</span></td><td class="c"></td><td class="c">2</td>
+              <td>14.08.2026</td><td>14.08.2026</td>
+            </tr>
+            <tr class="r-bug">
+              <td class="c">☐</td><td class="c"></td>
+              <td class="kon">Depo sayım farkları raporu</td>
+              <td>Stok</td><td>—</td><td>Depo Sorumlusu</td>
+              <td><span class="pill p-yeni">Yeni</span></td><td class="c">📝</td><td class="c"></td>
+              <td>14.08.2026</td><td>14.08.2026</td>
+            </tr>
+            <tr class="r-bay">
+              <td class="c">☐</td><td class="c"><span class="flag">🚩</span></td>
+              <td class="kon">PG migrasyon — DEPOLAR tablosu differential test</td>
+              <td>Proje</td><td>—</td><td>Mehmet Yıldız</td>
+              <td><span class="pill p-dev">Devam</span></td><td class="c">📝</td><td class="c">7</td>
+              <td>15.08.2026</td><td>20.08.2026</td>
+            </tr>
+            <tr class="r-bay">
+              <td class="c">☐</td><td class="c"><span class="flag">🚩</span></td>
+              <td class="kon">Yıl sonu devir takvimi duyurusu</td>
+              <td>Toplantı</td><td>—</td><td>Sistem Yöneticisi</td>
+              <td><span class="pill p-yeni">Yeni</span></td><td class="c"></td><td class="c">1</td>
+              <td>18.08.2026</td><td>18.08.2026</td>
+            </tr>
+            <tr>
+              <td class="c">☐</td><td class="c"></td>
+              <td class="kon">Servis fişi #4412 — parça teslimi bekleniyor</td>
+              <td>Servis</td><td>EUREKO SİGORTA</td><td>Teknik Ekip</td>
+              <td><span class="pill p-dev">Devam</span></td><td class="c"></td><td class="c">2</td>
+              <td>17.08.2026</td><td>21.08.2026</td>
+            </tr>
+            <tr>
+              <td class="c">☐</td><td class="c"></td>
+              <td class="kon">Yeni bayi eğitim materyali hazırlanacak</td>
+              <td>Görev</td><td>—</td><td>Elif Aksoy</td>
+              <td><span class="pill p-yeni">Yeni</span></td><td class="c"></td><td class="c"></td>
+              <td>19.08.2026</td><td>25.08.2026</td>
+            </tr>
+            <tr class="r-tam">
+              <td class="c">☑</td><td class="c"></td>
+              <td class="kon">Ağustos ayı kur güncellemesi kontrolü</td>
+              <td>Görev</td><td>—</td><td>Mehmet Yıldız</td>
+              <td><span class="pill p-tam">Tamam</span></td><td class="c"></td><td class="c">1</td>
+              <td>01.08.2026</td><td>01.08.2026</td>
+            </tr>
+            <tr class="r-tam">
+              <td class="c">☑</td><td class="c"></td>
+              <td class="kon">İzibiz test ortamı bağlantı testi</td>
+              <td>Görev</td><td>—</td><td>Burak Şen</td>
+              <td><span class="pill p-tam">Tamam</span></td><td class="c">📝</td><td class="c">4</td>
+              <td>05.08.2026</td><td>06.08.2026</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--r-gec)"></span>Gecikmiş (bitiş &lt; bugün)</span>
+          <span><span class="sw" style="background:var(--r-bug)"></span>Bugün</span>
+          <span><span class="sw" style="background:var(--r-bay)"></span>Bayraklı</span>
+          <span><span class="sw" style="background:var(--r-tam)"></span>Tamamlanmış — <b>en sonda</b>, konu üstü çizili</span>
+        </div>
+        <div class="hint">
+          Satır rengi <b>Styles.OnGetContentStyle</b> ile veriliyor; öncelik sırası
+          <b>Tamamlanmış → Gecikmiş → Bugün → Bayraklı</b>. Sıralama <b>ACKAPA ↑ · BITISTARIHI ↑ · BAYRAK ↓</b>,
+          böylece kapanan işler listenin altına iner.
+        </div>
+      </div>
+
+      <!-- ICERIK -->
+      <div class="pane" data-p="icerik">
+        <div class="grp">
+          <h4>Koçan tanımları 2026 kontrolü <span class="tag">GOREVLER.ID 8842</span></h4>
+          <div class="body">
+            <div style="display:flex;gap:14px;align-items:flex-start">
+              <div style="flex:1;min-width:0">
+                <div class="grid2">
+                  <label>Tür</label><div class="inp combo">Görev</div>
+                  <label>Liste</label><div class="inp combo">Bugün</div>
+                  <label>Cari</label><div class="inp combo">— seçilmedi —</div>
+                  <label>Proje</label><div class="inp combo">PG Migrasyon</div>
+                  <label>Ekleyen</label><div class="inp">Mehmet Yıldız · 12.08.2026 09:14</div>
+                </div>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div class="grid2">
+                  <label>Başlama</label><div class="inp">14.08.2026 09:00</div>
+                  <label>Bitiş</label><div class="inp">14.08.2026 18:00</div>
+                  <label>Durum</label><div class="inp combo">Devam ediyor</div>
+                  <label>Öncelik</label><div class="inp combo">Yüksek</div>
+                  <label>Atananlar</label>
+                  <div style="display:flex;gap:5px;align-items:center">
+                    <span class="av" style="background:#2f6db3">MY</span>
+                    <span class="av" style="background:#8a5cc0">EA</span>
+                    <span class="minibtn">👥 Atama Yap</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:10px">
+              <div class="inp" style="height:auto;min-height:56px;align-items:flex-start;padding:7px;line-height:1.5;white-space:normal">
+                2026 koçanlarının başlangıç numaraları ve sıfırlama periyotları kontrol edilecek.
+                e-Fatura (GNT) ve e-Arşiv (GEN) serilerinde çakışma olup olmadığına bakılacak, eksik koçan tanımları tamamlanacak.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Yorum / Medya <span class="tag">GOREVYORUM · DOKUMAN → IMAJ</span></h4>
+          <div class="body">
+            <div class="newc" style="margin-bottom:10px">
+              <div class="box">Yorum yaz…</div>
+              <div class="act">
+                <span class="minibtn">📎 Klasörden</span>
+                <span class="minibtn">🖨 Tarayıcıdan</span>
+                <span class="minibtn on" style="margin-left:auto">💬 Gönder</span>
+              </div>
+            </div>
+            <div class="feed">
+              <div class="cmt">
+                <span class="av" style="background:#2f6db3">MY</span>
+                <div class="cx">
+                  <div class="hd"><b>Mehmet Yıldız</b> · 13.08.2026 16:42</div>
+                  <div class="tx">Koçan listesi çıkarıldı, 4 numaralı kağıt koçanın sıfırlaması "Yok" görünüyor — kontrol edilmeli.</div>
+                  <div style="display:flex;gap:6px"><div class="thumb">📄</div><div class="thumb">🖼</div></div>
+                </div>
+              </div>
+              <div class="cmt">
+                <span class="av" style="background:#8a5cc0">EA</span>
+                <div class="cx">
+                  <div class="hd"><b>Elif Aksoy</b> · 14.08.2026 09:05</div>
+                  <div class="tx">Muhasebe ile görüşüldü, kağıt koçan artık kullanılmıyor. Pasife alınabilir.</div>
+                </div>
+              </div>
+              <div class="cmt">
+                <span class="av" style="background:#2e7d46">BŞ</span>
+                <div class="cx">
+                  <div class="hd"><b>Burak Şen</b> · 14.08.2026 10:20</div>
+                  <div class="tx">GNT ve GEN serilerinde çakışma yok, seri kuralları ekranından teyit ettim.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRUP -->
+      <div class="pane" data-p="grup">
+        <div class="gridtb">
+          <span style="font-size:11px;color:var(--muted)">Gruplama:</span>
+          <span class="minibtn on">Atanan</span>
+          <span class="minibtn">Tür</span>
+          <span class="minibtn">Durum</span>
+          <span class="minibtn">Proje</span>
+          <span class="minibtn">Cari</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th>KONUSU</th><th style="width:80px">TÜRÜ</th><th style="width:92px">DURUM</th><th style="width:74px">BİTİŞ</th></tr>
+            <tr><td colspan="4" style="background:#eaf1f8;font-weight:bold;color:var(--navy)">▾ Mehmet Yıldız (4) — 2 gecikmiş</td></tr>
+            <tr class="r-gec"><td style="padding-left:22px">e-Fatura seri tanımları gözden geçirilecek</td><td>Görev</td><td><span class="pill p-dev">Devam</span></td><td><b>12.08.2026</b></td></tr>
+            <tr class="r-bug"><td style="padding-left:22px">Koçan tanımları 2026 kontrolü</td><td>Görev</td><td><span class="pill p-dev">Devam</span></td><td>14.08.2026</td></tr>
+            <tr class="r-bay"><td style="padding-left:22px">PG migrasyon — DEPOLAR differential test</td><td>Proje</td><td><span class="pill p-dev">Devam</span></td><td>20.08.2026</td></tr>
+            <tr class="r-tam"><td style="padding-left:22px" class="kon">Ağustos ayı kur güncellemesi kontrolü</td><td>Görev</td><td><span class="pill p-tam">Tamam</span></td><td>01.08.2026</td></tr>
+            <tr><td colspan="4" style="background:#eaf1f8;font-weight:bold;color:var(--navy)">▾ Elif Aksoy (2) — 1 gecikmiş</td></tr>
+            <tr class="r-gec"><td style="padding-left:22px">Granit Bilgisayar — iade faturası mutabakatı</td><td>Cari İşi</td><td><span class="pill p-yeni">Yeni</span></td><td><b>13.08.2026</b></td></tr>
+            <tr><td style="padding-left:22px">Yeni bayi eğitim materyali hazırlanacak</td><td>Görev</td><td><span class="pill p-yeni">Yeni</span></td><td>25.08.2026</td></tr>
+            <tr><td colspan="4" style="background:#eaf1f8;font-weight:bold;color:var(--navy)">▾ Burak Şen (2)</td></tr>
+            <tr class="r-bug"><td style="padding-left:22px">MEFRUŞAT A.Ş. — teklif revizesi</td><td>Teklif</td><td><span class="pill p-onay">Onayda</span></td><td>14.08.2026</td></tr>
+            <tr class="r-tam"><td style="padding-left:22px" class="kon">İzibiz test ortamı bağlantı testi</td><td>Görev</td><td><span class="pill p-tam">Tamam</span></td><td>06.08.2026</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAKVIM -->
+      <div class="pane" data-p="takvim">
+        <div class="calbar">
+          <span class="minibtn">Günlük</span>
+          <span class="minibtn">İş Günleri</span>
+          <span class="minibtn on">Haftalık</span>
+          <span class="minibtn">Aylık</span>
+          <span class="minibtn">Yıllık</span>
+          <span class="minibtn">Gant Şeması</span>
+          <span style="margin-left:auto;display:flex;gap:5px;align-items:center">
+            <span class="minibtn">◀</span><b style="font-size:11.5px">10 – 16 Ağustos 2026</b><span class="minibtn">▶</span>
+          </span>
+        </div>
+        <div class="cal">
+          <table>
+            <tr><th style="width:52px"></th><th>Pzt 10</th><th>Sal 11</th><th>Çar 12</th><th>Per 13</th><th>Cum 14</th><th>Cmt 15</th><th>Paz 16</th></tr>
+            <tr><td style="color:var(--muted)">09:00</td><td></td><td></td><td><div class="ev r">Seri tanımları</div></td><td></td>
+                <td class="now"><div class="ev b">Koçan kontrolü</div></td><td></td><td></td></tr>
+            <tr><td style="color:var(--muted)">10:00</td><td><div class="ev g">Haftalık toplantı</div></td><td></td><td></td>
+                <td><div class="ev r">İade mutabakatı</div></td><td class="now"><div class="ev b">Teklif revizesi</div></td><td></td><td></td></tr>
+            <tr><td style="color:var(--muted)">11:00</td><td></td><td><div class="ev o">Depo sayımı</div></td><td></td><td></td><td class="now"></td><td></td><td></td></tr>
+            <tr><td style="color:var(--muted)">13:00</td><td></td><td></td><td></td><td></td>
+                <td class="now"><div class="ev b">Sayım farkları raporu</div></td><td><div class="ev o">PG diff test</div></td><td></td></tr>
+            <tr><td style="color:var(--muted)">15:00</td><td></td><td><div class="ev g">Servis #4412</div></td><td></td><td></td><td class="now"></td><td></td><td></td></tr>
+            <tr><td style="color:var(--muted)">17:00</td><td></td><td></td><td></td><td></td><td class="now"><div class="ev b">Gün sonu kontrol</div></td><td></td><td></td></tr>
+          </table>
+        </div>
+        <div class="hint">Takvimde gösterilen kişiler sağdaki personel panelinden seçilir; çift tık ile ilgili iş kartı açılır,
+          boş bir saate tıklayınca <b>"Bu Tarihe İş Ekle"</b> çalışır.</div>
+      </div>
+    </div>
+
+    <!-- ============ SAG: HIZLI EKLE + PERSONEL ============ -->
+    <div class="side right">
+      <h5>Hızlı İş Ekle</h5>
+      <div class="quick">
+        <div class="box">Yeni iş konusu…</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px">
+          <div class="inp" style="font-size:11px">14.08.2026</div>
+          <div class="inp" style="font-size:11px">17:00</div>
+        </div>
+        <div style="display:flex;gap:5px;margin-top:6px;align-items:center">
+          <label style="font-size:11px;color:var(--muted);display:flex;gap:5px;align-items:center">
+            <input type="checkbox"> 🚩 Bayrak</label>
+          <span class="minibtn on" style="margin-left:auto">➕ Ekle</span>
+        </div>
+      </div>
+
+      <div class="tvsep"></div>
+      <h5>Personel</h5>
+      <div style="display:flex;gap:5px;padding:2px 12px 6px">
+        <span class="minibtn">Hepsi</span><span class="minibtn">Hiçbiri</span>
+      </div>
+      <div class="prow"><input type="checkbox" checked> <span class="av" style="background:#2f6db3;width:20px;height:20px;font-size:9px">MY</span> Mehmet Yıldız</div>
+      <div class="prow"><input type="checkbox" checked> <span class="av" style="background:#8a5cc0;width:20px;height:20px;font-size:9px">EA</span> Elif Aksoy</div>
+      <div class="prow"><input type="checkbox" checked> <span class="av" style="background:#2e7d46;width:20px;height:20px;font-size:9px">BŞ</span> Burak Şen</div>
+      <div class="prow"><input type="checkbox"> <span class="av" style="background:#b5731a;width:20px;height:20px;font-size:9px">DS</span> Depo Sorumlusu</div>
+      <div class="prow"><input type="checkbox"> <span class="av" style="background:#7b8794;width:20px;height:20px;font-size:9px">TE</span> Teknik Ekip</div>
+
+      <div class="tvsep"></div>
+      <h5>Özet</h5>
+      <div class="prow"><span class="pill p-red">2</span> Gecikmiş</div>
+      <div class="prow"><span class="pill p-yeni">3</span> Bugün</div>
+      <div class="prow"><span class="pill p-dev">4</span> Devam eden</div>
+      <div class="prow"><span class="pill p-onay">3</span> Onay bekleyen</div>
+      <div class="prow"><span class="pill p-tam">2</span> Bu hafta tamamlanan</div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>İş → <b>GOREVLER</b> (LISTEID · KONUSU · TUR · DURUM · BAYRAK · ACKAPA · BASLAMA/BITISTARIHI)</span>·
+    <span>Atama → <b>GOREVKULLANICI</b> (TUR 11 = kime, 12 = bilgi)</span>·
+    <span>Yorum → <b>GOREVYORUM</b></span>·
+    <span>Ek → <b>DOKUMAN → IMAJ → GENDEPO.DOSYA</b></span>·
+    <span>Bildirim → <b>EPOSTAHESAP · SMSHESAP</b></span>·
+    <span>Log → <b>ISLEMLOG</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Liste: <b>Bugün</b> · 9 kayıt</span>
+    <span>Uyarı yenileme: <b>120 sn</b></span>
+    <span style="margin-left:auto">Seçili: Koçan tanımları 2026 kontrolü</span>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.side .tvi').forEach(function(i){
+    i.addEventListener('click',function(){
+      document.querySelectorAll('.side .tvi').forEach(function(x){x.classList.remove('on')});
+      i.classList.add('on');
+    });
+  });
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

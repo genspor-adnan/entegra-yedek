@@ -1,4 +1,4 @@
-﻿unit UIsEmriPersonelZaman;
+﻿unit  UIsEmriPersonelZaman;
 
 interface
 
@@ -216,6 +216,13 @@ implementation
 
 uses LocOnFly, UTablo, prjconst, FetaKurulusSiniflari, FetaClassExtensions, UAnaForm;
 
+const
+   // Ek alanlarin (Calisma / Ek Alan1 / Ek Alan2 sekmeleri) fiziksel tablosu.
+   //   ALANLAR.TABLO bu ada isaret ediyor ve veri de burada (TABLOLAR 526).
+   //   ADI YAZIM HATALI (OPERASON) AMA DOGRU TABLO BUDUR - duzeltilmis yazimli
+   //   URETIMOPERASYONPERSONEL_USER (TABLOLAR 511) bos ve ek alan kolonlari yok.
+   CUserTablo = 'URETIMOPERASONPERSONEL_USER';
+
 var
    OncekiPersonel:Integer;
    EkAlanOlustuCal, EkAlanOlustu, EkAlanOlustu2, IlkDefa : boolean;
@@ -388,11 +395,15 @@ begin
          OutputDebugString(PChar(ctrl.Name));
 
          Tablo.AlanlarDlgBaslat('E',1,-1,abs(ctrlPos.X), abs(ctrlPos.Y), -1,FindComponent(ctrl.Name),TIsEmriPersonelZamanDlg(Self), DtsUretimOperasyonPersonel);
-         Tablo.AlanOlustur(TIsEmriPersonelZamanDlg(Self), -1,DtsUretimOperasyonPersonel);
+         Tablo.AlanOlustur(TIsEmriPersonelZamanDlg(Self), -1,
+           Tablo.UserDataSourceHazirla(TIsEmriPersonelZamanDlg(Self),
+             DtsUretimOperasyonPersonel, CUserTablo));
       end;
   end else if (Shift = [ssAlt,ssCtrl]) and (Key = Ord('D')) then begin//Bileşen Düzenle
       Tablo.AlanlarDlgBaslat('D',1,0, abs(ctrlPos.X), abs(ctrlPos.Y), 0, FindComponent(ctrl.Name),TIsEmriPersonelZamanDlg(Self), DtsUretimOperasyonPersonel);
-      Tablo.AlanOlustur(TIsEmriPersonelZamanDlg(Self), -1,DtsUretimOperasyonPersonel);
+      Tablo.AlanOlustur(TIsEmriPersonelZamanDlg(Self), -1,
+        Tablo.UserDataSourceHazirla(TIsEmriPersonelZamanDlg(Self),
+          DtsUretimOperasyonPersonel, CUserTablo));
   end;
 end;
 
@@ -481,6 +492,9 @@ begin
          Tablo.UretimPersoneliYayinIslemleri('URETIMOPERASYONPERSONEL', Tabno_URETIMOPERASYONPERSONEL, TabUretimOperasyonPersonel.FieldByName('ID').AsInteger,
                OncekiPersonel, TabUretimOperasyonPersonel.FieldByName('PERSONEL').AsInteger, -38);
    end;
+   // Ek alanlar (_USER) kart post edildikten SONRA yazilir; hicbiri doldurulmadiysa
+   //   UserDataSourceKaydet satiri hic olusturmaz/siler.
+   Tablo.UserDataSourceKaydet(TIsEmriPersonelZamanDlg(Self), CUserTablo);
    Close;
 end;
 
@@ -512,9 +526,25 @@ procedure TIsEmriPersonelZamanDlg.PageControlUstChange(Sender: TObject);
     i:integer;
     component, MyClass: TComponent;
    begin
+       // Ek alanlar _USER tablosunda (kart ile 1:1, ID=kart ID) -> kart kaydedilmeden
+       //   (ID yokken) baglanamaz. Rehber/Teklif ekranlarindaki desenin aynisi.
+       if TabUretimOperasyonPersonel.State in [dsInsert, dsEdit] then
+       try
+         TabUretimOperasyonPersonel.Post;   // BeforePost zorunlu alan kontrolu -> Abort
+       except
+         on EAbort do Exit;
+       end;
+       if TabUretimOperasyonPersonel.FieldByName('ID').AsInteger <= 0 then
+         Exit;
+
        IlkDefa := False;
        EkOlustu:=True;
-       Tablo.AlanOlustur(TIsEmriPersonelZamanDlg(Self), -1, DtsUretimOperasyonPersonel);
+       // Ek alan kolonlari ANA sorguda YOK (select UO.* from URETIMOPERASYONPERSONEL) ->
+       //   DataField atanamayip kontroller bos/salt-okunur kaliyordu. _USER datasource'u
+       //   hazirla (UpdateTableName + RequestLive + kayit yoksa Append burada yapilir).
+       Tablo.AlanOlustur(TIsEmriPersonelZamanDlg(Self), -1,
+         Tablo.UserDataSourceHazirla(TIsEmriPersonelZamanDlg(Self),
+           DtsUretimOperasyonPersonel, CUserTablo));
 
  //AO 05.07.2025 kaldırıldı
       // MyClass := TComponent.Create(Self);

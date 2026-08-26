@@ -1,4 +1,4 @@
-﻿object StokHizmetAraDlg: TStokHizmetAraDlg
+object StokHizmetAraDlg: TStokHizmetAraDlg
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
@@ -414,7 +414,6 @@
       Height = 26
       Align = alCustom
       AutoSize = True
-      ButtonHeight = 24
       ButtonWidth = 47
       Caption = 'AletCubugu'
       Color = clTeal
@@ -438,11 +437,11 @@
       object LabelTumKayitlar: TToolButton
         Left = 0
         Top = 0
+        AllowAllUp = True
         Caption = 'T'#252'm'
+        Grouped = True
         ImageIndex = 32
         ImageName = 'PngImageListe'
-        AllowAllUp = True
-        Grouped = True
         Style = tbsCheck
         OnClick = LabelTumKayitlarClick
       end
@@ -450,11 +449,11 @@
         Tag = 5
         Left = 47
         Top = 0
+        AllowAllUp = True
         Caption = 'Son'
+        Grouped = True
         ImageIndex = 21
         ImageName = 'PngImage21'
-        AllowAllUp = True
-        Grouped = True
         Style = tbsCheck
         OnClick = LabelSonArananlarClick
       end
@@ -462,11 +461,11 @@
         Tag = 3
         Left = 94
         Top = 0
+        AllowAllUp = True
         Caption = 'S'#305'k'
+        Grouped = True
         ImageIndex = 31
         ImageName = 'PngImageYildiz'
-        AllowAllUp = True
-        Grouped = True
         Style = tbsCheck
         OnClick = LabelSikArananlarClick
       end
@@ -499,6 +498,10 @@
         Tag = 1
         Caption = 'Stoklar'
         ImageIndex = 12
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Label2: TLabel
           Left = 720
           Top = 107
@@ -721,6 +724,10 @@
       object SheetHizmet: TcxTabSheet
         Caption = 'Hizmetler'
         ImageIndex = 19
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object cxDBTreeList1: TcxDBTreeList
           Left = 0
           Top = 0
@@ -948,6 +955,10 @@
       object SheetDagitim: TcxTabSheet
         Caption = 'Da'#287#305't'#305'm'
         ImageIndex = 19
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GridDagitim: TcxGrid
           Left = 0
           Top = 0
@@ -1684,7 +1695,7 @@
         'exec dbo.sp_Prog_StokHizmetAra_DetayPaneller @Panel=3, @StokID=:' +
         'PUrunID, @Tur=:PUrunTur, @RehberID=:PRehberID')
     Left = 112
-    Top = 110
+    Top = 134
   end
   object DtsSonSatislar: TDataSource
     DataSet = TabSonSatislar

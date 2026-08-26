@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cari Liste Ekranı — Ver2 (yan menü)</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#d2dae3;--line2:#e6ebf1;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;--accent:#2f6db3;
+    --sel:#dcebfb;--selbd:#9cc4ee;--head:#f1f5f9;--head2:#e7eef5;--btnfrom:#ffffff;--btnto:#eef2f7;--ok:#2e7d46;--warn:#b5731a;--red:#b23b3b;}
+  *{box-sizing:border-box}
+  body{margin:0;background:#dfe4ea;color:var(--ink);font-family:"Segoe UI","Trebuchet MS",Tahoma,sans-serif;font-size:12px;padding:12px;}
+  .app{max-width:1360px;margin:0 auto;background:var(--bg);border:1px solid #b9c3ce;border-radius:8px;overflow:hidden;box-shadow:0 10px 30px rgba(20,40,70,.18);display:flex;flex-direction:column;height:760px}
+  /* title bar */
+  .titlebar{height:34px;background:linear-gradient(#2b5c95,#1c4374);color:#fff;display:flex;align-items:center;gap:8px;padding:0 10px;font-weight:600;font-size:12.5px}
+  .titlebar .logo{width:16px;height:16px;border-radius:3px;background:#7fb2e6}
+  .titlebar .wc{margin-left:auto;display:flex;gap:14px;opacity:.9}
+  /* menu */
+  .menubar{height:26px;background:#f4f6f9;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:0 12px;font-size:12px;color:#33465c}
+  .menubar b{font-weight:600}
+  /* shell: vertical rail + work */
+  .shell{flex:1;display:flex;min-height:0}
+  /* LEFT VERTICAL MODULE RAIL */
+  .rail{width:82px;flex:none;background:linear-gradient(#20477a,#173a66);border-right:1px solid #123258;display:flex;flex-direction:column;overflow:auto}
+  .rail .rtop{height:6px}
+  .rmod{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 8px;color:#cfe0f4;font-size:10px;cursor:default;border-left:3px solid transparent;position:relative}
+  .rmod .ri{font-size:19px;line-height:1}
+  .rmod:hover{background:rgba(255,255,255,.06);color:#fff}
+  .rmod.active{background:#fff;color:var(--navy);font-weight:600;border-left-color:var(--accent)}
+  .rmod.active .ri{filter:none}
+  .railfill{flex:1}
+  /* work = filter panel + main */
+  .work{flex:1;display:flex;min-height:0;background:#fff}
+  /* left filter panel */
+  .side{width:236px;flex:none;border-right:1px solid var(--line);background:#f7f9fc;display:flex;flex-direction:column;min-height:0}
+  .side .sh{display:flex;align-items:center;gap:8px;padding:10px 12px;background:linear-gradient(#fff5e6,#ffe9c9);border-bottom:1px solid #f0d9b0}
+  .side .sh .ic{font-size:20px}
+  .side .sh b{color:#8a5a1e;font-size:12.5px}
+  .side .subbtns{display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line2)}
+  .side .subbtns .b{flex:1;text-align:center;border:1px solid var(--line);background:linear-gradient(#fff,#eef2f7);border-radius:5px;padding:6px;font-size:11.5px;color:#3f5165}
+  .side .body{padding:10px;overflow:auto;flex:1}
+  .seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:10px}
+  .seg .s{flex:1;text-align:center;padding:5px;font-size:11.5px;color:var(--muted);background:#fff;border-right:1px solid var(--line2)}
+  .seg .s:last-child{border-right:none}
+  .seg .s.on{background:var(--accent);color:#fff;font-weight:600}
+  .srch{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:#fff;padding:4px 8px;margin-bottom:10px}
+  .srch input{border:none;outline:none;flex:1;font-size:12px;font-family:inherit}
+  .frow{display:flex;flex-direction:column;gap:2px;margin-bottom:7px}
+  .frow label{font-size:10.5px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:4px;background:#fff;height:24px;padding:0 6px;font-size:12px;display:flex;align-items:center;color:var(--ink)}
+  .inp.combo{position:relative}.inp.combo::after{content:"▾";position:absolute;right:6px;color:var(--muted);font-size:10px}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#3f5165;margin:4px 0}
+  .chk input{accent-color:var(--accent)}
+  .side .foot{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--line2)}
+  .side .foot .b{flex:1;text-align:center;border-radius:6px;padding:7px;font-size:12px;font-weight:600}
+  .side .foot .b.pri{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border:1px solid #2f6db3}
+  .side .foot .b.sec{background:linear-gradient(#fff,#eef2f7);color:#3f5165;border:1px solid var(--line)}
+  /* main */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .crumb{padding:7px 12px;border-bottom:1px solid var(--line2);color:var(--muted);font-size:11.5px;background:#fafbfd}
+  .crumb b{color:var(--navy)}
+  .toolbar{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);background:linear-gradient(#fff,#f4f7fb)}
+  .tb{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:6px;padding:6px 11px;font-size:12px;color:#33465c}
+  .tb:hover{border-color:var(--selbd)}
+  .tb.pri{background:linear-gradient(#5cb370,#2e7d46);border-color:#2e7d46;color:#fff;font-weight:600}
+  .tb.del{background:linear-gradient(#e0605c,#c0413d);border-color:#b23b3b;color:#fff;font-weight:600}
+  .tb .i{font-size:13px}
+  .toolbar .right{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .gsearch{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:#fff;padding:4px 8px;width:210px}
+  .gsearch input{border:none;outline:none;flex:1;font-size:12px;font-family:inherit}
+  /* grid */
+  .gridwrap{flex:1;display:flex;flex-direction:column;min-height:0;border-bottom:1px solid var(--line)}
+  .groupbar{padding:6px 12px;background:#eef2f7;border-bottom:1px solid var(--line2);color:#8595a6;font-size:11px;font-style:italic}
+  .gridscroll{flex:1;overflow:auto}
+  table.grid{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}
+  table.grid th{position:sticky;top:0;background:linear-gradient(#f3f7fb,#e6edf5);border-bottom:2px solid #cfdae6;border-right:1px solid var(--line2);text-align:left;padding:7px 9px;color:#3a5573;font-weight:600;white-space:nowrap;z-index:1}
+  table.grid td{border-bottom:1px solid #eef2f6;border-right:1px solid #f1f4f8;padding:6px 9px;white-space:nowrap}
+  table.grid tbody tr:nth-child(even) td{background:#fafcfe}
+  table.grid tbody tr:hover td{background:#f2f8ff}
+  table.grid tbody tr.sel td{background:var(--sel);box-shadow:inset 0 0 0 9999px rgba(47,109,179,.06)}
+  .amt{text-align:right;font-variant-numeric:tabular-nums}
+  .pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:600}
+  .pill.ok{background:#e7f5ec;color:#2e7d46;border:1px solid #c4e6d0}
+  .pill.red{background:#fdecec;color:#b23b3b;border:1px solid #f2c9c9}
+  .pill.gray{background:#eef1f4;color:#6b7a8b;border:1px solid #dbe1e8}
+  .bd{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10.5px;font-weight:600}
+  .bd.sat{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .bd.al{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}
+  .bd.bayi{background:#f0ecfb;color:#6b4bb0;border:1px solid #ddd2f0}
+  .kod{font-variant-numeric:tabular-nums;color:#4a5c70}
+  .gridfoot{display:flex;align-items:center;gap:14px;padding:5px 12px;background:#f4f7fb;border-top:1px solid var(--line2);font-size:11.5px;color:var(--muted)}
+  .gridfoot b{color:var(--navy)}
+  /* detail (master-detail) */
+  .detail{height:230px;flex:none;display:flex;flex-direction:column;background:#fff}
+  .dtabs{display:flex;gap:2px;padding:0 8px;background:#eaf0f6;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .dtab{padding:6px 12px;font-size:11.5px;background:#e2e9f1;border:1px solid var(--line);border-bottom:none;border-radius:5px 5px 0 0;margin-top:5px;color:var(--muted);position:relative;top:1px}
+  .dtab.active{background:#fff;color:var(--navy);font-weight:600}
+  .subtabs{display:flex;gap:6px;padding:6px 10px;border-bottom:1px solid var(--line2);background:#f7f9fc;flex-wrap:wrap}
+  .subtab{font-size:11.5px;color:#3f5165;border:1px solid var(--line);background:#fff;border-radius:14px;padding:3px 11px}
+  .subtab.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+  .dscroll{flex:1;overflow:auto}
+
+  /* ---- GORUNUMLER: Liste / Grup / Analiz ---- */
+  .vw{display:none;flex:1;min-height:0;overflow:auto;background:#fff}
+  .vw.on{display:block}
+  body.vw-grup .gridwrap,body.vw-grup .detail,
+  body.vw-analiz .gridwrap,body.vw-analiz .detail{display:none!important}
+  .vwbar{display:flex;align-items:center;gap:7px;padding:7px 12px;background:#eef2f7;
+    border-bottom:1px solid var(--line2);font-size:11.5px;color:#42607f;flex-wrap:wrap}
+  .vwbar .cip{border:1px solid var(--line);background:#fff;border-radius:14px;padding:3px 11px;font-size:11px;color:#3f5165}
+  .vwbar .cip.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+  .vwbar .sag{margin-left:auto;color:#8595a6;font-size:11px}
+  table.grid tbody tr.gh td{background:linear-gradient(#e7eff8,#dbe6f2);font-weight:700;color:var(--navy);
+    border-top:1px solid #c4d4e6}
+  table.grid tbody tr.gh td .ok2{display:inline-block;width:13px}
+  table.grid tbody tr.gt td{background:#f4f8fc;font-weight:600;color:#3a5573}
+  .anz{padding:12px 14px 18px}
+  .anzkpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:9px;margin-bottom:12px}
+  .anzkpi .k{background:#fff;border:1px solid var(--line);border-radius:6px;padding:9px 11px}
+  .anzkpi .k .t{font-size:10px;letter-spacing:.3px;text-transform:uppercase;color:#7b8ea3}
+  .anzkpi .k .v{font-size:17px;font-weight:700;color:var(--navy);margin-top:3px;font-variant-numeric:tabular-nums}
+  .anzkpi .k .s{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .anzkpi .k.al{border-left:3px solid #b23b3b}.anzkpi .k.iy{border-left:3px solid #2e7d46}
+  .anzkpi .k.uy{border-left:3px solid #b5731a}
+  .anzgrid{display:grid;grid-template-columns:1.25fr 1fr;gap:10px;align-items:start}
+  .kutu{background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:10px}
+  .kutu h4{margin:0;padding:6px 10px;font-size:10.5px;letter-spacing:.3px;text-transform:uppercase;color:#3a5573;
+    background:linear-gradient(#f3f7fb,#e6edf5);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px}
+  .kutu h4 .sg{margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0;font-size:10.5px;color:var(--muted)}
+  .kutu .ic2{padding:9px 11px}
+  .brow{display:flex;align-items:center;gap:9px;margin-bottom:6px;font-size:11.5px}
+  .brow .ad2{width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#3f5165}
+  .brow .mk2{width:118px;text-align:right;font-variant-numeric:tabular-nums;color:var(--navy);font-weight:600}
+  .bar2{flex:1;height:11px;border-radius:6px;background:#eef2f7;border:1px solid #dbe3ec;overflow:hidden;min-width:60px}
+  .bar2>span{display:block;height:100%}
+  .bar2 .mv{background:linear-gradient(#5b97d8,#2f6db3)}
+  .bar2 .ys{background:linear-gradient(#6bb87f,#2e7d46)}
+  .bar2 .kr{background:linear-gradient(#e0605c,#b23b3b)}
+  .bar2 .sr{background:linear-gradient(#e8b45a,#b5731a)}
+  .anznot{font-size:10.5px;color:var(--muted);padding:7px 11px;line-height:1.55;background:#fbfcfd;border-top:1px solid var(--line2)}
+  .statusbar{height:24px;background:linear-gradient(#eef2f7,#e4eaf1);border-top:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:0 12px;font-size:11px;color:#4a5c70}
+  .statusbar .r{margin-left:auto}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- title -->
+  <div class="titlebar"><span class="logo"></span> Gentegre ERP 26.8.10.2 <span class="wc"><span>—</span><span>▢</span><span>✕</span></span></div>
+  <!-- menu -->
+  <div class="menubar"><b>Gen</b><b>Seçenekler</b><b>Yardım</b><span style="margin-left:auto;color:#8595a6">🔔  🔄</span></div>
+
+  <div class="shell">
+    <!-- LEFT VERTICAL MODULE RAIL (üst şerit buraya taşındı) -->
+    <div class="rail">
+      <div class="rtop"></div>
+      <div class="rmod"><span class="ri">🧭</span>CRM</div>
+      <div class="rmod active"><span class="ri">👥</span>Cari</div>
+      <div class="rmod"><span class="ri">💵</span>Kasa</div>
+      <div class="rmod"><span class="ri">🛒</span>Alış/Satış</div>
+      <div class="rmod"><span class="ri">🏦</span>Banka</div>
+      <div class="rmod"><span class="ri">📦</span>Stok</div>
+      <div class="rmod"><span class="ri">⚙️</span>Üretim</div>
+      <div class="rmod"><span class="ri">🧑‍💼</span>IK</div>
+      <div class="rmod"><span class="ri">🖥️</span>Demirbaş</div>
+      <div class="rmod"><span class="ri">📄</span>Teklif</div>
+      <div class="rmod"><span class="ri">🔧</span>Servis</div>
+      <div class="rmod"><span class="ri">🗂️</span>Doküman</div>
+      <div class="railfill"></div>
+    </div>
+
+    <div class="work">
+      <!-- filter panel -->
+      <div class="side">
+        <div class="sh"><span class="ic">👤</span><b>Cari Hesap Kartı</b></div>
+        <div class="subbtns"><div class="b">🖨 Dökümler</div><div class="b">⚙ Özel</div></div>
+        <div class="body">
+          <div class="srch">🔎&nbsp;<input placeholder="Hızlı ara (ünvan, kod, VKN)…"></div>
+          <div class="seg"><div class="s on">Tüm</div><div class="s">Son</div><div class="s">Sık</div></div>
+          <div class="frow"><label>Ünvan</label><div class="inp"></div></div>
+          <div class="frow"><label>İlgili</label><div class="inp"></div></div>
+          <div class="frow"><label>Kod</label><div class="inp"></div></div>
+          <div class="frow"><label>Grup</label><div class="inp combo">Tümü</div></div>
+          <div class="frow"><label>Kategori</label><div class="inp combo">Tümü</div></div>
+          <div class="frow"><label>Sınıf</label><div class="inp combo">Tümü</div></div>
+          <div class="frow"><label>Özel Kod</label><div class="inp"></div></div>
+          <div class="frow"><label>Analiz</label><div class="inp combo">Seçiniz</div></div>
+          <div style="height:8px"></div>
+          <label class="chk"><input type="checkbox"> Detay göster</label>
+          <label class="chk"><input type="checkbox"> Pasifleri de göster</label>
+          <label class="chk"><input type="checkbox"> Potansiyelde de ara</label>
+        </div>
+        <div class="foot"><div class="b pri">Filtrele</div><div class="b sec">Temizle</div></div>
+      </div>
+
+      <!-- MAIN -->
+      <div class="main">
+        <div class="crumb">Cari › <b>Cari Hesap Kartı</b> · Liste</div>
+        <div class="toolbar">
+          <div class="tb pri"><span class="i">＋</span> Yeni</div>
+          <div class="tb del"><span class="i">🗑</span> Sil</div>
+          <div class="tb"><span class="i">✎</span> Düzenle</div>
+          <span style="width:1px;height:22px;background:var(--line);margin:0 2px"></span>
+          <div class="tb"><span class="i">📋</span> İş Listesi</div>
+          <div class="tb"><span class="i">🧭</span> CRM</div>
+          <div class="tb"><span class="i">▶</span> Aksiyon</div>
+          <div class="right">
+            <div class="gsearch">🔎&nbsp;<input placeholder="Listede ara…"></div>
+            <div class="tb"><span class="i">▦</span> Kolonlar</div>
+            <div class="tb"><span class="i">⬇</span> Excel</div>
+          </div>
+        </div>
+
+        <div class="gridwrap">
+          <div class="groupbar">⬇ Gruplamak istediğiniz kolonu buraya sürükleyin</div>
+          <div class="gridscroll">
+            <table class="grid">
+              <thead><tr>
+                <th style="width:60px">ID</th><th style="width:90px">Sınıf</th><th style="width:90px">Grup</th><th style="width:90px">Kategori</th>
+                <th style="width:80px">Sektör</th><th style="width:110px">Kod</th><th>Ünvan</th><th style="width:140px">Resmi Ad</th>
+                <th style="width:110px">İlgili</th><th class="amt" style="width:120px">Bakiye</th><th style="width:80px">Özel Kod</th><th style="width:80px">Durum</th>
+              </tr></thead>
+              <tbody>
+                <tr><td class="kod">1247</td><td><span class="bd sat">Satıcılar</span></td><td>—</td><td>A</td><td>Kaplama</td><td class="kod">320.02.010</td><td>OERLIKON BALZERS COATING</td><td>Oerlikon</td><td></td><td class="amt">−12.400,00</td><td></td><td><span class="pill ok">Aktif</span></td></tr>
+                <tr><td class="kod">1105</td><td><span class="bd bayi">Bayi</span></td><td>Alıcılar</td><td>B</td><td>Mühendislik</td><td class="kod">120.01.005</td><td>NAZORATİ MÜHENDİSLİK</td><td>Nazorati Müh.</td><td></td><td class="amt">84.900,00</td><td>NZR</td><td><span class="pill ok">Aktif</span></td></tr>
+                <tr><td class="kod">1125</td><td><span class="bd al">Alıcılar</span></td><td>Alıcılar</td><td>A</td><td>—</td><td class="kod">120.01.051</td><td>ZAFER TUNA</td><td></td><td></td><td class="amt">3.250,00</td><td></td><td><span class="pill red">Yasak</span></td></tr>
+                <tr class="sel"><td class="kod">1126</td><td><span class="bd al">Alıcılar</span></td><td>Alıcılar</td><td>A</td><td>Tekstil</td><td class="kod">120.01.052</td><td>BEETHOVEN GİYİM DIŞ TİC.</td><td>Beethoven</td><td></td><td class="amt">172.320,50</td><td>BTV</td><td><span class="pill ok">Aktif</span></td></tr>
+                <tr><td class="kod">4</td><td><span class="bd sat">Satıcılar</span></td><td>—</td><td>—</td><td>—</td><td class="kod">320.01.000</td><td>CARİ HESAP TUTULMAYAN</td><td></td><td>mehmet det</td><td class="amt">0,00</td><td></td><td><span class="pill ok">Aktif</span></td></tr>
+                <tr><td class="kod">1187</td><td><span class="bd sat">Satıcılar</span></td><td>—</td><td>C</td><td>Makine</td><td class="kod">320.01.109</td><td>ADMEN ENDÜSTRİYEL MAK.</td><td>Admen</td><td></td><td class="amt">−45.100,00</td><td></td><td><span class="pill ok">Aktif</span></td></tr>
+                <tr><td class="kod">1137</td><td><span class="bd al">Alıcılar</span></td><td>Alıcılar</td><td>B</td><td>—</td><td class="kod">120.01.001</td><td>VOLKAN ŞİRİNBAY</td><td></td><td></td><td class="amt">9.800,00</td><td></td><td><span class="pill ok">Aktif</span></td></tr>
+                <tr><td class="kod">1301</td><td><span class="bd al">Alıcılar</span></td><td>Alıcılar</td><td>A</td><td>Bilişim</td><td class="kod">120.01.052</td><td>GRANİT BİLGİSAYAR LTD.</td><td>Granit Bilg.</td><td>Ahmet K.</td><td class="amt">172.320,50</td><td>BLG</td><td><span class="pill ok">Aktif</span></td></tr>
+                <tr><td class="kod">988</td><td><span class="bd sat">Satıcılar</span></td><td>—</td><td>A</td><td>Teknoloji</td><td class="kod">320.02.044</td><td>MNG TEKNOLOJİ A.Ş.</td><td>MNG Tekno.</td><td>Elif D.</td><td class="amt">−958.200,00</td><td>MNG</td><td><span class="pill ok">Aktif</span></td></tr>
+                <tr><td class="kod">742</td><td><span class="bd al">Alıcılar</span></td><td>Alıcılar</td><td>C</td><td>—</td><td class="kod">120.02.210</td><td>ESKİ MÜŞTERİ TİC.</td><td></td><td></td><td class="amt">0,00</td><td></td><td><span class="pill gray">Pasif</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="gridfoot"><span>Kayıt: <b>100</b></span><span>Seçili: <b>BEETHOVEN GİYİM DIŞ TİC.</b> (1126)</span><span class="r">Toplam Bakiye (filtre): <b>−1.520.900,00 ₺</b></span></div>
+        </div>
+
+
+        <!-- ================= GRUP GORUNUMU ================= -->
+        <div class="vw" data-vw="grup">
+          <div class="vwbar">
+            <span>Gruplama:</span>
+            <span class="cip on">Sınıf</span><span class="cip">▸ Kategori</span>
+            <span class="cip">+ Sektör</span><span class="cip">+ Temsilci</span>
+            <span class="sag">Gruplamak istediğiniz kolonu başlıktan buraya sürükleyin · alt toplamlar otomatik</span>
+          </div>
+          <table class="grid">
+            <thead><tr>
+              <th style="width:300px">SINIF / KATEGORİ / CARİ</th><th style="width:110px">KOD</th>
+              <th style="width:110px">SEKTÖR</th><th style="width:110px">TEMSİLCİ</th>
+              <th class="amt" style="width:130px">BAKİYE</th><th class="amt" style="width:120px">VADESİ GEÇEN</th>
+              <th class="amt" style="width:120px">LİMİT</th><th style="width:90px">DURUM</th>
+            </tr></thead>
+            <tbody>
+              <tr class="gh"><td colspan="4"><span class="ok2">−</span> <b>Alıcılar</b> · 5 cari</td>
+                <td class="amt">442.591,00</td><td class="amt">69.500,00</td><td class="amt">850.000,00</td><td></td></tr>
+              <tr class="gt"><td colspan="4" style="padding-left:26px">▪ Kategori A · 3 cari</td>
+                <td class="amt">347.891,00</td><td class="amt">59.700,00</td><td class="amt">700.000,00</td><td></td></tr>
+              <tr><td style="padding-left:42px">GRANİT BİLGİSAYAR LTD.</td><td class="kod">120.01.052</td><td>Bilişim</td><td>Mehmet Yıldız</td>
+                <td class="amt">172.320,50</td><td class="amt">0,00</td><td class="amt">500.000,00</td><td><span class="pill ok">Aktif</span></td></tr>
+              <tr class="sel"><td style="padding-left:42px">BEETHOVEN GİYİM DIŞ TİC.</td><td class="kod">120.01.052</td><td>Tekstil</td><td>Ayşe Demir</td>
+                <td class="amt">172.320,50</td><td class="amt">0,00</td><td class="amt">200.000,00</td><td><span class="pill ok">Aktif</span></td></tr>
+              <tr><td style="padding-left:42px">ZAFER TUNA</td><td class="kod">120.01.051</td><td>—</td><td>Selin Kara</td>
+                <td class="amt">3.250,00</td><td class="amt">3.250,00</td><td class="amt">0,00</td><td><span class="pill red">Yasak</span></td></tr>
+              <tr class="gt"><td colspan="4" style="padding-left:26px">▪ Kategori B · 1 cari</td>
+                <td class="amt">9.800,00</td><td class="amt">9.800,00</td><td class="amt">50.000,00</td><td></td></tr>
+              <tr><td style="padding-left:42px">VOLKAN ŞİRİNBAY</td><td class="kod">120.01.001</td><td>—</td><td>Burak Şen</td>
+                <td class="amt">9.800,00</td><td class="amt">9.800,00</td><td class="amt">50.000,00</td><td><span class="pill ok">Aktif</span></td></tr>
+              <tr class="gt"><td colspan="4" style="padding-left:26px">▪ Kategori C · 1 cari (pasif)</td>
+                <td class="amt">0,00</td><td class="amt">0,00</td><td class="amt">100.000,00</td><td></td></tr>
+              <tr><td style="padding-left:42px">ESKİ MÜŞTERİ TİC.</td><td class="kod">120.02.210</td><td>—</td><td>—</td>
+                <td class="amt">0,00</td><td class="amt">0,00</td><td class="amt">100.000,00</td><td><span class="pill gray">Pasif</span></td></tr>
+
+              <tr class="gh"><td colspan="4"><span class="ok2">−</span> <b>Satıcılar</b> · 4 cari</td>
+                <td class="amt">−1.015.700,00</td><td class="amt">−200.000,00</td><td class="amt">—</td><td></td></tr>
+              <tr><td style="padding-left:42px">MNG TEKNOLOJİ A.Ş.</td><td class="kod">320.02.044</td><td>Teknoloji</td><td>Elif D.</td>
+                <td class="amt">−958.200,00</td><td class="amt">−200.000,00</td><td class="amt">—</td><td><span class="pill ok">Aktif</span></td></tr>
+              <tr><td style="padding-left:42px">ADMEN ENDÜSTRİYEL MAK.</td><td class="kod">320.01.109</td><td>Makine</td><td>—</td>
+                <td class="amt">−45.100,00</td><td class="amt">0,00</td><td class="amt">—</td><td><span class="pill ok">Aktif</span></td></tr>
+              <tr><td style="padding-left:42px">OERLIKON BALZERS COATING</td><td class="kod">320.02.010</td><td>Kaplama</td><td>—</td>
+                <td class="amt">−12.400,00</td><td class="amt">0,00</td><td class="amt">—</td><td><span class="pill ok">Aktif</span></td></tr>
+              <tr><td style="padding-left:42px">CARİ HESAP TUTULMAYAN</td><td class="kod">320.01.000</td><td>—</td><td>—</td>
+                <td class="amt">0,00</td><td class="amt">0,00</td><td class="amt">—</td><td><span class="pill ok">Aktif</span></td></tr>
+
+              <tr class="gh"><td colspan="4"><span class="ok2">+</span> <b>Bayi</b> · 1 cari</td>
+                <td class="amt">84.900,00</td><td class="amt">0,00</td><td class="amt">150.000,00</td><td></td></tr>
+            </tbody>
+            <tfoot><tr>
+              <td colspan="4" style="text-align:right"><b>GENEL TOPLAM · 10 cari · 3 grup</b></td>
+              <td class="amt"><b>−488.209,00</b></td><td class="amt"><b>−120.700,00</b></td>
+              <td class="amt"><b>1.000.000,00</b></td><td></td>
+            </tr></tfoot>
+          </table>
+          <div class="anznot">Gruplama <b>cxGrid GroupBy</b> ile yapılır; alt toplamlar <b>Summary</b> tanımlarından gelir.
+            Grup başlığındaki <b>−/+</b> ile daraltılır, sıralama grup içinde korunur.</div>
+        </div>
+
+        <!-- ================= ANALIZ GORUNUMU ================= -->
+        <div class="vw" data-vw="analiz">
+          <div class="vwbar">
+            <span>Analiz:</span>
+            <span class="cip on">Bakiye Dağılımı</span><span class="cip">Yaşlandırma</span>
+            <span class="cip">Sektör</span><span class="cip">Temsilci</span><span class="cip">Aylık Trend</span>
+            <span class="sag">Filtre: tüm cariler · 2026 dönemi · 14.08.2026</span>
+          </div>
+          <div class="anz">
+            <div class="anzkpi">
+              <div class="k iy"><div class="t">Toplam Alacak</div><div class="v">537.291,00 ₺</div><div class="s">6 cari · ort. 89.548,50 ₺</div></div>
+              <div class="k al"><div class="t">Toplam Borç</div><div class="v">1.015.700,00 ₺</div><div class="s">4 satıcı · ort. 253.925,00 ₺</div></div>
+              <div class="k"><div class="t">Net Bakiye</div><div class="v">−478.409,00 ₺</div><div class="s">borç ağırlıklı</div></div>
+              <div class="k uy"><div class="t">Vadesi Geçen</div><div class="v">69.500,00 ₺</div><div class="s">3 cari · en eski 92 gün</div></div>
+              <div class="k"><div class="t">Aktif Cari</div><div class="v">10</div><div class="s">1 pasif · 1 yasaklı</div></div>
+              <div class="k uy"><div class="t">Limit Riski</div><div class="v">1 cari</div><div class="s">BEETHOVEN · %86 doluluk</div></div>
+            </div>
+
+            <div class="anzgrid">
+              <div>
+                <div class="kutu">
+                  <h4>💰 En Yüksek Bakiyeler <span class="sg">alacak (mavi) / borç (kırmızı)</span></h4>
+                  <div class="ic2">
+                    <div class="brow"><span class="ad2">MNG TEKNOLOJİ A.Ş.</span><div class="bar2"><span class="kr" style="width:100%"></span></div><span class="mk2">−958.200,00</span></div>
+                    <div class="brow"><span class="ad2">GRANİT BİLGİSAYAR LTD.</span><div class="bar2"><span class="mv" style="width:18%"></span></div><span class="mk2">172.320,50</span></div>
+                    <div class="brow"><span class="ad2">BEETHOVEN GİYİM DIŞ TİC.</span><div class="bar2"><span class="mv" style="width:18%"></span></div><span class="mk2">172.320,50</span></div>
+                    <div class="brow"><span class="ad2">NAZORATİ MÜHENDİSLİK</span><div class="bar2"><span class="mv" style="width:9%"></span></div><span class="mk2">84.900,00</span></div>
+                    <div class="brow"><span class="ad2">ADMEN ENDÜSTRİYEL MAK.</span><div class="bar2"><span class="kr" style="width:5%"></span></div><span class="mk2">−45.100,00</span></div>
+                    <div class="brow"><span class="ad2">OERLIKON BALZERS</span><div class="bar2"><span class="kr" style="width:2%"></span></div><span class="mk2">−12.400,00</span></div>
+                    <div class="brow"><span class="ad2">VOLKAN ŞİRİNBAY</span><div class="bar2"><span class="mv" style="width:1%"></span></div><span class="mk2">9.800,00</span></div>
+                    <div class="brow"><span class="ad2">ZAFER TUNA</span><div class="bar2"><span class="mv" style="width:1%"></span></div><span class="mk2">3.250,00</span></div>
+                  </div>
+                </div>
+
+                <div class="kutu">
+                  <h4>⏳ Alacak Yaşlandırma <span class="sg">CARIHAREKET · vade bazlı</span></h4>
+                  <table class="grid">
+                    <thead><tr><th>CARİ</th><th class="amt" style="width:120px">TOPLAM</th>
+                      <th class="amt" style="width:110px">0-30 G</th><th class="amt" style="width:110px">31-60 G</th>
+                      <th class="amt" style="width:110px">61-90 G</th><th class="amt" style="width:110px">90+ G</th></tr></thead>
+                    <tbody>
+                      <tr><td>GRANİT BİLGİSAYAR LTD.</td><td class="amt">172.320,50</td><td class="amt">120.000,00</td><td class="amt">52.320,50</td><td class="amt">0,00</td><td class="amt">0,00</td></tr>
+                      <tr><td>BEETHOVEN GİYİM DIŞ TİC.</td><td class="amt">172.320,50</td><td class="amt">80.000,00</td><td class="amt">60.000,00</td><td class="amt">32.320,50</td><td class="amt">0,00</td></tr>
+                      <tr><td>NAZORATİ MÜHENDİSLİK</td><td class="amt">84.900,00</td><td class="amt">84.900,00</td><td class="amt">0,00</td><td class="amt">0,00</td><td class="amt">0,00</td></tr>
+                      <tr><td>VOLKAN ŞİRİNBAY</td><td class="amt">9.800,00</td><td class="amt">0,00</td><td class="amt">0,00</td><td class="amt">0,00</td><td class="amt">9.800,00</td></tr>
+                      <tr><td>ZAFER TUNA</td><td class="amt">3.250,00</td><td class="amt">0,00</td><td class="amt">0,00</td><td class="amt">0,00</td><td class="amt">3.250,00</td></tr>
+                    </tbody>
+                    <tfoot><tr><td style="text-align:right"><b>TOPLAM</b></td><td class="amt"><b>442.591,00</b></td>
+                      <td class="amt"><b>284.900,00</b></td><td class="amt"><b>112.320,50</b></td>
+                      <td class="amt"><b>32.320,50</b></td><td class="amt"><b>13.050,00</b></td></tr></tfoot>
+                  </table>
+                  <div class="anznot">90+ gün alacak <b>13.050,00 ₺</b> — takip/hukuk süreci için CRM'de görev açılabilir.</div>
+                </div>
+              </div>
+
+              <div>
+                <div class="kutu">
+                  <h4>🏷 Sınıf Dağılımı</h4>
+                  <div class="ic2">
+                    <div class="brow"><span class="ad2">Alıcılar (5)</span><div class="bar2"><span class="mv" style="width:100%"></span></div><span class="mk2">442.591,00</span></div>
+                    <div class="brow"><span class="ad2">Bayi (1)</span><div class="bar2"><span class="mv" style="width:19%"></span></div><span class="mk2">84.900,00</span></div>
+                    <div class="brow"><span class="ad2">Satıcılar (4)</span><div class="bar2"><span class="kr" style="width:100%"></span></div><span class="mk2">−1.015.700,00</span></div>
+                  </div>
+                </div>
+
+                <div class="kutu">
+                  <h4>🏭 Sektör Dağılımı <span class="sg">alacak bakiyesi</span></h4>
+                  <div class="ic2">
+                    <div class="brow"><span class="ad2">Bilişim</span><div class="bar2"><span class="ys" style="width:100%"></span></div><span class="mk2">172.320,50</span></div>
+                    <div class="brow"><span class="ad2">Tekstil</span><div class="bar2"><span class="ys" style="width:100%"></span></div><span class="mk2">172.320,50</span></div>
+                    <div class="brow"><span class="ad2">Mühendislik</span><div class="bar2"><span class="ys" style="width:49%"></span></div><span class="mk2">84.900,00</span></div>
+                    <div class="brow"><span class="ad2">Diğer</span><div class="bar2"><span class="ys" style="width:8%"></span></div><span class="mk2">13.050,00</span></div>
+                  </div>
+                </div>
+
+                <div class="kutu">
+                  <h4>📈 Aylık Tahsilat Trendi <span class="sg">son 6 ay</span></h4>
+                  <div class="ic2">
+                    <div class="brow"><span class="ad2">Mart 2026</span><div class="bar2"><span class="mv" style="width:62%"></span></div><span class="mk2">846.200,00</span></div>
+                    <div class="brow"><span class="ad2">Nisan 2026</span><div class="bar2"><span class="mv" style="width:71%"></span></div><span class="mk2">964.500,00</span></div>
+                    <div class="brow"><span class="ad2">Mayıs 2026</span><div class="bar2"><span class="mv" style="width:68%"></span></div><span class="mk2">922.100,00</span></div>
+                    <div class="brow"><span class="ad2">Haziran 2026</span><div class="bar2"><span class="mv" style="width:84%"></span></div><span class="mk2">1.140.800,00</span></div>
+                    <div class="brow"><span class="ad2">Temmuz 2026</span><div class="bar2"><span class="mv" style="width:79%"></span></div><span class="mk2">1.072.400,00</span></div>
+                    <div class="brow"><span class="ad2">Ağustos 2026</span><div class="bar2"><span class="sr" style="width:41%"></span></div><span class="mk2">556.900,00</span></div>
+                  </div>
+                  <div class="anznot">Ağustos ayı devam ediyor (14 gün) — trend karşılaştırması ay sonunda anlamlıdır.</div>
+                </div>
+
+                <div class="kutu">
+                  <h4>⚠ Limit / Risk</h4>
+                  <div class="ic2">
+                    <div class="brow"><span class="ad2">BEETHOVEN GİYİM</span><div class="bar2"><span class="sr" style="width:86%"></span></div><span class="mk2">%86</span></div>
+                    <div class="brow"><span class="ad2">NAZORATİ MÜH.</span><div class="bar2"><span class="ys" style="width:57%"></span></div><span class="mk2">%57</span></div>
+                    <div class="brow"><span class="ad2">GRANİT BİLGİSAYAR</span><div class="bar2"><span class="ys" style="width:34%"></span></div><span class="mk2">%34</span></div>
+                    <div class="brow"><span class="ad2">VOLKAN ŞİRİNBAY</span><div class="bar2"><span class="ys" style="width:20%"></span></div><span class="mk2">%20</span></div>
+                  </div>
+                  <div class="anznot">Limit doluluğu <b>%80</b> üzerindeki cariler turuncu — sipariş onayında uyarı verir.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MASTER-DETAIL -->
+        <div class="detail">
+          <div class="dtabs">
+            <div class="dtab">İletişim</div><div class="dtab">İlgililer</div><div class="dtab">Ticari Bilgiler</div>
+            <div class="dtab active">Alış/Satış</div><div class="dtab">Ekstre</div><div class="dtab">CRM</div>
+            <div class="dtab">Teklif</div><div class="dtab">Servis</div><div class="dtab">Yorum/Medya</div>
+          </div>
+          <div class="subtabs">
+            <div class="subtab active">Alış Sipariş</div><div class="subtab">Alış İrsaliye</div><div class="subtab">Alış Konsinye</div>
+            <div class="subtab">Satış Sipariş</div><div class="subtab">Satış İrsaliye</div><div class="subtab">Satış Konsinye</div>
+          </div>
+          <div class="dscroll">
+            <table class="grid">
+              <thead><tr><th style="width:130px">Tarih</th><th style="width:90px">Belge No</th><th style="width:60px">Seri</th><th>Açıklama</th><th class="amt" style="width:90px">Matrah</th><th class="amt" style="width:80px">KDV</th><th class="amt" style="width:90px">Tutar</th><th style="width:50px">Kur</th><th style="width:90px">Vade</th><th style="width:100px">Kaynak</th><th style="width:80px">Hedef</th><th style="width:90px">Depo</th></tr></thead>
+              <tbody>
+                <tr class="sel"><td>09.08.2026 12:10:59</td><td class="kod">20241375</td><td></td><td>000508 nolu belgeden</td><td class="amt">0,00</td><td class="amt">0,00</td><td class="amt">0,00</td><td>TL</td><td></td><td>Talepten</td><td></td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>Kullanıcı: <b>Mehmet Yıldız</b></span><span>Şube: Merkez</span><span>Motor: MSSQL · BILIM</span><span class="r">Gentegre ERP · 12.08.2026 15:20</span></div>
+</div>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+
+<script>
+/* ---- Liste / Grup / Analiz gorunum gecisi ----
+   Kabuk (gentegre.html) ustteki sekmelerden postMessage ile bildirir;
+   tek basina acildiginda #gorunum=grup ile de calisir. */
+(function(){
+  function uygula(ad){
+    ad=ad||'liste';
+    document.body.classList.remove('vw-liste','vw-grup','vw-analiz');
+    document.body.classList.add('vw-'+ad);
+    document.querySelectorAll('.vw').forEach(function(v){ v.classList.toggle('on', v.dataset.vw===ad); });
+  }
+  addEventListener('message',function(e){
+    var d=e.data;
+    if(d && d.gentegre==='gorunum') uygula(d.ad);
+  });
+  function hashtan(){
+    var m=(location.hash||'').match(/gorunum=([a-z]+)/i);
+    uygula(m?m[1]:'liste');
+  }
+  hashtan(); addEventListener('hashchange',hashtan);
+  /* kabuga "gorunum destegi var" bilgisini yolla */
+  try{ if(parent&&parent!==window) parent.postMessage({gentegre:'gorunumDestek', liste:['liste','grup','analiz']},'*'); }catch(x){}
+})();
+</script>
+</body>
+</html>

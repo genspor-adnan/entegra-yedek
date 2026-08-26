@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stok Kartı — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:735px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px}
+  .idstrip{display:grid;grid-template-columns:130px 1fr 150px 130px;gap:10px;padding:10px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted);letter-spacing:.2px}
+  .fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-family:inherit;font-size:12px;color:var(--ink);display:flex;align-items:center;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  /* gercek form ogeleri de .inp gorunumunu alsin */
+  input.inp,select.inp{display:block;width:100%;box-sizing:border-box;outline:none}
+  select.inp{padding:0 2px 0 4px}
+  input.inp:focus,select.inp:focus{border-color:var(--selbd,#3d6ea8);
+    box-shadow:0 0 0 2px rgba(77,143,214,.18)}
+  /* deger + birim ikilisi (or. Raf Ömrü: 2 / Yıl) */
+  .ikili{display:flex;gap:5px;align-items:center}
+  .ikili input.inp{flex:1;min-width:0}
+  .ikili select.inp{flex:none;width:52px}   /* dar kartta sayiya yer kalsin */
+  body.koyu select.inp{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+  .combo{position:relative}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .chip{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:bold}
+  .chip.on{background:#e2f3e8;color:var(--ok);border:1px solid #bfe3cb}
+  .chip.tr{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);margin-top:2px;flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;
+    font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:14px}
+  .pane.active{display:block}
+  .row{display:flex;gap:14px}
+  .col{flex:1;min-width:0}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);
+    border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;letter-spacing:.3px;margin-left:auto;
+    background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grid2{display:grid;grid-template-columns:120px 1fr;gap:8px 10px;align-items:center}
+  .grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .grid2 label.req::after{content:" *";color:var(--req)}
+  .full{grid-column:1 / -1}
+  textarea.inp{height:52px;padding:5px 6px;resize:none;line-height:1.35}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr:hover td{background:#f2f7fd}
+  .dg .c{text-align:center}
+  .amt{text-align:right;font-family:"Segoe UI",Tahoma}
+  .star{color:#e0a400;font-size:13px}
+  .gridtb{display:flex;gap:4px;padding:5px 0 0}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px}
+  .badge{font-size:10px;padding:1px 7px;border-radius:3px;font-weight:bold}
+  .badge.al{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}
+  .badge.sa{background:#eef7ee;color:#3f8a4e;border:1px solid #cfe8cf}
+  .badge.gir{background:#eef7ee;color:#3f8a4e;border:1px solid #cfe8cf}
+  .badge.cik{background:#fdecec;color:#b23b3b;border:1px solid #f2c9c9}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .req-note{color:var(--req)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+  .kpi{border:1px solid var(--line2);border-radius:4px;background:linear-gradient(#ffffff,#f6f9fc);padding:9px 11px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}
+  .kpi .v{font-size:17px;font-weight:bold;color:var(--navy);margin-top:3px;font-family:"Segoe UI",Tahoma}
+  .kpi .v.warn{color:#b5731a}.kpi .v.ok{color:#2e7d46}
+  .kpi .s{font-size:10px;color:var(--muted);margin-top:2px}
+  .bar{height:12px;border-radius:6px;background:#e7edf3;overflow:hidden;display:flex;border:1px solid var(--line2)}
+  .bar>span{display:block;height:100%}
+  .neg{color:#b23b3b}.pos{color:#2e7d46}
+  .imgbox{border:1px dashed #b9c6d4;border-radius:6px;background:linear-gradient(135deg,#eef3f9,#dbe6f1);
+    height:130px;display:flex;align-items:center;justify-content:center;color:#7c93aa;font-size:11px;position:relative}
+  .imgbox .ic{font-size:38px;opacity:.6}
+  .imgthumbs{display:flex;gap:6px;margin-top:6px}
+  .imgthumbs .t{width:40px;height:34px;border:1px solid var(--line);border-radius:3px;background:linear-gradient(135deg,#cfe0f3,#9dc0e6)}
+  .pill{font-size:10px;padding:1px 7px;border-radius:10px;font-weight:bold;border:1px solid}
+  .pill.r{background:#fdecec;color:#b23b3b;border-color:#f2c9c9}
+  .pill.g{background:#e9f6ee;color:#2e7d46;border-color:#c4e6d0}
+  /* feed (yorum/medya) */
+  .feed{display:flex;flex-direction:column;gap:10px}
+  .newc{border:1px solid var(--line2);border-radius:5px;background:#fff;padding:8px}
+  .newc textarea{width:100%;border:1px solid var(--line);border-radius:3px;height:40px;padding:6px;font-family:inherit;font-size:12px;resize:none}
+  .newc .act{display:flex;gap:6px;margin-top:6px;align-items:center}
+  .cmt{border:1px solid var(--line2);border-radius:5px;background:#fff;padding:9px 10px;display:flex;gap:10px}
+  .av{width:30px;height:30px;border-radius:50%;flex:none;color:#fff;font-weight:bold;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .cmt .cx{flex:1;min-width:0}
+  .cmt .hd{font-size:11px;color:var(--muted)}
+  .cmt .hd b{color:var(--navy)}
+  .cmt .tx{font-size:12px;margin:3px 0 6px;line-height:1.45}
+  .media{display:flex;gap:7px;flex-wrap:wrap}
+  .thumb{width:74px;height:56px;border:1px solid var(--line);border-radius:4px;
+    display:flex;align-items:center;justify-content:center;font-size:10px;color:#5c7189;position:relative;overflow:hidden;background:#eef3f8}
+  .thumb .ic{font-size:20px}
+  .thumb .lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(20,40,70,.62);color:#fff;font-size:9px;padding:1px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .thumb.img1{background:linear-gradient(135deg,#cfe0f3,#9dc0e6)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Stok Kartı — Düzenle
+    <span class="sp">STOKLAR.ID 4821 · KOD: STK.14‑0088</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">🏷 Etiket/Barkod</div>
+    <div class="btn">🖨️ Yazdır</div>
+    <div class="sepv"></div>
+    <div class="btn">✖ Kapat</div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label class="req">Stok Kodu</label><div class="inp big">STK.14‑0088</div></div>
+    <div class="fld"><label class="req">Stok Adı</label><div class="inp big">Lenovo ThinkPad E14 G5 i5 16GB 512GB</div></div>
+    <div class="fld"><label>Tür</label><div class="inp combo">Ticari Mal (Stok)</div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="chip on">● Aktif</span> <span class="chip tr" style="margin-left:4px">İzlemeli</span></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="genel">Genel</div>
+    <div class="tab" data-t="birim">Birim / Barkod <span class="b">3</span></div>
+    <div class="tab" data-t="fiyat">Fiyatlar <span class="b">4</span></div>
+    <div class="tab" data-t="serilot">Seri / Lot</div>
+    <div class="tab" data-t="uts">ÜTS Bilgileri</div>
+    <div class="tab" data-t="recete">Reçete</div>
+    <div class="tab" data-t="stok">Stok Durumu</div>
+    <div class="tab" data-t="hareket">Hareketler</div>
+    <div class="tab" data-t="yorum">Yorum / Medya <span class="b">3</span></div>
+    <div class="tab" data-t="ek">Ek Alanlar <span class="b">4</span></div>
+  </div>
+
+  <!-- GENEL -->
+  <div class="pane active" data-p="genel">
+    <!-- Sira: Tanim/Siniflandirma · Vergi & Ana Birim · Resim -->
+    <div class="row">
+      <!-- uc bolum esit genislikte (.col flex:1, basis 0); iki formda da
+           ayni izgara sablonu kullanildigi icin editler de esit genislikte -->
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Tanım / Sınıflandırma <span class="tag">STOKLAR</span></h4>
+          <div class="body grid2" style="grid-template-columns:80px minmax(0,1fr)">
+            <label>Kategori</label><div class="inp combo">Notebook</div>
+            <label>Marka</label><div class="inp combo">Lenovo</div>
+            <label>Model</label><div class="inp">ThinkPad E14</div>
+            <label>Grup</label><div class="inp combo">Bilgisayar</div>
+            <!-- GTIP Kodu "Vergi & Ana Birim" bolumune tasindi (Urun No · Barkod ile birlikte) -->
+            <label>Raf / Konum</label><div class="inp">A‑12‑03</div>
+            <!-- Delphi: STOKLAR.RAFOMRU_SURE + RAFOMRU_BIRIM (UIzleme.EditRafOmruClick).
+                 Delphi'de birim sabit 3 (Yil); burada birim de secilebiliyor. -->
+            <label for="rafOmru">Raf Ömrü</label>
+            <div class="ikili">
+              <input class="inp" id="rafOmru" value="2" inputmode="numeric"
+                     title="STOKLAR.RAFOMRU_SURE — SKT / son kullanma tarihi bu süreden hesaplanır">
+              <select class="inp" id="rafOmruBirim" title="STOKLAR.RAFOMRU_BIRIM">
+                <option value="1">Gün</option>
+                <option value="2">Ay</option>
+                <option value="3" selected>Yıl</option>
+              </select>
+            </div>
+            <!-- Delphi'de kart bazinda degil global UTSKullanimda bayragi var;
+                 burada stok bazinda secilir ve "ÜTS Bilgileri" sekmesini acar/kapatir. -->
+            <label for="bildirimTuru">Bildirim</label>
+            <select class="inp" id="bildirimTuru" title="Bu stok için harici bildirim zorunluluğu">
+              <option value="yok">Yok</option>
+              <option value="uts" selected>ÜTS</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Vergi & Ana Birim</h4>
+          <!-- Sira: Urun No (GTIN) · Barkod · GTIP Kodu · sonra vergi/birim alanlari -->
+          <div class="body grid2" style="grid-template-columns:80px minmax(0,1fr)">
+            <label for="urunNo">Ürün No</label>
+            <input class="inp" id="urunNo" value="08680001234567" autocomplete="off"
+                   title="ÜTS ürün numarası (GTIN) — bildirimde ürün eşleştirmesinde kullanılır">
+            <label>Barkod</label><div class="inp">8690000148802</div>
+            <label>GTİP Kodu</label><div class="inp">8471.30.00.00.00</div>
+            <label>Ana Birim</label><div class="inp combo">Adet</div>
+            <label>Birim Kodu</label><div class="inp">C62 (UBL)</div>
+            <label>KDV %</label><div class="inp">20</div>
+            <label>ÖTV</label><div class="inp">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Resim <span class="tag">IMAJ→DOSYA</span></h4>
+          <div class="body">
+            <div class="imgbox"><span class="ic">🖼</span></div>
+            <div class="imgthumbs"><div class="t"></div><div class="t"></div><div class="t" style="background:linear-gradient(135deg,#f3dfc7,#e6bd8f)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grp" style="margin-top:12px;margin-bottom:0">
+      <h4>Açıklama <span class="tag">STOKLAR.ACIKLAMA</span></h4>
+      <div class="body"><textarea class="inp" style="width:100%;height:44px" readonly>14" WUXGA, Intel Core i5-1335U, 16GB DDR4, 512GB NVMe SSD, Windows 11 Pro. 2 yıl garanti.</textarea></div>
+    </div>
+  </div>
+
+  <!-- BIRIM / BARKOD -->
+  <div class="pane" data-p="birim">
+    <div class="grp">
+      <h4>Birimler <span class="tag">STOKBIRIM (1:N) · çarpanlı</span></h4>
+      <div class="body">
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:26px" class="c">★</th><th>Birim</th><th class="amt" style="width:90px">Çarpan</th><th>Barkod</th><th class="amt" style="width:110px">Fiyat</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td class="c"><span class="star">★</span></td><td>Adet</td><td class="amt">1</td><td>8690000148802</td><td class="amt">₺ 24.900,00</td></tr>
+              <tr><td class="c"></td><td>Kutu (6'lı)</td><td class="amt">6</td><td>8690000148819</td><td class="amt">₺ 148.500,00</td></tr>
+              <tr><td class="c"></td><td>Palet (48)</td><td class="amt">48</td><td>—</td><td class="amt">₺ 1.180.800,00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gridtb"><span class="minibtn">＋ Birim Ekle</span><span class="minibtn">✎ Düzenle</span><span class="minibtn">🗑 Sil</span><span class="minibtn">★ Ana Birim Yap</span></div>
+      </div>
+    </div>
+    <div class="grp">
+      <h4>Barkodlar <span class="tag">STOKBARKOD (1:N)</span></h4>
+      <div class="body">
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:26px" class="c">★</th><th>Barkod</th><th style="width:110px">Tip</th><th style="width:110px">Birim</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td class="c"><span class="star">★</span></td><td>8690000148802</td><td>EAN‑13</td><td>Adet</td></tr>
+              <tr><td class="c"></td><td>LEN‑E14G5‑512</td><td>Tedarikçi</td><td>Adet</td></tr>
+              <tr><td class="c"></td><td>8690000148819</td><td>EAN‑13</td><td>Kutu</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gridtb"><span class="minibtn">＋ Barkod Ekle</span><span class="minibtn">🗑 Sil</span><span class="minibtn">🖨️ Etiket Bas</span></div>
+        <div class="hint">Girişler <b>pop‑up</b> ile. Bir stokun birden çok barkodu/birimi olabilir; ★ = varsayılan.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIYATLAR -->
+  <div class="pane" data-p="fiyat">
+    <div class="kpis">
+      <div class="kpi"><div class="k">Son Alış</div><div class="v">₺ 19.850,00</div><div class="s">02.08.2026 · MNG Tekno</div></div>
+      <div class="kpi"><div class="k">Ort. Maliyet</div><div class="v">₺ 20.140,00</div><div class="s">STOK_ORT_MALIYET</div></div>
+      <div class="kpi"><div class="k">Satış (Perakende)</div><div class="v ok">₺ 24.900,00</div><div class="s">Kâr %23,6</div></div>
+      <div class="kpi"><div class="k">Satış (Bayi)</div><div class="v">₺ 22.500,00</div><div class="s">Kâr %11,7</div></div>
+    </div>
+    <div class="grp">
+      <h4>Fiyat Listeleri <span class="tag">STOKFIYAT (1:N)</span></h4>
+      <div class="body">
+        <div class="dg">
+          <table>
+            <thead><tr><th>Liste</th><th style="width:70px">Tür</th><th class="amt" style="width:110px">Fiyat</th><th style="width:60px">Döviz</th><th class="c" style="width:80px">KDV Dahil</th><th class="amt" style="width:80px">İskonto</th></tr></thead>
+            <tbody>
+              <tr><td>Alış (varsayılan)</td><td><span class="badge al">Alış</span></td><td class="amt">19.850,00</td><td>TL</td><td class="c">Hariç</td><td class="amt">—</td></tr>
+              <tr class="sel"><td>Perakende Satış</td><td><span class="badge sa">Satış</span></td><td class="amt">24.900,00</td><td>TL</td><td class="c">Dahil</td><td class="amt">—</td></tr>
+              <tr><td>Bayi Satış</td><td><span class="badge sa">Satış</span></td><td class="amt">22.500,00</td><td>TL</td><td class="c">Dahil</td><td class="amt">%3</td></tr>
+              <tr><td>Döviz Alış (USD)</td><td><span class="badge al">Alış</span></td><td class="amt">585,00</td><td>USD</td><td class="c">Hariç</td><td class="amt">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gridtb"><span class="minibtn">＋ Fiyat Ekle</span><span class="minibtn">✎ Düzenle</span><span class="minibtn">🗑 Sil</span><span class="minibtn">📈 Kâr Hesapla</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SERI / LOT -->
+  <div class="pane" data-p="serilot">
+    <div class="grp">
+      <h4>Seri / Lot Takibi <span class="tag">STOKIZLEME · STOKSERILOT</span></h4>
+      <div class="body">
+        <div class="grid2" style="grid-template-columns:120px 1fr 120px 1fr;max-width:640px;margin-bottom:10px">
+          <label>İzleme Tipi</label><div class="inp combo">Seri No</div>
+          <label>SKT Takibi</label><div class="inp">Hayır</div>
+        </div>
+        <div class="dg">
+          <table>
+            <thead><tr><th>Seri No / Lot</th><th style="width:90px">SKT</th><th style="width:130px">Depo</th><th class="amt" style="width:70px">Kalan</th><th style="width:120px">Giriş Belgesi</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td>PF3A8821K</td><td>—</td><td>Merkez Depo</td><td class="amt">1</td><td>Alış Fat. MNG…0056</td></tr>
+              <tr><td>PF3A8822L</td><td>—</td><td>Merkez Depo</td><td class="amt">1</td><td>Alış Fat. MNG…0056</td></tr>
+              <tr><td>PF3A8830M</td><td>—</td><td>Şube — Ankara</td><td class="amt">1</td><td>Transfer TRF…0014</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gridtb"><span class="minibtn">🔎 Seri Sorgula</span><span class="minibtn">📄 Garanti/İzleme Geçmişi</span></div>
+        <div class="hint">Bu kart <b>izlemeli</b> (seri no). Miktar hareketleri seri/lot bazında STOKIZLEME'de tutulur; belge kesiminde seri seçimi zorunludur.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UTS BILGILERI — Delphi: UStokWizard.TabSheetUTS (alan sirasi birebir) -->
+  <div class="pane" data-p="uts">
+    <div class="row">
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>ÜTS / Medikal Bilgileri <span class="tag">STOKLAR (DtsStokUser)</span></h4>
+          <div class="body grid2" style="grid-template-columns:150px 1fr;max-width:560px">
+            <label>SUT Kodu</label><input class="inp" value="MD-140350" title="STOKLAR.SUTKODU">
+            <label>Branş Kodu</label><input class="inp" value="B-27" title="STOKLAR.BRANSKODU">
+            <label>ÜTS REF (Katalog No)</label><input class="inp" value="REF-88421-C" title="STOKLAR.UTSREF">
+            <label>FTN</label><input class="inp" value="FTN-0049213" title="STOKLAR.FTN">
+            <label>GMDN</label><input class="inp" value="35142" title="STOKLAR.GMDN">
+            <label>GMDN Adı</label><input class="inp" value="Cerrahi el aleti seti, tek kullanımlık" title="STOKLAR.GMDNADI">
+            <label>Diğer Ürün Adı</label><input class="inp" value="Disposable Surgical Instrument Set" title="STOKLAR.DIGERURUNADI">
+            <label>Sınıf</label>
+            <select class="inp" title="STOKLAR.MEDIKALSINIF · Tablo.RepMedikalSinif">
+              <option>Sınıf I</option><option selected>Sınıf IIa</option>
+              <option>Sınıf IIb</option><option>Sınıf III</option>
+            </select>
+            <label>İthal / İmal</label>
+            <select class="inp" title="STOKLAR.ITHALIMAL · 0=İthal · 1=İmal">
+              <option value="0" selected>İthal</option><option value="1">İmal</option>
+            </select>
+            <label>Menşei Ülke</label>
+            <select class="inp" title="STOKLAR.MENSEIULKE · ILLER (ILNO ≥ 100)">
+              <option>Almanya</option><option selected>Çin</option><option>Fransa</option>
+              <option>Güney Kore</option><option>İtalya</option><option>Türkiye</option>
+            </select>
+            <label>İhale Sıra No</label><input class="inp" value="2026/117-04" title="STOKLAR.IHALESIRANO">
+            <label>DMO Şartname Kodu</label>
+            <div class="ikili">
+              <input class="inp" value="DMO-4471" title="STOKLAR.DMOKODU">
+              <label style="text-align:right;white-space:nowrap;padding:0 2px">SM Kodu</label>
+              <input class="inp" value="SM-0912" style="flex:none;width:92px" title="STOKLAR.SMKODU">
+            </div>
+          </div>
+          <div class="hint" style="margin:10px 10px 10px">
+            Alanlar yalnız <b>ÜTS kullanımda</b> iken bağlanır (<b>UTSKullanimda</b>); kapalıyken sekme boş gelir.
+            Menşei ülke listesi <b>ILLER</b> tablosundan <b>ILNO ≥ 100</b> koşuluyla, ülke adına göre sıralı gelir.
+          </div>
+        </div>
+      </div>
+      <div class="col" style="max-width:270px">
+        <div class="grp" style="margin-bottom:0">
+          <h4>ÜTS Durumu</h4>
+          <div class="body">
+            <div class="grid2" style="grid-template-columns:98px 1fr">
+              <label>Bildirim</label><div class="inp" id="utsDurum"><span class="chip on">ÜTS — Kayıtlı</span></div>
+              <label>Son bildirim</label><div class="inp">14.08.2026</div>
+              <label>Tekil takip</label><div class="inp">Seri No</div>
+            </div>
+            <div class="gridtb" style="margin-top:10px">
+              <span class="minibtn">🔎 ÜTS'de Sorgula</span>
+              <span class="minibtn">📡 ÜTS Bildirim Ekranı</span>
+            </div>
+            <div class="hint" style="margin-top:10px">
+              Bildirim ekranı: <b>Stok › ÜTS Bildirim</b> (UUTSDlg). Bu karttaki
+              <b>ÜTS REF</b> ve <b>GTIN</b> bildirimde ürün eşleştirmesinde kullanılır.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECETE -->
+  <div class="pane" data-p="recete">
+    <div class="grp">
+      <h4>Ürün Reçetesi (BOM) <span class="tag">URETIMRECETE · yalnız mamul/set</span></h4>
+      <div class="body">
+        <div class="hint" style="margin:0 0 10px">Bu kart <b>ticari mal</b>; reçete yalnız <b>Mamul / Set</b> türü stoklarda kullanılır. Örnek (set ürün) gösterimi:</div>
+        <div class="dg">
+          <table>
+            <thead><tr><th>Bileşen (Stok)</th><th class="amt" style="width:80px">Miktar</th><th style="width:80px">Birim</th><th class="amt" style="width:70px">Fire %</th><th class="amt" style="width:110px">Br. Maliyet</th></tr></thead>
+            <tbody>
+              <tr><td>Notebook Çantası 14"</td><td class="amt">1</td><td>Adet</td><td class="amt">0</td><td class="amt">₺ 420,00</td></tr>
+              <tr><td>Kablosuz Mouse</td><td class="amt">1</td><td>Adet</td><td class="amt">0</td><td class="amt">₺ 180,00</td></tr>
+              <tr><td>USB‑C Hub</td><td class="amt">1</td><td>Adet</td><td class="amt">0</td><td class="amt">₺ 260,00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gridtb"><span class="minibtn">＋ Bileşen Ekle</span><span class="minibtn">🗑 Sil</span><span class="minibtn">🧮 Maliyet Hesapla</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STOK DURUMU -->
+  <div class="pane" data-p="stok">
+    <div class="kpis">
+      <div class="kpi"><div class="k">Toplam Stok</div><div class="v">86 Adet</div><div class="s">3 depoda</div></div>
+      <div class="kpi"><div class="k">Rezerve</div><div class="v warn">14 Adet</div><div class="s">açık siparişler</div></div>
+      <div class="kpi"><div class="k">Kullanılabilir</div><div class="v ok">72 Adet</div><div class="s">satışa hazır</div></div>
+      <div class="kpi"><div class="k">Yoldaki (Sipariş)</div><div class="v">40 Adet</div><div class="s">tahmini 18.08</div></div>
+    </div>
+    <div class="grp">
+      <h4>Depo Bazlı Stok <span class="tag">STOKDURUM (depo × stok)</span></h4>
+      <div class="body">
+        <div class="dg">
+          <table>
+            <thead><tr><th>Depo</th><th class="amt" style="width:80px">Miktar</th><th class="amt" style="width:80px">Rezerve</th><th class="amt" style="width:90px">Kullanılab.</th><th class="amt" style="width:70px">Min</th><th class="amt" style="width:70px">Max</th><th class="c" style="width:80px">Durum</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td>Merkez Depo</td><td class="amt">58</td><td class="amt">10</td><td class="amt">48</td><td class="amt">10</td><td class="amt">120</td><td class="c"><span class="pill g">Yeterli</span></td></tr>
+              <tr><td>Şube — Ankara</td><td class="amt">22</td><td class="amt">4</td><td class="amt">18</td><td class="amt">5</td><td class="amt">40</td><td class="c"><span class="pill g">Yeterli</span></td></tr>
+              <tr><td>Vitrin / Teşhir</td><td class="amt">6</td><td class="amt">0</td><td class="amt">6</td><td class="amt">8</td><td class="amt">15</td><td class="c"><span class="pill r">Kritik ↓</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gridtb"><span class="minibtn">🔄 Depolar Arası Transfer</span><span class="minibtn">📋 Sayım</span><span class="minibtn">📈 Hareket Grafiği</span></div>
+        <div class="hint">Miktarlar <b>salt‑okunur</b> (STOKDURUM tetiklerle güncellenir). Min/Max ve kritik seviye depo bazlı tanımlanır.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HAREKETLER -->
+  <div class="pane" data-p="hareket">
+    <div class="grp">
+      <h4>Son Stok Hareketleri <span class="tag">FATURA / depo (salt‑okunur)</span></h4>
+      <div class="body">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:11px;color:var(--muted)">
+          <span class="minibtn">📅 01.07.2026 – 12.08.2026</span>
+          <span class="minibtn">Depo: Tümü</span>
+          <span style="margin-left:auto">Devir: <b>62</b> · Kapanış: <b>86 Adet</b></span>
+        </div>
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:88px">Tarih</th><th style="width:160px">Belge</th><th style="width:70px">Tür</th><th>Depo</th><th class="amt" style="width:80px">Giriş</th><th class="amt" style="width:80px">Çıkış</th><th class="amt" style="width:80px">Kalan</th></tr></thead>
+            <tbody>
+              <tr><td>02.08.2026</td><td>Alış Fat. MNG…0056</td><td><span class="badge gir">Giriş</span></td><td>Merkez Depo</td><td class="amt pos">40</td><td class="amt"></td><td class="amt">86</td></tr>
+              <tr><td>28.07.2026</td><td>Satış Fat. GNT…0051</td><td><span class="badge cik">Çıkış</span></td><td>Merkez Depo</td><td class="amt"></td><td class="amt neg">12</td><td class="amt">46</td></tr>
+              <tr><td>21.07.2026</td><td>Transfer TRF…0014</td><td><span class="badge cik">Çıkış</span></td><td>Merkez → Ankara</td><td class="amt"></td><td class="amt neg">8</td><td class="amt">58</td></tr>
+              <tr><td>15.07.2026</td><td>Satış İrs. GEN…0009</td><td><span class="badge cik">Çıkış</span></td><td>Merkez Depo</td><td class="amt"></td><td class="amt neg">5</td><td class="amt">66</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gridtb"><span class="minibtn">🔎 Detaylı</span><span class="minibtn">📊 Excel'e Aktar</span><span class="minibtn">🖨️ Yazdır</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- YORUM / MEDYA -->
+  <div class="pane" data-p="yorum">
+    <div class="grp">
+      <h4>Yorum / Medya Akışı <span class="tag">GOREVYORUM + IMAJ → GENDEPO.DOSYA</span></h4>
+      <div class="body">
+        <div class="feed">
+          <div class="newc">
+            <textarea placeholder="Bu ürünle ilgili not/yorum yaz… (görsel, katalog, kılavuz ekle)"></textarea>
+            <div class="act"><span class="minibtn">📎 Dosya/Görsel</span><span class="minibtn">@ Etiketle</span>
+              <span class="btn primary" style="margin-left:auto">Gönder</span></div>
+          </div>
+          <div class="cmt">
+            <div class="av" style="background:#2f6db3">MY</div>
+            <div class="cx">
+              <div class="hd"><b>Mehmet Yıldız</b> · Satış · 05.08.2026 11:10</div>
+              <div class="tx">Yeni parti geldi, ürün fotoğrafları ve datasheet eklendi. Vitrin stoğu kritik, tamamlanmalı.</div>
+              <div class="media">
+                <div class="thumb img1"><span class="lbl">urun_1.jpg</span></div>
+                <div class="thumb img1"><span class="lbl">urun_2.jpg</span></div>
+                <div class="thumb"><span class="ic">📄</span><span class="lbl">datasheet.pdf</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cmt">
+            <div class="av" style="background:#3f8a4e">SÖ</div>
+            <div class="cx">
+              <div class="hd"><b>Serkan Öz</b> · Depo · 02.08.2026 09:40</div>
+              <div class="tx">Seri numaraları okutuldu, 40 adet girişi yapıldı. Kutular A‑12 rafına yerleşti.</div>
+            </div>
+          </div>
+        </div>
+        <div class="hint">Yorum <b>GOREVYORUM</b>'da; görsel/dosya <b>IMAJ → GENDEPO.DOSYA</b> (hash‑dedup, FILESTREAM).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EK ALANLAR -->
+  <div class="pane" data-p="ek">
+    <div class="grp">
+      <h4>Ek Alanlar <span class="tag">STOKBILGI / REHBERBILGI (EAV)</span></h4>
+      <div class="body">
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:180px">Etiket</th><th>Değer</th><th style="width:120px">Modül</th></tr></thead>
+            <tbody>
+              <tr><td>Garanti Süresi</td><td>24 Ay</td><td>Stok</td></tr>
+              <tr class="sel"><td>Tedarikçi Kodu</td><td>LEN‑21K8</td><td>Stok</td></tr>
+              <tr><td>Enerji Sınıfı</td><td>A</td><td>Stok</td></tr>
+              <tr><td>Ağırlık (kg)</td><td>1,41</td><td>Stok</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gridtb"><span class="minibtn">＋ Alan Ekle</span><span class="minibtn">✎ Düzenle</span><span class="minibtn">🗑 Sil</span></div>
+        <div class="hint">Yalnız serbest/öngörülemeyen alanlar. Birim, barkod, fiyat, GTİP gibi çekirdek veriler kendi sekmelerinde (tipli).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli:</b>
+    <span>Genel → <b>STOKLAR</b> + <b>IMAJ/DOSYA</b></span>·
+    <span>Birim/Barkod → <b>STOKBIRIM · STOKBARKOD</b> (1:N)</span>·
+    <span>Fiyatlar → <b>STOKFIYAT</b> (1:N)</span>·
+    <span>Stok Durumu → <b>STOKDURUM</b> (depo×stok)</span>·
+    <span>Seri/Lot → <b>STOKIZLEME · STOKSERILOT</b></span>·
+    <span>Reçete → <b>URETIMRECETE</b></span>·
+    <span>Yorum → <b>GOREVYORUM+IMAJ</b></span>·
+    <span>Ek → <b>STOKBILGI (EAV)</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Kayıt: 88 / 6412</span>
+    <span>Tür: <b>Ticari Mal · İzlemeli (Seri)</b></span>
+    <span class="req-note">* zorunlu alanlar</span>
+    <span style="margin-left:auto">Son değişiklik: 12.08.2026 · Mehmet Yıldız</span>
+  </div>
+</div>
+
+<script>
+  var tabs=document.querySelectorAll('.tab'), panes=document.querySelectorAll('.pane');
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('active')});
+    panes.forEach(function(x){x.classList.remove('active')});
+    t.classList.add('active');
+    document.querySelector('.pane[data-p="'+t.dataset.t+'"]').classList.add('active');
+  });});
+
+  /* ---- Bildirim: Yok / ÜTS ----
+     "Yok" secilince ÜTS Bilgileri sekmesi gizlenir (Delphi'de global
+     UTSKullanimda bayragi ayni isi yapiyor: kapaliyken alanlar baglanmiyor).
+     Acik sekme gizlenecekse Genel'e donulur.                              */
+  (function(){
+    var sec = document.getElementById('bildirimTuru');
+    var sek = document.querySelector('.tab[data-t="uts"]');
+    var pan = document.querySelector('.pane[data-p="uts"]');
+    var dur = document.getElementById('utsDurum');
+    if (!sec || !sek || !pan) return;
+    function uygula(){
+      var acik = sec.value === 'uts';
+      sek.style.display = acik ? '' : 'none';
+      if (!acik && sek.classList.contains('active')){
+        sek.classList.remove('active'); pan.classList.remove('active');
+        document.querySelector('.tab[data-t="genel"]').classList.add('active');
+        document.querySelector('.pane[data-p="genel"]').classList.add('active');
+      }
+      if (dur) dur.innerHTML = acik
+        ? '<span class="chip on">ÜTS — Kayıtlı</span>'
+        : '<span class="chip">Bildirim yok</span>';
+    }
+    sec.addEventListener('change', uygula);
+    uygula();
+  })();
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>.gmzgizle{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>.gmzgizle{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+/* === GN-KARTMOD: kart penceresinde tam genislik === */
+body.kartmod{padding:0!important;margin:0!important;background:#fff!important}
+body.kartmod .win,body.kartmod .app{max-width:none!important;width:auto!important;
+  margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+body.koyu.kartmod{background:#12171e!important}
+/* === GN-KARTMOD son === */
+/* === GN-KOYU-GRPBAS: grup basligi koyu tema === */
+body.koyu .grp>h4{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-bottom-color:#2c3542!important}
+body.koyu .grp{background:#1b222c!important;border-color:#2c3542!important}
+body.koyu .grp .tag{background:#2c3a4b!important;color:#9fc0e0!important}
+body.koyu .imgbox{background:linear-gradient(135deg,#222b37,#1b232d)!important;
+  border-color:#3b4a5c!important;color:#7f8fa1!important}
+body.koyu .imgthumbs .t{border-color:#33404f!important}
+/* === GN-KOYU-GRPBAS son === */
+</style>
+<script>(function(){
+function solMenuMu(e){
+  if(!e||e.nodeType!==1) return false;
+  if(/(^|\s)(gorev|solmenu|gtusgrup)(\s|$)/.test(e.className||"")) return true;
+  /* gorev tuslari / sekmeli sol sutun: .gtus veya .ltabs iceriyorsa gizlenir */
+  return !!e.querySelector(".gtus, .ltabs, .lpane");
+}
+function g(){
+  if(location.hash.indexOf("gomulu")>=0){
+    document.body.classList.add("gomulu");
+    [".wrap",".work"].forEach(function(sel){
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(w){
+        var ilk=w.firstElementChild;
+        if(ilk) ilk.classList.toggle("gmzgizle", solMenuMu(ilk));
+      });
+    });
+  } else document.body.classList.remove("gomulu");
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",g); else g();
+addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();
+/* --- GN-KARTMOD: kabuk kartlari "#kart-..." ile acar; genisligi ac --- */
+(function(){
+  function kartModu(){
+    document.body.classList.toggle('kartmod', /(^|[#&])kart(-|\b)/.test(location.hash || ''));
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kartModu);
+  else kartModu();
+  addEventListener('hashchange', kartModu);
+})();
+</script>
+</body>
+</html>

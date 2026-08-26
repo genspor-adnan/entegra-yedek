@@ -1537,22 +1537,22 @@ procedure TAnaGirisSayfasiFrame.ComboDuyuruSkinPropertiesEditValueChanged(
   Sender: TObject);
 var
   LSkin: string;
-  LDeger: Variant;
 begin
   if FSkinSecimiYukleniyor or not ComboDuyuruSkin.Enabled or
      (KullaniciID <= 0) then Exit;
 
   LSkin := Trim(VarToStr(ComboDuyuruSkin.EditValue));
   if LSkin = '' then LSkin := 'DEFAULT';
-  if SameText(LSkin, 'DEFAULT') then
-    LDeger := Null
-  else
-    LDeger := LSkin;
 
   try
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
-      'update KULLANICI set SKINADI=&SKINADI where ID=&ID',
-      ['&SKINADI', '&ID'], [LDeger, KullaniciID]);
+    if SameText(LSkin, 'DEFAULT') then
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'update KULLANICI set SKINADI=NULL where ID=&ID',
+        ['&ID'], [KullaniciID])
+    else
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+        'update KULLANICI set SKINADI=&SKINADI where ID=&ID',
+        ['&SKINADI', '&ID'], [LSkin, KullaniciID]);
   except
     SkinSeciminiYukle;
     raise;
@@ -2505,7 +2505,6 @@ RegisterClass(TAnaGirisSayfasiFrame);
 finalization
 
 end.
-
 
 
 

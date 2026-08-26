@@ -279,6 +279,12 @@ Uses  System.DateUtils, UVeriMotor, UBinarySave, PrjConst, FetaKurulusSiniflari,
   UGirisKutusuEx,UBelgeDonusum, UUTSKontrol;
 {$R *.dfm}
 
+const
+   // Transfer GERIYE donuk en fazla kac gun oncesine kaydedilebilir (bugun dahil).
+   //   Ileri tarih zaten kesin yasak; cok eski tarihli transfer aradaki hareketlerin
+   //   maliyet/bakiye hesabini geriye donuk bozdugu icin sinirlandi.
+   CTransferGerideGunSiniri = 7;
+
 var
    OncekiStokMiktar:Real;
    Kilit : boolean;
@@ -399,9 +405,10 @@ begin
   if TabFatBaslik.Connection = nil then TabFatBaslik.Connection := Tablo.FDCnn;
   if TabFatura.Connection = nil then TabFatura.Connection := Tablo.FDCnn;
   if FATURA.Connection = nil then FATURA.Connection := Tablo.FDCnn;
-  // Transfer ileri tarihe kaydedilemez -> takvimde de ileri gun SECILEMESIN (asil engel
-  //   TabFatBaslikBeforePost'ta; bu yalniz kullaniciyi bastan yonlendirir).
-  EditFatTarih.Properties.MaxDate := DateOf(Tablo.GENINI.BugunTrh);
+  // Transfer ileri tarihe kaydedilemez; asil engel TabFatBaslikBeforePost'ta.
+  // TcxDBDateEdit.MaxDate kullanma: Post sirasinda DevExpress kendi "Value out of bounds"
+  // exception'ini bizim kontrollu mesaja gelmeden firlatiyor.
+  EditFatTarih.Properties.MaxDate := 0;
   TabFatura.CachedUpdates := False;
   TabFatura.UpdateOptions.CountUpdatedRecords := False;
   // PG: varsayilan upWhereAll UPDATE WHERE'ine TUM alanlari koyar; PG'de bir alan degeri (bit->smallint,
@@ -442,8 +449,15 @@ begin
   case IslemOp of
     'E':
       begin // AktiviteWizardDlg.TabFatBaslik.Append;
-        ComboCikisDepo.RepositoryItem:=Tablo.RepStokDepolarAktif;
-        ComboGirisDepo.RepositoryItem:=Tablo.RepStokDepolarAktif;
+        // Yeni transferde aktif depolar, ANCAK konsinye cikis deposu (VARSAYILAN=7)
+        //   listelenmez; konsinye stogu transferle degil konsinye belgesiyle hareket eder.
+        //   (RepStokDepolarAktif tum aktif depolari tasidigi icin dogrudan kullanilamaz.)
+        ComboCikisDepo.RepositoryItem:=nil;
+        ComboGirisDepo.RepositoryItem:=nil;
+        ComboCikisDepo.Properties.Items := Tablo.imgComboboxInit(
+          'select 0 AS ID,'''' AS DEPOADI union all '+
+          'select ID,DEPOADI from DEPOLAR where DURUM=1 and (VARSAYILAN is null or VARSAYILAN<>7)').Items;
+        ComboGirisDepo.Properties.Items := ComboCikisDepo.Properties.Items;
         TabFatBaslik.Append; // Ekleme
       end;
     'D', 'K':
@@ -614,8 +628,16 @@ begin
 end;
 
 procedure TFatTransferWizardDlg.TabFatBaslikBeforePost(DataSet: TDataSet);
+var
+  LTransferTarihiDegisti: Boolean;
+  LEskiTarih: Variant;
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: fatura basligi post -> yakala
+  // Tarih ALANINA dokunuldu mu? (geriye donuk sinir yalniz yeni kayit/degisen tarihte)
+  LEskiTarih := TabFatBaslik.FieldByName('FATURATARIH').OldValue;
+  LTransferTarihiDegisti := VarIsNull(LEskiTarih) or VarIsEmpty(LEskiTarih) or
+    (DateOf(VarToDateTime(LEskiTarih)) <>
+     DateOf(TabFatBaslik.FieldByName('FATURATARIH').AsDateTime));
    if TabFatBaslik.FieldByName('CIKISDEPO').AsInteger<=0 then
    begin
        Application.MessageBox(PChar(FTWCikisDeposuBosOlamaz),PChar(HataPrj), MB_OK+ MB_ICONERROR);
@@ -626,6 +648,20 @@ begin
    begin
        Application.MessageBox(PChar(FTWGirisDeposuBosOlamaz),PChar(HataPrj), MB_OK+ MB_ICONERROR);
        ComboGirisDepo.SetFocus;
+       Abort;
+   end;
+
+   if TabFatBaslik.FieldByName('SATICIKODU').AsInteger<=0 then
+   begin
+       BoslukKontrol('', 'Teslim Eden');
+       if ComboTeslimlEden.CanFocus then ComboTeslimlEden.SetFocus;
+       Abort;
+   end;
+
+   if TabFatBaslik.FieldByName('REHBERID').AsInteger<=0 then
+   begin
+       BoslukKontrol('', BGTeslim_alan);
+       if ComboTeslimlAlan.CanFocus then ComboTeslimlAlan.SetFocus;
        Abort;
    end;
 
@@ -642,6 +678,21 @@ begin
    if DateOf(TabFatBaslik.FieldByName('FATURATARIH').AsDateTime) > DateOf(Tablo.GENINI.BugunTrh) then
    begin
      Application.MessageBox(PChar(FTWIleriTarihOlamaz),PChar(HataPrj), MB_OK+ MB_ICONERROR);
+     if EditFatTarih.CanFocus then EditFatTarih.SetFocus;
+     Abort;
+   end;
+
+   // GERIYE DONUK SINIR: ileri tarihle ayni gerekce (stok hareketi, maliyet/bakiye).
+   //   Cok eski tarihe transfer, aradaki tum hareketlerin maliyetini geriye donuk bozar.
+   //   CTransferGerideGunSiniri gun ONCESINE kadar serbest, daha eskisi yasak.
+   //   YALNIZ yeni kayitta veya tarih DEGISTIRILDIGINDE bakilir; boylece 7 gunden eski
+   //   mevcut bir transfer acilip (satir eklemek/duzeltmek icin) kaydedilebilir.
+   if ((TabFatBaslik.State = dsInsert) or LTransferTarihiDegisti) and
+      (DateOf(TabFatBaslik.FieldByName('FATURATARIH').AsDateTime) <
+       DateOf(Tablo.GENINI.BugunTrh) - CTransferGerideGunSiniri) then
+   begin
+     Application.MessageBox(PChar(Format(FTWGecmisTarihOlamaz, [CTransferGerideGunSiniri])),
+       PChar(HataPrj), MB_OK+ MB_ICONERROR);
      if EditFatTarih.CanFocus then EditFatTarih.SetFocus;
      Abort;
    end;
@@ -892,9 +943,14 @@ procedure TFatTransferWizardDlg.ToolButton4Click(Sender: TObject);
 begin
   // Alt hareketler (FATURA/transfer satir diff) ana kartin moduna gore -> tek ISLEMTIPI (UInfo tek satir).
   if (IslemOp='E') or (IslemOp='K') then LogUstModu := 1 else LogUstModu := 2;
+  if (TabFatura.State = dsBrowse) and (TabFatura.RecordCount = 0) then
+  begin
+    Application.MessageBox(PChar(UrungirilmedenKaydedilemez), PChar(HataPrj), MB_OK+ MB_ICONERROR);
+    if GridFatura.CanFocus then GridFatura.SetFocus;
+    Abort;
+  end;
+
   if TabFatBaslik.State in [dsInsert, dsEdit] then begin
-    //if TabFatura.RecordCount = 0 then
-      //raise Exception.create(Urungirilmedenkadedilmez);
     // Gercek degisiklik yoksa (Modified=False, D islemi) Post etme -> gereksiz DEGISTIREN/log olmasin.
     if (TabFatBaslik.State = dsInsert) or (IslemOp='E') or (IslemOp='K') or TabFatBaslik.Modified then
       TabFatBaslik.Post
@@ -1018,12 +1074,20 @@ function TFatTransferWizardDlg.BoslukKontrolu: Boolean;
 begin
   BoslukKontrolu := True;
   if not BoslukKontrol(EditFatTarih.Text, KontrolFaturaTarihi) then Abort;
+  if not BoslukKontrol(ComboTeslimlEden.Text, 'Teslim Eden') then Abort;
   if not BoslukKontrol(ComboTeslimlAlan.Text, BGTeslim_alan) then Abort;
   // Ileri tarih KESIN yasak (asil engel TabFatBaslikBeforePost'ta). TarihKontrol'DEN ONCE:
   //   o genel opsiyona bagli (-10088) ve "sor" modunda once soruyor, sonra post reddediyordu.
   if DateOf(EditFatTarih.Date) > DateOf(Tablo.GENINI.BugunTrh) then
   begin
     Application.MessageBox(PChar(FTWIleriTarihOlamaz),PChar(HataPrj), MB_OK+ MB_ICONERROR);
+    Abort;
+  end;
+  // Geriye donuk sinir (asil engel yine TabFatBaslikBeforePost'ta).
+  if DateOf(EditFatTarih.Date) < DateOf(Tablo.GENINI.BugunTrh) - CTransferGerideGunSiniri then
+  begin
+    Application.MessageBox(PChar(Format(FTWGecmisTarihOlamaz, [CTransferGerideGunSiniri])),
+      PChar(HataPrj), MB_OK+ MB_ICONERROR);
     Abort;
   end;
   if not TarihKontrol(EditFatTarih.Date, 'Transfer' + KontrolTarihi) then
@@ -1147,10 +1211,6 @@ begin
 end;
 
 end.
-
-
-
-
 
 
 

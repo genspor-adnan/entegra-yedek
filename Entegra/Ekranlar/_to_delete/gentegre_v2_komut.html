@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gentegre AI — Konsept A · Komut Paleti</title>
+<style>
+  body.sadeust .ust .yol, body.sadeust .ekcubuk, body.sadeust .vtabs, body.sadeust #komut{display:none!important}
+
+  :root{
+    --zem:#f6f8fa; --yuz:#ffffff; --yuz2:#f0f3f7; --cizgi:#e2e8f0; --cizgi2:#eef2f6;
+    --yazi:#1e293b; --soluk:#64748b; --vurgu:#2f6db3; --vurgu2:#dbeafe;
+    --rail:#0f1b2d; --rail2:#16283f; --railYazi:#8fa8c4;
+    --ok:#2e7d46; --uyari:#b5731a; --hata:#b23b3b;
+    --golge:0 1px 2px rgba(15,27,45,.06),0 6px 18px rgba(15,27,45,.06);
+    --r:9px;
+  }
+  body.koyu{
+    --zem:#0d1117; --yuz:#161b22; --yuz2:#1c2430; --cizgi:#2a3441; --cizgi2:#212a35;
+    --yazi:#e2e8f0; --soluk:#8b9bb0; --vurgu:#5b9bdd; 
+    --vurgu2:#1c3a5c; --rail:#080c12; --rail2:#111a26; --railYazi:#7d93ad;
+    --golge:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--zem);color:var(--yazi);
+    font-family:"Segoe UI",-apple-system,"Inter",Tahoma,sans-serif;font-size:12.5px;
+    height:100vh;overflow:hidden;display:flex}
+
+  /* ============ SOL IKON RAIL ============ */
+  .rail{width:60px;flex:none;background:linear-gradient(var(--rail),var(--rail2));
+    display:flex;flex-direction:column;align-items:center;padding:9px 0;gap:3px;overflow:auto}
+  .rail::-webkit-scrollbar{width:0}
+  .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(#4d8fd6,#22548f);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;margin-bottom:8px;flex:none}
+  .ri{width:44px;height:42px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:2px;color:var(--railYazi);cursor:default;flex:none;position:relative}
+  .ri .ic{font-size:17px;line-height:1}
+  .ri .nm{font-size:8.5px;letter-spacing:.1px;opacity:.85;white-space:nowrap}
+  .ri:hover{background:rgba(255,255,255,.07);color:#fff}
+  .ri.on{background:rgba(93,155,221,.18);color:#fff}
+  .ri.on::before{content:"";position:absolute;left:-9px;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:#5b9bdd}
+  .raildolgu{flex:1}
+  .ri.alt{color:#6b81a0}
+
+  /* ============ ORTA: BOLUM SUTUNU ============ */
+  .bolumler{width:212px;flex:none;background:var(--yuz);border-right:1px solid var(--cizgi);
+    display:flex;flex-direction:column;min-height:0;transition:margin-left .16s ease}
+  .bolumler.gizli{margin-left:-213px}
+  .bh{padding:12px 14px 8px;font-size:14px;font-weight:650;letter-spacing:-.2px;display:flex;align-items:center;gap:8px}
+  .bh .ic{font-size:16px}
+  .blgrp{display:flex;align-items:center;gap:7px;margin:9px 8px 3px;padding:5px 8px;border-radius:5px;
+    background:rgba(125,125,125,.12);font:700 10.5px/1 'Segoe UI',sans-serif;
+    letter-spacing:.4px;text-transform:uppercase;opacity:.85}
+  .bl.ic{padding-left:24px}
+
+  .bl{display:flex;align-items:center;gap:9px;margin:1px 8px;padding:7px 10px;border-radius:8px;
+    font-size:12.5px;color:var(--yazi);cursor:default}
+  .bl .bi{font-size:14px;width:18px;text-align:center;opacity:.85}
+  .bl:hover{background:var(--yuz2)}
+  .bl.on{background:var(--vurgu2);color:var(--vurgu);font-weight:650}
+  .bl .rz{margin-left:auto;font-size:9px;color:var(--soluk);opacity:.75}
+  .bsep{height:1px;background:var(--cizgi2);margin:8px 14px}
+  .bfoot{margin-top:auto;padding:9px 12px;border-top:1px solid var(--cizgi2)}
+  .kk{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--cizgi);border-radius:8px;
+    background:var(--yuz2);font-size:11.5px;color:var(--soluk)}
+  .kk kbd{font-family:inherit;font-size:10px;background:var(--yuz);border:1px solid var(--cizgi);
+    border-radius:4px;padding:1px 5px;color:var(--yazi);box-shadow:0 1px 0 var(--cizgi)}
+
+  /* ============ SAG: CALISMA ============ */
+  .ana{flex:1;min-width:0;display:flex;flex-direction:column}
+  .ust{height:46px;flex:none;display:flex;align-items:center;gap:10px;padding:0 12px;
+    background:var(--yuz);border-bottom:1px solid var(--cizgi)}
+  .ikon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    color:var(--soluk);font-size:14px;cursor:default}
+  .ikon:hover{background:var(--yuz2);color:var(--yazi)}
+  .yol{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--soluk);min-width:0}
+  .yol b{color:var(--yazi);font-weight:650}
+  .yol .ay{opacity:.5}
+  .kutu{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .ara{display:flex;align-items:center;gap:8px;height:31px;padding:0 10px;border:1px solid var(--cizgi);
+    border-radius:8px;background:var(--yuz2);color:var(--soluk);font-size:12px;min-width:250px;cursor:default}
+  .ara:hover{border-color:var(--vurgu);background:var(--yuz)}
+  .ara kbd{margin-left:auto;font-family:inherit;font-size:10px;background:var(--yuz);border:1px solid var(--cizgi);
+    border-radius:4px;padding:1px 5px}
+  .avt{width:28px;height:28px;border-radius:50%;background:linear-gradient(#4d8fd6,#22548f);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:650}
+
+  .arac{flex:none;display:flex;align-items:center;gap:7px;padding:9px 12px;background:var(--zem);
+    border-bottom:1px solid var(--cizgi);flex-wrap:wrap}
+  .d{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:8px;
+    border:1px solid var(--cizgi);background:var(--yuz);color:var(--yazi);font-size:12px;cursor:default;box-shadow:var(--golge)}
+  .d:hover{border-color:var(--vurgu);color:var(--vurgu)}
+  .d.bir{background:var(--vurgu);border-color:var(--vurgu);color:#fff;font-weight:650}
+  .d.bir:hover{filter:brightness(1.07);color:#fff}
+  .d.teh{border-color:#e6c3c3;color:var(--hata)}
+  .d.teh:hover{background:#fdf0f0;border-color:var(--hata)}
+  .d.pas{opacity:.42}
+  .arac .sag{margin-left:auto;display:flex;gap:7px;align-items:center}
+  .seg{display:flex;background:var(--yuz2);border:1px solid var(--cizgi);border-radius:8px;padding:2px;gap:2px}
+  .seg .s{padding:4px 11px;border-radius:6px;font-size:11.5px;color:var(--soluk);cursor:default}
+  .seg .s.on{background:var(--yuz);color:var(--yazi);font-weight:650;box-shadow:var(--golge)}
+  .seg .s.yok{opacity:.35}
+  .gara{display:flex;align-items:center;gap:7px;height:30px;padding:0 11px;border:1px solid var(--cizgi);
+    border-radius:8px;background:var(--yuz);width:230px}
+  .gara input{border:0;outline:0;flex:1;min-width:0;font-size:12px;font-family:inherit;background:transparent;color:var(--yazi)}
+  .gara .say{font-size:10.5px;color:var(--vurgu);font-weight:700;white-space:nowrap}
+
+  .sahne{flex:1;min-height:0;position:relative;background:var(--zem);padding:10px 12px 12px}
+  .kagit{position:absolute;inset:10px 12px 12px;border:1px solid var(--cizgi);border-radius:var(--r);
+    overflow:hidden;background:var(--yuz);box-shadow:var(--golge)}
+  .sf{position:absolute;inset:0;display:none}
+  .sf.on{display:block}
+  .sf iframe{width:100%;height:100%;border:0;display:block}
+
+  .durum{height:26px;flex:none;display:flex;align-items:center;gap:16px;padding:0 14px;
+    background:var(--yuz);border-top:1px solid var(--cizgi);font-size:11px;color:var(--soluk)}
+  .durum b{color:var(--yazi);font-weight:600}
+  .durum .sag{margin-left:auto;display:flex;gap:14px;align-items:center}
+  .nokta{width:7px;height:7px;border-radius:50%;background:#2e7d46;display:inline-block;margin-right:5px}
+
+  /* ============ KOMUT PALETI ============ */
+  .perde{position:fixed;inset:0;background:rgba(10,18,30,.45);display:none;z-index:300;backdrop-filter:blur(2px)}
+  .perde.on{display:block}
+  .kp{position:absolute;top:88px;left:50%;transform:translateX(-50%);width:min(660px,92vw);
+    background:var(--yuz);border:1px solid var(--cizgi);border-radius:14px;overflow:hidden;
+    box-shadow:0 24px 70px rgba(8,16,28,.45)}
+  .kp .gir{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--cizgi2)}
+  .kp .gir input{flex:1;border:0;outline:0;font-size:15px;background:transparent;color:var(--yazi);font-family:inherit}
+  .kp .gir .ip{font-size:10.5px;color:var(--soluk);border:1px solid var(--cizgi);border-radius:5px;padding:2px 6px}
+  .kpliste{max-height:390px;overflow:auto;padding:6px}
+  .kpbas{padding:8px 12px 4px;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--soluk)}
+  .kps{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:9px;font-size:13px;cursor:default}
+  .kps .ic{width:22px;text-align:center;font-size:15px}
+  .kps .yn{margin-left:auto;font-size:10.5px;color:var(--soluk)}
+  .kps.sec{background:var(--vurgu2);color:var(--vurgu)}
+  .kps.sec .yn{color:var(--vurgu)}
+  .kpalt{display:flex;gap:16px;padding:8px 14px;border-top:1px solid var(--cizgi2);background:var(--yuz2);
+    font-size:10.5px;color:var(--soluk)}
+
+  /* ============ KART PENCERESI ============ */
+  .kperde{position:fixed;inset:0;background:rgba(10,18,30,.5);display:none;z-index:280}
+  .kperde.on{display:block}
+  .kwin{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(1300px,96vw);
+    height:calc(100vh - 40px);background:var(--yuz);border-radius:12px;overflow:hidden;
+    box-shadow:0 30px 80px rgba(8,16,28,.5);border:1px solid var(--cizgi)}
+  .kwin iframe{width:100%;height:100%;border:0;display:block}
+  .kyok{padding:40px 30px;text-align:center;color:var(--soluk);line-height:1.8}
+  .kyok .bk{font-size:40px;display:block;margin-bottom:10px;opacity:.5}
+  .yukhata{position:absolute;inset:0;background:var(--yuz);padding:44px 30px;text-align:center;
+    color:var(--soluk);line-height:1.8;z-index:3}
+  .yukhata .kt{font-size:15px;font-weight:700;color:var(--hata);margin-bottom:10px}
+  .yukhata .ip{font-size:11.5px;margin-top:10px;max-width:720px;margin-left:auto;margin-right:auto}
+
+  /* ============ ANA SAYFA ============ */
+  .dash{position:absolute;inset:0;overflow:auto;padding:16px 18px 22px}
+  .dbas{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .dbas h1{margin:0;font-size:20px;font-weight:650;letter-spacing:-.4px}
+  .dbas .alt{font-size:12px;color:var(--soluk)}
+  .kart{background:var(--yuz);border:1px solid var(--cizgi);border-radius:var(--r);box-shadow:var(--golge)}
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:14px}
+  .kpi .k{padding:12px 14px;background:var(--yuz);border:1px solid var(--cizgi);border-radius:var(--r);box-shadow:var(--golge)}
+  .kpi .t{font-size:11px;color:var(--soluk)}
+  .kpi .v{font-size:20px;font-weight:650;letter-spacing:-.5px;margin-top:4px}
+  .kpi .s{font-size:11px;color:var(--soluk);margin-top:3px}
+  .kpi .s.up{color:var(--ok)}.kpi .s.dn{color:var(--hata)}
+  .ikili{display:grid;grid-template-columns:1.45fr 1fr;gap:12px;align-items:start}
+  .kart h3{margin:0;padding:11px 14px;font-size:12.5px;font-weight:650;border-bottom:1px solid var(--cizgi2);
+    display:flex;align-items:center;gap:8px}
+  .kart h3 .sg{margin-left:auto;font-weight:400;font-size:11px;color:var(--soluk)}
+  .sat{display:flex;align-items:center;gap:11px;padding:9px 14px;border-bottom:1px solid var(--cizgi2);font-size:12.5px}
+  .sat:last-child{border-bottom:0}
+  .sat:hover{background:var(--yuz2)}
+  .sat .rz{width:5px;height:26px;border-radius:3px;flex:none}
+  .sat .ad{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sat .ad small{display:block;color:var(--soluk);font-size:11px}
+  .sat .tt{font-variant-numeric:tabular-nums;font-weight:650}
+  .rz.k{background:var(--hata)}.rz.s{background:var(--uyari)}.rz.y{background:var(--ok)}.rz.m{background:var(--vurgu)}
+  .cip{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:600}
+  .cip.k{background:#fdecec;color:#b23b3b}.cip.s{background:#fdf4e3;color:#a9791a}
+  .cip.y{background:#e8f6ed;color:#2e7d46}.cip.m{background:#e6f0fb;color:#2f6db3}
+  body.koyu .cip.k{background:#4a1f22;color:#ffbcbc}body.koyu .cip.s{background:#463714;color:#ffdf9b}
+  body.koyu .cip.y{background:#173a25;color:#93e0ac}body.koyu .cip.m{background:#1c3a5c;color:#a9cdf2}
+  .kutucuk{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;padding:12px}
+  .kt2{border:1px solid var(--cizgi);border-radius:10px;padding:11px 6px;text-align:center;cursor:default;background:var(--yuz)}
+  .kt2:hover{border-color:var(--vurgu);background:var(--vurgu2)}
+  .kt2 .ic{font-size:19px;display:block}
+  .kt2 .nm{font-size:10.5px;color:var(--soluk);margin-top:5px;display:block;line-height:1.3}
+  .cbar{height:8px;border-radius:5px;background:var(--yuz2);overflow:hidden;flex:1;min-width:50px}
+  .cbar>span{display:block;height:100%;background:var(--vurgu)}
+  .uyari-yok{padding:16px;color:var(--soluk);font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- ============ IKON RAIL ============ -->
+<div class="rail" id="rail">
+  <div class="logo">G</div>
+  <div class="raildolgu" id="railDolgu" style="flex:none"></div>
+</div>
+
+<!-- ============ BOLUM SUTUNU ============ -->
+<div class="bolumler" id="bolumSutun">
+  <div class="bh"><span class="ic" id="bhIc">🏠</span><span id="bhAd">Genel</span></div>
+  <div id="blListe"></div>
+  <div class="bfoot">
+    <div class="kk" id="kkAc"><span>⌘</span> Komut paleti <kbd>Ctrl</kbd><kbd>K</kbd></div>
+  </div>
+</div>
+
+<!-- ============ CALISMA ALANI ============ -->
+<div class="ana">
+  <div class="ust">
+    <span class="ikon" id="panelDugme" title="Bölüm sütununu gizle/göster">☰</span>
+    <div class="yol" id="yol"><b>Ana Sayfa</b></div>
+    <div class="kutu">
+      <div class="ara" id="araAc">🔎 <span>Ekran, kayıt veya komut ara…</span><kbd>Ctrl K</kbd></div>
+      <span class="ikon" id="temaDugme" title="Açık / koyu tema">🌙</span>
+      <span class="ikon" title="Bildirimler">🔔</span>
+      <span class="avt">AD</span>
+    </div>
+  </div>
+
+  <div class="arac" id="arac"></div>
+
+  <div class="sahne">
+    <div class="kagit" id="kagit">
+      <!-- ANA SAYFA -->
+      <div class="sf on" data-sf="home">
+        <div class="dash">
+          <div class="dbas">
+            <h1>Günaydın Ayşe</h1>
+            <span class="alt">Merkez şubesi · 2026 dönemi · 14 Ağustos 2026, Cuma</span>
+          </div>
+
+          <div class="kpi">
+            <div class="k"><div class="t">Bugünkü ciro</div><div class="v">402.105,50 ₺</div><div class="s up">▲ %12,4 · dün 357.700,00</div></div>
+            <div class="k"><div class="t">Açık teklif</div><div class="v">3.184.200 ₺</div><div class="s">18 teklif · 4'ü bu hafta doluyor</div></div>
+            <div class="k"><div class="t">Huni (ağırlıklı)</div><div class="v">5.081.500 ₺</div><div class="s">11 fırsat</div></div>
+            <div class="k"><div class="t">Kasa + banka</div><div class="v">431.318,25 ₺</div><div class="s">9 kasa · 3 para birimi</div></div>
+            <div class="k"><div class="t">Kredi borcu</div><div class="v">26.062.271 ₺</div><div class="s dn">3 gecikmiş taksit</div></div>
+            <div class="k"><div class="t">POS bekleyen</div><div class="v">406.000,50 ₺</div><div class="s">valör ort. 1,4 gün</div></div>
+          </div>
+
+          <div class="ikili">
+            <div>
+              <div class="kart" style="margin-bottom:12px">
+                <h3>⚠ Dikkat gerektirenler <span class="sg">satıra tıkla → ilgili ekran</span></h3>
+                <div id="uyariListe"></div>
+              </div>
+              <div class="kart">
+                <h3>📅 Bugünün işleri <span class="sg">Ayşe Demir</span></h3>
+                <div class="sat"><span class="rz s"></span><span class="ad">Otel perde yenileme — teknik şartname sunumu<small>09:30 · Görüşme · FIR.2026/014</small></span><span class="cip s">Şimdi</span></div>
+                <div class="sat"><span class="rz m"></span><span class="ad">Plaza mefruşat teklifi revizesi<small>11:00 · Teklif · TKF.2026/0231</small></span><span class="cip m">Bekliyor</span></div>
+                <div class="sat"><span class="rz m"></span><span class="ad">İş Bankası kredi 17. taksit<small>14:00 · Ödeme · KRD.2025/014</small></span><span class="cip m">Bekliyor</span></div>
+                <div class="sat"><span class="rz m"></span><span class="ad">Forklift periyodik bakım dönüşü<small>15:30 · Servis · SRV.2026/0448</small></span><span class="cip m">Bekliyor</span></div>
+                <div class="sat"><span class="rz y"></span><span class="ad">Kasa sayımı ve POS mutabakatı<small>17:00 · Gün sonu</small></span><span class="cip m">Bekliyor</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="kart" style="margin-bottom:12px">
+                <h3>🎯 Satış hunisi <span class="sg">11 açık fırsat</span></h3>
+                <div style="padding:12px 14px">
+                  <div class="sat" style="border:0;padding:5px 0"><span style="width:98px;color:var(--soluk)">Yeni</span><span class="cbar"><span style="width:100%"></span></span><span class="tt" style="width:88px;text-align:right">3.150.000</span></div>
+                  <div class="sat" style="border:0;padding:5px 0"><span style="width:98px;color:var(--soluk)">İlk görüşme</span><span class="cbar"><span style="width:82%"></span></span><span class="tt" style="width:88px;text-align:right">2.580.000</span></div>
+                  <div class="sat" style="border:0;padding:5px 0"><span style="width:98px;color:var(--soluk)">İhtiyaç analizi</span><span class="cbar"><span style="width:64%"></span></span><span class="tt" style="width:88px;text-align:right">2.020.000</span></div>
+                  <div class="sat" style="border:0;padding:5px 0"><span style="width:98px;color:var(--soluk)">Teklif</span><span class="cbar"><span style="width:48%;background:var(--uyari)"></span></span><span class="tt" style="width:88px;text-align:right">1.510.000</span></div>
+                  <div class="sat" style="border:0;padding:5px 0"><span style="width:98px;color:var(--soluk)">Pazarlık</span><span class="cbar"><span style="width:29%;background:var(--uyari)"></span></span><span class="tt" style="width:88px;text-align:right">910.000</span></div>
+                  <div class="sat" style="border:0;padding:5px 0"><span style="width:98px;color:var(--soluk)">Kazanıldı</span><span class="cbar"><span style="width:24%;background:var(--ok)"></span></span><span class="tt" style="width:88px;text-align:right">780.000</span></div>
+                </div>
+              </div>
+              <div class="kart">
+                <h3>💸 30 günlük nakit</h3>
+                <div class="sat"><span class="ad">Toplam çıkış</span><span class="tt" style="color:var(--hata)">−1.470.970 ₺</span></div>
+                <div class="sat"><span class="ad">Toplam giriş</span><span class="tt" style="color:var(--ok)">+2.002.951 ₺</span></div>
+                <div class="sat"><span class="ad"><b>Net</b></span><span class="tt" style="color:var(--ok)">+531.980 ₺</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="durum">
+    <span><span class="nokta"></span>Bağlı · <b>BILIM</b> (MSSQL)</span>
+    <span>Ayşe Demir · Yönetici</span>
+    <span>Merkez · 2026</span>
+    <span class="sag">
+      <span id="ekranAd">Ana Sayfa</span>
+      <span>Gentegre AI 26.8.10.2</span>
+    </span>
+  </div>
+</div>
+
+<!-- ============ KOMUT PALETI ============ -->
+<div class="perde" id="kpPerde">
+  <div class="kp">
+    <div class="gir">
+      <span style="font-size:16px;color:var(--soluk)">🔎</span>
+      <input id="kpGiris" placeholder="Ekran, kayıt ya da komut yaz…  (ör. kritik stok, yeni fatura, DÖF)" autocomplete="off">
+      <span class="ip">Esc</span>
+    </div>
+    <div class="kpliste" id="kpListe"></div>
+    <div class="kpalt">
+      <span>↑↓ gez</span><span>↵ aç</span><span>Esc kapat</span>
+      <span style="margin-left:auto">Ctrl+K her yerden açılır</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ KART PENCERESI ============ -->
+<div class="kperde" id="kartPerde"><div class="kwin" id="kartWin"></div></div>
+
+<script src="gentegre_data.js"></script>
+<script>
+if(typeof MODULLER==='undefined'){
+  document.body.innerHTML='<div style="padding:60px;text-align:center;font-family:Segoe UI,sans-serif">'+
+   '<h2 style="color:#b23b3b">gentegre_data.js yüklenemedi</h2>'+
+   '<p>Bu dosyayı <b>Ekranlar</b> klasöründen açmalısın — tüm ekran dosyaları ve gentegre_data.js aynı klasörde olmalı.</p></div>';
+}else{
+/* ---------------- yardimcilar ---------------- */
+function el(t,c,h){var d=document.createElement(t);if(c)d.className=c;if(h!=null)d.innerHTML=h;return d;}
+function MOD(id){for(var i=0;i<MODULLER.length;i++)if(MODULLER[i].id===id)return MODULLER[i];return null;}
+function BOL(m,b){var x=MOD(m);if(!x)return null;for(var i=0;i<x.bolumler.length;i++)if(x.bolumler[i].id===b)return x.bolumler[i];return null;}
+var aktifModul='giris', aktifBolum='home', tema='acik';
+
+/* ---------------- rail ---------------- */
+(function(){
+  var r=document.getElementById('rail'), dolgu=document.getElementById('railDolgu');
+  MODULLER.forEach(function(m){
+    var d=el('div','ri'+(m.id===aktifModul?' on':''),'<span class="ic">'+m.ic+'</span><span class="nm">'+
+      (m.ad==='Gen'?'Genel':m.ad.split(' ')[0].substring(0,8))+'</span>');
+    d.dataset.mod=m.id; d.title=m.ad;
+    d.addEventListener('click',function(){ modulSec(m.id); });
+    r.insertBefore(d,dolgu);
+  });
+  dolgu.style.flex='1';
+  var ay=el('div','ri alt','<span class="ic">⚙</span><span class="nm">Ayar</span>');
+  ay.addEventListener('click',function(){ modulSec('giris','genel_opsiyonlar'); });
+  r.appendChild(ay);
+})();
+
+/* ---------------- bolum sutunu ---------------- */
+function modulSec(mid,bid){
+  aktifModul=mid; var m=MOD(mid);
+  document.querySelectorAll('.ri').forEach(function(x){ x.classList.toggle('on',x.dataset.mod===mid); });
+  document.getElementById('bhIc').textContent=m.ic;
+  document.getElementById('bhAd').textContent=m.ad==='Gen'?'Genel':m.ad;
+  var kap=document.getElementById('blListe'); kap.innerHTML='';
+  var sonGrup=null;
+  m.bolumler.forEach(function(b){
+    if(b.grup && b.grup!==sonGrup){
+      sonGrup=b.grup;
+      kap.appendChild(el('div','blgrp','<span>'+(b.gic||'📁')+'</span><span>'+b.grup+'</span>'));
+    }
+    var rz=b.tur==='liste'?'liste':b.tur==='kart'?'kart':b.tur==='islem'?'işlem':b.tur==='dokum'?'döküm':b.tur==='ayar'?'ayar':'';
+    var d=el('div','bl'+(b.grup?' ic':''),'<span class="bi">'+b.ic+'</span><span>'+b.ad+'</span><span class="rz">'+rz+'</span>');
+    d.dataset.bol=b.id;
+    d.addEventListener('click',function(){ bolumSec(b.id); });
+    kap.appendChild(d);
+  });
+  var hedef=bid||(m.bolumler.filter(function(b){return b.tur==='liste';})[0]||m.bolumler[0]).id;
+  bolumSec(hedef);
+}
+
+function bolumSec(bid){
+  var b=BOL(aktifModul,bid); if(!b) return;
+  aktifBolum=bid;
+  document.body.classList.toggle('sadeust', !!b.sade);
+  document.querySelectorAll('.bl').forEach(function(x){ x.classList.toggle('on',x.dataset.bol===bid); });
+  var anahtar=aktifModul+'|'+bid;
+  document.querySelectorAll('.sf').forEach(function(s){ s.classList.remove('on'); });
+  if(bid==='home'){ document.querySelector('.sf[data-sf="home"]').classList.add('on'); }
+  else{
+    var sh=document.querySelector('.sf[data-sf="'+anahtar+'"]');
+    if(!sh){
+      sh=el('div','sf'); sh.dataset.sf=anahtar;
+      if(b.dosya){
+        var fr=document.createElement('iframe');
+        fr.src=b.dosya+'#gomulu'+(b.ek||'')+(tema==='koyu'?'&tema=koyu':'');
+        fr.title=b.ad; sh.appendChild(fr); izle(sh,b);
+      }else{
+        sh.appendChild(el('div','kyok','<span class="bk">'+b.ic+'</span><b>'+b.ad+'</b> ekranı henüz tasarlanmadı.<br>'+
+          '<span style="font-size:11.5px">Delphi karşılığı: <b>'+(b.yol||'')+'</b></span>'));
+      }
+      document.getElementById('kagit').appendChild(sh);
+    }
+    sh.classList.add('on');
+  }
+  var m=MOD(aktifModul);
+  document.getElementById('yol').innerHTML='<span>'+(m.ad==='Gen'?'Genel':m.ad)+'</span><span class="ay">/</span><b>'+b.ad+'</b>'+
+    (b.yol?'<span class="ay" style="margin-left:8px;font-size:11px">'+b.yol+'</span>':'');
+  document.getElementById('ekranAd').textContent=b.ad;
+  kurArac(b);
+}
+
+/* ---------------- arac cubugu ---------------- */
+function kurArac(b){
+  var t=document.getElementById('arac'); t.innerHTML='';
+  var liste=(b.tur==='liste');
+  if(b.tur==='dokum'){
+    t.appendChild(el('div','d bir','▶ Listele'));
+    t.appendChild(el('div','d','🖨 Yazdır'));
+    t.appendChild(el('div','d','⬇ Excel'));
+    t.appendChild(el('div','d','⚙ Döküm Tasarla'));
+  }else{
+    var yeni=el('div','d bir'+(liste?'':' pas'),'＋ Yeni');
+    var duz=el('div','d'+(liste?'':' pas'),'✎ Düzenle');
+    var sil=el('div','d teh'+(liste?'':' pas'),'🗑 Sil');
+    if(liste){ yeni.addEventListener('click',function(){ kartAc(b,'yeni'); });
+               duz.addEventListener('click',function(){ kartAc(b,'duzenle'); }); }
+    t.appendChild(yeni); t.appendChild(duz); t.appendChild(sil);
+    (b.arac||[]).slice(0,5).forEach(function(a){ t.appendChild(el('div','d',a)); });
+  }
+  var sag=el('div','sag');
+  var gs=el('div','gara','🔎 <input placeholder="Listede ara…"><span class="say"></span>');
+  var gi=gs.querySelector('input'); gi.value=aramaMetni[anahtar()]||'';
+  gi.addEventListener('input',function(){ listedeAra(gi.value); });
+  gi.addEventListener('keydown',function(e){ if(e.key==='Escape'){ gi.value=''; listedeAra(''); } });
+  sag.appendChild(gs);
+  var seg=el('div','seg','<span class="s on" data-vw="liste">▤ Liste</span>'+
+    '<span class="s" data-vw="grup">▦ Grup</span><span class="s" data-vw="analiz">📊 Analiz</span>');
+  seg.querySelectorAll('.s').forEach(function(x){
+    x.addEventListener('click',function(){ gorunumSec(x.dataset.vw); });
+  });
+  sag.appendChild(seg);
+  sag.appendChild(el('div','d','▦ Kolonlar'));
+  sag.appendChild(el('div','d','⬇ Excel'));
+  t.appendChild(sag);
+  kurGorunum();
+}
+
+/* ---------------- listede arama ---------------- */
+var aramaMetni={};
+function listedeAra(q){
+  var a=anahtar(); aramaMetni[a]=q;
+  var fr=document.querySelector('.sf[data-sf="'+a+'"] iframe');
+  if(fr&&fr.contentWindow) fr.contentWindow.postMessage({gentegre:'ara',q:q},'*');
+  if(!q){ var s2=document.querySelector('.gara .say'); if(s2) s2.textContent=''; }
+}
+
+/* ---------------- gorunum (liste/grup/analiz) ---------------- */
+var destek={}, secim={};
+function anahtar(){ return aktifModul+'|'+aktifBolum; }
+function kurGorunum(){
+  var a=anahtar(), d=!!destek[a], s=secim[a]||'liste';
+  document.querySelectorAll('.seg .s').forEach(function(x){
+    x.classList.toggle('yok',!d);
+    x.classList.toggle('on', x.dataset.vw===(d?s:'liste'));
+  });
+}
+function gorunumSec(ad){
+  var a=anahtar(); if(!destek[a]) return;
+  secim[a]=ad; kurGorunum();
+  var fr=document.querySelector('.sf[data-sf="'+a+'"] iframe');
+  if(fr&&fr.contentWindow) fr.contentWindow.postMessage({gentegre:'gorunum',ad:ad},'*');
+}
+
+/* ---------------- yukleme kontrolu ---------------- */
+var bekle=[];
+function izle(sh,b){
+  var k={sh:sh,ok:false}; bekle.push(k);
+  setTimeout(function(){
+    if(k.ok) return;
+    var u=el('div','yukhata','<div class="kt">⚠ Ekran dosyası açılamadı</div>'+
+      '<div><b>'+b.dosya+'</b> bulunamadı.</div>'+
+      '<div class="ip">Bu kabuğu <b>Ekranlar</b> klasöründen aç — tüm ekran dosyaları aynı klasörde olmalı.</div>');
+    sh.appendChild(u);
+  },2500);
+}
+addEventListener('message',function(e){
+  var d=e.data; if(!d||!d.gentegre) return;
+  if(d.gentegre==='hazir'){
+    bekle.forEach(function(k){ var fr=k.sh.querySelector('iframe');
+      if(fr&&fr.contentWindow===e.source){ k.ok=true; var u=k.sh.querySelector('.yukhata'); if(u)u.remove(); } });
+  }
+  if(d.gentegre==='gorunumDestek'){
+    document.querySelectorAll('.sf').forEach(function(sh){
+      var fr=sh.querySelector('iframe'); if(fr&&fr.contentWindow===e.source) destek[sh.dataset.sf]=true; });
+    kurGorunum();
+  }
+  if(d.gentegre==='dokum'){
+    var m=MOD(aktifModul);
+    document.getElementById('yol').innerHTML='<span>'+(m.ad==='Gen'?'Genel':m.ad)+'</span><span class="ay">/</span><b>Dökümler</b>'+
+      '<span class="ay">/</span><span>'+d.ad+'</span>';
+  }
+  if(d.gentegre==='aramaSonuc'){ var s3=document.querySelector('.gara .say');
+    if(s3) s3.textContent=d.q?(d.bulunan+' / '+d.toplam):''; }
+  if(d.gentegre==='aramaSonuc'){ var s3=document.querySelector('.gara .say');
+    if(s3) s3.textContent=d.q?(d.bulunan+' / '+d.toplam):''; }
+  if(d.gentegre==='ekranAc'){ for(var mi=0;mi<MODULLER.length;mi++){ var bs=MODULLER[mi].bolumler||[];
+    for(var bi=0;bi<bs.length;bi++) if(bs[bi].id===d.id){ modulSec(MODULLER[mi].id, d.id); return; } } }
+  if(d.gentegre==='kapat') kartKapat();
+});
+
+/* ---------------- kart penceresi ---------------- */
+var kartPerde=document.getElementById('kartPerde'), kartWin=document.getElementById('kartWin');
+function kartAc(b,mod){
+  var k=b.kart?KARTLAR[b.kart]:null;
+  kartWin.innerHTML='';
+  if(k&&k.dosya){
+    var fr=document.createElement('iframe');
+    fr.src=k.dosya+'#kart-'+mod+(tema==='koyu'?'&tema=koyu':'');
+    kartWin.appendChild(fr);
+  }else{
+    kartWin.appendChild(el('div','kyok','<span class="bk">🗂</span><b>'+b.ad+'</b> için kart ekranı henüz tasarlanmadı.<br>'+
+      '<span style="font-size:11.5px">Delphi karşılığı: <b>'+(b.yol||'')+'</b> · Esc ile kapat</span>'));
+  }
+  kartPerde.classList.add('on');
+}
+function kartKapat(){ kartPerde.classList.remove('on'); kartWin.innerHTML=''; }
+kartPerde.addEventListener('click',function(e){ if(e.target===kartPerde) kartKapat(); });
+
+/* ---------------- komut paleti ---------------- */
+var kpPerde=document.getElementById('kpPerde'), kpGiris=document.getElementById('kpGiris'),
+    kpListe=document.getElementById('kpListe'), kpSecili=0, kpKayit=[];
+function komutlar(){
+  var l=[];
+  MODULLER.forEach(function(m){
+    m.bolumler.forEach(function(b){
+      l.push({tip:'Ekran', ic:b.ic, ad:b.ad, yn:(m.ad==='Gen'?'Genel':m.ad), mod:m.id, bol:b.id});
+    });
+  });
+  /* aksiyon komutlari */
+  [['➕','Yeni cari kartı','cari','musteriler',1],
+   ['➕','Yeni stok kartı','stok','stok_listesi',1],
+   ['➕','Yeni satış faturası','alissatis','fatura_satis_listesi',1],
+   ['➕','Yeni teklif','teklif','teklif_listesi',1],
+   ['➕','Yeni servis fişi','servis','servis_listesi',1],
+   ['➕','Yeni DÖF','kalite','kalite_dof',1],
+   ['⚠','Kritik stoklar','stok','stok_listesi',0],
+   ['📜','Karşılıksız çekler','banka','cek_senet_listesi',0],
+   ['📉','Gecikmiş kredi taksitleri','banka','krediler_listesi',0],
+   ['🎯','Açık fırsatlar','crm','firsat_listesi',0]
+  ].forEach(function(a){ l.push({tip:'Aksiyon', ic:a[0], ad:a[1], yn:a[4]?'kart aç':'listeyi filtrele', mod:a[2], bol:a[3], yeni:!!a[4]}); });
+  l.push({tip:'Ayar', ic:'🌙', ad:'Temayı değiştir (açık / koyu)', yn:'görünüm', tema:1});
+  return l;
+}
+function kpKur(q){
+  q=(q||'').toLocaleLowerCase('tr');
+  var hepsi=komutlar().filter(function(x){
+    return !q || (x.ad+' '+x.yn+' '+x.tip).toLocaleLowerCase('tr').indexOf(q)>=0;
+  }).slice(0,40);
+  kpKayit=hepsi; kpSecili=0;
+  kpListe.innerHTML='';
+  var son=null;
+  hepsi.forEach(function(x,i){
+    if(x.tip!==son){ kpListe.appendChild(el('div','kpbas',x.tip==='Ekran'?'Ekranlar':x.tip==='Aksiyon'?'Aksiyonlar':'Ayarlar')); son=x.tip; }
+    var d=el('div','kps'+(i===0?' sec':''),'<span class="ic">'+x.ic+'</span><span>'+x.ad+'</span><span class="yn">'+x.yn+'</span>');
+    d.dataset.i=i;
+    d.addEventListener('click',function(){ kpCalistir(i); });
+    kpListe.appendChild(d);
+  });
+  if(!hepsi.length) kpListe.appendChild(el('div','uyari-yok','Eşleşen komut yok.'));
+}
+function kpVurgu(){
+  kpListe.querySelectorAll('.kps').forEach(function(x){ x.classList.toggle('sec', +x.dataset.i===kpSecili); });
+  var s=kpListe.querySelector('.kps.sec'); if(s) s.scrollIntoView({block:'nearest'});
+}
+function kpCalistir(i){
+  var x=kpKayit[i]; if(!x) return;
+  kpKapat();
+  if(x.tema){ temaDegis(); return; }
+  modulSec(x.mod,x.bol);
+  if(x.yeni){ var b=BOL(x.mod,x.bol); if(b) setTimeout(function(){ kartAc(b,'yeni'); },250); }
+}
+function kpAc(){ kpPerde.classList.add('on'); kpGiris.value=''; kpKur(''); setTimeout(function(){ kpGiris.focus(); },30); }
+function kpKapat(){ kpPerde.classList.remove('on'); }
+document.getElementById('araAc').addEventListener('click',kpAc);
+document.getElementById('kkAc').addEventListener('click',kpAc);
+kpGiris.addEventListener('input',function(){ kpKur(this.value); });
+kpPerde.addEventListener('click',function(e){ if(e.target===kpPerde) kpKapat(); });
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){ e.preventDefault(); kpAc(); return; }
+  if(e.key==='Escape'){ if(kpPerde.classList.contains('on')) kpKapat(); else if(kartPerde.classList.contains('on')) kartKapat(); return; }
+  if(!kpPerde.classList.contains('on')) return;
+  if(e.key==='ArrowDown'){ e.preventDefault(); kpSecili=Math.min(kpSecili+1,kpKayit.length-1); kpVurgu(); }
+  if(e.key==='ArrowUp'){ e.preventDefault(); kpSecili=Math.max(kpSecili-1,0); kpVurgu(); }
+  if(e.key==='Enter'){ e.preventDefault(); kpCalistir(kpSecili); }
+});
+
+/* ---------------- tema ---------------- */
+function temaDegis(){
+  tema = tema==='acik' ? 'koyu' : 'acik';
+  document.body.classList.toggle('koyu', tema==='koyu');
+  document.getElementById('temaDugme').textContent = tema==='koyu' ? '☀' : '🌙';
+  document.querySelectorAll('.sf iframe, .kwin iframe').forEach(function(fr){
+    try{ fr.contentWindow.postMessage({gentegre:'tema', ad:tema},'*'); }catch(x){}
+  });
+}
+document.getElementById('temaDugme').addEventListener('click',temaDegis);
+
+/* ---------------- panel ---------------- */
+document.getElementById('panelDugme').addEventListener('click',function(){
+  document.getElementById('bolumSutun').classList.toggle('gizli');
+});
+
+/* ---------------- ana sayfa icerigi ---------------- */
+(function(){
+  var uy=[['k','Krediler','Gecikmiş kredi taksiti — vade geçti','3','246.960,00','banka','krediler_listesi'],
+          ['k','Çek / Senet','Karşılıksız / protestolu kıymet','2','54.350,00','banka','cek_senet_listesi'],
+          ['k','POS','Valörü geçtiği halde hesaba geçmeyen','1','86.400,00','kasa','pos_listesi'],
+          ['s','Kredi Kartı','Son ödemeye 3 gün veya daha az','2','118.240,00','banka','kredi_karti_listesi'],
+          ['s','Teklif','Geçerliliği bu hafta dolan','4','742.800,00','teklif','teklif_listesi'],
+          ['s','Servis','Termini geçmiş / bugün teslim','5','18.940,00','servis','servis_listesi'],
+          ['s','Stok','Kritik seviyenin altında','3','—','stok','stok_listesi'],
+          ['m','Kalite','Açık DÖF ve sapma','7','—','kalite','kalite_dof']];
+  var k=document.getElementById('uyariListe');
+  uy.forEach(function(u){
+    var d=el('div','sat','<span class="rz '+u[0]+'"></span>'+
+      '<span class="ad">'+u[2]+'<small>'+u[1]+'</small></span>'+
+      '<span class="cip '+u[0]+'">'+u[3]+'</span>'+
+      '<span class="tt" style="width:104px;text-align:right">'+u[4]+'</span>');
+    d.addEventListener('click',function(){ modulSec(u[5],u[6]); });
+    k.appendChild(d);
+  });
+
+})();
+
+modulSec('giris','home');
+}
+</script>
+</body>
+</html>

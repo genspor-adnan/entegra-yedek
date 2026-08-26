@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Krediler Listesi — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* kredi satir renkleri */
+    --s-yok:#f7cfcf; --s-yok-t:#7d1f1f;   /* gecikmis taksit var        */
+    --s-kri:#fbe6ae; --s-kri-t:#7a5407;   /* taksit vadesi 7 gun icinde */
+    --s-skt:#f6d9c0; --s-skt-t:#8a4a12;   /* doviz kredisi - kur riski  */
+    --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;   /* kapanmis kredi             */
+    /* gorev butonu (Delphi clGorevTusuSecili / Pasif) */
+    --tus-pas:#9c71ad; --tus-sec:#1f6fbe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+
+  .wrap{display:grid;grid-template-columns:222px 1fr 236px;gap:0}
+
+  /* SOL: Menu / Arama */
+  .gorev{background:#f4f7fa;border-right:1px solid var(--line2);padding:6px 6px 10px}
+  .gorev h5{margin:6px 4px 4px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .ltabs{display:flex;gap:2px;margin:-6px -6px 8px;padding:6px 6px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .ltab{flex:1;text-align:center;padding:6px 8px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);
+    border-bottom:none;border-radius:3px 3px 0 0;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .ltab.active{background:#f4f7fa;color:var(--navy);font-weight:bold}
+  .lpane{display:none}.lpane.active{display:block}
+  .gtus{display:flex;align-items:center;gap:8px;color:#fff;font-weight:bold;font-size:11.5px;
+    background:var(--tus-pas);border:1px solid rgba(0,0,0,.12);border-radius:3px;padding:8px 9px;margin-bottom:3px;cursor:default}
+  .gtus:hover{filter:brightness(1.06)}
+  .gtus.on{background:var(--tus-sec);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+  .gtus .ic{font-size:14px;width:18px;text-align:center}
+  .achips{display:flex;gap:4px;margin-bottom:8px}
+  .achips .minibtn{flex:1;justify-content:center}
+  .agrid{display:grid;grid-template-columns:70px 1fr;gap:5px 6px;align-items:center}
+  .agrid label{font-size:10.5px;color:var(--muted);text-align:right}
+  .gorev .minibtn{white-space:nowrap}
+
+  /* ORTA */
+  .center{min-width:0;display:flex;flex-direction:column}
+  .filtre{display:flex;gap:5px;padding:8px 10px 7px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line2);background:#fbfcfe}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.s-yok td{background:var(--s-yok);color:var(--s-yok-t)}
+  .dg tr.s-kri td{background:var(--s-kri);color:var(--s-kri-t)}
+  .dg tr.s-skt td{background:var(--s-skt);color:var(--s-skt-t)}
+  .dg tr.s-pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .dg tr.s-pas td.ad{text-decoration:line-through}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-izl{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .p-skt{background:#fdefe2;color:#96581a;border-color:#f0d6ba}
+  .tip{display:inline-block;min-width:30px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;padding:1px 5px;border:1px solid}
+  .t-mal{background:#e5ecf8;border-color:#c6d7ef;color:#2b5c95}   /* TL  */
+  .t-hzm{background:#e3f0e6;border-color:#c3e0cb;color:#2e7d46}   /* LSN */
+  .t-sar{background:#fdf1e2;border-color:#f0dcbd;color:#96651a}   /* DVZ */
+  /* mini bar */
+  .bar{height:9px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:54px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+  .bar .kur{background:#d0752c}.bar .pas{background:#9aa4ad}
+
+  /* alt detay */
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 12px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+  .gridtb{display:flex;gap:4px;padding:0 0 7px;align-items:center;flex-wrap:wrap}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px}
+
+  /* SAG */
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:8px 0}
+  .side h5{margin:0;padding:7px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11px;padding:3px 12px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .tvsep{height:1px;background:var(--line2);margin:7px 10px}
+  .sidebtns{display:flex;flex-direction:column;gap:4px;padding:4px 10px}
+  .urun{margin:0 10px;border:1px solid var(--line);border-radius:4px;background:#fff;padding:9px;text-align:center}
+  .urun .foto{height:82px;border:1px solid var(--line2);border-radius:3px;background:linear-gradient(#fff,#f2f6fa);
+    display:flex;align-items:center;justify-content:center;font-size:30px;color:#9fb3c8}
+  .urun .nm{font-size:11.5px;font-weight:bold;color:var(--navy);margin-top:7px;line-height:1.35}
+  .urun .mt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .depo{display:flex;align-items:center;gap:7px;padding:3px 12px;font-size:11px}
+  .depo .ad{width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+  .depo .mk{width:44px;text-align:right;font-family:"Segoe UI",Tahoma}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:22px;padding:0 6px;font-size:11.5px;
+    display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:5px;top:2px;color:var(--muted);font-size:10px}
+
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Krediler Listesi
+    <span class="sp">ListeFrame\UKrediListeDlg · KREDI · KREDITAKSIT · Şube: Merkez · 14.08.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni Kredi</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">📅 Ödeme Planı Oluştur</div>
+    <div class="btn">💳 Taksit Öde</div>
+    <div class="btn">🏁 Erken Kapama</div>
+    <div class="btn">🔁 Yeniden Yapılandır</div>
+    <div class="sepv"></div>
+    <div class="btn">📈 Faiz Tahakkuku</div>
+    <div class="btn">🔒 Teminat Ekle</div>
+    <div class="sepv"></div>
+    <div class="btn">📊 Excel</div>
+    <div class="btn">🖨 Yazdır</div>
+  </div>
+
+  <div class="wrap">
+    <!-- ============ SOL: MENU / ARAMA ============ -->
+    <div class="gorev">
+      <div class="ltabs">
+        <div class="ltab active" data-l="menu">☰ Menü</div>
+        <div class="ltab" data-l="arama">🔎 Arama</div>
+      </div>
+
+      <div class="lpane active" data-lp="menu">
+        <h5>Kredi</h5>
+        <div class="gtus on"><span class="ic">🏦</span> Kredi Kartı (Tanımı)</div>
+        <div class="gtus"><span class="ic">📅</span> Ödeme Planı</div>
+        <div class="gtus"><span class="ic">💳</span> Taksit Ödemeleri</div>
+        <div class="gtus"><span class="ic">🔒</span> Teminatlar</div>
+        <div class="gtus"><span class="ic">📈</span> Faiz &amp; Kur Farkı</div>
+        <h5>Diğer</h5>
+        <div class="gtus"><span class="ic">📁</span> Dökümler</div>
+        <div class="gtus"><span class="ic">📂</span> Özel Dökümler</div>
+        <div class="hint" style="padding:6px 4px 0">Tek buton aktif — <b>GorevTusuSec</b>;
+          seçili olan mavi.</div>
+      </div>
+
+      <div class="lpane" data-lp="arama">
+        <div class="achips">
+          <span class="minibtn on">Tüm</span><span class="minibtn">Son</span><span class="minibtn">Sık</span>
+        </div>
+        <div class="agrid">
+          <label>Kredi Adı</label><div class="inp"></div>
+          <label>Kredi / Söz. No</label><div class="inp">KRD.2025</div>
+          <label>Banka</label><div class="inp combo">(tümü)</div>
+          <label>Kredi Tipi</label><div class="inp combo">(tümü)</div>
+          <label>Para Birimi</label><div class="inp combo">(tümü)</div>
+          <label>Şube</label><div class="inp combo">Merkez</div>
+          <label>Durum</label><div class="inp combo">Aktif</div>
+          <label>Muh. Hesabı</label><div class="inp">300 / 400</div>
+        </div>
+        <div class="agrid" style="grid-template-columns:70px 1fr 1fr;margin-top:5px">
+          <label>Anapara</label><div class="inp">0,00</div><div class="inp">0,00</div>
+          <label>Faiz % (yıl)</label><div class="inp">0,00</div><div class="inp">99,99</div>
+          <label>Kullandırım</label><div class="inp">01.01.2024</div><div class="inp">14.08.2026</div>
+          <label>Vade</label><div class="inp">01.08.2026</div><div class="inp">31.12.2031</div>
+        </div>
+        <div class="hint" style="padding:5px 2px 0">Kredi tipi: Rotatif · Taksitli işletme · Spot ·
+          Leasing · Döviz · TL</div>
+        <label class="chk" style="margin-top:6px"><input type="checkbox" checked> Kapananları gizle</label>
+        <label class="chk"><input type="checkbox"> Sadece geciken taksitli</label>
+        <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn on" style="flex:1;justify-content:center">🔎 Ara</span>
+          <span class="minibtn" style="flex:1;justify-content:center">↩ Temizle</span>
+          <span class="minibtn" style="flex-basis:100%;justify-content:center">💾 Aramayı Kaydet</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ORTA: LISTE ============ -->
+    <div class="center">
+      <div class="filtre">
+        <span class="minibtn on">Aktif</span>
+        <span class="minibtn">Gecikmiş</span>
+        <span class="minibtn">Bu Ay Ödemeli</span>
+        <span class="minibtn">Döviz</span>
+        <span class="minibtn">Kapanmış</span>
+        <span class="minibtn">Tümü</span>
+        <span class="sepv" style="height:20px"></span>
+        <span class="minibtn">🏦 Banka: (tümü)</span>
+        <span class="minibtn">📑 Kredi Tipi: (tümü)</span>
+        <span class="minibtn">💱 PB: (tümü)</span>
+        <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">
+          Sıralama: gecikenler üstte · kapananlar en sonda</span>
+      </div>
+
+      <div style="padding:10px 10px 0">
+        <div class="dg">
+          <table>
+            <tr>
+              <th class="c" style="width:38px">TİP</th>
+              <th style="width:96px">KREDİ NO</th>
+              <th style="width:180px">KREDİ ADI</th>
+              <th style="width:112px">BANKA</th>
+              <th style="width:118px">KREDİ TİPİ</th>
+              <th class="c" style="width:36px">PB</th>
+              <th class="r" style="width:106px">ANAPARA</th>
+              <th class="r" style="width:58px">FAİZ %</th>
+              <th class="c" style="width:46px">VADE</th>
+              <th class="c" style="width:80px">KULLANDIRIM</th>
+              <th class="c" style="width:150px">İLK / SON TAKSİT</th>
+              <th class="c" style="width:104px">ÖDENEN TAKSİT</th>
+              <th class="r" style="width:110px">KALAN ANAPARA</th>
+              <th class="r" style="width:110px">KALAN BORÇ</th>
+              <th class="c" style="width:80px">SONRAKİ TAKSİT</th>
+              <th class="r" style="width:100px">SONRAKİ TUTAR</th>
+              <th class="r" style="width:112px">TL KARŞILIĞI</th>
+              <th class="c" style="width:78px">DURUM</th>
+            </tr>
+
+            <!-- gecikmis -->
+            <tr class="s-yok">
+              <td class="c"><span class="tip t-mal">TL</span></td><td>KRD.2025/009</td>
+              <td class="ad"><b>İşletme Kredisi — Halkbank 18 ay</b></td><td>Halkbank</td><td>Taksitli işletme</td>
+              <td class="c">TL</td>
+              <td class="r">1.200.000,00</td><td class="r">45,50</td><td class="c">18</td>
+              <td class="c">12.06.2025</td><td class="c">12.07.2025 / 12.12.2026</td>
+              <td class="c"><div style="display:flex;align-items:center;gap:5px"><span>11/18</span>
+                <div class="bar" style="flex:1"><span class="yok" style="width:61%"></span></div></div></td>
+              <td class="r">512.700,00</td><td class="r"><b>604.850,00</b></td>
+              <td class="c"><b>12.06.2026</b></td><td class="r">86.400,00</td>
+              <td class="r">604.850,00</td>
+              <td class="c"><span class="pill p-yok">2 gecikmiş</span></td>
+            </tr>
+            <tr class="s-yok">
+              <td class="c"><span class="tip t-mal">TL</span></td><td>KRD.2024/031</td>
+              <td class="ad">Taşıt Kredisi — Ford Transit</td><td>Vakıfbank</td><td>Taksitli işletme</td>
+              <td class="c">TL</td>
+              <td class="r">640.000,00</td><td class="r">39,90</td><td class="c">36</td>
+              <td class="c">10.09.2024</td><td class="c">10.10.2024 / 10.09.2027</td>
+              <td class="c"><div style="display:flex;align-items:center;gap:5px"><span>21/36</span>
+                <div class="bar" style="flex:1"><span class="yok" style="width:58%"></span></div></div></td>
+              <td class="r">264.180,00</td><td class="r"><b>312.480,00</b></td>
+              <td class="c"><b>10.08.2026</b></td><td class="r">74.160,00</td>
+              <td class="r">312.480,00</td>
+              <td class="c"><span class="pill p-yok">1 gecikmiş</span></td>
+            </tr>
+
+            <!-- vadesi 7 gun icinde -->
+            <tr class="s-kri foc">
+              <td class="c"><span class="tip t-mal">TL</span></td><td>KRD.2025/014</td>
+              <td class="ad"><b>İşletme Kredisi — İş Bankası 24 ay</b></td><td>Türkiye İş Bankası</td><td>Taksitli işletme</td>
+              <td class="c">TL</td>
+              <td class="r">2.500.000,00</td><td class="r">49,00</td><td class="c">24</td>
+              <td class="c">15.03.2025</td><td class="c">15.04.2025 / 15.03.2027</td>
+              <td class="c"><div style="display:flex;align-items:center;gap:5px"><span>16/24</span>
+                <div class="bar" style="flex:1"><span class="kri" style="width:67%"></span></div></div></td>
+              <td class="r">1.109.609,20</td><td class="r"><b>1.333.670,96</b></td>
+              <td class="c"><b>15.08.2026</b></td><td class="r">167.630,68</td>
+              <td class="r">1.333.670,96</td>
+              <td class="c"><span class="pill p-kri">Vadesi yakın</span></td>
+            </tr>
+            <tr class="s-kri">
+              <td class="c"><span class="tip t-mal">TL</span></td><td>KRD.2026/011</td>
+              <td class="ad">Spot Kredi — 90 gün tek ödemeli</td><td>Yapı Kredi</td><td>Spot</td>
+              <td class="c">TL</td>
+              <td class="r">750.000,00</td><td class="r">46,00</td><td class="c">3</td>
+              <td class="c">18.05.2026</td><td class="c">18.08.2026 / 18.08.2026</td>
+              <td class="c"><div style="display:flex;align-items:center;gap:5px"><span>0/1</span>
+                <div class="bar" style="flex:1"><span class="kri" style="width:0%"></span></div></div></td>
+              <td class="r">750.000,00</td><td class="r"><b>836.250,00</b></td>
+              <td class="c"><b>18.08.2026</b></td><td class="r">836.250,00</td>
+              <td class="r">836.250,00</td>
+              <td class="c"><span class="pill p-kri">Vadesi yakın</span></td>
+            </tr>
+            <tr class="s-kri">
+              <td class="c"><span class="tip t-mal">TL</span></td><td>KRD.2026/007</td>
+              <td class="ad">Rotatif Kredi — 1.000.000 limit</td><td>Garanti BBVA</td><td>Rotatif</td>
+              <td class="c">TL</td>
+              <td class="r">850.000,00</td><td class="r">52,80</td><td class="c">12</td>
+              <td class="c">20.03.2026</td><td class="c">20.04.2026 / 20.03.2027</td>
+              <td class="c"><div style="display:flex;align-items:center;gap:5px"><span>5/12</span>
+                <div class="bar" style="flex:1"><span class="kri" style="width:42%"></span></div></div></td>
+              <td class="r">850.000,00</td><td class="r"><b>887.400,00</b></td>
+              <td class="c"><b>20.08.2026</b></td><td class="r">37.400,00</td>
+              <td class="r">887.400,00</td>
+              <td class="c"><span class="pill p-kri">Faiz ödemesi</span></td>
+            </tr>
+
+            <!-- doviz / kur riski -->
+            <tr class="s-skt">
+              <td class="c"><span class="tip t-sar">DVZ</span></td><td>KRD.2026/001</td>
+              <td class="ad"><b>İhracat Kredisi — Eximbank reeskont</b></td><td>Akbank / Eximbank</td><td>Döviz</td>
+              <td class="c">USD</td>
+              <td class="r">400.000,00</td><td class="r">6,25</td><td class="c">12</td>
+              <td class="c">05.03.2026</td><td class="c">05.04.2026 / 05.03.2027</td>
+              <td class="c"><div style="display:flex;align-items:center;gap:5px"><span>5/12</span>
+                <div class="bar" style="flex:1"><span class="kur" style="width:42%"></span></div></div></td>
+              <td class="r">235.400,00</td><td class="r"><b>241.980,00</b></td>
+              <td class="c">05.09.2026</td><td class="r">34.560,00</td>
+              <td class="r">8.711.280,00</td>
+              <td class="c"><span class="pill p-skt">Kur riski</span></td>
+            </tr>
+            <tr class="s-skt">
+              <td class="c"><span class="tip t-hzm">LSN</span></td><td>LSN.2025/004</td>
+              <td class="ad">Finansal Kiralama — Forklift 2,5 t</td><td>QNB Fin. Kiralama</td><td>Leasing</td>
+              <td class="c">EUR</td>
+              <td class="r">85.000,00</td><td class="r">7,90</td><td class="c">36</td>
+              <td class="c">20.04.2025</td><td class="c">20.05.2025 / 20.04.2028</td>
+              <td class="c"><div style="display:flex;align-items:center;gap:5px"><span>15/36</span>
+                <div class="bar" style="flex:1"><span class="kur" style="width:42%"></span></div></div></td>
+              <td class="r">53.860,00</td><td class="r"><b>58.640,00</b></td>
+              <td class="c">20.09.2026</td><td class="r">2.792,00</td>
+              <td class="r">2.404.240,00</td>
+              <td class="c"><span class="pill p-skt">Kur riski</span></td>
+            </tr>
+
+            <!-- normal -->
+            <tr>
+              <td class="c"><span class="tip t-mal">TL</span></td><td>KRD.2026/003</td>
+              <td class="ad">Yatırım Kredisi — depo inşaatı</td><td>Ziraat Bankası</td><td>Taksitli işletme</td>
+              <td class="c">TL</td>
+              <td class="r">5.000.000,00</td><td class="r">38,50</td><td class="c">60</td>
+              <td class="c">10.02.2026</td><td class="c">10.03.2026 / 10.02.2031</td>
+              <td class="c"><div style="display:flex;align-items:center;gap:5px"><span>6/60</span>
+                <div class="bar" style="flex:1"><span class="ok" style="width:10%"></span></div></div></td>
+              <td class="r">4.712.400,00</td><td class="r"><b>9.184.600,00</b></td>
+              <td class="c">10.09.2026</td><td class="r">170.085,00</td>
+              <td class="r">9.184.600,00</td>
+              <td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+            <tr>
+              <td class="c"><span class="tip t-mal">TL</span></td><td>KRD.2026/009</td>
+              <td class="ad">İşletme Kredisi — sezon finansmanı</td><td>TEB</td><td>Taksitli işletme</td>
+              <td class="c">TL</td>
+              <td class="r">1.500.000,00</td><td class="r">44,75</td><td class="c">12</td>
+              <td class="c">25.06.2026</td><td class="c">25.07.2026 / 25.06.2027</td>
+              <td class="c"><div style="display:flex;align-items:center;gap:5px"><span>1/12</span>
+                <div class="bar" style="flex:1"><span class="ok" style="width:8%"></span></div></div></td>
+              <td class="r">1.392.400,00</td><td class="r"><b>1.787.500,00</b></td>
+              <td class="c">25.08.2026</td><td class="r">162.500,00</td>
+              <td class="r">1.787.500,00</td>
+              <td class="c"><span class="pill p-ok">Aktif</span></td>
+            </tr>
+
+            <!-- kapanmis -->
+            <tr class="s-pas">
+              <td class="c"><span class="tip t-mal">TL</span></td><td>KRD.2024/012</td>
+              <td class="ad">İşletme Kredisi — DenizBank 24 ay</td><td>DenizBank</td><td>Taksitli işletme</td>
+              <td class="c">TL</td>
+              <td class="r">1.800.000,00</td><td class="r">41,00</td><td class="c">24</td>
+              <td class="c">08.01.2024</td><td class="c">08.02.2024 / 08.01.2026</td>
+              <td class="c"><div style="display:flex;align-items:center;gap:5px"><span>24/24</span>
+                <div class="bar" style="flex:1"><span class="pas" style="width:100%"></span></div></div></td>
+              <td class="r">0,00</td><td class="r"><b>0,00</b></td>
+              <td class="c">—</td><td class="r">—</td>
+              <td class="r">0,00</td>
+              <td class="c"><span class="pill p-pas">Kapandı</span></td>
+            </tr>
+            <tr class="s-pas">
+              <td class="c"><span class="tip t-mal">TL</span></td><td>KRD.2023/005</td>
+              <td class="ad">Spot Kredi — erken kapatıldı</td><td>QNB Finansbank</td><td>Spot</td>
+              <td class="c">TL</td>
+              <td class="r">500.000,00</td><td class="r">36,00</td><td class="c">6</td>
+              <td class="c">14.11.2023</td><td class="c">14.05.2024 / 14.05.2024</td>
+              <td class="c"><div style="display:flex;align-items:center;gap:5px"><span>1/1</span>
+                <div class="bar" style="flex:1"><span class="pas" style="width:100%"></span></div></div></td>
+              <td class="r">0,00</td><td class="r"><b>0,00</b></td>
+              <td class="c">—</td><td class="r">—</td>
+              <td class="r">0,00</td>
+              <td class="c"><span class="pill p-pas">Erken kapama</span></td>
+            </tr>
+
+            <tfoot>
+              <tr>
+                <td colspan="12" style="text-align:right">TOPLAM (11 kredi · 9 aktif / 2 kapanmış · 3 gecikmiş taksit)</td>
+                <td class="r">—</td><td class="r">—</td><td class="c"></td>
+                <td class="r">1.041.280,42</td>
+                <td class="r">26.062.270,96</td>
+                <td class="c"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-yok)"></span>Gecikmiş taksit var (vade geçti, ödenmedi)</span>
+          <span><span class="sw" style="background:var(--s-kri)"></span>Taksit vadesi bugün / 7 gün içinde</span>
+          <span><span class="sw" style="background:var(--s-skt)"></span>Döviz kredisi — kur riski yüksek (kur farkı zararı)</span>
+          <span><span class="sw" style="background:var(--s-pas)"></span>Kapanmış kredi — <b>en sonda</b>, adı üstü çizili</span>
+        </div>
+        <div class="hint">
+          Satır rengi <b>Styles.OnGetContentStyle</b> ile; öncelik <b>Kapandı → Gecikmiş → Vadesi yakın → Kur riski → Normal</b>.
+          <b>TL KARŞILIĞI</b> döviz kredilerde kalan borcun <b>DOVIZKUR</b> tablosundaki gün sonu kuruyla çevrilmiş halidir
+          (USD 36,0000 · EUR 41,0000 · 13.08.2026 TCMB döviz satış). Ödenen taksit sayısı <b>KREDITAKSIT.DURUM = 1</b>
+          satırlarından, kalan borç ödenmemiş taksitlerin <b>TAKSITTUTAR</b> toplamından gelir — anapara + faiz + BSMV/KKDF.
+        </div>
+      </div>
+
+      <!-- ALT DETAY -->
+      <div class="tabs" style="margin-top:12px">
+        <div class="tab active" data-t="plan">Ödeme Planı / Taksit Tablosu <span class="b">24</span></div>
+        <div class="tab" data-t="odeme">Yapılan Ödemeler <span class="b">16</span></div>
+        <div class="tab" data-t="teminat">Teminatlar <span class="b">4</span></div>
+        <div class="tab" data-t="faiz">Faiz Tahakkuku &amp; Kur Farkı</div>
+        <div class="tab" data-t="muhasebe">Muhasebe Bağlantısı</div>
+        <div class="tab" data-t="belge">Sözleşme / Doküman <span class="b">3</span></div>
+        <div class="tab" data-t="yorum">Yorum</div>
+      </div>
+
+      <div class="pane active" data-p="plan">
+        <div class="gridtb">
+          <span style="font-size:11px;color:var(--muted)">Kredi:</span>
+          <div class="inp" style="width:230px">KRD.2025/014 — İş Bankası 24 ay</div>
+          <label class="chk" style="margin-left:8px"><input type="checkbox"> Sadece ödenmemiş taksitler</label>
+          <label class="chk"><input type="checkbox" checked> BSMV / KKDF ayrı kolon</label>
+          <span class="minibtn" style="margin-left:auto">📅 Planı Yeniden Üret</span>
+          <span class="minibtn">💳 Seçili Taksiti Öde</span>
+          <span class="minibtn">🖨 Planı Yazdır</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr>
+              <th class="c" style="width:52px">TAKSİT</th><th class="c" style="width:80px">VADE</th>
+              <th class="r" style="width:110px">ANAPARA</th><th class="r" style="width:100px">FAİZ</th>
+              <th class="r" style="width:96px">BSMV / KKDF</th><th class="r" style="width:112px">TAKSİT TUTARI</th>
+              <th class="r" style="width:118px">KALAN ANAPARA</th><th class="c" style="width:90px">DURUM</th>
+              <th style="width:150px">ÖDEME FİŞİ</th>
+            </tr>
+            <tr><td class="c">14</td><td class="c">15.05.2026</td><td class="r">106.474,60</td><td class="r">58.890,68</td>
+                <td class="r">2.944,53</td><td class="r">168.309,81</td><td class="r">1.335.775,15</td>
+                <td class="c"><span class="pill p-ok">Ödendi</span></td><td>BNK2026000000341</td></tr>
+            <tr><td class="c">15</td><td class="c">15.06.2026</td><td class="r">110.820,15</td><td class="r">54.545,32</td>
+                <td class="r">2.727,27</td><td class="r">168.092,74</td><td class="r">1.224.955,00</td>
+                <td class="c"><span class="pill p-ok">Ödendi</span></td><td>BNK2026000000388</td></tr>
+            <tr><td class="c">16</td><td class="c">15.07.2026</td><td class="r">115.345,80</td><td class="r">50.019,45</td>
+                <td class="r">2.500,97</td><td class="r">167.866,22</td><td class="r">1.109.609,20</td>
+                <td class="c"><span class="pill p-ok">Ödendi</span></td><td>BNK2026000000427</td></tr>
+            <tr class="s-kri foc"><td class="c"><b>17</b></td><td class="c"><b>15.08.2026</b></td><td class="r">120.056,44</td><td class="r">45.308,80</td>
+                <td class="r">2.265,44</td><td class="r"><b>167.630,68</b></td><td class="r">989.552,76</td>
+                <td class="c"><span class="pill p-kri">Ödenecek</span></td><td>—</td></tr>
+            <tr><td class="c">18</td><td class="c">15.09.2026</td><td class="r">124.959,08</td><td class="r">40.406,17</td>
+                <td class="r">2.020,31</td><td class="r">167.385,56</td><td class="r">864.593,68</td>
+                <td class="c"><span class="pill p-pas">Bekliyor</span></td><td>—</td></tr>
+            <tr><td class="c">19</td><td class="c">15.10.2026</td><td class="r">130.062,20</td><td class="r">35.303,05</td>
+                <td class="r">1.765,15</td><td class="r">167.130,40</td><td class="r">734.531,48</td>
+                <td class="c"><span class="pill p-pas">Bekliyor</span></td><td>—</td></tr>
+            <tr><td class="c">20</td><td class="c">15.11.2026</td><td class="r">135.373,74</td><td class="r">29.991,51</td>
+                <td class="r">1.499,58</td><td class="r">166.864,83</td><td class="r">599.157,74</td>
+                <td class="c"><span class="pill p-pas">Bekliyor</span></td><td>—</td></tr>
+            <tr><td class="c">21</td><td class="c">15.12.2026</td><td class="r">140.902,15</td><td class="r">24.463,10</td>
+                <td class="r">1.223,16</td><td class="r">166.588,41</td><td class="r">458.255,59</td>
+                <td class="c"><span class="pill p-pas">Bekliyor</span></td><td>—</td></tr>
+            <tr><td class="c">22</td><td class="c">15.01.2027</td><td class="r">146.656,42</td><td class="r">18.708,83</td>
+                <td class="r">935,44</td><td class="r">166.300,69</td><td class="r">311.599,17</td>
+                <td class="c"><span class="pill p-pas">Bekliyor</span></td><td>—</td></tr>
+            <tr><td class="c">23</td><td class="c">15.02.2027</td><td class="r">152.645,10</td><td class="r">12.720,15</td>
+                <td class="r">636,01</td><td class="r">166.001,26</td><td class="r">158.954,07</td>
+                <td class="c"><span class="pill p-pas">Bekliyor</span></td><td>—</td></tr>
+            <tr><td class="c">24</td><td class="c">15.03.2027</td><td class="r">158.954,07</td><td class="r">6.490,53</td>
+                <td class="r">324,53</td><td class="r">165.769,13</td><td class="r">0,00</td>
+                <td class="c"><span class="pill p-pas">Bekliyor</span></td><td>—</td></tr>
+            <tfoot>
+              <tr><td colspan="2" style="text-align:right">KALAN 8 TAKSİT</td>
+                <td class="r">1.109.609,20</td><td class="r">213.392,14</td><td class="r">10.669,62</td>
+                <td class="r">1.333.670,96</td><td class="r">0,00</td><td class="c"></td><td></td></tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="hint">Plan <b>KREDITAKSIT</b> tablosunda tutulur; "Ödeme Planı Oluştur" eşit taksitli (anüite)
+          hesapla üretir, <b>KREDI.FAIZTIPI</b> = Sabit / Değişken. Değişken faizde her tahakkuk sonrası
+          plan yeniden hesaplanır ve <b>eski satırlar silinmez</b>, iptal edilip yenisi eklenir (ISLEMLOG izlenebilirliği).</div>
+      </div>
+
+      <div class="pane" data-p="odeme">
+        <div class="gridtb">
+          <span style="font-size:11px;color:var(--muted)">Başlama:</span><div class="inp" style="width:92px">01.01.2026</div>
+          <span style="font-size:11px;color:var(--muted)">Bitiş:</span><div class="inp" style="width:92px">14.08.2026</div>
+          <span class="minibtn" style="margin-left:auto">💳 Taksit Öde</span>
+          <span class="minibtn">↩ Ödemeyi Geri Al</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th class="c" style="width:80px">TARİH</th><th class="c" style="width:52px">TAKSİT</th>
+                <th style="width:110px">ÖDEME TÜRÜ</th><th style="width:170px">BANKA HESABI</th>
+                <th class="r" style="width:110px">ANAPARA</th><th class="r" style="width:96px">FAİZ</th>
+                <th class="r" style="width:88px">BSMV</th><th class="r" style="width:74px">GECİKME</th>
+                <th class="r" style="width:112px">ÖDENEN TUTAR</th><th style="width:150px">FİŞ NO</th></tr>
+            <tr><td class="c">15.04.2026</td><td class="c">13</td><td>Otomatik ödeme</td><td>Garanti — Vadesiz TL</td>
+                <td class="r">102.297,80</td><td class="r">63.067,48</td><td class="r">3.153,37</td><td class="r">—</td>
+                <td class="r">168.518,65</td><td>BNK2026000000296</td></tr>
+            <tr><td class="c">15.05.2026</td><td class="c">14</td><td>Otomatik ödeme</td><td>Garanti — Vadesiz TL</td>
+                <td class="r">106.474,60</td><td class="r">58.890,68</td><td class="r">2.944,53</td><td class="r">—</td>
+                <td class="r">168.309,81</td><td>BNK2026000000341</td></tr>
+            <tr><td class="c">15.06.2026</td><td class="c">15</td><td>Otomatik ödeme</td><td>Garanti — Vadesiz TL</td>
+                <td class="r">110.820,15</td><td class="r">54.545,32</td><td class="r">2.727,27</td><td class="r">—</td>
+                <td class="r">168.092,74</td><td>BNK2026000000388</td></tr>
+            <tr class="foc"><td class="c">16.07.2026</td><td class="c">16</td><td>Havale / EFT</td><td>İş Bankası — Vadesiz TL</td>
+                <td class="r">115.345,80</td><td class="r">50.019,45</td><td class="r">2.500,97</td><td class="r">218,40</td>
+                <td class="r"><b>168.084,62</b></td><td>BNK2026000000427</td></tr>
+            <tfoot><tr><td colspan="4" style="text-align:right">2026 TOPLAM ÖDEME (7 taksit)</td>
+                <td class="r">728.412,90</td><td class="r">443.815,60</td><td class="r">22.190,78</td>
+                <td class="r">218,40</td><td class="r">1.194.637,68</td><td></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="hint">Ödeme kaydı <b>KREDIHAREKET</b>'e yazılır ve seçili banka hesabında (<b>BANKAHESAPLAR</b>)
+          karşılık hareketi oluşur. Vadeden sonra yapılan ödemede gecikme faizi ayrı kolonda tutulur —
+          muhasebeleştirmede <b>780/660</b> yerine <b>689</b> hesabına gider.</div>
+      </div>
+
+      <div class="pane" data-p="teminat">
+        <div class="gridtb"><span class="minibtn">➕ Teminat Ekle</span><span class="minibtn">✎ Düzenle</span>
+          <span class="minibtn">🗑 Sil</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Teminat / risk oranı: <b>%168</b> (4.200.000,00 TL teminat · 2.500.000,00 TL risk)</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:96px">TÜR</th><th>AÇIKLAMA</th><th style="width:150px">VEREN / BORÇLU</th>
+                <th class="r" style="width:118px">TUTAR</th><th class="c" style="width:40px">PB</th>
+                <th class="c" style="width:80px">BAŞLANGIÇ</th><th class="c" style="width:80px">BİTİŞ</th>
+                <th class="c" style="width:86px">DURUM</th></tr>
+            <tr><td>İpotek</td><td class="ad">Merkez depo — Pendik, 1. derece ipotek (tapu 4128/17)</td>
+                <td>Feta Bilgisayar A.Ş.</td><td class="r">3.000.000,00</td><td class="c">TL</td>
+                <td class="c">15.03.2025</td><td class="c">15.03.2027</td><td class="c"><span class="pill p-ok">Yürürlükte</span></td></tr>
+            <tr><td>Kefalet</td><td class="ad">Şirket ortağı şahsi kefaleti — müşterek borçlu</td>
+                <td>Ahmet Feta</td><td class="r">750.000,00</td><td class="c">TL</td>
+                <td class="c">15.03.2025</td><td class="c">15.03.2027</td><td class="c"><span class="pill p-ok">Yürürlükte</span></td></tr>
+            <tr class="s-kri"><td>Çek / Senet</td><td class="ad">Müşteri çekleri — 4 adet ciro (portföyden çıkış)</td>
+                <td>Granit Bilgisayar Ltd.</td><td class="r">380.000,00</td><td class="c">TL</td>
+                <td class="c">02.04.2026</td><td class="c">30.09.2026</td><td class="c"><span class="pill p-kri">Vade yakın</span></td></tr>
+            <tr><td>Rehin</td><td class="ad">Ticari işletme rehni — forklift ve raf sistemi</td>
+                <td>Feta Bilgisayar A.Ş.</td><td class="r">70.000,00</td><td class="c">TL</td>
+                <td class="c">15.03.2025</td><td class="c">15.03.2027</td><td class="c"><span class="pill p-ok">Yürürlükte</span></td></tr>
+            <tfoot><tr><td colspan="3" style="text-align:right">TOPLAM TEMİNAT</td><td class="r">4.200.000,00</td>
+                <td class="c">TL</td><td class="c"></td><td class="c"></td><td class="c"></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="hint">Teminatlar <b>TEMINAT</b> tablosunda; çek/senet teminatları ayrıca <b>CEKSENET</b> kartıyla
+          eşleşir (portföy → teminatta durumu). Kredi kapandığında teminat satırları <b>otomatik kapanmaz</b> —
+          fek/iade işlemi ayrıca kaydedilir.</div>
+      </div>
+
+      <div class="pane" data-p="faiz">
+        <div class="gridtb">
+          <span style="font-size:11px;color:var(--muted)">Dönem:</span><div class="inp combo" style="width:120px">Aylık</div>
+          <span class="minibtn">📈 Faiz Tahakkuku Çalıştır</span>
+          <span class="minibtn">💱 Kur Değerleme Çalıştır</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Kurlar: <b>DOVIZKUR</b> · TCMB döviz satış · 13.08.2026</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:96px">DÖNEM</th><th style="width:120px">KREDİ</th><th class="c" style="width:40px">PB</th>
+                <th class="r" style="width:104px">TAHAKKUK FAİZ</th><th class="r" style="width:84px">BSMV</th>
+                <th class="r" style="width:84px">DÖNEM KURU</th><th class="r" style="width:112px">KUR FARKI</th>
+                <th class="c" style="width:88px">TÜR</th><th style="width:150px">MUHASEBE FİŞİ</th></tr>
+            <tr><td>2026/06</td><td>KRD.2025/014</td><td class="c">TL</td><td class="r">54.545,32</td><td class="r">2.727,27</td>
+                <td class="r">—</td><td class="r">—</td><td class="c">—</td><td>MUH2026000001842</td></tr>
+            <tr><td>2026/07</td><td>KRD.2025/014</td><td class="c">TL</td><td class="r">50.019,45</td><td class="r">2.500,97</td>
+                <td class="r">—</td><td class="r">—</td><td class="c">—</td><td>MUH2026000001907</td></tr>
+            <tr class="s-skt"><td>2026/07</td><td>KRD.2026/001</td><td class="c">USD</td><td class="r">1.259,60</td><td class="r">—</td>
+                <td class="r">34,2500</td><td class="r">—411.166,00</td><td class="c">Gider (656)</td><td>MUH2026000001911</td></tr>
+            <tr class="s-skt"><td>2026/07</td><td>LSN.2025/004</td><td class="c">EUR</td><td class="r">371,40</td><td class="r">—</td>
+                <td class="r">39,8000</td><td class="r">—70.368,00</td><td class="c">Gider (656)</td><td>MUH2026000001912</td></tr>
+            <tr class="s-skt"><td>2026/08</td><td>KRD.2026/001</td><td class="c">USD</td><td class="r">1.226,04</td><td class="r">—</td>
+                <td class="r">36,0000</td><td class="r">—423.465,00</td><td class="c">Gider (656)</td><td><span class="pill p-kri">Fişlenmedi</span></td></tr>
+            <tfoot><tr><td colspan="3" style="text-align:right">2026 KÜMÜLATİF</td><td class="r">443.815,60</td>
+                <td class="r">22.190,78</td><td class="r"></td><td class="r">—904.999,00</td>
+                <td class="c">Net gider</td><td></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="hint">Kur farkı = kalan anapara × (dönem sonu kuru − önceki dönem kuru). Negatif değer
+          <b>kambiyo zararı (656)</b>, pozitif değer <b>kambiyo kârı (646)</b> olarak fişlenir.
+          Turuncu satır rengi listede de bu tabloya bakarak verilir: son 3 dönem kümülatif kur farkı zararı
+          kalan anaparanın <b>%5</b>'ini aşan döviz kredileri "kur riski yüksek" sayılır.</div>
+      </div>
+
+      <div class="pane" data-p="muhasebe">
+        <div class="gridtb"><span class="minibtn">🔗 Hesap Eşle</span><span class="minibtn">📄 Fişi Aç</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Vade ≤ 12 ay → <b>300</b>, &gt; 12 ay → <b>400</b> (dönem sonunda otomatik virman)</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:110px">HESAP KODU</th><th>HESAP ADI</th><th style="width:170px">KULLANIM</th>
+                <th class="r" style="width:124px">BAKİYE</th><th style="width:150px">SON FİŞ</th></tr>
+            <tr><td>300.01.014</td><td>Banka Kredileri — İş Bankası KRD.2025/014</td><td>Kısa vadeli anapara</td>
+                <td class="r">1.109.609,20</td><td>MUH2026000001907</td></tr>
+            <tr><td>400.01.003</td><td>Banka Kredileri (uzun vadeli) — Ziraat yatırım</td><td>Uzun vadeli anapara</td>
+                <td class="r">3.958.700,00</td><td>MUH2026000001880</td></tr>
+            <tr><td>302.01.014</td><td>Ertelenmiş Kredi Faiz Giderleri</td><td>Reeskont / dönemsellik</td>
+                <td class="r">213.392,14</td><td>MUH2026000001907</td></tr>
+            <tr class="foc"><td>780.01.001</td><td>Finansman Giderleri — kredi faizi</td><td>Dönem faiz gideri</td>
+                <td class="r">443.815,60</td><td>MUH2026000001907</td></tr>
+            <tr><td>770.03.002</td><td>Genel Yönetim Gid. — BSMV / KKDF</td><td>Vergi ve fon payı</td>
+                <td class="r">22.190,78</td><td>MUH2026000001907</td></tr>
+            <tr class="s-skt"><td>656.01.001</td><td>Kambiyo Zararları — kredi kur farkı</td><td>Döviz kredi değerleme</td>
+                <td class="r">904.999,00</td><td>MUH2026000001912</td></tr>
+            <tr><td>102.03.001</td><td>Bankalar — Garanti Vadesiz TL</td><td>Taksit ödeme karşılığı</td>
+                <td class="r">486.200,00</td><td>BNK2026000000427</td></tr>
+          </table>
+        </div>
+        <div class="hint">Eşleşme <b>KREDI.MUHKOD</b> / <b>KREDI.MUHKODUZUN</b> alanlarında saklanır; taksit ödemesi
+          <b>MUHFIS</b> + <b>MUHFISDETAY</b> üzerine tek fiş olarak yazılır (anapara borç 300, faiz borç 780,
+          BSMV borç 770, karşılık alacak 102). Fiş numarası ödeme satırına geri yazılır — çift kayıt engellenir.</div>
+      </div>
+
+      <div class="pane" data-p="belge">
+        <div class="gridtb"><span class="minibtn">📎 Klasörden</span><span class="minibtn">🖨 Tarayıcıdan</span>
+          <span class="minibtn">📋 Yapıştır</span><span class="minibtn">👁 Görüntüle</span></div>
+        <div class="dg">
+          <table>
+            <tr><th>DOSYA ADI</th><th style="width:130px">TÜR</th><th class="c" style="width:90px">TARİH</th>
+                <th class="r" style="width:80px">BOYUT</th><th style="width:130px">EKLEYEN</th><th class="c" style="width:70px">YERİ</th></tr>
+            <tr><td class="ad">Genel Kredi Sözleşmesi — İş Bankası.pdf</td><td>Sözleşme</td><td class="c">15.03.2025</td>
+                <td class="r">1,8 MB</td><td>Elif Demir</td><td class="c">GENDEPO</td></tr>
+            <tr><td class="ad">Ödeme Planı (banka onaylı).pdf</td><td>Ödeme planı</td><td class="c">15.03.2025</td>
+                <td class="r">312 KB</td><td>Elif Demir</td><td class="c">GENDEPO</td></tr>
+            <tr><td class="ad">İpotek Tesis Belgesi — Tapu 4128-17.pdf</td><td>Teminat belgesi</td><td class="c">18.03.2025</td>
+                <td class="r">960 KB</td><td>Mehmet Yıldız</td><td class="c">GENDEPO</td></tr>
+          </table>
+        </div>
+        <div class="hint">Belgeler <b>DOKUMAN → IMAJ → GENDEPO.DOSYA</b> zinciriyle saklanır;
+          <b>IMAJ.YERI</b> kredi bağlamı kodunu taşır, içerik FILESTREAM'de hash ile tekilleştirilir.</div>
+      </div>
+
+      <div class="pane" data-p="yorum">
+        <div class="gridtb"><span class="minibtn">➕ Yorum Ekle</span><span class="minibtn">📎 Ek</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:140px">KULLANICI</th><th style="width:130px">TARİH</th><th>YORUM</th><th class="c" style="width:60px">EK</th></tr>
+            <tr><td>Elif Demir</td><td>16.07.2026 11:40</td>
+                <td class="ad">16. taksit 1 gün gecikmeli ödendi, 218,40 TL gecikme faizi tahsil edildi.</td><td class="c">—</td></tr>
+            <tr><td>Mali Müşavir</td><td>05.08.2026 09:15</td>
+                <td class="ad">Ağustos sonunda 400 → 300 virmanı yapılacak, kalan vade 12 ayın altına düştü.</td><td class="c">📎 1</td></tr>
+            <tr><td>Ahmet Feta</td><td>13.08.2026 17:05</td>
+                <td class="ad">Banka erken kapama teklifi verdi; 15.09 taksitinden sonra hesaplatalım.</td><td class="c">—</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SAG: SECILI KREDI ============ -->
+    <div class="side">
+      <h5>Seçili Kredi</h5>
+      <div class="urun">
+        <div class="foto">🏦</div>
+        <div class="nm">İşletme Kredisi — İş Bankası 24 ay</div>
+        <div class="mt">KRD.2025/014 · Türkiye İş Bankası · Kadıköy</div>
+        <div style="display:flex;gap:5px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn">👁 Kart</span><span class="minibtn">📅 Plan</span><span class="minibtn">🔒 Teminat</span>
+        </div>
+      </div>
+
+      <div class="tvsep"></div>
+      <h5>Kredi Bilgileri</h5>
+      <div class="kv"><span>Anapara</span><b>2.500.000,00 TL</b></div>
+      <div class="kv"><span>Faiz oranı (yıllık)</span><b>%49,00</b></div>
+      <div class="kv"><span>Vade</span><b>24 ay · Taksitli</b></div>
+      <div class="kv"><span>Kalan anapara</span><b>1.109.609,20 TL</b></div>
+      <div class="kv"><span>Kalan borç</span><b style="color:#b23b3b">1.333.670,96 TL</b></div>
+      <div class="kv"><span>Ödenen taksit</span><b>16 / 24</b></div>
+      <div class="kv"><span>Sonraki taksit</span><b style="color:#a9791a">15.08.2026</b></div>
+      <div class="kv"><span>Sonraki tutar</span><b>167.630,68 TL</b></div>
+      <div class="kv"><span>Kalan faiz + BSMV</span><b>224.061,76 TL</b></div>
+      <div class="kv"><span>Durum</span><b><span class="pill p-kri">Vadesi yakın</span></b></div>
+
+      <div class="tvsep"></div>
+      <h5>Geri Ödeme İlerlemesi</h5>
+      <div style="padding:2px 12px 4px">
+        <div class="bar" style="height:14px;border-radius:7px"><span class="kri" style="width:67%"></span></div>
+        <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:3px">
+          <span>16 / 24 taksit</span><span><b>%66,7</b></span></div>
+        <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:1px">
+          <span>Ödenen anapara</span><span>1.390.390,80 TL</span></div>
+      </div>
+
+      <div class="tvsep"></div>
+      <h5>Vade Dağılımı (tüm krediler)</h5>
+      <div class="depo"><span class="ad">Bu ay</span>
+        <div class="bar" style="flex:1"><span class="kri" style="width:4%"></span></div><span class="mk">%4</span></div>
+      <div class="depo"><span class="ad">3 ay içinde</span>
+        <div class="bar" style="flex:1"><span class="kri" style="width:15%"></span></div><span class="mk">%15</span></div>
+      <div class="depo"><span class="ad">12 ay içinde</span>
+        <div class="bar" style="flex:1"><span class="ok" style="width:51%"></span></div><span class="mk">%51</span></div>
+      <div class="depo"><span class="ad">12 ay sonrası</span>
+        <div class="bar" style="flex:1"><span class="ok" style="width:30%"></span></div><span class="mk">%30</span></div>
+      <div class="kv" style="padding-top:5px"><span>Bu ay ödenecek</span><b>1.041.280,42 TL</b></div>
+      <div class="kv"><span>12 ay yükümlülük</span><b>18.142.180,42 TL</b></div>
+
+      <div class="tvsep"></div>
+      <h5>İşlemler</h5>
+      <div class="sidebtns">
+        <span class="minibtn">💳 Taksit Öde</span>
+        <span class="minibtn">🏁 Erken Kapama Hesapla</span>
+        <span class="minibtn">🖨 Ödeme Planı Yazdır</span>
+        <span class="minibtn">🔒 Teminat Ekle</span>
+        <span class="minibtn">📈 Faiz Tahakkuku</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Kart → <b>KREDI</b> (KREDINO · KREDIADI · BANKAID · KREDITIPI · PARABIRIMI · ANAPARA · FAIZORANI · VADEAY · KULLANDIRIMTARIH · DURUM · MUHKOD)</span>·
+    <span>Plan → <b>KREDITAKSIT</b> (TAKSITNO · VADETARIH · ANAPARA · FAIZ · BSMV · TAKSITTUTAR · KALANANAPARA · DURUM)</span>·
+    <span>Ödeme → <b>KREDIHAREKET</b> (TARIH · TUTAR · HESAPID · FISNO)</span>·
+    <span>Banka → <b>BANKALAR → BANKAHESAPLAR</b></span>·
+    <span>Teminat → <b>TEMINAT</b> (+ <b>CEKSENET</b>)</span>·
+    <span>Kur → <b>DOVIZKUR</b></span>·
+    <span>Muhasebe → <b>MUHFIS → MUHFISDETAY</b></span>·
+    <span>Ek → <b>DOKUMAN → IMAJ → GENDEPO.DOSYA</b></span>·
+    <span>Denetim → <b>GENDEPO.ISLEMLOG</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Aktif kredi: <b>9</b> (11 kayıt)</span>
+    <span>Toplam kalan borç: <b style="color:#b23b3b">26.062.270,96 TL</b></span>
+    <span>Bu ay ödenecek: <b>1.041.280,42 TL</b></span>
+    <span>Geciken taksit: <b style="color:#b23b3b">3</b> (246.960,00 TL)</span>
+    <span style="margin-left:auto">Seçili: KRD.2025/014</span>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.ltab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.ltab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.lpane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.lpane[data-lp="'+t.dataset.l+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.gtus').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.gtus').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');
+    });
+  });
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

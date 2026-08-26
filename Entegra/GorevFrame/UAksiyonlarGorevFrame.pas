@@ -1,28 +1,28 @@
-﻿unit UAksiyonlarGorevFrame;
+unit UAksiyonlarGorevFrame;
 
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
   Dialogs, Menus, cxLookAndFeelPainters, StdCtrls, cxButtons, UGentegreFrameYonetimi,
-  JvExControls, JvButton, JvNavigationPane, ImgList, PngImageList, ExtCtrls,
-  System.ImageList;
+  ImgList, PngImageList, ExtCtrls,
+  System.ImageList, cxGraphics, cxLookAndFeels;
 
 type
   TAksiyonlarGorevFrame = class(TFrame)
     PNGImageList1: TPngImageList;
     PanelProjeler: TPanel;
-    btnProjeTakvim: TJvNavPanelButton;
-    btnProjeListe: TJvNavPanelButton;
-    btnFirsatListe: TJvNavPanelButton;
+    btnProjeTakvim: TcxButton;
+    btnProjeListe: TcxButton;
+    btnFirsatListe: TcxButton;
     PanelDokumler: TPanel;
-    btnDokumlerOzel: TJvNavPanelButton;
-    btnDokumler: TJvNavPanelButton;
-    btnPotansiyelKart: TJvNavPanelButton;
+    btnDokumlerOzel: TcxButton;
+    btnDokumler: TcxButton;
+    btnPotansiyelKart: TcxButton;
     PanelIsListesi: TPanel;
-    btnIsTakvim: TJvNavPanelButton;
-    btnGorevListe: TJvNavPanelButton;
-    btnSocialMedia: TJvNavPanelButton;
+    btnIsTakvim: TcxButton;
+    btnGorevListe: TcxButton;
+    btnSocialMedia: TcxButton;
     procedure btnProjeTakvimClick(Sender: TObject);
     procedure btnProjeListeClick(Sender: TObject);
     procedure btnDokumlerMouseDown(Sender: TObject; Button: TMouseButton;
@@ -35,7 +35,7 @@ type
   private
     FFrameBilgi: TAnaFrameBilgi;
     procedure SetFrameBilgi(const Value: TAnaFrameBilgi);
-    procedure TusBasildi(Tus : TJvnavpanelbutton);
+    procedure TusBasildi(Tus : TcxButton);
     { Private declarations }
   public
     { Public declarations }
@@ -50,24 +50,18 @@ implementation
 
 uses
  UKasaWizard, Utablo, UTakvim, UKasa, UGorevListeDlg,UFirsatListeDlg, UProjeListeDlg, UTakvimProje,
- UDokumGirisFrame, UDokum,LocOnFly, prjconst, UReharadlg, URehberAramaFrame
- , uSocialListFrame
- , uSocialAramaFrame
+ UDokumGirisFrame, UDokum,LocOnFly, prjconst, UReharadlg, URehberAramaFrame,
+  uSocialListFrame,
+  uSocialAramaFrame
  ;
 
 {$R *.dfm}
 
 { TAksiyonlarGorevFrame }
-procedure TAksiyonlarGorevFrame.TusBasildi(Tus : TJvnavpanelbutton);
-var i : SmallInt;
+
+procedure TAksiyonlarGorevFrame.TusBasildi(Tus : TcxButton);
 begin
-   for i := 0 to ComponentCount - 1 do
-       if Components[i] is TJvnavpanelbutton then begin
-          if TJvnavpanelbutton(Components[i]) = Tus then
-             TJvnavpanelbutton(Components[i]).Down := True
-          else
-             TJvnavpanelbutton(Components[i]).Down := False;
-       end;
+  GorevTusuSec(Self, Tus);
 end;
 
 
@@ -77,49 +71,42 @@ begin
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=0
    else
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;
-  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TJVNavPanelButton(Sender).Tag;
+  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TcxButton(Sender).Tag;
   TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'R';
-  TusBasildi(btnDokumler);
+  TusBasildi(TcxButton(Sender));
 end;
 
 procedure TAksiyonlarGorevFrame.btnFirsatListeClick(Sender: TObject);
 begin
   FFrameBilgi.IcerikFrameYoneticisi.FrameBul(TFirsatListeDlg).Git;
-  TusBasildi(btnFirsatListe);
   btnUpAndDown(Sender);
 end;
 
 procedure TAksiyonlarGorevFrame.btnGorevListeClick(Sender: TObject);
 begin
-   FMenuTur := TJvNavPanelButton( Sender ).Tag;
+   FMenuTur := TcxButton( Sender ).Tag;
    FFrameBilgi.IcerikFrameYoneticisi.FrameBul(TGorevListeDlg).Git;
    TGorevListeDlg(FFrameBilgi.IcerikGit(TGorevListeDlg)).InitIslemler(Sender);
-{   if TJvNavPanelButton( Sender ).Tag = 0 then
+{   if TcxButton( Sender ).Tag = 0 then
       TGorevListeDlg(FFrameBilgi.IcerikGit(TGorevListeDlg)).PanelTakvim.Width := 10
    else
       TGorevListeDlg(FFrameBilgi.IcerikGit(TGorevListeDlg)).PanelListe.Width := 10;
 }
-   TusBasildi(btnGorevListe);
    btnUpAndDown(Sender);
 end;
 
 procedure TAksiyonlarGorevFrame.btnProjeListeClick(Sender: TObject);
 begin
   FFrameBilgi.IcerikFrameYoneticisi.FrameBul(TProjeListeDlg).Git;
-  TusBasildi(btnProjeListe);
   btnUpAndDown(Sender);
 end;
 
 procedure TAksiyonlarGorevFrame.btnUpAndDown(Sender: TObject);
 begin
-  btnProjeListe.Down := False;
-  if btnProjeTakvim.Visible then
-     btnProjeTakvim.Down := False;
-  btnFirsatListe.Down := False;
-  btnGorevListe.Down := False;
-  btnDokumler.Down := False;
-  btnDokumlerOzel.Down := False;
-  (Sender as TJvNavPanelButton).Down := True;
+  // Tek buton aktif: frame'deki TUM TcxButton'lar tek elden yonetilir.
+  // (Eskiden sabit bir buton listesi sifirlaniyordu; listede olmayan butonlar
+  //  basili kaldigi icin ayni anda birden fazla buton aktif gorunuyordu.)
+  GorevTusuSec(Self, Sender);
 end;
 
 procedure TAksiyonlarGorevFrame.btnSocialMediaClick(Sender: TObject);
@@ -158,7 +145,6 @@ end;
 procedure TAksiyonlarGorevFrame.btnProjeTakvimClick(Sender: TObject);
 begin
   FFrameBilgi.IcerikFrameYoneticisi.FrameBul(TTakvimProje).Git;
-  TusBasildi(btnProjeTakvim);
   btnUpAndDown(Sender);
 end;
 
@@ -167,7 +153,7 @@ procedure TAksiyonlarGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 var i:smallint;
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
 //haklar ve hukuklar
   PanelIsListesi.Visible := CRMGorevListe;
   //PanelAktiviteler.Visible := CRMAktivite;
@@ -201,3 +187,6 @@ end;
 initialization
   RegisterClass(TAksiyonlarGorevFrame);
 end.
+
+
+

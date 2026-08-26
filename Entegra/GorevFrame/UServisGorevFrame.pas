@@ -1,4 +1,4 @@
-ï»¿unit UServisGorevFrame;
+unit UServisGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -8,18 +8,18 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus,
-  cxLookAndFeelPainters, cxButtons, JvExControls, JvButton, JvNavigationPane,
+  cxLookAndFeelPainters, cxButtons,
   ImgList, PngImageList,UKodAgaci, CategoryButtons, ExtCtrls;           {Symbols}
 
 type
   TServisGorevFrame = class(TFrame)
-    btnHesapKarti: TJvNavPanelButton;
+    btnHesapKarti: TcxButton;
     PngImageList1: TPngImageList;
-    JvNavPanelButton2: TJvNavPanelButton;
-    btnServisListe: TJvNavPanelButton;
+    JvNavPanelButton2: TcxButton;
+    btnServisListe: TcxButton;
     Panel3: TPanel;
-    JvNavPanelButton1: TJvNavPanelButton;
-    btnDokumler: TJvNavPanelButton;
+    JvNavPanelButton1: TcxButton;
+    btnDokumler: TcxButton;
     procedure btnHesapKartiClick(Sender: TObject);
     procedure btnServisListeClick(Sender: TObject);
     procedure TumTusResimleriniDegistir(Menu:TCategoryButtons;ImajIndex:Integer);
@@ -58,7 +58,7 @@ begin
    if Button = mbRight then
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=0
    else
-      TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TJVNavPanelButton(Sender).Tag;
+      TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TcxButton(Sender).Tag;
   TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'E';
   btnUpAndDown(Sender);
 end;
@@ -73,13 +73,10 @@ end;
 
 procedure TServisGorevFrame.btnUpAndDown(Sender: TObject);
 begin
-  btnHesapKarti.Down := False;
-  JvNavPanelButton2.Down := False;
-  btnServisListe.Down := False;
-  JvNavPanelButton1.Down := False;
-  btnDokumler.Down := False;
-  if (Sender<>nil)and(Sender.ClassName = 'TJvNavPanelButton') then
-    (Sender as TJvNavPanelButton).Down := True;
+  // Tek buton aktif: frame'deki TUM TcxButton'lar tek elden yonetilir.
+  // (Eskiden sabit bir buton listesi sifirlaniyordu; listede olmayan butonlar
+  //  basili kaldigi icin ayni anda birden fazla buton aktif gorunuyordu.)
+  GorevTusuSec(Self, Sender);
 end;
 
 
@@ -107,7 +104,7 @@ var
 begin
   // Navigasyon: 'Tanim Listeleri' sekmesi SekmeConfig'de KAYITLI DEGIL -> IcerikGit nil-guard ile
   //   no-op (eski kod 'nil.Git/nil.Ornek' ile AV veriyordu). Dogru sekme adi belli olunca guncellenmeli.
-  FFrameBilgi.IcerikGit('TanÄ±m Listeleri');
+  FFrameBilgi.IcerikGit('Taným Listeleri');
   btnUpAndDown(Sender);
 end;
 
@@ -123,7 +120,7 @@ end;
 procedure TServisGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   btnHesapKarti.Visible := Tablo.YetkiVarmi(3001,YetkiTur_Gorme);
   JvNavPanelButton2.Visible := Tablo.YetkiVarmi(3011,YetkiTur_Gorme);
   btnDokumler.Visible := Tablo.YetkiVarmi(3099,YetkiTur_Gorme);
@@ -142,3 +139,5 @@ end;
 initialization
   RegisterClass(TServisGorevFrame);
 end.
+
+

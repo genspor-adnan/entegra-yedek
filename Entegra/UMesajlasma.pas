@@ -178,6 +178,9 @@ type
     FBilgiDetay: TLabel;   // birebir sohbette kunye
     FAvatarSorgu: TFDQuery;
     FGrupMu: Boolean;       // grup sohbetinde gonderen adi yazilir
+    function KoyuTemaMi: Boolean;
+    function TemaRengi(AAcik, AKoyu: TColor): TColor;
+    procedure MesajTemasiniUygula;
     procedure MesajEkle(ID, Grup  : Integer; Mesaj:string);
     procedure KanalAc(AKanalId: Integer);        // sohbeti ac: gecmis + okundu
     procedure YeniMesajlariAl;                   // yalniz FSonMesajId sonrasi
@@ -276,7 +279,6 @@ type
     procedure SohbetAraDegisti(Sender: TObject);
     procedure SohbetAraKapat(Sender: TObject);
     procedure BaslikAvatarPaint(Sender: TObject);
-      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
   public
     { Public declarations }
     AcilistaKanal: Integer;     // bildirime tiklaninca acilacak sohbet
@@ -292,6 +294,95 @@ implementation
 uses UTablo, FetaClassExtensions, FetaKurulusSiniflari, UAnaForm, PrjConst,
   ULog, Winapi.ShellAPI, System.IOUtils, System.Math, System.StrUtils, Vcl.Clipbrd,
   System.Character, Vcl.Imaging.jpeg;   // dosya eki + avatar (JPEG)
+
+function TMesajlasmaDlg.KoyuTemaMi: Boolean;
+begin
+  Result := Assigned(Tablo) and MatchText(Tablo.dxSkinController1.SkinName,
+    ['DevExpressDarkStyle', 'MetropolisDark', 'Office2010Black',
+     'Office2013DarkGray', 'Office2016Dark', 'VisualStudio2013Dark',
+     'HighContrast']);
+end;
+
+function TMesajlasmaDlg.TemaRengi(AAcik, AKoyu: TColor): TColor;
+begin
+  if KoyuTemaMi then
+    Result := AKoyu
+  else
+    Result := AAcik;
+end;
+
+procedure TMesajlasmaDlg.MesajTemasiniUygula;
+var
+  LZemin, LPanel, LSerit, LArama, LMetin, LAltMetin: TColor;
+begin
+  LZemin := TemaRengi($00DDE5EC, RGB(24, 25, 26));
+  LPanel := TemaRengi(clWhite, RGB(32, 33, 36));
+  LSerit := TemaRengi($00F0F2F5, RGB(42, 43, 46));
+  LArama := TemaRengi($00F7F7F7, RGB(52, 53, 56));
+  LMetin := TemaRengi($00202020, RGB(235, 235, 235));
+  LAltMetin := TemaRengi($00909090, RGB(170, 170, 170));
+
+  Color := LPanel;
+  pnlMesajlasma.ParentBackground := False;
+  pnlMesajlasma.Color := LPanel;
+  Panel10.ParentBackground := False;
+  Panel10.Color := LPanel;
+  PanelChat.ParentBackground := False;
+  PanelChat.ParentColor := False;
+  PanelChat.Color := LZemin;
+  Panel4.ParentBackground := False;
+  Panel4.Color := LZemin;
+
+  if Assigned(FSohbet) then FSohbet.Color := LZemin;
+  if Assigned(FSol) then
+  begin
+    FSol.Color := LPanel;
+    FSol.Font.Color := LMetin;
+    FSol.Invalidate;
+  end;
+  if Assigned(FCizim) then FCizim.Invalidate;
+
+  if Assigned(FAramaKutu) then FAramaKutu.Color := LSerit;
+  if Assigned(FAramaIkon) then FAramaIkon.Font.Color := LAltMetin;
+  if Assigned(FAramaTemizle) then FAramaTemizle.Font.Color := LAltMetin;
+  if Assigned(FMenuBtn) then FMenuBtn.Font.Color := LMetin;
+  MesajPersonAra.Style.Color := LSerit;
+  MesajPersonAra.Style.TextColor := LMetin;
+
+  if Assigned(FCipPanel) then FCipPanel.Color := LPanel;
+  CipleriTazele;
+
+  if Assigned(FBaslikPanel) then FBaslikPanel.Color := LSerit;
+  if Assigned(FBaslikAd) then FBaslikAd.Font.Color := LMetin;
+  if Assigned(FBaslikAlt) then FBaslikAlt.Font.Color := LAltMetin;
+  if Assigned(FBaslikMenuBtn) then FBaslikMenuBtn.Font.Color := LMetin;
+  if Assigned(FSohbetAraKutu) then FSohbetAraKutu.Color := LArama;
+  if Assigned(FSohbetAra) then
+  begin
+    FSohbetAra.Color := LPanel;
+    FSohbetAra.Font.Color := LMetin;
+  end;
+  if Assigned(FSohbetAraBilgi) then FSohbetAraBilgi.Font.Color := LAltMetin;
+
+  MemoChat.Style.Color := LPanel;
+  MemoChat.Style.TextColor := LMetin;
+  if Assigned(FEmojiPanel) then FEmojiPanel.Color := LPanel;
+  if Assigned(FEmojiCiz) then FEmojiCiz.Invalidate;
+
+  if Assigned(FBilgiPanel) then FBilgiPanel.Color := LPanel;
+  if Assigned(FBilgiUst) then FBilgiUst.Color := LPanel;
+  if Assigned(FBilgiAltPanel) then FBilgiAltPanel.Color := LPanel;
+  if Assigned(FBilgiAd) then FBilgiAd.Font.Color := LMetin;
+  if Assigned(FBilgiAlt) then FBilgiAlt.Font.Color := LAltMetin;
+  if Assigned(FBilgiDetay) then FBilgiDetay.Font.Color := LMetin;
+  if Assigned(FBilgiUyeler) then
+  begin
+    FBilgiUyeler.Color := LArama;
+    FBilgiUyeler.Font.Color := LMetin;
+  end;
+  if Assigned(FBaslikAvatar) then FBaslikAvatar.Invalidate;
+  if Assigned(FBilgiAvatar) then FBilgiAvatar.Invalidate;
+end;
 
 procedure TMesajlasmaDlg.MesajEkle(ID, Grup : Integer; Mesaj:string);
 // Mesaj gonderme ARTIK SUNUCUDA: sp_Api_Mesaj_Gonder_Json (GenDepoUpdate146).
@@ -748,7 +839,7 @@ var
   LUstSinir, LAltSinir: Integer;
 begin
   C := FCizim.Canvas;
-  C.Brush.Color := $00DDE5EC;
+  C.Brush.Color := TemaRengi($00DDE5EC, RGB(24, 25, 26));
   C.FillRect(FCizim.ClientRect);
   if FBalonListe = nil then Exit;
 
@@ -768,20 +859,22 @@ begin
     begin
       LSag := FCizim.Width - 12;
       LSol := LSag - LGen;
-      C.Brush.Color := $00C6F8DC;                 // kendi mesajim (#DCF8C6)
+      C.Brush.Color := TemaRengi($00C6F8DC, RGB(0, 92, 75));
     end
     else
     begin
       LSol := 12;
       LSag := LSol + LGen;
-      C.Brush.Color := clWhite;
+      C.Brush.Color := TemaRengi(clWhite, RGB(50, 51, 54));
     end;
     C.Pen.Color := C.Brush.Color;
     if (FSeciliBalonlar <> nil) and (FSeciliBalonlar.IndexOf(LB) >= 0) then  // secili mesaj
     begin
-      if LB.Benim then C.Brush.Color := $0092E0B4    // kendi balonumun koyu tonu
-      else C.Brush.Color := $00E8E8E8;
-      C.Pen.Color := $004CAF25;                       // WhatsApp yesili cerceve
+      if LB.Benim then
+        C.Brush.Color := TemaRengi($0092E0B4, RGB(0, 118, 96))
+      else
+        C.Brush.Color := TemaRengi($00E8E8E8, RGB(71, 72, 75));
+      C.Pen.Color := TemaRengi($004CAF25, RGB(37, 172, 100));
       C.Pen.Width := 2;
     end;
     RB := System.Types.Rect(LSol, LB.Y, LSag, LB.Y + LB.Yuk);
@@ -793,7 +886,7 @@ begin
     begin
       C.Font.Size := 8;
       C.Font.Style := [fsBold];
-      C.Font.Color := $00745C00;
+      C.Font.Color := TemaRengi($00745C00, RGB(114, 200, 255));
       C.Brush.Style := bsClear;
       C.TextOut(RB.Left + 10, LUst, LB.Gonderen);
       C.Brush.Style := bsSolid;
@@ -804,12 +897,12 @@ begin
     if LB.Silindi then
     begin
       C.Font.Style := [fsItalic];
-      C.Font.Color := clGray;
+      C.Font.Color := TemaRengi(clGray, RGB(150, 150, 150));
     end
     else
     begin
       C.Font.Style := [];
-      C.Font.Color := $00303030;
+      C.Font.Color := TemaRengi($00303030, RGB(235, 235, 235));
     end;
 
     RM := System.Types.Rect(RB.Left + 10, LUst, RB.Right - 10, RB.Bottom - 15);
@@ -820,7 +913,7 @@ begin
     begin
       C.Font.Size := 8;
       C.Font.Style := [fsUnderline];
-      C.Font.Color := $00A05000;                  // koyu mavi-yesil (link hissi)
+      C.Font.Color := TemaRengi($00A05000, RGB(86, 190, 255));
       C.Brush.Style := bsClear;
       C.TextOut(RB.Left + 10, RB.Bottom - 32,
                 '[ek] ' + LB.DosyaAdi + '  (' + BoyutYaz(LB.DosyaBoyut) + ')');
@@ -829,7 +922,7 @@ begin
 
     C.Font.Size := 7;
     C.Font.Style := [];
-    C.Font.Color := $00808080;
+    C.Font.Color := TemaRengi($00808080, RGB(190, 190, 190));
     C.Brush.Style := bsClear;
     LYaz := C.TextWidth(LB.Saat);
     C.TextOut(RB.Right - LYaz - 10, RB.Bottom - 15, LB.Saat);
@@ -1577,11 +1670,11 @@ begin
 
   if LS.Tur = 0 then                      // bolum basligi
   begin
-    C.Brush.Color := clWhite;
+    C.Brush.Color := TemaRengi(clWhite, RGB(32, 33, 36));
     C.FillRect(ARect);
     C.Font.Size := 9;
     C.Font.Style := [fsBold];
-    C.Font.Color := $004CAF25;             // WhatsApp yesili
+    C.Font.Color := TemaRengi($004CAF25, RGB(37, 172, 100));
     C.Brush.Style := bsClear;
     C.TextOut(ARect.Left + 12, ARect.Top + 16, LS.Ad);
     C.Brush.Style  := bsSolid;
@@ -1591,24 +1684,26 @@ begin
   // Sag tik hedefi: ince cerceve (secim atamiyoruz, kaydirmasin diye)
   // Acik sohbet: hafif yesil zemin + solda ince serit (odak listede olmasa da belli olsun)
   if (LS.Tur = 1) and (LS.KanalId = FKanalId) and (FKanalId > 0) then
-    C.Brush.Color := $00E8F5E2
-  else if odSelected in State then C.Brush.Color := $00F0EBE4
-  else C.Brush.Color := clWhite;
+    C.Brush.Color := TemaRengi($00E8F5E2, RGB(47, 58, 55))
+  else if odSelected in State then
+    C.Brush.Color := TemaRengi($00F0EBE4, RGB(62, 62, 65))
+  else
+    C.Brush.Color := TemaRengi(clWhite, RGB(32, 33, 36));
   C.FillRect(ARect);
   if (LS.Tur = 1) and (LS.KanalId = FKanalId) and (FKanalId > 0) then
   begin
-    C.Brush.Color := $004CAF25;
+    C.Brush.Color := TemaRengi($004CAF25, RGB(37, 172, 100));
     C.FillRect(System.Types.Rect(ARect.Left, ARect.Top, ARect.Left + 3, ARect.Bottom));
-    C.Brush.Color := $00E8F5E2;
+    C.Brush.Color := TemaRengi($00E8F5E2, RGB(47, 58, 55));
   end;
-  C.Pen.Color := $00ECECEC;
+  C.Pen.Color := TemaRengi($00ECECEC, RGB(70, 70, 72));
   C.MoveTo(ARect.Left + 62, ARect.Bottom - 1);
   C.LineTo(ARect.Right, ARect.Bottom - 1);
 
   if Index = FSolMenuSatir then            // sag tik menusunun hedefi
   begin
     C.Brush.Style := bsClear;
-    C.Pen.Color := $00B0B0B0;
+    C.Pen.Color := TemaRengi($00B0B0B0, RGB(115, 115, 118));
     C.Rectangle(ARect.Left + 1, ARect.Top + 1, ARect.Right - 1, ARect.Bottom - 1);
     C.Brush.Style := bsSolid;
   end;
@@ -1621,13 +1716,13 @@ begin
   C.Brush.Style := bsClear;
   C.Font.Size := 10;
   C.Font.Style := [];
-  C.Font.Color := $00202020;
+  C.Font.Color := TemaRengi($00202020, RGB(235, 235, 235));
   C.TextOut(ARect.Left + 62, ARect.Top + 8, LS.Ad);
   LSag := ARect.Left + 64 + C.TextWidth(LS.Ad);
   if LS.Favori then                       // favori isareti (yildiz)
   begin
     C.Font.Name := 'Segoe UI Symbol';
-    C.Font.Color := $0022B0F0;            // altin sari (BGR)
+    C.Font.Color := TemaRengi($0022B0F0, RGB(240, 176, 34));
     C.TextOut(LSag, ARect.Top + 8, #$2605);
     Inc(LSag, 16);
     C.Font.Name := 'Trebuchet MS';
@@ -1636,20 +1731,23 @@ begin
   begin
     C.Font.Name := 'Segoe UI Emoji';
     C.Font.Size := 8;
-    C.Font.Color := $00909090;
+    C.Font.Color := TemaRengi($00909090, RGB(170, 170, 170));
     C.TextOut(LSag, ARect.Top + 10, #$D83D#$DD15);
     C.Font.Name := 'Trebuchet MS';
     C.Font.Size := 10;
   end;
 
   C.Font.Size := 8;
-  C.Font.Color := $00909090;
+  C.Font.Color := TemaRengi($00909090, RGB(170, 170, 170));
   C.TextOut(ARect.Left + 62, ARect.Top + 30, Copy(LS.Alt, 1, 42));
 
   if LS.Saat <> '' then
   begin
     C.Font.Size := 7;
-    if LS.Okunmamis > 0 then C.Font.Color := $004CAF25 else C.Font.Color := $00A0A0A0;
+    if LS.Okunmamis > 0 then
+      C.Font.Color := TemaRengi($004CAF25, RGB(37, 172, 100))
+    else
+      C.Font.Color := TemaRengi($00A0A0A0, RGB(150, 150, 150));
     LSag := C.TextWidth(LS.Saat);
     C.TextOut(ARect.Right - LSag - 12, ARect.Top + 9, LS.Saat);
   end;
@@ -1657,7 +1755,7 @@ begin
   if LS.Okunmamis > 0 then                 // yesil rozet (sag alt)
   begin
     C.Brush.Style := bsSolid;
-    C.Brush.Color := $004CAF25;
+    C.Brush.Color := TemaRengi($004CAF25, RGB(37, 172, 100));
     C.Pen.Color := C.Brush.Color;
     RB := System.Types.Rect(ARect.Right - 36, ARect.Top + 29, ARect.Right - 12, ARect.Top + 47);
     C.RoundRect(RB.Left, RB.Top, RB.Right, RB.Bottom, 16, 16);
@@ -2402,13 +2500,13 @@ procedure TMesajlasmaDlg.CipleriTazele;
     if AEtiket = nil then Exit;
     if AEtiket.Tag = FFiltre then
     begin
-      AEtiket.Color := $00D9F2D0;
-      AEtiket.Font.Color := $00256B15;
+      AEtiket.Color := TemaRengi($00D9F2D0, RGB(47, 82, 68));
+      AEtiket.Font.Color := TemaRengi($00256B15, RGB(145, 230, 185));
     end
     else
     begin
-      AEtiket.Color := $00F0F0F0;
-      AEtiket.Font.Color := $00505050;
+      AEtiket.Color := TemaRengi($00F0F0F0, RGB(55, 56, 59));
+      AEtiket.Font.Color := TemaRengi($00505050, RGB(205, 205, 205));
     end;
     AEtiket.Transparent := False;
   end;
@@ -2722,6 +2820,7 @@ begin
 
   EmojiKur;
   BalonMenuKur;
+  MesajTemasiniUygula;
 end;
 
 procedure TMesajlasmaDlg.FormShow(Sender: TObject);
@@ -2901,12 +3000,13 @@ var
   i, LGen, LYuk, LX, LY: Integer;
   LS: string;
 begin
-  FEmojiCiz.Canvas.Brush.Color := clWhite;
+  FEmojiCiz.Canvas.Brush.Color := TemaRengi(clWhite, RGB(32, 33, 36));
   FEmojiCiz.Canvas.FillRect(FEmojiCiz.ClientRect);
   LGen := FEmojiCiz.Width div CSutun;
   LYuk := LGen;
   FEmojiCiz.Canvas.Font.Name := 'Segoe UI Emoji';
   FEmojiCiz.Canvas.Font.Size := 20;
+  FEmojiCiz.Canvas.Font.Color := TemaRengi(clWindowText, RGB(235, 235, 235));
   FEmojiCiz.Canvas.Brush.Style := bsClear;
   for i := 0 to High(CEmojiler) do
   begin
@@ -4055,7 +4155,3 @@ begin
 end;
 
 end.
-
-
-
-

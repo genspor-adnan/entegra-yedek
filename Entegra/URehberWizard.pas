@@ -103,6 +103,7 @@ type
     Btniletisim: TcxButton;
     btnTicariBilgiler: TcxButton;
     BtnCRM: TcxButton;
+    BtnBanka: TcxButton;
     CRMEkstreEkr: TJvWizardInteriorPage;
     ToolBar7: TToolBar;
     cxGridCRM: TcxGrid;
@@ -232,6 +233,25 @@ type
     cxDBCheckBox3: TcxDBCheckBox;
     cxLabel6: TcxLabel;
     cxDBTextEdit2: TcxDBTextEdit;
+    BankaEkr: TJvWizardInteriorPage;
+    ToolBarBanka: TToolBar;
+    BankaEkleTus: TToolButton;
+    BankaSilTus: TToolButton;
+    BankaAyirTus: TToolButton;
+    BankaDuzenleTus: TToolButton;
+    GridBanka: TcxGrid;
+    GridBankaView: TcxGridDBTableView;
+    GridBankaLevel: TcxGridLevel;
+    GridBankaViewVARSAYILAN: TcxGridDBColumn;
+    GridBankaViewBANKAADI: TcxGridDBColumn;
+    GridBankaViewSUBEADI: TcxGridDBColumn;
+    GridBankaViewHESAPNO: TcxGridDBColumn;
+    GridBankaViewHESAPADI: TcxGridDBColumn;
+    GridBankaViewIBAN: TcxGridDBColumn;
+    GridBankaViewKUR: TcxGridDBColumn;
+    GridBankaViewDURUM: TcxGridDBColumn;
+    TabBankaHesaplar: TFDQuery;
+    DtsBankaHesaplar: TDataSource;
     procedure FormShow(Sender: TObject);
     procedure WizardKontrolCancelButtonClick(Sender: TObject);
     procedure WizardKontrolFinishButtonClick(Sender: TObject);
@@ -366,6 +386,13 @@ type
     procedure MenuTarayacidanEkleClick(Sender: TObject);
     procedure LabelTemasClick(Sender: TObject);
     procedure LabelSorumluClick(Sender: TObject);
+    procedure BankaEkrEnterPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
+    procedure BankaEkrPage(Sender: TObject);
+    procedure BankaEkleTusClick(Sender: TObject);
+    procedure BankaDuzenleTusClick(Sender: TObject);
+    procedure BankaSilTusClick(Sender: TObject);
+    procedure TabBankaHesaplarAfterOpen(DataSet: TDataSet);
+    procedure BankaButonClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -379,6 +406,9 @@ type
     // Vergi No sorup izibiz NACE/mukellef bilgisini ceker, REHBER.ID olusturup
     // donen bilgileri ilgili alanlara (FIRMA + REHBERBILGI) yazar.
     procedure VeriAlNACE;
+    procedure BankaSayfasiOlustur;
+    function BankaIcinCariHazirla: Boolean;
+    procedure BankaListeYenile;
 
   public
     { Public declarations }
@@ -905,6 +935,7 @@ begin
   // LabelGrup.OnClick := Tablo.LabelClickCombobox;
   IlkAcilis:=True;
   CariPageControl.ActivePageIndex := 0;
+  BankaSayfasiOlustur;
 
   FKartSnap := TStringList.Create;
 
@@ -1008,6 +1039,243 @@ begin
     TabTicari.UpdateOptions.UpdateTableName := '';
     TabTicari.UpdateOptions.KeyFields := '';
   end;
+end;
+
+procedure TRehberWizardDlg.BankaSayfasiOlustur;
+
+  procedure KolonOlustur(var AKolon: TcxGridDBColumn; const AAlan, ABaslik: string; AGenislik: Integer);
+  begin
+    AKolon := GridBankaView.CreateColumn;
+    AKolon.DataBinding.FieldName := AAlan;
+    AKolon.Caption := ABaslik;
+    AKolon.Options.Editing := False;
+    AKolon.Width := AGenislik;
+  end;
+
+begin
+  if BankaEkr <> nil then
+    Exit;
+
+  BankaEkr := TJvWizardInteriorPage.Create(Self);
+  BankaEkr.Parent := WizardKontrol;
+  BankaEkr.Header.ParentFont := False;
+  BankaEkr.Header.Title.Text := 'Banka Bilgileri';
+  BankaEkr.Header.Title.Font.Charset := TURKISH_CHARSET;
+  BankaEkr.Header.Title.Font.Height := -16;
+  BankaEkr.Header.Title.Font.Name := 'Trebuchet MS';
+  BankaEkr.Header.Title.Font.Style := [fsBold];
+  BankaEkr.Header.Subtitle.Text := 'Cari banka hesaplari';
+  BankaEkr.Header.Subtitle.Font.Charset := TURKISH_CHARSET;
+  BankaEkr.Header.Subtitle.Font.Height := -11;
+  BankaEkr.Header.Subtitle.Font.Name := 'Trebuchet MS';
+  BankaEkr.VisibleButtons := [bkBack, bkFinish, bkCancel];
+  BankaEkr.Enabled := True;
+  BankaEkr.OnEnterPage := BankaEkrEnterPage;
+  BankaEkr.OnPage   := BankaEkrPage;
+
+  ToolBarBanka := TToolBar.Create(Self);
+  ToolBarBanka.Parent := BankaEkr;
+  ToolBarBanka.AlignWithMargins := True;
+  ToolBarBanka.Align := alTop;
+  ToolBarBanka.Margins.Bottom := 0;
+  ToolBarBanka.Height := 24;
+  ToolBarBanka.AutoSize := True;
+  ToolBarBanka.ButtonWidth := 66;
+  ToolBarBanka.Caption := 'AletCubugu';
+  ToolBarBanka.Color := clTeal;
+  ToolBarBanka.EdgeBorders := [ebLeft, ebTop, ebRight, ebBottom];
+  ToolBarBanka.EdgeInner := esLowered;
+  ToolBarBanka.EdgeOuter := esNone;
+  ToolBarBanka.Font.Charset := TURKISH_CHARSET;
+  ToolBarBanka.Font.Color := clBlack;
+  ToolBarBanka.Font.Height := -11;
+  ToolBarBanka.Font.Name := 'Arial';
+  ToolBarBanka.GradientEndColor := 11776947;
+  ToolBarBanka.GradientStartColor := 14540253;
+  ToolBarBanka.HotTrackColor := 65408;
+  ToolBarBanka.Images := Tablo.PNGImageList2;
+  ToolBarBanka.List := True;
+  ToolBarBanka.ParentColor := False;
+  ToolBarBanka.ParentFont := False;
+  ToolBarBanka.ShowCaptions := True;
+  ToolBarBanka.Transparent := True;
+
+  BankaEkleTus := TToolButton.Create(Self);
+  BankaEkleTus.Parent := ToolBarBanka;
+  BankaEkleTus.Caption := 'Yeni';
+  BankaEkleTus.ImageIndex := 0;
+  BankaEkleTus.OnClick := BankaEkleTusClick;
+
+  BankaSilTus := TToolButton.Create(Self);
+  BankaSilTus.Parent := ToolBarBanka;
+  BankaSilTus.Caption := 'Sil';
+  BankaSilTus.ImageIndex := 1;
+  BankaSilTus.OnClick := BankaSilTusClick;
+
+  BankaAyirTus := TToolButton.Create(Self);
+  BankaAyirTus.Parent := ToolBarBanka;
+  BankaAyirTus.Width := 8;
+  BankaAyirTus.Style := tbsSeparator;
+
+  BankaDuzenleTus := TToolButton.Create(Self);
+  BankaDuzenleTus.Parent := ToolBarBanka;
+  BankaDuzenleTus.Caption := 'Duzenle';
+  BankaDuzenleTus.ImageIndex := 7;
+  BankaDuzenleTus.OnClick := BankaDuzenleTusClick;
+
+  TabBankaHesaplar := TFDQuery.Create(Self);
+  TabBankaHesaplar.Connection := Tablo.FDCnn;
+  TabBankaHesaplar.AfterOpen := TabBankaHesaplarAfterOpen;
+  TabBankaHesaplar.SQL.Text :=
+    'SELECT BH.ID,BH.VARSAYILAN,BS.BANKAKODU,B.BANKAADI,BS.SUBEKODU,BS.SUBEADI,' +
+    'BH.HESAPNO,BH.HESAPADI,BH.IBAN,BH.KUR,BH.TIPI,BH.HESAPACIKLAMA,BH.DURUM ' +
+    'FROM BANKAHESAPLAR BH ' +
+    'LEFT JOIN BANKASUBELER BS ON BS.ID=BH.BANKASUBELERID ' +
+    'LEFT JOIN BANKALAR B ON B.BANKAKODU=BS.BANKAKODU ' +
+    'WHERE BH.REHBERID=:REHBERID ORDER BY BH.VARSAYILAN DESC, BH.ID';
+
+  DtsBankaHesaplar := TDataSource.Create(Self);
+  DtsBankaHesaplar.DataSet := TabBankaHesaplar;
+
+  GridBanka := TcxGrid.Create(Self);
+  GridBanka.Parent := BankaEkr;
+  GridBanka.Align := alClient;
+  GridBanka.LookAndFeel.Kind := lfOffice11;
+  GridBanka.LookAndFeel.NativeStyle := True;
+
+  GridBankaView := GridBanka.CreateView(TcxGridDBTableView) as TcxGridDBTableView;
+  GridBankaView.DataController.DataSource := DtsBankaHesaplar;
+  GridBankaView.OptionsData.Deleting := False;
+  GridBankaView.OptionsData.Editing := False;
+  GridBankaView.OptionsData.Inserting := False;
+  GridBankaView.OptionsCustomize.ColumnsQuickCustomization := True;
+  GridBankaView.OptionsView.GroupByBox := False;
+  GridBankaView.OptionsView.Indicator := True;
+  GridBankaView.OnDblClick := BankaDuzenleTusClick;
+
+  KolonOlustur(GridBankaViewVARSAYILAN, 'VARSAYILAN', 'Var.', 35);
+  GridBankaViewVARSAYILAN.PropertiesClassName := 'TcxCheckBoxProperties';
+  KolonOlustur(GridBankaViewBANKAADI, 'BANKAADI', 'Banka', 120);
+  KolonOlustur(GridBankaViewSUBEADI, 'SUBEADI', 'Sube', 120);
+  KolonOlustur(GridBankaViewHESAPNO, 'HESAPNO', 'Hesap No', 95);
+  KolonOlustur(GridBankaViewHESAPADI, 'HESAPADI', 'Hesap Adi', 130);
+  KolonOlustur(GridBankaViewIBAN, 'IBAN', 'IBAN', 210);
+  KolonOlustur(GridBankaViewKUR, 'KUR', 'P.Birimi', 65);
+  KolonOlustur(GridBankaViewDURUM, 'DURUM', 'Durum', 55);
+
+  GridBankaLevel := GridBanka.Levels.Add;
+  GridBankaLevel.GridView := GridBankaView;
+
+  BtnBanka := TcxButton.Create(Self);
+  BtnBanka.Parent := Panel2;
+  BtnBanka.Left := btnTicariBilgiler.Left;
+  BtnBanka.Top := btnTicariBilgiler.Top + btnTicariBilgiler.Height + 5;
+  BtnBanka.Width := btnTicariBilgiler.Width;
+  BtnBanka.Height := 29;
+  BtnBanka.Caption := 'Banka';
+  BtnBanka.TabOrder := 6;
+  BtnBanka.Font.Assign(btnTicariBilgiler.Font);
+  BtnBanka.ParentFont := False;
+  BtnBanka.OnClick := BankaButonClick;
+
+  BtnKisiBilgiFormu.Top := BtnKisiBilgiFormu.Top + 35;
+  BtnDokuman.Top := BtnDokuman.Top + 35;
+  BtnCRM.Top := BtnCRM.Top + 35;
+end;
+
+function TRehberWizardDlg.BankaIcinCariHazirla: Boolean;
+begin
+  Result := False;
+  if TabRehber.Active then begin
+    if TabRehber.State in [dsEdit, dsInsert] then begin
+      BoslukKontrolu;
+      TabRehber.Post;
+    end;
+    if not TabRehber.IsEmpty then
+      RehberID := TabRehber.FieldByName('ID').AsInteger;
+  end;
+  Result := RehberID <> 0;
+  if not Result then
+    ShowMessage('Banka bilgisi girmek icin once cari kart kaydi olusmalidir.');
+end;
+
+procedure TRehberWizardDlg.BankaListeYenile;
+begin
+  if not BankaIcinCariHazirla then
+    Exit;
+  TabloYenile(TabBankaHesaplar, [RehberID]);
+end;
+
+procedure TRehberWizardDlg.BankaEkrEnterPage(Sender: TObject;
+  const FromPage: TJvWizardCustomPage);
+begin
+  BankaListeYenile;
+end;
+
+procedure TRehberWizardDlg.BankaEkrPage(Sender: TObject);
+begin
+  ButtonDuzenle;
+end;
+
+procedure TRehberWizardDlg.BankaButonClick(Sender: TObject);
+begin
+  WizardKontrol.ActivePage := BankaEkr;
+  BankaListeYenile;
+  ButtonDuzenle;
+end;
+
+procedure TRehberWizardDlg.TabBankaHesaplarAfterOpen(DataSet: TDataSet);
+begin
+  BankaDuzenleTus.Enabled := not TabBankaHesaplar.IsEmpty;
+  BankaSilTus.Enabled := BankaDuzenleTus.Enabled;
+end;
+
+procedure TRehberWizardDlg.BankaEkleTusClick(Sender: TObject);
+var
+  ID: Integer;
+begin
+  if not BankaIcinCariHazirla then
+    Exit;
+  ULog.OturumYakala(FOturumID);
+  ID := Tablo.BankaTanimSihirbazBaslat('E', 1, -1, RehberID);
+  if ID > 0 then
+    BankaListeYenile;
+end;
+
+procedure TRehberWizardDlg.BankaDuzenleTusClick(Sender: TObject);
+var
+  ID: Integer;
+begin
+  if (TabBankaHesaplar = nil) or (not TabBankaHesaplar.Active) or TabBankaHesaplar.IsEmpty then
+    Exit;
+  if not BankaIcinCariHazirla then
+    Exit;
+  ULog.OturumYakala(FOturumID);
+  ID := Tablo.BankaTanimSihirbazBaslat('D', 1, TabBankaHesaplar.FieldByName('ID').AsInteger, RehberID);
+  if ID > 0 then
+    BankaListeYenile;
+end;
+
+procedure TRehberWizardDlg.BankaSilTusClick(Sender: TObject);
+begin
+  if (TabBankaHesaplar = nil) or (not TabBankaHesaplar.Active) or TabBankaHesaplar.IsEmpty then
+    Exit;
+  if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) <> IDYES then
+    Exit;
+  ULog.OturumYakala(FOturumID);
+
+  Tablo.Query1.Close;
+  Tablo.Query1.SQL.Text := ' select '+DbUst(1)+'ISLEMTARIHI from KASA where HESAPTURU=''B'' and HESAPID='+
+    TabBankaHesaplar.FieldByName('ID').AsString+' AND TUR<>1 '+DbSinir(1);
+  if AktifVeriMotor = vmPG then
+    Tablo.Query1.SQL.Text := PgSqlCevir(Tablo.Query1.SQL.Text);
+  Tablo.Query1.Open;
+  if not Tablo.Query1.IsEmpty then
+    raise Exception.Create(Tablo.Query1.Fields[0].AsString+RDGirilmisBankaBilgisiVarSilinemez);
+
+  Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from BANKAHESAPLAR where ID=&id',
+    ['&id'], [TabBankaHesaplar.FieldByName('ID').AsInteger]);
+  BankaListeYenile;
 end;
 
 procedure TRehberWizardDlg.FormKeyDown(Sender: TObject; var Key: Word;
@@ -1137,7 +1405,7 @@ begin
   if LogGun > 0 then
     ULog.LogUserAcilis('REHBER_USER', RehberID);
   FOturumID := '';
-  if (Cagiran = 0) and (RehberID > 0) and (GiristekiRehberId <> '') and (GiristekiRehberId <> '0') then
+  if (Cagiran = 0) and (RehberID <> 0) and (GiristekiRehberId <> '') and (GiristekiRehberId <> '0') then
     // LAZY: sadece PLANI yaz (bakmada is YOK). Ilk gercek degisiklikte OturumYakala(FOturumID)
     // tetiklenir (dataset Before* + Sil butonlari). Hic degismezse konfirmasyon+geri-yukleme YOK.
     FOturumID := ULog.OturumBaslatPlan('REHBER', RehberID,
@@ -1147,6 +1415,7 @@ begin
         ULog.SnapTablo(2, 'IMAJ',           'YERI=71 and YER_ID=' + IntToStr(RehberID)),   // 71=REHBER: profil resmi (LogoResim/RESIM cache); DOSYA icerigi pin ile korunur
         ULog.SnapTablo(2, 'REHBERILETISIM', 'REHBERID=' + IntToStr(RehberID)),
         ULog.SnapTablo(2, 'REHBERPERSONEL', 'REHBERID=' + IntToStr(RehberID)),
+        ULog.SnapTablo(2, 'BANKAHESAPLAR',  'REHBERID=' + IntToStr(RehberID)),
         ULog.SnapTablo(3, 'REHBERBILGI',    'YERI=1 and YER_ID in (select ID from REHBERILETISIM where REHBERID=' + IntToStr(RehberID) + ')'),
         ULog.SnapTablo(3, 'REHBERBILGI',    'YERI=4 and YER_ID in (select ID from REHBERPERSONEL where REHBERID=' + IntToStr(RehberID) + ')'),
         ULog.SnapTablo(3, 'REHBERBILGI',    'YERI in (2,3) and YER_ID=' + IntToStr(RehberID)),
@@ -1170,6 +1439,10 @@ begin
   PersonelIletisimEkr.Enabled := (Cagiran in [0, 4, 34]); //and (Tablo.YetkiVarmi(MODUL_Cari,YetkiTur_Gorme))  ;
   DokumanEkr.Enabled :=(Cagiran in [0, RehAyarYeri_Dokuman]); // and (Tablo.YetkiVarmi(MODUL_Cari,YetkiTur_Gorme))  ;
   CRMEkstreEkr.Enabled := (Cagiran in [0, RehAyarYeri_CRM]); // and (Tablo.YetkiVarmi(MODUL_Cari,YetkiTur_Gorme)) ;
+  if BankaEkr <> nil then
+    BankaEkr.Enabled := Cagiran = 0;
+  if BtnBanka <> nil then
+    BtnBanka.Visible := Cagiran = 0;
   panel2.Visible :=  Cagiran <> RehAyarYeri_CRM;
 
   case Cagiran of
@@ -2303,6 +2576,8 @@ begin
      BtnKisiBilgiFormu.Enabled := BtnKisiBilgiFormu.Tag <>WizardKontrol.ActivePageIndex;
      BtnDokuman.Enabled := BtnDokuman.Tag <> WizardKontrol.ActivePageIndex;
      BtnCRM.Enabled := BtnCRM.Tag <> WizardKontrol.ActivePageIndex;
+     if BtnBanka <> nil then
+       BtnBanka.Enabled := WizardKontrol.ActivePage <> BankaEkr;
   end;
  { else
   begin
@@ -2411,6 +2686,7 @@ begin
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE EXISTS (SELECT * FROM REHBERPERSONEL RP WHERE RP.ID=REHBERBILGI.YER_ID AND RP.REHBERID='+TabRehber.Fields[0].AsString+' AND YERI=4 )',[],[]);
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERPERSONEL where REHBERID = '+TabRehber.Fields[0].AsString,[],[]);
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBERBILGI WHERE YERI in (2,3) and YER_ID ='+TabRehber.Fields[0].AsString,[],[]);
+      veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM BANKAHESAPLAR where REHBERID = '+TabRehber.Fields[0].AsString,[],[]);
       veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM IMAJ WHERE REHBERID='+TabRehber.Fields[0].AsString,[],[]);
       if not Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from FATBASLIK where REHBERID=&ID', ['&ID'], [TabRehber.Fields[0].AsInteger]) then begin
         veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'DELETE FROM REHBER_USER WHERE ID='+TabRehber.Fields[0].AsString,[],[]);

@@ -66,6 +66,7 @@ These are documented in detail in the companion docs — read them before non-tr
 - **`error-handling.md`** — transaction pattern (`StartTransaction` / `try` / `Commit` / `except` / `Rollback if InTransaction` / `raise`), `Veritabani.VeriVarMi` / `BasitKomutCalistir` helpers, `Application.OnException` handler in `UKimlik.pas`, `ShowErrorDialog` from `UHataDialog`.
 - **`ebelge-akis.md`** — GİB e-Belge (e-Fatura / e-Arşiv / e-İrsaliye) flow: encoding schemes (`FATBASLIK.TUR`, `REHBERALIAS.BELGETURU`/`EBELGE.BELGETURU` alias codes), the tables/constants and REST endpoints used, and the decision logic in `UFaturalar.MenuEFatura` / `UOpsiyonFatura` / `UEBelgeOlusturucu`. Read this before touching e-invoice code. (`IHRACAT_DAGITIM.md` covers the İhracat/export e-Fatura specifics on top of it.)
 - **`loglama-sistemi.md`** — the full ISLEMLOG audit system: `Ortak/ULog.pas` helpers, the yearly `GENDEPO.LOG<yyyy>` tables + self-healing `ISLEMLOG` view, the `LOGCOZUM`/`LOGREFERANS` decode path behind the UInfo screen, and the delete→"Geri Al" undo. Read before touching audit logging (expands the summary in "Key patterns" below).
+- **`Doc/PROJE_OZETI.md`** — Turkish whole-project summary distilled from all of the above; useful as a fast orientation read, but the topic docs are authoritative.
 - **`belge-depolama.md`** — document/media storage: the three layers (business record → `IMAJ` metadata → content), the migration from `IMAJ.BELGE`/on-disk `.OBJ` to `GENDEPO.DOSYA` (FILESTREAM, hash-dedup), and `IMAJ.YERI` context codes. Read before touching attachments, images, or document content.
 
 Key patterns to honor without re-deriving:
@@ -90,7 +91,7 @@ An in-progress effort ports the app from SQL Server to PostgreSQL. It is **isola
 
 ### PG dev environment (local)
 
-Docker Postgres 14 (`gentegre-pg`, `localhost:5433`, db `gentegre`, `postgres`/`FETAGEN`) plus Adminer on `localhost:8080`. The app's dev target is this local container, not the cloud host (`HETZNER_PG_KURULUM.md` covers the cloud/"ekspert" instance).
+Docker Postgres 14 (`gentegre-pg`, `localhost:5433`, db `gentegre`, `postgres`/`FETAGEN`) plus Adminer on `localhost:8080`. The app's dev target is this local container, not the cloud host (`pg/HETZNER_PG_KURULUM.md` covers the cloud/"ekspert" instance).
 
 ```powershell
 Get-Content pg\schema\NN_x.sql | docker exec -i -e PGPASSWORD=FETAGEN gentegre-pg psql -U postgres -d gentegre
@@ -105,7 +106,8 @@ powershell -File pg\tools\db_diff.ps1 -Table DEPOLAR -Keys DEPOADI # compare eng
 DB objects are **not** migrated by the build. `GenUpdate/` holds:
 
 - `GenDepoKur1..9.sql` + `sql_ayaradi_doldur.sql` — one-time GENDEPO install.
-- `GenDepoUpdateN.sql` — incremental updates (N currently up to 60). **New DB changes go into a new numbered file**, never by editing an already-shipped one.
+- `Update_SQL_<N>.sql` / `Update_PG_<N>.sql` — incremental updates, **current naming** (N currently up to 170; files numbered up to 169 use the older `GenDepoUpdateN.sql` name — do not add new ones with that name). One logical change = one number, with the MSSQL and PostgreSQL variants sharing it: `Update_SQL_170.sql` + `Update_PG_170.sql`. The PG file must carry `#pg` in its header comment or the update service will run it against MSSQL.
+- **Every DB change — schema, stored procedure, trigger, or a one-off data repair — goes into a NEW numbered file**, never by editing an already-shipped one and never as an ad-hoc script run only on one machine. Assume the script will be run on a customer database: make it idempotent, back up rows before touching them, report what it will change, and restrict a data repair to rows that are *provably* wrong — never blanket-overwrite a column that a customer may have configured deliberately.
 - `sp_Prog_*.sql` / `sp_Grnt_*.sql` / `tbl_*.sql` — deployable stored-procedure and table definitions.
 
 Customers receive updates through `UVersiyonGuncelle.pas`, which pulls command rows from the GenUpdate web service and runs those newer than `GENINI` section `Ops_GenelOpsiyon_VersiyonNo`. Each command is engine-tagged: `#pg` / `#PG` anywhere in its `ACIKLAMA` marks it a **PostgreSQL** command; untagged means MSSQL. Only commands matching the active engine run — the others are skipped (and logged) while the version number still advances, so a PG-only change must be tagged or it will execute against MSSQL. Mind the batch order inside a script: inserts that copy data must precede the `DROP` of their source.
@@ -118,11 +120,14 @@ Deploying Turkish-containing SQL with `sqlcmd` requires `-f 65001` (a UTF-8 BOM 
 - `sql_calistir.ps1` + `sql_calistir.sql` — ad-hoc SQL runner against the local SQL Server, writes results to `sql_sonuc.txt`. Edit the `.sql` and re-run when you need to inspect DB state.
 - `refactor_references.ps1`, `refactor_missing_item.ps1`, `rollback.ps1` — refactoring helpers for the central component registry / `Utablo` items.
 - `tmp_query_*.ps1` — disposable experiments; safe to ignore. The `.claudeignore` excludes `tmp_*.ps1` from indexing.
+- `.mcp.json` registers the **`mssql-bilim`** MCP server (`@executeautomation/database-server` against `localhost\SQLEXPRESS` / `BILIM`) — use it, or plain `sqlcmd`, for read-only DB inspection on the dev machine. ODBC Driver 18 rejects the self-signed cert, so `sqlcmd` needs `-C` (trust cert). GENDEPO is reached from `BILIM` through the `ISLEMLOG` / `LOGCOZUM` / `SNAPSHOT` synonyms (physical DB is `BILIM_GENDEPO`; `sa` cannot open it directly).
 
 `.claudeignore` also excludes build artifacts (`*.dcu`, `*.exe`, `*.dll`, `*.bpl`, `*.res`, `*.map`, `*.identcache`, …), media (`*.bmp`, `*.png`, `*.jpg`, `*.wav`, `*.pdf`, `*.doc`, `*.xls`), the `3dparty/` vendored libraries, and archive backups (`*.rar`, `*.zip`). Don't try to read these blobs; if a `.dfm` reads as binary, it starts with `TPF0` — convert it with `../convert_dfm.py` before editing.
 
 ## Editing notes
 
+- **Don't create documentation files** (`*.md`, summaries, reports) unless the user asks for them.
+- `AGENTS.md` is a near-verbatim copy of this file for Codex; `.cursor/rules/entegra-ana-dizin-erisim.mdc` grants standing read/edit permission over this folder (destructive/bulk git operations still need explicit consent). When a convention here changes, mirror it into `AGENTS.md`.
 - `.pas` and `.dfm` files come as a pair — keep component names/types in sync between them. DFMs may be text or binary; the binary form is rare but possible.
 - `Utablo.dfm` is multi-megabyte (the central data module). Read specific offsets, do not dump the whole file.
 - Default code-page assumptions in legacy units are Windows-1254 (Turkish). Modern files are UTF-8; PowerShell helpers write UTF-8 explicitly.

@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DÖF Listesi — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* DOF satir renkleri */
+    --s-yok:#f7cfcf; --s-yok-t:#7d1f1f;   /* termini gecmis acik DOF   */
+    --s-kri:#fbe6ae; --s-kri-t:#7a5407;   /* termine <= 7 gun kaldi     */
+    --s-skt:#f6d9c0; --s-skt-t:#8a4a12;   /* etkinlik kontrolu bekliyor */
+    --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;   /* kapandi / iptal            */
+    /* gorev butonu (Delphi clGorevTusuSecili / Pasif) */
+    --tus-pas:#9c71ad; --tus-sec:#1f6fbe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+
+  .wrap{display:grid;grid-template-columns:222px 1fr 236px;gap:0}
+
+  /* SOL: Menu / Arama */
+  .gorev{background:#f4f7fa;border-right:1px solid var(--line2);padding:6px 6px 10px}
+  .gorev h5{margin:6px 4px 4px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .ltabs{display:flex;gap:2px;margin:-6px -6px 8px;padding:6px 6px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .ltab{flex:1;text-align:center;padding:6px 8px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);
+    border-bottom:none;border-radius:3px 3px 0 0;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .ltab.active{background:#f4f7fa;color:var(--navy);font-weight:bold}
+  .lpane{display:none}.lpane.active{display:block}
+  .gtus{display:flex;align-items:center;gap:8px;color:#fff;font-weight:bold;font-size:11.5px;
+    background:var(--tus-pas);border:1px solid rgba(0,0,0,.12);border-radius:3px;padding:8px 9px;margin-bottom:3px;cursor:default}
+  .gtus:hover{filter:brightness(1.06)}
+  .gtus.on{background:var(--tus-sec);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+  .gtus .ic{font-size:14px;width:18px;text-align:center}
+  .achips{display:flex;gap:4px;margin-bottom:8px}
+  .achips .minibtn{flex:1;justify-content:center}
+  .agrid{display:grid;grid-template-columns:70px 1fr;gap:5px 6px;align-items:center}
+  .agrid label{font-size:10.5px;color:var(--muted);text-align:right}
+  .gorev .minibtn{white-space:nowrap}
+
+  /* ORTA */
+  .center{min-width:0;display:flex;flex-direction:column}
+  .filtre{display:flex;gap:5px;padding:8px 10px 7px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line2);background:#fbfcfe}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.s-yok td{background:var(--s-yok);color:var(--s-yok-t)}
+  .dg tr.s-kri td{background:var(--s-kri);color:var(--s-kri-t)}
+  .dg tr.s-skt td{background:var(--s-skt);color:var(--s-skt-t)}
+  .dg tr.s-pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .dg tr.s-pas td.ad{text-decoration:line-through}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-izl{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .tip{display:inline-block;min-width:30px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;padding:1px 5px;border:1px solid}
+  .t-mal{background:#e5ecf8;border-color:#c6d7ef;color:#2b5c95}
+  .t-hzm{background:#e3f0e6;border-color:#c3e0cb;color:#2e7d46}
+  .t-sar{background:#fdf1e2;border-color:#f0dcbd;color:#96651a}
+  /* mini bar */
+  .bar{height:9px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:54px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+
+  /* alt detay */
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 12px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+  .gridtb{display:flex;gap:4px;padding:0 0 7px;align-items:center;flex-wrap:wrap}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px}
+
+  /* SAG */
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:8px 0}
+  .side h5{margin:0;padding:7px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11px;padding:3px 12px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .tvsep{height:1px;background:var(--line2);margin:7px 10px}
+  .sidebtns{display:flex;flex-direction:column;gap:4px;padding:4px 10px}
+  .urun{margin:0 10px;border:1px solid var(--line);border-radius:4px;background:#fff;padding:9px;text-align:center}
+  .urun .foto{height:82px;border:1px solid var(--line2);border-radius:3px;background:linear-gradient(#fff,#f2f6fa);
+    display:flex;align-items:center;justify-content:center;font-size:30px;color:#9fb3c8}
+  .urun .nm{font-size:11.5px;font-weight:bold;color:var(--navy);margin-top:7px;line-height:1.35}
+  .urun .mt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .depo{display:flex;align-items:center;gap:7px;padding:3px 12px;font-size:11px}
+  .depo .ad{width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+  .depo .mk{width:44px;text-align:right;font-family:"Segoe UI",Tahoma}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:22px;padding:0 6px;font-size:11.5px;
+    display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:5px;top:2px;color:var(--muted);font-size:10px}
+
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> DÖF Listesi — Düzeltici / Önleyici Faaliyet
+    <span class="sp">Kalite\UDofListeDlg · KALDOF · KALDOFAKSIYON · Şube: Merkez · 14.08.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">＋ Aksiyon Ekle</div>
+    <div class="btn">👤 Sorumlu Ata</div>
+    <div class="btn">📅 Termin Ver</div>
+    <div class="sepv"></div>
+    <div class="btn">🔍 Etkinlik Kontrolü</div>
+    <div class="btn" data-kayit="1">✔ Kapat</div>
+    <div class="sepv"></div>
+    <div class="btn">📊 Excel</div>
+    <div class="btn">🖨 Yazdır</div>
+  </div>
+
+  <div class="wrap">
+    <!-- ============ SOL: MENU / ARAMA ============ -->
+    <div class="gorev">
+      <div class="ltabs">
+        <div class="ltab active" data-l="menu">☰ Menü</div>
+        <div class="ltab" data-l="arama">🔎 Arama</div>
+      </div>
+
+      <div class="lpane active" data-lp="menu">
+        <h5>Kalite</h5>
+        <div class="gtus on"><span class="ic">📋</span> DÖF Kartı</div>
+        <div class="gtus"><span class="ic">🗂</span> Aksiyon Planı</div>
+        <div class="gtus"><span class="ic">🔍</span> Etkinlik Kontrolü</div>
+        <div class="gtus"><span class="ic">⚠</span> Kaynak Sapmalar</div>
+        <div class="gtus"><span class="ic">🔁</span> Tekrar Analizi</div>
+        <h5>Diğer</h5>
+        <div class="gtus"><span class="ic">📁</span> Dökümler</div>
+        <div class="gtus"><span class="ic">📂</span> Özel Dökümler</div>
+        <div class="hint" style="padding:6px 4px 0">Tek buton aktif — <b>GorevTusuSec</b>;
+          seçili olan mavi. Aksiyon / Etkinlik ekranları aynı <b>KALDOF</b> kaydını farklı
+          detay tablosuyla açar.</div>
+      </div>
+
+      <div class="lpane" data-lp="arama">
+        <div class="achips">
+          <span class="minibtn on">Tüm</span><span class="minibtn">Son</span><span class="minibtn">Sık</span>
+        </div>
+        <div class="agrid">
+          <label>DÖF No</label><div class="inp"></div>
+          <label>Konu</label><div class="inp">perde</div>
+          <label>Tür</label><div class="inp combo">(tümü)</div>
+          <label>Kaynak</label><div class="inp combo">(tümü)</div>
+          <label>Süreç</label><div class="inp combo">(tümü)</div>
+          <label>Sorumlu</label><div class="inp combo">(tümü)</div>
+          <label>Öncelik</label><div class="inp combo">(tümü)</div>
+          <label>Durum</label><div class="inp combo">Açık + Aksiyonda</div>
+        </div>
+        <div class="agrid" style="grid-template-columns:70px 1fr 1fr;margin-top:5px">
+          <label>Açılış</label><div class="inp">01.01.2026</div><div class="inp">14.08.2026</div>
+          <label>Termin</label><div class="inp">01.07.2026</div><div class="inp">30.09.2026</div>
+        </div>
+        <div class="hint" style="margin-top:6px">Tür: Düzeltici / Önleyici / İyileştirme ·
+          Kaynak: Sapma / Denetim bulgusu / Müşteri şikayeti / YGG kararı / Öneri</div>
+        <label class="chk" style="margin-top:6px"><input type="checkbox" checked> Kapananları da göster</label>
+        <label class="chk"><input type="checkbox"> Sadece gecikmişler</label>
+        <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn on" style="flex:1;justify-content:center">🔎 Ara</span>
+          <span class="minibtn" style="flex:1;justify-content:center">↩ Temizle</span>
+          <span class="minibtn" style="flex-basis:100%;justify-content:center">💾 Aramayı Kaydet</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ORTA: LISTE ============ -->
+    <div class="center">
+      <div class="filtre">
+        <span class="minibtn">Açık</span>
+        <span class="minibtn on">Aksiyonda</span>
+        <span class="minibtn">Etkinlik Kontrolünde</span>
+        <span class="minibtn">Gecikmiş</span>
+        <span class="minibtn">Kapandı</span>
+        <span class="minibtn">Tümü</span>
+        <span class="sepv" style="height:20px"></span>
+        <span class="minibtn">🏷 Tür: (tümü)</span>
+        <span class="minibtn">🏭 Süreç: (tümü)</span>
+        <span class="minibtn">👤 Sorumlu: (tümü)</span>
+        <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">
+          Sıralama: kapananlar en sonda · gecikmişler üstte · termin ↑</span>
+      </div>
+
+      <div style="padding:10px 10px 0">
+        <div class="dg">
+          <table>
+            <tr>
+              <th class="c" style="width:40px">TÜR</th>
+              <th style="width:104px">DÖF NO</th>
+              <th style="width:74px">AÇILIŞ</th>
+              <th>KONU</th>
+              <th style="width:112px">KAYNAK</th>
+              <th style="width:104px">KAYNAK KAYIT</th>
+              <th style="width:118px">SÜREÇ / BÖLÜM</th>
+              <th style="width:96px">SORUMLU</th>
+              <th class="c" style="width:60px">ÖNCELİK</th>
+              <th class="c" style="width:96px">AKSİYON</th>
+              <th style="width:74px">TERMİN</th>
+              <th class="r" style="width:64px">KALAN GÜN</th>
+              <th class="c" style="width:66px">ETKİNLİK</th>
+              <th class="r" style="width:82px">MALİYET</th>
+              <th class="c" style="width:112px">DURUM</th>
+            </tr>
+
+            <!-- ---- GECIKMIS (kirmizi) ---- -->
+            <tr class="s-yok foc">
+              <td class="c"><span class="tip t-mal">DÜZ</span></td><td><b>DOF.2026/0031</b></td><td>22.07.2026</td>
+              <td class="ad"><b>Hatalı ölçü ile perde teslimi — müşteri iadesi</b></td>
+              <td>Müşteri şikayeti</td><td>MŞK.2026/0118</td><td>Satış / Montaj</td><td>Serkan Öz</td>
+              <td class="c"><span class="pill p-yok">Yüksek</span></td>
+              <td class="c">2/4 <div class="bar"><span class="yok" style="width:50%"></span></div></td>
+              <td>05.08.2026</td><td class="r"><b>−9</b></td>
+              <td class="c"><span class="pill p-kri">Bekliyor</span></td>
+              <td class="r">18.450,00</td><td class="c"><span class="pill p-kri">Aksiyonda</span></td>
+            </tr>
+            <tr class="s-yok">
+              <td class="c"><span class="tip t-mal">DÜZ</span></td><td>DOF.2026/0028</td><td>15.07.2026</td>
+              <td class="ad">Tedarikçi sevkiyatında kumaş renk farkı (parti uyumsuzluğu)</td>
+              <td>Sapma</td><td>SPM.2026/0042</td><td>Satın Alma</td><td>Ayşe Demir</td>
+              <td class="c"><span class="pill p-yok">Yüksek</span></td>
+              <td class="c">3/5 <div class="bar"><span class="yok" style="width:60%"></span></div></td>
+              <td>12.08.2026</td><td class="r"><b>−2</b></td>
+              <td class="c"><span class="pill p-kri">Bekliyor</span></td>
+              <td class="r">42.300,00</td><td class="c"><span class="pill p-kri">Aksiyonda</span></td>
+            </tr>
+
+            <!-- ---- ETKINLIK KONTROLU BEKLIYOR (turuncu) ---- -->
+            <tr class="s-skt">
+              <td class="c"><span class="tip t-sar">İYİ</span></td><td>DOF.2026/0019</td><td>12.06.2026</td>
+              <td class="ad">Depo yerleşim düzeninin ABC analizine göre yeniden kurgulanması</td>
+              <td>Öneri</td><td>ÖNR.2026/0033</td><td>Depo / Lojistik</td><td>Murat Şahin</td>
+              <td class="c"><span class="pill p-pas">Düşük</span></td>
+              <td class="c">5/5 <div class="bar"><span class="ok" style="width:100%"></span></div></td>
+              <td>31.07.2026</td><td class="r">−14</td>
+              <td class="c"><span class="pill p-kri">Bekliyor</span></td>
+              <td class="r">12.900,00</td><td class="c"><span class="pill p-izl">Etkinlik Kont.</span></td>
+            </tr>
+            <tr class="s-skt">
+              <td class="c"><span class="tip t-mal">DÜZ</span></td><td>DOF.2026/0022</td><td>26.06.2026</td>
+              <td class="ad">e-Fatura gönderiminde hata oranının %4,2'ye yükselmesi</td>
+              <td>Denetim bulgusu</td><td>DNT.2026/07</td><td>Muhasebe / BT</td><td>Kemal Arslan</td>
+              <td class="c"><span class="pill p-kri">Orta</span></td>
+              <td class="c">4/4 <div class="bar"><span class="ok" style="width:100%"></span></div></td>
+              <td>08.08.2026</td><td class="r">−6</td>
+              <td class="c"><span class="pill p-kri">Bekliyor</span></td>
+              <td class="r">7.850,00</td><td class="c"><span class="pill p-izl">Etkinlik Kont.</span></td>
+            </tr>
+
+            <!-- ---- TERMINE <= 7 GUN (sari) ---- -->
+            <tr class="s-kri">
+              <td class="c"><span class="tip t-hzm">ÖNL</span></td><td>DOF.2026/0035</td><td>01.08.2026</td>
+              <td class="ad">Forklift manevra alanında yaya güvenliği — ramak kala olayı</td>
+              <td>Sapma</td><td>SPM.2026/0051</td><td>Depo / Lojistik</td><td>Murat Şahin</td>
+              <td class="c"><span class="pill p-yok">Yüksek</span></td>
+              <td class="c">1/3 <div class="bar"><span class="kri" style="width:33%"></span></div></td>
+              <td>18.08.2026</td><td class="r"><b>4</b></td>
+              <td class="c"><span class="pill p-kri">Bekliyor</span></td>
+              <td class="r">5.400,00</td><td class="c"><span class="pill p-kri">Aksiyonda</span></td>
+            </tr>
+            <tr class="s-kri">
+              <td class="c"><span class="tip t-hzm">ÖNL</span></td><td>DOF.2026/0030</td><td>20.07.2026</td>
+              <td class="ad">Tehlikeli kimyasal (yapıştırıcı) depolama koşullarının iyileştirilmesi</td>
+              <td>Denetim bulgusu</td><td>DNT.2026/06</td><td>İSG / Depo</td><td>Murat Şahin</td>
+              <td class="c"><span class="pill p-yok">Yüksek</span></td>
+              <td class="c">2/4 <div class="bar"><span class="kri" style="width:50%"></span></div></td>
+              <td>19.08.2026</td><td class="r"><b>5</b></td>
+              <td class="c"><span class="pill p-kri">Bekliyor</span></td>
+              <td class="r">9.250,00</td><td class="c"><span class="pill p-kri">Aksiyonda</span></td>
+            </tr>
+            <tr class="s-kri">
+              <td class="c"><span class="tip t-sar">İYİ</span></td><td>DOF.2026/0036</td><td>04.08.2026</td>
+              <td class="ad">Kalibrasyon takip sisteminin dijitalleştirilmesi</td>
+              <td>YGG kararı</td><td>YGG.2026/02</td><td>Kalite</td><td>Elif Yılmaz</td>
+              <td class="c"><span class="pill p-kri">Orta</span></td>
+              <td class="c">1/4 <div class="bar"><span class="kri" style="width:25%"></span></div></td>
+              <td>21.08.2026</td><td class="r"><b>7</b></td>
+              <td class="c"><span class="pill p-kri">Bekliyor</span></td>
+              <td class="r">22.600,00</td><td class="c"><span class="pill p-kri">Aksiyonda</span></td>
+            </tr>
+
+            <!-- ---- NORMAL ---- -->
+            <tr>
+              <td class="c"><span class="tip t-mal">DÜZ</span></td><td>DOF.2026/0037</td><td>08.08.2026</td>
+              <td class="ad">Montaj ekibinin müşteri randevusuna geç kalması (3 tekrar)</td>
+              <td>Müşteri şikayeti</td><td>MŞK.2026/0124</td><td>Montaj / Servis</td><td>Serkan Öz</td>
+              <td class="c"><span class="pill p-yok">Yüksek</span></td>
+              <td class="c">0/3 <div class="bar"><span class="yok" style="width:0%"></span></div></td>
+              <td>29.08.2026</td><td class="r">15</td>
+              <td class="c">—</td>
+              <td class="r">3.150,00</td><td class="c"><span class="pill p-izl">Kök neden</span></td>
+            </tr>
+            <tr>
+              <td class="c"><span class="tip t-hzm">ÖNL</span></td><td>DOF.2026/0033</td><td>28.07.2026</td>
+              <td class="ad">Kesim tezgâhı periyodik bakım aralığının kısaltılması</td>
+              <td>Sapma</td><td>SPM.2026/0047</td><td>Üretim</td><td>Hakan Toprak</td>
+              <td class="c"><span class="pill p-kri">Orta</span></td>
+              <td class="c">2/3 <div class="bar"><span class="ok" style="width:67%"></span></div></td>
+              <td>04.09.2026</td><td class="r">21</td>
+              <td class="c">—</td>
+              <td class="r">15.800,00</td><td class="c"><span class="pill p-kri">Aksiyonda</span></td>
+            </tr>
+
+            <!-- ---- KAPANDI / IPTAL (gri, en sonda) ---- -->
+            <tr class="s-pas">
+              <td class="c"><span class="tip t-sar">İYİ</span></td><td>DOF.2026/0008</td><td>05.03.2026</td>
+              <td class="ad">Sevkiyat irsaliyelerinin mobil imza ile onaylanması</td>
+              <td>Öneri</td><td>ÖNR.2026/0009</td><td>Sevkiyat</td><td>Kemal Arslan</td>
+              <td class="c"><span class="pill p-pas">Düşük</span></td>
+              <td class="c">3/3 <div class="bar"><span class="ok" style="width:100%"></span></div></td>
+              <td>15.05.2026</td><td class="r">—</td>
+              <td class="c"><span class="pill p-ok">Etkili</span></td>
+              <td class="r">4.750,00</td><td class="c"><span class="pill p-ok">Kapandı</span></td>
+            </tr>
+            <tr class="s-pas">
+              <td class="c"><span class="tip t-mal">DÜZ</span></td><td>DOF.2026/0015</td><td>02.05.2026</td>
+              <td class="ad">Ambalaj etiketlerinde barkod okunmama sorunu</td>
+              <td>Sapma</td><td>SPM.2026/0027</td><td>Sevkiyat</td><td>Elif Yılmaz</td>
+              <td class="c"><span class="pill p-kri">Orta</span></td>
+              <td class="c">4/4 <div class="bar"><span class="ok" style="width:100%"></span></div></td>
+              <td>10.06.2026</td><td class="r">—</td>
+              <td class="c"><span class="pill p-yok">Etkisiz</span></td>
+              <td class="r">11.200,00</td><td class="c"><span class="pill p-pas">Kapandı → 0037</span></td>
+            </tr>
+            <tr class="s-pas">
+              <td class="c"><span class="tip t-mal">DÜZ</span></td><td>DOF.2026/0012</td><td>18.04.2026</td>
+              <td class="ad">Stor perde mekanizmasında erken aşınma — garanti iadeleri</td>
+              <td>Sapma</td><td>SPM.2026/0021</td><td>Üretim / Satın Alma</td><td>Ayşe Demir</td>
+              <td class="c"><span class="pill p-yok">Yüksek</span></td>
+              <td class="c">6/6 <div class="bar"><span class="ok" style="width:100%"></span></div></td>
+              <td>30.06.2026</td><td class="r">—</td>
+              <td class="c"><span class="pill p-ok">Etkili</span></td>
+              <td class="r">96.750,00</td><td class="c"><span class="pill p-ok">Kapandı</span></td>
+            </tr>
+            <tr class="s-pas">
+              <td class="c"><span class="tip t-hzm">ÖNL</span></td><td>DOF.2026/0025</td><td>30.06.2026</td>
+              <td class="ad">Araç filosu lastik değişim planının öne çekilmesi</td>
+              <td>Öneri</td><td>ÖNR.2026/0041</td><td>İdari İşler</td><td>Hakan Toprak</td>
+              <td class="c"><span class="pill p-pas">Düşük</span></td>
+              <td class="c">0/2 <div class="bar"><span class="yok" style="width:0%"></span></div></td>
+              <td>05.08.2026</td><td class="r">—</td>
+              <td class="c">—</td>
+              <td class="r">0,00</td><td class="c"><span class="pill p-pas">İptal</span></td>
+            </tr>
+
+            <tfoot>
+              <tr>
+                <td colspan="9" style="text-align:right">TOPLAM (13 DÖF · 9 açık · 2 gecikmiş · 2 etkinlik kontrolünde)</td>
+                <td class="c">33 / 50</td>
+                <td></td><td class="r"></td><td class="c"></td>
+                <td class="r">250.400,00</td><td class="c"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-yok)"></span>Termini geçmiş açık DÖF</span>
+          <span><span class="sw" style="background:var(--s-kri)"></span>Termine ≤ 7 gün kaldı</span>
+          <span><span class="sw" style="background:var(--s-skt)"></span>Aksiyonları bitti — <b>etkinlik kontrolü</b> bekliyor</span>
+          <span><span class="sw" style="background:var(--s-pas)"></span>Kapandı / İptal — <b>en sonda</b>, konusu üstü çizili</span>
+        </div>
+        <div class="hint">
+          Satır rengi <b>Styles.OnGetContentStyle</b> ile; öncelik
+          <b>Kapandı/İptal → Gecikmiş (aksiyon açık) → Etkinlik kontrolü bekliyor → Termine ≤ 7 gün → Normal</b>.
+          Bir DÖF'ün aksiyonları bittiyse termini geçmiş olsa da kırmızı değil <b>turuncu</b> boyanır —
+          bekleyen iş artık aksiyon değil, etkinlik kontrolüdür.
+          DÖF akışı: <b>Açıldı → Kök neden → Aksiyon planı → Uygulama → Etkinlik kontrolü → Kapandı</b>.
+          Etkinlik "Etkisiz" çıkarsa DÖF kapanır ama yeni bir DÖF açılarak zincirlenir (ör. 0015 → 0037).
+          <b>KALAN GÜN</b> = Termin − bugün (14.08.2026); kapanan kayıtlarda gösterilmez.
+        </div>
+      </div>
+
+      <!-- ALT DETAY -->
+      <div class="tabs" style="margin-top:12px">
+        <div class="tab active" data-t="aksiyon">Aksiyon Planı <span class="b">4</span></div>
+        <div class="tab" data-t="kok">Kök Neden</div>
+        <div class="tab" data-t="kaynak">Kaynak Kayıtlar <span class="b">3</span></div>
+        <div class="tab" data-t="etkinlik">Etkinlik Kontrolü</div>
+        <div class="tab" data-t="maliyet">Maliyet</div>
+        <div class="tab" data-t="dokuman">Doküman / Kanıt <span class="b">5</span></div>
+        <div class="tab" data-t="yorum">Yorum</div>
+      </div>
+
+      <div class="pane active" data-p="aksiyon">
+        <div class="gridtb">
+          <span class="minibtn">➕ Aksiyon Ekle</span>
+          <span class="minibtn">✎ Düzenle</span>
+          <span class="minibtn">🗑 Sil</span>
+          <label class="chk" style="margin-left:10px"><input type="checkbox" checked> Görev olarak ata</label>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">DOF.2026/0031 · 2/4 tamamlandı</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th class="c" style="width:40px">SIRA</th><th>AKSİYON</th><th style="width:120px">SORUMLU</th>
+                <th style="width:88px">TERMİN</th><th class="c" style="width:110px">TAMAMLANMA</th>
+                <th class="c" style="width:100px">DURUM</th></tr>
+            <tr><td class="c">1</td><td class="ad">Ölçü formu revize edildi — müşteri imzası zorunlu alan yapıldı</td>
+                <td>Elif Yılmaz</td><td>28.07.2026</td>
+                <td class="c">100% <div class="bar"><span class="ok" style="width:100%"></span></div></td>
+                <td class="c"><span class="pill p-ok">Tamamlandı</span></td></tr>
+            <tr><td class="c">2</td><td class="ad">Montaj ekibine ölçü alma eğitimi (2 saat, 6 kişi)</td>
+                <td>Serkan Öz</td><td>01.08.2026</td>
+                <td class="c">100% <div class="bar"><span class="ok" style="width:100%"></span></div></td>
+                <td class="c"><span class="pill p-ok">Tamamlandı</span></td></tr>
+            <tr class="s-yok"><td class="c">3</td><td class="ad">Kesim öncesi ikinci ölçü doğrulama adımı (çift kontrol) tanımlanması</td>
+                <td>Hakan Toprak</td><td><b>05.08.2026</b></td>
+                <td class="c">40% <div class="bar"><span class="yok" style="width:40%"></span></div></td>
+                <td class="c"><span class="pill p-yok">Gecikti</span></td></tr>
+            <tr class="s-yok"><td class="c">4</td><td class="ad">Sipariş ekranına ölçü tolerans uyarısı eklenmesi (yazılım talebi)</td>
+                <td>Kemal Arslan</td><td><b>05.08.2026</b></td>
+                <td class="c">0% <div class="bar"><span class="yok" style="width:0%"></span></div></td>
+                <td class="c"><span class="pill p-yok">Başlamadı</span></td></tr>
+            <tfoot><tr><td colspan="4" style="text-align:right">TAMAMLANMA</td>
+                <td class="c">%60</td><td class="c">2 / 4</td></tr></tfoot>
+          </table>
+        </div>
+        <div class="hint">Her aksiyon satırı <b>KALDOFAKSIYON</b>'da tutulur; "Görev olarak ata" işaretliyse
+          sorumluya <b>GOREVLER</b> tablosunda bir görev açılır ve görev kapanınca tamamlanma otomatik %100 olur.</div>
+      </div>
+
+      <div class="pane" data-p="kok">
+        <div class="gridtb">
+          <span style="font-size:11px;color:var(--muted)">Yöntem:</span>
+          <div class="inp combo" style="width:150px">5 Neden</div>
+          <span style="font-size:11px;color:var(--muted);margin-left:8px">Kategori:</span>
+          <div class="inp combo" style="width:130px">Yöntem (Method)</div>
+          <span class="minibtn" style="margin-left:auto">🐟 Balık Kılçığı</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th class="c" style="width:56px">ADIM</th><th>NEDEN?</th><th style="width:150px">CEVAP TÜRÜ</th></tr>
+            <tr><td class="c">1. Neden</td><td class="ad">Perde ölçüsü müşteri penceresine uymadı.</td><td>Belirti</td></tr>
+            <tr><td class="c">2. Neden</td><td class="ad">Ölçü, montaj öncesi yerinde değil telefonla alınmış.</td><td>Süreç sapması</td></tr>
+            <tr><td class="c">3. Neden</td><td class="ad">Randevu yoğunluğu nedeniyle keşif adımı atlanmış.</td><td>Süreç sapması</td></tr>
+            <tr><td class="c">4. Neden</td><td class="ad">Ölçü formunda "yerinde ölçüldü" alanı zorunlu değil.</td><td>Sistem eksiği</td></tr>
+            <tr class="foc"><td class="c"><b>5. Neden</b></td>
+                <td class="ad"><b>Kesim öncesi ölçü doğrulama (çift kontrol) adımı süreçte tanımlı değil.</b></td>
+                <td><b>Kök neden</b></td></tr>
+          </table>
+        </div>
+        <div class="hint">Kök neden belirlenmeden aksiyon planı kaydedilemez — <b>KALDOF.KOKNEDEN</b> boşsa
+          "Aksiyon Ekle" butonu pasiftir.</div>
+      </div>
+
+      <div class="pane" data-p="kaynak">
+        <div class="gridtb"><span class="minibtn">🔗 Kayıt Bağla</span><span class="minibtn">👁 Kaynağı Aç</span>
+          <span class="minibtn">🗑 Bağı Kaldır</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:130px">KAYNAK TÜRÜ</th><th style="width:120px">KAYIT NO</th><th style="width:88px">TARİH</th>
+                <th>AÇIKLAMA</th><th style="width:120px">AÇAN</th><th class="c" style="width:80px">DURUM</th></tr>
+            <tr><td>Müşteri şikayeti</td><td><b>MŞK.2026/0118</b></td><td>21.07.2026</td>
+                <td class="ad">Meta Mefruşat A.Ş. — salon perdesi 12 cm kısa geldi, iade talebi</td>
+                <td>Ayşe Demir</td><td class="c"><span class="pill p-kri">Açık</span></td></tr>
+            <tr><td>Sapma</td><td>SPM.2026/0044</td><td>23.07.2026</td>
+                <td class="ad">Kesim fişi ile sipariş ölçüsü arasında 12 cm fark</td>
+                <td>Hakan Toprak</td><td class="c"><span class="pill p-ok">Kapandı</span></td></tr>
+            <tr><td>Denetim bulgusu</td><td>DNT.2026/07</td><td>10.07.2026</td>
+                <td class="ad">İç denetim — satış/montaj arayüzünde ölçü doğrulama kaydı bulunamadı</td>
+                <td>Elif Yılmaz</td><td class="c"><span class="pill p-kri">Açık</span></td></tr>
+          </table>
+        </div>
+        <div class="hint">Kaynak kayıtlar <b>KALSAPMA</b> ve <b>KALDENETIMBULGU</b> tablolarından bağlanır;
+          DÖF kapandığında bağlı sapmalar da kapanmaya aday olarak işaretlenir.</div>
+      </div>
+
+      <div class="pane" data-p="etkinlik">
+        <div class="gridtb">
+          <span class="minibtn">➕ Kontrol Ekle</span>
+          <span style="font-size:11px;color:var(--muted);margin-left:8px">Planlanan kontrol:</span>
+          <div class="inp" style="width:96px">15.09.2026</div>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">
+            Aksiyonlar bitmeden kontrol kaydı girilemez</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:100px">KONTROL TARİHİ</th><th style="width:150px">YÖNTEM</th>
+                <th>KABUL KRİTERİ</th><th class="c" style="width:96px">SONUÇ</th>
+                <th style="width:120px">KONTROL EDEN</th></tr>
+            <tr><td>15.09.2026 <span class="pill p-kri">plan</span></td><td>Kayıt incelemesi + saha gözlemi</td>
+                <td class="ad">Eylül ayında ölçü kaynaklı iade adedi 0 olmalı (Temmuz: 3)</td>
+                <td class="c"><span class="pill p-kri">Bekliyor</span></td><td>Elif Yılmaz</td></tr>
+            <tr class="s-pas"><td>—</td><td>—</td><td class="ad">(önceki kontrol kaydı yok)</td>
+                <td class="c">—</td><td>—</td></tr>
+          </table>
+        </div>
+        <div class="hint">Örnek — DOF.2026/0012 kontrolü: <b>30.07.2026</b> · yöntem: <i>garanti iade istatistiği</i> ·
+          kriter: <i>3 ay üst üste ≤ %0,5</i> · sonuç: <b style="color:#2e7d46">Etkili</b> · kontrol eden: Elif Yılmaz.
+          Sonuç <b>Etkisiz</b> ise DÖF kapanmaz; yeni aksiyon eklenir veya yeni DÖF zincirlenir.</div>
+      </div>
+
+      <div class="pane" data-p="maliyet">
+        <div class="dg" style="max-width:620px">
+          <table>
+            <tr><th>MALİYET KALEMİ</th><th style="width:130px">TÜR</th><th class="r" style="width:110px">TUTAR</th>
+                <th style="width:88px">TARİH</th></tr>
+            <tr><td>Hatalı üretilen perde kumaşı (iade / hurda)</td><td>Kalitesizlik</td><td class="r">9.800,00</td><td>24.07.2026</td></tr>
+            <tr><td>Yeniden kesim + dikim işçiliği</td><td>Yeniden işleme</td><td class="r">3.200,00</td><td>27.07.2026</td></tr>
+            <tr><td>İkinci montaj sevkiyatı (araç + ekip)</td><td>Yeniden işleme</td><td class="r">1.950,00</td><td>29.07.2026</td></tr>
+            <tr><td>Ölçü alma eğitimi (6 kişi × 2 saat)</td><td>Önleme</td><td class="r">2.400,00</td><td>01.08.2026</td></tr>
+            <tr><td>Sipariş ekranı tolerans uyarısı (yazılım)</td><td>Önleme</td><td class="r">1.100,00</td><td>—</td></tr>
+            <tfoot><tr><td colspan="2" style="text-align:right">TOPLAM DÖF MALİYETİ</td>
+                <td class="r">18.450,00</td><td></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="hint">Kalitesizlik maliyeti (hurda + yeniden işleme) <b>14.950,00</b> ·
+          önleme maliyeti <b>3.500,00</b>. Liste altındaki toplam, filtredeki tüm DÖF'lerin maliyet toplamıdır.</div>
+      </div>
+
+      <div class="pane" data-p="dokuman">
+        <div class="gridtb"><span class="minibtn">📎 Klasörden</span><span class="minibtn">🖨 Tarayıcıdan</span>
+          <span class="minibtn">📋 Yapıştır</span><span class="minibtn">🖼 Dosyadan</span>
+          <span class="minibtn" style="margin-left:auto">👁 Önizle</span></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:44px" class="c">TİP</th><th>DOSYA / KANIT</th><th style="width:130px">KATEGORİ</th>
+                <th style="width:120px">EKLEYEN</th><th style="width:120px">TARİH</th></tr>
+            <tr><td class="c">🖼</td><td class="ad">musteri_sikayet_foto_01.jpg</td><td>Kanıt — problem</td><td>Ayşe Demir</td><td>21.07.2026 11:40</td></tr>
+            <tr><td class="c">📄</td><td class="ad">olcu_formu_rev03.pdf</td><td>Kanıt — aksiyon 1</td><td>Elif Yılmaz</td><td>28.07.2026 09:15</td></tr>
+            <tr><td class="c">📄</td><td class="ad">egitim_katilim_tutanagi.pdf</td><td>Kanıt — aksiyon 2</td><td>Serkan Öz</td><td>01.08.2026 16:05</td></tr>
+            <tr><td class="c">📊</td><td class="ad">iade_istatistigi_temmuz.xlsx</td><td>Analiz</td><td>Elif Yılmaz</td><td>02.08.2026 10:30</td></tr>
+            <tr><td class="c">📄</td><td class="ad">tedarikci_bilgilendirme_yazisi.docx</td><td>Yazışma</td><td>Ayşe Demir</td><td>05.08.2026 14:22</td></tr>
+          </table>
+        </div>
+        <div class="hint">Dosyalar <b>DOKUMAN → IMAJ → GENDEPO.DOSYA</b> zinciriyle saklanır.
+          Aksiyon "Tamamlandı" yapılabilmesi için en az bir kanıt dosyası istenebilir (parametrik).</div>
+      </div>
+
+      <div class="pane" data-p="yorum">
+        <div class="gridtb"><span class="minibtn">💬 Yorum Ekle</span>
+          <label class="chk" style="margin-left:10px"><input type="checkbox" checked> Sistem satırlarını göster</label></div>
+        <div class="dg">
+          <table>
+            <tr><th style="width:130px">KULLANICI</th><th style="width:130px">TARİH</th><th>YORUM</th><th class="c" style="width:60px">EK</th></tr>
+            <tr><td>Ayşe Demir</td><td>22.07.2026 09:10</td><td class="ad">DÖF açıldı, müşteriye telafi perdesi ücretsiz üretilecek.</td><td class="c">📎 1</td></tr>
+            <tr><td>Elif Yılmaz</td><td>25.07.2026 15:35</td><td class="ad">Kök neden 5 Neden ile belirlendi: kesim öncesi çift kontrol adımı yok.</td><td class="c">—</td></tr>
+            <tr><td style="color:var(--muted)">(sistem)</td><td>28.07.2026 09:16</td><td class="ad" style="color:var(--muted)">Aksiyon 1 tamamlandı — Elif Yılmaz</td><td class="c">—</td></tr>
+            <tr><td style="color:var(--muted)">(sistem)</td><td>05.08.2026 00:05</td><td class="ad" style="color:var(--muted)">Termin geçti — DÖF gecikmiş olarak işaretlendi</td><td class="c">—</td></tr>
+            <tr class="foc"><td>Serkan Öz</td><td>13.08.2026 08:45</td><td class="ad">Aksiyon 3 için üretim planı ile toplantı yapıldı, 22.08'e uzatma talep ediliyor.</td><td class="c">—</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SAG: SECILI DOF ============ -->
+    <div class="side">
+      <h5>Seçili DÖF</h5>
+      <div class="urun">
+        <div class="foto">📋</div>
+        <div class="nm">Hatalı ölçü ile perde teslimi — müşteri iadesi</div>
+        <div class="mt">DOF.2026/0031 · Düzeltici · 22.07.2026</div>
+        <div style="display:flex;gap:5px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn">👁 Kart</span><span class="minibtn">🗂 Aksiyon</span><span class="minibtn">🖨 Form</span>
+        </div>
+      </div>
+
+      <div class="tvsep"></div>
+      <h5>Künye</h5>
+      <div class="kv"><span>Tür</span><b>Düzeltici</b></div>
+      <div class="kv"><span>Kaynak</span><b>Müşteri şikayeti</b></div>
+      <div class="kv"><span>Kaynak kayıt</span><b>MŞK.2026/0118</b></div>
+      <div class="kv"><span>Süreç</span><b>Satış / Montaj</b></div>
+      <div class="kv"><span>Sorumlu</span><b>Serkan Öz</b></div>
+      <div class="kv"><span>Öncelik</span><b><span class="pill p-yok">Yüksek</span></b></div>
+      <div class="kv"><span>Açık gün</span><b>23 gün</b></div>
+      <div class="kv"><span>Termin</span><b>05.08.2026</b></div>
+      <div class="kv"><span>Kalan gün</span><b style="color:#b23b3b">−9 (gecikmiş)</b></div>
+      <div class="kv"><span>Aksiyon</span><b>2 / 4</b></div>
+      <div class="kv"><span>Etkinlik</span><b><span class="pill p-kri">Bekliyor</span></b></div>
+      <div class="kv"><span>Maliyet</span><b>18.450,00 TL</b></div>
+
+      <div class="tvsep"></div>
+      <h5>Aksiyon İlerlemesi</h5>
+      <div style="padding:2px 12px 6px">
+        <div class="bar" style="height:14px;border-radius:7px"><span class="yok" style="width:60%"></span></div>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:4px">%60 · 2 tamamlandı · 1 gecikti · 1 başlamadı</div>
+      </div>
+
+      <div class="tvsep"></div>
+      <h5>Durum Dağılımı</h5>
+      <div class="depo"><span class="ad">Açık</span>
+        <div class="bar" style="flex:1"><span class="kri" style="width:11%"></span></div><span class="mk">1</span></div>
+      <div class="depo"><span class="ad">Aksiyonda</span>
+        <div class="bar" style="flex:1"><span class="kri" style="width:67%"></span></div><span class="mk">6</span></div>
+      <div class="depo"><span class="ad">Etk. Kont.</span>
+        <div class="bar" style="flex:1"><span class="yok" style="width:22%"></span></div><span class="mk">2</span></div>
+      <div class="depo"><span class="ad">Gecikmiş</span>
+        <div class="bar" style="flex:1"><span class="yok" style="width:22%"></span></div><span class="mk">2</span></div>
+      <div class="depo"><span class="ad">Kapandı</span>
+        <div class="bar" style="flex:1"><span class="ok" style="width:100%"></span></div><span class="mk">3</span></div>
+      <div class="depo"><span class="ad">İptal</span>
+        <div class="bar" style="flex:1"><span class="kri" style="width:8%"></span></div><span class="mk">1</span></div>
+
+      <div class="tvsep"></div>
+      <h5>İşlemler</h5>
+      <div class="sidebtns">
+        <span class="minibtn">➕ Aksiyon Ekle</span>
+        <span class="minibtn">📅 Termin Uzat</span>
+        <span class="minibtn">🔍 Etkinlik Kontrolü</span>
+        <span class="minibtn">📎 Kanıt Ekle</span>
+        <span class="minibtn" data-kayit="1">✔ DÖF'ü Kapat</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Kart → <b>KALDOF</b> (DOFNO · TUR · KAYNAK · SUREC · SORUMLU · TERMIN · DURUM)</span>·
+    <span>Aksiyon → <b>KALDOFAKSIYON</b> (AKSIYON · SORUMLU · TERMIN · TAMAMLANMA)</span>·
+    <span>Kaynak → <b>KALSAPMA</b> · <b>KALDENETIMBULGU</b></span>·
+    <span>Atama → <b>GOREVLER</b></span>·
+    <span>Kanıt → <b>DOKUMAN → IMAJ</b></span>·
+    <span>İz → <b>ISLEMLOG</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Açık DÖF: <b>9</b></span>
+    <span>Gecikmiş: <b style="color:#b23b3b">2</b></span>
+    <span>Etkinlik kontrolü bekleyen: <b style="color:#8a4a12">2</b></span>
+    <span>Ort. kapanma süresi: <b>62 gün</b></span>
+    <span style="margin-left:auto">Seçili: DOF.2026/0031</span>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.ltab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.ltab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.lpane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.lpane[data-lp="'+t.dataset.l+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.gtus').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.gtus').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');
+    });
+  });
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      /* "DOF'u Kapat" = KAYIT kapatma; pencere kapatma degil */
+      if(el.getAttribute&&el.getAttribute("data-kayit")) return;
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazgeç|çık)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

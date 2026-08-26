@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modül İkonları — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --head2:#e8eef5; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1080px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.9;font-size:11px}
+
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin:12px}
+  .grp>h4{margin:0;padding:7px 11px;font-size:11.5px;color:var(--navy);
+    background:linear-gradient(#f0f5fa,#e6eef6);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;
+    display:flex;align-items:center;gap:8px}
+  .grp>h4 .tag{margin-left:auto;font-size:9.5px;font-weight:bold;color:#3d6294;background:#eaf1f8;
+    border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grp .body{padding:12px}
+
+  .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+  .card{border:1px solid var(--line2);border-radius:6px;background:#fff;padding:12px 6px;text-align:center}
+  .card svg{width:30px;height:30px;color:var(--navy)}
+  .card .ad{font-size:11.5px;font-weight:bold;color:var(--navy);margin-top:7px}
+  .card .ik{font-size:9.5px;color:var(--muted);margin-top:1px}
+  .card .idx{display:inline-block;margin-top:4px;font-size:9px;color:#3d6294;background:#eef4fb;
+    border:1px solid #d6e5f5;border-radius:8px;padding:0 6px}
+
+  /* sekme seridi (ana form gorunumu) */
+  .tabs{display:flex;gap:2px;padding:8px 8px 0;background:var(--head2);border:1px solid var(--line);border-bottom:none;
+    border-radius:5px 5px 0 0;flex-wrap:wrap}
+  .tab{display:flex;align-items:center;gap:6px;padding:7px 12px;font-size:12px;background:#e9eef4;
+    border:1px solid var(--line);border-bottom:none;border-radius:5px 5px 0 0;color:var(--muted);position:relative;top:1px}
+  .tab svg{width:16px;height:16px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab.active svg{color:var(--accent)}
+  .tabsbody{border:1px solid var(--line);border-radius:0 0 5px 5px;background:#fff;padding:14px;color:var(--muted);font-size:11.5px}
+
+  /* koyu kontrol */
+  .dark{background:#26313d;border-radius:5px;padding:12px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+  .dark svg{width:24px;height:24px;color:#dfe8f2}
+
+  .note{font-size:10.5px;color:var(--muted);line-height:1.6;margin:0 12px 12px;padding:8px 12px;
+    background:#f7fafc;border:1px solid var(--line2);border-radius:5px}
+  .note b{color:#3d6294}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <!-- === ANA SEKMELER === -->
+  <symbol id="i-giris" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <symbol id="i-aksiyon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="i-cari" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-kasa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="4" width="18" height="15" rx="2"/><circle cx="10.5" cy="11.5" r="3.2"/>
+    <line x1="10.5" y1="8.3" x2="10.5" y2="9.6"/><line x1="13.4" y1="12.8" x2="12.3" y2="12.2"/>
+    <line x1="16" y1="11.5" x2="18" y2="11.5"/><line x1="6" y1="19" x2="6" y2="21"/><line x1="18" y1="19" x2="18" y2="21"/></symbol>
+  <symbol id="i-sepet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.6 8.6 H19.4 l-1.4 10 a1.2 1.2 0 0 1 -1.2 1 H7.2 a1.2 1.2 0 0 1 -1.2 -1 Z"/>
+    <path d="M8 8.6 a4 4 0 0 1 8 0"/><line x1="9.3" y1="11.6" x2="9.9" y2="16.4"/>
+    <line x1="12" y1="11.6" x2="12" y2="16.4"/><line x1="14.7" y1="11.6" x2="14.1" y2="16.4"/></symbol>
+  <symbol id="i-banka" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3 L21 8 H3 Z"/><line x1="6" y1="9.6" x2="6" y2="17.6"/><line x1="9.3" y1="9.6" x2="9.3" y2="17.6"/>
+    <line x1="12" y1="9.6" x2="12" y2="17.6"/><line x1="14.7" y1="9.6" x2="14.7" y2="17.6"/><line x1="18" y1="9.6" x2="18" y2="17.6"/>
+    <line x1="4" y1="17.8" x2="20" y2="17.8"/><line x1="2.7" y1="20.4" x2="21.3" y2="20.4"/></symbol>
+  <symbol id="i-belge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7 3 H14 l4 4 v12.5 a1.2 1.2 0 0 1 -1.2 1.2 H7 a1.2 1.2 0 0 1 -1.2 -1.2 V4.2 A1.2 1.2 0 0 1 7 3 Z"/>
+    <path d="M14 3 v4 h4"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="14.8" x2="15" y2="14.8"/><line x1="9" y1="17.6" x2="13" y2="17.6"/></symbol>
+
+  <!-- === DIGER MODULLER === -->
+  <symbol id="i-cark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-kasiyer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="12" width="18" height="8" rx="1.5"/><rect x="5" y="5" width="8" height="6" rx="1"/>
+    <line x1="6.6" y1="7.4" x2="11.4" y2="7.4"/><rect x="15.6" y="4" width="4.4" height="5.2" rx="0.7"/>
+    <line x1="16.7" y1="5.6" x2="18.9" y2="5.6"/><line x1="16.7" y1="7.2" x2="18.9" y2="7.2"/>
+    <circle cx="7" cy="15.4" r="0.7" fill="currentColor" stroke="none"/><circle cx="10" cy="15.4" r="0.7" fill="currentColor" stroke="none"/>
+    <circle cx="13" cy="15.4" r="0.7" fill="currentColor" stroke="none"/><line x1="6.5" y1="18" x2="9.5" y2="18"/></symbol>
+  <symbol id="i-stok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/></symbol>
+  <symbol id="i-proje" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+  <symbol id="i-ik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="3" width="16" height="18" rx="2"/><line x1="9.5" y1="5.4" x2="14.5" y2="5.4"/>
+    <circle cx="12" cy="11" r="2.4"/><path d="M8.2 17.4 a3.8 3.8 0 0 1 7.6 0"/></symbol>
+  <symbol id="i-servis" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+  <symbol id="i-teklif" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+    <circle cx="7" cy="7" r="1.1" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-siparis" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+    <rect x="8" y="2" width="8" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></symbol>
+  <symbol id="i-demirbas" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></symbol>
+  <symbol id="i-dokuman" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-firsat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-gorev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></symbol>
+  <symbol id="i-ebelge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M13 3 H7 a1.2 1.2 0 0 0 -1.2 1.2 V19.8 A1.2 1.2 0 0 0 7 21 h10 a1.2 1.2 0 0 0 1.2 -1.2 V8 Z"/>
+    <path d="M13 3 v5 h5"/><polyline points="9 15 12 12 15 15"/><line x1="12" y1="12" x2="12" y2="18"/></symbol>
+  <symbol id="i-rapor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="10"/>
+    <line x1="3" y1="20.5" x2="21" y2="20.5"/></symbol>
+  <symbol id="i-kalite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></symbol>
+</defs></svg>
+
+<div class="win">
+  <div class="title"><span class="dot"></span> Modül İkon Seti — Ana Form Sekmeleri + Modüller
+    <span class="sp">tek renk · cxImageList uyumlu · line stili</span>
+  </div>
+
+  <!-- ANA FORM SEKME SERIDI -->
+  <div style="margin:12px 12px 0">
+    <div class="tabs">
+      <div class="tab active"><svg><use href="#i-giris"/></svg>Giriş</div>
+      <div class="tab"><svg><use href="#i-aksiyon"/></svg>Aksiyonlar</div>
+      <div class="tab"><svg><use href="#i-cari"/></svg>Cari</div>
+      <div class="tab"><svg><use href="#i-kasa"/></svg>Kasa</div>
+      <div class="tab"><svg><use href="#i-sepet"/></svg>Alış/Satış</div>
+      <div class="tab"><svg><use href="#i-banka"/></svg>Banka</div>
+      <div class="tab"><svg><use href="#i-belge"/></svg>Çek/Senet</div>
+    </div>
+    <div class="tabsbody">Ana formdaki sekme şeridinin ikonlu görünümü (yapılandırmadaki Image sırasına göre).</div>
+  </div>
+
+  <div class="grp">
+    <h4>Ana Form Sekmeleri <span class="tag">entegra_sekmeconfig.xml · Image</span></h4>
+    <div class="body">
+      <div class="grid">
+        <div class="card"><svg><use href="#i-giris"/></svg><div class="ad">Giriş Sayfası</div><div class="ik">ev</div><span class="idx">Image 0</span></div>
+        <div class="card"><svg><use href="#i-aksiyon"/></svg><div class="ad">Aksiyonlar</div><div class="ik">şimşek</div><span class="idx">Image 7</span></div>
+        <div class="card"><svg><use href="#i-cari"/></svg><div class="ad">Cari</div><div class="ik">kişiler</div><span class="idx">Image 1</span></div>
+        <div class="card"><svg><use href="#i-kasa"/></svg><div class="ad">Kasa</div><div class="ik">kasa</div><span class="idx">Image 2</span></div>
+        <div class="card"><svg><use href="#i-sepet"/></svg><div class="ad">Alış/Satış</div><div class="ik">sepet</div><span class="idx">Image 3</span></div>
+        <div class="card"><svg><use href="#i-banka"/></svg><div class="ad">Banka</div><div class="ik">banka</div><span class="idx">Image 4</span></div>
+        <div class="card"><svg><use href="#i-belge"/></svg><div class="ad">Çek/Senet</div><div class="ik">belge</div><span class="idx">Image 5</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <h4>Diğer Modüller</h4>
+    <div class="body">
+      <div class="grid">
+        <div class="card"><svg><use href="#i-kasiyer"/></svg><div class="ad">Kasiyer</div><div class="ik">yazarkasa</div></div>
+        <div class="card"><svg><use href="#i-cark"/></svg><div class="ad">Üretim</div><div class="ik">çark</div></div>
+        <div class="card"><svg><use href="#i-stok"/></svg><div class="ad">Stok</div><div class="ik">kutu</div></div>
+        <div class="card"><svg><use href="#i-proje"/></svg><div class="ad">Proje</div><div class="ik">çanta</div></div>
+        <div class="card"><svg><use href="#i-ik"/></svg><div class="ad">İK / Personel</div><div class="ik">kimlik kartı</div></div>
+        <div class="card"><svg><use href="#i-servis"/></svg><div class="ad">Servis</div><div class="ik">anahtar</div></div>
+        <div class="card"><svg><use href="#i-teklif"/></svg><div class="ad">Teklif</div><div class="ik">etiket</div></div>
+        <div class="card"><svg><use href="#i-siparis"/></svg><div class="ad">Sipariş</div><div class="ik">liste</div></div>
+        <div class="card"><svg><use href="#i-demirbas"/></svg><div class="ad">Demirbaş</div><div class="ik">ekran</div></div>
+        <div class="card"><svg><use href="#i-dokuman"/></svg><div class="ad">Doküman</div><div class="ik">klasör</div></div>
+        <div class="card"><svg><use href="#i-firsat"/></svg><div class="ad">Fırsat</div><div class="ik">hedef</div></div>
+        <div class="card"><svg><use href="#i-gorev"/></svg><div class="ad">Görev</div><div class="ik">onay listesi</div></div>
+        <div class="card"><svg><use href="#i-ebelge"/></svg><div class="ad">e-Belge</div><div class="ik">gönderim</div></div>
+        <div class="card"><svg><use href="#i-rapor"/></svg><div class="ad">Raporlar</div><div class="ik">grafik</div></div>
+        <div class="card"><svg><use href="#i-kalite"/></svg><div class="ad">Kalite</div><div class="ik">kalkan-onay</div></div>
+      </div>
+
+      <div class="dark">
+        <svg><use href="#i-giris"/></svg><svg><use href="#i-cari"/></svg><svg><use href="#i-kasa"/></svg>
+        <svg><use href="#i-sepet"/></svg><svg><use href="#i-banka"/></svg><svg><use href="#i-belge"/></svg>
+        <svg><use href="#i-stok"/></svg><svg><use href="#i-cark"/></svg><svg><use href="#i-servis"/></svg>
+        <svg><use href="#i-rapor"/></svg><svg><use href="#i-kalite"/></svg><svg><use href="#i-ebelge"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>Tutarlılık:</b> Hepsi 24×24 grid, ~1.7 px tek çizgi, yuvarlak uç/köşe, <b>currentColor</b> —
+    ana form sekme ikon ailesiyle aynı dil. Menüde lacivert (#14315A), seçili/hover accent (#2F6DB3).
+    <b>DevExpress:</b> her ikonu şeffaf PNG 16/24/32 px olarak <b>cxImageList</b>'e ekle; sekme
+    <i>Image</i> indekslerini (0,1,2,3,4,5,7) buradaki eşlemeye göre koru. Aynı ImageIndex ana menü
+    (Seçenekler) ve alt menüde (Opsiyonlar) kullanılır. Önceki 6 ikon (kasa/kasiyer/banka/sepet/belge/çark) bu sette aynen korundu.
+  </div>
+</div>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>.gmzgizle{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>.gmzgizle{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+/* === GN-KOYU-GRPBAS: grup basligi koyu tema === */
+body.koyu .grp>h4{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-bottom-color:#2c3542!important}
+body.koyu .grp{background:#1b222c!important;border-color:#2c3542!important}
+body.koyu .grp .tag{background:#2c3a4b!important;color:#9fc0e0!important}
+body.koyu .imgbox{background:linear-gradient(135deg,#222b37,#1b232d)!important;
+  border-color:#3b4a5c!important;color:#7f8fa1!important}
+body.koyu .imgthumbs .t{border-color:#33404f!important}
+/* === GN-KOYU-GRPBAS son === */
+</style>
+<script>(function(){
+function solMenuMu(e){
+  if(!e||e.nodeType!==1) return false;
+  if(/(^|\s)(gorev|solmenu|gtusgrup)(\s|$)/.test(e.className||"")) return true;
+  /* gorev tuslari / sekmeli sol sutun: .gtus veya .ltabs iceriyorsa gizlenir */
+  return !!e.querySelector(".gtus, .ltabs, .lpane");
+}
+function g(){
+  if(location.hash.indexOf("gomulu")>=0){
+    document.body.classList.add("gomulu");
+    [".wrap",".work"].forEach(function(sel){
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(w){
+        var ilk=w.firstElementChild;
+        if(ilk) ilk.classList.toggle("gmzgizle", solMenuMu(ilk));
+      });
+    });
+  } else document.body.classList.remove("gomulu");
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",g); else g();
+addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

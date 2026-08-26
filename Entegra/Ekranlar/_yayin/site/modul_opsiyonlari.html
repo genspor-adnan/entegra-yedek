@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opsiyonlar — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    --warn:#b5731a;
+    --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;
+    --tus-pas:#9c71ad; --tus-sec:#1f6fbe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .ara{margin-left:auto;border:1px solid var(--line);border-radius:3px;background:#fff;height:24px;
+    padding:0 8px;font-size:11.5px;color:var(--muted);display:flex;align-items:center;min-width:200px}
+
+  /* uyari seridi */
+  .uyari{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:7px 12px;
+    background:linear-gradient(#fdf6e3,#f8edd4);border-bottom:1px solid #eeddb4;font-size:11.5px;color:#7a5407}
+  .uyari .ik{font-size:14px}
+  .uyari .kaps{margin-left:auto;display:flex;align-items:center;gap:6px;color:var(--muted)}
+
+  .wrap{display:grid;grid-template-columns:206px 1fr 236px;gap:0}
+
+  /* SOL: TdxNavBar — modul listesi */
+  .gorev{background:#f4f7fa;border-right:1px solid var(--line2);padding:8px 7px 10px;min-width:0}
+  .gorev h5{margin:6px 3px 5px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .gtus{display:flex;align-items:center;gap:8px;color:#fff;font-weight:bold;font-size:11.5px;
+    background:var(--tus-pas);border:1px solid rgba(0,0,0,.12);border-radius:3px;padding:7px 9px;margin-bottom:3px;cursor:pointer}
+  .gtus:hover{filter:brightness(1.06)}
+  .gtus.on{background:var(--tus-sec);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+  .gtus .ic{font-size:14px;width:18px;text-align:center}
+  .gtus .n{margin-left:auto;font-size:9.5px;font-weight:bold;background:rgba(255,255,255,.22);
+    border-radius:9px;padding:0 6px;min-width:18px;text-align:center}
+  .gtus .n.d{background:#fdf6e3;color:#a9791a}
+
+  /* ORTA */
+  .center{min-width:0;display:flex;flex-direction:column}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px;cursor:default}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .gridtb{display:flex;gap:4px;padding:0 0 7px;align-items:center;flex-wrap:wrap}
+
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;
+    display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;
+    font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);
+    border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:0}
+  .tag{font-size:9.5px;font-weight:bold;letter-spacing:.3px;margin-left:auto;
+    background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+
+  /* opsiyon satiri */
+  .opt{display:grid;grid-template-columns:246px 1fr;gap:3px 12px;padding:8px 11px;
+    border-bottom:1px solid var(--line2);align-items:center;background:#fff}
+  .opt:last-child{border-bottom:none;border-radius:0 0 4px 4px}
+  .opt:hover{background:#f7fafd}
+  .opt .lb{font-size:11.5px;color:#3a5573;text-align:right}
+  .opt .ct{display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0}
+  .opt .ds{grid-column:2;font-size:10.5px;color:var(--muted);line-height:1.45}
+  .opt.chg{background:#fdfaf0}
+  .opt.chg .lb{font-weight:bold;color:#7a5407}
+  .opt.chg:hover{background:#fbf5e6}
+  .mpane{display:none}.mpane.active{display:block}
+  .mbas{display:flex;align-items:center;gap:9px;margin-bottom:10px;flex-wrap:wrap}
+  .mbas .bad{font-size:18px}
+  .mbas h3{margin:0;font-size:14px;color:var(--navy)}
+  .mbas .ac{font-size:10.5px;color:var(--muted)}
+
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;color:var(--ink);display:flex;align-items:center;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.ro{background:#f4f6f9;color:var(--muted)}
+  .inp.sm{width:96px}
+  .inp.md{width:190px}
+  .inp.lg{width:300px}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:3px;color:var(--muted);font-size:10px}
+  .chk{display:flex;align-items:center;gap:7px;font-size:11.5px;padding:1px 0}
+  .chk input{vertical-align:-1px}
+  .seg{display:flex;gap:2px}
+  .seg .s{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);padding:3px 10px;font-size:11px;border-radius:3px;cursor:default}
+  .seg .s.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .birim{font-size:10.5px;color:var(--muted)}
+
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr.s-pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .dgx{overflow-x:auto;overflow-y:hidden}
+
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-off{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-y{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-r{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-izl{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .tip{display:inline-block;min-width:30px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;padding:1px 5px;border:1px solid}
+  .t-mal{background:#e5ecf8;border-color:#c6d7ef;color:#2b5c95}
+  .t-hzm{background:#e3f0e6;border-color:#c3e0cb;color:#2e7d46}
+  .t-sar{background:#fdf1e2;border-color:#f0dcbd;color:#96651a}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+
+  /* SAG */
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:8px 0}
+  .side h5{margin:0;padding:7px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11px;padding:3px 12px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .tvsep{height:1px;background:var(--line2);margin:7px 10px}
+  .sidebtns{display:flex;flex-direction:column;gap:4px;padding:4px 10px}
+  .urun{margin:0 10px;border:1px solid var(--line);border-radius:4px;background:#fff;padding:9px;text-align:center}
+  .urun .foto{height:60px;border:1px solid var(--line2);border-radius:3px;background:linear-gradient(#fff,#f2f6fa);
+    display:flex;align-items:center;justify-content:center;font-size:28px;color:#9fb3c8}
+  .urun .nm{font-size:11.5px;font-weight:bold;color:var(--navy);margin-top:7px;line-height:1.35}
+  .urun .mt{font-size:10.5px;color:var(--muted);margin-top:2px}
+
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Opsiyonlar
+    <span class="sp">Ortak\UOpsiyonFrame · GENINI · Gentegre Perde &amp; Mefruşat A.Ş. · Şube: Merkez · 14.08.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn">✖ Kapat</div>
+    <div class="sepv"></div>
+    <div class="btn">↩ Varsayılana Dön</div>
+    <div class="btn">📤 Ayarları Dışa Aktar</div>
+    <div class="btn">📥 Ayarları İçe Aktar</div>
+    <div class="ara">🔎 Opsiyonlarda ara… (ör. "barkod", "SLA", "iskonto")</div>
+  </div>
+
+  <div class="uyari">
+    <span class="ik">⚠</span>
+    <b>Değişiklikler kaydedilmedi</b>
+    <span>— 3 opsiyon değiştirildi (Genel · Alış Satış · Stok). Ekranı kapatırsanız değişiklikler kaybolur.</span>
+    <span class="minibtn on">💾 Kaydet</span>
+    <span class="minibtn">↩ Varsayılana Dön</span>
+    <span class="kaps">
+      Kapsam:
+      <span class="seg"><span class="s on">🏢 Firma Geneli</span><span class="s">🏬 Şube Bazlı</span></span>
+      <span class="inp combo" style="width:118px;background:#fff">Merkez</span>
+    </span>
+  </div>
+
+  <div class="wrap">
+    <!-- ============ SOL: MODUL LISTESI (TdxNavBar) ============ -->
+    <div class="gorev">
+      <h5>Modüller</h5>
+      <div class="gtus on" data-m="genel"><span class="ic">⚙</span> Genel <span class="n d">8</span></div>
+      <div class="gtus" data-m="crm"><span class="ic">🤝</span> CRM <span class="n">7</span></div>
+      <div class="gtus" data-m="cari"><span class="ic">🧾</span> Cari <span class="n">8</span></div>
+      <div class="gtus" data-m="kasa"><span class="ic">💰</span> Kasa <span class="n">6</span></div>
+      <div class="gtus" data-m="kasiyer"><span class="ic">🧑‍💼</span> Kasiyer <span class="n">7</span></div>
+      <div class="gtus" data-m="banka"><span class="ic">🏦</span> Banka <span class="n">6</span></div>
+      <div class="gtus" data-m="alissatis"><span class="ic">🛒</span> Alış Satış <span class="n d">9</span></div>
+      <div class="gtus" data-m="ceksenet"><span class="ic">📜</span> Çek Senet <span class="n">6</span></div>
+      <div class="gtus" data-m="stok"><span class="ic">📦</span> Stok <span class="n d">8</span></div>
+      <div class="gtus" data-m="uretim"><span class="ic">🏭</span> Üretim <span class="n">7</span></div>
+      <div class="gtus" data-m="ik"><span class="ic">👥</span> İK <span class="n">6</span></div>
+      <div class="gtus" data-m="demirbas"><span class="ic">🖥</span> Demirbaş <span class="n">6</span></div>
+      <div class="gtus" data-m="teklif"><span class="ic">📄</span> Teklif <span class="n">6</span></div>
+      <div class="gtus" data-m="servis"><span class="ic">🔧</span> Servis <span class="n">6</span></div>
+      <div class="gtus" data-m="dokuman"><span class="ic">📁</span> Doküman <span class="n">6</span></div>
+      <div class="gtus" data-m="kalite"><span class="ic">✅</span> Kalite <span class="n">6</span></div>
+      <div class="hint" style="padding:6px 4px 0">
+        Sarı rozet = bu modülde <b>kaydedilmemiş</b> değişiklik var.
+        Modül seçimi <b>TdxNavBar.OnLinkClick</b>, sağdaki panel <b>TdxLayoutControl</b> ile yeniden kurulur.
+      </div>
+    </div>
+
+    <!-- ============ ORTA: OPSIYONLAR ============ -->
+    <div class="center">
+      <div class="tabs">
+        <div class="tab active" data-t="ayar">⚙ Ayarlar</div>
+        <div class="tab" data-t="degisiklik">📝 Değişiklikler <span class="b">3</span></div>
+        <div class="tab" data-t="ini">🗄 Ini Kayıtları</div>
+      </div>
+
+      <!-- ================= AYARLAR ================= -->
+      <div class="pane active" data-p="ayar">
+
+        <!-- ---------- GENEL ---------- -->
+        <div class="mpane active" data-mp="genel">
+          <div class="mbas"><span class="bad">⚙</span><h3>Genel</h3>
+            <span class="pill p-y">1 değişiklik</span>
+            <span class="ac">Tüm modülleri etkileyen temel çalışma ayarları</span></div>
+          <div class="grp">
+            <h4>Çalışma Ortamı <span class="tag">GENINI · MODUL=GENEL</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">Varsayılan Şube</div>
+                <div class="ct"><div class="inp combo md">Merkez</div></div>
+                <div class="ds">Program açılışında ve yeni belgelerde bu şube gelir; kullanıcının şube yetkisi dar ise onun varsayılanı önceliklidir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Tarih Formatı</div>
+                <div class="ct"><div class="inp combo md">gg.aa.yyyy</div><span class="birim">örnek: 14.08.2026</span></div>
+                <div class="ds">Ekran, döküm ve dışa aktarımda kullanılan görüntüleme formatı. Veritabanında tarih her zaman datetime olarak saklanır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Ondalık Hane — Miktar</div>
+                <div class="ct"><div class="inp sm">2</div><span class="birim">hane · 1.234,56</span></div>
+                <div class="ds">Miktar kolonlarının gösterim hassasiyeti. Metrekare / metretül çalışan kartlarda 2 hane önerilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Ondalık Hane — Fiyat</div>
+                <div class="ct"><div class="inp sm">4</div><span class="birim">hane · 1.234,5678</span></div>
+                <div class="ds">Birim fiyat ve kur alanlarında kullanılır; satır toplamı yine 2 haneye yuvarlanarak muhasebeleşir.</div>
+              </div>
+              <div class="opt chg">
+                <div class="lb">Oturum Zaman Aşımı</div>
+                <div class="ct"><div class="inp sm">30</div><span class="birim">dakika</span>
+                  <span class="pill p-y">değişti · eski: 20</span></div>
+                <div class="ds">Hareketsiz kalan oturum bu süre sonunda kilitlenir. 0 yazılırsa zaman aşımı uygulanmaz (önerilmez).</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Açılış Ekranı</div>
+                <div class="ct"><div class="inp combo md">İş Listesi</div></div>
+                <div class="ds">Giriş sonrası açılacak ekran: İş Listesi, Yönetim Panosu, Boş Masaüstü veya son kullanılan ekran.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Otomatik Yedekleme</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Etkin</label>
+                  <div class="inp sm" style="width:70px">23:30</div>
+                  <span class="birim">her gün · \\SRV01\Yedek</span></div>
+                <div class="ds">SQL tam yedeği belirtilen saatte alınır; son 14 yedek saklanır, eskiler otomatik silinir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Dil</div>
+                <div class="ct"><div class="inp combo md">Türkçe</div>
+                  <label class="chk"><input type="checkbox"> Kullanıcı kendi dilini seçebilsin</label></div>
+                <div class="ds">Ekran metinleri ve seçim listeleri (GENINI.DIL) bu dile göre yüklenir; belge dökümleri ayrıca şablon bazında dil alabilir.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- CRM ---------- -->
+        <div class="mpane" data-mp="crm">
+          <div class="mbas"><span class="bad">🤝</span><h3>CRM</h3>
+            <span class="ac">Fırsat, aktivite ve potansiyel müşteri akışı</span></div>
+          <div class="grp">
+            <h4>Fırsat / Aktivite <span class="tag">GENINI · MODUL=CRM</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">Fırsat Aşamaları</div>
+                <div class="ct"><div class="inp lg">İlk Görüşme; Keşif; Teklif; Pazarlık; Kazanıldı; Kaybedildi</div>
+                  <span class="minibtn">✎ Düzenle</span></div>
+                <div class="ds">Noktalı virgülle ayrılır, sıralama huni (pipeline) görünümünü belirler. Kullanılan aşama silinemez, yalnız pasife alınır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Aktivite Hatırlatma</div>
+                <div class="ct"><div class="inp sm">2</div><span class="birim">gün önce</span></div>
+                <div class="ds">Planlanan aktiviteden kaç gün önce iş listesine uyarı düşeceği. 0 = yalnız aynı gün hatırlat.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Potansiyeli Cariye Çevirme</div>
+                <div class="ct"><div class="inp combo md">Kod otomatik üretilsin</div></div>
+                <div class="ds">Potansiyel müşteri cariye dönüştürülürken cari kodu CARI opsiyonlarındaki maskeye göre üretilir; "Manuel" seçilirse kullanıcı girer.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Kaybedildi Nedeni Zorunlu</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Zorunlu</label></div>
+                <div class="ds">Fırsat "Kaybedildi" aşamasına alınırken neden listesinden seçim yapılmadan kayıt kapatılamaz.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Fırsat Tutarı Zorunlu</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Zorunlu</label>
+                  <span class="birim">asgari 1.000,00 ₺</span></div>
+                <div class="ds">Tutarsız fırsat huni raporlarını bozar; asgari tutarın altındaki kayıtlar uyarı verir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Açık Aktivite Kontrolü</div>
+                <div class="ct"><label class="chk"><input type="checkbox"> Açık aktivite varken fırsat kapatılamasın</label></div>
+                <div class="ds">İşaretli ise kapatma sırasında bekleyen aktiviteler listelenir ve önce tamamlanması istenir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Hedef Takip Periyodu</div>
+                <div class="ct"><div class="inp combo md">Aylık</div></div>
+                <div class="ds">Satış temsilcisi hedef/gerçekleşme karşılaştırmasının dönemi; yönetim panosundaki grafikleri belirler.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- CARI ---------- -->
+        <div class="mpane" data-mp="cari">
+          <div class="mbas"><span class="bad">🧾</span><h3>Cari</h3>
+            <span class="ac">Cari kart, risk ve vade kontrolleri</span></div>
+          <div class="grp">
+            <h4>Kart / Risk <span class="tag">GENINI · MODUL=CARI</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">Cari Kod Üretimi</div>
+                <div class="ct"><div class="inp combo md">Otomatik</div>
+                  <span class="birim">maske: 120.#####</span></div>
+                <div class="ds">Otomatik seçilirse son numaradan devam eder; Manuel'de kullanıcı girer, mükerrer kod engellenir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Risk Limiti Kontrolü</div>
+                <div class="ct"><div class="seg"><span class="s">Kapalı</span><span class="s on">Uyar</span><span class="s">Engelle</span></div></div>
+                <div class="ds">Belge kaydında bakiye + açık sipariş + çek riski toplamı limiti aşarsa davranış. "Engelle" seçilirse yalnız yetkili kullanıcı devam edebilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Vade Aşımında Satış</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Vadesi geçmiş bakiyesi olan cariye satış engellensin</label>
+                  <span class="birim">tolerans 5 gün</span></div>
+                <div class="ds">Tolerans süresi içindeki gecikmeler yok sayılır; engel yalnız fatura ve irsaliyede uygulanır, tahsilat her zaman girilebilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Mükerrer VKN / TCKN</div>
+                <div class="ct"><div class="combo inp md">Engelle (aynı vergi no ile ikinci kart açılamaz)</div></div>
+                <div class="ds">Grup şirketleri için "Uyar" seçilebilir. Kontrol pasif carileri de kapsar.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Açılış Bakiyesi Hesabı</div>
+                <div class="ct"><div class="inp combo md">Açılış Fişi (—AÇILIŞ—)</div></div>
+                <div class="ds">Cari kartında girilen devir bakiyesinin hangi fiş türüyle muhasebeleşeceği; dönem başı tarihiyle otomatik fiş oluşur.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Varsayılan Vade</div>
+                <div class="ct"><div class="inp sm">45</div><span class="birim">gün</span></div>
+                <div class="ds">Cari kartında vade tanımlı değilse belgelerde bu süre uygulanır. Kart üzerindeki değer bu ayarı ezer.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Ekstre Varsayılan Aralığı</div>
+                <div class="ct"><div class="inp combo md">Son 12 ay</div></div>
+                <div class="ds">Cari ekstre ekranı açıldığında gelen tarih aralığı; büyük carilerde performans için 12 ay önerilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">e-Mutabakat</div>
+                <div class="ct"><label class="chk"><input type="checkbox"> Dönem sonunda otomatik gönderilsin</label>
+                  <span class="birim">ayın 1'i · 09:00</span></div>
+                <div class="ds">Bakiyesi sıfırdan farklı carilere e-posta ile mutabakat mektubu gönderilir; yanıtlar cari kartına işlenir.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- KASA ---------- -->
+        <div class="mpane" data-mp="kasa">
+          <div class="mbas"><span class="bad">💰</span><h3>Kasa</h3>
+            <span class="ac">Kasa fişleri, devir ve gün sonu</span></div>
+          <div class="grp">
+            <h4>Kasa Çalışma Kuralları <span class="tag">GENINI · MODUL=KASA</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">Kasa Devri</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Gün sonunda otomatik devir alınsın</label></div>
+                <div class="ds">Kapanış bakiyesi ertesi günün açılışına devreder; devir alınmadan yeni güne fiş girilemez.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Negatif Kasa İzni</div>
+                <div class="ct"><div class="seg"><span class="s on">Kapalı</span><span class="s">Uyar</span><span class="s">Serbest</span></div></div>
+                <div class="ds">Kapalı iken kasa bakiyesini eksiye düşüren ödeme kaydedilemez; nakit akışı hatalarının en sık kaynağıdır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Kasa Kapanış Saati</div>
+                <div class="ct"><div class="inp sm" style="width:70px">18:00</div>
+                  <span class="birim">sonrasında ertesi güne yazılır</span></div>
+                <div class="ds">Bu saatten sonra girilen fişler için program tarih onayı ister; gece çalışan şubelerde 00:00 verilebilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Masraf Merkezi</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Gider fişlerinde zorunlu</label></div>
+                <div class="ds">Masraf merkezi seçilmeden gider/ödeme fişi kaydedilemez; maliyet dağıtım raporlarının doğruluğu buna bağlıdır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Döviz Kuru Kaynağı</div>
+                <div class="ct"><div class="inp combo md">TCMB — Efektif Satış</div></div>
+                <div class="ds">Dövizli kasa hareketlerinde kullanılacak kur tipi; kur bulunamazsa son iş gününün kuru alınır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Gün Sonu Sayımı</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Zorunlu</label>
+                  <span class="birim">fark toleransı 50,00 ₺</span></div>
+                <div class="ds">Sayım tutarı ile sistem bakiyesi arasındaki fark tolerans üstündeyse kapanış yetkili onayı ister.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- KASIYER ---------- -->
+        <div class="mpane" data-mp="kasiyer">
+          <div class="mbas"><span class="bad">🧑‍💼</span><h3>Kasiyer</h3>
+            <span class="ac">POS / perakende satış ekranı davranışı</span></div>
+          <div class="grp">
+            <h4>Vardiya ve Satış <span class="tag">GENINI · MODUL=KASIYER</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">Vardiya Açılış Tutarı</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Zorunlu</label>
+                  <span class="birim">varsayılan 500,00 ₺</span></div>
+                <div class="ds">Kasiyer vardiyayı açarken çekmecedeki para tutarını girmeden satış ekranı açılmaz.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">X-Raporu Yetkisi</div>
+                <div class="ct"><div class="inp combo md">Vardiya Sorumlusu</div></div>
+                <div class="ds">Gün içi ara rapor (X) alma yetkisi. Z-raporu her durumda yalnız yönetici tarafından alınır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">İade Limiti</div>
+                <div class="ct"><div class="inp md">1.500,00 ₺</div><span class="birim">fiş başına</span></div>
+                <div class="ds">Limit üstü iadelerde yönetici şifresi istenir; fişsiz iade her durumda onaya tabidir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">İndirim Üst Sınırı</div>
+                <div class="ct"><div class="inp sm">10</div><span class="birim">%</span></div>
+                <div class="ds">Kasiyerin satır ya da fiş geneline uygulayabileceği azami indirim oranı; üstü yönetici onayı ile geçilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Müşteri Kartsız Satış</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> İzin ver (perakende müşteri)</label></div>
+                <div class="ds">Kapalı ise her fişte cari seçimi zorunlu olur; kampanya/puan takibi için kapatılması önerilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Fiş Yazıcısı</div>
+                <div class="ct"><div class="inp combo lg">EPSON TM-T88VI (Kasa-1)</div></div>
+                <div class="ds">Ödeme tamamlandığında fişin gönderileceği yazıcı; makine bazlı ayardır (GENINI kapsam = Makine).</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Vardiya Kapanış Toleransı</div>
+                <div class="ct"><div class="inp md">25,00 ₺</div></div>
+                <div class="ds">Sayım farkı bu tutarın altındaysa kapanış otomatik onaylanır, üstünde ise açıklama zorunlu olur.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- BANKA ---------- -->
+        <div class="mpane" data-mp="banka">
+          <div class="mbas"><span class="bad">🏦</span><h3>Banka</h3>
+            <span class="ac">Hesaplar, ekstre eşleştirme ve masraflar</span></div>
+          <div class="grp">
+            <h4>Hesap / Ekstre <span class="tag">GENINI · MODUL=BANKA</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">IBAN Doğrulama</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Zorunlu (mod-97 kontrolü)</label></div>
+                <div class="ds">Hatalı IBAN ile hesap kartı veya cari banka bilgisi kaydedilemez; yurt dışı hesaplarda kontrol atlanır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Ekstre Eşleştirme Toleransı</div>
+                <div class="ct"><div class="inp md">2,50 ₺</div></div>
+                <div class="ds">Otomatik eşleştirmede tutar farkı bu değerin altındaysa kayıt eşleşmiş sayılır, fark banka masrafına atılır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Eşleştirme Anahtarı</div>
+                <div class="ct"><div class="inp combo lg">Tutar + Tarih (± 2 gün) + Açıklamada cari kodu</div></div>
+                <div class="ds">Birden fazla aday bulunursa eşleştirme yapılmaz, kayıt "incelenecek" olarak işaretlenir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">MT940 Klasörü</div>
+                <div class="ct"><div class="inp lg">\\SRV01\Gentegre\MT940</div><span class="minibtn">📂 Seç</span></div>
+                <div class="ds">Bankadan indirilen MT940/CAMT dosyalarının okunacağı dizin; işlenen dosyalar \İşlenen alt klasörüne taşınır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Banka Masrafı Hesabı</div>
+                <div class="ct"><div class="inp combo lg">653 — Komisyon ve Banka Giderleri</div></div>
+                <div class="ds">Ekstredeki masraf/BSMV satırlarının otomatik yazılacağı gider hesabı.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Negatif Bakiye</div>
+                <div class="ct"><div class="seg"><span class="s">Kapalı</span><span class="s on">Uyar</span><span class="s">Engelle</span></div>
+                  <span class="birim">kredili mevduat hesapları hariç</span></div>
+                <div class="ds">Hesap bakiyesini eksiye düşüren ödemede davranış; KMH tanımlı hesaplarda limit kadar eksiye izin verilir.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- ALIS SATIS ---------- -->
+        <div class="mpane" data-mp="alissatis">
+          <div class="mbas"><span class="bad">🛒</span><h3>Alış Satış</h3>
+            <span class="pill p-y">1 değişiklik</span>
+            <span class="ac">Sipariş, irsaliye, fatura ve e-Belge akışı</span></div>
+          <div class="grp">
+            <h4>Belge / Fiyat <span class="tag">GENINI · MODUL=ALISSATIS</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">Fiyat Girişi</div>
+                <div class="ct"><div class="seg"><span class="s on">KDV Hariç</span><span class="s">KDV Dahil</span></div></div>
+                <div class="ds">Satır birim fiyatının KDV'li mi girileceği. Perakende çalışan şubelerde "KDV Dahil" seçilir; fatura toplamı her iki durumda aynıdır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">İskonto Kademesi Sayısı</div>
+                <div class="ct"><div class="inp sm">3</div><span class="birim">kademe (satır bazında)</span></div>
+                <div class="ds">Zincirleme iskonto sütun sayısı (İsk-1, İsk-2, İsk-3). Azaltmak dolu kademesi olan eski belgeleri etkilemez.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">İrsaliyesiz Fatura</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> İzin ver</label></div>
+                <div class="ds">Kapalı ise fatura yalnız irsaliyeden aktarılarak kesilebilir; stok hareketi irsaliye ile oluşur.</div>
+              </div>
+              <div class="opt chg">
+                <div class="lb">Negatif Stok Satışı</div>
+                <div class="ct"><div class="seg"><span class="s">Serbest</span><span class="s">Uyar</span><span class="s on">Engelle</span></div>
+                  <span class="pill p-y">değişti · eski: Uyar</span></div>
+                <div class="ds">Kalan miktarı yetmeyen kartın satışında davranış. "Engelle" seçildiğinde depo bazında kontrol yapılır, rezerve miktar düşülür.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">e-Fatura Gönderimi</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Kayıttan sonra otomatik gönder</label>
+                  <span class="birim">bekleme 15 dk</span></div>
+                <div class="ds">Bekleme süresi içinde belge düzeltilebilir; süre dolunca kuyruktaki belgeler entegratöre iletilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Sipariş Rezervasyonu</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Onaylı siparişte stok rezerve edilsin</label></div>
+                <div class="ds">Rezerve miktar stok listesinde "Kullanılabilir" değerinden düşülür; sipariş iptalinde otomatik serbest kalır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Maliyet Altı Satış</div>
+                <div class="ct"><div class="seg"><span class="s">Serbest</span><span class="s on">Uyar</span><span class="s">Engelle</span></div></div>
+                <div class="ds">Satır birim fiyatı güncel maliyetin altındaysa davranış; maliyet görme yetkisi olmayan kullanıcıya tutar gösterilmez.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Belge Satır Sınırı</div>
+                <div class="ct"><div class="inp sm">250</div><span class="birim">satır</span></div>
+                <div class="ds">e-Belge şemalarının satır sınırına takılmamak için uygulanır; aşıldığında belge otomatik bölünmesi önerilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Kısmi Sevkiyat</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Siparişten kısmi irsaliye kesilebilsin</label></div>
+                <div class="ds">Kapalı ise sipariş ancak tamamı sevk edilerek kapatılır; açık siparişlerde kalan miktar takibi yapılır.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- CEK SENET ---------- -->
+        <div class="mpane" data-mp="ceksenet">
+          <div class="mbas"><span class="bad">📜</span><h3>Çek Senet</h3>
+            <span class="ac">Portföy, ciro ve karşılıksız işlemleri</span></div>
+          <div class="grp">
+            <h4>Portföy Kuralları <span class="tag">GENINI · MODUL=CEKSENET</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">Portföy Giriş Kontrolü</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Banka + Çek No mükerrer kontrolü</label></div>
+                <div class="ds">Aynı banka/şube ve çek numarasıyla ikinci kayıt açılamaz; iade edilip yeniden alınan çeklerde uyarı verilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Karşılıksız İşlemi</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Cari riskini otomatik güncelle</label></div>
+                <div class="ds">Karşılıksız işaretlenen çek tutarı cari risk bakiyesine eklenir ve cari kartına "riskli" notu düşülür.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Ciro Zinciri Takibi</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Etkin</label></div>
+                <div class="ds">Çekin kimden alınıp kime ciro edildiği zincir halinde saklanır; karşılıksızda tüm zincire uyarı düşer.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Vade Uyarısı</div>
+                <div class="ct"><div class="inp sm">5</div><span class="birim">gün önce</span></div>
+                <div class="ds">Vadesi yaklaşan portföy ve borç senetleri iş listesinde bu süre kala görünür.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Teminat Çekleri</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Ayrı portföyde izlensin</label></div>
+                <div class="ds">Teminat çekleri bakiye ve nakit akışı raporlarına dahil edilmez, yalnız risk hesabında görünür.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Tahsil / Takas Süresi</div>
+                <div class="ct"><div class="inp sm">1</div><span class="birim">iş günü</span></div>
+                <div class="ds">Bankaya tahsile verilen çekin hesaba geçme süresi; nakit akışı tahmininde bu süre eklenir.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- STOK ---------- -->
+        <div class="mpane" data-mp="stok">
+          <div class="mbas"><span class="bad">📦</span><h3>Stok</h3>
+            <span class="pill p-y">1 değişiklik</span>
+            <span class="ac">Kart, izleme, maliyet ve sayım ayarları</span></div>
+          <div class="grp">
+            <h4>Kart / İzleme <span class="tag">GENINI · MODUL=STOK</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">Barkod Uzunluğu</div>
+                <div class="ct"><div class="inp sm">13</div><span class="birim">hane (EAN-13)</span></div>
+                <div class="ds">Barkod okutmada beklenen hane sayısı; farklı uzunluktaki kodlar için "serbest" değeri 0 girilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Seri / Lot Zorunluluğu</div>
+                <div class="ct"><div class="inp combo lg">İzlemeli kartlarda zorunlu</div></div>
+                <div class="ds">İzleme tipi Seri veya Lot olan kartlarda giriş/çıkışta numara girilmeden satır kaydedilemez.</div>
+              </div>
+              <div class="opt chg">
+                <div class="lb">SKT Uyarı Gün Sayısı</div>
+                <div class="ct"><div class="inp sm">30</div><span class="birim">gün</span>
+                  <span class="pill p-y">değişti · eski: 15</span></div>
+                <div class="ds">Son kullanma tarihine bu süre kalan lotlar stok listesinde turuncu boyanır ve iş listesine uyarı düşer.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Depolar Arası Negatif Transfer</div>
+                <div class="ct"><label class="chk"><input type="checkbox"> İzin ver</label></div>
+                <div class="ds">Kapalı iken çıkış deposunda yeterli miktar yoksa transfer fişi kaydedilemez.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Maliyet Yöntemi</div>
+                <div class="ct"><div class="seg"><span class="s on">Hareketli Ort.</span><span class="s">FIFO</span></div></div>
+                <div class="ds">Dönem içinde değiştirilmesi önerilmez; değişiklik yalnız yeni dönemden itibaren geçerli olur ve devir maliyeti yeniden hesaplanır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Sayım Farkı Fişi</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Otomatik oluşturulsun</label>
+                  <span class="birim">fazla/eksik ayrı fiş</span></div>
+                <div class="ds">Sayım kapatıldığında fark miktarları için giriş ve çıkış fişleri otomatik üretilir, sayım fişine bağlanır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Kritik Seviye Kontrolü</div>
+                <div class="ct"><div class="inp combo lg">Kullanılabilir miktar (kalan − rezerve)</div></div>
+                <div class="ds">Kritik seviye uyarılarının hangi miktara göre hesaplanacağı; rezerve düşülmezse sipariş edilen mallar stokta sayılır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Barkot Okutma Davranışı</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Aynı kart okutulunca miktarı artır</label></div>
+                <div class="ds">Kapalı ise her okutma yeni satır açar; seri numaralı kartlarda bu ayar dikkate alınmaz.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- URETIM ---------- -->
+        <div class="mpane" data-mp="uretim">
+          <div class="mbas"><span class="bad">🏭</span><h3>Üretim</h3>
+            <span class="ac">Reçete, iş emri ve kapasite kuralları</span></div>
+          <div class="grp">
+            <h4>İş Emri / Reçete <span class="tag">GENINI · MODUL=URETIM</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">Reçete Zorunlu</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> İş emri reçetesiz açılamasın</label></div>
+                <div class="ds">Mamul kartında geçerli reçete yoksa iş emri kaydedilmez; fason işlemlerde bu kontrol atlanabilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Fire Oranı Takibi</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Etkin</label>
+                  <div class="inp sm">5</div><span class="birim">% üstü uyarı</span></div>
+                <div class="ds">Gerçekleşen fire, reçetedeki oranı bu yüzdeden fazla aşarsa kapanışta açıklama istenir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">İş Emri Onayı</div>
+                <div class="ct"><div class="inp combo md">Üretim Müdürü</div></div>
+                <div class="ds">Onaylanmayan iş emrine malzeme çıkışı yapılamaz; onay yetkisi kullanıcı yetki matrisinden de kısıtlanabilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Yarı Mamul Stok Takibi</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Ara ürünler stokta izlensin</label></div>
+                <div class="ds">Kapalı ise çok kademeli reçetelerde yalnız hammadde ve mamul hareketi oluşur, ara stok tutulmaz.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Kapasite Kontrolü</div>
+                <div class="ct"><div class="seg"><span class="s">Kapalı</span><span class="s on">Uyar</span><span class="s">Engelle</span></div></div>
+                <div class="ds">İş merkezinin günlük kapasitesi aşılırsa planlama ekranında davranış; "Engelle" seçilirse tarih kaydırılması istenir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Kapanışta Mamul Girişi</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Otomatik stok girişi yapılsın</label></div>
+                <div class="ds">İş emri kapatıldığında üretilen miktar mamul deposuna giriş fişi ile yazılır, maliyet reçeteden hesaplanır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Reçete Revizyon Kilidi</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Kullanılmış reçete değiştirilemesin</label></div>
+                <div class="ds">İş emrinde kullanılmış reçete üzerinde değişiklik yapılamaz; yeni revizyon açılır ve eski kayıtlar bozulmaz.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- IK ---------- -->
+        <div class="mpane" data-mp="ik">
+          <div class="mbas"><span class="bad">👥</span><h3>İK</h3>
+            <span class="ac">Puantaj, izin ve bordro parametreleri</span></div>
+          <div class="grp">
+            <h4>Personel / Puantaj <span class="tag">GENINI · MODUL=IK</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">Puantaj Kaynağı</div>
+                <div class="ct"><div class="seg"><span class="s on">PDKS</span><span class="s">Manuel</span></div>
+                  <span class="birim">cihaz: \\SRV01\PDKS</span></div>
+                <div class="ds">PDKS seçilirse giriş/çıkış kayıtları cihazdan gece 01:00'de aktarılır, manuel düzeltmeler loglanır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Fazla Mesai Katsayısı</div>
+                <div class="ct"><div class="inp sm">1,50</div><span class="birim">normal · 2,00 tatil</span></div>
+                <div class="ds">Bordroda fazla mesai saat ücreti bu katsayı ile hesaplanır; resmi tatil katsayısı ayrı tanımlanır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">İzin Devri</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Sonraki yıla devretsin</label>
+                  <div class="inp sm">5</div><span class="birim">gün üst sınır</span></div>
+                <div class="ds">Kullanılmayan yıllık izinden devredebilecek azami gün; fazlası yıl sonunda düşer.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Bordro Kilidi</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Onaylanan bordro değiştirilemesin</label></div>
+                <div class="ds">Kilitli bordroda düzeltme ancak ters kayıt (iptal + yeniden hesap) ile yapılır; işlem seyir defterine yazılır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Yıllık İzin Hesabı</div>
+                <div class="ct"><div class="inp combo lg">İşe giriş yılına göre (hak ediş tarihinde)</div></div>
+                <div class="ds">Alternatif: takvim yılı başında toplu hak ediş. Değişiklik geçmiş yıl bakiyelerini yeniden hesaplamaz.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Avans Üst Sınırı</div>
+                <div class="ct"><div class="inp sm">40</div><span class="birim">% net maaş</span></div>
+                <div class="ds">Ay içinde verilebilecek azami avans oranı; üstü genel müdür onayına düşer.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- DEMIRBAS ---------- -->
+        <div class="mpane" data-mp="demirbas">
+          <div class="mbas"><span class="bad">🖥</span><h3>Demirbaş</h3>
+            <span class="ac">Amortisman, zimmet ve envanter</span></div>
+          <div class="grp">
+            <h4>Amortisman / Zimmet <span class="tag">GENINI · MODUL=DEMIRBAS</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">Amortisman Yöntemi</div>
+                <div class="ct"><div class="seg"><span class="s on">Normal</span><span class="s">Azalan Bakiyeler</span></div></div>
+                <div class="ds">Varsayılan yöntem; kart bazında değiştirilebilir. Yöntem değişikliği yalnız yeni alınan demirbaşlara uygulanır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Amortisman Dönemi</div>
+                <div class="ct"><div class="inp combo md">Aylık</div></div>
+                <div class="ds">Amortisman fişlerinin hesaplanma periyodu; yıllık seçilirse yalnız dönem sonunda tek fiş üretilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Kıst Amortisman</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Binek araçlarda uygulansın</label></div>
+                <div class="ds">Aktife alındığı aydan itibaren gün/ay oranına göre hesaplanır; diğer kıymetlerde tam yıl uygulanır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Zimmet İmzası</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Zorunlu (ıslak veya dijital)</label></div>
+                <div class="ds">İmza alınmadan zimmet kaydı kapatılamaz; dijital imza dosyası Doküman modülüne bağlanır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">QR Etiket</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Kart açılışında otomatik üret</label>
+                  <span class="birim">şablon: 50 × 30 mm</span></div>
+                <div class="ds">Etiket QR kodu demirbaş numarasını taşır; sayımda el terminali ile okutularak yer/zimmet güncellenir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Envanter Sayım Periyodu</div>
+                <div class="ct"><div class="inp combo md">6 ayda bir</div><span class="birim">sonraki: 31.12.2026</span></div>
+                <div class="ds">Periyot dolduğunda iş listesine sayım görevi düşer; sayılmayan demirbaşlar raporda "kayıp aday" olarak listelenir.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- TEKLIF ---------- -->
+        <div class="mpane" data-mp="teklif">
+          <div class="mbas"><span class="bad">📄</span><h3>Teklif</h3>
+            <span class="ac">Geçerlilik, revizyon ve onay akışı</span></div>
+          <div class="grp">
+            <h4>Teklif Kuralları <span class="tag">GENINI · MODUL=TEKLIF</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">Geçerlilik Süresi</div>
+                <div class="ct"><div class="inp sm">15</div><span class="birim">gün</span></div>
+                <div class="ds">Teklif tarihine eklenerek geçerlilik tarihi üretilir; belge üzerinde kullanıcı tarafından değiştirilebilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Revizyon Numaralandırma</div>
+                <div class="ct"><div class="inp combo lg">Aynı numara + revizyon eki (TKF-2026-0148 / R2)</div></div>
+                <div class="ds">Alternatif "her revizyona yeni numara". Revizyon açıldığında önceki sürüm salt okunur hale gelir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Onay Eşiği</div>
+                <div class="ct"><div class="inp md">100.000,00 ₺</div></div>
+                <div class="ds">Bu tutarın üzerindeki teklifler müşteriye gönderilmeden önce yönetici onayına düşer.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Teklif → Sipariş</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Kazanıldı işaretlenince sipariş otomatik oluşsun</label></div>
+                <div class="ds">Oluşan sipariş taslak durumda açılır; fiyat ve teslim tarihleri tekliften aktarılır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Maliyet / Kâr Görünürlüğü</div>
+                <div class="ct"><div class="inp combo md">Yetkiye bağlı</div></div>
+                <div class="ds">Teklif ekranındaki maliyet ve kâr marjı kolonları, kullanıcının fiyat görme yetkisine göre gizlenir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Süresi Dolan Teklifler</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Otomatik "Süresi Doldu" durumuna alınsın</label></div>
+                <div class="ds">Geçerlilik tarihi geçen teklifler gece işleminde kapatılır; huni raporundan düşer, silinmez.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- SERVIS ---------- -->
+        <div class="mpane" data-mp="servis">
+          <div class="mbas"><span class="bad">🔧</span><h3>Servis</h3>
+            <span class="ac">Servis fişi, SLA ve saha uygulaması</span></div>
+          <div class="grp">
+            <h4>Servis / Saha <span class="tag">GENINI · MODUL=SERVIS</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">SLA Süresi</div>
+                <div class="ct"><div class="inp sm">24</div><span class="birim">saat (ilk müdahale)</span></div>
+                <div class="ds">Servis talebi açıldıktan sonra ilk müdahale için tanınan süre; aşımda talep kırmızı işaretlenir ve yöneticiye bildirim gider.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Müşteri İmzası</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Fiş kapanışında zorunlu</label></div>
+                <div class="ds">Saha uygulamasında ekrandan alınan imza fişe eklenir; imzasız fiş faturaya aktarılamaz.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Yedek Parça Stok Düşümü</div>
+                <div class="ct"><div class="inp combo lg">İş emri kapanışında düşülsün</div></div>
+                <div class="ds">Alternatif: parça eklenir eklenmez düşülsün. Servis aracı deposu ayrı depo olarak tanımlanmalıdır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Saha Senkron Periyodu</div>
+                <div class="ct"><div class="inp sm">15</div><span class="birim">dakika</span></div>
+                <div class="ds">Mobil uygulamanın sunucuyla eşitlenme sıklığı; çevrimdışı yapılan kayıtlar bağlantı gelince sıraya alınır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Garanti Kontrolü</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Seri numarasından otomatik sorgulansın</label></div>
+                <div class="ds">Garanti kapsamındaki fişlerde işçilik ve parça ücreti sıfırlanır, ücretlendirme el ile açılabilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Memnuniyet Anketi</div>
+                <div class="ct"><label class="chk"><input type="checkbox"> Kapanışta SMS ile gönderilsin</label></div>
+                <div class="ds">Anket bağlantısı müşteri cep telefonuna gider; sonuçlar servis personeli performans raporuna işlenir.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- DOKUMAN ---------- -->
+        <div class="mpane" data-mp="dokuman">
+          <div class="mbas"><span class="bad">📁</span><h3>Doküman</h3>
+            <span class="ac">Belge saklama, sürüm ve boyut kuralları</span></div>
+          <div class="grp">
+            <h4>Arşiv Kuralları <span class="tag">GENINI · MODUL=DOKUMAN</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">Sürüm Takibi</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Etkin</label>
+                  <span class="birim">son 10 sürüm saklanır</span></div>
+                <div class="ds">Aynı belge yeniden yüklendiğinde eski sürüm silinmez, v1 / v2 olarak saklanır ve karşılaştırılabilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Saklama Süresi</div>
+                <div class="ct"><div class="inp sm">10</div><span class="birim">yıl</span></div>
+                <div class="ds">Süre dolan belgeler arşiv işleminde işaretlenir; mali belgelerde yasal süre altına inilmesine izin verilmez.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Boyut Sınırı</div>
+                <div class="ct"><div class="inp sm">25</div><span class="birim">MB / dosya</span></div>
+                <div class="ds">Sınırı aşan dosyalar yüklenemez; büyük çizim ve videolar için dosya sunucusu bağlantısı (kısayol) önerilir.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">İzin Verilen Uzantılar</div>
+                <div class="ct"><div class="inp lg">pdf; docx; xlsx; jpg; png; dwg; xml</div></div>
+                <div class="ds">Listede olmayan uzantılar reddedilir. Çalıştırılabilir dosyalar (exe, bat, js) hiçbir durumda kabul edilmez.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">İmzalı Belge Kilidi</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Dijital imzalı belge değiştirilemesin</label></div>
+                <div class="ds">İmzalı belge üzerine yazılamaz, silinemez; yalnız yeni sürüm eklenebilir ve imza doğrulaması saklanır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Belge Silme Yetkisi</div>
+                <div class="ct"><div class="inp combo md">Sadece Yönetici</div></div>
+                <div class="ds">Silinen belge fiziken kaldırılmaz, "silindi" işaretlenir ve seyir defterine kullanıcı/tarih ile yazılır.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- KALITE ---------- -->
+        <div class="mpane" data-mp="kalite">
+          <div class="mbas"><span class="bad">✅</span><h3>Kalite</h3>
+            <span class="ac">DÖF, sapma, denetim ve eğitim takibi</span></div>
+          <div class="grp">
+            <h4>Kalite Yönetimi <span class="tag">GENINI · MODUL=KALITE</span></h4>
+            <div class="body">
+              <div class="opt">
+                <div class="lb">DÖF Termin Süresi</div>
+                <div class="ct"><div class="inp sm">15</div><span class="birim">gün</span></div>
+                <div class="ds">Düzeltici/önleyici faaliyet açıldığında varsayılan termin tarihi bu süre eklenerek üretilir; gecikenler panoda kırmızı görünür.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Sapma Sınıflandırması</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Zorunlu (Kritik / Majör / Minör)</label></div>
+                <div class="ds">Sınıf seçilmeden sapma kaydı kapatılamaz; kritik sapmalar otomatik DÖF açar.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Denetim Periyodu</div>
+                <div class="ct"><div class="inp combo md">6 ayda bir</div><span class="birim">sonraki: 30.11.2026</span></div>
+                <div class="ds">İç denetim planı bu periyoda göre otomatik oluşturulur ve sorumlulara görev atanır.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Eğitim Geçerlilik Süresi</div>
+                <div class="ct"><div class="inp sm">24</div><span class="birim">ay</span></div>
+                <div class="ds">Süresi dolan eğitimler personel kartında "yenilenmeli" olarak işaretlenir, İK görev listesine düşer.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">DÖF Kapanış Kontrolü</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Etkinlik kontrolü yapılmadan kapatılamasın</label>
+                  <span class="birim">30 gün sonra</span></div>
+                <div class="ds">Faaliyet tamamlandıktan sonra belirtilen süre geçmeden DÖF kapatılamaz; etkinlik değerlendirmesi zorunludur.</div>
+              </div>
+              <div class="opt">
+                <div class="lb">Müşteri Şikayeti</div>
+                <div class="ct"><label class="chk"><input type="checkbox" checked> Otomatik DÖF açılsın</label></div>
+                <div class="ds">CRM'den gelen şikayet kaydı kalite modülünde DÖF olarak açılır ve şikayet kaydına bağlanır.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hint">
+          Değerler <b>GENINI</b> tablosuna <b>MODUL · ANAHTAR · DEGER · KAPSAM</b> olarak yazılır.
+          Kapsam sırası: <b>Makine → Kullanıcı → Şube → Firma</b>; en dar kapsam geçerlidir.
+          Kaydet tek transaction'dır, hata durumunda hiçbir ayar yarım kalmaz.
+        </div>
+      </div>
+
+      <!-- ================= DEGISIKLIKLER ================= -->
+      <div class="pane" data-p="degisiklik">
+        <div class="gridtb">
+          <span class="minibtn on">💾 Tümünü Kaydet</span>
+          <span class="minibtn">↩ Seçileni Geri Al</span>
+          <span class="minibtn">↩ Tümünü Varsayılana Dön</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Oturum: Mehmet Yıldız · 14.08.2026</span>
+        </div>
+        <div class="dg dgx">
+          <table>
+            <tr>
+              <th class="c" style="width:34px">✓</th>
+              <th style="width:104px">MODÜL</th>
+              <th class="c" style="width:52px">TÜR</th>
+              <th style="width:180px">ANAHTAR</th>
+              <th style="width:110px">ESKİ DEĞER</th>
+              <th style="width:110px">YENİ DEĞER</th>
+              <th style="width:96px">KAPSAM</th>
+              <th>ETKİ</th>
+            </tr>
+            <tr class="sel foc"><td class="c">✔</td><td>Genel</td><td class="c"><span class="tip t-mal">SAY</span></td><td>OTURUM_ZAMANASIMI</td>
+              <td>20</td><td><b>30</b></td><td>Firma</td>
+              <td class="ad">Tüm kullanıcıların oturum kilidi süresi uzar</td></tr>
+            <tr><td class="c">✔</td><td>Alış Satış</td><td class="c"><span class="tip t-sar">SEÇ</span></td><td>NEGATIF_STOK_SATISI</td>
+              <td>Uyar</td><td><b>Engelle</b></td><td>Firma</td>
+              <td class="ad">Stoğu yetmeyen kartlarda satış belgesi kaydedilemeyecek</td></tr>
+            <tr><td class="c">✔</td><td>Stok</td><td class="c"><span class="tip t-mal">SAY</span></td><td>SKT_UYARI_GUN</td>
+              <td>15</td><td><b>30</b></td><td>Şube: Merkez</td>
+              <td class="ad">SKT uyarıları 15 gün daha erken görünecek (yaklaşık 40 lot etkilenir)</td></tr>
+            <tfoot>
+              <tr><td class="c">Σ</td><td colspan="3">3 değişiklik</td><td colspan="2">3 anahtar</td>
+                <td>2 firma · 1 şube</td><td>Kaydedilmedi</td></tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="lgnd">
+          <span><span class="sw" style="background:#fdfaf0;border-color:#eeddb4"></span>Değişen opsiyon satırı (sarı)</span>
+          <span><span class="pill p-y">değişti</span> ayar kartındaki rozet</span>
+          <span><span class="sw" style="background:var(--sel)"></span>Seçili satır</span>
+          <span>Kontrol türü: <span class="tip t-mal">SAY</span> sayı kutusu <span class="tip t-sar">SEÇ</span> açılır liste / seçenek <span class="tip t-hzm">ONY</span> onay kutusu</span>
+        </div>
+        <div class="hint">Kaydet öncesi bu liste <b>GENINI</b>'ye yazılacak satırların tam karşılığıdır;
+          her satır ayrıca <b>ISLEMLOG</b>'a "opsiyon değişikliği" olarak düşer (kullanıcı · tarih · eski/yeni değer).</div>
+      </div>
+
+      <!-- ================= INI KAYITLARI ================= -->
+      <div class="pane" data-p="ini">
+        <div class="gridtb">
+          <span class="minibtn on">Tümü</span><span class="minibtn">Yalnız Firma</span>
+          <span class="minibtn">Yalnız Şube</span><span class="minibtn">Yalnız Kullanıcı</span>
+          <span class="minibtn">🖨️ Döküm</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">GENINI · 1.284 kayıt (ilk 10 satır)</span>
+        </div>
+        <div class="dg dgx">
+          <table>
+            <tr>
+              <th style="width:96px">MODUL</th>
+              <th style="width:200px">ANAHTAR</th>
+              <th style="width:190px">DEGER</th>
+              <th style="width:104px">KAPSAM</th>
+              <th style="width:96px">SUBE / KUL</th>
+              <th style="width:96px">GUNCELLEME</th>
+              <th>NOT</th>
+            </tr>
+            <tr><td>GENEL</td><td>VARSAYILAN_SUBE</td><td>1 — Merkez</td><td>Firma</td><td>—</td><td>02.01.2026</td><td class="ad">Kurulumda atandı</td></tr>
+            <tr><td>GENEL</td><td>TARIH_FORMATI</td><td>gg.aa.yyyy</td><td>Firma</td><td>—</td><td>02.01.2026</td><td class="ad">—</td></tr>
+            <tr class="sel"><td>GENEL</td><td>OTURUM_ZAMANASIMI</td><td>30</td><td>Firma</td><td>—</td><td><b>14.08.2026</b></td><td class="ad">Bekleyen değişiklik</td></tr>
+            <tr><td>CARI</td><td>RISK_KONTROL</td><td>UYAR</td><td>Firma</td><td>—</td><td>18.03.2026</td><td class="ad">Şube-2 için ENGELLE olarak ezilmiş</td></tr>
+            <tr><td>CARI</td><td>RISK_KONTROL</td><td>ENGELLE</td><td>Şube</td><td>Şube-2</td><td>18.03.2026</td><td class="ad">Dar kapsam — firma değerini ezer</td></tr>
+            <tr><td>ALISSATIS</td><td>NEGATIF_STOK_SATISI</td><td>ENGELLE</td><td>Firma</td><td>—</td><td><b>14.08.2026</b></td><td class="ad">Bekleyen değişiklik</td></tr>
+            <tr><td>ALISSATIS</td><td>ISKONTO_KADEME</td><td>3</td><td>Firma</td><td>—</td><td>02.01.2026</td><td class="ad">—</td></tr>
+            <tr><td>STOK</td><td>SKT_UYARI_GUN</td><td>30</td><td>Şube</td><td>Merkez</td><td><b>14.08.2026</b></td><td class="ad">Bekleyen değişiklik</td></tr>
+            <tr><td>STOK</td><td>MALIYET_YONTEMI</td><td>HAREKETLI_ORT</td><td>Firma</td><td>—</td><td>02.01.2026</td><td class="ad">Dönem içinde değiştirilemez</td></tr>
+            <tr class="s-pas"><td>KASIYER</td><td>FIS_YAZICI</td><td>EPSON TM-T88VI</td><td>Makine</td><td>KASA-1</td><td>11.06.2026</td><td class="ad">Makine bazlı — bu bilgisayarda geçerli değil</td></tr>
+            <tfoot>
+              <tr><td colspan="3">GENINI — MODUL · ANAHTAR · DEGER · KAPSAM</td>
+                <td colspan="2">1.284 kayıt</td><td colspan="2">3'ü kaydedilmemiş</td></tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-pas)"></span>Bu makinede geçerli olmayan (başka kapsam) kayıt</span>
+          <span>Kapsam önceliği: <b>Makine → Kullanıcı → Şube → Firma</b></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SAG: OZET ============ -->
+    <div class="side">
+      <div class="urun">
+        <div class="foto" id="sgIkon">⚙</div>
+        <div class="nm" id="sgAd">Genel</div>
+        <div class="mt">GENINI · MODUL=<span id="sgKod">GENEL</span></div>
+        <div class="mt" style="margin-top:5px"><span class="pill p-y">Kaydedilmedi</span></div>
+      </div>
+
+      <h5>Kapsam</h5>
+      <div class="kv"><span>Firma</span><b>Gentegre Perde &amp; Mefruşat A.Ş.</b></div>
+      <div class="kv"><span>Uygulama</span><b>Firma Geneli</b></div>
+      <div class="kv"><span>Şube</span><b>Merkez</b></div>
+      <div class="kv"><span>Kullanıcı</span><b>Mehmet Yıldız</b></div>
+      <div class="kv"><span>Tarih</span><b>14.08.2026</b></div>
+
+      <div class="tvsep"></div>
+      <h5>Bu Modül</h5>
+      <div class="kv"><span>Opsiyon sayısı</span><b id="sgAdet">8</b></div>
+      <div class="kv"><span>Değişen</span><b id="sgDeg">1</b></div>
+      <div class="kv"><span>Varsayılandan farklı</span><b>4</b></div>
+      <div class="kv"><span>Son güncelleme</span><b>14.08.2026</b></div>
+      <div class="kv"><span>Güncelleyen</span><b>Mehmet Yıldız</b></div>
+
+      <div class="tvsep"></div>
+      <h5>Genel Durum</h5>
+      <div class="kv"><span>Modül</span><b>16</b></div>
+      <div class="kv"><span>Toplam opsiyon</span><b>108</b></div>
+      <div class="kv"><span>Bekleyen değişiklik</span><b>3</b></div>
+      <div class="kv"><span>GENINI kaydı</span><b>1.284</b></div>
+
+      <div class="sidebtns" style="margin-top:8px">
+        <span class="minibtn">💾 Kaydet</span>
+        <span class="minibtn">↩ Bu Modülü Varsayılana Dön</span>
+        <span class="minibtn">📋 Başka Şubeye Kopyala</span>
+        <span class="minibtn">🖨️ Opsiyon Dökümü</span>
+        <span class="minibtn">📜 Değişiklik Geçmişi</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint" style="padding:10px 12px 0">
+    <b>Delphi / DevExpress eşleşmesi:</b>
+    <b>Ortak\UOpsiyonFrame</b> · <b>GENINI</b> (ini tablosu: MODUL·ANAHTAR·DEGER·KAPSAM) —
+    <b>TdxLayoutControl</b> + sol <b>TdxNavBar</b>.
+    Sol NavBar link'i (OnLinkClick) sağdaki TdxLayoutGroup'u değiştirir; kontroller
+    TcxCheckBox · TcxComboBox · TcxSpinEdit · TcxTextEdit olarak üretilir, açıklamalar TdxLayoutItem.CaptionOptions.Hint alanından gelir.
+    Değişen satırlar <b>Modified</b> bayrağı ile sarı boyanır (Styles.OnGetContentStyle), Kaydet tek transaction ile
+    GENINI'ye yazar ve <b>ISLEMLOG</b>'a düşer.
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Tüm opsiyonlar → <b>GENINI</b> (MODUL · ANAHTAR · DEGER · KAPSAM · SUBEID · KULID)</span>·
+    <span>Kapsam önceliği → <b>Makine → Kullanıcı → Şube → Firma</b></span>·
+    <span>Değişiklik izi → <b>ISLEMLOG → GENDEPO.LOG&lt;yyyy&gt;</b></span>·
+    <span>Koçan / kilit gibi özel ayarlar → <b>KOCAN · KILITLER</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Firma: <b>Gentegre Perde &amp; Mefruşat A.Ş.</b></span>
+    <span>Modül: <b id="sbModul">Genel</b></span>
+    <span>Kapsam: <b>Firma Geneli</b></span>
+    <span style="margin-left:auto">3 opsiyon değişti — kaydedilmedi</span>
+  </div>
+</div>
+
+<script>
+  /* ---- ust sekmeler (Ayarlar / Degisiklikler / Ini) ---- */
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+      t.classList.add('active');
+      var p=document.querySelector('.pane[data-p="'+t.dataset.t+'"]');
+      if(p) p.classList.add('active');
+    });
+  });
+
+  /* ---- sol modul listesi (TdxNavBar) ---- */
+  document.querySelectorAll('.gtus[data-m]').forEach(function(m){
+    m.addEventListener('click',function(){
+      document.querySelectorAll('.gtus[data-m]').forEach(function(x){x.classList.remove('on')});
+      document.querySelectorAll('.mpane').forEach(function(p){p.classList.remove('active')});
+      m.classList.add('on');
+      var kod=m.dataset.m;
+      var p=document.querySelector('.mpane[data-mp="'+kod+'"]');
+      if(p) p.classList.add('active');
+
+      /* Ayarlar sekmesine don */
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('active')});
+      document.querySelector('.tab[data-t="ayar"]').classList.add('active');
+      document.querySelector('.pane[data-p="ayar"]').classList.add('active');
+
+      /* sag ozet + durum cubugu */
+      var ad=m.textContent.replace(/\s+/g,' ').trim().replace(/^\S+\s/,'').replace(/\s\d+$/,'').trim();
+      var ikon=m.querySelector('.ic').textContent;
+      var adet=m.querySelector('.n').textContent;
+      var deg=m.querySelector('.n').classList.contains('d')?'1':'0';
+      document.getElementById('sgAd').textContent=ad;
+      document.getElementById('sgIkon').textContent=ikon;
+      document.getElementById('sgKod').textContent=kod.toUpperCase();
+      document.getElementById('sgAdet').textContent=adet;
+      document.getElementById('sgDeg').textContent=deg;
+      document.getElementById('sbModul').textContent=ad;
+    });
+  });
+</script>
+
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>.gmzgizle{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>.gmzgizle{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+/* === GN-KOYU-GRPBAS: grup basligi koyu tema === */
+body.koyu .grp>h4{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-bottom-color:#2c3542!important}
+body.koyu .grp{background:#1b222c!important;border-color:#2c3542!important}
+body.koyu .grp .tag{background:#2c3a4b!important;color:#9fc0e0!important}
+body.koyu .imgbox{background:linear-gradient(135deg,#222b37,#1b232d)!important;
+  border-color:#3b4a5c!important;color:#7f8fa1!important}
+body.koyu .imgthumbs .t{border-color:#33404f!important}
+/* === GN-KOYU-GRPBAS son === */
+</style>
+<script>(function(){
+function solMenuMu(e){
+  if(!e||e.nodeType!==1) return false;
+  if(/(^|\s)(gorev|solmenu|gtusgrup)(\s|$)/.test(e.className||"")) return true;
+  /* gorev tuslari / sekmeli sol sutun: .gtus veya .ltabs iceriyorsa gizlenir */
+  return !!e.querySelector(".gtus, .ltabs, .lpane");
+}
+function g(){
+  if(location.hash.indexOf("gomulu")>=0){
+    document.body.classList.add("gomulu");
+    [".wrap",".work"].forEach(function(sel){
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(w){
+        var ilk=w.firstElementChild;
+        if(ilk) ilk.classList.toggle("gmzgizle", solMenuMu(ilk));
+      });
+    });
+  } else document.body.classList.remove("gomulu");
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",g); else g();
+addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+
+<style id="gnPanoCss">
+.gnpk{position:absolute;z-index:40;width:22px;height:46px;
+  border:1px solid var(--line,#d8e0ea);border-radius:6px;
+  background:linear-gradient(#fff,#eef3f9);color:#2f6db3;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+  box-shadow:0 0 6px rgba(20,32,50,.10);user-select:none}
+.gnpk:hover{background:linear-gradient(#fff,#dce8f6);color:#14406f}
+.gnpk.sag{left:-11px;top:14px;border-right:0;border-radius:6px 0 0 6px}
+.gnpk.sol{right:-11px;top:14px;border-left:0;border-radius:0 6px 6px 0}
+.gnpanokap{position:relative}
+.gnpanokap.kapali{width:0!important;min-width:0!important;flex:none!important;
+  padding-left:0!important;padding-right:0!important;
+  border-left-width:0!important;border-right-width:0!important;overflow:visible!important}
+.gnpanokap.kapali>*:not(.gnpk){display:none!important}
+.gnpanokap.kapali .gnpk.sag{left:-23px;border-right:1px solid var(--line,#d8e0ea);border-radius:6px}
+.gnpanokap.kapali .gnpk.sol{right:-23px;border-left:1px solid var(--line,#d8e0ea);border-radius:6px}
+/* koyu tema */
+body.koyu .gnpk{background:linear-gradient(#26313f,#1f2836)!important;border-color:#33404f!important;color:#7fb2e6!important}
+body.koyu .gnpk:hover{background:linear-gradient(#2c3a4b,#242f3e)!important;color:#cfe0f4!important}
+</style>
+<script>
+/* ---- GN_PANO_AC_KAPA — SOL (klasor/arama) ve SAG (bilgi/icerik) panolari ---- */
+(function(){
+  function bul(){
+    var kap = document.querySelector('.wrap') || document.querySelector('.govde') || document.body;
+    var yanlar = [].slice.call(kap.children).filter(function(e){
+      return /\b(gorev|side|yan|nav)\b/.test(e.className || '');
+    });
+    var orta = kap.querySelector(':scope > .center, :scope > .main, :scope > .work');
+    var sol = null, sag = null;
+    yanlar.forEach(function(e){
+      if (/\bright\b/.test(e.className)) { sag = e; return; }
+      if (orta && e.compareDocumentPosition(orta) & Node.DOCUMENT_POSITION_FOLLOWING) sol = sol || e;
+      else if (orta) sag = sag || e;
+      else if (!sol) sol = e; else sag = sag || e;
+    });
+    return {sol: sol, sag: sag};
+  }
+
+  function tak(p, taraf, anahtar, ad){
+    if (!p || p.querySelector(':scope > .gnpk')) return;
+    p.classList.add('gnpanokap');
+    p.style.position = 'relative';
+    var d = document.createElement('div');
+    /* dugme SOL panonun SAG kenarinda, SAG panonun SOL kenarinda durur */
+    d.className = 'gnpk ' + (taraf === 'sol' ? 'sol' : 'sag');
+    function ciz(){
+      var k = p.classList.contains('kapali');
+      d.textContent = taraf === 'sol' ? (k ? '›' : '‹') : (k ? '‹' : '›');
+      d.title = (k ? ad + ' panosunu aç' : ad + ' panosunu kapat');
+    }
+    function uygula(kapali){
+      if (kapali){
+        p.classList.add('kapali');
+        ['width','min-width','max-width','flex-basis','padding-left','padding-right',
+         'border-left-width','border-right-width'].forEach(function(a){
+          p.style.setProperty(a, '0', 'important');
+        });
+        p.style.setProperty('flex', 'none', 'important');
+        p.style.setProperty('overflow', 'visible', 'important');
+      } else {
+        p.classList.remove('kapali');
+        p.style.cssText = '';
+      }
+      p.style.position = 'relative';
+      ciz();
+    }
+    d.addEventListener('click', function(){
+      var k = !p.classList.contains('kapali');
+      uygula(k);
+      try { sessionStorage.setItem(anahtar, k ? '1' : '0'); } catch(e){}
+    });
+    p.appendChild(d);
+    var bas = false;
+    try { bas = sessionStorage.getItem(anahtar) === '1'; } catch(e){}
+    uygula(bas);
+  }
+
+  function kur(){
+    var p = bul();
+    tak(p.sol, 'sol', 'gnPanoSol', 'Klasör / arama');
+    tak(p.sag, 'sag', 'gnPano',    'Bilgi');
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur);
+  else kur();
+})();
+</script>
+
+<script>
+/* ---- MENUDEN GELEN MODUL ONSECIMI:  #gomulu&mod=stok  ----
+   Yonetim > Opsiyonlar altindaki her giris bu ekrani kendi moduluyle acar. */
+(function(){
+  function modOnSec(){
+    var m=/[#&]mod=([a-z]+)/i.exec(location.hash||''); if(!m) return;
+    var kod=m[1].toLowerCase();
+    var d=document.querySelector('.gtus[data-m="'+kod+'"]'); if(!d) return;
+    d.click();
+    var b=document.querySelector('.title');
+    if(b){ var ad=d.textContent.replace(/\s+/g,' ').trim().replace(/^\S+\s/,'').replace(/\s\d+$/,'').trim();
+      var sp=b.querySelector('.sp');
+      b.innerHTML='<span class="dot"></span> Opsiyonlar — '+ad+(sp?sp.outerHTML:'');
+      document.title='Gentegre AI — '+ad+' Opsiyonları'; }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',modOnSec);
+  else modOnSec();
+  window.addEventListener('hashchange', function(){ location.reload(); });
+})();
+</script>
+</body>
+</html>

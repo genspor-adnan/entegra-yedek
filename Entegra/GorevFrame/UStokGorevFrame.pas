@@ -1,4 +1,4 @@
-﻿unit UStokGorevFrame;
+unit UStokGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -8,21 +8,21 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus, UUretimListeDlg, UUretimAramaFrame,
-  cxLookAndFeelPainters, cxButtons, JvExControls, JvButton, JvNavigationPane,
-  ImgList, PngImageList, ExtCtrls, System.ImageList;           {Symbols}
+  cxLookAndFeelPainters, cxButtons,
+  ImgList, PngImageList, ExtCtrls, System.ImageList, cxGraphics, cxLookAndFeels;           {Symbols}
 
 type
   TStokGorevFrame = class(TFrame)
-    btnHesapKarti: TJvNavPanelButton;
+    btnHesapKarti: TcxButton;
     PngImageList1: TPngImageList;
-    btnTransferler: TJvNavPanelButton;
+    btnTransferler: TcxButton;
     Panel1: TPanel;
-    BtnGFisler: TJvNavPanelButton;
-    BtnCFisler: TJvNavPanelButton;
+    BtnGFisler: TcxButton;
+    BtnCFisler: TcxButton;
     Panel3: TPanel;
-    btnDokumlerOzel: TJvNavPanelButton;
-    btnDokumler: TJvNavPanelButton;
-    btnTalepler: TJvNavPanelButton;
+    btnDokumlerOzel: TcxButton;
+    btnDokumler: TcxButton;
+    btnTalepler: TcxButton;
     procedure btnHesapKartiClick(Sender: TObject);
     procedure btnTransferlerClick(Sender: TObject);
     procedure BtnGFislerClick(Sender: TObject);
@@ -58,9 +58,9 @@ begin
    if Button = mbRight then
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=0
    else
-      TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TJVNavPanelButton(Sender).Tag;
+      TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TcxButton(Sender).Tag;
 
-  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TJVNavPanelButton(Sender).Tag;
+  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TcxButton(Sender).Tag;
   TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'S';
   btnUpAndDown(Sender);
 end;
@@ -106,14 +106,10 @@ end;
 
 procedure TStokGorevFrame.btnUpAndDown(Sender: TObject);
 begin
-  btnHesapKarti.Down := False;
-  btnTransferler.Down := False;
-  BtnCFisler.Down := False;
-  BtnGFisler.Down := False;
-  btnDokumler.Down := False;
-  btnDokumlerOzel.Down := False;
-  if (Sender<>nil)and(Sender.ClassName = 'TJvNavPanelButton') then
-    (Sender as TJvNavPanelButton).Down := True;
+  // Tek buton aktif: frame'deki TUM TcxButton'lar tek elden yonetilir.
+  // (Eskiden sabit bir buton listesi sifirlaniyordu; listede olmayan butonlar
+  //  basili kaldigi icin ayni anda birden fazla buton aktif gorunuyordu.)
+  GorevTusuSec(Self, Sender);
 end;
 
 procedure TStokGorevFrame.FrameAktifOlacak(Sender: TObject);
@@ -137,7 +133,7 @@ end;
 procedure TStokGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
 
   Value.AnaFrameYoneticisi.OnFrameAktifOlacak.Add(FrameAktifOlacak);
 
@@ -155,3 +151,5 @@ end;
 initialization
   RegisterClass(TStokGorevFrame);
 end.
+
+

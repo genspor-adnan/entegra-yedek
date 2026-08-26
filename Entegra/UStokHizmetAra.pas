@@ -1,4 +1,4 @@
-﻿unit UStokHizmetAra;
+﻿unit  UStokHizmetAra;
 
 interface
 
@@ -231,6 +231,8 @@ type
     procedure HizmetAra;
     procedure AramaKapsamiUygula(AMod: Integer);
     procedure AramaKapsamiSifirla;
+    procedure VarsayilanKapsamUygula;   // sekmeye gore otomatik liste (Stok=Son Aranan, Hizmet=Tumu)
+    procedure DetayAlanaYazZorla(const AAlan, ADeger: string);  // salt-okunur (subselect) alana yaz
     Procedure DagitimAra;
     procedure SagPanelDetayYukle;
     { Private declarations }
@@ -552,17 +554,14 @@ begin
       if (PageControl1.ActivePage.Name='SheetStok') and PanelDetayliArama.Visible then
         TabKategori.Open;
       TreeListKategori.Visible := TabKategori.Active and (TabKategori.RecordCount>0);
-      // Bos kriterde OTOMATIK listeleme YOK (stok da hizmet de): liste bos gelir,
-      //   kullanici arama yapinca ya da ToolBarAranan butonuna basinca dolar.
+      // Bos kriterde sekmenin VARSAYILAN kapsami gelir (Stok=Son Aranan, Hizmet=Tumu);
+      //   eskiden liste bos kalir, kullanici ToolBarAranan butonuna basmak zorundaydi.
       //   Dagitim sekmesi sabit/kucuk liste - o yuklenmeye devam eder.
       if not FAcilistaListelemeAtla then
         if (PageControl1.ActivePage = SheetDagitim) or StokAramaKriteriVar then
           ListeAc(1)
-        else begin
-          AramaKapsamiSifirla;
-          if TabStokListe.Active   then TabStokListe.Close;
-          if TabHizmetListe.Active then TabHizmetListe.Close;
-        end;
+        else
+          VarsayilanKapsamUygula;
     end;
 end;
 
@@ -768,6 +767,10 @@ begin
     FAcilistaListelemeAtla := False;
   end;
 
+  // Acilista da liste dolu gelsin: cagiran ekran bir kriterle actiysa (kod/ad/barkod)
+  //   ona dokunma, aksi halde sekmenin varsayilan kapsamini uygula.
+  if (PageControl1.ActivePage <> SheetDagitim) and (not StokAramaKriteriVar) then
+    VarsayilanKapsamUygula;
 end;
 
 procedure TStokHizmetAraDlg.GridStokViewCanFocusRecord(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; var AAllow: Boolean);
@@ -1138,8 +1141,19 @@ Begin
     TabDetayGiris.FieldByName('TUR').Value := 1; // stok
     TabDetayGiris.FieldByName('URUNID').AsInteger := UrunID;
     case stokhizmetaracagirantur of
-      3..20: ;
-      100,101,105: ;
+      // SIPARIS ailesi (9 verilen / 19 alinan siparis, 105 STOK TALEBI):
+      //   KOD ve AD sunucu tarafinda subselect ile uretilen
+      //   fkData alanlaridir (USiparisWizard ProviderFlags:=[] yapar, DML'e girmezler).
+      //   Yeni eklenen satirda bu alanlar BOS kaliyor ve stok kodu/adi gridde gorunmuyordu;
+      //   ancak kaydedip ekrandan cikip girince (dataset yeniden okunca) doluyordu.
+      //   Satiri eklerken degerleri elle yaz -> aninda gorunur, post'a etkisi yok.
+      9, 19, 105:
+        begin
+          DetayAlanaYazZorla('KOD', Kod);
+          DetayAlanaYazZorla('AD',  Ad);
+        end;
+      3..8, 10..18, 20: ;
+      100,101: ;
       109,110,119,138: ;
       250,260,270,280: ;
       430: ;
@@ -1285,6 +1299,13 @@ hizmeteklemeyedevam:
       TabDetayGiris.FieldByName('OZELKOD').AsString:= OzelKod;
       TabDetayGiris.FieldByName('OZELKOD2').AsString:= OzelKod2;
     end;
+    // SIPARIS ailesi (9/19 siparis, 105 stok talebi - hepsi SIPARISDETAY'a yazar):
+    //   KOD/AD sunucu subselect'inden gelen fkData alanlar; yeni satirda bos kalip
+    //   gridde gorunmuyordu (bkz. StokEkle'deki ayni duzeltme).
+    if stokhizmetaracagirantur in [9, 19, 105] then begin
+      DetayAlanaYazZorla('KOD', Kod);
+      DetayAlanaYazZorla('AD',  Ad);
+    end;
     SafePostDetayGiris;
     Result := True;
   end;
@@ -1353,6 +1374,39 @@ begin
     StokAra
   else if PageControl1.ActivePage = SheetHizmet then
     HizmetAra;
+end;
+
+procedure TStokHizmetAraDlg.DetayAlanaYazZorla(const AAlan, ADeger: string);
+// Detay sorgusunda SUNUCU TARAFI ifadeden (subselect) gelen kolonlari FireDAC
+//   salt-okunur isaretler; dogrudan yazmak "Field 'KOD' cannot be modified" verir.
+//   Bu alanlar DML'e de girmez (ProviderFlags=[]), yalniz GORUNTU icindir; yeni satirda
+//   bos kalmasin diye ReadOnly gecici acilip yazilir, sonra eski haline dondurulur.
+var
+  F: TField;
+  LEskiReadOnly: Boolean;
+begin
+  if TabDetayGiris = nil then Exit;
+  F := TabDetayGiris.FindField(AAlan);
+  if (F = nil) or (not (TabDetayGiris.State in [dsEdit, dsInsert])) then Exit;
+  LEskiReadOnly := F.ReadOnly;
+  F.ReadOnly := False;
+  try
+    F.AsString := ADeger;
+  finally
+    F.ReadOnly := LEskiReadOnly;
+  end;
+end;
+
+procedure TStokHizmetAraDlg.VarsayilanKapsamUygula;
+// Kriter girilmeden acilan/gecilen sekmede liste BOS kalmasin:
+//   Stok sekmesi   -> SON ARANANLAR (kullanicinin en cok ihtiyac duydugu kume; tum stok
+//                     listesini bos kriterle cekmek yavas).
+//   Hizmet sekmesi -> TUMU (hizmet/masraf kalemi sayisi kucuk, tam liste ucuz).
+begin
+  if PageControl1.ActivePage = SheetStok then
+    AramaKapsamiUygula(1)
+  else if PageControl1.ActivePage = SheetHizmet then
+    AramaKapsamiUygula(0);
 end;
 
 procedure TStokHizmetAraDlg.LabelTumKayitlarClick(Sender: TObject);

@@ -139,7 +139,6 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     end
   end
   object PageControlUst: TcxPageControl
-    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 957
@@ -148,21 +147,27 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     TabOrder = 1
     Properties.ActivePage = TabSheetCalisma
     Properties.CustomButtons.Buttons = <>
+    Properties.Images = Tablo.PNGImageList2
     OnChange = PageControlUstChange
     ClientRectBottom = 471
     ClientRectLeft = 4
     ClientRectRight = 953
-    ClientRectTop = 24
+    ClientRectTop = 25
     object TabSheetCalisma: TcxTabSheet
       Caption = #199'al'#305#351'ma'
       ImageIndex = 19
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GroupDetay: TcxGroupBox
         Left = 169
         Top = 0
         Align = alClient
         Caption = 'Detay'
         TabOrder = 0
-        Height = 447
+        ExplicitHeight = 447
+        Height = 446
         Width = 780
         object Panel2: TPanel
           Left = 2
@@ -314,11 +319,12 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
           Left = 2
           Top = 189
           Width = 776
-          Height = 256
+          Height = 255
           Align = alClient
           BevelEdges = []
           BevelOuter = bvNone
           TabOrder = 1
+          ExplicitHeight = 256
         end
       end
       object GrpBaslama: TcxGroupBox
@@ -327,7 +333,8 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
         Align = alLeft
         Caption = 'Zaman'
         TabOrder = 1
-        Height = 447
+        ExplicitHeight = 447
+        Height = 446
         Width = 169
         object cxLabel2: TcxLabel
           Left = 8
@@ -392,13 +399,16 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     object TabSheetOlcum: TcxTabSheet
       Caption = #214'l'#231#252'm'
       ImageIndex = 19
+      ExplicitTop = 24
+      ExplicitHeight = 447
       object Panel1: TPanel
         Left = 0
         Top = 0
         Width = 337
-        Height = 447
+        Height = 446
         Align = alLeft
         TabOrder = 0
+        ExplicitHeight = 447
         object PanelBaslik: TPanel
           Left = 1
           Top = 1
@@ -501,15 +511,17 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
         Align = alClient
         Caption = 'Bilgiler'
         TabOrder = 1
-        Height = 447
+        ExplicitHeight = 447
+        Height = 446
         Width = 612
         object Panel3: TPanel
           Left = 2
           Top = 249
           Width = 608
-          Height = 196
+          Height = 195
           Align = alClient
           TabOrder = 0
+          ExplicitHeight = 196
           object GridOlcumDetay: TcxGrid
             Left = 1
             Top = 28
@@ -974,6 +986,10 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     object TabSheetEkAlan111: TcxTabSheet
       Caption = 'Ek Alan1'
       ImageIndex = 19
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object TabSheetEkAlan1: TPanel
         Left = 0
         Top = 0
@@ -987,6 +1003,10 @@ object IsEmriPersonelZamanDlg: TIsEmriPersonelZamanDlg
     object TabSheetEkAlan222: TcxTabSheet
       Caption = 'Ek Alan 2'
       ImageIndex = 19
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object TabSheetEkAlan2: TPanel
         Left = 0
         Top = 0

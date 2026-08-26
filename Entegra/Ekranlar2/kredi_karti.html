@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kredi Kartı — Mockup</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;--sel:#d7e7fb;--selbd:#98c2ee;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--grpbg:#fbfcfd;}
+  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:970px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#574a9c,#3f3577);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#b4a9e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}.title .sp{margin-left:auto;font-weight:normal;opacity:.9;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#574a9c;background:linear-gradient(#7566c4,#574a9c);color:#fff;font-weight:bold}.btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px}
+  .idstrip{display:grid;grid-template-columns:1.3fr 1fr 150px 130px;gap:10px;padding:10px 12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}.fld label{font-size:10.5px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;color:var(--ink);display:flex;align-items:center}.inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}.combo{position:relative}.combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}.chip.on{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}.chip.warn{background:#fdf6e3;color:#a9791a;border:1px solid #eeddb4}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);margin-top:2px;flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);position:relative;top:1px}.tab.active{background:#fff;color:var(--navy);font-weight:bold}.tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:14px}.pane.active{display:block}.row{display:flex;gap:14px}.col{flex:1;min-width:0}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}.grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;gap:8px}.grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;margin-left:auto;background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grid2{display:grid;grid-template-columns:130px 1fr;gap:8px 10px;align-items:center}.grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}.dg table{border-collapse:collapse;width:100%}.dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold}.dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}.dg tr.sel td{background:var(--sel)}.dg tr:hover td{background:#f2f7fd}.dg .c{text-align:center}.amt{text-align:right;font-family:"Segoe UI",Tahoma}.neg{color:#b23b3b}
+  .gridtb{display:flex;gap:4px;padding:5px 0 0}.minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}.kpi{border:1px solid var(--line2);border-radius:4px;background:linear-gradient(#fff,#f6f9fc);padding:9px 11px}.kpi .k{font-size:10.5px;color:var(--muted)}.kpi .v{font-size:16px;font-weight:bold;color:var(--navy);margin-top:3px;font-family:"Segoe UI",Tahoma}.kpi .v.neg{color:#b23b3b}.kpi .s{font-size:10px;color:var(--muted);margin-top:2px}
+  .bar{height:12px;border-radius:6px;background:#e7edf3;overflow:hidden;display:flex;border:1px solid var(--line2)}.bar>span{display:block;height:100%}
+  .ccard{background:linear-gradient(135deg,#5b4ba0,#372e6b);color:#fff;border-radius:10px;padding:14px;height:120px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 4px 14px rgba(55,46,107,.35)}
+  .ccard .no{font-size:16px;letter-spacing:2px;font-family:"Segoe UI",Tahoma}.ccard .b{font-size:11px;opacity:.85}.ccard .row2{display:flex;justify-content:space-between;align-items:flex-end}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}.maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style></head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Kredi Kartı — Düzenle <span class="sp">KREDIKARTI.ID 7</span></div>
+  <div class="toolbar"><div class="btn primary">💾 Kaydet</div><div class="btn danger">🗑 Sil</div><div class="sepv"></div><div class="btn">💳 Harcama Gir</div><div class="btn">🏦 Ödeme (Kapat)</div><div class="btn">📥 Ekstre İçe Aktar</div><div class="btn">🖨 Yazdır</div><div class="sepv"></div><div class="btn">✖ Kapat</div></div>
+  <div class="idstrip">
+    <div class="fld"><label>Kart Adı</label><div class="inp big">Garanti — Şirket Bonus</div></div>
+    <div class="fld"><label>Banka</label><div class="inp big">Garanti BBVA</div></div>
+    <div class="fld"><label>Son 4 Hane</label><div class="inp combo">**** 4417</div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="chip on">● Aktif</span></div></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-t="genel">Genel</div><div class="tab" data-t="harcama">Harcamalar</div><div class="tab" data-t="ekstre">Ekstreler</div><div class="tab" data-t="taksit">Taksitli</div><div class="tab" data-t="ek">Ek Alanlar</div>
+  </div>
+  <div class="pane active" data-p="genel">
+    <div class="kpis">
+      <div class="kpi"><div class="k">Kart Limiti</div><div class="v">₺ 250.000</div></div>
+      <div class="kpi"><div class="k">Güncel Borç</div><div class="v neg">₺ 138.400</div><div class="s">%55 kullanım</div></div>
+      <div class="kpi"><div class="k">Kullanılabilir</div><div class="v">₺ 111.600</div><div class="bar" style="margin-top:5px"><span style="width:55%;background:linear-gradient(#7566c4,#574a9c)"></span></div></div>
+      <div class="kpi"><div class="k">Son Ödeme</div><div class="v" style="color:#b5731a">18.08.2026</div><div class="s">asgari ₺ 13.840</div></div>
+    </div>
+    <div class="row">
+      <div class="col" style="max-width:300px">
+        <div class="ccard"><div><div class="b">Garanti BBVA · Bonus</div><div class="no">**** **** **** 4417</div></div>
+          <div class="row2"><div><div class="b">Kart Sahibi</div><div style="font-size:12px">GENOTİP LTD.</div></div><div style="text-align:right"><div class="b">SKT</div><div style="font-size:12px">08/28</div></div></div></div>
+      </div>
+      <div class="col"><div class="grp" style="margin-bottom:0"><h4>Kart Bilgileri <span class="tag">KREDIKARTI</span></h4>
+        <div class="body grid2">
+          <label>Banka</label><div class="inp combo">Garanti BBVA</div>
+          <label>Kart Türü</label><div class="inp combo">Kurumsal / Bonus</div>
+          <label>Hesap Kesim Günü</label><div class="inp">Her ayın 5'i</div>
+          <label>Son Ödeme</label><div class="inp">Kesimden 13 gün sonra</div>
+          <label>Muhasebe Kodu</label><div class="inp">309.01.007</div>
+          <label>Sorumlu</label><div class="inp combo">Elif Demir</div>
+        </div></div></div>
+    </div>
+  </div>
+  <div class="pane" data-p="harcama"><div class="grp" style="margin-bottom:0"><h4>Harcamalar / Hareketler <span class="tag">KREDIKARTIHAREKET</span></h4>
+    <div class="body"><div class="dg"><table><thead><tr><th style="width:90px">Tarih</th><th>Açıklama / Üye İşyeri</th><th style="width:120px">Karşı Cari</th><th class="c" style="width:70px">Taksit</th><th class="amt" style="width:110px">Tutar</th></tr></thead>
+      <tbody>
+        <tr><td>06.08</td><td>Akaryakıt — OPET</td><td>—</td><td class="c">Tek</td><td class="amt neg">2.400,00</td></tr>
+        <tr class="sel"><td>08.08</td><td>Donanım alımı — MNG Teknoloji</td><td>MNG Tekno.</td><td class="c">3</td><td class="amt neg">36.000,00</td></tr>
+        <tr><td>10.08</td><td>Yazılım aboneliği</td><td>—</td><td class="c">Tek</td><td class="amt neg">1.850,00</td></tr>
+      </tbody></table></div>
+      <div class="gridtb"><span class="minibtn">＋ Harcama</span><span class="minibtn">🔗 Faturaya Bağla</span><span class="minibtn">📊 Excel</span></div>
+    </div></div></div>
+  <div class="pane" data-p="ekstre"><div class="grp" style="margin-bottom:0"><h4>Dönem Ekstreleri <span class="tag">KREDIKARTI (dönem)</span></h4>
+    <div class="body"><div class="dg"><table><thead><tr><th>Dönem</th><th style="width:110px">Kesim</th><th style="width:110px">Son Ödeme</th><th class="amt" style="width:120px">Dönem Borcu</th><th class="c" style="width:90px">Durum</th></tr></thead>
+      <tbody><tr class="sel"><td>Ağustos 2026</td><td>05.08.2026</td><td>18.08.2026</td><td class="amt">138.400,00</td><td class="c"><span class="chip warn">Ödenmedi</span></td></tr><tr><td>Temmuz 2026</td><td>05.07.2026</td><td>18.07.2026</td><td class="amt">96.200,00</td><td class="c"><span class="chip on">Ödendi</span></td></tr></tbody></table></div>
+      <div class="gridtb"><span class="minibtn">💳 Öde / Kapat</span><span class="minibtn">👁 Ekstre Detay</span></div></div></div></div>
+  <div class="pane" data-p="taksit"><div class="grp" style="margin-bottom:0"><h4>Devam Eden Taksitler <span class="tag">KREDIKARTIHAREKET</span></h4>
+    <div class="body"><div class="dg"><table><thead><tr><th>Harcama</th><th class="c" style="width:90px">Taksit</th><th class="amt" style="width:110px">Aylık</th><th class="amt" style="width:110px">Kalan</th></tr></thead>
+      <tbody><tr class="sel"><td>Donanım — MNG</td><td class="c">2 / 3</td><td class="amt">12.000,00</td><td class="amt">24.000,00</td></tr></tbody></table></div></div></div></div>
+  <div class="pane" data-p="ek"><div class="grp" style="margin-bottom:0"><h4>Ek Alanlar <span class="tag">REHBERBILGI/EAV</span></h4><div class="body"><div class="dg"><table><thead><tr><th style="width:180px">Etiket</th><th>Değer</th></tr></thead><tbody><tr><td>Zimmet</td><td>Elif Demir</td></tr><tr class="sel"><td>Puan (Bonus)</td><td>4.280</td></tr></tbody></table></div><div class="gridtb"><span class="minibtn">＋ Alan Ekle</span></div></div></div></div>
+  <div class="maprow"><b>Veri modeli:</b> <span>Genel → <b>KREDIKARTI</b></span>· <span>Harcama → <b>KREDIKARTIHAREKET</b></span>· <span>Ödeme → <b>KASA/BANKA</b></span>· <span>Ek → <b>REHBERBILGI</b></span></div>
+  <div class="statusbar"><span>Borç: <b style="color:#b23b3b">₺ 138.400</b></span><span>Son Ödeme: 18.08.2026</span><span style="margin-left:auto">Banka: Garanti BBVA</span></div>
+</div>
+<script>var tabs=document.querySelectorAll('.tab'),panes=document.querySelectorAll('.pane');tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('active')});panes.forEach(function(x){x.classList.remove('active')});t.classList.add('active');document.querySelector('.pane[data-p="'+t.dataset.t+'"]').classList.add('active');});});</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body></html>

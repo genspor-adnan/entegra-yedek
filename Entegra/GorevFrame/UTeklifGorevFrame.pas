@@ -1,4 +1,4 @@
-ï»¿unit UTeklifGorevFrame;
+unit UTeklifGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -8,17 +8,17 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus,
-  cxLookAndFeelPainters, cxButtons, JvExControls, JvButton, JvNavigationPane,
+  cxLookAndFeelPainters, cxButtons,
   ImgList, PngImageList, CategoryButtons, ExtCtrls;           {Symbols}
 
 type
   TTeklifGorevFrame = class(TFrame)
-    btnVerilenTeklif: TJvNavPanelButton;
+    btnVerilenTeklif: TcxButton;
     PngImageList1: TPngImageList;
-    btnSatinAlmaTeklif: TJvNavPanelButton;
+    btnSatinAlmaTeklif: TcxButton;
     Panel3: TPanel;
-    JvNavPanelButton2: TJvNavPanelButton;
-    btnDokumler: TJvNavPanelButton;
+    JvNavPanelButton2: TcxButton;
+    btnDokumler: TcxButton;
     procedure TumTusResimleriniDegistir(Menu: TCategoryButtons; ImajIndex: Integer);
     procedure btnVerilenTeklifClick(Sender: TObject);
     procedure btnSatinAlmaTeklifClick(Sender: TObject);
@@ -33,11 +33,11 @@ type
     procedure RehberKayitErisimTamamlandi(Sender: TObject);
     procedure KurumDlgKapatEylemi(Sender: TObject);
     procedure FrameAktifOlacak(Sender: TObject);
-    procedure TusBasildi(Tus: TJvnavpanelbutton);
+    procedure TusBasildi(Tus: TcxButton);
 
   public
     { Public declarations }
-      FAltTur : SmallInt;    //Tur: Verilen:80,SatÄ±nALma:81
+      FAltTur : SmallInt;    //Tur: Verilen:80,SatýnALma:81
 
   published
     property FrameBilgi : TAnaFrameBilgi read FFrameBilgi write SetFrameBilgi;
@@ -58,16 +58,9 @@ begin
 
 end;
 
-procedure TTeklifGorevFrame.TusBasildi(Tus : TJvnavpanelbutton);
-var i : SmallInt;
+procedure TTeklifGorevFrame.TusBasildi(Tus : TcxButton);
 begin
-   for i := 0 to ComponentCount - 1 do
-       if Components[i] is TJvnavpanelbutton then begin
-          if TJvnavpanelbutton(Components[i]) = Tus then
-             TJvnavpanelbutton(Components[i]).Down := True
-          else
-             TJvnavpanelbutton(Components[i]).Down := False;
-       end;
+  GorevTusuSec(Self, Tus);
 end;
 procedure TTeklifGorevFrame.btnDokumlerMouseDown(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -75,7 +68,7 @@ begin
    if Button = mbRight then
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=0
    else
-      TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TJVNavPanelButton(Sender).Tag;
+      TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TcxButton(Sender).Tag;
 
   TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'T';
   btnUpAndDown(Sender);
@@ -105,12 +98,10 @@ end;
 
 procedure TTeklifGorevFrame.btnUpAndDown(Sender: TObject);
 begin
-  btnVerilenTeklif.Down := False;
-  btnSatinAlmaTeklif.Down := False;
-  btnDokumler.Down := False;
-  JvNavPanelButton2.Down := False;
-  if (Sender<>nil)and(Sender.ClassName = 'TJvNavPanelButton') then
-    (Sender as TJvNavPanelButton).Down := True;
+  // Tek buton aktif: frame'deki TUM TcxButton'lar tek elden yonetilir.
+  // (Eskiden sabit bir buton listesi sifirlaniyordu; listede olmayan butonlar
+  //  basili kaldigi icin ayni anda birden fazla buton aktif gorunuyordu.)
+  GorevTusuSec(Self, Sender);
 end;
 
 procedure TTeklifGorevFrame.KurumDlgKapatEylemi(Sender: TObject);
@@ -125,7 +116,7 @@ end;
 procedure TTeklifGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yÃ¼kleniyor.
+  if CokluDilVar then LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
   btnVerilenTeklif.Visible := Tablo.YetkiVarmi(2901,YetkiTur_Gorme);
  // btnSatinAlmaTeklif.Visible := Tablo.YetkiVarmi(2911,YetkiTur_Gorme);
   btnDokumler.Visible := Tablo.YetkiVarmi(2999,YetkiTur_Gorme);
@@ -138,3 +129,5 @@ end;
 initialization
   RegisterClass(TTeklifGorevFrame);
 end.
+
+

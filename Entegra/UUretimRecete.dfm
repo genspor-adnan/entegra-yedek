@@ -404,7 +404,6 @@ object UretimReceteDlg: TUretimReceteDlg
       end
     end
     object PageControlOpr: TcxPageControl
-      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 136
       Width = 602
@@ -413,11 +412,12 @@ object UretimReceteDlg: TUretimReceteDlg
       TabOrder = 5
       Properties.ActivePage = cxTabSheet1
       Properties.CustomButtons.Buttons = <>
+      Properties.Images = Tablo.PNGImageList2
       OnChange = PageControlOprChange
       ClientRectBottom = 412
       ClientRectLeft = 4
       ClientRectRight = 598
-      ClientRectTop = 24
+      ClientRectTop = 25
       object cxTabSheet1: TcxTabSheet
         Caption = 'Malzeme'
         ImageIndex = 12
@@ -425,7 +425,7 @@ object UretimReceteDlg: TUretimReceteDlg
           Left = 0
           Top = 0
           Width = 594
-          Height = 388
+          Height = 387
           Align = alClient
           PopupMenu = PopupMenuDetay
           TabOrder = 0
@@ -769,7 +769,7 @@ object UretimReceteDlg: TUretimReceteDlg
           Left = 0
           Top = 249
           Width = 594
-          Height = 139
+          Height = 138
           Align = alClient
           TabOrder = 2
           object ToolBar1: TToolBar
@@ -843,7 +843,7 @@ object UretimReceteDlg: TUretimReceteDlg
             Left = 1
             Top = 28
             Width = 592
-            Height = 110
+            Height = 109
             Align = alClient
             Font.Charset = TURKISH_CHARSET
             Font.Color = clWindowText
@@ -1471,8 +1471,8 @@ object UretimReceteDlg: TUretimReceteDlg
   end
   object TabRecete: TFDQuery
     BeforeEdit = TabReceteBeforeEdit
-    BeforeScroll = TabReceteBeforeScroll
     BeforePost = TabReceteBeforePost
+    BeforeScroll = TabReceteBeforeScroll
     AfterScroll = TabReceteAfterScroll
     OnCalcFields = TabReceteCalcFields
     Connection = Tablo.FDCnn
@@ -1595,8 +1595,8 @@ object UretimReceteDlg: TUretimReceteDlg
   object DtsRecete: TDataSource
     DataSet = TabRecete
     OnStateChange = DtsReceteStateChange
-    Left = 244
-    Top = 48
+    Left = 180
+    Top = 96
   end
   object RECETE: TFDQuery
     Connection = Tablo.FDCnn
@@ -1938,8 +1938,8 @@ object UretimReceteDlg: TUretimReceteDlg
   end
   object PopupHesapla: TPopupMenu
     Images = Tablo.PNGImageList2
-    Left = 75
-    Top = 104
+    Left = 51
+    Top = 128
     object BuUrunMenu: TMenuItem
       Tag = 1
       Caption = 'Bu '#220'r'#252'n'#252

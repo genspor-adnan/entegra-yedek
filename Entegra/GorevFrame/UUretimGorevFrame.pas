@@ -1,4 +1,4 @@
-﻿unit UUretimGorevFrame;
+unit UUretimGorevFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
 { Tarih : 25/01/2010 11:04:25}
@@ -8,20 +8,20 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
   Dialogs, cxMaskEdit, cxButtonEdit, cxControls, cxContainer, cxEdit,
   cxTextEdit, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus,
-  cxLookAndFeelPainters, cxButtons, JvExControls, JvButton, JvNavigationPane,
+  cxLookAndFeelPainters, cxButtons,
   ImgList, PngImageList,UKodAgaci, CategoryButtons, ExtCtrls;           {Symbols}
 
 type
   TUretimGorevFrame = class(TFrame)
-    btnUretimEmirleri: TJvNavPanelButton;
+    btnUretimEmirleri: TcxButton;
     PngImageList1: TPngImageList;
-    btnRecete: TJvNavPanelButton;
-    btnUretimFisleri: TJvNavPanelButton;
-    BtnUretimOperasyonlar: TJvNavPanelButton;
-    btnUretimPlanlama: TJvNavPanelButton;
+    btnRecete: TcxButton;
+    btnUretimFisleri: TcxButton;
+    BtnUretimOperasyonlar: TcxButton;
+    btnUretimPlanlama: TcxButton;
     Panel3: TPanel;
-    JvNavPanelButton2: TJvNavPanelButton;
-    btnDokumler: TJvNavPanelButton;
+    JvNavPanelButton2: TcxButton;
+    btnDokumler: TcxButton;
     procedure btnHesapKartiClick(Sender: TObject);
     procedure TumTusResimleriniDegistir(Menu:TCategoryButtons;ImajIndex:Integer);
     procedure btnReceteClick(Sender: TObject);
@@ -62,9 +62,9 @@ begin
    if Button = mbRight then
       TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=0
    else
-      TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TJVNavPanelButton(Sender).Tag;
+      TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Durum:=9;  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TcxButton(Sender).Tag;
 
-  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TJVNavPanelButton(Sender).Tag;
+  TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).Standart := TcxButton(Sender).Tag;
   TDokumGirisFrame(FFrameBilgi.IcerikGit(TDokumGirisFrame).Ornek).DokumEkranAdi := 'U';
   btnUpAndDown(Sender);
 end;
@@ -81,15 +81,10 @@ end;
 
 procedure TUretimGorevFrame.btnUpAndDown(Sender: TObject);
 begin
-  btnUretimPlanlama.Down := False;
-  btnUretimEmirleri.Down := False;
-  BtnUretimOperasyonlar.Down := False;
-  btnUretimFisleri.Down := False;
-  btnRecete.Down := False;
-  btnDokumler.Down := False;
-  JvNavPanelButton2.Down := False;
-  if (Sender<>nil)and(Sender.ClassName = 'TJvNavPanelButton') then
-    (Sender as TJvNavPanelButton).Down := True;
+  // Tek buton aktif: frame'deki TUM TcxButton'lar tek elden yonetilir.
+  // (Eskiden sabit bir buton listesi sifirlaniyordu; listede olmayan butonlar
+  //  basili kaldigi icin ayni anda birden fazla buton aktif gorunuyordu.)
+  GorevTusuSec(Self, Sender);
 end;
 
 procedure TUretimGorevFrame.FrameAktifOlacak(Sender: TObject);
@@ -146,7 +141,7 @@ end;
 procedure TUretimGorevFrame.SetFrameBilgi(const Value: TAnaFrameBilgi);
 begin
   FFrameBilgi := Value;
-  LocalizerOnFly.ProcessContainer(Self);//Dil yükleniyor.
+  LocalizerOnFly.ProcessContainer(Self);//Dil y�kleniyor.
   Value.AnaFrameYoneticisi.OnFrameAktifOlacak.Add(FrameAktifOlacak);
   FIlkBaslatma := True;
 
@@ -169,3 +164,5 @@ end;
 initialization
   RegisterClass(TUretimGorevFrame);
 end.
+
+

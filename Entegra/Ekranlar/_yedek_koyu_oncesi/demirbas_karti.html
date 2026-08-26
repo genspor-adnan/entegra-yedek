@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demirbaş Kartı — Mockup</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;
+    --sel:#d7e7fb;--selbd:#98c2ee;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--grpbg:#fbfcfd;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:970px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#3a6a72,#294a50);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#9fd0d6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.9;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#3a6a72;background:linear-gradient(#4f8f99,#3a6a72);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px}
+  .idstrip{display:grid;grid-template-columns:120px 1fr 150px 140px;gap:10px;padding:10px 12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}.fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;color:var(--ink);display:flex;align-items:center}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative}.combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .chip.aktif{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}.chip.zimmet{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}.chip.servis{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);margin-top:2px;flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:14px}.pane.active{display:block}
+  .row{display:flex;gap:14px}.col{flex:1;min-width:0}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;margin-left:auto;background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grid2{display:grid;grid-template-columns:120px 1fr;gap:8px 10px;align-items:center}.grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .full{grid-column:1 / -1}
+  textarea.inp{height:52px;padding:5px 6px;resize:none;line-height:1.4}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}
+  .dg tr.sel td{background:var(--sel)}.dg tr:hover td{background:#f2f7fd}
+  .dg .c{text-align:center}.amt{text-align:right;font-family:"Segoe UI",Tahoma}
+  .gridtb{display:flex;gap:4px;padding:5px 0 0}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px}
+  .badge{font-size:10px;padding:1px 7px;border-radius:3px;font-weight:bold}
+  .badge.ver{background:#e6f0fb;color:#2f6db3;border:1px solid #cfe0f4}.badge.iade{background:#eef7ee;color:#3f8a4e;border:1px solid #cfe8cf}
+  .badge.on{background:#e9f6ee;color:#2e7d46;border:1px solid #c4e6d0}.badge.bek{background:#fdf6e3;color:#a9791a;border:1px solid #eeddb4}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}.maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}.req-note{color:var(--req)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+  .kpi{border:1px solid var(--line2);border-radius:4px;background:linear-gradient(#fff,#f6f9fc);padding:9px 11px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}.kpi .v{font-size:16px;font-weight:bold;color:var(--navy);margin-top:3px;font-family:"Segoe UI",Tahoma}
+  .kpi .v.pos{color:#2e7d46}.kpi .s{font-size:10px;color:var(--muted);margin-top:2px}
+  .bar{height:12px;border-radius:6px;background:#e7edf3;overflow:hidden;display:flex;border:1px solid var(--line2)}.bar>span{display:block;height:100%}
+  .photo{border:1px solid #b9c6d4;border-radius:6px;background:linear-gradient(135deg,#eef3f9,#d6e3f0);height:110px;display:flex;align-items:center;justify-content:center;color:#7c93aa;font-size:32px}
+  .av{width:24px;height:24px;border-radius:50%;color:#fff;font-weight:bold;display:inline-flex;align-items:center;justify-content:center;font-size:10px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Demirbaş Kartı — Düzenle <span class="sp">DEMIRBAS.ID 512 · No: DMB.0342</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">👤 Zimmetle</div>
+    <div class="btn">🔧 Servise Gönder</div>
+    <div class="btn">♻ Hurdaya Ayır</div>
+    <div class="btn">🖨 Etiket / Yazdır</div>
+    <div class="sepv"></div>
+    <div class="btn">✖ Kapat</div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label class="req">Demirbaş No</label><div class="inp big">DMB.0342</div></div>
+    <div class="fld"><label class="req">Adı</label><div class="inp big">Dizüstü Bilgisayar — Dell Latitude 5540</div></div>
+    <div class="fld"><label>Kategori</label><div class="inp combo">Bilgi İşlem</div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="chip zimmet">● Zimmetli</span></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="genel">Genel</div>
+    <div class="tab" data-t="amortisman">Amortisman</div>
+    <div class="tab" data-t="zimmet">Zimmet / Tutanak <span class="b">3</span></div>
+    <div class="tab" data-t="bakim">Bakım / Kalibrasyon <span class="b">2</span></div>
+    <div class="tab" data-t="belge">Belgeler <span class="b">3</span></div>
+    <div class="tab" data-t="ek">Ek Alanlar <span class="b">2</span></div>
+  </div>
+
+  <!-- GENEL -->
+  <div class="pane active" data-p="genel">
+    <div class="row">
+      <div class="col">
+        <div class="grp" style="margin-bottom:0">
+          <h4>Tanım <span class="tag">DEMIRBAS</span></h4>
+          <div class="body grid2">
+            <label>Marka</label><div class="inp combo">Dell</div>
+            <label>Model</label><div class="inp">Latitude 5540</div>
+            <label>Seri No</label><div class="inp">DL5540-2026-0198</div>
+            <label>Kategori</label><div class="inp combo">Bilgi İşlem</div>
+            <label>Barkod / Etiket</label><div class="inp">DMB0342</div>
+            <label>Marka/Model Yılı</label><div class="inp">2025</div>
+          </div>
+        </div>
+      </div>
+      <div class="col" style="max-width:230px">
+        <div class="grp"><h4>Görsel <span class="tag">IMAJ→DOSYA</span></h4><div class="body"><div class="photo">🖥️</div></div></div>
+        <div class="grp" style="margin-bottom:0">
+          <h4>Konum & Zimmet</h4>
+          <div class="body grid2" style="grid-template-columns:80px 1fr">
+            <label>Lokasyon</label><div class="inp combo">Ofis — 3. Kat</div>
+            <label>Zimmet</label><div class="inp"><span class="av" style="background:#2f6db3">EŞ</span>&nbsp;Elif Şahin</div>
+            <label>Şube</label><div class="inp combo">Merkez</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grp" style="margin-top:12px;margin-bottom:0">
+      <h4>Edinim <span class="tag">DEMIRBAS</span></h4>
+      <div class="body grid2" style="grid-template-columns:120px 1fr 120px 1fr">
+        <label>Alış Tarihi</label><div class="inp">15.01.2025</div>
+        <label>Tedarikçi</label><div class="inp combo">MNG Teknoloji A.Ş.</div>
+        <label>Alış Tutarı</label><div class="inp">₺ 42.000,00</div>
+        <label>Alış Faturası</label><div class="inp combo">MNG2025000000441</div>
+        <label>Garanti Bitiş</label><div class="inp">15.01.2028</div>
+        <label>Takip</label><div class="inp"><span class="chip aktif">Aktif</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AMORTISMAN -->
+  <div class="pane" data-p="amortisman">
+    <div class="kpis">
+      <div class="kpi"><div class="k">Alış Değeri</div><div class="v">₺ 42.000</div><div class="s">15.01.2025</div></div>
+      <div class="kpi"><div class="k">Birikmiş Amort.</div><div class="v">₺ 13.300</div><div class="s">%31,7</div></div>
+      <div class="kpi"><div class="k">Net Defter Değeri</div><div class="v pos">₺ 28.700</div></div>
+      <div class="kpi"><div class="k">Kalan Ömür</div><div class="v">2 yıl 5 ay</div><div class="s">4 yıl faydalı ömür</div></div>
+    </div>
+    <div class="grp" style="margin-bottom:12px">
+      <h4>Amortisman Ayarları <span class="tag">DEMIRBAS</span></h4>
+      <div class="body grid2" style="grid-template-columns:130px 1fr 130px 1fr">
+        <label>Yöntem</label><div class="inp combo">Normal (Doğrusal)</div>
+        <label>Oran / Ömür</label><div class="inp">%25 · 4 yıl</div>
+        <label>Başlangıç</label><div class="inp">01.02.2025</div>
+        <label>Amortisman Grubu</label><div class="inp combo">Demirbaş (255)</div>
+      </div>
+    </div>
+    <div class="grp" style="margin-bottom:0">
+      <h4>Yıllık Amortisman Tablosu <span class="tag">DEMIRBASTAKIP</span></h4>
+      <div class="body"><div class="dg"><table>
+        <thead><tr><th>Yıl</th><th class="amt">Amortisman</th><th class="amt">Birikmiş</th><th class="amt">Net Değer</th><th class="c">Durum</th></tr></thead>
+        <tbody>
+          <tr><td>2025</td><td class="amt">10.500,00</td><td class="amt">10.500,00</td><td class="amt">31.500,00</td><td class="c"><span class="badge on">İşlendi</span></td></tr>
+          <tr class="sel"><td>2026</td><td class="amt">10.500,00</td><td class="amt">21.000,00</td><td class="amt">21.000,00</td><td class="c"><span class="badge bek">Kısmi</span></td></tr>
+          <tr><td>2027</td><td class="amt">10.500,00</td><td class="amt">31.500,00</td><td class="amt">10.500,00</td><td class="c"><span class="badge bek">Bekliyor</span></td></tr>
+          <tr><td>2028</td><td class="amt">10.500,00</td><td class="amt">42.000,00</td><td class="amt">0,00</td><td class="c"><span class="badge bek">Bekliyor</span></td></tr>
+        </tbody>
+      </table></div></div>
+    </div>
+  </div>
+
+  <!-- ZIMMET / TUTANAK -->
+  <div class="pane" data-p="zimmet">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Zimmet / Tutanak Geçmişi <span class="tag">DEMIRBAS_TUTANAK (1:N)</span></h4>
+      <div class="body"><div class="dg"><table>
+        <thead><tr><th style="width:100px">Tarih</th><th style="width:80px">Tip</th><th>Kişi</th><th>Lokasyon</th><th style="width:120px">Tutanak</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td>10.03.2026</td><td><span class="badge ver">Veriş</span></td><td>Elif Şahin</td><td>Ofis — 3. Kat</td><td>TUT.2026-0088</td></tr>
+          <tr><td>05.03.2026</td><td><span class="badge iade">İade</span></td><td>Ahmet Kaya</td><td>Depo</td><td>TUT.2026-0081</td></tr>
+          <tr><td>01.02.2025</td><td><span class="badge ver">Veriş</span></td><td>Ahmet Kaya</td><td>Saha</td><td>TUT.2025-0402</td></tr>
+        </tbody>
+      </table></div>
+      <div class="gridtb"><span class="minibtn">👤 Zimmetle (Veriş)</span><span class="minibtn">↩ İade Al</span><span class="minibtn">🖨 Tutanak Yazdır</span></div>
+      <div class="hint">Her zimmet hareketi bir <b>tutanak</b> üretir (imzalı çıktı). Güncel zimmet, son "Veriş" kaydındaki kişidir.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BAKIM / KALIBRASYON -->
+  <div class="pane" data-p="bakim">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Bakım / Kalibrasyon <span class="tag">KALIBRASYON (1:N)</span></h4>
+      <div class="body"><div class="dg"><table>
+        <thead><tr><th style="width:90px">Tip</th><th style="width:100px">Tarih</th><th style="width:110px">Geçerlilik</th><th>Yapan</th><th style="width:110px">Sertifika</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td>Bakım</td><td>12.02.2026</td><td>12.02.2027</td><td>İç Ekip — Serkan Öz</td><td>—</td></tr>
+          <tr><td>Kalibrasyon</td><td>20.01.2025</td><td>20.01.2026 <span style="color:#b23b3b">(süresi doldu)</span></td><td>TSE</td><td>KAL-2025-118.pdf</td></tr>
+        </tbody>
+      </table></div>
+      <div class="gridtb"><span class="minibtn">＋ Bakım/Kalibrasyon</span><span class="minibtn">⏰ Hatırlatma Kur</span><span class="minibtn">📎 Sertifika Ekle</span></div>
+      <div class="hint">Geçerliliği yaklaşan/dolduran kayıtlar panelde uyarı üretir.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BELGELER -->
+  <div class="pane" data-p="belge">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Belgeler <span class="tag">DOKUMAN · IMAJ → GENDEPO.DOSYA</span></h4>
+      <div class="body"><div class="dg"><table>
+        <thead><tr><th style="width:150px">Tür</th><th>Ad</th><th style="width:70px" class="c">Boyut</th><th style="width:100px">Tarih</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td>🧾 Alış Faturası</td><td>mng_fatura_441.pdf</td><td class="c">120 KB</td><td>15.01.2025</td></tr>
+          <tr><td>🛡 Garanti Belgesi</td><td>dell_garanti.pdf</td><td class="c">90 KB</td><td>15.01.2025</td></tr>
+          <tr><td>📄 Zimmet Tutanağı</td><td>tutanak_2026_0088.pdf</td><td class="c">60 KB</td><td>10.03.2026</td></tr>
+        </tbody>
+      </table></div>
+      <div class="gridtb"><span class="minibtn">＋ Belge Ekle</span><span class="minibtn">👁 Aç</span><span class="minibtn">🗑 Sil</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EK -->
+  <div class="pane" data-p="ek">
+    <div class="grp" style="margin-bottom:0">
+      <h4>Ek Alanlar <span class="tag">REHBERBILGI/EAV</span></h4>
+      <div class="body"><div class="dg"><table><thead><tr><th style="width:180px">Etiket</th><th>Değer</th></tr></thead>
+        <tbody><tr><td>İşletim Sistemi</td><td>Windows 11 Pro</td></tr><tr class="sel"><td>MAC Adresi</td><td>A4:BB:6D:… </td></tr></tbody></table></div>
+        <div class="gridtb"><span class="minibtn">＋ Alan Ekle</span></div></div>
+    </div>
+  </div>
+
+  <div class="maprow"><b>Veri modeli:</b>
+    <span>Genel → <b>DEMIRBAS</b> + <b>IMAJ/DOSYA</b></span>· <span>Amortisman → <b>DEMIRBASTAKIP</b></span>· <span>Zimmet → <b>DEMIRBAS_TUTANAK</b> (+_DETAY)</span>·
+    <span>Bakım → <b>KALIBRASYON</b></span>· <span>Belgeler → <b>DOKUMAN/IMAJ</b></span>· <span>Ek → <b>REHBERBILGI</b></span>
+  </div>
+  <div class="statusbar"><span>Durum: <b style="color:#2f6db3">Zimmetli — Elif Şahin</b></span><span>Net Değer: ₺ 28.700</span><span style="margin-left:auto">Son değişiklik: 12.08.2026 · İK</span></div>
+</div>
+<script>
+  var tabs=document.querySelectorAll('.tab'),panes=document.querySelectorAll('.pane');
+  tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('active')});panes.forEach(function(x){x.classList.remove('active')});t.classList.add('active');document.querySelector('.pane[data-p="'+t.dataset.t+'"]').classList.add('active');});});
+</script>
+
+<!-- ===== GOMULU MOD (Gentegre ana kabugunda iframe icinde acilinca) ===== -->
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>:first-child{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>:first-child{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+</style>
+<script>(function(){
+function g(){if(location.hash.indexOf("gomulu")>=0)document.body.classList.add("gomulu");
+else document.body.classList.remove("gomulu");}g();addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>

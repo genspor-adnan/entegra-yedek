@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veri Al (Import) — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    --warn:#b5731a;
+    /* satir renkleri */
+    --s-yok:#f7cfcf; --s-yok-t:#7d1f1f;   /* hatali satir      */
+    --s-kri:#fbe6ae; --s-kri-t:#7a5407;   /* eslesmeyen / uyari */
+    --s-skt:#f6d9c0; --s-skt-t:#8a4a12;   /* donusturuldu      */
+    --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;   /* atlanan / pasif   */
+    --tus-pas:#9c71ad; --tus-sec:#1f6fbe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1380px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.5}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+
+  .wrap{display:grid;grid-template-columns:250px 1fr;gap:0}
+  .center{min-width:0;display:flex;flex-direction:column}
+
+  /* SOL: JvWizard adim listesi */
+  .gorev{background:#f4f7fa;border-right:1px solid var(--line2);padding:10px 8px 12px}
+  .gorev h5{margin:6px 4px 6px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .adim{display:flex;align-items:flex-start;gap:9px;border:1px solid var(--line);border-radius:3px;
+    background:linear-gradient(#fff,#eef3f8);padding:8px 9px;margin-bottom:5px;cursor:pointer}
+  .adim:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .adim .no{width:20px;height:20px;border-radius:50%;background:#cdd9e6;color:#34506e;font-weight:bold;
+    font-size:11px;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+  .adim .tx{min-width:0}
+  .adim .bs{font-size:11.5px;font-weight:bold;color:var(--navy);line-height:1.3}
+  .adim .alt{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.45}
+  .adim.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3}
+  .adim.on .bs,.adim.on .alt{color:#fff}
+  .adim.on .no{background:#fff;color:#2f6db3}
+  .adim.bitti .no{background:#5aa06f;color:#fff}
+  .adim.bitti .bs{color:#2e7d46}
+
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);
+    border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;letter-spacing:.3px;margin-left:auto;
+    background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 9px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+
+  .dg{border:1px solid var(--line);border-radius:3px;background:#fff;overflow-x:auto;overflow-y:hidden}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  .dg td.ad{overflow:hidden;text-overflow:ellipsis;max-width:1px}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.s-yok td{background:var(--s-yok);color:var(--s-yok-t)}
+  .dg tr.s-kri td{background:var(--s-kri);color:var(--s-kri-t)}
+  .dg tr.s-skt td{background:var(--s-skt);color:var(--s-skt-t)}
+  .dg tr.s-pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .dg tr.s-pas td.ad{text-decoration:line-through}
+  .dg tr.foc td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr:hover td{filter:brightness(.98)}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .p-izl{background:#f0e9f8;color:#7a4fb0;border-color:#ded0ee}
+  .tip{display:inline-block;min-width:30px;text-align:center;font-size:9.5px;font-weight:bold;border-radius:3px;padding:1px 5px;border:1px solid}
+  .t-mal{background:#e5ecf8;border-color:#c6d7ef;color:#2b5c95}
+  .t-hzm{background:#e3f0e6;border-color:#c3e0cb;color:#2e7d46}
+  .t-sar{background:#fdf1e2;border-color:#f0dcbd;color:#96651a}
+  .bar{height:9px;border-radius:5px;background:#e7edf3;border:1px solid #d5dee7;overflow:hidden;min-width:54px}
+  .bar>span{display:block;height:100%}
+  .bar .ok{background:#5aa06f}.bar .kri{background:#d8a013}.bar .yok{background:#c0504d}
+  .bar.buyuk{height:18px;border-radius:4px}
+
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 12px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;display:flex;align-items:center;gap:6px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;font-weight:bold}
+  .pane{display:none;padding:14px}
+  .pane.active{display:block}
+  .gridtb{display:flex;gap:4px;padding:0 0 7px;align-items:center;flex-wrap:wrap}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px}
+  .row{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+  .col{flex:1;min-width:280px}
+  .grid2{display:grid;grid-template-columns:150px 1fr;gap:8px 10px;align-items:center}
+  .grid2 label{font-size:11px;color:var(--muted);text-align:right}
+  .full{grid-column:1 / -1}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:22px;padding:0 6px;font-size:11.5px;
+    display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.ro{background:#f4f6f9;color:var(--muted)}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:5px;top:2px;color:var(--muted);font-size:10px}
+
+  /* adim basligi + gezinme */
+  .abas{display:flex;align-items:center;gap:10px;padding:9px 12px;background:linear-gradient(#f7fafd,#eef4fa);
+    border-bottom:1px solid var(--line)}
+  .abas .h{font-size:13px;font-weight:bold;color:var(--navy)}
+  .abas .a{font-size:10.5px;color:var(--muted)}
+  .abas .nav{margin-left:auto;display:flex;gap:5px}
+
+  /* hedef tablo kartlari */
+  .hkart{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .kutu{border:1px solid var(--line);border-radius:4px;background:linear-gradient(#fff,#f7fafd);padding:10px;cursor:pointer}
+  .kutu:hover{border-color:var(--selbd)}
+  .kutu.sec{border-color:#2f6db3;background:linear-gradient(#eaf3fd,#d7e7fb);box-shadow:inset 0 0 0 1px #98c2ee}
+  .kutu .ik{font-size:20px}
+  .kutu .bs{font-size:12px;font-weight:bold;color:var(--navy);margin-top:4px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+  .kutu.uyari{border-color:#eeddb4;background:linear-gradient(#fffdf6,#fdf6e3);cursor:default}
+  .kutu.hata{border-color:#f0c9c9;background:linear-gradient(#fff8f8,#fbe9e9);cursor:default}
+  .kutu.iyi{border-color:#cbe7d3;background:linear-gradient(#fbfefc,#e9f6ed);cursor:default}
+  .ozet{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+  .ozet .kutu .bs{font-size:17px;line-height:1.2}
+
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:8px 0}
+  .side h5{margin:0;padding:7px 12px 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;font-size:11px;padding:3px 12px;gap:8px}
+  .kv b{color:var(--navy);margin-left:auto;text-align:right}
+  .tvsep{height:1px;background:var(--line2);margin:7px 10px}
+
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span> Veri Al (Import)
+    <span class="sp">Import\UVeriAlWizard · IMPORTSABLON · IMPORTLOG · GENTEGRE-APP01 · BILIM · 14.08.2026 14:12</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn">📂 Dosya Seç</div>
+    <div class="btn">💾 Şablon Kaydet</div>
+    <div class="btn">📋 Şablon Yükle</div>
+    <div class="sepv"></div>
+    <div class="btn">🧪 Önizleme</div>
+    <div class="btn">📄 Log İndir</div>
+    <div class="btn danger" style="margin-left:auto">✖ Sihirbazı Kapat</div>
+  </div>
+
+  <div class="wrap">
+    <!-- ====== SOL: ADIM LISTESI (JvWizard) ====== -->
+    <div class="gorev">
+      <h5>Aktarım Adımları</h5>
+      <div class="adim bitti" data-a="1"><span class="no">1</span>
+        <span class="tx"><span class="bs">Kaynak Seç</span><span class="alt">Stok-Listesi-2026.xlsx · 2.847 satır</span></span></div>
+      <div class="adim bitti" data-a="2"><span class="no">2</span>
+        <span class="tx"><span class="bs">Hedef Tablo</span><span class="alt">Stok Kartları (STOKLAR)</span></span></div>
+      <div class="adim bitti" data-a="3"><span class="no">3</span>
+        <span class="tx"><span class="bs">Kolon Eşleştir</span><span class="alt">6 eşleşti · 2 eşleşmedi</span></span></div>
+      <div class="adim bitti" data-a="4"><span class="no">4</span>
+        <span class="tx"><span class="bs">Doğrula</span><span class="alt">2.831 geçerli · 12 hata · 4 uyarı</span></span></div>
+      <div class="adim on" data-a="5"><span class="no">5</span>
+        <span class="tx"><span class="bs">Aktar</span><span class="alt">%100 · 2.831 kayıt aktarıldı</span></span></div>
+
+      <div class="tvsep" style="margin:10px 2px"></div>
+      <h5>Şablon</h5>
+      <div class="grid2" style="grid-template-columns:1fr;gap:5px">
+        <div class="inp combo">Stok Kartı — Excel (varsayılan)</div>
+        <label class="chk"><input type="checkbox" checked> Eşleştirmeyi şablona kaydet</label>
+        <label class="chk"><input type="checkbox" checked> Hatalı satırları atla</label>
+        <label class="chk"><input type="checkbox"> Aktarımdan önce yedek al</label>
+      </div>
+      <div class="hint" style="padding:6px 2px 0">Adım listesi <b>JvWizard</b> sayfalarıdır; tamamlanan adımlar yeşil,
+        aktif adım mavi gösterilir. Adım başlığına tıklayarak geri dönülebilir.</div>
+    </div>
+
+    <!-- ====== SAG: ADIM ICERIKLERI ====== -->
+    <div class="center">
+      <div class="abas">
+        <span class="h" id="abasH">Adım 5 — Aktar</span>
+        <span class="a" id="abasA">Doğrulanan kayıtlar hedef tabloya yazılıyor</span>
+        <span class="nav">
+          <span class="btn" id="btnGeri">◀ Geri</span>
+          <span class="btn" id="btnIleri">İleri ▶</span>
+          <span class="btn primary" id="btnBasla">▶ Aktarımı Başlat</span>
+        </span>
+      </div>
+
+      <!-- ================= ADIM 1 ================= -->
+      <div class="pane" data-p="1">
+        <div class="row">
+          <div class="col" style="flex:1.3">
+            <div class="grp">
+              <h4>Kaynak Dosya <span class="tag">Excel / CSV / XML</span></h4>
+              <div class="body">
+                <div class="gridtb">
+                  <span class="minibtn on">📂 Dosya Seç…</span>
+                  <span class="minibtn">📋 Panodan Yapıştır</span>
+                  <span class="minibtn">🌐 URL'den Al</span>
+                </div>
+                <div class="grid2">
+                  <label>Dosya Adı</label><div class="inp">D:\Aktarim\Stok-Listesi-2026.xlsx</div>
+                  <label>Dosya Türü</label><div class="inp combo">Excel Çalışma Kitabı (*.xlsx)</div>
+                  <label>Boyut / Tarih</label><div class="inp ro">1,42 MB · 14.08.2026 08:55</div>
+                  <label>Sayfa</label><div class="inp combo">Sayfa1</div>
+                  <label>Başlık Satırı</label><div class="inp" style="max-width:110px">1</div>
+                  <label>Veri Başlangıcı</label><div class="inp" style="max-width:110px">2</div>
+                  <label>Kodlama</label><div class="inp combo">UTF-8</div>
+                  <label>Ayraç (CSV)</label><div class="inp combo">Noktalı virgül ( ; )</div>
+                  <label>Ondalık Ayracı</label><div class="inp combo">Virgül ( , )</div>
+                  <label>Tarih Biçimi</label><div class="inp combo">gg.aa.yyyy</div>
+                  <div class="full"><label class="chk"><input type="checkbox" checked> Baştaki/sondaki boşlukları temizle</label></div>
+                  <div class="full"><label class="chk"><input type="checkbox" checked> Tamamen boş satırları atla</label></div>
+                </div>
+                <div class="hint">Okunan satır sayısı: <b>2.847</b> · Kolon sayısı: <b>8</b> · Boş satır: <b>3</b> (atlandı)</div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="grp">
+              <h4>Dosya Önizleme <span class="tag">ilk 6 satır</span></h4>
+              <div class="body">
+                <div class="dg">
+                  <table>
+                    <tr><th class="c" style="width:34px">#</th><th style="width:96px">STOK KODU</th><th>ÜRÜN ADI</th>
+                        <th style="width:120px">BARKOD</th><th class="c" style="width:56px">BİRİM</th>
+                        <th class="r" style="width:52px">KDV</th><th class="r" style="width:78px">FİYAT</th></tr>
+                    <tr><td class="c">2</td><td>STK.10248</td><td class="ad">Perde kumaşı — jakarlı, 280 cm</td><td>8690001000248</td>
+                        <td class="c">MT</td><td class="r">20</td><td class="r">62,50</td></tr>
+                    <tr><td class="c">3</td><td>STK.10249</td><td class="ad">Perde kumaşı — düz, 280 cm</td><td>8690001000249</td>
+                        <td class="c">MT</td><td class="r">20</td><td class="r">58,00</td></tr>
+                    <tr><td class="c">4</td><td>STK.10311</td><td class="ad">Tül perde — bambu desen</td><td>8690001000311</td>
+                        <td class="c">MT</td><td class="r">20</td><td class="r">41,00</td></tr>
+                    <tr class="s-kri"><td class="c">5</td><td>STK.10402</td><td class="ad">Korniş seti — alüminyum 3 m</td><td></td>
+                        <td class="c">AD</td><td class="r">20</td><td class="r">128,00</td></tr>
+                    <tr><td class="c">6</td><td>STK.10520</td><td class="ad">Blackout kumaş — antrasit</td><td>8690001000520</td>
+                        <td class="c">MT</td><td class="r">20</td><td class="r">96,40</td></tr>
+                    <tr class="s-yok"><td class="c">7</td><td></td><td class="ad">Stor perde mekanizması — 25 mm</td><td>8690001000604</td>
+                        <td class="c">AD</td><td class="r">20</td><td class="r">142,00</td></tr>
+                  </table>
+                </div>
+                <div class="lgnd">
+                  <span><span class="sw" style="background:var(--s-yok)"></span>Zorunlu alan boş</span>
+                  <span><span class="sw" style="background:var(--s-kri)"></span>Eksik/şüpheli değer</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= ADIM 2 ================= -->
+      <div class="pane" data-p="2">
+        <div class="grp">
+          <h4>Hedef Tablo Seçimi <span class="tag">IMPORTSABLON.HEDEF</span></h4>
+          <div class="body">
+            <div class="hkart">
+              <div class="kutu sec"><div class="ik">📦</div><div class="bs">Stok Kartları</div>
+                <div class="alt">STOKLAR · STOKBARKOD · STOKFIYAT<br>Kod, ad, birim, KDV, barkod, fiyat</div></div>
+              <div class="kutu"><div class="ik">🏢</div><div class="bs">Cari Kartlar</div>
+                <div class="alt">CARI · CARIADRES<br>Ünvan, VKN/TCKN, adres, iletişim</div></div>
+              <div class="kutu"><div class="ik">🏷</div><div class="bs">Fiyat Listesi</div>
+                <div class="alt">FIYATLAR<br>Stok kodu, fiyat adı, tutar, tarih</div></div>
+              <div class="kutu"><div class="ik">📋</div><div class="bs">Stok Sayım</div>
+                <div class="alt">SAYIMBASLIK · SAYIMSATIR<br>Depo, stok kodu, sayılan miktar</div></div>
+              <div class="kutu"><div class="ik">💰</div><div class="bs">Cari Bakiye</div>
+                <div class="alt">CARIHAREKET<br>Açılış bakiyesi, borç/alacak</div></div>
+              <div class="kutu"><div class="ik">🏦</div><div class="bs">Banka Ekstresi</div>
+                <div class="alt">BANKAHAREKET<br>Tarih, açıklama, tutar, dekont no</div></div>
+            </div>
+
+            <div class="row" style="margin-top:12px">
+              <div class="col">
+                <div class="grp" style="margin:0">
+                  <h4>Aktarım Davranışı</h4>
+                  <div class="body grid2">
+                    <label>Kayıt Yoksa</label><div class="inp combo">Yeni kayıt aç</div>
+                    <label>Kayıt Varsa</label><div class="inp combo">Güncelle (eşleşen alanlar)</div>
+                    <label>Eşleştirme Anahtarı</label><div class="inp combo">STOKLAR.KOD</div>
+                    <div class="full"><label class="chk"><input type="checkbox" checked> Boş gelen alanları mevcut değerle koru</label></div>
+                    <div class="full"><label class="chk"><input type="checkbox"> Aktarımı tek transaction içinde yap (hata → tümü geri alınır)</label></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="grp" style="margin:0">
+                  <h4>Hedef Tablo Bilgisi <span class="tag">STOKLAR</span></h4>
+                  <div class="body">
+                    <div class="dg">
+                      <table>
+                        <tr><th>ALAN</th><th style="width:90px">TÜR</th><th class="c" style="width:64px">ZORUNLU</th><th class="c" style="width:60px">BENZERSİZ</th></tr>
+                        <tr><td>KOD</td><td>varchar(20)</td><td class="c">✔</td><td class="c">✔</td></tr>
+                        <tr><td>AD</td><td>varchar(150)</td><td class="c">✔</td><td class="c"></td></tr>
+                        <tr><td>BIRIM</td><td>varchar(6)</td><td class="c">✔</td><td class="c"></td></tr>
+                        <tr><td>KDVORAN</td><td>numeric(5,2)</td><td class="c"></td><td class="c"></td></tr>
+                        <tr><td>KATEGORI</td><td>varchar(40)</td><td class="c"></td><td class="c"></td></tr>
+                        <tr class="s-pas"><td class="ad">ESKIKOD</td><td>varchar(20)</td><td class="c"></td><td class="c"></td></tr>
+                      </table>
+                    </div>
+                    <div class="hint">Mevcut kayıt: <b>18.402</b> stok kartı · Son aktarım: <b>10.08.2026 16:41</b></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= ADIM 3 ================= -->
+      <div class="pane" data-p="3">
+        <div class="gridtb">
+          <span class="minibtn on">🪄 Otomatik Eşleştir</span>
+          <span class="minibtn">↩ Eşleştirmeyi Temizle</span>
+          <span class="minibtn">💾 Şablona Kaydet</span>
+          <span class="minibtn">📋 Şablondan Yükle</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">8 Excel kolonu · <b>6 eşleşti</b> · 2 eşleşmedi</span>
+        </div>
+        <div class="dg">
+          <table>
+            <tr>
+              <th class="c" style="width:44px">SÜTUN</th><th style="width:150px">EXCEL KOLONU</th>
+              <th style="width:200px">GENTEGRE ALANI</th><th class="c" style="width:72px">ZORUNLU</th>
+              <th style="width:180px">ÖRNEK DEĞER</th><th style="width:120px">DÖNÜŞÜM</th><th>AÇIKLAMA</th>
+            </tr>
+            <tr class="foc">
+              <td class="c">A</td><td><b>STOK KODU</b></td><td><div class="inp combo">STOKLAR.KOD</div></td>
+              <td class="c">✔</td><td>STK.10248</td><td>Kırp + büyük harf</td><td class="ad">Eşleştirme anahtarı</td>
+            </tr>
+            <tr>
+              <td class="c">B</td><td><b>ÜRÜN ADI</b></td><td><div class="inp combo">STOKLAR.AD</div></td>
+              <td class="c">✔</td><td class="ad">Perde kumaşı — jakarlı, 280 cm</td><td>Kırp</td><td class="ad">—</td>
+            </tr>
+            <tr>
+              <td class="c">C</td><td>BARKOD</td><td><div class="inp combo">STOKBARKOD.BARKOD</div></td>
+              <td class="c">—</td><td>8690001000248</td><td>Metin olarak</td><td class="ad">Boş gelirse barkod satırı açılmaz</td>
+            </tr>
+            <tr>
+              <td class="c">D</td><td>BİRİM</td><td><div class="inp combo">STOKLAR.BIRIM</div></td>
+              <td class="c">✔</td><td>MT</td><td>Liste eşle</td><td class="ad">Tanımsız birim uyarı üretir</td>
+            </tr>
+            <tr>
+              <td class="c">E</td><td>KDV</td><td><div class="inp combo">STOKLAR.KDVORAN</div></td>
+              <td class="c">—</td><td>20</td><td>Sayı (5,2)</td><td class="ad">Boşsa varsayılan %20</td>
+            </tr>
+            <tr>
+              <td class="c">F</td><td>FİYAT</td><td><div class="inp combo">STOKFIYAT.FIYAT</div></td>
+              <td class="c">—</td><td>62,50</td><td>Sayı (18,4)</td><td class="ad">Perakende Satış fiyatına yazılır</td>
+            </tr>
+            <tr class="s-kri">
+              <td class="c">G</td><td>RAF KODU</td><td><div class="inp combo">(eşleştirilmedi)</div></td>
+              <td class="c">—</td><td>B-04</td><td>—</td><td class="ad">Hedefte karşılığı yok — aktarılmayacak</td>
+            </tr>
+            <tr class="s-kri">
+              <td class="c">H</td><td>TEDARİKÇİ NOTU</td><td><div class="inp combo">(eşleştirilmedi)</div></td>
+              <td class="c">—</td><td class="ad">2026 sezon koleksiyonu</td><td>—</td><td class="ad">Hedefte karşılığı yok — aktarılmayacak</td>
+            </tr>
+            <tr class="s-pas">
+              <td class="c">—</td><td class="ad">ESKİ KOD (şablondan)</td><td><div class="inp combo">STOKLAR.ESKIKOD</div></td>
+              <td class="c">—</td><td>—</td><td>—</td><td class="ad">Kaynak dosyada bu kolon yok — pasif</td>
+            </tr>
+          </table>
+        </div>
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-yok)"></span>Zorunlu alan eşleşmedi — aktarım engellenir</span>
+          <span><span class="sw" style="background:var(--s-kri)"></span>Eşleşmeyen kolon — aktarılmaz</span>
+          <span><span class="sw" style="background:var(--s-pas)"></span>Kaynakta bulunmayan şablon satırı — <b>en sonda</b>, üstü çizili</span>
+        </div>
+        <div class="hint">Otomatik eşleştirme başlık metnini Türkçe karakter duyarsız normalleştirerek alan adlarıyla karşılaştırır.
+          Eşleştirme <b>IMPORTSABLON</b> tablosunda saklanır ve bir sonraki aktarımda hazır gelir.</div>
+      </div>
+
+      <!-- ================= ADIM 4 ================= -->
+      <div class="pane" data-p="4">
+        <div class="ozet">
+          <div class="kutu iyi"><div class="alt">Okunan satır</div><div class="bs">2.847</div>
+            <div class="alt">Kaynak: Stok-Listesi-2026.xlsx</div></div>
+          <div class="kutu iyi"><div class="alt">Geçerli</div><div class="bs">2.831</div>
+            <div class="alt">Aktarıma hazır</div></div>
+          <div class="kutu hata"><div class="alt">Hata</div><div class="bs">12</div>
+            <div class="alt">Mükerrer kod 4 · boş zorunlu 5 · geçersiz sayı 3</div></div>
+          <div class="kutu uyari"><div class="alt">Uyarı</div><div class="bs">4</div>
+            <div class="alt">Tanımsız birim / kategori</div></div>
+        </div>
+
+        <div class="gridtb">
+          <span style="font-size:11px;color:var(--muted)">Hata durumunda:</span>
+          <label class="chk"><input type="radio" name="hd" checked> Hatalıları Atla</label>
+          <label class="chk"><input type="radio" name="hd"> Durdur</label>
+          <span class="sepv" style="height:20px"></span>
+          <span class="minibtn">✔ Yeniden Doğrula</span>
+          <span class="minibtn">📄 Hata Listesini Dışa Aktar</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Doğrulama süresi: 00:00:06</span>
+        </div>
+
+        <div class="dg">
+          <table>
+            <tr>
+              <th class="r" style="width:66px">SATIR NO</th><th style="width:96px">STOK KODU</th>
+              <th style="width:200px">ÜRÜN ADI</th><th style="width:110px">HATA TÜRÜ</th>
+              <th class="c" style="width:74px">ÖNEM</th><th>HATA MESAJI</th><th class="c" style="width:80px">İŞLEM</th>
+            </tr>
+            <tr class="s-yok foc"><td class="r">7</td><td></td><td class="ad">Stor perde mekanizması — 25 mm</td>
+                <td>Boş zorunlu alan</td><td class="c"><span class="pill p-yok">Hata</span></td>
+                <td class="ad">STOKLAR.KOD boş olamaz</td><td class="c">Atlanacak</td></tr>
+            <tr class="s-yok"><td class="r">184</td><td>STK.10248</td><td class="ad">Perde kumaşı — jakarlı (kopya)</td>
+                <td>Mükerrer kod</td><td class="c"><span class="pill p-yok">Hata</span></td>
+                <td class="ad">Aynı kod dosyada 2 kez var (satır 2 ve 184)</td><td class="c">Atlanacak</td></tr>
+            <tr class="s-yok"><td class="r">412</td><td>STK.10990</td><td class="ad">Zincir mekanizma seti</td>
+                <td>Geçersiz sayı</td><td class="c"><span class="pill p-yok">Hata</span></td>
+                <td class="ad">FİYAT "128,00 TL" sayıya çevrilemedi</td><td class="c">Atlanacak</td></tr>
+            <tr class="s-yok"><td class="r">901</td><td>STK.11204</td><td class="ad">Perde bandı 8 cm</td>
+                <td>Boş zorunlu alan</td><td class="c"><span class="pill p-yok">Hata</span></td>
+                <td class="ad">STOKLAR.BIRIM boş olamaz</td><td class="c">Atlanacak</td></tr>
+            <tr class="s-yok"><td class="r">1.244</td><td>STK.10520</td><td class="ad">Blackout kumaş — antrasit (kopya)</td>
+                <td>Mükerrer kod</td><td class="c"><span class="pill p-yok">Hata</span></td>
+                <td class="ad">Aynı kod dosyada 2 kez var (satır 6 ve 1.244)</td><td class="c">Atlanacak</td></tr>
+            <tr class="s-yok"><td class="r">1.877</td><td>STK.11640</td><td class="ad">Tül perde — çiçek desen</td>
+                <td>Geçersiz sayı</td><td class="c"><span class="pill p-yok">Hata</span></td>
+                <td class="ad">KDV "%20" sayıya çevrilemedi</td><td class="c">Atlanacak</td></tr>
+            <tr class="s-kri"><td class="r">2.104</td><td>STK.11902</td><td class="ad">Ahşap korniş — ceviz 2 m</td>
+                <td>Tanımsız birim</td><td class="c"><span class="pill p-kri">Uyarı</span></td>
+                <td class="ad">"ADT" birimi tanımlı değil — "AD" olarak aktarılacak</td><td class="c">Aktarılacak</td></tr>
+            <tr class="s-kri"><td class="r">2.318</td><td>STK.12044</td><td class="ad">Perde ipi — pamuk</td>
+                <td>Tanımsız kategori</td><td class="c"><span class="pill p-kri">Uyarı</span></td>
+                <td class="ad">"Aksesuar-2" kategorisi yok — boş bırakılacak</td><td class="c">Aktarılacak</td></tr>
+            <tr class="s-skt"><td class="r">2.502</td><td>STK.12180</td><td class="ad">Stor perde kumaşı — kırık beyaz</td>
+                <td>Dönüştürüldü</td><td class="c"><span class="pill p-kri">Uyarı</span></td>
+                <td class="ad">FİYAT "1.240.50" → 1.240,50 olarak yorumlandı</td><td class="c">Aktarılacak</td></tr>
+            <tr class="s-pas"><td class="r">2.845</td><td>STK.09011</td><td class="ad">Eski model korniş (üretimden kalktı)</td>
+                <td>Pasif kart</td><td class="c"><span class="pill p-pas">Bilgi</span></td>
+                <td class="ad">Hedefte pasif — güncelleme uygulanmayacak</td><td class="c">Atlanacak</td></tr>
+            <tfoot>
+              <tr><td colspan="4" style="text-align:right">TOPLAM (12 hata · 4 uyarı · 2.831 geçerli)</td>
+                  <td class="c">—</td><td></td><td class="c">—</td></tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-yok)"></span>Hata — satır aktarılmayacak</span>
+          <span><span class="sw" style="background:var(--s-kri)"></span>Uyarı — düzeltilerek aktarılacak</span>
+          <span><span class="sw" style="background:var(--s-skt)"></span>Değer dönüştürüldü</span>
+          <span><span class="sw" style="background:var(--s-pas)"></span>Pasif hedef kayıt — <b>en sonda</b>, adı üstü çizili</span>
+        </div>
+        <div class="hint">"Hatalıları Atla" seçili olduğunda aktarım hatalı satırlar dışında devam eder ve atlanan satırlar
+          <b>IMPORTLOG</b>'a yazılır. "Durdur" seçilirse ilk hatada işlem iptal edilir ve hiçbir kayıt yazılmaz.</div>
+      </div>
+
+      <!-- ================= ADIM 5 ================= -->
+      <div class="pane active" data-p="5">
+        <div class="grp">
+          <h4>Aktarım İlerlemesi <span class="tag">TFDBatchMove</span></h4>
+          <div class="body">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="bar buyuk" style="flex:1"><span class="ok" style="width:100%"></span></div>
+              <b style="font-size:14px;color:var(--navy);min-width:52px;text-align:right">%100</b>
+            </div>
+            <div class="hint" style="margin-top:6px">2.831 / 2.831 kayıt işlendi · Süre <b>00:00:38</b> ·
+              Ortalama <b>74,5 kayıt/sn</b> · Bitiş <b>14.08.2026 14:09</b></div>
+          </div>
+        </div>
+
+        <div class="ozet">
+          <div class="kutu iyi"><div class="alt">Aktarılan kayıt</div><div class="bs">2.831</div>
+            <div class="alt">Hedef: STOKLAR</div></div>
+          <div class="kutu iyi"><div class="alt">Yeni</div><div class="bs">1.204</div>
+            <div class="alt">INSERT</div></div>
+          <div class="kutu"><div class="alt">Güncellenen</div><div class="bs">1.627</div>
+            <div class="alt">UPDATE</div></div>
+          <div class="kutu hata"><div class="alt">Atlanan</div><div class="bs">12</div>
+            <div class="alt">Hatalı satırlar</div></div>
+        </div>
+
+        <div class="gridtb">
+          <span class="minibtn on">📄 Log İndir (IMPORTLOG.CSV)</span>
+          <span class="minibtn">📊 Excel'e Aktar</span>
+          <span class="minibtn">📦 Aktarılan Kartları Listele</span>
+          <span class="minibtn">↩ Aktarımı Geri Al</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Aktarım no: <b>IMP.2026/0184</b></span>
+        </div>
+
+        <div class="dg">
+          <table>
+            <tr>
+              <th style="width:126px">ZAMAN</th><th style="width:120px">AŞAMA</th><th class="r" style="width:80px">KAYIT</th>
+              <th class="r" style="width:74px">SÜRE</th><th class="c" style="width:76px">DURUM</th><th>AÇIKLAMA</th>
+            </tr>
+            <tr><td>14.08.2026 14:08:22</td><td>Dosya Okuma</td><td class="r">2.847</td><td class="r">00:00:04</td>
+                <td class="c"><span class="pill p-ok">Tamam</span></td><td class="ad">Sayfa1 · UTF-8 · 8 kolon</td></tr>
+            <tr><td>14.08.2026 14:08:26</td><td>Doğrulama</td><td class="r">2.847</td><td class="r">00:00:06</td>
+                <td class="c"><span class="pill p-ok">Tamam</span></td><td class="ad">12 hata · 4 uyarı tespit edildi</td></tr>
+            <tr><td>14.08.2026 14:08:32</td><td>STOKLAR yazımı</td><td class="r">2.831</td><td class="r">00:00:19</td>
+                <td class="c"><span class="pill p-ok">Tamam</span></td><td class="ad">1.204 yeni · 1.627 güncellendi</td></tr>
+            <tr><td>14.08.2026 14:08:51</td><td>STOKBARKOD yazımı</td><td class="r">2.640</td><td class="r">00:00:11</td>
+                <td class="c"><span class="pill p-ok">Tamam</span></td><td class="ad">191 satırda barkod boştu, atlandı</td></tr>
+            <tr class="s-kri"><td>14.08.2026 14:09:02</td><td>STOKFIYAT yazımı</td><td class="r">2.827</td><td class="r">00:00:08</td>
+                <td class="c"><span class="pill p-kri">Uyarı</span></td><td class="ad">4 satırda fiyat 0,00 — kayıt açılmadı</td></tr>
+            <tr class="s-yok"><td>14.08.2026 14:09:10</td><td>Atlanan satırlar</td><td class="r">12</td><td class="r">—</td>
+                <td class="c"><span class="pill p-yok">Hata</span></td><td class="ad">Ayrıntı için IMPORTLOG.CSV indirilebilir</td></tr>
+            <tr class="s-pas"><td>10.08.2026 16:41:08</td><td>Önceki aktarım</td><td class="r">1.980</td><td class="r">00:00:26</td>
+                <td class="c"><span class="pill p-pas">Arşiv</span></td><td class="ad">IMP.2026/0183 — saklama süresi doldu</td></tr>
+            <tfoot>
+              <tr><td colspan="2" style="text-align:right">TOPLAM</td><td class="r">2.831</td><td class="r">00:00:38</td>
+                  <td colspan="2"></td></tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-yok)"></span>Hata — atlanan satırlar</span>
+          <span><span class="sw" style="background:var(--s-kri)"></span>Uyarı — kısmen yazıldı</span>
+          <span><span class="sw" style="background:var(--s-pas)"></span>Arşiv / pasif — <b>en sonda</b>, açıklaması üstü çizili</span>
+        </div>
+        <div class="hint">Aktarım <b>TFDBatchMove</b> ile paket paket (500 kayıt) yazılır; her paket kendi transaction'ındadır.
+          "Aktarımı Geri Al" bu aktarım numarasına ait <b>IMPORTLOG</b> kayıtlarını kullanarak yeni açılan kartları siler,
+          güncellenen kartların önceki değerlerini geri yazar.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <b>Veri modeli (kroki):</b>
+    <span>Şablon → <b>IMPORTSABLON</b> (SABLONAD · HEDEF · KAYNAKKOLON · HEDEFALAN · DONUSUM · ZORUNLU)</span>·
+    <span>Log → <b>IMPORTLOG</b> (AKTARIMNO · SATIRNO · DURUM · HATATURU · MESAJ · ESKIDEGER)</span>·
+    <span>Hedefler → <b>STOKLAR · STOKBARKOD · STOKFIYAT · CARI · FIYATLAR · SAYIMSATIR · CARIHAREKET · BANKAHAREKET</b></span>·
+    <span>Motor → <b>TFDBatchMove</b> (paket 500) · önizleme <b>TcxGrid</b></span>
+  </div>
+
+  <div class="statusbar">
+    <span>Gentegre v2026.8</span>
+    <span>Firma: <b>Gentegre Perde &amp; Mefruşat A.Ş.</b></span>
+    <span>Sunucu: <b>GENTEGRE-APP01</b> · <b>BILIM</b></span>
+    <span>Kaynak: <b>Stok-Listesi-2026.xlsx</b> · 2.847 satır</span>
+    <span>Aktarılan: <b>2.831</b> · Atlanan: <b>12</b></span>
+    <span style="margin-left:auto">Adım 5 / 5 — tamamlandı</span>
+  </div>
+</div>
+
+<div class="hint" style="max-width:1380px;margin:8px auto 0">
+  <b>Delphi / DevExpress eşleşmesi:</b>
+  Sihirbaz <b>Import\UVeriAlWizard</b> — <b>TJvWizard</b> + <b>TJvWizardInteriorPage</b> (5 sayfa), sol adım listesi
+  <b>TJvWizardRouteMapNodes</b> · Geri / İleri / Aktarımı Başlat <b>JvWizard.ButtonBar</b> (OnNextButtonClick doğrulama yapar) ·
+  dosya seçici <b>TJvFilenameEdit</b> · Excel okuma <b>TFDBatchMove</b> + <b>TFDBatchMoveTextReader / TcxSpreadSheet</b> ·
+  önizleme ve kolon eşleştirme grid'leri <b>TcxGridDBTableView</b> (hedef alan hücresi <b>TcxComboBoxProperties</b>) ·
+  doğrulama sonuçları <b>IMPORTLOG</b> bellek tablosuna (<b>TFDMemTable</b>) yazılır, satır boyama
+  <b>Styles.OnGetContentStyle</b> · ilerleme <b>TcxProgressBar</b> (TFDBatchMove.OnProgress) ·
+  şablon <b>IMPORTSABLON</b> tablosunda saklanır.
+</div>
+
+<script>
+  var adimBilgi={
+    "1":["Adım 1 — Kaynak Seç","Aktarılacak Excel / CSV / XML dosyasını ve okuma seçeneklerini belirleyin"],
+    "2":["Adım 2 — Hedef Tablo","Verinin yazılacağı Gentegre tablosunu ve aktarım davranışını seçin"],
+    "3":["Adım 3 — Kolon Eşleştir","Kaynak kolonlarını hedef alanlarla eşleştirin"],
+    "4":["Adım 4 — Doğrula","Aktarım öncesi kontrol sonuçlarını inceleyin"],
+    "5":["Adım 5 — Aktar","Doğrulanan kayıtlar hedef tabloya yazılıyor"]
+  };
+  function adimGoster(n){
+    n=String(n);
+    document.querySelectorAll('.adim').forEach(function(a){
+      var s=a.dataset.a;
+      a.classList.remove('on');
+      if(s===n){ a.classList.add('on'); a.classList.remove('bitti'); }
+      else if(Number(s)<Number(n)) a.classList.add('bitti');
+      else a.classList.remove('bitti');
+    });
+    document.querySelectorAll('.pane').forEach(function(p){
+      p.classList.toggle('active', p.dataset.p===n);
+    });
+    var b=adimBilgi[n];
+    document.getElementById('abasH').textContent=b[0];
+    document.getElementById('abasA').textContent=b[1];
+    document.getElementById('btnGeri').classList.toggle('pas', n==="1");
+    document.getElementById('btnIleri').classList.toggle('pas', n==="5");
+    document.getElementById('btnBasla').classList.toggle('pas', n!=="4" && n!=="5");
+  }
+  document.querySelectorAll('.adim').forEach(function(a){
+    a.addEventListener('click',function(){ adimGoster(a.dataset.a); });
+  });
+  function aktifAdim(){
+    var p=document.querySelector('.pane.active');
+    return p?Number(p.dataset.p):1;
+  }
+  document.getElementById('btnGeri').addEventListener('click',function(){
+    var n=aktifAdim(); if(n>1) adimGoster(n-1);
+  });
+  document.getElementById('btnIleri').addEventListener('click',function(){
+    var n=aktifAdim(); if(n<5) adimGoster(n+1);
+  });
+  document.getElementById('btnBasla').addEventListener('click',function(){ adimGoster(5); });
+  document.querySelectorAll('.hkart .kutu').forEach(function(k){
+    k.addEventListener('click',function(){
+      document.querySelectorAll('.hkart .kutu').forEach(function(x){x.classList.remove('sec')});
+      k.classList.add('sec');
+    });
+  });
+  adimGoster(5);
+</script>
+
+<style id="gomuluCss">
+body.gomulu{padding:0!important;margin:0!important;background:#fff!important}
+body.gomulu .win,body.gomulu .app{max-width:none!important;width:auto!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;min-height:100vh}
+body.gomulu .app{height:100vh!important;min-height:0!important}
+body.gomulu .title,body.gomulu .titlebar,body.gomulu .menubar,
+body.gomulu .toolbar,body.gomulu .rail,body.gomulu .ribbon,
+body.gomulu .crumb,body.gomulu .statusbar{display:none!important}
+body.gomulu .wrap{display:flex!important;align-items:stretch}
+body.gomulu .wrap>.gmzgizle{display:none!important}
+body.gomulu .wrap>.center{flex:1!important;min-width:0!important}
+body.gomulu .wrap>.side{width:240px!important;flex:none!important}
+body.gomulu .work>.gmzgizle{display:none!important}
+
+/* ===== KOYU TEMA (kabuk "tema" mesajiyla veya #tema=koyu ile) ===== */
+body.koyu{--bg:#161b22;--card:#1b222c;--line:#2c3542;--line2:#242c37;--ink:#dfe6ee;--muted:#93a1b1;
+  --navy:#cfe0f4;--accent:#4d8fd6;--sel:#1e3a56;--selbd:#3d6ea8;--head:#1e2632;--head2:#222b38;
+  --btnfrom:#242e3b;--btnto:#1c242f;--grpbg:#1e2632;background:#12171e!important;color:#dfe6ee!important}
+body.koyu .win,body.koyu .app{background:#1b222c!important;border-color:#2c3542!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.45)!important}
+body.koyu .title,body.koyu .titlebar{background:linear-gradient(#1e3d63,#16304f)!important;color:#e8f0f9!important}
+body.koyu .toolbar,body.koyu .menubar,body.koyu .filtre,body.koyu .tabs,body.koyu .dtabs,body.koyu .subtabs,
+body.koyu .statusbar,body.koyu .maprow,body.koyu .gridfoot,body.koyu .groupbar,body.koyu .grupbar,
+body.koyu .vwbar,body.koyu .crumb,body.koyu .agacust,body.koyu .agacalt,body.koyu .parm,body.koyu .rbas,
+body.koyu .splitter,body.koyu .gridtb,body.koyu .achips,body.koyu .ltabs{
+  background:#1e2632!important;border-color:#2c3542!important;color:#b9c6d4!important}
+body.koyu .btn,body.koyu .minibtn,body.koyu .tb,body.koyu .sbtn,body.koyu .inp,body.koyu .seg .s,
+body.koyu .subtab,body.koyu .gsearch,body.koyu .srch,body.koyu .cip,body.koyu .agacust .b,
+body.koyu .side .foot .b,body.koyu .arama .foot .b{
+  background:linear-gradient(#242e3b,#1c242f)!important;border-color:#33404f!important;color:#dfe6ee!important}
+body.koyu .btn.primary,body.koyu .minibtn.on,body.koyu .tb.pri,body.koyu .seg .s.on,body.koyu .subtab.active,
+body.koyu .cip.on,body.koyu .agacust .b.on,body.koyu .b.pri{
+  background:linear-gradient(#2f6db3,#245a95)!important;border-color:#2f6db3!important;color:#fff!important}
+body.koyu .btn.danger,body.koyu .tb.del{background:linear-gradient(#b8433f,#96322f)!important;border-color:#96322f!important;color:#fff!important}
+body.koyu input,body.koyu textarea{background:#1c242f!important;color:#dfe6ee!important;border-color:#33404f!important}
+body.koyu .dg,body.koyu table.grid,body.koyu .gridscroll,body.koyu .dscroll{background:#1b222c!important}
+body.koyu .dg th,body.koyu table.grid th{background:linear-gradient(#26313f,#1f2836)!important;
+  color:#a8c0d8!important;border-color:#33404f!important}
+body.koyu .dg td,body.koyu table.grid td{border-color:#2a3341!important;color:#dbe3ec!important;background:transparent}
+body.koyu table.grid tbody tr:nth-child(even) td{background:#1e2632!important}
+body.koyu table.grid tbody tr:hover td,body.koyu .dg tr:hover td{background:#243040!important;filter:none!important}
+body.koyu table.grid tbody tr.sel td,body.koyu .dg tr.foc td{background:#1e3a56!important;box-shadow:inset 0 0 0 1px #3d6ea8!important}
+body.koyu .dg tfoot td,body.koyu table.grid tfoot td{background:linear-gradient(#24303f,#1d2734)!important;color:#cfe0f4!important}
+body.koyu .side,body.koyu .gorev,body.koyu .agac,body.koyu .nav,body.koyu .navlist{
+  background:#1a212b!important;border-color:#2c3542!important}
+body.koyu .pane,body.koyu .center,body.koyu .main,body.koyu .cal,body.koyu .work,body.koyu .detail,
+body.koyu .gridwrap,body.koyu .dwrap,body.koyu .wrap{background:#1b222c!important}
+body.koyu .tab,body.koyu .ltab,body.koyu .dtab,body.koyu .vt{background:#212a36!important;color:#93a1b1!important;border-color:#33404f!important}
+body.koyu .tab.active,body.koyu .ltab.active,body.koyu .dtab.active,body.koyu .vt.on{background:#1b222c!important;color:#cfe0f4!important}
+body.koyu .urun,body.koyu .kutu,body.koyu .panel,body.koyu .kpi,body.koyu .anzkpi .k,body.koyu .tile,body.koyu .rp{
+  background:#1e2632!important;border-color:#2c3542!important;color:#dfe6ee!important}
+body.koyu .rp.on{background:linear-gradient(#24466b,#1c3a5c)!important;border-color:#3d6ea8!important;color:#e8f0f9!important}
+body.koyu h5,body.koyu .kutu h4,body.koyu .panel>h3,body.koyu .grph{color:#8fa6bd!important;background:#212a36!important}
+body.koyu .kv b,body.koyu .side h5{color:#cfe0f4!important}
+body.koyu .hint,body.koyu .lgnd,body.koyu .anznot,body.koyu .agacalt{color:#93a1b1!important;background:transparent!important}
+body.koyu .bar,body.koyu .bar2{background:#232d3a!important;border-color:#39465a!important}
+body.koyu .gtus{filter:brightness(.86)}
+body.koyu .tvsep,body.koyu hr{background:#2c3542!important}
+/* satir renk kurallari — koyu tonlar */
+body.koyu tr.s-yok td,body.koyu tr.u td{background:#4a1f22!important;color:#ffbcbc!important}
+body.koyu tr.s-kri td,body.koyu tr.d td{background:#463714!important;color:#ffdf9b!important}
+body.koyu tr.s-skt td,body.koyu tr.b td{background:#452c16!important;color:#ffd0a6!important}
+body.koyu tr.s-pas td{background:#2a303a!important;color:#8e99a6!important}
+body.koyu tr.gh td{background:linear-gradient(#27374a,#20303f)!important;color:#cfe0f4!important}
+body.koyu tr.gt td{background:#212b38!important;color:#a8c0d8!important}
+</style>
+<script>(function(){
+function solMenuMu(e){
+  if(!e||e.nodeType!==1) return false;
+  if(/(^|\s)(gorev|solmenu|gtusgrup)(\s|$)/.test(e.className||"")) return true;
+  /* gorev tuslari / sekmeli sol sutun: .gtus veya .ltabs iceriyorsa gizlenir */
+  return !!e.querySelector(".gtus, .ltabs, .lpane");
+}
+function g(){
+  if(location.hash.indexOf("gomulu")>=0){
+    document.body.classList.add("gomulu");
+    [".wrap",".work"].forEach(function(sel){
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(w){
+        var ilk=w.firstElementChild;
+        if(ilk) ilk.classList.toggle("gmzgizle", solMenuMu(ilk));
+      });
+    });
+  } else document.body.classList.remove("gomulu");
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",g); else g();
+addEventListener("hashchange",g);
+  /* ================= LISTE ARAMASI =================
+     1) ekranin kendi "ara" kutusu   2) kabuktan gelen {gentegre:"ara"} mesaji
+     Ana griddeki satirlari kelime kelime filtreler, sonucu kabuga bildirir. */
+  (function(){
+    function norm(s){ return (s||"").toLocaleLowerCase("tr").replace(/\u0130/g,"i").replace(/I/g,"\u0131").replace(/\s+/g," ").trim(); }
+    function anaTablo(){ return document.querySelector(".dg table, table.grid"); }
+    function veriSatirlari(t){
+      if(!t) return [];
+      var r=[].slice.call(t.querySelectorAll("tr"));
+      return r.filter(function(tr){
+        if(tr.querySelector("th")) return false;
+        if(tr.closest && tr.closest("tfoot")) return false;
+        return true;
+      });
+    }
+    var rozet=null, sonQ="";
+    function rozetKur(bulunan,toplam,q){
+      if(!rozet){
+        rozet=document.createElement("div");
+        rozet.style.cssText="position:fixed;right:14px;bottom:14px;z-index:99999;background:#2f6db3;color:#fff;"+
+          "border-radius:20px;padding:7px 13px;font:12px/1.4 'Segoe UI',Tahoma,sans-serif;"+
+          "box-shadow:0 6px 20px rgba(10,25,45,.32);display:flex;gap:9px;align-items:center";
+        document.body.appendChild(rozet);
+      }
+      rozet.innerHTML='\ud83d\udd0e <b>'+bulunan+'</b> / '+toplam+' kay\u0131t \u00b7 "'+q+'"';
+      var x=document.createElement("span");
+      x.textContent="\u2715"; x.style.cssText="cursor:pointer;font-weight:700;opacity:.85";
+      x.onclick=function(){ ara(""); document.querySelectorAll("input").forEach(function(i){ if(/ara/i.test(i.placeholder||"")) i.value=""; }); };
+      rozet.appendChild(x);
+      rozet.style.display="flex";
+    }
+    function ara(q){
+      var t=anaTablo(); if(!t) return;
+      sonQ=q||"";
+      var sat=veriSatirlari(t), parca=norm(q)?norm(q).split(" "):[], bulunan=0;
+      sat.forEach(function(tr){
+        var metin=norm(tr.textContent);
+        var uy=!parca.length||parca.every(function(p){ return metin.indexOf(p)>=0; });
+        tr.style.display=uy?"":"none"; if(uy) bulunan++;
+      });
+      if(parca.length) rozetKur(bulunan,sat.length,q); else if(rozet) rozet.style.display="none";
+      try{ if(parent&&parent!==window) parent.postMessage({gentegre:"aramaSonuc",bulunan:bulunan,toplam:sat.length,q:sonQ},"*"); }catch(e){}
+    }
+    window.gentegreAra=ara;
+    addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="ara") ara(e.data.q); });
+    document.addEventListener("input",function(e){
+      var i=e.target;
+      if(i&&i.tagName==="INPUT"&&/ara|search/i.test(i.placeholder||"")) ara(i.value);
+    },true);
+  })();
+
+  /* tema: kabuktan gelen mesaj veya hash */
+  function tema(ad){ document.body.classList.toggle("koyu", ad==="koyu"); }
+  addEventListener("message",function(e){ if(e.data&&e.data.gentegre==="tema") tema(e.data.ad); });
+  (function(){ var m=(location.hash||"").match(/tema=([a-z]+)/i); if(m) tema(m[1]); })();
+
+/* kart penceresi olarak acildiysa: kendi "Kapat / Vazgec" dugmesi ust pencereyi kapatsin */
+if(window.parent&&window.parent!==window){
+  /* kabuga "yuklendim" sinyali — dosya bulunamazsa kabuk uyari gosterir */
+  (function(){function hz(){try{parent.postMessage({gentegre:"hazir"},"*");}catch(x){}}
+   hz(); addEventListener("load",hz);})();
+  /* kart penceresi olarak acildiysa gercek icerik olculerini ust pencereye bildir */
+  if(location.hash.indexOf("kart")>=0){
+    var olcTimer=null;
+    function olc(){
+      var w=0,ch=document.body.children;
+      for(var i=0;i<ch.length;i++){
+        var t=ch[i].tagName; if(t==="SCRIPT"||t==="STYLE") continue;
+        var r=ch[i].getBoundingClientRect(); if(r.width>w) w=r.width;
+      }
+      var cs=getComputedStyle(document.body);
+      w+=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+      var alt=0;
+      for(var j=0;j<ch.length;j++){
+        var t2=ch[j].tagName; if(t2==="SCRIPT"||t2==="STYLE") continue;
+        var r2=ch[j].getBoundingClientRect(); if(r2.bottom>alt) alt=r2.bottom;
+      }
+      var h=Math.ceil(alt+parseFloat(cs.paddingBottom||0));
+      try{parent.postMessage({gentegre:"olcu",w:Math.ceil(w),h:Math.ceil(h)},"*");}catch(x){}
+    }
+    function olcGec(){clearTimeout(olcTimer);olcTimer=setTimeout(olc,60);}
+    addEventListener("load",olcGec); addEventListener("resize",olcGec);
+    document.addEventListener("click",olcGec,true);
+    olcGec();
+  }
+  addEventListener("click",function(e){
+    var el=e.target;
+    for(var i=0;i<3&&el&&el!==document.body;i++,el=el.parentElement){
+      var s=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(s.length<=16&&/(^|\s)(kapat|vazge\u00e7|\u00e7\u0131k)$/i.test(s)){
+        try{parent.postMessage({gentegre:"kapat"},"*");}catch(x){}
+        return;
+      }
+    }
+  },true);
+}
+})();</script>
+</body>
+</html>
