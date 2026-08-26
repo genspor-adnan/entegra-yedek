@@ -3,9 +3,15 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import type { ListeSatiri } from '../api/sozlesme';
 import { GenForm } from '../bilesenler/GenForm';
+import { SeriKurallari } from '../bilesenler/ebelge/SeriKurallari';
+import { XsltSablonlari } from '../bilesenler/ebelge/XsltSablonlari';
 
 const SEKMELER = [
   { anahtar: 'subeler', baslik: 'Şube Tanımları' },
+  // Seri kurallari ve XSLT sablonlari Ayarlar'dan buraya tasindi (kullanici):
+  //   ikisi de mukellefin gonderim kurulumunun parcasi - entegrator hesabi,
+  //   mukellefiyet ve seriler ayni ekranda durur.
+  { anahtar: 'ebelge',  baslik: 'e-Belge' },
   { anahtar: 'depolar', baslik: 'Depolar' },
 ] as const;
 
@@ -143,6 +149,18 @@ export function FirmaBilgileri() {
             “Merkez kimliği + şube adresi”nde ünvan/VKN merkezin, adres şubenindir.
           </div>
         </div>
+      )}
+
+      {!yukleniyor && aktif === 'ebelge' && (
+        <>
+          <div className="not" style={{ marginBottom: 8 }}>
+            Entegratör hesabı, test ortamı ve mükellefiyet bilgileri
+            <b> şube kartının e-Belge sekmesinde</b>; aşağıdakiler tüm şubeler
+            için ortaktır.
+          </div>
+          <SeriKurallari />
+          <XsltSablonlari />
+        </>
       )}
 
       {!yukleniyor && aktif === 'depolar' && (
