@@ -113,7 +113,76 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Hasta da bir TARAF - cari ekstresi aynen gecerli (hasta hesabi hareketleri).
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Hasta Ekstresi',
               tarihAlani: 'islemTarihi' },
-    menuGrup: 'Hasta', menuAd: 'Hasta Listesi', ic: '🏥', yetkiKodu: 'personel',
+    menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Listesi', ic: '🏥', yetkiKodu: 'personel',
+  },
+  {
+    kaynak: 'proje', baslik: 'Projeler', yol: 'CRM › Projeler', kartYolu: '/proje',
+    aksiyonEkrani: 'proje-liste',
+    cipler: [
+      { ad: 'Açık',       filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tamamlanan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Tumu' },
+    ],
+    // Grup CRM: musteri iliskileri basligi altinda projeler (kullanici karari).
+    menuGrup: 'CRM', menuAd: 'Projeler', ic: '📁', yetkiKodu: 'proje', menuSira: 30,
+  },
+  {
+    // GOREV / HATIRLATMA / TAKVIM (db/108) - ana sayfa panelini besleyen kayitlar.
+    kaynak: 'gorev', baslik: 'Görevler', yol: 'CRM › Görevler', kartYolu: '/gorev',
+    aksiyonEkrani: 'gorev-liste',
+    cipler: [
+      { ad: 'Bekleyen',  filtre: { alan: 'durum', op: 'kucukEsit', deger: 1 } },
+      { ad: 'Tamamlanan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'CRM', menuAd: 'Görevler', ic: '✅', yetkiKodu: 'gorev', menuSira: 40,
+  },
+  {
+    // SATIS FIRSATI (db/121, mockup firsat_karti/firsat_listesi.html) - teklif
+    //   ONCESI surec. Cipler huninin durumu: acik firsatlar, kazanilan, kaybedilen.
+    kaynak: 'firsat', baslik: 'Satış Fırsatları', yol: 'CRM › Satış Fırsatları',
+    kartYolu: '/firsat', aksiyonEkrani: 'firsat-liste',
+    cipler: [
+      { ad: 'Açık',        filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Kazanılan',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Kaybedilen',  filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tumu' },
+    ],
+    toplam: ['tahminiTutar', 'agirlikliTutar'],
+    yerTutucuSekmeler: ['Teklifler', 'Yorum / Medya', 'Ek Alanlar'],
+    menuGrup: 'CRM', menuAd: 'Satış Fırsatları', ic: '🎯', yetkiKodu: 'firsat', menuSira: 20,
+  },
+  {
+    // ADAY MÜŞTERİLER (db/122): henuz musteri olmayan firmalar. AYNI taraf
+    //   tablosu - anlasma saglaninca kayit tasinmaz, yalniz bayrak degisir
+    //   (musteri=1, aday=0) ve Musteri Listesi'nde gorunmeye baslar.
+    kaynak: 'cari', rota: 'aday', baslik: 'Aday Müşteriler',
+    yol: 'CRM › Aday Müşteriler', kartYolu: '/aday', aksiyonEkrani: 'aday-liste',
+    sabitFiltre: { alan: 'aday', op: 'esit', deger: 1 },
+    yeniKayitVarsayilanlari: { aday: true, musteri: false, tedarikci: false },
+    // Bu ekrandaki her kayit ADAY: "Musteri"/"Tedarikci" kolonlari hep bos,
+    //   yer kaplamaktan baska ise yaramiyor.
+    //   VKN, e-Fatura ve Adres yok: aday henuz faturalanmiyor, adres kartta.
+    gizliKolonlar: ['musteri', 'tedarikci', 'vkno', 'efatura', 'adres'],
+    // Once SAHIBI ve turu: kimin adayi, hangi kategoride.
+    kolonSirasi: ['temsilci', 'kategori', 'unvan', 'telefon', 'eposta', 'ilce', 'il', 'kod', 'durum'],
+    cipler: DURUM_CIPLERI,
+    // ADAY KARTI SADE (kullanici karari): aday henuz musteri degil - fatura
+    //   unvani/vergi dairesi, mali durum ve ek alanlar musteri olunca anlamli.
+    //   Kod da gizli: aday icin kod uydurmak gereksiz, kaydedince id atanir.
+    //   Musteri/Tedarikci kutulari da yok: aday henuz ikisi de degil, rol
+    //   donusumde (Müşteriye Dönüştür) belirlenir.
+    //   "Aday" kutusu da gizli: bu ekrandaki her kayit zaten aday, kutu bilgi
+    //   vermiyor ama yanlislikla kapatilirsa kayit listeden DUSER.
+    //   Cep telefonu ve Web de yok: adayda tek telefon + e-posta yeter,
+    //   ayrinti musteri olunca girilir.
+    gizliKartAlanlari: ['kod', 'musteri', 'tedarikci', 'aday', 'cepTel', 'epostaWeb'],
+    gizliKartSekmeleri: ['Fatura Bilgileri'],
+    //   Temsilci ZORUNLU: sahipsiz aday takipsiz kalir (varsayilan karti acan
+    //   kullanici). Musteri kartinda zorunlu DEGIL - eski kayitlarin cogunda bos.
+    zorunluKartAlanlari: ['temsilci'],
+    yerTutucuSekmeler: ['Yorum / Medya'],
+    menuGrup: 'CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'cari', menuSira: 10,
   },
   {
     // Kaynak id, API route ve yetki kodu 'cari' KALDI - Musteri Listesi kendi URL'ini
@@ -483,82 +552,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Kasa', menuAd: 'Cari Ekstre', ic: '🧮', yetkiKodu: 'mali_hareket',
   },
   {
-    // Kullanici: "Kasa altına Hizmet Listesi ve Masraf Listesi'ı taşı".
-    kaynak: 'hizmet', baslik: 'Hizmetler', yol: 'Stok › Hizmetler', cipler: DURUM_CIPLERI,
-    menuGrup: 'Kasa', menuAd: 'Hizmet Listesi', ic: '🛠️', yetkiKodu: 'hizmet',
-  },
-  {
     kaynak: 'masraf', baslik: 'Masraflar', yol: 'Stok › Masraflar', cipler: DURUM_CIPLERI,
     menuGrup: 'Kasa', menuAd: 'Masraf Listesi', ic: '🧾', yetkiKodu: 'masraf',
-  },
-  {
-    kaynak: 'proje', baslik: 'Projeler', yol: 'CRM › Projeler', kartYolu: '/proje',
-    aksiyonEkrani: 'proje-liste',
-    cipler: [
-      { ad: 'Açık',       filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'Tamamlanan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-      { ad: 'Tumu' },
-    ],
-    // Grup CRM: musteri iliskileri basligi altinda projeler (kullanici karari).
-    menuGrup: 'CRM', menuAd: 'Projeler', ic: '📁', yetkiKodu: 'proje', menuSira: 30,
-  },
-  {
-    // GOREV / HATIRLATMA / TAKVIM (db/108) - ana sayfa panelini besleyen kayitlar.
-    kaynak: 'gorev', baslik: 'Görevler', yol: 'CRM › Görevler', kartYolu: '/gorev',
-    aksiyonEkrani: 'gorev-liste',
-    cipler: [
-      { ad: 'Bekleyen',  filtre: { alan: 'durum', op: 'kucukEsit', deger: 1 } },
-      { ad: 'Tamamlanan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-      { ad: 'Tumu' },
-    ],
-    menuGrup: 'CRM', menuAd: 'Görevler', ic: '✅', yetkiKodu: 'gorev', menuSira: 40,
-  },
-  {
-    // SATIS FIRSATI (db/121, mockup firsat_karti/firsat_listesi.html) - teklif
-    //   ONCESI surec. Cipler huninin durumu: acik firsatlar, kazanilan, kaybedilen.
-    kaynak: 'firsat', baslik: 'Satış Fırsatları', yol: 'CRM › Satış Fırsatları',
-    kartYolu: '/firsat', aksiyonEkrani: 'firsat-liste',
-    cipler: [
-      { ad: 'Açık',        filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'Kazanılan',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-      { ad: 'Kaybedilen',  filtre: { alan: 'durum', op: 'esit', deger: 3 } },
-      { ad: 'Tumu' },
-    ],
-    toplam: ['tahminiTutar', 'agirlikliTutar'],
-    yerTutucuSekmeler: ['Teklifler', 'Yorum / Medya', 'Ek Alanlar'],
-    menuGrup: 'CRM', menuAd: 'Satış Fırsatları', ic: '🎯', yetkiKodu: 'firsat', menuSira: 20,
-  },
-  {
-    // ADAY MÜŞTERİLER (db/122): henuz musteri olmayan firmalar. AYNI taraf
-    //   tablosu - anlasma saglaninca kayit tasinmaz, yalniz bayrak degisir
-    //   (musteri=1, aday=0) ve Musteri Listesi'nde gorunmeye baslar.
-    kaynak: 'cari', rota: 'aday', baslik: 'Aday Müşteriler',
-    yol: 'CRM › Aday Müşteriler', kartYolu: '/aday', aksiyonEkrani: 'aday-liste',
-    sabitFiltre: { alan: 'aday', op: 'esit', deger: 1 },
-    yeniKayitVarsayilanlari: { aday: true, musteri: false, tedarikci: false },
-    // Bu ekrandaki her kayit ADAY: "Musteri"/"Tedarikci" kolonlari hep bos,
-    //   yer kaplamaktan baska ise yaramiyor.
-    //   VKN, e-Fatura ve Adres yok: aday henuz faturalanmiyor, adres kartta.
-    gizliKolonlar: ['musteri', 'tedarikci', 'vkno', 'efatura', 'adres'],
-    // Once SAHIBI ve turu: kimin adayi, hangi kategoride.
-    kolonSirasi: ['temsilci', 'kategori', 'unvan', 'telefon', 'eposta', 'ilce', 'il', 'kod', 'durum'],
-    cipler: DURUM_CIPLERI,
-    // ADAY KARTI SADE (kullanici karari): aday henuz musteri degil - fatura
-    //   unvani/vergi dairesi, mali durum ve ek alanlar musteri olunca anlamli.
-    //   Kod da gizli: aday icin kod uydurmak gereksiz, kaydedince id atanir.
-    //   Musteri/Tedarikci kutulari da yok: aday henuz ikisi de degil, rol
-    //   donusumde (Müşteriye Dönüştür) belirlenir.
-    //   "Aday" kutusu da gizli: bu ekrandaki her kayit zaten aday, kutu bilgi
-    //   vermiyor ama yanlislikla kapatilirsa kayit listeden DUSER.
-    //   Cep telefonu ve Web de yok: adayda tek telefon + e-posta yeter,
-    //   ayrinti musteri olunca girilir.
-    gizliKartAlanlari: ['kod', 'musteri', 'tedarikci', 'aday', 'cepTel', 'epostaWeb'],
-    gizliKartSekmeleri: ['Fatura Bilgileri'],
-    //   Temsilci ZORUNLU: sahipsiz aday takipsiz kalir (varsayilan karti acan
-    //   kullanici). Musteri kartinda zorunlu DEGIL - eski kayitlarin cogunda bos.
-    zorunluKartAlanlari: ['temsilci'],
-    yerTutucuSekmeler: ['Yorum / Medya'],
-    menuGrup: 'CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'cari', menuSira: 10,
   },
   {
     // Kullanici: "Stok altına Stok Listesi [taşı]" - tek ogeli grup, digerleriyle ayni desen.
@@ -570,7 +565,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // 'ÜTS Bilgileri' artik yer tutucu DEGIL - stok_uts (119) detayi olarak geliyor.
     yerTutucuSekmeler: ['Reçete', 'Stok Durumu', 'Hareketler', 'Yorum / Medya', 'Ek Alanlar'],
     resimYerTutucu: true,
-    menuGrup: 'Stok', menuAd: 'Stok Listesi', ic: '📦', yetkiKodu: 'stok',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Stok Listesi', ic: '📦', yetkiKodu: 'stok',
+  },
+  {
+    // Hizmetler KASA'dan STOK menusune alindi (kullanici): hizmet de belgede
+    //   satilan bir kalem - stokla ayni yerde aranir. Masraf Listesi kasada
+    //   kaldi: o satis kalemi degil, gider kalemi.
+    kaynak: 'hizmet', baslik: 'Hizmetler', yol: 'Stok › Hizmetler', cipler: DURUM_CIPLERI,
+    menuGrup: 'Stok & Hizmet', menuAd: 'Hizmet Listesi', ic: '🛠️', yetkiKodu: 'hizmet',
   },
   {
     // STOKTAN TALEP (tur 105): bir birim depodan mal ISTER. Stok ve cari
@@ -584,7 +586,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Karşılanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Stok', menuAd: 'Stoktan Talep', ic: '📥', yetkiKodu: 'belge',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Stoktan Talep', ic: '📥', yetkiKodu: 'belge',
   },
   {
     // DEPOLAR ARASI TRANSFER (tur 20): cari YOK, para YOK - tek satir cikis
@@ -595,7 +597,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'stok-transfer', baslik: 'Stok Transferleri',
     yol: 'Stok › Stok Transfer', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 20,
     cipler: [{ ad: 'Tumu' }],
-    menuGrup: 'Stok', menuAd: 'Stok Transfer', ic: '🔄', yetkiKodu: 'belge',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Stok Transfer', ic: '🔄', yetkiKodu: 'belge',
   },
   {
     // GIRIS FISI (3) / CIKIS FISI (4): irsaliye gibi stok oynatan ama CARISIZ
@@ -609,7 +611,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Fire',          filtre: { alan: 'tipi', op: 'esit', deger: 1 } },
       { ad: 'Sayım Fazlası', filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
     ],
-    menuGrup: 'Stok', menuAd: 'Giriş Fişi', ic: '📗', yetkiKodu: 'belge',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Giriş Fişi', ic: '📗', yetkiKodu: 'belge',
   },
   {
     kaynak: 'cikis-fis', baslik: 'Çıkış Fişleri', yol: 'Stok › Çıkış Fişi',
@@ -621,7 +623,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'İmha',         filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
       { ad: 'Sayım Eksiği', filtre: { alan: 'tipi', op: 'esit', deger: 5 } },
     ],
-    menuGrup: 'Stok', menuAd: 'Çıkış Fişi', ic: '📕', yetkiKodu: 'belge',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Çıkış Fişi', ic: '📕', yetkiKodu: 'belge',
   },
   {
     // Kullanici: "İK altına Personel Listesi taşı" - tek ogeli grup, digerleriyle ayni desen.

@@ -48,14 +48,14 @@ function grupla(liste: MenuOgesi[], sec: (m: MenuOgesi) => string | undefined): 
  * Listede olmayan grup icin notr klasor cizilir.
  */
 const GRUP_IKON: Record<string, string> = {
-  'Hasta':   '🏥',
+  'Kayıt Kabul': '🚑',
   'Cari':    '🤝',
   'Satış':   '🛍️',
   'Alış':    '🛒',
   'Kasa':    '💵',
   'Banka':   '🏦',
   'CRM':     '📈',
-  'Stok':    '📦',
+  'Stok & Hizmet': '📦',
   'İK':      '👥',
   'Yönetim': '🛠️',
 };
