@@ -39,6 +39,7 @@ const BOLUMLER = [
   // Seri bilgileri belge turlerinin SOLUNDA (kullanici): once "hangi seriyle
   //   kesilecek", sonra tur bazli servis ayarlari.
   { anahtar: 'seri',      baslik: 'Seri Bilgileri' },
+  { anahtar: 'xslt',      baslik: 'XSLT' },
   { anahtar: 'efatura',   baslik: 'e-Fatura' },
   { anahtar: 'earsiv',    baslik: 'e-Arşiv' },
   { anahtar: 'eirsaliye', baslik: 'e-İrsaliye' },
@@ -68,6 +69,21 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
   /** Gridde secili kural - Duzenle/Sil bunu kullanir. */
   const [seciliSeri, setSeciliSeri] = useState<ListeSatiri | null>(null);
   const [seriHata, setSeriHata] = useState<string | null>(null);
+  /** XSLT sablonlari - seri kurallariyla ayni desen. */
+  const [xsltKart, setXsltKart] = useState<number | 'yeni' | null>(null);
+  const [xsltYenile, setXsltYenile] = useState(0);
+  const [seciliXslt, setSeciliXslt] = useState<ListeSatiri | null>(null);
+
+  const xsltSil = async () => {
+    if (!seciliXslt) return;
+    if (!window.confirm(`"${seciliXslt.ad ?? ''}" şablonu silinecek. Onaylıyor musunuz?`)) return;
+    setSeriHata(null);
+    try {
+      await api.kartSil('ebelge-xslt', Number(seciliXslt.id));
+      setSeciliXslt(null);
+      setXsltYenile(t => t + 1);
+    } catch (h) { setSeriHata(hataMetni(h)) }
+  };
 
   const seriSil = async () => {
     if (!seciliSeri) return;
@@ -193,6 +209,52 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
           baslik="e-Belge Seri Kuralı"
           onKapat={() => setSeriKart(null)}
           onKaydedildi={() => { setSeriKart(null); setSeriYenile(t => t + 1) }}
+        />
+      )}
+
+      {bolum === 'xslt' && (
+        <div className="kagrup">
+          {/* Belge XML'ine gomulen goruntuleme sablonlari (159). Icerik burada
+              duzenlenmez - 100 KB - 1,3 MB'lik XSLT'yi form alanina koymak
+              ekrani kilitler; kart yalniz tanimlamayi yonetir. */}
+          <div className="numaralama-bas bitisik">
+            <h6>XSLT Şablonları</h6>
+            <span className="baslik-eylem">
+              <button className="d bir ikon-dugme" title="Yeni şablon"
+                      onClick={() => setXsltKart('yeni')}>＋</button>
+              <button className="d ikon-dugme" disabled={!seciliXslt}
+                      title={seciliXslt ? 'Seçili şablonu düzenle' : 'Önce satır seçin'}
+                      onClick={() => seciliXslt && setXsltKart(Number(seciliXslt.id))}>✎</button>
+              <button className="d teh ikon-dugme" disabled={!seciliXslt}
+                      title={seciliXslt ? 'Seçili şablonu sil' : 'Önce satır seçin'}
+                      onClick={() => { void xsltSil() }}>🗑</button>
+            </span>
+          </div>
+          <GenGrid
+            key={`ebelge-xslt-${xsltYenile}`}
+            kaynak="ebelge-xslt"
+            gomulu
+            seritGizli
+            boyut={25}
+            onSatirAc={satir => setXsltKart(Number(satir.id))}
+            onSecimDegisti={setSeciliXslt}
+          />
+          <div className="not">
+            Belge GİB'e XML olarak gider; insanın gördüğü fatura görüntüsü bu
+            şablon uygulanarak üretilir ve gönderimde XML'in <b>içine gömülür</b>.
+            Her belge türü ve yön için <b>bir</b> şablon varsayılan olabilir.
+            <b> Boyut</b> sıfırsa şablonun içeriği henüz yüklenmemiştir.
+          </div>
+        </div>
+      )}
+
+      {xsltKart !== null && (
+        <GenForm
+          kaynak="ebelge-xslt"
+          id={xsltKart}
+          baslik="XSLT Şablonu"
+          onKapat={() => setXsltKart(null)}
+          onKaydedildi={() => { setXsltKart(null); setXsltYenile(t => t + 1) }}
         />
       )}
 

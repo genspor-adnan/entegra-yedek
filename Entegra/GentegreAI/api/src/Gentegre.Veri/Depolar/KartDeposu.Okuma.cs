@@ -172,6 +172,7 @@ public sealed partial class KartDeposu
             "public.v_numara_turu_tahsilat", "public.v_numara_turu_odeme",
             // e-Belge seri kurallari (156).
             "public.v_ebelge_turu_lookup", "public.v_kullanici_lookup",
+            "public.v_ebelge_yon_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

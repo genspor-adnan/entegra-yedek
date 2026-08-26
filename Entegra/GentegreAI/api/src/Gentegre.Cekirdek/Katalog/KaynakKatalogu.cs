@@ -104,6 +104,7 @@ public static partial class KaynakKatalogu
         Ekle(NumaraTahsilat());
         Ekle(NumaraOdeme());
         Ekle(EBelgeSeri());
+        Ekle(EBelgeXslt());
         Ekle(KasaIslemTuru());
         Ekle(Firsat());
         Ekle(HesapEkstre());
