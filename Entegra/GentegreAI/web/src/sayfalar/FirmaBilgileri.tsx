@@ -12,16 +12,22 @@ const SEKMELER = [
   { anahtar: 'depolar', baslik: 'Depolar' },
 ] as const;
 
-/** Sube kartinin e-Belge sekmesindeki ALT sekmeler (kullanici). Genel = kartin
-    kendi alanlari; digerleri Ayarlar'dan tasinan bolumler. */
+/**
+ * Sube kartinin e-Belge sekmesindeki ALT sekmeler (kullanici). Genel = kartin
+ * kendi alanlari; digerleri Ayarlar'dan tasinan bolumler.
+ *
+ * TUR SEKMELERI MUKELLEFIYETE BAGLI (172): `mukellefAlani` isaretli degilse
+ * sekme hic cizilmez - mukellefi olmadigimiz turun servis adresini ve sabit
+ * notunu doldurmak ise yaramiyor, ekrani kalabaliklastiriyordu.
+ */
 const EBELGE_ALT = [
   { anahtar: 'genel',     baslik: 'Genel' },
   { anahtar: 'seri',      baslik: 'Seri Bilgileri' },
   { anahtar: 'xslt',      baslik: 'XSLT' },
-  { anahtar: 'efatura',   baslik: 'e-Fatura' },
-  { anahtar: 'earsiv',    baslik: 'e-Arşiv Fatura' },
-  { anahtar: 'eirsaliye', baslik: 'e-İrsaliye' },
-  { anahtar: 'esmm',      baslik: 'e-SMM' },
+  { anahtar: 'efatura',   baslik: 'e-Fatura',        mukellefAlani: 'efaturaMukellef' },
+  { anahtar: 'earsiv',    baslik: 'e-Arşiv Fatura',  mukellefAlani: 'earsivMukellef' },
+  { anahtar: 'eirsaliye', baslik: 'e-İrsaliye',      mukellefAlani: 'eirsaliyeMukellef' },
+  { anahtar: 'esmm',      baslik: 'e-SMM',           mukellefAlani: 'esmmMukellef' },
 ] as const;
 
 type Sekme = typeof SEKMELER[number]['anahtar'];
@@ -86,24 +92,31 @@ export function FirmaBilgileri() {
    * YENI kayitta yalniz Genel calisir: seri/XSLT/tur ayarlari kartin id'sine
    * bagli olmasa da, once subenin kaydedilmesi akisi anlasilir kiliyor.
    */
-  const ebelgeSekmesi = (sekmeBasligi: string, icerik: React.ReactNode) => {
+  const ebelgeSekmesi = (sekmeBasligi: string, icerik: React.ReactNode,
+                         deger: Record<string, unknown>) => {
     if (sekmeBasligi !== 'e-Belge') return icerik;
+    // Mukellefiyet bayragi kartin GUNCEL degerinden okunur: kutu isaretlenince
+    //   sekme kaydetmeyi beklemeden gorunur.
+    const gorunur = EBELGE_ALT.filter(
+      b => !('mukellefAlani' in b) || Boolean(deger[b.mukellefAlani]));
+    // Acik sekme gizlendiyse Genel'e don - yoksa bos icerik kalirdi.
+    const acik = gorunur.some(b => b.anahtar === ebelgeAlt) ? ebelgeAlt : 'genel';
     return (
       <>
         <div className="katab alt">
-          {EBELGE_ALT.map(b => (
+          {gorunur.map(b => (
             <div key={b.anahtar}
-                 className={`kat${b.anahtar === ebelgeAlt ? ' on' : ''}`}
+                 className={`kat${b.anahtar === acik ? ' on' : ''}`}
                  onClick={() => setEbelgeAlt(b.anahtar)}>
               {b.baslik}
             </div>
           ))}
         </div>
-        {ebelgeAlt === 'genel' && icerik}
-        {ebelgeAlt === 'seri' && <SeriKurallari />}
-        {ebelgeAlt === 'xslt' && <XsltSablonlari />}
-        {(['efatura', 'earsiv', 'eirsaliye', 'esmm'] as EBelgeTuru[]).includes(ebelgeAlt as EBelgeTuru)
-          && <TurAyarlari tur={ebelgeAlt as EBelgeTuru} />}
+        {acik === 'genel' && icerik}
+        {acik === 'seri' && <SeriKurallari />}
+        {acik === 'xslt' && <XsltSablonlari />}
+        {(['efatura', 'earsiv', 'eirsaliye', 'esmm'] as EBelgeTuru[]).includes(acik as EBelgeTuru)
+          && <TurAyarlari tur={acik as EBelgeTuru} />}
       </>
     );
   };

@@ -37,7 +37,8 @@ interface Props {
   /** Bir GRUP sekmesinin icerigini sarmalar - ekran o sekmeye alt sekme cubugu
       ya da ek bolum ekleyebilir (Firma Bilgileri'nde e-Belge sekmesi: Genel /
       Seri / XSLT / tur ayarlari). Verilmezse sekme dogrudan cizilir. */
-  sekmeSarmalayici?(sekmeBasligi: string, icerik: React.ReactNode): React.ReactNode;
+  sekmeSarmalayici?(sekmeBasligi: string, icerik: React.ReactNode,
+                    deger: Record<string, Deger>): React.ReactNode;
   /** Ust seritte kalacak alan adlari. Verilmezse "Kimlik" grubunun TAMAMI seritte
       (varsayilan davranis). Verilirse serit bunlarla sinirlanir, grubun kalani
       "Kimlik" sekmesine duser - kimlik alani cok olan kartlarda serit sismesin. */
@@ -599,7 +600,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           altGruplaVar={altGruplaVar} renderAlanListesi={renderAlanListesi}
         />
         );
-        return sekmeSarmalayici ? sekmeSarmalayici(aktif.baslik, govde) : govde;
+        return sekmeSarmalayici ? sekmeSarmalayici(aktif.baslik, govde, deger) : govde;
       })()}
 
       {/* Personel'e ozel: "Özlük" kendi sekmesi ama TEK SATIR form (TekOzluk.tsx) -

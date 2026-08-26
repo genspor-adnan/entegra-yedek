@@ -5,6 +5,10 @@ import { AyarAlani, useAyarlar } from '../AyarAlani';
  *
  * Ayarlar ekranindan sube kartinin e-Belge sekmesine tasindi (kullanici).
  *
+ * "AKTIF" ALANLARI YOK (172): turun acik olup olmadigini subenin MUKELLEFIYET
+ * bayragi soyler (Genel sekmesi) - ayni sey iki yerde durunca tutarsizlasiyordu.
+ * Mukellefi olmadigimiz turun sekmesi zaten cizilmez.
+ *
  * DIKKAT - BUNLAR FIRMA GENELI: degerler `public.referans`ta durur, subeye gore
  * degismez. Kartin icinde gorunmelerinin sebebi "e-Belge kurulumunun tamami tek
  * yerde" olsun istenmesi; bir subede degistirilen deger TUM subeler icin gecerli
@@ -30,7 +34,6 @@ const TURLER = {
   earsiv: {
     baslik: 'e-Arşiv Fatura',
     alanlar: [
-      { anahtar: 'earsiv.aktif', etiket: 'e-Arşiv aktif', tip: 'mantik' as const },
       { anahtar: 'earsiv.uretim_url', etiket: 'Üretim (giden) adresi', tip: 'metin' as const, genis: true },
       { anahtar: 'earsiv.gelen_url', etiket: 'Üretim (gelen) adresi', tip: 'metin' as const, genis: true },
       { anahtar: 'earsiv.test_url', etiket: 'Test (giden) adresi', tip: 'metin' as const, genis: true },
@@ -40,7 +43,6 @@ const TURLER = {
   eirsaliye: {
     baslik: 'e-İrsaliye',
     alanlar: [
-      { anahtar: 'eirsaliye.aktif', etiket: 'e-İrsaliye aktif', tip: 'mantik' as const },
       { anahtar: 'eirsaliye.gelen_al', etiket: 'Gelen irsaliyeleri al', tip: 'mantik' as const },
       { anahtar: 'eirsaliye.gib_alias', etiket: 'GİB portal adresi (alias)', tip: 'metin' as const, genis: true },
       { anahtar: 'eirsaliye.uretim_url', etiket: 'Üretim servis adresi', tip: 'metin' as const, genis: true },
@@ -51,7 +53,6 @@ const TURLER = {
   esmm: {
     baslik: 'e-SMM',
     alanlar: [
-      { anahtar: 'esmm.aktif', etiket: 'e-SMM aktif', tip: 'mantik' as const },
       { anahtar: 'esmm.uretim_url', etiket: 'Üretim servis adresi', tip: 'metin' as const, genis: true },
       { anahtar: 'esmm.test_url', etiket: 'Test servis adresi', tip: 'metin' as const, genis: true },
       { anahtar: 'esmm.sabit_notlar', etiket: 'Sabit notlar', tip: 'uzunMetin' as const },

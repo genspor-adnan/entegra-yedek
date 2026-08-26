@@ -87,13 +87,14 @@ begin
         raise exception 'e-Belge yalnızca satış faturası ve satış irsaliyesi için hazırlanır.';
     end if;
 
-    -- 3) Ana salter ve tur bayragi (155 ayarlari).
+    -- 3) ANA SALTER firma geneli; tur bayragi artik SUBENIN MUKELLEFIYETI (172).
+    --    Eski `eirsaliye.aktif` ayari kaldirildi: "aktif" ile "mukellefiyet"
+    --    ayni seydi ve iki yerde durunca tutarsizlasabiliyordu.
     if coalesce((select deger from public.referans where anahtar = 'ebelge.aktif'), '0') <> '1' then
         raise exception 'e-Belge kullanımda değil. Ayarlar › Satış Belgeleri › e-Belge''den açın.';
     end if;
-    if b.tur = 14
-       and coalesce((select deger from public.referans where anahtar = 'eirsaliye.aktif'), '0') <> '1' then
-        raise exception 'e-İrsaliye kullanımda değil.';
+    if b.tur = 14 and not public.fn_ebelge_mukellef_mi(b.sube_id, 7) then
+        raise exception 'Bu şube e-İrsaliye mükellefi değil. Yönetim › Firma Bilgileri › e-Belge''den işaretleyin.';
     end if;
 
     -- 4) DOGRULAMALAR - numara/seri TUKETILMEDEN (Delphi ile ayni gerekce).
@@ -132,6 +133,13 @@ begin
         v_tur := 2;                                  -- e-Arsiv
         v_durum := 11;
         v_uyari := 'Alıcı e-Fatura mükellefi değil; belge e-Arşiv olarak hazırlandı.';
+    end if;
+
+    -- Secilen turde mukellef degilsek belge entegratorden geri doner; numara
+    --   harcanmadan burada durur (172).
+    if not public.fn_ebelge_mukellef_mi(b.sube_id, v_tur) then
+        raise exception 'Bu şube % mükellefi değil. Yönetim › Firma Bilgileri › e-Belge''den işaretleyin.',
+              public.fn_ebelge_tur_adi(v_tur);
     end if;
 
     -- 6) SERI (156 kurallari) - yoksa hazirlama durur, numara harcanmaz.

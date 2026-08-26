@@ -143,7 +143,11 @@ public static partial class KartKatalogu
             new("earsivMukellef",    "earsiv_mukellef",     "mantik",
                 Baslik: "e-Arşiv Mükellefi", Grup: "e-Belge", AltGrup: "Mükellefiyet"),
             new("eirsaliyeMukellef", "eirsaliye_mukellef",  "mantik",
-                Baslik: "e-İrsaliye Mükellefi", Grup: "e-Belge", AltGrup: "Mükellefiyet")
+                Baslik: "e-İrsaliye Mükellefi", Grup: "e-Belge", AltGrup: "Mükellefiyet"),
+            // Mukellefiyet bayragi ayni zamanda TUR SEKMESININ gorunurlugunu
+            //   belirler (172): mukellefi olmadigimiz turun ayarlari cizilmez.
+            new("esmmMukellef",      "esmm_mukellef",       "mantik",
+                Baslik: "e-SMM Mükellefi", Grup: "e-Belge", AltGrup: "Mükellefiyet")
         },
         SilmeEngelleri: new[]
         {
