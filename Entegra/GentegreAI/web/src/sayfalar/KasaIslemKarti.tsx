@@ -30,6 +30,9 @@ const LOOKUP_PROJE = [
   { ad: 'ad', baslik: 'Proje', genis: true },
 ];
 
+/** Hesap secim listelerinde YALNIZ acik hesaplar (hesap.durum: 1 aktif / 0 pasif). */
+const HESAP_AKTIF = { alan: 'durum', op: 'esit' as const, deger: 1 };
+
 const GRUP_ADI: Record<string, string> = {
   tahsilat: 'Tahsilat', odeme: 'Ödeme', virman: 'Virman', doviz: 'Döviz', plan: 'Plan',
   // Cek/senet turleri (23/24/33/34 + portfoy islemleri) ayni gruptan gelir.
@@ -467,6 +470,9 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                         ? [{ alan: 'tur', op: 'esit' as const, deger: secili.anaHesapTuru }]
                         : []),
                       { alan: 'dovizCinsi', op: 'esit' as const, deger: anaDoviz },
+                      // PASIF hesap secilemez (kullanici): kapatilmis kasa/banka
+                      //   listede duruyor ve yanlislikla secilebiliyordu.
+                      HESAP_AKTIF,
                     ],
                   }}
                   deger={hesap?.ad}
@@ -502,8 +508,11 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                   zorunlu
                   alanlar={LOOKUP_HESAP}
                   sabitFiltre={secili?.karsiHesapTuru
-                    ? { alan: 'tur', op: 'esit', deger: secili.karsiHesapTuru }
-                    : undefined}
+                    ? { op: 'and', kosullar: [
+                        { alan: 'tur', op: 'esit' as const, deger: secili.karsiHesapTuru },
+                        HESAP_AKTIF,
+                      ] }
+                    : HESAP_AKTIF}
                   deger={karsiHesap?.ad}
                   hata={alanHatalari.karsiHesapId}
                   saltOkunur={kilitli}
@@ -639,6 +648,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                   etiket="Tahsilat / Ödeme Hesabı"
                   zorunlu
                   alanlar={LOOKUP_HESAP}
+                  sabitFiltre={HESAP_AKTIF}
                   deger={gHesap?.ad}
                   hata={alanHatalari.gHesapId}
                   onSec={s => setGHesap(s ? {
