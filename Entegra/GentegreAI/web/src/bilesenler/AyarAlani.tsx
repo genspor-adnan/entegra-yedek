@@ -44,7 +44,7 @@ export function useAyarlar() {
   return { ayarlar, yukleniyor, hata, bilgi, yaz };
 }
 
-export type AyarTipi = 'sayi' | 'metin' | 'mantik' | 'secenek';
+export type AyarTipi = 'sayi' | 'metin' | 'mantik' | 'secenek' | 'parola' | 'uzunMetin';
 
 /**
  * Tek ayar satiri — GENEL KURAL: etiket EDITIN USTUNDE, aciklama alt paragrafta
@@ -93,8 +93,19 @@ export function AyarAlani({ anahtar, etiket, tip = 'sayi', secenekler, ayarlar, 
                   onChange={e => { setTaslak(null); void onYaz(anahtar, e.target.value) }}>
             {(secenekler ?? []).map(s => <option key={s.deger} value={s.deger}>{s.ad}</option>)}
           </select>
+        ) : tip === 'uzunMetin' ? (
+          // Sabit notlar gibi COK SATIRLI ayarlar: tek satirlik kutuda metnin
+          //   yalniz bir parcasi gorunuyordu.
+          <textarea className="genis-deger" rows={3}
+                    value={deger}
+                    onChange={e => setTaslak(e.target.value)}
+                    onBlur={e => bitir(e.target.value)} />
         ) : (
           <input className={tip === 'sayi' ? 'hiza-sag' : genis ? 'genis-deger' : ''}
+                 // Entegrator sifresi ekranda ACIK yazmasin. Deger sunucuda DUZ
+                 //   METIN saklanir - gizleme yalniz omuz ustu okumaya karsi.
+                 type={tip === 'parola' ? 'password' : undefined}
+                 autoComplete={tip === 'parola' ? 'new-password' : undefined}
                  value={deger}
                  inputMode={tip === 'sayi' ? 'numeric' : undefined}
                  onChange={e => setTaslak(e.target.value)}

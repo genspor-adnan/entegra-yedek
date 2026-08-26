@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Sozlesme;
+﻿using Gentegre.Cekirdek.Sozlesme;
 using Npgsql;
 
 namespace Gentegre.Veri.Depolar;
@@ -45,12 +45,50 @@ public sealed class AyarDeposu
         "guvenlik.tek_oturum",
         "guvenlik.hatali_giris_siniri",
         "guvenlik.kilit_dakika",
+        // Belge girisi - yon bazli (155). Delphi'deki Opsiyonlar > Fatura'nin
+        //   karsiligi; ayni ayarin satis ve alista farkli degeri olabilir.
+        "belge.satis.vade_gun", "belge.satis.varsayilan_seri",
+        "belge.alis.vade_gun",  "belge.alis.varsayilan_seri",
+        // e-Belge (155): entegrator baglantisi TUM belge turleri icin ortak,
+        //   geri kalani belge turu basina. Delphi GENINI -24030..-24118.
+        "ebelge.aktif", "ebelge.entegrator", "ebelge.vkn",
+        "ebelge.kullanici", "ebelge.sifre",
+        "ebelge.test_aktif", "ebelge.test_kullanici", "ebelge.test_sifre",
+        "efatura.gelen_al", "efatura.senaryo", "efatura.ihracat_gonder",
+        "efatura.uretim_url", "efatura.test_url", "efatura.sabit_notlar",
+        "earsiv.aktif", "earsiv.uretim_url", "earsiv.gelen_url",
+        "earsiv.test_url", "earsiv.sabit_notlar",
+        "eirsaliye.aktif", "eirsaliye.gelen_al", "eirsaliye.gib_alias",
+        "eirsaliye.uretim_url", "eirsaliye.test_url", "eirsaliye.sabit_notlar",
+        "esmm.aktif", "esmm.uretim_url", "esmm.test_url", "esmm.sabit_notlar",
     };
 
     /// <summary>Metin (sayi olmayan) ayarlar - uzunluk disinda bicim serbest.</summary>
     private static readonly Dictionary<string, int> MetinAyar = new()
     {
         ["genel.yerel_para"] = 5,        // ISO kodu: TL, USD, EUR...
+        ["belge.satis.varsayilan_seri"] = 10,
+        ["belge.alis.varsayilan_seri"] = 10,
+        ["ebelge.entegrator"] = 60,
+        ["ebelge.vkn"] = 11,
+        ["ebelge.kullanici"] = 60,
+        ["ebelge.sifre"] = 100,
+        ["ebelge.test_kullanici"] = 60,
+        ["ebelge.test_sifre"] = 100,
+        ["efatura.uretim_url"] = 250,
+        ["efatura.test_url"] = 250,
+        ["efatura.sabit_notlar"] = 1000,
+        ["earsiv.uretim_url"] = 250,
+        ["earsiv.gelen_url"] = 250,
+        ["earsiv.test_url"] = 250,
+        ["earsiv.sabit_notlar"] = 1000,
+        ["eirsaliye.gib_alias"] = 120,
+        ["eirsaliye.uretim_url"] = 250,
+        ["eirsaliye.test_url"] = 250,
+        ["eirsaliye.sabit_notlar"] = 1000,
+        ["esmm.uretim_url"] = 250,
+        ["esmm.test_url"] = 250,
+        ["esmm.sabit_notlar"] = 1000,
     };
 
     /// <summary>Ayar yoksa kullanilan degerler - DB'siz de dogru davranis.</summary>
@@ -67,6 +105,20 @@ public sealed class AyarDeposu
         ["guvenlik.tek_oturum"] = 0,
         ["guvenlik.hatali_giris_siniri"] = 5,
         ["guvenlik.kilit_dakika"] = 15,
+        // Belge girisi (155)
+        ["belge.satis.vade_gun"] = 30,
+        ["belge.alis.vade_gun"] = 30,
+        // e-Belge bayraklari KAPALI baslar: acik varsayilan, kurulumu
+        //   yapilmamis bir sistemde belgeleri GIB'e gondermeye calisirdi.
+        ["ebelge.aktif"] = 0,
+        ["ebelge.test_aktif"] = 0,
+        ["efatura.gelen_al"] = 0,
+        ["efatura.senaryo"] = 1,          // Temel
+        ["efatura.ihracat_gonder"] = 0,
+        ["earsiv.aktif"] = 0,
+        ["eirsaliye.aktif"] = 0,
+        ["eirsaliye.gelen_al"] = 0,
+        ["esmm.aktif"] = 0,
     };
 
     /// <summary>Sayisal ayarlarin kabul araligi (yoksa yalniz "0 veya buyuk" kurali).</summary>
@@ -76,6 +128,9 @@ public sealed class AyarDeposu
         //   10'un altinda sayfalama ekrani surekli istek atmaya cevirir.
         ["liste.sayfa_boyu"] = (10, 500),
         ["stok.negatif_davranis"] = (0, 2),          // serbest / uyar / engelle
+        ["efatura.senaryo"] = (1, 8),                // 1 Temel / 2 Ticari / 8 Ilac
+        ["belge.satis.vade_gun"] = (0, 3650),
+        ["belge.alis.vade_gun"] = (0, 3650),
         ["guvenlik.jwt_dakika"] = (5, 1440),
         ["guvenlik.refresh_gun"] = (1, 365),
         ["guvenlik.parola_min_uzunluk"] = (6, 64),

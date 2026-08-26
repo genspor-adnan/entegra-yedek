@@ -709,4 +709,18 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Kasa',
     ic: '💵', yetkiKodu: 'kasa_islem',
   },
+  {
+    // Satis belgesi ayarlari: Genel + e-Belge (e-Belge yalniz GIDEN belgede).
+    kaynak: 'satis-ayarlar', baslik: 'Satış Belgeleri', yol: 'Yonetim › Ayarlar › Satış Belgeleri',
+    ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Satış Belgeleri',
+    ic: '🧾', yetkiKodu: 'belge',
+  },
+  {
+    // Alis belgesi ayarlari: yalniz Genel - alis faturasini GIB'e biz gondermeyiz.
+    kaynak: 'alis-ayarlar', baslik: 'Alış Belgeleri', yol: 'Yonetim › Ayarlar › Alış Belgeleri',
+    ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Alış Belgeleri',
+    ic: '📥', yetkiKodu: 'belge',
+  },
 ];
