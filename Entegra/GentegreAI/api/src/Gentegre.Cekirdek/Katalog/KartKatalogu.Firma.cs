@@ -66,6 +66,8 @@ public static partial class KartKatalogu
             // Kartin kendi kayit alanlari. Mockup'taki "Kayıt Bilgisi" kutusu
             //   (kayit tarihi / doluluk cubugu) ve "Faaliyet" kutusu kullanici
             //   karariyla ALINMADI.
+            new("varsayilan", "varsayilan", "mantik",
+                Baslik: "Varsayılan Şube", Grup: "Kimlik", AltGrup: "Kayıt"),
             new("firmaTuru", "firma_turu", "kod", KodListesi: "sube.firma_turu",
                 Baslik: "Firma Türü", Grup: "Kimlik", AltGrup: "Kayıt"),
             new("kod",   "kod",   "metin", EnFazlaUzunluk: 20,
@@ -76,8 +78,6 @@ public static partial class KartKatalogu
                 Baslik: "Mersis No", Grup: "Kimlik", AltGrup: "Kayıt"),
             new("naceKodu", "nace_kodu", "metin", EnFazlaUzunluk: 20,
                 Baslik: "NACE Kodu", Grup: "Kimlik", AltGrup: "Kayıt"),
-            new("varsayilan", "varsayilan", "mantik",
-                Baslik: "Varsayılan Şube", Grup: "Kimlik", AltGrup: "Kayıt"),
             new("aktif",      "aktif",      "kod", SabitKodlar: DurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik", AltGrup: "Kayıt"),
 
