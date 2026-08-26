@@ -14,7 +14,8 @@
 --  ve "firma bilgileri" odur - ayri bir firma tablosu acilmadi.
 --
 --  MOCKUP'TAKI EK ALANLAR: firma kimligi (tur, NACE, kurulus, sermaye, oda) ve
---  iletisim (KEP, GSM, 2. telefon). KEP e-Belge ile dogrudan ilgili.
+--  iletisim (KEP, GSM). KEP e-Belge ile dogrudan ilgili; telefon tek alan
+--  + GSM yeterli (kullanici).
 --
 --  MOCKUP'TA OLUP BILEREK ALINMAYANLAR (kullanici karari): "Yetkili / İmza",
 --  "Faaliyet" (sektor/SGK/calisan), "Kayıt Bilgisi" ve "Sevkiyat / Fatura
@@ -33,9 +34,7 @@ alter table public.sube
 
 -- ------------------------------------------------------------ iletisim -----
 alter table public.sube
-    add column if not exists telefon2         varchar(30)  not null default '',
     add column if not exists gsm              varchar(30)  not null default '',
-    add column if not exists muhasebe_eposta  varchar(120) not null default '',
     -- KEP: e-Belge ve resmi yazismada kullanilan kayitli elektronik posta.
     add column if not exists kep_adresi       varchar(120) not null default '',
     add column if not exists bolge            varchar(60)  not null default '';

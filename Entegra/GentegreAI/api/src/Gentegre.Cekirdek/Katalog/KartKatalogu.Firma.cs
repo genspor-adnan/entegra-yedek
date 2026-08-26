@@ -99,14 +99,10 @@ public static partial class KartKatalogu
 
             new("telefon", "telefon", "metin", EnFazlaUzunluk: 30,
                 Baslik: "Telefon", Grup: "Adres", AltGrup: "İletişim"),
-            new("telefon2", "telefon2", "metin", EnFazlaUzunluk: 30,
-                Baslik: "Telefon 2", Grup: "Adres", AltGrup: "İletişim"),
             new("gsm",      "gsm",      "metin", EnFazlaUzunluk: 30,
                 Baslik: "GSM", Grup: "Adres", AltGrup: "İletişim"),
             new("eposta",  "eposta",  "metin", EnFazlaUzunluk: 120,
                 Baslik: "E-posta", Grup: "Adres", AltGrup: "İletişim"),
-            new("muhasebeEposta", "muhasebe_eposta", "metin", EnFazlaUzunluk: 120,
-                Baslik: "Muhasebe E-postası", Grup: "Adres", AltGrup: "İletişim"),
             // KEP resmi bildirim adresi - e-Belge ve yasal yazismada kullanilir.
             new("kepAdresi", "kep_adresi", "metin", EnFazlaUzunluk: 120,
                 Baslik: "KEP Adresi", Grup: "Adres", AltGrup: "İletişim"),
