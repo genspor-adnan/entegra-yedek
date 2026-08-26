@@ -25,21 +25,11 @@ import { type AyarSatiri, type ListeSatiri } from '../api/sozlesme';
  *   - "Seri Kurallari" ve "Alan Eslestirme" gridleri - satirli tanimlar,
  *     ayar degil; kendi kartlarini isterler.
  *
- * Bolumler ALT SEKME (kullanici): alti bolum alt alta ~30 alan ediyordu, ekran
- * surekli kaydiriliyordu. Her belge turu kendi sekmesinde durur; entegrator
- * bilgisi ve test ortami ayri, cunku ikisi TUM turler icin ortaktir.
+ * ARTIK YALNIZ ANA SALTER: entegrator hesabi, seri kurallari, XSLT ve tur
+ * ayarlarinin tamami sube kartinin e-Belge sekmesine tasindi (kullanici) -
+ * e-Belge kurulumu tek yerde toplandi. Burada kalan `ebelge.aktif` firma
+ * genelidir: kapaliyken hicbir belge GIB'e gitmez.
  */
-const BOLUMLER = [
-  // Test ortami AYRI SEKME DEGIL (kullanici): Mükellef bilgisinin yanindaki
-  //   kutuda duruyor - ikisi birlikte "hangi kimlikle, hangi ortama" sorusunu
-  //   cevapliyor, ayri sekmelerde bakmak gerekiyordu.
-  { anahtar: 'baglanti',  baslik: 'Entegratör' },
-  { anahtar: 'efatura',   baslik: 'e-Fatura' },
-  { anahtar: 'earsiv',    baslik: 'e-Arşiv' },
-  { anahtar: 'eirsaliye', baslik: 'e-İrsaliye' },
-  { anahtar: 'esmm',      baslik: 'e-SMM' },
-] as const;
-
 export function EBelgeAyarlari({ ayarlar, yaz }: {
   ayarlar: AyarSatiri[];
   yaz(anahtar: string, deger: string): void | Promise<void>;
@@ -49,7 +39,6 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
     <AyarAlani anahtar={anahtar} etiket={etiket} ayarlar={ayarlar} onYaz={yaz} {...ek} />
   );
 
-  const [bolum, setBolum] = useState<string>('baglanti');
   /** Hangi subenin hangi entegratorle/ortamla gonderdigi - salt gorunum (171).
       Duzenleme sube kartinda; burada ozet olmasa kullanici ayar ekranina gelip
       "e-Belge nerede kuruluyor" sorusuna cevap bulamazdi. */
@@ -60,36 +49,23 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
   }, []);
   /**
    * ANA SALTER (kullanici): `ebelge.aktif` kapaliyken hicbir belge GIB'e
-   * gitmez - alt sekmelerdeki adresler, seriler ve tur bayraklari yazilabilir
+   * gitmez - sube kartindaki hesaplar, seriler ve tur bayraklari yazilabilir
    * ama HIC BIRI islemez. Kullanici saatlerce ayar doldurup "neden
    * gonderilmiyor" diye aramasin diye durum ustte yazili.
    */
   const anaSalter = ayarlar.find(a => a.anahtar === 'ebelge.aktif')?.deger === '1';
   return (
     <>
-      {/* Ikinci seviye sekme cubugu - ana sekmelerden (Genel / e-Belge) daha
-          kucuk cizilir ki hangisinin ust seviye oldugu karismasin. */}
-      <div className="katab alt">
-        {BOLUMLER.map(b => (
-          <div key={b.anahtar}
-               className={`kat${b.anahtar === bolum ? ' on' : ''}`}
-               onClick={() => setBolum(b.anahtar)}>
-            {b.baslik}
-          </div>
-        ))}
-      </div>
-
       {!anaSalter && (
         <div className="bilgi-kutusu" style={{ marginTop: 8 }}>
           <b>e-Belge kapalı.</b> Aşağıdaki ayarlar kaydedilir ama hiçbir belge
           GİB'e gönderilmez ve fatura/irsaliye numarası her zaman
-          <b> Belge No</b> şablonundan verilir. Açmak için <b>Entegratör</b>
-          sekmesindeki “e-Belge kullanımda” kutusunu işaretleyin.
+          <b> Belge No</b> şablonundan verilir. Açmak için aşağıdaki
+          “e-Belge kullanımda” kutusunu işaretleyin.
         </div>
       )}
 
-      {bolum === 'baglanti' && (
-        <>
+      <>
           <div className="kagrup">
             <div className="alan-izgara tek-sutun ayar-formu">
               {alan('ebelge.aktif', 'e-Belge kullanımda', { tip: 'mantik' })}
@@ -133,70 +109,15 @@ export function EBelgeAyarlari({ ayarlar, yaz }: {
               </table>
             )}
           </div>
-        </>
-      )}
-
-      {bolum === 'efatura' && (
-        <div className="kagrup">
-          <div className="alan-izgara tek-sutun ayar-formu">
-            {alan('efatura.gelen_al', 'Gelen faturaları al', { tip: 'mantik' })}
-            {alan('efatura.senaryo', 'Varsayılan senaryo', {
-              tip: 'secenek',
-              secenekler: [
-                { deger: '1', ad: 'Temel' },
-                { deger: '2', ad: 'Ticari' },
-                { deger: '8', ad: 'İlaç / Tıbbi Cihaz' },
-              ],
-            })}
-            {alan('efatura.ihracat_gonder', 'İhracat faturaları da gönderilsin', { tip: 'mantik' })}
-            {alan('efatura.uretim_url', 'Üretim servis adresi', { tip: 'metin', genis: true })}
-            {alan('efatura.test_url', 'Test servis adresi', { tip: 'metin', genis: true })}
-            {alan('efatura.sabit_notlar', 'Sabit notlar', { tip: 'uzunMetin' })}
-          </div>
-        </div>
-      )}
-
-      {bolum === 'earsiv' && (
-        <div className="kagrup">
-          <div className="alan-izgara tek-sutun ayar-formu">
-            {alan('earsiv.aktif', 'e-Arşiv aktif', { tip: 'mantik' })}
-            {alan('earsiv.uretim_url', 'Üretim (giden) adresi', { tip: 'metin', genis: true })}
-            {alan('earsiv.gelen_url', 'Üretim (gelen) adresi', { tip: 'metin', genis: true })}
-            {alan('earsiv.test_url', 'Test (giden) adresi', { tip: 'metin', genis: true })}
-            {alan('earsiv.sabit_notlar', 'Sabit notlar', { tip: 'uzunMetin' })}
-          </div>
-        </div>
-      )}
-
-      {bolum === 'eirsaliye' && (
-        <div className="kagrup">
-          <div className="alan-izgara tek-sutun ayar-formu">
-            {alan('eirsaliye.aktif', 'e-İrsaliye aktif', { tip: 'mantik' })}
-            {alan('eirsaliye.gelen_al', 'Gelen irsaliyeleri al', { tip: 'mantik' })}
-            {alan('eirsaliye.gib_alias', 'GİB portal adresi (alias)', { tip: 'metin', genis: true })}
-            {alan('eirsaliye.uretim_url', 'Üretim servis adresi', { tip: 'metin', genis: true })}
-            {alan('eirsaliye.test_url', 'Test servis adresi', { tip: 'metin', genis: true })}
-            {alan('eirsaliye.sabit_notlar', 'Sabit notlar', { tip: 'uzunMetin' })}
-          </div>
-        </div>
-      )}
-
-      {bolum === 'esmm' && (
-        <div className="kagrup">
-          <div className="alan-izgara tek-sutun ayar-formu">
-            {alan('esmm.aktif', 'e-SMM aktif', { tip: 'mantik' })}
-            {alan('esmm.uretim_url', 'Üretim servis adresi', { tip: 'metin', genis: true })}
-            {alan('esmm.test_url', 'Test servis adresi', { tip: 'metin', genis: true })}
-            {alan('esmm.sabit_notlar', 'Sabit notlar', { tip: 'uzunMetin' })}
-          </div>
-        </div>
-      )}
+      </>
 
       <div className="not">
-        <b>Seri Kuralları</b> ve <b>XSLT Şablonları</b> artık
-        <b> Yönetim › Firma Bilgileri › e-Belge</b> sekmesinde — ikisi de
-        mükellefin gönderim kurulumunun parçası. <b>Alan Eşleştirme</b> tablosu
-        henüz taşınmadı.
+        Entegratör hesabı, seri kuralları, XSLT şablonları ve tür ayarları
+        (e-Fatura · e-Arşiv · e-İrsaliye · e-SMM) artık
+        <b> Yönetim › Firma Bilgileri</b> → şubeyi açın →
+        <b> e-Belge</b> sekmesinde. Burada yalnızca <b>ana şalter</b> kaldı:
+        kapalıyken hiçbir belge GİB'e gitmez.
+        <b> Alan Eşleştirme</b> tablosu henüz taşınmadı.
       </div>
     </>
   );

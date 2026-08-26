@@ -5,14 +5,23 @@ import type { ListeSatiri } from '../api/sozlesme';
 import { GenForm } from '../bilesenler/GenForm';
 import { SeriKurallari } from '../bilesenler/ebelge/SeriKurallari';
 import { XsltSablonlari } from '../bilesenler/ebelge/XsltSablonlari';
+import { TurAyarlari, type EBelgeTuru } from '../bilesenler/ebelge/TurAyarlari';
 
 const SEKMELER = [
   { anahtar: 'subeler', baslik: 'Şube Tanımları' },
-  // Seri kurallari ve XSLT sablonlari Ayarlar'dan buraya tasindi (kullanici):
-  //   ikisi de mukellefin gonderim kurulumunun parcasi - entegrator hesabi,
-  //   mukellefiyet ve seriler ayni ekranda durur.
-  { anahtar: 'ebelge',  baslik: 'e-Belge' },
   { anahtar: 'depolar', baslik: 'Depolar' },
+] as const;
+
+/** Sube kartinin e-Belge sekmesindeki ALT sekmeler (kullanici). Genel = kartin
+    kendi alanlari; digerleri Ayarlar'dan tasinan bolumler. */
+const EBELGE_ALT = [
+  { anahtar: 'genel',     baslik: 'Genel' },
+  { anahtar: 'seri',      baslik: 'Seri Bilgileri' },
+  { anahtar: 'xslt',      baslik: 'XSLT' },
+  { anahtar: 'efatura',   baslik: 'e-Fatura' },
+  { anahtar: 'earsiv',    baslik: 'e-Arşiv Fatura' },
+  { anahtar: 'eirsaliye', baslik: 'e-İrsaliye' },
+  { anahtar: 'esmm',      baslik: 'e-SMM' },
 ] as const;
 
 type Sekme = typeof SEKMELER[number]['anahtar'];
@@ -42,6 +51,8 @@ export function FirmaBilgileri() {
   const [depolar, setDepolar] = useState<ListeSatiri[]>([]);
   /** Karti acan kayit: sayi = duzenle, 'yeni' = ekle, null = kart kapali. */
   const [kart, setKart] = useState<number | 'yeni' | null>(null);
+  /** e-Belge sekmesinin acik alt sekmesi (kart her acildiginda Genel'den baslar). */
+  const [ebelgeAlt, setEbelgeAlt] = useState<string>('genel');
   const [yukleniyor, setYukleniyor] = useState(true);
   const [hata, setHata] = useState<string | null>(null);
 
@@ -65,6 +76,37 @@ export function FirmaBilgileri() {
   useEffect(() => { void yukle(); }, [yukle]);
 
   const eksikSube = subeler.filter(s => String(s.ebelgeHazir ?? '') !== 'Tamam').length;
+
+  /**
+   * Kartin "e-Belge" sekmesine ALT SEKME cubugu takar (kullanici): Genel /
+   * Seri Bilgileri / XSLT / tur ayarlari. Genel kartin kendi alanlaridir
+   * (gonderici, mukellef hesabi, test ortami, mukellefiyet); digerleri
+   * Ayarlar ekranindan tasinan bolumler.
+   *
+   * YENI kayitta yalniz Genel calisir: seri/XSLT/tur ayarlari kartin id'sine
+   * bagli olmasa da, once subenin kaydedilmesi akisi anlasilir kiliyor.
+   */
+  const ebelgeSekmesi = (sekmeBasligi: string, icerik: React.ReactNode) => {
+    if (sekmeBasligi !== 'e-Belge') return icerik;
+    return (
+      <>
+        <div className="katab alt">
+          {EBELGE_ALT.map(b => (
+            <div key={b.anahtar}
+                 className={`kat${b.anahtar === ebelgeAlt ? ' on' : ''}`}
+                 onClick={() => setEbelgeAlt(b.anahtar)}>
+              {b.baslik}
+            </div>
+          ))}
+        </div>
+        {ebelgeAlt === 'genel' && icerik}
+        {ebelgeAlt === 'seri' && <SeriKurallari />}
+        {ebelgeAlt === 'xslt' && <XsltSablonlari />}
+        {(['efatura', 'earsiv', 'eirsaliye', 'esmm'] as EBelgeTuru[]).includes(ebelgeAlt as EBelgeTuru)
+          && <TurAyarlari tur={ebelgeAlt as EBelgeTuru} />}
+      </>
+    );
+  };
 
   return (
     <>
@@ -151,18 +193,6 @@ export function FirmaBilgileri() {
         </div>
       )}
 
-      {!yukleniyor && aktif === 'ebelge' && (
-        <>
-          <div className="not" style={{ marginBottom: 8 }}>
-            Entegratör hesabı, test ortamı ve mükellefiyet bilgileri
-            <b> şube kartının e-Belge sekmesinde</b>; aşağıdakiler tüm şubeler
-            için ortaktır.
-          </div>
-          <SeriKurallari />
-          <XsltSablonlari />
-        </>
-      )}
-
       {!yukleniyor && aktif === 'depolar' && (
         <div className="kagrup">
           <h6>Depolar</h6>
@@ -195,8 +225,9 @@ export function FirmaBilgileri() {
         <GenForm kaynak="sube" id={kart}
                  baslik={kart === 'yeni' ? 'Yeni Şube' : 'Firma / Şube'}
                  seritAlanlari={SERIT_ALANLARI}
-                 onKapat={() => setKart(null)}
-                 onKaydedildi={() => { setKart(null); void yukle(); }} />
+                 sekmeSarmalayici={ebelgeSekmesi}
+                 onKapat={() => { setKart(null); setEbelgeAlt('genel'); }}
+                 onKaydedildi={() => { setKart(null); setEbelgeAlt('genel'); void yukle(); }} />
       )}
     </>
   );

@@ -34,6 +34,10 @@ interface Props {
   id: number | 'yeni';
   baslik?: string;
   onKapat?(): void;
+  /** Bir GRUP sekmesinin icerigini sarmalar - ekran o sekmeye alt sekme cubugu
+      ya da ek bolum ekleyebilir (Firma Bilgileri'nde e-Belge sekmesi: Genel /
+      Seri / XSLT / tur ayarlari). Verilmezse sekme dogrudan cizilir. */
+  sekmeSarmalayici?(sekmeBasligi: string, icerik: React.ReactNode): React.ReactNode;
   /** Ust seritte kalacak alan adlari. Verilmezse "Kimlik" grubunun TAMAMI seritte
       (varsayilan davranis). Verilirse serit bunlarla sinirlanir, grubun kalani
       "Kimlik" sekmesine duser - kimlik alani cok olan kartlarda serit sismesin. */
@@ -83,7 +87,7 @@ interface Props {
  *  - Alan hatalari (`alanlar[]`) ilgili girdinin altina yazilir.
  *  - Detaylar FARK olarak gonderilir (eklenen / degisen / silinen), tam liste degil.
  */
-export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, onKaydedildi, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarmalayici, onKaydedildi, yerTutucuSekmeler,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
   const { kullanici } = useOturum();
@@ -583,7 +587,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, onKaydedil
         </div>
       )}
 
-      {aktif?.tur === 'grup' && meta && (
+      {aktif?.tur === 'grup' && meta && (() => {
+        const govde = (
         <KartGrupSekmesi
           aktif={aktif} kaynak={kaynak} id={id} yeniMi={yeniMi} meta={meta}
           salt={salt} personelGibiKart={personelGibiKart}
@@ -593,7 +598,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, onKaydedil
           resimYerTutucu={resimYerTutucu} gruplar={gruplar}
           altGruplaVar={altGruplaVar} renderAlanListesi={renderAlanListesi}
         />
-      )}
+        );
+        return sekmeSarmalayici ? sekmeSarmalayici(aktif.baslik, govde) : govde;
+      })()}
 
       {/* Personel'e ozel: "Özlük" kendi sekmesi ama TEK SATIR form (TekOzluk.tsx) -
           personel_ozluk 1:1, generic coklu-satir grid'e uymuyor (ik_karti.html). */}
