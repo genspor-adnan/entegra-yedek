@@ -23,13 +23,13 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",            "b.id",             "sayi",  "Id",          Varsayilan: false),
-            new("tur",           "b.tur",            "kod",   "Tur",         Hizalama: "orta"),
-            new("turAdi",        "bt.ad",            "metin", "Belge Türü"),
+            new("tur",           "b.tur",            "kod",   "Tur",         Hizalama: "orta", Genislik: 70),
+            new("turAdi",        "bt.ad",            "metin", "Belge Türü",  Genislik: 130),
             // F8: siparis/irsaliye ne kadari donusturuldu (0 acik / 1 kismi / 2 kapandi)
             new("kapanmaDurum",  "b.kapanma_durum",  "kod",   "Kapanma",     Hizalama: "orta", Varsayilan: false),
             new("tipi",          "b.tipi",           "kod",   "Tipi",        Hizalama: "orta", Varsayilan: false),
-            new("belgeSeri",     "b.belge_seri",     "metin", "Seri",        Varsayilan: false),
-            new("belgeNo",       "b.belge_no",       "metin", "Belge No"),
+            new("belgeSeri",     "b.belge_seri",     "metin", "Seri",        Genislik: 70, Varsayilan: false),
+            new("belgeNo",       "b.belge_no",       "metin", "Belge No",    Genislik: 155),
             // e-BELGE DURUMU ROZET: ham kod (0/1/11/51...) listede hicbir sey
             //   anlatmiyordu. Metin hem TURU hem ASAMAYI soyler; gonderilmis
             //   belge "✓" ile ve yesil rozetle ayrilir (163/164 kodlari).
@@ -44,9 +44,10 @@ public static partial class KaynakKatalogu
                 """,                             "metin", "e-Fatura", Hizalama: "orta",
                                                  Bicim: "rozet", Genislik: 110,
                                                  Siralanabilir: false, Filtrelenebilir: false),
-            new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",       Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm"),
+            new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",       Hizalama: "orta",
+                                                                Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
             new("tarafId",       "b.taraf_id",       "sayi",  "Cari Id",     Varsayilan: false),
-            new("tarafUnvan",    "b.taraf_unvan",    "metin", "Cari"),
+            new("tarafUnvan",    "b.taraf_unvan",    "metin", "Cari",        Genislik: 260),
             // KAYNAK / HEDEF: donusum zincirinin iki ucu (irsaliye listesindeki
             //   ile ayni). Kaynak baslik bagindan; hedef SATIR bagindan turer -
             //   bir belge birden fazla belgeye bolunebilir, numaralar birlestirilir.
@@ -66,14 +67,18 @@ public static partial class KaynakKatalogu
                 "           where ks.belge_id = b.id and hb.durum <> 2), '')",
                                                       "metin", "Hedef",       Genislik: 190,
                                                       Siralanabilir: false, Filtrelenebilir: false),
-            new("tarafVkno",     "b.taraf_vkno",     "metin", "VKN/TCKN",    Varsayilan: false),
-            new("matrah",        "b.matrah",         "para",  "Matrah",      Hizalama: "sag", Bicim: "#,##0.00"),
-            new("kdvTutari",     "b.kdv_tutari",     "para",  "KDV",         Hizalama: "sag", Bicim: "#,##0.00"),
-            new("genelToplam",   "b.genel_toplam",   "para",  "Genel Toplam",Hizalama: "sag", Bicim: "#,##0.00"),
+            new("tarafVkno",     "b.taraf_vkno",     "metin", "VKN/TCKN",    Genislik: 120, Varsayilan: false),
+            new("matrah",        "b.matrah",         "para",  "Matrah",      Hizalama: "sag",
+                                                                Bicim: "#,##0.00", Genislik: 120),
+            new("kdvTutari",     "b.kdv_tutari",     "para",  "KDV",         Hizalama: "sag",
+                                                                Bicim: "#,##0.00", Genislik: 110),
+            new("genelToplam",   "b.genel_toplam",   "para",  "Genel Toplam",Hizalama: "sag",
+                                                                Bicim: "#,##0.00", Genislik: 130),
             new("acikKapali",    "b.acik_kapali",    "kod",   "Acik/Kapali", Hizalama: "orta", Varsayilan: false),
-            new("durum",         "b.durum",          "kod",   "Durum",       Hizalama: "orta"),
-            new("vadeGun",       "b.vade_gun",       "sayi",  "Vade",        Hizalama: "sag", Varsayilan: false),
-            new("aciklama",      "b.aciklama",       "metin", "Aciklama",    Varsayilan: false),
+            new("durum",         "b.durum",          "kod",   "Durum",       Hizalama: "orta", Genislik: 90),
+            new("vadeGun",       "b.vade_gun",       "sayi",  "Vade",        Hizalama: "sag", Genislik: 80,
+                                                                Varsayilan: false),
+            new("aciklama",      "b.aciklama",       "metin", "Açıklama",    Genislik: 240, Varsayilan: false),
             // Alan yetkisine ornek: rol_alan_yetki'de 'belge.maliyetOrt' izin 0 ise
             //   bu kolon yanittan CIKARILIR ve /kolonlar listesinde de gorunmez.
             new("maliyetOrt",    "b.maliyet_ort",    "para",  "Ort. Maliyet",Hizalama: "sag",
