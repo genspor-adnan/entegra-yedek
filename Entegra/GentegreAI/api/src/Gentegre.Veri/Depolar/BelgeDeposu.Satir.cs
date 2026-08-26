@@ -18,11 +18,32 @@ namespace Gentegre.Veri.Depolar;
 public sealed partial class BelgeDeposu
 {
     /// <summary>
+    /// PL/pgSQL `raise exception` mesajini IS KURALI hatasina cevirir.
+    ///
+    /// Yoksa dogrulama mesaji ("... vergi/kimlik numarasi girilmemis") ham
+    /// PostgresException olarak 500'e dusuyor ve kullaniciya "Beklenmeyen bir
+    /// hata" diye gorunuyordu - yapmasi gerekeni soyleyen mesaj kayboluyordu.
+    /// P0001 = raise_exception (fonksiyonlarimizin bilerek attigi hata).
+    /// </summary>
+    private static async Task<T> IsKuraliCevirAsync<T>(Func<Task<T>> islem)
+    {
+        try { return await islem(); }
+        catch (PostgresException h) when (h.SqlState == "P0001")
+        {
+            throw GentegreHatasi.IsKurali(h.MessageText);
+        }
+    }
+
+    /// <summary>
     /// e-BELGE SIFIRLA (164) - Delphi `MenuSifirla`. Hazirlanmis belgeyi geri
     /// alir; GONDERILMIS belgede calismaz (numarasi GIB'e gitmistir).
     /// </summary>
-    public async Task<string> EBelgeSifirlaAsync(int belgeId, YazmaBaglami baglam,
+    public Task<string> EBelgeSifirlaAsync(int belgeId, YazmaBaglami baglam,
         CancellationToken iptal = default)
+        => IsKuraliCevirAsync(() => EBelgeSifirlaIcAsync(belgeId, baglam, iptal));
+
+    private async Task<string> EBelgeSifirlaIcAsync(int belgeId, YazmaBaglami baglam,
+        CancellationToken iptal)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
@@ -45,8 +66,12 @@ public sealed partial class BelgeDeposu
     /// e-BELGE SERI DEGISTIR (164) - Delphi `MenuSeriDegistir`. Seri
     /// verilmezse siradaki kurala gecer; yeni numara uretilir.
     /// </summary>
-    public async Task<(string Numara, string Seri)> EBelgeSeriDegistirAsync(int belgeId,
+    public Task<(string Numara, string Seri)> EBelgeSeriDegistirAsync(int belgeId,
         string? seri, YazmaBaglami baglam, CancellationToken iptal = default)
+        => IsKuraliCevirAsync(() => EBelgeSeriDegistirIcAsync(belgeId, seri, baglam, iptal));
+
+    private async Task<(string Numara, string Seri)> EBelgeSeriDegistirIcAsync(int belgeId,
+        string? seri, YazmaBaglami baglam, CancellationToken iptal)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
@@ -86,8 +111,12 @@ public sealed partial class BelgeDeposu
     /// UBL/XML BU ADIMDA URETILMEZ; belge kuyruga alinir, gonderim asamasi
     /// XML'i sonra kurar.
     /// </summary>
-    public async Task<(long EBelgeId, int BelgeTuru, string BelgeNo, string Seri, string Uyari)>
+    public Task<(long EBelgeId, int BelgeTuru, string BelgeNo, string Seri, string Uyari)>
         EBelgeHazirlaAsync(int belgeId, YazmaBaglami baglam, CancellationToken iptal = default)
+        => IsKuraliCevirAsync(() => EBelgeHazirlaIcAsync(belgeId, baglam, iptal));
+
+    private async Task<(long EBelgeId, int BelgeTuru, string BelgeNo, string Seri, string Uyari)>
+        EBelgeHazirlaIcAsync(int belgeId, YazmaBaglami baglam, CancellationToken iptal)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
