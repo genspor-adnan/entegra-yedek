@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
@@ -117,11 +117,14 @@ public sealed partial class BelgeDeposu
                    b.cikis_depo_id as "cikisDepoId", cd.ad as "cikisDepoAdi",
                    b.giris_depo_id as "girisDepoId", gd.ad as "girisDepoAdi",
                    b.satici_id as "saticiId", sc.unvan as "saticiAdi",
-                   b.teslim_sekli as "teslimSekli", b.vade_gun as "vadeGun",
-                   b.arac_plaka as "aracPlaka", b.sofor_ad as "soforAd",
-                   b.sofor_tckn as "soforTckn", b.teslim_eden_id as "teslimEdenId",
+                   b.vade_gun as "vadeGun",
+                   -- SEVKIYAT ayri tabloda (177): kaydi olmayan belgede gorunum
+                   --   bos deger dondurur, sozlesme (alan adlari) degismedi.
+                   sv.teslim_sekli as "teslimSekli",
+                   sv.arac_plaka as "aracPlaka", sv.sofor_ad as "soforAd",
+                   sv.sofor_tckn as "soforTckn", sv.teslim_eden_id as "teslimEdenId",
                    td.unvan as "teslimEdenAdi",
-                   b.teslim_alan_id as "teslimAlanId", ta.unvan as "teslimAlanAdi",
+                   sv.teslim_alan_id as "teslimAlanId", ta.unvan as "teslimAlanAdi",
                    b.proje_id as "projeId", b.efatura_durum as "efaturaDurum",
                    b.efatura_sonuc as "efaturaSonuc", b.senaryo, b.zarf_id as "zarfId",
                    b.gonderici_alias as "gondericiAlias",
@@ -139,8 +142,9 @@ public sealed partial class BelgeDeposu
               left join public.depo  cd on cd.id = b.cikis_depo_id
               left join public.depo  gd on gd.id = b.giris_depo_id
               left join public.taraf sc on sc.id = b.satici_id
-              left join public.taraf td on td.id = b.teslim_eden_id
-              left join public.taraf ta on ta.id = b.teslim_alan_id
+              join public.v_belge_sevkiyat sv on sv.belge_id = b.id
+              left join public.taraf td on td.id = sv.teslim_eden_id
+              left join public.taraf ta on ta.id = sv.teslim_alan_id
               left join public.belge kb on kb.id = b.kaynak_id and b.kaynak_tur = 30
               left join public.kasa_islem_turu kt on kt.kod = kb.tur
               left join lateral (

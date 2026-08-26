@@ -111,8 +111,13 @@ begin
         raise exception 'Belge tutarı sıfır; e-Belge hazırlanamaz.';
     end if;
     -- e-Irsaliyede sevk bilgisi zorunlu (Delphi: SevkBilgisiDogrula).
-    if b.tur = 14 and coalesce(btrim(b.arac_plaka), '') = ''
-       and coalesce(b.tasiyici_id, 0) = 0 then
+    --   Sevkiyat 177'de ayri tabloda; gorunum kaydi olmayan belgede de bos
+    --   deger dondurdugu icin kontrol tek satirda kaliyor.
+    if b.tur = 14
+       and coalesce(btrim((select sv.arac_plaka from public.v_belge_sevkiyat sv
+                            where sv.belge_id = b.id)), '') = ''
+       and coalesce((select sv.tasiyici_id from public.v_belge_sevkiyat sv
+                      where sv.belge_id = b.id), 0) = 0 then
         raise exception 'e-İrsaliyede taşıyıcı ya da araç plakası girilmeli (Taşıyıcı / Sevkiyat sekmesi).';
     end if;
 

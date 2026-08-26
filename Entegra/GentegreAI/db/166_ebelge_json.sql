@@ -113,6 +113,7 @@ declare
     v_tevk_alt   jsonb;
     v_iade_ref   jsonb;
     v_mail       text;
+    sv           record;   -- sevkiyat (177)
 begin
     select bl.*, e.id as e_belge_id, e.belge_turu as e_tur, e.belge_no as e_no,
            e.uuid as e_uuid, e.alici_alias, e.gonderici_alias,
@@ -140,6 +141,10 @@ begin
 
     select * into g from public.v_ebelge_gonderici
      where sube_id = coalesce(nullif(b.sube_id, 0), (select min(id) from public.sube));
+
+    -- Sevkiyat bilgileri ayri tabloda (177); kaydi olmayan belgede gorunum bos
+    --   deger dondurur, dolayisiyla ek kontrol gerekmiyor.
+    select * into sv from public.v_belge_sevkiyat where belge_id = p_belge_id;
 
     v_para := public.fn_ebelge_para_kodu(coalesce(nullif(b.belge_dovizi, ''), b.doviz_cinsi));
     v_uuid := coalesce(nullif(btrim(b.e_uuid), ''), gen_random_uuid()::text);
@@ -491,14 +496,35 @@ begin
                     'issueDate', to_char(coalesce(b.irsaliye_tarihi, b.belge_tarihi), 'YYYY-MM-DD'))));
         end if;
     else
-        -- e-Irsaliye: sevkiyat blogu. Tasima detayi (sofor/tasiyici) bizde
-        --   plaka disinda tutulmuyor; GIB plakayi yeterli sayar.
+        -- e-Irsaliye: sevkiyat blogu (177 tablosundan). GIB DriverPerson'da
+        --   ad ve SOYAD ayri ister; tek alanda tutulan "sofor_ad" son kelimeden
+        --   bolunur (aliciyla ayni kural, fn_ad_soyad_ayir).
         v_content := v_content || jsonb_build_object('shipment', jsonb_build_object(
             'id', 1,
             'goodsItems', jsonb_build_array(jsonb_build_object(
                 'currencyId', v_para, 'valueAmount', round(v_matrah, 2))),
-            'shipmentStages', jsonb_build_array(jsonb_strip_nulls(jsonb_build_object(
-                'licensePlateID', nullif(btrim(coalesce(b.arac_plaka, '')), '')))),
+            'shipmentStages', jsonb_build_array(
+                jsonb_strip_nulls(jsonb_build_object(
+                    'licensePlateID', nullif(sv.arac_plaka, '')))
+                || case when sv.sofor_ad <> '' then
+                       (select jsonb_build_object('driverPerson', jsonb_strip_nulls(
+                            jsonb_build_object(
+                                'firstName', a.ad,
+                                'familyName', nullif(a.soyad, ''),
+                                'title', 'Sürücü',
+                                -- GIB kimlik numarasini NationalityID'de tasir.
+                                'nationalityID', nullif(sv.sofor_tckn, ''))))
+                          from public.fn_ad_soyad_ayir(sv.sofor_ad) a)
+                   else '{}'::jsonb end
+                -- Nakliyeyi baska firma yapiyorsa carrierParty (kendi aracimizsa yok).
+                || case when sv.tasiyici_id is not null then
+                       (select jsonb_strip_nulls(jsonb_build_object('carrierParty',
+                            jsonb_build_object(
+                                'name', t.unvan,
+                                'identifier', nullif(regexp_replace(coalesce(t.vkno, ''), '\D', '', 'g'), ''),
+                                'schemeId', public.fn_ebelge_kimlik_semasi(t.vkno))))
+                          from public.taraf t where t.id = sv.tasiyici_id)
+                   else '{}'::jsonb end),
             'delivery', jsonb_build_object(
                 'deliveryAddress', jsonb_strip_nulls(jsonb_build_object(
                     'country', 'TR',

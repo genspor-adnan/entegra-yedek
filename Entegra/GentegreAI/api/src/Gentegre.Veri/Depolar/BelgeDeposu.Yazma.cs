@@ -30,13 +30,82 @@ public sealed partial class BelgeDeposu
         ["aciklama"] = "aciklama", ["ozelKod"] = "ozel_kod", ["senaryo"] = "senaryo",
         ["gondericiUnvan"] = "gonderici_unvan", ["gondericiVkno"] = "gonderici_vkno",
         ["gondericiAlias"] = "gonderici_alias", ["saticiId"] = "satici_id",
-        // Irsaliye karti (088): sevk bilgileri
-        ["teslimSekli"] = "teslim_sekli", ["merkezId"] = "merkez_id",
-        // 089 sevkiyat alanlari (e-Irsaliye UBL: plaka + sofor zorunlu)
+        ["merkezId"] = "merkez_id"
+    };
+
+    /// <summary>
+    /// SEVKIYAT alanlari 177'de `belge_sevkiyat` (1:1) tablosuna tasindi -
+    /// istek sozlesmesi AYNI kaldi, yalniz nereye yazildiklari degisti.
+    /// </summary>
+    private static readonly Dictionary<string, string> SevkiyatKolonlari = new(StringComparer.Ordinal)
+    {
+        ["teslimSekli"] = "teslim_sekli",
+        // e-Irsaliye UBL: plaka + sofor (ad ve TCKN) zorunlu.
         ["aracPlaka"] = "arac_plaka", ["soforAd"] = "sofor_ad", ["soforTckn"] = "sofor_tckn",
         ["tasiyiciId"] = "tasiyici_id", ["teslimEdenId"] = "teslim_eden_id",
         ["teslimAlanId"] = "teslim_alan_id"
     };
+
+    /// <summary>
+    /// Sevkiyat satirini yazar (upsert). SATIR YALNIZ DOLU BILGI VARSA acilir:
+    /// bos satir "sevkiyat girilmis" izlenimi verir ve irsaliye olmayan her
+    /// belge icin gereksiz kayit olusurdu. Duzenlemede bilgi tamamen
+    /// silinmisse satir da silinir.
+    /// </summary>
+    private async Task SevkiyatYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int belgeId, IDictionary<string, object?> belge, YazmaBaglami baglam,
+        CancellationToken iptal)
+    {
+        var kolonlar = new List<string>();
+        var degerler = new List<object?>();
+        var doluVar = false;
+
+        foreach (var (ad, kolon) in SevkiyatKolonlari)
+        {
+            if (!belge.TryGetValue(ad, out var deger)) continue;
+            kolonlar.Add(kolon);
+            degerler.Add(deger);
+            doluVar |= deger switch
+            {
+                null => false,
+                string m => m.Trim().Length > 0,
+                _ => Convert.ToDecimal(deger, CultureInfo.InvariantCulture) != 0,
+            };
+        }
+
+        if (kolonlar.Count == 0) return;               // istekte sevkiyat alani yok
+
+        if (!doluVar)
+        {
+            // Tum alanlar bosaltilmis: kaydi birak.
+            await using var sil = new NpgsqlCommand(
+                "delete from public.belge_sevkiyat where id = @p0", baglanti, islem);
+            sil.Parameters.AddWithValue("p0", belgeId);
+            await sil.ExecuteNonQueryAsync(iptal);
+            return;
+        }
+
+        var parametreler = new List<object?> { belgeId };
+        parametreler.AddRange(degerler);
+        var yerTutucular = Enumerable.Range(1, kolonlar.Count)
+            .Select(i => "@p" + i.ToString(CultureInfo.InvariantCulture)).ToList();
+        var guncelle = kolonlar.Select((k, i) => $"{k} = {yerTutucular[i]}").ToList();
+
+        parametreler.Add(baglam.KullaniciId);
+        var kullanici = "@p" + (parametreler.Count - 1).ToString(CultureInfo.InvariantCulture);
+
+        var sql = $"""
+            insert into public.belge_sevkiyat (id, {string.Join(", ", kolonlar)}, ekleyen)
+            values (@p0, {string.Join(", ", yerTutucular)}, {kullanici})
+            on conflict (id) do update
+               set {string.Join(", ", guncelle)},
+                   degistiren = {kullanici},
+                   degistirme_tarihi = now()::timestamp
+            """;
+
+        await using var komut = Komut(baglanti, islem, sql, parametreler);
+        await komut.ExecuteNonQueryAsync(iptal);
+    }
 
     private async Task<int> BelgeEkleAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         IDictionary<string, object?> belge, YazmaBaglami baglam, CancellationToken iptal)

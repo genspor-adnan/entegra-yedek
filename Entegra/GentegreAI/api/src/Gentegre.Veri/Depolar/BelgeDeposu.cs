@@ -435,6 +435,10 @@ public sealed partial class BelgeDeposu
             ? await BelgeGuncelleAsync(baglanti, islem, mevcutId, belge, baglam, iptal)
             : await BelgeEkleAsync(baglanti, islem, belge, baglam, iptal);
 
+        // SEVKIYAT ayri tabloda (177): plaka/sofor/tasiyici/teslim bilgileri.
+        //   Satir yalniz bilgi girilmisse acilir; bosaltilmissa silinir.
+        await SevkiyatYazAsync(baglanti, islem, belgeId, belge, baglam, iptal);
+
         // ------------------------------------------------------ 4) satirlar INSERT ----
         // Tur etkisi satirlardan ONCE okunur: stogu etkilemeyen bir belgede
         //   (siparis/teklif) satirin stok_durum_degis bayragi da 0 yazilmali -

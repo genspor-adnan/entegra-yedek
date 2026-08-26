@@ -99,7 +99,8 @@ public static partial class KaynakKatalogu
         Kaynak: """
             public.belge b
             left join public.depo  cd on cd.id = b.cikis_depo_id
-            left join public.taraf te on te.id = b.teslim_eden_id
+            join public.v_belge_sevkiyat sv on sv.belge_id = b.id
+            left join public.taraf te on te.id = sv.teslim_eden_id
             left join public.taraf sc on sc.id = b.satici_id
             left join public.belge kb on kb.id = b.kaynak_id and b.kaynak_tur = 30
             left join public.kasa_islem_turu kt2 on kt2.kod = kb.tur
@@ -146,9 +147,9 @@ public static partial class KaynakKatalogu
             new("kaynakBelgeNo", "kb.belge_no",      "metin", "Kaynak Belge No", Varsayilan: false),
             // Plaka ve sofor tek kolonda: mockup "07 ABC 145 / Hasan Celik" gosteriyor.
             new("aracSofor",
-                "case when btrim(coalesce(b.arac_plaka, '') || coalesce(b.sofor_ad, '')) = '' then '' " +
-                "else btrim(coalesce(b.arac_plaka, '')) || " +
-                "case when coalesce(b.sofor_ad, '') <> '' then ' / ' || b.sofor_ad else '' end end",
+                "case when btrim(sv.arac_plaka || sv.sofor_ad) = '' then '' " +
+                "else btrim(sv.arac_plaka) || " +
+                "case when sv.sofor_ad <> '' then ' / ' || sv.sofor_ad else '' end end",
                                                       "metin", "Araç / Şoför", Genislik: 170,
                                                       Varsayilan: false),
             // Teslim eden bos ise satis temsilcisi gosterilir (mockup'taki davranis).
@@ -180,14 +181,14 @@ public static partial class KaynakKatalogu
                                                       Varsayilan: false),
             new("genelToplam",   "b.genel_toplam",   "para",  "Tutar",     Hizalama: "sag", Bicim: "#,##0.00"),
             new("teslimSekli",
-                "case b.teslim_sekli when 1 then 'Alıcı adresine teslim' when 2 then 'Alıcı kendi aracıyla' " +
+                "case sv.teslim_sekli when 1 then 'Alıcı adresine teslim' when 2 then 'Alıcı kendi aracıyla' " +
                 "when 3 then 'Kargo / nakliye' when 4 then 'Depoda teslim' when 5 then 'Yurt dışı sevk' " +
                 "else 'Belirtilmemiş' end",
                                                       "metin", "Teslim Şekli", Hizalama: "orta", Varsayilan: false),
             new("irsaliyeTarihi","b.irsaliye_tarihi","tarih", "Sevk Zamanı", Hizalama: "orta",
                                                       Bicim: "dd.MM.yyyy HH:mm", Varsayilan: false),
-            new("aracPlaka",     "b.arac_plaka",     "metin", "Plaka",     Varsayilan: false),
-            new("soforAd",       "b.sofor_ad",       "metin", "Şoför",     Varsayilan: false),
+            new("aracPlaka",     "sv.arac_plaka",    "metin", "Plaka",     Varsayilan: false),
+            new("soforAd",       "sv.sofor_ad",      "metin", "Şoför",     Varsayilan: false),
             new("tur",           "b.tur",            "sayi",  "Tür Kodu",  Hizalama: "orta", Varsayilan: false),
             new("durumAdi",      "case b.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end",
                                                       "metin", "Durum",     Hizalama: "orta"),

@@ -196,8 +196,9 @@ public static partial class KaynakKatalogu
             public.belge b
             left join public.depo cd on cd.id = b.cikis_depo_id
             left join public.depo gd on gd.id = b.giris_depo_id
-            left join public.taraf te on te.id = b.teslim_eden_id
-            left join public.taraf ta on ta.id = b.teslim_alan_id
+            join public.v_belge_sevkiyat sv on sv.belge_id = b.id
+            left join public.taraf te on te.id = sv.teslim_eden_id
+            left join public.taraf ta on ta.id = sv.teslim_alan_id
             """,
         SabitKosul: "b.tur = 20",
         SubeKolonu: "b.sube_id",
@@ -230,7 +231,8 @@ public static partial class KaynakKatalogu
             public.belge b
             left join public.depo cd on cd.id = b.cikis_depo_id
             left join public.depo gd on gd.id = b.giris_depo_id
-            left join public.taraf ta on ta.id = b.teslim_alan_id
+            left join public.v_belge_sevkiyat sv on sv.belge_id = b.id
+            left join public.taraf ta on ta.id = sv.teslim_alan_id
             """,
         SabitKosul: "b.tur = 105",
         SubeKolonu: "b.sube_id",
