@@ -315,6 +315,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   Kart YOK - belge bizim degil; cift tik gonderenin goruntusunu acar.
     kaynak: 'gelen-belge', rota: 'gelen-belge', baslik: 'Gelen Kutusu',
     yol: 'Alis › Gelen Kutusu', aksiyonEkrani: 'gelen-belge-liste',
+    ebelgeMenusu: 'E-Fatura',
     toplam: ['tutar'],
     cipler: [
       { ad: 'Yanıt Bekleyen', filtre: { alan: 'durum', op: 'esit', deger: 100 } },

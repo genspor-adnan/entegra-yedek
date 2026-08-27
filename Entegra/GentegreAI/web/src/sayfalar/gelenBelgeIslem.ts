@@ -1,6 +1,6 @@
 import { api } from '../api/istemci';
 import { mesaj, metinSor, onay } from '../bilesenler/mesaj';
-import { hataMetni, type ListeSatiri } from '../api/sozlesme';
+import { hataMetni, type EBelgeMesaji, type ListeSatiri } from '../api/sozlesme';
 import { dosyaIndir } from './ebelgeIslem';
 
 /**
@@ -54,12 +54,61 @@ function kacir(m: string) {
  * switch'ine devam eder.
  */
 export async function gelenBelgeAksiyonu(
-  kod: string, satir: ListeSatiri | null, yenile: () => void): Promise<boolean> {
+  kod: string, satir: ListeSatiri | null, yenile: () => void,
+  mesajGoster?: (m: { belgeNo: string; satirlar: EBelgeMesaji[] }) => void): Promise<boolean> {
 
   const id = satir ? Number(satir.id) : 0;
   const no = String(satir?.belgeNo ?? id);
 
+  /** Goruntuyu yeni sekmede acar; `yazdir` ise yazdirma penceresini tetikler
+      (PDF, tarayicinin "PDF olarak kaydet" secenegiyle alinir). */
+  const goster = async (yazdir: boolean) => {
+    const y = await api.gelenBelgeUbl(id);
+    const pencere = window.open('', '_blank');
+    if (!pencere) { mesaj('Tarayıcı yeni sekmeyi engelledi; açılır pencere iznini verin.'); return }
+    pencere.document.write(goruntuUret(y.ubl));
+    pencere.document.close();
+    if (yazdir) pencere.setTimeout(() => pencere.print(), 400);
+    yenile();                                     // "Okundu" isaretlendi
+  };
+
   switch (kod) {
+    // e-FATURA KOMBOSU: gelen belgede id BELGE degil e_belge kaydidir; bu
+    //   yuzden giden taraftaki ebelgeCiktisi'ne DUSMEZ, buraya gelir.
+    case 'ebelge.onizle':
+      if (!id) return true;
+      try { await goster(false) } catch (h) { mesaj(hataMetni(h)) }
+      return true;
+
+    case 'ebelge.pdf':
+      if (!id) return true;
+      try { await goster(true) } catch (h) { mesaj(hataMetni(h)) }
+      return true;
+
+    case 'ebelge.html':
+      if (!id) return true;
+      try {
+        const y = await api.gelenBelgeUbl(id);
+        dosyaIndir(goruntuUret(y.ubl), `${no}.html`, 'text/html;charset=utf-8');
+      } catch (h) { mesaj(hataMetni(h)) }
+      return true;
+
+    case 'ebelge.xml':
+      if (!id) return true;
+      try {
+        const y = await api.gelenBelgeUbl(id);
+        dosyaIndir(y.ubl, `${no}.xml`, 'application/xml;charset=utf-8');
+      } catch (h) { mesaj(hataMetni(h)) }
+      return true;
+
+    case 'ebelge.mesajlar':
+      if (!id) return true;
+      try {
+        const y = await api.gelenBelgeMesajlar(id);
+        mesajGoster?.({ belgeNo: no, satirlar: y.mesajlar });
+      } catch (h) { mesaj(hataMetni(h)) }
+      return true;
+
     case 'gelen.yenile':
       try {
         const y = await api.gelenKutuYenile();

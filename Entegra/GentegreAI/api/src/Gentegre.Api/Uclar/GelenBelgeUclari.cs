@@ -25,6 +25,11 @@ public static class GelenBelgeUclari
         public string? Aciklama { get; set; }
     }
 
+    public sealed class IptalIstegi
+    {
+        public string? Gerekce { get; set; }
+    }
+
     private static Gentegre.Veri.Depolar.YazmaBaglami Baglam(dynamic baglam, HttpContext ctx)
         => new(baglam.KullaniciId, (int?)baglam.SubeId,
                ctx.Connection.RemoteIpAddress?.ToString() ?? "");
@@ -68,6 +73,36 @@ public static class GelenBelgeUclari
             return Results.Ok(new { ubl = xml, izlemeNo = baglam.IzlemeNo });
         });
 
+        // GET /api/gelen-belge/{id}/mesajlar - gelen belgenin gecmisi (189).
+        grup.MapGet("/{id:long}/mesajlar", async (
+            long id, BaglamCozucu cozucu, Gentegre.Veri.VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var komut = new Npgsql.NpgsqlCommand(
+                "select sira, tarih, olay, durum, kod, aciklama from public.fn_gelen_mesajlar(@p0) order by sira",
+                baglanti);
+            komut.Parameters.AddWithValue("p0", id);
+
+            var liste = new List<object>();
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            while (await o.ReadAsync(iptal))
+                liste.Add(new
+                {
+                    sira = o.GetInt32(0),
+                    tarih = o.IsDBNull(1) ? (DateTime?)null : o.GetDateTime(1),
+                    olay = o.IsDBNull(2) ? "" : o.GetString(2),
+                    durum = o.IsDBNull(3) ? "" : o.GetString(3),
+                    kod = o.IsDBNull(4) ? "" : o.GetString(4),
+                    aciklama = o.IsDBNull(5) ? "" : o.GetString(5),
+                });
+
+            return Results.Ok(new { mesajlar = liste, izlemeNo = baglam.IzlemeNo });
+        });
+
         // POST /api/gelen-belge/{id}/yanit - kabul / red.
         //   KABUL edilen belge ALIS FATURASINA da aktarilir (kullanici: "onaydan
         //   sonra ana listeye gecsin"): kutuda kalan belge muhasebeye girmez,
@@ -102,6 +137,20 @@ public static class GelenBelgeUclari
             return Results.Ok(new { s.Basarili, mesaj = s.Mesaj + ek, belgeId,
                                     izlemeNo = baglam.IzlemeNo });
         });
+
+        // POST /api/belge/{id}/ebelge-iptal - GIDEN belge iptali / iptal talebi (188).
+        //   Kutu ucu degil ama ayni servis sinifi; e-Belge disa bakan tarafi
+        //   tek yerde toplandi.
+        yol.MapPost("/api/belge/{id:int}/ebelge-iptal", async (
+            int id, IptalIstegi istek, BaglamCozucu cozucu, EBelgeGelen gelen,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Degistir);
+            var s = await gelen.IptalEtAsync(id, istek.Gerekce ?? "", baglam.SubeId,
+                                             baglam.KullaniciId, iptal);
+            return Results.Ok(new { s.Basarili, s.YeniDurum, s.Mesaj, izlemeNo = baglam.IzlemeNo });
+        }).RequireAuthorization();
 
         // POST /api/gelen-belge/{id}/aktar - alis faturasi olustur.
         //   Yanit gerektirmeyen belgeler (temel fatura, e-Arsiv) ve kabulde

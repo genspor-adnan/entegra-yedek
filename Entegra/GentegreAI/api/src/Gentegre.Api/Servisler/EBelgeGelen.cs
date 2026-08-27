@@ -384,4 +384,97 @@ public sealed class EBelgeGelen(VeriKaynagi veri, IHttpClientFactory istemciUret
 
         return new YanitSonucu(true, kabul ? "Belge kabul edildi." : "Belge reddedildi.");
     }
+
+    // ------------------------------------------------------------ iptal ----
+    public sealed record IptalSonucu(bool Basarili, short YeniDurum, string Mesaj);
+
+    /// <summary>
+    /// GIDEN belgeyi iptal et (188).
+    ///   e-ARSIV  : entegrator uzerinden dogrudan iptal (DELETE .../earchives/cancel).
+    ///   e-FATURA : tek tarafli iptal YOK - GIB iptal portalina TALEP gonderilir;
+    ///              alici onaylayana kadar belge gecerli kalir.
+    /// Hangisinin gecerli oldugu ve belgenin uygun asamada olup olmadigi
+    /// veritabaninda karara baglanir (fn_ebelge_iptal_edilebilir) - arayuz ile
+    /// sunucu ayni cevabi versin.
+    /// </summary>
+    public async Task<IptalSonucu> IptalEtAsync(int belgeId, string gerekce, int? subeId,
+                                                int kullaniciId, CancellationToken iptal = default)
+    {
+        if (string.IsNullOrWhiteSpace(gerekce))
+            throw GentegreHatasi.Dogrulama("İptal gerekçesi zorunlu.");
+
+        await using var baglanti = await veri.AcAsync(iptal);
+
+        short yeniDurum;
+        await using (var kural = new NpgsqlCommand(
+            "select uygun, yeni_durum, sebep from public.fn_ebelge_iptal_edilebilir(@p0)", baglanti))
+        {
+            kural.Parameters.AddWithValue("p0", belgeId);
+            await using var o = await kural.ExecuteReaderAsync(iptal);
+            if (!await o.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi();
+            if (!o.GetBoolean(0)) throw GentegreHatasi.IsKurali(o.GetString(2));
+            yeniDurum = o.GetInt16(1);
+        }
+
+        string uuid = "", belgeNo = "";
+        await using (var oku = new NpgsqlCommand("""
+            select coalesce(uuid, ''), coalesce(belge_no, '')
+              from public.e_belge
+             where belge_id = @p0 and yon = 1
+             order by id desc limit 1
+            """, baglanti))
+        {
+            oku.Parameters.AddWithValue("p0", belgeId);
+            await using var o = await oku.ExecuteReaderAsync(iptal);
+            if (await o.ReadAsync(iptal)) { uuid = o.GetString(0); belgeNo = o.GetString(1); }
+        }
+        if (uuid.Length == 0)
+            throw GentegreHatasi.IsKurali("Belgenin UUID'si yok; iptal edilemez.");
+
+        var hesap = await HesapOkuAsync(baglanti, subeId, iptal);
+        var istemci = istemciUretici.CreateClient("ebelge");
+        var jeton = await JetonAlAsync(istemci, hesap, iptal);
+
+        // e-Arsiv: DELETE + [{uuid}] · e-Fatura: iptal talebi ucu.
+        var arsiv = yeniDurum == 21;
+        var yol = arsiv ? "/v2/earchives/cancel" : "/v2/einvoices/cancel-request";
+        using var istek = new HttpRequestMessage(
+            arsiv ? HttpMethod.Delete : HttpMethod.Post, hesap.Url.TrimEnd('/') + yol)
+        {
+            Content = new StringContent(
+                JsonSerializer.Serialize(new[] { new { uuid, description = gerekce } }),
+                Encoding.UTF8, "application/json"),
+        };
+        istek.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jeton);
+
+        using var yanit = await istemci.SendAsync(istek, iptal);
+        var govde = await yanit.Content.ReadAsStringAsync(iptal);
+        if (!yanit.IsSuccessStatusCode)
+        {
+            // Entegratorun "uygun durumda degildir" cevabi tek basina anlamsiz:
+            //   e-Arsiv ancak GIB'e RAPORLANDIKTAN sonra iptal edilebilir
+            //   (raporlanmamis belgede iptal degil "Hazırı Geri Al" gecerlidir).
+            //   Sebebi kullaniciya burada soyluyoruz, ham cevabi da birakiyoruz.
+            var ek = govde.Contains("uygun durumda", StringComparison.OrdinalIgnoreCase)
+                     ? " Belge büyük olasılıkla henüz GİB'e raporlanmadı; " +
+                       "e-Arşiv iptali ancak raporlandıktan sonra yapılabilir."
+                     : "";
+            throw GentegreHatasi.IsKurali(
+                $"İptal edilemedi (HTTP {(int)yanit.StatusCode}).{ek} " +
+                (govde.Length > 300 ? govde[..300] : govde));
+        }
+
+        await using var yaz = new NpgsqlCommand(
+            "select public.fn_ebelge_iptal_yaz(@p0, @p1, @p2, @p3)", baglanti);
+        yaz.Parameters.AddWithValue("p0", belgeId);
+        yaz.Parameters.AddWithValue("p1", yeniDurum);
+        yaz.Parameters.AddWithValue("p2", gerekce);
+        yaz.Parameters.AddWithValue("p3", kullaniciId);
+        await yaz.ExecuteNonQueryAsync(iptal);
+
+        return new IptalSonucu(true, yeniDurum,
+            yeniDurum == 21
+                ? $"{belgeNo} iptal edildi."
+                : $"{belgeNo} için iptal talebi gönderildi; alıcı onaylayana kadar belge geçerlidir.");
+    }
 }

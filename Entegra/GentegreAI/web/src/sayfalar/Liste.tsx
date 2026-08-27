@@ -141,6 +141,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       // e-BELGE CIKTILARI (Ön İzle / PDF / HTML / XML / Mesaj Geçmişi) ayri
       //   modulde (180 refaktor): hepsi tek belge id'si alip cikti uretiyor,
       //   listeden bagimsiz. Ele aldiysa switch'e hic girmeyiz.
+      // GELEN KUTUSU once: oradaki id e_belge kaydidir, belge id'si degil -
+      //   ayni "ebelge.*" kodlari farkli uclara gider.
+      if (tanim.kaynak === 'gelen-belge'
+          && await gelenBelgeAksiyonu(kod, satir ?? null, () => setYenile(t => t + 1),
+                                      setEBelgeMesajlari)) return;
+
       if (satir && await ebelgeCiktisi(kod, satir, setEBelgeMesajlari,
                                        () => setYenile(t => t + 1))) return;
 
@@ -277,6 +283,27 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           } catch (h) { mesaj(hataMetni(h)) }
           return;
         }
+        // e-BELGE IPTALI (188): e-Arsivde dogrudan iptal, e-Faturada GIB'e
+        //   iptal TALEBI. Ikisi de geri alinamaz; gerekce zorunlu.
+        case 'ebelge.iptal': {
+          if (!satir) return;
+          const belgeNo = String(satir.belgeNo ?? satir.id);
+          if (!await onay(`"${belgeNo}" için e-Belge iptali başlatılacak.
+
+`
+                        + 'e-Arşiv doğrudan iptal edilir; e-Faturada GİB’e iptal talebi '
+                        + 'gönderilir ve alıcı onayına kalır. Geri alınamaz. Onaylıyor musunuz?',
+                          true)) return;
+          const gerekce = await metinSor('İptal gerekçesi (zorunlu):', '');
+          if (gerekce === null) return;
+          if (!gerekce.trim()) { mesaj('İptal gerekçesi zorunlu.'); return }
+          try {
+            const y = await api.belgeEBelgeIptal(Number(satir.id), gerekce);
+            mesaj(y.mesaj);
+            setYenile(t => t + 1);
+          } catch (h) { mesaj(hataMetni(h)) }
+          return;
+        }
         // BELGE SIL (181): izi olmayan belgede mumkun; kesin/izli belgede
         //   aksiyon zaten pasif ve sebebi title'da. Sunucu son sozu soyler.
         case 'belge.sil': {
@@ -377,10 +404,6 @@ Bu işlem geri alınamaz. `
         setKasaTuru(t);
         return;
       }
-
-      // GELEN e-BELGE (187): kutu aksiyonlari ayri dosyada; isledi ise burada biter.
-      if (kod.startsWith('gelen.')
-          && await gelenBelgeAksiyonu(kod, satir ?? null, () => setYenile(t => t + 1))) return;
 
       if (kod.endsWith('.yeni') && tanim.kartYolu) git(`${tanim.kartYolu}/yeni`);
       // SIL gercekten SILER: eskiden karti aciyordu ve kullanici "sildim" sanip

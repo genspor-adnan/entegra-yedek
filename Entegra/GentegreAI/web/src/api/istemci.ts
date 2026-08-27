@@ -337,10 +337,20 @@ export const api = {
     gonder<{ basarili: boolean; mesaj: string; belgeId: number | null }>(
       `/api/gelen-belge/${id}/yanit`, { kabul, aciklama }),
 
+  /** Gelen belgenin gecmisi (189): kutuya dusme, zarf, indirme, yanit, aktarim. */
+  gelenBelgeMesajlar: (id: number) =>
+    istek<{ mesajlar: EBelgeMesaji[] }>(`/api/gelen-belge/${id}/mesajlar`),
+
   /** Gelen belgeyi ALIS FATURASINA aktarir (187). */
   gelenBelgeAktar: (id: number) =>
     gonder<{ belgeId: number; belgeNo: string; satirSayisi: number;
              eslesenStok: number; mesaj: string }>(`/api/gelen-belge/${id}/aktar`, {}),
+
+  /** GIDEN belgeyi iptal eder / iptal talebi acar (188). Hangisi oldugunu
+      sunucu belirler: e-Arsiv dogrudan iptal, e-Fatura talep. */
+  belgeEBelgeIptal: (id: number, gerekce: string) =>
+    gonder<{ basarili: boolean; yeniDurum: number; mesaj: string }>(
+      `/api/belge/${id}/ebelge-iptal`, { gerekce }),
 
   /** e-Belgeyi geri al (164): kayit silinir, belge yeniden hazirlanabilir. */
   belgeEBelgeSifirla: (id: number) =>
