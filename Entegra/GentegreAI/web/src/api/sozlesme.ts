@@ -15,6 +15,9 @@ export interface HataGovdesi {
   cakisanAlanlar?: string[];
   guncelDeger?: Record<string, unknown>;
   engel?: { tablo: string; adet: number };
+  /** Excel iceri alma (207): satir numarali dogrulama hatalari. */
+  satirHatalari?: { satirNo: number; alan: string; mesaj: string }[];
+  toplamHata?: number;
 }
 
 /** Sunucudan donen hata; istemcide bu tip firlatilir. */

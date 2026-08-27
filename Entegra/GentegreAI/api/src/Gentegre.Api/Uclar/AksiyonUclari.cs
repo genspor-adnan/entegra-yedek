@@ -65,9 +65,14 @@ public static class AksiyonUclari
         AksiyonTanimi aksiyon, IstekBaglami baglam, long? kayitId,
         IDictionary<string, object?>? belge)
     {
-        // Yazma gerektiren aksiyon, salt okuma subesinde calismaz (kullanici_sube.yazma = 0)
+        // Yazma gerektiren aksiyon, salt okuma subesinde calismaz (kullanici_sube.yazma = 0).
+        //   Disa aktarim OKUMADIR ve istisna tutulur - onceki kod `aksiyon.Kod`a
+        //   bakiyordu ama "veri.disa-aktar" aksiyonun YETKISIDIR (Kod
+        //   "genel.yazdir"), istisna hic eslesmiyor ve salt-okuma subede CSV
+        //   kaydetme pasif kaliyordu. Iceri alma (veri.iceri-al) YAZMADIR,
+        //   bilerek istisna DEGILDIR.
         var yazmaGerekir = aksiyon.Islem != Cekirdek.Yetki.Islem.Gor || aksiyon.AksiyonYetkisi is not null;
-        if (yazmaGerekir && !baglam.SubeYazma && aksiyon.Kod != "veri.disa-aktar")
+        if (yazmaGerekir && !baglam.SubeYazma && aksiyon.AksiyonYetkisi != "veri.disa-aktar")
             return (false, "Bu subede yalnizca goruntuleme yetkiniz var.");
 
         if (aksiyon.KayitGerekir && kayitId is null)

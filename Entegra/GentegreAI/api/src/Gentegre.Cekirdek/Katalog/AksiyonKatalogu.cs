@@ -86,6 +86,15 @@ public static class AksiyonKatalogu
                 new("fiyat-listesi.satirlar", "Satırları Aç", "fiyat",
                     Hedef: "sagtus,palet", KaynakKodu: "fiyat_listesi", Islem: Islem.Gor,
                     KayitGerekir: true, Sira: 45),
+                // EXCEL AKISI (207): sablon indir -> Excel'de doldur -> geri yukle.
+                //   Iceri alma jenerik `veri.iceri-al` yetkisine bagli - stok/cari
+                //   iceri almalari da ayni yetkiyi kullanacak.
+                new("fiyat-listesi.iceri-al", "⬆ Excel'den İçeri Al", "fiyat",
+                    Hedef: "araccubugu,sagtus,palet", AksiyonYetkisi: "veri.iceri-al",
+                    KayitGerekir: true, Sira: 46),
+                new("fiyat-listesi.sablon", "⬇ Excel Şablonu", "fiyat",
+                    Hedef: "sagtus,palet", KaynakKodu: "fiyat_listesi", Islem: Islem.Gor,
+                    KayitGerekir: true, Sira: 47),
             ],
 
             // Satir listesi salt gorunum: satirlar listeden degil KARTTAN

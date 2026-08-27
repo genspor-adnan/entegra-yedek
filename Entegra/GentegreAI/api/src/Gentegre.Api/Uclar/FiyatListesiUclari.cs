@@ -1,4 +1,5 @@
 ﻿using Gentegre.Api.AraKatman;
+using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -171,5 +172,133 @@ public static class FiyatListesiUclari
 
             return Results.Ok(new { degisen, ayni, bulunamayan = yok, listeAdi, mesaj });
         }).WithTags("FiyatListesi").RequireAuthorization();
+
+        // ------------------------------------------------------------ sablon ----
+        // Excel sablonu. `dolu=1` MEVCUT satirlari doldurur: gercek akis
+        //   "indir -> Excel'de duzelt -> geri yukle"dir ve disari verilenle
+        //   iceri alinan AYNI sutun duzenini kullanir (tek sozlesme).
+        yol.MapGet("/api/fiyat-listesi/{id:int}/sablon", async (
+            int id, int? dolu, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("fiyat_listesi", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var liste = await ListeBulAsync(baglanti, id, baglam, iptal);
+            if (liste is null) return Results.NotFound();
+
+            byte[] icerik;
+            if (dolu == 1)
+            {
+                var satirlar = new List<IReadOnlyList<object?>>();
+                await using var komut = baglanti.Komut("""
+                    select case when v.stok_id is not null then v.kod else '' end,
+                           case when v.hizmet_id is not null then v.kod else '' end,
+                           v.ad, v.fiyat, v.doviz_cinsi,
+                           case when v.kdv_dahil = 1 then 'Dahil' else 'Hariç' end,
+                           coalesce(kd.ad, ''),
+                           case when v.durum = 1 then 'Aktif' else 'Pasif' end
+                      from public.v_fiyat_listesi_satir v
+                      left join public.kod_liste kl on kl.kod = 'stok.ana_birim'
+                      left join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = v.birim
+                     where v.liste_id = @p0
+                     order by v.kod
+                    """, null, id);
+                await using var o = await komut.ExecuteReaderAsync(iptal);
+                while (await o.ReadAsync(iptal))
+                    satirlar.Add(new object?[]
+                    {
+                        o.GetString(0), o.GetString(1), o.GetString(2), o.GetDecimal(3),
+                        o.GetString(4), o.GetString(5), o.GetString(6), o.GetString(7),
+                    });
+                icerik = ExcelOkuma.Yaz("Fiyat Listesi", FiyatListesiIceriAl.SablonBasliklari, satirlar);
+            }
+            else
+            {
+                icerik = FiyatListesiIceriAl.BosSablon();
+            }
+
+            var dosyaAdi = (dolu == 1 ? liste.Value.Ad : "Fiyat Listesi Şablonu") + ".xlsx";
+            return Results.File(icerik,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", dosyaAdi);
+        }).WithTags("FiyatListesi").RequireAuthorization();
+
+        // ---------------------------------------------------------- iceri al ----
+        // Excel'den satir alma. Iki yetki birden: `veri.iceri-al` (jenerik kapi)
+        //   + listenin kendisinde Degistir - kapi tek basina yazdirmaz.
+        yol.MapPost("/api/fiyat-listesi/{id:int}/iceri-al", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("veri.iceri-al");
+            baglam.YetkiIste("fiyat_listesi", Islem.Degistir);
+
+            var form = await ctx.Request.ReadFormAsync(iptal);
+            var dosya = form.Files.GetFile("dosya")
+                ?? throw GentegreHatasi.Dogrulama("Dosya gönderilmedi.",
+                       new AlanHatasi("dosya", "Bir .xlsx dosyası seçin."));
+            if (dosya.Length > ExcelOkuma.AzamiBoyut)
+                throw GentegreHatasi.Dogrulama(
+                    $"Dosya {ExcelOkuma.AzamiBoyut / 1024 / 1024} MB sınırını aşıyor.",
+                    new AlanHatasi("dosya", "Dosya çok büyük."));
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var liste = await ListeBulAsync(baglanti, id, baglam, iptal);
+            if (liste is null) return Results.NotFound();
+
+            ExcelOkuma.Sayfa sayfa;
+            await using (var akis = dosya.OpenReadStream())
+                sayfa = ExcelOkuma.Oku(akis);
+
+            var sonuc = await FiyatListesiIceriAl.CalistirAsync(
+                baglanti, id, liste.Value.KdvDahil, sayfa, baglam.KullaniciId, iptal);
+
+            if (sonuc.ToplamHata > 0)
+            {
+                // YA HEP YA HIC: hicbir sey yazilmadi; kullanici Excel'i
+                //   duzeltip ayni dosyayi yeniden yukler.
+                var govde = new
+                {
+                    hata = new
+                    {
+                        kod = "DOGRULAMA",
+                        mesaj = $"{sonuc.ToplamHata} satır hatalı; HİÇBİR satır alınmadı. " +
+                                "Hataları düzeltip dosyayı yeniden yükleyin.",
+                        izlemeNo = baglam.IzlemeNo,
+                        satirHatalari = sonuc.Hatalar,
+                        toplamHata = sonuc.ToplamHata,
+                    },
+                };
+                return Results.Json(govde, statusCode: 422);
+            }
+
+            var mesaj = $"\"{liste.Value.Ad}\": {sonuc.Eklenen} yeni, {sonuc.Guncellenen} güncellenen satır " +
+                        $"({dosya.FileName}).";
+            await log.YazAsync(baglanti, null!, LogIslemi.Degistir, 924, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new Dictionary<string, string> { ["iceriAl"] = mesaj }, iptal: iptal);
+
+            return Results.Ok(new { sonuc.Eklenen, sonuc.Guncellenen, sonuc.Toplam, mesaj });
+        }).WithTags("FiyatListesi").RequireAuthorization();
+    }
+
+    /// <summary>
+    /// Liste basligini okur ve SUBE SIZINTISINI keser: baska subenin listesi
+    /// yokmus gibi (404) davranir. Uc uctan cagrilan ortak kontrol.
+    /// </summary>
+    private static async Task<(string Ad, short KdvDahil)?> ListeBulAsync(
+        Npgsql.NpgsqlConnection baglanti, int id, IstekBaglami baglam, CancellationToken iptal)
+    {
+        await using var komut = baglanti.Komut(
+            "select ad, kdv_dahil, coalesce(sube_id, 0) from public.fiyat_listesi where id = @p0",
+            null, id);
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        if (!await o.ReadAsync(iptal)) return null;
+        var subeId = o.GetInt32(2);
+        if (subeId != 0 && baglam.SubeId is { } aktif && subeId != aktif)
+            throw GentegreHatasi.Yasak("Bu liste başka bir şubeye ait.");
+        return (o.GetString(0), o.GetInt16(1));
     }
 }

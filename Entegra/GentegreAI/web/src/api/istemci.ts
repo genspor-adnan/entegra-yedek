@@ -401,6 +401,22 @@ export const api = {
       `/api/fiyat-listesi/${listeId}/uret`,
       { method: 'POST', body: JSON.stringify({ stok: secim?.stok ?? true, hizmet: secim?.hizmet ?? true }) }),
 
+  /** Excel sablonu (207): dolu=true mevcut satirlari doldurur. Blob URL doner. */
+  fiyatListesiSablon: (listeId: number, dolu: boolean) =>
+    dosyaIndir(`/api/fiyat-listesi/${listeId}/sablon${dolu ? '?dolu=1' : ''}`),
+
+  /**
+   * Excel'den iceri alma (207). YA HEP YA HIC: sunucu bir hata bile bulursa
+   * hicbir satir yazmaz ve 422 govdesinde satir numarali hatalar doner
+   * (ApiHatasi.hata icinde satirHatalari).
+   */
+  fiyatListesiIceriAl: (listeId: number, dosya: File) => {
+    const form = new FormData();
+    form.append('dosya', dosya);
+    return dosyaYukle<{ eklenen: number; guncellenen: number; toplam: number; mesaj: string }>(
+      `/api/fiyat-listesi/${listeId}/iceri-al`, form);
+  },
+
   /** Belge acilirken gelecek fiyat listesi (205): turun yonune gore cari listesi > varsayilan. */
   belgeVarsayilanListe: (tur: number, tarafId: number) =>
     istek<{ listeId: number | null; ad: string; yon: number; kdvDahil: number }>(

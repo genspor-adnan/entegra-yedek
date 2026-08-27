@@ -7,6 +7,8 @@ import { GenForm } from '../bilesenler/GenForm';
 import { type EBelgeMesaji, type Kosul, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
+import { IceriAlModali } from '../bilesenler/IceriAlModali';
+import { dosyaIndirUrl } from '../bilesenler/indir';
 import { ebelgeCiktisi } from './ebelgeIslem';
 import { gelenBelgeAksiyonu } from './gelenBelgeIslem';
 import { Modal } from '../bilesenler/Modal';
@@ -57,6 +59,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // Yeni kart EKLENINCE (duzenlemede degil) grid "Son Aranan"a gecsin - kullanici
   //   az once ekledigi kaydi listede otomatik en ustte gorsun.
   const [odaklaSonEklenen, setOdaklaSonEklenen] = useState(0);
+  /** Excel'den iceri alma modali (207) - fiyat listesi; null iken kapali. */
+  const [iceriAl, setIceriAl] = useState<{ listeId: number; ad: string } | null>(null);
   // Donusum modali (F8): siparis/irsaliye satirlarindan yeni belge uretir.
   /** Mesaj gecmisi penceresi (178) - null iken kapali. */
   const [eBelgeMesajlari, setEBelgeMesajlari] =
@@ -439,6 +443,17 @@ Bu işlem geri alınamaz. `
           if (satir) git(`/fiyat-listesi-satir?listeId=${satir.id}`);
           return;
 
+        // EXCEL AKISI (207): modal sablon indirme + yukleme + hata tablosunu tasir.
+        case 'fiyat-listesi.iceri-al':
+          if (satir) setIceriAl({ listeId: Number(satir.id), ad: String(satir.ad ?? satir.id) });
+          return;
+        case 'fiyat-listesi.sablon':
+          if (!satir) return;
+          await guvenli(async () =>
+            dosyaIndirUrl(await api.fiyatListesiSablon(Number(satir.id), true),
+                          `${String(satir.ad ?? satir.id)}.xlsx`, true));
+          return;
+
         case 'genel.yazdir': mesaj('Yazdirma henuz baglanmadi.'); return;
       }
 
@@ -668,6 +683,15 @@ Bu işlem geri alınamaz. `
       </Modal>
     )}
 
+    {iceriAl && (
+      <IceriAlModali
+        baslik={iceriAl.ad}
+        sablonIndir={(dolu: boolean) => api.fiyatListesiSablon(iceriAl.listeId, dolu)}
+        yukle={(dosya: File) => api.fiyatListesiIceriAl(iceriAl.listeId, dosya)}
+        onKapat={() => setIceriAl(null)}
+        onAlindi={() => setYenile(t => t + 1)}
+      />
+    )}
     {donusum && (
       <BelgeDonusumModali
         belgeId={donusum.belgeId}
