@@ -23,9 +23,6 @@ public static class FiyatListesiUclari
     /// <param name="Hizmet">Hizmet kalemleri fiyatlansin mi (varsayilan evet).</param>
     public sealed record UretimIstegi(bool? Stok, bool? Hizmet);
 
-    /// <param name="ListeId">Uygulanacak liste; bos ise belgenin kendi listesi.</param>
-    public sealed record FiyatlandirIstegi(int? ListeId);
-
     public sealed record UretimSonucu(int Eklenen, int Guncellenen, int Korunan,
                                       int Fiyatsiz, string Mesaj);
 
@@ -143,35 +140,13 @@ public static class FiyatListesiUclari
             });
         }).WithTags("FiyatListesi").RequireAuthorization();
 
-        // ---------------------------------------------------- belgeyi fiyatla ----
-        // Liste degisince TUM satirlar yeniden fiyatlanir. Listede bulunmayan
-        //   kalemin satirina DOKUNULMAZ ve sayisi kullaniciya bildirilir -
-        //   sessizce 0 TL yazmak faturayi bozardi.
-        yol.MapPost("/api/belge/{id:int}/fiyatlandir", async (
-            int id, FiyatlandirIstegi? istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
-        {
-            var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("belge", Islem.Degistir);
-
-            await using var baglanti = await veri.AcAsync(iptal);
-            await using var komut = baglanti.Komut(
-                "select degisen, ayni, bulunamayan, liste_adi from public.fn_belge_fiyatlandir(@p0, @p1, @p2)",
-                null, id, istek?.ListeId, baglam.KullaniciId);
-
-            await using var o = await komut.ExecuteReaderAsync(iptal);
-            if (!await o.ReadAsync(iptal)) throw GentegreHatasi.IsKurali("Belge fiyatlanamadi.");
-
-            var degisen = o.GetInt32(0);
-            var ayni = o.GetInt32(1);
-            var yok = o.GetInt32(2);
-            var listeAdi = o.IsDBNull(3) ? "" : o.GetString(3);
-
-            var mesaj = $"\"{listeAdi}\": {degisen} satırın fiyatı değişti, {ayni} satır aynı kaldı.";
-            if (yok > 0) mesaj += $" {yok} kalem listede bulunamadı, fiyatı DEĞİŞMEDİ.";
-
-            return Results.Ok(new { degisen, ayni, bulunamayan = yok, listeAdi, mesaj });
-        }).WithTags("FiyatListesi").RequireAuthorization();
+        // NOT (208): /api/belge/{id}/fiyatlandir ucu ve fn_belge_fiyatlandir
+        //   KALDIRILDI. fn durum=0'i "kesin" sanip TUM normal belgeleri
+        //   reddediyordu ve yalniz birim_fiyat yazip toplamlari bayat
+        //   birakiyordu - satir matematigi (banker's rounding, ic yuvarlama)
+        //   BelgeHesap'ta, PG'de kurus paritesiyle tekrarlanamaz. Liste
+        //   degisiminde fiyatlar artik EKRANDA yenilenir, Kaydet toplamlariyla
+        //   birlikte kalicilastirir (BelgeKarti.listeDegisti).
 
         // ------------------------------------------------------------ sablon ----
         // Excel sablonu. `dolu=1` MEVCUT satirlari doldurur: gercek akis

@@ -642,6 +642,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           saltOkunur={salt || aktif.detay.saltOkunur}
           hatalar={alanHatalari}
           onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
+          // Fiyat listesi satirlari SALT GORUNUM + modal duzenleme: satir ici
+          //   kipte her satir stok (5.000+) ve hizmet (3.700+) lookup'unu ayri
+          //   <select> olarak cizer - 1.438 satirlik listede ~12 MILYON DOM
+          //   dugumu sekmeyi donduruyordu ("Satirlar acilmiyor").
+          modalDuzenle={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'}
+          ikonlu={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'}
         />
       )}
 

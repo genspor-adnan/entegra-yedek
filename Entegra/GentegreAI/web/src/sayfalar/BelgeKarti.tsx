@@ -650,26 +650,19 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   }, [belgeId, tur, cari?.id]);
 
   /**
-   * Liste DEGISTI: butun satirlar yeniden fiyatlanir (kullanici kurali).
-   * Kayitli belgede sunucu yapar (tek istek, tek dogruluk kaynagi); henuz
-   * kaydedilmemis belgede satirlar ekranda oldugu icin tek tek listeden okunur.
+   * Liste DEGISTI: butun satirlar EKRANDA yeniden fiyatlanir (kullanici
+   * kurali); Kaydet kalicilastirir. Kayitli belgede de ayni yol - sunucuda
+   * fiyatlayan fn_belge_fiyatlandir KALDIRILDI: durum=0 butun normal
+   * belgelerde "Kesin" oldugundan hepsini reddediyordu, ustelik yalniz
+   * birim_fiyat yazip tutar/matrah/genel_toplami bayat birakiyordu (satir
+   * matematigi banker's rounding ile BelgeHesap'ta - PG round'u farkli
+   * yuvarlar, kurus paritesi DB'de tutturulamaz). Kaydetme hatti zaten tum
+   * toplamlari satirlardan yeniden hesaplar.
    */
   async function listeDegisti(yeni: number | null) {
     setFiyatListesiIdHam(yeni);
     if (!yeni) return;
 
-    if (belgeId) {
-      await guvenli(async () => {
-        const y = await api.belgeFiyatlandir(belgeId, yeni);
-        mesaj(y.mesaj);
-        const g = await api.belgeOku(belgeId);
-        setSonuc(g);
-        setSatirlar(yanittanSatirlar(g.satirlar, yerelPara));
-      });
-      return;
-    }
-
-    // Kaydedilmemis belge: ekrandaki satirlari listeden fiyatla.
     await guvenli(async () => {
       let degisen = 0, bulunamayan = 0;
       const yeniSatirlar = await Promise.all(satirlar.map(async r => {
@@ -678,11 +671,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           r.stokId ? { stokId: r.stokId } : { hizmetId: r.hizmetId! });
         if (f.fiyat === null || f.fiyat <= 0) { bulunamayan++; return r }
         degisen++;
-        return { ...r, birimFiyat: String(f.fiyat) };
+        const metin = String(f.fiyat);
+        // dovizFiyat da yazilmali: kaydetme hatti doviz birim fiyati varsa
+        //   yerel fiyati ONDAN turetir - eski dovizFiyat kalirsa Kaydet
+        //   fiyati sessizce geri alirdi.
+        return { ...r, birimFiyat: metin, dovizFiyat: metin,
+                 fiyatDovizi: f.dovizCinsi || r.fiyatDovizi };
       }));
       setSatirlar(yeniSatirlar);
       mesaj(`${degisen} satırın fiyatı listeden güncellendi.`
-          + (bulunamayan ? ` ${bulunamayan} kalem listede bulunamadı, fiyatı DEĞİŞMEDİ.` : ''));
+          + (bulunamayan ? ` ${bulunamayan} kalem listede bulunamadı, fiyatı DEĞİŞMEDİ.` : '')
+          + (belgeId && degisen ? ' Kaydet ile kalıcı olur.' : ''));
     });
   }
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Modal } from './Modal';
+import { para } from './bicim';
 import type { DetayFarki, KartDetayMeta } from '../api/sozlesme';
 import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 import { TelefonGirdi } from './TelefonGirdi';
@@ -111,11 +112,15 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   /** Modalde duzenlenen taslak - Tamam'a basilana kadar tabloya yazilmaz. */
   const [taslak, setTaslak] = useState<Record<string, unknown>>({});
 
-  /** Salt gorunum hucresi: kod alani etiketiyle, mantik ✓ ile gosterilir. */
+  /** Salt gorunum hucresi: kod alani etiketiyle, mantik ✓, para TR bicimiyle. */
   const gorunum = (satir: Record<string, unknown>, a: typeof alanlar[number]) => {
     const d = satir[a.ad];
     if (a.tip === 'mantik') return Number(d) === 1 || d === true ? '✓' : '';
     if (a.kodlar) return a.kodlar[String(d ?? '')] ?? '';
+    if (a.tip === 'para' && d !== null && d !== undefined && d !== '') {
+      const s = Number(d);
+      if (Number.isFinite(s)) return para.format(s);
+    }
     return String(d ?? '');
   };
 

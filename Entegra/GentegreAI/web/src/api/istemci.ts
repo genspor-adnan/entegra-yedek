@@ -422,12 +422,6 @@ export const api = {
     istek<{ listeId: number | null; ad: string; yon: number; kdvDahil: number }>(
       `/api/belge/varsayilan-liste?tur=${tur}&tarafId=${tarafId}`),
 
-  /** Belgenin TUM satirlarini listeden yeniden fiyatlar (205). */
-  belgeFiyatlandir: (belgeId: number, listeId?: number) =>
-    istek<{ degisen: number; ayni: number; bulunamayan: number; listeAdi: string; mesaj: string }>(
-      `/api/belge/${belgeId}/fiyatlandir`,
-      { method: 'POST', body: JSON.stringify({ listeId: listeId ?? null }) }),
-
   /** Tek kalemin liste fiyati - liste henuz uretilmemis olsa da kural isletilir. */
   fiyatListesiFiyat: (listeId: number, kalem: { stokId?: number; hizmetId?: number }) =>
     istek<{ fiyat: number | null; dovizCinsi: string; kdvDahil: number; kaynak: string }>(
