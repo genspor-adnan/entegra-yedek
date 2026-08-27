@@ -230,14 +230,16 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   //   tanimi verir. Diger ekranlarda (or. irsaliye listesindeki tek
   //   "e-İrsaliye Gönder") aksiyon genel kutuda kalir.
   const ebelgeKutusuVar = ebelgeMenusu === true;
-  const ebelgeGrubu = (a: AksiyonYaniti) => ebelgeKutusuVar && a.grup === 'ebelge';
+  const ebelgeGrubu = (a: AksiyonYaniti) => a.grup === 'ebelge';
+  // e-BELGE KOMUTLARI GENEL KUTUDA HIC GORUNMEZ (kullanici): kendi "E-Fatura"
+  //   kutusuna aitler; genel listede "Aç / Yeni / Sil" arasina karisinca hem
+  //   uzuyor hem hangi komutun hangi akisa ait oldugu kayboluyordu. Sag tus
+  //   menusu ve komut paleti onlari GOSTERMEYE devam eder - oralarda gruplu.
   const aksiyonKombo = useMemo(
-    () => aksiyonlar.filter(a => hedefte(a, 'sagtus') && !ebelgeGrubu(a)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [aksiyonlar, ebelgeKutusuVar]);
+    () => aksiyonlar.filter(a => hedefte(a, 'sagtus') && !ebelgeGrubu(a)), [aksiyonlar]);
+  // Kutu yalniz satis fatura listesinde cizilir (liste tanimindaki bayrak).
   const ebelgeKombo = useMemo(
-    () => aksiyonlar.filter(a => hedefte(a, 'sagtus') && ebelgeGrubu(a)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    () => (ebelgeKutusuVar ? aksiyonlar.filter(a => hedefte(a, 'sagtus') && ebelgeGrubu(a)) : []),
     [aksiyonlar, ebelgeKutusuVar]);
   const [ebelgeSecim, setEbelgeSecim] = useState('');
   useEffect(() => { if (!aksiyonKombo.some(a => a.kod === aksiyonSecim)) setAksiyonSecim('') }, [aksiyonKombo, aksiyonSecim]);
