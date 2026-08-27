@@ -541,22 +541,40 @@ public sealed partial class BelgeDeposu
 
         // --------------------------------------------------------- 7b) MUHASEBE FISI ----
         // Kesin belge muhasebeye de girer (190). Taslak fislenmez: numarasi ve
-        //   kesinligi yok. Ayar kapaliysa (muhasebe.otomatik_fis = 0) atlanir ve
-        //   sonradan toplu fislenir. Fis uretimi belgeyi DUSURMEZ: eslemesi
-        //   eksikse uyari olarak doner, belge kaydi ayakta kalir.
+        //   kesinligi yok. SUBE AYARI (192) belirler: entegrasyon kapaliysa ya da
+        //   fis uretimi "gun sonu / elle" secilmisse burada uretilmez, toplu
+        //   fisleme yapar. Fis uretimi belgeyi DUSURMEZ: eslemesi eksikse uyari
+        //   doner, belge kaydi ayakta kalir ve hata KALICI IZ birakir
+        //   (muhasebe_fis_hata) - "kac belge fislenmedi" sorusu cevaplanabilsin.
         if (!secenekler.Taslak)
         {
             try
             {
-                await using var fis = new NpgsqlCommand(
-                    "select public.fn_belge_fisle(@p0, @p1)", baglanti, islem);
+                await using var fis = new NpgsqlCommand("""
+                    select case when public.fn_belge_fis_uretilsin(@p2)
+                                then public.fn_belge_fisle(@p0, @p1) end
+                    """, baglanti, islem);
                 fis.Parameters.AddWithValue("p0", belgeId);
                 fis.Parameters.AddWithValue("p1", baglam.KullaniciId);
+                fis.Parameters.AddWithValue("p2", (object?)baglam.SubeId ?? DBNull.Value);
                 await fis.ExecuteScalarAsync(iptal);
             }
             catch (PostgresException h)
             {
                 uyarilar.Add("Muhasebe fişi üretilemedi: " + h.MessageText);
+                await using var iz = new NpgsqlCommand("""
+                    insert into public.muhasebe_fis_hata
+                           (kaynak_tur, kaynak_id, hata_mesaji, sube_id, ekleyen)
+                    values (2, @p0, left(@p1, 500), @p2, @p3)
+                    on conflict (kaynak_tur, kaynak_id) where cozuldu = 0
+                    do update set hata_mesaji = excluded.hata_mesaji,
+                                  deneme_tarihi = now()::timestamp
+                    """, baglanti, islem);
+                iz.Parameters.AddWithValue("p0", belgeId);
+                iz.Parameters.AddWithValue("p1", h.MessageText);
+                iz.Parameters.AddWithValue("p2", (object?)baglam.SubeId ?? DBNull.Value);
+                iz.Parameters.AddWithValue("p3", baglam.KullaniciId);
+                await iz.ExecuteNonQueryAsync(iptal);
             }
         }
 

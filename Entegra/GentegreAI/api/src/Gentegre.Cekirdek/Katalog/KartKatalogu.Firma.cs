@@ -34,6 +34,9 @@ public static partial class KartKatalogu
             ["aktif"] = (short)1, ["varsayilan"] = (short)0, ["ulke"] = "Türkiye",
             ["efaturaMukellef"] = (short)0, ["earsivMukellef"] = (short)0,
             ["eirsaliyeMukellef"] = (short)0,
+            // Yeni sube MERKEZIN mali ayarlarini kullanir (192) - ayri VKN
+            //   alinca kullanici bayragi kaldirip kendi ayarini girer.
+            ["merkezMaliKullan"] = (short)1,
         },
         Alanlar: new KartAlani[]
         {
@@ -155,7 +158,77 @@ public static partial class KartKatalogu
             // Mukellefiyet bayragi ayni zamanda TUR SEKMESININ gorunurlugunu
             //   belirler (172): mukellefi olmadigimiz turun ayarlari cizilmez.
             new("esmmMukellef",      "esmm_mukellef",       "mantik",
-                Baslik: "e-SMM Mükellefi", Grup: "e-Belge", AltGrup: "Mükellefiyet")
+                Baslik: "e-SMM Mükellefi", Grup: "e-Belge", AltGrup: "Mükellefiyet"),
+
+            // ------------------------------------------------------------ Mali
+            // MOCKUP: Ekranlar/firma_bilgileri.html › Mali sekmesi.
+            //
+            // ŞUBE BAZLI MI? Ayrim "sube ayri VKN tasiyor mu" sorusuna bagli ve
+            //   bu semada tasiyabiliyor. Bu yuzden ayarlar SUBEDE durur ve
+            //   "Merkezin mali ayarlarini kullan" isaretliyse merkezden okunur
+            //   (fn_sube_mali) - e-Belge'deki merkez kimligi deseninin aynisi.
+            //
+            //   Defter turu, KDV/gecici vergi donemi, amortisman, para birimi,
+            //   ondalik ve yuvarlama HER ZAMAN merkezden gelir: iki sube farkli
+            //   ondalikla calisirsa ayni fiste iki yuvarlama cikar, mizan tutmaz.
+            //   Bu alanlar sube kartinda da gorunur ama etkin deger merkezinkidir.
+            new("merkezMaliKullan", "merkez_mali_kullan", "mantik",
+                Baslik: "Merkezin mali ayarlarını kullan", Grup: "Mali", AltGrup: "Ayar Kaynağı"),
+
+            new("defterTuru",        "defter_turu",         "kod", KodListesi: "mali.defter_turu",
+                Baslik: "Defter Tutma Şekli", Grup: "Mali", AltGrup: "Mali Dönem"),
+            new("kdvDonem",          "kdv_donem",           "kod", KodListesi: "mali.kdv_donem",
+                Baslik: "KDV Dönemi", Grup: "Mali", AltGrup: "Mali Dönem"),
+            new("geciciVergiDonem",  "gecici_vergi_donem",  "kod", KodListesi: "mali.gecici_donem",
+                Baslik: "Geçici Vergi Dönemi", Grup: "Mali", AltGrup: "Mali Dönem"),
+            new("donemDisiEngelle",  "donem_disi_engelle",  "mantik",
+                Baslik: "Dönem dışı tarihe belge kaydını engelle", Grup: "Mali", AltGrup: "Mali Dönem"),
+            new("devirFisiOtomatik", "devir_fisi_otomatik", "mantik",
+                Baslik: "Yıl sonu devir fişini otomatik üret", Grup: "Mali", AltGrup: "Mali Dönem"),
+
+            new("muhasebeEntegrasyon", "muhasebe_entegrasyon", "mantik",
+                Baslik: "Muhasebe entegrasyonu açık", Grup: "Mali", AltGrup: "Muhasebe Entegrasyonu"),
+            new("fisUretim",         "fis_uretim",          "kod", KodListesi: "mali.fis_uretim",
+                Baslik: "Fiş Üretim Şekli", Grup: "Mali", AltGrup: "Muhasebe Entegrasyonu"),
+            new("fisBirlestirme",    "fis_birlestirme",     "kod", KodListesi: "mali.fis_birlestirme",
+                Baslik: "Fiş Birleştirme", Grup: "Mali", AltGrup: "Muhasebe Entegrasyonu"),
+            new("masrafMerkeziKullan", "masraf_merkezi_kullan", "mantik",
+                Baslik: "Masraf merkezi kullanılıyor", Grup: "Mali", AltGrup: "Muhasebe Entegrasyonu"),
+            new("yuvarlamaHesapId",  "yuvarlama_hesap_id",  "kod",
+                KodTablosu: "public.v_hesap_plani_lookup",
+                Baslik: "Yuvarlama Hesabı", Grup: "Mali", AltGrup: "Muhasebe Entegrasyonu"),
+
+            new("amortismanYontem",  "amortisman_yontem",   "kod", KodListesi: "mali.amortisman_yontem",
+                Baslik: "Yöntem", Grup: "Mali", AltGrup: "Amortisman"),
+            new("amortismanKist",    "amortisman_kist",     "kod", KodListesi: "mali.amortisman_kist",
+                Baslik: "Kıst Uygulaması", Grup: "Mali", AltGrup: "Amortisman"),
+            new("amortismanPeriyot", "amortisman_periyot",  "kod", KodListesi: "mali.amortisman_periyot",
+                Baslik: "Hesaplama Periyodu", Grup: "Mali", AltGrup: "Amortisman"),
+            new("amortismanEnflasyon", "amortisman_enflasyon", "mantik",
+                Baslik: "Enflasyon düzeltmesi uygula", Grup: "Mali", AltGrup: "Amortisman"),
+            new("birikmisAmortismanHesapId", "birikmis_amortisman_hesap_id", "kod",
+                KodTablosu: "public.v_hesap_plani_lookup",
+                Baslik: "Birikmiş Amortisman Hesabı", Grup: "Mali", AltGrup: "Amortisman"),
+            new("amortismanGiderHesapId",    "amortisman_gider_hesap_id",    "kod",
+                KodTablosu: "public.v_hesap_plani_lookup",
+                Baslik: "Gider Hesabı", Grup: "Mali", AltGrup: "Amortisman"),
+            new("amortismanYilsonuFis", "amortisman_yilsonu_fis", "mantik",
+                Baslik: "Yıl sonunda amortisman fişini otomatik oluştur", Grup: "Mali", AltGrup: "Amortisman"),
+
+            new("varsayilanKdv",     "varsayilan_kdv",      "sayi",
+                Baslik: "Varsayılan KDV (%)", Grup: "Mali", AltGrup: "Vergi & Yuvarlama"),
+            new("tevkifatModu",      "tevkifat_modu",       "kod", KodListesi: "mali.tevkifat_modu",
+                Baslik: "Tevkifat", Grup: "Mali", AltGrup: "Vergi & Yuvarlama"),
+            new("yerelPara",         "yerel_para",          "metin", EnFazlaUzunluk: 5,
+                Baslik: "Para Birimi", Grup: "Mali", AltGrup: "Vergi & Yuvarlama"),
+            new("dovizVarsayilan",   "doviz_varsayilan",    "metin", EnFazlaUzunluk: 5,
+                Baslik: "Döviz Birimi", Grup: "Mali", AltGrup: "Vergi & Yuvarlama"),
+            new("tutarOndalik",      "tutar_ondalik",       "sayi",
+                Baslik: "Tutar Ondalık", Grup: "Mali", AltGrup: "Vergi & Yuvarlama"),
+            new("fiyatOndalik",      "fiyat_ondalik",       "sayi",
+                Baslik: "Birim Fiyat Ondalık", Grup: "Mali", AltGrup: "Vergi & Yuvarlama"),
+            new("yuvarlamaAdim",     "yuvarlama_adim",      "para",
+                Baslik: "Yuvarlama Adımı", Grup: "Mali", AltGrup: "Vergi & Yuvarlama")
         },
         // Subenin depolari - kartin "Depolar" sekmesinde, bayrakla ayni yerde
         //   (kullanici). Depo bakimi Stok menusunde de duruyor; burasi subeye

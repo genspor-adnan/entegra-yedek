@@ -128,7 +128,29 @@ const adliBlok = (
             )}
           </div>
         )}
-        {digerAdli.map(([altBaslik, alanlar]) => {
+        {/* MALİ SEKMESİ (192): sube "merkezin mali ayarlarini kullan" derse
+            kendi alanlari ETKISIZDIR - girilen deger fn_sube_mali tarafindan
+            zaten merkezinkiyle degistirilir. Alanlari cizip kullanicinin bos
+            yere doldurmasina izin vermek yerine sebebi yazilir. */}
+        {kaynak === 'sube' && aktif.baslik === 'Mali' && deger.merkezMaliKullan ? (
+          <div className="kagrup">
+            <h6>Mali Ayarlar</h6>
+            <div className="not" style={{ padding: 10 }}>
+              Bu şube <b>merkezin mali ayarlarını</b> kullanıyor: dönem, muhasebe
+              entegrasyonu, amortisman ve vergi/yuvarlama ayarları merkezden okunur.
+              Şubeye özel ayar girmek için yukarıdaki kutunun işaretini kaldırın.
+              <div style={{ marginTop: 6, opacity: .75 }}>
+                Defter türü, KDV / geçici vergi dönemi, para birimi, ondalık ve
+                yuvarlama adımı <b>her zaman merkezden</b> gelir — iki şube farklı
+                yuvarlamayla çalışırsa mizan tutmaz.
+              </div>
+            </div>
+          </div>
+        ) : null}
+        {digerAdli
+          .filter(([altBaslik]) => !(kaynak === 'sube' && aktif.baslik === 'Mali'
+                                     && deger.merkezMaliKullan && altBaslik !== 'Ayar Kaynağı'))
+          .map(([altBaslik, alanlar]) => {
           // Cari'ye ozel: Tanımlama kutusunda dort cift AYNI SATIRDA yan yana,
           // sirayla (kullanici): Kategori/İlk Temas, Sektör/Alt Sektör, Sınıf/Bölge,
           // Temsilci/Özel Kod.
