@@ -29,64 +29,19 @@ public static class AksiyonKatalogu
     private static readonly Dictionary<string, IReadOnlyList<AksiyonTanimi>> Ekranlar =
         new(StringComparer.OrdinalIgnoreCase)
         {
-            ["cari-liste"] = new AksiyonTanimi[]
-            {
-                new("cari.yeni",    "＋ Yeni",     "kart", Kisayol: "Ctrl+N",
-                    KaynakKodu: "cari", Islem: Islem.Ekle, Sira: 10),
-                new("cari.duzenle", "✎ Düzenle",   "kart", Kisayol: "Enter",
-                    KaynakKodu: "cari", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+            ["cari-liste"] =
+            [
+                .. Crud("cari", "kart", "cari"),
                 // GIB e-Fatura kaydini entegratore sorar ve karta isler (183).
                 new("cari.ebelge-mukellef", "e-Fatura Mükellefiyeti Sorgula", "kart",
                     Hedef: "sagtus,palet", KaynakKodu: "cari", Islem: Islem.Degistir,
                     KayitGerekir: true, Sira: 45),
-                new("cari.sil",     "🗑 Sil",         "kart", Hedef: "sagtus,palet", Kisayol: "Del",
-                    KaynakKodu: "cari", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
-                new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
-                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
-            },
+            ],
 
-            ["kisi-liste"] = new AksiyonTanimi[]
-            {
-                new("kisi.yeni",    "＋ Yeni",     "kisi", Kisayol: "Ctrl+N",
-                    KaynakKodu: "cari", Islem: Islem.Ekle, Sira: 10),
-                new("kisi.duzenle", "✎ Düzenle",   "kisi", Kisayol: "Enter",
-                    KaynakKodu: "cari", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("kisi.sil",     "🗑 Sil",         "kisi", Hedef: "sagtus,palet", Kisayol: "Del",
-                    KaynakKodu: "cari", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
-                new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
-                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
-            },
-            ["rol-liste"] = new AksiyonTanimi[]
-            {
-                new("rol.yeni",    "＋ Yeni",     "rol", Kisayol: "Ctrl+N",
-                    KaynakKodu: "rol", Islem: Islem.Ekle, Sira: 10),
-                new("rol.duzenle", "✎ Düzenle",   "rol", Kisayol: "Enter",
-                    KaynakKodu: "rol", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("rol.sil",     "🗑 Sil",         "rol", Hedef: "sagtus,palet", Kisayol: "Del",
-                    KaynakKodu: "rol", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
-            },
-            ["personel-liste"] = new AksiyonTanimi[]
-            {
-                new("personel.yeni",    "＋ Yeni",     "personel", Kisayol: "Ctrl+N",
-                    KaynakKodu: "personel", Islem: Islem.Ekle, Sira: 10),
-                new("personel.duzenle", "✎ Düzenle",   "personel", Kisayol: "Enter",
-                    KaynakKodu: "personel", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("personel.sil",     "🗑 Sil",         "personel", Hedef: "sagtus,palet", Kisayol: "Del",
-                    KaynakKodu: "personel", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
-                new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
-                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
-            },
-            ["hasta-liste"] = new AksiyonTanimi[]
-            {
-                new("hasta.yeni",    "＋ Yeni",     "hasta", Kisayol: "Ctrl+N",
-                    KaynakKodu: "personel", Islem: Islem.Ekle, Sira: 10),
-                new("hasta.duzenle", "✎ Düzenle",   "hasta", Kisayol: "Enter",
-                    KaynakKodu: "personel", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("hasta.sil",     "🗑 Sil",         "hasta", Hedef: "sagtus,palet", Kisayol: "Del",
-                    KaynakKodu: "personel", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
-                new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
-                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
-            },
+            ["kisi-liste"] = Crud("kisi", "kisi", "cari"),
+            ["rol-liste"] = Crud("rol", "rol", "rol", yazdir: false),
+            ["personel-liste"] = Crud("personel", "personel", "personel"),
+            ["hasta-liste"] = Crud("hasta", "hasta", "personel"),
 
             // AKSIYON KOMBOSU (sagtus hedefi) yalniz KOPYALA icerir (kullanici):
             //   Yeni/Duzenle/Sil zaten arac cubugunda dugme; komboda tekrar
@@ -107,62 +62,22 @@ public static class AksiyonKatalogu
             },
 
             // Banka tanimlari (db/109).
-            ["banka-liste"] = new AksiyonTanimi[]
-            {
-                new("banka.yeni",    "＋ Yeni",   "banka", Kisayol: "Ctrl+N",
-                    KaynakKodu: "hesap", Islem: Islem.Ekle, Sira: 10),
-                new("banka.duzenle", "✎ Düzenle", "banka", Kisayol: "Enter",
-                    KaynakKodu: "hesap", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("banka.sil",     "🗑 Sil",    "banka", Kisayol: "Del",
-                    KaynakKodu: "hesap", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
-                new("genel.yazdir",  "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
-                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
-            },
+            ["banka-liste"] = Crud("banka", "banka", "hesap", silHedef: null),
 
             // Gorev / hatirlatma / takvim (db/108): stok-liste ile ayni desen.
             //   "Tamamla" ayri bir aksiyon DEGIL - durum kartta degisir; listede
             //   tek tikla tamamlamak, ilerleme/tamamlanma alanlarini atlardi.
-            ["gorev-liste"] = new AksiyonTanimi[]
-            {
-                new("gorev.yeni",    "＋ Yeni",   "gorev", Kisayol: "Ctrl+N",
-                    KaynakKodu: "gorev", Islem: Islem.Ekle, Sira: 10),
-                new("gorev.duzenle", "✎ Düzenle", "gorev", Kisayol: "Enter",
-                    KaynakKodu: "gorev", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("gorev.sil",     "🗑 Sil",       "gorev", Hedef: "sagtus,palet", Kisayol: "Del",
-                    KaynakKodu: "gorev", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
-                new("genel.yazdir",  "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
-                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
-            },
+            ["gorev-liste"] = Crud("gorev", "gorev", "gorev"),
 
             // Projeler - gorev/firsat listeleriyle AYNI desen (Yeni / Düzenle /
             //   Sil / Yazdır); eskiden aksiyon seridi hic yoktu, kart yalniz
             //   cift tikla aciliyordu.
-            ["proje-liste"] = new AksiyonTanimi[]
-            {
-                new("proje.yeni",    "＋ Yeni",   "proje", Kisayol: "Ctrl+N",
-                    KaynakKodu: "proje", Islem: Islem.Ekle, Sira: 10),
-                new("proje.duzenle", "✎ Düzenle", "proje", Kisayol: "Enter",
-                    KaynakKodu: "proje", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("proje.sil",     "🗑 Sil",       "proje", Hedef: "sagtus,palet", Kisayol: "Del",
-                    KaynakKodu: "proje", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
-                new("genel.yazdir",  "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
-                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
-            },
+            ["proje-liste"] = Crud("proje", "proje", "proje"),
 
             // CRM satis firsati (121). Kazanildi/Kaybedildi ayri AKSIYON degil:
             //   asama alanindan secilir - iki yerden degistirilen bir durum
             //   birbirini tutmayan iki kayit uretir.
-            ["firsat-liste"] = new AksiyonTanimi[]
-            {
-                new("firsat.yeni",    "＋ Yeni",   "firsat", Kisayol: "Ctrl+N",
-                    KaynakKodu: "firsat", Islem: Islem.Ekle, Sira: 10),
-                new("firsat.duzenle", "✎ Düzenle", "firsat", Kisayol: "Enter",
-                    KaynakKodu: "firsat", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("firsat.sil",     "🗑 Sil",       "firsat", Hedef: "sagtus,palet", Kisayol: "Del",
-                    KaynakKodu: "firsat", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
-                new("genel.yazdir",   "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
-                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
-            },
+            ["firsat-liste"] = Crud("firsat", "firsat", "firsat"),
 
             // Aday musteriler (122). "Müşteriye Dönüştür" kaydi TASIMAZ, bayragi
             //   degistirir - firsat/gorev/adres gecmisi ayni kayitta kalir.
@@ -182,74 +97,23 @@ public static class AksiyonKatalogu
 
             // Hesap ekranlari (Kasa / Banka / POS / Kredi Karti / Kredi) - hepsi
             //   ayni 'hesap' kaynagi, tur'e gore ayri liste.
-            ["hesap-liste"] = new AksiyonTanimi[]
-            {
-                new("hesap.yeni",    "＋ Ekle",     "hesap", Kisayol: "Ctrl+N",
-                    KaynakKodu: "hesap", Islem: Islem.Ekle, Sira: 10),
-                new("hesap.duzenle", "✎ Düzenle",   "hesap", Kisayol: "Enter",
-                    KaynakKodu: "hesap", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("hesap.sil",     "🗑 Sil",      "hesap", Kisayol: "Del",
-                    KaynakKodu: "hesap", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
-                // Ekstre arac cubugunda DEGIL: cip seridinin sonundaki "📄 Ekstre"
-                //   dugmesi ayni gridi ekstreye ceviriyor (iki ayri giris kafa
-                //   karistiriyordu). Sag tus / palette de gerek kalmadi.
-                new("genel.yazdir",  "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
-                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
-            },
+            ["hesap-liste"] = Crud("hesap", "hesap", "hesap", "＋ Ekle", silHedef: null),
 
             // Cek / Senet portfoyu. Cek uzerindeki ISLEMLER (tahsil/ciro/bozdurma)
             //   kasa turleriyle yapilir - Kasa planinin F5 fazinda baglanacak;
             //   burada simdilik kart islemleri var.
-            ["cek-senet-liste"] = new AksiyonTanimi[]
-            {
-                new("cek-senet.yeni",    "＋ Ekle",     "cek-senet", Kisayol: "Ctrl+N",
-                    KaynakKodu: "cek_senet", Islem: Islem.Ekle, Sira: 10),
-                new("cek-senet.duzenle", "✎ Düzenle",   "cek-senet", Kisayol: "Enter",
-                    KaynakKodu: "cek_senet", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("cek-senet.sil",     "🗑 Sil",      "cek-senet", Kisayol: "Del",
-                    KaynakKodu: "cek_senet", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
-                new("genel.yazdir",      "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
-                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
-            },
+            ["cek-senet-liste"] = Crud("cek-senet", "cek-senet", "cek_senet", "＋ Ekle", silHedef: null),
 
             // Salt-gorunum ekranlari (ekstre, mizan...): yalniz cikti alma.
             //   "Yazdır" dugmesi acilir menusunde CSV Kaydet de var (GenGrid ekler).
-            ["cikti-liste"] = new AksiyonTanimi[]
-            {
-                new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
-                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
-            },
+            ["cikti-liste"] = [Yazdir()],
 
             // Stok Ayarlari > Depolar sekmesi.
-            ["sube-liste"] = new AksiyonTanimi[]
-            {
-                new("sube.yeni",    "＋ Ekle",   "sube", Kisayol: "Ctrl+N",
-                    KaynakKodu: "sube", Islem: Islem.Ekle, Sira: 10),
-                new("sube.duzenle", "✎ Düzenle", "sube", Kisayol: "Enter",
-                    KaynakKodu: "sube", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("sube.sil",     "🗑 Sil",    "sube", Kisayol: "Del",
-                    KaynakKodu: "sube", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
-            },
+            ["sube-liste"] = Crud("sube", "sube", "sube", "＋ Ekle", silHedef: null, yazdir: false),
 
-            ["hizmet-liste"] = new AksiyonTanimi[]
-            {
-                new("hizmet.yeni",    "＋ Ekle",   "hizmet", Kisayol: "Ctrl+N",
-                    KaynakKodu: "hizmet", Islem: Islem.Ekle, Sira: 10),
-                new("hizmet.duzenle", "✎ Düzenle", "hizmet", Kisayol: "Enter",
-                    KaynakKodu: "hizmet", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("hizmet.sil",     "🗑 Sil",    "hizmet", Kisayol: "Del",
-                    KaynakKodu: "hizmet", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
-            },
+            ["hizmet-liste"] = Crud("hizmet", "hizmet", "hizmet", "＋ Ekle", silHedef: null, yazdir: false),
 
-            ["depo-liste"] = new AksiyonTanimi[]
-            {
-                new("depo.yeni",    "＋ Ekle",   "depo", Kisayol: "Ctrl+N",
-                    KaynakKodu: "stok", Islem: Islem.Ekle, Sira: 10),
-                new("depo.duzenle", "✎ Düzenle", "depo", Kisayol: "Enter",
-                    KaynakKodu: "stok", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("depo.sil",     "🗑 Sil",    "depo", Kisayol: "Del",
-                    KaynakKodu: "stok", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
-            },
+            ["depo-liste"] = Crud("depo", "depo", "stok", "＋ Ekle", silHedef: null, yazdir: false),
 
             ["belge-liste"] = new AksiyonTanimi[]
             {
@@ -537,4 +401,48 @@ public static class AksiyonKatalogu
         if (aksiyon.AksiyonYetkisi is { } kod) return yetkiler.AksiyonVar(kod);
         return true;
     }
+
+    /// <summary>
+    /// STANDART KART DORTLUSU: Yeni · Düzenle · Sil · Yazdır.
+    ///
+    /// Bu dortlu 28 ekranda tek tek yazilmisti (26 "yeni", 24 "sil", 20 "yazdir"
+    /// girdisi). Kisayol ya da hedef yuzeyi birinde degistirilince otekiler
+    /// geride kaliyordu. Ayni ilke katalogun baska yerlerinde zaten uygulanmis
+    /// (KartKatalogu.NumaraKarti, KaynakKatalogu.NumaraKaynagi); aksiyonlara
+    /// gecmemisti.
+    ///
+    /// Ekranin kendine ozgu aksiyonlari dizinin arkasina eklenir:
+    ///   [.. Crud("proje", "proje", "proje"), new("proje.ekstre", ...)]
+    /// </summary>
+    /// <param name="onEk">Aksiyon kodu oneki ("cari" -> "cari.yeni").</param>
+    /// <param name="grup">Aksiyonun gorsel grubu (arac cubugunda obekleme).</param>
+    /// <param name="kaynakKodu">Yetki kaynagi ("cari", "hesap"...).</param>
+    /// <param name="ekleAdi">Ekleme dugmesinin adi - kart ekranlarinda "＋ Ekle".</param>
+    /// <param name="silHedef">Silmenin gorunecegi yuzeyler; null = hepsi.</param>
+    /// <param name="yazdir">Yazdir/CSV dugmesi eklensin mi.</param>
+    /// <param name="silSira">Silme sirasi - araya aksiyon giren ekranlarda kayar.</param>
+    private static AksiyonTanimi[] Crud(string onEk, string grup, string kaynakKodu,
+        string ekleAdi = "＋ Yeni", string? silHedef = "sagtus,palet",
+        bool yazdir = true, int silSira = 30)
+    {
+        AksiyonTanimi[] dortlu =
+        [
+            new($"{onEk}.yeni", ekleAdi, grup, Kisayol: "Ctrl+N",
+                KaynakKodu: kaynakKodu, Islem: Islem.Ekle, Sira: 10),
+            new($"{onEk}.duzenle", "✎ Düzenle", grup, Kisayol: "Enter",
+                KaynakKodu: kaynakKodu, Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+            silHedef is null
+                ? new($"{onEk}.sil", "🗑 Sil", grup, Kisayol: "Del",
+                      KaynakKodu: kaynakKodu, Islem: Islem.Sil, KayitGerekir: true, Sira: silSira)
+                : new($"{onEk}.sil", "🗑 Sil", grup, Hedef: silHedef, Kisayol: "Del",
+                      KaynakKodu: kaynakKodu, Islem: Islem.Sil, KayitGerekir: true, Sira: silSira),
+        ];
+        return yazdir ? [.. dortlu, Yazdir()] : dortlu;
+    }
+
+    /// <summary>Yazdir / CSV kaydet - salt gorunum ekranlarinda tek basina da kullanilir.</summary>
+    private static AksiyonTanimi Yazdir()
+        => new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+               AksiyonYetkisi: "veri.disa-aktar", Sira: 90);
+
 }

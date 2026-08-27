@@ -273,14 +273,23 @@ public static partial class KaynakKatalogu
     //   hareketleri ve ara toplami, sonra USD, sonra EUR... en altta yerel para
     //   cinsinden genel toplam. Farkli para birimlerini tek yuruyen bakiyede
     //   toplamak (eski hali) anlamsiz bir sayi uretiyordu.
+    // Iki ekstre (hesap ve cari) AYNI duzende gruplanir; ayarlarin birinde
+    //   degisip otekinde kalmasi kullaniciya "ayni ekran neden farkli davraniyor"
+    //   diye doner. Ortak olanlar burada, kolon listeleri ayri (biri giris/cikis,
+    //   oteki borc/alacak konusur).
+    private const string EkstreGrupKolonu = "dovizCinsi";
+    private const string EkstreGrupSira   = "dovizSira";
+    private const string EkstreSirala =
+        "e.doviz_sira asc, e.doviz_cinsi asc, e.islem_tarihi asc, e.id asc";
+
     private static KaynakTanimi HesapEkstre() => new(
         Ad: "hesap-ekstre",
         YetkiKodu: "hesap",
         Kaynak: "public.v_hesap_ekstre e",
         SubeKolonu: "e.sube_id",
-        GrupKolonu: "dovizCinsi",
-        GrupSiraKolonu: "dovizSira",
-        VarsayilanSirala: "e.doviz_sira asc, e.doviz_cinsi asc, e.islem_tarihi asc, e.id asc",
+        GrupKolonu: EkstreGrupKolonu,
+        GrupSiraKolonu: EkstreGrupSira,
+        VarsayilanSirala: EkstreSirala,
         Kolonlar: new KolonTanimi[]
         {
             new("id",           "e.id",            "sayi",  "Id", Varsayilan: false),
@@ -320,9 +329,9 @@ public static partial class KaynakKatalogu
         Kaynak: "public.v_cari_ekstre e",
         SubeKolonu: "e.sube_id",
         KapsamKolonu: "e.taraf_id",
-        GrupKolonu: "dovizCinsi",
-        GrupSiraKolonu: "dovizSira",
-        VarsayilanSirala: "e.doviz_sira asc, e.doviz_cinsi asc, e.islem_tarihi asc, e.id asc",
+        GrupKolonu: EkstreGrupKolonu,
+        GrupSiraKolonu: EkstreGrupSira,
+        VarsayilanSirala: EkstreSirala,
         Kolonlar: new KolonTanimi[]
         {
             new("id",           "e.id",           "sayi",  "Id", Varsayilan: false),
@@ -358,10 +367,6 @@ public static partial class KaynakKatalogu
             new("planTarihi",   "e.plan_tarihi",  "tarih", "Vade", Hizalama: "orta", Bicim: "dd.MM.yyyy", Varsayilan: false),
             new("subeId",       "e.sube_id",      "sayi",  "Sube", Varsayilan: false)
         });
-
-    // ---------------------------------------------------------- kasa islem ----
-    // Baslik listesi (makbuz seviyesi). Bacaklar "mali-hareket" listesindedir;
-    //   ikisi ayni veriye iki farkli granulariteden bakar.
 
     // ---------------------------------------------------------- kasa islem ----
     // Baslik listesi (makbuz seviyesi). Bacaklar "mali-hareket" listesindedir;

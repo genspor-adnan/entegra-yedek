@@ -533,33 +533,11 @@ public static class BelgeUclari
     }
 
     /// <summary>
-    /// Baslik alanlarini dogrular ve DB degerlerine cevirir. Beyaz liste:
-    /// katalogdaki kolon adlari disinda bir alan gelirse hata verilir.
+    /// Baslik alanlarini dogrular ve DB degerlerine cevirir. Dongu ORTAK
+    /// (BaslikDogrulayici); burada yalnizca belgeye ozgu alan tablolari var.
     /// </summary>
     private static Dictionary<string, object?> BaslikDegerleri(Dictionary<string, JsonElement>? gelen)
-    {
-        var sonuc = new Dictionary<string, object?>(StringComparer.Ordinal);
-        if (gelen is null) return sonuc;
-
-        foreach (var (ad, deger) in gelen)
-        {
-            var tip = BaslikTipi(ad)
-                ?? throw GentegreHatasi.Dogrulama($"Bilinmeyen belge alani: {ad}",
-                       new AlanHatasi(ad, "Belge basliginda boyle bir alan yok."));
-
-            var cevrilmis = DegerCevirici.Cevir(deger, tip, ad, ad);
-
-            // Uzunluk SUNUCUDA kesilir: aksi halde PG "value too long for type
-            //   character varying(5)" ile 500 veriyor, kullanici neyin uzun oldugunu
-            //   ogrenemiyordu (gercek vaka: istemci UTF-8'i bozunca "Hariç" 6 karakter oldu).
-            if (Uzunluk(ad) is { } sinir && cevrilmis is string m && m.Length > sinir)
-                throw GentegreHatasi.Dogrulama($"{ad}: en fazla {sinir} karakter.",
-                    new AlanHatasi(ad, $"En fazla {sinir} karakter ({m.Length} geldi)."));
-
-            sonuc[ad] = cevrilmis;
-        }
-        return sonuc;
-    }
+        => BaslikDogrulayici.Cevir(gelen, BaslikTipi, Uzunluk, "belge alani");
 
     private static string? BaslikTipi(string ad) => ad switch
     {

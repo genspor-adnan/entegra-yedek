@@ -256,35 +256,16 @@ public static class KasaUclari
         return kayit;
     }
 
+    /// <summary>Sunucunun kendi belirledigi alanlar - istekte gelemez.</summary>
+    private static readonly HashSet<string> SunucuAlanlari = new(StringComparer.Ordinal)
+        { "yerelTutar", "durum", "islemNo", "gerceklesenTutar", "muhasebeFisId" };
+
     /// <summary>
-    /// Baslik alan beyaz listesi. Katalogda olmayan bir alan gelirse istek
-    /// reddedilir - istemciden gelen ad hicbir zaman SQL'e girmez.
+    /// Baslik alan beyaz listesi - dongu ORTAK (BaslikDogrulayici); istemciden
+    /// gelen ad hicbir zaman SQL'e girmez.
     /// </summary>
     private static Dictionary<string, object?> BaslikDegerleri(Dictionary<string, JsonElement>? gelen)
-    {
-        var sonuc = new Dictionary<string, object?>(StringComparer.Ordinal);
-        if (gelen is null) return sonuc;
-
-        foreach (var (ad, deger) in gelen)
-        {
-            if (ad is "yerelTutar" or "durum" or "islemNo" or "gerceklesenTutar" or "muhasebeFisId")
-                throw GentegreHatasi.Dogrulama($"{ad} sunucuda belirlenir, istekte gönderilemez.",
-                    new AlanHatasi(ad, "Sunucu alanı."));
-
-            var tip = BaslikTipi(ad)
-                ?? throw GentegreHatasi.Dogrulama($"Bilinmeyen kasa işlemi alanı: {ad}",
-                       new AlanHatasi(ad, "Başlıkta böyle bir alan yok."));
-
-            var cevrilmis = DegerCevirici.Cevir(deger, tip, ad, ad);
-
-            if (Uzunluk(ad) is { } sinir && cevrilmis is string m && m.Length > sinir)
-                throw GentegreHatasi.Dogrulama($"{ad}: en fazla {sinir} karakter.",
-                    new AlanHatasi(ad, $"En fazla {sinir} karakter ({m.Length} geldi)."));
-
-            sonuc[ad] = cevrilmis;
-        }
-        return sonuc;
-    }
+        => BaslikDogrulayici.Cevir(gelen, BaslikTipi, Uzunluk, "kasa işlemi alanı", SunucuAlanlari);
 
     private static string? BaslikTipi(string ad) => ad switch
     {
