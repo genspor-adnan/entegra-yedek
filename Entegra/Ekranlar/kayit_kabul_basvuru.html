@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kayıt Kabul — Başvuru (Visit) — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    --s-acik:#e7f3ea; --s-acik-t:#24663a;   /* devam eden basvuru */
+    --s-ipt:#f0f2f4;  --s-ipt-t:#7b8794;    /* iptal / gelmedi    */
+    --s-acl:#fbe6ae;  --s-acl-t:#7a5407;    /* acil basvuru       */
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1240px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  /* Hasta arama seridi: kabul ekraninin GIRIS kapisi - once hasta bulunur. */
+  .arama{display:flex;gap:8px;align-items:flex-end;padding:9px 12px;background:linear-gradient(#ffffff,#f5f8fb);
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted);letter-spacing:.2px}
+  .fld label.req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-family:inherit;font-size:12px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .inp.ro{background:#f3f6fa;color:#4a5b6d}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  /* Secili hasta seridi: kimlik + kritik uyari her an gorunur. */
+  .hasta{display:grid;grid-template-columns:auto 1.3fr 1fr 1fr 1fr auto;gap:10px;align-items:center;
+    padding:9px 12px;background:#eaf2fb;border-bottom:1px solid var(--line2)}
+  .avatar{width:42px;height:42px;border-radius:50%;background:#cfe0f4;color:#2f6db3;display:flex;
+    align-items:center;justify-content:center;font-weight:bold;font-size:15px;border:1px solid #b7cfec}
+  .hasta .k{font-size:10.5px;color:var(--muted)}
+  .hasta .v{font-size:12.5px;font-weight:bold;color:var(--navy)}
+  .uyaribar{display:flex;gap:8px;align-items:center;padding:6px 12px;background:#fdeaea;
+    border-bottom:1px solid #f2caca;color:#8f2c2a;font-size:11.5px}
+  .wrap{display:flex;gap:0;align-items:stretch}
+  .center{flex:1;min-width:0;padding:12px}
+  .side{width:290px;flex:none;border-left:1px solid var(--line2);background:#f8fafc;padding:10px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);
+    border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .body{padding:10px}
+  .tag{font-size:9.5px;font-weight:bold;letter-spacing:.3px;margin-left:auto;
+    background:#eaf1f8;color:#3d6294;border:1px solid #cfe0f0;border-radius:3px;padding:1px 6px}
+  .grid4{display:grid;grid-template-columns:120px 1fr 120px 1fr;gap:8px 10px;align-items:center}
+  .grid4 label{font-size:11px;color:var(--muted);text-align:right}
+  .grid4 label.req::after{content:" *";color:var(--req)}
+  .full{grid-column:1 / -1}
+  textarea.inp{height:48px;padding:5px 6px;resize:none;line-height:1.35}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .seg .s{padding:4px 12px;font-size:11.5px;background:#fff;color:var(--muted);border-right:1px solid var(--line2)}
+  .seg .s:last-child{border-right:none}
+  .seg .s.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .seg .s.acil.on{background:linear-gradient(#e0605c,#c0413d);border-color:#a3312f}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr:hover td{background:#f2f7fd}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.s-acik td{background:var(--s-acik);color:var(--s-acik-t)}
+  .dg tr.s-ipt td{background:var(--s-ipt);color:var(--s-ipt-t)}
+  .dg tr.s-acl td{background:var(--s-acl);color:var(--s-acl-t)}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .gridtb{display:flex;gap:4px;padding:5px 0 0;flex-wrap:wrap;align-items:center}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-inf{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}
+  .sidebox{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:8px 9px;font-size:11.5px;line-height:1.6;margin-bottom:10px}
+  .sidebox h5{margin:0 0 5px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .sidebox b{color:var(--navy)}
+  .kuyruk{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted var(--line2)}
+  .kuyruk:last-child{border-bottom:none}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .req-note{color:var(--req)}
+</style>
+</head>
+<body>
+<div class="win">
+
+  <div class="title">
+    <span class="dot"></span> Kayıt Kabul — Başvuru (Visit)
+    <span class="sp">HBYS · Kayıt Kabul › Başvuru Aç &nbsp;|&nbsp; 27.08.2026 · MERKEZ HASTANE</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn ok">✔ Başvuruyu Aç (Protokol Ver)</div>
+    <div class="btn">🧾 Provizyon Al</div>
+    <div class="btn">🖨️ Protokol Fişi</div>
+    <div class="sepv"></div>
+    <div class="btn">👤 Hasta Kartını Aç</div>
+    <div class="btn">📅 Randevudan Getir</div>
+    <div class="btn">🚑 Acil Başvuru</div>
+    <div class="sepv"></div>
+    <div class="btn pas">🔁 Yatışa Çevir</div>
+    <div class="btn pas">💳 Tahsilat</div>
+    <div class="sepv"></div>
+    <div class="btn danger">✕ Başvuruyu İptal Et</div>
+  </div>
+
+  <!-- 1) HASTA BUL: TC / hasta no / protokol / ad-soyad. Yeni hastada
+       "Yeni Hasta Kaydı" hasta kimlik ekranini acar. -->
+  <div class="arama">
+    <div class="fld" style="width:150px">
+      <label>T.C. Kimlik No</label>
+      <div class="inp">12345678901</div>
+    </div>
+    <div class="fld" style="width:120px">
+      <label>Hasta No</label>
+      <div class="inp">000124587</div>
+    </div>
+    <div class="fld" style="width:230px">
+      <label>Ad Soyad</label>
+      <div class="inp">MERYEM AYDOĞAN</div>
+    </div>
+    <div class="fld" style="width:140px">
+      <label>Protokol No</label>
+      <div class="inp"></div>
+    </div>
+    <div class="btn primary">🔍 Ara (F3)</div>
+    <div class="btn">✚ Yeni Hasta Kaydı</div>
+    <div style="margin-left:auto;font-size:10.5px;color:var(--muted);align-self:center">
+      Kimlik doğrulama: <b>Kimlik kartı okuyucu</b> · <b>MERNİS</b>
+    </div>
+  </div>
+
+  <!-- 2) SECILI HASTA: kimlik + kritik uyari kabul boyunca ekranda kalir. -->
+  <div class="hasta">
+    <div class="avatar">MA</div>
+    <div>
+      <div class="k">Hasta</div>
+      <div class="v">MERYEM AYDOĞAN</div>
+    </div>
+    <div>
+      <div class="k">T.C. / Hasta No</div>
+      <div class="v">12345678901 · 000124587</div>
+    </div>
+    <div>
+      <div class="k">Doğum / Cinsiyet</div>
+      <div class="v">14.03.1979 · Kadın · 47 y</div>
+    </div>
+    <div>
+      <div class="k">Sigorta</div>
+      <div class="v">SGK 4/a <span class="pill p-ok">Müstehak</span></div>
+    </div>
+    <div style="text-align:right">
+      <div class="k">Açık Borç</div>
+      <div class="v">0,00 ₺</div>
+    </div>
+  </div>
+
+  <div class="uyaribar">
+    <b>⚠ Alerji:</b> Penisilin, kontrast madde &nbsp;·&nbsp; <b>Kronik:</b> Hipertansiyon (I10)
+    &nbsp;·&nbsp; <span class="pill p-kri">Son 10 gün içinde aynı branşta başvuru var (18.08.2026)</span>
+  </div>
+
+  <div class="wrap">
+    <div class="center">
+
+      <!-- 3) YENI BASVURU: protokol numarasi KAYDEDINCE verilir; ekranda
+           "atanacak" yazar. Numarayi onceden gostermek, vazgecilen kabulde
+           seride bosluk birakiyordu. -->
+      <div class="grp">
+        <h4>Yeni Başvuru <span class="tag">PROTOKOL</span></h4>
+        <div class="body">
+          <div class="grid4">
+            <label>Protokol No</label>
+            <div class="inp ro">(kaydedince atanacak)</div>
+            <label class="req">Başvuru Tarihi / Saati</label>
+            <div class="inp">27.08.2026 · 10:24</div>
+
+            <label class="req">Başvuru Türü</label>
+            <div class="full" style="grid-column:2 / -1">
+              <span class="seg">
+                <span class="s on">Poliklinik</span>
+                <span class="s acil">Acil</span>
+                <span class="s">Yatan Hasta</span>
+                <span class="s">Günübirlik</span>
+                <span class="s">Laboratuvar / Görüntüleme</span>
+              </span>
+            </div>
+
+            <label class="req">Geliş Şekli</label>   <div class="inp combo">Kendi imkânıyla</div>
+            <label>Geliş Nedeni</label>              <div class="inp combo">Kontrol</div>
+
+            <label class="req">Klinik / Branş</label><div class="inp combo">Dahiliye</div>
+            <label class="req">Hekim</label>         <div class="inp combo">Dr. Selim KARACA</div>
+
+            <label>Poliklinik Odası</label>          <div class="inp combo">Dahiliye-2 (Kat 1)</div>
+            <label>Sıra No</label>                   <div class="inp ro">A-037</div>
+
+            <label>Randevu</label>                   <div class="inp ro">27.08.2026 10:30 · MHRS · #772140</div>
+            <label>Refakatçi</label>                 <div class="inp">—</div>
+
+            <label class="full" style="text-align:left;color:var(--muted)">Başvuru Notu</label>
+            <textarea class="inp full">Tansiyon takibi; son tetkik sonuçları ile geldi.</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4) ODEME: kurum secimi provizyonu belirler. Ucretli hastada
+           MEDULA alanlari kapanir, fiyat listesi acilir. -->
+      <div class="grp">
+        <h4>Ödeme / Provizyon <span class="tag">MEDULA</span></h4>
+        <div class="body">
+          <div class="grid4">
+            <label class="req">Ödeme Türü</label>
+            <div class="full" style="grid-column:2 / -1">
+              <span class="seg">
+                <span class="s on">SGK</span>
+                <span class="s">Tamamlayıcı Sigorta</span>
+                <span class="s">Kurum Anlaşmalı</span>
+                <span class="s">Ücretli (Özel)</span>
+                <span class="s">Ücretsiz / Muaf</span>
+              </span>
+            </div>
+
+            <label>Kurum</label>            <div class="inp combo">SGK — 4/a Zorunlu</div>
+            <label>Fiyat Listesi</label>    <div class="inp combo">SUT 2026</div>
+
+            <label>Takip / Provizyon No</label><div class="inp">P2026-0083471</div>
+            <label>Provizyon Tipi</label>   <div class="inp combo">Normal</div>
+
+            <label>Müstehaklık</label>
+            <div class="inp ro">Müstehak · sorgu 27.08.2026 10:23 <span class="pill p-ok">Geçerli</span></div>
+            <label>Katılım Payı</label>     <div class="inp ro">%20 · Tahsil edilecek: 42,00 ₺</div>
+
+            <label>Sevkli mi?</label>       <div class="inp combo">Hayır</div>
+            <label>Sevk Eden Kurum</label>  <div class="inp ro">—</div>
+          </div>
+          <div class="hint">
+            SGK başvurusunda provizyon alınmadan protokol açılabilir; ancak <b>fatura kesilemez</b>.
+            Provizyon reddinde başvuru <b>Ücretli</b>ye çevrilir ve hastadan onay alınır.
+          </div>
+        </div>
+      </div>
+
+      <!-- 5) GECMIS BASVURULAR: ayni ekranda, cift tikla acilir. Kabul memuru
+           "daha once ne oldu" sorusunu baska ekrana gitmeden gorur. -->
+      <div class="grp">
+        <h4>Önceki Başvurular <span class="tag">14 kayıt</span></h4>
+        <div class="body">
+          <div class="gridtb" style="padding-bottom:6px">
+            <span class="minibtn on">Tümü</span>
+            <span class="minibtn">Poliklinik</span>
+            <span class="minibtn">Acil</span>
+            <span class="minibtn">Yatış</span>
+            <span class="minibtn">Açık (devam eden)</span>
+            <span style="margin-left:auto" class="minibtn">🖨️ Yazdır</span>
+          </div>
+          <div class="dg">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:34px" class="c">#</th>
+                  <th>Protokol</th><th>Tarih / Saat</th><th>Tür</th><th>Klinik</th><th>Hekim</th>
+                  <th>Tanı (ICD-10)</th><th>Ödeme</th><th>Durum</th>
+                  <th class="r">Tutar</th><th class="r">Hasta Payı</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="s-acik sel">
+                  <td class="c">1</td><td><b>2026-0091447</b></td><td>18.08.2026 09:12</td><td>Poliklinik</td>
+                  <td>Dahiliye</td><td>Dr. S. KARACA</td><td>I10 — Esansiyel HT</td><td>SGK</td>
+                  <td><span class="pill p-kri">Sonuç bekliyor</span></td>
+                  <td class="r">1.240,00</td><td class="r">42,00</td>
+                </tr>
+                <tr>
+                  <td class="c">2</td><td>2026-0088120</td><td>02.07.2026 14:35</td><td>Poliklinik</td>
+                  <td>Göz</td><td>Dr. N. ERTEN</td><td>H52.1 — Miyopi</td><td>SGK</td>
+                  <td><span class="pill p-ok">Kapandı</span></td>
+                  <td class="r">760,00</td><td class="r">38,00</td>
+                </tr>
+                <tr class="s-acl">
+                  <td class="c">3</td><td>2026-0071903</td><td>11.04.2026 23:48</td><td>Acil</td>
+                  <td>Acil Servis</td><td>Dr. B. TOPAL</td><td>R51 — Baş ağrısı</td><td>SGK</td>
+                  <td><span class="pill p-ok">Kapandı</span></td>
+                  <td class="r">2.185,50</td><td class="r">0,00</td>
+                </tr>
+                <tr>
+                  <td class="c">4</td><td>2025-0140277</td><td>19.11.2025 08:05</td><td>Yatış</td>
+                  <td>Genel Cerrahi</td><td>Op. Dr. M. ARAS</td><td>K80.2 — Safra taşı</td><td>SGK</td>
+                  <td><span class="pill p-ok">Taburcu</span></td>
+                  <td class="r">28.410,00</td><td class="r">0,00</td>
+                </tr>
+                <tr class="s-ipt">
+                  <td class="c">5</td><td>2025-0132118</td><td>03.10.2025 11:20</td><td>Poliklinik</td>
+                  <td>Kardiyoloji</td><td>Dr. E. SOLMAZ</td><td>—</td><td>SGK</td>
+                  <td><span class="pill p-inf">Gelmedi</span></td>
+                  <td class="r">0,00</td><td class="r">0,00</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr><td colspan="9">Toplam (14 başvuru)</td><td class="r">96.482,50</td><td class="r">1.184,00</td></tr>
+              </tfoot>
+            </table>
+          </div>
+          <div class="lgnd">
+            <span><i class="sw" style="background:var(--s-acik)"></i>Devam eden başvuru</span>
+            <span><i class="sw" style="background:var(--s-acl)"></i>Acil</span>
+            <span><i class="sw" style="background:var(--s-ipt)"></i>İptal / gelmedi</span>
+            <span style="margin-left:auto">Çift tık: başvuru detayını açar</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sag panel: kabul memurunun gun icinde bakip durdugu sayilar. -->
+    <div class="side">
+      <div class="sidebox">
+        <h5>Bugünkü Kabul</h5>
+        <div class="kuyruk"><span>Poliklinik</span><b>112</b></div>
+        <div class="kuyruk"><span>Acil</span><b>37</b></div>
+        <div class="kuyruk"><span>Yatan</span><b>9</b></div>
+        <div class="kuyruk"><span>İptal</span><b>4</b></div>
+      </div>
+
+      <div class="sidebox">
+        <h5>Dahiliye Kuyruğu</h5>
+        <div class="kuyruk"><span>Bekleyen</span><b>14</b></div>
+        <div class="kuyruk"><span>Muayenede</span><b>1</b></div>
+        <div class="kuyruk"><span>Ortalama bekleme</span><b>23 dk</b></div>
+        <div class="kuyruk"><span>Sıradaki no</span><b>A-036</b></div>
+      </div>
+
+      <div class="sidebox">
+        <h5>Kontrol Listesi</h5>
+        <div class="kuyruk"><span>Kimlik doğrulandı</span><span class="pill p-ok">✓</span></div>
+        <div class="kuyruk"><span>KVKK / onam</span><span class="pill p-ok">✓</span></div>
+        <div class="kuyruk"><span>Provizyon</span><span class="pill p-ok">Alındı</span></div>
+        <div class="kuyruk"><span>Katılım payı</span><span class="pill p-kri">Tahsil edilmedi</span></div>
+        <div class="kuyruk"><span>Randevu eşleşmesi</span><span class="pill p-ok">MHRS</span></div>
+      </div>
+
+      <div class="sidebox">
+        <h5>Kısayollar</h5>
+        <div class="kuyruk"><span>Ara</span><b>F3</b></div>
+        <div class="kuyruk"><span>Başvuru aç</span><b>F5</b></div>
+        <div class="kuyruk"><span>Provizyon</span><b>F6</b></div>
+        <div class="kuyruk"><span>Protokol fişi</span><b>Ctrl+P</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <span><b>basvuru</b> (visit): protokol_no, hasta_id, basvuru_tarihi, basvuru_turu, gelis_sekli, klinik_id, hekim_id, oda_id, sira_no, randevu_id, refakatci, durum, aciklama, sube_id</span>
+    <span><b>basvuru_odeme</b>: odeme_turu, kurum_id, fiyat_listesi_id, takip_no, provizyon_tipi, mustehaklik_durum, mustehaklik_tarih, katilim_payi, sevk_kurum_id</span>
+    <span><b>basvuru_hareket</b>: kabul → muayene → sonuç → kapanış izleri</span>
+  </div>
+
+  <div class="statusbar">
+    <span>Kullanıcı: <b>A. YILDIZ</b> · Kayıt Kabul</span>
+    <span>Şube: <b>MERKEZ HASTANE</b></span>
+    <span>Vardiya: <b>08:00 – 16:00</b></span>
+    <span>Bugün açılan protokol: <b>158</b></span>
+    <span class="req-note">* zorunlu alanlar</span>
+  </div>
+
+</div>
+</body>
+</html>
