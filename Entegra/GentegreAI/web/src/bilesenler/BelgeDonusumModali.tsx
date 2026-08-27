@@ -50,6 +50,8 @@ interface Props {
    * Listede yoksa ya da 0 ise ilk hedefe duser; kullanici combodan degistirir.
    */
   varsayilanHedef?: number;
+  /** Hedef listede secildi: combo degistirilemez (kullanici). */
+  hedefKilitli?: boolean;
   onKapat(): void;
   /** Donusum bittiginde cagrilir - cagiran yalnizca grid'i tazeler. */
   onTamam(yeni: BelgeYaniti): void;
@@ -62,7 +64,8 @@ interface Props {
  * kalan kaynak belgede durur. Miktar kontrolu SUNUCUDA yapilir (kaynak satirlar
  * kilitlenerek) - buradaki sinir yalnizca kullaniciyi erken uyarmak icindir.
  */
-export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, onKapat, onTamam }: Props) {
+export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKilitli,
+                                    onKapat, onTamam }: Props) {
   const [satirlar, setSatirlar] = useState<AcikSatir[]>([]);
   const [miktarlar, setMiktarlar] = useState<Record<number, string>>({});
   const [secili, setSecili] = useState<Record<number, boolean>>({});
@@ -181,7 +184,10 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, onKapat
             <div className="alan-izgara">
               <label className="alan">
                 <span className="etiket">Hedef Belge</span>
-                <select value={hedefTur} onChange={e => setHedefTur(Number(e.target.value))}>
+                {/* Hedef listeden secildiyse KILITLI - karar orada verildi. */}
+                <select value={hedefTur} disabled={hedefKilitli}
+                        title={hedefKilitli ? 'Hedef listede seçildi' : undefined}
+                        onChange={e => setHedefTur(Number(e.target.value))}>
                   {hedefler.map(h => <option key={h.kod} value={h.kod}>{h.ad}</option>)}
                 </select>
               </label>

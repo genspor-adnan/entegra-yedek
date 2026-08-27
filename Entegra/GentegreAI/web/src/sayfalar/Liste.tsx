@@ -10,7 +10,8 @@ import { ebelgeCiktisi } from './ebelgeIslem';
 import { Modal } from '../bilesenler/Modal';
 import { BelgeKarti } from './BelgeKarti';
 import { KasaIslemKarti } from './KasaIslemKarti';
-import { KASA_ARAC_MENUSU, LISTELER, type ListeTanimi } from './listeTanimlari';
+import { DONUSUM_MENUSU, KASA_ARAC_MENUSU, LISTELER, type ListeTanimi }
+  from './listeTanimlari';
 
 // Tanimlar ayri dosyada (listeTanimlari); disaridan alisilmis yol bozulmasin
 //   diye buradan da disa aktarilir (App.tsx / Kabuk.tsx LISTELER'i buradan alir).
@@ -51,7 +52,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   /** Mesaj gecmisi penceresi (178) - null iken kapali. */
   const [eBelgeMesajlari, setEBelgeMesajlari] =
     useState<{ belgeNo: string; satirlar: EBelgeMesaji[] } | null>(null);
-  const [donusum, setDonusum] = useState<{ belgeId: number; belgeTur: number } | null>(null);
+  const [donusum, setDonusum] =
+    useState<{ belgeId: number; belgeTur: number; hedef?: number } | null>(null);
   // Belge (fatura/siparis) karti da MODAL: liste arkada kalir, rota degismez.
   const [yeniBelgeTuru, setYeniBelgeTuru] = useState<number | null>(null);
   // Mevcut belgeyi ac (salt gorunum) - ayni modal, id ile.
@@ -140,6 +142,17 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   listeden bagimsiz. Ele aldiysa switch'e hic girmeyiz.
       if (satir && await ebelgeCiktisi(kod, satir, setEBelgeMesajlari,
                                        () => setYenile(t => t + 1))) return;
+
+      // DONUSUM ALT MENUSU: "belge.donustur.15" gibi kodlarda hedef tur
+      //   kodun icinde gelir ve karta KILITLI gecer.
+      if (kod.startsWith('belge.donustur.') && satir) {
+        setDonusum({
+          belgeId: Number(satir.id),
+          belgeTur: Number(satir.tur),
+          hedef: Number(kod.slice('belge.donustur.'.length)),
+        });
+        return;
+      }
 
       switch (kod) {
         // Grup basina bir giris: kart tur seridini o grubun turleriyle acar.
@@ -429,7 +442,7 @@ Bu işlem geri alınamaz. `
       ebelgeMenusu={tanim.ebelgeMenusu}
       gizliKolonlar={tanim.gizliKolonlar}
       kolonSirasi={tanim.kolonSirasi}
-      altSecenekler={KASA_ARAC_MENUSU}
+      altSecenekler={{ ...KASA_ARAC_MENUSU, ...DONUSUM_MENUSU }}
       yenile={yenile}
       odaklaSonEklenen={odaklaSonEklenen}
       icerikAlani={tanim.icerikAlani}
@@ -559,6 +572,10 @@ Bu işlem geri alınamaz. `
       <BelgeDonusumModali
         belgeId={donusum.belgeId}
         belgeTur={donusum.belgeTur}
+        varsayilanHedef={donusum.hedef}
+        // Hedef LISTEDE secildiyse kartta degistirilemez (kullanici): karar
+        //   zaten verilmis, ikinci kez sormak hata kapisi acar.
+        hedefKilitli={donusum.hedef != null}
         onKapat={() => setDonusum(null)}
         // Modal KAPANMAZ: sonucu (yeni belge no + tutar) kendi icinde gosterir.
         //   mesaj() kullanmak tarayici diyalogu acar ve sayfayi kilitler.

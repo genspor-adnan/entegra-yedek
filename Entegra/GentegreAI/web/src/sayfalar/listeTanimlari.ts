@@ -16,6 +16,23 @@ import type { Kosul } from '../api/sozlesme';
  * kesideci) - kayit ekrani Kasa planinin F5 fazinda gelecek. Menude durup
  * kaydedilemeyen (422) bir secenek gostermek yerine F5'te eklenecek.
  */
+/**
+ * "⇢ Dönüştür" alt menusu (kullanici): hedefi LISTEDE secmek, karti actiktan
+ * sonra combo'dan secmekten hizli. Secim karta KILITLI gider - kullanici zaten
+ * kararini vermistir, kartta ikinci kez sormak hata kapisi acar.
+ *
+ * Kod bicimi "belge.donustur.<hedef tur>"; hedef turler BelgeDonusumModali'ndaki
+ * HEDEFLER ile ayni (satis siparisi 19 -> 14/15/16/13).
+ */
+export const DONUSUM_MENUSU: Record<string, { kod: string; ad: string }[]> = {
+  'belge.donustur': [
+    { kod: 'belge.donustur.14', ad: '🚚 İrsaliye' },
+    { kod: 'belge.donustur.15', ad: '🧾 Fatura' },
+    { kod: 'belge.donustur.16', ad: '🧮 Fiş' },
+    { kod: 'belge.donustur.13', ad: '📑 Tahakkuk' },
+  ],
+};
+
 export const KASA_ARAC_MENUSU: Record<string, { kod: string; ad: string }[]> = {
   'kasa.tahsilat.yeni': [
     { kod: 'kasa.yeni.21', ad: '💵 Nakit' },
