@@ -622,7 +622,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         const y = await api.liste('fiyat-listesi', {
           sayfa: 1, boyut: 200,
           filtre: { op: 'and', kosullar: [
-            { alan: 'durum',   op: 'esit', deger: 'Aktif' },
+            // 'durum' HAM KOD kolonudur (sayi) - metin 'Aktif' gondermek
+            //   sunucuda tip hatasiyla 500 veriyordu, kutu hic dolmuyordu.
+            { alan: 'durum',   op: 'esit', deger: 1 },
             { alan: 'yonKodu', op: 'esit', deger: alisMi ? 1 : 2 },
           ] },
         });
@@ -963,12 +965,30 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             //   yonsuz belgelerde suzme yok.
             yon={depoBelgesi || stokFisiMi ? undefined : alisMi ? 'alis' : 'satis'}
             onKapat={() => setStokArama(false)}
-            onSec={sec => {
+            onSec={sec => void (async () => {
               // Secim "Son / Sik Aranan" sayacina islensin - listede oldugu gibi.
               void api.aramaIsaretle(
                 sec.tip === 'hizmet' ? 'hizmet' : 'stok', Number(sec.id));
-              setKalem(stokSecimindenKalem(sec, sonAnahtar(satirlar) + 1, yerelPara));
-            }}
+              const yeni = stokSecimindenKalem(sec, sonAnahtar(satirlar) + 1, yerelPara);
+              // FIYAT LISTESI ONCELIKLI (205/207): belgenin listesi varsa fiyat
+              //   ORADAN gelir; kartin kendi fiyati yalniz listede kalem yoksa
+              //   kalir. Fiyat kalem penceresi ACILMADAN once beklenir - pencere
+              //   `satir` prop'unu acilista kopyalar (useState), sonradan
+              //   gonderilen guncelleme pencereye ulasmaz.
+              if (fiyatListesiId) {
+                try {
+                  const f = await api.fiyatListesiFiyat(fiyatListesiId,
+                    sec.tip === 'hizmet' ? { hizmetId: Number(sec.id) } : { stokId: Number(sec.id) });
+                  if (f.fiyat !== null && f.fiyat > 0) {
+                    const metin = String(f.fiyat);
+                    yeni.birimFiyat = metin;
+                    yeni.dovizFiyat = metin;
+                    if (f.dovizCinsi) yeni.fiyatDovizi = f.dovizCinsi;
+                  }
+                } catch { /* liste fiyati alinamazsa kart fiyati kalir */ }
+              }
+              setKalem(yeni);
+            })()}
           />
         )}
 

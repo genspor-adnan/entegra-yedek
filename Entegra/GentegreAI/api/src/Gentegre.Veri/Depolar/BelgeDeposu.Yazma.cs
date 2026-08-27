@@ -24,6 +24,9 @@ public sealed partial class BelgeDeposu
         ["belgeTarihi"] = "belge_tarihi", ["irsaliyeNo"] = "irsaliye_no",
         ["irsaliyeTarihi"] = "irsaliye_tarihi", ["girisDepoId"] = "giris_depo_id",
         ["cikisDepoId"] = "cikis_depo_id", ["subeId"] = "sube_id", ["projeId"] = "proje_id",
+        // Belgenin fiyat listesi (205): uc whitelist'inde vardi ama bu sozlukte
+        //   eksikti - istek kabul edilip alan SESSIZCE atlaniyordu.
+        ["fiyatListesiId"] = "fiyat_listesi_id",
         ["kdvDurum"] = "kdv_durum", ["belgeDovizi"] = "belge_dovizi",
         ["dovizCinsi"] = "doviz_cinsi", ["dovizKuru"] = "doviz_kuru", ["kur"] = "kur",
         ["raporDovizi"] = "rapor_dovizi", ["ekstreDovizi"] = "ekstre_dovizi",
