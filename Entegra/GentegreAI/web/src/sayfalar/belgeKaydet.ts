@@ -1,5 +1,6 @@
 import type { BelgeYaniti } from '../api/sozlesme';
 import type { SatirDurumu } from './belgeSatir';
+import { hamSayi } from '../bilesenler/bicim';
 
 /** Kart uzerinde secilen bir kayit (cari, depo, tasiyici, personel...). */
 export interface Secim { id: number; ad: string }
@@ -137,7 +138,7 @@ return {
     belgeDovizi: yerelPara,
     raporDovizi,
     ekstreDovizi,
-    dovizKuru: Number(String(belgeKuru).replace(',', '.')) || 1,
+    dovizKuru: hamSayi(belgeKuru) || 1,
     vadeGun: Number(vadeGun) || 0,
     subeId,
     // Depo ALANI ture gore: alista giris, satista cikis (stok yonu buradan).
@@ -184,23 +185,23 @@ return {
     // `adet` GIRILEN miktardir (2 kutu); ANA BIRIM karsiligini (24 adet)
     //   sunucu carpandan hesaplar - iki yerde hesaplamak iki farkli sonuc
     //   demekti, o yuzden `miktar` GONDERILMEZ (143).
-    adet: Number(s.adet.replace(',', '.')) || 0,
-    birimFiyat: Number(s.birimFiyat.replace(',', '.')) || 0,
+    adet: hamSayi(s.adet),
+    birimFiyat: hamSayi(s.birimFiyat),
     // SATIR BAZLI DOVIZ: bir kalem 100 USD, digeri 100 TL olabilir (kullanici).
     //   Yerel birim fiyat her zaman yazilir; doviz alanlari yalniz satir kendi
     //   para biriminde girildiyse gider (sunucu ikisini birbirinden turetiyor).
     dovizCinsi: s.fiyatDovizi || undefined,
     dovizBirimFiyat: s.fiyatDovizi && s.fiyatDovizi !== yerelPara
-      ? Number(String(s.dovizFiyat).replace(',', '.')) || 0
+      ? hamSayi(s.dovizFiyat)
       : undefined,
     dovizKuru: s.fiyatDovizi && s.fiyatDovizi !== yerelPara
-      ? Number(String(s.kur).replace(',', '.')) || 1
+      ? hamSayi(s.kur) || 1
       : undefined,
-    iskonto: stokFisiMi ? 0 : Number(s.iskonto.replace(',', '.')) || 0,
-    iskonto2: stokFisiMi ? 0 : Number(s.iskonto2.replace(',', '.')) || 0,
+    iskonto: stokFisiMi ? 0 : hamSayi(s.iskonto),
+    iskonto2: stokFisiMi ? 0 : hamSayi(s.iskonto2),
     // Stok fisi vergi dogurmaz: stok kartindan gelen KDV/iskonto sifirlanir
     //   (yoksa dip toplam vergili cikip muhasebe matrahini sisirir).
-    kdv: stokFisiMi ? 0 : Number(s.kdv.replace(',', '.')) || 0,
+    kdv: stokFisiMi ? 0 : hamSayi(s.kdv),
     aciklama: s.aciklama,
     // IADE satiri kaynak fatura satirina baglanir (kaynak_tur 30): iade edilen
     //   miktar bu bagdan turetilir, ayni kalem iki kez iade edilemez (132).
@@ -223,7 +224,7 @@ return {
           uretimTarihi: z.uretimTarihi || null,
           sonKullanmaTarihi: z.sonKullanmaTarihi || null,
           durum: z.durum,
-          miktar: Number(z.miktar.replace(',', '.')) || 0,
+          miktar: hamSayi(z.miktar),
         }))
       : undefined,
   })),

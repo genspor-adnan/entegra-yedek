@@ -7,7 +7,7 @@ import {
   type KartMetaYaniti, type KartYetkisi, hataMetni } from '../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, bosDetay, detayFarki } from './GenDetayTablo';
 import { Modal } from './Modal';
-import { yerelAnMetni } from '../sayfalar/belgeSabitleri';
+import { yerelAnMetni, bugunIso, hamSayi } from './bicim';
 import { PaketSekmesi } from './PaketSekmesi';
 import { KartGrupSekmesi } from './kart/KartGrupSekmesi';
 import { alanCizici, type Deger } from './kartAlanCizim';
@@ -236,7 +236,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       return;
     }
     let iptal = false;
-    const tarih = dovizTarihi || new Date().toISOString().slice(0, 10);
+    const tarih = dovizTarihi || bugunIso();
     setKurNotu('Kur alınıyor…');
     api.dovizKur(dovizCinsi, tarih)
       .then(y => {
@@ -258,8 +258,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
   /** Yerel karsilik ONIZLEMESI - kaydederken sunucu yeniden hesaplar. */
   const yerelTutar = useMemo(() => {
     if (!doviz) return 0;
-    const tutar = Number(String(deger[doviz.tutarAlani] ?? '0').replace(',', '.')) || 0;
-    const kur = Number(String(deger[doviz.kurAlani] ?? '1').replace(',', '.')) || 1;
+    const tutar = hamSayi(deger[doviz.tutarAlani] ?? '0');
+    const kur = hamSayi(deger[doviz.kurAlani] ?? '1') || 1;
     return tutar * kur;
   }, [doviz, deger]);
 

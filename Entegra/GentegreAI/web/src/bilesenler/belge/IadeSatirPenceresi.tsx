@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal } from '../Modal';
+import { hamSayi as sayi } from '../bicim';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { para } from '../bicim';
@@ -96,7 +97,6 @@ export function IadeSatirPenceresi({ tarafId, tarafUnvan, belgeId, turler, onSec
   const miktarYaz = (satirId: number, deger: string) =>
     setSecili(s => ({ ...s, [satirId]: deger }));
 
-  const sayi = (m: string) => Number(String(m).replace(',', '.')) || 0;
 
   const secilenler = satirlar
     .filter(r => secili[r.satirId] !== undefined)

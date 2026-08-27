@@ -1,5 +1,6 @@
 import { type SatirDurumu, bosSatir } from './belgeSatir';
 import type { IadeSatiri } from '../bilesenler/belge/IadeSatirPenceresi';
+import { hamSayi } from '../bilesenler/bicim';
 
 /**
  * KALEM URETIMI - secimden belge satirina.
@@ -61,7 +62,7 @@ export function paketIcerigiUygula(
                      kdv?: number; izleme?: number; fiyat?: number }[],
 ): SatirDurumu[] {
   const temiz = mevcut.filter(x => x.paketAnahtar !== paket.anahtar);
-  const adet = Number(paket.adet.replace(',', '.')) || 1;
+  const adet = hamSayi(paket.adet) || 1;
   let anahtar = sonAnahtar(temiz);
   const yeniler = icerik.map(i => ({
     ...bosSatir(++anahtar),

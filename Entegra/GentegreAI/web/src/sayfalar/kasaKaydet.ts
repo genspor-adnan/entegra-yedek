@@ -1,4 +1,4 @@
-import { sayiOku as sayi } from './belgeSabitleri';
+import { sayiOku as sayi, hamSayi } from '../bilesenler/bicim';
 
 /**
  * KASA ISLEMI - dogrulama ve istek govdesi (SAF).
@@ -91,7 +91,7 @@ export function kasaGovdesi(g: KasaGirdisi, taslak: boolean, plan: boolean) {
       // Ekstre dovizi (139): yerel islemde anlamsiz - bos gider, sunucu islem
       //   dovizini kullanir.
       ekstreDovizi: dovizli ? g.ekstreDovizi : '',
-      dovizKuru: Number(g.kur.replace(',', '.')) || 1,
+      dovizKuru: hamSayi(g.kur) || 1,
       karsiDovizCinsi: donusum ? g.karsiHesap?.doviz ?? '' : '',
       karsiTutar: donusum ? sayi(g.karsiTutar) : 0,
       masrafTutar: sayi(g.masrafTutar),

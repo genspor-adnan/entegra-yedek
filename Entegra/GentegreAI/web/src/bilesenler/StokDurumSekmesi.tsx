@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { type StokDurumYaniti, type StokLotSatiri, hataMetni } from '../api/sozlesme';
-import { say4, gunMetni } from './bicim';
+import { say4, gunMetni, sayiOkuNull as sayiCoz } from './bicim';
 
 
 /** "2027-06-30T00:00:00" -> "30.06.2027"; bos ise tire. */
@@ -42,12 +42,6 @@ function lotTablosu(satirlar: StokLotSatiri[]) {
 const limitMetni = (d: number | null | undefined) =>
   d === null || d === undefined ? '' : say4.format(Number(d));
 
-const sayiCoz = (m: string): number | null => {
-  const t = m.trim();
-  if (t === '') return null;
-  const s = Number(t.replace(/\./g, '').replace(',', '.'));
-  return Number.isFinite(s) ? s : null;
-};
 
 /**
  * Stok kartı "Stok Durumu" sekmesi — Ekranlar/stok_karti.html.

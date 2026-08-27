@@ -5,7 +5,9 @@ import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
 import { type AksiyonYaniti, type KolonMeta, type Kosul, type ListeSatiri, type ListeYaniti,
          type Siralama, hataMetni } from '../api/sozlesme';
-import { bicimle } from './bicim';
+import { bicimle, bugunIso } from './bicim';
+import { csvMetni, CSV_TIPI } from './csv';
+import { dosyaIndir, dosyaAdiTemiz } from './indir';
 import { GenKomutPaleti, GenSagTus, GenToolbar, hedefte, useAksiyonlar,
          type AltSecenek } from './Aksiyonlar';
 import { Modal } from './Modal';
@@ -448,21 +450,10 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
         if (tumu.length >= y.toplamKayit || y.satirlar.length === 0) break;
       }
 
-      // Excel-TR uyumu: ayirici ';' ve UTF-8 BOM (yoksa Turkce karakter bozulur).
-      const kacir = (m: string) =>
-        (/[";\r\n]/.test(m) ? `"${m.replace(/"/g, '""')}"` : m);
-      const satirlar = [
-        kolonlar.map(k => kacir(cev(k.baslik))).join(';'),
-        ...tumu.map(r => kolonlar.map(k => kacir(bicimle(r[k.ad], k))).join(';')),
-      ];
-      const ad = `${(baslik ?? kaynak).replace(/[\/:*?"<>|]/g, '')}-${new Date().toISOString().slice(0, 10)}.csv`;
-      const bag = document.createElement('a');
-      // '﻿' = UTF-8 BOM: Excel bunu gormezse Turkce karakterler bozulur.
-      bag.href = URL.createObjectURL(
-        new Blob(['﻿' + satirlar.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
-      bag.download = ad;
-      bag.click();
-      URL.revokeObjectURL(bag.href);
+      const metin = csvMetni(
+        kolonlar.map(k => cev(k.baslik)),
+        tumu.map(r => kolonlar.map(k => bicimle(r[k.ad], k))));
+      dosyaIndir(metin, `${dosyaAdiTemiz(baslik ?? kaynak)}-${bugunIso()}.csv`, CSV_TIPI);
     } catch (h) {
       setHata(hataMetni(h));
     } finally { setYukleniyor(false) }

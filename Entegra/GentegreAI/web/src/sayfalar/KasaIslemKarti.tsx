@@ -9,10 +9,8 @@ import { TarafSecici } from '../bilesenler/TarafArama';
 import { FisOnizleme } from '../bilesenler/kasa/FisOnizleme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { Modal } from '../bilesenler/GenForm';
-import { para } from '../bilesenler/bicim';
-import {
-  DOVIZ_KODLARI, YEREL_PARA_VARSAYILAN, yerelAnMetni, sayiOku as sayi, tutarMetni,
-} from './belgeSabitleri';
+import { para, yerelAnMetni, bugunIso, sayiOku as sayi, tutarMetni, hamSayi } from '../bilesenler/bicim';
+import { DOVIZ_KODLARI, YEREL_PARA_VARSAYILAN } from './belgeSabitleri';
 import { kasaDogrula, kasaGovdesi, kasaTurBilgisi, type KasaGirdisi } from './kasaKaydet';
 
 
@@ -128,7 +126,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   // Plan gerceklestirme paneli
   const [gHesap, setGHesap] = useState<HesapSecimi | null>(null);
   const [gTutar, setGTutar] = useState('');
-  const [gTarih, setGTarih] = useState(new Date().toISOString().slice(0, 10));
+  const [gTarih, setGTarih] = useState(bugunIso);
 
   const [sonuc, setSonuc] = useState<KasaIslemYaniti | null>(null);
   const [calisiyor, setCalisiyor] = useState(false);
@@ -252,7 +250,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     })();
   }, [anaDoviz, tarih, grup, kilitli]);
 
-  const yerelOnizleme = sayi(tutar) * (Number(kur.replace(',', '.')) || 1);
+  const yerelOnizleme = sayi(tutar) * (hamSayi(kur) || 1);
   // Doviz donusumunde efektif kur: verilen yerel tutar / alinan doviz tutari.
   const caprazKur = donusum && sayi(karsiTutar) > 0 ? yerelOnizleme / sayi(karsiTutar) : 0;
 

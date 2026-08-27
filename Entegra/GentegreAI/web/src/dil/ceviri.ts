@@ -100,7 +100,9 @@ export function eksikCeviriler(): string[] {
   return [...eksikler].sort();
 }
 
-/** Yüklü dil - bileşenler tazeleme anahtarı olarak kullanır. */
-export function yukluDilKodu(): number {
-  return yukluDil;
+// Dokumantasyonda "eksik ceviriler toplanip sozluge eklenebilir" yaziyordu ama
+//   fonksiyonun cagiran hicbir yeri yoktu - gelistirme derlemesinde konsoldan
+//   `eksikCeviriler()` yazilabilsin diye burada baglanir.
+if (import.meta.env.DEV) {
+  (globalThis as unknown as Record<string, unknown>).eksikCeviriler = eksikCeviriler;
 }

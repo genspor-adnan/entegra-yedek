@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
-import { para } from '../bicim';
-import { iskonatoMetni, satirTutari, tarihSaat, type SatirDurumu } from '../../sayfalar/belgeSatir';
+import { para, tarihSaat, hamSayi as sayi } from '../bicim';
+import { iskonatoMetni, satirTutari, type SatirDurumu } from '../../sayfalar/belgeSatir';
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
 import type { BelgeYaniti } from '../../api/sozlesme';
 
@@ -20,7 +20,6 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     setStokArama, setKalem, seciliSil, satirTikla, sonTiklanan, secimDegis, doviz,
   } = p;
 
-  const sayi = (m: unknown) => Number(String(m ?? '').replace(',', '.')) || 0;
   const yerelPara = doviz?.yerelPara ?? 'TL';
 
   /**
@@ -145,8 +144,8 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     </thead>
     <tbody>
       {satirlar.map((r, sira) => {
-        const adet = Number(r.adet.replace(',', '.')) || 0;
-        const fiyat = Number(r.birimFiyat.replace(',', '.')) || 0;
+        const adet = sayi(r.adet);
+        const fiyat = sayi(r.birimFiyat);
         const tutar = satirTutari(adet, fiyat, r.iskonto, r.iskonto2);
         const secili = seciliSatirlar.has(r.anahtar);
         // Izlemli kalemin lotlari ALTINDA acilir (master-detail):
@@ -242,7 +241,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                         <td>{z.uretimTarihi ? z.uretimTarihi.split('-').reverse().join('.') : '—'}</td>
                         <td>{z.sonKullanmaTarihi ? z.sonKullanmaTarihi.split('-').reverse().join('.') : '—'}</td>
                         <td className="hiza-sag">
-                          {(Number(String(z.miktar).replace(',', '.')) || 0).toLocaleString('tr-TR')}
+                          {(sayi(z.miktar)).toLocaleString('tr-TR')}
                         </td>
                       </tr>
                     ))}
@@ -268,7 +267,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
       <tr className="genel">
         <td colSpan={aciklamaVar ? 5 : 4} className="hiza-sag">TOPLAM</td>
         <td className="hiza-sag">
-          {satirlar.reduce((t, r) => t + (Number(r.adet.replace(',', '.')) || 0), 0)
+          {satirlar.reduce((t, r) => t + (sayi(r.adet)), 0)
                    .toLocaleString('tr-TR')}
         </td>
         {bilgi.kalem !== 'miktar' && <td colSpan={bilgi.kalem === 'sade' ? 1 : 3} />}

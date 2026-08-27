@@ -8,6 +8,7 @@
  * KURAL: buradaki hesaplar ONIZLEMEDIR - kesin tutari sunucu (BelgeHesap)
  * hesaplar. Ikisi ayni sirayi izler ki ekran ile kayit uyusun.
  */
+import { hamSayi } from '../bilesenler/bicim';
 
 export interface SatirDurumu {
   anahtar: number;
@@ -105,12 +106,7 @@ export function tariheEkle(iso: string, sure: number, birim: number, yon: 1 | -1
   const p = (n: number) => String(n).padStart(2, '0');
   return `${t.getFullYear()}-${p(t.getMonth() + 1)}-${p(t.getDate())}`;
 }
-/** Bugunun ISO tarihi (yerel) - SKT gecmis mi kontrolu icin. */
-export const bugunIso = () => {
-  const t = new Date();
-  const p = (n: number) => String(n).padStart(2, '0');
-  return `${t.getFullYear()}-${p(t.getMonth() + 1)}-${p(t.getDate())}`;
-};
+// bugunIso / tarihSaat `bilesenler/bicim.ts`e tasindi (tek bicim evi).
 
 /** Yururlukteki ve gecmis KDV oranlari - eski belgeler %8/%18 tasiyor. */
 export const KDV_ORANLARI = [0, 1, 8, 10, 18, 20] as const;
@@ -134,24 +130,16 @@ export const bosSatir = (anahtar: number): SatirDurumu => ({
  * once (adet x fiyat) yuvarlanir, sonra iki iskonto CARPIMSAL uygulanir.
  * Kesin tutar yine sunucudan gelir; bu yalniz ekranda anlik gosterim.
  */
-/** "2026-08-23T14:05:00" -> "23.08.2026 14:05" (saat yoksa yalniz tarih). */
-export function tarihSaat(ham: unknown): string {
-  const metin = String(ham ?? '');
-  if (!metin) return '';
-  const gun = metin.slice(0, 10).split('-').reverse().join('.');
-  const saat = metin.slice(11, 16);
-  return saat && saat !== '00:00' ? `${gun} ${saat}` : gun;
-}
 /** Gridde iskonto gosterimi: tek iskonto "%10", iki kademeli "%10 + %5". */
 export function iskonatoMetni(r: { iskonto: string; iskonto2: string }): string {
-  const i1 = Number(r.iskonto.replace(',', '.')) || 0;
-  const i2 = Number(r.iskonto2.replace(',', '.')) || 0;
+  const i1 = hamSayi(r.iskonto);
+  const i2 = hamSayi(r.iskonto2);
   if (!i1 && !i2) return '';
   return i2 ? `%${i1} + %${i2}` : `%${i1}`;
 }
 export function satirTutari(adet: number, fiyat: number, iskonto: string, iskonto2: string): number {
-  const i1 = Number(iskonto.replace(',', '.')) || 0;
-  const i2 = Number(iskonto2.replace(',', '.')) || 0;
+  const i1 = hamSayi(iskonto);
+  const i2 = hamSayi(iskonto2);
   return Math.round(adet * fiyat * 100) / 100 * ((100 - i1) / 100) * ((100 - i2) / 100);
 }
 
@@ -221,7 +209,7 @@ export function yanittanSatirlar(
  * belge satirinda anlamsiz, dugmeyle oraya inilemez.
  */
 export function adetKaydir(deger: string, yon: number): string {
-  const sayi = Number(deger.replace(',', '.')) || 0;
+  const sayi = hamSayi(deger);
   const yeni = Math.max(1, sayi + yon);
   return Number.isInteger(yeni) ? String(yeni) : yeni.toFixed(2).replace('.', ',');
 }

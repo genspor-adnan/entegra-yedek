@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import { hataMetni, type ListeSatiri } from '../../api/sozlesme';
 import { GenGrid } from '../GenGrid';
 import { Modal } from '../Modal';
+import { dosyaIndirUrl } from '../indir';
 
 /**
  * XSLT SABLONLARI — belge GIB'e XML gider, insanin gordugu goruntu bu sablon
@@ -96,14 +97,7 @@ export function XsltSablonlari() {
     try {
       const url = await api.dokumanIcerikUrl(Number(secili.id));
       const ad = String(secili.ad ?? 'sablon');
-      const bag = document.createElement('a');
-      bag.href = url;
-      bag.download = /\.(xsl|xslt|xml)$/i.test(ad) ? ad : `${ad}.xslt`;
-      document.body.appendChild(bag);
-      bag.click();
-      bag.remove();
-      // Blob URL'i birak - yoksa sekme kapanana kadar bellekte kalir.
-      setTimeout(() => URL.revokeObjectURL(url), 10_000);
+      dosyaIndirUrl(url, /\.(xsl|xslt|xml)$/i.test(ad) ? ad : `${ad}.xslt`, true);
     } catch (h) { setHata(hataMetni(h)) }
   };
 

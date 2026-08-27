@@ -200,16 +200,3 @@ export function GenLookup({
     </div>
   );
 }
-
-/** Sik kullanilan iki lookup icin hazir alan kumeleri. */
-export const LOOKUP_CARI = [
-  { ad: 'kod', baslik: 'Kod' },
-  { ad: 'unvan', baslik: 'Unvan', genis: true },
-  { ad: 'vkno', baslik: 'VKN/TCKN' },
-];
-
-export const LOOKUP_STOK = [
-  { ad: 'kod', baslik: 'Kod' },
-  { ad: 'ad', baslik: 'Stok Adi', genis: true },
-  { ad: 'kdv', baslik: 'KDV' },
-];

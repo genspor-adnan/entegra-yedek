@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import { type AcikSatir, type BelgeYaniti, hataMetni } from '../api/sozlesme';
 import { Modal } from './GenForm';
-import { para, say4 } from './bicim';
+import { para, say4, bugunIso, sayiOku as sayi } from './bicim';
 
 
 /**
@@ -74,7 +74,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
     return liste.some(h => h.kod === varsayilanHedef)
       ? varsayilanHedef! : (liste[0]?.kod ?? 0);
   });
-  const [tarih, setTarih] = useState(new Date().toISOString().slice(0, 10));
+  const [tarih, setTarih] = useState(bugunIso);
   const [belgeNo, setBelgeNo] = useState('');
   /* Taslak kutusu kaldirildi (kullanici) - donusum hep KESIN belge uretir. */
   const taslak = false;
@@ -100,7 +100,6 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
 
   const hedefler = HEDEFLER[belgeTur] ?? [];
   const disNumarali = DIS_NUMARALI.has(hedefTur);
-  const sayi = (m: string) => Number(m.replace(/\./g, '').replace(',', '.')) || 0;
 
   const toplam = useMemo(() =>
     satirlar.reduce((t, s) => secili[s.satirId]

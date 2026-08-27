@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import { type BelgeYaniti, hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import type { SatirDurumu } from '../../sayfalar/belgeSatir';
+import { hamSayi } from '../bicim';
 
 /**
  * TERMIN GUNCELLEME (140) - siparis satirlarinin teslim tarihi.
@@ -98,7 +99,7 @@ export function TerminModali({ belgeId, satirlar, onKapat, onTamam }: {
                   <td><code>{s.stokKodu || '—'}</code></td>
                   <td>{s.stokAdi || s.aciklama}</td>
                   <td className="hiza-sag">
-                    {(Number(s.adet.replace(',', '.')) || 0).toLocaleString('tr-TR')}
+                    {(hamSayi(s.adet)).toLocaleString('tr-TR')}
                   </td>
                   <td className="hiza-orta sonuk">
                     {s.teslimTarihi ? s.teslimTarihi.split('-').reverse().join('.') : '—'}

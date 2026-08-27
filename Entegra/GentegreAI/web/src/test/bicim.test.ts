@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { ApiHatasi, hataMetni } from '../api/sozlesme';
-import { gunMetni, kidemMetni } from '../bilesenler/bicim';
-import { sayiOku, tutarMetni } from '../sayfalar/belgeSabitleri';
-import { tarihSaat, tariheEkle } from '../sayfalar/belgeSatir';
+import { gunMetni, kidemMetni, sayiOku, tutarMetni, tarihSaat, hamSayi, bugunIso } from '../bilesenler/bicim';
+
+import { tariheEkle } from '../sayfalar/belgeSatir';
 
 describe('hataMetni', () => {
   const hata = (kod: string, mesaj: string) =>
@@ -54,6 +54,46 @@ describe('sayiOku / tutarMetni', () => {
       expect(sayiOku(tutarMetni(ham))).toBeCloseTo(Number(ham), 2);
     }
     expect(sayiOku('1234.56')).not.toBe(1234.56);   // dogrudan verilirse bozulur
+  });
+});
+
+/**
+ * `hamSayi` SUNUCUDAN gelen degeri cozer: orada nokta ONDALIK ayracidir.
+ * `sayiOku` ile ayni fonksiyon olamaz - ayni girdide farkli sonuc vermeleri
+ * GEREKIR; ikisini birlestirmek yukaridaki 100-kat hatasini geri getirir.
+ */
+describe('hamSayi', () => {
+  it('nokta ONDALIK sayilir (sayiOku ile ayni degil)', () => {
+    expect(hamSayi('1234.56')).toBe(1234.56);
+    expect(hamSayi('1234,56')).toBe(1234.56);   // virgul de kabul
+    expect(hamSayi('1234.56')).not.toBe(sayiOku('1234.56'));
+  });
+
+  it('sayi/null/bos girdide cokmez', () => {
+    expect(hamSayi(1234.56)).toBe(1234.56);
+    expect(hamSayi(null)).toBe(0);
+    expect(hamSayi(undefined)).toBe(0);
+    expect(hamSayi('')).toBe(0);
+    expect(hamSayi('abc')).toBe(0);
+  });
+});
+
+/**
+ * `bugunIso` YEREL gunu vermeli. `toISOString()` UTC'ye cevirdigi icin TR'de
+ * saat 03:00'ten sonraki anlarda bir SONRAKI gunu yaziyordu - bes ekranda
+ * (belge donusum tarihi, stok hareket bitis tarihi, kasa tarihi, doviz kuru
+ * tarihi, CSV dosya adi) bu hata duruyordu.
+ */
+describe('bugunIso', () => {
+  it('yerel gunu verir, UTC gunu degil', () => {
+    // TR (UTC+3) gece yarisindan hemen sonra: UTC'de HALA onceki gun.
+    const geceYarisi = new Date(2026, 7, 25, 0, 30, 0);
+    expect(bugunIso(geceYarisi)).toBe('2026-08-25');
+    expect(geceYarisi.toISOString().slice(0, 10)).not.toBe('2026-08-25');
+  });
+
+  it('ay ve gunu iki hane yazar', () => {
+    expect(bugunIso(new Date(2026, 0, 5))).toBe('2026-01-05');
   });
 });
 

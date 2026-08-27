@@ -9,11 +9,11 @@ import { TarafArama } from '../bilesenler/TarafArama';
 import { belgeTuruBilgisi, GIRILEBILIR_TURLER, VARSAYILAN_TUR } from './belgeTuru';
 import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { useOturum } from '../kimlik/OturumBaglami';
-import { para } from '../bilesenler/bicim';
+import { para, yerelAnMetni, hamSayi } from '../bilesenler/bicim';
 import { type SatirDurumu, satirTutari, yanittanSatirlar } from './belgeSatir';
 import { belgeDogrula, belgeGovdesi, doluSatirlar, type BelgeGirdisi } from './belgeKaydet';
 import {
-  YEREL_PARA_VARSAYILAN, GERIYE_GUN_VARSAYILAN, yerelAnMetni, KAPANMA_ETIKET,
+  YEREL_PARA_VARSAYILAN, GERIYE_GUN_VARSAYILAN, KAPANMA_ETIKET,
 } from './belgeSabitleri';
 import { KalemPenceresi } from '../bilesenler/belge/KalemPenceresi';
 import { TerminModali } from '../bilesenler/belge/TerminModali';
@@ -445,10 +445,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const onizleme = useMemo(() => {
     let matrah = 0, kdv = 0;
     satirlar.forEach(s => {
-      const adet = Number(s.adet.replace(',', '.')) || 0;
-      const fiyat = Number(s.birimFiyat.replace(',', '.')) || 0;
+      const adet = hamSayi(s.adet);
+      const fiyat = hamSayi(s.birimFiyat);
       // Stok fisi vergisizdir (asagida satir da 0 ile gonderilir).
-      const oran = stokFisiMi ? 0 : Number(s.kdv.replace(',', '.')) || 0;
+      const oran = stokFisiMi ? 0 : hamSayi(s.kdv);
       const tutar = stokFisiMi ? adet * fiyat
                                : satirTutari(adet, fiyat, s.iskonto, s.iskonto2);
       matrah += tutar;
@@ -485,7 +485,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     //   asagidaki kutudan kendisi secer.
     if (satir.fiyatDovizi && satir.fiyatDovizi !== yerelPara && raporDovizi === yerelPara) {
       setRaporDovizi(satir.fiyatDovizi);
-      const k = Number(String(satir.kur).replace(',', '.')) || 0;
+      const k = hamSayi(satir.kur);
       if (k > 0) setBelgeKuru(String(k));
     }
 

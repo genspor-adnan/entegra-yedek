@@ -363,10 +363,9 @@ export interface AcikSatir {
   kapanmaDurum: number;
 }
 
-/** belge.kapanma_durum */
-export const KAPANMA_DURUM: Record<number, string> = {
-  0: 'Açık', 1: 'Kısmi Dönüştü', 2: 'Kapandı',
-};
+// belge.kapanma_durum etiketleri BURADA DEGIL: `sayfalar/belgeSabitleri.ts`
+//   icindeki KAPANMA_ETIKET tek kaynak (rozet sinifini da tasir). Burada
+//   ikinci bir kopya duruyordu ve hic cagrilmiyordu.
 
 // -------------------------------------------------------------- referans ----
 /** Il/Ilce/Ulke (039_il_ilce_ulke.sql) - Adresler grid'inde il->ilce cascading secim. */

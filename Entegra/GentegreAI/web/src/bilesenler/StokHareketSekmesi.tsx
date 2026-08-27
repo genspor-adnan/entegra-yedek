@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { type StokHareketYaniti, hataMetni } from '../api/sozlesme';
-import { say4, gunMetni } from './bicim';
+import { say4, gunMetni, bugunIso } from './bicim';
+import { csvMetni, CSV_TIPI } from './csv';
+import { dosyaIndir } from './indir';
 
 
 /** Belge türünden liste/kart yolu - hareket satırına çift tıklayınca oraya gidilir. */
@@ -24,7 +26,7 @@ const BELGE_YOLU: Record<number, string> = {
 export function StokHareketSekmesi({ stokId }: { stokId: number }) {
   const git = useNavigate();
   const yil = new Date().getFullYear();
-  const bugun = new Date().toISOString().slice(0, 10);
+  const bugun = bugunIso();
 
   const [bas, setBas] = useState(`${yil}-01-01`);
   const [bit, setBit] = useState(bugun);
@@ -59,14 +61,8 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
       s.giris ? say4.format(s.giris) : '', s.cikis ? say4.format(s.cikis) : '',
       say4.format(s.kalan), s.aciklama,
     ]);
-    // Excel-TR: ayirac ";" ve UTF-8 BOM (yoksa Turkce karakterler bozuluyor).
-    const metin = '﻿' + [basliklar, ...satirlar]
-      .map(r => r.map(h => `"${String(h).replace(/"/g, '""')}"`).join(';')).join('\r\n');
-    const bag = document.createElement('a');
-    bag.href = URL.createObjectURL(new Blob([metin], { type: 'text/csv;charset=utf-8' }));
-    bag.download = `stok_hareket_${stokId}_${bas}_${bit}.csv`;
-    bag.click();
-    URL.revokeObjectURL(bag.href);
+    dosyaIndir(csvMetni(basliklar, satirlar),
+               `stok_hareket_${stokId}_${bas}_${bit}.csv`, CSV_TIPI);
   }
 
   const birim = veri?.birim ? ` ${veri.birim}` : '';

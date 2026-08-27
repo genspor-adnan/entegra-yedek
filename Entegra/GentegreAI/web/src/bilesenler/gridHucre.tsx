@@ -84,7 +84,7 @@ export function rozetHucre(deger: unknown, kolon: KolonMeta) {
 }
 
 /** "İçerik" penceresi (ör. islem-log > bilgi) - JSON ise okunakli bicimde, degilse duz metin. */
-export function icerikMetni(deger: unknown): string {
+function icerikMetni(deger: unknown): string {
   if (deger === null || deger === undefined || deger === '') return 'İçerik yok.';
   if (typeof deger !== 'string') return String(deger);
   try {
@@ -94,7 +94,7 @@ export function icerikMetni(deger: unknown): string {
   }
 }
 
-export function jsonCoz(deger: unknown): unknown {
+function jsonCoz(deger: unknown): unknown {
   if (deger === null || deger === undefined || deger === '') return null;
   if (typeof deger !== 'string') return deger;
   try {
@@ -104,10 +104,10 @@ export function jsonCoz(deger: unknown): unknown {
   }
 }
 
-export const degerMetni = (deger: unknown) =>
+const degerMetni = (deger: unknown) =>
   deger === null || deger === undefined || deger === '' ? '-' : String(deger);
 
-export const degisimAyir = (deger: unknown): { onceki?: string; sonraki?: string; duz: string } => {
+const degisimAyir = (deger: unknown): { onceki?: string; sonraki?: string; duz: string } => {
   const metin = degerMetni(deger);
   const ayirac = ' -> ';
   const indeks = metin.indexOf(ayirac);

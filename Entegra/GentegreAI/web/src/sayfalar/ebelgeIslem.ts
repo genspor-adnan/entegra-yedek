@@ -14,18 +14,10 @@ import { hataMetni, type EBelgeMesaji, type ListeSatiri } from '../api/sozlesme'
 /** Satir sonu - sablon dizgede kacis karisikligi olmasin diye sabit. */
 const NL = '\n';
 
-/** Metni dosya olarak indirir. Blob URL kisa omurlu - birakilmazsa sekme
-    kapanana kadar bellekte kalir. */
-export function dosyaIndir(icerik: string, ad: string, tip: string) {
-  const url = URL.createObjectURL(new Blob([icerik], { type: tip }));
-  const bag = document.createElement('a');
-  bag.href = url;
-  bag.download = ad;
-  document.body.appendChild(bag);
-  bag.click();
-  bag.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 10_000);
-}
+// Indirme `bilesenler/indir.ts`e tasindi (bes kopyasi vardi); buradan
+//   yeniden disa vuruluyor ki e-Belge cagrilari degismesin.
+import { dosyaIndir } from '../bilesenler/indir';
+export { dosyaIndir };
 
 /**
  * GIB GORUNTUSU: UBL'e goruntuleme XSLT'si uygulanir (182) - GIB'e giden

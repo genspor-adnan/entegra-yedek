@@ -12,7 +12,7 @@ export const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, m
 export const say4 = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 4 });
 export const sayi = new Intl.NumberFormat('tr-TR');
 const tarih = new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-const tarihSaat = new Intl.DateTimeFormat('tr-TR', {
+const tarihSaatBicim = new Intl.DateTimeFormat('tr-TR', {
   day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
 });
 
@@ -106,7 +106,7 @@ export function bicimle(deger: unknown, kolon: KolonMeta): string {
 
       const t = new Date(metin);
       if (Number.isNaN(t.getTime())) return String(deger);
-      return kolon.bicim?.includes('HH') ? tarihSaat.format(t) : tarih.format(t);
+      return kolon.bicim?.includes('HH') ? tarihSaatBicim.format(t) : tarih.format(t);
     }
     case 'mantik':
       return Number(deger) === 1 ? '✓' : '';
@@ -142,3 +142,85 @@ export function kidemMetni(tarihStr: string): string | null {
  */
 export const gunMetni = (t?: string | null) =>
   (t ? t.slice(0, 10).split('-').reverse().join('.') : '—');
+
+/**
+ * "2026-08-23T14:05:00" -> "23.08.2026 14:05" (saat yoksa/00:00 ise yalniz
+ * tarih). `gunMetni` ile ayni metin-kesme mantigi; farki saati de gostermesi.
+ */
+export function tarihSaat(ham: unknown): string {
+  const metin = String(ham ?? '');
+  if (!metin) return '';
+  const gun = metin.slice(0, 10).split('-').reverse().join('.');
+  const saat = metin.slice(11, 16);
+  return saat && saat !== '00:00' ? `${gun} ${saat}` : gun;
+}
+
+/**
+ * YEREL gunun ISO metni ("2026-08-23").
+ *
+ * `new Date().toISOString().slice(0,10)` KULLANMAYIN: UTC'ye cevirir, TR'de
+ * aksam 03:00'ten sonra bir SONRAKI gunu yazar. Tarih kutulari, CSV dosya adi,
+ * varsayilan belge tarihi - hepsi bu fonksiyondan gecmeli.
+ */
+export const bugunIso = (d: Date = new Date()) => yerelGun(d);
+
+/** Verilen tarihin yerel "YYYY-MM-DD" metni (saat dilimine kaymadan). */
+export function yerelGun(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+/** datetime-local kutusunun bekledigi YEREL "YYYY-MM-DDTHH:mm" (UTC'ye kaymaz). */
+export function yerelAnMetni(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${yerelGun(d)}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+// ============================================================ sayi okuma ====
+// EKRANDAN gelen metin ile SUNUCUDAN gelen ham deger AYNI SEKILDE COZULEMEZ;
+// nokta birinde binlik ayraci, otekinde ondalik ayracidir. Ayni fonksiyonu
+// ikisine de vermek gercek bir hataya yol acmisti (kayitli kasa islemi acilip
+// yeniden kaydedilince tutar 100 katina cikiyordu). Bu yuzden IKI AYRI ad:
+
+/**
+ * EKRAN kutusundaki TURKCE sayiyi cozer: nokta binlik, virgul ondalik
+ * ("1.234,56" -> 1234.56). Cozulemezse 0.
+ *
+ * Sunucudan gelen ham degeri ("1234.56") BURAYA VERMEYIN - `hamSayi` kullanin
+ * ya da once `tutarMetni` ile ekran bicimine cevirin.
+ */
+export const sayiOku = (metin: unknown) =>
+  Number(String(metin ?? '').replace(/\./g, '').replace(',', '.')) || 0;
+
+/** `sayiOku`nun bos/gecersiz degeri 0 yerine null dondurdugu surumu. */
+export const sayiOkuNull = (metin: unknown): number | null => {
+  const t = String(metin ?? '').trim();
+  if (t === '') return null;
+  const s = Number(t.replace(/\./g, '').replace(',', '.'));
+  return Number.isFinite(s) ? s : null;
+};
+
+/**
+ * SUNUCUDAN/JSON'dan gelen sayiyi cozer ("1234.56" ya da "1234,56" - ikisi de
+ * ondalik). Binlik ayraci beklenmez. Cozulemezse 0.
+ */
+export const hamSayi = (deger: unknown) =>
+  Number(String(deger ?? '').replace(',', '.')) || 0;
+
+/** `hamSayi`nin bos/gecersiz degeri 0 yerine null dondurugu surumu. */
+export const hamSayiNull = (deger: unknown): number | null => {
+  const metin = String(deger ?? '').trim();
+  if (metin === '') return null;
+  const n = Number(metin.replace(',', '.'));
+  return Number.isFinite(n) ? n : null;
+};
+
+/**
+ * Ham/JSON tutari EKRAN bicimine cevirir ("1234.5600" -> "1234,56").
+ * `sayiOku`nun tersi: ikisi bir arada gidip gelen deger bozulmasin.
+ */
+export const tutarMetni = (ham: string | number | undefined | null): string => {
+  if (ham === null || ham === undefined || ham === '') return '';
+  const n = Number(String(ham).replace(',', '.'));
+  return Number.isFinite(n) ? n.toFixed(2).replace('.', ',') : '';
+};

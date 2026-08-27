@@ -25,12 +25,10 @@ export const YEREL_PARA_VARSAYILAN = 'TL';
  */
 export const GERIYE_GUN_VARSAYILAN = 7;
 
-/** datetime-local kutusunun bekledigi YEREL "YYYY-MM-DDTHH:mm" (UTC'ye kaymaz). */
-export const yerelAnMetni = (d: Date) => {
-  const p = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
-       + `T${p(d.getHours())}:${p(d.getMinutes())}`;
-};
+// Tarih/sayi bicimleyicileri `bilesenler/bicim.ts` icinde toplandi
+//   (yerelAnMetni, bugunIso, sayiOku, tutarMetni, tarihSaat). Burada
+//   duruyorlardi ve ekranlar bir kismini bicim.ts'ten, bir kismini buradan
+//   aliyordu - ayni isin iki evi vardi.
 
 /**
  * FATURA TIPI (db/130 kod listesi belge.fatura_tipi) - faturanin cinsi.
@@ -145,24 +143,4 @@ export const SEKMELER: {
   { anahtar: 'yorum',    baslik: 'Yorum / Medya' },
 ];
 
-/**
- * EKRANDAN girilen sayiyi cozer - TURKCE bicim: nokta binlik ayraci, virgul
- * ondalik ("1.234,56" -> 1234.56).
- *
- * DIKKAT: JSON'dan gelen ham deger ("1234.56") buraya DOGRUDAN VERILEMEZ -
- * nokta binlik sayilir ve 123456 cikar (gercek vaka: kayitli kasa islemi
- * acilip yeniden kaydedilince tutar 100 katina ciktiyordu). Ham degeri once
- * `tutarMetni` ile ekran bicimine cevirin.
- */
-export const sayiOku = (metin: string) =>
-  Number(metin.replace(/\./g, '').replace(',', '.')) || 0;
-
-/**
- * Ham/JSON tutari EKRAN bicimine cevirir ("1234.5600" -> "1234,56").
- * `sayiOku`nun tersi: ikisi bir arada gidip gelen deger bozulmasin.
- */
-export const tutarMetni = (ham: string | number | undefined | null): string => {
-  if (ham === null || ham === undefined || ham === '') return '';
-  const n = Number(String(ham).replace(',', '.'));
-  return Number.isFinite(n) ? n.toFixed(2).replace('.', ',') : '';
-};
+// sayiOku / tutarMetni de bicim.ts'e tasindi (yukaridaki nota bakin).

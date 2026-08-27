@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal } from '../Modal';
 import { api } from '../../api/istemci';
-import { para } from '../bicim';
+import { para, hamSayi } from '../bicim';
 import {
   type SatirDurumu, satirTutari, adetKaydir, KDV_ORANLARI,
 } from '../../sayfalar/belgeSatir';
@@ -93,18 +93,18 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
     })();
   }, [dovizli, r.fiyatDovizi, belgeTarihi]);
 
-  const adet = Number(r.adet.replace(',', '.')) || 0;
+  const adet = hamSayi(r.adet);
   /** Ana birim karsiligi: "2 Kutu = 24 Adet". Ana birim seciliyse gosterilmez. */
   const seciliCarpan = Number(r.birimCarpan ?? 1) || 1;
   const anaBirimMiktar = seciliCarpan !== 1 && adet > 0
     ? Math.round(adet * seciliCarpan * 1e6) / 1e6
     : null;
-  const kur = dovizli ? (Number(r.kur.replace(',', '.')) || 0) : 1;
-  const dovizFiyat = Number(r.dovizFiyat.replace(',', '.')) || 0;
+  const kur = dovizli ? (hamSayi(r.kur)) : 1;
+  const dovizFiyat = hamSayi(r.dovizFiyat);
   // Yerel birim fiyat: dovizli kalemde doviz fiyati x kur, degilse dogrudan girilen.
   const fiyat = dovizli
     ? Math.round(dovizFiyat * kur * 100) / 100
-    : (Number(r.birimFiyat.replace(',', '.')) || 0);
+    : (hamSayi(r.birimFiyat));
   const tutar = satirTutari(adet, fiyat, r.iskonto, r.iskonto2);
 
   /** Izlemli stokta lot adimi: giriste DAGITIM, cikista SECIM (db/114). */
@@ -210,8 +210,8 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                           } else {
                             // Dovize gecis: yerel fiyat kur ile boluner (kur
                             //   birazdan gunluk kurla guncellenir).
-                            const k = Number(String(r.kur).replace(',', '.')) || 1;
-                            const yerel = Number(String(r.birimFiyat).replace(',', '.')) || 0;
+                            const k = hamSayi(r.kur) || 1;
+                            const yerel = hamSayi(r.birimFiyat);
                             setR(x => ({ ...x, fiyatDovizi: yeniCins,
                                          dovizFiyat: k > 0 ? String(yerel / k) : x.dovizFiyat }));
                           }

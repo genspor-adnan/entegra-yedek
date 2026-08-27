@@ -3,8 +3,9 @@ import { Modal } from '../Modal';
 import { api } from '../../api/istemci';
 import { ApiHatasi, hataMetni } from '../../api/sozlesme';
 import {
-  type IzlemSatiri, bosIzlem, izlemKurali, tariheEkle, bugunIso, RAF_BIRIM,
+  type IzlemSatiri, bosIzlem, izlemKurali, tariheEkle, RAF_BIRIM,
 } from '../../sayfalar/belgeSatir';
+import { bugunIso, hamSayi as sayi } from '../bicim';
 
 /**
  * IZLEM (LOT / SERI) PENCERESI — giris belgelerinde izlemli stok icin.
@@ -72,7 +73,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
 
   /** Raf omru kullanicidan alindi: STOK KARTINA yazilir, sonra hesaplama acilir. */
   async function rafKaydet() {
-    const sure = Number(rafTaslak.sure.replace(',', '.')) || 0;
+    const sure = sayi(rafTaslak.sure);
     const birim = Number(rafTaslak.birim) || 0;
     if (sure <= 0 || birim <= 0) { setHata('Raf ömrü ve birimi girilmeli.'); return }
     setRafSure(sure); setRafBirim(birim); setRafSoruluyor(false); setHata(null);
@@ -117,7 +118,6 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
     return () => { iptal = true };
   }, [cikis, stokId, depoId]);
 
-  const sayi = (m: string) => Number(m.replace(',', '.')) || 0;
   const toplam = liste.reduce((t, z) => t + sayi(z.miktar), 0);
   const fark = Math.round((miktar - toplam) * 10000) / 10000;
   /** SKT'si gecmis lot sayisi - girisi ENGELLEMEZ, uyarir. */

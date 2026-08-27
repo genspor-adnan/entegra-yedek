@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { api } from '../api/istemci';
 import { type DokumanSatiri, hataMetni } from '../api/sozlesme';
 import { tarihYaz } from './bicim';
+import { dosyaIndirUrl } from './indir';
 
 const boyutYaz = (b: number) => b < 1024 ? `${b} B` : b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
 
@@ -165,11 +166,11 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
 
   const indir = async (satir: DokumanSatiri) => {
     try {
-      const url = await icerikUrl(satir.id);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = satir.ad;
-      a.click();
+      // ONBELLEKTEKI url SERBEST BIRAKILMAZ: ayni blob'u kucuk resim de
+      //   kullaniyor, birakilirsa galerideki gorsel bozulur. Yalnizca bu
+      //   indirme icin yeni uretilen url birakilir.
+      const onbellekte = resimUrlleri[satir.id] !== undefined;
+      dosyaIndirUrl(await icerikUrl(satir.id), satir.ad, !onbellekte);
     } catch (h) {
       setHata(hataMetni(h));
     }
