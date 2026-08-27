@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// Kasa, banka, cek/senet, muhasebe ve ekstre listeleri (071-080).
@@ -80,6 +80,13 @@ public static partial class KaynakKatalogu
             new("kod",         "h.kod",           "metin", "Kod"),
             new("ad",          "h.ad",            "metin", "Hesap Adi", Genislik: 220),
             new("dovizCinsi",  "h.doviz_cinsi",   "metin", "Doviz", Hizalama: "orta"),
+            // ATAMA (196): tek kolonda okunur karsilik - "Varsayılan", personel
+            //   adi ya da bos. Nakit tahsilatta acilacak kasa buna gore secilir.
+            new("atamaAdi",    "public.fn_hesap_atama_adi(h.atama, h.sorumlu_id)",
+                                                  "metin", "Atama", Hizalama: "orta",
+                                                   Genislik: 150, Siralanabilir: false,
+                                                   Filtrelenebilir: false),
+            new("atama",       "h.atama",         "sayi",  "Atama Kodu", Varsayilan: false),
             new("bakiye",      "coalesce(b.bakiye, 0)",       "para", "Bakiye",     Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false, Filtrelenebilir: false),
             new("yerelBakiye", "coalesce(b.yerel_bakiye, 0)", "para", "TL Bakiye",  Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false, Filtrelenebilir: false),
             new("bankaAdi",    "h.banka_adi",     "metin", "Banka",   Varsayilan: false),

@@ -425,6 +425,12 @@ export const api = {
 
   kasaOku: (id: number) => istek<KasaIslemYaniti>(`/api/kasa-islem/${id}`),
 
+  /** Nakit islemde acilacak kasa (196): once kullaniciya atanmis kasa, yoksa
+      subenin varsayilan kasasi. Yoksa hesapId null doner. */
+  kullaniciKasasi: (tur = 'K') =>
+    istek<{ hesapId: number | null; ad?: string; dovizCinsi?: string; kendiKasasi?: boolean }>(
+      `/api/kasa/kullanici-kasasi?tur=${encodeURIComponent(tur)}`),
+
   kasaEkle: (govde: KasaIslemYazmaIstegi) =>
     gonder<KasaIslemYaniti>('/api/kasa-islem', govde),
 

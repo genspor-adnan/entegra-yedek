@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// Kasa-banka alt sistemi kartlari: hesap, banka, cek/senet, proje, gorev, firsat, masraf merkezi, hesap plani.
@@ -25,6 +25,10 @@ public static partial class KartKatalogu
             new("dovizCinsi",      "doviz_cinsi",       "kod",   Zorunlu: true, SabitKodlar: DovizKodlari, Baslik: "Para Birimi", Grup: "Kimlik"),
             new("durum",           "durum",             "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
             // --- Genel
+            // KASA ATAMASI (196): "Varsayilan" -> kullanicinin kendi kasasi yoksa
+            //   nakit islemde bu acilir; "Personel" -> Sorumlu alanindaki kisinin
+            //   kasasi. Kisi icin ayri alan YOK: sorumlu_id zaten bu anlamda.
+            new("atama",           "atama",             "kod",   KodListesi: "hesap.atama", Baslik: "Atama", Grup: "Genel", AltGrup: "Tanımlama"),
             new("sorumluId",       "sorumlu_id",        "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Sorumlu", Grup: "Genel", AltGrup: "Tanımlama"),
             new("bagliHesapId",    "bagli_hesap_id",    "kod",   KodTablosu: "public.v_hesap_lookup", Baslik: "Bağlı Hesap", Grup: "Genel", AltGrup: "Tanımlama"),
             new("altTur",          "alt_tur",           "kod",   KodListesi: "hesap.alt_tur", Baslik: "Alt Tür", Grup: "Genel", AltGrup: "Tanımlama"),

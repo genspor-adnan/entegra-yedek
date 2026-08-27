@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import {
@@ -136,6 +136,30 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const [alanHatalari, setAlanHatalari] = useState<Record<string, string>>({});
 
   const secili = useMemo(() => turler.find(t => t.kod === tur), [turler, tur]);
+
+  // VARSAYILAN KASA (196): yeni islemde hesap alani bos gelmesin - once
+  //   kullaniciya ATANMIS kasa, yoksa subenin VARSAYILAN kasasi acilir.
+  //   Kural sunucuda (fn_kullanici_kasa); burada yalnizca uygulanir.
+  //   Kullanici elle baska hesap sectiyse EZILMEZ; kayitli islem acilirken de
+  //   calismaz (o kaydin kendi hesabi var).
+  const kasaOnyuklendi = useRef(false);
+  useEffect(() => {
+    if (kayitId !== null || hesap || kasaOnyuklendi.current) return;
+    const hesapTuru = secili?.anaHesapTuru;
+    // Yalniz KASA/BANKA gibi hesap turu belli islemlerde; virman/cek-senet
+    //   akislarinda kullanici zaten hesabi bilincli seciyor.
+    if (!hesapTuru) return;
+    kasaOnyuklendi.current = true;
+    void (async () => {
+      try {
+        const y = await api.kullaniciKasasi(String(hesapTuru));
+        if (y.hesapId) {
+          setHesap({ id: y.hesapId, ad: y.ad ?? '', doviz: y.dovizCinsi ?? 'TL' });
+          if (y.dovizCinsi) { setDoviz(y.dovizCinsi); setEkstreDovizi(y.dovizCinsi) }
+        }
+      } catch { /* kasa bulunamadi: alan bos kalir, kullanici secer */ }
+    })();
+  }, [kayitId, hesap, secili?.anaHesapTuru]);
   const grup = secili?.grup ?? 'tahsilat';
   const durum = sonuc ? Number(sonuc.islem.durum ?? 0) : null;
   /**

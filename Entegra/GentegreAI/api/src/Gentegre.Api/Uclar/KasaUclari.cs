@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
@@ -29,6 +29,39 @@ public static class KasaUclari
         }).RequireAuthorization().WithTags("Kasa");
 
         // GET /api/referans/doviz-kur?cins=USD&tarih=2026-08-22&yon=1
+        // GET /api/kasa/kullanici-kasasi - nakit islemde acilacak kasa (196).
+        //   Once kullaniciya ATANMIS kasa, yoksa subenin VARSAYILAN kasasi.
+        //   Karar veritabaninda (fn_kullanici_kasa) - ayni kural baska bir
+        //   ekranda ikinci kez yazilmasin.
+        yol.MapGet("/api/kasa/kullanici-kasasi", async (
+            string? tur, BaglamCozucu cozucu, Gentegre.Veri.VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("kasa_islem", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var komut = new Npgsql.NpgsqlCommand(
+                "select hesap_id, ad, doviz_cinsi, kendi_kasasi from public.fn_kullanici_kasa(@p0, @p1, @p2)",
+                baglanti);
+            komut.Parameters.AddWithValue("p0", baglam.KullaniciId);
+            komut.Parameters.AddWithValue("p1", (object?)baglam.SubeId ?? DBNull.Value);
+            komut.Parameters.AddWithValue("p2", string.IsNullOrWhiteSpace(tur) ? "K" : tur);
+
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            if (!await o.ReadAsync(iptal))
+                return Results.Ok(new { hesapId = (int?)null, izlemeNo = baglam.IzlemeNo });
+
+            return Results.Ok(new
+            {
+                hesapId = o.GetInt32(0),
+                ad = o.IsDBNull(1) ? "" : o.GetString(1),
+                dovizCinsi = o.IsDBNull(2) ? "TL" : o.GetString(2),
+                kendiKasasi = !o.IsDBNull(3) && o.GetBoolean(3),
+                izlemeNo = baglam.IzlemeNo,
+            });
+        }).RequireAuthorization().WithTags("Kasa");
+
         yol.MapGet("/api/referans/doviz-kur", async (
             string cins, DateTime? tarih, int? yon,
             BaglamCozucu cozucu, KasaDeposu depo, HttpContext ctx, CancellationToken iptal) =>
