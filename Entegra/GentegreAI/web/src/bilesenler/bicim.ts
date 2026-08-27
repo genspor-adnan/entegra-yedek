@@ -9,6 +9,8 @@ import type { KolonMeta } from '../api/sozlesme';
  * degistiginde otekiler geride kaliyordu.
  */
 export const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+/** Kur / carpan kolonlari - dort hane (7,0092'nin 7,01 gorunmemesi icin). */
+export const para4 = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
 export const say4 = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 4 });
 export const sayi = new Intl.NumberFormat('tr-TR');
 const tarih = new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -88,7 +90,10 @@ export function bicimle(deger: unknown, kolon: KolonMeta): string {
   switch (kolon.tip) {
     case 'para': {
       const s = Number(deger);
-      return Number.isFinite(s) ? para.format(s) : String(deger);
+      if (!Number.isFinite(s)) return String(deger);
+      // Kolon 4 haneli bicim istediyse (carpan/kur kolonlari "#,##0.0000")
+      //   2 haneye EZILMEZ: 7,0092'yi 7,01 gostermek kullaniciyi yaniltir.
+      return kolon.bicim?.includes('0000') ? para4.format(s) : para.format(s);
     }
     case 'sayi': {
       const s = Number(deger);
