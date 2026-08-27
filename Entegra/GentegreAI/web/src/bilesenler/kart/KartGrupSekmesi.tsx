@@ -1,4 +1,5 @@
 import { GenDetayTablo, bosDetay, type DetayDurumu } from '../GenDetayTablo';
+import { DokumanGalerisi } from '../DokumanGalerisi';
 import { IlgiliKisiler } from '../IlgiliKisiler';
 import { TekAdres } from '../TekAdres';
 import { PersonelKimlikOzet } from '../PersonelKimlikOzet';
@@ -132,7 +133,9 @@ const adliBlok = (
             kendi alanlari ETKISIZDIR - girilen deger fn_sube_mali tarafindan
             zaten merkezinkiyle degistirilir. Alanlari cizip kullanicinin bos
             yere doldurmasina izin vermek yerine sebebi yazilir. */}
-        {kaynak === 'sube' && aktif.baslik === 'Mali' && deger.merkezMaliKullan ? (
+        {/* Merkezin kendisi miras alamaz - kendi ayarini duzenlemeli. */}
+        {kaynak === 'sube' && aktif.baslik === 'Mali'
+         && deger.merkezMaliKullan && deger.ustSubeId ? (
           <div className="kagrup">
             <h6>Mali Ayarlar</h6>
             <div className="not" style={{ padding: 10 }}>
@@ -149,7 +152,8 @@ const adliBlok = (
         ) : null}
         {digerAdli
           .filter(([altBaslik]) => !(kaynak === 'sube' && aktif.baslik === 'Mali'
-                                     && deger.merkezMaliKullan && altBaslik !== 'Ayar Kaynağı'))
+                                     && deger.merkezMaliKullan && deger.ustSubeId
+                                     && altBaslik !== 'Ayar Kaynağı'))
           .map(([altBaslik, alanlar]) => {
           // Cari'ye ozel: Tanımlama kutusunda dort cift AYNI SATIRDA yan yana,
           // sirayla (kullanici): Kategori/İlk Temas, Sektör/Alt Sektör, Sınıf/Bölge,
@@ -338,6 +342,51 @@ return (
         sekmede (kullanici): kutu "hangi depolari gorurum" sorusunun cevabi,
         listenin hemen ustunde durmasi gerekiyor. Yeni subede henuz id yok -
         once kaydedilmeli. */}
+    {/* LOGO & KAŞE (193): ayar kutularinin altinda GALERI. Gorseller kolon
+        degil dokuman; galeri yukleme/silme/onizlemeyi zaten yapiyor. Merkezin
+        gorselleri kullaniliyorsa yukleme kutusu yerine sebep yazilir - sube
+        gorseli yuklense bile basilmayacak (fn_sube_gorsel). */}
+    {kaynak === 'sube' && aktif.baslik === 'Logo & Kaşe' && (() => {
+      // Merkezin KENDISI miras alamaz: bayragi isaretli olsa da kendi
+      //   gorsellerini buradan yukler, yoksa hicbir yerde logo tanimlanamazdi.
+      const merkezMi = !deger.ustSubeId;
+      if (yeniMi) {
+        return (
+          <div className="kagrup">
+            <h6>Logo / Kaşe / İmza</h6>
+            <div className="not" style={{ padding: 10 }}>
+              Şube kaydedildikten sonra buradan logo, kaşe ve imza yüklenebilir.
+            </div>
+          </div>
+        );
+      }
+      if (deger.merkezGorselKullan && !merkezMi) {
+        return (
+          <div className="kagrup">
+            <h6>Logo / Kaşe / İmza</h6>
+            <div className="not" style={{ padding: 10 }}>
+              Bu şube <b>merkezin logo, kaşe ve imzasını</b> kullanıyor; belgelerde
+              merkezin görselleri basılır. Şubeye özel görsel yüklemek için
+              yukarıdaki kutunun işaretini kaldırın.
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className="kagrup">
+          <h6>Logo / Kaşe / İmza</h6>
+          <div style={{ padding: 10 }}>
+            <div className="not" style={{ marginBottom: 8 }}>
+              Yüklerken <b>türünü</b> seçin: <b>Logo</b> · <b>Kaşe</b> · <b>İmza</b> ·
+              <b> Antet</b>. Belgede her türün <b>varsayılan</b> işaretlisi kullanılır.
+              Önerilen logo: PNG, saydam zemin, en az 480×160 px.
+            </div>
+            <DokumanGalerisi kartAdi="sube" kaynakId={id as number} saltOkunur={salt} />
+          </div>
+        </div>
+      );
+    })()}
+
     {kaynak === 'sube' && aktif.baslik === 'Depolar' && (() => {
       const depoDetay = meta.detaylar.find(d => d.ad === 'depolar');
       if (!depoDetay) return null;

@@ -138,6 +138,9 @@ public static class DokumanUclari
         "stok" => "stok",
         // e-Belge XSLT sablonlari (160): kart degil ama ayni depoyu kullanir.
         "ebelge-xslt" => "ebelge-xslt",
+        // Firma gorselleri (193): logo / kase / imza; belge_turu hangisi
+        //   oldugunu tasir, kaynak_id sube kimligidir.
+        "sube" => "sube",
         _ => throw new InvalidOperationException($"Bilinmeyen kart: {kartAdi}"),
     };
 

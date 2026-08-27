@@ -19,7 +19,9 @@ public sealed class DokumanDeposu
     private static readonly HashSet<string> KaynakBeyazListe =
         // "ebelge-xslt" (160): kart degil, e-Belge goruntuleme sablonlari -
         //   kaynak_id belge turu kodudur (1 e-Fatura, 2 e-Arsiv...).
-        new(StringComparer.Ordinal) { "taraf", "stok", "ebelge-xslt" };
+        //   "sube" (193): firma logosu / kase / imza - belge_turu alani hangisi
+        //   oldugunu tasir ('Logo' | 'Kaşe' | 'İmza' | 'Antet').
+        new(StringComparer.Ordinal) { "taraf", "stok", "ebelge-xslt", "sube" };
 
     private static readonly HashSet<string> IcerikTipiBeyazListe = new(StringComparer.OrdinalIgnoreCase)
     {

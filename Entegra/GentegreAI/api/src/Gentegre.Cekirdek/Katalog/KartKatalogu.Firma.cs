@@ -37,6 +37,7 @@ public static partial class KartKatalogu
             // Yeni sube MERKEZIN mali ayarlarini kullanir (192) - ayri VKN
             //   alinca kullanici bayragi kaldirip kendi ayarini girer.
             ["merkezMaliKullan"] = (short)1,
+            ["merkezGorselKullan"] = (short)1,
         },
         Alanlar: new KartAlani[]
         {
@@ -228,7 +229,27 @@ public static partial class KartKatalogu
             new("fiyatOndalik",      "fiyat_ondalik",       "sayi",
                 Baslik: "Birim Fiyat Ondalık", Grup: "Mali", AltGrup: "Vergi & Yuvarlama"),
             new("yuvarlamaAdim",     "yuvarlama_adim",      "para",
-                Baslik: "Yuvarlama Adımı", Grup: "Mali", AltGrup: "Vergi & Yuvarlama")
+                Baslik: "Yuvarlama Adımı", Grup: "Mali", AltGrup: "Vergi & Yuvarlama"),
+
+            // ---------------------------------------------------- Logo & Kaşe
+            // MOCKUP: firma_bilgileri.html › "Logo & Kaşe".
+            //   Gorsellerin KENDISI kolon degil DOKUMAN (193): kaynak='sube',
+            //   belge_turu 'Logo' | 'Kaşe' | 'İmza'. Uc ayri bytea kolonu acmak
+            //   yerine hash-dedup / boyut denetimi / log hazir olan altyapi
+            //   kullanilir; sekmede galeri cizilir.
+            //   MERKEZ / SUBE ayrimi burada da var (kullanici): sube kendi
+            //   gorsellerini kullanmiyorsa merkezinki basilir (fn_sube_gorsel).
+            new("merkezGorselKullan", "merkez_gorsel_kullan", "mantik",
+                Baslik: "Merkezin logo / kaşesini kullan",
+                Grup: "Logo & Kaşe", AltGrup: "Görsel Kaynağı"),
+            new("kasePdfBas",   "kase_pdf_bas",   "mantik",
+                Baslik: "e-Arşiv PDF çıktısına kaşe + imza bas",
+                Grup: "Logo & Kaşe", AltGrup: "Çıktı Ayarları"),
+            new("kaseKagitBas", "kase_kagit_bas", "mantik",
+                Baslik: "Kağıt çıktılarda da kaşe görünsün",
+                Grup: "Logo & Kaşe", AltGrup: "Çıktı Ayarları"),
+            new("antetSablonu", "antet_sablonu",  "metin", EnFazlaUzunluk: 80,
+                Baslik: "Antet Şablonu", Grup: "Logo & Kaşe", AltGrup: "Çıktı Ayarları")
         },
         // Subenin depolari - kartin "Depolar" sekmesinde, bayrakla ayni yerde
         //   (kullanici). Depo bakimi Stok menusunde de duruyor; burasi subeye

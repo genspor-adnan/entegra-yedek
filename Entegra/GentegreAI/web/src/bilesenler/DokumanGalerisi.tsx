@@ -25,7 +25,10 @@ const dosyaTipiBaslik = (contentType: string) => {
 
 const resimMi = (s: DokumanSatiri) => s.contentType.startsWith('image/');
 
-const belgeTuruSecenekleri = [
+// Tur onerileri KARTA gore: personel ozluk belgeleri ile firma gorselleri
+//   ayni listede olsaydi ikisi de kirli gorunurdu. Liste ONERIDIR - kullanici
+//   serbest metin de yazabilir (datalist).
+const OZLUK_TURLERI = [
   'Adli Sicil',
   'Diploma',
   'İş Sözleşmesi',
@@ -33,6 +36,10 @@ const belgeTuruSecenekleri = [
   'Sağlık Raporu',
   'SGK İşe Giriş',
 ];
+
+// Firma karti (193): logo / kase / imza ayrimini BELGE TURU tasir; belgede
+//   hangi gorselin basilacagi buna gore secilir (fn_sube_gorsel).
+const FIRMA_GORSELLERI = ['Logo', 'Kaşe', 'İmza', 'Antet'];
 
 function ResimBandi({ resimler, resimUrlleri }: { resimler: DokumanSatiri[]; resimUrlleri: Record<number, string> }) {
   return (
@@ -271,7 +278,8 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
                 placeholder="İş sözleşmesi, sağlık raporu..."
               />
               <datalist id="dokuman-belge-turu-secenekleri">
-                {belgeTuruSecenekleri.map(s => <option key={s} value={s} />)}
+                {(kartAdi === 'sube' ? FIRMA_GORSELLERI : OZLUK_TURLERI)
+                  .map(s => <option key={s} value={s} />)}
               </datalist>
             </label>
             <label className="alan">
