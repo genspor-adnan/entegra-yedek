@@ -304,6 +304,29 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           } catch (h) { mesaj(hataMetni(h)) }
           return;
         }
+        // MUHASEBE FISI (190): belgenin fis satirlarini acar. Fis kartı ayri
+        //   bir ekran degil - "Fiş Satırları" listesi fisId ile filtrelenir.
+        case 'belge.fis-gor': {
+          if (!satir) return;
+          const fisId = Number(satir.fisId ?? 0);
+          if (!fisId) { mesaj('Belgenin muhasebe fişi yok.'); return }
+          git(`/muhasebe-fis-satir?fisId=${fisId}`);
+          return;
+        }
+        // DONUSUM ZINCIRI (F8): kaynak ve hedef belge ayni modal kartta acilir.
+        case 'belge.kaynak-ac':
+        case 'belge.hedef-ac': {
+          if (!satir) return;
+          const hedef = Number(kod === 'belge.kaynak-ac' ? satir.kaynakId : satir.hedefId) || 0;
+          if (!hedef) {
+            mesaj(kod === 'belge.kaynak-ac'
+              ? 'Bu belge bir dönüşümden gelmiyor.'
+              : 'Bu belgeden üretilmiş bir belge yok.');
+            return;
+          }
+          setAcikBelgeId(hedef);
+          return;
+        }
         // BELGE SIL (181): izi olmayan belgede mumkun; kesin/izli belgede
         //   aksiyon zaten pasif ve sebebi title'da. Sunucu son sozu soyler.
         case 'belge.sil': {

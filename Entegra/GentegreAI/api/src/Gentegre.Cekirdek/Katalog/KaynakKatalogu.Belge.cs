@@ -17,7 +17,9 @@ public static partial class KaynakKatalogu
                 // F8 donusum zinciri: kaynak baslik bagindan okunur.
                 "left join public.belge kb on kb.id = b.kaynak_id and b.kaynak_tur = 30 " +
                 "left join public.kasa_islem_turu kt2 on kt2.kod = kb.tur " +
-                "left join public.sube sb on sb.id = b.sube_id",
+                "left join public.sube sb on sb.id = b.sube_id " +
+                // Muhasebe fisi (190): numarasi listede gorunsun.
+                "left join public.muhasebe_fis mf on mf.id = b.muhasebe_fis_id",
         SubeKolonu: "b.sube_id",
         VarsayilanSirala: "b.belge_tarihi desc, b.id desc",
         KapsamKolonu: "b.taraf_id",
@@ -137,7 +139,22 @@ public static partial class KaynakKatalogu
                                                                             Bicim: "#,##0.0000", Varsayilan: false),
             new("subeAdi",       "coalesce(sb.ad, '')", "metin", "Şube",     Genislik: 120,
                                                                             Varsayilan: false),
-            new("subeId",        "b.sube_id",        "sayi",  "Şube Kodu",   Varsayilan: false)
+            new("subeId",        "b.sube_id",        "sayi",  "Şube Kodu",   Varsayilan: false),
+            // MUHASEBE FISI (190): belge muhasebeye girdi mi tek bakista gorunsun.
+            //   Bos ise fis yok - "Fişi Aç" aksiyonu da pasif kalir.
+            new("fisNo",         "coalesce(mf.fis_no, '')", "metin", "Fiş No",
+                                                      Hizalama: "orta", Genislik: 110, Varsayilan: false),
+            new("fisId",         "coalesce(b.muhasebe_fis_id, 0)", "sayi", "Fiş Id", Varsayilan: false),
+            // DONUSUM ZINCIRI (F8) ID'leri: "Kaynak/Hedef Belgeyi Aç" aksiyonlari
+            //   metin kolonundan id cikaramaz. Hedef birden fazla olabilir -
+            //   EN ESKI hedef acilir (zincirde bir sonraki adim).
+            new("kaynakId",      "coalesce(b.kaynak_id, 0)", "sayi", "Kaynak Id", Varsayilan: false),
+            new("hedefId",
+                "coalesce((select min(hs.belge_id) from public.belge_satir hs " +
+                "            join public.belge_satir ks on ks.id = hs.kaynak_id and hs.kaynak_tur = 30 " +
+                "            join public.belge hb on hb.id = hs.belge_id " +
+                "           where ks.belge_id = b.id and hb.durum <> 2), 0)",
+                                                      "sayi", "Hedef Id", Varsayilan: false)
         });
 
     // ----------------------------------------------------------- personel ----

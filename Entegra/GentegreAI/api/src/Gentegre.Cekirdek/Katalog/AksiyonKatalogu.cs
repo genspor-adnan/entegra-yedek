@@ -301,6 +301,14 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 53),
                 new("ebelge.mesajlar", "Mesaj Geçmişini Göster", "ebelge", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 54),
+                // MUHASEBE FISI (190) ve DONUSUM ZINCIRI (F8): belgeden tek
+                //   tikla fise ve zincirin iki ucuna gidilir.
+                new("belge.fis-gor",   "Muhasebe Fişini Aç", "belge", Hedef: "sagtus,palet",
+                    KaynakKodu: "muhasebe_fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 60),
+                new("belge.kaynak-ac", "Kaynak Belgeyi Aç",  "belge", Hedef: "sagtus,palet",
+                    KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 61),
+                new("belge.hedef-ac",  "Hedef Belgeyi Aç",   "belge", Hedef: "sagtus,palet",
+                    KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 62),
                 new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
@@ -360,6 +368,14 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 30),
                 new("belge.iptal",    "İptal Et",        "belge", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "belge.iptal", KayitGerekir: true, Sira: 40),
+                // MUHASEBE FISI (190) ve DONUSUM ZINCIRI (F8): belgeden tek
+                //   tikla fise ve zincirin iki ucuna gidilir.
+                new("belge.fis-gor",   "Muhasebe Fişini Aç", "belge", Hedef: "sagtus,palet",
+                    KaynakKodu: "muhasebe_fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 60),
+                new("belge.kaynak-ac", "Kaynak Belgeyi Aç",  "belge", Hedef: "sagtus,palet",
+                    KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 61),
+                new("belge.hedef-ac",  "Hedef Belgeyi Aç",   "belge", Hedef: "sagtus,palet",
+                    KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 62),
                 new("genel.yazdir",   "🖨️ Yazdır",    "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
@@ -405,6 +421,14 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 54),
                 new("belge.iptal",    "✖ İrsaliyeyi İptal Et", "belge", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "belge.iptal", KayitGerekir: true, Sira: 50),
+                // MUHASEBE FISI (190) ve DONUSUM ZINCIRI (F8): belgeden tek
+                //   tikla fise ve zincirin iki ucuna gidilir.
+                new("belge.fis-gor",   "Muhasebe Fişini Aç", "belge", Hedef: "sagtus,palet",
+                    KaynakKodu: "muhasebe_fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 60),
+                new("belge.kaynak-ac", "Kaynak Belgeyi Aç",  "belge", Hedef: "sagtus,palet",
+                    KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 61),
+                new("belge.hedef-ac",  "Hedef Belgeyi Aç",   "belge", Hedef: "sagtus,palet",
+                    KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 62),
                 new("genel.yazdir",   "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },

@@ -126,6 +126,15 @@ public static class AksiyonUclari
                     return (false, $"{turAdi} gönderilmiş; serisi değiştirilemez, geri alınamaz.");
                 case "ebelge.seri" or "ebelge.sifirla" when !hazirlandi:
                     return (false, "Önce \"Hazırla\" ile e-Belge oluşturun.");
+
+                // MUHASEBE FISI ve DONUSUM ZINCIRI (190 / F8): hedefi olmayan
+                //   aksiyon pasif gorunur, sebebi title'da yazar.
+                case "belge.fis-gor" when Sayi(belge, "fisId") == 0:
+                    return (false, "Belgenin muhasebe fişi yok.");
+                case "belge.kaynak-ac" when Sayi(belge, "kaynakId") == 0:
+                    return (false, "Bu belge bir dönüşümden gelmiyor; kaynak belge yok.");
+                case "belge.hedef-ac" when Sayi(belge, "hedefId") == 0:
+                    return (false, "Bu belgeden üretilmiş bir belge yok.");
             }
         }
 

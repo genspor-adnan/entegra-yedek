@@ -499,6 +499,27 @@ public sealed partial class BelgeDeposu
             }
         }
 
+        // --------------------------------------------------------- 7b) MUHASEBE FISI ----
+        // Kesin belge muhasebeye de girer (190). Taslak fislenmez: numarasi ve
+        //   kesinligi yok. Ayar kapaliysa (muhasebe.otomatik_fis = 0) atlanir ve
+        //   sonradan toplu fislenir. Fis uretimi belgeyi DUSURMEZ: eslemesi
+        //   eksikse uyari olarak doner, belge kaydi ayakta kalir.
+        if (!secenekler.Taslak)
+        {
+            try
+            {
+                await using var fis = new NpgsqlCommand(
+                    "select public.fn_belge_fisle(@p0, @p1)", baglanti, islem);
+                fis.Parameters.AddWithValue("p0", belgeId);
+                fis.Parameters.AddWithValue("p1", baglam.KullaniciId);
+                await fis.ExecuteScalarAsync(iptal);
+            }
+            catch (PostgresException h)
+            {
+                uyarilar.Add("Muhasebe fişi üretilemedi: " + h.MessageText);
+            }
+        }
+
         // ------------------------------------------------------------------ 8) log ----
         await _log.YazAsync(baglanti, islem, LogIslemi.Ekle, LogTabloBelge, belgeId,
             baglam.KullaniciId, baglam.SubeId, baglam.Ip,

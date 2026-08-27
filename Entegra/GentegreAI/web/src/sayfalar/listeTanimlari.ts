@@ -706,6 +706,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   },
   {
     kaynak: 'muhasebe-fis-satir', baslik: 'Fiş Satırları', yol: 'Yonetim › Fis Satirlari',
+    // Belgeden "Muhasebe Fişini Aç" bu ekrana fisId ile gelir.
+    urlFiltreAlani: 'fisId',
     toplam: ['borc', 'alacak'],
     menuGrup: 'Yönetim', menuAd: 'Fiş Satırları', ic: '📗', yetkiKodu: 'muhasebe_fis',
   },

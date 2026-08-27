@@ -137,6 +137,13 @@ public sealed partial class BelgeDeposu
                    b.kaynak_tur as "kaynakTur", b.kaynak_id as "kaynakId",
                    kb.belge_no as "kaynakBelgeNo", kb.belge_tarihi as "kaynakBelgeTarihi",
                    kt.ad as "kaynakTurAdi", b.aciklama,
+                   -- Muhasebe fisi (190) ve zincirin ILERI ucu (F8): kartta
+                   --   gosterilmez ama aksiyonlarin aktifligi bunlara bakar.
+                   coalesce(b.muhasebe_fis_id, 0) as "fisId",
+                   coalesce((select min(hs.belge_id) from public.belge_satir hs
+                               join public.belge_satir ks on ks.id = hs.kaynak_id and hs.kaynak_tur = 30
+                               join public.belge hb on hb.id = hs.belge_id
+                              where ks.belge_id = b.id and hb.durum <> 2), 0) as "hedefId",
                    b.xmin::text as surum
               from public.belge b
               left join public.depo  cd on cd.id = b.cikis_depo_id
