@@ -152,13 +152,15 @@ input, select { font: inherit; color: inherit }
    `.genis` ile tam genislige acilir ki `margin-left:auto` calissin. */
 .durumseg.genis { width: 100% }
 .durumseg .ebk {
-  /* Zemin SERIDIN zemini (transparent): kutu ayri bir yuzey gibi durmasin. */
-  margin-left: auto; height: 24px; border: 1px solid var(--cizgi); border-radius: var(--r);
+  /* Zemin SERIDIN zemini (transparent): kutu ayri bir yuzey gibi durmasin.
+     Cerceve "Uygula" dugmesiyle AYNI (kullanici): ikisi de bir islemi
+     baslatiyor, ayni ailedenmis gibi gorunsunler. */
+  margin-left: auto; height: 24px; border: 1px solid #2f6db3; border-radius: var(--r);
   padding: 0 6px; font-size: 11.5px; background: transparent; color: var(--yazi);
   width: 132px;
 }
 .durumseg .ebk:hover:not(:disabled) { background: var(--yuz2) }
-.durumseg .ebk:disabled { color: var(--soluk); border-color: var(--cizgi2); cursor: default }
+.durumseg .ebk:disabled { color: var(--soluk); border-color: var(--cizgi); cursor: default }
 
 .cipsag .uygd {
   height: 27px; padding: 0 13px; border-radius: var(--r); border: 1px solid #2f6db3;

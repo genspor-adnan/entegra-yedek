@@ -255,8 +255,9 @@ public static class AksiyonKatalogu
                     KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
                 new("belge.kesinlestir", "Kesinlestir", "belge", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "belge.kesinlestir", KayitGerekir: true, Sira: 30),
-                new("belge.donustur", "⇢ Dönüştür", "belge", Hedef: "sagtus,palet",
-                    AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 35),
+                // DONUSTUR YOK (kullanici): fatura zincirin SONU - siparis ve
+                //   irsaliye faturaya donusur, fatura baska bir belgeye donusmez.
+                //   Aksiyon siparis-liste ve irsaliye-liste ekranlarinda duruyor.
                 new("belge.iptal", "Belgeyi Iptal Et", "belge", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "belge.iptal", KayitGerekir: true, Sira: 40),
                 // e-BELGE MENUSU (Delphi menu sirasiyla ayni, kullanici istegi):
