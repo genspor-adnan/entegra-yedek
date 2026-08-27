@@ -26,6 +26,29 @@
   --hata: #b23b3b;
   --golge: 0 6px 22px rgba(20, 40, 70, .14);
   --r: 4px;
+
+  /* Yuzeyler: gece modunda yeniden tanimlanabilsin diye DEGISKEN. Dogrudan
+     hex yazilan her zemin, koyu temada acik kalip yaziyi okunmaz yapiyordu. */
+  --dug1: #fbfcfe;      /* dugme gradyan ust  */
+  --dug2: #e7edf4;      /* dugme gradyan alt  */
+  --dugh1: #ffffff;     /* dugme hover ust    */
+  --dugh2: #dce8f6;     /* dugme hover alt    */
+  --dugkenar: #98c2ee;  /* dugme hover cerceve */
+  --serit1: #f4f7fb;    /* tablo basligi / arac serit ust */
+  --serit2: #e7eef6;    /* ... alt */
+  --serit3: #f0f5fa;    /* modal/kart basligi ust */
+  --serit4: #e6eef6;    /* ... alt */
+  --satirust: #f2f7fd;  /* grid satir hover */
+  --satiralt: #eef3f8;  /* ikincil satir / bos kutu zemini */
+  --grupzem: #eaf1f9;   /* grup basligi */
+  --grupyazi: #23405c;
+  --toplamzem: #f6f8fb; /* grup toplam satiri */
+  --okzem: #e2f3e8;   --okkenar: #bfe3cb;
+  --hatazem: #fdeceb; --hatakenar: #f6d3d1;
+  --uyarizem: #fdf6e3; --uyarikenar: #eeddb4;
+  --kartzem: #fbfcfd;   /* kart ici grup kutusu */
+  --sekmezem: #e9eef4;  /* pasif sekme dili */
+  --degisikzem: #fff6dc; /* log: degisiklik satiri */
 }
 
 * { box-sizing: border-box }
@@ -85,6 +108,9 @@ input, select { font: inherit; color: inherit }
   width: 230px; flex: none; background: var(--yuz2); border-right: 1px solid var(--cizgi);
   display: flex; flex-direction: column; min-height: 0;
 }
+/* Menu kapali: yan serit tamamen kalkar, ana alan tum genisligi alir. */
+.kabuk.menu-kapali .yan { display: none }
+.menu-tus { margin-right: 2px; font-size: 15px }
 .yanic { flex: 1; overflow: auto; padding: 10px 8px }
 .bolum {
   font-size: 10px; letter-spacing: .5px; text-transform: uppercase; color: var(--soluk);
@@ -94,7 +120,7 @@ input, select { font: inherit; color: inherit }
   display: flex; align-items: center; gap: 10px; padding: 7px 9px; border-radius: var(--r);
   font-size: 12.5px; color: var(--yazi2); margin-bottom: 1px; text-decoration: none;
 }
-.mi:hover { background: var(--head, #e8eef5) }
+.mi:hover { background: var(--satiralt) }
 .mi.on { background: var(--mor2); color: var(--mor); font-weight: 700 }
 .mi .ic { font-size: 14px; width: 18px; text-align: center }
 .mi .rz { margin-left: auto; font-size: 10px; color: var(--soluk) }
@@ -117,10 +143,10 @@ input, select { font: inherit; color: inherit }
 
 .d {
   display: inline-flex; align-items: center; gap: 5px; height: 25px; padding: 0 10px;
-  border-radius: 3px; border: 1px solid var(--cizgi); background: linear-gradient(#fbfcfe, #e7edf4);
+  border-radius: 3px; border: 1px solid var(--cizgi); background: linear-gradient(var(--dug1), var(--dug2));
   color: var(--yazi); font-size: 11.5px;
 }
-.d:hover:not(:disabled) { border-color: #98c2ee; background: linear-gradient(#fff, #dce8f6) }
+.d:hover:not(:disabled) { border-color: var(--dugkenar); background: linear-gradient(var(--dugh1), var(--dugh2)) }
 .d.bir { background: linear-gradient(#4d8fd6, #2f6db3); border-color: #2f6db3; color: #fff; font-weight: 700 }
 .d.bir:hover:not(:disabled) { background: linear-gradient(#5b98da, #2f6db3) }
 .d.teh { color: #fff; background: linear-gradient(#d9534f, #b83b37); border-color: #a3312f; font-weight: 700 }
@@ -199,7 +225,7 @@ input, select { font: inherit; color: inherit }
 .gridkaydir { overflow: auto; max-height: calc(100vh - 300px) }
 table.grid { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px }
 table.grid th {
-  position: sticky; top: 0; z-index: 1; background: linear-gradient(#f4f7fb, #e7eef6); text-align: left;
+  position: sticky; top: 0; z-index: 1; background: linear-gradient(var(--serit1), var(--serit2)); text-align: left;
   padding: 5px 14px; border-bottom: 1px solid var(--cizgi); border-right: 1px solid var(--cizgi2);
   font-size: 11px; font-weight: 700; color: #3a5573; white-space: nowrap;
 }
@@ -211,26 +237,26 @@ table.grid td { padding: 4px 14px; border-bottom: 1px solid var(--cizgi2); borde
    DIKEY dolgu degisir - yatay hizalama ve kolon genislikleri sabit kalir. */
 table.grid.boy-sik   td { padding-top: 1px; padding-bottom: 1px }
 table.grid.boy-genis td { padding-top: 9px; padding-bottom: 9px }
-table.grid tbody tr:hover td { background: #f2f7fd }
+table.grid tbody tr:hover td { background: var(--satirust) }
 table.grid tbody tr.secili td { background: var(--mor2) }
 table.grid tr.log-bolum-satiri td {
-  background: #eef3f8;
+  background: var(--satiralt);
   color: #2f4d69;
   font-weight: 700;
   border-top: 1px solid var(--cizgi);
 }
-table.grid tr.log-bolum-satiri:hover td { background: #eef3f8 }
+table.grid tr.log-bolum-satiri:hover td { background: var(--satiralt) }
 /* Gruplu liste (ekstre: para birimi basina): grup basligi ve ara toplam satiri.
    Ara toplam veri satirlariyla karismasin diye ustten cizgili ve kalin. */
 table.grid tr.grup-bas td {
-  background: #eaf1f9; color: #23405c; font-weight: 700;
+  background: var(--grupzem); color: var(--grupyazi); font-weight: 700;
   border-top: 2px solid var(--cizgi);
 }
-table.grid tr.grup-bas:hover td { background: #eaf1f9 }
+table.grid tr.grup-bas:hover td { background: var(--grupzem) }
 table.grid tr.grup-toplam td {
-  background: #f6f8fb; font-weight: 700; border-top: 1px solid var(--cizgi);
+  background: var(--toplamzem); font-weight: 700; border-top: 1px solid var(--cizgi);
 }
-table.grid tr.grup-toplam:hover td { background: #f6f8fb }
+table.grid tr.grup-toplam:hover td { background: var(--toplamzem) }
 table.grid tfoot td {
   position: sticky; bottom: 0; background: var(--yuz2); border-top: 1px solid var(--cizgi);
   font-weight: 700;
@@ -269,16 +295,16 @@ table.grid tr.flt input {
   width: 100%; border: 1px solid var(--cizgi); border-radius: 3px; height: 24px; padding: 0 7px;
   font-size: 11.5px; background: var(--yuz); font-weight: 400; text-transform: none; letter-spacing: normal;
 }
-.satir-kritik td { background: #fdf2f2 !important }
-.satir-uyari td { background: #fdf8ec !important }
+.satir-kritik td { background: var(--hatazem) !important }
+.satir-uyari td { background: var(--uyarizem) !important }
 .satir-pasif td { color: var(--soluk) }
-.satir-log-ekle td { background: #eaf7ef !important }
-.satir-log-degisiklik td { background: #fff6dc !important }
-.satir-log-sil td { background: #fde8e8 !important }
+.satir-log-ekle td { background: var(--okzem) !important }
+.satir-log-degisiklik td { background: var(--degisikzem) !important }
+.satir-log-sil td { background: var(--hatazem) !important }
 .bos { padding: 30px; text-align: center; color: var(--soluk) }
 .yukleniyor {
   position: absolute; inset: 0; display: grid; place-items: center;
-  background: rgba(255, 255, 255, .7); color: var(--soluk);
+  background: var(--yuz); color: var(--soluk);
 }
 .gridwrap { position: relative; display: flex; flex-direction: column; min-height: 0 }
 .altbilgi {
@@ -289,9 +315,9 @@ table.grid tr.flt input {
 
 /* rozetler */
 .rozet { padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 700; display: inline-block }
-.rozet.ok { background: #e2f3e8; color: var(--ok); border: 1px solid #bfe3cb }
-.rozet.hata { background: #fdeceb; color: var(--hata) }
-.rozet.uyari { background: #fdf6e3; color: var(--uyari); border: 1px solid #eeddb4 }
+.rozet.ok { background: var(--okzem); color: var(--ok); border: 1px solid var(--okkenar) }
+.rozet.hata { background: var(--hatazem); color: var(--hata) }
+.rozet.uyari { background: var(--uyarizem); color: var(--uyari); border: 1px solid var(--uyarikenar) }
 .rozet.mor { background: var(--mor2); color: var(--mor) }
 .rozet.gri { background: var(--yuz2); color: var(--soluk) }
 /* Rozet gorunumlu ama SECILEBILIR select (İlgili Kişiler Durum sutunu). */
@@ -303,8 +329,8 @@ table.grid tr.flt input {
   background-position: right 10px top 55%, right 6px top 55%;
   background-size: 4px 4px, 4px 4px; background-repeat: no-repeat;
 }
-.rozet-sec.ok { background-color: #e2f3e8; color: var(--ok) }
-.rozet-sec.hata { background-color: #fdeceb; color: var(--hata) }
+.rozet-sec.ok { background-color: var(--okzem); color: var(--ok) }
+.rozet-sec.hata { background-color: var(--hatazem); color: var(--hata) }
 .rozet-sec:disabled { cursor: default; opacity: .8 }
 
 /* --------------------------------------------------------- kart modali ---- */
@@ -341,7 +367,7 @@ table.grid tr.flt input {
 .kaara input { flex: 1; min-width: 0 }
 .kabtn {
   flex: none; width: 32px; height: 32px; border: 1px solid var(--cizgi); border-radius: 3px;
-  background: linear-gradient(#fbfcfe, #e7edf4);
+  background: linear-gradient(var(--dug1), var(--dug2));
 }
 .kabtn:disabled { opacity: .55; cursor: default }
 .karoz {
@@ -350,8 +376,8 @@ table.grid tr.flt input {
 }
 .kaok { color: var(--ok); font-weight: 700; font-size: 14px; width: 16px; text-align: center }
 .kauyari {
-  margin: 8px 10px 0; padding: 7px 9px; border: 1px solid #eeddb4; border-radius: 3px;
-  background: #fdf6e3; color: var(--uyari); font-size: 12px;
+  margin: 8px 10px 0; padding: 7px 9px; border: 1px solid var(--uyarikenar); border-radius: 3px;
+  background: var(--uyarizem); color: var(--uyari); font-size: 12px;
 }
 .kanot { margin: 8px 10px 10px; color: var(--soluk); font-size: 11.5px; line-height: 1.35 }
 .kaalt {
@@ -360,7 +386,7 @@ table.grid tr.flt input {
 }
 .kaalt button {
   height: 28px; padding: 0 13px; border: 1px solid var(--cizgi); border-radius: 3px;
-  background: linear-gradient(#fbfcfe, #e7edf4); font-weight: 600;
+  background: linear-gradient(var(--dug1), var(--dug2)); font-weight: 600;
 }
 .kaalt button.bas {
   border-color: #2f6db3; background: linear-gradient(#4d8fd6, #2f6db3); color: #fff;
@@ -374,7 +400,7 @@ table.grid tr.flt input {
 /* Kimlik seridi (mockup: idstrip) — sekme DEGIL, her sekmede sabit gorunur. */
 .kaid {
   padding: 10px 12px; border-bottom: 1px solid var(--cizgi2);
-  background: linear-gradient(#ffffff, #f5f8fb);
+  background: linear-gradient(var(--dugh1), var(--serit1));
   flex: none;   /* kimlik seridi de sikismasin (bkz. .katab) */
 }
 /* Mockup idstrip'i (Kod/Ad/Tur/Durum) TEK SATIRDA - genis min-width sarmaya zorluyordu. */
@@ -397,7 +423,7 @@ table.grid tr.flt input {
 }
 .katab .kat {
   padding: 7px 13px; font-size: 12px; color: var(--soluk); cursor: pointer; white-space: nowrap;
-  background: #e9eef4; border: 1px solid var(--cizgi); border-bottom: none; border-radius: 3px 3px 0 0;
+  background: var(--sekmezem); border: 1px solid var(--cizgi); border-bottom: none; border-radius: 3px 3px 0 0;
   margin-top: 5px; position: relative; top: 1px; display: flex; align-items: center; gap: 6px; user-select: none;
 }
 .katab .kat:hover { color: var(--yazi2) }
@@ -413,11 +439,11 @@ table.grid tr.flt input {
 }
 .mesaj-kutu {
   width: min(360px, calc(100% - 32px)); border: 1px solid var(--cizgi); border-radius: 4px;
-  background: #fff; box-shadow: 0 12px 32px rgba(22, 34, 48, .2); overflow: hidden;
+  background: var(--yuz); box-shadow: 0 12px 32px rgba(0, 0, 0, .3); overflow: hidden;
 }
 .mesaj-kutu h3 {
   margin: 0; padding: 8px 10px; font-size: 13px; font-weight: 700;
-  background: linear-gradient(#f0f5fa, #e6eef6); border-bottom: 1px solid var(--cizgi2);
+  background: linear-gradient(var(--serit3), var(--serit4)); border-bottom: 1px solid var(--cizgi2);
 }
 .mesaj-kutu p { margin: 0; padding: 16px 12px; font-size: 12px }
 .mesaj-dugme {
@@ -426,10 +452,10 @@ table.grid tr.flt input {
 }
 
 /* ---------------------------------------------------------------- kart ---- */
-.kagrup { border: 1px solid var(--cizgi2); border-radius: var(--r); background: #fbfcfd; margin-bottom: 12px; overflow: hidden }
+.kagrup { border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--kartzem); margin-bottom: 12px; overflow: hidden }
 .kagrup > h6 {
   margin: 0; padding: 6px 10px; font-size: 11px; color: var(--yazi2);
-  background: linear-gradient(#f0f5fa, #e6eef6); border-bottom: 1px solid var(--cizgi2);
+  background: linear-gradient(var(--serit3), var(--serit4)); border-bottom: 1px solid var(--cizgi2);
   font-weight: 700; display: flex; align-items: center; gap: 8px;
 }
 .kagrup > .alan-izgara, .kagrup > .resim-kutusu { margin: 10px }
@@ -443,7 +469,7 @@ table.grid tr.flt input {
 .personel-iletisim-yerlesim > .kagrup { margin-bottom: 0 }
 .kagrup-resim { flex: 0 0 150px; width: 150px; max-width: 150px }
 .resim-kutusu {
-  width: 130px; height: 130px; border: 1px dashed var(--cizgi); border-radius: 3px; background: #eef3f8;
+  width: 130px; height: 130px; border: 1px dashed var(--cizgi); border-radius: 3px; background: var(--satiralt);
   display: grid; place-items: center; font-size: 30px; color: var(--soluk);
 }
 .resim-kutusu img { width: 100%; height: 100%; object-fit: contain }
@@ -468,7 +494,7 @@ table.grid tr.flt input {
   grid-column: 2; border: 1px solid var(--cizgi); border-radius: 2px; background: var(--yuz);
   height: 23px; padding: 0 6px; font-size: 12px; width: 100%; color: var(--yazi);
 }
-.alan input:focus, .alan select:focus, .inp:focus { outline: 2px solid var(--mor2); border-color: #98c2ee }
+.alan input:focus, .alan select:focus, .inp:focus { outline: 2px solid var(--mor2); border-color: var(--dugkenar) }
 .alan input:disabled, .alan select:disabled, .inp:disabled { background: var(--yuz2); color: var(--soluk) }
 /* Mockup .ikili: deger + birim TEK etiket altinda yan yana (or. Raf Ömrü: sayi + Gün/Ay/Yıl). */
 .alan .ikili { grid-column: 2; display: flex; gap: 5px; min-width: 0 }
@@ -554,7 +580,7 @@ table.grid tr.flt input {
 /* Detay bloku: soldan girintili, sol kenarinda mavi seritle kalem/depo
    satirina bagli oldugu belli olsun. */
 tr.lot-detay > td {
-  background: #eef4fb; padding: 6px 10px 8px 34px;
+  background: var(--satirust); padding: 6px 10px 8px 34px;
   border-left: 3px solid var(--mor);
 }
 table.lot-tablo {
@@ -570,16 +596,16 @@ table.lot-tablo td {
   padding: 3px 14px; border-bottom: 1px solid var(--cizgi2); white-space: nowrap;
 }
 table.lot-tablo tr:last-child td { border-bottom: 0 }
-table.lot-tablo tbody tr:hover td { background: #f2f7fd }
+table.lot-tablo tbody tr:hover td { background: var(--satirust) }
 table.lot-tablo code { font-weight: 700; color: var(--yazi2) }
 
 /* SKT'si gecmis lot: kutunun kendisi kirmizi - satirda goze carpsin. */
 /* Gecersiz telefon: gridde kutu kirmizi cerceve alir (kart formunda alan-hata
    metni cikiyor; gridde satir basina metin yeri yok). */
-.tel-gecersiz .tel-girdi input { border-color: var(--hata); background: #fdf1f1 }
+.tel-gecersiz .tel-girdi input { border-color: var(--hata); background: var(--hatazem) }
 
 input.skt-gecmis {
-  border-color: var(--hata); background: #fdf1f1; color: var(--hata); font-weight: 700;
+  border-color: var(--hata); background: var(--hatazem); color: var(--hata); font-weight: 700;
 }
 
 /* Otomatik doldurulan alanin altindaki aciklama (ör. "24.08.2026 kuru"). */
@@ -589,7 +615,7 @@ input.skt-gecmis {
 .detay-tablo { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11.5px }
 .detay-tablo th {
   text-align: left; padding: 5px 8px; color: #3a5573; font-size: 11px; font-weight: 700;
-  background: linear-gradient(#f4f7fb, #e7eef6); border-bottom: 1px solid var(--cizgi);
+  background: linear-gradient(var(--serit1), var(--serit2)); border-bottom: 1px solid var(--cizgi);
   border-right: 1px solid var(--cizgi2);
 }
 .detay-tablo td { padding: 5px 7px; border-bottom: 1px solid var(--cizgi2); border-right: 1px solid #eef2f6 }
@@ -608,12 +634,12 @@ input.skt-gecmis {
 .hata-kutusu, .bilgi-kutusu, .cakisma-kutusu {
   padding: 9px 12px; border-radius: var(--r); font-size: 12px; margin: 0 0 12px;
 }
-.hata-kutusu { background: #fdeceb; border: 1px solid #f6d3d1; color: var(--hata) }
-.bilgi-kutusu { background: #e6f5ee; border: 1px solid #c5e6d6; color: var(--ok) }
-.cakisma-kutusu { background: #fdf6e3; border: 1px solid #eeddb4; color: var(--uyari) }
+.hata-kutusu { background: var(--hatazem); border: 1px solid var(--hatakenar); color: var(--hata) }
+.bilgi-kutusu { background: var(--okzem); border: 1px solid var(--okkenar); color: var(--ok) }
+.cakisma-kutusu { background: var(--uyarizem); border: 1px solid var(--uyarikenar); color: var(--uyari) }
 .cakisma-arac { display: flex; gap: 8px; margin-top: 8px }
 .uyari-liste { margin: 6px 0 0; padding-left: 18px }
-.rozet-uyari { background: #fdf6e3; color: var(--uyari); padding: 2px 9px; border-radius: 10px; font-size: 11px }
+.rozet-uyari { background: var(--uyarizem); color: var(--uyari); padding: 2px 9px; border-radius: 10px; font-size: 11px }
 
 /* -------------------------------------------------------------- lookup ---- */
 .lookup { display: flex; flex-direction: column; gap: 3px; position: relative }
@@ -626,9 +652,9 @@ input.skt-gecmis {
 .lookup-kutu input:disabled { background: var(--yuz2); cursor: default }
 .lookup-kutu button {
   height: 23px; width: 26px; border: 1px solid var(--cizgi); border-radius: 2px;
-  background: linear-gradient(#fbfcfe, #e7edf4); padding: 0;
+  background: linear-gradient(var(--dug1), var(--dug2)); padding: 0;
 }
-.lookup-kutu button:hover { background: linear-gradient(#fff, #dce8f6) }
+.lookup-kutu button:hover { background: linear-gradient(var(--dugh1), var(--dugh2)) }
 
 .perde { position: fixed; inset: 0; background: rgba(20, 40, 70, .35); z-index: 20 }
 .lookup-pencere, .palet {
@@ -672,7 +698,7 @@ input.skt-gecmis {
 .lookup-liste tbody tr { cursor: pointer }
 .lookup-liste tbody tr.secili td { background: var(--mor2) }
 .lookup-alt { display: flex; justify-content: space-between; align-items: center; color: var(--soluk); font-size: 11px }
-.lookup-alt button { height: 27px; padding: 0 11px; border: 1px solid var(--cizgi); border-radius: 3px; background: linear-gradient(#fbfcfe, #e7edf4) }
+.lookup-alt button { height: 27px; padding: 0 11px; border: 1px solid var(--cizgi); border-radius: 3px; background: linear-gradient(var(--dug1), var(--dug2)) }
 
 /* ------------------------------------------------------------- aksiyon ---- */
 .arac-cubugu { display: flex; gap: 6px; align-items: center }
@@ -749,7 +775,7 @@ input.skt-gecmis {
 .belge-hdr-sar {
   /* Modal govdesinin (kagov) 14px dolgusunu asarak tam genislik serit olur. */
   margin: -14px -14px 0; padding: 12px 14px;
-  background: linear-gradient(#fff, #f5f8fb); border-bottom: 1px solid var(--cizgi);
+  background: linear-gradient(var(--dugh1), var(--serit1)); border-bottom: 1px solid var(--cizgi);
 }
 .belge-hdr-sar .alan-izgara { margin: 0 }
 /* Sekme cubugu baslik seridinin hemen altinda, grid'in ustunde. */
@@ -788,7 +814,7 @@ input.skt-gecmis {
 /* Salt gorunum alani: rozet + aciklama yan yana. */
 .alan .deger-serit { display: flex; align-items: center; gap: 6px; min-height: 28px; flex-wrap: wrap }
 .alan .deger-serit .sonuk { color: var(--soluk); font-size: 11px }
-.rozet.bilgi { background: #e6f0fb; color: #2f6db3; border-color: #cfe0f4 }
+.rozet.bilgi { background: var(--grupzem); color: var(--mor); border-color: var(--cizgi) }
 
 /* Sekme icindeki alan izgarasinda etiketler SOLDA (.alan'in varsayilani boyle).
    GenLookup kendi icinde dikeydi; burada o da yatay hizaya cekilir ki
@@ -803,8 +829,8 @@ input.skt-gecmis {
 
 /* Salt gorunum kalem gridi: satir secimi onay kutusuyla, cift tik duzenler. */
 .detay-tablo.secilebilir tbody tr { cursor: default }
-.detay-tablo.secilebilir tbody tr:hover td { background: #f3f7fc }
-.detay-tablo.secilebilir tbody tr.secili td { background: var(--sec, #d7e7fb) }
+.detay-tablo.secilebilir tbody tr:hover td { background: var(--satirust) }
+.detay-tablo.secilebilir tbody tr.secili td { background: var(--sec, var(--mor2)) }
 .detay-tablo.secilebilir td { padding: 5px 8px }
 .detay-tablo .sonuk { color: var(--soluk) }
 .detay-tablo td.bos { text-align: center; color: var(--soluk); padding: 14px }
@@ -831,7 +857,7 @@ input.skt-gecmis {
 .kpi-serit { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px }
 .kpi {
   border: 1px solid var(--cizgi); border-radius: 4px;
-  background: linear-gradient(#fff, #f6f9fc); padding: 9px 11px;
+  background: linear-gradient(var(--dugh1), var(--serit1)); padding: 9px 11px;
 }
 .kpi .k { font-size: 11px; color: var(--soluk) }
 .kpi .v { font-size: 17px; font-weight: 700; color: var(--yazi2); margin-top: 3px }
@@ -841,7 +867,7 @@ input.skt-gecmis {
 /* Grid icindeki duzenlenebilir hucre: cerceve yalniz odakta belirir. */
 .hucre-girdi { width: 100%; border: 1px solid transparent; background: transparent; padding: 1px 3px }
 .hucre-girdi:hover { border-color: var(--cizgi) }
-.hucre-girdi:focus { border-color: var(--vurgu); background: #fff }
+.hucre-girdi:focus { border-color: var(--vurgu); background: var(--yuz) }
 
 /* Stok kartı "Hareketler": tarih aralığı + depo şeridi (mockup'ta grid üstü satır). */
 .hareket-serit {
@@ -909,7 +935,8 @@ input.skt-gecmis {
 }
 .dil-oge:hover { background: var(--yuz2) }
 .dil-oge.on { background: var(--mor2); font-weight: 700 }
-.dil-oge .bayrak { font-size: 14px; line-height: 1 }
+/* Bayrak artik SVG (bkz. bilesenler/Bayrak.tsx) - metinle hizali dursun. */
+.dil-oge .bayrak { display: inline-flex; align-items: center; line-height: 1 }
 
 /* ---------------------------------------------- ana sayfa paneli ---- */
 .panel-kutular { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-bottom: 14px }
@@ -941,7 +968,7 @@ input.skt-gecmis {
    ilk denemede bu yuzden kucuk kalmisti. */
 .numaralama-bas {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  padding: 6px 10px; background: linear-gradient(#f0f5fa, #e6eef6);
+  padding: 6px 10px; background: linear-gradient(var(--serit3), var(--serit4));
   border-bottom: 1px solid var(--cizgi2);
 }
 .numaralama-bas h6 { margin: 0; font-size: 13px; color: var(--yazi); font-weight: 700 }
@@ -993,6 +1020,24 @@ input.skt-gecmis {
   --uyari: #d0a44a;
   --hata: #e06a6a;
   --golge: 0 6px 22px rgba(0, 0, 0, .45);
+
+  /* Yuzeyler (bkz. :root): koyu karsiliklar. Dugme/serit/kart zeminleri
+     boylece gecede de KOYU, uzerindeki acik yazi okunur olur. */
+  --dug1: #2b3540;  --dug2: #222b36;
+  --dugh1: #35414f; --dugh2: #2a3542;
+  --dugkenar: #4d8fd6;
+  --serit1: #242e3a; --serit2: #1d252f;
+  --serit3: #242e3a; --serit4: #1d252f;
+  --satirust: #232e3b;
+  --satiralt: #1f2731;
+  --grupzem: #24384f; --grupyazi: #cfe3fb;
+  --toplamzem: #232c37;
+  --okzem: #1d3326;   --okkenar: #2f5c40;
+  --hatazem: #3a2222; --hatakenar: #6b3535;
+  --uyarizem: #3a3122; --uyarikenar: #6b5a2f;
+  --kartzem: #1f2731;
+  --sekmezem: #202932;
+  --degisikzem: #3a3322;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1012,6 +1057,27 @@ input.skt-gecmis {
     --uyari: #d0a44a;
     --hata: #e06a6a;
     --golge: 0 6px 22px rgba(0, 0, 0, .45);
+
+    /* Yuzeyler (bkz. :root): koyu karsiliklar. Dugme/serit/kart zeminleri
+       boylece gecede de KOYU, uzerindeki acik yazi okunur olur. */
+    --dug1: #2b3540;  --dug2: #222b36;
+    --dugh1: #35414f; --dugh2: #2a3542;
+    --dugkenar: #4d8fd6;
+    --serit1: #242e3a; --serit2: #1d252f;
+    --serit3: #242e3a; --serit4: #1d252f;
+    --satirust: #232e3b;
+    --satiralt: #1f2731;
+    --grupzem: #24384f; --grupyazi: #cfe3fb;
+    --toplamzem: #232c37;
+    --okzem: #1d3326;   --okkenar: #2f5c40;
+    --hatazem: #3a2222; --hatakenar: #6b3535;
+    --uyarizem: #3a3122; --uyarikenar: #6b5a2f;
+    --kartzem: #1f2731;
+    --sekmezem: #202932;
+    --degisikzem: #3a3322;
+  --kartzem: #1f2731;
+  --sekmezem: #202932;
+  --degisikzem: #3a3322;
   }
 }
 

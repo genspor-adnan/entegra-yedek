@@ -19,7 +19,13 @@ namespace Gentegre.Api.Servisler;
 public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUretici)
 {
     public sealed record MukellefBilgisi(bool Mukellef, string Unvan, string VergiDairesi,
-                                         string Il, string Ilce, string Adres, string Durum);
+                                         string Il, string Ilce, string Adres, string Durum,
+                                         string Alias = "", string IrsaliyeAlias = "",
+                                         bool IrsaliyeKullanicisi = false);
+
+    /// <summary>GIB kullanici listesi sonucu: posta kutulari + kullanici mi.</summary>
+    private sealed record GibKullanici(bool EFatura, bool EIrsaliye,
+                                       string Alias, string IrsaliyeAlias);
 
     public sealed record DurumBilgisi(string BelgeNo, string Kod, string Aciklama, bool Degisti);
 
@@ -79,6 +85,66 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
         throw GentegreHatasi.IsKurali("Entegratör jetonu alınamadı.");
     }
 
+
+    /// <summary>
+    /// GIB e-FATURA KULLANICI LISTESI (186): GET /v1/resources/gib-users.
+    /// Donen her kayit bir POSTA KUTUSU (alias) + belge turu (INVOICE /
+    /// DESPATCHADVICE). Liste bossa alici e-Fatura kullanicisi DEGILDIR.
+    ///
+    /// Mukellefiyetin TEK dogru kaynagi burasi: /v2/taxpayers vergi dairesi
+    /// kaydini doner, faal her firmaya "aktif" der. Onunla karar verilince
+    /// e-Arsivlik alicilara e-Fatura hazirlaniyor, gonderimde entegrator
+    /// RECEIVER_COULD_NOT_FOUND_IN_GIB_USER_LIST ile reddediyordu.
+    /// </summary>
+    private static async Task<GibKullanici> GibKullaniciAsync(HttpClient istemci, Hesap hesap,
+        string jeton, string vkno, CancellationToken iptal)
+    {
+        using var istek = new HttpRequestMessage(HttpMethod.Get,
+            $"{hesap.Url.TrimEnd('/')}/v1/resources/gib-users?identifier={vkno}");
+        istek.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jeton);
+        using var yanit = await istemci.SendAsync(istek, iptal);
+
+        // 404 = listede yok; hata degil, gecerli bir cevap (e-Arsiv kesilecek).
+        if (yanit.StatusCode == System.Net.HttpStatusCode.NotFound)
+            return new GibKullanici(false, false, "", "");
+        if (!yanit.IsSuccessStatusCode)
+            throw GentegreHatasi.IsKurali(
+                $"GİB kullanıcı sorgusu başarısız (HTTP {(int)yanit.StatusCode}).");
+
+        using var belge = JsonDocument.Parse(await yanit.Content.ReadAsStringAsync(iptal));
+        if (!belge.RootElement.TryGetProperty("data", out var dizi)
+            || dizi.ValueKind != JsonValueKind.Array)
+            return new GibKullanici(false, false, "", "");
+
+        string fatura = "", irsaliye = "";
+        foreach (var k in dizi.EnumerateArray())
+        {
+            if (k.ValueKind != JsonValueKind.Object) continue;
+            // Kapatilmis posta kutusu ATLANIR - eskimis alias'a gonderim GIB'de reddedilir.
+            if (k.TryGetProperty("active", out var ak) && ak.ValueKind == JsonValueKind.False)
+                continue;
+
+            var alias = k.TryGetProperty("alias", out var a) && a.ValueKind == JsonValueKind.String
+                        ? (a.GetString() ?? "").Trim() : "";
+            if (alias.Length == 0) continue;
+
+            var tur = k.TryGetProperty("documentType", out var t) && t.ValueKind == JsonValueKind.String
+                      ? (t.GetString() ?? "").ToUpperInvariant() : "";
+            // Delphi ile ayni kural: tur DESPATCHADVICE ya da alias'ta "IRSALIYE".
+            if (tur == "DESPATCHADVICE" || alias.ToUpperInvariant().Contains("IRSALIYE"))
+            {
+                if (irsaliye.Length == 0) irsaliye = alias;
+            }
+            else if (fatura.Length == 0) fatura = alias;
+        }
+
+        // Fatura kutusu yoksa ama irsaliye kutusu varsa alici yine GIB
+        //   kullanicisidir; fatura icin o alias kullanilir.
+        var eFatura = fatura.Length > 0 || irsaliye.Length > 0;
+        return new GibKullanici(eFatura, irsaliye.Length > 0,
+                                fatura.Length > 0 ? fatura : irsaliye, irsaliye);
+    }
+
     // --------------------------------------------------------- mukellef ----
     /// <summary>
     /// GIB e-Fatura kullanicisi mi? 404 = kayitli DEGIL (e-Arsiv kesilecek) -
@@ -97,20 +163,28 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
         var istemci = istemciUretici.CreateClient("ebelge");
         var jeton = await JetonAlAsync(istemci, hesap, iptal);
 
+        // MUKELLEFIYET + ALIAS: GIB kullanici listesi (tek dogru kaynak).
+        var gib = await GibKullaniciAsync(istemci, hesap, jeton, temiz, iptal);
+
+        // UNVAN / VERGI DAIRESI / ADRES: vergi dairesi kaydi - kart doldurmak icin.
         using var istek = new HttpRequestMessage(HttpMethod.Get,
             $"{hesap.Url.TrimEnd('/')}/v2/taxpayers/{temiz}");
         istek.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jeton);
         using var yanit = await istemci.SendAsync(istek, iptal);
 
         if (yanit.StatusCode == System.Net.HttpStatusCode.NotFound)
-            return new MukellefBilgisi(false, "", "", "", "", "", "Kayıtlı değil");
+            return new MukellefBilgisi(gib.EFatura, "", "", "", "", "",
+                                       gib.EFatura ? "Kayıtlı" : "Kayıtlı değil",
+                                       gib.Alias, gib.IrsaliyeAlias, gib.EIrsaliye);
         if (!yanit.IsSuccessStatusCode)
             throw GentegreHatasi.IsKurali(
                 $"Mükellef sorgusu başarısız (HTTP {(int)yanit.StatusCode}).");
 
         using var belge = JsonDocument.Parse(await yanit.Content.ReadAsStringAsync(iptal));
         if (!belge.RootElement.TryGetProperty("data", out var d) || d.ValueKind != JsonValueKind.Object)
-            return new MukellefBilgisi(false, "", "", "", "", "", "Kayıtlı değil");
+            return new MukellefBilgisi(gib.EFatura, "", "", "", "", "",
+                                       gib.EFatura ? "Kayıtlı" : "Kayıtlı değil",
+                                       gib.Alias, gib.IrsaliyeAlias, gib.EIrsaliye);
 
         string Metin(JsonElement e, string ad)
             => e.TryGetProperty(ad, out var v) && v.ValueKind == JsonValueKind.String
@@ -130,13 +204,16 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
         }
 
         var durum = Metin(d, "status");
-        // FAAL kaydi olan mukellef e-Fatura kullanicisidir; kapanmis mukellefe
-        //   (status <> FAAL) e-Fatura kesilmez.
-        var aktif = durum.Equals("FAAL", StringComparison.OrdinalIgnoreCase)
-                    || (d.TryGetProperty("active", out var ak) && ak.ValueKind == JsonValueKind.True);
+        // MUKELLEFIYET gib-users'tan; ama vergi dairesi kaydi KAPANMISSA (status
+        //   <> FAAL) e-Fatura kesilmez - iki kaynak da olumlu olmali.
+        var faal = durum.Length == 0
+                   || durum.Equals("FAAL", StringComparison.OrdinalIgnoreCase)
+                   || (d.TryGetProperty("active", out var ak) && ak.ValueKind == JsonValueKind.True);
 
-        return new MukellefBilgisi(aktif, Metin(d, "commercialName"), Metin(d, "taxoffice"),
-                                   il, ilce, adres, string.IsNullOrWhiteSpace(durum) ? "-" : durum);
+        return new MukellefBilgisi(gib.EFatura && faal, Metin(d, "commercialName"),
+                                   Metin(d, "taxoffice"), il, ilce, adres,
+                                   string.IsNullOrWhiteSpace(durum) ? "-" : durum,
+                                   gib.Alias, gib.IrsaliyeAlias, gib.EIrsaliye);
     }
 
     // ------------------------------------------------------------ durum ----
@@ -268,25 +345,33 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
             subeId = o.IsDBNull(2) ? null : o.GetInt32(2);
         }
 
-        bool mukellef;
+        MukellefBilgisi bilgi;
         try
         {
-            mukellef = (await MukellefSorgulaAsync(vkno, subeId, iptal)).Mukellef;
+            bilgi = await MukellefSorgulaAsync(vkno, subeId, iptal);
         }
         catch
         {
             return false;                                    // ag/servis hatasi: sessiz gec
         }
 
+        // ALIAS da yazilir (186): e-Fatura gonderiminde posta kutusu ZORUNLU.
+        //   Sorgu alias dondurmediyse elle girilmis alias EZILMEZ.
         await using var yaz = new NpgsqlCommand("""
             update public.taraf
-               set efatura = @p1, efatura_sorgu_tarihi = now()::timestamp,
+               set efatura = @p1, eirsaliye = @p3,
+                   alias_eposta = case when @p4 <> '' then @p4 else alias_eposta end,
+                   alias_irsaliye = case when @p5 <> '' then @p5 else alias_irsaliye end,
+                   efatura_sorgu_tarihi = now()::timestamp,
                    degistiren = @p2, degistirme_tarihi = now()::timestamp
              where id = @p0
             """, baglanti);
         yaz.Parameters.AddWithValue("p0", tarafId);
-        yaz.Parameters.AddWithValue("p1", (short)(mukellef ? 1 : 0));
+        yaz.Parameters.AddWithValue("p1", (short)(bilgi.Mukellef ? 1 : 0));
         yaz.Parameters.AddWithValue("p2", kullaniciId);
+        yaz.Parameters.AddWithValue("p3", (short)(bilgi.IrsaliyeKullanicisi ? 1 : 0));
+        yaz.Parameters.AddWithValue("p4", bilgi.Alias ?? "");
+        yaz.Parameters.AddWithValue("p5", bilgi.IrsaliyeAlias ?? "");
         await yaz.ExecuteNonQueryAsync(iptal);
         return true;
     }

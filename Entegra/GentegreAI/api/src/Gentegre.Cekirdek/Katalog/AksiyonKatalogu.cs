@@ -39,7 +39,7 @@ public static class AksiyonKatalogu
                 new("cari.ebelge-mukellef", "e-Fatura Mükellefiyeti Sorgula", "kart",
                     Hedef: "sagtus,palet", KaynakKodu: "cari", Islem: Islem.Degistir,
                     KayitGerekir: true, Sira: 45),
-                new("cari.sil",     "Sil",         "kart", Hedef: "sagtus,palet", Kisayol: "Del",
+                new("cari.sil",     "🗑 Sil",         "kart", Hedef: "sagtus,palet", Kisayol: "Del",
                     KaynakKodu: "cari", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
                 new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
@@ -51,7 +51,7 @@ public static class AksiyonKatalogu
                     KaynakKodu: "cari", Islem: Islem.Ekle, Sira: 10),
                 new("kisi.duzenle", "✎ Düzenle",   "kisi", Kisayol: "Enter",
                     KaynakKodu: "cari", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("kisi.sil",     "Sil",         "kisi", Hedef: "sagtus,palet", Kisayol: "Del",
+                new("kisi.sil",     "🗑 Sil",         "kisi", Hedef: "sagtus,palet", Kisayol: "Del",
                     KaynakKodu: "cari", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
                 new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
@@ -62,7 +62,7 @@ public static class AksiyonKatalogu
                     KaynakKodu: "rol", Islem: Islem.Ekle, Sira: 10),
                 new("rol.duzenle", "✎ Düzenle",   "rol", Kisayol: "Enter",
                     KaynakKodu: "rol", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("rol.sil",     "Sil",         "rol", Hedef: "sagtus,palet", Kisayol: "Del",
+                new("rol.sil",     "🗑 Sil",         "rol", Hedef: "sagtus,palet", Kisayol: "Del",
                     KaynakKodu: "rol", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
             },
             ["personel-liste"] = new AksiyonTanimi[]
@@ -71,7 +71,7 @@ public static class AksiyonKatalogu
                     KaynakKodu: "personel", Islem: Islem.Ekle, Sira: 10),
                 new("personel.duzenle", "✎ Düzenle",   "personel", Kisayol: "Enter",
                     KaynakKodu: "personel", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("personel.sil",     "Sil",         "personel", Hedef: "sagtus,palet", Kisayol: "Del",
+                new("personel.sil",     "🗑 Sil",         "personel", Hedef: "sagtus,palet", Kisayol: "Del",
                     KaynakKodu: "personel", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
                 new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
@@ -82,7 +82,7 @@ public static class AksiyonKatalogu
                     KaynakKodu: "personel", Islem: Islem.Ekle, Sira: 10),
                 new("hasta.duzenle", "✎ Düzenle",   "hasta", Kisayol: "Enter",
                     KaynakKodu: "personel", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("hasta.sil",     "Sil",         "hasta", Hedef: "sagtus,palet", Kisayol: "Del",
+                new("hasta.sil",     "🗑 Sil",         "hasta", Hedef: "sagtus,palet", Kisayol: "Del",
                     KaynakKodu: "personel", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
                 new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
@@ -97,7 +97,7 @@ public static class AksiyonKatalogu
                     KaynakKodu: "stok", Islem: Islem.Ekle, Sira: 10),
                 new("stok.duzenle", "✎ Düzenle",   "stok", Hedef: "araccubugu,palet", Kisayol: "Enter",
                     KaynakKodu: "stok", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("stok.sil",     "Sil",         "stok", Hedef: "palet", Kisayol: "Del",
+                new("stok.sil",     "🗑 Sil",         "stok", Hedef: "palet", Kisayol: "Del",
                     KaynakKodu: "stok", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
                 // Kopyalama (126): secili kart icerigiyle cogaltilir.
                 new("stok.kopyala", "⧉ Stok Kartını Kopyala", "stok", Hedef: "sagtus,palet",
@@ -128,7 +128,7 @@ public static class AksiyonKatalogu
                     KaynakKodu: "gorev", Islem: Islem.Ekle, Sira: 10),
                 new("gorev.duzenle", "✎ Düzenle", "gorev", Kisayol: "Enter",
                     KaynakKodu: "gorev", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("gorev.sil",     "Sil",       "gorev", Hedef: "sagtus,palet", Kisayol: "Del",
+                new("gorev.sil",     "🗑 Sil",       "gorev", Hedef: "sagtus,palet", Kisayol: "Del",
                     KaynakKodu: "gorev", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
                 new("genel.yazdir",  "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
@@ -143,7 +143,7 @@ public static class AksiyonKatalogu
                     KaynakKodu: "proje", Islem: Islem.Ekle, Sira: 10),
                 new("proje.duzenle", "✎ Düzenle", "proje", Kisayol: "Enter",
                     KaynakKodu: "proje", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("proje.sil",     "Sil",       "proje", Hedef: "sagtus,palet", Kisayol: "Del",
+                new("proje.sil",     "🗑 Sil",       "proje", Hedef: "sagtus,palet", Kisayol: "Del",
                     KaynakKodu: "proje", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
                 new("genel.yazdir",  "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
@@ -158,7 +158,7 @@ public static class AksiyonKatalogu
                     KaynakKodu: "firsat", Islem: Islem.Ekle, Sira: 10),
                 new("firsat.duzenle", "✎ Düzenle", "firsat", Kisayol: "Enter",
                     KaynakKodu: "firsat", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
-                new("firsat.sil",     "Sil",       "firsat", Hedef: "sagtus,palet", Kisayol: "Del",
+                new("firsat.sil",     "🗑 Sil",       "firsat", Hedef: "sagtus,palet", Kisayol: "Del",
                     KaynakKodu: "firsat", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
                 new("genel.yazdir",   "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
@@ -174,7 +174,7 @@ public static class AksiyonKatalogu
                     KaynakKodu: "cari", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
                 new("aday.donustur",  "🤝 Müşteriye Dönüştür", "cari",
                     KaynakKodu: "cari", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30),
-                new("aday.sil",       "Sil",       "cari", Hedef: "sagtus,palet", Kisayol: "Del",
+                new("aday.sil",       "🗑 Sil",       "cari", Hedef: "sagtus,palet", Kisayol: "Del",
                     KaynakKodu: "cari", Islem: Islem.Sil, KayitGerekir: true, Sira: 40),
                 new("genel.yazdir",   "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
@@ -259,7 +259,7 @@ public static class AksiyonKatalogu
                     KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
                 // SIL, "Belgeyi Aç"in saginda (kullanici). Silme yalniz IZI
                 //   OLMAYAN belgede mumkun; kesin/izli belgede "İptal Et".
-                new("belge.sil",   "Sil",          "belge", Kisayol: "Del",
+                new("belge.sil",   "🗑 Sil",       "belge", Kisayol: "Del",
                     KaynakKodu: "belge", Islem: Islem.Sil, KayitGerekir: true, Sira: 25),
                 new("belge.kesinlestir", "Kesinlestir", "belge", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "belge.kesinlestir", KayitGerekir: true, Sira: 30),
@@ -309,6 +309,10 @@ public static class AksiyonKatalogu
                     KaynakKodu: "belge", Islem: Islem.Ekle, Sira: 10),
                 new("belge.ac",       "Aç",              "belge", Kisayol: "Enter",
                     KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                // Fatura listesindeki desenin AYNISI: "Aç"in saginda silme.
+                //   Izi olmayan (kesinlesmemis) belge silinir; digerinde "İptal Et".
+                new("belge.sil",      "🗑 Sil",          "belge", Kisayol: "Del",
+                    KaynakKodu: "belge", Islem: Islem.Sil, KayitGerekir: true, Sira: 25),
                 new("belge.donustur", "⇢ Dönüştür",      "belge",
                     AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 30),
                 new("belge.iptal",    "İptal Et",        "belge", Hedef: "sagtus,palet",
@@ -326,6 +330,8 @@ public static class AksiyonKatalogu
                     KaynakKodu: "belge", Islem: Islem.Ekle, Sira: 10),
                 new("belge.ac",       "İrsaliyeyi Aç",    "belge", Kisayol: "Enter",
                     KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                new("belge.sil",      "🗑 Sil",           "belge", Kisayol: "Del",
+                    KaynakKodu: "belge", Islem: Islem.Sil, KayitGerekir: true, Sira: 25),
                 new("belge.donustur", "🧾 Faturaya Dönüştür", "belge",
                     AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 30),
                 // e-BELGE MENUSU - fatura listesindekiyle AYNI adimlar ve sira
@@ -372,13 +378,13 @@ public static class AksiyonKatalogu
 
             ["cari-kart"] = new AksiyonTanimi[]
             {
-                new("cari.sil", "Sil", "kart", Hedef: "araccubugu,palet",
+                new("cari.sil", "🗑 Sil", "kart", Hedef: "araccubugu,palet",
                     KaynakKodu: "cari", Islem: Islem.Sil, KayitGerekir: true, Sira: 20),
             },
 
             ["stok-kart"] = new AksiyonTanimi[]
             {
-                new("stok.sil", "Sil", "stok", Hedef: "araccubugu,palet",
+                new("stok.sil", "🗑 Sil", "stok", Hedef: "araccubugu,palet",
                     KaynakKodu: "stok", Islem: Islem.Sil, KayitGerekir: true, Sira: 20),
             },
 
@@ -403,7 +409,7 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "kasa.kesinlestir", KayitGerekir: true, Sira: 40),
                 new("kasa.iptal",         "İptal Et",    "kasa", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "kasa.iptal", KayitGerekir: true, Sira: 50),
-                new("kasa.sil",           "Sil",         "kasa", Hedef: "sagtus,palet", Kisayol: "Del",
+                new("kasa.sil",           "🗑 Sil",         "kasa", Hedef: "sagtus,palet", Kisayol: "Del",
                     KaynakKodu: "kasa_islem", Islem: Islem.Sil, KayitGerekir: true, Sira: 60),
                 new("kasa.fis-gor",       "Muhasebe Fişi", "muhasebe", Hedef: "sagtus,palet",
                     KaynakKodu: "muhasebe_fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 70),
@@ -421,7 +427,7 @@ public static class AksiyonKatalogu
                     KaynakKodu: "muhasebe_fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
                 new("kasa.iptal",       "İptal Et",    "kasa", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "kasa.iptal", KayitGerekir: true, Sira: 30),
-                new("kasa.sil",         "Sil",         "kasa", Hedef: "sagtus,palet",
+                new("kasa.sil",         "🗑 Sil",         "kasa", Hedef: "sagtus,palet",
                     KaynakKodu: "kasa_islem", Islem: Islem.Sil, KayitGerekir: true, Sira: 40),
             },
 
@@ -435,7 +441,7 @@ public static class AksiyonKatalogu
                     KaynakKodu: "kasa_islem", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
                 new("kasa.gerceklestir", "✔ Gerçekleştir", "kasa",
                     AksiyonYetkisi: "kasa.gerceklestir", KayitGerekir: true, Sira: 30),
-                new("kasa.sil",          "Sil",          "kasa", Hedef: "sagtus,palet", Kisayol: "Del",
+                new("kasa.sil",          "🗑 Sil",          "kasa", Hedef: "sagtus,palet", Kisayol: "Del",
                     KaynakKodu: "kasa_islem", Islem: Islem.Sil, KayitGerekir: true, Sira: 40),
                 new("genel.yazdir",      "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),

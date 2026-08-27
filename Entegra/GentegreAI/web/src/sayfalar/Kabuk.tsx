@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Bayrak } from '../bilesenler/Bayrak';
 import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { LISTELER } from './Liste';
@@ -62,11 +63,13 @@ const GRUP_IKON: Record<string, string> = {
   'Yönetim': '🛠️',
 };
 
-/** Arayuz dilleri - db/081: taraf_kullanici.dil (0 TR / 1 EN / 2 DE). */
+/** Arayuz dilleri - db/081: taraf_kullanici.dil (0 TR / 1 EN / 2 DE).
+    Bayrak SVG cizilir (<Bayrak dil=…/>): Windows'ta bayrak EMOJISI yok, emoji
+    kullanildiginda kullanici "TR"/"GB"/"DE" harflerini goruyordu. */
 const DILLER = [
-  { deger: 0, ad: 'Türkçe',  bayrak: '🇹🇷' },
-  { deger: 1, ad: 'English', bayrak: '🇬🇧' },
-  { deger: 2, ad: 'Deutsch', bayrak: '🇩🇪' },
+  { deger: 0, ad: 'Türkçe' },
+  { deger: 1, ad: 'English' },
+  { deger: 2, ad: 'Deutsch' },
 ] as const;
 
 export function Kabuk() {
@@ -111,6 +114,14 @@ export function Kabuk() {
   /** Bayrak dugmesinin acilir listesi. */
   const [dilMenusu, setDilMenusu] = useState(false);
   const [tema, setTema] = useState<Tema>(() => temaOku());
+  /** Sol menu acik/kapali - tercih tarayicida kalir (dar ekranda kapali calisilir). */
+  const [menuKapali, setMenuKapali] = useState<boolean>(() => {
+    try { return localStorage.getItem('gentegre.menu') === 'kapali' } catch { return false }
+  });
+  const menuCevir = () => setMenuKapali(k => {
+    try { localStorage.setItem('gentegre.menu', k ? 'acik' : 'kapali') } catch { /* gizli sekme */ }
+    return !k;
+  });
   const grupAcikMi = (ad: string, alt: typeof moduller) =>
     ad in acikGruplar ? acikGruplar[ad] : alt.some(m => konum.pathname.startsWith(m.yol));
 
@@ -180,8 +191,14 @@ export function Kabuk() {
   }, [kullaniciAyariAcik]);
 
   return (
-    <div className="kabuk">
+    <div className={`kabuk${menuKapali ? ' menu-kapali' : ''}`}>
       <header className="ust">
+        {/* Menu ac/kapa: markanin SOLUNDA - kapaninca ana alan tam genislige acilir. */}
+        <button className="ib menu-tus" onClick={menuCevir}
+                title={menuKapali ? 'Menüyü aç' : 'Menüyü kapat'}
+                aria-expanded={!menuKapali}>
+          ☰
+        </button>
         <div className="marka marka-bag" role="link" tabIndex={0}
              title="Ana sayfa"
              onClick={() => git('/panel')}
@@ -229,7 +246,7 @@ export function Kabuk() {
           <span className="dil-sec" onMouseDown={e => e.stopPropagation()}>
             <button type="button" className="ib" title={`Dil — ${DILLER[kullanici?.dil ?? 0]?.ad ?? ''}`}
                     onClick={() => setDilMenusu(a => !a)}>
-              {DILLER[kullanici?.dil ?? 0]?.bayrak ?? '🏳️'}
+              <Bayrak dil={kullanici?.dil ?? 0} boy={18} />
             </button>
             {dilMenusu && (
               <span className="dil-menu">
@@ -237,7 +254,7 @@ export function Kabuk() {
                   <button key={d.deger} type="button"
                           className={`dil-oge${(kullanici?.dil ?? 0) === d.deger ? ' on' : ''}`}
                           onClick={() => { setDilMenusu(false); void dilSec(d.deger) }}>
-                    <span className="bayrak">{d.bayrak}</span> {d.ad}
+                    <span className="bayrak"><Bayrak dil={d.deger} /></span> {d.ad}
                   </button>
                 ))}
               </span>
@@ -385,7 +402,7 @@ export function Kabuk() {
                   <select value={seciliDil} onChange={e => setSeciliDil(Number(e.target.value))}
                           disabled={ayarKaydediliyor}>
                     {DILLER.map(d => (
-                      <option key={d.deger} value={d.deger}>{d.bayrak}  {d.ad}</option>
+                      <option key={d.deger} value={d.deger}>{d.ad}</option>
                     ))}
                   </select>
                   <label>Tema</label>

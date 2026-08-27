@@ -120,6 +120,21 @@ public sealed class EBelgeGonderimi(VeriKaynagi veri, IHttpClientFactory istemci
             // Yanit AYNEN saklanir: entegrator hata metni tek teshis kaynagi.
             await SonucYazAsync(baglanti, eBelgeId, belgeId, durum, entegrator,
                                 httpKodu, Kisalt(govdeYanit), "", false, kullaniciId, iptal);
+
+            // ALICI GIB LISTESINDE YOK: mukellef sorgusu (vergi dairesi kaydi)
+            //   "FAAL" dese de alici e-Fatura KULLANICISI olmayabilir - tek kesin
+            //   kanit gonderimin kendisi. Cariyi e-Arsiv'e cevirip kullaniciya ne
+            //   yapacagini soyle; yoksa ayni belge her denemede ayni hatayi alir.
+            if (belgeTuru == 1 && govdeYanit.Contains("RECEIVER_COULD_NOT_FOUND",
+                                                      StringComparison.OrdinalIgnoreCase))
+            {
+                await MukellefDegilIsaretleAsync(baglanti, belgeId, kullaniciId, iptal);
+                throw GentegreHatasi.IsKurali(
+                    "Alıcı GİB e-Fatura kullanıcı listesinde yok; cari e-Arşiv'e çevrildi. " +
+                    "\"Hazırı Geri Al\" ve ardından \"Hazırla\" ile belgeyi e-Arşiv olarak " +
+                    "yeniden hazırlayın.");
+            }
+
             throw GentegreHatasi.IsKurali($"Gönderilemedi (HTTP {httpKodu}): {Kisalt(govdeYanit, 500)}");
         }
 
@@ -129,6 +144,26 @@ public sealed class EBelgeGonderimi(VeriKaynagi veri, IHttpClientFactory istemci
                             kullaniciId, iptal);
 
         return new Sonuc(true, mesaj, uuid, httpKodu, belgeNo, entegrator);
+    }
+
+    /// <summary>
+    /// Belgenin carisini "e-Fatura mükellefi DEĞİL" olarak isaretle ve sorgu
+    /// tarihini tazele (185) - boylece bir sonraki hazirlama e-Arsiv secer ve
+    /// tazelik kurali hemen yeniden sormaz.
+    /// </summary>
+    private static async Task MukellefDegilIsaretleAsync(NpgsqlConnection baglanti,
+        int belgeId, int kullaniciId, CancellationToken iptal)
+    {
+        await using var komut = new NpgsqlCommand("""
+            update public.taraf t
+               set efatura = 0, efatura_sorgu_tarihi = now()::timestamp,
+                   degistiren = @p1, degistirme_tarihi = now()::timestamp
+              from public.belge b
+             where b.id = @p0 and t.id = b.taraf_id
+            """, baglanti);
+        komut.Parameters.AddWithValue("p0", belgeId);
+        komut.Parameters.AddWithValue("p1", kullaniciId);
+        await komut.ExecuteNonQueryAsync(iptal);
     }
 
     // --------------------------------------------------------------- okuma ----

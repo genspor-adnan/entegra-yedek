@@ -39,22 +39,32 @@ public static class KartUclari
 
             var m = await sorgu.MukellefSorgulaAsync(vkno, baglam.SubeId, iptal);
 
-            // Bayrak GUNCELLENIR, diger alanlar DOKUNULMAZ: unvan/adres
-            //   musterinin kendi kaydi, entegratorun yazimiyla ezilmemeli -
-            //   yanitta gelirler, kullanici isterse elle alir.
+            // Bayraklar ve POSTA KUTUSU (186) guncellenir; unvan/adres
+            //   DOKUNULMAZ: musterinin kendi kaydi, entegratorun yazimiyla
+            //   ezilmemeli - yanitta gelirler, kullanici isterse elle alir.
+            //   Sorgu alias dondurmediyse elle girilmis alias korunur.
             await using var yaz = new Npgsql.NpgsqlCommand("""
-                update public.taraf set efatura = @p1, degistiren = @p2,
-                       degistirme_tarihi = now()::timestamp
-                 where id = @p0 and coalesce(efatura, 0) <> @p1
+                update public.taraf
+                   set efatura = @p1, eirsaliye = @p3,
+                       alias_eposta = case when @p4 <> '' then @p4 else alias_eposta end,
+                       alias_irsaliye = case when @p5 <> '' then @p5 else alias_irsaliye end,
+                       efatura_sorgu_tarihi = now()::timestamp,
+                       degistiren = @p2, degistirme_tarihi = now()::timestamp
+                 where id = @p0
                 """, baglanti);
             yaz.Parameters.AddWithValue("p0", id);
             yaz.Parameters.AddWithValue("p1", (short)(m.Mukellef ? 1 : 0));
             yaz.Parameters.AddWithValue("p2", baglam.KullaniciId);
-            var degisti = await yaz.ExecuteNonQueryAsync(iptal) > 0;
+            yaz.Parameters.AddWithValue("p3", (short)(m.IrsaliyeKullanicisi ? 1 : 0));
+            yaz.Parameters.AddWithValue("p4", m.Alias ?? "");
+            yaz.Parameters.AddWithValue("p5", m.IrsaliyeAlias ?? "");
+            await yaz.ExecuteNonQueryAsync(iptal);
+            var degisti = true;
 
             return Results.Ok(new
             {
                 mukellef = m.Mukellef, durum = m.Durum, degisti,
+                alias = m.Alias, irsaliyeAlias = m.IrsaliyeAlias,
                 gelen = new { unvan = m.Unvan, vergiDairesi = m.VergiDairesi,
                               il = m.Il, ilce = m.Ilce, adres = m.Adres },
                 kayitli = new { unvan, vkno },
