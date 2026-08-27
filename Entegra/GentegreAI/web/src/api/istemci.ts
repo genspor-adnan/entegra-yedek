@@ -286,7 +286,11 @@ export const api = {
   belgeEBelgeOnizle: (id: number) =>
     istek<{ html: string }>(`/api/belge/${id}/ebelge-onizle`),
 
-  /** Gonderim govdesi (XML Kaydet): bicim 1 JSON / 2 UBL-XML. */
+  /** UBL-XML + goruntuleme XSLT'si (182): "XML Kaydet" ve XSLT'li on izleme. */
+  belgeEBelgeUbl: (id: number) =>
+    istek<{ ubl: string; xslt: string; dosyaAdi: string }>(`/api/belge/${id}/ebelge-ubl`),
+
+  /** Gonderim govdesi (entegratore giden ham istek). */
   belgeEBelgeGovde: (id: number) =>
     istek<{ bicim: number; govde: string; dosyaAdi: string }>(`/api/belge/${id}/ebelge-govde`),
 

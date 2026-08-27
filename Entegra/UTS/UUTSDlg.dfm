@@ -14,7 +14,6 @@ object UTSDlg: TUTSDlg
   OnCreate = FormCreate
   TextHeight = 13
   object cxPageControl1: TcxPageControl
-    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 1370
@@ -23,27 +22,22 @@ object UTSDlg: TUTSDlg
     TabOrder = 0
     Properties.ActivePage = cxTabSheet2
     Properties.CustomButtons.Buttons = <>
+    Properties.Images = Tablo.PNGImageList2
     LookAndFeel.Kind = lfFlat
     LookAndFeel.NativeStyle = False
     LookAndFeel.SkinName = 'VS2010'
     OnChange = cxPageControl1Change
-    ClientRectBottom = 31
+    ClientRectBottom = 32
     ClientRectLeft = 2
     ClientRectRight = 1368
-    ClientRectTop = 31
+    ClientRectTop = 32
     object cxTabSheet2: TcxTabSheet
       Caption = 'Sorgula / G'#246'nder'
       ImageIndex = 19
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
     end
     object cxTabSheet6: TcxTabSheet
       Caption = 'Ba'#351'ar'#305'l'#305'lar'
       ImageIndex = 19
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
     end
     object cxTabSheet5: TcxTabSheet
       Caption = 'Hatal'#305'lar'
@@ -54,16 +48,10 @@ object UTSDlg: TUTSDlg
       Font.Style = [fsBold]
       ImageIndex = 19
       ParentFont = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
     end
     object cxTabSheet1: TcxTabSheet
       Caption = #304'ptaller'
       ImageIndex = 19
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
     end
   end
   object PanelKategori: TJvNavPaneToolPanel
@@ -135,7 +123,6 @@ object UTSDlg: TUTSDlg
     Align = alClient
     TabOrder = 2
     object PageControlListe: TcxPageControl
-      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 184
       Width = 1172
@@ -144,22 +131,19 @@ object UTSDlg: TUTSDlg
       TabOrder = 0
       Properties.ActivePage = TabSheetSorgu
       Properties.CustomButtons.Buttons = <>
+      Properties.Images = Tablo.PNGImageList2
       ClientRectBottom = 300
       ClientRectLeft = 4
       ClientRectRight = 1168
-      ClientRectTop = 24
+      ClientRectTop = 25
       object TabSheetSorgu: TcxTabSheet
         Caption = 'Sorgu Listesi'
         ImageIndex = 32
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object GridSorgu: TcxGrid
           Left = 0
           Top = 0
           Width = 1164
-          Height = 276
+          Height = 275
           Align = alClient
           TabOrder = 0
           object GridSorguView: TcxGridDBTableView
@@ -245,15 +229,11 @@ object UTSDlg: TUTSDlg
       object TabSheetBildirim: TcxTabSheet
         Caption = 'Bildirim Listesi'
         ImageIndex = 32
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object GridUTS: TcxGrid
           Left = 0
           Top = 0
           Width = 1164
-          Height = 276
+          Height = 275
           Align = alClient
           TabOrder = 0
           object GridUTSView: TcxGridDBTableView
@@ -1089,8 +1069,8 @@ object UTSDlg: TUTSDlg
   object MemDataSorgu: TdxMemData
     Indexes = <>
     SortOptions = []
-    Left = 672
-    Top = 8
+    Left = 560
+    Top = 16
     object MemDataSorgunumara: TIntegerField
       FieldName = 'numara'
     end
@@ -1142,7 +1122,7 @@ object UTSDlg: TUTSDlg
   end
   object DtsDepo: TDataSource
     DataSet = TabDepo
-    Left = 296
-    Top = 152
+    Left = 384
+    Top = 40
   end
 end

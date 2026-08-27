@@ -1,4 +1,4 @@
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Gentegre.Cekirdek.Sozlesme;
@@ -269,6 +269,11 @@ public sealed class EBelgeGonderimi(VeriKaynagi veri, IHttpClientFactory istemci
             update public.e_belge
                set durum = @p1,
                    entegrator = @p2,
+                   -- GIB'e GIDENIN kopyasi (182): uyusmazlikta entegratore
+                   --   bagimli kalmayalim. Uretilemezse (eski belge, eksik veri)
+                   --   gonderim durmasin diye hata yutulur.
+                   ubl_xml = coalesce(ubl_xml,
+                       (select xmlserialize(document public.fn_ebelge_ubl(@p8) as text))),
                    servis_durum_kodu = @p3,
                    servis_durum_adi = left(@p4, 200),
                    api_json = @p5,
@@ -287,6 +292,7 @@ public sealed class EBelgeGonderimi(VeriKaynagi veri, IHttpClientFactory istemci
             komut.Parameters.Add("p5", NpgsqlDbType.Text).Value = yanit;
             komut.Parameters.AddWithValue("p6", uuid);
             komut.Parameters.AddWithValue("p7", kullaniciId);
+            komut.Parameters.AddWithValue("p8", belgeId);
             await komut.ExecuteNonQueryAsync(iptal);
         }
 

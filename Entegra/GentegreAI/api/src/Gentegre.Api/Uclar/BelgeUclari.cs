@@ -206,6 +206,18 @@ public static class BelgeUclari
             return Results.Ok(new { html, izlemeNo = baglam.IzlemeNo });
         });
 
+        // GET /api/belge/{id}/ebelge-ubl - UBL-XML + goruntuleme XSLT'si (182).
+        //   "XML Kaydet" ve XSLT'li on izleme bunu kullanir.
+        grup.MapGet("/{id:int}/ebelge-ubl", async (
+            int id, BaglamCozucu cozucu, BelgeDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+            var (ubl, xslt, ad) = await depo.EBelgeUblAsync(id, iptal);
+            return Results.Ok(new { ubl, xslt, dosyaAdi = ad, izlemeNo = baglam.IzlemeNo });
+        });
+
         // GET /api/belge/{id}/ebelge-govde - gonderilecek/gonderilen GOVDE.
         //   "XML Kaydet" bunu kullanir: izibiz JSON tabanli calistigi icin
         //   elimizdeki resmi icerik gonderim govdesidir (UBL'i entegrator kurar).

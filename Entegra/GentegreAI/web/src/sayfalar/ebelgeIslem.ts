@@ -25,18 +25,49 @@ export function dosyaIndir(icerik: string, ad: string, tip: string) {
 }
 
 /**
- * Onizleme HTML'ini yeni sekmede acar. `yazdir` ise yazdirma penceresini de
- * tetikler - "PDF Kaydet" ayri bir PDF motoru yerine tarayicinin
- * "PDF olarak kaydet" secenegini kullanir.
+ * GIB GORUNTUSU: UBL'e goruntuleme XSLT'si uygulanir (182) - GIB'e giden
+ * belgenin gordugu goruntunun AYNISI. Sablon yoksa ya da donusum basarisiz
+ * olursa uygulamanin kendi sade HTML onizlemesine duseriz; kullanici bos ekran
+ * gormesin.
+ */
+async function goruntuUret(belgeId: number): Promise<string> {
+  try {
+    const y = await api.belgeEBelgeUbl(belgeId);
+    if (y.xslt && y.ubl) {
+      const ayristirici = new DOMParser();
+      const ubl = ayristirici.parseFromString(y.ubl, 'application/xml');
+      const xslt = ayristirici.parseFromString(y.xslt, 'application/xml');
+      // Ayristirma hatasi "parsererror" dugumu birakir - sessizce yanlis
+      //   goruntu cizmek yerine sade onizlemeye duselim.
+      if (!ubl.querySelector('parsererror') && !xslt.querySelector('parsererror')) {
+        const islemci = new XSLTProcessor();
+        islemci.importStylesheet(xslt);
+        const sonuc = islemci.transformToDocument(ubl);
+        if (sonuc?.documentElement) {
+          return new XMLSerializer().serializeToString(sonuc);
+        }
+      }
+    }
+  } catch {
+    /* XSLT yoksa/bozuksa sade onizlemeye dusulur */
+  }
+  const h = await api.belgeEBelgeOnizle(belgeId);
+  return h.html;
+}
+
+/**
+ * Goruntuyu yeni sekmede acar. `yazdir` ise yazdirma penceresini de tetikler -
+ * "PDF Kaydet" ayri bir PDF motoru yerine tarayicinin "PDF olarak kaydet"
+ * secenegini kullanir.
  */
 async function onizle(belgeId: number, yazdir: boolean) {
-  const y = await api.belgeEBelgeOnizle(belgeId);
+  const html = await goruntuUret(belgeId);
   const pencere = window.open('', '_blank');
   if (!pencere) {
     mesaj('Tarayıcı yeni sekmeyi engelledi; açılır pencere iznini verin.');
     return;
   }
-  pencere.document.write(y.html);
+  pencere.document.write(html);
   pencere.document.close();
   if (yazdir) pencere.setTimeout(() => pencere.print(), 400);
 }
@@ -87,17 +118,16 @@ export async function ebelgeCiktisi(
         await onizle(id, true);
         return true;
       case 'ebelge.html': {
-        const y = await api.belgeEBelgeOnizle(id);
-        dosyaIndir(y.html, `${belgeNo}.html`, 'text/html;charset=utf-8');
+        // Ekranda gorulen GORUNTUNUN aynisi insin (XSLT varsa o).
+        dosyaIndir(await goruntuUret(id), `${belgeNo}.html`, 'text/html;charset=utf-8');
         return true;
       }
-      // XML KAYDET: entegratore giden GOVDE. izibiz JSON tabanli oldugu icin
-      //   uzanti bicime gore secilir - UBL ureten entegratorde .xml olur.
+      // XML KAYDET: artik GERCEK UBL (182). Entegratore giden ham istek
+      //   (izibiz'de JSON) ayri bir uctan alinabiliyor; kullanici "XML" derken
+      //   GIB belgesini kastediyor.
       case 'ebelge.xml': {
-        const y = await api.belgeEBelgeGovde(id);
-        const xmlMi = y.bicim === 2;
-        dosyaIndir(y.govde, `${y.dosyaAdi}.${xmlMi ? 'xml' : 'json'}`,
-                   xmlMi ? 'application/xml' : 'application/json');
+        const y = await api.belgeEBelgeUbl(id);
+        dosyaIndir(y.ubl, `${y.dosyaAdi}.xml`, 'application/xml;charset=utf-8');
         return true;
       }
       case 'ebelge.mesajlar': {

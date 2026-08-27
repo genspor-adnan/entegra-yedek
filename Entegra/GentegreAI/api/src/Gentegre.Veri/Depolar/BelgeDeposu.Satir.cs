@@ -498,4 +498,39 @@ public sealed partial class BelgeDeposu
         komut.Parameters.AddWithValue("p0", belgeId);
         return (await komut.ExecuteScalarAsync(iptal))?.ToString() ?? "";
     }
+
+    /// <summary>
+    /// Belgenin UBL-XML'i + (varsa) goruntuleme XSLT'si (182).
+    ///
+    /// XSLT'yi de AYNI cagrida doner: arayuz ikisini birlestirip GIB'in gordugu
+    /// goruntuyu cizer. Ayri iki istek, 1-2 MB'lik sablonu ikinci kez cekmek
+    /// demekti.
+    /// </summary>
+    public async Task<(string Ubl, string Xslt, string DosyaAdi)> EBelgeUblAsync(
+        int belgeId, CancellationToken iptal = default)
+        => await IsKuraliCevirAsync(async () =>
+        {
+            await using var baglanti = await _veri.AcAsync(iptal);
+            await using var komut = new NpgsqlCommand("""
+                select xmlserialize(document public.fn_ebelge_ubl(@p0) as text),
+                       coalesce((select convert_from(di.icerik, 'UTF8')
+                                   from public.dokuman d
+                                   join public.dokuman_icerik di on di.hash = d.hash
+                                  where d.kaynak = 'ebelge-xslt' and d.durum = 1
+                                    and d.kaynak_id = coalesce(
+                                        (select e.belge_turu from public.e_belge e
+                                          where e.belge_id = @p0 order by e.id desc limit 1),
+                                        case when (select bl.tur from public.belge bl
+                                                    where bl.id = @p0) = 14 then 7 else 1 end)
+                                  order by d.varsayilan desc, d.id limit 1), ''),
+                       coalesce((select nullif(e.belge_no, '') from public.e_belge e
+                                  where e.belge_id = @p0 order by e.id desc limit 1),
+                                'belge-' || @p0::text)
+                """, baglanti);
+            komut.Parameters.AddWithValue("p0", belgeId);
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            if (!await o.ReadAsync(iptal))
+                throw GentegreHatasi.IsKurali("UBL üretilemedi.");
+            return (o.GetString(0), o.GetString(1), o.GetString(2));
+        });
 }

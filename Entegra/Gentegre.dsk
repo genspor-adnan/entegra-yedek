@@ -1,19 +1,19 @@
 ﻿[Closed Files]
-File_0=TSourceModule,'C:\Users\HP\Entegra\Entegra\IcerikFrame\UFaturalar.pas',0,1,1,7,1,0,0,,
-File_1=TSourceModule,'C:\Users\HP\Entegra\Entegra\UStokWizard.pas',0,1,1145,13,1149,0,0,,
-File_2=TSourceModule,'C:\Users\HP\Entegra\Entegra\UVersiyonGuncelle.pas',0,1,1,21,7,0,0,,
-File_3=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\firedac\FireDAC.Phys.ODBCWrapper.pas',0,1,1609,1,1621,0,0,,
-File_4=TSourceModule,'C:\Users\HP\Entegra\Entegra\UBankaTanimWizard.pas',0,1,1,1,1,0,0,,
-File_5=TSourceModule,'C:\Users\HP\Entegra\Entegra\UFaturaWizard.pas',0,1,1,1,1,0,0,,
-File_6=TSourceModule,'C:\Users\HP\Entegra\Entegra\URehberWizard.pas',0,1,1073,20,1074,0,0,,
-File_7=TSourceModule,'C:\Users\HP\Entegra\Entegra\IcerikFrame\UReharadlg.pas',0,1,1,29,4,0,0,,
-File_8=TSourceModule,'C:\Users\HP\Entegra\Entegra\PrjConst.pas',0,1,2341,44,2353,0,0,,
-File_9=TSourceModule,'C:\Users\HP\Entegra\Entegra\ListeFrame\UUretimListeDlg.pas',0,1,1,6,1,0,0,,
-File_10=TSourceModule,'C:\Users\HP\Entegra\Entegra\UStokHizmetAra.pas',0,1,1,7,1,0,0,,
-File_11=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\Data.DB.pas',0,1,3306,1,3318,0,0,,
-File_12=TSourceModule,'C:\Users\HP\Entegra\Entegra\ListeFrame\UFirsatListeDlg.pas',0,1,351,48,364,0,0,,
-File_13=TSourceModule,'C:\Users\HP\Entegra\Entegra\UOpsDlg.pas',0,1,1,13,1,0,0,,
-File_14=TSourceModule,'C:\Users\HP\Entegra\Entegra\URehberAramaEkrani.pas',0,1,1,1,1,0,0,,
+File_0=TSourceModule,'C:\Users\HP\Entegra\Entegra\UTS\UUTSDlg.pas',0,1,1,1,1,0,0,,
+File_1=TSourceModule,'C:\Users\HP\Entegra\Entegra\Ortak\FileAssociationDetails.pas',0,1,203,128,209,0,0,,
+File_2=TSourceModule,'C:\Users\HP\Entegra\Entegra\IcerikFrame\UFaturalar.pas',0,1,1,7,1,0,0,,
+File_3=TSourceModule,'C:\Users\HP\Entegra\Entegra\UStokWizard.pas',0,1,1145,13,1149,0,0,,
+File_4=TSourceModule,'C:\Users\HP\Entegra\Entegra\UVersiyonGuncelle.pas',0,1,1,21,7,0,0,,
+File_5=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\firedac\FireDAC.Phys.ODBCWrapper.pas',0,1,1609,1,1621,0,0,,
+File_6=TSourceModule,'C:\Users\HP\Entegra\Entegra\UBankaTanimWizard.pas',0,1,1,1,1,0,0,,
+File_7=TSourceModule,'C:\Users\HP\Entegra\Entegra\UFaturaWizard.pas',0,1,1,1,1,0,0,,
+File_8=TSourceModule,'C:\Users\HP\Entegra\Entegra\URehberWizard.pas',0,1,1073,20,1074,0,0,,
+File_9=TSourceModule,'C:\Users\HP\Entegra\Entegra\IcerikFrame\UReharadlg.pas',0,1,1,29,4,0,0,,
+File_10=TSourceModule,'C:\Users\HP\Entegra\Entegra\PrjConst.pas',0,1,2341,44,2353,0,0,,
+File_11=TSourceModule,'C:\Users\HP\Entegra\Entegra\ListeFrame\UUretimListeDlg.pas',0,1,1,6,1,0,0,,
+File_12=TSourceModule,'C:\Users\HP\Entegra\Entegra\UStokHizmetAra.pas',0,1,1,7,1,0,0,,
+File_13=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\Data.DB.pas',0,1,3306,1,3318,0,0,,
+File_14=TSourceModule,'C:\Users\HP\Entegra\Entegra\ListeFrame\UFirsatListeDlg.pas',0,1,351,48,364,0,0,,
 
 [Modules]
 Module0=C:\Users\HP\Entegra\Entegra\UUretimRecete.pas
@@ -221,7 +221,7 @@ SplitPos=111
 
 [PropInspDesignerSelection]
 ArrangeBy=Name
-SelectedItem=ImageIndex,CustomHint
+SelectedItem=ImageIndex,Action
 ExpandedItems=Images=0,"LiveBindings Designer=0",MenuAnimation=0,Anchors=0,BorderIcons=0,Constraints=0,Properties=1,Properties.Alignment=0,Properties.AssignedValues=0,Properties.ButtonGlyph=0,Properties.IncrementalFilteringOptions=0,DataSet=0,ActiveStoredUsage=0,FetchOptions=0,FieldOptions=0,FilterChanges=0,FilterOptions=0,FormatOptions=0,ActiveControl=0,CustomTitleBar=0,LiveBindings=0
 
 [frmDesignPreview]

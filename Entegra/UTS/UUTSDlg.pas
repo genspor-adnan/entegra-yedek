@@ -597,12 +597,55 @@ var
 	i,j, ID, n : Integer;
   slist : TStringlist;
   }
+  function UTSUrunNoNorm(const AUrunNo: string): string;
+  var
+    I: Integer;
+    LRakam: Boolean;
+  begin
+    Result := Trim(AUrunNo);
+    if Result = '' then
+      Exit;
+
+    LRakam := True;
+    for I := 1 to Length(Result) do
+      if not CharInSet(Result[I], ['0'..'9']) then begin
+        LRakam := False;
+        Break;
+      end;
+
+    if LRakam then
+      while Length(Result) < 14 do
+        Result := '0' + Result;
+  end;
+
+  function UTSUrunSorguJson(const AUrunNo: string; ASayfa, AAdet: Integer;
+    ASayfali: Boolean): string;
+  var
+    LJson: TJSONObject;
+  begin
+    LJson := TJSONObject.Create;
+    try
+      LJson.AddPair('UNO', AUrunNo);
+      if Trim(EditLNO.Text) <> '' then
+        LJson.AddPair('LNO', Trim(EditLNO.Text));
+      if Trim(EditSNO.Text) <> '' then
+        LJson.AddPair('SNO', Trim(EditSNO.Text));
+      if ASayfali then begin
+        LJson.AddPair('ADT', TJSONNumber.Create(AAdet));
+        LJson.AddPair('SAY', TJSONNumber.Create(ASayfa));
+      end;
+      Result := LJson.ToString;
+    finally
+      LJson.Free;
+    end;
+  end;
+
   procedure AlmaSorgusu;
     var
 	       k : TKabulSonuc;
          TMAS : TM_AlmaSorgu;
          Fadet : Integer;
-         Foffset: string;
+         Foffset, LSorguAdresi: string;
          Devam:boolean;
 
          function Getir(adet:integer; Var offset:string):boolean;
@@ -612,7 +655,7 @@ var
 //            TMAS.SAN := Sayfa;
             TMAS.ADT := adet;
             TMAS.OFF := offset;
-            k := TKabulSonuc(utsTalkMC(TabBildirimTur.FieldByName('ADRESSORGU').AsString, //'/UTS/uh/rest/bildirim/alma/bekleyenler/sorgula/offset',
+            k := TKabulSonuc(utsTalkMC(LSorguAdresi,
                                       TMAS, TKabulSonuc));         //     TModel.Create
             if k = nil then
                raise Exception.Create('Okunamadı');
@@ -634,6 +677,10 @@ var
         TKabulSonucItem.toTable(MemDataSorgu);
         DtsSorgu.DataSet := MemDataSorgu;
         GridSorguView.DataController.CreateAllItems();
+
+        LSorguAdresi := Trim(TabBildirimTur.FieldByName('ADRESSORGU').AsString);
+        if (LSorguAdresi = '') or (Pos('ayrintiliTekilUrun', LSorguAdresi) > 0) then
+          LSorguAdresi := '/UTS/uh/rest/bildirim/alma/bekleyenler/sorgula/offset';
 
         Devam :=True;
         Fadet:=100;
@@ -685,8 +732,27 @@ var
   procedure SistemdeTekilUrunSorgusu;
     var
 	       k : TUrunSonuc;
-         TMU : TM_Urun;
          i : Integer;
+         LSorguAdresi, LHamUrunNo, LNormUrunNo, LSonRaw, LSonIstek: string;
+
+    function TekilUrunGetir(const AUrunNo: string): TUrunSonuc;
+    var
+      LRaw: string;
+    begin
+      LSonIstek := UTSUrunSorguJson(AUrunNo, 0, 0, False);
+      LRaw := utsTalkSS(LSorguAdresi, LSonIstek);
+      LSonRaw := LRaw;
+      if Trim(LRaw) = '' then
+        Exit(nil);
+      Result := TUrunSonuc.Create('{}');
+      try
+        Result.byJson(LRaw);
+      except
+        Result.Free;
+        raise;
+      end;
+    end;
+
     begin //Alma için kabul sorgulama
         if (EditUNO.Text='')then begin // or(EditLNO.Text='')
             Showmessage('Ürün no ve Lotno bilgisi girin!');
@@ -698,39 +764,70 @@ var
         DtsSorgu.DataSet := MemDataSorgu;
         GridSorguView.DataController.CreateAllItems();
 
-        TMU := TM_Urun.Create;
-        TMU.UNO := EditUNO.Text;
-        TMU.LNO := EditLNO.Text;
-        TMU.SNO := EditSNO.Text;
-        k := TUrunSonuc(utsTalkMC(TabBildirimTur.FieldByName('ADRESSORGU').AsString, //'/UTS/uh/rest/bildirim/alma/bekleyenler/sorgula',
-                                  TMU, TUrunSonuc));         //     TModel.Create
+        LSorguAdresi := Trim(TabBildirimTur.FieldByName('ADRESSORGU').AsString);
+        if (LSorguAdresi = '') or (Pos('ayrintiliTekilUrun', LSorguAdresi) > 0) then
+          LSorguAdresi := '/UTS/uh/rest/tekilUrun/sorgula';
+
+        LHamUrunNo := Trim(EditUNO.Text);
+        LNormUrunNo := UTSUrunNoNorm(LHamUrunNo);
+        k := TekilUrunGetir(LNormUrunNo);
         if k = nil then
            raise Exception.Create('Okunamadı');
         n := length(k.SNC);
+        if (n = 0) and (LNormUrunNo <> LHamUrunNo) then begin
+          k.Free;
+          k := TekilUrunGetir(LHamUrunNo);
+          if k = nil then
+             raise Exception.Create('Okunamadı');
+          n := length(k.SNC);
+        end;
         for i := 0 to n - 1 do
             k.SNC[i].toDataSet(MemDataSorgu);
+        if n = 0 then begin
+          MemoLog.Lines.Add('Tekil ürün sorgu sonucu boş. Endpoint=' +
+            LSorguAdresi + ' UNO=' + LHamUrunNo);
+          MemoLog.Lines.Add('İstek: ' + LSonIstek);
+          MemoLog.Lines.Add('Cevap: ' + Copy(LSonRaw, 1, 500));
+          if (Trim(EditLNO.Text) = '') and (Trim(EditSNO.Text) = '') then
+            MemoLog.Lines.Add('Not: ÜTS tekil ürün sorgusunda lot takipli ürün için LNO, seri takipli ürün için SNO girilmelidir.');
+          MemoLog.Lines.Add('Not: ÜTS hata mesajı dönmedi; bu kurum/filtre için kayıt bulunamadı. Ürün no, lot/seri no ve bildirimin kurum kapsamını kontrol edin.');
+          for i := 0 to High(k.MSJ) do
+            MemoLog.Lines.Add('ÜTS: ' + k.MSJ[i].TIP + ' ' +
+              k.MSJ[i].KOD + ' ' + k.MSJ[i].MET);
+        end;
+        k.Free;
     end;
 
   /////////
   procedure SistemdeAyrintiliTekilUrunSorgusu;
     var
 	       k : TAyrintiUrunSonuc;
-         TMU : TM_Urun_Sayfa;
          i, Sayfa : Integer;
          urunNumarasi : string[50];
+         LSorguAdresi, LHamUrunNo, LSorguUrunNo, LSonRaw, LSonIstek: string;
+         LHamTekrarDene: Boolean;
+
+    function UrunNoAlternatif(const AUrunNo: string): string;
+    var
+      LUrunNo: string;
+    begin
+      LUrunNo := Trim(AUrunNo);
+      while (Length(LUrunNo) > 1) and (LUrunNo[1] = '0') do
+        Delete(LUrunNo, 1, 1);
+      Result := LUrunNo;
+    end;
 
     procedure AyrintiUrunSonucGetir;
     var
       //LResponse: TAyrintiUrunSonuc;
       JsonData: string;
-      urunNumarasi2 : string[50];
+      urunNumarasi2: string;
       i : Integer;
     begin
-      urunNumarasi := Trim(EditUNO.text);
-      if urunNumarasi[1]='0' then
-          urunNumarasi2 := copy(urunNumarasi,2,100)
-      else
-          urunNumarasi2 := urunNumarasi;
+      urunNumarasi := UTSUrunNoNorm(EditUNO.text);
+      if urunNumarasi = '' then
+        Exit;
+      urunNumarasi2 := UrunNoAlternatif(urunNumarasi);
       Tablo.Query0.Close;
       Tablo.Query0.SQL.Text := 'EXEC [sp_UTS_AyrintiliTekil_StokIrsaliye] @UrunNo1 = '''+urunNumarasi+''', '+
           ' @UrunNo2 = '''+urunNumarasi2+''', @Lotno='''+Trim(EditLNO.Text)+'''';
@@ -744,13 +841,17 @@ var
          JsonData := Tablo.Query0.Fields[0].AsString;
          // JSON stringini do?rudan s?n?fa de-serialize et
          k := TJson.JsonToObject<TAyrintiUrunSonuc>(JsonData);
-         n := length(k.SNC);
-         if n>0 then
+         if k <> nil then begin
+           n := length(k.SNC);
+           if n>0 then
             for i := 0 to n - 1 do begin
               k.SNC[i].toDataSet(MemDataSorgu);
+            end;
+           k.Free;
+         end;
       end;
     end;
-    end;
+
     procedure MukerrerSil;
     var adet, Lotno : string [50];
     begin
@@ -764,7 +865,8 @@ var
               MemDataSorgu.delete
           else if (adet<>'0') then begin
               MemDataSorgu.next;
-              if (lotno = MemDataSorgu.FieldByName('lotBatchNumarasi').AsString)and
+              if (not MemDataSorgu.Eof) and
+                  (lotno = MemDataSorgu.FieldByName('lotBatchNumarasi').AsString)and
                   (MemDataSorgu.FieldByName('adet').AsString='0')and
                   (MemDataSorgu.FieldByName('kullanilabilirAdet').AsString='0') then
                   MemDataSorgu.delete;
@@ -788,19 +890,46 @@ var
 
         n:=1;  //sayfalama oldu?u i?in
         Sayfa := 0;
+        LSorguAdresi := Trim(TabBildirimTur.FieldByName('ADRESSORGU').AsString);
+        if (LSorguAdresi = '') or (Pos('ayrintiliTekilUrun', LSorguAdresi) = 0) then
+          LSorguAdresi := '/UTS/uh/rest/ayrintiliTekilUrun/sorgula';
+        LHamUrunNo := Trim(EditUNO.Text);
+        LSorguUrunNo := UTSUrunNoNorm(LHamUrunNo);
+        LHamTekrarDene := LSorguUrunNo <> LHamUrunNo;
         while n > 0 do begin
-            TMU := TM_Urun_Sayfa.Create;
-            TMU.UNO := EditUNO.Text;
-            TMU.LNO := EditLNO.Text;
-            TMU.SNO := EditSNO.Text;
-            TMU.ADT := 120;
-            TMU.SAY:= Sayfa;
-            k := TAyrintiUrunSonuc(utsTalkMC(TabBildirimTur.FieldByName('ADRESSORGU').AsString, //'/UTS/uh/rest/bildirim/alma/bekleyenler/sorgula',
-                                      TMU, TAyrintiUrunSonuc));         //     TModel.Create
+            LSonIstek := UTSUrunSorguJson(LSorguUrunNo, Sayfa, 120, True);
+            LSonRaw := utsTalkSS(LSorguAdresi, LSonIstek);
             inc(Sayfa);
-            if k = nil then
+            if Trim(LSonRaw) = '' then
                raise Exception.Create('Okunamadı');
+            k := TAyrintiUrunSonuc.Create('{}');
+            try
+              k.byJson(LSonRaw);
+            except
+              k.Free;
+              raise;
+            end;
             n := length(k.SNC);
+            if (n = 0) and (Sayfa = 1) and LHamTekrarDene then begin
+              k.Free;
+              LSorguUrunNo := LHamUrunNo;
+              LHamTekrarDene := False;
+              Sayfa := 0;
+              n := 1;
+              Continue;
+            end;
+            if (n = 0) and (Sayfa = 1) then begin
+              MemoLog.Lines.Add('Ayrıntılı tekil ürün sorgu sonucu boş. Endpoint=' +
+                LSorguAdresi + ' UNO=' + LSorguUrunNo);
+              MemoLog.Lines.Add('İstek: ' + LSonIstek);
+              MemoLog.Lines.Add('Cevap: ' + Copy(LSonRaw, 1, 500));
+              if (Trim(EditLNO.Text) = '') and (Trim(EditSNO.Text) = '') then
+                MemoLog.Lines.Add('Not: ÜTS ayrıntılı tekil ürün sorgusunda lot takipli ürün için LNO, seri takipli ürün için SNO girilmelidir.');
+              MemoLog.Lines.Add('Not: ÜTS hata mesajı dönmedi; bu kurum/filtre için kayıt bulunamadı. Ürün no, lot/seri no ve bildirimin kurum kapsamını kontrol edin.');
+              for i := 0 to High(k.MSJ) do
+                MemoLog.Lines.Add('ÜTS: ' + k.MSJ[i].TIP + ' ' +
+                  k.MSJ[i].KOD + ' ' + k.MSJ[i].MET);
+            end;
             if n>0 then
                Tablo.Query0.SQL.Text := SQLMEMO1.text;   //her sat?r i?in kalan irsaliye kolonu g?ncellenecek
             for i := 0 to n - 1 do begin
@@ -808,11 +937,7 @@ var
                 urunNumarasi := MemDataSorgu.fieldbyname('urunNumarasi').asstring;
                 Tablo.Query0.Close;
                 Tablo.Query0.Params[0].Value := urunNumarasi;
-                if urunNumarasi[1]='0' then
-                   urunNumarasi := copy(urunNumarasi,2,100);
-
-
-                Tablo.Query0.Params[1].Value := urunNumarasi;
+                Tablo.Query0.Params[1].Value := UrunNoAlternatif(urunNumarasi);
                 Tablo.Query0.Params[2].Value := MemDataSorgu.fieldbyname('lotBatchNumarasi').asstring;
                 Tablo.Query0.Open;
                 if Tablo.Query0.recordCount>0 then begin
@@ -821,6 +946,7 @@ var
                    MemDataSorgu.post;
                 end;
             end;
+            k.Free;
         end;
         AyrintiUrunSonucGetir;
         MukerrerSil;
@@ -1226,11 +1352,20 @@ begin
             end;
             mObjAl.Free;}
 
-	          mObjAl := TM_Alma.Create(gDbc.DataSet);
-            Result := mObjAl.toJson;
-            mObjAl.Destroy;
-
-
+            var LVBI := '';
+            if gDbc.DataSet.FindField('VBI') <> nil then
+              LVBI := Trim(gDbc.DataSet.FieldByName('VBI').AsString);
+            if (LVBI = '') and (gDbc.DataSet.FindField('BID') <> nil) then
+              LVBI := Trim(gDbc.DataSet.FieldByName('BID').AsString);
+            var LJsonAlma := TJSONObject.Create;
+            try
+              LJsonAlma.AddPair('VBI', LVBI);
+              LJsonAlma.AddPair('ADT',
+                TJSONNumber.Create(gDbc.DataSet.FieldByName('ADT').AsInteger));
+              Result := LJsonAlma.ToString;
+            finally
+              LJsonAlma.Free;
+            end;
 
           end;
       7: begin  //hek zayiat
