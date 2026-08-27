@@ -50,10 +50,29 @@ public sealed class EBelgeGonderimi(VeriKaynagi veri, IHttpClientFactory istemci
     public sealed record Sonuc(bool Basarili, string Mesaj, string Uuid,
                                int HttpKodu, string BelgeNo, string Entegrator);
 
+    /// <param name="aliciAlias">
+    /// e-Faturada GIB posta kutusu, e-ARSIVDE ALICI E-POSTASI (Delphi ile ayni
+    /// ikili anlam). Dolu gelirse govde uretilmeden ONCE kayda yazilir - govde
+    /// onu okuyup mailFlag / receiverAlias'i kurar.
+    /// </param>
     public async Task<Sonuc> GonderAsync(int belgeId, int kullaniciId,
+                                         string? aliciAlias = null,
                                          CancellationToken iptal = default)
     {
         await using var baglanti = await veri.AcAsync(iptal);
+
+        if (!string.IsNullOrWhiteSpace(aliciAlias))
+        {
+            await using var alias = new NpgsqlCommand(
+                "update public.e_belge set alici_alias = left(btrim(@p1), 500), "
+                + "degistiren = @p2, degistirme_tarihi = now()::timestamp "
+                + "where belge_id = @p0 and id = (select max(id) from public.e_belge "
+                + "where belge_id = @p0)", baglanti);
+            alias.Parameters.AddWithValue("p0", belgeId);
+            alias.Parameters.AddWithValue("p1", aliciAlias);
+            alias.Parameters.AddWithValue("p2", kullaniciId);
+            await alias.ExecuteNonQueryAsync(iptal);
+        }
 
         // 1) Belgenin e-Belge kaydi + durumu.
         var (eBelgeId, belgeTuru, belgeNo, durum, subeId) =

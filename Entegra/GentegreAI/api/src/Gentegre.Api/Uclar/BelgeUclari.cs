@@ -169,11 +169,15 @@ public static class BelgeUclari
 
         // POST /api/belge/{id}/ebelge-hazirla - belgeyi e-Belge kuyruguna al (163)
         grup.MapPost("/{id:int}/ebelge-hazirla", async (
-            int id, BaglamCozucu cozucu, BelgeDeposu depo,
+            int id, BaglamCozucu cozucu, BelgeDeposu depo, EBelgeSorgu sorgu,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Degistir);
+
+            // MUKELLEFIYETI TAZELE (185): e-Fatura mi e-Arsiv mi karari buna
+            //   bagli. Sorgu gerekmiyorsa (taze bilgi) ag turu atilmaz.
+            await sorgu.MukellefiyetTazeleAsync(id, baglam.KullaniciId, iptal);
 
             var (eBelgeId, tur, no, seri, uyari) = await depo.EBelgeHazirlaAsync(id,
                 new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
@@ -241,7 +245,7 @@ public static class BelgeUclari
                 {
                     try
                     {
-                        var g = await gonderim.GonderAsync(id, baglam.KullaniciId, iptal);
+                        var g = await gonderim.GonderAsync(id, baglam.KullaniciId, null, iptal);
                         sonuc.Add(new BelgeDeposu.TopluSonuc(id, true, g.BelgeNo, g.Mesaj));
                     }
                     catch (GentegreHatasi h)
@@ -266,6 +270,20 @@ public static class BelgeUclari
             baglam.YetkiIste("belge", Islem.Gor);
             var d = await sorgu.DurumSorgulaAsync(id, baglam.KullaniciId, iptal);
             return Results.Ok(new { d.BelgeNo, d.Kod, d.Aciklama, d.Degisti,
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // GET /api/belge/{id}/ebelge-alici - gonderimden once alici adresi (184).
+        //   e-ARSIVDE alias alani ALICI E-POSTASIDIR: bos ise arayuz sorar,
+        //   varsayilan olarak carinin e-postasi onerilir (Delphi ile ayni akis).
+        grup.MapGet("/{id:int}/ebelge-alici", async (
+            int id, BaglamCozucu cozucu, BelgeDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+            var a = await depo.EBelgeAliciAsync(id, iptal);
+            return Results.Ok(new { a.BelgeTuru, a.Alias, a.OnerilenMail, a.TarafUnvan,
                                     izlemeNo = baglam.IzlemeNo });
         });
 
@@ -309,13 +327,14 @@ public static class BelgeUclari
         //   Yetki: DEGISTIR yetmez - gonderim GERI ALINAMAZ (GIB'e giden belge
         //   iptal edilmez, yalniz iade faturasiyla duzeltilir).
         grup.MapPost("/{id:int}/ebelge-gonder", async (
-            int id, BaglamCozucu cozucu, BelgeDeposu depo, EBelgeGonderimi gonderim,
-            HttpContext ctx, CancellationToken iptal) =>
+            int id, GonderimIstegi? istek, BaglamCozucu cozucu, BelgeDeposu depo,
+            EBelgeGonderimi gonderim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Degistir);
 
-            var sonuc = await gonderim.GonderAsync(id, baglam.KullaniciId, iptal);
+            var sonuc = await gonderim.GonderAsync(id, baglam.KullaniciId,
+                                                   istek?.AliciAlias, iptal);
 
             var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
             var mesajlar = new List<string>
@@ -485,6 +504,12 @@ public static class BelgeUclari
     public sealed class EBelgeSeriIstegi
     {
         public string? Seri { get; set; }
+    }
+
+    /// <summary>Gonderim istegi: e-Arsivde alici e-postasi (184).</summary>
+    public sealed class GonderimIstegi
+    {
+        public string? AliciAlias { get; set; }
     }
 
     /// <summary>Toplu e-Belge istegi (183): islem "hazirla" ya da "gonder".</summary>

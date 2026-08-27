@@ -276,8 +276,13 @@ export const api = {
    * e-BELGE GONDER: hazirlanmis belgeyi entegratore yollar. GERI ALINAMAZ -
    * GIB'e giden belge iptal edilmez, yalniz iade faturasiyla duzeltilir.
    */
-  belgeEBelgeGonder: (id: number) =>
-    gonder<BelgeYaniti>(`/api/belge/${id}/ebelge-gonder`, {}),
+  belgeEBelgeGonder: (id: number, aliciAlias?: string) =>
+    gonder<BelgeYaniti>(`/api/belge/${id}/ebelge-gonder`, { aliciAlias: aliciAlias ?? null }),
+
+  /** Gonderim oncesi alici adresi (184): e-Arsivde alias = alici e-postasi. */
+  belgeEBelgeAlici: (id: number) =>
+    istek<{ belgeTuru: number; alias: string; onerilenMail: string; tarafUnvan: string }>(
+      `/api/belge/${id}/ebelge-alici`),
 
   /** Belgeyi siler (181). Izli belgede sunucu 422 doner (sebep mesajda). */
   belgeSil: (id: number) =>

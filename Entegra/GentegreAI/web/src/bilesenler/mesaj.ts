@@ -16,7 +16,12 @@ export interface MesajIstegi {
   onayMi: boolean;
   /** Kirmizi vurgulu baslik (silme gibi geri alinamaz isler icin). */
   tehlike?: boolean;
+  /** Metin istegi: kutuya yazilan deger `cozumMetin`e gider (iptalde null). */
+  girdiMi?: boolean;
+  girdiVarsayilan?: string;
+  girdiEtiket?: string;
   cozum(sonuc: boolean): void;
+  cozumMetin?(deger: string | null): void;
 }
 
 type Dinleyici = (istek: MesajIstegi) => void;
@@ -32,6 +37,21 @@ export function mesajDinleyiciAta(d: Dinleyici | null) {
 export function mesaj(metin: string) {
   if (!dinleyici) { alert(metin); return }
   dinleyici({ metin, onayMi: false, cozum: () => {} });
+}
+
+/**
+ * Metin sorma penceresi (tarayici `prompt` yerine). Iptalde null doner.
+ * e-Arsiv gonderiminde alici e-postasi bununla sorulur.
+ */
+export function metinSor(metin: string, varsayilan = '', etiket = ''): Promise<string | null> {
+  if (!dinleyici) return Promise.resolve(prompt(metin, varsayilan));
+  return new Promise<string | null>(cozum => {
+    dinleyici!({
+      metin, onayMi: true, girdiMi: true,
+      girdiVarsayilan: varsayilan, girdiEtiket: etiket,
+      cozum: () => {}, cozumMetin: cozum,
+    });
+  });
 }
 
 /** Onay penceresi: kullanici "Tamam" derse true. */

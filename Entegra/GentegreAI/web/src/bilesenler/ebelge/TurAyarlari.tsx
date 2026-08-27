@@ -26,6 +26,11 @@ const TURLER = {
           { deger: '8', ad: 'İlaç / Tıbbi Cihaz' },
         ] },
       { anahtar: 'efatura.ihracat_gonder', etiket: 'İhracat faturaları da gönderilsin', tip: 'mantik' as const },
+      // 185: mukellef bilinen cari bu sure dolmadan entegratore SORULMAZ;
+      //   mukellef olmayan cari her seferinde sorulur (yeni mukellefiyet her an
+      //   baslayabilir ve belge turu degismelidir).
+      { anahtar: 'efatura.mukellef_sorgu_gun',
+        etiket: 'Mükellefiyet sorgusu tazeleme (gün)', tip: 'sayi' as const },
       { anahtar: 'efatura.uretim_url', etiket: 'Üretim servis adresi', tip: 'metin' as const, genis: true },
       { anahtar: 'efatura.test_url', etiket: 'Test servis adresi', tip: 'metin' as const, genis: true },
       { anahtar: 'efatura.sabit_notlar', etiket: 'Sabit notlar', tip: 'uzunMetin' as const },

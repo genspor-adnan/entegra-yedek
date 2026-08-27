@@ -53,6 +53,8 @@ public sealed class AyarDeposu
         //   kutusu. Burada yalniz belge turu basina DAVRANIS ayarlari kaldi
         //   (servis adresleri, sabit notlar, gelen belge alma).
         "efatura.gelen_al", "efatura.senaryo", "efatura.ihracat_gonder",
+        // 185: e-Fatura mukellefi bilinen cari kac gun sonra yeniden sorulur.
+        "efatura.mukellef_sorgu_gun",
         "efatura.uretim_url", "efatura.test_url", "efatura.sabit_notlar",
         "earsiv.uretim_url", "earsiv.gelen_url",
         "earsiv.test_url", "earsiv.sabit_notlar",

@@ -558,4 +558,24 @@ public sealed partial class BelgeDeposu
                                      o.IsDBNull(3) ? "" : o.GetString(3)));
         return liste;
     }
+
+    public sealed record AliciBilgisi(short BelgeTuru, string Alias, string OnerilenMail,
+                                      string TarafUnvan);
+
+    /// <summary>
+    /// Gonderim oncesi alici adresi (184). e-ARSIVDE alias alani alici
+    /// e-postasidir; bos ise arayuz sorar ve carinin adresini onerir.
+    /// </summary>
+    public async Task<AliciBilgisi> EBelgeAliciAsync(int belgeId, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = new NpgsqlCommand(
+            "select belge_turu, alias, onerilen_mail, taraf_unvan from public.fn_ebelge_alici_bilgi(@p0)",
+            baglanti);
+        komut.Parameters.AddWithValue("p0", belgeId);
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        if (!await o.ReadAsync(iptal))
+            throw GentegreHatasi.IsKurali("Belge icin e-Belge kaydi yok.");
+        return new AliciBilgisi(o.GetInt16(0), o.GetString(1), o.GetString(2), o.GetString(3));
+    }
 }

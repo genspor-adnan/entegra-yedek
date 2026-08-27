@@ -14,6 +14,7 @@ import { mesajDinleyiciAta, type MesajIstegi } from './mesaj';
  */
 export function MesajKatmani() {
   const [istek, setIstek] = useState<MesajIstegi | null>(null);
+  const [girdi, setGirdi] = useState('');
 
   useEffect(() => {
     mesajDinleyiciAta(setIstek);
@@ -23,8 +24,11 @@ export function MesajKatmani() {
   if (!istek) return null;
 
   const kapat = (sonuc: boolean) => {
-    istek.cozum(sonuc);
+    // Metin istegi ise degeri (iptalde null) ayri geri cagirimla veririz.
+    if (istek.girdiMi) istek.cozumMetin?.(sonuc ? girdi : null);
+    else istek.cozum(sonuc);
     setIstek(null);
+    setGirdi('');
   };
 
   return (
@@ -53,6 +57,19 @@ export function MesajKatmani() {
         <div style={{ padding: '10px 12px', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
           {istek.metin}
         </div>
+        {istek.girdiMi && (
+          <div className="alan-izgara tek-sutun ayar-formu" style={{ padding: '0 12px 12px' }}>
+            <label className="alan">
+              {istek.girdiEtiket && <span className="etiket">{istek.girdiEtiket}</span>}
+              <span className="ikili">
+                <input className="genis-deger" autoFocus
+                       value={girdi || istek.girdiVarsayilan || ''}
+                       onChange={e => setGirdi(e.target.value)}
+                       onKeyDown={e => { if (e.key === 'Enter') kapat(true) }} />
+              </span>
+            </label>
+          </div>
+        )}
       </div>
     </Modal>
   );

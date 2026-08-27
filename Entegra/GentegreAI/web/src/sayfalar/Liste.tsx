@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { mesaj, onay } from '../bilesenler/mesaj';
+import { mesaj, metinSor, onay } from '../bilesenler/mesaj';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
@@ -225,11 +225,30 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         case 'ebelge.gonder': {
           if (!satir) return;
           const no = String(satir.belgeNo ?? satir.id);
-          if (!await onay(`"${no}" entegratöre GÖNDERİLECEK.\n\n`
-                     + 'Gönderilen belge geri alınamaz; düzeltme ancak iade '
-                     + 'faturasıyla yapılır. Onaylıyor musunuz?')) return;
           try {
-            const y = await api.belgeEBelgeGonder(Number(satir.id));
+            // e-ARSIVDE ALICI E-POSTASI SORULUR (184, Delphi ile ayni): alias
+            //   alani e-Faturada GIB posta kutusu, e-Arsivde e-posta adresidir.
+            //   Bos gonderilirse entegrator belgeyi KAGIT olarak isaretliyor.
+            let alias: string | undefined;
+            const a = await api.belgeEBelgeAlici(Number(satir.id));
+            if (a.belgeTuru === 2) {
+              const girilen = await metinSor(
+                `"${no}" e-Arşiv olarak gönderilecek.
+
+`
+                + 'Belge alıcıya e-postayla iletilir. Boş bırakırsanız kâğıt '
+                + 'belge olarak işaretlenir.',
+                a.alias || a.onerilenMail, 'Alıcı e-postası');
+              if (girilen === null) return;              // vazgecildi
+              alias = girilen.trim();
+            } else if (!await onay(`"${no}" entegratöre GÖNDERİLECEK.
+
+`
+                                 + 'Gönderilen belge geri alınamaz; düzeltme ancak iade '
+                                 + 'faturasıyla yapılır. Onaylıyor musunuz?', true)) {
+              return;
+            }
+            const y = await api.belgeEBelgeGonder(Number(satir.id), alias);
             mesaj((y.uyarilar ?? []).join(' • ') || 'Gönderildi.');
             setYenile(t => t + 1);
           } catch (h) { mesaj(hataMetni(h)) }

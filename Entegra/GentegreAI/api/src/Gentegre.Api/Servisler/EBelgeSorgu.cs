@@ -1,4 +1,4 @@
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text.Json;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
@@ -236,5 +236,58 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
         var degisti = await yaz.ExecuteNonQueryAsync(iptal) > 0;
 
         return new DurumBilgisi(belgeNo, kod, aciklama, degisti);
+    }
+
+    /// <summary>
+    /// Hazirlamadan ONCE mukellefiyeti TAZELE (185). Kural veritabaninda
+    /// (fn_mukellef_sorgu_gerekli): mukellef bilinen cari sorgu taze ise
+    /// sorulmaz, mukellef olmayan HER SEFERINDE sorulur - yeni mukellefiyet
+    /// her an baslayabilir ve e-Arsiv kesilen aliciya artik e-Fatura gitmelidir.
+    ///
+    /// SESSIZ BASARISIZLIK: entegratore ulasilamazsa hazirlama DURMAZ, elde
+    /// olan bayrakla devam eder. Ag arizasi yuzunden fatura kesilememesi,
+    /// yanlis turde kesilmesinden daha kotu bir sonuc.
+    /// </summary>
+    public async Task<bool> MukellefiyetTazeleAsync(int belgeId, int kullaniciId,
+                                                    CancellationToken iptal = default)
+    {
+        await using var baglanti = await veri.AcAsync(iptal);
+
+        int tarafId; string vkno; int? subeId;
+        await using (var oku = new NpgsqlCommand("""
+            select bl.taraf_id, coalesce(t.vkno, ''), nullif(bl.sube_id, 0)
+              from public.belge bl
+              left join public.taraf t on t.id = bl.taraf_id
+             where bl.id = @p0 and public.fn_mukellef_sorgu_gerekli(bl.taraf_id)
+            """, baglanti))
+        {
+            oku.Parameters.AddWithValue("p0", belgeId);
+            await using var o = await oku.ExecuteReaderAsync(iptal);
+            if (!await o.ReadAsync(iptal)) return false;     // sorgu gerekmiyor
+            tarafId = o.GetInt32(0); vkno = o.GetString(1);
+            subeId = o.IsDBNull(2) ? null : o.GetInt32(2);
+        }
+
+        bool mukellef;
+        try
+        {
+            mukellef = (await MukellefSorgulaAsync(vkno, subeId, iptal)).Mukellef;
+        }
+        catch
+        {
+            return false;                                    // ag/servis hatasi: sessiz gec
+        }
+
+        await using var yaz = new NpgsqlCommand("""
+            update public.taraf
+               set efatura = @p1, efatura_sorgu_tarihi = now()::timestamp,
+                   degistiren = @p2, degistirme_tarihi = now()::timestamp
+             where id = @p0
+            """, baglanti);
+        yaz.Parameters.AddWithValue("p0", tarafId);
+        yaz.Parameters.AddWithValue("p1", (short)(mukellef ? 1 : 0));
+        yaz.Parameters.AddWithValue("p2", kullaniciId);
+        await yaz.ExecuteNonQueryAsync(iptal);
+        return true;
     }
 }
