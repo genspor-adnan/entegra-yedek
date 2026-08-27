@@ -32,7 +32,7 @@ interface Props {
   /** e-Belge menusu kutusunun BASLIGI ("E-Fatura" / "E-İrsaliye"); verilmezse
       kutu cizilmez (yalniz satis faturasi ve satis irsaliyesi listeleri). */
   ebelgeMenusu?: string;
-  onAksiyon?(kod: string, satir: ListeSatiri | null): void;
+  onAksiyon?(kod: string, satir: ListeSatiri | null, secililer?: ListeSatiri[]): void;
   /** Ust cip filtreleri: { ad, filtre } — mockup'taki "Aktif / Pasif / Tumu" seridi. */
   cipler?: { ad: string; filtre?: Kosul }[];
   /** Kart icine gomulu kucuk grid (ör. cari kartinda İlgili Kişiler) - buyuk baslik/yol
@@ -206,7 +206,10 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const aksiyonCalistir = (kod: string) => {
     // CSV disariya CIKMAZ: veri (satirlar, kolonlar, filtre) burada, disarida degil.
     if (kod === 'genel.csv') { void csvIndir(); return }
-    onAksiyon?.(kod === 'genel.yazdir.dogrudan' ? 'genel.yazdir' : kod, seciliSatir);
+    // Secili ID listesi de gider: bir aksiyon (or. e-Belge hazirla/gonder)
+    //   coklu secimde TOPLU calisabilsin. Tek secimde liste tek elemanlidir.
+    onAksiyon?.(kod === 'genel.yazdir.dogrudan' ? 'genel.yazdir' : kod, seciliSatir,
+                satirlar.filter((sr, i) => secili.has(String(sr.id ?? i))));
   };
 
   /** "🖨️ Yazdır" dugmesi acilir menu: CSV Kaydet + Yazdir. Disaridan gelen
@@ -654,8 +657,10 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                 // Islemlerin tamami SECILI BELGEYE uygulanir (kullanici):
                 //   satir yokken kutu pasif - secim yapmadan menuyu acip
                 //   "neden calismiyor" demek yerine sebebi title'da yaziyor.
-                disabled={!seciliSatir}
-                title={seciliSatir ? '' : 'Önce bir satır seçin'}
+                // Coklu secimde `seciliSatir` null olur ama TOPLU islem
+                //   yapilabilir - kutu secim VARSA aktif.
+                disabled={secili.size === 0}
+                title={secili.size === 0 ? 'Önce bir satır seçin' : ''}
                 value={ebelgeSecim}
                 onChange={e => {
                   const kod = e.target.value;

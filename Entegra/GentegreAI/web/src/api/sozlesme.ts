@@ -101,6 +101,14 @@ export interface EBelgeMesaji {
   aciklama: string;
 }
 
+/** Toplu e-Belge isleminde satir basina sonuc (183). */
+export interface TopluEBelgeSonucu {
+  belgeId: number;
+  basarili: boolean;
+  belgeNo: string;
+  mesaj: string;
+}
+
 export interface ListeIstegi {
   sayfa?: number;
   boyut?: number;

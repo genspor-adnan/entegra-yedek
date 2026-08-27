@@ -11,6 +11,7 @@ import {
   type AyarSatiri, type YardimKaydi,
   type PanelYaniti,
   type EBelgeMesaji,
+  type TopluEBelgeSonucu,
 } from './sozlesme';
 
 const TABAN = import.meta.env.VITE_API ?? 'http://localhost:5180';
@@ -285,6 +286,10 @@ export const api = {
   /** Onizleme HTML'i (178) - gonderim gerekmez. */
   belgeEBelgeOnizle: (id: number) =>
     istek<{ html: string }>(`/api/belge/${id}/ebelge-onizle`),
+
+  /** Toplu e-Belge (183): secili belgeleri hazirlar ya da gonderir. */
+  belgeEBelgeToplu: (belgeler: number[], islem: 'hazirla' | 'gonder') =>
+    gonder<{ sonuclar: TopluEBelgeSonucu[] }>('/api/belge/ebelge-toplu', { belgeler, islem }),
 
   /** UBL-XML + goruntuleme XSLT'si (182): "XML Kaydet" ve XSLT'li on izleme. */
   belgeEBelgeUbl: (id: number) =>

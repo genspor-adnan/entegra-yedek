@@ -533,4 +533,29 @@ public sealed partial class BelgeDeposu
                 throw GentegreHatasi.IsKurali("UBL üretilemedi.");
             return (o.GetString(0), o.GetString(1), o.GetString(2));
         });
+
+    public sealed record TopluSonuc(int BelgeId, bool Basarili, string BelgeNo, string Mesaj);
+
+    /// <summary>
+    /// Secili belgeleri TEK cagrida hazirlar (183). Hata tek belgeyi duserir,
+    /// digerleri devam eder - tek transaction olsaydi bir hatali belge yuzunden
+    /// dogru olanlar da geri alinirdi.
+    /// </summary>
+    public async Task<IReadOnlyList<TopluSonuc>> EBelgeTopluHazirlaAsync(
+        IReadOnlyList<int> belgeIdler, YazmaBaglami baglam, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = new NpgsqlCommand(
+            "select belge_id, basarili, belge_no, mesaj from public.fn_ebelge_toplu_hazirla(@p0, @p1)",
+            baglanti);
+        komut.Parameters.AddWithValue("p0", belgeIdler.ToArray());
+        komut.Parameters.AddWithValue("p1", baglam.KullaniciId);
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        var liste = new List<TopluSonuc>();
+        while (await o.ReadAsync(iptal))
+            liste.Add(new TopluSonuc(o.GetInt32(0), o.GetBoolean(1),
+                                     o.IsDBNull(2) ? "" : o.GetString(2),
+                                     o.IsDBNull(3) ? "" : o.GetString(3)));
+        return liste;
+    }
 }

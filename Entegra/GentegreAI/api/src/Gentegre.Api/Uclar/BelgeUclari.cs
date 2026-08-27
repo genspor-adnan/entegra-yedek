@@ -206,6 +206,55 @@ public static class BelgeUclari
             return Results.Ok(new { html, izlemeNo = baglam.IzlemeNo });
         });
 
+        // POST /api/belge/ebelge-toplu - secili belgeleri toplu hazirla/gonder (183).
+        //   SINIR 100 KAYIT: gonderim belge basina saniyeler suruyor; sinirsiz
+        //   liste istegi zaman asimina dusurur ve yarim kalan is belirsiz olur.
+        grup.MapPost("/ebelge-toplu", async (
+            TopluIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
+            EBelgeGonderimi gonderim, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Degistir);
+
+            var idler = (istek?.Belgeler ?? Array.Empty<int>()).Distinct().ToList();
+            if (idler.Count == 0)
+                throw GentegreHatasi.Dogrulama("Belge seçilmemiş.");
+            if (idler.Count > 100)
+                throw GentegreHatasi.IsKurali(
+                    $"En fazla 100 belge işlenebilir (seçilen: {idler.Count}).");
+
+            var yazma = new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx));
+
+            if (string.Equals(istek!.Islem, "hazirla", StringComparison.OrdinalIgnoreCase))
+            {
+                var sonuc = await depo.EBelgeTopluHazirlaAsync(idler, yazma, iptal);
+                return Results.Ok(new { sonuclar = sonuc, izlemeNo = baglam.IzlemeNo });
+            }
+
+            if (string.Equals(istek.Islem, "gonder", StringComparison.OrdinalIgnoreCase))
+            {
+                // Gonderim HTTP: tek tek, sirayla. Paralel gondermek entegratorde
+                //   hiz sinirina takiliyor ve hangi belgenin hangi hatayi aldigi
+                //   karisiyor.
+                var sonuc = new List<BelgeDeposu.TopluSonuc>();
+                foreach (var id in idler)
+                {
+                    try
+                    {
+                        var g = await gonderim.GonderAsync(id, baglam.KullaniciId, iptal);
+                        sonuc.Add(new BelgeDeposu.TopluSonuc(id, true, g.BelgeNo, g.Mesaj));
+                    }
+                    catch (GentegreHatasi h)
+                    {
+                        sonuc.Add(new BelgeDeposu.TopluSonuc(id, false, "", h.Message));
+                    }
+                }
+                return Results.Ok(new { sonuclar = sonuc, izlemeNo = baglam.IzlemeNo });
+            }
+
+            throw GentegreHatasi.Dogrulama($"Bilinmeyen toplu işlem: {istek.Islem}");
+        });
+
         // GET /api/belge/{id}/ebelge-ubl - UBL-XML + goruntuleme XSLT'si (182).
         //   "XML Kaydet" ve XSLT'li on izleme bunu kullanir.
         grup.MapGet("/{id:int}/ebelge-ubl", async (
@@ -422,6 +471,13 @@ public static class BelgeUclari
     public sealed class EBelgeSeriIstegi
     {
         public string? Seri { get; set; }
+    }
+
+    /// <summary>Toplu e-Belge istegi (183): islem "hazirla" ya da "gonder".</summary>
+    public sealed class TopluIstegi
+    {
+        public int[]? Belgeler { get; set; }
+        public string Islem { get; set; } = "";
     }
 
     /// <summary>Termin (teslim tarihi) guncelleme istegi - 140.</summary>

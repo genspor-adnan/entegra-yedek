@@ -103,10 +103,38 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
   // Aksiyon yonlendirme. Kasa aksiyonlari API cagirir (kesinlestir/iptal/sil) ve
   //   sonrasinda grid'i tazeler; digerleri kart rotasina gider.
-  async function aksiyon(kod: string, satir?: ListeSatiri | null) {
+  async function aksiyon(kod: string, satir?: ListeSatiri | null,
+                         secililer?: ListeSatiri[]) {
     const kartaGit = (kayitId: unknown) => git(`${tanim.kartYolu}/${kayitId}`);
 
     try {
+      // TOPLU ISLEM (183): birden fazla satir seciliyken Hazırla/Gönder tek
+      //   istekte calisir. Sonuc satir satir raporlanir - bir belgenin hatasi
+      //   digerlerini durdurmaz.
+      if (secililer && secililer.length > 1
+          && (kod === 'ebelge.hazirla' || kod === 'ebelge.gonder')) {
+        const islem = kod === 'ebelge.hazirla' ? 'hazirla' : 'gonder';
+        const ad = islem === 'hazirla' ? 'hazırlanacak' : 'GÖNDERİLECEK';
+        if (!await onay(`${secililer.length} belge ${ad}.\n\n`
+                      + (islem === 'gonder'
+                         ? 'Gönderilen belge geri alınamaz. Onaylıyor musunuz?'
+                         : 'Her belgeye seri ve e-Belge numarası verilir. Onaylıyor musunuz?'),
+                        islem === 'gonder')) return;
+        try {
+          const y = await api.belgeEBelgeToplu(secililer.map(x => Number(x.id)), islem);
+          const olan = y.sonuclar.filter(r => r.basarili).length;
+          const olmayan = y.sonuclar.filter(r => !r.basarili);
+          mesaj(`${olan} belge tamam, ${olmayan.length} hata.`
+              + (olmayan.length
+                 ? '\n\n' + olmayan.slice(0, 10)
+                     .map(r => `#${r.belgeId}: ${r.mesaj}`).join('\n')
+                   + (olmayan.length > 10 ? `\n… ve ${olmayan.length - 10} tane daha` : '')
+                 : ''));
+          setYenile(t => t + 1);
+        } catch (h) { mesaj(hataMetni(h)) }
+        return;
+      }
+
       // e-BELGE CIKTILARI (Ön İzle / PDF / HTML / XML / Mesaj Geçmişi) ayri
       //   modulde (180 refaktor): hepsi tek belge id'si alip cikti uretiyor,
       //   listeden bagimsiz. Ele aldiysa switch'e hic girmeyiz.
@@ -390,7 +418,7 @@ Bu işlem geri alınamaz. `
         else if (tanim.kaynak === 'kasa-islem') setAcikKasaId(Number(satir.id));
         else if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`);
       }}
-      onAksiyon={(kod, satir) => { void aksiyon(kod, satir) }}
+      onAksiyon={(kod, satir, secililer) => { void aksiyon(kod, satir, secililer) }}
       tarihAlani={tanim.tarihAlani}
       // Ekstreden donunce ayni hesap secili kalsin.
       seciliBaslangicId={sonSeciliId}
