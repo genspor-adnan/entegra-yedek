@@ -34,7 +34,11 @@ public static class AksiyonUclari
             var eBelgeVar = await belgeler.EBelgeKullanimdaAsync(baglam.SubeId, iptal);
 
             var sonuc = tanimlar
-                .Where(a => eBelgeVar || !a.Grup.Equals("ebelge", StringComparison.OrdinalIgnoreCase))
+                // "gelen" grubu da e-Belgeye baglidir: mukellef olmayan sirkette
+                //   gelen kutusu diye bir sey yoktur (kullanici istegi).
+                .Where(a => eBelgeVar
+                            || !(a.Grup.Equals("ebelge", StringComparison.OrdinalIgnoreCase)
+                                 || a.Grup.Equals("gelen", StringComparison.OrdinalIgnoreCase)))
                 .Where(a => AksiyonKatalogu.Yetkili(a, baglam.Yetkiler))
                 .OrderBy(a => a.Sira)
                 .Select(a =>

@@ -66,7 +66,9 @@ export interface ListeTanimi {
   toplam?: string[];
   /** `rota` verilen cip FILTRE degil GECIS'tir: tiklaninca o listeye gidilir
       (Alis Faturalari > "Gelen Kutusu"). Ayni serit, farkli kaynak. */
-  cipler?: { ad: string; filtre?: Kosul; rota?: string }[];
+  /** `kosul: 'ebelge'` verilen cip YALNIZ e-Fatura mukellefinde cizilir
+      (sunucu e-Belge aksiyonu donduruyorsa). */
+  cipler?: { ad: string; filtre?: Kosul; rota?: string; kosul?: 'ebelge' }[];
   /** Rotasi var ama MENUDE gorunmez (baska bir listenin sekmesinden girilir). */
   menuGizli?: boolean;
   /** Mockup'ta olup backend'i henuz olmayan kart sekmeleri (or. stok: "ÜTS Bilgileri"). */
@@ -417,7 +419,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'İade',   filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
       // Bize KESILEN e-Faturalar (187): ayni serit, ayri kaynak. Alis
       //   faturasi olarak islenecek belgeler once burada gorunur.
-      { ad: '📥 Gelen Kutusu', rota: 'gelen-belge' },
+      { ad: '📥 Gelen Kutusu', rota: 'gelen-belge', kosul: 'ebelge' },
     ],
     menuGrup: 'Alış', menuAd: 'Alış Faturaları', ic: '🧾', yetkiKodu: 'belge',
   },

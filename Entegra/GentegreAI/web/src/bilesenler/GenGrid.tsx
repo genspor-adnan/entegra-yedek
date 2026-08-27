@@ -36,7 +36,9 @@ interface Props {
   /** Ust cip filtreleri: { ad, filtre } — mockup'taki "Aktif / Pasif / Tumu" seridi. */
   /** `rota` verilen cip FILTRE degil GECIS'tir: tiklaninca o listeye gidilir
       (Alis Faturalari > "Gelen Kutusu"). Ayni serit, farkli kaynak. */
-  cipler?: { ad: string; filtre?: Kosul; rota?: string }[];
+  /** `kosul: 'ebelge'` verilen cip YALNIZ e-Fatura mukellefinde cizilir
+      (sunucu e-Belge aksiyonu donduruyorsa). */
+  cipler?: { ad: string; filtre?: Kosul; rota?: string; kosul?: 'ebelge' }[];
   /** Kart icine gomulu kucuk grid (ör. cari kartinda İlgili Kişiler) - buyuk baslik/yol
       satiri (.sayfabas) gizlenir, geri kalan (arama/cipler/tablo/sayfalama) ayni kalir. */
   gomulu?: boolean;
@@ -250,6 +252,12 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const ebelgeKombo = useMemo(
     () => (ebelgeKutusuVar ? aksiyonlar.filter(a => hedefte(a, 'sagtus') && ebelgeGrubu(a)) : []),
     [aksiyonlar, ebelgeKutusuVar]);
+  /** Sube e-Fatura mukellefi mi: sunucu e-Belge aksiyonu donduruyorsa evet
+      (AksiyonUclari mukellef olmayan subede bu grubu HIC gondermez). Kutu
+      bayragindan BAGIMSIZ - Alis Faturalari'nda kutu yok ama "Gelen Kutusu"
+      sekmesi mukellefiyete bagli. */
+  const ebelgeMukellef = useMemo(
+    () => aksiyonlar.some(a => ebelgeGrubu(a) || a.grup === 'gelen'), [aksiyonlar]);
   const [ebelgeSecim, setEbelgeSecim] = useState('');
   useEffect(() => { if (!aksiyonKombo.some(a => a.kod === aksiyonSecim)) setAksiyonSecim('') }, [aksiyonKombo, aksiyonSecim]);
   const secilenAksiyon = aksiyonKombo.find(a => a.kod === aksiyonSecim);
@@ -641,7 +649,13 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
               ⭐
             </button>
             <span className="durumseg-ayrac" />
-            {(cipler ?? []).map((c, i) => (
+            {/* e-BELGEYE BAGLI CIPLER: sunucu ebelge aksiyonu dondurmuyorsa
+                (sube mukellef degil) hic cizilmez - tiklaninca bos ekran
+                acan sekme gostermeyelim. Indeksler ciplerin KENDI dizisinden
+                gelir; suzme yalniz cizimi etkiler. */}
+            {(cipler ?? []).map((c, i) => ({ c, i }))
+              .filter(({ c }) => c.kosul !== 'ebelge' || ebelgeMukellef)
+              .map(({ c, i }) => (
               <button
                 key={c.ad}
                 className={i === cipIndeks ? 'on' : ''}
