@@ -1,7 +1,7 @@
 import { api } from '../api/istemci';
 import { mesaj, metinSor, onay } from '../bilesenler/mesaj';
 import { hataMetni, type EBelgeMesaji, type ListeSatiri } from '../api/sozlesme';
-import { dosyaIndir } from './ebelgeIslem';
+import { dosyaIndir, ebelgeDosyaAdi, ebelgeTurAdi } from './ebelgeIslem';
 
 /**
  * GELEN e-BELGE aksiyonlari (187): kutuyu yenile · goruntule · kabul · red ·
@@ -59,6 +59,10 @@ export async function gelenBelgeAksiyonu(
 
   const id = satir ? Number(satir.id) : 0;
   const no = String(satir?.belgeNo ?? id);
+  // Kaydet dosya adi: "<tür> <belge no> <gönderici ilk 2 kelime>" (giden ile ayni kural).
+  const dosyaAdi = satir
+    ? ebelgeDosyaAdi(ebelgeTurAdi(satir), no, String(satir.gondericiUnvan ?? ''))
+    : no;
 
   /** Goruntuyu yeni sekmede acar; `yazdir` ise yazdirma penceresini tetikler
       (PDF, tarayicinin "PDF olarak kaydet" secenegiyle alinir). */
@@ -89,7 +93,7 @@ export async function gelenBelgeAksiyonu(
       if (!id) return true;
       try {
         const y = await api.gelenBelgeUbl(id);
-        dosyaIndir(goruntuUret(y.ubl), `${no}.html`, 'text/html;charset=utf-8');
+        dosyaIndir(goruntuUret(y.ubl), `${dosyaAdi}.html`, 'text/html;charset=utf-8');
       } catch (h) { mesaj(hataMetni(h)) }
       return true;
 
@@ -97,7 +101,7 @@ export async function gelenBelgeAksiyonu(
       if (!id) return true;
       try {
         const y = await api.gelenBelgeUbl(id);
-        dosyaIndir(y.ubl, `${no}.xml`, 'application/xml;charset=utf-8');
+        dosyaIndir(y.ubl, `${dosyaAdi}.xml`, 'application/xml;charset=utf-8');
       } catch (h) { mesaj(hataMetni(h)) }
       return true;
 

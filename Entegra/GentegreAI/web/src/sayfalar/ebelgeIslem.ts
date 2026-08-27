@@ -75,6 +75,32 @@ async function onizle(belgeId: number, yazdir: boolean) {
   if (yazdir) pencere.setTimeout(() => pencere.print(), 400);
 }
 
+
+/**
+ * KAYDET dosya adi (kullanici kurali): "<tür adı> <belge no> <cari adı ilk 2 kelime>"
+ *   ör. "e-Arşiv GNY2026000000009 3EKSEN TEKNOLOJİ.xml"
+ *
+ * Tur adi listedeki rozetten gelir ("e-Arşiv ✓" gibi) - onay isareti ve fazla
+ * bosluk atilir. Dosya sisteminde yasakli karakterler temizlenir; Turkce
+ * harfler KORUNUR (Windows ve Linux ikisinde de gecerli).
+ */
+export function ebelgeDosyaAdi(turAdi: string, belgeNo: string, cariAdi: string): string {
+  const temiz = (m: string) => (m ?? '').replace(/[\\/:*?"<>|]/g, ' ')
+                                        .replace(/\s+/g, ' ').trim();
+  const tur = temiz(turAdi).replace(/[✓✔]/g, '').trim();
+  const cari = temiz(cariAdi).split(' ').slice(0, 2).join(' ');
+  return [tur, temiz(belgeNo), cari].filter(Boolean).join(' ') || 'belge';
+}
+
+/** Liste satirindan tur adi: satis faturasinda `efatura`, irsaliyede `eIrsaliye`,
+    gelen kutusunda `belgeTuruAdi` kolonu tasir. */
+export function ebelgeTurAdi(satir: ListeSatiri): string {
+  const aday = [satir.belgeTuruAdi, satir.efatura, satir.eIrsaliye]
+    .map(x => String(x ?? '').trim())
+    .find(x => x.length > 0 && x !== 'Kağıt' && x !== 'Bilinmiyor');
+  return aday ?? 'e-Belge';
+}
+
 /**
  * Menunun cikti adimlarini calistirir. Bilinen bir kod degilse `false` doner -
  * cagiran kendi switch'ine devam eder.
@@ -89,6 +115,8 @@ export async function ebelgeCiktisi(
 ): Promise<boolean> {
   const id = Number(satir.id);
   const belgeNo = String(satir.belgeNo ?? satir.id);
+  const dosyaAdi = ebelgeDosyaAdi(ebelgeTurAdi(satir), belgeNo,
+                                  String(satir.tarafUnvan ?? ''));
   const hazirlanmamis = Number(satir.efaturaDurum ?? 0) === 0;
 
   /**
@@ -122,7 +150,7 @@ export async function ebelgeCiktisi(
         return true;
       case 'ebelge.html': {
         // Ekranda gorulen GORUNTUNUN aynisi insin (XSLT varsa o).
-        dosyaIndir(await goruntuUret(id), `${belgeNo}.html`, 'text/html;charset=utf-8');
+        dosyaIndir(await goruntuUret(id), `${dosyaAdi}.html`, 'text/html;charset=utf-8');
         return true;
       }
       // XML KAYDET: artik GERCEK UBL (182). Entegratore giden ham istek
@@ -130,7 +158,7 @@ export async function ebelgeCiktisi(
       //   GIB belgesini kastediyor.
       case 'ebelge.xml': {
         const y = await api.belgeEBelgeUbl(id);
-        dosyaIndir(y.ubl, `${y.dosyaAdi}.xml`, 'application/xml;charset=utf-8');
+        dosyaIndir(y.ubl, `${dosyaAdi}.xml`, 'application/xml;charset=utf-8');
         return true;
       }
       // DURUM SORGULA (183): entegratordeki GIB durumunu ceker ve kayda isler.
