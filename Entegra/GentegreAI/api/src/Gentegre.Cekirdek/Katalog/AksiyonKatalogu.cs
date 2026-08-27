@@ -301,6 +301,30 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            // GELEN e-BELGE KUTUSU (187): kutuyu yenile, icerigi gor, yanitla.
+            //   "Yeni" YOK - gelen belgeyi biz uretmeyiz.
+            ["gelen-belge-liste"] = new AksiyonTanimi[]
+            {
+                new("gelen.yenile",  "⟳ Kutuyu Yenile", "gelen",
+                    AksiyonYetkisi: "ebelge.gonder", Sira: 10),
+                new("gelen.goruntule", "Belgeyi Görüntüle", "gelen", Kisayol: "Enter",
+                    KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                new("gelen.kabul",   "✓ Kabul Et",      "gelen", Hedef: "araccubugu,sagtus,palet",
+                    AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 30),
+                new("gelen.red",     "✕ Reddet",        "gelen", Hedef: "araccubugu,sagtus,palet",
+                    AksiyonYetkisi: "ebelge.gonder", KayitGerekir: true, Sira: 40),
+                // ALIS FATURASINA AKTAR: kutu satiri muhasebeye ancak boyle girer
+                //   (kutunun kendisi cari borc/alacak URETMEZ - kullanici kurali).
+                //   Kabulde otomatik calisir; burada yanit gerekmeyen belgeler
+                //   (temel fatura / e-Arsiv) ve tekrar denemeler icin durur.
+                new("gelen.aktar",   "🧾 Faturaya Aktar", "gelen",
+                    KaynakKodu: "belge", Islem: Islem.Ekle, KayitGerekir: true, Sira: 25),
+                new("gelen.xml",     "XML Kaydet",      "gelen", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", KayitGerekir: true, Sira: 50),
+                new("genel.yazdir",  "🖨️ Yazdır",     "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             // Siparis listesi: buradan irsaliye/faturaya donusum yapilir (F8).
             //   Ayni 'belge' kaynagi, tur in (9,19) sabit filtresiyle.
             ["siparis-liste"] = new AksiyonTanimi[]

@@ -124,6 +124,8 @@ public static partial class KaynakKatalogu
         Ekle(BelgeAcikSatir());
         Ekle(Depo());
         Ekle(Irsaliye());
+        // Gelen e-Belge kutusu (187)
+        Ekle(GelenBelge());
         Ekle(StokTransfer());
         Ekle(StokTalep());
         Ekle(StokFisi(3));

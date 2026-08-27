@@ -7,6 +7,7 @@ import { type EBelgeMesaji, type Kosul, type ListeSatiri, hataMetni } from '../a
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { ebelgeCiktisi } from './ebelgeIslem';
+import { gelenBelgeAksiyonu } from './gelenBelgeIslem';
 import { Modal } from '../bilesenler/Modal';
 import { BelgeKarti } from './BelgeKarti';
 import { KasaIslemKarti } from './KasaIslemKarti';
@@ -377,6 +378,10 @@ Bu işlem geri alınamaz. `
         return;
       }
 
+      // GELEN e-BELGE (187): kutu aksiyonlari ayri dosyada; isledi ise burada biter.
+      if (kod.startsWith('gelen.')
+          && await gelenBelgeAksiyonu(kod, satir ?? null, () => setYenile(t => t + 1))) return;
+
       if (kod.endsWith('.yeni') && tanim.kartYolu) git(`${tanim.kartYolu}/yeni`);
       // SIL gercekten SILER: eskiden karti aciyordu ve kullanici "sildim" sanip
       //   ekranda kaydi gorunce sasiriyordu. Onay sorulur; silme engelleri
@@ -474,6 +479,9 @@ Bu işlem geri alınamaz. `
           setAcikBelgeId(Number(satir.id));
         // Kasa islemi de MODAL (kullanici) - "Aç" aksiyonuyla ayni davranis.
         else if (tanim.kaynak === 'kasa-islem') setAcikKasaId(Number(satir.id));
+        // Gelen belgenin KARTI YOK: cift tik gonderenin goruntusunu acar.
+        else if (tanim.kaynak === 'gelen-belge')
+          void gelenBelgeAksiyonu('gelen.goruntule', satir, () => setYenile(t => t + 1));
         else if (tanim.kartYolu) git(`${tanim.kartYolu}/${satir.id}`);
       }}
       onAksiyon={(kod, satir, secililer) => { void aksiyon(kod, satir, secililer) }}
@@ -482,6 +490,7 @@ Bu işlem geri alınamaz. `
       seciliBaslangicId={sonSeciliId}
       cipBaslangic={cipIndeks}
       onCipSecildi={setCipIndeks}
+      onCipRota={r => git(`/${r}`)}
       onSecimDegisti={s => { setSeciliSatir(s); if (s) setSonSeciliId(Number(s.id)) }}
       cipSonu={tanim.ekstre && (
         <button

@@ -64,7 +64,11 @@ export interface ListeTanimi {
       tahakkuk / alis faturasi listelerinde de kullaniliyor. */
   ebelgeMenusu?: string;
   toplam?: string[];
-  cipler?: { ad: string; filtre?: Kosul }[];
+  /** `rota` verilen cip FILTRE degil GECIS'tir: tiklaninca o listeye gidilir
+      (Alis Faturalari > "Gelen Kutusu"). Ayni serit, farkli kaynak. */
+  cipler?: { ad: string; filtre?: Kosul; rota?: string }[];
+  /** Rotasi var ama MENUDE gorunmez (baska bir listenin sekmesinden girilir). */
+  menuGizli?: boolean;
   /** Mockup'ta olup backend'i henuz olmayan kart sekmeleri (or. stok: "ÜTS Bilgileri"). */
   yerTutucuSekmeler?: string[];
   /** Mockup'taki "Genel" sekmesindeki bos "Resim" kutusu (IMAJ→DOSYA hic baglanmadi). */
@@ -307,6 +311,25 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Satış', menuAd: 'Satış Faturaları', ic: '🧾', yetkiKodu: 'belge',
   },
   {
+    // GELEN e-BELGE KUTUSU (187): bize kesilen e-Fatura / e-Arsiv belgeleri.
+    //   Kart YOK - belge bizim degil; cift tik gonderenin goruntusunu acar.
+    kaynak: 'gelen-belge', rota: 'gelen-belge', baslik: 'Gelen Kutusu',
+    yol: 'Alis › Gelen Kutusu', aksiyonEkrani: 'gelen-belge-liste',
+    toplam: ['tutar'],
+    cipler: [
+      { ad: 'Yanıt Bekleyen', filtre: { alan: 'durum', op: 'esit', deger: 100 } },
+      { ad: 'Kabul',          filtre: { alan: 'durum', op: 'esit', deger: 101 } },
+      { ad: 'Red',            filtre: { alan: 'durum', op: 'esit', deger: 102 } },
+      { ad: 'Tumu' },
+      // Geri donus: iki liste tek ekranin iki sekmesi gibi calissin.
+      { ad: '🧾 Alış Faturaları', rota: 'alis-fatura' },
+    ],
+    // MENUDE YOK (kullanici): Alis Faturalari > "Gelen Kutusu" sekmesinden
+    //   girilir; menude ikinci bir giris ayni ekrani iki yerde gosterirdi.
+    menuGizli: true,
+    menuGrup: 'Alış', menuAd: 'Gelen Kutusu', ic: '📥', yetkiKodu: 'belge',
+  },
+  {
     // SATIS FISI (tur 16): perakende/pesin satis. Fatura ile ayni kart ve ayni
     //   akis - fark yalniz belge turu ve numara serisi. Muhasebe fisi URETIR
     //   (kasa_islem_turu.fis_mi = 1), belge fisleme F7'de baglanacak.
@@ -391,6 +414,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tumu' },
       { ad: 'Fatura', filtre: { alan: 'tipi', op: 'esitDegil', deger: 2 } },
       { ad: 'İade',   filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
+      // Bize KESILEN e-Faturalar (187): ayni serit, ayri kaynak. Alis
+      //   faturasi olarak islenecek belgeler once burada gorunur.
+      { ad: '📥 Gelen Kutusu', rota: 'gelen-belge' },
     ],
     menuGrup: 'Alış', menuAd: 'Alış Faturaları', ic: '🧾', yetkiKodu: 'belge',
   },

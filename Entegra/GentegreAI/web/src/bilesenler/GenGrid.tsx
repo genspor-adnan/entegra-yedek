@@ -34,7 +34,9 @@ interface Props {
   ebelgeMenusu?: string;
   onAksiyon?(kod: string, satir: ListeSatiri | null, secililer?: ListeSatiri[]): void;
   /** Ust cip filtreleri: { ad, filtre } — mockup'taki "Aktif / Pasif / Tumu" seridi. */
-  cipler?: { ad: string; filtre?: Kosul }[];
+  /** `rota` verilen cip FILTRE degil GECIS'tir: tiklaninca o listeye gidilir
+      (Alis Faturalari > "Gelen Kutusu"). Ayni serit, farkli kaynak. */
+  cipler?: { ad: string; filtre?: Kosul; rota?: string }[];
   /** Kart icine gomulu kucuk grid (ör. cari kartinda İlgili Kişiler) - buyuk baslik/yol
       satiri (.sayfabas) gizlenir, geri kalan (arama/cipler/tablo/sayfalama) ayni kalir. */
   gomulu?: boolean;
@@ -53,6 +55,8 @@ interface Props {
   /** Cip'e tiklanınca cagrilir - ekstre modundan listeye donmek gibi ekran
       disi davranislar icin (grid kendi filtresini yine uygular). */
   onCipSecildi?(indeks: number): void;
+  /** Rotali cip (kaynak degistiren sekme) tiklandi. */
+  onCipRota?(rota: string): void;
   /** Satir secimi degisince cagrilir - disaridaki dugmeler (Ekstre gibi) buna gore
       aktif/pasif olur. */
   onSecimDegisti?(satir: ListeSatiri | null): void;
@@ -102,7 +106,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           dovizsizGizle,
                           gizliKolonlar, kolonSirasi, altSecenekler, tarihAlani, tarihVarsayilan,
                           seciliBaslangicId, cipSonu, cipBaslangic,
-                          onCipSecildi, onSecimDegisti, yenile, odaklaSonEklenen,
+                          onCipSecildi, onCipRota, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik }: Props) {
   // Sayfa boyu: cagiran acikca verdiyse o, yoksa Genel Ayarlar'daki
   //   `liste.sayfa_boyu` (varsayilan 50). Ayar gelene kadar 50 ile calisir.
@@ -641,7 +645,12 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
               <button
                 key={c.ad}
                 className={i === cipIndeks ? 'on' : ''}
-                onClick={() => { setCipIndeks(i); setSayfa(1); onCipSecildi?.(i) }}
+                onClick={() => {
+                  // Rotali cip: kendi listesine gider, secili cip DEGISMEZ -
+                  //   geri donuldugunde onceki filtre korunur.
+                  if (c.rota) { onCipRota?.(c.rota); return }
+                  setCipIndeks(i); setSayfa(1); onCipSecildi?.(i);
+                }}
               >
                 {c.ad}
               </button>

@@ -331,4 +331,56 @@ public static partial class KaynakKatalogu
             new("kapanmaDurum",    "a.kapanma_durum",    "kod",   "Kapanma",  Hizalama: "orta", Varsayilan: false),
             new("subeId",          "a.sube_id",          "sayi",  "Şube",     Varsayilan: false)
         });
+
+    // ------------------------------------------------------- gelen belge ----
+    // KUTU (187): bize kesilen e-Fatura/e-Arsiv belgeleri. Ayni `e_belge`
+    //   tablosu, yon = 2. Liste kutu odakli: kim gonderdi, ne kadar, yanit
+    //   verildi mi. Giden belgelerle karistirmamak icin AYRI kaynak.
+    private static KaynakTanimi GelenBelge() => new(
+        Ad: "gelen-belge",
+        YetkiKodu: "belge",
+        Kaynak: """
+            public.e_belge e
+            left join public.taraf t on t.id = e.taraf_id
+            """,
+        SabitKosul: "e.yon = 2",
+        SubeKolonu: "e.sube_id",
+        KapsamKolonu: "e.taraf_id",
+        VarsayilanSirala: "e.belge_tarihi desc nulls last, e.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",              "e.id",                "sayi",  "Id",       Varsayilan: false),
+            new("belgeNo",         "e.belge_no",          "metin", "Belge No", Genislik: 175),
+            new("belgeTuruAdi",    "public.fn_ebelge_tur_adi(e.belge_turu)",
+                                                          "metin", "Tür",      Hizalama: "orta",
+                                                           Bicim: "rozet", Genislik: 105,
+                                                           Siralanabilir: false, Filtrelenebilir: false),
+            new("durumAdi",        "public.fn_gelen_durum_adi(e.durum)",
+                                                          "metin", "Durum",    Hizalama: "orta",
+                                                           Bicim: "rozet", Genislik: 125,
+                                                           Siralanabilir: false, Filtrelenebilir: false),
+            new("belgeTarihi",     "e.belge_tarihi",      "tarih", "Tarih",    Hizalama: "orta",
+                                                           Bicim: "dd.MM.yyyy", Genislik: 105),
+            // Gonderici carimiz degilse taraf bos kalir - JSON'dan gelen unvan gosterilir.
+            new("gondericiUnvan",  "coalesce(nullif(t.unvan, ''), e.gonderici_unvan)",
+                                                          "metin", "Gönderici", Genislik: 260),
+            new("gondericiVkno",   "e.gonderici_vkno",    "metin", "VKN/TCKN", Hizalama: "orta", Genislik: 115),
+            new("tutar",           "e.tutar",             "para",  "Tutar",    Hizalama: "sag",
+                                                           Bicim: "#,##0.00", Genislik: 125),
+            new("vergiTutar",      "e.vergi_tutar",       "para",  "KDV",      Hizalama: "sag",
+                                                           Bicim: "#,##0.00", Genislik: 115, Varsayilan: false),
+            new("paraBirimi",      "e.para_birimi",       "metin", "Döviz",    Hizalama: "orta",
+                                                           Genislik: 70, Varsayilan: false),
+            new("profil",          "e.profil",            "metin", "Profil",   Hizalama: "orta", Genislik: 130),
+            new("okunduAdi",       "case when e.okundu = 1 then 'Okundu' else 'Yeni' end",
+                                                          "metin", "Okundu",   Hizalama: "orta",
+                                                           Genislik: 90, Siralanabilir: false,
+                                                           Filtrelenebilir: false, Varsayilan: false),
+            new("yanitAciklama",   "e.yanit_aciklama",    "metin", "Yanıt Notu", Varsayilan: false),
+            new("gibAciklama",     "e.gib_durum_aciklama", "metin", "GİB Durumu", Varsayilan: false),
+            new("durum",           "e.durum",             "sayi",  "Durum Kodu", Varsayilan: false),
+            new("belgeTuru",       "e.belge_turu",        "sayi",  "Tür Kodu", Varsayilan: false),
+            new("tarafId",         "e.taraf_id",          "sayi",  "Cari Id",  Varsayilan: false),
+            new("subeId",          "e.sube_id",           "sayi",  "Şube",     Varsayilan: false)
+        });
 }

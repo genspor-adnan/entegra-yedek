@@ -80,7 +80,7 @@ export function Kabuk() {
   // Menu, liste tanimlarindan uretilir; yetkisiz modul hic cizilmez. menuGrup verilen
   //   ogeler ("Cari" -> Musteri/Tedarikci/Kisi Listesi) acilir-kapanir bir ana menu
   //   altinda TOPLANIR; menuGrup'suz ogeler eskisi gibi duz sirada kalir.
-  const yetkiliListeler = LISTELER.filter(l => yetki(l.yetkiKodu));
+  const yetkiliListeler = LISTELER.filter(l => yetki(l.yetkiKodu) && !l.menuGizli);
   const moduller: MenuOgesi[] =
     yetkiliListeler.map(l => ({
       yol: `/${l.rota ?? l.kaynak}`, ad: l.menuAd, ic: l.ic,

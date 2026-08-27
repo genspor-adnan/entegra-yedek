@@ -116,6 +116,8 @@ Saat.DilimAyarla(kurucu.Configuration["Kurulus:SaatDilimi"]);
 kurucu.Services.AddHttpClient("ebelge", i => i.Timeout = TimeSpan.FromMinutes(2));
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EBelgeGonderimi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EBelgeSorgu>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.EBelgeGelen>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.GelenBelgeAktar>();
 
 var uygulama = kurucu.Build();
 
@@ -148,6 +150,7 @@ uygulama.AyarUclariniEkle();
 uygulama.PanelUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
 uygulama.DokumanUclariniEkle();
+uygulama.GelenBelgeUclariniEkle();
 uygulama.DokumanIcerikUcunuEkle();
 uygulama.ReferansUclariniEkle();
 uygulama.BelgeUclariniEkle();

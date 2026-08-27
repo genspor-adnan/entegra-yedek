@@ -320,6 +320,28 @@ export const api = {
   belgeEBelgeMesajlar: (id: number) =>
     istek<{ mesajlar: EBelgeMesaji[] }>(`/api/belge/${id}/ebelge-mesajlar`),
 
+  // ------------------------------------------------------ gelen belge ----
+  /** Entegrator kutusunu tarar, gelen belgeleri kaydeder (187). */
+  gelenKutuYenile: (baslangic?: string, bitis?: string) =>
+    gonder<{ okunan: number; yeni: number; guncellenen: number; mesaj: string }>(
+      '/api/gelen-belge/kutu-yenile',
+      { baslangic: baslangic ?? null, bitis: bitis ?? null }),
+
+  /** Gelen belgenin UBL XML'i; ilk cagride entegratorden indirilir (187). */
+  gelenBelgeUbl: (id: number) =>
+    istek<{ ubl: string }>(`/api/gelen-belge/${id}/ubl`),
+
+  /** Gelen ticari faturaya KABUL / RED yaniti (187). Kabulde belge alis
+      faturasina da aktarilir; olusan belge id'si `belgeId` ile doner. */
+  gelenBelgeYanit: (id: number, kabul: boolean, aciklama: string) =>
+    gonder<{ basarili: boolean; mesaj: string; belgeId: number | null }>(
+      `/api/gelen-belge/${id}/yanit`, { kabul, aciklama }),
+
+  /** Gelen belgeyi ALIS FATURASINA aktarir (187). */
+  gelenBelgeAktar: (id: number) =>
+    gonder<{ belgeId: number; belgeNo: string; satirSayisi: number;
+             eslesenStok: number; mesaj: string }>(`/api/gelen-belge/${id}/aktar`, {}),
+
   /** e-Belgeyi geri al (164): kayit silinir, belge yeniden hazirlanabilir. */
   belgeEBelgeSifirla: (id: number) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/ebelge-sifirla`, {}),
