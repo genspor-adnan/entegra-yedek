@@ -1,0 +1,59 @@
+import { useEffect, useState } from 'react';
+import { Modal } from './Modal';
+import { mesajDinleyiciAta, type MesajIstegi } from './mesaj';
+
+/**
+ * "Gentegre AI Mesajı" penceresi - uygulamanin TEK mesaj/onay ekrani.
+ *
+ * App'in koküne bir kez konur; `mesaj()` ve `onay()` cagrilari buraya duser.
+ * Tarayicinin alert/confirm kutulari sayfayi kilitliyor ve "localhost diyor ki"
+ * basligiyla cikiyordu.
+ *
+ * Kuyruk YOK: ust uste gelen mesajda son istek gosterilir - kullanici arka
+ * arkaya diyalog kapatmak zorunda kalmasin.
+ */
+export function MesajKatmani() {
+  const [istek, setIstek] = useState<MesajIstegi | null>(null);
+
+  useEffect(() => {
+    mesajDinleyiciAta(setIstek);
+    return () => mesajDinleyiciAta(null);
+  }, []);
+
+  if (!istek) return null;
+
+  const kapat = (sonuc: boolean) => {
+    istek.cozum(sonuc);
+    setIstek(null);
+  };
+
+  return (
+    <Modal
+      baslik="Gentegre AI Mesajı"
+      dar
+      onKapat={() => kapat(false)}
+      alt={
+        <>
+          {istek.onayMi && (
+            <button type="button" className="d kapat-dugmesi"
+                    onClick={() => kapat(false)}>Vazgeç</button>
+          )}
+          <button type="button"
+                  className={`d ${istek.tehlike ? 'teh' : 'bir'}`}
+                  autoFocus
+                  onClick={() => kapat(true)}>
+            {istek.onayMi ? 'Tamam' : 'Kapat'}
+          </button>
+        </>
+      }
+    >
+      {/* Satir sonlari korunur: sunucudan gelen cok satirli aciklamalar
+          (or. "Gönderilemedi (HTTP 400): ...") okunakli kalsin. */}
+      <div className="kagrup">
+        <div style={{ padding: '10px 12px', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+          {istek.metin}
+        </div>
+      </div>
+    </Modal>
+  );
+}

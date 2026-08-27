@@ -8,6 +8,7 @@ import { Liste, LISTELER } from './sayfalar/Liste';
 import { StokAyarlar } from './sayfalar/StokAyarlar';
 import { KasaAyarlar } from './sayfalar/KasaAyarlar';
 import { FirmaBilgileri } from './sayfalar/FirmaBilgileri';
+import { MesajKatmani } from './bilesenler/MesajKatmani';
 import { GenelAyarlar } from './sayfalar/GenelAyarlar';
 import { SatisAyarlar, AlisAyarlar } from './sayfalar/BelgeAyarlar';
 import { Panel } from './sayfalar/Panel';
@@ -71,6 +72,9 @@ export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <OturumSaglayici>
+        {/* Tek mesaj/onay penceresi ("Gentegre AI Mesajı") - tarayici
+            alert/confirm kutulari yerine (bkz. bilesenler/mesaj.ts). */}
+        <MesajKatmani />
         <Yollar />
       </OturumSaglayici>
     </BrowserRouter>

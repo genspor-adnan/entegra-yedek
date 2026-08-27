@@ -75,16 +75,53 @@ public static class AksiyonUclari
             var efaturaDurum = Sayi(belge, "efaturaDurum");
             var belgeNo = belge.TryGetValue("belgeNo", out var no) ? no?.ToString() ?? "" : "";
 
+            // e-BELGE ASAMASI: 0 hazirlanmadi · 1/11/51 hazirlandi · 2/12/52
+            //   gonderildi. Eski kod "efaturaDurum != 0" ise "zaten gonderilmis"
+            //   diyordu - HAZIRLANMIS belgeyi de gonderilmis sayip gonderimi
+            //   engelliyordu.
+            var hazirlandi = efaturaDurum is 1 or 11 or 51;
+            var gonderildi = efaturaDurum is 2 or 12 or 52;
+            var turAdi = efaturaDurum switch
+            {
+                1 or 2 => "e-Fatura", 11 or 12 => "e-Arşiv", 51 or 52 => "e-İrsaliye",
+                _ => "e-Belge",
+            };
+
             switch (aksiyon.Kod)
             {
                 case "belge.kesinlestir" when durum != 1:
-                    return (false, "Belge zaten kesinlesmis.");
+                    return (false, "Belge zaten kesinleşmiş.");
+
+                // GONDERILMIS BELGE DEGISTIRILEMEZ/SILINEMEZ: numarasi GIB'e
+                //   gitmistir; duzeltme ancak IADE faturasiyla yapilir.
+                case "belge.iptal" or "belge.sil" when gonderildi:
+                    return (false, $"{turAdi} gönderilmiş; belge iptal edilemez/silinemez. "
+                                 + "Düzeltme için iade faturası kesin.");
+                case "belge.iptal" or "belge.sil" when hazirlandi:
+                    return (false, $"{turAdi} hazırlanmış; önce \"Hazırı Geri Al\" ile "
+                                 + "e-Belge kaydını kaldırın.");
                 case "belge.iptal" when durum == 2:
-                    return (false, "Belge zaten iptal edilmis.");
-                case "ebelge.gonder" when efaturaDurum != 0:
-                    return (false, "Belge zaten gonderilmis.");
+                    return (false, "Belge zaten iptal edilmiş.");
+
+                case "ebelge.hazirla" when gonderildi:
+                    return (false, $"{turAdi} zaten gönderilmiş.");
+                case "ebelge.hazirla" when hazirlandi:
+                    return (false, $"{turAdi} zaten hazırlanmış. Değiştirmek için "
+                                 + "\"Seri Değiştir\" ya da \"Hazırı Geri Al\" kullanın.");
+                case "ebelge.hazirla" when durum == 2:
+                    return (false, "İptal edilmiş belge için e-Belge hazırlanamaz.");
+
+                case "ebelge.gonder" when gonderildi:
+                    return (false, $"{turAdi} zaten gönderilmiş.");
+                case "ebelge.gonder" when !hazirlandi:
+                    return (false, "Önce \"Hazırla\" ile e-Belge oluşturun.");
                 case "ebelge.gonder" when belgeNo.Length == 0:
-                    return (false, "Taslak belge gonderilemez - once kesinlestirin.");
+                    return (false, "Taslak belge gönderilemez - önce kesinleştirin.");
+
+                case "ebelge.seri" or "ebelge.sifirla" when gonderildi:
+                    return (false, $"{turAdi} gönderilmiş; serisi değiştirilemez, geri alınamaz.");
+                case "ebelge.seri" or "ebelge.sifirla" when !hazirlandi:
+                    return (false, "Önce \"Hazırla\" ile e-Belge oluşturun.");
             }
         }
 

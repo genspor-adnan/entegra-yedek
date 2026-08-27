@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { mesaj, onay } from '../bilesenler/mesaj';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
@@ -109,7 +110,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       // e-BELGE CIKTILARI (Ön İzle / PDF / HTML / XML / Mesaj Geçmişi) ayri
       //   modulde (180 refaktor): hepsi tek belge id'si alip cikti uretiyor,
       //   listeden bagimsiz. Ele aldiysa switch'e hic girmeyiz.
-      if (satir && await ebelgeCiktisi(kod, satir, setEBelgeMesajlari)) return;
+      if (satir && await ebelgeCiktisi(kod, satir, setEBelgeMesajlari,
+                                       () => setYenile(t => t + 1))) return;
 
       switch (kod) {
         // Grup basina bir giris: kart tur seridini o grubun turleriyle acar.
@@ -137,7 +139,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
         case 'kasa.kesinlestir':
           if (!satir) return;
-          if (!confirm('İşlem kesinleştirilecek: makbuz numarası verilir ve muhasebe fişi yazılır. Onaylıyor musunuz?')) return;
+          if (!await onay('İşlem kesinleştirilecek: makbuz numarası verilir ve muhasebe fişi yazılır. Onaylıyor musunuz?')) return;
           await api.kasaKesinlestir(Number(satir.id));
           setYenile(t => t + 1);
           return;
@@ -153,7 +155,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
         case 'kasa.sil':
           if (!satir) return;
-          if (!confirm('Taslak/plan kaydı silinecek. Onaylıyor musunuz?')) return;
+          if (!await onay('Taslak/plan kaydı silinecek. Onaylıyor musunuz?')) return;
           await api.kasaSil(Number(satir.id));
           setYenile(t => t + 1);
           return;
@@ -168,13 +170,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         case 'ebelge.hazirla': {
           if (!satir) return;
           const belgeNo = String(satir.belgeNo ?? satir.id);
-          if (!confirm(`"${belgeNo}" için e-Belge hazırlansın mı? `
+          if (!await onay(`"${belgeNo}" için e-Belge hazırlansın mı? `
                      + 'Belgeye seri ve e-Belge numarası verilir.')) return;
           try {
             const y = await api.belgeEBelgeHazirla(Number(satir.id));
-            alert((y.uyarilar ?? []).join(' • ') || 'e-Belge hazırlandı.');
+            mesaj((y.uyarilar ?? []).join(' • ') || 'e-Belge hazırlandı.');
             setYenile(t => t + 1);
-          } catch (h) { alert(hataMetni(h)) }
+          } catch (h) { mesaj(hataMetni(h)) }
           return;
         }
         // e-BELGE GONDER: GERI ALINAMAZ, bu yuzden onay metni acik yazilir -
@@ -182,14 +184,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         case 'ebelge.gonder': {
           if (!satir) return;
           const no = String(satir.belgeNo ?? satir.id);
-          if (!confirm(`"${no}" entegratöre GÖNDERİLECEK.\n\n`
+          if (!await onay(`"${no}" entegratöre GÖNDERİLECEK.\n\n`
                      + 'Gönderilen belge geri alınamaz; düzeltme ancak iade '
                      + 'faturasıyla yapılır. Onaylıyor musunuz?')) return;
           try {
             const y = await api.belgeEBelgeGonder(Number(satir.id));
-            alert((y.uyarilar ?? []).join(' • ') || 'Gönderildi.');
+            mesaj((y.uyarilar ?? []).join(' • ') || 'Gönderildi.');
             setYenile(t => t + 1);
-          } catch (h) { alert(hataMetni(h)) }
+          } catch (h) { mesaj(hataMetni(h)) }
           return;
         }
         // e-Belge menusunun oteki adimlari (164): seri degistir ve sifirla.
@@ -198,20 +200,20 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           const seri = prompt('Yeni seri (boş bırakırsanız sıradaki seriye geçilir):', '') ?? undefined;
           try {
             const y = await api.belgeEBelgeSeri(Number(satir.id), seri?.trim() || undefined);
-            alert((y.uyarilar ?? []).join(' • ') || 'Seri değişti.');
+            mesaj((y.uyarilar ?? []).join(' • ') || 'Seri değişti.');
             setYenile(t => t + 1);
-          } catch (h) { alert(hataMetni(h)) }
+          } catch (h) { mesaj(hataMetni(h)) }
           return;
         }
         case 'ebelge.sifirla': {
           if (!satir) return;
-          if (!confirm('e-Belge geri alınacak; belge yeniden hazırlanabilir hale gelir. '
+          if (!await onay('e-Belge geri alınacak; belge yeniden hazırlanabilir hale gelir. '
                      + 'Numara boşa düşer. Onaylıyor musunuz?')) return;
           try {
             const y = await api.belgeEBelgeSifirla(Number(satir.id));
-            alert((y.uyarilar ?? []).join(' • ') || 'e-Belge geri alındı.');
+            mesaj((y.uyarilar ?? []).join(' • ') || 'e-Belge geri alındı.');
             setYenile(t => t + 1);
-          } catch (h) { alert(hataMetni(h)) }
+          } catch (h) { mesaj(hataMetni(h)) }
           return;
         }
         case 'belge.donustur':
@@ -228,7 +230,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         case 'aday.donustur': {
           if (!satir) return;
           const ad = String(satir.unvan ?? satir.ad ?? satir.id);
-          if (!confirm(`"${ad}" müşteriye dönüştürülsün mü?
+          if (!await onay(`"${ad}" müşteriye dönüştürülsün mü?
 
 ` +
                        "Kayıt Müşteri Listesi'ne geçer; fırsat, görev ve adres geçmişi aynı kalır.")) return;
@@ -240,7 +242,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
                   kart: { musteri: true, aday: false } });
               setYenile(y => y + 1);
             } catch (h) {
-              alert(hataMetni(h));
+              mesaj(hataMetni(h));
             }
           })();
           return;
@@ -250,7 +252,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         case 'stok.kopyala': {
           if (!satir) return;
           const ad = String(satir.ad ?? satir.kod ?? satir.id);
-          if (!confirm(`"${ad}" kartı kopyalanacak.\n\n`
+          if (!await onay(`"${ad}" kartı kopyalanacak.\n\n`
                      + 'Kod sonuna "_K1", ad sonuna " kopya" eklenir; paket ise içeriği de kopyalanır.\n'
                      + 'Fiyat ve barkod kopyalanmaz.')) return;
           const yeniId = await api.stokKopyala(Number(satir.id));
@@ -258,7 +260,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           kartaGit(yeniId);
           return;
         }
-        case 'genel.yazdir': alert('Yazdirma henuz baglanmadi.'); return;
+        case 'genel.yazdir': mesaj('Yazdirma henuz baglanmadi.'); return;
       }
 
       // Alt menuden gelen arac secimi: "kasa.yeni.22" -> tur 22 ile modal.
@@ -279,7 +281,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   (SilmeEngeli) sunucuda, 422 mesaji kullaniciya aynen gosterilir.
       else if (kod.endsWith('.sil') && satir && tanim.kartYolu) {
         const ad = String(satir.ad ?? satir.konu ?? satir.unvan ?? satir.kod ?? satir.id);
-        if (!confirm(`"${ad}" silinecek. Onaylıyor musunuz?`)) return;
+        if (!await onay(`"${ad}" silinecek. Onaylıyor musunuz?`)) return;
         // Kart adi KAYNAK'tir, rota degil: Cek/Senet listelerinin rotasi '/cek'
         //   ama kart 'cek-senet'. Yoldan turetmek yanlis karta giderdi.
         await api.kartSil(tanim.kaynak, Number(satir.id));
@@ -287,9 +289,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       }
       else if ((kod.endsWith('.duzenle') || kod.endsWith('.ac')) && satir && tanim.kartYolu)
         kartaGit(satir.id);
-      else if (satir) alert(`"${kod}" aksiyonu henuz baglanmadi.`);
+      else if (satir) mesaj(`"${kod}" aksiyonu henuz baglanmadi.`);
     } catch (h) {
-      alert(hataMetni(h));
+      mesaj(hataMetni(h));
     }
   }
 
@@ -329,7 +331,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           if (kasaId) setAcikKasaId(kasaId);
           else if (belgeId) setAcikBelgeId(belgeId);
         }}
-        onAksiyon={kod => { if (kod === 'genel.yazdir') alert('Yazdirma henuz baglanmadi.') }}
+        onAksiyon={kod => { if (kod === 'genel.yazdir') mesaj('Yazdirma henuz baglanmadi.') }}
         cipBaslangic={cipIndeks}
         // Cip'e basmak = listeye don (secilen filtreyle).
         onCipSecildi={i => { setCipIndeks(i); setEkstre(null) }}
@@ -489,7 +491,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         belgeTur={donusum.belgeTur}
         onKapat={() => setDonusum(null)}
         // Modal KAPANMAZ: sonucu (yeni belge no + tutar) kendi icinde gosterir.
-        //   alert() kullanmak tarayici diyalogu acar ve sayfayi kilitler.
+        //   mesaj() kullanmak tarayici diyalogu acar ve sayfayi kilitler.
         onTamam={() => setYenile(t => t + 1)}
       />
     )}

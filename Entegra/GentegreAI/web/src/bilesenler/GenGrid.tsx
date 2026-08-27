@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { mesaj } from './mesaj';
 import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
 import { type AksiyonYaniti, type KolonMeta, type Kosul, type ListeSatiri, type ListeYaniti,
@@ -662,7 +663,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                   if (!kod) return;
                   const a = ebelgeKombo.find(x => x.kod === kod);
                   if (!a) return;
-                  if (!a.aktif) { alert(a.pasifSebep ?? 'Bu işlem şu an yapılamaz.'); return }
+                  if (!a.aktif) { mesaj(a.pasifSebep ?? 'Bu işlem şu an yapılamaz.'); return }
                   aksiyonCalistir(kod);
                 }}
               >

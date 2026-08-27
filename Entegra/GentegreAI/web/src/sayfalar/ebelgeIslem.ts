@@ -1,4 +1,5 @@
 import { api } from '../api/istemci';
+import { mesaj, onay } from '../bilesenler/mesaj';
 import { hataMetni, type EBelgeMesaji, type ListeSatiri } from '../api/sozlesme';
 
 /**
@@ -32,7 +33,7 @@ async function onizle(belgeId: number, yazdir: boolean) {
   const y = await api.belgeEBelgeOnizle(belgeId);
   const pencere = window.open('', '_blank');
   if (!pencere) {
-    alert('Tarayıcı yeni sekmeyi engelledi; açılır pencere iznini verin.');
+    mesaj('Tarayıcı yeni sekmeyi engelledi; açılır pencere iznini verin.');
     return;
   }
   pencere.document.write(y.html);
@@ -50,15 +51,39 @@ export async function ebelgeCiktisi(
   kod: string,
   satir: ListeSatiri,
   mesajGoster: (veri: { belgeNo: string; satirlar: EBelgeMesaji[] }) => void,
+  yenile?: () => void,
 ): Promise<boolean> {
   const id = Number(satir.id);
   const belgeNo = String(satir.belgeNo ?? satir.id);
+  const hazirlanmamis = Number(satir.efaturaDurum ?? 0) === 0;
+
+  /**
+   * ONIZLEMEDEN ONCE HAZIRLA (kullanici; Delphi MenuOnizle de boyle yapar):
+   * hazirlanmamis belgenin numarasi ve turu HENUZ YOK - onizleme "belge no -"
+   * gosterirdi. Kullanici onay verirse once hazirlanir, sonra onizlenir.
+   * Hazirlama numara ve seri TUKETIR, o yuzden sessizce yapilmaz.
+   */
+  const hazirlaGerekirse = async (): Promise<boolean> => {
+    if (!hazirlanmamis) return true;
+    if (!await onay(`"${belgeNo}" için e-Belge henüz hazırlanmamış.
+
+`
+                  + 'Ön izleme için önce hazırlansın mı? '
+                  + 'Belgeye seri ve e-Belge numarası verilir.')) return false;
+    const h = await api.belgeEBelgeHazirla(id);
+    mesaj((h.uyarilar ?? []).join(' • ') || 'e-Belge hazırlandı.');
+    yenile?.();
+    return true;
+  };
+
   try {
     switch (kod) {
       case 'ebelge.onizle':
+        if (!await hazirlaGerekirse()) return true;
         await onizle(id, false);
         return true;
       case 'ebelge.pdf':
+        if (!await hazirlaGerekirse()) return true;
         await onizle(id, true);
         return true;
       case 'ebelge.html': {
@@ -84,7 +109,7 @@ export async function ebelgeCiktisi(
         return false;
     }
   } catch (h) {
-    alert(hataMetni(h));
+    mesaj(hataMetni(h));
     return true;                 // ele alindi: cagiran yeniden denemesin
   }
 }
