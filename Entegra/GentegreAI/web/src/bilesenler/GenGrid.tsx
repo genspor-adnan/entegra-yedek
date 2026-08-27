@@ -649,6 +649,11 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
             {aksiyonEkrani && ebelgeKombo.length > 0 && (
               <select
                 className="ebk"
+                // Islemlerin tamami SECILI BELGEYE uygulanir (kullanici):
+                //   satir yokken kutu pasif - secim yapmadan menuyu acip
+                //   "neden calismiyor" demek yerine sebebi title'da yaziyor.
+                disabled={!seciliSatir}
+                title={seciliSatir ? '' : 'Önce bir satır seçin'}
                 value={ebelgeSecim}
                 onChange={e => {
                   const kod = e.target.value;
