@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Sozlesme;
+﻿using Gentegre.Cekirdek.Sozlesme;
 using Npgsql;
 
 namespace Gentegre.Veri.Depolar;
@@ -405,7 +405,7 @@ public sealed class StokDurumDeposu
         long stokId, int? depoId = null, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select ld.seri_lot_id, l.lot_no, l.seri_no,
                    case when l.uretim_tarihi in (timestamp '1899-12-31 00:00',
                                                  timestamp '1990-01-01 00:00')
@@ -421,9 +421,8 @@ public sealed class StokDurumDeposu
                and ld.kalan > 0
                and (@p1::int is null or ld.depo_id = @p1)
              order by l.son_kullanma_tarihi asc nulls last, ld.seri_lot_id asc
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", (int)stokId);
-        komut.Parameters.AddWithValue("p1", (object?)depoId ?? DBNull.Value);
+            """, null,
+            (int)stokId, (object?)depoId ?? DBNull.Value);
 
         var sonuc = new List<StokLotSatiri>();
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
@@ -449,7 +448,7 @@ public sealed class StokDurumDeposu
         long paketStokId, bool alis = false, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select s.id, s.kod, s.ad,
                    case when p.birim > 0 then p.birim else s.ana_birim end as birim,
                    p.adet, s.kdv, s.izleme,
@@ -464,9 +463,8 @@ public sealed class StokDurumDeposu
               join public.stok s on s.id = p.icerik_stok_id
              where p.paket_stok_id = @p0
              order by p.id
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", (int)paketStokId);
-        komut.Parameters.AddWithValue("p1", alis);
+            """, null,
+            (int)paketStokId, alis);
 
         var sonuc = new List<PaketIcerikSatiri>();
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);

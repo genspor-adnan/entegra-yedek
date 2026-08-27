@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -22,6 +22,15 @@ public sealed class IstekBaglami
     public IReadOnlyList<int> Kapsam { get; init; } = Array.Empty<int>();
     public IReadOnlyList<SubeOzeti> Subeler { get; init; } = Array.Empty<SubeOzeti>();
     public string IzlemeNo { get; init; } = "";
+    /// <summary>Istegi yapan istemcinin IP adresi - islem gunlugune yazilir.</summary>
+    public string Ip { get; init; } = "";
+
+    /// <summary>
+    /// Depo katmaninin bekledigi yazma baglami (kullanici + sube + IP).
+    /// Uc dosyalarinda 25 kez "kullanici + sube + IP" ucusu elle kuruluyordu;
+    /// IP'yi unutan bir kopya islem gunlugune bos IP yazardi.
+    /// </summary>
+    public YazmaBaglami Yazma => new(KullaniciId, SubeId, Ip);
 
     public void YetkiIste(string kaynakKodu, Islem islem)
     {
@@ -71,7 +80,10 @@ public sealed class BaglamCozucu
             Yetkiler = yetkiler,
             Kapsam = kapsam,
             Subeler = subeler,
-            IzlemeNo = ctx.Items["izlemeNo"] as string ?? Izleme.YeniNo()
+            IzlemeNo = ctx.Items["izlemeNo"] as string ?? Izleme.YeniNo(),
+            // IP her uc dosyasinda ayri bir `Ip(HttpContext)` yardimcisiyla
+            //   cikariliyordu (10 kopya); baglam zaten ctx'i goruyor.
+            Ip = IpCoz(ctx)
         };
     }
 
@@ -97,6 +109,10 @@ public sealed class BaglamCozucu
 
         return (subeler.FirstOrDefault(s => s.Varsayilan) ?? subeler[0]).Id;
     }
+
+    /// <summary>Istemci IP adresi; cozulemezse bos metin.</summary>
+    public static string IpCoz(HttpContext ctx)
+        => ctx.Connection.RemoteIpAddress?.ToString() ?? "";
 
     private static int? TalepSayi(HttpContext ctx, string ad)
     {

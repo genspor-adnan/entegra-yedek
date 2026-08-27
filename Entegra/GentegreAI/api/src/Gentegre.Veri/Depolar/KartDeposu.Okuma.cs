@@ -40,8 +40,8 @@ public sealed partial class KartDeposu
         if (kapsam is { Count: > 0 } && tanim.KapsamKolonu is { } kk)
             sql += $" and {kk} = any(@p1)";
 
-        await using var komut = new NpgsqlCommand(sql, baglanti, islem);
-        komut.Parameters.AddWithValue("p0", id);
+        await using var komut = baglanti.Komut(sql, islem,
+            id);
         if (kapsam is { Count: > 0 } && tanim.KapsamKolonu is not null)
             komut.Parameters.AddWithValue("p1", kapsam.ToArray());
 
@@ -74,8 +74,8 @@ public sealed partial class KartDeposu
             var secim = string.Join(", ", detay.Alanlar.Select(a => $"{a.Kolon} as \"{a.Ad}\""));
             var sql = $"select {secim} from {detay.Tablo} where {detay.UstKolon} = @p0 order by {detay.Sirala}";
 
-            await using var komut = new NpgsqlCommand(sql, baglanti);
-            komut.Parameters.AddWithValue("p0", id);
+            await using var komut = baglanti.Komut(sql, null,
+                id);
 
             var satirlar = new List<IDictionary<string, object?>>();
             await using var okuyucu = await komut.ExecuteReaderAsync(iptal);

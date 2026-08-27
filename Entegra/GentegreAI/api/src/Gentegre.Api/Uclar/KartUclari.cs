@@ -121,7 +121,7 @@ public static class KartUclari
 
             var degerler = Degerler(tanim, istek.Kart, baglam, yeni: true);
             var yeniId = await depo.EkleAsync(tanim, degerler, istek.Detaylar,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
 
             // KULLANICI_ARAMA karsiligi: yeni kayit da ekleyen kullanici icin isaretlenir.
             await arama.IsaretleAsync(baglam.KullaniciId, tanim.Ad, yeniId, iptal);
@@ -158,7 +158,7 @@ public static class KartUclari
             var degerler = Degerler(tanim, istek.Kart, baglam, yeni: false);
 
             await depo.GuncelleAsync(tanim, id, istek.Surum!, degerler, istek.Detaylar,
-                okunabilir, new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                okunabilir, baglam.Yazma, iptal);
 
             var kart = await depo.OkuAsync(tanim, id, okunabilir, baglam.Kapsam, iptal)
                        ?? throw GentegreHatasi.Bulunamadi();
@@ -187,7 +187,7 @@ public static class KartUclari
             // Silme logu kartin TAM halini saklar - alan yetkisiyle kirpilmis
             // kume degil, butun alanlar okunur ("Geri Al" eksik satir diriltmesin).
             await depo.SilAsync(tanim, id, tanim.Alanlar,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
 
             return Results.NoContent();
         });
@@ -358,6 +358,4 @@ public static class KartUclari
         return sonuc;
     }
 
-    private static string Ip(HttpContext ctx)
-        => ctx.Connection.RemoteIpAddress?.ToString() ?? "";
 }

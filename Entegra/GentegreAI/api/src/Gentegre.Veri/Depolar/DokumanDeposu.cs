@@ -60,14 +60,13 @@ public sealed class DokumanDeposu
     {
         KaynakDogrula(kaynak);
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select id, ad, belge_turu, content_type, boyut, varsayilan, sira, ekleme_tarihi, paylasim_kodu
               from public.dokuman
              where kaynak = @p0 and kaynak_id = @p1
              order by sira, id
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", kaynak);
-        komut.Parameters.AddWithValue("p1", kaynakId);
+            """, null,
+            kaynak, kaynakId);
 
         var sonuc = new List<DokumanSatiri>();
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
@@ -108,12 +107,11 @@ public sealed class DokumanDeposu
         var mevcutResimVarMi = false;
         if (resimMi)
         {
-            await using var kontrol = new NpgsqlCommand("""
+            await using var kontrol = baglanti.Komut("""
                 select exists(select 1 from public.dokuman
                                where kaynak = @p0 and kaynak_id = @p1 and content_type like 'image/%')
-                """, baglanti, islem);
-            kontrol.Parameters.AddWithValue("p0", kaynak);
-            kontrol.Parameters.AddWithValue("p1", kaynakId);
+                """, islem,
+                kaynak, kaynakId);
             mevcutResimVarMi = (bool)(await kontrol.ExecuteScalarAsync(iptal))!;
         }
         var varsayilanOlacak = resimMi && (varsayilanIstendi || !mevcutResimVarMi);
@@ -282,15 +280,14 @@ public sealed class DokumanDeposu
         // galeri hep "biri varsayilan" kuralini korusun.
         if (varsayilanMiydi)
         {
-            await using var yeniAday = new NpgsqlCommand("""
+            await using var yeniAday = baglanti.Komut("""
                 update public.dokuman set varsayilan = 1
                  where id = (
                      select id from public.dokuman
                       where kaynak = @p0 and kaynak_id = @p1 and content_type like 'image/%'
                       order by sira, id limit 1)
-                """, baglanti, islem);
-            yeniAday.Parameters.AddWithValue("p0", kaynak);
-            yeniAday.Parameters.AddWithValue("p1", kaynakId);
+                """, islem,
+                kaynak, kaynakId);
             await yeniAday.ExecuteNonQueryAsync(iptal);
         }
 
@@ -301,12 +298,12 @@ public sealed class DokumanDeposu
     public async Task<DokumanIcerik?> IcerikAsync(int dokumanId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select i.icerik, d.content_type, d.ad
               from public.dokuman d join public.dokuman_icerik i on i.hash = d.hash
              where d.id = @p0
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", dokumanId);
+            """, null,
+            dokumanId);
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
         if (!await okuyucu.ReadAsync(iptal)) return null;
         return new DokumanIcerik((byte[])okuyucu[0], okuyucu.GetString(1), okuyucu.GetString(2));
@@ -356,12 +353,12 @@ public sealed class DokumanDeposu
     public async Task<DokumanIcerik?> IcerikPaylasimKoduIleAsync(string kod, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select i.icerik, d.content_type, d.ad
               from public.dokuman d join public.dokuman_icerik i on i.hash = d.hash
              where d.paylasim_kodu = @p0
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", kod);
+            """, null,
+            kod);
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
         if (!await okuyucu.ReadAsync(iptal)) return null;
         return new DokumanIcerik((byte[])okuyucu[0], okuyucu.GetString(1), okuyucu.GetString(2));
@@ -372,8 +369,8 @@ public sealed class DokumanDeposu
     private static async Task<T> SatirBulAsync<T>(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         string sql, int dokumanId, Func<NpgsqlDataReader, T> oku, CancellationToken iptal)
     {
-        await using var kontrol = new NpgsqlCommand(sql, baglanti, islem);
-        kontrol.Parameters.AddWithValue("p0", dokumanId);
+        await using var kontrol = baglanti.Komut(sql, islem,
+            dokumanId);
         await using var okuyucu = await kontrol.ExecuteReaderAsync(iptal);
         if (!await okuyucu.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi("Doküman bulunamadı.");
         return oku(okuyucu);
@@ -387,14 +384,11 @@ public sealed class DokumanDeposu
     private static async Task VarsayilaniKaldirAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         string kaynak, long kaynakId, int kullaniciId, CancellationToken iptal, short yon = 0)
     {
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             update public.dokuman set varsayilan = 0, degistiren = @p0
              where kaynak = @p1 and kaynak_id = @p2 and yon = @p3 and varsayilan = 1
-            """, baglanti, islem);
-        komut.Parameters.AddWithValue("p0", kullaniciId);
-        komut.Parameters.AddWithValue("p1", kaynak);
-        komut.Parameters.AddWithValue("p2", kaynakId);
-        komut.Parameters.AddWithValue("p3", yon);
+            """, islem,
+            kullaniciId, kaynak, kaynakId, yon);
         await komut.ExecuteNonQueryAsync(iptal);
     }
 }

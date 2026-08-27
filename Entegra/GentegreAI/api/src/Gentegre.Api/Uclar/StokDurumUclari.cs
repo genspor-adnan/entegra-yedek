@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri.Depolar;
 
@@ -64,7 +64,7 @@ public static class StokDurumUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("stok", Islem.Ekle);
             var yeniId = await depo.KopyalaAsync(stokId,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
             return Results.Ok(new { id = yeniId, izlemeNo = baglam.IzlemeNo });
         }).WithTags("Kart").RequireAuthorization();
 
@@ -88,10 +88,8 @@ public static class StokDurumUclari
             baglam.YetkiIste("stok", Islem.Degistir);
             return Results.Ok(await depo.LimitYazAsync(stokId, istek.DepoId,
                 istek.MinStok, istek.MaxStok,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal));
+                baglam.Yazma, iptal));
         });
     }
 
-    private static string Ip(HttpContext ctx)
-        => ctx.Connection.RemoteIpAddress?.ToString() ?? "";
 }

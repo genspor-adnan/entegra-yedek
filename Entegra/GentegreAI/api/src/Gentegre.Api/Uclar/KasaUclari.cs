@@ -95,7 +95,7 @@ public static class KasaUclari
 
             var (id, uyarilar) = await depo.KaydetAsync(
                 BaslikDegerleri(istek.Islem), istek.Bacaklar, istek.Secenekler,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal,
+                baglam.Yazma, iptal,
                 istek.CekSenet);
 
             var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
@@ -118,7 +118,7 @@ public static class KasaUclari
 
             var uyarilar = await depo.GuncelleAsync(id, BaslikDegerleri(istek.Islem), istek.Bacaklar,
                 istek.Secenekler, istek.Surum,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
 
             var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
             kayit.Uyarilar = uyarilar;
@@ -150,7 +150,7 @@ public static class KasaUclari
             baglam.AksiyonIste("kasa.kesinlestir");
             await SubeKontrolAsync(depo, id, baglam, iptal);
 
-            await depo.KesinlestirAsync(id, new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+            await depo.KesinlestirAsync(id, baglam.Yazma, iptal);
 
             var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
             kayit.IzlemeNo = baglam.IzlemeNo;
@@ -173,7 +173,7 @@ public static class KasaUclari
             await SubeKontrolAsync(depo, id, baglam, iptal);
 
             var tersId = await depo.IptalAsync(id, istek.Sebep, istek.Tarih,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
 
             var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
             kayit.IzlemeNo = baglam.IzlemeNo;
@@ -196,7 +196,7 @@ public static class KasaUclari
             await SubeKontrolAsync(depo, id, baglam, iptal);
 
             var yeniId = await depo.PlanGerceklestirAsync(id, istek.HesapId, istek.Tutar,
-                istek.Tarih, istek.Tur, new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                istek.Tarih, istek.Tur, baglam.Yazma, iptal);
 
             var kayit = await depo.OkuAsync(yeniId, iptal) ?? throw GentegreHatasi.Bulunamadi();
             kayit.IzlemeNo = baglam.IzlemeNo;
@@ -211,7 +211,7 @@ public static class KasaUclari
             baglam.YetkiIste("kasa_islem", Islem.Sil);
             await SubeKontrolAsync(depo, id, baglam, iptal);
 
-            await depo.SilAsync(id, new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+            await depo.SilAsync(id, baglam.Yazma, iptal);
             return Results.Ok(new { silindi = true, izlemeNo = baglam.IzlemeNo });
         });
 
@@ -310,6 +310,4 @@ public static class KasaUclari
         _ => null
     };
 
-    private static string Ip(HttpContext ctx)
-        => ctx.Connection.RemoteIpAddress?.ToString() ?? "";
 }

@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using System.Xml.Linq;
 using Gentegre.Cekirdek.Sozlesme;
@@ -172,10 +172,9 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
 
         if (temiz.Length > 0)
         {
-            await using var ara = new NpgsqlCommand(
-                "select id from public.taraf where regexp_replace(coalesce(vkno,''), '\\D', '', 'g') = @p0 order by id limit 1",
-                baglanti);
-            ara.Parameters.AddWithValue("p0", temiz);
+            await using var ara = baglanti.Komut(
+                "select id from public.taraf where regexp_replace(coalesce(vkno,''), '\\D', '', 'g') = @p0 order by id limit 1", null,
+                temiz);
             if (await ara.ExecuteScalarAsync(iptal) is int bulunan) return bulunan;
         }
 
@@ -190,13 +189,12 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
         // ADRES taraf tablosunda DEGIL (taraf_adres) - kart acilirken adres
         //   yazilmaz; kullanici gerekirse kartta ekler. Burada amac faturayi
         //   bir cariye baglamak, tedarikci kartini eksiksiz doldurmak degil.
-        await using var ekle = new NpgsqlCommand("""
+        await using var ekle = baglanti.Komut("""
             insert into public.taraf (unvan, vkno, vd, tedarikci, durum, sube_id, ekleyen)
             values (left(@p0, 120), left(@p1, 20), left(@p2, 60), 1, 1, @p3, @p4)
             returning id
-            """, baglanti);
-        ekle.Parameters.AddWithValue("p0", ad);
-        ekle.Parameters.AddWithValue("p1", temiz);
+            """, null,
+            ad, temiz);
         ekle.Parameters.AddWithValue("p2",
             taraf?.Element(Cac + "PartyTaxScheme")?.Element(Cac + "TaxScheme")
                  ?.Element(Cbc + "Name")?.Value?.Trim() ?? "");
@@ -214,12 +212,12 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
     {
         if (string.IsNullOrWhiteSpace(kod)) return (null, false);
 
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select id from public.stok
              where upper(btrim(kod)) = upper(btrim(@p0))
              order by id limit 1
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", kod);
+            """, null,
+            kod);
         return await komut.ExecuteScalarAsync(iptal) is int id ? (id, true) : (null, false);
     }
 

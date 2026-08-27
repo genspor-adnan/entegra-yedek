@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri.Depolar;
 
@@ -30,7 +30,7 @@ public static class KisiUclari
             baglam.YetkiIste("cari", Islem.Degistir);
             var liste = await depo.EkleAsync(tarafId, istek.Unvan, istek.Telefon, istek.Eposta,
                 istek.Gorev, istek.Departman,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
             return Results.Ok(liste);
         });
 
@@ -42,7 +42,7 @@ public static class KisiUclari
             baglam.YetkiIste("cari", Islem.Degistir);
             var liste = await depo.GuncelleAsync(tarafId, kisiId, istek.Unvan, istek.Telefon,
                 istek.Eposta, istek.Aktif, istek.Gorev, istek.Departman,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
             return Results.Ok(liste);
         });
 
@@ -54,7 +54,7 @@ public static class KisiUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("cari", Islem.Degistir);
             var liste = await depo.BaglaAsync(tarafId, kisiId,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
             return Results.Ok(liste);
         });
 
@@ -66,7 +66,7 @@ public static class KisiUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("cari", Islem.Degistir);
             var liste = await depo.KoparAsync(tarafId, kisiId,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
             return Results.Ok(liste);
         });
 
@@ -76,7 +76,7 @@ public static class KisiUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("cari", Islem.Sil);
-            await depo.SilAsync(tarafId, kisiId, new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+            await depo.SilAsync(tarafId, kisiId, baglam.Yazma, iptal);
             return Results.NoContent();
         });
     }

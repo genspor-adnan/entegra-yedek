@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
@@ -14,10 +14,10 @@ public sealed partial class KasaDeposu
     private async Task<IDictionary<string, object?>> BaslikSozlukAsync(
         NpgsqlConnection baglanti, NpgsqlTransaction tx, int id, CancellationToken iptal)
     {
-        await using var komut = new NpgsqlCommand(
+        await using var komut = baglanti.Komut(
             "select doviz_cinsi as \"dovizCinsi\", doviz_kuru as \"dovizKuru\" " +
-            "from public.kasa_islem where id = @p0", baglanti, tx);
-        komut.Parameters.AddWithValue("p0", id);
+            "from public.kasa_islem where id = @p0", tx,
+            id);
         await using var o = await komut.ExecuteReaderAsync(iptal);
         return await o.ReadAsync(iptal) ? Satir(o) : new Dictionary<string, object?>();
     }
@@ -25,11 +25,11 @@ public sealed partial class KasaDeposu
     private async Task<KasaIslemTuru?> TurOkuAsync(NpgsqlConnection baglanti, NpgsqlTransaction tx,
         int tur, CancellationToken iptal)
     {
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select kod, ad, grup, cari_zorunlu, kalem_turu, fis_mi, aktif
               from public.kasa_islem_turu where kod = @p0
-            """, baglanti, tx);
-        komut.Parameters.AddWithValue("p0", tur);
+            """, tx,
+            tur);
         await using var o = await komut.ExecuteReaderAsync(iptal);
         if (!await o.ReadAsync(iptal)) return null;
         if (!o.Bayrak("aktif"))

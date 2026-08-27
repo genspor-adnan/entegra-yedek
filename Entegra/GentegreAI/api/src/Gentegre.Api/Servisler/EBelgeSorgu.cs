@@ -29,62 +29,10 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
 
     public sealed record DurumBilgisi(string BelgeNo, string Kod, string Aciklama, bool Degisti);
 
-    private sealed record Hesap(string Entegrator, string Kullanici, string Sifre,
-                                bool TestMi, string Url);
-
-    // ------------------------------------------------------------- hesap ----
-    private static async Task<Hesap> HesapOkuAsync(NpgsqlConnection baglanti, int? subeId,
-                                                   CancellationToken iptal)
-    {
-        await using var komut = new NpgsqlCommand(
-            "select entegrator, kullanici, sifre, test_mi, url from public.fn_ebelge_hesap(@p0)",
-            baglanti);
-        komut.Parameters.AddWithValue("p0", (object?)subeId ?? DBNull.Value);
-        await using var o = await komut.ExecuteReaderAsync(iptal);
-        if (!await o.ReadAsync(iptal))
-            throw GentegreHatasi.IsKurali("Şubenin e-Belge hesabı çözülemedi.");
-
-        var h = new Hesap(
-            o.IsDBNull(0) ? "" : o.GetString(0), o.IsDBNull(1) ? "" : o.GetString(1),
-            o.IsDBNull(2) ? "" : o.GetString(2), !o.IsDBNull(3) && o.GetBoolean(3),
-            o.IsDBNull(4) ? "" : o.GetString(4));
-
-        if (string.IsNullOrWhiteSpace(h.Entegrator) || string.IsNullOrWhiteSpace(h.Url))
-            throw GentegreHatasi.IsKurali(
-                "Entegratör ayarları eksik. Yönetim › Firma Bilgileri › e-Belge.");
-        if (h.Entegrator != "izibiz")
-            throw GentegreHatasi.IsKurali(
-                $"\"{h.Entegrator}\" için sorgulama henüz desteklenmiyor.");
-        return h;
-    }
-
-    /// <summary>Gonderimdeki ile ayni login (JSON govdeli /v1/auth/token).</summary>
-    private static async Task<string> JetonAlAsync(HttpClient istemci, Hesap hesap,
-                                                   CancellationToken iptal)
-    {
-        using var istek = new HttpRequestMessage(HttpMethod.Post,
-            hesap.Url.TrimEnd('/') + "/v1/auth/token")
-        {
-            Content = new StringContent(
-                JsonSerializer.Serialize(new { username = hesap.Kullanici, password = hesap.Sifre }),
-                System.Text.Encoding.UTF8, "application/json"),
-        };
-        using var yanit = await istemci.SendAsync(istek, iptal);
-        if (!yanit.IsSuccessStatusCode)
-            throw GentegreHatasi.IsKurali("Entegratöre giriş yapılamadı.");
-
-        using var belge = JsonDocument.Parse(await yanit.Content.ReadAsStringAsync(iptal));
-        var kok = belge.RootElement;
-        foreach (var kaynak in new[] { kok, kok.TryGetProperty("data", out var d) ? d : default })
-        {
-            if (kaynak.ValueKind != JsonValueKind.Object) continue;
-            foreach (var ad in new[] { "accessToken", "access_token", "token" })
-                if (kaynak.TryGetProperty(ad, out var t) && t.ValueKind == JsonValueKind.String)
-                    return t.GetString()!;
-        }
-        throw GentegreHatasi.IsKurali("Entegratör jetonu alınamadı.");
-    }
-
+    // Hesap okuma / jeton alma ORTAK: EBelgeIstemcisi. Uc serviste ayri ayri
+    //   yaziliyordu ve kopyalar ayrismisti (jeton yedek yolu yalniz gonderimde
+    //   vardi) - ayni hesapla gonderim calisirken sorgu "giris yapilamadi"
+    //   diyebiliyordu.
 
     /// <summary>
     /// GIB e-FATURA KULLANICI LISTESI (186): GET /v1/resources/gib-users.
@@ -96,11 +44,11 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
     /// e-Arsivlik alicilara e-Fatura hazirlaniyor, gonderimde entegrator
     /// RECEIVER_COULD_NOT_FOUND_IN_GIB_USER_LIST ile reddediyordu.
     /// </summary>
-    private static async Task<GibKullanici> GibKullaniciAsync(HttpClient istemci, Hesap hesap,
+    private static async Task<GibKullanici> GibKullaniciAsync(HttpClient istemci, EBelgeHesabi hesap,
         string jeton, string vkno, CancellationToken iptal)
     {
         using var istek = new HttpRequestMessage(HttpMethod.Get,
-            $"{hesap.Url.TrimEnd('/')}/v1/resources/gib-users?identifier={vkno}");
+            $"{hesap.Taban}/v1/resources/gib-users?identifier={vkno}");
         istek.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jeton);
         using var yanit = await istemci.SendAsync(istek, iptal);
 
@@ -158,17 +106,17 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
             throw GentegreHatasi.Dogrulama("VKN 10, TCKN 11 hane olmalı.");
 
         await using var baglanti = await veri.AcAsync(iptal);
-        var hesap = await HesapOkuAsync(baglanti, subeId, iptal);
+        var hesap = await EBelgeIstemcisi.HesapAsync(baglanti, subeId, "sorgulama", iptal);
 
         var istemci = istemciUretici.CreateClient("ebelge");
-        var jeton = await JetonAlAsync(istemci, hesap, iptal);
+        var jeton = await EBelgeIstemcisi.JetonAsync(istemci, hesap, iptal);
 
         // MUKELLEFIYET + ALIAS: GIB kullanici listesi (tek dogru kaynak).
         var gib = await GibKullaniciAsync(istemci, hesap, jeton, temiz, iptal);
 
         // UNVAN / VERGI DAIRESI / ADRES: vergi dairesi kaydi - kart doldurmak icin.
         using var istek = new HttpRequestMessage(HttpMethod.Get,
-            $"{hesap.Url.TrimEnd('/')}/v2/taxpayers/{temiz}");
+            $"{hesap.Taban}/v2/taxpayers/{temiz}");
         istek.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jeton);
         using var yanit = await istemci.SendAsync(istek, iptal);
 
@@ -227,7 +175,7 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
     {
         await using var baglanti = await veri.AcAsync(iptal);
 
-        await using var oku = new NpgsqlCommand("""
+        await using var oku = baglanti.Komut("""
             select e.id, coalesce(e.belge_no, ''), e.belge_turu, e.durum,
                    to_char(bl.belge_tarihi, 'YYYY-MM-DD'),
                    coalesce(nullif(bl.sube_id, 0), (select s.id from public.sube s
@@ -235,8 +183,8 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
               from public.belge bl
               join public.e_belge e on e.belge_id = bl.id
              where bl.id = @p0 order by e.id desc limit 1
-            """, baglanti);
-        oku.Parameters.AddWithValue("p0", belgeId);
+            """, null,
+            belgeId);
         long eBelgeId; string belgeNo, tarih; short belgeTuru, durum; int subeId;
         await using (var o = await oku.ExecuteReaderAsync(iptal))
         {
@@ -249,9 +197,9 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
         if (durum is not (2 or 12 or 52))
             throw GentegreHatasi.IsKurali("Belge henüz gönderilmemiş; sorgulanacak durum yok.");
 
-        var hesap = await HesapOkuAsync(baglanti, subeId, iptal);
+        var hesap = await EBelgeIstemcisi.HesapAsync(baglanti, subeId, "sorgulama", iptal);
         var istemci = istemciUretici.CreateClient("ebelge");
-        var jeton = await JetonAlAsync(istemci, hesap, iptal);
+        var jeton = await EBelgeIstemcisi.JetonAsync(istemci, hesap, iptal);
 
         var yol = belgeTuru switch
         {
@@ -259,14 +207,9 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
             7 => "/v2/edespatches",
             _ => "/v1/einvoices/outbox",
         };
-        using var istek = new HttpRequestMessage(HttpMethod.Get,
-            $"{hesap.Url.TrimEnd('/')}{yol}?startDate={tarih}&endDate={tarih}&page=0&pageSize=100");
-        istek.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jeton);
-        using var yanit = await istemci.SendAsync(istek, iptal);
-        var govde = await yanit.Content.ReadAsStringAsync(iptal);
-        if (!yanit.IsSuccessStatusCode)
-            throw GentegreHatasi.IsKurali(
-                $"Durum sorgusu başarısız (HTTP {(int)yanit.StatusCode}).");
+        var govde = await EBelgeIstemcisi.IsteAsync(istemci, hesap, jeton, HttpMethod.Get,
+            $"{yol}?startDate={tarih}&endDate={tarih}&page=0&pageSize=100", null,
+            "Durum sorgusu", iptal);
 
         string kod = "", aciklama = "";
         using (var belge = JsonDocument.Parse(govde))
@@ -298,18 +241,15 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
         if (kod == "")
             return new DurumBilgisi(belgeNo, "", "Entegratörde bu numarayla belge bulunamadı.", false);
 
-        await using var yaz = new NpgsqlCommand("""
+        await using var yaz = baglanti.Komut("""
             update public.e_belge
                set gib_durum_kodu = left(@p1, 40), gib_durum_aciklama = left(@p2, 200),
                    degistiren = @p3, degistirme_tarihi = now()::timestamp
              where id = @p0
                and (coalesce(gib_durum_kodu, '') <> @p1
                  or coalesce(gib_durum_aciklama, '') <> @p2)
-            """, baglanti);
-        yaz.Parameters.AddWithValue("p0", eBelgeId);
-        yaz.Parameters.AddWithValue("p1", kod);
-        yaz.Parameters.AddWithValue("p2", aciklama);
-        yaz.Parameters.AddWithValue("p3", kullaniciId);
+            """, null,
+            eBelgeId, kod, aciklama, kullaniciId);
         var degisti = await yaz.ExecuteNonQueryAsync(iptal) > 0;
 
         return new DurumBilgisi(belgeNo, kod, aciklama, degisti);
@@ -357,7 +297,7 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
 
         // ALIAS da yazilir (186): e-Fatura gonderiminde posta kutusu ZORUNLU.
         //   Sorgu alias dondurmediyse elle girilmis alias EZILMEZ.
-        await using var yaz = new NpgsqlCommand("""
+        await using var yaz = baglanti.Komut("""
             update public.taraf
                set efatura = @p1, eirsaliye = @p3,
                    alias_eposta = case when @p4 <> '' then @p4 else alias_eposta end,
@@ -365,13 +305,8 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
                    efatura_sorgu_tarihi = now()::timestamp,
                    degistiren = @p2, degistirme_tarihi = now()::timestamp
              where id = @p0
-            """, baglanti);
-        yaz.Parameters.AddWithValue("p0", tarafId);
-        yaz.Parameters.AddWithValue("p1", (short)(bilgi.Mukellef ? 1 : 0));
-        yaz.Parameters.AddWithValue("p2", kullaniciId);
-        yaz.Parameters.AddWithValue("p3", (short)(bilgi.IrsaliyeKullanicisi ? 1 : 0));
-        yaz.Parameters.AddWithValue("p4", bilgi.Alias ?? "");
-        yaz.Parameters.AddWithValue("p5", bilgi.IrsaliyeAlias ?? "");
+            """, null,
+            tarafId, (short)(bilgi.Mukellef ? 1 : 0), kullaniciId, (short)(bilgi.IrsaliyeKullanicisi ? 1 : 0), bilgi.Alias ?? "", bilgi.IrsaliyeAlias ?? "");
         await yaz.ExecuteNonQueryAsync(iptal);
         return true;
     }

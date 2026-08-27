@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri.Depolar;
 
@@ -32,7 +32,7 @@ public static class RolYetkiUclari
                 .Select(s => new YetkiGuncelleIstegi(s.YetkiId, s.Gor, s.Ekle, s.Degistir, s.Sil))
                 .ToList();
             var liste = await depo.KaydetAsync(rolId, satirlar,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
             return Results.Ok(liste);
         });
     }

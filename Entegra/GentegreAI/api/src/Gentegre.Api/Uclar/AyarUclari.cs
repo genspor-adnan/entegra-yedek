@@ -45,11 +45,9 @@ public static class AyarUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("ayar", Islem.Degistir);
             var liste = await depo.YazAsync(anahtar, istek?.Deger ?? "",
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
             return Results.Ok(new { ayarlar = liste, izlemeNo = baglam.IzlemeNo });
         });
     }
 
-    private static string Ip(HttpContext ctx)
-        => ctx.Connection.RemoteIpAddress?.ToString() ?? "";
 }

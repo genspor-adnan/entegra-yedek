@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Sozlesme;
+﻿using Gentegre.Cekirdek.Sozlesme;
 using Npgsql;
 
 namespace Gentegre.Veri.Depolar;
@@ -42,7 +42,7 @@ public sealed class KisiDeposu
     private static async Task<IReadOnlyList<KisiKaydi>> ListeleAsync(
         NpgsqlConnection baglanti, NpgsqlTransaction? islem, long tarafId, CancellationToken iptal)
     {
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select id, unvan, telefon, eposta, durum, gorev, departman, true as bagli
               from public.taraf
              where bag_id = @p0 and kisi = 1
@@ -54,8 +54,8 @@ public sealed class KisiDeposu
                and id in (select distinct kisi_id from public.taraf_gecmis
                            where cari_id = @p0 and bitis_tarihi is not null)
              order by bagli desc, unvan
-            """, baglanti, islem);
-        komut.Parameters.AddWithValue("p0", tarafId);
+            """, islem,
+            tarafId);
 
         var sonuc = new List<KisiKaydi>();
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
@@ -76,26 +76,22 @@ public sealed class KisiDeposu
     private static async Task GecmisKapatAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         long kisiId, long cariId, int kullaniciId, CancellationToken iptal)
     {
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             update public.taraf_gecmis set bitis_tarihi = current_date, degistiren = @p0
             where kisi_id = @p1 and cari_id = @p2 and bitis_tarihi is null
-            """, baglanti, islem);
-        komut.Parameters.AddWithValue("p0", kullaniciId);
-        komut.Parameters.AddWithValue("p1", kisiId);
-        komut.Parameters.AddWithValue("p2", cariId);
+            """, islem,
+            kullaniciId, kisiId, cariId);
         var etkilenen = await komut.ExecuteNonQueryAsync(iptal);
 
         // Acik donem hic yoktu (eski/legacy baglanti, hic izlenmemis) - yine de "gecmiste
         // bagliydi" bilgisini kaybetmeyelim, baslangici bilinmeyen kapali bir satir ekle.
         if (etkilenen == 0)
         {
-            await using var ekle = new NpgsqlCommand("""
+            await using var ekle = baglanti.Komut("""
                 insert into public.taraf_gecmis (kisi_id, cari_id, baslama_tarihi, bitis_tarihi, ekleyen)
                 values (@p0, @p1, null, current_date, @p2)
-                """, baglanti, islem);
-            ekle.Parameters.AddWithValue("p0", kisiId);
-            ekle.Parameters.AddWithValue("p1", cariId);
-            ekle.Parameters.AddWithValue("p2", kullaniciId);
+                """, islem,
+                kisiId, cariId, kullaniciId);
             await ekle.ExecuteNonQueryAsync(iptal);
         }
     }
@@ -104,23 +100,21 @@ public sealed class KisiDeposu
     private static async Task GecmisAcAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         long kisiId, long cariId, int kullaniciId, CancellationToken iptal)
     {
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             insert into public.taraf_gecmis (kisi_id, cari_id, baslama_tarihi, ekleyen)
             values (@p0, @p1, current_date, @p2)
             on conflict (kisi_id, cari_id) where bitis_tarihi is null do nothing
-            """, baglanti, islem);
-        komut.Parameters.AddWithValue("p0", kisiId);
-        komut.Parameters.AddWithValue("p1", cariId);
-        komut.Parameters.AddWithValue("p2", kullaniciId);
+            """, islem,
+            kisiId, cariId, kullaniciId);
         await komut.ExecuteNonQueryAsync(iptal);
     }
 
     private static async Task<(int SubeId, short Musteri, short Tedarikci)> UstTarafAsync(
         NpgsqlConnection baglanti, NpgsqlTransaction islem, long tarafId, CancellationToken iptal)
     {
-        await using var komut = new NpgsqlCommand(
-            "select sube_id, musteri, tedarikci from public.taraf where id = @p0", baglanti, islem);
-        komut.Parameters.AddWithValue("p0", tarafId);
+        await using var komut = baglanti.Komut(
+            "select sube_id, musteri, tedarikci from public.taraf where id = @p0", islem,
+            tarafId);
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
         if (!await okuyucu.ReadAsync(iptal))
             throw GentegreHatasi.Bulunamadi("Cari bulunamadi.");

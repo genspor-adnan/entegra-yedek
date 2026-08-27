@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -31,8 +31,7 @@ public static class GelenBelgeUclari
     }
 
     private static Gentegre.Veri.Depolar.YazmaBaglami Baglam(dynamic baglam, HttpContext ctx)
-        => new(baglam.KullaniciId, (int?)baglam.SubeId,
-               ctx.Connection.RemoteIpAddress?.ToString() ?? "");
+        => new(baglam.KullaniciId, (int?)baglam.SubeId, BaglamCozucu.IpCoz(ctx));
 
     public static void GelenBelgeUclariniEkle(this IEndpointRouteBuilder yol)
     {

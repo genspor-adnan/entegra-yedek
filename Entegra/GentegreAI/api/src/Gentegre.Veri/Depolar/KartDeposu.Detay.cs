@@ -134,11 +134,9 @@ public sealed partial class KartDeposu
                     await DetayLogAsync(baglanti, islem, tanim, detay, LogIslemi.Sil, satirId, ustId,
                         yedek, baglam, iptal);
 
-                await using var komut = new NpgsqlCommand(
-                    $"delete from {detay.Tablo} where {detay.IdKolonu} = @p0 and {detay.UstKolon} = @p1",
-                    baglanti, islem);
-                komut.Parameters.AddWithValue("p0", satirId);
-                komut.Parameters.AddWithValue("p1", ustId);
+                await using var komut = baglanti.Komut(
+                    $"delete from {detay.Tablo} where {detay.IdKolonu} = @p0 and {detay.UstKolon} = @p1", islem,
+                    satirId, ustId);
                 await komut.ExecuteNonQueryAsync(iptal);
             }
         }

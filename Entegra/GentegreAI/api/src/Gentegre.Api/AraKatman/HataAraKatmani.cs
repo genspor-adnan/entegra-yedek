@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
@@ -51,7 +51,7 @@ public sealed class HataAraKatmani
         await depo.HataYazAsync(
             izlemeNo, kod, durum, ctx.Request.Path, ctx.Request.Method, mesaj,
             durum >= 500 ? hata.ToString() : "", durum >= 500 ? (hata.StackTrace ?? "") : "",
-            KullaniciId(ctx), null, Ip(ctx), null, ctx.RequestAborted);
+            KullaniciId(ctx), null, BaglamCozucu.IpCoz(ctx), null, ctx.RequestAborted);
 
         if (ctx.Response.HasStarted) return;
 
@@ -99,8 +99,6 @@ public sealed class HataAraKatmani
     private static int? KullaniciId(HttpContext ctx)
         => int.TryParse(ctx.User.FindFirst(Talep.KullaniciId)?.Value, out var i) ? i : null;
 
-    private static string Ip(HttpContext ctx)
-        => ctx.Connection.RemoteIpAddress?.ToString() ?? "";
 }
 
 public static class JsonAyarlari

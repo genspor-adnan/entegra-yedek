@@ -158,11 +158,9 @@ public sealed partial class KasaDeposu
                                          CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand(
-            "select public.fn_doviz_kur_getir(@p0, @p1::date, @p2::smallint)", baglanti);
-        komut.Parameters.AddWithValue("p0", dovizCinsi ?? "TL");
-        komut.Parameters.AddWithValue("p1", tarih.Date);
-        komut.Parameters.AddWithValue("p2", (short)yon);
+        await using var komut = baglanti.Komut(
+            "select public.fn_doviz_kur_getir(@p0, @p1::date, @p2::smallint)", null,
+            dovizCinsi ?? "TL", tarih.Date, (short)yon);
         var sonuc = await komut.ExecuteScalarAsync(iptal);
         return sonuc is null or DBNull ? null : Convert.ToDecimal(sonuc);
     }
@@ -176,13 +174,12 @@ public sealed partial class KasaDeposu
                                                 CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select tarih from public.doviz_kur
              where doviz_cinsi = public.fn_doviz_iso(@p0) and tarih <= @p1::date
              order by tarih desc limit 1
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", dovizCinsi ?? "TL");
-        komut.Parameters.AddWithValue("p1", tarih.Date);
+            """, null,
+            dovizCinsi ?? "TL", tarih.Date);
         var sonuc = await komut.ExecuteScalarAsync(iptal);
         return sonuc is null or DBNull ? null : Convert.ToDateTime(sonuc);
     }

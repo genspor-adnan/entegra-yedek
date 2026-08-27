@@ -4,6 +4,7 @@ using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Npgsql;
 using NpgsqlTypes;
+using static Gentegre.Veri.JsonDeger;
 
 namespace Gentegre.Veri.Depolar;
 
@@ -78,9 +79,9 @@ public sealed partial class BelgeDeposu
         if (!doluVar)
         {
             // Tum alanlar bosaltilmis: kaydi birak.
-            await using var sil = new NpgsqlCommand(
-                "delete from public.belge_sevkiyat where id = @p0", baglanti, islem);
-            sil.Parameters.AddWithValue("p0", belgeId);
+            await using var sil = baglanti.Komut(
+                "delete from public.belge_sevkiyat where id = @p0", islem,
+                belgeId);
             await sil.ExecuteNonQueryAsync(iptal);
             return;
         }
@@ -327,18 +328,13 @@ public sealed partial class BelgeDeposu
             }
         }
 
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             update public.belge
                set matrah = @p1, kdv_tutari = @p2, ek_vergi = @p3, genel_toplam = @p4,
                    doviz_tutari = @p5
              where id = @p0
-            """, baglanti, islem);
-        komut.Parameters.AddWithValue("p0", belgeId);
-        komut.Parameters.AddWithValue("p1", matrah);
-        komut.Parameters.AddWithValue("p2", kdv);
-        komut.Parameters.AddWithValue("p3", ek);
-        komut.Parameters.AddWithValue("p4", genel);
-        komut.Parameters.AddWithValue("p5", dovizGenel);
+            """, islem,
+            belgeId, matrah, kdv, ek, genel, dovizGenel);
         await komut.ExecuteNonQueryAsync(iptal);
     }
 
@@ -353,7 +349,7 @@ public sealed partial class BelgeDeposu
         // Eski "kur" ve "doviz_tutari" kolonlari 080'de DUSURULDU.
         // hesap_turu 'C' (cari) - eskiden yanlislikla '1' yaziliyordu; sema
         //   yorumu (012_sema_belge.sql:212) ve tum ekstre gorunumleri 'C' bekler.
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             insert into public.mali_hareket
                 (tur, hesap_turu, taraf_id, belge_id, belge_no, islem_tarihi,
                  borc, alacak, yerel_borc, yerel_alacak,
@@ -384,8 +380,8 @@ public sealed partial class BelgeDeposu
                                           nullif(btrim(b.belge_dovizi), ''), 'TL') as cins) rapor
               ) d
              where b.id = @p3
-            """, baglanti, islem);
-        komut.Parameters.AddWithValue("p0", (short)tur);
+            """, islem,
+            (short)tur);
         // IADEDE YON TERS: satis iadesi cariyi ALACAKLANDIRIR (132).
         komut.Parameters.AddWithValue("p1", BelgeTuru.CikisMi(tur, tipi));
         komut.Parameters.AddWithValue("p2", baglam.KullaniciId);
@@ -399,25 +395,22 @@ public sealed partial class BelgeDeposu
         // Numara sablonu (152) BELGE TARIHINE gore secilir: "1 Eylul'den itibaren
         //   B- serisi" denince Agustos tarihli belge eski seriyi korumali. Tarih
         //   belgenin kendisinden okunur - cagiran ayrica tasimasin.
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             update public.belge
                set belge_no = public.fn_belge_no_uret(@p1, @p2, @p3, 9, belge_tarihi::date)
              where id = @p0 and coalesce(belge_no, '') = ''
-            """, baglanti, islem);
-        komut.Parameters.AddWithValue("p0", belgeId);
-        komut.Parameters.AddWithValue("p1", tur);
-        komut.Parameters.AddWithValue("p2", seri ?? "");
-        komut.Parameters.AddWithValue("p3", subeId ?? 0);
+            """, islem,
+            belgeId, tur, seri ?? "", subeId ?? 0);
         await komut.ExecuteNonQueryAsync(iptal);
 
         // Numara belgeye yazildi; mali_hareket satirindaki kopyasi da guncellenir.
-        await using var komut2 = new NpgsqlCommand("""
+        await using var komut2 = baglanti.Komut("""
             update public.mali_hareket m
                set belge_no = b.belge_no
               from public.belge b
              where b.id = m.belge_id and m.belge_id = @p0
-            """, baglanti, islem);
-        komut2.Parameters.AddWithValue("p0", belgeId);
+            """, islem,
+            belgeId);
         await komut2.ExecuteNonQueryAsync(iptal);
     }
 

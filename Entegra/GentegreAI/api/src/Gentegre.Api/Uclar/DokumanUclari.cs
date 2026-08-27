@@ -53,7 +53,7 @@ public static class DokumanUclari
 
             var liste = await depo.EkleAsync(FizikselKaynak(kartAdi), kaynakId, dosya.FileName,
                 tip, akis.ToArray(), varsayilanIstendi,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal, yon);
+                baglam.Yazma, iptal, yon);
             return Results.Ok(liste);
         });
 
@@ -66,7 +66,7 @@ public static class DokumanUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
             var liste = await depo.VarsayilanYapAsync(dokumanId,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
             return Results.Ok(liste);
         });
 
@@ -77,7 +77,7 @@ public static class DokumanUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
             var liste = await depo.DuzenleAsync(dokumanId, istek.Ad, istek.BelgeTuru,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal,
+                baglam.Yazma, iptal,
                 istek.KaynakId, istek.Yon, istek.Varsayilan);
             return Results.Ok(liste);
         });
@@ -89,7 +89,7 @@ public static class DokumanUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
             var liste = await depo.SilAsync(dokumanId,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
             return Results.Ok(liste);
         });
 
@@ -100,7 +100,7 @@ public static class DokumanUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
             var kod = await depo.PaylasAsync(dokumanId,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
             return Results.Ok(new { kod });
         });
     }
@@ -153,5 +153,4 @@ public static class DokumanUclari
         _ => kartAdi
     };
 
-    private static string Ip(HttpContext ctx) => ctx.Connection.RemoteIpAddress?.ToString() ?? "";
 }

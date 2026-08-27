@@ -1,9 +1,10 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Npgsql;
 using NpgsqlTypes;
+using static Gentegre.Veri.JsonDeger;
 
 namespace Gentegre.Veri.Depolar;
 
@@ -115,19 +116,13 @@ public sealed partial class BelgeDeposu
             var seriLotId = await SeriLotIdAsync(baglanti, islem, stokId, lotNo, seriNo,
                                                  uretim, skt, iptal);
 
-            await using var komut = new NpgsqlCommand("""
+            await using var komut = baglanti.Komut("""
                 insert into public.stok_izleme
                     (stok_id, seri_lot_id, izlem_tur, belge_tur, belge_id, belge_satir_id,
                      adet, kalan, durum, depo_id, ekleyen)
                 values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p6, @p7, @p9, @p8)
-                """, baglanti, islem);
-            komut.Parameters.AddWithValue("p0", stokId);
-            komut.Parameters.AddWithValue("p1", seriLotId);
-            komut.Parameters.AddWithValue("p2", (short)stokIzleme);
-            komut.Parameters.AddWithValue("p3", (short)belgeTur);
-            komut.Parameters.AddWithValue("p4", belgeId);
-            komut.Parameters.AddWithValue("p5", satirId);
-            komut.Parameters.AddWithValue("p6", miktar);
+                """, islem,
+                stokId, seriLotId, (short)stokIzleme, (short)belgeTur, belgeId, satirId, miktar);
             // Giriste durum her zaman 0 (kullanici karari); diger durumlar
             //   kod listesi tanimlanınca isletilecek.
             komut.Parameters.AddWithValue("p7", (short)JsonSayi(izlem, "durum", 0));
@@ -237,14 +232,12 @@ public sealed partial class BelgeDeposu
         //    olmayan mali VAR gosterebiliyordu.
         if (kaynakDepo is { } depo)
         {
-            await using var kontrol = new NpgsqlCommand("""
+            await using var kontrol = baglanti.Komut("""
                 select kalan from public.stok_lot_durum
                  where stok_id = @p0 and depo_id = @p1 and seri_lot_id = @p2
                  for update
-                """, baglanti, islem);
-            kontrol.Parameters.AddWithValue("p0", stokId);
-            kontrol.Parameters.AddWithValue("p1", depo);
-            kontrol.Parameters.AddWithValue("p2", seriLotId);
+                """, islem,
+                stokId, depo, seriLotId);
             var eldeki = await kontrol.ExecuteScalarAsync(iptal) is { } d and not DBNull
                 ? Convert.ToDecimal(d) : 0m;
             if (eldeki < miktar)
@@ -283,11 +276,9 @@ public sealed partial class BelgeDeposu
             kalanIstek -= pay;
             if (ilkKaynak == 0) ilkKaynak = kaynakId;
 
-            await using var dus = new NpgsqlCommand(
-                "update public.stok_izleme set kalan = kalan - @p1 where id = @p0 and kalan >= @p1",
-                baglanti, islem);
-            dus.Parameters.AddWithValue("p0", kaynakId);
-            dus.Parameters.AddWithValue("p1", pay);
+            await using var dus = baglanti.Komut(
+                "update public.stok_izleme set kalan = kalan - @p1 where id = @p0 and kalan >= @p1", islem,
+                kaynakId, pay);
             await dus.ExecuteNonQueryAsync(iptal);
         }
 
@@ -334,16 +325,13 @@ public sealed partial class BelgeDeposu
     private static async Task LotDurumYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int stokId, int depoId, int seriLotId, decimal degisim, CancellationToken iptal)
     {
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             insert into public.stok_lot_durum (stok_id, depo_id, seri_lot_id, kalan)
             values (@p0, @p1, @p2, @p3)
             on conflict (stok_id, depo_id, seri_lot_id) do update
                set kalan = stok_lot_durum.kalan + excluded.kalan
-            """, baglanti, islem);
-        komut.Parameters.AddWithValue("p0", stokId);
-        komut.Parameters.AddWithValue("p1", depoId);
-        komut.Parameters.AddWithValue("p2", seriLotId);
-        komut.Parameters.AddWithValue("p3", degisim);
+            """, islem,
+            stokId, depoId, seriLotId, degisim);
         await komut.ExecuteNonQueryAsync(iptal);
     }
 
@@ -374,7 +362,7 @@ public sealed partial class BelgeDeposu
         var secim = new List<object>();
         var kalanIstek = miktar;
 
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select d.seri_lot_id, d.kalan
               from public.stok_lot_durum d
               left join public.stok_seri_lot sl on sl.id = d.seri_lot_id
@@ -382,9 +370,8 @@ public sealed partial class BelgeDeposu
              order by sl.son_kullanma_tarihi nulls last,
                       sl.uretim_tarihi nulls last,
                       d.seri_lot_id
-            """, baglanti, islem);
-        komut.Parameters.AddWithValue("p0", stokId);
-        komut.Parameters.AddWithValue("p1", depo);
+            """, islem,
+            stokId, depo);
 
         await using (var o = await komut.ExecuteReaderAsync(iptal))
         {
@@ -409,9 +396,9 @@ public sealed partial class BelgeDeposu
     private static async Task<int> StokIzlemeTuruAsync(NpgsqlConnection baglanti,
         NpgsqlTransaction islem, int stokId, CancellationToken iptal)
     {
-        await using var komut = new NpgsqlCommand(
-            "select izleme from public.stok where id = @p0", baglanti, islem);
-        komut.Parameters.AddWithValue("p0", stokId);
+        await using var komut = baglanti.Komut(
+            "select izleme from public.stok where id = @p0", islem,
+            stokId);
         var sonuc = await komut.ExecuteScalarAsync(iptal);
         return sonuc is null or DBNull ? 0 : Convert.ToInt32(sonuc);
     }
@@ -433,7 +420,7 @@ public sealed partial class BelgeDeposu
         NpgsqlTransaction islem, int stokId, string lotNo, string seriNo,
         DateTime? uretim, DateTime? skt, CancellationToken iptal)
     {
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             insert into public.stok_seri_lot (stok_id, lot_no, seri_no, uretim_tarihi, son_kullanma_tarihi)
             values (@p0, @p1, @p2, @p3, @p4)
             on conflict (stok_id, lot_no, seri_no) do update
@@ -441,12 +428,8 @@ public sealed partial class BelgeDeposu
                    son_kullanma_tarihi = coalesce(public.stok_seri_lot.son_kullanma_tarihi,
                                                   excluded.son_kullanma_tarihi)
             returning id
-            """, baglanti, islem);
-        komut.Parameters.AddWithValue("p0", stokId);
-        komut.Parameters.AddWithValue("p1", lotNo);
-        komut.Parameters.AddWithValue("p2", seriNo);
-        komut.Parameters.AddWithValue("p3", (object?)uretim ?? DBNull.Value);
-        komut.Parameters.AddWithValue("p4", (object?)skt ?? DBNull.Value);
+            """, islem,
+            stokId, lotNo, seriNo, (object?)uretim ?? DBNull.Value, (object?)skt ?? DBNull.Value);
         return Convert.ToInt32(await komut.ExecuteScalarAsync(iptal));
     }
 
@@ -464,7 +447,7 @@ public sealed partial class BelgeDeposu
         // stok_durum_degis = 0 olan satirlar stok bakiyesini ETKILEMEZ.
         // Transferde IKI depo da okunur: satir cikis deposundan duser, giris
         //   deposuna eklenir - tek satir iki hareket uretir.
-        await using var oku = new NpgsqlCommand("""
+        await using var oku = baglanti.Komut("""
             select s.stok_id, s.miktar, s.adet,
                    coalesce(s.cikis_depo_id, b.cikis_depo_id) as cikis_depo_id,
                    coalesce(s.giris_depo_id, b.giris_depo_id) as giris_depo_id,
@@ -474,8 +457,8 @@ public sealed partial class BelgeDeposu
               left join public.stok st on st.id = s.stok_id
              where s.belge_id = @p0 and s.tur = 1 and s.stok_id is not null
                and s.stok_durum_degis = 1
-            """, baglanti, islem);
-        oku.Parameters.AddWithValue("p0", belgeId);
+            """, islem,
+            belgeId);
 
         var hareketler = new List<(int StokId, decimal Miktar, int? CikisDepo, int? GirisDepo,
                                    bool Reuse)>();
@@ -537,7 +520,7 @@ public sealed partial class BelgeDeposu
         int stokId, int depoId, decimal giren, decimal cikan,
         bool stokKontrolu, int negatifDavranis, List<string> uyarilar, CancellationToken iptal)
     {
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             insert into public.stok_durum (stok_id, depo_id, giren, cikan, kalan)
             values (@p0, @p1, @p2, @p3, @p2 - @p3)
             on conflict (stok_id, depo_id) do update
@@ -545,11 +528,8 @@ public sealed partial class BelgeDeposu
                    cikan = stok_durum.cikan + excluded.cikan,
                    kalan = stok_durum.kalan + excluded.giren - excluded.cikan
             returning kalan
-            """, baglanti, islem);
-        komut.Parameters.AddWithValue("p0", stokId);
-        komut.Parameters.AddWithValue("p1", depoId);
-        komut.Parameters.AddWithValue("p2", giren);
-        komut.Parameters.AddWithValue("p3", cikan);
+            """, islem,
+            stokId, depoId, giren, cikan);
 
         var kalan = Convert.ToDecimal(await komut.ExecuteScalarAsync(iptal) ?? 0m);
         if (!stokKontrolu || kalan >= 0 || negatifDavranis == 0) return;

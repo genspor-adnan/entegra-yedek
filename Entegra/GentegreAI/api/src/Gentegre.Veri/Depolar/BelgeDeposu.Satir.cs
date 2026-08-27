@@ -48,10 +48,9 @@ public sealed partial class BelgeDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-        await using var komut = new NpgsqlCommand(
-            "select public.fn_ebelge_sifirla(@p0, @p1)", baglanti, islem);
-        komut.Parameters.AddWithValue("p0", belgeId);
-        komut.Parameters.AddWithValue("p1", baglam.KullaniciId);
+        await using var komut = baglanti.Komut(
+            "select public.fn_ebelge_sifirla(@p0, @p1)", islem,
+            belgeId, baglam.KullaniciId);
         var mesaj = (await komut.ExecuteScalarAsync(iptal))?.ToString() ?? "";
 
         await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloBelge, belgeId,
@@ -76,12 +75,9 @@ public sealed partial class BelgeDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-        await using var komut = new NpgsqlCommand(
-            "select * from public.fn_ebelge_seri_degistir(@p0, @p1, @p2)", baglanti, islem);
-        komut.Parameters.AddWithValue("p0", belgeId);
-        komut.Parameters.AddWithValue("p1", baglam.KullaniciId);
-        komut.Parameters.AddWithValue("p2",
-            string.IsNullOrWhiteSpace(seri) ? DBNull.Value : seri.Trim());
+        await using var komut = baglanti.Komut(
+            "select * from public.fn_ebelge_seri_degistir(@p0, @p1, @p2)", islem,
+            belgeId, baglam.KullaniciId, string.IsNullOrWhiteSpace(seri) ? DBNull.Value : seri.Trim());
 
         string no, yeniSeri;
         await using (var okuyucu = await komut.ExecuteReaderAsync(iptal))
@@ -121,10 +117,9 @@ public sealed partial class BelgeDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-        await using var komut = new NpgsqlCommand(
-            "select * from public.fn_ebelge_hazirla(@p0, @p1)", baglanti, islem);
-        komut.Parameters.AddWithValue("p0", belgeId);
-        komut.Parameters.AddWithValue("p1", baglam.KullaniciId);
+        await using var komut = baglanti.Komut(
+            "select * from public.fn_ebelge_hazirla(@p0, @p1)", islem,
+            belgeId, baglam.KullaniciId);
 
         long eBelgeId; int tur; string no, seri, uyari;
         await using (var okuyucu = await komut.ExecuteReaderAsync(iptal))
@@ -193,15 +188,12 @@ public sealed partial class BelgeDeposu
         var degisen = 0;
         foreach (var (satirId, tarih) in satirlar)
         {
-            await using var komut = new NpgsqlCommand("""
+            await using var komut = baglanti.Komut("""
                 update public.belge_satir
                    set teslim_tarihi = @p2, degistiren = @p3
                  where id = @p0 and belge_id = @p1
-                """, baglanti, islem);
-            komut.Parameters.AddWithValue("p0", satirId);
-            komut.Parameters.AddWithValue("p1", belgeId);
-            komut.Parameters.AddWithValue("p2", (object?)tarih ?? DBNull.Value);
-            komut.Parameters.AddWithValue("p3", baglam.KullaniciId);
+                """, islem,
+                satirId, belgeId, (object?)tarih ?? DBNull.Value, baglam.KullaniciId);
             var etkilenen = await komut.ExecuteNonQueryAsync(iptal);
             if (etkilenen == 0)
                 throw GentegreHatasi.Bulunamadi($"Satır bu belgeye ait değil: {satirId}");
@@ -244,9 +236,9 @@ public sealed partial class BelgeDeposu
 
         if (baglam.SubeId is { } sube)
         {
-            await using var kontrol = new NpgsqlCommand(
-                "select sube_id from public.belge where id = @p0", baglanti, islem);
-            kontrol.Parameters.AddWithValue("p0", belgeId);
+            await using var kontrol = baglanti.Komut(
+                "select sube_id from public.belge where id = @p0", islem,
+                belgeId);
             var bs = await kontrol.ExecuteScalarAsync(iptal);
             if (bs is null) throw GentegreHatasi.Bulunamadi();
             if (bs is not DBNull && Convert.ToInt32(bs) != sube) throw GentegreHatasi.Bulunamadi();
@@ -285,7 +277,7 @@ public sealed partial class BelgeDeposu
         int belgeId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select v.satir_id as "satirId", v.sira, v.satir_tur as "satirTur",
                    v.stok_id as "stokId", v.stok_kodu as "stokKodu", v.stok_adi as "stokAdi",
                    v.hizmet_id as "hizmetId", v.masraf_id as "masrafId", v.aciklama,
@@ -297,8 +289,8 @@ public sealed partial class BelgeDeposu
                    v.belge_dovizi as "belgeDovizi", v.kapanma_durum as "kapanmaDurum"
               from public.v_belge_acik_satir v
              where v.belge_id = @p0 order by v.sira
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", belgeId);
+            """, null,
+            belgeId);
 
         var liste = new List<IDictionary<string, object?>>();
         await using var o = await komut.ExecuteReaderAsync(iptal);
@@ -319,7 +311,7 @@ public sealed partial class BelgeDeposu
         CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select v.satir_id as "satirId", v.belge_id as "belgeId",
                    v.belge_tur as "belgeTur", v.belge_no as "belgeNo",
                    v.belge_tarihi as "belgeTarihi", v.taraf_id as "tarafId",
@@ -343,11 +335,8 @@ public sealed partial class BelgeDeposu
                              or v.belge_no  ilike '%' || @p2 || '%')
              order by v.belge_tarihi desc, v.belge_id desc, v.sira
              limit 200
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", tarafId);
-        komut.Parameters.AddWithValue("p1", belgeId ?? 0);
-        komut.Parameters.AddWithValue("p2", ara ?? "");
-        komut.Parameters.AddWithValue("p3", (turler ?? Array.Empty<int>()).ToArray());
+            """, null,
+            tarafId, belgeId ?? 0, ara ?? "", (turler ?? Array.Empty<int>()).ToArray());
 
         var liste = new List<IDictionary<string, object?>>();
         await using var o = await komut.ExecuteReaderAsync(iptal);
@@ -363,7 +352,7 @@ public sealed partial class BelgeDeposu
         int belgeId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select hb.id                       as "belgeId",
                    hb.belge_no                 as "belgeNo",
                    hb.belge_tarihi             as "belgeTarihi",
@@ -380,8 +369,8 @@ public sealed partial class BelgeDeposu
              where ks.belge_id = @p0
              group by hb.id, hb.belge_no, hb.belge_tarihi, ht.ad, hb.taraf_unvan, hb.durum
              order by hb.belge_tarihi, hb.id
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", belgeId);
+            """, null,
+            belgeId);
 
         var liste = new List<IDictionary<string, object?>>();
         await using var o = await komut.ExecuteReaderAsync(iptal);
@@ -394,9 +383,9 @@ public sealed partial class BelgeDeposu
         => await IsKuraliCevirAsync(async () =>
         {
             await using var baglanti = await _veri.AcAsync(iptal);
-            await using var komut = new NpgsqlCommand(
-                "select public.fn_ebelge_html(@p0)", baglanti);
-            komut.Parameters.AddWithValue("p0", belgeId);
+            await using var komut = baglanti.Komut(
+                "select public.fn_ebelge_html(@p0)", null,
+                belgeId);
             return (await komut.ExecuteScalarAsync(iptal))?.ToString() ?? "";
         });
 
@@ -409,14 +398,14 @@ public sealed partial class BelgeDeposu
         => await IsKuraliCevirAsync(async () =>
         {
             await using var baglanti = await _veri.AcAsync(iptal);
-            await using var komut = new NpgsqlCommand("""
+            await using var komut = baglanti.Komut("""
                 select g.bicim, g.govde::text,
                        coalesce(nullif(e.belge_no, ''), 'belge-' || @p0::text)
                   from public.fn_ebelge_gonderim_govdesi(@p0) g
                   left join lateral (select e2.belge_no from public.e_belge e2
                                       where e2.belge_id = @p0 order by e2.id desc limit 1) e on true
-                """, baglanti);
-            komut.Parameters.AddWithValue("p0", belgeId);
+                """, null,
+                belgeId);
             await using var o = await komut.ExecuteReaderAsync(iptal);
             if (!await o.ReadAsync(iptal))
                 throw GentegreHatasi.IsKurali("Gönderim gövdesi üretilemedi.");
@@ -431,10 +420,9 @@ public sealed partial class BelgeDeposu
         int belgeId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand(
-            "select sira, tarih, olay, durum, kod, aciklama from public.fn_ebelge_mesajlar(@p0)",
-            baglanti);
-        komut.Parameters.AddWithValue("p0", belgeId);
+        await using var komut = baglanti.Komut(
+            "select sira, tarih, olay, durum, kod, aciklama from public.fn_ebelge_mesajlar(@p0)", null,
+            belgeId);
         await using var o = await komut.ExecuteReaderAsync(iptal);
         var liste = new List<EBelgeMesaji>();
         while (await o.ReadAsync(iptal))
@@ -456,10 +444,10 @@ public sealed partial class BelgeDeposu
     public async Task<bool> EBelgeKullanimdaAsync(int? subeId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select public.fn_ebelge_acik(@p0)
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", (object?)subeId ?? DBNull.Value);
+            """, null,
+            (object?)subeId ?? DBNull.Value);
         return await komut.ExecuteScalarAsync(iptal) is bool b && b;
     }
 
@@ -479,10 +467,9 @@ public sealed partial class BelgeDeposu
             await _log.YazAsync(baglanti, islem, LogIslemi.Sil, LogTabloBelge, belgeId,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip, null, iptal: iptal);
 
-            await using var komut = new NpgsqlCommand(
-                "select public.fn_belge_sil(@p0, @p1)", baglanti, islem);
-            komut.Parameters.AddWithValue("p0", belgeId);
-            komut.Parameters.AddWithValue("p1", baglam.KullaniciId);
+            await using var komut = baglanti.Komut(
+                "select public.fn_belge_sil(@p0, @p1)", islem,
+                belgeId, baglam.KullaniciId);
             var mesaj = (await komut.ExecuteScalarAsync(iptal))?.ToString() ?? "Belge silindi.";
 
             await islem.CommitAsync(iptal);
@@ -493,9 +480,9 @@ public sealed partial class BelgeDeposu
     public async Task<string> SilinebilirMiAsync(int belgeId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand(
-            "select public.fn_belge_silinebilir(@p0)", baglanti);
-        komut.Parameters.AddWithValue("p0", belgeId);
+        await using var komut = baglanti.Komut(
+            "select public.fn_belge_silinebilir(@p0)", null,
+            belgeId);
         return (await komut.ExecuteScalarAsync(iptal))?.ToString() ?? "";
     }
 
@@ -511,7 +498,7 @@ public sealed partial class BelgeDeposu
         => await IsKuraliCevirAsync(async () =>
         {
             await using var baglanti = await _veri.AcAsync(iptal);
-            await using var komut = new NpgsqlCommand("""
+            await using var komut = baglanti.Komut("""
                 select xmlserialize(document public.fn_ebelge_ubl(@p0) as text),
                        coalesce((select convert_from(di.icerik, 'UTF8')
                                    from public.dokuman d
@@ -526,8 +513,8 @@ public sealed partial class BelgeDeposu
                        coalesce((select nullif(e.belge_no, '') from public.e_belge e
                                   where e.belge_id = @p0 order by e.id desc limit 1),
                                 'belge-' || @p0::text)
-                """, baglanti);
-            komut.Parameters.AddWithValue("p0", belgeId);
+                """, null,
+                belgeId);
             await using var o = await komut.ExecuteReaderAsync(iptal);
             if (!await o.ReadAsync(iptal))
                 throw GentegreHatasi.IsKurali("UBL üretilemedi.");
@@ -545,11 +532,9 @@ public sealed partial class BelgeDeposu
         IReadOnlyList<int> belgeIdler, YazmaBaglami baglam, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand(
-            "select belge_id, basarili, belge_no, mesaj from public.fn_ebelge_toplu_hazirla(@p0, @p1)",
-            baglanti);
-        komut.Parameters.AddWithValue("p0", belgeIdler.ToArray());
-        komut.Parameters.AddWithValue("p1", baglam.KullaniciId);
+        await using var komut = baglanti.Komut(
+            "select belge_id, basarili, belge_no, mesaj from public.fn_ebelge_toplu_hazirla(@p0, @p1)", null,
+            belgeIdler.ToArray(), baglam.KullaniciId);
         await using var o = await komut.ExecuteReaderAsync(iptal);
         var liste = new List<TopluSonuc>();
         while (await o.ReadAsync(iptal))
@@ -569,10 +554,9 @@ public sealed partial class BelgeDeposu
     public async Task<AliciBilgisi> EBelgeAliciAsync(int belgeId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand(
-            "select belge_turu, alias, onerilen_mail, taraf_unvan from public.fn_ebelge_alici_bilgi(@p0)",
-            baglanti);
-        komut.Parameters.AddWithValue("p0", belgeId);
+        await using var komut = baglanti.Komut(
+            "select belge_turu, alias, onerilen_mail, taraf_unvan from public.fn_ebelge_alici_bilgi(@p0)", null,
+            belgeId);
         await using var o = await komut.ExecuteReaderAsync(iptal);
         if (!await o.ReadAsync(iptal))
             throw GentegreHatasi.IsKurali("Belge icin e-Belge kaydi yok.");

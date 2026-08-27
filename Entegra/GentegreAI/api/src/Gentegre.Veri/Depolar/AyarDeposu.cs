@@ -137,7 +137,7 @@ public sealed class AyarDeposu
     public async Task<IReadOnlyList<AyarSatiri>> ListeleAsync(CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select r.anahtar, r.deger, r.tip, r.aciklama,
                    coalesce(h.baslik, ''), coalesce(h.metin, '')
               from public.referans r
@@ -145,8 +145,11 @@ public sealed class AyarDeposu
                      on h.anahtar = 'ayar.' || r.anahtar and h.dil = 0
              where r.anahtar = any(@p0)
              order by r.anahtar
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", BeyazListe.ToArray());
+            """, null,
+            // (object?) SART: `params` bir DIZIYI tek basina verirsen ACAR ve her
+            //   ogesi ayri parametre olur (@p0 dizi yerine ilk anahtar olurdu ->
+            //   "op ANY/ALL (array) requires array on right side").
+            (object?)BeyazListe.ToArray());
 
         var liste = new List<AyarSatiri>();
         await using var o = await komut.ExecuteReaderAsync(iptal);
@@ -226,9 +229,9 @@ public sealed class AyarDeposu
     public async Task<YardimKaydi?> YardimAsync(string anahtar, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand(
-            "select baslik, metin from public.help where anahtar = @p0 and dil = 0", baglanti);
-        komut.Parameters.AddWithValue("p0", anahtar);
+        await using var komut = baglanti.Komut(
+            "select baslik, metin from public.help where anahtar = @p0 and dil = 0", null,
+            anahtar);
         await using var o = await komut.ExecuteReaderAsync(iptal);
         return await o.ReadAsync(iptal) ? new YardimKaydi(anahtar, o.GetString(0), o.GetString(1)) : null;
     }
@@ -268,9 +271,9 @@ public sealed class AyarDeposu
     public static async Task<string> MetinAsync(NpgsqlConnection baglanti, NpgsqlTransaction? islem,
         string anahtar, string varsayilan, CancellationToken iptal = default)
     {
-        await using var komut = new NpgsqlCommand(
-            "select deger from public.referans where anahtar = @p0", baglanti, islem);
-        komut.Parameters.AddWithValue("p0", anahtar);
+        await using var komut = baglanti.Komut(
+            "select deger from public.referans where anahtar = @p0", islem,
+            anahtar);
         return await komut.ExecuteScalarAsync(iptal) is string metin && metin.Length > 0
             ? metin : varsayilan;
     }

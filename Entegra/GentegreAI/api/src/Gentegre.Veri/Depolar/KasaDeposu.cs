@@ -173,9 +173,9 @@ public sealed partial class KasaDeposu
                 "Gerçekleşmiş işlem düzeltme kapalı (Ayarlar > Kasa > düzeltme gün sayısı) - "
               + "İptal edip yeniden girin.");
 
-        await using var komut = new NpgsqlCommand(
-            "select islem_tarihi from public.kasa_islem where id = @p0", baglanti, tx);
-        komut.Parameters.AddWithValue("p0", id);
+        await using var komut = baglanti.Komut(
+            "select islem_tarihi from public.kasa_islem where id = @p0", tx,
+            id);
         if (await komut.ExecuteScalarAsync(iptal) is not DateTime tarih) return;
 
         if (Saat.Bugun > tarih.Date.AddDays(gun))
@@ -240,9 +240,9 @@ public sealed partial class KasaDeposu
 
         if (bacaklar is { Count: > 0 })
         {
-            await using var sil = new NpgsqlCommand(
-                "delete from public.mali_hareket where kasa_islem_id = @p0", baglanti, tx);
-            sil.Parameters.AddWithValue("p0", id);
+            await using var sil = baglanti.Komut(
+                "delete from public.mali_hareket where kasa_islem_id = @p0", tx,
+                id);
             await sil.ExecuteNonQueryAsync(iptal);
 
             var tam = await BaslikSozlukAsync(baglanti, tx, id, iptal);
@@ -370,13 +370,4 @@ public sealed partial class KasaDeposu
 
         await tx.CommitAsync(iptal);
     }
-
-    private static string JsonMetin(Dictionary<string, JsonElement> d, string ad)
-        => d.TryGetValue(ad, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() ?? "" : "";
-
-    private static decimal JsonOndalik(Dictionary<string, JsonElement> d, string ad, decimal varsayilan)
-        => d.TryGetValue(ad, out var v) && v.ValueKind == JsonValueKind.Number ? v.GetDecimal() : varsayilan;
-
-    private static int? JsonSayiNull(Dictionary<string, JsonElement> d, string ad)
-        => d.TryGetValue(ad, out var v) && v.ValueKind == JsonValueKind.Number ? v.GetInt32() : null;
 }

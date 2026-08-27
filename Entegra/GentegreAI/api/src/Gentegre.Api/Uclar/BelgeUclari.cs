@@ -26,7 +26,7 @@ public static class BelgeUclari
             var satirlar = istek.Satirlar ?? new List<Dictionary<string, JsonElement>>();
 
             var (id, uyarilar) = await depo.KaydetAsync(belge, satirlar, istek.Secenekler,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
 
             var kayit = await depo.OkuAsync(id, iptal)
                         ?? throw GentegreHatasi.Bulunamadi();
@@ -91,7 +91,7 @@ public static class BelgeUclari
             var satirlar = istek.Satirlar ?? new List<Dictionary<string, JsonElement>>();
 
             var (belgeId, uyarilar) = await depo.GuncelleAsync(id, belge, satirlar,
-                istek.Secenekler, new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)),
+                istek.Secenekler, baglam.Yazma,
                 iptal);
 
             var kayit = await depo.OkuAsync(belgeId, iptal) ?? throw GentegreHatasi.Bulunamadi();
@@ -139,7 +139,7 @@ public static class BelgeUclari
 
             var ac = istek?.Ac ?? true;
             var adet = await depo.RezerveAsync(id, ac,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
 
             var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
             return Results.Ok(new BelgeYaniti
@@ -163,7 +163,7 @@ public static class BelgeUclari
             baglam.YetkiIste("belge", Islem.Sil);
 
             var mesaj = await depo.SilAsync(id,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
             return Results.Ok(new { mesaj, izlemeNo = baglam.IzlemeNo });
         });
 
@@ -180,7 +180,7 @@ public static class BelgeUclari
             await sorgu.MukellefiyetTazeleAsync(id, baglam.KullaniciId, iptal);
 
             var (eBelgeId, tur, no, seri, uyari) = await depo.EBelgeHazirlaAsync(id,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
 
             var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
             var turAdi = tur switch { 1 => "e-Fatura", 2 => "e-Arşiv", 7 => "e-İrsaliye", _ => "e-Belge" };
@@ -227,7 +227,7 @@ public static class BelgeUclari
                 throw GentegreHatasi.IsKurali(
                     $"En fazla 100 belge işlenebilir (seçilen: {idler.Count}).");
 
-            var yazma = new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx));
+            var yazma = baglam.Yazma;
 
             if (string.Equals(istek!.Islem, "hazirla", StringComparison.OrdinalIgnoreCase))
             {
@@ -359,7 +359,7 @@ public static class BelgeUclari
             baglam.YetkiIste("belge", Islem.Degistir);
 
             var mesaj = await depo.EBelgeSifirlaAsync(id,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
 
             var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
             return Results.Ok(new BelgeYaniti
@@ -378,7 +378,7 @@ public static class BelgeUclari
             baglam.YetkiIste("belge", Islem.Degistir);
 
             var (no, seri) = await depo.EBelgeSeriDegistirAsync(id, istek?.Seri,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
 
             var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
             return Results.Ok(new BelgeYaniti
@@ -405,7 +405,7 @@ public static class BelgeUclari
                 .ToList();
 
             var adet = await depo.TerminGuncelleAsync(id, secilen,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+                baglam.Yazma, iptal);
 
             var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
             return Results.Ok(new BelgeYaniti
@@ -438,7 +438,7 @@ public static class BelgeUclari
 
             var (yeniId, uyarilar) = await depo.DonusturAsync(id, istek.HedefTur, secilen,
                 istek.BelgeTarihi, istek.Taslak,
-                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal,
+                baglam.Yazma, iptal,
                 istek.BelgeNo);
 
             var kayit = await depo.OkuAsync(yeniId, iptal) ?? throw GentegreHatasi.Bulunamadi();
@@ -595,6 +595,4 @@ public static class BelgeUclari
         _ => null
     };
 
-    private static string Ip(HttpContext ctx)
-        => ctx.Connection.RemoteIpAddress?.ToString() ?? "";
 }

@@ -1,9 +1,10 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Npgsql;
+using static Gentegre.Veri.JsonDeger;
 
 namespace Gentegre.Veri.Depolar;
 
@@ -279,10 +280,9 @@ public sealed partial class KasaDeposu
         if (tarafId is null or <= 0) return;
         if (Metin(islem, "tarafUnvan").Length > 0) return;
 
-        await using var komut = new NpgsqlCommand(
-            "select coalesce(nullif(fatura_unvan, ''), unvan) as unvan from public.taraf where id = @p0",
-            baglanti, tx);
-        komut.Parameters.AddWithValue("p0", tarafId.Value);
+        await using var komut = baglanti.Komut(
+            "select coalesce(nullif(fatura_unvan, ''), unvan) as unvan from public.taraf where id = @p0", tx,
+            tarafId.Value);
         await using var o = await komut.ExecuteReaderAsync(iptal);
         if (!await o.ReadAsync(iptal))
             throw GentegreHatasi.Dogrulama("Cari kayıt bulunamadı.", new AlanHatasi("tarafId", "Geçersiz."));
@@ -308,9 +308,9 @@ public sealed partial class KasaDeposu
         var hesapId = SayiNull(islem, "hesapId");
         if (doviz.Length == 0 && hesapId is > 0)
         {
-            await using var komut = new NpgsqlCommand(
-                "select doviz_cinsi from public.hesap where id = @p0", baglanti, tx);
-            komut.Parameters.AddWithValue("p0", hesapId.Value);
+            await using var komut = baglanti.Komut(
+                "select doviz_cinsi from public.hesap where id = @p0", tx,
+                hesapId.Value);
             doviz = (await komut.ExecuteScalarAsync(iptal))?.ToString() ?? "";
         }
         if (doviz.Length == 0) doviz = KasaHesap.YerelDoviz;
@@ -326,11 +326,9 @@ public sealed partial class KasaDeposu
             var tarih = Tarih(islem, "islemTarihi") ?? DateTime.Today;
             var yon = (short)(Sayi(islem, "tur") is 21 or 22 or 23 or 24 or 25 or 26 or 87 ? 1 : 2);
 
-            await using var komut = new NpgsqlCommand(
-                "select public.fn_doviz_kur_getir(@p0, @p1::date, @p2::smallint)", baglanti, tx);
-            komut.Parameters.AddWithValue("p0", doviz);
-            komut.Parameters.AddWithValue("p1", tarih.Date);
-            komut.Parameters.AddWithValue("p2", yon);
+            await using var komut = baglanti.Komut(
+                "select public.fn_doviz_kur_getir(@p0, @p1::date, @p2::smallint)", tx,
+                doviz, tarih.Date, yon);
             var sonuc = await komut.ExecuteScalarAsync(iptal);
 
             if (sonuc is null or DBNull)

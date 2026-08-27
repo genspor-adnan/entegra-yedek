@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri.Depolar;
@@ -102,8 +102,9 @@ public static class KimlikUclari
         }).RequireAuthorization();
     }
 
-    private static string Ip(HttpContext ctx)
-        => ctx.Connection.RemoteIpAddress?.ToString() ?? "";
+    // Giris/yenileme baglam COZULMEDEN once calisir (henuz kimlik yok) -
+    //   IP'yi merkezi cozucuden dogrudan alir.
+    private static string Ip(HttpContext ctx) => BaglamCozucu.IpCoz(ctx);
 
     private static string Istemci(HttpContext ctx)
         => ctx.Request.Headers.UserAgent.ToString();

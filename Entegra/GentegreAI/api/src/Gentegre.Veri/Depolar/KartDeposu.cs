@@ -241,9 +241,9 @@ public sealed partial class KartDeposu
         // Is kurali engelleri (§3.3): sebebi ve adedi ile 422.
         foreach (var engel in tanim.SilmeEngelleri ?? Array.Empty<SilmeEngeli>())
         {
-            await using var sayim = new NpgsqlCommand(
-                $"select count(*) from {engel.Tablo} where {engel.Kolon} = @p0", baglanti, islem);
-            sayim.Parameters.AddWithValue("p0", id);
+            await using var sayim = baglanti.Komut(
+                $"select count(*) from {engel.Tablo} where {engel.Kolon} = @p0", islem,
+                id);
             var adet = Convert.ToInt64(await sayim.ExecuteScalarAsync(iptal) ?? 0L);
 
             if (adet > 0)
@@ -260,9 +260,9 @@ public sealed partial class KartDeposu
         foreach (var detay in tanim.Detaylar ?? Array.Empty<DetayTanimi>())
         {
             var secim = string.Join(", ", detay.Alanlar.Select(a => $"{a.Kolon} as \"{a.Ad}\""));
-            await using var komut = new NpgsqlCommand(
-                $"select {secim} from {detay.Tablo} where {detay.UstKolon} = @p0", baglanti, islem);
-            komut.Parameters.AddWithValue("p0", id);
+            await using var komut = baglanti.Komut(
+                $"select {secim} from {detay.Tablo} where {detay.UstKolon} = @p0", islem,
+                id);
 
             var satirlar = new List<Dictionary<string, string>>();
             await using (var okuyucu = await komut.ExecuteReaderAsync(iptal))
@@ -290,9 +290,9 @@ public sealed partial class KartDeposu
 
         foreach (var detay in tanim.Detaylar ?? Array.Empty<DetayTanimi>())
         {
-            await using var komut = new NpgsqlCommand(
-                $"delete from {detay.Tablo} where {detay.UstKolon} = @p0", baglanti, islem);
-            komut.Parameters.AddWithValue("p0", id);
+            await using var komut = baglanti.Komut(
+                $"delete from {detay.Tablo} where {detay.UstKolon} = @p0", islem,
+                id);
             await komut.ExecuteNonQueryAsync(iptal);
         }
 

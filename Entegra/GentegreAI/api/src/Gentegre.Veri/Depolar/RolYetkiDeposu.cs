@@ -1,4 +1,4 @@
-using Npgsql;
+﻿using Npgsql;
 
 namespace Gentegre.Veri.Depolar;
 
@@ -23,15 +23,15 @@ public sealed class RolYetkiDeposu
     public async Task<IReadOnlyList<YetkiSatiri>> ListeleAsync(int rolId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select y.id, y.kod, y.ad, y.grup,
                    coalesce(ry.gor, 0), coalesce(ry.ekle, 0), coalesce(ry.degistir, 0), coalesce(ry.sil, 0)
               from public.yetki y
               left join public.rol_yetki ry on ry.yetki_id = y.id and ry.rol_id = @p0
              where y.aktif = 1
              order by y.sira, y.ad
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", rolId);
+            """, null,
+            rolId);
 
         var sonuc = new List<YetkiSatiri>();
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
@@ -51,20 +51,14 @@ public sealed class RolYetkiDeposu
 
         foreach (var s in satirlar)
         {
-            await using var komut = new NpgsqlCommand("""
+            await using var komut = baglanti.Komut("""
                 insert into public.rol_yetki (rol_id, yetki_id, gor, ekle, degistir, sil, ekleyen)
                 values (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
                 on conflict (rol_id, yetki_id) do update set
                     gor = excluded.gor, ekle = excluded.ekle, degistir = excluded.degistir, sil = excluded.sil,
                     degistiren = @p6
-                """, baglanti, islem);
-            komut.Parameters.AddWithValue("p0", rolId);
-            komut.Parameters.AddWithValue("p1", s.YetkiId);
-            komut.Parameters.AddWithValue("p2", (short)(s.Gor ? 1 : 0));
-            komut.Parameters.AddWithValue("p3", (short)(s.Ekle ? 1 : 0));
-            komut.Parameters.AddWithValue("p4", (short)(s.Degistir ? 1 : 0));
-            komut.Parameters.AddWithValue("p5", (short)(s.Sil ? 1 : 0));
-            komut.Parameters.AddWithValue("p6", baglam.KullaniciId);
+                """, islem,
+                rolId, s.YetkiId, (short)(s.Gor ? 1 : 0), (short)(s.Ekle ? 1 : 0), (short)(s.Degistir ? 1 : 0), (short)(s.Sil ? 1 : 0), baglam.KullaniciId);
             await komut.ExecuteNonQueryAsync(iptal);
         }
 

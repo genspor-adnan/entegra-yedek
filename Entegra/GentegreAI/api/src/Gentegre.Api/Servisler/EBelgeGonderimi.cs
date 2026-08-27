@@ -63,14 +63,12 @@ public sealed class EBelgeGonderimi(VeriKaynagi veri, IHttpClientFactory istemci
 
         if (!string.IsNullOrWhiteSpace(aliciAlias))
         {
-            await using var alias = new NpgsqlCommand(
+            await using var alias = baglanti.Komut(
                 "update public.e_belge set alici_alias = left(btrim(@p1), 500), "
                 + "degistiren = @p2, degistirme_tarihi = now()::timestamp "
                 + "where belge_id = @p0 and id = (select max(id) from public.e_belge "
-                + "where belge_id = @p0)", baglanti);
-            alias.Parameters.AddWithValue("p0", belgeId);
-            alias.Parameters.AddWithValue("p1", aliciAlias);
-            alias.Parameters.AddWithValue("p2", kullaniciId);
+                + "where belge_id = @p0)", null,
+                belgeId, aliciAlias, kullaniciId);
             await alias.ExecuteNonQueryAsync(iptal);
         }
 
@@ -84,28 +82,23 @@ public sealed class EBelgeGonderimi(VeriKaynagi veri, IHttpClientFactory istemci
             throw GentegreHatasi.IsKurali("Önce \"e-Fatura Hazırla\" ile belge hazırlanmalı.");
 
         // 2) Mukellef hesabi (171): kimlik hangi subedeyse hesap da onun.
-        var hesap = await HesapOkuAsync(baglanti, subeId, iptal);
-        if (string.IsNullOrWhiteSpace(hesap.Entegrator))
-            throw GentegreHatasi.IsKurali(
-                "Bu şube için entegratör seçilmemiş. Yönetim › Firma Bilgileri › e-Belge.");
+        var hesap = await EBelgeIstemcisi.HesapAsync(baglanti, subeId, "gönderim", iptal);
         if (string.IsNullOrWhiteSpace(hesap.Kullanici) || string.IsNullOrWhiteSpace(hesap.Sifre))
             throw GentegreHatasi.IsKurali(
                 hesap.TestMi
                     ? "Test kullanıcı adı / şifresi girilmemiş (Firma Bilgileri › e-Belge)."
                     : "Entegratör kullanıcı adı / şifresi girilmemiş (Firma Bilgileri › e-Belge).");
-        if (string.IsNullOrWhiteSpace(hesap.Url))
-            throw GentegreHatasi.IsKurali("Entegratör servis adresi boş.");
 
         // 3) Gonderim govdesi - adaptor secimi veritabaninda (167/171).
         var (entegrator, _, govde) = await GovdeUretAsync(baglanti, belgeId, iptal);
 
         // 4) Login + gonder.
         var istemci = istemciUretici.CreateClient("ebelge");
-        var jeton = await JetonAlAsync(istemci, hesap, iptal);
+        var jeton = await EBelgeIstemcisi.JetonAsync(istemci, hesap, iptal);
         var yol = YolBul(entegrator, belgeTuru);
 
         using var istek = new HttpRequestMessage(HttpMethod.Post,
-            hesap.Url.TrimEnd('/') + yol)
+            hesap.Taban + yol)
         {
             Content = new StringContent(govde, Encoding.UTF8, "application/json"),
         };
@@ -154,15 +147,14 @@ public sealed class EBelgeGonderimi(VeriKaynagi veri, IHttpClientFactory istemci
     private static async Task MukellefDegilIsaretleAsync(NpgsqlConnection baglanti,
         int belgeId, int kullaniciId, CancellationToken iptal)
     {
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             update public.taraf t
                set efatura = 0, efatura_sorgu_tarihi = now()::timestamp,
                    degistiren = @p1, degistirme_tarihi = now()::timestamp
               from public.belge b
              where b.id = @p0 and t.id = b.taraf_id
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", belgeId);
-        komut.Parameters.AddWithValue("p1", kullaniciId);
+            """, null,
+            belgeId, kullaniciId);
         await komut.ExecuteNonQueryAsync(iptal);
     }
 
@@ -170,7 +162,7 @@ public sealed class EBelgeGonderimi(VeriKaynagi veri, IHttpClientFactory istemci
     private static async Task<(long EBelgeId, short BelgeTuru, string BelgeNo, short Durum, int SubeId)>
         EBelgeOkuAsync(NpgsqlConnection baglanti, int belgeId, CancellationToken iptal)
     {
-        await using var komut = new NpgsqlCommand("""
+        await using var komut = baglanti.Komut("""
             select e.id, e.belge_turu, coalesce(e.belge_no, ''), e.durum,
                    coalesce(nullif(bl.sube_id, 0),
                             (select s.id from public.sube s
@@ -180,8 +172,8 @@ public sealed class EBelgeGonderimi(VeriKaynagi veri, IHttpClientFactory istemci
              where bl.id = @p0
              order by e.id desc
              limit 1
-            """, baglanti);
-        komut.Parameters.AddWithValue("p0", belgeId);
+            """, null,
+            belgeId);
         await using var o = await komut.ExecuteReaderAsync(iptal);
         if (!await o.ReadAsync(iptal))
             throw GentegreHatasi.IsKurali(
@@ -189,99 +181,18 @@ public sealed class EBelgeGonderimi(VeriKaynagi veri, IHttpClientFactory istemci
         return (o.GetInt64(0), o.GetInt16(1), o.GetString(2), o.GetInt16(3), o.GetInt32(4));
     }
 
-    private sealed record Hesap(string Entegrator, string Kullanici, string Sifre,
-                                bool TestMi, string Url);
-
-    private static async Task<Hesap> HesapOkuAsync(NpgsqlConnection baglanti, int subeId,
-                                                   CancellationToken iptal)
-    {
-        await using var komut = new NpgsqlCommand(
-            "select entegrator, kullanici, sifre, test_mi, url from public.fn_ebelge_hesap(@p0)",
-            baglanti);
-        komut.Parameters.AddWithValue("p0", subeId);
-        await using var o = await komut.ExecuteReaderAsync(iptal);
-        if (!await o.ReadAsync(iptal))
-            throw GentegreHatasi.IsKurali("Şubenin e-Belge hesabı çözülemedi.");
-        return new Hesap(
-            o.IsDBNull(0) ? "" : o.GetString(0),
-            o.IsDBNull(1) ? "" : o.GetString(1),
-            o.IsDBNull(2) ? "" : o.GetString(2),
-            !o.IsDBNull(3) && o.GetBoolean(3),
-            o.IsDBNull(4) ? "" : o.GetString(4));
-    }
+    // Hesap okuma / jeton alma ORTAK: EBelgeIstemcisi (uc serviste kopyaydi).
 
     private static async Task<(string Entegrator, short Bicim, string Govde)>
         GovdeUretAsync(NpgsqlConnection baglanti, int belgeId, CancellationToken iptal)
     {
-        await using var komut = new NpgsqlCommand(
-            "select entegrator, bicim, govde::text from public.fn_ebelge_gonderim_govdesi(@p0)",
-            baglanti);
-        komut.Parameters.AddWithValue("p0", belgeId);
+        await using var komut = baglanti.Komut(
+            "select entegrator, bicim, govde::text from public.fn_ebelge_gonderim_govdesi(@p0)", null,
+            belgeId);
         await using var o = await komut.ExecuteReaderAsync(iptal);
         if (!await o.ReadAsync(iptal))
             throw GentegreHatasi.IsKurali("Gönderim gövdesi üretilemedi.");
         return (o.GetString(0), o.GetInt16(1), o.GetString(2));
-    }
-
-    // --------------------------------------------------------------- login ----
-    /// <summary>
-    /// izibiz jeton alma. Delphi uc varyant deniyor; calisani JSON govdeli
-    /// `/v1/auth/token` (dogrulandi) - once o denenir, olmazsa form-encoded.
-    /// </summary>
-    private static async Task<string> JetonAlAsync(HttpClient istemci, Hesap hesap,
-                                                   CancellationToken iptal)
-    {
-        var taban = hesap.Url.TrimEnd('/');
-
-        var jeton = await DeneAsync(new StringContent(
-            JsonSerializer.Serialize(new { username = hesap.Kullanici, password = hesap.Sifre }),
-            Encoding.UTF8, "application/json"));
-        if (jeton is not null) return jeton;
-
-        jeton = await DeneAsync(new FormUrlEncodedContent(new Dictionary<string, string>
-        {
-            ["grant_type"] = "password",
-            ["username"] = hesap.Kullanici,
-            ["password"] = hesap.Sifre,
-        }));
-        if (jeton is not null) return jeton;
-
-        throw GentegreHatasi.IsKurali(
-            "Entegratöre giriş yapılamadı; kullanıcı adı / şifre ve ortam (test/üretim) doğru mu?");
-
-        async Task<string?> DeneAsync(HttpContent govde)
-        {
-            using var istek = new HttpRequestMessage(HttpMethod.Post, taban + "/v1/auth/token")
-            { Content = govde };
-            using var yanit = await istemci.SendAsync(istek, iptal);
-            if (!yanit.IsSuccessStatusCode) return null;
-            var metin = await yanit.Content.ReadAsStringAsync(iptal);
-            return JetonAyikla(metin);
-        }
-    }
-
-    /// <summary>Jeton anahtari entegratore gore degisir; bilinen adlar denenir.</summary>
-    private static string? JetonAyikla(string yanit)
-    {
-        try
-        {
-            using var belge = JsonDocument.Parse(yanit);
-            var kok = belge.RootElement;
-            if (Bul(kok) is { } t) return t;
-            // izibiz jetonu `data` altinda dondurur.
-            if (kok.TryGetProperty("data", out var veri) && Bul(veri) is { } t2) return t2;
-            return null;
-        }
-        catch (JsonException) { return null; }
-
-        static string? Bul(JsonElement e)
-        {
-            foreach (var ad in new[] { "accessToken", "access_token", "token", "ACCESS_TOKEN" })
-                if (e.ValueKind == JsonValueKind.Object && e.TryGetProperty(ad, out var d)
-                    && d.ValueKind == JsonValueKind.String)
-                    return d.GetString();
-            return null;
-        }
     }
 
     private static (string Uuid, string Mesaj) YanitCoz(string yanit)
@@ -352,15 +263,13 @@ public sealed class EBelgeGonderimi(VeriKaynagi veri, IHttpClientFactory istemci
 
         if (basarili)
         {
-            await using var komut = new NpgsqlCommand("""
+            await using var komut = baglanti.Komut("""
                 update public.belge
                    set efatura_durum = @p1, degistiren = @p2,
                        degistirme_tarihi = now()::timestamp
                  where id = @p0
-                """, baglanti, islem);
-            komut.Parameters.AddWithValue("p0", belgeId);
-            komut.Parameters.AddWithValue("p1", durum);
-            komut.Parameters.AddWithValue("p2", kullaniciId);
+                """, islem,
+                belgeId, durum, kullaniciId);
             await komut.ExecuteNonQueryAsync(iptal);
         }
 
