@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { c, cm } from '../dil/ceviri';
-import { mesaj, metinSor, onay } from '../bilesenler/mesaj';
+import { guvenli, mesaj, metinSor, onay } from '../bilesenler/mesaj';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
@@ -131,7 +131,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
                          ? 'Gönderilen belge geri alınamaz. Onaylıyor musunuz?'
                          : 'Her belgeye seri ve e-Belge numarası verilir. Onaylıyor musunuz?'),
                         islem === 'gonder')) return;
-        try {
+        await guvenli(async () => {
           const y = await api.belgeEBelgeToplu(secililer.map(x => Number(x.id)), islem);
           const olan = y.sonuclar.filter(r => r.basarili).length;
           const olmayan = y.sonuclar.filter(r => !r.basarili);
@@ -142,7 +142,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
                    + (olmayan.length > 10 ? `\n… ve ${olmayan.length - 10} tane daha` : '')
                  : ''));
           setYenile(t => t + 1);
-        } catch (h) { mesaj(hataMetni(h)) }
+        });
         return;
       }
 
@@ -228,11 +228,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           const belgeNo = String(satir.belgeNo ?? satir.id);
           if (!await onay(`"${belgeNo}" için e-Belge hazırlansın mı? `
                      + 'Belgeye seri ve e-Belge numarası verilir.')) return;
-          try {
+          await guvenli(async () => {
             const y = await api.belgeEBelgeHazirla(Number(satir.id));
             mesaj((y.uyarilar ?? []).join(' • ') || 'e-Belge hazırlandı.');
             setYenile(t => t + 1);
-          } catch (h) { mesaj(hataMetni(h)) }
+          });
           return;
         }
         // e-BELGE GONDER: GERI ALINAMAZ, bu yuzden onay metni acik yazilir -
@@ -240,7 +240,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         case 'ebelge.gonder': {
           if (!satir) return;
           const no = String(satir.belgeNo ?? satir.id);
-          try {
+          await guvenli(async () => {
             // e-ARSIVDE ALICI E-POSTASI SORULUR (184, Delphi ile ayni): alias
             //   alani e-Faturada GIB posta kutusu, e-Arsivde e-posta adresidir.
             //   Bos gonderilirse entegrator belgeyi KAGIT olarak isaretliyor.
@@ -266,29 +266,29 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
             const y = await api.belgeEBelgeGonder(Number(satir.id), alias);
             mesaj((y.uyarilar ?? []).join(' • ') || 'Gönderildi.');
             setYenile(t => t + 1);
-          } catch (h) { mesaj(hataMetni(h)) }
+          });
           return;
         }
         // e-Belge menusunun oteki adimlari (164): seri degistir ve sifirla.
         case 'ebelge.seri': {
           if (!satir) return;
           const seri = prompt('Yeni seri (boş bırakırsanız sıradaki seriye geçilir):', '') ?? undefined;
-          try {
+          await guvenli(async () => {
             const y = await api.belgeEBelgeSeri(Number(satir.id), seri?.trim() || undefined);
             mesaj((y.uyarilar ?? []).join(' • ') || 'Seri değişti.');
             setYenile(t => t + 1);
-          } catch (h) { mesaj(hataMetni(h)) }
+          });
           return;
         }
         case 'ebelge.sifirla': {
           if (!satir) return;
           if (!await onay('e-Belge geri alınacak; belge yeniden hazırlanabilir hale gelir. '
                      + 'Numara boşa düşer. Onaylıyor musunuz?')) return;
-          try {
+          await guvenli(async () => {
             const y = await api.belgeEBelgeSifirla(Number(satir.id));
             mesaj((y.uyarilar ?? []).join(' • ') || 'e-Belge geri alındı.');
             setYenile(t => t + 1);
-          } catch (h) { mesaj(hataMetni(h)) }
+          });
           return;
         }
         // e-BELGE IPTALI (188): e-Arsivde dogrudan iptal, e-Faturada GIB'e
@@ -305,11 +305,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           const gerekce = await metinSor('İptal gerekçesi (zorunlu):', '');
           if (gerekce === null) return;
           if (!gerekce.trim()) { mesaj('İptal gerekçesi zorunlu.'); return }
-          try {
+          await guvenli(async () => {
             const y = await api.belgeEBelgeIptal(Number(satir.id), gerekce);
             mesaj(y.mesaj);
             setYenile(t => t + 1);
-          } catch (h) { mesaj(hataMetni(h)) }
+          });
           return;
         }
         // MUHASEBE FISI (190): belgenin fis satirlarini acar. Fis kartı ayri
@@ -344,11 +344,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
 Bu işlem geri alınamaz. `
                         + 'Onaylıyor musunuz?', true)) return;
-          try {
+          await guvenli(async () => {
             const y = await api.belgeSil(Number(satir.id));
             mesaj(y.mesaj || 'Belge silindi.');
             setYenile(t => t + 1);
-          } catch (h) { mesaj(hataMetni(h)) }
+          });
           return;
         }
         // CARI MUKELLEFIYET SORGUSU (183): entegratore sorar, bayragi isler.
@@ -356,7 +356,7 @@ Bu işlem geri alınamaz. `
         //   entegratorun yazimiyla ezilmemeli.
         case 'cari.ebelge-mukellef': {
           if (!satir) return;
-          try {
+          await guvenli(async () => {
             const y = await api.cariEBelgeMukellef(Number(satir.id));
             const satirlar = [
               String(y.kayitli.unvan || satir.unvan || ''),
@@ -374,7 +374,7 @@ Bu işlem geri alınamaz. `
             }
             mesaj(satirlar.join('\n'));
             setYenile(t => t + 1);
-          } catch (h) { mesaj(hataMetni(h)) }
+          });
           return;
         }
         case 'belge.donustur':
@@ -395,17 +395,13 @@ Bu işlem geri alınamaz. `
 
 ` +
                        "Kayıt Müşteri Listesi'ne geçer; fırsat, görev ve adres geçmişi aynı kalır.")) return;
-          void (async () => {
-            try {
-              const k = await api.kartOku('cari', Number(satir.id));
-              await api.kartGuncelle('cari', Number(satir.id),
-                { surum: k.kart.surum as string | undefined,
-                  kart: { musteri: true, aday: false } });
-              setYenile(y => y + 1);
-            } catch (h) {
-              mesaj(hataMetni(h));
-            }
-          })();
+          void guvenli(async () => {
+            const k = await api.kartOku('cari', Number(satir.id));
+            await api.kartGuncelle('cari', Number(satir.id),
+              { surum: k.kart.surum as string | undefined,
+                kart: { musteri: true, aday: false } });
+            setYenile(y => y + 1);
+          });
           return;
         }
         // STOK KARTI KOPYALA (126): kopya olusur ve HEMEN acilir - kullanici

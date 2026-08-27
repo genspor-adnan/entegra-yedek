@@ -43,6 +43,52 @@ export function hataMetni(h: unknown, kodlu = false): string {
   return h instanceof Error ? h.message : String(h);
 }
 
+/** `hataAyristir` ciktisi - kartlarin durum kutularina birebir oturur. */
+export interface HataCozumu {
+  /** Kutuda gosterilecek metin. */
+  mesaj: string;
+  /** alan -> mesaj; alan bazli uyarilar icin. Yoksa bos nesne. */
+  alanlar: Record<string, string>;
+  /** Ilk hatali alan - kart o sekmeye atlayabilsin diye. */
+  ilkAlan: string | null;
+  /** 409 CAKISMA: baskasinin degistirdigi alanlar + guncel degerler. */
+  cakisma: { alanlar: string[]; guncel: Record<string, unknown> } | null;
+}
+
+/**
+ * KAYIT HATASINI EKRAN DURUMUNA CEVIRIR - tek yer.
+ *
+ * Uc kart (GenForm, BelgeKarti, KasaIslemKarti) bunu ayri ayri yaziyordu ve
+ * kopyalar ayrismisti: `cakisma` (409) ve `engel` (silme engeli sayaci)
+ * dallari YALNIZ GenForm'da vardi, oteki iki kart ayni sunucu yanitina daha
+ * fakir tepki veriyordu. Tek cozumleyici uc kartin davranisini esitler.
+ */
+export function hataAyristir(h: unknown): HataCozumu {
+  if (!(h instanceof ApiHatasi))
+    return { mesaj: hataMetni(h), alanlar: {}, ilkAlan: null, cakisma: null };
+
+  if (h.dogrulamaMi && h.hata.alanlar?.length)
+    return {
+      mesaj: h.message,
+      alanlar: Object.fromEntries(h.hata.alanlar.map(a => [a.alan, a.mesaj])),
+      ilkAlan: h.hata.alanlar[0].alan,
+      cakisma: null,
+    };
+
+  if (h.cakismaMi)
+    return {
+      mesaj: h.message,
+      alanlar: {},
+      ilkAlan: null,
+      cakisma: { alanlar: h.hata.cakisanAlanlar ?? [], guncel: h.hata.guncelDeger ?? {} },
+    };
+
+  // Silme/degistirme engeli: "hangi tabloda kac kayit" bilgisi mesaja eklenir,
+  //   kullanici neyi temizleyecegini bilsin.
+  const engel = h.hata.engel ? ` (${h.hata.engel.tablo}: ${h.hata.engel.adet})` : '';
+  return { mesaj: `${h.hata.kod}: ${h.message}${engel}`, alanlar: {}, ilkAlan: null, cakisma: null };
+}
+
 // --------------------------------------------------------------- kimlik ----
 export interface SubeOzeti { id: number; ad: string; varsayilan: boolean; yazma: boolean }
 
@@ -161,11 +207,18 @@ export interface PaketIcerikSatiri {
   izleme: number;
 }
 
+/**
+ * Bir alanin/kolonun VERI TIPI. Liste kolonu (KolonMeta) ve kart alani
+ * (KartAlanMeta) ayni kumeyi kullanir - iki yerde ayri yazilinca sunucuya yeni
+ * bir tip eklendiginde birinde unutuluyordu.
+ */
+export type AlanTipi = 'metin' | 'sayi' | 'para' | 'tarih' | 'zaman' | 'kod' | 'mantik';
+
 /** §2.4 kolon metasi. Yetkisiz kolon bu listede HIC donmez. */
 export interface KolonMeta {
   ad: string;
   baslik: string;
-  tip: 'metin' | 'sayi' | 'para' | 'tarih' | 'zaman' | 'kod' | 'mantik';
+  tip: AlanTipi;
   hizalama: 'sol' | 'orta' | 'sag';
   bicim?: string | null;
   varsayilan: boolean;
@@ -199,14 +252,8 @@ export interface KisiKaydi {
   bagli: boolean;
 }
 
-export interface KisiIstegi {
-  unvan: string;
-  telefon?: string | null;
-  eposta?: string | null;
-  aktif?: boolean;
-  gorev?: string | null;
-  departman?: number | null;
-}
+/** Kisi YAZMA istegi = kaydin sunucunun urettigi alanlari cikarilmis hali. */
+export type KisiIstegi = Omit<KisiKaydi, 'id' | 'bagli' | 'aktif'> & { aktif?: boolean };
 
 export interface YetkiSatiri {
   yetkiId: number;
@@ -219,13 +266,8 @@ export interface YetkiSatiri {
   sil: boolean;
 }
 
-export interface YetkiSatiriIstegi {
-  yetkiId: number;
-  gor: boolean;
-  ekle: boolean;
-  degistir: boolean;
-  sil: boolean;
-}
+/** Yetki YAZMA istegi = satirin salt-gosterim alanlari (kod/ad/grup) cikarilmis hali. */
+export type YetkiSatiriIstegi = Omit<YetkiSatiri, 'kod' | 'ad' | 'grup'>;
 
 export interface DokumanSatiri {
   id: number;
@@ -255,7 +297,7 @@ export interface KartYazmaIstegi {
 export interface KartAlanMeta {
   ad: string;
   baslik: string;
-  tip: 'metin' | 'sayi' | 'para' | 'tarih' | 'zaman' | 'kod' | 'mantik';
+  tip: AlanTipi;
   grup?: string | null;
   altGrup?: string | null;
   eslesAlan?: string | null;

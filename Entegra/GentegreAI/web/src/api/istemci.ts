@@ -68,9 +68,18 @@ async function yenile(): Promise<boolean> {
   return yenilemeIslemi;
 }
 
-async function istek<T>(yol: string, secenek: RequestInit = {}, tekrar = true): Promise<T> {
+/**
+ * TEK CEKIRDEK: basliklar + 401 yenileme + hata govdesi cozumleme.
+ *
+ * Bu uc adim uc ayri fonksiyonda (istek / dosyaYukle / dosyaIndir) kopyalanmisti
+ * ve kopyalar ayrismisti: indirme 401'de YENILEMIYORDU, yani token'in suresi
+ * dolduktan sonra ilk dosya indirme/onizleme sessizce basarisiz oluyordu.
+ * Cekirdek tekleserek o bosluk da kapandi.
+ */
+async function ham(yol: string, secenek: RequestInit, jsonGovde: boolean,
+                   tekrar = true): Promise<Response> {
   const basliklar: Record<string, string> = {
-    'Content-Type': 'application/json',
+    ...(jsonGovde ? { 'Content-Type': 'application/json' } : {}),
     ...(secenek.headers as Record<string, string> ?? {}),
   };
   if (oturum.access) basliklar.Authorization = `Bearer ${oturum.access}`;
@@ -80,7 +89,7 @@ async function istek<T>(yol: string, secenek: RequestInit = {}, tekrar = true): 
   const yanit = await fetch(`${TABAN}${yol}`, { ...secenek, headers: basliklar });
 
   if (yanit.status === 401 && tekrar && await yenile())
-    return istek<T>(yol, secenek, false);
+    return ham(yol, secenek, jsonGovde, false);
 
   if (!yanit.ok) {
     let govde: HataGovdesi;
@@ -91,7 +100,11 @@ async function istek<T>(yol: string, secenek: RequestInit = {}, tekrar = true): 
     }
     throw new ApiHatasi(yanit.status, govde);
   }
+  return yanit;
+}
 
+async function istek<T>(yol: string, secenek: RequestInit = {}): Promise<T> {
+  const yanit = await ham(yol, secenek, true);
   if (yanit.status === 204) return undefined as T;
   return yanit.json() as Promise<T>;
 }
@@ -99,36 +112,16 @@ async function istek<T>(yol: string, secenek: RequestInit = {}, tekrar = true): 
 const gonder = <T,>(yol: string, govde: unknown, yontem = 'POST') =>
   istek<T>(yol, { method: yontem, body: JSON.stringify(govde) });
 
-/** Dosya yukleme - istek()'in sabit "Content-Type: application/json" basligini KOYMAZ,
+/** Dosya yukleme - "Content-Type: application/json" KOYULMAZ,
  *  tarayici FormData icin dogru multipart boundary'yi kendisi ekler. */
-async function dosyaYukle<T>(yol: string, form: FormData, tekrar = true): Promise<T> {
-  const basliklar: Record<string, string> = {};
-  if (oturum.access) basliklar.Authorization = `Bearer ${oturum.access}`;
-  if (oturum.subeId) basliklar['X-Sube-Id'] = String(oturum.subeId);
-
-  const yanit = await fetch(`${TABAN}${yol}`, { method: 'POST', headers: basliklar, body: form });
-
-  if (yanit.status === 401 && tekrar && await yenile())
-    return dosyaYukle<T>(yol, form, false);
-
-  if (!yanit.ok) {
-    let govde: HataGovdesi;
-    try {
-      govde = ((await yanit.json()) as { hata: HataGovdesi }).hata;
-    } catch {
-      govde = { kod: 'SUNUCU', mesaj: `Sunucuya ulasilamadi (${yanit.status}).`, izlemeNo: '' };
-    }
-    throw new ApiHatasi(yanit.status, govde);
-  }
+async function dosyaYukle<T>(yol: string, form: FormData): Promise<T> {
+  const yanit = await ham(yol, { method: 'POST', body: form }, false);
   return yanit.json() as Promise<T>;
 }
 
 /** İçerik indirme - blob URL doner, <img>/indirme icin (Authorization header ile, token URL'e sizmaz). */
 async function dosyaIndir(yol: string): Promise<string> {
-  const basliklar: Record<string, string> = {};
-  if (oturum.access) basliklar.Authorization = `Bearer ${oturum.access}`;
-  const yanit = await fetch(`${TABAN}${yol}`, { headers: basliklar });
-  if (!yanit.ok) throw new ApiHatasi(yanit.status, { kod: 'SUNUCU', mesaj: 'Dosya alınamadı.', izlemeNo: '' });
+  const yanit = await ham(yol, {}, false);
   return URL.createObjectURL(await yanit.blob());
 }
 

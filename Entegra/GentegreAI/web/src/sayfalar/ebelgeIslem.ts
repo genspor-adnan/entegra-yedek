@@ -17,6 +17,7 @@ const NL = '\n';
 // Indirme `bilesenler/indir.ts`e tasindi (bes kopyasi vardi); buradan
 //   yeniden disa vuruluyor ki e-Belge cagrilari degismesin.
 import { dosyaIndir } from '../bilesenler/indir';
+import { xsltUygula } from './xsltGoruntu';
 export { dosyaIndir };
 
 /**
@@ -29,19 +30,8 @@ async function goruntuUret(belgeId: number): Promise<string> {
   try {
     const y = await api.belgeEBelgeUbl(belgeId);
     if (y.xslt && y.ubl) {
-      const ayristirici = new DOMParser();
-      const ubl = ayristirici.parseFromString(y.ubl, 'application/xml');
-      const xslt = ayristirici.parseFromString(y.xslt, 'application/xml');
-      // Ayristirma hatasi "parsererror" dugumu birakir - sessizce yanlis
-      //   goruntu cizmek yerine sade onizlemeye duselim.
-      if (!ubl.querySelector('parsererror') && !xslt.querySelector('parsererror')) {
-        const islemci = new XSLTProcessor();
-        islemci.importStylesheet(xslt);
-        const sonuc = islemci.transformToDocument(ubl);
-        if (sonuc?.documentElement) {
-          return new XMLSerializer().serializeToString(sonuc);
-        }
-      }
+      const goruntu = xsltUygula(y.ubl, y.xslt);
+      if (goruntu) return goruntu;
     }
   } catch {
     /* XSLT yoksa/bozuksa sade onizlemeye dusulur */

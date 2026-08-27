@@ -9,6 +9,7 @@
  * Kullanim tek satir kalsin diye modul seviyesinde: bilesenden context
  * gecirmek gerekmiyor, `mesaj('...')` / `await onay('...')` yeter.
  */
+import { hataMetni } from '../api/sozlesme';
 
 export interface MesajIstegi {
   metin: string;
@@ -60,4 +61,25 @@ export function onay(metin: string, tehlike = false): Promise<boolean> {
   return new Promise<boolean>(cozum => {
     dinleyici!({ metin, onayMi: true, tehlike, cozum });
   });
+}
+
+/**
+ * "Calistir, patlarsa mesaj goster" sarmalayicisi.
+ *
+ * `try { ... } catch (h) { mesaj(hataMetni(h)) }` kalibi 18 yerde birebir
+ * tekrarliyordu (liste aksiyonlari + gelen e-Belge adimlari). Hepsi ayni seyi
+ * yapiyor: aksiyonu calistir, sunucu hatasini kullaniciya goster, ekrani
+ * cokertme.
+ *
+ * Isi bittiyse (hata cikmadiysa) true doner - cagiran "basardiysa listeyi
+ * tazele" diyebilsin.
+ */
+export async function guvenli(is: () => Promise<unknown> | unknown): Promise<boolean> {
+  try {
+    await is();
+    return true;
+  } catch (h) {
+    mesaj(hataMetni(h));
+    return false;
+  }
 }

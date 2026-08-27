@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import {
-  ApiHatasi, KASA_DURUM,
+  hataAyristir, KASA_DURUM,
   type KasaIslemTuru, type KasaIslemYaniti, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { GenLookup } from '../bilesenler/GenLookup';
 import { TarafSecici } from '../bilesenler/TarafArama';
@@ -322,11 +322,9 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   }
 
   function hataYaz(h: unknown) {
-    if (h instanceof ApiHatasi) {
-      if (h.hata.alanlar)
-        setAlanHatalari(Object.fromEntries(h.hata.alanlar.map(a => [a.alan, a.mesaj])));
-      setHata(h.message);
-    } else setHata(String(h));
+    const c = hataAyristir(h);
+    setAlanHatalari(c.alanlar);
+    setHata(c.mesaj);
   }
 
   if (!ekleyebilir && kayitId === null)

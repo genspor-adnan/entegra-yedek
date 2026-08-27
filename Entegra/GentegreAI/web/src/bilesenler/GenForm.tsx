@@ -3,7 +3,7 @@ import { c } from '../dil/ceviri';
 import { api, oturum } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import {
-  ApiHatasi,
+  ApiHatasi, hataAyristir,
   type KartMetaYaniti, type KartYetkisi, hataMetni } from '../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, bosDetay, detayFarki } from './GenDetayTablo';
 import { Modal } from './Modal';
@@ -411,22 +411,16 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       onKapat?.();
       return;
     } catch (h) {
-      if (h instanceof ApiHatasi) {
-        if (h.dogrulamaMi && h.hata.alanlar) {
-          setAlanHatalari(Object.fromEntries(h.hata.alanlar.map(a => [a.alan, a.mesaj])));
-          setHata(h.message);
-          const hedefSekme = h.hata.alanlar[0] ? sekmeBul(h.hata.alanlar[0].alan) : null;
-          if (hedefSekme) setAktifSekme(hedefSekme);
-        } else if (h.cakismaMi) {
-          setCakisma({
-            alanlar: h.hata.cakisanAlanlar ?? [],
-            guncel: h.hata.guncelDeger ?? {},
-          });
-        } else {
-          setHata(`${h.hata.kod}: ${h.message}${h.hata.engel ? ` (${h.hata.engel.tablo}: ${h.hata.engel.adet})` : ''}`);
-        }
+      const c = hataAyristir(h);
+      if (c.cakisma) {
+        setCakisma(c.cakisma);
       } else {
-        setHata(String(h));
+        setAlanHatalari(c.alanlar);
+        setHata(c.mesaj);
+        // Hatali alan baska sekmedeyse oraya atla - kullanici bos ekranda
+        //   "nerede hata var" diye aramasin.
+        const hedefSekme = c.ilkAlan ? sekmeBul(c.ilkAlan) : null;
+        if (hedefSekme) setAktifSekme(hedefSekme);
       }
     } finally {
       setKaydediyor(false);

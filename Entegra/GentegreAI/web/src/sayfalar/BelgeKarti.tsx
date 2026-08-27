@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
-import { ApiHatasi, type BelgeYaniti, type KasaIslemTuru, hataMetni } from '../api/sozlesme';
+import { type BelgeYaniti, type KasaIslemTuru, hataMetni, hataAyristir } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { StokAramaPenceresi } from '../bilesenler/StokAramaPenceresi';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
@@ -581,11 +581,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       if (kapatilsin) kapat();
       return Number(yanit.belge.id ?? 0);
     } catch (h) {
-      if (h instanceof ApiHatasi) {
-        if (h.dogrulamaMi && h.hata.alanlar)
-          setAlanHatalari(Object.fromEntries(h.hata.alanlar.map(a => [a.alan, a.mesaj])));
-        setHata(`${h.hata.kod}: ${h.message}`);
-      } else setHata(String(h));
+      const c = hataAyristir(h);
+      setAlanHatalari(c.alanlar);
+      setHata(c.mesaj);
     } finally {
       setKaydediyor(false);
     }

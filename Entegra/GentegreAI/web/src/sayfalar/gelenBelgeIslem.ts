@@ -1,7 +1,8 @@
 import { api } from '../api/istemci';
-import { mesaj, metinSor, onay } from '../bilesenler/mesaj';
-import { hataMetni, type EBelgeMesaji, type ListeSatiri } from '../api/sozlesme';
+import { guvenli, mesaj, metinSor, onay } from '../bilesenler/mesaj';
+import { type EBelgeMesaji, type ListeSatiri } from '../api/sozlesme';
 import { belgeGoruntusuAc, dosyaIndir, ebelgeDosyaAdi, ebelgeTurAdi } from './ebelgeIslem';
+import { xmlAyristir, xsltUygula, hamXmlGorunumu } from './xsltGoruntu';
 
 /**
  * GELEN e-BELGE aksiyonlari (187): kutuyu yenile · goruntule · kabul · red ·
@@ -18,35 +19,27 @@ import { belgeGoruntusuAc, dosyaIndir, ebelgeDosyaAdi, ebelgeTurAdi } from './eb
  * Yoksa ham XML'i okunur bicimde gosteririz; bos ekran birakmayiz.
  */
 function goruntuUret(ubl: string): string {
-  const ayristirici = new DOMParser();
-  const belge = ayristirici.parseFromString(ubl, 'application/xml');
-  if (belge.querySelector('parsererror')) return `<pre>${kacir(ubl)}</pre>`;
+  const belge = xmlAyristir(ubl);
+  if (!belge) return hamXmlGorunumu(ubl);
 
-  // Gomulu XSLT: base64 govdenin ilk baytlari "<?xml" ya da "<xsl" olmali.
+  // Gomulu XSLT: base64 govde bir stylesheet olmali (fatura ekleri arasinda
+  //   PDF/gorsel de gelebilir - hepsini denemek yerine icerige bakariz).
   const gomulu = Array.from(belge.getElementsByTagName('*'))
     .filter(d => d.localName === 'EmbeddedDocumentBinaryObject');
   for (const d of gomulu) {
+    let cozulmus: string;
     try {
-      const cozulmus = new TextDecoder('utf-8').decode(
+      cozulmus = new TextDecoder('utf-8').decode(
         Uint8Array.from(atob((d.textContent ?? '').trim()), c => c.charCodeAt(0)));
-      if (!cozulmus.includes('xsl:stylesheet') && !cozulmus.includes('xsl:transform')) continue;
-
-      const xslt = ayristirici.parseFromString(cozulmus, 'application/xml');
-      if (xslt.querySelector('parsererror')) continue;
-
-      const islemci = new XSLTProcessor();
-      islemci.importStylesheet(xslt);
-      const sonuc = islemci.transformToDocument(belge);
-      if (sonuc?.documentElement) return new XMLSerializer().serializeToString(sonuc);
     } catch {
-      /* bozuk base64 / desteklenmeyen XSLT - sonraki adaya gec */
+      continue;                       // bozuk base64 - sonraki adaya gec
     }
-  }
-  return `<pre style="font:12px/1.5 monospace;white-space:pre-wrap">${kacir(ubl)}</pre>`;
-}
+    if (!cozulmus.includes('xsl:stylesheet') && !cozulmus.includes('xsl:transform')) continue;
 
-function kacir(m: string) {
-  return m.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const goruntu = xsltUygula(belge, cozulmus);
+    if (goruntu) return goruntu;
+  }
+  return hamXmlGorunumu(ubl);
 }
 
 /**
@@ -78,58 +71,58 @@ export async function gelenBelgeAksiyonu(
     //   yuzden giden taraftaki ebelgeCiktisi'ne DUSMEZ, buraya gelir.
     case 'ebelge.onizle':
       if (!id) return true;
-      try { await goster(false) } catch (h) { mesaj(hataMetni(h)) }
+      await guvenli(() => goster(false));
       return true;
 
     case 'ebelge.pdf':
       if (!id) return true;
-      try { await goster(true) } catch (h) { mesaj(hataMetni(h)) }
+      await guvenli(() => goster(true));
       return true;
 
     case 'ebelge.html':
       if (!id) return true;
-      try {
+      await guvenli(async () => {
         const y = await api.gelenBelgeUbl(id);
         dosyaIndir(goruntuUret(y.ubl), `${dosyaAdi}.html`, 'text/html;charset=utf-8');
-      } catch (h) { mesaj(hataMetni(h)) }
+      });
       return true;
 
     case 'ebelge.xml':
       if (!id) return true;
-      try {
+      await guvenli(async () => {
         const y = await api.gelenBelgeUbl(id);
         dosyaIndir(y.ubl, `${dosyaAdi}.xml`, 'application/xml;charset=utf-8');
-      } catch (h) { mesaj(hataMetni(h)) }
+      });
       return true;
 
     case 'ebelge.mesajlar':
       if (!id) return true;
-      try {
+      await guvenli(async () => {
         const y = await api.gelenBelgeMesajlar(id);
         mesajGoster?.({ belgeNo: no, satirlar: y.mesajlar });
-      } catch (h) { mesaj(hataMetni(h)) }
+      });
       return true;
 
     case 'gelen.yenile':
-      try {
+      await guvenli(async () => {
         const y = await api.gelenKutuYenile();
         mesaj(y.mesaj);
         yenile();
-      } catch (h) { mesaj(hataMetni(h)) }
+      });
       return true;
 
     case 'gelen.goruntule': {
       if (!id) return true;
-      try { await goster(false) } catch (h) { mesaj(hataMetni(h)) }
+      await guvenli(() => goster(false));
       return true;
     }
 
     case 'gelen.xml': {
       if (!id) return true;
-      try {
+      await guvenli(async () => {
         const y = await api.gelenBelgeUbl(id);
         dosyaIndir(y.ubl, `${no}.xml`, 'application/xml;charset=utf-8');
-      } catch (h) { mesaj(hataMetni(h)) }
+      });
       return true;
     }
 
@@ -137,11 +130,11 @@ export async function gelenBelgeAksiyonu(
     //   ve stok girisi ancak bundan sonra dogar.
     case 'gelen.aktar': {
       if (!id) return true;
-      try {
+      await guvenli(async () => {
         const y = await api.gelenBelgeAktar(id);
         mesaj(y.mesaj);
         yenile();
-      } catch (h) { mesaj(hataMetni(h)) }
+      });
       return true;
     }
 
@@ -160,11 +153,11 @@ export async function gelenBelgeAksiyonu(
       if (aciklama === null) return true;
       if (!kabul && !aciklama.trim()) { mesaj('Red gerekçesi zorunlu.'); return true }
 
-      try {
+      await guvenli(async () => {
         const y = await api.gelenBelgeYanit(id, kabul, aciklama);
         mesaj(y.mesaj);
         yenile();
-      } catch (h) { mesaj(hataMetni(h)) }
+      });
       return true;
     }
   }
