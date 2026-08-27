@@ -1,7 +1,7 @@
 import { api } from '../api/istemci';
 import { mesaj, metinSor, onay } from '../bilesenler/mesaj';
 import { hataMetni, type EBelgeMesaji, type ListeSatiri } from '../api/sozlesme';
-import { dosyaIndir, ebelgeDosyaAdi, ebelgeTurAdi } from './ebelgeIslem';
+import { belgeGoruntusuAc, dosyaIndir, ebelgeDosyaAdi, ebelgeTurAdi } from './ebelgeIslem';
 
 /**
  * GELEN e-BELGE aksiyonlari (187): kutuyu yenile · goruntule · kabul · red ·
@@ -68,11 +68,8 @@ export async function gelenBelgeAksiyonu(
       (PDF, tarayicinin "PDF olarak kaydet" secenegiyle alinir). */
   const goster = async (yazdir: boolean) => {
     const y = await api.gelenBelgeUbl(id);
-    const pencere = window.open('', '_blank');
-    if (!pencere) { mesaj('Tarayıcı yeni sekmeyi engelledi; açılır pencere iznini verin.'); return }
-    pencere.document.write(goruntuUret(y.ubl));
-    pencere.document.close();
-    if (yazdir) pencere.setTimeout(() => pencere.print(), 400);
+    // Baslik = dosya adi: yazdirma diyalogundaki PDF adi buradan gelir.
+    await belgeGoruntusuAc(goruntuUret(y.ubl), dosyaAdi, yazdir);
     yenile();                                     // "Okundu" isaretlendi
   };
 
@@ -123,14 +120,7 @@ export async function gelenBelgeAksiyonu(
 
     case 'gelen.goruntule': {
       if (!id) return true;
-      try {
-        const y = await api.gelenBelgeUbl(id);
-        const pencere = window.open('', '_blank');
-        if (!pencere) { mesaj('Tarayıcı yeni sekmeyi engelledi; açılır pencere iznini verin.'); return true }
-        pencere.document.write(goruntuUret(y.ubl));
-        pencere.document.close();
-        yenile();                                   // "Okundu" isaretlendi
-      } catch (h) { mesaj(hataMetni(h)) }
+      try { await goster(false) } catch (h) { mesaj(hataMetni(h)) }
       return true;
     }
 

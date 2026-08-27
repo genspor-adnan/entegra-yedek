@@ -62,9 +62,12 @@ async function goruntuUret(belgeId: number): Promise<string> {
  * Goruntuyu yeni sekmede acar. `yazdir` ise yazdirma penceresini de tetikler -
  * "PDF Kaydet" ayri bir PDF motoru yerine tarayicinin "PDF olarak kaydet"
  * secenegini kullanir.
+ *
+ * BASLIK = DOSYA ADI: tarayicinin yazdirma diyalogu kaydedilecek PDF'in adini
+ * sayfanin `document.title`indan alir. XSLT ciktisinin kendi basligi
+ * ("e-Fatura") geliyordu; kullanicinin istedigi ad ancak boyle gecer.
  */
-async function onizle(belgeId: number, yazdir: boolean) {
-  const html = await goruntuUret(belgeId);
+export async function belgeGoruntusuAc(html: string, baslik: string, yazdir: boolean) {
   const pencere = window.open('', '_blank');
   if (!pencere) {
     mesaj('Tarayıcı yeni sekmeyi engelledi; açılır pencere iznini verin.');
@@ -72,7 +75,13 @@ async function onizle(belgeId: number, yazdir: boolean) {
   }
   pencere.document.write(html);
   pencere.document.close();
+  // Sablonun kendi <title>'i yazildiktan SONRA ezilir.
+  try { pencere.document.title = baslik } catch { /* farkli koken - onemsiz */ }
   if (yazdir) pencere.setTimeout(() => pencere.print(), 400);
+}
+
+async function onizle(belgeId: number, yazdir: boolean, baslik: string) {
+  await belgeGoruntusuAc(await goruntuUret(belgeId), baslik, yazdir);
 }
 
 
@@ -142,11 +151,11 @@ export async function ebelgeCiktisi(
     switch (kod) {
       case 'ebelge.onizle':
         if (!await hazirlaGerekirse()) return true;
-        await onizle(id, false);
+        await onizle(id, false, dosyaAdi);
         return true;
       case 'ebelge.pdf':
         if (!await hazirlaGerekirse()) return true;
-        await onizle(id, true);
+        await onizle(id, true, dosyaAdi);
         return true;
       case 'ebelge.html': {
         // Ekranda gorulen GORUNTUNUN aynisi insin (XSLT varsa o).
