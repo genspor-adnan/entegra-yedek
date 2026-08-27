@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { c } from '../dil/ceviri';
 import { api, oturum } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import {
@@ -497,7 +498,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
               className={`kat${s.anahtar === aktif?.anahtar ? ' on' : ''}`}
               onClick={() => setAktifSekme(s.anahtar)}
             >
-              {s.baslik}
+              {c(s.baslik)}
               {s.tur === 'detay' && <span className="b">{(detaylar[s.detay.ad] ?? bosDetay()).guncel.length}</span>}
             </div>
           ))}

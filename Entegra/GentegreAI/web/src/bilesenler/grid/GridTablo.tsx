@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import { c } from '../../dil/ceviri';
 import { bicimle } from '../bicim';
 import { durumRozeti, rozetHucre } from '../gridHucre';
 import type { KolonMeta, ListeSatiri, ListeYaniti } from '../../api/sozlesme';
@@ -54,7 +55,7 @@ export function GridTablo(p: GridTabloProps) {
           className={`hiza-${k.hizalama} ${k.siralanabilir ? 'siralanir' : ''}`}
           onClick={() => siralamaDegistir(k)}
         >
-          {k.baslik}{siraIsareti(k.ad)}
+          {c(k.baslik)}{siraIsareti(k.ad)}
         </th>
       ))}
     </tr>
@@ -168,7 +169,7 @@ export function GridTablo(p: GridTabloProps) {
           return (
             <td key={k.ad} className={`hiza-${k.hizalama}`}>
               {t ? bicimle(t[1], k)
-                 : (i === 0 ? (grupKolonu ? 'GENEL TOPLAM' : 'Toplam') : '')}
+                 : (i === 0 ? (grupKolonu ? c('GENEL TOPLAM') : c('Toplam')) : '')}
             </td>
           );
         })}

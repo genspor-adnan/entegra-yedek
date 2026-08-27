@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { c, cm } from '../dil/ceviri';
 import { mesaj, metinSor, onay } from '../bilesenler/mesaj';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
@@ -17,6 +18,13 @@ import { DONUSUM_MENUSU, KASA_ARAC_MENUSU, LISTELER, type ListeTanimi }
 // Tanimlar ayri dosyada (listeTanimlari); disaridan alisilmis yol bozulmasin
 //   diye buradan da disa aktarilir (App.tsx / Kabuk.tsx LISTELER'i buradan alir).
 export { LISTELER };
+
+/** Kirilma yolu ("Satis › Satış Faturaları") parca parca cevrilir: ayrac
+    korunur, her parca menu sozlugunden gecer. */
+function yolCevir(yol: string | undefined): string | undefined {
+  if (!yol) return yol;
+  return yol.split('›').map(p => cm(p.trim())).join(' › ');
+}
 export type { ListeTanimi };
 
 /**
@@ -456,8 +464,8 @@ Bu işlem geri alınamaz. `
       <GenGrid
         key={`${tanim.ekstre.kaynak}-${ekstre.id}`}
         kaynak={tanim.ekstre.kaynak}
-        baslik={`${tanim.ekstre.baslik} — ${ekstre.ad}`}
-        yol={tanim.yol}
+        baslik={`${c(tanim.ekstre.baslik)} — ${ekstre.ad}`}
+        yol={yolCevir(tanim.yol)}
         sabitFiltre={{ alan: tanim.ekstre.alan, op: 'esit', deger: ekstre.id }}
         // DOVIZSIZ ekstrede yerel karsilik kolonlari CIZILMEZ (kullanici):
         //   hepsi TL ise "Borç" ile "Yerel Borç" ayni sayiyi iki kez gosterir.
@@ -503,7 +511,7 @@ Bu işlem geri alınamaz. `
       //   secilince Islem Gunlugu'ne gecince orada da "son" gonderiliyordu).
       key={tanim.rota ?? tanim.kaynak}
       kaynak={tanim.kaynak}
-      baslik={tanim.baslik}
+      baslik={cm(tanim.baslik)}
       yol={tanim.yol}
       toplam={tanim.toplam}
       cipler={tanim.cipler}

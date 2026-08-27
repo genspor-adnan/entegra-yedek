@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { c as cev } from '../dil/ceviri';
 import { mesaj } from './mesaj';
 import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
@@ -451,7 +452,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       const kacir = (m: string) =>
         (/[";\r\n]/.test(m) ? `"${m.replace(/"/g, '""')}"` : m);
       const satirlar = [
-        kolonlar.map(k => kacir(k.baslik)).join(';'),
+        kolonlar.map(k => kacir(cev(k.baslik))).join(';'),
         ...tumu.map(r => kolonlar.map(k => kacir(bicimle(r[k.ad], k))).join(';')),
       ];
       const ad = `${(baslik ?? kaynak).replace(/[\/:*?"<>|]/g, '')}-${new Date().toISOString().slice(0, 10)}.csv`;
@@ -563,7 +564,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
           <span>🔍</span>
           <input
             style={{ border: 0, background: 'transparent', outline: 'none', width: '100%', color: 'inherit' }}
-            placeholder="Bu listede ara…"
+            placeholder={cev('Bu listede ara…')}
             onChange={e => aramaDegisti(e.target.value)}
           />
         </div>
@@ -574,7 +575,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
             className={`cip ${gorunum === g.v ? 'on' : ''}`}
             onClick={() => setGorunum(g.v)}
           >
-            {g.ik} {g.ad}
+            {g.ik} {cev(g.ad)}
           </button>
         ))}
 
@@ -586,9 +587,9 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                 value={aksiyonSecim}
                 onChange={e => setAksiyonSecim(e.target.value)}
               >
-                <option value="">— Aksiyon Seç —</option>
+                <option value="">— {cev('Aksiyon Seç')} —</option>
                 {aksiyonKombo.map(a => (
-                  <option key={a.kod} value={a.kod}>{a.ad}</option>
+                  <option key={a.kod} value={a.kod}>{cev(a.ad)}</option>
                 ))}
               </select>
               <button
@@ -598,7 +599,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                 title={secilenAksiyon && !secilenAksiyon.aktif ? (secilenAksiyon.pasifSebep ?? '') : ''}
                 onClick={() => { if (secilenAksiyon?.aktif) aksiyonCalistir(secilenAksiyon.kod) }}
               >
-                Uygula
+                {cev('Uygula')}
               </button>
             </>
           )}
@@ -629,7 +630,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                 kart acilis/ekleme sikligina gore sunucuda filtrelenir+siralanir. */}
             <button
               className={`ikon-liste ${aramaGorunumu === 'tum' ? 'on' : ''}`}
-              title="Tüm Liste"
+              title={cev('Tüm Liste')}
               onClick={() => { setAramaGorunumu('tum'); setSayfa(1) }}
             >
               ☰
@@ -666,7 +667,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                   setCipIndeks(i); setSayfa(1); onCipSecildi?.(i);
                 }}
               >
-                {c.ad}
+                {cev(c.ad)}
               </button>
             ))}
             {/* e-BELGE KUTUSU: Tüm Liste / Son / Sık dugmeleriyle AYNI seritte,
@@ -699,7 +700,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                 {ebelgeKombo.map(a => (
                   a.kod.includes('.ayrac')
                     ? <option key={a.kod} value="" disabled>──────────</option>
-                    : <option key={a.kod} value={a.kod}>{a.ad}</option>
+                    : <option key={a.kod} value={a.kod}>{cev(a.ad)}</option>
                 ))}
               </select>
             )}
@@ -726,7 +727,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
         {gorunum !== 'liste' ? (
           <div className="kutu" style={{ padding: 48, textAlign: 'center', color: 'var(--soluk)' }}>
             {GORUNUMLER.find(g => g.v === gorunum)?.ik}{' '}
-            {GORUNUMLER.find(g => g.v === gorunum)?.ad} görünümü yakında.
+            {cev(GORUNUMLER.find(g => g.v === gorunum)?.ad)} görünümü yakında.
           </div>
         ) : (
         <div className="kutu dolgusuz">
@@ -757,7 +758,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
           </div>
 
           <div className="altbilgi">
-            <span>Kayit: <b>{toplamKayit.toLocaleString('tr-TR')}</b>{sureMs > 0 && ` · ${sureMs} ms`}</span>
+            <span>{cev('Kayıt')}: <b>{toplamKayit.toLocaleString('tr-TR')}</b>{sureMs > 0 && ` · ${sureMs} ms`}</span>
             {secili.size > 0 ? (
               <span>Secili: <b>{secili.size}</b></span>
             ) : seciliSatir && (
@@ -766,7 +767,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
             <span className="sag">
               <button className="d" disabled={sayfa <= 1} onClick={() => setSayfa(s => s - 1)}>‹ Onceki</button>
               <span>{sayfa} / {sonSayfa}</span>
-              <button className="d" disabled={sayfa >= sonSayfa} onClick={() => setSayfa(s => s + 1)}>Sonraki ›</button>
+              <button className="d" disabled={sayfa >= sonSayfa} onClick={() => setSayfa(s => s + 1)}>{cev('Sonraki')} ›</button>
             </span>
           </div>
         </div>
@@ -799,7 +800,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
               <tbody>
                 {kolonlar.filter(k => k.ad !== icerikAlani).map(k => (
                   <tr key={k.ad}>
-                    <td style={{ fontWeight: 600, width: 140 }}>{k.baslik}</td>
+                    <td style={{ fontWeight: 600, width: 140 }}>{cev(k.baslik)}</td>
                     <td>{bicimle(icerikAcikSatir[k.ad], k)}</td>
                   </tr>
                 ))}

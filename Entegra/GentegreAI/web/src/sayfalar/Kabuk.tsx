@@ -3,6 +3,7 @@ import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Bayrak } from '../bilesenler/Bayrak';
+import { cm, ceviriYukle, ceviriDinle } from '../dil/ceviri';
 import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { LISTELER } from './Liste';
@@ -63,6 +64,21 @@ const GRUP_IKON: Record<string, string> = {
   'Yönetim': '🛠️',
 };
 
+/** Cevrilmis grup adindan ikona: menu adi dile gore degisince Turkce anahtarli
+    GRUP_IKON eslesmiyordu (194). Ceviriyi burada TERSINE cevirmek yerine
+    cevrilmis adlari da tabloya ekliyoruz - liste kisa ve dil eklendikce buyur. */
+const GRUP_IKON_CEV: Record<string, string> = {
+  'Admissions': '🚑', 'Aufnahme': '🚑',
+  'Accounts': '🤝', 'Geschäftspartner': '🤝',
+  'Sales': '🛍️', 'Verkauf': '🛍️',
+  'Purchasing': '🛒', 'Einkauf': '🛒',
+  'Cash': '💵', 'Kasse': '💵',
+  'Bank': '🏦',
+  'Items & Services': '📦', 'Artikel & Leistungen': '📦',
+  'HR': '👥', 'Personal': '👥',
+  'Administration': '🛠️', 'Verwaltung': '🛠️',
+};
+
 /** Arayuz dilleri - db/081: taraf_kullanici.dil (0 TR / 1 EN / 2 DE).
     Bayrak SVG cizilir (<Bayrak dil=…/>): Windows'ta bayrak EMOJISI yok, emoji
     kullanildiginda kullanici "TR"/"GB"/"DE" harflerini goruyordu. */
@@ -83,8 +99,10 @@ export function Kabuk() {
   const yetkiliListeler = LISTELER.filter(l => yetki(l.yetkiKodu) && !l.menuGizli);
   const moduller: MenuOgesi[] =
     yetkiliListeler.map(l => ({
-      yol: `/${l.rota ?? l.kaynak}`, ad: l.menuAd, ic: l.ic,
-      rz: l.ozelSayfa ? 'ayar' : 'liste', grup: l.menuGrup, altGrup: l.menuAltGrup,
+      yol: `/${l.rota ?? l.kaynak}`, ad: cm(l.menuAd), ic: l.ic,
+      rz: l.ozelSayfa ? 'ayar' : 'liste',
+      grup: l.menuGrup ? cm(l.menuGrup) : undefined,
+      altGrup: l.menuAltGrup ? cm(l.menuAltGrup) : undefined,
       sira: l.menuSira,
     }));
 
@@ -114,6 +132,16 @@ export function Kabuk() {
   /** Bayrak dugmesinin acilir listesi. */
   const [dilMenusu, setDilMenusu] = useState(false);
   const [tema, setTema] = useState<Tema>(() => temaOku());
+  // DIL (194): sozluk sunucudan iner; degisince menu yeniden cizilsin diye
+  //   sayac artirilir (sozluk modul kapsaminda, React state'i degil).
+  const [ceviriSurumu, setCeviriSurumu] = useState(0);
+  useEffect(() => ceviriDinle(() => setCeviriSurumu(s => s + 1)), []);
+  // Sozluk MODUL kapsaminda (React state degil): indiginde React kendiliginden
+  //   yeniden cizmez. Menu bu bilesenin icinde oldugu icin state degisimiyle
+  //   tazelenir; ANA ALAN (liste/kart) ayri agac - ona `key` verilerek yeniden
+  //   kurulur. Dil degisimi nadir ve bilincli bir eylem; sayfa yenilemekle
+  //   ayni etkiyi verir ama oturum ve konum korunur.
+  useEffect(() => { void ceviriYukle(kullanici?.dil ?? 0) }, [kullanici?.dil]);
   /** Sol menu acik/kapali - tercih tarayicida kalir (dar ekranda kapali calisilir). */
   const [menuKapali, setMenuKapali] = useState<boolean>(() => {
     try { return localStorage.getItem('gentegre.menu') === 'kapali' } catch { return false }
@@ -281,10 +309,10 @@ export function Kabuk() {
             <NavLink to="/panel"
                      className={() => `mi ${konum.pathname === '/panel' ? 'on' : ''}`}>
               <span className="ic">🏠</span>
-              <span>Ana Sayfa</span>
+              <span>{cm('Ana Sayfa')}</span>
             </NavLink>
 
-            <div className="bolum">Calisma alani</div>
+            <div className="bolum">{cm('Calisma alani')}</div>
             {satirlar.map(s => s.tur === 'duz' ? (
               <NavLink
                 key={s.m.yol}
@@ -303,7 +331,7 @@ export function Kabuk() {
                   style={{ width: '100%', border: 0, background: 'transparent', cursor: 'pointer' }}
                   onClick={() => setAcikGruplar(g => ({ ...g, [s.ad]: !grupAcikMi(s.ad, s.alt) }))}
                 >
-                  <span className="ic">{GRUP_IKON[s.ad] ?? '📁'}</span>
+                  <span className="ic">{GRUP_IKON[s.ad] ?? GRUP_IKON_CEV[s.ad] ?? '📁'}</span>
                   <span>{s.ad}</span>
                   <span className="rz">{grupAcikMi(s.ad, s.alt) ? '▾' : '▸'}</span>
                 </button>
@@ -351,7 +379,7 @@ export function Kabuk() {
               </div>
             ))}
 
-            <div className="bolum">Oturum</div>
+            <div className="bolum">{cm('Oturum')}</div>
             <div className="mi" style={{ cursor: 'default' }}>
               <span className="ic">🏢</span>
               <span>{aktifSube?.ad ?? '-'}</span>
@@ -371,7 +399,7 @@ export function Kabuk() {
           </div>
         </aside>
 
-        <main className="ana"><Outlet /></main>
+        <main className="ana" key={ceviriSurumu}><Outlet /></main>
       </div>
 
       {kullaniciAyariAcik && (

@@ -130,10 +130,13 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
     }
   };
 
+  const tahsilEdilen = tahsilToplami(tahsilatlar);
+
   return {
     /** Islemin baglanacagi belge - modallar bunu onyukler. */
     belgeId: kayitliId,
     tahsilatlar,
+    tahsilEdilen,
     tahsilatAcik, setTahsilatAcik,
     cekTuru, setCekTuru,
     tahsilatAcilis, setTahsilatAcilis,
@@ -141,4 +144,27 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
     tahsilatKayitId, setTahsilatKayitId,
     tazele, tahsilatSil, tahsilatAdimi, cekKartKaydedildi,
   };
+}
+
+/**
+ * Belgeye baglanmis tahsilatlarin toplami. Yerel tutar varsa o kullanilir
+ * (doviz belgede kasa islemi yerel karsiligiyla kapatir).
+ */
+export function tahsilToplami(satirlar: ListeSatiri[]): number {
+  return (satirlar ?? []).reduce(
+    (t, x) => t + (Number(x.yerelTutar ?? x.tutar ?? 0) || 0), 0);
+}
+
+/**
+ * Yeni tahsilat acilirken tutar alanina yazilacak deger: KALAN (kullanici).
+ * Once genel toplam onyukleniyordu; ikinci tahsilatta kullanici tutari elle
+ * duzeltmek zorunda kaliyor, unutursa belge iki kez tahsil edilmis oluyordu.
+ *
+ * - Fazla tahsilatta negatife dusmez (0 doner).
+ * - Belge toplami yoksa bos birakilir - yanlis sifir yazmaktansa bos.
+ */
+export function kalanTahsilat(genelToplam: unknown, satirlar: ListeSatiri[]): number {
+  const toplam = Number(genelToplam ?? 0) || 0;
+  if (!toplam) return 0;
+  return Math.max(0, toplam - tahsilToplami(satirlar));
 }

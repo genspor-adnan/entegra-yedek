@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { c } from '../dil/ceviri';
 import { api } from '../api/istemci';
 import { type AksiyonYaniti, hataMetni } from '../api/sozlesme';
 
@@ -78,7 +79,7 @@ export function GenToolbar({ aksiyonlar, calistir, altSecenekler }: CalistirProp
                 setAcikMenu(m => (m === a.kod ? null : a.kod));
               }}
             >
-              <span>{a.ad}{alt ? ' ▾' : ''}</span>
+              <span>{c(a.ad)}{alt ? ' ▾' : ''}</span>
             </button>
             {alt && acikMenu === a.kod && (
               <div className="dugme-menu-liste">
@@ -126,7 +127,7 @@ export function GenSagTus({ aksiyonlar, calistir, konum, onKapat }: SagTusProps)
           title={a.aktif ? '' : (a.pasifSebep ?? '')}
           onClick={() => { if (a.aktif) { calistir(a.kod); onKapat() } }}
         >
-          <span>{a.ad}</span>
+          <span>{c(a.ad)}</span>
           {a.kisayol && <span className="kisayol">{a.kisayol}</span>}
           {!a.aktif && a.pasifSebep && <span className="pasif-sebep">{a.pasifSebep}</span>}
         </button>
@@ -193,7 +194,7 @@ export function GenKomutPaleti({ aksiyonlar, calistir }: CalistirProps) {
               onMouseEnter={() => setSecili(i)}
               onClick={() => sec(a)}
             >
-              <span>{a.ad}</span>
+              <span>{c(a.ad)}</span>
               <span className="grup">{a.grup}</span>
               {a.kisayol && <span className="kisayol">{a.kisayol}</span>}
               {!a.aktif && a.pasifSebep && <span className="pasif-sebep">{a.pasifSebep}</span>}

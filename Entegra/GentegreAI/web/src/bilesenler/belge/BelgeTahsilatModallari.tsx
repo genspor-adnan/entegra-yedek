@@ -1,6 +1,6 @@
 import { GenForm } from '../GenForm';
 import { KasaIslemKarti } from '../../sayfalar/KasaIslemKarti';
-import type { useBelgeTahsilat } from '../../sayfalar/belgeTahsilat';
+import { kalanTahsilat, type useBelgeTahsilat } from '../../sayfalar/belgeTahsilat';
 
 /**
  * Belge kartinin ustunde acilan TAHSILAT pencereleri.
@@ -25,6 +25,15 @@ export function BelgeTahsilatModallari({ tahsilat, cari, genelToplam }: {
   } = tahsilat;
   const senetMi = cekTuru?.tur === 24 || cekTuru?.tur === 34;
 
+  // ONYUKLENEN TUTAR = KALAN (kullanici): belge kismen tahsil edildiyse yeni
+  //   tahsilat kalanla acilir. Kalan negatife dusmez (fazla tahsilat) ve hic
+  //   tahsilat yoksa genel toplama esittir. Tahsilat listesi HENUZ YUKLENMEDIYSE
+  //   (sekmeye girilmemis) genel toplam gosterilir - yanlis dusuk tutar
+  //   onyuklemektense tam tutar guvenli.
+  const toplam = Number(genelToplam ?? 0) || 0;
+  const kalan = kalanTahsilat(genelToplam, tahsilat.tahsilatlar);
+  const onyukluTutar = toplam ? String(kalan) : '';
+
   return (
     <>
       {/* MEVCUT tahsilati duzeltme (cift tik / ✎): kasa karti kayit kimligiyle
@@ -48,7 +57,7 @@ export function BelgeTahsilatModallari({ tahsilat, cari, genelToplam }: {
             tur: senetMi ? 2 : 1,
             yon: cekTuru.tur === 33 || cekTuru.tur === 34 ? 2 : 1,
             ...(cari ? { tarafId: cari.id } : {}),
-            ...(genelToplam ? { tutar: Number(genelToplam) } : {}),
+            ...(toplam ? { tutar: kalan } : {}),
           }}
           onKapat={() => setCekTuru(null)}
           onKaydedildi={csId => { void cekKartKaydedildi(cekTuru.tur, cekTuru.belgeId, csId) }}
@@ -69,7 +78,7 @@ export function BelgeTahsilatModallari({ tahsilat, cari, genelToplam }: {
             tarafId: cari?.id,
             tarafUnvan: cari?.unvan,
             belgeId: tahsilat.belgeId,
-            tutar: String(genelToplam ?? ''),
+            tutar: onyukluTutar,
           }}
           onKapat={() => { setTahsilatAcik(null); tazele() }}
         />

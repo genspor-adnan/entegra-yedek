@@ -151,6 +151,7 @@ uygulama.PanelUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
 uygulama.DokumanUclariniEkle();
 uygulama.GelenBelgeUclariniEkle();
+uygulama.CeviriUclariniEkle();
 uygulama.DokumanIcerikUcunuEkle();
 uygulama.ReferansUclariniEkle();
 uygulama.BelgeUclariniEkle();

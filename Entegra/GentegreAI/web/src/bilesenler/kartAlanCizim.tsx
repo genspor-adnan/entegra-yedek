@@ -1,4 +1,5 @@
 import { TelefonGirdi } from './TelefonGirdi';
+import { c } from '../dil/ceviri';
 import { telefonAlaniMi, epostaGecerliMi } from './alanBicim';
 import type { KartAlanMeta, KartMetaYaniti, DovizMetasi } from '../api/sozlesme';
 
@@ -159,7 +160,7 @@ export function alanCizici(b: AlanCizimBaglami) {
     const renderAlan = (a: KartAlanMeta) => (
       <label key={a.ad} className={`alan tip-${a.tip}`}>
         <span className="etiket">
-          {a.baslik}{a.zorunlu && <b className="zorunlu"> *</b>}
+          {c(a.baslik)}{a.zorunlu && <b className="zorunlu"> *</b>}
         </span>
         {renderGirdi(a)}
         {/* Kur kutusunun altinda kurun NEREDEN geldigi (tarih kuru / bulunamadi) -
@@ -198,17 +199,17 @@ export function alanCizici(b: AlanCizimBaglami) {
             return (
               <div key={a.ad} className="alan ikili-mantik">
                 <label className="alan tip-mantik">
-                  {renderGirdi(a)}<span className="etiket">{a.baslik}</span>
+                  {renderGirdi(a)}<span className="etiket">{c(a.baslik)}</span>
                 </label>
                 <label className="alan tip-mantik">
-                  {renderGirdi(hedef)}<span className="etiket">{hedef.baslik}</span>
+                  {renderGirdi(hedef)}<span className="etiket">{c(hedef.baslik)}</span>
                 </label>
               </div>
             );
           return (
             <label key={a.ad} className={`alan tip-${a.tip}`}>
               <span className="etiket">
-                {a.baslik}{a.zorunlu && <b className="zorunlu"> *</b>}
+                {c(a.baslik)}{a.zorunlu && <b className="zorunlu"> *</b>}
               </span>
               <div className="ikili">{renderGirdi(a)}{renderGirdi(hedef)}</div>
               {(alanHatalari[a.ad] || alanHatalari[hedef.ad]) && (

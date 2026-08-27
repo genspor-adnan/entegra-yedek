@@ -1,4 +1,5 @@
 import { GenDetayTablo, bosDetay, type DetayDurumu } from '../GenDetayTablo';
+import { c } from '../../dil/ceviri';
 import { DokumanGalerisi } from '../DokumanGalerisi';
 import { IlgiliKisiler } from '../IlgiliKisiler';
 import { TekAdres } from '../TekAdres';
@@ -169,7 +170,7 @@ const adliBlok = (
             : undefined;
           return (
             <div className="kagrup" key={altBaslik}>
-              <h6>{altBaslik}</h6>
+              <h6>{c(altBaslik)}</h6>
               <div className="alan-izgara tek-sutun">
                 {ciftliAlanlar.map((cift, i) => cift.length > 0 && (
                   <div className="adres-satir" key={i}>{renderAlanListesi(cift)}</div>
