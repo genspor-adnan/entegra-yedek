@@ -54,11 +54,11 @@ public static partial class KartKatalogu
             //   tedarikci olabiliyor; tek alan olsaydi ayni cariye satarken de
             //   alirken de ayni liste uygulanirdi. Bos ise yonun VARSAYILAN
             //   listesi gecerli - her cariye tek tek atamak gerekmez.
-            new("satisListesiId", "satis_listesi_id", "kod",
-                KodTablosu: "public.v_satis_listesi_satis_lookup",
+            new("satisFiyatListesiId", "satis_fiyat_listesi_id", "kod",
+                KodTablosu: "public.v_fiyat_listesi_satis_lookup",
                 Baslik: "Satış Fiyat Listesi", Grup: "Fatura Bilgileri", AltGrup: "Fiyatlandırma"),
-            new("alisListesiId",  "alis_listesi_id",  "kod",
-                KodTablosu: "public.v_satis_listesi_alis_lookup",
+            new("alisFiyatListesiId",  "alis_fiyat_listesi_id",  "kod",
+                KodTablosu: "public.v_fiyat_listesi_alis_lookup",
                 Baslik: "Alış Fiyat Listesi", Grup: "Fatura Bilgileri", AltGrup: "Fiyatlandırma"),
             // "Iletisim"/"Siniflandirma"/"Diger" SEKME DEGIL - mockup'ta Genel'in alt-kutulari
             //   (Kart Bilgileri / İletişim / Notlar). Grup kaldirildi, AltGrup ile Genel'e katlandi.

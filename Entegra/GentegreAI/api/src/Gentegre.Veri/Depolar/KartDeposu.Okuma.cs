@@ -177,10 +177,10 @@ public sealed partial class KartDeposu
             // e-Belge seri kurallari (156).
             "public.v_ebelge_turu_lookup", "public.v_kullanici_lookup",
             "public.v_ebelge_yon_lookup",
-            // Satis fiyat listesi (201) - taban liste secimi (kart + satir ezmesi).
-            "public.v_satis_listesi_lookup",
+            // Fiyat listesi (201) - taban liste secimi (kart + satir ezmesi).
+            "public.v_fiyat_listesi_lookup",
             // Yon bazli: cari kartinda satis alani alis listesini gostermemeli (204).
-            "public.v_satis_listesi_satis_lookup", "public.v_satis_listesi_alis_lookup",
+            "public.v_fiyat_listesi_satis_lookup", "public.v_fiyat_listesi_alis_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

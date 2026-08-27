@@ -7,15 +7,15 @@ using Gentegre.Veri.Depolar;
 namespace Gentegre.Api.Uclar;
 
 /// <summary>
-/// SATIS FIYAT LISTESI uclari (201/202).
+/// FIYAT LISTESI uclari (201/202).
 ///
 /// Listenin kendisi ve satirlari GENERIC kart uclarindan yonetilir
-/// (/api/kart/satis-listesi); burada yalnizca kart sozlesmesine sigmayan iki
+/// (/api/kart/fiyat-listesi); burada yalnizca kart sozlesmesine sigmayan iki
 /// islem var: listeyi URETMEK ve tek kalemin fiyatini SORMAK.
 /// </summary>
 public static class FiyatListesiUclari
 {
-    /// <summary>islem_log.tablo_id - KartKatalogu.SatisListesi ile AYNI kod olmali.</summary>
+    /// <summary>islem_log.tablo_id - KartKatalogu.FiyatListesi ile AYNI kod olmali.</summary>
     private const int LogTabloFiyatListesi = 923;
 
     /// <param name="Stok">Stok kalemleri fiyatlansin mi (varsayilan evet).</param>
@@ -31,21 +31,21 @@ public static class FiyatListesiUclari
     public static void FiyatListesiUclariniEkle(this IEndpointRouteBuilder yol)
     {
         // ------------------------------------------------------------ uret ----
-        // Listeyi MATERYALIZE eder. Ayri yetki (satis_listesi.uret): binlerce
+        // Listeyi MATERYALIZE eder. Ayri yetki (fiyat_listesi.uret): binlerce
         //   satir yazar ve taban liste degistiyse fiyatlari toptan degistirir.
-        yol.MapPost("/api/satis-listesi/{id:int}/uret", async (
+        yol.MapPost("/api/fiyat-listesi/{id:int}/uret", async (
             int id, UretimIstegi? istek, BaglamCozucu cozucu, VeriKaynagi veri,
             LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.AksiyonIste("satis_listesi.uret");
+            baglam.AksiyonIste("fiyat_listesi.uret");
 
             await using var baglanti = await veri.AcAsync(iptal);
 
             // Liste var mi + hangi subeye ait: baska subenin listesini uretmek
             //   sessiz bir veri sizintisi olurdu.
             await using var kontrol = baglanti.Komut(
-                "select ad, coalesce(sube_id, 0) from public.satis_listesi where id = @p0", null, id);
+                "select ad, coalesce(sube_id, 0) from public.fiyat_listesi where id = @p0", null, id);
             string ad;
             int subeId;
             await using (var o = await kontrol.ExecuteReaderAsync(iptal))
@@ -58,7 +58,7 @@ public static class FiyatListesiUclari
                 throw GentegreHatasi.Yasak("Bu liste başka bir şubeye ait.");
 
             await using var komut = baglanti.Komut(
-                "select eklenen, guncellenen, korunan, fiyatsiz from public.fn_satis_listesi_uret(@p0, @p1, @p2, @p3)",
+                "select eklenen, guncellenen, korunan, fiyatsiz from public.fn_fiyat_listesi_uret(@p0, @p1, @p2, @p3)",
                 null, id, baglam.KullaniciId, istek?.Stok ?? true, istek?.Hizmet ?? true);
 
             await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
@@ -86,19 +86,19 @@ public static class FiyatListesiUclari
         // ------------------------------------------------------------ fiyat ----
         // Tek kalemin liste fiyati. Liste HENUZ URETILMEMIS olsa da cevap
         //   doner - kural zincirle isletilir (onizleme icin).
-        yol.MapGet("/api/satis-listesi/{id:int}/fiyat", async (
+        yol.MapGet("/api/fiyat-listesi/{id:int}/fiyat", async (
             int id, int? stokId, int? hizmetId, BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("satis_listesi", Islem.Gor);
+            baglam.YetkiIste("fiyat_listesi", Islem.Gor);
 
             if ((stokId is null or 0) == (hizmetId is null or 0))
                 throw GentegreHatasi.Dogrulama("stokId ya da hizmetId'den TAM BIRI verilmeli.");
 
             await using var baglanti = await veri.AcAsync(iptal);
             await using var komut = baglanti.Komut(
-                "select fiyat, doviz_cinsi, kdv_dahil, kaynak from public.fn_satis_listesi_fiyat(@p0, @p1, @p2)",
+                "select fiyat, doviz_cinsi, kdv_dahil, kaynak from public.fn_fiyat_listesi_fiyat(@p0, @p1, @p2)",
                 null, id, stokId is 0 ? null : stokId, hizmetId is 0 ? null : hizmetId);
 
             await using var o = await komut.ExecuteReaderAsync(iptal);
@@ -127,7 +127,7 @@ public static class FiyatListesiUclari
             await using var baglanti = await veri.AcAsync(iptal);
             await using var komut = baglanti.Komut("""
                 select l.id, l.ad, l.yon, l.kdv_dahil
-                  from public.satis_listesi l
+                  from public.fiyat_listesi l
                  where l.id = public.fn_belge_varsayilan_liste(@p0, @p1)
                 """, null, tur, tarafId);
 

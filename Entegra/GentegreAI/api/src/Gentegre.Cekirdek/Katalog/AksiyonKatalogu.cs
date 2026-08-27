@@ -74,23 +74,23 @@ public static class AksiyonKatalogu
             //   cift tikla aciliyordu.
             ["proje-liste"] = Crud("proje", "proje", "proje"),
 
-            // SATIS FIYAT LISTESI (201/202). "Listeyi Üret" ayri yetki ister:
+            // FIYAT LISTESI (201/202). "Listeyi Üret" ayri yetki ister:
             //   binlerce satir yazar ve taban degisince fiyatlari toptan
             //   degistirir - gorme/duzeltme yetkisi tek basina yetmemeli.
-            ["satis-listesi-liste"] =
+            ["fiyat-listesi-liste"] =
             [
-                .. Crud("satis-listesi", "fiyat", "satis_listesi"),
-                new("satis-listesi.uret", "⟳ Listeyi Üret", "fiyat",
-                    Hedef: "araccubugu,sagtus,palet", AksiyonYetkisi: "satis_listesi.uret",
+                .. Crud("fiyat-listesi", "fiyat", "fiyat_listesi"),
+                new("fiyat-listesi.uret", "⟳ Listeyi Üret", "fiyat",
+                    Hedef: "araccubugu,sagtus,palet", AksiyonYetkisi: "fiyat_listesi.uret",
                     KayitGerekir: true, Sira: 40),
-                new("satis-listesi.satirlar", "Satırları Aç", "fiyat",
-                    Hedef: "sagtus,palet", KaynakKodu: "satis_listesi", Islem: Islem.Gor,
+                new("fiyat-listesi.satirlar", "Satırları Aç", "fiyat",
+                    Hedef: "sagtus,palet", KaynakKodu: "fiyat_listesi", Islem: Islem.Gor,
                     KayitGerekir: true, Sira: 45),
             ],
 
             // Satir listesi salt gorunum: satirlar listeden degil KARTTAN
             //   duzenlenir (kural ezmesi baslikla birlikte anlamli).
-            ["satis-listesi-satir-liste"] = [Yazdir()],
+            ["fiyat-listesi-satir-liste"] = [Yazdir()],
 
             // CRM satis firsati (121). Kazanildi/Kaybedildi ayri AKSIYON degil:
             //   asama alanindan secilir - iki yerden degistirilen bir durum

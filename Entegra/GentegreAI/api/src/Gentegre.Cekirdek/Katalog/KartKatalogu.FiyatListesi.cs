@@ -1,19 +1,19 @@
 ﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
-/// SATIS FIYAT LISTESI karti (201/202).
+/// FIYAT LISTESI karti (201/202).
 ///
 /// Liste bir KURALDIR (taban liste x carpan -> yuvarlama), satirlar o kuralin
 /// materyalize edilmis halidir. Satir gridinde kalemin kodu/adi/kategorisi
-/// GORUNUR ama tabloda TUTULMAZ - stok/hizmet kartindan gelir (v_satis_listesi_satir).
+/// GORUNUR ama tabloda TUTULMAZ - stok/hizmet kartindan gelir (v_fiyat_listesi_satir).
 /// </summary>
 public static partial class KartKatalogu
 {
     /// <summary>Fiyat listesinin kendisi - kural ve gecerlilik araligi.</summary>
-    private static KartTanimi SatisListesi() => new(
-        Ad: "satis-listesi",
-        YetkiKodu: "satis_listesi",
-        Tablo: "public.satis_listesi",
+    private static KartTanimi FiyatListesi() => new(
+        Ad: "fiyat-listesi",
+        YetkiKodu: "fiyat_listesi",
+        Tablo: "public.fiyat_listesi",
         LogTabloId: 923,
         SubeKolonu: "sube_id",
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
@@ -29,7 +29,7 @@ public static partial class KartKatalogu
             new("id",   "id",   "sayi",  Yazilabilir: false),
             new("ad",   "ad",   "metin", Zorunlu: true, EnFazlaUzunluk: 80,
                 Baslik: "Liste Adı", Grup: "Genel"),
-            new("grup", "grup", "kod",   KodListesi: "satis_listesi.grup",
+            new("grup", "grup", "kod",   KodListesi: "fiyat_listesi.grup",
                 Baslik: "Grubu", Grup: "Genel"),
             // YON (204): liste alis mi satis mi? Belge turu hangi yondeyse o
             //   yonun listesi uygulanir. Taban liste AYNI YONDE olmali (DB tetigi).
@@ -52,11 +52,11 @@ public static partial class KartKatalogu
             // FIYATLAMA KURALI. Taban liste bos ise liste KOKTUR: fiyatlar
             //   kalemin kendi kartindan (stok_fiyat / hizmet_fiyat) baslar.
             new("tabanListeId", "taban_liste_id", "kod",
-                KodTablosu: "public.v_satis_listesi_lookup",
+                KodTablosu: "public.v_fiyat_listesi_lookup",
                 Baslik: "Taban Liste", Grup: "Genel", AltGrup: "Fiyatlama"),
             new("carpan", "carpan", "para", Baslik: "Çarpan",
                 Grup: "Genel", AltGrup: "Fiyatlama"),
-            new("yuvarlama", "yuvarlama", "kod", KodListesi: "satis_listesi.yuvarlama",
+            new("yuvarlama", "yuvarlama", "kod", KodListesi: "fiyat_listesi.yuvarlama",
                 Baslik: "Yuvarlama", Grup: "Genel", AltGrup: "Fiyatlama"),
             // "En Yakin Degere" bir ADIM ister; adimsiz "en yakin" tanimsizdir.
             new("yuvarlamaBirim", "yuvarlama_birim", "para", Baslik: "Yuvarlama Adımı",
@@ -73,7 +73,7 @@ public static partial class KartKatalogu
             // SATIRLAR. Kod / Ad / Kategori kalemin kartindan gelir - burada
             //   yazilabilir alan degiller (SaltOkunur alanlar okuma icin
             //   gorunumden beslenir, yazma tabloya gider).
-            new DetayTanimi("satirlar", "public.satis_listesi_satir", "liste_id", new KartAlani[]
+            new DetayTanimi("satirlar", "public.fiyat_listesi_satir", "liste_id", new KartAlani[]
             {
                 new("id",        "id",        "sayi", Yazilabilir: false),
                 new("stokId",    "stok_id",   "kod",  KodTablosu: "public.v_stok_lookup",
@@ -87,12 +87,12 @@ public static partial class KartKatalogu
                 new("durum",     "durum",     "kod",  SabitKodlar: DurumKodlari, Baslik: "Durum"),
 
                 // Satir seviyesi KURAL EZMESI - bos birakilirsa basligin kurali.
-                new("yazim",     "yazim",     "kod",  KodListesi: "satis_listesi.yazim",
+                new("yazim",     "yazim",     "kod",  KodListesi: "fiyat_listesi.yazim",
                     Baslik: "Yazım"),
                 new("tabanListeId", "taban_liste_id", "kod",
-                    KodTablosu: "public.v_satis_listesi_lookup", Baslik: "Taban Fiyat"),
+                    KodTablosu: "public.v_fiyat_listesi_lookup", Baslik: "Taban Fiyat"),
                 new("carpan",    "carpan",    "para", Baslik: "Çarpan"),
-                new("yuvarlama", "yuvarlama", "kod",  KodListesi: "satis_listesi.yuvarlama",
+                new("yuvarlama", "yuvarlama", "kod",  KodListesi: "fiyat_listesi.yuvarlama",
                     Baslik: "Yuvarlama"),
                 new("tabanFiyat","taban_fiyat","para", Yazilabilir: false, Baslik: "Taban Fiyat Değeri"),
             }, Sirala: "id", SubeKolonu: null, LogTabloId: 924, Baslik: "Satırlar")
@@ -101,7 +101,7 @@ public static partial class KartKatalogu
         {
             // Baska bir liste bunu TABAN aliyorsa silinemez - zincirin ortasi
             //   cekilirse turetilen listeler fiyatsiz kalir.
-            new SilmeEngeli("public.satis_listesi", "taban_liste_id",
+            new SilmeEngeli("public.fiyat_listesi", "taban_liste_id",
                 "Bu listeyi taban alan {0} liste var; önce onların tabanını değiştirin."),
         });
 

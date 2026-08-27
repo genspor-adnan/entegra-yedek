@@ -25,7 +25,7 @@ do $$
 begin
     if not exists (select 1 from pg_constraint where conname = 'fk_belge_fiyat_listesi') then
         alter table public.belge add constraint fk_belge_fiyat_listesi
-            foreign key (fiyat_listesi_id) references public.satis_listesi (id);
+            foreign key (fiyat_listesi_id) references public.fiyat_listesi (id);
     end if;
 end $$;
 
@@ -100,7 +100,7 @@ begin
             continue;
         end if;
 
-        select * into v_f from public.fn_satis_listesi_fiyat(v_liste, s.stok_id, s.hizmet_id);
+        select * into v_f from public.fn_fiyat_listesi_fiyat(v_liste, s.stok_id, s.hizmet_id);
 
         if v_f.fiyat is null or v_f.fiyat <= 0 then
             v_yok := v_yok + 1;
@@ -124,7 +124,7 @@ begin
      where id = p_belge_id;
 
     return query select v_deg, v_ayni, v_yok,
-                        (select ad from public.satis_listesi where id = v_liste);
+                        (select ad from public.fiyat_listesi where id = v_liste);
 end $$;
 
 comment on function public.fn_belge_fiyatlandir(integer, integer, integer) is

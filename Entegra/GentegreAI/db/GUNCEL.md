@@ -71,7 +71,11 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_firsat_asama_izle` | `121_firsat.sql` | — |
 | `fn_firsat_kazanildi_musteri` | `122_aday_musteri.sql` | — |
 | `fn_firsat_no_uret` | `121_firsat.sql` | — |
-| `fn_fiyat_yuvarla` | `202_fn_satis_listesi.sql` | — |
+| `fn_fiyat_listesi_dongu_kontrol` | `201_fiyat_listesi.sql` | — |
+| `fn_fiyat_listesi_fiyat` | `202_fn_fiyat_listesi.sql` | — |
+| `fn_fiyat_listesi_uret` | `202_fn_fiyat_listesi.sql` | — |
+| `fn_fiyat_listesi_yon_kontrol` | `204_cari_fiyat_listesi.sql` | — |
+| `fn_fiyat_yuvarla` | `202_fn_fiyat_listesi.sql` | — |
 | `fn_gelen_belge_kaydet` | `187_gelen_belge.sql` | — |
 | `fn_gelen_belge_yanit_yaz` | `187_gelen_belge.sql` | — |
 | `fn_gelen_durum_adi` | `187_gelen_belge.sql` | — |
@@ -79,7 +83,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_goc_sube_coz` | `080_goc_kasa.sql` | — |
 | `fn_hesap_atama_adi` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
 | `fn_hesap_plani_alt_ac` | `076_fn_kasa.sql` | — |
-| `fn_kalem_kart_fiyati` | `202_fn_satis_listesi.sql` | — |
+| `fn_kalem_kart_fiyati` | `202_fn_fiyat_listesi.sql` | — |
 | `fn_kasa_islem_bacak_uret` | `139_kasa_ekstre_dovizi.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql, 096_kasa_bacak_rol_kontrol.sql |
 | `fn_kasa_islem_dogrula` | `085_fn_kasa_f3.sql` | 076_fn_kasa.sql |
 | `fn_kasa_islem_duzelt_hazirla` | `148_kasa_islem_duzelt.sql` | — |
@@ -88,7 +92,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kasa_islem_kesinlestir` | `152_numara_sablonu.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql |
 | `fn_kasa_islem_no_uret` | `152_numara_sablonu.sql` | 073_kasa_islem.sql, 087_numara_kesme_duzeltmesi.sql |
 | `fn_kasa_islem_silme_koruma` | `076_fn_kasa.sql` | — |
-| `fn_kdv_cevir` | `202_fn_satis_listesi.sql` | — |
+| `fn_kdv_cevir` | `202_fn_fiyat_listesi.sql` | — |
 | `fn_kullanici_kasa` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
 | `fn_kullanici_yetkileri` | `068_taraf_rol_id_kolonlari.sql` | 020_sema_kimlik.sql |
 | `fn_mizan` | `077_v_ekstre.sql` | — |
@@ -101,10 +105,6 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_parola_ata` | `068_taraf_rol_id_kolonlari.sql` | 020_sema_kimlik.sql |
 | `fn_parola_dogru` | `020_sema_kimlik.sql` | — |
 | `fn_plan_gerceklestir` | `085_fn_kasa_f3.sql` | — |
-| `fn_satis_listesi_dongu_kontrol` | `201_satis_listesi.sql` | — |
-| `fn_satis_listesi_fiyat` | `202_fn_satis_listesi.sql` | — |
-| `fn_satis_listesi_uret` | `202_fn_satis_listesi.sql` | — |
-| `fn_satis_listesi_yon_kontrol` | `204_cari_fiyat_listesi.sql` | — |
 | `fn_slug` | `021_goc_kimlik.sql` | — |
 | `fn_stok_kart_fiyat` | `128_fn_stok_kart_fiyat.sql` | — |
 | `fn_stok_kopyala` | `127_stok_kopyala_fiyat.sql` | 126_fn_stok_kopyala.sql |
@@ -148,6 +148,11 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_ebelge_yon_lookup` | `159_ebelge_xslt.sql` | — |
 | `v_firsat_asama_gecmis` | `121_firsat.sql` | — |
 | `v_firsat_liste` | `121_firsat.sql` | — |
+| `v_fiyat_listesi_alis_lookup` | `204_cari_fiyat_listesi.sql` | — |
+| `v_fiyat_listesi_kullanim` | `204_cari_fiyat_listesi.sql` | — |
+| `v_fiyat_listesi_lookup` | `201_fiyat_listesi.sql` | — |
+| `v_fiyat_listesi_satir` | `201_fiyat_listesi.sql` | — |
+| `v_fiyat_listesi_satis_lookup` | `204_cari_fiyat_listesi.sql` | — |
 | `v_hesap_atama_lookup` | `199_kasa_atama_listesi.sql` | 197_kasa_atama_tek_alan.sql |
 | `v_hesap_bakiye` | `077_v_ekstre.sql` | — |
 | `v_hesap_ekstre` | `111_ekstre_doviz_gruplu.sql` | 077_v_ekstre.sql, 097_ekstre_kaynak_kayit.sql |
@@ -168,11 +173,6 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_plan_vade` | `077_v_ekstre.sql` | — |
 | `v_proje_ekstre` | `077_v_ekstre.sql` | — |
 | `v_proje_lookup` | `071_kasa_master.sql` | — |
-| `v_satis_listesi_alis_lookup` | `204_cari_fiyat_listesi.sql` | — |
-| `v_satis_listesi_kullanim` | `204_cari_fiyat_listesi.sql` | — |
-| `v_satis_listesi_lookup` | `201_satis_listesi.sql` | — |
-| `v_satis_listesi_satir` | `201_satis_listesi.sql` | — |
-| `v_satis_listesi_satis_lookup` | `204_cari_fiyat_listesi.sql` | — |
 | `v_stok_kullanilabilir` | `142_siparis_rezervasyon.sql` | — |
 | `v_stok_lookup` | `121_firsat.sql` | — |
 | `v_ulke_lookup` | `119_stok_uts.sql` | — |

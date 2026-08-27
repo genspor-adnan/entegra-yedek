@@ -1,17 +1,17 @@
 ﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
-/// SATIS FIYAT LISTESI listeleri (201/202): listelerin kendisi ve satirlari.
+/// FIYAT LISTESI listeleri (201/202): listelerin kendisi ve satirlari.
 /// </summary>
 public static partial class KaynakKatalogu
 {
     /// <summary>Fiyat listeleri - kural ve gecerlilik ozeti.</summary>
-    private static KaynakTanimi SatisListesi() => new(
-        Ad: "satis-listesi",
-        YetkiKodu: "satis_listesi",
+    private static KaynakTanimi FiyatListesi() => new(
+        Ad: "fiyat-listesi",
+        YetkiKodu: "fiyat_listesi",
         Kaynak: """
-            public.satis_listesi l
-            left join public.satis_listesi t on t.id = l.taban_liste_id
+            public.fiyat_listesi l
+            left join public.fiyat_listesi t on t.id = l.taban_liste_id
             """,
         SubeKolonu: "l.sube_id",
         VarsayilanSirala: "l.grup, l.ad",
@@ -39,7 +39,7 @@ public static partial class KaynakKatalogu
             new("bitis",     "l.bitis",     "tarih", "Bitiş",   Hizalama: "orta", Bicim: "dd.MM.yyyy"),
             // Satir sayisi: listenin URETILIP uretilmedigini tek bakista gosterir.
             new("satirSayisi",
-                "(select count(*) from public.satis_listesi_satir r where r.liste_id = l.id)",
+                "(select count(*) from public.fiyat_listesi_satir r where r.liste_id = l.id)",
                 "sayi", "Satır", Hizalama: "sag", Filtrelenebilir: false),
             new("durum", "case when l.durum = 1 then 'Aktif' else 'Pasif' end", "metin",
                 "Durum", Hizalama: "orta"),
@@ -51,10 +51,10 @@ public static partial class KaynakKatalogu
     /// Liste satirlari. Kaynak GORUNUM: kod/ad/kategori kalemin kartindan gelir,
     /// satir tablosunda tutulmaz (kart duzeltilince liste yalan soylemesin).
     /// </summary>
-    private static KaynakTanimi SatisListesiSatir() => new(
-        Ad: "satis-listesi-satir",
-        YetkiKodu: "satis_listesi",
-        Kaynak: "public.v_satis_listesi_satir v",
+    private static KaynakTanimi FiyatListesiSatir() => new(
+        Ad: "fiyat-listesi-satir",
+        YetkiKodu: "fiyat_listesi",
+        Kaynak: "public.v_fiyat_listesi_satir v",
         SubeKolonu: "v.sube_id",
         VarsayilanSirala: "v.kod, v.ad",
         Kolonlar: new KolonTanimi[]

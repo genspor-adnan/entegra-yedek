@@ -7,45 +7,43 @@
 --  (alis ve satis) gelmeli."
 --
 --  Yani fiyat COZUM SIRASI:
---     1) carinin kendi listesi   (taraf.satis_listesi_id / alis_listesi_id)
---     2) yonun VARSAYILAN listesi (satis_listesi.varsayilan = 1)
+--     1) carinin kendi listesi   (taraf.satis_fiyat_listesi_id / alis_fiyat_listesi_id)
+--     2) yonun VARSAYILAN listesi (fiyat_listesi.varsayilan = 1)
 --     3) kalemin kart fiyati      (stok_fiyat / hizmet_fiyat - 128)
 --
---  YON: 201'de tablo yalniz SATIS listesi olarak tasarlanmisti; alis tarafi da
---  istenince ayni yapiya `yon` kolonu eklendi (1 alis / 2 satis). Ayri bir
---  "alis_listesi" tablosu acmak ayni kurali (taban/carpan/yuvarlama) ve ayni
---  uretim fonksiyonunu ikinci kez yazmak olurdu.
---  NOT: tablo adi `satis_listesi` KALDI (kullanicinin verdigi ad); artik iki
---  yonu de tasidigi icin ad biraz dar - `fiyat_listesi` daha dogru olurdu.
+--  YON: liste hem alis hem satis tarafinda kullanilir, ayrimi `yon` kolonu
+--  tasir (1 alis / 2 satis). Ayri bir "alis_listesi" tablosu acmak ayni kurali
+--  (taban/carpan/yuvarlama) ve ayni uretim fonksiyonunu ikinci kez yazmak
+--  olurdu; tablonun adi da bu yuzden `fiyat_listesi` - iki yonu de kapsar.
 -- ============================================================================
 \set ON_ERROR_STOP on
 
 -- ---------------------------------------------------------------------------
 --  YON + VARSAYILAN
 -- ---------------------------------------------------------------------------
-alter table public.satis_listesi
+alter table public.fiyat_listesi
     add column if not exists yon        smallint not null default 2,   -- 1 alis, 2 satis
     add column if not exists varsayilan smallint not null default 0;
 
-comment on column public.satis_listesi.yon is
+comment on column public.fiyat_listesi.yon is
   'Listenin yonu (204): 1 alis, 2 satis. Belgede hangi yonun listesi kullanilacagini belirler.';
-comment on column public.satis_listesi.varsayilan is
+comment on column public.fiyat_listesi.varsayilan is
   'Bu yonun VARSAYILAN listesi mi (204): carisi olmayan / carisinde liste tanimlanmamis belgede bu kullanilir.';
 
 -- Her yon icin TEK varsayilan: iki tanesi olursa hangisinin gelecegi kuraya
 --   kalir ve fiyat sessizce degisir.
-create unique index if not exists ux_satis_listesi_varsayilan
-    on public.satis_listesi (yon) where varsayilan = 1 and durum = 1;
+create unique index if not exists ux_fiyat_listesi_varsayilan
+    on public.fiyat_listesi (yon) where varsayilan = 1 and durum = 1;
 
-create index if not exists ix_satis_listesi_yon on public.satis_listesi (yon, durum);
+create index if not exists ix_fiyat_listesi_yon on public.fiyat_listesi (yon, durum);
 
 -- Taban liste AYNI YONDE olmali: satis listesinin tabani alis listesi olursa
 --   satis fiyati maliyetten turetilir ve kimse farkina varmaz.
-create or replace function public.fn_satis_listesi_yon_kontrol()
+create or replace function public.fn_fiyat_listesi_yon_kontrol()
 returns trigger language plpgsql as $$
 declare v_yon smallint;
 begin
-    select yon into v_yon from public.satis_listesi where id = new.taban_liste_id;
+    select yon into v_yon from public.fiyat_listesi where id = new.taban_liste_id;
     if v_yon is not null and v_yon <> new.yon then
         raise exception 'Taban liste farkli yonde: % listesine % listesi taban olamaz.',
             case when new.yon = 1 then 'alis' else 'satis' end,
@@ -55,11 +53,11 @@ begin
     return new;
 end $$;
 
-drop trigger if exists trg_satis_listesi_yon on public.satis_listesi;
-create trigger trg_satis_listesi_yon
-    before insert or update of taban_liste_id, yon on public.satis_listesi
+drop trigger if exists trg_fiyat_listesi_yon on public.fiyat_listesi;
+create trigger trg_fiyat_listesi_yon
+    before insert or update of taban_liste_id, yon on public.fiyat_listesi
     for each row when (new.taban_liste_id is not null)
-    execute function public.fn_satis_listesi_yon_kontrol();
+    execute function public.fn_fiyat_listesi_yon_kontrol();
 
 -- ---------------------------------------------------------------------------
 --  CARININ LISTESI
@@ -69,46 +67,46 @@ create trigger trg_satis_listesi_yon
 --  satarken de alirken de ayni liste uygulanirdi.
 -- ---------------------------------------------------------------------------
 alter table public.taraf
-    add column if not exists satis_listesi_id integer,
-    add column if not exists alis_listesi_id  integer;
+    add column if not exists satis_fiyat_listesi_id integer,
+    add column if not exists alis_fiyat_listesi_id  integer;
 
 do $$
 begin
-    if not exists (select 1 from pg_constraint where conname = 'fk_taraf_satis_listesi') then
-        alter table public.taraf add constraint fk_taraf_satis_listesi
-            foreign key (satis_listesi_id) references public.satis_listesi (id);
+    if not exists (select 1 from pg_constraint where conname = 'fk_taraf_satis_fiyat_listesi') then
+        alter table public.taraf add constraint fk_taraf_satis_fiyat_listesi
+            foreign key (satis_fiyat_listesi_id) references public.fiyat_listesi (id);
     end if;
-    if not exists (select 1 from pg_constraint where conname = 'fk_taraf_alis_listesi') then
-        alter table public.taraf add constraint fk_taraf_alis_listesi
-            foreign key (alis_listesi_id) references public.satis_listesi (id);
+    if not exists (select 1 from pg_constraint where conname = 'fk_taraf_alis_fiyat_listesi') then
+        alter table public.taraf add constraint fk_taraf_alis_fiyat_listesi
+            foreign key (alis_fiyat_listesi_id) references public.fiyat_listesi (id);
     end if;
 end $$;
 
-comment on column public.taraf.satis_listesi_id is
+comment on column public.taraf.satis_fiyat_listesi_id is
   'Bu cariye SATISTA uygulanacak fiyat listesi (204). Bos ise yonun varsayilan listesi.';
-comment on column public.taraf.alis_listesi_id is
+comment on column public.taraf.alis_fiyat_listesi_id is
   'Bu cariden ALISTA uygulanacak fiyat listesi (204). Bos ise yonun varsayilan listesi.';
 
-create index if not exists ix_taraf_satis_listesi on public.taraf (satis_listesi_id)
-    where satis_listesi_id is not null;
-create index if not exists ix_taraf_alis_listesi  on public.taraf (alis_listesi_id)
-    where alis_listesi_id is not null;
+create index if not exists ix_taraf_satis_fiyat_listesi on public.taraf (satis_fiyat_listesi_id)
+    where satis_fiyat_listesi_id is not null;
+create index if not exists ix_taraf_alis_fiyat_listesi  on public.taraf (alis_fiyat_listesi_id)
+    where alis_fiyat_listesi_id is not null;
 
 -- Listeyi kullanan cari varken liste silinmesin (kart SilmeEngeli'nin DB ayagi).
-create or replace view public.v_satis_listesi_kullanim as
+create or replace view public.v_fiyat_listesi_kullanim as
     select l.id as liste_id, l.ad,
            (select count(*) from public.taraf t
-             where t.satis_listesi_id = l.id or t.alis_listesi_id = l.id) as cari_sayisi,
-           (select count(*) from public.satis_listesi b where b.taban_liste_id = l.id) as turetilen_liste
-      from public.satis_listesi l;
+             where t.satis_fiyat_listesi_id = l.id or t.alis_fiyat_listesi_id = l.id) as cari_sayisi,
+           (select count(*) from public.fiyat_listesi b where b.taban_liste_id = l.id) as turetilen_liste
+      from public.fiyat_listesi l;
 
 -- Yon bazli lookup: cari kartindaki iki alan yalniz KENDI yonunun listelerini
 --   gostermeli (satis alaninda alis listesi cikmasin).
-create or replace view public.v_satis_listesi_satis_lookup as
-    select id, ad::text as ad, durum as aktif from public.satis_listesi where yon = 2;
+create or replace view public.v_fiyat_listesi_satis_lookup as
+    select id, ad::text as ad, durum as aktif from public.fiyat_listesi where yon = 2;
 
-create or replace view public.v_satis_listesi_alis_lookup as
-    select id, ad::text as ad, durum as aktif from public.satis_listesi where yon = 1;
+create or replace view public.v_fiyat_listesi_alis_lookup as
+    select id, ad::text as ad, durum as aktif from public.fiyat_listesi where yon = 1;
 
 -- ---------------------------------------------------------------------------
 --  COZUM: bu cari + bu yon icin hangi liste gecerli?
@@ -125,8 +123,8 @@ language sql stable parallel safe as $$
     -- 1) Carinin kendi listesi (yonu ve gecerliligi tutuyorsa)
     select l.id
       from public.taraf t
-      join public.satis_listesi l
-        on l.id = case when p_yon = 1 then t.alis_listesi_id else t.satis_listesi_id end
+      join public.fiyat_listesi l
+        on l.id = case when p_yon = 1 then t.alis_fiyat_listesi_id else t.satis_fiyat_listesi_id end
      where t.id = p_taraf_id
        and l.durum = 1 and l.yon = p_yon
        and (l.baslangic is null or l.baslangic <= p_tarih)
@@ -134,7 +132,7 @@ language sql stable parallel safe as $$
     union all
     -- 2) Yonun varsayilan listesi
     select l.id
-      from public.satis_listesi l
+      from public.fiyat_listesi l
      where l.varsayilan = 1 and l.durum = 1 and l.yon = p_yon
        and (l.baslangic is null or l.baslangic <= p_tarih)
        and (l.bitis     is null or l.bitis     >= p_tarih)
@@ -166,11 +164,11 @@ begin
     v_liste := public.fn_cari_fiyat_listesi(p_taraf_id, p_yon, p_tarih);
 
     if v_liste is not null then
-        select * into v_f from public.fn_satis_listesi_fiyat(v_liste, p_stok_id, p_hizmet_id);
+        select * into v_f from public.fn_fiyat_listesi_fiyat(v_liste, p_stok_id, p_hizmet_id);
         if v_f.fiyat is not null then
             return query
               select v_f.fiyat, v_f.doviz_cinsi, v_f.kdv_dahil, v_liste,
-                     (select ad from public.satis_listesi where id = v_liste),
+                     (select ad from public.fiyat_listesi where id = v_liste),
                      'liste:' || v_f.kaynak;
             return;
         end if;
@@ -191,6 +189,6 @@ do $$
 declare v integer;
 begin
     select count(*) into v from information_schema.columns
-     where table_name = 'taraf' and column_name in ('satis_listesi_id', 'alis_listesi_id');
-    raise notice '204 tamam: satis_listesi.yon/varsayilan + taraf fiyat listesi alanlari (%), fn_cari_fiyat_listesi / fn_belge_kalem_fiyati.', v;
+     where table_name = 'taraf' and column_name in ('fiyat_listesi_id', 'alis_listesi_id');
+    raise notice '204 tamam: fiyat_listesi.yon/varsayilan + taraf fiyat listesi alanlari (%), fn_cari_fiyat_listesi / fn_belge_kalem_fiyati.', v;
 end $$;

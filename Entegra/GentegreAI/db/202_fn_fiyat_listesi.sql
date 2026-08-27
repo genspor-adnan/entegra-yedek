@@ -1,6 +1,6 @@
 -- ============================================================================
 --  Gentegre AI — FIYAT LISTESI HESABI VE URETIMI
---  202_fn_satis_listesi.sql
+--  202_fn_fiyat_listesi.sql
 --
 --  Kural TEK YERDE: "taban fiyat x carpan -> yuvarla". Ayni formulu hem liste
 --  uretimi hem tekil fiyat sorgusu kullanir; iki yere yazilirsa uretilen liste
@@ -99,9 +99,9 @@ $$;
 -- ESKI IMZAYI DUSUR: `create or replace` PARAMETRE EKLEYEMEZ - yeni bir asiri
 --   yukleme yaratir ve iki aday arasinda PostgreSQL "function is not unique"
 --   diyerek cagriyi reddeder. Once eski surum silinir.
-drop function if exists public.fn_satis_listesi_fiyat(integer, integer, integer, integer);
+drop function if exists public.fn_fiyat_listesi_fiyat(integer, integer, integer, integer);
 
-create or replace function public.fn_satis_listesi_fiyat(
+create or replace function public.fn_fiyat_listesi_fiyat(
     p_liste_id  integer,
     p_stok_id   integer default null,
     p_hizmet_id integer default null,
@@ -116,8 +116,8 @@ create or replace function public.fn_satis_listesi_fiyat(
 returns table (fiyat numeric, doviz_cinsi varchar, kdv_dahil smallint, kaynak text)
 language plpgsql stable as $$
 declare
-    l          public.satis_listesi%rowtype;
-    r          public.satis_listesi_satir%rowtype;
+    l          public.fiyat_listesi%rowtype;
+    r          public.fiyat_listesi_satir%rowtype;
     v_taban    numeric;
     v_doviz    varchar(5);
     v_tbn_kdv  smallint;
@@ -133,12 +133,12 @@ begin
         raise exception 'Fiyat listesi zinciri 20 adimi asti (liste %).', p_liste_id;
     end if;
 
-    select * into l from public.satis_listesi where id = p_liste_id;
+    select * into l from public.fiyat_listesi where id = p_liste_id;
     if not found then return; end if;
 
     -- 1) Listede YAZILI satir
     if p_yazili then
-    select * into r from public.satis_listesi_satir
+    select * into r from public.fiyat_listesi_satir
      where liste_id = p_liste_id and durum = 1
        and (p_stok_id   is not null and stok_id   = p_stok_id
          or p_hizmet_id is not null and hizmet_id = p_hizmet_id)
@@ -152,7 +152,7 @@ begin
     else
         -- Yazili satir atlanacak; yine de SATIR SEVIYESI KURAL EZMESI okunur
         --   (satirin kendi taban/carpan/yuvarlamasi uretimde de gecerli).
-        select * into r from public.satis_listesi_satir
+        select * into r from public.fiyat_listesi_satir
          where liste_id = p_liste_id
            and (p_stok_id   is not null and stok_id   = p_stok_id
              or p_hizmet_id is not null and hizmet_id = p_hizmet_id)
@@ -168,7 +168,7 @@ begin
     if v_taban_id is not null then
         select t.fiyat, t.doviz_cinsi, t.kdv_dahil
           into v_taban, v_doviz, v_tbn_kdv
-          from public.fn_satis_listesi_fiyat(v_taban_id, p_stok_id, p_hizmet_id, p_derinlik + 1, true) t;
+          from public.fn_fiyat_listesi_fiyat(v_taban_id, p_stok_id, p_hizmet_id, p_derinlik + 1, true) t;
     else
         -- KOK liste: kalemin kart fiyati, LISTENIN YONUNDE.
         select k.fiyat, k.doviz_cinsi, k.kdv_dahil
@@ -193,7 +193,7 @@ begin
              'hesap'::text;
 end $$;
 
-comment on function public.fn_satis_listesi_fiyat(integer, integer, integer, integer, boolean) is
+comment on function public.fn_fiyat_listesi_fiyat(integer, integer, integer, integer, boolean) is
   'Kalemin liste fiyati (202): once yazili satir, yoksa taban zinciri x carpan -> yuvarlama.';
 
 -- ---------------------------------------------------------------------------
@@ -205,7 +205,7 @@ comment on function public.fn_satis_listesi_fiyat(integer, integer, integer, int
 --  KORUNAN: `yazim = 1` (manuel) satirlar. Elle girilen fiyati hesapla ezmek,
 --  kullanicinin bilerek yaptigi istisnayi sessizce silmek olurdu.
 -- ---------------------------------------------------------------------------
-create or replace function public.fn_satis_listesi_uret(
+create or replace function public.fn_fiyat_listesi_uret(
     p_liste_id  integer,
     p_kullanici integer default 0,
     p_stok      boolean default true,
@@ -213,7 +213,7 @@ create or replace function public.fn_satis_listesi_uret(
 returns table (eklenen integer, guncellenen integer, korunan integer, fiyatsiz integer)
 language plpgsql as $$
 declare
-    l          public.satis_listesi%rowtype;
+    l          public.fiyat_listesi%rowtype;
     v_ekle     integer := 0;
     v_guncelle integer := 0;
     v_koru     integer := 0;
@@ -221,12 +221,12 @@ declare
     k          record;
     v_f        record;
 begin
-    select * into l from public.satis_listesi where id = p_liste_id;
+    select * into l from public.fiyat_listesi where id = p_liste_id;
     if not found then
         raise exception 'Fiyat listesi bulunamadi: %', p_liste_id;
     end if;
 
-    select count(*) into v_koru from public.satis_listesi_satir
+    select count(*) into v_koru from public.fiyat_listesi_satir
      where liste_id = p_liste_id and yazim = 1;
 
     -- Kalem kumesi: aktif stoklar + aktif hizmetler. Baslik satiri olan
@@ -242,7 +242,7 @@ begin
     loop
         -- p_yazili = false: kural yeniden isletilsin, kendi eski satirini okumasin.
         select * into v_f
-          from public.fn_satis_listesi_fiyat(p_liste_id, k.stok_id, k.hizmet_id, 0, false);
+          from public.fn_fiyat_listesi_fiyat(p_liste_id, k.stok_id, k.hizmet_id, 0, false);
 
         -- Fiyati cozulemeyen kalem ATLANIR: 0 TL'lik satir yazmak, listeyi
         --   "bedava" gosteren bir tuzak olurdu.
@@ -251,7 +251,7 @@ begin
             continue;
         end if;
 
-        insert into public.satis_listesi_satir
+        insert into public.fiyat_listesi_satir
             (liste_id, stok_id, hizmet_id, fiyat, doviz_cinsi, kdv_dahil, birim,
              durum, yazim, taban_fiyat, uretim_tarihi, ekleyen, degistiren)
         values
@@ -263,7 +263,7 @@ begin
             v_ekle := v_ekle + 1;
         else
             -- Var olan satir: yalniz HESAP satirlari guncellenir.
-            update public.satis_listesi_satir
+            update public.fiyat_listesi_satir
                set fiyat = v_f.fiyat, doviz_cinsi = v_f.doviz_cinsi, kdv_dahil = v_f.kdv_dahil,
                    taban_fiyat = v_f.fiyat, uretim_tarihi = now()::timestamp,
                    degistiren = p_kullanici
@@ -277,10 +277,10 @@ begin
     return query select v_ekle, v_guncelle, v_koru, v_yok;
 end $$;
 
-comment on function public.fn_satis_listesi_uret(integer, integer, boolean, boolean) is
+comment on function public.fn_fiyat_listesi_uret(integer, integer, boolean, boolean) is
   'Listeyi materyalize eder (202): hesap satirlarini yazar/gunceller, MANUEL satirlari korur.';
 
 do $$
 begin
-    raise notice '202 tamam: fn_fiyat_yuvarla / fn_kalem_kart_fiyati / fn_satis_listesi_fiyat / fn_satis_listesi_uret.';
+    raise notice '202 tamam: fn_fiyat_yuvarla / fn_kalem_kart_fiyati / fn_fiyat_listesi_fiyat / fn_fiyat_listesi_uret.';
 end $$;

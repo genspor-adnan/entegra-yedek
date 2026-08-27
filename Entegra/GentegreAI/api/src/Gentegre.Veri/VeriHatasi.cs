@@ -55,8 +55,8 @@ public static class VeriHatasi
         ["ux_hesap_ana_kasa"] = "Bu şubede zaten bir Ana Kasa var; önce onun atamasını kaldırın.",
         ["ux_hesap_personel_kasa"] = "Bu personelin zaten bir kasası var; bir personel tek kasaya atanabilir.",
         // Fiyat listesi (204): yon basina TEK varsayilan.
-        ["ux_satis_listesi_varsayilan"] = "Bu yönde zaten bir varsayılan liste var; önce onun \"Varsayılan\" işaretini kaldırın.",
-        ["ux_satis_listesi_ad"] = "Bu adda bir fiyat listesi zaten var."
+        ["ux_fiyat_listesi_varsayilan"] = "Bu yönde zaten bir varsayılan liste var; önce onun \"Varsayılan\" işaretini kaldırın.",
+        ["ux_fiyat_listesi_ad"] = "Bu adda bir fiyat listesi zaten var."
     };
 
     /// <summary>

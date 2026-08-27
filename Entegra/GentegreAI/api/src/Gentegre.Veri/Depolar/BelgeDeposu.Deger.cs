@@ -100,7 +100,7 @@ public sealed partial class BelgeDeposu
                               where ks.belge_id = b.id and hb.durum <> 2), 0) as "hedefId",
                    b.xmin::text as surum
               from public.belge b
-              left join public.satis_listesi fl on fl.id = b.fiyat_listesi_id
+              left join public.fiyat_listesi fl on fl.id = b.fiyat_listesi_id
               left join public.depo  cd on cd.id = b.cikis_depo_id
               left join public.depo  gd on gd.id = b.giris_depo_id
               left join public.taraf sc on sc.id = b.satici_id

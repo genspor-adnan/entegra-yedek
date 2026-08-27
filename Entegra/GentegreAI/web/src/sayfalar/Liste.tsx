@@ -420,7 +420,7 @@ Bu işlem geri alınamaz. `
         // FIYAT LISTESI URETIMI (202): kurali yeniden isletip satirlari yazar.
         //   Onay ISTENIR - binlerce satiri degistirir ve taban fiyat degistiyse
         //   liste fiyatlari toptan degisir.
-        case 'satis-listesi.uret': {
+        case 'fiyat-listesi.uret': {
           if (!satir) return;
           const ad = String(satir.ad ?? satir.id);
           if (!await onay(`"${ad}" listesinin satırları yeniden üretilecek.
@@ -429,14 +429,14 @@ Bu işlem geri alınamaz. `
                      + 'Kural (taban liste × çarpan → yuvarlama) yeniden işletilir. '
                      + 'Elle girilmiş (Manuel) satırlar KORUNUR.')) return;
           await guvenli(async () => {
-            const y = await api.satisListesiUret(Number(satir.id));
+            const y = await api.fiyatListesiUret(Number(satir.id));
             mesaj(y.mesaj);
             setYenile(t => t + 1);
           });
           return;
         }
-        case 'satis-listesi.satirlar':
-          if (satir) git(`/satis-listesi-satir?listeId=${satir.id}`);
+        case 'fiyat-listesi.satirlar':
+          if (satir) git(`/fiyat-listesi-satir?listeId=${satir.id}`);
           return;
 
         case 'genel.yazdir': mesaj('Yazdirma henuz baglanmadi.'); return;

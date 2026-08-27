@@ -619,7 +619,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       try {
         // YON SUZMESI SART: alis belgesinde satis listesi secilememeli -
         //   satis fiyatiyla mal girisi yapmak maliyeti bozar.
-        const y = await api.liste('satis-listesi', {
+        const y = await api.liste('fiyat-listesi', {
           sayfa: 1, boyut: 200,
           filtre: { op: 'and', kosullar: [
             { alan: 'durum',   op: 'esit', deger: 'Aktif' },
@@ -672,7 +672,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       let degisen = 0, bulunamayan = 0;
       const yeniSatirlar = await Promise.all(satirlar.map(async r => {
         if (!r.stokId && !r.hizmetId) return r;
-        const f = await api.satisListesiFiyat(yeni,
+        const f = await api.fiyatListesiFiyat(yeni,
           r.stokId ? { stokId: r.stokId } : { hizmetId: r.hizmetId! });
         if (f.fiyat === null || f.fiyat <= 0) { bulunamayan++; return r }
         degisen++;
