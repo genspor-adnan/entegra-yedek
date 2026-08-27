@@ -1,8 +1,10 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Gentegre.Api.AraKatman;
+using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
+using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 
 namespace Gentegre.Api.Uclar;
@@ -12,6 +14,54 @@ public static class KartUclari
     public static void KartUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/kart").WithTags("Kart").RequireAuthorization();
+
+        // POST /api/kart/cari/{id}/ebelge-mukellef - alicinin GIB e-Fatura
+        //   kaydini entegratore SOR ve karta isle. Elle isaretlenen bayrak
+        //   yanlissa belge yanlis turde gider ve GIB reddeder.
+        yol.MapPost("/api/kart/cari/{id:int}/ebelge-mukellef", async (
+            int id, BaglamCozucu cozucu, EBelgeSorgu sorgu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("cari", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var oku = new Npgsql.NpgsqlCommand(
+                "select coalesce(vkno, ''), coalesce(unvan, '') from public.taraf where id = @p0",
+                baglanti);
+            oku.Parameters.AddWithValue("p0", id);
+            string vkno = "", unvan = "";
+            await using (var o = await oku.ExecuteReaderAsync(iptal))
+            {
+                if (!await o.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi();
+                vkno = o.GetString(0); unvan = o.GetString(1);
+            }
+
+            var m = await sorgu.MukellefSorgulaAsync(vkno, baglam.SubeId, iptal);
+
+            // Bayrak GUNCELLENIR, diger alanlar DOKUNULMAZ: unvan/adres
+            //   musterinin kendi kaydi, entegratorun yazimiyla ezilmemeli -
+            //   yanitta gelirler, kullanici isterse elle alir.
+            await using var yaz = new Npgsql.NpgsqlCommand("""
+                update public.taraf set efatura = @p1, degistiren = @p2,
+                       degistirme_tarihi = now()::timestamp
+                 where id = @p0 and coalesce(efatura, 0) <> @p1
+                """, baglanti);
+            yaz.Parameters.AddWithValue("p0", id);
+            yaz.Parameters.AddWithValue("p1", (short)(m.Mukellef ? 1 : 0));
+            yaz.Parameters.AddWithValue("p2", baglam.KullaniciId);
+            var degisti = await yaz.ExecuteNonQueryAsync(iptal) > 0;
+
+            return Results.Ok(new
+            {
+                mukellef = m.Mukellef, durum = m.Durum, degisti,
+                gelen = new { unvan = m.Unvan, vergiDairesi = m.VergiDairesi,
+                              il = m.Il, ilce = m.Ilce, adres = m.Adres },
+                kayitli = new { unvan, vkno },
+                izlemeNo = baglam.IzlemeNo,
+            });
+        }).RequireAuthorization();
+
 
         // ------------------------------------------------------------- oku ----
         grup.MapGet("/{kaynak}/{id:long}", async (

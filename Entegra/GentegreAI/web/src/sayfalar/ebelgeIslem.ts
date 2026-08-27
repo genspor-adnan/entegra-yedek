@@ -11,6 +11,9 @@ import { hataMetni, type EBelgeMesaji, type ListeSatiri } from '../api/sozlesme'
  * ve onay diyalogu istiyor, yani ekranin durumuna bagli.
  */
 
+/** Satir sonu - sablon dizgede kacis karisikligi olmasin diye sabit. */
+const NL = '\n';
+
 /** Metni dosya olarak indirir. Blob URL kisa omurlu - birakilmazsa sekme
     kapanana kadar bellekte kalir. */
 export function dosyaIndir(icerik: string, ad: string, tip: string) {
@@ -128,6 +131,16 @@ export async function ebelgeCiktisi(
       case 'ebelge.xml': {
         const y = await api.belgeEBelgeUbl(id);
         dosyaIndir(y.ubl, `${y.dosyaAdi}.xml`, 'application/xml;charset=utf-8');
+        return true;
+      }
+      // DURUM SORGULA (183): entegratordeki GIB durumunu ceker ve kayda isler.
+      case 'ebelge.durum': {
+        const d = await api.belgeEBelgeDurum(id);
+        const ek = d.degisti ? 'Durum güncellendi.' : 'Durum değişmemiş.';
+        mesaj(d.kod
+          ? `${d.belgeNo}: ${d.aciklama || d.kod}` + NL + NL + ek
+          : `${d.belgeNo}: ${d.aciklama}`);
+        if (d.degisti) yenile?.();
         return true;
       }
       case 'ebelge.mesajlar': {

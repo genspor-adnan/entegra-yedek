@@ -115,6 +115,7 @@ Saat.DilimAyarla(kurucu.Configuration["Kurulus:SaatDilimi"]);
 //   (gonderim entegratorde 1-2 dakika surebiliyor).
 kurucu.Services.AddHttpClient("ebelge", i => i.Timeout = TimeSpan.FromMinutes(2));
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EBelgeGonderimi>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.EBelgeSorgu>();
 
 var uygulama = kurucu.Build();
 

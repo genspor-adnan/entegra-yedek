@@ -260,6 +260,32 @@ Bu işlem geri alınamaz. `
           } catch (h) { mesaj(hataMetni(h)) }
           return;
         }
+        // CARI MUKELLEFIYET SORGUSU (183): entegratore sorar, bayragi isler.
+        //   Gelen unvan/adres YALNIZ GOSTERILIR - musterinin kendi kaydi
+        //   entegratorun yazimiyla ezilmemeli.
+        case 'cari.ebelge-mukellef': {
+          if (!satir) return;
+          try {
+            const y = await api.cariEBelgeMukellef(Number(satir.id));
+            const satirlar = [
+              String(y.kayitli.unvan || satir.unvan || ''),
+              '',
+              'GİB kaydı: ' + (y.mukellef
+                ? 'e-Fatura MÜKELLEFİ' : 'kayıtlı değil (e-Arşiv kesilir)') + ' — ' + y.durum,
+            ];
+            if (y.degisti) satirlar.push('Cari kartındaki bayrak güncellendi.');
+            // GIB'den gelen unvan/adres YALNIZ GOSTERILIR: musterinin kendi
+            //   kaydi entegratorun yazimiyla ezilmemeli.
+            if (y.gelen.unvan) {
+              satirlar.push('', 'GİB’deki bilgiler:', y.gelen.unvan);
+              if (y.gelen.vergiDairesi) satirlar.push(y.gelen.vergiDairesi);
+              if (y.gelen.il) satirlar.push(`${y.gelen.adres} ${y.gelen.ilce} / ${y.gelen.il}`);
+            }
+            mesaj(satirlar.join('\n'));
+            setYenile(t => t + 1);
+          } catch (h) { mesaj(hataMetni(h)) }
+          return;
+        }
         case 'belge.donustur':
           if (!satir) return;
           setDonusum({ belgeId: Number(satir.id), belgeTur: Number(satir.tur) });

@@ -255,6 +255,20 @@ public static class BelgeUclari
             throw GentegreHatasi.Dogrulama($"Bilinmeyen toplu işlem: {istek.Islem}");
         });
 
+        // POST /api/belge/{id}/ebelge-durum - GIB durumunu entegratorden cek.
+        //   Gonderimden sonra durum kendiliginden degismiyordu; "gonderdim, ne
+        //   oldu?" sorusunun cevabi buradan gelir.
+        grup.MapPost("/{id:int}/ebelge-durum", async (
+            int id, BaglamCozucu cozucu, EBelgeSorgu sorgu,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+            var d = await sorgu.DurumSorgulaAsync(id, baglam.KullaniciId, iptal);
+            return Results.Ok(new { d.BelgeNo, d.Kod, d.Aciklama, d.Degisti,
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
         // GET /api/belge/{id}/ebelge-ubl - UBL-XML + goruntuleme XSLT'si (182).
         //   "XML Kaydet" ve XSLT'li on izleme bunu kullanir.
         grup.MapGet("/{id:int}/ebelge-ubl", async (

@@ -287,6 +287,18 @@ export const api = {
   belgeEBelgeOnizle: (id: number) =>
     istek<{ html: string }>(`/api/belge/${id}/ebelge-onizle`),
 
+  /** GIB durumunu entegratorden ceker ve kayda isler (183). */
+  belgeEBelgeDurum: (id: number) =>
+    gonder<{ belgeNo: string; kod: string; aciklama: string; degisti: boolean }>(
+      `/api/belge/${id}/ebelge-durum`, {}),
+
+  /** Carinin GIB e-Fatura kaydini sorar, bayragi gunceller (183). */
+  cariEBelgeMukellef: (id: number) =>
+    gonder<{ mukellef: boolean; durum: string; degisti: boolean;
+             gelen: { unvan: string; vergiDairesi: string; il: string; ilce: string; adres: string };
+             kayitli: { unvan: string; vkno: string } }>(
+      `/api/kart/cari/${id}/ebelge-mukellef`, {}),
+
   /** Toplu e-Belge (183): secili belgeleri hazirlar ya da gonderir. */
   belgeEBelgeToplu: (belgeler: number[], islem: 'hazirla' | 'gonder') =>
     gonder<{ sonuclar: TopluEBelgeSonucu[] }>('/api/belge/ebelge-toplu', { belgeler, islem }),
