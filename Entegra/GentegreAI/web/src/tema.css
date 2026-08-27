@@ -968,3 +968,54 @@ input.skt-gecmis {
 .baslik-eylem { display: inline-flex; gap: 4px; flex: none }
 /* Eylem ikonlari basligin HEMEN saginda dursun (saga yaslanmasin). */
 .numaralama-bas.bitisik { justify-content: flex-start; gap: 10px }
+
+/* ============================================================================
+   GECE MODU - yalniz DEGISKENLER yeniden tanimlanir; bilesen kurallari aynen
+   calisir (hepsi `var(--...)` kullaniyor).
+
+   Iki yol: (1) kullanici acikca sectiyse `data-tema="gece"`, (2) hicbir sey
+   secmediyse isletim sisteminin koyu temasi. Kullanici "gunduz" dediyse sistem
+   koyu olsa bile aydinlik kalir - acik secim sistemi EZER.
+   ========================================================================= */
+:root[data-tema="gece"] {
+  --zem: #151a21;
+  --yuz: #1b222b;
+  --yuz2: #222b36;
+  --cizgi: #38434f;
+  --cizgi2: #2a333e;
+  --yazi: #e6edf5;
+  --yazi2: #9fc6f5;
+  --soluk: #93a3b4;
+  --mor: #4d8fd6;
+  --mor2: #24384f;
+  --vurgu: #4d8fd6;
+  --ok: #56b374;
+  --uyari: #d0a44a;
+  --hata: #e06a6a;
+  --golge: 0 6px 22px rgba(0, 0, 0, .45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="gunduz"]) {
+    --zem: #151a21;
+    --yuz: #1b222b;
+    --yuz2: #222b36;
+    --cizgi: #38434f;
+    --cizgi2: #2a333e;
+    --yazi: #e6edf5;
+    --yazi2: #9fc6f5;
+    --soluk: #93a3b4;
+    --mor: #4d8fd6;
+    --mor2: #24384f;
+    --vurgu: #4d8fd6;
+    --ok: #56b374;
+    --uyari: #d0a44a;
+    --hata: #e06a6a;
+    --golge: 0 6px 22px rgba(0, 0, 0, .45);
+  }
+}
+
+/* Gecede beyaz zeminli gomulu icerik (onizleme HTML'i, XSLT ciktisi) goz
+   almasin diye hafif kisilir; ICERIGIN kendi renkleri korunur. */
+:root[data-tema="gece"] .kagov iframe,
+:root[data-tema="gece"] img { filter: brightness(.92) }

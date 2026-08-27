@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
+  from '../bilesenler/tema';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -108,6 +110,7 @@ export function Kabuk() {
   const [ayarKaydediliyor, setAyarKaydediliyor] = useState(false);
   /** Bayrak dugmesinin acilir listesi. */
   const [dilMenusu, setDilMenusu] = useState(false);
+  const [tema, setTema] = useState<Tema>(() => temaOku());
   const grupAcikMi = (ad: string, alt: typeof moduller) =>
     ad in acikGruplar ? acikGruplar[ad] : alt.some(m => konum.pathname.startsWith(m.yol));
 
@@ -211,6 +214,13 @@ export function Kabuk() {
               ))}
             </select>
           )}
+
+          {/* GECE / GUNDUZ: uc durumlu - Sistem, Gündüz, Gece. Secim tarayicida
+              saklanir (ayni hesap iki cihazda farkli olabilir). */}
+          <button className="ib" title={`Tema — ${TEMA_ADI[tema]} (değiştirmek için tıklayın)`}
+                  onClick={() => { const y = temaSonraki(tema); setTema(y); temaUygula(y) }}>
+            {TEMA_IKON[tema]}
+          </button>
 
           <button className="ib" title="Bildirimler">🔔</button>
 
@@ -370,10 +380,21 @@ export function Kabuk() {
                   <label>Kullanıcı Durumu</label><input value="Aktif" disabled />
                   <label>Çalışılan Şube</label><input value={aktifSube?.ad ?? '-'} disabled />
                   <label>Dil</label>
-                  <select value={seciliDil} onChange={e => setSeciliDil(Number(e.target.value))} disabled={ayarKaydediliyor}>
-                    <option value={0}>Türkçe</option>
-                    <option value={1}>English</option>
-                    <option value={2}>Deutsch</option>
+                  {/* Bayrakli secim (kullanici): "Türkçe/English/Deutsch" yerine
+                      ust cubuktaki bayrakla AYNI gorsel dil. */}
+                  <select value={seciliDil} onChange={e => setSeciliDil(Number(e.target.value))}
+                          disabled={ayarKaydediliyor}>
+                    {DILLER.map(d => (
+                      <option key={d.deger} value={d.deger}>{d.bayrak}  {d.ad}</option>
+                    ))}
+                  </select>
+                  <label>Tema</label>
+                  <select value={tema}
+                          onChange={e => { const y = e.target.value as Tema;
+                                           setTema(y); temaUygula(y) }}>
+                    {(['sistem', 'gunduz', 'gece'] as Tema[]).map(t => (
+                      <option key={t} value={t}>{TEMA_IKON[t]}  {TEMA_ADI[t]}</option>
+                    ))}
                   </select>
                 </div>
               </div>
