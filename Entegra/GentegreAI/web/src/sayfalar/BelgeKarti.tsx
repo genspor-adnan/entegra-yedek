@@ -239,7 +239,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    */
   const eBelgeGonderildi = Number(sonuc?.belge.efaturaDurum ?? 0) > 0;
   const faturalandi = Number(sonuc?.belge.kapanmaDurum ?? 0) > 0;
-  const duzenlenebilir = mevcutBelge && !!sonuc && !eBelgeGonderildi && !faturalandi;
+  // SIPARIS donusmus olsa da acilir (kullanici): kapanmis siparise yeni satir
+  //   eklenebilmeli, belge o zaman KISMI'ye doner. Donusmus SATIRLAR sunucuda
+  //   korunur; fatura/irsaliyede kilit surer - kalemi degistirmek hedef belgeyi
+  //   ve muhasebe fisini tutarsiz birakirdi.
+  const siparisTuru = tur === 9 || tur === 19;
+  const duzenlenebilir = mevcutBelge && !!sonuc && !eBelgeGonderildi
+                         && (!faturalandi || siparisTuru);
   const kilitli = (mevcutBelge && !duzenlenebilir) || (!mevcutBelge && !!sonuc);
   // Turun EKRAN DAVRANISI tek yerden gelir (belgeTuru.ts): hangi alan cizilir,
   //   kalem satiri nasil gorunur, kayittan sonra ne olur. Eskiden bu kararlar

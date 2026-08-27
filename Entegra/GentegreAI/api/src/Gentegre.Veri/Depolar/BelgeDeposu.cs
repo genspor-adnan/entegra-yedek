@@ -173,7 +173,14 @@ public sealed partial class BelgeDeposu
         if (efaturaDurum > 0)
             throw GentegreHatasi.IsKurali(
                 "e-Belge gonderilmis belge degistirilemez; iptal edip yeniden kesin.");
-        if (kapanma > 0)
+        // DONUSMUS BELGE (kapanma_durum > 0)
+        //   SIPARIS: duzenlenebilir. Kullanici kapanmis siparise YENI SATIR
+        //     ekleyebilmeli; donusmus satirlar ise KORUNUR (hedef belge onlara
+        //     bagli) - asagida silinmez ve istemciden gelen kopyalari atlanir.
+        //   FATURA / IRSALIYE: kilit surer. Turetilmis belgenin kalemini
+        //     degistirmek hedef belgeyi ve muhasebe fisini tutarsiz birakir.
+        var siparisMi = tur is 9 or 19;
+        if (kapanma > 0 && !siparisMi)
             throw GentegreHatasi.IsKurali(
                 "Bu belgeden fatura turetilmis; once turetilen belgeyi iptal edin.");
         if (duzenlemeGun > 0 && Saat.Bugun > belgeTarihi.Date.AddDays(duzenlemeGun))
@@ -191,13 +198,46 @@ public sealed partial class BelgeDeposu
             await sil.ExecuteNonQueryAsync(iptal);
         }
 
+        // DONUSMUS SATIRLAR SILINMEZ: hedef belgenin satirlari bunlara
+        //   (belge_satir.kaynak_id) bagli; silinirse zincir kopar ve
+        //   kapatilan_miktar tetigi bozulur.
+        var korunan = new List<int>();
+        if (kapanma > 0)
+        {
+            await using var oku = new NpgsqlCommand(
+                "select id from public.belge_satir where belge_id = @p0 and coalesce(kapatilan_miktar, 0) > 0",
+                baglanti, islem);
+            oku.Parameters.AddWithValue("p0", belgeId);
+            await using var o = await oku.ExecuteReaderAsync(iptal);
+            while (await o.ReadAsync(iptal)) korunan.Add(o.GetInt32(0));
+        }
+
         await using (var sil = new NpgsqlCommand("""
-            delete from public.stok_izleme where belge_id = @p0;
-            delete from public.belge_satir  where belge_id = @p0;
+            delete from public.stok_izleme where belge_id = @p0
+                  and coalesce(array_length(@p1::int[], 1), 0) = 0;
+            delete from public.belge_satir  where belge_id = @p0
+                  and not (id = any(@p1::int[]));
             """, baglanti, islem))
         {
             sil.Parameters.AddWithValue("p0", belgeId);
+            sil.Parameters.AddWithValue("p1", korunan.ToArray());
             await sil.ExecuteNonQueryAsync(iptal);
+        }
+
+        // Istemci TUM satirlari gonderir; korunanlarin kopyasi ATILIR, yoksa
+        //   ayni kalem iki kez yazilirdi.
+        if (korunan.Count > 0)
+        {
+            satirlar = satirlar
+                // Kimlik alani istemcide "satirId", kart okumasinda "id" adiyla
+                //   geliyor - ikisi de kabul edilir.
+                .Where(x => !((x.TryGetValue("satirId", out var sid)
+                               && sid.ValueKind == JsonValueKind.Number
+                               && korunan.Contains(sid.GetInt32()))
+                              || (x.TryGetValue("id", out var kid)
+                                  && kid.ValueKind == JsonValueKind.Number
+                                  && korunan.Contains(kid.GetInt32()))))
+                .ToList();
         }
 
         // ------------------------------------------- 3) yeni haliyle yeniden yaz ----

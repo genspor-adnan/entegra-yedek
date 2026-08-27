@@ -174,6 +174,10 @@ return {
   },
   satirlar: dolu.map((s, i) => ({
     sira: i + 1,
+    // KAYITLI satirin kimligi: donusmus (kapatilan_miktar > 0) satirlar
+    //   sunucuda KORUNUR ve buradan gelen kopyalari atilir (191). Yeni
+    //   satirda yoktur.
+    satirId: s.satirId,
     tur: s.satirTur,
     stokId: s.stokId,
     hizmetId: s.hizmetId,
