@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hastalar — Liste — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* satir renkleri */
+    --s-alj:#fbe6ae; --s-alj-t:#7a5407;   /* kritik alerji            */
+    --s-eks:#fdf1e2; --s-eks-t:#8a5a12;   /* kimlik / iletisim eksik  */
+    --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;   /* pasif / vefat            */
+    --s-brc:#f7cfcf; --s-brc-t:#7d1f1f;   /* acik borc                */
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1360px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .wrap{display:grid;grid-template-columns:230px 1fr 250px;gap:0}
+  /* SOL: menu + arama */
+  .gorev{background:#f4f7fa;border-right:1px solid var(--line2);padding:6px 6px 10px}
+  .gorev h5{margin:6px 4px 4px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .ltabs{display:flex;gap:2px;margin:-6px -6px 8px;padding:6px 6px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .ltab{flex:1;text-align:center;padding:6px 8px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);
+    border-bottom:none;border-radius:4px 4px 0 0;color:var(--muted);cursor:pointer}
+  .ltab.active{background:#f4f7fa;color:var(--navy);font-weight:bold}
+  .lpane{display:none}.lpane.active{display:block}
+  .gtus{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:3px;font-size:11.5px;color:var(--ink);cursor:pointer}
+  .gtus:hover{background:#e7eef7}
+  .gtus.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .gtus .ic{width:16px;text-align:center}
+  .gtus .n{margin-left:auto;font-size:10px;color:#5b6b7c;background:#dde6ef;border-radius:9px;padding:0 6px}
+  .gtus.on .n{background:rgba(255,255,255,.25);color:#fff}
+  .achips{display:flex;gap:4px;margin-bottom:8px}
+  .achips .minibtn{flex:1;justify-content:center}
+  .agrid{display:grid;grid-template-columns:78px 1fr;gap:5px 6px;align-items:center}
+  .agrid label{font-size:10.5px;color:var(--muted);text-align:right}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:22px;padding:0 6px;
+    font-size:11.5px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:3px;color:var(--muted);font-size:10px}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink);margin-top:5px}
+  /* ORTA */
+  .center{min-width:0;display:flex;flex-direction:column}
+  .filtre{display:flex;gap:5px;padding:8px 10px 7px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line2);background:#fbfcfe}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 7px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap;
+    text-transform:uppercase;letter-spacing:.2px;position:sticky;top:0}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 7px;font-size:11.5px;white-space:nowrap}
+  .dg tr:hover td{background:#f2f7fd}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.s-alj td{background:var(--s-alj);color:var(--s-alj-t)}
+  .dg tr.s-eks td{background:var(--s-eks);color:var(--s-eks-t)}
+  .dg tr.s-brc td{background:var(--s-brc);color:var(--s-brc-t)}
+  .dg tr.s-pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .dg tr.s-pas td.ad{text-decoration:line-through}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-inf{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.55}
+  .sayfalama{display:flex;align-items:center;gap:6px;padding:7px 10px;border-top:1px solid var(--line2);background:#fbfcfe;font-size:11px;color:var(--muted)}
+  /* alt detay */
+  .tabs{display:flex;gap:2px;padding:0 10px;background:var(--head2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 13px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;
+    font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:10px}
+  .pane.active{display:block}
+  .kutu{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:8px 10px}
+  .kutu h6{margin:0 0 6px;font-size:10.5px;letter-spacing:.3px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;justify-content:space-between;gap:10px;padding:2px 0;font-size:11.5px;border-bottom:1px dotted var(--line2)}
+  .kv:last-child{border-bottom:none}
+  .kv b{color:var(--navy)}
+  /* SAG */
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:10px}
+  .sidebox{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:8px 9px;font-size:11.5px;margin-bottom:10px}
+  .sidebox h6{margin:0 0 6px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .foto{height:120px;border:1px dashed var(--line);border-radius:3px;background:#eef3f8;
+    display:flex;align-items:center;justify-content:center;color:#9aa9b8;font-size:11px;margin-bottom:8px}
+  .uyari{background:#fdeaea;border:1px solid #f2caca;border-radius:3px;padding:7px 8px;font-size:11px;color:#8f2c2a;margin-bottom:10px;line-height:1.45}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="win">
+
+  <div class="title"><span class="dot"></span> Hastalar — Liste
+    <span class="sp">HBYS · Kayıt Kabul › Hastalar &nbsp;|&nbsp; MERKEZ HASTANE · 27.08.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni Hasta</div>
+    <div class="btn">✎ Kartı Aç</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn ok">➕ Başvuru Aç (Kabul)</div>
+    <div class="btn">🧾 Provizyon Sorgula</div>
+    <div class="btn">🪪 MERNİS'ten Tazele</div>
+    <div class="sepv"></div>
+    <div class="btn">🔗 Kayıt Birleştir</div>
+    <div class="btn">📊 Excel</div>
+    <div class="btn">🖨️ Yazdır</div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- ==================== SOL: MENU / ARAMA ==================== -->
+    <div class="gorev">
+      <div class="ltabs">
+        <div class="ltab active" data-l="menu">☰ Menü</div>
+        <div class="ltab" data-l="arama">🔎 Arama</div>
+      </div>
+
+      <div class="lpane active" data-lp="menu">
+        <h5>Hastalar</h5>
+        <div class="gtus on"><span class="ic">👥</span> Tüm Hastalar <span class="n">18.442</span></div>
+        <div class="gtus"><span class="ic">🕓</span> Bugün Gelenler <span class="n">158</span></div>
+        <div class="gtus"><span class="ic">🩸</span> Kritik Alerjisi Olan <span class="n">271</span></div>
+        <div class="gtus"><span class="ic">⚠️</span> Kimliği Eksik <span class="n">36</span></div>
+        <div class="gtus"><span class="ic">💳</span> Açık Borcu Olan <span class="n">84</span></div>
+        <div class="gtus"><span class="ic">👶</span> Yenidoğan (TC bekleyen) <span class="n">7</span></div>
+        <div class="gtus"><span class="ic">🌍</span> Yabancı Uyruklu <span class="n">412</span></div>
+        <h5>Diğer</h5>
+        <div class="gtus"><span class="ic">🧬</span> Mükerrer Kayıt Adayları <span class="n">19</span></div>
+        <div class="gtus"><span class="ic">🚫</span> Pasif / Vefat <span class="n">203</span></div>
+        <div class="hint" style="padding:6px 4px 0">
+          Menü kutuları <b>hazır filtre</b>dir; seçili olan mavi. "Mükerrer Kayıt Adayları"
+          aynı TC ya da aynı ad+doğum tarihi ile açılmış kartları bulur.
+        </div>
+      </div>
+
+      <div class="lpane" data-lp="arama">
+        <div class="achips">
+          <span class="minibtn on">Tüm</span><span class="minibtn">Son</span><span class="minibtn">Sık</span>
+        </div>
+        <div class="agrid">
+          <label>T.C. Kimlik</label><div class="inp"></div>
+          <label>Hasta No</label><div class="inp"></div>
+          <label>Ad</label><div class="inp">MERYEM</div>
+          <label>Soyad</label><div class="inp"></div>
+          <label>Baba Adı</label><div class="inp"></div>
+          <label>Doğum Tar.</label><div class="inp"></div>
+          <label>Cinsiyet</label><div class="inp combo">(tümü)</div>
+          <label>Telefon</label><div class="inp"></div>
+          <label>Uyruk</label><div class="inp combo">(tümü)</div>
+          <label>Kurum</label><div class="inp combo">(tümü)</div>
+          <label>Kan Grubu</label><div class="inp combo">(tümü)</div>
+          <label>Durum</label><div class="inp combo">Aktif</div>
+        </div>
+        <div class="agrid" style="grid-template-columns:78px 1fr 1fr;margin-top:5px">
+          <label>Son başvuru</label><div class="inp">01.01.2026</div><div class="inp">27.08.2026</div>
+        </div>
+        <label class="chk"><input type="checkbox" checked> Pasif / vefat kayıtları gizle</label>
+        <label class="chk"><input type="checkbox"> Sadece alerjisi olanlar</label>
+        <label class="chk"><input type="checkbox"> Sadece açık borcu olanlar</label>
+        <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap">
+          <span class="minibtn on" style="flex:1;justify-content:center">🔎 Ara</span>
+          <span class="minibtn" style="flex:1;justify-content:center">↩ Temizle</span>
+          <span class="minibtn" style="flex-basis:100%;justify-content:center">💾 Aramayı Kaydet</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ORTA: LISTE ==================== -->
+    <div class="center">
+      <div class="filtre">
+        <span class="minibtn on">Aktif</span>
+        <span class="minibtn">Alerjili</span>
+        <span class="minibtn">Kimliği Eksik</span>
+        <span class="minibtn">Borçlu</span>
+        <span class="minibtn">Pasif</span>
+        <span class="minibtn">Tümü</span>
+        <span class="sepv" style="height:20px"></span>
+        <span class="minibtn">🏥 Kurum: (tümü)</span>
+        <span class="minibtn">🌍 Uyruk: (tümü)</span>
+        <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">
+          Sıralama: son başvuru ↓ · pasifler en sonda</span>
+      </div>
+
+      <div style="padding:10px 10px 0">
+        <div class="dg" style="max-height:330px;overflow-y:auto">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:28px" class="c">#</th>
+                <th>Hasta No</th><th>T.C. Kimlik</th><th>Ad Soyad</th>
+                <th class="c">Doğum / Yaş</th><th class="c">Cins.</th>
+                <th>Telefon</th><th>Kurum</th>
+                <th class="c">Son Başvuru</th><th class="c">Başvuru</th>
+                <th class="r">Açık Borç</th><th>Uyarı</th><th>Durum</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="s-alj sel">
+                <td class="c">1</td><td>000124587</td><td>12345678901</td><td class="ad"><b>MERYEM AYDOĞAN</b></td>
+                <td class="c">14.03.1979 · 47</td><td class="c">K</td><td>0532 114 27 63</td><td>SGK 4/a</td>
+                <td class="c">18.08.2026</td><td class="c">14</td><td class="r">0,00</td>
+                <td>⚠ Penisilin</td><td><span class="pill p-ok">Aktif</span></td>
+              </tr>
+              <tr>
+                <td class="c">2</td><td>000119302</td><td>23456789012</td><td class="ad">KEMAL AYDOĞAN</td>
+                <td class="c">02.09.1975 · 50</td><td class="c">E</td><td>0533 447 19 22</td><td>SGK 4/a</td>
+                <td class="c">11.08.2026</td><td class="c">6</td><td class="r">0,00</td>
+                <td>—</td><td><span class="pill p-ok">Aktif</span></td>
+              </tr>
+              <tr class="s-brc">
+                <td class="c">3</td><td>000131774</td><td>34567890123</td><td class="ad">SELMA DEMİRTAŞ</td>
+                <td class="c">27.11.1990 · 35</td><td class="c">K</td><td>0545 331 08 77</td><td>Ücretli</td>
+                <td class="c">06.08.2026</td><td class="c">3</td><td class="r">1.860,00</td>
+                <td>—</td><td><span class="pill p-ok">Aktif</span></td>
+              </tr>
+              <tr class="s-eks">
+                <td class="c">4</td><td>000140911</td><td>—</td><td class="ad">BEBEK / SELMA DEMİRTAŞ</td>
+                <td class="c">21.08.2026 · 6 g</td><td class="c">E</td><td>0545 331 08 77</td><td>SGK (anne)</td>
+                <td class="c">21.08.2026</td><td class="c">1</td><td class="r">0,00</td>
+                <td>TC bekleniyor</td><td><span class="pill p-kri">Geçici</span></td>
+              </tr>
+              <tr>
+                <td class="c">5</td><td>000098447</td><td>45678901234</td><td class="ad">AHMET YALÇIN</td>
+                <td class="c">08.05.1962 · 64</td><td class="c">E</td><td>0532 990 41 06</td><td>SGK 4/b</td>
+                <td class="c">02.08.2026</td><td class="c">27</td><td class="r">0,00</td>
+                <td>⚠ Diyabet</td><td><span class="pill p-ok">Aktif</span></td>
+              </tr>
+              <tr class="s-eks">
+                <td class="c">6</td><td>000138220</td><td>99000112233</td><td class="ad">SAMIR AL-HAJJ</td>
+                <td class="c">19.01.1988 · 38</td><td class="c">E</td><td>—</td><td>Ücretli</td>
+                <td class="c">28.07.2026</td><td class="c">2</td><td class="r">0,00</td>
+                <td>Telefon yok</td><td><span class="pill p-ok">Aktif</span></td>
+              </tr>
+              <tr>
+                <td class="c">7</td><td>000102338</td><td>56789012345</td><td class="ad">HATİCE ÖZKAN</td>
+                <td class="c">30.06.1955 · 71</td><td class="c">K</td><td>0542 118 76 90</td><td>SGK 4/c</td>
+                <td class="c">14.07.2026</td><td class="c">41</td><td class="r">0,00</td>
+                <td>⚠ Kontrast</td><td><span class="pill p-ok">Aktif</span></td>
+              </tr>
+              <tr class="s-pas">
+                <td class="c">8</td><td>000044190</td><td>67890123456</td><td class="ad">MUSTAFA GÜNEŞ</td>
+                <td class="c">17.02.1941 · 85</td><td class="c">E</td><td>—</td><td>SGK 4/c</td>
+                <td class="c">03.01.2025</td><td class="c">62</td><td class="r">0,00</td>
+                <td>Vefat 11.02.2025</td><td><span class="pill p-pas">Pasif</span></td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="9">TOPLAM (8 / 18.442 hasta · 7 aktif · 1 pasif)</td>
+                <td class="c">156</td><td class="r">1.860,00</td>
+                <td colspan="2">3 alerji · 2 eksik kayıt</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="lgnd">
+          <span><span class="sw" style="background:var(--s-alj)"></span>Kritik alerji — kabul ve muayenede uyarı çıkar</span>
+          <span><span class="sw" style="background:var(--s-eks)"></span>Kimlik / iletişim eksik — başvuruda tamamlanmalı</span>
+          <span><span class="sw" style="background:var(--s-brc)"></span>Açık borç var</span>
+          <span><span class="sw" style="background:var(--s-pas)"></span>Pasif / vefat — <b>en sonda</b>, adı üstü çizili</span>
+        </div>
+        <div class="hint">
+          Satır rengi önceliği: <b>Pasif → Kritik alerji → Açık borç → Eksik kayıt → Normal</b>.
+          Çift tık <b>hasta kartını</b> açar; <b>Enter</b> seçili hastaya doğrudan <b>başvuru (kabul)</b> başlatır.
+          Arama TC / hasta no / ad-soyad / telefon üzerinde çalışır; TC 11 hane girildiğinde <b>tek kayıt</b>
+          bulunursa liste beklemeden karta geçer.
+        </div>
+      </div>
+
+      <!-- ALT DETAY -->
+      <div class="tabs" style="margin-top:10px">
+        <div class="tab active" data-t="ozet">Özet</div>
+        <div class="tab" data-t="basvuru">Son Başvurular <span class="b">14</span></div>
+        <div class="tab" data-t="tibbi">Tıbbi Uyarılar <span class="b">2</span></div>
+        <div class="tab" data-t="mali">Mali Durum</div>
+      </div>
+
+      <div class="pane active" data-p="ozet">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div class="kutu">
+            <h6>Kimlik</h6>
+            <div class="kv"><span>Hasta No</span><b>000124587</b></div>
+            <div class="kv"><span>T.C. Kimlik</span><b>12345678901</b></div>
+            <div class="kv"><span>Doğum</span><b>14.03.1979 · TEKİRDAĞ</b></div>
+            <div class="kv"><span>Baba / Ana</span><b>HÜSEYİN / FATMA</b></div>
+            <div class="kv"><span>Kan Grubu</span><b>A Rh (+)</b></div>
+          </div>
+          <div class="kutu">
+            <h6>İletişim</h6>
+            <div class="kv"><span>Cep</span><b>0532 114 27 63</b></div>
+            <div class="kv"><span>E-posta</span><b>meryem.aydogan@example.com</b></div>
+            <div class="kv"><span>Adres</span><b>ÇERKEZKÖY / TEKİRDAĞ</b></div>
+            <div class="kv"><span>KVKK</span><b><span class="pill p-ok">İmzalı</span></b></div>
+          </div>
+          <div class="kutu">
+            <h6>Sigorta</h6>
+            <div class="kv"><span>Kurum</span><b>SGK — 4/a</b></div>
+            <div class="kv"><span>Müstehaklık</span><b><span class="pill p-ok">Geçerli</span></b></div>
+            <div class="kv"><span>Son sorgu</span><b>18.08.2026 09:12</b></div>
+            <div class="kv"><span>Tamamlayıcı</span><b>Anadolu Sigorta</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane" data-p="basvuru">
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:28px" class="c">#</th><th>Protokol</th><th>Tarih</th><th>Tür</th>
+                       <th>Klinik</th><th>Hekim</th><th>Durum</th><th class="r">Tutar</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td class="c">1</td><td><b>2026-0091447</b></td><td>18.08.2026</td><td>Poliklinik</td>
+                  <td>Dahiliye</td><td>Dr. S. KARACA</td><td><span class="pill p-kri">Sonuç bekliyor</span></td><td class="r">1.240,00</td></tr>
+              <tr><td class="c">2</td><td>2026-0088120</td><td>02.07.2026</td><td>Poliklinik</td>
+                  <td>Göz</td><td>Dr. N. ERTEN</td><td><span class="pill p-ok">Kapandı</span></td><td class="r">760,00</td></tr>
+              <tr><td class="c">3</td><td>2026-0071903</td><td>11.04.2026</td><td>Acil</td>
+                  <td>Acil Servis</td><td>Dr. B. TOPAL</td><td><span class="pill p-ok">Kapandı</span></td><td class="r">2.185,50</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pane" data-p="tibbi">
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:28px" class="c">#</th><th>Tür</th><th>Etken / Tanı</th><th>Şiddet / Durum</th>
+                       <th class="c">Tarih</th><th>Kaynak</th></tr></thead>
+            <tbody>
+              <tr><td class="c">1</td><td>Alerji</td><td>Penisilin</td>
+                  <td><span class="pill p-yok">Ağır (anafilaksi)</span></td><td class="c">11.04.2023</td><td>Hekim</td></tr>
+              <tr><td class="c">2</td><td>Alerji</td><td>İyotlu kontrast madde</td>
+                  <td><span class="pill p-kri">Orta</span></td><td class="c">19.11.2025</td><td>Radyoloji</td></tr>
+              <tr><td class="c">3</td><td>Kronik</td><td>I10 — Esansiyel hipertansiyon</td>
+                  <td><span class="pill p-inf">Takipte</span></td><td class="c">2021</td><td>Dahiliye</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pane" data-p="mali">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div class="kutu"><h6>Toplam</h6>
+            <div class="kv"><span>Toplam işlem</span><b>96.482,50 ₺</b></div>
+            <div class="kv"><span>Kurum payı</span><b>95.298,50 ₺</b></div>
+            <div class="kv"><span>Hasta payı</span><b>1.184,00 ₺</b></div>
+          </div>
+          <div class="kutu"><h6>Tahsilat</h6>
+            <div class="kv"><span>Tahsil edilen</span><b>1.184,00 ₺</b></div>
+            <div class="kv"><span>Açık borç</span><b>0,00 ₺</b></div>
+            <div class="kv"><span>Son tahsilat</span><b>02.07.2026</b></div>
+          </div>
+          <div class="kutu"><h6>Fatura</h6>
+            <div class="kv"><span>Kesilen fatura</span><b>9</b></div>
+            <div class="kv"><span>SGK dönem</span><b>08/2026 — açık</b></div>
+            <div class="kv"><span>e-Belge</span><b><span class="pill p-ok">Gönderildi</span></b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sayfalama">
+        <span class="minibtn">‹ Önceki</span>
+        <span class="minibtn on">1</span><span class="minibtn">2</span><span class="minibtn">3</span>
+        <span class="minibtn">Sonraki ›</span>
+        <span style="margin-left:auto">18.442 kayıt · sayfa başına 50 · 41 ms</span>
+      </div>
+    </div>
+
+    <!-- ==================== SAG: SECILI HASTA ==================== -->
+    <div class="side">
+      <div class="foto">📷 Fotoğraf yok</div>
+      <div class="uyari"><b>⚠ Alerji:</b> Penisilin, kontrast madde</div>
+      <div class="sidebox">
+        <h6>Seçili Hasta</h6>
+        <div class="kv"><span>Ad Soyad</span><b>MERYEM AYDOĞAN</b></div>
+        <div class="kv"><span>Hasta No</span><b>000124587</b></div>
+        <div class="kv"><span>Yaş / Cinsiyet</span><b>47 · Kadın</b></div>
+        <div class="kv"><span>Sigorta</span><b>SGK 4/a</b></div>
+        <div class="kv"><span>Açık borç</span><b>0,00 ₺</b></div>
+      </div>
+      <div class="sidebox">
+        <h6>Hızlı İşlem</h6>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <span class="minibtn" style="justify-content:center">➕ Başvuru Aç</span>
+          <span class="minibtn" style="justify-content:center">✎ Kartı Aç</span>
+          <span class="minibtn" style="justify-content:center">🧾 Provizyon Sorgula</span>
+          <span class="minibtn" style="justify-content:center">📅 Randevu Ver</span>
+          <span class="minibtn" style="justify-content:center">🖨️ Hasta Kartı Yazdır</span>
+        </div>
+      </div>
+      <div class="sidebox">
+        <h6>Bugün</h6>
+        <div class="kv"><span>Yeni hasta kaydı</span><b>23</b></div>
+        <div class="kv"><span>MERNİS tazeleme</span><b>61</b></div>
+        <div class="kv"><span>Mükerrer uyarısı</span><b>2</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="maprow">
+    <span><b>taraf</b> (hasta=1) + <b>taraf_hasta</b>: hasta_no, tc, ad, soyad, dogum_tarihi, cinsiyet, kan_grubu, uyruk, durum</span>
+    <span><b>hasta_sigorta</b>: kurum, müstehaklık · <b>hasta_alerji</b> / <b>hasta_tani</b>: uyarı sütunu</span>
+    <span><b>basvuru</b>: son başvuru + adet · <b>mali_hareket</b>: açık borç · <b>kullanici_arama</b>: Son / Sık aranan</span>
+  </div>
+
+  <div class="statusbar">
+    <span>Kullanıcı: <b>A. YILDIZ</b> · Kayıt Kabul</span>
+    <span>Şube: <b>MERKEZ HASTANE</b></span>
+    <span>Filtre: <b>Aktif</b></span>
+    <span>Seçili: <b>1 kayıt</b></span>
+  </div>
+
+</div>
+
+<script>
+  // Sol menu sekmeleri (Menu / Arama) ve alt detay sekmeleri.
+  var ltabs = document.querySelectorAll('.ltab'), lpanes = document.querySelectorAll('.lpane');
+  ltabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      ltabs.forEach(function (x) { x.classList.remove('active') });
+      lpanes.forEach(function (x) { x.classList.remove('active') });
+      t.classList.add('active');
+      var p = document.querySelector('.lpane[data-lp="' + t.dataset.l + '"]');
+      if (p) p.classList.add('active');
+    });
+  });
+
+  var tabs = document.querySelectorAll('.tab'), panes = document.querySelectorAll('.pane');
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (x) { x.classList.remove('active') });
+      panes.forEach(function (x) { x.classList.remove('active') });
+      t.classList.add('active');
+      var p = document.querySelector('.pane[data-p="' + t.dataset.t + '"]');
+      if (p) p.classList.add('active');
+    });
+  });
+
+  // Satir secimi - mockup'ta da hangi satirin secili oldugu gorulsun.
+  document.querySelectorAll('.dg tbody tr').forEach(function (tr) {
+    tr.addEventListener('click', function () {
+      var g = tr.closest('table');
+      g.querySelectorAll('tbody tr').forEach(function (x) { x.classList.remove('sel') });
+      tr.classList.add('sel');
+    });
+  });
+</script>
+</body>
+</html>
