@@ -52,14 +52,47 @@ zorunlu bağ → `not null` + FK; opsiyonel bağ ve tarihlerde NULL serbest.
 | `025_fn_belge_no.sql` | Belge numarası: `fn_belge_no_uret` (satır kilidi altında boşluksuz, şube bazlı kapsam, taslak tüketmez) + sayaçların mevcut numaralarla hizalanması |
 | `027_arama_normalize.sql` | **Türkçe arama düzeltmesi**: `fn_ara_metin` (Türkçe harfleri ASCII'ye indirip `C` collation ile küçültür) + `pg_trgm` GIN indeksleri bu ifade üzerine. ICU `tr-TR` locale'de `lower('GRANIT') = 'granıt'` olduğu için `ILIKE` küçük harfle arayanı hiç bulmuyordu |
 | `026_doviz_tutar_kurali.sql` | Tutarın yerel + döviz karşılığı **her zaman dolu**: TL işlemde de `doviz_cinsi='TL'`, `doviz_kuru=1`, `doviz_tutari=tutar`. Kolon varsayılanları + `doviz_kuru > 0` check |
-| `kur.ps1` | Uçtan uca: veritabanını oluşturur, şemaları uygular, MSSQL'den `stg`'yi doldurur, göçü çalıştırır |
+| `kur.ps1` | Uçtan uca: veritabanını oluşturur, **numaralı bütün göçleri sırayla uygular**, MSSQL'den `stg`'yi doldurur, göçü çalıştırır |
+| `araclar/guncel_indeks.ps1` | `GUNCEL.md` üretir — hangi fonksiyon/görünümün **yürürlükteki tanımı hangi dosyada** |
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\kur.ps1              # tam kurulum + göç
 powershell -ExecutionPolicy Bypass -File .\kur.ps1 -SadeceSema  # yalnız şema
+powershell -ExecutionPolicy Bypass -File .\kur.ps1 -TemelAl     # var olan DB'yi deftere işaretle
 ```
 
 Delphi PG pilotunun veritabanına (PG 14'teki `gentegre`) dokunulmaz.
+
+## Göç defteri (`goc_gecmisi`)
+
+Hangi `NNN_*.sql` dosyasının bu veritabanında çalıştığı **veritabanının kendisinde**
+tutulur. Göçler idempotent yazılsa da (`create if not exists` / `on conflict`) kayıt
+tutmak *"bu veritabanı hangi sürümde"* sorusunun tek cevabıdır. Aynı tablo sunucu
+tarafında zaten kullanılıyordu (`yayin/sunucu-guncelle.sh`); **yerelde yoktu** ve
+`kur.ps1` 026'da bitiyordu — yani sıfırdan kurulum 190'dan fazla göç dosyasını hiç
+uygulamıyordu, geliştirme veritabanı elle çalıştırılan göçlerle ayakta duruyordu.
+Artık iki taraf aynı mekanizmayı kullanır: dosya adına göre bir kez uygulanır,
+betiği tekrar çalıştırmak yalnız **yeni** göçleri işler.
+
+Elle kurulmuş bir veritabanını deftere tanıtmak için `-TemelAl` (hiçbir SQL
+çalıştırmaz, yalnız işaretler).
+
+## Yürürlükteki tanım nerede? (`GUNCEL.md`)
+
+Göçler **tarihtir; silinmez ve düzenlenmez**. Ama bir fonksiyon zaman içinde
+defalarca `create or replace` ile yeniden yazılınca *"şu an çalışan hali hangi
+dosyada"* sorusunun cevabı grep'e kalıyordu. Ölçüldü: 101 fonksiyon adı 138 kez,
+45 görünüm adı 65 kez tanımlanmış; 25 fonksiyon ve 18 görünüm birden çok dosyada —
+`fn_kasa_islem_bacak_uret` **dört** ayrı dosyada.
+
+`GUNCEL.md` her nesnenin yürürlükteki dosyasını (en yüksek numaralı tanım) ve
+önceki tanımlarını listeler. Üretilmiş dosyadır, elle düzenlenmez:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\araclar\guncel_indeks.ps1
+```
+
+Yeni göç eklediğinizde yeniden çalıştırın.
 
 ## Kaldırılan tablolar
 

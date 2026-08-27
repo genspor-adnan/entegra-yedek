@@ -15,6 +15,10 @@
 # ============================================================================
 param(
   [switch]$SadeceSema,
+  # Mevcut (elle kurulmus) veritabanini goc defterine "uygulanmis" olarak
+  #   isaretler; hicbir SQL CALISTIRMAZ. Bir kez calistirilir, sonra normal
+  #   kullanimda yalniz YENI gocler uygulanir.
+  [switch]$TemelAl,
   [string]$Kap         = "gentegre-pg18",   # PostgreSQL 18 (host portu 5434)
   [string]$Db          = "gentegre_ai",
   [string]$PgHost      = "",          # dolu ise docker exec YERINE dogrudan baglanir (bulut)
@@ -68,6 +72,40 @@ function PsqlKomut([string]$Sql, [string]$Hedef) {
                     psql -h $PgHost -p $PgPort -U $Kul -d $Hedef -tA)
 }
 
+# ---- GOC DEFTERI ------------------------------------------------------------
+# Hangi goc dosyasinin bu veritabaninda calistigi DB'de tutulur. Gocler
+#   idempotent yazilsa da (create if not exists / on conflict) kayit tutmak
+#   "bu veritabani hangi surumde" sorusunun tek cevabidir. Ayni tablo sunucu
+#   tarafinda da kullaniliyor (yayin/sunucu-guncelle.sh) - iki taraf ayni.
+function GocDefteriKur() {
+  PsqlKomut @"
+create table if not exists public.goc_gecmisi (
+    dosya      varchar(200) primary key,
+    uygulama   timestamp not null default now()::timestamp
+);
+comment on table public.goc_gecmisi is
+  'Bu veritabaninda calistirilmis db/NNN_*.sql goc dosyalari (kur.ps1 / yayinla.ps1).';
+"@ $Db | Out-Null
+}
+
+function GocUygulandiMi([string]$Ad) {
+  return [bool](PsqlKomut ("select 1 from public.goc_gecmisi where dosya = '" + $Ad + "'") $Db)
+}
+
+function GocIsaretle([string]$Ad) {
+  PsqlKomut ("insert into public.goc_gecmisi(dosya) values ('" + $Ad +
+             "') on conflict (dosya) do nothing") $Db | Out-Null
+}
+
+# Defterde varsa ATLA - "sadece sema" gibi kismi calistirmalar zaten uygulanmis
+#   dosyalari yeniden calistirmasin (idempotent olsalar da gereksiz ve yavas).
+function GocCalistir([string]$Ad) {
+  if (GocUygulandiMi $Ad) { Adim ($Ad + " (zaten uygulanmis, atlandi)"); return }
+  Adim $Ad
+  PsqlDosya (Join-Path $Dizin $Ad) $Db
+  GocIsaretle $Ad
+}
+
 # ---- 1. veritabani
 Adim ("Veritabani kontrol ediliyor: " + $Db)
 $var = PsqlKomut ("select 1 from pg_database where datname='" + $Db + "'") "postgres"
@@ -81,23 +119,29 @@ if (-not $var) {
              " LOCALE_PROVIDER icu ICU_LOCALE 'tr-TR' LOCALE 'en_US.utf8'") "postgres" | Out-Null
 }
 
+GocDefteriKur
+
+if ($TemelAl) {
+  Adim "Temel alma: mevcut veritabani goc defterine isaretleniyor (SQL calistirilmaz)"
+  $hepsi = Get-ChildItem $Dizin -Filter "*.sql" | Where-Object { $_.Name -match '^\d{3}_' } | Sort-Object Name
+  foreach ($g in $hepsi) { GocIsaretle $g.Name }
+  Adim ("Defterde " + (PsqlKomut "select count(*) from public.goc_gecmisi" $Db) + " dosya kayitli.")
+  return
+}
+
 # ---- 2/3. semalar
-Adim "001_sema_taraf.sql"
-PsqlDosya (Join-Path $Dizin "001_sema_taraf.sql") $Db
-Adim "002_stg_kaynak_tablolar.sql"
-PsqlDosya (Join-Path $Dizin "002_stg_kaynak_tablolar.sql") $Db
+GocCalistir "001_sema_taraf.sql"
+GocCalistir "002_stg_kaynak_tablolar.sql"
 
 # ---- Faz 1 semasi (veri gocu ayri adimda)
 foreach ($f in @("010_sema_ortak.sql", "011_sema_stok.sql", "012_sema_belge.sql", "015_sema_log_ebelge.sql", "016_arama_indeksleri.sql", "017_sema_sube_rol.sql")) {
-  Adim $f
-  PsqlDosya (Join-Path $Dizin $f) $Db
+  GocCalistir $f
 }
 
 if ($SadeceSema) {
   # Kimlik semasi gocten bagimsiz; sadece-sema kurulumunda da olusur
   # (sube tablosu bos oldugu icin admin kullanicisi subeye baglanmaz).
-  Adim "020_sema_kimlik.sql"
-  PsqlDosya (Join-Path $Dizin "020_sema_kimlik.sql") $Db
+  GocCalistir "020_sema_kimlik.sql"
   Adim "SadeceSema verildi - veri cekilmedi, goc calistirilmadi."
   return
 }
@@ -111,22 +155,39 @@ if ($LASTEXITCODE -ne 0) { throw "kaynak aktarimi basarisiz" }
 
 # ---- 5. goc (SIRA ONEMLI: taraf -> stok/kalem/referans -> belge/hareket)
 foreach ($f in @("003_goc_taraf.sql", "013_goc_faz1.sql", "014_goc_belge.sql", "018_goc_sube_rol.sql")) {
-  Adim $f
-  PsqlDosya (Join-Path $Dizin $f) $Db
+  GocCalistir $f
 }
 
 # 019 goc SONRASI: sube_id degerleri duzeldikten sonra NOT NULL + FK zorlanabilir
-Adim "019_sema_cok_sube.sql"
-PsqlDosya (Join-Path $Dizin "019_sema_cok_sube.sql") $Db
+GocCalistir "019_sema_cok_sube.sql"
 
 # Kimlik/yetki: sema 019'dan SONRA (admin kullanicisi varsayilan subeye baglanir),
 #   ardindan eski KULLANICI/ROLLER/YETKI gocu.
 foreach ($f in @("020_sema_kimlik.sql", "021_goc_kimlik.sql", "022_sema_sube_ebelge.sql",
                  "023_sema_belge_hesap.sql", "024_fn_belge_diptoplam.sql",
                  "025_fn_belge_no.sql", "026_doviz_tutar_kurali.sql")) {
-  Adim $f
-  PsqlDosya (Join-Path $Dizin $f) $Db
+  GocCalistir $f
 }
+
+# ---- 6. KALAN TUM GOCLER (027...)
+#
+# BU ADIM EKSIKTI: betik 026'da bitiyordu, oysa klasorde 190'in uzerinde goc
+# dosyasi var. Yani "sifirdan kurulum" aslinda calismiyordu - gelistirme
+# veritabani elle uygulanan goclerle ayakta duruyordu ve hangi dosyanin
+# uygulandigi hicbir yerde yazmiyordu.
+#
+# Ayni defter (goc_gecmisi) SUNUCUDA zaten vardi (yayin/sunucu-guncelle.sh);
+# yerelde yoktu. Artik iki taraf ayni mekanizmayi kullaniyor: dosya adina gore
+# bir kez uygulanir, tekrar calistirmak zararsizdir.
+Adim "Kalan gocler (027+)"
+$kalan = Get-ChildItem $Dizin -Filter "*.sql" |
+         Where-Object { $_.Name -match '^(\d{3})_' -and [int]$Matches[1] -ge 27 } |
+         Sort-Object Name
+foreach ($g in $kalan) {
+  if (GocUygulandiMi $g.Name) { continue }
+  GocCalistir $g.Name
+}
+Adim ("Goc defteri: " + (PsqlKomut "select count(*) from public.goc_gecmisi" $Db) + " dosya kayitli")
 
 Write-Host ""
 Write-Host ("Bitti. Veritabani: " + $Db + " (docker: " + $Kap + ")") -ForegroundColor Green
