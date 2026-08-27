@@ -216,6 +216,22 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           } catch (h) { mesaj(hataMetni(h)) }
           return;
         }
+        // BELGE SIL (181): izi olmayan belgede mumkun; kesin/izli belgede
+        //   aksiyon zaten pasif ve sebebi title'da. Sunucu son sozu soyler.
+        case 'belge.sil': {
+          if (!satir) return;
+          const no = String(satir.belgeNo ?? satir.id);
+          if (!await onay(`"${no}" silinecek.
+
+Bu işlem geri alınamaz. `
+                        + 'Onaylıyor musunuz?', true)) return;
+          try {
+            const y = await api.belgeSil(Number(satir.id));
+            mesaj(y.mesaj || 'Belge silindi.');
+            setYenile(t => t + 1);
+          } catch (h) { mesaj(hataMetni(h)) }
+          return;
+        }
         case 'belge.donustur':
           if (!satir) return;
           setDonusum({ belgeId: Number(satir.id), belgeTur: Number(satir.tur) });

@@ -253,6 +253,10 @@ public static class AksiyonKatalogu
                     KaynakKodu: "belge", Islem: Islem.Ekle, Sira: 10),
                 new("belge.ac",    "Belgeyi Ac",   "belge", Kisayol: "Enter",
                     KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                // SIL, "Belgeyi Aç"in saginda (kullanici). Silme yalniz IZI
+                //   OLMAYAN belgede mumkun; kesin/izli belgede "İptal Et".
+                new("belge.sil",   "Sil",          "belge", Kisayol: "Del",
+                    KaynakKodu: "belge", Islem: Islem.Sil, KayitGerekir: true, Sira: 25),
                 new("belge.kesinlestir", "Kesinlestir", "belge", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "belge.kesinlestir", KayitGerekir: true, Sira: 30),
                 // DONUSTUR YOK (kullanici): fatura zincirin SONU - siparis ve

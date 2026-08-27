@@ -278,6 +278,10 @@ export const api = {
   belgeEBelgeGonder: (id: number) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/ebelge-gonder`, {}),
 
+  /** Belgeyi siler (181). Izli belgede sunucu 422 doner (sebep mesajda). */
+  belgeSil: (id: number) =>
+    istek<{ mesaj: string }>(`/api/belge/${id}`, { method: 'DELETE' }),
+
   /** Onizleme HTML'i (178) - gonderim gerekmez. */
   belgeEBelgeOnizle: (id: number) =>
     istek<{ html: string }>(`/api/belge/${id}/ebelge-onizle`),

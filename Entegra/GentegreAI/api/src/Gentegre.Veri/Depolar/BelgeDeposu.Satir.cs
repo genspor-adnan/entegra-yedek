@@ -462,4 +462,40 @@ public sealed partial class BelgeDeposu
         komut.Parameters.AddWithValue("p0", (object?)subeId ?? DBNull.Value);
         return await komut.ExecuteScalarAsync(iptal) is bool b && b;
     }
+
+    /// <summary>
+    /// Belgeyi siler (181). On-kosul saglanmazsa IS KURALI hatasi doner -
+    /// e-Belge hazirlanmis/gonderilmis, kasa islemi bagli ya da baska belgeye
+    /// donusturulmus belge SILINMEZ; onlarda "İptal Et" kullanilir.
+    /// </summary>
+    public async Task<string> SilAsync(int belgeId, YazmaBaglami baglam,
+                                       CancellationToken iptal = default)
+        => await IsKuraliCevirAsync(async () =>
+        {
+            await using var baglanti = await _veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            // Log SILMEDEN ONCE yazilir: silinen satirin alanlari sonra okunamaz.
+            await _log.YazAsync(baglanti, islem, LogIslemi.Sil, LogTabloBelge, belgeId,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip, null, iptal: iptal);
+
+            await using var komut = new NpgsqlCommand(
+                "select public.fn_belge_sil(@p0, @p1)", baglanti, islem);
+            komut.Parameters.AddWithValue("p0", belgeId);
+            komut.Parameters.AddWithValue("p1", baglam.KullaniciId);
+            var mesaj = (await komut.ExecuteScalarAsync(iptal))?.ToString() ?? "Belge silindi.";
+
+            await islem.CommitAsync(iptal);
+            return mesaj;
+        });
+
+    /// <summary>Silme on-kosulu: bos metin = silinebilir, dolu = sebep (181).</summary>
+    public async Task<string> SilinebilirMiAsync(int belgeId, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = new NpgsqlCommand(
+            "select public.fn_belge_silinebilir(@p0)", baglanti);
+        komut.Parameters.AddWithValue("p0", belgeId);
+        return (await komut.ExecuteScalarAsync(iptal))?.ToString() ?? "";
+    }
 }

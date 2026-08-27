@@ -152,6 +152,21 @@ public static class BelgeUclari
             });
         });
 
+        // DELETE /api/belge/{id} - belgeyi sil (181). Kesin/izli belgede
+        //   IPTAL kullanilir; on-kosullar veritabaninda (fn_belge_silinebilir),
+        //   arayuz ve uc AYNI cevabi alsin diye.
+        grup.MapDelete("/{id:int}", async (
+            int id, BaglamCozucu cozucu, BelgeDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Sil);
+
+            var mesaj = await depo.SilAsync(id,
+                new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, Ip(ctx)), iptal);
+            return Results.Ok(new { mesaj, izlemeNo = baglam.IzlemeNo });
+        });
+
         // POST /api/belge/{id}/ebelge-hazirla - belgeyi e-Belge kuyruguna al (163)
         grup.MapPost("/{id:int}/ebelge-hazirla", async (
             int id, BaglamCozucu cozucu, BelgeDeposu depo,
