@@ -44,7 +44,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     setFisTipi, satirlar, donusumler, setCariArama, setSaticiArama, setPersonelArama,
     kapanmaAlani, bagliSiparisAlani, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
     tahakkukMu, depoBelgesi, stokFisiMi, fisCikisMi, transferMi, talepMi, disNumarali,
-    eBelgeYok,
+    eBelgeYok, fiyatListeleri, fiyatListesiId, setFiyatListesiId,
   } = p;
 
   /**
@@ -255,6 +255,21 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       </label>
     )}
 
+    {/* --- 9b) FIYAT LISTESI (205) ---
+        Acilista cariden cozulur; degistirilince satirlar yeniden fiyatlanir.
+        Liste hic tanimlanmamissa hucre CIZILMEZ - bos bir combo kullaniciya
+        cozemeyecegi bir soru sorardi. */}
+    {fiyatListeleri.length > 0 && (
+      <label className="alan">
+        <span className="etiket">Fiyat Listesi</span>
+        <select value={fiyatListesiId ?? ''} disabled={kilitli}
+                onChange={e => setFiyatListesiId(e.target.value ? Number(e.target.value) : null)}>
+          <option value="">(liste yok)</option>
+          {fiyatListeleri.map(l => <option key={l.id} value={l.id}>{l.ad}</option>)}
+        </select>
+      </label>
+    )}
+
     {/* --- 10-11) ZINCIR HUCRELERI ---
         Bagli Siparis, Faturalama Durumu'nun SOLUNDA (kullanici).
         Kapanma burada YALNIZ e-Belgeli turlerde: e-Belgesizde 4. hucreyi zaten
@@ -316,6 +331,12 @@ export interface BelgeBaslikProps {
   setTarih(v: string): void;
   tarihEnGec: string;
   tarihEnErken?: string;
+  /** Belgeye uygulanan fiyat listesi (205) - bos ise liste kurulmamis demektir. */
+  fiyatListesiId: number | null;
+  /** Liste degisince TUM satirlar yeniden fiyatlanir (cagiran yapar). */
+  setFiyatListesiId(v: number | null): void;
+  /** Belge YONUNDEKI secilebilir listeler (alis belgesinde alis listeleri). */
+  fiyatListeleri: { id: number; ad: string }[];
   vadeGun: string;
   setVadeGun(v: string): void;
   cari: { id: number; unvan: string } | null;

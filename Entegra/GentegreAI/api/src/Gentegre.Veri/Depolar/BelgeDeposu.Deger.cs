@@ -77,6 +77,9 @@ public sealed partial class BelgeDeposu
                    td.unvan as "teslimEdenAdi",
                    sv.teslim_alan_id as "teslimAlanId", ta.unvan as "teslimAlanAdi",
                    b.proje_id as "projeId", b.efatura_durum as "efaturaDurum",
+                   -- Belgenin fiyat listesi (205) + adi: kart basliginda gosterilir.
+                   b.fiyat_listesi_id as "fiyatListesiId",
+                   coalesce(fl.ad, '') as "fiyatListesiAdi",
                    b.efatura_sonuc as "efaturaSonuc", b.senaryo, b.zarf_id as "zarfId",
                    b.gonderici_alias as "gondericiAlias",
                    -- e-Belge kuyrugundaki SON kayit: ETTN (uuid) ve GIB yaniti
@@ -97,6 +100,7 @@ public sealed partial class BelgeDeposu
                               where ks.belge_id = b.id and hb.durum <> 2), 0) as "hedefId",
                    b.xmin::text as surum
               from public.belge b
+              left join public.satis_listesi fl on fl.id = b.fiyat_listesi_id
               left join public.depo  cd on cd.id = b.cikis_depo_id
               left join public.depo  gd on gd.id = b.giris_depo_id
               left join public.taraf sc on sc.id = b.satici_id

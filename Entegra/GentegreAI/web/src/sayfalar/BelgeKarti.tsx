@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
+import { guvenli, mesaj } from '../bilesenler/mesaj';
 import { type BelgeYaniti, type KasaIslemTuru, hataMetni, hataAyristir } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { StokAramaPenceresi } from '../bilesenler/StokAramaPenceresi';
@@ -127,6 +128,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   /** Yalniz dis numarali turde (alis faturasi) kullanilir - tedarikcinin no'su. */
   const [belgeNo, setBelgeNo] = useState('');
   const [vadeGun, setVadeGun] = useState('30');
+  /**
+   * FIYAT LISTESI (205). Acilista belge TURUNUN yonune gore cariden cozulur
+   * (cari listesi > yonun varsayilani). Kullanici degistirince satirlar
+   * yeniden fiyatlanir - kaydedilmis belgede sunucuda, kaydedilmemis belgede
+   * satir satir listeden okunarak.
+   */
+  const [fiyatListesiId, setFiyatListesiIdHam] = useState<number | null>(null);
+  const [fiyatListeleri, setFiyatListeleri] = useState<{ id: number; ad: string }[]>([]);
   const [depo, setDepo] = useState<{ id: number; ad: string } | null>(null);
   /** Yalniz transferde (20): malin GIDECEGI depo. Tekil belgelerde kullanilmaz. */
   const [girisDepo, setGirisDepo] = useState<{ id: number; ad: string } | null>(null);
@@ -377,6 +386,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setTarih(String(y.belge.belgeTarihi ?? '').slice(0, 16));
         setSeri(String(y.belge.belgeSeri ?? ''));
         setVadeGun(String(y.belge.vadeGun ?? 0));
+        setFiyatListesiIdHam(Number(y.belge.fiyatListesiId) || null);
         // Alis belgesi GIRIS deposunu, satis CIKIS deposunu kullanir.
         // Transferde "depo" CIKIS deposudur, girisDepo ayri alanda tutulur;
         //   digerlerinde hangisi doluysa o tek depo alanina yansir.
@@ -549,6 +559,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     //   (belgeKaydet.ts) - ekran yalniz sonucu gosterir.
     const girdi: BelgeGirdisi = {
       tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun, faturaTipi,
+      fiyatListesiId,
       raporDovizi, ekstreDovizi, belgeKuru, yerelPara,
       senaryo, satici, depo, girisDepo, teslimEden, teslimAlan, tasiyici,
       aracPlaka, soforAd, soforTckn, sevkTarihi, teslimSekli, fisTipi, satirlar,
@@ -595,6 +606,82 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     setCari(null);
     setSatirlar([]);
     setHata(null);
+  }
+
+  // --------------------------------------------------------- fiyat listesi ----
+  /**
+   * Belge YONUNDEKI listeler + acilista gelecek liste. Cari ya da tur
+   * degisince yeniden cozulur: alis belgesinde alis listeleri, satista satis.
+   */
+  useEffect(() => {
+    let iptal = false;
+    void (async () => {
+      try {
+        // YON SUZMESI SART: alis belgesinde satis listesi secilememeli -
+        //   satis fiyatiyla mal girisi yapmak maliyeti bozar.
+        const y = await api.liste('satis-listesi', {
+          sayfa: 1, boyut: 200,
+          filtre: { op: 'and', kosullar: [
+            { alan: 'durum',   op: 'esit', deger: 'Aktif' },
+            { alan: 'yonKodu', op: 'esit', deger: alisMi ? 1 : 2 },
+          ] },
+        });
+        if (iptal) return;
+        setFiyatListeleri(y.satirlar.map(r => ({ id: Number(r.id), ad: String(r.ad ?? '') })));
+      } catch { if (!iptal) setFiyatListeleri([]) }
+    })();
+    return () => { iptal = true };
+  }, [alisMi]);
+
+  // Acilista / cari degisince belgenin listesi cariden cozulur. KAYITLI
+  //   belgede DOKUNULMAZ: belge hangi listeyle kesildiyse onu tasir.
+  useEffect(() => {
+    if (belgeId || !cari?.id) return;
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.belgeVarsayilanListe(tur, cari.id);
+        if (!iptal) setFiyatListesiIdHam(y.listeId ?? null);
+      } catch { /* liste kurulmamis olabilir - fiyatlar kart fiyatindan gelir */ }
+    })();
+    return () => { iptal = true };
+  }, [belgeId, tur, cari?.id]);
+
+  /**
+   * Liste DEGISTI: butun satirlar yeniden fiyatlanir (kullanici kurali).
+   * Kayitli belgede sunucu yapar (tek istek, tek dogruluk kaynagi); henuz
+   * kaydedilmemis belgede satirlar ekranda oldugu icin tek tek listeden okunur.
+   */
+  async function listeDegisti(yeni: number | null) {
+    setFiyatListesiIdHam(yeni);
+    if (!yeni) return;
+
+    if (belgeId) {
+      await guvenli(async () => {
+        const y = await api.belgeFiyatlandir(belgeId, yeni);
+        mesaj(y.mesaj);
+        const g = await api.belgeOku(belgeId);
+        setSonuc(g);
+        setSatirlar(yanittanSatirlar(g.satirlar, yerelPara));
+      });
+      return;
+    }
+
+    // Kaydedilmemis belge: ekrandaki satirlari listeden fiyatla.
+    await guvenli(async () => {
+      let degisen = 0, bulunamayan = 0;
+      const yeniSatirlar = await Promise.all(satirlar.map(async r => {
+        if (!r.stokId && !r.hizmetId) return r;
+        const f = await api.satisListesiFiyat(yeni,
+          r.stokId ? { stokId: r.stokId } : { hizmetId: r.hizmetId! });
+        if (f.fiyat === null || f.fiyat <= 0) { bulunamayan++; return r }
+        degisen++;
+        return { ...r, birimFiyat: String(f.fiyat) };
+      }));
+      setSatirlar(yeniSatirlar);
+      mesaj(`${degisen} satırın fiyatı listeden güncellendi.`
+          + (bulunamayan ? ` ${bulunamayan} kalem listede bulunamadı, fiyatı DEĞİŞMEDİ.` : ''));
+    });
   }
 
   /** Modal icinde acildiysa cagiran kapatir; dogrudan URL ile acildiysa listeye doner. */
@@ -697,6 +784,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           tarih={tarih} setTarih={setTarih}
           tarihEnGec={tarihEnGec} tarihEnErken={tarihEnErken}
           vadeGun={vadeGun} setVadeGun={setVadeGun}
+          fiyatListesiId={fiyatListesiId} setFiyatListesiId={listeDegisti}
+          fiyatListeleri={fiyatListeleri}
           cari={cari} satici={satici}
           depo={depo} setDepo={setDepo} girisDepo={girisDepo} setGirisDepo={setGirisDepo}
           teslimEden={teslimEden} teslimAlan={teslimAlan}

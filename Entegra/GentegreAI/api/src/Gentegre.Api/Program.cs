@@ -156,6 +156,7 @@ uygulama.DokumanIcerikUcunuEkle();
 uygulama.ReferansUclariniEkle();
 uygulama.BelgeUclariniEkle();
 uygulama.KasaUclariniEkle();
+uygulama.FiyatListesiUclariniEkle();
 uygulama.AksiyonUclariniEkle();
 
 uygulama.Run();

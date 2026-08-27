@@ -50,6 +50,16 @@ public static partial class KartKatalogu
             new("vd",          "vd",           "metin", EnFazlaUzunluk: 60,  Baslik: "Vergi Dairesi",  Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
             new("efatura",     "efatura",      "mantik", Baslik: "e-Fatura mukellefi", Grup: "Fatura Bilgileri", AltGrup: "e-Belge Ayarlari"),
             new("aliasEposta", "alias_eposta", "metin", EnFazlaUzunluk: 200, Baslik: "Alias / e-Posta", Grup: "Fatura Bilgileri", AltGrup: "e-Belge Ayarlari"),
+            // FIYAT LISTESI (204). IKI AYRI ALAN: bir cari hem musteri hem
+            //   tedarikci olabiliyor; tek alan olsaydi ayni cariye satarken de
+            //   alirken de ayni liste uygulanirdi. Bos ise yonun VARSAYILAN
+            //   listesi gecerli - her cariye tek tek atamak gerekmez.
+            new("satisListesiId", "satis_listesi_id", "kod",
+                KodTablosu: "public.v_satis_listesi_satis_lookup",
+                Baslik: "Satış Fiyat Listesi", Grup: "Fatura Bilgileri", AltGrup: "Fiyatlandırma"),
+            new("alisListesiId",  "alis_listesi_id",  "kod",
+                KodTablosu: "public.v_satis_listesi_alis_lookup",
+                Baslik: "Alış Fiyat Listesi", Grup: "Fatura Bilgileri", AltGrup: "Fiyatlandırma"),
             // "Iletisim"/"Siniflandirma"/"Diger" SEKME DEGIL - mockup'ta Genel'in alt-kutulari
             //   (Kart Bilgileri / İletişim / Notlar). Grup kaldirildi, AltGrup ile Genel'e katlandi.
             new("telefon",     "telefon",      "metin", EnFazlaUzunluk: 30,  Baslik: "Telefon",        AltGrup: "İletişim"),

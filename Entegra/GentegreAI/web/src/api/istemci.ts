@@ -391,6 +391,33 @@ export const api = {
   stokKopyala: (stokId: number) =>
     istek<{ id: number }>(`/api/kart/stok/${stokId}/kopyala`, { method: 'POST' }).then(y => y.id),
 
+  /**
+   * Fiyat listesini URETIR (202): satirlari kurala gore yeniden yazar.
+   * MANUEL girilen satirlar korunur; fiyati cozulemeyen kalemler atlanir ve
+   * sayilari mesajda bildirilir.
+   */
+  satisListesiUret: (listeId: number, secim?: { stok?: boolean; hizmet?: boolean }) =>
+    istek<{ eklenen: number; guncellenen: number; korunan: number; fiyatsiz: number; mesaj: string }>(
+      `/api/satis-listesi/${listeId}/uret`,
+      { method: 'POST', body: JSON.stringify({ stok: secim?.stok ?? true, hizmet: secim?.hizmet ?? true }) }),
+
+  /** Belge acilirken gelecek fiyat listesi (205): turun yonune gore cari listesi > varsayilan. */
+  belgeVarsayilanListe: (tur: number, tarafId: number) =>
+    istek<{ listeId: number | null; ad: string; yon: number; kdvDahil: number }>(
+      `/api/belge/varsayilan-liste?tur=${tur}&tarafId=${tarafId}`),
+
+  /** Belgenin TUM satirlarini listeden yeniden fiyatlar (205). */
+  belgeFiyatlandir: (belgeId: number, listeId?: number) =>
+    istek<{ degisen: number; ayni: number; bulunamayan: number; listeAdi: string; mesaj: string }>(
+      `/api/belge/${belgeId}/fiyatlandir`,
+      { method: 'POST', body: JSON.stringify({ listeId: listeId ?? null }) }),
+
+  /** Tek kalemin liste fiyati - liste henuz uretilmemis olsa da kural isletilir. */
+  satisListesiFiyat: (listeId: number, kalem: { stokId?: number; hizmetId?: number }) =>
+    istek<{ fiyat: number | null; dovizCinsi: string; kdvDahil: number; kaynak: string }>(
+      `/api/satis-listesi/${listeId}/fiyat?`
+      + (kalem.stokId ? `stokId=${kalem.stokId}` : `hizmetId=${kalem.hizmetId}`)),
+
   /** Depo bazli min/max seviye (099). Miktarlara DOKUNMAZ. */
   stokDurumLimit: (stokId: number, depoId: number,
                    minStok: number | null, maxStok: number | null) =>

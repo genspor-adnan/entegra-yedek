@@ -544,7 +544,9 @@ public static class BelgeUclari
         "tur" or "tipi" or "tarafId" or "tarafAdresId" or "kocanNo" or "girisDepoId" or
         "cikisDepoId" or "subeId" or "projeId" or "vadeGun" or "durum" or "senaryo" or
         "saticiId" or "teslimSekli" or "merkezId" or "tasiyiciId" or "teslimEdenId" or
-        "teslimAlanId" => "sayi",
+        // Belgenin fiyat listesi (205): acilista cariden cozulur, kullanici
+        //   degistirirse satirlar yeniden fiyatlanir (/fiyatlandir ucu).
+        "teslimAlanId" or "fiyatListesiId" => "sayi",
 
         "dovizKuru" => "para",
 

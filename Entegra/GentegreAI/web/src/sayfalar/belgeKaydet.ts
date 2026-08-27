@@ -19,6 +19,8 @@ export interface BelgeGirdisi {
   seri: string;
   belgeNo: string;
   vadeGun: string;
+  /** Belgeye uygulanan fiyat listesi (205). */
+  fiyatListesiId: number | null;
   senaryo: number;
   satici: Secim | null;
   depo: Secim | null;
@@ -120,7 +122,7 @@ export function belgeGovdesi(g: BelgeGirdisi, dolu: SatirDurumu[], taslak: boole
           vadeGun, subeId, fisCikisMi, depo, girisDepo, alisMi, faturaMi, fisTipi, faturaTipi,
           raporDovizi, ekstreDovizi, belgeKuru, yerelPara, satici,
           senaryo, irsaliyeMi, teslimSekli, aracPlaka, soforAd, sevkTarihi,
-          soforTckn, tasiyici, transferMi, teslimEden, teslimAlan } = g;
+          soforTckn, tasiyici, transferMi, teslimEden, teslimAlan, fiyatListesiId } = g;
 
 return {
   belge: {
@@ -140,6 +142,7 @@ return {
     ekstreDovizi,
     dovizKuru: hamSayi(belgeKuru) || 1,
     vadeGun: Number(vadeGun) || 0,
+    fiyatListesiId,
     subeId,
     // Depo ALANI ture gore: alista giris, satista cikis (stok yonu buradan).
     //   TRANSFERDE IKISI DE dolu - tek satir iki depoyu oynatir.

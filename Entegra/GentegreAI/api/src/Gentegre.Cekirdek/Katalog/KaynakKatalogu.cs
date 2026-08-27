@@ -123,6 +123,9 @@ public static partial class KaynakKatalogu
         // Belge donusumu (F8)
         Ekle(BelgeAcikSatir());
         Ekle(Depo());
+        // Satis fiyat listesi (201)
+        Ekle(SatisListesi());
+        Ekle(SatisListesiSatir());
         Ekle(Irsaliye());
         // Gelen e-Belge kutusu (187)
         Ekle(GelenBelge());

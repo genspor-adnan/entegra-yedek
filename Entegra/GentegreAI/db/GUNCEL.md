@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (102 ad, 26 tanesi birden cok dosyada)
+## Fonksiyonlar (114 ad, 26 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -16,6 +16,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_fis_uretilsin` | `192_mali_ayarlar.sql` | — |
 | `fn_belge_fisle` | `190_belge_fisle.sql` | — |
 | `fn_belge_fisle_toplu` | `190_belge_fisle.sql` | — |
+| `fn_belge_fiyatlandir` | `205_belge_fiyat_listesi.sql` | — |
+| `fn_belge_kalem_fiyati` | `204_cari_fiyat_listesi.sql` | — |
 | `fn_belge_kapanma_tazele` | `191_kapanma_tazele.sql` | — |
 | `fn_belge_no_anahtar` | `025_fn_belge_no.sql` | — |
 | `fn_belge_no_uret` | `152_numara_sablonu.sql` | 025_fn_belge_no.sql, 087_numara_kesme_duzeltmesi.sql |
@@ -26,6 +28,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_satir_rezerve_kirp` | `142_siparis_rezervasyon.sql` | — |
 | `fn_belge_sil` | `181_belge_sil.sql` | — |
 | `fn_belge_silinebilir` | `181_belge_sil.sql` | — |
+| `fn_belge_varsayilan_liste` | `205_belge_fiyat_listesi.sql` | — |
+| `fn_belge_yon` | `205_belge_fiyat_listesi.sql` | — |
+| `fn_cari_fiyat_listesi` | `204_cari_fiyat_listesi.sql` | — |
 | `fn_ceviri` | `194_ceviri.sql` | — |
 | `fn_ceviri_sozluk` | `194_ceviri.sql` | — |
 | `fn_degistirme_tarihi` | `015_sema_log_ebelge.sql` | — |
@@ -66,6 +71,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_firsat_asama_izle` | `121_firsat.sql` | — |
 | `fn_firsat_kazanildi_musteri` | `122_aday_musteri.sql` | — |
 | `fn_firsat_no_uret` | `121_firsat.sql` | — |
+| `fn_fiyat_yuvarla` | `202_fn_satis_listesi.sql` | — |
 | `fn_gelen_belge_kaydet` | `187_gelen_belge.sql` | — |
 | `fn_gelen_belge_yanit_yaz` | `187_gelen_belge.sql` | — |
 | `fn_gelen_durum_adi` | `187_gelen_belge.sql` | — |
@@ -73,6 +79,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_goc_sube_coz` | `080_goc_kasa.sql` | — |
 | `fn_hesap_atama_adi` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
 | `fn_hesap_plani_alt_ac` | `076_fn_kasa.sql` | — |
+| `fn_kalem_kart_fiyati` | `202_fn_satis_listesi.sql` | — |
 | `fn_kasa_islem_bacak_uret` | `139_kasa_ekstre_dovizi.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql, 096_kasa_bacak_rol_kontrol.sql |
 | `fn_kasa_islem_dogrula` | `085_fn_kasa_f3.sql` | 076_fn_kasa.sql |
 | `fn_kasa_islem_duzelt_hazirla` | `148_kasa_islem_duzelt.sql` | — |
@@ -81,6 +88,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kasa_islem_kesinlestir` | `152_numara_sablonu.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql |
 | `fn_kasa_islem_no_uret` | `152_numara_sablonu.sql` | 073_kasa_islem.sql, 087_numara_kesme_duzeltmesi.sql |
 | `fn_kasa_islem_silme_koruma` | `076_fn_kasa.sql` | — |
+| `fn_kdv_cevir` | `202_fn_satis_listesi.sql` | — |
 | `fn_kullanici_kasa` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
 | `fn_kullanici_yetkileri` | `068_taraf_rol_id_kolonlari.sql` | 020_sema_kimlik.sql |
 | `fn_mizan` | `077_v_ekstre.sql` | — |
@@ -93,6 +101,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_parola_ata` | `068_taraf_rol_id_kolonlari.sql` | 020_sema_kimlik.sql |
 | `fn_parola_dogru` | `020_sema_kimlik.sql` | — |
 | `fn_plan_gerceklestir` | `085_fn_kasa_f3.sql` | — |
+| `fn_satis_listesi_dongu_kontrol` | `201_satis_listesi.sql` | — |
+| `fn_satis_listesi_fiyat` | `202_fn_satis_listesi.sql` | — |
+| `fn_satis_listesi_uret` | `202_fn_satis_listesi.sql` | — |
+| `fn_satis_listesi_yon_kontrol` | `204_cari_fiyat_listesi.sql` | — |
 | `fn_slug` | `021_goc_kimlik.sql` | — |
 | `fn_stok_kart_fiyat` | `128_fn_stok_kart_fiyat.sql` | — |
 | `fn_stok_kopyala` | `127_stok_kopyala_fiyat.sql` | 126_fn_stok_kopyala.sql |
@@ -111,7 +123,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_yetki_surumu_artir` | `020_sema_kimlik.sql` | — |
 | `tg_sube_vkn_dogrula` | `170_sube_vkn_dogrula.sql` | — |
 
-## Gorunumler (44 ad, 18 tanesi birden cok dosyada)
+## Gorunumler (49 ad, 18 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -156,6 +168,11 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_plan_vade` | `077_v_ekstre.sql` | — |
 | `v_proje_ekstre` | `077_v_ekstre.sql` | — |
 | `v_proje_lookup` | `071_kasa_master.sql` | — |
+| `v_satis_listesi_alis_lookup` | `204_cari_fiyat_listesi.sql` | — |
+| `v_satis_listesi_kullanim` | `204_cari_fiyat_listesi.sql` | — |
+| `v_satis_listesi_lookup` | `201_satis_listesi.sql` | — |
+| `v_satis_listesi_satir` | `201_satis_listesi.sql` | — |
+| `v_satis_listesi_satis_lookup` | `204_cari_fiyat_listesi.sql` | — |
 | `v_stok_kullanilabilir` | `142_siparis_rezervasyon.sql` | — |
 | `v_stok_lookup` | `121_firsat.sql` | — |
 | `v_ulke_lookup` | `119_stok_uts.sql` | — |

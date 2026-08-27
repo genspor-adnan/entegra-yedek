@@ -626,6 +626,22 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Stok & Hizmet', menuAd: 'Hizmet Listesi', ic: '🛠️', yetkiKodu: 'hizmet',
   },
   {
+    // SATIS FIYAT LISTELERI (201): liste bir KURALDIR (taban liste x carpan ->
+    //   yuvarlama), satirlari o kuralin materyalize halidir. "⟳ Listeyi Üret"
+    //   satirlari yeniden yazar; MANUEL girilen satirlar korunur.
+    kaynak: 'satis-listesi', baslik: 'Fiyat Listeleri', yol: 'Stok › Fiyat Listeleri',
+    kartYolu: '/satis-listesi', aksiyonEkrani: 'satis-listesi-liste', cipler: DURUM_CIPLERI,
+    menuGrup: 'Stok & Hizmet', menuAd: 'Fiyat Listeleri', ic: '🏷️', yetkiKodu: 'satis_listesi',
+  },
+  {
+    // Liste SATIRLARI ayri ekran: bir listenin binlerce satiri kart icinde
+    //   rahat gezilmiyor. Menude gizli - listeden "Satırları Aç" ile gelinir.
+    kaynak: 'satis-listesi-satir', baslik: 'Fiyat Listesi Satırları',
+    yol: 'Stok › Fiyat Listesi Satırları', aksiyonEkrani: 'satis-listesi-satir-liste',
+    urlFiltreAlani: 'listeId', menuGizli: true, yetkiKodu: 'satis_listesi',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Fiyat Listesi Satırları', ic: '🏷️',
+  },
+  {
     // STOKTAN TALEP (tur 105): bir birim depodan mal ISTER. Stok ve cari
     //   ETKILEMEZ - asil hareketi, talep karsilaninca kesilen transfer yapar.
     //   Kart transferin kardesi: para yok, e-Belge yok; teslim eden yerine

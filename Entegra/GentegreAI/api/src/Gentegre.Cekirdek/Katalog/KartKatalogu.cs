@@ -167,6 +167,8 @@ public static partial class KartKatalogu
         Ekle(CekSenet());
         Ekle(Depo());
         Ekle(Hizmet());
+        // Satis fiyat listesi (201): kural + materyalize satirlar
+        Ekle(SatisListesi());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
 
