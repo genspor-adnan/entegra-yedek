@@ -28,8 +28,9 @@ interface Props {
   onSatirAc?(satir: ListeSatiri): void;
   /** Aksiyon katalogu ekrani ("cari-liste"); verilirse arac cubugu + sag tus + palet gelir. */
   aksiyonEkrani?: string;
-  /** e-Belge menusu AYRI kutuda cizilsin mi (yalniz satis fatura listesi, 179). */
-  ebelgeMenusu?: boolean;
+  /** e-Belge menusu kutusunun BASLIGI ("E-Fatura" / "E-İrsaliye"); verilmezse
+      kutu cizilmez (yalniz satis faturasi ve satis irsaliyesi listeleri). */
+  ebelgeMenusu?: string;
   onAksiyon?(kod: string, satir: ListeSatiri | null): void;
   /** Ust cip filtreleri: { ad, filtre } — mockup'taki "Aktif / Pasif / Tumu" seridi. */
   cipler?: { ad: string; filtre?: Kosul }[];
@@ -229,7 +230,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   //   tahakkuk ve alis faturasi listelerinde de kullaniliyor; karari liste
   //   tanimi verir. Diger ekranlarda (or. irsaliye listesindeki tek
   //   "e-İrsaliye Gönder") aksiyon genel kutuda kalir.
-  const ebelgeKutusuVar = ebelgeMenusu === true;
+  const ebelgeKutusuVar = !!ebelgeMenusu;
   const ebelgeGrubu = (a: AksiyonYaniti) => a.grup === 'ebelge';
   // e-BELGE KOMUTLARI GENEL KUTUDA HIC GORUNMEZ (kullanici): kendi "E-Fatura"
   //   kutusuna aitler; genel listede "Aç / Yeni / Sil" arasina karisinca hem
@@ -665,7 +666,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                   aksiyonCalistir(kod);
                 }}
               >
-                <option value="">— E-Fatura —</option>
+                <option value="">— {ebelgeMenusu} —</option>
                 {ebelgeKombo.map(a => (
                   a.kod.includes('.ayrac')
                     ? <option key={a.kod} value="" disabled>──────────</option>
