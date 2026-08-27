@@ -23,7 +23,8 @@
 --  fn_belge_varsayilan_liste YERINDE duruyor.
 -- ============================================================================
 
+-- NOT: goc_gecmisi kaydini DOSYA ATMAZ - sunucu-guncelle.sh calistirdigi
+--   dosyayi kendisi kaydeder (guard'siz insert); dosyanin kendi insert'i
+--   onunla cakisip yayini durdurdu (ilk 208 yayin denemesi). Yerel/elle
+--   uygulamada kaydi ayrica atin.
 drop function if exists public.fn_belge_fiyatlandir(integer, integer, integer);
-
-insert into goc_gecmisi (dosya) values ('208_belge_fiyatlandir_kaldir.sql')
-on conflict (dosya) do nothing;
