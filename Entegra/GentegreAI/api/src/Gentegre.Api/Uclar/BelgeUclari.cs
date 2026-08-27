@@ -545,7 +545,7 @@ public static class BelgeUclari
         "cikisDepoId" or "subeId" or "projeId" or "vadeGun" or "durum" or "senaryo" or
         "saticiId" or "teslimSekli" or "merkezId" or "tasiyiciId" or "teslimEdenId" or
         // Belgenin fiyat listesi (205): acilista cariden cozulur, kullanici
-        //   degistirirse satirlar yeniden fiyatlanir (/fiyatlandir ucu).
+        //   degistirirse satirlar EKRANDA yeniden fiyatlanir (BelgeKarti.listeDegisti).
         "teslimAlanId" or "fiyatListesiId" => "sayi",
 
         "dovizKuru" => "para",

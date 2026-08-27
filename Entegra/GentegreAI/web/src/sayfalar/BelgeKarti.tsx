@@ -27,7 +27,7 @@ import { BelgeAracCubugu } from '../bilesenler/belge/BelgeAracCubugu';
 import { BelgeBaslik } from '../bilesenler/belge/BelgeBaslik';
 import { useBelgeTahsilat } from './belgeTahsilat';
 import {
-  iadeSatirlari, paketIcerigiUygula, sonAnahtar, stokSecimindenKalem,
+  iadeSatirlari, listeFiyatiUygula, paketIcerigiUygula, sonAnahtar, stokSecimindenKalem,
 } from './belgeKalem';
 import { BelgeTahsilatModallari } from '../bilesenler/belge/BelgeTahsilatModallari';
 
@@ -669,14 +669,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         if (!r.stokId && !r.hizmetId) return r;
         const f = await api.fiyatListesiFiyat(yeni,
           r.stokId ? { stokId: r.stokId } : { hizmetId: r.hizmetId! });
-        if (f.fiyat === null || f.fiyat <= 0) { bulunamayan++; return r }
-        degisen++;
-        const metin = String(f.fiyat);
-        // dovizFiyat da yazilmali: kaydetme hatti doviz birim fiyati varsa
-        //   yerel fiyati ONDAN turetir - eski dovizFiyat kalirsa Kaydet
-        //   fiyati sessizce geri alirdi.
-        return { ...r, birimFiyat: metin, dovizFiyat: metin,
-                 fiyatDovizi: f.dovizCinsi || r.fiyatDovizi };
+        const y = listeFiyatiUygula(r, f);
+        if (y === r) bulunamayan++; else degisen++;
+        return y;
       }));
       setSatirlar(yeniSatirlar);
       mesaj(`${degisen} satırın fiyatı listeden güncellendi.`
@@ -968,7 +963,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               // Secim "Son / Sik Aranan" sayacina islensin - listede oldugu gibi.
               void api.aramaIsaretle(
                 sec.tip === 'hizmet' ? 'hizmet' : 'stok', Number(sec.id));
-              const yeni = stokSecimindenKalem(sec, sonAnahtar(satirlar) + 1, yerelPara);
+              let yeni = stokSecimindenKalem(sec, sonAnahtar(satirlar) + 1, yerelPara);
               // FIYAT LISTESI ONCELIKLI (205/207): belgenin listesi varsa fiyat
               //   ORADAN gelir; kartin kendi fiyati yalniz listede kalem yoksa
               //   kalir. Fiyat kalem penceresi ACILMADAN once beklenir - pencere
@@ -978,12 +973,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                 try {
                   const f = await api.fiyatListesiFiyat(fiyatListesiId,
                     sec.tip === 'hizmet' ? { hizmetId: Number(sec.id) } : { stokId: Number(sec.id) });
-                  if (f.fiyat !== null && f.fiyat > 0) {
-                    const metin = String(f.fiyat);
-                    yeni.birimFiyat = metin;
-                    yeni.dovizFiyat = metin;
-                    if (f.dovizCinsi) yeni.fiyatDovizi = f.dovizCinsi;
-                  }
+                  yeni = listeFiyatiUygula(yeni, f);
                 } catch { /* liste fiyati alinamazsa kart fiyati kalir */ }
               }
               setKalem(yeni);

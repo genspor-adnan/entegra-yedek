@@ -8,11 +8,12 @@ using Gentegre.Veri.Depolar;
 namespace Gentegre.Api.Uclar;
 
 /// <summary>
-/// FIYAT LISTESI uclari (201/202).
+/// FIYAT LISTESI uclari (201/202/205/207).
 ///
 /// Listenin kendisi ve satirlari GENERIC kart uclarindan yonetilir
-/// (/api/kart/fiyat-listesi); burada yalnizca kart sozlesmesine sigmayan iki
-/// islem var: listeyi URETMEK ve tek kalemin fiyatini SORMAK.
+/// (/api/kart/fiyat-listesi); buradakiler kart sozlesmesine sigmayan isler:
+/// listeyi URETMEK, tek kalemin fiyatini SORMAK, belge acilisinda varsayilan
+/// listeyi COZMEK ve Excel sablon indirme / iceri alma.
 /// </summary>
 public static class FiyatListesiUclari
 {
