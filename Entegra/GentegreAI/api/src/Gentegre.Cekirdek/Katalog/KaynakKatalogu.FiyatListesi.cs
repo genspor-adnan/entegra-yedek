@@ -41,8 +41,13 @@ public static partial class KaynakKatalogu
             new("satirSayisi",
                 "(select count(*) from public.fiyat_listesi_satir r where r.liste_id = l.id)",
                 "sayi", "Satır", Hizalama: "sag", Filtrelenebilir: false),
-            new("durum", "case when l.durum = 1 then 'Aktif' else 'Pasif' end", "metin",
-                "Durum", Hizalama: "orta"),
+            // Durum IKI kolon (hesap kaynagindaki desen): gorunen METIN
+            //   (GenGrid yesil/kirmizi rozet basar) + FILTRELENEBILIR ham kod.
+            //   Tek metin kolonu birakilinca "Aktif" cipi (durum = 1) hicbir
+            //   satirla eslesmiyor, liste bos gorunuyordu.
+            new("durumAdi", "case l.durum when 1 then 'Aktif' else 'Pasif' end", "metin",
+                "Durum", Hizalama: "orta", Genislik: 90, Filtrelenebilir: false),
+            new("durum", "l.durum", "kod", "Durum Kodu", Hizalama: "orta", Varsayilan: false),
             new("aciklama", "l.aciklama", "metin", "Açıklama", Genislik: 240, Varsayilan: false),
             new("subeId", "l.sube_id", "sayi", "Şube", Varsayilan: false),
         });
@@ -70,8 +75,9 @@ public static partial class KaynakKatalogu
             new("kdvDahil", "case when v.kdv_dahil = 1 then 'Dahil' else 'Hariç' end", "metin",
                 "KDV", Hizalama: "orta"),
             new("birim",  "v.birim",  "kod", "Birim", Hizalama: "orta"),
-            new("durum", "case when v.durum = 1 then 'Aktif' else 'Pasif' end", "metin",
-                "Durum", Hizalama: "orta"),
+            new("durumAdi", "case v.durum when 1 then 'Aktif' else 'Pasif' end", "metin",
+                "Durum", Hizalama: "orta", Genislik: 90, Filtrelenebilir: false),
+            new("durum", "v.durum", "kod", "Durum Kodu", Hizalama: "orta", Varsayilan: false),
             // Yururlukteki kural: satirda ezme yoksa basligin degeri gorunur.
             new("yazim", "case when v.yazim = 1 then 'Manuel' else 'Hesap' end", "metin",
                 "Yazım", Hizalama: "orta"),

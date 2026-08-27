@@ -23,31 +23,24 @@ public static partial class KartKatalogu
             ["yuvarlama"] = (short)0,
             ["yuvarlamaBirim"] = 1m,
             ["kdvDahil"] = (short)0,
+            // Yon SECILMEDEN kalmamali: kart "—" gosterip DB'ye 2 yazardi.
+            //   Yeni liste cogunlukla satis listesidir.
+            ["yon"] = (short)2,
         },
         Alanlar: new KartAlani[]
         {
             new("id",   "id",   "sayi",  Yazilabilir: false),
+            // STANDART BASLIK SERIDI ("Kimlik" grubu): sekme degil, kartin ust
+            //   seridinde her sekmede sabit durur - listeyi tanimlayan uc alan.
             new("ad",   "ad",   "metin", Zorunlu: true, EnFazlaUzunluk: 80,
-                Baslik: "Liste Adı", Grup: "Genel"),
+                Baslik: "Liste Adı", Grup: "Kimlik"),
             new("grup", "grup", "kod",   KodListesi: "fiyat_listesi.grup",
-                Baslik: "Grubu", Grup: "Genel"),
-            // YON (204): liste alis mi satis mi? Belge turu hangi yondeyse o
-            //   yonun listesi uygulanir. Taban liste AYNI YONDE olmali (DB tetigi).
-            new("yon", "yon", "kod", SabitKodlar: YonKodlari,
-                Baslik: "Yön", Grup: "Genel"),
-            // VARSAYILAN: carisinde liste tanimlanmamis belgeler bunu kullanir.
-            //   Yon basina TEK varsayilan olabilir (DB tekil indeksi).
-            new("varsayilan", "varsayilan", "mantik",
-                Baslik: "Varsayılan Liste", Grup: "Genel"),
+                Baslik: "Grubu", Grup: "Kimlik"),
             new("durum", "durum", "kod", SabitKodlar: DurumKodlari,
-                Baslik: "Durum", Grup: "Genel"),
+                Baslik: "Durum", Grup: "Kimlik"),
 
-            // GECERLILIK: bos birakilirsa sinirsiz. Bitis, baslangictan once
-            //   olamaz (DB check).
-            new("baslangic", "baslangic", "tarih", Baslik: "Başlama",
-                Grup: "Genel", AltGrup: "Geçerlilik"),
-            new("bitis",     "bitis",     "tarih", Baslik: "Bitiş",
-                Grup: "Genel", AltGrup: "Geçerlilik"),
+            // ALT GRUP SIRASI = ALAN SIRASI: kutular ekranda alanlarin ilk
+            //   goruldugu sirayla dizilir (Fiyatlama · Detay).
 
             // FIYATLAMA KURALI. Taban liste bos ise liste KOKTUR: fiyatlar
             //   kalemin kendi kartindan (stok_fiyat / hizmet_fiyat) baslar.
@@ -61,12 +54,30 @@ public static partial class KartKatalogu
             // "En Yakin Degere" bir ADIM ister; adimsiz "en yakin" tanimsizdir.
             new("yuvarlamaBirim", "yuvarlama_birim", "para", Baslik: "Yuvarlama Adımı",
                 Grup: "Genel", AltGrup: "Fiyatlama"),
-            new("kdvDahil", "kdv_dahil", "kod", SabitKodlar: KdvDahilKodlari,
-                Baslik: "KDV", Grup: "Genel", AltGrup: "Fiyatlama"),
-
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
-                Baslik: "Açıklama", Grup: "Genel"),
-            new("subeId", "sube_id", "sayi", Yazilabilir: false),
+                Baslik: "Açıklama", Grup: "Genel", AltGrup: "Fiyatlama"),
+
+            // DETAY: listenin NASIL kullanilacagini soyleyen alanlar - fiyatin
+            //   nasil hesaplandigi degil.
+            // VARSAYILAN: carisinde liste tanimlanmamis belgeler bunu kullanir.
+            //   Yon basina TEK varsayilan olabilir (DB tekil indeksi).
+            new("varsayilan", "varsayilan", "mantik",
+                Baslik: "Varsayılan Liste", Grup: "Genel", AltGrup: "Detay"),
+            // YON (204): liste alis mi satis mi? Belge turu hangi yondeyse o
+            //   yonun listesi uygulanir. Taban liste AYNI YONDE olmali (DB tetigi).
+            new("yon", "yon", "kod", SabitKodlar: YonKodlari,
+                Baslik: "Yön", Grup: "Genel", AltGrup: "Detay"),
+            new("kdvDahil", "kdv_dahil", "kod", SabitKodlar: KdvDahilKodlari,
+                Baslik: "KDV", Grup: "Genel", AltGrup: "Detay"),
+            // GECERLILIK ARALIGI da Detay kutusunun altinda (kullanici): iki
+            //   tarih icin ayri bir kutu fazladan bir kat gorsel gurultuydu.
+            //   Bos birakilirsa sinirsiz; bitis baslangictan once olamaz (DB check).
+            new("baslangic", "baslangic", "tarih", Baslik: "Başlama",
+                Grup: "Genel", AltGrup: "Detay"),
+            new("bitis",     "bitis",     "tarih", Baslik: "Bitiş",
+                Grup: "Genel", AltGrup: "Detay"),
+
+            new("subeId", "sube_id", "sayi", Yazilabilir: false, Baslik: "Şube"),
         },
         Detaylar: new[]
         {
