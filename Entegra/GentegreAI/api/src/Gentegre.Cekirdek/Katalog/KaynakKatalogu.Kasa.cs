@@ -82,7 +82,7 @@ public static partial class KaynakKatalogu
             new("dovizCinsi",  "h.doviz_cinsi",   "metin", "Doviz", Hizalama: "orta"),
             // ATAMA (196): tek kolonda okunur karsilik - "Varsayılan", personel
             //   adi ya da bos. Nakit tahsilatta acilacak kasa buna gore secilir.
-            new("atamaAdi",    "public.fn_hesap_atama_adi(h.atama, h.sorumlu_id)",
+            new("atamaAdi",    "public.fn_hesap_atama_adi(h.atama)",
                                                   "metin", "Atama", Hizalama: "orta",
                                                    Genislik: 150, Siralanabilir: false,
                                                    Filtrelenebilir: false),

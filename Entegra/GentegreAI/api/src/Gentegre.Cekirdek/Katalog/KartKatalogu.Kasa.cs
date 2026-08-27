@@ -25,11 +25,12 @@ public static partial class KartKatalogu
             new("dovizCinsi",      "doviz_cinsi",       "kod",   Zorunlu: true, SabitKodlar: DovizKodlari, Baslik: "Para Birimi", Grup: "Kimlik"),
             new("durum",           "durum",             "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
             // --- Genel
-            // KASA ATAMASI (196): "Varsayilan" -> kullanicinin kendi kasasi yoksa
-            //   nakit islemde bu acilir; "Personel" -> Sorumlu alanindaki kisinin
-            //   kasasi. Kisi icin ayri alan YOK: sorumlu_id zaten bu anlamda.
-            new("atama",           "atama",             "kod",   KodListesi: "hesap.atama", Baslik: "Atama", Grup: "Genel", AltGrup: "Tanımlama"),
-            new("sorumluId",       "sorumlu_id",        "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Sorumlu", Grup: "Genel", AltGrup: "Tanımlama"),
+            // KASA ATAMASI (197) - TEK ALAN (kullanici): combo'da "Ana Kasa"
+            //   ve personel listesi birlikte. Ayri bir "Sorumlu" alani YOK;
+            //   iki alan doldurmak gereksizdi. Deger -1 ise ana kasa, pozitifse
+            //   personel kimligi, bos ise siradan kasa.
+            //   ANA KASA subede TEKTIR (kismi tekil index); ikincisi eklenemez.
+            new("atama",           "atama",             "kod",   KodTablosu: "public.v_hesap_atama_lookup", Baslik: "Atama", Grup: "Genel", AltGrup: "Tanımlama"),
             new("bagliHesapId",    "bagli_hesap_id",    "kod",   KodTablosu: "public.v_hesap_lookup", Baslik: "Bağlı Hesap", Grup: "Genel", AltGrup: "Tanımlama"),
             new("altTur",          "alt_tur",           "kod",   KodListesi: "hesap.alt_tur", Baslik: "Alt Tür", Grup: "Genel", AltGrup: "Tanımlama"),
             new("aciklama",        "aciklama",          "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama", Grup: "Genel", AltGrup: "Tanımlama"),

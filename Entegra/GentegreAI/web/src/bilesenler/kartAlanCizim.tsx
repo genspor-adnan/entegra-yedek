@@ -90,8 +90,14 @@ export function alanCizici(b: AlanCizimBaglami) {
       ) : a.kodlar ? (() => {
         // BAGLI liste (Şube -> Banka): yalniz secili ust'un altindakiler.
         const ustDegeri = a.bagliAlan ? String(deger[a.bagliAlan] ?? '') : '';
-        const secenekler = Object.entries(a.kodlar).filter(
-          ([k]) => !a.bagliAlan || (a.kodUst?.[k] ?? '') === ustDegeri);
+        // SIRALAMA ADA GORE: JS nesne anahtarlari sayisal ise ARTAN, degilse
+        //   ekleme sirasinda gelir - "-1" (Ana Kasa) string sayilip listenin
+        //   SONUNA dusuyordu. Kullanicinin gordugu sira sunucudaki sira degil,
+        //   ad sirasi olmali; ozel secenekler adinin basindaki isaretle
+        //   ("★ Ana Kasa") one gecer.
+        const secenekler = Object.entries(a.kodlar)
+          .filter(([k]) => !a.bagliAlan || (a.kodUst?.[k] ?? '') === ustDegeri)
+          .sort((x, y) => x[1].localeCompare(y[1], 'tr'));
         const ustBos = Boolean(a.bagliAlan) && ustDegeri === '';
         return (
           <select
