@@ -56,6 +56,21 @@
   .wrap{display:flex;gap:0;align-items:stretch}
   .center{flex:1;min-width:0;padding:12px}
   .side{width:290px;flex:none;border-left:1px solid var(--line2);background:#f8fafc;padding:10px}
+  .tabs{display:flex;gap:2px;padding:0 8px 0 0;background:transparent;border-bottom:1px solid var(--line);
+    margin:-2px 0 12px;flex-wrap:wrap}
+  .tab{padding:7px 14px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;
+    font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none}
+  .pane.active{display:block}
+  .ozet{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+  .ozet .k{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:8px 10px}
+  .ozet .k .t{font-size:10.5px;color:var(--muted)}
+  .ozet .k .v{font-size:16px;font-weight:bold;color:var(--navy);font-family:"Segoe UI",Tahoma}
+  .ozet .k.borc .v{color:#b23b3b}
+  .ozet .k.tahsil .v{color:#2e7d46}
   .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
   .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);
     border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
@@ -191,6 +206,20 @@
   <div class="wrap">
     <div class="center">
 
+      <!-- Kabul memuru ayni protokol uzerinde dort is yapar: basvuruyu acar,
+           islemleri fiyatlandirir, provizyonu alir, katilim payini tahsil eder.
+           Hepsi AYNI ekranda sekme - ayri pencerelere dagitmak protokolu
+           kaybettiriyordu. -->
+      <div class="tabs">
+        <div class="tab active" data-t="basvuru">Başvuru</div>
+        <div class="tab" data-t="ucret">Ücretlendirme <span class="b">5</span></div>
+        <div class="tab" data-t="tahsilat">Tahsilat</div>
+        <div class="tab" data-t="provizyon">Provizyon <span class="b">MEDULA</span></div>
+        <div class="tab" data-t="gecmis">Önceki Başvurular <span class="b">14</span></div>
+      </div>
+
+      <div class="pane active" data-p="basvuru">
+
       <!-- 3) YENI BASVURU: protokol numarasi KAYDEDINCE verilir; ekranda
            "atanacak" yazar. Numarayi onceden gostermek, vazgecilen kabulde
            seride bosluk birakiyordu. -->
@@ -269,6 +298,234 @@
         </div>
       </div>
 
+      </div><!-- /pane basvuru -->
+
+      <!-- ============================= UCRETLENDIRME ============================= -->
+      <div class="pane" data-p="ucret">
+        <div class="ozet">
+          <div class="k"><div class="t">İşlem Toplamı</div><div class="v">1.240,00 ₺</div></div>
+          <div class="k"><div class="t">Kurum Payı (SGK)</div><div class="v">1.198,00 ₺</div></div>
+          <div class="k borc"><div class="t">Hasta Payı</div><div class="v">42,00 ₺</div></div>
+          <div class="k tahsil"><div class="t">Tahsil Edilen</div><div class="v">0,00 ₺</div></div>
+        </div>
+
+        <div class="grp">
+          <h4>İşlem / Hizmet Kalemleri <span class="tag">SUT 2026</span></h4>
+          <div class="body">
+            <div class="gridtb" style="padding-bottom:6px">
+              <span class="minibtn">➕ İşlem Ekle</span>
+              <span class="minibtn">🔍 SUT Kodundan Ara</span>
+              <span class="minibtn">📦 Paket Uygula</span>
+              <span class="minibtn">✎ Düzenle</span>
+              <span class="minibtn">🗑 Sil</span>
+              <span style="margin-left:auto" class="minibtn">🔄 Fiyatları Yenile</span>
+            </div>
+            <div class="dg">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:30px" class="c">#</th>
+                    <th>SUT Kodu</th><th>İşlem / Hizmet</th><th>Klinik</th><th class="c">Adet</th>
+                    <th class="r">Birim Fiyat</th><th class="r">Tutar</th>
+                    <th class="r">Kurum Payı</th><th class="r">Hasta Payı</th><th>Karşılama</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="sel">
+                    <td class="c">1</td><td>520030</td><td>Ayaktan hasta muayenesi — Dahiliye</td><td>Dahiliye</td>
+                    <td class="c">1</td><td class="r">210,00</td><td class="r">210,00</td>
+                    <td class="r">168,00</td><td class="r">42,00</td>
+                    <td><span class="pill p-ok">SGK</span></td>
+                  </tr>
+                  <tr>
+                    <td class="c">2</td><td>901350</td><td>Tam kan sayımı (hemogram)</td><td>Laboratuvar</td>
+                    <td class="c">1</td><td class="r">96,00</td><td class="r">96,00</td>
+                    <td class="r">96,00</td><td class="r">0,00</td>
+                    <td><span class="pill p-ok">SGK</span></td>
+                  </tr>
+                  <tr>
+                    <td class="c">3</td><td>901720</td><td>Biyokimya paneli (12 parametre)</td><td>Laboratuvar</td>
+                    <td class="c">1</td><td class="r">384,00</td><td class="r">384,00</td>
+                    <td class="r">384,00</td><td class="r">0,00</td>
+                    <td><span class="pill p-ok">SGK</span></td>
+                  </tr>
+                  <tr>
+                    <td class="c">4</td><td>803210</td><td>EKG — 12 derivasyon</td><td>Kardiyoloji</td>
+                    <td class="c">1</td><td class="r">130,00</td><td class="r">130,00</td>
+                    <td class="r">130,00</td><td class="r">0,00</td>
+                    <td><span class="pill p-ok">SGK</span></td>
+                  </tr>
+                  <tr>
+                    <td class="c">5</td><td>—</td><td>Öncelikli muayene farkı (özel istek)</td><td>Dahiliye</td>
+                    <td class="c">1</td><td class="r">420,00</td><td class="r">420,00</td>
+                    <td class="r">420,00</td><td class="r">0,00</td>
+                    <td><span class="pill p-inf">Tamamlayıcı</span></td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr><td colspan="6">Toplam (5 kalem)</td><td class="r">1.240,00</td>
+                      <td class="r">1.198,00</td><td class="r">42,00</td><td></td></tr>
+                </tfoot>
+              </table>
+            </div>
+            <div class="hint">
+              Fiyat <b>kurumun fiyat listesinden</b> gelir (SGK → SUT, özel → hastane listesi).
+              SUT'ta karşılığı olmayan kalem otomatik <b>hasta payına</b> yazılır; kalemin karşılama
+              sütunu bunu gösterir. Kalem silmek provizyon alındıktan sonra <b>MEDULA'da da</b> iptal ister.
+            </div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Fiyat / İndirim</h4>
+          <div class="body">
+            <div class="grid4">
+              <label>Fiyat Listesi</label>   <div class="inp combo">SUT 2026</div>
+              <label>Anlaşma / Protokol</label><div class="inp combo">—</div>
+              <label>İndirim Türü</label>    <div class="inp combo">Yok</div>
+              <label>İndirim Oranı</label>   <div class="inp">%0</div>
+              <label>Muafiyet</label>        <div class="inp combo">Yok</div>
+              <label>Onaylayan</label>       <div class="inp ro">—</div>
+            </div>
+            <div class="hint">İndirim ve muafiyet <b>yetki ister</b>; onaylayan kullanıcı kayda yazılır.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== TAHSILAT ============================== -->
+      <div class="pane" data-p="tahsilat">
+        <div class="ozet">
+          <div class="k"><div class="t">Hasta Payı</div><div class="v">42,00 ₺</div></div>
+          <div class="k tahsil"><div class="t">Tahsil Edilen</div><div class="v">0,00 ₺</div></div>
+          <div class="k borc"><div class="t">Kalan</div><div class="v">42,00 ₺</div></div>
+          <div class="k"><div class="t">Önceki Açık Borç</div><div class="v">0,00 ₺</div></div>
+        </div>
+
+        <div class="grp">
+          <h4>Tahsilat Girişi <span class="tag">KASA</span></h4>
+          <div class="body">
+            <div class="grid4">
+              <label class="req">Ödeme Aracı</label>
+              <div class="full" style="grid-column:2 / -1">
+                <span class="seg">
+                  <span class="s on">Nakit</span>
+                  <span class="s">Kredi Kartı</span>
+                  <span class="s">Banka / Havale</span>
+                  <span class="s">Senet</span>
+                  <span class="s">Kurum Tahakkuku</span>
+                </span>
+              </div>
+
+              <label class="req">Tutar</label>      <div class="inp">42,00</div>
+              <label>Para Birimi</label>            <div class="inp combo">TL</div>
+
+              <label>Kasa / POS</label>             <div class="inp combo">Poliklinik Vezne 1</div>
+              <label>Taksit</label>                 <div class="inp combo">Peşin</div>
+
+              <label>Makbuz No</label>              <div class="inp ro">(tahsilatta atanacak)</div>
+              <label>Tahsil Eden</label>            <div class="inp ro">A. YILDIZ</div>
+
+              <label class="full" style="text-align:left;color:var(--muted)">Açıklama</label>
+              <textarea class="inp full">Muayene katılım payı</textarea>
+            </div>
+            <div class="gridtb" style="padding-top:10px">
+              <span class="btn ok">💳 Tahsilatı Kaydet</span>
+              <span class="btn">🖨️ Makbuz Yazdır</span>
+              <span class="btn">↩ İade / İptal</span>
+              <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">
+                Tahsilat <b>kasa işlemine</b> dönüşür; muhasebe fişi otomatik oluşur.
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Bu Başvurunun Tahsilatları</h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <thead>
+                  <tr><th style="width:30px" class="c">#</th><th>Tarih / Saat</th><th>Makbuz</th><th>Ödeme Aracı</th>
+                      <th>Kasa / POS</th><th>Tahsil Eden</th><th>Durum</th><th class="r">Tutar</th></tr>
+                </thead>
+                <tbody>
+                  <tr class="s-ipt"><td class="c">—</td><td colspan="6">Bu başvuru için henüz tahsilat yapılmadı.</td>
+                      <td class="r">0,00</td></tr>
+                </tbody>
+                <tfoot>
+                  <tr><td colspan="7">Tahsil edilen / Kalan</td><td class="r">0,00 / 42,00</td></tr>
+                </tfoot>
+              </table>
+            </div>
+            <div class="hint">
+              Katılım payı tahsil edilmeden hasta <b>muayeneye gönderilebilir</b> (kontrol listesinde
+              uyarı kalır); fatura kesilirken kalan bakiye hastaya <b>borç</b> yazılır.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== PROVIZYON ============================== -->
+      <div class="pane" data-p="provizyon">
+        <div class="grp">
+          <h4>MEDULA İşlemleri <span class="tag">SGK</span></h4>
+          <div class="body">
+            <div class="grid4">
+              <label>Hasta T.C.</label>        <div class="inp ro">12345678901</div>
+              <label>Sigorta Türü</label>      <div class="inp ro">4/a — Zorunlu</div>
+              <label class="req">Provizyon Tipi</label><div class="inp combo">Normal</div>
+              <label>Takip Türü</label>        <div class="inp combo">Ayaktan (A)</div>
+              <label>Devam Eden Takip</label>  <div class="inp ro">Yok</div>
+              <label>Tesis Kodu</label>        <div class="inp ro">11-59-0038</div>
+              <label>Takip No</label>          <div class="inp">P2026-0083471</div>
+              <label>Geçerlilik</label>        <div class="inp ro">27.08.2026 23:59</div>
+            </div>
+            <div class="gridtb" style="padding-top:10px">
+              <span class="btn primary">🧾 Provizyon Al</span>
+              <span class="btn">🔄 Müstehaklık Sorgula</span>
+              <span class="btn">📤 Hizmet Kaydet (İşlemleri Gönder)</span>
+              <span class="btn">✔ Takibi Sonlandır</span>
+              <span class="btn danger">✕ Provizyon İptal</span>
+            </div>
+            <div class="hint">
+              Sıra: <b>Provizyon Al → Ücretlendirme → Hizmet Kaydet → Takibi Sonlandır</b>.
+              Takip sonlandırılmadan dönem faturası kesilemez; sonlandırılan takibe kalem eklenemez.
+            </div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Sorgu / İşlem Geçmişi</h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <thead>
+                  <tr><th style="width:30px" class="c">#</th><th>Tarih / Saat</th><th>İşlem</th><th>Takip No</th>
+                      <th>Sonuç</th><th>Hata Kodu</th><th>Açıklama</th></tr>
+                </thead>
+                <tbody>
+                  <tr class="sel"><td class="c">1</td><td>27.08.2026 10:23</td><td>Müstehaklık Sorgu</td>
+                      <td>—</td><td><span class="pill p-ok">Müstehak</span></td><td>—</td>
+                      <td>Aktif sigortalı, prim borcu yok</td></tr>
+                  <tr><td class="c">2</td><td>27.08.2026 10:24</td><td>Provizyon Al</td>
+                      <td>P2026-0083471</td><td><span class="pill p-ok">Başarılı</span></td><td>—</td>
+                      <td>Ayaktan takip açıldı</td></tr>
+                  <tr class="s-ipt"><td class="c">3</td><td>—</td><td>Hizmet Kaydet</td><td>P2026-0083471</td>
+                      <td><span class="pill p-inf">Bekliyor</span></td><td>—</td>
+                      <td>Ücretlendirme tamamlanınca gönderilecek</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="hint">
+              MEDULA yanıtları <b>ham olarak</b> saklanır; hata kodu (ör. 1093 — takip bulunamadı)
+              destek ekibinin tek teşhis kaynağıdır.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================ ONCEKI BASVURULAR ======================== -->
+      <div class="pane" data-p="gecmis">
       <!-- 5) GECMIS BASVURULAR: ayni ekranda, cift tikla acilir. Kabul memuru
            "daha once ne oldu" sorusunu baska ekrana gitmeden gorur. -->
       <div class="grp">
@@ -337,7 +594,7 @@
           </div>
         </div>
       </div>
-
+      </div>
     </div>
 
     <!-- Sag panel: kabul memurunun gun icinde bakip durdugu sayilar. -->
@@ -381,6 +638,9 @@
     <span><b>basvuru</b> (visit): protokol_no, hasta_id, basvuru_tarihi, basvuru_turu, gelis_sekli, klinik_id, hekim_id, oda_id, sira_no, randevu_id, refakatci, durum, aciklama, sube_id</span>
     <span><b>basvuru_odeme</b>: odeme_turu, kurum_id, fiyat_listesi_id, takip_no, provizyon_tipi, mustehaklik_durum, mustehaklik_tarih, katilim_payi, sevk_kurum_id</span>
     <span><b>basvuru_hareket</b>: kabul → muayene → sonuç → kapanış izleri</span>
+    <span><b>basvuru_islem</b> (ücretlendirme): sut_kodu, islem_id, klinik_id, adet, birim_fiyat, tutar, kurum_payi, hasta_payi, karsilama</span>
+    <span><b>basvuru_tahsilat</b>: odeme_araci, tutar, kasa_id, taksit, makbuz_no, tahsil_eden, kasa_islem_id</span>
+    <span><b>medula_islem</b>: islem_turu, takip_no, sonuc, hata_kodu, istek/yanit ham JSON</span>
   </div>
 
   <div class="statusbar">
@@ -392,5 +652,19 @@
   </div>
 
 </div>
+
+<script>
+  // Sekme gecisi (kisi_karti.html ile ayni desen) - mockup gezilebilsin.
+  var tabs = document.querySelectorAll('.tab'), panes = document.querySelectorAll('.pane');
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (x) { x.classList.remove('active') });
+      panes.forEach(function (x) { x.classList.remove('active') });
+      t.classList.add('active');
+      var p = document.querySelector('.pane[data-p="' + t.dataset.t + '"]');
+      if (p) p.classList.add('active');
+    });
+  });
+</script>
 </body>
 </html>

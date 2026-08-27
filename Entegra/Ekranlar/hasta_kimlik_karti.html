@@ -156,16 +156,16 @@
   </div>
 
   <div class="tabs">
-    <div class="tab active">Kimlik</div>
-    <div class="tab">İletişim / Adres</div>
-    <div class="tab">Sigorta &amp; Kurum <span class="b">2</span></div>
-    <div class="tab">Yakınlar / Acil <span class="b">2</span></div>
-    <div class="tab">Tıbbi Özet</div>
-    <div class="tab">Başvurular <span class="b">14</span></div>
-    <div class="tab">Doküman <span class="b">3</span></div>
+    <div class="tab active" data-t="kimlik">Kimlik</div>
+    <div class="tab" data-t="iletisim">İletişim / Adres</div>
+    <div class="tab" data-t="sigorta">Sigorta &amp; Kurum <span class="b">2</span></div>
+    <div class="tab" data-t="yakin">Yakınlar / Acil <span class="b">2</span></div>
+    <div class="tab" data-t="tibbi">Tıbbi Özet</div>
+    <div class="tab" data-t="basvuru">Başvurular <span class="b">14</span></div>
+    <div class="tab" data-t="dokuman">Doküman <span class="b">3</span></div>
   </div>
 
-  <div class="pane active">
+  <div class="pane active" data-p="kimlik">
     <div class="row">
       <div class="col">
 
@@ -245,6 +245,68 @@
       </div>
     </div>
 
+  </div>
+
+
+  <!-- ============================ ILETISIM / ADRES ============================ -->
+  <div class="pane" data-p="iletisim">
+    <div class="grp">
+      <h4>İletişim</h4>
+      <div class="body">
+        <div class="grid4">
+          <label class="req">Cep Telefonu</label> <div class="inp">0532 114 27 63 <span class="pill p-ok">Doğrulandı</span></div>
+          <label>Ev Telefonu</label>              <div class="inp">0282 726 41 08</div>
+          <label>E-posta</label>                  <div class="inp">meryem.aydogan@example.com</div>
+          <label>Tercih Edilen Kanal</label>      <div class="inp combo">SMS</div>
+        </div>
+        <div class="hint">SMS doğrulaması yapılmamış numaraya randevu ve sonuç bildirimi <b>gönderilmez</b>.</div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h4>Adres <span class="tag">MERNİS / Beyan</span></h4>
+      <div class="body">
+        <div class="grid4">
+          <label>Adres Türü</label>    <div class="inp combo">Yerleşim Yeri (MERNİS)</div>
+          <label>Ülke</label>          <div class="inp combo">Türkiye</div>
+          <label>İl / İlçe</label>     <div class="inp">TEKİRDAĞ / ÇERKEZKÖY</div>
+          <label>Mahalle</label>       <div class="inp">FEVZİ PAŞA MAH.</div>
+          <label>Cadde / Sokak</label> <div class="inp">ŞÜKRÜAĞA SK.</div>
+          <label>Bina / Daire</label>  <div class="inp">14 / 6</div>
+          <label>Posta Kodu</label>    <div class="inp">59500</div>
+          <label>Adres Kodu</label>    <div class="inp ro">1234567890</div>
+          <label class="full" style="text-align:left;color:var(--muted)">Açık Adres</label>
+          <textarea class="inp full">FEVZİ PAŞA MAH. ŞÜKRÜAĞA SK. NO:14 D:6 ÇERKEZKÖY / TEKİRDAĞ</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h4>Kayıtlı Adresler</h4>
+      <div class="body">
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:30px" class="c">#</th><th>Tür</th><th>İl / İlçe</th><th>Adres</th><th class="c">Varsayılan</th><th>Kaynak</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td class="c">1</td><td>Yerleşim Yeri</td><td>TEKİRDAĞ / ÇERKEZKÖY</td>
+                  <td>FEVZİ PAŞA MAH. ŞÜKRÜAĞA SK. 14/6</td><td class="c">✓</td><td>MERNİS</td></tr>
+              <tr><td class="c">2</td><td>İş</td><td>TEKİRDAĞ / ÇORLU</td>
+                  <td>ATATÜRK CAD. 118 — Çorlu Anadolu Lisesi</td><td class="c">—</td><td>Beyan</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gridtb">
+          <span class="minibtn">➕ Adres Ekle</span>
+          <span class="minibtn">✎ Düzenle</span>
+          <span class="minibtn">🗑 Sil</span>
+          <span class="minibtn">🔄 MERNİS Adresini Getir</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ SIGORTA & KURUM ============================ -->
+  <div class="pane" data-p="sigorta">
     <!-- Sigorta ozeti kartta da gorunsun: kabul ekranina gecmeden once
          mustehaklik durumu bilinmeli. -->
     <div class="grp">
@@ -283,6 +345,198 @@
       </div>
     </div>
 
+    <div class="grp">
+      <h4>Provizyon Geçmişi</h4>
+      <div class="body">
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:30px" class="c">#</th><th>Tarih</th><th>Kurum</th><th>Takip No</th>
+                       <th>Provizyon Tipi</th><th>Sonuç</th><th>Açıklama</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td class="c">1</td><td>18.08.2026 09:12</td><td>SGK</td><td>P2026-0083471</td>
+                  <td>Normal</td><td><span class="pill p-ok">Müstehak</span></td><td>—</td></tr>
+              <tr><td class="c">2</td><td>02.07.2026 14:33</td><td>SGK</td><td>P2026-0079004</td>
+                  <td>Normal</td><td><span class="pill p-ok">Müstehak</span></td><td>—</td></tr>
+              <tr><td class="c">3</td><td>03.10.2025 11:18</td><td>SGK</td><td>—</td>
+                  <td>Normal</td><td><span class="pill p-yok">Red</span></td><td>Prim borcu — 30 gün kuralı</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="hint">Provizyon reddi başvuruyu <b>engellemez</b>; başvuru "Ücretli"ye çevrilir ve hastadan onay alınır.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ YAKINLAR / ACIL ============================ -->
+  <div class="pane" data-p="yakin">
+    <div class="grp">
+      <h4>Yakınlar / Acil Durumda Aranacak <span class="tag">EN AZ 1 KAYIT</span></h4>
+      <div class="body">
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:30px" class="c">#</th><th>Ad Soyad</th><th>Yakınlık</th><th>T.C. Kimlik</th>
+                       <th>Telefon</th><th class="c">Acil</th><th class="c">Yasal Temsilci</th><th>Not</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td class="c">1</td><td>KEMAL AYDOĞAN</td><td>Eş</td><td>23456789012</td>
+                  <td>0533 447 19 22</td><td class="c">✓</td><td class="c">—</td><td>İlk aranacak</td></tr>
+              <tr><td class="c">2</td><td>ELİF AYDOĞAN</td><td>Kız</td><td>34567890123</td>
+                  <td>0546 220 78 41</td><td class="c">✓</td><td class="c">—</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gridtb">
+          <span class="minibtn">➕ Yakın Ekle</span>
+          <span class="minibtn">✎ Düzenle</span>
+          <span class="minibtn">🗑 Sil</span>
+        </div>
+        <div class="hint">
+          Hasta <b>18 yaş altı</b> ya da <b>vesayet altında</b> ise yasal temsilci kaydı zorunludur;
+          onam formları temsilci adına imzalanır.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ TIBBI OZET ============================ -->
+  <div class="pane" data-p="tibbi">
+    <div class="row">
+      <div class="col">
+        <div class="grp">
+          <h4>Alerjiler <span class="tag">KRİTİK</span></h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <thead><tr><th style="width:30px" class="c">#</th><th>Etken</th><th>Tür</th><th>Şiddet</th>
+                           <th>Bildirim</th><th>Kaynak</th></tr></thead>
+                <tbody>
+                  <tr><td class="c">1</td><td>Penisilin</td><td>İlaç</td>
+                      <td><span class="pill p-yok">Ağır (anafilaksi)</span></td><td class="c">11.04.2023</td><td>Hekim</td></tr>
+                  <tr><td class="c">2</td><td>İyotlu kontrast madde</td><td>İlaç</td>
+                      <td><span class="pill p-kri">Orta</span></td><td class="c">19.11.2025</td><td>Radyoloji</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="gridtb"><span class="minibtn">➕ Alerji Ekle</span><span class="minibtn">✎ Düzenle</span></div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Kronik Tanılar</h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <thead><tr><th style="width:30px" class="c">#</th><th>ICD-10</th><th>Tanı</th><th>Başlangıç</th><th>Durum</th></tr></thead>
+                <tbody>
+                  <tr><td class="c">1</td><td>I10</td><td>Esansiyel (primer) hipertansiyon</td><td class="c">2021</td>
+                      <td><span class="pill p-inf">Takipte</span></td></tr>
+                  <tr><td class="c">2</td><td>E78.5</td><td>Hiperlipidemi</td><td class="c">2023</td>
+                      <td><span class="pill p-inf">Takipte</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="grp">
+          <h4>Sürekli Kullandığı İlaçlar</h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <thead><tr><th style="width:30px" class="c">#</th><th>İlaç</th><th>Doz</th><th>Kullanım</th><th>Başlangıç</th></tr></thead>
+                <tbody>
+                  <tr><td class="c">1</td><td>Ramipril</td><td>5 mg</td><td>1x1 sabah</td><td class="c">2021</td></tr>
+                  <tr><td class="c">2</td><td>Atorvastatin</td><td>20 mg</td><td>1x1 akşam</td><td class="c">2023</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Ameliyat / Girişim Geçmişi</h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <thead><tr><th style="width:30px" class="c">#</th><th>Tarih</th><th>İşlem</th><th>Klinik</th><th>Hekim</th></tr></thead>
+                <tbody>
+                  <tr><td class="c">1</td><td>21.11.2025</td><td>Laparoskopik kolesistektomi</td><td>Genel Cerrahi</td><td>Op. Dr. M. ARAS</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="hint">Tıbbi özet <b>salt okunur</b>dur: kayıtlar hekim ekranlarından (muayene, yatış, ameliyat) doğar.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ BASVURULAR ============================ -->
+  <div class="pane" data-p="basvuru">
+    <div class="grp">
+      <h4>Başvuru Geçmişi <span class="tag">14 kayıt</span></h4>
+      <div class="body">
+        <div class="gridtb" style="padding-bottom:6px">
+          <span class="minibtn">Tümü</span>
+          <span class="minibtn">Poliklinik</span>
+          <span class="minibtn">Acil</span>
+          <span class="minibtn">Yatış</span>
+          <span style="margin-left:auto" class="minibtn">➕ Yeni Başvuru (Kabul)</span>
+        </div>
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:30px" class="c">#</th><th>Protokol</th><th>Tarih</th><th>Tür</th>
+                       <th>Klinik</th><th>Hekim</th><th>Tanı</th><th>Durum</th><th class="r">Tutar</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td class="c">1</td><td><b>2026-0091447</b></td><td>18.08.2026</td><td>Poliklinik</td>
+                  <td>Dahiliye</td><td>Dr. S. KARACA</td><td>I10</td>
+                  <td><span class="pill p-kri">Sonuç bekliyor</span></td><td class="r">1.240,00</td></tr>
+              <tr><td class="c">2</td><td>2026-0088120</td><td>02.07.2026</td><td>Poliklinik</td>
+                  <td>Göz</td><td>Dr. N. ERTEN</td><td>H52.1</td>
+                  <td><span class="pill p-ok">Kapandı</span></td><td class="r">760,00</td></tr>
+              <tr><td class="c">3</td><td>2026-0071903</td><td>11.04.2026</td><td>Acil</td>
+                  <td>Acil Servis</td><td>Dr. B. TOPAL</td><td>R51</td>
+                  <td><span class="pill p-ok">Kapandı</span></td><td class="r">2.185,50</td></tr>
+              <tr><td class="c">4</td><td>2025-0140277</td><td>19.11.2025</td><td>Yatış</td>
+                  <td>Genel Cerrahi</td><td>Op. Dr. M. ARAS</td><td>K80.2</td>
+                  <td><span class="pill p-ok">Taburcu</span></td><td class="r">28.410,00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="hint">Çift tık: <b>Kayıt Kabul — Başvuru</b> ekranını o protokolle açar.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ DOKUMAN ============================ -->
+  <div class="pane" data-p="dokuman">
+    <div class="grp">
+      <h4>Dokümanlar <span class="tag">3 dosya</span></h4>
+      <div class="body">
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:30px" class="c">#</th><th>Tür</th><th>Dosya</th><th>Tarih</th>
+                       <th>Yükleyen</th><th class="c">İmzalı</th><th class="r">Boyut</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td class="c">1</td><td>KVKK Açık Rıza</td><td>kvkk_riza_2019.pdf</td><td>06.02.2019</td>
+                  <td>A. YILDIZ</td><td class="c">✓</td><td class="r">184 KB</td></tr>
+              <tr><td class="c">2</td><td>Aydınlatılmış Onam</td><td>onam_kolesistektomi.pdf</td><td>19.11.2025</td>
+                  <td>H. DEMİR</td><td class="c">✓</td><td class="r">402 KB</td></tr>
+              <tr><td class="c">3</td><td>Kimlik Fotokopisi</td><td>kimlik_on_arka.jpg</td><td>06.02.2019</td>
+                  <td>A. YILDIZ</td><td class="c">—</td><td class="r">1,2 MB</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gridtb">
+          <span class="minibtn">⬆ Dosya Yükle</span>
+          <span class="minibtn">👁 Görüntüle</span>
+          <span class="minibtn">⬇ İndir</span>
+          <span class="minibtn">🗑 Sil</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Rıza belgesi olmadan başvuru açılırken uyarı verilir.</span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Alan esleme notu: mockup hangi tabloya oturuyor, gelistirici bunu okur. -->
@@ -300,5 +554,20 @@
   </div>
 
 </div>
+
+<script>
+  // Sekme gecisi: mockup'ta da calissin ki her sekmenin icerigi gorulebilsin
+  // (kisi_karti.html ile ayni desen).
+  var tabs = document.querySelectorAll('.tab'), panes = document.querySelectorAll('.pane');
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (x) { x.classList.remove('active') });
+      panes.forEach(function (x) { x.classList.remove('active') });
+      t.classList.add('active');
+      var p = document.querySelector('.pane[data-p="' + t.dataset.t + '"]');
+      if (p) p.classList.add('active');
+    });
+  });
+</script>
 </body>
 </html>
