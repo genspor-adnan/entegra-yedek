@@ -495,6 +495,10 @@ export const api = {
     gonder<UtsBildirimYaniti>(`/api/uts/bildirim/${id}/iptal`, {}),
   utsYenidenGonder: (id: number) =>
     gonder<UtsBildirimYaniti>(`/api/uts/bildirim/${id}/yeniden-gonder`, {}),
+  /** İki aşamalı verme, 1. adım: bekleyen kayıtları üretir (ÜTS'ye gitmez). */
+  utsVermeHazirla: () =>
+    gonder<{ olusan: number; atlanan: string[]; atlananSayisi: number; mesaj: string }>(
+      '/api/uts/verme-hazirla', {}),
   utsBelgedenBildir: (belgeId: number) =>
     gonder<UtsBelgeBildirimYaniti>(`/api/uts/belge/${belgeId}/bildir`, {}),
   utsBildirimDetay: (id: number) =>

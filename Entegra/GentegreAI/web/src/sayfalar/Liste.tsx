@@ -9,10 +9,9 @@ import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
 import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
-import { UtsVermeModali, UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
+import { UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
 import { UtsGenelBildirimModali, type UtsBildirimTuru }
   from '../bilesenler/uts/UtsGenelBildirimModali';
-import { UtsVermeSecimModali } from '../bilesenler/uts/UtsVermeSecimModali';
 import { UtsBelgeSonucModali } from '../bilesenler/uts/UtsBelgeSonucModali';
 import type { UtsBelgeBildirimYaniti } from '../api/istemci';
 import { dosyaIndirUrl } from '../bilesenler/indir';
@@ -71,11 +70,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // ÜTS alma bildirimi (223): askidaki envanter satirindan modal.
   const [utsAlma, setUtsAlma] = useState<{ envanterId: number; urunNo: string;
     kurumUnvan: string; askiAdet: number; seriNo: string } | null>(null);
-  const [utsVerme, setUtsVerme] = useState(false);
   const [utsKullanim, setUtsKullanim] = useState(false);
   const [utsGenel, setUtsGenel] = useState<UtsBildirimTuru | null>(null);
-  // Verme = fatura secim listesi (230); elle form yedek.
-  const [utsVermeSecim, setUtsVermeSecim] = useState(false);
   // Belge koprusu sonucu (226): satir satir verme/alma raporu.
   const [utsBelgeSonuc, setUtsBelgeSonuc] = useState<UtsBelgeBildirimYaniti | null>(null);
   // Donusum modali (F8): siparis/irsaliye satirlarindan yeni belge uretir.
@@ -502,7 +498,18 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
           });
           return;
         }
-        case 'uts.verme':    setUtsVermeSecim(true); return;
+        // Iki asamali verme (kullanici): 1) hazirla - e-Belgeli satis
+        //   faturalarindan BEKLEYEN kayitlar gride dolar (UTS'ye gitmez),
+        //   2) gridde secilenler "📤 Gönder" ile cikar.
+        case 'uts.verme':
+          await guvenli(async () => {
+            const y = await api.utsVermeHazirla();
+            mesaj(y.mesaj + (y.atlanan.length > 0
+              ? '\n\nAtlananlar:\n• ' + y.atlanan.join('\n• ')
+              : ''));
+            setYenile(t => t + 1);
+          });
+          return;
         case 'uts.kullanim': setUtsKullanim(true); return;
         case 'uts.uretim':   setUtsGenel('uretim'); return;
         case 'uts.ithalat':  setUtsGenel('ithalat'); return;
@@ -542,14 +549,34 @@ Onaylıyor musunuz?`)) return;
           });
           return;
         }
-        case 'uts.yeniden-gonder':
-          if (!satir) return;
+        case 'uts.yeniden-gonder': {
+          // GONDER: coklu secim - isaretli bekleyen/hatali bildirimler
+          //   sirayla UTS'ye cikar, satirlar guncellenir.
+          const hedefler = (secililer && secililer.length > 0 ? secililer
+                            : satir ? [satir] : []);
+          if (hedefler.length === 0) return;
+          if (!await onay(`${hedefler.length} bildirim ÜTS'ye GÖNDERİLECEK.
+
+Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
           await guvenli(async () => {
-            const y = await api.utsYenidenGonder(Number(satir.id));
-            mesaj(y.mesaj);
+            let tamam = 0; const hatalar: string[] = [];
+            for (const h of hedefler) {
+              try {
+                const y = await api.utsYenidenGonder(Number(h.id));
+                if (y.basarili) tamam++;
+                else hatalar.push(`#${h.id}: ${y.mesaj}`);
+              } catch (hh) {
+                hatalar.push(`#${h.id}: ${hataMetni(hh)}`);
+              }
+            }
+            mesaj(hedefler.length === 1 && hatalar.length === 0
+              ? 'Bildirim başarıyla gönderildi.'
+              : `${tamam}/${hedefler.length} bildirim gönderildi.`
+                + (hatalar.length > 0 ? '\n\n' + hatalar.join('\n') : ''));
             setYenile(t => t + 1);
           });
           return;
+        }
         case 'uts.detay':
           if (!satir) return;
           await guvenli(async () => {
@@ -804,24 +831,11 @@ Onaylıyor musunuz?`)) return;
     {utsBelgeSonuc && (
       <UtsBelgeSonucModali sonuc={utsBelgeSonuc} onKapat={() => setUtsBelgeSonuc(null)} />
     )}
-    {utsVermeSecim && (
-      <UtsVermeSecimModali
-        onKapat={() => { setUtsVermeSecim(false); setYenile(t => t + 1) }}
-        onTamam={m => { setUtsVermeSecim(false); mesaj(m); setYenile(t => t + 1) }}
-        onElleGiris={() => { setUtsVermeSecim(false); setUtsVerme(true) }}
-      />
-    )}
     {utsGenel && (
       <UtsGenelBildirimModali
         tur={utsGenel}
         onKapat={() => setUtsGenel(null)}
         onTamam={m => { setUtsGenel(null); mesaj(m); setYenile(t => t + 1) }}
-      />
-    )}
-    {utsVerme && (
-      <UtsVermeModali
-        onKapat={() => setUtsVerme(false)}
-        onTamam={m => { setUtsVerme(false); mesaj(m); setYenile(t => t + 1) }}
       />
     )}
     {utsKullanim && (

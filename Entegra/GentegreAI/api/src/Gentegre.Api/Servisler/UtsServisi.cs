@@ -349,20 +349,26 @@ public sealed class UtsServisi
         };
     }
 
-    /// <summary>Hatalı (durum 2) bildirimi AYNI gövdeyle tekrar gönderir.</summary>
+    /// <summary>
+    /// GÖNDER: BEKLEYEN (0) ya da HATALI (2) bildirimi kayıtlı gövdeyle
+    /// ÜTS'ye yollar. İki aşamalı akışın 2. adımı - "Verme Hazırla" ürettiği
+    /// bekleyen satırlar gridde seçilip buradan gider.
+    /// </summary>
     public async Task<object> YenidenGonderAsync(int bildirimId, YazmaBaglami baglam,
         CancellationToken iptal)
     {
+        var belgeId = await _depo.BildirimBelgeIdAsync(bildirimId, iptal);
         var b = await _depo.BildirimOkuAsync(bildirimId, iptal);
-        if (b.Durum != 2)
-            throw GentegreHatasi.IsKurali("Yalnız HATALI bildirim yeniden gönderilebilir.");
+        if (b.Durum is not (0 or 2))
+            throw GentegreHatasi.IsKurali(
+                "Yalnız BEKLEYEN ya da HATALI bildirim gönderilebilir.");
         if (b.IstekJson.Length == 0)
             throw GentegreHatasi.IsKurali("Bildirimin kayıtlı isteği yok.");
 
         var hesap = await HesapAsync(b.SubeId, iptal);
         var (httpKodu, cevap) = await UtsIstemcisi.PostAsync(
             Istemci(), hesap, Turler[b.Tur].EkleYolu, b.IstekJson,
-            $"ÜTS {Turler[b.Tur].Ad} bildirimi (yeniden)", iptal);
+            $"ÜTS {Turler[b.Tur].Ad} bildirimi", iptal);
 
         var mesajlar = UtsIstemcisi.MesajlariAyikla(cevap);
         var snc = UtsIstemcisi.SncAyikla(cevap);
@@ -372,12 +378,84 @@ public sealed class UtsServisi
 
         await _depo.SonucYazAsync(bildirimId, (short)(basarili ? 1 : 2),
             snc ?? b.UtsBildirimId, cevap, httpKodu, kod, mesaj, baglam, iptal);
+        if (basarili && belgeId is > 0)
+            await _depo.BelgeUtsDurumGuncelleAsync(belgeId.Value, iptal);
 
         return new
         {
             bildirimId, basarili, mesajlar,
             mesaj = basarili ? "Bildirim başarıyla gönderildi."
-                             : (mesaj.Length > 0 ? mesaj : "ÜTS bildirimi yine reddetti.")
+                             : (mesaj.Length > 0 ? mesaj : "ÜTS bildirimi reddetti.")
+        };
+    }
+
+    /// <summary>
+    /// VERME HAZIRLA (iki aşamalı akış, 1. adım): e-Belgeli satış faturalarının
+    /// bildirilmemiş seri/lot satırlarından BEKLEYEN (durum 0) verme kayıtları
+    /// üretir - ÜTS'ye GİTMEZ. Kullanıcı gridde seçip "Gönder" der.
+    /// Tekrar çalıştırmak güvenlidir: bekleyen/başarılı satırlar atlanır.
+    /// </summary>
+    public async Task<object> VermeHazirlaAsync(int? subeId, YazmaBaglami baglam,
+        CancellationToken iptal)
+    {
+        var belgeler = await _depo.VermeHazirlanacakBelgelerAsync(subeId, iptal);
+        var hesaplar = new Dictionary<int, UtsHesabi>();
+        var olusan = 0;
+        var atlanan = new List<string>();
+
+        foreach (var belgeId in belgeler)
+        {
+            var b = await _depo.BelgeOzetAsync(belgeId, iptal);
+            var izlemler = await _depo.BelgeIzlemleriAsync(belgeId, TurVerme, iptal);
+            foreach (var i in izlemler.Where(x => !x.Bildirildi))
+            {
+                if (i.UrunNo.Length == 0)
+                {
+                    atlanan.Add($"{b.BelgeNo} · {i.StokAdi}: stok kartında ÜTS ürün no (GTIN) boş.");
+                    continue;
+                }
+                if (b.TarafUtsNo.Length == 0)
+                {
+                    atlanan.Add($"{b.BelgeNo} · {b.TarafUnvan}: cari ÜTS Kurum No boş.");
+                    continue;
+                }
+                decimal? adt;
+                try { adt = UtsDogrulama.AdetKurali(i.SeriNo, i.LotNo, i.Adet); }
+                catch (GentegreHatasi h)
+                {
+                    atlanan.Add($"{b.BelgeNo} · {i.StokAdi}: {h.Message}");
+                    continue;
+                }
+
+                if (!hesaplar.TryGetValue(b.SubeId, out var hesap))
+                    hesaplar[b.SubeId] = hesap = await HesapAsync(b.SubeId, iptal);
+
+                var istek = new UtsVermeIstek(
+                    Uno: i.UrunNo, Kun: b.TarafUtsNo, Bno: b.BelgeNo,
+                    Lno: i.LotNo.Length > 0 ? i.LotNo : null,
+                    Sno: i.SeriNo.Length > 0 ? i.SeriNo : null,
+                    Adt: adt,
+                    Git: b.BelgeTarihi.ToString("yyyy-MM-dd",
+                        System.Globalization.CultureInfo.InvariantCulture));
+                await _depo.BildirimEkleAsync(TurVerme, baglam, hesap.TestMi,
+                    i.StokId, i.SeriLotId, belgeId, i.BelgeSatirId,
+                    adt ?? 1, b.BelgeTarihi, b.TarafUtsNo, b.BelgeNo,
+                    i.UrunNo, i.LotNo, i.SeriNo, null, null,
+                    JsonSerializer.Serialize(istek, UtsJson.Ayarlar), iptal);
+                olusan++;
+            }
+        }
+
+        return new
+        {
+            olusan,
+            atlanan = atlanan.Take(20).ToList(),
+            atlananSayisi = atlanan.Count,
+            mesaj = olusan == 0 && atlanan.Count == 0
+                ? "Hazırlanacak yeni satır yok - uygun faturaların tüm seri/lot satırları zaten bildirilmiş ya da bekliyor."
+                : $"{olusan} bekleyen verme bildirimi hazırlandı"
+                  + (atlanan.Count > 0 ? $", {atlanan.Count} satır atlandı." : ".")
+                  + " Gridde seçip 📤 Gönder'e basın."
         };
     }
 

@@ -164,6 +164,20 @@ public static class UtsUclari
                 istek.SubeId ?? baglam.SubeId, baglam.Yazma, iptal));
         });
 
+        // Verme hazirla (iki asamali akis, 1. adim): e-Belgeli satis
+        // faturalarindan BEKLEYEN verme kayitlari uretir - UTS'ye GITMEZ.
+        grup.MapPost("/verme-hazirla", async (BaglamCozucu cozucu,
+            UtsServisi servis, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("uts.bildir");
+            // Sube filtresi bilerek yok: tum subelerin e-Belgeli satis
+            // faturalari taranir (belge basina zaten kendi subesinin
+            // hesabiyla kayit acilir).
+            return Results.Ok(await servis.VermeHazirlaAsync(
+                null, baglam.Yazma, iptal));
+        });
+
         // Belge koprusu (226): satista verme, alista askidan eslesip alma.
         grup.MapPost("/belge/{id:int}/bildir", async (int id, BaglamCozucu cozucu,
             UtsServisi servis, HttpContext ctx, CancellationToken iptal) =>

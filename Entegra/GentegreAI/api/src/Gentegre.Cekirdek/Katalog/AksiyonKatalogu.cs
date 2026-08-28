@@ -283,7 +283,9 @@ public static class AksiyonKatalogu
                 new("uts.detay", "ÜTS Detay Sorgula", "stok",
                     Hedef: "sagtus,palet", KaynakKodu: "uts", Islem: Islem.Gor,
                     KayitGerekir: true, Sira: 20),
-                new("uts.yeniden-gonder", "⟳ Yeniden Gönder", "stok",
+                // Iki asamali akis: "Verme" gridi bekleyenlerle doldurur,
+                //   secilenler buradan UTS'ye cikar (bekleyen + hatali).
+                new("uts.yeniden-gonder", "📤 Gönder", "stok",
                     Hedef: "araccubugu,sagtus,palet", AksiyonYetkisi: "uts.bildir",
                     KayitGerekir: true, Sira: 30),
                 new("uts.iptal", "✖ ÜTS'de İptal Et", "stok",

@@ -283,6 +283,32 @@ public sealed class UtsDeposu
         return liste;
     }
 
+    /// <summary>
+    /// Verme HAZIRLA (iki aşamalı akış, 1. adım): e-Belgesi hazırlanmış/
+    /// gönderilmiş, ÜTS'si tamamlanmamış satış faturaları — bekleyen verme
+    /// kayıtları bunların izlem satırlarından üretilir.
+    /// </summary>
+    public async Task<List<int>> VermeHazirlanacakBelgelerAsync(int? subeId,
+        CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = baglanti.Komut("""
+            select b.id
+              from public.belge b
+             where b.tur = 15
+               and coalesce(b.efatura_durum, 0) <> 0
+               and b.durum <> 2
+               and b.uts_durum < 2
+               and (@p0::int is null or b.sube_id = @p0)
+             order by b.belge_tarihi desc, b.id desc
+             limit 200
+            """, null, (object?)subeId ?? DBNull.Value);
+        var liste = new List<int>();
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        while (await o.ReadAsync(iptal)) liste.Add(o.GetInt32(0));
+        return liste;
+    }
+
     /// <summary>Bildirimin bağlı olduğu belge (iptal sonrası rozet için).</summary>
     public async Task<int?> BildirimBelgeIdAsync(int bildirimId,
         CancellationToken iptal = default)
