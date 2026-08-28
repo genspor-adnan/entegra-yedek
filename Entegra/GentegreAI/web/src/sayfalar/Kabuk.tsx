@@ -338,26 +338,38 @@ export function Kabuk() {
           <div className="yanic">
             {/* Panel menude YOKTU: kullanici bir listeye girince ana sayfaya
                 donmenin yolu kalmiyordu. En ustte, gruplarin disinda. */}
-            {/* FAVORILER Ana Sayfa'nin da USTUNDE, basliksiz (kullanici):
-                yildizlanan ogeler dogrudan en tepede durur. */}
-            {favoriler.map(yol => {
-              const m = moduller.find(x => x.yol === yol);
-              if (!m) return null;   // yetki/mod degisince kalinti yol
-              return (
-                <NavLink key={`fav-${yol}`} to={yol}
-                         className={() => `mi ${konum.pathname.startsWith(yol) ? 'on' : ''}`}>
-                  <span className="ic">{m.ic}</span>
-                  <span>{m.ad}</span>
-                  {yildiz(yol)}
-                </NavLink>
-              );
-            })}
-
             <NavLink to="/panel"
                      className={() => `mi ${konum.pathname === '/panel' ? 'on' : ''}`}>
               <span className="ic">🏠</span>
               <span>{cm('Ana Sayfa')}</span>
             </NavLink>
+
+            {/* FAVORI grubu Ana Sayfa'nin ALTINDA (kullanici): yildizlanan ogeler bu
+                menunun altinda; diger gruplar gibi acilir-kapanir, varsayilan
+                ACIK. Bos ise hic cizilmez. */}
+            {favoriler.length > 0 && (
+              <div>
+                <button type="button" className="mi"
+                        style={{ width: '100%', border: 0, background: 'transparent', cursor: 'pointer' }}
+                        onClick={() => setAcikGruplar(g => ({ ...g, '⭐Favori': !(g['⭐Favori'] ?? true) }))}>
+                  <span className="ic">⭐</span>
+                  <span>{cm('Favori')}</span>
+                  <span className="rz">{(acikGruplar['⭐Favori'] ?? true) ? '▾' : '▸'}</span>
+                </button>
+                {(acikGruplar['⭐Favori'] ?? true) && favoriler.map(yol => {
+                  const m = moduller.find(x => x.yol === yol);
+                  if (!m) return null;   // yetki/mod degisince kalinti yol
+                  return (
+                    <NavLink key={`fav-${yol}`} to={yol} style={{ paddingLeft: 34 }}
+                             className={() => `mi ${konum.pathname.startsWith(yol) ? 'on' : ''}`}>
+                      <span className="ic">{m.ic}</span>
+                      <span>{m.ad}</span>
+                      {yildiz(yol)}
+                    </NavLink>
+                  );
+                })}
+              </div>
+            )}
 
             {/* "Calisma alani" bolum basligi kaldirildi (kullanici). */}
             {satirlar.map(s => s.tur === 'duz' ? (
