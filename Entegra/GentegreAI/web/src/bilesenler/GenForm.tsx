@@ -692,9 +692,6 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
             { baslik: 'ÜTS Hesabı Test',
               alanlar: ['testOrtami', 'testKurumNo', 'testToken'] },
           ]}
-          not={<>Sistem token'ı ÜTS arayüzünde e-imza ile üretilir ve buraya
-               yapıştırılır. Şubenin kaydı yoksa bildirimler MERKEZİN (varsayılan
-               şube) hesabıyla gider. Yeni hesap TEST ortamında başlar.</>}
         />
       )}
 
