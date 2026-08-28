@@ -690,7 +690,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       )}
 
       {aktif?.tur === 'detay' && !(personelGibiKart && aktif.detay.ad === 'ozluk')
-        && !(kaynak === 'stok' && (aktif.detay.ad === 'uts' || aktif.detay.ad === 'paket')) && (
+        && !(kaynak === 'stok' && (aktif.detay.ad === 'uts' || aktif.detay.ad === 'paket'))
+        // Hizmet > Fiyatlar: kartin kendi fiyat gridi KALKTI (kullanici) -
+        //   sekme yalniz fiyat listelerindeki fiyatlari gosterir (asagida).
+        && !(kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar') && (
         <GenDetayTablo
           meta={aktif.detay}
           durum={detaylar[aktif.detay.ad] ?? bosDetay()}
@@ -714,11 +717,15 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
         />
       )}
 
-      {/* Hizmet > Fiyatlar: kart fiyatlarinin ALTINDA kalemin gectigi fiyat
-          listesi satirlari (kullanici: "bu hizmete ait tum fiyatlar gelsin"). */}
-      {aktif?.tur === 'detay' && kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar'
-        && !yeniMi && (
-        <HizmetListeFiyatlari hizmetId={id as number} />
+      {/* Hizmet > Fiyatlar: kalemin gectigi fiyat listesi satirlari
+          (kullanici: "bu hizmete ait tum fiyatlar gelsin"; kartin kendi
+          hizmet_fiyat gridi kaldirildi). */}
+      {aktif?.tur === 'detay' && kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar' && (
+        yeniMi
+          ? <div className="not" style={{ marginTop: 12 }}>
+              Fiyatlar kart kaydedildikten sonra fiyat listelerinden gelir.
+            </div>
+          : <HizmetListeFiyatlari hizmetId={id as number} />
       )}
 
       {aktif?.tur === 'ozel' && kaynak === 'rol' && (

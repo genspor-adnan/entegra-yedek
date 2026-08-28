@@ -217,6 +217,21 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   // Suzme YALNIZ gorunumu daraltir: indeksler ORIJINAL diziden gider ki
   //   duzenle/sil dogru satira uygulansin. Buyuk gridlerde (fiyat listesi
   //   satirlari) bu kutu listedeki "Bu listede ara"nin karsiligidir.
+  // FIYAT LISTESI SATIRLARI gridi (meta.ad 'satirlar', modal kip): Stok ve
+  //   Hizmet lookup'lari iki ayri kolon yerine TIP IKONU + tek "Adı" kolonu
+  //   (kullanici) - belge kalem gridiyle ayni okuma. Modal duzenlemede iki
+  //   secim kutusu ayri durur; yalniz GRID gorunumu birlesir.
+  const satirlarGrid = !!modalDuzenle && meta.ad === 'satirlar';
+  const stokAlani   = alanlar.find(a => a.ad === 'stokId');
+  const hizmetAlani = alanlar.find(a => a.ad === 'hizmetId');
+  const gridAlanlari = satirlarGrid
+    ? alanlar.filter(a => a.ad !== 'stokId' && a.ad !== 'hizmetId')
+    : alanlar;
+  const kalemAdi = (satir: Record<string, unknown>) =>
+    satir.stokId != null && satir.stokId !== '' && stokAlani
+      ? gorunum(satir, stokAlani)
+      : hizmetAlani ? gorunum(satir, hizmetAlani) : '';
+
   const aramaAnahtari = arama.trim().toLocaleLowerCase('tr');
   const cipSuz = cipler?.[aktifCip]?.suz;
   const gorunurler = durum.guncel
@@ -283,7 +298,8 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
         <thead>
           <tr>
             {modalDuzenle && !saltOkunur && <th style={{ width: 30 }} />}
-            {alanlar.map(a => <th key={a.ad}>{a.baslik}{a.zorunlu && ' *'}</th>)}
+            {satirlarGrid && <><th style={{ width: 36 }}>Tip</th><th>Adı</th></>}
+            {gridAlanlari.map(a => <th key={a.ad}>{a.baslik}{a.zorunlu && ' *'}</th>)}
             {!modalDuzenle && !saltOkunur && <th />}
           </tr>
         </thead>
@@ -300,7 +316,15 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                          onChange={e => setSecili(e.target.checked ? i : null)} />
                 </td>
               )}
-              {modalDuzenle && alanlar.map(a => (
+              {satirlarGrid && (
+                <>
+                  <td className="hiza-orta" title={satir.stokId != null && satir.stokId !== '' ? 'Stok' : 'Hizmet'}>
+                    {satir.stokId != null && satir.stokId !== '' ? '📦' : '🛠️'}
+                  </td>
+                  <td>{kalemAdi(satir)}</td>
+                </>
+              )}
+              {modalDuzenle && gridAlanlari.map(a => (
                 <td key={a.ad} className={a.tip === 'mantik' ? 'hiza-orta' : undefined}>
                   {gorunum(satir, a)}
                 </td>
@@ -428,7 +452,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
             </tr>
           ))}
           {gorunurler.length === 0 && (
-            <tr><td colSpan={alanlar.length + 1} className="bos">
+            <tr><td colSpan={gridAlanlari.length + (satirlarGrid ? 2 : 0) + 1} className="bos">
               {durum.guncel.length === 0 ? 'Satır yok' : 'Eşleşen satır yok'}
             </td></tr>
           )}

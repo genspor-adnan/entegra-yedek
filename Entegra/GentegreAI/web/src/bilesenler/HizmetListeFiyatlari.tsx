@@ -33,9 +33,9 @@ export function HizmetListeFiyatlari({ hizmetId }: { hizmetId: number }) {
   if (satirlar.length === 0)
     return <div className="not" style={{ marginTop: 12 }}>Bu hizmet hiçbir fiyat listesinde yer almıyor.</div>;
 
+  // Cerceve/baslik YOK (kullanici): sekmede yalniz grid durur.
   return (
-    <div className="kagrup" style={{ marginTop: 12 }}>
-      <h6>Fiyat Listelerindeki Fiyatları</h6>
+    <div style={{ marginTop: 12 }}>
       <table className="detay-tablo">
         <thead>
           <tr><th>Liste</th><th style={{ textAlign: 'right' }}>Fiyat</th><th>Döviz</th>
