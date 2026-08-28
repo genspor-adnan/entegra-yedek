@@ -393,13 +393,14 @@ return (
       if (!depoDetay) return null;
       // Merkez deposu kullaniliyorsa subenin KENDI depo listesi yok (174):
       //   grid cizilseydi "burada da depo tanimlayabilirim" izlenimi verirdi.
-      if (deger.merkezDepoKullan) {
+      if (Number(deger.depoBazSubeId) > 0) {
         return (
           <div className="kagrup">
             <h6>Depolar</h6>
             <div className="not" style={{ padding: 10 }}>
-              Bu şube <b>merkezin depolarını</b> kullanıyor; kendi deposu tutulmaz.
-              Kendi depolarını tanımlamak için yukarıdaki kutunun işaretini kaldırın.
+              Bu şube <b>baz alınan şubenin depolarını</b> kullanıyor; kendi
+              deposu tutulmaz. Kendi depolarını tanımlamak için yukarıdaki
+              comboyu <b>Kendisi</b> yapın.
             </div>
           </div>
         );

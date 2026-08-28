@@ -159,6 +159,7 @@ public sealed partial class KartDeposu
     private static readonly HashSet<string> KodTablosuBeyazListe =
         new(StringComparer.Ordinal) {
             "public.kategori", "public.v_cari_lookup", "public.rol", "public.sube", "public.v_personel_lookup",
+            "public.v_sube_baz_lookup",
             // Kasa alt sistemi (071/074). Hepsi "id, ad, aktif" kolonlu gorunum -
             //   hizmet/masraf/proje "durum" kullandigi icin gorunumle uyarlandi.
             "public.v_hesap_lookup", "public.v_proje_lookup", "public.v_hesap_plani_lookup",
@@ -195,7 +196,10 @@ public sealed partial class KartDeposu
     public async Task<Dictionary<string, string>> KodTablosuSecenekleriAsync(
         string tablo, CancellationToken iptal = default)
         => (await _veri.ListeAsync(
-                $"select id, ad from {KodTablosuDogrula(tablo)} where aktif = 1 order by ad",
+                // id = 0 satiri ("Kendisi" gibi sabit secenekler) alfabetik
+                //   siraya girmez, HEP basta durur (227).
+                $"select id, ad from {KodTablosuDogrula(tablo)} where aktif = 1 " +
+                "order by case when id = 0 then 0 else 1 end, ad",
                 null, r => (Id: r.GetInt32(0), Ad: r.GetString(1)), iptal))
             .ToDictionary(x => x.Id.ToString(CultureInfo.InvariantCulture), x => x.Ad, StringComparer.Ordinal);
 

@@ -688,7 +688,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
           // SOLDA canli hesap, SAGDA test cercevesi (kullanici).
           gruplar={[
-            { baslik: 'ÜTS Hesabı', alanlar: ['aktif', 'kurumNo', 'token'] },
+            { baslik: 'ÜTS Hesabı', alanlar: ['aktif', 'bazSubeId', 'kurumNo', 'token'] },
             { baslik: 'ÜTS Hesabı Test',
               alanlar: ['testOrtami', 'testKurumNo', 'testToken'] },
           ]}

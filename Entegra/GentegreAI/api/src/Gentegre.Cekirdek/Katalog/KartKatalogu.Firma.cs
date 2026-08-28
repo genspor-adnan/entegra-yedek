@@ -114,8 +114,12 @@ public static partial class KartKatalogu
             //   karari subenin ozelligi. Isaretliyse sube KENDI depolarini
             //   tutmaz, merkezinkileri kullanir (174) - depo listesi de
             //   gosterilmez.
-            new("merkezDepoKullan", "merkez_depo_kullan", "mantik",
-                Baslik: "Merkez deposunu kullan", Grup: "Depolar"),
+            // "Merkez deposunu kullan" bayragi BAZ SUBE secimine genelledi
+            //   (227, kullanici): 4 subeli yerde ikiser sube farkli ortak
+            //   depolari kullanabilsin. 0 = Kendisi.
+            new("depoBazSubeId", "depo_baz_sube_id", "kod",
+                KodTablosu: "public.v_sube_baz_lookup",
+                Baslik: "Baz Alınacak Şube", Grup: "Depolar"),
 
             // --------------------------------------------------------- e-Belge
             // Alias gonderici etiketidir, mukellef bayraklari hangi belgeyi
@@ -126,7 +130,7 @@ public static partial class KartKatalogu
             new("ebelgeKimlik", "ebelge_kimlik", "kod", KodListesi: "sube.ebelge_kimlik",
                 Baslik: "Gönderici Kimliği", Grup: "e-Belge", AltGrup: "Gönderici"),
             new("ustSubeId",    "ust_sube_id",   "kod", KodTablosu: "public.sube",
-                Baslik: "Bağlı Olduğu Merkez", Grup: "e-Belge", AltGrup: "Gönderici"),
+                Baslik: "Baz Alınacak Şube", Grup: "e-Belge", AltGrup: "Gönderici"),
             // MUKELLEF HESABI (171): entegrator baglantisi mukellefe aittir -
             //   ayri VKN'li sube ayri kullanici/sifre ile baglanir. Onceden firma
             //   geneli ayardaydi, cok mukellefli kurulum mumkun degildi.
@@ -269,6 +273,10 @@ public static partial class KartKatalogu
                 new("id",          "sube_id",       "sayi",  Yazilabilir: false),
                 new("aktif",       "aktif",         "mantik",
                     Baslik: "ÜTS Hesabı Aktif"),
+                // 0 = Kendisi (227): dolu ise bildirimler o subenin hesabiyla.
+                new("bazSubeId",   "baz_sube_id",   "kod",
+                    KodTablosu: "public.v_sube_baz_lookup",
+                    Baslik: "Baz Alınacak Şube"),
                 new("testOrtami",  "test_ortami",   "mantik",
                     Baslik: "Test Ortamı"),
                 new("kurumNo",     "kurum_no",      "metin", EnFazlaUzunluk: 30,
