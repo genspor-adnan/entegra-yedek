@@ -80,8 +80,9 @@ public sealed partial class BelgeDeposu
                    -- Belgenin fiyat listesi (205) + adi: kart basliginda gosterilir.
                    b.fiyat_listesi_id as "fiyatListesiId",
                    coalesce(fl.ad, '') as "fiyatListesiAdi",
-                   -- Teklif durumu (218): yalniz tur 18'de anlamli.
+                   -- Teklif durumu (218) + revize no (220): yalniz tur 18'de anlamli.
                    b.teklif_durum as "teklifDurum",
+                   b.revize_no as "revizeNo",
                    b.efatura_sonuc as "efaturaSonuc", b.senaryo, b.zarf_id as "zarfId",
                    b.gonderici_alias as "gondericiAlias",
                    -- e-Belge kuyrugundaki SON kayit: ETTN (uuid) ve GIB yaniti

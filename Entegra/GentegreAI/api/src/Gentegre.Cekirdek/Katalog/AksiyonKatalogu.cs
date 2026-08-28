@@ -255,6 +255,9 @@ public static class AksiyonKatalogu
                     KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
                 new("belge.sil",  "🗑 Sil",         "belge", Kisayol: "Del",
                     KaynakKodu: "belge", Islem: Islem.Sil, KayitGerekir: true, Sira: 25),
+                // Teklif -> siparis (KABUL sartiyla; istemci ve sunucu dogrular).
+                new("belge.donustur", "⇢ Siparişe Dönüştür", "belge",
+                    AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 30),
                 new("genel.yazdir", "🖨️ Yazdır",   "genel", Hedef: "araccubugu,palet",
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },

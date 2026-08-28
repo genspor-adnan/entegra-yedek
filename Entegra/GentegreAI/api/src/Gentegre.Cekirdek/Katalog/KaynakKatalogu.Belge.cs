@@ -19,7 +19,9 @@ public static partial class KaynakKatalogu
                 "left join public.kasa_islem_turu kt2 on kt2.kod = kb.tur " +
                 "left join public.sube sb on sb.id = b.sube_id " +
                 // Muhasebe fisi (190): numarasi listede gorunsun.
-                "left join public.muhasebe_fis mf on mf.id = b.muhasebe_fis_id",
+                "left join public.muhasebe_fis mf on mf.id = b.muhasebe_fis_id " +
+                // Satis temsilcisi (teklif listesi kolonu): personel de taraf.
+                "left join public.taraf st on st.id = b.satici_id",
         SubeKolonu: "b.sube_id",
         VarsayilanSirala: "b.belge_tarihi desc, b.id desc",
         KapsamKolonu: "b.taraf_id",
@@ -42,6 +44,16 @@ public static partial class KaynakKatalogu
                                                  Varsayilan: false, Filtrelenebilir: false),
             new("kapanmaDurum",  "b.kapanma_durum",  "kod",   "Kapanma Kodu",Hizalama: "orta", Varsayilan: false),
             new("belgeSeri",     "b.belge_seri",     "metin", "Seri",        Genislik: 70, Varsayilan: false),
+            // Teklif listesinde EN SOLDA (kolonSirasi) - diger belge
+            //   listelerinde istege bagli (kolon menusunden acilir).
+            // satici_id 0/NULL "atanmadi" demek - 0 kaydi "Tanımsız Cari"
+            //   oldugundan bos gosterilir.
+            new("saticiAdi",
+                "case when coalesce(b.satici_id, 0) = 0 then '' " +
+                "else coalesce(st.unvan, '') end",
+                                                 "metin", "Satış Temsilcisi",
+                                                 Genislik: 150, Varsayilan: false,
+                                                 Siralanabilir: false, Filtrelenebilir: false),
             new("belgeNo",       "b.belge_no",       "metin", "Belge No",    Genislik: 155),
             // e-BELGE DURUMU ROZET: ham kod (0/1/11/51...) listede hicbir sey
             //   anlatmiyordu. Metin hem TURU hem ASAMAYI soyler; gonderilmis
@@ -130,6 +142,17 @@ public static partial class KaynakKatalogu
                                                  Filtrelenebilir: false),
             new("durum",         "b.durum",          "kod",   "Durum Kodu",  Hizalama: "orta",
                                                                             Varsayilan: false),
+            // Teklif durumu (218) - teklif listesinin cipleri/guard'i icin.
+            new("teklifDurum",   "b.teklif_durum",   "kod",   "Teklif Durum Kodu",
+                Hizalama: "orta", Varsayilan: false),
+            new("teklifDurumAdi",
+                """
+                case coalesce(b.teklif_durum, 1)
+                     when 1 then 'Hazırlanıyor' when 2 then 'Sunuldu' when 3 then 'Kabul'
+                     when 4 then 'Red' when 5 then 'İptal' else '' end
+                """,                            "metin", "Durumu", Hizalama: "orta",
+                                                 Bicim: "rozet", Genislik: 110,
+                                                 Filtrelenebilir: false),
             new("vadeGun",       "b.vade_gun",       "sayi",  "Vade",        Hizalama: "sag", Genislik: 80,
                                                                 Varsayilan: false),
             new("aciklama",      "b.aciklama",       "metin", "Açıklama",    Genislik: 240, Varsayilan: false),

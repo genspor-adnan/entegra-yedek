@@ -44,7 +44,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     setFisTipi, satirlar, donusumler, setCariArama, setSaticiArama, setPersonelArama,
     kapanmaAlani, bagliSiparisAlani, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
     tahakkukMu, depoBelgesi, stokFisiMi, fisCikisMi, transferMi, talepMi, disNumarali,
-    eBelgeYok, teklifDurum, setTeklifDurum,
+    eBelgeYok, teklifDurum, setTeklifDurum, revizeNo, setRevizeNo,
   } = p;
 
   /** Teklif (216): katalog adi 'Teklif' - durum combosu ve sekme adi degisir. */
@@ -121,15 +121,30 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     {/* --- 2) BELGE NO ---
         Alis faturasinda numara TEDARIKCININ: sayacimiz uretemez (harf
         icerebilir, bizim seriyle iliskisi yok), kullanici girer. Diger
-        turlerde numarayi kayitta sunucu verir - alan salt-okunur. */}
+        turlerde numarayi kayitta sunucu verir - alan salt-okunur.
+        Teklifte hucre IKIYE BOLUNUR (220, kullanici): solda numara, sagda
+        REVIZE NO - serbest kullanici editi, varsayilan bos. */}
     <label className="alan">
       <span className={`etiket${disNumarali && !kilitli ? ' zorunlu-isaret' : ''}`}>
-        {disNumarali ? 'Tedarikçi Fatura No' : `${belgeSozu} No`}
+        {disNumarali ? 'Tedarikçi Fatura No'
+          : teklifMi ? `${belgeSozu} No / Revize No` : `${belgeSozu} No`}
       </span>
       {disNumarali && !kilitli ? (
         <input className="one-cikan" value={belgeNo} maxLength={20}
                placeholder="örn. ABC2026000001234"
                onChange={e => setBelgeNo(e.target.value)} />
+      ) : teklifMi ? (
+        <span className="ikili">
+          <input className="one-cikan"
+                 value={String(sonuc?.belge.belgeNo ?? '') || (kilitli ? '' : '(kaydedince verilir)')}
+                 readOnly />
+          {/* Revize, NUMARASI OLAN teklife yazilir (kullanici): numara yokken
+              revize kavrami yok - kaydedilince edit acilir. */}
+          <input value={revizeNo} maxLength={20} placeholder="Revize"
+                 style={{ flex: '0 0 76px' }}
+                 disabled={kilitli || !String(sonuc?.belge.belgeNo ?? '')}
+                 onChange={e => setRevizeNo(e.target.value)} />
+        </span>
       ) : (
         <input className="one-cikan"
                value={String(sonuc?.belge.belgeNo ?? '') || (kilitli ? '' : '(kaydedince verilir)')}
@@ -309,7 +324,9 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
               //   sonu (faturaYok), depo belgesi ve stok fisi ise hic
               //   donusmez. Irsaliyede GORUNUR - kalem bicimine bakmak
               //   yanlisti, irsaliyeyi de gizliyordu.
-              && !((bilgi.depoBelgesi || bilgi.stokFisi) && x.anahtar === 'fatura'))
+              && !((bilgi.depoBelgesi || bilgi.stokFisi) && x.anahtar === 'fatura')
+              // Teklifte Siparis sekmesi yalniz KABUL (3) durumunda (kullanici).
+              && !(teklifMi && x.anahtar === 'fatura' && teklifDurum !== '3'))
     .map(x => (
     <div key={x.anahtar}
          className={`kat${x.anahtar === aktifSekme ? ' on' : ''}`}
@@ -346,6 +363,9 @@ export interface BelgeBaslikProps {
   /** Teklif durumu (218) - yalniz teklifte cizilir (Hazirlaniyor/Sunuldu/...). */
   teklifDurum: string;
   setTeklifDurum(v: string): void;
+  /** Teklif revize no (220) - Teklif No hucresinin sag yarisi, serbest metin. */
+  revizeNo: string;
+  setRevizeNo(v: string): void;
   vadeGun: string;
   setVadeGun(v: string): void;
   cari: { id: number; unvan: string } | null;

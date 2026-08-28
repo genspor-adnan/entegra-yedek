@@ -194,7 +194,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Bu ekrandaki her kayit ADAY: "Musteri"/"Tedarikci" kolonlari hep bos,
     //   yer kaplamaktan baska ise yaramiyor.
     //   VKN, e-Fatura ve Adres yok: aday henuz faturalanmiyor, adres kartta.
-    gizliKolonlar: ['musteri', 'tedarikci', 'vkno', 'efatura', 'adres'],
+    gizliKolonlar: ['musteri', 'tedarikci', 'vkno', 'efatura', 'adres', 'teklifDurumAdi', 'teklifDurum'],
     // Once SAHIBI ve turu: kimin adayi, hangi kategoride.
     kolonSirasi: ['temsilci', 'kategori', 'unvan', 'telefon', 'eposta', 'ilce', 'il', 'kod', 'durum'],
     cipler: DURUM_CIPLERI,
@@ -265,8 +265,25 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     urunModu: 1,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 18 },
     // e-Fatura/kapanma teklif icin anlamsiz.
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'kapanmaAdi', 'kapanmaDurum'],
+    // 'kaynak' teklifte anlamsiz (zincirin BASI); belge durum rozeti (Pasif)
+    //   yerine teklif akisinin "Durumu" kolonu gosterilir (kullanici).
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'kapanmaAdi', 'kapanmaDurum',
+                    'kaynak', 'durumAdi', 'durum', 'tipi', 'belgeSeri', 'tarafId'],
+    // Sira (kullanici): Satış Temsilcisi | Durumu | Belge No en solda.
+    //   kolonSirasi ayni zamanda ZORUNLU gorunurluk: kayitli kolon secimi
+    //   'belge' kaynagini fatura/siparis listeleriyle paylasiyor - Durumu ve
+    //   Temsilci onsuz hic cikmazdi.
+    kolonSirasi: ['saticiAdi', 'teklifDurumAdi', 'belgeNo', 'belgeTarihi', 'tarafUnvan'],
     toplam: ['genelToplam'],
+    // Durum cipleri (kullanici): arama editinin altinda Tumu + teklif akisi.
+    cipler: [
+      { ad: 'Tümü' },
+      { ad: 'Hazırlanıyor', filtre: { alan: 'teklifDurum', op: 'esit', deger: 1 } },
+      { ad: 'Sunuldu',      filtre: { alan: 'teklifDurum', op: 'esit', deger: 2 } },
+      { ad: 'Kabul',        filtre: { alan: 'teklifDurum', op: 'esit', deger: 3 } },
+      { ad: 'Red',          filtre: { alan: 'teklifDurum', op: 'esit', deger: 4 } },
+      { ad: 'İptal',        filtre: { alan: 'teklifDurum', op: 'esit', deger: 5 } },
+    ],
     menuGrup: 'Satış', menuAd: 'Satış Teklifleri', ic: '📄', yetkiKodu: 'belge', menuSira: 5,
   },
   {
@@ -279,7 +296,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   gostersin; tur kolonlari o yuzden gereksiz (alis siparisi ayri ekran).
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 19 },
     // e-Fatura durumu SIPARISTE anlamsiz (siparis e-Belge degil).
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum'],
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
@@ -318,7 +335,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 15, ebelgeMenusu: 'E-Fatura',
     // Tur / Belge Turu kolonlari bu ekranda ayni degeri tekrarliyor (hepsi
     //   satis faturasi) - iade ayrimi cip seridinde zaten var.
-    gizliKolonlar: ['tur', 'turAdi'],
+    gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
     // Yalniz SATIS FATURASI (15). 16 "Satis Fisi" ayri ekran; iade ise ayri tur
     //   degil, belge.tipi = 2 - cipler onu kullanir.
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 15 },
@@ -357,7 +374,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'belge', rota: 'satis-fisi', baslik: 'Satış Fişleri',
     yol: 'Satis › Satış Fişleri', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 16,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 16 },
-    gizliKolonlar: ['tur', 'turAdi'],
+    gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
     cipler: [
       { ad: 'Tumu' },
@@ -374,7 +391,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'belge', rota: 'tahakkuk', baslik: 'Alacak Tahakkukları',
     yol: 'Satis › Tahakkuklar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 13,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 13 },
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum'],
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
     menuGrup: 'Satış', menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge',
   },
@@ -384,7 +401,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'belge', rota: 'satis-konsinye', baslik: 'Satış Konsinyeler',
     yol: 'Satis › Konsinye', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 119,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 119 },
-    gizliKolonlar: ['tur', 'turAdi'],
+    gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
     cipler: [
       { ad: 'Tumu' },
@@ -401,7 +418,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'belge', rota: 'alis-siparis', baslik: 'Alış Siparişleri',
     yol: 'Alis › Siparişler', aksiyonEkrani: 'siparis-liste', yeniBelgeTuru: 9,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 9 },
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum'],
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
@@ -415,7 +432,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'belge', rota: 'alis-irsaliye', baslik: 'Alış İrsaliyeleri',
     yol: 'Alis › İrsaliyeler', aksiyonEkrani: 'irsaliye-liste', yeniBelgeTuru: 10,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 10 },
-    gizliKolonlar: ['tur', 'turAdi'],
+    gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Faturalanmadı', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
@@ -429,7 +446,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'belge', rota: 'alis-fatura', baslik: 'Alış Faturaları',
     yol: 'Alis › Faturalar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 11,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 11 },
-    gizliKolonlar: ['tur', 'turAdi'],
+    gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
     cipler: [
       { ad: 'Tumu' },
@@ -445,7 +462,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'belge', rota: 'alis-fisi', baslik: 'Alış Fişleri',
     yol: 'Alis › Fişler', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 12,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 12 },
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum'],
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
     menuGrup: 'Alış', menuAd: 'Alış Fişleri', ic: '🧾', yetkiKodu: 'belge',
   },
@@ -454,7 +471,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'belge', rota: 'borc-tahakkuk', baslik: 'Borç Tahakkukları',
     yol: 'Alis › Tahakkuklar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 17,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 17 },
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum'],
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
     menuGrup: 'Alış', menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge',
   },
@@ -462,7 +479,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'belge', rota: 'alis-konsinye', baslik: 'Alış Konsinyeler',
     yol: 'Alis › Konsinye', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 109,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 109 },
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum'],
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
     cipler: [
       { ad: 'Tumu' },
@@ -581,7 +598,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kartYolu: '/cek', aksiyonEkrani: 'cek-senet-liste',
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 1 },
     yeniKayitVarsayilanlari: { tur: 1 },
-    gizliKolonlar: ['tur'],
+    gizliKolonlar: ['tur', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['tutar'],
     cipler: [
       { ad: 'Portföy', filtre: { alan: 'durum', op: 'esit', deger: 10 } },
@@ -596,7 +613,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kartYolu: '/senet', aksiyonEkrani: 'cek-senet-liste',
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 2 },
     yeniKayitVarsayilanlari: { tur: 2 },
-    gizliKolonlar: ['tur'],
+    gizliKolonlar: ['tur', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['tutar'],
     cipler: [
       { ad: 'Portföy', filtre: { alan: 'durum', op: 'esit', deger: 10 } },

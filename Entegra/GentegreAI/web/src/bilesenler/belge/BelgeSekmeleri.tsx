@@ -190,20 +190,28 @@ export function EBelgeSekmesi({
   );
 }
 
-export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi }: {
+export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
+                                    teklifDurum }: {
   donusumler: Record<string, unknown>[];
   kayitliId: number;
   /** Donusum modalini acar; 0 = hedefi modal secsin (ilk hedef). */
   setDonusum(v: number | null): void;
   /** Teklifte sekme "Sipariş"tir ve tek hedef siparis (216). */
   teklifMi?: boolean;
+  /** Teklif YALNIZ Kabul (3) durumundayken donusur (kullanici) - sunucu da
+      ayni kurali dogrular. */
+  teklifDurum?: string;
 }) {
+  const donusumKapali = !!teklifMi && teklifDurum !== '3';
   return (
   <div className="kagrup">
     <h6>
       {teklifMi ? 'Sipariş' : 'Faturalama'}
       {kayitliId > 0 && (
-        <button type="button" className="d bir" onClick={() => setDonusum(0)}>
+        <button type="button" className="d bir" disabled={donusumKapali}
+                title={donusumKapali
+                  ? 'Yalnız KABUL durumundaki teklif siparişe dönüştürülebilir.' : undefined}
+                onClick={() => setDonusum(0)}>
           {teklifMi ? '📋 Siparişe Dönüştür' : '🧾 Faturaya Dönüştür'}
         </button>
       )}

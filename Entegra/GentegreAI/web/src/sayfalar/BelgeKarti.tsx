@@ -137,6 +137,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [fiyatListesiId, setFiyatListesiIdHam] = useState<number | null>(null);
   /** Teklif durumu (218): 1 Hazirlaniyor / 2 Sunuldu / 3 Kabul / 4 Red / 5 Iptal. */
   const [teklifDurum, setTeklifDurum] = useState('1');
+  const [revizeNo, setRevizeNo] = useState('');
   const [fiyatListeleri, setFiyatListeleri] = useState<{ id: number; ad: string }[]>([]);
   const [depo, setDepo] = useState<{ id: number; ad: string } | null>(null);
   /** Yalniz transferde (20): malin GIDECEGI depo. Tekil belgelerde kullanilmaz. */
@@ -148,7 +149,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [fisTipi, setFisTipi] = useState(0);
   /** Hangi personel alani araniyor - ayni TarafArama iki alani da besler. */
   const [personelArama, setPersonelArama] = useState<'eden' | 'alan' | null>(null);
-  const [satici, setSatici] = useState<{ id: number; ad: string } | null>(null);
+  // Yeni kartta Satis Temsilcisi/Sorumlu VARSAYILANI oturum kullanicisi
+  //   (kullanici) - KullaniciOzeti.Id zaten taraf_id. Kayit yuklenirken
+  //   belgedeki deger bunu ezer; kullanici istedigiyle degistirebilir.
+  const [satici, setSatici] = useState<{ id: number; ad: string } | null>(
+    kullanici ? { id: kullanici.id, ad: kullanici.ad } : null);
   const [teslimSekli, setTeslimSekli] = useState(0);
   const [sevkTarihi, setSevkTarihi] = useState('');
   const [soforTckn, setSoforTckn] = useState('');
@@ -392,6 +397,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setVadeGun(String(y.belge.vadeGun ?? 0));
         setFiyatListesiIdHam(Number(y.belge.fiyatListesiId) || null);
         setTeklifDurum(String(y.belge.teklifDurum ?? '1'));
+        setRevizeNo(String(y.belge.revizeNo ?? ''));
         // Alis belgesi GIRIS deposunu, satis CIKIS deposunu kullanir.
         // Transferde "depo" CIKIS deposudur, girisDepo ayri alanda tutulur;
         //   digerlerinde hangisi doluysa o tek depo alanina yansir.
@@ -566,7 +572,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun, faturaTipi,
       fiyatListesiId,
       // Teklif durumu yalniz teklifte anlamli - baska turde gonderilmez.
-      ...(teklifMi ? { teklifDurum: Number(teklifDurum) || 1 } : {}),
+      ...(teklifMi ? { teklifDurum: Number(teklifDurum) || 1, revizeNo } : {}),
       raporDovizi, ekstreDovizi, belgeKuru, yerelPara,
       senaryo, satici, depo, girisDepo, teslimEden, teslimAlan, tasiyici,
       aracPlaka, soforAd, soforTckn, sevkTarihi, teslimSekli, fisTipi, satirlar,
@@ -788,6 +794,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           tarihEnGec={tarihEnGec} tarihEnErken={tarihEnErken}
           vadeGun={vadeGun} setVadeGun={setVadeGun}
           teklifDurum={teklifDurum} setTeklifDurum={setTeklifDurum}
+          revizeNo={revizeNo} setRevizeNo={setRevizeNo}
           cari={cari} satici={satici}
           depo={depo} setDepo={setDepo} girisDepo={girisDepo} setGirisDepo={setGirisDepo}
           teslimEden={teslimEden} teslimAlan={teslimAlan}
@@ -859,7 +866,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         {aktifSekme === 'fatura' && (
           <FaturalamaSekmesi
             donusumler={donusumler} kayitliId={kayitliId} setDonusum={setDonusum}
-            teklifMi={teklifMi}
+            teklifMi={teklifMi} teklifDurum={teklifDurum}
           />
         )}
         {aktifSekme === 'tahsilat' && (

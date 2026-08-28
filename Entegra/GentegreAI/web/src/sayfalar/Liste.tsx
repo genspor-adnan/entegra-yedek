@@ -383,6 +383,12 @@ Bu işlem geri alınamaz. `
         }
         case 'belge.donustur':
           if (!satir) return;
+          // Teklif (18) yalniz KABUL (3) durumundayken donusur - sunucu da
+          //   ayni kurali dogrular, burasi erken/anlasilir uyari.
+          if (Number(satir.tur) === 18 && Number(satir.teklifDurum ?? 1) !== 3) {
+            mesaj('Teklif yalnız KABUL durumundayken siparişe dönüştürülebilir.');
+            return;
+          }
           setDonusum({ belgeId: Number(satir.id), belgeTur: Number(satir.tur) });
           return;
         // Secili hesabin ekstresi - ayni ekran, hesapId sorgu parametresiyle.

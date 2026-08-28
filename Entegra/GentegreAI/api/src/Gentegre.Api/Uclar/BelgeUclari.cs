@@ -555,6 +555,8 @@ public static class BelgeUclari
         "tarafUnvan" or "tarafVkno" or "tarafVd" or "tarafAdres" or "tarafIlce" or "tarafIl" or
         "belgeSeri" or "belgeNo" or "irsaliyeNo" or "kdvDurum" or "belgeDovizi" or
         "dovizCinsi" or "kur" or "raporDovizi" or "ekstreDovizi" or "aciklama" or "ozelKod" or
+        // Teklif revize no (220) - serbest metin.
+        "revizeNo" or
         "gondericiUnvan" or "gondericiVkno" or "gondericiAlias" or
         "aracPlaka" or "soforAd" or "soforTckn" => "metin",
 

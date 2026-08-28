@@ -60,8 +60,17 @@ export function useKolonTercihi({ kaynak, gizliKolonlar, kolonSirasi, setHata }:
           const secilenler = secim
             .map(ad => bul.get(ad))
             .filter((k): k is KolonMeta => !!k && !gizli.has(k.ad));
+          // `kolonSirasi` verilen ekranda o kolonlar HER ZAMAN en solda ve o
+          //   sirada: tercih ayni kaynagi paylasan baska listede kaydedilmis
+          //   olabilir (belge tercihi fatura ekranindan) - teklifin Temsilci /
+          //   Durumu / Belge No uclusu yoksa hic gorunmez, sirasi da kayardi.
+          //   Kalan kolonlar kullanicinin kendi sirasinda arkadan gelir.
+          const bastakiler = (kolonSirasi ?? [])
+            .map(ad => bul.get(ad))
+            .filter((k): k is KolonMeta => !!k && !gizli.has(k.ad));
+          const kalanlar = secilenler.filter(k => !zorunlu.has(k.ad));
           // Secim tumuyle gecersizse (kolonlar yeniden adlandirilmis) varsayilana don.
-          setKolonlar(secilenler.length ? secilenler : gorunen);
+          setKolonlar(secilenler.length ? [...bastakiler, ...kalanlar] : gorunen);
           return;
         }
         // Ekran sirasi: listede adi gecen kolonlar SOLDA ve verilen sirada.

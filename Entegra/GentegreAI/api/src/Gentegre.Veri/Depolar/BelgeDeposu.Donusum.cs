@@ -51,6 +51,7 @@ public sealed partial class BelgeDeposu
         await using (var komut = new NpgsqlCommand("""
             select b.id, b.tur, b.tipi, b.taraf_id, b.taraf_unvan, b.taraf_vkno, b.taraf_vd,
                    b.taraf_adres_id, b.belge_dovizi, b.doviz_kuru, b.kdv_durum, b.durum,
+                   b.teklif_durum,
                    b.rapor_dovizi, b.ekstre_dovizi,
                    b.proje_id, b.sube_id, b.vade_gun, b.giris_depo_id, b.cikis_depo_id,
                    b.satici_id, b.ozel_kod, b.aciklama, b.belge_no, kt.ad as tur_adi
@@ -67,6 +68,13 @@ public sealed partial class BelgeDeposu
 
         if (Convert.ToInt32(kaynak["durum"]) != 0)
             throw GentegreHatasi.IsKurali("Yalnız kesinleşmiş belge dönüştürülebilir (taslak/iptal değil).");
+
+        // TEKLIF yalniz KABUL (3) durumundayken siparise donusur (kullanici):
+        //   sunulmamis/reddedilmis teklif taahhude cevrilmemeli.
+        if (Convert.ToInt32(kaynak["tur"]) == 18
+            && Convert.ToInt32(kaynak["teklif_durum"] ?? 1) != 3)
+            throw GentegreHatasi.IsKurali(
+                "Teklif yalnız KABUL durumundayken siparişe dönüştürülebilir.");
 
         if (baglam.SubeId is { } sube && kaynak["sube_id"] is { } ks && Convert.ToInt32(ks) != sube)
             throw GentegreHatasi.Bulunamadi();
