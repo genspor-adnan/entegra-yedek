@@ -459,15 +459,22 @@ public sealed class UtsServisi
         var hesap = await HesapAsync(subeId, iptal);
         var gorulen = new List<string>();
         var toplam = 0;
+        // ÜTS'nin dondurdugu HATA/UYARI'lar YUTULMAZ (ilk surumde 400
+        //   sessizce "0 kayit" gorunuyordu) - kullaniciya aynen tasinir.
+        var utsMesajlari = new List<UtsMesaj>();
 
         var offsetCalisti = await OffsetIleAsync();
         if (!offsetCalisti)
             await SayfaIleAsync();
 
         var kaybolan = await _depo.EnvanterEksikleriIsaretleAsync(subeId, gorulen, iptal);
-        return new { toplam, kaybolan,
+        var hatalar = utsMesajlari.Where(m => m.Tip is "HATA" or "UYARI")
+            .Select(m => m.Met).Where(m => !string.IsNullOrEmpty(m)).Distinct().ToList();
+        return new { toplam, kaybolan, mesajlar = utsMesajlari,
                      mesaj = $"{toplam} askıdaki kayıt senkronlandı"
-                           + (kaybolan > 0 ? $", {kaybolan} kayıt askıdan düştü." : ".") };
+                           + (kaybolan > 0 ? $", {kaybolan} kayıt askıdan düştü." : ".")
+                           + (hatalar.Count > 0 ? " ÜTS: " + string.Join(" | ", hatalar) : "")
+                           + (hesap.TestMi ? " (TEST ortamı)" : " (CANLI)") };
 
         async Task<bool> OffsetIleAsync()
         {
@@ -481,6 +488,7 @@ public sealed class UtsServisi
                 var (httpKodu, cevap) = await UtsIstemcisi.PostAsync(
                     Istemci(), hesap, YolAskidakilerOffset, govde,
                     "ÜTS askıdakiler sorgusu", iptal);
+                utsMesajlari.AddRange(UtsIstemcisi.MesajlariAyikla(cevap));
                 if (httpKodu != 200) return tur > 1;   // ilk istekte 400 → uç yok say
                 var (satirlar, yeniOff) = ListeAyikla(cevap);
                 foreach (var s in satirlar) await IsleAsync(s);
@@ -500,6 +508,7 @@ public sealed class UtsServisi
                 var (httpKodu, cevap) = await UtsIstemcisi.PostAsync(
                     Istemci(), hesap, YolAskidakilerSayfa, govde,
                     "ÜTS askıdakiler sorgusu", iptal);
+                utsMesajlari.AddRange(UtsIstemcisi.MesajlariAyikla(cevap));
                 if (httpKodu != 200) break;
                 var (satirlar, _) = ListeAyikla(cevap);
                 if (satirlar.Count == 0) break;
@@ -515,11 +524,12 @@ public sealed class UtsServisi
             int? stokId = uno.Length > 0
                 ? await _depo.StokEsleAsync(UtsDogrulama.UnoVaryantlari(uno), iptal)
                 : null;
+            // BZA metin tarih ("2026-08-24 10:14:44"); cozulemezse bos gecilir.
+            DateTime? bza = DateTime.TryParse(s.Bza, System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out var t) ? t : null;
             await _depo.EnvanterUpsertAsync(subeId, s.Bid,
                 s.Kun?.ToString() ?? "", s.Aku ?? "", uno, s.Lno ?? "", s.Sno ?? "",
-                s.Bno ?? "", s.Bti ?? "",
-                s.Bza is > 0 ? DateTimeOffset.FromUnixTimeMilliseconds(s.Bza.Value)
-                                             .UtcDateTime : null,
+                s.Bno ?? "", s.Bti ?? "", bza,
                 s.Mme ?? "", s.Adt ?? 1, stokId, iptal);
             toplam++;
         }
@@ -546,11 +556,17 @@ public sealed class UtsServisi
                     }
                     if (liste.ValueKind == JsonValueKind.Array)
                         foreach (var e in liste.EnumerateArray())
-                        {
-                            var s = JsonSerializer.Deserialize<UtsAskidakiSatir>(
-                                e.GetRawText(), UtsJson.Ayarlar);
-                            if (s is not null) satirlar.Add(s);
-                        }
+                            try
+                            {
+                                var s = JsonSerializer.Deserialize<UtsAskidakiSatir>(
+                                    e.GetRawText(), UtsJson.Ayarlar);
+                                if (s is not null) satirlar.Add(s);
+                            }
+                            catch (JsonException)
+                            {
+                                // Tek satirin beklenmedik alani TUM listeyi
+                                //   dusurmesin (BZA metin tarihi vakasi).
+                            }
                 }
             }
             catch (JsonException) { }

@@ -110,6 +110,9 @@ public sealed record UtsAskidakiSatir(
     [property: JsonPropertyName("ADT")] decimal? Adt,
     [property: JsonPropertyName("BID")] string? Bid,
     [property: JsonPropertyName("BTI")] string? Bti,     // VERME / GECICI_VERME / GERI_CEKME_VERME
-    [property: JsonPropertyName("BZA")] long? Bza,       // UNIX ms
+    // DİKKAT: ÜTS BZA'yı "2026-08-24 10:14:44" METNİ olarak döndürüyor
+    //   (dokümandaki UNIX-ms beklentisinin aksine) - long yapınca ilk satırda
+    //   deserialize patlıyor ve TÜM liste boş görünüyordu (canlıda görüldü).
+    [property: JsonPropertyName("BZA")] string? Bza,
     [property: JsonPropertyName("AKU")] string? Aku,     // veren kurum unvanı
     [property: JsonPropertyName("MME")] string? Mme);    // marka/model
