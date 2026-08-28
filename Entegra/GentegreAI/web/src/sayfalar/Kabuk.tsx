@@ -391,12 +391,6 @@ export function Kabuk() {
             </div>
           </div>
 
-          <div className="yanalt">
-            <div className="yankart">
-              <div className="b">⌘ Komut paleti</div>
-              <div className="s">Ctrl+K ile her ekrana, karta ve aksiyona tek satirdan ulas.</div>
-            </div>
-          </div>
         </aside>
 
         <main className="ana" key={ceviriSurumu}><Outlet /></main>

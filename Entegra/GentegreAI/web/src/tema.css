@@ -125,14 +125,6 @@ input, select { font: inherit; color: inherit }
 .mi .ic { font-size: 14px; width: 18px; text-align: center }
 .mi .rz { margin-left: auto; font-size: 10px; color: var(--soluk) }
 
-.yanalt { border-top: 1px solid var(--cizgi); padding: 10px }
-.yankart {
-  background: linear-gradient(#2b5c95, #1c4374); color: #fff; border-radius: var(--r);
-  padding: 11px 12px;
-}
-.yankart .b { font-weight: 700; font-size: 12.5px; margin-bottom: 3px }
-.yankart .s { font-size: 11px; opacity: .85; line-height: 1.35 }
-
 /* ------------------------------------------------------- ana calisma ---- */
 .ana { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--zem) }
 .sayfabas { flex: none; padding: 12px 20px 0 }
