@@ -273,7 +273,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   kolonSirasi ayni zamanda ZORUNLU gorunurluk: kayitli kolon secimi
     //   'belge' kaynagini fatura/siparis listeleriyle paylasiyor - Durumu ve
     //   Temsilci onsuz hic cikmazdi.
-    kolonSirasi: ['saticiAdi', 'teklifDurumAdi', 'belgeNo', 'belgeTarihi', 'tarafUnvan'],
+    kolonSirasi: ['saticiAdi', 'teklifKonusu', 'teklifDurumAdi', 'belgeNo', 'belgeTarihi', 'tarafUnvan'],
     toplam: ['genelToplam'],
     // Durum cipleri (kullanici): arama editinin altinda Tumu + teklif akisi.
     cipler: [
@@ -753,6 +753,15 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Kullanici: "Yönetim altına Roller ve İşlem Günlüğü al".
     kaynak: 'islem-log', baslik: 'Islem Gunlugu', yol: 'Yonetim › Islem Gunlugu',
     icerikAlani: 'bilgi', icerikBaslik: 'Log İçeriği',
+    // Islem tipi cipleri + tarih araligi (kullanici). Filtre ham kod
+    //   kolonuyla (islemTipiKod) - gorunen "İşlem" SQL case metni.
+    cipler: [
+      { ad: 'Tümü' },
+      { ad: 'Ekleme',     filtre: { alan: 'islemTipiKod', op: 'esit', deger: 1 } },
+      { ad: 'Değişiklik', filtre: { alan: 'islemTipiKod', op: 'esit', deger: 2 } },
+      { ad: 'Silme',      filtre: { alan: 'islemTipiKod', op: 'esit', deger: 0 } },
+    ],
+    tarihAlani: 'tarih',
     menuGrup: 'Yönetim', menuAd: 'İşlem Günlüğü', ic: '📋', yetkiKodu: 'islem_log',
   },
   {

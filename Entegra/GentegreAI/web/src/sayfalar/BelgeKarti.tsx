@@ -138,6 +138,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   /** Teklif durumu (218): 1 Hazirlaniyor / 2 Sunuldu / 3 Kabul / 4 Red / 5 Iptal. */
   const [teklifDurum, setTeklifDurum] = useState('1');
   const [revizeNo, setRevizeNo] = useState('');
+  const [teklifKonusu, setTeklifKonusu] = useState('');
+  const [teklifTeslim, setTeklifTeslim] = useState('');
   const [fiyatListeleri, setFiyatListeleri] = useState<{ id: number; ad: string }[]>([]);
   const [depo, setDepo] = useState<{ id: number; ad: string } | null>(null);
   /** Yalniz transferde (20): malin GIDECEGI depo. Tekil belgelerde kullanilmaz. */
@@ -398,6 +400,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setFiyatListesiIdHam(Number(y.belge.fiyatListesiId) || null);
         setTeklifDurum(String(y.belge.teklifDurum ?? '1'));
         setRevizeNo(String(y.belge.revizeNo ?? ''));
+        setTeklifKonusu(String(y.belge.teklifKonusu ?? ''));
+        setTeklifTeslim(String(y.belge.teklifTeslim ?? ''));
         // Alis belgesi GIRIS deposunu, satis CIKIS deposunu kullanir.
         // Transferde "depo" CIKIS deposudur, girisDepo ayri alanda tutulur;
         //   digerlerinde hangisi doluysa o tek depo alanina yansir.
@@ -572,7 +576,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun, faturaTipi,
       fiyatListesiId,
       // Teklif durumu yalniz teklifte anlamli - baska turde gonderilmez.
-      ...(teklifMi ? { teklifDurum: Number(teklifDurum) || 1, revizeNo } : {}),
+      ...(teklifMi ? { teklifDurum: Number(teklifDurum) || 1, revizeNo,
+                       teklifKonusu, teklifTeslim } : {}),
       raporDovizi, ekstreDovizi, belgeKuru, yerelPara,
       senaryo, satici, depo, girisDepo, teslimEden, teslimAlan, tasiyici,
       aracPlaka, soforAd, soforTckn, sevkTarihi, teslimSekli, fisTipi, satirlar,
@@ -795,6 +800,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           vadeGun={vadeGun} setVadeGun={setVadeGun}
           teklifDurum={teklifDurum} setTeklifDurum={setTeklifDurum}
           revizeNo={revizeNo} setRevizeNo={setRevizeNo}
+          teklifKonusu={teklifKonusu} setTeklifKonusu={setTeklifKonusu}
+          teklifTeslim={teklifTeslim} setTeklifTeslim={setTeklifTeslim}
           cari={cari} satici={satici}
           depo={depo} setDepo={setDepo} girisDepo={girisDepo} setGirisDepo={setGirisDepo}
           teslimEden={teslimEden} teslimAlan={teslimAlan}

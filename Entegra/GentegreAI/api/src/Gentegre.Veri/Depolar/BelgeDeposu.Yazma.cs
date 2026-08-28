@@ -29,7 +29,8 @@ public sealed partial class BelgeDeposu
         ["fiyatListesiId"] = "fiyat_listesi_id",
         // Teklif durumu (218): Hazirlaniyor/Sunuldu/Kabul/Red/Iptal.
         ["teklifDurum"] = "teklif_durum",
-        ["revizeNo"] = "revize_no",
+        ["revizeNo"] = "revize_no", ["teklifKonusu"] = "teklif_konusu",
+        ["teklifTeslim"] = "teklif_teslim",
         ["kdvDurum"] = "kdv_durum", ["belgeDovizi"] = "belge_dovizi",
         ["dovizCinsi"] = "doviz_cinsi", ["dovizKuru"] = "doviz_kuru", ["kur"] = "kur",
         ["raporDovizi"] = "rapor_dovizi", ["ekstreDovizi"] = "ekstre_dovizi",

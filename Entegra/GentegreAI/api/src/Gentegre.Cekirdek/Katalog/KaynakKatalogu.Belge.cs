@@ -143,6 +143,8 @@ public static partial class KaynakKatalogu
             new("durum",         "b.durum",          "kod",   "Durum Kodu",  Hizalama: "orta",
                                                                             Varsayilan: false),
             // Teklif durumu (218) - teklif listesinin cipleri/guard'i icin.
+            new("teklifKonusu",  "b.teklif_konusu",  "metin", "Konusu",      Genislik: 150,
+                                                                            Varsayilan: false),
             new("teklifDurum",   "b.teklif_durum",   "kod",   "Teklif Durum Kodu",
                 Hizalama: "orta", Varsayilan: false),
             new("teklifDurumAdi",

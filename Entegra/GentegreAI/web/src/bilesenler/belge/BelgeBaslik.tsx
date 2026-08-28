@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react';
 import { GenLookup } from '../GenLookup';
+import { api } from '../../api/istemci';
+import { KodListesiModali } from '../KodListesiModali';
 import { TarafAlani } from '../../sayfalar/BelgeKarti';
 import {
   LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, SEKMELER, TEKLIF_DURUMLARI,
@@ -45,6 +48,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     kapanmaAlani, bagliSiparisAlani, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
     tahakkukMu, depoBelgesi, stokFisiMi, fisCikisMi, transferMi, talepMi, disNumarali,
     eBelgeYok, teklifDurum, setTeklifDurum, revizeNo, setRevizeNo,
+    teklifKonusu, setTeklifKonusu, teklifTeslim, setTeklifTeslim,
   } = p;
 
   /** Teklif (216): katalog adi 'Teklif' - durum combosu ve sekme adi degisir. */
@@ -253,6 +257,19 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         hata={alanHatalari.girisDepoId}
         onSec={x => setGirisDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
       />
+    ) : teklifMi ? (
+      /* Teklifte depo YOK (stok cikisi yapmaz, 222) - yerine 2. sira uclusu:
+         Teklif Konusu (yazilabilir combo) | Teslim Sekli (salt combo).
+         Ikisi de kod listesinden; ETIKETE tiklaninca jenerik modalda
+         duzenlenir (AyarAlani listeKod deseni). Gecerlilik Suresi = vade. */
+      <>
+        <KodListeAlani etiket="Teklif Konusu" listeKod="belge.teklif_konusu"
+                       deger={teklifKonusu} onDeger={setTeklifKonusu}
+                       kilitli={kilitli} yazilabilir />
+        <KodListeAlani etiket="Teslim Şekli" listeKod="belge.teslim_sekli"
+                       deger={teklifTeslim} onDeger={setTeklifTeslim}
+                       kilitli={kilitli} />
+      </>
     ) : !tahakkukMu ? (
       <GenLookup
         kaynak="depo"
@@ -286,7 +303,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         Faturada / tahakkukta anlamli (irsaliyede mal cikis tarihi esas). */}
     {bilgi.vade && (
       <label className="alan">
-        <span className="etiket">Vade (gün)</span>
+        <span className="etiket">{teklifMi ? 'Geçerlilik Süresi (gün)' : 'Vade (gün)'}</span>
         <input className="hiza-sag" value={vadeGun} disabled={kilitli}
                onChange={e => setVadeGun(e.target.value)} />
       </label>
@@ -366,6 +383,11 @@ export interface BelgeBaslikProps {
   /** Teklif revize no (220) - Teklif No hucresinin sag yarisi, serbest metin. */
   revizeNo: string;
   setRevizeNo(v: string): void;
+  /** Teklif konusu / teslim sekli (222) - kod listesi destekli combolar. */
+  teklifKonusu: string;
+  setTeklifKonusu(v: string): void;
+  teklifTeslim: string;
+  setTeklifTeslim(v: string): void;
   vadeGun: string;
   setVadeGun(v: string): void;
   cari: { id: number; unvan: string } | null;
@@ -404,4 +426,69 @@ export interface BelgeBaslikProps {
   talepMi: boolean;
   disNumarali: boolean;
   eBelgeYok: boolean;
+}
+
+/**
+ * KOD LISTELI KART ALANI (222): degeri kod listesinden onerilen combo.
+ * `yazilabilir` ise input+datalist (kullanici listede olmayani da yazar),
+ * degilse salt select. Etiket TIKLANINCA jenerik KodListesiModali acilir -
+ * liste icerigi (Teklif Konusu, Teslim Sekli...) oradan yonetilir; modal
+ * kapaninca oneriler tazelenir (AyarAlani listeKod deseniyle ayni).
+ */
+function KodListeAlani({ etiket, listeKod, deger, onDeger, kilitli, yazilabilir }: {
+  etiket: string;
+  listeKod: string;
+  deger: string;
+  onDeger(v: string): void;
+  kilitli: boolean;
+  yazilabilir?: boolean;
+}) {
+  const [secenekler, setSecenekler] = useState<string[]>([]);
+  const [modal, setModal] = useState(false);
+  const [surum, setSurum] = useState(0);
+  useEffect(() => {
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.kodListe(listeKod);
+        if (!iptal)
+          setSecenekler(y.degerler.filter(d => d.aktif === 1).map(d => d.ad));
+      } catch { /* liste yoksa oneriler bos kalir */ }
+    })();
+    return () => { iptal = true };
+  }, [listeKod, surum]);
+  return (
+    <label className="alan">
+      <span className="etiket" role="button" tabIndex={0}
+            title="Liste içeriğini düzenle" style={{ cursor: 'pointer' }}
+            onClick={e => { e.preventDefault(); setModal(true) }}>
+        {etiket} ✎
+      </span>
+      {yazilabilir ? (
+        /* HEM EDIT HEM COMBO (kullanici): solda serbest metin, sagda dar
+           liste - secim editi doldurur, kullanici uzerine yazabilir. */
+        <span className="ikili">
+          <input value={deger} maxLength={100} disabled={kilitli}
+                 onChange={e => onDeger(e.target.value)} />
+          <select value="" disabled={kilitli} aria-label={`${etiket} listesi`}
+                  onChange={e => { if (e.target.value) onDeger(e.target.value) }}>
+            <option value="" />
+            {secenekler.map(a => <option key={a} value={a}>{a}</option>)}
+          </select>
+        </span>
+      ) : (
+        <select value={deger} disabled={kilitli}
+                onChange={e => onDeger(e.target.value)}>
+          <option value="">Seçiniz…</option>
+          {/* Kayitli deger listeden silinmisse yine gorunsun. */}
+          {deger && !secenekler.includes(deger) && <option value={deger}>{deger}</option>}
+          {secenekler.map(a => <option key={a} value={a}>{a}</option>)}
+        </select>
+      )}
+      {modal && (
+        <KodListesiModali kod={listeKod} baslik={etiket}
+                          onKapat={() => { setModal(false); setSurum(x => x + 1) }} />
+      )}
+    </label>
+  );
 }

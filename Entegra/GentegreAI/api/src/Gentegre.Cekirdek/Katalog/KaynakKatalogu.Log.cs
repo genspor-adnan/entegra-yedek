@@ -37,7 +37,9 @@ public static partial class KaynakKatalogu
             left join public.kasa_islem ki on ki.id = l.kayit_id and l.tablo_id = 908
             left join public.kasa_islem_turu kit on kit.kod = ki.tur
             left join public.kasa_islem_turu bt on l.tablo_id = 30
-                 and bt.kod = coalesce(kb.tur::int, (l.bilgi->>'tur')::int)
+                 and bt.kod = coalesce(kb.tur::int,
+                     case when l.bilgi->>'tur' ~ '^[0-9]+$'
+                          then (l.bilgi->>'tur')::int end)
             left join public.taraf ktr on ktr.id = l.taraf_id
             """,
         VarsayilanSirala: "l.tarih desc, l.id desc",
@@ -50,7 +52,11 @@ public static partial class KaynakKatalogu
                 "(l.tarih + make_interval(hours => coalesce((select nullif(r.deger, '')::int " +
                 "from public.referans r where r.anahtar = 'genel.saat_farki'), 3)))",
                                                              "tarih", "Tarih",     Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm"),
-            new("islemTipi",  IslemAdiIfade("l.islem_tipi"),   "metin", "İşlem",     Hizalama: "orta"),
+            new("islemTipi",  IslemAdiIfade("l.islem_tipi"),   "metin", "İşlem",     Hizalama: "orta",
+                                                                            Bicim: "rozet"),
+            // Cip filtreleri ham kodla calisir (metin case'i degil).
+            new("islemTipiKod", "l.islem_tipi",                "kod",   "İşlem Kodu", Hizalama: "orta",
+                                                                            Varsayilan: false),
             new("modul",      LogModulIfade(),                 "metin", "Modül",     Hizalama: "orta"),
             // Belge silinmisse numara bilgi JSON'undan; kasa islem_no; baska
             //   cozum yoksa satirin taraf_id cari'sinin kodu (kullanici).
