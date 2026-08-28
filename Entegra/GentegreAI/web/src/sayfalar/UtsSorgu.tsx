@@ -104,7 +104,8 @@ export function UtsSorgu() {
             </label>
             <label className="alan">
               <span className="etiket">&nbsp;</span>
-              <span className="ikili">
+              {/* ikili degil duz flex: buton metni hucrede kirpiliyordu. */}
+              <span style={{ display: 'flex', gap: 6, whiteSpace: 'nowrap' }}>
                 <button type="submit" className="d bir" disabled={sorguluyor}>
                   {sorguluyor ? 'Sorgulanıyor…' : '🔍 ÜTS’de Sorgula'}
                 </button>
@@ -120,15 +121,26 @@ export function UtsSorgu() {
 
         {hata && <div className="hata-kutusu">{hata}</div>}
 
-        {yanit && (
-          <div style={{ maxWidth: 980 }}>
-            <MesajListesi mesajlar={yanit.mesajlar} />
-            {yanit.sonuc != null && <SonucKarti sonuc={yanit.sonuc} />}
-            {yanit.sonuc == null && yanit.basarili && (
-              <div className="bilgi-kutusu">Sonuç boş döndü.</div>
-            )}
-          </div>
-        )}
+        {yanit && (() => {
+          // ÜTS "bulunamadı"yı HATA degil BOS DIZI olarak dondurur (canlıda
+          //   görüldü) - bos liste sessizce hic bir sey cizmiyordu.
+          const kayitlar = Array.isArray(yanit.sonuc)
+            ? yanit.sonuc : yanit.sonuc != null ? [yanit.sonuc] : [];
+          return (
+            <div style={{ maxWidth: 980 }}>
+              <MesajListesi mesajlar={yanit.mesajlar} />
+              {kayitlar.length > 0 ? (
+                <SonucKarti sonuc={kayitlar} />
+              ) : yanit.basarili ? (
+                <div className="bilgi-kutusu">
+                  ÜTS'de bu ölçütlerle tekil ürün kaydı bulunamadı. (Tekil ürün
+                  sorgusu SERİ ya da LOT numarasıyla birlikte daha isabetlidir;
+                  yalnız ürün no ile genellikle boş döner.)
+                </div>
+              ) : null}
+            </div>
+          );
+        })()}
       </div>
     </>
   );
@@ -181,13 +193,13 @@ const AD_SOZLUGU: Record<string, string> = {
   UDI: 'Eşsiz Kimlik (UDI)', MME: 'Marka / Model', SKG: 'Sahip Kurum',
   KKG: 'Kullanan Kurum', BID: 'Bildirim Id', BTI: 'Bildirim Tipi',
   KUN: 'Kurum No', AKU: 'Kurum Unvanı', BNO: 'Belge No', DUR: 'Durum',
+  UIK: 'Üretici/İthalatçı Kurum No', UAK: 'Takip Şekli',
 };
 
 function bicimle(deger: unknown): string {
   if (deger == null) return '';
-  // UNIX ms tarih alanları (ÜTS bazı tarihler için sayı döndürür).
-  if (typeof deger === 'number' && deger > 1_000_000_000_000)
-    return new Date(deger).toLocaleDateString('tr-TR');
+  // Sayı → tarih SEZGİSİ YOK: ÜTS kurum numaraları da 13 haneli sayı
+  //   (UIK 2667... "10.07.2054" görünmüştü); tarihler zaten metin geliyor.
   if (typeof deger === 'object') return JSON.stringify(deger);
   return String(deger);
 }
