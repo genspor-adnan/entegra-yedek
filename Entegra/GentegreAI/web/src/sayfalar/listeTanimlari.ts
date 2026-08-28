@@ -655,14 +655,6 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Stok & Hizmet', menuAd: 'Fiyat Listeleri', ic: '🏷️', yetkiKodu: 'fiyat_listesi',
   },
   {
-    // DEMIRBAS (216, Ekranlar/demirbas_listesi.html): kimlik + satin alma
-    //   cekirdegi; zimmet gecmisi / bakim / amortisman gridleri ileride.
-    kaynak: 'demirbas', baslik: 'Demirbaşlar', yol: 'Stok › Demirbaşlar',
-    kartYolu: '/demirbas', aksiyonEkrani: 'demirbas-liste', cipler: DURUM_CIPLERI,
-    yerTutucuSekmeler: ['Zimmet Geçmişi', 'Bakım / Servis', 'Amortisman'],
-    menuGrup: 'Stok & Hizmet', menuAd: 'Demirbaş Listesi', ic: '🖥️', yetkiKodu: 'demirbas',
-  },
-  {
     // Liste SATIRLARI ayri ekran: bir listenin binlerce satiri kart icinde
     //   rahat gezilmiyor. Menude gizli - listeden "Satırları Aç" ile gelinir.
     kaynak: 'fiyat-listesi-satir', baslik: 'Fiyat Listesi Satırları',
@@ -726,6 +718,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'personel', baslik: 'Personel', yol: 'IK › Personel', kartYolu: '/personel',
     aksiyonEkrani: 'personel-liste', cipler: DURUM_CIPLERI,
     menuGrup: 'İK', menuAd: 'Personel Listesi', ic: '🪪', yetkiKodu: 'personel',
+  },
+  {
+    // DEMIRBAS (216, Ekranlar/demirbas_listesi.html) - ana menude IK'nin
+    //   ALTINDA TEK BASINA (kullanici; grupsuz duz oge). Iki modda ORTAK.
+    kaynak: 'demirbas', baslik: 'Demirbaş', yol: 'Demirbaş',
+    kartYolu: '/demirbas', aksiyonEkrani: 'demirbas-liste', cipler: DURUM_CIPLERI,
+    yerTutucuSekmeler: ['Zimmet Geçmişi', 'Bakım / Servis', 'Amortisman'],
+    menuAd: 'Demirbaş', ic: '🖥️', yetkiKodu: 'demirbas',
   },
   {
     // Kullanici: "e-Belge'yi de bir Yönetim altına".
