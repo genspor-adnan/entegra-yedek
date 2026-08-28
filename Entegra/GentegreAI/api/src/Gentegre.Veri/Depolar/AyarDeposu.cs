@@ -33,6 +33,10 @@ public sealed class AyarDeposu
     public static readonly IReadOnlyList<string> BeyazListe = new[]
     {
         "genel.yerel_para",
+        // Urun modu (215): 1 Gentegre AI (ERP), 2 GenoTIP AI (HBYS). Ad, menu
+        //   (Kayit Kabul yalniz HBYS) ve mesaj basliklari buna gore degisir;
+        //   giris yanitiyla istemciye tasinir.
+        "genel.urun_modu",
         "belge.geri_gun_siniri",
         "liste.sayfa_boyu",
         "stok.negatif_davranis",
@@ -88,6 +92,7 @@ public sealed class AyarDeposu
     /// <summary>Ayar yoksa kullanilan degerler - DB'siz de dogru davranis.</summary>
     private static readonly Dictionary<string, int> Varsayilan = new()
     {
+        ["genel.urun_modu"] = 1,
         ["belge.geri_gun_siniri"] = 7,
         // Tahsilat/odeme kac gun sonra kilitlensin (149): 0 kapali, -1 sinirsiz.
         ["kasa.duzenleme_gun"] = 7,

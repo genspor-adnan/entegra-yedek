@@ -3,7 +3,7 @@ import { c } from '../dil/ceviri';
 import { api, oturum } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import {
-  ApiHatasi, hataAyristir,
+  ApiHatasi, hataAyristir, urunAdi,
   type KartMetaYaniti, type KartYetkisi, hataMetni } from '../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, bosDetay, detayFarki } from './GenDetayTablo';
 import { Modal } from './Modal';
@@ -781,7 +781,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       {kapatmaUyarisi && (
         <div className="mesaj-perde" onMouseDown={e => e.stopPropagation()}>
           <div className="mesaj-kutu">
-            <h3>Gentegre AI Mesajı</h3>
+            <h3>{`${urunAdi(kullanici?.urunModu)} Mesajı`}</h3>
             <p>Kaydedilmemiş değişiklikler var.</p>
             <div className="mesaj-dugme">
               <button className="d bir" disabled={kaydediyor} onClick={() => { setKapatmaUyarisi(false); void kaydet(); }}>Kaydet</button>

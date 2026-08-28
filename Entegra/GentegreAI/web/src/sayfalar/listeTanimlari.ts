@@ -56,6 +56,8 @@ export interface ListeTanimi {
   kaynak: string;
   baslik: string;
   yol: string;
+  /** Yalniz bu urun modunda gorunur (215): 2 = GenoTIP AI (HBYS). Bos = ortak. */
+  urunModu?: number;
   /** Kart ekrani olan kaynaklarda cift tik karta gider. */
   kartYolu?: string;
   aksiyonEkrani?: string;
@@ -140,7 +142,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Hasta da bir TARAF - cari ekstresi aynen gecerli (hasta hesabi hareketleri).
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Hasta Ekstresi',
               tarihAlani: 'islemTarihi' },
+    // Kayit Kabul YALNIZ GenoTIP AI'da (kullanici, 215) - diger moduller ortak.
     menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Listesi', ic: '🏥', yetkiKodu: 'personel',
+    urunModu: 2,
   },
   {
     kaynak: 'proje', baslik: 'Projeler', yol: 'CRM › Projeler', kartYolu: '/proje',

@@ -58,6 +58,9 @@ public sealed class KullaniciOzeti
     public bool SubeYazma { get; set; } = true;
     /// <summary>Kullanicinin giris / islem yapabilecegi subeler (kullanici_sube).</summary>
     public IReadOnlyList<SubeOzeti> Subeler { get; set; } = Array.Empty<SubeOzeti>();
+    /// <summary>Urun modu (referans genel.urun_modu): 1 Gentegre AI (ERP),
+    /// 2 GenoTIP AI (HBYS). Ad, menu ve mesaj basliklari buna gore degisir.</summary>
+    public int UrunModu { get; set; } = 1;
 }
 
 public sealed record SubeOzeti(int Id, string Ad, bool Varsayilan, bool Yazma);

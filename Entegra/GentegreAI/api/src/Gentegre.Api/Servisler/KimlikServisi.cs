@@ -119,7 +119,8 @@ public sealed class KimlikServisi
             RefreshToken = refreshToken ?? "",
             SonaErme = sonaErme,
             ParolaDegismeli = kullanici.ParolaDegismeli,
-            Kullanici = KullaniciOzetiKur(kullanici, subeler, subeId)
+            Kullanici = KullaniciOzetiKur(kullanici, subeler, subeId,
+                await AyarAsync("genel.urun_modu", 1, iptal))
         };
     }
 
@@ -223,12 +224,13 @@ public sealed class KimlikServisi
             SonaErme = sonaErme,
             RefreshSonaErme = refreshBitis,
             ParolaDegismeli = kullanici.ParolaDegismeli,
-            Kullanici = KullaniciOzetiKur(kullanici, subeler, subeId)
+            Kullanici = KullaniciOzetiKur(kullanici, subeler, subeId,
+                await AyarAsync("genel.urun_modu", 1, iptal))
         };
     }
 
     private static KullaniciOzeti KullaniciOzetiKur(KullaniciKaydi kullanici,
-        IReadOnlyList<SubeOzeti> subeler, int? subeId) => new()
+        IReadOnlyList<SubeOzeti> subeler, int? subeId, int urunModu) => new()
     {
         Id = kullanici.TarafId,
         Kod = kullanici.Kod,
@@ -239,7 +241,8 @@ public sealed class KimlikServisi
         YetkiSurumu = kullanici.YetkiSurumu,
         SubeId = subeId,
         SubeYazma = subeId is null || subeler.FirstOrDefault(s => s.Id == subeId)?.Yazma != false,
-        Subeler = subeler
+        Subeler = subeler,
+        UrunModu = urunModu
     };
 
     private static int? SubeSec(int? istenen, IReadOnlyList<SubeOzeti> subeler)

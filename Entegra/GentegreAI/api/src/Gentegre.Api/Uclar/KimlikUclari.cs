@@ -1,6 +1,7 @@
 ﻿using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
+using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Microsoft.AspNetCore.Authorization;
 
@@ -52,12 +53,20 @@ public static class KimlikUclari
         }).RequireAuthorization();
 
         grup.MapGet("/ben", async (
-            BaglamCozucu cozucu, KullaniciDeposu kullanicilar, HttpContext ctx, CancellationToken iptal) =>
+            BaglamCozucu cozucu, KullaniciDeposu kullanicilar, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             var kullanici = await kullanicilar.IdIleBulAsync(baglam.KullaniciId, iptal)
                             ?? throw GentegreHatasi.Yetkisiz();
             var subeler = await kullanicilar.SubeleriAsync(baglam.KullaniciId, iptal);
+
+            // Urun modu (215) - giris yanitindaki ile ayni kaynak; /ben acilista
+            //   cagrildigi icin buradan da gelmezse istemci hep ERP sanirdi.
+            var modMetin = await veri.TekDegerAsync<string>(
+                "select deger from public.referans where anahtar = 'genel.urun_modu'",
+                Array.Empty<object?>(), iptal);
+            var urunModu = int.TryParse(modMetin, out var m) ? m : 1;
 
             return Results.Ok(new BenYaniti
             {
@@ -72,7 +81,8 @@ public static class KimlikUclari
                     YetkiSurumu = baglam.Yetkiler.YetkiSurumu,
                     SubeId = baglam.SubeId,
                     SubeYazma = baglam.SubeYazma,
-                    Subeler = subeler
+                    Subeler = subeler,
+                    UrunModu = urunModu
                 },
                 // Yetkisiz aksiyon HIC donmez (API §7).
                 Aksiyonlar = baglam.Yetkiler.Tumu.Where(y => y.Tur == 1 && y.Gor)

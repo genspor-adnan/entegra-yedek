@@ -103,7 +103,14 @@ export interface KullaniciOzeti {
   subeId?: number | null;
   subeYazma: boolean;
   subeler: SubeOzeti[];
+  /** Urun modu (215): 1 Gentegre AI (ERP), 2 GenoTIP AI (HBYS). */
+  urunModu?: number;
 }
+
+/** Urun modlari (215). Ad sol ust marka, mesaj basligi ve menu suzmede kullanilir. */
+export const URUN_GENTEGRE = 1;
+export const URUN_GENOTIP = 2;
+export const urunAdi = (mod?: number) => (mod === URUN_GENOTIP ? 'GenoTIP AI' : 'Gentegre AI');
 
 export interface GirisYaniti {
   accessToken: string;

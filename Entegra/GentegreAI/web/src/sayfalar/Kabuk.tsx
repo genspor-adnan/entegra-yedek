@@ -6,6 +6,7 @@ import { Bayrak } from '../bilesenler/Bayrak';
 import { cm, ceviriYukle, ceviriDinle } from '../dil/ceviri';
 import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
+import { urunAdi } from '../api/sozlesme';
 import { LISTELER } from './Liste';
 
 interface MenuOgesi {
@@ -96,7 +97,9 @@ export function Kabuk() {
   // Menu, liste tanimlarindan uretilir; yetkisiz modul hic cizilmez. menuGrup verilen
   //   ogeler ("Cari" -> Musteri/Tedarikci/Kisi Listesi) acilir-kapanir bir ana menu
   //   altinda TOPLANIR; menuGrup'suz ogeler eskisi gibi duz sirada kalir.
-  const yetkiliListeler = LISTELER.filter(l => yetki(l.yetkiKodu) && !l.menuGizli);
+  const yetkiliListeler = LISTELER.filter(l => yetki(l.yetkiKodu) && !l.menuGizli
+    // Urun modu suzmesi (215): Kayit Kabul yalniz GenoTIP AI'da.
+    && (!l.urunModu || l.urunModu === (kullanici?.urunModu ?? 1)));
   const moduller: MenuOgesi[] =
     yetkiliListeler.map(l => ({
       yol: `/${l.rota ?? l.kaynak}`, ad: cm(l.menuAd), ic: l.ic,
@@ -236,7 +239,8 @@ export function Kabuk() {
           <span className="lg">
             <img src={`${import.meta.env.BASE_URL}gentegre-sembol.svg`} alt="Gentegre" />
           </span>
-          Gentegre AI
+          {/* Marka urun moduna gore (215): ikon ayni, ad degisir. */}
+          {urunAdi(kullanici?.urunModu)}
         </div>
 
         <button className="ara" onClick={paletiAc} title="Komut paleti">

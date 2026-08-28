@@ -30,7 +30,10 @@ function Yollar() {
             zorunlu olarak - ayni kaynak ('cari') Musteri/Tedarikci gibi birden fazla
             ekranda farkli `rota` ile kullanilabilir, o yuzden path `rota ?? kaynak`dan
             uretilir. */}
-        {LISTELER.filter(l => yetki(l.yetkiKodu) && !l.ozelSayfa).flatMap(l => {
+        {LISTELER.filter(l => yetki(l.yetkiKodu) && !l.ozelSayfa
+          // Urun modu suzmesi (215): moda ozel ekranlar (Kayit Kabul = GenoTIP)
+          //   diger urunde rotasiyla birlikte yok olur.
+          && (!l.urunModu || l.urunModu === (kullanici.urunModu ?? 1))).flatMap(l => {
           const rota = l.rota ?? l.kaynak;
           return [
             <Route key={rota} path={`/${rota}`} element={<Liste tanim={l} />} />,

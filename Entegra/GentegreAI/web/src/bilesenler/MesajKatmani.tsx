@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Modal } from './Modal';
 import { mesajDinleyiciAta, type MesajIstegi } from './mesaj';
+import { urunAdi } from '../api/sozlesme';
+import { useOturum } from '../kimlik/OturumBaglami';
 
 /**
  * "Gentegre AI Mesajı" penceresi - uygulamanin TEK mesaj/onay ekrani.
@@ -13,6 +15,7 @@ import { mesajDinleyiciAta, type MesajIstegi } from './mesaj';
  * arkaya diyalog kapatmak zorunda kalmasin.
  */
 export function MesajKatmani() {
+  const { kullanici } = useOturum();
   const [istek, setIstek] = useState<MesajIstegi | null>(null);
   const [girdi, setGirdi] = useState('');
 
@@ -33,7 +36,7 @@ export function MesajKatmani() {
 
   return (
     <Modal
-      baslik="Gentegre AI Mesajı"
+      baslik={`${urunAdi(kullanici?.urunModu)} Mesajı`}
       dar
       onKapat={() => kapat(false)}
       alt={
