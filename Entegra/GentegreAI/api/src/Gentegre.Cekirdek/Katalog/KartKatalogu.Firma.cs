@@ -263,6 +263,10 @@ public static partial class KartKatalogu
             //   buraya kullanici yapistirir - koda/loga asla yazilmaz.
             new DetayTanimi("uts", "public.uts_hesap", "sube_id", new KartAlani[]
             {
+                // 'id' = sube_id (tablonun kendi kimligi yok, 1:1): okuma bu
+                //   alani satira koymazsa guncelleme "id yok" diye eklemeye
+                //   doner ve PK cakisir.
+                new("id",          "sube_id",       "sayi",  Yazilabilir: false),
                 new("aktif",       "aktif",         "mantik",
                     Baslik: "ÜTS Hesabı Aktif"),
                 new("testOrtami",  "test_ortami",   "mantik",
@@ -275,7 +279,9 @@ public static partial class KartKatalogu
                     Baslik: "Test Kurum No"),
                 new("testToken",   "test_token",    "metin", EnFazlaUzunluk: 4000,
                     Baslik: "Test Token'ı")
-            }, Sirala: "sube_id", SubeKolonu: null, LogTabloId: 930, Baslik: "ÜTS"),
+            // uts_hesap'in kendi 'id'si YOK - PK dogrudan sube_id (1:1).
+            }, IdKolonu: "sube_id", Sirala: "sube_id", SubeKolonu: null,
+               LogTabloId: 930, Baslik: "ÜTS"),
 
             new DetayTanimi(
                 Ad: "depolar",
