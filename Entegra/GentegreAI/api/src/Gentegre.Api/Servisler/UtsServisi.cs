@@ -32,7 +32,8 @@ public sealed class UtsServisi
     }
 
     // ------------------------------------------------------ yol kataloğu ----
-    public const short TurAlma = 1, TurVerme = 2, TurKullanim = 3;
+    public const short TurAlma = 1, TurVerme = 2, TurKullanim = 3,
+                       TurUretim = 4, TurIthalat = 5, TurHek = 6, TurImha = 7;
 
     private static readonly Dictionary<short, (string Ad, string EkleYolu, string? IptalYolu)>
         Turler = new()
@@ -42,6 +43,14 @@ public sealed class UtsServisi
                           "/UTS/uh/rest/bildirim/verme/iptal"),
             [TurKullanim] = ("Kullanım", "/UTS/uh/rest/bildirim/kullanim/ekle",
                              "/UTS/uh/rest/bildirim/kullanim/iptal"),
+            [TurUretim] = ("Üretim", "/UTS/uh/rest/bildirim/uretim/ekle",
+                           "/UTS/uh/rest/bildirim/uretim/iptal"),
+            [TurIthalat] = ("İthalat", "/UTS/uh/rest/bildirim/ithalat/ekle",
+                            "/UTS/uh/rest/bildirim/ithalat/iptal"),
+            [TurHek] = ("Kayıp/HEK", "/UTS/uh/rest/bildirim/hekZayiat/ekle",
+                        "/UTS/uh/rest/bildirim/hekZayiat/iptal"),
+            [TurImha] = ("İmha/Bertaraf", "/UTS/uh/rest/bildirim/imhaBertaraf/ekle",
+                         "/UTS/uh/rest/bildirim/imhaBertaraf/iptal"),
         };
 
     private const string YolTekilUrun = "/UTS/uh/rest/tekilUrun/sorgula";
@@ -160,6 +169,103 @@ public sealed class UtsServisi
 
         static string? Bosalt(string? d) =>
             string.IsNullOrWhiteSpace(d) ? null : d.Trim();
+    }
+
+    /// <summary>ÜRETİM bildirimi (s24): ürün sistemde bu bildirimle doğar.</summary>
+    public async Task<object> UretimBildirAsync(string? uno, string? lotNo, string? seriNo,
+        decimal adet, DateTime? urt, DateTime? skt,
+        int? subeId, YazmaBaglami baglam, CancellationToken iptal)
+    {
+        var u = UtsDogrulama.Uno(uno);
+        var l = UtsDogrulama.LotNo(lotNo);
+        var sn = UtsDogrulama.SeriNo(seriNo);
+        var adt = UtsDogrulama.AdetKurali(sn, l, adet);
+        var istek = new UtsUretimIstek(Uno: u,
+            Urt: UtsDogrulama.Tarih(urt, "urt", "Üretim tarihi"),
+            Lno: l, Sno: sn, Adt: adt,
+            Skt: skt is null ? null : UtsDogrulama.Tarih(skt, "skt", "Son kullanma"));
+        var sonuc = await GonderAsync(TurUretim, istek, subeId, baglam,
+            null, null, null, null, adt ?? 1, urt, "", "", u, l ?? "", sn ?? "",
+            urt, skt, iptal);
+        return sonuc.Yanit;
+    }
+
+    /// <summary>İTHALAT bildirimi (s27): ülke kodları ÜTS sayısal (TR 792).</summary>
+    public async Task<object> IthalatBildirAsync(string? uno, string? lotNo, string? seriNo,
+        decimal adet, DateTime? urt, DateTime? skt, int? ithalUlke, int? menseiUlke,
+        string? gumrukBeyanname, int? subeId, YazmaBaglami baglam, CancellationToken iptal)
+    {
+        var u = UtsDogrulama.Uno(uno);
+        var l = UtsDogrulama.LotNo(lotNo);
+        var sn = UtsDogrulama.SeriNo(seriNo);
+        var adt = UtsDogrulama.AdetKurali(sn, l, adet);
+        if (ithalUlke is null or <= 0 || menseiUlke is null or <= 0)
+            throw GentegreHatasi.Dogrulama(
+                "İthal edildiği ülke (IEU) ve menşei ülke (MEU) kodları zorunludur (Türkiye 792).",
+                new AlanHatasi("ithalUlke", "ÜTS sayısal ülke kodu."));
+        var gbn = (gumrukBeyanname ?? "").Trim();
+        var istek = new UtsIthalatIstek(Uno: u,
+            Urt: UtsDogrulama.Tarih(urt, "urt", "Üretim tarihi"),
+            IthalUlke: ithalUlke, MenseiUlke: menseiUlke,
+            Lno: l, Sno: sn, Adt: adt,
+            Skt: skt is null ? null : UtsDogrulama.Tarih(skt, "skt", "Son kullanma"),
+            GumrukBeyanname: gbn.Length > 0 ? gbn : null);
+        var sonuc = await GonderAsync(TurIthalat, istek, subeId, baglam,
+            null, null, null, null, adt ?? 1, urt, "", gbn, u, l ?? "", sn ?? "",
+            urt, skt, iptal);
+        return sonuc.Yanit;
+    }
+
+    /// <summary>KAYIP / HEK / Zayiat (s74): TUR zorunlu; DIGER'de açıklama şart.</summary>
+    public async Task<object> HekBildirAsync(string? uno, string? lotNo, string? seriNo,
+        decimal adet, string? tur, string? digerAciklama,
+        int? subeId, YazmaBaglami baglam, CancellationToken iptal)
+    {
+        var u = UtsDogrulama.Uno(uno);
+        var l = UtsDogrulama.LotNo(lotNo);
+        var sn = UtsDogrulama.SeriNo(seriNo);
+        var adt = UtsDogrulama.AdetKurali(sn, l, adet);
+        var t = (tur ?? "").Trim();
+        if (t.Length == 0)
+            throw GentegreHatasi.Dogrulama("Kayıp/HEK türü zorunludur.",
+                new AlanHatasi("tur", "HEK, DOGAL_AFET, YANGIN, CALINMA, STOK_DUZELTME, DIGER."));
+        var dta = (digerAciklama ?? "").Trim();
+        if (t == "DIGER" && dta.Length == 0)
+            throw GentegreHatasi.Dogrulama("Türü 'Diğer' ise açıklama zorunludur.",
+                new AlanHatasi("digerAciklama", "Gerekçeyi yazın."));
+        var istek = new UtsHekIstek(Uno: u, Tur: t, Lno: l, Sno: sn, Adt: adt,
+            DigerAciklama: dta.Length > 0 ? dta : null);
+        var sonuc = await GonderAsync(TurHek, istek, subeId, baglam,
+            null, null, null, null, adt ?? 1, null, "", "", u, l ?? "", sn ?? "",
+            null, null, iptal);
+        return sonuc.Yanit;
+    }
+
+    /// <summary>İMHA / Bertaraf (s83): gerekçe listesi + zorunlu imha belge no.</summary>
+    public async Task<object> ImhaBildirAsync(string? uno, string? lotNo, string? seriNo,
+        decimal adet, string? gerekce, string? digerAciklama, string? belgeNo,
+        int? subeId, YazmaBaglami baglam, CancellationToken iptal)
+    {
+        var u = UtsDogrulama.Uno(uno);
+        var l = UtsDogrulama.LotNo(lotNo);
+        var sn = UtsDogrulama.SeriNo(seriNo);
+        var adt = UtsDogrulama.AdetKurali(sn, l, adet);
+        var g = (gerekce ?? "").Trim();
+        if (g.Length == 0)
+            throw GentegreHatasi.Dogrulama("İmha gerekçesi zorunludur.",
+                new AlanHatasi("gerekce", "GRK listesinden bir değer seçin."));
+        var b = UtsDogrulama.BelgeNo(belgeNo);
+        var dga = (digerAciklama ?? "").Trim();
+        if (g == "DIGER" && dga.Length == 0)
+            throw GentegreHatasi.Dogrulama("Gerekçe 'Diğer' ise açıklama zorunludur.",
+                new AlanHatasi("digerAciklama", "Gerekçeyi yazın."));
+        var istek = new UtsImhaIstek(Uno: u, Gerekce: g, BelgeNo: b,
+            Lno: l, Sno: sn, Adt: adt,
+            DigerAciklama: dga.Length > 0 ? dga : null);
+        var sonuc = await GonderAsync(TurImha, istek, subeId, baglam,
+            null, null, null, null, adt ?? 1, null, "", b, u, l ?? "", sn ?? "",
+            null, null, iptal);
+        return sonuc.Yanit;
     }
 
     /// <summary>Ortak gönderim: kaydet(durum 0) → POST → sonucu yaz.</summary>

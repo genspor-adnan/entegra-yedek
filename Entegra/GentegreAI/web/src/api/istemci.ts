@@ -483,6 +483,14 @@ export const api = {
     gonder<UtsBildirimYaniti>('/api/uts/bildirim/verme', govde),
   utsKullanimBildir: (govde: Record<string, unknown>) =>
     gonder<UtsBildirimYaniti>('/api/uts/bildirim/kullanim', govde),
+  utsUretimBildir: (govde: Record<string, unknown>) =>
+    gonder<UtsBildirimYaniti>('/api/uts/bildirim/uretim', govde),
+  utsIthalatBildir: (govde: Record<string, unknown>) =>
+    gonder<UtsBildirimYaniti>('/api/uts/bildirim/ithalat', govde),
+  utsHekBildir: (govde: Record<string, unknown>) =>
+    gonder<UtsBildirimYaniti>('/api/uts/bildirim/hek', govde),
+  utsImhaBildir: (govde: Record<string, unknown>) =>
+    gonder<UtsBildirimYaniti>('/api/uts/bildirim/imha', govde),
   utsIptal: (id: number) =>
     gonder<UtsBildirimYaniti>(`/api/uts/bildirim/${id}/iptal`, {}),
   utsYenidenGonder: (id: number) =>

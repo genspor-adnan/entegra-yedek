@@ -10,6 +10,8 @@ import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
 import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
 import { UtsVermeModali, UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
+import { UtsGenelBildirimModali, type UtsBildirimTuru }
+  from '../bilesenler/uts/UtsGenelBildirimModali';
 import { UtsBelgeSonucModali } from '../bilesenler/uts/UtsBelgeSonucModali';
 import type { UtsBelgeBildirimYaniti } from '../api/istemci';
 import { dosyaIndirUrl } from '../bilesenler/indir';
@@ -70,6 +72,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     kurumUnvan: string; askiAdet: number; seriNo: string } | null>(null);
   const [utsVerme, setUtsVerme] = useState(false);
   const [utsKullanim, setUtsKullanim] = useState(false);
+  const [utsGenel, setUtsGenel] = useState<UtsBildirimTuru | null>(null);
   // Belge koprusu sonucu (226): satir satir verme/alma raporu.
   const [utsBelgeSonuc, setUtsBelgeSonuc] = useState<UtsBelgeBildirimYaniti | null>(null);
   // Donusum modali (F8): siparis/irsaliye satirlarindan yeni belge uretir.
@@ -485,6 +488,10 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         }
         case 'uts.verme':    setUtsVerme(true); return;
         case 'uts.kullanim': setUtsKullanim(true); return;
+        case 'uts.uretim':   setUtsGenel('uretim'); return;
+        case 'uts.ithalat':  setUtsGenel('ithalat'); return;
+        case 'uts.hek':      setUtsGenel('hek'); return;
+        case 'uts.imha':     setUtsGenel('imha'); return;
         case 'uts.senkron':
           await guvenli(async () => {
             const y = await api.utsAskidakilerSenkron();
@@ -636,8 +643,10 @@ Onaylıyor musunuz?`)) return;
       aksiyonEkrani={tanim.aksiyonEkrani}
       ebelgeMenusu={tanim.ebelgeMenusu}
       gizliKolonlar={tanim.gizliKolonlar}
+      aramaGorunumGizli={tanim.aramaGorunumGizli}
       kolonSirasi={tanim.kolonSirasi}
-      altSecenekler={{ ...KASA_ARAC_MENUSU, ...DONUSUM_MENUSU }}
+      altSecenekler={{ ...KASA_ARAC_MENUSU, ...DONUSUM_MENUSU,
+                       ...(tanim.altSecenekler ?? {}) }}
       yenile={yenile}
       odaklaSonEklenen={odaklaSonEklenen}
       icerikAlani={tanim.icerikAlani}
@@ -778,6 +787,13 @@ Onaylıyor musunuz?`)) return;
     )}
     {utsBelgeSonuc && (
       <UtsBelgeSonucModali sonuc={utsBelgeSonuc} onKapat={() => setUtsBelgeSonuc(null)} />
+    )}
+    {utsGenel && (
+      <UtsGenelBildirimModali
+        tur={utsGenel}
+        onKapat={() => setUtsGenel(null)}
+        onTamam={m => { setUtsGenel(null); mesaj(m); setYenile(t => t + 1) }}
+      />
     )}
     {utsVerme && (
       <UtsVermeModali

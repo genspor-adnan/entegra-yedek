@@ -276,12 +276,10 @@ public static class AksiyonKatalogu
             //   ayri aksiyon yetkileri (uts.iptal / uts.bildir).
             ["uts-bildirim-liste"] = new AksiyonTanimi[]
             {
-                // Elle bildirim formlari (F2): belge kopruden gelmeyen tekil
-                //   islemler icin.
-                new("uts.verme", "➤ Verme Bildirimi", "stok",
-                    Hedef: "araccubugu,palet", AksiyonYetkisi: "uts.bildir", Sira: 10),
-                new("uts.kullanim", "🧑‍⚕️ Kullanım Bildirimi", "stok",
-                    Hedef: "araccubugu,palet", AksiyonYetkisi: "uts.bildir", Sira: 12),
+                // Elle bildirim formlari: TEK "Bildirim" dugmesi, asagi acilir
+                //   menu (kullanici) - alt secenekler listeTanimlari'nda.
+                new("uts.bildirim-menu", "＋ Bildirim", "stok",
+                    Hedef: "araccubugu", AksiyonYetkisi: "uts.bildir", Sira: 10),
                 new("uts.detay", "ÜTS Detay Sorgula", "stok",
                     Hedef: "sagtus,palet", KaynakKodu: "uts", Islem: Islem.Gor,
                     KayitGerekir: true, Sira: 20),

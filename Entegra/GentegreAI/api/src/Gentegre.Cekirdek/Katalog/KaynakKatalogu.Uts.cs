@@ -26,7 +26,8 @@ public static partial class KaynakKatalogu
                                                                              Bicim: "dd.MM.yyyy HH:mm"),
             new("turAdi",
                 "case b.tur when 1 then 'Alma' when 2 then 'Verme' " +
-                "when 3 then 'Kullanım' else b.tur::text end",
+                "when 3 then 'Kullanım' when 4 then 'Üretim' when 5 then 'İthalat' " +
+                "when 6 then 'Kayıp/HEK' when 7 then 'İmha' else b.tur::text end",
                                                       "metin", "Türü",       Hizalama: "orta",
                                                                              Bicim: "rozet", Genislik: 90,
                                                                              Filtrelenebilir: false),

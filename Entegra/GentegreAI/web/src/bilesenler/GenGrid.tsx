@@ -77,6 +77,9 @@ interface Props {
   /** Arama + Liste/Grup/Analiz + toplu aksiyon seridini hic cizme (ör. Stok Ayarlari >
       Depolar): birkac satirlik ayar listesinde bu serit bilgi degil gurultu. */
   seritGizli?: boolean;
+  /** ☰/🕓/⭐ (Tum/Son/Sik) gorunum ikonlarini gizle (ör. ÜTS listeleri -
+      kart acma aliskanligi olmayan ekranlarda anlamsizlar). */
+  aramaGorunumGizli?: boolean;
   /** Gomulu gridin arac cubugu saga degil SOLA yaslanir (gridin sol ust kosesi). */
   aracCubuguSol?: boolean;
   /**
@@ -110,6 +113,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           aksiyonEkrani, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
                           dovizsizGizle,
                           gizliKolonlar, kolonSirasi, altSecenekler, tarihAlani, tarihVarsayilan,
+                          aramaGorunumGizli,
                           seciliBaslangicId, cipSonu, cipBaslangic,
                           onCipSecildi, onCipRota, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik }: Props) {
@@ -619,6 +623,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
           <div className={`durumseg${ebelgeKombo.length > 0 ? ' genis' : ''}`}>
             {/* Delphi'deki "Tum Liste / Son Aranan / Sik Aranan" (KULLANICI_ARAMA) -
                 kart acilis/ekleme sikligina gore sunucuda filtrelenir+siralanir. */}
+            {!aramaGorunumGizli && (<>
             <button
               className={`ikon-liste ${aramaGorunumu === 'tum' ? 'on' : ''}`}
               title={cev('Tüm Liste')}
@@ -640,6 +645,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
             >
               ⭐
             </button>
+            </>)}
             <span className="durumseg-ayrac" />
             {/* e-BELGEYE BAGLI CIPLER: sunucu ebelge aksiyonu dondurmuyorsa
                 (sube mukellef degil) hic cizilmez - tiklaninca bos ekran

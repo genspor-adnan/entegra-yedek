@@ -282,7 +282,8 @@ function SonucListesi({ kayitlar }: { kayitlar: Record<string, unknown>[] }) {
                     <button type="button" title="Grid menüsü"
                             style={{ padding: '0 6px', marginRight: 6,
                                      border: 'none', background: 'transparent',
-                                     cursor: 'pointer', fontWeight: 700 }}
+                                     cursor: 'pointer', fontWeight: 700,
+                                     fontSize: 15, lineHeight: 1 }}
                             onClick={e => {
                               e.stopPropagation();
                               const r = e.currentTarget.getBoundingClientRect();

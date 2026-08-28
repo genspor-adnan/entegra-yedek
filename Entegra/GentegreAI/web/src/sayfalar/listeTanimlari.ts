@@ -119,6 +119,10 @@ export interface ListeTanimi {
   tarihAlani?: string;
   /** Bu ekranda gizlenecek kolonlar (ör. Satis Faturalari'nda tur / turAdi). */
   gizliKolonlar?: string[];
+  /** ☰/🕓/⭐ (Tum/Son/Sik) ikonlarini gizle (ÜTS listeleri). */
+  aramaGorunumGizli?: boolean;
+  /** Arac cubugu dugmesine acilir alt menu: aksiyon kodu -> secenekler. */
+  altSecenekler?: Record<string, { kod: string; ad: string }[]>;
   /** Liste DEGIL, kendi sayfasi olan menu ogesi (ör. Stok Ayarları: sekmeli ekran).
       App.tsx rotayi kendisi tanimlar; buradaki `kaynak` yalnizca anahtar/rota icindir. */
   ozelSayfa?: boolean;
@@ -685,6 +689,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   Bildirimi Yap" ile alinir (askı adeti duser).
     kaynak: 'uts-envanter', baslik: 'ÜTS Askıdaki Ürünler',
     yol: 'Stok › ÜTS Askıdaki Ürünler', aksiyonEkrani: 'uts-envanter-liste',
+    aramaGorunumGizli: true,
     cipler: [
       { ad: 'Askıda',   filtre: { alan: 'durum', op: 'esit', deger: 1 } },
       { ad: 'Alındı',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
@@ -700,6 +705,18 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'uts-bildirim', baslik: 'ÜTS Bildirimleri',
     yol: 'Stok › ÜTS Bildirimleri', aksiyonEkrani: 'uts-bildirim-liste',
     tarihAlani: 'tarih', icerikAlani: 'cevapJson', icerikBaslik: 'ÜTS Cevabı',
+    aramaGorunumGizli: true,
+    // "＋ Bildirim" dugmesine asagi acilir menu (kullanici).
+    altSecenekler: {
+      'uts.bildirim-menu': [
+        { kod: 'uts.verme',    ad: '➤ Verme' },
+        { kod: 'uts.kullanim', ad: '🧑‍⚕️ Kullanım' },
+        { kod: 'uts.uretim',   ad: '🏭 Üretim' },
+        { kod: 'uts.ithalat',  ad: '🚢 İthalat' },
+        { kod: 'uts.hek',      ad: '⚠️ Kayıp / HEK' },
+        { kod: 'uts.imha',     ad: '🔥 İmha / Bertaraf' },
+      ],
+    },
     cipler: [
       { ad: 'Bekleyen', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
       { ad: 'Başarılı', filtre: { alan: 'durum', op: 'esit', deger: 1 } },

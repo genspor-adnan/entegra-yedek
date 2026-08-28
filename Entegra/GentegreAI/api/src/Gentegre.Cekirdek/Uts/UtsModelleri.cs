@@ -61,6 +61,49 @@ public sealed record UtsKullanimIstek(
     [property: JsonPropertyName("HAA")] string? HastaAdi = null,
     [property: JsonPropertyName("HAS")] string? HastaSoyadi = null);
 
+/// <summary>Üretim bildirimi (s24): ürün ÜTS'de bu bildirimle doğar.</summary>
+public sealed record UtsUretimIstek(
+    [property: JsonPropertyName("UNO")] string? Uno,
+    [property: JsonPropertyName("URT")] string? Urt,
+    [property: JsonPropertyName("LNO")] string? Lno = null,
+    [property: JsonPropertyName("SNO")] string? Sno = null,
+    [property: JsonPropertyName("ADT")] decimal? Adt = null,
+    [property: JsonPropertyName("SKT")] string? Skt = null);
+
+/// <summary>İthalat bildirimi (s27): + ülke kodları (ÜTS sayısal kod,
+/// Türkiye 792) ve isteğe bağlı gümrük beyannamesi.</summary>
+public sealed record UtsIthalatIstek(
+    [property: JsonPropertyName("UNO")] string? Uno,
+    [property: JsonPropertyName("URT")] string? Urt,
+    [property: JsonPropertyName("IEU")] int? IthalUlke,
+    [property: JsonPropertyName("MEU")] int? MenseiUlke,
+    [property: JsonPropertyName("LNO")] string? Lno = null,
+    [property: JsonPropertyName("SNO")] string? Sno = null,
+    [property: JsonPropertyName("ADT")] decimal? Adt = null,
+    [property: JsonPropertyName("SKT")] string? Skt = null,
+    [property: JsonPropertyName("GBN")] string? GumrukBeyanname = null);
+
+/// <summary>HEK / Zayiat (s74): TUR = HEK, DOGAL_AFET, YANGIN, CALINMA,
+/// STOK_DUZELTME, DIGER (DIGER'de DTA zorunlu).</summary>
+public sealed record UtsHekIstek(
+    [property: JsonPropertyName("UNO")] string? Uno,
+    [property: JsonPropertyName("TUR")] string? Tur,
+    [property: JsonPropertyName("LNO")] string? Lno = null,
+    [property: JsonPropertyName("SNO")] string? Sno = null,
+    [property: JsonPropertyName("ADT")] decimal? Adt = null,
+    [property: JsonPropertyName("DTA")] string? DigerAciklama = null);
+
+/// <summary>İmha / Bertaraf (s83): GRK gerekçe listesi + zorunlu imha belge
+/// numarası (BNO).</summary>
+public sealed record UtsImhaIstek(
+    [property: JsonPropertyName("UNO")] string? Uno,
+    [property: JsonPropertyName("GRK")] string? Gerekce,
+    [property: JsonPropertyName("BNO")] string? BelgeNo,
+    [property: JsonPropertyName("LNO")] string? Lno = null,
+    [property: JsonPropertyName("SNO")] string? Sno = null,
+    [property: JsonPropertyName("ADT")] decimal? Adt = null,
+    [property: JsonPropertyName("DGA")] string? DigerAciklama = null);
+
 /// <summary>Bildirim iptali (s96): BID = ÜTS bildirim GUID'i. Gövde yalnız bu.</summary>
 public sealed record UtsIptalIstek(
     [property: JsonPropertyName("BID")] string Bid);

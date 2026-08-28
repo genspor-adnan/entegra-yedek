@@ -23,6 +23,15 @@ public static class UtsUclari
         DateTime? Git, string? HastaTckn, string? HastaAdi, string? HastaSoyadi,
         int? StokId, int? SeriLotId, int? BelgeId, int? BelgeSatirId, int? SubeId);
     public sealed record SorguIstegi(string? Uno, string? LotNo, string? SeriNo, int? SubeId);
+    public sealed record UretimIstegi(string? Uno, string? LotNo, string? SeriNo, decimal? Adet,
+        DateTime? Urt, DateTime? Skt, int? SubeId);
+    public sealed record IthalatIstegi(string? Uno, string? LotNo, string? SeriNo, decimal? Adet,
+        DateTime? Urt, DateTime? Skt, int? IthalUlke, int? MenseiUlke,
+        string? GumrukBeyanname, int? SubeId);
+    public sealed record HekIstegi(string? Uno, string? LotNo, string? SeriNo, decimal? Adet,
+        string? Tur, string? DigerAciklama, int? SubeId);
+    public sealed record ImhaIstegi(string? Uno, string? LotNo, string? SeriNo, decimal? Adet,
+        string? Gerekce, string? DigerAciklama, string? BelgeNo, int? SubeId);
     public sealed record SenkronIstegi(int? SubeId);
 
     public static void UtsUclariniEkle(this IEndpointRouteBuilder yol)
@@ -107,6 +116,51 @@ public static class UtsUclari
                 istek.Uno, istek.LotNo, istek.SeriNo, istek.Adet ?? 0, istek.Git,
                 istek.HastaTckn, istek.HastaAdi, istek.HastaSoyadi,
                 istek.StokId, istek.SeriLotId, istek.BelgeId, istek.BelgeSatirId,
+                istek.SubeId ?? baglam.SubeId, baglam.Yazma, iptal));
+        });
+
+        grup.MapPost("/bildirim/uretim", async (UretimIstegi istek, BaglamCozucu cozucu,
+            UtsServisi servis, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("uts.bildir");
+            return Results.Ok(await servis.UretimBildirAsync(
+                istek.Uno, istek.LotNo, istek.SeriNo, istek.Adet ?? 0,
+                istek.Urt, istek.Skt,
+                istek.SubeId ?? baglam.SubeId, baglam.Yazma, iptal));
+        });
+
+        grup.MapPost("/bildirim/ithalat", async (IthalatIstegi istek, BaglamCozucu cozucu,
+            UtsServisi servis, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("uts.bildir");
+            return Results.Ok(await servis.IthalatBildirAsync(
+                istek.Uno, istek.LotNo, istek.SeriNo, istek.Adet ?? 0,
+                istek.Urt, istek.Skt, istek.IthalUlke, istek.MenseiUlke,
+                istek.GumrukBeyanname,
+                istek.SubeId ?? baglam.SubeId, baglam.Yazma, iptal));
+        });
+
+        grup.MapPost("/bildirim/hek", async (HekIstegi istek, BaglamCozucu cozucu,
+            UtsServisi servis, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("uts.bildir");
+            return Results.Ok(await servis.HekBildirAsync(
+                istek.Uno, istek.LotNo, istek.SeriNo, istek.Adet ?? 0,
+                istek.Tur, istek.DigerAciklama,
+                istek.SubeId ?? baglam.SubeId, baglam.Yazma, iptal));
+        });
+
+        grup.MapPost("/bildirim/imha", async (ImhaIstegi istek, BaglamCozucu cozucu,
+            UtsServisi servis, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("uts.bildir");
+            return Results.Ok(await servis.ImhaBildirAsync(
+                istek.Uno, istek.LotNo, istek.SeriNo, istek.Adet ?? 0,
+                istek.Gerekce, istek.DigerAciklama, istek.BelgeNo,
                 istek.SubeId ?? baglam.SubeId, baglam.Yazma, iptal));
         });
 
