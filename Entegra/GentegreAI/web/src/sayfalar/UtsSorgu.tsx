@@ -123,7 +123,7 @@ export function UtsSorgu() {
           )}
         </div>
 
-        <div className="kagrup" style={{ maxWidth: 980 }}>
+        <div className="kagrup">
           <h6>Sorgu</h6>
           {/* Izgara degil FLEX: editler dar (%35 kisik) ve SOLA yanasik
               (kullanici) - izgara kolonlari genise dagitiyordu. */}
