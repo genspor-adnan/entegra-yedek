@@ -47,14 +47,17 @@ returns table (kurum_no varchar, token text, test_mi boolean, url varchar)
 language sql stable as $$
     with h as (
         -- Önce İSTENEN şubenin kaydı, yoksa varsayılan şubenin kaydı.
+        -- "ÜTS Hesabı Aktif" ile "Test Ortamı" ekranda KARŞILIKLI DIŞLANAN
+        -- seçimdir (kullanıcı): test işaretliyken aktif kalkıktır - hesap
+        -- ikisinden biri işaretliyse kullanılabilir sayılır.
         select x.* from public.uts_hesap x
-         where x.aktif = 1
+         where (x.aktif = 1 or x.test_ortami = 1)
            and x.sube_id = coalesce(p_sube_id,
                  (select id from public.sube
                    where varsayilan = 1 and aktif = 1 order by id limit 1))
         union all
         select x.* from public.uts_hesap x
-         where x.aktif = 1
+         where (x.aktif = 1 or x.test_ortami = 1)
            and x.sube_id = (select id from public.sube
                              where varsayilan = 1 and aktif = 1 order by id limit 1)
         limit 1

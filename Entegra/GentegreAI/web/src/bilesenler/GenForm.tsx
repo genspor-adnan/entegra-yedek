@@ -692,6 +692,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
             { baslik: 'ÜTS Hesabı Test',
               alanlar: ['testOrtami', 'testKurumNo', 'testToken'] },
           ]}
+          // Canli/test SECIMDIR (kullanici): biri isaretlenince digeri kalkar.
+          dislar={{ aktif: ['testOrtami'], testOrtami: ['aktif'] }}
         />
       )}
 

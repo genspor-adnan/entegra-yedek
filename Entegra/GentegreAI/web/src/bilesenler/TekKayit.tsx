@@ -16,6 +16,9 @@ interface Props {
       ÜTS: solda canli hesap, sagda test hesabi). Listede olmayan alan
       cizilmez; not SON kutunun altina gider. */
   gruplar?: { baslik: string; alanlar: string[] }[];
+  /** Karsilikli dislanan onay kutulari: anahtar alan ISARETLENINCE listedeki
+      alanlar kaldirilir (or. ÜTS canli/test secimi radyo gibi davranir). */
+  dislar?: Record<string, string[]>;
 }
 
 /**
@@ -30,11 +33,16 @@ interface Props {
  * Kayit satiri yoksa BOS bir satir uzerinde calisilir; kullanici bir alani
  * doldurup Kaydet derse detay farkinda "eklenen" olarak gider.
  */
-export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, gruplar }: Props) {
+export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, gruplar,
+                           dislar }: Props) {
   const satir: Satir = durum.guncel[0] ?? {};
 
   const degis = (ad: string, deger: unknown) => {
     const yeniSatir = { ...satir, [ad]: deger };
+    // Karsilikli dislama: kutu ISARETLENIRKEN karsitlari kalkar (kaldirirken
+    //   dokunulmaz - ikisi de bos kalabilir).
+    if (deger === true && dislar?.[ad])
+      for (const karsit of dislar[ad]) yeniSatir[karsit] = false;
     const guncel = durum.guncel.length ? [yeniSatir, ...durum.guncel.slice(1)] : [yeniSatir];
     onDegis({ ...durum, guncel });
   };
