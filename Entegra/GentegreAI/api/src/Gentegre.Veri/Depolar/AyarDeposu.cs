@@ -37,6 +37,8 @@ public sealed class AyarDeposu
         //   (Kayit Kabul yalniz HBYS) ve mesaj basliklari buna gore degisir;
         //   giris yanitiyla istemciye tasinir.
         "genel.urun_modu",
+        // Varsayilan doviz (219) - genel.doviz kod listesinden secilir.
+        "genel.varsayilan_doviz",
         "belge.geri_gun_siniri",
         "liste.sayfa_boyu",
         "stok.negatif_davranis",
@@ -71,6 +73,7 @@ public sealed class AyarDeposu
     private static readonly Dictionary<string, int> MetinAyar = new()
     {
         ["genel.yerel_para"] = 5,        // ISO kodu: TL, USD, EUR...
+        ["genel.varsayilan_doviz"] = 5,
         ["belge.satis.varsayilan_seri"] = 10,
         ["belge.alis.varsayilan_seri"] = 10,
         ["efatura.uretim_url"] = 250,

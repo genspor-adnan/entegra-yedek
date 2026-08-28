@@ -53,8 +53,10 @@ export function GenelAyarlar() {
           <>
             <div className="kagrup">
               <h6>Genel</h6>
-              <div className="alan-izgara tek-sutun ayar-formu">
-                {alan('genel.yerel_para', 'Yerel para birimi', { tip: 'metin' })}
+              {/* ILK SATIR (kullanici): Urun modu | Yerel para | Doviz yan yana.
+                  Para/doviz combolari genel.doviz kod listesinden beslenir;
+                  ETIKETLERINE tiklaninca liste icerigi jenerik modalda yonetilir. */}
+              <div className="alan-izgara ayar-formu">
                 {/* Urun modu (215): menu/marka/mesaj basliklari buna gore.
                     Degisiklik acik oturumlara SONRAKI giris/yenilemede iner. */}
                 {alan('genel.urun_modu', 'Ürün modu', {
@@ -64,6 +66,8 @@ export function GenelAyarlar() {
                     { deger: '2', ad: 'GenoTIP AI (HBYS)' },
                   ],
                 })}
+                {alan('genel.yerel_para', 'Yerel para birimi', { listeKod: 'genel.doviz' })}
+                {alan('genel.varsayilan_doviz', 'Döviz', { listeKod: 'genel.doviz' })}
               </div>
             </div>
 

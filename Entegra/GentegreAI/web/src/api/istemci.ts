@@ -449,6 +449,17 @@ export const api = {
     gonder<{ ayarlar: AyarSatiri[] }>(`/api/ayar/${encodeURIComponent(anahtar)}`,
                                       { deger }, 'PUT').then(y => y.ayarlar),
 
+  // Kod listesi yonetimi (219) - ayar combolarinin icerigi.
+  kodListe: (kod: string) =>
+    istek<{ kod: string; degerler: { deger: number; ad: string; sira: number; aktif: number }[] }>(
+      `/api/kod-liste/${encodeURIComponent(kod)}`),
+  kodListeEkle: (kod: string, ad: string, sira?: number) =>
+    gonder<{ deger: number }>(`/api/kod-liste/${encodeURIComponent(kod)}`, { ad, sira }),
+  kodListeGuncelle: (kod: string, deger: number, govde: { ad: string; sira?: number; aktif?: number }) =>
+    gonder<object>(`/api/kod-liste/${encodeURIComponent(kod)}/${deger}`, govde, 'PUT'),
+  kodListeSil: (kod: string, deger: number) =>
+    gonder<object>(`/api/kod-liste/${encodeURIComponent(kod)}/${deger}`, undefined, 'DELETE'),
+
   // --------------------------------------------------------------- kasa ----
   kasaIslemTurleri: () =>
     istek<{ turler: KasaIslemTuru[] }>('/api/kasa-islem-turu').then(y => y.turler),

@@ -3,6 +3,7 @@ import { api } from '../api/istemci';
 import { ayarOnbellegiTemizle } from '../api/ayarlar';
 import { type AyarSatiri, hataMetni } from '../api/sozlesme';
 import { YardimIkonu } from './YardimIkonu';
+import { KodListesiModali } from './KodListesiModali';
 
 /**
  * Ayar ekranlarinin ortak kancasi: /api/ayar'i yukler, tek alan yazar, hata ve
@@ -54,12 +55,17 @@ export type AyarTipi = 'sayi' | 'metin' | 'mantik' | 'secenek' | 'parola' | 'uzu
  * degistigi anda yazilir. Tek alanlik ayarlara "Kaydet" dugmesi koymak
  * kullaniciyi bekletmekten baska ise yaramiyordu.
  */
-export function AyarAlani({ anahtar, etiket, tip = 'sayi', secenekler, ayarlar, onYaz, genis }: {
+export function AyarAlani({ anahtar, etiket, tip = 'sayi', secenekler, listeKod,
+                            ayarlar, onYaz, genis }: {
   anahtar: string;
   etiket: string;
   tip?: AyarTipi;
   /** tip='secenek' icin: [{ deger, ad }]. */
   secenekler?: { deger: string; ad: string }[];
+  /** Secenekleri kod listesinden cek (219): ayar degeri = deger ADI (or. 'TL').
+      Verilirse ETIKET tiklanabilir olur ve jenerik KodListesiModali'ni acar -
+      kullanici combo icerigini oradan ekler/siler/degistirir. */
+  listeKod?: string;
   ayarlar: AyarSatiri[];
   onYaz(anahtar: string, deger: string): void | Promise<void>;
   /** Metin alanini genis ciz (kisa kodlarda dar durur). */
@@ -69,6 +75,25 @@ export function AyarAlani({ anahtar, etiket, tip = 'sayi', secenekler, ayarlar, 
   const kayitliDeger = kayit?.deger ?? '';
   const [taslak, setTaslak] = useState<string | null>(null);
   const deger = taslak ?? kayitliDeger;
+
+  // Kod listesi secenekleri (219). Modal kapaninca `surum` artar, liste tazelenir.
+  const [listeSecenekleri, setListeSecenekleri] =
+    useState<{ deger: string; ad: string }[]>([]);
+  const [listeModal, setListeModal] = useState(false);
+  const [listeSurum, setListeSurum] = useState(0);
+  useEffect(() => {
+    if (!listeKod) return;
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.kodListe(listeKod);
+        if (!iptal)
+          setListeSecenekleri(y.degerler.filter(d => d.aktif === 1)
+            .map(d => ({ deger: d.ad, ad: d.ad })));
+      } catch { /* liste yoksa combo bos kalir */ }
+    })();
+    return () => { iptal = true };
+  }, [listeKod, listeSurum]);
 
   const yardim = (
     <YardimIkonu anahtar={`ayar.${anahtar}`}
@@ -98,15 +123,33 @@ export function AyarAlani({ anahtar, etiket, tip = 'sayi', secenekler, ayarlar, 
     );
   }
 
+  const secimListesi = listeKod ? listeSecenekleri : (secenekler ?? []);
+  const comboMu = tip === 'secenek' || !!listeKod;
+
   return (
     <label className="alan">
-      <span className="etiket">{etiket}</span>
+      {/* listeKod'lu comboda etiket TIKLANABILIR (kullanici): liste icerigi
+          jenerik modaldan yonetilir. */}
+      {listeKod ? (
+        <span className="etiket" role="button" tabIndex={0}
+              title="Liste içeriğini düzenle" style={{ cursor: 'pointer' }}
+              onClick={e => { e.preventDefault(); setListeModal(true) }}>
+          {etiket} ✎
+        </span>
+      ) : (
+        <span className="etiket">{etiket}</span>
+      )}
       <span className="ikili">
         {yardim}
-        {tip === 'secenek' ? (
+        {comboMu ? (
           <select value={deger}
                   onChange={e => { setTaslak(null); void onYaz(anahtar, e.target.value) }}>
-            {(secenekler ?? []).map(s => <option key={s.deger} value={s.deger}>{s.ad}</option>)}
+            {/* Kayitli deger listede yoksa (silinmis) yine gorunsun - combo
+                sessizce ilk secenege atlamasin. */}
+            {listeKod && deger && !secimListesi.some(s => s.deger === deger) && (
+              <option value={deger}>{deger}</option>
+            )}
+            {secimListesi.map(s => <option key={s.deger} value={s.deger}>{s.ad}</option>)}
           </select>
         ) : tip === 'uzunMetin' ? (
           // Sabit notlar gibi COK SATIRLI ayarlar: tek satirlik kutuda metnin
@@ -128,6 +171,11 @@ export function AyarAlani({ anahtar, etiket, tip = 'sayi', secenekler, ayarlar, 
                  onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />
         )}
       </span>
+
+      {listeKod && listeModal && (
+        <KodListesiModali kod={listeKod} baslik={etiket}
+          onKapat={() => { setListeModal(false); setListeSurum(t => t + 1) }} />
+      )}
     </label>
   );
 }

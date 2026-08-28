@@ -158,5 +158,6 @@ uygulama.BelgeUclariniEkle();
 uygulama.KasaUclariniEkle();
 uygulama.FiyatListesiUclariniEkle();
 uygulama.AksiyonUclariniEkle();
+uygulama.KodListeUclariniEkle();
 
 uygulama.Run();
