@@ -209,11 +209,13 @@ const KOLON_ONCELIK = [
   'UTP', 'UAK', 'olusturulmaTarihiString',
 ];
 
-/** LİSTE görünümü: kayıtlar satır, alanlar kolon - grid tablosu.
-    ⋮ menüsü: CSV kaydet + kolon göster/gizle (oturumluk). */
+/** LİSTE görünümü: kayıtlar satır, alanlar kolon - GenGrid diliyle:
+    başlığa tıklayınca SIRALAMA (▲/▼), sol baştaki ⋮ menüsünde CSV +
+    kolon göster/gizle (oturumluk). */
 function SonucListesi({ kayitlar }: { kayitlar: Record<string, unknown>[] }) {
   const [menuKonum, setMenuKonum] = useState<{ x: number; y: number } | null>(null);
   const [gizli, setGizli] = useState<Set<string>>(new Set());
+  const [sirala, setSirala] = useState<{ ad: string; yon: 1 | -1 } | null>(null);
 
   const tumKolonlar: string[] = [];
   const gorulen = new Set<string>();
@@ -226,9 +228,23 @@ function SonucListesi({ kayitlar }: { kayitlar: Record<string, unknown>[] }) {
       }
   const kolonlar = tumKolonlar.filter(ad => !gizli.has(ad));
 
+  // Yerel siralama: sayi kolonlari sayisal, digerleri metin (tr).
+  const sirali = sirala
+    ? [...kayitlar].sort((a, b) => {
+        const x = a[sirala.ad]; const y = b[sirala.ad];
+        const nx = Number(x); const ny = Number(y);
+        const c = !Number.isNaN(nx) && !Number.isNaN(ny) && x !== '' && y !== ''
+          ? nx - ny
+          : String(x ?? '').localeCompare(String(y ?? ''), 'tr');
+        return c * sirala.yon;
+      })
+    : kayitlar;
+  const siralaTikla = (ad: string) => setSirala(t =>
+    t?.ad === ad ? (t.yon === 1 ? { ad, yon: -1 } : null) : { ad, yon: 1 });
+
   const csvIndir = () => {
     const bas = kolonlar.map(ad => AD_SOZLUGU[ad] ?? ad).join(';');
-    const govde = kayitlar.map(k =>
+    const govde = sirali.map(k =>
       kolonlar.map(ad => bicimle(k[ad]).replace(/;/g, ',')).join(';')).join('\n');
     const url = URL.createObjectURL(new Blob(['﻿' + bas + '\n' + govde],
       { type: 'text/csv;charset=utf-8' }));
@@ -252,21 +268,32 @@ function SonucListesi({ kayitlar }: { kayitlar: Record<string, unknown>[] }) {
 
   return (
     <div className="kagrup">
-      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '4px 6px 0' }}>
-        <button type="button" className="d" title="Grid menüsü"
-                onClick={e => {
-                  const r = e.currentTarget.getBoundingClientRect();
-                  setMenuKonum(menuKonum ? null : { x: r.left - 160, y: r.bottom + 4 });
-                }}>⋮</button>
-      </div>
       <div style={{ overflowX: 'auto' }}>
         <table className="grid">
           <thead>
-            <tr>{kolonlar.map(ad => <th key={ad}>{AD_SOZLUGU[ad] ?? ad}</th>)}</tr>
+            <tr>
+              {/* ⋮ SOL BASTA (kullanici) - GenGrid'deki kolon menusuyle ayni yer. */}
+              <th style={{ width: 30, textAlign: 'center' }}>
+                <button type="button" className="d" title="Grid menüsü"
+                        style={{ padding: '0 6px' }}
+                        onClick={e => {
+                          const r = e.currentTarget.getBoundingClientRect();
+                          setMenuKonum(menuKonum ? null : { x: r.left, y: r.bottom + 4 });
+                        }}>⋮</button>
+              </th>
+              {kolonlar.map(ad => (
+                <th key={ad} style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    onClick={() => siralaTikla(ad)}>
+                  {AD_SOZLUGU[ad] ?? ad}
+                  {sirala?.ad === ad && (sirala.yon === 1 ? ' ▲' : ' ▼')}
+                </th>
+              ))}
+            </tr>
           </thead>
           <tbody>
-            {kayitlar.map((k, i) => (
+            {sirali.map((k, i) => (
               <tr key={i}>
+                <td />
                 {kolonlar.map(ad => <td key={ad}>{bicimle(k[ad])}</td>)}
               </tr>
             ))}
