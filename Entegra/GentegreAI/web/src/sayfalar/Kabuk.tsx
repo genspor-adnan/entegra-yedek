@@ -316,7 +316,7 @@ export function Kabuk() {
               <span>{cm('Ana Sayfa')}</span>
             </NavLink>
 
-            <div className="bolum">{cm('Calisma alani')}</div>
+            {/* "Calisma alani" bolum basligi kaldirildi (kullanici). */}
             {satirlar.map(s => s.tur === 'duz' ? (
               <NavLink
                 key={s.m.yol}
