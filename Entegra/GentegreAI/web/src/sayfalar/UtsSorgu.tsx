@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import type { UtsMesaji, UtsSorguYaniti } from '../api/istemci';
+import { GridMenu, type MenuOgesi } from '../bilesenler/grid/GridMenu';
+import { dosyaIndirUrl } from '../bilesenler/indir';
 
 /**
  * ÜTS ÜRÜN SORGU (223) - UNO/LNO/SNO ile ÜTS'den canlı tekil ürün sorgusu.
@@ -17,6 +19,11 @@ export function UtsSorgu() {
   //   KART = anahtar/deger dokumu (tek kaydin tum alanlari).
   const [gorunum, setGorunum] = useState<'liste' | 'kart'>('liste');
   const [yanit, setYanit] = useState<UtsSorguYaniti | null>(null);
+
+  // ÜTS "bulunamadı"yı HATA degil BOS DIZI olarak dondurur (canlıda görüldü).
+  const kayitlar = (Array.isArray(yanit?.sonuc)
+    ? yanit!.sonuc : yanit?.sonuc != null ? [yanit.sonuc] : []) as Record<string, unknown>[];
+  const toplamAdet = kayitlar.reduce((a, k) => a + (Number(k.ADT ?? k.adet) || 0), 0);
   const [hata, setHata] = useState('');
   const [hesap, setHesap] = useState<{ kurumNo: string; testMi: boolean;
     url: string; tokenVar: boolean; tokenSonu: string } | null>(null);
@@ -107,11 +114,18 @@ export function UtsSorgu() {
                   onClick={() => setGorunum('liste')}>☰ Liste</button>
           <button type="button" className={`cip${gorunum === 'kart' ? ' on' : ''}`}
                   onClick={() => setGorunum('kart')}>🗂 Kart</button>
+          {/* Sayac ciplerin SAGINDA (kullanici). */}
+          {kayitlar.length > 0 && (
+            <span style={{ alignSelf: 'center', fontSize: 12 }}>
+              <b>{kayitlar.length}</b> kayıt listelendi
+              {toplamAdet > 0 && <> · toplam adet <b>{toplamAdet}</b></>}
+            </span>
+          )}
         </div>
 
         <div className="kagrup" style={{ maxWidth: 980 }}>
           <h6>Sorgu</h6>
-          <form className="alan-izgara dort-sutun" onSubmit={sorgula}>
+          <form id="uts-sorgu-form" className="alan-izgara" onSubmit={sorgula}>
             <label className="alan">
               <span className="etiket zorunlu-isaret">Ürün No (UNO)</span>
               <input value={uno} maxLength={23} autoFocus
@@ -125,57 +139,38 @@ export function UtsSorgu() {
               <span className="etiket">Seri No (SNO)</span>
               <input value={seriNo} maxLength={20} onChange={e => setSeriNo(e.target.value)} />
             </label>
-            <label className="alan">
-              <span className="etiket">&nbsp;</span>
-              {/* ikili degil duz flex: buton metni hucrede kirpiliyordu. */}
-              <span style={{ display: 'flex', gap: 6, whiteSpace: 'nowrap' }}>
-                <button type="submit" className="d bir" disabled={sorguluyor}>
-                  {sorguluyor ? 'Sorgulanıyor…' : '🔍 ÜTS’de Sorgula'}
-                </button>
-                <button type="button" className="d" disabled={sorguluyor}
-                        title="Deneysel ayrıntılı tekil ürün servisi"
-                        onClick={() => void ayrintili()}>
-                  Ayrıntılı
-                </button>
-              </span>
-            </label>
           </form>
+          {/* Butonlar izgara HUCRESINDE degil (kirpiliyordu) - kutunun altinda
+              kendi satirlarinda; submit form="..." ile forma bagli. */}
+          <div style={{ display: 'flex', gap: 6, padding: '0 10px 10px' }}>
+            <button type="submit" form="uts-sorgu-form" className="d bir"
+                    disabled={sorguluyor}>
+              {sorguluyor ? 'Sorgulanıyor…' : '🔍 ÜTS’de Sorgula'}
+            </button>
+            <button type="button" className="d" disabled={sorguluyor}
+                    title="Deneysel ayrıntılı tekil ürün servisi"
+                    onClick={() => void ayrintili()}>
+              Ayrıntılı
+            </button>
+          </div>
         </div>
 
         {hata && <div className="hata-kutusu">{hata}</div>}
 
-        {yanit && (() => {
-          // ÜTS "bulunamadı"yı HATA degil BOS DIZI olarak dondurur (canlıda
-          //   görüldü) - bos liste sessizce hic bir sey cizmiyordu.
-          const kayitlar = Array.isArray(yanit.sonuc)
-            ? yanit.sonuc : yanit.sonuc != null ? [yanit.sonuc] : [];
-          return (
-            <div>
-              <MesajListesi mesajlar={yanit.mesajlar} />
-              {kayitlar.length > 0 ? (
-                <>
-                  <div className="bilgi-kutusu">
-                    <b>{kayitlar.length}</b> kayıt listelendi
-                    {(() => {
-                      const t = (kayitlar as Record<string, unknown>[])
-                        .reduce((a, k) => a + (Number(k.ADT ?? k.adet) || 0), 0);
-                      return t > 0 ? <> · toplam adet <b>{t}</b></> : null;
-                    })()}
-                  </div>
-                  {gorunum === 'liste'
-                    ? <SonucListesi kayitlar={kayitlar as Record<string, unknown>[]} />
-                    : <SonucKarti sonuc={kayitlar} />}
-                </>
-              ) : yanit.basarili ? (
-                <div className="bilgi-kutusu">
-                  ÜTS'de bu ölçütlerle tekil ürün kaydı bulunamadı. (Tekil ürün
-                  sorgusu SERİ ya da LOT numarasıyla birlikte daha isabetlidir;
-                  yalnız ürün no ile genellikle boş döner.)
-                </div>
-              ) : null}
-            </div>
-          );
-        })()}
+        {yanit && (
+          <div>
+            <MesajListesi mesajlar={yanit.mesajlar} />
+            {kayitlar.length > 0 ? (
+              gorunum === 'liste'
+                ? <SonucListesi kayitlar={kayitlar} />
+                : <SonucKarti sonuc={kayitlar} />
+            ) : yanit.basarili ? (
+              <div className="bilgi-kutusu">
+                ÜTS'de bu ölçütlerle tekil ürün kaydı bulunamadı.
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
     </>
   );
@@ -206,19 +201,56 @@ const KOLON_ONCELIK = [
   'UTP', 'UAK', 'olusturulmaTarihiString',
 ];
 
-/** LİSTE görünümü: kayıtlar satır, alanlar kolon - grid tablosu. */
+/** LİSTE görünümü: kayıtlar satır, alanlar kolon - grid tablosu.
+    ⋮ menüsü: CSV kaydet + kolon göster/gizle (oturumluk). */
 function SonucListesi({ kayitlar }: { kayitlar: Record<string, unknown>[] }) {
-  const kolonlar: string[] = [];
+  const [menuKonum, setMenuKonum] = useState<{ x: number; y: number } | null>(null);
+  const [gizli, setGizli] = useState<Set<string>>(new Set());
+
+  const tumKolonlar: string[] = [];
   const gorulen = new Set<string>();
   for (const ad of KOLON_ONCELIK)
-    if (kayitlar.some(k => k[ad] != null)) { kolonlar.push(ad); gorulen.add(ad); }
+    if (kayitlar.some(k => k[ad] != null)) { tumKolonlar.push(ad); gorulen.add(ad); }
   for (const k of kayitlar)
     for (const ad of Object.keys(k))
       if (!gorulen.has(ad) && !GIZLI_ALANLAR.has(ad) && k[ad] != null) {
-        kolonlar.push(ad); gorulen.add(ad);
+        tumKolonlar.push(ad); gorulen.add(ad);
       }
+  const kolonlar = tumKolonlar.filter(ad => !gizli.has(ad));
+
+  const csvIndir = () => {
+    const bas = kolonlar.map(ad => AD_SOZLUGU[ad] ?? ad).join(';');
+    const govde = kayitlar.map(k =>
+      kolonlar.map(ad => bicimle(k[ad]).replace(/;/g, ',')).join(';')).join('\n');
+    const url = URL.createObjectURL(new Blob(['﻿' + bas + '\n' + govde],
+      { type: 'text/csv;charset=utf-8' }));
+    dosyaIndirUrl(url, 'uts-sorgu.csv', true);
+  };
+
+  const menuOgeleri: MenuOgesi[] = [
+    { ik: '📄', ad: 'CSV Kaydet', fn: csvIndir },
+    ...tumKolonlar.map((ad, i) => ({
+      ik: gizli.has(ad) ? '○' : '●',
+      ad: AD_SOZLUGU[ad] ?? ad,
+      secili: !gizli.has(ad),
+      ayrac: i === 0,
+      fn: () => setGizli(t => {
+        const y = new Set(t);
+        if (y.has(ad)) y.delete(ad); else if (kolonlar.length > 1) y.add(ad);
+        return y;
+      }),
+    })),
+  ];
+
   return (
     <div className="kagrup">
+      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '4px 6px 0' }}>
+        <button type="button" className="d" title="Grid menüsü"
+                onClick={e => {
+                  const r = e.currentTarget.getBoundingClientRect();
+                  setMenuKonum(menuKonum ? null : { x: r.left - 160, y: r.bottom + 4 });
+                }}>⋮</button>
+      </div>
       <div style={{ overflowX: 'auto' }}>
         <table className="grid">
           <thead>
@@ -233,6 +265,8 @@ function SonucListesi({ kayitlar }: { kayitlar: Record<string, unknown>[] }) {
           </tbody>
         </table>
       </div>
+      <GridMenu konum={menuKonum} ogeler={menuOgeleri}
+                onKapat={() => setMenuKonum(null)} />
     </div>
   );
 }
