@@ -101,7 +101,16 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, grupla
         {ustAlanlar && ustAlanlar.length > 0 && (
           <div className="alan-izgara dort-sutun" style={{ marginBottom: 8 }}>
             {ustAlanlar.map(ad => bul.get(ad)).filter((a): a is KartAlanMeta => !!a)
-              .map(alanCiz)}
+              .map(a => (
+                <label key={a.ad} className={`alan tip-${a.tip}`}>
+                  {/* Etiket TEK SATIR (kullanici): dar etiket kolonu
+                      "Baz Alınacak Şube"yi ikiye kiriyordu. */}
+                  <span className="etiket" style={{ whiteSpace: 'nowrap' }}>
+                    {a.baslik}
+                  </span>
+                  {girdi(a)}
+                </label>
+              ))}
           </div>
         )}
         <div className="kasira">

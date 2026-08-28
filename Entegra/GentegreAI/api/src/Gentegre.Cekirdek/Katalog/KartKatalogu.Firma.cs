@@ -127,10 +127,16 @@ public static partial class KartKatalogu
             // KIMLIK KAYNAGI (169): sube kendi VKN'siyle mi gonderiyor, merkezin
             //   kimligiyle mi. Alias ve Mersis/sicil de bu secimi izler - GIB posta
             //   kutusu VKN'ye bagli oldugu icin ikisi ayrilamaz.
-            new("ebelgeKimlik", "ebelge_kimlik", "kod", KodListesi: "sube.ebelge_kimlik",
-                Baslik: "Gönderici Kimliği", Grup: "e-Belge", AltGrup: "Gönderici"),
+            // GONDERICI KIMLIGI combosunun YERINI "Baz Alınacak Şube" aldi
+            //   (kullanici, 228): Kendisi = kendi kimligi; sube secilirse o
+            //   subenin kimligi + KENDI adresi. ebelge_kimlik kodu artik
+            //   ekranda yok, trigger ust_sube_id'den turetir (1 kendi / 3
+            //   baz kimlik + sube adresi) - eski "2" kayitlari korunur.
             new("ustSubeId",    "ust_sube_id",   "kod", KodTablosu: "public.sube",
                 Baslik: "Baz Alınacak Şube", Grup: "e-Belge", AltGrup: "Gönderici"),
+            new("ebelgeKimlik", "ebelge_kimlik", "kod", KodListesi: "sube.ebelge_kimlik",
+                Baslik: "Gönderici Kimliği", Grup: "e-Belge", AltGrup: "Gönderici",
+                Gizli: true),
             // MUKELLEF HESABI (171): entegrator baglantisi mukellefe aittir -
             //   ayri VKN'li sube ayri kullanici/sifre ile baglanir. Onceden firma
             //   geneli ayardaydi, cok mukellefli kurulum mumkun degildi.

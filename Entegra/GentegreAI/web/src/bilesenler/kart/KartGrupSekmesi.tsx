@@ -416,15 +416,19 @@ return (
         );
       }
       return (
-        <GenDetayTablo
-          meta={depoDetay}
-          durum={detaylar[depoDetay.ad] ?? bosDetay()}
-          saltOkunur={salt || depoDetay.saltOkunur}
-          hatalar={alanHatalari}
-          onDegis={yeni => setDetaylar(t => ({ ...t, [depoDetay.ad]: yeni }))}
-          ikonlu
-          modalDuzenle
-        />
+        /* ~6 satirlik yukseklik, fazlasi dikey scroll (kullanici) - cok
+           depolu subede sekme uzayip kartin altini itiyordu. */
+        <div style={{ maxHeight: 268, overflowY: 'auto' }}>
+          <GenDetayTablo
+            meta={depoDetay}
+            durum={detaylar[depoDetay.ad] ?? bosDetay()}
+            saltOkunur={salt || depoDetay.saltOkunur}
+            hatalar={alanHatalari}
+            onDegis={yeni => setDetaylar(t => ({ ...t, [depoDetay.ad]: yeni }))}
+            ikonlu
+            modalDuzenle
+          />
+        </div>
       );
     })()}
     {kaynak === 'cari' && aktif.baslik === 'Genel' && !yeniMi
