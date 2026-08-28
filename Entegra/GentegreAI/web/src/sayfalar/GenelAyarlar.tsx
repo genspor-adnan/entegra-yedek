@@ -3,9 +3,10 @@ import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
 import { NumaralamaSekmesi } from '../bilesenler/NumaralamaSekmesi';
 
 const SEKMELER = [
+  // Guvenlik 2. sirada (kullanici).
   { anahtar: 'genel',      baslik: 'Genel' },
-  { anahtar: 'numaralama', baslik: 'Belge No' },
   { anahtar: 'guvenlik',   baslik: 'Güvenlik' },
+  { anahtar: 'numaralama', baslik: 'Belge No' },
 ] as const;
 
 type Sekme = typeof SEKMELER[number]['anahtar'];
@@ -53,10 +54,14 @@ export function GenelAyarlar() {
           <>
             <div className="kagrup">
               <h6>Genel</h6>
-              {/* ILK SATIR (kullanici): Urun modu | Yerel para | Doviz yan yana.
-                  Para/doviz combolari genel.doviz kod listesinden beslenir;
-                  ETIKETLERINE tiklaninca liste icerigi jenerik modalda yonetilir. */}
-              <div className="alan-izgara ayar-formu">
+              {/* ILK SATIR (kullanici): Urun modu | Yerel para | Doviz yan yana
+                  ama AYRIK - sabit genislikli kolonlar + genis bosluk; tam
+                  genislik 1fr kolonlar editleri bitistiriyordu. Para/doviz
+                  combolari genel.doviz kod listesinden; ETIKETLERINE
+                  tiklaninca liste icerigi jenerik modalda yonetilir. */}
+              <div className="alan-izgara ayar-formu"
+                   style={{ gridTemplateColumns: 'repeat(auto-fill, 240px)',
+                            columnGap: 56, justifyContent: 'start' }}>
                 {/* Urun modu (215): menu/marka/mesaj basliklari buna gore.
                     Degisiklik acik oturumlara SONRAKI giris/yenilemede iner. */}
                 {alan('genel.urun_modu', 'Ürün modu', {

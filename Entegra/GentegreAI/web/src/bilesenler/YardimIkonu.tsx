@@ -13,12 +13,16 @@ import { api } from '../api/istemci';
  *    acilirken onlarca yardim metni indirmemek icin tembel yukleme).
  *
  * Metni olmayan anahtarda ikon HIC gorunmez: bos balon acan bir "?" gurultudur.
+ * Istisna `hepGoster` (kullanici, ayar ekranlari): ikon metinsiz de durur -
+ * balon "Açıklama yok." der; metin sonradan help tablosuna girilebilir.
  */
-export function YardimIkonu({ anahtar, baslik, metin }: {
+export function YardimIkonu({ anahtar, baslik, metin, hepGoster }: {
   anahtar: string;
   baslik?: string;
   /** Onceden yuklenmis metin. Bos string = "metin yok" -> ikon gizlenir. */
   metin?: string;
+  /** Metin olmasa da ikonu goster (ayar alanlarinin varsayilani). */
+  hepGoster?: boolean;
 }) {
   const [acik, setAcik] = useState(false);
   /** Balonun ekran koordinati - asagi bak. */
@@ -51,7 +55,7 @@ export function YardimIkonu({ anahtar, baslik, metin }: {
 
   // metin prop'u VERILMISSE (bos olsa da) sunucuya gidilmez: cagiran zaten biliyor.
   const propVar = metin !== undefined;
-  if (propVar && !metin) return null;
+  if (propVar && !metin && !hepGoster) return null;
 
   const gosterilen = propVar
     ? { baslik: baslik ?? '', metin: metin ?? '' }

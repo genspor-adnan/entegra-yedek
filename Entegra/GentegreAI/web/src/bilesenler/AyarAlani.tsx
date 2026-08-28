@@ -96,9 +96,11 @@ export function AyarAlani({ anahtar, etiket, tip = 'sayi', secenekler, listeKod,
   }, [listeKod, listeSurum]);
 
   const yardim = (
+    // hepGoster (kullanici): her ayarin solunda "?" varsayilan olarak durur -
+    //   metinsizse balon "Açıklama yok." der.
     <YardimIkonu anahtar={`ayar.${anahtar}`}
                  baslik={kayit?.yardimBaslik}
-                 metin={kayit?.yardim} />
+                 metin={kayit?.yardim} hepGoster />
   );
 
   const bitir = (v: string) => {
