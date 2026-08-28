@@ -10,6 +10,8 @@ import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
 import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
 import { UtsVermeModali, UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
+import { UtsBelgeSonucModali } from '../bilesenler/uts/UtsBelgeSonucModali';
+import type { UtsBelgeBildirimYaniti } from '../api/istemci';
 import { dosyaIndirUrl } from '../bilesenler/indir';
 import { ebelgeCiktisi } from './ebelgeIslem';
 import { gelenBelgeAksiyonu } from './gelenBelgeIslem';
@@ -68,6 +70,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     kurumUnvan: string; askiAdet: number; seriNo: string } | null>(null);
   const [utsVerme, setUtsVerme] = useState(false);
   const [utsKullanim, setUtsKullanim] = useState(false);
+  // Belge koprusu sonucu (226): satir satir verme/alma raporu.
+  const [utsBelgeSonuc, setUtsBelgeSonuc] = useState<UtsBelgeBildirimYaniti | null>(null);
   // Donusum modali (F8): siparis/irsaliye satirlarindan yeni belge uretir.
   /** Mesaj gecmisi penceresi (178) - null iken kapali. */
   const [eBelgeMesajlari, setEBelgeMesajlari] =
@@ -468,6 +472,17 @@ Bu işlem geri alınamaz. `
           return;
 
         // ÜTS (223): senkron + alma + iptal + yeniden gonder + detay.
+        case 'belge.uts-bildir': {
+          if (!satir) return;
+          if (!await onay(`"${String(satir.belgeNo ?? satir.id)}" belgesinin seri/lot satırları ÜTS'ye bildirilecek.
+
+Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor musunuz?`)) return;
+          await guvenli(async () => {
+            setUtsBelgeSonuc(await api.utsBelgedenBildir(Number(satir.id)));
+            setYenile(t => t + 1);
+          });
+          return;
+        }
         case 'uts.verme':    setUtsVerme(true); return;
         case 'uts.kullanim': setUtsKullanim(true); return;
         case 'uts.senkron':
@@ -760,6 +775,9 @@ Onaylıyor musunuz?`)) return;
         onKapat={() => setIceriAl(null)}
         onAlindi={() => setYenile(t => t + 1)}
       />
+    )}
+    {utsBelgeSonuc && (
+      <UtsBelgeSonucModali sonuc={utsBelgeSonuc} onKapat={() => setUtsBelgeSonuc(null)} />
     )}
     {utsVerme && (
       <UtsVermeModali

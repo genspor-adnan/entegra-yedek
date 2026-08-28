@@ -163,7 +163,7 @@ public sealed class UtsServisi
     }
 
     /// <summary>Ortak gönderim: kaydet(durum 0) → POST → sonucu yaz.</summary>
-    private async Task<(bool Basarili, object Yanit)> GonderAsync<T>(
+    private async Task<(bool Basarili, string Mesaj, object Yanit)> GonderAsync<T>(
         short tur, T istek, int? subeId, YazmaBaglami baglam,
         int? stokId, int? seriLotId, int? belgeId, int? belgeSatirId,
         decimal adet, DateTime? git,
@@ -190,15 +190,16 @@ public sealed class UtsServisi
         await _depo.SonucYazAsync(bildirimId, (short)(basarili ? 1 : 2),
             snc ?? "", cevap, httpKodu, kod, mesaj, baglam, iptal);
 
-        return (basarili, new
+        var ozet = basarili
+            ? $"ÜTS {Turler[tur].Ad} bildirimi başarılı."
+            : (mesaj.Length > 0 ? mesaj : "ÜTS bildirimi reddetti.");
+        return (basarili, ozet, new
         {
             bildirimId,
             basarili,
             utsBildirimId = snc ?? "",
             mesajlar,
-            mesaj = basarili
-                ? $"ÜTS {Turler[tur].Ad} bildirimi başarılı."
-                : (mesaj.Length > 0 ? mesaj : "ÜTS bildirimi reddetti.")
+            mesaj = ozet
         });
     }
 
@@ -331,6 +332,116 @@ public sealed class UtsServisi
         catch (JsonException) { }
         return new { basarili = httpKodu == 200 && mesajlar.All(m => m.Tip != "HATA"),
                      sonuc = snc, mesajlar };
+    }
+
+    // -------------------------------------------------- belge köprüsü (226) ----
+
+    public sealed record BelgeBildirimSonucu(string Stok, string SeriNo, string LotNo,
+        decimal Adet, string Islem, bool Basarili, string Mesaj);
+
+    /// <summary>
+    /// Belgeden toplu ÜTS bildirimi: SATIŞ belgesinde (14/15/16) her seri/lot
+    /// için VERME, ALIŞ belgesinde (10/11/12) askıdaki envanterle eşleştirip
+    /// ALMA. Sonuç satır satır raporlanır - bir satırın hatası diğerlerini
+    /// durdurmaz. Daha önce bildirilmiş (bekleyen/başarılı) seri/lot atlanır.
+    /// </summary>
+    public async Task<object> BelgedenBildirAsync(int belgeId, YazmaBaglami baglam,
+        CancellationToken iptal)
+    {
+        var b = await _depo.BelgeOzetAsync(belgeId, iptal);
+        var satisMi = b.Tur is 14 or 15 or 16;
+        var alisMi = b.Tur is 10 or 11 or 12;
+        if (!satisMi && !alisMi)
+            throw GentegreHatasi.IsKurali(
+                "ÜTS bildirimi yalnız alış/satış irsaliye, fatura ve fişlerinden yapılır.");
+
+        var tur = satisMi ? TurVerme : TurAlma;
+        var izlemler = await _depo.BelgeIzlemleriAsync(belgeId, tur, iptal);
+        if (izlemler.Count == 0)
+            throw GentegreHatasi.IsKurali(
+                "Belgede seri/lot izlemi yok - ÜTS bildirimi seri/lot takipli kalemlerden yapılır.");
+        if (satisMi && b.TarafUtsNo.Length == 0)
+            throw GentegreHatasi.IsKurali(
+                $"\"{b.TarafUnvan}\" carisinin ÜTS Kurum No'su boş. "
+                + "Cari kartı › Fatura Bilgileri › ÜTS Kurum No alanına girin.");
+
+        var sonuclar = new List<BelgeBildirimSonucu>();
+        foreach (var i in izlemler)
+        {
+            var islemAdi = satisMi ? "Verme" : "Alma";
+            try
+            {
+                if (i.Bildirildi)
+                {
+                    sonuclar.Add(new(i.StokAdi, i.SeriNo, i.LotNo, i.Adet, islemAdi,
+                        true, "Daha önce bildirilmiş - atlandı."));
+                    continue;
+                }
+                if (satisMi)
+                    sonuclar.Add(await SatirVermeAsync(i));
+                else
+                    sonuclar.Add(await SatirAlmaAsync(i));
+            }
+            catch (GentegreHatasi h)
+            {
+                sonuclar.Add(new(i.StokAdi, i.SeriNo, i.LotNo, i.Adet, islemAdi,
+                    false, h.Message));
+            }
+        }
+
+        var basarili = sonuclar.Count(x => x.Basarili);
+        return new
+        {
+            belgeNo = b.BelgeNo,
+            toplam = sonuclar.Count,
+            basarili,
+            hatali = sonuclar.Count - basarili,
+            sonuclar,
+            mesaj = $"{b.BelgeNo}: {basarili}/{sonuclar.Count} satır bildirildi."
+        };
+
+        async Task<BelgeBildirimSonucu> SatirVermeAsync(UtsDeposu.BelgeIzlemSatiri i)
+        {
+            if (i.UrunNo.Length == 0)
+                return new(i.StokAdi, i.SeriNo, i.LotNo, i.Adet, "Verme", false,
+                    "Stok kartında ÜTS ürün no (GTIN) boş.");
+            var adt = UtsDogrulama.AdetKurali(i.SeriNo, i.LotNo, i.Adet);
+            var istek = new UtsVermeIstek(
+                Uno: i.UrunNo, Kun: b.TarafUtsNo, Bno: b.BelgeNo,
+                Lno: i.LotNo.Length > 0 ? i.LotNo : null,
+                Sno: i.SeriNo.Length > 0 ? i.SeriNo : null,
+                Adt: adt,
+                Git: b.BelgeTarihi.ToString("yyyy-MM-dd",
+                    System.Globalization.CultureInfo.InvariantCulture));
+            var sonuc = await GonderAsync(TurVerme, istek, b.SubeId, baglam,
+                i.StokId, i.SeriLotId, belgeId, i.BelgeSatirId, adt ?? 1, b.BelgeTarihi,
+                b.TarafUtsNo, b.BelgeNo, i.UrunNo, i.LotNo, i.SeriNo, null, null, iptal);
+            return new(i.StokAdi, i.SeriNo, i.LotNo, i.Adet, "Verme",
+                sonuc.Basarili, sonuc.Mesaj);
+        }
+
+        async Task<BelgeBildirimSonucu> SatirAlmaAsync(UtsDeposu.BelgeIzlemSatiri i)
+        {
+            var varyantlar = i.UrunNo.Length > 0
+                ? UtsDogrulama.UnoVaryantlari(i.UrunNo) : Array.Empty<string>();
+            var es = varyantlar.Length > 0
+                ? await _depo.EnvanterEsleAsync(b.SubeId, varyantlar, i.SeriNo, i.LotNo, iptal)
+                : null;
+            if (es is null)
+                return new(i.StokAdi, i.SeriNo, i.LotNo, i.Adet, "Alma", false,
+                    "Askıdakilerde eşleşme yok - önce \"Askıdakileri Getir\" çalıştırın "
+                    + "ya da karşı firma verme bildirimini yapmamış.");
+            var adet = Math.Min(i.Adet, es.Value.AskiAdet);
+            var istek = new UtsAlmaIstek(Vbi: es.Value.Bid,
+                Adt: i.SeriNo.Length == 0 && adet > 0 ? adet : null);
+            var sonuc = await GonderAsync(TurAlma, istek, b.SubeId, baglam,
+                i.StokId, i.SeriLotId, belgeId, i.BelgeSatirId, adet, b.BelgeTarihi,
+                "", b.BelgeNo, i.UrunNo, i.LotNo, i.SeriNo, null, null, iptal);
+            if (sonuc.Basarili)
+                await _depo.EnvanterAlindiAsync(es.Value.Id, adet, baglam, iptal);
+            return new(i.StokAdi, i.SeriNo, i.LotNo, i.Adet, "Alma",
+                sonuc.Basarili, sonuc.Mesaj);
+        }
     }
 
     // ------------------------------------------------ askıdakiler senkron ----

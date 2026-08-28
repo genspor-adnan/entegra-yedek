@@ -227,6 +227,88 @@ public sealed class UtsDeposu
         await islem.CommitAsync(iptal);
     }
 
+    /// <summary>Belge köprüsü (226): belgenin ÜTS'ye konu özeti.</summary>
+    public async Task<(short Tur, string BelgeNo, DateTime BelgeTarihi, int SubeId,
+                       int TarafId, string TarafUnvan, string TarafUtsNo)>
+        BelgeOzetAsync(int belgeId, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = baglanti.Komut("""
+            select b.tur, b.belge_no, b.belge_tarihi, coalesce(b.sube_id, 0),
+                   coalesce(b.taraf_id, 0), coalesce(t.unvan, ''),
+                   coalesce(t.uts_kurum_no, '')
+              from public.belge b
+              left join public.taraf t on t.id = b.taraf_id
+             where b.id = @p0
+            """, null, belgeId);
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        if (!await o.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi("Belge bulunamadı.");
+        return (o.GetInt16(0), o.GetString(1), o.GetDateTime(2), o.GetInt32(3),
+                o.GetInt32(4), o.GetString(5), o.GetString(6));
+    }
+
+    public sealed record BelgeIzlemSatiri(int BelgeSatirId, int StokId, int SeriLotId,
+        string StokAdi, string UrunNo, string SeriNo, string LotNo, decimal Adet,
+        bool Bildirildi);
+
+    /// <summary>
+    /// Belgenin seri/lot dökümü + stok ÜTS ürün no'su + "bu seri/lot için
+    /// bekleyen/başarılı bildirim var mı" işareti (çift gönderim raporu).
+    /// </summary>
+    public async Task<List<BelgeIzlemSatiri>> BelgeIzlemleriAsync(int belgeId, short tur,
+        CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = baglanti.Komut("""
+            select i.belge_satir_id, i.stok_id, i.seri_lot_id,
+                   coalesce(s.ad, ''), coalesce(s.urun_no, ''),
+                   coalesce(i.seri_no, ''), coalesce(i.lot_no, ''), i.adet,
+                   exists(select 1 from public.uts_bildirim ub
+                           where ub.belge_satir_id = i.belge_satir_id
+                             and ub.tur = @p1
+                             and coalesce(ub.seri_lot_id, 0) = i.seri_lot_id
+                             and ub.durum in (0, 1)) as bildirildi
+              from public.v_belge_satir_izlem i
+              join public.stok s on s.id = i.stok_id
+             where i.belge_id = @p0
+             order by i.id
+            """, null, belgeId, tur);
+        var liste = new List<BelgeIzlemSatiri>();
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        while (await o.ReadAsync(iptal))
+            liste.Add(new BelgeIzlemSatiri(
+                o.GetInt32(0), o.GetInt32(1), o.GetInt32(2), o.GetString(3),
+                o.GetString(4), o.GetString(5), o.GetString(6), o.GetDecimal(7),
+                o.GetBoolean(8)));
+        return liste;
+    }
+
+    /// <summary>Alış köprüsü: askıdaki envanterde seri/lot eşleşmesi arar.</summary>
+    public async Task<(int Id, string Bid, decimal AskiAdet)?> EnvanterEsleAsync(
+        int subeId, string[] unoVaryantlari, string seriNo, string lotNo,
+        CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = new NpgsqlCommand("""
+            select id, verme_bildirim_id, aski_adet
+              from public.uts_envanter
+             where sube_id = @p0 and durum = 1
+               and urun_no = any(@p1)
+               and (@p2 = '' or seri_no = @p2)
+               and (@p3 = '' or lot_no = @p3)
+             order by bildirim_zamani nulls last, id
+             limit 1
+            """, baglanti);
+        komut.Parameters.AddWithValue("p0", subeId);
+        komut.Parameters.Add("p1", NpgsqlDbType.Array | NpgsqlDbType.Varchar)
+             .Value = unoVaryantlari;
+        komut.Parameters.AddWithValue("p2", seriNo);
+        komut.Parameters.AddWithValue("p3", lotNo);
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        if (!await o.ReadAsync(iptal)) return null;
+        return (o.GetInt32(0), o.GetString(1), o.GetDecimal(2));
+    }
+
     /// <summary>
     /// UNO → stok eşleşmesi: GTIN 13/14 iki varyantla stok.urun_no ve
     /// stok_barkod.barkod aranır (Delphi tuzağı).

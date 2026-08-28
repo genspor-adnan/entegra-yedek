@@ -110,6 +110,14 @@ export interface UtsBildirimYaniti {
   bildirimId: number; basarili: boolean; utsBildirimId?: string;
   mesajlar: UtsMesaji[]; mesaj: string;
 }
+export interface UtsBelgeBildirimSatiri {
+  stok: string; seriNo: string; lotNo: string; adet: number;
+  islem: string; basarili: boolean; mesaj: string;
+}
+export interface UtsBelgeBildirimYaniti {
+  belgeNo: string; toplam: number; basarili: number; hatali: number;
+  sonuclar: UtsBelgeBildirimSatiri[]; mesaj: string;
+}
 
 async function istek<T>(yol: string, secenek: RequestInit = {}): Promise<T> {
   const yanit = await ham(yol, secenek, true);
@@ -479,6 +487,8 @@ export const api = {
     gonder<UtsBildirimYaniti>(`/api/uts/bildirim/${id}/iptal`, {}),
   utsYenidenGonder: (id: number) =>
     gonder<UtsBildirimYaniti>(`/api/uts/bildirim/${id}/yeniden-gonder`, {}),
+  utsBelgedenBildir: (belgeId: number) =>
+    gonder<UtsBelgeBildirimYaniti>(`/api/uts/belge/${belgeId}/bildir`, {}),
   utsBildirimDetay: (id: number) =>
     gonder<UtsSorguYaniti>(`/api/uts/bildirim/${id}/detay-sorgula`, {}),
 

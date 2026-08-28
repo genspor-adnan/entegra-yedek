@@ -110,6 +110,15 @@ public static class UtsUclari
                 istek.SubeId ?? baglam.SubeId, baglam.Yazma, iptal));
         });
 
+        // Belge koprusu (226): satista verme, alista askidan eslesip alma.
+        grup.MapPost("/belge/{id:int}/bildir", async (int id, BaglamCozucu cozucu,
+            UtsServisi servis, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("uts.bildir");
+            return Results.Ok(await servis.BelgedenBildirAsync(id, baglam.Yazma, iptal));
+        });
+
         grup.MapPost("/bildirim/{id:int}/iptal", async (int id, BaglamCozucu cozucu,
             UtsServisi servis, HttpContext ctx, CancellationToken iptal) =>
         {

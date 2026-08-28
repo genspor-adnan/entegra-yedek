@@ -144,6 +144,13 @@ public static class AksiyonKatalogu
 
             ["belge-liste"] = new AksiyonTanimi[]
             {
+                // ÜTS belge koprusu (226): satista satir basina VERME, alista
+                //   askidakilerle eslesip ALMA. Sunucu tur guard'li - yalniz
+                //   alis/satis irsaliye/fatura/fis. Sag tusta durur, arac
+                //   cubugunu kalabaliklastirmaz.
+                new("belge.uts-bildir", "🩺 ÜTS Bildir", "stok",
+                    Hedef: "sagtus,palet", AksiyonYetkisi: "uts.bildir",
+                    KayitGerekir: true, Sira: 62),
                 new("belge.yeni",  "＋ Yeni",      "belge", Kisayol: "Ctrl+N",
                     KaynakKodu: "belge", Islem: Islem.Ekle, Sira: 10),
                 new("belge.ac",    "Belgeyi Ac",   "belge", Kisayol: "Enter",
