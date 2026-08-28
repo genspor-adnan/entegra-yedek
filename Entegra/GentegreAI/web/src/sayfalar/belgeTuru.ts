@@ -13,7 +13,7 @@
 
 /** Kartin acabilecegi turler - liste/menu "Yeni" dugmeleri bunlari gonderir. */
 export const GIRILEBILIR_TURLER = [
-  19, 15, 14, 9, 11, 10, 16, 12, 13, 17, 119, 109, 20, 105, 3, 4,
+  18, 19, 15, 14, 9, 11, 10, 16, 12, 13, 17, 119, 109, 20, 105, 3, 4,
 ] as const;
 
 /** Kart acilisinda tur verilmediyse (dogrudan /belge/yeni) kullanilan tur. */
@@ -81,6 +81,7 @@ const EBELGE_TURLERI = new Set([10, 11, 14, 15]);
 
 const LISTE_YOLU: Record<number, string> = {
   // SATIS
+  18: '/teklif',
   19: '/siparis', 14: '/satis-irsaliye', 15: '/belge', 16: '/satis-fisi',
   13: '/tahakkuk', 119: '/satis-konsinye',
   // ALIS
@@ -92,6 +93,7 @@ const LISTE_YOLU: Record<number, string> = {
 
 /** Baslik etiketlerinde kullanilan kisa ad ("<ad> No", "<ad> Tarihi"). */
 function turAdi(tur: number): string {
+  if (tur === 18) return 'Teklif';
   if (STOK_FISI_TURLERI.has(tur)) return 'Fiş';
   if (tur === 105) return 'Talep';
   if (tur === 20) return 'Transfer';

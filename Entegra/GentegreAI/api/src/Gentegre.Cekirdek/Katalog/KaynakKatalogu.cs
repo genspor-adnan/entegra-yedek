@@ -126,6 +126,8 @@ public static partial class KaynakKatalogu
         // Fiyat listesi (201)
         Ekle(FiyatListesi());
         Ekle(FiyatListesiSatir());
+        // Demirbas (216)
+        Ekle(Demirbas());
         Ekle(Irsaliye());
         // Gelen e-Belge kutusu (187)
         Ekle(GelenBelge());

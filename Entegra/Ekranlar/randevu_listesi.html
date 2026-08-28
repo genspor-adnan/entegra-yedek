@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Randevu Listesi / Takvim — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1180px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .ara{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:12px;
+    background:#fff;height:23px;padding:0 9px;width:230px;color:var(--muted)}
+  .cips{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:11px;padding:2px 10px;font-size:11px;background:#fff}
+  .cip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .gorunum{margin-left:auto;display:flex;gap:2px}
+  .gorunum .cip.on{background:var(--navy);border-color:var(--navy)}
+  .ana{display:grid;grid-template-columns:1fr 240px;gap:0}
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px;white-space:nowrap}
+  tr.sec td{background:var(--sel)}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .c-plan{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .c-geldi{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .c-mua{background:#efe4fa;color:#6a3fa0;border:1px solid #d8c3ef}
+  .c-tamam{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-iptal{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .yan{border-left:1px solid var(--line2);padding:10px;background:#fbfcfd}
+  .yan h5{margin:2px 0 8px;font-size:11.5px;color:var(--navy)}
+  .mini{width:100%;border-collapse:collapse;font-size:10.5px;text-align:center}
+  .mini th{background:none;border:none;color:var(--muted);padding:2px}
+  .mini td{border:none;padding:3px 0;border-radius:3px}
+  .mini td.bugun{background:var(--accent);color:#fff;font-weight:bold;border-radius:50%}
+  .mini td.dolu{font-weight:bold;color:var(--navy);text-decoration:underline}
+  .ozet{margin-top:12px;font-size:11px;color:var(--muted);line-height:1.7}
+  .ozet b{color:var(--ink)}
+  .dip{display:flex;gap:14px;padding:6px 10px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted)}
+  /* -------- TAKVIM gorunumu -------- */
+  .takvim{display:none;padding:10px}
+  .takvim.acik{display:block}
+  .liste.kapali{display:none}
+  .tkgrid{display:grid;grid-template-columns:52px repeat(5,1fr);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .tkgun{background:var(--head2);border-bottom:1px solid var(--line);border-left:1px solid var(--line2);
+    padding:5px;font-size:11px;font-weight:bold;color:var(--navy);text-align:center}
+  .tksaat{background:var(--head);border-top:1px solid var(--line2);padding:3px 5px;font-size:10px;color:var(--muted)}
+  .tkhuc{border-top:1px solid var(--line2);border-left:1px solid var(--line2);min-height:34px;padding:2px;position:relative}
+  .rnd{border-radius:3px;font-size:10px;padding:2px 5px;margin:1px 0;border:1px solid;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .r-plan{background:#e3ecfa;border-color:#bcd2ef;color:#2f5c9e}
+  .r-geldi{background:#fdf1e2;border-color:#f2ddbf;color:#b5731a}
+  .r-tamam{background:#e2f3e8;border-color:#bfe3cb;color:#2e7d46}
+  .r-iptal{background:#f4d9d6;border-color:#e4b7b2;color:#8f3d36;text-decoration:line-through}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">📅 Randevular <span class="sp">GenoTIP AI · Kayıt Kabul › Randevular</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni Randevu</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn">🗑 Sil</div>
+    <div class="btn">🖨️ Yazdır ▾</div>
+    <div class="ara" style="margin-left:auto">🔍 Hasta / hekim / bölüm ara…</div>
+  </div>
+
+  <div class="cips">
+    <span class="cip on">Bugün</span><span class="cip">Yarın</span><span class="cip">Bu Hafta</span><span class="cip">Tümü</span>
+    <span style="width:10px"></span>
+    <span class="cip">Planlandı</span><span class="cip">Geldi</span><span class="cip">Tamamlandı</span><span class="cip">İptal</span>
+    <span style="width:10px"></span>
+    <span class="cip">Hekim: Tümü ▾</span><span class="cip">Bölüm: Tümü ▾</span>
+    <span class="gorunum"><span class="cip on">▤ Liste</span><span class="cip">▦ Takvim (Hafta)</span></span>
+  </div>
+
+  <div class="ana">
+    <div>
+      <!-- LISTE gorunumu -->
+      <div class="liste">
+        <table>
+          <tr><th></th><th>Saat</th><th>Hasta</th><th>Hekim</th><th>Bölüm</th><th>Hizmet</th><th>Süre</th><th>Durum</th><th>Not</th></tr>
+          <tr><td>☐</td><td><b>09:00</b></td><td>MEHMET DEMİR</td><td>Dr. K. ARSLAN</td><td>Dahiliye</td><td>Muayene</td><td>20 dk</td><td><span class="chip c-tamam">Tamamlandı</span></td><td></td></tr>
+          <tr><td>☐</td><td><b>09:20</b></td><td>FATMA ÇELİK</td><td>Dr. K. ARSLAN</td><td>Dahiliye</td><td>Muayene</td><td>20 dk</td><td><span class="chip c-mua">Muayenede</span></td><td>Tahlil sonucu ile</td></tr>
+          <tr class="sec"><td>☑</td><td><b>10:20</b></td><td>AYŞE YILMAZ</td><td>Dr. M. KAYA</td><td>Radyoloji</td><td>Tüm Abdomen MD BT</td><td>20 dk</td><td><span class="chip c-plan">Planlandı</span></td><td>Kontrastlı — aç gelecek</td></tr>
+          <tr><td>☐</td><td><b>10:40</b></td><td>ALİ ÖZTÜRK</td><td>Dr. M. KAYA</td><td>Radyoloji</td><td>Eko (B MOD + RDUS)</td><td>20 dk</td><td><span class="chip c-geldi">Geldi</span></td><td></td></tr>
+          <tr><td>☐</td><td><b>11:00</b></td><td>ZEYNEP AK</td><td>Dr. S. YURT</td><td>Kadın Doğum</td><td>Muayene</td><td>30 dk</td><td><span class="chip c-plan">Planlandı</span></td><td>İlk muayene</td></tr>
+          <tr><td>☐</td><td><b>11:40</b></td><td>HASAN KORKMAZ</td><td>Dr. K. ARSLAN</td><td>Dahiliye</td><td>Kontrol</td><td>10 dk</td><td><span class="chip c-iptal">İptal</span></td><td>Hasta aradı</td></tr>
+          <tr><td>☐</td><td><b>13:00</b></td><td>EMİNE ŞAHİN</td><td>Dr. M. KAYA</td><td>Radyoloji</td><td>Pelvik Arteriografi</td><td>40 dk</td><td><span class="chip c-plan">Planlandı</span></td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- TAKVIM (hafta) gorunumu - mockup'ta ikisi de gosterildi -->
+      <div class="takvim acik" style="border-top:1px dashed var(--line)">
+        <div style="font-size:11px;color:var(--muted);margin:2px 0 8px">▦ Takvim (Hafta) görünümü — 01–05 Eylül · Hekim: Dr. M. KAYA</div>
+        <div class="tkgrid">
+          <div class="tksaat" style="background:var(--head2)"></div>
+          <div class="tkgun">Pzt 01</div><div class="tkgun">Sal 02</div><div class="tkgun">Çar 03</div><div class="tkgun">Per 04</div><div class="tkgun">Cum 05</div>
+
+          <div class="tksaat">09:00</div>
+          <div class="tkhuc"><div class="rnd r-tamam">09:00 M. DEMİR</div></div>
+          <div class="tkhuc"></div>
+          <div class="tkhuc"><div class="rnd r-plan">09:00 S. ACAR</div></div>
+          <div class="tkhuc"></div>
+          <div class="tkhuc"><div class="rnd r-plan">09:20 B. TAN</div></div>
+
+          <div class="tksaat">10:00</div>
+          <div class="tkhuc"></div>
+          <div class="tkhuc"><div class="rnd r-plan">10:20 A. YILMAZ</div><div class="rnd r-geldi">10:40 A. ÖZTÜRK</div></div>
+          <div class="tkhuc"></div>
+          <div class="tkhuc"><div class="rnd r-plan">10:00 D. KURT</div></div>
+          <div class="tkhuc"></div>
+
+          <div class="tksaat">11:00</div>
+          <div class="tkhuc"><div class="rnd r-iptal">11:40 H. KORKMAZ</div></div>
+          <div class="tkhuc"></div>
+          <div class="tkhuc"></div>
+          <div class="tkhuc"><div class="rnd r-plan">11:00 N. ER</div></div>
+          <div class="tkhuc"></div>
+
+          <div class="tksaat">13:00</div>
+          <div class="tkhuc"></div>
+          <div class="tkhuc"><div class="rnd r-plan">13:00 E. ŞAHİN</div></div>
+          <div class="tkhuc"><div class="rnd r-plan">13:20 R. SU</div></div>
+          <div class="tkhuc"></div>
+          <div class="tkhuc"></div>
+        </div>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:6px">
+          Boş hücreye tık = o gün/saate <b>Yeni Randevu</b> (kart açılır) · Bloğa çift tık = randevu kartı ·
+          Sürükle-bırak = saat değiştir (onay sorar).
+        </div>
+      </div>
+    </div>
+
+    <!-- SAG PANEL: mini takvim + gun ozeti -->
+    <div class="yan">
+      <h5>Eylül 2026</h5>
+      <table class="mini">
+        <tr><th>Pt</th><th>Sa</th><th>Ça</th><th>Pe</th><th>Cu</th><th>Ct</th><th>Pz</th></tr>
+        <tr><td class="dolu">1</td><td class="bugun">2</td><td class="dolu">3</td><td>4</td><td class="dolu">5</td><td>6</td><td>7</td></tr>
+        <tr><td>8</td><td class="dolu">9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td></tr>
+        <tr><td>15</td><td>16</td><td class="dolu">17</td><td>18</td><td>19</td><td>20</td><td>21</td></tr>
+        <tr><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td></tr>
+        <tr><td>29</td><td>30</td><td></td><td></td><td></td><td></td><td></td></tr>
+      </table>
+      <div class="ozet">
+        <b>02.09.2026 Salı</b><br>
+        Randevu: <b>7</b> · Geldi: <b>2</b><br>
+        Tamamlandı: <b>1</b> · İptal: <b>1</b><br>
+        Boş kapasite: <b>%38</b><br><br>
+        <b>Hekim doluluk</b><br>
+        Dr. M. KAYA — <b>%75</b><br>
+        Dr. K. ARSLAN — <b>%60</b><br>
+        Dr. S. YURT — <b>%25</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="dip"><span>Kayıt: <b>7</b> · 12 ms</span><span>Seçili: 1</span><span style="margin-left:auto">‹ Önceki · 1 / 1 · Sonraki ›</span></div>
+</div>
+
+<div style="max-width:1180px;margin:10px auto;color:#6b7a8b;font-size:11px">
+  NOT (mockup): Liste ve Takvim ayni ekranin iki görünümüdür (Liste/Grup/Analiz desenindeki
+  görünüm çipleri gibi). Takvim haftalık; hekim filtresi seçiliyken tek hekimin ajandası,
+  seçili değilken bölümün tüm randevuları renk kodlu gösterilir. Sağ panel mini takvimde
+  randevulu günler altı çizili; güne tık listeyi o güne filtreler.
+</div>
+</body>
+</html>

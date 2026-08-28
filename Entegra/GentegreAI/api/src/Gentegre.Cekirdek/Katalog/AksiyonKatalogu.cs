@@ -245,6 +245,23 @@ public static class AksiyonKatalogu
 
             // Siparis listesi: buradan irsaliye/faturaya donusum yapilir (F8).
             //   Ayni 'belge' kaynagi, tur in (9,19) sabit filtresiyle.
+            // TEKLIF listesi (216): siparis setinin sadesi - donusum/iptal/fis
+            //   akislari ilk surumde yok, yalniz ekle/ac/sil + yazdir.
+            ["teklif-liste"] = new AksiyonTanimi[]
+            {
+                new("belge.yeni", "＋ Yeni Teklif", "belge", Kisayol: "Ctrl+N",
+                    KaynakKodu: "belge", Islem: Islem.Ekle, Sira: 10),
+                new("belge.ac",   "Aç",             "belge", Kisayol: "Enter",
+                    KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                new("belge.sil",  "🗑 Sil",         "belge", Kisayol: "Del",
+                    KaynakKodu: "belge", Islem: Islem.Sil, KayitGerekir: true, Sira: 25),
+                new("genel.yazdir", "🖨️ Yazdır",   "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
+            // DEMIRBAS listesi (216): standart kart Crud'u.
+            ["demirbas-liste"] = Crud("demirbas", "demirbas", "demirbas"),
+
             ["siparis-liste"] = new AksiyonTanimi[]
             {
                 new("belge.yeni",     "＋ Yeni Sipariş", "belge", Kisayol: "Ctrl+N",

@@ -169,6 +169,8 @@ public static partial class KartKatalogu
         Ekle(Hizmet());
         // Fiyat listesi (201): kural + materyalize satirlar
         Ekle(FiyatListesi());
+        // Demirbas (216)
+        Ekle(Demirbas());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
 

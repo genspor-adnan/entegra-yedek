@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Randevu Kartı — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:760px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#b23b3b;background:linear-gradient(#e2695f,#b23b3b);color:#fff}
+  .sp{margin-left:auto}
+  /* KIMLIK SERIDI: Hasta / Tarih-Saat / Durum her sekmede sabit (kart standardi) */
+  .idstrip{display:grid;grid-template-columns:1fr 210px 150px;gap:10px;padding:10px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .ikili{display:flex;gap:6px}
+  .ikili .inp{flex:1}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin:12px}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);
+    background:var(--head);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0}
+  .grp .iz{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:10px 12px}
+  .grp .iz .tam{grid-column:1 / -1}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold}
+  .c-plan{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .c-geldi{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .not{padding:8px 12px;color:var(--muted);font-size:11px}
+  .ozet{display:flex;gap:14px;padding:8px 12px;background:var(--head);border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .ozet b{color:var(--ink)}
+  .slot{display:flex;gap:4px;flex-wrap:wrap;padding:4px 0}
+  .slot span{border:1px solid var(--line);border-radius:3px;padding:2px 8px;background:#fff;font-size:11px}
+  .slot span.dolu{background:#f4d9d6;color:#8f3d36;border-color:#e4b7b2;text-decoration:line-through}
+  .slot span.secili{background:var(--sel);border-color:var(--selbd);font-weight:bold}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">📅 Randevu — 000124 <span class="sp">GenoTIP AI · Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="btn">✔ Geldi İşaretle</div>
+    <div class="btn">➜ Muayeneye Al</div>
+    <div class="btn">✖ İptal</div>
+    <div class="btn sp">Kapat</div>
+  </div>
+
+  <!-- Kimlik seridi: her sekmede sabit -->
+  <div class="idstrip">
+    <div class="fld"><label class="req">Hasta</label>
+      <div class="inp big combo">AYŞE YILMAZ — TC 12*******34 · ☎ +90 532 111 22 33</div></div>
+    <div class="fld"><label class="req">Tarih / Saat</label>
+      <div class="ikili"><div class="inp">02.09.2026</div><div class="inp">10:20</div></div></div>
+    <div class="fld"><label>Durum</label>
+      <div class="inp"><span class="chip c-plan">Planlandı</span></div></div>
+  </div>
+
+  <div class="grp">
+    <h4>Randevu</h4>
+    <div class="iz">
+      <div class="fld"><label class="req">Bölüm / Poliklinik</label>
+        <div class="inp combo">Radyoloji</div></div>
+      <div class="fld"><label class="req">Hekim</label>
+        <div class="inp combo">Uzm. Dr. Mehmet KAYA</div></div>
+      <div class="fld"><label>Hizmet / İşlem</label>
+        <div class="inp combo">BT.003 — Tüm Abdomen MD BT</div></div>
+      <div class="fld"><label>Süre</label>
+        <div class="ikili"><div class="inp">20</div><div class="inp combo" style="max-width:70px">dk</div></div></div>
+      <div class="fld"><label>Randevu Tipi</label>
+        <div class="inp combo">Muayene</div></div>
+      <div class="fld"><label>Kaynak</label>
+        <div class="inp combo">Telefon</div></div>
+      <div class="fld tam"><label>Açıklama</label>
+        <div class="inp">Kontrastlı çekim — aç gelecek.</div></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <h4>Uygun Saatler — 02.09.2026 · Uzm. Dr. Mehmet KAYA</h4>
+    <div class="iz"><div class="fld tam">
+      <div class="slot">
+        <span>09:00</span><span>09:20</span><span class="dolu">09:40</span><span>10:00</span>
+        <span class="secili">10:20</span><span class="dolu">10:40</span><span>11:00</span>
+        <span>11:20</span><span class="dolu">11:40</span><span>13:00</span><span>13:20</span>
+      </div>
+      <div class="not">Dolu saatler çizili; seçili saat maviyle işaretli. Hekim/tarih değişince
+        şerit yenilenir.</div>
+    </div></div>
+  </div>
+
+  <div class="ozet">
+    <span>Hasta No: <b>H-000871</b></span>
+    <span>Son Randevu: <b>14.07.2026 · Dahiliye (Tamamlandı)</b></span>
+    <span>Açık Bakiye: <b>0,00 ₺</b></span>
+    <span>Oluşturan: <b>admin · 28.08.2026 10:05</b></span>
+  </div>
+</div>
+
+<div style="max-width:760px;margin:10px auto;color:#6b7a8b;font-size:11px">
+  NOT (mockup): Kimlik şeridi Hasta/Tarih-Saat/Durum standart desendir. "Geldi İşaretle /
+  Muayeneye Al / İptal" durum akışı butonları durum koduna göre aktifleşir. Uygun Saatler
+  şeridi hekim takviminden (randevu tablosu + süre) türetilir.
+</div>
+</body>
+</html>

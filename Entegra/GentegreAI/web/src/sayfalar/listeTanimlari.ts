@@ -256,6 +256,18 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Cari', menuAd: 'Kişi Listesi', ic: '🧑', yetkiKodu: 'cari',
   },
   {
+    // SATIS TEKLIFI (216, Ekranlar/teklif_listesi.html): belge turu 18 -
+    //   stok/cari/fis ETKILEMEZ, kalem/toplam altyapisi belgeden. Mockup'taki
+    //   revizyon/onay akisi ileride; ilk surum ekle/ac/sil.
+    kaynak: 'belge', rota: 'teklif', baslik: 'Satış Teklifleri', yol: 'Satis › Satış Teklifleri',
+    aksiyonEkrani: 'teklif-liste', yeniBelgeTuru: 18,
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 18 },
+    // e-Fatura/kapanma teklif icin anlamsiz.
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'kapanmaAdi', 'kapanmaDurum'],
+    toplam: ['genelToplam'],
+    menuGrup: 'Satış', menuAd: 'Satış Teklifleri', ic: '📄', yetkiKodu: 'belge', menuSira: 5,
+  },
+  {
     // Siparisler AYNI 'belge' kaynagi, tur in (9,19) sabit filtresiyle (Musteri/
     //   Tedarikci deseni). "Kalan" takibi belge_satir.kapatilan_miktar uzerinden;
     //   "Dönüştür" aksiyonu secili siparisten irsaliye/fatura uretir (F8).
@@ -639,6 +651,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'fiyat-listesi', baslik: 'Fiyat Listeleri', yol: 'Stok › Fiyat Listeleri',
     kartYolu: '/fiyat-listesi', aksiyonEkrani: 'fiyat-listesi-liste', cipler: DURUM_CIPLERI,
     menuGrup: 'Stok & Hizmet', menuAd: 'Fiyat Listeleri', ic: '🏷️', yetkiKodu: 'fiyat_listesi',
+  },
+  {
+    // DEMIRBAS (216, Ekranlar/demirbas_listesi.html): kimlik + satin alma
+    //   cekirdegi; zimmet gecmisi / bakim / amortisman gridleri ileride.
+    kaynak: 'demirbas', baslik: 'Demirbaşlar', yol: 'Stok › Demirbaşlar',
+    kartYolu: '/demirbas', aksiyonEkrani: 'demirbas-liste', cipler: DURUM_CIPLERI,
+    yerTutucuSekmeler: ['Zimmet Geçmişi', 'Bakım / Servis', 'Amortisman'],
+    menuGrup: 'Stok & Hizmet', menuAd: 'Demirbaş Listesi', ic: '🖥️', yetkiKodu: 'demirbas',
   },
   {
     // Liste SATIRLARI ayri ekran: bir listenin binlerce satiri kart icinde

@@ -55,9 +55,12 @@ export function stokSecimindenKalem(
  * doviz fiyati kalirsa Kaydet yeni fiyati sessizce geri alir.
  */
 export function listeFiyatiUygula(
-  satir: SatirDurumu, f: { fiyat: number | null; dovizCinsi?: string | null },
+  satir: SatirDurumu, f: { fiyat?: number | null; dovizCinsi?: string | null },
 ): SatirDurumu {
-  if (f.fiyat === null || f.fiyat <= 0) return satir;
+  // `== null` hem null hem undefined'i yakalar: uc, satiri olmayan kalemde
+  //   fiyat alanini hic gondermeyebilir - `undefined <= 0` false oldugundan
+  //   eski kosul kacar ve String(undefined) fiyat kutusuna "undefined" yazardi.
+  if (f.fiyat == null || f.fiyat <= 0) return satir;
   const metin = String(f.fiyat);
   return { ...satir, birimFiyat: metin, dovizFiyat: metin,
            fiyatDovizi: f.dovizCinsi || satir.fiyatDovizi };

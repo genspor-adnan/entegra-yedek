@@ -52,16 +52,21 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
    * belgesi ve stok fisinde kartin kendi adi (Transfer, Talep, Giriş Fişi...)
    * kullanilir; `belgeAdi` zaten tur katalogundan geliyor.
    */
+  // Katalog ozel bir ad verdiyse (Teklif) o kullanilir; 'Belge' generic'i
+  //   fatura turlerinin adi olarak 'Fatura'ya cevrilir (216).
   const belgeSozu = depoBelgesi || stokFisiMi ? belgeAdi
                   : irsaliyeMi ? 'İrsaliye' : siparisMi ? 'Sipariş'
-                  : tahakkukMu ? 'Tahakkuk' : 'Fatura';
+                  : tahakkukMu ? 'Tahakkuk'
+                  : belgeAdi !== 'Belge' ? belgeAdi : 'Fatura';
 
   /**
    * Kapanma ("bu belgeden ne kadari faturalandi") hangi turde ANLAMLI:
    * faturada ve tahakkukta zincirin sonundayiz, depo belgesi ve stok fisi ise
    * fatura zincirinde hic degil.
    */
-  const kapanmaGoster = !faturaMi && !tahakkukMu && !depoBelgesi && !stokFisiMi;
+  // Teklif fatura zincirinde degil (216) - "Faturalanmadı" rozeti yaniltirdi.
+  const kapanmaGoster = !faturaMi && !tahakkukMu && !depoBelgesi && !stokFisiMi
+                        && belgeAdi !== 'Teklif';
 
   return (
   <>
