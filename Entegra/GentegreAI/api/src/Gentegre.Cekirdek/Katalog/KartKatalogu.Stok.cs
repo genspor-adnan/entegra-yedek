@@ -203,12 +203,15 @@ public static partial class KartKatalogu
                 Baslik: "Hizmet Adı", Grup: "Kimlik"),
             new("durum",    "durum",    "kod",   SabitKodlar: DurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),
-            new("kdv",      "kdv",      "sayi",  Baslik: "KDV %", Grup: "Genel"),
+            // "Detay" kutusu Kodlar'in SOLUNDA (kullanici) - alt gruplar alan
+            //   sirasiyla dizilir, Detay alanlari once tanimlanir.
+            new("kdv",      "kdv",      "sayi",  Baslik: "KDV %",
+                Grup: "Genel", AltGrup: "Detay"),
             // Hizmet birimi stogunkiyle AYNI listeden (51 Adet, 57 Kg...).
             new("birim",    "birim",    "kod",   KodListesi: "stok.ana_birim",
-                Baslik: "Birim", Grup: "Genel"),
+                Baslik: "Birim", Grup: "Genel", AltGrup: "Detay"),
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 80,
-                Baslik: "Açıklama", Grup: "Genel"),
+                Baslik: "Açıklama", Grup: "Genel", AltGrup: "Detay"),
 
             new("muhKodu",  "muh_kodu",  "metin", EnFazlaUzunluk: 20,
                 Baslik: "Muhasebe Kodu", Grup: "Genel", AltGrup: "Kodlar"),
