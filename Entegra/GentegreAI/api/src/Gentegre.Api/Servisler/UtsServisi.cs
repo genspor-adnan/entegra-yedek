@@ -313,6 +313,7 @@ public sealed class UtsServisi
     public async Task<object> IptalAsync(int bildirimId, YazmaBaglami baglam,
         CancellationToken iptal)
     {
+        var belgeId = await _depo.BildirimBelgeIdAsync(bildirimId, iptal);
         var b = await _depo.BildirimOkuAsync(bildirimId, iptal);
         if (b.Durum != 1)
             throw GentegreHatasi.IsKurali("Yalnız BAŞARILI bildirim iptal edilebilir.");
@@ -332,8 +333,13 @@ public sealed class UtsServisi
         var basarili = httpKodu == 200 && mesajlar.All(m => m.Tip != "HATA");
         var (kod, mesaj) = UtsIstemcisi.HataOzeti(mesajlar);
         if (basarili)
+        {
             await _depo.SonucYazAsync(bildirimId, 3, b.UtsBildirimId, cevap, httpKodu,
                 kod, "İptal edildi.", baglam, iptal);
+            // Belge bagli bildirimse rozet geri duser (230).
+            if (belgeId is > 0)
+                await _depo.BelgeUtsDurumGuncelleAsync(belgeId.Value, iptal);
+        }
 
         return new
         {
@@ -558,6 +564,8 @@ public sealed class UtsServisi
         }
 
         var basarili = sonuclar.Count(x => x.Basarili);
+        // Belge uzerindeki ÜTS durum rozeti (230): 0/1 kismi/2 tamam.
+        await _depo.BelgeUtsDurumGuncelleAsync(belgeId, iptal);
         return new
         {
             belgeNo = b.BelgeNo,

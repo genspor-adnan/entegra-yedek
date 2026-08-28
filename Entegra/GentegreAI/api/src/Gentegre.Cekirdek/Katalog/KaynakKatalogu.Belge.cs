@@ -145,6 +145,21 @@ public static partial class KaynakKatalogu
             // Teklif durumu (218) - teklif listesinin cipleri/guard'i icin.
             new("teklifKonusu",  "b.teklif_konusu",  "metin", "Konusu",      Genislik: 150,
                                                                             Varsayilan: false),
+            // Ham e-Belge kodu (230): ÜTS verme secim listesi "hazirlanmis/
+            //   gonderilmis" suzmesi icin filtrelenebilir sayi (gorunen
+            //   'efaturaDurum' CASE metni filtrelenemiyor).
+            new("efaturaKodu",   "coalesce(b.efatura_durum, 0)",
+                                                 "sayi", "e-Belge Kodu", Hizalama: "orta",
+                                                 Varsayilan: false, Siralanabilir: false),
+            // ÜTS bildirim rozeti (230): verme secim listesi ve fatura listesi.
+            new("utsDurumAdi",
+                "case b.uts_durum when 2 then 'Bildirildi' when 1 then 'Kısmi' " +
+                "else 'Bildirilmedi' end",
+                                                 "metin", "ÜTS", Hizalama: "orta",
+                                                 Bicim: "rozet", Genislik: 100,
+                                                 Varsayilan: false, Filtrelenebilir: false),
+            new("utsDurum",      "b.uts_durum",      "kod",   "ÜTS Kodu",    Hizalama: "orta",
+                                                                            Varsayilan: false),
             new("teklifDurum",   "b.teklif_durum",   "kod",   "Teklif Durum Kodu",
                 Hizalama: "orta", Varsayilan: false),
             new("teklifDurumAdi",

@@ -283,6 +283,51 @@ public sealed class UtsDeposu
         return liste;
     }
 
+    /// <summary>Bildirimin bağlı olduğu belge (iptal sonrası rozet için).</summary>
+    public async Task<int?> BildirimBelgeIdAsync(int bildirimId,
+        CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        var d = await baglanti.TekDegerAsync<int?>(
+            "select belge_id from public.uts_bildirim where id = @p0", null,
+            new object?[] { bildirimId }, iptal);
+        return d;
+    }
+
+    /// <summary>
+    /// Belgenin ÜTS durumunu yeniden hesaplar (230): izlem satırlarının kaçı
+    /// BAŞARILI bildirimli → 0 bildirilmedi / 1 kısmi / 2 tamam. Köprü
+    /// gönderiminden ve iptalden sonra çağrılır.
+    /// </summary>
+    public async Task BelgeUtsDurumGuncelleAsync(int belgeId,
+        CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = baglanti.Komut("""
+            update public.belge b
+               set uts_durum = alt.durum
+              from (
+                select case
+                         when t.toplam = 0 or t.bildirilen = 0 then 0
+                         when t.bildirilen >= t.toplam then 2
+                         else 1
+                       end as durum
+                  from (
+                    select count(*) as toplam,
+                           count(*) filter (where exists (
+                               select 1 from public.uts_bildirim ub
+                                where ub.belge_satir_id = i.belge_satir_id
+                                  and coalesce(ub.seri_lot_id, 0) = i.seri_lot_id
+                                  and ub.durum = 1)) as bildirilen
+                      from public.v_belge_satir_izlem i
+                     where i.belge_id = @p0
+                  ) t
+              ) alt
+             where b.id = @p0
+            """, null, belgeId);
+        await komut.ExecuteNonQueryAsync(iptal);
+    }
+
     /// <summary>Alış köprüsü: askıdaki envanterde seri/lot eşleşmesi arar.</summary>
     public async Task<(int Id, string Bid, decimal AskiAdet)?> EnvanterEsleAsync(
         int subeId, string[] unoVaryantlari, string seriNo, string lotNo,
