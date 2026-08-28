@@ -265,6 +265,35 @@ public static class AksiyonKatalogu
             // DEMIRBAS listesi (216): standart kart Crud'u.
             ["demirbas-liste"] = Crud("demirbas", "demirbas", "demirbas"),
 
+            // ÜTS bildirim gecmisi (223). Iptal/yeniden gonderme RESMI islem:
+            //   ayri aksiyon yetkileri (uts.iptal / uts.bildir).
+            ["uts-bildirim-liste"] = new AksiyonTanimi[]
+            {
+                new("uts.detay", "ÜTS Detay Sorgula", "stok",
+                    Hedef: "sagtus,palet", KaynakKodu: "uts", Islem: Islem.Gor,
+                    KayitGerekir: true, Sira: 20),
+                new("uts.yeniden-gonder", "⟳ Yeniden Gönder", "stok",
+                    Hedef: "araccubugu,sagtus,palet", AksiyonYetkisi: "uts.bildir",
+                    KayitGerekir: true, Sira: 30),
+                new("uts.iptal", "✖ ÜTS'de İptal Et", "stok",
+                    Hedef: "araccubugu,sagtus,palet", AksiyonYetkisi: "uts.iptal",
+                    KayitGerekir: true, Sira: 40),
+                new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
+            // ÜTS askidaki/gelen urunler (223): senkron + alma bildirimi.
+            ["uts-envanter-liste"] = new AksiyonTanimi[]
+            {
+                new("uts.senkron", "⟳ Askıdakileri Getir", "stok",
+                    Hedef: "araccubugu,palet", AksiyonYetkisi: "uts.bildir", Sira: 10),
+                new("uts.al", "📥 Alma Bildirimi Yap", "stok",
+                    Hedef: "araccubugu,sagtus,palet", AksiyonYetkisi: "uts.bildir",
+                    KayitGerekir: true, Sira: 20),
+                new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             ["siparis-liste"] = new AksiyonTanimi[]
             {
                 new("belge.yeni",     "＋ Yeni Sipariş", "belge", Kisayol: "Ctrl+N",

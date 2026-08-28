@@ -10,6 +10,7 @@ import { KasaAyarlar } from './sayfalar/KasaAyarlar';
 import { FirmaBilgileri } from './sayfalar/FirmaBilgileri';
 import { MesajKatmani } from './bilesenler/MesajKatmani';
 import { GenelAyarlar } from './sayfalar/GenelAyarlar';
+import { UtsSorgu } from './sayfalar/UtsSorgu';
 import { SatisAyarlar, AlisAyarlar } from './sayfalar/BelgeAyarlar';
 import { Panel } from './sayfalar/Panel';
 
@@ -62,6 +63,8 @@ function Yollar() {
         {yetki('sube') && <Route path="/sube" element={<FirmaBilgileri />} />}
         {yetki('belge') && <Route path="/satis-ayarlar" element={<SatisAyarlar />} />}
         {yetki('belge') && <Route path="/alis-ayarlar" element={<AlisAyarlar />} />}
+        {/* ÜTS urun sorgu (223): liste degil, canli sorgu formu. */}
+        {yetki('uts') && <Route path="/uts-sorgu" element={<UtsSorgu />} />}
 
         <Route path="*" element={<Navigate to="/panel" replace />} />
       </Route>

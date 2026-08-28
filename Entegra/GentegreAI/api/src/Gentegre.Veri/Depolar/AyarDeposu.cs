@@ -39,6 +39,10 @@ public sealed class AyarDeposu
         "genel.urun_modu",
         // Varsayilan doviz (219) - genel.doviz kod listesinden secilir.
         "genel.varsayilan_doviz",
+        // ÜTS taban adresleri (223) - bos birakilirsa fn_uts_hesap resmi
+        //   sabitlere duser.
+        "uts.uretim_url",
+        "uts.test_url",
         "belge.geri_gun_siniri",
         "liste.sayfa_boyu",
         "stok.negatif_davranis",
@@ -82,6 +86,8 @@ public sealed class AyarDeposu
         ["earsiv.uretim_url"] = 250,
         ["earsiv.gelen_url"] = 250,
         ["earsiv.test_url"] = 250,
+        ["uts.uretim_url"] = 250,
+        ["uts.test_url"] = 250,
         ["earsiv.sabit_notlar"] = 1000,
         ["eirsaliye.gib_alias"] = 120,
         ["eirsaliye.uretim_url"] = 250,

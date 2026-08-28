@@ -680,6 +680,45 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Stok & Hizmet', menuAd: 'Fiyat Listesi Satırları', ic: '🏷️',
   },
   {
+    // ÜTS askidaki/gelen urunler (223): karsi kurumlarin bize VERDIGI tekil
+    //   urunler. "Askıdakileri Getir" ÜTS'den senkronlar; satirdan "Alma
+    //   Bildirimi Yap" ile alinir (askı adeti duser).
+    kaynak: 'uts-envanter', baslik: 'ÜTS Askıdaki Ürünler',
+    yol: 'Stok › ÜTS Askıdaki Ürünler', aksiyonEkrani: 'uts-envanter-liste',
+    cipler: [
+      { ad: 'Askıda',   filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Alındı',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Kayboldu', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'Stok & Hizmet', menuAd: 'ÜTS Gelen/Askıdakiler', ic: '🩺',
+    yetkiKodu: 'uts', menuSira: 60,
+  },
+  {
+    // ÜTS bildirim gecmisi (223): gonderilen alma/verme/kullanim bildirimleri,
+    //   ham istek/cevap JSON'u Icerik penceresinde.
+    kaynak: 'uts-bildirim', baslik: 'ÜTS Bildirimleri',
+    yol: 'Stok › ÜTS Bildirimleri', aksiyonEkrani: 'uts-bildirim-liste',
+    tarihAlani: 'tarih', icerikAlani: 'cevapJson', icerikBaslik: 'ÜTS Cevabı',
+    cipler: [
+      { ad: 'Bekleyen', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Başarılı', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Hatalı',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'İptal',    filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'Stok & Hizmet', menuAd: 'ÜTS Bildirimleri', ic: '📡',
+    yetkiKodu: 'uts', menuSira: 61,
+  },
+  {
+    // ÜTS urun sorgu (223): UNO/LNO/SNO ile ÜTS'den canli tekil urun sorgusu.
+    //   Liste degil, kendi sayfasi (App.tsx rotayi tanimlar).
+    kaynak: 'uts-sorgu', ozelSayfa: true, baslik: 'ÜTS Ürün Sorgu',
+    yol: 'Stok › ÜTS Ürün Sorgu',
+    menuGrup: 'Stok & Hizmet', menuAd: 'ÜTS Ürün Sorgu', ic: '🔍',
+    yetkiKodu: 'uts', menuSira: 62,
+  },
+  {
     // STOKTAN TALEP (tur 105): bir birim depodan mal ISTER. Stok ve cari
     //   ETKILEMEZ - asil hareketi, talep karsilaninca kesilen transfer yapar.
     //   Kart transferin kardesi: para yok, e-Belge yok; teslim eden yerine

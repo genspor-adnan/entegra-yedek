@@ -256,6 +256,27 @@ public static partial class KartKatalogu
         //   ait olanlari gosterir ve yenisini buradan acmayi saglar.
         Detaylar: new[]
         {
+            // ÜTS hesabi (223) - sube bazli (kullanici: "e-fatura gibi hem
+            //   merkez hem subeye ozel"): subenin kaydi yoksa fn_uts_hesap
+            //   varsayilan subenin (merkez) hesabina duser. Tek satirlik form
+            //   (stok_uts deseni). TOKEN e-imza ile ÜTS arayuzunde uretilir ve
+            //   buraya kullanici yapistirir - koda/loga asla yazilmaz.
+            new DetayTanimi("uts", "public.uts_hesap", "sube_id", new KartAlani[]
+            {
+                new("aktif",       "aktif",         "mantik",
+                    Baslik: "ÜTS Aktif"),
+                new("testOrtami",  "test_ortami",   "mantik",
+                    Baslik: "Test Ortamı"),
+                new("kurumNo",     "kurum_no",      "metin", EnFazlaUzunluk: 30,
+                    Baslik: "Kurum No (canlı)"),
+                new("token",       "token",         "metin", EnFazlaUzunluk: 4000,
+                    Baslik: "Sistem Token'ı (canlı)"),
+                new("testKurumNo", "test_kurum_no", "metin", EnFazlaUzunluk: 30,
+                    Baslik: "Test Kurum No"),
+                new("testToken",   "test_token",    "metin", EnFazlaUzunluk: 4000,
+                    Baslik: "Test Token'ı")
+            }, Sirala: "sube_id", SubeKolonu: null, LogTabloId: 930, Baslik: "ÜTS"),
+
             new DetayTanimi(
                 Ad: "depolar",
                 Tablo: "public.depo",

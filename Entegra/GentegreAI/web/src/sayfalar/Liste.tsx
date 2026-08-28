@@ -8,6 +8,7 @@ import { type EBelgeMesaji, type Kosul, type ListeSatiri, hataMetni } from '../a
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
+import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
 import { dosyaIndirUrl } from '../bilesenler/indir';
 import { ebelgeCiktisi } from './ebelgeIslem';
 import { gelenBelgeAksiyonu } from './gelenBelgeIslem';
@@ -61,6 +62,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [odaklaSonEklenen, setOdaklaSonEklenen] = useState(0);
   /** Excel'den iceri alma modali (207) - fiyat listesi; null iken kapali. */
   const [iceriAl, setIceriAl] = useState<{ listeId: number; ad: string } | null>(null);
+  // ÜTS alma bildirimi (223): askidaki envanter satirindan modal.
+  const [utsAlma, setUtsAlma] = useState<{ envanterId: number; urunNo: string;
+    kurumUnvan: string; askiAdet: number; seriNo: string } | null>(null);
   // Donusum modali (F8): siparis/irsaliye satirlarindan yeni belge uretir.
   /** Mesaj gecmisi penceresi (178) - null iken kapali. */
   const [eBelgeMesajlari, setEBelgeMesajlari] =
@@ -460,6 +464,60 @@ Bu işlem geri alınamaz. `
                           `${String(satir.ad ?? satir.id)}.xlsx`, true));
           return;
 
+        // ÜTS (223): senkron + alma + iptal + yeniden gonder + detay.
+        case 'uts.senkron':
+          await guvenli(async () => {
+            const y = await api.utsAskidakilerSenkron();
+            mesaj(y.mesaj);
+            setYenile(t => t + 1);
+          });
+          return;
+        case 'uts.al':
+          if (!satir) return;
+          if (Number(satir.durum) !== 1) { mesaj('Bu kayıt askıda değil.'); return }
+          setUtsAlma({
+            envanterId: Number(satir.id),
+            urunNo: String(satir.urunNo ?? ''),
+            kurumUnvan: String(satir.kurumUnvan ?? ''),
+            askiAdet: Number(satir.askiAdet ?? 1),
+            seriNo: String(satir.seriNo ?? ''),
+          });
+          return;
+        case 'uts.iptal': {
+          if (!satir) return;
+          if (Number(satir.tur) === 1) {
+            mesaj("Alma bildirimi ÜTS'de iptal edilemez (karşı taraf verme bildirimini iptal etmelidir).");
+            return;
+          }
+          if (!await onay(`"${String(satir.utsBildirimId ?? satir.id)}" bildirimi ÜTS'de İPTAL edilecek.
+
+Onaylıyor musunuz?`)) return;
+          await guvenli(async () => {
+            const y = await api.utsIptal(Number(satir.id));
+            mesaj(y.mesaj);
+            setYenile(t => t + 1);
+          });
+          return;
+        }
+        case 'uts.yeniden-gonder':
+          if (!satir) return;
+          await guvenli(async () => {
+            const y = await api.utsYenidenGonder(Number(satir.id));
+            mesaj(y.mesaj);
+            setYenile(t => t + 1);
+          });
+          return;
+        case 'uts.detay':
+          if (!satir) return;
+          await guvenli(async () => {
+            const y = await api.utsBildirimDetay(Number(satir.id));
+            const ozet = y.mesajlar.map(m => `${m.tip ?? ''}: ${m.met ?? ''}`).join('\n');
+            mesaj(y.sonuc != null
+              ? JSON.stringify(y.sonuc, null, 2).slice(0, 1500)
+              : (ozet || 'ÜTS detay dönmedi.'));
+          });
+          return;
+
         case 'genel.yazdir': mesaj('Yazdirma henuz baglanmadi.'); return;
       }
 
@@ -696,6 +754,17 @@ Bu işlem geri alınamaz. `
         yukle={(dosya: File) => api.fiyatListesiIceriAl(iceriAl.listeId, dosya)}
         onKapat={() => setIceriAl(null)}
         onAlindi={() => setYenile(t => t + 1)}
+      />
+    )}
+    {utsAlma && (
+      <UtsAlmaModali
+        envanterId={utsAlma.envanterId}
+        urunNo={utsAlma.urunNo}
+        kurumUnvan={utsAlma.kurumUnvan}
+        askiAdet={utsAlma.askiAdet}
+        seriNo={utsAlma.seriNo}
+        onKapat={() => setUtsAlma(null)}
+        onTamam={m => { setUtsAlma(null); mesaj(m); setYenile(t => t + 1) }}
       />
     )}
     {donusum && (

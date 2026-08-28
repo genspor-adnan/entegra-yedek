@@ -678,6 +678,21 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
         />
       )}
 
+      {/* Şube > ÜTS: uts_hesap 1:1 uzanti (223) - grid degil TEK kayit formu.
+          Bir subenin bir ÜTS hesabi olur; token buraya kullanici yapistirir. */}
+      {aktif?.tur === 'detay' && kaynak === 'sube' && aktif.detay.ad === 'uts' && (
+        <TekKayit
+          meta={aktif.detay}
+          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
+          saltOkunur={salt || aktif.detay.saltOkunur}
+          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
+          baslik="ÜTS Hesabı"
+          not={<>Sistem token'ı ÜTS arayüzünde e-imza ile üretilir ve buraya
+               yapıştırılır. Şubenin kaydı yoksa bildirimler MERKEZİN (varsayılan
+               şube) hesabıyla gider. Yeni hesap TEST ortamında başlar.</>}
+        />
+      )}
+
       {/* Stok > Paket: icerik satiri stok arama penceresinden gelir (grid salt
           gorunum) - baslik/cerceve yok, sekmenin adi zaten "Paket". */}
       {aktif?.tur === 'detay' && kaynak === 'stok' && aktif.detay.ad === 'paket' && (
@@ -691,6 +706,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
 
       {aktif?.tur === 'detay' && !(personelGibiKart && aktif.detay.ad === 'ozluk')
         && !(kaynak === 'stok' && (aktif.detay.ad === 'uts' || aktif.detay.ad === 'paket'))
+        && !(kaynak === 'sube' && aktif.detay.ad === 'uts')
         // Hizmet > Fiyatlar: kartin kendi fiyat gridi KALKTI (kullanici) -
         //   sekme yalniz fiyat listelerindeki fiyatlari gosterir (asagida).
         && !(kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar') && (

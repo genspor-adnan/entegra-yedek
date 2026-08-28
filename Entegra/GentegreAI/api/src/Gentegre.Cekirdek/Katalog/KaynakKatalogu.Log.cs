@@ -116,6 +116,9 @@ public static partial class KaynakKatalogu
             when 906 then 'Acil Durum Kişi'
             when 907 then 'Hasta Bilgisi'
             when 908 then 'Kasa İşlemi'
+            when 930 then 'ÜTS Hesabı'
+            when 931 then 'ÜTS Bildirimi'
+            when 932 then 'ÜTS Envanteri'
             else {kolon}::text
         end
         """;
@@ -144,6 +147,7 @@ public static partial class KaynakKatalogu
                 end
             when l.tablo_id = 30 then coalesce(nullif(bt.ad, ''), 'Belge')
             when l.tablo_id = 908 then coalesce(nullif(kit.ad, ''), 'Kasa')
+            when l.tablo_id in (930, 931, 932) then 'ÜTS'
             when l.tablo_id = 88 then 'Stok'
             when l.tablo_id = 903 then 'Rol'
             else ''

@@ -103,6 +103,14 @@ async function ham(yol: string, secenek: RequestInit, jsonGovde: boolean,
   return yanit;
 }
 
+/** ÜTS cevap zarflari (223). */
+export interface UtsMesaji { tip?: string; met?: string; kod?: string }
+export interface UtsSorguYaniti { basarili: boolean; sonuc?: unknown; mesajlar: UtsMesaji[] }
+export interface UtsBildirimYaniti {
+  bildirimId: number; basarili: boolean; utsBildirimId?: string;
+  mesajlar: UtsMesaji[]; mesaj: string;
+}
+
 async function istek<T>(yol: string, secenek: RequestInit = {}): Promise<T> {
   const yanit = await ham(yol, secenek, true);
   if (yanit.status === 204) return undefined as T;
@@ -450,6 +458,30 @@ export const api = {
                                       { deger }, 'PUT').then(y => y.ayarlar),
 
   // Kod listesi yonetimi (219) - ayar combolarinin icerigi.
+  // ÜTS (223) - Saglik Bakanligi Urun Takip Sistemi.
+  utsHesapDurum: () =>
+    istek<{ kurumNo: string; testMi: boolean; url: string;
+            tokenVar: boolean; tokenSonu: string }>('/api/uts/hesap-durum'),
+  utsTekilUrun: (govde: { uno: string; lotNo?: string; seriNo?: string }) =>
+    gonder<UtsSorguYaniti>('/api/uts/sorgu/tekil-urun', govde),
+  utsAyrintili: (govde: { uno?: string; lotNo?: string; seriNo?: string }) =>
+    gonder<UtsSorguYaniti>('/api/uts/sorgu/ayrintili', govde),
+  utsAskidakilerSenkron: () =>
+    gonder<{ toplam: number; kaybolan: number; mesaj: string }>(
+      '/api/uts/askidakiler-senkron', {}),
+  utsAlmaBildir: (govde: { envanterId?: number; vbi?: string; adet?: number }) =>
+    gonder<UtsBildirimYaniti>('/api/uts/bildirim/alma', govde),
+  utsVermeBildir: (govde: Record<string, unknown>) =>
+    gonder<UtsBildirimYaniti>('/api/uts/bildirim/verme', govde),
+  utsKullanimBildir: (govde: Record<string, unknown>) =>
+    gonder<UtsBildirimYaniti>('/api/uts/bildirim/kullanim', govde),
+  utsIptal: (id: number) =>
+    gonder<UtsBildirimYaniti>(`/api/uts/bildirim/${id}/iptal`, {}),
+  utsYenidenGonder: (id: number) =>
+    gonder<UtsBildirimYaniti>(`/api/uts/bildirim/${id}/yeniden-gonder`, {}),
+  utsBildirimDetay: (id: number) =>
+    gonder<UtsSorguYaniti>(`/api/uts/bildirim/${id}/detay-sorgula`, {}),
+
   kodListe: (kod: string) =>
     istek<{ kod: string; degerler: { deger: number; ad: string; sira: number; aktif: number }[] }>(
       `/api/kod-liste/${encodeURIComponent(kod)}`),

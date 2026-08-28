@@ -43,6 +43,7 @@ kurucu.Services.AddSingleton<ReferansDeposu>();
 kurucu.Services.AddScoped<BelgeDeposu>();
 kurucu.Services.AddScoped<KasaDeposu>();
 kurucu.Services.AddScoped<GunlukDeposu>();
+kurucu.Services.AddScoped<UtsDeposu>();
 kurucu.Services.AddSingleton<LogDeposu>();
 kurucu.Services.AddScoped<KimlikServisi>();
 kurucu.Services.AddScoped<BaglamCozucu>();
@@ -114,6 +115,9 @@ Saat.DilimAyarla(kurucu.Configuration["Kurulus:SaatDilimi"]);
 // e-Belge gonderimi entegratore HTTP ile gider: named client, makul zaman asimi
 //   (gonderim entegratorde 1-2 dakika surebiliyor).
 kurucu.Services.AddHttpClient("ebelge", i => i.Timeout = TimeSpan.FromMinutes(2));
+// ÜTS (Saglik Bakanligi Urun Takip Sistemi) - ayni desen (223).
+kurucu.Services.AddHttpClient("uts", i => i.Timeout = TimeSpan.FromMinutes(2));
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.UtsServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EBelgeGonderimi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EBelgeSorgu>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EBelgeGelen>();
@@ -159,5 +163,6 @@ uygulama.KasaUclariniEkle();
 uygulama.FiyatListesiUclariniEkle();
 uygulama.AksiyonUclariniEkle();
 uygulama.KodListeUclariniEkle();
+uygulama.UtsUclariniEkle();
 
 uygulama.Run();
