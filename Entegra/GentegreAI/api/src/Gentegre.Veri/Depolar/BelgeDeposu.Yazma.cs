@@ -27,6 +27,8 @@ public sealed partial class BelgeDeposu
         // Belgenin fiyat listesi (205): uc whitelist'inde vardi ama bu sozlukte
         //   eksikti - istek kabul edilip alan SESSIZCE atlaniyordu.
         ["fiyatListesiId"] = "fiyat_listesi_id",
+        // Teklif durumu (218): Hazirlaniyor/Sunuldu/Kabul/Red/Iptal.
+        ["teklifDurum"] = "teklif_durum",
         ["kdvDurum"] = "kdv_durum", ["belgeDovizi"] = "belge_dovizi",
         ["dovizCinsi"] = "doviz_cinsi", ["dovizKuru"] = "doviz_kuru", ["kur"] = "kur",
         ["raporDovizi"] = "rapor_dovizi", ["ekstreDovizi"] = "ekstre_dovizi",

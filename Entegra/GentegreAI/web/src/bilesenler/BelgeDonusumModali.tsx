@@ -25,6 +25,9 @@ const DIS_NUMARALI = new Set([11]);
  * Yon KAYNAKTAN gelir: alis zincirinde alis hedefleri, satista satis.
  */
 const HEDEFLER: Record<number, { kod: number; ad: string }[]> = {
+  // Satis teklifi (216): teklif YALNIZ siparise donusur (kullanici) -
+  //   taahhut zinciri teklif -> siparis -> irsaliye/fatura sirasiyla yurur.
+  18: [{ kod: 19, ad: 'Satış Siparişi' }],
   // Alis siparisi
   9:  [{ kod: 10, ad: 'Alış İrsaliyesi' }, { kod: 11, ad: 'Alış Faturası' },
        { kod: 12, ad: 'Alış Fişi' }, { kod: 17, ad: 'Alış Tahakkuku' }],

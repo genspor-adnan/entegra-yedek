@@ -21,6 +21,8 @@ export interface BelgeGirdisi {
   vadeGun: string;
   /** Belgeye uygulanan fiyat listesi (205). */
   fiyatListesiId: number | null;
+  /** Teklif durumu (218) - yalniz tur 18'de gonderilir. */
+  teklifDurum?: number;
   senaryo: number;
   satici: Secim | null;
   depo: Secim | null;
@@ -122,7 +124,8 @@ export function belgeGovdesi(g: BelgeGirdisi, dolu: SatirDurumu[], taslak: boole
           vadeGun, subeId, fisCikisMi, depo, girisDepo, alisMi, faturaMi, fisTipi, faturaTipi,
           raporDovizi, ekstreDovizi, belgeKuru, yerelPara, satici,
           senaryo, irsaliyeMi, teslimSekli, aracPlaka, soforAd, sevkTarihi,
-          soforTckn, tasiyici, transferMi, teslimEden, teslimAlan, fiyatListesiId } = g;
+          soforTckn, tasiyici, transferMi, teslimEden, teslimAlan, fiyatListesiId,
+          teklifDurum } = g;
 
 return {
   belge: {
@@ -143,6 +146,7 @@ return {
     dovizKuru: hamSayi(belgeKuru) || 1,
     vadeGun: Number(vadeGun) || 0,
     fiyatListesiId,
+    ...(teklifDurum !== undefined ? { teklifDurum } : {}),
     subeId,
     // Depo ALANI ture gore: alista giris, satista cikis (stok yonu buradan).
     //   TRANSFERDE IKISI DE dolu - tek satir iki depoyu oynatir.

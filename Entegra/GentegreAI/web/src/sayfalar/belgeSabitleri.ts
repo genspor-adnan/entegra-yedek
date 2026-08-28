@@ -140,7 +140,14 @@ export const SEKMELER: {
   { anahtar: 'tahsilat', baslik: 'Tahsilat',   faturaMi: true },   // alista "Ödeme" olur
   { anahtar: 'fatura',   baslik: 'Faturalama', faturaYok: true },
   { anahtar: 'imza',     baslik: 'İmza / Teslim', irsaliye: true },
-  { anahtar: 'yorum',    baslik: 'Yorum / Medya' },
+  // "Yorum / Medya" -> "Resim / Doküman" (kullanici, 218).
+  { anahtar: 'yorum',    baslik: 'Resim / Doküman' },
 ];
+
+/** Teklif durumu (218) - belge.teklif_durum kod uzayi. */
+export const TEKLIF_DURUMLARI: Record<string, string> = {
+  '1': 'Hazırlanıyor', '2': 'Sunuldu', '6': 'Revize',
+  '3': 'Kabul', '4': 'Red', '5': 'İptal',
+};
 
 // sayiOku / tutarMetni de bicim.ts'e tasindi (yukaridaki nota bakin).

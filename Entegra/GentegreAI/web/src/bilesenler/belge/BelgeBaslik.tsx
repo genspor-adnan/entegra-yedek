@@ -1,7 +1,7 @@
 import { GenLookup } from '../GenLookup';
 import { TarafAlani } from '../../sayfalar/BelgeKarti';
 import {
-  LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, SEKMELER,
+  LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, SEKMELER, TEKLIF_DURUMLARI,
 } from '../../sayfalar/belgeSabitleri';
 import type { SatirDurumu } from '../../sayfalar/belgeSatir';
 import type { Secim } from '../../sayfalar/belgeKaydet';
@@ -44,8 +44,11 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     setFisTipi, satirlar, donusumler, setCariArama, setSaticiArama, setPersonelArama,
     kapanmaAlani, bagliSiparisAlani, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
     tahakkukMu, depoBelgesi, stokFisiMi, fisCikisMi, transferMi, talepMi, disNumarali,
-    eBelgeYok, fiyatListeleri, fiyatListesiId, setFiyatListesiId,
+    eBelgeYok, teklifDurum, setTeklifDurum,
   } = p;
+
+  /** Teklif (216): katalog adi 'Teklif' - durum combosu ve sekme adi degisir. */
+  const teklifMi = belgeAdi === 'Teklif';
 
   /**
    * Belge turunun adi - "İrsaliye No" / "Fatura No" / "Sipariş No". Depo
@@ -143,6 +146,18 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
              onChange={e => setTarih(e.target.value)} />
       {alanHatalari.belgeTarihi && <span className="alan-hata">{alanHatalari.belgeTarihi}</span>}
     </label>
+
+    {/* --- 3b) TEKLIF DURUMU (218) - tarih sagina (kullanici). */}
+    {teklifMi && (
+      <label className="alan">
+        <span className="etiket">Durumu</span>
+        <select value={teklifDurum} disabled={kilitli}
+                onChange={e => setTeklifDurum(e.target.value)}>
+          {Object.entries(TEKLIF_DURUMLARI).map(([k, v]) =>
+            <option key={k} value={k}>{v}</option>)}
+        </select>
+      </label>
+    )}
 
     {/* --- 4) e-BELGE ---
         Kavrami OLMAYAN turlerde (siparis, tahakkuk, depo belgesi, stok fisi)
@@ -260,26 +275,15 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       </label>
     )}
 
-    {/* --- 9b) FIYAT LISTESI (205) ---
-        Acilista cariden cozulur; degistirilince satirlar yeniden fiyatlanir.
-        Liste hic tanimlanmamissa hucre CIZILMEZ - bos bir combo kullaniciya
-        cozemeyecegi bir soru sorardi. */}
-    {fiyatListeleri.length > 0 && (
-      <label className="alan">
-        <span className="etiket">Fiyat Listesi</span>
-        <select value={fiyatListesiId ?? ''} disabled={kilitli}
-                onChange={e => setFiyatListesiId(e.target.value ? Number(e.target.value) : null)}>
-          <option value="">(liste yok)</option>
-          {fiyatListeleri.map(l => <option key={l.id} value={l.id}>{l.ad}</option>)}
-        </select>
-      </label>
-    )}
+    {/* Fiyat Listesi combosu ASAGIDA, Rapor Dovizi cercevesinin saginda
+        (kullanici, 218) - KalemSekmesi cizer. */}
 
     {/* --- 10-11) ZINCIR HUCRELERI ---
         Bagli Siparis, Faturalama Durumu'nun SOLUNDA (kullanici).
         Kapanma burada YALNIZ e-Belgeli turlerde: e-Belgesizde 4. hucreyi zaten
-        o dolduruyor (temsilci carinin altina insin diye). */}
-    {!depoBelgesi && !stokFisiMi && bagliSiparisAlani}
+        o dolduruyor (temsilci carinin altina insin diye).
+        Teklifte "Bağlı Sipariş" cizilmez (kullanici) - teklif zincirin BASI. */}
+    {!depoBelgesi && !stokFisiMi && !teklifMi && bagliSiparisAlani}
     {!eBelgeYok && kapanmaGoster && kapanmaAlani}
   </div>
 </div>
@@ -308,7 +312,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     <div key={x.anahtar}
          className={`kat${x.anahtar === aktifSekme ? ' on' : ''}`}
          onClick={() => setAktifSekme(x.anahtar)}>
-      {x.anahtar === 'tahsilat' && alisMi ? 'Ödeme' : x.baslik}
+      {x.anahtar === 'tahsilat' && alisMi ? 'Ödeme'
+        : x.anahtar === 'fatura' && teklifMi ? 'Sipariş' : x.baslik}
       {x.anahtar === 'kalem' && <span className="b">{satirlar.length}</span>}
       {x.anahtar === 'fatura' && donusumler.length > 0 && (
         <span className="b">{donusumler.length}</span>
@@ -336,12 +341,9 @@ export interface BelgeBaslikProps {
   setTarih(v: string): void;
   tarihEnGec: string;
   tarihEnErken?: string;
-  /** Belgeye uygulanan fiyat listesi (205) - bos ise liste kurulmamis demektir. */
-  fiyatListesiId: number | null;
-  /** Liste degisince TUM satirlar yeniden fiyatlanir (cagiran yapar). */
-  setFiyatListesiId(v: number | null): void;
-  /** Belge YONUNDEKI secilebilir listeler (alis belgesinde alis listeleri). */
-  fiyatListeleri: { id: number; ad: string }[];
+  /** Teklif durumu (218) - yalniz teklifte cizilir (Hazirlaniyor/Sunuldu/...). */
+  teklifDurum: string;
+  setTeklifDurum(v: string): void;
   vadeGun: string;
   setVadeGun(v: string): void;
   cari: { id: number; unvan: string } | null;

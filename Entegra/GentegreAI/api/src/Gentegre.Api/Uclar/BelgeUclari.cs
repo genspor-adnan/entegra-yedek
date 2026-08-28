@@ -546,7 +546,7 @@ public static class BelgeUclari
         "saticiId" or "teslimSekli" or "merkezId" or "tasiyiciId" or "teslimEdenId" or
         // Belgenin fiyat listesi (205): acilista cariden cozulur, kullanici
         //   degistirirse satirlar EKRANDA yeniden fiyatlanir (BelgeKarti.listeDegisti).
-        "teslimAlanId" or "fiyatListesiId" => "sayi",
+        "teslimAlanId" or "fiyatListesiId" or "teklifDurum" => "sayi",
 
         "dovizKuru" => "para",
 

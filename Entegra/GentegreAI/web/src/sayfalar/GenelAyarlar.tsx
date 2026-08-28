@@ -55,6 +55,15 @@ export function GenelAyarlar() {
               <h6>Genel</h6>
               <div className="alan-izgara tek-sutun ayar-formu">
                 {alan('genel.yerel_para', 'Yerel para birimi', { tip: 'metin' })}
+                {/* Urun modu (215): menu/marka/mesaj basliklari buna gore.
+                    Degisiklik acik oturumlara SONRAKI giris/yenilemede iner. */}
+                {alan('genel.urun_modu', 'Ürün modu', {
+                  tip: 'secenek',
+                  secenekler: [
+                    { deger: '1', ad: 'Gentegre AI (ERP)' },
+                    { deger: '2', ad: 'GenoTIP AI (HBYS)' },
+                  ],
+                })}
               </div>
             </div>
 

@@ -18,6 +18,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     kilitli, bilgi, onizleme, sonuc, transferBaslikEksigi,
     depoBelgesi, stokFisiMi, talepMi,
     setStokArama, setKalem, seciliSil, satirTikla, sonTiklanan, secimDegis, doviz,
+    fiyatListesi,
   } = p;
 
   const yerelPara = doviz?.yerelPara ?? 'TL';
@@ -343,6 +344,23 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
   </div>
 )}
 
+{/* FIYAT LISTESI (218): basliktan buraya tasindi - doviz cercevesinin
+    SAGINDA (kullanici). Degistirilince satirlar yeniden fiyatlanir. */}
+{fiyatListesi && fiyatListesi.listeler.length > 0 && (
+  <div className="kagrup belge-doviz">
+    <div className="alan-izgara tek-sutun">
+      <label className="alan">
+        <span className="etiket">Fiyat Listesi</span>
+        <select value={fiyatListesi.seciliId ?? ''} disabled={kilitli}
+                onChange={e => fiyatListesi.sec(e.target.value ? Number(e.target.value) : null)}>
+          <option value="">(liste yok)</option>
+          {fiyatListesi.listeler.map(l => <option key={l.id} value={l.id}>{l.ad}</option>)}
+        </select>
+      </label>
+    </div>
+  </div>
+)}
+
 {(
 <div className="kagrup dip-toplam">
   {/* BASLIK YOK (kullanici): cerceve ve kolon basliklari zaten neyin ne
@@ -429,6 +447,13 @@ export interface KalemSekmesiProps {
   /** Son tiklanan satirin SIRASI - Shift araligi bunun uzerinden hesaplanir. */
   sonTiklanan: React.MutableRefObject<number | null>;
   secimDegis(anahtar: number): void;
+  /** Fiyat listesi (205/218): doviz cercevesinin SAGINDA cizilir (kullanici).
+      Liste hic kurulmamissa verilmez, kutu cizilmez. */
+  fiyatListesi?: {
+    listeler: { id: number; ad: string }[];
+    seciliId: number | null;
+    sec(v: number | null): void;
+  };
   /** Rapor / ekstre dovizi kutusu (134). Verilmezse kutu cizilmez. */
   doviz?: {
     raporDovizi: string;

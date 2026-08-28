@@ -481,11 +481,15 @@ export function Kabuk() {
               </div>
             </div>
 
+            {/* STANDART ALT SERIT (kullanici): modallarin ortak deseni -
+                solda Iptal (d kapat-dugmesi), sagda birincil Kaydet (d bir). */}
             <div className="kaalt">
-              <button className="bas" onClick={() => void ayarTamam()} disabled={ayarKaydediliyor}>
-                {ayarKaydediliyor ? 'Kaydediliyor...' : 'Tamam'}
+              <button className="d kapat-dugmesi" onClick={ayarKapat}
+                      disabled={ayarKaydediliyor}>İptal</button>
+              <button className="d bir" onClick={() => void ayarTamam()}
+                      disabled={ayarKaydediliyor}>
+                {ayarKaydediliyor ? 'Kaydediliyor…' : 'Kaydet'}
               </button>
-              <button onClick={ayarKapat} disabled={ayarKaydediliyor}>İptal</button>
             </div>
           </div>
         </div>

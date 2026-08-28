@@ -261,6 +261,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   revizyon/onay akisi ileride; ilk surum ekle/ac/sil.
     kaynak: 'belge', rota: 'teklif', baslik: 'Satış Teklifleri', yol: 'Satis › Satış Teklifleri',
     aksiyonEkrani: 'teklif-liste', yeniBelgeTuru: 18,
+    // Teklif yalniz Gentegre AI (ERP) modunda (kullanici).
+    urunModu: 1,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 18 },
     // e-Fatura/kapanma teklif icin anlamsiz.
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'kapanmaAdi', 'kapanmaDurum'],

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 /**
  * Kart/pencere kabugu - kart ekranlari ve secim pencereleri ayni cerceveyi
@@ -23,6 +23,21 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, onKapat,
     return () => window.removeEventListener('keydown', tus);
   }, [onKapat]);
 
+  // YUKSEKLIK KILIDI (kullanici): sekme degisince pencere ALCALMASIN -
+  //   icerik buyudukce yukselir, o yukseklik minHeight olarak korunur.
+  //   Pencere basina yasar; kapaninca ref'le birlikte gider.
+  const govdeRef = useRef<HTMLDivElement | null>(null);
+  const enYuksek = useRef(0);
+  useLayoutEffect(() => {
+    const el = govdeRef.current;
+    if (!el) return;
+    const h = el.scrollHeight;
+    if (h > enYuksek.current) {
+      enYuksek.current = h;
+      el.style.minHeight = `${h}px`;
+    }
+  });
+
   return (
     <div className="kaperde" onMouseDown={e => { if (e.target === e.currentTarget) onKapat?.() }}>
       <div className={`kawin${dar ? '' : ' genis'}`} onMouseDown={e => e.stopPropagation()}>
@@ -35,7 +50,7 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, onKapat,
         <div className="katoolbar">{alt}</div>
         {ustSerit}
         {sekmeBar}
-        <div className="kagov">{children}</div>
+        <div className="kagov" ref={govdeRef}>{children}</div>
       </div>
     </div>
   );

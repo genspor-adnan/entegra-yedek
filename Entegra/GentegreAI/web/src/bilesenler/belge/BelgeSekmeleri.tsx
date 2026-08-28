@@ -190,19 +190,21 @@ export function EBelgeSekmesi({
   );
 }
 
-export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum }: {
+export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi }: {
   donusumler: Record<string, unknown>[];
   kayitliId: number;
   /** Donusum modalini acar; 0 = hedefi modal secsin (ilk hedef). */
   setDonusum(v: number | null): void;
+  /** Teklifte sekme "Sipariş"tir ve tek hedef siparis (216). */
+  teklifMi?: boolean;
 }) {
   return (
   <div className="kagrup">
     <h6>
-      Faturalama
+      {teklifMi ? 'Sipariş' : 'Faturalama'}
       {kayitliId > 0 && (
         <button type="button" className="d bir" onClick={() => setDonusum(0)}>
-          🧾 Faturaya Dönüştür
+          {teklifMi ? '📋 Siparişe Dönüştür' : '🧾 Faturaya Dönüştür'}
         </button>
       )}
     </h6>
