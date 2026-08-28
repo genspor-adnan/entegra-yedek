@@ -686,7 +686,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           durum={detaylar[aktif.detay.ad] ?? bosDetay()}
           saltOkunur={salt || aktif.detay.saltOkunur}
           onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
-          baslik="ÜTS Hesabı"
+          // SOLDA canli hesap, SAGDA test cercevesi (kullanici).
+          gruplar={[
+            { baslik: 'ÜTS Hesabı', alanlar: ['aktif', 'kurumNo', 'token'] },
+            { baslik: 'ÜTS Hesabı Test',
+              alanlar: ['testOrtami', 'testKurumNo', 'testToken'] },
+          ]}
           not={<>Sistem token'ı ÜTS arayüzünde e-imza ile üretilir ve buraya
                yapıştırılır. Şubenin kaydı yoksa bildirimler MERKEZİN (varsayılan
                şube) hesabıyla gider. Yeni hesap TEST ortamında başlar.</>}

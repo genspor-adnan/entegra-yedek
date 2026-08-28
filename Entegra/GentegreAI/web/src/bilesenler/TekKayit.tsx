@@ -12,6 +12,10 @@ interface Props {
   baslik?: string;
   /** Kutunun altinda aciklama satiri. */
   not?: React.ReactNode;
+  /** Verilirse alanlar TEK kutu yerine YAN YANA kutulara bolunur (or. sube
+      ÜTS: solda canli hesap, sagda test hesabi). Listede olmayan alan
+      cizilmez; not SON kutunun altina gider. */
+  gruplar?: { baslik: string; alanlar: string[] }[];
 }
 
 /**
@@ -26,7 +30,7 @@ interface Props {
  * Kayit satiri yoksa BOS bir satir uzerinde calisilir; kullanici bir alani
  * doldurup Kaydet derse detay farkinda "eklenen" olarak gider.
  */
-export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not }: Props) {
+export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, gruplar }: Props) {
   const satir: Satir = durum.guncel[0] ?? {};
 
   const degis = (ad: string, deger: unknown) => {
@@ -70,17 +74,38 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not }: Prop
     );
   };
 
+  const alanCiz = (a: KartAlanMeta) => (
+    <label key={a.ad} className={`alan tip-${a.tip}`}>
+      <span className="etiket">{a.baslik}</span>
+      {girdi(a)}
+    </label>
+  );
+  const alanlar = meta.alanlar.filter(a => a.ad !== 'id' && !a.gizli);
+
+  if (gruplar?.length) {
+    const bul = new Map(alanlar.map(a => [a.ad, a]));
+    return (
+      <div className="kasira">
+        {gruplar.map((g, i) => (
+          <div key={g.baslik} className="kagrup">
+            <h6>{g.baslik}</h6>
+            <div className="alan-izgara tek-sutun">
+              {g.alanlar.map(ad => bul.get(ad)).filter((a): a is KartAlanMeta => !!a)
+                .map(alanCiz)}
+            </div>
+            {not && i === gruplar.length - 1 && <div className="not">{not}</div>}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="kasira">
       <div className="kagrup">
         <h6>{baslik ?? meta.baslik}</h6>
         <div className="alan-izgara tek-sutun">
-          {meta.alanlar.filter(a => a.ad !== 'id' && !a.gizli).map(a => (
-            <label key={a.ad} className={`alan tip-${a.tip}`}>
-              <span className="etiket">{a.baslik}</span>
-              {girdi(a)}
-            </label>
-          ))}
+          {alanlar.map(alanCiz)}
         </div>
         {not && <div className="not">{not}</div>}
       </div>

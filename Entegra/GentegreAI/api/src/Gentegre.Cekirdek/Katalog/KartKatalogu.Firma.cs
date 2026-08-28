@@ -264,7 +264,7 @@ public static partial class KartKatalogu
             new DetayTanimi("uts", "public.uts_hesap", "sube_id", new KartAlani[]
             {
                 new("aktif",       "aktif",         "mantik",
-                    Baslik: "ÜTS Aktif"),
+                    Baslik: "ÜTS Hesabı Aktif"),
                 new("testOrtami",  "test_ortami",   "mantik",
                     Baslik: "Test Ortamı"),
                 new("kurumNo",     "kurum_no",      "metin", EnFazlaUzunluk: 30,
