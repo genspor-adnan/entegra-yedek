@@ -347,7 +347,9 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
 {/* FIYAT LISTESI (218): basliktan buraya tasindi - doviz cercevesinin
     SAGINDA (kullanici). Degistirilince satirlar yeniden fiyatlanir. */}
 {fiyatListesi && fiyatListesi.listeler.length > 0 && (
-  <div className="kagrup belge-doviz">
+  // marginRight:auto - kutu SOLDAKI doviz cercevesine yanasik durur,
+  //   dip toplam sagda kalir (kullanici).
+  <div className="kagrup belge-doviz" style={{ marginRight: 'auto' }}>
     <div className="alan-izgara tek-sutun">
       <label className="alan">
         <span className="etiket">Fiyat Listesi</span>

@@ -176,10 +176,12 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
           : <span className="rozet">gönderilmedi</span>}
       </span>
     </label>
-    ) : depoBelgesi || stokFisiMi ? null : kapanmaGoster ? kapanmaAlani : (
+    ) : depoBelgesi || stokFisiMi || teklifMi ? null : kapanmaGoster ? kapanmaAlani : (
       /* e-Belgesi de kapanmasi da olmayan tur (tahakkuk): hucre BOS BIRAKILIR.
          Yoksa temsilci yukari, 1. satirin sonuna kayardi - kullanici temsilciyi
-         her turde CARININ ALTINDA istiyor. */
+         her turde CARININ ALTINDA istiyor. Teklifte yer tutucuya gerek yok:
+         4. hucreyi zaten Durumu combosu dolduruyor - fazladan bos hucre
+         2. sirayi bir saga kaydiriyordu (kullanici). */
       <span className="alan" aria-hidden />
     )}
 
