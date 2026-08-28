@@ -9,6 +9,7 @@ import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
 import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
+import { UtsVermeModali, UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
 import { dosyaIndirUrl } from '../bilesenler/indir';
 import { ebelgeCiktisi } from './ebelgeIslem';
 import { gelenBelgeAksiyonu } from './gelenBelgeIslem';
@@ -65,6 +66,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // ÜTS alma bildirimi (223): askidaki envanter satirindan modal.
   const [utsAlma, setUtsAlma] = useState<{ envanterId: number; urunNo: string;
     kurumUnvan: string; askiAdet: number; seriNo: string } | null>(null);
+  const [utsVerme, setUtsVerme] = useState(false);
+  const [utsKullanim, setUtsKullanim] = useState(false);
   // Donusum modali (F8): siparis/irsaliye satirlarindan yeni belge uretir.
   /** Mesaj gecmisi penceresi (178) - null iken kapali. */
   const [eBelgeMesajlari, setEBelgeMesajlari] =
@@ -465,6 +468,8 @@ Bu işlem geri alınamaz. `
           return;
 
         // ÜTS (223): senkron + alma + iptal + yeniden gonder + detay.
+        case 'uts.verme':    setUtsVerme(true); return;
+        case 'uts.kullanim': setUtsKullanim(true); return;
         case 'uts.senkron':
           await guvenli(async () => {
             const y = await api.utsAskidakilerSenkron();
@@ -754,6 +759,18 @@ Onaylıyor musunuz?`)) return;
         yukle={(dosya: File) => api.fiyatListesiIceriAl(iceriAl.listeId, dosya)}
         onKapat={() => setIceriAl(null)}
         onAlindi={() => setYenile(t => t + 1)}
+      />
+    )}
+    {utsVerme && (
+      <UtsVermeModali
+        onKapat={() => setUtsVerme(false)}
+        onTamam={m => { setUtsVerme(false); mesaj(m); setYenile(t => t + 1) }}
+      />
+    )}
+    {utsKullanim && (
+      <UtsKullanimModali
+        onKapat={() => setUtsKullanim(false)}
+        onTamam={m => { setUtsKullanim(false); mesaj(m); setYenile(t => t + 1) }}
       />
     )}
     {utsAlma && (

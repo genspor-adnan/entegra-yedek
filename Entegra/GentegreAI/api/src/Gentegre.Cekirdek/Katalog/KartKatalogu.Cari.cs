@@ -48,6 +48,8 @@ public static partial class KartKatalogu
             new("faturaUnvan", "fatura_unvan", "metin", EnFazlaUzunluk: 200, Baslik: "Fatura Unvani", Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
             new("vkno",        "vkno",         "metin", EnFazlaUzunluk: 20,  Baslik: "VKN / TCKN",     Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
             new("vd",          "vd",           "metin", EnFazlaUzunluk: 60,  Baslik: "Vergi Dairesi",  Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
+            // ÜTS verme bildiriminde KUN buradan okunur (225).
+            new("utsKurumNo",  "uts_kurum_no", "metin", EnFazlaUzunluk: 30,  Baslik: "ÜTS Kurum No",   Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
             new("efatura",     "efatura",      "mantik", Baslik: "e-Fatura mukellefi", Grup: "Fatura Bilgileri", AltGrup: "e-Belge Ayarlari"),
             new("aliasEposta", "alias_eposta", "metin", EnFazlaUzunluk: 200, Baslik: "Alias / e-Posta", Grup: "Fatura Bilgileri", AltGrup: "e-Belge Ayarlari"),
             // FIYAT LISTESI (204). IKI AYRI ALAN: bir cari hem musteri hem

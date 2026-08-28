@@ -30,13 +30,30 @@ export function UtsSorgu() {
   const sorgula = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!uno.trim()) { setHata('Ürün numarası (UNO) girin.'); return }
+    await calistir(() => api.utsTekilUrun({
+      uno: uno.trim(),
+      lotNo: lotNo.trim() || undefined,
+      seriNo: seriNo.trim() || undefined,
+    }));
+  };
+
+  // Ayrintili sorgu DENEYSEL uc (sozlesme s170) - yalniz rapor; UNO/LNO/SNO
+  //   herhangi biriyle calisir.
+  const ayrintili = async () => {
+    if (!uno.trim() && !lotNo.trim() && !seriNo.trim()) {
+      setHata('Ayrıntılı sorgu için UNO, LNO ya da SNO girin.'); return;
+    }
+    await calistir(() => api.utsAyrintili({
+      uno: uno.trim() || undefined,
+      lotNo: lotNo.trim() || undefined,
+      seriNo: seriNo.trim() || undefined,
+    }));
+  };
+
+  const calistir = async (f: () => Promise<UtsSorguYaniti>) => {
     setSorguluyor(true); setHata(''); setYanit(null);
     try {
-      setYanit(await api.utsTekilUrun({
-        uno: uno.trim(),
-        lotNo: lotNo.trim() || undefined,
-        seriNo: seriNo.trim() || undefined,
-      }));
+      setYanit(await f());
     } catch (h) {
       setHata(h instanceof Error ? h.message : String(h));
     } finally {
@@ -87,9 +104,16 @@ export function UtsSorgu() {
             </label>
             <label className="alan">
               <span className="etiket">&nbsp;</span>
-              <button type="submit" className="d bir" disabled={sorguluyor}>
-                {sorguluyor ? 'Sorgulanıyor…' : '🔍 ÜTS’de Sorgula'}
-              </button>
+              <span className="ikili">
+                <button type="submit" className="d bir" disabled={sorguluyor}>
+                  {sorguluyor ? 'Sorgulanıyor…' : '🔍 ÜTS’de Sorgula'}
+                </button>
+                <button type="button" className="d" disabled={sorguluyor}
+                        title="Deneysel ayrıntılı tekil ürün servisi"
+                        onClick={() => void ayrintili()}>
+                  Ayrıntılı
+                </button>
+              </span>
             </label>
           </form>
         </div>

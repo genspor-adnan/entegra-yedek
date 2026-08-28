@@ -25,6 +25,8 @@ public static partial class KaynakKatalogu
             new("unvan",        "t.unvan",         "metin", "Unvan"),
             new("faturaUnvan",  "t.fatura_unvan",  "metin", "Fatura Unvani", Varsayilan: false),
             new("vkno",         "t.vkno",          "metin", "VKN/TCKN"),
+            new("utsKurumNo",   "t.uts_kurum_no",  "metin", "ÜTS Kurum No", Genislik: 110,
+                                                                            Varsayilan: false),
             new("vd",           "t.vd",            "metin", "Vergi Dairesi", Varsayilan: false),
             new("telefon",      "t.telefon",       "metin", "Telefon"),
             new("cepTel",       "t.cep_tel",       "metin", "Cep",           Varsayilan: false),
