@@ -279,8 +279,10 @@ function SonucListesi({ kayitlar }: { kayitlar: Record<string, unknown>[] }) {
                       stopPropagation SART: tik window'a kabarirsa GridMenu'nun
                       "disari tiklandi" dinleyicisi menuyu ANINDA kapatiyordu. */}
                   {i === 0 && (
-                    <button type="button" className="d" title="Grid menüsü"
-                            style={{ padding: '0 6px', marginRight: 6 }}
+                    <button type="button" title="Grid menüsü"
+                            style={{ padding: '0 6px', marginRight: 6,
+                                     border: 'none', background: 'transparent',
+                                     cursor: 'pointer', fontWeight: 700 }}
                             onClick={e => {
                               e.stopPropagation();
                               const r = e.currentTarget.getBoundingClientRect();
