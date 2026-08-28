@@ -334,20 +334,50 @@ public sealed class UtsServisi
         object? son = null;
         foreach (var varyant in varyantlar)
         {
-            var istek = new
+            // SAY sayfalamasi: TUM sayfalar toplanir (100'erlik; Delphi de
+            //   boyle geziyordu) - tek sayfada kalinca "411'in 100'u" gorunuyordu.
+            var tumu = new List<object>();
+            var mesajlar = new List<UtsMesaj>();
+            var basarili = true;
+            for (var sayfa = 0; sayfa < 100; sayfa++)   // emniyet: 10.000 kayit
             {
-                UNO = varyant,
-                LNO = string.IsNullOrWhiteSpace(lotNo) ? null : lotNo!.Trim(),
-                SNO = string.IsNullOrWhiteSpace(seriNo) ? null : seriNo!.Trim(),
-                ADT = (int?)100, SAY = (int?)0
-            };
-            var govde = JsonSerializer.Serialize(istek, UtsJson.Ayarlar);
-            var (httpKodu, cevap) = await UtsIstemcisi.PostAsync(
-                Istemci(), hesap, YolAyrintili, govde, "ÜTS ayrıntılı ürün sorgusu", iptal);
-            son = SorguYaniti(httpKodu, cevap);
-            if (SonucDoluMu(son)) return son;
+                var istek = new
+                {
+                    UNO = varyant,
+                    LNO = string.IsNullOrWhiteSpace(lotNo) ? null : lotNo!.Trim(),
+                    SNO = string.IsNullOrWhiteSpace(seriNo) ? null : seriNo!.Trim(),
+                    ADT = (int?)100, SAY = (int?)sayfa
+                };
+                var govde = JsonSerializer.Serialize(istek, UtsJson.Ayarlar);
+                var (httpKodu, cevap) = await UtsIstemcisi.PostAsync(
+                    Istemci(), hesap, YolAyrintili, govde, "ÜTS ayrıntılı ürün sorgusu", iptal);
+                mesajlar.AddRange(UtsIstemcisi.MesajlariAyikla(cevap));
+                if (httpKodu != 200) { basarili = tumu.Count > 0; break; }
+                var parca = SayfaKayitlari(cevap);
+                if (parca.Count == 0) break;
+                tumu.AddRange(parca);
+                if (parca.Count < 100) break;           // son sayfa
+            }
+            son = new { basarili, sonuc = tumu, mesajlar };
+            if (tumu.Count > 0) return son;
         }
         return son!;
+
+        static List<object> SayfaKayitlari(string cevap)
+        {
+            var liste = new List<object>();
+            try
+            {
+                using var belge = JsonDocument.Parse(cevap);
+                if (belge.RootElement.ValueKind == JsonValueKind.Object
+                    && belge.RootElement.TryGetProperty("SNC", out var snc)
+                    && snc.ValueKind == JsonValueKind.Array)
+                    foreach (var e in snc.EnumerateArray())
+                        liste.Add(JsonSerializer.Deserialize<object>(e.GetRawText())!);
+            }
+            catch (JsonException) { }
+            return liste;
+        }
     }
 
     private static object SorguYaniti(int httpKodu, string cevap)

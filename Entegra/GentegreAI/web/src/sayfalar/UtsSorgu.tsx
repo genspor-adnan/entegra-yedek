@@ -125,19 +125,29 @@ export function UtsSorgu() {
 
         <div className="kagrup" style={{ maxWidth: 980 }}>
           <h6>Sorgu</h6>
-          <form id="uts-sorgu-form" className="alan-izgara" onSubmit={sorgula}>
-            <label className="alan">
-              <span className="etiket zorunlu-isaret">Ürün No (UNO)</span>
-              <input value={uno} maxLength={23} autoFocus
+          {/* Izgara degil FLEX: editler dar (%35 kisik) ve SOLA yanasik
+              (kullanici) - izgara kolonlari genise dagitiyordu. */}
+          <form id="uts-sorgu-form" onSubmit={sorgula}
+                style={{ display: 'flex', gap: 18, flexWrap: 'wrap',
+                         alignItems: 'center', padding: 10 }}>
+            <label className="alan" style={{ display: 'flex', gap: 8,
+                                             alignItems: 'center' }}>
+              <span className="etiket zorunlu-isaret"
+                    style={{ whiteSpace: 'nowrap' }}>Ürün No (UNO)</span>
+              <input value={uno} maxLength={23} autoFocus style={{ width: 170 }}
                      onChange={e => setUno(e.target.value)} />
             </label>
-            <label className="alan">
-              <span className="etiket">Lot No (LNO)</span>
-              <input value={lotNo} maxLength={20} onChange={e => setLotNo(e.target.value)} />
+            <label className="alan" style={{ display: 'flex', gap: 8,
+                                             alignItems: 'center' }}>
+              <span className="etiket" style={{ whiteSpace: 'nowrap' }}>Lot No (LNO)</span>
+              <input value={lotNo} maxLength={20} style={{ width: 140 }}
+                     onChange={e => setLotNo(e.target.value)} />
             </label>
-            <label className="alan">
-              <span className="etiket">Seri No (SNO)</span>
-              <input value={seriNo} maxLength={20} onChange={e => setSeriNo(e.target.value)} />
+            <label className="alan" style={{ display: 'flex', gap: 8,
+                                             alignItems: 'center' }}>
+              <span className="etiket" style={{ whiteSpace: 'nowrap' }}>Seri No (SNO)</span>
+              <input value={seriNo} maxLength={20} style={{ width: 140 }}
+                     onChange={e => setSeriNo(e.target.value)} />
             </label>
           </form>
           {/* Butonlar izgara HUCRESINDE degil (kirpiliyordu) - kutunun altinda
