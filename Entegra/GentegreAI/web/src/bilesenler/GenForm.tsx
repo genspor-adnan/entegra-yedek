@@ -441,6 +441,47 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
     }
   }
 
+  /**
+   * FIYAT LISTESI SATIR MODALI EKRAN KURALI (kullanici):
+   *  - Carpan degisince fiyat = taban fiyat x carpan (yuvarlama satirdan,
+   *    bossa basligin kuralindan) ve Yazim MANUEL olur - uretim artik ezmez.
+   *  - Yazim HESAP'a cevrilince fiyat basligin kuralindan yeniden hesaplanir,
+   *    carpan basligin carpanina doner.
+   * Ayni kural DB tetiginde son otorite olarak da durur; buradaki kopya
+   * kullanicinin sonucu KAYDETMEDEN gormesi ve fiyat/yazim'in istekle
+   * birlikte gidip ISLEM LOGUNA yazilmasi icindir.
+   */
+  function fiyatSatirKurali(alan: string, v: unknown, taslak: Record<string, unknown>) {
+    const yuvarla = (tutar: number, yonHam: unknown, adimHam: unknown) => {
+      const yon = Number(yonHam ?? 0);
+      const adim = hamSayi(adimHam) || 1;
+      if (!yon || adim <= 0) return tutar;
+      if (yon === 1) return Math.ceil(tutar / adim) * adim;
+      if (yon === 2) return Math.floor(tutar / adim) * adim;
+      if (yon === 3) return Math.round(tutar / adim) * adim;
+      return tutar;
+    };
+    const metin = (s: number) => String(Math.round(s * 10000) / 10000);
+    const taban = hamSayi(taslak.tabanFiyat);
+
+    if (alan === 'carpan') {
+      const carpan = hamSayi(v);
+      if (carpan <= 0 || taban <= 0) return { yazim: '1' };
+      const bos = (d: unknown) => d === '' || d === null || d === undefined;
+      const yon  = bos(taslak.yuvarlama)      ? deger.yuvarlama      : taslak.yuvarlama;
+      const adim = bos(taslak.yuvarlamaBirim) ? deger.yuvarlamaBirim : taslak.yuvarlamaBirim;
+      return { fiyat: metin(yuvarla(taban * carpan, yon, adim)), yazim: '1' };
+    }
+    if (alan === 'yazim' && String(v) === '2' && taban > 0) {
+      const carpan = hamSayi(deger.carpan) || 1;
+      return {
+        fiyat: metin(yuvarla(taban * carpan, deger.yuvarlama, deger.yuvarlamaBirim)),
+        carpan: metin(carpan),
+      };
+    }
+    return null;
+  }
+
   if (yukleniyor)
     return (
       <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} alt={<button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
@@ -648,6 +689,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           //   dugumu sekmeyi donduruyordu ("Satirlar acilmiyor").
           modalDuzenle={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'}
           ikonlu={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'}
+          taslakKural={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
+            ? fiyatSatirKurali : undefined}
         />
       )}
 

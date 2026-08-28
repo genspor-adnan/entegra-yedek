@@ -622,7 +622,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Hizmetler KASA'dan STOK menusune alindi (kullanici): hizmet de belgede
     //   satilan bir kalem - stokla ayni yerde aranir. Masraf Listesi kasada
     //   kaldi: o satis kalemi degil, gider kalemi.
-    kaynak: 'hizmet', baslik: 'Hizmetler', yol: 'Stok › Hizmetler', cipler: DURUM_CIPLERI,
+    // kartYolu + aksiyonEkrani (kullanici): ekle/duzenle deseni - hizmet karti
+    //   generic GenForm ile acilir, aksiyonlar hizmet-liste Crud'undan gelir.
+    kaynak: 'hizmet', baslik: 'Hizmetler', yol: 'Stok › Hizmetler', kartYolu: '/hizmet',
+    aksiyonEkrani: 'hizmet-liste', cipler: DURUM_CIPLERI,
     menuGrup: 'Stok & Hizmet', menuAd: 'Hizmet Listesi', ic: '🛠️', yetkiKodu: 'hizmet',
   },
   {

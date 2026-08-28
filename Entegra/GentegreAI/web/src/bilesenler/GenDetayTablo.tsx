@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Modal } from './Modal';
-import { para } from './bicim';
+import { para4 } from './bicim';
 import type { DetayFarki, KartDetayMeta } from '../api/sozlesme';
 import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 import { TelefonGirdi } from './TelefonGirdi';
@@ -73,6 +73,13 @@ interface Props {
       birlikte gosterir. Veri akisi degismez - degisiklik yine kartin
       Kaydet'iyle gider. */
   modalDuzenle?: boolean;
+  /** Modal taslaginda bir alan degisince EKRAN kurali calistirir: donen
+      alanlar taslagin ustune yazilir (ör. fiyat listesi satirinda carpan
+      degisince fiyat = taban x carpan ve Yazim = Manuel). Boylece turetilen
+      alanlar da Kaydet'le sunucuya gider ve islem loguna girer; DB tetigi
+      ayni kurali son otorite olarak yine uygular. */
+  taslakKural?: (alan: string, deger: unknown,
+                 taslak: Record<string, unknown>) => Record<string, unknown> | null;
 }
 
 // Adresler grid'ine ozel kolon genislikleri (kullanici: "Adres geniş, İl/İlçe aynı
@@ -98,7 +105,7 @@ const EGITIM_GECERLILIK = ['Süresiz', 'Süreli'];
 const tarihYilTemizle = (deger: string) => deger.replace(/[^0-9./-]/g, '').slice(0, 10);
 
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
-                               modalDuzenle }: Props) {
+                               modalDuzenle, taslakKural }: Props) {
   const alanlar = meta.alanlar.filter(a => a.ad !== 'id');
   const yerler = useYerler(meta.ad === 'adresler');
   const adresGrid = meta.ad === 'adresler';
@@ -119,7 +126,9 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
     if (a.kodlar) return a.kodlar[String(d ?? '')] ?? '';
     if (a.tip === 'para' && d !== null && d !== undefined && d !== '') {
       const s = Number(d);
-      if (Number.isFinite(s)) return para.format(s);
+      // para4: iki haneye EZMEZ - carpan 7,0092'yi 7,01 gostermek yaniltir;
+      //   tutarlar zaten iki hanede gelir, fazladan hane basilmaz.
+      if (Number.isFinite(s)) return para4.format(s);
     }
     return String(d ?? '');
   };
@@ -128,6 +137,13 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
     setTaslak(i === 'yeni' ? bosSatir() : { ...durum.guncel[i] });
     setModalSatir(i);
   };
+
+  /** Modal taslagina yazar; varsa ekran kuralinin turettigi alanlari da isler. */
+  const taslakYaz = (alan: string, deger: unknown) =>
+    setTaslak(t => {
+      const yeni = { ...t, [alan]: deger };
+      return { ...yeni, ...(taslakKural?.(alan, deger, yeni) ?? {}) };
+    });
 
   const modalKaydet = () => {
     if (modalSatir === null) return;
@@ -404,7 +420,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                     <>
                       <input type="checkbox" disabled={!a.yazilabilir}
                              checked={Number(taslak[a.ad]) === 1 || taslak[a.ad] === true}
-                             onChange={e => setTaslak(t => ({ ...t, [a.ad]: e.target.checked ? 1 : 0 }))} />
+                             onChange={e => taslakYaz(a.ad, e.target.checked ? 1 : 0)} />
                       <span className="etiket">{a.baslik}</span>
                     </>
                   ) : (
@@ -413,7 +429,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                       <span className="ikili">
                         {a.kodlar ? (
                           <select value={String(taslak[a.ad] ?? '')} disabled={!a.yazilabilir}
-                                  onChange={e => setTaslak(t => ({ ...t, [a.ad]: e.target.value }))}>
+                                  onChange={e => taslakYaz(a.ad, e.target.value)}>
                             <option value="">—</option>
                             {Object.entries(a.kodlar).map(([k, v]) => (
                               <option key={k} value={k}>{v}</option>
@@ -423,7 +439,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                           <input className="genis-deger" value={String(taslak[a.ad] ?? '')}
                                  maxLength={a.enFazlaUzunluk ?? undefined}
                                  disabled={!a.yazilabilir}
-                                 onChange={e => setTaslak(t => ({ ...t, [a.ad]: e.target.value }))} />
+                                 onChange={e => taslakYaz(a.ad, e.target.value)} />
                         )}
                       </span>
                     </>
