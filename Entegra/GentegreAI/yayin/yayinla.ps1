@@ -77,9 +77,15 @@ if ($Yalniz -in @('hepsi','api')) {
 # -------------------------------------------------------------------- db ----
 # Goc dosyalari her yayinla gider; sunucu hangilerinin uygulandigini
 #   goc_gecmisi tablosundan bilir ve yalniz yenileri calistirir.
+# YALNIZ NNN_*.sql kopyalanir: db/ klasorundeki dev dump'lari (or.
+#   gentegre_ai_pg14_*.sql, yuzlerce MB) paketlenip TEMP'i dolduruyordu.
 Adim 'db gocleri paketleniyor'
-Copy-Item (Join-Path $kok 'db') (Join-Path $gecici 'db') -Recurse -Filter '*.sql'
-Bilgi "$((Get-ChildItem (Join-Path $gecici 'db') -Filter *.sql).Count) goc dosyasi"
+$dbHedef = Join-Path $gecici 'db'
+New-Item -ItemType Directory -Path $dbHedef -Force | Out-Null
+Get-ChildItem (Join-Path $kok 'db') -Filter '*.sql' |
+    Where-Object { $_.Name -match '^\d{3}_' } |
+    Copy-Item -Destination $dbHedef
+Bilgi "$((Get-ChildItem $dbHedef -Filter *.sql).Count) goc dosyasi"
 
 # ------------------------------------------------------------- paketle ------
 Adim 'paketleniyor ve yukleniyor'
