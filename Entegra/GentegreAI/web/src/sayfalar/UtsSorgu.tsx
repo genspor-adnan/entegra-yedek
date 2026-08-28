@@ -13,6 +13,9 @@ export function UtsSorgu() {
   const [lotNo, setLotNo] = useState('');
   const [seriNo, setSeriNo] = useState('');
   const [sorguluyor, setSorguluyor] = useState(false);
+  // Sonuc gorunumu (kullanici): LISTE = grid tablosu (cok kayitta dogal),
+  //   KART = anahtar/deger dokumu (tek kaydin tum alanlari).
+  const [gorunum, setGorunum] = useState<'liste' | 'kart'>('liste');
   const [yanit, setYanit] = useState<UtsSorguYaniti | null>(null);
   const [hata, setHata] = useState('');
   const [hesap, setHesap] = useState<{ kurumNo: string; testMi: boolean;
@@ -98,6 +101,14 @@ export function UtsSorgu() {
           </div>
         )}
 
+        {/* Liste / Kart secimi - liste ekranlarindaki gorunum cipleriyle ayni dil. */}
+        <div style={{ display: 'flex', gap: 6, margin: '0 0 8px' }}>
+          <button type="button" className={`cip${gorunum === 'liste' ? ' on' : ''}`}
+                  onClick={() => setGorunum('liste')}>☰ Liste</button>
+          <button type="button" className={`cip${gorunum === 'kart' ? ' on' : ''}`}
+                  onClick={() => setGorunum('kart')}>🗂 Kart</button>
+        </div>
+
         <div className="kagrup" style={{ maxWidth: 980 }}>
           <h6>Sorgu</h6>
           <form className="alan-izgara dort-sutun" onSubmit={sorgula}>
@@ -139,10 +150,22 @@ export function UtsSorgu() {
           const kayitlar = Array.isArray(yanit.sonuc)
             ? yanit.sonuc : yanit.sonuc != null ? [yanit.sonuc] : [];
           return (
-            <div style={{ maxWidth: 980 }}>
+            <div>
               <MesajListesi mesajlar={yanit.mesajlar} />
               {kayitlar.length > 0 ? (
-                <SonucKarti sonuc={kayitlar} />
+                <>
+                  <div className="bilgi-kutusu">
+                    <b>{kayitlar.length}</b> kayıt listelendi
+                    {(() => {
+                      const t = (kayitlar as Record<string, unknown>[])
+                        .reduce((a, k) => a + (Number(k.ADT ?? k.adet) || 0), 0);
+                      return t > 0 ? <> · toplam adet <b>{t}</b></> : null;
+                    })()}
+                  </div>
+                  {gorunum === 'liste'
+                    ? <SonucListesi kayitlar={kayitlar as Record<string, unknown>[]} />
+                    : <SonucKarti sonuc={kayitlar} />}
+                </>
               ) : yanit.basarili ? (
                 <div className="bilgi-kutusu">
                   ÜTS'de bu ölçütlerle tekil ürün kaydı bulunamadı. (Tekil ürün
@@ -171,6 +194,45 @@ function MesajListesi({ mesajlar }: { mesajlar: UtsMesaji[] }) {
           {m.met ?? ''}{m.kod ? ` (${m.kod})` : ''}
         </div>
       ))}
+    </div>
+  );
+}
+
+/** Kolon öncelik sırası: bilinenler önde, kalanlar geldiği sırada. */
+const KOLON_ONCELIK = [
+  'UNO', 'urunNumarasi', 'LNO', 'lotBatchNumarasi', 'SNO', 'seriNumarasi',
+  'ADT', 'adet', 'kullanilabilirAdet', 'URT', 'uretimTarihiString',
+  'SKT', 'sonKullanmaTarihiString', 'MME', 'urunTanimi', 'sahibiUnvan',
+  'UTP', 'UAK', 'olusturulmaTarihiString',
+];
+
+/** LİSTE görünümü: kayıtlar satır, alanlar kolon - grid tablosu. */
+function SonucListesi({ kayitlar }: { kayitlar: Record<string, unknown>[] }) {
+  const kolonlar: string[] = [];
+  const gorulen = new Set<string>();
+  for (const ad of KOLON_ONCELIK)
+    if (kayitlar.some(k => k[ad] != null)) { kolonlar.push(ad); gorulen.add(ad); }
+  for (const k of kayitlar)
+    for (const ad of Object.keys(k))
+      if (!gorulen.has(ad) && !GIZLI_ALANLAR.has(ad) && k[ad] != null) {
+        kolonlar.push(ad); gorulen.add(ad);
+      }
+  return (
+    <div className="kagrup">
+      <div style={{ overflowX: 'auto' }}>
+        <table className="grid">
+          <thead>
+            <tr>{kolonlar.map(ad => <th key={ad}>{AD_SOZLUGU[ad] ?? ad}</th>)}</tr>
+          </thead>
+          <tbody>
+            {kayitlar.map((k, i) => (
+              <tr key={i}>
+                {kolonlar.map(ad => <td key={ad}>{bicimle(k[ad])}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
