@@ -3323,3 +3323,47 @@ Ayrıca `@simdi` varsayılanı tarih tipli alanlarda güne kırpılıyor:
 
 **Sırada:** F4 kapatma + kur farkı, F5 çek/senet portföy aksiyonları (tahsile
 ver, ciro, karşılıksız), F6 kredi/kupon, F7 belge fişleme.
+
+---
+
+## 28-29.08.2026 — ÜTS modülü: katmanlı yeniden yazım (`db/223-230`)
+
+Sağlık Bakanlığı Ürün Takip Sistemi (ÜTS) sıfırdan yazıldı. Delphi'deki eski
+modüle (UTS/UUTSDlg.pas, 2.441 satır) **dokunulmadı** — orada endpoint + JSON
+üretimi + DB insert + grid + iş kuralı aynı prosedürlerde karışıktı ve kaynak
+koda müşteri token'ları gömülüydü.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K30 | **Katmanlı yapı**: `Cekirdek/Uts/UtsModelleri+UtsDogrulama` · `Api/Servisler/UtsIstemcisi+UtsServisi` · `Veri/Depolar/UtsDeposu` · `Uclar/UtsUclari` | Sözleşme modeli, doğrulama, HTTP, iş akışı ve depo ayrıştı; resmi sözleşme PDF repoda (`UTS-PRJ-TakipVeIzleme...-20231023.pdf`) |
+| K31 | **ÜTS hesabı şube bazlı** (`uts_hesap`, sube_id PK) + `fn_uts_hesap` düşüşü; ekranda "ÜTS Hesabı Aktif" ↔ "Test Ortamı" **karşılıklı dışlanan** onay kutuları | e-Belge hesabıyla aynı model; canlı ve test alanları tek sekmede iki çerçeve |
+| K32 | **Token asla koda/loga/istek_json'a yazılmaz** — yalnız ekrandan girilir, HTTP `utsToken` header'ında taşınır; hesap-durum ucu son 4 haneyi döner | Delphi'deki gömülü-token hatası tekrarlanmadı |
+| K33 | Bildirim akışı: **durum=0 kaydet-COMMIT (HTTP öncesi iz) → POST → SNC→1 / HATA→2**; RETRY YOK; "yeniden gönder" yalnız hatalı/bekleyen | Bildirim idempotent değil — kör retry çift bildirim üretir. Çift gönderim kilidi `ux_uts_bildirim_satir` (belge_satir_id, tur, seri_lot_id; durum 0/1) |
+| K34 | **Verme = fatura akışı, iki aşamalı** (kullanıcı): "Verme" e-Belgeli satış faturalarından gride BEKLEYEN kayıtlar üretir (ÜTS'ye gitmez), kullanıcı seçip "📤 Gönder" der | Önce anında-gönderen fatura seçim modalı yapıldı; kullanıcı grid akışını istedi, modal kaldırıldı |
+| K35 | **"Baz Alınacak Şube"** (`db/227-228`): depo / ÜTS / e-Belge sekmelerinde combo — "Kendisi" ilk sırada, yoksa başka şubenin verisi kullanılır | 4 şubeli yerde 2+2 şube ortak veri kullanabilsin; e-Belge göndericisi de bu combodan (trigger `fn_sube_ebelge_kimlik_turet`) |
+
+### Sözleşme tuzakları (PDF'ten) ve canlı sapmalar (gerçek hesapla bulundu)
+
+- `BID`/`VBI` GUID varchar(36), int değil. **Alma bildiriminin iptali yok** (s96).
+- Boş alan JSON'a hiç yazılmaz (`WhenWritingNull`); SNO dolu = tekil → ADT gönderilmez, yalnız LNO = lot → ADT ≥ 1.
+- **`BZA` dokümanın aksine metin tarih** ("2026-08-24 10:14:44", UNIX-ms değil) — `long?` alan ilk satırda patlayıp tüm askıdakiler listesini boşaltıyordu ("0 kayıt geldi" arızasının kökü).
+- **Ayrıntılı tekil ürün yolu dokümanın aksine `/UTS/uh/rest/...`** — dokümandaki `/uh`'suz yol canlıda 404 (BILIM `UTS_BILDIRIM_TUR` tablosuyla teyit).
+- "Bulunamadı" = HTTP 200 + **boş dizi**, hata değil. GTIN 13/14 farkı: UNO'nun baştaki '0'ı at/ekle iki varyantla dene (sorgu + stok eşleme).
+- Askıdakiler: önce `/offset` (OFF imleci), kabul edilmezse SAN sayfalamasına düşüş; ayrıntılı sorguda SAY ile **tüm sayfalar** toplanır (ilk sürüm 100'de kesiyordu — "411'in kalanı nerede").
+
+### Yapılanlar
+
+- **223/224**: `uts_hesap`, `uts_bildirim` (+`_mesaj` 1:1, istek/cevap JSON), `uts_envanter` (askıdakiler), kod listeleri, yetkiler (`uts`, `uts.bildir`, `uts.iptal`), LogTablo 930-932. Şube kartına ÜTS sekmesi (canlı | test çerçeveleri). İlk tuzak: `uts_hesap`'ın kendi `id`'si yok — detay kaydetme `IdKolonu:"sube_id"` + `id` alias'ıyla düzeldi.
+- **7 çekirdek servis**: alma, verme, kullanım, tekil sorgu, ayrıntılı sorgu, askıdakiler senkronu, iptal + bildirim detay. Canlı doğrulama: **1.607 askıdaki kayıt** indi (1.595 stok eşleşmesi), ayrıntılı sorgu **527 kayıt / 94.917 adet**.
+- **225/226**: cari kartına `uts_kurum_no`; belge köprüsü `POST /api/uts/belge/{id}/bildir` — satışta (14/15/16) satır başına VERME, alışta (10/11/12) askıdakiyle eşleştirip ALMA; `fn_belge_silinebilir` başarılı bildirimli belgeyi engeller.
+- **229**: üretim / ithalat / kayıp-HEK / imha bildirimleri (tür 4-7) — tek jenerik modal, araç çubuğunda "＋ Bildirim ▾" açılır menüsü. İthalatta ülke kodları ÜTS sayısal (TR 792), HEK/imha gerekçe listeleri sözleşmeden.
+- **230**: `belge.uts_durum` rozeti (Bildirilmedi / Kısmi / Bildirildi) — köprü gönderimi, "Gönder" ve iptal sonrası izlemlerden yeniden hesaplanır; fatura listesinde kolon. Fatura listesinden sağ tuş "ÜTS Bildir" **çoklu seçim**.
+- **Verme iki aşamalı** (K34): `POST /api/uts/verme-hazirla` e-Belgeli satış faturalarının bildirilmemiş seri/lot satırlarından bekleyen kayıtlar üretir; eksikler satır satır raporlanır (cari ÜTS kurum no boş / stok GTIN boş); tekrar çalıştırmak güvenli. "⟳ Yeniden Gönder" → "📤 Gönder": bekleyen + hatalı kabul eder, çoklu seçim, onaylı.
+- **ÜTS Ürün Sorgu ekranı**: yalnız ürün no ile sorgu (eski program alışkanlığı) — tekil boş dönerse otomatik ayrıntılıya düşer; Liste/Kart görünümü, kayıt + toplam adet sayacı, sıralanabilir başlıklar, ⋮ GridMenu (CSV, kolon gizle; menü tıkı `stopPropagation` ister yoksa dışarı-tık dinleyicisi anında kapatır).
+- **Şube ekranı rötuşları** (kullanıcı istekleri): sekme çubuğu kalktı, üstte ＋ ✎ 🗑 ikonları, işaret kolonu, depo gridi 6 satır + kaydırma, e-Belge alt bölümleri buton, logo/kaşe üstte.
+
+**Sırada (istenirse):** üretim/ithalat için belge köprüleri (üretim fişi / alış
+faturası), durum-0 mutabakatı ("Bekleyenleri Denetle"), HBYS kullanım
+bildiriminde hasta kartı bağı.
