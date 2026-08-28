@@ -48,9 +48,9 @@ public sealed class UtsServisi
     private const string YolAskidakilerOffset = "/UTS/uh/rest/bildirim/verme/askidakiler/offset";
     private const string YolAskidakilerSayfa = "/UTS/uh/rest/bildirim/verme/askidakiler";
     private const string YolBildirimDetay = "/UTS/uh/rest/bildirim/detay/sorgula";
-    // DİKKAT: ayrıntılı sorguda "/uh" YOK (doküman s170); servis deneyseldir,
-    //   hiçbir iş akışı ona bağlanmaz - yalnız rapor.
-    private const string YolAyrintili = "/UTS/rest/ayrintiliTekilUrun/sorgula";
+    // Doküman (s170) "/uh"suz yazar ama CANLIDA o yol 404 - Delphi'nin
+    //   kullandığı "/uh"lu adres çalışıyor (UUTSDlg:965 ile aynı).
+    private const string YolAyrintili = "/UTS/uh/rest/ayrintiliTekilUrun/sorgula";
 
     private HttpClient Istemci() => _http.CreateClient("uts");
 
@@ -271,19 +271,40 @@ public sealed class UtsServisi
 
     // ---------------------------------------------------------- sorgular ----
 
-    /// <summary>Tekil ürün sorgusu - DB'ye bildirim satırı AÇMAZ, ham cevabı döndürür.</summary>
+    /// <summary>Tekil ürün sorgusu - DB'ye bildirim satırı AÇMAZ, ham cevabı döndürür.
+    /// Boş dönerse UNO'nun GTIN 13/14 varyantıyla ikinci deneme yapılır
+    /// (Delphi davranışı - baştaki '0' farkı sık yaşanıyor).</summary>
     public async Task<object> TekilUrunSorgulaAsync(string? uno, string? lotNo, string? seriNo,
         int? subeId, CancellationToken iptal)
     {
         var u = UtsDogrulama.Uno(uno);
         var hesap = await HesapAsync(subeId, iptal);
-        var istek = new UtsTekilUrunSorgu(u,
-            UtsDogrulama.LotNo(lotNo), UtsDogrulama.SeriNo(seriNo));
-        var govde = JsonSerializer.Serialize(istek, UtsJson.Ayarlar);
-        var (httpKodu, cevap) = await UtsIstemcisi.PostAsync(
-            Istemci(), hesap, YolTekilUrun, govde, "ÜTS tekil ürün sorgusu", iptal);
+        var l = UtsDogrulama.LotNo(lotNo);
+        var sn = UtsDogrulama.SeriNo(seriNo);
 
-        return SorguYaniti(httpKodu, cevap);
+        foreach (var varyant in UtsDogrulama.UnoVaryantlari(u))
+        {
+            var govde = JsonSerializer.Serialize(
+                new UtsTekilUrunSorgu(varyant, l, sn), UtsJson.Ayarlar);
+            var (httpKodu, cevap) = await UtsIstemcisi.PostAsync(
+                Istemci(), hesap, YolTekilUrun, govde, "ÜTS tekil ürün sorgusu", iptal);
+            var yanit = SorguYaniti(httpKodu, cevap);
+            if (SonucDoluMu(yanit)) return yanit;
+        }
+        // Iki varyant da bos: son (bos) cevabi standart zarfla dondur.
+        return new { basarili = true, sonuc = Array.Empty<object>(),
+                     mesajlar = Array.Empty<UtsMesaj>() };
+    }
+
+    private static bool SonucDoluMu(object yanit)
+    {
+        var p = yanit.GetType().GetProperty("sonuc")?.GetValue(yanit);
+        return p switch
+        {
+            null => false,
+            System.Collections.ICollection k => k.Count > 0,
+            _ => true
+        };
     }
 
     /// <summary>Kendi bildirimimizin ÜTS'deki detayını sorgular.</summary>
@@ -300,22 +321,33 @@ public sealed class UtsServisi
         return SorguYaniti(httpKodu, cevap);
     }
 
-    /// <summary>Ayrıntılı tekil ürün (deneysel uç) - yalnız rapor.</summary>
+    /// <summary>Ayrıntılı tekil ürün - ürünün TEKİLLERİNİ listeler (Delphi'nin
+    /// yalnız-UNO akışı). Boş dönerse GTIN varyantıyla tekrar denenir.</summary>
     public async Task<object> AyrintiliSorgulaAsync(string? uno, string? lotNo, string? seriNo,
         int? subeId, CancellationToken iptal)
     {
         var hesap = await HesapAsync(subeId, iptal);
-        var istek = new
+        var u = string.IsNullOrWhiteSpace(uno) ? null : uno!.Trim();
+        var varyantlar = u is null ? new string?[] { null }
+                                   : UtsDogrulama.UnoVaryantlari(u).Cast<string?>().ToArray();
+
+        object? son = null;
+        foreach (var varyant in varyantlar)
         {
-            UNO = string.IsNullOrWhiteSpace(uno) ? null : uno!.Trim(),
-            LNO = string.IsNullOrWhiteSpace(lotNo) ? null : lotNo!.Trim(),
-            SNO = string.IsNullOrWhiteSpace(seriNo) ? null : seriNo!.Trim(),
-            ADT = (int?)100, SAY = (int?)0
-        };
-        var govde = JsonSerializer.Serialize(istek, UtsJson.Ayarlar);
-        var (httpKodu, cevap) = await UtsIstemcisi.PostAsync(
-            Istemci(), hesap, YolAyrintili, govde, "ÜTS ayrıntılı ürün sorgusu", iptal);
-        return SorguYaniti(httpKodu, cevap);
+            var istek = new
+            {
+                UNO = varyant,
+                LNO = string.IsNullOrWhiteSpace(lotNo) ? null : lotNo!.Trim(),
+                SNO = string.IsNullOrWhiteSpace(seriNo) ? null : seriNo!.Trim(),
+                ADT = (int?)100, SAY = (int?)0
+            };
+            var govde = JsonSerializer.Serialize(istek, UtsJson.Ayarlar);
+            var (httpKodu, cevap) = await UtsIstemcisi.PostAsync(
+                Istemci(), hesap, YolAyrintili, govde, "ÜTS ayrıntılı ürün sorgusu", iptal);
+            son = SorguYaniti(httpKodu, cevap);
+            if (SonucDoluMu(son)) return son;
+        }
+        return son!;
     }
 
     private static object SorguYaniti(int httpKodu, string cevap)

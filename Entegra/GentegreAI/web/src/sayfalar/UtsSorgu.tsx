@@ -30,11 +30,23 @@ export function UtsSorgu() {
   const sorgula = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!uno.trim()) { setHata('Ürün numarası (UNO) girin.'); return }
-    await calistir(() => api.utsTekilUrun({
-      uno: uno.trim(),
-      lotNo: lotNo.trim() || undefined,
-      seriNo: seriNo.trim() || undefined,
-    }));
+    // Eski programın akışı: yalnız ürün no girildiyse ve TEKİL sorgu boş
+    //   dönerse otomatik AYRINTILI sorguya düşülür (ürünün tekilleri listelenir).
+    await calistir(async () => {
+      const tekil = await api.utsTekilUrun({
+        uno: uno.trim(),
+        lotNo: lotNo.trim() || undefined,
+        seriNo: seriNo.trim() || undefined,
+      });
+      const bos = tekil.basarili
+        && (tekil.sonuc == null || (Array.isArray(tekil.sonuc) && tekil.sonuc.length === 0));
+      if (!bos) return tekil;
+      return api.utsAyrintili({
+        uno: uno.trim(),
+        lotNo: lotNo.trim() || undefined,
+        seriNo: seriNo.trim() || undefined,
+      });
+    });
   };
 
   // Ayrintili sorgu DENEYSEL uc (sozlesme s170) - yalniz rapor; UNO/LNO/SNO
@@ -172,7 +184,9 @@ function SonucKarti({ sonuc }: { sonuc: unknown }) {
         <div key={i} className="kagrup" style={{ marginBottom: 8 }}>
           <table className="detay-tablo">
             <tbody>
-              {Object.entries((k ?? {}) as Record<string, unknown>).map(([ad, deger]) => (
+              {Object.entries((k ?? {}) as Record<string, unknown>)
+                .filter(([ad, deger]) => !GIZLI_ALANLAR.has(ad) && deger != null)
+                .map(([ad, deger]) => (
                 <tr key={ad}>
                   <td style={{ fontWeight: 600, width: 220 }}>{AD_SOZLUGU[ad] ?? ad}</td>
                   <td>{bicimle(deger)}</td>
@@ -186,7 +200,8 @@ function SonucKarti({ sonuc }: { sonuc: unknown }) {
   );
 }
 
-/** Üç harfli ÜTS kodları okunur başlığa (bilinenler; kalanlar ham kalır). */
+/** ÜTS alan adları okunur başlığa: üç harfli kodlar (tekil sorgu) +
+    camelCase adlar (ayrıntılı sorgu); bilinmeyenler ham kalır. */
 const AD_SOZLUGU: Record<string, string> = {
   UNO: 'Ürün Numarası', LNO: 'Lot/Batch No', SNO: 'Seri No', ADT: 'Adet',
   URT: 'Üretim Tarihi', SKT: 'Son Kullanma', UTP: 'Ürün Tipi', TTI: 'Takip Tipi',
@@ -194,7 +209,23 @@ const AD_SOZLUGU: Record<string, string> = {
   KKG: 'Kullanan Kurum', BID: 'Bildirim Id', BTI: 'Bildirim Tipi',
   KUN: 'Kurum No', AKU: 'Kurum Unvanı', BNO: 'Belge No', DUR: 'Durum',
   UIK: 'Üretici/İthalatçı Kurum No', UAK: 'Takip Şekli',
+  // Ayrıntılı sorgu (camelCase) alanları.
+  urunNumarasi: 'Ürün Numarası', seriNumarasi: 'Seri No',
+  lotBatchNumarasi: 'Lot/Batch No', adet: 'Adet',
+  kullanilabilirAdet: 'Kullanılabilir Adet', sahibiUnvan: 'Sahibi',
+  sahibi: 'Sahibi Kurum No', ureticiIthalatciKurumNo: 'Üretici/İthalatçı No',
+  urunTanimi: 'Ürün Tanımı', essizKimlik: 'Eşsiz Kimlik (UDI)',
+  uretimTarihiString: 'Üretim Tarihi', sonKullanmaTarihiString: 'Son Kullanma',
+  olusturulmaTarihiString: 'Oluşturulma',
 };
+
+/** Ayrıntılı cevabındaki gürültü: *ForExcel kopyaları ve ms cinsinden tarih
+    çiftleri (String'lisi zaten var) gösterilmez. */
+const GIZLI_ALANLAR = new Set([
+  'essizKimlikForExcel', 'ureticiIthalatciKurumNoForExcel',
+  'kullanilabilirAdetForExcel', 'olusturulmaTarihi', 'sonKullanmaTarihi',
+  'uretimTarihi', 'urunBilgileri',
+]);
 
 function bicimle(deger: unknown): string {
   if (deger == null) return '';
