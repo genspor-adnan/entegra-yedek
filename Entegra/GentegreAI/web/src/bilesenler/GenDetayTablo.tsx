@@ -80,6 +80,9 @@ interface Props {
       ayni kurali son otorite olarak yine uygular. */
   taslakKural?: (alan: string, deger: unknown,
                  taslak: Record<string, unknown>) => Record<string, unknown> | null;
+  /** Baslik seridine suzme cipleri (listelerin Aktif/Pasif cipleri gibi).
+      Ilk cip varsayilan seciliyor; suzme yalniz gorunumu daraltir. */
+  cipler?: { ad: string; suz: (satir: Record<string, unknown>) => boolean }[];
 }
 
 // Adresler grid'ine ozel kolon genislikleri (kullanici: "Adres geniş, İl/İlçe aynı
@@ -105,7 +108,7 @@ const EGITIM_GECERLILIK = ['Süresiz', 'Süreli'];
 const tarihYilTemizle = (deger: string) => deger.replace(/[^0-9./-]/g, '').slice(0, 10);
 
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
-                               modalDuzenle, taslakKural }: Props) {
+                               modalDuzenle, taslakKural, cipler }: Props) {
   const alanlar = meta.alanlar.filter(a => a.ad !== 'id');
   const yerler = useYerler(meta.ad === 'adresler');
   const adresGrid = meta.ad === 'adresler';
@@ -118,6 +121,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const [modalSatir, setModalSatir] = useState<number | 'yeni' | null>(null);
   /** Modalde duzenlenen taslak - Tamam'a basilana kadar tabloya yazilmaz. */
   const [taslak, setTaslak] = useState<Record<string, unknown>>({});
+  /** Grid ici arama (listedeki "Bu listede ara" gibi) - buyuk detay gridleri. */
+  const [arama, setArama] = useState('');
+  /** Aktif suzme cipi (cipler verilmisse; 0 = ilk cip). */
+  const [aktifCip, setAktifCip] = useState(0);
 
   /** Salt gorunum hucresi: kod alani etiketiyle, mantik ✓, para TR bicimiyle. */
   const gorunum = (satir: Record<string, unknown>, a: typeof alanlar[number]) => {
@@ -207,6 +214,18 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
     onDegis({ ...durum, guncel, silinen });
   };
 
+  // Suzme YALNIZ gorunumu daraltir: indeksler ORIJINAL diziden gider ki
+  //   duzenle/sil dogru satira uygulansin. Buyuk gridlerde (fiyat listesi
+  //   satirlari) bu kutu listedeki "Bu listede ara"nin karsiligidir.
+  const aramaAnahtari = arama.trim().toLocaleLowerCase('tr');
+  const cipSuz = cipler?.[aktifCip]?.suz;
+  const gorunurler = durum.guncel
+    .map((satir, i) => ({ satir, i }))
+    .filter(({ satir }) => !cipSuz || cipSuz(satir))
+    .filter(({ satir }) => !aramaAnahtari
+      || alanlar.some(a => gorunum(satir, a).toLocaleLowerCase('tr').includes(aramaAnahtari)));
+  const aramaVar = modalDuzenle && (durum.guncel.length > 20 || arama !== '');
+
   return (
     <div className="kagrup">
       <h6>
@@ -229,6 +248,21 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                           title={secili === null ? 'Önce satır seçin' : 'Seçili satırı sil'}
                           onClick={() => { if (secili !== null) { satirSil(secili); setSecili(null); } }}>🗑</button>
                 </>
+              )}
+              {/* Suzme cipleri (kullanici: Tumu / Stok / Hizmet) - listelerin
+                  durum cipleriyle ayni gorunum, yalniz gorunumu daraltir. */}
+              {cipler && cipler.map((cip, ci) => (
+                <button key={cip.ad} type="button"
+                        className={`d ${ci === aktifCip ? 'bir' : ''}`}
+                        style={{ marginLeft: ci === 0 ? 10 : 4 }}
+                        onClick={() => { setAktifCip(ci); setSecili(null); }}>
+                  {cip.ad}
+                </button>
+              ))}
+              {aramaVar && (
+                <input value={arama} placeholder="Satırlarda ara…"
+                       style={{ marginLeft: 10, width: 220 }}
+                       onChange={e => { setArama(e.target.value); setSecili(null); }} />
               )}
             </span>
           ) : (
@@ -254,7 +288,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           </tr>
         </thead>
         <tbody>
-          {durum.guncel.map((satir, i) => (
+          {gorunurler.map(({ satir, i }) => (
             <tr key={satir.id ?? `yeni-${i}`}
                 className={modalDuzenle && secili === i ? 'secili' : undefined}
                 onDoubleClick={() => modalDuzenle && !saltOkunur && modalAc(i)}>
@@ -393,8 +427,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               )}
             </tr>
           ))}
-          {durum.guncel.length === 0 && (
-            <tr><td colSpan={alanlar.length + 1} className="bos">Satır yok</td></tr>
+          {gorunurler.length === 0 && (
+            <tr><td colSpan={alanlar.length + 1} className="bos">
+              {durum.guncel.length === 0 ? 'Satır yok' : 'Eşleşen satır yok'}
+            </td></tr>
           )}
         </tbody>
       </table>

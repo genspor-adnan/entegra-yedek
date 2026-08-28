@@ -196,17 +196,19 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id",       "id",       "sayi",  Yazilabilir: false),
-            new("kod",      "kod",      "metin", EnFazlaUzunluk: 40, Baslik: "Kod", Grup: "Genel"),
+            // STANDART BASLIK SERIDI (kullanici): Kod / Ad / Durum kartin ust
+            //   seridinde her sekmede sabit durur (fiyat listesi kartiyla ayni).
+            new("kod",      "kod",      "metin", EnFazlaUzunluk: 40, Baslik: "Kod", Grup: "Kimlik"),
             new("ad",       "ad",       "metin", Zorunlu: true, EnFazlaUzunluk: 200,
-                Baslik: "Hizmet Adı", Grup: "Genel"),
+                Baslik: "Hizmet Adı", Grup: "Kimlik"),
+            new("durum",    "durum",    "kod",   SabitKodlar: DurumKodlari,
+                Baslik: "Durum", Grup: "Kimlik"),
             new("kdv",      "kdv",      "sayi",  Baslik: "KDV %", Grup: "Genel"),
             // Hizmet birimi stogunkiyle AYNI listeden (51 Adet, 57 Kg...).
             new("birim",    "birim",    "kod",   KodListesi: "stok.ana_birim",
                 Baslik: "Birim", Grup: "Genel"),
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 80,
                 Baslik: "Açıklama", Grup: "Genel"),
-            new("durum",    "durum",    "kod",   SabitKodlar: DurumKodlari,
-                Baslik: "Durum", Grup: "Genel"),
 
             new("muhKodu",  "muh_kodu",  "metin", EnFazlaUzunluk: 20,
                 Baslik: "Muhasebe Kodu", Grup: "Genel", AltGrup: "Kodlar"),

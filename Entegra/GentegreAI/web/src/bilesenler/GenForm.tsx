@@ -26,6 +26,7 @@ import { RolYetkiMatrisi } from './RolYetkiMatrisi';
 import { DokumanGalerisi } from './DokumanGalerisi';
 import { StokDurumSekmesi } from './StokDurumSekmesi';
 import { StokHareketSekmesi } from './StokHareketSekmesi';
+import { HizmetListeFiyatlari } from './HizmetListeFiyatlari';
 import { TarafArama } from './TarafArama';
 import { telefonAlaniMi } from './alanBicim';
 import { telefonBicimle } from './bicim';
@@ -461,7 +462,11 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       if (yon === 3) return Math.round(tutar / adim) * adim;
       return tutar;
     };
-    const metin = (s: number) => String(Math.round(s * 10000) / 10000);
+    // Fiyat 4, carpan 6 hane (kolon numeric(18,6) - 7,0092 gibi degerler).
+    const metin = (s: number, hane = 4) => {
+      const k = 10 ** hane;
+      return String(Math.round(s * k) / k);
+    };
     const taban = hamSayi(taslak.tabanFiyat);
 
     if (alan === 'carpan') {
@@ -472,11 +477,20 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       const adim = bos(taslak.yuvarlamaBirim) ? deger.yuvarlamaBirim : taslak.yuvarlamaBirim;
       return { fiyat: metin(yuvarla(taban * carpan, yon, adim)), yazim: '1' };
     }
+    // FIYAT elle degisti: satir Manuel olur; zincirli satirda carpan fiyattan
+    //   GERIYE hesaplanir (taban degismez). Koksuz/manuel listede carpan
+    //   anlamsiz - dokunulmaz.
+    if (alan === 'fiyat') {
+      const f = hamSayi(v);
+      if (taslak.tabanListeId && taban > 0 && f > 0)
+        return { yazim: '1', carpan: metin(f / taban, 6) };
+      return { yazim: '1' };
+    }
     if (alan === 'yazim' && String(v) === '2' && taban > 0) {
       const carpan = hamSayi(deger.carpan) || 1;
       return {
         fiyat: metin(yuvarla(taban * carpan, deger.yuvarlama, deger.yuvarlamaBirim)),
-        carpan: metin(carpan),
+        carpan: metin(carpan, 6),
       };
     }
     return null;
@@ -691,7 +705,20 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           ikonlu={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'}
           taslakKural={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
             ? fiyatSatirKurali : undefined}
+          // Tumu / Stok / Hizmet cipleri (kullanici) - karma listede tek tur gorunur.
+          cipler={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
+            ? [{ ad: 'Tümü', suz: () => true },
+               { ad: 'Stok', suz: s => s.stokId != null && s.stokId !== '' },
+               { ad: 'Hizmet', suz: s => s.hizmetId != null && s.hizmetId !== '' }]
+            : undefined}
         />
+      )}
+
+      {/* Hizmet > Fiyatlar: kart fiyatlarinin ALTINDA kalemin gectigi fiyat
+          listesi satirlari (kullanici: "bu hizmete ait tum fiyatlar gelsin"). */}
+      {aktif?.tur === 'detay' && kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar'
+        && !yeniMi && (
+        <HizmetListeFiyatlari hizmetId={id as number} />
       )}
 
       {aktif?.tur === 'ozel' && kaynak === 'rol' && (
