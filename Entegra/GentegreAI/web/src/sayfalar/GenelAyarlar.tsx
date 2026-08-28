@@ -54,14 +54,11 @@ export function GenelAyarlar() {
           <>
             <div className="kagrup">
               <h6>Genel</h6>
-              {/* ILK SATIR (kullanici): Urun modu | Yerel para | Doviz yan yana
-                  ama AYRIK - sabit genislikli kolonlar + genis bosluk; tam
-                  genislik 1fr kolonlar editleri bitistiriyordu. Para/doviz
-                  combolari genel.doviz kod listesinden; ETIKETLERINE
-                  tiklaninca liste icerigi jenerik modalda yonetilir. */}
-              <div className="alan-izgara ayar-formu"
-                   style={{ gridTemplateColumns: 'repeat(auto-fill, 240px)',
-                            columnGap: 56, justifyContent: 'start' }}>
+              {/* Urun modu / Yerel para / Doviz - HER BIRI AYRI SATIRDA
+                  (kullanici: yan yana denemeleri "bitisik" gorunuyordu).
+                  Para/doviz combolari genel.doviz kod listesinden;
+                  ETIKETLERINE tiklaninca liste jenerik modalda yonetilir. */}
+              <div className="alan-izgara tek-sutun ayar-formu">
                 {/* Urun modu (215): menu/marka/mesaj basliklari buna gore.
                     Degisiklik acik oturumlara SONRAKI giris/yenilemede iner. */}
                 {alan('genel.urun_modu', 'Ürün modu', {
