@@ -356,9 +356,13 @@ export function Kabuk() {
                   <span>{cm('Favori')}</span>
                   <span className="rz">{(acikGruplar['⭐Favori'] ?? true) ? '▾' : '▸'}</span>
                 </button>
-                {(acikGruplar['⭐Favori'] ?? true) && favoriler.map(yol => {
-                  const m = moduller.find(x => x.yol === yol);
-                  if (!m) return null;   // yetki/mod degisince kalinti yol
+                {/* Siralama EKLEME sirasi degil ANA MENU sirasi (kullanici):
+                    Musteri Listesi menude tekliften ustteyse favoride de ustte. */}
+                {(acikGruplar['⭐Favori'] ?? true) && satirlar
+                  .flatMap(sat => (sat.tur === 'duz' ? [sat.m] : sat.alt))
+                  .filter(m => favoriler.includes(m.yol))
+                  .map(m => {
+                  const yol = m.yol;
                   return (
                     <NavLink key={`fav-${yol}`} to={yol} style={{ paddingLeft: 34 }}
                              className={() => `mi ${konum.pathname.startsWith(yol) ? 'on' : ''}`}>
