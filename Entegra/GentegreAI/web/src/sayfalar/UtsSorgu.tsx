@@ -272,18 +272,22 @@ function SonucListesi({ kayitlar }: { kayitlar: Record<string, unknown>[] }) {
         <table className="grid">
           <thead>
             <tr>
-              {/* ⋮ SOL BASTA (kullanici) - GenGrid'deki kolon menusuyle ayni yer. */}
-              <th style={{ width: 30, textAlign: 'center' }}>
-                <button type="button" className="d" title="Grid menüsü"
-                        style={{ padding: '0 6px' }}
-                        onClick={e => {
-                          const r = e.currentTarget.getBoundingClientRect();
-                          setMenuKonum(menuKonum ? null : { x: r.left, y: r.bottom + 4 });
-                        }}>⋮</button>
-              </th>
-              {kolonlar.map(ad => (
+              {kolonlar.map((ad, i) => (
                 <th key={ad} style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
                     onClick={() => siralaTikla(ad)}>
+                  {/* ⋮ ILK KOLON basliginda (kullanici) - GenGrid'deki yerlesim.
+                      stopPropagation SART: tik window'a kabarirsa GridMenu'nun
+                      "disari tiklandi" dinleyicisi menuyu ANINDA kapatiyordu. */}
+                  {i === 0 && (
+                    <button type="button" className="d" title="Grid menüsü"
+                            style={{ padding: '0 6px', marginRight: 6 }}
+                            onClick={e => {
+                              e.stopPropagation();
+                              const r = e.currentTarget.getBoundingClientRect();
+                              setMenuKonum(menuKonum ? null
+                                : { x: r.left, y: r.bottom + 4 });
+                            }}>⋮</button>
+                  )}
                   {AD_SOZLUGU[ad] ?? ad}
                   {sirala?.ad === ad && (sirala.yon === 1 ? ' ▲' : ' ▼')}
                 </th>
@@ -293,7 +297,6 @@ function SonucListesi({ kayitlar }: { kayitlar: Record<string, unknown>[] }) {
           <tbody>
             {sirali.map((k, i) => (
               <tr key={i}>
-                <td />
                 {kolonlar.map(ad => <td key={ad}>{bicimle(k[ad])}</td>)}
               </tr>
             ))}
