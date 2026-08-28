@@ -149,20 +149,18 @@ export function UtsSorgu() {
               <input value={seriNo} maxLength={20} style={{ width: 140 }}
                      onChange={e => setSeriNo(e.target.value)} />
             </label>
+            {/* Butonlar SNO'nun SAGINDA, ayni satirda (kullanici). */}
+            <span style={{ display: 'flex', gap: 6, whiteSpace: 'nowrap' }}>
+              <button type="submit" className="d bir" disabled={sorguluyor}>
+                {sorguluyor ? 'Sorgulanıyor…' : '🔍 ÜTS’de Sorgula'}
+              </button>
+              <button type="button" className="d" disabled={sorguluyor}
+                      title="Deneysel ayrıntılı tekil ürün servisi"
+                      onClick={() => void ayrintili()}>
+                Ayrıntılı
+              </button>
+            </span>
           </form>
-          {/* Butonlar izgara HUCRESINDE degil (kirpiliyordu) - kutunun altinda
-              kendi satirlarinda; submit form="..." ile forma bagli. */}
-          <div style={{ display: 'flex', gap: 6, padding: '0 10px 10px' }}>
-            <button type="submit" form="uts-sorgu-form" className="d bir"
-                    disabled={sorguluyor}>
-              {sorguluyor ? 'Sorgulanıyor…' : '🔍 ÜTS’de Sorgula'}
-            </button>
-            <button type="button" className="d" disabled={sorguluyor}
-                    title="Deneysel ayrıntılı tekil ürün servisi"
-                    onClick={() => void ayrintili()}>
-              Ayrıntılı
-            </button>
-          </div>
         </div>
 
         {hata && <div className="hata-kutusu">{hata}</div>}
