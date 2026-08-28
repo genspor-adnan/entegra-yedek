@@ -117,6 +117,9 @@ public static partial class KartKatalogu
             // "Merkez deposunu kullan" bayragi BAZ SUBE secimine genelledi
             //   (227, kullanici): 4 subeli yerde ikiser sube farkli ortak
             //   depolari kullanabilsin. 0 = Kendisi.
+            // Comboyu Depolar sekmesinde KartGrupSekmesi elle cizer (tek
+            //   satirlik etiket); generic cizim istemci tarafinda bastirilir.
+            //   Gizli:true OLMAZ - grubun tek alani gizlenince sekme dusuyor.
             new("depoBazSubeId", "depo_baz_sube_id", "kod",
                 KodTablosu: "public.v_sube_baz_lookup",
                 Baslik: "Baz Alınacak Şube", Grup: "Depolar"),
@@ -132,7 +135,8 @@ public static partial class KartKatalogu
             //   subenin kimligi + KENDI adresi. ebelge_kimlik kodu artik
             //   ekranda yok, trigger ust_sube_id'den turetir (1 kendi / 3
             //   baz kimlik + sube adresi) - eski "2" kayitlari korunur.
-            new("ustSubeId",    "ust_sube_id",   "kod", KodTablosu: "public.sube",
+            new("ustSubeId",    "ust_sube_id",   "kod",
+                KodTablosu: "public.v_sube_baz_lookup",
                 Baslik: "Baz Alınacak Şube", Grup: "e-Belge", AltGrup: "Gönderici"),
             new("ebelgeKimlik", "ebelge_kimlik", "kod", KodListesi: "sube.ebelge_kimlik",
                 Baslik: "Gönderici Kimliği", Grup: "e-Belge", AltGrup: "Gönderici",

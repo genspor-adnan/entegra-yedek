@@ -1087,3 +1087,6 @@ input.skt-gecmis {
    almasin diye hafif kisilir; ICERIGIN kendi renkleri korunur. */
 :root[data-tema="gece"] .kagov iframe,
 :root[data-tema="gece"] img { filter: brightness(.92) }
+
+/* Baz sube gibi ust combolar: etiket TEK SATIR (kullanici). */
+.tek-satir-etiket .etiket { white-space: nowrap }

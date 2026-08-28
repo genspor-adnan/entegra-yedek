@@ -38,6 +38,8 @@ const gizli = kaynak === 'cari' ? new Set(['ad', 'soyad', 'musteri', 'tedarikci'
   //   (ik_karti.html: TCKN "Kimlik Bilgileri" kutusunda, Görev "Özet" kutusunda).
   : kaynak === 'personel' ? new Set(['personel', 'unvan', 'vkno', 'gorev'])
   : kaynak === 'hasta' ? new Set(['hasta', 'grup', 'unvan', 'gorev'])
+  // Sube: baz sube combosu Depolar dalinda ELLE cizilir (tek satir etiket).
+  : kaynak === 'sube' ? new Set(['depoBazSubeId'])
   : new Set<string>();
 const adsiz = (gruplanmis.find(([b]) => !b)?.[1] ?? []).filter(a => !gizli.has(a.ad));
 // Cari'ya ozel: Iletisim + Notlar ayni (sol) sutunda ust-alt, Tanımlama sagda.
@@ -315,6 +317,47 @@ const adsizBlok = adsizUst.length > 0 && (
   </div>
 );
 const adsizAltBlok = adsizAlt.length > 0 && <div className="alan-izgara">{renderAlanListesi(adsizAlt)}</div>;
+/* LOGO & KAŞE (193): gorseller USTTE, ayar kutulari altta (kullanici).
+   Gorseller kolon degil dokuman; galeri yukleme/silme/onizlemeyi yapiyor.
+   Merkezin gorselleri kullaniliyorsa yukleme yerine sebep yazilir. */
+const logoKase = kaynak === 'sube' && aktif.baslik === 'Logo & Kaşe' ? (() => {
+  const merkezMi = !deger.ustSubeId;
+  if (yeniMi) {
+    return (
+      <div className="kagrup">
+        <h6>Logo / Kaşe / İmza</h6>
+        <div className="not" style={{ padding: 10 }}>
+          Şube kaydedildikten sonra buradan logo, kaşe ve imza yüklenebilir.
+        </div>
+      </div>
+    );
+  }
+  if (deger.merkezGorselKullan && !merkezMi) {
+    return (
+      <div className="kagrup">
+        <h6>Logo / Kaşe / İmza</h6>
+        <div className="not" style={{ padding: 10 }}>
+          Bu şube <b>merkezin logo, kaşe ve imzasını</b> kullanıyor; belgelerde
+          merkezin görselleri basılır. Şubeye özel görsel yüklemek için
+          aşağıdaki kutunun işaretini kaldırın.
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="kagrup">
+      <h6>Logo / Kaşe / İmza</h6>
+      <div style={{ padding: 10 }}>
+        <div className="not" style={{ marginBottom: 8 }}>
+          Yüklerken <b>türünü</b> seçin: <b>Logo</b> · <b>Kaşe</b> · <b>İmza</b> ·
+          <b> Antet</b>. Belgede her türün <b>varsayılan</b> işaretlisi kullanılır.
+          Önerilen logo: PNG, saydam zemin, en az 480×160 px.
+        </div>
+        <DokumanGalerisi kartAdi="sube" kaynakId={id as number} saltOkunur={salt} />
+      </div>
+    </div>
+  );
+})() : null;
 return (
   <>
     {/* Kisi'ye ozel: Bagli Cari/Rol/Durum (adsiz) idstrip'in HEMEN ALTINDA, 2. sirada
@@ -324,6 +367,13 @@ return (
       <>
         {adsizBlok}
         {adliBlok}
+      </>
+    ) : logoKase ? (
+      /* Logo & Kaşe: GALERI USTTE, ayar kutulari altinda (kullanici). */
+      <>
+        {logoKase}
+        {adliBlok}
+        {adsizBlok}
       </>
     ) : (
       <>
@@ -343,58 +393,24 @@ return (
         sekmede (kullanici): kutu "hangi depolari gorurum" sorusunun cevabi,
         listenin hemen ustunde durmasi gerekiyor. Yeni subede henuz id yok -
         once kaydedilmeli. */}
-    {/* LOGO & KAŞE (193): ayar kutularinin altinda GALERI. Gorseller kolon
-        degil dokuman; galeri yukleme/silme/onizlemeyi zaten yapiyor. Merkezin
-        gorselleri kullaniliyorsa yukleme kutusu yerine sebep yazilir - sube
-        gorseli yuklense bile basilmayacak (fn_sube_gorsel). */}
-    {kaynak === 'sube' && aktif.baslik === 'Logo & Kaşe' && (() => {
-      // Merkezin KENDISI miras alamaz: bayragi isaretli olsa da kendi
-      //   gorsellerini buradan yukler, yoksa hicbir yerde logo tanimlanamazdi.
-      const merkezMi = !deger.ustSubeId;
-      if (yeniMi) {
-        return (
-          <div className="kagrup">
-            <h6>Logo / Kaşe / İmza</h6>
-            <div className="not" style={{ padding: 10 }}>
-              Şube kaydedildikten sonra buradan logo, kaşe ve imza yüklenebilir.
-            </div>
-          </div>
-        );
-      }
-      if (deger.merkezGorselKullan && !merkezMi) {
-        return (
-          <div className="kagrup">
-            <h6>Logo / Kaşe / İmza</h6>
-            <div className="not" style={{ padding: 10 }}>
-              Bu şube <b>merkezin logo, kaşe ve imzasını</b> kullanıyor; belgelerde
-              merkezin görselleri basılır. Şubeye özel görsel yüklemek için
-              yukarıdaki kutunun işaretini kaldırın.
-            </div>
-          </div>
-        );
-      }
-      return (
-        <div className="kagrup">
-          <h6>Logo / Kaşe / İmza</h6>
-          <div style={{ padding: 10 }}>
-            <div className="not" style={{ marginBottom: 8 }}>
-              Yüklerken <b>türünü</b> seçin: <b>Logo</b> · <b>Kaşe</b> · <b>İmza</b> ·
-              <b> Antet</b>. Belgede her türün <b>varsayılan</b> işaretlisi kullanılır.
-              Önerilen logo: PNG, saydam zemin, en az 480×160 px.
-            </div>
-            <DokumanGalerisi kartAdi="sube" kaynakId={id as number} saltOkunur={salt} />
-          </div>
-        </div>
-      );
-    })()}
-
     {kaynak === 'sube' && aktif.baslik === 'Depolar' && (() => {
       const depoDetay = meta.detaylar.find(d => d.ad === 'depolar');
       if (!depoDetay) return null;
+      // Baz sube combosu ELLE (kullanici: etiket tek satir) - alan katalogda
+      //   Gizli, generic akis cizmiyor.
+      const bazAlan = meta.alanlar.find(a => a.ad === 'depoBazSubeId');
+      const bazCombo = bazAlan ? (
+        <div className="alan-izgara dort-sutun tek-satir-etiket"
+             style={{ marginBottom: 8 }}>
+          {renderAlanListesi([bazAlan])}
+        </div>
+      ) : null;
       // Merkez deposu kullaniliyorsa subenin KENDI depo listesi yok (174):
       //   grid cizilseydi "burada da depo tanimlayabilirim" izlenimi verirdi.
       if (Number(deger.depoBazSubeId) > 0) {
         return (
+          <>
+          {bazCombo}
           <div className="kagrup">
             <h6>Depolar</h6>
             <div className="not" style={{ padding: 10 }}>
@@ -403,21 +419,27 @@ return (
               comboyu <b>Kendisi</b> yapın.
             </div>
           </div>
+          </>
         );
       }
       if (yeniMi) {
         return (
+          <>
+          {bazCombo}
           <div className="kagrup">
             <h6>Depolar</h6>
             <div className="not" style={{ padding: 10 }}>
               Şube kaydedildikten sonra buradan depo eklenebilir.
             </div>
           </div>
+          </>
         );
       }
       return (
-        /* ~6 satirlik yukseklik, fazlasi dikey scroll (kullanici) - cok
-           depolu subede sekme uzayip kartin altini itiyordu. */
+        <>
+        {bazCombo}
+        {/* ~6 satirlik yukseklik, fazlasi dikey scroll (kullanici) - cok
+            depolu subede sekme uzayip kartin altini itiyordu. */}
         <div style={{ maxHeight: 268, overflowY: 'auto' }}>
           <GenDetayTablo
             meta={depoDetay}
@@ -429,6 +451,7 @@ return (
             modalDuzenle
           />
         </div>
+        </>
       );
     })()}
     {kaynak === 'cari' && aktif.baslik === 'Genel' && !yeniMi

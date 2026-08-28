@@ -53,10 +53,13 @@ const SERIT_ALANLARI = ['unvan', 'ad', 'aktif'];
  * eksikse listede gorunur - eksik bilgi ancak fatura gonderilirken fark ediliyordu.
  */
 export function FirmaBilgileri() {
-  const [aktif, setAktif] = useState<Sekme>('subeler');
+  const [aktif] = useState<Sekme>('subeler');
   const [subeler, setSubeler] = useState<ListeSatiri[]>([]);
   /** Karti acan kayit: sayi = duzenle, 'yeni' = ekle, null = kart kapali. */
   const [kart, setKart] = useState<number | 'yeni' | null>(null);
+  // Listede secili sube (228): satira tiklayinca isaretlenir; ust ikonlar
+  //   (duzenle/sil) secili satiri kullanir.
+  const [seciliSube, setSeciliSube] = useState<number | null>(null);
   /** e-Belge sekmesinin acik alt sekmesi (kart her acildiginda Genel'den baslar). */
   const [ebelgeAlt, setEbelgeAlt] = useState<string>('genel');
   const [yukleniyor, setYukleniyor] = useState(true);
@@ -90,6 +93,19 @@ export function FirmaBilgileri() {
    * YENI kayitta yalniz Genel calisir: seri/XSLT/tur ayarlari kartin id'sine
    * bagli olmasa da, once subenin kaydedilmesi akisi anlasilir kiliyor.
    */
+  /** Secili subeyi siler - sunucu engelleri (belge/kullanici bagi) mesajla doner. */
+  const subeSil = async (id: number) => {
+    const ad = String(subeler.find(x => Number(x.id) === id)?.ad ?? id);
+    if (!confirm(`"${ad}" şubesi silinecek. Onaylıyor musunuz?`)) return;
+    try {
+      await api.kartSil('sube', id);
+      setSeciliSube(null);
+      void yukle();
+    } catch (h) {
+      setHata(hataMetni(h));
+    }
+  };
+
   const ebelgeSekmesi = (sekmeBasligi: string, icerik: React.ReactNode,
                          deger: Record<string, unknown>) => {
     if (sekmeBasligi !== 'e-Belge') return icerik;
@@ -101,13 +117,15 @@ export function FirmaBilgileri() {
     const acik = gorunur.some(b => b.anahtar === ebelgeAlt) ? ebelgeAlt : 'genel';
     return (
       <>
-        <div className="katab alt">
+        {/* Alt bolumler BUTON gorunumunde (kullanici) - sekme cizgisi ana
+            sekmelerle karisiyordu. */}
+        <div style={{ display: 'flex', gap: 6, margin: '-6px 0 8px' }}>
           {gorunur.map(b => (
-            <div key={b.anahtar}
-                 className={`kat${b.anahtar === acik ? ' on' : ''}`}
-                 onClick={() => setEbelgeAlt(b.anahtar)}>
+            <button key={b.anahtar} type="button"
+                    className={`d${b.anahtar === acik ? ' bir' : ''}`}
+                    onClick={() => setEbelgeAlt(b.anahtar)}>
               {b.baslik}
-            </div>
+            </button>
           ))}
         </div>
         {acik === 'genel' && icerik}
@@ -121,23 +139,15 @@ export function FirmaBilgileri() {
 
   return (
     <>
-      <div className="sayfabas">
+      <div className="sayfabas" style={{ marginBottom: 10 }}>
         <div className="basrow">
           <h1>Firma Bilgileri</h1>
           <span className="yol">Yönetim › Firma Bilgileri</span>
         </div>
       </div>
 
-      <div className="katab">
-        {SEKMELER.map(s => (
-          <div key={s.anahtar}
-               className={`kat${s.anahtar === aktif ? ' on' : ''}`}
-               onClick={() => setAktif(s.anahtar)}>
-            {s.baslik}
-          </div>
-        ))}
-      </div>
-
+      {/* Tek sekme vardi ("Şube Tanımları") - sekme cubugu kaldirildi
+          (kullanici); baslik zaten kutunun kendisinde. */}
       {hata && <div className="hata-kutusu">{hata}</div>}
       {yukleniyor && <div className="yukleniyor">Yükleniyor…</div>}
 
@@ -145,7 +155,13 @@ export function FirmaBilgileri() {
         <div className="kagrup">
           <div className="numaralama-bas bitisik">
             <h6>Şube Tanımları</h6>
-            <button className="d bir" onClick={() => setKart('yeni')}>+ Yeni Şube</button>
+            {/* Ekle / Duzenle / Sil IKON olarak ustte (kullanici). */}
+            <button className="d bir" title="Yeni Şube"
+                    onClick={() => setKart('yeni')}>＋</button>
+            <button className="d" title="Düzenle" disabled={seciliSube === null}
+                    onClick={() => seciliSube !== null && setKart(seciliSube)}>✎</button>
+            <button className="d" title="Sil" disabled={seciliSube === null}
+                    onClick={() => { if (seciliSube !== null) void subeSil(seciliSube) }}>🗑</button>
           </div>
 
           {/* e-Belge icin bilgisi eksik sube varsa ustte uyari: gonderim o
@@ -160,24 +176,32 @@ export function FirmaBilgileri() {
           <table className="grid">
             <thead>
               <tr>
+                <th style={{ width: 34 }}></th>
                 <th>Kod</th><th>Şube Adı</th><th>Ünvan</th>
                 <th>İlçe / İl</th><th>Telefon</th>
-                <th>Gönderici Kimliği</th>
                 <th style={{ textAlign: 'center' }}>Vars.</th>
                 <th style={{ textAlign: 'center' }}>e-Belge</th>
                 <th style={{ textAlign: 'center' }}>Durum</th>
-                <th style={{ width: 90 }}></th>
               </tr>
             </thead>
             <tbody>
               {subeler.map(s => (
-                <tr key={String(s.id)} onDoubleClick={() => setKart(Number(s.id))}>
+                /* Tek tik SATIRI ISARETLER (check), cift tik karti acar. */
+                <tr key={String(s.id)}
+                    className={seciliSube === Number(s.id) ? 'secili' : undefined}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setSeciliSube(t =>
+                      t === Number(s.id) ? null : Number(s.id))}
+                    onDoubleClick={() => setKart(Number(s.id))}>
+                  <td style={{ textAlign: 'center' }}>
+                    <input type="checkbox" checked={seciliSube === Number(s.id)}
+                           readOnly />
+                  </td>
                   <td>{String(s.kod ?? '')}</td>
                   <td>{String(s.ad ?? '')}</td>
                   <td>{String(s.unvan ?? '')}</td>
                   <td>{[s.ilce, s.il].filter(Boolean).join(' / ')}</td>
                   <td>{String(s.telefon ?? '')}</td>
-                  <td>{String(s.ebelgeKimlikAdi ?? 'Kendi')}</td>
                   <td style={{ textAlign: 'center' }}>{Number(s.varsayilan) === 1 ? '✓' : ''}</td>
                   <td style={{ textAlign: 'center' }}>
                     <span className={`rozet ${String(s.ebelgeHazir) === 'Tamam' ? 'ok' : 'uyari'}`}>
@@ -189,17 +213,12 @@ export function FirmaBilgileri() {
                       {Number(s.aktif) === 1 ? 'Aktif' : 'Pasif'}
                     </span>
                   </td>
-                  <td style={{ textAlign: 'center' }}>
-                    <button className="d" onClick={() => setKart(Number(s.id))}>Düzenle</button>
-                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
           <div className="not">
-            Satıra çift tıklayınca da kart açılır. <b>Gönderici Kimliği</b>
-            “Merkez” ise şubenin faturası merkezin ünvanı ve VKN’siyle gider;
-            “Merkez kimliği + şube adresi”nde ünvan/VKN merkezin, adres şubenindir.
+            Satıra tıklayınca seçilir, çift tıklayınca kart açılır. <b>Baz Alınacak Şube</b> seçiliyse şubenin faturası o şubenin ünvanı ve VKN’siyle, kendi adresiyle gider.
           </div>
         </div>
       )}
