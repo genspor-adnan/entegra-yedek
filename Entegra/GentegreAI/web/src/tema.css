@@ -905,6 +905,16 @@ input.skt-gecmis {
 /* Etiket edit genisligini asmasin: uzun cumleler satiri dagitiyordu. */
 .alan-izgara.ayar-formu .alan .etiket { width: 100%; max-width: 460px; font-size: 11px }
 .alan-izgara.ayar-formu .alan input { max-width: 160px }
+/* YAN YANA ayar dizisi (Genel: Urun modu | Yerel para | Doviz) - kullanici:
+   combolar Belge Girisi editi olcusunde (160px), aralarinda belirgin bosluk. */
+.ayar-yanyana { display: flex !important; flex-wrap: wrap; column-gap: 48px; row-gap: 8px }
+.ayar-yanyana .alan { width: auto }
+.ayar-yanyana .alan .etiket { width: auto; max-width: none }
+/* Asagidaki genel ".ayar-formu .alan select" kurali (min 320) daha spesifik -
+   burada uc sinifla ezilir. */
+.alan-izgara.ayar-formu.ayar-yanyana .alan select {
+  width: 160px; min-width: 160px; max-width: 160px;
+}
 .alan-izgara.ayar-formu .ikili { display: flex; align-items: center; gap: 6px }
 /* Metin ayarlarinda dar kutu yeter (ISO kodu, kisa kodlar); "genis-deger" istisna. */
 .alan-izgara.ayar-formu .alan input.genis-deger { max-width: 320px }
