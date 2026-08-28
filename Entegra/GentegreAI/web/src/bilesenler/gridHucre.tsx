@@ -71,6 +71,8 @@ const ROZET_SINIFI: Record<string, string> = {
   'Temel': 'gri', 'Ticari': 'uyari', 'İhracat': 'mor', 'Kamu': 'mor',
   'İlaç / Tıbbi Cihaz': 'bilgi',
   // Fatura tipleri (satis fatura listesi).
+  // Teklif akisi (218): Kabul/Red/İptal yukarida zaten var.
+  'Hazırlanıyor': 'gri', 'Sunuldu': 'bilgi',
   'Tevkifatlı': 'uyari', 'KDV İstisna': 'bilgi', 'İhraç Kayıtlı': 'bilgi',
   'Fiyat Farkı': 'gri', 'Kur Farkı': 'gri', 'SGK': 'bilgi',
   'Bilinmiyor': 'hata',

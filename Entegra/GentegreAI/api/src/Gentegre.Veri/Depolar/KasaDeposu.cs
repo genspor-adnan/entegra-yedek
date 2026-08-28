@@ -356,9 +356,24 @@ public sealed partial class KasaDeposu
 
         // Gerceklesmis/fislenmis kayit DB trigger'i ile korunur (076) - burada
         //   tekrar kontrol etmiyoruz; tek kural kaynagi motor.
+        // Ozet (tur/no/cari) bilgiye: log listesi silinmis kayitta da
+        //   Modul/Kod/Ad cozebilsin (belge silme ile ayni desen).
+        var logOzet = new Dictionary<string, string> { ["aksiyon"] = "sil" };
+        await using (var ozetKomut = new NpgsqlCommand(
+            "select tur, islem_no, taraf_unvan from public.kasa_islem where id = @p0",
+            baglanti, tx))
+        {
+            ozetKomut.Parameters.AddWithValue("p0", id);
+            await using var o = await ozetKomut.ExecuteReaderAsync(iptal);
+            if (await o.ReadAsync(iptal))
+            {
+                logOzet["tur"] = Convert.ToString(o["tur"], CultureInfo.InvariantCulture) ?? "";
+                logOzet["islemNo"] = Convert.ToString(o["islem_no"]) ?? "";
+                logOzet["tarafUnvan"] = Convert.ToString(o["taraf_unvan"]) ?? "";
+            }
+        }
         await _log.YazAsync(baglanti, tx, LogIslemi.Sil, LogTabloKasa, id,
-            baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-            new Dictionary<string, string> { ["aksiyon"] = "sil" }, iptal: iptal);
+            baglam.KullaniciId, baglam.SubeId, baglam.Ip, logOzet, iptal: iptal);
 
         await using (var komut = new NpgsqlCommand(
             "delete from public.kasa_islem where id = @p0", baglanti, tx))

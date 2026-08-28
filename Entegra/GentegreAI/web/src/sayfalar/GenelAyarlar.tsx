@@ -70,6 +70,14 @@ export function GenelAyarlar() {
                 })}
                 {alan('genel.yerel_para', 'Yerel para birimi', { listeKod: 'genel.doviz' })}
                 {alan('genel.varsayilan_doviz', 'Döviz', { listeKod: 'genel.doviz' })}
+                {/* Loglar sunucuda UTC tutulur; listede bu kayma eklenir. */}
+                {alan('genel.saat_farki', 'Saat farkı (UTC+)', {
+                  tip: 'secenek',
+                  secenekler: Array.from({ length: 27 }, (_, i) => ({
+                    deger: String(i - 12),
+                    ad: `UTC${i - 12 >= 0 ? '+' : ''}${i - 12}`,
+                  })),
+                })}
               </div>
             </div>
 

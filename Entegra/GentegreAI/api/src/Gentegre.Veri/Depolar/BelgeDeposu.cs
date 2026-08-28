@@ -567,11 +567,20 @@ public sealed partial class BelgeDeposu
         }
 
         // ------------------------------------------------------------------ 8) log ----
-        await _log.YazAsync(baglanti, islem, LogIslemi.Ekle, LogTabloBelge, belgeId,
+        // Belge no bilgiye yazilir: kayit SILINDIKTEN sonra da log listesinde
+        //   Kod cozulebilsin (canli kayitta join zaten cozuyor). Numara bu
+        //   noktada verilmis oluyor (7. adim).
+        await using var noKomut = baglanti.Komut(
+            "select belge_no from public.belge where id = @p0", islem, belgeId);
+        var logBelgeNo = (await noKomut.ExecuteScalarAsync(iptal))?.ToString() ?? "";
+
+        await _log.YazAsync(baglanti, islem,
+            mevcutId > 0 ? LogIslemi.Degistir : LogIslemi.Ekle, LogTabloBelge, belgeId,
             baglam.KullaniciId, baglam.SubeId, baglam.Ip,
             new Dictionary<string, string>
             {
                 ["tur"] = tur.ToString(CultureInfo.InvariantCulture),
+                ["belgeNo"] = logBelgeNo,
                 ["tarafId"] = tarafId.ToString(CultureInfo.InvariantCulture),
                 ["satirAdedi"] = satirlar.Count.ToString(CultureInfo.InvariantCulture),
                 ["taslak"] = secenekler.Taslak ? "1" : "0"

@@ -464,8 +464,23 @@ public sealed partial class BelgeDeposu
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             // Log SILMEDEN ONCE yazilir: silinen satirin alanlari sonra okunamaz.
+            //   Ozet (tur/no/cari) bilgiye konur - log listesi Modul/Kod/Ad
+            //   kolonlarini silinmis kayitta da cozebilsin.
+            Dictionary<string, string>? logOzet = null;
+            await using (var ozetKomut = baglanti.Komut(
+                "select tur, belge_no, taraf_unvan, taraf_id from public.belge where id = @p0",
+                islem, belgeId))
+            await using (var o = await ozetKomut.ExecuteReaderAsync(iptal))
+                if (await o.ReadAsync(iptal))
+                    logOzet = new Dictionary<string, string>
+                    {
+                        ["tur"] = Convert.ToString(o["tur"], CultureInfo.InvariantCulture) ?? "",
+                        ["belgeNo"] = Convert.ToString(o["belge_no"]) ?? "",
+                        ["tarafUnvan"] = Convert.ToString(o["taraf_unvan"]) ?? "",
+                        ["tarafId"] = Convert.ToString(o["taraf_id"], CultureInfo.InvariantCulture) ?? ""
+                    };
             await _log.YazAsync(baglanti, islem, LogIslemi.Sil, LogTabloBelge, belgeId,
-                baglam.KullaniciId, baglam.SubeId, baglam.Ip, null, iptal: iptal);
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip, logOzet, iptal: iptal);
 
             await using var komut = baglanti.Komut(
                 "select public.fn_belge_sil(@p0, @p1)", islem,

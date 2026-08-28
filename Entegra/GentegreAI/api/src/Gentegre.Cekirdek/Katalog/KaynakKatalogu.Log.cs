@@ -34,17 +34,29 @@ public static partial class KaynakKatalogu
             left join public.stok ks on ks.id = l.kayit_id and l.tablo_id = 88
             left join public.belge kb on kb.id = l.kayit_id and l.tablo_id = 30
             left join public.rol kr on kr.id = l.kayit_id and l.tablo_id = 903
+            left join public.kasa_islem ki on ki.id = l.kayit_id and l.tablo_id = 908
+            left join public.kasa_islem_turu kit on kit.kod = ki.tur
+            left join public.kasa_islem_turu bt on l.tablo_id = 30
+                 and bt.kod = coalesce(kb.tur::int, (l.bilgi->>'tur')::int)
+            left join public.taraf ktr on ktr.id = l.taraf_id
             """,
         VarsayilanSirala: "l.tarih desc, l.id desc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",         "l.id",                          "sayi",  "Id",        Varsayilan: false),
-            new("tarih",      "(l.tarih + interval '3 hours')", "tarih", "Tarih",     Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm"),
+            // Sunucu UTC yazar; gosterim kaymasi genel.saat_farki ayarindan
+            //   (varsayilan +3, Genel Ayarlar > Genel'den degistirilir).
+            new("tarih",
+                "(l.tarih + make_interval(hours => coalesce((select nullif(r.deger, '')::int " +
+                "from public.referans r where r.anahtar = 'genel.saat_farki'), 3)))",
+                                                             "tarih", "Tarih",     Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm"),
             new("islemTipi",  IslemAdiIfade("l.islem_tipi"),   "metin", "İşlem",     Hizalama: "orta"),
             new("modul",      LogModulIfade(),                 "metin", "Modül",     Hizalama: "orta"),
-            new("kod",        "case when l.ust_tablo_id in (71, 73) then kut.kod when l.tablo_id in (71, 73) then kt.kod when l.tablo_id = 88 then ks.kod when l.tablo_id = 30 then kb.belge_no when l.tablo_id = 903 then kr.kod end",
+            // Belge silinmisse numara bilgi JSON'undan; kasa islem_no; baska
+            //   cozum yoksa satirin taraf_id cari'sinin kodu (kullanici).
+            new("kod",        "case when l.ust_tablo_id in (71, 73) then kut.kod when l.tablo_id in (71, 73) then kt.kod when l.tablo_id = 88 then ks.kod when l.tablo_id = 30 then coalesce(nullif(kb.belge_no, ''), l.bilgi->>'belgeNo') when l.tablo_id = 908 then ki.islem_no::text when l.tablo_id = 903 then kr.kod else ktr.kod end",
                                                                 "metin", "Kod"),
-            new("ad",         "case when l.ust_tablo_id in (71, 73) then kut.unvan when l.tablo_id in (71, 73) then kt.unvan when l.tablo_id = 88 then ks.ad when l.tablo_id = 30 then kb.taraf_unvan when l.tablo_id = 903 then kr.ad end",
+            new("ad",         "case when l.ust_tablo_id in (71, 73) then kut.unvan when l.tablo_id in (71, 73) then kt.unvan when l.tablo_id = 88 then ks.ad when l.tablo_id = 30 then coalesce(nullif(kb.taraf_unvan, ''), l.bilgi->>'tarafUnvan', ktr.unvan) when l.tablo_id = 908 then coalesce(nullif(ki.taraf_unvan, ''), l.bilgi->>'tarafUnvan', ktr.unvan) when l.tablo_id = 903 then kr.ad else ktr.unvan end",
                                                                 "metin", "Ad"),
             new("kayitId",    "l.kayit_id",                    "sayi",  "Kayıt Id",  Hizalama: "sag"),
             new("kullanici",  "k.unvan",                       "metin", "Kullanıcı"),
@@ -97,6 +109,7 @@ public static partial class KaynakKatalogu
             when 905 then 'Eğitim/Sertifika'
             when 906 then 'Acil Durum Kişi'
             when 907 then 'Hasta Bilgisi'
+            when 908 then 'Kasa İşlemi'
             else {kolon}::text
         end
         """;
@@ -123,7 +136,8 @@ public static partial class KaynakKatalogu
                     when kt.musteri = 1 then 'Müşteri'
                     else 'Cari'
                 end
-            when l.tablo_id = 30 then 'Belge'
+            when l.tablo_id = 30 then coalesce(nullif(bt.ad, ''), 'Belge')
+            when l.tablo_id = 908 then coalesce(nullif(kit.ad, ''), 'Kasa')
             when l.tablo_id = 88 then 'Stok'
             when l.tablo_id = 903 then 'Rol'
             else ''

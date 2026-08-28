@@ -734,7 +734,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Kullanici: "İK altına Personel Listesi taşı" - tek ogeli grup, digerleriyle ayni desen.
     kaynak: 'personel', baslik: 'Personel', yol: 'IK › Personel', kartYolu: '/personel',
     aksiyonEkrani: 'personel-liste', cipler: DURUM_CIPLERI,
-    menuGrup: 'İK', menuAd: 'Personel Listesi', ic: '🪪', yetkiKodu: 'personel',
+    menuGrup: 'İK', menuAd: 'Personel Listesi', ic: '🧑‍🤝‍🧑', yetkiKodu: 'personel',
   },
   {
     // DEMIRBAS (216, Ekranlar/demirbas_listesi.html) - ana menude IK'nin
