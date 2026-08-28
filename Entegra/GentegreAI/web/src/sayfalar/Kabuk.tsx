@@ -122,6 +122,34 @@ export function Kabuk() {
       .map(x => x.m);
   });
 
+  /**
+   * FAVORILER (kullanici): alt menu ogelerinin sagindaki yildiz ☆ tiklaninca
+   * oge menunun EN USTUNDEKI "Favoriler" bolumune de girer; asil yerinde ★
+   * dolu gorunur, tekrar tiklaninca cikar. Kullanici BASINA tarayicida
+   * saklanir (localStorage) - sunucu tarafina tasinmasi ileriki is.
+   */
+  const favoriAnahtar = `favoriler.${kullanici?.id ?? 0}`;
+  const [favoriler, setFavoriler] = useState<string[]>([]);
+  useEffect(() => {
+    try { setFavoriler(JSON.parse(localStorage.getItem(favoriAnahtar) ?? '[]') as string[]) }
+    catch { setFavoriler([]) }
+  }, [favoriAnahtar]);
+  const favoriToggle = (yol: string) => setFavoriler(t => {
+    const y = t.includes(yol) ? t.filter(x => x !== yol) : [...t, yol];
+    try { localStorage.setItem(favoriAnahtar, JSON.stringify(y)) } catch { /* dolu/kapali depo */ }
+    return y;
+  });
+  /** "liste" rozetinin yerine yildiz: bos = ekle, dolu = cikar. */
+  const yildiz = (yol: string) => (
+    <button type="button" className="rz"
+            title={favoriler.includes(yol) ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+            style={{ border: 0, background: 'transparent', cursor: 'pointer',
+                     padding: 0, fontSize: 13, lineHeight: 1 }}
+            onClick={e => { e.preventDefault(); e.stopPropagation(); favoriToggle(yol) }}>
+      {favoriler.includes(yol) ? '★' : '☆'}
+    </button>
+  );
+
   // Acik/kapali durumu kullanici ELLE degistirmedikce, aktif alt-ogeyi iceren grup
   //   otomatik acik gelir (dogrudan /tedarikci gibi bir URL'e gelindiginde de gorunsun).
   const [acikGruplar, setAcikGruplar] = useState<Record<string, boolean>>({});
@@ -310,6 +338,21 @@ export function Kabuk() {
           <div className="yanic">
             {/* Panel menude YOKTU: kullanici bir listeye girince ana sayfaya
                 donmenin yolu kalmiyordu. En ustte, gruplarin disinda. */}
+            {/* FAVORILER Ana Sayfa'nin da USTUNDE, basliksiz (kullanici):
+                yildizlanan ogeler dogrudan en tepede durur. */}
+            {favoriler.map(yol => {
+              const m = moduller.find(x => x.yol === yol);
+              if (!m) return null;   // yetki/mod degisince kalinti yol
+              return (
+                <NavLink key={`fav-${yol}`} to={yol}
+                         className={() => `mi ${konum.pathname.startsWith(yol) ? 'on' : ''}`}>
+                  <span className="ic">{m.ic}</span>
+                  <span>{m.ad}</span>
+                  {yildiz(yol)}
+                </NavLink>
+              );
+            })}
+
             <NavLink to="/panel"
                      className={() => `mi ${konum.pathname === '/panel' ? 'on' : ''}`}>
               <span className="ic">🏠</span>
@@ -325,7 +368,7 @@ export function Kabuk() {
               >
                 <span className="ic">{s.m.ic}</span>
                 <span>{s.m.ad}</span>
-                <span className="rz">{s.m.rz}</span>
+                {yildiz(s.m.yol)}
               </NavLink>
             ) : (
               <div key={s.ad}>
@@ -348,7 +391,7 @@ export function Kabuk() {
                   >
                     <span className="ic">{a.m.ic}</span>
                     <span>{a.m.ad}</span>
-                    <span className="rz">{a.m.rz}</span>
+                    {yildiz(a.m.yol)}
                   </NavLink>
                 ) : (
                   // Ikinci seviye (ör. Yönetim › Ayarlar): kendi ac/kapa durumu,
@@ -375,7 +418,7 @@ export function Kabuk() {
                       >
                         <span className="ic">{m.ic}</span>
                         <span>{m.ad}</span>
-                        <span className="rz">{m.rz}</span>
+                        {yildiz(m.yol)}
                       </NavLink>
                     ))}
                   </div>

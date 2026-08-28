@@ -802,7 +802,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Firma geneli DAVRANIS ayarlari (public.referans). Liste degil (ozelSayfa).
     kaynak: 'genel-ayarlar', baslik: 'Genel Ayarlar', yol: 'Yonetim › Ayarlar › Genel',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Genel',
+    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Genel', menuSira: 1,
     ic: '⚙️', yetkiKodu: 'ayar',
   },
   {
@@ -810,28 +810,28 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   Yönetim grubunun altinda "Ayarlar" alt basligiyla toplanir.
     kaynak: 'stok-ayarlar', baslik: 'Stok Ayarları', yol: 'Yonetim › Ayarlar › Stok Ayarlari',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Stok Ayarları',
+    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Stok Ayarları', menuSira: 2,
     ic: '📦', yetkiKodu: 'stok',
   },
   {
     // Kasa modulu ayarlari (149) - simdilik tek sekme: duzeltme gun siniri.
     kaynak: 'kasa-ayarlar', baslik: 'Kasa Ayarları', yol: 'Yonetim › Ayarlar › Kasa',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Kasa',
+    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Kasa', menuSira: 3,
     ic: '💵', yetkiKodu: 'kasa_islem',
   },
   {
     // Satis belgesi ayarlari: Genel + e-Belge (e-Belge yalniz GIDEN belgede).
     kaynak: 'satis-ayarlar', baslik: 'Satış Belgeleri', yol: 'Yonetim › Ayarlar › Satış Belgeleri',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Satış Belgeleri',
+    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Satış Belgeleri', menuSira: 4,
     ic: '🧾', yetkiKodu: 'belge',
   },
   {
     // Alis belgesi ayarlari: yalniz Genel - alis faturasini GIB'e biz gondermeyiz.
     kaynak: 'alis-ayarlar', baslik: 'Alış Belgeleri', yol: 'Yonetim › Ayarlar › Alış Belgeleri',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Alış Belgeleri',
+    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Alış Belgeleri', menuSira: 5,
     ic: '📥', yetkiKodu: 'belge',
   },
 ];
