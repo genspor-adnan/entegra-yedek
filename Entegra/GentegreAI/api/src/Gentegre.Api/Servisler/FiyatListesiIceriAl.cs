@@ -22,7 +22,7 @@ namespace Gentegre.Api.Servisler;
 ///    sey yazilmaz ve satir numarali hata listesi doner. Upsert sayesinde
 ///    duzelt-tekrar-yukle bedava; yarim iceri alma "hangi satir girdi"
 ///    belirsizligi yaratir.
-///  - Yazilan satir MANUEL (yazim = 1) sayilir: "Listeyi Üret" iceri alinan
+///  - Yazilan satir İMPORT (yazim = 3, 214) isaretlenir: "Listeyi Üret" iceri alinan
 ///    fiyati ezmez (201/202 kurali).
 /// </summary>
 public static class FiyatListesiIceriAl
@@ -220,26 +220,34 @@ public static class FiyatListesiIceriAl
         {
             foreach (var s in temiz)
             {
+                // yazim = 3 (İmport, 214). uretim_tarihi de yazilir: satir
+                //   tetigi kullanici duzenlemesini uretim_tarihi'nin
+                //   DEGISMEMESINDEN tanir - iceri alma bir sistem yazisidir,
+                //   tetik fiyat degisimini gorup satiri Manuel'e cevirmemeli.
                 var sql = s.StokId is not null
                     ? """
                       insert into public.fiyat_listesi_satir
                           (liste_id, stok_id, fiyat, doviz_cinsi, kdv_dahil, birim, durum,
-                           yazim, taban_fiyat, ekleyen, degistiren)
-                      values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, 1, @p2, @p7, @p7)
+                           yazim, taban_fiyat, uretim_tarihi, ekleyen, degistiren)
+                      values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, 3, @p2, now()::timestamp, @p7, @p7)
                       on conflict (liste_id, stok_id, birim, doviz_cinsi) where stok_id is not null
                       do update set fiyat = excluded.fiyat, kdv_dahil = excluded.kdv_dahil,
-                                    durum = excluded.durum, yazim = 1, degistiren = excluded.degistiren
+                                    durum = excluded.durum, yazim = 3,
+                                    uretim_tarihi = excluded.uretim_tarihi,
+                                    degistiren = excluded.degistiren
                       returning (xmax = 0) as yeni
                       """
                     : """
                       insert into public.fiyat_listesi_satir
                           (liste_id, hizmet_id, fiyat, doviz_cinsi, kdv_dahil, birim, durum,
-                           yazim, taban_fiyat, ekleyen, degistiren)
-                      values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, 1, @p2, @p7, @p7)
+                           yazim, taban_fiyat, uretim_tarihi, ekleyen, degistiren)
+                      values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, 3, @p2, now()::timestamp, @p7, @p7)
                       on conflict (liste_id, hizmet_id, doviz_cinsi) where hizmet_id is not null
                       do update set fiyat = excluded.fiyat, kdv_dahil = excluded.kdv_dahil,
                                     durum = excluded.durum, birim = excluded.birim,
-                                    yazim = 1, degistiren = excluded.degistiren
+                                    yazim = 3,
+                                    uretim_tarihi = excluded.uretim_tarihi,
+                                    degistiren = excluded.degistiren
                       returning (xmax = 0) as yeni
                       """;
 

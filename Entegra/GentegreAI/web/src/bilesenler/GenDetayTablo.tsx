@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Modal } from './Modal';
 import { para4 } from './bicim';
+import { GridMenu, type MenuOgesi } from './grid/GridMenu';
+import { dosyaIndirUrl } from './indir';
 import type { DetayFarki, KartDetayMeta } from '../api/sozlesme';
 import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 import { TelefonGirdi } from './TelefonGirdi';
@@ -125,6 +127,9 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const [arama, setArama] = useState('');
   /** Aktif suzme cipi (cipler verilmisse; 0 = ilk cip). */
   const [aktifCip, setAktifCip] = useState(0);
+  /** Uc nokta menusu (satirlar gridi): konum + gizlenen kolonlar (oturumluk). */
+  const [menuKonum, setMenuKonum] = useState<{ x: number; y: number } | null>(null);
+  const [gizliKolonlar, setGizliKolonlar] = useState<Set<string>>(new Set());
 
   /** Salt gorunum hucresi: kod alani etiketiyle, mantik ✓, para TR bicimiyle. */
   const gorunum = (satir: Record<string, unknown>, a: typeof alanlar[number]) => {
@@ -224,13 +229,64 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const satirlarGrid = !!modalDuzenle && meta.ad === 'satirlar';
   const stokAlani   = alanlar.find(a => a.ad === 'stokId');
   const hizmetAlani = alanlar.find(a => a.ad === 'hizmetId');
-  const gridAlanlari = satirlarGrid
+  const tumGridAlanlari = satirlarGrid
     ? alanlar.filter(a => a.ad !== 'stokId' && a.ad !== 'hizmetId')
     : alanlar;
+  const gridAlanlari = tumGridAlanlari.filter(a => !gizliKolonlar.has(a.ad));
   const kalemAdi = (satir: Record<string, unknown>) =>
     satir.stokId != null && satir.stokId !== '' && stokAlani
       ? gorunum(satir, stokAlani)
       : hizmetAlani ? gorunum(satir, hizmetAlani) : '';
+
+  // UC NOKTA MENUSU (satirlar gridi): kolon goster/gizle (oturumluk) + CSV.
+  //   Listelerin menusuyle ayni cizim (GridMenu); ogeler grid'e ozgu.
+  const csvIndir = () => {
+    const b = [
+      ...(satirlarGrid ? ['Tip', 'Adı'] : []),
+      ...gridAlanlari.map(a => a.baslik),
+    ].join(';');
+    const govde = gorunurler.map(({ satir }) => [
+      ...(satirlarGrid
+        ? [satir.stokId != null && satir.stokId !== '' ? 'Stok' : 'Hizmet', kalemAdi(satir)]
+        : []),
+      ...gridAlanlari.map(a => gorunum(satir, a).replace(/;/g, ',')),
+    ].join(';')).join('\n');
+    const url = URL.createObjectURL(new Blob(['﻿' + b + '\n' + govde],
+      { type: 'text/csv;charset=utf-8' }));
+    dosyaIndirUrl(url, `${meta.baslik}.csv`, true);
+  };
+  const menuOgeleri: MenuOgesi[] = [
+    { ik: '📄', ad: 'CSV Kaydet', fn: csvIndir },
+    ...tumGridAlanlari.map((a, i) => ({
+      ik: gizliKolonlar.has(a.ad) ? '☐' : '☑',
+      ad: a.baslik, secili: !gizliKolonlar.has(a.ad), ayrac: i === 0,
+      fn: () => setGizliKolonlar(t => {
+        const y = new Set(t);
+        if (y.has(a.ad)) y.delete(a.ad); else y.add(a.ad);
+        return y;
+      }),
+    })),
+    { ik: '↺', ad: 'Tüm Kolonlar', fn: () => setGizliKolonlar(new Set()) },
+  ];
+
+  /**
+   * HIZLI FIYAT GIRISI (kullanici): satirlar gridinde Fiyat hucresi satir ici
+   * kutudur - Enter/asagi ok degeri isler ve BIR ALT gorunur satirin fiyatina
+   * gecer (Excel akisi). Deger islenirken ekran kurali da kosar (taslakKural
+   * 'fiyat' dali: Manuel + carpan geri hesabi); kayit yine kartin Kaydet'iyle.
+   */
+  const fiyatHucreIsle = (satirIndeks: number, metin: string) => {
+    const eski = durum.guncel[satirIndeks];
+    const yeni = metin.trim().replace(',', '.');
+    if (yeni === '' || String(eski.fiyat ?? '') === yeni) return;
+    const n = Number(yeni);
+    if (!Number.isFinite(n) || n < 0) return;
+    const kural = taslakKural?.('fiyat', yeni, { ...eski, fiyat: yeni }) ?? {};
+    onDegis({
+      ...durum,
+      guncel: durum.guncel.map((s, x) => (x === satirIndeks ? { ...s, fiyat: yeni, ...kural } : s)),
+    });
+  };
 
   const aramaAnahtari = arama.trim().toLocaleLowerCase('tr');
   const cipSuz = cipler?.[aktifCip]?.suz;
@@ -289,6 +345,15 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                          onChange={e => { setArama(e.target.value); setSecili(null); }} />
                 </span>
               )}
+              {satirlarGrid && (
+                <button type="button" className="d ikon-dugme" title="Grid menüsü"
+                        style={{ marginLeft: 6 }}
+                        onClick={e => {
+                          e.stopPropagation();
+                          const r = e.currentTarget.getBoundingClientRect();
+                          setMenuKonum(menuKonum ? null : { x: r.left, y: r.bottom + 4 });
+                        }}>⋮</button>
+              )}
             </span>
           ) : (
             <button type="button" className="d bir" disabled={!satirEklenebilir} onClick={satirEkle}>
@@ -336,7 +401,33 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               )}
               {modalDuzenle && gridAlanlari.map(a => (
                 <td key={a.ad} className={a.tip === 'mantik' ? 'hiza-orta' : undefined}>
-                  {gorunum(satir, a)}
+                  {satirlarGrid && a.ad === 'fiyat' && !saltOkunur && a.yazilabilir ? (
+                    <input
+                      // Disaridan (modal/kural) fiyat degisince kutu tazelensin;
+                      //   kullanici yazarken prop degismedigi icin remount olmaz.
+                      key={`${satir.id ?? i}-${String(satir.fiyat ?? '')}`}
+                      defaultValue={String(satir.fiyat ?? '')}
+                      data-fiyat-satir={i}
+                      inputMode="decimal"
+                      style={{ width: 90, textAlign: 'right' }}
+                      // Cift tik SATIR MODALINI acmasin; odaklaninca tumu
+                      //   secilsin - hizli giriste dogrudan yazilir.
+                      onDoubleClick={e => e.stopPropagation()}
+                      onFocus={e => e.currentTarget.select()}
+                      onKeyDown={e => {
+                        if (e.key !== 'Enter' && e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+                        e.preventDefault();
+                        (e.target as HTMLInputElement).blur();   // blur -> isle
+                        const sirada = gorunurler.findIndex(g => g.i === i);
+                        const hedef = gorunurler[e.key === 'ArrowUp' ? sirada - 1 : sirada + 1]?.i;
+                        if (hedef !== undefined)
+                          requestAnimationFrame(() =>
+                            document.querySelector<HTMLInputElement>(
+                              `input[data-fiyat-satir="${hedef}"]`)?.select());
+                      }}
+                      onBlur={e => fiyatHucreIsle(i, e.target.value)}
+                    />
+                  ) : gorunum(satir, a)}
                 </td>
               ))}
               {!modalDuzenle && alanlar.map(a => (
@@ -468,6 +559,11 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           )}
         </tbody>
       </table>
+
+      {satirlarGrid && (
+        <GridMenu konum={menuKonum} ogeler={menuOgeleri}
+                  onKapat={() => setMenuKonum(null)} />
+      )}
 
       {/* Satir duzenleme modali: alanlar etiketleriyle alt alta. "Tamam" yalniz
           TABLOYA yazar - kayit kartin kendi Kaydet'iyle sunucuya gider. */}

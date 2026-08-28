@@ -78,9 +78,10 @@ public static partial class KaynakKatalogu
             new("durumAdi", "case v.durum when 1 then 'Aktif' else 'Pasif' end", "metin",
                 "Durum", Hizalama: "orta", Genislik: 90, Filtrelenebilir: false),
             new("durum", "v.durum", "kod", "Durum Kodu", Hizalama: "orta", Varsayilan: false),
-            // Yururlukteki kural: satirda ezme yoksa basligin degeri gorunur.
-            new("yazim", "case when v.yazim = 1 then 'Manuel' else 'Hesap' end", "metin",
-                "Yazım", Hizalama: "orta"),
+            // Satirin NEREDEN geldigi (214): elle / kuraldan / Excel'den.
+            new("yazim",
+                "case v.yazim when 1 then 'Manuel' when 3 then 'İmport' else 'Hesap' end",
+                "metin", "Oluşma", Hizalama: "orta"),
             new("tabanListeAdi", "v.taban_liste_adi", "metin", "Taban Fiyat", Genislik: 160),
             new("carpan",    "v.carpan",    "para", "Çarpan", Hizalama: "sag", Bicim: "#,##0.0000"),
             new("yuvarlama", "v.yuvarlama", "kod",  "Yuvarlama", Hizalama: "orta"),

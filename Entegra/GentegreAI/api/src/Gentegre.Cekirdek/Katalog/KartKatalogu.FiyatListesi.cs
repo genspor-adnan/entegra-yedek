@@ -97,9 +97,9 @@ public static partial class KartKatalogu
                 new("birim",     "birim",     "kod",  KodListesi: "stok.ana_birim", Baslik: "Birim"),
                 new("durum",     "durum",     "kod",  SabitKodlar: DurumKodlari, Baslik: "Durum"),
 
-                // Satir seviyesi KURAL EZMESI - bos birakilirsa basligin kurali.
+                // Satirin NEREDEN geldigi (214): Manuel / Hesap / İmport.
                 new("yazim",     "yazim",     "kod",  KodListesi: "fiyat_listesi.yazim",
-                    Baslik: "Yazım"),
+                    Baslik: "Oluşma"),
                 new("tabanListeId", "taban_liste_id", "kod",
                     KodTablosu: "public.v_fiyat_listesi_lookup", Baslik: "Taban Fiyat"),
                 new("carpan",    "carpan",    "para", Baslik: "Çarpan"),

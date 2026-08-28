@@ -80,7 +80,7 @@ export function IceriAlModali({ baslik, sablonIndir, yukle, onKapat, onAlindi }:
           Sütunlar: <b>Stok Kodu</b> ya da <b>Hizmet Kodu</b> (tam biri; tek <b>Kod</b> sütunu
           da kabul edilir) · <b>Fiyat</b> · Döviz · KDV (Dahil/Hariç) · Birim · Durum.
           Eşleşen kalem <b>güncellenir</b>, yeni kalem eklenir; içeri alınan satırlar
-          Manuel sayılır ve "Listeyi Üret" onları ezmez.
+          <b> İmport</b> işaretlenir ve "Listeyi Üret" onları ezmez.
         </div>
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>

@@ -711,8 +711,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           // Tumu / Stok / Hizmet cipleri (kullanici) - karma listede tek tur gorunur.
           cipler={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
             ? [{ ad: 'Tümü', suz: () => true },
-               { ad: 'Stok', suz: s => s.stokId != null && s.stokId !== '' },
-               { ad: 'Hizmet', suz: s => s.hizmetId != null && s.hizmetId !== '' }]
+               { ad: '📦 Stok', suz: s => s.stokId != null && s.stokId !== '' },
+               { ad: '🛠️ Hizmet', suz: s => s.hizmetId != null && s.hizmetId !== '' }]
             : undefined}
         />
       )}
