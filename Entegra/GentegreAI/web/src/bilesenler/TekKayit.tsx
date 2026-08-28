@@ -19,6 +19,9 @@ interface Props {
   /** Karsilikli dislanan onay kutulari: anahtar alan ISARETLENINCE listedeki
       alanlar kaldirilir (or. ÜTS canli/test secimi radyo gibi davranir). */
   dislar?: Record<string, string[]>;
+  /** Kutularin USTUNDE, tek basina cizilecek alanlar (or. ÜTS "Baz Alınacak
+      Şube" - iki cercevenin ikisini de yonettigi icin birinin icinde durmasin). */
+  ustAlanlar?: string[];
 }
 
 /**
@@ -34,7 +37,7 @@ interface Props {
  * doldurup Kaydet derse detay farkinda "eklenen" olarak gider.
  */
 export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, gruplar,
-                           dislar }: Props) {
+                           dislar, ustAlanlar }: Props) {
   const satir: Satir = durum.guncel[0] ?? {};
 
   const degis = (ad: string, deger: unknown) => {
@@ -93,18 +96,27 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, grupla
   if (gruplar?.length) {
     const bul = new Map(alanlar.map(a => [a.ad, a]));
     return (
-      <div className="kasira">
-        {gruplar.map((g, i) => (
-          <div key={g.baslik} className="kagrup">
-            <h6>{g.baslik}</h6>
-            <div className="alan-izgara tek-sutun">
-              {g.alanlar.map(ad => bul.get(ad)).filter((a): a is KartAlanMeta => !!a)
-                .map(alanCiz)}
-            </div>
-            {not && i === gruplar.length - 1 && <div className="not">{not}</div>}
+      <>
+        {/* Ust alanlar: kutularin uzerinde tek basina (or. baz sube secimi). */}
+        {ustAlanlar && ustAlanlar.length > 0 && (
+          <div className="alan-izgara dort-sutun" style={{ marginBottom: 8 }}>
+            {ustAlanlar.map(ad => bul.get(ad)).filter((a): a is KartAlanMeta => !!a)
+              .map(alanCiz)}
           </div>
-        ))}
-      </div>
+        )}
+        <div className="kasira">
+          {gruplar.map((g, i) => (
+            <div key={g.baslik} className="kagrup">
+              <h6>{g.baslik}</h6>
+              <div className="alan-izgara tek-sutun">
+                {g.alanlar.map(ad => bul.get(ad)).filter((a): a is KartAlanMeta => !!a)
+                  .map(alanCiz)}
+              </div>
+              {not && i === gruplar.length - 1 && <div className="not">{not}</div>}
+            </div>
+          ))}
+        </div>
+      </>
     );
   }
 
