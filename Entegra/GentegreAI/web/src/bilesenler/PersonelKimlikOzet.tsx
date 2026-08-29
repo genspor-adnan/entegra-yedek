@@ -5,6 +5,7 @@ import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { TekOzluk } from './TekOzluk';
+import { KartKullaniciRolu } from './KartKullaniciRolu';
 import { KartKullaniciSubeleri } from './KartKullaniciSubeleri';
 
 interface Props {
@@ -51,7 +52,7 @@ function yasHesapla(tarihStr: string): string | null {
  * diğer kimlik alanları 1:1 detay kaydından gelir.
  */
 export function PersonelKimlikOzet({
-  kartAdi = 'personel', vknoAlan, vkno, onVknoDegis, gorevAlan, gorev, onGorevDegis,
+  kartAdi = 'personel', vknoAlan, vkno, onVknoDegis,
   ozlukMeta, ozlukDurum, saltOkunur, onOzlukDegis, egitimler, fotoSolEk, ozetGizli,
   subeAlan, sube, onSubeDegis,
   vknoGizli, kimlikSutunGenisligi, kaynakId, fotoSolEkOnce = false,
@@ -127,19 +128,10 @@ export function PersonelKimlikOzet({
                     onChange={e => onVknoDegis(e.target.value)} />
                 </label>
               )}
-              {/* Pozisyon: "Özet" kutusu kaldirilinca buraya alindi (kullanici). */}
-              {!ozetGizli && (
-                <label className="alan tip-kod">
-                  <span className="etiket zorunlu-isaret">{gorevAlan.baslik}</span>
-                  {/* Pozisyon KOD alani (236): secenekler ayarlardan yonetilen
-                      'taraf.gorev' kod listesinden gelir, kayda ID yazilir. */}
-                  <select value={gorev} disabled={saltOkunur}
-                          onChange={e => onGorevDegis(e.target.value)}>
-                    <option value="">-</option>
-                    {gorevAlan.kodlar && Object.entries(gorevAlan.kodlar)
-                      .map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                  </select>
-                </label>
+              {/* ROL burada (kullanici: gorev ile yer degistirdi) - gorev
+                  kimlik seridinde. Kullanici hesabi yoksa alan cizilmez. */}
+              {!ozetGizli && kaynakId && (
+                <KartKullaniciRolu sade kartId={kaynakId} saltOkunur={saltOkunur} />
               )}
             </div>
             <div className="adres-satir">

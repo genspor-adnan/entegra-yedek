@@ -23,7 +23,6 @@ import { TekKayit } from './TekKayit';
 export { Modal };
 import { RolYetkiMatrisi } from './RolYetkiMatrisi';
 import { ekKaydetleriCalistir, ekKaydetTemizle } from './kartEkKaydet';
-import { KartKullaniciRolu } from './KartKullaniciRolu';
 import { DokumanGalerisi } from './DokumanGalerisi';
 import { StokDurumSekmesi } from './StokDurumSekmesi';
 import { StokHareketSekmesi } from './StokHareketSekmesi';
@@ -592,7 +591,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
                  style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}>
               {renderAlanListesi(kimlikAlanlari.filter(a =>
                 ['kod', 'ad', 'soyad', 'departman'].includes(a.ad)))}
-              <KartKullaniciRolu sade kartId={id as number} saltOkunur={salt} />
+              {/* Serit'in 5. alani GÖREV (kullanici: rol ile yer degistirdi);
+                  Rol combosu Kimlik Bilgileri kutusunda. */}
+              {renderAlanListesi(
+                (meta?.alanlar ?? []).filter(a => a.ad === 'gorevId'))}
               {/* "durum" seritte YOK - baslikta rozet olarak gosteriliyor. */}
               {renderAlanListesi(kimlikAlanlari.filter(a =>
                 !['kod', 'ad', 'soyad', 'departman', 'durum'].includes(a.ad)))}

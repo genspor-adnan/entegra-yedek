@@ -313,9 +313,10 @@ public static partial class KartKatalogu
             {
                 new("id",               "id",                "sayi",  Yazilabilir: false),
                 new("tur",              "tur",               "kod",   SabitKodlar: IzinTuruKodlari, Baslik: "Tür", Zorunlu: true),
-                new("baslangicTarihi",  "baslangic_tarihi",  "tarih", Baslik: "Başlangıç"),
-                new("bitisTarihi",      "bitis_tarihi",      "tarih", Baslik: "Bitiş"),
-                new("gun",              "gun",               "sayi",  Baslik: "Gün"),
+                new("baslangicTarihi",  "baslangic_tarihi",  "tarih", Zorunlu: true, Baslik: "Başlangıç"),
+                new("bitisTarihi",      "bitis_tarihi",      "tarih", Zorunlu: true, Baslik: "Bitiş"),
+                // Gün elle girilmez: baslangic/bitis'ten hesaplanir (iki uc dahil).
+                new("gun",              "gun",               "sayi",  Yazilabilir: false, Baslik: "Gün"),
                 new("aciklama",         "aciklama",          "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
                 new("durum",            "durum",             "kod",   SabitKodlar: IzinDurumuKodlari, Baslik: "Durum")
             }, Sirala: "baslangic_tarihi desc, id desc", LogTabloId: 904, Baslik: "İzinler"),

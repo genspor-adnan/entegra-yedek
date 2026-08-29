@@ -109,6 +109,15 @@ const EGITIM_GECERLILIK = ['Süresiz', 'Süreli'];
 
 const tarihYilTemizle = (deger: string) => deger.replace(/[^0-9./-]/g, '').slice(0, 10);
 
+/** Iki tarih arasi GUN (iki uc dahil): 01.09 - 05.09 => 5 gun. */
+function gunFarki(bas: string, bit: string): number | null {
+  if (!bas || !bit) return null;
+  const b = new Date(bas.slice(0, 10)); const s = new Date(bit.slice(0, 10));
+  if (Number.isNaN(b.getTime()) || Number.isNaN(s.getTime())) return null;
+  const fark = Math.round((s.getTime() - b.getTime()) / 86400000) + 1;
+  return fark > 0 ? fark : null;
+}
+
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler }: Props) {
   const alanlar = meta.alanlar.filter(a => a.ad !== 'id');
@@ -171,7 +180,15 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
       if (meta.ad === 'acilKisiler' && alan === 'varsayilan' && (deger === true || Number(deger) === 1)) {
         return { ...s, varsayilan: i === satirIndeks ? 1 : 0 };
       }
-      return i === satirIndeks ? { ...s, [alan]: deger } : s;
+      if (i !== satirIndeks) return s;
+      const yeni = { ...s, [alan]: deger };
+      // IZINLERDE gun sayisi elle girilmez: baslangic/bitis degisince
+      //   (iki uc dahil) hesaplanir.
+      if (meta.ad === 'izinler' && (alan === 'baslangicTarihi' || alan === 'bitisTarihi')) {
+        const g = gunFarki(String(yeni.baslangicTarihi ?? ''), String(yeni.bitisTarihi ?? ''));
+        if (g !== null) yeni.gun = g;
+      }
+      return yeni;
     });
     onDegis({ ...durum, guncel });
   };
@@ -530,10 +547,20 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                       <option value="">—</option>
                       {Object.entries(a.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                     </select>
+                  ) : a.tip === 'tarih' ? (
+                    // Detay gridlerinde tarih alanlari DUZ METIN kutusuydu
+                    //   (izin baslangic/bitis) - takvim secici yoktu.
+                    <input type="date"
+                      value={String(satir[a.ad] ?? '').slice(0, 10)}
+                      disabled={saltOkunur || !a.yazilabilir}
+                      onChange={e => hucreDegis(i, a.ad, e.target.value)}
+                    />
                   ) : (
                     <input
+                      className={a.tip === 'sayi' || a.tip === 'para' ? 'hiza-sag' : undefined}
                       value={String(satir[a.ad] ?? '')}
                       maxLength={a.enFazlaUzunluk ?? undefined}
+                      inputMode={a.tip === 'sayi' ? 'numeric' : undefined}
                       disabled={saltOkunur || !a.yazilabilir}
                       onChange={e => hucreDegis(i, a.ad, e.target.value)}
                     />
