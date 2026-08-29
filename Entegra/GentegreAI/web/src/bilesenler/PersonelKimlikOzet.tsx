@@ -121,10 +121,16 @@ export function PersonelKimlikOzet({
               )}
               {/* Pozisyon: "Özet" kutusu kaldirilinca buraya alindi (kullanici). */}
               {!ozetGizli && (
-                <label className="alan tip-metin">
+                <label className="alan tip-kod">
                   <span className="etiket zorunlu-isaret">{gorevAlan.baslik}</span>
-                  <input value={gorev} maxLength={gorevAlan.enFazlaUzunluk ?? undefined}
-                    disabled={saltOkunur} onChange={e => onGorevDegis(e.target.value)} />
+                  {/* Pozisyon KOD alani (236): secenekler ayarlardan yonetilen
+                      'taraf.gorev' kod listesinden gelir, kayda ID yazilir. */}
+                  <select value={gorev} disabled={saltOkunur}
+                          onChange={e => onGorevDegis(e.target.value)}>
+                    <option value="">-</option>
+                    {gorevAlan.kodlar && Object.entries(gorevAlan.kodlar)
+                      .map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  </select>
                 </label>
               )}
             </div>

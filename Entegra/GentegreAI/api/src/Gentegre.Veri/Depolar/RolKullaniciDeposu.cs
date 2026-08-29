@@ -36,7 +36,10 @@ public sealed class RolKullaniciDeposu
                               join public.kod_liste l on l.id = d.liste_id
                              where l.kod = 'taraf.departman'
                                and d.deger = t.departman), ''),
-                   coalesce(t.gorev, ''),
+                   coalesce((select d.ad from public.kod_deger d
+                              join public.kod_liste l on l.id = d.liste_id
+                             where l.kod = 'taraf.gorev'
+                               and d.deger = t.gorev_id), t.gorev, ''),
                    coalesce(nullif(t.telefon, ''), nullif(t.cep_tel, ''),
                             k.cep_tel, ''),
                    k.aktif, k.son_giris_tarihi, coalesce(r.ad, '')
@@ -64,7 +67,10 @@ public sealed class RolKullaniciDeposu
                               join public.kod_liste l on l.id = d.liste_id
                              where l.kod = 'taraf.departman'
                                and d.deger = t.departman), ''),
-                   coalesce(t.gorev, ''),
+                   coalesce((select d.ad from public.kod_deger d
+                              join public.kod_liste l on l.id = d.liste_id
+                             where l.kod = 'taraf.gorev'
+                               and d.deger = t.gorev_id), t.gorev, ''),
                    coalesce(nullif(t.telefon, ''), nullif(t.cep_tel, ''),
                             k.cep_tel, ''),
                    k.aktif, k.son_giris_tarihi, coalesce(r.ad, '')

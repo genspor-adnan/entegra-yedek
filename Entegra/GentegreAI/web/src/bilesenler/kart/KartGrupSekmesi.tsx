@@ -38,8 +38,8 @@ const gizli = kaynak === 'cari' ? new Set(['ad', 'soyad', 'musteri', 'tedarikci'
   //   "kisi" bayragiyla ayni sebeple gizli. "vkno"/"gorev" de gizli - normal
   //   adsiz akistan CIKARILIP PersonelKimlikOzet.tsx'e props olarak geciyor
   //   (ik_karti.html: TCKN "Kimlik Bilgileri" kutusunda, Görev "Özet" kutusunda).
-  : kaynak === 'personel' ? new Set(['personel', 'unvan', 'vkno', 'gorev'])
-  : kaynak === 'hasta' ? new Set(['hasta', 'grup', 'unvan', 'gorev'])
+  : kaynak === 'personel' ? new Set(['personel', 'unvan', 'vkno', 'gorevId'])
+  : kaynak === 'hasta' ? new Set(['hasta', 'grup', 'unvan', 'gorevId'])
   // Sube: baz sube combosu Depolar dalinda ELLE cizilir (tek satir etiket).
   : kaynak === 'sube' ? new Set(['depoBazSubeId'])
   : new Set<string>();
@@ -227,7 +227,7 @@ const adliBlok = (
           const ozlukDetay = meta.detaylar.find(d => d.ad === 'ozluk');
           const egitimDetay = meta.detaylar.find(d => d.ad === 'egitimler');
           const vknoAlan = meta.alanlar.find(a => a.ad === 'vkno');
-          const gorevAlan = meta.alanlar.find(a => a.ad === 'gorev');
+          const gorevAlan = meta.alanlar.find(a => a.ad === 'gorevId');
           if (!ozlukDetay || !vknoAlan || !gorevAlan) return null;
           const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
           const hastaIletisimAlanlari = kaynak === 'hasta'
@@ -240,8 +240,8 @@ const adliBlok = (
               vkno={String(deger.vkno ?? '')}
               onVknoDegis={v => setDeger(d => ({ ...d, vkno: v }))}
               gorevAlan={gorevAlan}
-              gorev={String(deger.gorev ?? '')}
-              onGorevDegis={v => setDeger(d => ({ ...d, gorev: v }))}
+              gorev={String(deger.gorevId ?? '')}
+              onGorevDegis={v => setDeger(d => ({ ...d, gorevId: v }))}
               ozlukMeta={ozlukDetay}
               ozlukDurum={detaylar[ozlukDetay.ad] ?? bosDetay()}
               saltOkunur={salt}

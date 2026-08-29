@@ -235,7 +235,10 @@ public static partial class KartKatalogu
             //   sekmesinin "Özet" kutusunda (PersonelKimlikOzet.tsx). TCKN de "Kimlik
             //   Bilgileri" kutusunda - ikisi de adsiz (Grup yok), gizli Set (GenForm.tsx)
             //   ile genel/duz render'dan cikarilip ozel bilesene props olarak geciyor.
-            new("gorev",     "gorev",      "metin", Zorunlu: true, EnFazlaUzunluk: 100, Baslik: "Pozisyon"),
+            // Pozisyon KOD (236, kullanici: "combo ve ID olarak olsun") - eski
+            //   serbest metin kolonu (taraf.gorev) veri olarak duruyor.
+            new("gorevId",   "gorev_id",   "kod",   Zorunlu: true,
+                KodListesi: "taraf.gorev", Baslik: "Pozisyon"),
             new("vkno",      "vkno",       "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "T.C. Kimlik No"),
             // ik_karti.html mockup'ta İletişim AYRI SEKME (Genel'e gomulu AltGrup DEGIL) -
             //   Grup:"İletişim" bu yuzden AltGrup degil.

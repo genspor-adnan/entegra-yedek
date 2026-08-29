@@ -21,6 +21,12 @@ public static partial class KaynakKatalogu
             "     then left(t.vkno, 3) || '******' || right(t.vkno, 2) " +
             "     else coalesce(t.vkno, '') end";
 
+        /// <summary>Pozisyon (236) - kod listesi 'taraf.gorev'; eslesmeyen eski metin yedek.</summary>
+        public const string PozisyonAdi =
+            "coalesce((select d.ad from public.kod_deger d " +
+            "           join public.kod_liste l on l.id = d.liste_id " +
+            "          where l.kod = 'taraf.gorev' and d.deger = t.gorev_id), t.gorev, '')";
+
         /// <summary>taraf.departman smallint bir koddur - adi kod listesinden.</summary>
         public const string DepartmanAdi =
             "coalesce((select d.ad from public.kod_deger d " +
@@ -245,7 +251,7 @@ public static partial class KaynakKatalogu
             // Ad Soyad'in SAGINDA: departman / gorev / rol / ise giris (kullanici).
             new("departmanAdi", TarafKatalog.DepartmanAdi,
                                                    "metin", "Departman"),
-            new("gorev",        "t.gorev",         "metin", "Görev"),
+            new("gorev",        TarafKatalog.PozisyonAdi, "metin", "Görev"),
             new("rolAdi",       "coalesce(r.ad, '')", "metin", "Rol"),
             new("iseGirisTarihi", "po.ise_giris_tarihi", "tarih", "İşe Giriş",
                 Hizalama: "orta"),
