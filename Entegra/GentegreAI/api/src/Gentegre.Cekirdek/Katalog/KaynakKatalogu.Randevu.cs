@@ -36,6 +36,11 @@ public static partial class KaynakKatalogu
                 "to_char(rv.baslangic + (rv.sure_dk || ' minutes')::interval, 'HH24:MI')",
                                             "metin", "Bitiş", Hizalama: "orta", Genislik: 70),
             new("sureDk",     "rv.sure_dk",   "sayi",  "Süre (dk)", Hizalama: "sag"),
+            // Durum SURENIN SAGINDA (kullanici): randevunun akibeti saat/sure
+            //   bilgisinin hemen yaninda okunsun.
+            new("durumAdi", RandevuKatalog.DurumAdi, "metin", "Durum", Hizalama: "orta",
+                Bicim: "rozet"),
+            new("durum",      "rv.durum",     "sayi",  "Durum Kodu", Varsayilan: false),
             new("baslangic",  "rv.baslangic", "zaman", "Başlangıç", Varsayilan: false),
             // Kurum HIZMETIN SOLUNDA (kullanici): odeyen, yapilan isten once
             //   gorulsun - kayit kabul once "kim odeyecek"e bakiyor.
@@ -47,9 +52,6 @@ public static partial class KaynakKatalogu
                 Varsayilan: false),
             new("kaynakAdi", RandevuKatalog.KaynakAdi, "metin", "Kaynak", Hizalama: "orta",
                 Varsayilan: false),
-            new("durumAdi", RandevuKatalog.DurumAdi, "metin", "Durum", Hizalama: "orta",
-                Bicim: "rozet"),
-            new("durum",      "rv.durum",     "sayi",  "Durum Kodu", Varsayilan: false),
             new("aciklama",   "rv.aciklama",  "metin", "Açıklama", Genislik: 220),
             new("belgeNo",    "coalesce(b.belge_no, '')", "metin", "Başvuru", Varsayilan: false),
             new("subeId",     "rv.sube_id",   "sayi",  "Şube", Varsayilan: false),
