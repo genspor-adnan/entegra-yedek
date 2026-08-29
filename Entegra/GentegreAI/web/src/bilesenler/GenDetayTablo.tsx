@@ -550,6 +550,14 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                       <option value="">—</option>
                       {Object.entries(a.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                     </select>
+                  ) : a.tip === 'zaman' ? (
+                    // Zaman alani (randevu baslangici) ham "2026-09-01T10:00:00"
+                    //   metni olarak cizilyordu; datetime-local saniyeyi atar.
+                    <input type="datetime-local"
+                      value={String(satir[a.ad] ?? '').slice(0, 16)}
+                      disabled={saltOkunur || !a.yazilabilir}
+                      onChange={e => hucreDegis(i, a.ad, e.target.value)}
+                    />
                   ) : a.tip === 'tarih' ? (
                     // Detay gridlerinde tarih alanlari DUZ METIN kutusuydu
                     //   (izin baslangic/bitis) - takvim secici yoktu.

@@ -239,6 +239,11 @@ public static partial class KartKatalogu
             // Departman kod listesi degil TABLO (251): bolum/hekim iliskisi de
             //   buradan kuruluyor - randevu bolumu bir departmandir.
             new("departman", "departman",  "kod",   Zorunlu: true, KodTablosu: "public.v_departman_lookup", Baslik: "Departman", Grup: "Kimlik"),
+            // RANDEVU VERILEBILIR (252, kullanici: "randevu verilen bolumle
+            //   randevu verilen personel bulusmus olur") - departman tarafinda
+            //   da ayni bayrak var (251); ikisi kesisince "hekim" cikar.
+            new("randevuVerilebilir", "randevu_verilebilir", "mantik",
+                Baslik: "Randevu Verilebilir", Grup: "Kimlik"),
             new("durum",     "durum",      "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
             // ik_karti.html mockup'ta idstrip'te DEGIL - Görev "Pozisyon" adiyla Genel
             //   sekmesinin "Özet" kutusunda (PersonelKimlikOzet.tsx). TCKN de "Kimlik
@@ -340,7 +345,52 @@ public static partial class KartKatalogu
                 // tutulabilir; DB kolonu 055 ile varchar(10) yapıldı.
                 new("tarih",       "tarih",       "metin", EnFazlaUzunluk: 10, Baslik: "Tarih/Yıl"),
                 new("gecerlilik",  "gecerlilik",  "metin", EnFazlaUzunluk: 60, Baslik: "Geçerlilik")
-            }, Sirala: "tarih desc nulls last, id desc", LogTabloId: 905, Baslik: "Eğitim / Sertifika")
+            }, Sirala: "tarih desc nulls last, id desc", LogTabloId: 905, Baslik: "Eğitim / Sertifika"),
+            // HEKIMIN RANDEVULARI (251, kullanici) - personel karti hekim
+            //   kartidir; kisinin randevu takvimi burada gorunur. SALT OKUNUR:
+            //   randevu kendi kartindan verilir, buradan satir eklemek ayni
+            //   bilgiyi iki yerden yazmak olurdu.
+            new DetayTanimi("randevular", "public.randevu", "hekim_id", new KartAlani[]
+            {
+                new("id",        "id",        "sayi",  Yazilabilir: false),
+                new("baslangic", "baslangic", "zaman", Baslik: "Başlangıç"),
+                new("sureDk",    "sure_dk",   "sayi",  Baslik: "Süre (dk)"),
+                new("bolum",     "bolum",     "kod",   KodTablosu: "public.v_randevu_bolum_lookup",
+                    Baslik: "Bölüm"),
+                new("hastaId",   "hasta_id",  "kod",   KodTablosu: "public.v_hasta_lookup",
+                    Baslik: "Hasta"),
+                new("durum",     "durum",     "kod",   KodListesi: "randevu.durum", Baslik: "Durum"),
+                new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
+            }, Sirala: "baslangic desc", SubeKolonu: null, SaltOkunur: true,
+               LogTabloId: 905, Baslik: "Randevular", KosulAlani: "randevuVerilebilir"),
+            // HEKIMIN RANDEVU DUZENI (252, kullanici: "personelde Randevu
+            //   Verilebilir seciliyse Randevu sekmesi olusur ve bu personele
+            //   ait randevu ayarlari gorunur, istenirse duzenlenebilir").
+            //   Randevu Ayarlari > Bölümler ekranindaki AYNI satir - iki yerden
+            //   de duzenlenebilir, veri tek yerde (randevu_bolum_ayar).
+            //   Bos birakilan alan bolumden, o da Genel Ayarlar'dan devralinir.
+            new DetayTanimi("randevuAyar", "public.randevu_bolum_ayar", "hekim_id",
+            new KartAlani[]
+            {
+                new("id",              "id",              "sayi",  Yazilabilir: false),
+                new("departmanId",     "departman_id",    "kod",   Zorunlu: true,
+                    KodTablosu: "public.v_randevu_bolum_lookup", Baslik: "Bölüm"),
+                new("baslangicSaat",   "baslangic_saat",  "metin", EnFazlaUzunluk: 5,
+                    Baslik: "Başlangıç"),
+                new("bitisSaat",       "bitis_saat",      "metin", EnFazlaUzunluk: 5, Baslik: "Bitiş"),
+                new("ogleBaslangic",   "ogle_baslangic",  "metin", EnFazlaUzunluk: 5,
+                    Baslik: "Öğle Başl."),
+                new("ogleBitis",       "ogle_bitis",      "metin", EnFazlaUzunluk: 5,
+                    Baslik: "Öğle Bitiş"),
+                new("slotDk",          "slot_dk",         "sayi",  Baslik: "Aralık (dk)"),
+                new("varsayilanSure",  "varsayilan_sure", "sayi",  Baslik: "Süre (dk)"),
+                new("calismaGunleri",  "calisma_gunleri", "metin", EnFazlaUzunluk: 20,
+                    Baslik: "Günler (1 Pzt … 7 Paz)"),
+                new("aktif",           "aktif",           "mantik", Baslik: "Randevuya Açık"),
+                new("aciklama",        "aciklama",        "metin", EnFazlaUzunluk: 300,
+                    Baslik: "Açıklama"),
+            }, SubeKolonu: null, LogTabloId: 912, Baslik: "Randevu Ayarları",
+               KosulAlani: "randevuVerilebilir")
         },
         SilmeEngelleri: new[]
         {

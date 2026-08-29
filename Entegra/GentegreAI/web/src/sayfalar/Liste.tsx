@@ -844,19 +844,23 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
           📄 Ekstre
         </button>
       )}
-      // RANDEVU (243): takvim gridin ALTINDA ama AYNI kaydirma alaninda -
-      //   disarida kardes olunca .sahne (flex:1) eziliyor, cip seridi ve grid
-      //   kirpiliyordu. Hucre tiklamasi o saate yeni randevu acar.
-      altPanel={tanim.kaynak === 'randevu' && (
-        <RandevuTakvimi
-          ayarlar={takvimAyarlari}
-          bolum={bolumSuzgec === '' ? undefined : bolumSuzgec}
-          hekimId={hekimSuzgec === '' ? undefined : hekimSuzgec}
-          yenile={yenile}
-          onYeni={bas => git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`)}
-          onAc={id => git(`/randevu/${id}`)}
-        />
-      )}
+      // RANDEVU (251, kullanici: "arama editi sagina takvim butonu, basinca
+      //   randevu takvimi listeye bassin"): takvim artik listenin ALTINDA
+      //   degil, Liste/Grup/Analiz yanindaki "Takvim" dugmesiyle onun YERINE
+      //   cizilir - ust serit (arama, cipler, bolum/hekim suzgeci) ortak kalir.
+      ekGorunum={tanim.kaynak === 'randevu' ? {
+        ad: 'Takvim', ik: '📅',
+        icerik: (
+          <RandevuTakvimi
+            ayarlar={takvimAyarlari}
+            bolum={bolumSuzgec === '' ? undefined : bolumSuzgec}
+            hekimId={hekimSuzgec === '' ? undefined : hekimSuzgec}
+            yenile={yenile}
+            onYeni={bas => git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`)}
+            onAc={id => git(`/randevu/${id}`)}
+          />
+        ),
+      } : undefined}
     />
     </>
     )}

@@ -62,6 +62,12 @@ interface Props {
    * (kullanici: "tüm/sık/son ile başlayan butonlar kırpılmış").
    */
   altPanel?: React.ReactNode;
+  /**
+   * Arama seridine (Liste/Grup/Analiz'in yanina) EK GORUNUM dugmesi: secilince
+   * grid yerine `icerik` cizilir - randevu takvimi boyle acilir (kullanici:
+   * "arama editi sagina takvim butonu, basinca takvim listeye bassin").
+   */
+  ekGorunum?: { ad: string; ik: string; icerik: React.ReactNode };
   /** Acilista secili gelecek cip (geri donuste onceki filtreyi korumak icin). */
   cipBaslangic?: number;
   /** Cip'e tiklanınca cagrilir - ekstre modundan listeye donmek gibi ekran
@@ -121,7 +127,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           dovizsizGizle,
                           gizliKolonlar, kolonSirasi, altSecenekler, tarihAlani, tarihVarsayilan,
                           aramaGorunumGizli,
-                          seciliBaslangicId, cipSonu, cipBaslangic, altPanel,
+                          seciliBaslangicId, cipSonu, cipBaslangic, altPanel, ekGorunum,
                           onCipSecildi, onCipRota, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik }: Props) {
   // Sayfa boyu: cagiran acikca verdiyse o, yoksa Genel Ayarlar'daki
@@ -188,7 +194,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const [aramaGorunumu, setAramaGorunumu] = useState<'tum' | 'son' | 'sik'>('tum');
   // Mockup: Liste/Grup/Analiz gorunum secimi. Grup/Analiz backend'de HENUZ YOK -
   //   grid yerine "yakinda" yer tutucu gosterilir (aksiyon stub'lariyla ayni durustluk).
-  const [gorunum, setGorunum] = useState<'liste' | 'grup' | 'analiz'>('liste');
+  const [gorunum, setGorunum] = useState<'liste' | 'grup' | 'analiz' | 'ek'>('liste');
   const [yukleniyor, setYukleniyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
 
@@ -580,6 +586,12 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
             {g.ik} {cev(g.ad)}
           </button>
         ))}
+        {ekGorunum && (
+          <button className={`cip ${gorunum === 'ek' ? 'on' : ''}`}
+                  onClick={() => setGorunum(gorunum === 'ek' ? 'liste' : 'ek')}>
+            {ekGorunum.ik} {ekGorunum.ad}
+          </button>
+        )}
 
         <span className="cipsag">
           {aksiyonEkrani && aksiyonKombo.length > 0 && (
@@ -728,7 +740,9 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
           </div>
         )}
 
-        {gorunum !== 'liste' ? (
+        {gorunum === 'ek' && ekGorunum ? (
+          ekGorunum.icerik
+        ) : gorunum !== 'liste' ? (
           <div className="kutu" style={{ padding: 48, textAlign: 'center', color: 'var(--soluk)' }}>
             {GORUNUMLER.find(g => g.v === gorunum)?.ik}{' '}
             {cev(GORUNUMLER.find(g => g.v === gorunum)?.ad)} görünümü yakında.

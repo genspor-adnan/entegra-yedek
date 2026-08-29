@@ -29,7 +29,9 @@ public static partial class KartKatalogu
                 //   randevu verilmez.
                 KodTablosu: "public.v_randevu_bolum_lookup", Baslik: "Bölüm", Grup: "Kimlik"),
             new("hekimId",   "hekim_id",  "kod",   Zorunlu: true,
-                KodTablosu: "public.v_personel_lookup", Baslik: "Hekim", Grup: "Kimlik"),
+                // Tum personel DEGIL: yalniz "randevu verilebilir" isaretli
+                //   olanlar (252) - muhasebeciye randevu verilmez.
+                KodTablosu: "public.v_hekim_lookup", Baslik: "Hekim", Grup: "Kimlik"),
             new("hastaId",   "hasta_id",  "kod",   Zorunlu: true,
                 KodTablosu: "public.v_hasta_lookup", Baslik: "Hasta", Grup: "Kimlik"),
             new("baslangic", "baslangic", "zaman", Zorunlu: true,

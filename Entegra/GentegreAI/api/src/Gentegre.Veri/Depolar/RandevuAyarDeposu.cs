@@ -57,6 +57,8 @@ public sealed class RandevuAyarDeposu
               from public.departman d
               join public.taraf t on t.departman = d.id and t.personel = 1
              where d.randevu_verilebilir = 1 and d.aktif = 1
+               -- Bolumdeki HER personel degil, randevu verilebilir olan (252).
+               and t.randevu_verilebilir = 1
                and coalesce(t.durum, 1) = 1
              order by 2, 5, 4
             """, baglanti);
