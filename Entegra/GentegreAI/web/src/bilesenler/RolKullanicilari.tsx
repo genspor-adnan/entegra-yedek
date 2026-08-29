@@ -136,17 +136,16 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
 
       {ekleAcik && (
         <Modal baslik="Role Kullanıcı Ekle" dar onKapat={() => { setEkleAcik(false); setAdaySecim(new Set()) }}
-          alt={<button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                       onClick={() => { setEkleAcik(false); setAdaySecim(new Set()) }}>Kapat</button>}>
+          /* Ekle, Kapat ile AYNI arac cubugunda (kullanici) - kart/modal deseni. */
+          alt={<>
+            <button className="d bir" disabled={islemde || adaySecim.size === 0}
+                    onClick={() => void ekle()}>
+              {islemde ? 'Ekleniyor…' : `Ekle${adaySecim.size > 0 ? ` (${adaySecim.size})` : ''}`}
+            </button>
+            <button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
+                    onClick={() => { setEkleAcik(false); setAdaySecim(new Set()) }}>Kapat</button>
+          </>}>
           <div style={{ padding: 10 }}>
-            <div className="numaralama-bas bitisik">
-              <h6>Kullanıcı Seç {adaySecim.size > 0 && (
-                <span style={{ opacity: .6 }}>({adaySecim.size} seçili)</span>)}</h6>
-              {/* Ekle dugmesi UST BASLIKTA - satir satir degil, secilenler topluca. */}
-              <button className="d bir" title="Seçilenleri role ekle"
-                      disabled={islemde || adaySecim.size === 0}
-                      onClick={() => void ekle()}>＋</button>
-            </div>
             {/* Listelerdeki oval arama kutusu. */}
             <div className="ara" style={{
               maxWidth: 260, margin: '0 0 8px', height: 23, borderRadius: 12,
