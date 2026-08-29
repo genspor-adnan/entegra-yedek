@@ -1,32 +1,36 @@
 ﻿[Closed Files]
-File_0=TSourceModule,'C:\Users\HP\Entegra\Entegra\UTS\UUTSDlg.pas',0,1,1,1,1,0,0,,
-File_1=TSourceModule,'C:\Users\HP\Entegra\Entegra\Ortak\FileAssociationDetails.pas',0,1,203,128,209,0,0,,
-File_2=TSourceModule,'C:\Users\HP\Entegra\Entegra\IcerikFrame\UFaturalar.pas',0,1,1,7,1,0,0,,
-File_3=TSourceModule,'C:\Users\HP\Entegra\Entegra\UStokWizard.pas',0,1,1145,13,1149,0,0,,
-File_4=TSourceModule,'C:\Users\HP\Entegra\Entegra\UVersiyonGuncelle.pas',0,1,1,21,7,0,0,,
-File_5=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\firedac\FireDAC.Phys.ODBCWrapper.pas',0,1,1609,1,1621,0,0,,
-File_6=TSourceModule,'C:\Users\HP\Entegra\Entegra\UBankaTanimWizard.pas',0,1,1,1,1,0,0,,
-File_7=TSourceModule,'C:\Users\HP\Entegra\Entegra\UFaturaWizard.pas',0,1,1,1,1,0,0,,
-File_8=TSourceModule,'C:\Users\HP\Entegra\Entegra\URehberWizard.pas',0,1,1073,20,1074,0,0,,
-File_9=TSourceModule,'C:\Users\HP\Entegra\Entegra\IcerikFrame\UReharadlg.pas',0,1,1,29,4,0,0,,
-File_10=TSourceModule,'C:\Users\HP\Entegra\Entegra\PrjConst.pas',0,1,2341,44,2353,0,0,,
-File_11=TSourceModule,'C:\Users\HP\Entegra\Entegra\ListeFrame\UUretimListeDlg.pas',0,1,1,6,1,0,0,,
-File_12=TSourceModule,'C:\Users\HP\Entegra\Entegra\UStokHizmetAra.pas',0,1,1,7,1,0,0,,
-File_13=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\Data.DB.pas',0,1,3306,1,3318,0,0,,
-File_14=TSourceModule,'C:\Users\HP\Entegra\Entegra\ListeFrame\UFirsatListeDlg.pas',0,1,351,48,364,0,0,,
+File_0=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\Indy10\Protocols\IdHTTP.pas',0,1,815,1,827,0,0,,
+File_1=TSourceModule,'C:\Users\HP\Entegra\Entegra\UTS\RestUTS.pas',0,1,114,1,126,0,0,,
+File_2=TSourceModule,'C:\Users\HP\Entegra\Entegra\Ortak\FileAssociationDetails.pas',0,1,203,128,209,0,0,,
+File_3=TSourceModule,'C:\Users\HP\Entegra\Entegra\IcerikFrame\UFaturalar.pas',0,1,1,7,1,0,0,,
+File_4=TSourceModule,'C:\Users\HP\Entegra\Entegra\UStokWizard.pas',0,1,1145,13,1149,0,0,,
+File_5=TSourceModule,'C:\Users\HP\Entegra\Entegra\UVersiyonGuncelle.pas',0,1,1,21,7,0,0,,
+File_6=TSourceModule,'c:\program files (x86)\embarcadero\studio\37.0\source\data\firedac\FireDAC.Phys.ODBCWrapper.pas',0,1,1609,1,1621,0,0,,
+File_7=TSourceModule,'C:\Users\HP\Entegra\Entegra\UBankaTanimWizard.pas',0,1,1,1,1,0,0,,
+File_8=TSourceModule,'C:\Users\HP\Entegra\Entegra\UFaturaWizard.pas',0,1,1,1,1,0,0,,
+File_9=TSourceModule,'C:\Users\HP\Entegra\Entegra\URehberWizard.pas',0,1,1073,20,1074,0,0,,
+File_10=TSourceModule,'C:\Users\HP\Entegra\Entegra\IcerikFrame\UReharadlg.pas',0,1,1,29,4,0,0,,
+File_11=TSourceModule,'C:\Users\HP\Entegra\Entegra\PrjConst.pas',0,1,2341,44,2353,0,0,,
+File_12=TSourceModule,'C:\Users\HP\Entegra\Entegra\ListeFrame\UUretimListeDlg.pas',0,1,1,6,1,0,0,,
+File_13=TSourceModule,'C:\Users\HP\Entegra\Entegra\UStokHizmetAra.pas',0,1,1,7,1,0,0,,
 
 [Modules]
-Module0=C:\Users\HP\Entegra\Entegra\UUretimRecete.pas
-Count=1
+Module0=C:\Users\HP\Entegra\Entegra\UTS\UUTSDlg.pas
+Module1=C:\Users\HP\Entegra\Entegra\UUretimRecete.pas
+Count=2
 EditWindowCount=1
+
+[C:\Users\HP\Entegra\Entegra\UTS\UUTSDlg.pas]
+ModuleType=TSourceModule
 
 [C:\Users\HP\Entegra\Entegra\UUretimRecete.pas]
 ModuleType=TSourceModule
 
 [EditWindow0]
-ViewCount=1
-CurrentEditView=C:\Users\HP\Entegra\Entegra\UUretimRecete.pas
+ViewCount=2
+CurrentEditView=C:\Users\HP\Entegra\Entegra\UTS\UUTSDlg.pas
 View0=0
+View1=1
 PercentageSizes=1
 Create=1
 Visible=1
@@ -47,9 +51,9 @@ StayOnTop=0
 DockedToMainForm=1
 BorlandEditorCodeExplorer=BorlandEditorCodeExplorer@EditWindow0
 TopPanelSize=0
-LeftPanelSize=1896
+LeftPanelSize=1772
 LeftPanelClients=PropertyInspector
-LeftPanelData=00000800010100000000E60D0000000000000168070000000000000100000000B81800001100000050726F7065727479496E73706563746F72FFFFFFFF
+LeftPanelData=00000800010100000000E60D00000000000001EC060000000000000100000000B81800001100000050726F7065727479496E73706563746F72FFFFFFFF
 RightPanelSize=0
 RightPanelClients=DockSite2
 RightPanelData=0000080001010100000009000000446F636B5369746532C90D00000000000001CF07000000000000FFFFFFFF
@@ -66,6 +70,17 @@ Module=C:\Users\HP\Entegra\Entegra\UUretimRecete.pas
 CursorX=27
 CursorY=1092
 TopLine=1080
+LeftCol=1
+Elisions=
+Bookmarks=
+EditViewName=Borland.FormDesignerView
+
+[View1]
+CustomEditViewType=TEditView
+Module=C:\Users\HP\Entegra\Entegra\UTS\UUTSDlg.pas
+CursorX=13
+CursorY=1
+TopLine=1
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -205,23 +220,23 @@ Docked=1
 State=0
 Left=0
 Top=28
-Width=1896
+Width=1772
 Height=6361
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=1896
+ClientWidth=1772
 ClientHeight=6361
 PixelsPerInch=96
 MonitorNum=0
 TBDockHeight=9014
-LRDockWidth=1896
+LRDockWidth=1772
 Dockable=1
 StayOnTop=0
-SplitPos=111
+SplitPos=104
 
 [PropInspDesignerSelection]
 ArrangeBy=Name
-SelectedItem=ImageIndex,Action
+SelectedItem=ImageIndex,DataSet
 ExpandedItems=Images=0,"LiveBindings Designer=0",MenuAnimation=0,Anchors=0,BorderIcons=0,Constraints=0,Properties=1,Properties.Alignment=0,Properties.AssignedValues=0,Properties.ButtonGlyph=0,Properties.IncrementalFilteringOptions=0,DataSet=0,ActiveStoredUsage=0,FetchOptions=0,FieldOptions=0,FilterChanges=0,FilterOptions=0,FormatOptions=0,ActiveControl=0,CustomTitleBar=0,LiveBindings=0
 
 [frmDesignPreview]

@@ -3,7 +3,7 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, cxGrid,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, cxGrid, System.JSON,
   Dialogs, cxStyles, dxSkinsCore, dxSkinLiquidSky, dxSkinscxPCPainter, FireDAC.Comp.Client, cxEdit,
   cxCustomData, cxGraphics, cxFilter, cxClasses, cxDataStorage, cxDBData, ExtCtrls,
   cxGridTableView, cxControls, cxData, DB, cxGridLevel, cxGridCustomView, cxGridCustomTableView,
@@ -125,35 +125,109 @@ var
          aski : TAskiSonuc;
          j,n,GelenAdet,AskiAdet,Sonuc : Integer;
          Adres,GelenURT,GelenSKT : string;
+
+    function AlanDegeri(const AAlan: string): string;
+    begin
+      if TabUTSKontrol.FindField(AAlan) = nil then
+        Result := ''
+      else
+        Result := Trim(TabUTSKontrol.FieldByName(AAlan).AsString);
+    end;
+
+    function UTSUrunNoNorm(const AUrunNo: string): string;
+    var
+      I: Integer;
+      LRakam: Boolean;
+    begin
+      Result := Trim(AUrunNo);
+      if Result = '' then
+        Exit;
+
+      LRakam := True;
+      for I := 1 to Length(Result) do
+        if not CharInSet(Result[I], ['0'..'9']) then begin
+          LRakam := False;
+          Break;
+        end;
+
+      if LRakam then
+        while Length(Result) < 14 do
+          Result := '0' + Result;
+    end;
+
+    function UTSUrunSorguJson(const AUrunNo: string): string;
+    var
+      LJson: TJSONObject;
+      LLotNo, LSeriNo: string;
+    begin
+      LJson := TJSONObject.Create;
+      try
+        LJson.AddPair('UNO', AUrunNo);
+        LLotNo := AlanDegeri('LOTNO');
+        LSeriNo := AlanDegeri('SERINO');
+        if LLotNo <> '' then
+          LJson.AddPair('LNO', LLotNo);
+        if LSeriNo <> '' then
+          LJson.AddPair('SNO', LSeriNo);
+        Result := LJson.ToString;
+      finally
+        LJson.Free;
+      end;
+    end;
+
+    function TekilUrunSorgula(const AUrunNo: string): TUrunSonuc;
+    var
+      LRaw: string;
+    begin
+      LRaw := utsTalkSS(Adres, UTSUrunSorguJson(AUrunNo));
+      if Trim(LRaw) = '' then
+        Exit(nil);
+
+      Result := TUrunSonuc.Create('{}');
+      try
+        Result.byJson(LRaw);
+      except
+        Result.Free;
+        raise;
+      end;
+    end;
+
     procedure Sorgula(BildirimTur:Integer);
     var
-       TMU : TM_Verme;   //TM_Urun;
+       TMU : TM_Urun_Off;
+       LHamUrunNo, LNormUrunNo: string;
     begin
-        TMU := TM_Verme.Create; ///TM_Urun.Create;
-        TMU.UNO := TabUTSKontrol.FieldByName('UNO').AsString;//'08680734652908';//EditUNO.Text;
-        TMU.LNO := TabUTSKontrol.FieldByName('LOTNO').AsString;//'231316';//EditLNO.Text;
-        TMU.SNO := '';//EditSNO.Text;
         Tablo.TablodanSorguAc(1,'  select ADRESSORGU from [UTS_BILDIRIM_TUR] where ID='+IntToStr(BildirimTur));
         if Tablo.Query1.IsEmpty then
            raise Exception.Create('UTS bildirim türü tanımı bulunamadı (UTS_BILDIRIM_TUR ID=' + IntToStr(BildirimTur) + ')');
         Adres := Tablo.Query1.Fields[0].AsString;  //  utsServer
-        if Trim(Adres) = '' then
-           raise Exception.Create('UTS sorgu adresi boş (UTS_BILDIRIM_TUR ID=' + IntToStr(BildirimTur) + ')');
 
         case BildirimTur of
         45 : begin //tekil sorgu
-                 k := TUrunSonuc(utsTalkMC(Adres, //'/UTS/uh/rest/bildirim/alma/bekleyenler/sorgula',
-                                   TMU, TUrunSonuc));         //     TModel.Create
+                 if (Trim(Adres) = '') or (Pos('ayrintiliTekilUrun', Adres) > 0) then
+                   Adres := '/UTS/uh/rest/tekilUrun/sorgula';
+
+                 LHamUrunNo := AlanDegeri('UNO');
+                 LNormUrunNo := UTSUrunNoNorm(LHamUrunNo);
+                 k := TekilUrunSorgula(LNormUrunNo);
+                 if (k <> nil) and (Length(k.SNC) = 0) and (LNormUrunNo <> LHamUrunNo) then begin
+                   k.Free;
+                   k := TekilUrunSorgula(LHamUrunNo);
+                 end;
                  if k = nil then raise Exception.Create('Okunamadı');
              end;
         52 : begin
-                 //TMU.KUN := UTSFirmaNo;
+                 if (Trim(Adres) = '') or (Pos('ayrintiliTekilUrun', Adres) > 0) then
+                   Adres := '/UTS/uh/rest/bildirim/verme/askidakiler/offset';
+                 TMU := TM_Urun_Off.Create;
+                 TMU.UNO := AlanDegeri('UNO');
+                 TMU.LNO := AlanDegeri('LOTNO');
+                 TMU.SNO := AlanDegeri('SERINO');
                  TMU.ADT := 100;
                  aski := TAskiSonuc(utsTalkMC(Adres, TMU, TAskiSonuc)); //askı sorgu
                  if aski = nil then raise Exception.Create('Askı sorgusu okunamadı');
              end;
         end;
-        //TMU.Free;
     end;
 
 begin
@@ -161,36 +235,43 @@ begin
         aski := nil;
         GelenURT := '';
         GelenSKT := '';
-        Sorgula(45);//tekil ürün sorgusu
-        GelenAdet := 0;
-        AskiAdet := 0;
-        n := length(k.SNC);
-        if n > 0 then begin
-           // ilk kalemin URT/SKT'si (onceden atanmamis "i" degiskeni kullaniliyordu)
-           GelenURT := k.SNC[0].URT;
-           GelenSKT := k.SNC[0].SKT;
+        try
+          Sorgula(45);//tekil ürün sorgusu
+          GelenAdet := 0;
+          AskiAdet := 0;
+          n := length(k.SNC);
+          if n > 0 then begin
+             // ilk kalemin URT/SKT'si (onceden atanmamis "i" degiskeni kullaniliyordu)
+             GelenURT := k.SNC[0].URT;
+             GelenSKT := k.SNC[0].SKT;
 
 
-           for j := 0 to n-1 do
-                 GelenAdet := GelenAdet + k.SNC[j].ADT;
-        //
-           Sorgula(52);//giden askı sorgusu
-           // TAskiSonuc.SNC bir NESNE (TAskiSNC): yanitta SNC yoksa nil kalir ->
-           //   "aski.SNC.LST" nil nesne okumasi = access violation. Once nil kontrolu.
-           if (aski <> nil) and (aski.SNC <> nil) then begin
-              n := length(aski.SNC.LST);
-              if n > 0 then
-                 for j := 0 to n-1 do
-                    AskiAdet := AskiAdet + aski.SNC.LST[j].ADT;
+             for j := 0 to n-1 do
+                   GelenAdet := GelenAdet + k.SNC[j].ADT;
+          //
+             Sorgula(52);//giden askı sorgusu
+             // TAskiSonuc.SNC bir NESNE (TAskiSNC): yanitta SNC yoksa nil kalir ->
+             //   "aski.SNC.LST" nil nesne okumasi = access violation. Once nil kontrolu.
+             if (aski <> nil) and (aski.SNC <> nil) then begin
+                n := length(aski.SNC.LST);
+                if n > 0 then
+                   for j := 0 to n-1 do
+                      AskiAdet := AskiAdet + aski.SNC.LST[j].ADT;
+             end;
            end;
-        end;
-        if TabUTSKontrol.FieldByName('ADET').AsInteger > (GelenAdet - AskiAdet) then
-           Sonuc:=0
-        else Sonuc:=1;
+          if TabUTSKontrol.FieldByName('ADET').AsInteger > (GelenAdet - AskiAdet) then
+             Sonuc:=0
+          else Sonuc:=1;
 
-        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update UTSKONTROL set GELENADET='+ IntToStr(GelenAdet)+ ',ASKIADET = '+ IntToStr(AskiAdet)+
-            ', ACIKADET ='+IntToStr(GelenAdet - AskiAdet) +', GELENURT = '''+ GelenURT+ ''', GELENSKT = '''+GelenSKT +''', SONUC='+IntToStr(Sonuc)+
-            ', DEGISTIREN='+Kullanan+', DEGISTIRMETARIHI=getdate() where ID='+TabUTSKontrol.FieldByName('ID').AsString,[],[]);
+          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update UTSKONTROL set GELENADET='+ IntToStr(GelenAdet)+ ',ASKIADET = '+ IntToStr(AskiAdet)+
+              ', ACIKADET ='+IntToStr(GelenAdet - AskiAdet) +', GELENURT = '''+ GelenURT+ ''', GELENSKT = '''+GelenSKT +''', SONUC='+IntToStr(Sonuc)+
+              ', DEGISTIREN='+Kullanan+', DEGISTIRMETARIHI=getdate() where ID='+TabUTSKontrol.FieldByName('ID').AsString,[],[]);
+        finally
+          if k <> nil then
+            k.Free;
+          if aski <> nil then
+            aski.Free;
+        end;
 
 
 

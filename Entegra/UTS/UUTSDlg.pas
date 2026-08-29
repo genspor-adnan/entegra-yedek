@@ -46,7 +46,7 @@ type
     TabBildirimYERID: TIntegerField;
     TabBildirimTUR2: TWordField;
     TabBildirimDURUM: TWordField;
-    TabBildirimTARIH: TDateTimeField;
+    TabBildirimTARIH: TSQLTimeStampField;
     TabBildirimADET: TIntegerField;
     TabBildirimURUNNO: TStringField;
     TabBildirimSERINO: TStringField;
@@ -55,7 +55,7 @@ type
     TabBildirimSONUCKODU: TStringField;
     TabBildirimSONUCMESAJI: TStringField;
     TabBildirimEKLEYEN: TStringField;
-    TabBildirimEKLEMETARIHI: TDateTimeField;
+    TabBildirimEKLEMETARIHI: TSQLTimeStampField;
     TabHata: TFDQuery;
     DtsHata: TDataSource;
     TabBasari: TFDQuery;
@@ -138,8 +138,8 @@ type
     GridUTSViewEKLEMETARIHI: TcxGridDBColumn;
     GridUTSViewURT: TcxGridDBColumn;
     GridUTSViewSKT: TcxGridDBColumn;
-    TabBildirimURT: TDateTimeField;
-    TabBildirimSKT: TDateTimeField;
+    TabBildirimURT: TSQLTimeStampField;
+    TabBildirimSKT: TSQLTimeStampField;
     cxLabel7: TcxLabel;
     ComboBildirim: TcxImageComboBox;
     GridUTSViewFIRMA: TcxGridDBColumn;
@@ -802,10 +802,10 @@ var
   procedure SistemdeAyrintiliTekilUrunSorgusu;
     var
 	       k : TAyrintiUrunSonuc;
-         i, Sayfa : Integer;
+         i, Sayfa, Toplam, Eklenen, LIstekSayfa : Integer;
          urunNumarasi : string[50];
          LSorguAdresi, LHamUrunNo, LSorguUrunNo, LSonRaw, LSonIstek: string;
-         LHamTekrarDene: Boolean;
+         LHamTekrarDene, LOffsetMod, LOffsetDenendi: Boolean;
 
     function UrunNoAlternatif(const AUrunNo: string): string;
     var
@@ -876,6 +876,75 @@ var
       end;
     end;
 
+    function AyrintiKayitVarMi(const AEssizKimlik, AUrunNo, ALotNo, ASeriNo: string): Boolean;
+    begin
+      Result := False;
+      if MemDataSorgu.IsEmpty then
+        Exit;
+      if Trim(AEssizKimlik) <> '' then
+        Result := MemDataSorgu.Locate('essizKimlik', AEssizKimlik, [])
+      else
+        Result := MemDataSorgu.Locate('urunNumarasi;lotBatchNumarasi;seriNumarasi',
+          VarArrayOf([AUrunNo, ALotNo, ASeriNo]), []);
+    end;
+
+    procedure StokIrsaliyeBilgisiDoldur;
+    var
+      LDegerler: TStringList;
+      LUrunNo1, LUrunNo2, LLotNo, LDeger: string;
+    begin
+      if MemDataSorgu.IsEmpty then
+        Exit;
+
+      LUrunNo1 := UTSUrunNoNorm(EditUNO.Text);
+      if LUrunNo1 = '' then
+        Exit;
+      LUrunNo2 := UrunNoAlternatif(LUrunNo1);
+
+      LDegerler := TStringList.Create;
+      try
+        LDegerler.NameValueSeparator := '=';
+        Tablo.Query0.Close;
+        Tablo.Query0.SQL.Text :=
+          'select LOTNO, sum(STOK_ARTI_IRSALIYE) STOK_ARTI_IRSALIYE from ('+
+          'SELECT SL.LOTNO, SUM(SDI.KALAN) + ISNULL(IRS.ACIK_IRSALIYE, 0) AS STOK_ARTI_IRSALIYE '+
+          'FROM STOKLAR S '+
+          'INNER JOIN STOKSERILOT SL ON SL.STOKID = S.ID '+
+          'INNER JOIN STOKDURUMIZLEME SDI ON SDI.STOKID = S.ID AND SDI.SERILOTID = SL.ID '+
+          'OUTER APPLY (SELECT SUM(KALAN) AS ACIK_IRSALIYE FROM STOKIZLEME '+
+          'WHERE STOKID = S.ID AND SERILOTID = SL.ID AND BELGETUR = 14) IRS '+
+          'WHERE (S.URUNNO = '+QuotedStr(LUrunNo1)+' or S.URUNNO = '+QuotedStr(LUrunNo2)+') '+
+          'AND S.IZLEME > 0 '+
+          'GROUP BY S.KOD, S.URUNNO, SL.ID, SL.LOTNO, IRS.ACIK_IRSALIYE'+
+          ') X group by LOTNO';
+        Tablo.Query0.Open;
+        while not Tablo.Query0.Eof do begin
+          LDegerler.Values[Tablo.Query0.FieldByName('LOTNO').AsString] :=
+            Tablo.Query0.FieldByName('STOK_ARTI_IRSALIYE').AsString;
+          Tablo.Query0.Next;
+        end;
+
+        MemDataSorgu.DisableControls;
+        try
+          MemDataSorgu.First;
+          while not MemDataSorgu.Eof do begin
+            LLotNo := MemDataSorgu.FieldByName('lotBatchNumarasi').AsString;
+            LDeger := LDegerler.Values[LLotNo];
+            if LDeger <> '' then begin
+              MemDataSorgu.Edit;
+              MemDataSorgu.FieldByName('Stok_Arti_AcikIrsaliye').AsString := LDeger;
+              MemDataSorgu.Post;
+            end;
+            MemDataSorgu.Next;
+          end;
+        finally
+          MemDataSorgu.EnableControls;
+        end;
+      finally
+        LDegerler.Free;
+      end;
+    end;
+
     begin //Alma i?in kabul sorgulama
         if (EditUNO.Text='')then begin // or(EditLNO.Text='')
             Showmessage('ürün no ve Lotno bilgisi girin!');
@@ -890,16 +959,19 @@ var
 
         n:=1;  //sayfalama oldu?u i?in
         Sayfa := 0;
+        Toplam := 0;
         LSorguAdresi := Trim(TabBildirimTur.FieldByName('ADRESSORGU').AsString);
         if (LSorguAdresi = '') or (Pos('ayrintiliTekilUrun', LSorguAdresi) = 0) then
           LSorguAdresi := '/UTS/uh/rest/ayrintiliTekilUrun/sorgula';
         LHamUrunNo := Trim(EditUNO.Text);
         LSorguUrunNo := UTSUrunNoNorm(LHamUrunNo);
         LHamTekrarDene := LSorguUrunNo <> LHamUrunNo;
+        LOffsetMod := False;
+        LOffsetDenendi := False;
         while n > 0 do begin
+            LIstekSayfa := Sayfa;
             LSonIstek := UTSUrunSorguJson(LSorguUrunNo, Sayfa, 120, True);
             LSonRaw := utsTalkSS(LSorguAdresi, LSonIstek);
-            inc(Sayfa);
             if Trim(LSonRaw) = '' then
                raise Exception.Create('Okunamadı');
             k := TAyrintiUrunSonuc.Create('{}');
@@ -910,7 +982,7 @@ var
               raise;
             end;
             n := length(k.SNC);
-            if (n = 0) and (Sayfa = 1) and LHamTekrarDene then begin
+            if (n = 0) and (LIstekSayfa = 0) and LHamTekrarDene then begin
               k.Free;
               LSorguUrunNo := LHamUrunNo;
               LHamTekrarDene := False;
@@ -918,7 +990,16 @@ var
               n := 1;
               Continue;
             end;
-            if (n = 0) and (Sayfa = 1) then begin
+            if (n = 0) and (Toplam > 0) and (not LOffsetDenendi) and (not LOffsetMod) then begin
+              k.Free;
+              LOffsetDenendi := True;
+              LOffsetMod := True;
+              Sayfa := Toplam;
+              MemoLog.Lines.Add('Ayrıntılı tekil ürün sorgusu: SAY=1 boş döndü, offset modu deneniyor. SAY=' + IntToStr(Sayfa));
+              n := 1;
+              Continue;
+            end;
+            if (n = 0) and (LIstekSayfa = 0) then begin
               MemoLog.Lines.Add('Ayrıntılı tekil ürün sorgu sonucu boş. Endpoint=' +
                 LSorguAdresi + ' UNO=' + LSorguUrunNo);
               MemoLog.Lines.Add('İstek: ' + LSonIstek);
@@ -930,26 +1011,30 @@ var
                 MemoLog.Lines.Add('ÜTS: ' + k.MSJ[i].TIP + ' ' +
                   k.MSJ[i].KOD + ' ' + k.MSJ[i].MET);
             end;
-            if n>0 then
-               Tablo.Query0.SQL.Text := SQLMEMO1.text;   //her sat?r i?in kalan irsaliye kolonu g?ncellenecek
+            Eklenen := 0;
+            MemoLog.Lines.Add('Ayrıntılı tekil ürün sorgusu: SAY=' +
+              IntToStr(LIstekSayfa) + ', gelen=' + IntToStr(n) +
+              ', toplam=' + IntToStr(Toplam + n));
             for i := 0 to n - 1 do begin
-                k.SNC[i].toDataSet(MemDataSorgu);
-                urunNumarasi := MemDataSorgu.fieldbyname('urunNumarasi').asstring;
-                Tablo.Query0.Close;
-                Tablo.Query0.Params[0].Value := urunNumarasi;
-                Tablo.Query0.Params[1].Value := UrunNoAlternatif(urunNumarasi);
-                Tablo.Query0.Params[2].Value := MemDataSorgu.fieldbyname('lotBatchNumarasi').asstring;
-                Tablo.Query0.Open;
-                if Tablo.Query0.recordCount>0 then begin
-                   MemDataSorgu.edit;
-                   MemDataSorgu.fieldbyname('Stok_Arti_AcikIrsaliye').asstring := Tablo.Query0.Fields[0].AsString;
-                   MemDataSorgu.post;
+                if not AyrintiKayitVarMi(k.SNC[i].essizKimlik, k.SNC[i].urunNumarasi,
+                  k.SNC[i].lotBatchNumarasi, k.SNC[i].seriNumarasi) then begin
+                  k.SNC[i].toDataSet(MemDataSorgu);
+                  Inc(Eklenen);
                 end;
             end;
+            MemoLog.Lines.Add('Ayrıntılı tekil ürün eklenen satır: ' + IntToStr(Eklenen));
+            Toplam := Toplam + n;
             k.Free;
+            if LOffsetMod then
+              Sayfa := LIstekSayfa + n
+            else
+              Sayfa := LIstekSayfa + 1;
         end;
-        AyrintiUrunSonucGetir;
+        MemoLog.Lines.Add('Ayrıntılı tekil ürün ham sonuç toplamı: ' + IntToStr(Toplam));
+        StokIrsaliyeBilgisiDoldur;
         MukerrerSil;
+        MemoLog.Lines.Add('Ayrıntılı tekil ürün ekrandaki sonuç toplamı: ' +
+          IntToStr(MemDataSorgu.RecordCount));
     end;
 
     procedure BildirimListesiSorgusu_Liste;
@@ -1245,15 +1330,25 @@ end;
 
 procedure TUTSDlg.ButtonGonderClick(Sender: TObject);
 begin
-   if GridSorguView.DataController.Controller.SelectedRecordCount < 1 then
-      ShowMessage('Önce seçim yapın!')
-   else begin
-      TabloyaKaydet;
+   if GridSorguView.DataController.Controller.SelectedRecordCount < 1 then begin
+      ShowMessage('Önce seçim yapın!');
+      Exit;
    end;
+
+   TabloyaKaydet;
+
    //e?er alma/verme bildirimi ise g?nderilmi? sat?rlar? sadece listeden ??karal?m listeleme uzun s?r?yor.. de?ilse listeleme yapal?m
-   if TabBildirimTur.Fields[0].AsInteger in [1, 25] then
-      GridSorguView.DataController.DeleteSelection
-   else
+   if TabBildirimTur.Fields[0].AsInteger in [1, 25] then begin
+      if (DtsSorgu.DataSet = MemDataSorgu) and MemDataSorgu.Active then begin
+         try
+            GridSorguView.DataController.DeleteSelection;
+         except
+            on E: EDatabaseError do
+               Listele;
+         end;
+      end else
+         Listele;
+   end else
       Listele;
 end;
 
@@ -1507,7 +1602,7 @@ var
     KRM,BZA,TRH,ADT,UNO,UNO2,LNO,SNO,BNO,URT, SKT, URTSKT, IEU, MEU, ONAY : string;
     GIT,TUA,TUS,TKN,YKN,PAN,DTA,TUR, TUKETICI_AD,TUKETICI_SOYAD,TC_NO,YAB_NO,PASS_NO,KISI_NO ,KIMLIK_TUR : string;
     //URT, SKT : TDateTime;
-    SayBasari, SayHata: integer;
+    SayBasari, SayHata, SayAtlanan: integer;
     Sonuc : boolean;
     SonucListe : TStringList;
 begin
@@ -1523,7 +1618,7 @@ begin
 //       BaslikTur := 10
     else
        BaslikTur := 11;
-    SayBasari:=0; SayHata:=0;
+    SayBasari:=0; SayHata:=0; SayAtlanan:=0;
 
 
 
@@ -1635,7 +1730,18 @@ begin
              YERID := 0;
         end else begin
              TabNo := TabNo_STOKIZLEME;
-             YERID := TS.Values[GridSorguView.GetColumnByFieldName('YERID').Index];
+             YERID := StrToIntDef(VarToStr(TS.Values[GridSorguView.GetColumnByFieldName('YERID').Index]), 0);
+        end;
+
+        if (YERID > 0) and (TabBildirimTur.fields[0].asInteger <> 1) and
+           Veritabani.VeriVarMi(Tablo.FDCnn,
+             'select 1 from STOKIZLEME SI inner join UTSBILDIRIM U on U.ID=SI.YERID '+
+             'where SI.ID=&ID and SI.YER=&YER and SI.YERID>0 and U.TUR=&TUR and U.DURUM=1',
+             ['&ID','&YER','&TUR'],
+             [YERID, TabNo_STOKUTS, TabBildirimTur.fields[0].asInteger]) then begin
+           MemoLog.Lines.Add(UNO+' '+LNO+' ürünü için daha önce başarılı ÜTS bildirimi yapılmış. İşlem atlandı.');
+           Inc(SayAtlanan);
+           Continue;
         end;
 
         MemoLog.Lines.Add(UNO+' '+LNO+' ürünü için işlem başlatıldı.');
@@ -1673,6 +1779,8 @@ begin
        Application.MessageBox(PChar(IntToStr(SayBasari)+' '+KIslem_basarili), PChar(Uyari),  MB_OK);
     if SayHata>0 then
        Application.MessageBox(PChar(IntToStr(SayHata)+' '+KIslem_basarisiz), PChar(Uyari),  MB_OK);
+    if SayAtlanan>0 then
+       Application.MessageBox(PChar(IntToStr(SayAtlanan)+' ürün için daha önce başarılı ÜTS bildirimi yapılmış. Tekrar gönderilmedi.'), PChar(Uyari),  MB_OK);
 
 end;
 

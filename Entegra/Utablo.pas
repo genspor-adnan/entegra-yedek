@@ -123,6 +123,7 @@ uses Windows, DB, System.JSON, xmldom, XMLIntf, dxSkinsCore,dxSkinLondonLiquidSk
     FSiralamaKullanici: Boolean; // siralamayi KULLANICI mi yapti (kayitli grid ayari degil)
     FOtoBuyutme: Integer;        // ardisik OTOMATIK sayfa buyutme sayaci (zincir freni)
     FDegerListesiKuruluyor: Boolean;  // FiltreDegerListesi re-Load reentrancy guard'i
+    FFiltreKontrolKuyrukta: Boolean;  // cxGrid dropdown filtresi kriteri commit ettikten sonra tek tekrar kontrol
     FSessizBitis: UInt64;        // yukleme sonrasi scroll tetigini yok sayma damgasi (GetTickCount64)
     FSerit: TPanel;              // "kismi liste" uyari seridi (grid'in altinda, lazy olusur)
     FSeritYazi: TLabel;
@@ -133,6 +134,8 @@ uses Windows, DB, System.JSON, xmldom, XMLIntf, dxSkinsCore,dxSkinLondonLiquidSk
     function  TamSinirAl: Integer;    // "tam liste" ust siniri (TamListeSiniri, vars.5000; 0=sinirsiz)
     function  TamGereksinim: Boolean; // filtre DOLU ya da SIRALAMA aktif -> tam liste sart
     procedure TamModaGec;             // FTamListe=True + kuyrukta TOP'suz requery
+    procedure FiltreDurumunuUygula(AGecikmeli: Boolean);
+    procedure FiltreKontrolKuyrukla;
     procedure ScrollDegisti(Sender: TObject);
     procedure FiltreDegisti(Sender: TObject);
     procedure FiltreDegerListesi(Sender: TcxFilterCriteria; AItemIndex: Integer;
@@ -16662,18 +16665,38 @@ begin
   FiltreDegisti(nil);   // ayni degerlendirme: gereksinim degistiyse gecis yap
 end;
 
+procedure TSayfaliListe.FiltreKontrolKuyrukla;
+begin
+  if FFiltreKontrolKuyrukta then Exit;
+  FFiltreKontrolKuyrukta := True;
+  TThread.ForceQueue(nil,
+    TThreadProcedure(procedure
+    begin
+      if csDestroying in ComponentState then Exit;
+      FFiltreKontrolKuyrukta := False;
+      FiltreDurumunuUygula(True);
+    end));
+end;
+
 // Grid filtre/siralama durumu degisti: gereksinim DOGDUYSA tam listeye gec,
 // KALKTIYSA sayfali moda don (her iki gecis de ayni baglamla requery).
-procedure TSayfaliListe.FiltreDegisti(Sender: TObject);
+procedure TSayfaliListe.FiltreDurumunuUygula(AGecikmeli: Boolean);
 var
   LGerekli: Boolean;
 begin
-  if (Sender <> nil) and Assigned(FEskiFiltre) then FEskiFiltre(Sender);
   if GGridAyarYukleniyor then Exit;   // kayitli duzen yukleniyor: kullanici eylemi degil
   if FYukleniyor or (not FAktif) then Exit;
   if (FTab = nil) or (not FTab.Active) then Exit;
   LGerekli := TamGereksinim;
-  if LGerekli = FTamListe then Exit;   // mod degismedi
+  if LGerekli = FTamListe then begin
+    // cxGrid dropdown/multiselect filtrelerinde OnChanged ilk secimde kriter grid'e
+    // tam commit edilmeden gelebiliyor. Bu durumda anlik kontrolde filtre bos gorunur,
+    // kullanici uncheck/re-select yapana kadar tam liste moduna gecilmez. UI kuyruğunda
+    // tek tekrar kontrol, kriter commit edildikten sonra ayni kullanici eylemini yakalar.
+    if not AGecikmeli then
+      FiltreKontrolKuyrukla;
+    Exit;
+  end;
   if LGerekli then
     TamModaGec
   else begin
@@ -16690,6 +16713,12 @@ begin
         end;
       end));
   end;
+end;
+
+procedure TSayfaliListe.FiltreDegisti(Sender: TObject);
+begin
+  if (Sender <> nil) and Assigned(FEskiFiltre) then FEskiFiltre(Sender);
+  FiltreDurumunuUygula(False);
 end;
 
 procedure TSayfaliListe.YuklemeSonrasi;

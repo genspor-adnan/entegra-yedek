@@ -38,6 +38,9 @@ object UTSDlg: TUTSDlg
     object cxTabSheet6: TcxTabSheet
       Caption = 'Ba'#351'ar'#305'l'#305'lar'
       ImageIndex = 19
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
     end
     object cxTabSheet5: TcxTabSheet
       Caption = 'Hatal'#305'lar'
@@ -48,10 +51,16 @@ object UTSDlg: TUTSDlg
       Font.Style = [fsBold]
       ImageIndex = 19
       ParentFont = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
     end
     object cxTabSheet1: TcxTabSheet
       Caption = #304'ptaller'
       ImageIndex = 19
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
     end
   end
   object PanelKategori: TJvNavPaneToolPanel
@@ -229,6 +238,10 @@ object UTSDlg: TUTSDlg
       object TabSheetBildirim: TcxTabSheet
         Caption = 'Bildirim Listesi'
         ImageIndex = 32
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GridUTS: TcxGrid
           Left = 0
           Top = 0
@@ -928,8 +941,14 @@ object UTSDlg: TUTSDlg
     Connection = Tablo.FDCnn
     SQL.Strings = (
       
-        'select * from UTSBILDIRIM U left join UTSBILDIRIMMESAJ UM on U.I' +
-        'D=UM.ID '
+        'select U.ID, U.YER, U.YERID, U.TUR, U.DURUM, TARIH=CAST(U.TARIH ' +
+        'AS datetime), U.ADET,'
+      'UM.URUNNO, UM.SERINO, UM.LOTNO, UM.JSON, UM.SONUCKODU,'
+      
+        'UM.SONUCMESAJI, UM.EKLEYEN, UM.EKLEMETARIHI, UM.KURUMNO, UM.BELG' +
+        'ENO,'
+      'URT=CAST(UM.URT AS datetime), SKT=CAST(UM.SKT AS datetime)'
+      'from UTSBILDIRIM U left join UTSBILDIRIMMESAJ UM on U.ID=UM.ID '
       'where U.ID = :PRM1'
       'order by EKLEMETARIHI desc')
     Left = 544
@@ -950,7 +969,7 @@ object UTSDlg: TUTSDlg
     object TabBildirimDURUM: TWordField
       FieldName = 'DURUM'
     end
-    object TabBildirimTARIH: TDateTimeField
+    object TabBildirimTARIH: TSQLTimeStampField
       FieldName = 'TARIH'
     end
     object TabBildirimADET: TIntegerField
@@ -981,7 +1000,7 @@ object UTSDlg: TUTSDlg
       FieldName = 'EKLEYEN'
       Size = 5
     end
-    object TabBildirimEKLEMETARIHI: TDateTimeField
+    object TabBildirimEKLEMETARIHI: TSQLTimeStampField
       FieldName = 'EKLEMETARIHI'
     end
     object TabBildirimKURUMNO: TStringField
@@ -991,10 +1010,10 @@ object UTSDlg: TUTSDlg
     object TabBildirimBELGENO: TStringField
       FieldName = 'BELGENO'
     end
-    object TabBildirimURT: TDateTimeField
+    object TabBildirimURT: TSQLTimeStampField
       FieldName = 'URT'
     end
-    object TabBildirimSKT: TDateTimeField
+    object TabBildirimSKT: TSQLTimeStampField
       FieldName = 'SKT'
     end
   end
@@ -1122,7 +1141,7 @@ object UTSDlg: TUTSDlg
   end
   object DtsDepo: TDataSource
     DataSet = TabDepo
-    Left = 384
+    Left = 272
     Top = 40
   end
 end

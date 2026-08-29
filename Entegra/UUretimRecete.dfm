@@ -1595,8 +1595,8 @@ object UretimReceteDlg: TUretimReceteDlg
   object DtsRecete: TDataSource
     DataSet = TabRecete
     OnStateChange = DtsReceteStateChange
-    Left = 180
-    Top = 96
+    Left = 148
+    Top = 64
   end
   object RECETE: TFDQuery
     Connection = Tablo.FDCnn
