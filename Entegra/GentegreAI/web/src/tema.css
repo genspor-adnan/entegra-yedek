@@ -1124,3 +1124,46 @@ input.skt-gecmis {
 }
 .alan.onay-satiri input[type="checkbox"] { flex: none; margin: 0 }
 .alan.onay-satiri span { font-size: 12px }
+
+/* ---- Randevu karti "Uygun Saatler" seridi (mockup randevu_karti.html) ---- */
+/* Mockup: beyaz zeminli kucuk kutucuklar; DOLU olan pembe + uzeri cizili,
+   SECILI olan mavi ve kalin. */
+.saat-serit { display: flex; gap: 4px; flex-wrap: wrap; padding: 6px 12px }
+.saat-serit .saat {
+  border: 1px solid var(--cizgi); border-radius: 3px; padding: 2px 8px;
+  background: #fff; font-size: 11px; color: var(--yazi); cursor: pointer;
+}
+.saat-serit .saat:hover:not(:disabled) { background: var(--yuz2) }
+.saat-serit .saat.dolu {
+  background: #f4d9d6; color: #8f3d36; border-color: #e4b7b2;
+  text-decoration: line-through; cursor: default;
+}
+.saat-serit .saat.secili {
+  background: var(--sec, #d7e7fb); border-color: #98c2ee; font-weight: 700;
+  text-decoration: none; color: var(--yazi);
+}
+
+/* ---- Randevu karti alan izgarasi (mockup randevu_karti.html) ------------- */
+/* Mockup iki sutunlu ve etiketler alanlarin USTUNDE; son alan (Açıklama) tam
+   satir. Diger kartlarin "etiket solda" duzeni degismez. */
+.alan-izgara.randevu-alanlar { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px }
+/* Etiket USTTE: grid track'i ezmek yerine kimlik seridindeki (.kaid .alan)
+   FLEX duzenini kullaniyoruz - `.alan`in iki sutunlu grid'i baska kurallarla
+   cakisiyordu. */
+.randevu-alanlar .alan { display: flex; flex-direction: column; align-items: stretch; gap: 2px }
+.randevu-alanlar .alan .etiket { text-align: left; width: 100% }
+.randevu-alanlar > .alan:last-child { grid-column: 1 / -1 }
+
+/* Randevu durum rozeti "Planlandı" - mockup'taki mavi chip (.c-plan). */
+.rozet.mavi { background: #e3ecfa; color: #2f5c9e; border: 1px solid #bcd2ef }
+/* Kimlik seridindeki durum rozeti kutuyu kaplamasin - mockup'ta kucuk chip. */
+.kaid .alan > .rozet { align-self: flex-start }
+
+/* Randevu kartinin ALT OZET seridi (mockup .ozet): kucuk gri bilgi satiri. */
+.randevu-ozet {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  padding: 8px 12px; margin-top: 10px;
+  background: var(--yuz2); border-top: 1px solid var(--cizgi);
+  font-size: 11px; color: var(--soluk);
+}
+.randevu-ozet b { color: var(--yazi); font-weight: 700 }

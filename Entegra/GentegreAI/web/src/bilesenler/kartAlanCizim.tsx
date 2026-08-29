@@ -91,6 +91,14 @@ export function alanCizici(b: AlanCizimBaglami) {
           value={yerelTutar.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                  + ' ' + doviz.yerelPara}
         />
+      ) : kaynak === 'randevu' && a.ad === 'durum' ? (
+        // Mockup: durum bir CHIP - degistirme arac cubugundaki akis
+        //   dugmeleriyle (Geldi / Gelmedi / İptal) yapilir.
+        <span key={a.ad} className={`rozet ${Number(deger.durum) === 2 ? 'ok'
+                                    : Number(deger.durum) === 3 ? 'hata'
+                                    : Number(deger.durum) === 4 ? 'uyari' : 'mavi'}`}>
+          {a.kodlar?.[String(deger[a.ad] ?? '')] ?? '—'}
+        </span>
       ) : a.aramaKaynagi ? (
         // JENERIK ARAMA EKRANI (260): combo yerine secili adi gosteren okunur
         //   kutu + "…" dugmesi. Deger id; ad once bu oturumda secilenden,

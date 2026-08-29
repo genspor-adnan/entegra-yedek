@@ -337,7 +337,10 @@ const adsizAlt = adsiz.filter(a => enAltAd.has(a.ad));
     doldurur (kullanici: "rol ve durum saga yanasik, aradaki bosluk bagli cari editi
     doldursun"). Alan sirasi katalogda Bagli Cari, Rol, Durum. */}
 const adsizBlok = adsizUst.length > 0 && (
+  // RANDEVU (mockup randevu_karti.html): iki sutun, etiketler alanlarin
+  //   USTUNDE, Açıklama tam satir - kart mockup'la ayni duzende gorunsun.
   <div className={`alan-izgara${kaynak === 'kisi' ? ' kisi-ust-satir' : ''}` +
+                  (kaynak === 'randevu' ? ' randevu-alanlar' : '') +
                   (TEK_SUTUN_KARTLAR.has(kaynak) ? ' tek-sutun ayar-formu' : '')}>
     {renderAlanListesi(adsizUst)}
   </div>

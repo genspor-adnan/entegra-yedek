@@ -29,6 +29,8 @@ import { StokHareketSekmesi } from './StokHareketSekmesi';
 import { HizmetListeFiyatlari } from './HizmetListeFiyatlari';
 import { TarafArama } from './TarafArama';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
+import { RandevuUygunSaatler } from './RandevuUygunSaatler';
+import { RandevuOzetSeridi } from './RandevuOzetSeridi';
 import { telefonAlaniMi } from './alanBicim';
 import { telefonBicimle } from './bicim';
 
@@ -683,6 +685,19 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
               </select>
             </label>
           )}
+          {/* RANDEVU akis dugmeleri (mockup): durum comboyla degil bu
+              dugmelerle degisir. Kaydet'e basilinca yazilir - kart
+              standardindan sapmamak icin ayri bir istek yapilmaz. */}
+          {kaynak === 'randevu' && !salt && (
+            <>
+              <button className="d" disabled={Number(deger.durum) === 2}
+                      onClick={() => alanDegistir('durum', '2')}>✔ Geldi İşaretle</button>
+              <button className="d" disabled={Number(deger.durum) === 3}
+                      onClick={() => alanDegistir('durum', '3')}>✖ Gelmedi</button>
+              <button className="d" disabled={Number(deger.durum) === 4}
+                      onClick={() => alanDegistir('durum', '4')}>⊘ İptal</button>
+            </>
+          )}
           <button className="d kapat-dugmesi" onClick={kapatIstendi}>Kapat</button>
           {/* Cari'ye ozel: Musteri/Tedarikci rolleri hizlı erisim icin arac cubuguna,
               Kaydet/Sil ile ayni satira, saga yanasik olarak da tasindi (Roller sekmesindeki
@@ -745,7 +760,33 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           altGruplaVar={altGruplaVar} renderAlanListesi={renderAlanListesi}
         />
         );
-        return sekmeSarmalayici ? sekmeSarmalayici(aktif.baslik, govde, deger) : govde;
+        const tam = kaynak === 'randevu' ? (
+          <>
+            {govde}
+            {/* UYGUN SAATLER (mockup): secili hekim + tarih icin o gunun
+                slotlari; bos saate tiklamak kartin baslangicini tasir. */}
+            <RandevuUygunSaatler
+              hekimId={Number(deger.hekimId) || null}
+              hekimAdi={meta.alanlar.find(a => a.ad === 'hekimId')
+                            ?.kodlar?.[String(deger.hekimId ?? '')]}
+              bolum={Number(deger.bolum) || null}
+              tarih={String(deger.baslangic ?? '').slice(0, 10)}
+              sureDk={Number(deger.sureDk) || 0}
+              seciliSaat={String(deger.baslangic ?? '').slice(11, 16)}
+              hariçId={yeniMi ? null : Number(id)}
+              onSec={saat => alanDegistir(
+                'baslangic', `${String(deger.baslangic ?? '').slice(0, 10)}T${saat}`)}
+            />
+            {/* Ozet serit EN ALTTA (mockup .ozet): hasta no, son randevu,
+                acik bakiye, olusturma. */}
+            <RandevuOzetSeridi
+              hastaId={Number(deger.hastaId) || null}
+              hariçId={yeniMi ? null : Number(id)}
+              olusturan={String(deger.eklemeTarihi ?? '')}
+            />
+          </>
+        ) : govde;
+        return sekmeSarmalayici ? sekmeSarmalayici(aktif.baslik, tam, deger) : tam;
       })()}
 
       {/* Stok > ÜTS: stok_uts 1:1 uzanti (119) - grid degil TEK kayit formu.
