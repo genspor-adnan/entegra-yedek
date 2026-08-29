@@ -22,6 +22,8 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
   const [uyeler, setUyeler] = useState<RolKullanicisi[] | null>(null);
   const [secili, setSecili] = useState<number | null>(null);
   const [adaylar, setAdaylar] = useState<RolKullanicisi[]>([]);
+  // Aday listesinde COKLU isaretleme (kullanici): secilenler tek "Ekle" ile girer.
+  const [adaySecim, setAdaySecim] = useState<Set<number>>(new Set());
   const [arama, setArama] = useState('');
   const [ekleAcik, setEkleAcik] = useState(false);
   const [hata, setHata] = useState('');
@@ -47,14 +49,24 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
     return () => { iptal = true; clearTimeout(zaman) };
   }, [ekleAcik, arama, rolId]);
 
-  const ekle = async (k: RolKullanicisi) => {
+  const ekle = async () => {
+    if (adaySecim.size === 0) return;
     setIslemde(true); setHata(''); setBilgi('');
     try {
-      setUyeler(await api.rolKullaniciEkle(rolId, k.id));
-      setBilgi(`${k.unvan || k.kod} bu role eklendi.`);
-      setAdaylar(a => a.filter(x => x.id !== k.id));
+      let sonListe = uyeler ?? [];
+      for (const id of adaySecim) sonListe = await api.rolKullaniciEkle(rolId, id);
+      setUyeler(sonListe);
+      setBilgi(`${adaySecim.size} kullanıcı bu role eklendi.`);
+      setAdaylar(a => a.filter(x => !adaySecim.has(x.id)));
+      setAdaySecim(new Set());
     } catch (h) { setHata(hataMetni(h)) } finally { setIslemde(false) }
   };
+
+  const adayIsaretle = (id: number) => setAdaySecim(t => {
+    const y = new Set(t);
+    if (y.has(id)) y.delete(id); else y.add(id);
+    return y;
+  });
 
   const cikar = async () => {
     const k = uyeler?.find(x => x.id === secili);
@@ -123,28 +135,50 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
       </table>
 
       {ekleAcik && (
-        <Modal baslik="Role Kullanıcı Ekle" dar onKapat={() => setEkleAcik(false)}
+        <Modal baslik="Role Kullanıcı Ekle" dar onKapat={() => { setEkleAcik(false); setAdaySecim(new Set()) }}
           alt={<button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                       onClick={() => setEkleAcik(false)}>Kapat</button>}>
+                       onClick={() => { setEkleAcik(false); setAdaySecim(new Set()) }}>Kapat</button>}>
           <div style={{ padding: 10 }}>
-            <input placeholder="Kullanıcı ara (ad, kod, e-posta)…" value={arama}
-                   style={{ width: '100%' }} autoFocus
-                   onChange={e => setArama(e.target.value)} />
-            <div style={{ maxHeight: 320, overflowY: 'auto', marginTop: 8 }}>
+            <div className="numaralama-bas bitisik">
+              <h6>Kullanıcı Seç {adaySecim.size > 0 && (
+                <span style={{ opacity: .6 }}>({adaySecim.size} seçili)</span>)}</h6>
+              {/* Ekle dugmesi UST BASLIKTA - satir satir degil, secilenler topluca. */}
+              <button className="d bir" title="Seçilenleri role ekle"
+                      disabled={islemde || adaySecim.size === 0}
+                      onClick={() => void ekle()}>＋</button>
+            </div>
+            {/* Listelerdeki oval arama kutusu. */}
+            <div className="ara" style={{
+              maxWidth: 260, margin: '0 0 8px', height: 23, borderRadius: 12,
+              background: 'var(--yuz)', color: 'var(--yazi)', border: '1px solid var(--cizgi)',
+            }}>
+              <span>🔍</span>
+              <input autoFocus value={arama}
+                     style={{ border: 0, background: 'transparent', outline: 'none',
+                              width: '100%', color: 'inherit' }}
+                     placeholder="Kullanıcı ara (ad, kod, e-posta)…"
+                     onChange={e => setArama(e.target.value)} />
+            </div>
+            <div style={{ maxHeight: 320, overflowY: 'auto' }}>
               <table className="grid">
                 <thead>
-                  <tr><th>Kullanıcı</th><th>Kod</th><th>Şu anki rolü</th><th style={{ width: 70 }}></th></tr>
+                  <tr>
+                    <th style={{ width: 34 }}></th>
+                    <th>Kullanıcı</th><th>Kod</th><th>Şu anki rolü</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {adaylar.map(k => (
-                    <tr key={k.id}>
+                    <tr key={k.id} className={adaySecim.has(k.id) ? 'secili' : undefined}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => adayIsaretle(k.id)}
+                        onDoubleClick={() => { adayIsaretle(k.id); void ekle() }}>
+                      <td style={{ textAlign: 'center' }}>
+                        <input type="checkbox" checked={adaySecim.has(k.id)} readOnly />
+                      </td>
                       <td>{k.unvan || '—'}</td>
                       <td>{k.kod}</td>
                       <td style={{ opacity: .7 }}>{k.rolAdi}</td>
-                      <td style={{ textAlign: 'right' }}>
-                        <button type="button" className="d" disabled={islemde}
-                                onClick={() => void ekle(k)}>Ekle</button>
-                      </td>
                     </tr>
                   ))}
                   {adaylar.length === 0 && (
