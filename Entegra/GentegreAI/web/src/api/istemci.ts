@@ -103,6 +103,12 @@ async function ham(yol: string, secenek: RequestInit, jsonGovde: boolean,
   return yanit;
 }
 
+/** Personel/kisi kartinda kullanici rolu bolumu. */
+export interface KartRolBilgisi {
+  kullaniciVar: boolean; rolId: number; rolAdi: string;
+  roller: { id: number; ad: string }[];
+}
+
 /** Rol > Kullanicilar sekmesi satiri. */
 export interface RolKullanicisi {
   id: number; kod: string; unvan: string; eposta: string;
@@ -223,6 +229,11 @@ export const api = {
 
   // ------------------------------------------------------- rol > yetkiler ----
   rolYetkileri: (rolId: number) => istek<YetkiSatiri[]>(`/api/kart/rol/${rolId}/yetkiler`),
+  /** Personel/kisi kartindan rol goster-degistir. */
+  kartRol: (kartId: number) =>
+    istek<KartRolBilgisi>(`/api/kart/kullanici/${kartId}/rol`),
+  kartRolDegistir: (kartId: number, rolId: number) =>
+    istek<KartRolBilgisi>(`/api/kart/kullanici/${kartId}/rol/${rolId}`, { method: 'PUT' }),
   rolKullanicilari: (rolId: number) =>
     istek<RolKullanicisi[]>(`/api/kart/rol/${rolId}/kullanicilar`),
   rolKullaniciAdaylari: (rolId: number, arama: string) =>

@@ -4,6 +4,7 @@ import type { KartAlanMeta, KartDetayMeta } from '../api/sozlesme';
 import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
+import { KartKullaniciRolu } from './KartKullaniciRolu';
 import { kidemMetni } from './bicim';
 
 interface Props {
@@ -230,6 +231,11 @@ export function PersonelKimlikOzet({
               )}
             </div>
           </div>
+        )}
+        {/* Kullanici rolu (kullanici): karta bagli kullanici hesabinin rolu -
+            gorulur ve degistirilebilir. Yeni kayitta id yok, gosterilmez. */}
+        {!ozetGizli && kaynakId && (
+          <KartKullaniciRolu kartId={kaynakId} saltOkunur={saltOkunur} />
         )}
       </div>
     </div>

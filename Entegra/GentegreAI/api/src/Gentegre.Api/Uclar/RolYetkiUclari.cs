@@ -68,6 +68,38 @@ public static class RolYetkiUclari
             return Results.Ok(await depo.ListeleAsync(rolId, iptal));
         });
 
+        // Personel/kisi kartindan rol goster-degistir (kullanici). Kart id'si
+        //   = kullanici id'si (taraf_kullanici.id -> taraf.id).
+        var kartRol = yol.MapGroup("/api/kart/kullanici/{kartId:int}/rol")
+                         .WithTags("Kart").RequireAuthorization();
+
+        kartRol.MapGet("/", async (int kartId, BaglamCozucu cozucu,
+            RolKullaniciDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("rol", Islem.Gor);
+            var d = await depo.KartRolOkuAsync(kartId, iptal);
+            return Results.Ok(new
+            {
+                kullaniciVar = d.KullaniciVar, rolId = d.RolId, rolAdi = d.RolAdi,
+                roller = d.Roller.Select(r => new { id = r.Id, ad = r.Ad }),
+            });
+        });
+
+        kartRol.MapPut("/{rolId:int}", async (int kartId, int rolId, BaglamCozucu cozucu,
+            RolKullaniciDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("rol", Islem.Degistir);
+            await depo.KartRolDegistirAsync(kartId, rolId, baglam.Yazma, iptal);
+            var d = await depo.KartRolOkuAsync(kartId, iptal);
+            return Results.Ok(new
+            {
+                kullaniciVar = d.KullaniciVar, rolId = d.RolId, rolAdi = d.RolAdi,
+                roller = d.Roller.Select(r => new { id = r.Id, ad = r.Ad }),
+            });
+        });
+
         kul.MapDelete("/{kullaniciId:int}", async (int rolId, int kullaniciId,
             BaglamCozucu cozucu, RolKullaniciDeposu depo, HttpContext ctx,
             CancellationToken iptal) =>

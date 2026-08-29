@@ -152,6 +152,38 @@ public sealed class RolKullaniciDeposu
         return "Kullanıcı varsayılan role (Yönetici) taşındı.";
     }
 
+    /// <summary>
+    /// Personel/kişi kartından kullanıcı rolü (kullanıcı: "personel kartında
+    /// rolü görebilmem ve istersem değiştirebilmem lazım"). Kartın kullanıcı
+    /// hesabı yoksa KullaniciVar=false döner - ekran "hesabı yok" der.
+    /// </summary>
+    public async Task<(bool KullaniciVar, int RolId, string RolAdi,
+                       IReadOnlyList<(int Id, string Ad)> Roller)>
+        KartRolOkuAsync(int kartId, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+
+        var roller = new List<(int, string)>();
+        await using (var k = baglanti.Komut(
+            "select id, ad from public.rol where aktif = 1 order by ad", null))
+        await using (var o = await k.ExecuteReaderAsync(iptal))
+            while (await o.ReadAsync(iptal)) roller.Add((o.GetInt32(0), o.GetString(1)));
+
+        await using var komut = baglanti.Komut(
+            "select k.rol_id, coalesce(r.ad, '') " +
+            "  from public.taraf_kullanici k " +
+            "  left join public.rol r on r.id = k.rol_id " +
+            " where k.id = @p0", null, kartId);
+        await using var oku = await komut.ExecuteReaderAsync(iptal);
+        if (!await oku.ReadAsync(iptal)) return (false, 0, "", roller);
+        return (true, oku.GetInt32(0), oku.GetString(1), roller);
+    }
+
+    /// <summary>Karttan rol değiştirme - AtaAsync ile aynı iz (islem_log).</summary>
+    public async Task KartRolDegistirAsync(int kartId, int rolId, YazmaBaglami baglam,
+        CancellationToken iptal = default)
+        => await AtaAsync(rolId, kartId, baglam, iptal);
+
     private static async Task<IReadOnlyList<RolKullanicisi>> OkuAsync(NpgsqlCommand komut,
         CancellationToken iptal)
     {
