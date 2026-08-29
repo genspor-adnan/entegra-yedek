@@ -61,10 +61,16 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
    */
   // Katalog ozel bir ad verdiyse (Teklif) o kullanilir; 'Belge' generic'i
   //   fatura turlerinin adi olarak 'Fatura'ya cevrilir (216).
+  // BASVURU (246): numara "Protokol No", tarih "Başvuru Tarihi" (kullanici) -
+  //   siparis davranisini miras aliyor ama HBYS'de karsiligi protokoldur.
+  const basvuruMu = belgeAdi === 'Başvuru';
   const belgeSozu = depoBelgesi || stokFisiMi ? belgeAdi
+                  : basvuruMu ? 'Başvuru'
                   : irsaliyeMi ? 'İrsaliye' : siparisMi ? 'Sipariş'
                   : tahakkukMu ? 'Tahakkuk'
                   : belgeAdi !== 'Belge' ? belgeAdi : 'Fatura';
+  /** Numara etiketi: basvuruda "Protokol No", digerlerinde "<tur> No". */
+  const numaraSozu = basvuruMu ? 'Protokol' : belgeSozu;
 
   /**
    * Kapanma ("bu belgeden ne kadari faturalandi") hangi turde ANLAMLI:
@@ -131,7 +137,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     <label className="alan">
       <span className={`etiket${disNumarali && !kilitli ? ' zorunlu-isaret' : ''}`}>
         {disNumarali ? 'Tedarikçi Fatura No'
-          : teklifMi ? `${belgeSozu} No / Revize No` : `${belgeSozu} No`}
+          : teklifMi ? `${belgeSozu} No / Revize No` : `${numaraSozu} No`}
       </span>
       {disNumarali && !kilitli ? (
         <input className="one-cikan" value={belgeNo} maxLength={20}

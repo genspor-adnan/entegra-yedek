@@ -261,7 +261,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   //   eklenebilmeli, belge o zaman KISMI'ye doner. Donusmus SATIRLAR sunucuda
   //   korunur; fatura/irsaliyede kilit surer - kalemi degistirmek hedef belgeyi
   //   ve muhasebe fisini tutarsiz birakirdi.
-  const siparisTuru = tur === 9 || tur === 19;
+  const siparisTuru = tur === 9 || tur === 19 || tur === 30;
   const duzenlenebilir = mevcutBelge && !!sonuc && !eBelgeGonderildi
                          && (!faturalandi || siparisTuru);
   const kilitli = (mevcutBelge && !duzenlenebilir) || (!mevcutBelge && !!sonuc);
@@ -278,6 +278,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   } = bilgi;
   /** Satis teklifi (216): tur 18 - durum combosu, "Sipariş" sekmesi, tek hedef. */
   const teklifMi = tur === 18;
+  /**
+   * BASVURU (246): siparis davranisini miras alir ama HBYS belgesidir - uretim
+   * ve termin (teslim tarihi) kavrami yoktur, o iki dugme gizlenir (kullanici).
+   */
+  const basvuruMu = tur === 30;
 
   /**
    * IRSALIYE PILOTU (kullanici): 4 sutunlu baslik + arac cubugunda Taslak
@@ -761,6 +766,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           setIade={v => setFaturaTipi(v ? 2 : 1)}
           faturaTipi={faturaTipi} setFaturaTipi={setFaturaTipi}
           siparisMi={siparisMi} irsaliyeMi={irsaliyeMi} faturaMi={faturaMi} alisMi={alisMi}
+          basvuruMu={basvuruMu}
           eBelgeYok={eBelgeYok} kayitliId={kayitliId}
           kes={kes} yeniBelge={yeniBelge} kapat={kapat}
           setDonusum={setDonusum} setTerminAcik={setTerminAcik}

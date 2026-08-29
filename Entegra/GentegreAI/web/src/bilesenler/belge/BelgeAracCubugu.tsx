@@ -11,7 +11,7 @@ import { FATURA_TIPLERI } from '../../sayfalar/belgeSabitleri';
 export function BelgeAracCubugu({
   mevcutBelge, duzenlenebilir, sonuc, kaydediyor, kilitli,
   iadeKutusu, iade, setIade, faturaTipi, setFaturaTipi,
-  siparisMi, irsaliyeMi, faturaMi, alisMi, eBelgeYok, kayitliId,
+  siparisMi, irsaliyeMi, faturaMi, alisMi, basvuruMu, eBelgeYok, kayitliId,
   kes, yeniBelge, kapat, setDonusum, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
 }: {
@@ -32,6 +32,8 @@ export function BelgeAracCubugu({
   irsaliyeMi: boolean;
   faturaMi: boolean;
   alisMi: boolean;
+  /** Basvuru (246): uretim ve termin dugmeleri gizlenir - HBYS belgesi. */
+  basvuruMu?: boolean;
   /** e-Belge (fatura/irsaliye) kavrami olmayan turler: fis, transfer, talep. */
   eBelgeYok: boolean;
   kayitliId: number;
@@ -99,7 +101,8 @@ export function BelgeAracCubugu({
               onClick={() => setDonusum(alisMi ? 11 : 15)}>
         🧾 Faturaya Dönüştür
       </button>
-      <button className="d" disabled title="Üretim emri henüz bağlanmadı.">🏭 Üretime Aktar</button>
+      {!basvuruMu &&
+        <button className="d" disabled title="Üretim emri henüz bağlanmadı.">🏭 Üretime Aktar</button>}
       <span className="ayrac" />
       {/* ON ODEME dugmesi kalkti (kullanici): avans/on odeme artik siparisin
           kendi Tahsilat sekmesinden giriliyor - fatura kartiyla ayni yer,
@@ -107,12 +110,13 @@ export function BelgeAracCubugu({
       {/* TERMIN (140): satirlarin teslim tarihini toplu gunceller. Tutar/stok/
           cari etkilemedigi icin KESIN sipariste de calisir - gecikince siparisi
           iptal edip yeniden kesmeye gerek yok. */}
-      <button className="d" disabled={!kayitliId}
-              title={kayitliId ? 'Satırların teslim tarihini güncelle'
-                               : 'Önce siparişi kaydedin.'}
-              onClick={() => setTerminAcik(true)}>
-        📅 Termin Güncelle
-      </button>
+      {!basvuruMu &&
+        <button className="d" disabled={!kayitliId}
+                title={kayitliId ? 'Satırların teslim tarihini güncelle'
+                                 : 'Önce siparişi kaydedin.'}
+                onClick={() => setTerminAcik(true)}>
+          📅 Termin Güncelle
+        </button>}
       <button className="d" disabled title="Yazdırma henüz bağlanmadı.">🖨️ Yazdır</button>
     </>
   )}

@@ -118,7 +118,9 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, yenile }: {
   };
 
   return (
-    <div className="kagrup">
+    // Gridin ALTINDA ayri katman: ust bosluk olmadan liste seridine (Tüm/Son/
+    //   Sık dugmeleri) yapisip onlari kirpiyordu (kullanici).
+    <div className="kagrup" style={{ marginTop: 16 }}>
       <div className="numaralama-bas bitisik">
         <h6>Takvim</h6>
         <button type="button" className={`cip${gorunum === 'gun' ? ' on' : ''}`}
