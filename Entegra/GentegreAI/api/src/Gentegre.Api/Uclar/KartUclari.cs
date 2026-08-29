@@ -301,6 +301,7 @@ public static class KartUclari
             kodTablosuSecenekleri ?? alan.SabitKodlar,
             alan.Gizli,
             alan.BagliAlan,
+            alan.AramaKaynagi,
             ustHaritasi);
 
     private static KartTanimi KartBul(string ad)

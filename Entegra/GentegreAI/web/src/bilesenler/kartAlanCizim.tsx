@@ -34,12 +34,16 @@ export interface AlanCizimBaglami {
   /** Kisi karti "Cariye Bagla": secilen tarafin adi (lookup bilmiyor). */
   bagliTarafAdi: string | null;
   setBagliTarafAdi: React.Dispatch<React.SetStateAction<string | null>>;
+  /** Jenerik arama ekranindan secilen alanlar (260): alan adi -> gorunen ad. */
+  secilenAdlar: Record<string, string>;
+  /** "…" dugmesi: alan icin arama modalini acar. */
+  aramaAc(alanAdi: string, kaynak: string): void;
 }
 
 export function alanCizici(b: AlanCizimBaglami) {
   const { kaynak, salt, meta, deger, setDeger, alanDegistir,
           alanHatalari, setAlanHatalari, doviz, yerelTutar, kurNotu,
-          bagliTarafAdi, setBagliTarafAdi } = b;
+          bagliTarafAdi, setBagliTarafAdi, secilenAdlar, aramaAc } = b;
 
     /** Sekme icinde mockup'taki gibi alt-bolumler (or. Genel -> Tanım/Sınıflandırma). */
     const altGruplaVar = (alanlar: KartAlanMeta[]) => {
@@ -87,6 +91,26 @@ export function alanCizici(b: AlanCizimBaglami) {
           value={yerelTutar.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                  + ' ' + doviz.yerelPara}
         />
+      ) : a.aramaKaynagi ? (
+        // JENERIK ARAMA EKRANI (260): combo yerine secili adi gosteren okunur
+        //   kutu + "…" dugmesi. Deger id; ad once bu oturumda secilenden,
+        //   yoksa lookup haritasindan cozulur.
+        <span className="ikili" key={a.ad}>
+          <input
+            readOnly
+            value={secilenAdlar[a.ad]
+                   ?? (deger[a.ad] ? (a.kodlar?.[String(deger[a.ad])] ?? '') : '')}
+            placeholder="— seçiniz —"
+            disabled={salt || !a.yazilabilir}
+            onClick={() => !salt && a.yazilabilir && aramaAc(a.ad, a.aramaKaynagi!)}
+          />
+          <button type="button" className="d mini" disabled={salt || !a.yazilabilir}
+                  title="Ara" onClick={() => aramaAc(a.ad, a.aramaKaynagi!)}>…</button>
+          {!a.zorunlu && deger[a.ad] ? (
+            <button type="button" className="d mini" disabled={salt || !a.yazilabilir}
+                    title="Temizle" onClick={() => alanDegistir(a.ad, '')}>×</button>
+          ) : null}
+        </span>
       ) : a.kodlar ? (() => {
         // BAGLI liste (Şube -> Banka): yalniz secili ust'un altindakiler.
         const ustDegeri = a.bagliAlan ? String(deger[a.bagliAlan] ?? '') : '';

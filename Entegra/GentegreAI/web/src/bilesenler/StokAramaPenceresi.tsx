@@ -12,7 +12,7 @@ import { para } from './bicim';
  * o kapaninca kullanici buradan siradaki stogu secer. Boylece on kalemlik bir
  * irsaliye tek arama penceresiyle girilir.
  */
-export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yon }: {
+export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHizmet, yon }: {
   /** Ustunde kalem penceresi acikken false olur; true'ya donunce arama
       kutusuna odak GERI GELIR (ardisik girişte fare gerekmesin). */
   etkin: boolean;
@@ -20,6 +20,8 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yon }: {
   onKapat(): void;
   /** Yalniz STOK aranir (paket icerigi gibi hizmet kabul etmeyen yerler). */
   yalnizStok?: boolean;
+  /** Yalniz HIZMET aranir (260: randevunun konusu bir hizmettir, stok degil). */
+  yalnizHizmet?: boolean;
   /**
    * BELGENIN YONU (141): 'satis' ise yalniz `satilan`, 'alis' ise yalniz
    * `alinan` isaretli stoklar listelenir - kendi urettigimiz mamul alis
@@ -64,7 +66,8 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yon }: {
       // gorunum: Son/Sik Aranan sunucuda kullanici_arama ile suzulur+siralanir.
       const gorunum = gorunumSecimi === 'tum' ? undefined : gorunumSecimi;
       const [stoklar, hizmetler] = await Promise.all([
-        api.liste('stok',   { sayfa: 1, boyut: 25, filtre: stokFiltresi, gorunum }),
+        yalnizHizmet ? Promise.resolve({ satirlar: [] as ListeSatiri[] })
+                     : api.liste('stok', { sayfa: 1, boyut: 25, filtre: stokFiltresi, gorunum }),
         yalnizStok ? Promise.resolve({ satirlar: [] as ListeSatiri[] })
                    : api.liste('hizmet', { sayfa: 1, boyut: 25, filtre, gorunum }),
       ]);
@@ -80,7 +83,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yon }: {
       setHata(hataMetni(h));
       setSatirlar([]);
     } finally { setYukleniyor(false) }
-  }, [yalnizStok, yon]);
+  }, [yalnizStok, yalnizHizmet, yon]);
 
   useEffect(() => { void ara(arama, aramaGorunumu) }, [ara, aramaGorunumu]);  // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -101,7 +104,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yon }: {
 
   return (
     <Modal
-      baslik={yalnizStok ? "Stok Ara" : "Stok / Hizmet Ara"}
+      baslik={yalnizStok ? "Stok Ara" : yalnizHizmet ? "Hizmet Ara" : "Stok / Hizmet Ara"}
       onKapat={onKapat}
       alt={<button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>}
     >

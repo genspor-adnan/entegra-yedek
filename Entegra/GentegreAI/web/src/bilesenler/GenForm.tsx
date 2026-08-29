@@ -28,6 +28,7 @@ import { StokDurumSekmesi } from './StokDurumSekmesi';
 import { StokHareketSekmesi } from './StokHareketSekmesi';
 import { HizmetListeFiyatlari } from './HizmetListeFiyatlari';
 import { TarafArama } from './TarafArama';
+import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { telefonAlaniMi } from './alanBicim';
 import { telefonBicimle } from './bicim';
 
@@ -128,6 +129,13 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
   const [cakisma, setCakisma] = useState<{ alanlar: string[]; guncel: Record<string, unknown> } | null>(null);
   const [bilgi, setBilgi] = useState<string | null>(null);
   const [cariyeBaglaAcik, setCariyeBaglaAcik] = useState(false);
+  /**
+   * JENERIK ARAMA EKRANI ile secilen alanlar (260): hangi alan icin hangi
+   * arama acik + secilen kaydin adi. Ad, lookup haritasinda olmayabilir
+   * (yeni secim) - o yuzden ayri tutulur.
+   */
+  const [aramaAlani, setAramaAlani] = useState<{ alan: string; kaynak: string } | null>(null);
+  const [secilenAdlar, setSecilenAdlar] = useState<Record<string, string>>({});
   /** Katalogdaki AcilistaTarafSecimi ile acilan cari secimi (yeni kayitta). */
   const [tarafSecimAcik, setTarafSecimAcik] = useState(false);
   const [kapatmaUyarisi, setKapatmaUyarisi] = useState(false);
@@ -551,6 +559,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
   const { altGruplaVar, renderAlanListesi } = alanCizici({
     kaynak, salt, meta, deger, setDeger, alanDegistir, alanHatalari, setAlanHatalari,
     doviz, yerelTutar, kurNotu, bagliTarafAdi, setBagliTarafAdi,
+    secilenAdlar, aramaAc: (alanAdi, kaynakAdi) => setAramaAlani({ alan: alanAdi, kaynak: kaynakAdi }),
   });
 
   return (
@@ -872,6 +881,37 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           onSec={secilen => {
             setDeger(d => ({ ...d, [meta.acilistaTarafSecimi!]: String(secilen.id) }));
             setTarafSecimAcik(false);
+          }}
+        />
+      )}
+
+      {/* Jenerik arama ekranlari (260): hasta -> taraf aramasi (yalniz hasta
+          kaynagi), hizmet -> stok/hizmet aramasi (yalniz hizmet). */}
+      {aramaAlani?.kaynak === 'hasta' && (
+        <TarafArama
+          acik
+          kaynaklar={['hasta']}
+          yerTutucu="Hasta ara…"
+          onKapat={() => setAramaAlani(null)}
+          onSec={secilen => {
+            alanDegistir(aramaAlani.alan, String(secilen.id));
+            setSecilenAdlar(o => ({ ...o, [aramaAlani.alan]: secilen.unvan }));
+            setAramaAlani(null);
+          }}
+        />
+      )}
+      {aramaAlani?.kaynak === 'hizmet' && (
+        <StokAramaPenceresi
+          etkin
+          yalnizHizmet
+          onKapat={() => setAramaAlani(null)}
+          onSec={satir => {
+            alanDegistir(aramaAlani.alan, String(satir.id));
+            setSecilenAdlar(o => ({
+              ...o,
+              [aramaAlani.alan]: String(satir.ad ?? satir.kod ?? ''),
+            }));
+            setAramaAlani(null);
           }}
         />
       )}

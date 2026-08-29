@@ -57,6 +57,8 @@ public sealed record KartAlanMeta(
     bool Gizli = false,
     /// <summary>Doluysa secenekler bu alanin degerine gore suzulur (Şube -> Banka).</summary>
     string? BagliAlan = null,
+    /// <summary>Doluysa alan jenerik arama ekranindan secilir (260).</summary>
+    string? AramaKaynagi = null,
     /// <summary>Bagli alanda her secenegin UST degeri: secenek id -> ust id.</summary>
     IReadOnlyDictionary<string, string>? KodUst = null);
 

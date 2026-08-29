@@ -19,29 +19,46 @@ public static partial class KartKatalogu
             ["durum"] = (short)1,          // Planlandı
             ["sureDk"] = (short)15,
             ["baslangic"] = "@simdi",
+            ["tip"] = (short)1,             // Muayene
+            ["kaynak"] = (short)1,          // Telefon
         },
         Alanlar: new KartAlani[]
         {
             new("id",        "id",        "sayi",  Yazilabilir: false),
-            // Bölüm ve hekim kartın da BAŞINDA (listeyle aynı sıra).
+            // KIMLIK SERIDI (Ekranlar/randevu_karti.html): Hasta / Tarih-Saat /
+            //   Durum her sekmede sabit ust seritte durur - kart standardi.
+            //   Hasta JENERIK ARAMA EKRANINDAN secilir (260), yalniz hastalar.
+            new("hastaId",   "hasta_id",  "kod",   Zorunlu: true,
+                KodTablosu: "public.v_hasta_lookup", AramaKaynagi: "hasta",
+                Baslik: "Hasta", Grup: "Kimlik"),
+            new("baslangic", "baslangic", "zaman", Zorunlu: true,
+                Baslik: "Tarih / Saat", Grup: "Kimlik"),
+            new("durum",     "durum",     "kod",   KodListesi: "randevu.durum",
+                Baslik: "Durum", Grup: "Kimlik"),
+
+            // RANDEVU kutusu - mockup'taki alan sirasi.
             new("bolum",     "bolum",     "kod",   Zorunlu: true,
                 // Yalniz randevu_verilebilir departmanlar (251) - Muhasebe'ye
                 //   randevu verilmez.
-                KodTablosu: "public.v_randevu_bolum_lookup", Baslik: "Bölüm", Grup: "Kimlik"),
+                KodTablosu: "public.v_randevu_bolum_lookup",
+                Baslik: "Bölüm / Poliklinik", Grup: "Randevu"),
             new("hekimId",   "hekim_id",  "kod",   Zorunlu: true,
                 // Tum personel DEGIL: yalniz "randevu verilebilir" isaretli
                 //   olanlar (252) - muhasebeciye randevu verilmez.
-                KodTablosu: "public.v_hekim_lookup", Baslik: "Hekim", Grup: "Kimlik"),
-            new("hastaId",   "hasta_id",  "kod",   Zorunlu: true,
-                KodTablosu: "public.v_hasta_lookup", Baslik: "Hasta", Grup: "Kimlik"),
-            new("baslangic", "baslangic", "zaman", Zorunlu: true,
-                Baslik: "Başlangıç", Grup: "Kimlik"),
+                KodTablosu: "public.v_hekim_lookup", Baslik: "Hekim", Grup: "Randevu"),
+            // Hizmet de jenerik stok/hizmet aramasindan, yalniz hizmetler (260).
+            new("hizmetId",  "hizmet_id", "kod",
+                KodTablosu: "public.v_hizmet_lookup", AramaKaynagi: "hizmet",
+                Baslik: "Hizmet / İşlem", Grup: "Randevu"),
             new("sureDk",    "sure_dk",   "sayi",  Zorunlu: true,
-                Baslik: "Süre (dk)", Grup: "Kimlik"),
-            new("durum",     "durum",     "kod",   KodListesi: "randevu.durum",
-                Baslik: "Durum", Grup: "Kimlik"),
+                Baslik: "Süre (dk)", Grup: "Randevu"),
+            new("tip",       "tip",       "kod",   KodListesi: "randevu.tip",
+                Baslik: "Randevu Tipi", Grup: "Randevu"),
+            new("kaynak",    "kaynak",    "kod",   KodListesi: "randevu.kaynak",
+                Baslik: "Kaynak", Grup: "Randevu"),
             new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 300,
-                Baslik: "Açıklama", Grup: "Genel"),
+                Baslik: "Açıklama", Grup: "Randevu"),
+
             new("belgeId",   "belge_id",  "sayi",  Yazilabilir: false, Gizli: true),
             new("eklemeTarihi", "ekleme_tarihi", "tarih", Yazilabilir: false),
         });

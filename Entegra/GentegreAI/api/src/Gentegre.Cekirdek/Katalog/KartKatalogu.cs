@@ -23,6 +23,13 @@ public sealed record KartAlani(
     //   gecerli olmayan alt deger TEMIZLENIR - yoksa "Ziraat + Akbank subesi"
     //   gibi tutarsiz kayit olusur.
     string? BagliAlan = null,
+    // JENERIK ARAMA EKRANI (260, kullanici: "hasta secimi jenerik kisi
+    //   seciminden ama sadece hastalar; hizmet secimi jenerik stok/hizmet
+    //   arama ekranindan, sadece hizmetler"). Doluysa alan combo yerine
+    //   "secili ad + …" kutusu olarak cizilir ve o arama modali acilir.
+    //   Deger yine id'dir; adi cozmek icin KodTablosu da verilir.
+    //   Gecerli degerler: "hasta", "hizmet".
+    string? AramaKaynagi = null,
     string? Baslik = null,         // form etiketi; bos ise Ad'dan uretilir
     string? Grup = null,           // form bolumu / SEKME: "Kimlik", "Iletisim", "Mali"
     // Sekme DEGIL - ayni sekme icinde mockup'taki gibi kucuk alt-baslik

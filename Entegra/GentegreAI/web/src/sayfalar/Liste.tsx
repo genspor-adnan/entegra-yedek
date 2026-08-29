@@ -224,8 +224,16 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     const dugumler = bolumSuzgec === ''
       ? randevuAgaci
       : randevuAgaci.filter(d => d.departmanId === bolumSuzgec);
-    return dugumler.flatMap(d => d.hekimler.map(h => ({ id: h.hekimId ?? 0, ad: h.ad })));
+    // Hekimin BOLUMU de tasinir: takvimde bir hekim sutununda saat secilince
+    //   kartta bolum de dolu gelsin (kullanici: "dr bolumu belli, kartta
+    //   bolumu doldursun").
+    return dugumler.flatMap(d =>
+      d.hekimler.map(h => ({ id: h.hekimId ?? 0, ad: h.ad, bolum: d.departmanId })));
   }, [randevuAgaci, bolumSuzgec]);
+
+  /** Hekimin bolumu (takvim sutunundan gelen hekim icin). */
+  const hekimBolumu = (hekim?: number) =>
+    hekim ? hekimSecenekleri.find(h => h.id === hekim)?.bolum : undefined;
 
   // Aksiyon yonlendirme. Kasa aksiyonlari API cagirir (kesinlestir/iptal/sil) ve
   //   sonrasinda grid'i tazeler; digerleri kart rotasina gider.
@@ -704,10 +712,12 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         // RANDEVU (251): takvimde fareyle isaretlenen aralik varsa saat ve sure
         //   karta tasinir - kullanici "yukaridan asagi isaretleyip Yeni'ye
         //   basinca" formda o araligi gormek istiyor.
+        const arBolum = hekimBolumu(takvimAralik?.hekimId) ?? (bolumSuzgec || undefined);
         const ek = tanim.kaynak === 'randevu' && takvimAralik
           ? `?baslangic=${encodeURIComponent(takvimAralik.baslangic)}`
             + `&sure=${takvimAralik.sureDk}`
             + (takvimAralik.hekimId ? `&hekim=${takvimAralik.hekimId}` : '')
+            + (arBolum ? `&bolum=${arBolum}` : '')
           : '';
         git(`${tanim.kartYolu}/yeni${ek}`);
       }
@@ -871,8 +881,12 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
             yenile={yenile}
             // Hekim gorunumunde sutunun hekimi de karta gecer (251).
             hekimler={hekimSecenekleri}
-            onYeni={(bas, hek) => git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`
-                                      + (hek ? `&hekim=${hek}` : ''))}
+            onYeni={(bas, hek) => {
+              const bol = hekimBolumu(hek) ?? (bolumSuzgec || undefined);
+              git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`
+                  + (hek ? `&hekim=${hek}` : '')
+                  + (bol ? `&bolum=${bol}` : ''));
+            }}
             onAc={id => git(`/randevu/${id}`)}
             onAralik={(bas, sure, hek) =>
               setTakvimAralik(bas ? { baslangic: bas, sureDk: sure, hekimId: hek } : null)}
@@ -1044,6 +1058,7 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
               baslangic: sorgu.get('baslangic')!,
               ...(sorgu.get('sure') ? { sureDk: Number(sorgu.get('sure')) } : {}),
               ...(sorgu.get('hekim') ? { hekimId: Number(sorgu.get('hekim')) } : {}),
+              ...(sorgu.get('bolum') ? { bolum: Number(sorgu.get('bolum')) } : {}),
             }
           : tanim.yeniKayitVarsayilanlari}
         onKapat={() => git(tanim.kartYolu!)}
