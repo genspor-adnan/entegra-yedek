@@ -91,7 +91,24 @@ export function alanCizici(b: AlanCizimBaglami) {
           value={yerelTutar.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                  + ' ' + doviz.yerelPara}
         />
-      ) : kaynak === 'randevu' && a.ad === 'durum' ? (
+      ) : kaynak === 'randevu' && a.ad === 'baslangic' ? (() => {
+        // Mockup'ta TARIH ve SAAT ayri iki kutu; tek datetime-local kutusu
+        //   kayit kabul masasinda saat girisini yavaslatiyordu. Deger yine
+        //   tek alan: "yyyy-aa-ggTss:dd".
+        const tam = String(deger[a.ad] ?? '');
+        const yaz = (g: string, s2: string) =>
+          alanDegistir(a.ad, g ? `${g}T${s2 || '00:00'}` : '');
+        return (
+          <span className="ikili" key={a.ad}>
+            <input type="date" value={tam.slice(0, 10)}
+                   disabled={salt || !a.yazilabilir}
+                   onChange={e => yaz(e.target.value, tam.slice(11, 16))} />
+            <input type="time" value={tam.slice(11, 16)}
+                   disabled={salt || !a.yazilabilir}
+                   onChange={e => yaz(tam.slice(0, 10), e.target.value)} />
+          </span>
+        );
+      })() : kaynak === 'randevu' && a.ad === 'durum' ? (
         // Mockup: durum bir CHIP - degistirme arac cubugundaki akis
         //   dugmeleriyle (Geldi / Gelmedi / İptal) yapilir.
         <span key={a.ad} className={`rozet ${Number(deger.durum) === 2 ? 'ok'
