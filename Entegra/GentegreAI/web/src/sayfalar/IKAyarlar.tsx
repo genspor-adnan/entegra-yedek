@@ -9,18 +9,18 @@ const SEKMELER = [
 
 type Sekme = typeof SEKMELER[number]['anahtar'];
 
-/** Ayar ekranında yönetilen kod listeleri (kullanıcı: Departman + Pozisyon). */
+/** Ayar ekranında yönetilen kod listeleri (kullanıcı: Departman + Görev). */
 const LISTELER = [
   { kod: 'taraf.departman', baslik: 'Departman',
     aciklama: 'Personel kartındaki Departman combosunu besler.' },
-  { kod: 'taraf.gorev', baslik: 'Pozisyon',
-    aciklama: 'Personel kartındaki Pozisyon alanının seçenekleri.' },
+  { kod: 'taraf.gorev', baslik: 'Görev',
+    aciklama: 'Personel kartındaki Görev combosunun seçenekleri.' },
 ] as const;
 
 /**
  * İK AYARLARI (Yönetim › Ayarlar › İK) - kasa/stok ayarlarıyla aynı desen.
  *
- * Genel sekmesinde Departman ve Pozisyon listeleri: combo mevcut değerleri
+ * Genel sekmesinde Departman ve Görev listeleri: combo mevcut değerleri
  * gösterir, "Düzenle" jenerik KodListesiModali'nı açar (ekle/sil/sırala,
  * taslak modeli - Kaydet'e basılana dek sunucuya gitmez).
  */

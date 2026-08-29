@@ -238,7 +238,7 @@ public static partial class KartKatalogu
             // Pozisyon KOD (236, kullanici: "combo ve ID olarak olsun") - eski
             //   serbest metin kolonu (taraf.gorev) veri olarak duruyor.
             new("gorevId",   "gorev_id",   "kod",   Zorunlu: true,
-                KodListesi: "taraf.gorev", Baslik: "Pozisyon"),
+                KodListesi: "taraf.gorev", Baslik: "Görev"),
             new("vkno",      "vkno",       "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "T.C. Kimlik No"),
             // ik_karti.html mockup'ta İletişim AYRI SEKME (Genel'e gomulu AltGrup DEGIL) -
             //   Grup:"İletişim" bu yuzden AltGrup degil.
