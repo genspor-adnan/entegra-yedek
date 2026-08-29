@@ -11,10 +11,8 @@ type Sekme = typeof SEKMELER[number]['anahtar'];
 
 /** Ayar ekranında yönetilen kod listeleri (kullanıcı: Departman + Görev). */
 const LISTELER = [
-  { kod: 'taraf.departman', baslik: 'Departman',
-    aciklama: 'Personel kartındaki Departman combosunu besler.' },
-  { kod: 'taraf.gorev', baslik: 'Görev',
-    aciklama: 'Personel kartındaki Görev combosunun seçenekleri.' },
+  { kod: 'taraf.departman', baslik: 'Departman' },
+  { kod: 'taraf.gorev', baslik: 'Görev' },
 ] as const;
 
 /**
@@ -71,26 +69,30 @@ export function IKAyarlar() {
         <div className="kagrup">
           <h6>Genel</h6>
           <div className="alan-izgara tek-sutun ayar-formu">
+            {/* AyarAlani ile AYNI desen (kullanici: "standart deseni uygula"):
+                etiket TIKLANABILIR (✎) ve jenerik kod listesi modalini acar,
+                combo listenin icerigini gosterir. */}
             {LISTELER.map(l => {
               const liste = degerler[l.kod] ?? [];
               return (
-                <label key={l.kod} className="alan tip-kod">
-                  <span className="etiket">{l.baslik}</span>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <select value={secili[l.kod] ?? ''} style={{ minWidth: 220 }}
+                <label key={l.kod} className="alan">
+                  <span className="etiket" role="button" tabIndex={0}
+                        title="Liste içeriğini düzenle" style={{ cursor: 'pointer' }}
+                        onClick={e => { e.preventDefault(); setDuzenlenen(l) }}>
+                    {l.baslik} ✎
+                  </span>
+                  <span className="ikili">
+                    <select value={secili[l.kod] ?? ''}
                             onChange={e => setSecili(s => ({ ...s, [l.kod]: e.target.value }))}>
                       <option value="">
-                        {liste.length === 0 ? '(liste boş - Düzenle ile ekleyin)'
+                        {liste.length === 0 ? '(liste boş - etikete tıklayıp ekleyin)'
                                             : `${liste.length} seçenek`}
                       </option>
                       {liste.map(d => (
                         <option key={d.deger} value={String(d.deger)}>{d.ad}</option>
                       ))}
                     </select>
-                    <button type="button" className="d"
-                            onClick={() => setDuzenlenen(l)}>Düzenle</button>
-                    <span style={{ fontSize: 11, color: 'var(--soluk)' }}>{l.aciklama}</span>
-                  </div>
+                  </span>
                 </label>
               );
             })}
