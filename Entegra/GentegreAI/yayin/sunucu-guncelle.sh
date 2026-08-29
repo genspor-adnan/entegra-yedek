@@ -51,12 +51,12 @@ if [ -d "$GECICI/db" ]; then
     UYGULANAN=0; ATLANAN=0
     for D in $(ls "$GECICI"/db/*.sql 2>/dev/null | sort); do
         AD=$(basename "$D")
-        VAR=$(docker exec gentegre-pg18 psql -U postgres -d gentegre_ai -tA \
+        VAR=$(docker exec -e PGOPTIONS='-c client_min_messages=warning' gentegre-pg18 psql -U postgres -d gentegre_ai -tA \
               -c "select 1 from public.goc_gecmisi where dosya = '$AD'")
         [ -n "$VAR" ] && { ATLANAN=$((ATLANAN+1)); continue; }
 
         if [ "$TEMEL_AL" = "1" ]; then
-            docker exec -i gentegre-pg18 psql -U postgres -d gentegre_ai -q \
+            docker exec -i -e PGOPTIONS='-c client_min_messages=warning' gentegre-pg18 psql -U postgres -d gentegre_ai -q \
                 -c "insert into public.goc_gecmisi(dosya) values ('$AD')"
             UYGULANAN=$((UYGULANAN+1))
             continue
@@ -65,9 +65,9 @@ if [ -d "$GECICI/db" ]; then
         bilgi "goc: $AD"
         # Goc PATLARSA yayindan cikilir: yarim sema ile yeni kodu acmak,
         #   eski kodu birakmaktan daha kotudur.
-        docker exec -i gentegre-pg18 psql -U postgres -d gentegre_ai \
+        docker exec -i -e PGOPTIONS='-c client_min_messages=warning' gentegre-pg18 psql -U postgres -d gentegre_ai \
             -v ON_ERROR_STOP=1 -q < "$D" || hata "goc basarisiz: $AD (kod DEGISTIRILMEDI)"
-        docker exec -i gentegre-pg18 psql -U postgres -d gentegre_ai -q \
+        docker exec -i -e PGOPTIONS='-c client_min_messages=warning' gentegre-pg18 psql -U postgres -d gentegre_ai -q \
             -c "insert into public.goc_gecmisi(dosya) values ('$AD')"
         UYGULANAN=$((UYGULANAN+1))
     done

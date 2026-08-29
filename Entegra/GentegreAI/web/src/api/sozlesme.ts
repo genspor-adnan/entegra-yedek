@@ -646,3 +646,32 @@ export interface PanelYaniti {
   /** Onumuzdeki 14 gunun takvimi (baslangici olan kayitlar). */
   takvim: PanelSatiri[];
 }
+
+/** Randevu Ayarlari > Bolumler (251) - bolum ya da hekim satiri. */
+export interface RandevuAyarSatiri {
+  id: number | null;
+  departmanId: number;
+  hekimId: number | null;
+  /** Bolum ya da hekim adi (ekranda gosterilir). */
+  ad: string;
+  baslangicSaat: string;
+  bitisSaat: string;
+  ogleBaslangic: string;
+  ogleBitis: string;
+  slotDk: number | null;
+  varsayilanSure: number | null;
+  calismaGunleri: string;
+  aktif: number;
+  aciklama: string;
+}
+
+/** Sol agacin bir dugumu: bolum + altindaki hekimler. */
+export interface RandevuBolumDugumu {
+  departmanId: number;
+  ad: string;
+  ayar: RandevuAyarSatiri;
+  hekimler: RandevuAyarSatiri[];
+}
+
+/** Bolum/hekim ayar yazma istegi - bos alan ust seviyeden miras alinir. */
+export type RandevuAyarYazma = Omit<RandevuAyarSatiri, 'id' | 'ad'>;

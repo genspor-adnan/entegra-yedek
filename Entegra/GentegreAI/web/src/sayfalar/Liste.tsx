@@ -5,7 +5,9 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
 import { GenForm } from '../bilesenler/GenForm';
-import { type EBelgeMesaji, type Kosul, type ListeSatiri, hataMetni } from '../api/sozlesme';
+import {
+  type EBelgeMesaji, type Kosul, type ListeSatiri, type RandevuBolumDugumu, hataMetni,
+} from '../api/sozlesme';
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
@@ -138,6 +140,21 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [randevuAyarlari, setRandevuAyarlari] = useState<{
     baslangicSaat?: string; bitisSaat?: string; slotDk?: number; calismaGunleri?: number[];
   }>({});
+  // RANDEVU (251, kullanici: "bu bölüm ve hekimler randevu listesi üst tarafta
+  //   tarih sağında listelenip filtrelensin"): tek uctan hem bolum hem hekim
+  //   listesi gelir (Randevu Ayarlari > Bölümler ile ayni kaynak).
+  const [randevuAgaci, setRandevuAgaci] = useState<RandevuBolumDugumu[]>([]);
+  const [bolumSuzgec, setBolumSuzgec] = useState<number | ''>('');
+  const [hekimSuzgec, setHekimSuzgec] = useState<number | ''>('');
+  useEffect(() => {
+    if (tanim.kaynak !== 'randevu') return;
+    let iptal = false;
+    api.randevuBolumleri()
+      .then(y => { if (!iptal) setRandevuAgaci(y) })
+      .catch(() => { /* bolum listesi okunamazsa suzgecler bos kalir */ });
+    return () => { iptal = true };
+  }, [tanim.kaynak]);
+
   useEffect(() => {
     if (tanim.kaynak !== 'randevu') return;
     let iptal = false;
@@ -155,6 +172,57 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     }).catch(() => { /* ayar okunamazsa takvim varsayilanla calisir */ });
     return () => { iptal = true };
   }, [tanim.kaynak]);
+
+  /**
+   * Randevu suzgecleri (251) gride ve takvime AYNI kosulu verir: ust seritte
+   * ne seciliyse alttaki takvim de onu gosterir - iki ayri suzgec kafa karistirir.
+   */
+  const randevuFiltresi = useMemo<Kosul | undefined>(() => {
+    if (tanim.kaynak !== 'randevu') return sabitFiltre;
+    const kosullar: Kosul[] = [];
+    if (sabitFiltre) kosullar.push(sabitFiltre);
+    if (bolumSuzgec !== '') kosullar.push({ alan: 'bolum', op: 'esit', deger: bolumSuzgec });
+    if (hekimSuzgec !== '') kosullar.push({ alan: 'hekimId', op: 'esit', deger: hekimSuzgec });
+    return kosullar.length === 0 ? undefined
+         : kosullar.length === 1 ? kosullar[0]
+         : { op: 'and', kosullar };
+  }, [tanim.kaynak, sabitFiltre, bolumSuzgec, hekimSuzgec]);
+
+  /**
+   * Takvimin kullanacagi ayar: HEKIM -> BÖLÜM -> Genel Ayarlar sirasiyla
+   * miras alinir (251). Hekim ogle arasini degistirdiyse takvim o hekim
+   * secildiginde onu gostermeli - yoksa bolum duzeni sanilir.
+   */
+  const takvimAyarlari = useMemo(() => {
+    const bolumDugum = bolumSuzgec === '' ? undefined
+      : randevuAgaci.find(d => d.departmanId === bolumSuzgec);
+    const hekimAyar = hekimSuzgec === ''
+      ? undefined
+      : (bolumDugum ?? randevuAgaci.find(d => d.hekimler.some(h => h.hekimId === hekimSuzgec)))
+          ?.hekimler.find(h => h.hekimId === hekimSuzgec);
+    const oncelikli = (...adaylar: (string | number | null | undefined)[]) =>
+      adaylar.find(v => v !== '' && v !== null && v !== undefined);
+    const gunler = String(oncelikli(hekimAyar?.calismaGunleri, bolumDugum?.ayar.calismaGunleri) ?? '')
+      .split(',').map(x => Number(x.trim())).filter(x => x >= 1 && x <= 7);
+    return {
+      ...randevuAyarlari,
+      baslangicSaat: oncelikli(hekimAyar?.baslangicSaat, bolumDugum?.ayar.baslangicSaat) as string
+                     ?? randevuAyarlari.baslangicSaat,
+      bitisSaat: oncelikli(hekimAyar?.bitisSaat, bolumDugum?.ayar.bitisSaat) as string
+                 ?? randevuAyarlari.bitisSaat,
+      slotDk: (oncelikli(hekimAyar?.slotDk, bolumDugum?.ayar.slotDk) as number)
+              ?? randevuAyarlari.slotDk,
+      calismaGunleri: gunler.length ? gunler : randevuAyarlari.calismaGunleri,
+    };
+  }, [randevuAgaci, randevuAyarlari, bolumSuzgec, hekimSuzgec]);
+
+  /** Bolum secilince hekim listesi o bolume daralir. */
+  const hekimSecenekleri = useMemo(() => {
+    const dugumler = bolumSuzgec === ''
+      ? randevuAgaci
+      : randevuAgaci.filter(d => d.departmanId === bolumSuzgec);
+    return dugumler.flatMap(d => d.hekimler.map(h => ({ id: h.hekimId ?? 0, ad: h.ad })));
+  }, [randevuAgaci, bolumSuzgec]);
 
   // Aksiyon yonlendirme. Kasa aksiyonlari API cagirir (kesinlestir/iptal/sil) ve
   //   sonrasinda grid'i tazeler; digerleri kart rotasina gider.
@@ -709,7 +777,7 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
       yol={tanim.yol}
       toplam={tanim.toplam}
       cipler={tanim.cipler}
-      sabitFiltre={sabitFiltre}
+      sabitFiltre={randevuFiltresi}
       aksiyonEkrani={tanim.aksiyonEkrani}
       ebelgeMenusu={tanim.ebelgeMenusu}
       gizliKolonlar={tanim.gizliKolonlar}
@@ -742,7 +810,29 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
       onCipSecildi={setCipIndeks}
       onCipRota={r => git(`/${r}`)}
       onSecimDegisti={s => { setSeciliSatir(s); if (s) setSonSeciliId(Number(s.id)) }}
-      cipSonu={tanim.ekstre && (
+      cipSonu={tanim.kaynak === 'randevu' ? (
+        // Bolum/hekim suzgeci TARIH ARALIGININ SAGINDA (kullanici) - grid ve
+        //   altindaki takvim ayni secimi kullanir.
+        <>
+          <select value={bolumSuzgec} title="Bölüm"
+                  onChange={e => { setBolumSuzgec(e.target.value ? Number(e.target.value) : '');
+                                   setHekimSuzgec('') }}>
+            <option value="">Tüm bölümler</option>
+            {randevuAgaci.map(d => (
+              <option key={d.departmanId} value={d.departmanId}>{d.ad}</option>
+            ))}
+          </select>
+          <select value={hekimSuzgec} title="Hekim"
+                  onChange={e => setHekimSuzgec(e.target.value ? Number(e.target.value) : '')}>
+            <option value="">Tüm hekimler</option>
+            {hekimSecenekleri.map(h => <option key={h.id} value={h.id}>{h.ad}</option>)}
+          </select>
+          {(bolumSuzgec !== '' || hekimSuzgec !== '') && (
+            <button type="button" title="Bölüm/hekim filtresini kaldır"
+                    onClick={() => { setBolumSuzgec(''); setHekimSuzgec('') }}>×</button>
+          )}
+        </>
+      ) : tanim.ekstre && (
         <button
           disabled={!seciliSatir}
           title={seciliSatir ? 'Seçili hesabın ekstresi' : 'Önce bir satır seçin'}
@@ -759,7 +849,9 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
       //   kirpiliyordu. Hucre tiklamasi o saate yeni randevu acar.
       altPanel={tanim.kaynak === 'randevu' && (
         <RandevuTakvimi
-          ayarlar={randevuAyarlari}
+          ayarlar={takvimAyarlari}
+          bolum={bolumSuzgec === '' ? undefined : bolumSuzgec}
+          hekimId={hekimSuzgec === '' ? undefined : hekimSuzgec}
           yenile={yenile}
           onYeni={bas => git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`)}
           onAc={id => git(`/randevu/${id}`)}

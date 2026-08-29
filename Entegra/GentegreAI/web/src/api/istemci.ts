@@ -12,6 +12,7 @@ import {
   type PanelYaniti,
   type EBelgeMesaji,
   type TopluEBelgeSonucu,
+  type RandevuBolumDugumu, type RandevuAyarYazma,
 } from './sozlesme';
 
 const TABAN = import.meta.env.VITE_API ?? 'http://localhost:5180';
@@ -504,6 +505,15 @@ export const api = {
   // -------------------------------------------------------- ana sayfa ----
   /** Panel: kutular + listeler TEK istekte (acilista bes cagri yapmamak icin). */
   panel: () => istek<PanelYaniti>('/api/panel'),
+
+  // ------------------------------------------------ randevu bolumleri ----
+  // Randevu Ayarlari > Bolumler (251): randevu verilen bolumler, hekimleri ve
+  //   her ikisinin randevu duzeni; sol agac + sag form ayni yanittan beslenir.
+  randevuBolumleri: () => istek<RandevuBolumDugumu[]>('/api/randevu/bolumler'),
+  randevuBolumAyarYaz: (istek_: RandevuAyarYazma) =>
+    gonder<{ tamam: boolean }>('/api/randevu/bolum-ayar', istek_, 'PUT'),
+  randevuBolumIsaretle: (departmanId: number, bolumMu: boolean) =>
+    gonder<{ tamam: boolean }>('/api/randevu/bolum', { departmanId, bolumMu }, 'PUT'),
 
   // ---------------------------------------------------------- ayarlar ----
   ayarlar: () => istek<{ ayarlar: AyarSatiri[] }>('/api/ayar').then(y => y.ayarlar),

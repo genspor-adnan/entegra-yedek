@@ -25,7 +25,9 @@ public static partial class KartKatalogu
             new("id",        "id",        "sayi",  Yazilabilir: false),
             // Bölüm ve hekim kartın da BAŞINDA (listeyle aynı sıra).
             new("bolum",     "bolum",     "kod",   Zorunlu: true,
-                KodListesi: "randevu.bolum", Baslik: "Bölüm", Grup: "Kimlik"),
+                // Yalniz randevu_verilebilir departmanlar (251) - Muhasebe'ye
+                //   randevu verilmez.
+                KodTablosu: "public.v_randevu_bolum_lookup", Baslik: "Bölüm", Grup: "Kimlik"),
             new("hekimId",   "hekim_id",  "kod",   Zorunlu: true,
                 KodTablosu: "public.v_personel_lookup", Baslik: "Hekim", Grup: "Kimlik"),
             new("hastaId",   "hasta_id",  "kod",   Zorunlu: true,

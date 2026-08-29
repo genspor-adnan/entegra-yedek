@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
+import { RandevuBolumAyarlari } from '../bilesenler/RandevuBolumAyarlari';
 
 const SEKMELER = [
   { anahtar: 'genel', baslik: 'Genel' },
+  // BÖLÜMLER (251, kullanici): randevu verilen bolumler + hekimleri; sag
+  //   tarafta o bolume/hekime ait randevu duzeni (master-detail).
+  { anahtar: 'bolumler', baslik: 'Bölümler' },
 ] as const;
 
 type Sekme = typeof SEKMELER[number]['anahtar'];
@@ -15,6 +19,9 @@ type Sekme = typeof SEKMELER[number]['anahtar'];
 export function RandevuAyarlar() {
   const [aktif, setAktif] = useState<Sekme>('genel');
   const { ayarlar, yukleniyor, hata, bilgi, yaz } = useAyarlar();
+  /** Genel Ayarlar degeri - Bölümler sekmesinde "devralinan" yer tutucu. */
+  const deger = (anahtar: string, varsayilan: string) =>
+    ayarlar.find(a => a.anahtar === anahtar)?.deger || varsayilan;
 
   return (
     <>
@@ -37,6 +44,20 @@ export function RandevuAyarlar() {
 
       {hata && <div className="hata-kutusu">{hata}</div>}
       {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
+
+      {aktif === 'bolumler' && (
+        yukleniyor ? <div className="yukleniyor">Yükleniyor…</div> : (
+          <RandevuBolumAyarlari genel={{
+            baslangicSaat: deger('randevu.baslangic_saat', '09:00'),
+            bitisSaat: deger('randevu.bitis_saat', '18:00'),
+            slotDk: deger('randevu.slot_dk', '15'),
+            varsayilanSure: deger('randevu.varsayilan_sure', '15'),
+            calismaGunleri: deger('randevu.calisma_gunleri', '1,2,3,4,5,6'),
+            ogleBaslangic: deger('randevu.ogle_baslangic', ''),
+            ogleBitis: deger('randevu.ogle_bitis', ''),
+          }} />
+        )
+      )}
 
       {aktif === 'genel' && (
         yukleniyor ? <div className="yukleniyor">Yükleniyor…</div> : (

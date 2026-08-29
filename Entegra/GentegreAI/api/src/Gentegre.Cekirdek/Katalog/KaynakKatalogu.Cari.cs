@@ -27,11 +27,9 @@ public static partial class KaynakKatalogu
             "           join public.kod_liste l on l.id = d.liste_id " +
             "          where l.kod = 'taraf.gorev' and d.deger = t.gorev_id), t.gorev, '')";
 
-        /// <summary>taraf.departman smallint bir koddur - adi kod listesinden.</summary>
+        /// <summary>taraf.departman artik departman TABLOSUNA isaret eder (251).</summary>
         public const string DepartmanAdi =
-            "coalesce((select d.ad from public.kod_deger d " +
-            "           join public.kod_liste l on l.id = d.liste_id " +
-            "          where l.kod = 'taraf.departman' and d.deger = t.departman), '')";
+            "coalesce((select dp.ad from public.departman dp where dp.id = t.departman), '')";
     }
 
     // --------------------------------------------------------------- cari ----
@@ -277,6 +275,26 @@ public static partial class KaynakKatalogu
             SabitKosul = "t.aday = 1",
         };
     }
+
+    // ---------------------------------------------------------- departman ----
+    /// <summary>
+    /// Departman/bolum listesi (251). Randevu bolumleri de burada - farki
+    /// `randevuVerilebilir` bayragidir; ayri bir bolum tablosu yok.
+    /// </summary>
+    private static KaynakTanimi Departman() => new(
+        Ad: "departman",
+        YetkiKodu: "personel",
+        Kaynak: "public.departman d",
+        VarsayilanSirala: "d.ad asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",                 "d.id",                  "sayi",  "Id", Varsayilan: false),
+            new("ad",                 "d.ad",                  "metin", "Departman"),
+            new("randevuVerilebilir", "d.randevu_verilebilir", "mantik","Randevu Bölümü",
+                Hizalama: "orta"),
+            new("aktif",              "d.aktif",               "mantik","Aktif", Hizalama: "orta"),
+            new("sira",               "d.sira",                "sayi",  "Sıra", Varsayilan: false),
+        });
 
     // -------------------------------------------------------------- kurum ----
     /// <summary>

@@ -43,8 +43,11 @@ function haftaBasi(t: Date) {
   return g;
 }
 
-export function RandevuTakvimi({ ayarlar, onYeni, onAc, yenile }: {
+export function RandevuTakvimi({ ayarlar, onYeni, onAc, yenile, bolum, hekimId }: {
   ayarlar?: Partial<Ayarlar>;
+  /** Ust seritteki bolum/hekim suzgeci (251) - takvim de ayni secimi gosterir. */
+  bolum?: number;
+  hekimId?: number;
   /** Boş hücre: o tarih-saatte yeni randevu. */
   onYeni(baslangic: string): void;
   /** Dolu randevu: kartı aç. */
@@ -82,12 +85,14 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, yenile }: {
           kosullar: [
             { alan: 'tarih', op: 'arasinda', deger: [gunler[0], gunler[gunler.length - 1]] },
             { alan: 'durum', op: 'esitDegil', deger: 4 },
+            ...(bolum ? [{ alan: 'bolum', op: 'esit' as const, deger: bolum }] : []),
+            ...(hekimId ? [{ alan: 'hekimId', op: 'esit' as const, deger: hekimId }] : []),
           ],
         },
       });
       setSatirlar(y.satirlar);
     } catch (h) { setHata(hataMetni(h)) } finally { setYukleniyor(false) }
-  }, [gunler]);
+  }, [gunler, bolum, hekimId]);
 
   useEffect(() => { void yukle() }, [yukle, yenile]);
 

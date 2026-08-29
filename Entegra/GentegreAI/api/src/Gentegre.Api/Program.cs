@@ -35,6 +35,7 @@ kurucu.Services.AddScoped<KartDeposu>();
 kurucu.Services.AddScoped<KullaniciAramaDeposu>();
 kurucu.Services.AddScoped<KisiDeposu>();
 kurucu.Services.AddScoped<StokDurumDeposu>();
+kurucu.Services.AddScoped<RandevuAyarDeposu>();
 kurucu.Services.AddScoped<AyarDeposu>();
 kurucu.Services.AddScoped<PanelDeposu>();
 kurucu.Services.AddScoped<RolYetkiDeposu>();
@@ -153,6 +154,8 @@ uygulama.ListeUclariniEkle();
 uygulama.KartUclariniEkle();
 uygulama.KisiUclariniEkle();
 uygulama.StokDurumUclariniEkle();
+// Randevu Ayarlari > Bolumler (251): bolum/hekim bazli randevu duzeni.
+uygulama.RandevuUclariniEkle();
 uygulama.AyarUclariniEkle();
 uygulama.PanelUclariniEkle();
 uygulama.RolYetkiUclariniEkle();

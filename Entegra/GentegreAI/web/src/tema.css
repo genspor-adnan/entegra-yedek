@@ -1096,3 +1096,17 @@ input.skt-gecmis {
 
 /* Baz sube gibi ust combolar: etiket TEK SATIR (kullanici). */
 .tek-satir-etiket .etiket { white-space: nowrap }
+
+/* ---- Randevu Ayarlari > Bölümler agaci (251) --------------------------- */
+/* Sol sutun: bolum satiri kalin, hekim satiri girintili. Tiklanan satir
+   grid'deki secili satirla ayni vurguyu alir - iki liste ayni dili konussun. */
+.agac-satir {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 10px; cursor: pointer; font-size: 12.5px;
+  border-bottom: 1px solid var(--cizgi);
+}
+.agac-satir:hover { background: var(--yuz2) }
+.agac-satir.on { background: var(--sec, var(--mor2)); color: var(--vurgu) }
+.agac-satir.alt { padding-left: 26px; font-size: 12px }
+.agac-satir .sag { margin-left: auto }
+.agac-satir button.d.mini { padding: 0 6px; font-size: 11px; line-height: 18px }

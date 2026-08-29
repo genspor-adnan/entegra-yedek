@@ -46,9 +46,7 @@ public static partial class KaynakKatalogu
     internal static class RandevuKatalog
     {
         public const string BolumAdi =
-            "coalesce((select d.ad from public.kod_deger d " +
-            "           join public.kod_liste l on l.id = d.liste_id " +
-            "          where l.kod = 'randevu.bolum' and d.deger = rv.bolum), '')";
+            "coalesce((select dp.ad from public.departman dp where dp.id = rv.bolum), '')";
 
         public const string DurumAdi =
             "case rv.durum when 1 then 'Planlandı' when 2 then 'Geldi' " +

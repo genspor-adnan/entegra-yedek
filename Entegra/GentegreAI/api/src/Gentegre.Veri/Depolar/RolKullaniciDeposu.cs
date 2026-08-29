@@ -32,10 +32,8 @@ public sealed class RolKullaniciDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = baglanti.Komut("""
             select k.id, k.kod, coalesce(t.unvan, ''), k.eposta,
-                   coalesce((select d.ad from public.kod_deger d
-                              join public.kod_liste l on l.id = d.liste_id
-                             where l.kod = 'taraf.departman'
-                               and d.deger = t.departman), ''),
+                   coalesce((select dp.ad from public.departman dp
+                              where dp.id = t.departman), ''),
                    coalesce((select d.ad from public.kod_deger d
                               join public.kod_liste l on l.id = d.liste_id
                              where l.kod = 'taraf.gorev'
@@ -65,10 +63,8 @@ public sealed class RolKullaniciDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = baglanti.Komut("""
             select k.id, k.kod, coalesce(t.unvan, ''), k.eposta,
-                   coalesce((select d.ad from public.kod_deger d
-                              join public.kod_liste l on l.id = d.liste_id
-                             where l.kod = 'taraf.departman'
-                               and d.deger = t.departman), ''),
+                   coalesce((select dp.ad from public.departman dp
+                              where dp.id = t.departman), ''),
                    coalesce((select d.ad from public.kod_deger d
                               join public.kod_liste l on l.id = d.liste_id
                              where l.kod = 'taraf.gorev'

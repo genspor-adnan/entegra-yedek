@@ -157,6 +157,7 @@ public static partial class KartKatalogu
         Ekle(Personel());
         Ekle(Hasta());
         Ekle(Kurum());
+        Ekle(Departman());
         Ekle(Rol());
         Ekle(Stok());
         // Kasa alt sistemi ana verileri (071-074). Kasa ISLEMI kart degil - belge

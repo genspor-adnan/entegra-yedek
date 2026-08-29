@@ -300,6 +300,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Cari', menuAd: 'Tedarikçi Listesi', ic: '🚚', yetkiKodu: 'cari',
   },
   {
+    // DEPARTMANLAR (251): personel departmani ve randevu bolumu AYNI tablo -
+    //   "Randevu Bölümü" isaretli olanlar randevu kartinin Bölüm listesinde.
+    kaynak: 'departman', baslik: 'Departmanlar', yol: 'Yönetim › Departmanlar',
+    kartYolu: '/departman', aksiyonEkrani: 'cari-liste',
+    menuGrup: 'Yönetim', menuAd: 'Departmanlar', ic: '🏢', yetkiKodu: 'personel',
+  },
+  {
     // ANLASMALI KURUMLAR (249, kullanici: "cari altina musteri benzeri Kurumlar
     //   menusu liste ve karti olustur"). Kurum da bir cari - hastanin odemesini
     //   ustlenen taraf; sozlesme suresi/turu ve fiyat politikasi kartinda.

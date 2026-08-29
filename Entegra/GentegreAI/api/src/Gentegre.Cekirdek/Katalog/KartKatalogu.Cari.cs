@@ -159,7 +159,7 @@ public static partial class KartKatalogu
             new("kisi",      "kisi",       "mantik", Baslik: "Kisi"),
             new("kod",       "kod",        "metin", EnFazlaUzunluk: 20, Baslik: "Kisi Kodu", Grup: "Kimlik"),
             new("unvan",     "unvan",      "metin", Zorunlu: true, EnFazlaUzunluk: 120, Baslik: "Unvan", Grup: "Kimlik"),
-            new("departman", "departman",  "kod",   KodListesi: "taraf.departman", Baslik: "Departman", Grup: "Kimlik"),
+            new("departman", "departman",  "kod",   KodTablosu: "public.v_departman_lookup", Baslik: "Departman", Grup: "Kimlik"),
             new("gorev",     "gorev",      "metin", EnFazlaUzunluk: 100, Baslik: "Gorev", Grup: "Kimlik"),
             // "Is Bilgileri" kutu basligi IPTAL edildi (kullanici) - Bagli Cari/Rol/Durum
             //   AltGrup'suz (adsiz) duz alan olarak kaliyor, idstrip'in hemen altinda.
@@ -236,7 +236,9 @@ public static partial class KartKatalogu
             new("kod",       "kod",        "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "Sicil No", Grup: "Kimlik"),
             new("ad",        "ad",         "metin", Zorunlu: true, EnFazlaUzunluk: 50, Baslik: "Ad", Grup: "Kimlik"),
             new("soyad",     "soyad",      "metin", Zorunlu: true, EnFazlaUzunluk: 60, Baslik: "Soyad", Grup: "Kimlik"),
-            new("departman", "departman",  "kod",   Zorunlu: true, KodListesi: "taraf.departman", Baslik: "Departman", Grup: "Kimlik"),
+            // Departman kod listesi degil TABLO (251): bolum/hekim iliskisi de
+            //   buradan kuruluyor - randevu bolumu bir departmandir.
+            new("departman", "departman",  "kod",   Zorunlu: true, KodTablosu: "public.v_departman_lookup", Baslik: "Departman", Grup: "Kimlik"),
             new("durum",     "durum",      "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
             // ik_karti.html mockup'ta idstrip'te DEGIL - Görev "Pozisyon" adiyla Genel
             //   sekmesinin "Özet" kutusunda (PersonelKimlikOzet.tsx). TCKN de "Kimlik
@@ -343,6 +345,30 @@ public static partial class KartKatalogu
         SilmeEngelleri: new[]
         {
             new SilmeEngeli("public.taraf_kullanici", "id", "Bu kart bir kullaniciya bagli, silinemez.")
+        });
+
+    // ---------------------------------------------------------- departman ----
+    /// <summary>
+    /// Departman karti (251) - personel departmani ve randevu bolumu AYNI
+    /// tablodur; `randevuVerilebilir` isaretlenirse randevu kartinin Bölüm
+    /// listesinde cikar.
+    /// </summary>
+    private static KartTanimi Departman() => new(
+        Ad: "departman",
+        YetkiKodu: "personel",
+        Tablo: "public.departman",
+        LogTabloId: 911,
+        SubeKolonu: null,                     // ana veri - subeler arasi ORTAK
+        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["aktif"] = (short)1 },
+        Alanlar: new KartAlani[]
+        {
+            new("id",                 "id",                  "sayi",  Yazilabilir: false),
+            new("ad",                 "ad",                  "metin", Zorunlu: true,
+                EnFazlaUzunluk: 100, Baslik: "Departman", Grup: "Kimlik"),
+            new("randevuVerilebilir", "randevu_verilebilir", "mantik",
+                Baslik: "Randevu Bölümü", Grup: "Kimlik"),
+            new("aktif",              "aktif",               "mantik", Baslik: "Aktif", Grup: "Kimlik"),
+            new("sira",               "sira",                "sayi",  Baslik: "Sıra", Grup: "Kimlik"),
         });
 
     // -------------------------------------------------------------- kurum ----
