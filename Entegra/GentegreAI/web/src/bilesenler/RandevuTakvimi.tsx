@@ -10,7 +10,7 @@ import { type ListeSatiri, hataMetni } from '../api/sozlesme';
  * Hücreye tıklamak o saat için yeni randevu açar; dolu randevuya tıklamak
  * kartı açar - liste görünümüyle aynı kart, ikinci bir ekran yok.
  */
-type Gorunum = 'gun' | 'hafta';
+type Gorunum = 'gun' | 'hafta' | 'hekim';
 
 interface Ayarlar {
   baslangicSaat: string;
@@ -25,6 +25,15 @@ const VARSAYILAN: Ayarlar = {
 };
 
 const GUN_ADI = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+
+/** Takvimin bir sutunu: gunluk/haftalik gorunumde bir GUN, hekim gorunumunde
+    bir HEKIM (o gunun icinde). */
+interface Sutun {
+  anahtar: string;
+  baslik: string;
+  gun: string;
+  hekim?: number;
+}
 
 /** "09:00" -> 540 (dakika). */
 const dk = (saat: string) => {
@@ -44,13 +53,19 @@ function haftaBasi(t: Date) {
 }
 
 export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
-                                 bolum, hekimId }: {
+                                 bolum, hekimId, hekimler = [] }: {
   ayarlar?: Partial<Ayarlar>;
   /** Ust seritteki bolum/hekim suzgeci (251) - takvim de ayni secimi gosterir. */
   bolum?: number;
   hekimId?: number;
-  /** Boş hücre: o tarih-saatte yeni randevu. */
-  onYeni(baslangic: string): void;
+  /**
+   * HEKIM GORUNUMU (kullanici: "hekim bazli sutunlu gorunum") icin sutun
+   * kaynagi: secili bolumun hekimleri (bolum secili degilse tumu). Ust
+   * seritteki suzgecle AYNI liste - iki yerde farkli kadro gorunmesin.
+   */
+  hekimler?: { id: number; ad: string }[];
+  /** Boş hücre: o tarih-saatte yeni randevu (hekim görünümünde hekimiyle). */
+  onYeni(baslangic: string, hekimId?: number): void;
   /** Dolu randevu: kartı aç. */
   onAc(id: number): void;
   /**
@@ -58,7 +73,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
    * ve süre "＋ Yeni"ye taşınır. Seçim tek başına kart AÇMAZ - kullanıcı önce
    * aralığı işaretler, sonra Yeni'ye basar.
    */
-  onAralik?(baslangic: string | null, sureDk: number): void;
+  onAralik?(baslangic: string | null, sureDk: number, hekimId?: number): void;
   /** Dışarıdan tazeleme sayacı (kayıt sonrası). */
   yenile?: number;
 }) {
@@ -71,7 +86,10 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
 
   // Gorunume gore tarih araligi.
   const gunler = useMemo(() => {
-    if (gorunum === 'gun') return [gun];
+    // Hekim gorunumu de TEK GUNluktur (sutunlar hekimlerdir) - haftalik dala
+    //   dusunce veri araligi haftaya cikiyor ve secili gun calisma gunu
+    //   degilse (Pazar) listeden tamamen eleniyordu.
+    if (gorunum !== 'hafta') return [gun];
     const bas = haftaBasi(new Date(gun));
     return Array.from({ length: 7 }, (_, i) => {
       const t = new Date(bas);
@@ -113,11 +131,33 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     return liste;
   }, [ayar.baslangicSaat, ayar.bitisSaat, ayar.slotDk]);
 
-  /** gun + slot -> o aralikta baslayan randevular. */
-  const hucre = (tarih: string, slot: number) => {
+  /**
+   * SUTUNLAR: gunluk/haftalik gorunumde GUN, hekim gorunumunde HEKIM. Hucre
+   * mantigi ikisinde de ayni oldugu icin tek soyutlama - gun ve hekim suzgeci
+   * sutunun kendisinde tasiniyor.
+   */
+  const sutunlar = useMemo<Sutun[]>(() => {
+    if (gorunum === 'hekim') {
+      const liste = hekimId ? hekimler.filter(h => h.id === hekimId) : hekimler;
+      return liste.map(h => ({ anahtar: `h${h.id}`, baslik: h.ad, gun, hekim: h.id }));
+    }
+    return gunler.map(g => {
+      const t = new Date(g);
+      return {
+        anahtar: g,
+        baslik: `${GUN_ADI[(t.getDay() + 6) % 7]} ${g.slice(8, 10)}.${g.slice(5, 7)}`,
+        gun: g,
+        hekim: undefined,
+      };
+    });
+  }, [gorunum, gunler, gun, hekimler, hekimId]);
+
+  /** sutun + slot -> o aralikta baslayan randevular. */
+  const hucre = (sutun: Sutun, slot: number) => {
     const adim = Math.max(5, Number(ayar.slotDk) || 15);
     return satirlar.filter(r => {
-      if (String(r.tarih ?? '').slice(0, 10) !== tarih) return false;
+      if (String(r.tarih ?? '').slice(0, 10) !== sutun.gun) return false;
+      if (sutun.hekim !== undefined && Number(r.hekimId) !== sutun.hekim) return false;
       const b = dk(String(r.saat ?? ''));
       return b >= slot && b < slot + adim;
     });
@@ -128,37 +168,39 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
    * genişler, mouseup bitirir. Tek hücrede bırakılırsa (sürükleme yok) eski
    * davranış korunur - o saate yeni randevu açılır.
    */
-  const [secim, setSecim] = useState<{ gun: string; bas: number; bit: number } | null>(null);
+  const [secim, setSecim] = useState<
+    { sutun: string; gun: string; hekim?: number; bas: number; bit: number } | null>(null);
   const [suruklu, setSuruklu] = useState(false);
 
-  const araliktaMi = (g: string, slot: number) =>
-    !!secim && secim.gun === g
+  const araliktaMi = (s: Sutun, slot: number) =>
+    !!secim && secim.sutun === s.anahtar
     && slot >= Math.min(secim.bas, secim.bit) && slot <= Math.max(secim.bas, secim.bit);
 
-  const secimBasla = (g: string, slot: number) => {
-    setSecim({ gun: g, bas: slot, bit: slot });
+  const secimBasla = (s: Sutun, slot: number) => {
+    setSecim({ sutun: s.anahtar, gun: s.gun, hekim: s.hekim, bas: slot, bit: slot });
     setSuruklu(true);
   };
-  const secimGenislet = (g: string, slot: number) => {
-    if (!suruklu || !secim || secim.gun !== g) return;
+  const secimGenislet = (s: Sutun, slot: number) => {
+    if (!suruklu || !secim || secim.sutun !== s.anahtar) return;
     setSecim(o => (o ? { ...o, bit: slot } : o));
   };
-  const secimBitir = (g: string, slot: number) => {
+  const secimBitir = (s: Sutun, slot: number) => {
     if (!suruklu) return;
     setSuruklu(false);
     const bas = secim ? Math.min(secim.bas, slot) : slot;
     const bit = secim ? Math.max(secim.bit, slot) : slot;
     const adim = Math.max(5, Number(ayar.slotDk) || 15);
     if (bas === bit) {
-      // Tek hücre = tiklama: eskisi gibi o saate yeni randevu.
+      // Tek hücre = tiklama: eskisi gibi o saate yeni randevu. Hekim
+      //   gorunumunde SUTUNUN hekimi de forma tasinir.
       setSecim(null);
       onAralik?.(null, 0);
-      if (hucre(g, bas).length === 0) onYeni(`${g}T${saatMetni(bas)}`);
+      if (hucre(s, bas).length === 0) onYeni(`${s.gun}T${saatMetni(bas)}`, s.hekim);
       return;
     }
     // Son slot da dahil: 09:00-09:30 isaretlenirse sure 45 dk degil 45'tir
     //   (bitis slotunun kendisi de secili sayilir).
-    onAralik?.(`${g}T${saatMetni(bas)}`, bit - bas + adim);
+    onAralik?.(`${s.gun}T${saatMetni(bas)}`, bit - bas + adim, s.hekim);
   };
 
   const kaydir = (yon: number) => {
@@ -177,6 +219,9 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                 onClick={() => setGorunum('gun')}>Günlük</button>
         <button type="button" className={`cip${gorunum === 'hafta' ? ' on' : ''}`}
                 onClick={() => setGorunum('hafta')}>Haftalık</button>
+        {/* Hekim gorunumu: secili GUN icin sutunlar hekimlerdir (kullanici). */}
+        <button type="button" className={`cip${gorunum === 'hekim' ? ' on' : ''}`}
+                onClick={() => setGorunum('hekim')}>Hekim</button>
         <button type="button" className="d" onClick={() => kaydir(-1)}>‹</button>
         <input type="date" value={gun} onChange={e => setGun(e.target.value)} />
         <button type="button" className="d" onClick={() => kaydir(1)}>›</button>
@@ -193,31 +238,31 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
           <thead>
             <tr>
               <th style={{ width: 64 }}>Saat</th>
-              {gunler.map(g => {
-                const t = new Date(g);
-                return (
-                  <th key={g} style={{ textAlign: 'center' }}>
-                    {GUN_ADI[(t.getDay() + 6) % 7]} {g.slice(8, 10)}.{g.slice(5, 7)}
-                  </th>
-                );
-              })}
+              {sutunlar.map(s => (
+                <th key={s.anahtar} style={{ textAlign: 'center' }}>{s.baslik}</th>
+              ))}
+              {sutunlar.length === 0 && (
+                <th style={{ textAlign: 'center', fontWeight: 400, opacity: .7 }}>
+                  Bu bölümde randevu verilebilir personel yok
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
             {slotlar.map(slot => (
               <tr key={slot}>
                 <td style={{ textAlign: 'center', opacity: .75 }}>{saatMetni(slot)}</td>
-                {gunler.map(g => {
-                  const kayitlar = hucre(g, slot);
-                  const secili = araliktaMi(g, slot);
+                {sutunlar.map(sut => {
+                  const kayitlar = hucre(sut, slot);
+                  const secili = araliktaMi(sut, slot);
                   return (
-                    <td key={g + slot}
+                    <td key={sut.anahtar + slot}
                         style={{ cursor: 'pointer', verticalAlign: 'top',
                                  background: secili ? 'var(--sec, var(--mor2))' : undefined,
                                  userSelect: 'none' }}
-                        onMouseDown={() => kayitlar.length === 0 && secimBasla(g, slot)}
-                        onMouseEnter={() => secimGenislet(g, slot)}
-                        onMouseUp={() => secimBitir(g, slot)}>
+                        onMouseDown={() => kayitlar.length === 0 && secimBasla(sut, slot)}
+                        onMouseEnter={() => secimGenislet(sut, slot)}
+                        onMouseUp={() => secimBitir(sut, slot)}>
                       {kayitlar.map(r => (
                         <div key={String(r.id)}
                              onClick={e => { e.stopPropagation(); onAc(Number(r.id)) }}

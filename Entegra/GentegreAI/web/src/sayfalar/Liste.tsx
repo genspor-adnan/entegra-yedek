@@ -146,7 +146,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [randevuAgaci, setRandevuAgaci] = useState<RandevuBolumDugumu[]>([]);
   const [bolumSuzgec, setBolumSuzgec] = useState<number | ''>('');
   /** Takvimde fareyle secilen aralik (251): "＋ Yeni" bunu karta tasir. */
-  const [takvimAralik, setTakvimAralik] = useState<{ baslangic: string; sureDk: number } | null>(null);
+  const [takvimAralik, setTakvimAralik] =
+    useState<{ baslangic: string; sureDk: number; hekimId?: number } | null>(null);
   const [hekimSuzgec, setHekimSuzgec] = useState<number | ''>('');
   useEffect(() => {
     if (tanim.kaynak !== 'randevu') return;
@@ -704,7 +705,9 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         //   karta tasinir - kullanici "yukaridan asagi isaretleyip Yeni'ye
         //   basinca" formda o araligi gormek istiyor.
         const ek = tanim.kaynak === 'randevu' && takvimAralik
-          ? `?baslangic=${encodeURIComponent(takvimAralik.baslangic)}&sure=${takvimAralik.sureDk}`
+          ? `?baslangic=${encodeURIComponent(takvimAralik.baslangic)}`
+            + `&sure=${takvimAralik.sureDk}`
+            + (takvimAralik.hekimId ? `&hekim=${takvimAralik.hekimId}` : '')
           : '';
         git(`${tanim.kartYolu}/yeni${ek}`);
       }
@@ -866,10 +869,13 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
             bolum={bolumSuzgec === '' ? undefined : bolumSuzgec}
             hekimId={hekimSuzgec === '' ? undefined : hekimSuzgec}
             yenile={yenile}
-            onYeni={bas => git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`)}
+            // Hekim gorunumunde sutunun hekimi de karta gecer (251).
+            hekimler={hekimSecenekleri}
+            onYeni={(bas, hek) => git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`
+                                      + (hek ? `&hekim=${hek}` : ''))}
             onAc={id => git(`/randevu/${id}`)}
-            onAralik={(bas, sure) =>
-              setTakvimAralik(bas ? { baslangic: bas, sureDk: sure } : null)}
+            onAralik={(bas, sure, hek) =>
+              setTakvimAralik(bas ? { baslangic: bas, sureDk: sure, hekimId: hek } : null)}
           />
         ),
       } : undefined}
@@ -1037,6 +1043,7 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
               ...tanim.yeniKayitVarsayilanlari,
               baslangic: sorgu.get('baslangic')!,
               ...(sorgu.get('sure') ? { sureDk: Number(sorgu.get('sure')) } : {}),
+              ...(sorgu.get('hekim') ? { hekimId: Number(sorgu.get('hekim')) } : {}),
             }
           : tanim.yeniKayitVarsayilanlari}
         onKapat={() => git(tanim.kartYolu!)}

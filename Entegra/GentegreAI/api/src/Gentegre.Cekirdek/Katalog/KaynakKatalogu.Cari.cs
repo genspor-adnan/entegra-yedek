@@ -304,7 +304,7 @@ public static partial class KaynakKatalogu
                                       "metin", "Üst Birim", Filtrelenebilir: false),
             new("ustbirimId",         "d.ustbirim_id",         "sayi",  "Üst Birim Id",
                 Varsayilan: false),
-            new("randevuVerilebilir", "d.randevu_verilebilir", "mantik","Randevu Bölümü",
+            new("randevuVerilebilir", "d.randevu_verilebilir", "mantik","Randevu",
                 Hizalama: "orta"),
             new("durum",              "d.durum",               "mantik","Durum", Hizalama: "orta"),
             new("sira",               "d.sira",                "sayi",  "Sıra", Varsayilan: false),
