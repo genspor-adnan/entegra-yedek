@@ -73,6 +73,7 @@ public sealed partial class KartDeposu
             && baglam.SubeId is { } s && !degerler.ContainsKey("subeId"))
             degerler["__sube_id"] = s;
 
+        await SlugUretAsync(baglanti, islem, tanim, degerler, null, iptal);
         await DovizHesaplaAsync(baglanti, islem, tanim, degerler, null, iptal);
 
         var kolonlar = new List<string>();
@@ -157,6 +158,7 @@ public sealed partial class KartDeposu
         // Tutar/kur/para birimi degistiyse yerel karsilik yeniden hesaplanir.
         //   Kismi guncellemede (yalniz "tutar" geldiginde) eksik degerler mevcut
         //   kayittan tamamlanir - yoksa kur 0 sayilip yerel tutar sifirlanirdi.
+        await SlugUretAsync(baglanti, islem, tanim, degerler, id, iptal);
         await DovizHesaplaAsync(baglanti, islem, tanim, degerler, oncesi.Kart, iptal);
 
         if (degerler.Count > 0)
@@ -340,5 +342,66 @@ public sealed partial class KartDeposu
         //   tipsiz NULL'i PG 42P08 ile reddediyor.
         Parametre.Ekle(komut, parametreler);
         return komut;
+    }
+
+    /// <summary>
+    /// SlugKaynak'li alanlari (ör. rol.kod) teknik koda cevirir: kullanici
+    /// "Satış Müdürü" yazsa da kayda "satis-muduru" gider. Bos birakilmissa
+    /// kaynak alandan uretilir; ayni kod varsa -2, -3 eklenerek benzersizlestirilir.
+    /// </summary>
+    private static async Task SlugUretAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        KartTanimi tanim, IDictionary<string, object?> degerler, long? mevcutId,
+        CancellationToken iptal)
+    {
+        foreach (var alan in tanim.Alanlar.Where(a => a.SlugKaynak is not null))
+        {
+            var verildi = degerler.TryGetValue(alan.Ad, out var d) ? d as string : null;
+            var kaynak = verildi;
+            if (string.IsNullOrWhiteSpace(kaynak))
+            {
+                // Bos birakildi: kaynak alandan uret. Guncellemede kaynak da
+                //   gelmediyse mevcut kod korunur (alan sozlukten cikarilir).
+                kaynak = degerler.TryGetValue(alan.SlugKaynak!, out var k) ? k as string : null;
+                if (string.IsNullOrWhiteSpace(kaynak))
+                {
+                    if (mevcutId is not null) degerler.Remove(alan.Ad);
+                    continue;
+                }
+            }
+
+            var taban = Slug(kaynak!);
+            if (taban.Length == 0) taban = "kayit";
+            if (alan.EnFazlaUzunluk is { } uz && taban.Length > uz - 3)
+                taban = taban[..(uz - 3)];
+
+            var aday = taban;
+            for (var n = 2; ; n++)
+            {
+                await using var komut = new NpgsqlCommand(
+                    $"select 1 from {tanim.Tablo} where {alan.Kolon} = @p0"
+                    + (mevcutId is null ? "" : $" and {tanim.IdKolonu} <> @p1"), baglanti, islem);
+                komut.Parameters.AddWithValue("p0", aday);
+                if (mevcutId is not null) komut.Parameters.AddWithValue("p1", mevcutId.Value);
+                if (await komut.ExecuteScalarAsync(iptal) is null) break;
+                aday = $"{taban}-{n.ToString(CultureInfo.InvariantCulture)}";
+            }
+            degerler[alan.Ad] = aday;
+        }
+    }
+
+    /// <summary>Türkçe harfleri de çeviren ASCII slug: "Satış Müdürü" -> "satis-muduru".</summary>
+    private static string Slug(string metin)
+    {
+        const string kaynak = "çğıöşüÇĞİÖŞÜ";
+        const string hedef  = "cgiosucgiosu";
+        var s = new System.Text.StringBuilder(metin.Length);
+        foreach (var h in metin.Trim())
+        {
+            var i = kaynak.IndexOf(h, StringComparison.Ordinal);
+            var c = i >= 0 ? hedef[i] : char.ToLowerInvariant(h);
+            if (c is >= 'a' and <= 'z' or >= '0' and <= '9' or '.' or '_') s.Append(c);
+            else if (s.Length > 0 && s[^1] != '-') s.Append('-');
+        }
+        return s.ToString().Trim('-');
     }
 }

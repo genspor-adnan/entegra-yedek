@@ -39,6 +39,7 @@ kurucu.Services.AddScoped<AyarDeposu>();
 kurucu.Services.AddScoped<PanelDeposu>();
 kurucu.Services.AddScoped<RolYetkiDeposu>();
 kurucu.Services.AddScoped<RolKullaniciDeposu>();
+kurucu.Services.AddScoped<YetkiSenkronu>();
 kurucu.Services.AddScoped<DokumanDeposu>();
 kurucu.Services.AddSingleton<ReferansDeposu>();
 kurucu.Services.AddScoped<BelgeDeposu>();
@@ -165,5 +166,22 @@ uygulama.FiyatListesiUclariniEkle();
 uygulama.AksiyonUclariniEkle();
 uygulama.KodListeUclariniEkle();
 uygulama.UtsUclariniEkle();
+
+// YETKI SENKRONU (kullanici: "menulerdeki ekle/sil/degisimlerde yetki matrisini
+//   update et"): katalogdaki ekran/aksiyon yetkileri ile `yetki` tablosu her
+//   aciliste karsilastirilir - yeni ekran matriste kendiliginden belirir,
+//   kaldirilan ekranin yetkisi pasiflesir. Hata uygulamayi DURDURMAZ.
+using (var kapsam = uygulama.Services.CreateScope())
+{
+    try
+    {
+        await kapsam.ServiceProvider.GetRequiredService<YetkiSenkronu>().CalistirAsync();
+    }
+    catch (Exception h)
+    {
+        kapsam.ServiceProvider.GetRequiredService<ILogger<Program>>()
+              .LogWarning(h, "Yetki senkronu calistirilamadi - matris eski haliyle acilir.");
+    }
+}
 
 uygulama.Run();

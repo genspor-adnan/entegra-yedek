@@ -421,7 +421,10 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id",        "id",         "sayi",  Yazilabilir: false),
-            new("kod",       "kod",        "metin", Zorunlu: true, EnFazlaUzunluk: 40,  Baslik: "Kod", Grup: "Kimlik"),
+            // Kod teknik alan: bos birakilirsa ADDAN uretilir, girilirse slug'a
+            //   cevrilir (ck_rol_kod dar alfabe istiyor - "Satış Müdürü" patliyordu).
+            new("kod",       "kod",        "metin", EnFazlaUzunluk: 40,  Baslik: "Kod", Grup: "Kimlik",
+                SlugKaynak: "ad"),
             new("ad",        "ad",         "metin", Zorunlu: true, EnFazlaUzunluk: 100, Baslik: "Ad",  Grup: "Kimlik"),
             new("ustRolId",  "ust_rol_id", "kod",   KodTablosu: "public.rol", Baslik: "Üst Rol", Grup: "Kimlik"),
             new("aktif",     "aktif",      "kod",   SabitKodlar: DurumKodlari, Baslik: "Aktif", Grup: "Kimlik"),

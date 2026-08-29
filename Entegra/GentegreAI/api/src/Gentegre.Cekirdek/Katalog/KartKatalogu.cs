@@ -34,7 +34,12 @@ public sealed record KartAlani(
     // ARKA PLAN alani: formda CIZILMEZ ama degeri tasinir (kaydetmede gonderilir).
     //   Cek/senet "Tür" boyle: kagidin turu hangi listeden gelindigiyle belli,
     //   ekranda yer kaplamasi gereksiz - ama kayda dogru deger gitmeli.
-    bool Gizli = false
+    bool Gizli = false,
+    // TEKNIK KOD alani: DB kisiti dar bir alfabe istiyor (rol.kod ~ '^[a-z0-9._-]+$').
+    //   Kullanici "Satış Müdürü" yazinca kayit CHECK ihlaliyle patliyordu; bu bayrak
+    //   varsa deger ASCII-slug'a cevrilir, bos birakilmissa adi gecen alandan uretilir
+    //   ("Satış Müdürü" -> "satis-muduru") ve benzersiz olana dek -2, -3 eklenir.
+    string? SlugKaynak = null
 )
 {
     /// <summary>Etiket verilmediyse camelCase addan uretilir: faturaUnvan -> "Fatura Unvan".</summary>

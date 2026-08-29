@@ -23,6 +23,8 @@ const ESKI_KOK = 'Eski Program Yetkileri (Delphi)';
 interface Dugum {
   anahtar: string;
   ad: string;
+  /** Fare ustunde gorunen aciklama - yetki birden cok ekrani kapsiyorsa listesi. */
+  ipucu?: string;
   ic?: string;
   /** Dolu ise yaprak: gerçek yetki satırı. Düğüm hem yaprak hem üst olabilir
       (ör. "ÜTS" modülü + altındaki uts.bildir / uts.iptal aksiyonları). */
@@ -36,15 +38,24 @@ interface Dugum {
  * ekranlar menüde yok, yetki ağacında da başlık açmazlar.
  */
 function menuHaritasi(urunModu: number) {
-  const harita = new Map<string, { grup: string; altGrup?: string; ic: string }>();
+  const harita = new Map<string, {
+    grup: string; altGrup?: string; ic: string; ekranlar: string[];
+  }>();
   const grupSirasi: string[] = [];
   for (const l of LISTELER) {
     if (l.urunModu && l.urunModu !== urunModu) continue;
+    if (l.menuGizli) continue;
     if (l.menuGrup && !grupSirasi.includes(l.menuGrup)) grupSirasi.push(l.menuGrup);
-    // Ayni yetki kodu birden cok listede olabilir (belge -> teklif/siparis/fatura...);
-    //   ILK gorunen yeri esas aliriz - menude de o sirayla cizilir.
-    if (!l.menuGrup || harita.has(l.yetkiKodu)) continue;
-    harita.set(l.yetkiKodu, { grup: l.menuGrup, altGrup: l.menuAltGrup, ic: l.ic });
+    if (!l.menuGrup) continue;
+    // Ayni yetki kodu birden cok ekranda olabilir (belge -> teklif/siparis/
+    //   fatura...): ILK ekranin yeri esas alinir, ekran ADLARININ hepsi
+    //   toplanir - tek ekransa yaprak o adla cizilir (kullanici: "modul
+    //   adlari menudeki adlarla ayni olsun").
+    const v = harita.get(l.yetkiKodu);
+    if (v) v.ekranlar.push(l.menuAd);
+    else harita.set(l.yetkiKodu, {
+      grup: l.menuGrup, altGrup: l.menuAltGrup, ic: l.ic, ekranlar: [l.menuAd],
+    });
   }
   return { harita, grupSirasi };
 }
@@ -78,7 +89,12 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number): Dugum[] {
     const yer = harita.get(s.kod);
     const kok = kokBul(yer?.grup ?? GRUP_ADI[s.grup] ?? 'Diğer', yer?.ic);
     const ust = yer?.altGrup ? altBul(kok, yer.altGrup) : kok;
-    const d: Dugum = { anahtar: `y:${s.yetkiId}`, ad: s.ad, ic: yer?.ic, satir: s, cocuklar: [] };
+    const d: Dugum = {
+      anahtar: `y:${s.yetkiId}`,
+      ad: yer?.ekranlar.length === 1 ? yer.ekranlar[0] : s.ad,
+      ipucu: yer && yer.ekranlar.length > 1 ? `Ekranlar: ${yer.ekranlar.join(', ')}` : undefined,
+      ic: yer?.ic, satir: s, cocuklar: [],
+    };
     ust.cocuklar.push(d);
     modulDugumu.set(s.kod, d);
   }
@@ -255,7 +271,7 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
             </button>
           ) : <span style={{ display: 'inline-block', width: 15 }} />}
           {d.ic ? `${d.ic} ` : ''}
-          <span style={{ fontWeight: d.satir ? 400 : 600 }}>{d.ad}</span>
+          <span style={{ fontWeight: d.satir ? 400 : 600 }} title={d.ipucu}>{d.ad}</span>
           {aksiyon && <span className="rozet gri" style={{ marginLeft: 6 }}>aksiyon</span>}
           {!d.satir && (
             <span style={{ opacity: .55, marginLeft: 6, fontSize: 12 }}>
