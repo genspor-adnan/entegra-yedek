@@ -409,6 +409,10 @@ public static partial class KartKatalogu
                 Baslik: "Kod", Grup: "Kimlik"),
             new("ad",                 "ad",                  "metin", Zorunlu: true,
                 EnFazlaUzunluk: 100, Baslik: "Departman", Grup: "Kimlik"),
+            // Ust birim (257): secilirse departman digerinin ALTINA gecer.
+            //   Bos = kok departman. Dongu (kendi altina alma) DB tetiginde.
+            new("ustbirimId",         "ustbirim_id",         "kod",
+                KodTablosu: "public.v_departman_lookup", Baslik: "Üst Birim", Grup: "Kimlik"),
             new("randevuVerilebilir", "randevu_verilebilir", "mantik",
                 Baslik: "Randevu Bölümü", Grup: "Kimlik"),
             // Kolon adi `durum` (256, kullanici) - taraf.durum / fiyat_listesi.durum ile ayni.

@@ -285,12 +285,25 @@ public static partial class KaynakKatalogu
         Ad: "departman",
         YetkiKodu: "personel",
         Kaynak: "public.departman d",
-        VarsayilanSirala: "d.ad asc",
+        // Alt birim UST BIRIMININ ALTINDA listelensin (257): once ust birimin
+        //   adi (kok departmanlarda kendi adi), sonra kendi adi.
+        VarsayilanSirala: "coalesce((select u.ad from public.departman u " +
+                          "           where u.id = d.ustbirim_id), d.ad) asc, " +
+                          "d.ustbirim_id nulls first, d.ad asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",                 "d.id",                  "sayi",  "Id", Varsayilan: false),
             new("kod",                "d.kod",                 "metin", "Kod", Genislik: 110),
-            new("ad",                 "d.ad",                  "metin", "Departman"),
+            // Alt birim adi GIRINTILI - agac oldugu listede tek bakista gorunsun.
+            new("ad",                 "case when d.ustbirim_id is null then d.ad " +
+                                      "     else '— ' || d.ad end",
+                                      "metin", "Departman"),
+            // Ust birim (257) - bos ise kok departman.
+            new("ustbirimAdi",        "coalesce((select u.ad from public.departman u " +
+                                      "           where u.id = d.ustbirim_id), '')",
+                                      "metin", "Üst Birim", Filtrelenebilir: false),
+            new("ustbirimId",         "d.ustbirim_id",         "sayi",  "Üst Birim Id",
+                Varsayilan: false),
             new("randevuVerilebilir", "d.randevu_verilebilir", "mantik","Randevu Bölümü",
                 Hizalama: "orta"),
             new("durum",              "d.durum",               "mantik","Durum", Hizalama: "orta"),
