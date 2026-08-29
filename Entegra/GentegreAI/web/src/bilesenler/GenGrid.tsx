@@ -577,6 +577,12 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
           />
         </div>
 
+        {ekGorunum && (
+          <button className={`cip ${gorunum === 'ek' ? 'on' : ''}`}
+                  onClick={() => setGorunum(gorunum === 'ek' ? 'liste' : 'ek')}>
+            {ekGorunum.ik} {ekGorunum.ad}
+          </button>
+        )}
         {GORUNUMLER.map(g => (
           <button
             key={g.v}
@@ -586,12 +592,6 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
             {g.ik} {cev(g.ad)}
           </button>
         ))}
-        {ekGorunum && (
-          <button className={`cip ${gorunum === 'ek' ? 'on' : ''}`}
-                  onClick={() => setGorunum(gorunum === 'ek' ? 'liste' : 'ek')}>
-            {ekGorunum.ik} {ekGorunum.ad}
-          </button>
-        )}
 
         <span className="cipsag">
           {aksiyonEkrani && aksiyonKombo.length > 0 && (
