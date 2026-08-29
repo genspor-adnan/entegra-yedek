@@ -6,6 +6,9 @@ interface Props {
   durum: DetayDurumu;
   saltOkunur: boolean;
   onDegis(yeni: DetayDurumu): void;
+  /** "Çalıştığı Şube" combosu - taraf alani oldugu icin disaridan gelir
+      (kullanici: is bilgilerinde, Yonetici'nin SOLUNDA). */
+  subeEk?: React.ReactNode;
 }
 
 /** "01.09.2019" -> "6 yıl 11 ay" (ik_karti.html mockup "Kıdem" - hesaplanan, saklanmaz). */
@@ -16,7 +19,7 @@ interface Props {
  * Medeni Hal/Uyruk/Kan Grubu/Öğrenim mockup'ta GENEL sekmesinde ("Kimlik Bilgileri" kutusu,
  * bkz. PersonelKimlikOzet.tsx) - burada TEKRARLANMAZ, sadece iş/SGK bilgileri var.
  */
-export function TekOzluk({ meta, durum, saltOkunur, onDegis }: Props) {
+export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk }: Props) {
   const satir: Satir = durum.guncel[0] ?? {};
 
   const degis = (degisiklik: Record<string, unknown>) => {
@@ -40,14 +43,18 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis }: Props) {
       <div className="kagrup">
         <h6>İş Bilgileri</h6>
         <div className="alan-izgara tek-sutun">
-          <label className="alan tip-kod">
-            <span className="etiket">Yönetici</span>
-            <select value={String(satir.yoneticiId ?? '')} disabled={saltOkunur}
-              onChange={e => degis({ yoneticiId: e.target.value })}>
-              <option value="">—</option>
-              {yoneticiAlan?.kodlar && Object.entries(yoneticiAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-            </select>
-          </label>
+          {/* Sube solda, Yonetici SAGINDA (kullanici). */}
+          <div className="adres-satir">
+            {subeEk}
+            <label className="alan tip-kod">
+              <span className="etiket">Yönetici</span>
+              <select value={String(satir.yoneticiId ?? '')} disabled={saltOkunur}
+                onChange={e => degis({ yoneticiId: e.target.value })}>
+                <option value="">—</option>
+                {yoneticiAlan?.kodlar && Object.entries(yoneticiAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              </select>
+            </label>
+          </div>
           <div className="adres-satir">
             <label className="alan tip-kod">
               <span className="etiket">Çalışma Şekli</span>

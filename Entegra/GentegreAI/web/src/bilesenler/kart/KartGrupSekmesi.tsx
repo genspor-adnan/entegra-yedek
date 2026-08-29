@@ -6,7 +6,6 @@ import { TekAdres } from '../TekAdres';
 import { PersonelKimlikOzet } from '../PersonelKimlikOzet';
 import { KartResimKutusu } from '../KartResimKutusu';
 import { RolKullanicilari } from '../RolKullanicilari';
-import { RolSubeleri } from '../RolSubeleri';
 import { TEK_SUTUN_KARTLAR } from '../kartSekmeleri';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
 import type { Deger } from '../kartAlanCizim';
@@ -38,7 +37,7 @@ const gizli = kaynak === 'cari' ? new Set(['ad', 'soyad', 'musteri', 'tedarikci'
   //   "kisi" bayragiyla ayni sebeple gizli. "vkno"/"gorev" de gizli - normal
   //   adsiz akistan CIKARILIP PersonelKimlikOzet.tsx'e props olarak geciyor
   //   (ik_karti.html: TCKN "Kimlik Bilgileri" kutusunda, Görev "Özet" kutusunda).
-  : kaynak === 'personel' ? new Set(['personel', 'unvan', 'vkno', 'gorevId'])
+  : kaynak === 'personel' ? new Set(['personel', 'unvan', 'vkno', 'gorevId', 'subeId'])
   : kaynak === 'hasta' ? new Set(['hasta', 'grup', 'unvan', 'gorevId'])
   // Sube: baz sube combosu Depolar dalinda ELLE cizilir (tek satir etiket).
   : kaynak === 'sube' ? new Set(['depoBazSubeId'])
@@ -235,6 +234,9 @@ const adliBlok = (
             : [];
           return (
             <PersonelKimlikOzet
+              subeAlan={meta.alanlar.find(a => a.ad === 'subeId')}
+              sube={String(deger.subeId ?? '')}
+              onSubeDegis={v => setDeger(d => ({ ...d, subeId: v }))}
               kartAdi={kaynak}
               vknoAlan={vknoAlan}
               vkno={String(deger.vkno ?? '')}
@@ -399,12 +401,9 @@ return (
         (kullanici: "kullanicilari genel sekmesine al, kullanici sekmesini
         kaldir"). Yeni rolde henuz id yok - once kaydedilmeli. */}
     {kaynak === 'rol' && !yeniMi && aktif.baslik === 'Genel' && (
-      <>
-        {/* Sube kisiti ROLDE (234): bu roldeki kullanicilar isaretli
-            subelerde calisir - kisiye ayrica sube verilmez. */}
-        <RolSubeleri rolId={id as number} saltOkunur={salt} />
-        <RolKullanicilari rolId={id as number} saltOkunur={salt} />
-      </>
+      /* Sube listesi ROLDE DEGIL (kullanici: "rolden kaldir tekrar") -
+         personel kartinda, fotografin altinda. */
+      <RolKullanicilari rolId={id as number} saltOkunur={salt} />
     )}
 
     {kaynak === 'sube' && aktif.baslik === 'Depolar' && (() => {

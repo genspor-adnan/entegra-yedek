@@ -102,27 +102,28 @@ public static class RolYetkiUclari
             });
         });
 
-        // ROL > SUBELER (234, kullanici karari: "sube kisitini personel degil
-        //   role ata"). Kullanicinin girebildigi subeler rolunden gelir.
-        var rolSube = yol.MapGroup("/api/kart/rol/{rolId:int}/subeler")
-                         .WithTags("Kart").RequireAuthorization();
+        // KULLANICI > SUBELER (kullanici: "fotonun altina yetkili subeleri
+        //   getir, rolden kaldir tekrar"). Rol modul yetkisini, bu liste
+        //   calisilabilen subeleri tasir.
+        var kartSube = yol.MapGroup("/api/kart/kullanici/{kartId:int}/subeler")
+                          .WithTags("Kart").RequireAuthorization();
 
-        rolSube.MapGet("/", async (int rolId, BaglamCozucu cozucu,
+        kartSube.MapGet("/", async (int kartId, BaglamCozucu cozucu,
             KullaniciSubeDeposu depo, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("rol", Islem.Gor);
-            return Results.Ok(await depo.ListeleAsync(rolId, iptal));
+            return Results.Ok(await depo.ListeleAsync(kartId, iptal));
         });
 
-        rolSube.MapPut("/", async (int rolId, SubeKaydetIstegi istek,
+        kartSube.MapPut("/", async (int kartId, SubeKaydetIstegi istek,
             BaglamCozucu cozucu, KullaniciSubeDeposu depo, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("rol", Islem.Degistir);
-            await depo.KaydetAsync(rolId, istek.Satirlar, baglam.Yazma, iptal);
-            return Results.Ok(await depo.ListeleAsync(rolId, iptal));
+            await depo.KaydetAsync(kartId, istek.Satirlar, baglam.Yazma, iptal);
+            return Results.Ok(await depo.ListeleAsync(kartId, iptal));
         });
 
         kul.MapDelete("/{kullaniciId:int}", async (int rolId, int kullaniciId,

@@ -5,6 +5,7 @@ import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { TekOzluk } from './TekOzluk';
+import { KartKullaniciSubeleri } from './KartKullaniciSubeleri';
 
 interface Props {
   kartAdi?: string;
@@ -22,6 +23,10 @@ interface Props {
   fotoSolEk?: ReactNode;
   fotoSolEkOnce?: boolean;
   ozetGizli?: boolean;
+  /** "Çalıştığı Şube" alani (taraf.sube_id) - is bilgilerinde cizilir. */
+  subeAlan?: KartAlanMeta;
+  sube?: string;
+  onSubeDegis?(v: string): void;
   vknoGizli?: boolean;
   kimlikSutunGenisligi?: string;
   /** Yeni kayıtta henüz yok; kart kaydedilmeden dosya yüklenemez. */
@@ -48,6 +53,7 @@ function yasHesapla(tarihStr: string): string | null {
 export function PersonelKimlikOzet({
   kartAdi = 'personel', vknoAlan, vkno, onVknoDegis, gorevAlan, gorev, onGorevDegis,
   ozlukMeta, ozlukDurum, saltOkunur, onOzlukDegis, egitimler, fotoSolEk, ozetGizli,
+  subeAlan, sube, onSubeDegis,
   vknoGizli, kimlikSutunGenisligi, kaynakId, fotoSolEkOnce = false,
 }: Props) {
   const yerler = useYerler(true);
@@ -205,7 +211,18 @@ export function PersonelKimlikOzet({
       {!ozetGizli && (
         <div className="kasutun" style={{ flex: 1 }}>
           <TekOzluk meta={ozlukMeta} durum={ozlukDurum} saltOkunur={saltOkunur}
-                    onDegis={onOzlukDegis} />
+                    onDegis={onOzlukDegis}
+                    subeEk={subeAlan && onSubeDegis ? (
+                      <label className="alan tip-kod">
+                        <span className="etiket">{subeAlan.baslik}</span>
+                        <select value={sube ?? ''} disabled={saltOkunur}
+                                onChange={e => onSubeDegis(e.target.value)}>
+                          <option value="">-</option>
+                          {subeAlan.kodlar && Object.entries(subeAlan.kodlar)
+                            .map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                        </select>
+                      </label>
+                    ) : undefined} />
         </div>
       )}
       {!fotoSolEkOnce && fotoSolEk}
@@ -232,6 +249,10 @@ export function PersonelKimlikOzet({
           </div>
           {resimHata && <div className="alan-hata" style={{ margin: '4px 10px 0' }}>{resimHata}</div>}
         </div>
+        {/* Yetkili subeler FOTOGRAFIN ALTINDA (kullanici). */}
+        {!ozetGizli && kaynakId && (
+          <KartKullaniciSubeleri kartId={kaynakId} saltOkunur={saltOkunur} />
+        )}
 
         {/* Kullanici rolu (kullanici): karta bagli kullanici hesabinin rolu -
             gorulur ve degistirilebilir. Yeni kayitta id yok, gosterilmez. */}

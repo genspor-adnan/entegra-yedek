@@ -99,7 +99,21 @@ public sealed class KullaniciDeposu
     public async Task<List<SubeOzeti>> SubeleriAsync(int tarafId,
         CancellationToken iptal = default)
     {
-        var liste = await RolSubeleriAsync(tarafId, iptal);
+        // 1) KISIYE tanimli subeler (kullanici karari: sube kisiti kisiye
+        //    dondu - kullanici_sube), 2) yoksa rolunun subeleri (234 donemi
+        //    kayitlari), 3) o da yoksa tek subeli kurulum kurali.
+        var liste = await _veri.ListeAsync(
+            "select s.id, s.ad, ks.varsayilan, ks.yazma " +
+            "  from public.kullanici_sube ks " +
+            "  join public.sube s on s.id = ks.sube_id and s.aktif = 1 " +
+            " where ks.taraf_id = @p0 " +
+            " order by ks.varsayilan desc, s.ad",
+            new object?[] { tarafId },
+            o => new SubeOzeti(o.Sayi("id"), o.Metin("ad"), o.Bayrak("varsayilan"),
+                               o.Bayrak("yazma")), iptal);
+        if (liste.Count > 0) return liste;
+
+        liste = await RolSubeleriAsync(tarafId, iptal);
         if (liste.Count > 0) return liste;
         return await _veri.ListeAsync(
             "select s.id, s.ad, 1 as varsayilan, 1 as yazma " +

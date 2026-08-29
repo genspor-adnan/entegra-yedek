@@ -1,22 +1,21 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
-import type { RolSubeSatiri } from '../api/istemci';
+import type { KullaniciSubeSatiri } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 
 /**
- * Rol kartı "Şubeler" bölümü (kullanıcı kararı: "şube kısıtını personel değil
- * role ata, personel yetkiyi her zaman rolden alır").
+ * Personel kartında "Yetkili Şubeler" (kullanıcı: "fotoğrafın altına yetkili
+ * şubeleri getir, rolden kaldır tekrar").
  *
- * Rol hem ne yapılabileceğini (yetki matrisi) hem nerede çalışılacağını (bu
- * liste) belirler: bu roldeki her kullanıcı giriş yaptığında işaretli şubeleri
- * görür. "Vars." açılışta gelen şube (tek), "Yazma" kapalıysa o şube salt
- * okunur - kullanıcı görür ama kayıt değiştiremez.
+ * Rol modül yetkisini taşır; kişinin hangi şubelerde çalıştığı BURADA
+ * belirlenir - aynı roldeki iki kişi farklı şubelerde olabilir. "Vars."
+ * açılışta gelen şube (tek), "Yazma" kapalıysa o şube salt okunur.
  */
-export function RolSubeleri({ rolId, saltOkunur }: {
-  rolId: number;
+export function KartKullaniciSubeleri({ kartId, saltOkunur }: {
+  kartId: number;
   saltOkunur: boolean;
 }) {
-  const [satirlar, setSatirlar] = useState<RolSubeSatiri[] | null>(null);
+  const [satirlar, setSatirlar] = useState<KullaniciSubeSatiri[] | null>(null);
   const [hata, setHata] = useState('');
   const [mesaj, setMesaj] = useState('');
   const [islemde, setIslemde] = useState(false);
@@ -24,13 +23,13 @@ export function RolSubeleri({ rolId, saltOkunur }: {
 
   useEffect(() => {
     let iptal = false;
-    api.rolSubeleri(rolId)
+    api.kartSubeleri(kartId)
       .then(y => { if (!iptal) setSatirlar(y) })
       .catch(h => { if (!iptal) setHata(hataMetni(h)) });
     return () => { iptal = true };
-  }, [rolId]);
+  }, [kartId]);
 
-  const degis = (subeId: number, yama: Partial<RolSubeSatiri>) => {
+  const degis = (subeId: number, yama: Partial<KullaniciSubeSatiri>) => {
     setDegisti(true); setMesaj('');
     setSatirlar(s => s?.map(x => {
       // Varsayilan TEK olabilir: baskasi varsayilan yapilinca digeri duser.
@@ -46,11 +45,11 @@ export function RolSubeleri({ rolId, saltOkunur }: {
     if (!satirlar) return;
     setIslemde(true); setHata(''); setMesaj('');
     try {
-      setSatirlar(await api.rolSubeKaydet(rolId, satirlar.map(s => ({
+      setSatirlar(await api.kartSubeKaydet(kartId, satirlar.map(s => ({
         subeId: s.subeId, yetkili: s.yetkili, varsayilan: s.varsayilan, yazma: s.yazma,
       }))));
       setDegisti(false);
-      setMesaj('Rolün şubeleri kaydedildi.');
+      setMesaj('Şube yetkileri kaydedildi.');
     } catch (h) { setHata(hataMetni(h)) } finally { setIslemde(false) }
   };
 
@@ -64,7 +63,7 @@ export function RolSubeleri({ rolId, saltOkunur }: {
   return (
     <div className="kagrup" style={{ marginTop: 12 }}>
       <div className="numaralama-bas bitisik">
-        <h6>Şubeler</h6>
+        <h6>Yetkili Şubeler</h6>
         {!saltOkunur && (
           <button className="d bir" disabled={islemde || !degisti}
                   onClick={() => void kaydet()}>
@@ -72,15 +71,12 @@ export function RolSubeleri({ rolId, saltOkunur }: {
           </button>
         )}
       </div>
-      <div className="not" style={{ margin: '0 10px 8px' }}>
-        Bu roldeki kullanıcılar işaretli şubelerde çalışır; şube yetkisi kişiye
-        değil role verilir.
-      </div>
+
       {hata && <div className="hata-kutusu">{hata}</div>}
       {mesaj && <div className="bilgi-kutusu">{mesaj}</div>}
       {!secili && (
         <div className="hata-kutusu">
-          Şube seçilmedi - bu roldeki kullanıcılar hiçbir şubeye giremez.
+          Şube seçilmedi - bu kullanıcı hiçbir şubeye giremez.
         </div>
       )}
       <table className="grid">
@@ -103,7 +99,7 @@ export function RolSubeleri({ rolId, saltOkunur }: {
               </td>
               <td>{s.subeAdi}</td>
               <td style={{ textAlign: 'center' }} onClick={e => e.stopPropagation()}>
-                <input type="radio" name={`rolvars-${rolId}`} checked={s.varsayilan}
+                <input type="radio" name={`kvars-${kartId}`} checked={s.varsayilan}
                        disabled={saltOkunur || !s.yetkili}
                        onChange={() => degis(s.subeId, { varsayilan: true })} />
               </td>
