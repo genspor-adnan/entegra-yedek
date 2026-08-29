@@ -745,16 +745,21 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
             setAcikBelgeId(Number(satir.belgeId));
             return;
           }
-          // Hizmetin fiyat/KDV'si listeden: kalem satiri bos tutarla acilmasin.
-          let birimFiyat = 0;
-          let kdv = 0;
-          if (hizmetId) {
-            const h = await api.liste('hizmet', {
-              sayfa: 1, boyut: 1,
-              filtre: { alan: 'id', op: 'esit', deger: hizmetId },
-            });
-            birimFiyat = Number(h.satirlar[0]?.fiyat) || 0;
-            kdv = Number(h.satirlar[0]?.kdv) || 0;
+          // FIYAT: belge kartinin kendi kurali (205) - turun yonune gore
+          //   carinin listesi, yoksa VARSAYILAN satis listesi. Kalem fiyati o
+          //   listeden cozulur; liste kuralindan fiyat cikmazsa hizmet
+          //   kartindaki fiyata dusulur.
+          const varsayilanListe = await api.belgeVarsayilanListe(30, hastaId);
+          const fiyatListesiId = varsayilanListe.listeId ?? null;
+          const h = await api.liste('hizmet', {
+            sayfa: 1, boyut: 1,
+            filtre: { alan: 'id', op: 'esit', deger: hizmetId },
+          });
+          const kdv = Number(h.satirlar[0]?.kdv) || 0;
+          let birimFiyat = Number(h.satirlar[0]?.fiyat) || 0;
+          if (fiyatListesiId) {
+            const f = await api.fiyatListesiFiyat(fiyatListesiId, { hizmetId });
+            if (f.fiyat != null && f.fiyat > 0) birimFiyat = f.fiyat;
           }
           const y = await api.belgeEkle({
             belge: {
@@ -762,6 +767,7 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
               tarafId: hastaId,
               belgeTarihi: `${String(satir.tarih ?? '').slice(0, 10)}T${String(satir.saat ?? '00:00')}`,
               subeId: oturumSubeId,
+              fiyatListesiId,
               aciklama: `Randevu #${satir.id}`
                         + (satir.bolumAdi ? ` · ${String(satir.bolumAdi)}` : ''),
             },
