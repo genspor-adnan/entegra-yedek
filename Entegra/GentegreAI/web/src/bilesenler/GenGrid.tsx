@@ -55,6 +55,13 @@ interface Props {
   seciliBaslangicId?: number | null;
   /** Cip seridinin SONUNA eklenecek dugmeler (ör. "│ 📄 Ekstre"). */
   cipSonu?: React.ReactNode;
+  /**
+   * Gridin ALTINA, ayni kaydirma alaninin (.sahne) icine eklenecek panel -
+   * randevu takvimi gibi. GenGrid'in DISINA kardes olarak konursa `.sahne`
+   * flex:1 oldugu icin sifira kadar eziliyor, cip seridi ve grid kirpiliyordu
+   * (kullanici: "tüm/sık/son ile başlayan butonlar kırpılmış").
+   */
+  altPanel?: React.ReactNode;
   /** Acilista secili gelecek cip (geri donuste onceki filtreyi korumak icin). */
   cipBaslangic?: number;
   /** Cip'e tiklanınca cagrilir - ekstre modundan listeye donmek gibi ekran
@@ -114,7 +121,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           dovizsizGizle,
                           gizliKolonlar, kolonSirasi, altSecenekler, tarihAlani, tarihVarsayilan,
                           aramaGorunumGizli,
-                          seciliBaslangicId, cipSonu, cipBaslangic,
+                          seciliBaslangicId, cipSonu, cipBaslangic, altPanel,
                           onCipSecildi, onCipRota, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik }: Props) {
   // Sayfa boyu: cagiran acikca verdiyse o, yoksa Genel Ayarlar'daki
@@ -769,6 +776,8 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
           </div>
         </div>
         )}
+
+        {altPanel}
       </div>
 
       <GridMenu konum={gridMenuKonum} ogeler={menuOgeleri}

@@ -754,18 +754,18 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
           📄 Ekstre
         </button>
       )}
+      // RANDEVU (243): takvim gridin ALTINDA ama AYNI kaydirma alaninda -
+      //   disarida kardes olunca .sahne (flex:1) eziliyor, cip seridi ve grid
+      //   kirpiliyordu. Hucre tiklamasi o saate yeni randevu acar.
+      altPanel={tanim.kaynak === 'randevu' && (
+        <RandevuTakvimi
+          ayarlar={randevuAyarlari}
+          yenile={yenile}
+          onYeni={bas => git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`)}
+          onAc={id => git(`/randevu/${id}`)}
+        />
+      )}
     />
-    {/* RANDEVU (243): takvim gridin ALTINDA (kullanici: "standart desen altta
-        kalmis, uste al") - liste ve arac cubugu once, takvim ikinci katman.
-        Hucreye tiklamak o saate yeni randevu acar, dolu randevu karti acar. */}
-    {tanim.kaynak === 'randevu' && (
-      <RandevuTakvimi
-        ayarlar={randevuAyarlari}
-        yenile={yenile}
-        onYeni={bas => git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`)}
-        onAc={id => git(`/randevu/${id}`)}
-      />
-    )}
     </>
     )}
 
