@@ -270,6 +270,9 @@ public static partial class KaynakKatalogu
                 Filtrelenebilir: false),
             new("vknoHam",      "t.vkno",          "metin", "TCKN (ham)", Varsayilan: false),
             new("cepTel",       "t.cep_tel",       "metin", "Cep"),
+            // Telefonla arama (266): personel/hasta aramasi da rakamla bulsun.
+            new("telefonHam",   TarafKatalog.TelefonHam, "metin", "Telefon (ham)",
+                Varsayilan: false),
             new("eposta",       "t.eposta",        "metin", "E-posta"),
             new("durum",        "t.durum",         "kod",   "Durum",     Hizalama: "orta"),
             new("subeId",       "t.sube_id",       "sayi",  "Sube",      Varsayilan: false)

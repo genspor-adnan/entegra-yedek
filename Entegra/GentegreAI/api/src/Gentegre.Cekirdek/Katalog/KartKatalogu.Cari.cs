@@ -483,8 +483,10 @@ public static partial class KartKatalogu
                 Baslik: "Soyad", Grup: "Kimlik"),
             new("cepTel",   "cep_tel",  "metin", Zorunlu: true, EnFazlaUzunluk: 30,
                 Baslik: "Cep", Grup: "Kimlik"),
+            // Durum kimlik seridinde DEGIL arac cubugunda ROZET (kullanici):
+            //   aday kaydinda degistirilecek bir alan degil, bir DURUM bilgisi.
             new("durum",    "durum",    "kod",   SabitKodlar: HastaDurumKodlari,
-                Baslik: "Durum", Grup: "Kimlik"),
+                Baslik: "Durum", Gizli: true),
             new("eposta",   "eposta",   "metin", EnFazlaUzunluk: 200, Baslik: "E-posta"),
             new("vkno",     "vkno",     "metin", EnFazlaUzunluk: 20, Baslik: "TC No"),
             // Dosya no (kod) CEP NUMARASINDAN uretilir - ekranda gosterilmez.
@@ -507,8 +509,10 @@ public static partial class KartKatalogu
                 new("cinsiyet",    "cinsiyet",     "kod",   SabitKodlar: CinsiyetKodlari,
                     Baslik: "Cinsiyet"),
                 new("dogumTarihi", "dogum_tarihi", "tarih", Baslik: "Doğum Tarihi"),
+                // Kurum KIMLIK SERIDINDE cizilir (266) - burada yalniz veri
+                //   tasiyicisi olarak duruyor, ekranda tekrar gosterilmez.
                 new("kurumId",     "kurum_id",     "kod",   KodTablosu: "public.v_kurum_lookup",
-                    Baslik: "Kurum"),
+                    Baslik: "Kurum", Gizli: true),
             }, SubeKolonu: null, Baslik: "Hasta Bilgisi", LogTabloId: 907, TekSatir: true),
             // IL / ILCE taraf'ta degil ADRES tablosunda (taraf_adres): aday
             //   kartinda tek adres satiri yeter, tam kartta adres listesi var.

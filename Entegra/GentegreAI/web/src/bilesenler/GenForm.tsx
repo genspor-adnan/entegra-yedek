@@ -628,7 +628,35 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           {/* YENI kayitta da gecerli: Görev ZORUNLU ama serit yalniz mevcut
               kartta cizilince alan hic gorunmuyordu ("Görev zorunlu" hatasi
               alinip duzeltilemiyordu). */}
-          {personelGibiKart ? (
+          {/* ADAY HASTA (266): kimlik seridinde Durum yerine KURUM - durum arac
+              cubugunda rozet. Kurum taraf_hasta detayinda oldugu icin serit
+              alanlarindan degil, detay durumundan besleniyor. */}
+          {kaynak === 'hasta-aday' ? (() => {
+            const ozluk = meta?.detaylar.find(d => d.ad === 'ozluk');
+            const kurumAlan = ozluk?.alanlar.find(a => a.ad === 'kurumId');
+            const satir = detaylar[ozluk?.ad ?? '']?.guncel[0] ?? {};
+            return (
+              <div className="alan-izgara"
+                   style={{ gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }}>
+                {renderAlanListesi(kimlikAlanlari)}
+                {kurumAlan && ozluk && (
+                  <label className="alan tip-kod">
+                    <span className="etiket">{kurumAlan.baslik}</span>
+                    <select value={String(satir.kurumId ?? '')} disabled={salt}
+                            onChange={e => setDetaylar(t => {
+                              const d = t[ozluk.ad] ?? { ilk: [], guncel: [] };
+                              const yeni = { ...(d.guncel[0] ?? {}), kurumId: e.target.value };
+                              return { ...t, [ozluk.ad]: { ...d, guncel: [yeni, ...d.guncel.slice(1)] } };
+                            })}>
+                      <option value="">—</option>
+                      {kurumAlan.kodlar && Object.entries(kurumAlan.kodlar)
+                        .map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                    </select>
+                  </label>
+                )}
+              </div>
+            );
+          })() : personelGibiKart ? (
             <div className="alan-izgara"
                  style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}>
               {renderAlanListesi(kimlikAlanlari.filter(a =>
@@ -697,6 +725,18 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
                 <option value={2}>Verilen</option>
               </select>
             </label>
+          )}
+          {/* ADAY HASTA (266): durum arac cubugunda ROZET - Kaydet ile Kapat
+              arasinda (kullanici). Aday yesil degil MAVI: henuz gercek hasta
+              degil, basvuruya donusunce Aktif olur. */}
+          {kaynak === 'hasta-aday' && (
+            <span className={`rozet ${Number(deger.durum) === 1 ? 'ok'
+                              : Number(deger.durum) === 2 ? 'mavi'
+                              : Number(deger.durum) === 3 ? 'hata' : 'gri'}`}
+                  style={{ alignSelf: 'center' }}>
+              {meta.alanlar.find(a => a.ad === 'durum')?.kodlar?.[String(deger.durum ?? '')]
+               ?? 'Aday'}
+            </span>
           )}
           {/* RANDEVU akis dugmeleri (mockup): durum comboyla degil bu
               dugmelerle degisir. Kaydet'e basilinca yazilir - kart
