@@ -68,8 +68,16 @@ public sealed class KimlikServisi
                 $"Cok sayida hatali giris - hesap {kilit:HH:mm}'e kadar kilitli.");
         }
 
-        var parolaDogru = kullanici.ParolaHash.Length > 0 &&
-                          BCrypt.Net.BCrypt.Verify(istek.Parola, kullanici.ParolaHash);
+        // PAROLASI HIC TANIMLANMAMIS hesap: istemci dogrudan "parolani belirle"
+        //   ekranini acar (kullanici: "sifre bossa user pass ekrani direk ciksin").
+        if (kullanici.ParolaHash.Length == 0)
+        {
+            await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, false,
+                                             "parola_yok", iptal);
+            throw GentegreHatasi.IlkParolaGerekli();
+        }
+
+        var parolaDogru = BCrypt.Net.BCrypt.Verify(istek.Parola, kullanici.ParolaHash);
 
         if (!parolaDogru)
         {

@@ -10,10 +10,14 @@ public static class HataKodu
     public const string Cakisma    = "CAKISMA";     // 409 - esszamanlilik
     public const string IsKurali   = "IS_KURALI";   // 422 - "Bu cariye ait fatura var, silinemez."
     public const string Sunucu     = "SUNUCU";      // 500 - beklenmeyen
+    /// <summary>401 - hesap var ama parolasi HIC tanimlanmamis; istemci
+    /// dogrudan "parolani belirle" ekranini acar (kullanici istegi).</summary>
+    public const string IlkParola  = "ILK_PAROLA";
 
     public static int HttpDurumu(string kod) => kod switch
     {
         Dogrulama  => 400,
+        IlkParola  => 401,
         Yetkisiz   => 401,
         Yasak      => 403,
         Bulunamadi => 404,
@@ -72,6 +76,11 @@ public class GentegreHatasi : Exception
 
     public static GentegreHatasi Yetkisiz(string mesaj = "Oturum gecersiz ya da suresi dolmus.")
         => new(HataKodu.Yetkisiz, mesaj);
+
+    /// <summary>Parolasi hic tanimlanmamis hesap - istemci ilk parola ekranini acar.</summary>
+    public static GentegreHatasi IlkParolaGerekli(string mesaj =
+        "Bu hesabın parolası henüz tanımlanmamış - lütfen parolanızı belirleyin.")
+        => new(HataKodu.IlkParola, mesaj);
 
     public static GentegreHatasi Yasak(string mesaj = "Bu islem icin yetkiniz yok.")
         => new(HataKodu.Yasak, mesaj);

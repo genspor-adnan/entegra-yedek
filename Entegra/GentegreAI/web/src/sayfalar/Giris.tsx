@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { api } from '../api/istemci';
-import { type SubeOzeti, hataMetni } from '../api/sozlesme';
+import { ApiHatasi, type SubeOzeti, hataMetni } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
 
 /**
@@ -64,7 +64,15 @@ export function Giris() {
         await girisYap(kod, parola, subeId ?? undefined);
       }
     } catch (h) {
-      setHata(hataMetni(h));
+      // Hesap var ama parolasi HIC tanimlanmamis: dogrudan parola belirleme
+      //   ekranina gecilir (kullanici: "sifre bossa user pass ekrani direk ciksin").
+      if (h instanceof ApiHatasi && h.hata.kod === 'ILK_PAROLA') {
+        setIlkAcik(true);
+        setHata(null);
+        setBilgi(h.hata.mesaj);
+      } else {
+        setHata(hataMetni(h));
+      }
       setSubeler(null);
     } finally {
       setBekliyor(false);
@@ -97,6 +105,7 @@ export function Giris() {
                    onChange={e => setYeni2(e.target.value)} />
           </label>
           <p style={{ fontSize: 11, opacity: .8, margin: '2px 0 6px' }}>{PAROLA_KURALI}</p>
+          {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
           {hata && <div className="hata-kutusu">{hata}</div>}
           <button type="submit" disabled={bekliyor}>
             {bekliyor ? 'Bekleyin…' : 'Parolayı Belirle'}
@@ -148,12 +157,7 @@ export function Giris() {
         <button type="submit" disabled={bekliyor}>
           {bekliyor ? 'Bekleyin…' : subeler === null ? 'Giris' : 'Devam'}
         </button>
-        {subeler === null && (
-          <button type="button" className="d" style={{ marginTop: 8 }}
-                  onClick={() => { setIlkAcik(true); setHata(null); setBilgi(null) }}>
-            İlk giriş — parolamı belirle
-          </button>
-        )}
+
       </form>
     </div>
   );

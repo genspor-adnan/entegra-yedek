@@ -3,7 +3,10 @@
 
 export type HataKodu =
   | 'DOGRULAMA' | 'YETKISIZ' | 'YASAK' | 'BULUNAMADI'
-  | 'CAKISMA' | 'IS_KURALI' | 'SUNUCU';
+  | 'CAKISMA' | 'IS_KURALI' | 'SUNUCU'
+  // Hesap var ama parolasi hic tanimlanmamis - giris ekrani parola belirleme
+  //   adimina gecer.
+  | 'ILK_PAROLA';
 
 export interface AlanHatasi { alan: string; mesaj: string }
 
