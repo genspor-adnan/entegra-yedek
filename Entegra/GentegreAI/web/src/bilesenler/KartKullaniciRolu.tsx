@@ -12,9 +12,11 @@ import { hataMetni } from '../api/sozlesme';
  * bir yetkidir ve islem_log'a rol kartı üzerinden yazılır). Kartın kullanıcı
  * hesabı yoksa bölüm bilgi satırı olarak kalır.
  */
-export function KartKullaniciRolu({ kartId, saltOkunur }: {
+export function KartKullaniciRolu({ kartId, saltOkunur, sade }: {
   kartId: number;
   saltOkunur: boolean;
+  /** Kimlik seridinde tek alan olarak cizilir (kutu/baslik yok). */
+  sade?: boolean;
 }) {
   const [bilgi, setBilgi] = useState<KartRolBilgisi | null>(null);
   const [hata, setHata] = useState('');
@@ -40,6 +42,24 @@ export function KartKullaniciRolu({ kartId, saltOkunur }: {
 
   // Yetkisi olmayan kullanici rol bolumunu hic gormesin (GET 403 -> sessiz).
   if (hata && !bilgi) return null;
+
+  const combo = !bilgi ? null : !bilgi.kullaniciVar ? null : (
+    <select value={bilgi.rolId} disabled={saltOkunur || islemde}
+            onChange={e => void degistir(Number(e.target.value))}>
+      {bilgi.roller.map(r => <option key={r.id} value={r.id}>{r.ad}</option>)}
+    </select>
+  );
+
+  // SERIT modu: kimlik seridinde departmanin sagindaki tek alan.
+  if (sade) {
+    if (!combo) return null;
+    return (
+      <label className="alan tip-kod">
+        <span className="etiket">Rol</span>
+        {combo}
+      </label>
+    );
+  }
 
   return (
     <div className="kagrup">

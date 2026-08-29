@@ -22,6 +22,7 @@ import {
 import { TekKayit } from './TekKayit';
 export { Modal };
 import { RolYetkiMatrisi } from './RolYetkiMatrisi';
+import { KartKullaniciRolu } from './KartKullaniciRolu';
 import { DokumanGalerisi } from './DokumanGalerisi';
 import { StokDurumSekmesi } from './StokDurumSekmesi';
 import { StokHareketSekmesi } from './StokHareketSekmesi';
@@ -533,9 +534,22 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
         <div className="kaid">
           {/* Kisi'ye ozel: Kisi Kodu dar, Unvan genis (kullanici: "kod edit yariya dussun,
               onu unvana ekle") - idstrip'in 4 sabit alani (Kod/Unvan/Departman/Gorev). */}
-          <div className={`alan-izgara${kaynak === 'kisi' ? ' kaid-kisi' : ''}`}>
-            {renderAlanListesi(kimlikAlanlari)}
-          </div>
+          {/* Personelde ROL kimlik seridinde, DEPARTMANIN SAGINDA (kullanici);
+              serit 5 sutunlu akar. Diger kartlarda serit eskisi gibi. */}
+          {personelGibiKart && !yeniMi ? (
+            <div className="alan-izgara"
+                 style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}>
+              {renderAlanListesi(kimlikAlanlari.filter(a =>
+                ['kod', 'ad', 'soyad', 'departman'].includes(a.ad)))}
+              <KartKullaniciRolu sade kartId={id as number} saltOkunur={salt} />
+              {renderAlanListesi(kimlikAlanlari.filter(a =>
+                !['kod', 'ad', 'soyad', 'departman'].includes(a.ad)))}
+            </div>
+          ) : (
+            <div className={`alan-izgara${kaynak === 'kisi' ? ' kaid-kisi' : ''}`}>
+              {renderAlanListesi(kimlikAlanlari)}
+            </div>
+          )}
         </div>
       )}
       sekmeBar={sekmeler.length > 1 && (
