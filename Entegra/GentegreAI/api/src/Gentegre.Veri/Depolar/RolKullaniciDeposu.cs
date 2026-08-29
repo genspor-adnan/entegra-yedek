@@ -4,6 +4,7 @@ using Npgsql;
 namespace Gentegre.Veri.Depolar;
 
 public sealed record RolKullanicisi(int Id, string Kod, string Unvan, string Eposta,
+    string Departman, string Gorev, string Telefon,
     bool Aktif, DateTime? SonGiris, string RolAdi);
 
 /// <summary>
@@ -30,8 +31,15 @@ public sealed class RolKullaniciDeposu
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = baglanti.Komut("""
-            select k.id, k.kod, coalesce(t.unvan, ''), k.eposta, k.aktif,
-                   k.son_giris_tarihi, coalesce(r.ad, '')
+            select k.id, k.kod, coalesce(t.unvan, ''), k.eposta,
+                   coalesce((select d.ad from public.kod_deger d
+                              join public.kod_liste l on l.id = d.liste_id
+                             where l.kod = 'taraf.departman'
+                               and d.deger = t.departman), ''),
+                   coalesce(t.gorev, ''),
+                   coalesce(nullif(t.telefon, ''), nullif(t.cep_tel, ''),
+                            k.cep_tel, ''),
+                   k.aktif, k.son_giris_tarihi, coalesce(r.ad, '')
               from public.taraf_kullanici k
               join public.taraf t on t.id = k.id
               left join public.rol r on r.id = k.rol_id
@@ -51,15 +59,23 @@ public sealed class RolKullaniciDeposu
         var q = (arama ?? "").Trim();
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = baglanti.Komut("""
-            select k.id, k.kod, coalesce(t.unvan, ''), k.eposta, k.aktif,
-                   k.son_giris_tarihi, coalesce(r.ad, '')
+            select k.id, k.kod, coalesce(t.unvan, ''), k.eposta,
+                   coalesce((select d.ad from public.kod_deger d
+                              join public.kod_liste l on l.id = d.liste_id
+                             where l.kod = 'taraf.departman'
+                               and d.deger = t.departman), ''),
+                   coalesce(t.gorev, ''),
+                   coalesce(nullif(t.telefon, ''), nullif(t.cep_tel, ''),
+                            k.cep_tel, ''),
+                   k.aktif, k.son_giris_tarihi, coalesce(r.ad, '')
               from public.taraf_kullanici k
               join public.taraf t on t.id = k.id
               left join public.rol r on r.id = k.rol_id
              where k.rol_id <> @p0
                and (@p1 = '' or t.unvan ilike '%' || @p1 || '%'
                              or k.kod ilike '%' || @p1 || '%'
-                             or k.eposta ilike '%' || @p1 || '%')
+                             or k.eposta ilike '%' || @p1 || '%'
+                             or t.gorev ilike '%' || @p1 || '%')
              order by k.aktif desc, t.unvan
              limit 50
             """, null, rolId, q);
@@ -143,8 +159,9 @@ public sealed class RolKullaniciDeposu
         await using var o = await komut.ExecuteReaderAsync(iptal);
         while (await o.ReadAsync(iptal))
             liste.Add(new RolKullanicisi(o.GetInt32(0), o.GetString(1), o.GetString(2),
-                o.GetString(3), o.GetInt16(4) == 1,
-                o.IsDBNull(5) ? null : o.GetDateTime(5), o.GetString(6)));
+                o.GetString(3), o.GetString(4), o.GetString(5), o.GetString(6),
+                o.GetInt16(7) == 1,
+                o.IsDBNull(8) ? null : o.GetDateTime(8), o.GetString(9)));
         return liste;
     }
 }

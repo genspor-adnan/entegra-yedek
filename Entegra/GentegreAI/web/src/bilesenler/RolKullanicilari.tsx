@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import type { RolKullanicisi } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
@@ -18,7 +17,11 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
   rolId: number;
   saltOkunur: boolean;
 }) {
-  const git = useNavigate();
+  // Personel karti YENI SEKMEDE acilir (kullanici: "karti kapatinca bu
+  //   ekrana donemedim") - rol karti oldugu yerde kalir, sekme kapaninca
+  //   kullanici kaldigi yere doner.
+  const kartiAc = (id: number) =>
+    window.open(`/personel/${id}`, '_blank', 'noopener');
   const [uyeler, setUyeler] = useState<RolKullanicisi[] | null>(null);
   const [secili, setSecili] = useState<number | null>(null);
   const [adaylar, setAdaylar] = useState<RolKullanicisi[]>([]);
@@ -87,8 +90,8 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
         {/* Ekle / Duzenle / Sil IKON olarak ustte - sube gridiyle ayni desen. */}
         <button className="d bir" title="Role kullanıcı ekle" disabled={saltOkunur || islemde}
                 onClick={() => setEkleAcik(true)}>＋</button>
-        <button className="d" title="Kullanıcı kartını aç" disabled={secili === null}
-                onClick={() => secili !== null && git(`/personel/${secili}`)}>✎</button>
+        <button className="d" title="Kullanıcı kartını yeni sekmede aç" disabled={secili === null}
+                onClick={() => secili !== null && kartiAc(secili)}>✎</button>
         <button className="d" title="Rolden çıkar (kullanıcı silinmez)"
                 disabled={saltOkunur || islemde || secili === null}
                 onClick={() => void cikar()}>🗑</button>
@@ -101,27 +104,30 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
         <thead>
           <tr>
             <th style={{ width: 34 }}></th>
-            <th>Kullanıcı</th><th>Kod</th><th>E-posta</th>
+            <th>Kullanıcı</th><th>Departman</th><th>Görev</th><th>Telefon</th>
+            <th>E-posta</th>
             <th style={{ textAlign: 'center' }}>Durum</th>
             <th>Son Giriş</th>
           </tr>
         </thead>
         <tbody>
-          {!uyeler && <tr><td colSpan={6}>Yükleniyor…</td></tr>}
+          {!uyeler && <tr><td colSpan={8}>Yükleniyor…</td></tr>}
           {uyeler?.length === 0 && (
-            <tr><td colSpan={6} className="bos">Bu rolde kullanıcı yok.</td></tr>
+            <tr><td colSpan={8} className="bos">Bu rolde kullanıcı yok.</td></tr>
           )}
           {uyeler?.map(k => (
             /* Tek tik SATIRI ISARETLER, cift tik kullanici kartini acar. */
             <tr key={k.id} className={secili === k.id ? 'secili' : undefined}
                 style={{ cursor: 'pointer' }}
                 onClick={() => setSecili(t => (t === k.id ? null : k.id))}
-                onDoubleClick={() => git(`/personel/${k.id}`)}>
+                onDoubleClick={() => kartiAc(k.id)}>
               <td style={{ textAlign: 'center' }}>
                 <input type="checkbox" checked={secili === k.id} readOnly />
               </td>
               <td>{k.unvan || '—'}</td>
-              <td>{k.kod}</td>
+              <td>{k.departman}</td>
+              <td>{k.gorev}</td>
+              <td>{k.telefon}</td>
               <td>{k.eposta}</td>
               <td style={{ textAlign: 'center' }}>
                 <span className={`rozet ${k.aktif ? 'ok' : 'gri'}`}>
@@ -163,7 +169,8 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
                 <thead>
                   <tr>
                     <th style={{ width: 34 }}></th>
-                    <th>Kullanıcı</th><th>Kod</th><th>Şu anki rolü</th>
+                    <th>Kullanıcı</th><th>Departman</th><th>Görev</th>
+                    <th>Şu anki rolü</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -176,12 +183,13 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
                         <input type="checkbox" checked={adaySecim.has(k.id)} readOnly />
                       </td>
                       <td>{k.unvan || '—'}</td>
-                      <td>{k.kod}</td>
+                      <td>{k.departman}</td>
+                      <td>{k.gorev}</td>
                       <td style={{ opacity: .7 }}>{k.rolAdi}</td>
                     </tr>
                   ))}
                   {adaylar.length === 0 && (
-                    <tr><td colSpan={4} className="bos">Eklenebilecek kullanıcı bulunamadı.</td></tr>
+                    <tr><td colSpan={5} className="bos">Eklenebilecek kullanıcı bulunamadı.</td></tr>
                   )}
                 </tbody>
               </table>

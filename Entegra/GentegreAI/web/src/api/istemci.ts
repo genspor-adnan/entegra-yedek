@@ -106,6 +106,7 @@ async function ham(yol: string, secenek: RequestInit, jsonGovde: boolean,
 /** Rol > Kullanicilar sekmesi satiri. */
 export interface RolKullanicisi {
   id: number; kod: string; unvan: string; eposta: string;
+  departman: string; gorev: string; telefon: string;
   aktif: boolean; sonGiris?: string | null; rolAdi: string;
 }
 
