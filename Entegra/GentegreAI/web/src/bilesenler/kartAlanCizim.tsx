@@ -103,7 +103,9 @@ export function alanCizici(b: AlanCizimBaglami) {
             <input type="date" value={tam.slice(0, 10)}
                    disabled={salt || !a.yazilabilir}
                    onChange={e => yaz(e.target.value, tam.slice(11, 16))} />
-            <input type="time" value={tam.slice(11, 16)}
+            {/* Saat kutusu tarihin YARISI kadar (kullanici): "22:07" dar
+                bir deger, tarihle esit genislik bos yer birakiyordu. */}
+            <input type="time" className="yari" value={tam.slice(11, 16)}
                    disabled={salt || !a.yazilabilir}
                    onChange={e => yaz(tam.slice(0, 10), e.target.value)} />
           </span>
