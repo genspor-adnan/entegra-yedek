@@ -90,7 +90,29 @@ public sealed class KullaniciDeposu
              where id = @p0
             """, new object?[] { tarafId, dil }, iptal);
 
-    public Task<List<SubeOzeti>> SubeleriAsync(int tarafId, CancellationToken iptal = default)
+    /// <summary>
+    /// Kullanıcının şubeleri - ROLÜNDEN gelir (234). Rolün şubesi tanımlı
+    /// değilse ve kurulumda TEK şube varsa o şube verilir: tek şubeli
+    /// kurulumda şube seçimi anlamsız (rol kartında bölüm de çizilmez),
+    /// kimse şubesiz kalmamalı.
+    /// </summary>
+    public async Task<List<SubeOzeti>> SubeleriAsync(int tarafId,
+        CancellationToken iptal = default)
+    {
+        var liste = await RolSubeleriAsync(tarafId, iptal);
+        if (liste.Count > 0) return liste;
+        return await _veri.ListeAsync(
+            "select s.id, s.ad, 1 as varsayilan, 1 as yazma " +
+            "  from public.sube s " +
+            " where s.aktif = 1 " +
+            "   and (select count(*) from public.sube where aktif = 1) = 1",
+            Array.Empty<object?>(),
+            o => new SubeOzeti(o.Sayi("id"), o.Metin("ad"), o.Bayrak("varsayilan"),
+                               o.Bayrak("yazma")),
+            iptal);
+    }
+
+    private Task<List<SubeOzeti>> RolSubeleriAsync(int tarafId, CancellationToken iptal)
         => _veri.ListeAsync("""
             -- Sube yetkisi ROLDEN gelir (234, kullanici karari): kullanicinin
             --   girebildigi subeler rolunun subeleridir. Eski kullanici_sube

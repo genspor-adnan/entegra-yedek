@@ -55,6 +55,11 @@ export function RolSubeleri({ rolId, saltOkunur }: {
   };
 
   if (hata && !satirlar) return null;   // yetkisi yoksa bolum hic cizilmez
+  // TEK SUBELI kurulumda sube secimi anlamsiz (kullanici): bolum hic cizilmez,
+  //   sunucu da rolun subesi yoksa o tek subeyi verir.
+  if (satirlar && satirlar.length <= 1) return null;
+
+  const secili = satirlar?.some(s => s.yetkili) ?? true;
 
   return (
     <div className="kagrup" style={{ marginTop: 12 }}>
@@ -73,6 +78,11 @@ export function RolSubeleri({ rolId, saltOkunur }: {
       </div>
       {hata && <div className="hata-kutusu">{hata}</div>}
       {mesaj && <div className="bilgi-kutusu">{mesaj}</div>}
+      {!secili && (
+        <div className="hata-kutusu">
+          Şube seçilmedi - bu roldeki kullanıcılar hiçbir şubeye giremez.
+        </div>
+      )}
       <table className="grid">
         <thead>
           <tr>
