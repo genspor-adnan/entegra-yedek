@@ -270,14 +270,19 @@ export interface YetkiSatiri {
   kod: string;
   ad: string;
   grup: string;
+  /** 1 = aksiyon yetkisi (tek izin), 0 = modül yetkisi (Gör/Ekle/Değiştir/Sil). */
+  tur: number;
+  /** Eski Delphi MODULID'i - ağaçta prefix hiyerarşisini kurar ('' ise yeni yetki). */
+  eskiModulId: string;
   gor: boolean;
   ekle: boolean;
   degistir: boolean;
   sil: boolean;
 }
 
-/** Yetki YAZMA istegi = satirin salt-gosterim alanlari (kod/ad/grup) cikarilmis hali. */
-export type YetkiSatiriIstegi = Omit<YetkiSatiri, 'kod' | 'ad' | 'grup'>;
+/** Yetki YAZMA istegi = satirin salt-gosterim alanlari cikarilmis hali. */
+export type YetkiSatiriIstegi =
+  Omit<YetkiSatiri, 'kod' | 'ad' | 'grup' | 'tur' | 'eskiModulId'>;
 
 export interface DokumanSatiri {
   id: number;

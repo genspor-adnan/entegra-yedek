@@ -35,6 +35,48 @@ public static class RolYetkiUclari
                 baglam.Yazma, iptal);
             return Results.Ok(liste);
         });
+
+        // Rol > Kullanicilar sekmesi (kullanici: "rollerin icine kullanici
+        //   ekleyebileyim"). Bir kullanici TEK role bagli - ekleme = rolunu
+        //   bu role cevirme, cikarma = varsayilan sistem roluna geri tasima.
+        var kul = yol.MapGroup("/api/kart/rol/{rolId:int}/kullanicilar")
+                     .WithTags("Kart").RequireAuthorization();
+
+        kul.MapGet("/", async (int rolId, BaglamCozucu cozucu, RolKullaniciDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("rol", Islem.Gor);
+            return Results.Ok(await depo.ListeleAsync(rolId, iptal));
+        });
+
+        kul.MapGet("/adaylar", async (int rolId, string? arama, BaglamCozucu cozucu,
+            RolKullaniciDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("rol", Islem.Gor);
+            return Results.Ok(await depo.AdaylarAsync(rolId, arama, iptal));
+        });
+
+        kul.MapPost("/{kullaniciId:int}", async (int rolId, int kullaniciId,
+            BaglamCozucu cozucu, RolKullaniciDeposu depo, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("rol", Islem.Degistir);
+            await depo.AtaAsync(rolId, kullaniciId, baglam.Yazma, iptal);
+            return Results.Ok(await depo.ListeleAsync(rolId, iptal));
+        });
+
+        kul.MapDelete("/{kullaniciId:int}", async (int rolId, int kullaniciId,
+            BaglamCozucu cozucu, RolKullaniciDeposu depo, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("rol", Islem.Degistir);
+            var mesaj = await depo.CikarAsync(rolId, kullaniciId, baglam.Yazma, iptal);
+            return Results.Ok(new { mesaj, kullanicilar = await depo.ListeleAsync(rolId, iptal) });
+        });
     }
 
     private static string Ip(HttpContext ctx) => ctx.Connection.RemoteIpAddress?.ToString() ?? "";

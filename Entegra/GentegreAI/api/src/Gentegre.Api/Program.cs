@@ -38,6 +38,7 @@ kurucu.Services.AddScoped<StokDurumDeposu>();
 kurucu.Services.AddScoped<AyarDeposu>();
 kurucu.Services.AddScoped<PanelDeposu>();
 kurucu.Services.AddScoped<RolYetkiDeposu>();
+kurucu.Services.AddScoped<RolKullaniciDeposu>();
 kurucu.Services.AddScoped<DokumanDeposu>();
 kurucu.Services.AddSingleton<ReferansDeposu>();
 kurucu.Services.AddScoped<BelgeDeposu>();

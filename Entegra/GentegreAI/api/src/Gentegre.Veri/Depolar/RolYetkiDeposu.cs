@@ -2,8 +2,13 @@
 
 namespace Gentegre.Veri.Depolar;
 
+/// <summary>
+/// Matris satiri. <paramref name="Tur"/> 1 = AKSIYON yetkisi (tek izin;
+/// ekle/degistir/sil anlamsiz), 0 = modul yetkisi. <paramref name="EskiModulId"/>
+/// eski Delphi MODULID'i - ekranda agac kurmak icin (prefix hiyerarsisi).
+/// </summary>
 public sealed record YetkiSatiri(int YetkiId, string Kod, string Ad, string Grup,
-    bool Gor, bool Ekle, bool Degistir, bool Sil);
+    short Tur, string EskiModulId, bool Gor, bool Ekle, bool Degistir, bool Sil);
 
 public sealed record YetkiGuncelleIstegi(int YetkiId, bool Gor, bool Ekle, bool Degistir, bool Sil);
 
@@ -24,7 +29,8 @@ public sealed class RolYetkiDeposu
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = baglanti.Komut("""
-            select y.id, y.kod, y.ad, y.grup,
+            select y.id, y.kod, y.ad, y.grup, y.tur,
+                   coalesce(y.eski_modul_id::text, ''),
                    coalesce(ry.gor, 0), coalesce(ry.ekle, 0), coalesce(ry.degistir, 0), coalesce(ry.sil, 0)
               from public.yetki y
               left join public.rol_yetki ry on ry.yetki_id = y.id and ry.rol_id = @p0
@@ -38,8 +44,9 @@ public sealed class RolYetkiDeposu
         while (await okuyucu.ReadAsync(iptal))
             sonuc.Add(new YetkiSatiri(
                 okuyucu.GetInt32(0), okuyucu.GetString(1), okuyucu.GetString(2), okuyucu.GetString(3),
-                okuyucu.GetInt16(4) == 1, okuyucu.GetInt16(5) == 1,
-                okuyucu.GetInt16(6) == 1, okuyucu.GetInt16(7) == 1));
+                okuyucu.GetInt16(4), okuyucu.GetString(5),
+                okuyucu.GetInt16(6) == 1, okuyucu.GetInt16(7) == 1,
+                okuyucu.GetInt16(8) == 1, okuyucu.GetInt16(9) == 1));
         return sonuc;
     }
 

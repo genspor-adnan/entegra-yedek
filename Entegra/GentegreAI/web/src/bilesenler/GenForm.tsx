@@ -23,6 +23,7 @@ import { TekOzluk } from './TekOzluk';
 import { TekKayit } from './TekKayit';
 export { Modal };
 import { RolYetkiMatrisi } from './RolYetkiMatrisi';
+import { RolKullanicilari } from './RolKullanicilari';
 import { DokumanGalerisi } from './DokumanGalerisi';
 import { StokDurumSekmesi } from './StokDurumSekmesi';
 import { StokHareketSekmesi } from './StokHareketSekmesi';
@@ -750,8 +751,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           : <HizmetListeFiyatlari hizmetId={id as number} />
       )}
 
-      {aktif?.tur === 'ozel' && kaynak === 'rol' && (
+      {aktif?.tur === 'ozel' && kaynak === 'rol' && aktif.anahtar === 'ozel:yetkiler' && (
         <RolYetkiMatrisi rolId={id as number} saltOkunur={salt} />
+      )}
+
+      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:rolKullanicilari' && (
+        <RolKullanicilari rolId={id as number} saltOkunur={salt} />
       )}
 
       {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:dokuman' && (

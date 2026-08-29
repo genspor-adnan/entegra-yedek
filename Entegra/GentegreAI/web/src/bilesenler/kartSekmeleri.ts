@@ -130,6 +130,8 @@ export function sekmeleriKur(secenek: {
   //   henuz rolId yok, kart once kaydedilmeli (Kisi'nin İlgili Kişiler'iyle ayni kural).
   if (kaynak === 'rol' && !yeniMi) {
     s.push({ tur: 'ozel', anahtar: 'ozel:yetkiler', baslik: 'Yetki Matrisi' });
+    // Kullanici: "rollerin icine kullanici ekleyebileyim" - uyelik sekmesi.
+    s.push({ tur: 'ozel', anahtar: 'ozel:rolKullanicilari', baslik: 'Kullanıcılar' });
   }
   // Personel'e ozel: Resim/Doküman galerisi (057_dokuman.sql, generic DokumanGalerisi -
   // Kişi/Cari/Stok'ta da aynı bileşen kullanılabilir). Yeni kayıtta henüz id yok.

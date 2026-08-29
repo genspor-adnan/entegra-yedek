@@ -103,6 +103,12 @@ async function ham(yol: string, secenek: RequestInit, jsonGovde: boolean,
   return yanit;
 }
 
+/** Rol > Kullanicilar sekmesi satiri. */
+export interface RolKullanicisi {
+  id: number; kod: string; unvan: string; eposta: string;
+  aktif: boolean; sonGiris?: string | null; rolAdi: string;
+}
+
 /** ÜTS cevap zarflari (223). */
 export interface UtsMesaji { tip?: string; met?: string; kod?: string }
 export interface UtsSorguYaniti { basarili: boolean; sonuc?: unknown; mesajlar: UtsMesaji[] }
@@ -216,6 +222,16 @@ export const api = {
 
   // ------------------------------------------------------- rol > yetkiler ----
   rolYetkileri: (rolId: number) => istek<YetkiSatiri[]>(`/api/kart/rol/${rolId}/yetkiler`),
+  rolKullanicilari: (rolId: number) =>
+    istek<RolKullanicisi[]>(`/api/kart/rol/${rolId}/kullanicilar`),
+  rolKullaniciAdaylari: (rolId: number, arama: string) =>
+    istek<RolKullanicisi[]>(
+      `/api/kart/rol/${rolId}/kullanicilar/adaylar?arama=${encodeURIComponent(arama)}`),
+  rolKullaniciEkle: (rolId: number, kullaniciId: number) =>
+    gonder<RolKullanicisi[]>(`/api/kart/rol/${rolId}/kullanicilar/${kullaniciId}`, {}),
+  rolKullaniciCikar: (rolId: number, kullaniciId: number) =>
+    istek<{ mesaj: string; kullanicilar: RolKullanicisi[] }>(
+      `/api/kart/rol/${rolId}/kullanicilar/${kullaniciId}`, { method: 'DELETE' }),
   rolYetkiKaydet: (rolId: number, satirlar: YetkiSatiriIstegi[]) =>
     gonder<YetkiSatiri[]>(`/api/kart/rol/${rolId}/yetkiler`, { satirlar }, 'PUT'),
 
