@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { KodListesiModali } from '../bilesenler/KodListesiModali';
+import { YardimIkonu } from '../bilesenler/YardimIkonu';
 
 const SEKMELER = [
   { anahtar: 'genel', baslik: 'Genel' },
@@ -11,8 +12,14 @@ type Sekme = typeof SEKMELER[number]['anahtar'];
 
 /** Ayar ekranında yönetilen kod listeleri (kullanıcı: Departman + Görev). */
 const LISTELER = [
-  { kod: 'taraf.departman', baslik: 'Departman' },
-  { kod: 'taraf.gorev', baslik: 'Görev' },
+  { kod: 'taraf.departman', baslik: 'Departman',
+    yardim: 'Personel kartındaki Departman seçeneklerini yönetir. '
+          + 'Etikete tıklayarak ekleyip düzenleyebilirsiniz; silinen bir değer '
+          + 'kullanan kayıtlarda alan boş görünür.' },
+  { kod: 'taraf.gorev', baslik: 'Görev',
+    yardim: 'Personel kartındaki Görev seçeneklerini yönetir. Kayıtlarda görev '
+          + 'artık ID olarak saklanır - buradaki adı değiştirmek tüm kayıtlarda '
+          + 'görünen adı değiştirir.' },
 ] as const;
 
 /**
@@ -82,6 +89,10 @@ export function IKAyarlar() {
                     {l.baslik} ✎
                   </span>
                   <span className="ikili">
+                    {/* (?) combonun SOLUNDA (kullanici) - ayar alanlarindaki
+                        yerlesimin aynisi. */}
+                    <YardimIkonu anahtar={`ayar.ik.${l.kod}`} baslik={l.baslik}
+                                 metin={l.yardim} hepGoster />
                     <select value={secili[l.kod] ?? ''}
                             onChange={e => setSecili(s => ({ ...s, [l.kod]: e.target.value }))}>
                       <option value="">

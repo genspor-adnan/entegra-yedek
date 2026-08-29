@@ -29,11 +29,19 @@ public static class KodListeUclari
         {
             await cozucu.CozAsync(ctx, iptal);
             var liste = await veri.ListeAsync("""
-                select d.deger, d.ad, d.sira, d.aktif
-                  from public.kod_deger d
-                  join public.kod_liste l on l.id = d.liste_id
-                 where l.kod = @p0 and d.dil = 0
-                 order by d.sira, d.deger
+                -- VARSAYILAN DIL: gocten gelen 4181 satir dil = -1 ile
+                --   yazilmis, uygulama icinde eklenenler dil = 0. Yalniz 0
+                --   suzulunce Delphi'den tasinan TUM listeler (departman,
+                --   sektor...) BOS goruluyordu. Ikisi de kabul edilir; ayni
+                --   deger her ikisinde varsa 0 (uygulama kaydi) kazanir.
+                select * from (
+                  select distinct on (d.deger) d.deger, d.ad, d.sira, d.aktif
+                    from public.kod_deger d
+                    join public.kod_liste l on l.id = d.liste_id
+                   where l.kod = @p0 and d.dil in (0, -1)
+                   order by d.deger, d.dil desc
+                ) t
+                 order by t.sira, t.deger
                 """, new object?[] { kod },
                 r => new { deger = r.GetInt32(0), ad = r.GetString(1),
                            sira = (int)r.GetInt16(2), aktif = (int)r.GetInt16(3) }, iptal);
@@ -92,7 +100,7 @@ public static class KodListeUclari
                    set ad = @p2, sira = coalesce(@p3, d.sira),
                        aktif = coalesce(@p4, d.aktif), degistiren = @p5
                   from public.kod_liste l
-                 where l.id = d.liste_id and l.kod = @p0 and d.deger = @p1 and d.dil = 0
+                 where l.id = d.liste_id and l.kod = @p0 and d.deger = @p1 and d.dil in (0, -1)
                 """, null, kod, deger, ad, istek!.Sira, istek.Aktif, baglam.KullaniciId);
             return await komut.ExecuteNonQueryAsync(iptal) > 0
                 ? Results.Ok(new { })
