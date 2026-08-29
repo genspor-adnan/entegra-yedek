@@ -113,7 +113,9 @@ export function PersonelKimlikOzet({
     //   kimlik seridi (.kaid) bu sarmalayicinin DISINDA, orada etiketler solda.
     <div className="kasira etiket-sag">
       {fotoSolEkOnce && fotoSolEk}
-      <div className="kasutun" style={{ flex: kimlikSutunGenisligi ? `0 0 ${kimlikSutunGenisligi}` : 1 }}>
+      <div className="kasutun"
+           style={{ flex: kimlikSutunGenisligi ? `0 0 ${kimlikSutunGenisligi}` : 1,
+                    minWidth: 0 }}>
         <div className="kagrup">
           <h6>Kimlik Bilgileri</h6>
           <div className="alan-izgara tek-sutun">
@@ -209,7 +211,7 @@ export function PersonelKimlikOzet({
       {/* Özlük ("İş Bilgileri") kimlik kutusunun SAGINDA, alanlar alt alta
           (kullanici) - eskiden ayri sekmedeydi. Hasta kartinda ozluk yok. */}
       {!ozetGizli && (
-        <div className="kasutun" style={{ flex: 1 }}>
+        <div className="kasutun" style={{ flex: 1, minWidth: 0 }}>
           <TekOzluk meta={ozlukMeta} durum={ozlukDurum} saltOkunur={saltOkunur}
                     onDegis={onOzlukDegis}
                     subeEk={subeAlan && onSubeDegis ? (

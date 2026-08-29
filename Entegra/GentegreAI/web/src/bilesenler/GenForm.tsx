@@ -90,6 +90,23 @@ interface Props {
  *  - Alan hatalari (`alanlar[]`) ilgili girdinin altina yazilir.
  *  - Detaylar FARK olarak gonderilir (eklenen / degisen / silinen), tam liste degil.
  */
+/**
+ * Sekme ikonlari (kullanici: "sekmelere ikon ekle"). Anahtar SEKME BASLIGI -
+ * sekmeler katalogdan/alan gruplarindan uretildigi icin ayri bir ikon alani
+ * yok; listede olmayan baslik notr simge alir.
+ */
+const SEKME_IKON: Record<string, string> = {
+  'Genel': '📋', 'Kimlik': '🪪', 'İletişim': '📞', 'Adresler': '📍',
+  'Notlar': '📝', 'Mali': '💰', 'Fatura Bilgileri': '🧾', 'Banka': '🏦',
+  'Depolar': '🏬', 'Logo & Kaşe': '🖼️', 'e-Belge': '📨', 'ÜTS': '🩺',
+  'İzinler': '🌴', 'Eğitimler': '🎓', 'Resim / Doküman': '📎',
+  'Yorum / Medya': '💬', 'Yetki Matrisi': '🛡️', 'Kullanıcılar': '👥',
+  'Stok Durumu': '📦', 'Hareketler': '🔄', 'Fiyatlar': '🏷️',
+  'Ek Alanlar': '➕', 'Reçete': '🧪', 'Paket İçeriği': '🧺',
+  'Satırlar': '📄', 'Sevkiyat': '🚚', 'Özlük': '🗂️', 'Ayarlar': '⚙️',
+};
+const sekmeIkonu = (baslik: string) => SEKME_IKON[baslik] ?? '▫️';
+
 export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarmalayici, onKaydedildi, yerTutucuSekmeler,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
@@ -586,7 +603,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
               className={`kat${s.anahtar === aktif?.anahtar ? ' on' : ''}`}
               onClick={() => setAktifSekme(s.anahtar)}
             >
-              {c(s.baslik)}
+              {sekmeIkonu(s.baslik)} {c(s.baslik)}
               {s.tur === 'detay' && <span className="b">{(detaylar[s.detay.ad] ?? bosDetay()).guncel.length}</span>}
             </div>
           ))}
