@@ -1,19 +1,26 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import type { RolKullanicisi } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
+import { Modal } from './Modal';
 
 /**
- * Rol kartı "Kullanıcılar" sekmesi (kullanıcı: "rollerin içine kullanıcı
- * ekleyebileyim"). Bir kullanıcı TEK role bağlı olduğu için "ekleme" o
- * kullanıcının rolünü bu role çevirir - eski rolü satırda gösterilir ki
- * kimin nereden alındığı görünsün. "Çıkar" varsayılan sistem rolüne taşır.
+ * Rol kartı Genel sekmesindeki "Kullanıcılar" gridi (kullanıcı: "kullanıcıları
+ * genel sekmesine al", "standart GenGrid deseni, üstte ekle/düzenle/sil ikonu").
+ *
+ * Bir kullanıcı TEK role bağlı olduğu için "ekleme" o kullanıcının rolünü bu
+ * role çevirir (eski rolü aday listesinde görünür); 🗑 rolden çıkarır -
+ * kullanıcıyı SİLMEZ, varsayılan sistem rolüne taşır. ✎ kullanıcının kartını
+ * açar.
  */
 export function RolKullanicilari({ rolId, saltOkunur }: {
   rolId: number;
   saltOkunur: boolean;
 }) {
+  const git = useNavigate();
   const [uyeler, setUyeler] = useState<RolKullanicisi[] | null>(null);
+  const [secili, setSecili] = useState<number | null>(null);
   const [adaylar, setAdaylar] = useState<RolKullanicisi[]>([]);
   const [arama, setArama] = useState('');
   const [ekleAcik, setEkleAcik] = useState(false);
@@ -49,65 +56,42 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
     } catch (h) { setHata(hataMetni(h)) } finally { setIslemde(false) }
   };
 
-  const cikar = async (k: RolKullanicisi) => {
+  const cikar = async () => {
+    const k = uyeler?.find(x => x.id === secili);
+    if (!k) return;
     setIslemde(true); setHata(''); setBilgi('');
     try {
       const y = await api.rolKullaniciCikar(rolId, k.id);
       setUyeler(y.kullanicilar);
+      setSecili(null);
       setBilgi(`${k.unvan || k.kod}: ${y.mesaj}`);
     } catch (h) { setHata(hataMetni(h)) } finally { setIslemde(false) }
   };
 
   return (
-    <div className="kagrup">
-      <h6>
-        Kullanıcılar {uyeler && <span style={{ opacity: .6 }}>({uyeler.length})</span>}
-        {!saltOkunur && (
-          <button type="button" className="d bir" disabled={islemde}
-                  onClick={() => setEkleAcik(a => !a)}>
-            {ekleAcik ? 'Kapat' : '＋ Kullanıcı Ekle'}
-          </button>
-        )}
-      </h6>
+    <div className="kagrup" style={{ marginTop: 12 }}>
+      <div className="numaralama-bas bitisik">
+        <h6>Kullanıcılar {uyeler && <span style={{ opacity: .6 }}>({uyeler.length})</span>}</h6>
+        {/* Ekle / Duzenle / Sil IKON olarak ustte - sube gridiyle ayni desen. */}
+        <button className="d bir" title="Role kullanıcı ekle" disabled={saltOkunur || islemde}
+                onClick={() => setEkleAcik(true)}>＋</button>
+        <button className="d" title="Kullanıcı kartını aç" disabled={secili === null}
+                onClick={() => secili !== null && git(`/personel/${secili}`)}>✎</button>
+        <button className="d" title="Rolden çıkar (kullanıcı silinmez)"
+                disabled={saltOkunur || islemde || secili === null}
+                onClick={() => void cikar()}>🗑</button>
+      </div>
 
-      {hata && <div className="alan-hata" style={{ margin: '0 10px' }}>{hata}</div>}
-      {bilgi && <div className="bilgi-kutusu" style={{ margin: '0 10px 10px' }}>{bilgi}</div>}
+      {hata && <div className="hata-kutusu">{hata}</div>}
+      {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
 
-      {ekleAcik && !saltOkunur && (
-        <div style={{ margin: '0 10px 10px', padding: 8, border: '1px solid var(--cizgi)',
-                      borderRadius: 4 }}>
-          <input placeholder="Kullanıcı ara (ad, kod, e-posta)…" value={arama}
-                 style={{ width: 300 }} onChange={e => setArama(e.target.value)} />
-          <div style={{ maxHeight: 220, overflowY: 'auto', marginTop: 8 }}>
-            <table className="detay-tablo">
-              <tbody>
-                {adaylar.map(k => (
-                  <tr key={k.id}>
-                    <td>{k.unvan || k.kod}</td>
-                    <td style={{ opacity: .7 }}>{k.kod}</td>
-                    <td style={{ opacity: .7 }}>{k.rolAdi}</td>
-                    <td style={{ width: 90, textAlign: 'right' }}>
-                      <button type="button" className="d" disabled={islemde}
-                              onClick={() => void ekle(k)}>Ekle</button>
-                    </td>
-                  </tr>
-                ))}
-                {adaylar.length === 0 && (
-                  <tr><td className="bos">Eklenebilecek kullanıcı bulunamadı.</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      <table className="detay-tablo">
+      <table className="grid">
         <thead>
           <tr>
+            <th style={{ width: 34 }}></th>
             <th>Kullanıcı</th><th>Kod</th><th>E-posta</th>
             <th style={{ textAlign: 'center' }}>Durum</th>
             <th>Son Giriş</th>
-            {!saltOkunur && <th style={{ width: 80 }}></th>}
           </tr>
         </thead>
         <tbody>
@@ -116,7 +100,14 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
             <tr><td colSpan={6} className="bos">Bu rolde kullanıcı yok.</td></tr>
           )}
           {uyeler?.map(k => (
-            <tr key={k.id}>
+            /* Tek tik SATIRI ISARETLER, cift tik kullanici kartini acar. */
+            <tr key={k.id} className={secili === k.id ? 'secili' : undefined}
+                style={{ cursor: 'pointer' }}
+                onClick={() => setSecili(t => (t === k.id ? null : k.id))}
+                onDoubleClick={() => git(`/personel/${k.id}`)}>
+              <td style={{ textAlign: 'center' }}>
+                <input type="checkbox" checked={secili === k.id} readOnly />
+              </td>
               <td>{k.unvan || '—'}</td>
               <td>{k.kod}</td>
               <td>{k.eposta}</td>
@@ -126,17 +117,45 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
                 </span>
               </td>
               <td>{k.sonGiris ? String(k.sonGiris).slice(0, 16).replace('T', ' ') : '—'}</td>
-              {!saltOkunur && (
-                <td style={{ textAlign: 'right' }}>
-                  <button type="button" className="d" disabled={islemde}
-                          title="Varsayılan role taşır"
-                          onClick={() => void cikar(k)}>Çıkar</button>
-                </td>
-              )}
             </tr>
           ))}
         </tbody>
       </table>
+
+      {ekleAcik && (
+        <Modal baslik="Role Kullanıcı Ekle" dar onKapat={() => setEkleAcik(false)}
+          alt={<button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
+                       onClick={() => setEkleAcik(false)}>Kapat</button>}>
+          <div style={{ padding: 10 }}>
+            <input placeholder="Kullanıcı ara (ad, kod, e-posta)…" value={arama}
+                   style={{ width: '100%' }} autoFocus
+                   onChange={e => setArama(e.target.value)} />
+            <div style={{ maxHeight: 320, overflowY: 'auto', marginTop: 8 }}>
+              <table className="grid">
+                <thead>
+                  <tr><th>Kullanıcı</th><th>Kod</th><th>Şu anki rolü</th><th style={{ width: 70 }}></th></tr>
+                </thead>
+                <tbody>
+                  {adaylar.map(k => (
+                    <tr key={k.id}>
+                      <td>{k.unvan || '—'}</td>
+                      <td>{k.kod}</td>
+                      <td style={{ opacity: .7 }}>{k.rolAdi}</td>
+                      <td style={{ textAlign: 'right' }}>
+                        <button type="button" className="d" disabled={islemde}
+                                onClick={() => void ekle(k)}>Ekle</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {adaylar.length === 0 && (
+                    <tr><td colSpan={4} className="bos">Eklenebilecek kullanıcı bulunamadı.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { api } from '../api/istemci';
 import type { YetkiSatiri } from '../api/sozlesme';
 import { hataMetni } from '../api/sozlesme';
 import { LISTELER } from '../sayfalar/listeTanimlari';
+import { useOturum } from '../kimlik/OturumBaglami';
 
 type Sutun = 'gor' | 'ekle' | 'degistir' | 'sil';
 const SUTUNLAR: { ad: Sutun; baslik: string }[] = [
@@ -29,11 +30,16 @@ interface Dugum {
   cocuklar: Dugum[];
 }
 
-/** Yetki kodu → menüdeki yeri: ekran ağacı ile yetki ağacı aynı görünsün. */
-function menuHaritasi() {
+/**
+ * Yetki kodu → menüdeki yeri: ekran ağacı ile yetki ağacı aynı görünsün.
+ * ÜRÜN MODU (232) burada da geçerli: ERP'de "Kayıt Kabul" gibi HBYS'e özgü
+ * ekranlar menüde yok, yetki ağacında da başlık açmazlar.
+ */
+function menuHaritasi(urunModu: number) {
   const harita = new Map<string, { grup: string; altGrup?: string; ic: string }>();
   const grupSirasi: string[] = [];
   for (const l of LISTELER) {
+    if (l.urunModu && l.urunModu !== urunModu) continue;
     if (l.menuGrup && !grupSirasi.includes(l.menuGrup)) grupSirasi.push(l.menuGrup);
     // Ayni yetki kodu birden cok listede olabilir (belge -> teklif/siparis/fatura...);
     //   ILK gorunen yeri esas aliriz - menude de o sirayla cizilir.
@@ -44,8 +50,8 @@ function menuHaritasi() {
 }
 
 /** Düz yetki listesinden menü düzeninde ağaç kurar. */
-function agacKur(satirlar: YetkiSatiri[]): Dugum[] {
-  const { harita, grupSirasi } = menuHaritasi();
+function agacKur(satirlar: YetkiSatiri[], urunModu: number): Dugum[] {
+  const { harita, grupSirasi } = menuHaritasi(urunModu);
   const kokler: Dugum[] = [];
   const kokBul = (ad: string, ic?: string) => {
     let d = kokler.find(k => k.ad === ad);
@@ -128,12 +134,14 @@ function yapraklar(d: Dugum, biriktir: YetkiSatiri[] = []): YetkiSatiri[] {
  * Kaydet YALNIZ değişen satırları gönderir.
  */
 export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkunur: boolean }) {
+  const { kullanici } = useOturum();
   const [satirlar, setSatirlar] = useState<YetkiSatiri[] | null>(null);
   const [ilk, setIlk] = useState<Map<number, YetkiSatiri>>(new Map());
   const [yukleniyor, setYukleniyor] = useState(false);
   const [kaydediyor, setKaydediyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const [bilgi, setBilgi] = useState<string | null>(null);
+  // Kullanici: matris VARSAYILAN KAPALI acilsin - istenen dal elle acilir.
   const [kapali, setKapali] = useState<Set<string>>(new Set(['g:eski']));
   const [arama, setArama] = useState('');
 
@@ -151,7 +159,15 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
       .finally(() => setYukleniyor(false));
   }, [rolId]);
 
-  const agac = useMemo(() => (satirlar ? agacKur(satirlar) : []), [satirlar]);
+  // Agac aktif urun moduna gore kurulur (232).
+  const agac = useMemo(() => (satirlar ? agacKur(satirlar, kullanici?.urunModu ?? 1) : []),
+                       [satirlar, kullanici?.urunModu]);
+
+  // Ilk yuklemede TUM dallar kapali (kullanici) - 900 satirlik agac acik
+  //   gelirse ekran okunmuyordu.
+  useEffect(() => {
+    if (agac.length > 0) setKapali(new Set(agac.flatMap(k => tumAnahtarlar(k))));
+  }, [agac]);
 
   /** Arama: eşleşen yaprakların id kümesi (atalar açık çizilir). */
   const suzgec = useMemo(() => {
@@ -269,8 +285,18 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
         )}
       </h6>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '0 10px 8px' }}>
-        <input placeholder="Yetki ara…" value={arama} style={{ width: 240 }}
-               onChange={e => setArama(e.target.value)} />
+        {/* Listelerdeki oval arama kutusuyla ayni gorunum (kullanici). */}
+        <div className="ara" style={{
+          maxWidth: 225, margin: 0, height: 23, borderRadius: 12,
+          background: 'var(--yuz)', color: 'var(--yazi)', border: '1px solid var(--cizgi)',
+        }}>
+          <span>🔍</span>
+          <input
+            style={{ border: 0, background: 'transparent', outline: 'none',
+                     width: '100%', color: 'inherit' }}
+            placeholder="Yetki ara…" value={arama}
+            onChange={e => setArama(e.target.value)} />
+        </div>
         <button type="button" className="d" onClick={() => setKapali(new Set())}>
           Tümünü Aç
         </button>

@@ -5,6 +5,7 @@ import { IlgiliKisiler } from '../IlgiliKisiler';
 import { TekAdres } from '../TekAdres';
 import { PersonelKimlikOzet } from '../PersonelKimlikOzet';
 import { KartResimKutusu } from '../KartResimKutusu';
+import { RolKullanicilari } from '../RolKullanicilari';
 import { TEK_SUTUN_KARTLAR } from '../kartSekmeleri';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
 import type { Deger } from '../kartAlanCizim';
@@ -393,6 +394,13 @@ return (
         sekmede (kullanici): kutu "hangi depolari gorurum" sorusunun cevabi,
         listenin hemen ustunde durmasi gerekiyor. Yeni subede henuz id yok -
         once kaydedilmeli. */}
+    {/* Rol kartinda kullanicilar Genel sekmesinde, alanlarin altinda
+        (kullanici: "kullanicilari genel sekmesine al, kullanici sekmesini
+        kaldir"). Yeni rolde henuz id yok - once kaydedilmeli. */}
+    {kaynak === 'rol' && !yeniMi && aktif.baslik === 'Genel' && (
+      <RolKullanicilari rolId={id as number} saltOkunur={salt} />
+    )}
+
     {kaynak === 'sube' && aktif.baslik === 'Depolar' && (() => {
       const depoDetay = meta.detaylar.find(d => d.ad === 'depolar');
       if (!depoDetay) return null;
