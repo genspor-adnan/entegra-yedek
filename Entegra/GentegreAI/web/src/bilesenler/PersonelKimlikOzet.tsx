@@ -24,6 +24,8 @@ interface Props {
   ozetGizli?: boolean;
   vknoGizli?: boolean;
   kimlikSutunGenisligi?: string;
+  /** Foto + Özet sütunu SAĞA yaslansın (kullanıcı; personel kartı). */
+  fotoSagaYasli?: boolean;
   /** Yeni kayıtta henüz yok; kart kaydedilmeden dosya yüklenemez. */
   kaynakId?: number;
 }
@@ -48,7 +50,7 @@ function yasHesapla(tarihStr: string): string | null {
 export function PersonelKimlikOzet({
   kartAdi = 'personel', vknoAlan, vkno, onVknoDegis, gorevAlan, gorev, onGorevDegis,
   ozlukMeta, ozlukDurum, saltOkunur, onOzlukDegis, egitimler, fotoSolEk, ozetGizli,
-  vknoGizli, kimlikSutunGenisligi, kaynakId, fotoSolEkOnce = false,
+  vknoGizli, kimlikSutunGenisligi, fotoSagaYasli, kaynakId, fotoSolEkOnce = false,
 }: Props) {
   const yerler = useYerler(true);
   const [resimUrl, setResimUrl] = useState<string | null>(null);
@@ -184,7 +186,8 @@ export function PersonelKimlikOzet({
         {egitimler}
       </div>
       {!fotoSolEkOnce && fotoSolEk}
-      <div className="kasutun" style={{ flex: '0 0 150px' }}>
+      <div className="kasutun"
+           style={{ flex: '0 0 150px', marginLeft: fotoSagaYasli ? 'auto' : undefined }}>
         <div className="kagrup kagrup-resim">
           <h6>Fotoğraf</h6>
           {!saltOkunur && kaynakId && (
