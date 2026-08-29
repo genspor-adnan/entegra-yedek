@@ -118,6 +118,14 @@ export interface UtsBelgeBildirimYaniti {
   belgeNo: string; toplam: number; basarili: number; hatali: number;
   sonuclar: UtsBelgeBildirimSatiri[]; mesaj: string;
 }
+/** Verme hazırla: hazırlanamayan satır (gridde gösterilir, CSV'ye gider). */
+export interface UtsHazirlaAtlanan {
+  belgeNo: string; tarih: string; cari: string; stok: string;
+  urunNo: string; seriNo: string; lotNo: string; adet: number; sebep: string;
+}
+export interface UtsHazirlaYaniti {
+  olusan: number; atlanan: UtsHazirlaAtlanan[]; atlananSayisi: number; mesaj: string;
+}
 
 async function istek<T>(yol: string, secenek: RequestInit = {}): Promise<T> {
   const yanit = await ham(yol, secenek, true);
@@ -497,8 +505,7 @@ export const api = {
     gonder<UtsBildirimYaniti>(`/api/uts/bildirim/${id}/yeniden-gonder`, {}),
   /** İki aşamalı verme, 1. adım: bekleyen kayıtları üretir (ÜTS'ye gitmez). */
   utsVermeHazirla: () =>
-    gonder<{ olusan: number; atlanan: string[]; atlananSayisi: number; mesaj: string }>(
-      '/api/uts/verme-hazirla', {}),
+    gonder<UtsHazirlaYaniti>('/api/uts/verme-hazirla', {}),
   utsBelgedenBildir: (belgeId: number) =>
     gonder<UtsBelgeBildirimYaniti>(`/api/uts/belge/${belgeId}/bildir`, {}),
   utsBildirimDetay: (id: number) =>

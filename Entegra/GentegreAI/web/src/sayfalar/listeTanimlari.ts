@@ -696,7 +696,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Kayboldu', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Stok & Hizmet', menuAd: 'ÜTS Gelen/Askıdakiler', ic: '🩺',
+    // Uc UTS ekrani "Stok & Hizmet > ÜTS" alt menusunde toplanir (kullanici).
+    menuGrup: 'Stok & Hizmet', menuAltGrup: 'ÜTS',
+    menuAd: 'Gelen / Askıdakiler', ic: '🩺',
     yetkiKodu: 'uts', menuSira: 60,
   },
   {
@@ -724,7 +726,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'İptal',    filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Stok & Hizmet', menuAd: 'ÜTS Bildirimleri', ic: '📡',
+    menuGrup: 'Stok & Hizmet', menuAltGrup: 'ÜTS',
+    menuAd: 'Bildirimler', ic: '📡',
     yetkiKodu: 'uts', menuSira: 61,
   },
   {
@@ -732,7 +735,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   Liste degil, kendi sayfasi (App.tsx rotayi tanimlar).
     kaynak: 'uts-sorgu', ozelSayfa: true, baslik: 'ÜTS Ürün Sorgu',
     yol: 'Stok › ÜTS Ürün Sorgu',
-    menuGrup: 'Stok & Hizmet', menuAd: 'ÜTS Ürün Sorgu', ic: '🔍',
+    menuGrup: 'Stok & Hizmet', menuAltGrup: 'ÜTS',
+    menuAd: 'Ürün Sorgu', ic: '🔍',
     yetkiKodu: 'uts', menuSira: 62,
   },
   {

@@ -13,7 +13,8 @@ import { UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
 import { UtsGenelBildirimModali, type UtsBildirimTuru }
   from '../bilesenler/uts/UtsGenelBildirimModali';
 import { UtsBelgeSonucModali } from '../bilesenler/uts/UtsBelgeSonucModali';
-import type { UtsBelgeBildirimYaniti } from '../api/istemci';
+import { UtsHazirlaSonucModali } from '../bilesenler/uts/UtsHazirlaSonucModali';
+import type { UtsBelgeBildirimYaniti, UtsHazirlaYaniti } from '../api/istemci';
 import { dosyaIndirUrl } from '../bilesenler/indir';
 import { ebelgeCiktisi } from './ebelgeIslem';
 import { gelenBelgeAksiyonu } from './gelenBelgeIslem';
@@ -72,6 +73,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     kurumUnvan: string; askiAdet: number; seriNo: string } | null>(null);
   const [utsKullanim, setUtsKullanim] = useState(false);
   const [utsGenel, setUtsGenel] = useState<UtsBildirimTuru | null>(null);
+  // Verme hazirlama raporu (atlananlar gridi + CSV).
+  const [utsHazirla, setUtsHazirla] = useState<UtsHazirlaYaniti | null>(null);
   // Belge koprusu sonucu (226): satir satir verme/alma raporu.
   const [utsBelgeSonuc, setUtsBelgeSonuc] = useState<UtsBelgeBildirimYaniti | null>(null);
   // Donusum modali (F8): siparis/irsaliye satirlarindan yeni belge uretir.
@@ -504,9 +507,8 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         case 'uts.verme':
           await guvenli(async () => {
             const y = await api.utsVermeHazirla();
-            mesaj(y.mesaj + (y.atlanan.length > 0
-              ? '\n\nAtlananlar:\n• ' + y.atlanan.join('\n• ')
-              : ''));
+            // Atlananlar GRIDDE (kullanici): siralanir + CSV kaydedilir.
+            if (y.atlanan.length > 0) setUtsHazirla(y); else mesaj(y.mesaj);
             setYenile(t => t + 1);
           });
           return;
@@ -830,6 +832,9 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
     )}
     {utsBelgeSonuc && (
       <UtsBelgeSonucModali sonuc={utsBelgeSonuc} onKapat={() => setUtsBelgeSonuc(null)} />
+    )}
+    {utsHazirla && (
+      <UtsHazirlaSonucModali sonuc={utsHazirla} onKapat={() => setUtsHazirla(null)} />
     )}
     {utsGenel && (
       <UtsGenelBildirimModali

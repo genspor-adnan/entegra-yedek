@@ -401,7 +401,9 @@ public sealed class UtsServisi
         var belgeler = await _depo.VermeHazirlanacakBelgelerAsync(subeId, iptal);
         var hesaplar = new Dictionary<int, UtsHesabi>();
         var olusan = 0;
-        var atlanan = new List<string>();
+        // Atlananlar GRIDDE gosterilir (kullanici) - duz metin degil, kolonlu
+        //   kayit: ekranda siralanir, CSV olarak kaydedilir.
+        var atlanan = new List<VermeHazirlaAtlanan>();
 
         foreach (var belgeId in belgeler)
         {
@@ -411,19 +413,19 @@ public sealed class UtsServisi
             {
                 if (i.UrunNo.Length == 0)
                 {
-                    atlanan.Add($"{b.BelgeNo} · {i.StokAdi}: stok kartında ÜTS ürün no (GTIN) boş.");
+                    atlanan.Add(Atla(b, i, "Stok kartında ÜTS ürün no (GTIN) boş."));
                     continue;
                 }
                 if (b.TarafUtsNo.Length == 0)
                 {
-                    atlanan.Add($"{b.BelgeNo} · {b.TarafUnvan}: cari ÜTS Kurum No boş.");
+                    atlanan.Add(Atla(b, i, "Cari kartında ÜTS Kurum No boş."));
                     continue;
                 }
                 decimal? adt;
                 try { adt = UtsDogrulama.AdetKurali(i.SeriNo, i.LotNo, i.Adet); }
                 catch (GentegreHatasi h)
                 {
-                    atlanan.Add($"{b.BelgeNo} · {i.StokAdi}: {h.Message}");
+                    atlanan.Add(Atla(b, i, h.Message));
                     continue;
                 }
 
@@ -449,15 +451,28 @@ public sealed class UtsServisi
         return new
         {
             olusan,
-            atlanan = atlanan.Take(20).ToList(),
+            atlanan,
             atlananSayisi = atlanan.Count,
             mesaj = olusan == 0 && atlanan.Count == 0
                 ? "Hazırlanacak yeni satır yok - uygun faturaların tüm seri/lot satırları zaten bildirilmiş ya da bekliyor."
                 : $"{olusan} bekleyen verme bildirimi hazırlandı"
                   + (atlanan.Count > 0 ? $", {atlanan.Count} satır atlandı." : ".")
-                  + " Gridde seçip 📤 Gönder'e basın."
+                  + (olusan > 0 ? " Gridde seçip 📤 Gönder'e basın." : "")
         };
+
+        static VermeHazirlaAtlanan Atla(
+            (short Tur, string BelgeNo, DateTime BelgeTarihi, int SubeId, int TarafId,
+             string TarafUnvan, string TarafUtsNo) b,
+            UtsDeposu.BelgeIzlemSatiri i, string sebep) =>
+            new(b.BelgeNo, b.BelgeTarihi.ToString("dd.MM.yyyy",
+                    System.Globalization.CultureInfo.InvariantCulture),
+                b.TarafUnvan, i.StokAdi, i.UrunNo, i.SeriNo, i.LotNo, i.Adet, sebep);
     }
+
+    /// <summary>Hazırlanamayan satır - ekranda grid, dışa aktarımda CSV satırı.</summary>
+    public sealed record VermeHazirlaAtlanan(string BelgeNo, string Tarih, string Cari,
+        string Stok, string UrunNo, string SeriNo, string LotNo, decimal Adet,
+        string Sebep);
 
     // ---------------------------------------------------------- sorgular ----
 
