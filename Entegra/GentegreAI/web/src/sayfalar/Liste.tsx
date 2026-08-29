@@ -697,16 +697,6 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
       />
     ) : (
     <>
-    {/* RANDEVU (243): gridin ustunde gunluk/haftalik takvim - hucreye tiklamak
-        o saate yeni randevu acar, dolu randevu karti acar. */}
-    {tanim.kaynak === 'randevu' && (
-      <RandevuTakvimi
-        ayarlar={randevuAyarlari}
-        yenile={yenile}
-        onYeni={bas => git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`)}
-        onAc={id => git(`/randevu/${id}`)}
-      />
-    )}
     <GenGrid
       // key: kaynak degisince (baska liste ekranina gecince) GenGrid TAMAMEN yeniden
       //   kurulsun - Route ayni tree konumunda kaldigi icin React bilesen orneğini
@@ -765,6 +755,17 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         </button>
       )}
     />
+    {/* RANDEVU (243): takvim gridin ALTINDA (kullanici: "standart desen altta
+        kalmis, uste al") - liste ve arac cubugu once, takvim ikinci katman.
+        Hucreye tiklamak o saate yeni randevu acar, dolu randevu karti acar. */}
+    {tanim.kaynak === 'randevu' && (
+      <RandevuTakvimi
+        ayarlar={randevuAyarlari}
+        yenile={yenile}
+        onYeni={bas => git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`)}
+        onAc={id => git(`/randevu/${id}`)}
+      />
+    )}
     </>
     )}
 
