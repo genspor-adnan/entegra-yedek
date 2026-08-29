@@ -77,6 +77,8 @@ const ROZET_SINIFI: Record<string, string> = {
   'Hazırlanıyor': 'gri', 'Sunuldu': 'bilgi',
   'Tevkifatlı': 'uyari', 'KDV İstisna': 'bilgi', 'İhraç Kayıtlı': 'bilgi',
   'Fiyat Farkı': 'gri', 'Kur Farkı': 'gri', 'SGK': 'bilgi',
+  // Randevu durumlari (243, kullanici: "randevu listesi durum rozet olsun").
+  'Planlandı': 'bilgi', 'Geldi': 'ok', 'Gelmedi': 'hata',
   'Bilinmiyor': 'hata',
 };
 
