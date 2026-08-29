@@ -1,4 +1,3 @@
-import type { BelgeYaniti } from '../api/sozlesme';
 import type { SatirDurumu } from './belgeSatir';
 import { hamSayi } from '../bilesenler/bicim';
 
@@ -251,4 +250,3 @@ return {
 export const doluSatirlar = (satirlar: SatirDurumu[]) =>
   satirlar.filter(s => s.stokId || s.hizmetId);
 
-export type BelgeKayitYaniti = BelgeYaniti;

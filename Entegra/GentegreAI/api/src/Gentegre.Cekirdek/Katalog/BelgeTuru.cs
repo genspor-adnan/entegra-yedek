@@ -31,6 +31,13 @@ public static class BelgeTuru
     /// <summary>Stoktan talep: stok/cari ETKILEMEZ, karsilanmasi transferle olur.</summary>
     public const int Talep = 105;
 
+    /// <summary>
+    /// HASTA BASVURUSU (246). Satis siparisi (19) ile ayni davranis: hizmet/
+    /// malzeme satirlarini tasir, stok ve muhasebe ETKILEMEZ; gercek hareket
+    /// faturaya/fise/tahakkuka donusturulunce olusur.
+    /// </summary>
+    public const int Basvuru = 30;
+
     /// <summary>e-Fatura / e-Arsiv olarak GIDEN satis faturasi.</summary>
     public const int SatisFaturasi = 15;
 

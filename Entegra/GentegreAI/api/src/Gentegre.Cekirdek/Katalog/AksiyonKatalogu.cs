@@ -326,6 +326,31 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            // BASVURU (246, kullanici): satis siparisinin AYNISI - ek olarak
+            //   tahsilat acilabilir (hasta odemesi basvuru ekranindan alinir).
+            ["basvuru-liste"] = new AksiyonTanimi[]
+            {
+                new("belge.yeni",     "＋ Yeni Başvuru", "belge", Kisayol: "Ctrl+N",
+                    KaynakKodu: "belge", Islem: Islem.Ekle, Sira: 10),
+                new("belge.ac",       "Aç",              "belge", Kisayol: "Enter",
+                    KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                new("belge.sil",      "🗑 Sil",          "belge", Kisayol: "Del",
+                    KaynakKodu: "belge", Islem: Islem.Sil, KayitGerekir: true, Sira: 25),
+                new("belge.donustur", "⇢ Dönüştür",      "belge",
+                    AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 30),
+                // Tahsilat: hasta odemesi (nakit/banka/POS) basvurudan alinir.
+                new("kasa.tahsilat.yeni", "＋ Tahsilat", "kasa",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Ekle, Sira: 35),
+                new("belge.iptal",    "İptal Et",        "belge", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "belge.iptal", KayitGerekir: true, Sira: 40),
+                new("belge.fis-gor",  "Muhasebe Fişini Aç", "belge", Hedef: "sagtus,palet",
+                    KaynakKodu: "muhasebe_fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 60),
+                new("belge.hedef-ac", "Hedef Belgeyi Aç",   "belge", Hedef: "sagtus,palet",
+                    KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 61),
+                new("genel.yazdir",   "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             ["siparis-liste"] = new AksiyonTanimi[]
             {
                 new("belge.yeni",     "＋ Yeni Sipariş", "belge", Kisayol: "Ctrl+N",

@@ -176,6 +176,27 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     yetkiKodu: 'randevu', menuSira: 21,
   },
   {
+    // BASVURU (246, kullanici: "satis siparisini aynen buraya al"): ayni
+    //   'belge' kaynagi, tur = 30. Hizmet/malzeme satirlari, tahsilat ve
+    //   fatura/fis/tahakkuk donusumu siparisle ayni altyapidan gelir.
+    kaynak: 'belge', rota: 'basvuru', baslik: 'Başvurular',
+    yol: 'Kayıt Kabul › Başvurular',
+    aksiyonEkrani: 'basvuru-liste', yeniBelgeTuru: 30,
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 30 },
+    // Basvuru e-Belge degil; tur kolonlari da tek turlu listede gereksiz.
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
+    toplam: ['genelToplam'],
+    cipler: [
+      { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
+      { ad: 'Kısmi',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
+      { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2,
+    menuGrup: 'Kayıt Kabul', menuAd: 'Başvurular', ic: '📝', yetkiKodu: 'belge',
+    menuSira: 30,
+  },
+  {
     kaynak: 'proje', baslik: 'Projeler', yol: 'CRM › Projeler', kartYolu: '/proje',
     aksiyonEkrani: 'proje-liste',
     cipler: [
