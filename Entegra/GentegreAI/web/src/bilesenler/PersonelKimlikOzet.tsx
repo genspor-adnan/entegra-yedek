@@ -5,7 +5,6 @@ import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { TekOzluk } from './TekOzluk';
-import { kidemMetni } from './bicim';
 
 interface Props {
   kartAdi?: string;
@@ -101,7 +100,6 @@ export function PersonelKimlikOzet({
   const kanGrubuAlan = alan('kanGrubu');
   const meslekAlan = alan('meslek');
 
-  const kidem = kidemMetni(String(satir.iseGirisTarihi ?? ''));
   const yas = yasHesapla(String(satir.dogumTarihi ?? ''));
 
   return (
@@ -111,13 +109,23 @@ export function PersonelKimlikOzet({
         <div className="kagrup">
           <h6>Kimlik Bilgileri</h6>
           <div className="alan-izgara tek-sutun">
-            {!vknoGizli && (
-              <label className="alan tip-metin">
-                <span className="etiket">{vknoAlan.baslik}{vknoAlan.zorunlu && ' *'}</span>
-                <input value={vkno} maxLength={vknoAlan.enFazlaUzunluk ?? undefined} disabled={saltOkunur}
-                  onChange={e => onVknoDegis(e.target.value)} />
-              </label>
-            )}
+            <div className="adres-satir">
+              {!vknoGizli && (
+                <label className="alan tip-metin">
+                  <span className="etiket">{vknoAlan.baslik}{vknoAlan.zorunlu && ' *'}</span>
+                  <input value={vkno} maxLength={vknoAlan.enFazlaUzunluk ?? undefined} disabled={saltOkunur}
+                    onChange={e => onVknoDegis(e.target.value)} />
+                </label>
+              )}
+              {/* Pozisyon: "Özet" kutusu kaldirilinca buraya alindi (kullanici). */}
+              {!ozetGizli && (
+                <label className="alan tip-metin">
+                  <span className="etiket">{gorevAlan.baslik}</span>
+                  <input value={gorev} maxLength={gorevAlan.enFazlaUzunluk ?? undefined}
+                    disabled={saltOkunur} onChange={e => onGorevDegis(e.target.value)} />
+                </label>
+              )}
+            </div>
             <div className="adres-satir">
               <label className="alan tip-tarih">
                 <span className="etiket">Doğum Tarihi *</span>
@@ -216,29 +224,7 @@ export function PersonelKimlikOzet({
           </div>
           {resimHata && <div className="alan-hata" style={{ margin: '4px 10px 0' }}>{resimHata}</div>}
         </div>
-        {!ozetGizli && (
-          <div className="kagrup">
-            <h6>Özet</h6>
-            <div className="alan-izgara tek-sutun">
-              <label className="alan tip-metin">
-                <span className="etiket">{gorevAlan.baslik}</span>
-                <input value={gorev} maxLength={gorevAlan.enFazlaUzunluk ?? undefined} disabled={saltOkunur}
-                  onChange={e => onGorevDegis(e.target.value)} />
-              </label>
-              <label className="alan tip-tarih">
-                <span className="etiket">İşe Giriş</span>
-                <input type="date" value={String(satir.iseGirisTarihi ?? '')} disabled={saltOkunur}
-                  onChange={e => ozlukDegis({ iseGirisTarihi: e.target.value })} />
-              </label>
-              {kidem && (
-                <label className="alan tip-metin">
-                  <span className="etiket">Kıdem</span>
-                  <input value={kidem} disabled readOnly />
-                </label>
-              )}
-            </div>
-          </div>
-        )}
+
         {/* Kullanici rolu (kullanici): karta bagli kullanici hesabinin rolu -
             gorulur ve degistirilebilir. Yeni kayitta id yok, gosterilmez. */}
 

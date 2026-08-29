@@ -33,7 +33,8 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis }: Props) {
   const denemeSuresiAlan = alan('denemeSuresi');
   const yoneticiAlan = alan('yoneticiId');
 
-  const kidem = kidemMetni(String(satir.iseGirisTarihi ?? ''));
+  const kidem = kidemMetni(String(satir.iseGirisTarihi ?? ''),
+                           String(satir.istenCikisTarihi ?? '') || null);
 
   // Kutular ALT ALTA (kullanici: "is bilgi altina sgk gelsin") - kok satir
   //   (kasira) degil, disaridaki sutunun akisina birakilir.

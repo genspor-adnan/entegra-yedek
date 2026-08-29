@@ -7,7 +7,7 @@ import {
   type KartMetaYaniti, type KartYetkisi, hataMetni } from '../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, bosDetay, detayFarki } from './GenDetayTablo';
 import { Modal } from './Modal';
-import { yerelAnMetni, bugunIso, hamSayi } from './bicim';
+import { yerelAnMetni, bugunIso, hamSayi, kidemMetni } from './bicim';
 import { PaketSekmesi } from './PaketSekmesi';
 import { KartGrupSekmesi } from './kart/KartGrupSekmesi';
 import { alanCizici, type Deger } from './kartAlanCizim';
@@ -530,14 +530,24 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
               cikis tarihi girilmisse pasif kirmizi - cikis tarihi olan biri
               "aktif" gorunmesin. Serit alani olarak ayrica cizilmez. */}
           {personelGibiKart && !yeniMi && (() => {
-            const cikis = String(
-              (detaylar.ozluk?.guncel[0]?.istenCikisTarihi as string | undefined) ?? '');
+            const ozluk = detaylar.ozluk?.guncel[0];
+            const cikis = String((ozluk?.istenCikisTarihi as string | undefined) ?? '');
             const pasif = cikis.length > 0 || Number(deger.durum) === 0;
+            // Kidem rozetin SAGINDA duz yazi (kullanici; "Özet" kutusu kalkti).
+            const kidem = kidemMetni(
+              String((ozluk?.iseGirisTarihi as string | undefined) ?? ''), cikis || null);
             return (
-              <span className={`rozet ${pasif ? 'hata' : 'ok'}`}
-                    style={{ margin: '0 auto' }}
-                    title={cikis ? `İşten çıkış: ${cikis}` : undefined}>
-                {pasif ? 'Pasif' : 'Aktif'}
+              <span style={{ margin: '0 auto', display: 'flex', gap: 8,
+                             alignItems: 'center' }}>
+                <span className={`rozet ${pasif ? 'hata' : 'ok'}`}
+                      title={cikis ? `İşten çıkış: ${cikis}` : undefined}>
+                  {pasif ? 'Pasif' : 'Aktif'}
+                </span>
+                {kidem && (
+                  <span style={{ fontWeight: 400, fontSize: 11.5, opacity: .9 }}>
+                    Kıdem {kidem}
+                  </span>
+                )}
               </span>
             );
           })()}

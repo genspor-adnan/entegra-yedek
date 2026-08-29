@@ -127,11 +127,14 @@ export function bicimle(deger: unknown, kolon: KolonMeta): string {
  * (25.03 girisli personel 10.06'da 2 ay kidemlidir, 3 degil).
  * Iki ekranda (PersonelKimlikOzet, TekOzluk) birebir ayni kod duruyordu.
  */
-export function kidemMetni(tarihStr: string): string | null {
+export function kidemMetni(tarihStr: string, bitisStr?: string | null): string | null {
   if (!tarihStr) return null;
   const giris = new Date(tarihStr);
   if (Number.isNaN(giris.getTime())) return null;
-  const simdi = new Date();
+  // Isten cikis tarihi varsa kidem GIRIS-CIKIS arasidir (kullanici); yoksa
+  //   bugune kadar isler.
+  const bitis = bitisStr ? new Date(bitisStr) : null;
+  const simdi = bitis && !Number.isNaN(bitis.getTime()) ? bitis : new Date();
   let ay = (simdi.getFullYear() - giris.getFullYear()) * 12
          + (simdi.getMonth() - giris.getMonth());
   if (simdi.getDate() < giris.getDate()) ay -= 1;
