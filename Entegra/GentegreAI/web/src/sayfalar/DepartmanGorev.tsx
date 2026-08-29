@@ -112,11 +112,8 @@ export function DepartmanGorev() {
           kaynak={kart.taraf === 'departman' ? 'departman' : 'personel-gorev'}
           id={kart.id}
           baslik={kart.taraf === 'departman' ? 'Departman' : 'Görev'}
-          // Yeni görev SOLDA SEÇİLİ departmana bağlı açılır; kullanıcı isterse
-          //   kartta boşaltıp bağımsız yapar.
-          yeniKayitVarsayilanlari={kart.taraf === 'gorev' && departmanId !== null
-            ? { departmanId }
-            : undefined}
+          // Yeni gorevde departman BOS gelir (kullanici): gorev cogu zaman
+          //   bagimsizdir; departman gerekiyorsa kartta secilir.
           onKapat={() => setKart(null)}
           onKaydedildi={() => { setKart(null); setYenile(t => t + 1) }}
         />
