@@ -541,14 +541,16 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
 
   if (yukleniyor)
     return (
-      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} alt={<button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
+      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)}
+        ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined} alt={<button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
         <div className="yukleniyor-satir">Yukleniyor…</div>
       </Modal>
     );
 
   if (!meta)
     return (
-      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} alt={<button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
+      <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)}
+        ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined} alt={<button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
         <div className="hata-kutusu">{hata}</div>
       </Modal>
     );
@@ -568,6 +570,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
     <Modal
       baslik={`${baslik ?? kaynak} ${yeniMi ? '— Yeni' : `#${id}`}`}
       dar={TEK_SUTUN_KARTLAR.has(kaynak)}
+        ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined}
       ustBilgi={
         <>
           {/* Personel durumu BASLIKTA rozet (kullanici): aktif yesil, isten

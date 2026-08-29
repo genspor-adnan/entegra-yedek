@@ -1174,4 +1174,10 @@ input.skt-gecmis {
 
 /* Randevu kimlik seridi (mockup: 1fr 210px 150px): HASTA genis, tarih/saat ve
    durum kadar yer kaplamasin - hasta adi + TC + telefon tek satira sigsin. */
-.kaid .alan-izgara.kaid-randevu { grid-template-columns: 1.9fr 250px 150px }
+/* Hasta kutusu YARI genislik (kullanici): fr birakilirsa kalan alanin
+   tamamini yutuyordu - sabit genislik, artan yer sagda bos kalir. */
+.kaid .alan-izgara.kaid-randevu { grid-template-columns: minmax(0, 460px) 250px 150px }
+
+/* Randevu karti mockup genisliginde (randevu_karti.html .win: 760px) - alan
+   sayisi az, 1080px'te sag taraf bos kaliyordu. */
+.kawin.genis.kart-orta { width: min(780px, 96vw) }

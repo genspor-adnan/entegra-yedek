@@ -6,7 +6,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
  * kullanip GenForm tarafindan da cizildigi icin, ayni dosyada kalsa
  * dairesel import olurdu.
  */
-export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, onKapat, children }: {
+export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif, onKapat, children }: {
   baslik: string;
   ustBilgi?: React.ReactNode;
   ustSerit?: React.ReactNode;
@@ -14,6 +14,8 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, onKapat,
   alt: React.ReactNode;
   /** Az alanli kartlar icin yarim genislik (1080 -> 560): bos beyaz alan kalmasin. */
   dar?: boolean;
+  /** Pencereye ek sinif (or. randevu karti mockup genisligi: `kart-orta`). */
+  ekSinif?: string;
   onKapat?(): void;
   children: React.ReactNode;
 }) {
@@ -60,7 +62,8 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, onKapat,
 
   return (
     <div className="kaperde" onMouseDown={e => { if (e.target === e.currentTarget) onKapat?.() }}>
-      <div className={`kawin${dar ? '' : ' genis'}`} onMouseDown={e => e.stopPropagation()}
+      <div className={`kawin${dar ? '' : ' genis'}${ekSinif ? ' ' + ekSinif : ''}`}
+           onMouseDown={e => e.stopPropagation()}
            style={kaydirma.x || kaydirma.y
              ? { transform: `translate(${kaydirma.x}px, ${kaydirma.y}px)` } : undefined}>
         {/* Baslik cubugundan tutup FAREYLE TASINIR (kullanici): arkadaki listeyi
