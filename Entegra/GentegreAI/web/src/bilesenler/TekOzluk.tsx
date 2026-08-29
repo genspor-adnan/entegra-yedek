@@ -99,12 +99,12 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk }: Props) {
           <div className="adres-satir">
             <label className="alan tip-tarih">
               <span className="etiket zorunlu-isaret">İşe Giriş</span>
-              <input type="date" value={String(satir.iseGirisTarihi ?? '')} disabled={saltOkunur}
+              <input type="date" value={String(satir.iseGirisTarihi ?? '').slice(0, 10)} disabled={saltOkunur}
                 onChange={e => degis({ iseGirisTarihi: e.target.value })} />
             </label>
             <label className="alan tip-tarih">
               <span className="etiket">İşten Çıkış</span>
-              <input type="date" value={String(satir.istenCikisTarihi ?? '')} disabled={saltOkunur}
+              <input type="date" value={String(satir.istenCikisTarihi ?? '').slice(0, 10)} disabled={saltOkunur}
                 onChange={e => degis({ istenCikisTarihi: e.target.value })} />
             </label>
           </div>
@@ -116,7 +116,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk }: Props) {
             </label>
             <label className="alan tip-tarih">
               <span className="etiket">SGK Başlama</span>
-              <input type="date" value={String(satir.sgkBaslamaTarihi ?? '')} disabled={saltOkunur}
+              <input type="date" value={String(satir.sgkBaslamaTarihi ?? '').slice(0, 10)} disabled={saltOkunur}
                 onChange={e => degis({ sgkBaslamaTarihi: e.target.value })} />
             </label>
           </div>

@@ -58,8 +58,6 @@ export function KartKullaniciSubeleri({ kartId, saltOkunur, zorunluSubeId }: {
   //   sunucu da rolun subesi yoksa o tek subeyi verir.
   if (satirlar && satirlar.length <= 1) return null;
 
-  const secili = satirlar?.some(s => s.yetkili) ?? true;
-
   return (
     <div className="kagrup" style={{ marginTop: 12 }}>
       <div className="numaralama-bas bitisik">
@@ -72,11 +70,6 @@ export function KartKullaniciSubeleri({ kartId, saltOkunur, zorunluSubeId }: {
       </div>
 
       {hata && <div className="hata-kutusu">{hata}</div>}
-      {!secili && (
-        <div className="hata-kutusu">
-          Şube seçilmedi - bu kullanıcı hiçbir şubeye giremez.
-        </div>
-      )}
       <table className="grid">
         <thead>
           <tr>

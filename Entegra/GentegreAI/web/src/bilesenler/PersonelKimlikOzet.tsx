@@ -138,7 +138,7 @@ export function PersonelKimlikOzet({
               <label className="alan tip-tarih">
                 <span className="etiket">Doğum Tarihi *</span>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                  <input type="date" value={String(satir.dogumTarihi ?? '')} disabled={saltOkunur}
+                  <input type="date" value={String(satir.dogumTarihi ?? '').slice(0, 10)} disabled={saltOkunur}
                     onChange={e => ozlukDegis({ dogumTarihi: e.target.value })} />
                   {yas && <span style={{ fontSize: 10, color: 'var(--soluk)', whiteSpace: 'nowrap' }}>{yas}</span>}
                 </div>

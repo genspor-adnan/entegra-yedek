@@ -568,6 +568,14 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
                       title={cikis ? `İşten çıkış: ${cikis}` : undefined}>
                   {pasif ? 'Pasif' : 'Aktif'}
                 </span>
+                {/* Görev de basliktan gorunsun (kullanici): kod -> ad. */}
+                {(() => {
+                  const kod = String(deger.gorevId ?? '');
+                  const ad = kod
+                    ? meta?.alanlar.find(a => a.ad === 'gorevId')?.kodlar?.[kod]
+                    : null;
+                  return ad ? <span className="rozet gri">{ad}</span> : null;
+                })()}
                 {kidem && (
                   <span style={{ fontWeight: 400, fontSize: 11.5, opacity: .9 }}>
                     Kıdem {kidem}
@@ -586,7 +594,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
               onu unvana ekle") - idstrip'in 4 sabit alani (Kod/Unvan/Departman/Gorev). */}
           {/* Personelde ROL kimlik seridinde, DEPARTMANIN SAGINDA (kullanici);
               serit 5 sutunlu akar. Diger kartlarda serit eskisi gibi. */}
-          {personelGibiKart && !yeniMi ? (
+          {/* YENI kayitta da gecerli: Görev ZORUNLU ama serit yalniz mevcut
+              kartta cizilince alan hic gorunmuyordu ("Görev zorunlu" hatasi
+              alinip duzeltilemiyordu). */}
+          {personelGibiKart ? (
             <div className="alan-izgara"
                  style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}>
               {renderAlanListesi(kimlikAlanlari.filter(a =>
