@@ -92,11 +92,15 @@ public sealed class KullaniciDeposu
 
     public Task<List<SubeOzeti>> SubeleriAsync(int tarafId, CancellationToken iptal = default)
         => _veri.ListeAsync("""
-            select s.id, s.ad, ks.varsayilan, ks.yazma
-              from public.kullanici_sube ks
-              join public.sube s on s.id = ks.sube_id
-             where ks.taraf_id = @p0
-             order by ks.varsayilan desc, s.ad
+            -- Sube yetkisi ROLDEN gelir (234, kullanici karari): kullanicinin
+            --   girebildigi subeler rolunun subeleridir. Eski kullanici_sube
+            --   tablosu veri olarak duruyor ama ARTIK OKUNMUYOR.
+            select s.id, s.ad, rs.varsayilan, rs.yazma
+              from public.taraf_kullanici k
+              join public.rol_sube rs on rs.rol_id = k.rol_id
+              join public.sube s on s.id = rs.sube_id and s.aktif = 1
+             where k.id = @p0
+             order by rs.varsayilan desc, s.ad
             """, new object?[] { tarafId },
             o => new SubeOzeti(o.Sayi("id"), o.Metin("ad"), o.Bayrak("varsayilan"), o.Bayrak("yazma")),
             iptal);

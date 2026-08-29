@@ -5,7 +5,6 @@ import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { KartKullaniciRolu } from './KartKullaniciRolu';
-import { KartKullaniciSubeleri } from './KartKullaniciSubeleri';
 import { kidemMetni } from './bicim';
 
 interface Props {
@@ -235,13 +234,10 @@ export function PersonelKimlikOzet({
         )}
         {/* Kullanici rolu (kullanici): karta bagli kullanici hesabinin rolu -
             gorulur ve degistirilebilir. Yeni kayitta id yok, gosterilmez. */}
+        {/* Kullanici rolu: personelin YETKISI (modul + sube) tamamen rolden
+            gelir (234) - burada yalniz hangi rolde oldugu secilir. */}
         {!ozetGizli && kaynakId && (
-          <>
-            <KartKullaniciRolu kartId={kaynakId} saltOkunur={saltOkunur} />
-            {/* Sube yetkisi ROLE degil KULLANICIYA baglidir (kullanici_sube):
-                rol "ne yapabilir", bu liste "nerede calisir". */}
-            <KartKullaniciSubeleri kartId={kaynakId} saltOkunur={saltOkunur} />
-          </>
+          <KartKullaniciRolu kartId={kaynakId} saltOkunur={saltOkunur} />
         )}
       </div>
     </div>

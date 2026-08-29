@@ -39,7 +39,7 @@ public static class KimlikUclari
             return Results.Ok(await servis.SubeSecAsync(baglam.KullaniciId, istek.SubeId, refresh, iptal));
         }).RequireAuthorization();
 
-        // Kullanicinin giris / islem yapabilecegi subeler (kullanici_sube).
+        // Kullanicinin giris / islem yapabilecegi subeler (rolunun subeleri - rol_sube, 234).
         grup.MapGet("/subeler", async (
             BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {

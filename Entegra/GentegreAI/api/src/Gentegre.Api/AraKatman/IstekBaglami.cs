@@ -16,7 +16,7 @@ public sealed class IstekBaglami
     public int KullaniciId { get; init; }
     public int RolId { get; init; }
     public int? SubeId { get; init; }
-    /// <summary>Aktif subede yazma hakki (kullanici_sube.yazma). 0 ise sube salt okunur.</summary>
+    /// <summary>Aktif subede yazma hakki (rol_sube.yazma). 0 ise sube salt okunur.</summary>
     public bool SubeYazma { get; init; } = true;
     public YetkiSeti Yetkiler { get; init; } = default!;
     public IReadOnlyList<int> Kapsam { get; init; } = Array.Empty<int>();

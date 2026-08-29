@@ -324,6 +324,6 @@ public static partial class KartKatalogu
         SilmeEngelleri: new[]
         {
             new SilmeEngeli("public.belge", "sube_id", "Bu şubede belge var, silinemez."),
-            new SilmeEngeli("public.kullanici_sube", "sube_id", "Bu şubeye bağlı kullanıcı var, silinemez.")
+            new SilmeEngeli("public.rol_sube", "sube_id", "Bu şube bir role atanmış, silinemez.")
         });
 }

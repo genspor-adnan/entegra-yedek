@@ -6,6 +6,7 @@ import { TekAdres } from '../TekAdres';
 import { PersonelKimlikOzet } from '../PersonelKimlikOzet';
 import { KartResimKutusu } from '../KartResimKutusu';
 import { RolKullanicilari } from '../RolKullanicilari';
+import { RolSubeleri } from '../RolSubeleri';
 import { TEK_SUTUN_KARTLAR } from '../kartSekmeleri';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
 import type { Deger } from '../kartAlanCizim';
@@ -399,7 +400,12 @@ return (
         (kullanici: "kullanicilari genel sekmesine al, kullanici sekmesini
         kaldir"). Yeni rolde henuz id yok - once kaydedilmeli. */}
     {kaynak === 'rol' && !yeniMi && aktif.baslik === 'Genel' && (
-      <RolKullanicilari rolId={id as number} saltOkunur={salt} />
+      <>
+        {/* Sube kisiti ROLDE (234): bu roldeki kullanicilar isaretli
+            subelerde calisir - kisiye ayrica sube verilmez. */}
+        <RolSubeleri rolId={id as number} saltOkunur={salt} />
+        <RolKullanicilari rolId={id as number} saltOkunur={salt} />
+      </>
     )}
 
     {kaynak === 'sube' && aktif.baslik === 'Depolar' && (() => {

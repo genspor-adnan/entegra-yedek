@@ -65,7 +65,7 @@ public static class AksiyonUclari
         AksiyonTanimi aksiyon, IstekBaglami baglam, long? kayitId,
         IDictionary<string, object?>? belge)
     {
-        // Yazma gerektiren aksiyon, salt okuma subesinde calismaz (kullanici_sube.yazma = 0).
+        // Yazma gerektiren aksiyon, salt okuma subesinde calismaz (rol_sube.yazma = 0).
         //   Disa aktarim OKUMADIR ve istisna tutulur - onceki kod `aksiyon.Kod`a
         //   bakiyordu ama "veri.disa-aktar" aksiyonun YETKISIDIR (Kod
         //   "genel.yazdir"), istisna hic eslesmiyor ve salt-okuma subede CSV

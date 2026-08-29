@@ -1,23 +1,22 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
-import type { KullaniciSubeSatiri } from '../api/istemci';
+import type { RolSubeSatiri } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 
 /**
- * Personel/kişi kartında ŞUBE YETKİSİ (kullanıcı: "rolün yetkili olduğu
- * şubeleri nasıl seçerim?").
+ * Rol kartı "Şubeler" bölümü (kullanıcı kararı: "şube kısıtını personel değil
+ * role ata, personel yetkiyi her zaman rolden alır").
  *
- * Modelde şube yetkisi role değil KULLANICIYA bağlıdır: rol "ne yapabilir"i,
- * bu tablo "nerede çalışır"ı söyler. Grid tüm aktif şubeleri listeler; işaretli
- * olanlar kullanıcının girebildiği şubelerdir. "Vars." kullanıcının açılışta
- * geldiği şube (tek), "Yazma" kapalıysa o şube salt okunur.
+ * Rol hem ne yapılabileceğini (yetki matrisi) hem nerede çalışılacağını (bu
+ * liste) belirler: bu roldeki her kullanıcı giriş yaptığında işaretli şubeleri
+ * görür. "Vars." açılışta gelen şube (tek), "Yazma" kapalıysa o şube salt
+ * okunur - kullanıcı görür ama kayıt değiştiremez.
  */
-export function KartKullaniciSubeleri({ kartId, saltOkunur }: {
-  kartId: number;
+export function RolSubeleri({ rolId, saltOkunur }: {
+  rolId: number;
   saltOkunur: boolean;
 }) {
-  const [satirlar, setSatirlar] = useState<KullaniciSubeSatiri[] | null>(null);
-  const [kullaniciVar, setKullaniciVar] = useState(true);
+  const [satirlar, setSatirlar] = useState<RolSubeSatiri[] | null>(null);
   const [hata, setHata] = useState('');
   const [mesaj, setMesaj] = useState('');
   const [islemde, setIslemde] = useState(false);
@@ -25,21 +24,18 @@ export function KartKullaniciSubeleri({ kartId, saltOkunur }: {
 
   useEffect(() => {
     let iptal = false;
-    api.kartSubeleri(kartId)
-      .then(y => { if (!iptal) { setSatirlar(y.satirlar); setKullaniciVar(y.kullaniciVar) } })
+    api.rolSubeleri(rolId)
+      .then(y => { if (!iptal) setSatirlar(y) })
       .catch(h => { if (!iptal) setHata(hataMetni(h)) });
     return () => { iptal = true };
-  }, [kartId]);
+  }, [rolId]);
 
-  const degis = (subeId: number, yama: Partial<KullaniciSubeSatiri>) => {
+  const degis = (subeId: number, yama: Partial<RolSubeSatiri>) => {
     setDegisti(true); setMesaj('');
     setSatirlar(s => s?.map(x => {
-      if (x.subeId !== subeId) {
-        // Varsayilan TEK olabilir: baskasi varsayilan yapilinca digeri duser.
-        return yama.varsayilan ? { ...x, varsayilan: false } : x;
-      }
+      // Varsayilan TEK olabilir: baskasi varsayilan yapilinca digeri duser.
+      if (x.subeId !== subeId) return yama.varsayilan ? { ...x, varsayilan: false } : x;
       const yeni = { ...x, ...yama };
-      // Yetki kalkarsa varsayilan/yazma da anlamsiz.
       if (yama.yetkili === false) return { ...yeni, varsayilan: false };
       if (yama.varsayilan) return { ...yeni, yetkili: true };
       return yeni;
@@ -50,28 +46,30 @@ export function KartKullaniciSubeleri({ kartId, saltOkunur }: {
     if (!satirlar) return;
     setIslemde(true); setHata(''); setMesaj('');
     try {
-      const y = await api.kartSubeKaydet(kartId, satirlar.map(s => ({
+      setSatirlar(await api.rolSubeKaydet(rolId, satirlar.map(s => ({
         subeId: s.subeId, yetkili: s.yetkili, varsayilan: s.varsayilan, yazma: s.yazma,
-      })));
-      setSatirlar(y.satirlar);
+      }))));
       setDegisti(false);
-      setMesaj('Şube yetkileri kaydedildi.');
+      setMesaj('Rolün şubeleri kaydedildi.');
     } catch (h) { setHata(hataMetni(h)) } finally { setIslemde(false) }
   };
 
   if (hata && !satirlar) return null;   // yetkisi yoksa bolum hic cizilmez
-  if (!kullaniciVar) return null;       // kullanici hesabi olmayan kartta anlamsiz
 
   return (
-    <div className="kagrup">
+    <div className="kagrup" style={{ marginTop: 12 }}>
       <div className="numaralama-bas bitisik">
-        <h6>Yetkili Olduğu Şubeler</h6>
+        <h6>Şubeler</h6>
         {!saltOkunur && (
           <button className="d bir" disabled={islemde || !degisti}
                   onClick={() => void kaydet()}>
             {islemde ? 'Kaydediliyor…' : 'Kaydet'}
           </button>
         )}
+      </div>
+      <div className="not" style={{ margin: '0 10px 8px' }}>
+        Bu roldeki kullanıcılar işaretli şubelerde çalışır; şube yetkisi kişiye
+        değil role verilir.
       </div>
       {hata && <div className="hata-kutusu">{hata}</div>}
       {mesaj && <div className="bilgi-kutusu">{mesaj}</div>}
@@ -95,7 +93,7 @@ export function KartKullaniciSubeleri({ kartId, saltOkunur }: {
               </td>
               <td>{s.subeAdi}</td>
               <td style={{ textAlign: 'center' }} onClick={e => e.stopPropagation()}>
-                <input type="radio" name={`vars-${kartId}`} checked={s.varsayilan}
+                <input type="radio" name={`rolvars-${rolId}`} checked={s.varsayilan}
                        disabled={saltOkunur || !s.yetkili}
                        onChange={() => degis(s.subeId, { varsayilan: true })} />
               </td>

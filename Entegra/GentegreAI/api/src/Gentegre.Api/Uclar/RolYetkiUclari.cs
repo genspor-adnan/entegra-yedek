@@ -102,30 +102,27 @@ public static class RolYetkiUclari
             });
         });
 
-        // Kullanici > SUBE yetkisi (kullanici: "yetkili oldugu subeleri nasil
-        //   secerim"). Sube yetkisi ROLE degil KULLANICIYA bagli - kart
-        //   uzerinden yonetilir.
-        var kartSube = yol.MapGroup("/api/kart/kullanici/{kartId:int}/subeler")
-                          .WithTags("Kart").RequireAuthorization();
+        // ROL > SUBELER (234, kullanici karari: "sube kisitini personel degil
+        //   role ata"). Kullanicinin girebildigi subeler rolunden gelir.
+        var rolSube = yol.MapGroup("/api/kart/rol/{rolId:int}/subeler")
+                         .WithTags("Kart").RequireAuthorization();
 
-        kartSube.MapGet("/", async (int kartId, BaglamCozucu cozucu,
+        rolSube.MapGet("/", async (int rolId, BaglamCozucu cozucu,
             KullaniciSubeDeposu depo, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("rol", Islem.Gor);
-            var (kullaniciVar, satirlar) = await depo.ListeleAsync(kartId, iptal);
-            return Results.Ok(new { kullaniciVar, satirlar });
+            return Results.Ok(await depo.ListeleAsync(rolId, iptal));
         });
 
-        kartSube.MapPut("/", async (int kartId, SubeKaydetIstegi istek,
+        rolSube.MapPut("/", async (int rolId, SubeKaydetIstegi istek,
             BaglamCozucu cozucu, KullaniciSubeDeposu depo, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("rol", Islem.Degistir);
-            await depo.KaydetAsync(kartId, istek.Satirlar, baglam.Yazma, iptal);
-            var (kullaniciVar, satirlar) = await depo.ListeleAsync(kartId, iptal);
-            return Results.Ok(new { kullaniciVar, satirlar });
+            await depo.KaydetAsync(rolId, istek.Satirlar, baglam.Yazma, iptal);
+            return Results.Ok(await depo.ListeleAsync(rolId, iptal));
         });
 
         kul.MapDelete("/{kullaniciId:int}", async (int rolId, int kullaniciId,

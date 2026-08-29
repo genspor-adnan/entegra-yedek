@@ -54,9 +54,9 @@ public sealed class KullaniciOzeti
     public int Dil { get; set; }
     public long YetkiSurumu { get; set; }
     public int? SubeId { get; set; }
-    /// <summary>Aktif subede yazma hakki (kullanici_sube.yazma). 0 ise salt okuma.</summary>
+    /// <summary>Aktif subede yazma hakki (rol_sube.yazma). 0 ise salt okuma.</summary>
     public bool SubeYazma { get; set; } = true;
-    /// <summary>Kullanicinin giris / islem yapabilecegi subeler (kullanici_sube).</summary>
+    /// <summary>Kullanicinin giris / islem yapabilecegi subeler (rol_sube uzerinden rolunden gelir).</summary>
     public IReadOnlyList<SubeOzeti> Subeler { get; set; } = Array.Empty<SubeOzeti>();
     /// <summary>Urun modu (referans genel.urun_modu): 1 Gentegre AI (ERP),
     /// 2 GenoTIP AI (HBYS). Ad, menu ve mesaj basliklari buna gore degisir.</summary>

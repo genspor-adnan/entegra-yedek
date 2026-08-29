@@ -103,8 +103,8 @@ async function ham(yol: string, secenek: RequestInit, jsonGovde: boolean,
   return yanit;
 }
 
-/** Personel/kisi kartinda sube yetkisi satiri. */
-export interface KullaniciSubeSatiri {
+/** Rol kartinda sube yetkisi satiri (234 - sube kisiti ROLDE). */
+export interface RolSubeSatiri {
   subeId: number; subeAdi: string;
   yetkili: boolean; varsayilan: boolean; yazma: boolean;
 }
@@ -240,12 +240,10 @@ export const api = {
     istek<KartRolBilgisi>(`/api/kart/kullanici/${kartId}/rol`),
   kartRolDegistir: (kartId: number, rolId: number) =>
     istek<KartRolBilgisi>(`/api/kart/kullanici/${kartId}/rol/${rolId}`, { method: 'PUT' }),
-  kartSubeleri: (kartId: number) =>
-    istek<{ kullaniciVar: boolean; satirlar: KullaniciSubeSatiri[] }>(
-      `/api/kart/kullanici/${kartId}/subeler`),
-  kartSubeKaydet: (kartId: number, satirlar: Omit<KullaniciSubeSatiri, 'subeAdi'>[]) =>
-    istek<{ kullaniciVar: boolean; satirlar: KullaniciSubeSatiri[] }>(
-      `/api/kart/kullanici/${kartId}/subeler`,
+  rolSubeleri: (rolId: number) =>
+    istek<RolSubeSatiri[]>(`/api/kart/rol/${rolId}/subeler`),
+  rolSubeKaydet: (rolId: number, satirlar: Omit<RolSubeSatiri, 'subeAdi'>[]) =>
+    istek<RolSubeSatiri[]>(`/api/kart/rol/${rolId}/subeler`,
       { method: 'PUT', body: JSON.stringify({ satirlar }) }),
   rolKullanicilari: (rolId: number) =>
     istek<RolKullanicisi[]>(`/api/kart/rol/${rolId}/kullanicilar`),
