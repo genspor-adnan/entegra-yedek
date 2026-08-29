@@ -7,6 +7,7 @@ import { KasaIslemKarti } from './sayfalar/KasaIslemKarti';
 import { Liste, LISTELER } from './sayfalar/Liste';
 import { StokAyarlar } from './sayfalar/StokAyarlar';
 import { KasaAyarlar } from './sayfalar/KasaAyarlar';
+import { IKAyarlar } from './sayfalar/IKAyarlar';
 import { FirmaBilgileri } from './sayfalar/FirmaBilgileri';
 import { MesajKatmani } from './bilesenler/MesajKatmani';
 import { GenelAyarlar } from './sayfalar/GenelAyarlar';
@@ -60,6 +61,7 @@ function Yollar() {
         {yetki('ayar') && <Route path="/genel-ayarlar" element={<GenelAyarlar />} />}
         {yetki('stok') && <Route path="/stok-ayarlar" element={<StokAyarlar />} />}
         {yetki('kasa_islem') && <Route path="/kasa-ayarlar" element={<KasaAyarlar />} />}
+        {yetki('personel') && <Route path="/ik-ayarlar" element={<IKAyarlar />} />}
         {yetki('sube') && <Route path="/sube" element={<FirmaBilgileri />} />}
         {yetki('belge') && <Route path="/satis-ayarlar" element={<SatisAyarlar />} />}
         {yetki('belge') && <Route path="/alis-ayarlar" element={<AlisAyarlar />} />}

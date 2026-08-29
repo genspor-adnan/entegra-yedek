@@ -922,6 +922,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ic: '🧾', yetkiKodu: 'belge',
   },
   {
+    // IK ayarlari (kullanici): Departman + Pozisyon kod listeleri duzenlenir.
+    kaynak: 'ik-ayarlar', baslik: 'İK Ayarları', yol: 'Yonetim › Ayarlar › İK',
+    ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'İK', menuSira: 6,
+    ic: '👥', yetkiKodu: 'personel',
+  },
+  {
     // Alis belgesi ayarlari: yalniz Genel - alis faturasini GIB'e biz gondermeyiz.
     kaynak: 'alis-ayarlar', baslik: 'Alış Belgeleri', yol: 'Yonetim › Ayarlar › Alış Belgeleri',
     ozelSayfa: true,
