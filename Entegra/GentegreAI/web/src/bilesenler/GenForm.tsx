@@ -146,10 +146,18 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       const ham = await api.kartAlanlari(kaynak);
       // Ekrana ozel zorunluluk: katalog degismez, bu ekranda alan yildizli
       //   gelir ve bos birakilirsa kayit engellenir.
-      const m: KartMetaYaniti = zorunluAlanlar?.length
+      const zorunlulu: KartMetaYaniti = zorunluAlanlar?.length
         ? { ...ham, alanlar: ham.alanlar.map(a =>
             zorunluAlanlar.includes(a.ad) ? { ...a, zorunlu: true } : a) }
         : ham;
+      // RANDEVU alanlari YALNIZ HBYS modunda (252, kullanici): ERP kurulumunda
+      //   personelin "randevu verilebilir" olmasi ve randevu duzeni anlamsiz -
+      //   kart hic gostermez. Urun modu 2 = HBYS (referans genel.urun_modu).
+      const m: KartMetaYaniti = kullanici?.urunModu === 2 ? zorunlulu : {
+        ...zorunlulu,
+        alanlar: zorunlulu.alanlar.filter(a => a.ad !== 'randevuVerilebilir'),
+        detaylar: zorunlulu.detaylar.filter(d => d.ad !== 'randevuAyar'),
+      };
       setMeta(m);
       setYetki(m.yetki);
 

@@ -139,21 +139,11 @@ const DURUM_CIPLERI: ListeTanimi['cipler'] = [
     ana menu altinda TOPLANIR. */
 export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: string; menuGrup?: string })[] = [
   {
-    // Tek ogeli grup (kullanici: "Cari menu ustune Hasta menusu ac, altina Hasta
-    // Listesi ekle") - Cari grubunun HEMEN USTUNDE, ayni acilir-kapanir desende.
-    kaynak: 'hasta', baslik: 'Hastalar', yol: 'Hasta › Hastalar', kartYolu: '/hasta',
-    aksiyonEkrani: 'hasta-liste', cipler: DURUM_CIPLERI,
-    // Hasta da bir TARAF - cari ekstresi aynen gecerli (hasta hesabi hareketleri).
-    ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Hasta Ekstresi',
-              tarihAlani: 'islemTarihi' },
-    // Kayit Kabul YALNIZ GenoTIP AI'da (kullanici, 215) - diger moduller ortak.
-    menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Listesi', ic: '🏥', yetkiKodu: 'personel',
-    urunModu: 2,
-  },
-  {
-    // RANDEVU (243): liste + gunluk/haftalik takvim ayni ekranda; bolum ve
-    //   hekim kolonlari BASTA (kullanici).
-    kaynak: 'randevu', baslik: 'Randevular', yol: 'Kayıt Kabul › Randevular',
+    // RANDEVU kendi menu grubu (kullanici: "Randevu diye yeni menu olustur,
+    //   Kayıt Kabul menusunun ust tarafina; icine Randevu ve Randevu Ayarlarini
+    //   al; bunlar hbys icin gecerli"). Grup sirasi bu dizideki ILK gorulme
+    //   sirasindan gelir - bu yuzden Hasta/Kayıt Kabul girdisinden ONCE durur.
+    kaynak: 'randevu', baslik: 'Randevular', yol: 'Randevu › Randevular',
     kartYolu: '/randevu', aksiyonEkrani: 'randevu-liste',
     tarihAlani: 'tarih',
     cipler: [
@@ -164,16 +154,28 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Kayıt Kabul', menuAd: 'Randevular', ic: '📅', yetkiKodu: 'randevu',
-    menuSira: 20,
+    menuGrup: 'Randevu', menuAd: 'Randevular', ic: '📅', yetkiKodu: 'randevu',
+    menuSira: 10,
   },
   {
-    // Randevu Ayarlari (243): gun/saat duzeni - liste degil ozel sayfa.
+    // Randevu Ayarlari (243): gun/saat duzeni + Bölümler sekmesi (251).
     kaynak: 'randevu-ayarlar', ozelSayfa: true, baslik: 'Randevu Ayarları',
-    yol: 'Kayıt Kabul › Randevu Ayarları',
+    yol: 'Randevu › Randevu Ayarları',
     urunModu: 2,
-    menuGrup: 'Kayıt Kabul', menuAd: 'Randevu Ayarları', ic: '⚙️',
-    yetkiKodu: 'randevu', menuSira: 21,
+    menuGrup: 'Randevu', menuAd: 'Randevu Ayarları', ic: '⚙️',
+    yetkiKodu: 'randevu', menuSira: 11,
+  },
+  {
+    // Tek ogeli grup (kullanici: "Cari menu ustune Hasta menusu ac, altina Hasta
+    // Listesi ekle") - Cari grubunun HEMEN USTUNDE, ayni acilir-kapanir desende.
+    kaynak: 'hasta', baslik: 'Hastalar', yol: 'Hasta › Hastalar', kartYolu: '/hasta',
+    aksiyonEkrani: 'hasta-liste', cipler: DURUM_CIPLERI,
+    // Hasta da bir TARAF - cari ekstresi aynen gecerli (hasta hesabi hareketleri).
+    ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Hasta Ekstresi',
+              tarihAlani: 'islemTarihi' },
+    // Kayit Kabul YALNIZ GenoTIP AI'da (kullanici, 215) - diger moduller ortak.
+    menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Listesi', ic: '🏥', yetkiKodu: 'personel',
+    urunModu: 2,
   },
   {
     // BASVURU (246, kullanici: "satis siparisini aynen buraya al"): ayni

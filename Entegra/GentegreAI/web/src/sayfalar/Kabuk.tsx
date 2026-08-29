@@ -53,6 +53,7 @@ function grupla(liste: MenuOgesi[], sec: (m: MenuOgesi) => string | undefined): 
  * Listede olmayan grup icin notr klasor cizilir.
  */
 const GRUP_IKON: Record<string, string> = {
+  'Randevu': '📅',
   'Kayıt Kabul': '🚑',
   'Cari':    '🤝',
   'Satış':   '🛍️',
@@ -69,6 +70,7 @@ const GRUP_IKON: Record<string, string> = {
     GRUP_IKON eslesmiyordu (194). Ceviriyi burada TERSINE cevirmek yerine
     cevrilmis adlari da tabloya ekliyoruz - liste kisa ve dil eklendikce buyur. */
 const GRUP_IKON_CEV: Record<string, string> = {
+  'Appointments': '📅', 'Termine': '📅',
   'Admissions': '🚑', 'Aufnahme': '🚑',
   'Accounts': '🤝', 'Geschäftspartner': '🤝',
   'Sales': '🛍️', 'Verkauf': '🛍️',
