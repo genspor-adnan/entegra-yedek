@@ -264,6 +264,20 @@ public static partial class KaynakKatalogu
             new("subeId",       "t.sube_id",       "sayi",  "Sube",      Varsayilan: false)
         });
 
+    // ADAY MUSTERILER ayri YETKI (kullanici: satici rolu CRM'i gorsun ama Cari
+    //   listelerini GORMESIN). Ayni tablo/kolonlar - degisen yalniz yetki kodu
+    //   ve sabit kosul; boylece 'cari' yetkisi verilmeden aday ekrani acilir.
+    private static KaynakTanimi Aday()
+    {
+        var c = Cari();
+        return c with
+        {
+            Ad = "aday",
+            YetkiKodu = "aday",
+            SabitKosul = "t.aday = 1",
+        };
+    }
+
     private static KaynakTanimi Hasta()
     {
         var p = Personel();

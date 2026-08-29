@@ -18,6 +18,10 @@ const GRUP_ADI: Record<string, string> = {
   kart: 'Kartlar', stok: 'Stok & Hizmet', belge: 'Belgeler', mali: 'Kasa & Muhasebe',
   ebelge: 'e-Belge', yonetim: 'Yönetim', genel: 'Genel',
 };
+
+/** Menude listesi olmayan ama yetkisi olan ekranlar (kod -> agac grubu). */
+const EK_GRUP: Record<string, string> = { panel: 'Ana Sayfa' };
+const ANA_SAYFA = 'Ana Sayfa';
 const ESKI_KOK = 'Eski Program Yetkileri (Delphi)';
 
 interface Dugum {
@@ -87,7 +91,8 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number): Dugum[] {
   const modulDugumu = new Map<string, Dugum>();
   for (const s of yeni.filter(x => !x.kod.includes('.'))) {
     const yer = harita.get(s.kod);
-    const kok = kokBul(yer?.grup ?? GRUP_ADI[s.grup] ?? 'Diğer', yer?.ic);
+    const kok = kokBul(yer?.grup ?? EK_GRUP[s.kod] ?? GRUP_ADI[s.grup] ?? 'Diğer',
+                       yer?.ic ?? (EK_GRUP[s.kod] ? '🏠' : undefined));
     const ust = yer?.altGrup ? altBul(kok, yer.altGrup) : kok;
     const d: Dugum = {
       anahtar: `y:${s.yetkiId}`,
@@ -128,6 +133,7 @@ function agacKur(satirlar: YetkiSatiri[], urunModu: number): Dugum[] {
   // Kokler menu sirasiyla; menude olmayan basliklar sonda, eski en altta.
   kokler.sort((a, b) => sira(a) - sira(b));
   function sira(d: Dugum) {
+    if (d.ad === ANA_SAYFA) return -1;      // en basta (kullanici)
     if (d.ad === ESKI_KOK) return 9000;
     const i = grupSirasi.indexOf(d.ad);
     return i >= 0 ? i : 1000 + kokler.indexOf(d);

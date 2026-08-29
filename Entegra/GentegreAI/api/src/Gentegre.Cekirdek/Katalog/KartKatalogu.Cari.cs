@@ -6,6 +6,13 @@
 public static partial class KartKatalogu
 {
     // --------------------------------------------------------------- cari ----
+    /// <summary>
+    /// Aday musteri karti - cari kartinin AYNISI, yalniz YETKI KODU farkli
+    /// ('aday'): satici rolu adaylari yonetebilsin ama cari kartlarini
+    /// acamasin (kullanici: "sadece crm gelsin").
+    /// </summary>
+    private static KartTanimi Aday() => Cari() with { Ad = "aday", YetkiKodu = "aday" };
+
     private static KartTanimi Cari() => new(
         Ad: "cari",
         YetkiKodu: "cari",

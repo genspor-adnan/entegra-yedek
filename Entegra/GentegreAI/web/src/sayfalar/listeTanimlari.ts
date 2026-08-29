@@ -191,7 +191,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // ADAY MÜŞTERİLER (db/122): henuz musteri olmayan firmalar. AYNI taraf
     //   tablosu - anlasma saglaninca kayit tasinmaz, yalniz bayrak degisir
     //   (musteri=1, aday=0) ve Musteri Listesi'nde gorunmeye baslar.
-    kaynak: 'cari', rota: 'aday', baslik: 'Aday Müşteriler',
+    // Kaynak ve yetki AYRI ('aday'): satici rolu CRM'i gorurken Cari
+    //   listelerini gormesin (kullanici).
+    kaynak: 'aday', baslik: 'Aday Müşteriler',
     yol: 'CRM › Aday Müşteriler', kartYolu: '/aday', aksiyonEkrani: 'aday-liste',
     sabitFiltre: { alan: 'aday', op: 'esit', deger: 1 },
     yeniKayitVarsayilanlari: { aday: true, musteri: false, tedarikci: false },
@@ -217,7 +219,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   kullanici). Musteri kartinda zorunlu DEGIL - eski kayitlarin cogunda bos.
     zorunluKartAlanlari: ['temsilci'],
     yerTutucuSekmeler: ['Yorum / Medya'],
-    menuGrup: 'CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'cari', menuSira: 10,
+    menuGrup: 'CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'aday', menuSira: 10,
   },
   {
     // Kaynak id, API route ve yetki kodu 'cari' KALDI - Musteri Listesi kendi URL'ini

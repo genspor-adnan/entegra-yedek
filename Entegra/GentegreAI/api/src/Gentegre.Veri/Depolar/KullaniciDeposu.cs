@@ -33,6 +33,43 @@ public sealed class KullaniciDeposu
     public Task<KullaniciKaydi?> KodIleBulAsync(string kod, CancellationToken iptal = default)
         => _veri.TekAsync(Secim + " where k.kod = @p0", new object?[] { kod }, Cevir, iptal);
 
+    /// <summary>
+    /// ESNEK GIRIS (kullanici: "user giriste de isim/cep/mail olabilir"):
+    /// kullanici kodu, CEP TELEFONU (bicimden bagimsiz - yalniz rakamlar
+    /// karsilastirilir), e-posta ya da ad-soyad ile kullaniciyi bulur.
+    /// Birden fazla kisi eslesirse (ayni isim) NULL doner - cagiran "kim
+    /// oldugunuz belirsiz" der; yanlis hesaba giris riski alinmaz.
+    /// </summary>
+    public async Task<(KullaniciKaydi? Kullanici, bool Belirsiz)> EsnekBulAsync(
+        string girdi, CancellationToken iptal = default)
+    {
+        var g = (girdi ?? "").Trim().ToLowerInvariant();
+        if (g.Length == 0) return (null, false);
+        // Cep: yalniz rakamlar, bastaki 90/0 atilir -> "5551112233".
+        var rakam = new string(g.Where(char.IsDigit).ToArray());
+        if (rakam.StartsWith("90", StringComparison.Ordinal) && rakam.Length > 10)
+            rakam = rakam[2..];
+        rakam = rakam.TrimStart('0');
+
+        var liste = await _veri.ListeAsync(Secim + """
+             where lower(k.kod) = @p0
+                or lower(nullif(k.eposta, '')) = @p0
+                or lower(nullif(t.eposta, '')) = @p0
+                or lower(nullif(t.unvan, '')) = @p0
+                or (@p1 <> '' and length(@p1) >= 10 and (
+                      right(regexp_replace(coalesce(t.cep_tel, ''), '[^0-9]', '', 'g'), 10) = right(@p1, 10)
+                   or right(regexp_replace(coalesce(k.cep_tel, ''), '[^0-9]', '', 'g'), 10) = right(@p1, 10)))
+             limit 3
+            """, new object?[] { g, rakam }, Cevir, iptal);
+
+        return liste.Count switch
+        {
+            1 => (liste[0], false),
+            0 => (null, false),
+            _ => (null, true),
+        };
+    }
+
     public Task<KullaniciKaydi?> IdIleBulAsync(int tarafId, CancellationToken iptal = default)
         => _veri.TekAsync(Secim + " where k.id = @p0", new object?[] { tarafId }, Cevir, iptal);
 
@@ -56,7 +93,11 @@ public sealed class KullaniciDeposu
             with hedef as (
                 select t.id,
                        nullif(trim(t.kod), '') as sicil,
-                       coalesce(nullif(trim(t.eposta), ''), '') as eposta
+                       coalesce(nullif(trim(t.eposta), ''), '') as eposta,
+                       -- Cep: yalniz rakam, bastaki 90/0 atilmis 10 hane.
+                       ltrim(regexp_replace(
+                           regexp_replace(coalesce(t.cep_tel, ''), '[^0-9]', '', 'g'),
+                           '^(90)?0*', ''), '0') as cep
                   from public.taraf t
                  where t.personel = 1 and t.durum = 1
                    and (@p0::int is null or t.id = @p0)
@@ -65,8 +106,13 @@ public sealed class KullaniciDeposu
                 insert into public.taraf_kullanici
                        (id, kod, parola_hash, parola_degismeli, rol_id, eposta, aktif, ekleyen)
                 select h.id,
-                       -- Kod BENZERSIZ olmali: sicil doluysa o, cakisirsa/boşsa id.
-                       case when h.sicil is not null
+                       -- Kod = CEP NO (kullanici); yoksa sicil, o da yoksa id.
+                       --   Benzersizlik zorunlu: cakisirsa bir sonrakine duser.
+                       case when h.cep <> ''
+                             and not exists (select 1 from public.taraf_kullanici k
+                                              where k.kod = h.cep)
+                            then h.cep
+                            when h.sicil is not null
                              and not exists (select 1 from public.taraf_kullanici k
                                               where lower(k.kod) = lower(h.sicil))
                             then lower(h.sicil)

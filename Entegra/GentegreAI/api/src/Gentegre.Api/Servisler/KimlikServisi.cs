@@ -39,7 +39,14 @@ public sealed class KimlikServisi
             throw GentegreHatasi.Dogrulama("Kullanici adi ve parola gerekli.",
                 new AlanHatasi("kod", "Bos birakilamaz."));
 
-        var kullanici = await _kullanicilar.KodIleBulAsync(kod, iptal);
+        // Kullanici adi KOD, CEP, E-POSTA ya da AD SOYAD olabilir (kullanici).
+        var (kullanici, belirsiz) = await _kullanicilar.EsnekBulAsync(kod, iptal);
+        if (belirsiz)
+        {
+            await _gunluk.GirisDenemesiAsync(kod, null, ip, istemci, false, "belirsiz", iptal);
+            throw GentegreHatasi.Yetkisiz(
+                "Bu bilgiyle birden fazla kullanıcı eşleşiyor - sicil no ya da cep numaranızla girin.");
+        }
 
         if (kullanici is null)
         {
@@ -199,7 +206,9 @@ public sealed class KimlikServisi
                                      CancellationToken iptal = default)
     {
         var kod = (istek.Kod ?? "").Trim().ToLowerInvariant();
-        var kullanici = kod.Length > 0 ? await _kullanicilar.KodIleBulAsync(kod, iptal) : null;
+        var (kullanici, _) = kod.Length > 0
+            ? await _kullanicilar.EsnekBulAsync(kod, iptal)
+            : (null, false);
 
         // Kullanici var mi / parolasi bos mu SIZDIRILMAZ - tek mesaj.
         const string ortakHata = "Kullanıcı adı ya da kimlik doğrulaması hatalı.";

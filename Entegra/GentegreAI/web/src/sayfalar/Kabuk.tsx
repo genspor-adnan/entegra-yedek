@@ -338,11 +338,15 @@ export function Kabuk() {
           <div className="yanic">
             {/* Panel menude YOKTU: kullanici bir listeye girince ana sayfaya
                 donmenin yolu kalmiyordu. En ustte, gruplarin disinda. */}
-            <NavLink to="/panel"
-                     className={() => `mi ${konum.pathname === '/panel' ? 'on' : ''}`}>
-              <span className="ic">🏠</span>
-              <span>{cm('Ana Sayfa')}</span>
-            </NavLink>
+            {/* Ana Sayfa da YETKIYE bagli (241, kullanici: "anasayfayi da
+                yetkilerde en basa al"). */}
+            {yetki('panel') && (
+              <NavLink to="/panel"
+                       className={() => `mi ${konum.pathname === '/panel' ? 'on' : ''}`}>
+                <span className="ic">🏠</span>
+                <span>{cm('Ana Sayfa')}</span>
+              </NavLink>
+            )}
 
             {/* FAVORI grubu Ana Sayfa'nin ALTINDA (kullanici): yildizlanan ogeler bu
                 menunun altinda; diger gruplar gibi acilir-kapanir, varsayilan
