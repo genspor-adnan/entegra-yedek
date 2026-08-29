@@ -43,7 +43,8 @@ function haftaBasi(t: Date) {
   return g;
 }
 
-export function RandevuTakvimi({ ayarlar, onYeni, onAc, yenile, bolum, hekimId }: {
+export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
+                                 bolum, hekimId }: {
   ayarlar?: Partial<Ayarlar>;
   /** Ust seritteki bolum/hekim suzgeci (251) - takvim de ayni secimi gosterir. */
   bolum?: number;
@@ -52,6 +53,12 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, yenile, bolum, hekimId }
   onYeni(baslangic: string): void;
   /** Dolu randevu: kartı aç. */
   onAc(id: number): void;
+  /**
+   * Fareyle YUKARIDAN AŞAĞI sürüklenerek seçilen aralık (kullanıcı): başlangıç
+   * ve süre "＋ Yeni"ye taşınır. Seçim tek başına kart AÇMAZ - kullanıcı önce
+   * aralığı işaretler, sonra Yeni'ye basar.
+   */
+  onAralik?(baslangic: string | null, sureDk: number): void;
   /** Dışarıdan tazeleme sayacı (kayıt sonrası). */
   yenile?: number;
 }) {
@@ -116,6 +123,44 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, yenile, bolum, hekimId }
     });
   };
 
+  /**
+   * SÜRÜKLEYEREK ARALIK SEÇİMİ: mousedown başlatır, hücre üzerinden geçerken
+   * genişler, mouseup bitirir. Tek hücrede bırakılırsa (sürükleme yok) eski
+   * davranış korunur - o saate yeni randevu açılır.
+   */
+  const [secim, setSecim] = useState<{ gun: string; bas: number; bit: number } | null>(null);
+  const [suruklu, setSuruklu] = useState(false);
+
+  const araliktaMi = (g: string, slot: number) =>
+    !!secim && secim.gun === g
+    && slot >= Math.min(secim.bas, secim.bit) && slot <= Math.max(secim.bas, secim.bit);
+
+  const secimBasla = (g: string, slot: number) => {
+    setSecim({ gun: g, bas: slot, bit: slot });
+    setSuruklu(true);
+  };
+  const secimGenislet = (g: string, slot: number) => {
+    if (!suruklu || !secim || secim.gun !== g) return;
+    setSecim(o => (o ? { ...o, bit: slot } : o));
+  };
+  const secimBitir = (g: string, slot: number) => {
+    if (!suruklu) return;
+    setSuruklu(false);
+    const bas = secim ? Math.min(secim.bas, slot) : slot;
+    const bit = secim ? Math.max(secim.bit, slot) : slot;
+    const adim = Math.max(5, Number(ayar.slotDk) || 15);
+    if (bas === bit) {
+      // Tek hücre = tiklama: eskisi gibi o saate yeni randevu.
+      setSecim(null);
+      onAralik?.(null, 0);
+      if (hucre(g, bas).length === 0) onYeni(`${g}T${saatMetni(bas)}`);
+      return;
+    }
+    // Son slot da dahil: 09:00-09:30 isaretlenirse sure 45 dk degil 45'tir
+    //   (bitis slotunun kendisi de secili sayilir).
+    onAralik?.(`${g}T${saatMetni(bas)}`, bit - bas + adim);
+  };
+
   const kaydir = (yon: number) => {
     const t = new Date(gun);
     t.setDate(t.getDate() + (gorunum === 'gun' ? yon : yon * 7));
@@ -164,10 +209,15 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, yenile, bolum, hekimId }
                 <td style={{ textAlign: 'center', opacity: .75 }}>{saatMetni(slot)}</td>
                 {gunler.map(g => {
                   const kayitlar = hucre(g, slot);
+                  const secili = araliktaMi(g, slot);
                   return (
-                    <td key={g + slot} style={{ cursor: 'pointer', verticalAlign: 'top' }}
-                        onClick={() => kayitlar.length === 0
-                          && onYeni(`${g}T${saatMetni(slot)}`)}>
+                    <td key={g + slot}
+                        style={{ cursor: 'pointer', verticalAlign: 'top',
+                                 background: secili ? 'var(--sec, var(--mor2))' : undefined,
+                                 userSelect: 'none' }}
+                        onMouseDown={() => kayitlar.length === 0 && secimBasla(g, slot)}
+                        onMouseEnter={() => secimGenislet(g, slot)}
+                        onMouseUp={() => secimBitir(g, slot)}>
                       {kayitlar.map(r => (
                         <div key={String(r.id)}
                              onClick={e => { e.stopPropagation(); onAc(Number(r.id)) }}

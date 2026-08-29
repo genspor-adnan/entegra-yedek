@@ -145,6 +145,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   //   listesi gelir (Randevu Ayarlari > Bölümler ile ayni kaynak).
   const [randevuAgaci, setRandevuAgaci] = useState<RandevuBolumDugumu[]>([]);
   const [bolumSuzgec, setBolumSuzgec] = useState<number | ''>('');
+  /** Takvimde fareyle secilen aralik (251): "＋ Yeni" bunu karta tasir. */
+  const [takvimAralik, setTakvimAralik] = useState<{ baslangic: string; sureDk: number } | null>(null);
   const [hekimSuzgec, setHekimSuzgec] = useState<number | ''>('');
   useEffect(() => {
     if (tanim.kaynak !== 'randevu') return;
@@ -697,7 +699,15 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         return;
       }
 
-      if (kod.endsWith('.yeni') && tanim.kartYolu) git(`${tanim.kartYolu}/yeni`);
+      if (kod.endsWith('.yeni') && tanim.kartYolu) {
+        // RANDEVU (251): takvimde fareyle isaretlenen aralik varsa saat ve sure
+        //   karta tasinir - kullanici "yukaridan asagi isaretleyip Yeni'ye
+        //   basinca" formda o araligi gormek istiyor.
+        const ek = tanim.kaynak === 'randevu' && takvimAralik
+          ? `?baslangic=${encodeURIComponent(takvimAralik.baslangic)}&sure=${takvimAralik.sureDk}`
+          : '';
+        git(`${tanim.kartYolu}/yeni${ek}`);
+      }
       // SIL gercekten SILER: eskiden karti aciyordu ve kullanici "sildim" sanip
       //   ekranda kaydi gorunce sasiriyordu. Onay sorulur; silme engelleri
       //   (SilmeEngeli) sunucuda, 422 mesaji kullaniciya aynen gosterilir.
@@ -858,6 +868,8 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
             yenile={yenile}
             onYeni={bas => git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`)}
             onAc={id => git(`/randevu/${id}`)}
+            onAralik={(bas, sure) =>
+              setTakvimAralik(bas ? { baslangic: bas, sureDk: sure } : null)}
           />
         ),
       } : undefined}
@@ -1018,7 +1030,15 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         gizliSekmeler={tanim.gizliKartSekmeleri}
         zorunluAlanlar={tanim.zorunluKartAlanlari}
         resimYerTutucu={tanim.resimYerTutucu}
-        yeniKayitVarsayilanlari={tanim.yeniKayitVarsayilanlari}
+        // Takvimden gelen saat/sure (251): URL parametreleri kart varsayilani
+        //   olur - kart acilinca alanlar dolu gelir.
+        yeniKayitVarsayilanlari={tanim.kaynak === 'randevu' && sorgu.get('baslangic')
+          ? {
+              ...tanim.yeniKayitVarsayilanlari,
+              baslangic: sorgu.get('baslangic')!,
+              ...(sorgu.get('sure') ? { sureDk: Number(sorgu.get('sure')) } : {}),
+            }
+          : tanim.yeniKayitVarsayilanlari}
         onKapat={() => git(tanim.kartYolu!)}
         onKaydedildi={yeniId => {
           setYenile(t => t + 1);
