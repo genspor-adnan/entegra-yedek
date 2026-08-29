@@ -673,18 +673,19 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // SATIS FIYAT LISTELERI (201): liste bir KURALDIR (taban liste x carpan ->
     //   yuvarlama), satirlari o kuralin materyalize halidir. "⟳ Listeyi Üret"
     //   satirlari yeniden yazar; MANUEL girilen satirlar korunur.
-    kaynak: 'fiyat-listesi', baslik: 'Fiyat Listeleri', yol: 'Stok › Fiyat Listeleri',
+    kaynak: 'fiyat-listesi', baslik: 'Fiyat Listeleri', yol: 'Yönetim › Fiyat Listeleri',
     kartYolu: '/fiyat-listesi', aksiyonEkrani: 'fiyat-listesi-liste', cipler: DURUM_CIPLERI,
-    menuGrup: 'Stok & Hizmet', menuAd: 'Fiyat Listeleri', ic: '🏷️', yetkiKodu: 'fiyat_listesi',
-    menuSira: 80,
+    // Kullanici: fiyat listeleri Yonetim altinda (tanim ekrani, gunluk stok isi degil).
+    menuGrup: 'Yönetim', menuAd: 'Fiyat Listeleri', ic: '🏷️', yetkiKodu: 'fiyat_listesi',
+    menuSira: 950,
   },
   {
     // Liste SATIRLARI ayri ekran: bir listenin binlerce satiri kart icinde
     //   rahat gezilmiyor. Menude gizli - listeden "Satırları Aç" ile gelinir.
     kaynak: 'fiyat-listesi-satir', baslik: 'Fiyat Listesi Satırları',
-    yol: 'Stok › Fiyat Listesi Satırları', aksiyonEkrani: 'fiyat-listesi-satir-liste',
+    yol: 'Yönetim › Fiyat Listesi Satırları', aksiyonEkrani: 'fiyat-listesi-satir-liste',
     urlFiltreAlani: 'listeId', menuGizli: true, yetkiKodu: 'fiyat_listesi',
-    menuGrup: 'Stok & Hizmet', menuAd: 'Fiyat Listesi Satırları', ic: '🏷️',
+    menuGrup: 'Yönetim', menuAd: 'Fiyat Listesi Satırları', ic: '🏷️',
   },
   {
     // ÜTS askidaki/gelen urunler (223): karsi kurumlarin bize VERDIGI tekil
