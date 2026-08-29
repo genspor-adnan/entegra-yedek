@@ -60,13 +60,22 @@ public sealed class KullaniciSubeDeposu
     public async Task KaydetAsync(int kartId, IReadOnlyList<SubeIstegi> satirlar,
         YazmaBaglami baglam, CancellationToken iptal = default)
     {
+        // Kisinin CALISTIGI subesi (taraf.sube_id) her zaman yetkilidir
+        //   (kullanici): ekran kilitli gonderiyor, sunucu da garantiler.
+        var calistigi = await _veri.TekDegerAsync<int>(
+            "select coalesce(sube_id, 0) from public.taraf where id = @p0",
+            new object?[] { kartId }, iptal);
+
         var yetkililer = satirlar.Where(s => s.Yetkili).ToList();
+        if (calistigi > 0 && yetkililer.All(s => s.SubeId != calistigi))
+            yetkililer.Add(new SubeIstegi(calistigi, true, false, true));
         if (yetkililer.Count == 0)
             throw GentegreHatasi.IsKurali(
                 "Kullanıcı en az bir şubede yetkili olmalı - yoksa hiçbir şubeye giremez.");
-        var varsayilanlar = yetkililer.Where(s => s.Varsayilan).ToList();
-        if (varsayilanlar.Count > 1)
-            throw GentegreHatasi.IsKurali("Yalnız bir şube varsayılan olabilir.");
+        // VARSAYILAN = calistigi sube (kullanici: "vars kolonu kaldir, cunku
+        //   calistigi sube zorunlu varsayilandir"); tanimli degilse ilk yetkili.
+        var varsayilanId = calistigi > 0 && yetkililer.Any(s => s.SubeId == calistigi)
+            ? calistigi : yetkililer[0].SubeId;
 
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
@@ -77,9 +86,6 @@ public sealed class KullaniciSubeDeposu
         await using (var k = baglanti.Komut(
             "delete from public.kullanici_sube where taraf_id = @p0", islem, kartId))
             await k.ExecuteNonQueryAsync(iptal);
-
-        var varsayilanId = varsayilanlar.Count == 1
-            ? varsayilanlar[0].SubeId : yetkililer[0].SubeId;
 
         foreach (var s in yetkililer)
         {

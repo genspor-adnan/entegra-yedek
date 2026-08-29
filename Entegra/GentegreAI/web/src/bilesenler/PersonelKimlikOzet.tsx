@@ -253,7 +253,8 @@ export function PersonelKimlikOzet({
         </div>
         {/* Yetkili subeler FOTOGRAFIN ALTINDA (kullanici). */}
         {!ozetGizli && kaynakId && (
-          <KartKullaniciSubeleri kartId={kaynakId} saltOkunur={saltOkunur} />
+          <KartKullaniciSubeleri kartId={kaynakId} saltOkunur={saltOkunur}
+                                 zorunluSubeId={Number(sube) || undefined} />
         )}
 
         {/* Kullanici rolu (kullanici): karta bagli kullanici hesabinin rolu -

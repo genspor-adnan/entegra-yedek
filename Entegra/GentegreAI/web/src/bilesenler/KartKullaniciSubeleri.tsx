@@ -11,9 +11,11 @@ import { hataMetni } from '../api/sozlesme';
  * belirlenir - aynı roldeki iki kişi farklı şubelerde olabilir. "Vars."
  * açılışta gelen şube (tek), "Yazma" kapalıysa o şube salt okunur.
  */
-export function KartKullaniciSubeleri({ kartId, saltOkunur }: {
+export function KartKullaniciSubeleri({ kartId, saltOkunur, zorunluSubeId }: {
   kartId: number;
   saltOkunur: boolean;
+  /** Kişinin ÇALIŞTIĞI şube: her zaman yetkili, işareti kaldırılamaz. */
+  zorunluSubeId?: number;
 }) {
   const [satirlar, setSatirlar] = useState<KullaniciSubeSatiri[] | null>(null);
   const [hata, setHata] = useState('');
@@ -30,15 +32,10 @@ export function KartKullaniciSubeleri({ kartId, saltOkunur }: {
   }, [kartId]);
 
   const degis = (subeId: number, yama: Partial<KullaniciSubeSatiri>) => {
+    // Calistigi sube kilitli (kullanici): yetkisi kaldirilamaz.
+    if (subeId === zorunluSubeId && yama.yetkili === false) return;
     setDegisti(true); setMesaj('');
-    setSatirlar(s => s?.map(x => {
-      // Varsayilan TEK olabilir: baskasi varsayilan yapilinca digeri duser.
-      if (x.subeId !== subeId) return yama.varsayilan ? { ...x, varsayilan: false } : x;
-      const yeni = { ...x, ...yama };
-      if (yama.yetkili === false) return { ...yeni, varsayilan: false };
-      if (yama.varsayilan) return { ...yeni, yetkili: true };
-      return yeni;
-    }) ?? s);
+    setSatirlar(s => s?.map(x => (x.subeId === subeId ? { ...x, ...yama } : x)) ?? s);
   };
 
   const kaydet = async () => {
@@ -46,7 +43,11 @@ export function KartKullaniciSubeleri({ kartId, saltOkunur }: {
     setIslemde(true); setHata(''); setMesaj('');
     try {
       setSatirlar(await api.kartSubeKaydet(kartId, satirlar.map(s => ({
-        subeId: s.subeId, yetkili: s.yetkili, varsayilan: s.varsayilan, yazma: s.yazma,
+        subeId: s.subeId,
+        yetkili: s.yetkili || s.subeId === zorunluSubeId,
+        // Varsayilan HER ZAMAN calistigi sube (kullanici) - ayri kolon yok.
+        varsayilan: s.subeId === zorunluSubeId,
+        yazma: s.yazma,
       }))));
       setDegisti(false);
       setMesaj('Şube yetkileri kaydedildi.');
@@ -84,7 +85,6 @@ export function KartKullaniciSubeleri({ kartId, saltOkunur }: {
           <tr>
             <th style={{ width: 34 }}></th>
             <th>Şube</th>
-            <th style={{ textAlign: 'center', width: 60 }} title="Açılışta gelen şube">Vars.</th>
             <th style={{ textAlign: 'center', width: 60 }} title="Kapalıysa şube salt okunur">Yazma</th>
           </tr>
         </thead>
@@ -92,16 +92,16 @@ export function KartKullaniciSubeleri({ kartId, saltOkunur }: {
           {!satirlar && <tr><td colSpan={4}>Yükleniyor…</td></tr>}
           {satirlar?.map(s => (
             <tr key={s.subeId} className={s.yetkili ? 'secili' : undefined}
-                style={{ cursor: saltOkunur ? 'default' : 'pointer' }}
+                style={{ cursor: saltOkunur || s.subeId === zorunluSubeId
+                                 ? 'default' : 'pointer' }}
                 onClick={() => { if (!saltOkunur) degis(s.subeId, { yetkili: !s.yetkili }) }}>
               <td style={{ textAlign: 'center' }}>
-                <input type="checkbox" checked={s.yetkili} readOnly />
+                <input type="checkbox" checked={s.yetkili || s.subeId === zorunluSubeId}
+                       disabled={s.subeId === zorunluSubeId} readOnly />
               </td>
-              <td>{s.subeAdi}</td>
-              <td style={{ textAlign: 'center' }} onClick={e => e.stopPropagation()}>
-                <input type="radio" name={`kvars-${kartId}`} checked={s.varsayilan}
-                       disabled={saltOkunur || !s.yetkili}
-                       onChange={() => degis(s.subeId, { varsayilan: true })} />
+              <td title={s.subeId === zorunluSubeId
+                         ? 'Çalıştığı şube - yetkisi kaldırılamaz' : undefined}>
+                {s.subeAdi}
               </td>
               <td style={{ textAlign: 'center' }} onClick={e => e.stopPropagation()}>
                 <input type="checkbox" checked={s.yazma}
