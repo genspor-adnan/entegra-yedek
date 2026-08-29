@@ -35,8 +35,10 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis }: Props) {
 
   const kidem = kidemMetni(String(satir.iseGirisTarihi ?? ''));
 
+  // Kutular ALT ALTA (kullanici: "is bilgi altina sgk gelsin") - kok satir
+  //   (kasira) degil, disaridaki sutunun akisina birakilir.
   return (
-    <div className="kasira">
+    <>
       <div className="kagrup">
         <h6>İş Bilgileri</h6>
         <div className="alan-izgara tek-sutun">
@@ -126,6 +128,6 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis }: Props) {
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }

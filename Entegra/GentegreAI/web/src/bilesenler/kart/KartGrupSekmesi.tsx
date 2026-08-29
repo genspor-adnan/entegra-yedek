@@ -250,7 +250,6 @@ const adliBlok = (
               ozetGizli={kaynak === 'hasta'}
               vknoGizli={kaynak === 'hasta'}
               kimlikSutunGenisligi={kaynak === 'hasta' ? '420px' : undefined}
-              fotoSagaYasli={kaynak !== 'hasta'}
               fotoSolEkOnce={kaynak === 'hasta'}
               fotoSolEk={hastaIletisimAlanlari.length > 0 && (
                 <div className="kasutun" style={{ flex: '1 1 260px' }}>
