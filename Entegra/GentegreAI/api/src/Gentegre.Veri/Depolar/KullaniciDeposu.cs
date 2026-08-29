@@ -122,6 +122,17 @@ public sealed class KullaniciDeposu
                                 (select id from public.rol order by id limit 1)),
                        h.eposta, 1, 0
                   from hedef h
+                returning id
+            )
+            , sube as (
+                insert into public.kullanici_sube
+                       (taraf_id, sube_id, varsayilan, yazma, ekleyen)
+                select y.id, t.sube_id, 1, 1, 0
+                  from yeni y
+                  join public.taraf t on t.id = y.id
+                 where coalesce(t.sube_id, 0) > 0
+                   and not exists (select 1 from public.kullanici_sube ks
+                                    where ks.taraf_id = y.id)
                 returning 1
             )
             select count(*)::int from yeni
@@ -205,6 +216,18 @@ public sealed class KullaniciDeposu
         if (liste.Count > 0) return liste;
 
         liste = await RolSubeleriAsync(tarafId, iptal);
+        if (liste.Count > 0) return liste;
+
+        // 3) Kisinin CALISTIGI subesi (taraf.sube_id) - yeni acilan hesaplar
+        //    subesiz kalmasin (sube secici ve oturum bilgisi bos goruluyordu).
+        liste = await _veri.ListeAsync(
+            "select s.id, s.ad, 1 as varsayilan, 1 as yazma " +
+            "  from public.taraf t " +
+            "  join public.sube s on s.id = t.sube_id and s.aktif = 1 " +
+            " where t.id = @p0",
+            new object?[] { tarafId },
+            o => new SubeOzeti(o.Sayi("id"), o.Metin("ad"), o.Bayrak("varsayilan"),
+                               o.Bayrak("yazma")), iptal);
         if (liste.Count > 0) return liste;
         return await _veri.ListeAsync(
             "select s.id, s.ad, 1 as varsayilan, 1 as yazma " +
