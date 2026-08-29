@@ -117,6 +117,10 @@ public static class AksiyonKatalogu
                     KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30),
                 new("randevu.gelmedi",  "✖ Gelmedi", "randevu",
                     KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40),
+                // Randevudan BASVURUYA (265): hasta geldiginde poliklinik
+                //   basvurusu acilir, randevunun hizmeti kalem olur.
+                new("randevu.basvuru",  "➜ Başvuruya Dönüştür", "belge",
+                    KaynakKodu: "belge", Islem: Islem.Ekle, KayitGerekir: true, Sira: 45),
                 new("randevu.iptal",    "⊘ İptal",   "randevu", Hedef: "sagtus,palet",
                     KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50),
                 new("randevu.sil",      "🗑 Sil",    "randevu", Hedef: "sagtus,palet", Kisayol: "Del",

@@ -59,7 +59,9 @@ public static partial class KartKatalogu
             new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 300,
                 Baslik: "Açıklama", Grup: "Randevu"),
 
-            new("belgeId",   "belge_id",  "sayi",  Yazilabilir: false, Gizli: true),
+            // Basvuruya donusunce (265) buraya belge id yazilir - kart
+            //   ekraninda gorunmez ama yazilabilir olmali.
+            new("belgeId",   "belge_id",  "sayi",  Gizli: true),
             new("eklemeTarihi", "ekleme_tarihi", "tarih", Yazilabilir: false),
         });
 }

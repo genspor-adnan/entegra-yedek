@@ -146,6 +146,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [randevuAgaci, setRandevuAgaci] = useState<RandevuBolumDugumu[]>([]);
   const [bolumSuzgec, setBolumSuzgec] = useState<number | ''>('');
   /** Takvimde fareyle secilen aralik (251): "＋ Yeni" bunu karta tasir. */
+  /** Belge olusturmada sube: oturumun calisma subesi. */
+  const oturumSubeId = Number(localStorage.getItem('gentegre.sube')) || undefined;
   const [takvimAralik, setTakvimAralik] =
     useState<{ baslangic: string; sureDk: number; hekimId?: number } | null>(null);
   const [hekimSuzgec, setHekimSuzgec] = useState<number | ''>('');
@@ -705,6 +707,79 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         //   BAGLANARAK olusturulur (asagida cekKartKaydedildi).
         if (t === 23 || t === 24 || t === 33 || t === 34) { setCekTuru(t); return }
         setKasaTuru(t);
+        return;
+      }
+
+      // RANDEVU durum akisi (243) ve BASVURUYA DONUSUM (265). Durum
+      //   dugmeleri simdiye kadar bagli DEGILDI - tiklaninca hicbir sey
+      //   olmuyordu.
+      if (kod === 'randevu.geldi' || kod === 'randevu.gelmedi' || kod === 'randevu.iptal') {
+        if (!satir) return;
+        const yeniDurum = kod === 'randevu.geldi' ? 2 : kod === 'randevu.gelmedi' ? 3 : 4;
+        await guvenli(async () => {
+          const mevcut = await api.kartOku('randevu', Number(satir.id));
+          await api.kartGuncelle('randevu', Number(satir.id),
+                                 { surum: mevcut.kart.surum, kart: { durum: yeniDurum } });
+          setYenile(t => t + 1);
+        });
+        return;
+      }
+
+      if (kod === 'randevu.basvuru') {
+        if (!satir) return;
+        await guvenli(async () => {
+          const hastaId = Number(satir.hastaId) || 0;
+          const hizmetId = Number(satir.hizmetId) || 0;
+          if (!hastaId) { mesaj('Randevuda hasta yok.'); return }
+          // Basvuru en az bir kalemle acilir (sunucu bos belgeyi reddediyor):
+          //   randevunun hizmeti yoksa once o secilmeli.
+          if (!Number(satir.hizmetId)) {
+            mesaj('Randevuda hizmet seçili değil — başvuru kalemi oluşturulamıyor. '
+                + 'Randevu kartından "Hizmet / İşlem" seçip tekrar deneyin.');
+            git(`/randevu/${Number(satir.id)}`);
+            return;
+          }
+          if (satir.belgeId) {
+            // Zaten donusmus: yeni belge acmak yerine mevcut basvuruyu ac -
+            //   ayni randevudan iki basvuru cikmasin.
+            setAcikBelgeId(Number(satir.belgeId));
+            return;
+          }
+          // Hizmetin fiyat/KDV'si listeden: kalem satiri bos tutarla acilmasin.
+          let birimFiyat = 0;
+          let kdv = 0;
+          if (hizmetId) {
+            const h = await api.liste('hizmet', {
+              sayfa: 1, boyut: 1,
+              filtre: { alan: 'id', op: 'esit', deger: hizmetId },
+            });
+            birimFiyat = Number(h.satirlar[0]?.fiyat) || 0;
+            kdv = Number(h.satirlar[0]?.kdv) || 0;
+          }
+          const y = await api.belgeEkle({
+            belge: {
+              tur: 30,
+              tarafId: hastaId,
+              belgeTarihi: `${String(satir.tarih ?? '').slice(0, 10)}T${String(satir.saat ?? '00:00')}`,
+              subeId: oturumSubeId,
+              aciklama: `Randevu #${satir.id}`
+                        + (satir.bolumAdi ? ` · ${String(satir.bolumAdi)}` : ''),
+            },
+            // tur = 2 (hizmet): sunucu tur ile urun bagini karsilastiriyor
+            //   (1 stok / 2 hizmet / 3 masraf).
+            satirlar: [{ sira: 1, tur: 2, hizmetId, adet: 1, birimFiyat, kdv }],
+          });
+          const belgeId = Number((y as { belge?: { id?: number } }).belge?.id) || 0;
+          // Randevu artik basvuruya bagli ve "Geldi" - hasta muayeneye alindi.
+          //   Kart guncellemesi SURUM ister (iyimser kilit): once oku.
+          const mevcut = await api.kartOku('randevu', Number(satir.id));
+          await api.kartGuncelle('randevu', Number(satir.id),
+                                 { surum: mevcut.kart.surum, kart: { belgeId, durum: 2 } });
+          setYenile(t => t + 1);
+          // Basvuru kartI MODAL acilir (belge kartinin rotasi yok, her listede
+          //   bu bilesenle aciliyor).
+          if (belgeId) setAcikBelgeId(belgeId);
+        });
         return;
       }
 
