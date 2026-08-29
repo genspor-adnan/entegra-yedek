@@ -7,4 +7,8 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: process.env.VITE_BASE ?? '/',
   plugins: [react()],
+  // 500 kB uyarisi STDERR'e yaziliyor, PowerShell bunu hata sayip yayinla.ps1'i
+  //   durduruyordu. Paket tek parca (SPA, tamami girişte gerekiyor) - siniri
+  //   gercek boyutun uzerine alip uyariyi susturuyoruz.
+  build: { chunkSizeWarningLimit: 1500 },
 })

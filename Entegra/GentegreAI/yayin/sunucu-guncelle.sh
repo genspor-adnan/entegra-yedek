@@ -35,7 +35,10 @@ bilgi "paket acildi: $(du -sh "$GECICI" | cut -f1)"
 # Uygulanan gocler DB'de tutulur; ayni dosya iki kez calistirilmaz. Gocler
 #   idempotent yazilsa da (create if not exists / on conflict) kayit tutmak
 #   "hangi surum sunucuda" sorusunun tek cevabidir.
-docker exec -i gentegre-pg18 psql -U postgres -d gentegre_ai -q <<'SQL'
+# NOTICE'ler bastirilir: psql onlari STDERR'e yazar, yerelde yayinla.ps1'i
+#   calistiran PowerShell de native STDERR'i HATA sayip yayini yarida kesiyordu
+#   ("relation goc_gecmisi already exists, skipping" gibi zararsiz bir satir).
+docker exec -i -e PGOPTIONS='-c client_min_messages=warning'        gentegre-pg18 psql -U postgres -d gentegre_ai -q <<'SQL'
 create table if not exists public.goc_gecmisi (
     dosya      varchar(200) primary key,
     uygulama   timestamp not null default now()::timestamp
