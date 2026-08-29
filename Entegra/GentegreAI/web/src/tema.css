@@ -477,6 +477,9 @@ table.grid tr.flt input {
 .alan { display: grid; grid-template-columns: 84px 1fr; column-gap: 8px; align-items: center }
 .alan .etiket { grid-column: 1; font-size: 11px; color: var(--soluk); text-align: left }
 .alan .zorunlu { color: var(--hata) }
+/* Grid ogesi varsayilan min-width:auto ile KUCULMEZ: date girdileri dogal
+   genisliginden dar sutunda sagdan kirpiliyordu (İşten Çıkış, SGK Başlama). */
+.alan input, .alan select, .alan textarea { min-width: 0 }
 /* Personel kartinda etiketler SAGA yasli (kullanici) - girdiye yaklassin;
    kimlik seridindeki etiketler etkilenmez (.kaid ayri kural). */
 .etiket-sag .alan .etiket { text-align: right }
