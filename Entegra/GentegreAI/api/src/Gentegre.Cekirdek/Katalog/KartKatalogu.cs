@@ -75,7 +75,11 @@ public sealed record DetayTanimi(
     // Sekme KOSULLU: verilen mantik alani isaretli degilse sekme hic acilmaz
     //   (or. stok "Paket" sekmesi yalniz paket=1 iken). Bos sekme gostermek,
     //   kullaniciya doldurulacak bir sey varmis izlenimi verir.
-    string? KosulAlani = null
+    string? KosulAlani = null,
+    // 1:1 uzanti (UstKolon = "id"): tablonun PK'si ust kayitla AYNI, ikinci
+    //   satir zaten yazilamaz. Ekranda "+ Satır" dugmesi ilk satirdan sonra
+    //   gizlenir - kullaniciya yazilamayacak satir teklif etmeyelim.
+    bool TekSatir = false
 )
 {
     public string Etiket => Baslik ?? (Ad.Length > 0 ? char.ToUpperInvariant(Ad[0]) + Ad[1..] : Ad);
@@ -152,6 +156,7 @@ public static partial class KartKatalogu
         Ekle(Kisi());
         Ekle(Personel());
         Ekle(Hasta());
+        Ekle(Kurum());
         Ekle(Rol());
         Ekle(Stok());
         // Kasa alt sistemi ana verileri (071-074). Kasa ISLEMI kart degil - belge

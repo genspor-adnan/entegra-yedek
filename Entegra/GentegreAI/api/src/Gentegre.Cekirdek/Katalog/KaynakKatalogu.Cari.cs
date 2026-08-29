@@ -278,6 +278,47 @@ public static partial class KaynakKatalogu
         };
     }
 
+    // -------------------------------------------------------------- kurum ----
+    /// <summary>
+    /// ANLASMALI KURUMLAR listesi (249, kullanici: "cari altina musteri benzeri
+    /// Kurumlar menusu"). Cari listesinin turevi; sozlesme kolonlari
+    /// (tur/no/sure/durum) taraf_kurum'dan gelir.
+    /// </summary>
+    private static KaynakTanimi Kurum()
+    {
+        var c = Cari();
+        // Sozlesme basligi 1:1 - alt sorgu yerine LEFT JOIN, kolon basina
+        //   tekrar sorgu acmasin.
+        var kaynak = "public.taraf t left join public.taraf_kurum k on k.id = t.id";
+        var kolonlar = c.Kolonlar.Select(x => x.Ad switch
+        {
+            "kod"   => x with { Baslik = "Kurum Kodu" },
+            "unvan" => x with { Baslik = "Kurum Adı" },
+            _ => x
+        }).ToList();
+        // Kurum turu adi kod listesinden (Özel/ÖSS/SGK).
+        kolonlar.InsertRange(3, new KolonTanimi[]
+        {
+            new("turAdi",     "coalesce((select d.ad from public.kod_deger d " +
+                              "  join public.kod_liste l on l.id = d.liste_id " +
+                              " where l.kod = 'taraf.kurum_turu' and d.deger = k.tur), '')",
+                              "metin", "Kurum Türü", Genislik: 130, Filtrelenebilir: false),
+            new("tur",        "k.tur",           "sayi",  "Tür (ham)", Varsayilan: false),
+            new("sozlesmeNo", "k.sozlesme_no",   "metin", "Sözleşme No", Genislik: 120),
+            new("baslangic",  "k.baslangic",     "tarih", "Başlangıç"),
+            new("bitis",      "k.bitis",         "tarih", "Bitiş"),
+            new("sozlesmeDurum", "k.durum",      "mantik","Sözleşme Aktif", Hizalama: "orta"),
+        });
+        return c with
+        {
+            Ad = "kurum",
+            YetkiKodu = "kurum",
+            Kaynak = kaynak,
+            SabitKosul = "t.kurum = 1",
+            Kolonlar = kolonlar.ToArray()
+        };
+    }
+
     private static KaynakTanimi Hasta()
     {
         var p = Personel();

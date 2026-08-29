@@ -348,6 +348,8 @@ export interface KartDetayMeta {
   ad: string; baslik: string; saltOkunur: boolean; alanlar: KartAlanMeta[];
   /** Doluysa sekme yalniz bu mantik alan isaretliyken acilir (stok "Paket"). */
   kosulAlani?: string | null;
+  /** 1:1 detay (249): en fazla tek satir - ikinci satir DB'de zaten yazilamaz. */
+  tekSatir?: boolean;
 }
 
 export interface KartMetaYaniti {

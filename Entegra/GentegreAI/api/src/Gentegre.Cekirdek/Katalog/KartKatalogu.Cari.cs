@@ -345,6 +345,85 @@ public static partial class KartKatalogu
             new SilmeEngeli("public.taraf_kullanici", "id", "Bu kart bir kullaniciya bagli, silinemez.")
         });
 
+    // -------------------------------------------------------------- kurum ----
+    /// <summary>
+    /// ANLASMALI KURUM karti (249, kullanici: "hastanenin sozlesme yaptigi
+    /// kurumlarin listesi... bunlar da bir nevi musteri, hastanin odemesini
+    /// yapacak"). Cari kartinin turevi - kurum da fatura edilen, tahsilat
+    /// yapilan bir caridir; ayri bir kart tipi acmak ayni alanlari ikinci kez
+    /// tanimlamak olurdu. Farki: iki sekme (sozlesme basligi + fiyat politikasi
+    /// satirlari) ve `kurum = 1` rol bayragi.
+    /// </summary>
+    private static KartTanimi Kurum()
+    {
+        var c = Cari();
+        var alanlar = c.Alanlar.Select(a => a.Ad switch
+        {
+            "kod"   => a with { Baslik = "Kurum Kodu" },
+            "unvan" => a with { Baslik = "Kurum Adı" },
+            _ => a
+        }).ToList();
+        alanlar.Add(new KartAlani("kurum", "kurum", "mantik", Baslik: "Kurum", Gizli: true));
+
+        var detaylar = (c.Detaylar ?? Array.Empty<DetayTanimi>()).ToList();
+        // SOZLESME BASLIGI - 1:1 (kurumun kendisi zaten sozlesmenin tarafi).
+        detaylar.Add(new DetayTanimi("sozlesme", "public.taraf_kurum", "id", new KartAlani[]
+        {
+            new("id",             "id",               "sayi",  Yazilabilir: false),
+            new("tur",            "tur",              "kod",   Zorunlu: true,
+                KodListesi: "taraf.kurum_turu", Baslik: "Kurum Türü"),
+            new("sozlesmeNo",     "sozlesme_no",      "metin", EnFazlaUzunluk: 40, Baslik: "Sözleşme No"),
+            new("baslangic",      "baslangic",        "tarih", Baslik: "Başlangıç"),
+            new("bitis",          "bitis",            "tarih", Baslik: "Bitiş"),
+            new("durum",          "durum",            "mantik", Baslik: "Aktif"),
+            new("fiyatListesiId", "fiyat_listesi_id", "kod",
+                KodTablosu: "public.v_fiyat_listesi_satis_lookup", Baslik: "Fiyat Listesi"),
+            new("iskontoYuzde",   "iskonto_yuzde",    "para",  Baslik: "Genel İskonto %"),
+            new("aciklama",       "aciklama",         "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
+        }, SubeKolonu: null, Baslik: "Sözleşme", LogTabloId: 909, TekSatir: true));
+
+        // FIYAT POLITIKASI SATIRLARI - "su kategoriden %20 indirim" (kullanici).
+        //   Kapsam daraldikca oncelik artar: hizmet/stok satiri kategoriyi,
+        //   kategori de "Tümü"yu ezer (fiyatlama tarafinda bu sirayla bakilir).
+        detaylar.Add(new DetayTanimi("sozlesmeSatir", "public.kurum_sozlesme", "kurum_id",
+        new KartAlani[]
+        {
+            new("id",            "id",            "sayi",  Yazilabilir: false),
+            new("kapsam",        "kapsam",        "kod",   Zorunlu: true,
+                KodListesi: "kurum.sozlesme_kapsam", Baslik: "Kapsam"),
+            new("kategoriId",    "kategori_id",   "kod",   KodTablosu: "public.v_kategori_lookup",
+                Baslik: "Kategori"),
+            new("stokId",        "stok_id",       "kod",   KodTablosu: "public.v_stok_lookup",
+                Baslik: "Stok"),
+            new("hizmetId",      "hizmet_id",     "kod",   KodTablosu: "public.v_hizmet_lookup",
+                Baslik: "Hizmet"),
+            new("indirimYuzde",  "indirim_yuzde", "para",  Baslik: "İndirim %"),
+            new("sabitFiyat",    "sabit_fiyat",   "para",  Baslik: "Sabit Fiyat"),
+            new("baslangic",     "baslangic",     "tarih", Baslik: "Başlangıç"),
+            new("bitis",         "bitis",         "tarih", Baslik: "Bitiş"),
+            new("aktif",         "aktif",         "mantik", Baslik: "Aktif"),
+            new("aciklama",      "aciklama",      "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
+        }, SubeKolonu: null, Sirala: "kapsam desc, id",
+           Baslik: "Fiyat Politikası", LogTabloId: 910));
+
+        return c with
+        {
+            Ad = "kurum",
+            YetkiKodu = "kurum",
+            SabitKosul = "kurum = 1",
+            YeniKayitVarsayilanlari = new Dictionary<string, object?>
+            {
+                ["kurum"] = (short)1,
+                // Kurum AYNI ZAMANDA MUSTERI: basvuru/faturada cari olarak
+                //   secilebilsin, cari hesabi ve ekstresi calissin.
+                ["musteri"] = (short)1,
+                ["durum"] = (short)1
+            },
+            Alanlar = alanlar.ToArray(),
+            Detaylar = detaylar.ToArray()
+        };
+    }
+
     private static KartTanimi Hasta()
     {
         var p = Personel();
@@ -391,20 +470,30 @@ public static partial class KartKatalogu
             }, SubeKolonu: null, Baslik: "Hasta Bilgisi", LogTabloId: 907)
             : d).ToList();
 
-        // KURUM / ÖDEYEN (245, kullanici): hastanin sponsoru - Özel (kendi),
-        //   ÖSS (sigorta sirketi) ya da SGK. 1:1 uzanti, taraf_hasta deseni.
-        detaylar?.Add(new DetayTanimi("kurum", "public.taraf_kurum", "id", new KartAlani[]
+        // KURUM / ÖDEYEN (248, kullanici): hastanin sponsoru - Özel (kendi),
+        //   ÖSS (sigorta sirketi) ya da SGK. 1:N: police ZAMANLA DEGISIR, her
+        //   basvuruda guncel poliçe girilir, eskisi tarihçe olarak kalir.
+        //   "Sonuncusu aktif" kurali DB tetiginde (tg_taraf_hasta_kurum_tek_aktif) -
+        //   yeni satir eklenince oncekiler kendiliginden pasife duser.
+        detaylar?.Add(new DetayTanimi("kurum", "public.taraf_hasta_kurum", "hasta_id",
+        new KartAlani[]
         {
             new("id",         "id",         "sayi",  Yazilabilir: false),
             new("tur",        "tur",        "kod",   Zorunlu: true,
                 KodListesi: "taraf.kurum_turu", Baslik: "Kurum Türü"),
-            new("kurumId",    "kurum_id",   "kod",   KodTablosu: "public.v_cari_lookup",
+            // Anlasmali kurumlar (249) - tum cariler DEGIL: odeyen ancak
+            //   sozlesmesi olan bir kurum olabilir.
+            new("kurumId",    "kurum_id",   "kod",   KodTablosu: "public.v_kurum_lookup",
                 Baslik: "Kurum / Sigorta"),
             new("policeNo",   "police_no",  "metin", EnFazlaUzunluk: 40, Baslik: "Poliçe No"),
             new("gecerlilik", "gecerlilik", "tarih", Baslik: "Geçerlilik"),
             new("kapsam",     "kapsam",     "metin", EnFazlaUzunluk: 200, Baslik: "Kapsam"),
             new("aciklama",   "aciklama",   "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
-        }, SubeKolonu: null, Baslik: "Kurum / Ödeyen", LogTabloId: 908));
+            // Yazilabilir: eski bir poliçeyi tekrar aktif etmek istenirse tetik
+            //   digerlerini pasife ceker. Varsayilan 1 - son giren aktif olur.
+            new("aktif",      "aktif",      "mantik", Baslik: "Aktif"),
+        }, SubeKolonu: null, Sirala: "aktif desc, id desc",
+           Baslik: "Kurum / Ödeyen", LogTabloId: 908));
 
         return p with
         {

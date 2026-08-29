@@ -67,7 +67,9 @@ public sealed record KartDetayMeta(
     IReadOnlyList<KartAlanMeta> Alanlar,
     /// <summary>Doluysa sekme YALNIZ bu (mantik) alan isaretliyken acilir
     /// (ör. stok "Paket" sekmesi paket=1 iken).</summary>
-    string? KosulAlani = null);
+    string? KosulAlani = null,
+    /// <summary>1:1 detay - en fazla tek satir (249).</summary>
+    bool TekSatir = false);
 
 public sealed class KartMetaYaniti
 {

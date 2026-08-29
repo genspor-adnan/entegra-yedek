@@ -128,6 +128,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   /** Yalniz dis numarali turde (alis faturasi) kullanilir - tedarikcinin no'su. */
   const [belgeNo, setBelgeNo] = useState('');
   const [vadeGun, setVadeGun] = useState('30');
+  // BASVURU (249): vade yerine "Ödeyen Kurum" - hizmeti kim odeyecek
+  //   (anlasmali kurum / sigorta / SGK). Bos = hasta kendi oder.
+  const [odeyenKurumId, setOdeyenKurumId] = useState<number | null>(null);
+  const [kurumlar, setKurumlar] = useState<{ id: number; ad: string }[]>([]);
   /**
    * FIYAT LISTESI (205). Acilista belge TURUNUN yonune gore cariden cozulur
    * (cari listesi > yonun varsayilani). Kullanici degistirince satirlar
@@ -390,6 +394,21 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     tahsilatAdimi(tahsilatTuru, id);
   };
 
+  // BASVURU (249): odeyen kurum combosu - yalniz anlasmali kurumlar
+  //   (taraf.kurum = 1), tum cariler degil.
+  useEffect(() => {
+    if (!basvuruMu || kurumlar.length > 0) return;
+    void (async () => {
+      try {
+        const y = await api.liste('kurum', {
+          sayfa: 1, boyut: 500, sirala: [{ alan: 'unvan', yon: 'asc' }],
+          filtre: { op: 'and', kosullar: [{ alan: 'durum', op: 'esit', deger: 1 }] },
+        });
+        setKurumlar(y.satirlar.map(r => ({ id: Number(r.id), ad: String(r.unvan ?? '') })));
+      } catch { /* kurum listesi okunamazsa combo bos kalir, kayit engellenmez */ }
+    })();
+  }, [basvuruMu, kurumlar.length]);
+
   // Mevcut belgeyi ac: baslik + satirlar + dip toplam sunucudan gelir.
   useEffect(() => {
     if (!belgeId) return;
@@ -402,6 +421,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setTarih(String(y.belge.belgeTarihi ?? '').slice(0, 16));
         setSeri(String(y.belge.belgeSeri ?? ''));
         setVadeGun(String(y.belge.vadeGun ?? 0));
+        setOdeyenKurumId(y.belge.odeyenKurumId != null ? Number(y.belge.odeyenKurumId) : null);
         setFiyatListesiIdHam(Number(y.belge.fiyatListesiId) || null);
         setTeklifDurum(String(y.belge.teklifDurum ?? '1'));
         setRevizeNo(String(y.belge.revizeNo ?? ''));
@@ -579,6 +599,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     //   (belgeKaydet.ts) - ekran yalniz sonucu gosterir.
     const girdi: BelgeGirdisi = {
       tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun, faturaTipi,
+      // Basvuruda vade yerine odeyen kurum gonderilir (249).
+      ...(basvuruMu ? { odeyenKurumId } : {}),
       fiyatListesiId,
       // Teklif durumu yalniz teklifte anlamli - baska turde gonderilmez.
       ...(teklifMi ? { teklifDurum: Number(teklifDurum) || 1, revizeNo,
@@ -804,6 +826,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           tarih={tarih} setTarih={setTarih}
           tarihEnGec={tarihEnGec} tarihEnErken={tarihEnErken}
           vadeGun={vadeGun} setVadeGun={setVadeGun}
+          basvuruMu={basvuruMu} kurumlar={kurumlar}
+          odeyenKurumId={odeyenKurumId} setOdeyenKurumId={setOdeyenKurumId}
           teklifDurum={teklifDurum} setTeklifDurum={setTeklifDurum}
           revizeNo={revizeNo} setRevizeNo={setRevizeNo}
           teklifKonusu={teklifKonusu} setTeklifKonusu={setTeklifKonusu}

@@ -43,6 +43,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   const {
     aktifSekme, setAktifSekme, alanHatalari, bilgi, sonuc, kilitli, baslikKilitli, belgeAdi,
     belgeNo, setBelgeNo, tarih, setTarih, tarihEnGec, tarihEnErken, vadeGun, setVadeGun,
+    basvuruMu, kurumlar, odeyenKurumId, setOdeyenKurumId,
     cari, satici, depo, setDepo, girisDepo, setGirisDepo, teslimEden, teslimAlan, fisTipi,
     setFisTipi, satirlar, donusumler, setCariArama, setSaticiArama, setPersonelArama,
     kapanmaAlani, bagliSiparisAlani, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
@@ -63,7 +64,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   //   fatura turlerinin adi olarak 'Fatura'ya cevrilir (216).
   // BASVURU (246): numara "Protokol No", tarih "Başvuru Tarihi" (kullanici) -
   //   siparis davranisini miras aliyor ama HBYS'de karsiligi protokoldur.
-  const basvuruMu = belgeAdi === 'Başvuru';
+  //   Bayrak KARTTAN gelir (tur === 30); katalog adi degisse de kirilmaz.
   const belgeSozu = depoBelgesi || stokFisiMi ? belgeAdi
                   : basvuruMu ? 'Başvuru'
                   : irsaliyeMi ? 'İrsaliye' : siparisMi ? 'Sipariş'
@@ -305,9 +306,23 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     {/* --- 8) FATURA TIPI (130) BASLIKTAN CIKTI (kullanici): arac cubugunda,
         dugmelerin saginda duruyor - irsaliyedeki IADE kutusuyla ayni yerde. */}
 
-    {/* --- 9) VADE ---
-        Faturada / tahakkukta anlamli (irsaliyede mal cikis tarihi esas). */}
-    {bilgi.vade && (
+    {/* --- 9) VADE / ODEYEN KURUM ---
+        Faturada / tahakkukta vade anlamli (irsaliyede mal cikis tarihi esas).
+        BASVURUDA (249) vade YOK, yerine ODEYEN KURUM: hizmeti kim odeyecek
+        (kullanici: "basvuruda vade yerine Ödeyen Kurum olsun ve taraf_kurum
+        listelensin"). Bos birakilirsa hasta kendi oder. */}
+    {basvuruMu ? (
+      <label className="alan">
+        <span className="etiket">Ödeyen Kurum</span>
+        <select value={odeyenKurumId ?? ''} disabled={kilitli}
+                onChange={e => setOdeyenKurumId?.(e.target.value ? Number(e.target.value) : null)}>
+          <option value="">— Hasta kendi öder —</option>
+          {(kurumlar ?? []).map(k => (
+            <option key={k.id} value={k.id}>{k.ad}</option>
+          ))}
+        </select>
+      </label>
+    ) : bilgi.vade && (
       <label className="alan">
         <span className="etiket">{teklifMi ? 'Geçerlilik Süresi (gün)' : 'Vade (gün)'}</span>
         <input className="hiza-sag" value={vadeGun} disabled={kilitli}
@@ -396,6 +411,12 @@ export interface BelgeBaslikProps {
   setTeklifTeslim(v: string): void;
   vadeGun: string;
   setVadeGun(v: string): void;
+  /** Basvuru (249): vade yerine odeyen kurum combosu cizilir. */
+  basvuruMu?: boolean;
+  /** Anlasmali kurumlar (taraf.kurum = 1) - basvuruda odeyen adaylari. */
+  kurumlar?: { id: number; ad: string }[];
+  odeyenKurumId?: number | null;
+  setOdeyenKurumId?(v: number | null): void;
   cari: { id: number; unvan: string } | null;
   satici: Secim | null;
   depo: Secim | null;

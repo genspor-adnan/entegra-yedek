@@ -69,6 +69,9 @@ public sealed partial class BelgeDeposu
                    b.giris_depo_id as "girisDepoId", gd.ad as "girisDepoAdi",
                    b.satici_id as "saticiId", sc.unvan as "saticiAdi",
                    b.vade_gun as "vadeGun",
+                   -- Basvuruda (249) vade yerine odeyen kurum gosterilir.
+                   b.odeyen_kurum_id as "odeyenKurumId",
+                   coalesce(ok.unvan, '') as "odeyenKurumAdi",
                    -- SEVKIYAT ayri tabloda (177): kaydi olmayan belgede gorunum
                    --   bos deger dondurur, sozlesme (alan adlari) degismedi.
                    sv.teslim_sekli as "teslimSekli",
@@ -108,6 +111,7 @@ public sealed partial class BelgeDeposu
               left join public.depo  cd on cd.id = b.cikis_depo_id
               left join public.depo  gd on gd.id = b.giris_depo_id
               left join public.taraf sc on sc.id = b.satici_id
+              left join public.taraf ok on ok.id = b.odeyen_kurum_id
               join public.v_belge_sevkiyat sv on sv.belge_id = b.id
               left join public.taraf td on td.id = sv.teslim_eden_id
               left join public.taraf ta on ta.id = sv.teslim_alan_id

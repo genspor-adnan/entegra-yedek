@@ -35,6 +35,10 @@ public sealed partial class BelgeDeposu
         ["dovizCinsi"] = "doviz_cinsi", ["dovizKuru"] = "doviz_kuru", ["kur"] = "kur",
         ["raporDovizi"] = "rapor_dovizi", ["ekstreDovizi"] = "ekstre_dovizi",
         ["vadeGun"] = "vade_gun", ["durum"] = "durum",
+        // BASVURUDA (249) vade yerine ODEYEN KURUM: hizmeti kim odeyecek
+        //   (anlasmali kurum / sigorta). Belgeye yazilir - hastanin polices
+        //   sonradan degisse de gecmis basvurunun odeyeni sabit kalir.
+        ["odeyenKurumId"] = "odeyen_kurum_id",
         ["aciklama"] = "aciklama", ["ozelKod"] = "ozel_kod", ["senaryo"] = "senaryo",
         ["gondericiUnvan"] = "gonderici_unvan", ["gondericiVkno"] = "gonderici_vkno",
         ["gondericiAlias"] = "gonderici_alias", ["saticiId"] = "satici_id",

@@ -300,6 +300,17 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Cari', menuAd: 'Tedarikçi Listesi', ic: '🚚', yetkiKodu: 'cari',
   },
   {
+    // ANLASMALI KURUMLAR (249, kullanici: "cari altina musteri benzeri Kurumlar
+    //   menusu liste ve karti olustur"). Kurum da bir cari - hastanin odemesini
+    //   ustlenen taraf; sozlesme suresi/turu ve fiyat politikasi kartinda.
+    kaynak: 'kurum', baslik: 'Kurumlar', yol: 'Cari › Kurumlar', kartYolu: '/kurum',
+    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Kurum Ekstresi',
+              tarihAlani: 'islemTarihi' },
+    yeniKayitVarsayilanlari: { kurum: true, musteri: true },
+    menuGrup: 'Cari', menuAd: 'Kurumlar', ic: '🏛️', yetkiKodu: 'kurum',
+  },
+  {
     // kisi_listesi.html mockup - kullanici "sade grid olsun, altta sekme yanda bilgi
     // olmasin" dedi; GenGrid zaten duz grid (mockup'taki sag "Secili Kisi" paneli hic
     // yapilmadi, ozel bir "sadelestirme" gerekmedi).

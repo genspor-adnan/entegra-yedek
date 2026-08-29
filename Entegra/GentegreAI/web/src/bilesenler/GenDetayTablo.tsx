@@ -196,7 +196,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   // Adresler'de acik (Adres Tipi secilmemis) satir varken yeni satir eklenemez (kullanici:
   // "adres te fatura tipi seçilmeden yeni satır açılmasın" - Adres Tipi kastediliyor).
   const acikAdresSatiriVar = adresGrid && durum.guncel.some(s => !s.tur);
-  const satirEklenebilir = !saltOkunur && !acikAdresSatiriVar;
+  // 1:1 detayda (249, ör. kurum sozlesme basligi) tek satir: PK ust kayitla
+  //   ayni oldugu icin ikinci satir DB'ye yazilamaz - dugmeyi hic acmayalim.
+  const tekSatirDolu = !!meta.tekSatir && durum.guncel.length >= 1;
+  const satirEklenebilir = !saltOkunur && !acikAdresSatiriVar && !tekSatirDolu;
 
   /** Yeni satirin baslangic degerleri - satir ici ve modal ekleme ayni kumeyi kullanir. */
   const bosSatir = (): Record<string, unknown> => Object.fromEntries(
