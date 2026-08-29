@@ -102,6 +102,9 @@ export function sekmeleriKur(secenek: {
     // Hasta'da kimlik/hasta bilgisi Genel sekmesindeki özetin içinde kalır; izinler
     // hasta kartında kullanılmaz, ayrı sekme olarak gösterilmez.
     if (kaynak === 'hasta' && (d.ad === 'ozluk' || d.ad === 'izinler')) return;
+    // ADAY HASTA (266): tek ekranlik hizli giris - cinsiyet/dogum/kurum ayri
+    //   sekmeye dusmesin, Genel'in altinda cizilir.
+    if (kaynak === 'hasta-aday' && (d.ad === 'ozluk' || d.ad === 'adresler')) return;
     // Personelde de Özlük AYRI SEKME DEGIL (kullanici: "ozluk bilgilerini
     //   kimlik bilgisinin sagina al") - Genel sekmesinde, PersonelKimlikOzet
     //   icinde ciziliyor.

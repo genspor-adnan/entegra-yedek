@@ -450,6 +450,76 @@ public static partial class KartKatalogu
             new("sira",        "sira",         "sayi",  Baslik: "Sıra", Grup: "Kimlik"),
         });
 
+    // -------------------------------------------------------- aday hasta ----
+    /// <summary>
+    /// ADAY HASTA karti (266, kullanici: "sade basit bir Aday Hasta karti...
+    /// zorunlu alanlar ad, soyad, cep; digerleri eposta, tcno, kurum, cinsiyet,
+    /// dogum tarihi, il, ilce; dosya no olarak cep numarasini versin").
+    ///
+    /// Randevu verirken hasta bulunamayinca aciliyor: tam hasta kartinin
+    /// (sekmeler, ozluk, fatura bilgileri) yerine tek ekranlik hizli giris.
+    /// Ayni TABLO (taraf + taraf_hasta) - sonradan tam kartla tamamlanir.
+    /// </summary>
+    private static KartTanimi HastaAday() => new(
+        Ad: "hasta-aday",
+        YetkiKodu: "personel",
+        Tablo: "public.taraf",
+        LogTabloId: 71,
+        SubeKolonu: null,
+        SabitKosul: "hasta = 1",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["grup"] = (short)101,
+            ["hasta"] = (short)1,
+            ["musteri"] = (short)1,
+            ["durum"] = (short)2,          // ADAY
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id",       "id",       "sayi",  Yazilabilir: false),
+            new("ad",       "ad",       "metin", Zorunlu: true, EnFazlaUzunluk: 50,
+                Baslik: "Ad", Grup: "Kimlik"),
+            new("soyad",    "soyad",    "metin", Zorunlu: true, EnFazlaUzunluk: 60,
+                Baslik: "Soyad", Grup: "Kimlik"),
+            new("cepTel",   "cep_tel",  "metin", Zorunlu: true, EnFazlaUzunluk: 30,
+                Baslik: "Cep", Grup: "Kimlik"),
+            new("durum",    "durum",    "kod",   SabitKodlar: HastaDurumKodlari,
+                Baslik: "Durum", Grup: "Kimlik"),
+            new("eposta",   "eposta",   "metin", EnFazlaUzunluk: 200, Baslik: "E-posta"),
+            new("vkno",     "vkno",     "metin", EnFazlaUzunluk: 20, Baslik: "TC No"),
+            // Dosya no (kod) CEP NUMARASINDAN uretilir - ekranda gosterilmez.
+            new("kod",      "kod",      "metin", EnFazlaUzunluk: 20, Gizli: true),
+            new("unvan",    "unvan",    "metin", EnFazlaUzunluk: 120, Gizli: true),
+            // taraf.sube_id NOT NULL: alan GIZLI ama var - kart acilirken
+            //   oturumun subesiyle dolar (GenForm yeni kayit varsayilani).
+            new("subeId",   "sube_id",  "kod",   Gizli: true),
+            new("grup",     "grup",     "kod",   Gizli: true),
+            new("hasta",    "hasta",    "mantik", Gizli: true),
+            new("musteri",  "musteri",  "mantik", Gizli: true),
+        },
+        Detaylar: new[]
+        {
+            // Hasta bilgisi (1:1): aday kartinda yalniz cinsiyet, dogum tarihi
+            //   ve kurum - digerleri tam hasta kartinda.
+            new DetayTanimi("ozluk", "public.taraf_hasta", "id", new KartAlani[]
+            {
+                new("id",          "id",           "sayi",  Yazilabilir: false),
+                new("cinsiyet",    "cinsiyet",     "kod",   SabitKodlar: CinsiyetKodlari,
+                    Baslik: "Cinsiyet"),
+                new("dogumTarihi", "dogum_tarihi", "tarih", Baslik: "Doğum Tarihi"),
+                new("kurumId",     "kurum_id",     "kod",   KodTablosu: "public.v_kurum_lookup",
+                    Baslik: "Kurum"),
+            }, SubeKolonu: null, Baslik: "Hasta Bilgisi", LogTabloId: 907, TekSatir: true),
+            // IL / ILCE taraf'ta degil ADRES tablosunda (taraf_adres): aday
+            //   kartinda tek adres satiri yeter, tam kartta adres listesi var.
+            new DetayTanimi("adresler", "public.taraf_adres", "taraf_id", new KartAlani[]
+            {
+                new("id",   "id",   "sayi",  Yazilabilir: false),
+                new("il",   "il",   "metin", EnFazlaUzunluk: 60, Baslik: "İl"),
+                new("ilce", "ilce", "metin", EnFazlaUzunluk: 60, Baslik: "İlçe"),
+            }, LogTabloId: 901, Baslik: "Adres", TekSatir: true),
+        });
+
     // -------------------------------------------------------------- kurum ----
     /// <summary>
     /// ANLASMALI KURUM karti (249, kullanici: "hastanenin sozlesme yaptigi
@@ -543,6 +613,8 @@ public static partial class KartKatalogu
             "eposta" => a with { Zorunlu = false },
             "gorevId" => a with { Zorunlu = false, Gizli = true },
             "subeId" => a with { Baslik = "Şube" },
+            // Hasta durumu dort degerli (266): Aktif / Pasif / Aday / Vefat.
+            "durum" => a with { SabitKodlar = HastaDurumKodlari },
             _ => a
         }).Where(a => a.Ad is not ("departman" or "telefon" or "epostaWeb")).ToList();
         var durum = alanlar.FirstOrDefault(a => a.Ad == "durum");
@@ -571,7 +643,11 @@ public static partial class KartKatalogu
                 new("cinsiyet",    "cinsiyet",     "kod",   SabitKodlar: CinsiyetKodlari, Baslik: "Cinsiyet"),
                 new("uyruk",       "uyruk",        "metin", EnFazlaUzunluk: 60, Baslik: "Uyrugu"),
                 new("kanGrubu",    "kan_grubu",    "kod",   KodListesi: "taraf.kan_grubu", Baslik: "Kan Grubu"),
-                new("meslek",      "meslek",       "kod",   SabitKodlar: HastaMeslekKodlari, Baslik: "Meslek")
+                new("meslek",      "meslek",       "kod",   SabitKodlar: HastaMeslekKodlari, Baslik: "Meslek"),
+                // Odeyen kurum (266) hastanin kendisinde: cok policeli izleme
+                //   ayri sekmede (taraf_hasta_kurum), burada tek alan yeter.
+                new("kurumId",     "kurum_id",     "kod",   KodTablosu: "public.v_kurum_lookup",
+                    Baslik: "Kurum / Ödeyen")
             }, SubeKolonu: null, Baslik: "Hasta Bilgisi", LogTabloId: 907)
             : d).ToList();
 

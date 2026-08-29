@@ -42,6 +42,11 @@ interface Props {
   acik: boolean;
   /** Aranacak taraf-tabanli kaynaklar (varsayilan: cari + kisi). */
   kaynaklar?: string[];
+  /**
+   * "＋ Yeni" hangi KARTI acsin (266): randevu ekraninda hasta aranirken tam
+   * hasta karti degil sade ADAY HASTA karti acilir. Verilmezse aranan kaynak.
+   */
+  yeniKaynak?: string;
   yerTutucu?: string;
   onKapat(): void;
   onSec(secilen: { kaynak: string; id: number; unvan: string }): void;
@@ -55,7 +60,8 @@ interface Props {
  * arar (Tip/Bağlı Kurum/Görev-Rol gibi taraf-ortak kolonlarla) ve disaridan (ör. toolbar
  * butonu) acik/kapali kontrol edilir (`acik` prop) - kendi tetikleyicisi yok.
  */
-export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKapat, onSec }: Props) {
+export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak,
+                             yerTutucu, onKapat, onSec }: Props) {
   /** Kutuda yazan metin (aninda) - `arama` bunun gecikmeli (debounce) hali. */
   const [metin, setMetin] = useState('');
   const [arama, setArama] = useState('');
@@ -75,10 +81,19 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
     setYukleniyor(true);
     setHata(null);
     try {
+      // TELEFONLA ARAMA (266, kullanici: "kullanici 5336657898 diye girebilir
+      //   ama varsa bulmasi gerekir"): metindeki rakamlar ayiklanip normalize
+      //   telefon kolonunda aranir - kayitli numara "+90 533 665 78 98" gibi
+      //   bosluklu olsa da bulunur. En az 4 rakam: "12" gibi kisa parcalar
+      //   butun listeyi getirmesin.
+      const rakamlar = metin.replace(/\D/g, '');
       const filtre = metin.trim()
         ? { op: 'or' as const, kosullar: [
             { alan: 'kod', op: 'icerir' as const, deger: metin.trim() },
             { alan: 'unvan', op: 'icerir' as const, deger: metin.trim() },
+            ...(rakamlar.length >= 4
+              ? [{ alan: 'telefonHam', op: 'icerir' as const, deger: rakamlar }]
+              : []),
           ] }
         : undefined;
       // gorunum: Son/Sik Aranan sunucuda kullanici_arama ile suzulur+siralanir.
@@ -168,6 +183,8 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
       <GenForm
         kaynak={kaynak}
         id={kartAcik.id}
+        // Kart basligi kaynak adindan uretiliyordu ("hasta-aday"); okunur ad.
+        baslik={kaynak === 'hasta-aday' ? 'Aday Hasta' : undefined}
         cariyeBaglaGizli
         onKapat={() => { setKartAcik(null); void ara(arama) }}
         onKaydedildi={id => { void kartKaydedildi(kaynak, yeniMi, id) }}
@@ -186,7 +203,8 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yerTutucu, onKa
         <div className="lookup-cubuk">
           {kaynaklar.length === 1 && (
             <>
-              <button type="button" className="d" onClick={() => setKartAcik({ kaynak: kaynaklar[0], id: 'yeni' })}>
+              <button type="button" className="d"
+                onClick={() => setKartAcik({ kaynak: yeniKaynak ?? kaynaklar[0], id: 'yeni' })}>
                 ＋ Yeni
               </button>
               <button type="button" className="d" disabled={!satirlar[secili]}

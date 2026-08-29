@@ -397,7 +397,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
   useEffect(() => { ekKaydetTemizle(); return () => ekKaydetTemizle() }, [kaynak, id]);
 
   async function kaydet() {
-    // Kaydetmeden onceki alan kontrolleri TEK YERDE (kartDogrulama): e-posta,
+    // ADAY HASTA (266): dosya no CEP NUMARASI, unvan ad+soyad. Ikisi de kartta
+  //   gosterilmez; kullanicidan iki alan daha istemek yerine turetiliyor.
+  // Kaydetmeden onceki alan kontrolleri TEK YERDE (kartDogrulama): e-posta,
     //   ekrana ozel zorunluluk ve telefon. Ilk hatada ilgili sekmeye atlanir.
     const alanHatasi = kartDogrula(meta, deger, zorunluAlanlar);
     if (alanHatasi) {
@@ -436,11 +438,18 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
 
       // Personel'de "unvan" hic gosterilmiyor/duzenlenmiyor (kullanici: ad/soyad kullanilsin)
       // - DB'de NOT NULL oldugu icin Kaydet'te ad+soyad'dan burada birlestirilip eklenir.
-      if (personelGibiKart) {
+      if (personelGibiKart || kaynak === 'hasta-aday') {
         const ad = String(deger.ad ?? '').trim();
         const soyad = String(deger.soyad ?? '').trim();
         const unvan = [ad, soyad].filter(Boolean).join(' ');
         if (unvan) govde.kart.unvan = unvan;
+      }
+      // ADAY HASTA (266): DOSYA NO = CEP NUMARASI (kullanici). Kullanicidan
+      //   ayrica dosya no istemek yerine turetiliyor; elle girilmis kod varsa
+      //   ona dokunulmaz.
+      if (kaynak === 'hasta-aday' && !String(deger.kod ?? '').trim()) {
+        const cep = String(deger.cepTel ?? '').trim();
+        if (cep) govde.kart.kod = cep;
       }
 
       const yanit = yeniMi
@@ -936,26 +945,15 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
         <TarafArama
           acik
           kaynaklar={['hasta']}
+          // Bulunamayan hasta icin SADE aday karti (266) - tam hasta karti
+          //   kayit kabul masasinda fazla agir.
+          yeniKaynak="hasta-aday"
           yerTutucu="Hasta ara…"
           onKapat={() => setAramaAlani(null)}
           onSec={secilen => {
             alanDegistir(aramaAlani.alan, String(secilen.id));
             setSecilenAdlar(o => ({ ...o, [aramaAlani.alan]: secilen.unvan }));
             setAramaAlani(null);
-            // RANDEVU (265): hastanin AKTIF policesindeki kurum randevuya
-            //   kopyalanir - kayit kabul ayrica secmesin. Police yoksa alan
-            //   bos kalir (hasta kendi oder).
-            if (kaynak === 'randevu') {
-              void (async () => {
-                try {
-                  const h = await api.kartOku('hasta', secilen.id);
-                  const policeler = (h.detaylar?.kurum ?? []) as Record<string, unknown>[];
-                  const aktif = policeler.find(x => Number(x.aktif) === 1) ?? policeler[0];
-                  const kurumId = Number(aktif?.kurumId) || 0;
-                  if (kurumId) alanDegistir('kurumId', String(kurumId));
-                } catch { /* police okunamazsa alan bos kalir */ }
-              })();
-            }
           }}
         />
       )}

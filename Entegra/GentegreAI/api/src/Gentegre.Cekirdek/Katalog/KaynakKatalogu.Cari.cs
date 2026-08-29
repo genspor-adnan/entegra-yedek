@@ -27,6 +27,16 @@ public static partial class KaynakKatalogu
             "coalesce((select g.ad from public.personel_gorev g where g.id = t.gorev_id), " +
             "         t.gorev, '')";
 
+        /// <summary>
+        /// ARAMA ICIN normalize telefon (266, kullanici: "kullanici 5336657898
+        /// diye girebilir ama varsa bulmasi gerekir"). Cep ve sabit telefon
+        /// rakamlara indirgenip birlestirilir; bosluk/parantez/+90 farki arama
+        /// sonucunu degistirmesin.
+        /// </summary>
+        public const string TelefonHam =
+            "regexp_replace(coalesce(t.cep_tel, '') || ' ' || coalesce(t.telefon, ''), " +
+            "               '[^0-9]', '', 'g')";
+
         /// <summary>taraf.departman artik departman TABLOSUNA isaret eder (251).</summary>
         public const string DepartmanAdi =
             "coalesce((select dp.ad from public.departman dp where dp.id = t.departman), '')";
@@ -53,6 +63,9 @@ public static partial class KaynakKatalogu
             new("vkno",         TarafKatalog.TcknMaske, "metin", "VKN/TCKN",
                 Filtrelenebilir: false),
             new("vknoHam",      "t.vkno",          "metin", "VKN/TCKN (ham)", Varsayilan: false),
+            // Telefonla arama (266): yalniz RAKAMLAR - ekranda gosterilmez.
+            new("telefonHam",   TarafKatalog.TelefonHam, "metin", "Telefon (ham)",
+                Varsayilan: false),
             new("utsKurumNo",   "t.uts_kurum_no",  "metin", "ÜTS Kurum No", Genislik: 110,
                                                                             Varsayilan: false),
             new("vd",           "t.vd",            "metin", "Vergi Dairesi", Varsayilan: false),

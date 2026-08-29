@@ -3,6 +3,7 @@ import { c } from '../../dil/ceviri';
 import { DokumanGalerisi } from '../DokumanGalerisi';
 import { IlgiliKisiler } from '../IlgiliKisiler';
 import { TekAdres } from '../TekAdres';
+import { TekKayit } from '../TekKayit';
 import { PersonelKimlikOzet } from '../PersonelKimlikOzet';
 import { KartResimKutusu } from '../KartResimKutusu';
 import { RolKullanicilari } from '../RolKullanicilari';
@@ -346,6 +347,32 @@ const adsizBlok = adsizUst.length > 0 && (
   </div>
 );
 const adsizAltBlok = adsizAlt.length > 0 && <div className="alan-izgara">{renderAlanListesi(adsizAlt)}</div>;
+/* ADAY HASTA (266): cinsiyet / dogum tarihi / kurum ayri sekme degil, Genel'in
+   altinda tek ekranda - kayit kabul masasinda tek nefeste doldurulsun. */
+const adayOzluk = kaynak === 'hasta-aday'
+  ? meta.detaylar.find(d => d.ad === 'ozluk')
+  : undefined;
+const adayAdres = kaynak === 'hasta-aday'
+  ? meta.detaylar.find(d => d.ad === 'adresler')
+  : undefined;
+const adayAdresBlok = adayAdres && (
+  <TekKayit
+    key="aday-adres"
+    meta={adayAdres}
+    durum={detaylar[adayAdres.ad] ?? bosDetay()}
+    saltOkunur={salt}
+    onDegis={yeni => setDetaylar(t => ({ ...t, [adayAdres.ad]: yeni }))}
+  />
+);
+const adayOzlukBlok = adayOzluk && (
+  <TekKayit
+    key="aday-ozluk"
+    meta={adayOzluk}
+    durum={detaylar[adayOzluk.ad] ?? bosDetay()}
+    saltOkunur={salt}
+    onDegis={yeni => setDetaylar(t => ({ ...t, [adayOzluk.ad]: yeni }))}
+  />
+);
 /* LOGO & KAŞE (193): gorseller USTTE, ayar kutulari altta (kullanici).
    Gorseller kolon degil dokuman; galeri yukleme/silme/onizlemeyi yapiyor.
    Merkezin gorselleri kullaniliyorsa yukleme yerine sebep yazilir. */
@@ -546,6 +573,8 @@ return (
         kutularindan da SONRA (kullanici iki kez duzeltti: onceki yer "ortada"
         kaliyordu, İlgili Kişiler grid'inden ONCE geliyordu). */}
     {adsizAltBlok}
+    {adayOzlukBlok}
+    {adayAdresBlok}
   </>
 );
 }

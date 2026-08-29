@@ -765,11 +765,12 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
             belge: {
               tur: 30,
               tarafId: hastaId,
-              belgeTarihi: `${String(satir.tarih ?? '').slice(0, 10)}T${String(satir.saat ?? '00:00')}`,
+              // Basvuru BUGUNUN tarihiyle acilir: hasta simdi geldi. Randevu
+              //   ileri tarihliyse sunucu "belge tarihi ileri tarihli olamaz"
+              //   diyordu; randevunun kendi tarihi aciklamada duruyor.
+              belgeTarihi: new Date().toISOString().slice(0, 16),
               subeId: oturumSubeId,
               fiyatListesiId,
-              // Randevudaki odeyen kurum (265) basvuruya tasinir.
-              ...(satir.kurumId ? { odeyenKurumId: Number(satir.kurumId) } : {}),
               aciklama: `Randevu #${satir.id}`
                         + (satir.bolumAdi ? ` · ${String(satir.bolumAdi)}` : ''),
             },
@@ -778,6 +779,15 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
             satirlar: [{ sira: 1, tur: 2, hizmetId, adet: 1, birimFiyat, kdv }],
           });
           const belgeId = Number((y as { belge?: { id?: number } }).belge?.id) || 0;
+          // ADAY hasta (266) basvuruya donusunce AKTIF olur: randevu sirasinda
+          //   hizli acilmis kayit, hasta gelince gercek hastaya doner.
+          try {
+            const h = await api.kartOku('hasta', hastaId);
+            if (Number(h.kart.durum) === 2) {
+              await api.kartGuncelle('hasta', hastaId,
+                                     { surum: h.kart.surum, kart: { durum: 1 } });
+            }
+          } catch { /* hasta okunamazsa donusum yine de tamamlanir */ }
           // Randevu artik basvuruya bagli ve "Geldi" - hasta muayeneye alindi.
           //   Kart guncellemesi SURUM ister (iyimser kilit): once oku.
           const mevcut = await api.kartOku('randevu', Number(satir.id));

@@ -10,6 +10,15 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> DurumKodlari =
         new() { ["1"] = "Aktif", ["0"] = "Pasif" };
 
+    /// <summary>
+    /// HASTA durumu (266, kullanici: "Aktif, pasif, aday, vefat"). taraf.durum
+    /// kolonu ORTAK - 0/1 kullanan diger kartlar etkilenmez, hasta karti iki
+    /// deger daha gosterir. ADAY: randevu sirasinda hizlica acilmis eksik kayit;
+    /// hasta gelip basvuruya donusturulunce AKTIF olur.
+    /// </summary>
+    private static readonly Dictionary<string, string> HastaDurumKodlari =
+        new() { ["1"] = "Aktif", ["0"] = "Pasif", ["2"] = "Aday", ["3"] = "Vefat" };
+
     /// <summary>Depo tipi - liste kaynagindaki CASE ile ayni kodlar (173).</summary>
     private static readonly Dictionary<string, string> DepoTipleri =
         new() { ["1"] = "Merkez", ["2"] = "Demirbaş",

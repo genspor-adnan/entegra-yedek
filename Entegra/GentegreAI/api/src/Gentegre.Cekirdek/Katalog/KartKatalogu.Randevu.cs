@@ -56,10 +56,6 @@ public static partial class KartKatalogu
                 Baslik: "Randevu Tipi", Grup: "Randevu"),
             new("kaynak",    "kaynak",    "kod",   KodListesi: "randevu.kaynak",
                 Baslik: "Kaynak", Grup: "Randevu"),
-            // ODEYEN KURUM (265): hasta secilince aktif policesinden gelir,
-            //   basvuruya donusunce belge.odeyen_kurum_id'ye gecer.
-            new("kurumId",   "kurum_id",  "kod",   KodTablosu: "public.v_kurum_lookup",
-                Baslik: "Kurum / Ödeyen", Grup: "Randevu"),
             new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 300,
                 Baslik: "Açıklama", Grup: "Randevu"),
 
