@@ -54,8 +54,8 @@ public static class KodListeUclari
                     new AlanHatasi("ad", "1-200 karakter."));
 
             await using var baglanti = await veri.AcAsync(iptal);
-            // TekDegerAsync<int?> KULLANMA: Convert.ChangeType Nullable'a
-            //   cevirmez ("Invalid cast") - int al, 0 = liste yok.
+            // int alinir: 0 = liste yok. (Nullable tuzagi artik TekDegerAsync
+            //   icinde cozuluyor, ama burada 0 yeterli.)
             var yeni = await baglanti.TekDegerAsync<int>("""
                 insert into public.kod_deger (liste_id, deger, ad, sira, aktif, ekleyen)
                 select l.id,

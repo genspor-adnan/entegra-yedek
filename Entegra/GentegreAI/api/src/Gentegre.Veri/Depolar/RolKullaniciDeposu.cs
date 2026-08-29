@@ -73,10 +73,12 @@ public sealed class RolKullaniciDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-        var eski = await baglanti.TekDegerAsync<int?>(
+        // int (0 = kayit yok): nullable donusu merkezi olarak calisiyor ama
+        //   burada 0 kontrolu hem daha basit hem cagriyi tipe bagimli birakmiyor.
+        var eski = await baglanti.TekDegerAsync<int>(
             "select rol_id from public.taraf_kullanici where id = @p0", islem,
-            new object?[] { kullaniciId }, iptal)
-            ?? throw GentegreHatasi.Bulunamadi("Kullanıcı bulunamadı.");
+            new object?[] { kullaniciId }, iptal);
+        if (eski == 0) throw GentegreHatasi.Bulunamadi("Kullanıcı bulunamadı.");
 
         await using (var k = baglanti.Komut("""
             update public.taraf_kullanici
@@ -91,7 +93,7 @@ public sealed class RolKullaniciDeposu
             {
                 ["islem"] = "Kullanıcı role eklendi",
                 ["kullaniciId"] = kullaniciId.ToString(),
-                ["eskiRolId"] = eski.ToString()!,
+                ["eskiRolId"] = eski.ToString(),
             }, iptal: iptal);
 
         await islem.CommitAsync(iptal);
@@ -107,9 +109,9 @@ public sealed class RolKullaniciDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-        var varsayilan = await baglanti.TekDegerAsync<int?>(
+        var varsayilan = await baglanti.TekDegerAsync<int>(
             "select id from public.rol where kod = 'yonetici'", islem, null, iptal);
-        if (varsayilan is null or 0)
+        if (varsayilan == 0)
             throw GentegreHatasi.IsKurali("Varsayılan sistem rolü (yonetici) bulunamadı.");
         if (varsayilan == rolId)
             throw GentegreHatasi.IsKurali(
@@ -119,7 +121,7 @@ public sealed class RolKullaniciDeposu
             update public.taraf_kullanici
                set rol_id = @p1, degistiren = @p2, degistirme_tarihi = now()::timestamp
              where id = @p0 and rol_id = @p3
-            """, islem, kullaniciId, varsayilan.Value, baglam.KullaniciId, rolId))
+            """, islem, kullaniciId, varsayilan, baglam.KullaniciId, rolId))
             await k.ExecuteNonQueryAsync(iptal);
 
         await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloRol, rolId,

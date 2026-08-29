@@ -117,13 +117,20 @@ public static class BaglantiGenisletmeleri
         return await komut.ExecuteNonQueryAsync(iptal);
     }
 
-    /// <summary>Tek hucre; satir yoksa ya da NULL ise <c>default</c>.</summary>
+    /// <summary>
+    /// Tek hucre; satir yoksa ya da NULL ise <c>default</c>.
+    /// T NULLABLE olabilir (<c>int?</c>): Convert.ChangeType Nullable&lt;T&gt;'yi
+    /// ceviremedigi icin alttaki tip kullanilir - eskiden cagri yerlerinin
+    /// "TekDegerAsync&lt;int?&gt; KULLANMA" notuyla dolasmasi gerekiyordu.
+    /// </summary>
     public static async Task<T?> TekDegerAsync<T>(this NpgsqlConnection baglanti, string sql,
         NpgsqlTransaction? islem, object?[] par, CancellationToken iptal = default)
     {
         await using var komut = baglanti.Komut(sql, islem, par);
         var sonuc = await komut.ExecuteScalarAsync(iptal);
-        return sonuc is null or DBNull ? default : (T)Convert.ChangeType(sonuc, typeof(T));
+        if (sonuc is null or DBNull) return default;
+        var tip = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
+        return (T)Convert.ChangeType(sonuc, tip);
     }
 
     /// <summary>Satirlari <paramref name="cevir"/> ile nesneye donusturur.</summary>
