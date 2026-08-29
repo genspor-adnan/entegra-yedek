@@ -32,6 +32,9 @@ const HEDEFLER: Record<number, { kod: number; ad: string }[]> = {
   9:  [{ kod: 10, ad: 'Alış İrsaliyesi' }, { kod: 11, ad: 'Alış Faturası' },
        { kod: 12, ad: 'Alış Fişi' }, { kod: 17, ad: 'Alış Tahakkuku' }],
   // Satis siparisi
+  // BASVURU (246, kullanici): fatura / fis / tahakkuk.
+  30: [{ kod: 15, ad: 'Satış Faturası' }, { kod: 16, ad: 'Satış Fişi' },
+       { kod: 13, ad: 'Satış Tahakkuku' }],
   19: [{ kod: 14, ad: 'Satış İrsaliyesi' }, { kod: 15, ad: 'Satış Faturası' },
        { kod: 16, ad: 'Satış Fişi' }, { kod: 13, ad: 'Satış Tahakkuku' }],
   // Irsaliyeler (konsinye dahil): mal zaten cikti/girdi, sirada belgelenmesi var

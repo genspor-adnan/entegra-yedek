@@ -353,7 +353,11 @@ public static partial class KartKatalogu
             "personel" => new KartAlani("hasta", "hasta", "mantik", Baslik: "Hasta"),
             "kod" => a with { Baslik = "Dosya No" },
             "vkno" => a with { Baslik = "TC No", Grup = "Kimlik", AltGrup = null },
-            "cepTel" => a with { Baslik = "Telefon" },
+            // Hastada zorunluluklar GEVSEK: gorev/e-posta personel alanlaridir,
+            //   hasta kaydi acilirken istenmez (kayit kabul hizli olmali).
+            "cepTel" => a with { Baslik = "Telefon", Zorunlu = false },
+            "eposta" => a with { Zorunlu = false },
+            "gorevId" => a with { Zorunlu = false, Gizli = true },
             "subeId" => a with { Baslik = "Şube" },
             _ => a
         }).Where(a => a.Ad is not ("departman" or "telefon" or "epostaWeb")).ToList();
@@ -413,6 +417,9 @@ public static partial class KartKatalogu
             {
                 ["grup"] = (short)101,
                 ["hasta"] = (short)1,
+                // Hasta AYNI ZAMANDA MUSTERI: basvuru/fatura cari tarafinda
+                //   secilebilsin (HBYS'de hastaya fatura kesilir).
+                ["musteri"] = (short)1,
                 ["durum"] = (short)1
             },
             Alanlar = alanlar.ToArray(),
