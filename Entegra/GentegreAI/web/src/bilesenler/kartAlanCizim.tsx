@@ -95,8 +95,14 @@ export function alanCizici(b: AlanCizimBaglami) {
         //   SONUNA dusuyordu. Kullanicinin gordugu sira sunucudaki sira degil,
         //   ad sirasi olmali; ozel secenekler adinin basindaki isaretle
         //   ("★ Ana Kasa") one gecer.
+        // Bagli combo suzgeci: ust haritasinda YER ALMAYAN secenek her ust
+        //   degerinde gorunur - "bagimsiz" kayit demektir (255: departmani
+        //   olmayan gorev her departmanda secilebilir). Ust'u dolu olan secenek
+        //   yalnizca kendi ustunde cikar (banka -> sube deseni degismedi).
         const secenekler = Object.entries(a.kodlar)
-          .filter(([k]) => !a.bagliAlan || (a.kodUst?.[k] ?? '') === ustDegeri)
+          .filter(([k]) => !a.bagliAlan
+                           || a.kodUst?.[k] === undefined
+                           || a.kodUst[k] === ustDegeri)
           .sort((x, y) => x[1].localeCompare(y[1], 'tr'));
         const ustBos = Boolean(a.bagliAlan) && ustDegeri === '';
         return (

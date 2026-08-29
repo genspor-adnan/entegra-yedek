@@ -168,6 +168,8 @@ public sealed partial class KartDeposu
             // Departman/bolum (251): personel kartinda tum departmanlar, randevu
             //   kartinda yalniz randevu verilebilen bolumler.
             "public.v_departman_lookup", "public.v_randevu_bolum_lookup",
+            // Personel gorevi (255) - departmana bagli combo.
+            "public.v_gorev_lookup",
             // Randevu verilebilir personel (252) - randevu kartindaki hekim.
             "public.v_hekim_lookup",
             // Kasa alt sistemi (071/074). Hepsi "id, ad, aktif" kolonlu gorunum -

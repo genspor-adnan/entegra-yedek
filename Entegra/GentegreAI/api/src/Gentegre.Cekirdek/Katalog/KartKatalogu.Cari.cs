@@ -253,8 +253,13 @@ public static partial class KartKatalogu
             //   ile genel/duz render'dan cikarilip ozel bilesene props olarak geciyor.
             // Pozisyon KOD (236, kullanici: "combo ve ID olarak olsun") - eski
             //   serbest metin kolonu (taraf.gorev) veri olarak duruyor.
+            // Gorev artik kod listesi degil TABLO (255) ve DEPARTMANA BAGLI:
+            //   secilen departmanin gorevleri + bagimsiz gorevler listelenir
+            //   (kullanici: "personel kartinda departmana gore bu gorev listesi
+            //   gelecek ve secilecek").
             new("gorevId",   "gorev_id",   "kod",   Zorunlu: true,
-                KodListesi: "taraf.gorev", Baslik: "Görev"),
+                KodTablosu: "public.v_gorev_lookup", BagliAlan: "departman",
+                Baslik: "Görev"),
             new("vkno",      "vkno",       "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "T.C. Kimlik No"),
             // ik_karti.html mockup'ta İletişim AYRI SEKME (Genel'e gomulu AltGrup DEGIL) -
             //   Grup:"İletişim" bu yuzden AltGrup degil.
@@ -394,7 +399,7 @@ public static partial class KartKatalogu
         Tablo: "public.departman",
         LogTabloId: 911,
         SubeKolonu: null,                     // ana veri - subeler arasi ORTAK
-        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["aktif"] = (short)1 },
+        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["durum"] = (short)1 },
         Alanlar: new KartAlani[]
         {
             new("id",                 "id",                  "sayi",  Yazilabilir: false),
@@ -406,8 +411,39 @@ public static partial class KartKatalogu
                 EnFazlaUzunluk: 100, Baslik: "Departman", Grup: "Kimlik"),
             new("randevuVerilebilir", "randevu_verilebilir", "mantik",
                 Baslik: "Randevu Bölümü", Grup: "Kimlik"),
-            new("aktif",              "aktif",               "mantik", Baslik: "Aktif", Grup: "Kimlik"),
+            // Kolon adi `durum` (256, kullanici) - taraf.durum / fiyat_listesi.durum ile ayni.
+            new("durum",              "durum",               "mantik", Baslik: "Aktif", Grup: "Kimlik"),
             new("sira",               "sira",                "sayi",  Baslik: "Sıra", Grup: "Kimlik"),
+        });
+
+    // ------------------------------------------------------------- gorev ----
+    /// <summary>
+    /// Personel gorevi (255). Departmana BAGLANABILIR ama zorunlu degil:
+    /// departman_id = 0 birakilirsa gorev bagimsizdir, her departmanda secilir.
+    /// </summary>
+    private static KartTanimi PersonelGorev() => new(
+        // "gorev" adi CRM gorevlerinde kullaniliyor (Kasa.cs) - bu personelin
+        //   POZISYONU, ayri kaynak adi.
+        Ad: "personel-gorev",
+        YetkiKodu: "personel",
+        Tablo: "public.personel_gorev",
+        LogTabloId: 913,
+        SubeKolonu: null,                     // ana veri - subeler arasi ORTAK
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["durum"] = (short)1,
+            ["departmanId"] = 0,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id",          "id",           "sayi",  Yazilabilir: false),
+            new("ad",          "ad",           "metin", Zorunlu: true, EnFazlaUzunluk: 100,
+                Baslik: "Görev", Grup: "Kimlik"),
+            // Bos birakilirsa (0) bagimsiz gorev - her departmanda listelenir.
+            new("departmanId", "departman_id", "kod",   KodTablosu: "public.v_departman_lookup",
+                Baslik: "Departman", Grup: "Kimlik"),
+            new("durum",       "durum",        "mantik", Baslik: "Aktif", Grup: "Kimlik"),
+            new("sira",        "sira",         "sayi",  Baslik: "Sıra", Grup: "Kimlik"),
         });
 
     // -------------------------------------------------------------- kurum ----

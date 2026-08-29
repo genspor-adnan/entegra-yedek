@@ -51,12 +51,12 @@ public sealed class RandevuAyarDeposu
         await using var komut = new NpgsqlCommand("""
             select d.id, d.ad, null::integer as hekim_id, d.ad as satir_ad, 0 as tip
               from public.departman d
-             where d.randevu_verilebilir = 1 and d.aktif = 1
+             where d.randevu_verilebilir = 1 and d.durum = 1
             union all
             select d.id, d.ad, t.id, t.unvan, 1
               from public.departman d
               join public.taraf t on t.departman = d.id and t.personel = 1
-             where d.randevu_verilebilir = 1 and d.aktif = 1
+             where d.randevu_verilebilir = 1 and d.durum = 1
                -- Bolumdeki HER personel degil, randevu verilebilir olan (252).
                and t.randevu_verilebilir = 1
                and coalesce(t.durum, 1) = 1

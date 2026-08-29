@@ -302,9 +302,11 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   {
     // DEPARTMANLAR (251): personel departmani ve randevu bolumu AYNI tablo -
     //   "Randevu Bölümü" isaretli olanlar randevu kartinin Bölüm listesinde.
-    kaynak: 'departman', baslik: 'Departmanlar', yol: 'Yönetim › Departmanlar',
-    kartYolu: '/departman', aksiyonEkrani: 'cari-liste',
-    menuGrup: 'Yönetim', menuAd: 'Departmanlar', ic: '🏢', yetkiKodu: 'personel',
+    // 255: iki bolmeli ozel ekran (solda departman, sagda gorev) - duz liste
+    //   degil; kullanici "Departman listesi ekranini 2'ye bol" dedi.
+    kaynak: 'departman', baslik: 'Departman / Görev', yol: 'Yönetim › Departman / Görev',
+    ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAd: 'Departman / Görev', ic: '🏢', yetkiKodu: 'personel',
   },
   {
     // ANLASMALI KURUMLAR (249, kullanici: "cari altina musteri benzeri Kurumlar

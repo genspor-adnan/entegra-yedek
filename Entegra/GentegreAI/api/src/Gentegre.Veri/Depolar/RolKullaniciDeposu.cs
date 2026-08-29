@@ -34,10 +34,8 @@ public sealed class RolKullaniciDeposu
             select k.id, k.kod, coalesce(t.unvan, ''), k.eposta,
                    coalesce((select dp.ad from public.departman dp
                               where dp.id = t.departman), ''),
-                   coalesce((select d.ad from public.kod_deger d
-                              join public.kod_liste l on l.id = d.liste_id
-                             where l.kod = 'taraf.gorev'
-                               and d.deger = t.gorev_id), t.gorev, ''),
+                   coalesce((select g.ad from public.personel_gorev g
+                              where g.id = t.gorev_id), t.gorev, ''),
                    coalesce(nullif(t.telefon, ''), nullif(t.cep_tel, ''),
                             k.cep_tel, ''),
                    coalesce(sb.ad, ''),
@@ -65,10 +63,8 @@ public sealed class RolKullaniciDeposu
             select k.id, k.kod, coalesce(t.unvan, ''), k.eposta,
                    coalesce((select dp.ad from public.departman dp
                               where dp.id = t.departman), ''),
-                   coalesce((select d.ad from public.kod_deger d
-                              join public.kod_liste l on l.id = d.liste_id
-                             where l.kod = 'taraf.gorev'
-                               and d.deger = t.gorev_id), t.gorev, ''),
+                   coalesce((select g.ad from public.personel_gorev g
+                              where g.id = t.gorev_id), t.gorev, ''),
                    coalesce(nullif(t.telefon, ''), nullif(t.cep_tel, ''),
                             k.cep_tel, ''),
                    coalesce(sb.ad, ''),

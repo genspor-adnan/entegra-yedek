@@ -22,10 +22,10 @@ public static partial class KaynakKatalogu
             "     else coalesce(t.vkno, '') end";
 
         /// <summary>Pozisyon (236) - kod listesi 'taraf.gorev'; eslesmeyen eski metin yedek.</summary>
+        /// <summary>taraf.gorev_id artik personel_gorev TABLOSUNA isaret eder (255).</summary>
         public const string PozisyonAdi =
-            "coalesce((select d.ad from public.kod_deger d " +
-            "           join public.kod_liste l on l.id = d.liste_id " +
-            "          where l.kod = 'taraf.gorev' and d.deger = t.gorev_id), t.gorev, '')";
+            "coalesce((select g.ad from public.personel_gorev g where g.id = t.gorev_id), " +
+            "         t.gorev, '')";
 
         /// <summary>taraf.departman artik departman TABLOSUNA isaret eder (251).</summary>
         public const string DepartmanAdi =
@@ -293,8 +293,29 @@ public static partial class KaynakKatalogu
             new("ad",                 "d.ad",                  "metin", "Departman"),
             new("randevuVerilebilir", "d.randevu_verilebilir", "mantik","Randevu Bölümü",
                 Hizalama: "orta"),
-            new("aktif",              "d.aktif",               "mantik","Aktif", Hizalama: "orta"),
+            new("durum",              "d.durum",               "mantik","Aktif", Hizalama: "orta"),
             new("sira",               "d.sira",                "sayi",  "Sıra", Varsayilan: false),
+        });
+
+    // ------------------------------------------------------------- gorev ----
+    /// <summary>Personel gorevleri (255) - Departmanlar ekraninin SAG gridi.</summary>
+    private static KaynakTanimi PersonelGorev() => new(
+        // CRM gorevleriyle karismasin: bu personelin POZISYON listesi.
+        Ad: "personel-gorev",
+        YetkiKodu: "personel",
+        Kaynak: "public.personel_gorev g",
+        VarsayilanSirala: "g.ad asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",           "g.id",           "sayi",  "Id", Varsayilan: false),
+            new("ad",           "g.ad",           "metin", "Görev"),
+            // Bagimsiz gorevde (0) bos gorunur - "her departmanda gecerli".
+            new("departmanAdi", "coalesce((select dp.ad from public.departman dp " +
+                                "           where dp.id = g.departman_id), '')",
+                                "metin", "Departman", Filtrelenebilir: false),
+            new("departmanId",  "g.departman_id", "sayi",  "Departman Id", Varsayilan: false),
+            new("durum",        "g.durum",        "mantik","Aktif", Hizalama: "orta"),
+            new("sira",         "g.sira",         "sayi",  "Sıra", Varsayilan: false),
         });
 
     // -------------------------------------------------------------- kurum ----
