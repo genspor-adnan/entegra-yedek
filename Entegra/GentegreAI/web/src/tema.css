@@ -1170,13 +1170,19 @@ input.skt-gecmis {
 
 /* Randevu kartinda saat kutusu tarihin YARISI genislikte (kullanici).
    `.alan .ikili input { flex: 1 }` kuralindan daha ozgul olmali. */
-.alan .ikili input.yari { flex: 0 0 33%; max-width: 33% }
+/* Saat kutusu: yuzde degil SABIT genislik - tarih sutunu daralinca (175px)
+   yuzdeyle "22:07" kirpiliyordu. */
+.alan .ikili input.yari { flex: 0 0 78px; max-width: 78px }
 
 /* Randevu kimlik seridi (mockup: 1fr 210px 150px): HASTA genis, tarih/saat ve
    durum kadar yer kaplamasin - hasta adi + TC + telefon tek satira sigsin. */
 /* Hasta kutusu YARI genislik (kullanici): fr birakilirsa kalan alanin
    tamamini yutuyordu - sabit genislik, artan yer sagda bos kalir. */
-.kaid .alan-izgara.kaid-randevu { grid-template-columns: minmax(0, 460px) 250px 150px }
+/* Hasta %30 genis (460 -> 600), tarih/saat %30 dar (250 -> 175) - kullanici:
+   hasta metni uzun (ad + cinsiyet + yas + telefon), tarih kutusu dar yeter. */
+/* Tarih sutunu 250 -> 205: %30 daraltmada (175) tarih kutusu "29.08.20" diye
+   kirpiliyordu - tarih + 78px saat icin en az bu kadar yer gerekiyor. */
+.kaid .alan-izgara.kaid-randevu { grid-template-columns: minmax(0, 600px) 205px 150px }
 
 /* Randevu karti mockup genisliginde (randevu_karti.html .win: 760px) - alan
    sayisi az, 1080px'te sag taraf bos kaliyordu. */
