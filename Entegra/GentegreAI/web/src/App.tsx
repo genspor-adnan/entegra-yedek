@@ -24,6 +24,14 @@ function Yollar() {
   // Acilis ekrani artik PANEL (bkz. asagidaki "*" rotasi); eskiden yetkisi olan
   //   ILK liste aciliyordu ve kullanici nerede oldugunu anlamiyordu.
 
+  // Yetkisiz kullanici ana sayfaya dusmesin: ilk erisilebilir ekran.
+  const ilkErisilebilir = LISTELER.find(l =>
+    yetki(l.yetkiKodu) && !l.menuGizli
+    && (!l.urunModu || l.urunModu === (kullanici?.urunModu ?? 1)));
+  const ilkYol = yetki('panel')
+    ? '/panel'
+    : `/${ilkErisilebilir?.rota ?? ilkErisilebilir?.kaynak ?? 'panel'}`;
+
   return (
     <Routes>
       <Route element={<Kabuk />}>
@@ -54,8 +62,10 @@ function Yollar() {
         <Route path="/kasa-islem/:id" element={<KasaIslemKarti />} />
 
         {/* ANA SAYFA: panel. Giris sonrasi buraya gelinir - eskiden ilk listeye
-            (Hasta) dusuyordu, kullanici nerede oldugunu anlamiyordu. */}
-        <Route path="/panel" element={<Panel />} />
+            (Hasta) dusuyordu, kullanici nerede oldugunu anlamiyordu.
+            YETKIYE BAGLI (241): menude gizlemek yetmiyordu, rota acik kalinca
+            giris sonrasi yine ana sayfa aciliyordu (kullanici). */}
+        {yetki('panel') && <Route path="/panel" element={<Panel />} />}
 
         {/* Ayar ekranlari liste degil (ozelSayfa) - rotalari burada. */}
         {yetki('ayar') && <Route path="/genel-ayarlar" element={<GenelAyarlar />} />}
@@ -68,7 +78,9 @@ function Yollar() {
         {/* ÜTS urun sorgu (223): liste degil, canli sorgu formu. */}
         {yetki('uts') && <Route path="/uts-sorgu" element={<UtsSorgu />} />}
 
-        <Route path="*" element={<Navigate to="/panel" replace />} />
+        {/* Bilinmeyen yol: Ana Sayfa yetkisi varsa panele, yoksa kullanicinin
+            girebildigi ILK ekrana (yetkisi hic yoksa oldugu yerde kalir). */}
+        <Route path="*" element={<Navigate to={ilkYol} replace />} />
       </Route>
     </Routes>
   );
