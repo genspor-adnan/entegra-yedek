@@ -385,7 +385,22 @@ public static partial class KartKatalogu
                 new("kanGrubu",    "kan_grubu",    "kod",   KodListesi: "taraf.kan_grubu", Baslik: "Kan Grubu"),
                 new("meslek",      "meslek",       "kod",   SabitKodlar: HastaMeslekKodlari, Baslik: "Meslek")
             }, SubeKolonu: null, Baslik: "Hasta Bilgisi", LogTabloId: 907)
-            : d).ToArray();
+            : d).ToList();
+
+        // KURUM / ÖDEYEN (245, kullanici): hastanin sponsoru - Özel (kendi),
+        //   ÖSS (sigorta sirketi) ya da SGK. 1:1 uzanti, taraf_hasta deseni.
+        detaylar?.Add(new DetayTanimi("kurum", "public.taraf_kurum", "id", new KartAlani[]
+        {
+            new("id",         "id",         "sayi",  Yazilabilir: false),
+            new("tur",        "tur",        "kod",   Zorunlu: true,
+                KodListesi: "taraf.kurum_turu", Baslik: "Kurum Türü"),
+            new("kurumId",    "kurum_id",   "kod",   KodTablosu: "public.v_cari_lookup",
+                Baslik: "Kurum / Sigorta"),
+            new("policeNo",   "police_no",  "metin", EnFazlaUzunluk: 40, Baslik: "Poliçe No"),
+            new("gecerlilik", "gecerlilik", "tarih", Baslik: "Geçerlilik"),
+            new("kapsam",     "kapsam",     "metin", EnFazlaUzunluk: 200, Baslik: "Kapsam"),
+            new("aciklama",   "aciklama",   "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
+        }, SubeKolonu: null, Baslik: "Kurum / Ödeyen", LogTabloId: 908));
 
         return p with
         {
@@ -401,7 +416,7 @@ public static partial class KartKatalogu
                 ["durum"] = (short)1
             },
             Alanlar = alanlar.ToArray(),
-            Detaylar = detaylar
+            Detaylar = detaylar?.ToArray()
         };
     }
 

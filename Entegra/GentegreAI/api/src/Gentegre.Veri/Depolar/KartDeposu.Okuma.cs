@@ -160,6 +160,8 @@ public sealed partial class KartDeposu
         new(StringComparer.Ordinal) {
             "public.kategori", "public.v_cari_lookup", "public.rol", "public.sube", "public.v_personel_lookup",
             "public.v_sube_baz_lookup",
+            // Randevu (243): hasta secimi.
+            "public.v_hasta_lookup",
             // Kasa alt sistemi (071/074). Hepsi "id, ad, aktif" kolonlu gorunum -
             //   hizmet/masraf/proje "durum" kullandigi icin gorunumle uyarlandi.
             "public.v_hesap_lookup", "public.v_proje_lookup", "public.v_hesap_plani_lookup",

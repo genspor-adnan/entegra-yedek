@@ -43,6 +43,10 @@ public sealed class AyarDeposu
         //   sabitlere duser.
         "uts.uretim_url",
         "uts.test_url",
+        // Randevu takvimi (243): gun/saat duzeni.
+        "randevu.baslangic_saat", "randevu.bitis_saat", "randevu.slot_dk",
+        "randevu.varsayilan_sure", "randevu.calisma_gunleri",
+        "randevu.ogle_baslangic", "randevu.ogle_bitis",
         "belge.geri_gun_siniri",
         "liste.sayfa_boyu",
         "stok.negatif_davranis",

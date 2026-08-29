@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { c, cm } from '../dil/ceviri';
 import { guvenli, mesaj, metinSor, onay } from '../bilesenler/mesaj';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
+import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
 import { GenForm } from '../bilesenler/GenForm';
 import { type EBelgeMesaji, type Kosul, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { api } from '../api/istemci';
@@ -131,6 +132,29 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [sonSeciliId, setSonSeciliId] = useState<number | null>(null);
   // Ekstreden donunce ayni cip (Aktif/Pasif/Tumu) secili kalsin.
   const [cipIndeks, setCipIndeks] = useState(0);
+
+  // RANDEVU TAKVIMI (243) ayarlari: takvim saat araligi/calisma gunleri
+  //   Randevu Ayarlari ekranindan (referans) gelir.
+  const [randevuAyarlari, setRandevuAyarlari] = useState<{
+    baslangicSaat?: string; bitisSaat?: string; slotDk?: number; calismaGunleri?: number[];
+  }>({});
+  useEffect(() => {
+    if (tanim.kaynak !== 'randevu') return;
+    let iptal = false;
+    api.ayarlar().then(liste => {
+      if (iptal) return;
+      const bul = (a: string) => liste.find(x => x.anahtar === a)?.deger ?? '';
+      const gunler = bul('randevu.calisma_gunleri')
+        .split(',').map(x => Number(x.trim())).filter(x => x >= 1 && x <= 7);
+      setRandevuAyarlari({
+        baslangicSaat: bul('randevu.baslangic_saat') || undefined,
+        bitisSaat: bul('randevu.bitis_saat') || undefined,
+        slotDk: Number(bul('randevu.slot_dk')) || undefined,
+        calismaGunleri: gunler.length ? gunler : undefined,
+      });
+    }).catch(() => { /* ayar okunamazsa takvim varsayilanla calisir */ });
+    return () => { iptal = true };
+  }, [tanim.kaynak]);
 
   // Aksiyon yonlendirme. Kasa aksiyonlari API cagirir (kesinlestir/iptal/sil) ve
   //   sonrasinda grid'i tazeler; digerleri kart rotasina gider.
@@ -672,6 +696,17 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         }
       />
     ) : (
+    <>
+    {/* RANDEVU (243): gridin ustunde gunluk/haftalik takvim - hucreye tiklamak
+        o saate yeni randevu acar, dolu randevu karti acar. */}
+    {tanim.kaynak === 'randevu' && (
+      <RandevuTakvimi
+        ayarlar={randevuAyarlari}
+        yenile={yenile}
+        onYeni={bas => git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`)}
+        onAc={id => git(`/randevu/${id}`)}
+      />
+    )}
     <GenGrid
       // key: kaynak degisince (baska liste ekranina gecince) GenGrid TAMAMEN yeniden
       //   kurulsun - Route ayni tree konumunda kaldigi icin React bilesen orneğini
@@ -730,6 +765,7 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         </button>
       )}
     />
+    </>
     )}
 
     {acikKasaId !== null && (

@@ -106,6 +106,25 @@ public static class AksiyonKatalogu
             //   birbirini tutmayan iki kayit uretir.
             ["firsat-liste"] = Crud("firsat", "firsat", "firsat"),
 
+            // RANDEVU (243): liste + takvim gorunumu ayni ekranda.
+            ["randevu-liste"] = new AksiyonTanimi[]
+            {
+                new("randevu.yeni",     "＋ Yeni",   "randevu", Kisayol: "Ctrl+N",
+                    KaynakKodu: "randevu", Islem: Islem.Ekle, Sira: 10),
+                new("randevu.duzenle",  "✎ Düzenle", "randevu", Kisayol: "Enter",
+                    KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("randevu.geldi",    "✔ Geldi",   "randevu",
+                    KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30),
+                new("randevu.gelmedi",  "✖ Gelmedi", "randevu",
+                    KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40),
+                new("randevu.iptal",    "⊘ İptal",   "randevu", Hedef: "sagtus,palet",
+                    KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50),
+                new("randevu.sil",      "🗑 Sil",    "randevu", Hedef: "sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "randevu", Islem: Islem.Sil, KayitGerekir: true, Sira: 60),
+                new("genel.yazdir",     "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             // Aday musteriler (122). "Müşteriye Dönüştür" kaydi TASIMAZ, bayragi
             //   degistirir - firsat/gorev/adres gecmisi ayni kayitta kalir.
             ["aday-liste"] = new AksiyonTanimi[]

@@ -151,6 +151,31 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     urunModu: 2,
   },
   {
+    // RANDEVU (243): liste + gunluk/haftalik takvim ayni ekranda; bolum ve
+    //   hekim kolonlari BASTA (kullanici).
+    kaynak: 'randevu', baslik: 'Randevular', yol: 'Kayıt Kabul › Randevular',
+    kartYolu: '/randevu', aksiyonEkrani: 'randevu-liste',
+    tarihAlani: 'tarih',
+    cipler: [
+      { ad: 'Planlandı', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Geldi',     filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Gelmedi',   filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'İptal',     filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2,
+    menuGrup: 'Kayıt Kabul', menuAd: 'Randevular', ic: '📅', yetkiKodu: 'randevu',
+    menuSira: 20,
+  },
+  {
+    // Randevu Ayarlari (243): gun/saat duzeni - liste degil ozel sayfa.
+    kaynak: 'randevu-ayarlar', ozelSayfa: true, baslik: 'Randevu Ayarları',
+    yol: 'Kayıt Kabul › Randevu Ayarları',
+    urunModu: 2,
+    menuGrup: 'Kayıt Kabul', menuAd: 'Randevu Ayarları', ic: '⚙️',
+    yetkiKodu: 'randevu', menuSira: 21,
+  },
+  {
     kaynak: 'proje', baslik: 'Projeler', yol: 'CRM › Projeler', kartYolu: '/proje',
     aksiyonEkrani: 'proje-liste',
     cipler: [

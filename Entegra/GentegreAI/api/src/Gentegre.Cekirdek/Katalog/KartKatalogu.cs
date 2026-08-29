@@ -148,6 +148,7 @@ public static partial class KartKatalogu
     {
         Ekle(Cari());
         Ekle(Aday());
+        Ekle(Randevu());
         Ekle(Kisi());
         Ekle(Personel());
         Ekle(Hasta());
