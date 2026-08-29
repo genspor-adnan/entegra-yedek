@@ -42,6 +42,51 @@ public sealed class KullaniciDeposu
         (short)o.Sayi("dil"), o.Uzun("yetki_surumu"), o.Bayrak("aktif"),
         (short)o.Sayi("hatali_giris"), o.Tarih("kilit_bitis"));
 
+    /// <summary>
+    /// PERSONELE OTOMATIK KULLANICI HESABI (kullanici: "personel ekleyince
+    /// otomatik kullanici hesabi acsin"). Parola BOS birakilir ve
+    /// parola_degismeli = 1 olur: kisi ilk girisde kendi parolasini tanimlar
+    /// (bkz. KimlikServisi.IlkParolaAsync - TCKN son 4 ile dogrulanir).
+    /// Kod sicil numarasidir; bos/cakisik ise taraf id'si kullanilir.
+    /// Zaten hesabi olan kayit ATLANIR; kac hesap acildigini doner.
+    /// </summary>
+    public async Task<int> OtomatikHesapAcAsync(int? tarafId = null,
+        CancellationToken iptal = default)
+        => await _veri.TekDegerAsync<int>("""
+            with hedef as (
+                select t.id,
+                       nullif(trim(t.kod), '') as sicil,
+                       coalesce(nullif(trim(t.eposta), ''), '') as eposta
+                  from public.taraf t
+                 where t.personel = 1 and t.durum = 1
+                   and (@p0::int is null or t.id = @p0)
+                   and not exists (select 1 from public.taraf_kullanici k where k.id = t.id)
+            ), yeni as (
+                insert into public.taraf_kullanici
+                       (id, kod, parola_hash, parola_degismeli, rol_id, eposta, aktif, ekleyen)
+                select h.id,
+                       -- Kod BENZERSIZ olmali: sicil doluysa o, cakisirsa/boşsa id.
+                       case when h.sicil is not null
+                             and not exists (select 1 from public.taraf_kullanici k
+                                              where lower(k.kod) = lower(h.sicil))
+                            then lower(h.sicil)
+                            else h.id::text end,
+                       '', 1,
+                       coalesce((select id from public.rol where kod = 'atanmamis'),
+                                (select id from public.rol order by id limit 1)),
+                       h.eposta, 1, 0
+                  from hedef h
+                returning 1
+            )
+            select count(*)::int from yeni
+            """, new object?[] { tarafId }, iptal);
+
+    /// <summary>Ilk parola dogrulamasi icin TCKN (taraf.vkno).</summary>
+    public Task<string?> TcknAsync(int tarafId, CancellationToken iptal = default)
+        => _veri.TekDegerAsync<string>(
+            "select coalesce(vkno, '') from public.taraf where id = @p0",
+            new object?[] { tarafId }, iptal);
+
     /// <summary>Basarili giris: sayaci sifirla, son giris bilgisini yaz.</summary>
     public Task GirisBasariliAsync(int tarafId, string ip, CancellationToken iptal = default)
         => _veri.CalistirAsync("""

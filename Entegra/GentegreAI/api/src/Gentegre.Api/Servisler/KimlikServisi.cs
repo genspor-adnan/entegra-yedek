@@ -178,16 +178,54 @@ public sealed class KimlikServisi
             throw GentegreHatasi.Dogrulama("Mevcut parola hatali.",
                 new AlanHatasi("eskiParola", "Parola dogrulanamadi."));
 
-        var enAz = await AyarAsync("guvenlik.parola_min_uzunluk", 8, iptal);
-        if ((istek.YeniParola ?? "").Length < enAz)
-            throw GentegreHatasi.Dogrulama($"Parola en az {enAz} karakter olmali.",
-                new AlanHatasi("yeniParola", $"En az {enAz} karakter."));
+        var enAz = await AyarAsync("guvenlik.parola_min_uzunluk", ParolaKurali.VarsayilanEnAz, iptal);
+        ParolaKurali.Dogrula(istek.YeniParola, enAz);
 
         var hash = BCrypt.Net.BCrypt.HashPassword(istek.YeniParola, workFactor: 12);
         await _kullanicilar.ParolaAtaAsync(kullaniciId, hash, degismeli: false, iptal);
 
         // Parola degisince acik oturumlar kapanir.
         await _oturumlar.KullaniciOturumlariniKapatAsync(kullaniciId, "parola_degisti", iptal);
+    }
+
+    /// <summary>
+    /// ILK PAROLA (kullanici: "kullanici ilk giriste pass tanimlasin").
+    /// Otomatik acilan hesaplarin parolasi BOSTUR; kisi kendi parolasini
+    /// burada belirler. Kimlik kaniti olarak TCKN'nin SON 4 HANESI istenir -
+    /// yoksa kullanici kodunu bilen herkes baskasinin hesabini ele gecirirdi.
+    /// Parolasi zaten tanimli hesapta calismaz (normal "parola degistir" akisi).
+    /// </summary>
+    public async Task IlkParolaAsync(IlkParolaIstegi istek, string ip, string istemci,
+                                     CancellationToken iptal = default)
+    {
+        var kod = (istek.Kod ?? "").Trim().ToLowerInvariant();
+        var kullanici = kod.Length > 0 ? await _kullanicilar.KodIleBulAsync(kod, iptal) : null;
+
+        // Kullanici var mi / parolasi bos mu SIZDIRILMAZ - tek mesaj.
+        const string ortakHata = "Kullanıcı adı ya da kimlik doğrulaması hatalı.";
+        if (kullanici is null || !kullanici.Aktif || kullanici.ParolaHash.Length > 0)
+        {
+            await _gunluk.GirisDenemesiAsync(kod, kullanici?.TarafId, ip, istemci, false,
+                                             "ilk_parola", iptal);
+            throw GentegreHatasi.Yetkisiz(ortakHata);
+        }
+
+        var tckn = (await _kullanicilar.TcknAsync(kullanici.TarafId, iptal) ?? "").Trim();
+        var son4 = (istek.TcknSon4 ?? "").Trim();
+        if (tckn.Length < 4 || son4.Length != 4 || !tckn.EndsWith(son4, StringComparison.Ordinal))
+        {
+            await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, false,
+                                             "ilk_parola_tckn", iptal);
+            throw GentegreHatasi.Yetkisiz(ortakHata);
+        }
+
+        var enAz = await AyarAsync("guvenlik.parola_min_uzunluk", ParolaKurali.VarsayilanEnAz, iptal);
+        ParolaKurali.Dogrula(istek.YeniParola, enAz);
+
+        var hash = BCrypt.Net.BCrypt.HashPassword(istek.YeniParola, workFactor: 12);
+        await _kullanicilar.ParolaAtaAsync(kullanici.TarafId, hash, degismeli: false, iptal);
+        await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, true,
+                                         "ilk_parola", iptal);
     }
 
     public async Task DilDegistirAsync(int kullaniciId, DilDegistirIstegi istek,

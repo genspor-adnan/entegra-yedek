@@ -93,6 +93,17 @@ public static class KimlikUclari
             });
         }).RequireAuthorization();
 
+        // ILK PAROLA (anonim): otomatik acilan hesap sahibinin kendi parolasini
+        //   belirlemesi. Kimlik kaniti TCKN son 4 (bkz. KimlikServisi).
+        grup.MapPost("/ilk-parola", async (
+            IlkParolaIstegi istek, KimlikServisi servis, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            await servis.IlkParolaAsync(istek, Ip(ctx),
+                ctx.Request.Headers.UserAgent.ToString(), iptal);
+            return Results.Ok(new { mesaj = "Parolanız tanımlandı, giriş yapabilirsiniz." });
+        }).AllowAnonymous();
+
         grup.MapPost("/parola", async (
             ParolaDegistirIstegi istek, KimlikServisi servis, BaglamCozucu cozucu,
             HttpContext ctx, CancellationToken iptal) =>

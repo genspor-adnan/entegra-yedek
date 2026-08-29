@@ -188,6 +188,10 @@ export const api = {
       headers: oturum.refresh ? { 'X-Refresh-Token': oturum.refresh } : {},
     }),
 
+  /** Ilk giris: otomatik acilan hesabin parolasini kisi kendisi tanimlar. */
+  ilkParola: (kod: string, tcknSon4: string, yeniParola: string) =>
+    gonder<{ mesaj: string }>('/api/kimlik/ilk-parola', { kod, tcknSon4, yeniParola }),
+
   parolaDegistir: (eskiParola: string, yeniParola: string) =>
     gonder<void>('/api/kimlik/parola', { eskiParola, yeniParola }),
 

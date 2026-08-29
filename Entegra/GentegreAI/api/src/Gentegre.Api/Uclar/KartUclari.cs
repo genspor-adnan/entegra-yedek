@@ -113,7 +113,7 @@ public static class KartUclari
         // ------------------------------------------------------------ ekle ----
         grup.MapPost("/{kaynak}", async (
             string kaynak, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo, KullaniciAramaDeposu arama,
-            HttpContext ctx, CancellationToken iptal) =>
+            KullaniciDeposu kullanicilar, HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -125,6 +125,11 @@ public static class KartUclari
 
             // KULLANICI_ARAMA karsiligi: yeni kayit da ekleyen kullanici icin isaretlenir.
             await arama.IsaretleAsync(baglam.KullaniciId, tanim.Ad, yeniId, iptal);
+
+            // PERSONELE OTOMATIK KULLANICI HESABI (kullanici): parolasi BOS,
+            //   rolu "Rol Atanmamış"; kisi ilk giriste kendi parolasini belirler.
+            if (tanim.Ad == "personel")
+                await kullanicilar.OtomatikHesapAcAsync((int)yeniId, iptal);
 
             var (okunabilir, _) = Alanlar(tanim, baglam);
             var kart = await depo.OkuAsync(tanim, yeniId, okunabilir, null, iptal);

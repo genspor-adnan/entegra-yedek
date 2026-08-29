@@ -17,6 +17,33 @@ export function Giris() {
   const [subeId, setSubeId] = useState<number | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [bekliyor, setBekliyor] = useState(false);
+  // ILK GIRIS (kullanici): personel eklenince acilan hesabin parolasi bostur;
+  //   kisi burada kendi parolasini tanimlar. Kimlik kaniti TCKN son 4.
+  const [ilkAcik, setIlkAcik] = useState(false);
+  const [tcknSon4, setTcknSon4] = useState('');
+  const [yeni1, setYeni1] = useState('');
+  const [yeni2, setYeni2] = useState('');
+  const [bilgi, setBilgi] = useState<string | null>(null);
+
+  const PAROLA_KURALI = 'En az 8 karakter; küçük harf, BÜYÜK harf, rakam ve '
+                      + 'harf/rakam dışı bir karakter (ör. .!?*-_) içermeli.';
+
+  async function ilkParola(e: React.FormEvent) {
+    e.preventDefault();
+    setHata(null); setBilgi(null);
+    if (yeni1 !== yeni2) { setHata('Parolalar aynı değil.'); return }
+    setBekliyor(true);
+    try {
+      const y = await api.ilkParola(kod, tcknSon4, yeni1);
+      setBilgi(y.mesaj);
+      setIlkAcik(false);
+      setParola(''); setYeni1(''); setYeni2(''); setTcknSon4('');
+    } catch (h) {
+      setHata(hataMetni(h));
+    } finally {
+      setBekliyor(false);
+    }
+  }
 
   async function gonder(e: React.FormEvent) {
     e.preventDefault();
@@ -42,6 +69,45 @@ export function Giris() {
     } finally {
       setBekliyor(false);
     }
+  }
+
+  if (ilkAcik) {
+    return (
+      <div className="giris-sayfa">
+        <form className="giris-kart" onSubmit={ilkParola}>
+          <h1>Gentegre</h1>
+          <p className="alt-baslik">İlk giriş — parolanızı belirleyin</p>
+          <label>
+            Kullanıcı (sicil no)
+            <input value={kod} onChange={e => setKod(e.target.value)} autoFocus />
+          </label>
+          <label>
+            T.C. Kimlik No — son 4 hane
+            <input value={tcknSon4} maxLength={4} inputMode="numeric"
+                   onChange={e => setTcknSon4(e.target.value.replace(/\D/g, ''))} />
+          </label>
+          <label>
+            Yeni parola
+            <input type="password" value={yeni1} autoComplete="new-password"
+                   onChange={e => setYeni1(e.target.value)} />
+          </label>
+          <label>
+            Yeni parola (tekrar)
+            <input type="password" value={yeni2} autoComplete="new-password"
+                   onChange={e => setYeni2(e.target.value)} />
+          </label>
+          <p style={{ fontSize: 11, opacity: .8, margin: '2px 0 6px' }}>{PAROLA_KURALI}</p>
+          {hata && <div className="hata-kutusu">{hata}</div>}
+          <button type="submit" disabled={bekliyor}>
+            {bekliyor ? 'Bekleyin…' : 'Parolayı Belirle'}
+          </button>
+          <button type="button" className="d" style={{ marginTop: 8 }}
+                  onClick={() => { setIlkAcik(false); setHata(null) }}>
+            Girişe dön
+          </button>
+        </form>
+      </div>
+    );
   }
 
   return (
@@ -77,10 +143,17 @@ export function Giris() {
         )}
 
         {hata && <div className="hata-kutusu">{hata}</div>}
+        {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
 
         <button type="submit" disabled={bekliyor}>
           {bekliyor ? 'Bekleyin…' : subeler === null ? 'Giris' : 'Devam'}
         </button>
+        {subeler === null && (
+          <button type="button" className="d" style={{ marginTop: 8 }}
+                  onClick={() => { setIlkAcik(true); setHata(null); setBilgi(null) }}>
+            İlk giriş — parolamı belirle
+          </button>
+        )}
       </form>
     </div>
   );

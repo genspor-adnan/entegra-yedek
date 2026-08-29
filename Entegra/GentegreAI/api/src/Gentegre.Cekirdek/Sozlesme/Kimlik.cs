@@ -18,6 +18,15 @@ public sealed class ParolaDegistirIstegi
     public string YeniParola { get; set; } = "";
 }
 
+/// <summary>Ilk parola belirleme - otomatik acilmis hesabin parolasi bostur.</summary>
+public sealed class IlkParolaIstegi
+{
+    public string Kod { get; set; } = "";
+    /// <summary>Kimlik kaniti: TCKN'nin son 4 hanesi.</summary>
+    public string TcknSon4 { get; set; } = "";
+    public string YeniParola { get; set; } = "";
+}
+
 public sealed class DilDegistirIstegi
 {
     public int Dil { get; set; }
