@@ -1,6 +1,5 @@
 import type { DetayDurumu, Satir } from './GenDetayTablo';
 import type { KartDetayMeta } from '../api/sozlesme';
-import { kidemMetni } from './bicim';
 
 interface Props {
   meta: KartDetayMeta;
@@ -33,8 +32,6 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis }: Props) {
   const denemeSuresiAlan = alan('denemeSuresi');
   const yoneticiAlan = alan('yoneticiId');
 
-  const kidem = kidemMetni(String(satir.iseGirisTarihi ?? ''),
-                           String(satir.istenCikisTarihi ?? '') || null);
 
   // Kutular ALT ALTA (kullanici: "is bilgi altina sgk gelsin") - kok satir
   //   (kasira) degil, disaridaki sutunun akisina birakilir.
@@ -94,7 +91,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis }: Props) {
         <div className="alan-izgara tek-sutun">
           <div className="adres-satir">
             <label className="alan tip-tarih">
-              <span className="etiket">İşe Giriş</span>
+              <span className="etiket zorunlu-isaret">İşe Giriş</span>
               <input type="date" value={String(satir.iseGirisTarihi ?? '')} disabled={saltOkunur}
                 onChange={e => degis({ iseGirisTarihi: e.target.value })} />
             </label>
@@ -121,12 +118,6 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis }: Props) {
             <input value={String(satir.meslekKodu ?? '')} disabled={saltOkunur}
               onChange={e => degis({ meslekKodu: e.target.value })} />
           </label>
-          {kidem && (
-            <label className="alan tip-metin">
-              <span className="etiket">Kıdem</span>
-              <input value={kidem} disabled readOnly />
-            </label>
-          )}
         </div>
       </div>
     </>

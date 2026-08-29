@@ -103,7 +103,9 @@ export function PersonelKimlikOzet({
   const yas = yasHesapla(String(satir.dogumTarihi ?? ''));
 
   return (
-    <div className="kasira">
+    // "etiket-sag": kart govdesindeki alan etiketleri saga yaslanir (kullanici);
+    //   kimlik seridi (.kaid) bu sarmalayicinin DISINDA, orada etiketler solda.
+    <div className="kasira etiket-sag">
       {fotoSolEkOnce && fotoSolEk}
       <div className="kasutun" style={{ flex: kimlikSutunGenisligi ? `0 0 ${kimlikSutunGenisligi}` : 1 }}>
         <div className="kagrup">
@@ -120,7 +122,7 @@ export function PersonelKimlikOzet({
               {/* Pozisyon: "Özet" kutusu kaldirilinca buraya alindi (kullanici). */}
               {!ozetGizli && (
                 <label className="alan tip-metin">
-                  <span className="etiket">{gorevAlan.baslik}</span>
+                  <span className="etiket zorunlu-isaret">{gorevAlan.baslik}</span>
                   <input value={gorev} maxLength={gorevAlan.enFazlaUzunluk ?? undefined}
                     disabled={saltOkunur} onChange={e => onGorevDegis(e.target.value)} />
                 </label>

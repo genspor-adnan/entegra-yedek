@@ -55,7 +55,7 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade }: {
     if (!combo) return null;
     return (
       <label className="alan tip-kod">
-        <span className="etiket">Rol</span>
+        <span className="etiket zorunlu-isaret">Rol</span>
         {combo}
       </label>
     );

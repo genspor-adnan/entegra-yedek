@@ -8,6 +8,26 @@ namespace Gentegre.Cekirdek.Katalog;
 /// </summary>
 public static partial class KaynakKatalogu
 {
+    /// <summary>Taraf listelerinde tekrar eden SQL parcalari.</summary>
+    private static class TarafKatalog
+    {
+        /// <summary>
+        /// TCKN listelerde MASKELI gorunur (kullanici): ilk 3 + son 2 acik,
+        /// arasi yildiz (12345678901 -> 123******01). 11 haneli olmayan
+        /// (10 haneli VKN gibi) degerler oldugu gibi kalir.
+        /// </summary>
+        public const string TcknMaske =
+            "case when length(t.vkno) = 11 " +
+            "     then left(t.vkno, 3) || '******' || right(t.vkno, 2) " +
+            "     else coalesce(t.vkno, '') end";
+
+        /// <summary>taraf.departman smallint bir koddur - adi kod listesinden.</summary>
+        public const string DepartmanAdi =
+            "coalesce((select d.ad from public.kod_deger d " +
+            "           join public.kod_liste l on l.id = d.liste_id " +
+            "          where l.kod = 'taraf.departman' and d.deger = t.departman), '')";
+    }
+
     // --------------------------------------------------------------- cari ----
     private static KaynakTanimi Cari() => new(
         Ad: "cari",
@@ -24,7 +44,11 @@ public static partial class KaynakKatalogu
             new("kod",          "t.kod",           "metin", "Kod", Genislik: 110),
             new("unvan",        "t.unvan",         "metin", "Unvan"),
             new("faturaUnvan",  "t.fatura_unvan",  "metin", "Fatura Unvani", Varsayilan: false),
-            new("vkno",         "t.vkno",          "metin", "VKN/TCKN"),
+            // TCKN listede MASKELI (kullanici): ilk 3 + son 2 acik. 10 haneli
+            //   VKN dokunulmadan kalir; ham deger gizli kolonda (arama icin).
+            new("vkno",         TarafKatalog.TcknMaske, "metin", "VKN/TCKN",
+                Filtrelenebilir: false),
+            new("vknoHam",      "t.vkno",          "metin", "VKN/TCKN (ham)", Varsayilan: false),
             new("utsKurumNo",   "t.uts_kurum_no",  "metin", "ÜTS Kurum No", Genislik: 110,
                                                                             Varsayilan: false),
             new("vd",           "t.vd",            "metin", "Vergi Dairesi", Varsayilan: false),
@@ -203,7 +227,14 @@ public static partial class KaynakKatalogu
     private static KaynakTanimi Personel() => new(
         Ad: "personel",
         YetkiKodu: "personel",
-        Kaynak: "public.taraf t",
+        // Ozluk (ise giris) ve kullanici hesabinin rolu listede gorunsun
+        //   (kullanici) - ikisi de 1:1 baglanti, satir cogaltmaz.
+        Kaynak: """
+            public.taraf t
+            left join public.taraf_personel po on po.id = t.id
+            left join public.taraf_kullanici tk on tk.id = t.id
+            left join public.rol r on r.id = tk.rol_id
+            """,
         SabitKosul: "t.personel = 1",
         VarsayilanSirala: "t.unvan asc",
         Kolonlar: new KolonTanimi[]
@@ -211,7 +242,16 @@ public static partial class KaynakKatalogu
             new("id",           "t.id",            "sayi",  "Id",        Varsayilan: false),
             new("kod",          "t.kod",           "metin", "Sicil No"),
             new("unvan",        "t.unvan",         "metin", "Ad Soyad"),
-            new("vkno",         "t.vkno",          "metin", "TCKN"),
+            // Ad Soyad'in SAGINDA: departman / gorev / rol / ise giris (kullanici).
+            new("departmanAdi", TarafKatalog.DepartmanAdi,
+                                                   "metin", "Departman"),
+            new("gorev",        "t.gorev",         "metin", "Görev"),
+            new("rolAdi",       "coalesce(r.ad, '')", "metin", "Rol"),
+            new("iseGirisTarihi", "po.ise_giris_tarihi", "tarih", "İşe Giriş",
+                Hizalama: "orta"),
+            new("vkno",         TarafKatalog.TcknMaske, "metin", "TCKN",
+                Filtrelenebilir: false),
+            new("vknoHam",      "t.vkno",          "metin", "TCKN (ham)", Varsayilan: false),
             new("cepTel",       "t.cep_tel",       "metin", "Cep"),
             new("eposta",       "t.eposta",        "metin", "E-posta"),
             new("durum",        "t.durum",         "kod",   "Durum",     Hizalama: "orta"),

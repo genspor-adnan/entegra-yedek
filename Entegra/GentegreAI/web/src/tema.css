@@ -477,6 +477,9 @@ table.grid tr.flt input {
 .alan { display: grid; grid-template-columns: 84px 1fr; column-gap: 8px; align-items: center }
 .alan .etiket { grid-column: 1; font-size: 11px; color: var(--soluk); text-align: left }
 .alan .zorunlu { color: var(--hata) }
+/* Personel kartinda etiketler SAGA yasli (kullanici) - girdiye yaklassin;
+   kimlik seridindeki etiketler etkilenmez (.kaid ayri kural). */
+.etiket-sag .alan .etiket { text-align: right }
 /* Zorunlu alan yildizi. GenLookup etikete <b class="zorunlu"> * </b> koyuyordu,
    TarafAlani/fis tipi/tedarikci fatura no ise `zorunlu-isaret` sinifi veriyordu -
    ama sinifin CSS karsiligi YOKTU: cari zorunlu oldugu halde yildizsiz cikiyor,

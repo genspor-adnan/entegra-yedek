@@ -226,16 +226,16 @@ public static partial class KartKatalogu
             // "unvan" da UI'da GIZLI (gizli Set, GenForm.tsx) - ad+soyad'dan turetilir,
             //   ayrica DUZENLENMEZ, sadece DB NOT NULL kisitini karsilamak icin gonderilir.
             new("unvan",     "unvan",      "metin", Zorunlu: true, EnFazlaUzunluk: 120, Baslik: "Unvan"),
-            new("kod",       "kod",        "metin", EnFazlaUzunluk: 20, Baslik: "Sicil No", Grup: "Kimlik"),
+            new("kod",       "kod",        "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "Sicil No", Grup: "Kimlik"),
             new("ad",        "ad",         "metin", Zorunlu: true, EnFazlaUzunluk: 50, Baslik: "Ad", Grup: "Kimlik"),
             new("soyad",     "soyad",      "metin", Zorunlu: true, EnFazlaUzunluk: 60, Baslik: "Soyad", Grup: "Kimlik"),
-            new("departman", "departman",  "kod",   KodListesi: "taraf.departman", Baslik: "Departman", Grup: "Kimlik"),
+            new("departman", "departman",  "kod",   Zorunlu: true, KodListesi: "taraf.departman", Baslik: "Departman", Grup: "Kimlik"),
             new("durum",     "durum",      "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
             // ik_karti.html mockup'ta idstrip'te DEGIL - Görev "Pozisyon" adiyla Genel
             //   sekmesinin "Özet" kutusunda (PersonelKimlikOzet.tsx). TCKN de "Kimlik
             //   Bilgileri" kutusunda - ikisi de adsiz (Grup yok), gizli Set (GenForm.tsx)
             //   ile genel/duz render'dan cikarilip ozel bilesene props olarak geciyor.
-            new("gorev",     "gorev",      "metin", EnFazlaUzunluk: 100, Baslik: "Pozisyon"),
+            new("gorev",     "gorev",      "metin", Zorunlu: true, EnFazlaUzunluk: 100, Baslik: "Pozisyon"),
             new("vkno",      "vkno",       "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "T.C. Kimlik No"),
             // ik_karti.html mockup'ta İletişim AYRI SEKME (Genel'e gomulu AltGrup DEGIL) -
             //   Grup:"İletişim" bu yuzden AltGrup degil.
@@ -284,7 +284,7 @@ public static partial class KartKatalogu
                 new("dogumTarihi",        "dogum_tarihi",        "tarih", Zorunlu: true, Baslik: "Doğum Tarihi"),
                 new("dogumYeri",          "dogum_yeri",          "metin", EnFazlaUzunluk: 60, Baslik: "Doğum Yeri"),
                 new("cinsiyet",           "cinsiyet",            "kod",   SabitKodlar: CinsiyetKodlari, Baslik: "Cinsiyet"),
-                new("iseGirisTarihi",     "ise_giris_tarihi",    "tarih", Baslik: "İşe Giriş Tarihi"),
+                new("iseGirisTarihi",     "ise_giris_tarihi",    "tarih", Zorunlu: true, Baslik: "İşe Giriş Tarihi"),
                 new("istenCikisTarihi",   "isten_cikis_tarihi",  "tarih", Baslik: "İşten Çıkış Tarihi"),
                 new("calismaSekli",       "calisma_sekli",       "kod",   SabitKodlar: CalismaSekliKodlari, Baslik: "Çalışma Şekli"),
                 // Uyruk (ulke) - TekOzluk.tsx'te TekAdres'teki Ulke ile AYNI mekanizma
