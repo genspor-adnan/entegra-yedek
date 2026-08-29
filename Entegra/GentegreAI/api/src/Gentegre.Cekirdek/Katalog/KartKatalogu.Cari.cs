@@ -243,8 +243,8 @@ public static partial class KartKatalogu
             // ik_karti.html mockup'ta İletişim AYRI SEKME (Genel'e gomulu AltGrup DEGIL) -
             //   Grup:"İletişim" bu yuzden AltGrup degil.
             new("telefon",   "telefon",    "metin", EnFazlaUzunluk: 30,  Baslik: "Ev Telefonu",         Grup: "İletişim"),
-            new("cepTel",    "cep_tel",    "metin", EnFazlaUzunluk: 30,  Baslik: "Cep",                 Grup: "İletişim"),
-            new("eposta",    "eposta",     "metin", EnFazlaUzunluk: 120, Baslik: "E-posta (İş)",        Grup: "İletişim"),
+            new("cepTel",    "cep_tel",    "metin", Zorunlu: true, EnFazlaUzunluk: 30,  Baslik: "Cep",        Grup: "İletişim"),
+            new("eposta",    "eposta",     "metin", Zorunlu: true, EnFazlaUzunluk: 120, Baslik: "E-posta (İş)", Grup: "İletişim"),
             new("epostaWeb", "eposta_web", "metin", EnFazlaUzunluk: 200, Baslik: "E-posta (Kişisel)",   Grup: "İletişim"),
             // Diger kartlarda subeId salt-okunur/gizli meta alan - Personel'de kullanici
             //   isteğiyle GERCEK VERI: "Çalıştığı Şube" (kullanici: "taraf subeid de
