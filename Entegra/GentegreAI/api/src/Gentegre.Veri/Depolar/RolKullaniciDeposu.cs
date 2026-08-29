@@ -4,7 +4,7 @@ using Npgsql;
 namespace Gentegre.Veri.Depolar;
 
 public sealed record RolKullanicisi(int Id, string Kod, string Unvan, string Eposta,
-    string Departman, string Gorev, string Telefon,
+    string Departman, string Gorev, string Telefon, string Sube,
     bool Aktif, DateTime? SonGiris, string RolAdi);
 
 /// <summary>
@@ -42,9 +42,11 @@ public sealed class RolKullaniciDeposu
                                and d.deger = t.gorev_id), t.gorev, ''),
                    coalesce(nullif(t.telefon, ''), nullif(t.cep_tel, ''),
                             k.cep_tel, ''),
+                   coalesce(sb.ad, ''),
                    k.aktif, k.son_giris_tarihi, coalesce(r.ad, '')
               from public.taraf_kullanici k
               join public.taraf t on t.id = k.id
+              left join public.sube sb on sb.id = t.sube_id
               left join public.rol r on r.id = k.rol_id
              where k.rol_id = @p0
              order by k.aktif desc, t.unvan
@@ -73,9 +75,11 @@ public sealed class RolKullaniciDeposu
                                and d.deger = t.gorev_id), t.gorev, ''),
                    coalesce(nullif(t.telefon, ''), nullif(t.cep_tel, ''),
                             k.cep_tel, ''),
+                   coalesce(sb.ad, ''),
                    k.aktif, k.son_giris_tarihi, coalesce(r.ad, '')
               from public.taraf_kullanici k
               join public.taraf t on t.id = k.id
+              left join public.sube sb on sb.id = t.sube_id
               left join public.rol r on r.id = k.rol_id
              where k.rol_id <> @p0
                and (@p1 = '' or t.unvan ilike '%' || @p1 || '%'
@@ -198,8 +202,8 @@ public sealed class RolKullaniciDeposu
         while (await o.ReadAsync(iptal))
             liste.Add(new RolKullanicisi(o.GetInt32(0), o.GetString(1), o.GetString(2),
                 o.GetString(3), o.GetString(4), o.GetString(5), o.GetString(6),
-                o.GetInt16(7) == 1,
-                o.IsDBNull(8) ? null : o.GetDateTime(8), o.GetString(9)));
+                o.GetString(7), o.GetInt16(8) == 1,
+                o.IsDBNull(9) ? null : o.GetDateTime(9), o.GetString(10)));
         return liste;
     }
 }

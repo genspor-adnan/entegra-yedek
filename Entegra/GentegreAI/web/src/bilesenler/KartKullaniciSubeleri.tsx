@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import type { KullaniciSubeSatiri } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
+import { ekKaydetKaydol } from './kartEkKaydet';
 
 /**
  * Personel kartında "Yetkili Şubeler" (kullanıcı: "fotoğrafın altına yetkili
@@ -19,8 +20,6 @@ export function KartKullaniciSubeleri({ kartId, saltOkunur, zorunluSubeId }: {
 }) {
   const [satirlar, setSatirlar] = useState<KullaniciSubeSatiri[] | null>(null);
   const [hata, setHata] = useState('');
-  const [mesaj, setMesaj] = useState('');
-  const [islemde, setIslemde] = useState(false);
   const [degisti, setDegisti] = useState(false);
 
   useEffect(() => {
@@ -34,25 +33,25 @@ export function KartKullaniciSubeleri({ kartId, saltOkunur, zorunluSubeId }: {
   const degis = (subeId: number, yama: Partial<KullaniciSubeSatiri>) => {
     // Calistigi sube kilitli (kullanici): yetkisi kaldirilamaz.
     if (subeId === zorunluSubeId && yama.yetkili === false) return;
-    setDegisti(true); setMesaj('');
+    setDegisti(true);
     setSatirlar(s => s?.map(x => (x.subeId === subeId ? { ...x, ...yama } : x)) ?? s);
   };
 
-  const kaydet = async () => {
-    if (!satirlar) return;
-    setIslemde(true); setHata(''); setMesaj('');
-    try {
-      setSatirlar(await api.kartSubeKaydet(kartId, satirlar.map(s => ({
+  // Kendi Kaydet dugmesi YOK (kullanici): degisiklik kartin ust Kaydet'ine
+  //   baglanir - kuyruga son hal birakilir.
+  useEffect(() => {
+    if (!degisti || !satirlar) return;
+    ekKaydetKaydol(`subeler:${kartId}`, async () => {
+      await api.kartSubeKaydet(kartId, satirlar.map(s => ({
         subeId: s.subeId,
         yetkili: s.yetkili || s.subeId === zorunluSubeId,
         // Varsayilan HER ZAMAN calistigi sube (kullanici) - ayri kolon yok.
         varsayilan: s.subeId === zorunluSubeId,
         yazma: s.yazma,
-      }))));
-      setDegisti(false);
-      setMesaj('Şube yetkileri kaydedildi.');
-    } catch (h) { setHata(hataMetni(h)) } finally { setIslemde(false) }
-  };
+      })));
+    });
+    return () => ekKaydetKaydol(`subeler:${kartId}`, null);
+  }, [degisti, satirlar, kartId, zorunluSubeId]);
 
   if (hata && !satirlar) return null;   // yetkisi yoksa bolum hic cizilmez
   // TEK SUBELI kurulumda sube secimi anlamsiz (kullanici): bolum hic cizilmez,
@@ -65,16 +64,14 @@ export function KartKullaniciSubeleri({ kartId, saltOkunur, zorunluSubeId }: {
     <div className="kagrup" style={{ marginTop: 12 }}>
       <div className="numaralama-bas bitisik">
         <h6>Yetkili Şubeler</h6>
-        {!saltOkunur && (
-          <button className="d bir" disabled={islemde || !degisti}
-                  onClick={() => void kaydet()}>
-            {islemde ? 'Kaydediliyor…' : 'Kaydet'}
-          </button>
+        {degisti && (
+          <span style={{ fontSize: 11, color: 'var(--soluk)' }}>
+            Kaydet ile yazılır
+          </span>
         )}
       </div>
 
       {hata && <div className="hata-kutusu">{hata}</div>}
-      {mesaj && <div className="bilgi-kutusu">{mesaj}</div>}
       {!secili && (
         <div className="hata-kutusu">
           Şube seçilmedi - bu kullanıcı hiçbir şubeye giremez.

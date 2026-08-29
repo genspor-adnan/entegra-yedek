@@ -22,6 +22,7 @@ import {
 import { TekKayit } from './TekKayit';
 export { Modal };
 import { RolYetkiMatrisi } from './RolYetkiMatrisi';
+import { ekKaydetleriCalistir, ekKaydetTemizle } from './kartEkKaydet';
 import { KartKullaniciRolu } from './KartKullaniciRolu';
 import { DokumanGalerisi } from './DokumanGalerisi';
 import { StokDurumSekmesi } from './StokDurumSekmesi';
@@ -374,6 +375,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
     onKapat?.();
   }, [kaydedilmemisDegisiklikVar, onKapat]);
 
+  // Kart acildiginda/kapatildiginda bekleyen ek kayit isleri temizlenir -
+  //   baska kartin degisikligi buraya sizmasin.
+  useEffect(() => { ekKaydetTemizle(); return () => ekKaydetTemizle() }, [kaynak, id]);
+
   async function kaydet() {
     // Kaydetmeden onceki alan kontrolleri TEK YERDE (kartDogrulama): e-posta,
     //   ekrana ozel zorunluluk ve telefon. Ilk hatada ilgili sekmeye atlanir.
@@ -424,6 +429,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       const yanit = yeniMi
         ? await api.kartEkle(kaynak, govde)
         : await api.kartGuncelle(kaynak, id as number, govde);
+
+      // Kartin AYRI uca yazan bolumleri (personel > yetkili subeler) tek
+      //   Kaydet'e baglidir: kart yazildiktan sonra kuyruk calisir.
+      await ekKaydetleriCalistir();
 
       onKaydedildi?.(Number(yanit.kart.id));
       onKapat?.();

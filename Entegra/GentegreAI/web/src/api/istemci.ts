@@ -118,7 +118,7 @@ export interface KartRolBilgisi {
 /** Rol > Kullanicilar sekmesi satiri. */
 export interface RolKullanicisi {
   id: number; kod: string; unvan: string; eposta: string;
-  departman: string; gorev: string; telefon: string;
+  departman: string; gorev: string; telefon: string; sube: string;
   aktif: boolean; sonGiris?: string | null; rolAdi: string;
 }
 
