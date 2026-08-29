@@ -19,7 +19,6 @@ import {
   alanGruplari, sekmeleriKur, detaySekmeAnahtari, grupSekmeAnahtari,
   KIMLIK_GRUP, TEK_SUTUN_KARTLAR, type SekmeTanimi,
 } from './kartSekmeleri';
-import { TekOzluk } from './TekOzluk';
 import { TekKayit } from './TekKayit';
 export { Modal };
 import { RolYetkiMatrisi } from './RolYetkiMatrisi';
@@ -652,17 +651,6 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
         );
         return sekmeSarmalayici ? sekmeSarmalayici(aktif.baslik, govde, deger) : govde;
       })()}
-
-      {/* Personel'e ozel: "Özlük" kendi sekmesi ama TEK SATIR form (TekOzluk.tsx) -
-          personel_ozluk 1:1, generic coklu-satir grid'e uymuyor (ik_karti.html). */}
-      {aktif?.tur === 'detay' && personelGibiKart && aktif.detay.ad === 'ozluk' && (
-        <TekOzluk
-          meta={aktif.detay}
-          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
-          saltOkunur={salt || aktif.detay.saltOkunur}
-          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
-        />
-      )}
 
       {/* Stok > ÜTS: stok_uts 1:1 uzanti (119) - grid degil TEK kayit formu.
           Bir stokun bir ÜTS kaydi olur; "satir ekle" yanlis bir vaat olurdu. */}

@@ -102,6 +102,10 @@ export function sekmeleriKur(secenek: {
     // Hasta'da kimlik/hasta bilgisi Genel sekmesindeki özetin içinde kalır; izinler
     // hasta kartında kullanılmaz, ayrı sekme olarak gösterilmez.
     if (kaynak === 'hasta' && (d.ad === 'ozluk' || d.ad === 'izinler')) return;
+    // Personelde de Özlük AYRI SEKME DEGIL (kullanici: "ozluk bilgilerini
+    //   kimlik bilgisinin sagina al") - Genel sekmesinde, PersonelKimlikOzet
+    //   icinde ciziliyor.
+    if (personelGibiKart && d.ad === 'ozluk') return;
     // Personel'de acil kişiler ik_karti.html mockup'ta İletişim sekmesinin altında
     // gömülü grid; ayrı sekme açılmasın.
     if (personelGibiKart && d.ad === 'acilKisiler') return;

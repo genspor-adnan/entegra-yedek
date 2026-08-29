@@ -5,6 +5,7 @@ import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { KartKullaniciRolu } from './KartKullaniciRolu';
+import { TekOzluk } from './TekOzluk';
 import { kidemMetni } from './bicim';
 
 interface Props {
@@ -186,6 +187,14 @@ export function PersonelKimlikOzet({
         </div>
         {egitimler}
       </div>
+      {/* Özlük ("İş Bilgileri") kimlik kutusunun SAGINDA, alanlar alt alta
+          (kullanici) - eskiden ayri sekmedeydi. Hasta kartinda ozluk yok. */}
+      {!ozetGizli && (
+        <div className="kasutun" style={{ flex: 1 }}>
+          <TekOzluk meta={ozlukMeta} durum={ozlukDurum} saltOkunur={saltOkunur}
+                    onDegis={onOzlukDegis} />
+        </div>
+      )}
       {!fotoSolEkOnce && fotoSolEk}
       <div className="kasutun"
            style={{ flex: '0 0 150px', marginLeft: fotoSagaYasli ? 'auto' : undefined }}>
