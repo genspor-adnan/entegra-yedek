@@ -656,6 +656,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     yerTutucuSekmeler: ['Reçete', 'Stok Durumu', 'Hareketler', 'Yorum / Medya', 'Ek Alanlar'],
     resimYerTutucu: true,
     menuGrup: 'Stok & Hizmet', menuAd: 'Stok Listesi', ic: '📦', yetkiKodu: 'stok',
+    menuSira: 10,
   },
   {
     // Hizmetler KASA'dan STOK menusune alindi (kullanici): hizmet de belgede
@@ -666,6 +667,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'hizmet', baslik: 'Hizmetler', yol: 'Stok › Hizmetler', kartYolu: '/hizmet',
     aksiyonEkrani: 'hizmet-liste', cipler: DURUM_CIPLERI,
     menuGrup: 'Stok & Hizmet', menuAd: 'Hizmet Listesi', ic: '🛠️', yetkiKodu: 'hizmet',
+    menuSira: 20,
   },
   {
     // SATIS FIYAT LISTELERI (201): liste bir KURALDIR (taban liste x carpan ->
@@ -674,6 +676,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'fiyat-listesi', baslik: 'Fiyat Listeleri', yol: 'Stok › Fiyat Listeleri',
     kartYolu: '/fiyat-listesi', aksiyonEkrani: 'fiyat-listesi-liste', cipler: DURUM_CIPLERI,
     menuGrup: 'Stok & Hizmet', menuAd: 'Fiyat Listeleri', ic: '🏷️', yetkiKodu: 'fiyat_listesi',
+    menuSira: 80,
   },
   {
     // Liste SATIRLARI ayri ekran: bir listenin binlerce satiri kart icinde
@@ -699,7 +702,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Uc UTS ekrani "Stok & Hizmet > ÜTS" alt menusunde toplanir (kullanici).
     menuGrup: 'Stok & Hizmet', menuAltGrup: 'ÜTS',
     menuAd: 'Gelen / Askıdakiler', ic: '🩺',
-    yetkiKodu: 'uts', menuSira: 60,
+    yetkiKodu: 'uts', menuSira: 70,
   },
   {
     // ÜTS bildirim gecmisi (223): gonderilen alma/verme/kullanim bildirimleri,
@@ -728,7 +731,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ],
     menuGrup: 'Stok & Hizmet', menuAltGrup: 'ÜTS',
     menuAd: 'Bildirimler', ic: '📡',
-    yetkiKodu: 'uts', menuSira: 61,
+    yetkiKodu: 'uts', menuSira: 71,
   },
   {
     // ÜTS urun sorgu (223): UNO/LNO/SNO ile ÜTS'den canli tekil urun sorgusu.
@@ -737,7 +740,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     yol: 'Stok › ÜTS Ürün Sorgu',
     menuGrup: 'Stok & Hizmet', menuAltGrup: 'ÜTS',
     menuAd: 'Ürün Sorgu', ic: '🔍',
-    yetkiKodu: 'uts', menuSira: 62,
+    yetkiKodu: 'uts', menuSira: 72,
   },
   {
     // STOKTAN TALEP (tur 105): bir birim depodan mal ISTER. Stok ve cari
@@ -752,6 +755,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tumu' },
     ],
     menuGrup: 'Stok & Hizmet', menuAd: 'Stoktan Talep', ic: '📥', yetkiKodu: 'belge',
+    menuSira: 30,
   },
   {
     // DEPOLAR ARASI TRANSFER (tur 20): cari YOK, para YOK - tek satir cikis
@@ -763,6 +767,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     yol: 'Stok › Stok Transfer', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 20,
     cipler: [{ ad: 'Tumu' }],
     menuGrup: 'Stok & Hizmet', menuAd: 'Stok Transfer', ic: '🔄', yetkiKodu: 'belge',
+    menuSira: 40,
   },
   {
     // GIRIS FISI (3) / CIKIS FISI (4): irsaliye gibi stok oynatan ama CARISIZ
@@ -777,6 +782,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Sayım Fazlası', filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
     ],
     menuGrup: 'Stok & Hizmet', menuAd: 'Giriş Fişi', ic: '📗', yetkiKodu: 'belge',
+    menuSira: 50,
   },
   {
     kaynak: 'cikis-fis', baslik: 'Çıkış Fişleri', yol: 'Stok › Çıkış Fişi',
@@ -789,6 +795,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Sayım Eksiği', filtre: { alan: 'tipi', op: 'esit', deger: 5 } },
     ],
     menuGrup: 'Stok & Hizmet', menuAd: 'Çıkış Fişi', ic: '📕', yetkiKodu: 'belge',
+    menuSira: 60,
   },
   {
     // Kullanici: "İK altına Personel Listesi taşı" - tek ogeli grup, digerleriyle ayni desen.
