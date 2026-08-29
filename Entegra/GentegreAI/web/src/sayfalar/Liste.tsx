@@ -768,6 +768,8 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
               belgeTarihi: `${String(satir.tarih ?? '').slice(0, 10)}T${String(satir.saat ?? '00:00')}`,
               subeId: oturumSubeId,
               fiyatListesiId,
+              // Randevudaki odeyen kurum (265) basvuruya tasinir.
+              ...(satir.kurumId ? { odeyenKurumId: Number(satir.kurumId) } : {}),
               aciklama: `Randevu #${satir.id}`
                         + (satir.bolumAdi ? ` · ${String(satir.bolumAdi)}` : ''),
             },

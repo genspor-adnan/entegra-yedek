@@ -15,6 +15,7 @@ public static partial class KaynakKatalogu
             left join public.taraf p  on p.id = rv.hasta_id
             left join public.belge b  on b.id = rv.belge_id
             left join public.hizmet hz on hz.id = rv.hizmet_id
+            left join public.taraf ku on ku.id = rv.kurum_id
             """,
         SubeKolonu: "rv.sube_id",
         VarsayilanSirala: "rv.baslangic desc, rv.id desc",
@@ -42,6 +43,9 @@ public static partial class KaynakKatalogu
                 Varsayilan: false),
             new("kaynakAdi", RandevuKatalog.KaynakAdi, "metin", "Kaynak", Hizalama: "orta",
                 Varsayilan: false),
+            new("kurum",      "coalesce(ku.unvan, '')", "metin", "Kurum / Ödeyen",
+                Genislik: 150, Varsayilan: false),
+            new("kurumId",    "rv.kurum_id",  "sayi",  "Kurum Id", Varsayilan: false),
             new("durumAdi", RandevuKatalog.DurumAdi, "metin", "Durum", Hizalama: "orta",
                 Bicim: "rozet"),
             new("durum",      "rv.durum",     "sayi",  "Durum Kodu", Varsayilan: false),

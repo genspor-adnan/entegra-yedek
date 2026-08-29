@@ -942,6 +942,20 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
             alanDegistir(aramaAlani.alan, String(secilen.id));
             setSecilenAdlar(o => ({ ...o, [aramaAlani.alan]: secilen.unvan }));
             setAramaAlani(null);
+            // RANDEVU (265): hastanin AKTIF policesindeki kurum randevuya
+            //   kopyalanir - kayit kabul ayrica secmesin. Police yoksa alan
+            //   bos kalir (hasta kendi oder).
+            if (kaynak === 'randevu') {
+              void (async () => {
+                try {
+                  const h = await api.kartOku('hasta', secilen.id);
+                  const policeler = (h.detaylar?.kurum ?? []) as Record<string, unknown>[];
+                  const aktif = policeler.find(x => Number(x.aktif) === 1) ?? policeler[0];
+                  const kurumId = Number(aktif?.kurumId) || 0;
+                  if (kurumId) alanDegistir('kurumId', String(kurumId));
+                } catch { /* police okunamazsa alan bos kalir */ }
+              })();
+            }
           }}
         />
       )}
