@@ -9,6 +9,9 @@ interface Props {
   /** "Çalıştığı Şube" combosu - taraf alani oldugu icin disaridan gelir
       (kullanici: is bilgilerinde, Yonetici'nin SOLUNDA). */
   subeEk?: React.ReactNode;
+  /** İş Bilgileri kutusunun SONUNA eklenecek alan(lar) - ör. personelin
+      "Randevu Verilebilir" kutusu (252; kullanici: "iş bilgileri çerçevesine al"). */
+  isBilgiEk?: React.ReactNode;
 }
 
 /** "01.09.2019" -> "6 yıl 11 ay" (ik_karti.html mockup "Kıdem" - hesaplanan, saklanmaz). */
@@ -19,7 +22,7 @@ interface Props {
  * Medeni Hal/Uyruk/Kan Grubu/Öğrenim mockup'ta GENEL sekmesinde ("Kimlik Bilgileri" kutusu,
  * bkz. PersonelKimlikOzet.tsx) - burada TEKRARLANMAZ, sadece iş/SGK bilgileri var.
  */
-export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk }: Props) {
+export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }: Props) {
   const satir: Satir = durum.guncel[0] ?? {};
 
   const degis = (degisiklik: Record<string, unknown>) => {
@@ -91,6 +94,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk }: Props) {
               </select>
             </label>
           </div>
+          {isBilgiEk && <div className="adres-satir">{isBilgiEk}</div>}
         </div>
       </div>
       <div className="kagrup">

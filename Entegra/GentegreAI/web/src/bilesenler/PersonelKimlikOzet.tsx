@@ -22,6 +22,8 @@ interface Props {
   onOzlukDegis(yeni: DetayDurumu): void;
   egitimler?: ReactNode;
   fotoSolEk?: ReactNode;
+  /** İş Bilgileri kutusuna eklenecek alan (252: "Randevu Verilebilir"). */
+  isBilgiEk?: ReactNode;
   fotoSolEkOnce?: boolean;
   ozetGizli?: boolean;
   /** "Çalıştığı Şube" alani (taraf.sube_id) - is bilgilerinde cizilir. */
@@ -53,7 +55,7 @@ function yasHesapla(tarihStr: string): string | null {
  */
 export function PersonelKimlikOzet({
   kartAdi = 'personel', vknoAlan, vkno, onVknoDegis,
-  ozlukMeta, ozlukDurum, saltOkunur, onOzlukDegis, egitimler, fotoSolEk, ozetGizli,
+  ozlukMeta, ozlukDurum, saltOkunur, onOzlukDegis, egitimler, fotoSolEk, isBilgiEk, ozetGizli,
   subeAlan, sube, onSubeDegis,
   vknoGizli, kimlikSutunGenisligi, kaynakId, fotoSolEkOnce = false,
 }: Props) {
@@ -205,7 +207,7 @@ export function PersonelKimlikOzet({
       {!ozetGizli && (
         <div className="kasutun" style={{ flex: 1, minWidth: 0 }}>
           <TekOzluk meta={ozlukMeta} durum={ozlukDurum} saltOkunur={saltOkunur}
-                    onDegis={onOzlukDegis}
+                    onDegis={onOzlukDegis} isBilgiEk={isBilgiEk}
                     subeEk={subeAlan && onSubeDegis ? (
                       <label className="alan tip-kod">
                         <span className="etiket">{subeAlan.baslik}</span>

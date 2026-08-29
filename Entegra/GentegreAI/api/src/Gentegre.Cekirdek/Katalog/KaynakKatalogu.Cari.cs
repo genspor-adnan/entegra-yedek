@@ -289,6 +289,7 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",                 "d.id",                  "sayi",  "Id", Varsayilan: false),
+            new("kod",                "d.kod",                 "metin", "Kod", Genislik: 110),
             new("ad",                 "d.ad",                  "metin", "Departman"),
             new("randevuVerilebilir", "d.randevu_verilebilir", "mantik","Randevu Bölümü",
                 Hizalama: "orta"),

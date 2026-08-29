@@ -37,7 +37,10 @@ const gizli = kaynak === 'cari' ? new Set(['ad', 'soyad', 'musteri', 'tedarikci'
   //   "kisi" bayragiyla ayni sebeple gizli. "vkno"/"gorev" de gizli - normal
   //   adsiz akistan CIKARILIP PersonelKimlikOzet.tsx'e props olarak geciyor
   //   (ik_karti.html: TCKN "Kimlik Bilgileri" kutusunda, Görev "Özet" kutusunda).
-  : kaynak === 'personel' ? new Set(['personel', 'unvan', 'vkno', 'gorevId', 'subeId'])
+  //   "randevuVerilebilir" de gizli: baslik seridinde degil, İş Bilgileri
+  //   kutusunda cizilir (252, kullanici) - PersonelKimlikOzet'e prop olarak gider.
+  : kaynak === 'personel'
+    ? new Set(['personel', 'unvan', 'vkno', 'gorevId', 'subeId', 'randevuVerilebilir'])
   : kaynak === 'hasta' ? new Set(['hasta', 'grup', 'unvan', 'gorevId'])
   // Sube: baz sube combosu Depolar dalinda ELLE cizilir (tek satir etiket).
   : kaynak === 'sube' ? new Set(['depoBazSubeId'])
@@ -249,6 +252,22 @@ const adliBlok = (
               saltOkunur={salt}
               onOzlukDegis={yeni => setDetaylar(t => ({ ...t, [ozlukDetay.ad]: yeni }))}
               kaynakId={yeniMi ? undefined : (id as number)}
+              isBilgiEk={(() => {
+                // RANDEVU VERILEBILIR (252): hekim mi - is bilgisi oldugu icin
+                //   İş Bilgileri kutusunda (kullanici), kimlik seridinde degil.
+                const a = meta.alanlar.find(x => x.ad === 'randevuVerilebilir');
+                if (!a || kaynak !== 'personel') return undefined;
+                return (
+                  <label className="alan ayar-onay">
+                    <span className="etiket">{a.baslik}</span>
+                    <input type="checkbox" disabled={salt}
+                           checked={Number(deger.randevuVerilebilir ?? 0) === 1}
+                           onChange={e => setDeger(d => ({
+                             ...d, randevuVerilebilir: e.target.checked ? 1 : 0,
+                           }))} />
+                  </label>
+                );
+              })()}
               ozetGizli={kaynak === 'hasta'}
               vknoGizli={kaynak === 'hasta'}
               kimlikSutunGenisligi={kaynak === 'hasta' ? '420px' : undefined}
