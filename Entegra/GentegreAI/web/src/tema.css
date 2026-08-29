@@ -1117,6 +1117,10 @@ input.skt-gecmis {
 .alan.onay-satiri {
   display: flex; align-items: center; gap: 6px;
   white-space: nowrap; grid-column: 1 / -1;
+  /* Kutu, DIGER ALANLARIN GIRDI sutunuyla ayni hizada baslar (kullanici:
+     "checki sagda editin oldugu yere kaydir") - etiket sutunu 84px + 8px
+     bosluk kadar icerlek. */
+  padding-left: 92px;
 }
 .alan.onay-satiri input[type="checkbox"] { flex: none; margin: 0 }
 .alan.onay-satiri span { font-size: 12px }
