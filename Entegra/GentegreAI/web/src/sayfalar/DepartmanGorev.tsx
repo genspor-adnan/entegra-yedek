@@ -38,10 +38,12 @@ export function DepartmanGorev() {
     } catch (h) { setHata(hataMetni(h)) }
   };
 
-  /** İki gridin de başlığı aynı: ad + ＋ ✎ 🗑. */
-  const baslik = (ad: string, taraf: Taraf, secili: ListeSatiri | null) => (
+  /**
+   * İki gridin de araç şeridi: yalnız ＋ ✎ 🗑 (kullanici: "Departmanlar ve
+   * Görevler label'larını kaldır") - hangi grid olduğu kolonlardan belli.
+   */
+  const baslik = (taraf: Taraf, secili: ListeSatiri | null) => (
     <div className="numaralama-bas bitisik">
-      <h6>{ad}</h6>
       <button type="button" className="d" title="Ekle"
               onClick={() => setKart({ taraf, id: 'yeni' })}>＋</button>
       <button type="button" className="d" title="Düzenle" disabled={!secili}
@@ -64,7 +66,7 @@ export function DepartmanGorev() {
 
       <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
         <div className="kagrup" style={{ flex: '1 1 0', minWidth: 0 }}>
-          {baslik('Departmanlar', 'departman', departman)}
+          {baslik('departman', departman)}
           <GenGrid
             kaynak="departman"
             baslik="Departmanlar"
@@ -81,8 +83,7 @@ export function DepartmanGorev() {
         </div>
 
         <div className="kagrup" style={{ flex: '1 1 0', minWidth: 0 }}>
-          {baslik(departman ? `Görevler — ${String(departman.ad ?? '')}` : 'Görevler',
-                  'gorev', gorev)}
+          {baslik('gorev', gorev)}
           <GenGrid
             kaynak="personel-gorev"
             baslik="Görevler"

@@ -293,7 +293,7 @@ public static partial class KaynakKatalogu
             new("ad",                 "d.ad",                  "metin", "Departman"),
             new("randevuVerilebilir", "d.randevu_verilebilir", "mantik","Randevu Bölümü",
                 Hizalama: "orta"),
-            new("durum",              "d.durum",               "mantik","Aktif", Hizalama: "orta"),
+            new("durum",              "d.durum",               "mantik","Durum", Hizalama: "orta"),
             new("sira",               "d.sira",                "sayi",  "Sıra", Varsayilan: false),
         });
 
@@ -314,7 +314,7 @@ public static partial class KaynakKatalogu
                                 "           where dp.id = g.departman_id), '')",
                                 "metin", "Departman", Filtrelenebilir: false),
             new("departmanId",  "g.departman_id", "sayi",  "Departman Id", Varsayilan: false),
-            new("durum",        "g.durum",        "mantik","Aktif", Hizalama: "orta"),
+            new("durum",        "g.durum",        "mantik","Durum", Hizalama: "orta"),
             new("sira",         "g.sira",         "sayi",  "Sıra", Varsayilan: false),
         });
 

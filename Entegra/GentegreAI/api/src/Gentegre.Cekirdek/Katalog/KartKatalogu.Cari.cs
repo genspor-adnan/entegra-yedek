@@ -412,7 +412,7 @@ public static partial class KartKatalogu
             new("randevuVerilebilir", "randevu_verilebilir", "mantik",
                 Baslik: "Randevu Bölümü", Grup: "Kimlik"),
             // Kolon adi `durum` (256, kullanici) - taraf.durum / fiyat_listesi.durum ile ayni.
-            new("durum",              "durum",               "mantik", Baslik: "Aktif", Grup: "Kimlik"),
+            new("durum",              "durum",               "mantik", Baslik: "Durum", Grup: "Kimlik"),
             new("sira",               "sira",                "sayi",  Baslik: "Sıra", Grup: "Kimlik"),
         });
 
@@ -442,7 +442,7 @@ public static partial class KartKatalogu
             // Bos birakilirsa (0) bagimsiz gorev - her departmanda listelenir.
             new("departmanId", "departman_id", "kod",   KodTablosu: "public.v_departman_lookup",
                 Baslik: "Departman", Grup: "Kimlik"),
-            new("durum",       "durum",        "mantik", Baslik: "Aktif", Grup: "Kimlik"),
+            new("durum",       "durum",        "mantik", Baslik: "Durum", Grup: "Kimlik"),
             new("sira",        "sira",         "sayi",  Baslik: "Sıra", Grup: "Kimlik"),
         });
 
