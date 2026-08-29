@@ -346,23 +346,6 @@ public static partial class KartKatalogu
                 new("tarih",       "tarih",       "metin", EnFazlaUzunluk: 10, Baslik: "Tarih/Yıl"),
                 new("gecerlilik",  "gecerlilik",  "metin", EnFazlaUzunluk: 60, Baslik: "Geçerlilik")
             }, Sirala: "tarih desc nulls last, id desc", LogTabloId: 905, Baslik: "Eğitim / Sertifika"),
-            // HEKIMIN RANDEVULARI (251, kullanici) - personel karti hekim
-            //   kartidir; kisinin randevu takvimi burada gorunur. SALT OKUNUR:
-            //   randevu kendi kartindan verilir, buradan satir eklemek ayni
-            //   bilgiyi iki yerden yazmak olurdu.
-            new DetayTanimi("randevular", "public.randevu", "hekim_id", new KartAlani[]
-            {
-                new("id",        "id",        "sayi",  Yazilabilir: false),
-                new("baslangic", "baslangic", "zaman", Baslik: "Başlangıç"),
-                new("sureDk",    "sure_dk",   "sayi",  Baslik: "Süre (dk)"),
-                new("bolum",     "bolum",     "kod",   KodTablosu: "public.v_randevu_bolum_lookup",
-                    Baslik: "Bölüm"),
-                new("hastaId",   "hasta_id",  "kod",   KodTablosu: "public.v_hasta_lookup",
-                    Baslik: "Hasta"),
-                new("durum",     "durum",     "kod",   KodListesi: "randevu.durum", Baslik: "Durum"),
-                new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
-            }, Sirala: "baslangic desc", SubeKolonu: null, SaltOkunur: true,
-               LogTabloId: 905, Baslik: "Randevular", KosulAlani: "randevuVerilebilir"),
             // HEKIMIN RANDEVU DUZENI (252, kullanici: "personelde Randevu
             //   Verilebilir seciliyse Randevu sekmesi olusur ve bu personele
             //   ait randevu ayarlari gorunur, istenirse duzenlenebilir").
