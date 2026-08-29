@@ -257,14 +257,17 @@ const adliBlok = (
                 //   İş Bilgileri kutusunda (kullanici), kimlik seridinde degil.
                 const a = meta.alanlar.find(x => x.ad === 'randevuVerilebilir');
                 if (!a || kaynak !== 'personel') return undefined;
+                // Etiket kutunun SAGINDA, tek satir (kullanici) - diger
+                //   alanlardaki "etiket solda, deger sagda" duzeni burada
+                //   etiketi iki satira sarip kutuyu tek basina birakiyordu.
                 return (
-                  <label className="alan ayar-onay">
-                    <span className="etiket">{a.baslik}</span>
+                  <label className="alan onay-satiri">
                     <input type="checkbox" disabled={salt}
                            checked={Number(deger.randevuVerilebilir ?? 0) === 1}
                            onChange={e => setDeger(d => ({
                              ...d, randevuVerilebilir: e.target.checked ? 1 : 0,
                            }))} />
+                    <span>{a.baslik}</span>
                   </label>
                 );
               })()}

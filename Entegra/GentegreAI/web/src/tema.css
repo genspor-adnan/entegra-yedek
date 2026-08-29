@@ -1110,3 +1110,13 @@ input.skt-gecmis {
 .agac-satir.alt { padding-left: 26px; font-size: 12px }
 .agac-satir .sag { margin-left: auto }
 .agac-satir button.d.mini { padding: 0 6px; font-size: 11px; line-height: 18px }
+
+/* Onay kutusu SOLDA, yazisi saginda tek satir (252 personel "Randevu
+   Verilebilir"): normal .alan duzeni etiketi sola yaslayip iki satira
+   sardiriyordu. */
+.alan.onay-satiri {
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap; grid-column: 1 / -1;
+}
+.alan.onay-satiri input[type="checkbox"] { flex: none; margin: 0 }
+.alan.onay-satiri span { font-size: 12px }
