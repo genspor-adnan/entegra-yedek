@@ -526,6 +526,21 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       dar={TEK_SUTUN_KARTLAR.has(kaynak)}
       ustBilgi={
         <>
+          {/* Personel durumu BASLIKTA rozet (kullanici): aktif yesil, isten
+              cikis tarihi girilmisse pasif kirmizi - cikis tarihi olan biri
+              "aktif" gorunmesin. Serit alani olarak ayrica cizilmez. */}
+          {personelGibiKart && !yeniMi && (() => {
+            const cikis = String(
+              (detaylar.ozluk?.guncel[0]?.istenCikisTarihi as string | undefined) ?? '');
+            const pasif = cikis.length > 0 || Number(deger.durum) === 0;
+            return (
+              <span className={`rozet ${pasif ? 'hata' : 'ok'}`}
+                    style={{ margin: '0 auto' }}
+                    title={cikis ? `İşten çıkış: ${cikis}` : undefined}>
+                {pasif ? 'Pasif' : 'Aktif'}
+              </span>
+            );
+          })()}
           {surum && <span className="rozet gri">surum {surum}</span>}
           {salt && <span className="rozet uyari">salt okunur</span>}
         </>
@@ -542,8 +557,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
               {renderAlanListesi(kimlikAlanlari.filter(a =>
                 ['kod', 'ad', 'soyad', 'departman'].includes(a.ad)))}
               <KartKullaniciRolu sade kartId={id as number} saltOkunur={salt} />
+              {/* "durum" seritte YOK - baslikta rozet olarak gosteriliyor. */}
               {renderAlanListesi(kimlikAlanlari.filter(a =>
-                !['kod', 'ad', 'soyad', 'departman'].includes(a.ad)))}
+                !['kod', 'ad', 'soyad', 'departman', 'durum'].includes(a.ad)))}
             </div>
           ) : (
             <div className={`alan-izgara${kaynak === 'kisi' ? ' kaid-kisi' : ''}`}>

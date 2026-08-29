@@ -195,7 +195,7 @@ export function PersonelKimlikOzet({
       {!fotoSolEkOnce && fotoSolEk}
       {/* Foto sutunu is bilgilerinin HEMEN saginda (kullanici) - araya bosluk
           birakan saga yaslama kaldirildi, uc sutun bitisik akiyor. */}
-      <div className="kasutun" style={{ flex: '0 0 150px' }}>
+      <div className="kasutun" style={{ flex: '0 0 210px' }}>
         <div className="kagrup kagrup-resim">
           <h6>Fotoğraf</h6>
           {!saltOkunur && kaynakId && (
