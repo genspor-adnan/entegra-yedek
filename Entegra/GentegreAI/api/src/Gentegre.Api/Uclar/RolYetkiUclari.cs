@@ -9,6 +9,8 @@ public static class RolYetkiUclari
 {
     public sealed record YetkiSatiriIstegi(int YetkiId, bool Gor, bool Ekle, bool Degistir, bool Sil);
     public sealed record YetkiKaydetIstegi(IReadOnlyList<YetkiSatiriIstegi> Satirlar);
+    public sealed record SubeKaydetIstegi(
+        IReadOnlyList<KullaniciSubeDeposu.SubeIstegi> Satirlar);
 
     public static void RolYetkiUclariniEkle(this IEndpointRouteBuilder yol)
     {
@@ -98,6 +100,32 @@ public static class RolYetkiUclari
                 kullaniciVar = d.KullaniciVar, rolId = d.RolId, rolAdi = d.RolAdi,
                 roller = d.Roller.Select(r => new { id = r.Id, ad = r.Ad }),
             });
+        });
+
+        // Kullanici > SUBE yetkisi (kullanici: "yetkili oldugu subeleri nasil
+        //   secerim"). Sube yetkisi ROLE degil KULLANICIYA bagli - kart
+        //   uzerinden yonetilir.
+        var kartSube = yol.MapGroup("/api/kart/kullanici/{kartId:int}/subeler")
+                          .WithTags("Kart").RequireAuthorization();
+
+        kartSube.MapGet("/", async (int kartId, BaglamCozucu cozucu,
+            KullaniciSubeDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("rol", Islem.Gor);
+            var (kullaniciVar, satirlar) = await depo.ListeleAsync(kartId, iptal);
+            return Results.Ok(new { kullaniciVar, satirlar });
+        });
+
+        kartSube.MapPut("/", async (int kartId, SubeKaydetIstegi istek,
+            BaglamCozucu cozucu, KullaniciSubeDeposu depo, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("rol", Islem.Degistir);
+            await depo.KaydetAsync(kartId, istek.Satirlar, baglam.Yazma, iptal);
+            var (kullaniciVar, satirlar) = await depo.ListeleAsync(kartId, iptal);
+            return Results.Ok(new { kullaniciVar, satirlar });
         });
 
         kul.MapDelete("/{kullaniciId:int}", async (int rolId, int kullaniciId,
