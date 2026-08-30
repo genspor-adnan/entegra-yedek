@@ -724,9 +724,15 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
           if (!kurumAd) return;
           // Kurum kaynaginda ad kolonu 'unvan' ('kurumAdi' icmal kaynaginin
           //   kolonu) - yanlis alan sunucuda "Bilinmeyen alan" hatasi veriyordu.
+          // KOD YA DA AD: soru ikisini de kabul ediyor ("SGK" ya da "Sosyal
+          //   Güvenlik Kurumu") - yalniz unvana bakinca kodla arayan kullanici
+          //   "Kurum bulunamadı" aliyordu.
           const k = await api.liste('kurum', {
             sayfa: 1, boyut: 5,
-            filtre: { alan: 'unvan', op: 'icerir', deger: kurumAd },
+            filtre: { op: 'or', kosullar: [
+              { alan: 'unvan', op: 'icerir', deger: kurumAd },
+              { alan: 'kod',   op: 'icerir', deger: kurumAd },
+            ] },
           });
           if (k.satirlar.length === 0) { mesaj('Kurum bulunamadı.'); return }
           const kurumId = Number(k.satirlar[0].id);

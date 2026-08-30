@@ -55,6 +55,10 @@ public static class IcmalUclari
                    and b.durum = 0
                    and b.belge_tarihi >= @p1 and b.belge_tarihi < (@p2::date + 1)
                    and s.kurum_tutar > s.kurum_kapatilan
+                   -- YALNIZ KAYNAK SATIR: pay > 0 olan satır zaten bir payın
+                   --   dönüşümüdür (hasta tahakkuku / kurum faturası); icmale
+                   --   girerse aynı tutar ikinci kez faturalanır.
+                   and coalesce(s.pay, 0) = 0
                    -- Zaten bir icmalde olan satır ikinci kez alınmaz.
                    and not exists (select 1 from public.kurum_icmal_satir ks
                                     where ks.belge_satir_id = s.id)
@@ -99,6 +103,9 @@ public static class IcmalUclari
                    and b.durum = 0
                    and b.belge_tarihi >= @p2 and b.belge_tarihi < (@p3::date + 1)
                    and s.kurum_tutar > s.kurum_kapatilan
+                   -- Onizlemeyle AYNI filtre: turetilmis pay satirlari (hasta
+                   --   tahakkuku / kurum faturasi) icmale girmez.
+                   and coalesce(s.pay, 0) = 0
                    and not exists (select 1 from public.kurum_icmal_satir ks
                                     where ks.belge_satir_id = s.id)
                 """, islem, [icmalId, istek.KurumId, istek.DonemBas, istek.DonemBit], iptal);

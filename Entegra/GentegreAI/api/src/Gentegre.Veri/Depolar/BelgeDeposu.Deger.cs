@@ -230,6 +230,7 @@ public sealed partial class BelgeDeposu
         var dovizBirimFiyat = k["doviz_birim_fiyat"];
         var iskonto = k["iskonto"];
         var iskonto2 = k["iskonto2"];
+        var payKalan = 0m;
 
         if (pay > 0)
         {
@@ -239,6 +240,7 @@ public sealed partial class BelgeDeposu
             var kapanan = Convert.ToDecimal(
                 (pay == 1 ? k["hasta_kapatilan"] : k["kurum_kapatilan"]) ?? 0m);
             var kalan = payTutar - kapanan;
+            payKalan = kalan;
             birimFiyat = miktar > 0 ? decimal.Round(kalan / miktar, 6) : kalan;
             // DOVIZ FIYATI DA PAYDAN: kaynaktan aynen kopyalaninca dip toplamin
             //   doviz sutunu KAYNAK fiyatiyla hesaplaniyor, belge.doviz_tutari
@@ -252,6 +254,13 @@ public sealed partial class BelgeDeposu
         var govde = new Dictionary<string, object?>
         {
             ["pay"] = pay,
+            // PAY HEDEFTE SABITTIR: tutarlar acikca yazilmazsa kayit hatti
+            //   satiri odeyen kuruma gore YENIDEN paylastiriyor - hasta payi
+            //   tahakkuku "kurum payi" olarak isaretlenip donem icmaline
+            //   giriyordu (ayni tutar ikinci kez kuruma faturalanirdi).
+            ["kurumTutar"] = pay == 2 ? payKalan : pay == 1 ? 0m : (object?)null,
+            ["hastaTutar"] = pay == 1 ? payKalan : pay == 2 ? 0m : (object?)null,
+            ["karsilama"] = pay > 0 ? 0m : (object?)null,
             ["tur"] = k["tur"],
             ["stokId"] = k["stok_id"],
             ["hizmetId"] = k["hizmet_id"],
