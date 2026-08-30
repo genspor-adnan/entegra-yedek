@@ -60,6 +60,12 @@ export interface ListeTanimi {
   urunModu?: number;
   /** Kart ekrani olan kaynaklarda cift tik karta gider. */
   kartYolu?: string;
+  /**
+   * Kart baslıgı. Verilmezse liste basligindan turetilir (sondaki -ler/-lar
+   * atilir). "Radyoloji Çalışma Listesi" gibi baslikta bu turetme ise yaramaz:
+   * kart tek bir ISTEM'i gosterir, listenin adini tasimamali.
+   */
+  kartBaslik?: string;
   aksiyonEkrani?: string;
   /** e-Belge menusu KUTUSUNUN basligi ("E-Fatura" / "E-İrsaliye"). Verilmezse
       kutu cizilmez. Ekran adi ayirt etmiyor: 'belge-liste' satis fisi /
@@ -143,6 +149,29 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   Kayıt Kabul menusunun ust tarafina; icine Randevu ve Randevu Ayarlarini
     //   al; bunlar hbys icin gecerli"). Grup sirasi bu dizideki ILK gorulme
     //   sirasindan gelir - bu yuzden Hasta/Kayıt Kabul girdisinden ONCE durur.
+    // RADYOLOJI CALISMA LISTESI (283): modulun giris ekrani - rapor yazma,
+    //   PACS acma ve onay buradan baslar. Cipler gunun isini bolumler:
+    //   once cekilecekler, sonra raporlanacaklar, sonra onay bekleyenler.
+    kaynak: 'radyoloji-istem', rota: 'radyoloji', baslik: 'Radyoloji Çalışma Listesi',
+    yol: 'Radyoloji › Çalışma Listesi',
+    // Kart rotasi LISTE ROTASINDAN turetilir (/radyoloji/:id) - kartYolu farkli
+    //   yazilirsa cift tik tanimsiz rotaya gider ve ana sayfaya duser.
+    kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi',
+    aksiyonEkrani: 'radyoloji-liste',
+    tarihAlani: 'saat',
+    cipler: [
+      { ad: 'Bekleyen Çekim', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Raporlanacak',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Raporlanıyor',   filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Onay Bekleyen',  filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Onaylandı',      filtre: { alan: 'durum', op: 'esit', deger: 5 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2,
+    menuGrup: 'Radyoloji', menuAd: 'Çalışma Listesi', ic: '☢️', yetkiKodu: 'radyoloji',
+    menuSira: 10,
+  },
+  {
     kaynak: 'randevu', baslik: 'Randevular', yol: 'Randevu › Randevular',
     kartYolu: '/randevu', aksiyonEkrani: 'randevu-liste',
     tarihAlani: 'tarih',

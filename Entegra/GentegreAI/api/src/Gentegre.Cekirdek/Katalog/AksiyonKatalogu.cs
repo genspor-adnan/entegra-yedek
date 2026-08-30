@@ -106,6 +106,26 @@ public static class AksiyonKatalogu
             //   birbirini tutmayan iki kayit uretir.
             ["firsat-liste"] = Crud("firsat", "firsat", "firsat"),
 
+            // RADYOLOJI CALISMA LISTESI (283): modulun giris ekrani. Durum
+            //   akisi dugmelerle ilerler - "Cekildi" teknisyenin, rapor ve
+            //   onay hekimin islemidir, o yuzden AYRI aksiyon yetkileri
+            //   (rad.rapor_yaz / rad.rapor_onayla) uzerinden yonetilir.
+            ["radyoloji-liste"] = new AksiyonTanimi[]
+            {
+                new("radyoloji.yeni",     "＋ Yeni İstem", "radyoloji", Kisayol: "Ctrl+N",
+                    KaynakKodu: "radyoloji", Islem: Islem.Ekle, Sira: 10),
+                new("radyoloji.duzenle",  "✎ Düzenle", "radyoloji", Kisayol: "Enter",
+                    KaynakKodu: "radyoloji", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 20),
+                new("radyoloji.cekildi",  "✔ Çekildi İşaretle", "radyoloji",
+                    KaynakKodu: "radyoloji", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 30),
+                new("radyoloji.rapor",    "✎ Rapor Yaz", "radyoloji",
+                    AksiyonYetkisi: "rad.rapor_yaz", KayitGerekir: true, Sira: 40),
+                new("radyoloji.iptal",    "✖ İstemi İptal Et", "radyoloji",
+                    AksiyonYetkisi: "rad.istem_iptal", KayitGerekir: true, Sira: 50),
+            },
+
             // RANDEVU (243): liste + takvim gorunumu ayni ekranda.
             ["randevu-liste"] = new AksiyonTanimi[]
             {

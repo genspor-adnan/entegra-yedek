@@ -714,6 +714,38 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
       // RANDEVU durum akisi (243) ve BASVURUYA DONUSUM (265). Durum
       //   dugmeleri simdiye kadar bagli DEGILDI - tiklaninca hicbir sey
       //   olmuyordu.
+      // RADYOLOJI (283): worklist durum akisi. "Cekildi" teknisyenin islemi -
+      //   cekim zamani da yazilir, cunku bekleme suresi (kalite gostergesi)
+      //   oradan hesaplanir. Iptal onay ister: cekilmis istem iptal edilirse
+      //   goruntu ortada kalir.
+      if (kod === 'radyoloji.cekildi' || kod === 'radyoloji.iptal') {
+        if (!satir) return;
+        const iptalMi = kod === 'radyoloji.iptal';
+        if (iptalMi && !(await onay(
+              `${String(satir.accessionNo ?? '')} istemi iptal edilsin mi? `
+              + 'Çekim yapıldıysa görüntü ve rapor kaydı yerinde kalır.'))) return;
+        await guvenli(async () => {
+          const mevcut = await api.kartOku('radyoloji-istem', Number(satir.id));
+          await api.kartGuncelle('radyoloji-istem', Number(satir.id), {
+            surum: mevcut.kart.surum,
+            kart: iptalMi
+              ? { durum: 0 }
+              : { durum: 2, cekimTarihi: new Date().toISOString().slice(0, 16) },
+          });
+          setYenile(t => t + 1);
+          mesaj(iptalMi ? 'İstem iptal edildi.' : 'İstem "Çekildi" olarak işaretlendi.');
+        });
+        return;
+      }
+
+      // Rapor ekrani ayri is (Faz 2 ekranlari): istem kartina yonlendirilir.
+      if (kod === 'radyoloji.rapor') {
+        if (!satir) return;
+        mesaj('Rapor yazma ekranı bir sonraki adımda geliyor. '
+            + `Şimdilik istem kartından çekim bilgisini tamamlayabilirsiniz (${satir.accessionNo}).`);
+        return;
+      }
+
       if (kod === 'randevu.geldi' || kod === 'randevu.gelmedi' || kod === 'randevu.iptal') {
         if (!satir) return;
         const yeniDurum = kod === 'randevu.geldi' ? 2 : kod === 'randevu.gelmedi' ? 3 : 4;
@@ -1179,7 +1211,7 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
       <GenForm
         kaynak={tanim.kaynak}
         id={kartId}
-        baslik={tanim.baslik.replace(/ler$|lar$/, '')}
+        baslik={tanim.kartBaslik ?? tanim.baslik.replace(/ler$|lar$/, '')}
         yerTutucuSekmeler={tanim.yerTutucuSekmeler}
         gizliAlanlar={tanim.gizliKartAlanlari}
         gizliSekmeler={tanim.gizliKartSekmeleri}
