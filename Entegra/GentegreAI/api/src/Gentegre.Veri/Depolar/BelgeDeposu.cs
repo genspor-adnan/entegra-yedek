@@ -543,11 +543,14 @@ public sealed partial class BelgeDeposu
         {
             try
             {
+                // TUR de sorulur (280): siparis/teklif/talep/irsaliye/konsinye
+                //   ve transfer TAAHHUT belgesidir - mali sonuc faturada dogar,
+                //   fis kesilirse ayni tutar fatura fisinde IKINCI kez girer.
                 await using var fis = baglanti.Komut("""
-                    select case when public.fn_belge_fis_uretilsin(@p2)
+                    select case when public.fn_belge_fis_uretilsin(@p2, @p3)
                                 then public.fn_belge_fisle(@p0, @p1) end
                     """, islem,
-                    belgeId, baglam.KullaniciId, (object?)baglam.SubeId ?? DBNull.Value);
+                    belgeId, baglam.KullaniciId, (object?)baglam.SubeId ?? DBNull.Value, tur);
                 await fis.ExecuteScalarAsync(iptal);
             }
             catch (PostgresException h)

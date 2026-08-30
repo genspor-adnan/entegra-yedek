@@ -188,7 +188,15 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     aksiyonEkrani: 'basvuru-liste', yeniBelgeTuru: 19,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 19 },
     // Basvuru e-Belge degil; tur kolonlari da tek turlu listede gereksiz.
-    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
+    //   'durum' (Durum Kodu) siparis listesinden miras: basvuruda anlami yok,
+    //   hepsi ayni degeri gosterip "Pasif" gibi okunuyordu (kullanici).
+    gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum',
+                    'durum', 'durumAdi'],
+    // SERI EN SOLDA (kullanici): basvurular siparis dizisiyle birleşince ayni
+    //   numara iki seride gorunebiliyor (WEB/000000011 ve /000000011); seri
+    //   gorunmezse iki farkli belge ayni numarali sanilir. kolonSirasi'nda adi
+    //   gecen kolon katalogda "varsayilan degil" olsa da acilir.
+    kolonSirasi: ['belgeSeri', 'belgeNo'],
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
