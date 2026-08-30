@@ -13,9 +13,11 @@
 
 /** Kartin acabilecegi turler - liste/menu "Yeni" dugmeleri bunlari gonderir. */
 export const GIRILEBILIR_TURLER = [
+  // BASVURU AYRI TUR DEGIL (279): HBYS kurulumunda satis siparisi (19) ZATEN
+  //   basvurudur - ayri kod (30) ayni isi ikiye boluyor, siparis listeleri ve
+  //   kalan/kapanma raporlari basvurulari gormuyordu. "Başvuru" artik yalniz
+  //   GenoTIP modundaki EKRAN ADI (urunModu 2).
   18, 19, 15, 14, 9, 11, 10, 16, 12, 13, 17, 119, 109, 20, 105, 3, 4,
-  // 30 BASVURU (246): hasta basvurusu - siparis (19) davranisi.
-  30,
 ] as const;
 
 /** Kart acilisinda tur verilmediyse (dogrudan /belge/yeni) kullanilan tur. */
@@ -71,9 +73,7 @@ export interface BelgeTuruBilgisi {
 
 /** Turden turetilen ortak gruplar - tablo satirlari bunlarla kisaliyor. */
 const ALIS_TURLERI      = new Set([9, 10, 11, 12, 17, 109]);
-// 30 BASVURU (246): satis siparisi (19) ile ayni davranis - stok/muhasebe
-//   etkilemez, faturaya/fise/tahakkuka donusturulur.
-const SIPARIS_TURLERI   = new Set([9, 19, 30]);
+const SIPARIS_TURLERI   = new Set([9, 19]);
 const IRSALIYE_TURLERI  = new Set([10, 14, 109, 119]);
 const FATURA_TURLERI    = new Set([11, 12, 15, 16]);
 const TAHAKKUK_TURLERI  = new Set([13, 17]);
@@ -87,7 +87,6 @@ const LISTE_YOLU: Record<number, string> = {
   // SATIS
   18: '/teklif',
   19: '/siparis', 14: '/satis-irsaliye', 15: '/belge', 16: '/satis-fisi',
-  30: '/basvuru',
   13: '/tahakkuk', 119: '/satis-konsinye',
   // ALIS
   9: '/alis-siparis', 10: '/alis-irsaliye', 11: '/alis-fatura', 12: '/alis-fisi',
@@ -99,7 +98,6 @@ const LISTE_YOLU: Record<number, string> = {
 /** Baslik etiketlerinde kullanilan kisa ad ("<ad> No", "<ad> Tarihi"). */
 function turAdi(tur: number): string {
   if (tur === 18) return 'Teklif';
-  if (tur === 30) return 'Başvuru';
   if (STOK_FISI_TURLERI.has(tur)) return 'Fiş';
   if (tur === 105) return 'Talep';
   if (tur === 20) return 'Transfer';

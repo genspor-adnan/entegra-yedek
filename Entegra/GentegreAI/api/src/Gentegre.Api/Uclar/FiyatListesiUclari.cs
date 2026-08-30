@@ -228,7 +228,7 @@ public static class FiyatListesiUclari
         // Belge acilirken hangi liste gelecek: belge TURUNUN yonune gore
         //   carinin listesi, yoksa o yonun varsayilani.
         yol.MapGet("/api/belge/varsayilan-liste", async (
-            int tur, int tarafId, BaglamCozucu cozucu, VeriKaynagi veri,
+            int tur, int tarafId, int? kurumId, BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -238,8 +238,8 @@ public static class FiyatListesiUclari
             await using var komut = baglanti.Komut("""
                 select l.id, l.ad, l.yon, l.kdv_dahil
                   from public.fiyat_listesi l
-                 where l.id = public.fn_belge_varsayilan_liste(@p0, @p1)
-                """, null, tur, tarafId);
+                 where l.id = public.fn_belge_varsayilan_liste(@p0, @p1, current_date, @p2)
+                """, null, tur, tarafId, kurumId is 0 ? null : kurumId);
 
             await using var o = await komut.ExecuteReaderAsync(iptal);
             if (!await o.ReadAsync(iptal))

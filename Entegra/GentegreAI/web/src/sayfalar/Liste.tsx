@@ -764,7 +764,8 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
           //   kuralindan gelir (205: carinin listesi > varsayilan satis);
           //   kampanyanin kendi listesi varsa uc onu kullanir. Fiyat cikmazsa
           //   hizmet kartindaki fiyata dusulur.
-          const varsayilanListe = await api.belgeVarsayilanListe(30, hastaId);
+          // Odeyen kurumun kendi listesi hastaninkini ezer (278).
+          const varsayilanListe = await api.belgeVarsayilanListe(19, hastaId, odeyenKurumId);
           let fiyatListesiId = varsayilanListe.listeId ?? null;
           // KAMPANYANIN KENDI LISTESI bazi belirler (kurum sozlesmesi "TTB2018
           //   uzerinden %40" der): varsayilan satis listesi acikca gonderilirse
@@ -801,7 +802,8 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
 
           const y = await api.belgeEkle({
             belge: {
-              tur: 30,
+              // Basvuru = SATIS SIPARISI (279): ayri tur yok.
+              tur: 19,
               tarafId: hastaId,
               odeyenKurumId,
               kampanyaId,

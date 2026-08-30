@@ -53,6 +53,10 @@ public sealed partial class BelgeDeposu
                    b.taraf_adres_id, b.belge_dovizi, b.doviz_kuru, b.kdv_durum, b.durum,
                    b.teklif_durum,
                    b.rapor_dovizi, b.ekstre_dovizi,
+                   -- Fiyatlama kimligi (274): liste BAZ, kampanya INDIRIM verdi;
+                   --   ikisi de hedefe TASINIR - basvurudan cikan fatura
+                   --   "hangi anlasmayla" kesildigini kaybetmemeli.
+                   b.fiyat_listesi_id, b.kampanya_id, b.odeyen_kurum_id,
                    b.proje_id, b.sube_id, b.vade_gun, b.giris_depo_id, b.cikis_depo_id,
                    b.satici_id, b.ozel_kod, b.aciklama, b.belge_no, kt.ad as tur_adi
               from public.belge b
@@ -171,6 +175,14 @@ public sealed partial class BelgeDeposu
             ["raporDovizi"] = kaynak["rapor_dovizi"],
             ["ekstreDovizi"] = kaynak["ekstre_dovizi"],
             ["kdvDurum"] = kaynak["kdv_durum"],
+            // FIYAT LISTESI + KAMPANYA + ODEYEN KURUM (274): satirlar zaten
+            //   kaynagin fiyatiyla kopyalanir, tutar degismez - tasinan sey
+            //   KIMLIK. Kopyalanmazsa basvurudan cikan fatura kurumsuz ve
+            //   kampanyasiz aciliyor, sonradan eklenen kalem cari fiyatina
+            //   dusuyordu (ayni belgede iki farkli fiyat politikasi).
+            ["fiyatListesiId"] = kaynak["fiyat_listesi_id"],
+            ["kampanyaId"] = kaynak["kampanya_id"],
+            ["odeyenKurumId"] = kaynak["odeyen_kurum_id"],
             ["projeId"] = kaynak["proje_id"],
             ["vadeGun"] = kaynak["vade_gun"],
             ["girisDepoId"] = kaynak["giris_depo_id"],

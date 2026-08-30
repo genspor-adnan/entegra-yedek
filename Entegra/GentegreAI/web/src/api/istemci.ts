@@ -486,9 +486,10 @@ export const api = {
   },
 
   /** Belge acilirken gelecek fiyat listesi (205): turun yonune gore cari listesi > varsayilan. */
-  belgeVarsayilanListe: (tur: number, tarafId: number) =>
+  belgeVarsayilanListe: (tur: number, tarafId: number, kurumId?: number | null) =>
     istek<{ listeId: number | null; ad: string; yon: number; kdvDahil: number }>(
-      `/api/belge/varsayilan-liste?tur=${tur}&tarafId=${tarafId}`),
+      `/api/belge/varsayilan-liste?tur=${tur}&tarafId=${tarafId}`
+      + (kurumId ? `&kurumId=${kurumId}` : '')),
 
   /** Tek kalemin liste fiyati - liste henuz uretilmemis olsa da kural isletilir. */
   fiyatListesiFiyat: (listeId: number, kalem: { stokId?: number; hizmetId?: number }) =>

@@ -178,13 +178,15 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     urunModu: 2,
   },
   {
-    // BASVURU (246, kullanici: "satis siparisini aynen buraya al"): ayni
-    //   'belge' kaynagi, tur = 30. Hizmet/malzeme satirlari, tahsilat ve
-    //   fatura/fis/tahakkuk donusumu siparisle ayni altyapidan gelir.
+    // BASVURU (246/279, kullanici: "basvurudaki islemler normal alinan
+    //   siparislerimizdir"): AYRI TUR DEGIL - satis siparisinin (19) GenoTIP
+    //   ekranidir. Ayni belge ERP kurulumunda "Satış Siparişleri" listesinde
+    //   gorunur; iki liste ayni turu gostermesin diye ikisi de urunModu ile
+    //   suzulur.
     kaynak: 'belge', rota: 'basvuru', baslik: 'Başvurular',
     yol: 'Kayıt Kabul › Başvurular',
-    aksiyonEkrani: 'basvuru-liste', yeniBelgeTuru: 30,
-    sabitFiltre: { alan: 'tur', op: 'esit', deger: 30 },
+    aksiyonEkrani: 'basvuru-liste', yeniBelgeTuru: 19,
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 19 },
     // Basvuru e-Belge degil; tur kolonlari da tek turlu listede gereksiz.
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
@@ -378,8 +380,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Siparisler AYNI 'belge' kaynagi, tur in (9,19) sabit filtresiyle (Musteri/
     //   Tedarikci deseni). "Kalan" takibi belge_satir.kapatilan_miktar uzerinden;
     //   "Dönüştür" aksiyonu secili siparisten irsaliye/fatura uretir (F8).
+    // GenoTIP'te bu liste GORUNMEZ: ayni tur orada "Başvurular" ekraniyla
+    //   yonetilir (279) - iki menu ayni belgeleri iki adla gostermesin.
     kaynak: 'belge', rota: 'siparis', baslik: 'Satış Siparişleri', yol: 'Satis › Satış Siparişleri',
-    aksiyonEkrani: 'siparis-liste', yeniBelgeTuru: 19,
+    aksiyonEkrani: 'siparis-liste', yeniBelgeTuru: 19, urunModu: 1,
     // Menude "Satis Siparisleri" seciliyse liste de yalniz SATIS siparisi (19)
     //   gostersin; tur kolonlari o yuzden gereksiz (alis siparisi ayri ekran).
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 19 },

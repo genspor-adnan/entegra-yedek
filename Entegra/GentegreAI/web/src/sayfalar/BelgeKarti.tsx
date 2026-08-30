@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { guvenli, mesaj } from '../bilesenler/mesaj';
-import { type BelgeYaniti, type KasaIslemTuru, hataMetni, hataAyristir } from '../api/sozlesme';
+import { type BelgeYaniti, type KasaIslemTuru, URUN_GENOTIP, hataMetni, hataAyristir } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { StokAramaPenceresi } from '../bilesenler/StokAramaPenceresi';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
@@ -273,7 +273,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   //   eklenebilmeli, belge o zaman KISMI'ye doner. Donusmus SATIRLAR sunucuda
   //   korunur; fatura/irsaliyede kilit surer - kalemi degistirmek hedef belgeyi
   //   ve muhasebe fisini tutarsiz birakirdi.
-  const siparisTuru = tur === 9 || tur === 19 || tur === 30;
+  const siparisTuru = tur === 9 || tur === 19;
   const duzenlenebilir = mevcutBelge && !!sonuc && !eBelgeGonderildi
                          && (!faturalandi || siparisTuru);
   const kilitli = (mevcutBelge && !duzenlenebilir) || (!mevcutBelge && !!sonuc);
@@ -291,10 +291,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   /** Satis teklifi (216): tur 18 - durum combosu, "Sipariş" sekmesi, tek hedef. */
   const teklifMi = tur === 18;
   /**
-   * BASVURU (246): siparis davranisini miras alir ama HBYS belgesidir - uretim
-   * ve termin (teslim tarihi) kavrami yoktur, o iki dugme gizlenir (kullanici).
+   * BASVURU (246/279): AYRI TUR DEGIL - HBYS kurulumunda satis siparisinin
+   * kendisidir (kullanici: "basvurudaki islemler normal alinan
+   * siparislerimizdir"). Ayrim URUN MODUNDAN gelir: GenoTIP'te siparis ekrani
+   * basvuru olarak cizilir (Protokol No, Ödeyen Kurum; uretim ve termin yok),
+   * ERP'de ayni belge normal satis siparisidir.
    */
-  const basvuruMu = tur === 30;
+  const basvuruMu = tur === 19 && kullanici?.urunModu === URUN_GENOTIP;
 
   /**
    * IRSALIYE PILOTU (kullanici): 4 sutunlu baslik + arac cubugunda Taslak
@@ -700,12 +703,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     let iptal = false;
     void (async () => {
       try {
-        const y = await api.belgeVarsayilanListe(tur, cari.id);
+        const y = await api.belgeVarsayilanListe(tur, cari.id, odeyenKurumId);
         if (!iptal) setFiyatListesiIdHam(y.listeId ?? null);
       } catch { /* liste kurulmamis olabilir - fiyatlar kart fiyatindan gelir */ }
     })();
     return () => { iptal = true };
-  }, [belgeId, tur, cari?.id]);
+  }, [belgeId, tur, cari?.id, odeyenKurumId]);
 
   /**
    * KAMPANYA COZUMU (274). Odeyen kurum varsa kampanya ONUN sozlesmesinden
@@ -743,26 +746,59 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * yuvarlar, kurus paritesi DB'de tutturulamaz). Kaydetme hatti zaten tum
    * toplamlari satirlardan yeniden hesaplar.
    */
-  async function listeDegisti(yeni: number | null) {
-    setFiyatListesiIdHam(yeni);
-    if (!yeni) return;
-
+  /**
+   * Butun satirlari verilen liste + gecerli kampanya ile yeniden fiyatlar.
+   * Liste degisimi ve ODEYEN KURUM degisimi ayni yolu kullanir: kurum degisince
+   * gecerli kampanya da degisir - satirlar eski kurumun fiyatinda kalirsa belge
+   * "SGK anlasmasi" fiyatiyla Ozel Yasam'a kesilirdi.
+   */
+  async function satirlariYenidenFiyatla(
+    listeId: number | null, kurumId: number | null, kaynakAdi: string,
+  ) {
+    if (!listeId) return;
     await guvenli(async () => {
       let degisen = 0, bulunamayan = 0;
       const yeniSatirlar = await Promise.all(satirlar.map(async r => {
         if (!r.stokId && !r.hizmetId) return r;
         const f = await api.fiyatKalem(
           r.stokId ? { stokId: r.stokId } : { hizmetId: r.hizmetId! },
-          { tarafId: cari?.id ?? null, kurumId: odeyenKurumId, listeId: yeni });
+          { tarafId: cari?.id ?? null, kurumId, listeId });
         const y = kampanyaFiyatiUygula(r, f);
         if (y === r) bulunamayan++; else degisen++;
         return y;
       }));
       setSatirlar(yeniSatirlar);
-      mesaj(`${degisen} satırın fiyatı listeden güncellendi.`
+      mesaj(`${degisen} satırın fiyatı ${kaynakAdi} güncellendi.`
           + (bulunamayan ? ` ${bulunamayan} kalem listede bulunamadı, fiyatı DEĞİŞMEDİ.` : '')
           + (belgeId && degisen ? ' Kaydet ile kalıcı olur.' : ''));
     });
+  }
+
+  async function listeDegisti(yeni: number | null) {
+    setFiyatListesiIdHam(yeni);
+    await satirlariYenidenFiyatla(yeni, odeyenKurumId, 'listeden');
+  }
+
+  /**
+   * ODEYEN KURUM degisti (274): kampanya kurumun sozlesmesinden geldigi icin
+   * once kampanya yeniden cozulur (listesi varsa belgenin listesi ona cekilir),
+   * sonra satirlar o listeyle yeniden fiyatlanir. Kalemsiz belgede yalniz
+   * baslik guncellenir - mesaj cikmaz.
+   */
+  async function odeyenKurumDegisti(yeni: number | null) {
+    setOdeyenKurumId(yeni);
+    if (kilitli) return;
+
+    let liste = fiyatListesiId;
+    try {
+      const k = await api.fiyatKampanya({ tarafId: cari?.id ?? null, kurumId: yeni });
+      setKampanyaId(k.kampanyaId);
+      setKampanyaAdi(k.kampanyaId ? `${k.kod ? k.kod + ' · ' : ''}${k.ad}` : '');
+      if (k.fiyatListesiId) { liste = k.fiyatListesiId; setFiyatListesiIdHam(k.fiyatListesiId) }
+    } catch { /* kampanya cozulemezse mevcut liste ile devam */ }
+
+    if (satirlar.some(r => r.stokId || r.hizmetId))
+      await satirlariYenidenFiyatla(liste, yeni, 'ödeyen kuruma göre');
   }
 
   /** Modal icinde acildiysa cagiran kapatir; dogrudan URL ile acildiysa listeye doner. */
@@ -796,7 +832,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     </label>
   );
 
-  const kapat = () => (onKapat ? onKapat() : git(bilgi.liste));
+  // Basvuru kendi listesine doner: tur 19'un varsayilan yolu /siparis ama
+  //   GenoTIP menusunde o rota yok (279).
+  const kapat = () => (onKapat ? onKapat() : git(basvuruMu ? '/basvuru' : bilgi.liste));
 
   if (!ekleyebilir)
     return (
@@ -807,9 +845,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
   return (
     <Modal
-      baslik={mevcutBelge
-        ? `${seciliTurAdi}${sonuc?.belge.belgeNo ? ` — ${sonuc.belge.belgeNo}` : ''}`
-        : seciliTurAdi}
+      // GenoTIP'te ayni tur "Başvuru" adiyla acilir (279): tur katalogundaki ad
+      //   "Satış Siparişi" - hasta ekraninda o basligi gostermek yanlis olurdu.
+      baslik={(() => {
+        const ad = basvuruMu ? 'Başvuru' : seciliTurAdi;
+        return mevcutBelge
+          ? `${ad}${sonuc?.belge.belgeNo ? ` — ${sonuc.belge.belgeNo}` : ''}`
+          : ad;
+      })()}
       ustBilgi={kullanici?.subeYazma === false
         ? <span className="rozet uyari">salt okuma şubesi</span>
         : <span className="kapt">{kullanici?.subeler.find(s => s.id === kullanici?.subeId)?.ad}</span>}
@@ -867,7 +910,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           tarihEnGec={tarihEnGec} tarihEnErken={tarihEnErken}
           vadeGun={vadeGun} setVadeGun={setVadeGun}
           basvuruMu={basvuruMu} kurumlar={kurumlar}
-          odeyenKurumId={odeyenKurumId} setOdeyenKurumId={setOdeyenKurumId}
+          odeyenKurumId={odeyenKurumId}
+          setOdeyenKurumId={v => void odeyenKurumDegisti(v)}
           teklifDurum={teklifDurum} setTeklifDurum={setTeklifDurum}
           revizeNo={revizeNo} setRevizeNo={setRevizeNo}
           teklifKonusu={teklifKonusu} setTeklifKonusu={setTeklifKonusu}
