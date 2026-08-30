@@ -66,36 +66,60 @@ export function listeFiyatiUygula(
            fiyatDovizi: f.dovizCinsi || satir.fiyatDovizi };
 }
 
+/** /api/fiyat/kalem cevabi (274) - liste fiyati + kampanya kurali. */
+export interface KalemFiyati {
+  fiyat?: number | null;
+  bazFiyat?: number | null;
+  dovizCinsi?: string | null;
+  satirId?: number | null;
+  iskontoTipi?: number | null;
+  iskonto?: number | null;
+}
+
 /**
- * KAMPANYALI FIYAT (274) - liste fiyati + kampanya indirimi tek cevaptan.
+ * KAMPANYALI FIYATIN SATIR KARSILIGI (274). Belge kartI ve randevu->basvuru
+ * donusumu ayni kurali isletmeli, o yuzden karar TEK YERDE:
  *
- * Iki tip AYRI islenir, cunku belgede farkli gorunmeleri gerekir:
- *   YUZDE  -> birim fiyat LISTE fiyati kalir, indirim SATIR ISKONTOSUNA yazilir.
+ *   YUZDE  -> birim fiyat LISTE fiyati kalir, indirim SATIR ISKONTOSUNA gider.
  *             Faturada "liste 1.000 · %20 iskonto · net 800" gorunur; kuruma
  *             karsi indirimin gerekcesi belgenin uzerinde durur.
  *   TUTAR  -> paket/sabit anlasma fiyati; dogrudan birim fiyat olur, iskonto
  *             alanina dokunulmaz.
- * Kampanya kalemi vurmadiysa (satirId yok) davranis liste fiyatiyla ayni.
+ *
+ * Kampanya kalemi vurmadiysa (satirId yok) sonuc duz liste fiyatidir.
+ * `null` doner: fiyat cozulemedi - cagiran kendi varsayilanini korur.
  */
-export function kampanyaFiyatiUygula(
-  satir: SatirDurumu,
-  f: { fiyat?: number | null; bazFiyat?: number | null; dovizCinsi?: string | null;
-       satirId?: number | null; iskontoTipi?: number | null; iskonto?: number | null },
-): SatirDurumu {
-  // Kampanya kurali yok: eski yol.
-  if (!f.satirId) return listeFiyatiUygula(satir, f);
-
+export function kampanyaKalemFiyati(f: KalemFiyati):
+    { birimFiyat: number; iskonto?: number; dovizCinsi?: string | null;
+      kampanyaSatirId?: number } | null {
+  if (!f.satirId) {
+    return f.fiyat != null && f.fiyat > 0
+      ? { birimFiyat: f.fiyat, dovizCinsi: f.dovizCinsi } : null;
+  }
   const yuzde = f.iskontoTipi !== 2;
   const taban = yuzde ? f.bazFiyat : f.fiyat;
-  if (taban == null || taban <= 0) return satir;
+  if (taban == null || taban <= 0) return null;
 
-  const metin = String(taban);
+  return {
+    birimFiyat: taban,
+    dovizCinsi: f.dovizCinsi,
+    kampanyaSatirId: f.satirId,
+    ...(yuzde ? { iskonto: Number(f.iskonto) || 0 } : {}),
+  };
+}
+
+/** Kampanyali fiyati BELGE SATIRINA isler. Fiyat cozulemezse satir aynen doner. */
+export function kampanyaFiyatiUygula(satir: SatirDurumu, f: KalemFiyati): SatirDurumu {
+  const y = kampanyaKalemFiyati(f);
+  if (!y) return satir;
+
+  const metin = String(y.birimFiyat);
   return {
     ...satir,
     birimFiyat: metin, dovizFiyat: metin,
-    fiyatDovizi: f.dovizCinsi || satir.fiyatDovizi,
-    iskonto: yuzde ? String(f.iskonto ?? 0) : satir.iskonto,
-    kampanyaSatirId: f.satirId,
+    fiyatDovizi: y.dovizCinsi || satir.fiyatDovizi,
+    iskonto: y.iskonto !== undefined ? String(y.iskonto) : satir.iskonto,
+    kampanyaSatirId: y.kampanyaSatirId ?? satir.kampanyaSatirId,
   };
 }
 

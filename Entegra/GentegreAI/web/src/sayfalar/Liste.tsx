@@ -8,6 +8,7 @@ import { GenForm } from '../bilesenler/GenForm';
 import {
   type EBelgeMesaji, type Kosul, type ListeSatiri, type RandevuBolumDugumu, hataMetni,
 } from '../api/sozlesme';
+import { kampanyaKalemFiyati } from './belgeKalem';
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
@@ -772,17 +773,15 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
               { tarafId: hastaId, kurumId: odeyenKurumId, listeId: fiyatListesiId });
             kampanyaId = f.kampanyaId;
             if (f.listeId) fiyatListesiId = f.listeId;
-            if (f.satirId) {
-              // YUZDE: birim fiyat LISTE fiyati kalir, indirim satir
-              //   iskontosuna yazilir (fatura "liste · %x · net" gosterir).
-              //   TUTAR: sabit anlasma fiyati dogrudan birim fiyat olur.
-              kampanyaSatirId = f.satirId;
-              if (f.iskontoTipi === 2) { if (f.fiyat != null && f.fiyat > 0) birimFiyat = f.fiyat }
-              else {
-                if (f.bazFiyat != null && f.bazFiyat > 0) birimFiyat = f.bazFiyat;
-                iskonto = Number(f.iskonto) || 0;
-              }
-            } else if (f.fiyat != null && f.fiyat > 0) birimFiyat = f.fiyat;
+            // Yuzde/tutar karari BELGE KARTIYLA AYNI yerden (belgeKalem.ts):
+            //   iki yerde yazilirsa donusumdeki fatura kartta gorunenden
+            //   farkli fiyatlanir.
+            const y = kampanyaKalemFiyati(f);
+            if (y) {
+              birimFiyat = y.birimFiyat;
+              iskonto = y.iskonto ?? 0;
+              kampanyaSatirId = y.kampanyaSatirId ?? null;
+            }
           } catch { /* fiyat cozulemezse hizmet kartindaki fiyat kalir */ }
 
           const y = await api.belgeEkle({
