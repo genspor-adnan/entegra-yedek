@@ -302,6 +302,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Cari', menuAd: 'Tedarikçi Listesi', ic: '🚚', yetkiKodu: 'cari',
   },
   {
+    // KAMPANYALAR (268, kullanici: "ayarlara liste ve kart olarak ekle"):
+    //   fiyat listesi uzerine isleyen indirim kurallari; kurum sozlesmesinde
+    //   secilir.
+    kaynak: 'kampanya', baslik: 'Kampanyalar', yol: 'Yönetim › Kampanyalar',
+    kartYolu: '/kampanya', aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    menuGrup: 'Yönetim', menuAd: 'Kampanyalar', ic: '🏷️', yetkiKodu: 'fiyat_listesi',
+  },
+  {
     // DEPARTMANLAR (251): personel departmani ve randevu bolumu AYNI tablo -
     //   "Randevu Bölümü" isaretli olanlar randevu kartinin Bölüm listesinde.
     // 255: iki bolmeli ozel ekran (solda departman, sagda gorev) - duz liste

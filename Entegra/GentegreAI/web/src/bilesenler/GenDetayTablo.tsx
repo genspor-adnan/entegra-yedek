@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Modal } from './Modal';
+import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { para4 } from './bicim';
 import { GridMenu, type MenuOgesi } from './grid/GridMenu';
 import { dosyaIndirUrl } from './indir';
@@ -120,6 +121,16 @@ function gunFarki(bas: string, bit: string): number | null {
 
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler }: Props) {
+  /**
+   * KAMPANYA SATIRI (268): "İskonto Yeri" TEK kolondur (iskonto_yeri_id) ama
+   * anlami satirin TIPINE gore degisir - Liste'de 0, Kategori'de kategori id,
+   * Ürün'de stok/hizmet id. Bu yuzden hucre tipe gore cizilir: kategoride
+   * combo, urunde stok/hizmet arama penceresi, listede kapali.
+   * Kategoriler az sayida (15) - bir kez cekilip bellekte tutulur; stok/hizmet
+   * binlerce oldugu icin ORADA combo degil arama penceresi kullanilir.
+   */
+  const kampanyaSatiri = meta.ad === 'satirlar' && meta.alanlar.some(a => a.ad === 'iskontoYeriId');
+  const [urunAramaSatiri, setUrunAramaSatiri] = useState<number | null>(null);
   const alanlar = meta.alanlar.filter(a => a.ad !== 'id');
   const yerler = useYerler(meta.ad === 'adresler');
   const adresGrid = meta.ad === 'adresler';
@@ -541,6 +552,32 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                     >
                       {EGITIM_GECERLILIK.map(ad => <option key={ad} value={ad}>{ad}</option>)}
                     </select>
+                  ) : kampanyaSatiri && a.ad === 'iskontoYeriId' ? (
+                    Number(satir.tip) === 2 ? (
+                      <select
+                        value={String(satir[a.ad] ?? '')}
+                        disabled={saltOkunur || !a.yazilabilir}
+                        onChange={e => hucreDegis(i, a.ad, e.target.value)}
+                      >
+                        <option value="">— kategori —</option>
+                        {Object.entries(a.kodlar ?? {}).map(([k, v]) => (
+                          <option key={k} value={k}>{v}</option>
+                        ))}
+                      </select>
+                    ) : Number(satir.tip) === 3 ? (
+                      <span className="ikili">
+                        <input readOnly value={String(satir.iskontoYeriAdi ?? satir[a.ad] ?? '')}
+                               placeholder="— ürün —"
+                               disabled={saltOkunur || !a.yazilabilir}
+                               onClick={() => !saltOkunur && setUrunAramaSatiri(i)} />
+                        <button type="button" className="d mini" title="Ürün ara"
+                                disabled={saltOkunur || !a.yazilabilir}
+                                onClick={() => setUrunAramaSatiri(i)}>…</button>
+                      </span>
+                    ) : (
+                      // Liste satirinda hedef yok: kolon 0 kalir.
+                      <input readOnly value="tüm liste" disabled />
+                    )
                   ) : a.kodlar ? (
                     <select
                       value={String(satir[a.ad] ?? '')}
@@ -653,6 +690,22 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
             </div>
           </div>
         </Modal>
+      )}
+
+      {/* KAMPANYA (268): urun satirinda hedef stok/hizmet jenerik arama
+          penceresinden secilir - binlerce kayit combo'ya sigmaz. Secilen id
+          iskonto_yeri_id'ye, adi ekranda gostermek icin satira yazilir. */}
+      {urunAramaSatiri !== null && (
+        <StokAramaPenceresi
+          etkin
+          onKapat={() => setUrunAramaSatiri(null)}
+          onSec={secilen => {
+            hucreDegis(urunAramaSatiri, 'iskontoYeriId', String(secilen.id));
+            hucreDegis(urunAramaSatiri, 'kalemTuru',
+                       String(secilen.tip) === 'hizmet' ? '2' : '1');
+            setUrunAramaSatiri(null);
+          }}
+        />
       )}
     </div>
   );

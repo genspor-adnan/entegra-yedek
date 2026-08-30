@@ -292,6 +292,33 @@ public static partial class KaynakKatalogu
         };
     }
 
+    // ---------------------------------------------------------- kampanya ----
+    /// <summary>Kampanya listesi (268) - Yönetim > Ayarlar yanindaki ekran.</summary>
+    private static KaynakTanimi Kampanya() => new(
+        Ad: "kampanya",
+        YetkiKodu: "fiyat_listesi",
+        Kaynak: """
+            public.kampanya k
+            left join public.fiyat_listesi fl on fl.id = k.fiyat_listesi_id
+            """,
+        VarsayilanSirala: "k.ad asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",              "k.id",              "sayi",  "Id", Varsayilan: false),
+            new("kod",             "k.kod",             "metin", "Kod", Genislik: 110),
+            new("ad",              "k.ad",              "metin", "Kampanya"),
+            new("baslangic",       "k.baslangic",       "tarih", "Başlangıç", Hizalama: "orta"),
+            new("bitis",           "k.bitis",           "tarih", "Bitiş", Hizalama: "orta"),
+            new("fiyatListesi",    "coalesce(fl.ad, '')", "metin", "Fiyat Listesi",
+                Genislik: 150, Filtrelenebilir: false),
+            new("fiyatListesiId",  "k.fiyat_listesi_id", "sayi", "Liste Id", Varsayilan: false),
+            new("satirSayisi",     "(select count(*) from public.kampanya_satir ks " +
+                                   "  where ks.kampanya_id = k.id)", "sayi", "Satır",
+                Hizalama: "sag", Filtrelenebilir: false),
+            new("durum",           "k.durum",           "mantik","Durum", Hizalama: "orta"),
+            new("aciklama",        "k.aciklama",        "metin", "Açıklama", Varsayilan: false),
+        });
+
     // ---------------------------------------------------------- departman ----
     /// <summary>
     /// Departman/bolum listesi (251). Randevu bolumleri de burada - farki

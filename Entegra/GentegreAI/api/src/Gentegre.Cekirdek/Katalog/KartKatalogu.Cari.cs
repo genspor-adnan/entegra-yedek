@@ -555,8 +555,11 @@ public static partial class KartKatalogu
             new("baslangic",      "baslangic",        "tarih", Baslik: "Başlangıç"),
             new("bitis",          "bitis",            "tarih", Baslik: "Bitiş"),
             new("durum",          "durum",            "mantik", Baslik: "Aktif"),
-            new("fiyatListesiId", "fiyat_listesi_id", "kod",
-                KodTablosu: "public.v_fiyat_listesi_satis_lookup", Baslik: "Fiyat Listesi"),
+            // Anlasma kosulu artik KAMPANYA (268): kampanyanin kendi fiyat
+            //   listesi ve indirim satirlari var - ikisini ayri secmek ayni
+            //   bilgiyi iki yere yazmak olurdu.
+            new("kampanyaId",     "kampanya_id",      "kod",
+                KodTablosu: "public.v_kampanya_lookup", Baslik: "Kampanya"),
             new("iskontoYuzde",   "iskonto_yuzde",    "para",  Baslik: "Genel İskonto %"),
             new("aciklama",       "aciklama",         "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
         }, SubeKolonu: null, Baslik: "Sözleşme", LogTabloId: 909, TekSatir: true));
