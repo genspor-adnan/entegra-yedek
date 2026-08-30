@@ -57,7 +57,7 @@ public static partial class KartKatalogu
                 //   seceneklerden secer, tip=Ürün'de arama penceresi acilir
                 //   (stok/hizmet binlerce - combo'ya sigmaz).
                 new("iskontoYeriId", "iskonto_yeri_id", "kod",
-                    KodTablosu: "public.v_kategori_lookup", Baslik: "İskonto Yeri"),
+                    KodTablosu: "public.v_kategori_lookup", Baslik: "Kapsam"),
                 new("iskontoTipi",   "iskonto_tipi",    "kod",   Zorunlu: true,
                     KodListesi: "kampanya.iskonto_tipi", Baslik: "İskonto Tipi"),
                 new("iskonto",       "iskonto",         "para",  Baslik: "İskonto"),

@@ -134,7 +134,7 @@ function gunFarki(bas: string, bit: string): number | null {
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler }: Props) {
   /**
-   * KAMPANYA SATIRI (268): "İskonto Yeri" TEK kolondur (iskonto_yeri_id) ama
+   * KAMPANYA SATIRI (268): "Kapsam" TEK kolondur (iskonto_yeri_id) ama
    * anlami satirin TIPINE gore degisir - Liste'de 0, Kategori'de kategori id,
    * Ürün'de stok/hizmet id. Bu yuzden hucre tipe gore cizilir: kategoride
    * combo, urunde stok/hizmet arama penceresi, listede kapali.
