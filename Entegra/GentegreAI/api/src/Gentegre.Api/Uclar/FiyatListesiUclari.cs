@@ -98,24 +98,13 @@ public static class FiyatListesiUclari
             await using var baglanti = await veri.AcAsync(iptal);
             // KATILIM PAYI (291) fiyatla BIRLIKTE doner: islem secilince hem SUT
             //   bedeli hem hastadan alinacak katki tek istekte gelsin.
-            await using var komut = baglanti.Komut(
-                "select f.fiyat, f.doviz_cinsi, f.kdv_dahil, f.kaynak, " +
-                "       public.fn_fiyat_listesi_katki(@p0, @p1, @p2) as katki " +
-                "  from public.fn_fiyat_listesi_fiyat(@p0, @p1, @p2) f",
-                null, id, stokId is 0 ? null : stokId, hizmetId is 0 ? null : hizmetId);
-
-            await using var o = await komut.ExecuteReaderAsync(iptal);
-            if (!await o.ReadAsync(iptal))
-                return Results.Ok(new { fiyat = (decimal?)null, dovizCinsi = "", kdvDahil = 0,
-                                        kaynak = "yok", katki = 0m });
+            var f = await ListeFiyatiAsync(baglanti, id,
+                stokId is 0 ? null : stokId, hizmetId is 0 ? null : hizmetId, iptal);
 
             return Results.Ok(new
             {
-                fiyat = o.IsDBNull(0) ? (decimal?)null : o.GetDecimal(0),
-                dovizCinsi = o.IsDBNull(1) ? "" : o.GetString(1),
-                kdvDahil = o.IsDBNull(2) ? 0 : o.GetInt16(2),
-                kaynak = o.IsDBNull(3) ? "" : o.GetString(3),
-                katki = o.IsDBNull(4) ? 0m : o.GetDecimal(4),
+                fiyat = f.Fiyat, dovizCinsi = f.DovizCinsi, kdvDahil = f.KdvDahil,
+                kaynak = f.Kaynak, katki = f.Katki,
             });
         }).WithTags("FiyatListesi").RequireAuthorization();
 
@@ -191,28 +180,14 @@ public static class FiyatListesiUclari
 
             // 2) Baz fiyat: liste kurali (liste yoksa fiyat da yok - kampanya
             //    yuzdesi bos fiyat uzerinde anlamsiz, TUTAR tipi yine calisir).
-            decimal? bazFiyat = null;
-            var dovizCinsi = "";
-            short kdvDahil = 0;
-            var kaynak = "yok";
-            var katki = 0m;
-            if (bazListe is { } bl)
-            {
-                await using var f = baglanti.Komut(
-                    "select f.fiyat, f.doviz_cinsi, f.kdv_dahil, f.kaynak, " +
-                    "       public.fn_fiyat_listesi_katki(@p0, @p1, @p2) as katki " +
-                    "  from public.fn_fiyat_listesi_fiyat(@p0, @p1, @p2) f",
-                    null, bl, stok, hizmet);
-                await using var o = await f.ExecuteReaderAsync(iptal);
-                if (await o.ReadAsync(iptal))
-                {
-                    bazFiyat   = o.IsDBNull(0) ? null : o.GetDecimal(0);
-                    dovizCinsi = o.IsDBNull(1) ? "" : o.GetString(1);
-                    kdvDahil   = o.IsDBNull(2) ? (short)0 : o.GetInt16(2);
-                    kaynak     = o.IsDBNull(3) ? "" : o.GetString(3);
-                    katki      = o.IsDBNull(4) ? 0m : o.GetDecimal(4);
-                }
-            }
+            var liste = bazListe is { } bl
+                ? await ListeFiyatiAsync(baglanti, bl, stok, hizmet, iptal)
+                : ListeFiyati.Bos;
+            var bazFiyat   = liste.Fiyat;
+            var dovizCinsi = liste.DovizCinsi;
+            var kdvDahil   = liste.KdvDahil;
+            var kaynak     = liste.Kaynak;
+            var katki      = liste.Katki;
 
             // 3) Kampanya indirimi.
             decimal? fiyat = bazFiyat;
@@ -417,6 +392,41 @@ public static class FiyatListesiUclari
         if (subeId != 0 && baglam.SubeId is { } aktif && subeId != aktif)
             throw GentegreHatasi.Yasak("Bu liste başka bir şubeye ait.");
         return (o.GetString(0), o.GetInt16(1));
+    }
+
+    /// <summary>Listeden cozulen fiyat + katilim payi (291).</summary>
+    private sealed record ListeFiyati(
+        decimal? Fiyat, string DovizCinsi, short KdvDahil, string Kaynak, decimal Katki)
+    {
+        public static ListeFiyati Bos => new(null, "", 0, "yok", 0m);
+    }
+
+    /// <summary>
+    /// Bir kalemin LISTE fiyatini ve KATILIM PAYINI tek sorguda cozer.
+    ///
+    /// Iki uc de (tek kalem sorgusu ve kampanyali kalem ucu) ayni ikiliye
+    /// ihtiyac duyuyor; sorguyu iki yerde tutmak katki zincirini (291) birinde
+    /// guncelleyip digerinde unutmaya davetti.
+    /// </summary>
+    private static async Task<ListeFiyati> ListeFiyatiAsync(
+        Npgsql.NpgsqlConnection baglanti, int listeId, int? stokId, int? hizmetId,
+        CancellationToken iptal)
+    {
+        await using var komut = baglanti.Komut(
+            "select f.fiyat, f.doviz_cinsi, f.kdv_dahil, f.kaynak, " +
+            "       public.fn_fiyat_listesi_katki(@p0, @p1, @p2) as katki " +
+            "  from public.fn_fiyat_listesi_fiyat(@p0, @p1, @p2) f",
+            null, listeId, stokId, hizmetId);
+
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        if (!await o.ReadAsync(iptal)) return ListeFiyati.Bos;
+
+        return new ListeFiyati(
+            o.IsDBNull(0) ? null : o.GetDecimal(0),
+            o.IsDBNull(1) ? "" : o.GetString(1),
+            o.IsDBNull(2) ? (short)0 : o.GetInt16(2),
+            o.IsDBNull(3) ? "" : o.GetString(3),
+            o.IsDBNull(4) ? 0m : o.GetDecimal(4));
     }
 
     /// <summary>

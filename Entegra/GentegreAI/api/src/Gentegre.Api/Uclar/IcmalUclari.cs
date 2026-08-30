@@ -23,6 +23,29 @@ public static class IcmalUclari
     public sealed record IcmalIstegi(int KurumId, DateTime DonemBas, DateTime DonemBit,
                                      string? Aciklama);
 
+    /// <summary>
+    /// DÖNEMDE FATURALANACAK SATIR ölçüsü. Önizleme ile icmal oluşturma AYNI
+    /// kümeyi görmek ZORUNDA: filtre iki yerde ayrı yazıldığında biri
+    /// güncellenip diğeri unutulursa kullanıcı önizlemede gördüğünden başkasını
+    /// faturalar.
+    ///
+    /// Kurallar: kesin belge (durum 0), dönem içinde, kurum payı henüz
+    /// kapanmamış, satır KAYNAK satır (pay = 0 - hasta tahakkuku / kurum
+    /// faturası gibi türetilmiş pay satırları ikinci kez faturalanamaz) ve
+    /// satır başka bir icmalde değil.
+    ///
+    /// Parametre sırası SABİT: @p0 kurum, @p1 dönem başı, @p2 dönem sonu.
+    /// </summary>
+    private const string AcikKurumPayiKosulu = """
+                 where b.odeyen_kurum_id = @p0
+                   and b.durum = 0
+                   and b.belge_tarihi >= @p1 and b.belge_tarihi < (@p2::date + 1)
+                   and s.kurum_tutar > s.kurum_kapatilan
+                   and coalesce(s.pay, 0) = 0
+                   and not exists (select 1 from public.kurum_icmal_satir ks
+                                    where ks.belge_satir_id = s.id)
+        """;
+
     public static void IcmalUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/kurum-icmal").WithTags("Kurum İcmali").RequireAuthorization();
@@ -51,17 +74,7 @@ public static class IcmalUclari
                   left join public.taraf  h  on h.id  = b.taraf_id
                   left join public.hizmet hz on hz.id = s.hizmet_id
                   left join public.stok   st on st.id = s.stok_id
-                 where b.odeyen_kurum_id = @p0
-                   and b.durum = 0
-                   and b.belge_tarihi >= @p1 and b.belge_tarihi < (@p2::date + 1)
-                   and s.kurum_tutar > s.kurum_kapatilan
-                   -- YALNIZ KAYNAK SATIR: pay > 0 olan satır zaten bir payın
-                   --   dönüşümüdür (hasta tahakkuku / kurum faturası); icmale
-                   --   girerse aynı tutar ikinci kez faturalanır.
-                   and coalesce(s.pay, 0) = 0
-                   -- Zaten bir icmalde olan satır ikinci kez alınmaz.
-                   and not exists (select 1 from public.kurum_icmal_satir ks
-                                    where ks.belge_satir_id = s.id)
+                """ + AcikKurumPayiKosulu + """
                  order by b.belge_tarihi, b.id, s.sira
                 """, null, [kurumId, donemBas, donemBit], Satir, iptal);
 
@@ -94,21 +107,16 @@ public static class IcmalUclari
 
             // Satırlar TEK sorguyla toplanır: aynı satır iki icmale giremez
             //   (ux_kurum_icmal_satir); yarış durumunda ikinci istek düşer.
+            // Parametre sırası koşulun beklediği gibi (kurum, dönem başı, dönem
+            //   sonu); icmal kimliği SONA alındı ki filtre önizlemeyle harfiyen
+            //   aynı metin olsun.
             var adet = await baglanti.CalistirAsync("""
                 insert into public.kurum_icmal_satir (icmal_id, belge_satir_id, tutar)
-                select @p0, s.id, s.kurum_tutar - s.kurum_kapatilan
+                select @p3, s.id, s.kurum_tutar - s.kurum_kapatilan
                   from public.belge_satir s
                   join public.belge b on b.id = s.belge_id
-                 where b.odeyen_kurum_id = @p1
-                   and b.durum = 0
-                   and b.belge_tarihi >= @p2 and b.belge_tarihi < (@p3::date + 1)
-                   and s.kurum_tutar > s.kurum_kapatilan
-                   -- Onizlemeyle AYNI filtre: turetilmis pay satirlari (hasta
-                   --   tahakkuku / kurum faturasi) icmale girmez.
-                   and coalesce(s.pay, 0) = 0
-                   and not exists (select 1 from public.kurum_icmal_satir ks
-                                    where ks.belge_satir_id = s.id)
-                """, islem, [icmalId, istek.KurumId, istek.DonemBas, istek.DonemBit], iptal);
+                """ + AcikKurumPayiKosulu,
+                islem, [istek.KurumId, istek.DonemBas, istek.DonemBit, icmalId], iptal);
 
             if (adet == 0)
                 throw GentegreHatasi.IsKurali(

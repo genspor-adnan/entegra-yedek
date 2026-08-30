@@ -718,48 +718,54 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   }, [belgeId, tur, cari?.id, odeyenKurumId]);
 
   /**
-   * PAY HESAPLAMA MODU (291) KAYITLI belgede de okunur: mod kampanyanin degil
-   * KURUMUN ozelligidir ve belgeye yazilmaz - kayitli basvuruda provizyon
-   * dugmesi yine SGK'ya gore davranmali. Kampanya cozumu (asagida) yalniz yeni
-   * belgede kosar, o yuzden ayri efekt.
+   * KAMPANYAYI COZ ve baslik alanlarina isle (274/291). Uc yerden cagrilir
+   * (yeni belge acilisi, kayitli belgede pay modu, odeyen kurum degisimi);
+   * uceye ayri ayri yazilinca "modu da set etmeyi unutma" hatasi kacinilmazdi.
+   *
+   * @param kampanyaYaz kampanya kimligini/listesini de yaz. KAYITLI belgede
+   *   FALSE gecilir: belge hangi kampanyayla kesildiyse onu tasir, yalniz
+   *   PAY MODU tazelenir (mod kampanyanin degil KURUMUN ozelligi, belgeye
+   *   yazilmaz - kayitli basvuruda provizyon dugmesi de dogru davranmali).
+   * @returns kampanyanin fiyat listesi (varsa) - cagiran satirlari o listeyle
+   *   yeniden fiyatlayabilsin.
    */
-  useEffect(() => {
-    if (!odeyenKurumId) { setPaylasimModu(1); return }
-    let iptal = false;
-    void (async () => {
-      try {
-        const y = await api.fiyatKampanya({ tarafId: null, kurumId: odeyenKurumId });
-        if (!iptal) setPaylasimModu(y.paylasimModu ?? 1);
-      } catch { if (!iptal) setPaylasimModu(1) }
-    })();
-    return () => { iptal = true };
-  }, [odeyenKurumId]);
+  async function kampanyaCoz(
+    kurumId: number | null, kampanyaYaz: boolean,
+  ): Promise<number | null> {
+    try {
+      const y = await api.fiyatKampanya({
+        tarafId: kampanyaYaz ? cari?.id ?? null : null, kurumId,
+      });
+      setPaylasimModu(y.paylasimModu ?? 1);
+      if (!kampanyaYaz) return null;
+
+      setKampanyaId(y.kampanyaId);
+      setKampanyaAdi(y.kampanyaId ? `${y.kod ? y.kod + ' · ' : ''}${y.ad}` : '');
+      // Kampanyanin kendi fiyat listesi varsa belgenin listesi ONA cekilir:
+      //   baslik neyle fiyatlandigini dogru gostersin (kullanici degistirebilir).
+      if (y.fiyatListesiId) { setFiyatListesiIdHam(y.fiyatListesiId); return y.fiyatListesiId }
+      return null;
+    } catch {
+      if (kampanyaYaz) { setKampanyaId(null); setKampanyaAdi('') } else setPaylasimModu(1);
+      return null;
+    }
+  }
 
   /**
    * KAMPANYA COZUMU (274). Odeyen kurum varsa kampanya ONUN sozlesmesinden
    * gelir - odemeyi yapan taraf fiyati belirler; yoksa carinin kendi
-   * kampanyasi, o da yoksa genel kampanya. Kampanyanin kendi fiyat listesi
-   * varsa belgenin listesi ONA cekilir: baslik neyle fiyatlandigini dogru
-   * gostersin, kullanici isterse yine degistirebilir.
+   * kampanyasi, o da yoksa genel kampanya.
    *
-   * KAYITLI belgede calismaz - belge hangi kampanyayla kesildiyse onu tasir.
+   * KAYITLI belgede kampanya DEGISMEZ; o durumda yalniz pay modu okunur.
    */
   useEffect(() => {
-    if (belgeId) return;
-    if (!cari?.id && !odeyenKurumId) { setKampanyaId(null); setKampanyaAdi(''); return }
-    let iptal = false;
-    void (async () => {
-      try {
-        const y = await api.fiyatKampanya({ tarafId: cari?.id ?? null, kurumId: odeyenKurumId });
-        if (iptal) return;
-        setKampanyaId(y.kampanyaId);
-        setKampanyaAdi(y.kampanyaId
-          ? `${y.kod ? y.kod + ' · ' : ''}${y.ad}` : '');
-        setPaylasimModu(y.paylasimModu ?? 1);
-        if (y.fiyatListesiId) setFiyatListesiIdHam(y.fiyatListesiId);
-      } catch { if (!iptal) { setKampanyaId(null); setKampanyaAdi('') } }
-    })();
-    return () => { iptal = true };
+    const kampanyaYaz = !belgeId;
+    if (kampanyaYaz && !cari?.id && !odeyenKurumId) {
+      setKampanyaId(null); setKampanyaAdi(''); setPaylasimModu(1); return;
+    }
+    if (!kampanyaYaz && !odeyenKurumId) { setPaylasimModu(1); return }
+    void kampanyaCoz(odeyenKurumId, kampanyaYaz);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [belgeId, cari?.id, odeyenKurumId]);
 
   /**
@@ -815,14 +821,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     setOdeyenKurumId(yeni);
     if (kilitli) return;
 
-    let liste = fiyatListesiId;
-    try {
-      const k = await api.fiyatKampanya({ tarafId: cari?.id ?? null, kurumId: yeni });
-      setKampanyaId(k.kampanyaId);
-      setKampanyaAdi(k.kampanyaId ? `${k.kod ? k.kod + ' · ' : ''}${k.ad}` : '');
-      setPaylasimModu(k.paylasimModu ?? 1);
-      if (k.fiyatListesiId) { liste = k.fiyatListesiId; setFiyatListesiIdHam(k.fiyatListesiId) }
-    } catch { /* kampanya cozulemezse mevcut liste ile devam */ }
+    // Kampanya cozulemezse mevcut liste ile devam edilir (kampanyaCoz yutar).
+    const liste = (await kampanyaCoz(yeni, true)) ?? fiyatListesiId;
 
     if (satirlar.some(r => r.stokId || r.hizmetId))
       await satirlariYenidenFiyatla(liste, yeni, 'ödeyen kuruma göre');
