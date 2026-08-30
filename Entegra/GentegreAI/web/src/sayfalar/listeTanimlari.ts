@@ -203,14 +203,18 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   Kalan ham/ERP kolonlari da basvuruda okunmuyor: Cari Id, Açık/Kapalı
     //   Kodu, Ort. Maliyet ve Tipi (fatura/irsaliye alt turu).
                     'subeId', 'vadeGun', 'senaryoAdi', 'senaryo', 'belgeSeri',
-                    'tarafId', 'acikKapali', 'maliyetOrt', 'tipiAdi'],
+    //   Matrah/KDV basvuruda okunmuyor: hastaya soylenen rakam GENEL TOPLAM,
+    //   yaninda ne kadari tahsil edildigi (kullanici).
+                    'tarafId', 'acikKapali', 'maliyetOrt', 'tipiAdi',
+                    'matrah', 'kdvTutari'],
     // Kaynak kolonunun yerine ODEYEN KURUM / POLIKLINIK / DOKTOR (kullanici).
     //   SERI listede yok ama katalogda DURUYOR: gizliKolonlar'a konsa kolon
     //   menusunden de kaybolurdu - gerektiginde kullanici acar.
     //   Sira: once belgenin kimligi (no, tarih, hasta), sonra basvuru bilgisi
     //   (odeyen kurum, poliklinik, hekim) - kullanici.
     kolonSirasi: ['belgeNo', 'belgeTarihi', 'tarafUnvan',
-                  'odeyenKurumAdi', 'poliklinik', 'doktor'],
+                  'odeyenKurumAdi', 'poliklinik', 'doktor',
+                  'genelToplam', 'tahsilat'],
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },

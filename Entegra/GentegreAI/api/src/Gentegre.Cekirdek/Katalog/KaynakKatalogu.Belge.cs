@@ -154,6 +154,18 @@ public static partial class KaynakKatalogu
                                                       "metin", "Doktor", Genislik: 160,
                                                       Varsayilan: false, Siralanabilir: false,
                                                       Filtrelenebilir: false),
+            // TAHSILAT (basvuru listesi): belgeye baglanmis kasa islemlerinin
+            //   toplami - hasta pesin oderse "ne kadari tahsil edildi" genel
+            //   toplamin yaninda okunur.
+            //   YALNIZ GERCEKLESEN sayilir (kasa_islem.durum = 2): 0 taslak ve
+            //   1 planli henuz para degil, 3 iptal edilmis. Kolon "tahsil
+            //   edilen tutar" demek - plani da toplayan bir sayi yaniltir.
+            new("tahsilat",
+                "coalesce((select sum(ki.tutar) from public.kasa_islem ki " +
+                "           where ki.belge_id = b.id and ki.durum = 2), 0)",
+                                                      "para", "Tahsilat", Hizalama: "sag",
+                                                      Genislik: 120, Varsayilan: false,
+                                                      Siralanabilir: false, Filtrelenebilir: false),
             new("tarafVkno",     "b.taraf_vkno",     "metin", "VKN/TCKN",    Genislik: 120, Varsayilan: false),
             new("matrah",        "b.matrah",         "para",  "Matrah",      Hizalama: "sag",
                                                                 Bicim: "#,##0.00", Genislik: 120),
