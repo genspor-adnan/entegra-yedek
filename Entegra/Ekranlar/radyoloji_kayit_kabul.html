@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Görüntüleme Merkezi — Hasta Kabul / Dış İstem — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1120px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fa96b,#2e7d46);color:#fff;font-weight:bold}
+  .sp{margin-left:auto}
+  .idstrip{display:grid;grid-template-columns:1fr 150px 150px 170px;gap:10px;padding:10px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .ikili{display:flex;gap:6px}.ikili .inp{flex:1}
+  .ana{display:grid;grid-template-columns:1fr 320px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin:12px}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);
+    background:var(--head);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;
+    display:flex;align-items:center;gap:8px}
+  .grp h4 .mini{margin-left:auto;border:1px solid var(--line);border-radius:3px;background:#fff;
+    padding:2px 8px;font-size:10.5px;font-weight:normal}
+  .iz{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:10px 12px}
+  .iz .tam{grid-column:1 / -1}
+  table{border-collapse:collapse;width:100%;font-size:12px;background:#fff}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px;white-space:nowrap}
+  .sag{text-align:right}
+  .yan{border-left:1px solid var(--line2);background:#fbfcfd;padding:10px}
+  .yan h5{margin:2px 0 6px;font-size:11.5px;color:var(--navy)}
+  .tut{display:flex;justify-content:space-between;padding:3px 0;font-size:12px}
+  .tut.buyuk{font-size:14px;font-weight:bold;color:var(--navy);border-top:1px solid var(--line);
+    margin-top:5px;padding-top:6px}
+  .tut .ind{color:var(--ok)}
+  .kutu{border:1px solid var(--line2);border-radius:3px;background:#fff;padding:8px;margin-bottom:10px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .c-kamp{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-yeni{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .odeme{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+  .odeme span{border:1px solid var(--line);border-radius:3px;background:#fff;padding:3px 9px;font-size:11px}
+  .odeme span.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .uyari{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;padding:6px 8px;
+    font-size:11px;color:#8a6218;line-height:1.5}
+  .ozet{display:flex;gap:14px;padding:8px 12px;background:var(--head);border-top:1px solid var(--line2);
+    font-size:11px;color:var(--muted)}
+  .ozet b{color:var(--ink)}
+  .not{max-width:1120px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🏥 Hasta Kabul — Dış İstemle Gelen Hasta <span class="sp">GenoTIP AI · Görüntüleme Merkezi</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet (Başvuru + İstem)</div>
+    <div class="btn ok">💵 Tahsilat Al ve Kabul Et</div>
+    <div class="btn">📅 Randevu Ver</div>
+    <div class="btn">📷 İstem Kâğıdını Tara</div>
+    <div class="btn">🖨 Hasta Bilgi Formu</div>
+    <div class="btn sp">Kapat</div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label class="req">Hasta</label>
+      <div class="inp big combo">♂ MEHMET ÇELİK · 67 y · ☎ 0532 111 22 33 <span class="chip c-yeni">Yeni</span></div></div>
+    <div class="fld"><label>TC Kimlik</label><div class="inp">12*******34</div></div>
+    <div class="fld"><label>Dosya No</label><div class="inp">H-000914</div></div>
+    <div class="fld"><label class="req">Kabul Tarihi / Saat</label>
+      <div class="ikili"><div class="inp">30.08.2026</div><div class="inp">11:05</div></div></div>
+  </div>
+
+  <div class="ana">
+    <div>
+      <div class="grp">
+        <h4>Dış İstem <span class="mini">📎 İstem kâğıdı ekli (1)</span></h4>
+        <div class="iz">
+          <div class="fld"><label class="req">İsteyen Hekim (Dış)</label>
+            <div class="inp combo">Op. Dr. Kerem ATALAY</div></div>
+          <div class="fld"><label>İsteyen Kurum</label>
+            <div class="inp combo">Özel Anadolu Hastanesi</div></div>
+          <div class="fld"><label>Ön Tanı (ICD-10)</label>
+            <div class="inp combo">M54.5 · Bel ağrısı</div></div>
+          <div class="fld"><label>İstem Tarihi</label><div class="inp">28.08.2026</div></div>
+          <div class="fld tam"><label>Klinik Bilgi</label>
+            <div class="inp" style="height:auto;padding:5px 6px;white-space:normal">
+              Sağ bacağa yayılan bel ağrısı, 3 aydır. Konservatif tedaviye yanıtsız.</div></div>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h4>Tetkikler <span class="mini">＋ Tetkik Ekle</span></h4>
+        <table>
+          <thead><tr><th style="width:26px"></th><th>Kod</th><th>Tetkik</th><th>Mod.</th>
+            <th>Çekim</th><th class="sag">Liste</th><th class="sag">İndirim</th>
+            <th class="sag">Tutar</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>☐</td><td>MR.012</td><td>Lomber Vertebra MR (kontrastsız)</td><td>MR</td>
+              <td>Randevulu · 31.08 09:00</td>
+              <td class="sag">3.200,00</td><td class="sag ind">%25</td><td class="sag"><b>2.400,00</b></td>
+            </tr>
+            <tr>
+              <td>☐</td><td>DR.001</td><td>Akciğer Grafisi PA</td><td>DR</td>
+              <td>Hemen (walk-in)</td>
+              <td class="sag">300,00</td><td class="sag ind">%25</td><td class="sag"><b>225,00</b></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="uyari" style="margin:10px 12px">
+          ⚠ MR randevu ister (cihaz kapasitesi), röntgen walk-in çekilir. Kaydet'e basıldığında
+          her tetkik için ayrı <b>istem (accession no)</b> üretilir ve çalışma listesine düşer.
+        </div>
+      </div>
+    </div>
+
+    <div class="yan">
+      <h5>Ödeme</h5>
+      <div class="kutu">
+        <div class="fld" style="margin-bottom:6px"><label>Ödeyen Kurum</label>
+          <div class="inp combo">Özel Yaşam Sigorta A.Ş.</div></div>
+        <div class="fld" style="margin-bottom:6px"><label>Poliçe No</label>
+          <div class="inp">PL-2026-889134</div></div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.5">
+          Fiyat <span class="chip c-kamp">KMP-TEST</span> kampanyasından geldi ·
+          Baz liste: <b>TTB2018</b>
+        </div>
+      </div>
+
+      <div class="kutu">
+        <div class="tut"><span>Liste tutarı</span><span>3.500,00 ₺</span></div>
+        <div class="tut"><span>Kampanya indirimi (%25)</span><span class="ind">−875,00 ₺</span></div>
+        <div class="tut"><span>KDV (%10)</span><span>262,50 ₺</span></div>
+        <div class="tut buyuk"><span>Genel Toplam</span><span>2.887,50 ₺</span></div>
+        <div class="tut" style="margin-top:6px"><span>Kurumdan tahsil</span><span>2.887,50 ₺</span></div>
+        <div class="tut"><span>Hastadan (katılım payı)</span><span><b>0,00 ₺</b></span></div>
+      </div>
+
+      <h5>Hastadan Tahsilat</h5>
+      <div class="odeme">
+        <span class="on">Nakit</span><span>Kredi Kartı</span><span>Havale</span><span>Sonra</span>
+      </div>
+      <div class="kutu" style="margin-bottom:10px">
+        <div class="fld"><label>Tahsil edilecek</label><div class="inp">0,00</div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5">
+          Sözleşmeli kurum tamamını karşılıyor — hastadan tahsilat yok. Sözleşmesizde tutar
+          buraya düşer ve makbuz basılır.
+        </div>
+      </div>
+
+      <h5>Kabul Sonrası</h5>
+      <div class="kutu" style="font-size:11px;line-height:1.6;color:var(--muted)">
+        ☑ Cihaz listesine (MWL) gönder<br>
+        ☑ Randevu SMS'i yolla<br>
+        ☑ Hazırlık talimatı ver (aç gelme, metal çıkarma)<br>
+        ☐ Sonuç için CD hazırla
+      </div>
+    </div>
+  </div>
+
+  <div class="ozet">
+    <span>Başvuru: <b>yeni (kaydedilince numara alır)</b></span>
+    <span>Üretilecek istem: <b>2</b></span>
+    <span>Kabul eden: <b>admin</b></span>
+    <span class="sp">Bugün kabul: <b>37 hasta · 54 tetkik</b></span>
+  </div>
+</div>
+
+<div class="not">
+  <b>NOT (mockup):</b> Görüntüleme merkezi (bağımsız) senaryosu: hasta <b>dışarıdan</b>, başka
+  hekimin istem kâğıdıyla gelir — iç poliklinik istemi yoktur. Bu ekran tek adımda üç kayıt
+  üretir: <b>başvuru</b> (satış siparişi), tetkik başına <b>istem</b> (accession no) ve gerekiyorsa
+  <b>tahsilat</b>. "İsteyen Hekim (Dış)" ayrı bir kayıttır (dış hekim/kurum kartı) — SGK ve sigorta
+  faturalamasında istenir, serbest metin bırakılmaz. Fiyat kurum sözleşmesindeki kampanyadan
+  çözülür; sözleşme yoksa liste fiyatı uygulanır ve fark hastadan tahsil edilir. Kaydetmeyle
+  birlikte istemler <b>DICOM MWL</b> olarak cihazlara düşer: teknisyen hasta bilgisini elle
+  yazmaz, listeden seçer.
+</div>
+</body>
+</html>

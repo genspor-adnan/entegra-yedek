@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hekim Tetkik İstemi (İç İstem) — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1120px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sp{margin-left:auto}
+  .idstrip{display:grid;grid-template-columns:1fr 190px 160px 150px;gap:10px;padding:10px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .ana{display:grid;grid-template-columns:250px 1fr 290px;min-height:430px}
+  .sol{border-right:1px solid var(--line2);background:#fbfcfd;padding:9px}
+  .sag{border-left:1px solid var(--line2);background:#fbfcfd;padding:9px}
+  .orta{padding:10px 12px}
+  .sol h5,.sag h5{margin:2px 0 6px;font-size:11.5px;color:var(--navy)}
+  .ara{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:12px;
+    background:#fff;height:23px;padding:0 9px;color:var(--muted);margin-bottom:7px}
+  .agac{font-size:11.5px;line-height:1.9}
+  .agac .dal{color:var(--navy);font-weight:bold}
+  .agac .yaprak{padding-left:14px;color:#33414f}
+  .agac .yaprak.on{background:var(--sel);border-radius:3px}
+  .sik{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+  .sik span{border:1px solid var(--line);border-radius:11px;background:#fff;padding:2px 9px;font-size:11px}
+  table{border-collapse:collapse;width:100%;font-size:12px;background:#fff}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .c-acil{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .c-norm{background:#eef1f5;color:#5b6b7c;border:1px solid #d4dde6}
+  .c-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .kutu{border:1px solid var(--line2);border-radius:3px;background:#fff;padding:8px;margin-bottom:9px;
+    font-size:11px;line-height:1.55}
+  .kutu b{color:var(--navy)}
+  .uyari{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;padding:7px 9px;
+    font-size:11px;color:#8a6218;line-height:1.55;margin-bottom:9px}
+  .tehlike{border:1px solid #e4b7b2;background:#fdf3f2;color:#8f3d36}
+  .ozet{display:flex;gap:14px;padding:8px 12px;background:var(--head);border-top:1px solid var(--line2);
+    font-size:11px;color:var(--muted)}
+  .ozet b{color:var(--ink)}
+  .not{max-width:1120px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🩺 Tetkik İstemi — Muayene · Ortopedi <span class="sp">GenoTIP AI · Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">➜ İstemi Gönder</div>
+    <div class="btn">＋ Başvuruya Ekle (ücretlendir)</div>
+    <div class="btn">📅 Randevu ile Gönder</div>
+    <div class="btn">⧉ Önceki İstemi Tekrarla</div>
+    <div class="btn pas">🖨 İstem Kâğıdı</div>
+    <div class="btn sp">Kapat</div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label>Hasta</label>
+      <div class="inp big">♀ AYŞE YILMAZ · 41 y · H-000871</div></div>
+    <div class="fld"><label>Başvuru (Protokol)</label>
+      <div class="inp">000000011 · 30.08.2026</div></div>
+    <div class="fld"><label>İsteyen Hekim</label>
+      <div class="inp">Dr. Bahar Aladağ</div></div>
+    <div class="fld"><label>Ödeyen Kurum</label>
+      <div class="inp">Özel Yaşam Sigorta</div></div>
+  </div>
+
+  <div class="ana">
+    <!-- SOL: tetkik agaci -->
+    <div class="sol">
+      <div class="ara">🔍 Tetkik ara (kod / ad)</div>
+      <h5>Sık İstenenler — Ortopedi</h5>
+      <div class="sik">
+        <span>Lomber MR</span><span>Diz MR</span><span>Direkt Grafi</span>
+        <span>Servikal MR</span><span>Kalça BT</span>
+      </div>
+      <h5>Tetkik Ağacı</h5>
+      <div class="agac">
+        <div class="dal">▾ MR</div>
+        <div class="yaprak on">MR.012 · Lomber Vertebra MR</div>
+        <div class="yaprak">MR.014 · Servikal Vertebra MR</div>
+        <div class="yaprak">MR.021 · Diz MR</div>
+        <div class="dal">▾ BT</div>
+        <div class="yaprak">BT.001 · Beyin BT</div>
+        <div class="yaprak">BT.003 · Tüm Abdomen BT</div>
+        <div class="dal">▸ USG</div>
+        <div class="dal">▾ Direkt Grafi</div>
+        <div class="yaprak">DR.001 · Akciğer Grafisi PA</div>
+        <div class="yaprak">DR.010 · Lomber Grafi (2 yön)</div>
+      </div>
+    </div>
+
+    <!-- ORTA: istem satirlari -->
+    <div class="orta">
+      <table>
+        <thead><tr><th style="width:26px"></th><th>Kod</th><th>Tetkik</th><th style="width:80px">Öncelik</th>
+          <th style="width:110px">Kontrast</th><th style="width:120px">Planlama</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>☐</td><td>MR.012</td><td><b>Lomber Vertebra MR</b></td>
+            <td><span class="chip c-norm">Normal</span></td><td>Verilmeyecek</td><td>Randevu ver</td>
+          </tr>
+          <tr>
+            <td>☐</td><td>DR.010</td><td><b>Lomber Grafi (2 yön)</b></td>
+            <td><span class="chip c-norm">Normal</span></td><td>—</td><td>Hemen</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:12px">
+        <div class="fld" style="margin-bottom:8px"><label class="req">Ön Tanı (ICD-10)</label>
+          <div class="inp combo">M51.1 · Lomber diskopati</div></div>
+        <div class="fld"><label class="req">Klinik Bilgi / İstem Gerekçesi</label>
+          <div class="inp" style="height:auto;min-height:52px;padding:6px;white-space:normal;align-items:flex-start">
+            3 aydır süren bel ağrısı, sağ bacağa yayılım. Konservatif tedaviye yanıtsız.
+            Nörolojik defisit yok. Cerrahi planlama öncesi değerlendirme.</div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:5px">
+          Klinik bilgi radyoloğun raporunda <b>Klinik Bilgi</b> bölümüne düşer — boş istem
+          radyologa "neden çekildi" sorusunu bıraktığı için zorunludur.
+        </div>
+      </div>
+    </div>
+
+    <!-- SAG: hasta guvenligi + gecmis -->
+    <div class="sag">
+      <h5>Güvenlik Kontrolleri</h5>
+      <div class="uyari tehlike">
+        ⚠ <b>MR:</b> hastada kalp pili / metal implant / koklear implant sorgusu çekim öncesi
+        teknisyen tarafından yapılacak. Klostrofobi öyküsü varsa işaretleyin.
+      </div>
+      <div class="kutu">
+        <b>Gebelik:</b> son adet tarihi sorulmadı · <span class="chip c-norm">Sorulacak</span><br>
+        <b>Kreatinin:</b> 0,9 mg/dL (12.08.2026) · <span class="chip c-ok">Uygun</span><br>
+        <b>Alerji:</b> bilinen kontrast alerjisi yok
+      </div>
+
+      <h5>Son 12 Ayda Aynı Tetkik</h5>
+      <div class="uyari">
+        ℹ 14.02.2026 tarihinde <b>Lomber MR</b> çekilmiş (6 ay önce).
+        Yeni istemi <b>gerekçelendirin</b> — mükerrer tetkik uyarısı rapora not düşer.
+      </div>
+
+      <h5>Ücret / Karşılama</h5>
+      <div class="kutu">
+        Lomber MR — <b>2.400,00 ₺</b> <span class="chip c-ok">Kurum karşılıyor</span><br>
+        Lomber Grafi — <b>225,00 ₺</b> <span class="chip c-ok">Kurum karşılıyor</span><br>
+        <span style="color:var(--muted)">Fiyat sözleşme kampanyasından (KMP-TEST · TTB2018 −%25).
+        Kurum karşılamazsa tutar hastanın başvurusuna eklenir.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ozet">
+    <span>Seçili tetkik: <b>2</b></span>
+    <span>Üretilecek istem: <b>2 (accession no)</b></span>
+    <span>Hedef bölüm: <b>Radyoloji</b></span>
+    <span class="sp">Gönderildiğinde radyoloji çalışma listesinde <b>Bekliyor</b> olarak görünür.</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>NOT (mockup):</b> Hastane senaryosu: istemi <b>içerideki hekim</b> muayene sırasında yapar.
+  Ekran hastanın açık başvurusuna (protokol) bağlıdır — ödeyen kurum ve fiyat oradan gelir, hekime
+  para sorusu sorulmaz; yalnız <b>karşılanıyor mu</b> bilgisi gösterilir. "İstemi Gönder" her tetkik
+  için ayrı <b>accession no</b> üretir, başvuruya hizmet satırı ekler ve radyoloji çalışma listesine
+  <i>Bekliyor</i> olarak düşürür. Klinik bilgi ve ön tanı zorunludur (rapora ve SGK/sigorta
+  faturasına gider). Sağ sütun karar desteğidir: MR güvenlik uyarısı, kontrastlı tetkikte kreatinin,
+  gebelik sorgusu ve <b>mükerrer tetkik</b> uyarısı — gereksiz ışın ve gereksiz maliyet buradan
+  önlenir. Dış hastadan gelen istem için ayrı ekran vardır (radyoloji_kayit_kabul.html).
+</div>
+</body>
+</html>
