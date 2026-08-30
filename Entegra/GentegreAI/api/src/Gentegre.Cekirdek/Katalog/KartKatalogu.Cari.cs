@@ -69,6 +69,13 @@ public static partial class KartKatalogu
             new("alisFiyatListesiId",  "alis_fiyat_listesi_id",  "kod",
                 KodTablosu: "public.v_fiyat_listesi_alis_lookup",
                 Baslik: "Alış Fiyat Listesi", Grup: "Fatura Bilgileri", AltGrup: "Fiyatlandırma"),
+            // KAMPANYA (274): listenin YERINE gecmez, USTUNE isler - liste baz
+            //   fiyati, kampanya indirimi verir. Bos ise genel kampanya (varsa)
+            //   gecerli olur; anlasmali kurumda kampanya sozlesmeden gelir ve
+            //   bunu ezer (fn_taraf_kampanya).
+            new("kampanyaId", "kampanya_id", "kod",
+                KodTablosu: "public.v_kampanya_lookup",
+                Baslik: "Kampanya", Grup: "Fatura Bilgileri", AltGrup: "Fiyatlandırma"),
             // "Iletisim"/"Siniflandirma"/"Diger" SEKME DEGIL - mockup'ta Genel'in alt-kutulari
             //   (Kart Bilgileri / İletişim / Notlar). Grup kaldirildi, AltGrup ile Genel'e katlandi.
             new("telefon",     "telefon",      "metin", EnFazlaUzunluk: 30,  Baslik: "Telefon",        AltGrup: "İletişim"),

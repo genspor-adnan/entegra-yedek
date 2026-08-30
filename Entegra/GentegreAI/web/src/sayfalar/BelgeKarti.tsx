@@ -27,7 +27,7 @@ import { BelgeAracCubugu } from '../bilesenler/belge/BelgeAracCubugu';
 import { BelgeBaslik } from '../bilesenler/belge/BelgeBaslik';
 import { useBelgeTahsilat } from './belgeTahsilat';
 import {
-  iadeSatirlari, listeFiyatiUygula, paketIcerigiUygula, sonAnahtar, stokSecimindenKalem,
+  iadeSatirlari, kampanyaFiyatiUygula, paketIcerigiUygula, sonAnahtar, stokSecimindenKalem,
 } from './belgeKalem';
 import { BelgeTahsilatModallari } from '../bilesenler/belge/BelgeTahsilatModallari';
 
@@ -132,6 +132,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   //   (anlasmali kurum / sigorta / SGK). Bos = hasta kendi oder.
   const [odeyenKurumId, setOdeyenKurumId] = useState<number | null>(null);
   const [kurumlar, setKurumlar] = useState<{ id: number; ad: string }[]>([]);
+  /**
+   * YURURLUKTEKI KAMPANYA (274). Fiyat listesiyle YARISMAZ: liste BAZ fiyati,
+   * kampanya INDIRIMI verir. Baslikta rozet olarak gorunur ve belgeye YAZILIR -
+   * kurum sonradan kampanya degistirse eski belge kendi kampanyasini tasir.
+   * Kayitli belgede COZULMEZ, kayittan okunur.
+   */
+  const [kampanyaId, setKampanyaId] = useState<number | null>(null);
+  const [kampanyaAdi, setKampanyaAdi] = useState('');
   /**
    * FIYAT LISTESI (205). Acilista belge TURUNUN yonune gore cariden cozulur
    * (cari listesi > yonun varsayilani). Kullanici degistirince satirlar
@@ -423,6 +431,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setVadeGun(String(y.belge.vadeGun ?? 0));
         setOdeyenKurumId(y.belge.odeyenKurumId != null ? Number(y.belge.odeyenKurumId) : null);
         setFiyatListesiIdHam(Number(y.belge.fiyatListesiId) || null);
+        setKampanyaId(y.belge.kampanyaId != null ? Number(y.belge.kampanyaId) : null);
+        setKampanyaAdi(String(y.belge.kampanyaAdi ?? ''));
         setTeklifDurum(String(y.belge.teklifDurum ?? '1'));
         setRevizeNo(String(y.belge.revizeNo ?? ''));
         setTeklifKonusu(String(y.belge.teklifKonusu ?? ''));
@@ -602,6 +612,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       // Basvuruda vade yerine odeyen kurum gonderilir (249).
       ...(basvuruMu ? { odeyenKurumId } : {}),
       fiyatListesiId,
+      // Kampanya belgeye YAZILIR (274): kurum sonradan kampanya degistirse
+      //   eski belgenin hangi anlasmayla kesildigi sabit kalir.
+      kampanyaId,
       // Teklif durumu yalniz teklifte anlamli - baska turde gonderilmez.
       ...(teklifMi ? { teklifDurum: Number(teklifDurum) || 1, revizeNo,
                        teklifKonusu, teklifTeslim } : {}),
@@ -695,6 +708,32 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   }, [belgeId, tur, cari?.id]);
 
   /**
+   * KAMPANYA COZUMU (274). Odeyen kurum varsa kampanya ONUN sozlesmesinden
+   * gelir - odemeyi yapan taraf fiyati belirler; yoksa carinin kendi
+   * kampanyasi, o da yoksa genel kampanya. Kampanyanin kendi fiyat listesi
+   * varsa belgenin listesi ONA cekilir: baslik neyle fiyatlandigini dogru
+   * gostersin, kullanici isterse yine degistirebilir.
+   *
+   * KAYITLI belgede calismaz - belge hangi kampanyayla kesildiyse onu tasir.
+   */
+  useEffect(() => {
+    if (belgeId) return;
+    if (!cari?.id && !odeyenKurumId) { setKampanyaId(null); setKampanyaAdi(''); return }
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.fiyatKampanya({ tarafId: cari?.id ?? null, kurumId: odeyenKurumId });
+        if (iptal) return;
+        setKampanyaId(y.kampanyaId);
+        setKampanyaAdi(y.kampanyaId
+          ? `${y.kod ? y.kod + ' · ' : ''}${y.ad}` : '');
+        if (y.fiyatListesiId) setFiyatListesiIdHam(y.fiyatListesiId);
+      } catch { if (!iptal) { setKampanyaId(null); setKampanyaAdi('') } }
+    })();
+    return () => { iptal = true };
+  }, [belgeId, cari?.id, odeyenKurumId]);
+
+  /**
    * Liste DEGISTI: butun satirlar EKRANDA yeniden fiyatlanir (kullanici
    * kurali); Kaydet kalicilastirir. Kayitli belgede de ayni yol - sunucuda
    * fiyatlayan fn_belge_fiyatlandir KALDIRILDI: durum=0 butun normal
@@ -712,9 +751,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       let degisen = 0, bulunamayan = 0;
       const yeniSatirlar = await Promise.all(satirlar.map(async r => {
         if (!r.stokId && !r.hizmetId) return r;
-        const f = await api.fiyatListesiFiyat(yeni,
-          r.stokId ? { stokId: r.stokId } : { hizmetId: r.hizmetId! });
-        const y = listeFiyatiUygula(r, f);
+        const f = await api.fiyatKalem(
+          r.stokId ? { stokId: r.stokId } : { hizmetId: r.hizmetId! },
+          { tarafId: cari?.id ?? null, kurumId: odeyenKurumId, listeId: yeni });
+        const y = kampanyaFiyatiUygula(r, f);
         if (y === r) bulunamayan++; else degisen++;
         return y;
       }));
@@ -860,7 +900,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             setKalem={setKalem} seciliSil={seciliSil}
             satirTikla={satirTikla} sonTiklanan={sonTiklanan} secimDegis={secimDegis}
             fiyatListesi={{ listeler: fiyatListeleri, seciliId: fiyatListesiId,
-                            sec: v => void listeDegisti(v) }}
+                            sec: v => void listeDegisti(v), kampanyaAdi }}
             doviz={{
               raporDovizi, setRaporDovizi: yeni => {
                 setRaporDovizi(yeni);
@@ -1022,11 +1062,15 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
               //   kalir. Fiyat kalem penceresi ACILMADAN once beklenir - pencere
               //   `satir` prop'unu acilista kopyalar (useState), sonradan
               //   gonderilen guncelleme pencereye ulasmaz.
-              if (fiyatListesiId) {
+              if (fiyatListesiId || kampanyaId) {
                 try {
-                  const f = await api.fiyatListesiFiyat(fiyatListesiId,
-                    sec.tip === 'hizmet' ? { hizmetId: Number(sec.id) } : { stokId: Number(sec.id) });
-                  yeni = listeFiyatiUygula(yeni, f);
+                  // Fiyat LISTE + KAMPANYA (274): baz listeden, indirim
+                  //   kampanyadan. Kampanya yoksa uc liste fiyatini doner.
+                  const f = await api.fiyatKalem(
+                    sec.tip === 'hizmet' ? { hizmetId: Number(sec.id) } : { stokId: Number(sec.id) },
+                    { tarafId: cari?.id ?? null, kurumId: odeyenKurumId,
+                      listeId: fiyatListesiId });
+                  yeni = kampanyaFiyatiUygula(yeni, f);
                 } catch { /* liste fiyati alinamazsa kart fiyati kalir */ }
               }
               setKalem(yeni);

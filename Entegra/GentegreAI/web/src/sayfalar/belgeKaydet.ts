@@ -22,6 +22,11 @@ export interface BelgeGirdisi {
   odeyenKurumId?: number | null;
   /** Belgeye uygulanan fiyat listesi (205). */
   fiyatListesiId: number | null;
+  /**
+   * Belgeye isleyen kampanya (274). Liste ile birlikte gider, yerine gecmez:
+   * liste BAZ fiyati, kampanya INDIRIMI verir.
+   */
+  kampanyaId?: number | null;
   /** Teklif durumu (218) - yalniz tur 18'de gonderilir. */
   teklifDurum?: number;
   /** Teklif revize no (220) - serbest metin, yalniz tur 18. */
@@ -131,7 +136,7 @@ export function belgeGovdesi(g: BelgeGirdisi, dolu: SatirDurumu[], taslak: boole
           raporDovizi, ekstreDovizi, belgeKuru, yerelPara, satici,
           senaryo, irsaliyeMi, teslimSekli, aracPlaka, soforAd, sevkTarihi,
           soforTckn, tasiyici, transferMi, teslimEden, teslimAlan, fiyatListesiId,
-          teklifDurum, revizeNo, teklifKonusu, teklifTeslim } = g;
+          kampanyaId, teklifDurum, revizeNo, teklifKonusu, teklifTeslim } = g;
 
 return {
   belge: {
@@ -153,6 +158,7 @@ return {
     vadeGun: Number(vadeGun) || 0,
     ...(odeyenKurumId !== undefined ? { odeyenKurumId } : {}),
     fiyatListesiId,
+    ...(kampanyaId !== undefined ? { kampanyaId } : {}),
     ...(teklifDurum !== undefined ? { teklifDurum } : {}),
     ...(revizeNo !== undefined ? { revizeNo } : {}),
     ...(teklifKonusu !== undefined ? { teklifKonusu } : {}),
@@ -224,6 +230,9 @@ return {
     //   miktar bu bagdan turetilir, ayni kalem iki kez iade edilemez (132).
     kaynakTur: s.kaynakSatirId ? 30 : undefined,
     kaynakId: s.kaynakSatirId,
+    // Kalemi fiyatlayan kampanya kurali (274): kampanya satiri sonradan
+    //   degistirilse bile belgede HANGI kuralin uygulandigi kalir.
+    kampanyaSatirId: s.kampanyaSatirId ?? null,
     izlemeKodu: s.izlemeKodu,
     izleme: s.izleme || (s.izlemeKodu ? 1 : 0),
     // Termin (140): bos string DEGIL null gider - sunucu tarih bekliyor.

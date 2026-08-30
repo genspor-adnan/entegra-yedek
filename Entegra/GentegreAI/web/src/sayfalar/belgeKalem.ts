@@ -67,6 +67,39 @@ export function listeFiyatiUygula(
 }
 
 /**
+ * KAMPANYALI FIYAT (274) - liste fiyati + kampanya indirimi tek cevaptan.
+ *
+ * Iki tip AYRI islenir, cunku belgede farkli gorunmeleri gerekir:
+ *   YUZDE  -> birim fiyat LISTE fiyati kalir, indirim SATIR ISKONTOSUNA yazilir.
+ *             Faturada "liste 1.000 · %20 iskonto · net 800" gorunur; kuruma
+ *             karsi indirimin gerekcesi belgenin uzerinde durur.
+ *   TUTAR  -> paket/sabit anlasma fiyati; dogrudan birim fiyat olur, iskonto
+ *             alanina dokunulmaz.
+ * Kampanya kalemi vurmadiysa (satirId yok) davranis liste fiyatiyla ayni.
+ */
+export function kampanyaFiyatiUygula(
+  satir: SatirDurumu,
+  f: { fiyat?: number | null; bazFiyat?: number | null; dovizCinsi?: string | null;
+       satirId?: number | null; iskontoTipi?: number | null; iskonto?: number | null },
+): SatirDurumu {
+  // Kampanya kurali yok: eski yol.
+  if (!f.satirId) return listeFiyatiUygula(satir, f);
+
+  const yuzde = f.iskontoTipi !== 2;
+  const taban = yuzde ? f.bazFiyat : f.fiyat;
+  if (taban == null || taban <= 0) return satir;
+
+  const metin = String(taban);
+  return {
+    ...satir,
+    birimFiyat: metin, dovizFiyat: metin,
+    fiyatDovizi: f.dovizCinsi || satir.fiyatDovizi,
+    iskonto: yuzde ? String(f.iskonto ?? 0) : satir.iskonto,
+    kampanyaSatirId: f.satirId,
+  };
+}
+
+/**
  * PAKET (124) icerigini satirlara acar ve paket satirinin HEMEN ALTINA yazar.
  *
  * Icerik adetleri paketin adediyle CARPILIR (2 paket x 3 adet = 6). Ayni

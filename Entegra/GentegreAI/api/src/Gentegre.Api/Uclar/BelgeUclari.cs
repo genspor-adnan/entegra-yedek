@@ -547,7 +547,10 @@ public static class BelgeUclari
         // Belgenin fiyat listesi (205): acilista cariden cozulur, kullanici
         //   degistirirse satirlar EKRANDA yeniden fiyatlanir (BelgeKarti.listeDegisti).
         // Basvuruda (249) vade yerine ODEYEN KURUM secilir - anlasmali kurum id'si.
-        "teslimAlanId" or "fiyatListesiId" or "teklifDurum" or "odeyenKurumId" => "sayi",
+        // Belgeye isleyen kampanya (274): liste BAZ fiyati, kampanya INDIRIMI
+        //   verir - ikisi birlikte saklanir, biri otekinin yerine gecmez.
+        "teslimAlanId" or "fiyatListesiId" or "teklifDurum" or "odeyenKurumId" or
+        "kampanyaId" => "sayi",
 
         "dovizKuru" => "para",
 

@@ -496,6 +496,34 @@ export const api = {
       `/api/fiyat-listesi/${listeId}/fiyat?`
       + (kalem.stokId ? `stokId=${kalem.stokId}` : `hizmetId=${kalem.hizmetId}`)),
 
+  /**
+   * Yururlukteki kampanya (274) - belge basligindaki rozet. Basvuruda ODEYEN
+   * KURUM verilir: odemeyi yapan taraf fiyati belirler.
+   */
+  fiyatKampanya: (taraf: { tarafId?: number | null; kurumId?: number | null }) =>
+    istek<{ kampanyaId: number | null; kod: string; ad: string;
+            fiyatListesiId: number | null }>(
+      '/api/fiyat/kampanya?'
+      + (taraf.kurumId ? `kurumId=${taraf.kurumId}&` : '')
+      + (taraf.tarafId ? `tarafId=${taraf.tarafId}` : '')),
+
+  /**
+   * Kalem fiyati LISTE + KAMPANYA (274). Baz fiyat listeden gelir, kampanya
+   * uzerine indirim isler; kampanyanin kendi listesi varsa baz O olur.
+   */
+  fiyatKalem: (kalem: { stokId?: number; hizmetId?: number },
+               kaynak: { tarafId?: number | null; kurumId?: number | null;
+                         listeId?: number | null }) =>
+    istek<{ fiyat: number | null; bazFiyat: number | null; dovizCinsi: string;
+            kdvDahil: number; kaynak: string; kampanyaId: number | null;
+            listeId: number | null; satirId: number | null; tip: number | null;
+            iskontoTipi: number | null; iskonto: number | null }>(
+      '/api/fiyat/kalem?'
+      + (kalem.stokId ? `stokId=${kalem.stokId}` : `hizmetId=${kalem.hizmetId}`)
+      + (kaynak.tarafId ? `&tarafId=${kaynak.tarafId}` : '')
+      + (kaynak.kurumId ? `&kurumId=${kaynak.kurumId}` : '')
+      + (kaynak.listeId ? `&listeId=${kaynak.listeId}` : '')),
+
   /** Depo bazli min/max seviye (099). Miktarlara DOKUNMAZ. */
   stokDurumLimit: (stokId: number, depoId: number,
                    minStok: number | null, maxStok: number | null) =>

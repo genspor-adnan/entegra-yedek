@@ -113,15 +113,33 @@ public static class FiyatListesiUclari
             });
         }).WithTags("FiyatListesi").RequireAuthorization();
 
+        // ------------------------------------------------- gecerli kampanya ----
+        // Belge basligindaki KAMPANYA ROZETI (274). Kalem eklenmeden once de
+        //   gorunmesi gerektigi icin fiyat ucundan ayri: kart acilir acilmaz
+        //   "hangi anlasma yuruyor" yazar.
+        yol.MapGet("/api/fiyat/kampanya", async (
+            int? tarafId, int? kurumId, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var (kampanyaId, _, kod, ad, kampanyaListesi) =
+                await KampanyaCozAsync(baglanti, tarafId, kurumId, iptal);
+
+            return Results.Ok(new { kampanyaId, kod, ad, fiyatListesiId = kampanyaListesi });
+        }).WithTags("FiyatListesi").RequireAuthorization();
+
         // --------------------------------------------------- kampanyali fiyat ----
-        // KURUM FIYATI (272): odeyen kurumun kampanyasi varsa kalem fiyati o
-        //   kampanyanin kurallarindan gecer. Baz fiyat once LISTEDEN cozulur
-        //   (kampanyanin kendi listesi > verilen liste > belgenin varsayilani),
-        //   sonra indirim islenir. Iki asamayi tek uca koymak sart: istemci
-        //   iki ayri istekle ayni sonucu kurmaya calisirsa fiyat listesi ile
-        //   kampanya arasindaki bag (kampanya.fiyat_listesi_id) kacar.
-        yol.MapGet("/api/fiyat/kurum", async (
-            int kurumId, int? stokId, int? hizmetId, int? listeId,
+        // KALEM FIYATI (272/274): carinin - basvuruda ODEYEN KURUMUN - gecerli
+        //   kampanyasi varsa kalem fiyati o kampanyanin kurallarindan gecer.
+        //   Baz fiyat once LISTEDEN cozulur (kampanyanin kendi listesi > verilen
+        //   liste), sonra indirim islenir. Iki asamayi tek uca koymak sart:
+        //   istemci iki ayri istekle ayni sonucu kurmaya calisirsa fiyat listesi
+        //   ile kampanya arasindaki bag (kampanya.fiyat_listesi_id) kacar.
+        yol.MapGet("/api/fiyat/kalem", async (
+            int? tarafId, int? kurumId, int? stokId, int? hizmetId, int? listeId,
             BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
         {
@@ -136,21 +154,15 @@ public static class FiyatListesiUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
 
-            // 1) Kurumun gecerli kampanyasi ve kampanyanin baz listesi.
-            int? kampanyaId = null;
-            int? kampanyaListesi = null;
-            await using (var k = baglanti.Komut(
-                "select k.id, k.fiyat_listesi_id " +
-                "  from public.kampanya k " +
-                " where k.id = public.fn_kurum_kampanya(@p0)", null, kurumId))
-            await using (var o = await k.ExecuteReaderAsync(iptal))
-                if (await o.ReadAsync(iptal))
-                {
-                    kampanyaId = o.GetInt32(0);
-                    kampanyaListesi = o.IsDBNull(1) ? null : o.GetInt32(1);
-                }
+            // 1) Gecerli kampanya ve kampanyanin baz listesi.
+            var (kampanyaId, _, _, _, kampanyaListesi) =
+                await KampanyaCozAsync(baglanti, tarafId, kurumId, iptal);
 
-            var bazListe = kampanyaListesi ?? (listeId is 0 ? null : listeId);
+            // Baz liste: ACIKCA verilen liste kazanir, yoksa kampanyanin kendi
+            //   listesi. Belge basligi zaten kampanyanin listesine gecirilir
+            //   (BelgeKarti) - kullanici oradan baskasini secerse SECIMI gecerli
+            //   olmali, kampanya listesi onu sessizce geri almamali.
+            var bazListe = (listeId is 0 ? null : listeId) ?? kampanyaListesi;
 
             // 2) Baz fiyat: liste kurali (liste yoksa fiyat da yok - kampanya
             //    yuzdesi bos fiyat uzerinde anlamsiz, TUTAR tipi yine calisir).
@@ -375,5 +387,28 @@ public static class FiyatListesiUclari
         if (subeId != 0 && baglam.SubeId is { } aktif && subeId != aktif)
             throw GentegreHatasi.Yasak("Bu liste başka bir şubeye ait.");
         return (o.GetString(0), o.GetInt16(1));
+    }
+
+    /// <summary>
+    /// Yururlukteki KAMPANYA (274). Basvuruda ODEYEN KURUM varsa kampanya ONUN
+    /// sozlesmesinden gelir - odemeyi yapan taraf fiyati belirler; yoksa carinin
+    /// kendi kampanyasi, o da yoksa genel kampanya (fn_taraf_kampanya).
+    /// </summary>
+    private static async Task<(int? Id, int? TarafId, string Kod, string Ad, int? FiyatListesiId)>
+        KampanyaCozAsync(Npgsql.NpgsqlConnection baglanti, int? tarafId, int? kurumId,
+                         CancellationToken iptal)
+    {
+        var taraf = kurumId is > 0 ? kurumId : tarafId is > 0 ? tarafId : null;
+
+        await using var komut = baglanti.Komut("""
+            select k.id, k.kod, k.ad, k.fiyat_listesi_id
+              from public.kampanya k
+             where k.id = public.fn_taraf_kampanya(@p0)
+            """, null, taraf);
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        if (!await o.ReadAsync(iptal)) return (null, taraf, "", "", null);
+
+        return (o.GetInt32(0), taraf, o.GetString(1), o.GetString(2),
+                o.IsDBNull(3) ? null : o.GetInt32(3));
     }
 }

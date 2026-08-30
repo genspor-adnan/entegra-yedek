@@ -359,6 +359,17 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
           {fiyatListesi.listeler.map(l => <option key={l.id} value={l.id}>{l.ad}</option>)}
         </select>
       </label>
+      {/* KAMPANYA ROZETI (274): SALT OKUNUR - kampanya kurumun sozlesmesinden
+          (ya da cariden) gelir, belgede elle secilmez; kullanici yanlislikla
+          anlasmadan cikmasin. Liste bazi, kampanya indirimi verir. */}
+      {fiyatListesi.kampanyaAdi && (
+        <label className="alan">
+          <span className="etiket">Kampanya</span>
+          <span className="deger-serit">
+            <span className="rozet bilgi">{fiyatListesi.kampanyaAdi}</span>
+          </span>
+        </label>
+      )}
     </div>
   </div>
 )}
@@ -455,6 +466,8 @@ export interface KalemSekmesiProps {
     listeler: { id: number; ad: string }[];
     seciliId: number | null;
     sec(v: number | null): void;
+    /** Yururlukteki kampanya adi (274) - listenin altinda ROZET, salt okunur. */
+    kampanyaAdi?: string;
   };
   /** Rapor / ekstre dovizi kutusu (134). Verilmezse kutu cizilmez. */
   doviz?: {

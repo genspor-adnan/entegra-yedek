@@ -745,26 +745,52 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
             setAcikBelgeId(Number(satir.belgeId));
             return;
           }
-          // FIYAT: belge kartinin kendi kurali (205) - turun yonune gore
-          //   carinin listesi, yoksa VARSAYILAN satis listesi. Kalem fiyati o
-          //   listeden cozulur; liste kuralindan fiyat cikmazsa hizmet
-          //   kartindaki fiyata dusulur.
+          // HASTANIN KURUMU (266) basvurunun ODEYENI olur ve FIYATI belirler
+          //   (274): hasta basvurusu her zaman kurum + kampanya uzerinden.
+          //   Kart okunamazsa donusum yine yapilir - kurumsuz, hasta kendi oder.
+          let hastaKart: { surum?: string; durum?: unknown; kurumId?: unknown } | null = null;
+          try { hastaKart = (await api.kartOku('hasta', hastaId)).kart } catch { /* yoksa kurumsuz */ }
+          const odeyenKurumId = Number(hastaKart?.kurumId) || null;
+
+          // FIYAT: liste BAZ, kampanya INDIRIM (274). Baz liste belge kartinin
+          //   kuralindan gelir (205: carinin listesi > varsayilan satis);
+          //   kampanyanin kendi listesi varsa uc onu kullanir. Fiyat cikmazsa
+          //   hizmet kartindaki fiyata dusulur.
           const varsayilanListe = await api.belgeVarsayilanListe(30, hastaId);
-          const fiyatListesiId = varsayilanListe.listeId ?? null;
+          let fiyatListesiId = varsayilanListe.listeId ?? null;
           const h = await api.liste('hizmet', {
             sayfa: 1, boyut: 1,
             filtre: { alan: 'id', op: 'esit', deger: hizmetId },
           });
           const kdv = Number(h.satirlar[0]?.kdv) || 0;
           let birimFiyat = Number(h.satirlar[0]?.fiyat) || 0;
-          if (fiyatListesiId) {
-            const f = await api.fiyatListesiFiyat(fiyatListesiId, { hizmetId });
-            if (f.fiyat != null && f.fiyat > 0) birimFiyat = f.fiyat;
-          }
+          let iskonto = 0;
+          let kampanyaId: number | null = null;
+          let kampanyaSatirId: number | null = null;
+          try {
+            const f = await api.fiyatKalem({ hizmetId },
+              { tarafId: hastaId, kurumId: odeyenKurumId, listeId: fiyatListesiId });
+            kampanyaId = f.kampanyaId;
+            if (f.listeId) fiyatListesiId = f.listeId;
+            if (f.satirId) {
+              // YUZDE: birim fiyat LISTE fiyati kalir, indirim satir
+              //   iskontosuna yazilir (fatura "liste · %x · net" gosterir).
+              //   TUTAR: sabit anlasma fiyati dogrudan birim fiyat olur.
+              kampanyaSatirId = f.satirId;
+              if (f.iskontoTipi === 2) { if (f.fiyat != null && f.fiyat > 0) birimFiyat = f.fiyat }
+              else {
+                if (f.bazFiyat != null && f.bazFiyat > 0) birimFiyat = f.bazFiyat;
+                iskonto = Number(f.iskonto) || 0;
+              }
+            } else if (f.fiyat != null && f.fiyat > 0) birimFiyat = f.fiyat;
+          } catch { /* fiyat cozulemezse hizmet kartindaki fiyat kalir */ }
+
           const y = await api.belgeEkle({
             belge: {
               tur: 30,
               tarafId: hastaId,
+              odeyenKurumId,
+              kampanyaId,
               // Basvuru BUGUNUN tarihiyle acilir: hasta simdi geldi. Randevu
               //   ileri tarihliyse sunucu "belge tarihi ileri tarihli olamaz"
               //   diyordu; randevunun kendi tarihi aciklamada duruyor.
@@ -776,18 +802,18 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
             },
             // tur = 2 (hizmet): sunucu tur ile urun bagini karsilastiriyor
             //   (1 stok / 2 hizmet / 3 masraf).
-            satirlar: [{ sira: 1, tur: 2, hizmetId, adet: 1, birimFiyat, kdv }],
+            satirlar: [{ sira: 1, tur: 2, hizmetId, adet: 1, birimFiyat, kdv,
+                         iskonto, kampanyaSatirId }],
           });
           const belgeId = Number((y as { belge?: { id?: number } }).belge?.id) || 0;
           // ADAY hasta (266) basvuruya donusunce AKTIF olur: randevu sirasinda
           //   hizli acilmis kayit, hasta gelince gercek hastaya doner.
           try {
-            const h = await api.kartOku('hasta', hastaId);
-            if (Number(h.kart.durum) === 2) {
+            if (hastaKart && Number(hastaKart.durum) === 2) {
               await api.kartGuncelle('hasta', hastaId,
-                                     { surum: h.kart.surum, kart: { durum: 1 } });
+                                     { surum: hastaKart.surum, kart: { durum: 1 } });
             }
-          } catch { /* hasta okunamazsa donusum yine de tamamlanir */ }
+          } catch { /* durum guncellenemezse donusum yine de tamamlanir */ }
           // Randevu artik basvuruya bagli ve "Geldi" - hasta muayeneye alindi.
           //   Kart guncellemesi SURUM ister (iyimser kilit): once oku.
           const mevcut = await api.kartOku('randevu', Number(satir.id));

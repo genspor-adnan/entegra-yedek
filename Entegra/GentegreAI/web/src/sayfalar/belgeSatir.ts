@@ -67,6 +67,12 @@ export interface SatirDurumu {
    * bu bagdan hesaplanir (132) - kolon degil, tureme.
    */
   kaynakSatirId?: number;
+  /**
+   * Kalemi fiyatlayan KAMPANYA SATIRI (274) - denetim izi. Kampanya kurali
+   * sonradan degistirilse ya da silinse bile belgede hangi kuralin uygulandigi
+   * kalir; iade/iptalde ayni fiyat yeniden uretilebilir.
+   */
+  kampanyaSatirId?: number | null;
   /** Kalemin lot/seri dagilimi - bir kalem 1:n lottan gelebilir (db/114). */
   izlemler: IzlemSatiri[];
 }

@@ -83,6 +83,11 @@ public sealed partial class BelgeDeposu
                    -- Belgenin fiyat listesi (205) + adi: kart basliginda gosterilir.
                    b.fiyat_listesi_id as "fiyatListesiId",
                    coalesce(fl.ad, '') as "fiyatListesiAdi",
+                   -- Belgeye isleyen kampanya (274): baslikta ROZET olarak
+                   --   gorunur - "hangi anlasmayla fiyatlandi" belgenin uzerinde.
+                   b.kampanya_id as "kampanyaId",
+                   coalesce(nullif(kmp.kod, '') || ' · ', '')
+                     || coalesce(kmp.ad, '') as "kampanyaAdi",
                    -- Teklif durumu (218) + revize no (220): yalniz tur 18'de anlamli.
                    b.teklif_durum as "teklifDurum",
                    b.revize_no as "revizeNo",
@@ -108,6 +113,7 @@ public sealed partial class BelgeDeposu
                    b.xmin::text as surum
               from public.belge b
               left join public.fiyat_listesi fl on fl.id = b.fiyat_listesi_id
+              left join public.kampanya kmp on kmp.id = b.kampanya_id
               left join public.depo  cd on cd.id = b.cikis_depo_id
               left join public.depo  gd on gd.id = b.giris_depo_id
               left join public.taraf sc on sc.id = b.satici_id
@@ -155,7 +161,10 @@ public sealed partial class BelgeDeposu
                    coalesce(hz.ad, '')  as "hizmetAdi", coalesce(ms.ad, '') as "masrafAdi",
                    s.kapatilan_miktar as "kapatilanMiktar", s.kalan_miktar as "kalanMiktar",
                    s.kaynak_tur as "kaynakTur", s.kaynak_id as "kaynakId",
-                   s.teslim_tarihi as "teslimTarihi", s.rezerve
+                   s.teslim_tarihi as "teslimTarihi", s.rezerve,
+                   -- Kalemi fiyatlayan kampanya kurali (274) - satir geri
+                   --   yuklendiginde bag korunsun, Kaydet onu silmesin.
+                   s.kampanya_satir_id as "kampanyaSatirId"
               from public.belge_satir s
               left join public.stok   st on st.id = s.stok_id
               left join public.hizmet hz on hz.id = s.hizmet_id

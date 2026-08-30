@@ -27,6 +27,10 @@ public sealed partial class BelgeDeposu
         // Belgenin fiyat listesi (205): uc whitelist'inde vardi ama bu sozlukte
         //   eksikti - istek kabul edilip alan SESSIZCE atlaniyordu.
         ["fiyatListesiId"] = "fiyat_listesi_id",
+        // Belgeye ISLEYEN KAMPANYA (274). Liste ile birlikte durur, yerine
+        //   gecmez: liste bazi, kampanya indirimi verir. Belgeye yazilir -
+        //   kurum sonradan kampanya degistirse eski belge sabit kalir.
+        ["kampanyaId"] = "kampanya_id",
         // Teklif durumu (218): Hazirlaniyor/Sunuldu/Kabul/Red/Iptal.
         ["teklifDurum"] = "teklif_durum",
         ["revizeNo"] = "revize_no", ["teklifKonusu"] = "teklif_konusu",
@@ -252,6 +256,9 @@ public sealed partial class BelgeDeposu
             "kaynak_tur", "kaynak_id", "proje_id",
             // Satir bazli TESLIM TARIHI (140) - siparis termini. Bos gecilebilir.
             "teslim_tarihi",
+            // Kalemi HANGI kampanya kurali fiyatladi (274) - denetim izi.
+            //   Kampanya satiri sonradan degisse de belgede kanit kalir.
+            "kampanya_satir_id",
             "sube_id", "ekleyen"
         };
         var parametreler = new List<object?>
@@ -269,6 +276,7 @@ public sealed partial class BelgeDeposu
             (int)JsonSayi(satir, "kaynakTur", 0), JsonSayi(satir, "kaynakId", 0),
             JsonSayiNull(satir, "projeId") ?? SayiNull(belge, "projeId"),
             JsonTarih(satir, "teslimTarihi"),
+            JsonSayiNull(satir, "kampanyaSatirId"),
             (short)baglam.SubeZorunlu(), baglam.KullaniciId
         };
 
