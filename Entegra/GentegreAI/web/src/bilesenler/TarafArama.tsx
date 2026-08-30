@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../api/istemci';
-import { type ListeSatiri, hataMetni } from '../api/sozlesme';
+import { type Kosul, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { GenForm } from './GenForm';
 
 interface TarafSatiri {
@@ -47,6 +47,8 @@ interface Props {
    * hasta karti degil sade ADAY HASTA karti acilir. Verilmezse aranan kaynak.
    */
   yeniKaynak?: string;
+  /** Aramaya EKLENEN sabit kosul (ör. randevuda yalniz aktif/aday hastalar). */
+  ekFiltre?: Kosul;
   yerTutucu?: string;
   onKapat(): void;
   onSec(secilen: { kaynak: string; id: number; unvan: string }): void;
@@ -60,7 +62,7 @@ interface Props {
  * arar (Tip/Bağlı Kurum/Görev-Rol gibi taraf-ortak kolonlarla) ve disaridan (ör. toolbar
  * butonu) acik/kapali kontrol edilir (`acik` prop) - kendi tetikleyicisi yok.
  */
-export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak,
+export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekFiltre,
                              yerTutucu, onKapat, onSec }: Props) {
   /** Kutuda yazan metin (aninda) - `arama` bunun gecikmeli (debounce) hali. */
   const [metin, setMetin] = useState('');
@@ -96,10 +98,16 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak,
               : []),
           ] }
         : undefined;
+      // Cagiranin sabit kosulu (ör. "pasif ve vefat hastalar gelmesin") metin
+      //   filtresiyle AND'lenir.
+      const tamFiltre: Kosul | undefined = ekFiltre
+        ? (filtre ? { op: 'and' as const, kosullar: [ekFiltre, filtre] } : ekFiltre)
+        : filtre;
       // gorunum: Son/Sik Aranan sunucuda kullanici_arama ile suzulur+siralanir.
       const gorunumParam = gorunumSecimi === 'tum' ? undefined : gorunumSecimi;
       const yanitlar = await Promise.all(
-        kaynaklar.map(k => api.liste(k, { sayfa: 1, boyut: 20, filtre, gorunum: gorunumParam })));
+        kaynaklar.map(k => api.liste(k, { sayfa: 1, boyut: 20, filtre: tamFiltre,
+                                          gorunum: gorunumParam })));
       setSatirlar(yanitlar.flatMap((y, i) => y.satirlar.map(s => satiraCevir(kaynaklar[i], s))));
       setSecili(0);
     } catch (h) {
@@ -109,7 +117,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak,
       setYukleniyor(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kaynaklar.join(',')]);
+  }, [kaynaklar.join(','), ekFiltre]);
 
   useEffect(() => {
     if (!acik) return;

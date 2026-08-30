@@ -988,6 +988,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           // Bulunamayan hasta icin SADE aday karti (266) - tam hasta karti
           //   kayit kabul masasinda fazla agir.
           yeniKaynak="hasta-aday"
+          // Pasif ve VEFAT hastalar randevu aramasinda cikmaz (kullanici):
+          //   yalniz AKTIF (1) ve ADAY (2). Durum kodlari 266'da.
+          ekFiltre={{ op: 'or', kosullar: [
+            { alan: 'durum', op: 'esit', deger: 1 },
+            { alan: 'durum', op: 'esit', deger: 2 },
+          ] }}
           yerTutucu="Hasta ara…"
           onKapat={() => setAramaAlani(null)}
           onSec={secilen => {
