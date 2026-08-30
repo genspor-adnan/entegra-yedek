@@ -190,13 +190,19 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Basvuru e-Belge degil; tur kolonlari da tek turlu listede gereksiz.
     //   'durum' (Durum Kodu) siparis listesinden miras: basvuruda anlami yok,
     //   hepsi ayni degeri gosterip "Pasif" gibi okunuyordu (kullanici).
+    //   'kaynak' (donusum zincirinde onceki belge) da gizli: basvuru zincirin
+    //   BASI, kolon hep bos duruyordu. 'tipi'/'kapanmaDurum' ham KOD
+    //   kolonlaridir (filtre icin) - okunur karsiliklari zaten var (kullanici).
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum',
-                    'durum', 'durumAdi'],
-    // SERI EN SOLDA (kullanici): basvurular siparis dizisiyle birleşince ayni
-    //   numara iki seride gorunebiliyor (WEB/000000011 ve /000000011); seri
-    //   gorunmezse iki farkli belge ayni numarali sanilir. kolonSirasi'nda adi
-    //   gecen kolon katalogda "varsayilan degil" olsa da acilir.
-    kolonSirasi: ['belgeSeri', 'belgeNo'],
+    //   'subeId' (Şube Kodu) ve 'vadeGun' de gizli: sube ADI zaten var, vade
+    //   basvuruda yok - yerine Ödeyen Kurum kullaniliyor (kullanici).
+    //   'senaryoAdi'/'senaryo' e-Fatura kavrami - basvuruda karsiligi yok.
+                    'durum', 'durumAdi', 'kaynak', 'tipi', 'kapanmaDurum',
+                    'subeId', 'vadeGun', 'senaryoAdi', 'senaryo'],
+    // Kaynak kolonunun yerine ODEYEN KURUM / POLIKLINIK / DOKTOR (kullanici).
+    //   SERI listede yok ama katalogda DURUYOR: gizliKolonlar'a konsa kolon
+    //   menusunden de kaybolurdu - gerektiginde kullanici acar.
+    kolonSirasi: ['belgeNo', 'odeyenKurumAdi', 'poliklinik', 'doktor'],
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },

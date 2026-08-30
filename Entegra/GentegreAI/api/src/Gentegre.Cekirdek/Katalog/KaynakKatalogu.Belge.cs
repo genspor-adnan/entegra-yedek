@@ -118,6 +118,31 @@ public static partial class KaynakKatalogu
                 "           where ks.belge_id = b.id and hb.durum <> 2), '')",
                                                       "metin", "Hedef",       Genislik: 190,
                                                       Siralanabilir: false, Filtrelenebilir: false),
+            // BASVURU (279) kolonlari: odemeyi ustlenen kurum ve - randevudan
+            //   acilan basvurularda - poliklinik ile hekim. Bu ucu belgede
+            //   kolon degil: kurum id'den ada cozulur, poliklinik/hekim
+            //   BELGEYE BAGLI RANDEVUDAN gelir (randevu.belge_id, indeks 282).
+            //   Varsayilan kapali - ERP listelerinde kalabaligi artirmasin,
+            //   basvuru listesi kolonSirasi ile aciyor.
+            new("odeyenKurumAdi",
+                "coalesce((select ok.unvan from public.taraf ok " +
+                "           where ok.id = b.odeyen_kurum_id), '')",
+                                                      "metin", "Ödeyen Kurum", Genislik: 180,
+                                                      Varsayilan: false, Siralanabilir: false),
+            new("poliklinik",
+                "coalesce((select d.ad from public.randevu r " +
+                "            join public.departman d on d.id = r.bolum " +
+                "           where r.belge_id = b.id order by r.id limit 1), '')",
+                                                      "metin", "Poliklinik", Genislik: 150,
+                                                      Varsayilan: false, Siralanabilir: false,
+                                                      Filtrelenebilir: false),
+            new("doktor",
+                "coalesce((select hk.unvan from public.randevu r " +
+                "            join public.taraf hk on hk.id = r.hekim_id " +
+                "           where r.belge_id = b.id order by r.id limit 1), '')",
+                                                      "metin", "Doktor", Genislik: 160,
+                                                      Varsayilan: false, Siralanabilir: false,
+                                                      Filtrelenebilir: false),
             new("tarafVkno",     "b.taraf_vkno",     "metin", "VKN/TCKN",    Genislik: 120, Varsayilan: false),
             new("matrah",        "b.matrah",         "para",  "Matrah",      Hizalama: "sag",
                                                                 Bicim: "#,##0.00", Genislik: 120),
