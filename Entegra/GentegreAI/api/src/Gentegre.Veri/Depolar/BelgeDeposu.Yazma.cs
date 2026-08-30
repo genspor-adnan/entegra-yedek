@@ -387,6 +387,13 @@ public sealed partial class BelgeDeposu
                 if (rapor.Length > 0
                     && !rapor.Equals(belgeDoviz, StringComparison.OrdinalIgnoreCase) && kur > 0)
                     dovizGenel = Math.Round(genel / kur, 2, MidpointRounding.ToEven);
+                else
+                    // RAPOR DOVIZI YEREL: ayri bir "doviz karsiligi" YOKTUR.
+                    //   Dip toplamin doviz sutunu satirlarin doviz fiyatindan
+                    //   hesaplanir; bir satirin doviz fiyati bayat kalirsa
+                    //   (or. pay donusumu) buraya yanlis tutar sizip
+                    //   mali_hareket.borc'u bozuyordu.
+                    dovizGenel = 0m;
             }
         }
 

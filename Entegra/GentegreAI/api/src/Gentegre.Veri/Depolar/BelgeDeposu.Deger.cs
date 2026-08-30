@@ -227,6 +227,7 @@ public sealed partial class BelgeDeposu
         IReadOnlyList<object>? izlemler = null, short pay = 0)
     {
         var birimFiyat = k["birim_fiyat"];
+        var dovizBirimFiyat = k["doviz_birim_fiyat"];
         var iskonto = k["iskonto"];
         var iskonto2 = k["iskonto2"];
 
@@ -239,6 +240,11 @@ public sealed partial class BelgeDeposu
                 (pay == 1 ? k["hasta_kapatilan"] : k["kurum_kapatilan"]) ?? 0m);
             var kalan = payTutar - kapanan;
             birimFiyat = miktar > 0 ? decimal.Round(kalan / miktar, 6) : kalan;
+            // DOVIZ FIYATI DA PAYDAN: kaynaktan aynen kopyalaninca dip toplamin
+            //   doviz sutunu KAYNAK fiyatiyla hesaplaniyor, belge.doviz_tutari
+            //   oradan doluyor ve mali_hareket.borc onu kullaniyordu - 30 TL'lik
+            //   hasta tahakkuku cariye 165 TL borc yaziyordu (gercek vaka).
+            dovizBirimFiyat = birimFiyat;
             iskonto = 0m;
             iskonto2 = 0m;
         }
@@ -262,7 +268,7 @@ public sealed partial class BelgeDeposu
             ["otvMiktar"] = k["otv_miktar"],
             ["kdvMuafiyeti"] = k["kdv_muafiyeti"],
             ["dovizCinsi"] = k["doviz_cinsi"],
-            ["dovizBirimFiyat"] = k["doviz_birim_fiyat"],
+            ["dovizBirimFiyat"] = dovizBirimFiyat,
             ["dovizKuru"] = k["doviz_kuru"],
             ["girisDepoId"] = k["giris_depo_id"],
             ["cikisDepoId"] = k["cikis_depo_id"],

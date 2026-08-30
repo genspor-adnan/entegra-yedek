@@ -290,7 +290,10 @@ public sealed partial class BelgeDeposu
                    -- Odeme paylasimi (289/290): donusum penceresi hangi payin
                    --   ne kadarinin acik oldugunu gostersin.
                    v.kurum_tutar as "kurumTutar", v.hasta_tutar as "hastaTutar",
-                   v.kurum_kalan as "kurumKalan", v.hasta_kalan as "hastaKalan"
+                   v.kurum_kalan as "kurumKalan", v.hasta_kalan as "hastaKalan",
+                   -- Kalem adi (293): stok disi satirlarda (hizmet/masraf) ad
+                   --   yoktu, donusum penceresinde satir BOS gorunuyordu.
+                   v.kalem_kodu as "kalemKodu", v.kalem_adi as "kalemAdi"
               from public.v_belge_acik_satir v
              where v.belge_id = @p0 order by v.sira
             """, null,

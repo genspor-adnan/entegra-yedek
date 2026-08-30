@@ -115,10 +115,23 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
   const paylasimVar = satirlar.some(
     s => Number(s.kurumTutar ?? 0) > 0 && Number(s.hastaTutar ?? 0) > 0);
 
+  /**
+   * ONIZLEME FIYATI: pay secilince satirin birim fiyati DEGISIR - hedef belge
+   * o payin KALANIYLA uretilir (BelgeDeposu.SatirJson). Kaynak fiyatini
+   * gostermek "30 TL'lik hasta tahakkuku" icin 150 TL yaziyordu.
+   */
+  const payliFiyat = (s: AcikSatir) => {
+    if (pay === 0) return Number(s.birimFiyat ?? 0);
+    const kalan = Number((pay === 1 ? s.hastaKalan : s.kurumKalan) ?? 0);
+    const miktar = Number(s.miktar ?? 0);
+    return miktar > 0 ? kalan / miktar : kalan;
+  };
+
   const toplam = useMemo(() =>
     satirlar.reduce((t, s) => secili[s.satirId]
-      ? t + sayi(miktarlar[s.satirId] ?? '0') * Number(s.birimFiyat ?? 0) : t, 0),
-    [satirlar, secili, miktarlar]);
+      ? t + sayi(miktarlar[s.satirId] ?? '0') * payliFiyat(s) : t, 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [satirlar, secili, miktarlar, pay]);
 
   const seciliSayi = satirlar.filter(s => secili[s.satirId] && sayi(miktarlar[s.satirId] ?? '0') > 0).length;
 
@@ -268,7 +281,13 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                         />
                       </td>
                       <td>
-                        {s.stokKodu ? <><code>{s.stokKodu}</code> {s.stokAdi}</> : s.aciklama}
+                        {/* Stok disi satirda (hizmet/masraf) ad kalem_adi'ndan
+                            gelir (293) - once bos gorunuyordu. */}
+                        {(s.stokKodu ?? s.kalemKodu)
+                          ? <><code>{s.stokKodu ?? s.kalemKodu}</code>{' '}
+                              {s.stokAdi ?? s.kalemAdi}{' '}
+                              {s.aciklama ? <span className="sonuk">· {s.aciklama}</span> : null}</>
+                          : s.aciklama}
                       </td>
                       <td className="hiza-sag">{say4.format(Number(s.miktar))}</td>
                       <td className="hiza-sag">{say4.format(Number(s.kapatilanMiktar))}</td>
@@ -282,7 +301,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                           onChange={e => setMiktarlar(x => ({ ...x, [s.satirId]: e.target.value }))}
                         />
                       </td>
-                      <td className="hiza-sag">{para.format(Number(s.birimFiyat ?? 0))}</td>
+                      <td className="hiza-sag">{para.format(payliFiyat(s))}</td>
                     </tr>
                   ))}
                   {satirlar.length === 0 && (

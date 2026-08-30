@@ -409,6 +409,9 @@ export interface AcikSatir {
   stokId?: number | null;
   stokKodu?: string | null;
   stokAdi?: string | null;
+  /** Kalemin kimligi (293): stok > hizmet > masraf sirasiyla ilk dolu olan. */
+  kalemKodu?: string | null;
+  kalemAdi?: string | null;
   hizmetId?: number | null;
   masrafId?: number | null;
   aciklama: string;
