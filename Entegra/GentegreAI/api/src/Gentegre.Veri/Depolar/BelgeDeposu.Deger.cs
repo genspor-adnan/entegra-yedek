@@ -162,6 +162,11 @@ public sealed partial class BelgeDeposu
                    s.kapatilan_miktar as "kapatilanMiktar", s.kalan_miktar as "kalanMiktar",
                    s.kaynak_tur as "kaynakTur", s.kaynak_id as "kaynakId",
                    s.teslim_tarihi as "teslimTarihi", s.rezerve,
+                   -- Odeme paylasimi (289): kurum/hasta payi ve kapanma sayaclari.
+                   s.kurum_tutar as "kurumTutar", s.hasta_tutar as "hastaTutar",
+                   s.karsilama, s.provizyon_no as "provizyonNo",
+                   s.kurum_kapatilan as "kurumKapatilan",
+                   s.hasta_kapatilan as "hastaKapatilan",
                    -- Kalemi fiyatlayan kampanya kurali (274) - satir geri
                    --   yuklendiginde bag korunsun, Kaydet onu silmesin.
                    s.kampanya_satir_id as "kampanyaSatirId"
@@ -209,13 +214,38 @@ public sealed partial class BelgeDeposu
         return (belge!, satirlar, dip);
     }
 
-    /// <summary>Kaynak satiri hedef satir JSON'una cevirir (fiyat/iskonto/KDV aynen tasinir).</summary>
+    /// <summary>
+    /// Kaynak satiri hedef satir JSON'una cevirir (fiyat/iskonto/KDV aynen tasinir).
+    ///
+    /// PAY DONUSUMU (289): `pay` 1 (hasta) ya da 2 (kurum) verilirse hedef satir
+    /// o payin TUTARIYLA uretilir - birim fiyat pay tutarindan turetilir ve
+    /// iskonto sifirlanir (indirim zaten pay hesabina girmistir). Boylece ayni
+    /// basvuru satiri iki ayri belgeye (hasta fisi + kurum faturasi) bolunebilir.
+    /// </summary>
     private static Dictionary<string, JsonElement> SatirJson(
         IDictionary<string, object?> k, decimal miktar, int kaynakSatirId, int stokDurumDegis,
-        IReadOnlyList<object>? izlemler = null)
+        IReadOnlyList<object>? izlemler = null, short pay = 0)
     {
+        var birimFiyat = k["birim_fiyat"];
+        var iskonto = k["iskonto"];
+        var iskonto2 = k["iskonto2"];
+
+        if (pay > 0)
+        {
+            var payTutar = Convert.ToDecimal(
+                (pay == 1 ? k["hasta_tutar"] : k["kurum_tutar"]) ?? 0m);
+            // Kalan pay: kismi donusumde ayni paydan ikinci kez alinmasin.
+            var kapanan = Convert.ToDecimal(
+                (pay == 1 ? k["hasta_kapatilan"] : k["kurum_kapatilan"]) ?? 0m);
+            var kalan = payTutar - kapanan;
+            birimFiyat = miktar > 0 ? decimal.Round(kalan / miktar, 6) : kalan;
+            iskonto = 0m;
+            iskonto2 = 0m;
+        }
+
         var govde = new Dictionary<string, object?>
         {
+            ["pay"] = pay,
             ["tur"] = k["tur"],
             ["stokId"] = k["stok_id"],
             ["hizmetId"] = k["hizmet_id"],
@@ -224,9 +254,9 @@ public sealed partial class BelgeDeposu
             ["adet"] = miktar,
             ["miktar"] = miktar,
             ["birim"] = k["birim"],
-            ["birimFiyat"] = k["birim_fiyat"],
-            ["iskonto"] = k["iskonto"],
-            ["iskonto2"] = k["iskonto2"],
+            ["birimFiyat"] = birimFiyat,
+            ["iskonto"] = iskonto,
+            ["iskonto2"] = iskonto2,
             ["kdv"] = k["kdv"],
             ["otvYuzde"] = k["otv_yuzde"],
             ["otvMiktar"] = k["otv_miktar"],

@@ -37,7 +37,11 @@ public sealed partial class BelgeDeposu
         IReadOnlyList<(int SatirId, decimal Miktar)> secilen,
         DateTime? belgeTarihi, bool taslak,
         YazmaBaglami baglam, CancellationToken iptal = default,
-        string? belgeNo = null)
+        string? belgeNo = null,
+        // ODEME PAYLASIMI (289): 0 tum satir · 1 yalniz HASTA payi · 2 yalniz
+        //   KURUM payi. Pay donusumunde hedef belgenin CARISI de degisir:
+        //   kurum payi kuruma faturalanir, hastaya degil.
+        short pay = 0)
     {
         if (secilen.Count == 0)
             throw GentegreHatasi.Dogrulama("Dönüştürülecek satır seçilmeli.",
@@ -96,7 +100,8 @@ public sealed partial class BelgeDeposu
                    s.kdv, s.otv_yuzde, s.otv_miktar, s.kdv_muafiyeti,
                    s.doviz_cinsi, s.doviz_birim_fiyat, s.doviz_kuru,
                    s.giris_depo_id, s.cikis_depo_id, s.izleme, s.izleme_kodu,
-                   s.stok_durum_degis, s.proje_id, s.kalan_miktar, s.belge_id
+                   s.stok_durum_degis, s.proje_id, s.kalan_miktar, s.belge_id,
+                   s.kurum_tutar, s.hasta_tutar, s.kurum_kapatilan, s.hasta_kapatilan
               from public.belge_satir s
              where s.id = any(@p0)
              order by s.sira
@@ -124,7 +129,20 @@ public sealed partial class BelgeDeposu
             if (miktar <= 0)
                 throw GentegreHatasi.Dogrulama("Miktar sıfırdan büyük olmalı.",
                     new AlanHatasi($"satirlar[{satirId}].miktar", "Sıfırdan büyük olmalı."));
-            if (miktar > kalan)
+
+            if (pay > 0)
+            {
+                // PAY DONUSUMU: sinir miktar degil TUTAR. Ayni pay ikinci kez
+                //   donusturulemez - yoksa kurum payi iki faturaya girerdi.
+                var payTutar = Convert.ToDecimal((pay == 1 ? ks2["hasta_tutar"] : ks2["kurum_tutar"]) ?? 0m);
+                var payKapanan = Convert.ToDecimal(
+                    (pay == 1 ? ks2["hasta_kapatilan"] : ks2["kurum_kapatilan"]) ?? 0m);
+                if (payTutar - payKapanan <= 0)
+                    throw GentegreHatasi.IsKurali(
+                        pay == 1 ? "Bu satırın hasta payı zaten kapatılmış."
+                                 : "Bu satırın kurum payı zaten kapatılmış.");
+            }
+            else if (miktar > kalan)
                 throw GentegreHatasi.IsKurali(
                     $"Seçilen miktar kalanı aşıyor (istenen {miktar:0.####}, kalan {kalan:0.####}).");
 
@@ -153,7 +171,7 @@ public sealed partial class BelgeDeposu
             }
 
             satirlar.Add(SatirJson(ks2, miktar, satirId,
-                stokDurumDegis: stokDusecek ? 1 : 0, izlemler));
+                stokDurumDegis: stokDusecek ? 1 : 0, izlemler, pay));
         }
 
         // --------------------------------------------------- 3) hedef baslik ----
@@ -161,7 +179,10 @@ public sealed partial class BelgeDeposu
         {
             ["tur"] = hedefTur,
             ["tipi"] = kaynak["tipi"],
-            ["tarafId"] = kaynak["taraf_id"],
+            // KURUM PAYI KURUMA FATURALANIR (289): hedef belgenin carisi hasta
+            //   degil odeyen kurumdur - fatura sigortaya/SGK'ya kesilir.
+            ["tarafId"] = pay == 2 && kaynak["odeyen_kurum_id"] is { } ok
+                          ? ok : kaynak["taraf_id"],
             ["tarafUnvan"] = kaynak["taraf_unvan"],
             ["tarafVkno"] = kaynak["taraf_vkno"],
             ["tarafVd"] = kaynak["taraf_vd"],

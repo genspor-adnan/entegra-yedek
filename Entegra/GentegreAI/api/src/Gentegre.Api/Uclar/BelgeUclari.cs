@@ -439,7 +439,7 @@ public static class BelgeUclari
             var (yeniId, uyarilar) = await depo.DonusturAsync(id, istek.HedefTur, secilen,
                 istek.BelgeTarihi, istek.Taslak,
                 baglam.Yazma, iptal,
-                istek.BelgeNo);
+                istek.BelgeNo, (short)(istek.Pay ?? 0));
 
             var kayit = await depo.OkuAsync(yeniId, iptal) ?? throw GentegreHatasi.Bulunamadi();
             return Results.Created($"/api/belge/{yeniId}", new BelgeYaniti
@@ -486,6 +486,13 @@ public static class BelgeUclari
 
         /// <summary>Alis faturasinda TEDARIKCININ numarasi - sayac uretmez.</summary>
         public string? BelgeNo { get; set; }
+
+        /// <summary>
+        /// ODEME PAYLASIMI (289): 0/bos tum satir · 1 yalniz HASTA payi ·
+        /// 2 yalniz KURUM payi. Kurum payinda hedef belgenin carisi odeyen
+        /// kurumdur - fatura sigortaya/SGK'ya kesilir.
+        /// </summary>
+        public int? Pay { get; set; }
     }
 
     public sealed class DonusumSatiri
