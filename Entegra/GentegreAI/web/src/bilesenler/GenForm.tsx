@@ -363,6 +363,14 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
     return grup === KIMLIK_GRUP ? null : grupSekmeAnahtari(grup);
   }, [meta, kaynak, personelGibiKart]);
 
+  /**
+   * Bir detayin SUNUCUYA GONDERILEBILIR alan adlari. Grid, satirda gosterim
+   * icin ek anahtar tutabiliyor (kampanya urun satirinda secilen urunun adi);
+   * bunlar katalogda alan olmadigindan sunucu "Bilinmeyen alan" der.
+   */
+  const detayAlanlari = (m: typeof meta, ad: string) =>
+    m?.detaylar.find(d => d.ad === ad)?.alanlar.map(a => a.ad);
+
   // Govde ve "degisti mi" karari saf fonksiyonlarda (kartDegisim.ts).
   const degisenAlanlar = useCallback(
     () => degisenAlanlarHesapla({
@@ -377,8 +385,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
     //   edilir (kartDegisim.alanEsit), yoksa "1.000000" ile '1' fark sayilirdi.
     if (kartDegistiMi(meta?.alanlar, deger, ilkDeger)) return true;
 
-    return Object.values(detaylar).some(durum => {
-      const fark = detayFarki(durum);
+    return Object.entries(detaylar).some(([ad, durum]) => {
+      const fark = detayFarki(durum, detayAlanlari(meta, ad));
       return (fark.eklenen?.length ?? 0) + (fark.degisen?.length ?? 0)
            + (fark.silinen?.length ?? 0) > 0;
     });
@@ -429,7 +437,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
         kart: kartGovdesi,
         detaylar: Object.fromEntries(
           Object.entries(detaylar)
-            .map(([ad, durum]) => [ad, detayFarki(durum)])
+            .map(([ad, durum]) => [ad, detayFarki(durum, detayAlanlari(meta, ad))])
             .filter(([, fark]) => {
               const f = fark as ReturnType<typeof detayFarki>;
               return (f.eklenen?.length ?? 0) + (f.degisen?.length ?? 0) + (f.silinen?.length ?? 0) > 0;

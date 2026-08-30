@@ -749,9 +749,16 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
           // HASTANIN KURUMU (266) basvurunun ODEYENI olur ve FIYATI belirler
           //   (274): hasta basvurusu her zaman kurum + kampanya uzerinden.
           //   Kart okunamazsa donusum yine yapilir - kurumsuz, hasta kendi oder.
-          let hastaKart: { surum?: string; durum?: unknown; kurumId?: unknown } | null = null;
-          try { hastaKart = (await api.kartOku('hasta', hastaId)).kart } catch { /* yoksa kurumsuz */ }
-          const odeyenKurumId = Number(hastaKart?.kurumId) || null;
+          let hastaKart: { surum?: string; durum?: unknown } | null = null;
+          let odeyenKurumId: number | null = null;
+          try {
+            const hk = await api.kartOku('hasta', hastaId);
+            hastaKart = hk.kart;
+            // Kurum kartin KENDI alani degil "ozluk" detayindadir (taraf_hasta,
+            //   266): kart kokunden okunursa hep bos gelir - basvuru odeyensiz
+            //   ve kampanyasiz aciliyordu.
+            odeyenKurumId = Number(hk.detaylar?.ozluk?.[0]?.kurumId) || null;
+          } catch { /* hasta okunamazsa kurumsuz devam */ }
 
           // FIYAT: liste BAZ, kampanya INDIRIM (274). Baz liste belge kartinin
           //   kuralindan gelir (205: carinin listesi > varsayilan satis);
@@ -759,6 +766,14 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
           //   hizmet kartindaki fiyata dusulur.
           const varsayilanListe = await api.belgeVarsayilanListe(30, hastaId);
           let fiyatListesiId = varsayilanListe.listeId ?? null;
+          // KAMPANYANIN KENDI LISTESI bazi belirler (kurum sozlesmesi "TTB2018
+          //   uzerinden %40" der): varsayilan satis listesi acikca gonderilirse
+          //   uc onu baz alir ve kampanyanin listesi devre disi kalirdi. Belge
+          //   karti da acilista ayni sirayi izliyor (BelgeKarti kampanya cozumu).
+          try {
+            const kmp = await api.fiyatKampanya({ tarafId: hastaId, kurumId: odeyenKurumId });
+            if (kmp.fiyatListesiId) fiyatListesiId = kmp.fiyatListesiId;
+          } catch { /* kampanya cozulemezse varsayilan liste kalir */ }
           const h = await api.liste('hizmet', {
             sayfa: 1, boyut: 1,
             filtre: { alan: 'id', op: 'esit', deger: hizmetId },

@@ -27,8 +27,19 @@ export const bosDetay = (satirlar: Satir[] = []): DetayDurumu => ({
   silinen: [],
 });
 
-/** Ekrandaki durumdan sunucunun bekledigi fark listesini uretir. */
-export function detayFarki(durum: DetayDurumu): DetayFarki {
+/**
+ * Ekrandaki durumdan sunucunun bekledigi fark listesini uretir.
+ *
+ * `izinliAlanlar` verilirse satirdaki BASKA anahtarlar ELENIR: gride yalniz
+ * gosterim icin konan alanlar (or. kampanya urun satirindaki `iskontoYeriAdi`)
+ * sunucuya gidince "Bilinmeyen alan" hatasi veriyordu.
+ */
+export function detayFarki(durum: DetayDurumu,
+                           izinliAlanlar?: readonly string[]): DetayFarki {
+  const izinli = izinliAlanlar ? new Set([...izinliAlanlar, 'id']) : null;
+  const suz = (s: Satir): Satir => (izinli
+    ? Object.fromEntries(Object.entries(s).filter(([k]) => izinli.has(k))) as Satir
+    : s);
   // YENI satirda BOS birakilan alan HIC GONDERILMEZ (GenForm'daki kuralin
   //   detay karsiligi): bos metin NOT NULL + varsayilanli kolonlarda
   //   "birim bos birakilamaz" gibi hatalara yol aciyordu. Gonderilmeyince
@@ -36,7 +47,7 @@ export function detayFarki(durum: DetayDurumu): DetayFarki {
   const eklenen = durum.guncel
     .filter(s => s.id === undefined || s.id === null)
     .map(s => Object.fromEntries(
-      Object.entries(s).filter(([, v]) => v !== '' && v !== null && v !== undefined)) as Satir);
+      Object.entries(suz(s)).filter(([, v]) => v !== '' && v !== null && v !== undefined)) as Satir);
 
   const degisen = durum.guncel
     .filter(s => s.id !== undefined && s.id !== null)
@@ -46,7 +57,7 @@ export function detayFarki(durum: DetayDurumu): DetayFarki {
       // Yalniz gercekten degisen alanlar gonderilir
       const fark: Satir = { id: s.id };
       let degisti = false;
-      Object.keys(s).forEach(alan => {
+      Object.keys(suz(s)).forEach(alan => {
         if (alan === 'id') return;
         if (String(s[alan] ?? '') !== String(eski[alan] ?? '')) { fark[alan] = s[alan]; degisti = true }
       });
@@ -199,13 +210,22 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
     setModalSatir(null);
   };
 
-  const hucreDegis = (satirIndeks: number, alan: string, deger: unknown) => {
+  /**
+   * Satirda BIR ya da BIRDEN COK alani birlikte gunceller.
+   *
+   * Coklu yazim SART: hucreDegis'i arka arkaya iki kez cagirmak ikinci
+   * cagrida hala ESKI `durum`u okur (state bu render'da degismez) ve ilk
+   * yazimi ezer - kampanya urun secimi (id + kalem turu) bu yuzden satira
+   * hic islenmiyordu.
+   */
+  const satirDegis = (satirIndeks: number, degisiklikler: Record<string, unknown>) => {
+    const [alan, deger] = Object.entries(degisiklikler)[0] ?? ['', undefined];
     const guncel = durum.guncel.map((s, i) => {
       if (meta.ad === 'acilKisiler' && alan === 'varsayilan' && (deger === true || Number(deger) === 1)) {
         return { ...s, varsayilan: i === satirIndeks ? 1 : 0 };
       }
       if (i !== satirIndeks) return s;
-      const yeni = { ...s, [alan]: deger };
+      const yeni = { ...s, ...degisiklikler };
       // IZINLERDE gun sayisi elle girilmez: baslangic/bitis degisince
       //   (iki uc dahil) hesaplanir.
       if (meta.ad === 'izinler' && (alan === 'baslangicTarihi' || alan === 'bitisTarihi')) {
@@ -215,13 +235,17 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
       // KAMPANYA (268, kullanici): iskonto tipi TUTAR ise doviz varsayilan
       //   YEREL PARA; YÜZDE ise doviz anlamsizdir (yuzde birimsizdir) - alan
       //   temizlenir ve hucre "%" gosterir.
-      if (kampanyaSatiri && alan === 'iskontoTipi') {
-        yeni.dovizCinsi = Number(deger) === 2 ? (yeni.dovizCinsi || 'TL') : '';
+      if (kampanyaSatiri && 'iskontoTipi' in degisiklikler) {
+        yeni.dovizCinsi = Number(degisiklikler.iskontoTipi) === 2
+          ? (yeni.dovizCinsi || 'TL') : '';
       }
       return yeni;
     });
     onDegis({ ...durum, guncel });
   };
+
+  const hucreDegis = (satirIndeks: number, alan: string, deger: unknown) =>
+    satirDegis(satirIndeks, { [alan]: deger });
 
   // Adresler'de acik (Adres Tipi secilmemis) satir varken yeni satir eklenemez (kullanici:
   // "adres te fatura tipi seçilmeden yeni satır açılmasın" - Adres Tipi kastediliyor).
@@ -725,9 +749,13 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           etkin
           onKapat={() => setUrunAramaSatiri(null)}
           onSec={secilen => {
-            hucreDegis(urunAramaSatiri, 'iskontoYeriId', String(secilen.id));
-            hucreDegis(urunAramaSatiri, 'kalemTuru',
-                       String(secilen.tip) === 'hizmet' ? '2' : '1');
+            // Id ve kalem turu TEK yazimda: iki ayri cagri birbirini ezer.
+            //   Ad da satirda tutulur - ekranda id degil ad gorunsun.
+            satirDegis(urunAramaSatiri, {
+              iskontoYeriId: String(secilen.id),
+              kalemTuru: String(secilen.tip) === 'hizmet' ? '2' : '1',
+              iskontoYeriAdi: `${secilen.kod ?? ''} ${secilen.ad ?? ''}`.trim(),
+            });
             setUrunAramaSatiri(null);
           }}
         />
