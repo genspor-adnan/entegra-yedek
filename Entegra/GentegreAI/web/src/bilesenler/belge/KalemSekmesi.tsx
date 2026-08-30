@@ -18,7 +18,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     kilitli, bilgi, onizleme, sonuc, transferBaslikEksigi,
     depoBelgesi, stokFisiMi, talepMi,
     setStokArama, setKalem, seciliSil, satirTikla, sonTiklanan, secimDegis, doviz,
-    fiyatListesi,
+    fiyatListesi, paylasim,
   } = p;
 
   const yerelPara = doviz?.yerelPara ?? 'TL';
@@ -86,6 +86,15 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             }}>
       ✎
     </button>
+    {/* PROVIZYON UYGULA (289): kurumun karsilama oranini butun satirlara isler.
+        Yalniz odeyen kurumlu basvuruda gorunur. */}
+    {paylasim?.acik && (
+      <button type="button" className="d ikon" disabled={kilitli}
+              title="Provizyon / karşılama oranını satırlara uygula"
+              onClick={() => paylasim.uygula()}>
+        ⚖
+      </button>
+    )}
     <button type="button" className="d teh ikon"
             disabled={kilitli || seciliSatirlar.size === 0}
             title={kilitli ? 'Kesin belgeden satır silinemez.'
@@ -129,6 +138,10 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         {bilgi.kalem !== 'miktar' && (
           <th className="hiza-sag" style={{ width: 120 }}>Tutar ({yerelPara})</th>
         )}
+        {/* PAYLASIM (289): kurum ve hasta payi - yalniz odeyen kurumlu
+            basvuruda. Provizyon degisince tutarlar burada okunur. */}
+        {paylasim?.acik && <th className="hiza-sag" style={{ width: 110 }}>Kurum Payı</th>}
+        {paylasim?.acik && <th className="hiza-sag" style={{ width: 110 }}>Hasta Payı</th>}
         {/* Doviz kolonlari: satir kendi dovizinde girildiyse ya da rapor dovizi
             secildiyse cizilir; hepsi yerel ve rapor yoksa GIZLI. */}
         {bilgi.kalem !== 'miktar' && dovizKolon && (
@@ -158,7 +171,8 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         const kolonSayisi = (bilgi.kalem === 'miktar' ? 6 : bilgi.kalem === 'sade' ? 8 : 10)
                           - (aciklamaVar ? 0 : 1)
                           + (dovizKolon && bilgi.kalem !== 'miktar' ? 2 : 0)
-                          + (bilgi.siparis ? 1 : 0);   // teslim tarihi (140)
+                          + (bilgi.siparis ? 1 : 0)    // teslim tarihi (140)
+                          + (paylasim?.acik ? 2 : 0);  // kurum/hasta payi (289)
         return (
           <Fragment key={r.anahtar}>
           <tr className={secili ? 'secili' : ''}
@@ -208,6 +222,18 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             {bilgi.kalem === 'tam' && <td className="hiza-sag">%{r.kdv}</td>}
             {bilgi.kalem !== 'miktar' && <td className="hiza-sag">{para.format(fiyat)}</td>}
             {bilgi.kalem !== 'miktar' && <td className="hiza-sag"><b>{para.format(tutar)}</b></td>}
+            {/* Pay hucreleri (289): kapanan pay YESIL - hangi payin
+                faturalandigi listeye bakinca gorunsun. */}
+            {paylasim?.acik && (
+              <td className={`hiza-sag${(r.kurumKapatilan ?? 0) > 0 ? ' basari' : ''}`}>
+                {para.format(sayi(r.kurumTutar ?? '0'))}
+              </td>
+            )}
+            {paylasim?.acik && (
+              <td className={`hiza-sag${(r.hastaKapatilan ?? 0) > 0 ? ' basari' : ''}`}>
+                {para.format(sayi(r.hastaTutar ?? '0'))}
+              </td>
+            )}
             {bilgi.kalem !== 'miktar' && dovizKolon && (() => {
               const d = satirDoviz(r, tutar, fiyat);
               return (
@@ -460,6 +486,12 @@ export interface KalemSekmesiProps {
   /** Son tiklanan satirin SIRASI - Shift araligi bunun uzerinden hesaplanir. */
   sonTiklanan: React.MutableRefObject<number | null>;
   secimDegis(anahtar: number): void;
+  /**
+   * ODEME PAYLASIMI (289): basvuruda odeyen kurum varsa satirin KURUM ve HASTA
+   * payi kolon olarak gorunur. Verilmezse kolonlar hic cizilmez - normal
+   * fatura/irsaliyede paylasim kavrami yoktur.
+   */
+  paylasim?: { acik: boolean; uygula(): void };
   /** Fiyat listesi (205/218): doviz cercevesinin SAGINDA cizilir (kullanici).
       Liste hic kurulmamissa verilmez, kutu cizilmez. */
   fiyatListesi?: {

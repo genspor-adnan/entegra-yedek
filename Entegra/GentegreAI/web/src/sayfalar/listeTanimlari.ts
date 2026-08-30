@@ -172,6 +172,20 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuSira: 10,
   },
   {
+    // KURUM ICMALI (289): SGK payi tek tek faturalanmaz, donem sonu toplanip
+    //   tek fatura kesilir. Liste donemleri ve durumlarini gosterir.
+    kaynak: 'kurum-icmal', rota: 'kurum-icmal', baslik: 'Kurum İcmalleri',
+    yol: 'Cari › Kurum İcmalleri', aksiyonEkrani: 'icmal-liste',
+    cipler: [
+      { ad: 'Hazırlanıyor', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Faturalandı',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Tümü' },
+    ],
+    toplam: ['toplam'],
+    menuGrup: 'Cari', menuAd: 'Kurum İcmalleri', ic: '🧾', yetkiKodu: 'kurum',
+    menuSira: 45,
+  },
+  {
     // RAPOR SABLONLARI (283/288): bolum iskeleti, makrolar ve skor alanlari.
     //   Sablon tetkike baglanir; rapor ekrani varsayilani kendiliginden yukler.
     kaynak: 'radyoloji-sablon', rota: 'radyoloji-sablon',

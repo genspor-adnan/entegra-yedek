@@ -415,6 +415,11 @@ export interface AcikSatir {
   miktar: number;
   kapatilanMiktar: number;
   kalanMiktar: number;
+  /** Odeme paylasimi (289): satirin kurum/hasta payi ve kalanlari. */
+  kurumTutar?: number;
+  hastaTutar?: number;
+  kurumKalan?: number;
+  hastaKalan?: number;
   birim: number;
   birimFiyat: number;
   iskonto: number;

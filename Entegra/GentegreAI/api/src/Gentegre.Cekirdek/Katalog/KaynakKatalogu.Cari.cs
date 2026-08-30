@@ -292,6 +292,42 @@ public static partial class KaynakKatalogu
         };
     }
 
+    // ------------------------------------------------------- kurum-icmal ----
+    /// <summary>
+    /// Kurum donem icmalleri (289): SGK payinin toplu faturalanmasi. Satir
+    /// sayisi ve toplam, icmalin ne kadarlik bir fatura uretecegini gosterir.
+    /// </summary>
+    private static KaynakTanimi KurumIcmal() => new(
+        Ad: "kurum-icmal",
+        YetkiKodu: "kurum",
+        Kaynak: "public.kurum_icmal i " +
+                "left join public.taraf t on t.id = i.kurum_id " +
+                "left join public.belge b on b.id = i.belge_id",
+        SubeKolonu: "i.sube_id",
+        VarsayilanSirala: "i.donem_bas desc, i.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",        "i.id",        "sayi",  "Id", Varsayilan: false),
+            new("kurumAdi",  "coalesce(t.unvan, \'\')", "metin", "Kurum", Genislik: 230),
+            new("donemBas",  "i.donem_bas", "tarih", "Dönem Başlama", Hizalama: "orta"),
+            new("donemBit",  "i.donem_bit", "tarih", "Dönem Bitiş",   Hizalama: "orta"),
+            new("satirSayisi",
+                "(select count(*) from public.kurum_icmal_satir ks where ks.icmal_id = i.id)",
+                                            "sayi",  "Satır", Hizalama: "sag", Genislik: 80,
+                                                     Filtrelenebilir: false),
+            new("toplam",    "i.toplam",    "para",  "Toplam", Hizalama: "sag"),
+            new("durumAdi",
+                "case i.durum when 0 then \'İptal\' when 1 then \'Hazırlanıyor\' " +
+                "when 2 then \'Faturalandı\' else \'\' end",
+                                            "metin", "Durum", Hizalama: "orta", Bicim: "rozet",
+                                                     Genislik: 120, Filtrelenebilir: false),
+            new("durum",     "i.durum",     "kod",   "Durum Kodu", Varsayilan: false),
+            new("faturaNo",  "coalesce(b.belge_no, \'\')", "metin", "Fatura No", Genislik: 130),
+            new("aciklama",  "i.aciklama",  "metin", "Açıklama", Varsayilan: false),
+            new("kurumId",   "i.kurum_id",  "sayi",  "Kurum Id", Varsayilan: false),
+            new("belgeId",   "i.belge_id",  "sayi",  "Belge Id", Varsayilan: false),
+        });
+
     // ---------------------------------------------------------- kategori ----
     /// <summary>
     /// Kategori listesi (270). Alt kategori ust kategorisinin ALTINDA ve adi

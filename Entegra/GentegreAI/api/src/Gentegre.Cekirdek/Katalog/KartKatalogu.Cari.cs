@@ -600,6 +600,13 @@ public static partial class KartKatalogu
             //   bilgiyi iki yere yazmak olurdu.
             new("kampanyaId",     "kampanya_id",      "kod",
                 KodTablosu: "public.v_kampanya_lookup", Baslik: "Kampanya"),
+            // ODEME PAYLASIMI (289): kurum payi NASIL faturalanir - SGK donem
+            //   icmali ister, sigorta sirketleri cogunlukla vaka bazli fatura.
+            new("faturalamaModu", "faturalama_modu",  "kod",
+                KodListesi: "kurum.faturalama_modu", Baslik: "Faturalama"),
+            // Provizyon girilmediginde uygulanacak karsilama orani (%).
+            new("varsayilanKarsilama", "varsayilan_karsilama", "para",
+                Baslik: "Varsayılan Karşılama %"),
             new("aciklama",       "aciklama",         "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
         }, SubeKolonu: null, Baslik: "Sözleşme", LogTabloId: 909, TekSatir: true));
 

@@ -714,6 +714,64 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
       // RANDEVU durum akisi (243) ve BASVURUYA DONUSUM (265). Durum
       //   dugmeleri simdiye kadar bagli DEGILDI - tiklaninca hicbir sey
       //   olmuyordu.
+      // KURUM ICMALI (289): SGK payi donem sonu TEK faturaya doner.
+      if (kod === 'icmal.yeni') {
+        await guvenli(async () => {
+          const kurumAd = await metinSor('Kurum kodu ya da adı',
+            'İcmal hangi kuruma kesilecek? (ör. SGK)');
+          if (!kurumAd) return;
+          const k = await api.liste('kurum', {
+            sayfa: 1, boyut: 5,
+            filtre: { alan: 'kurumAdi', op: 'icerir', deger: kurumAd },
+          });
+          if (k.satirlar.length === 0) { mesaj('Kurum bulunamadı.'); return }
+          const kurumId = Number(k.satirlar[0].id);
+
+          const bugun = new Date();
+          const bas = new Date(bugun.getFullYear(), bugun.getMonth(), 1)
+            .toISOString().slice(0, 10);
+          const bit = new Date(bugun.getFullYear(), bugun.getMonth() + 1, 0)
+            .toISOString().slice(0, 10);
+
+          // ONIZLEME: kullanici neyi faturaladigini gormeden icmal acmasin.
+          const on = await api.icmalOnizleme(kurumId, bas, bit);
+          if (on.satirlar.length === 0) {
+            mesaj(`${k.satirlar[0].kurumAdi ?? kurumAd} için bu dönemde açık kurum payı yok.`);
+            return;
+          }
+          if (!(await onay(
+                `${k.satirlar[0].kurumAdi ?? kurumAd} · ${bas} – ${bit}: `
+                + `${on.satirlar.length} satır, toplam ${on.toplam.toFixed(2)}. `
+                + 'İcmal oluşturulsun mu?'))) return;
+
+          const y = await api.icmalOlustur({ kurumId, donemBas: bas, donemBit: bit });
+          setYenile(t => t + 1);
+          mesaj(`İcmal oluşturuldu: ${y.satir} satır. "Faturala" ile tek fatura kesilir.`);
+        });
+        return;
+      }
+
+      if (kod === 'icmal.faturala') {
+        if (!satir) return;
+        if (Number(satir.durum) !== 1) { mesaj('Yalnız hazırlanan icmal faturalanabilir.'); return }
+        if (!(await onay(`${satir.kurumAdi} icmali faturalansın mı? `
+              + `Toplam ${Number(satir.toplam ?? 0).toFixed(2)} tutarında TEK fatura kesilir `
+              + 've satırların kurum payı kapanır.'))) return;
+        await guvenli(async () => {
+          const y = await api.icmalFaturala(Number(satir.id));
+          setYenile(t => t + 1);
+          mesaj(`Fatura kesildi (${y.satir} kalem).`);
+          setAcikBelgeId(y.belgeId);
+        });
+        return;
+      }
+
+      if (kod === 'icmal.belge') {
+        if (!satir?.belgeId) { mesaj('Bu icmal henüz faturalanmamış.'); return }
+        setAcikBelgeId(Number(satir.belgeId));
+        return;
+      }
+
       // RADYOLOJI (283): worklist durum akisi. "Cekildi" teknisyenin islemi -
       //   cekim zamani da yazilir, cunku bekleme suresi (kalite gostergesi)
       //   oradan hesaplanir. Iptal onay ister: cekilmis istem iptal edilirse

@@ -286,7 +286,11 @@ public sealed partial class BelgeDeposu
                    v.birim_fiyat as "birimFiyat", v.iskonto, v.kdv,
                    v.belge_tur as "belgeTur", v.belge_tur_adi as "belgeTurAdi",
                    v.belge_no as "belgeNo", v.taraf_unvan as "tarafUnvan",
-                   v.belge_dovizi as "belgeDovizi", v.kapanma_durum as "kapanmaDurum"
+                   v.belge_dovizi as "belgeDovizi", v.kapanma_durum as "kapanmaDurum",
+                   -- Odeme paylasimi (289/290): donusum penceresi hangi payin
+                   --   ne kadarinin acik oldugunu gostersin.
+                   v.kurum_tutar as "kurumTutar", v.hasta_tutar as "hastaTutar",
+                   v.kurum_kalan as "kurumKalan", v.hasta_kalan as "hastaKalan"
               from public.v_belge_acik_satir v
              where v.belge_id = @p0 order by v.sira
             """, null,

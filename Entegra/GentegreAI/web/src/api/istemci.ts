@@ -429,11 +429,16 @@ export const api = {
   belgeTermin: (id: number, satirlar: { satirId: number; teslimTarihi: string | null }[]) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/termin`, { satirlar }),
 
+  /**
+   * Belge donusumu. `pay` (289): 0/bos tum satir · 1 yalniz HASTA payi ·
+   * 2 yalniz KURUM payi - kurum payinda hedef belgenin carisi odeyen kurum olur.
+   */
   belgeDonustur: (id: number, hedefTur: number,
                   satirlar: { satirId: number; miktar: number }[],
-                  belgeTarihi?: string, taslak = false, belgeNo?: string) =>
+                  belgeTarihi?: string, taslak = false, belgeNo?: string,
+                  pay = 0) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/donustur`,
-                        { hedefTur, satirlar, belgeTarihi, taslak, belgeNo }),
+                        { hedefTur, satirlar, belgeTarihi, taslak, belgeNo, pay }),
 
   // ------------------------------------------ stok karti: Stok Durumu ----
   /** Depo bazli miktar/rezerve/kullanilabilir + KPI seridi (salt okunur). */
@@ -534,6 +539,22 @@ export const api = {
   // -------------------------------------------------------- ana sayfa ----
   /** Panel: kutular + listeler TEK istekte (acilista bes cagri yapmamak icin). */
   panel: () => istek<PanelYaniti>('/api/panel'),
+
+  // -------------------------------------------------------- kurum icmali ----
+  /** Donemde faturalanacak acik kurum paylari (289) - icmal oncesi onizleme. */
+  icmalOnizleme: (kurumId: number, donemBas: string, donemBit: string) =>
+    istek<{ satirlar: Record<string, unknown>[]; toplam: number }>(
+      `/api/kurum-icmal/onizleme?kurumId=${kurumId}`
+      + `&donemBas=${donemBas}&donemBit=${donemBit}`),
+
+  icmalOlustur: (govde: { kurumId: number; donemBas: string; donemBit: string;
+                          aciklama?: string }) =>
+    gonder<{ icmalId: number; satir: number }>('/api/kurum-icmal', govde),
+
+  /** Icmali TEK faturaya cevirir; cari KURUMDUR, satirlarin kurum payi kapanir. */
+  icmalFaturala: (icmalId: number) =>
+    gonder<{ belgeId: number; satir: number; uyarilar?: string[] }>(
+      `/api/kurum-icmal/${icmalId}/faturala`, {}),
 
   // ---------------------------------------------------------- radyoloji ----
   // RAPOR EKRANI (283): acilista ihtiyac duyulan HER SEY tek istekte gelir -

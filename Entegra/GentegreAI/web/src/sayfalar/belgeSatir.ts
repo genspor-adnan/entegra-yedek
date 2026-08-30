@@ -73,6 +73,18 @@ export interface SatirDurumu {
    * kalir; iade/iptalde ayni fiyat yeniden uretilebilir.
    */
   kampanyaSatirId?: number | null;
+  /**
+   * ODEME PAYLASIMI (289). Basvuruda satir tutari iki paya bolunur: kurum
+   * (SGK/OSS provizyonu) ve hasta (katilim payi / fark). Satir FIZIKSEL
+   * BOLUNMEZ - provizyon revize olunca burada tutar guncellenir.
+   */
+  kurumTutar?: string;
+  hastaTutar?: string;
+  /** Karsilama orani % - tutarlar bundan hesaplanir, elle de girilebilir. */
+  karsilama?: string;
+  /** Payin ne kadari belgeye donustu (sunucudan gelir, salt okunur). */
+  kurumKapatilan?: number;
+  hastaKapatilan?: number;
   /** Kalemin lot/seri dagilimi - bir kalem 1:n lottan gelebilir (db/114). */
   izlemler: IzlemSatiri[];
 }
@@ -169,6 +181,12 @@ export function yanittanSatirlar(
     stokId: r.stokId ? Number(r.stokId) : null,
     hizmetId: r.hizmetId ? Number(r.hizmetId) : null,
     stokKodu: String(r.stokKodu ?? ''),
+    // Odeme paylasimi (289): tutarlar ve kapanma sayaclari.
+    kurumTutar: r.kurumTutar != null ? String(r.kurumTutar) : undefined,
+    hastaTutar: r.hastaTutar != null ? String(r.hastaTutar) : undefined,
+    karsilama: r.karsilama != null ? String(r.karsilama) : undefined,
+    kurumKapatilan: r.kurumKapatilan != null ? Number(r.kurumKapatilan) : undefined,
+    hastaKapatilan: r.hastaKapatilan != null ? Number(r.hastaKapatilan) : undefined,
     // "??" DEGIL "||": sunucu bos alani '' donduruyor ve nullish operatoru bos
     //   string'i gecerli sayip yedege dusmuyordu - hizmet satirinda kod/ad bos
     //   gorunuyordu (kullanici).

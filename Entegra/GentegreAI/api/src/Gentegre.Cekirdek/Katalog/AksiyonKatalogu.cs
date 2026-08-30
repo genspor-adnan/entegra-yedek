@@ -106,6 +106,17 @@ public static class AksiyonKatalogu
             //   birbirini tutmayan iki kayit uretir.
             ["firsat-liste"] = Crud("firsat", "firsat", "firsat"),
 
+            // KURUM ICMALI (289): SGK payinin toplu faturalanmasi.
+            ["icmal-liste"] = new AksiyonTanimi[]
+            {
+                new("icmal.yeni",     "＋ İcmal Oluştur", "kurum",
+                    KaynakKodu: "kurum", Islem: Islem.Ekle, Sira: 10),
+                new("icmal.faturala", "🧾 Faturala", "kurum",
+                    KaynakKodu: "belge", Islem: Islem.Ekle, KayitGerekir: true, Sira: 20),
+                new("icmal.belge",    "↗ Faturayı Aç", "kurum",
+                    KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 30),
+            },
+
             // RADYOLOJI CALISMA LISTESI (283): modulun giris ekrani. Durum
             //   akisi dugmelerle ilerler - "Cekildi" teknisyenin, rapor ve
             //   onay hekimin islemidir, o yuzden AYRI aksiyon yetkileri

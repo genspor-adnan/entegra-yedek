@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
-import { guvenli, mesaj } from '../bilesenler/mesaj';
+import { guvenli, mesaj, metinSor } from '../bilesenler/mesaj';
 import { type BelgeYaniti, type KasaIslemTuru, URUN_GENOTIP, hataMetni, hataAyristir } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { StokAramaPenceresi } from '../bilesenler/StokAramaPenceresi';
@@ -801,6 +801,30 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       await satirlariYenidenFiyatla(liste, yeni, 'ödeyen kuruma göre');
   }
 
+  /**
+   * PROVIZYON UYGULA (289): kurumun karsilama oranini butun satirlara isler.
+   * Tutarlar EKRANDA hesaplanir, Kaydet kalicilastirir - liste degisiminde
+   * oldugu gibi. Oran 0 verilirse tamami hastaya yazilir (kendi oder).
+   */
+  async function provizyonUygula() {
+    // Varsayilan olarak KURUMUN sozlesmedeki orani gelir - hekim/kayit
+    //   gorevlisi provizyon farkliysa degistirir.
+    const cevap = await metinSor(
+      'Kurumun karşılama oranı (%) — 0 girilirse tamamı hastaya yazılır',
+      String(satirlar.find(r => hamSayi(r.karsilama ?? '0') > 0)?.karsilama ?? ''),
+      'Karşılama %');
+    if (cevap === null || cevap.trim() === '') return;
+    const oran = Math.min(100, Math.max(0, hamSayi(cevap)));
+
+    setSatirlar(eski => eski.map(r => {
+      const tutar = satirTutari(hamSayi(r.adet), hamSayi(r.birimFiyat), r.iskonto, r.iskonto2);
+      const kurum = Math.round(tutar * oran) / 100;
+      return { ...r, karsilama: String(oran),
+               kurumTutar: kurum.toFixed(2), hastaTutar: (tutar - kurum).toFixed(2) };
+    }));
+    mesaj(`Karşılama oranı %${oran} uygulandı. Kaydet ile kalıcı olur.`);
+  }
+
   /** Modal icinde acildiysa cagiran kapatir; dogrudan URL ile acildiysa listeye doner. */
   /** Sag sutun hucreleri: e-Belge OLMAYAN turlerde sira Kapanma > Bagli Siparis
       > Doviz olur; e-Belgeli turlerde eski duzen korunur. */
@@ -945,6 +969,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             satirTikla={satirTikla} sonTiklanan={sonTiklanan} secimDegis={secimDegis}
             fiyatListesi={{ listeler: fiyatListeleri, seciliId: fiyatListesiId,
                             sec: v => void listeDegisti(v), kampanyaAdi }}
+            // ODEME PAYLASIMI (289): yalniz odeyen kurumlu basvuruda.
+            paylasim={{ acik: basvuruMu && !!odeyenKurumId,
+                        uygula: () => void provizyonUygula() }}
             doviz={{
               raporDovizi, setRaporDovizi: yeni => {
                 setRaporDovizi(yeni);

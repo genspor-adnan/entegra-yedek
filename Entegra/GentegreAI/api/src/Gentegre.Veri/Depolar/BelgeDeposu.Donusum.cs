@@ -61,10 +61,16 @@ public sealed partial class BelgeDeposu
                    --   ikisi de hedefe TASINIR - basvurudan cikan fatura
                    --   "hangi anlasmayla" kesildigini kaybetmemeli.
                    b.fiyat_listesi_id, b.kampanya_id, b.odeyen_kurum_id,
+                   -- Kurum payi kuruma faturalanirken KIMLIK de kurumundur:
+                   --   unvan ve vergi bilgisi hastadan kopyalanirsa fatura
+                   --   yanlis kisiye kesilmis gorunur (289).
+                   ok.unvan as odeyen_unvan, ok.vkno as odeyen_vkno,
+                   ok.vd as odeyen_vd,
                    b.proje_id, b.sube_id, b.vade_gun, b.giris_depo_id, b.cikis_depo_id,
                    b.satici_id, b.ozel_kod, b.aciklama, b.belge_no, kt.ad as tur_adi
               from public.belge b
               left join public.kasa_islem_turu kt on kt.kod = b.tur
+              left join public.taraf ok on ok.id = b.odeyen_kurum_id
              where b.id = @p0
             """, baglanti, islem))
         {
@@ -183,9 +189,10 @@ public sealed partial class BelgeDeposu
             //   degil odeyen kurumdur - fatura sigortaya/SGK'ya kesilir.
             ["tarafId"] = pay == 2 && kaynak["odeyen_kurum_id"] is { } ok
                           ? ok : kaynak["taraf_id"],
-            ["tarafUnvan"] = kaynak["taraf_unvan"],
-            ["tarafVkno"] = kaynak["taraf_vkno"],
-            ["tarafVd"] = kaynak["taraf_vd"],
+            ["tarafUnvan"] = pay == 2 && kaynak["odeyen_unvan"] is { } ou
+                             ? ou : kaynak["taraf_unvan"],
+            ["tarafVkno"] = pay == 2 ? kaynak["odeyen_vkno"] : kaynak["taraf_vkno"],
+            ["tarafVd"] = pay == 2 ? kaynak["odeyen_vd"] : kaynak["taraf_vd"],
             ["tarafAdresId"] = kaynak["taraf_adres_id"],
             ["belgeTarihi"] = belgeTarihi ?? Saat.Simdi,
             ["belgeDovizi"] = kaynak["belge_dovizi"],

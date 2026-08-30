@@ -233,6 +233,15 @@ return {
     // Kalemi fiyatlayan kampanya kurali (274): kampanya satiri sonradan
     //   degistirilse bile belgede HANGI kuralin uygulandigi kalir.
     kampanyaSatirId: s.kampanyaSatirId ?? null,
+    // ODEME PAYLASIMI (289): tutar girilmisse AYNEN gider - sunucu yalniz
+    //   bos birakilan payi orandan hesaplar (sigorta sabit tutara onay
+    //   verebilir, oran her zaman dogru sonucu vermez).
+    ...(s.kurumTutar !== undefined && s.kurumTutar !== ''
+        ? { kurumTutar: hamSayi(s.kurumTutar) } : {}),
+    ...(s.hastaTutar !== undefined && s.hastaTutar !== ''
+        ? { hastaTutar: hamSayi(s.hastaTutar) } : {}),
+    ...(s.karsilama !== undefined && s.karsilama !== ''
+        ? { karsilama: hamSayi(s.karsilama) } : {}),
     izlemeKodu: s.izlemeKodu,
     izleme: s.izleme || (s.izlemeKodu ? 1 : 0),
     // Termin (140): bos string DEGIL null gider - sunucu tarih bekliyor.

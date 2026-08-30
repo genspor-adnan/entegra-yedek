@@ -106,6 +106,14 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
 
   const hedefler = HEDEFLER[belgeTur] ?? [];
   const disNumarali = DIS_NUMARALI.has(hedefTur);
+  /**
+   * ODEME PAYLASIMI (289): satirda kurum ve hasta payi ayri duruyorsa
+   * donusum HANGI PAYI kapatacagini sorar. Kurum payi kuruma faturalanir,
+   * hasta payi hastaya - ayni satir iki ayri belgeye boluner.
+   */
+  const [pay, setPay] = useState(0);
+  const paylasimVar = satirlar.some(
+    s => Number(s.kurumTutar ?? 0) > 0 && Number(s.hastaTutar ?? 0) > 0);
 
   const toplam = useMemo(() =>
     satirlar.reduce((t, s) => secili[s.satirId]
@@ -123,7 +131,8 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
     if (gonderilecek.length === 0) { setHata('En az bir satır seçilmeli.'); return }
     if (!hedefTur) { setHata('Hedef belge türü seçilmeli.'); return }
 
-    const asan = gonderilecek.find(g => {
+    // PAY donusumunde sinir miktar degil TUTAR - kontrol sunucuda (289).
+    const asan = pay > 0 ? undefined : gonderilecek.find(g => {
       const s = satirlar.find(x => x.satirId === g.satirId)!;
       return g.miktar > Number(s.kalanMiktar);
     });
@@ -135,7 +144,8 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
     setCalisiyor(true);
     try {
       const yeni = await api.belgeDonustur(belgeId, hedefTur, gonderilecek, tarih, taslak,
-                                           disNumarali ? belgeNo.trim() : undefined);
+                                           disNumarali ? belgeNo.trim() : undefined,
+                                           paylasimVar ? pay : 0);
       setSonuc(yeni);
       setSonucAd(hedefler.find(h => h.kod === hedefTur)?.ad ?? 'Belge');
       setBelgeNo('');
@@ -196,6 +206,19 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                   {hedefler.map(h => <option key={h.kod} value={h.kod}>{h.ad}</option>)}
                 </select>
               </label>
+              {/* ODEME PAYLASIMI (289): satirlar kurum/hasta payina bolunmusse
+                  hangi payin donusturulecegi sorulur. Kurum payi KURUMA
+                  faturalanir - hedef belgenin carisi hasta degildir. */}
+              {paylasimVar && (
+                <label className="alan">
+                  <span className="etiket">Dönüştürülecek Pay</span>
+                  <select value={pay} onChange={e => setPay(Number(e.target.value))}>
+                    <option value={0}>Tümü (paylaşımsız)</option>
+                    <option value={1}>Hasta payı</option>
+                    <option value={2}>Kurum payı → kuruma faturalanır</option>
+                  </select>
+                </label>
+              )}
               {/* Alis faturasinda numara TEDARIKCININ - sayac uretmez, sorulur. */}
               {disNumarali && (
                 <label className="alan">
