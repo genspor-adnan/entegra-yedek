@@ -29,16 +29,16 @@ public static partial class KartKatalogu
                 EnFazlaUzunluk: 20, Baslik: "Kod", Grup: "Kimlik"),
             new("ad",              "ad",               "metin", Zorunlu: true,
                 EnFazlaUzunluk: 150, Baslik: "Kampanya", Grup: "Kimlik"),
+            // Fiyat listesi de KIMLIK seridinde (kullanici: "tek sira kalsin"):
+            //   kampanyanin uzerine isledigi liste kartin kimligi kadar temel.
+            new("fiyatListesiId",  "fiyat_listesi_id", "kod",   Zorunlu: true,
+                KodTablosu: "public.v_fiyat_listesi_satis_lookup",
+                Baslik: "Fiyat Listesi", Grup: "Kimlik"),
             new("baslangic",       "baslangic",        "tarih", Zorunlu: true,
                 Baslik: "Başlama", Grup: "Kimlik"),
             new("bitis",           "bitis",            "tarih", Zorunlu: true,
                 Baslik: "Bitiş", Grup: "Kimlik"),
             new("durum",           "durum",            "mantik", Baslik: "Aktif", Grup: "Kimlik"),
-            // Kampanyanin uzerine isledigi liste: indirimler bu listenin
-            //   fiyatlarindan hesaplanir.
-            new("fiyatListesiId",  "fiyat_listesi_id", "kod",   Zorunlu: true,
-                KodTablosu: "public.v_fiyat_listesi_satis_lookup",
-                Baslik: "Fiyat Listesi", Grup: "Genel"),
             new("aciklama",        "aciklama",         "metin", EnFazlaUzunluk: 300,
                 Baslik: "Açıklama", Grup: "Genel"),
         },

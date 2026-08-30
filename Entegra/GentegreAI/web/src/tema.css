@@ -1195,3 +1195,9 @@ input.skt-gecmis {
 /* Doviz ve iskonto dar deger: kolonlar icerige gore daralsin. */
 .kampanya-satirlar select.dar,
 .kampanya-satirlar input.dar { max-width: 90px }
+
+/* Kampanya kimlik seridi TEK SIRA (kullanici): kod, ad, fiyat listesi, iki
+   tarih ve durum yan yana - tarihler dar, ad ve liste genis. */
+.kaid .alan-izgara.kaid-kampanya {
+  grid-template-columns: 0.8fr 1.5fr 1.2fr 120px 120px 70px;
+}

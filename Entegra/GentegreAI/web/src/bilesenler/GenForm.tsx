@@ -671,7 +671,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
             </div>
           ) : (
             <div className={`alan-izgara${kaynak === 'kisi' ? ' kaid-kisi' : ''}`
-                            + (kaynak === 'randevu' ? ' kaid-randevu' : '')}>
+                            + (kaynak === 'randevu' ? ' kaid-randevu' : '')
+                            + (kaynak === 'kampanya' ? ' kaid-kampanya' : '')}>
               {renderAlanListesi(kimlikAlanlari)}
             </div>
           )}
