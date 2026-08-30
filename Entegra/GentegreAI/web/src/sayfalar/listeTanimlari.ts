@@ -204,7 +204,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Kaynak kolonunun yerine ODEYEN KURUM / POLIKLINIK / DOKTOR (kullanici).
     //   SERI listede yok ama katalogda DURUYOR: gizliKolonlar'a konsa kolon
     //   menusunden de kaybolurdu - gerektiginde kullanici acar.
-    kolonSirasi: ['belgeNo', 'odeyenKurumAdi', 'poliklinik', 'doktor'],
+    //   Sira: once belgenin kimligi (no, tarih, hasta), sonra basvuru bilgisi
+    //   (odeyen kurum, poliklinik, hekim) - kullanici.
+    kolonSirasi: ['belgeNo', 'belgeTarihi', 'tarafUnvan',
+                  'odeyenKurumAdi', 'poliklinik', 'doktor'],
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
