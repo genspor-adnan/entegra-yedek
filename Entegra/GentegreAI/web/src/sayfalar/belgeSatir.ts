@@ -82,6 +82,12 @@ export interface SatirDurumu {
   hastaTutar?: string;
   /** Karsilama orani % - tutarlar bundan hesaplanir, elle de girilebilir. */
   karsilama?: string;
+  /**
+   * KATILIM PAYI (291): SGK modunda hastadan alinacak SABIT tutar. Kalem
+   * secilirken fiyat listesinden fiyatla BIRLIKTE gelir; sunucu paylastirmayi
+   * buna gore yapar (hasta = katki, kurum = tutar - katki).
+   */
+  katkiTutar?: string;
   /** Payin ne kadari belgeye donustu (sunucudan gelir, salt okunur). */
   kurumKapatilan?: number;
   hastaKapatilan?: number;
@@ -185,6 +191,7 @@ export function yanittanSatirlar(
     kurumTutar: r.kurumTutar != null ? String(r.kurumTutar) : undefined,
     hastaTutar: r.hastaTutar != null ? String(r.hastaTutar) : undefined,
     karsilama: r.karsilama != null ? String(r.karsilama) : undefined,
+    katkiTutar: r.katkiTutar != null ? String(r.katkiTutar) : undefined,
     kurumKapatilan: r.kurumKapatilan != null ? Number(r.kurumKapatilan) : undefined,
     hastaKapatilan: r.hastaKapatilan != null ? Number(r.hastaKapatilan) : undefined,
     // "??" DEGIL "||": sunucu bos alani '' donduruyor ve nullish operatoru bos

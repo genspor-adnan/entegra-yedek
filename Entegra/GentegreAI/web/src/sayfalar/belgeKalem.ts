@@ -74,6 +74,8 @@ export interface KalemFiyati {
   satirId?: number | null;
   iskontoTipi?: number | null;
   iskonto?: number | null;
+  /** Katilim payi (291) - SGK modunda hastadan alinacak sabit tutar. */
+  katki?: number | null;
 }
 
 /**
@@ -120,6 +122,9 @@ export function kampanyaFiyatiUygula(satir: SatirDurumu, f: KalemFiyati): SatirD
     fiyatDovizi: y.dovizCinsi || satir.fiyatDovizi,
     iskonto: y.iskonto !== undefined ? String(y.iskonto) : satir.iskonto,
     kampanyaSatirId: y.kampanyaSatirId ?? satir.kampanyaSatirId,
+    // Katilim payi fiyatla BIRLIKTE gelir (291): SGK modunda sunucu bundan
+    //   paylastirir, oran modunda alan yok sayilir.
+    katkiTutar: f.katki != null && f.katki > 0 ? String(f.katki) : satir.katkiTutar,
   };
 }
 

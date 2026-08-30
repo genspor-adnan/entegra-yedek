@@ -96,13 +96,18 @@ public static class FiyatListesiUclari
                 throw GentegreHatasi.Dogrulama("stokId ya da hizmetId'den TAM BIRI verilmeli.");
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // KATILIM PAYI (291) fiyatla BIRLIKTE doner: islem secilince hem SUT
+            //   bedeli hem hastadan alinacak katki tek istekte gelsin.
             await using var komut = baglanti.Komut(
-                "select fiyat, doviz_cinsi, kdv_dahil, kaynak from public.fn_fiyat_listesi_fiyat(@p0, @p1, @p2)",
+                "select f.fiyat, f.doviz_cinsi, f.kdv_dahil, f.kaynak, " +
+                "       public.fn_fiyat_listesi_katki(@p0, @p1, @p2) as katki " +
+                "  from public.fn_fiyat_listesi_fiyat(@p0, @p1, @p2) f",
                 null, id, stokId is 0 ? null : stokId, hizmetId is 0 ? null : hizmetId);
 
             await using var o = await komut.ExecuteReaderAsync(iptal);
             if (!await o.ReadAsync(iptal))
-                return Results.Ok(new { fiyat = (decimal?)null, dovizCinsi = "", kdvDahil = 0, kaynak = "yok" });
+                return Results.Ok(new { fiyat = (decimal?)null, dovizCinsi = "", kdvDahil = 0,
+                                        kaynak = "yok", katki = 0m });
 
             return Results.Ok(new
             {
@@ -110,6 +115,7 @@ public static class FiyatListesiUclari
                 dovizCinsi = o.IsDBNull(1) ? "" : o.GetString(1),
                 kdvDahil = o.IsDBNull(2) ? 0 : o.GetInt16(2),
                 kaynak = o.IsDBNull(3) ? "" : o.GetString(3),
+                katki = o.IsDBNull(4) ? 0m : o.GetDecimal(4),
             });
         }).WithTags("FiyatListesi").RequireAuthorization();
 
@@ -170,11 +176,13 @@ public static class FiyatListesiUclari
             var dovizCinsi = "";
             short kdvDahil = 0;
             var kaynak = "yok";
+            var katki = 0m;
             if (bazListe is { } bl)
             {
                 await using var f = baglanti.Komut(
-                    "select fiyat, doviz_cinsi, kdv_dahil, kaynak " +
-                    "  from public.fn_fiyat_listesi_fiyat(@p0, @p1, @p2)",
+                    "select f.fiyat, f.doviz_cinsi, f.kdv_dahil, f.kaynak, " +
+                    "       public.fn_fiyat_listesi_katki(@p0, @p1, @p2) as katki " +
+                    "  from public.fn_fiyat_listesi_fiyat(@p0, @p1, @p2) f",
                     null, bl, stok, hizmet);
                 await using var o = await f.ExecuteReaderAsync(iptal);
                 if (await o.ReadAsync(iptal))
@@ -183,6 +191,7 @@ public static class FiyatListesiUclari
                     dovizCinsi = o.IsDBNull(1) ? "" : o.GetString(1);
                     kdvDahil   = o.IsDBNull(2) ? (short)0 : o.GetInt16(2);
                     kaynak     = o.IsDBNull(3) ? "" : o.GetString(3);
+                    katki      = o.IsDBNull(4) ? 0m : o.GetDecimal(4);
                 }
             }
 
@@ -215,6 +224,8 @@ public static class FiyatListesiUclari
                 dovizCinsi,
                 kdvDahil,
                 kaynak = satirId is null ? kaynak : "kampanya",
+                // Katilim payi (291): SGK modunda hasta payi bu tutardir.
+                katki,
                 kampanyaId,
                 listeId = bazListe,
                 satirId,

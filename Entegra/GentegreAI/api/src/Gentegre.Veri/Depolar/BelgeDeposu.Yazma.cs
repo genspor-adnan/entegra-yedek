@@ -257,10 +257,13 @@ public sealed partial class BelgeDeposu
         {
             if (odeyenKurum is { } kid && kid > 0)
             {
+                // KATILIM PAYI (291): SGK modunda paylastirma orana degil
+                //   satirin KATKI TUTARINA gore yapilir - istemci fiyatla
+                //   birlikte gelen katkiyi gonderir.
                 await using var pay = Komut(baglanti, islem,
                     "select kurum_tutar, hasta_tutar, karsilama " +
-                    "  from public.fn_belge_satir_paylastir(@p0, @p1, @p2)",
-                    [tutar, karsilama, kid]);
+                    "  from public.fn_belge_satir_paylastir(@p0, @p1, @p2, @p3)",
+                    [tutar, karsilama, kid, JsonOndalik(satir, "katkiTutar", 0)]);
                 await using var o = await pay.ExecuteReaderAsync(iptal);
                 if (await o.ReadAsync(iptal))
                 {

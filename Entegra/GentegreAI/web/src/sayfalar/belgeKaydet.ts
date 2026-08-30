@@ -242,6 +242,8 @@ return {
         ? { hastaTutar: hamSayi(s.hastaTutar) } : {}),
     ...(s.karsilama !== undefined && s.karsilama !== ''
         ? { karsilama: hamSayi(s.karsilama) } : {}),
+    ...(s.katkiTutar !== undefined && s.katkiTutar !== ''
+        ? { katkiTutar: hamSayi(s.katkiTutar) } : {}),
     izlemeKodu: s.izlemeKodu,
     izleme: s.izleme || (s.izlemeKodu ? 1 : 0),
     // Termin (140): bos string DEGIL null gider - sunucu tarih bekliyor.

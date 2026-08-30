@@ -69,6 +69,10 @@ public static partial class KartKatalogu
                 Baslik: "Yön", Grup: "Genel", AltGrup: "Detay"),
             new("kdvDahil", "kdv_dahil", "kod", SabitKodlar: KdvDahilKodlari,
                 Baslik: "KDV", Grup: "Genel", AltGrup: "Detay"),
+            // KATILIM PAYI (291): listenin varsayilani - satirda
+            //   girilmeyen kalemlerde bu tutar hastadan alinir.
+            new("katkiTutar", "katki_tutar", "para", Baslik: "Katılım Payı",
+                Grup: "Genel", AltGrup: "Detay"),
             // GECERLILIK ARALIGI da Detay kutusunun altinda (kullanici): iki
             //   tarih icin ayri bir kutu fazladan bir kat gorsel gurultuydu.
             //   Bos birakilirsa sinirsiz; bitis baslangictan once olamaz (DB check).
@@ -92,6 +96,9 @@ public static partial class KartKatalogu
                 new("hizmetId",  "hizmet_id", "kod",  KodTablosu: "public.v_hizmet_lookup",
                     Baslik: "Hizmet"),
                 new("fiyat",     "fiyat",     "para", Zorunlu: true, Baslik: "Fiyat"),
+                // KATILIM PAYI (291): SUT bedeliyle AYNI SATIRDA durur - islem
+                //   secilince ikisi birlikte gelsin. 0 ise listenin varsayilani.
+                new("katkiTutar","katki_tutar","para", Baslik: "Katılım Payı"),
                 new("dovizCinsi","doviz_cinsi","kod", Baslik: "Döviz"),
                 new("kdvDahil",  "kdv_dahil", "kod",  SabitKodlar: KdvDahilKodlari, Baslik: "KDV"),
                 new("birim",     "birim",     "kod",  KodListesi: "stok.ana_birim", Baslik: "Birim"),
