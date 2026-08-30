@@ -1155,6 +1155,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             satir={kalem}
             transferMi={bilgi.kalem === 'miktar'}
             siparisMi={siparisMi}
+            paylasimli={basvuruMu && !!odeyenKurumId}
             anaBirimKod={kalem?.birim ?? 0}
             anaBirimAdi={kalem?.birimAdi ?? ''}
             vergisiz={bilgi.kalem === 'sade' && stokFisiMi}

@@ -8,7 +8,7 @@ import {
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
 import { IzlemPenceresi } from './IzlemPenceresi';
 
-export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi,
+export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi, paylasimli,
                          anaBirimKod = 0, anaBirimAdi = '',
                          girisIzlemi, cikisIzlemi, cikisDepoId, belgeTarihi,
                          onKapat, onKaydet }: {
@@ -27,6 +27,12 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   transferMi: boolean;
   /** Siparis: satira TESLIM TARIHI (termin) sorulur (140). */
   siparisMi: boolean;
+  /**
+   * ODEME PAYLASIMI (289): odeyen kurumlu basvuruda satirin kurum/hasta payi
+   * sorulur. EK KATKI (istisnai hizmet farki, ilave ucret) kutusu isaretlenince
+   * tutarin TAMAMI hastaya yazilir - o satir kurum icmaline hic girmez.
+   */
+  paylasimli?: boolean;
   /** Stok kartinin ANA BIRIMI (143) - ambalaj listesinin ilk ogesi, carpan 1. */
   anaBirimKod?: number;
   anaBirimAdi?: string;
@@ -267,6 +273,26 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                        onChange={e => degis('iskonto2', e.target.value)} />
               </span>
             </label>
+            )}
+
+            {/* EK KATKI (289): istisnai hizmet farki / ilave ucret. Isaretliyse
+                tutarin tamami HASTA payidir; kurum icmaline girmez ve kuruma
+                faturalanmaz. Isaret kaldirilinca satir yeniden kurumun
+                karsilama oranindan paylastirilir (bos birakilir, sunucu hesaplar). */}
+            {paylasimli && !transferMi && (
+              <label className="alan">
+                <span className="etiket">Ek Katkı</span>
+                <span className="deger-serit">
+                  <input type="checkbox"
+                         checked={hamSayi(r.hastaTutar ?? '0') > 0
+                                  && hamSayi(r.kurumTutar ?? '0') === 0}
+                         onChange={e => setR(x => e.target.checked
+                           ? { ...x, kurumTutar: '0', hastaTutar: String(tutar), karsilama: '0' }
+                           : { ...x, kurumTutar: undefined, hastaTutar: undefined,
+                               karsilama: undefined })} />
+                  <span>Tamamı hastadan tahsil edilir (kuruma faturalanmaz)</span>
+                </span>
+              </label>
             )}
 
             {/* Duz metin "Seri / Lot" alani kaldirildi (kullanici): izlemli
