@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji Rapor Şablonu Kartı — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:980px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#b23b3b;background:linear-gradient(#e2695f,#b23b3b);color:#fff}
+  .sp{margin-left:auto}
+  .idstrip{display:grid;grid-template-columns:130px 1fr 90px 1fr 100px;gap:10px;padding:10px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .sekmeler{display:flex;gap:2px;padding:8px 12px 0;border-bottom:1px solid var(--line)}
+  .sek{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    background:var(--head);font-size:11.5px;color:var(--muted)}
+  .sek.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin:12px}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);
+    background:var(--head);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;
+    display:flex;align-items:center;gap:8px}
+  .grp h4 .mini{margin-left:auto;border:1px solid var(--line);border-radius:3px;background:#fff;
+    padding:2px 8px;font-size:10.5px;font-weight:normal;color:var(--ink)}
+  table{border-collapse:collapse;width:100%;font-size:12px;background:#fff}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy)}
+  td{border-bottom:1px solid var(--line2);padding:4px 8px;vertical-align:top}
+  td.metin{white-space:normal;color:#33414f;line-height:1.5}
+  .yer{background:#fff6da;border:1px solid #ecd9a3;border-radius:2px;padding:0 3px}
+  .kis{display:inline-block;border:1px solid var(--line);border-radius:3px;background:#f7f9fc;
+    padding:0 5px;font-family:Consolas,monospace;font-size:10.5px;color:var(--navy)}
+  .not{padding:8px 12px;color:var(--muted);font-size:11px;line-height:1.6}
+  .altnot{max-width:980px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .sag{text-align:right}
+  .orta{text-align:center}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">📄 Rapor Şablonu — RS-BT-001 <span class="sp">GenoTIP AI · Yönetim</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="btn">⧉ Kopyala</div>
+    <div class="btn">👁 Önizle</div>
+    <div class="btn sp">Kapat</div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label class="req">Kod</label><div class="inp">RS-BT-001</div></div>
+    <div class="fld"><label class="req">Şablon Adı</label>
+      <div class="inp big">Beyin BT — Normal</div></div>
+    <div class="fld"><label class="req">Modalite</label><div class="inp combo">BT</div></div>
+    <div class="fld"><label>Bağlı Tetkik (Hizmet)</label>
+      <div class="inp combo">BT.001 · Beyin BT (kontrastsız)</div></div>
+    <div class="fld"><label>Durum</label><div class="inp combo">Aktif</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sek on">Bölümler</div>
+    <div class="sek">Makrolar</div>
+    <div class="sek">Yapılandırılmış Alanlar</div>
+    <div class="sek">Yetki / Görünürlük</div>
+  </div>
+
+  <div class="grp">
+    <h4>Rapor Bölümleri
+      <span class="mini">＋ Bölüm</span><span class="mini">↑</span><span class="mini">↓</span>
+      <span class="mini">🗑</span>
+    </h4>
+    <table>
+      <thead>
+        <tr><th style="width:26px"></th><th style="width:30px">#</th><th style="width:170px">Başlık</th>
+            <th>Varsayılan Metin</th><th style="width:70px" class="orta">Zorunlu</th>
+            <th style="width:80px" class="orta">Yazdır</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>☐</td><td>1</td><td><b>Klinik Bilgi</b></td>
+          <td class="metin"><span class="yer">{{istem_notu}}</span></td>
+          <td class="orta">☑</td><td class="orta">☑</td>
+        </tr>
+        <tr>
+          <td>☐</td><td>2</td><td><b>Teknik</b></td>
+          <td class="metin">Kontrast madde verilmeksizin aksiyel planda beyin BT incelemesi yapıldı.
+            Doz: <span class="yer">{{dlp}}</span> mGy·cm</td>
+          <td class="orta">☐</td><td class="orta">☑</td>
+        </tr>
+        <tr>
+          <td>☐</td><td>3</td><td><b>Karşılaştırma</b></td>
+          <td class="metin"><span class="yer">{{onceki_tetkik}}</span> — önceki tetkik yoksa bölüm
+            rapora yazılmaz.</td>
+          <td class="orta">☐</td><td class="orta">☑</td>
+        </tr>
+        <tr class="sec">
+          <td>☑</td><td>4</td><td><b>Bulgular</b></td>
+          <td class="metin">Serebral hemisferler normal görünümde. Akut kanama, iskemi ya da kitle
+            lezyonu izlenmedi. Ventriküler sistem normal genişlikte, orta hat yapıları yerindedir.
+            Sisternalar açıktır. Kemik yapılarda fraktür saptanmadı.</td>
+          <td class="orta">☑</td><td class="orta">☑</td>
+        </tr>
+        <tr>
+          <td>☐</td><td>5</td><td><b>Sonuç</b></td>
+          <td class="metin">Beyin BT incelemesi normal sınırlardadır.</td>
+          <td class="orta">☑</td><td class="orta">☑</td>
+        </tr>
+        <tr>
+          <td>☐</td><td>6</td><td><b>Öneri</b></td>
+          <td class="metin">—</td>
+          <td class="orta">☐</td><td class="orta">☑</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="not">Sıra rapor çıktısındaki sırayla aynıdır. <b>Zorunlu</b> işaretli bölüm boş
+      bırakılırsa rapor onaya gönderilemez. <b>Yazdır</b> kapalı bölüm ekranda görünür ama hasta
+      çıktısına basılmaz (iç not).</div>
+  </div>
+
+  <div class="grp">
+    <h4>Makrolar (hızlı ifade) <span class="mini">＋ Makro</span></h4>
+    <table>
+      <thead><tr><th style="width:26px"></th><th style="width:110px">Kısayol</th>
+        <th style="width:150px">Ad</th><th>Metin</th><th style="width:110px">Hedef Bölüm</th></tr></thead>
+      <tbody>
+        <tr><td>☐</td><td><span class="kis">.nrm</span></td><td>Normal beyin</td>
+          <td class="metin">Serebral hemisferler normal görünümde, patolojik sinyal değişikliği
+            izlenmedi.</td><td>Bulgular</td></tr>
+        <tr><td>☐</td><td><span class="kis">.kri</span></td><td>Kronik iskemik</td>
+          <td class="metin">Derin ak maddede kronik iskemik gliotik değişikliklerle uyumlu
+            hipodens alanlar mevcuttur.</td><td>Bulgular</td></tr>
+        <tr><td>☐</td><td><span class="kis">.sin</span></td><td>Sinüzit</td>
+          <td class="metin">Maksiller sinüslerde mukozal kalınlaşma izlenmektedir.</td>
+          <td>Bulgular</td></tr>
+        <tr><td>☐</td><td><span class="kis">.kon</span></td><td>Kontrol öneri</td>
+          <td class="metin">Klinik korelasyon ve gerekirse kontrastlı MR ile ileri inceleme
+            önerilir.</td><td>Öneri</td></tr>
+      </tbody>
+    </table>
+    <div class="not">Hekim rapor yazarken kısayolu yazıp <b>Tab</b>'a basınca metin o bölüme
+      eklenir; makro listesi sağ panelden tıklanarak da kullanılır.</div>
+  </div>
+
+  <div class="ozet not" style="background:var(--head);border-top:1px solid var(--line2);padding:8px 12px">
+    Kullanım: <b>418 rapor</b> · Son kullanım: <b>30.08.2026 09:12</b> ·
+    Oluşturan: <b>Uzm. Dr. M. Kaya · 12.03.2026</b> · Sürüm: <b>4</b>
+  </div>
+</div>
+
+<div class="altnot">
+  <b>NOT (mockup):</b> "Yapılandırılmış Alanlar" sekmesi modaliteye göre skor alanları taşır
+  (mamografide <b>BI-RADS</b>, tiroid USG'de <b>TI-RADS</b>, karaciğer MR'da <b>LI-RADS</b>);
+  bu alanlar hem rapora basılır hem de sayısal olarak saklanır — takip ve istatistik ancak böyle
+  yapılabilir. "Yetki / Görünürlük" sekmesi şablonu belirli bölüm/hekimlere kısıtlar.
+  Şablonun <b>sürümü</b> tutulur: eski raporlar hangi sürümle yazıldıysa o metinle saklanır,
+  şablon sonradan değişince geçmiş raporlar değişmez.
+</div>
+</body>
+</html>

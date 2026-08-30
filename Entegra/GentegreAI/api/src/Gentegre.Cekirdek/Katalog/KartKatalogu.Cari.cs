@@ -574,6 +574,12 @@ public static partial class KartKatalogu
         {
             "kod"   => a with { Baslik = "Kurum Kodu" },
             "unvan" => a with { Baslik = "Kurum Adı" },
+            // CARI KAMPANYASI KURUMDA GIZLI (kullanici): kurumun fiyat kurali
+            //   SOZLESMEDEN gelir (taraf_kurum.kampanya_id). Ayni kartta iki
+            //   kampanya alani gorunmesi "hangisi gecerli" sorusunu doguruyordu -
+            //   cozum sirasi zaten sozlesme > cari > genel (fn_taraf_kampanya),
+            //   yani kurumda cari alani hicbir zaman kazanmaz.
+            "kampanyaId" => a with { Gizli = true },
             _ => a
         }).ToList();
         alanlar.Add(new KartAlani("kurum", "kurum", "mantik", Baslik: "Kurum", Gizli: true));

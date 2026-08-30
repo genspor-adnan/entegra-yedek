@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji Rapor Çıktısı — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:900px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sp{margin-left:auto}
+  /* --- A4 kagit --- */
+  .sayfa{background:#fff;margin:14px auto;padding:26px 30px;width:794px;min-height:1000px;
+    border:1px solid var(--line2);box-shadow:0 2px 10px rgba(20,40,70,.08);
+    font-family:"Segoe UI","Trebuchet MS",Tahoma,sans-serif;font-size:12.5px;color:#22303d}
+  .kbaslik{display:flex;align-items:flex-start;gap:14px;border-bottom:2px solid var(--navy);padding-bottom:8px}
+  .logo{width:52px;height:52px;border:1px solid var(--line);border-radius:6px;display:flex;
+    align-items:center;justify-content:center;font-size:22px;color:var(--navy)}
+  .kbaslik h1{margin:0;font-size:16px;color:var(--navy);letter-spacing:.2px}
+  .kbaslik .alt{font-size:11px;color:var(--muted);line-height:1.5}
+  .kbaslik .sag{margin-left:auto;text-align:right;font-size:11px;color:var(--muted);line-height:1.6}
+  .rapadi{text-align:center;font-size:14px;font-weight:bold;color:var(--navy);
+    letter-spacing:.6px;margin:14px 0 10px;text-transform:uppercase}
+  .kimlik{display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;border:1px solid var(--line2);
+    border-radius:3px;padding:8px 10px;font-size:11.5px;background:#fbfcfd}
+  .kimlik div{display:flex;gap:6px}
+  .kimlik span.et{color:var(--muted);min-width:96px}
+  .kimlik span.dg{font-weight:bold}
+  .bolum{margin-top:14px}
+  .bolum h3{margin:0 0 3px;font-size:11.5px;color:var(--navy);text-transform:uppercase;
+    letter-spacing:.4px;border-bottom:1px solid var(--line2);padding-bottom:2px}
+  .bolum p{margin:0;line-height:1.65;text-align:justify}
+  .bolum ol{margin:0;padding-left:18px;line-height:1.7}
+  .imza{margin-top:26px;display:flex;justify-content:flex-end}
+  .imzak{width:290px;text-align:center;font-size:11.5px;line-height:1.6}
+  .imzak .cizgi{border-top:1px solid var(--line);margin-bottom:4px}
+  .imzak b{color:var(--navy)}
+  .eimza{margin-top:6px;border:1px solid #bfe3cb;background:#f1faf4;border-radius:3px;
+    padding:5px 7px;font-size:10.5px;color:#2e7d46;text-align:left;line-height:1.5}
+  .dipnot{margin-top:18px;border-top:1px solid var(--line2);padding-top:6px;
+    font-size:10px;color:var(--muted);line-height:1.5;display:flex;gap:10px}
+  .qr{width:56px;height:56px;border:1px solid var(--line);border-radius:3px;
+    background:repeating-linear-gradient(45deg,#22303d 0 3px,#fff 3px 6px);opacity:.75;flex:0 0 auto}
+  .not{max-width:900px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .rozet{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold;
+    background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🖨 Rapor Çıktısı — ACC-260830-0043 <span class="sp">GenoTIP AI · Merkez</span></div>
+  <div class="toolbar">
+    <div class="btn primary">🖨 Yazdır</div>
+    <div class="btn">📄 PDF</div>
+    <div class="btn">✉ Hastaya Gönder (SMS/e-posta)</div>
+    <div class="btn">🔗 Hasta Portalı Bağlantısı</div>
+    <div class="btn">＋ Ek Rapor (Addendum)</div>
+    <div class="btn sp">Kapat</div>
+  </div>
+
+  <div class="sayfa">
+    <div class="kbaslik">
+      <div class="logo">🏥</div>
+      <div>
+        <h1>ÖZEL GENOTİP TIP MERKEZİ</h1>
+        <div class="alt">Radyoloji Bölümü · Bağdat Cd. No:120 Kadıköy / İstanbul<br>
+          Tel: 0216 000 00 00 · MERSİS 0 000 0000 0000 0000</div>
+      </div>
+      <div class="sag">
+        Rapor No: <b>RAD-2026-004317</b><br>
+        Protokol: <b>000000011</b><br>
+        Accession: <b>ACC-260830-0043</b>
+      </div>
+    </div>
+
+    <div class="rapadi">Manyetik Rezonans İnceleme Raporu</div>
+
+    <div class="kimlik">
+      <div><span class="et">Hasta</span><span class="dg">AYŞE YILMAZ</span></div>
+      <div><span class="et">Tetkik</span><span class="dg">Lomber Vertebra MR (kontrastsız)</span></div>
+      <div><span class="et">Doğum T. / Yaş</span><span class="dg">14.05.1985 · 41 · Kadın</span></div>
+      <div><span class="et">Çekim Tarihi</span><span class="dg">30.08.2026 09:05</span></div>
+      <div><span class="et">Hasta No</span><span class="dg">H-000871</span></div>
+      <div><span class="et">Rapor Tarihi</span><span class="dg">30.08.2026 09:58</span></div>
+      <div><span class="et">İsteyen Hekim</span><span class="dg">Dr. Bahar Aladağ · Ortopedi</span></div>
+      <div><span class="et">Ödeyen Kurum</span><span class="dg">Özel Yaşam Sigorta A.Ş. (ÖSS)</span></div>
+    </div>
+
+    <div class="bolum">
+      <h3>Klinik Bilgi</h3>
+      <p>3 aydır süren bel ağrısı, sağ bacağa yayılım. Ön tanı: lomber diskopati (M51.1).</p>
+    </div>
+
+    <div class="bolum">
+      <h3>Teknik</h3>
+      <p>1.5T MR cihazında sagital T1, sagital T2, aksiyel T2 ve koronal STIR sekansları ile
+         kontrast madde verilmeksizin lomber vertebra incelemesi yapıldı.</p>
+    </div>
+
+    <div class="bolum">
+      <h3>Karşılaştırma</h3>
+      <p>14.02.2026 tarihli lomber MR incelemesi ile karşılaştırmalı değerlendirildi.</p>
+    </div>
+
+    <div class="bolum">
+      <h3>Bulgular</h3>
+      <p>Lomber lordoz düzleşmiştir. Vertebra korpus yükseklikleri ve sinyal özellikleri doğaldır.
+         L4-L5 düzeyinde posterior anüler bulging ve sağ paramedian protrüzyon izlenmekte olup,
+         sağ L5 kök basısına yol açmaktadır. L5-S1 düzeyinde disk dejenerasyonu ve hafif difüz
+         bulging mevcuttur. Konus medullaris L1 düzeyinde sonlanmakta, sinyal özellikleri
+         normaldir. Paravertebral yumuşak dokular olağandır.</p>
+    </div>
+
+    <div class="bolum">
+      <h3>Sonuç</h3>
+      <ol>
+        <li>L4-L5 posterior anüler bulging ve sağ paramedian protrüzyon; sağ L5 kök basısı.</li>
+        <li>L5-S1 disk dejenerasyonu ve hafif difüz bulging.</li>
+        <li>Önceki tetkike göre L4-L5 protrüzyonda hafif artış izlenmiştir.</li>
+      </ol>
+    </div>
+
+    <div class="imza">
+      <div class="imzak">
+        <div class="cizgi"></div>
+        <b>Uzm. Dr. Selin AYDIN</b><br>
+        Radyoloji Uzmanı · Dip. No 123456
+        <div class="eimza">
+          ✔ <b>Elektronik imzalıdır</b> — 30.08.2026 09:58<br>
+          Ön rapor: Asis. Dr. Esra Tunç · 09:41<br>
+          Doğrulama: genotip.com.tr/rapor · RAD-2026-004317
+        </div>
+      </div>
+    </div>
+
+    <div class="dipnot">
+      <div class="qr"></div>
+      <div>
+        Bu rapor <b>görüntüleme bulgularının değerlendirmesidir</b>; tanı ve tedavi kararı
+        klinik bulgularla birlikte hekiminiz tarafından verilir. Rapor ve görüntülere karekod ya da
+        hasta portalı üzerinden erişebilirsiniz. Görüntüler kurumumuzda 10 yıl saklanır.<br>
+        Sayfa 1 / 1 · Basım: 30.08.2026 10:12 · admin
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>NOT (mockup):</b> Çıktı düzeni <b>A4</b> ölçüsündedir; şablonda "Yazdır" işareti kapalı
+  bölümler buraya basılmaz (iç notlar hastaya gitmez). Üst başlık kurum kartından, kimlik bloğu
+  başvuru + istem kaydından, imza bloğu onaylayan hekimden gelir — ön rapor yazan asistan da
+  görünür, sorumluluk zinciri kaybolmaz. Rapor onaylandıktan sonra metin <b>kilitlidir</b>;
+  düzeltme "Ek Rapor (Addendum)" olarak alta eklenir ve ayrıca imzalanır. Karekod hasta portalı
+  doğrulama bağlantısını taşır. <span class="rozet">Onaylı</span> raporda çıktı serbesttir;
+  taslak raporda çıktıya "ÖN RAPOR — İMZASIZ" filigranı basılır.
+</div>
+</body>
+</html>

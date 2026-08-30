@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji Çalışma Listesi — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --req:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1240px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sp{margin-left:auto}
+  .ara{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:12px;
+    background:#fff;height:23px;padding:0 9px;width:240px;color:var(--muted)}
+  .cips{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:11px;padding:2px 10px;font-size:11px;background:#fff}
+  .cip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .suz{display:flex;gap:6px;margin-left:auto;align-items:center}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:11.5px;display:flex;align-items:center;white-space:nowrap}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px;white-space:nowrap}
+  tr.sec td{background:var(--sel)}
+  tr.acil td{background:#fdf3f2}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .c-bek{background:#eef1f5;color:#5b6b7c;border:1px solid #d4dde6}
+  .c-cek{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .c-rap{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .c-on{background:#efe4fa;color:#6a3fa0;border:1px solid #d8c3ef}
+  .c-tamam{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-acil{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .mod{display:inline-block;min-width:34px;text-align:center;border:1px solid var(--line);
+    border-radius:3px;background:#fff;font-size:10px;font-weight:bold;color:var(--navy);padding:1px 4px}
+  .dip{display:flex;gap:14px;padding:6px 10px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted)}
+  .dip b{color:var(--ink)}
+  .not{max-width:1240px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .kritik{color:#b23b3b;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🩻 Radyoloji — Çalışma Listesi <span class="sp">GenoTIP AI · Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">✎ Rapor Yaz</div>
+    <div class="btn">👁 Görüntüyü Aç (PACS)</div>
+    <div class="btn">✔ Çekildi İşaretle</div>
+    <div class="btn">↺ Tekrar Çekim</div>
+    <div class="btn pas">✍ Onayla</div>
+    <div class="btn">🖨 Rapor Çıktısı</div>
+    <div class="ara sp">🔍 Hasta adı, protokol, accession no…</div>
+  </div>
+
+  <div class="cips">
+    <span class="cip on">Raporlanacak</span>
+    <span class="cip">Bekleyen Çekim</span>
+    <span class="cip">Taslak Raporlar</span>
+    <span class="cip">Onay Bekleyen</span>
+    <span class="cip">Bugün Tamamlanan</span>
+    <span class="cip">Tümü</span>
+    <div class="suz">
+      <div class="inp combo">Tüm modaliteler</div>
+      <div class="inp combo">Tüm radyologlar</div>
+      <div class="inp">30.08.2026</div>
+      <div class="inp">—</div>
+      <div class="inp">30.08.2026</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:26px"></th>
+        <th>Saat</th><th>Mod.</th><th>Accession</th><th>Hasta</th><th>Yaş/C</th>
+        <th>Tetkik</th><th>İstem Yapan</th><th>Ödeyen Kurum</th>
+        <th>Öncelik</th><th>Durum</th><th>Radyolog</th><th style="text-align:right">Süre</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="acil">
+        <td>☐</td><td>08:14</td><td><span class="mod">BT</span></td><td>ACC-260830-0041</td>
+        <td>MEHMET ÇELİK</td><td>67 / E</td>
+        <td>Beyin BT (kontrastsız)</td><td>Acil Servis</td><td>SGK</td>
+        <td><span class="chip c-acil">ACİL</span></td>
+        <td><span class="chip c-rap">Raporlanacak</span></td>
+        <td>—</td><td style="text-align:right" class="kritik">42 dk</td>
+      </tr>
+      <tr class="sec">
+        <td>☑</td><td>09:05</td><td><span class="mod">MR</span></td><td>ACC-260830-0043</td>
+        <td>AYŞE YILMAZ</td><td>41 / K</td>
+        <td>Lomber MR (kontrastsız)</td><td>Ortopedi · Dr. B. Aladağ</td><td>Özel Yaşam Sigorta</td>
+        <td>Normal</td>
+        <td><span class="chip c-rap">Raporlanacak</span></td>
+        <td>—</td><td style="text-align:right">18 dk</td>
+      </tr>
+      <tr>
+        <td>☐</td><td>09:20</td><td><span class="mod">USG</span></td><td>ACC-260830-0044</td>
+        <td>ZEYNEP KAYA</td><td>29 / K</td>
+        <td>Tiroid USG</td><td>Dahiliye · Dr. A. Yılmaz</td><td>Kendi Öder</td>
+        <td>Normal</td>
+        <td><span class="chip c-on">Ön Rapor</span></td>
+        <td>Asis. Dr. E. Tunç</td><td style="text-align:right">6 dk</td>
+      </tr>
+      <tr>
+        <td>☐</td><td>09:40</td><td><span class="mod">DR</span></td><td>ACC-260830-0045</td>
+        <td>FAİK BULUT</td><td>55 / E</td>
+        <td>Akciğer Grafisi PA</td><td>Göğüs Hast.</td><td>SGK</td>
+        <td>Normal</td>
+        <td><span class="chip c-cek">Çekildi</span></td>
+        <td>—</td><td style="text-align:right">3 dk</td>
+      </tr>
+      <tr>
+        <td>☐</td><td>10:10</td><td><span class="mod">MG</span></td><td>ACC-260830-0047</td>
+        <td>MERVE DEMİR</td><td>48 / K</td>
+        <td>Bilateral Mamografi + Tomosentez</td><td>Genel Cerrahi</td><td>Özel Yaşam Sigorta</td>
+        <td>Normal</td>
+        <td><span class="chip c-bek">Bekliyor</span></td>
+        <td>—</td><td style="text-align:right">—</td>
+      </tr>
+      <tr>
+        <td>☐</td><td>10:30</td><td><span class="mod">BT</span></td><td>ACC-260830-0048</td>
+        <td>ALİ ELMA</td><td>73 / E</td>
+        <td>Tüm Abdomen BT (kontrastlı)</td><td>Üroloji · Dr. A. Kurt</td><td>SGK</td>
+        <td>Normal</td>
+        <td><span class="chip c-tamam">Onaylandı</span></td>
+        <td>Uzm. Dr. M. Kaya</td><td style="text-align:right">—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="dip">
+    <span>Kayıt: <b>6</b></span>
+    <span>Raporlanacak: <b>2</b></span>
+    <span>Ön rapor (onay bekleyen): <b>1</b></span>
+    <span class="kritik">Acil bekleyen: 1 · en eski 42 dk</span>
+    <span class="sp">Ortalama rapor süresi (bugün): <b>31 dk</b></span>
+  </div>
+</div>
+
+<div class="not">
+  <b>NOT (mockup):</b> Bu ekran radyolojinin GİRİŞ ekranıdır — rapor yazma, PACS açma ve onay
+  buradan başlar. Satırlar <b>istem</b> kaydından gelir (başvuru satırındaki radyoloji hizmeti);
+  <b>Accession No</b> istem oluşurken üretilir ve PACS/DICOM ile eşleşmenin anahtarıdır.
+  Durum akışı: <i>Bekliyor → Çekildi → Raporlanacak → Ön Rapor → Onaylandı</i>; ön rapor asistan,
+  onay uzman hekim tarafından verilir (e-imza). ACİL satırlar kırmızı zeminde ve en üstte durur,
+  "Süre" çekimden bu yana geçen bekleme süresidir — acil bekleme süresi kalite göstergesidir.
+  Ödeyen Kurum başvurudan taşınır (fiyat kampanyadan çözülür).
+</div>
+</body>
+</html>

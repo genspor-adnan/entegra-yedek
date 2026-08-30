@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji İstem Kartı — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:860px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#b23b3b;background:linear-gradient(#e2695f,#b23b3b);color:#fff}
+  .sp{margin-left:auto}
+  .idstrip{display:grid;grid-template-columns:1fr 200px 150px 130px;gap:10px;padding:10px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+  .inp.big{height:25px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .ikili{display:flex;gap:6px}.ikili .inp{flex:1}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin:12px}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);
+    background:var(--head);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;
+    display:flex;align-items:center;gap:8px}
+  .grp h4 .mini{margin-left:auto;border:1px solid var(--line);border-radius:3px;background:#fff;
+    padding:2px 8px;font-size:10.5px;font-weight:normal;color:var(--ink)}
+  .iz{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:10px 12px}
+  .iz .tam{grid-column:1 / -1}
+  table{border-collapse:collapse;width:100%;font-size:12px;background:#fff}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .c-bek{background:#eef1f5;color:#5b6b7c;border:1px solid #d4dde6}
+  .c-cek{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .c-tamam{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-acil{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .akis{display:flex;align-items:center;gap:0;padding:10px 12px;background:#fff;
+    border-top:1px solid var(--line2)}
+  .adim{flex:1;text-align:center;font-size:10.5px;color:var(--muted);position:relative;padding-top:16px}
+  .adim::before{content:"";position:absolute;top:4px;left:50%;transform:translateX(-50%);
+    width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid var(--line)}
+  .adim::after{content:"";position:absolute;top:9px;left:50%;width:100%;height:2px;background:var(--line2)}
+  .adim:last-child::after{display:none}
+  .adim.ok{color:var(--ok);font-weight:bold}
+  .adim.ok::before{background:var(--ok);border-color:var(--ok)}
+  .adim.simdi{color:var(--accent);font-weight:bold}
+  .adim.simdi::before{background:var(--accent);border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(47,109,179,.2)}
+  .uyari{margin:0 12px 12px;border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;
+    padding:7px 9px;font-size:11px;color:#8a6218;line-height:1.55}
+  .ozet{display:flex;gap:14px;padding:8px 12px;background:var(--head);border-top:1px solid var(--line2);
+    font-size:11px;color:var(--muted)}
+  .ozet b{color:var(--ink)}
+  .not{max-width:860px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🧾 Radyoloji İstemi — ACC-260830-0043 <span class="sp">GenoTIP AI · Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn">📅 Randevu Ver</div>
+    <div class="btn">✔ Çekildi İşaretle</div>
+    <div class="btn">✎ Rapor Yaz</div>
+    <div class="btn danger">✖ İstemi İptal Et</div>
+    <div class="btn sp">Kapat</div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label class="req">Hasta</label>
+      <div class="inp big combo">♀ AYŞE YILMAZ · 41 y · ☎ +90 532 111 22 33</div></div>
+    <div class="fld"><label class="req">Tetkik</label>
+      <div class="inp combo">MR.012 · Lomber Vertebra MR</div></div>
+    <div class="fld"><label>Öncelik</label><div class="inp combo">Normal</div></div>
+    <div class="fld"><label>Durum</label>
+      <div class="inp"><span class="chip c-cek">Çekildi</span></div></div>
+  </div>
+
+  <div class="akis">
+    <div class="adim ok">İstem<br>09:02</div>
+    <div class="adim ok">Randevu<br>09:05</div>
+    <div class="adim ok">Çekim<br>09:23</div>
+    <div class="adim simdi">Raporlanıyor<br>—</div>
+    <div class="adim">Onay<br>—</div>
+    <div class="adim">Teslim<br>—</div>
+  </div>
+
+  <div class="grp">
+    <h4>İstem Bilgisi</h4>
+    <div class="iz">
+      <div class="fld"><label class="req">İsteyen Hekim / Bölüm</label>
+        <div class="inp combo">Dr. Bahar Aladağ · Ortopedi</div></div>
+      <div class="fld"><label>Başvuru (Protokol)</label>
+        <div class="inp">000000011 · 30.08.2026</div></div>
+      <div class="fld"><label>Ön Tanı (ICD-10)</label>
+        <div class="inp combo">M51.1 · Lomber diskopati</div></div>
+      <div class="fld"><label>Ödeyen Kurum</label>
+        <div class="inp">Özel Yaşam Sigorta A.Ş.</div></div>
+      <div class="fld tam"><label>Klinik Bilgi / İstem Notu</label>
+        <div class="inp" style="height:auto;padding:5px 6px;white-space:normal">3 aydır süren bel
+          ağrısı, sağ bacağa yayılım. Konservatif tedaviye yanıtsız.</div></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <h4>Çekim / Görüntü <span class="mini">🔄 PACS ile eşleştir</span></h4>
+    <div class="iz">
+      <div class="fld"><label>Modalite / Cihaz</label>
+        <div class="inp">MR · Siemens Magnetom 1.5T (MR-01)</div></div>
+      <div class="fld"><label>Tekniker</label><div class="inp combo">H. Şahin</div></div>
+      <div class="fld"><label>Çekim Zamanı</label>
+        <div class="ikili"><div class="inp">30.08.2026</div><div class="inp">09:23</div></div></div>
+      <div class="fld"><label>Kontrast</label>
+        <div class="ikili"><div class="inp combo">Verilmedi</div><div class="inp">— ml</div></div></div>
+      <div class="fld"><label>Seri / Görüntü</label><div class="inp">6 seri · 248 görüntü</div></div>
+      <div class="fld"><label>Doz (DLP / CTDIvol)</label><div class="inp">— (MR'da doz yok)</div></div>
+      <div class="fld tam"><label>Study UID</label>
+        <div class="inp" style="font-family:Consolas,monospace;font-size:11px">
+          1.2.826.0.1.3680043.8.498.10329457821004573920184</div></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <h4>Kontrol Listesi (çekim öncesi)</h4>
+    <table>
+      <thead><tr><th style="width:26px"></th><th>Soru</th><th style="width:150px">Yanıt</th>
+        <th style="width:170px">Kaydeden</th></tr></thead>
+      <tbody>
+        <tr><td>☑</td><td>Gebelik / gebelik şüphesi var mı?</td><td>Hayır</td><td>H. Şahin · 09:18</td></tr>
+        <tr><td>☑</td><td>Metal implant, pil, koklear implant?</td><td>Yok</td><td>H. Şahin · 09:18</td></tr>
+        <tr><td>☑</td><td>Klostrofobi / sedasyon ihtiyacı?</td><td>Yok</td><td>H. Şahin · 09:19</td></tr>
+        <tr><td>☑</td><td>Onam formu alındı mı?</td><td>Evet · imzalı</td><td>H. Şahin · 09:20</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="uyari">
+    ⚠ <b>MR güvenlik kontrolü zorunludur:</b> metal/pil sorusu yanıtlanmadan "Çekildi" işaretlenemez.
+    BT ve mamografide gebelik sorusu, kontrastlı tetkiklerde ayrıca kreatinin değeri ve alerji
+    sorgusu istenir.
+  </div>
+
+  <div class="ozet">
+    <span>İstem No: <b>ACC-260830-0043</b></span>
+    <span>Bekleme (istem→çekim): <b>21 dk</b></span>
+    <span>Rapor durumu: <b>Taslak · Asis. Dr. E. Tunç</b></span>
+    <span>Oluşturan: <b>Dr. B. Aladağ · 30.08.2026 09:02</b></span>
+  </div>
+</div>
+
+<div class="not">
+  <b>NOT (mockup):</b> İstem, başvurunun (satış siparişi) radyoloji hizmeti satırından doğar —
+  ücret ve ödeyen kurum oradan gelir, burada tekrar sorulmaz. <b>Accession No</b> istem
+  oluşurken üretilir; PACS'ten dönen Study UID bu numarayla eşleşir. Üstteki akış şeridi altı
+  durumu gösterir ve çalışma listesindeki "Durum" ile aynı kaynaktan beslenir. Kontrol listesi
+  modaliteye göre değişir (MR'da metal/pil, BT'de gebelik ve doz, kontrastlıda kreatinin).
+  İstem iptal edilirse başvuru satırı açık kalır — ücret otomatik düşmez, kullanıcı karar verir.
+</div>
+</body>
+</html>
