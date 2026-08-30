@@ -141,6 +141,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [kampanyaId, setKampanyaId] = useState<number | null>(null);
   const [kampanyaAdi, setKampanyaAdi] = useState('');
   /**
+   * ODEYEN KURUMUN PAY HESABI (291): 1 karsilama ORANI (ozel sigorta),
+   * 2 KATILIM PAYI sabit tutar (SGK). Provizyon dugmesi buna gore davranir -
+   * SGK'da oran sormak yanlis olurdu: SUT bedelinin tamami kuruma, hastadan
+   * yalniz katilim payi alinir.
+   */
+  const [paylasimModu, setPaylasimModu] = useState(1);
+  /**
    * FIYAT LISTESI (205). Acilista belge TURUNUN yonune gore cariden cozulur
    * (cari listesi > yonun varsayilani). Kullanici degistirince satirlar
    * yeniden fiyatlanir - kaydedilmis belgede sunucuda, kaydedilmemis belgede
@@ -711,6 +718,24 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   }, [belgeId, tur, cari?.id, odeyenKurumId]);
 
   /**
+   * PAY HESAPLAMA MODU (291) KAYITLI belgede de okunur: mod kampanyanin degil
+   * KURUMUN ozelligidir ve belgeye yazilmaz - kayitli basvuruda provizyon
+   * dugmesi yine SGK'ya gore davranmali. Kampanya cozumu (asagida) yalniz yeni
+   * belgede kosar, o yuzden ayri efekt.
+   */
+  useEffect(() => {
+    if (!odeyenKurumId) { setPaylasimModu(1); return }
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.fiyatKampanya({ tarafId: null, kurumId: odeyenKurumId });
+        if (!iptal) setPaylasimModu(y.paylasimModu ?? 1);
+      } catch { if (!iptal) setPaylasimModu(1) }
+    })();
+    return () => { iptal = true };
+  }, [odeyenKurumId]);
+
+  /**
    * KAMPANYA COZUMU (274). Odeyen kurum varsa kampanya ONUN sozlesmesinden
    * gelir - odemeyi yapan taraf fiyati belirler; yoksa carinin kendi
    * kampanyasi, o da yoksa genel kampanya. Kampanyanin kendi fiyat listesi
@@ -730,6 +755,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setKampanyaId(y.kampanyaId);
         setKampanyaAdi(y.kampanyaId
           ? `${y.kod ? y.kod + ' · ' : ''}${y.ad}` : '');
+        setPaylasimModu(y.paylasimModu ?? 1);
         if (y.fiyatListesiId) setFiyatListesiIdHam(y.fiyatListesiId);
       } catch { if (!iptal) { setKampanyaId(null); setKampanyaAdi('') } }
     })();
@@ -794,6 +820,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       const k = await api.fiyatKampanya({ tarafId: cari?.id ?? null, kurumId: yeni });
       setKampanyaId(k.kampanyaId);
       setKampanyaAdi(k.kampanyaId ? `${k.kod ? k.kod + ' · ' : ''}${k.ad}` : '');
+      setPaylasimModu(k.paylasimModu ?? 1);
       if (k.fiyatListesiId) { liste = k.fiyatListesiId; setFiyatListesiIdHam(k.fiyatListesiId) }
     } catch { /* kampanya cozulemezse mevcut liste ile devam */ }
 
@@ -807,6 +834,31 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * oldugu gibi. Oran 0 verilirse tamami hastaya yazilir (kendi oder).
    */
   async function provizyonUygula() {
+    // KATILIM PAYI MODU (291, SGK): oran sorulmaz. Her satir KENDI katilim
+    //   payiyla bolunur (fiyat listesinden kalemle birlikte gelir); kullanici
+    //   tek tip bir tutar dayatmak isterse kutuya yazar.
+    if (paylasimModu === 2) {
+      const cevapKatki = await metinSor(
+        'Katılım payı (TL) — boş bırakılırsa her satırın kendi katılım payı uygulanır',
+        '', 'Katılım payı');
+      if (cevapKatki === null) return;
+      const elle = cevapKatki.trim() === '' ? null : Math.max(0, hamSayi(cevapKatki));
+
+      // Yeni satirlar ONCE hesaplanir: toplami setSatirlar geri cagriminda
+      //   biriktirmek mesaji "0.00" gosteriyordu (state guncellemesi ertelenir).
+      const yeniler = satirlar.map(r => {
+        const tutar = satirTutari(hamSayi(r.adet), hamSayi(r.birimFiyat), r.iskonto, r.iskonto2);
+        const katki = Math.min(elle ?? hamSayi(r.katkiTutar ?? '0'), tutar);
+        return { ...r, karsilama: '0', katkiTutar: String(katki),
+                 kurumTutar: (tutar - katki).toFixed(2), hastaTutar: katki.toFixed(2) };
+      });
+      const toplamHasta = yeniler.reduce((t, r) => t + hamSayi(r.hastaTutar ?? '0'), 0);
+      setSatirlar(yeniler);
+      mesaj(`Katılım payı uygulandı: hastadan ${toplamHasta.toFixed(2)} TL, `
+          + 'kalanı kuruma. Kaydet ile kalıcı olur.');
+      return;
+    }
+
     // Varsayilan olarak KURUMUN sozlesmedeki orani gelir - hekim/kayit
     //   gorevlisi provizyon farkliysa degistirir.
     const cevap = await metinSor(
@@ -971,6 +1023,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                             sec: v => void listeDegisti(v), kampanyaAdi }}
             // ODEME PAYLASIMI (289): yalniz odeyen kurumlu basvuruda.
             paylasim={{ acik: basvuruMu && !!odeyenKurumId,
+                        katkiModu: paylasimModu === 2,
                         uygula: () => void provizyonUygula() }}
             doviz={{
               raporDovizi, setRaporDovizi: yeni => {

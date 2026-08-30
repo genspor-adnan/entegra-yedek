@@ -717,30 +717,39 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
       // KURUM ICMALI (289): SGK payi donem sonu TEK faturaya doner.
       if (kod === 'icmal.yeni') {
         await guvenli(async () => {
-          const kurumAd = await metinSor('Kurum kodu ya da adı',
-            'İcmal hangi kuruma kesilecek? (ör. SGK)');
+          // Soru METINDE, kutu BOS: ikinci parametre varsayilan DEGERDIR -
+          //   soruyu oraya yazmak kutuyu hazir doldurup aramayi bozuyordu.
+          const kurumAd = await metinSor(
+            'İcmal hangi kuruma kesilecek? (ör. SGK)', '', 'Kurum kodu ya da adı');
           if (!kurumAd) return;
+          // Kurum kaynaginda ad kolonu 'unvan' ('kurumAdi' icmal kaynaginin
+          //   kolonu) - yanlis alan sunucuda "Bilinmeyen alan" hatasi veriyordu.
           const k = await api.liste('kurum', {
             sayfa: 1, boyut: 5,
-            filtre: { alan: 'kurumAdi', op: 'icerir', deger: kurumAd },
+            filtre: { alan: 'unvan', op: 'icerir', deger: kurumAd },
           });
           if (k.satirlar.length === 0) { mesaj('Kurum bulunamadı.'); return }
           const kurumId = Number(k.satirlar[0].id);
+          const kurumUnvan = String(k.satirlar[0].unvan ?? kurumAd);
 
+          // Donem = icinde bulunulan AY. toISOString UTC'ye cevirdigi icin
+          //   yerel gece yarisi bir onceki gune kayiyordu (1 Agustos ->
+          //   "07-31"): ayin ilk gunu onceki aya dusup satirlari kacirirdi.
           const bugun = new Date();
-          const bas = new Date(bugun.getFullYear(), bugun.getMonth(), 1)
-            .toISOString().slice(0, 10);
-          const bit = new Date(bugun.getFullYear(), bugun.getMonth() + 1, 0)
-            .toISOString().slice(0, 10);
+          const gun = (t: Date) => `${t.getFullYear()}-`
+            + `${String(t.getMonth() + 1).padStart(2, '0')}-`
+            + `${String(t.getDate()).padStart(2, '0')}`;
+          const bas = gun(new Date(bugun.getFullYear(), bugun.getMonth(), 1));
+          const bit = gun(new Date(bugun.getFullYear(), bugun.getMonth() + 1, 0));
 
           // ONIZLEME: kullanici neyi faturaladigini gormeden icmal acmasin.
           const on = await api.icmalOnizleme(kurumId, bas, bit);
           if (on.satirlar.length === 0) {
-            mesaj(`${k.satirlar[0].kurumAdi ?? kurumAd} için bu dönemde açık kurum payı yok.`);
+            mesaj(`${kurumUnvan} için bu dönemde açık kurum payı yok.`);
             return;
           }
           if (!(await onay(
-                `${k.satirlar[0].kurumAdi ?? kurumAd} · ${bas} – ${bit}: `
+                `${kurumUnvan} · ${bas} – ${bit}: `
                 + `${on.satirlar.length} satır, toplam ${on.toplam.toFixed(2)}. `
                 + 'İcmal oluşturulsun mu?'))) return;
 

@@ -38,6 +38,7 @@ export function MesajKatmani() {
     <Modal
       baslik={`${urunAdi(kullanici?.urunModu)} Mesajı`}
       dar
+      enUst
       onKapat={() => kapat(false)}
       alt={
         <>

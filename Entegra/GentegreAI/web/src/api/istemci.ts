@@ -508,7 +508,9 @@ export const api = {
    */
   fiyatKampanya: (taraf: { tarafId?: number | null; kurumId?: number | null }) =>
     istek<{ kampanyaId: number | null; kod: string; ad: string;
-            fiyatListesiId: number | null }>(
+            fiyatListesiId: number | null;
+            /** 1 karsilama ORANI (OSS) · 2 KATILIM PAYI sabit tutar (SGK). */
+            paylasimModu: number; varsayilanKarsilama: number }>(
       '/api/fiyat/kampanya?'
       + (taraf.kurumId ? `kurumId=${taraf.kurumId}&` : '')
       + (taraf.tarafId ? `tarafId=${taraf.tarafId}` : '')),

@@ -604,6 +604,10 @@ public static partial class KartKatalogu
             //   icmali ister, sigorta sirketleri cogunlukla vaka bazli fatura.
             new("faturalamaModu", "faturalama_modu",  "kod",
                 KodListesi: "kurum.faturalama_modu", Baslik: "Faturalama"),
+            // PAY HESAPLAMA MODU (291): sigorta sirketleri ORAN, SGK sabit
+            //   KATILIM PAYI ile calisir - satir tutari buna gore bolunur.
+            new("paylasimModu",   "paylasim_modu",    "kod",
+                KodListesi: "kurum.paylasim_modu", Baslik: "Pay Hesabı"),
             // Provizyon girilmediginde uygulanacak karsilama orani (%).
             new("varsayilanKarsilama", "varsayilan_karsilama", "para",
                 Baslik: "Varsayılan Karşılama %"),

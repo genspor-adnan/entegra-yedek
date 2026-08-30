@@ -328,6 +328,9 @@ table.grid tr.flt input {
 /* --------------------------------------------------------- kart modali ---- */
 /* Mockup'ta kart MODAL acilir: .kaperde (perde) + .kawin (ortali pencere). */
 .kaperde { position: fixed; inset: 0; background: rgba(20, 40, 70, .45); z-index: 320 }
+/* Mesaj/onay penceresi HER ZAMAN en ustte: kart modali acikken sorulan onay
+   ayni z-index'te kalip arkada kayboluyordu. */
+.kaperde.enust { z-index: 420 }
 .kawin {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
   width: min(560px, 94vw); background: var(--yuz); border: 1px solid var(--cizgi);

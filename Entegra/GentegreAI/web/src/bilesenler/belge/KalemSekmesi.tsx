@@ -90,7 +90,9 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         Yalniz odeyen kurumlu basvuruda gorunur. */}
     {paylasim?.acik && (
       <button type="button" className="d ikon" disabled={kilitli}
-              title="Provizyon / karşılama oranını satırlara uygula"
+              title={paylasim.katkiModu
+                ? 'Katılım payını satırlara uygula (kalanı kuruma)'
+                : 'Provizyon / karşılama oranını satırlara uygula'}
               onClick={() => paylasim.uygula()}>
         ⚖
       </button>
@@ -491,7 +493,12 @@ export interface KalemSekmesiProps {
    * payi kolon olarak gorunur. Verilmezse kolonlar hic cizilmez - normal
    * fatura/irsaliyede paylasim kavrami yoktur.
    */
-  paylasim?: { acik: boolean; uygula(): void };
+  paylasim?: {
+    acik: boolean;
+    /** SGK modu (291): pay ORAN degil sabit KATILIM PAYI ile bolunur. */
+    katkiModu?: boolean;
+    uygula(): void;
+  };
   /** Fiyat listesi (205/218): doviz cercevesinin SAGINDA cizilir (kullanici).
       Liste hic kurulmamissa verilmez, kutu cizilmez. */
   fiyatListesi?: {

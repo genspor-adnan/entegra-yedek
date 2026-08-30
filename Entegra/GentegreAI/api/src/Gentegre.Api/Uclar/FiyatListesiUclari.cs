@@ -134,7 +134,26 @@ public static class FiyatListesiUclari
             var (kampanyaId, _, kod, ad, kampanyaListesi) =
                 await KampanyaCozAsync(baglanti, tarafId, kurumId, iptal);
 
-            return Results.Ok(new { kampanyaId, kod, ad, fiyatListesiId = kampanyaListesi });
+            // PAYLASIM KURALI (289/291) ayni cevapta: ekran "kurum payi nasil
+            //   hesaplanir" bilgisini kampanyayla BIRLIKTE ogrensin - provizyon
+            //   dugmesi SGK'da oran degil KATILIM PAYI islemeli.
+            short paylasimModu = 1;
+            decimal varsayilanKarsilama = 0;
+            if (kurumId is > 0)
+            {
+                await using var pk = baglanti.Komut(
+                    "select paylasim_modu, varsayilan_karsilama " +
+                    "  from public.taraf_kurum where id = @p0", null, kurumId);
+                await using var po = await pk.ExecuteReaderAsync(iptal);
+                if (await po.ReadAsync(iptal))
+                {
+                    paylasimModu = po.IsDBNull(0) ? (short)1 : po.GetInt16(0);
+                    varsayilanKarsilama = po.IsDBNull(1) ? 0 : po.GetDecimal(1);
+                }
+            }
+
+            return Results.Ok(new { kampanyaId, kod, ad, fiyatListesiId = kampanyaListesi,
+                                    paylasimModu, varsayilanKarsilama });
         }).WithTags("FiyatListesi").RequireAuthorization();
 
         // --------------------------------------------------- kampanyali fiyat ----

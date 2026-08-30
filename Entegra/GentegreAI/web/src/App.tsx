@@ -101,10 +101,12 @@ export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <OturumSaglayici>
-        {/* Tek mesaj/onay penceresi ("Gentegre AI Mesajı") - tarayici
-            alert/confirm kutulari yerine (bkz. bilesenler/mesaj.ts). */}
-        <MesajKatmani />
         <Yollar />
+        {/* Tek mesaj/onay penceresi ("Gentegre AI Mesajı") - tarayici
+            alert/confirm kutulari yerine (bkz. bilesenler/mesaj.ts).
+            Yollar'dan SONRA cizilir ve perdesi enUst'tur: kart modali acikken
+            sorulan onay arkada kaybolmasin. */}
+        <MesajKatmani />
       </OturumSaglayici>
     </BrowserRouter>
   );
