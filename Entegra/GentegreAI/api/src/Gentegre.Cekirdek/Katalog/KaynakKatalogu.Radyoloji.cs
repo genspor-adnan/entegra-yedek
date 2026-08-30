@@ -94,4 +94,42 @@ public static partial class KaynakKatalogu
             new("raporId",       "r.id",              "sayi",  "Rapor Id",      Varsayilan: false),
             new("raporDurum",    "coalesce(r.durum, 0)", "kod", "Rapor Durum Kodu", Varsayilan: false),
         });
+
+    // ------------------------------------------------- radyoloji-sablon ----
+    /// <summary>
+    /// Rapor sablonlari listesi (283). "Kullanim" sayaci hangi sablonun
+    /// gercekten ise yaradigini gosterir; kullanilmayan sablon pasife cekilir.
+    /// </summary>
+    private static KaynakTanimi RadyolojiSablon() => new(
+        Ad: "radyoloji-sablon",
+        YetkiKodu: "radyoloji",
+        Kaynak: "public.radyoloji_sablon s " +
+                "left join public.hizmet hz on hz.id = s.hizmet_id",
+        SubeKolonu: "s.sube_id",
+        VarsayilanSirala: "s.modalite, s.ad",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",         "s.id",   "sayi",  "Id", Varsayilan: false),
+            new("kod",        "s.kod",  "metin", "Kod", Genislik: 120),
+            new("modaliteAdi",
+                "case s.modalite when 1 then \'BT\' when 2 then \'MR\' when 3 then \'USG\' " +
+                "when 4 then \'Röntgen\' when 5 then \'Mamografi\' when 6 then \'DEXA\' " +
+                "when 7 then \'Anjiyo\' when 8 then \'Skopi\' else \'\' end",
+                                        "metin", "Mod.", Hizalama: "orta", Bicim: "rozet",
+                                                 Genislik: 80, Filtrelenebilir: false),
+            new("modalite",   "s.modalite", "kod", "Modalite Kodu", Varsayilan: false),
+            new("ad",         "s.ad",   "metin", "Sablon Adi", Genislik: 240),
+            new("tetkik",
+                "coalesce(nullif(hz.kod, \'\') || \' · \', \'\') || coalesce(hz.ad, \'\')",
+                                        "metin", "Bagli Tetkik", Genislik: 240,
+                                                 Filtrelenebilir: false),
+            new("bolum",      "s.bolum", "metin", "Bolum", Genislik: 130),
+            new("bolumSayisi",
+                "(select count(*) from public.radyoloji_sablon_bolum b where b.sablon_id = s.id)",
+                                        "sayi",  "Bolum", Hizalama: "sag", Genislik: 80,
+                                                 Filtrelenebilir: false),
+            new("kullanim",   "s.kullanim", "sayi", "Kullanim", Hizalama: "sag", Genislik: 90),
+            new("varsayilan", "s.varsayilan", "mantik", "Varsayilan", Hizalama: "orta"),
+            new("durum",      "s.durum", "mantik", "Aktif", Hizalama: "orta"),
+        });
 }

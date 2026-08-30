@@ -95,6 +95,7 @@ public static partial class KaynakKatalogu
         Ekle(Kampanya());
         Ekle(Kategori());
         Ekle(RadyolojiIstem());
+        Ekle(RadyolojiSablon());
         Ekle(PersonelGorev());
         Ekle(Hizmet());
         Ekle(Masraf());

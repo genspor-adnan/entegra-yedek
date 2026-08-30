@@ -535,6 +535,43 @@ export const api = {
   /** Panel: kutular + listeler TEK istekte (acilista bes cagri yapmamak icin). */
   panel: () => istek<PanelYaniti>('/api/panel'),
 
+  // ---------------------------------------------------------- radyoloji ----
+  // RAPOR EKRANI (283): acilista ihtiyac duyulan HER SEY tek istekte gelir -
+  //   istem, rapor, bolumler, sablonlar, makrolar, skorlar, hasta gecmisi ve
+  //   kritik bulgu bildirimleri.
+  radyolojiRapor: (istemId: number) =>
+    istek<{
+      istem: Record<string, unknown>;
+      rapor: Record<string, unknown> | null;
+      bolumler: Record<string, unknown>[];
+      alanlar: Record<string, unknown>[];
+      sablonlar: Record<string, unknown>[];
+      makrolar: Record<string, unknown>[];
+      skorlar: Record<string, unknown>[];
+      gecmis: Record<string, unknown>[];
+      kritikler: Record<string, unknown>[];
+    }>(`/api/radyoloji/istem/${istemId}/rapor`),
+
+  radyolojiRaporYaz: (istemId: number, govde: unknown) =>
+    gonder<{ raporId: number }>(`/api/radyoloji/istem/${istemId}/rapor`, govde),
+
+  /** Sablon iskeleti - "yeniden uygula" bolumleri buradan kurar. */
+  radyolojiSablonBolumleri: async (sablonId: number) => {
+    const y = await istek<{ detaylar?: Record<string, Record<string, unknown>[]> }>(
+      `/api/kart/radyoloji-sablon/${sablonId}`);
+    return y.detaylar?.bolumler ?? [];
+  },
+
+  /** Ön rapor / onay. Onay ön kosullari sunucuda (fn_radyoloji_rapor_onaylanabilir). */
+  radyolojiRaporDurum: (raporId: number, hedef: 'on-rapor' | 'onay') =>
+    gonder<{ tamam: boolean }>(`/api/radyoloji/rapor/${raporId}/durum?hedef=${hedef}`, {}),
+
+  radyolojiAddendum: (raporId: number) =>
+    gonder<{ raporId: number }>(`/api/radyoloji/rapor/${raporId}/addendum`, {}),
+
+  radyolojiKritikBulgu: (istemId: number, govde: unknown) =>
+    gonder<{ tamam: boolean }>(`/api/radyoloji/istem/${istemId}/kritik-bulgu`, govde),
+
   // ------------------------------------------------ randevu bolumleri ----
   // Randevu Ayarlari > Bolumler (251): randevu verilen bolumler, hekimleri ve
   //   her ikisinin randevu duzeni; sol agac + sag form ayni yanittan beslenir.

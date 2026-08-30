@@ -172,6 +172,22 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuSira: 10,
   },
   {
+    // RAPOR SABLONLARI (283/288): bolum iskeleti, makrolar ve skor alanlari.
+    //   Sablon tetkike baglanir; rapor ekrani varsayilani kendiliginden yukler.
+    kaynak: 'radyoloji-sablon', rota: 'radyoloji-sablon',
+    baslik: 'Rapor Şablonları', yol: 'Radyoloji › Rapor Şablonları',
+    kartYolu: '/radyoloji-sablon', kartBaslik: 'Rapor Şablonu',
+    aksiyonEkrani: 'cari-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2,
+    menuGrup: 'Radyoloji', menuAd: 'Rapor Şablonları', ic: '📄', yetkiKodu: 'radyoloji',
+    menuSira: 20,
+  },
+  {
     kaynak: 'randevu', baslik: 'Randevular', yol: 'Randevu › Randevular',
     kartYolu: '/randevu', aksiyonEkrani: 'randevu-liste',
     tarihAlani: 'tarih',

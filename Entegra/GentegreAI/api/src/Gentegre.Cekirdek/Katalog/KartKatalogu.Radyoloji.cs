@@ -99,4 +99,89 @@ public static partial class KartKatalogu
             new("randevuId",    "randevu_id",     "kod", Gizli: true),
             new("subeId",       "sube_id",        "kod", Gizli: true),
         });
+
+    /// <summary>
+    /// RAPOR SABLONU (283/284). Sablon TETKIKE baglanir: rapor ekrani acilinca
+    /// o tetkikin varsayilani kendiliginden yuklenir. Uc detay:
+    ///   BOLUMLER - raporun iskeleti (sira + zorunlu + yazdir bayragi),
+    ///   MAKROLAR - hekimin sik yazdigi ifadeler (kisayolla eklenir),
+    ///   SKOR ALANLARI - BI-RADS/TI-RADS gibi yapilandirilmis degerler.
+    /// SURUM: sablon degisince gecmis raporlar degismemeli - rapor kendi
+    /// surumunu saklar, bu yuzden sablonu duzenleyen surumu artirmali.
+    /// </summary>
+    private static KartTanimi RadyolojiSablon() => new(
+        Ad: "radyoloji-sablon",
+        YetkiKodu: "radyoloji",
+        Tablo: "public.radyoloji_sablon",
+        LogTabloId: 942,
+        SubeKolonu: "sube_id",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["durum"] = (short)1, ["surum"] = 1, ["varsayilan"] = (short)0,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("kod",       "kod",       "metin", EnFazlaUzunluk: 20,
+                Baslik: "Kod", Grup: "Kimlik"),
+            new("ad",        "ad",        "metin", Zorunlu: true, EnFazlaUzunluk: 150,
+                Baslik: "Sablon Adi", Grup: "Kimlik"),
+            new("modalite",  "modalite",  "kod", KodListesi: "rad.modalite",
+                Baslik: "Modalite", Grup: "Kimlik"),
+            // Bos birakilirsa sablon o modalitenin GENEL sablonu olur; tetkike
+            //   bagliysa rapor ekraninda ilk sirada gelir.
+            new("hizmetId",  "hizmet_id", "kod", KodTablosu: "public.v_rad_tetkik_lookup",
+                Baslik: "Bagli Tetkik", Grup: "Kimlik"),
+            new("varsayilan", "varsayilan", "mantik", Baslik: "Varsayilan", Grup: "Kimlik"),
+            new("durum",     "durum",     "mantik", Baslik: "Aktif", Grup: "Kimlik"),
+            new("bolum",     "bolum",     "metin", EnFazlaUzunluk: 60,
+                Baslik: "Bolum", Grup: "Genel"),
+            new("surum",     "surum",     "sayi",  Baslik: "Surum", Grup: "Genel"),
+            new("kullanim",  "kullanim",  "sayi",  Yazilabilir: false,
+                Baslik: "Kullanim", Grup: "Genel"),
+            new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 300,
+                Baslik: "Aciklama", Grup: "Genel"),
+            new("subeId",    "sube_id",   "kod", Gizli: true),
+        },
+        Detaylar: new DetayTanimi[]
+        {
+            new("bolumler", "public.radyoloji_sablon_bolum", "sablon_id", new KartAlani[]
+            {
+                new("id",   "id",   "sayi", Yazilabilir: false),
+                new("sira", "sira", "sayi", Baslik: "Sira"),
+                new("baslik", "baslik", "metin", Zorunlu: true, EnFazlaUzunluk: 60,
+                    Baslik: "Baslik"),
+                new("varsayilanMetin", "varsayilan_metin", "metin", Baslik: "Varsayilan Metin"),
+                new("zorunlu", "zorunlu", "mantik", Baslik: "Zorunlu"),
+                // Kapaliysa bolum ekranda gorunur ama hasta ciktisina basilmaz.
+                new("yazdir",  "yazdir",  "mantik", Baslik: "Yazdir"),
+            }, SubeKolonu: null, Baslik: "Bolumler", LogTabloId: 942),
+
+            new("makrolar", "public.radyoloji_sablon_makro", "sablon_id", new KartAlani[]
+            {
+                new("id",      "id",      "sayi", Yazilabilir: false),
+                new("kisayol", "kisayol", "metin", Zorunlu: true, EnFazlaUzunluk: 20,
+                    Baslik: "Kisayol"),
+                new("ad",      "ad",      "metin", EnFazlaUzunluk: 80, Baslik: "Ad"),
+                new("metin",   "metin",   "metin", Baslik: "Metin"),
+                new("hedefBolum", "hedef_bolum", "metin", EnFazlaUzunluk: 60,
+                    Baslik: "Hedef Bolum"),
+            }, SubeKolonu: null, Baslik: "Makrolar", LogTabloId: 942),
+
+            new("skorlar", "public.radyoloji_sablon_alan", "sablon_id", new KartAlani[]
+            {
+                new("id",       "id",       "sayi", Yazilabilir: false),
+                new("sira",     "sira",     "sayi", Baslik: "Sira"),
+                new("alanKod",  "alan_kod", "metin", Zorunlu: true, EnFazlaUzunluk: 40,
+                    Baslik: "Alan Kodu"),
+                new("alanAd",   "alan_ad",  "metin", Zorunlu: true, EnFazlaUzunluk: 80,
+                    Baslik: "Alan Adi"),
+                // Secenekler "|" ile ayrilir: serbest metin birakilirsa
+                //   "BIRADS 4" ile "Bi-Rads IV" iki ayri deger olur.
+                new("secenekler", "secenekler", "metin", EnFazlaUzunluk: 400,
+                    Baslik: "Secenekler (| ile)"),
+                new("zorunlu",  "zorunlu",  "mantik", Baslik: "Zorunlu"),
+                new("raporaBas", "rapora_bas", "mantik", Baslik: "Rapora Bas"),
+            }, SubeKolonu: null, Baslik: "Skor Alanlari", LogTabloId: 942),
+        });
 }

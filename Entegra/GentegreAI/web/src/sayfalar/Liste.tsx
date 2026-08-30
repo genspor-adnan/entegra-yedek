@@ -738,11 +738,11 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         return;
       }
 
-      // Rapor ekrani ayri is (Faz 2 ekranlari): istem kartina yonlendirilir.
+      // Rapor yazma AYRI EKRAN (283): bolumler sablondan uretilir, onay iki
+      //   asamalidir - generic karta sigmaz.
       if (kod === 'radyoloji.rapor') {
         if (!satir) return;
-        mesaj('Rapor yazma ekranı bir sonraki adımda geliyor. '
-            + `Şimdilik istem kartından çekim bilgisini tamamlayabilirsiniz (${satir.accessionNo}).`);
+        git(`/radyoloji/rapor/${Number(satir.id)}`);
         return;
       }
 

@@ -1201,3 +1201,37 @@ input.skt-gecmis {
 .kaid .alan-izgara.kaid-kampanya {
   grid-template-columns: 0.8fr 1.5fr 1.2fr 120px 120px 70px;
 }
+
+/* ============================================ RADYOLOJI RAPORU (283/284) ==
+   Uc sutun: solda hastanin gecmisi, ortada rapor bolumleri, sagda sablon/
+   makro/skor. Mockup: Ekranlar/radyoloji_rapor_yaz.html                    */
+.rad-govde { display: grid; grid-template-columns: 250px 1fr 290px; gap: 12px;
+             align-items: start; margin-top: 10px; }
+.rad-yan { background: var(--kutu-bg, #fbfcfd); border: 1px solid var(--cizgi, #e3e9f0);
+           border-radius: 4px; padding: 9px; }
+.rad-yan h5 { margin: 2px 0 6px; font-size: 11.5px; color: var(--lacivert, #14315a); }
+.rad-kart { border: 1px solid var(--cizgi, #e3e9f0); border-radius: 3px; background: #fff;
+            padding: 6px 8px; margin-bottom: 6px; font-size: 11px; line-height: 1.5; }
+.rad-kart.teh { border-color: #e4b7b2; background: #fdf3f2; }
+.rad-orta { display: flex; flex-direction: column; gap: 10px; }
+.rad-bolum-bas { font-size: 11px; font-weight: bold; text-transform: uppercase;
+                 letter-spacing: .3px; color: var(--lacivert, #14315a); margin-bottom: 3px; }
+.rad-bolum-bas .zor { color: #b23b3b; }
+.rad-bolum textarea { width: 100%; border: 1px solid var(--cizgi, #cdd6e0); border-radius: 3px;
+                      padding: 6px 8px; font: inherit; line-height: 1.55; resize: vertical; }
+.rad-bolum textarea:focus { outline: none; border-color: #98c2ee;
+                            box-shadow: 0 0 0 2px rgba(152, 194, 238, .35); }
+/* Makro dugmesi: kisayol + ad; metnin tamami title'da durur. */
+.rad-makro { display: flex; gap: 6px; align-items: center; width: 100%; text-align: left;
+             border: 1px solid var(--cizgi, #e3e9f0); border-radius: 3px; background: #fff;
+             padding: 4px 6px; margin-bottom: 5px; font-size: 11px; cursor: pointer; }
+.rad-makro:hover:not(:disabled) { background: #f2f7fd; border-color: #98c2ee; }
+.rad-makro:disabled { opacity: .5; cursor: default; }
+.rad-makro .kis { font-family: Consolas, monospace; font-size: 10.5px;
+                  border: 1px solid var(--cizgi, #cdd6e0); border-radius: 3px;
+                  background: #f7f9fc; padding: 0 5px; flex: 0 0 auto; }
+.rad-kimlik { grid-template-columns: 1.4fr 1.6fr 1.2fr 1fr; }
+.uyari-kutusu { border: 1px solid #f2ddbf; background: #fdf9f1; border-radius: 3px;
+                padding: 6px 8px; color: #8a6218; line-height: 1.5; }
+.kucuk { font-size: 11px; }
+@media (max-width: 1200px) { .rad-govde { grid-template-columns: 1fr; } }

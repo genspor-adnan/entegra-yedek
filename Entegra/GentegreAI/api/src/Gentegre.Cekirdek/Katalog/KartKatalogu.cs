@@ -169,6 +169,7 @@ public static partial class KartKatalogu
         Ekle(Kampanya());
         Ekle(Kategori());
         Ekle(RadyolojiIstem());
+        Ekle(RadyolojiSablon());
         Ekle(PersonelGorev());
         Ekle(Rol());
         Ekle(Stok());

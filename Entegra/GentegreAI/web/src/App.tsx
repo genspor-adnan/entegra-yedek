@@ -14,6 +14,7 @@ import { FirmaBilgileri } from './sayfalar/FirmaBilgileri';
 import { MesajKatmani } from './bilesenler/MesajKatmani';
 import { GenelAyarlar } from './sayfalar/GenelAyarlar';
 import { UtsSorgu } from './sayfalar/UtsSorgu';
+import { RadyolojiRapor } from './sayfalar/RadyolojiRapor';
 import { SatisAyarlar, AlisAyarlar } from './sayfalar/BelgeAyarlar';
 import { Panel } from './sayfalar/Panel';
 
@@ -82,6 +83,9 @@ function Yollar() {
         {yetki('belge') && <Route path="/alis-ayarlar" element={<AlisAyarlar />} />}
         {/* ÜTS urun sorgu (223): liste degil, canli sorgu formu. */}
         {yetki('uts') && <Route path="/uts-sorgu" element={<UtsSorgu />} />}
+        {/* Radyoloji raporu: generic kart degil - bolumler sablondan uretilir,
+            onay iki asamali ve onaydan sonra rapor kilitlenir (283/284). */}
+        {yetki('radyoloji') && <Route path="/radyoloji/rapor/:istemId" element={<RadyolojiRapor />} />}
 
         {/* Bilinmeyen yol: Ana Sayfa yetkisi varsa panele, yoksa kullanicinin
             girebildigi ILK ekrana (yetkisi hic yoksa oldugu yerde kalir). */}
