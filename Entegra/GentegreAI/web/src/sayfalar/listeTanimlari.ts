@@ -198,7 +198,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   basvuruda yok - yerine Ödeyen Kurum kullaniliyor (kullanici).
     //   'senaryoAdi'/'senaryo' e-Fatura kavrami - basvuruda karsiligi yok.
                     'durum', 'durumAdi', 'kaynak', 'tipi', 'kapanmaDurum',
-                    'subeId', 'vadeGun', 'senaryoAdi', 'senaryo'],
+    //   'belgeSeri' DB'de duruyor (numara benzersizligi seri+no ikilisinde) ama
+    //   listede hic gosterilmez - kolon menusunde de cikmaz (kullanici).
+                    'subeId', 'vadeGun', 'senaryoAdi', 'senaryo', 'belgeSeri'],
     // Kaynak kolonunun yerine ODEYEN KURUM / POLIKLINIK / DOKTOR (kullanici).
     //   SERI listede yok ama katalogda DURUYOR: gizliKolonlar'a konsa kolon
     //   menusunden de kaybolurdu - gerektiginde kullanici acar.
