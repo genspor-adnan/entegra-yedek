@@ -110,7 +110,18 @@ public static partial class KaynakKatalogu
                                                       "metin", "Kaynak",      Genislik: 170,
                                                       Siralanabilir: false, Filtrelenebilir: false),
             new("hedef",
-                "coalesce((select string_agg(distinct coalesce(ht.ad, '') || ' ' || hb.belge_no, ', ') " +
+                // Bir belge BIRDEN COK ve FARKLI TURDE hedefe bolunebilir (bir
+                //   kismi faturaya, kalani tahakkuka): hepsi virgulle yazilir.
+                //   Numarasi verilmemis hedefte YALNIZ tur adi gorunur - eski
+                //   ifade "Satış İrsaliyesi 0" yaziyordu. Siralama tur+no ile
+                //   sabit: string_agg sirasiz calisir, ayni belge her acilista
+                //   farkli sirada gorunuyordu.
+                "coalesce((select string_agg(distinct trim(coalesce(ht.ad, '') || ' ' || " +
+                "                            case when coalesce(hb.belge_no, '') in ('', '0') " +
+                "                                 then '' else hb.belge_no end), ', ' " +
+                "                            order by trim(coalesce(ht.ad, '') || ' ' || " +
+                "                                     case when coalesce(hb.belge_no, '') in ('', '0') " +
+                "                                          then '' else hb.belge_no end)) " +
                 "            from public.belge_satir hs " +
                 "            join public.belge_satir ks on ks.id = hs.kaynak_id and hs.kaynak_tur = 30 " +
                 "            join public.belge hb on hb.id = hs.belge_id " +
@@ -289,7 +300,18 @@ public static partial class KaynakKatalogu
                                                       "metin", "Kaynak",    Genislik: 170,
                                                       Siralanabilir: false, Filtrelenebilir: false),
             new("hedef",
-                "coalesce((select string_agg(distinct coalesce(ht.ad, '') || ' ' || hb.belge_no, ', ') " +
+                // Bir belge BIRDEN COK ve FARKLI TURDE hedefe bolunebilir (bir
+                //   kismi faturaya, kalani tahakkuka): hepsi virgulle yazilir.
+                //   Numarasi verilmemis hedefte YALNIZ tur adi gorunur - eski
+                //   ifade "Satış İrsaliyesi 0" yaziyordu. Siralama tur+no ile
+                //   sabit: string_agg sirasiz calisir, ayni belge her acilista
+                //   farkli sirada gorunuyordu.
+                "coalesce((select string_agg(distinct trim(coalesce(ht.ad, '') || ' ' || " +
+                "                            case when coalesce(hb.belge_no, '') in ('', '0') " +
+                "                                 then '' else hb.belge_no end), ', ' " +
+                "                            order by trim(coalesce(ht.ad, '') || ' ' || " +
+                "                                     case when coalesce(hb.belge_no, '') in ('', '0') " +
+                "                                          then '' else hb.belge_no end)) " +
                 "            from public.belge_satir hs " +
                 "            join public.belge_satir ks on ks.id = hs.kaynak_id and hs.kaynak_tur = 30 " +
                 "            join public.belge hb on hb.id = hs.belge_id " +

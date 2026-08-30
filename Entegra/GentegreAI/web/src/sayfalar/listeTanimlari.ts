@@ -200,7 +200,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
                     'durum', 'durumAdi', 'kaynak', 'tipi', 'kapanmaDurum',
     //   'belgeSeri' DB'de duruyor (numara benzersizligi seri+no ikilisinde) ama
     //   listede hic gosterilmez - kolon menusunde de cikmaz (kullanici).
-                    'subeId', 'vadeGun', 'senaryoAdi', 'senaryo', 'belgeSeri'],
+    //   Kalan ham/ERP kolonlari da basvuruda okunmuyor: Cari Id, Açık/Kapalı
+    //   Kodu, Ort. Maliyet ve Tipi (fatura/irsaliye alt turu).
+                    'subeId', 'vadeGun', 'senaryoAdi', 'senaryo', 'belgeSeri',
+                    'tarafId', 'acikKapali', 'maliyetOrt', 'tipiAdi'],
     // Kaynak kolonunun yerine ODEYEN KURUM / POLIKLINIK / DOKTOR (kullanici).
     //   SERI listede yok ama katalogda DURUYOR: gizliKolonlar'a konsa kolon
     //   menusunden de kaybolurdu - gerektiginde kullanici acar.
