@@ -387,6 +387,33 @@ public static partial class KartKatalogu
             new SilmeEngeli("public.taraf_kullanici", "id", "Bu kart bir kullaniciya bagli, silinemez.")
         });
 
+    // ---------------------------------------------------------- kategori ----
+    /// <summary>
+    /// KATEGORI karti (270, kullanici: "kategori istedigimiz kadar alt seviyeli
+    /// olmali", "kodu ve adi olmali"). Stok VE hizmet ayni agaci kullanir (269);
+    /// kampanya satiri "su kategoriden %20" derken bu agactan secer.
+    /// Ust kategori dongusu DB tetiginde engellenir.
+    /// </summary>
+    private static KartTanimi Kategori() => new(
+        Ad: "kategori",
+        YetkiKodu: "stok",
+        Tablo: "public.kategori",
+        LogTabloId: 916,
+        SubeKolonu: "sube_id",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["aktif"] = (short)1 },
+        Alanlar: new KartAlani[]
+        {
+            new("id",     "id",     "sayi",  Yazilabilir: false),
+            new("kod",    "kod",    "metin", EnFazlaUzunluk: 20, Baslik: "Kod", Grup: "Kimlik"),
+            new("ad",     "ad",     "metin", Zorunlu: true, EnFazlaUzunluk: 100,
+                Baslik: "Kategori", Grup: "Kimlik"),
+            // Bos ise KOK kategori; secilirse altina gecer (sinirsiz derinlik).
+            new("ustId",  "ust_id", "kod",   KodTablosu: "public.v_kategori_lookup",
+                Baslik: "Üst Kategori", Grup: "Kimlik"),
+            new("aktif",  "aktif",  "mantik", Baslik: "Durum", Grup: "Kimlik"),
+            new("subeId", "sube_id", "kod",  Gizli: true),
+        });
+
     // ---------------------------------------------------------- departman ----
     /// <summary>
     /// Departman karti (251) - personel departmani ve randevu bolumu AYNI
@@ -560,33 +587,9 @@ public static partial class KartKatalogu
             //   bilgiyi iki yere yazmak olurdu.
             new("kampanyaId",     "kampanya_id",      "kod",
                 KodTablosu: "public.v_kampanya_lookup", Baslik: "Kampanya"),
-            new("iskontoYuzde",   "iskonto_yuzde",    "para",  Baslik: "Genel İskonto %"),
             new("aciklama",       "aciklama",         "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
         }, SubeKolonu: null, Baslik: "Sözleşme", LogTabloId: 909, TekSatir: true));
 
-        // FIYAT POLITIKASI SATIRLARI - "su kategoriden %20 indirim" (kullanici).
-        //   Kapsam daraldikca oncelik artar: hizmet/stok satiri kategoriyi,
-        //   kategori de "Tümü"yu ezer (fiyatlama tarafinda bu sirayla bakilir).
-        detaylar.Add(new DetayTanimi("sozlesmeSatir", "public.kurum_sozlesme", "kurum_id",
-        new KartAlani[]
-        {
-            new("id",            "id",            "sayi",  Yazilabilir: false),
-            new("kapsam",        "kapsam",        "kod",   Zorunlu: true,
-                KodListesi: "kurum.sozlesme_kapsam", Baslik: "Kapsam"),
-            new("kategoriId",    "kategori_id",   "kod",   KodTablosu: "public.v_kategori_lookup",
-                Baslik: "Kategori"),
-            new("stokId",        "stok_id",       "kod",   KodTablosu: "public.v_stok_lookup",
-                Baslik: "Stok"),
-            new("hizmetId",      "hizmet_id",     "kod",   KodTablosu: "public.v_hizmet_lookup",
-                Baslik: "Hizmet"),
-            new("indirimYuzde",  "indirim_yuzde", "para",  Baslik: "İndirim %"),
-            new("sabitFiyat",    "sabit_fiyat",   "para",  Baslik: "Sabit Fiyat"),
-            new("baslangic",     "baslangic",     "tarih", Baslik: "Başlangıç"),
-            new("bitis",         "bitis",         "tarih", Baslik: "Bitiş"),
-            new("aktif",         "aktif",         "mantik", Baslik: "Aktif"),
-            new("aciklama",      "aciklama",      "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
-        }, SubeKolonu: null, Sirala: "kapsam desc, id",
-           Baslik: "Fiyat Politikası", LogTabloId: 910));
 
         return c with
         {

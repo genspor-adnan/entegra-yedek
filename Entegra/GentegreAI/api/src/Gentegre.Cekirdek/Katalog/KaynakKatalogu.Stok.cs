@@ -311,7 +311,12 @@ public static partial class KaynakKatalogu
             new("id",      "h.id",       "sayi",  "Id",         Varsayilan: false),
             new("kod",     "h.kod",      "metin", "Kod"),
             new("ad",      "h.ad",       "metin", "Hizmet Adi"),
-            new("grubu",   "h.grubu",    "kod",   "Grup"),
+            // Eski `grubu` kolonu hic kullanilmamis (hepsi 0) - yerine 269'da
+            //   eklenen kategori gosteriliyor.
+            new("kategoriAdi", "coalesce((select k.ad from public.kategori k " +
+                               "           where k.id = h.kategori), '')",
+                               "metin", "Kategori", Filtrelenebilir: false),
+            new("kategori", "h.kategori", "sayi", "Kategori Id", Varsayilan: false),
             new("kdv",     "h.kdv",      "sayi",  "KDV %",      Hizalama: "sag"),
             // Hizmette satis/alis ayrimi yok - tek fiyat listesi.
             new("fiyat",

@@ -205,6 +205,10 @@ public static partial class KartKatalogu
                 Baslik: "Durum", Grup: "Kimlik"),
             // "Detay" kutusu Kodlar'in SOLUNDA (kullanici) - alt gruplar alan
             //   sirasiyla dizilir, Detay alanlari once tanimlanir.
+            // Kategori STOKLA ORTAK agac (269): kampanya satiri "su kategoriden
+            //   %20" derken hizmetleri de kapsayabilsin.
+            new("kategori", "kategori", "kod",   KodTablosu: "public.kategori",
+                Baslik: "Kategori", Grup: "Genel", AltGrup: "Detay"),
             new("kdv",      "kdv",      "sayi",  Baslik: "KDV %",
                 Grup: "Genel", AltGrup: "Detay"),
             // Hizmet birimi stogunkiyle AYNI listeden (51 Adet, 57 Kg...).

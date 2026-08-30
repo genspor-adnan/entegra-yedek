@@ -292,6 +292,35 @@ public static partial class KaynakKatalogu
         };
     }
 
+    // ---------------------------------------------------------- kategori ----
+    /// <summary>
+    /// Kategori listesi (270). Alt kategori ust kategorisinin ALTINDA ve adi
+    /// girintili - agac oldugu tek bakista gorunsun (departman deseni, 257).
+    /// </summary>
+    private static KaynakTanimi Kategori() => new(
+        Ad: "kategori",
+        YetkiKodu: "stok",
+        Kaynak: "public.kategori k",
+        VarsayilanSirala: "coalesce((select u.ad from public.kategori u " +
+                          "           where u.id = k.ust_id), k.ad) asc, " +
+                          "k.ust_id nulls first, k.ad asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",       "k.id",     "sayi",  "Id", Varsayilan: false),
+            new("kod",      "k.kod",    "metin", "Kod", Genislik: 110),
+            new("ad",       "case when k.ust_id is null then k.ad else '— ' || k.ad end",
+                            "metin", "Kategori"),
+            new("ustAdi",   "coalesce((select u.ad from public.kategori u " +
+                            "           where u.id = k.ust_id), '')",
+                            "metin", "Üst Kategori", Filtrelenebilir: false),
+            new("ustId",    "k.ust_id", "sayi",  "Üst Id", Varsayilan: false),
+            new("stokSayisi", "(select count(*) from public.stok s where s.kategori = k.id)",
+                            "sayi", "Stok", Hizalama: "sag", Filtrelenebilir: false),
+            new("hizmetSayisi", "(select count(*) from public.hizmet h where h.kategori = k.id)",
+                            "sayi", "Hizmet", Hizalama: "sag", Filtrelenebilir: false),
+            new("aktif",    "k.aktif",  "mantik","Durum", Hizalama: "orta"),
+        });
+
     // ---------------------------------------------------------- kampanya ----
     /// <summary>Kampanya listesi (268) - Yönetim > Ayarlar yanindaki ekran.</summary>
     private static KaynakTanimi Kampanya() => new(

@@ -167,6 +167,7 @@ public static partial class KartKatalogu
         Ekle(Kurum());
         Ekle(Departman());
         Ekle(Kampanya());
+        Ekle(Kategori());
         Ekle(PersonelGorev());
         Ekle(Rol());
         Ekle(Stok());
