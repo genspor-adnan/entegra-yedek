@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from './Modal';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
+import { api } from '../api/istemci';
 import { para4 } from './bicim';
 import { GridMenu, type MenuOgesi } from './grid/GridMenu';
 import { dosyaIndirUrl } from './indir';
@@ -143,6 +144,46 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const kampanyaSatiri = meta.ad === 'satirlar' && meta.alanlar.some(a => a.ad === 'iskontoYeriId');
 
   /**
+   * KAYITLI urun satirinda ad (268): sunucu yalniz id tasir, kart acilinca
+   * hucrede "4262" gorunuyordu - hangi hizmet oldugu okunamiyordu. Adlar
+   * id -> ad sozlugunde tutulur; secim aninda satira yazilan `iskontoYeriAdi`
+   * onceliklidir (yeni secim hemen gorunur).
+   */
+  const [urunAdlari, setUrunAdlari] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!kampanyaSatiri) return;
+    // Adi bilinmeyen URUN satirlari: stok ve hizmet ayri kaynaklardan gelir.
+    const eksik = durum.guncel
+      .filter(r => Number(r.tip) === 3 && r.iskontoYeriId && !r.iskontoYeriAdi
+                   && !urunAdlari[String(r.iskontoYeriId)])
+      .map(r => ({ id: Number(r.iskontoYeriId), hizmet: Number(r.kalemTuru) === 2 }));
+    if (eksik.length === 0) return;
+
+    let iptal = false;
+    void (async () => {
+      const yeni: Record<string, string> = {};
+      for (const kaynak of ['stok', 'hizmet'] as const) {
+        const idler = eksik.filter(e => (kaynak === 'hizmet') === e.hizmet).map(e => e.id);
+        if (idler.length === 0) continue;
+        try {
+          const y = await api.liste(kaynak, {
+            sayfa: 1, boyut: idler.length,
+            filtre: { op: 'or', kosullar: idler.map(id => ({ alan: 'id', op: 'esit', deger: id })) },
+          });
+          y.satirlar.forEach(r => {
+            yeni[String(r.id)] = `${String(r.kod ?? '')} ${String(r.ad ?? '')}`.trim();
+          });
+        } catch { /* ad cozulemezse id gorunur - satir yine calisir */ }
+      }
+      if (!iptal && Object.keys(yeni).length) setUrunAdlari(m => ({ ...m, ...yeni }));
+    })();
+    return () => { iptal = true };
+  // urunAdlari bilerek bagimlilikta degil: sozluk buyudukce dongu olurdu.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kampanyaSatiri, durum.guncel]);
+
+  /**
    * KAMPANYA (268, kullanici): "İskonto Tipi yüzde ise başlıkta İskonto %,
    * tutar ise Tutar yazacak". Baslik kolon basinadir, satir basina degil -
    * satirlarin HEPSI ayni tipteyse ona gore yazilir, karisikta genel ad kalir.
@@ -262,11 +303,13 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const satirEkle = () => {
     if (acikAdresSatiriVar) return;
     const yeni: Satir = {};
-    // "aktif" alani yeni satirda ACIK baslar: kullanici bir kayit eklerken onu
-    //   pasif olsun diye eklemez. Kapali baslayinca (banka subesi ornegi) satir
-    //   kaydediliyor ama secim listelerinde HIC gorunmuyordu.
+    // "aktif"/"durum" alani yeni satirda ACIK baslar: kullanici bir kayit
+    //   eklerken onu pasif olsun diye eklemez. Kapali baslayinca (banka subesi
+    //   ornegi) satir kaydediliyor ama secim listelerinde HIC gorunmuyordu.
+    //   Iki ad da ayni isi yapiyor - kampanya satirinda kolon "durum" oldugu
+    //   icin eski kontrol kaciriyor, her satirda elle isaretlemek gerekiyordu.
     alanlar.forEach(a => {
-      yeni[a.ad] = a.tip === 'mantik' ? (a.ad === 'aktif' ? 1 : 0) : '';
+      yeni[a.ad] = a.tip === 'mantik' ? (a.ad === 'aktif' || a.ad === 'durum' ? 1 : 0) : '';
     });
     if (meta.ad === 'adresler') {
       yeni.ulke = VARSAYILAN_ULKE;
@@ -282,6 +325,13 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
     }
     if (meta.ad === 'acilKisiler' && durum.guncel.length === 0) {
       yeni.varsayilan = 1;
+    }
+    // KAMPANYA satiri (268): en sik kurulan satir "tum listeye yuzde indirim".
+    //   Zorunlu iki kod alani bos aciliyor ve Kaydet'te hata veriyordu.
+    if (kampanyaSatiri) {
+      yeni.tip = '1';          // Liste
+      yeni.kalemTuru = '0';    // Farketmez (stok + hizmet)
+      yeni.iskontoTipi = '1';  // Yuzde - doviz alani "%" olarak cizilir
     }
     onDegis({ ...durum, guncel: [...durum.guncel, yeni] });
   };
@@ -615,7 +665,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                       </select>
                     ) : Number(satir.tip) === 3 ? (
                       <span className="ikili">
-                        <input readOnly value={String(satir.iskontoYeriAdi ?? satir[a.ad] ?? '')}
+                        <input readOnly
+                               value={String(satir.iskontoYeriAdi
+                                             ?? urunAdlari[String(satir[a.ad] ?? '')]
+                                             ?? satir[a.ad] ?? '')}
                                placeholder="— ürün —"
                                disabled={saltOkunur || !a.yazilabilir}
                                onClick={() => !saltOkunur && setUrunAramaSatiri(i)} />
