@@ -399,18 +399,25 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
    * gecer (Excel akisi). Deger islenirken ekran kurali da kosar (taslakKural
    * 'fiyat' dali: Manuel + carpan geri hesabi); kayit yine kartin Kaydet'iyle.
    */
-  const fiyatHucreIsle = (satirIndeks: number, metin: string) => {
+  const fiyatHucreIsle = (satirIndeks: number, metin: string, alan = 'fiyat') => {
     const eski = durum.guncel[satirIndeks];
     const yeni = metin.trim().replace(',', '.');
-    if (yeni === '' || String(eski.fiyat ?? '') === yeni) return;
+    if (yeni === '' || String(eski[alan] ?? '') === yeni) return;
     const n = Number(yeni);
     if (!Number.isFinite(n) || n < 0) return;
-    const kural = taslakKural?.('fiyat', yeni, { ...eski, fiyat: yeni }) ?? {};
+    // Ekran kurali YALNIZ fiyata bagli (Manuel + carpan geri hesabi); katilim
+    //   payi (291) fiyatlama zincirine girmez, dogrudan yazilir.
+    const kural = alan === 'fiyat'
+      ? taslakKural?.('fiyat', yeni, { ...eski, fiyat: yeni }) ?? {}
+      : {};
     onDegis({
       ...durum,
-      guncel: durum.guncel.map((s, x) => (x === satirIndeks ? { ...s, fiyat: yeni, ...kural } : s)),
+      guncel: durum.guncel.map((s, x) => (x === satirIndeks ? { ...s, [alan]: yeni, ...kural } : s)),
     });
   };
+
+  /** Satir ici hizli giris yapilan kolonlar: fiyat ve katilim payi (291). */
+  const hizliHucre = (ad: string) => ad === 'fiyat' || ad === 'katkiTutar';
 
   const aramaAnahtari = arama.trim().toLocaleLowerCase('tr');
   const cipSuz = cipler?.[aktifCip]?.suz;
@@ -527,13 +534,14 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               )}
               {modalDuzenle && gridAlanlari.map(a => (
                 <td key={a.ad} className={a.tip === 'mantik' ? 'hiza-orta' : undefined}>
-                  {satirlarGrid && a.ad === 'fiyat' && !saltOkunur && a.yazilabilir ? (
+                  {satirlarGrid && hizliHucre(a.ad) && !saltOkunur && a.yazilabilir ? (
                     <input
                       // Disaridan (modal/kural) fiyat degisince kutu tazelensin;
                       //   kullanici yazarken prop degismedigi icin remount olmaz.
-                      key={`${satir.id ?? i}-${String(satir.fiyat ?? '')}`}
-                      defaultValue={String(satir.fiyat ?? '')}
+                      key={`${satir.id ?? i}-${a.ad}-${String(satir[a.ad] ?? '')}`}
+                      defaultValue={String(satir[a.ad] ?? '')}
                       data-fiyat-satir={i}
+                      data-fiyat-alan={a.ad}
                       inputMode="decimal"
                       style={{ width: 90, textAlign: 'right' }}
                       // Cift tik SATIR MODALINI acmasin; odaklaninca tumu
@@ -549,9 +557,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                         if (hedef !== undefined)
                           requestAnimationFrame(() =>
                             document.querySelector<HTMLInputElement>(
-                              `input[data-fiyat-satir="${hedef}"]`)?.select());
+                              `input[data-fiyat-satir="${hedef}"]`
+                              + `[data-fiyat-alan="${a.ad}"]`)?.select());
                       }}
-                      onBlur={e => fiyatHucreIsle(i, e.target.value)}
+                      onBlur={e => fiyatHucreIsle(i, e.target.value, a.ad)}
                     />
                   ) : gorunum(satir, a)}
                 </td>
