@@ -113,6 +113,105 @@ public static class FiyatListesiUclari
             });
         }).WithTags("FiyatListesi").RequireAuthorization();
 
+        // --------------------------------------------------- kampanyali fiyat ----
+        // KURUM FIYATI (272): odeyen kurumun kampanyasi varsa kalem fiyati o
+        //   kampanyanin kurallarindan gecer. Baz fiyat once LISTEDEN cozulur
+        //   (kampanyanin kendi listesi > verilen liste > belgenin varsayilani),
+        //   sonra indirim islenir. Iki asamayi tek uca koymak sart: istemci
+        //   iki ayri istekle ayni sonucu kurmaya calisirsa fiyat listesi ile
+        //   kampanya arasindaki bag (kampanya.fiyat_listesi_id) kacar.
+        yol.MapGet("/api/fiyat/kurum", async (
+            int kurumId, int? stokId, int? hizmetId, int? listeId,
+            BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+
+            if ((stokId is null or 0) == (hizmetId is null or 0))
+                throw GentegreHatasi.Dogrulama("stokId ya da hizmetId'den TAM BIRI verilmeli.");
+
+            var stok   = stokId   is 0 ? null : stokId;
+            var hizmet = hizmetId is 0 ? null : hizmetId;
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            // 1) Kurumun gecerli kampanyasi ve kampanyanin baz listesi.
+            int? kampanyaId = null;
+            int? kampanyaListesi = null;
+            await using (var k = baglanti.Komut(
+                "select k.id, k.fiyat_listesi_id " +
+                "  from public.kampanya k " +
+                " where k.id = public.fn_kurum_kampanya(@p0)", null, kurumId))
+            await using (var o = await k.ExecuteReaderAsync(iptal))
+                if (await o.ReadAsync(iptal))
+                {
+                    kampanyaId = o.GetInt32(0);
+                    kampanyaListesi = o.IsDBNull(1) ? null : o.GetInt32(1);
+                }
+
+            var bazListe = kampanyaListesi ?? (listeId is 0 ? null : listeId);
+
+            // 2) Baz fiyat: liste kurali (liste yoksa fiyat da yok - kampanya
+            //    yuzdesi bos fiyat uzerinde anlamsiz, TUTAR tipi yine calisir).
+            decimal? bazFiyat = null;
+            var dovizCinsi = "";
+            short kdvDahil = 0;
+            var kaynak = "yok";
+            if (bazListe is { } bl)
+            {
+                await using var f = baglanti.Komut(
+                    "select fiyat, doviz_cinsi, kdv_dahil, kaynak " +
+                    "  from public.fn_fiyat_listesi_fiyat(@p0, @p1, @p2)",
+                    null, bl, stok, hizmet);
+                await using var o = await f.ExecuteReaderAsync(iptal);
+                if (await o.ReadAsync(iptal))
+                {
+                    bazFiyat   = o.IsDBNull(0) ? null : o.GetDecimal(0);
+                    dovizCinsi = o.IsDBNull(1) ? "" : o.GetString(1);
+                    kdvDahil   = o.IsDBNull(2) ? (short)0 : o.GetInt16(2);
+                    kaynak     = o.IsDBNull(3) ? "" : o.GetString(3);
+                }
+            }
+
+            // 3) Kampanya indirimi.
+            decimal? fiyat = bazFiyat;
+            int? satirId = null;
+            short? tip = null, iskontoTipi = null;
+            decimal? iskonto = null;
+            if (kampanyaId is { } kid)
+            {
+                await using var kf = baglanti.Komut(
+                    "select fiyat, satir_id, tip, iskonto_tipi, iskonto " +
+                    "  from public.fn_kampanya_fiyat(@p0, @p1, @p2, @p3)",
+                    null, kid, stok, hizmet, bazFiyat);
+                await using var o = await kf.ExecuteReaderAsync(iptal);
+                if (await o.ReadAsync(iptal))
+                {
+                    fiyat       = o.IsDBNull(0) ? bazFiyat : o.GetDecimal(0);
+                    satirId     = o.IsDBNull(1) ? null : o.GetInt32(1);
+                    tip         = o.IsDBNull(2) ? null : o.GetInt16(2);
+                    iskontoTipi = o.IsDBNull(3) ? null : o.GetInt16(3);
+                    iskonto     = o.IsDBNull(4) ? null : o.GetDecimal(4);
+                }
+            }
+
+            return Results.Ok(new
+            {
+                fiyat,
+                bazFiyat,
+                dovizCinsi,
+                kdvDahil,
+                kaynak = satirId is null ? kaynak : "kampanya",
+                kampanyaId,
+                listeId = bazListe,
+                satirId,
+                tip,
+                iskontoTipi,
+                iskonto,
+            });
+        }).WithTags("FiyatListesi").RequireAuthorization();
+
         // ------------------------------------------- belgenin varsayilan listesi ----
         // Belge acilirken hangi liste gelecek: belge TURUNUN yonune gore
         //   carinin listesi, yoksa o yonun varsayilani.

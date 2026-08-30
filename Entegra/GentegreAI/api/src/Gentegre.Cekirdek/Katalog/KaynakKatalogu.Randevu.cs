@@ -40,7 +40,7 @@ public static partial class KaynakKatalogu
             new("durumAdi", RandevuKatalog.DurumAdi, "metin", "Durum", Hizalama: "orta",
                 Bicim: "rozet"),
             new("durum",      "rv.durum",     "sayi",  "Durum Kodu", Varsayilan: false),
-            new("baslangic",  "rv.baslangic", "zaman", "Başlangıç", Varsayilan: false),
+            new("baslangic",  "rv.baslangic", "zaman", "Başlama", Varsayilan: false),
             new("hizmet",     "coalesce(hz.ad, '')", "metin", "Hizmet", Genislik: 180),
             new("hizmetId",   "rv.hizmet_id", "sayi", "Hizmet Id", Varsayilan: false),
             new("tipAdi", RandevuKatalog.TipAdi, "metin", "Tip", Hizalama: "orta",

@@ -105,6 +105,9 @@ export function sekmeleriKur(secenek: {
     // ADAY HASTA (266): tek ekranlik hizli giris - cinsiyet/dogum/kurum ayri
     //   sekmeye dusmesin, Genel'in altinda cizilir.
     if (kaynak === 'hasta-aday' && (d.ad === 'ozluk' || d.ad === 'adresler')) return;
+    // KAMPANYA (268, kullanici): indirim satirlari AYRI SEKME degil, Genel'in
+    //   altinda - kartin tek isi zaten o satirlari tanimlamak.
+    if (kaynak === 'kampanya' && d.ad === 'satirlar') return;
     // Personelde de Özlük AYRI SEKME DEGIL (kullanici: "ozluk bilgilerini
     //   kimlik bilgisinin sagina al") - Genel sekmesinde, PersonelKimlikOzet
     //   icinde ciziliyor.

@@ -207,7 +207,7 @@ export function RandevuBolumAyarlari({ genel }: {
 
               <div className="alan-izgara tek-sutun ayar-formu">
                 <label className="alan">
-                  <span className="etiket">Başlangıç saati</span>
+                  <span className="etiket">Başlama saati</span>
                   <input value={form.baslangicSaat} placeholder={genel.baslangicSaat}
                          onChange={e => degis('baslangicSaat', e.target.value)} />
                 </label>
@@ -217,7 +217,7 @@ export function RandevuBolumAyarlari({ genel }: {
                          onChange={e => degis('bitisSaat', e.target.value)} />
                 </label>
                 <label className="alan">
-                  <span className="etiket">Öğle arası başlangıcı</span>
+                  <span className="etiket">Öğle arası başlaması</span>
                   <input value={form.ogleBaslangic} placeholder={genel.ogleBaslangic || '—'}
                          onChange={e => degis('ogleBaslangic', e.target.value)} />
                 </label>

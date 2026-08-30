@@ -352,6 +352,24 @@ const adsizAltBlok = adsizAlt.length > 0 && <div className="alan-izgara">{render
 const adayOzluk = kaynak === 'hasta-aday'
   ? meta.detaylar.find(d => d.ad === 'ozluk')
   : undefined;
+/* KAMPANYA (268): indirim satirlari Genel sekmesinin altinda tam genislikte. */
+const kampanyaSatirlari = kaynak === 'kampanya'
+  ? meta.detaylar.find(d => d.ad === 'satirlar')
+  : undefined;
+// Cerceve/baslik YOK (kullanici): kartin tek isi bu satirlar - "İndirim
+//   Satırları" basligi ve kutusu ekrani daraltiyordu.
+const kampanyaSatirBlok = kampanyaSatirlari && (
+  <div key="kampanya-satir" className="kampanya-satirlar">
+    <GenDetayTablo
+      meta={kampanyaSatirlari}
+      durum={detaylar[kampanyaSatirlari.ad] ?? bosDetay()}
+      saltOkunur={salt}
+      hatalar={alanHatalari}
+      onDegis={yeni => setDetaylar(t => ({ ...t, [kampanyaSatirlari.ad]: yeni }))}
+    />
+  </div>
+);
+
 const adayAdres = kaynak === 'hasta-aday'
   ? meta.detaylar.find(d => d.ad === 'adresler')
   : undefined;
@@ -575,6 +593,7 @@ return (
     {adsizAltBlok}
     {adayOzlukBlok}
     {adayAdresBlok}
+    {kampanyaSatirBlok}
   </>
 );
 }

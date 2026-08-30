@@ -305,7 +305,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // KATEGORILER (270): stok VE hizmet ayni agaci kullanir; sinirsiz derinlik.
     kaynak: 'kategori', baslik: 'Kategoriler', yol: 'Yönetim › Kategoriler',
     kartYolu: '/kategori', aksiyonEkrani: 'cari-liste',
-    menuGrup: 'Yönetim', menuAd: 'Kategoriler', ic: '🗂️', yetkiKodu: 'stok',
+    menuGrup: 'Yönetim', menuAd: 'Kategoriler', ic: '🌳', yetkiKodu: 'stok',
   },
   {
     // KAMPANYALAR (268, kullanici: "ayarlara liste ve kart olarak ekle"):

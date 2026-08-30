@@ -4,7 +4,7 @@ import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { para4 } from './bicim';
 import { GridMenu, type MenuOgesi } from './grid/GridMenu';
 import { dosyaIndirUrl } from './indir';
-import type { DetayFarki, KartDetayMeta } from '../api/sozlesme';
+import type { DetayFarki, KartAlanMeta, KartDetayMeta } from '../api/sozlesme';
 import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 import { TelefonGirdi } from './TelefonGirdi';
 import { telefonAlaniMi, telefonGecerliMi } from './alanBicim';
@@ -130,6 +130,19 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
    * binlerce oldugu icin ORADA combo degil arama penceresi kullanilir.
    */
   const kampanyaSatiri = meta.ad === 'satirlar' && meta.alanlar.some(a => a.ad === 'iskontoYeriId');
+
+  /**
+   * KAMPANYA (268, kullanici): "İskonto Tipi yüzde ise başlıkta İskonto %,
+   * tutar ise Tutar yazacak". Baslik kolon basinadir, satir basina degil -
+   * satirlarin HEPSI ayni tipteyse ona gore yazilir, karisikta genel ad kalir.
+   */
+  const kolonBasligi = (a: KartAlanMeta) => {
+    if (!kampanyaSatiri || a.ad !== 'iskonto') return a.baslik;
+    const tipler = new Set(durum.guncel.map(x => Number(x.iskontoTipi) || 0));
+    if (tipler.size === 1 && tipler.has(1)) return 'İskonto %';
+    if (tipler.size === 1 && tipler.has(2)) return 'Tutar';
+    return a.baslik;
+  };
   const [urunAramaSatiri, setUrunAramaSatiri] = useState<number | null>(null);
   const alanlar = meta.alanlar.filter(a => a.ad !== 'id');
   const yerler = useYerler(meta.ad === 'adresler');
@@ -198,6 +211,12 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
       if (meta.ad === 'izinler' && (alan === 'baslangicTarihi' || alan === 'bitisTarihi')) {
         const g = gunFarki(String(yeni.baslangicTarihi ?? ''), String(yeni.bitisTarihi ?? ''));
         if (g !== null) yeni.gun = g;
+      }
+      // KAMPANYA (268, kullanici): iskonto tipi TUTAR ise doviz varsayilan
+      //   YEREL PARA; YÜZDE ise doviz anlamsizdir (yuzde birimsizdir) - alan
+      //   temizlenir ve hucre "%" gosterir.
+      if (kampanyaSatiri && alan === 'iskontoTipi') {
+        yeni.dovizCinsi = Number(deger) === 2 ? (yeni.dovizCinsi || 'TL') : '';
       }
       return yeni;
     });
@@ -405,7 +424,9 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           <tr>
             {modalDuzenle && !saltOkunur && <th style={{ width: 30 }} />}
             {satirlarGrid && <><th style={{ width: 36 }}>Tip</th><th>Adı</th></>}
-            {gridAlanlari.map(a => <th key={a.ad}>{a.baslik}{a.zorunlu && ' *'}</th>)}
+            {gridAlanlari.map(a => (
+              <th key={a.ad}>{kolonBasligi(a)}{a.zorunlu && ' *'}</th>
+            ))}
             {!modalDuzenle && !saltOkunur && <th />}
           </tr>
         </thead>
@@ -552,6 +573,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                     >
                       {EGITIM_GECERLILIK.map(ad => <option key={ad} value={ad}>{ad}</option>)}
                     </select>
+                  ) : kampanyaSatiri && a.ad === 'dovizCinsi'
+                        && Number(satir.iskontoTipi) !== 2 ? (
+                    // Yuzde satirinda doviz yok: birim "%" (kullanici).
+                    <input readOnly disabled value="%" style={{ textAlign: 'center' }} />
                   ) : kampanyaSatiri && a.ad === 'iskontoYeriId' ? (
                     Number(satir.tip) === 2 ? (
                       <select

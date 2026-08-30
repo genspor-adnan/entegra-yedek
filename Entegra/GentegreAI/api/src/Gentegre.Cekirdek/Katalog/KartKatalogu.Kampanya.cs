@@ -22,16 +22,21 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id",              "id",               "sayi",  Yazilabilir: false),
-            new("kod",             "kod",              "metin", EnFazlaUzunluk: 20,
-                Baslik: "Kod", Grup: "Kimlik"),
+            // Kod / sure / liste ZORUNLU (kullanici): kampanya hangi listeye,
+            //   hangi tarih araliginda islediyse anlamlidir - eksigi fiyati
+            //   sessizce degistirmeyen ölü kayit birakirdi.
+            new("kod",             "kod",              "metin", Zorunlu: true,
+                EnFazlaUzunluk: 20, Baslik: "Kod", Grup: "Kimlik"),
             new("ad",              "ad",               "metin", Zorunlu: true,
                 EnFazlaUzunluk: 150, Baslik: "Kampanya", Grup: "Kimlik"),
-            new("baslangic",       "baslangic",        "tarih", Baslik: "Başlangıç", Grup: "Kimlik"),
-            new("bitis",           "bitis",            "tarih", Baslik: "Bitiş", Grup: "Kimlik"),
+            new("baslangic",       "baslangic",        "tarih", Zorunlu: true,
+                Baslik: "Başlama", Grup: "Kimlik"),
+            new("bitis",           "bitis",            "tarih", Zorunlu: true,
+                Baslik: "Bitiş", Grup: "Kimlik"),
             new("durum",           "durum",            "mantik", Baslik: "Aktif", Grup: "Kimlik"),
             // Kampanyanin uzerine isledigi liste: indirimler bu listenin
             //   fiyatlarindan hesaplanir.
-            new("fiyatListesiId",  "fiyat_listesi_id", "kod",
+            new("fiyatListesiId",  "fiyat_listesi_id", "kod",   Zorunlu: true,
                 KodTablosu: "public.v_fiyat_listesi_satis_lookup",
                 Baslik: "Fiyat Listesi", Grup: "Genel"),
             new("aciklama",        "aciklama",         "metin", EnFazlaUzunluk: 300,
@@ -56,7 +61,10 @@ public static partial class KartKatalogu
                 new("iskontoTipi",   "iskonto_tipi",    "kod",   Zorunlu: true,
                     KodListesi: "kampanya.iskonto_tipi", Baslik: "İskonto Tipi"),
                 new("iskonto",       "iskonto",         "para",  Baslik: "İskonto"),
-                new("dovizCinsi",    "doviz_cinsi",     "metin", EnFazlaUzunluk: 10,
+                // Doviz COMBO (kullanici): serbest metin yerine kasa/belge
+                //   kartlariyla AYNI kod listesi - "TL" ile "TRY" karisikligi
+                //   fiyati bozardi.
+                new("dovizCinsi",    "doviz_cinsi",     "kod",   SabitKodlar: DovizKodlari,
                     Baslik: "Döviz"),
                 new("durum",         "durum",           "mantik", Baslik: "Aktif"),
                 new("aciklama",      "aciklama",        "metin", EnFazlaUzunluk: 300,

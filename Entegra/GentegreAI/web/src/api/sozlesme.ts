@@ -592,7 +592,7 @@ export interface StokHareketSatiri {
 }
 
 export interface StokHareketYaniti {
-  /** Başlangıç tarihinden önceki net toplam. */
+  /** Başlama tarihinden önceki net toplam. */
   devir: number;
   kapanis: number;
   satirlar: StokHareketSatiri[];

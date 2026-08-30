@@ -334,7 +334,7 @@ public static partial class KartKatalogu
             {
                 new("id",               "id",                "sayi",  Yazilabilir: false),
                 new("tur",              "tur",               "kod",   SabitKodlar: IzinTuruKodlari, Baslik: "Tür", Zorunlu: true),
-                new("baslangicTarihi",  "baslangic_tarihi",  "tarih", Zorunlu: true, Baslik: "Başlangıç"),
+                new("baslangicTarihi",  "baslangic_tarihi",  "tarih", Zorunlu: true, Baslik: "Başlama"),
                 new("bitisTarihi",      "bitis_tarihi",      "tarih", Zorunlu: true, Baslik: "Bitiş"),
                 // Gün elle girilmez: baslangic/bitis'ten hesaplanir (iki uc dahil).
                 new("gun",              "gun",               "sayi",  Yazilabilir: false, Baslik: "Gün"),
@@ -366,7 +366,7 @@ public static partial class KartKatalogu
                 new("departmanId",     "departman_id",    "kod",   Zorunlu: true,
                     KodTablosu: "public.v_randevu_bolum_lookup", Baslik: "Bölüm"),
                 new("baslangicSaat",   "baslangic_saat",  "metin", EnFazlaUzunluk: 5,
-                    Baslik: "Başlangıç"),
+                    Baslik: "Başlama"),
                 new("bitisSaat",       "bitis_saat",      "metin", EnFazlaUzunluk: 5, Baslik: "Bitiş"),
                 new("ogleBaslangic",   "ogle_baslangic",  "metin", EnFazlaUzunluk: 5,
                     Baslik: "Öğle Başl."),
@@ -579,7 +579,7 @@ public static partial class KartKatalogu
             new("tur",            "tur",              "kod",   Zorunlu: true,
                 KodListesi: "taraf.kurum_turu", Baslik: "Kurum Türü"),
             new("sozlesmeNo",     "sozlesme_no",      "metin", EnFazlaUzunluk: 40, Baslik: "Sözleşme No"),
-            new("baslangic",      "baslangic",        "tarih", Baslik: "Başlangıç"),
+            new("baslangic",      "baslangic",        "tarih", Baslik: "Başlama"),
             new("bitis",          "bitis",            "tarih", Baslik: "Bitiş"),
             new("durum",          "durum",            "mantik", Baslik: "Aktif"),
             // Anlasma kosulu artik KAMPANYA (268): kampanyanin kendi fiyat

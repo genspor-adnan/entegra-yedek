@@ -65,11 +65,11 @@ export function RandevuAyarlar() {
             <div className="kagrup">
               <h6>Çalışma Saatleri</h6>
               <div className="alan-izgara tek-sutun ayar-formu">
-                <AyarAlani anahtar="randevu.baslangic_saat" etiket="Takvim başlangıç saati"
+                <AyarAlani anahtar="randevu.baslangic_saat" etiket="Takvim başlama saati"
                            tip="metin" ayarlar={ayarlar} onYaz={yaz} />
                 <AyarAlani anahtar="randevu.bitis_saat" etiket="Takvim bitiş saati"
                            tip="metin" ayarlar={ayarlar} onYaz={yaz} />
-                <AyarAlani anahtar="randevu.ogle_baslangic" etiket="Öğle arası başlangıcı"
+                <AyarAlani anahtar="randevu.ogle_baslangic" etiket="Öğle arası başlaması"
                            tip="metin" ayarlar={ayarlar} onYaz={yaz} />
                 <AyarAlani anahtar="randevu.ogle_bitis" etiket="Öğle arası bitişi"
                            tip="metin" ayarlar={ayarlar} onYaz={yaz} />

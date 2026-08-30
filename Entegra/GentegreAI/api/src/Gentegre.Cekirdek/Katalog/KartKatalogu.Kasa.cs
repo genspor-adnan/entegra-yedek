@@ -202,7 +202,7 @@ public static partial class KartKatalogu
             new("ustId",       "ust_id",       "kod",   KodTablosu: "public.v_proje_lookup", Baslik: "Üst Proje", Grup: "Genel", AltGrup: "Tanımlama"),
             new("tarafId",     "taraf_id",     "kod",   KodTablosu: "public.v_cari_lookup", Baslik: "Müşteri", Grup: "Genel", AltGrup: "Tanımlama"),
             new("sorumluId",   "sorumlu_id",   "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Sorumlu", Grup: "Genel", AltGrup: "Tanımlama"),
-            new("baslangic",   "baslangic",    "tarih", Baslik: "Başlangıç", Grup: "Genel", AltGrup: "Süre"),
+            new("baslangic",   "baslangic",    "tarih", Baslik: "Başlama", Grup: "Genel", AltGrup: "Süre"),
             new("bitis",       "bitis",        "tarih", Baslik: "Bitiş", Grup: "Genel", AltGrup: "Süre"),
             new("butceTutar",  "butce_tutar",  "para",  Baslik: "Bütçe", Grup: "Genel", AltGrup: "Bütçe"),
             new("butceDovizi", "butce_dovizi", "metin", EnFazlaUzunluk: 6, Baslik: "Bütçe Dövizi", Grup: "Genel", AltGrup: "Bütçe"),
@@ -252,7 +252,7 @@ public static partial class KartKatalogu
             new("ilerleme",   "ilerleme",   "sayi",  Baslik: "İlerleme %",
                                             Grup: "Genel", AltGrup: "Görev Bilgileri"),
 
-            new("baslangic",  "baslangic",  "tarih", Baslik: "Başlangıç",
+            new("baslangic",  "baslangic",  "tarih", Baslik: "Başlama",
                                             Grup: "Genel", AltGrup: "Zaman"),
             new("termin",     "termin",     "tarih", Baslik: "Termin",
                                             Grup: "Genel", AltGrup: "Zaman"),
@@ -352,7 +352,7 @@ public static partial class KartKatalogu
                 new("tur",        "tur",        "kod",   KodListesi: "gorev.tur", Baslik: "Tür"),
                 new("konu",       "konu",       "metin", EnFazlaUzunluk: 200, Baslik: "Konu"),
                 new("sorumluId",  "sorumlu_id", "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Sorumlu"),
-                new("baslangic",  "baslangic",  "tarih", Baslik: "Başlangıç"),
+                new("baslangic",  "baslangic",  "tarih", Baslik: "Başlama"),
                 new("termin",     "termin",     "tarih", Baslik: "Termin"),
                 new("durum",      "durum",      "kod",   KodListesi: "gorev.durum", Baslik: "Durum")
             }, Sirala: "coalesce(baslangic, ekleme_tarihi) desc, id desc", LogTabloId: 108, Baslik: "Aktiviteler")

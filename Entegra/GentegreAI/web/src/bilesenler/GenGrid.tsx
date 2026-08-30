@@ -724,7 +724,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
               <>
                 <span className="durumseg-ayrac" />
                 <span className="tarih-araligi">
-                  <input type="date" value={tarihBas} title="Başlangıç tarihi"
+                  <input type="date" value={tarihBas} title="Başlama tarihi"
                          onChange={e => { setTarihBas(e.target.value); setSayfa(1) }} />
                   <span className="ayrac-metin">–</span>
                   <input type="date" value={tarihBit} title="Bitiş tarihi"

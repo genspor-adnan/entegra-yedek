@@ -1187,3 +1187,11 @@ input.skt-gecmis {
 /* Randevu karti mockup genisliginde (randevu_karti.html .win: 760px) - alan
    sayisi az, 1080px'te sag taraf bos kaliyordu. */
 .kawin.genis.kart-orta { width: min(780px, 96vw) }
+
+/* ---- Kampanya karti (268) --------------------------------------------- */
+/* Indirim satirlari GENEL sekmesinin altinda; ust alanlarla arasinda nefes
+   olsun (kullanici: "fiyat listesi altina az bosluk ver, grid yapismis"). */
+.kampanya-satirlar { margin-top: 12px }
+/* Doviz ve iskonto dar deger: kolonlar icerige gore daralsin. */
+.kampanya-satirlar select.dar,
+.kampanya-satirlar input.dar { max-width: 90px }
