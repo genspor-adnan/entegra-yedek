@@ -118,6 +118,10 @@ export function sekmeleriKur(secenek: {
     // Sube kartinda depolar "Depolar" GRUP sekmesine gomulu cizilir (merkez
     //   deposu kutusuyla birlikte, 173) - ayni adla iki sekme acilmasin.
     if (kaynak === 'sube' && d.ad === 'depolar') return;
+    // Dis hekimde (305) "Hekim Bilgisi" GENEL sekmesinde, iletisimin yaninda
+    //   cizilir (kullanici) - ayrica sekme acmak ayni kutuyu iki yere koymak
+    //   olurdu. Adres de yine Genel'de, altta grid olarak.
+    if (kaynak === 'dis-hekim' && (d.ad === 'hekim' || d.ad === 'adresler')) return;
     s.push({ tur: 'detay', anahtar: detaySekmeAnahtari(d.ad), baslik: d.baslik, detay: d });
   });
   (yerTutucuSekmeler ?? []).forEach(baslik => {

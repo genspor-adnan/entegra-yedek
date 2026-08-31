@@ -380,6 +380,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   readonly gengrid yap"): sekme yer tutucu olarak acilir, icini
     //   KartGrupSekmesi salt okunur GenGrid ile doldurur.
     yerTutucuSekmeler: ['Gönderim Geçmişi'],
+    // Hekim Bilgisi ARTIK GENEL SEKMESINDE (kullanici): ayri sekme olarak da
+    //   gorunmesi ayni kutuyu iki yere koymak olurdu.
+    gizliKartSekmeleri: ['Hekim Bilgisi'],
     menuGrup: 'Cari', menuAd: 'Dış Doktorlar', ic: '🩺', yetkiKodu: 'personel',
     urunModu: 2,
   },

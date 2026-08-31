@@ -1442,3 +1442,15 @@ input.skt-gecmis {
   min-width: 4px;
 }
 .hekim-ozet .bar .sayi { font-weight: 700 }
+
+/* Dis hekim Genel sekmesi (305, kullanici): İletişim ve Hekim Bilgisi ESIT
+   genislikte yan yana; adres gridi altta tam genislik. */
+/* Hekim Bilgisi %10 daha genis (kullanici): brans/kurum adlari uzun,
+   iletisim alanlari kisa. */
+.personel-iletisim-yerlesim.esit-ikili > .kasira {
+  display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 14px; align-items: start;
+}
+.personel-iletisim-yerlesim.esit-ikili > .kasira > .kagrup { width: 100% }
+/* Adres gridi TAM GENISLIK - ustteki iki kutunun altinda (305). */
+.hekim-adres-blok { margin-top: 12px }
+.hekim-adres-blok .kagrup { margin-bottom: 0 }

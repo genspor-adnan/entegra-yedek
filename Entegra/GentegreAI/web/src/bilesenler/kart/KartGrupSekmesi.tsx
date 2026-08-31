@@ -59,13 +59,29 @@ const personelIletisimSekmesi = personelGibiKart
 if (personelIletisimSekmesi) {
   const iletisimAlanlari = iletisim?.[1] ?? aktif.alanlar.filter(a => !gizli.has(a.ad));
   return (
-    <div className="personel-iletisim-yerlesim">
+    <div className={'personel-iletisim-yerlesim'
+                    + (kaynak === 'dis-hekim' ? ' esit-ikili' : '')}>
       <div className="kasira">
         <div className="kagrup">
           <h6>İletişim</h6>
           <div className="alan-izgara tek-sutun">{renderAlanListesi(iletisimAlanlari)}</div>
         </div>
-        {adresDetay && (
+        {/* DIS HEKIMDE (305, kullanici) iletisimin yanindaki kutu ADRES DEGIL
+            HEKIM BILGISI: brans/kurum/tescil kartin asil bilgisidir, adres
+            ikincil. Adres ALTTA GRID olarak - bir hekimin muayenehanesi ve
+            calistigi hastane(ler) ayri satirlardir, tek adres yetmez. */}
+        {kaynak === 'dis-hekim' ? (() => {
+          const hekimDetay = meta.detaylar.find(d => d.ad === 'hekim');
+          return hekimDetay ? (
+            <TekKayit
+              meta={hekimDetay}
+              durum={detaylar[hekimDetay.ad] ?? bosDetay()}
+              saltOkunur={salt || hekimDetay.saltOkunur}
+              onDegis={yeni => setDetaylar(t => ({ ...t, [hekimDetay.ad]: yeni }))}
+              baslik="Hekim Bilgisi"
+            />
+          ) : null;
+        })() : adresDetay && (
           <TekAdres
             meta={adresDetay}
             durum={detaylar[adresDetay.ad] ?? bosDetay()}
@@ -77,6 +93,21 @@ if (personelIletisimSekmesi) {
           />
         )}
       </div>
+
+      {/* Adres GRIDI (dis hekim): muayenehane / hastane satirlari. */}
+      {kaynak === 'dis-hekim' && adresDetay && (
+        // 'kasira' DEGIL: ust satirdaki iki kutu icin grid kurdugumuzdan ayni
+        //   sinif adres gridini de yarim sutuna sikistiriyordu.
+        <div className="hekim-adres-blok">
+          <GenDetayTablo
+            meta={adresDetay}
+            durum={detaylar[adresDetay.ad] ?? bosDetay()}
+            saltOkunur={salt || adresDetay.saltOkunur}
+            hatalar={alanHatalari}
+            onDegis={yeni => setDetaylar(t => ({ ...t, [adresDetay.ad]: yeni }))}
+          />
+        </div>
+      )}
       {acilDetay && (
         <GenDetayTablo
           meta={acilDetay}

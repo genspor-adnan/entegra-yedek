@@ -923,8 +923,6 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           saltOkunur={salt || aktif.detay.saltOkunur}
           onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
           baslik="Hekim Bilgisi"
-          not={<>Kurum kayıtlı cariyse seçin; değilse yalnız adını yazın —
-                 her sevk eden hastane için cari kartı açmak gerekmez.</>}
         />
       )}
 

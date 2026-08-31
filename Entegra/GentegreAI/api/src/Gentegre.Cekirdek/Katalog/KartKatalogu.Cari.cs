@@ -13,6 +13,17 @@ public static partial class KartKatalogu
     /// </summary>
     private static KartTanimi Aday() => Cari() with { Ad = "aday", YetkiKodu = "aday" };
 
+    /// <summary>
+    /// DIS HEKIM adres tipleri (305): hekimin bizi ilgilendiren adresleri
+    /// muayenehanesi ve calistigi hastanedir - "ev/is" ayrimi burada anlamsiz.
+    /// </summary>
+    private static readonly Dictionary<string, string> HekimAdresTurKodlari = new()
+    {
+        ["1"] = "Muayenehane",
+        ["2"] = "Hastane",
+        ["9"] = "Diğer",
+    };
+
     private static KartTanimi Cari() => new(
         Ad: "cari",
         YetkiKodu: "cari",
@@ -588,13 +599,14 @@ public static partial class KartKatalogu
                    ["dis_hekim"] = (short)1,
                }),
 
-            // ADRES (mockup "Genel" sekmesi): rapor/CD kuryeyle gonderiliyorsa
-            //   gerekir - zorunlu degil. Cari/personel kartlariyla ayni tablo
-            //   ve ayni alanlar; ayri bir adres yapisi acilmadi.
+            // ADRES (kullanici: "alta grid olarak da adres gelsin"): bir hekimin
+            //   MUAYENEHANESI ve calistigi HASTANE(ler) ayri satirlardir - tek
+            //   adres yetmez. Tablo cari/personel ile ayni, degisen yalniz tip
+            //   listesi: burada "ev/is" degil "muayenehane/hastane" sorulur.
             new DetayTanimi("adresler", "public.taraf_adres", "taraf_id", new KartAlani[]
             {
                 new("id",         "id",          "sayi",  Yazilabilir: false),
-                new("tur",        "tur",         "kod",   SabitKodlar: AdresTurKodlari,
+                new("tur",        "tur",         "kod",   SabitKodlar: HekimAdresTurKodlari,
                     Baslik: "Adres Tipi", Zorunlu: true),
                 new("adres",      "adres",       "metin", EnFazlaUzunluk: 300),
                 new("il",         "il",          "metin", EnFazlaUzunluk: 60),
