@@ -18,12 +18,17 @@ interface TarafSatiri {
   ilce: string;
   il: string;
   sonBasvuru: string;
+  /** DIS HEKIM duzeni (305): brans, kurum ve gonderdigi tetkik sayisi. */
+  brans: string;
+  kurum: string;
+  istemSayisi: string;
 }
 
 const tipEtiketi = (kaynak: string, s: ListeSatiri): string => {
   if (kaynak === 'kisi') return 'Kişi';
   if (kaynak === 'personel') return 'Personel';
   if (kaynak === 'hasta') return 'Hasta';
+  if (kaynak === 'dis-hekim') return 'Dış Hekim';
   const musteri = Number(s.musteri) === 1;
   const tedarikci = Number(s.tedarikci) === 1;
   if (musteri && tedarikci) return 'Müşteri/Tedarikçi';
@@ -55,6 +60,9 @@ const satiraCevir = (kaynak: string, s: ListeSatiri): TarafSatiri => ({
   ilce: String(s.ilce ?? ''),
   il: String(s.il ?? ''),
   sonBasvuru: gun(s.sonBasvuru),
+  brans: String(s.bransAdi ?? ''),
+  kurum: String(s.kurum ?? ''),
+  istemSayisi: s.istemSayisi != null ? String(s.istemSayisi) : '',
 });
 
 interface Props {
@@ -106,6 +114,12 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
    * Ilce, Il, Son Basvuru. Karisik aramada (cari+kisi) taraf duzeni kalir.
    */
   const hastaDuzeni = kaynaklar.length === 1 && kaynaklar[0] === 'hasta';
+  /**
+   * DIS HEKIM DUZENI (305): sevk eden hekim aranirken kod/unvan/gorev degil
+   * BRANS, KURUM ve gonderdigi tetkik sayisi gerekir - "hangi Ortopedi
+   * hekimiydi" sorusu bu kolonlarla cevaplanir.
+   */
+  const disHekimDuzeni = kaynaklar.length === 1 && kaynaklar[0] === 'dis-hekim';
 
   /** Kutuda yazan metin (aninda) - `arama` bunun gecikmeli (debounce) hali. */
   const [metin, setMetin] = useState('');
@@ -330,6 +344,14 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
                     <th style={{ width: 104 }}>İl</th>
                     <th style={{ width: 96 }}>Son Başvuru</th>
                   </>
+                ) : disHekimDuzeni ? (
+                  <>
+                    <th className="genis">Ad Soyad</th>
+                    <th style={{ width: 190 }}>Branş</th>
+                    <th style={{ width: 210 }}>Kurum</th>
+                    <th style={{ width: 132 }}>Cep</th>
+                    <th style={{ width: 90 }} className="hiza-sag">Gönderdiği</th>
+                  </>
                 ) : (
                   <>
                     <th className="dar">Tip</th>
@@ -361,6 +383,14 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
                       <td>{satir.il}</td>
                       <td>{satir.sonBasvuru || <span className="sonuk">—</span>}</td>
                     </>
+                  ) : disHekimDuzeni ? (
+                    <>
+                      <td>{satir.unvan}</td>
+                      <td>{satir.brans || <span className="sonuk">—</span>}</td>
+                      <td>{satir.kurum || <span className="sonuk">—</span>}</td>
+                      <td>{satir.telefon}</td>
+                      <td className="hiza-sag">{satir.istemSayisi}</td>
+                    </>
                   ) : (
                     <>
                       <td>{satir.tip}</td>
@@ -373,7 +403,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
                 </tr>
               ))}
               {!yukleniyor && satirlar.length === 0 && (
-                <tr><td colSpan={hastaDuzeni ? 9 : 6} className="bos">Kayıt yok</td></tr>
+                <tr><td colSpan={hastaDuzeni ? 9 : disHekimDuzeni ? 6 : 6} className="bos">Kayıt yok</td></tr>
               )}
             </tbody>
           </table>

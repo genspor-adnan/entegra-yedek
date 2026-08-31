@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
+import { TarafArama } from '../TarafArama';
 import { mesaj } from '../mesaj';
 
 /**
@@ -20,7 +21,6 @@ import { mesaj } from '../mesaj';
 interface Tetkik { id: number; kod: string; ad: string; modalite: number;
                    modaliteAdi: string; kdv: number }
 interface Hekim { id: number; ad: string; bolumAdi: string }
-interface DisHekim { id: number; ad: string; kurum: string; brans: string }
 interface Gecmis { hizmetId: number; tetkikAdi: string; tarih: string }
 
 /** Secili tetkik: listedeki tetkik + isteme ozel secimler. */
@@ -55,9 +55,10 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
 }) {
   const [tetkikler, setTetkikler] = useState<Tetkik[]>([]);
   const [hekimler, setHekimler] = useState<Hekim[]>([]);
-  const [disHekimler, setDisHekimler] = useState<DisHekim[]>([]);
   /** Kayitli dis hekim secildiyse id; "listede yok" ise serbest metin. */
   const [disHekimId, setDisHekimId] = useState<number | null>(null);
+  const [disHekimSecim, setDisHekimSecim] = useState('');
+  const [hekimArama, setHekimArama] = useState(false);
   const [gecmis, setGecmis] = useState<Gecmis[]>([]);
   const [ara, setAra] = useState('');
   const [secili, setSecili] = useState<Secim[]>([]);
@@ -76,7 +77,6 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
       const y = await api.radyolojiIstemSecenekleri(hastaId);
       setTetkikler(y.tetkikler as unknown as Tetkik[]);
       setHekimler(y.hekimler as unknown as Hekim[]);
-      setDisHekimler(y.disHekimler as unknown as DisHekim[]);
       setGecmis(y.gecmis as unknown as Gecmis[]);
     } catch (h) { setHata(hataMetni(h)) }
   }, [hastaId]);
@@ -246,20 +246,28 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
             <div className="alan-izgara dort-sutun">
               {disIstem ? (
                 <>
-                  {/* Kayitli dis hekim (305): secilirse istem ona baglanir ve
+                  {/* Kayitli dis hekim (305) JENERIK ARAMA EKRANINDAN secilir
+                      (kullanici): combo, hekim sayisi artinca kullanilmaz hale
+                      gelirdi - arama ekraninda brans/kurum kolonlariyla
+                      "hangi Ortopedi hekimiydi" sorusu cevaplanabiliyor.
+                      Secilen hekim istemin istek_hekim_id'sine yazilir ve
                       hekim kartindaki "gonderdigi tetkik" sayaci isler. */}
                   <label className="alan">
                     <span className="etiket">İsteyen Hekim (dış)</span>
-                    <select value={disHekimId ?? ''}
-                            onChange={e => setDisHekimId(
-                              e.target.value ? Number(e.target.value) : null)}>
-                      <option value="">— Listede yok (elle yaz) —</option>
-                      {disHekimler.map(h => (
-                        <option key={h.id} value={h.id}>
-                          {h.ad}{h.kurum ? ` · ${h.kurum}` : ''}
-                        </option>
-                      ))}
-                    </select>
+                    <span className="ikili">
+                      <input value={disHekimSecim} readOnly
+                             placeholder="Kayıtlı hekim seç…"
+                             onClick={() => setHekimArama(true)} />
+                      <button type="button" className="d mini"
+                              title="Dış hekim ara"
+                              onClick={() => setHekimArama(true)}>…</button>
+                      {disHekimId != null && (
+                        <button type="button" className="d mini" title="Seçimi kaldır"
+                                onClick={() => { setDisHekimId(null); setDisHekimSecim('') }}>
+                          ✕
+                        </button>
+                      )}
+                    </span>
                   </label>
                   {/* Kayitli hekim SECILMEDIYSE serbest metin - bir kerelik
                       gelen, kaydedilmeye degmeyen hekim icin. */}
@@ -327,6 +335,21 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
           </div>
         </div>
       </div>
+
+      {/* Dis hekim arama - jenerik taraf arama ekrani, kaynak 'dis-hekim'.
+          enUst: bu modalin uzerinde acilmali. */}
+      <TarafArama
+        acik={hekimArama}
+        kaynaklar={['dis-hekim']}
+        yerTutucu="Dış hekimi ad / kurum ile ara…"
+        onKapat={() => setHekimArama(false)}
+        onSec={sec => {
+          setDisHekimId(sec.id);
+          setDisHekimSecim(sec.unvan);
+          setDisHekimAd('');
+          setHekimArama(false);
+        }}
+      />
     </Modal>
   );
 }
