@@ -74,7 +74,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     <>
 <div className="kagrup">
   <h6>
-    Kalemler
+    {basvuruMu ? 'Ücretlendirme' : 'Kalemler'}
     {/* Ekle / Duzenle / Sil - YALNIZ IKON (yer kazanmak icin), ne
         yaptiklari title'da. Dugmeler kesin belgede de GORUNUR, yalnizca
         pasif: kaybolunca kullanici "nereye gitti" diye ariyordu. */}

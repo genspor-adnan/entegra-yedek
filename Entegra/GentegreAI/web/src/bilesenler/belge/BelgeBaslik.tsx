@@ -433,8 +433,11 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     <div key={x.anahtar}
          className={`kat${x.anahtar === aktifSekme ? ' on' : ''}`}
          onClick={() => setAktifSekme(x.anahtar)}>
+      {/* BASVURUDA kalem sekmesi "Ücretlendirme" (kullanici): hastaya yazilan
+          islem/tetkik ucretleri - "kalem" ERP sozu, kayit kabulde karsiligi yok. */}
       {x.anahtar === 'tahsilat' && alisMi ? 'Ödeme'
-        : x.anahtar === 'fatura' && teklifMi ? 'Sipariş' : x.baslik}
+        : x.anahtar === 'fatura' && teklifMi ? 'Sipariş'
+        : x.anahtar === 'kalem' && basvuruMu ? 'Ücretlendirme' : x.baslik}
       {x.anahtar === 'kalem' && <span className="b">{satirlar.length}</span>}
       {x.anahtar === 'fatura' && donusumler.length > 0 && (
         <span className="b">{donusumler.length}</span>
