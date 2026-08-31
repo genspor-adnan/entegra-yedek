@@ -595,6 +595,15 @@ public static partial class KartKatalogu
             new("baslangic",      "baslangic",        "tarih", Baslik: "Başlama"),
             new("bitis",          "bitis",            "tarih", Baslik: "Bitiş"),
             new("durum",          "durum",            "mantik", Baslik: "Aktif"),
+            // SOZLESME FIYAT LISTESI (302, kullanici: "kampanya soluna fiyat
+            //   listesi ekle"). Kampanya yalniz INDIRIM tasiyabilir; anlasmanin
+            //   BAZ listesi burada aciktan yazilir. Cozum sirasi:
+            //   kampanya listesi > sozlesme listesi > kurumun cari listesi >
+            //   hastanin listesi (fn_belge_varsayilan_liste).
+            //   Yalniz SATIS yonlu listeler: kuruma hizmet SATILIYOR, alis
+            //   listesi burada anlamsiz olurdu.
+            new("fiyatListesiId", "fiyat_listesi_id", "kod",
+                KodTablosu: "public.v_fiyat_listesi_satis_lookup", Baslik: "Fiyat Listesi"),
             // Anlasma kosulu artik KAMPANYA (268): kampanyanin kendi fiyat
             //   listesi ve indirim satirlari var - ikisini ayri secmek ayni
             //   bilgiyi iki yere yazmak olurdu.
