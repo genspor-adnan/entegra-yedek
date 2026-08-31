@@ -98,6 +98,51 @@ function KodSecim({ etiket, listeKod, deger, onDeger, kilitli, zorunlu }: {
   );
 }
 
+/**
+ * SEGMENT SECIM (mockup .seg): kod listesini combo yerine yan yana dugmelerle
+ * gosterir - az secenekli, sik kullanilan alanlar icin (Başvuru Türü). Liste
+ * beklenenden uzun gelirse (5'ten fazla) combo'ya duser: 10 dugme satiri
+ * tasirirdi.
+ */
+function KodSegment({ etiket, listeKod, deger, onDeger, kilitli, zorunlu, vurgu }: {
+  etiket: string; listeKod: string; deger?: number | null;
+  onDeger(v: number | null): void; kilitli?: boolean; zorunlu?: boolean;
+  /** Bu degerdeki secenek secilince KIRMIZI cizilir (ör. Acil). */
+  vurgu?: number;
+}) {
+  const [secenekler, setSecenekler] = useState<{ deger: number; ad: string }[]>([]);
+  useEffect(() => {
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.kodListe(listeKod);
+        if (!iptal) setSecenekler(y.degerler.filter(d => d.aktif === 1));
+      } catch { /* liste yoksa segment bos kalir - kayit engellenmez */ }
+    })();
+    return () => { iptal = true };
+  }, [listeKod]);
+
+  if (secenekler.length > 5) {
+    return <KodSecim etiket={etiket} listeKod={listeKod} deger={deger}
+                     onDeger={onDeger} kilitli={kilitli} zorunlu={zorunlu} />;
+  }
+  return (
+    <label className="alan genis-4">
+      <span className={`etiket${zorunlu ? ' zorunlu-isaret' : ''}`}>{etiket}</span>
+      <span className={`seg${kilitli ? ' kilitli' : ''}`}>
+        {secenekler.map(s => (
+          <span key={s.deger}
+                className={`s${s.deger === vurgu ? ' acil' : ''}`
+                           + (Number(deger ?? 0) === s.deger ? ' on' : '')}
+                onClick={() => { if (!kilitli) onDeger(s.deger) }}>
+            {s.ad}
+          </span>
+        ))}
+      </span>
+    </label>
+  );
+}
+
 /** Kisa metin alani. */
 function MetinAlani({ etiket, deger, onDeger, kilitli, ipucu }: {
   etiket: string; deger?: string; onDeger(v: string): void;
@@ -224,8 +269,10 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, kapanma
   return (
     <>
       {/* 1) HASTA ARAMA SATIRI (mockup): arac cubugunun altinda, bandin
-             ustunde. Hasta secili degilken de gorunur - yeni basvuruda
-             hastayi burada bulunur. */}
+             ustunde. PROTOKOL VERILINCE KAYBOLUR (kullanici): basvuru
+             acildiktan sonra hasta degismez - degismesi gerekiyorsa basvuru
+             iptal edilip yenisi acilir, satir o zaman geri gelir. */}
+      {!protokolNo && (
       <div className="hasta-arama">
         <label className="alan">
           <span className="etiket">T.C. Kimlik No</span>
@@ -242,17 +289,19 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, kapanma
           <input value={adSoyad} disabled={kilitli} onKeyDown={enter}
                  onChange={e => setAdSoyad(e.target.value)} />
         </label>
-        {/* Protokol no BELGENIN numarasi - aranmaz, kayitta atanir. */}
+        {/* Protokol no BELGENIN numarasi - aranmaz, kayitta atanir. Satir
+            zaten yalniz protokol YOKKEN cizildigi icin hep bos gorunur;
+            numara verilince alan Basvuru sekmesinde okunur. */}
         <label className="alan">
           <span className="etiket">Protokol No</span>
-          <input value={protokolNo || ''} readOnly
-                 placeholder="(kaydedince atanacak)" />
+          <input value="" readOnly placeholder="(kaydedince atanacak)" />
         </label>
         <button type="button" className="d bir" onClick={ara}
                 disabled={kilitli}>🔍 Ara (F3)</button>
         <button type="button" className="d" onClick={() => onYeniHasta?.()}
                 disabled={kilitli}>✚ Yeni Hasta Kaydı</button>
       </div>
+      )}
 
       {/* 2) SECILI HASTA BANDI - hasta secilene kadar cizilmez. */}
       {tarafId ? (
@@ -315,7 +364,8 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, protokolNo, randevuBi
                                  tarih, setTarih, tarihEnGec, tarihEnErken, tarihHatasi,
                                  bolumler, bolumId, setBolumId,
                                  gorevliler, personelId, setPersonelId,
-                                 kurumlar, odeyenKurumId, setOdeyenKurumId }: {
+                                 kurumlar, odeyenKurumId, setOdeyenKurumId,
+                                 aciklama, setAciklama }: {
   bilgi: BasvuruBilgi;
   degistir(y: Partial<BasvuruBilgi>): void;
   kilitli: boolean;
@@ -348,6 +398,9 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, protokolNo, randevuBi
   kurumlar?: { id: number; ad: string }[];
   odeyenKurumId?: number | null;
   setOdeyenKurumId?(v: number | null): void;
+  /** Basvuru notu - belgenin aciklama alani (mockup "Başvuru Notu"). */
+  aciklama?: string;
+  setAciklama?(v: string): void;
 }) {
   // Hekim listesi bolume gore SUZULUR; bolum bosken hepsi gelir.
   const hekimler = (gorevliler ?? [])
@@ -362,15 +415,12 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, protokolNo, randevuBi
           <input value={protokolNo || '(kaydedince atanacak)'} readOnly />
         </label>
         <label className="alan">
-          <span className="etiket">Başvuru Tarihi</span>
+          <span className="etiket zorunlu-isaret">Başvuru Tarihi / Saati</span>
           <input type="datetime-local" value={tarih} disabled={kilitli}
                  max={tarihEnGec} min={tarihEnErken}
                  onChange={e => setTarih(e.target.value)} />
           {tarihHatasi && <span className="alan-hata">{tarihHatasi}</span>}
         </label>
-        <KodSecim etiket="Başvuru Türü" listeKod="basvuru.tur" zorunlu
-                  deger={bilgi.basvuruTuru} kilitli={kilitli}
-                  onDeger={v => degistir({ basvuruTuru: v })} />
         <label className="alan">
           <span className="etiket">Ödeyen Kurum</span>
           <select value={odeyenKurumId ?? ''} disabled={kilitli}
@@ -382,6 +432,12 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, protokolNo, randevuBi
             ))}
           </select>
         </label>
+
+        {/* Basvuru turu SEGMENT (mockup): etiketten sonra TAM SATIR - besinci
+            secenek ("Laboratuvar / Görüntüleme") iki sutuna sigmiyordu. */}
+        <KodSegment etiket="Başvuru Türü" listeKod="basvuru.tur" zorunlu vurgu={2}
+                    deger={bilgi.basvuruTuru} kilitli={kilitli}
+                    onDeger={v => degistir({ basvuruTuru: v })} />
 
         <label className="alan">
           <span className="etiket">Başvurulan Bölüm</span>
@@ -430,14 +486,15 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, protokolNo, randevuBi
                   onDeger={v => degistir({ oda: v })} />
         <MetinAlani etiket="Sıra No" deger={bilgi.siraNo} kilitli={kilitli}
                     ipucu="örn. A-037" onDeger={v => degistir({ siraNo: v })} />
-        <MetinAlani etiket="Refakatçi" deger={bilgi.refakatci} kilitli={kilitli}
-                    onDeger={v => degistir({ refakatci: v })} />
         {/* Randevu SALT OKUNUR: bag randevu tarafinda kurulur (randevu.belge_id),
-            burada yalnizca "hangi randevudan geldi" okunur. */}
+            burada yalnizca "hangi randevudan geldi" okunur. Mockup sirasi:
+            Oda · Sıra No · Randevu · Refakatçi. */}
         <label className="alan">
           <span className="etiket">Randevu</span>
           <input value={randevuBilgi || '—'} readOnly />
         </label>
+        <MetinAlani etiket="Refakatçi" deger={bilgi.refakatci} kilitli={kilitli}
+                    onDeger={v => degistir({ refakatci: v })} />
 
         {/* AMBULANS (300): yalniz gelis sekli Ambulans iken sorulur - ama
             DOLU ise her zaman gorunur, yoksa gelis sekli sonradan
@@ -454,6 +511,16 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, protokolNo, randevuBi
                         onDeger={v => degistir({ ambulansBileklikNo: v })} />
           </>
         )}
+
+        {/* BASVURU NOTU (mockup): tam genislikte serbest metin. Belgenin
+            kendi aciklama alanina yazilir - ayri bir kolon acmaya gerek yok,
+            alan bugune kadar basvuru kartinda hic kullanilmiyordu. */}
+        <label className="alan genis-4">
+          <span className="etiket">Başvuru Notu</span>
+          <textarea rows={2} value={aciklama ?? ''} disabled={kilitli}
+                    placeholder="örn. Tansiyon takibi; son tetkik sonuçları ile geldi."
+                    onChange={e => setAciklama?.(e.target.value)} />
+        </label>
       </div>
     </div>
   );

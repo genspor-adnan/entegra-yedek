@@ -497,6 +497,21 @@ table.grid tr.flt input {
   background: linear-gradient(var(--serit3), var(--serit4)); border-bottom: 1px solid var(--cizgi2);
   font-weight: 700; display: flex; align-items: center; gap: 8px;
 }
+/* SEGMENT SECIM (mockup .seg): az sayida secenek combo yerine yan yana
+   dugmelerle - kayit kabul memuru tek tikla secsin, listeyi acmasin. */
+.seg { display: inline-flex; border: 1px solid var(--cizgi); border-radius: 3px; overflow: hidden }
+.seg .s {
+  padding: 3px 12px; font-size: 11.5px; line-height: 15px; cursor: pointer;
+  background: var(--yuz); color: var(--soluk); border-right: 1px solid var(--cizgi2);
+  white-space: nowrap; user-select: none;
+}
+.seg .s:last-child { border-right: none }
+.seg .s:hover:not(.on) { background: var(--yuz2) }
+.seg .s.on { background: linear-gradient(#4d8fd6, #2f6db3); color: #fff; font-weight: 700 }
+/* Acil secenegi secilince KIRMIZI - kayit kabulde acil basvuru goze carpsin. */
+.seg .s.acil.on { background: linear-gradient(#e0605c, #c0413d) }
+.seg.kilitli .s { cursor: default; opacity: .7 }
+
 /* Grup basligindaki eylem dugmesi (ör. "Provizyon Al") SAGA yaslanir; serit
    yuksekligini buyutmesin diye kisa tutulur. */
 .kagrup > h6 .d.sag { margin-left: auto; height: 20px; font-size: 11px }
@@ -860,6 +875,11 @@ input.skt-gecmis {
    (Doviz/Kur grid altindaki kutuda.) */
 .alan-izgara.dort-sutun { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 14px }
 .alan-izgara.dort-sutun .genis-2 { grid-column: span 2 }
+/* Tam satir kaplayan alan (ör. Başvuru Notu) - dort sutunun hepsi. */
+.alan-izgara.dort-sutun .genis-4 { grid-column: 1 / -1 }
+.alan-izgara .genis-4 textarea { resize: vertical; font: inherit; font-size: 12px;
+  border: 1px solid var(--cizgi); border-radius: 2px; background: var(--yuz);
+  color: var(--yazi); padding: 4px 6px; width: 100% }
 @media (max-width: 1000px) { .alan-izgara.dort-sutun { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
 .alan-izgara.uc-sutun .genis-2 { grid-column: span 2 }
 @media (max-width: 900px) { .alan-izgara.uc-sutun { grid-template-columns: 1fr } }

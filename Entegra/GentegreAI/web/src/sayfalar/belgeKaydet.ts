@@ -36,6 +36,8 @@ export interface BelgeGirdisi {
   seri: string;
   belgeNo: string;
   vadeGun: string;
+  /** Belge aciklamasi - basvuruda "Başvuru Notu" (300). */
+  aciklama?: string;
   /** Basvuruda (249) vade yerine odeyen kurum secilir - anlasmali kurum id. */
   odeyenKurumId?: number | null;
   /** Basvurunun bolumu ve karsilayan personeli (296/297). */
@@ -164,7 +166,7 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
 /** API §4 istek govdesi. `dolu` = stok/hizmet secilmis satirlar. */
 export function belgeGovdesi(g: BelgeGirdisi, dolu: SatirDurumu[], taslak: boolean) {
   const { tur, cari, tarih, depoBelgesi, stokFisiMi, seri, disNumarali, belgeNo,
-          vadeGun, odeyenKurumId, bolumId, personelId, basvuruAlanlari,
+          vadeGun, aciklama, odeyenKurumId, bolumId, personelId, basvuruAlanlari,
           subeId, fisCikisMi, depo, girisDepo, alisMi, faturaMi, fisTipi, faturaTipi,
           raporDovizi, ekstreDovizi, belgeKuru, yerelPara, satici,
           senaryo, irsaliyeMi, teslimSekli, aracPlaka, soforAd, sevkTarihi,
@@ -189,6 +191,7 @@ return {
     ekstreDovizi,
     dovizKuru: hamSayi(belgeKuru) || 1,
     vadeGun: Number(vadeGun) || 0,
+    ...(aciklama !== undefined ? { aciklama } : {}),
     ...(odeyenKurumId !== undefined ? { odeyenKurumId } : {}),
     ...(bolumId !== undefined ? { bolumId } : {}),
     ...(personelId !== undefined ? { personelId } : {}),

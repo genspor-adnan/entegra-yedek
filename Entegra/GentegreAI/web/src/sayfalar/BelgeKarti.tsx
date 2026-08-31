@@ -132,6 +132,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   /** Yalniz dis numarali turde (alis faturasi) kullanilir - tedarikcinin no'su. */
   const [belgeNo, setBelgeNo] = useState('');
   const [vadeGun, setVadeGun] = useState('30');
+  /** Belge aciklamasi - basvuruda "Başvuru Notu" alani (300, mockup). */
+  const [aciklama, setAciklama] = useState('');
   // BASVURU (249): vade yerine "Ödeyen Kurum" - hizmeti kim odeyecek
   //   (anlasmali kurum / sigorta / SGK). Bos = hasta kendi oder.
   const [odeyenKurumId, setOdeyenKurumId] = useState<number | null>(null);
@@ -543,6 +545,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setTarih(String(y.belge.belgeTarihi ?? '').slice(0, 16));
         setSeri(String(y.belge.belgeSeri ?? ''));
         setVadeGun(String(y.belge.vadeGun ?? 0));
+        setAciklama(String(y.belge.aciklama ?? ''));
         setOdeyenKurumId(y.belge.odeyenKurumId != null ? Number(y.belge.odeyenKurumId) : null);
         setFiyatListesiIdHam(Number(y.belge.fiyatListesiId) || null);
         setBolumId(y.belge.bolumId != null ? Number(y.belge.bolumId) : null);
@@ -787,6 +790,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       // Teklif durumu yalniz teklifte anlamli - baska turde gonderilmez.
       ...(teklifMi ? { teklifDurum: Number(teklifDurum) || 1, revizeNo,
                        teklifKonusu, teklifTeslim } : {}),
+      aciklama,
       raporDovizi, ekstreDovizi, belgeKuru, yerelPara,
       senaryo, satici, depo, girisDepo, teslimEden, teslimAlan, tasiyici,
       aracPlaka, soforAd, soforTckn, sevkTarihi, teslimSekli, fisTipi, satirlar,
@@ -1302,6 +1306,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             gorevliler={gorevliler} personelId={personelId} setPersonelId={setPersonelId}
             kurumlar={kurumlar} odeyenKurumId={odeyenKurumId}
             setOdeyenKurumId={v => void odeyenKurumDegisti(v)}
+            aciklama={aciklama} setAciklama={setAciklama}
             randevuBilgi={sonuc?.belge.randevuOzet
               ? String(sonuc.belge.randevuOzet) : undefined}
           />
