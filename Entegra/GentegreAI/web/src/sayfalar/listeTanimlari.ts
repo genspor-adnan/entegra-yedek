@@ -196,7 +196,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'belge', rota: 'basvuru', baslik: 'Başvurular',
     yol: 'Kayıt Kabul › Başvurular',
     aksiyonEkrani: 'basvuru-liste', yeniBelgeTuru: 19,
-    sabitFiltre: { alan: 'tur', op: 'esit', deger: 19 },
+    // BASVURU ile SATIS SIPARISI ayni turdur (19); ayirt eden belge TIPIDIR
+    //   (301): basvuru 30, ERP siparisi 1. urunModu zaten iki ekrani ayri
+    //   kurulumlara veriyor ama filtre veriye de dayansin - ayni veritabanina
+    //   iki modla bakildiginda listeler karismasin.
+    sabitFiltre: { op: 'and', kosullar: [
+      { alan: 'tur', op: 'esit', deger: 19 },
+      { alan: 'tipi', op: 'esit', deger: 30 },
+    ] },
     // Basvuru e-Belge degil; tur kolonlari da tek turlu listede gereksiz.
     //   'durum' (Durum Kodu) siparis listesinden miras: basvuruda anlami yok,
     //   hepsi ayni degeri gosterip "Pasif" gibi okunuyordu (kullanici).
@@ -494,7 +501,11 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     aksiyonEkrani: 'siparis-liste', yeniBelgeTuru: 19, urunModu: 1,
     // Menude "Satis Siparisleri" seciliyse liste de yalniz SATIS siparisi (19)
     //   gostersin; tur kolonlari o yuzden gereksiz (alis siparisi ayri ekran).
-    sabitFiltre: { alan: 'tur', op: 'esit', deger: 19 },
+    sabitFiltre: { op: 'and', kosullar: [
+      { alan: 'tur', op: 'esit', deger: 19 },
+      // Hasta basvurulari (tipi 30) ERP siparis listesinde GORUNMEZ (301).
+      { alan: 'tipi', op: 'esitDegil', deger: 30 },
+    ] },
     // e-Fatura durumu SIPARISTE anlamsiz (siparis e-Belge degil).
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],

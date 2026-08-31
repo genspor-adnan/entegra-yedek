@@ -52,6 +52,14 @@ export const FATURA_TIPLERI: { deger: number; ad: string }[] = [
 ];
 
 /**
+ * HASTA BASVURUSU belge tipi (301). Basvuru ile satis siparisi AYNI TURDUR
+ * (tur 19) - ayirt eden tek sey buydu: basvuru `tipi = 30`, ERP siparisi
+ * `tipi = 1`. Boylece rapor/SQL/dis entegrasyon belge_basvuru uzantisina
+ * JOIN atmadan hangisi oldugunu bilir.
+ */
+export const BASVURU_TIPI = 30;
+
+/**
  * IRSALIYE TIPI - irsaliyede fatura tiplerinin cogu anlamsiz (fiyat farki,
  * tevkifat, SGK...); mal ya gider ya GERI GELIR. Ayni alan (belge.tipi) ve ayni
  * iade numarasi (2) kullanilir.

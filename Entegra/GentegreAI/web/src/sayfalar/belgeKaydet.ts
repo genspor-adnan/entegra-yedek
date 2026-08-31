@@ -1,5 +1,6 @@
 import type { SatirDurumu } from './belgeSatir';
 import { hamSayi } from '../bilesenler/bicim';
+import { BASVURU_TIPI } from './belgeSabitleri';
 
 /** Kart uzerinde secilen bir kayit (cari, depo, tasiyici, personel...). */
 export interface Secim { id: number; ad: string }
@@ -166,7 +167,7 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
 /** API §4 istek govdesi. `dolu` = stok/hizmet secilmis satirlar. */
 export function belgeGovdesi(g: BelgeGirdisi, dolu: SatirDurumu[], taslak: boolean) {
   const { tur, cari, tarih, depoBelgesi, stokFisiMi, seri, disNumarali, belgeNo,
-          vadeGun, aciklama, odeyenKurumId, bolumId, personelId, basvuruAlanlari,
+          vadeGun, aciklama, odeyenKurumId, bolumId, personelId, basvuruAlanlari, basvuruMu,
           subeId, fisCikisMi, depo, girisDepo, alisMi, faturaMi, fisTipi, faturaTipi,
           raporDovizi, ekstreDovizi, belgeKuru, yerelPara, satici,
           senaryo, irsaliyeMi, teslimSekli, aracPlaka, soforAd, sevkTarihi,
@@ -219,10 +220,13 @@ return {
     girisDepoId: stokFisiMi ? (fisCikisMi ? null : depo?.id ?? null)
                : depoBelgesi ? girisDepo?.id ?? null
                : alisMi ? depo?.id ?? null : null,
-    // belge.tipi UC anlamda kullanilir: stok fisinde fisin SEBEBI, faturada
-    //   FATURA TIPI (130), irsaliyede NORMAL/IADE (133). Siparis, transfer ve
-    //   talepte anlami yok - gonderilmez, alan 0 kalir.
-    tipi: stokFisiMi ? fisTipi : (faturaMi || irsaliyeMi) ? faturaTipi : undefined,
+    // belge.tipi DORT anlamda kullanilir: stok fisinde fisin SEBEBI, faturada
+    //   FATURA TIPI (130), irsaliyede NORMAL/IADE (133), BASVURUDA ise
+    //   siparisten ayirt edici isaret (301: tur 19 ikisinde de ayni).
+    //   Transfer ve talepte anlami yok - gonderilmez, alan 0 kalir.
+    tipi: stokFisiMi ? fisTipi
+        : basvuruMu ? BASVURU_TIPI
+        : (faturaMi || irsaliyeMi) ? faturaTipi : undefined,
     // satici_id NOT NULL default 0 - "secilmedi" burada null degil 0
     //   (null gonderince sunucu "saticiId bos birakilamaz" ile reddediyordu).
     saticiId: satici?.id ?? 0,
