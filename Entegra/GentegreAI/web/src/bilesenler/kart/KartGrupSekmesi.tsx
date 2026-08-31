@@ -90,6 +90,7 @@ if (personelIletisimSekmesi) {
                  Bilgisi" grubunun alanlari buraya cizilir. */
               ekAlanlar={renderAlanListesi(
                 gruplar.find(([ad]) => ad === 'Hekim Bilgisi')?.[1] ?? [])}
+              ekAlanlarSira={1}
             />
             </div>
           ) : null;

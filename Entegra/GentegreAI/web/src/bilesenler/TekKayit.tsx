@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import type React from 'react';
 import { TelefonGirdi } from './TelefonGirdi';
 import { telefonAlaniMi } from './alanBicim';
@@ -38,6 +39,9 @@ interface Props {
    * TekKayit onu kendisi cizemez, ama gorsel olarak ayni kutuda durmali.
    */
   ekAlanlar?: React.ReactNode;
+  /** ekAlanlar KACINCI alandan once cizilsin (0 = en uste). Dis hekimde 1:
+      kullanici kurumu bransin ALTINDA istiyor. */
+  ekAlanlarSira?: number;
 }
 
 /**
@@ -53,7 +57,8 @@ interface Props {
  * doldurup Kaydet derse detay farkinda "eklenen" olarak gider.
  */
 export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, gruplar,
-                           dislar, ustAlanlar, aramaAc, secilenAdlar, ekAlanlar }: Props) {
+                           dislar, ustAlanlar, aramaAc, secilenAdlar, ekAlanlar,
+                           ekAlanlarSira }: Props) {
   const satir: Satir = durum.guncel[0] ?? {};
 
   const degis = (ad: string, deger: unknown) => {
@@ -173,13 +178,19 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, grupla
     );
   }
 
+  // Kart alanlari (ekAlanlar) detay alanlarinin ARASINA girer - ayri bir blok
+  //   olarak ustte/altta durmasi kutuyu ikiye bolmus gibi gorunuyordu.
+  const cizimler = alanlar.map(alanCiz);
+  if (ekAlanlar)
+    cizimler.splice(Math.min(ekAlanlarSira ?? 0, cizimler.length), 0,
+                    <Fragment key="_ek">{ekAlanlar}</Fragment>);
+
   return (
     <div className="kasira">
       <div className="kagrup">
         <h6>{baslik ?? meta.baslik}</h6>
         <div className="alan-izgara tek-sutun">
-          {ekAlanlar}
-          {alanlar.map(alanCiz)}
+          {cizimler}
         </div>
         {not && <div className="not">{not}</div>}
       </div>
