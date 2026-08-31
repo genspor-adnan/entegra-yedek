@@ -65,7 +65,9 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
   const [istekHekimId, setIstekHekimId] = useState<number | null>(null);
   const [disHekimAd, setDisHekimAd] = useState('');
   const [istekKurumId, setIstekKurumId] = useState<number | null>(null);
-  const [kurumlar, setKurumlar] = useState<{ id: number; ad: string }[]>([]);
+  /** Secili kurumun ADI - kutuda id degil ad gorunur. */
+  const [istekKurumAd, setIstekKurumAd] = useState('');
+  const [kurumArama, setKurumArama] = useState(false);
   const [onTani, setOnTani] = useState('');
   const [klinikBilgi, setKlinikBilgi] = useState('');
   const [ucretEkle, setUcretEkle] = useState(true);
@@ -82,17 +84,6 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
   }, [hastaId]);
 
   useEffect(() => { if (acik) void yukle() }, [acik, yukle]);
-
-  // Dis istemde isteyen KURUM listesi gerekir; ic istemde sorulmaz.
-  useEffect(() => {
-    if (!acik || !disIstem) return;
-    void (async () => {
-      try {
-        const y = await api.liste('cari', { sayfa: 1, boyut: 200 });
-        setKurumlar(y.satirlar.map(s => ({ id: Number(s.id), ad: String(s.unvan ?? '') })));
-      } catch { /* kurum listesi gelmezse alan bos kalir - istem yine acilir */ }
-    })();
-  }, [acik, disIstem]);
 
   /** Modaliteye gore gruplu, aramayla suzulmus tetkik agaci. */
   const agac = useMemo(() => {
@@ -252,7 +243,9 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
                       "hangi Ortopedi hekimiydi" sorusu cevaplanabiliyor.
                       Secilen hekim istemin istek_hekim_id'sine yazilir ve
                       hekim kartindaki "gonderdigi tetkik" sayaci isler. */}
-                  <label className="alan">
+                  {/* genis-2: arama kutusu + iki dugme dort-sutunluk dar hucreye
+                      sigmiyor, secili ad "Öz…" diye kirpiliyordu. */}
+                  <label className="alan genis-2">
                     <span className="etiket">İsteyen Hekim (dış)</span>
                     <span className="ikili">
                       <input value={disHekimSecim} readOnly
@@ -278,14 +271,25 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
                              onChange={e => setDisHekimAd(e.target.value)} />
                     </label>
                   )}
-                  <label className="alan">
+                  {/* ISTEYEN KURUM da JENERIK ARAMA (kullanici): combo yalniz
+                      ilk 200 cariyi tasiyordu - sevk eden hastane listede
+                      yoksa alan bos birakiliyordu. Arama ekraninda "+ Yeni"
+                      ile kurum aninda cari olarak acilabiliyor. */}
+                  <label className="alan genis-2">
                     <span className="etiket">İsteyen Kurum</span>
-                    <select value={istekKurumId ?? ''}
-                            onChange={e => setIstekKurumId(
-                              e.target.value ? Number(e.target.value) : null)}>
-                      <option value="">— Seçiniz —</option>
-                      {kurumlar.map(k => <option key={k.id} value={k.id}>{k.ad}</option>)}
-                    </select>
+                    <span className="ikili">
+                      <input value={istekKurumAd} readOnly
+                             placeholder="Kurum seç…"
+                             onClick={() => setKurumArama(true)} />
+                      <button type="button" className="d mini" title="Kurum ara"
+                              onClick={() => setKurumArama(true)}>…</button>
+                      {istekKurumId != null && (
+                        <button type="button" className="d mini" title="Seçimi kaldır"
+                                onClick={() => { setIstekKurumId(null); setIstekKurumAd('') }}>
+                          ✕
+                        </button>
+                      )}
+                    </span>
                   </label>
                 </>
               ) : (
@@ -348,6 +352,19 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
           setDisHekimSecim(sec.unvan);
           setDisHekimAd('');
           setHekimArama(false);
+        }}
+      />
+
+      {/* Isteyen kurum - jenerik cari aramasi (hekim aramasiyla ayni desen). */}
+      <TarafArama
+        acik={kurumArama}
+        kaynaklar={['cari']}
+        yerTutucu="Kurum / cari ara…"
+        onKapat={() => setKurumArama(false)}
+        onSec={sec => {
+          setIstekKurumId(sec.id);
+          setIstekKurumAd(sec.unvan);
+          setKurumArama(false);
         }}
       />
     </Modal>
