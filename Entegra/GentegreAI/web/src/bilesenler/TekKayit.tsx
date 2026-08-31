@@ -1,3 +1,4 @@
+import type React from 'react';
 import { TelefonGirdi } from './TelefonGirdi';
 import { telefonAlaniMi } from './alanBicim';
 import type { DetayDurumu, Satir } from './GenDetayTablo';
@@ -30,6 +31,13 @@ interface Props {
   aramaAc?(alan: string, kaynak: string, uygula?: (deger: string) => void): void;
   /** Secili kaydin ADI - id'den cozulen gosterim metni. */
   secilenAdlar?: Record<string, string>;
+
+  /**
+   * Kutunun ICINE, detay alanlarindan ONCE cizilecek KART alanlari (309).
+   * Dis hekimde kurum bagi taraf.bag_id'de - detay tablosunda olmadigi icin
+   * TekKayit onu kendisi cizemez, ama gorsel olarak ayni kutuda durmali.
+   */
+  ekAlanlar?: React.ReactNode;
 }
 
 /**
@@ -45,7 +53,7 @@ interface Props {
  * doldurup Kaydet derse detay farkinda "eklenen" olarak gider.
  */
 export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, gruplar,
-                           dislar, ustAlanlar, aramaAc, secilenAdlar }: Props) {
+                           dislar, ustAlanlar, aramaAc, secilenAdlar, ekAlanlar }: Props) {
   const satir: Satir = durum.guncel[0] ?? {};
 
   const degis = (ad: string, deger: unknown) => {
@@ -170,6 +178,7 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, grupla
       <div className="kagrup">
         <h6>{baslik ?? meta.baslik}</h6>
         <div className="alan-izgara tek-sutun">
+          {ekAlanlar}
           {alanlar.map(alanCiz)}
         </div>
         {not && <div className="not">{not}</div>}

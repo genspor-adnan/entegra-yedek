@@ -559,7 +559,18 @@ public static partial class KartKatalogu
             new("cepTel",   "cep_tel",  "metin", EnFazlaUzunluk: 30, Baslik: "Cep"),
             new("telefon",  "telefon",  "metin", EnFazlaUzunluk: 30, Baslik: "Telefon"),
             new("eposta",   "eposta",   "metin", EnFazlaUzunluk: 200, Baslik: "E-posta"),
-            new("vkno",     "vkno",     "metin", EnFazlaUzunluk: 20, Baslik: "TC No"),
+            // CALISTIGI KURUM (309): personel uzantisinda DEGIL tarafin kendi
+            //   bag_id'sinde - "Bağlı Kurum" bagi kisi/cari ekranlariyla ortak,
+            //   ayni bilgiyi ikinci bir kolonda tutmak gerekmiyor. Yalniz
+            //   KAYITLI cari (308): kayitli degilse arama ekranindaki "+ Yeni".
+            //   Combo degil JENERIK ARAMA: cari listesi binlerce kayit olabilir;
+            //   KodTablosu secili kaydin ADINI cozmek icin durur.
+            //   Grup "Hekim Bilgisi": sekme olarak DEGIL, Genel sekmesindeki
+            //   Hekim Bilgisi kutusunun icinde cizilir (KartGrupSekmesi).
+            new("kurumId",  "bag_id",   "kod",   KodTablosu: "public.v_cari_lookup",
+                AramaKaynagi: "cari", Baslik: "Kurum", Grup: "Hekim Bilgisi"),
+            // TC No YOK (kullanici): dis hekimin kimlik numarasini biz tutmuyoruz -
+            //   sevk eden hekim icin gerekli olan iletisim ve tescil bilgisidir.
             // taraf'ta serbest not kolonu "notlar" (aciklama YOK).
             new("notlar",   "notlar",   "metin", EnFazlaUzunluk: 300, Baslik: "Not"),
             // subeId ALAN OLARAK YOK: dis hekim subeye ait degil ama taraf.sube_id
@@ -574,15 +585,6 @@ public static partial class KartKatalogu
                 new("id",       "id",        "sayi", Yazilabilir: false),
                 new("brans",    "brans",     "kod", KodListesi: "hekim.brans",
                     Baslik: "Branş"),
-                // Calistigi kurum YALNIZ KAYITLI CARI (308): serbest metin alani
-                //   kaldirildi - ayni hastane bir kayitta cari bir kayitta metin
-                //   olunca "hangi kurumdan kac hasta geldi" sorulamiyordu.
-                //   Kayitli degilse arama ekranindaki "+ Yeni" ile cari acilir.
-                // JENERIK ARAMA ile secilir: cari listesi binlerce kayit
-                //   icerebiliyor, combo kullanilmaz olurdu. KodTablosu yine
-                //   verilir - secili kaydin ADI ondan cozulur.
-                new("kurumId",  "kurum_id",  "kod", KodTablosu: "public.v_cari_lookup",
-                    AramaKaynagi: "cari", Baslik: "Kurum"),
                 new("tescilNo", "tescil_no", "metin", EnFazlaUzunluk: 30,
                     Baslik: "Diploma / Tescil No"),
                 // taraf_personel'de ZATEN VAR - dis hekimde "kadrolu / part-time /

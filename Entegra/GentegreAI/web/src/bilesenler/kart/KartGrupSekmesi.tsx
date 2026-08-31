@@ -85,6 +85,11 @@ if (personelIletisimSekmesi) {
               baslik="Hekim Bilgisi"
               aramaAc={aramaAc}
               secilenAdlar={secilenAdlar}
+              /* KURUM kartin kendi alani (taraf.bag_id, 309) - detayda degil,
+                 ama kutunun icinde durmali: sekme olarak gizlenen "Hekim
+                 Bilgisi" grubunun alanlari buraya cizilir. */
+              ekAlanlar={renderAlanListesi(
+                gruplar.find(([ad]) => ad === 'Hekim Bilgisi')?.[1] ?? [])}
             />
             </div>
           ) : null;

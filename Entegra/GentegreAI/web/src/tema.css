@@ -1461,6 +1461,9 @@ input.skt-gecmis {
 .hekim-bilgi-kutu { flex: 1; min-width: 0 }
 .hekim-bilgi-kutu .kasira { margin-bottom: 0 }
 .hekim-bilgi-kutu .alan { grid-template-columns: 132px 1fr }
+/* Brans / tescil / calisma sekli KURUM kadar genis (kullanici): kurum bir
+   .ikili (kutu + ara dugmeleri) ve sutunun tamamini kaplar - digerleri %82'de
+   kalinca satirlar hizasiz gorunuyordu. */
 .hekim-bilgi-kutu .alan input,
 .hekim-bilgi-kutu .alan select,
-.hekim-bilgi-kutu .alan textarea { width: 82% }
+.hekim-bilgi-kutu .alan textarea { width: 100% }

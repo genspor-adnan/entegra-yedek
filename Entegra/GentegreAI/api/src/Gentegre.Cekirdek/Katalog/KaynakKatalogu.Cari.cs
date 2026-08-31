@@ -301,7 +301,7 @@ public static partial class KaynakKatalogu
         Kaynak: """
             public.taraf t
             join public.taraf_personel po on po.id = t.id
-            left join public.taraf k on k.id = po.kurum_id
+            left join public.taraf k on k.id = t.bag_id
             left join public.kod_liste kl on kl.kod = 'hekim.brans'
             left join public.kod_deger kd on kd.liste_id = kl.id
                                          and kd.deger::text = nullif(po.brans, '')
