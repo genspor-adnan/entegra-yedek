@@ -321,9 +321,8 @@ public static partial class KaynakKatalogu
                 + "btrim(coalesce(t.ad, '') || ' ' || coalesce(t.soyad, '')))",
                                         "metin", "Ad Soyad", Genislik: 220),
             new("bransAdi", "coalesce(kd.ad, '')", "metin", "Branş", Genislik: 200),
-            // Kurum: kayitli cari varsa onun unvani, yoksa serbest metin.
-            new("kurum",
-                "coalesce(nullif(po.kurum_ad, ''), coalesce(k.unvan, ''))",
+            // Kurum: artik yalniz KAYITLI cari (308) - serbest metin alani yok.
+            new("kurum",    "coalesce(k.unvan, '')",
                                         "metin", "Kurum", Genislik: 220),
             new("tescilNo", "po.tescil_no", "metin", "Tescil No"),
             new("cepTel",   "t.cep_tel", "metin", "Cep"),

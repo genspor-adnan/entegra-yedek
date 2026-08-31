@@ -574,15 +574,15 @@ public static partial class KartKatalogu
                 new("id",       "id",        "sayi", Yazilabilir: false),
                 new("brans",    "brans",     "kod", KodListesi: "hekim.brans",
                     Baslik: "Branş"),
-                // Calistigi kurum: cari kaydi VARSA baglanir, yoksa adi yazilir.
-                //   Sevk eden hastanelerin cogu cari listesinde olmaz.
-                // Kurum JENERIK ARAMA ile secilir (kullanici): cari listesi
-                //   binlerce kayit icerebiliyor, combo kullanilmaz olurdu.
-                //   KodTablosu yine verilir - secili kaydin ADI ondan cozulur.
+                // Calistigi kurum YALNIZ KAYITLI CARI (308): serbest metin alani
+                //   kaldirildi - ayni hastane bir kayitta cari bir kayitta metin
+                //   olunca "hangi kurumdan kac hasta geldi" sorulamiyordu.
+                //   Kayitli degilse arama ekranindaki "+ Yeni" ile cari acilir.
+                // JENERIK ARAMA ile secilir: cari listesi binlerce kayit
+                //   icerebiliyor, combo kullanilmaz olurdu. KodTablosu yine
+                //   verilir - secili kaydin ADI ondan cozulur.
                 new("kurumId",  "kurum_id",  "kod", KodTablosu: "public.v_cari_lookup",
-                    AramaKaynagi: "cari", Baslik: "Kurum (kayıtlı)"),
-                new("kurumAd",  "kurum_ad",  "metin", EnFazlaUzunluk: 200,
-                    Baslik: "Kurum Adı"),
+                    AramaKaynagi: "cari", Baslik: "Kurum"),
                 new("tescilNo", "tescil_no", "metin", EnFazlaUzunluk: 30,
                     Baslik: "Diploma / Tescil No"),
                 // taraf_personel'de ZATEN VAR - dis hekimde "kadrolu / part-time /
