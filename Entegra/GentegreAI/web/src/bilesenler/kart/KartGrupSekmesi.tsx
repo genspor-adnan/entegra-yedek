@@ -73,6 +73,9 @@ if (personelIletisimSekmesi) {
         {kaynak === 'dis-hekim' ? (() => {
           const hekimDetay = meta.detaylar.find(d => d.ad === 'hekim');
           return hekimDetay ? (
+            /* Sarmalayici sinif: TekKayit kendi .kasira/.kagrup yapisini
+               uretiyor, dis seciciyle icindeki alanlara ulasilamiyordu. */
+            <div className="hekim-bilgi-kutu">
             <TekKayit
               meta={hekimDetay}
               durum={detaylar[hekimDetay.ad] ?? bosDetay()}
@@ -80,6 +83,7 @@ if (personelIletisimSekmesi) {
               onDegis={yeni => setDetaylar(t => ({ ...t, [hekimDetay.ad]: yeni }))}
               baslik="Hekim Bilgisi"
             />
+            </div>
           ) : null;
         })() : adresDetay && (
           <TekAdres

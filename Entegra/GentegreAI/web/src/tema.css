@@ -1455,11 +1455,12 @@ input.skt-gecmis {
 .hekim-adres-blok { margin-top: 12px }
 .hekim-adres-blok .kagrup { margin-bottom: 0 }
 
-/* Hekim Bilgisi kutusundaki editler %10 dar (kullanici): etiketler uzun
-   ("Diploma / Tescil No"), kutu genisledigi icin girdiler gereginden uzun
-   duruyordu. Kutunun kendisi genis kalir, iceride nefes payi olur. */
-.personel-iletisim-yerlesim.esit-ikili > .kasira > .kagrup:last-child .alan input,
-.personel-iletisim-yerlesim.esit-ikili > .kasira > .kagrup:last-child .alan select,
-.personel-iletisim-yerlesim.esit-ikili > .kasira > .kagrup:last-child .alan textarea {
-  width: 90%;
-}
+/* Hekim Bilgisi kutusu (kullanici): "Diploma / Tescil No" etiketi 84px'e
+   sigmayip iki satira sariyordu - etiket sutunu genisletildi, editler de
+   daraltildi. Kutunun kendisi genis kalir. */
+.hekim-bilgi-kutu { flex: 1; min-width: 0 }
+.hekim-bilgi-kutu .kasira { margin-bottom: 0 }
+.hekim-bilgi-kutu .alan { grid-template-columns: 132px 1fr }
+.hekim-bilgi-kutu .alan input,
+.hekim-bilgi-kutu .alan select,
+.hekim-bilgi-kutu .alan textarea { width: 82% }

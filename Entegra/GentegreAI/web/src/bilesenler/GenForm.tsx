@@ -130,6 +130,16 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
    */
   const [unvanOnek, setUnvanOnek] = useState('');
   const [unvanSecenek, setUnvanSecenek] = useState<string[]>([]);
+  /**
+   * Karttan okunan HAM unvan ("Op.Dr. Kerem ATALAY"). Onek ayristirmasi ayri
+   * bir etkide yapilir: kod listesi ASENKRON geliyor, kart okunurken
+   * secenekler henuz bos oluyor ve combo bos kaliyordu.
+   */
+  const [unvanHam, setUnvanHam] = useState('');
+  useEffect(() => {
+    if (kaynak !== 'dis-hekim' || !unvanHam || unvanSecenek.length === 0) return;
+    setUnvanOnek(unvanSecenek.find(o => unvanHam.startsWith(o + ' ')) ?? '');
+  }, [kaynak, unvanHam, unvanSecenek]);
   useEffect(() => {
     if (kaynak !== 'dis-hekim') return;
     let iptal = false;
@@ -249,6 +259,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           const d = k.kart[a.ad];
           gelen[a.ad] = a.tip === 'mantik' ? Number(d) === 1 : (d === null || d === undefined ? '' : String(d));
         });
+        if (kaynak === 'dis-hekim') setUnvanHam(String(k.kart.unvan ?? '').trim());
         setDeger(gelen);
         setIlkDeger(gelen);
         // KAYITLI kur tarihseldir - acilista bugunun kuruyla EZILMEMELI. Yuklenen
@@ -709,7 +720,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
                ve "DR-0042" tam sutunda bos yer birakiyordu. Ad/Soyad ve
                Temsilci tam sutun kalir. */
             <div className="alan-izgara"
-                 style={{ gridTemplateColumns: '0.5fr 1fr 1fr 0.5fr 1fr 1fr' }}>
+                 style={{ gridTemplateColumns: '0.5fr 1fr 1fr 0.5fr 1fr 0.5fr' }}>
               <label className="alan tip-kod">
                 <span className="etiket">Ünvan</span>
                 <select value={unvanOnek} disabled={salt}
