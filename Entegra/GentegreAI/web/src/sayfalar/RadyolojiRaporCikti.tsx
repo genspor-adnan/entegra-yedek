@@ -39,12 +39,14 @@ const CINSIYET: Record<number, string> = { 1: 'Erkek', 2: 'Kadın' };
 
 /** Modaliteye gore rapor basligi (mockup "Manyetik Rezonans İnceleme Raporu"). */
 const RAPOR_ADI: Record<number, string> = {
-  1: 'Direkt Grafi İnceleme Raporu',
-  2: 'Ultrasonografi İnceleme Raporu',
-  3: 'Bilgisayarlı Tomografi İnceleme Raporu',
-  4: 'Manyetik Rezonans İnceleme Raporu',
+  1: 'Bilgisayarlı Tomografi İnceleme Raporu',
+  2: 'Manyetik Rezonans İnceleme Raporu',
+  3: 'Ultrasonografi İnceleme Raporu',
+  4: 'Direkt Grafi İnceleme Raporu',
   5: 'Mamografi İnceleme Raporu',
-  6: 'Kemik Dansitometri Raporu',
+  6: 'Kemik Dansitometri (DEXA) Raporu',
+  7: 'Anjiyografi İnceleme Raporu',
+  8: 'Skopi İnceleme Raporu',
 };
 
 export function RadyolojiRaporCikti() {

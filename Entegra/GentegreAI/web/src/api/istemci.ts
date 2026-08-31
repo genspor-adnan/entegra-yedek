@@ -619,6 +619,25 @@ export const api = {
     gonder<{ idler: number[]; accessionlar: string[]; uyarilar: string[] }>(
       '/api/radyoloji/istem', govde),
 
+  /** SONUC TESLIMI (304): film/CD/basili rapor kime verildi. */
+  radyolojiTeslim: (istemId: number, govde: unknown) =>
+    gonder<{ tamam: boolean }>(`/api/radyoloji/istem/${istemId}/teslim`, govde),
+
+  radyolojiTeslimler: (istemId: number) =>
+    istek<Record<string, unknown>[]>(`/api/radyoloji/istem/${istemId}/teslimler`),
+
+  /**
+   * KONSULTASYON (304): ikinci gorus. `konsultasyonId` verilirse DONEN GORUS
+   * yazilir (kayit "dondu" olur), yoksa yeni istek acilir.
+   */
+  radyolojiKonsultasyon: (istemId: number, govde: unknown, konsultasyonId?: number) =>
+    gonder<{ id: number }>(
+      `/api/radyoloji/istem/${istemId}/konsultasyon`
+      + (konsultasyonId ? `?konsultasyonId=${konsultasyonId}` : ''), govde),
+
+  radyolojiKonsultasyonlar: (istemId: number) =>
+    istek<Record<string, unknown>[]>(`/api/radyoloji/istem/${istemId}/konsultasyonlar`),
+
   radyolojiAddendum: (raporId: number) =>
     gonder<{ raporId: number }>(`/api/radyoloji/rapor/${raporId}/addendum`, {}),
 

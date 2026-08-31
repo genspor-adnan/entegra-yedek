@@ -234,7 +234,29 @@ public static partial class KartKatalogu
                 new("fiyat",      "fiyat",       "para", Zorunlu: true, Baslik: "Fiyat"),
                 new("dovizCinsi", "doviz_cinsi", "kod",  Baslik: "Döviz"),
                 new("kdvDurum",   "kdv_durum",   "kod",  Baslik: "KDV Durumu")
-            }, Sirala: "fiyat_adi, id", SubeKolonu: null, LogTabloId: 922, Baslik: "Fiyatlar")
+            }, Sirala: "fiyat_adi, id", SubeKolonu: null, LogTabloId: 922, Baslik: "Fiyatlar"),
+
+            // RADYOLOJI PROTOKOLU (283, 1:1): tetkigin NASIL cekilecegi -
+            //   sure, kontrast, seri tarifi, hasta hazirligi ve ozel uyari.
+            //   Sema vardi ama girisi yoktu; ayri bir "protokol karti" acmak
+            //   yerine tetkikin kendi kartina baglandi - protokol tetkikten
+            //   bagimsiz yasamiyor. Yalniz modalitesi tanimli hizmette
+            //   anlamli, bos birakilirsa satir yazilmaz (TekSatir deseni).
+            new DetayTanimi("radyolojiProtokol", "public.radyoloji_protokol", "hizmet_id",
+            new KartAlani[]
+            {
+                new("modalite",    "modalite",       "kod", KodListesi: "rad.modalite",
+                    Baslik: "Modalite"),
+                new("sureDk",      "sure_dk",        "sayi", Baslik: "Süre (dk)"),
+                new("kontrast",    "kontrast",       "kod", KodListesi: "rad.kontrast",
+                    Baslik: "Kontrast"),
+                new("seriTarifi",  "seri_tarifi",    "metin", EnFazlaUzunluk: 400,
+                    Baslik: "Seri / Sekans Tarifi"),
+                new("hazirlikMetni", "hazirlik_metni", "metin", EnFazlaUzunluk: 400,
+                    Baslik: "Hasta Hazırlığı"),
+                new("ozelUyari",   "ozel_uyari",     "metin", EnFazlaUzunluk: 200,
+                    Baslik: "Özel Uyarı"),
+            }, SubeKolonu: null, LogTabloId: 943, Baslik: "Radyoloji Protokolü", TekSatir: true)
         },
         SilmeEngelleri: new[]
         {

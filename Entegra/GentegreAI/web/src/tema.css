@@ -1404,3 +1404,15 @@ input.skt-gecmis {
 .istem-agac .agac-satir:hover { background: var(--secim, #e8f0fb) }
 .istem-sag { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
 .istem-sag .detay-tablo select { height: 22px; font-size: 11.5px }
+
+/* Konsultasyon satirlari - rapor ekraninin sag paneli (304). */
+.kons-satir {
+  border: 1px solid var(--cizgi2); border-radius: 3px; padding: 5px 7px;
+  margin-top: 5px; font-size: 11.5px; display: flex; flex-direction: column; gap: 3px;
+}
+.kons-satir .rozet { margin-left: 6px }
+.kons-gorus {
+  background: var(--yuz2); border-left: 3px solid #4d8fd6; padding: 4px 6px;
+  border-radius: 2px; white-space: pre-wrap;
+}
+.not.kucuk { font-size: 11px; padding: 3px 0 }

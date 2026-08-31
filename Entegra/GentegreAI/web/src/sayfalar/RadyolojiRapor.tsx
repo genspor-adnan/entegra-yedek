@@ -66,6 +66,14 @@ export function RadyolojiRapor() {
   const [yukleniyor, setYukleniyor] = useState(true);
   const [hata, setHata] = useState('');
   const [kritikModal, setKritikModal] = useState(false);
+  /**
+   * KONSULTASYON (304): ikinci gorus. Istek ve DONEN GORUS ayni yerden
+   * yazilir - gorus alanina yazip kaydetmek kaydi "dondu"ye gecirir.
+   */
+  const [konsultasyonlar, setKonsultasyonlar] = useState<Kayit[]>([]);
+  const [konsModal, setKonsModal] = useState(false);
+  const [konsForm, setKonsForm] = useState({ hekimId: '', gerekce: '' });
+  const [gorusYaz, setGorusYaz] = useState<{ id: number; gorus: string } | null>(null);
   const [kritikForm, setKritikForm] = useState({ bulgu: '', bildirilenAd: '', yol: 1,
                                                  geriBildirim: '' });
   /** Makro hangi bölüme eklenecek: en son dokunulan alan. */
@@ -81,6 +89,7 @@ export function RadyolojiRapor() {
       setSkorlar(y.skorlar as unknown as Skor[]);
       setGecmis(y.gecmis as unknown as Gecmis[]);
       setKritikler(y.kritikler as unknown as Kritik[]);
+      setKonsultasyonlar(await api.radyolojiKonsultasyonlar(id));
       setKritik(Number(y.istem?.kritik ?? 0) === 1);
 
       const sec = (y.rapor?.sablonId as number | undefined)
@@ -378,8 +387,91 @@ export function RadyolojiRapor() {
             İşaretliyse <b>bildirim kaydı olmadan rapor onaylanamaz</b>: kime, hangi yolla ve
             ne zaman haber verildiği kayda geçer.
           </div>
+
+          {/* KONSULTASYON (304): supheli olguda ikinci gorus. Rapor kilitli
+              olsa da istenebilir - gorus geldiginde addendum yazilir. */}
+          <h5 style={{ marginTop: 12 }}>Konsültasyon</h5>
+          <button className="d mini" onClick={() => setKonsModal(true)}>
+            ＋ İkinci Görüş İste
+          </button>
+          {konsultasyonlar.length === 0 && (
+            <div className="not kucuk">İstenmiş konsültasyon yok.</div>
+          )}
+          {konsultasyonlar.map(k => (
+            <div className="kons-satir" key={String(k.id)}>
+              <div>
+                <b>{String(k.hekim ?? '') || String(k.kurum ?? '') || '—'}</b>
+                <span className={`rozet ${Number(k.durum ?? 0) === 2 ? 'basari' : 'uyari'}`}>
+                  {Number(k.durum ?? 0) === 2 ? 'Görüş geldi' : 'Bekliyor'}
+                </span>
+              </div>
+              <div className="sonuk">{String(k.gerekce ?? '')}</div>
+              {String(k.gorus ?? '').trim() !== '' && (
+                <div className="kons-gorus">{String(k.gorus)}</div>
+              )}
+              {Number(k.durum ?? 0) !== 2 && (
+                <button className="d mini"
+                        onClick={() => setGorusYaz({ id: Number(k.id), gorus: '' })}>
+                  ✎ Görüşü Gir
+                </button>
+              )}
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* Konsultasyon ISTEGI: hekim listesi rapor ekraninda zaten yok, bu
+          yuzden serbest metin gerekce + (opsiyonel) hekim secimi yerine
+          gerekce yeterli - gorusu YAZAN kisi kayittan belli olur. */}
+      {konsModal && (
+        <Modal baslik="İkinci Görüş İste" dar onKapat={() => setKonsModal(false)}
+               alt={<>
+                 <button className="d bir" onClick={() => void guvenli(async () => {
+                   await api.radyolojiKonsultasyon(id, { gerekce: konsForm.gerekce,
+                                                         hekimId: null, kurumId: null });
+                   setKonsModal(false);
+                   setKonsForm({ hekimId: '', gerekce: '' });
+                   await yukle();
+                   mesaj('Konsültasyon istendi.');
+                 })}>Gönder</button>
+                 <button className="d" onClick={() => setKonsModal(false)}>Vazgeç</button>
+               </>}>
+          <div className="alan-izgara tek-sutun">
+            <label className="alan">
+              <span className="etiket zorunlu-isaret">Gerekçe</span>
+              <textarea rows={3} value={konsForm.gerekce}
+                        placeholder="örn. L4-L5 düzeyinde şüpheli lezyon; nöroradyoloji görüşü."
+                        onChange={e => setKonsForm(f => ({ ...f, gerekce: e.target.value }))} />
+            </label>
+          </div>
+        </Modal>
+      )}
+
+      {gorusYaz && (
+        <Modal baslik="Konsültasyon Görüşü" dar onKapat={() => setGorusYaz(null)}
+               alt={<>
+                 <button className="d bir" onClick={() => void guvenli(async () => {
+                   await api.radyolojiKonsultasyon(id, { gorus: gorusYaz.gorus, gerekce: '' },
+                                                   gorusYaz.id);
+                   setGorusYaz(null);
+                   await yukle();
+                   mesaj('Görüş kaydedildi.');
+                 })}>Kaydet</button>
+                 <button className="d" onClick={() => setGorusYaz(null)}>Vazgeç</button>
+               </>}>
+          <div className="alan-izgara tek-sutun">
+            <label className="alan">
+              <span className="etiket zorunlu-isaret">Görüş</span>
+              <textarea rows={4} value={gorusYaz.gorus}
+                        onChange={e => setGorusYaz(g => (g ? { ...g, gorus: e.target.value } : g))} />
+            </label>
+          </div>
+          <div className="not">
+            Gelen görüş raporu DEĞİŞTİRMEZ; onaylı raporda düzeltme gerekiyorsa
+            “＋ Ek Rapor” ile addendum yazın.
+          </div>
+        </Modal>
+      )}
 
       {kritikModal && (
         <Modal baslik="Kritik Bulgu Bildirimi" onKapat={() => setKritikModal(false)}

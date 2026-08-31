@@ -28,6 +28,17 @@ public static class RadyolojiUclari
     public sealed record KritikIstegi(string Bulgu, string BildirilenAd, short Yol,
                                       string GeriBildirim);
 
+    /// <summary>SONUC TESLIMI (304): film/CD/basili rapor kime verildi.</summary>
+    public sealed record TeslimIstegi(short Tur, string AlanAd, string AlanYakinlik,
+                                      short KimlikDogrulandi, string Aciklama);
+
+    /// <summary>
+    /// KONSULTASYON (304): ikinci gorus. Istek ve DONEN GORUS ayni ucu kullanir -
+    /// gorus dolu gelirse kayit "donmus" sayilir.
+    /// </summary>
+    public sealed record KonsultasyonIstegi(int? HekimId, int? KurumId, string Gerekce,
+                                            string? Gorus);
+
     /// <summary>islem_log.tablo_id - istem.</summary>
     private const int LogTabloIstem = 940;
 
@@ -641,6 +652,125 @@ public static class RadyolojiUclari
 
             await islem.CommitAsync(iptal);
             return Results.Ok(new { tamam = true });
+        });
+
+        // -------------------------------------------------- sonuç teslimi ----
+        // Film / CD / basılı raporun kime verildiği. Hasta dışında biri
+        //   alıyorsa YAKINLIK ve kimlik doğrulaması kayda geçer: sonuç kişisel
+        //   sağlık verisidir, "kime verdik" sorusunun cevabı belgede durmalı.
+        grup.MapPost("/istem/{id:int}/teslim", async (
+            int id, TeslimIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("rad.teslim");
+
+            if (string.IsNullOrWhiteSpace(istek.AlanAd))
+                throw GentegreHatasi.Dogrulama("Teslim alan kişi yazılmalı.",
+                    new AlanHatasi("alanAd", "Zorunlu."));
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            // Onaylı rapor varsa teslime BAĞLANIR: hangi rapor sürümünün
+            //   verildiği sonradan sorulabiliyor (addendum sonrası önemli).
+            var raporId = await baglanti.TekDegerAsync<int?>("""
+                select max(id) from public.radyoloji_rapor
+                 where istem_id = @p0 and durum = 3
+                """, null, [id], iptal);
+
+            await baglanti.CalistirAsync("""
+                insert into public.radyoloji_teslim
+                    (istem_id, rapor_id, tur, teslim_zamani, teslim_eden_id,
+                     alan_ad, alan_yakinlik, kimlik_dogrulandi, aciklama, ekleyen)
+                values (@p0, @p1, @p2, now()::timestamp, @p3, @p4, @p5, @p6, @p7, @p3)
+                """, null,
+                [id, raporId, istek.Tur, baglam.KullaniciId, istek.AlanAd,
+                 istek.AlanYakinlik ?? "", istek.KimlikDogrulandi, istek.Aciklama ?? ""], iptal);
+
+            return Results.Ok(new { tamam = true });
+        });
+
+        grup.MapGet("/istem/{id:int}/teslimler", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+            await using var baglanti = await veri.AcAsync(iptal);
+            return Results.Ok(await baglanti.ListeAsync("""
+                select t.id, t.tur, t.teslim_zamani as "teslimZamani",
+                       coalesce(p.unvan, '') as "teslimEden", t.alan_ad as "alanAd",
+                       t.alan_yakinlik as "alanYakinlik",
+                       t.kimlik_dogrulandi as "kimlikDogrulandi", t.aciklama
+                  from public.radyoloji_teslim t
+                  left join public.taraf p on p.id = t.teslim_eden_id
+                 where t.istem_id = @p0 order by t.id desc
+                """, null, [id], Satir, iptal));
+        });
+
+        // ------------------------------------------------- konsültasyon ----
+        // İkinci görüş: raporu yazan radyolog başka bir hekimin/kurumun
+        //   görüşünü ister. İstek ve DÖNEN GÖRÜŞ aynı uçtan yazılır - görüş
+        //   dolu gelirse kayıt "döndü" (durum 2) sayılır; ayrı bir "cevapla"
+        //   ucu, aynı satırın iki sahibi olması demekti.
+        grup.MapPost("/istem/{id:int}/konsultasyon", async (
+            int id, KonsultasyonIstegi istek, int? konsultasyonId,
+            BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("rad.rapor_yaz");
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            if (konsultasyonId is int kid && kid > 0)
+            {
+                if (string.IsNullOrWhiteSpace(istek.Gorus))
+                    throw GentegreHatasi.Dogrulama("Görüş metni boş olamaz.",
+                        new AlanHatasi("gorus", "Zorunlu."));
+                await baglanti.CalistirAsync("""
+                    update public.radyoloji_konsultasyon
+                       set gorus = @p1, durum = 2, donus_zamani = now()::timestamp,
+                           degistiren = @p2, degistirme_tarihi = now()::timestamp
+                     where id = @p0
+                    """, null, [kid, istek.Gorus, baglam.KullaniciId], iptal);
+                return Results.Ok(new { id = kid });
+            }
+
+            if (string.IsNullOrWhiteSpace(istek.Gerekce))
+                throw GentegreHatasi.Dogrulama("Konsültasyon gerekçesi yazılmalı.",
+                    new AlanHatasi("gerekce", "Zorunlu."));
+
+            var raporId = await baglanti.TekDegerAsync<int?>(
+                "select max(id) from public.radyoloji_rapor where istem_id = @p0",
+                null, [id], iptal);
+
+            var yeni = await baglanti.TekDegerAsync<int>("""
+                insert into public.radyoloji_konsultasyon
+                    (istem_id, rapor_id, hekim_id, kurum_id, durum,
+                     gonderim_zamani, gerekce, ekleyen)
+                values (@p0, @p1, @p2, @p3, 1, now()::timestamp, @p4, @p5)
+                returning id
+                """, null,
+                [id, raporId, istek.HekimId, istek.KurumId, istek.Gerekce,
+                 baglam.KullaniciId], iptal);
+
+            return Results.Ok(new { id = yeni });
+        });
+
+        grup.MapGet("/istem/{id:int}/konsultasyonlar", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+            await using var baglanti = await veri.AcAsync(iptal);
+            return Results.Ok(await baglanti.ListeAsync("""
+                select k.id, k.durum, k.gerekce, k.gorus,
+                       k.gonderim_zamani as "gonderimZamani", k.donus_zamani as "donusZamani",
+                       coalesce(h.unvan, '') as "hekim", coalesce(kr.unvan, '') as "kurum"
+                  from public.radyoloji_konsultasyon k
+                  left join public.taraf h on h.id = k.hekim_id
+                  left join public.taraf kr on kr.id = k.kurum_id
+                 where k.istem_id = @p0 order by k.id desc
+                """, null, [id], Satir, iptal));
         });
     }
 

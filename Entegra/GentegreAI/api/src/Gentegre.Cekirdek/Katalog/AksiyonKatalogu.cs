@@ -133,6 +133,10 @@ public static class AksiyonKatalogu
                     KayitGerekir: true, Sira: 30),
                 new("radyoloji.rapor",    "✎ Rapor Yaz", "radyoloji",
                     AksiyonYetkisi: "rad.rapor_yaz", KayitGerekir: true, Sira: 40),
+                // TESLIM (304): film/CD/basili rapor kime verildi - sonuc
+                //   kisisel saglik verisi, "kime verdik" kayda gecer.
+                new("radyoloji.teslim",   "📦 Sonuç Teslim Et", "radyoloji",
+                    AksiyonYetkisi: "rad.teslim", KayitGerekir: true, Sira: 45),
                 new("radyoloji.iptal",    "✖ İstemi İptal Et", "radyoloji",
                     AksiyonYetkisi: "rad.istem_iptal", KayitGerekir: true, Sira: 50),
             },

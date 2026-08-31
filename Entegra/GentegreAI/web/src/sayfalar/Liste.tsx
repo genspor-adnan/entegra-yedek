@@ -13,6 +13,7 @@ import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
 import { IstemModali } from '../bilesenler/radyoloji/IstemModali';
+import { TeslimModali } from '../bilesenler/radyoloji/TeslimModali';
 import { TarafArama } from '../bilesenler/TarafArama';
 import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
 import { UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
@@ -76,6 +77,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [istemHastaArama, setIstemHastaArama] = useState(false);
   const [istemModali, setIstemModali] = useState<
     { hastaId: number; hastaAdi: string; disIstem: boolean } | null>(null);
+  /** Sonuc teslimi (304) - film/CD/rapor kime verildi. */
+  const [teslimModali, setTeslimModali] = useState<
+    { istemId: number; accessionNo: string } | null>(null);
   // Yeni kart EKLENINCE (duzenlemede degil) grid "Son Aranan"a gecsin - kullanici
   //   az once ekledigi kaydi listede otomatik en ustte gorsun.
   const [odaklaSonEklenen, setOdaklaSonEklenen] = useState(0);
@@ -830,6 +834,13 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         return;
       }
 
+      if (kod === 'radyoloji.teslim') {
+        if (!satir) return;
+        setTeslimModali({ istemId: Number(satir.id),
+                          accessionNo: String(satir.accessionNo ?? '') });
+        return;
+      }
+
       // Rapor yazma AYRI EKRAN (283): bolumler sablondan uretilir, onay iki
       //   asamalidir - generic karta sigmaz.
       if (kod === 'radyoloji.rapor') {
@@ -1273,6 +1284,14 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         hastaAdi={istemModali.hastaAdi}
         disIstem={istemModali.disIstem}
         onKapat={() => setIstemModali(null)}
+        onTamam={() => setYenile(t => t + 1)}
+      />
+    )}
+    {teslimModali && (
+      <TeslimModali
+        istemId={teslimModali.istemId}
+        accessionNo={teslimModali.accessionNo}
+        onKapat={() => setTeslimModali(null)}
         onTamam={() => setYenile(t => t + 1)}
       />
     )}
