@@ -127,7 +127,7 @@ public static partial class KaynakKatalogu
             new("bagId",        "t.bag_id",        "sayi",  "Bagli Cari Id", Varsayilan: false, Filtrelenebilir: true),
             new("bagliCari",    "(select c.unvan from public.taraf c where c.id = t.bag_id)",
                                                     "metin", "Cari (Firma)", Genislik: 180),
-            new("departman",    "t.departman",     "kod",   "Departman"),
+            new("departman",    "t.departman",     "kod",   "Bölüm"),
             new("gorev",        "t.gorev",         "metin", "Gorev"),
             new("cepTel",       "t.cep_tel",       "metin", "Cep Telefonu"),
             new("telefon",      "t.telefon",       "metin", "Telefon",       Varsayilan: false),
@@ -261,7 +261,7 @@ public static partial class KaynakKatalogu
             new("unvan",        "t.unvan",         "metin", "Ad Soyad"),
             // Ad Soyad'in SAGINDA: departman / gorev / rol / ise giris (kullanici).
             new("departmanAdi", TarafKatalog.DepartmanAdi,
-                                                   "metin", "Departman"),
+                                                   "metin", "Bölüm"),
             new("gorev",        TarafKatalog.PozisyonAdi, "metin", "Görev"),
             new("rolAdi",       "coalesce(r.ad, '')", "metin", "Rol"),
             new("iseGirisTarihi", "po.ise_giris_tarihi", "tarih", "İşe Giriş",
@@ -405,7 +405,7 @@ public static partial class KaynakKatalogu
             // Alt birim adi GIRINTILI - agac oldugu listede tek bakista gorunsun.
             new("ad",                 "case when d.ustbirim_id is null then d.ad " +
                                       "     else '— ' || d.ad end",
-                                      "metin", "Departman"),
+                                      "metin", "Bölüm"),
             // Ust birim (257) - bos ise kok departman.
             new("ustbirimAdi",        "coalesce((select u.ad from public.departman u " +
                                       "           where u.id = d.ustbirim_id), '')",
@@ -433,8 +433,8 @@ public static partial class KaynakKatalogu
             // Bagimsiz gorevde (0) bos gorunur - "her departmanda gecerli".
             new("departmanAdi", "coalesce((select dp.ad from public.departman dp " +
                                 "           where dp.id = g.departman_id), '')",
-                                "metin", "Departman", Filtrelenebilir: false),
-            new("departmanId",  "g.departman_id", "sayi",  "Departman Id", Varsayilan: false),
+                                "metin", "Bölüm", Filtrelenebilir: false),
+            new("departmanId",  "g.departman_id", "sayi",  "Bölüm Id", Varsayilan: false),
             new("durum",        "g.durum",        "mantik","Durum", Hizalama: "orta"),
             new("sira",         "g.sira",         "sayi",  "Sıra", Varsayilan: false),
         });

@@ -166,7 +166,7 @@ public static partial class KartKatalogu
             new("kisi",      "kisi",       "mantik", Baslik: "Kisi"),
             new("kod",       "kod",        "metin", EnFazlaUzunluk: 20, Baslik: "Kisi Kodu", Grup: "Kimlik"),
             new("unvan",     "unvan",      "metin", Zorunlu: true, EnFazlaUzunluk: 120, Baslik: "Unvan", Grup: "Kimlik"),
-            new("departman", "departman",  "kod",   KodTablosu: "public.v_departman_lookup", Baslik: "Departman", Grup: "Kimlik"),
+            new("departman", "departman",  "kod",   KodTablosu: "public.v_departman_lookup", Baslik: "Bölüm", Grup: "Kimlik"),
             new("gorev",     "gorev",      "metin", EnFazlaUzunluk: 100, Baslik: "Gorev", Grup: "Kimlik"),
             // "Is Bilgileri" kutu basligi IPTAL edildi (kullanici) - Bagli Cari/Rol/Durum
             //   AltGrup'suz (adsiz) duz alan olarak kaliyor, idstrip'in hemen altinda.
@@ -245,7 +245,7 @@ public static partial class KartKatalogu
             new("soyad",     "soyad",      "metin", Zorunlu: true, EnFazlaUzunluk: 60, Baslik: "Soyad", Grup: "Kimlik"),
             // Departman kod listesi degil TABLO (251): bolum/hekim iliskisi de
             //   buradan kuruluyor - randevu bolumu bir departmandir.
-            new("departman", "departman",  "kod",   Zorunlu: true, KodTablosu: "public.v_departman_lookup", Baslik: "Departman", Grup: "Kimlik"),
+            new("departman", "departman",  "kod",   Zorunlu: true, KodTablosu: "public.v_departman_lookup", Baslik: "Bölüm", Grup: "Kimlik"),
             // RANDEVU VERILEBILIR (252, kullanici: "randevu verilen bolumle
             //   randevu verilen personel bulusmus olur") - departman tarafinda
             //   da ayni bayrak var (251); ikisi kesisince "hekim" cikar.
@@ -442,7 +442,7 @@ public static partial class KartKatalogu
             new("kod",                "kod",                 "metin", EnFazlaUzunluk: 20,
                 Baslik: "Kod", Grup: "Kimlik"),
             new("ad",                 "ad",                  "metin", Zorunlu: true,
-                EnFazlaUzunluk: 100, Baslik: "Departman", Grup: "Kimlik"),
+                EnFazlaUzunluk: 100, Baslik: "Bölüm", Grup: "Kimlik"),
             // Ust birim (257): secilirse departman digerinin ALTINA gecer.
             //   Bos = kok departman. Dongu (kendi altina alma) DB tetiginde.
             new("ustbirimId",         "ustbirim_id",         "kod",
@@ -479,7 +479,7 @@ public static partial class KartKatalogu
                 Baslik: "Görev", Grup: "Kimlik"),
             // Bos birakilirsa (0) bagimsiz gorev - her departmanda listelenir.
             new("departmanId", "departman_id", "kod",   KodTablosu: "public.v_departman_lookup",
-                Baslik: "Departman", Grup: "Kimlik"),
+                Baslik: "Bölüm", Grup: "Kimlik"),
             new("durum",       "durum",        "mantik", Baslik: "Durum", Grup: "Kimlik"),
             new("sira",        "sira",         "sayi",  Baslik: "Sıra", Grup: "Kimlik"),
         });

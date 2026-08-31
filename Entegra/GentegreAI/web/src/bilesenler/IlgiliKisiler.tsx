@@ -113,7 +113,7 @@ export function IlgiliKisiler({ tarafId, saltOkunur }: { tarafId: number; saltOk
         <thead>
           <tr>
             <th>Unvan</th>
-            <th>Departman</th>
+            <th>Bölüm</th>
             <th>Görev</th>
             <th>Telefon</th>
             <th>E-posta</th>

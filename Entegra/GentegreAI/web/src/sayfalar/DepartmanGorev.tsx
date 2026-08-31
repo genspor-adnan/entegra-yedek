@@ -57,8 +57,8 @@ export function DepartmanGorev() {
     <>
       <div className="sayfabas">
         <div className="basrow">
-          <h1>Departman / Görev</h1>
-          <span className="yol">Yönetim › Departman / Görev</span>
+          <h1>Bölüm / Görev</h1>
+          <span className="yol">Yönetim › Bölüm / Görev</span>
         </div>
       </div>
 
@@ -69,7 +69,7 @@ export function DepartmanGorev() {
           {baslik('departman', departman)}
           <GenGrid
             kaynak="departman"
-            baslik="Departmanlar"
+            baslik="Bölümler"
             // gomulu: gridin kendi baslik/yol satiri cizilmez - baslik zaten
             //   ustteki ikon seridinde (＋ ✎ 🗑).
             gomulu
@@ -111,7 +111,7 @@ export function DepartmanGorev() {
         <GenForm
           kaynak={kart.taraf === 'departman' ? 'departman' : 'personel-gorev'}
           id={kart.id}
-          baslik={kart.taraf === 'departman' ? 'Departman' : 'Görev'}
+          baslik={kart.taraf === 'departman' ? 'Bölüm' : 'Görev'}
           // Yeni gorevde departman BOS gelir (kullanici): gorev cogu zaman
           //   bagimsizdir; departman gerekiyorsa kartta secilir.
           onKapat={() => setKart(null)}

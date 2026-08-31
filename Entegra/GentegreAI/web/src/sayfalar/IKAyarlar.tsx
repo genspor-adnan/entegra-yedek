@@ -12,8 +12,8 @@ type Sekme = typeof SEKMELER[number]['anahtar'];
 
 /** Ayar ekranında yönetilen kod listeleri (kullanıcı: Departman + Görev). */
 const LISTELER = [
-  { kod: 'taraf.departman', baslik: 'Departman',
-    yardim: 'Personel kartındaki Departman seçeneklerini yönetir. '
+  { kod: 'taraf.departman', baslik: 'Bölüm',
+    yardim: 'Personel kartındaki Bölüm seçeneklerini yönetir. '
           + 'Etikete tıklayarak ekleyip düzenleyebilirsiniz; silinen bir değer '
           + 'kullanan kayıtlarda alan boş görünür.' },
   { kod: 'taraf.gorev', baslik: 'Görev',

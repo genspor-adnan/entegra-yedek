@@ -442,9 +442,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   "Randevu Bölümü" isaretli olanlar randevu kartinin Bölüm listesinde.
     // 255: iki bolmeli ozel ekran (solda departman, sagda gorev) - duz liste
     //   degil; kullanici "Departman listesi ekranini 2'ye bol" dedi.
-    kaynak: 'departman', baslik: 'Departman / Görev', yol: 'Yönetim › Departman / Görev',
+    kaynak: 'departman', baslik: 'Bölüm / Görev', yol: 'Yönetim › Bölüm / Görev',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAd: 'Departman / Görev', ic: '🏢', yetkiKodu: 'personel',
+    menuGrup: 'Yönetim', menuAd: 'Bölüm / Görev', ic: '🏢', yetkiKodu: 'personel',
   },
   {
     // SATIS TEKLIFI (216, Ekranlar/teklif_listesi.html): belge turu 18 -

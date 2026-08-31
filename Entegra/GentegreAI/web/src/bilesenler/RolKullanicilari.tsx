@@ -104,7 +104,7 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
         <thead>
           <tr>
             <th style={{ width: 34 }}></th>
-            <th>Kullanıcı</th><th>Departman</th><th>Görev</th><th>Telefon</th>
+            <th>Kullanıcı</th><th>Bölüm</th><th>Görev</th><th>Telefon</th>
             <th>E-posta</th><th>Şube</th>
             <th style={{ textAlign: 'center' }}>Durum</th>
             <th>Son Giriş</th>
@@ -170,7 +170,7 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
                 <thead>
                   <tr>
                     <th style={{ width: 34 }}></th>
-                    <th>Kullanıcı</th><th>Departman</th><th>Görev</th>
+                    <th>Kullanıcı</th><th>Bölüm</th><th>Görev</th>
                     <th>Şu anki rolü</th>
                   </tr>
                 </thead>
