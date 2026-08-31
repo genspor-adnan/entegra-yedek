@@ -250,6 +250,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   // Cari YOKSA arama da acilmaz: transfer (20), talep (105), stok fisleri (3/4).
   // Cari YOKSA arama da acilmaz (transfer/talep/stok fisi) - tablodan.
   const [cariArama, setCariArama] = useState(!belgeId && belgeTuruBilgisi(tur).cariVar);
+  /**
+   * Hasta arama seridinden (300) gelen acilis istegi: kutuya yazilan metin
+   * pencereye ON-DOLGU gecer, "＋ Yeni Hasta Kaydi" ise dogrudan kart acar.
+   * Pencere kapaninca ikisi de temizlenir - sonraki acilis temiz baslasin.
+   */
+  const [hastaAramaMetni, setHastaAramaMetni] = useState('');
+  const [hastaAramaYeni, setHastaAramaYeni] = useState(false);
   /** Satis temsilcisi (personel) secim modali - cari ile ayni ekran. */
   const [saticiArama, setSaticiArama] = useState(false);
   /** e-Fatura senaryosu (belge.senaryo) - GIB profilini belirler. */
@@ -1123,7 +1130,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
         {/* SECILI HASTA SERIDI (298, mockup): basligin USTUNDE - kabul memuru
             dogru hastada oldugunu surekli gorsun. */}
-        {basvuruMu && <HastaSeridi tarafId={cari?.id} />}
+        {basvuruMu && (
+          <HastaSeridi tarafId={cari?.id}
+                       mustehaklik={Number(basvuruBilgi.sgkMustehaklik ?? 0)}
+                       protokolNo={belgeNo || String(sonuc?.belge.belgeNo ?? '')}
+                       kilitli={kilitli}
+                       onAra={metin => { setHastaAramaMetni(metin); setCariArama(true) }}
+                       onYeniHasta={() => { setHastaAramaYeni(true); setCariArama(true) }} />
+        )}
 
         <BelgeBaslik
           aktifSekme={aktifSekme ?? ''}
@@ -1299,10 +1313,18 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           kaynaklar={basvuruMu ? ['hasta'] : ['cari']}
           yerTutucu={basvuruMu
             ? 'Hastayı isim/tel ile ara…' : 'Müşteri / tedarikçi ara…'}
-          onKapat={() => setCariArama(false)}
+          baslangicMetni={hastaAramaMetni}
+          baslangicYeni={hastaAramaYeni}
+          onKapat={() => {
+            setCariArama(false);
+            setHastaAramaMetni('');
+            setHastaAramaYeni(false);
+          }}
           onSec={sec => {
             setCari({ id: sec.id, unvan: sec.unvan });
             setCariArama(false);
+            setHastaAramaMetni('');
+            setHastaAramaYeni(false);
           }}
         />
 

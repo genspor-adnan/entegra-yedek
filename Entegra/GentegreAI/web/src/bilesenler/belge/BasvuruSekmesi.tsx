@@ -140,11 +140,31 @@ function ZamanAlani({ etiket, deger, onDeger, kilitli }: {
  * henuz yok, uydurma bilgi gostermek yaniltici olurdu. Yerine gercek veriden
  * "son basvuru" uyarisi cizilir.
  */
-export function HastaSeridi({ tarafId }: { tarafId?: number | null }) {
+export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli,
+                              onAra, onYeniHasta }: {
+  tarafId?: number | null;
+  /** Belgenin SGK mustehaklik durumu (299) - sigortanin yanina rozet. */
+  mustehaklik?: number | null;
+  /** Belge numarasi - mockupta arama satirinin son alani. */
+  protokolNo?: string;
+  kilitli?: boolean;
+  /** Arama penceresini acar; kutulara yazilan metin ON-DOLGU olarak gecer. */
+  onAra?(metin: string): void;
+  onYeniHasta?(): void;
+}) {
   const [h, setH] = useState<Record<string, unknown> | null>(null);
+  /**
+   * ARAMA SATIRI kutulari (mockup, kullanici: "butonlarin altinda tcno, hasta
+   * no, ad soyad, protokolno, ara buton, yeni hasta kaydi buton"). Secili hasta
+   * varsa onun bilgileriyle dolu gelir; memur uzerine yazip Ara'ya (ya da
+   * Enter'a) basinca BASKA hastayi arar.
+   */
+  const [tc, setTc] = useState('');
+  const [dosyaNo, setDosyaNo] = useState('');
+  const [adSoyad, setAdSoyad] = useState('');
 
   useEffect(() => {
-    if (!tarafId) { setH(null); return }
+    if (!tarafId) { setH(null); setTc(''); setDosyaNo(''); setAdSoyad(''); return }
     let iptal = false;
     void (async () => {
       try {
@@ -152,22 +172,88 @@ export function HastaSeridi({ tarafId }: { tarafId?: number | null }) {
           sayfa: 1, boyut: 1,
           filtre: { alan: 'id', op: 'esit', deger: tarafId },
         });
-        if (!iptal) setH(y.satirlar[0] ?? null);
+        if (iptal) return;
+        const s = y.satirlar[0] ?? null;
+        setH(s);
+        setTc(String(s?.vkno ?? ''));
+        setDosyaNo(String(s?.kod ?? ''));
+        setAdSoyad(String(s?.unvan ?? ''));
       } catch { if (!iptal) setH(null) }
     })();
     return () => { iptal = true };
   }, [tarafId]);
-
-  if (!tarafId) return null;
 
   const ad = String(h?.unvan ?? '');
   const bas = ad.split(/\s+/).filter(Boolean).slice(0, 2)
                 .map(x => x[0]?.toLocaleUpperCase('tr') ?? '').join('');
   const dogum = String(h?.dogumTarihi ?? '').slice(0, 10);
   const yas = h?.yas != null && h.yas !== '' ? `${h.yas} y` : '';
-  const sonBasvuru = String(h?.sonBasvuru ?? '').slice(0, 10);
+
+  /**
+   * Ara: memurun DEGISTIRDIGI kutuyla arar (T.C. > dosya no > ad). Kutular
+   * secili hastanin bilgileriyle dolu geldigi icin dokunulmamis degeri arama
+   * metni saymak yanlis olurdu - ustelik T.C. MASKELI gosterilir
+   * ("111******10"), onunla arama hicbir sey bulmaz. Hicbiri degismemisse
+   * pencere bos acilir (tum liste).
+   */
+  const ara = () => {
+    const degisen = [[tc, h?.vkno], [dosyaNo, h?.kod], [adSoyad, h?.unvan]]
+      .map(([kutu, kayitli]) => String(kutu ?? '').trim() === String(kayitli ?? '').trim()
+        ? '' : String(kutu ?? '').trim())
+      .find(Boolean);
+    onAra?.(degisen ?? '');
+  };
+  const enter = (e: React.KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); ara() } };
+
+  // F3 = Ara (mockup butonunun etiketi). Tarayicinin "sayfada bul-sonraki"
+  //   davranisi engellenir; kilitli belgede kisayol da calismaz.
+  useEffect(() => {
+    if (kilitli) return;
+    const tus = (e: KeyboardEvent) => {
+      if (e.key !== 'F3') return;
+      e.preventDefault();
+      ara();
+    };
+    window.addEventListener('keydown', tus);
+    return () => window.removeEventListener('keydown', tus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kilitli, tc, dosyaNo, adSoyad, h]);
 
   return (
+    <>
+      {/* 1) HASTA ARAMA SATIRI (mockup): arac cubugunun altinda, bandin
+             ustunde. Hasta secili degilken de gorunur - yeni basvuruda
+             hastayi burada bulunur. */}
+      <div className="hasta-arama">
+        <label className="alan">
+          <span className="etiket">T.C. Kimlik No</span>
+          <input value={tc} disabled={kilitli} onKeyDown={enter}
+                 onChange={e => setTc(e.target.value)} />
+        </label>
+        <label className="alan">
+          <span className="etiket">Hasta No</span>
+          <input value={dosyaNo} disabled={kilitli} onKeyDown={enter}
+                 onChange={e => setDosyaNo(e.target.value)} />
+        </label>
+        <label className="alan genis">
+          <span className="etiket">Ad Soyad</span>
+          <input value={adSoyad} disabled={kilitli} onKeyDown={enter}
+                 onChange={e => setAdSoyad(e.target.value)} />
+        </label>
+        {/* Protokol no BELGENIN numarasi - aranmaz, kayitta atanir. */}
+        <label className="alan">
+          <span className="etiket">Protokol No</span>
+          <input value={protokolNo || ''} readOnly
+                 placeholder="(kaydedince atanacak)" />
+        </label>
+        <button type="button" className="d bir" onClick={ara}
+                disabled={kilitli}>🔍 Ara (F3)</button>
+        <button type="button" className="d" onClick={() => onYeniHasta?.()}
+                disabled={kilitli}>✚ Yeni Hasta Kaydı</button>
+      </div>
+
+      {/* 2) SECILI HASTA BANDI - hasta secilene kadar cizilmez. */}
+      {tarafId ? (
     <div className="hasta-serit">
       <span className="avatar">{bas || '—'}</span>
       <span className="hs">
@@ -185,18 +271,34 @@ export function HastaSeridi({ tarafId }: { tarafId?: number | null }) {
             String(h?.cinsiyetAdi ?? ''), yas].filter(Boolean).join(' · ') || '—'}
         </span>
       </span>
+      {/* Mockup'taki SIGORTA hucresi: hastanin bagli kurumu + belgenin
+          mustehaklik rozeti. Mustehaklik BELGEYE ait (her basvuruda yeniden
+          sorgulanir), kuruma degil - o yuzden rozet disaridan gelir. */}
       <span className="hs">
-        <span className="k">Telefon</span>
-        <span className="v">{String(h?.cepTel ?? '') || '—'}</span>
-      </span>
-      <span className="hs">
-        <span className="k">Son Başvuru</span>
+        <span className="k">Sigorta</span>
         <span className="v">
-          {sonBasvuru ? sonBasvuru.split('-').reverse().join('.')
-                      : <span className="sonuk">ilk başvuru</span>}
+          {String(h?.sigortaAdi ?? '') || '—'}
+          {mustehaklik != null && mustehaklik > 0 && (
+            <span className={`rozet ${MUSTEHAKLIK[mustehaklik]?.sinif ?? ''}`}>
+              {MUSTEHAKLIK[mustehaklik]?.ad}
+            </span>
+          )}
+        </span>
+      </span>
+      {/* Telefon ve son basvuru seritte YOK (kullanici): hasta zaten secilmis
+          durumda - ikisi de arama penceresinde ise yarar, kabul ekraninda yer
+          kaplar. Kalan hucreler seride esit araliklarla dagitilir. */}
+      {/* ACIK BORC saga yaslanir (mockup): kabul memuru "tahsilat gerekiyor
+          mu" sorusunu tek bakista gorsun. */}
+      <span className="hs sag">
+        <span className="k">Açık Borç</span>
+        <span className={`v ${Number(h?.acikBorc ?? 0) > 0 ? 'teh' : ''}`}>
+          {para.format(Number(h?.acikBorc ?? 0))} ₺
         </span>
       </span>
     </div>
+      ) : null}
+    </>
   );
 }
 

@@ -328,6 +328,21 @@ table.grid tr.flt input {
 /* --------------------------------------------------------- kart modali ---- */
 /* Mockup'ta kart MODAL acilir: .kaperde (perde) + .kawin (ortali pencere). */
 /* SECILI HASTA SERIDI (298): kabul boyunca kart basliginin ustunde durur. */
+/* HASTA ARAMA SATIRI (300, mockup): arac cubugu ile hasta bandi arasinda.
+   Alanlar esnek, iki buton sagda sabit. */
+.hasta-arama {
+  display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap;
+  padding: 8px 12px; margin-bottom: 8px;
+  background: var(--yuz); border: 1px solid var(--cizgi); border-radius: 6px;
+}
+/* Etiket USTTE (mockup) - kartin genel "etiket solda" kuralinin disinda. */
+.hasta-arama .alan {
+  display: flex; flex-direction: column; gap: 2px;
+  flex: 1 1 130px; min-width: 0;
+}
+.hasta-arama .alan.genis { flex: 2 1 200px }
+.hasta-arama .d { flex: 0 0 auto }
+
 .hasta-serit {
   display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
   padding: 7px 12px; margin-bottom: 8px;
@@ -338,9 +353,21 @@ table.grid tr.flt input {
   display: grid; place-items: center; font-weight: 700; font-size: 12px;
   background: var(--vurgu, #2b6cb0); color: #fff;
 }
-.hasta-serit .hs { display: flex; flex-direction: column; line-height: 1.35 }
+/* Hucreler seride ESIT araliklarla dagilir (kullanici): sabit genislikli
+   avatar disinda her hucre ayni payi alir, uzun deger tasmadan kirpilir. */
+.hasta-serit .hs {
+  display: flex; flex-direction: column; line-height: 1.35;
+  flex: 1 1 0; min-width: 0;
+}
 .hasta-serit .hs .k { font-size: 10.5px; color: var(--sonuk, #6b7a8d) }
-.hasta-serit .hs .v { font-size: 12.5px; font-weight: 600 }
+.hasta-serit .hs .v {
+  font-size: 12.5px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* Acik borc seridin SAG ucunda (mockup). */
+.hasta-serit .hs.sag { text-align: right }
+.hasta-serit .hs .v .rozet { margin-left: 6px }
+.hasta-serit .hs .v.teh { color: var(--teh, #b23c3c) }
 
 .kaperde { position: fixed; inset: 0; background: rgba(20, 40, 70, .45); z-index: 320 }
 /* Mesaj/onay penceresi HER ZAMAN en ustte: kart modali acikken sorulan onay

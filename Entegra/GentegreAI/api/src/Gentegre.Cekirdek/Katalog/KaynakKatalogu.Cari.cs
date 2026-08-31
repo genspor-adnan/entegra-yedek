@@ -534,6 +534,23 @@ public static partial class KaynakKatalogu
                 + " where b.taraf_id = t.id and b.tur = 19)",
                                    "tarih", "Son Başvuru", Hizalama: "orta",
                                    Filtrelenebilir: false),
+            // Hasta seridinin (mockup) iki alani: SIGORTA ve ACIK BORC.
+            //   Sigorta = hastanin bagli oldugu anlasmali kurum (taraf_hasta.kurum_id).
+            new("sigortaAdi", "coalesce(sg.unvan, '')", "metin", "Sigorta / Kurum",
+                Genislik: 180),
+            // Acik borc CARI EKSTRE ile ayni kurali kullanir (v_mali_hareket_ek):
+            //   yalniz cari hesap hareketleri, ekstreye giren islem turleri ve
+            //   iptal olmayan (durum 1-2) islemler. Ayri bir formul yazmak
+            //   ekstredeki bakiyeyle uyusmayan bir sayi uretirdi.
+            new("acikBorc",
+                "(select coalesce(sum(case when e.bakiye_dahil = 1 "
+                + "                       then e.yerel_borc - e.yerel_alacak else 0 end), 0) "
+                + "   from public.v_mali_hareket_ek e "
+                + "  where e.taraf_id = t.id and e.hesap_turu = 'C' "
+                + "    and e.cari_ekstre = 1 and e.islem_durum in (1, 2))",
+                                   "para", "Açık Borç", Hizalama: "sag",
+                                   Bicim: "#,##0.00", Siralanabilir: false,
+                                   Filtrelenebilir: false),
         };
         var unvanSonu = kolonlar.FindIndex(k => k.Ad == "unvan") + 1;
         kolonlar.InsertRange(unvanSonu, ek);
@@ -549,6 +566,7 @@ public static partial class KaynakKatalogu
             Kaynak = p.Kaynak + """
 
                 left join public.taraf_hasta th on th.id = t.id
+                left join public.taraf sg on sg.id = th.kurum_id
                 left join lateral (
                     select a.ilce, a.il from public.taraf_adres a
                      where a.taraf_id = t.id and a.aktif = 1

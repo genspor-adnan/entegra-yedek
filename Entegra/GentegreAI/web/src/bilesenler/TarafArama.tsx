@@ -69,6 +69,17 @@ interface Props {
   /** Aramaya EKLENEN sabit kosul (ör. randevuda yalniz aktif/aday hastalar). */
   ekFiltre?: Kosul;
   yerTutucu?: string;
+  /**
+   * Acilista kutuya YAZILI gelen metin (300): kayit kabul seridinde memur
+   * T.C./dosya no/ad yazip Ara'ya basiyor - pencere acilinca ayni metni bir
+   * daha yazmasin, sonuc hazir gelsin.
+   */
+  baslangicMetni?: string;
+  /**
+   * Acilista dogrudan YENI KART acilsin mi ("＋ Yeni Hasta Kaydi" butonu):
+   * arama listesinden gecmeden kart formu gelir.
+   */
+  baslangicYeni?: boolean;
   onKapat(): void;
   onSec(secilen: { kaynak: string; id: number; unvan: string }): void;
 }
@@ -82,7 +93,8 @@ interface Props {
  * butonu) acik/kapali kontrol edilir (`acik` prop) - kendi tetikleyicisi yok.
  */
 export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekFiltre,
-                             yerTutucu, onKapat, onSec }: Props) {
+                             yerTutucu, baslangicMetni, baslangicYeni,
+                             onKapat, onSec }: Props) {
   /**
    * HASTA DUZENI (kullanici): yalniz hasta aranirken kolonlar kayit kabulun
    * ihtiyaci olan bilgiler olur - Dosya No, Ad Soyad, Cinsiyet, Yas, Telefon,
@@ -152,11 +164,20 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
   }, [acik, arama, gorunum, ara]);
 
   useEffect(() => {
-    if (acik) { setTimeout(() => kutu.current?.focus(), 0); return }
+    if (acik) {
+      // Disaridan gelen metinle acilis (300): kutuya yazilir VE aramasi
+      //   hemen tetiklenir - debounce beklemeden sonuc gelsin.
+      if (baslangicMetni) { setMetin(baslangicMetni); setArama(baslangicMetni) }
+      if (baslangicYeni) setKartAcik({ kaynak: yeniKaynak ?? kaynaklar[0], id: 'yeni' });
+      setTimeout(() => kutu.current?.focus(), 0);
+      return;
+    }
     setMetin('');
     setArama('');
     setGorunum('tum');
     setSatirlar([]);
+    setKartAcik(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [acik]);
 
   const yaz = (yeni: string) => {

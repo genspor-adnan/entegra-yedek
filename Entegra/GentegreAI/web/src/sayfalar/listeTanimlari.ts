@@ -176,6 +176,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Listesi ekle") - Cari grubunun HEMEN USTUNDE, ayni acilir-kapanir desende.
     kaynak: 'hasta', baslik: 'Hastalar', yol: 'Hasta › Hastalar', kartYolu: '/hasta',
     aksiyonEkrani: 'hasta-liste', cipler: DURUM_CIPLERI,
+    // Sigorta ve acik borc HASTA SERIDI icin katalogda duruyor (basvuru
+    //   kartinin ustundeki serit onlari okuyor); listenin kolon duzeni
+    //   kullanicinin belirledigi haliyle kalsin diye gridde gizli.
+    gizliKolonlar: ['sigortaAdi', 'acikBorc'],
     // Hasta da bir TARAF - cari ekstresi aynen gecerli (hasta hesabi hareketleri).
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Hasta Ekstresi',
               tarihAlani: 'islemTarihi' },
