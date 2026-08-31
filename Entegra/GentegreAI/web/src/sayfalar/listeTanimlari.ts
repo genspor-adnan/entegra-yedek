@@ -168,7 +168,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Radyoloji', menuAd: 'Çalışma Listesi', ic: '☢️', yetkiKodu: 'radyoloji',
+    // Nukleer ikon RADYOLOJI ANA MENUSUNUN (Kabuk.GRUP_IKON); calisma listesi
+    //   modalitelerin ekranidir (kullanici).
+    menuGrup: 'Radyoloji', menuAd: 'Çalışma Listesi', ic: '🖥️', yetkiKodu: 'radyoloji',
     menuSira: 10,
   },
   {
@@ -182,6 +184,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     toplam: ['toplam'],
+    // Yalniz HBYS: donem icmali odeyen kurum (SGK/OSS) akisinin parcasi,
+    //   ERP kurulumunda karsiligi yok (kullanici).
+    urunModu: 2,
     menuGrup: 'Cari', menuAd: 'Kurum İcmalleri', ic: '🧾', yetkiKodu: 'kurum',
     menuSira: 45,
   },
@@ -371,6 +376,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     yeniKayitVarsayilanlari: { musteri: true, tedarikci: false },
     // Mockup'ta (cari_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
     yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
+    // Yalniz ERP (kullanici): HBYS'de musterinin karsiligi HASTA listesidir,
+    //   iki liste ayni tarafi iki adla gostermesin.
+    urunModu: 1,
     menuGrup: 'Cari', menuAd: 'Müşteri Listesi', ic: '👥', yetkiKodu: 'cari',
   },
   {
@@ -420,6 +428,11 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Kurum Ekstresi',
               tarihAlani: 'islemTarihi' },
     yeniKayitVarsayilanlari: { kurum: true, musteri: true },
+    // Yalniz HBYS: anlasmali kurum (odeyen taraf) kavrami HBYS'ye ozgu.
+    urunModu: 2,
+    // Cari grubunun EN USTU (kullanici): HBYS'de en cok girilen liste.
+    //   Sirasiz ogeler 900+ ile diziliyor, 10 hepsinin onune gecer.
+    menuSira: 10,
     menuGrup: 'Cari', menuAd: 'Kurumlar', ic: '🏛️', yetkiKodu: 'kurum',
   },
   {
@@ -586,6 +599,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Kısmi',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
       { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
     ],
+    // Yalniz HBYS (kullanici): konsinye takibi tibbi malzeme/implant akisinda
+    //   kullaniliyor, ERP kurulumunda menude yer kaplamasin.
+    urunModu: 2,
     menuGrup: 'Satış', menuAd: 'Satış Konsinyeler', ic: '📦', yetkiKodu: 'belge',
   },
   // ------------------------------------------------------------- ALIS ----

@@ -55,6 +55,7 @@ function grupla(liste: MenuOgesi[], sec: (m: MenuOgesi) => string | undefined): 
 const GRUP_IKON: Record<string, string> = {
   'Randevu': '📅',
   'Kayıt Kabul': '🚑',
+  'Radyoloji': '☢️',
   'Cari':    '🤝',
   'Satış':   '🛍️',
   'Alış':    '🛒',
@@ -72,6 +73,7 @@ const GRUP_IKON: Record<string, string> = {
 const GRUP_IKON_CEV: Record<string, string> = {
   'Appointments': '📅', 'Termine': '📅',
   'Admissions': '🚑', 'Aufnahme': '🚑',
+  'Radiology': '☢️', 'Radiologie': '☢️',
   'Accounts': '🤝', 'Geschäftspartner': '🤝',
   'Sales': '🛍️', 'Verkauf': '🛍️',
   'Purchasing': '🛒', 'Einkauf': '🛒',
