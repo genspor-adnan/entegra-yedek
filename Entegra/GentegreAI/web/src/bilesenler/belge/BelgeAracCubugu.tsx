@@ -124,14 +124,10 @@ export function BelgeAracCubugu({
       <button className="d" disabled title="Yatan hasta (yatış) modülü henüz yok.">
         🔁 Yatışa Çevir
       </button>
-      {/* TAHSILAT dugmesi arac cubugunda YOK (kullanici): tahsilat kendi
-          sekmesinden yapiliyor - fatura kartiyla ayni yer. */}
-      <button className="d" disabled={!kayitliId}
-              title={kayitliId ? 'Seçili satırları faturaya / fişe / tahakkuka aktar'
-                               : 'Önce başvuruyu açın.'}
-              onClick={() => setDonusum(15)}>
-        🧾 Faturaya Dönüştür
-      </button>
+      {/* TAHSILAT ve FATURAYA DONUSTUR arac cubugunda YOK (kullanici):
+          tahsilat kendi sekmesinden yapiliyor, faturaya donusum ise
+          Basvurular listesindeki "→ Dönüştür" aksiyonundan - kayit kabul
+          memurunun ekraninda durmasi gerekmiyor. */}
 
       <span className="ayrac" />
 
