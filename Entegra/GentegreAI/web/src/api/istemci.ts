@@ -611,6 +611,8 @@ export const api = {
     istek<{
       tetkikler: Record<string, unknown>[];
       hekimler: Record<string, unknown>[];
+      /** Kayitli DIS hekimler (305) - dis istemde listeden secilir. */
+      disHekimler: Record<string, unknown>[];
       gecmis: Record<string, unknown>[];
     }>(`/api/radyoloji/istem-secenekleri?hastaId=${hastaId}`),
 

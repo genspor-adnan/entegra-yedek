@@ -47,6 +47,18 @@ public sealed partial class KartDeposu
                     parametreler.Add(deger);
                 }
 
+                // KART KIMLIGI VARSAYILANLARI (305): ayni tabloyu paylasan iki
+                //   kartin farkini belirleyen bayraklar (or. taraf_personel'de
+                //   dis_hekim = 1). Kullanicidan istenmez - hangi karttan
+                //   girildigiyle belli; ANAHTAR DB KOLONUDUR.
+                if (detay.YeniSatirVarsayilanlari is { } varsayilanlar)
+                    foreach (var (kolon, deger) in varsayilanlar)
+                        if (!kolonlar.Contains(kolon))
+                        {
+                            kolonlar.Add(kolon);
+                            parametreler.Add(deger);
+                        }
+
                 var yerTutucular = Enumerable.Range(0, parametreler.Count)
                     .Select(i => "@p" + i.ToString(CultureInfo.InvariantCulture));
 

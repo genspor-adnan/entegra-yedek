@@ -494,6 +494,93 @@ public static partial class KartKatalogu
     /// (sekmeler, ozluk, fatura bilgileri) yerine tek ekranlik hizli giris.
     /// Ayni TABLO (taraf + taraf_hasta) - sonradan tam kartla tamamlanir.
     /// </summary>
+    /// <summary>
+    /// DIS DOKTOR KARTI (305) - goruntuleme merkezine hasta GONDEREN, kurum
+    /// disindaki hekim.
+    ///
+    /// Personel kartinin kardesi: ayni taraf + taraf_personel ikilisini
+    /// kullanir, ayirt eden taraf_personel.dis_hekim = 1. Ayri tablo acmak
+    /// ad/telefon/adres alanlarini ikinci kez tanimlamak olurdu; ustelik ayni
+    /// kisi hem kurumda calisip hem baska merkezden sevk edebiliyor.
+    ///
+    /// Personelden FARKI: sicil no, departman, gorev, ise giris gibi OZLUK
+    /// alanlari yok - onun yerine brans, calistigi kurum ve tescil no var.
+    /// </summary>
+    private static KartTanimi DisHekim() => new(
+        Ad: "dis-hekim",
+        YetkiKodu: "personel",
+        Tablo: "public.taraf",
+        LogTabloId: 73,
+        // taraf.sube_id NOT NULL: kayit oturumun subesiyle yazilsin diye sube
+        //   kolonu ACIKCA verilir (KartTanimi varsayilani null'dur). Dis hekim
+        //   subeye ait degil ama kolon dolmali - kullanicidan sorulmaz.
+        SubeKolonu: "sube_id",
+        // Kart YALNIZ dis hekimleri acar: kurum personeli bu ekrandan
+        //   duzenlenmemeli (orada departman/gorev zorunlu).
+        SabitKosul: "personel = 1 and exists (select 1 from public.taraf_personel p "
+                  + "where p.id = taraf.id and p.dis_hekim = 1)",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["personel"] = (short)1,
+            ["durum"] = (short)1,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id",       "id",       "sayi",  Yazilabilir: false),
+            new("personel", "personel", "mantik", Gizli: true),
+            // Unvan ad+soyaddan turetilir (personel kartiyla ayni kural).
+            new("unvan",    "unvan",    "metin", Zorunlu: true, EnFazlaUzunluk: 120,
+                Baslik: "Unvan", Gizli: true),
+            new("ad",       "ad",       "metin", Zorunlu: true, EnFazlaUzunluk: 50,
+                Baslik: "Ad", Grup: "Kimlik"),
+            new("soyad",    "soyad",    "metin", Zorunlu: true, EnFazlaUzunluk: 60,
+                Baslik: "Soyad", Grup: "Kimlik"),
+            // Kod ZORUNLU DEGIL: dis hekimin bizde sicili yok - bos birakilirsa
+            //   sunucu numara vermez, ad soyad yeter.
+            new("kod",      "kod",      "metin", EnFazlaUzunluk: 20,
+                Baslik: "Kod", Grup: "Kimlik"),
+            new("durum",    "durum",    "kod",   SabitKodlar: DurumKodlari,
+                Baslik: "Durum", Grup: "Kimlik"),
+            new("cepTel",   "cep_tel",  "metin", EnFazlaUzunluk: 30, Baslik: "Cep"),
+            new("telefon",  "telefon",  "metin", EnFazlaUzunluk: 30, Baslik: "Telefon"),
+            new("eposta",   "eposta",   "metin", EnFazlaUzunluk: 200, Baslik: "E-posta"),
+            new("vkno",     "vkno",     "metin", EnFazlaUzunluk: 20, Baslik: "TC No"),
+            // taraf'ta serbest not kolonu "notlar" (aciklama YOK).
+            new("notlar",   "notlar",   "metin", EnFazlaUzunluk: 300, Baslik: "Not"),
+            // subeId ALAN OLARAK YOK: dis hekim subeye ait degil ama taraf.sube_id
+            //   NOT NULL - kart tanimindaki SubeKolonu sayesinde oturumun subesi
+            //   kayit sirasinda yazilir. Personel kartinda alan VAR cunku orada
+            //   "calistigi sube" gercek bir bilgi; burada degil.
+        },
+        Detaylar: new[]
+        {
+            new DetayTanimi("hekim", "public.taraf_personel", "id", new KartAlani[]
+            {
+                new("id",       "id",        "sayi", Yazilabilir: false),
+                new("brans",    "brans",     "kod", KodListesi: "hekim.brans",
+                    Baslik: "Branş"),
+                // Calistigi kurum: cari kaydi VARSA baglanir, yoksa adi yazilir.
+                //   Sevk eden hastanelerin cogu cari listesinde olmaz.
+                new("kurumId",  "kurum_id",  "kod", KodTablosu: "public.v_cari_lookup",
+                    Baslik: "Kurum (kayıtlı)"),
+                new("kurumAd",  "kurum_ad",  "metin", EnFazlaUzunluk: 200,
+                    Baslik: "Kurum Adı"),
+                new("tescilNo", "tescil_no", "metin", EnFazlaUzunluk: 30,
+                    Baslik: "Diploma / Tescil No"),
+            // SubeKolonu VARSAYILAN: taraf_personel.sube_id NOT NULL - detay
+            //   satiri oturumun subesiyle yazilir (null verilirse insert
+            //   "subeId bos birakilamaz" ile patlar).
+            }, Baslik: "Hekim Bilgisi", LogTabloId: 906, TekSatir: true,
+               // Kaydi DIS hekim yapan bayrak KULLANICIDAN ISTENMEZ (305):
+               //   hangi karttan girildigiyle belli. Kutu isaretlettirmek, ayni
+               //   tabloyu paylasan iki kart arasindaki farki kullanicinin
+               //   sorumluluguna atmak olurdu.
+               YeniSatirVarsayilanlari: new Dictionary<string, object?>
+               {
+                   ["dis_hekim"] = (short)1,
+               }),
+        });
+
     private static KartTanimi HastaAday() => new(
         Ad: "hasta-aday",
         YetkiKodu: "personel",

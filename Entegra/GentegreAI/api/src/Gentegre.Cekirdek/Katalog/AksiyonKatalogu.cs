@@ -42,6 +42,8 @@ public static class AksiyonKatalogu
             ["rol-liste"] = Crud("rol", "rol", "rol", yazdir: false),
             ["personel-liste"] = Crud("personel", "personel", "personel"),
             ["hasta-liste"] = Crud("hasta", "hasta", "personel"),
+            // Dis doktor (305): personel yetkisiyle, kendi kart adiyla.
+            ["dis-hekim-liste"] = Crud("dis-hekim", "dis-hekim", "personel"),
 
             // AKSIYON KOMBOSU (sagtus hedefi) yalniz KOPYALA icerir (kullanici):
             //   Yeni/Duzenle/Sil zaten arac cubugunda dugme; komboda tekrar

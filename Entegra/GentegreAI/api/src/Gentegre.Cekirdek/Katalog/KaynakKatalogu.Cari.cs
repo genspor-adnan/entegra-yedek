@@ -286,6 +286,59 @@ public static partial class KaynakKatalogu
             new("subeId",       "t.sube_id",       "sayi",  "Sube",      Varsayilan: false)
         });
 
+    /// <summary>
+    /// DIS DOKTOR LISTESI (305): goruntuleme merkezine hasta GONDEREN kurum
+    /// disi hekimler. Personel listesiyle ayni tabloyu okur, ayirt eden
+    /// taraf_personel.dis_hekim = 1.
+    ///
+    /// Kolonlar personelinkinden FARKLI: sicil/departman/gorev yerine brans,
+    /// calistigi kurum ve GONDERDIGI HASTA SAYISI - listenin sorusu "kim kac
+    /// hasta gonderdi".
+    /// </summary>
+    private static KaynakTanimi DisHekim() => new(
+        Ad: "dis-hekim",
+        YetkiKodu: "personel",
+        Kaynak: """
+            public.taraf t
+            join public.taraf_personel po on po.id = t.id
+            left join public.taraf k on k.id = po.kurum_id
+            left join public.kod_liste kl on kl.kod = 'hekim.brans'
+            left join public.kod_deger kd on kd.liste_id = kl.id
+                                         and kd.deger::text = nullif(po.brans, '')
+            """,
+        SabitKosul: "t.personel = 1 and po.dis_hekim = 1",
+        VarsayilanSirala: "t.unvan asc",
+        SubeKolonu: null,
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",       "t.id",     "sayi",  "Id", Varsayilan: false),
+            new("unvan",    "t.unvan",  "metin", "Ad Soyad", Genislik: 220),
+            new("bransAdi", "coalesce(kd.ad, '')", "metin", "Branş", Genislik: 200),
+            // Kurum: kayitli cari varsa onun unvani, yoksa serbest metin.
+            new("kurum",
+                "coalesce(nullif(po.kurum_ad, ''), coalesce(k.unvan, ''))",
+                                        "metin", "Kurum", Genislik: 220),
+            new("tescilNo", "po.tescil_no", "metin", "Tescil No"),
+            new("cepTel",   "t.cep_tel", "metin", "Cep"),
+            new("telefonHam", TarafKatalog.TelefonHam, "metin", "Telefon (ham)",
+                Varsayilan: false),
+            new("eposta",   "t.eposta",  "metin", "E-posta"),
+            // GONDERDIGI HASTA: dis hekimin bizim icin degeri budur - kac
+            //   istem acilmis. Iptal (durum 0) sayilmaz.
+            new("istemSayisi",
+                "(select count(*) from public.radyoloji_istem i "
+                + " where i.istek_hekim_id = t.id and i.durum > 0)",
+                                        "sayi",  "Gönderdiği Tetkik",
+                Hizalama: "sag", Filtrelenebilir: false),
+            new("sonIstem",
+                "(select max(coalesce(i.cekim_tarihi, i.ekleme_tarihi)) "
+                + "   from public.radyoloji_istem i where i.istek_hekim_id = t.id)",
+                                        "tarih", "Son Gönderim", Hizalama: "orta",
+                Filtrelenebilir: false),
+            new("brans",    "po.brans", "metin", "Branş (ham)", Varsayilan: false),
+            new("durum",    "t.durum",  "kod",   "Durum", Hizalama: "orta"),
+        });
+
     // ADAY MUSTERILER ayri YETKI (kullanici: satici rolu CRM'i gorsun ama Cari
     //   listelerini GORMESIN). Ayni tablo/kolonlar - degisen yalniz yetki kodu
     //   ve sabit kosul; boylece 'cari' yetkisi verilmeden aday ekrani acilir.

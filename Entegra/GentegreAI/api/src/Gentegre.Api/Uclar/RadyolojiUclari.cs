@@ -91,6 +91,13 @@ public static class RadyolojiUclari
                  order by t.unvan
                 """, null, [], Satir, iptal);
 
+            // KAYITLI DIS HEKIMLER (305): dis istemde artik serbest metin yerine
+            //   listeden secilir - "kim kac hasta gonderdi" sorusu ancak
+            //   istek_hekim_id dolduysa cevaplanabiliyor.
+            var disHekimler = await baglanti.ListeAsync("""
+                select id, ad, kurum, brans from public.v_dis_hekim_lookup order by ad
+                """, null, [], Satir, iptal);
+
             // Son 12 ay: aynı tetkik tekrar isteniyorsa hekim gerekçelendirsin.
             var gecmis = hastaId is null || hastaId <= 0
                 ? new List<IDictionary<string, object?>>()
@@ -105,7 +112,7 @@ public static class RadyolojiUclari
                      group by i.hizmet_id, hz.ad
                     """, null, [hastaId.Value], Satir, iptal);
 
-            return Results.Ok(new { tetkikler, hekimler, gecmis });
+            return Results.Ok(new { tetkikler, hekimler, disHekimler, gecmis });
         });
 
         // --------------------------------------------------- istem açma ----

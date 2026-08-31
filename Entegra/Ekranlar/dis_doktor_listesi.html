@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dış Doktorlar — Liste — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;   /* pasif hekim */
+    --s-yog:#e7f3ea; --s-yog-t:#24663a;   /* cok gonderen */
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .sp{margin-left:auto}
+  /* arama seridi */
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted)}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:24px;padding:0 6px;
+    font-size:11.5px;display:flex;align-items:center;min-width:150px}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  /* grid */
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap;position:sticky;top:0}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr:hover td{background:#f2f7fd}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line)}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.yog{background:#fff3d6;color:#7a5407;border-color:#f0dcae}
+  .sonuk{color:var(--muted)}
+  /* durum cubugu */
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);
+    font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+</style>
+</head>
+<body>
+<div class="win">
+
+  <div class="title">
+    <span class="dot"></span> Dış Doktorlar
+    <span class="sp">Cari › Dış Doktorlar &nbsp;|&nbsp; 31.08.2026 · MERKEZ</span>
+  </div>
+
+  <!-- Kurum personeli DEGIL: goruntuleme merkezine hasta GONDEREN hekimler.
+       Ayni tabloyu (taraf + taraf_personel) kullanir, ayirt eden dis_hekim=1. -->
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni Doktor</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">☢️ Bu Doktordan İstem Aç</div>
+    <div class="btn">📊 Gönderim Raporu</div>
+    <div class="sepv"></div>
+    <div class="btn">🖨️ Yazdır</div>
+    <div class="btn">⤓ Excel</div>
+  </div>
+
+  <div class="arama">
+    <div class="kutu">🔍 <span>Ad, kurum ya da telefon ile ara…</span></div>
+    <span class="chip on">Aktif</span>
+    <span class="chip">Pasif</span>
+    <span class="chip">Tümü</span>
+    <div class="inp combo" style="min-width:190px">Branş: Tümü</div>
+    <div class="inp combo" style="min-width:220px">Kurum: Tümü</div>
+  </div>
+
+  <div class="dg">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:26px"><input type="checkbox" disabled></th>
+          <th>Ad Soyad</th>
+          <th>Branş</th>
+          <th>Kurum</th>
+          <th>Tescil No</th>
+          <th>Cep</th>
+          <th>E-posta</th>
+          <th class="sag">Gönderdiği Tetkik</th>
+          <th class="orta">Son Gönderim</th>
+          <th class="orta">Durum</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="sel">
+          <td><input type="checkbox" checked disabled></td>
+          <td><b>Op. Dr. Kerem ATALAY</b></td>
+          <td>Ortopedi ve Travmatoloji</td>
+          <td>Özel Anadolu Hastanesi</td>
+          <td>112458</td>
+          <td>0532 111 22 33</td>
+          <td>k.atalay@anadoluhastane.com</td>
+          <td class="sag"><span class="rz yog">42</span></td>
+          <td class="orta">30.08.2026</td>
+          <td class="orta"><span class="rz ok">Aktif</span></td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" disabled></td>
+          <td>Dr. Selin YILDIRIM</td>
+          <td>Nöroloji</td>
+          <td>Bahçelievler Tıp Merkezi</td>
+          <td>098331</td>
+          <td>0505 220 14 90</td>
+          <td>—</td>
+          <td class="sag">18</td>
+          <td class="orta">28.08.2026</td>
+          <td class="orta"><span class="rz ok">Aktif</span></td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" disabled></td>
+          <td>Prof. Dr. Halil GÜNEŞ</td>
+          <td>Beyin ve Sinir Cerrahisi</td>
+          <td>Üniversite Hastanesi</td>
+          <td>044102</td>
+          <td>0533 640 77 12</td>
+          <td>hgunes@uni.edu.tr</td>
+          <td class="sag">9</td>
+          <td class="orta">21.08.2026</td>
+          <td class="orta"><span class="rz ok">Aktif</span></td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" disabled></td>
+          <td>Dr. Emre KOÇAK</td>
+          <td>Fizik Tedavi ve Rehabilitasyon</td>
+          <td class="sonuk">— (serbest hekim)</td>
+          <td>201774</td>
+          <td>0542 908 31 26</td>
+          <td>—</td>
+          <td class="sag">6</td>
+          <td class="orta">12.08.2026</td>
+          <td class="orta"><span class="rz ok">Aktif</span></td>
+        </tr>
+        <tr class="pas">
+          <td><input type="checkbox" disabled></td>
+          <td>Dr. Nalan ÖZ</td>
+          <td>İç Hastalıkları</td>
+          <td>Kadıköy Poliklinik</td>
+          <td>077219</td>
+          <td>0530 411 08 55</td>
+          <td>—</td>
+          <td class="sag">2</td>
+          <td class="orta">03.02.2026</td>
+          <td class="orta"><span class="rz pas">Pasif</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="maprow">
+    <b>Gönderdiği Tetkik</b>: bu hekimin isteğiyle açılan radyoloji istemi sayısı
+    (iptaller hariç) · <b>Son Gönderim</b>: en son çekim/istem tarihi ·
+    Sarı rozet ayda 10'dan fazla gönderen hekimi işaretler.
+  </div>
+
+  <div class="statusbar">
+    <span>Kayıt: <b>5</b></span>
+    <span>Aktif: <b>4</b></span>
+    <span>Toplam gönderim: <b>77</b> tetkik</span>
+    <span class="sp">Seçili: Op. Dr. Kerem ATALAY</span>
+  </div>
+</div>
+</body>
+</html>

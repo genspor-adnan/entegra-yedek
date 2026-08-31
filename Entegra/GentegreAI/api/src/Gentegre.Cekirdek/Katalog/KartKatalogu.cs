@@ -86,7 +86,14 @@ public sealed record DetayTanimi(
     // 1:1 uzanti (UstKolon = "id"): tablonun PK'si ust kayitla AYNI, ikinci
     //   satir zaten yazilamaz. Ekranda "+ Satır" dugmesi ilk satirdan sonra
     //   gizlenir - kullaniciya yazilamayacak satir teklif etmeyelim.
-    bool TekSatir = false
+    bool TekSatir = false,
+    // YENI SATIR VARSAYILANLARI: istekte gelmeyen alanlara kayit sirasinda
+    //   yazilir. Kartin KIMLIGINI belirleyen bayraklar icindir - ornegin dis
+    //   hekim kartinda taraf_personel.dis_hekim = 1 (305): kullaniciya
+    //   "ben dis hekimim" kutusu isaretlettirmek, ayni tabloyu paylasan iki
+    //   kart arasindaki farki kullanicinin sorumluluguna atmak olurdu.
+    //   ANAHTAR DB KOLONU (alan adi degil) - dogrudan insert'e girer.
+    IReadOnlyDictionary<string, object?>? YeniSatirVarsayilanlari = null
 )
 {
     public string Etiket => Baslik ?? (Ad.Length > 0 ? char.ToUpperInvariant(Ad[0]) + Ad[1..] : Ad);
@@ -164,6 +171,7 @@ public static partial class KartKatalogu
         Ekle(Personel());
         Ekle(Hasta());
         Ekle(HastaAday());
+        Ekle(DisHekim());
         Ekle(Kurum());
         Ekle(Departman());
         Ekle(Kampanya());

@@ -367,6 +367,19 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Cari', menuAd: 'Kişi Listesi', ic: '🧑', yetkiKodu: 'cari',
   },
   {
+    // DIS DOKTORLAR (305, kullanici): goruntuleme merkezine hasta GONDEREN
+    //   kurum disi hekimler. Personel listesiyle ayni tabloyu okur
+    //   (taraf + taraf_personel), ayirt eden dis_hekim = 1 - ayri tablo acmak
+    //   ad/telefon/adres alanlarini ikinci kez tanimlamak olurdu.
+    //   YALNIZ HBYS: ERP kurulumunda sevk eden hekim kavrami yok.
+    kaynak: 'dis-hekim', baslik: 'Dış Doktorlar', yol: 'Cari › Dış Doktorlar',
+    kartYolu: '/dis-hekim', kartBaslik: 'Dış Doktor',
+    aksiyonEkrani: 'dis-hekim-liste', cipler: DURUM_CIPLERI,
+    gizliKolonlar: ['brans', 'telefonHam'],
+    menuGrup: 'Cari', menuAd: 'Dış Doktorlar', ic: '🩺', yetkiKodu: 'personel',
+    urunModu: 2,
+  },
+  {
     kaynak: 'proje', baslik: 'Projeler', yol: 'CRM › Projeler', kartYolu: '/proje',
     aksiyonEkrani: 'proje-liste',
     cipler: [

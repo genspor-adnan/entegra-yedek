@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dış Doktor Kartı — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1080px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .sp{margin-left:auto}
+
+  /* KIMLIK SERIDI - kartin ust bandi, her sekmede gorunur */
+  .idstrip{display:flex;gap:16px;align-items:center;padding:9px 12px;background:#f2f6fb;
+    border-bottom:1px solid var(--line2)}
+  .avatar{width:38px;height:38px;border-radius:50%;background:#2b6cb0;color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .v{font-size:12.5px;font-weight:bold}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:12px;display:flex;align-items:center;min-width:0}
+  .inp.ro{background:#f4f6f8;color:var(--muted)}
+  .inp.uzun{height:auto;min-height:46px;padding:5px 6px;align-items:flex-start;line-height:1.5}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:3px;color:var(--muted);font-size:10px}
+  .req::after{content:" *";color:var(--req)}
+
+  /* SEKMELER - tiklanabilir (kisi_karti.html ile ayni desen) */
+  .tabs{display:flex;gap:2px;padding:6px 8px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .tab{padding:6px 14px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);
+    border-bottom:none;border-radius:4px 4px 0 0;color:var(--muted);cursor:pointer}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .pane{display:none;padding:12px}
+  .pane.active{display:block}
+
+  .grp{border:1px solid var(--line2);border-radius:3px;margin-bottom:12px;background:var(--grpbg)}
+  .grp h4{margin:0;padding:6px 10px;font-size:11px;text-transform:uppercase;letter-spacing:.3px;
+    color:var(--navy);background:linear-gradient(#f4f7fb,#eaf0f7);border-bottom:1px solid var(--line2);
+    display:flex;align-items:center;gap:8px}
+  .grp h4 .tag{margin-left:auto;font-size:9.5px;border:1px solid var(--line);border-radius:9px;
+    padding:0 7px;background:#fff;color:var(--muted);text-transform:none;letter-spacing:0}
+  .grp .body{padding:10px}
+  .grid4{display:grid;grid-template-columns:120px 1fr 120px 1fr;gap:8px 10px;align-items:center}
+  .grid4 label{font-size:11px;color:var(--muted);text-align:right}
+  .full{grid-column:2 / -1}
+  .hint{margin:8px 10px 10px;font-size:10.5px;color:var(--muted);line-height:1.5;
+    border-left:3px solid #cfe0f2;padding-left:8px}
+
+  .dg{border:1px solid var(--line2);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr:hover td{background:#f2f7fd}
+  .sag{text-align:right}.orta{text-align:center}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line)}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.bek{background:#fff3d6;color:#7a5407;border-color:#f0dcae}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .ozet{display:flex;gap:22px;padding:9px 10px;flex-wrap:wrap}
+  .ozet .k{display:flex;flex-direction:column;gap:2px;min-width:96px}
+  .ozet .k b{font-size:17px;color:var(--navy)}
+  .ozet .k span{font-size:10.5px;color:var(--muted)}
+  .bar{display:flex;align-items:center;gap:8px;font-size:11px;margin:3px 0}
+  .bar .ad{width:130px;color:var(--muted)}
+  .bar .ct{height:11px;border-radius:6px;background:linear-gradient(#7fb2e6,#4d8fd6)}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+
+  <div class="title">
+    Dış Doktor — Op. Dr. Kerem ATALAY
+    <span class="sp">Cari › Dış Doktorlar › Kart</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn ok">💾 Kaydet</div>
+    <div class="btn">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">☢️ Bu Doktordan İstem Aç</div>
+    <div class="btn">📞 Ara</div>
+    <div class="btn pas">✉ e-Posta Gönder</div>
+    <div class="sp"></div>
+    <div class="btn">✖ Kapat</div>
+  </div>
+
+  <!-- KIMLIK SERIDI: hangi sekmede olursak olalim kimin karti oldugu gorunur. -->
+  <div class="idstrip">
+    <div class="avatar">KA</div>
+    <div class="fld" style="width:160px">
+      <label class="req">Ad</label>
+      <div class="inp">Kerem</div>
+    </div>
+    <div class="fld" style="width:180px">
+      <label class="req">Soyad</label>
+      <div class="inp">ATALAY</div>
+    </div>
+    <div class="fld" style="width:140px">
+      <label>Kod</label>
+      <div class="inp">DR-0042</div>
+    </div>
+    <div class="fld" style="width:120px">
+      <label>Durum</label>
+      <div class="inp combo">Aktif</div>
+    </div>
+    <div class="fld" style="margin-left:auto;text-align:right">
+      <label>Gönderdiği Tetkik</label>
+      <div class="v">42 <span style="font-weight:normal;color:#6b7a8b">· son 30.08.2026</span></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="genel">📋 Genel</div>
+    <div class="tab" data-t="hekim">🩺 Hekim Bilgisi</div>
+    <div class="tab" data-t="gonderim">📊 Gönderim Geçmişi</div>
+    <div class="tab" data-t="not">📝 Not / Belge</div>
+  </div>
+
+  <!-- ================================================== GENEL ============ -->
+  <div class="pane active" data-p="genel">
+    <div class="grp">
+      <h4>İletişim</h4>
+      <div class="body">
+        <div class="grid4">
+          <label>Cep</label>            <div class="inp">0532 111 22 33</div>
+          <label>Telefon</label>        <div class="inp">0216 000 00 00</div>
+          <label>E-posta</label>        <div class="inp">k.atalay@anadoluhastane.com</div>
+          <label>TC No</label>          <div class="inp">12*******34</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h4>Adres</h4>
+      <div class="body">
+        <div class="grid4">
+          <label>Adres</label>
+          <div class="inp full">Bağdat Cd. No:120 K:3</div>
+          <label>İlçe</label>           <div class="inp">Kadıköy</div>
+          <label>İl</label>             <div class="inp combo">İstanbul</div>
+        </div>
+      </div>
+      <div class="hint">
+        Adres <b>zorunlu değil</b>: dış hekimin bize gerekli olan bilgisi telefon
+        ve kurumudur. Rapor/CD kuryeyle gönderiliyorsa doldurulur.
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================== HEKIM ============ -->
+  <div class="pane" data-p="hekim">
+    <div class="grp">
+      <h4>Mesleki Bilgiler <span class="tag">taraf_personel · dis_hekim = 1</span></h4>
+      <div class="body">
+        <div class="grid4">
+          <label class="req">Branş</label>   <div class="inp combo">Ortopedi ve Travmatoloji</div>
+          <label>Tescil No</label>           <div class="inp">112458</div>
+          <label>Kurum (kayıtlı)</label>     <div class="inp combo">Özel Anadolu Hastanesi</div>
+          <label>Kurum Adı</label>           <div class="inp">Özel Anadolu Hastanesi</div>
+          <label>Yan Dal</label>             <div class="inp">Artroplasti</div>
+          <label>Çalışma Şekli</label>       <div class="inp combo">Kadrolu (dış kurum)</div>
+        </div>
+      </div>
+      <div class="hint">
+        <b>Kurum iki alanda tutulur:</b> sevk eden hastane bizim cari listemizde
+        kayıtlıysa <i>Kurum (kayıtlı)</i> seçilir — kurum bazlı raporlama o zaman
+        mümkün olur. Kayıtlı değilse yalnız <i>Kurum Adı</i> yazılır; her sevk eden
+        hastane için cari kartı açmak zorunlu değildir.
+      </div>
+    </div>
+
+    <div class="grp">
+      <h4>Çalışma Tercihleri</h4>
+      <div class="body">
+        <div class="grid4">
+          <label>Rapor Teslimi</label>       <div class="inp combo">e-Posta + basılı</div>
+          <label>Görüntü</label>             <div class="inp combo">CD verilsin</div>
+          <label>Öncelik</label>             <div class="inp combo">Normal</div>
+          <label>Anlaşma İskontosu</label>   <div class="inp">%0</div>
+          <label>Tercih Notu</label>
+          <div class="inp uzun full">Hafta içi 14:00 sonrası aranabilir. Acil bulguda
+            telefonla haber verilmesini istiyor.</div>
+        </div>
+      </div>
+      <div class="hint">
+        Bu tercihler istem açılırken <b>ön değer</b> olur; istem ekranında
+        değiştirilebilir — hekimin genel tercihi tek tek istemlere yazılmaz.
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================== GONDERIM ========= -->
+  <div class="pane" data-p="gonderim">
+    <div class="grp">
+      <h4>Özet <span class="tag">radyoloji_istem.istek_hekim_id</span></h4>
+      <div class="ozet">
+        <div class="k"><b>42</b><span>Toplam tetkik</span></div>
+        <div class="k"><b>7</b><span>Bu ay</span></div>
+        <div class="k"><b>38</b><span>Raporlanan</span></div>
+        <div class="k"><b>3</b><span>Bekleyen</span></div>
+        <div class="k"><b>98.400 ₺</b><span>Toplam tutar</span></div>
+      </div>
+      <div class="body" style="padding-top:0">
+        <div class="bar"><span class="ad">MR</span><span class="ct" style="width:210px"></span><span>21</span></div>
+        <div class="bar"><span class="ad">Direkt Grafi</span><span class="ct" style="width:130px"></span><span>13</span></div>
+        <div class="bar"><span class="ad">BT</span><span class="ct" style="width:60px"></span><span>6</span></div>
+        <div class="bar"><span class="ad">USG</span><span class="ct" style="width:20px"></span><span>2</span></div>
+      </div>
+      <div class="hint">
+        Dağılım, hangi cihazın bu hekim için kritik olduğunu gösterir — MR
+        kapasitesi planlanırken en çok gönderen hekimler burada okunur.
+      </div>
+    </div>
+
+    <div class="grp">
+      <h4>Gönderdiği İstemler</h4>
+      <div class="body">
+        <div class="dg">
+          <table>
+            <thead>
+              <tr><th>Tarih</th><th>Accession</th><th>Hasta</th><th>Tetkik</th>
+                  <th class="orta">Durum</th><th class="sag">Tutar</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>30.08.2026</td><td>ACC-260830-0043</td><td>AYŞE YILMAZ</td>
+                  <td>Lomber Vertebra MR</td><td class="orta"><span class="rz ok">Raporlandı</span></td>
+                  <td class="sag">2.400,00</td></tr>
+              <tr><td>28.08.2026</td><td>ACC-260828-0017</td><td>MEHMET ÇELİK</td>
+                  <td>Diz MR (sağ)</td><td class="orta"><span class="rz ok">Raporlandı</span></td>
+                  <td class="sag">2.400,00</td></tr>
+              <tr><td>27.08.2026</td><td>ACC-260827-0031</td><td>HASAN DEMİR</td>
+                  <td>Lomber Grafi (2 yön)</td><td class="orta"><span class="rz bek">Raporlanacak</span></td>
+                  <td class="sag">225,00</td></tr>
+              <tr><td>21.08.2026</td><td>ACC-260821-0008</td><td>ZEYNEP KAYA</td>
+                  <td>Servikal MR</td><td class="orta"><span class="rz ok">Raporlandı</span></td>
+                  <td class="sag">2.400,00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="hint">
+        Liste <b>istek_hekim_id</b> üzerinden gelir: dış istem açılırken bu hekim
+        seçildiğinde kayıt buraya düşer. Serbest metinle (kayıtsız hekim) açılan
+        istemler burada <b>görünmez</b> — hekimi kartla eşleştirmenin asıl faydası budur.
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================== NOT / BELGE ====== -->
+  <div class="pane" data-p="not">
+    <div class="grp">
+      <h4>Notlar</h4>
+      <div class="body">
+        <div class="grid4">
+          <label>Genel Not</label>
+          <div class="inp uzun full">Anlaşma görüşmesi 12.03.2026'da yapıldı;
+            MR fiyatında %10 kurum iskontosu sözlü olarak kabul edildi,
+            yazılı sözleşme bekleniyor.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h4>Belgeler</h4>
+      <div class="body">
+        <div class="dg">
+          <table>
+            <thead><tr><th>Tarih</th><th>Belge</th><th>Tür</th><th class="sag">Boyut</th></tr></thead>
+            <tbody>
+              <tr><td>12.03.2026</td><td>Diploma fotokopisi.pdf</td><td>Diploma</td><td class="sag">412 KB</td></tr>
+              <tr><td>12.03.2026</td><td>Kimlik.jpg</td><td>Kimlik</td><td class="sag">188 KB</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="hint">
+        Belgeler hasta/cari kartındaki <b>Resim / Doküman</b> deseniyle aynı
+        yerde saklanır — dış hekim için ayrı bir depo yoktur.
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Kayıt: <b>Op. Dr. Kerem ATALAY</b></span>
+    <span>Oluşturma: 12.03.2026 · admin</span>
+    <span class="sp">Son değişiklik: 30.08.2026 14:22 · admin</span>
+  </div>
+</div>
+
+<script>
+  // Sekme gecisi (kisi_karti.html ile ayni desen) - mockup gezilebilsin.
+  var tabs = document.querySelectorAll('.tab'), panes = document.querySelectorAll('.pane');
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (x) { x.classList.remove('active') });
+      panes.forEach(function (x) { x.classList.remove('active') });
+      t.classList.add('active');
+      var p = document.querySelector('.pane[data-p="' + t.dataset.t + '"]');
+      if (p) p.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

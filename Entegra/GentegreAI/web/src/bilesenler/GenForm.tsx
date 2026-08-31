@@ -115,7 +115,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
   const { kullanici } = useOturum();
   const yeniMi = id === 'yeni';
-  const personelGibiKart = kaynak === 'personel' || kaynak === 'hasta';
+  // Dis hekim (305) de ad/soyad ile calisir: unvan gosterilmez, ad+soyaddan
+  //   turetilir - personel/hasta kartlariyla ayni kural.
+  const personelGibiKart = kaynak === 'personel' || kaynak === 'hasta'
+                        || kaynak === 'dis-hekim';
 
   const [meta, setMeta] = useState<KartMetaYaniti | null>(null);
   const [deger, setDeger] = useState<Record<string, Deger>>({});
