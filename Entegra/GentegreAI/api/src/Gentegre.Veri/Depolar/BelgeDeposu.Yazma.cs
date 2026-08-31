@@ -74,7 +74,11 @@ public sealed partial class BelgeDeposu
         // Basvuru sekmesi (298): kayit kabulun doldurdugu alanlar.
         ["basvuruTuru"] = "basvuru_turu", ["gelisSekli"] = "gelis_sekli",
         ["gelisNedeni"] = "gelis_nedeni", ["oda"] = "oda", ["siraNo"] = "sira_no",
-        ["refakatci"] = "refakatci"
+        ["refakatci"] = "refakatci",
+        // Ambulans (300): 112 kayit no + acilde takilan bileklik no. Odeyiciye
+        // degil HASTAYA ait bilgi oldugu icin provizyonda degil burada.
+        ["ambulansHastaNo"] = "ambulans_hasta_no",
+        ["ambulansBileklikNo"] = "ambulans_bileklik_no"
     };
 
     /// <summary>
@@ -144,22 +148,33 @@ public sealed partial class BelgeDeposu
     /// <summary>
     /// PROVIZYON (299) alanlari - belge_provizyon 1:1. SGK ve ozel sigorta
     /// AYNI ANDA alinabilir (hasta hem SGK'li hem tamamlayici policeli
-    /// olabilir), o yuzden iki ayri alan takimi: sgk_* ve oss_*. Sorgu/alinma
-    /// ZAMANLARI sunucu-servis tarafindan yazilir - istekten gelmez.
+    /// olabilir), o yuzden iki ayri alan takimi: sgk_* ve oss_*.
+    ///
+    /// Provizyon/takip TARIHLERI elle girilebilir: MEDULA baglanana kadar
+    /// kayit kabul bunlari kendisi yazar, servis geldiginde uzerine yazacak.
+    /// Yalnizca mustehaklik SORGU zamani (servis damgasi) istekten gelmez.
     /// </summary>
     private static readonly Dictionary<string, string> ProvizyonKolonlari = new(StringComparer.Ordinal)
     {
         // SGK / MEDULA
         ["sgkDurum"] = "sgk_durum", ["sgkProvizyonNo"] = "sgk_provizyon_no",
-        ["sgkProvizyonTipi"] = "sgk_provizyon_tipi", ["sgkGecerlilik"] = "sgk_gecerlilik",
+        ["sgkProvizyonTipi"] = "sgk_provizyon_tipi",
+        ["sgkProvizyonTarihi"] = "sgk_provizyon_tarihi",
+        ["sgkGecerlilik"] = "sgk_gecerlilik",
         ["sgkKarsilama"] = "sgk_karsilama", ["sgkTutar"] = "sgk_tutar",
         ["sgkRedNedeni"] = "sgk_red_nedeni", ["sgkSigortaTuru"] = "sgk_sigorta_turu",
-        ["sgkTakipNo"] = "sgk_takip_no", ["sgkTakipTuru"] = "sgk_takip_turu",
+        // Basvuru (muracaat) no ile takip no FARKLI numaralardir; faturalama
+        // takip numarasi uzerinden yapilir (300).
+        ["sgkBasvuruNo"] = "sgk_basvuru_no",
+        ["sgkTakipNo"] = "sgk_takip_no", ["sgkTakipTarihi"] = "sgk_takip_tarihi",
+        ["sgkTakipTuru"] = "sgk_takip_turu",
         ["sgkTesisKodu"] = "sgk_tesis_kodu", ["sgkMustehaklik"] = "sgk_mustehaklik",
         ["sgkSevkli"] = "sgk_sevkli", ["sgkSevkKurum"] = "sgk_sevk_kurum",
         // Ozel / tamamlayici saglik sigortasi
         ["ossKurumId"] = "oss_kurum_id", ["ossDurum"] = "oss_durum",
-        ["ossOnayNo"] = "oss_onay_no", ["ossGecerlilik"] = "oss_gecerlilik",
+        ["ossProvizyonNo"] = "oss_provizyon_no",
+        ["ossProvizyonTarihi"] = "oss_provizyon_tarihi",
+        ["ossGecerlilik"] = "oss_gecerlilik",
         ["ossKarsilama"] = "oss_karsilama", ["ossTutar"] = "oss_tutar",
         ["ossRedNedeni"] = "oss_red_nedeni", ["ossPoliceNo"] = "oss_police_no",
         ["ossHasarNo"] = "oss_hasar_no", ["ossBrans"] = "oss_brans",

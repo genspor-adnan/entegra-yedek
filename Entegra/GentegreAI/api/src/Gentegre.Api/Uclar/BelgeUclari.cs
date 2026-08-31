@@ -571,8 +571,11 @@ public static class BelgeUclari
         "dovizKuru" or "sgkKarsilama" or "sgkTutar"
         or "ossKarsilama" or "ossTutar" => "para",
 
+        // Provizyon TARIHLERI (300) elle girilebilir - MEDULA baglanana kadar
+        // kayit kabul yaziyor, servis geldiginde uzerine yazacak.
         "belgeTarihi" or "irsaliyeTarihi"
-        or "sgkGecerlilik" or "ossGecerlilik" => "tarih",
+        or "sgkGecerlilik" or "sgkProvizyonTarihi" or "sgkTakipTarihi"
+        or "ossGecerlilik" or "ossProvizyonTarihi" => "tarih",
 
         "tarafUnvan" or "tarafVkno" or "tarafVd" or "tarafAdres" or "tarafIlce" or "tarafIl" or
         "belgeSeri" or "belgeNo" or "irsaliyeNo" or "kdvDurum" or "belgeDovizi" or
@@ -583,10 +586,13 @@ public static class BelgeUclari
         // Basvuru sekmesi (298) - metin alanlari.
         "aracPlaka" or "soforAd" or "soforTckn"
         or "siraNo" or "refakatci"
+        // Ambulans (300) - basvuru uzantisinda.
+        or "ambulansHastaNo" or "ambulansBileklikNo"
         // Provizyon (299) - metin alanlari.
-        or "sgkProvizyonNo" or "sgkRedNedeni" or "sgkSigortaTuru" or "sgkTakipNo"
+        or "sgkProvizyonNo" or "sgkRedNedeni" or "sgkSigortaTuru"
+        or "sgkBasvuruNo" or "sgkTakipNo"
         or "sgkTesisKodu" or "sgkSevkKurum"
-        or "ossOnayNo" or "ossRedNedeni" or "ossPoliceNo" or "ossHasarNo" or "ossBrans"
+        or "ossProvizyonNo" or "ossRedNedeni" or "ossPoliceNo" or "ossHasarNo" or "ossBrans"
         or "provizyonAciklama" => "metin",
 
         _ => null
@@ -598,6 +604,10 @@ public static class BelgeUclari
         "belgeSeri" or "belgeDovizi" or "kur" or "raporDovizi" or "ekstreDovizi" or "kdvDurum" => 5,
         "dovizCinsi" => 6,
         "belgeNo" or "irsaliyeNo" or "tarafVkno" => 20,
+        // Provizyon/ambulans numaralari (299-300) - hepsi varchar(40).
+        "sgkProvizyonNo" or "sgkBasvuruNo" or "sgkTakipNo" or "sgkTesisKodu"
+        or "ossProvizyonNo" or "ossPoliceNo" or "ossHasarNo"
+        or "ambulansHastaNo" or "ambulansBileklikNo" => 40,
         "tarafIlce" or "tarafIl" or "tarafVd" or "gondericiVkno" => 60,
         "ozelKod" => 20,
         "tarafUnvan" or "gondericiUnvan" => 200,

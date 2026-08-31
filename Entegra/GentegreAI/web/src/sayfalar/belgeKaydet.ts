@@ -13,7 +13,7 @@ export interface Secim { id: number; ad: string }
  * istekten gelmez - govdede gorunurlerse "Bilinmeyen belge alani" ile reddedilir.
  */
 const PROVIZYON_SALT_OKUNUR = new Set(
-  ['sgkAlinmaZaman', 'sgkMustehaklikZaman', 'ossAlinmaZaman', 'ossKurumAdi']);
+  ['sgkMustehaklikZaman', 'ossKurumAdi']);
 
 /**
  * SAYISAL / TARIH alanlar: ekranda BOS iken '' tutulur ama sunucuya bos metin
@@ -22,7 +22,8 @@ const PROVIZYON_SALT_OKUNUR = new Set(
  */
 const BOSU_GONDERME = new Set([
   'sgkKarsilama', 'sgkTutar', 'sgkGecerlilik',
-  'ossKarsilama', 'ossTutar', 'ossGecerlilik',
+  'sgkProvizyonTarihi', 'sgkTakipTarihi',
+  'ossKarsilama', 'ossTutar', 'ossGecerlilik', 'ossProvizyonTarihi',
 ]);
 
 export interface BelgeGirdisi {

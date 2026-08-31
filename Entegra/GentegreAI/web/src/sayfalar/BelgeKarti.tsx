@@ -536,19 +536,25 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           oda: y.belge.oda != null ? Number(y.belge.oda) : null,
           siraNo: String(y.belge.siraNo ?? ''),
           refakatci: String(y.belge.refakatci ?? ''),
+          ambulansHastaNo: String(y.belge.ambulansHastaNo ?? ''),
+          ambulansBileklikNo: String(y.belge.ambulansBileklikNo ?? ''),
           // PROVIZYON (299) - belge_provizyon 1:1; SGK ve ozel sigorta ayri.
           sgkDurum: y.belge.sgkDurum != null ? Number(y.belge.sgkDurum) : 0,
           sgkProvizyonNo: String(y.belge.sgkProvizyonNo ?? ''),
           sgkProvizyonTipi: y.belge.sgkProvizyonTipi != null
             ? Number(y.belge.sgkProvizyonTipi) : null,
-          sgkAlinmaZaman: y.belge.sgkAlinmaZaman ? String(y.belge.sgkAlinmaZaman) : null,
+          sgkProvizyonTarihi: y.belge.sgkProvizyonTarihi
+            ? String(y.belge.sgkProvizyonTarihi).slice(0, 16) : null,
           sgkGecerlilik: y.belge.sgkGecerlilik
             ? String(y.belge.sgkGecerlilik).slice(0, 16) : null,
           sgkKarsilama: y.belge.sgkKarsilama != null ? String(y.belge.sgkKarsilama) : '',
           sgkTutar: y.belge.sgkTutar != null ? String(y.belge.sgkTutar) : '',
           sgkRedNedeni: String(y.belge.sgkRedNedeni ?? ''),
           sgkSigortaTuru: String(y.belge.sgkSigortaTuru ?? ''),
+          sgkBasvuruNo: String(y.belge.sgkBasvuruNo ?? ''),
           sgkTakipNo: String(y.belge.sgkTakipNo ?? ''),
+          sgkTakipTarihi: y.belge.sgkTakipTarihi
+            ? String(y.belge.sgkTakipTarihi).slice(0, 16) : null,
           sgkTakipTuru: y.belge.sgkTakipTuru != null ? Number(y.belge.sgkTakipTuru) : null,
           sgkTesisKodu: String(y.belge.sgkTesisKodu ?? ''),
           sgkMustehaklik: y.belge.sgkMustehaklik != null
@@ -560,8 +566,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           ossKurumId: y.belge.ossKurumId != null ? Number(y.belge.ossKurumId) : null,
           ossKurumAdi: String(y.belge.ossKurumAdi ?? ''),
           ossDurum: y.belge.ossDurum != null ? Number(y.belge.ossDurum) : 0,
-          ossOnayNo: String(y.belge.ossOnayNo ?? ''),
-          ossAlinmaZaman: y.belge.ossAlinmaZaman ? String(y.belge.ossAlinmaZaman) : null,
+          ossProvizyonNo: String(y.belge.ossProvizyonNo ?? ''),
+          ossProvizyonTarihi: y.belge.ossProvizyonTarihi
+            ? String(y.belge.ossProvizyonTarihi).slice(0, 16) : null,
           ossGecerlilik: y.belge.ossGecerlilik
             ? String(y.belge.ossGecerlilik).slice(0, 16) : null,
           ossKarsilama: y.belge.ossKarsilama != null ? String(y.belge.ossKarsilama) : '',
