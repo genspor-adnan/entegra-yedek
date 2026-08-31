@@ -14,6 +14,7 @@ export function BelgeAracCubugu({
   siparisMi, irsaliyeMi, faturaMi, alisMi, basvuruMu, eBelgeYok, kayitliId,
   kes, yeniBelge, kapat, setDonusum, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
+  setAktifSekme, hastaKartiAc, acilBasvuru, hastaVar,
 }: {
   mevcutBelge: boolean;
   /** Kayitli belge degistirilebilir mi (135). */
@@ -50,6 +51,12 @@ export function BelgeAracCubugu({
   rezerveCalisiyor: boolean;
   /** true = rezerve et, false = birak. */
   rezerveDegistir(ac: boolean): Promise<void>;
+  /** Basvuru dugmeleri (300, mockup): sekmeye gecis / hasta karti / acil. */
+  setAktifSekme?(anahtar: string): void;
+  hastaKartiAc?(): void;
+  acilBasvuru?(): void;
+  /** Hasta secili mi - "Hasta Kartını Aç" ona bagli. */
+  hastaVar?: boolean;
   /* TAHSILAT arac cubugundan kalkti - tahsilat kendi sekmesinden aciliyor. */
 }) {
   return (
@@ -64,18 +71,87 @@ export function BelgeAracCubugu({
             💾 Kaydet
           </button>)
     : sonuc
-      ? <button className="d onay" onClick={yeniBelge}>＋ Yeni Belge</button>
+      ? <button className="d onay" onClick={yeniBelge}>
+          {basvuruMu ? '＋ Yeni Başvuru' : '＋ Yeni Belge'}
+        </button>
       : <button className="d onay" disabled={kaydediyor} onClick={() => void kes()}>
-          {kaydediyor ? '💾 Kaydediliyor…' : '💾 Kaydet'}
+          {/* BASVURUDA kaydetmek "protokol vermek"tir (mockup): numara kayitla
+              atanir, o yuzden dugme isini soyluyor. */}
+          {kaydediyor ? '💾 Kaydediliyor…'
+            : basvuruMu ? '✔ Başvuruyu Aç (Protokol Ver)' : '💾 Kaydet'}
         </button>}
-  <button className="d teh" disabled title="Belge iptali henüz bağlanmadı (F7).">
-    🗑 Sil
-  </button>
+  {/* Basvuruda IPTAL en SONDA (mockup) - dugme grubunun sonunda durur. */}
+  {!basvuruMu && (
+    <button className="d teh" disabled title="Belge iptali henüz bağlanmadı (F7).">
+      🗑 Sil
+    </button>
+  )}
 
   <span className="ayrac" />
 
+  {/* ---------------------------------------------------- BASVURU ---- */}
+  {/* Basvuru da tur 19'dur (satis siparisi), ama arac cubugu HBYS mockupunun
+      dugmeleridir: rezervasyon/termin/uretim kayit kabulde anlamsiz.
+      "Faturaya Dönüştür" mockupta yok ama KORUNDU: kurum payinin faturaya
+      cikisi bu dugmeden geciyor, kaldirmak akisi keserdi. */}
+  {basvuruMu && (
+    <>
+      <button className="d bir" disabled={!kayitliId}
+              title={kayitliId
+                ? 'Provizyon bilgilerini gir - MEDULA sorgusu henüz bağlı değil.'
+                : 'Önce başvuruyu açın.'}
+              onClick={() => setAktifSekme?.('provizyon')}>
+        🧾 Provizyon Al
+      </button>
+      <button className="d" disabled title="Protokol fişi yazdırma henüz bağlanmadı.">
+        🖨️ Protokol Fişi
+      </button>
+
+      <span className="ayrac" />
+
+      <button className="d" disabled={!hastaVar}
+              title={hastaVar ? 'Seçili hastanın kartını aç' : 'Önce hasta seçin.'}
+              onClick={() => hastaKartiAc?.()}>
+        👤 Hasta Kartını Aç
+      </button>
+      <button className="d" disabled title="Randevudan başvuru açma henüz bağlanmadı.">
+        📅 Randevudan Getir
+      </button>
+      {/* Acil basvuru: turu Acil, gelis seklini Ambulans yapar - kayit kabul
+          memuru acil kapisinda iki combo yerine tek dugmeye bassin. */}
+      <button className="d" disabled={kilitli}
+              title="Başvuru türünü Acil, geliş şeklini Ambulans yapar"
+              onClick={() => acilBasvuru?.()}>
+        🚑 Acil Başvuru
+      </button>
+
+      <span className="ayrac" />
+
+      <button className="d" disabled title="Yatan hasta (yatış) modülü henüz yok.">
+        🔁 Yatışa Çevir
+      </button>
+      <button className="d" disabled={!kayitliId}
+              title={kayitliId ? 'Tahsilat sekmesini aç' : 'Önce başvuruyu açın.'}
+              onClick={() => setAktifSekme?.('tahsilat')}>
+        💳 Tahsilat
+      </button>
+      <button className="d" disabled={!kayitliId}
+              title={kayitliId ? 'Seçili satırları faturaya / fişe / tahakkuka aktar'
+                               : 'Önce başvuruyu açın.'}
+              onClick={() => setDonusum(15)}>
+        🧾 Faturaya Dönüştür
+      </button>
+
+      <span className="ayrac" />
+
+      <button className="d teh" disabled title="Başvuru iptali henüz bağlanmadı (F7).">
+        ✕ Başvuruyu İptal Et
+      </button>
+    </>
+  )}
+
   {/* ---------------------------------------------------- SIPARIS ---- */}
-  {siparisMi && (
+  {siparisMi && !basvuruMu && (
     <>
       {/* REZERVASYON (142): satirlarin KALAN miktarini depoda ayirir - stok
           dusmez, ama stok aramasinda "kullanilabilir" miktardan dusulur, ayni

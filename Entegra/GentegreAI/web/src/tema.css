@@ -833,6 +833,12 @@ input.skt-gecmis {
 }
 .belge-hdr-sar .alan .etiket,
 .alan-izgara.belge-hdr .alan .etiket { text-align: left; font-size: 10.5px }
+/* Baslik editleri DAHA KUCUK (kullanici): serit kartin ustunde duran bir ozet,
+   asil is alani asagida - dikey yer kart govdesine kalsin. */
+.belge-hdr-sar .alan input,
+.belge-hdr-sar .alan select,
+.alan-izgara.belge-hdr .alan input,
+.alan-izgara.belge-hdr .alan select { height: 21px; font-size: 11.5px }
 
 /* Belge karti basligi: mockup (.hdr) 3 sutunlu izgara. */
 .alan-izgara.uc-sutun { grid-template-columns: repeat(3, minmax(0, 1fr)) }

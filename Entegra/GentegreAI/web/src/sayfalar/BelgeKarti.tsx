@@ -257,6 +257,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    */
   const [hastaAramaMetni, setHastaAramaMetni] = useState('');
   const [hastaAramaYeni, setHastaAramaYeni] = useState(false);
+  /** "Hasta Kartını Aç" (300): pencere arama listesi yerine kartla acilir. */
+  const [hastaKartId, setHastaKartId] = useState<number | null>(null);
   /** Satis temsilcisi (personel) secim modali - cari ile ayni ekran. */
   const [saticiArama, setSaticiArama] = useState(false);
   /** e-Fatura senaryosu (belge.senaryo) - GIB profilini belirler. */
@@ -1108,6 +1110,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           setDonusum={setDonusum} setTerminAcik={setTerminAcik}
           rezerveVar={rezerveVar} rezerveCalisiyor={rezerveCalisiyor}
           rezerveDegistir={rezerveDegistir}
+          setAktifSekme={s => { setHata(null); setAlanHatalari({}); setAktifSekme(s) }}
+          hastaVar={!!cari?.id}
+          hastaKartiAc={() => { setHastaKartId(cari?.id ?? null); setCariArama(true) }}
+          // Acil kapisi: tur "Acil" (2), gelis sekli "Ambulans" (2).
+          acilBasvuru={() => setBasvuruBilgi(o => ({ ...o, basvuruTuru: 2, gelisSekli: 2 }))}
         />
       }
     >
@@ -1315,16 +1322,19 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             ? 'Hastayı isim/tel ile ara…' : 'Müşteri / tedarikçi ara…'}
           baslangicMetni={hastaAramaMetni}
           baslangicYeni={hastaAramaYeni}
+          baslangicKartId={hastaKartId}
           onKapat={() => {
             setCariArama(false);
             setHastaAramaMetni('');
             setHastaAramaYeni(false);
+            setHastaKartId(null);
           }}
           onSec={sec => {
             setCari({ id: sec.id, unvan: sec.unvan });
             setCariArama(false);
             setHastaAramaMetni('');
             setHastaAramaYeni(false);
+            setHastaKartId(null);
           }}
         />
 
