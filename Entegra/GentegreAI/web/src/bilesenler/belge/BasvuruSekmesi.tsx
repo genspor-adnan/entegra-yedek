@@ -311,14 +311,48 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, kapanma
 }
 
 // ============================================================ BASVURU ====
-export function BasvuruSekmesi({ bilgi, degistir, kilitli, protokolNo, randevuBilgi }: {
+export function BasvuruSekmesi({ bilgi, degistir, kilitli, protokolNo, randevuBilgi,
+                                 tarih, setTarih, tarihEnGec, tarihEnErken, tarihHatasi,
+                                 bolumler, bolumId, setBolumId,
+                                 gorevliler, personelId, setPersonelId,
+                                 kurumlar, odeyenKurumId, setOdeyenKurumId }: {
   bilgi: BasvuruBilgi;
   degistir(y: Partial<BasvuruBilgi>): void;
   kilitli: boolean;
   protokolNo: string;
   /** Belgeye bagli randevu varsa ozeti (tarih · kaynak) - salt okunur. */
   randevuBilgi?: string;
+  /**
+   * BASLIKTAN BURAYA TASINAN alanlar (300, kullanici): basvurunun basligi
+   * artik yalniz hasta arama satiri + hasta bandi; tarih, bolum, hekim ve
+   * odeyen kurum bu sekmede - hepsi kayit kabulun doldurdugu bilgiler.
+   */
+  tarih: string;
+  setTarih(v: string): void;
+  tarihEnGec?: string;
+  tarihEnErken?: string;
+  tarihHatasi?: string;
+  /**
+   * Bolum ve basvuruyu KARSILAYAN PERSONEL - hekim olmak zorunda degil. Iki
+   * alan BIRBIRINI doldurur (kullanici): bolum secilince liste o bolumle
+   * sinirlanir, personel secilince bolum ONUN bolumune gecer; bolum bosken
+   * TUM randevu verilebilir personel listelenir.
+   */
+  bolumler?: { id: number; ad: string }[];
+  bolumId?: number | null;
+  setBolumId?(v: number | null): void;
+  gorevliler?: { id: number; ad: string; bolumId?: number | null }[];
+  personelId?: number | null;
+  setPersonelId?(v: number | null): void;
+  /** Anlasmali kurumlar - bos ise hasta kendi oder. */
+  kurumlar?: { id: number; ad: string }[];
+  odeyenKurumId?: number | null;
+  setOdeyenKurumId?(v: number | null): void;
 }) {
+  // Hekim listesi bolume gore SUZULUR; bolum bosken hepsi gelir.
+  const hekimler = (gorevliler ?? [])
+    .filter(g => !bolumId || (g.bolumId ?? null) === bolumId);
+
   return (
     <div className="kagrup">
       <h6>Başvuru Bilgileri</h6>
@@ -327,9 +361,63 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, protokolNo, randevuBi
           <span className="etiket">Protokol No</span>
           <input value={protokolNo || '(kaydedince atanacak)'} readOnly />
         </label>
+        <label className="alan">
+          <span className="etiket">Başvuru Tarihi</span>
+          <input type="datetime-local" value={tarih} disabled={kilitli}
+                 max={tarihEnGec} min={tarihEnErken}
+                 onChange={e => setTarih(e.target.value)} />
+          {tarihHatasi && <span className="alan-hata">{tarihHatasi}</span>}
+        </label>
         <KodSecim etiket="Başvuru Türü" listeKod="basvuru.tur" zorunlu
                   deger={bilgi.basvuruTuru} kilitli={kilitli}
                   onDeger={v => degistir({ basvuruTuru: v })} />
+        <label className="alan">
+          <span className="etiket">Ödeyen Kurum</span>
+          <select value={odeyenKurumId ?? ''} disabled={kilitli}
+                  onChange={e => setOdeyenKurumId?.(
+                    e.target.value ? Number(e.target.value) : null)}>
+            <option value="">— Hasta kendi öder —</option>
+            {(kurumlar ?? []).map(k => (
+              <option key={k.id} value={k.id}>{k.ad}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className="alan">
+          <span className="etiket">Başvurulan Bölüm</span>
+          <select value={bolumId ?? ''} disabled={kilitli}
+                  onChange={e => {
+                    const y = e.target.value ? Number(e.target.value) : null;
+                    setBolumId?.(y);
+                    // Secili personel YENI BOLUME AIT DEGILSE birakilir; ait
+                    //   ise korunur (personelden bolume dogru doldurmada secim
+                    //   kendini iptal etmesin).
+                    const g = (gorevliler ?? []).find(x => x.id === personelId);
+                    if (y && g && (g.bolumId ?? null) !== y) setPersonelId?.(null);
+                  }}>
+            <option value="">— Seçiniz —</option>
+            {(bolumler ?? []).map(b => (
+              <option key={b.id} value={b.id}>{b.ad}</option>
+            ))}
+          </select>
+        </label>
+        <label className="alan">
+          <span className="etiket">Hekim / Personel</span>
+          <select value={personelId ?? ''} disabled={kilitli}
+                  onChange={e => {
+                    const y = e.target.value ? Number(e.target.value) : null;
+                    setPersonelId?.(y);
+                    // PERSONELDEN BOLUME (kullanici): once doktor secilirse
+                    //   bolum onun bolumune gecer.
+                    const g = (gorevliler ?? []).find(x => x.id === y);
+                    if (g?.bolumId) setBolumId?.(g.bolumId);
+                  }}>
+            <option value="">— Seçiniz —</option>
+            {hekimler.map(g => (
+              <option key={g.id} value={g.id}>{g.ad}</option>
+            ))}
+          </select>
+        </label>
         <KodSecim etiket="Geliş Şekli" listeKod="basvuru.gelis_sekli"
                   deger={bilgi.gelisSekli} kilitli={kilitli}
                   onDeger={v => degistir({ gelisSekli: v })} />

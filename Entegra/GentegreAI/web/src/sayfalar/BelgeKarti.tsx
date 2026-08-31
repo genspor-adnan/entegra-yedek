@@ -1176,11 +1176,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           tarih={tarih} setTarih={setTarih}
           tarihEnGec={tarihEnGec} tarihEnErken={tarihEnErken}
           vadeGun={vadeGun} setVadeGun={setVadeGun}
-          basvuruMu={basvuruMu} kurumlar={kurumlar}
-          odeyenKurumId={odeyenKurumId}
-          setOdeyenKurumId={v => void odeyenKurumDegisti(v)}
-          bolumler={bolumler} bolumId={bolumId} setBolumId={setBolumId}
-          gorevliler={gorevliler} personelId={personelId} setPersonelId={setPersonelId}
+          basvuruMu={basvuruMu}
           teklifDurum={teklifDurum} setTeklifDurum={setTeklifDurum}
           revizeNo={revizeNo} setRevizeNo={setRevizeNo}
           teklifKonusu={teklifKonusu} setTeklifKonusu={setTeklifKonusu}
@@ -1299,6 +1295,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             degistir={y => setBasvuruBilgi(x => ({ ...x, ...y }))}
             kilitli={kilitli}
             protokolNo={String(sonuc?.belge.belgeNo ?? '')}
+            tarih={tarih} setTarih={setTarih}
+            tarihEnGec={tarihEnGec} tarihEnErken={tarihEnErken}
+            tarihHatasi={alanHatalari.belgeTarihi}
+            bolumler={bolumler} bolumId={bolumId} setBolumId={setBolumId}
+            gorevliler={gorevliler} personelId={personelId} setPersonelId={setPersonelId}
+            kurumlar={kurumlar} odeyenKurumId={odeyenKurumId}
+            setOdeyenKurumId={v => void odeyenKurumDegisti(v)}
             randevuBilgi={sonuc?.belge.randevuOzet
               ? String(sonuc.belge.randevuOzet) : undefined}
           />

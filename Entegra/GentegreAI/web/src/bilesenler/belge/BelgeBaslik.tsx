@@ -43,8 +43,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   const {
     aktifSekme, setAktifSekme, alanHatalari, bilgi, sonuc, kilitli, baslikKilitli, belgeAdi,
     belgeNo, setBelgeNo, tarih, setTarih, tarihEnGec, tarihEnErken, vadeGun, setVadeGun,
-    basvuruMu, kurumlar, odeyenKurumId, setOdeyenKurumId,
-    bolumler, bolumId, setBolumId, gorevliler, personelId, setPersonelId,
+    basvuruMu,
     cari, satici, depo, setDepo, girisDepo, setGirisDepo, teslimEden, teslimAlan, fisTipi,
     setFisTipi, satirlar, donusumler, setCariArama, setSaticiArama, setPersonelArama,
     kapanmaAlani, bagliSiparisAlani, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
@@ -96,6 +95,10 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
 
   return (
   <>
+{/* BASVURUDA BASLIK SERIDI YOK (300, kullanici): kimlik hasta arama satiri
+    ve hasta bandinda, tarih/bolum/hekim/odeyen kurum ise Basvuru sekmesinde.
+    Basligi bosuna cizmek kart tepesinde iki kez ayni bilgiyi gosteriyordu. */}
+{!basvuruMu && (
 <div className="belge-hdr-sar">
   <div className="alan-izgara dort-sutun belge-hdr">
     {/* --- 1) KIMLIK --- */}
@@ -131,7 +134,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       />
     ) : (
       <TarafAlani
-        etiket={basvuruMu ? 'Hasta' : alisMi ? 'Tedarikçi (Cari)' : 'Müşteri (Cari)'}
+        etiket={alisMi ? 'Tedarikçi (Cari)' : 'Müşteri (Cari)'}
         deger={cari?.unvan}
         kilitli={kilitli}
         zorunlu
@@ -147,9 +150,6 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         turlerde numarayi kayitta sunucu verir - alan salt-okunur.
         Teklifte hucre IKIYE BOLUNUR (220, kullanici): solda numara, sagda
         REVIZE NO - serbest kullanici editi, varsayilan bos. */}
-    {/* BASVURUDA numara hucresi YOK (kullanici): protokol no arac cubugunda
-        rozet olarak duruyor - baslikta ikinci kez yer kaplamasin. */}
-    {!basvuruMu && (
     <label className="alan">
       <span className={`etiket${disNumarali && !kilitli ? ' zorunlu-isaret' : ''}`}>
         {disNumarali ? 'Tedarikçi Fatura No'
@@ -178,12 +178,9 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       )}
       {alanHatalari.belgeNo && <span className="alan-hata">{alanHatalari.belgeNo}</span>}
     </label>
-    )}
 
-    {/* --- 3) TARIH ---
-        BASVURUDA hucre sirasi Hasta · Bölüm · Hekim · Tarih (kullanici): tarih
-        3. degil 4. sirada cizilir, asagida bolum/hekimden SONRA. */}
-    {!basvuruMu && tarihHucresi}
+    {/* --- 3) TARIH --- */}
+    {tarihHucresi}
 
     {/* --- 3b) TEKLIF DURUMU (218) - tarih sagina (kullanici). */}
     {teklifMi && (
@@ -228,28 +225,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         yok - talebi acan kisi 7. hucrede "Talep Eden" olarak sorulur.
         Satis temsilcisi PERSONEL'dir (cari degil) ve secim cari ile ayni
         TarafArama ekranindan yapilir - tek arama bicimi. */}
-    {basvuruMu ? (
-      /* BASVURUDA (296) satis temsilcisi YOK: hastanin geldigi BOLUM sorulur -
-         randevu verilebilen departmanlar. Hekim listesi buna baglidir. */
-      <label className="alan">
-        <span className="etiket">Başvurulan Bölüm</span>
-        <select value={bolumId ?? ''} disabled={kilitli}
-                onChange={e => {
-                  const y = e.target.value ? Number(e.target.value) : null;
-                  setBolumId?.(y);
-                  // Secili personel YENI BOLUME AIT DEGILSE birakilir; ait ise
-                  //   korunur (personelden bolume dogru doldurmada secim
-                  //   kendini iptal etmesin).
-                  const g = (gorevliler ?? []).find(x => x.id === personelId);
-                  if (y && g && (g.bolumId ?? null) !== y) setPersonelId?.(null);
-                }}>
-          <option value="">— Seçiniz —</option>
-          {(bolumler ?? []).map(b2 => (
-            <option key={b2.id} value={b2.id}>{b2.ad}</option>
-          ))}
-        </select>
-      </label>
-    ) : transferMi ? (
+    {transferMi ? (
       <TarafAlani
         etiket="Teslim Eden"
         zorunlu
@@ -273,33 +249,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         Depo belgesinde malin GITTIGI depo, stok fisinde fisin tek deposu,
         carili belgelerde mal cikis/giris deposu. Tahakkukta depo YOK: stok
         etkilemez (kasa_islem_turu.stok_etkiler=0). */}
-    {basvuruMu ? (
-      /* Depo yerine BASVURUYU KARSILAYAN kisi (297): hekim olabilir,
-         diyetisyen/teknisyen de olabilir. Ardindan TARIH gelir - Ödeyen Kurum
-         boylece alt satirin basina duser (kullanici). Depo dip bolumde. */
-      <>
-      <label className="alan">
-        <span className="etiket">Hekim / Personel</span>
-        <select value={personelId ?? ''} disabled={kilitli}
-                onChange={e => {
-                  const y = e.target.value ? Number(e.target.value) : null;
-                  setPersonelId?.(y);
-                  // PERSONELDEN BOLUME (kullanici): once doktor secilirse bolum
-                  //   onun bolumune gecer - kayit kabul iki alani ayri ayri
-                  //   doldurmak zorunda kalmasin.
-                  const g = (gorevliler ?? []).find(x => x.id === y);
-                  if (g?.bolumId) setBolumId?.(g.bolumId);
-                }}>
-          <option value="">— Seçiniz —</option>
-          {(gorevliler ?? []).map(g => (
-            <option key={g.id} value={g.id}>{g.ad}</option>
-          ))}
-        </select>
-      </label>
-      {/* 4. hucre TARIH: Hasta · Bölüm · Hekim · Tarih (kullanici). */}
-      {tarihHucresi}
-      </>
-    ) : stokFisiMi ? (
+    {stokFisiMi ? (
       <GenLookup
         kaynak="depo"
         etiket={fisCikisMi ? 'Çıkış Deposu' : 'Giriş Deposu'}
@@ -370,21 +320,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         BASVURUDA (249) vade YOK, yerine ODEYEN KURUM: hizmeti kim odeyecek
         (kullanici: "basvuruda vade yerine Ödeyen Kurum olsun ve taraf_kurum
         listelensin"). Bos birakilirsa hasta kendi oder. */}
-    {basvuruMu ? (
-      /* ODEYEN KURUM: bos ise hasta kendi oder. Ayri bir "ödeyen tipi"
-         combosu DENENDI ve KALDIRILDI (kullanici): kurumun turu zaten
-         kendisinde, iki secim ayni bilgiyi iki kez sordurtuyordu. */
-      <label className="alan">
-        <span className="etiket">Ödeyen Kurum</span>
-        <select value={odeyenKurumId ?? ''} disabled={kilitli}
-                onChange={e => setOdeyenKurumId?.(e.target.value ? Number(e.target.value) : null)}>
-          <option value="">— Hasta kendi öder —</option>
-          {(kurumlar ?? []).map(k => (
-            <option key={k.id} value={k.id}>{k.ad}</option>
-          ))}
-        </select>
-      </label>
-    ) : bilgi.vade && (
+    {bilgi.vade && (
       <label className="alan">
         <span className="etiket">{teklifMi ? 'Geçerlilik Süresi (gün)' : 'Vade (gün)'}</span>
         <input className="hiza-sag" value={vadeGun} disabled={kilitli}
@@ -400,12 +336,11 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         Kapanma burada YALNIZ e-Belgeli turlerde: e-Belgesizde 4. hucreyi zaten
         o dolduruyor (temsilci carinin altina insin diye).
         Teklifte "Bağlı Sipariş" cizilmez (kullanici) - teklif zincirin BASI. */}
-    {/* BASVURUDA "Kaynak Belge" YOK (kullanici): basvuru zincirin BASI, her
-        zaman bos duruyordu - hucre yer kapliyordu. */}
-    {!depoBelgesi && !stokFisiMi && !teklifMi && !basvuruMu && bagliSiparisAlani}
+    {!depoBelgesi && !stokFisiMi && !teklifMi && bagliSiparisAlani}
     {!eBelgeYok && kapanmaGoster && kapanmaAlani}
   </div>
 </div>
+)}
 
 {/* Sekmeler BASLIK ALANLARININ ALTINDA, grid'in hemen ustunde -
     mockup duzeni (toolbar > hdr > tabs > pane). Tasiyici ve Imza/Teslim
@@ -481,23 +416,12 @@ export interface BelgeBaslikProps {
   vadeGun: string;
   setVadeGun(v: string): void;
   /** Basvuru (249): vade yerine odeyen kurum combosu cizilir. */
-  basvuruMu?: boolean;
-  /** Anlasmali kurumlar (taraf.kurum = 1) - basvuruda odeyen adaylari. */
-  kurumlar?: { id: number; ad: string; tur?: number }[];
-  odeyenKurumId?: number | null;
-  setOdeyenKurumId?(v: number | null): void;
   /**
-   * BASVURU (296/297): bolum ve basvuruyu KARSILAYAN PERSONEL - hekim olmak
-   * zorunda degil. Iki alan BIRBIRINI doldurur (kullanici): bolum secilince
-   * liste o bolumle sinirlanir, personel secilince bolum ONUN bolumune gecer;
-   * bolum bosken TUM randevu verilebilir personel listelenir.
+   * Basvuru mu (246): baslik seridi HIC cizilmez - kimlik hasta bandinda,
+   * tarih/bolum/hekim/odeyen kurum Basvuru sekmesinde (300). Bayrak yalniz
+   * sekme suzgeci ve sekme adlari icin duruyor ("Kalemler" -> "Ücretlendirme").
    */
-  bolumler?: { id: number; ad: string }[];
-  bolumId?: number | null;
-  setBolumId?(v: number | null): void;
-  gorevliler?: { id: number; ad: string; bolumId?: number | null }[];
-  personelId?: number | null;
-  setPersonelId?(v: number | null): void;
+  basvuruMu?: boolean;
   cari: { id: number; unvan: string } | null;
   satici: Secim | null;
   depo: Secim | null;
