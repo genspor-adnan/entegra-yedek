@@ -589,6 +589,20 @@ export const api = {
   radyolojiRaporDurum: (raporId: number, hedef: 'on-rapor' | 'onay') =>
     gonder<{ tamam: boolean }>(`/api/radyoloji/rapor/${raporId}/durum?hedef=${hedef}`, {}),
 
+  /**
+   * RAPOR CIKTISI (303): hastaya verilen belge. Yazma ekraninin verisinden
+   * AYRI - burada sablon/makro degil KURUM ANTETI, kimlik satirlari, yalniz
+   * basilacak bolumler ve ek raporlar var.
+   */
+  radyolojiRaporCikti: (raporId: number) =>
+    istek<{
+      rapor: Record<string, unknown>;
+      bolumler: Record<string, unknown>[];
+      alanlar: Record<string, unknown>[];
+      ekler: Record<string, unknown>[];
+      kurum: Record<string, unknown> | null;
+    }>(`/api/radyoloji/rapor/${raporId}/cikti`),
+
   radyolojiAddendum: (raporId: number) =>
     gonder<{ raporId: number }>(`/api/radyoloji/rapor/${raporId}/addendum`, {}),
 

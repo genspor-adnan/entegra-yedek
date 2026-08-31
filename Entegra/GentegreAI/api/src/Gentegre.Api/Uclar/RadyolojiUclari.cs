@@ -160,6 +160,105 @@ public static class RadyolojiUclari
                                     skorlar, gecmis, kritikler });
         });
 
+        // ------------------------------------------------- rapor ÇIKTISI ----
+        // Hastaya verilen belge (mockup: radyoloji_rapor_onizleme.html). Yazma
+        //   ekranından AYRI uç: çıktının ihtiyacı şablon/makro/skor değil,
+        //   KURUM ANTETİ, kimlik satırları, basılacak bölümler ve imzadır.
+        //
+        // Yalnız `yazdir = 1` bölümler döner: şablonda ekrana konan ama
+        //   hastaya basılmayan bölümler (ör. teknisyen notu) çıktıya girmez.
+        grup.MapGet("/rapor/{id:int}/cikti", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var rapor = await baglanti.TekAsync("""
+                select r.id, r.rapor_no as "raporNo", r.durum, r.kilit,
+                       r.ust_rapor_id as "ustRaporId",
+                       coalesce(yz.unvan, '') as "yazan", r.yazma_tarihi as "yazmaTarihi",
+                       coalesce(on_.unvan, '') as "onaylayan", r.onay_tarihi as "onayTarihi",
+                       i.id as "istemId", i.accession_no as "accessionNo",
+                       i.modalite, i.cekim_tarihi as "cekimTarihi",
+                       i.on_tani as "onTani", i.klinik_bilgi as "klinikBilgi",
+                       i.kontrast, coalesce(cz.ad, '') as "cihazAdi",
+                       coalesce(hz.kod, '') as "tetkikKodu", coalesce(hz.ad, '') as "tetkikAdi",
+                       coalesce(h.unvan, '') as "hastaAdi", coalesce(h.kod, '') as "hastaNo",
+                       coalesce(h.vkno, '') as "hastaTc",
+                       hs.dogum_tarihi as "dogumTarihi", coalesce(hs.cinsiyet, 0) as cinsiyet,
+                       coalesce(ih.unvan, nullif(i.dis_hekim_ad, ''), '') as "isteyen",
+                       coalesce(ik.unvan, '') as "isteyenKurum",
+                       coalesce(b.belge_no, '') as "protokolNo",
+                       coalesce(ok.unvan, '') as "odeyenKurum"
+                  from public.radyoloji_rapor r
+                  join public.radyoloji_istem i on i.id = r.istem_id
+                  left join public.taraf yz on yz.id = r.yazan_id
+                  left join public.taraf on_ on on_.id = r.onaylayan_id
+                  left join public.taraf h on h.id = i.hasta_id
+                  left join public.taraf_hasta hs on hs.id = i.hasta_id
+                  left join public.hizmet hz on hz.id = i.hizmet_id
+                  left join public.taraf ih on ih.id = i.istek_hekim_id
+                  left join public.taraf ik on ik.id = i.istek_kurum_id
+                  left join public.radyoloji_cihaz cz on cz.id = i.cihaz_id
+                  left join public.belge b on b.id = i.belge_id
+                  left join public.belge_basvuru bb on bb.id = b.id
+                  left join public.taraf ok on ok.id = bb.odeyen_kurum_id
+                 where r.id = @p0
+                """, null, [id], Satir, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Rapor bulunamadı.");
+
+            var bolumler = await baglanti.ListeAsync("""
+                select sira, baslik, metin
+                  from public.radyoloji_rapor_bolum
+                 where rapor_id = @p0 and coalesce(yazdir, 1) = 1
+                   and coalesce(metin, '') <> ''
+                 order by sira
+                """, null, [id], Satir, iptal);
+
+            // Skor/ölçüm alanları rapora BASILACAK olanlarla sınırlı.
+            var alanlar = await baglanti.ListeAsync("""
+                select a.alan_ad as "alanAd", a.deger
+                  from public.radyoloji_rapor_alan a
+                  join public.radyoloji_rapor r on r.id = a.rapor_id
+                  left join public.radyoloji_sablon_alan sa
+                         on sa.sablon_id = r.sablon_id and sa.alan_kod = a.alan_kod
+                 where a.rapor_id = @p0
+                   and coalesce(sa.rapora_bas, 1) = 1
+                   and coalesce(a.deger, '') <> ''
+                 order by a.id
+                """, null, [id], Satir, iptal);
+
+            // EK RAPORLAR (addendum): orijinalin altında, tarihleriyle basılır -
+            //   düzeltme ayrı kayıttır, orijinal metin değişmez.
+            var ekler = await baglanti.ListeAsync("""
+                select r.id, r.rapor_no as "raporNo", r.onay_tarihi as "onayTarihi",
+                       coalesce(on_.unvan, '') as "onaylayan",
+                       coalesce((select string_agg(b.metin, E'\n' order by b.sira)
+                                   from public.radyoloji_rapor_bolum b
+                                  where b.rapor_id = r.id and coalesce(b.yazdir, 1) = 1), '') as metin
+                  from public.radyoloji_rapor r
+                  left join public.taraf on_ on on_.id = r.onaylayan_id
+                 where r.ust_rapor_id = @p0
+                 order by r.id
+                """, null, [id], Satir, iptal);
+
+            // ANTET: raporun ait olduğu şube (kurum kimliği hastaya verilen
+            //   belgede zorunlu). Şube yoksa varsayılan şube kullanılır.
+            var kurum = await baglanti.TekAsync("""
+                select coalesce(nullif(s.unvan, ''), s.ad) as unvan, s.adres, s.ilce, s.il,
+                       s.telefon, s.mersis_no as "mersisNo", s.vkno, s.vd
+                  from public.sube s
+                 where s.id = coalesce((select i.sube_id from public.radyoloji_istem i
+                                         join public.radyoloji_rapor r on r.istem_id = i.id
+                                        where r.id = @p0),
+                                       (select id from public.sube where varsayilan = 1 limit 1))
+                """, null, [id], Satir, iptal);
+
+            return Results.Ok(new { rapor, bolumler, alanlar, ekler, kurum });
+        });
+
         // ------------------------------------------------- taslak kaydet ----
         // Rapor yoksa açılır, varsa güncellenir. Bölümler TOPLU yazılır
         //   (sil+yaz): sıra ve başlık şablondan gelir, kısmi güncelleme
@@ -271,9 +370,15 @@ public static class RadyolojiUclari
 
             if (onayMi)
             {
+                // RESMI RAPOR NUMARASI onayda atanir (303): taslak asamasinda
+                //   vermek, vazgecilen raporlarda numara boslugu birakirdi.
+                //   Zaten numarali rapor (yeniden onay) numarasini KORUR.
                 await baglanti.CalistirAsync("""
                     update public.radyoloji_rapor
                        set durum = 3, kilit = 1, onaylayan_id = @p1, onay_tarihi = now()::timestamp,
+                           rapor_no = case when rapor_no = ''
+                                           then public.fn_radyoloji_rapor_no()
+                                           else rapor_no end,
                            degistiren = @p1, degistirme_tarihi = now()::timestamp
                      where id = @p0
                     """, islem, [id, baglam.KullaniciId], iptal);

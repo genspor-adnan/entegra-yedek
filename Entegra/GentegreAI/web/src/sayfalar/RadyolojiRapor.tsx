@@ -219,6 +219,15 @@ export function RadyolojiRapor() {
           <button className="d teh" disabled={kilitli}
                   onClick={() => setKritikModal(true)}>⚠ Kritik Bulgu Bildir</button>
           {kilitli && <button className="d" onClick={() => void addendum()}>＋ Ek Rapor</button>}
+          {/* CIKTI (303): rapor kaydedilmeden numarasi/bolumleri olmaz -
+              rapor yoksa dugme kapali. Onaysiz raporun ciktisinda "taslak"
+              uyarisi cikar, basilmasi engellenmez (hekim kontrol icin alir). */}
+          <button className="d" disabled={!rapor?.id}
+                  title={rapor?.id ? 'Hastaya verilecek rapor çıktısı'
+                                   : 'Önce raporu kaydedin.'}
+                  onClick={() => git(`/radyoloji/cikti/${Number(rapor?.id)}`)}>
+            🖨 Çıktı
+          </button>
           <button className="d" onClick={() => git('/radyoloji')}>Kapat</button>
         </div>
       </div>

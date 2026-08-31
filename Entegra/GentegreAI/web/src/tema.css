@@ -1311,3 +1311,78 @@ input.skt-gecmis {
                 padding: 6px 8px; color: #8a6218; line-height: 1.5; }
 .kucuk { font-size: 11px; }
 @media (max-width: 1200px) { .rad-govde { grid-template-columns: 1fr; } }
+
+/* ================================================ RADYOLOJI RAPOR CIKTISI ==
+   Hastaya verilen belge (303, mockup radyoloji_rapor_onizleme.html). Ekranda
+   A4 genisliginde bir "kagit" gosterilir; yazdirmada arac cubugu ve uygulama
+   cercevesi cikar, yalniz kagit kalir. */
+.rapor-cikti { padding: 10px }
+.cikti-arac {
+  display: flex; align-items: center; gap: 6px; padding: 6px 8px;
+  background: var(--head, var(--yuz2)); border: 1px solid var(--cizgi);
+  border-radius: 4px; margin-bottom: 12px;
+}
+.cikti-sayfa {
+  background: #fff; color: #1a2430; margin: 0 auto; padding: 26px 30px;
+  width: 794px; max-width: 100%; min-height: 1000px;
+  border: 1px solid var(--cizgi); box-shadow: 0 2px 10px rgba(20, 40, 70, .12);
+  font-size: 12px;
+}
+.cikti-sayfa .kbaslik {
+  display: flex; align-items: flex-start; gap: 14px;
+  border-bottom: 2px solid #1c4374; padding-bottom: 8px;
+}
+.cikti-sayfa .logo {
+  width: 52px; height: 52px; flex: 0 0 52px; border: 1px solid #d5dee8;
+  border-radius: 6px; display: grid; place-items: center; font-size: 26px;
+}
+.cikti-sayfa .kbaslik h1 { margin: 0; font-size: 16px; color: #1c4374 }
+.cikti-sayfa .kbaslik .alt { font-size: 11px; color: #6b7a8d; line-height: 1.5 }
+.cikti-sayfa .kbaslik .sag {
+  margin-left: auto; text-align: right; font-size: 11px; color: #6b7a8d; line-height: 1.6;
+}
+.cikti-sayfa .rapadi {
+  text-align: center; font-size: 14px; font-weight: 700; color: #1c4374;
+  margin: 14px 0 10px; letter-spacing: .2px;
+}
+.cikti-sayfa .kimlik {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2px 18px;
+  border: 1px solid #e4eaf1; border-radius: 3px; padding: 8px 10px; font-size: 11.5px;
+}
+.cikti-sayfa .kimlik div { display: flex; gap: 6px }
+.cikti-sayfa .kimlik .et { color: #6b7a8d; min-width: 96px }
+.cikti-sayfa .kimlik .dg { font-weight: 700 }
+.cikti-sayfa .bolum { margin-top: 14px }
+.cikti-sayfa .bolum h3 {
+  margin: 0 0 3px; font-size: 11.5px; color: #1c4374; text-transform: uppercase;
+  letter-spacing: .3px; border-bottom: 1px solid #e4eaf1; padding-bottom: 2px;
+}
+.cikti-sayfa .bolum p { margin: 0; line-height: 1.65; text-align: justify; white-space: pre-wrap }
+/* Ek rapor orijinalden ayirt edilsin - metin degismedi, EKLENDI. */
+.cikti-sayfa .ek-rapor { border-left: 3px solid #4d8fd6; padding-left: 10px }
+.cikti-alan { border-collapse: collapse; font-size: 11.5px; margin-top: 4px }
+.cikti-alan td { border-bottom: 1px solid #eef2f6; padding: 3px 10px 3px 0 }
+.cikti-sayfa .imza { margin-top: 26px; display: flex; justify-content: flex-end }
+.cikti-sayfa .imzak { width: 290px; text-align: center; font-size: 11.5px; line-height: 1.6 }
+.cikti-sayfa .imzak .cizgi { border-top: 1px solid #d5dee8; margin-bottom: 4px }
+.cikti-sayfa .imzak b { color: #1c4374 }
+.cikti-sayfa .eimza {
+  margin-top: 6px; border: 1px solid #bfe3cb; background: #f1faf4; border-radius: 3px;
+  padding: 3px 6px; font-size: 10.5px; color: #2e7d46;
+}
+.cikti-sayfa .dipnot {
+  margin-top: 18px; border-top: 1px solid #e4eaf1; padding-top: 6px;
+  font-size: 10.5px; color: #6b7a8d; line-height: 1.5;
+}
+
+@media print {
+  /* Yazdirmada uygulama kabugu (menu, ust serit, arac cubugu) YOK. */
+  body * { visibility: hidden }
+  .cikti-sayfa, .cikti-sayfa * { visibility: visible }
+  .cikti-sayfa {
+    position: absolute; left: 0; top: 0; width: 100%; margin: 0;
+    border: none; box-shadow: none; padding: 0;
+  }
+  .cikti-arac { display: none }
+  @page { size: A4; margin: 14mm }
+}

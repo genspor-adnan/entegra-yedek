@@ -15,6 +15,7 @@ import { MesajKatmani } from './bilesenler/MesajKatmani';
 import { GenelAyarlar } from './sayfalar/GenelAyarlar';
 import { UtsSorgu } from './sayfalar/UtsSorgu';
 import { RadyolojiRapor } from './sayfalar/RadyolojiRapor';
+import { RadyolojiRaporCikti } from './sayfalar/RadyolojiRaporCikti';
 import { SatisAyarlar, AlisAyarlar } from './sayfalar/BelgeAyarlar';
 import { Panel } from './sayfalar/Panel';
 
@@ -86,6 +87,9 @@ function Yollar() {
         {/* Radyoloji raporu: generic kart degil - bolumler sablondan uretilir,
             onay iki asamali ve onaydan sonra rapor kilitlenir (283/284). */}
         {yetki('radyoloji') && <Route path="/radyoloji/rapor/:istemId" element={<RadyolojiRapor />} />}
+        {/* Rapor CIKTISI (303): hastaya verilen belge - yazma ekranindan ayri
+            sayfa, yazdirma tarayicinin kendi diyalogu. */}
+        {yetki('radyoloji') && <Route path="/radyoloji/cikti/:id" element={<RadyolojiRaporCikti />} />}
 
         {/* Bilinmeyen yol: Ana Sayfa yetkisi varsa panele, yoksa kullanicinin
             girebildigi ILK ekrana (yetkisi hic yoksa oldugu yerde kalir). */}
