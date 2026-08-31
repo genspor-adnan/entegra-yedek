@@ -53,9 +53,15 @@ export const FATURA_TIPLERI: { deger: number; ad: string }[] = [
 
 /**
  * HASTA BASVURUSU belge tipi (301). Basvuru ile satis siparisi AYNI TURDUR
- * (tur 19) - ayirt eden tek sey buydu: basvuru `tipi = 30`, ERP siparisi
+ * (tur 19) - ayirt eden tek sey bu: basvuru `tipi = 30`, ERP siparisi
  * `tipi = 1`. Boylece rapor/SQL/dis entegrasyon belge_basvuru uzantisina
  * JOIN atmadan hangisi oldugunu bilir.
+ *
+ * NEDEN 2 DEGIL: "sipariste iade olmaz, 2 bosta" dogru bir gozlem ama
+ * `tipi = 2`yi TURE BAKMADAN iade sayan sorgular var (db/132, db/133:
+ * "bu satirdan iade edilen miktar" hesabi). Teklif -> siparis donusumunde
+ * basvuru bir teklif satirindan turedigi icin o teklif "iade edilmis"
+ * gorunurdu. 30 hicbir yerde kullanilmiyor.
  */
 export const BASVURU_TIPI = 30;
 

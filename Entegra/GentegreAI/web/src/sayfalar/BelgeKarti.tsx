@@ -268,7 +268,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   /** FATURA TIPI (130): faturanin cinsi - belge.tipi alaninda tutulur. */
   const [faturaTipi, setFaturaTipi] = useState(1);
   /** IADE mi - kalem secimi "onceki alinanlar"dan yapilir (132/133). */
-  const iadeMi = faturaTipi === 2;
+  // IADE yalniz iadesi OLAN turlerde anlamli (301): siparis/basvuru turunde
+  //   (19) iade yok - orada tipi baska bir sey anlatir. Sunucu ayni karari
+  //   BelgeTuru.CikisMi(tur, tipi) icinde veriyor.
+  const iadeMi = faturaTipi === 2 && tur !== 19;
   /** Rapor dovizi yerel disindaysa BELGE TARIHININ kuru cekilir; kullanici
    *  elle degistirebilir (kur pazarlikli olabiliyor). */
   const kurElleRef = useRef(false);

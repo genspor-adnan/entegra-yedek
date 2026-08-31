@@ -71,12 +71,27 @@ public static class BelgeTuru
     /// IADE YONU TERSTIR: satis faturasi stoktan duser ve cariyi borclandirir;
     /// satis IADESI (tipi = 2) ayni turde ama mal geri GIRER, cari ALACAKLANIR.
     /// Yon hesabinin tek yeri burasi - stok ve cari hareketi ayni karari kullanir.
+    ///
+    /// TIP HER ZAMAN TURE BAGLI OKUNUR (kullanici): `tipi` tek bir kod uzayi
+    /// degil - stok fisinde fisin sebebi, faturada fatura tipi, irsaliyede
+    /// normal/iade, basvuruda (301) "hasta basvurusu" isaretidir. Bu yuzden
+    /// iade yorumu yalniz IADESI OLAN turlerde uygulanir: siparis, teklif,
+    /// transfer ve talep iade edilemez. Tur 19 zaten cikis turu degil -
+    /// korumasiz birakilirsa tipi 2 onu "cikis" yapar, fatura donusumu ters
+    /// yonde hesaplanirdi.
     /// </summary>
     public static bool CikisMi(int tur, int tipi) =>
-        tipi == IadeTipi ? !CikisMi(tur) : CikisMi(tur);
+        tipi == IadeTipi && !IadesizTurler.Contains(tur) ? !CikisMi(tur) : CikisMi(tur);
 
     /// <summary>belge.tipi = 2 -> iade (130 kod listesinde de ayni numara).</summary>
     public const int IadeTipi = 2;
+
+    /// <summary>
+    /// Iadesi OLMAYAN turler: siparis (9, 19 = basvuru), teklif (18),
+    /// transfer (20), talep (105). Bunlarda mal hareketi yok ya da karsi
+    /// taraf yok; `tipi = 2` iade degil, ture ozel bir isarettir.
+    /// </summary>
+    private static readonly HashSet<int> IadesizTurler = new() { 9, 18, 19, 20, 105 };
 
     public static bool TransferMi(int tur) => tur == Transfer;
 
