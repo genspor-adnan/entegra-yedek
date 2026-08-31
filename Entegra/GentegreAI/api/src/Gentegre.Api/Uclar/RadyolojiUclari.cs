@@ -78,12 +78,16 @@ public static class RadyolojiUclari
                  order by modalite, ad
                 """, null, [], Satir, iptal);
 
+            // Bolum ve "randevu verilebilir" bayragi TARAF tablosunda
+            //   (taraf.departman departman tablosuna isaret eder, 251) -
+            //   taraf_personel yalniz ozluk bilgisini tasir.
             var hekimler = await baglanti.ListeAsync("""
                 select t.id, t.unvan as ad, coalesce(d.ad, '') as "bolumAdi"
                   from public.taraf t
-                  join public.taraf_personel p on p.id = t.id
-                  left join public.departman d on d.id = p.departman_id
-                 where coalesce(p.randevu_verilebilir, 0) = 1 and coalesce(t.durum, 1) = 1
+                  left join public.departman d on d.id = t.departman
+                 where coalesce(t.personel, 0) = 1
+                   and coalesce(t.randevu_verilebilir, 0) = 1
+                   and coalesce(t.durum, 1) = 1
                  order by t.unvan
                 """, null, [], Satir, iptal);
 
@@ -184,10 +188,24 @@ public static class RadyolojiUclari
                 for (var i = 0; i < istek.Tetkikler.Count; i++)
                 {
                     var t = istek.Tetkikler[i];
+                    // FIYAT: once belgenin KENDI listesinden (basvuruya sozlesme
+                    //   listesi islenmis olabilir), yoksa carinin kuralindan.
+                    //   fn_belge_kalem_fiyati TABLO donduruyor - FROM'da
+                    //   cagrilmali, COALESCE icinde kullanilamaz.
                     var fiyat = await baglanti.TekDegerAsync<decimal>("""
-                        select coalesce((public.fn_belge_kalem_fiyati(
-                                   @p0, 2::smallint, null, @p1, current_date)).fiyat, 0)
-                        """, null, [istek.HastaId, t.HizmetId], iptal);
+                        select coalesce(
+                            (select fs.fiyat
+                               from public.fiyat_listesi_satir fs
+                               join public.belge b on b.id = @p2
+                              where fs.liste_id = b.fiyat_listesi_id
+                                and fs.hizmet_id = @p1
+                              limit 1),
+                            (select f.fiyat
+                               from public.fn_belge_kalem_fiyati(
+                                        @p0, 2::smallint, null, @p1, current_date) f
+                              limit 1),
+                            0)
+                        """, null, [istek.HastaId, t.HizmetId, belgeId], iptal);
                     var kdv = await baglanti.TekDegerAsync<int>(
                         "select coalesce(kdv, 0) from public.hizmet where id = @p0",
                         null, [t.HizmetId], iptal);
@@ -822,7 +840,10 @@ public static class RadyolojiUclari
             select s.id, s.tur, s.stok_id as "stokId", s.hizmet_id as "hizmetId",
                    s.masraf_id as "masrafId", s.aciklama, s.miktar, s.birim,
                    s.birim_fiyat as "birimFiyat", s.iskonto, s.kdv,
-                   s.doviz_cinsi as "dovizCinsi", s.depo_id as "depoId",
+                   s.doviz_cinsi as "dovizCinsi",
+                   -- Satirda TEK depo kolonu yok: yon'e gore giris/cikis
+                   --   kolonlari kullaniliyor (belge_satir semasi).
+                   s.giris_depo_id as "girisDepoId", s.cikis_depo_id as "cikisDepoId",
                    s.kaynak_tur as "kaynakTur", s.kaynak_id as "kaynakId",
                    s.pay, s.kurum_tutar as "kurumTutar", s.hasta_tutar as "hastaTutar",
                    s.sira
