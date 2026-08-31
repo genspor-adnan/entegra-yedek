@@ -561,12 +561,18 @@ public static class BelgeUclari
         "teslimAlanId" or "fiyatListesiId" or "teklifDurum" or "odeyenKurumId" or
         // Basvuru sekmesi (298) - kod/sayi alanlari.
         "kampanyaId" or "bolumId" or "personelId" or "basvuruTuru" or "gelisSekli"
-        or "gelisNedeni" or "oda" or "provizyonTipi" or "mustehaklik" or "sevkli"
+        or "gelisNedeni" or "oda"
+        // Provizyon (299) - kod/sayi alanlari (SGK ve ozel sigorta ayri).
+        or "sgkDurum" or "sgkProvizyonTipi" or "sgkTakipTuru" or "sgkMustehaklik"
+        or "sgkSevkli" or "ossDurum" or "ossKurumId"
             => "sayi",
 
-        "dovizKuru" => "para",
+        // Provizyon oran/tutarlari (299) - iki odeyici icin ayri.
+        "dovizKuru" or "sgkKarsilama" or "sgkTutar"
+        or "ossKarsilama" or "ossTutar" => "para",
 
-        "belgeTarihi" or "irsaliyeTarihi" => "tarih",
+        "belgeTarihi" or "irsaliyeTarihi"
+        or "sgkGecerlilik" or "ossGecerlilik" => "tarih",
 
         "tarafUnvan" or "tarafVkno" or "tarafVd" or "tarafAdres" or "tarafIlce" or "tarafIl" or
         "belgeSeri" or "belgeNo" or "irsaliyeNo" or "kdvDurum" or "belgeDovizi" or
@@ -576,7 +582,12 @@ public static class BelgeUclari
         "gondericiUnvan" or "gondericiVkno" or "gondericiAlias" or
         // Basvuru sekmesi (298) - metin alanlari.
         "aracPlaka" or "soforAd" or "soforTckn"
-        or "siraNo" or "refakatci" or "provizyonNo" or "sevkKurum" => "metin",
+        or "siraNo" or "refakatci"
+        // Provizyon (299) - metin alanlari.
+        or "sgkProvizyonNo" or "sgkRedNedeni" or "sgkSigortaTuru" or "sgkTakipNo"
+        or "sgkTesisKodu" or "sgkSevkKurum"
+        or "ossOnayNo" or "ossRedNedeni" or "ossPoliceNo" or "ossHasarNo" or "ossBrans"
+        or "provizyonAciklama" => "metin",
 
         _ => null
     };

@@ -28,12 +28,38 @@ export interface BasvuruBilgi {
   oda?: number | null;
   siraNo?: string;
   refakatci?: string;
-  provizyonNo?: string;
-  provizyonTipi?: number | null;
-  mustehaklik?: number | null;
-  mustehaklikZaman?: string | null;
-  sevkli?: number | null;
-  sevkKurum?: string;
+  // PROVIZYON (299) - belge_provizyon 1:1. SGK ve ozel sigorta AYNI ANDA
+  // olabilir (SGK ana odeyici, tamamlayici police farki ustlenir), o yuzden
+  // her odeyicinin kendi durumu/numarasi/orani var.
+  sgkDurum?: number | null;
+  sgkProvizyonNo?: string;
+  sgkProvizyonTipi?: number | null;
+  sgkAlinmaZaman?: string | null;       // salt okunur (servis yazar)
+  sgkGecerlilik?: string | null;
+  sgkKarsilama?: number | string | null;
+  sgkTutar?: number | string | null;
+  sgkRedNedeni?: string;
+  sgkSigortaTuru?: string;
+  sgkTakipNo?: string;
+  sgkTakipTuru?: number | null;
+  sgkTesisKodu?: string;
+  sgkMustehaklik?: number | null;
+  sgkMustehaklikZaman?: string | null;  // salt okunur
+  sgkSevkli?: number | null;
+  sgkSevkKurum?: string;
+  ossKurumId?: number | null;
+  ossKurumAdi?: string;                 // salt okunur (join)
+  ossDurum?: number | null;
+  ossOnayNo?: string;
+  ossAlinmaZaman?: string | null;       // salt okunur
+  ossGecerlilik?: string | null;
+  ossKarsilama?: number | string | null;
+  ossTutar?: number | string | null;
+  ossRedNedeni?: string;
+  ossPoliceNo?: string;
+  ossHasarNo?: string;
+  ossBrans?: string;
+  provizyonAciklama?: string;
 }
 
 /** Kod listesi combosu - deger kod_deger.deger, gosterim ad. */
@@ -201,56 +227,153 @@ const MUSTEHAKLIK: Record<number, { ad: string; sinif: string }> = {
   2: { ad: 'Müstehak değil', sinif: 'teh' },
 };
 
-export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi }: {
+export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar }: {
   bilgi: BasvuruBilgi;
   degistir(y: Partial<BasvuruBilgi>): void;
   kilitli: boolean;
+  /** Belgenin odeyen kurumu - SGK bloÄunda bilgi olarak gosterilir. */
   kurumAdi?: string;
+  /** Anlasmali kurumlar: ozel sigorta sirketi buradan secilir (tur 2). */
+  kurumlar?: { id: number; ad: string; tur?: number }[];
 }) {
-  const m = MUSTEHAKLIK[Number(bilgi.mustehaklik ?? 0)] ?? MUSTEHAKLIK[0];
+  const m = MUSTEHAKLIK[Number(bilgi.sgkMustehaklik ?? 0)] ?? MUSTEHAKLIK[0];
+
   return (
     <>
+      {/* IKI PROVIZYON AYNI ANDA (kullanici): hasta hem SGK'li olabilir hem
+          tamamlayici policesi bulunabilir - SGK karsilamadigi farki ozel
+          sigorta ustlenir. Bu yuzden gruplar kurum turune gore GIZLENMEZ,
+          ikisi de acik durur; doldurulmayan grup bos kalir. */}
       <div className="kagrup">
-        <h6>Provizyon / Takip</h6>
+        <h6>SGK / MEDULA Provizyonu</h6>
         <div className="alan-izgara dort-sutun">
           <label className="alan">
             <span className="etiket">Kurum</span>
-            <input value={kurumAdi || '— Hasta kendi öder —'} readOnly />
+            <input value={kurumAdi || "—"} readOnly />
           </label>
-          <MetinAlani etiket="Takip / Provizyon No" deger={bilgi.provizyonNo}
+          <KodSecim etiket="Durum" listeKod="provizyon.durum"
+                    deger={bilgi.sgkDurum} kilitli={kilitli}
+                    onDeger={v => degistir({ sgkDurum: v })} />
+          <MetinAlani etiket="Provizyon No" deger={bilgi.sgkProvizyonNo}
                       kilitli={kilitli} ipucu="örn. P2026-0083471"
-                      onDeger={v => degistir({ provizyonNo: v })} />
+                      onDeger={v => degistir({ sgkProvizyonNo: v })} />
           <KodSecim etiket="Provizyon Tipi" listeKod="basvuru.provizyon_tipi"
-                    deger={bilgi.provizyonTipi} kilitli={kilitli}
-                    onDeger={v => degistir({ provizyonTipi: v })} />
+                    deger={bilgi.sgkProvizyonTipi} kilitli={kilitli}
+                    onDeger={v => degistir({ sgkProvizyonTipi: v })} />
+
+          <MetinAlani etiket="Sigorta Türü" deger={bilgi.sgkSigortaTuru}
+                      kilitli={kilitli} ipucu="4/a · 4/b · 4/c"
+                      onDeger={v => degistir({ sgkSigortaTuru: v })} />
+          <MetinAlani etiket="Takip No" deger={bilgi.sgkTakipNo} kilitli={kilitli}
+                      onDeger={v => degistir({ sgkTakipNo: v })} />
+          <KodSecim etiket="Takip Türü" listeKod="provizyon.takip_turu"
+                    deger={bilgi.sgkTakipTuru} kilitli={kilitli}
+                    onDeger={v => degistir({ sgkTakipTuru: v })} />
+          <MetinAlani etiket="Tesis Kodu" deger={bilgi.sgkTesisKodu} kilitli={kilitli}
+                      onDeger={v => degistir({ sgkTesisKodu: v })} />
+
+          <label className="alan">
+            <span className="etiket">Geçerlilik</span>
+            <input type="datetime-local"
+                   value={String(bilgi.sgkGecerlilik ?? "").slice(0, 16)}
+                   disabled={kilitli}
+                   onChange={e => degistir({ sgkGecerlilik: e.target.value || null })} />
+          </label>
+          <label className="alan">
+            <span className="etiket">Karşılama %</span>
+            <input className="hiza-sag" value={String(bilgi.sgkKarsilama ?? "")}
+                   disabled={kilitli}
+                   onChange={e => degistir({ sgkKarsilama: e.target.value })} />
+          </label>
+          <label className="alan">
+            <span className="etiket">Onaylanan Tutar</span>
+            <input className="hiza-sag" value={String(bilgi.sgkTutar ?? "")}
+                   disabled={kilitli}
+                   onChange={e => degistir({ sgkTutar: e.target.value })} />
+          </label>
           <label className="alan">
             <span className="etiket">Müstehaklık</span>
             <span className="deger-serit">
               <span className={`rozet ${m.sinif}`}>{m.ad}</span>
-              {bilgi.mustehaklikZaman && (
-                <span className="sonuk">{tarihSaat(bilgi.mustehaklikZaman)}</span>
+              {bilgi.sgkMustehaklikZaman && (
+                <span className="sonuk">{tarihSaat(bilgi.sgkMustehaklikZaman)}</span>
               )}
             </span>
           </label>
 
           <label className="alan">
             <span className="etiket">Sevkli mi?</span>
-            <select value={Number(bilgi.sevkli ?? 0)} disabled={kilitli}
-                    onChange={e => degistir({ sevkli: Number(e.target.value) })}>
+            <select value={Number(bilgi.sgkSevkli ?? 0)} disabled={kilitli}
+                    onChange={e => degistir({ sgkSevkli: Number(e.target.value) })}>
               <option value={0}>Hayır</option>
               <option value={1}>Evet</option>
             </select>
           </label>
-          <MetinAlani etiket="Sevk Eden Kurum" deger={bilgi.sevkKurum}
-                      kilitli={kilitli || Number(bilgi.sevkli ?? 0) === 0}
-                      onDeger={v => degistir({ sevkKurum: v })} />
+          <MetinAlani etiket="Sevk Eden Kurum" deger={bilgi.sgkSevkKurum}
+                      kilitli={kilitli || Number(bilgi.sgkSevkli ?? 0) === 0}
+                      onDeger={v => degistir({ sgkSevkKurum: v })} />
+          {/* Red nedeni yalniz REDDEDILDI durumunda anlamli. */}
+          <MetinAlani etiket="Red Nedeni" deger={bilgi.sgkRedNedeni}
+                      kilitli={kilitli || Number(bilgi.sgkDurum ?? 0) !== 2}
+                      onDeger={v => degistir({ sgkRedNedeni: v })} />
         </div>
-        {/* Kural mockup'tan (kayit_kabul_basvuru.html): provizyon alinmadan
-            protokol acilabilir, FATURA kesilemez. */}
         <div className="not">
           Provizyon alınmadan başvuru açılabilir; kurum payı ancak provizyon
           numarası girildikten sonra faturalanmalıdır. Müstehaklık sorgusu
           (MEDULA) henüz bağlı değil — alanlar elle doldurulur.
+        </div>
+      </div>
+
+      <div className="kagrup">
+        <h6>Özel / Tamamlayıcı Sigorta Provizyonu</h6>
+        <div className="alan-izgara dort-sutun">
+          {/* Sirket belgenin odeyen kurumundan FARKLI olabilir. */}
+          <label className="alan">
+            <span className="etiket">Sigorta Şirketi</span>
+            <select value={bilgi.ossKurumId ?? ""} disabled={kilitli}
+                    onChange={e => degistir({
+                      ossKurumId: e.target.value ? Number(e.target.value) : null })}>
+              <option value="">— Yok —</option>
+              {(kurumlar ?? []).filter(k => (k.tur ?? 0) === 2)
+                .map(k => <option key={k.id} value={k.id}>{k.ad}</option>)}
+            </select>
+          </label>
+          <KodSecim etiket="Durum" listeKod="provizyon.durum"
+                    deger={bilgi.ossDurum} kilitli={kilitli}
+                    onDeger={v => degistir({ ossDurum: v })} />
+          <MetinAlani etiket="Onay No" deger={bilgi.ossOnayNo} kilitli={kilitli}
+                      onDeger={v => degistir({ ossOnayNo: v })} />
+          <MetinAlani etiket="Poliçe No" deger={bilgi.ossPoliceNo} kilitli={kilitli}
+                      onDeger={v => degistir({ ossPoliceNo: v })} />
+
+          <MetinAlani etiket="Hasar / Dosya No" deger={bilgi.ossHasarNo} kilitli={kilitli}
+                      onDeger={v => degistir({ ossHasarNo: v })} />
+          <MetinAlani etiket="Branş" deger={bilgi.ossBrans} kilitli={kilitli}
+                      ipucu="örn. Yatarak Tedavi"
+                      onDeger={v => degistir({ ossBrans: v })} />
+          <label className="alan">
+            <span className="etiket">Geçerlilik</span>
+            <input type="datetime-local"
+                   value={String(bilgi.ossGecerlilik ?? "").slice(0, 16)}
+                   disabled={kilitli}
+                   onChange={e => degistir({ ossGecerlilik: e.target.value || null })} />
+          </label>
+          <label className="alan">
+            <span className="etiket">Karşılama %</span>
+            <input className="hiza-sag" value={String(bilgi.ossKarsilama ?? "")}
+                   disabled={kilitli}
+                   onChange={e => degistir({ ossKarsilama: e.target.value })} />
+          </label>
+
+          <label className="alan">
+            <span className="etiket">Onaylanan Tutar</span>
+            <input className="hiza-sag" value={String(bilgi.ossTutar ?? "")}
+                   disabled={kilitli}
+                   onChange={e => degistir({ ossTutar: e.target.value })} />
+          </label>
+          <MetinAlani etiket="Red Nedeni" deger={bilgi.ossRedNedeni}
+                      kilitli={kilitli || Number(bilgi.ossDurum ?? 0) !== 2}
+                      onDeger={v => degistir({ ossRedNedeni: v })} />
         </div>
       </div>
     </>

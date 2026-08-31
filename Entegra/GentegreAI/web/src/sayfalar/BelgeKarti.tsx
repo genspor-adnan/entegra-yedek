@@ -536,13 +536,41 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           oda: y.belge.oda != null ? Number(y.belge.oda) : null,
           siraNo: String(y.belge.siraNo ?? ''),
           refakatci: String(y.belge.refakatci ?? ''),
-          provizyonNo: String(y.belge.provizyonNo ?? ''),
-          provizyonTipi: y.belge.provizyonTipi != null ? Number(y.belge.provizyonTipi) : null,
-          mustehaklik: y.belge.mustehaklik != null ? Number(y.belge.mustehaklik) : 0,
-          mustehaklikZaman: y.belge.mustehaklikZaman
-            ? String(y.belge.mustehaklikZaman) : null,
-          sevkli: y.belge.sevkli != null ? Number(y.belge.sevkli) : 0,
-          sevkKurum: String(y.belge.sevkKurum ?? ''),
+          // PROVIZYON (299) - belge_provizyon 1:1; SGK ve ozel sigorta ayri.
+          sgkDurum: y.belge.sgkDurum != null ? Number(y.belge.sgkDurum) : 0,
+          sgkProvizyonNo: String(y.belge.sgkProvizyonNo ?? ''),
+          sgkProvizyonTipi: y.belge.sgkProvizyonTipi != null
+            ? Number(y.belge.sgkProvizyonTipi) : null,
+          sgkAlinmaZaman: y.belge.sgkAlinmaZaman ? String(y.belge.sgkAlinmaZaman) : null,
+          sgkGecerlilik: y.belge.sgkGecerlilik
+            ? String(y.belge.sgkGecerlilik).slice(0, 16) : null,
+          sgkKarsilama: y.belge.sgkKarsilama != null ? String(y.belge.sgkKarsilama) : '',
+          sgkTutar: y.belge.sgkTutar != null ? String(y.belge.sgkTutar) : '',
+          sgkRedNedeni: String(y.belge.sgkRedNedeni ?? ''),
+          sgkSigortaTuru: String(y.belge.sgkSigortaTuru ?? ''),
+          sgkTakipNo: String(y.belge.sgkTakipNo ?? ''),
+          sgkTakipTuru: y.belge.sgkTakipTuru != null ? Number(y.belge.sgkTakipTuru) : null,
+          sgkTesisKodu: String(y.belge.sgkTesisKodu ?? ''),
+          sgkMustehaklik: y.belge.sgkMustehaklik != null
+            ? Number(y.belge.sgkMustehaklik) : 0,
+          sgkMustehaklikZaman: y.belge.sgkMustehaklikZaman
+            ? String(y.belge.sgkMustehaklikZaman) : null,
+          sgkSevkli: y.belge.sgkSevkli != null ? Number(y.belge.sgkSevkli) : 0,
+          sgkSevkKurum: String(y.belge.sgkSevkKurum ?? ''),
+          ossKurumId: y.belge.ossKurumId != null ? Number(y.belge.ossKurumId) : null,
+          ossKurumAdi: String(y.belge.ossKurumAdi ?? ''),
+          ossDurum: y.belge.ossDurum != null ? Number(y.belge.ossDurum) : 0,
+          ossOnayNo: String(y.belge.ossOnayNo ?? ''),
+          ossAlinmaZaman: y.belge.ossAlinmaZaman ? String(y.belge.ossAlinmaZaman) : null,
+          ossGecerlilik: y.belge.ossGecerlilik
+            ? String(y.belge.ossGecerlilik).slice(0, 16) : null,
+          ossKarsilama: y.belge.ossKarsilama != null ? String(y.belge.ossKarsilama) : '',
+          ossTutar: y.belge.ossTutar != null ? String(y.belge.ossTutar) : '',
+          ossRedNedeni: String(y.belge.ossRedNedeni ?? ''),
+          ossPoliceNo: String(y.belge.ossPoliceNo ?? ''),
+          ossHasarNo: String(y.belge.ossHasarNo ?? ''),
+          ossBrans: String(y.belge.ossBrans ?? ''),
+          provizyonAciklama: String(y.belge.provizyonAciklama ?? ''),
         });
         setKampanyaId(y.belge.kampanyaId != null ? Number(y.belge.kampanyaId) : null);
         setKampanyaAdi(String(y.belge.kampanyaAdi ?? ''));
@@ -1236,6 +1264,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             degistir={y => setBasvuruBilgi(x => ({ ...x, ...y }))}
             kilitli={kilitli}
             kurumAdi={kurumlar.find(k => k.id === odeyenKurumId)?.ad}
+            kurumlar={kurumlar}
           />
         )}
 

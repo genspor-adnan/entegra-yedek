@@ -471,9 +471,16 @@ public sealed partial class BelgeDeposu
 
         // SEVKIYAT ayri tabloda (177): plaka/sofor/tasiyici/teslim bilgileri.
         //   Satir yalniz bilgi girilmisse acilir; bosaltilmissa silinir.
-        await SevkiyatYazAsync(baglanti, islem, belgeId, belge, baglam, iptal);
-        // BASVURU uzantisi (296): bolum/hekim - yalniz basvuruda dolar.
-        await BasvuruYazAsync(baglanti, islem, belgeId, belge, baglam, iptal);
+        // 1:1 UZANTILAR (tek yazici, BelgeDeposu.Yazma.UzantiYazAsync): satir
+        //   yalniz dolu bilgi varsa acilir, bosaltilinca silinir.
+        await UzantiYazAsync(baglanti, islem, "public.belge_sevkiyat", SevkiyatKolonlari,
+                             belgeId, belge, baglam, iptal);
+        // Basvuru (296/298): bolum, personel, odeyen kurum, kabul alanlari.
+        await UzantiYazAsync(baglanti, islem, "public.belge_basvuru", BasvuruKolonlari,
+                             belgeId, belge, baglam, iptal);
+        // Provizyon (299): SGK/MEDULA ve ozel sigorta alanlari.
+        await UzantiYazAsync(baglanti, islem, "public.belge_provizyon", ProvizyonKolonlari,
+                             belgeId, belge, baglam, iptal);
 
         // ------------------------------------------------------ 4) satirlar INSERT ----
         // Tur etkisi satirlardan ONCE okunur: stogu etkilemeyen bir belgede

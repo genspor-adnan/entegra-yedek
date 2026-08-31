@@ -74,19 +74,23 @@ public sealed partial class BelgeDeposu
         // Basvuru sekmesi (298): kayit kabulun doldurdugu alanlar.
         ["basvuruTuru"] = "basvuru_turu", ["gelisSekli"] = "gelis_sekli",
         ["gelisNedeni"] = "gelis_nedeni", ["oda"] = "oda", ["siraNo"] = "sira_no",
-        ["refakatci"] = "refakatci",
-        ["provizyonNo"] = "provizyon_no", ["provizyonTipi"] = "provizyon_tipi",
-        ["mustehaklik"] = "mustehaklik", ["sevkli"] = "sevkli",
-        ["sevkKurum"] = "sevk_kurum"
+        ["refakatci"] = "refakatci"
     };
 
     /// <summary>
-    /// Sevkiyat satirini yazar (upsert). SATIR YALNIZ DOLU BILGI VARSA acilir:
-    /// bos satir "sevkiyat girilmis" izlenimi verir ve irsaliye olmayan her
-    /// belge icin gereksiz kayit olusurdu. Duzenlemede bilgi tamamen
-    /// silinmisse satir da silinir.
+    /// 1:1 UZANTI SATIRI yazar (upsert). Belge basliginin yanindaki uzantilar
+    /// - sevkiyat (177), basvuru (296), provizyon (299) - ayni kurali paylasir:
+    ///
+    ///   * Istekte o gruba ait HIC alan yoksa dokunulmaz (kismi guncelleme).
+    ///   * Butun alanlar bosaltilmissa satir SILINIR - bos uzanti "bilgi
+    ///     girilmis" izlenimi verir ve her belge icin gereksiz kayit yaratirdi.
+    ///   * Aksi halde insert ... on conflict (id) do update.
+    ///
+    /// Uc ayri kopya yerine tek yer: yeni bir uzanti eklemek artik sozluk +
+    /// tablo adi vermekten ibaret.
     /// </summary>
-    private async Task SevkiyatYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+    private async Task UzantiYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        string tablo, IReadOnlyDictionary<string, string> alanlar,
         int belgeId, IDictionary<string, object?> belge, YazmaBaglami baglam,
         CancellationToken iptal)
     {
@@ -94,7 +98,7 @@ public sealed partial class BelgeDeposu
         var degerler = new List<object?>();
         var doluVar = false;
 
-        foreach (var (ad, kolon) in SevkiyatKolonlari)
+        foreach (var (ad, kolon) in alanlar)
         {
             if (!belge.TryGetValue(ad, out var deger)) continue;
             kolonlar.Add(kolon);
@@ -107,14 +111,12 @@ public sealed partial class BelgeDeposu
             };
         }
 
-        if (kolonlar.Count == 0) return;               // istekte sevkiyat alani yok
+        if (kolonlar.Count == 0) return;               // istekte bu gruba ait alan yok
 
         if (!doluVar)
         {
-            // Tum alanlar bosaltilmis: kaydi birak.
             await using var sil = baglanti.Komut(
-                "delete from public.belge_sevkiyat where id = @p0", islem,
-                belgeId);
+                $"delete from {tablo} where id = @p0", islem, belgeId);
             await sil.ExecuteNonQueryAsync(iptal);
             return;
         }
@@ -128,74 +130,41 @@ public sealed partial class BelgeDeposu
         parametreler.Add(baglam.KullaniciId);
         var kullanici = "@p" + (parametreler.Count - 1).ToString(CultureInfo.InvariantCulture);
 
-        var sql = $"""
-            insert into public.belge_sevkiyat (id, {string.Join(", ", kolonlar)}, ekleyen)
-            values (@p0, {string.Join(", ", yerTutucular)}, {kullanici})
-            on conflict (id) do update
-               set {string.Join(", ", guncelle)},
-                   degistiren = {kullanici},
-                   degistirme_tarihi = now()::timestamp
-            """;
-
-        await using var komut = Komut(baglanti, islem, sql, parametreler);
-        await komut.ExecuteNonQueryAsync(iptal);
-    }
-
-    /// <summary>
-    /// BASVURU UZANTISINI yazar (belge_basvuru, 296). Sevkiyat satiriyla ayni
-    /// kural: satir YALNIZ dolu bilgi varsa acilir, alanlar bosaltilinca satir
-    /// silinir - bos uzanti "bolum girilmis" izlenimi verirdi.
-    /// </summary>
-    private async Task BasvuruYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
-        int belgeId, IDictionary<string, object?> belge, YazmaBaglami baglam,
-        CancellationToken iptal)
-    {
-        var kolonlar = new List<string>();
-        var degerler = new List<object?>();
-        var doluVar = false;
-
-        foreach (var (ad, kolon) in BasvuruKolonlari)
-        {
-            if (!belge.TryGetValue(ad, out var deger)) continue;
-            kolonlar.Add(kolon);
-            degerler.Add(deger);
-            doluVar |= deger switch
-            {
-                null => false,
-                string m => m.Trim().Length > 0,
-                _ => Convert.ToDecimal(deger, CultureInfo.InvariantCulture) != 0,
-            };
-        }
-
-        if (kolonlar.Count == 0) return;               // istekte basvuru alani yok
-
-        if (!doluVar)
-        {
-            await using var sil = baglanti.Komut(
-                "delete from public.belge_basvuru where id = @p0", islem, belgeId);
-            await sil.ExecuteNonQueryAsync(iptal);
-            return;
-        }
-
-        var parametreler = new List<object?> { belgeId };
-        parametreler.AddRange(degerler);
-        var yerTutucular = Enumerable.Range(1, kolonlar.Count)
-            .Select(i => "@p" + i.ToString(CultureInfo.InvariantCulture)).ToList();
-        var guncelle = kolonlar.Select((k, i) => $"{k} = {yerTutucular[i]}").ToList();
-
-        parametreler.Add(baglam.KullaniciId);
-        var kullanici = "@p" + (parametreler.Count - 1).ToString(CultureInfo.InvariantCulture);
-
-        var sql = $"insert into public.belge_basvuru (id, {string.Join(", ", kolonlar)}, ekleyen)\n"
-                + $"values (@p0, {string.Join(", ", yerTutucular)}, {kullanici})\n"
-                + "on conflict (id) do update\n"
-                + $"   set {string.Join(", ", guncelle)},\n"
-                + $"       degistiren = {kullanici},\n"
+        var sql = $"insert into {tablo} (id, {string.Join(", ", kolonlar)}, ekleyen) "
+                + $"values (@p0, {string.Join(", ", yerTutucular)}, {kullanici}) "
+                + "on conflict (id) do update "
+                + $"   set {string.Join(", ", guncelle)}, "
+                + $"       degistiren = {kullanici}, "
                 + "       degistirme_tarihi = now()::timestamp";
 
         await using var komut = Komut(baglanti, islem, sql, parametreler);
         await komut.ExecuteNonQueryAsync(iptal);
     }
+
+    /// <summary>
+    /// PROVIZYON (299) alanlari - belge_provizyon 1:1. SGK ve ozel sigorta
+    /// AYNI ANDA alinabilir (hasta hem SGK'li hem tamamlayici policeli
+    /// olabilir), o yuzden iki ayri alan takimi: sgk_* ve oss_*. Sorgu/alinma
+    /// ZAMANLARI sunucu-servis tarafindan yazilir - istekten gelmez.
+    /// </summary>
+    private static readonly Dictionary<string, string> ProvizyonKolonlari = new(StringComparer.Ordinal)
+    {
+        // SGK / MEDULA
+        ["sgkDurum"] = "sgk_durum", ["sgkProvizyonNo"] = "sgk_provizyon_no",
+        ["sgkProvizyonTipi"] = "sgk_provizyon_tipi", ["sgkGecerlilik"] = "sgk_gecerlilik",
+        ["sgkKarsilama"] = "sgk_karsilama", ["sgkTutar"] = "sgk_tutar",
+        ["sgkRedNedeni"] = "sgk_red_nedeni", ["sgkSigortaTuru"] = "sgk_sigorta_turu",
+        ["sgkTakipNo"] = "sgk_takip_no", ["sgkTakipTuru"] = "sgk_takip_turu",
+        ["sgkTesisKodu"] = "sgk_tesis_kodu", ["sgkMustehaklik"] = "sgk_mustehaklik",
+        ["sgkSevkli"] = "sgk_sevkli", ["sgkSevkKurum"] = "sgk_sevk_kurum",
+        // Ozel / tamamlayici saglik sigortasi
+        ["ossKurumId"] = "oss_kurum_id", ["ossDurum"] = "oss_durum",
+        ["ossOnayNo"] = "oss_onay_no", ["ossGecerlilik"] = "oss_gecerlilik",
+        ["ossKarsilama"] = "oss_karsilama", ["ossTutar"] = "oss_tutar",
+        ["ossRedNedeni"] = "oss_red_nedeni", ["ossPoliceNo"] = "oss_police_no",
+        ["ossHasarNo"] = "oss_hasar_no", ["ossBrans"] = "oss_brans",
+        ["provizyonAciklama"] = "aciklama"
+    };
 
     private async Task<int> BelgeEkleAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         IDictionary<string, object?> belge, YazmaBaglami baglam, CancellationToken iptal)

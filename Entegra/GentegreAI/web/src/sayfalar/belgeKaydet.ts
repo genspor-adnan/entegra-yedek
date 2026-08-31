@@ -8,6 +8,23 @@ export interface Secim { id: number; ad: string }
  * Kaydetmeye giden KART DURUMU. Dogrulama ve istek govdesi bunun uzerinden
  * uretilir - ikisi de SAF fonksiyon, ekran durumuna dokunmaz.
  */
+/**
+ * Provizyonun SUNUCU/SERVIS tarafindan yazilan alanlari (299): sorgu zamanlari
+ * istekten gelmez - govdede gorunurlerse "Bilinmeyen belge alani" ile reddedilir.
+ */
+const PROVIZYON_SALT_OKUNUR = new Set(
+  ['sgkAlinmaZaman', 'sgkMustehaklikZaman', 'ossAlinmaZaman', 'ossKurumAdi']);
+
+/**
+ * SAYISAL / TARIH alanlar: ekranda BOS iken '' tutulur ama sunucuya bos metin
+ * gonderilemez ("sgkKarsilama boş bırakılamaz"). Bos degerleri istekten
+ * cikariyoruz - alan "verilmedi" sayilir, kayitli deger korunur.
+ */
+const BOSU_GONDERME = new Set([
+  'sgkKarsilama', 'sgkTutar', 'sgkGecerlilik',
+  'ossKarsilama', 'ossTutar', 'ossGecerlilik',
+]);
+
 export interface BelgeGirdisi {
   tur: number;
   cari: { id: number; unvan: string } | null;
@@ -174,7 +191,8 @@ return {
     //   alanlar (mustehaklik sorgusunun zamani) gonderilmez: sunucu yazar,
     //   istekte gorunurse "Bilinmeyen belge alani" ile reddedilir.
     ...Object.fromEntries(Object.entries(basvuruAlanlari ?? {})
-      .filter(([k, v]) => v !== undefined && k !== 'mustehaklikZaman')),
+      .filter(([k, v]) => v !== undefined && !PROVIZYON_SALT_OKUNUR.has(k)
+                       && !(BOSU_GONDERME.has(k) && (v === '' || v === null)))),
     fiyatListesiId,
     ...(kampanyaId !== undefined ? { kampanyaId } : {}),
     ...(teklifDurum !== undefined ? { teklifDurum } : {}),

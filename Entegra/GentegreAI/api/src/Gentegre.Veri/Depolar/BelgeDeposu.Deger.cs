@@ -76,10 +76,30 @@ public sealed partial class BelgeDeposu
                    -- Basvuru sekmesi alanlari (298).
                    bb.basvuru_turu as "basvuruTuru", bb.gelis_sekli as "gelisSekli",
                    bb.gelis_nedeni as "gelisNedeni", bb.oda, bb.sira_no as "siraNo",
-                   bb.refakatci, bb.provizyon_no as "provizyonNo",
-                   bb.provizyon_tipi as "provizyonTipi", bb.mustehaklik,
-                   bb.mustehaklik_zaman as "mustehaklikZaman",
-                   bb.sevkli, bb.sevk_kurum as "sevkKurum",
+                   bb.refakatci,
+                   -- PROVIZYON (299) ayri 1:1 tabloda. SGK ve ozel sigorta
+                   --   AYNI ANDA olabilir: iki ayri alan takimi.
+                   bp.sgk_durum as "sgkDurum", bp.sgk_provizyon_no as "sgkProvizyonNo",
+                   bp.sgk_provizyon_tipi as "sgkProvizyonTipi",
+                   bp.sgk_alinma_zaman as "sgkAlinmaZaman",
+                   bp.sgk_gecerlilik as "sgkGecerlilik",
+                   bp.sgk_karsilama as "sgkKarsilama", bp.sgk_tutar as "sgkTutar",
+                   bp.sgk_red_nedeni as "sgkRedNedeni",
+                   bp.sgk_sigorta_turu as "sgkSigortaTuru", bp.sgk_takip_no as "sgkTakipNo",
+                   bp.sgk_takip_turu as "sgkTakipTuru", bp.sgk_tesis_kodu as "sgkTesisKodu",
+                   bp.sgk_mustehaklik as "sgkMustehaklik",
+                   bp.sgk_mustehaklik_zaman as "sgkMustehaklikZaman",
+                   bp.sgk_sevkli as "sgkSevkli", bp.sgk_sevk_kurum as "sgkSevkKurum",
+                   bp.oss_kurum_id as "ossKurumId",
+                   coalesce(ok2.unvan, '') as "ossKurumAdi",
+                   bp.oss_durum as "ossDurum", bp.oss_onay_no as "ossOnayNo",
+                   bp.oss_alinma_zaman as "ossAlinmaZaman",
+                   bp.oss_gecerlilik as "ossGecerlilik",
+                   bp.oss_karsilama as "ossKarsilama", bp.oss_tutar as "ossTutar",
+                   bp.oss_red_nedeni as "ossRedNedeni",
+                   bp.oss_police_no as "ossPoliceNo", bp.oss_hasar_no as "ossHasarNo",
+                   bp.oss_brans as "ossBrans",
+                   bp.aciklama as "provizyonAciklama",
                    b.vade_gun as "vadeGun",
                    -- Basvuruda (249) vade yerine odeyen kurum gosterilir.
                    bb.odeyen_kurum_id as "odeyenKurumId",
@@ -130,6 +150,8 @@ public sealed partial class BelgeDeposu
               left join public.depo  gd on gd.id = b.giris_depo_id
               left join public.taraf sc on sc.id = b.satici_id
               left join public.belge_basvuru bb on bb.id = b.id
+              left join public.belge_provizyon bp on bp.id = b.id
+              left join public.taraf ok2 on ok2.id = bp.oss_kurum_id
               left join public.departman bl on bl.id = bb.bolum_id
               left join public.taraf     hk on hk.id = bb.personel_id
               left join public.taraf ok on ok.id = bb.odeyen_kurum_id
