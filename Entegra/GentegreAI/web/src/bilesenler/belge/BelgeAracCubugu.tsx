@@ -1,4 +1,4 @@
-import { FATURA_TIPLERI, KAPANMA_ETIKET } from '../../sayfalar/belgeSabitleri';
+import { FATURA_TIPLERI } from '../../sayfalar/belgeSabitleri';
 
 /**
  * BELGE KARTI ARAC CUBUGU - Kaydet / Sil ve ture ozel eylemler (siparisten
@@ -14,7 +14,7 @@ export function BelgeAracCubugu({
   siparisMi, irsaliyeMi, faturaMi, alisMi, basvuruMu, eBelgeYok, kayitliId,
   kes, yeniBelge, kapat, setDonusum, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
-  setAktifSekme, hastaKartiAc, acilBasvuru, hastaVar,
+  hastaKartiAc, acilBasvuru, hastaVar,
 }: {
   mevcutBelge: boolean;
   /** Kayitli belge degistirilebilir mi (135). */
@@ -51,8 +51,7 @@ export function BelgeAracCubugu({
   rezerveCalisiyor: boolean;
   /** true = rezerve et, false = birak. */
   rezerveDegistir(ac: boolean): Promise<void>;
-  /** Basvuru dugmeleri (300, mockup): sekmeye gecis / hasta karti / acil. */
-  setAktifSekme?(anahtar: string): void;
+  /** Basvuru dugmeleri (300, mockup): hasta karti / acil basvuru. */
   hastaKartiAc?(): void;
   acilBasvuru?(): void;
   /** Hasta secili mi - "Hasta Kartını Aç" ona bagli. */
@@ -96,13 +95,8 @@ export function BelgeAracCubugu({
       cikisi bu dugmeden geciyor, kaldirmak akisi keserdi. */}
   {basvuruMu && (
     <>
-      <button className="d bir" disabled={!kayitliId}
-              title={kayitliId
-                ? 'Provizyon bilgilerini gir - MEDULA sorgusu henüz bağlı değil.'
-                : 'Önce başvuruyu açın.'}
-              onClick={() => setAktifSekme?.('provizyon')}>
-        🧾 Provizyon Al
-      </button>
+      {/* "Provizyon Al" arac cubugundan KALKTI (kullanici): Provizyon
+          sekmesinde her odeyicinin kendi grup basliginda duruyor. */}
       <button className="d" disabled title="Protokol fişi yazdırma henüz bağlanmadı.">
         🖨️ Protokol Fişi
       </button>
@@ -130,11 +124,8 @@ export function BelgeAracCubugu({
       <button className="d" disabled title="Yatan hasta (yatış) modülü henüz yok.">
         🔁 Yatışa Çevir
       </button>
-      <button className="d" disabled={!kayitliId}
-              title={kayitliId ? 'Tahsilat sekmesini aç' : 'Önce başvuruyu açın.'}
-              onClick={() => setAktifSekme?.('tahsilat')}>
-        💳 Tahsilat
-      </button>
+      {/* TAHSILAT dugmesi arac cubugunda YOK (kullanici): tahsilat kendi
+          sekmesinden yapiliyor - fatura kartiyla ayni yer. */}
       <button className="d" disabled={!kayitliId}
               title={kayitliId ? 'Seçili satırları faturaya / fişe / tahakkuka aktar'
                                : 'Önce başvuruyu açın.'}
@@ -247,26 +238,9 @@ export function BelgeAracCubugu({
 
   <span className="ayrac" />
 
-  {/* BASVURUDA (kullanici) PROTOKOL NO ve KAPANMA rozetleri Kapat'in SOLUNDA:
-      baslikta iki hucre kapliyorlardi, ikisi de salt okunur bilgi. Protokol
-      etiketsiz - rozetin kendisi zaten numarayi soyluyor. */}
-  {basvuruMu && (
-    <span className="deger-serit" style={{ marginLeft: 'auto', marginRight: 8 }}>
-      {(() => {
-        // `sonuc` bu bilesende unknown (arac cubugu belge icerigini bilmez) -
-        //   yalniz gosterilecek iki alan okunur.
-        const b2 = (sonuc as { belge?: Record<string, unknown> } | null)?.belge;
-        const no = String(b2?.belgeNo ?? '');
-        const k = KAPANMA_ETIKET[Number(b2?.kapanmaDurum ?? 0)];
-        return (
-          <>
-            {no && <span className="rozet bilgi">{no}</span>}
-            {k && <span className={`rozet ${k.sinif ?? ''}`}>{k.ad}</span>}
-          </>
-        );
-      })()}
-    </span>
-  )}
+  {/* BASVURUDA arac cubugunda ROZET YOK (kullanici): protokol no hasta arama
+      satirinda, kapanma ("Faturalanmadı") rozeti ise hasta bandinda acik
+      borcun saginda duruyor. */}
   <button className="d kapat-dugmesi" onClick={kapat}>✖ Kapat</button>
 
   {/* FATURA TIPI (130) burada, DUGMELERIN SAGINDA (kullanici): basliktan

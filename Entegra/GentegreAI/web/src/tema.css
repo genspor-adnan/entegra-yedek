@@ -336,11 +336,13 @@ table.grid tr.flt input {
   padding: 0 2px; margin-bottom: 8px;
 }
 /* Etiket USTTE (mockup) - kartin genel "etiket solda" kuralinin disinda. */
+/* Kutular %35 DAR (kullanici): T.C./hasta no/ad soyad icin bu genislik yeter,
+   artani dugmelere ve bosluga kalsin. */
 .hasta-arama .alan {
   display: flex; flex-direction: column; gap: 2px;
-  flex: 1 1 130px; min-width: 0;
+  flex: 0 1 85px; min-width: 0;
 }
-.hasta-arama .alan.genis { flex: 2 1 200px }
+.hasta-arama .alan.genis { flex: 0 1 130px }
 .hasta-arama .d { flex: 0 0 auto }
 
 .hasta-serit {
@@ -495,6 +497,9 @@ table.grid tr.flt input {
   background: linear-gradient(var(--serit3), var(--serit4)); border-bottom: 1px solid var(--cizgi2);
   font-weight: 700; display: flex; align-items: center; gap: 8px;
 }
+/* Grup basligindaki eylem dugmesi (ör. "Provizyon Al") SAGA yaslanir; serit
+   yuksekligini buyutmesin diye kisa tutulur. */
+.kagrup > h6 .d.sag { margin-left: auto; height: 20px; font-size: 11px }
 .kagrup > .alan-izgara, .kagrup > .resim-kutusu { margin: 10px }
 .kagrup > .detay-tablo { width: calc(100% - 20px); margin: 10px }
 /* Mockup (.row > .col > .grp): birden fazla alt-basликlı kutu AYNI SATIRDA yan yana. */

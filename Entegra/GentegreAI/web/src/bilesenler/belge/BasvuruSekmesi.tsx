@@ -140,9 +140,11 @@ function ZamanAlani({ etiket, deger, onDeger, kilitli }: {
  * henuz yok, uydurma bilgi gostermek yaniltici olurdu. Yerine gercek veriden
  * "son basvuru" uyarisi cizilir.
  */
-export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli,
+export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, kapanma,
                               onAra, onYeniHasta }: {
   tarafId?: number | null;
+  /** Belgenin kapanma rozeti (KAPANMA_ETIKET) - seridin en saginda. */
+  kapanma?: { ad: string; sinif?: string } | null;
   /** Belgenin SGK mustehaklik durumu (299) - sigortanin yanina rozet. */
   mustehaklik?: number | null;
   /** Belge numarasi - mockupta arama satirinin son alani. */
@@ -296,6 +298,12 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli,
           {para.format(Number(h?.acikBorc ?? 0))} ₺
         </span>
       </span>
+      {/* Kapanma ("Faturalanmadı" / "Kısmi" / "Kapandı") rozeti seridin en
+          saginda (kullanici): arac cubugundan buraya alindi - basvurunun
+          parasal durumu acik borcun yaninda okunsun. */}
+      {kapanma && (
+        <span className={`rozet ${kapanma.sinif ?? ''}`}>{kapanma.ad}</span>
+      )}
     </div>
       ) : null}
     </>
@@ -388,7 +396,16 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar 
           sigorta ustlenir. Bu yuzden gruplar kurum turune gore GIZLENMEZ,
           ikisi de acik durur; doldurulmayan grup bos kalir. */}
       <div className="kagrup">
-        <h6>SGK / MEDULA Provizyonu</h6>
+        {/* "Provizyon Al" dugmesi GRUP BASLIGINDA saga yasli (kullanici):
+            arac cubugundan alindi - hangi odeyiciden provizyon alindigi
+            dugmenin yerinden anlasilsin (SGK ayri, ozel sigorta ayri). */}
+        <h6>
+          SGK / MEDULA Provizyonu
+          <button type="button" className="d bir sag" disabled
+                  title="MEDULA provizyon sorgusu henüz bağlı değil - alanlar elle doldurulur.">
+            🧾 Provizyon Al
+          </button>
+        </h6>
         <div className="alan-izgara dort-sutun">
           <label className="alan">
             <span className="etiket">Kurum</span>
@@ -475,7 +492,13 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar 
       </div>
 
       <div className="kagrup">
-        <h6>Özel / Tamamlayıcı Sigorta Provizyonu</h6>
+        <h6>
+          Özel / Tamamlayıcı Sigorta Provizyonu
+          <button type="button" className="d bir sag" disabled
+                  title="Sigorta şirketi provizyon servisi henüz bağlı değil - alanlar elle doldurulur.">
+            🧾 Provizyon Al
+          </button>
+        </h6>
         <div className="alan-izgara dort-sutun">
           {/* Sirket belgenin odeyen kurumundan FARKLI olabilir. */}
           <label className="alan">

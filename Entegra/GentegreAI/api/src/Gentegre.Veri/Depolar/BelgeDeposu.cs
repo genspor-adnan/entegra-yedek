@@ -316,7 +316,11 @@ public sealed partial class BelgeDeposu
         var cariZorunlu = await CariZorunluMuAsync(baglanti, islem, tur, iptal);
         if (tarafId <= 0 && cariZorunlu)
             throw GentegreHatasi.Dogrulama("Cari secilmeli.", new AlanHatasi("tarafId", "Zorunlu."));
-        if (satirlar.Count == 0)
+        // SIPARIS/BASVURU (19) SATIRSIZ acilabilir: kayit kabulde once basvuru
+        //   acilir (hasta gelir, protokol verilir), hizmetler muayene sirasinda
+        //   eklenir. Diger turlerde bos belge anlamsizdir - stok/cari etkisi
+        //   olmayan bir kayit numara tuketirdi.
+        if (satirlar.Count == 0 && tur != BelgeTuru.SatisSiparisi)
             throw GentegreHatasi.Dogrulama("Belgede en az bir satir olmali.",
                 new AlanHatasi("satirlar", "Bos birakilamaz."));
 

@@ -297,8 +297,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
   const turAdi = (kod: number) => turler.find(t => t.kod === kod)?.ad ?? `Belge (${kod})`;
   const seciliTurAdi = turAdi(tur);
-  /** Mevcut belge SALT GORUNUM: duzenleme ucu (PUT /api/belge/{id}) henuz yok. */
-  const mevcutBelge = !!belgeId;
+  /**
+   * BASVURUDA (300, kullanici: "en basta basvuru acilacak, islemler
+   * tamamlaninca kaydedilecek") kaydet KARTI KAPATMAZ: ilk kayit protokolu
+   * verir, kart acik kalir, ucretlendirme/provizyon girildikten sonra ayni
+   * yesil dugmeyle kaydedilir. Acilan basvurunun id'si burada tutulur -
+   * kart boylece "kayitli belge" moduna gecer (kilit acilir, ikinci kayit
+   * INSERT degil UPDATE olur).
+   */
+  const [acilanId, setAcilanId] = useState<number | null>(null);
+  const etkinBelgeId = belgeId ?? acilanId;
+  const mevcutBelge = !!etkinBelgeId;
   /**
    * DUZENLEME (135): kayitli belge, e-Belge GONDERILMEMIS ve faturalanmamissa
    * degistirilebilir (kullanici). Sunucu ayni kurallari + sure sinirini
@@ -392,7 +401,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   //   SIPARIS de e-Belge degil: hicbir siparis GIB'e gitmez.
   const eBelgeYok = !bilgi.eBelge;
   /** Kaydedilmis belgenin id'si (yeni kayittan ya da acilan belgeden). */
-  const kayitliId = belgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
+  const kayitliId = etkinBelgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
 
   /** Bu belge icin tahsilat islemi ac (cari ve tutar onyuklu). */
   /** Tahsilat MODAL acilir - belge kartindan cikmadan (kullanici istegi).
@@ -783,7 +792,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       aracPlaka, soforAd, soforTckn, sevkTarihi, teslimSekli, fisTipi, satirlar,
       subeId: kullanici?.subeId ?? undefined,
       alisMi, irsaliyeMi, faturaMi, depoBelgesi, stokFisiMi, fisCikisMi, transferMi,
-      talepMi, disNumarali,
+      talepMi, disNumarali, basvuruMu,
     };
     const hatalar = belgeDogrula(girdi);
     if (hatalar) {
@@ -798,8 +807,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
       // DUZENLEME (135): kayitli belge PUT ile yeniden yazilir - numara korunur,
       //   eski stok/cari etkisi sunucuda geri alinip yenisi uygulanir.
-      const yanit = duzenlenebilir && belgeId
-        ? await api.belgeGuncelle(belgeId, govde)
+      // IKINCI kayit UPDATE olmali: basvuru kartta acik kaldigi icin ayni
+      //   dugmeye tekrar basiliyor - etkinBelgeId olmasa her basis yeni belge
+      //   uretirdi.
+      const yanit = duzenlenebilir && etkinBelgeId
+        ? await api.belgeGuncelle(etkinBelgeId, govde)
         : await api.belgeEkle(govde);
       setSonuc(yanit);
       onKaydedildi?.();
@@ -807,8 +819,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       //   yapilacak isler (e-Belge gonderimi, donusum) listeden belge yeniden
       //   acilarak surdurulur - kart acik birakmak "kaydettim mi?" belirsizligi
       //   yaratiyordu. Tek istisna "kaydet ve devam et" (kapatilsin=false).
+      const yeniId = Number(yanit.belge.id ?? 0);
+      // BASVURU akisi (300): ilk kayit KAPATMAZ - protokol verilir, kart acik
+      //   kalir; ucretlendirme ve provizyon girildikten sonra ayni dugmeyle
+      //   kaydedilip kapatilir. Diger turlerde genel kural surer.
+      if (basvuruMu && !etkinBelgeId && yeniId) { setAcilanId(yeniId); return yeniId }
       if (kapatilsin) kapat();
-      return Number(yanit.belge.id ?? 0);
+      return yeniId;
     } catch (h) {
       const c = hataAyristir(h);
       setAlanHatalari(c.alanlar);
@@ -821,6 +838,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
   function yeniBelge() {
     setSonuc(null);
+    setAcilanId(null);
     setCari(null);
     setSatirlar([]);
     setHata(null);
@@ -1110,7 +1128,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           setDonusum={setDonusum} setTerminAcik={setTerminAcik}
           rezerveVar={rezerveVar} rezerveCalisiyor={rezerveCalisiyor}
           rezerveDegistir={rezerveDegistir}
-          setAktifSekme={s => { setHata(null); setAlanHatalari({}); setAktifSekme(s) }}
           hastaVar={!!cari?.id}
           hastaKartiAc={() => { setHastaKartId(cari?.id ?? null); setCariArama(true) }}
           // Acil kapisi: tur "Acil" (2), gelis sekli "Ambulans" (2).
@@ -1142,6 +1159,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                        mustehaklik={Number(basvuruBilgi.sgkMustehaklik ?? 0)}
                        protokolNo={belgeNo || String(sonuc?.belge.belgeNo ?? '')}
                        kilitli={kilitli}
+                       kapanma={KAPANMA_ETIKET[Number(sonuc?.belge.kapanmaDurum ?? 0)]}
                        onAra={metin => { setHastaAramaMetni(metin); setCariArama(true) }}
                        onYeniHasta={() => { setHastaAramaYeni(true); setCariArama(true) }} />
         )}

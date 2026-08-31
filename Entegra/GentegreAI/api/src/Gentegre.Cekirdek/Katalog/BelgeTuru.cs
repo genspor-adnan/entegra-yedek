@@ -32,11 +32,13 @@ public static class BelgeTuru
     public const int Talep = 105;
 
     /// <summary>
-    /// HASTA BASVURUSU (246). Satis siparisi (19) ile ayni davranis: hizmet/
-    /// malzeme satirlarini tasir, stok ve muhasebe ETKILEMEZ; gercek hareket
-    /// faturaya/fise/tahakkuka donusturulunce olusur.
+    /// SATIS SIPARISI. HASTA BASVURUSU (246) DA BU TURDUR - ayri bir tur
+    /// numarasi yoktur: ayni kayit ERP kurulumunda "Satış Siparişleri",
+    /// GenoTIP'te "Başvurular" ekraninda gorunur (liste tanimlari urunModu ile
+    /// suzer). Hizmet/malzeme satirlarini tasir, stok ve muhasebe ETKILEMEZ;
+    /// gercek hareket faturaya/fise/tahakkuka donusturulunce olusur.
     /// </summary>
-    public const int Basvuru = 30;
+    public const int SatisSiparisi = 19;
 
     /// <summary>e-Fatura / e-Arsiv olarak GIDEN satis faturasi.</summary>
     public const int SatisFaturasi = 15;

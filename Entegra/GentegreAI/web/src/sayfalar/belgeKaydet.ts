@@ -95,6 +95,8 @@ export interface BelgeGirdisi {
   transferMi: boolean;
   talepMi: boolean;
   disNumarali: boolean;
+  /** Basvuru (300): kalemsiz acilabilir - once protokol, hizmetler sonra. */
+  basvuruMu?: boolean;
 }
 
 /**
@@ -106,7 +108,7 @@ export interface BelgeGirdisi {
 export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
   const { cari, depoBelgesi, stokFisiMi, fisTipi, fisCikisMi, depo, tarih,
           tarihEnGec, tarihEnErken, geriGun, talepMi, teslimAlan, girisDepo,
-          transferMi, teslimEden, disNumarali, belgeNo, satirlar } = g;
+          transferMi, teslimEden, disNumarali, belgeNo, satirlar, basvuruMu } = g;
 
   // Transferde cari YOK (sunucu da katalogtan ayni karari veriyor).
   if (!cari && !depoBelgesi && !stokFisiMi) {
@@ -150,7 +152,10 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
   if (disNumarali && belgeNo.trim() === '') {
     return { belgeNo: 'Tedarikçinin fatura numarası girilmeli.' };
   }
-  if (satirlar.filter(s => s.stokId || s.hizmetId).length === 0)
+  // BASVURU KALEMSIZ ACILIR (300, kullanici: "en basta basvuru acilacak,
+  //   islemler tamamlaninca kaydedilecek"): hasta gelir, protokol verilir,
+  //   hizmetler muayene sirasinda eklenir. Diger turlerde bos belge anlamsiz.
+  if (!basvuruMu && satirlar.filter(s => s.stokId || s.hizmetId).length === 0)
     return { genel: 'En az bir satırda stok ya da hizmet seçilmeli.' };
 
   return null;
