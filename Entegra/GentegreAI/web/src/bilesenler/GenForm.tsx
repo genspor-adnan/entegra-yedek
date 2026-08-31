@@ -20,6 +20,7 @@ import {
   KIMLIK_GRUP, TEK_SUTUN_KARTLAR, type SekmeTanimi,
 } from './kartSekmeleri';
 import { TekKayit } from './TekKayit';
+import { GenGrid } from './GenGrid';
 export { Modal };
 import { RolYetkiMatrisi } from './RolYetkiMatrisi';
 import { ekKaydetleriCalistir, ekKaydetTemizle } from './kartEkKaydet';
@@ -119,6 +120,26 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
   //   turetilir - personel/hasta kartlariyla ayni kural.
   const personelGibiKart = kaynak === 'personel' || kaynak === 'hasta'
                         || kaynak === 'dis-hekim';
+  /**
+   * HEKIM UNVANI (306, kullanici: "unvan alanında tutabilirsin"): Dr./Prof.Dr...
+   * AYRI KOLON YOK - onek taraf.unvan icinde saklanir ("Prof.Dr. Halil GÜNEŞ").
+   * Kart acilirken unvanin basindaki bilinen onek ayristirilip comboya konur,
+   * kaydederken ad/soyadin onune eklenir. Boylece hekim her yerde (arama,
+   * liste, rapor ciktisi) unvaniyla gorunur.
+   */
+  const [unvanOnek, setUnvanOnek] = useState('');
+  const [unvanSecenek, setUnvanSecenek] = useState<string[]>([]);
+  useEffect(() => {
+    if (kaynak !== 'dis-hekim') return;
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.kodListe('hekim.unvan');
+        if (!iptal) setUnvanSecenek(y.degerler.filter(d => d.aktif === 1).map(d => d.ad));
+      } catch { /* liste yoksa combo bos kalir - kayit engellenmez */ }
+    })();
+    return () => { iptal = true };
+  }, [kaynak]);
 
   const [meta, setMeta] = useState<KartMetaYaniti | null>(null);
   const [deger, setDeger] = useState<Record<string, Deger>>({});
@@ -452,7 +473,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       if (personelGibiKart || kaynak === 'hasta-aday') {
         const ad = String(deger.ad ?? '').trim();
         const soyad = String(deger.soyad ?? '').trim();
-        const unvan = [ad, soyad].filter(Boolean).join(' ');
+        // Hekim unvani (306) adin ONUNE gelir: "Prof.Dr. Halil GÜNEŞ".
+        const unvan = [unvanOnek, ad, soyad].filter(Boolean).join(' ');
         if (unvan) govde.kart.unvan = unvan;
       }
       // ADAY HASTA (266): DOSYA NO = CEP NUMARASI (kullanici). Kullanicidan
@@ -596,7 +618,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           {/* Personel durumu BASLIKTA rozet (kullanici): aktif yesil, isten
               cikis tarihi girilmisse pasif kirmizi - cikis tarihi olan biri
               "aktif" gorunmesin. Serit alani olarak ayrica cizilmez. */}
-          {personelGibiKart && !yeniMi && (() => {
+          {/* DIS HEKIMDE baslik rozeti YOK (kullanici): durum seritte combo -
+              ayni bilgiyi iki yerde gostermek gereksiz. */}
+          {personelGibiKart && kaynak !== 'dis-hekim' && !yeniMi && (() => {
             const ozluk = detaylar.ozluk?.guncel[0];
             const cikis = String((ozluk?.istenCikisTarihi as string | undefined) ?? '');
             const pasif = cikis.length > 0 || Number(deger.durum) === 0;
@@ -632,6 +656,14 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       }
       ustSerit={kimlikAlanlari.length > 0 && (
         <div className="kaid">
+          {/* AVATAR (305, kullanici: "ad soyadin soluna avatar ekle"): ad ve
+              soyadin bas harfleri. Kisi kartlarinda kimin karti oldugunu tek
+              bakista gosterir - hasta seridindeki desenle ayni. */}
+          {kaynak === 'dis-hekim' && (() => {
+            const bas = [String(deger.ad ?? ''), String(deger.soyad ?? '')]
+              .map(x => x.trim()[0] ?? '').join('').toLocaleUpperCase('tr');
+            return <span className="kart-avatar">{bas || '—'}</span>;
+          })()}
           {/* Kisi'ye ozel: Kisi Kodu dar, Unvan genis (kullanici: "kod edit yariya dussun,
               onu unvana ekle") - idstrip'in 4 sabit alani (Kod/Unvan/Departman/Gorev). */}
           {/* Personelde ROL kimlik seridinde, DEPARTMANIN SAGINDA (kullanici);
@@ -667,7 +699,31 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
                 )}
               </div>
             );
-          })() : personelGibiKart ? (
+          })() : kaynak === 'dis-hekim' ? (
+            /* DIS HEKIM (305/306) serit duzeni: avatar · Ünvan · Ad · Soyad ·
+               Kod · Temsilci · Durum. Departman/gorev YOK - dis hekim bizim
+               kadromuzda degil; Temsilci ise BIZIM personelimiz (bu hekimle
+               ilgilenen kisi). */
+            /* Ünvan ve Kod YARIM sutun (kullanici): kisa degerler - "Prof.Dr."
+               ve "DR-0042" tam sutunda bos yer birakiyordu. Ad/Soyad ve
+               Temsilci tam sutun kalir. */
+            <div className="alan-izgara"
+                 style={{ gridTemplateColumns: '0.5fr 1fr 1fr 0.5fr 1fr 1fr' }}>
+              <label className="alan tip-kod">
+                <span className="etiket">Ünvan</span>
+                <select value={unvanOnek} disabled={salt}
+                        onChange={e => setUnvanOnek(e.target.value)}>
+                  <option value="">—</option>
+                  {unvanSecenek.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </label>
+              {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'ad'))}
+              {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'soyad'))}
+              {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'kod'))}
+              {renderAlanListesi((meta?.alanlar ?? []).filter(a => a.ad === 'temsilci'))}
+              {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
+            </div>
+          ) : personelGibiKart ? (
             <div className="alan-izgara"
                  style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}>
               {renderAlanListesi(kimlikAlanlari.filter(a =>
@@ -856,6 +912,21 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
 
       {/* Stok > ÜTS: stok_uts 1:1 uzanti (119) - grid degil TEK kayit formu.
           Bir stokun bir ÜTS kaydi olur; "satir ekle" yanlis bir vaat olurdu. */}
+      {/* DIS HEKIM "Hekim Bilgisi" (305): 1:1 uzanti - satir ekle/sil'li grid
+          degil TEK KAYIT formu (kullanici: "mockup gibi label ve edit olsun").
+          Ikinci satir DB'de zaten yazilamaz; grid yanlis bir vaat. */}
+      {aktif?.tur === 'detay' && kaynak === 'dis-hekim' && aktif.detay.ad === 'hekim' && (
+        <TekKayit
+          meta={aktif.detay}
+          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
+          saltOkunur={salt || aktif.detay.saltOkunur}
+          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
+          baslik="Hekim Bilgisi"
+          not={<>Kurum kayıtlı cariyse seçin; değilse yalnız adını yazın —
+                 her sevk eden hastane için cari kartı açmak gerekmez.</>}
+        />
+      )}
+
       {aktif?.tur === 'detay' && kaynak === 'stok' && aktif.detay.ad === 'uts' && (
         <TekKayit
           meta={aktif.detay}
@@ -903,6 +974,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       {aktif?.tur === 'detay' && !(personelGibiKart && aktif.detay.ad === 'ozluk')
         && !(kaynak === 'stok' && (aktif.detay.ad === 'uts' || aktif.detay.ad === 'paket'))
         && !(kaynak === 'sube' && aktif.detay.ad === 'uts')
+        // Dis hekim "Hekim Bilgisi" TekKayit ile cizildi (305) - generic grid
+        //   ayrica cizilirse ayni detay iki kez gorunur.
+        && !(kaynak === 'dis-hekim' && aktif.detay.ad === 'hekim')
         // Hizmet > Fiyatlar: kartin kendi fiyat gridi KALKTI (kullanici) -
         //   sekme yalniz fiyat listelerindeki fiyatlari gosterir (asagida).
         && !(kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar') && (
@@ -957,7 +1031,29 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
         <StokHareketSekmesi stokId={id as number} />
       )}
 
-      {aktif?.tur === 'yerTutucu' && (
+      {/* DIS HEKIM "Gönderim Geçmişi" (305): kart DETAYI degil - baska bir
+          ekranin kayitlari (radyoloji istemleri). Duzenlenebilir satir gridi
+          yerine liste ekranlarindaki GenGrid, SALT OKUNUR ve hekim filtreli.
+          Sekme yer tutucu olarak aciliyor, icini burasi dolduruyor. */}
+      {aktif?.tur === 'yerTutucu' && kaynak === 'dis-hekim'
+       && aktif.baslik === 'Gönderim Geçmişi' && (
+        yeniMi ? (
+          <div className="not" style={{ padding: 20 }}>
+            Hekim kaydedildikten sonra gönderdiği tetkikler burada listelenir.
+          </div>
+        ) : (
+          <GenGrid
+            kaynak="radyoloji-istem"
+            gomulu
+            seritGizli
+            boyut={25}
+            sabitFiltre={{ alan: 'istekHekimId', op: 'esit', deger: id as number }}
+          />
+        )
+      )}
+
+      {aktif?.tur === 'yerTutucu'
+       && !(kaynak === 'dis-hekim' && aktif.baslik === 'Gönderim Geçmişi') && (
         <div style={{ padding: 40, textAlign: 'center', color: 'var(--soluk)' }}>
           {aktif.baslik} sekmesi yakında.
         </div>

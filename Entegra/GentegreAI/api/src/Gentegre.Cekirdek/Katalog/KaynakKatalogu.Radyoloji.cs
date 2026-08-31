@@ -55,6 +55,10 @@ public static partial class KaynakKatalogu
                 "coalesce(nullif(ih.unvan, ''), nullif(i.dis_hekim_ad, ''), '')",
                                                       "metin", "İstem Yapan",   Genislik: 170,
                                                                                 Filtrelenebilir: false),
+            // Ham hekim id (305): dis hekim kartinin "Gönderim Geçmişi" gridi
+            //   bu kolonla suzuluyor - gridde gizli.
+            new("istekHekimId",  "i.istek_hekim_id", "sayi", "İstem Hekim Id",
+                Varsayilan: false),
             new("isteyenKurum",  "coalesce(ik.unvan, '')", "metin", "İsteyen Kurum",
                                                                                 Genislik: 160, Varsayilan: false),
             new("odeyenKurum",   "coalesce(ok.unvan, '')", "metin", "Ödeyen Kurum",

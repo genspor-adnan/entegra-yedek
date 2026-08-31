@@ -476,6 +476,12 @@ return (
       <RolKullanicilari rolId={id as number} saltOkunur={salt} />
     )}
 
+    {/* DIS HEKIM (305) - iki sekme generic akisin disinda:
+        - "Hekim Bilgisi" 1:1 uzanti: satir ekle/sil'li grid degil TEK KAYIT
+          formu (kullanici: "mockup gibi label ve edit olsun"). Ikinci satir
+          zaten yazilamaz, grid yanlis bir vaat.
+        - "Gönderim Geçmişi" BASKA BIR EKRANIN kayitlari (radyoloji istemleri):
+          kart detayi degil, liste ekranlarindaki GenGrid - salt okunur. */}
     {kaynak === 'sube' && aktif.baslik === 'Depolar' && (() => {
       const depoDetay = meta.detaylar.find(d => d.ad === 'depolar');
       if (!depoDetay) return null;

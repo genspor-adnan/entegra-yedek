@@ -1416,3 +1416,13 @@ input.skt-gecmis {
   border-radius: 2px; white-space: pre-wrap;
 }
 .not.kucuk { font-size: 11px; padding: 3px 0 }
+
+/* Kart kimlik seridindeki avatar (305) - ad/soyad bas harfleri; hasta
+   seridindeki daire ile ayni gorunum. */
+.kaid { display: flex; align-items: center; gap: 12px }
+.kaid > .alan-izgara { flex: 1; min-width: 0 }
+.kart-avatar {
+  width: 38px; height: 38px; flex: 0 0 38px; border-radius: 50%;
+  display: grid; place-items: center; font-weight: 700; font-size: 13px;
+  background: var(--vurgu, #2b6cb0); color: #fff;
+}

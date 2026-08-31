@@ -541,6 +541,10 @@ public static partial class KartKatalogu
                 Baslik: "Kod", Grup: "Kimlik"),
             new("durum",    "durum",    "kod",   SabitKodlar: DurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),
+            // TEMSILCI = BIZIM personelimiz (kullanici): bu hekimle ilgilenen,
+            //   iliskiyi yuruten kisi - hekimin kendi kurumundaki biri degil.
+            new("temsilci", "temsilci", "kod",   KodTablosu: "public.v_personel_lookup",
+                Baslik: "Temsilci", Grup: "Kimlik"),
             new("cepTel",   "cep_tel",  "metin", EnFazlaUzunluk: 30, Baslik: "Cep"),
             new("telefon",  "telefon",  "metin", EnFazlaUzunluk: 30, Baslik: "Telefon"),
             new("eposta",   "eposta",   "metin", EnFazlaUzunluk: 200, Baslik: "E-posta"),
@@ -567,6 +571,10 @@ public static partial class KartKatalogu
                     Baslik: "Kurum Adı"),
                 new("tescilNo", "tescil_no", "metin", EnFazlaUzunluk: 30,
                     Baslik: "Diploma / Tescil No"),
+                // taraf_personel'de ZATEN VAR - dis hekimde "kadrolu / part-time /
+                //   serbest" ayrimini tasir, yeni kolon gerekmedi.
+                new("calismaSekli", "calisma_sekli", "kod",
+                    SabitKodlar: CalismaSekliKodlari, Baslik: "Çalışma Şekli"),
             // SubeKolonu VARSAYILAN: taraf_personel.sube_id NOT NULL - detay
             //   satiri oturumun subesiyle yazilir (null verilirse insert
             //   "subeId bos birakilamaz" ile patlar).
@@ -579,6 +587,29 @@ public static partial class KartKatalogu
                {
                    ["dis_hekim"] = (short)1,
                }),
+
+            // ADRES (mockup "Genel" sekmesi): rapor/CD kuryeyle gonderiliyorsa
+            //   gerekir - zorunlu degil. Cari/personel kartlariyla ayni tablo
+            //   ve ayni alanlar; ayri bir adres yapisi acilmadi.
+            new DetayTanimi("adresler", "public.taraf_adres", "taraf_id", new KartAlani[]
+            {
+                new("id",         "id",          "sayi",  Yazilabilir: false),
+                new("tur",        "tur",         "kod",   SabitKodlar: AdresTurKodlari,
+                    Baslik: "Adres Tipi", Zorunlu: true),
+                new("adres",      "adres",       "metin", EnFazlaUzunluk: 300),
+                new("il",         "il",          "metin", EnFazlaUzunluk: 60),
+                new("ilce",       "ilce",        "metin", EnFazlaUzunluk: 60),
+                new("postaKodu",  "posta_kodu",  "metin", EnFazlaUzunluk: 10),
+                new("varsayilan", "varsayilan",  "mantik"),
+                new("aktif",      "aktif",       "mantik"),
+            }, Sirala: "varsayilan desc, id", LogTabloId: 901, Baslik: "Adres"),
+
+            // GONDERIM GECMISI KATALOGDA DEGIL (305, kullanici: "frame kaldir
+            //   ve gridi readonly gengrid yap"): detay tanimi kart formunun
+            //   duzenlenebilir satir gridini cizerdi - burada gosterilen sey
+            //   BASKA BIR EKRANIN kayitlari (radyoloji istemleri), duzenlenmez.
+            //   Kartin "Gönderim Geçmişi" sekmesini KartGrupSekmesi ciziyor:
+            //   liste ekranlarindaki GenGrid, salt okunur, hekim filtresiyle.
         });
 
     private static KartTanimi HastaAday() => new(

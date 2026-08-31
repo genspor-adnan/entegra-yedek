@@ -376,6 +376,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kartYolu: '/dis-hekim', kartBaslik: 'Dış Doktor',
     aksiyonEkrani: 'dis-hekim-liste', cipler: DURUM_CIPLERI,
     gizliKolonlar: ['brans', 'telefonHam'],
+    // GONDERIM GECMISI sekmesi katalog detayi DEGIL (kullanici: "frame kaldir,
+    //   readonly gengrid yap"): sekme yer tutucu olarak acilir, icini
+    //   KartGrupSekmesi salt okunur GenGrid ile doldurur.
+    yerTutucuSekmeler: ['Gönderim Geçmişi'],
     menuGrup: 'Cari', menuAd: 'Dış Doktorlar', ic: '🩺', yetkiKodu: 'personel',
     urunModu: 2,
   },
