@@ -1,4 +1,4 @@
-import { FATURA_TIPLERI } from '../../sayfalar/belgeSabitleri';
+import { FATURA_TIPLERI, KAPANMA_ETIKET } from '../../sayfalar/belgeSabitleri';
 
 /**
  * BELGE KARTI ARAC CUBUGU - Kaydet / Sil ve ture ozel eylemler (siparisten
@@ -171,6 +171,26 @@ export function BelgeAracCubugu({
 
   <span className="ayrac" />
 
+  {/* BASVURUDA (kullanici) PROTOKOL NO ve KAPANMA rozetleri Kapat'in SOLUNDA:
+      baslikta iki hucre kapliyorlardi, ikisi de salt okunur bilgi. Protokol
+      etiketsiz - rozetin kendisi zaten numarayi soyluyor. */}
+  {basvuruMu && (
+    <span className="deger-serit" style={{ marginLeft: 'auto', marginRight: 8 }}>
+      {(() => {
+        // `sonuc` bu bilesende unknown (arac cubugu belge icerigini bilmez) -
+        //   yalniz gosterilecek iki alan okunur.
+        const b2 = (sonuc as { belge?: Record<string, unknown> } | null)?.belge;
+        const no = String(b2?.belgeNo ?? '');
+        const k = KAPANMA_ETIKET[Number(b2?.kapanmaDurum ?? 0)];
+        return (
+          <>
+            {no && <span className="rozet bilgi">{no}</span>}
+            {k && <span className={`rozet ${k.sinif ?? ''}`}>{k.ad}</span>}
+          </>
+        );
+      })()}
+    </span>
+  )}
   <button className="d kapat-dugmesi" onClick={kapat}>✖ Kapat</button>
 
   {/* FATURA TIPI (130) burada, DUGMELERIN SAGINDA (kullanici): basliktan

@@ -58,6 +58,16 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
    *  sutun gridi daraltiyordu. */
   const aciklamaVar = satirlar.some(x => String(x.aciklama ?? '').trim() !== '');
 
+  /**
+   * DOVIZ CERCEVESI (kullanici): dovizli islem YOKSA "Rapor Dövizi / Sipariş
+   * Dövizi" kutusu HIC cizilmez - basvuru/HBYS gibi tamamen yerel akislarda
+   * bos yer kapliyordu. Bir kalemde doviz fiyat girilince (ya da rapor dovizi
+   * yerelden farkli bir belgede) kutu kendiliginden geri gelir.
+   */
+  const dovizliIslem = raporDovizli
+    || !!doviz?.ekstreDovizi && doviz.ekstreDovizi !== yerelPara
+    || satirlar.some(r => !!r.fiyatDovizi && r.fiyatDovizi !== yerelPara);
+
   /** Dip toplam / TOPLAM satiri icin yerel -> rapor dovizi. */
   const dovizeCevir = (yerel: number) => (raporDovizli ? yerel / raporKur : yerel);
   return (
@@ -342,7 +352,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
 {/* Doviz kutusu SOLDA, dip toplam SAGDA - ayni hizada (kullanici). */}
 {bilgi.kalem !== 'miktar' && (
 <div className="grid-alt-serit">
-{doviz && (
+{doviz && dovizliIslem && (
   /* RAPOR / EKSTRE DOVIZI (134) - gridin ALTINDA SOLDA (kullanici).
      Rapor dovizi yerel para disindaysa yaninda KUR editi cikar ve dip toplam
      ikinci bir kolonda yerel karsiligiyla gosterilir. Ekstre dovizi cari

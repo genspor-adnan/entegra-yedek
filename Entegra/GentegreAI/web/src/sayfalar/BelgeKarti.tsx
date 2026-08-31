@@ -133,22 +133,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [odeyenKurumId, setOdeyenKurumId] = useState<number | null>(null);
   const [kurumlar, setKurumlar] = useState<{ id: number; ad: string; tur: number }[]>([]);
   /**
-   * BASVURU BASLIGI (296): basvurulan BOLUM ve HEKIM. Bolum randevu
-   * verilebilen departmanlardan, hekim SECILI BOLUMUN randevu verilebilir
-   * personelinden gelir - iki alan da belge_basvuru uzantisinda saklanir.
+   * BASVURU BASLIGI (296/297): basvurulan BOLUM ve karsilayan PERSONEL.
+   * Personel HEKIM OLMAK ZORUNDA DEGIL (kullanici): diyetisyen,
+   * fizyoterapist, teknisyen de basvuru karsilar - kisit "randevu verilebilir
+   * personel" + secili bolum. Ikisi de belge_basvuru uzantisinda saklanir.
    */
   const [bolumId, setBolumId] = useState<number | null>(null);
-  const [hekimId, setHekimId] = useState<number | null>(null);
+  const [personelId, setPersonelId] = useState<number | null>(null);
   const [bolumler, setBolumler] = useState<{ id: number; ad: string }[]>([]);
   /** Basvuruda depo combosu dip bolumde cizilir - liste burada tutulur. */
   const [depolar, setDepolar] = useState<{ id: number; ad: string }[]>([]);
-  const [hekimler, setHekimler] = useState<{ id: number; ad: string }[]>([]);
-  /**
-   * ODEYEN TIPI (kullanici): 0 hasta kendi oder · 1 Özel (Kendi) · 2 ÖSS ·
-   * 3 SGK. Kurum listesini suzer; belgeye AYRI yazilmaz - kurumun kendi
-   * turundan (taraf_kurum.tur) okunur, tek kaynak orasi.
-   */
-  const [odeyenTip, setOdeyenTip] = useState(0);
+  const [gorevliler, setGorevliler] = useState<{ id: number; ad: string }[]>([]);
   /**
    * YURURLUKTEKI KAMPANYA (274). Fiyat listesiyle YARISMAZ: liste BAZ fiyati,
    * kampanya INDIRIMI verir. Baslikta rozet olarak gorunur ve belgeye YAZILIR -
@@ -458,7 +453,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             { alan: 'randevuVerilebilir', op: 'esit', deger: 1 },
           ] },
         });
-        setBolumler(y.satirlar.map(r => ({ id: Number(r.id), ad: String(r.ad ?? '') })));
+        // Departman kaynagi alt birimleri "— Dahiliye" gibi GIRINTILI dondurur
+        //   (257, Bölüm/Görev ekranindaki agac gorunumu icin). Combo'da agac
+        //   yok - onek kirpilir, yoksa her bolum tire ile basliyormus gibi durur.
+        setBolumler(y.satirlar.map(r => ({
+          id: Number(r.id), ad: String(r.ad ?? '').replace(/^—\s*/, '') })));
       } catch { /* bolum listesi okunamazsa combo bos kalir, kayit engellenmez */ }
     })();
   }, [basvuruMu, bolumler.length]);
@@ -477,24 +476,30 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     })();
   }, [basvuruMu, depolar.length]);
 
-  // HEKIM listesi BOLUME BAGLI (kullanici): bolum secilmeden doktor secilemez;
-  //   secilince o bolumun randevu verilebilir personeli gelir.
+  /**
+   * PERSONEL listesi (297): bolum SECILIYSE o bolumle sinirli, BOS ise TUM
+   * randevu verilebilir personel (kullanici: "bolum secilmeden dr listesine
+   * tum doktorlar gelir"). Her satir kendi bolumunu tasir - personel secilince
+   * bolum ondan doldurulur.
+   */
   useEffect(() => {
-    if (!basvuruMu || !bolumId) { setHekimler([]); return }
+    if (!basvuruMu) { setGorevliler([]); return }
     let iptal = false;
     void (async () => {
       try {
+        const kosullar = [
+          { alan: 'durum', op: 'esit' as const, deger: 1 },
+          { alan: 'randevuVerilebilir', op: 'esit' as const, deger: 1 },
+          ...(bolumId ? [{ alan: 'departmanId', op: 'esit' as const, deger: bolumId }] : []),
+        ];
         const y = await api.liste('personel', {
-          sayfa: 1, boyut: 300, sirala: [{ alan: 'unvan', yon: 'asc' }],
-          filtre: { op: 'and', kosullar: [
-            { alan: 'durum', op: 'esit', deger: 1 },
-            { alan: 'randevuVerilebilir', op: 'esit', deger: 1 },
-            { alan: 'departmanId', op: 'esit', deger: bolumId },
-          ] },
+          sayfa: 1, boyut: 500, sirala: [{ alan: 'unvan', yon: 'asc' }],
+          filtre: { op: 'and', kosullar },
         });
-        if (!iptal) setHekimler(y.satirlar.map(r => ({
-          id: Number(r.id), ad: String(r.unvan ?? '') })));
-      } catch { if (!iptal) setHekimler([]) }
+        if (!iptal) setGorevliler(y.satirlar.map(r => ({
+          id: Number(r.id), ad: String(r.unvan ?? ''),
+          bolumId: r.departmanId != null ? Number(r.departmanId) : null })));
+      } catch { if (!iptal) setGorevliler([]) }
     })();
     return () => { iptal = true };
   }, [basvuruMu, bolumId]);
@@ -514,12 +519,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setOdeyenKurumId(y.belge.odeyenKurumId != null ? Number(y.belge.odeyenKurumId) : null);
         setFiyatListesiIdHam(Number(y.belge.fiyatListesiId) || null);
         setBolumId(y.belge.bolumId != null ? Number(y.belge.bolumId) : null);
-        // Odeyen tipi belgede DURMAZ: secili kurumun turunden cozulur.
-        {
-          const kid = y.belge.odeyenKurumId != null ? Number(y.belge.odeyenKurumId) : null;
-          setOdeyenTip(kid ? kurumlar.find(k => k.id === kid)?.tur ?? 0 : 0);
-        }
-        setHekimId(y.belge.hekimId != null ? Number(y.belge.hekimId) : null);
+        setPersonelId(y.belge.personelId != null ? Number(y.belge.personelId) : null);
         setKampanyaId(y.belge.kampanyaId != null ? Number(y.belge.kampanyaId) : null);
         setKampanyaAdi(String(y.belge.kampanyaAdi ?? ''));
         setTeklifDurum(String(y.belge.teklifDurum ?? '1'));
@@ -700,7 +700,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun, faturaTipi,
       // Basvuruda vade yerine odeyen kurum gonderilir (249); bolum ve hekim
       //   de basvuruya ozgu (296) - hepsi belge_basvuru uzantisina yazilir.
-      ...(basvuruMu ? { odeyenKurumId, bolumId, hekimId } : {}),
+      ...(basvuruMu ? { odeyenKurumId, bolumId, personelId } : {}),
       fiyatListesiId,
       // Kampanya belgeye YAZILIR (274): kurum sonradan kampanya degistirse
       //   eski belgenin hangi anlasmayla kesildigi sabit kalir.
@@ -754,13 +754,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     setCari(null);
     setSatirlar([]);
     setHata(null);
-    // BASVURU (296): odeyen kurum ve hekim SIFIRLANIR - siradaki hastanin
-    //   odeyeni/doktoru bir onceki hastadan devralinirsa yanlis kuruma
+    // BASVURU (296): odeyen kurum ve personel SIFIRLANIR - siradaki hastanin
+    //   odeyeni/gorevlisi bir onceki hastadan devralinirsa yanlis kuruma
     //   faturalanir. BOLUM KALIR: kayit kabul ayni poliklinikte ardisik hasta
     //   girer, her seferinde yeniden secmek yorar (kullanici akisi).
-    setHekimId(null);
+    setPersonelId(null);
     setOdeyenKurumId(null);
-    setOdeyenTip(0);
   }
 
   // --------------------------------------------------------- fiyat listesi ----
@@ -1075,9 +1074,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           basvuruMu={basvuruMu} kurumlar={kurumlar}
           odeyenKurumId={odeyenKurumId}
           setOdeyenKurumId={v => void odeyenKurumDegisti(v)}
-          odeyenTip={odeyenTip} setOdeyenTip={setOdeyenTip}
           bolumler={bolumler} bolumId={bolumId} setBolumId={setBolumId}
-          hekimler={hekimler} hekimId={hekimId} setHekimId={setHekimId}
+          gorevliler={gorevliler} personelId={personelId} setPersonelId={setPersonelId}
           teklifDurum={teklifDurum} setTeklifDurum={setTeklifDurum}
           revizeNo={revizeNo} setRevizeNo={setRevizeNo}
           teklifKonusu={teklifKonusu} setTeklifKonusu={setTeklifKonusu}

@@ -997,6 +997,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Kullanici: "İK altına Personel Listesi taşı" - tek ogeli grup, digerleriyle ayni desen.
     kaynak: 'personel', baslik: 'Personel', yol: 'IK › Personel', kartYolu: '/personel',
     aksiyonEkrani: 'personel-liste', cipler: DURUM_CIPLERI,
+    // Ham bolum id API'den geliyor (basvuruda personel -> bolum doldurmak icin)
+    //   ama gridde gorunmesin: orada departmanAdi var.
+    gizliKolonlar: ['departmanId'],
     menuGrup: 'İK', menuAd: 'Personel Listesi', ic: '🧑‍🤝‍🧑', yetkiKodu: 'personel',
   },
   {

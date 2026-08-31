@@ -67,7 +67,7 @@ public sealed partial class BelgeDeposu
                    ok.unvan as odeyen_unvan, ok.vkno as odeyen_vkno,
                    ok.vd as odeyen_vd,
                    b.proje_id, b.sube_id, b.vade_gun, b.giris_depo_id, b.cikis_depo_id,
-                   b.satici_id, bb.bolum_id, bb.hekim_id,
+                   b.satici_id, bb.bolum_id, bb.personel_id,
                    b.ozel_kod, b.aciklama, b.belge_no, kt.ad as tur_adi
               from public.belge b
               left join public.belge_basvuru bb on bb.id = b.id
@@ -221,7 +221,7 @@ public sealed partial class BelgeDeposu
             // Basvurudan turetilen belge bolumu/hekimi tasir (296): fatura
             //   hangi poliklinikte uretildigini kaybetmesin.
             ["bolumId"] = kaynak["bolum_id"],
-            ["hekimId"] = kaynak["hekim_id"],
+            ["personelId"] = kaynak["personel_id"],
             ["ozelKod"] = kaynak["ozel_kod"],
             ["aciklama"] = Kirp($"{kaynak["tur_adi"]} {kaynak["belge_no"]} dönüşümü", 200),
         };

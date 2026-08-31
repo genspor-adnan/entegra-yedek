@@ -274,7 +274,10 @@ public static partial class KaynakKatalogu
             //   = doktor. Bolume gore suzme t.departman ile yapilir.
             new("randevuVerilebilir", "t.randevu_verilebilir", "mantik", "Randevu",
                 Hizalama: "orta", Varsayilan: false),
-            new("departmanId",  "t.departman",     "sayi",  "Bölüm Id", Varsayilan: false),
+            // Ham bolum id ISTEMCIYE GELIR (297): basvuruda personel secilince
+            //   bolum ONDAN doldurulur. Personel gridinde gizli - orada
+            //   departmanAdi var (listeTanimlari.gizliKolonlar).
+            new("departmanId",  "t.departman",     "sayi",  "Bölüm Id"),
             // Telefonla arama (266): personel/hasta aramasi da rakamla bulsun.
             new("telefonHam",   TarafKatalog.TelefonHam, "metin", "Telefon (ham)",
                 Varsayilan: false),

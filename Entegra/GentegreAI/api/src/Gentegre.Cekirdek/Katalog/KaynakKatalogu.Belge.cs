@@ -142,15 +142,24 @@ public static partial class KaynakKatalogu
                 "                           where bb.id = b.id)), '')",
                                                       "metin", "Ödeyen Kurum", Genislik: 180,
                                                       Varsayilan: false, Siralanabilir: false),
+            // ONCE BELGENIN KENDI ALANI (296, belge_basvuru), yoksa randevudan:
+            //   randevusuz acilan basvuruda bilgi artik belgede duruyor; eski
+            //   kayitlarda ve randevudan donusenlerde randevu yedegi kalir.
             new("poliklinik",
-                "coalesce((select d.ad from public.randevu r " +
+                "coalesce((select d.ad from public.belge_basvuru bb " +
+                "            join public.departman d on d.id = bb.bolum_id " +
+                "           where bb.id = b.id), " +
+                "         (select d.ad from public.randevu r " +
                 "            join public.departman d on d.id = r.bolum " +
                 "           where r.belge_id = b.id order by r.id limit 1), '')",
                                                       "metin", "Poliklinik", Genislik: 150,
                                                       Varsayilan: false, Siralanabilir: false,
                                                       Filtrelenebilir: false),
             new("doktor",
-                "coalesce((select hk.unvan from public.randevu r " +
+                "coalesce((select hk.unvan from public.belge_basvuru bb " +
+                "            join public.taraf hk on hk.id = bb.personel_id " +
+                "           where bb.id = b.id), " +
+                "         (select hk.unvan from public.randevu r " +
                 "            join public.taraf hk on hk.id = r.hekim_id " +
                 "           where r.belge_id = b.id order by r.id limit 1), '')",
                                                       "metin", "Doktor", Genislik: 160,

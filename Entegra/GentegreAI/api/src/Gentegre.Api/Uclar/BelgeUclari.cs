@@ -559,7 +559,7 @@ public static class BelgeUclari
         // Basvuru uzantisi (296): basvurulan BOLUM ve karsilayan HEKIM -
         //   belge_basvuru tablosuna yazilir (ana belgede kolonlari yok).
         "teslimAlanId" or "fiyatListesiId" or "teklifDurum" or "odeyenKurumId" or
-        "kampanyaId" or "bolumId" or "hekimId" => "sayi",
+        "kampanyaId" or "bolumId" or "personelId" => "sayi",
 
         "dovizKuru" => "para",
 

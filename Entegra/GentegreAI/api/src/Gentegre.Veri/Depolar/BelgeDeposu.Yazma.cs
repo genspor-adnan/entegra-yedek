@@ -68,7 +68,7 @@ public sealed partial class BelgeDeposu
     /// </summary>
     private static readonly Dictionary<string, string> BasvuruKolonlari = new(StringComparer.Ordinal)
     {
-        ["bolumId"] = "bolum_id", ["hekimId"] = "hekim_id",
+        ["bolumId"] = "bolum_id", ["personelId"] = "personel_id",
         // Odeyen kurum (289) da basvuruya ozgu - 296 ile buraya tasindi.
         ["odeyenKurumId"] = "odeyen_kurum_id"
     };

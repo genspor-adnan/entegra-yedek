@@ -44,7 +44,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     aktifSekme, setAktifSekme, alanHatalari, bilgi, sonuc, kilitli, baslikKilitli, belgeAdi,
     belgeNo, setBelgeNo, tarih, setTarih, tarihEnGec, tarihEnErken, vadeGun, setVadeGun,
     basvuruMu, kurumlar, odeyenKurumId, setOdeyenKurumId,
-    odeyenTip, setOdeyenTip, bolumler, bolumId, setBolumId, hekimler, hekimId, setHekimId,
+    bolumler, bolumId, setBolumId, gorevliler, personelId, setPersonelId,
     cari, satici, depo, setDepo, girisDepo, setGirisDepo, teslimEden, teslimAlan, fisTipi,
     setFisTipi, satirlar, donusumler, setCariArama, setSaticiArama, setPersonelArama,
     kapanmaAlani, bagliSiparisAlani, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
@@ -73,6 +73,17 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
                   : belgeAdi !== 'Belge' ? belgeAdi : 'Fatura';
   /** Numara etiketi: basvuruda "Protokol No", digerlerinde "<tur> No". */
   const numaraSozu = basvuruMu ? 'Protokol' : belgeSozu;
+
+  /** Tarih hucresi: basvuruda bolum/hekimden SONRA cizildigi icin degisken. */
+  const tarihHucresi = (
+    <label className="alan">
+      <span className="etiket">{belgeSozu} Tarihi</span>
+      <input type="datetime-local" value={tarih} disabled={baslikKilitli}
+             max={tarihEnGec} min={tarihEnErken}
+             onChange={e => setTarih(e.target.value)} />
+      {alanHatalari.belgeTarihi && <span className="alan-hata">{alanHatalari.belgeTarihi}</span>}
+    </label>
+  );
 
   /**
    * Kapanma ("bu belgeden ne kadari faturalandi") hangi turde ANLAMLI:
@@ -120,7 +131,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       />
     ) : (
       <TarafAlani
-        etiket={alisMi ? 'Tedarikçi (Cari)' : 'Müşteri (Cari)'}
+        etiket={basvuruMu ? 'Hasta' : alisMi ? 'Tedarikçi (Cari)' : 'Müşteri (Cari)'}
         deger={cari?.unvan}
         kilitli={kilitli}
         zorunlu
@@ -136,6 +147,9 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         turlerde numarayi kayitta sunucu verir - alan salt-okunur.
         Teklifte hucre IKIYE BOLUNUR (220, kullanici): solda numara, sagda
         REVIZE NO - serbest kullanici editi, varsayilan bos. */}
+    {/* BASVURUDA numara hucresi YOK (kullanici): protokol no arac cubugunda
+        rozet olarak duruyor - baslikta ikinci kez yer kaplamasin. */}
+    {!basvuruMu && (
     <label className="alan">
       <span className={`etiket${disNumarali && !kilitli ? ' zorunlu-isaret' : ''}`}>
         {disNumarali ? 'Tedarikçi Fatura No'
@@ -164,15 +178,12 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       )}
       {alanHatalari.belgeNo && <span className="alan-hata">{alanHatalari.belgeNo}</span>}
     </label>
+    )}
 
-    {/* --- 3) TARIH --- */}
-    <label className="alan">
-      <span className="etiket">{belgeSozu} Tarihi</span>
-      <input type="datetime-local" value={tarih} disabled={baslikKilitli}
-             max={tarihEnGec} min={tarihEnErken}
-             onChange={e => setTarih(e.target.value)} />
-      {alanHatalari.belgeTarihi && <span className="alan-hata">{alanHatalari.belgeTarihi}</span>}
-    </label>
+    {/* --- 3) TARIH ---
+        BASVURUDA hucre sirasi Hasta · Bölüm · Hekim · Tarih (kullanici): tarih
+        3. degil 4. sirada cizilir, asagida bolum/hekimden SONRA. */}
+    {!basvuruMu && tarihHucresi}
 
     {/* --- 3b) TEKLIF DURUMU (218) - tarih sagina (kullanici). */}
     {teklifMi && (
@@ -203,7 +214,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
           : <span className="rozet">gönderilmedi</span>}
       </span>
     </label>
-    ) : depoBelgesi || stokFisiMi || teklifMi ? null : kapanmaGoster ? kapanmaAlani : (
+    ) : depoBelgesi || stokFisiMi || teklifMi || basvuruMu ? null : kapanmaGoster ? kapanmaAlani : (
       /* e-Belgesi de kapanmasi da olmayan tur (tahakkuk): hucre BOS BIRAKILIR.
          Yoksa temsilci yukari, 1. satirin sonuna kayardi - kullanici temsilciyi
          her turde CARININ ALTINDA istiyor. Teklifte yer tutucuya gerek yok:
@@ -226,9 +237,11 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
                 onChange={e => {
                   const y = e.target.value ? Number(e.target.value) : null;
                   setBolumId?.(y);
-                  // Bolum degisince eski hekim gecersiz: baska bolumun
-                  //   doktoru secili kalmasin.
-                  setHekimId?.(null);
+                  // Secili personel YENI BOLUME AIT DEGILSE birakilir; ait ise
+                  //   korunur (personelden bolume dogru doldurmada secim
+                  //   kendini iptal etmesin).
+                  const g = (gorevliler ?? []).find(x => x.id === personelId);
+                  if (y && g && (g.bolumId ?? null) !== y) setPersonelId?.(null);
                 }}>
           <option value="">— Seçiniz —</option>
           {(bolumler ?? []).map(b2 => (
@@ -261,20 +274,31 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         carili belgelerde mal cikis/giris deposu. Tahakkukta depo YOK: stok
         etkilemez (kasa_islem_turu.stok_etkiler=0). */}
     {basvuruMu ? (
-      /* Depo yerine DOKTOR (kullanici): basvuruyu karsilayan hekim. Liste
-         SECILI BOLUMDEN gelir - bolum secilmeden secim yapilamaz. Depo
-         basvuruda dip bolumde (fiyat listesinin altinda) durur. */
+      /* Depo yerine BASVURUYU KARSILAYAN kisi (297): hekim olabilir,
+         diyetisyen/teknisyen de olabilir. Ardindan TARIH gelir - Ödeyen Kurum
+         boylece alt satirin basina duser (kullanici). Depo dip bolumde. */
+      <>
       <label className="alan">
-        <span className="etiket">Doktor</span>
-        <select value={hekimId ?? ''} disabled={kilitli || !bolumId}
-                title={!bolumId ? 'Önce bölüm seçin' : undefined}
-                onChange={e => setHekimId?.(e.target.value ? Number(e.target.value) : null)}>
-          <option value="">{bolumId ? '— Seçiniz —' : '— Önce bölüm —'}</option>
-          {(hekimler ?? []).map(h => (
-            <option key={h.id} value={h.id}>{h.ad}</option>
+        <span className="etiket">Hekim / Personel</span>
+        <select value={personelId ?? ''} disabled={kilitli}
+                onChange={e => {
+                  const y = e.target.value ? Number(e.target.value) : null;
+                  setPersonelId?.(y);
+                  // PERSONELDEN BOLUME (kullanici): once doktor secilirse bolum
+                  //   onun bolumune gecer - kayit kabul iki alani ayri ayri
+                  //   doldurmak zorunda kalmasin.
+                  const g = (gorevliler ?? []).find(x => x.id === y);
+                  if (g?.bolumId) setBolumId?.(g.bolumId);
+                }}>
+          <option value="">— Seçiniz —</option>
+          {(gorevliler ?? []).map(g => (
+            <option key={g.id} value={g.id}>{g.ad}</option>
           ))}
         </select>
       </label>
+      {/* 4. hucre TARIH: Hasta · Bölüm · Hekim · Tarih (kullanici). */}
+      {tarihHucresi}
+      </>
     ) : stokFisiMi ? (
       <GenLookup
         kaynak="depo"
@@ -347,38 +371,18 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         (kullanici: "basvuruda vade yerine Ödeyen Kurum olsun ve taraf_kurum
         listelensin"). Bos birakilirsa hasta kendi oder. */}
     {basvuruMu ? (
-      /* ODEYEN TIPI + KURUM yan yana (kullanici): tip kurumlari suzer
-         (1 Özel · 2 ÖSS · 3 SGK), "kendi öder"de kurum secilmez. Tip belgeye
-         AYRI yazilmaz - kurumun kendi turunden okunur. */
+      /* ODEYEN KURUM: bos ise hasta kendi oder. Ayri bir "ödeyen tipi"
+         combosu DENENDI ve KALDIRILDI (kullanici): kurumun turu zaten
+         kendisinde, iki secim ayni bilgiyi iki kez sordurtuyordu. */
       <label className="alan">
-        <span className="etiket">Ödeyen</span>
-        <span className="ikili">
-          {/* Tip DAR, kurum adi genis kalsin: esit bolusmede "Sosyal Güvenlik
-              Kurumu" kirpiliyordu. */}
-          <select value={odeyenTip ?? 0} disabled={kilitli}
-                  style={{ flex: '0 0 108px', minWidth: 0 }}
-                  onChange={e => {
-                    const t = Number(e.target.value);
-                    setOdeyenTip?.(t);
-                    // Tip degisince secili kurum artik listede olmayabilir.
-                    const k = (kurumlar ?? []).find(x => x.id === odeyenKurumId);
-                    if (t === 0 || (k && (k.tur ?? 0) !== t)) setOdeyenKurumId?.(null);
-                  }}>
-            <option value={0}>Hasta kendi öder</option>
-            <option value={1}>Özel (Kendi)</option>
-            <option value={2}>ÖSS</option>
-            <option value={3}>SGK</option>
-          </select>
-          <select value={odeyenKurumId ?? ''} disabled={kilitli || !odeyenTip}
-                  style={{ flex: 1, minWidth: 0 }}
-                  title={!odeyenTip ? 'Önce ödeyen tipi seçin' : undefined}
-                  onChange={e => setOdeyenKurumId?.(e.target.value ? Number(e.target.value) : null)}>
-            <option value="">{odeyenTip ? '— Kurum seçin —' : '— Kurum yok —'}</option>
-            {(kurumlar ?? [])
-              .filter(k => !odeyenTip || (k.tur ?? 0) === odeyenTip)
-              .map(k => <option key={k.id} value={k.id}>{k.ad}</option>)}
-          </select>
-        </span>
+        <span className="etiket">Ödeyen Kurum</span>
+        <select value={odeyenKurumId ?? ''} disabled={kilitli}
+                onChange={e => setOdeyenKurumId?.(e.target.value ? Number(e.target.value) : null)}>
+          <option value="">— Hasta kendi öder —</option>
+          {(kurumlar ?? []).map(k => (
+            <option key={k.id} value={k.id}>{k.ad}</option>
+          ))}
+        </select>
       </label>
     ) : bilgi.vade && (
       <label className="alan">
@@ -396,7 +400,9 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         Kapanma burada YALNIZ e-Belgeli turlerde: e-Belgesizde 4. hucreyi zaten
         o dolduruyor (temsilci carinin altina insin diye).
         Teklifte "Bağlı Sipariş" cizilmez (kullanici) - teklif zincirin BASI. */}
-    {!depoBelgesi && !stokFisiMi && !teklifMi && bagliSiparisAlani}
+    {/* BASVURUDA "Kaynak Belge" YOK (kullanici): basvuru zincirin BASI, her
+        zaman bos duruyordu - hucre yer kapliyordu. */}
+    {!depoBelgesi && !stokFisiMi && !teklifMi && !basvuruMu && bagliSiparisAlani}
     {!eBelgeYok && kapanmaGoster && kapanmaAlani}
   </div>
 </div>
@@ -475,16 +481,18 @@ export interface BelgeBaslikProps {
   kurumlar?: { id: number; ad: string; tur?: number }[];
   odeyenKurumId?: number | null;
   setOdeyenKurumId?(v: number | null): void;
-  /** ODEYEN TIPI (296): 0 kendi · 1 Özel · 2 ÖSS · 3 SGK - kurum listesini suzer. */
-  odeyenTip?: number;
-  setOdeyenTip?(v: number): void;
-  /** BASVURU (296): bolum ve HEKIM (hekim listesi secili boluma gore gelir). */
+  /**
+   * BASVURU (296/297): bolum ve basvuruyu KARSILAYAN PERSONEL - hekim olmak
+   * zorunda degil. Iki alan BIRBIRINI doldurur (kullanici): bolum secilince
+   * liste o bolumle sinirlanir, personel secilince bolum ONUN bolumune gecer;
+   * bolum bosken TUM randevu verilebilir personel listelenir.
+   */
   bolumler?: { id: number; ad: string }[];
   bolumId?: number | null;
   setBolumId?(v: number | null): void;
-  hekimler?: { id: number; ad: string }[];
-  hekimId?: number | null;
-  setHekimId?(v: number | null): void;
+  gorevliler?: { id: number; ad: string; bolumId?: number | null }[];
+  personelId?: number | null;
+  setPersonelId?(v: number | null): void;
   cari: { id: number; unvan: string } | null;
   satici: Secim | null;
   depo: Secim | null;
