@@ -1454,3 +1454,12 @@ input.skt-gecmis {
 /* Adres gridi TAM GENISLIK - ustteki iki kutunun altinda (305). */
 .hekim-adres-blok { margin-top: 12px }
 .hekim-adres-blok .kagrup { margin-bottom: 0 }
+
+/* Hekim Bilgisi kutusundaki editler %10 dar (kullanici): etiketler uzun
+   ("Diploma / Tescil No"), kutu genisledigi icin girdiler gereginden uzun
+   duruyordu. Kutunun kendisi genis kalir, iceride nefes payi olur. */
+.personel-iletisim-yerlesim.esit-ikili > .kasira > .kagrup:last-child .alan input,
+.personel-iletisim-yerlesim.esit-ikili > .kasira > .kagrup:last-child .alan select,
+.personel-iletisim-yerlesim.esit-ikili > .kasira > .kagrup:last-child .alan textarea {
+  width: 90%;
+}
