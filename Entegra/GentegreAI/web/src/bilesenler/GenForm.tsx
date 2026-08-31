@@ -203,7 +203,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       // RANDEVU alanlari YALNIZ HBYS modunda (252, kullanici): ERP kurulumunda
       //   personelin "randevu verilebilir" olmasi ve randevu duzeni anlamsiz -
       //   kart hic gostermez. Urun modu 2 = HBYS (referans genel.urun_modu).
-      const m: KartMetaYaniti = kullanici?.urunModu === 2 ? zorunlulu : {
+      let m: KartMetaYaniti = kullanici?.urunModu === 2 ? zorunlulu : {
         ...zorunlulu,
         alanlar: zorunlulu.alanlar.filter(a => a.ad !== 'randevuVerilebilir'),
         detaylar: zorunlulu.detaylar.filter(d => d.ad !== 'randevuAyar'),
@@ -265,6 +265,25 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           gelen[a.ad] = a.tip === 'mantik' ? Number(d) === 1 : (d === null || d === undefined ? '' : String(d));
         });
         if (kaynak === 'dis-hekim') setUnvanHam(String(k.kart.unvan ?? '').trim());
+        // SECILI kodun adi listede yoksa EKLE: kod tablolari yalniz AKTIF
+        //   satirlari gonderir; kayitta pasiflesmis bir deger (or. pasif
+        //   personel temsilci olarak duruyorsa) comboda bos gorunur ve kayit
+        //   dogru degeri tasidigi halde "bos" izlenimi verirdi. Sunucu bu tek
+        //   degerin adini zaten kodAd ile gonderiyor.
+        if (k.kodAd) {
+          const eksikli = m.alanlar.map(a => {
+            const ek = k.kodAd?.[a.ad];
+            if (!ek) return a;
+            const yeni = { ...(a.kodlar ?? {}) };
+            let degisti = false;
+            Object.entries(ek).forEach(([anahtar, ad]) => {
+              if (!(anahtar in yeni)) { yeni[anahtar] = ad; degisti = true }
+            });
+            return degisti ? { ...a, kodlar: yeni } : a;
+          });
+          m = { ...m, alanlar: eksikli };
+          setMeta(m);
+        }
         setDeger(gelen);
         setIlkDeger(gelen);
         // KAYITLI kur tarihseldir - acilista bugunun kuruyla EZILMEMELI. Yuklenen
