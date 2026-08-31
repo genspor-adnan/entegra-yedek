@@ -21,6 +21,7 @@ import {
 } from './kartSekmeleri';
 import { TekKayit } from './TekKayit';
 import { GenGrid } from './GenGrid';
+import { HekimGonderimOzeti } from './radyoloji/HekimGonderimOzeti';
 export { Modal };
 import { RolYetkiMatrisi } from './RolYetkiMatrisi';
 import { ekKaydetleriCalistir, ekKaydetTemizle } from './kartEkKaydet';
@@ -1042,13 +1043,18 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
             Hekim kaydedildikten sonra gönderdiği tetkikler burada listelenir.
           </div>
         ) : (
-          <GenGrid
-            kaynak="radyoloji-istem"
-            gomulu
-            seritGizli
-            boyut={25}
-            sabitFiltre={{ alan: 'istekHekimId', op: 'esit', deger: id as number }}
-          />
+          <>
+            {/* Ozet + modalite dagilimi GRIDIN USTUNDE: satirlar "hangi
+                tetkik", ozet "ne kadar / hangi cihaz" sorusunu cevaplar. */}
+            <HekimGonderimOzeti hekimId={id as number} />
+            <GenGrid
+              kaynak="radyoloji-istem"
+              gomulu
+              seritGizli
+              boyut={25}
+              sabitFiltre={{ alan: 'istekHekimId', op: 'esit', deger: id as number }}
+            />
+          </>
         )
       )}
 

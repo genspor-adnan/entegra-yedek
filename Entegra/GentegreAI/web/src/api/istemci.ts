@@ -640,6 +640,11 @@ export const api = {
   radyolojiKonsultasyonlar: (istemId: number) =>
     istek<Record<string, unknown>[]>(`/api/radyoloji/istem/${istemId}/konsultasyonlar`),
 
+  /** Dis hekim gonderim ozeti (305): kutular + modalite dagilimi. */
+  radyolojiHekimOzeti: (hekimId: number) =>
+    istek<{ ozet: Record<string, unknown>; dagilim: Record<string, unknown>[] }>(
+      `/api/radyoloji/hekim/${hekimId}/ozet`),
+
   radyolojiAddendum: (raporId: number) =>
     gonder<{ raporId: number }>(`/api/radyoloji/rapor/${raporId}/addendum`, {}),
 

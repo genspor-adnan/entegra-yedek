@@ -115,6 +115,51 @@ public static class RadyolojiUclari
             return Results.Ok(new { tetkikler, hekimler, disHekimler, gecmis });
         });
 
+        // ------------------------------------- dış hekim gönderim özeti ----
+        // Hekim kartinin "Gönderim Geçmişi" sekmesindeki ozet kutular ve
+        //   modalite dagilimi (mockup dis_doktor_karti.html). Grid zaten
+        //   satirlari gosteriyor; buradaki soru "ne kadar, ne zaman, hangi
+        //   cihazda" - satirlari istemcide toplamak sayfalama yuzunden
+        //   yanlis sonuc verirdi.
+        grup.MapGet("/hekim/{id:int}/ozet", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var ozet = await baglanti.TekAsync("""
+                select count(*) as toplam,
+                       count(*) filter (
+                           where coalesce(i.cekim_tarihi, i.ekleme_tarihi)
+                                 >= date_trunc('month', current_date)) as "buAy",
+                       count(*) filter (where i.durum = 5) as raporlanan,
+                       count(*) filter (where i.durum between 1 and 4) as bekleyen,
+                       coalesce(sum(s.tutar), 0) as tutar,
+                       max(coalesce(i.cekim_tarihi, i.ekleme_tarihi)) as "sonGonderim"
+                  from public.radyoloji_istem i
+                  left join public.belge_satir s on s.id = i.belge_satir_id
+                 where i.istek_hekim_id = @p0 and i.durum > 0
+                """, null, [id], Satir, iptal);
+
+            // Modalite dagilimi: hangi cihaz bu hekim icin kritik - MR
+            //   kapasitesi planlanirken en cok gonderen hekimler buradan okunur.
+            var dagilim = await baglanti.ListeAsync("""
+                select coalesce(kd.ad, 'Diğer') as ad, count(*) as adet
+                  from public.radyoloji_istem i
+                  left join public.kod_liste kl on kl.kod = 'rad.modalite'
+                  left join public.kod_deger kd on kd.liste_id = kl.id
+                                               and kd.deger = i.modalite
+                 where i.istek_hekim_id = @p0 and i.durum > 0
+                 group by coalesce(kd.ad, 'Diğer')
+                 order by count(*) desc
+                """, null, [id], Satir, iptal);
+
+            return Results.Ok(new { ozet, dagilim });
+        });
+
         // --------------------------------------------------- istem açma ----
         // Mockup: radyoloji_hekim_istem.html (iç istem) ve
         //   radyoloji_kayit_kabul.html (dış istem). İKİSİ AYNI UÇ: fark yalnız
