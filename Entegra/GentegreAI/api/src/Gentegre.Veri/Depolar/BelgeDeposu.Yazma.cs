@@ -70,7 +70,14 @@ public sealed partial class BelgeDeposu
     {
         ["bolumId"] = "bolum_id", ["personelId"] = "personel_id",
         // Odeyen kurum (289) da basvuruya ozgu - 296 ile buraya tasindi.
-        ["odeyenKurumId"] = "odeyen_kurum_id"
+        ["odeyenKurumId"] = "odeyen_kurum_id",
+        // Basvuru sekmesi (298): kayit kabulun doldurdugu alanlar.
+        ["basvuruTuru"] = "basvuru_turu", ["gelisSekli"] = "gelis_sekli",
+        ["gelisNedeni"] = "gelis_nedeni", ["oda"] = "oda", ["siraNo"] = "sira_no",
+        ["refakatci"] = "refakatci",
+        ["provizyonNo"] = "provizyon_no", ["provizyonTipi"] = "provizyon_tipi",
+        ["mustehaklik"] = "mustehaklik", ["sevkli"] = "sevkli",
+        ["sevkKurum"] = "sevk_kurum"
     };
 
     /// <summary>

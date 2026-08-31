@@ -23,6 +23,12 @@ export interface BelgeGirdisi {
   /** Basvurunun bolumu ve karsilayan personeli (296/297). */
   bolumId?: number | null;
   personelId?: number | null;
+  /**
+   * BASVURU SEKMESI (298) alanlari - belge_basvuru uzantisina yazilir.
+   * Tek tek saymak yerine nesne olarak tasinir: liste zamanla buyuyecek,
+   * her yeni alanda uc dosyaya dokunmak gerekmesin.
+   */
+  basvuruAlanlari?: Record<string, string | number | null | undefined>;
   /** Belgeye uygulanan fiyat listesi (205). */
   fiyatListesiId: number | null;
   /**
@@ -135,7 +141,7 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
 /** API §4 istek govdesi. `dolu` = stok/hizmet secilmis satirlar. */
 export function belgeGovdesi(g: BelgeGirdisi, dolu: SatirDurumu[], taslak: boolean) {
   const { tur, cari, tarih, depoBelgesi, stokFisiMi, seri, disNumarali, belgeNo,
-          vadeGun, odeyenKurumId, bolumId, personelId,
+          vadeGun, odeyenKurumId, bolumId, personelId, basvuruAlanlari,
           subeId, fisCikisMi, depo, girisDepo, alisMi, faturaMi, fisTipi, faturaTipi,
           raporDovizi, ekstreDovizi, belgeKuru, yerelPara, satici,
           senaryo, irsaliyeMi, teslimSekli, aracPlaka, soforAd, sevkTarihi,
@@ -163,6 +169,12 @@ return {
     ...(odeyenKurumId !== undefined ? { odeyenKurumId } : {}),
     ...(bolumId !== undefined ? { bolumId } : {}),
     ...(personelId !== undefined ? { personelId } : {}),
+    // Basvuru sekmesi alanlari (298): bos/undefined olanlar ELENIR - sunucu
+    //   "istekte yok" ile "bosaltildi" ayrimini yapabilsin. SALT OKUNUR
+    //   alanlar (mustehaklik sorgusunun zamani) gonderilmez: sunucu yazar,
+    //   istekte gorunurse "Bilinmeyen belge alani" ile reddedilir.
+    ...Object.fromEntries(Object.entries(basvuruAlanlari ?? {})
+      .filter(([k, v]) => v !== undefined && k !== 'mustehaklikZaman')),
     fiyatListesiId,
     ...(kampanyaId !== undefined ? { kampanyaId } : {}),
     ...(teklifDurum !== undefined ? { teklifDurum } : {}),

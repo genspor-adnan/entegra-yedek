@@ -73,6 +73,13 @@ public sealed partial class BelgeDeposu
                    --   girilebilsin diye BELGEDE tutulur, randevudan okunmaz.
                    bb.bolum_id as "bolumId", coalesce(bl.ad, '') as "bolumAdi",
                    bb.personel_id as "personelId", coalesce(hk.unvan, '') as "personelAdi",
+                   -- Basvuru sekmesi alanlari (298).
+                   bb.basvuru_turu as "basvuruTuru", bb.gelis_sekli as "gelisSekli",
+                   bb.gelis_nedeni as "gelisNedeni", bb.oda, bb.sira_no as "siraNo",
+                   bb.refakatci, bb.provizyon_no as "provizyonNo",
+                   bb.provizyon_tipi as "provizyonTipi", bb.mustehaklik,
+                   bb.mustehaklik_zaman as "mustehaklikZaman",
+                   bb.sevkli, bb.sevk_kurum as "sevkKurum",
                    b.vade_gun as "vadeGun",
                    -- Basvuruda (249) vade yerine odeyen kurum gosterilir.
                    bb.odeyen_kurum_id as "odeyenKurumId",

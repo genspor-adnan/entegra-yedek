@@ -22,6 +22,10 @@ import {
   TasiyiciSekmesi, EBelgeSekmesi, FaturalamaSekmesi,
 } from '../bilesenler/belge/BelgeSekmeleri';
 import { KalemSekmesi, TahsilatSekmesi } from '../bilesenler/belge/KalemSekmesi';
+import {
+  BasvuruSekmesi, ProvizyonSekmesi, OncekiBasvurular, HastaSeridi,
+  type BasvuruBilgi,
+} from '../bilesenler/belge/BasvuruSekmesi';
 import { IadeSatirPenceresi } from '../bilesenler/belge/IadeSatirPenceresi';
 import { BelgeAracCubugu } from '../bilesenler/belge/BelgeAracCubugu';
 import { BelgeBaslik } from '../bilesenler/belge/BelgeBaslik';
@@ -140,6 +144,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    */
   const [bolumId, setBolumId] = useState<number | null>(null);
   const [personelId, setPersonelId] = useState<number | null>(null);
+  /**
+   * BASVURU SEKMESI (298) alanlari TEK NESNEDE: on kadar alan icin ayri ayri
+   * state tutmak karti sisiriyordu; hepsi belge_basvuru uzantisina gider.
+   */
+  const [basvuruBilgi, setBasvuruBilgi] = useState<BasvuruBilgi>({});
   const [bolumler, setBolumler] = useState<{ id: number; ad: string }[]>([]);
   /** Basvuruda depo combosu dip bolumde cizilir - liste burada tutulur. */
   const [depolar, setDepolar] = useState<{ id: number; ad: string }[]>([]);
@@ -520,6 +529,21 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setFiyatListesiIdHam(Number(y.belge.fiyatListesiId) || null);
         setBolumId(y.belge.bolumId != null ? Number(y.belge.bolumId) : null);
         setPersonelId(y.belge.personelId != null ? Number(y.belge.personelId) : null);
+        setBasvuruBilgi({
+          basvuruTuru: y.belge.basvuruTuru != null ? Number(y.belge.basvuruTuru) : null,
+          gelisSekli: y.belge.gelisSekli != null ? Number(y.belge.gelisSekli) : null,
+          gelisNedeni: y.belge.gelisNedeni != null ? Number(y.belge.gelisNedeni) : null,
+          oda: y.belge.oda != null ? Number(y.belge.oda) : null,
+          siraNo: String(y.belge.siraNo ?? ''),
+          refakatci: String(y.belge.refakatci ?? ''),
+          provizyonNo: String(y.belge.provizyonNo ?? ''),
+          provizyonTipi: y.belge.provizyonTipi != null ? Number(y.belge.provizyonTipi) : null,
+          mustehaklik: y.belge.mustehaklik != null ? Number(y.belge.mustehaklik) : 0,
+          mustehaklikZaman: y.belge.mustehaklikZaman
+            ? String(y.belge.mustehaklikZaman) : null,
+          sevkli: y.belge.sevkli != null ? Number(y.belge.sevkli) : 0,
+          sevkKurum: String(y.belge.sevkKurum ?? ''),
+        });
         setKampanyaId(y.belge.kampanyaId != null ? Number(y.belge.kampanyaId) : null);
         setKampanyaAdi(String(y.belge.kampanyaAdi ?? ''));
         setTeklifDurum(String(y.belge.teklifDurum ?? '1'));
@@ -700,7 +724,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun, faturaTipi,
       // Basvuruda vade yerine odeyen kurum gonderilir (249); bolum ve hekim
       //   de basvuruya ozgu (296) - hepsi belge_basvuru uzantisina yazilir.
-      ...(basvuruMu ? { odeyenKurumId, bolumId, personelId } : {}),
+      ...(basvuruMu
+        ? { odeyenKurumId, bolumId, personelId, basvuruAlanlari: basvuruBilgi }
+        : {}),
       fiyatListesiId,
       // Kampanya belgeye YAZILIR (274): kurum sonradan kampanya degistirse
       //   eski belgenin hangi anlasmayla kesildigi sabit kalir.
@@ -760,6 +786,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     //   girer, her seferinde yeniden secmek yorar (kullanici akisi).
     setPersonelId(null);
     setOdeyenKurumId(null);
+    setBasvuruBilgi({});
   }
 
   // --------------------------------------------------------- fiyat listesi ----
@@ -1059,6 +1086,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         </div>
       )}
 
+        {/* SECILI HASTA SERIDI (298, mockup): basligin USTUNDE - kabul memuru
+            dogru hastada oldugunu surekli gorsun. */}
+        {basvuruMu && <HastaSeridi tarafId={cari?.id} />}
+
         <BelgeBaslik
           aktifSekme={aktifSekme ?? ''}
           /* Sekme degisince onceki hata kutusu TEMIZLENIR: kalemsiz kartta
@@ -1187,6 +1218,31 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         )}
 
         {/* ============================================= YORUM / MEDYA ==== */}
+        {/* BASVURU SEKMELERI (298) - mockup: Ekranlar/kayit_kabul_basvuru.html */}
+        {aktifSekme === 'basvuru' && (
+          <BasvuruSekmesi
+            bilgi={basvuruBilgi}
+            degistir={y => setBasvuruBilgi(x => ({ ...x, ...y }))}
+            kilitli={kilitli}
+            protokolNo={String(sonuc?.belge.belgeNo ?? '')}
+            randevuBilgi={sonuc?.belge.randevuOzet
+              ? String(sonuc.belge.randevuOzet) : undefined}
+          />
+        )}
+
+        {aktifSekme === 'provizyon' && (
+          <ProvizyonSekmesi
+            bilgi={basvuruBilgi}
+            degistir={y => setBasvuruBilgi(x => ({ ...x, ...y }))}
+            kilitli={kilitli}
+            kurumAdi={kurumlar.find(k => k.id === odeyenKurumId)?.ad}
+          />
+        )}
+
+        {aktifSekme === 'gecmis' && (
+          <OncekiBasvurular tarafId={cari?.id} haricBelgeId={kayitliId || undefined} />
+        )}
+
         {aktifSekme === 'yorum' && (
           <div className="kagrup">
             <h6>Yorum / Medya</h6>

@@ -129,7 +129,13 @@ export const KAPANMA_ETIKET: Record<number, { ad: string; sinif: string }> = {
 export const SEKMELER: {
   anahtar: string; baslik: string;
   irsaliye?: boolean; faturaYok?: boolean; faturaMi?: boolean;
+  /** YALNIZ BASVURUDA cizilir (298): kayit kabul akisina ozel sekmeler. */
+  basvuru?: boolean;
 }[] = [
+  // BASVURU (298, Ekranlar/kayit_kabul_basvuru.html): kabul bilgileri
+  //   Ücretlendirme'nin SOLUNDA - once "kim, neden, hangi klinige geldi",
+  //   sonra ucret.
+  { anahtar: 'basvuru',  baslik: 'Başvuru', basvuru: true },
   { anahtar: 'kalem',    baslik: 'Kalemler' },
   { anahtar: 'tasiyici', baslik: 'Taşıyıcı / Sevkiyat', irsaliye: true },
   { anahtar: 'ebelge',   baslik: 'e-Belge' },
@@ -142,6 +148,10 @@ export const SEKMELER: {
   { anahtar: 'imza',     baslik: 'İmza / Teslim', irsaliye: true },
   // "Yorum / Medya" -> "Resim / Doküman" (kullanici, 218).
   { anahtar: 'yorum',    baslik: 'Resim / Doküman' },
+  // Provizyon ve gecmis EN SONDA (kullanici): biri kurum onayi, digeri
+  //   hastanin oykusu - gunluk kabul akisinin disinda kalirlar.
+  { anahtar: 'provizyon', baslik: 'Provizyon',         basvuru: true },
+  { anahtar: 'gecmis',    baslik: 'Önceki Başvurular', basvuru: true },
 ];
 
 /** Teklif durumu (218) - belge.teklif_durum kod uzayi. */

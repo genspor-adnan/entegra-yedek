@@ -327,6 +327,21 @@ table.grid tr.flt input {
 
 /* --------------------------------------------------------- kart modali ---- */
 /* Mockup'ta kart MODAL acilir: .kaperde (perde) + .kawin (ortali pencere). */
+/* SECILI HASTA SERIDI (298): kabul boyunca kart basliginin ustunde durur. */
+.hasta-serit {
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  padding: 7px 12px; margin-bottom: 8px;
+  background: var(--yuz2, #f2f6fb); border: 1px solid var(--cizgi); border-radius: 6px;
+}
+.hasta-serit .avatar {
+  width: 34px; height: 34px; border-radius: 50%; flex: 0 0 34px;
+  display: grid; place-items: center; font-weight: 700; font-size: 12px;
+  background: var(--vurgu, #2b6cb0); color: #fff;
+}
+.hasta-serit .hs { display: flex; flex-direction: column; line-height: 1.35 }
+.hasta-serit .hs .k { font-size: 10.5px; color: var(--sonuk, #6b7a8d) }
+.hasta-serit .hs .v { font-size: 12.5px; font-weight: 600 }
+
 .kaperde { position: fixed; inset: 0; background: rgba(20, 40, 70, .45); z-index: 320 }
 /* Mesaj/onay penceresi HER ZAMAN en ustte: kart modali acikken sorulan onay
    ayni z-index'te kalip arkada kayboluyordu. */

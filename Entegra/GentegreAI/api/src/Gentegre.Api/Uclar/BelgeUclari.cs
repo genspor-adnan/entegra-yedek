@@ -559,7 +559,10 @@ public static class BelgeUclari
         // Basvuru uzantisi (296): basvurulan BOLUM ve karsilayan HEKIM -
         //   belge_basvuru tablosuna yazilir (ana belgede kolonlari yok).
         "teslimAlanId" or "fiyatListesiId" or "teklifDurum" or "odeyenKurumId" or
-        "kampanyaId" or "bolumId" or "personelId" => "sayi",
+        // Basvuru sekmesi (298) - kod/sayi alanlari.
+        "kampanyaId" or "bolumId" or "personelId" or "basvuruTuru" or "gelisSekli"
+        or "gelisNedeni" or "oda" or "provizyonTipi" or "mustehaklik" or "sevkli"
+            => "sayi",
 
         "dovizKuru" => "para",
 
@@ -571,7 +574,9 @@ public static class BelgeUclari
         // Teklif revize no (220) - serbest metin.
         "revizeNo" or "teklifKonusu" or "teklifTeslim" or
         "gondericiUnvan" or "gondericiVkno" or "gondericiAlias" or
-        "aracPlaka" or "soforAd" or "soforTckn" => "metin",
+        // Basvuru sekmesi (298) - metin alanlari.
+        "aracPlaka" or "soforAd" or "soforTckn"
+        or "siraNo" or "refakatci" or "provizyonNo" or "sevkKurum" => "metin",
 
         _ => null
     };

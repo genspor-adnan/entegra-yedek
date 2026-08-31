@@ -412,7 +412,9 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     yalniz irsaliyede anlamli, o yuzden suzuluyor. */}
 <div className="katab">
   {SEKMELER
-    .filter(x => (!x.irsaliye || irsaliyeMi)
+    // Basvuruya ozel sekmeler (298) yalniz basvuruda; diger turlerde cizilmez.
+    .filter(x => (!x.basvuru || basvuruMu)
+              && (!x.irsaliye || irsaliyeMi)
               && (!x.faturaYok || !(faturaMi || tahakkukMu))
               // Tahsilat: fatura/fis, tahakkuk VE SIPARIS (kullanici) - siparis
               //   avansi/on odemesi de bu sekmeden girilir, fatura kartindaki
