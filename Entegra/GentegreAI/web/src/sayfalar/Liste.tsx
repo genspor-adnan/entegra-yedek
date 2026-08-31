@@ -12,6 +12,8 @@ import { kampanyaKalemFiyati } from './belgeKalem';
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
+import { IstemModali } from '../bilesenler/radyoloji/IstemModali';
+import { TarafArama } from '../bilesenler/TarafArama';
 import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
 import { UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
 import { UtsGenelBildirimModali, type UtsBildirimTuru }
@@ -67,6 +69,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // Kart kaydedilince (ekleme ya da duzenleme) grid'i yeniden yukletmek icin - GenForm
   //   onKaydedildi'de bir arttirilir, GenGrid bu degisimi izleyip yukle() cagirir.
   const [yenile, setYenile] = useState(0);
+  /**
+   * RADYOLOJI ISTEM ACMA (304): listeden acilinca once HASTA secilir
+   * (istem hastaya aittir), sonra tetkik modali gelir.
+   */
+  const [istemHastaArama, setIstemHastaArama] = useState(false);
+  const [istemModali, setIstemModali] = useState<
+    { hastaId: number; hastaAdi: string; disIstem: boolean } | null>(null);
   // Yeni kart EKLENINCE (duzenlemede degil) grid "Son Aranan"a gecsin - kullanici
   //   az once ekledigi kaydi listede otomatik en ustte gorsun.
   const [odaklaSonEklenen, setOdaklaSonEklenen] = useState(0);
@@ -811,6 +820,16 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         return;
       }
 
+      // YENI ISTEM (304): generic kart TEK tetkik acardi; istem ekrani coklu
+      //   tetkik secer, klinik bilgiyi hepsine gecer ve basvuruya ucret
+      //   satirlarini ekler. Listeden acildiginda DIS istem varsayilir -
+      //   hastanin kendi hekimi yoksa disaridan gelmistir; ic istem basvuru
+      //   kartindan acilir.
+      if (kod === 'radyoloji.yeni') {
+        setIstemHastaArama(true);
+        return;
+      }
+
       // Rapor yazma AYRI EKRAN (283): bolumler sablondan uretilir, onay iki
       //   asamalidir - generic karta sigmaz.
       if (kod === 'radyoloji.rapor') {
@@ -1233,6 +1252,28 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         yukle={(dosya: File) => api.fiyatListesiIceriAl(iceriAl.listeId, dosya)}
         onKapat={() => setIceriAl(null)}
         onAlindi={() => setYenile(t => t + 1)}
+      />
+    )}
+    {/* RADYOLOJI ISTEM (304): once hasta, sonra tetkikler. Listeden acilan
+        istem DIS istemdir - ic istem basvuru kartindan acilir. */}
+    <TarafArama
+      acik={istemHastaArama}
+      kaynaklar={['hasta']}
+      yerTutucu="Hastayı isim/tel ile ara…"
+      onKapat={() => setIstemHastaArama(false)}
+      onSec={sec => {
+        setIstemHastaArama(false);
+        setIstemModali({ hastaId: sec.id, hastaAdi: sec.unvan, disIstem: true });
+      }}
+    />
+    {istemModali && (
+      <IstemModali
+        acik
+        hastaId={istemModali.hastaId}
+        hastaAdi={istemModali.hastaAdi}
+        disIstem={istemModali.disIstem}
+        onKapat={() => setIstemModali(null)}
+        onTamam={() => setYenile(t => t + 1)}
       />
     )}
     {utsBelgeSonuc && (

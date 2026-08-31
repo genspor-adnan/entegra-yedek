@@ -7,6 +7,7 @@ import { Modal } from '../bilesenler/Modal';
 import { StokAramaPenceresi } from '../bilesenler/StokAramaPenceresi';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { TarafArama } from '../bilesenler/TarafArama';
+import { IstemModali } from '../bilesenler/radyoloji/IstemModali';
 import { belgeTuruBilgisi, GIRILEBILIR_TURLER, VARSAYILAN_TUR } from './belgeTuru';
 import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -261,6 +262,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [hastaAramaYeni, setHastaAramaYeni] = useState(false);
   /** "Hasta Kartını Aç" (300): pencere arama listesi yerine kartla acilir. */
   const [hastaKartId, setHastaKartId] = useState<number | null>(null);
+  /** Basvurudan RADYOLOJI ISTEMI (304) - ic istem: hasta ve protokol hazir. */
+  const [istemModali, setIstemModali] = useState(false);
   /** Satis temsilcisi (personel) secim modali - cari ile ayni ekran. */
   const [saticiArama, setSaticiArama] = useState(false);
   /** e-Fatura senaryosu (belge.senaryo) - GIB profilini belirler. */
@@ -1137,6 +1140,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           rezerveDegistir={rezerveDegistir}
           hastaVar={!!cari?.id}
           hastaKartiAc={() => { setHastaKartId(cari?.id ?? null); setCariArama(true) }}
+          radyolojiIstemi={() => setIstemModali(true)}
           // Acil kapisi: tur "Acil" (2), gelis sekli "Ambulans" (2).
           acilBasvuru={() => setBasvuruBilgi(o => ({ ...o, basvuruTuru: 2, gelisSekli: 2 }))}
         />
@@ -1366,6 +1370,21 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             setHastaKartId(null);
           }}
         />
+
+        {/* RADYOLOJI ISTEMI (304): basvurudan acilan IC istem - hasta ve
+            protokol hazir, ucret satirlari bu basvuruya eklenir. */}
+        {istemModali && cari && (
+          <IstemModali
+            acik
+            hastaId={cari.id}
+            hastaAdi={cari.unvan}
+            belgeId={kayitliId || null}
+            onKapat={() => setIstemModali(false)}
+            // Istemler basvuruya ucret satiri ekledi: liste tazelensin,
+            //   kart ise kaydedilmis halini yeniden okusun.
+            onTamam={() => { onKaydedildi?.(); if (kayitliId) git(0) }}
+          />
+        )}
 
         {/* Tahsilat pencereleri (duzeltme · cek/senet · dogrudan kasa islemi)
             ayri dosyada: BelgeTahsilatModallari. */}

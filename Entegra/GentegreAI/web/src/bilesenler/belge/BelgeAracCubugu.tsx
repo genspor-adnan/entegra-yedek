@@ -14,7 +14,7 @@ export function BelgeAracCubugu({
   siparisMi, irsaliyeMi, faturaMi, alisMi, basvuruMu, eBelgeYok, kayitliId,
   kes, yeniBelge, kapat, setDonusum, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
-  hastaKartiAc, acilBasvuru, hastaVar,
+  hastaKartiAc, acilBasvuru, hastaVar, radyolojiIstemi,
 }: {
   mevcutBelge: boolean;
   /** Kayitli belge degistirilebilir mi (135). */
@@ -56,6 +56,8 @@ export function BelgeAracCubugu({
   acilBasvuru?(): void;
   /** Hasta secili mi - "Hasta Kartını Aç" ona bagli. */
   hastaVar?: boolean;
+  /** Basvurudan RADYOLOJI ISTEMI acar (304) - ic istem. */
+  radyolojiIstemi?(): void;
   /* TAHSILAT arac cubugundan kalkti - tahsilat kendi sekmesinden aciliyor. */
 }) {
   return (
@@ -110,6 +112,14 @@ export function BelgeAracCubugu({
       </button>
       <button className="d" disabled title="Randevudan başvuru açma henüz bağlanmadı.">
         📅 Randevudan Getir
+      </button>
+      {/* RADYOLOJI ISTEMI (304): coklu tetkik secer, her biri ayri accession
+          alir ve ucretleri BU basvuruya eklenir. */}
+      <button className="d" disabled={!hastaVar || kilitli}
+              title={hastaVar ? 'Bu başvuruya radyoloji tetkiki iste'
+                              : 'Önce hasta seçin.'}
+              onClick={() => radyolojiIstemi?.()}>
+        ☢️ Radyoloji İstemi
       </button>
       {/* Acil basvuru: turu Acil, gelis seklini Ambulans yapar - kayit kabul
           memuru acil kapisinda iki combo yerine tek dugmeye bassin. */}

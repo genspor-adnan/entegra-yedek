@@ -4,6 +4,7 @@ using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Npgsql;
+using System.Text.Json;
 
 namespace Gentegre.Api.Uclar;
 
@@ -27,9 +28,190 @@ public static class RadyolojiUclari
     public sealed record KritikIstegi(string Bulgu, string BildirilenAd, short Yol,
                                       string GeriBildirim);
 
+    /// <summary>islem_log.tablo_id - istem.</summary>
+    private const int LogTabloIstem = 940;
+
+    /// <summary>
+    /// ISTEM OLUSTURMA (304). Bir seferde COK TETKIK secilir - her biri ayri
+    /// istem (ayri accession no) olur; hasta bir kez yazilir, klinik bilgi
+    /// hepsine gecer.
+    /// </summary>
+    public sealed record TetkikIstegi(int HizmetId, short? Oncelik, short? Kontrast);
+    public sealed record IstemIstegi(
+        int HastaId, int? BelgeId, int? IstekHekimId, string? DisHekimAd,
+        int? IstekKurumId, string? OnTani, string? KlinikBilgi, short? Oncelik,
+        /// <summary>Basvuruya UCRET SATIRI da eklensin mi (mockup: tetkik secilince tutar cikar).</summary>
+        bool UcretEkle,
+        IReadOnlyList<TetkikIstegi> Tetkikler);
+
     public static void RadyolojiUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/radyoloji").WithTags("Radyoloji").RequireAuthorization();
+
+        // ------------------------------------------- istem ekranı verisi ----
+        // Tetkik ağacı (modalite > tetkik), isteyen hekim adayları ve hastanın
+        //   SON 12 AYDA aynı tetkiği çekilip çekilmediği tek istekte gelir -
+        //   mükerrer tetkik uyarısı (mockup) bu listeden çıkar.
+        grup.MapGet("/istem-secenekleri", async (
+            int? hastaId, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var tetkikler = await baglanti.ListeAsync("""
+                select id, kod, ad, modalite, coalesce(modalite_adi, '') as "modaliteAdi", kdv
+                  from public.v_radyoloji_tetkik
+                 order by modalite, ad
+                """, null, [], Satir, iptal);
+
+            var hekimler = await baglanti.ListeAsync("""
+                select t.id, t.unvan as ad, coalesce(d.ad, '') as "bolumAdi"
+                  from public.taraf t
+                  join public.taraf_personel p on p.id = t.id
+                  left join public.departman d on d.id = p.departman_id
+                 where coalesce(p.randevu_verilebilir, 0) = 1 and coalesce(t.durum, 1) = 1
+                 order by t.unvan
+                """, null, [], Satir, iptal);
+
+            // Son 12 ay: aynı tetkik tekrar isteniyorsa hekim gerekçelendirsin.
+            var gecmis = hastaId is null || hastaId <= 0
+                ? new List<IDictionary<string, object?>>()
+                : await baglanti.ListeAsync("""
+                    select i.hizmet_id as "hizmetId", coalesce(hz.ad, '') as "tetkikAdi",
+                           max(coalesce(i.cekim_tarihi, i.ekleme_tarihi)) as tarih
+                      from public.radyoloji_istem i
+                      left join public.hizmet hz on hz.id = i.hizmet_id
+                     where i.hasta_id = @p0 and i.durum > 0
+                       and coalesce(i.cekim_tarihi, i.ekleme_tarihi)
+                           >= (current_date - interval '12 months')
+                     group by i.hizmet_id, hz.ad
+                    """, null, [hastaId.Value], Satir, iptal);
+
+            return Results.Ok(new { tetkikler, hekimler, gecmis });
+        });
+
+        // --------------------------------------------------- istem açma ----
+        // Mockup: radyoloji_hekim_istem.html (iç istem) ve
+        //   radyoloji_kayit_kabul.html (dış istem). İKİSİ AYNI UÇ: fark yalnız
+        //   isteyenin kim olduğu (iç hekim / dış hekim + kurum) - akış, ücret
+        //   ve accession üretimi aynıdır, iki uç yazmak ikisini ayrıştırırdı.
+        //
+        // Her tetkik AYRI istem olur: PACS ve raporlama accession bazlıdır,
+        //   iki tetkiği tek isteme koymak raporu da tek yapardı.
+        grup.MapPost("/istem", async (
+            IstemIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            BelgeDeposu belgeDepo, LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("rad.istem_ac");
+
+            if (istek.Tetkikler is null || istek.Tetkikler.Count == 0)
+                throw GentegreHatasi.Dogrulama("En az bir tetkik seçilmeli.",
+                    new AlanHatasi("tetkikler", "Boş bırakılamaz."));
+            if (istek.HastaId <= 0)
+                throw GentegreHatasi.Dogrulama("Hasta seçilmeli.",
+                    new AlanHatasi("hastaId", "Zorunlu."));
+            // Klinik bilgi ZORUNLU (mockup): boş istem radyoloğa "neden çekildi"
+            //   sorusunu bırakır ve raporun Klinik Bilgi bölümü boş kalır.
+            if (string.IsNullOrWhiteSpace(istek.KlinikBilgi))
+                throw GentegreHatasi.Dogrulama("Klinik bilgi / istem gerekçesi yazılmalı.",
+                    new AlanHatasi("klinikBilgi", "Zorunlu."));
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var idler = new List<int>();
+            var accessionlar = new List<string>();
+
+            await using (var islem = await baglanti.BeginTransactionAsync(iptal))
+            {
+                foreach (var t in istek.Tetkikler)
+                {
+                    // Modalite HIZMETTEN okunur: tetkikin hangi cihaz ailesine
+                    //   ait olduğu hizmet kartında tanımlı (286).
+                    var modalite = await baglanti.TekDegerAsync<int>("""
+                        select coalesce(modalite, 0) from public.hizmet where id = @p0
+                        """, islem, [t.HizmetId], iptal);
+
+                    var id = await baglanti.TekDegerAsync<int>("""
+                        insert into public.radyoloji_istem
+                            (sube_id, belge_id, hasta_id, hizmet_id, modalite, durum, oncelik,
+                             istek_hekim_id, istek_kurum_id, dis_hekim_ad, on_tani, klinik_bilgi,
+                             kontrast, ekleyen)
+                        values (@p0, @p1, @p2, @p3, @p4, 1, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12)
+                        returning id
+                        """, islem,
+                        [baglam.SubeId, istek.BelgeId, istek.HastaId, t.HizmetId, modalite,
+                         t.Oncelik ?? istek.Oncelik ?? 1,
+                         istek.IstekHekimId, istek.IstekKurumId, istek.DisHekimAd ?? "",
+                         istek.OnTani ?? "", istek.KlinikBilgi, t.Kontrast ?? 0,
+                         baglam.KullaniciId], iptal);
+
+                    idler.Add(id);
+                    accessionlar.Add(await baglanti.TekDegerAsync<string>(
+                        "select accession_no from public.radyoloji_istem where id = @p0",
+                        islem, [id], iptal) ?? "");
+
+                    await log.YazAsync(baglanti, islem, LogIslemi.Ekle, LogTabloIstem, id,
+                        baglam.KullaniciId, baglam.SubeId, baglam.Ip, null, iptal: iptal);
+                }
+                await islem.CommitAsync(iptal);
+            }
+
+            // ÜCRET: başvurunun kalem listesine tetkikler eklenir. Belge yazma
+            //   hattı (BelgeDeposu) kullanılır - fiyat listesi, kampanya, pay
+            //   bölüşümü ve toplamlar orada çözülüyor; burada ikinci bir
+            //   hesap yolu açmak ikisinin sapmasi demek olurdu.
+            var uyarilar = new List<string>();
+            if (istek.UcretEkle && istek.BelgeId is int belgeId && belgeId > 0)
+            {
+                var (belge, satirlar) = await BelgeGovdesiAsync(baglanti, belgeId, iptal);
+
+                var sira = satirlar.Count;
+                for (var i = 0; i < istek.Tetkikler.Count; i++)
+                {
+                    var t = istek.Tetkikler[i];
+                    var fiyat = await baglanti.TekDegerAsync<decimal>("""
+                        select coalesce((public.fn_belge_kalem_fiyati(
+                                   @p0, 2::smallint, null, @p1, current_date)).fiyat, 0)
+                        """, null, [istek.HastaId, t.HizmetId], iptal);
+                    var kdv = await baglanti.TekDegerAsync<int>(
+                        "select coalesce(kdv, 0) from public.hizmet where id = @p0",
+                        null, [t.HizmetId], iptal);
+
+                    satirlar.Add(SatirGovdesi(new Dictionary<string, object?>
+                    {
+                        ["tur"] = 2,
+                        ["hizmetId"] = t.HizmetId,
+                        ["miktar"] = 1m,
+                        ["birimFiyat"] = fiyat,
+                        ["kdv"] = kdv,
+                        ["dovizCinsi"] = "TL",
+                        ["aciklama"] = accessionlar[i],
+                        ["sira"] = ++sira,
+                    }));
+                }
+
+                var (_, uy) = await belgeDepo.GuncelleAsync(belgeId, belge, satirlar,
+                    new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
+                    new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
+                uyarilar.AddRange(uy);
+
+                // Üretilen satırlar istemlere BAĞLANIR: sonra "bu tetkik
+                //   faturalandı mı" sorusu tek join ile cevaplanır.
+                await baglanti.CalistirAsync("""
+                    update public.radyoloji_istem i
+                       set belge_satir_id = s.id
+                      from public.belge_satir s
+                     where s.belge_id = @p0 and s.aciklama = i.accession_no
+                       and i.belge_satir_id is null and i.id = any(@p1)
+                    """, null, [belgeId, idler.ToArray()], iptal);
+            }
+
+            return Results.Ok(new { idler, accessionlar, uyarilar });
+        });
 
         // ------------------------------------------------- rapor ekranı ----
         // Ekranın ihtiyacı olan HER ŞEY tek istekte: istem + hasta + tetkik,
@@ -468,5 +650,55 @@ public static class RadyolojiUclari
         for (var i = 0; i < o.FieldCount; i++)
             satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
         return satir;
+    }
+
+    /// <summary>
+    /// Sozluk -> BelgeDeposu'nun bekledigi JsonElement satiri. Belge yazma
+    /// hatti istegi JSON olarak aliyor; radyoloji ucu satiri kod icinde
+    /// kurdugu icin ayni bicime cevrilir (icmal faturasi ile ayni desen).
+    /// </summary>
+    private static Dictionary<string, JsonElement> SatirGovdesi(
+        IDictionary<string, object?> alanlar)
+    {
+        var json = JsonSerializer.SerializeToElement(alanlar);
+        var sozluk = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+        foreach (var alan in json.EnumerateObject()) sozluk[alan.Name] = alan.Value;
+        return sozluk;
+    }
+
+    /// <summary>
+    /// Mevcut belgeyi (baslik + satirlar) yazma hattinin bekledigi bicimde
+    /// okur. Belgeye SATIR EKLEMEK icin gerekli: BelgeDeposu.GuncelleAsync
+    /// belgeyi butun olarak yazar - eksik gonderilen satir SILINMIS sayilir.
+    /// </summary>
+    private static async Task<(IDictionary<string, object?> Belge,
+                               List<Dictionary<string, JsonElement>> Satirlar)>
+        BelgeGovdesiAsync(NpgsqlConnection baglanti, int belgeId, CancellationToken iptal)
+    {
+        var belge = await baglanti.TekAsync("""
+            select b.tur, b.tipi, b.taraf_id as "tarafId", b.belge_tarihi as "belgeTarihi",
+                   b.belge_seri as "belgeSeri", b.belge_no as "belgeNo",
+                   b.belge_dovizi as "belgeDovizi", b.rapor_dovizi as "raporDovizi",
+                   b.ekstre_dovizi as "ekstreDovizi", b.doviz_kuru as "dovizKuru",
+                   b.vade_gun as "vadeGun", b.aciklama, b.ozel_kod as "ozelKod",
+                   b.satici_id as "saticiId", b.cikis_depo_id as "cikisDepoId",
+                   b.giris_depo_id as "girisDepoId", b.fiyat_listesi_id as "fiyatListesiId",
+                   b.kampanya_id as "kampanyaId", b.sube_id as "subeId", b.senaryo
+              from public.belge b where b.id = @p0
+            """, null, [belgeId], Satir, iptal)
+            ?? throw GentegreHatasi.Bulunamadi("Başvuru bulunamadı.");
+
+        var mevcut = await baglanti.ListeAsync("""
+            select s.id, s.tur, s.stok_id as "stokId", s.hizmet_id as "hizmetId",
+                   s.masraf_id as "masrafId", s.aciklama, s.miktar, s.birim,
+                   s.birim_fiyat as "birimFiyat", s.iskonto, s.kdv,
+                   s.doviz_cinsi as "dovizCinsi", s.depo_id as "depoId",
+                   s.kaynak_tur as "kaynakTur", s.kaynak_id as "kaynakId",
+                   s.pay, s.kurum_tutar as "kurumTutar", s.hasta_tutar as "hastaTutar",
+                   s.sira
+              from public.belge_satir s where s.belge_id = @p0 order by s.sira, s.id
+            """, null, [belgeId], Satir, iptal);
+
+        return (belge, mevcut.Select(SatirGovdesi).ToList());
     }
 }

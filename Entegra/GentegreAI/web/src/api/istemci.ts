@@ -603,6 +603,22 @@ export const api = {
       kurum: Record<string, unknown> | null;
     }>(`/api/radyoloji/rapor/${raporId}/cikti`),
 
+  /**
+   * ISTEM EKRANI (304): tetkik agaci (modalite gruplu), isteyen hekim adaylari
+   * ve hastanin son 12 aydaki ayni tetkikleri - mukerrer uyarisi bundan cikar.
+   */
+  radyolojiIstemSecenekleri: (hastaId: number) =>
+    istek<{
+      tetkikler: Record<string, unknown>[];
+      hekimler: Record<string, unknown>[];
+      gecmis: Record<string, unknown>[];
+    }>(`/api/radyoloji/istem-secenekleri?hastaId=${hastaId}`),
+
+  /** Coklu tetkik -> her biri AYRI istem (ayri accession no). */
+  radyolojiIstemAc: (govde: unknown) =>
+    gonder<{ idler: number[]; accessionlar: string[]; uyarilar: string[] }>(
+      '/api/radyoloji/istem', govde),
+
   radyolojiAddendum: (raporId: number) =>
     gonder<{ raporId: number }>(`/api/radyoloji/rapor/${raporId}/addendum`, {}),
 

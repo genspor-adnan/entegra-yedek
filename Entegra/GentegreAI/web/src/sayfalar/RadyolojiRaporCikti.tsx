@@ -63,7 +63,7 @@ export function RadyolojiRaporCikti() {
 
   useEffect(() => { void yukle() }, [yukle]);
 
-  if (hata) return <div className="hata-kutu">{hata}</div>;
+  if (hata) return <div className="hata-kutusu">{hata}</div>;
   if (!veri) return <div className="yukleniyor">Yükleniyor…</div>;
 
   const r = veri.rapor;
