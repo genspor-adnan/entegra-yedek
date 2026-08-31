@@ -37,7 +37,7 @@ public static class IcmalUclari
     /// Parametre sırası SABİT: @p0 kurum, @p1 dönem başı, @p2 dönem sonu.
     /// </summary>
     private const string AcikKurumPayiKosulu = """
-                 where b.odeyen_kurum_id = @p0
+                 where bb.odeyen_kurum_id = @p0
                    and b.durum = 0
                    and b.belge_tarihi >= @p1 and b.belge_tarihi < (@p2::date + 1)
                    and s.kurum_tutar > s.kurum_kapatilan
@@ -71,6 +71,7 @@ public static class IcmalUclari
                        (s.kurum_tutar - s.kurum_kapatilan) as "kalan"
                   from public.belge_satir s
                   join public.belge b on b.id = s.belge_id
+                  join public.belge_basvuru bb on bb.id = b.id
                   left join public.taraf  h  on h.id  = b.taraf_id
                   left join public.hizmet hz on hz.id = s.hizmet_id
                   left join public.stok   st on st.id = s.stok_id
@@ -115,6 +116,7 @@ public static class IcmalUclari
                 select @p3, s.id, s.kurum_tutar - s.kurum_kapatilan
                   from public.belge_satir s
                   join public.belge b on b.id = s.belge_id
+                  join public.belge_basvuru bb on bb.id = b.id
                 """ + AcikKurumPayiKosulu,
                 islem, [istek.KurumId, istek.DonemBas, istek.DonemBit, icmalId], iptal);
 

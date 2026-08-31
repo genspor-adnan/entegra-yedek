@@ -60,17 +60,19 @@ public sealed partial class BelgeDeposu
                    -- Fiyatlama kimligi (274): liste BAZ, kampanya INDIRIM verdi;
                    --   ikisi de hedefe TASINIR - basvurudan cikan fatura
                    --   "hangi anlasmayla" kesildigini kaybetmemeli.
-                   b.fiyat_listesi_id, b.kampanya_id, b.odeyen_kurum_id,
+                   b.fiyat_listesi_id, b.kampanya_id, bb.odeyen_kurum_id,
                    -- Kurum payi kuruma faturalanirken KIMLIK de kurumundur:
                    --   unvan ve vergi bilgisi hastadan kopyalanirsa fatura
                    --   yanlis kisiye kesilmis gorunur (289).
                    ok.unvan as odeyen_unvan, ok.vkno as odeyen_vkno,
                    ok.vd as odeyen_vd,
                    b.proje_id, b.sube_id, b.vade_gun, b.giris_depo_id, b.cikis_depo_id,
-                   b.satici_id, b.ozel_kod, b.aciklama, b.belge_no, kt.ad as tur_adi
+                   b.satici_id, bb.bolum_id, bb.hekim_id,
+                   b.ozel_kod, b.aciklama, b.belge_no, kt.ad as tur_adi
               from public.belge b
+              left join public.belge_basvuru bb on bb.id = b.id
               left join public.kasa_islem_turu kt on kt.kod = b.tur
-              left join public.taraf ok on ok.id = b.odeyen_kurum_id
+              left join public.taraf ok on ok.id = bb.odeyen_kurum_id
              where b.id = @p0
             """, baglanti, islem))
         {
@@ -216,6 +218,10 @@ public sealed partial class BelgeDeposu
             ["girisDepoId"] = kaynak["giris_depo_id"],
             ["cikisDepoId"] = kaynak["cikis_depo_id"],
             ["saticiId"] = kaynak["satici_id"],
+            // Basvurudan turetilen belge bolumu/hekimi tasir (296): fatura
+            //   hangi poliklinikte uretildigini kaybetmesin.
+            ["bolumId"] = kaynak["bolum_id"],
+            ["hekimId"] = kaynak["hekim_id"],
             ["ozelKod"] = kaynak["ozel_kod"],
             ["aciklama"] = Kirp($"{kaynak["tur_adi"]} {kaynak["belge_no"]} dönüşümü", 200),
         };

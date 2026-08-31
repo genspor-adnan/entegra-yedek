@@ -270,6 +270,11 @@ public static partial class KaynakKatalogu
                 Filtrelenebilir: false),
             new("vknoHam",      "t.vkno",          "metin", "TCKN (ham)", Varsayilan: false),
             new("cepTel",       "t.cep_tel",       "metin", "Cep"),
+            // Randevu/basvuru hekim secimi (296): "randevu verilebilir" personel
+            //   = doktor. Bolume gore suzme t.departman ile yapilir.
+            new("randevuVerilebilir", "t.randevu_verilebilir", "mantik", "Randevu",
+                Hizalama: "orta", Varsayilan: false),
+            new("departmanId",  "t.departman",     "sayi",  "Bölüm Id", Varsayilan: false),
             // Telefonla arama (266): personel/hasta aramasi da rakamla bulsun.
             new("telefonHam",   TarafKatalog.TelefonHam, "metin", "Telefon (ham)",
                 Varsayilan: false),
@@ -464,7 +469,10 @@ public static partial class KaynakKatalogu
                               "  join public.kod_liste l on l.id = d.liste_id " +
                               " where l.kod = 'taraf.kurum_turu' and d.deger = k.tur), '')",
                               "metin", "Kurum Türü", Genislik: 130, Filtrelenebilir: false),
-            new("tur",        "k.tur",           "sayi",  "Tür (ham)", Varsayilan: false),
+            // Ham tur ISTEMCIYE GELIR (296): basvuru basligindaki "Ödeyen Tipi"
+            //   secimi kurumlari 1 Özel / 2 ÖSS / 3 SGK diye suzer. Kurumlar
+            //   gridinde gizli (listeTanimlari.gizliKolonlar) - orada turAdi var.
+            new("tur",        "k.tur",           "sayi",  "Tür (ham)"),
             new("sozlesmeNo", "k.sozlesme_no",   "metin", "Sözleşme No", Genislik: 120),
             new("baslangic",  "k.baslangic",     "tarih", "Başlama"),
             new("bitis",      "k.bitis",         "tarih", "Bitiş"),

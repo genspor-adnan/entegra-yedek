@@ -22,7 +22,8 @@ public static partial class KaynakKatalogu
                 "left join public.taraf  ih on ih.id = i.istek_hekim_id " +
                 "left join public.taraf  ik on ik.id = i.istek_kurum_id " +
                 "left join public.belge  b  on b.id  = i.belge_id " +
-                "left join public.taraf  ok on ok.id = b.odeyen_kurum_id " +
+                "left join public.belge_basvuru bb on bb.id = b.id " +
+                "left join public.taraf  ok on ok.id = bb.odeyen_kurum_id " +
                 "left join public.radyoloji_cihaz cz on cz.id = i.cihaz_id " +
                 "left join public.radyoloji_rapor r on r.istem_id = i.id and r.ust_rapor_id is null " +
                 "left join public.taraf  ry on ry.id = coalesce(r.onaylayan_id, r.yazan_id)",

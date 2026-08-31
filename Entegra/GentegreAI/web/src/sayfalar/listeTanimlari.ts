@@ -342,6 +342,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Cari grubunun EN USTU (kullanici): HBYS'de en cok girilen liste.
     //   Sirasiz ogeler 900+ ile diziliyor, 10 hepsinin onune gecer.
     menuSira: 10,
+    // Ham tur kolonu API'den geliyor (basvuru "Ödeyen Tipi" suzmesi icin) ama
+    //   gridde gorunmesin - turAdi zaten var.
+    gizliKolonlar: ['tur'],
     menuGrup: 'Cari', menuAd: 'Kurumlar', ic: '🏛️', yetkiKodu: 'kurum',
   },
   {

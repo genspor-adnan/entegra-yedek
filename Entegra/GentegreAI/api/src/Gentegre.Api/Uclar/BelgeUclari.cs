@@ -556,8 +556,10 @@ public static class BelgeUclari
         // Basvuruda (249) vade yerine ODEYEN KURUM secilir - anlasmali kurum id'si.
         // Belgeye isleyen kampanya (274): liste BAZ fiyati, kampanya INDIRIMI
         //   verir - ikisi birlikte saklanir, biri otekinin yerine gecmez.
+        // Basvuru uzantisi (296): basvurulan BOLUM ve karsilayan HEKIM -
+        //   belge_basvuru tablosuna yazilir (ana belgede kolonlari yok).
         "teslimAlanId" or "fiyatListesiId" or "teklifDurum" or "odeyenKurumId" or
-        "kampanyaId" => "sayi",
+        "kampanyaId" or "bolumId" or "hekimId" => "sayi",
 
         "dovizKuru" => "para",
 

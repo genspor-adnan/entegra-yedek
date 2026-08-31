@@ -42,7 +42,6 @@ public sealed partial class BelgeDeposu
         // BASVURUDA (249) vade yerine ODEYEN KURUM: hizmeti kim odeyecek
         //   (anlasmali kurum / sigorta). Belgeye yazilir - hastanin polices
         //   sonradan degisse de gecmis basvurunun odeyeni sabit kalir.
-        ["odeyenKurumId"] = "odeyen_kurum_id",
         ["aciklama"] = "aciklama", ["ozelKod"] = "ozel_kod", ["senaryo"] = "senaryo",
         ["gondericiUnvan"] = "gonderici_unvan", ["gondericiVkno"] = "gonderici_vkno",
         ["gondericiAlias"] = "gonderici_alias", ["saticiId"] = "satici_id",
@@ -60,6 +59,18 @@ public sealed partial class BelgeDeposu
         ["aracPlaka"] = "arac_plaka", ["soforAd"] = "sofor_ad", ["soforTckn"] = "sofor_tckn",
         ["tasiyiciId"] = "tasiyici_id", ["teslimEdenId"] = "teslim_eden_id",
         ["teslimAlanId"] = "teslim_alan_id"
+    };
+
+    /// <summary>
+    /// BASVURU UZANTISI (296) alanlari - belge_basvuru 1:1. Basvuruya ozgu
+    /// alanlar ana belge tablosunu sismesin diye burada; liste ZAMANLA
+    /// BUYUYECEK (kullanici), yeni alan eklemek icin tek satir yeter.
+    /// </summary>
+    private static readonly Dictionary<string, string> BasvuruKolonlari = new(StringComparer.Ordinal)
+    {
+        ["bolumId"] = "bolum_id", ["hekimId"] = "hekim_id",
+        // Odeyen kurum (289) da basvuruya ozgu - 296 ile buraya tasindi.
+        ["odeyenKurumId"] = "odeyen_kurum_id"
     };
 
     /// <summary>
@@ -118,6 +129,62 @@ public sealed partial class BelgeDeposu
                    degistiren = {kullanici},
                    degistirme_tarihi = now()::timestamp
             """;
+
+        await using var komut = Komut(baglanti, islem, sql, parametreler);
+        await komut.ExecuteNonQueryAsync(iptal);
+    }
+
+    /// <summary>
+    /// BASVURU UZANTISINI yazar (belge_basvuru, 296). Sevkiyat satiriyla ayni
+    /// kural: satir YALNIZ dolu bilgi varsa acilir, alanlar bosaltilinca satir
+    /// silinir - bos uzanti "bolum girilmis" izlenimi verirdi.
+    /// </summary>
+    private async Task BasvuruYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int belgeId, IDictionary<string, object?> belge, YazmaBaglami baglam,
+        CancellationToken iptal)
+    {
+        var kolonlar = new List<string>();
+        var degerler = new List<object?>();
+        var doluVar = false;
+
+        foreach (var (ad, kolon) in BasvuruKolonlari)
+        {
+            if (!belge.TryGetValue(ad, out var deger)) continue;
+            kolonlar.Add(kolon);
+            degerler.Add(deger);
+            doluVar |= deger switch
+            {
+                null => false,
+                string m => m.Trim().Length > 0,
+                _ => Convert.ToDecimal(deger, CultureInfo.InvariantCulture) != 0,
+            };
+        }
+
+        if (kolonlar.Count == 0) return;               // istekte basvuru alani yok
+
+        if (!doluVar)
+        {
+            await using var sil = baglanti.Komut(
+                "delete from public.belge_basvuru where id = @p0", islem, belgeId);
+            await sil.ExecuteNonQueryAsync(iptal);
+            return;
+        }
+
+        var parametreler = new List<object?> { belgeId };
+        parametreler.AddRange(degerler);
+        var yerTutucular = Enumerable.Range(1, kolonlar.Count)
+            .Select(i => "@p" + i.ToString(CultureInfo.InvariantCulture)).ToList();
+        var guncelle = kolonlar.Select((k, i) => $"{k} = {yerTutucular[i]}").ToList();
+
+        parametreler.Add(baglam.KullaniciId);
+        var kullanici = "@p" + (parametreler.Count - 1).ToString(CultureInfo.InvariantCulture);
+
+        var sql = $"insert into public.belge_basvuru (id, {string.Join(", ", kolonlar)}, ekleyen)\n"
+                + $"values (@p0, {string.Join(", ", yerTutucular)}, {kullanici})\n"
+                + "on conflict (id) do update\n"
+                + $"   set {string.Join(", ", guncelle)},\n"
+                + $"       degistiren = {kullanici},\n"
+                + "       degistirme_tarihi = now()::timestamp";
 
         await using var komut = Komut(baglanti, islem, sql, parametreler);
         await komut.ExecuteNonQueryAsync(iptal);

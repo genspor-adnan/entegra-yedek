@@ -472,6 +472,8 @@ public sealed partial class BelgeDeposu
         // SEVKIYAT ayri tabloda (177): plaka/sofor/tasiyici/teslim bilgileri.
         //   Satir yalniz bilgi girilmisse acilir; bosaltilmissa silinir.
         await SevkiyatYazAsync(baglanti, islem, belgeId, belge, baglam, iptal);
+        // BASVURU uzantisi (296): bolum/hekim - yalniz basvuruda dolar.
+        await BasvuruYazAsync(baglanti, islem, belgeId, belge, baglam, iptal);
 
         // ------------------------------------------------------ 4) satirlar INSERT ----
         // Tur etkisi satirlardan ONCE okunur: stogu etkilemeyen bir belgede

@@ -131,7 +131,24 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   // BASVURU (249): vade yerine "Ödeyen Kurum" - hizmeti kim odeyecek
   //   (anlasmali kurum / sigorta / SGK). Bos = hasta kendi oder.
   const [odeyenKurumId, setOdeyenKurumId] = useState<number | null>(null);
-  const [kurumlar, setKurumlar] = useState<{ id: number; ad: string }[]>([]);
+  const [kurumlar, setKurumlar] = useState<{ id: number; ad: string; tur: number }[]>([]);
+  /**
+   * BASVURU BASLIGI (296): basvurulan BOLUM ve HEKIM. Bolum randevu
+   * verilebilen departmanlardan, hekim SECILI BOLUMUN randevu verilebilir
+   * personelinden gelir - iki alan da belge_basvuru uzantisinda saklanir.
+   */
+  const [bolumId, setBolumId] = useState<number | null>(null);
+  const [hekimId, setHekimId] = useState<number | null>(null);
+  const [bolumler, setBolumler] = useState<{ id: number; ad: string }[]>([]);
+  /** Basvuruda depo combosu dip bolumde cizilir - liste burada tutulur. */
+  const [depolar, setDepolar] = useState<{ id: number; ad: string }[]>([]);
+  const [hekimler, setHekimler] = useState<{ id: number; ad: string }[]>([]);
+  /**
+   * ODEYEN TIPI (kullanici): 0 hasta kendi oder · 1 Özel (Kendi) · 2 ÖSS ·
+   * 3 SGK. Kurum listesini suzer; belgeye AYRI yazilmaz - kurumun kendi
+   * turundan (taraf_kurum.tur) okunur, tek kaynak orasi.
+   */
+  const [odeyenTip, setOdeyenTip] = useState(0);
   /**
    * YURURLUKTEKI KAMPANYA (274). Fiyat listesiyle YARISMAZ: liste BAZ fiyati,
    * kampanya INDIRIMI verir. Baslikta rozet olarak gorunur ve belgeye YAZILIR -
@@ -422,10 +439,65 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           sayfa: 1, boyut: 500, sirala: [{ alan: 'unvan', yon: 'asc' }],
           filtre: { op: 'and', kosullar: [{ alan: 'durum', op: 'esit', deger: 1 }] },
         });
-        setKurumlar(y.satirlar.map(r => ({ id: Number(r.id), ad: String(r.unvan ?? '') })));
+        setKurumlar(y.satirlar.map(r => ({
+          id: Number(r.id), ad: String(r.unvan ?? ''), tur: Number(r.tur ?? 0) })));
       } catch { /* kurum listesi okunamazsa combo bos kalir, kayit engellenmez */ }
     })();
   }, [basvuruMu, kurumlar.length]);
+
+  // BASVURU (296): randevu verilebilen BOLUMLER - basvurunun yapildigi
+  //   poliklinik/klinik. Randevu ekraniyla ayni kume.
+  useEffect(() => {
+    if (!basvuruMu || bolumler.length > 0) return;
+    void (async () => {
+      try {
+        const y = await api.liste('departman', {
+          sayfa: 1, boyut: 300, sirala: [{ alan: 'ad', yon: 'asc' }],
+          filtre: { op: 'and', kosullar: [
+            { alan: 'durum', op: 'esit', deger: 1 },
+            { alan: 'randevuVerilebilir', op: 'esit', deger: 1 },
+          ] },
+        });
+        setBolumler(y.satirlar.map(r => ({ id: Number(r.id), ad: String(r.ad ?? '') })));
+      } catch { /* bolum listesi okunamazsa combo bos kalir, kayit engellenmez */ }
+    })();
+  }, [basvuruMu, bolumler.length]);
+
+  // Basvuruda depo combosu (296) icin aktif depolar.
+  useEffect(() => {
+    if (!basvuruMu || depolar.length > 0) return;
+    void (async () => {
+      try {
+        const y = await api.liste('depo', {
+          sayfa: 1, boyut: 200, sirala: [{ alan: 'ad', yon: 'asc' }],
+          filtre: { alan: 'durum', op: 'esit', deger: 1 },
+        });
+        setDepolar(y.satirlar.map(r => ({ id: Number(r.id), ad: String(r.ad ?? '') })));
+      } catch { /* depo listesi okunamazsa combo bos kalir */ }
+    })();
+  }, [basvuruMu, depolar.length]);
+
+  // HEKIM listesi BOLUME BAGLI (kullanici): bolum secilmeden doktor secilemez;
+  //   secilince o bolumun randevu verilebilir personeli gelir.
+  useEffect(() => {
+    if (!basvuruMu || !bolumId) { setHekimler([]); return }
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.liste('personel', {
+          sayfa: 1, boyut: 300, sirala: [{ alan: 'unvan', yon: 'asc' }],
+          filtre: { op: 'and', kosullar: [
+            { alan: 'durum', op: 'esit', deger: 1 },
+            { alan: 'randevuVerilebilir', op: 'esit', deger: 1 },
+            { alan: 'departmanId', op: 'esit', deger: bolumId },
+          ] },
+        });
+        if (!iptal) setHekimler(y.satirlar.map(r => ({
+          id: Number(r.id), ad: String(r.unvan ?? '') })));
+      } catch { if (!iptal) setHekimler([]) }
+    })();
+    return () => { iptal = true };
+  }, [basvuruMu, bolumId]);
 
   // Mevcut belgeyi ac: baslik + satirlar + dip toplam sunucudan gelir.
   useEffect(() => {
@@ -441,6 +513,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         setVadeGun(String(y.belge.vadeGun ?? 0));
         setOdeyenKurumId(y.belge.odeyenKurumId != null ? Number(y.belge.odeyenKurumId) : null);
         setFiyatListesiIdHam(Number(y.belge.fiyatListesiId) || null);
+        setBolumId(y.belge.bolumId != null ? Number(y.belge.bolumId) : null);
+        // Odeyen tipi belgede DURMAZ: secili kurumun turunden cozulur.
+        {
+          const kid = y.belge.odeyenKurumId != null ? Number(y.belge.odeyenKurumId) : null;
+          setOdeyenTip(kid ? kurumlar.find(k => k.id === kid)?.tur ?? 0 : 0);
+        }
+        setHekimId(y.belge.hekimId != null ? Number(y.belge.hekimId) : null);
         setKampanyaId(y.belge.kampanyaId != null ? Number(y.belge.kampanyaId) : null);
         setKampanyaAdi(String(y.belge.kampanyaAdi ?? ''));
         setTeklifDurum(String(y.belge.teklifDurum ?? '1'));
@@ -619,8 +698,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     //   (belgeKaydet.ts) - ekran yalniz sonucu gosterir.
     const girdi: BelgeGirdisi = {
       tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun, faturaTipi,
-      // Basvuruda vade yerine odeyen kurum gonderilir (249).
-      ...(basvuruMu ? { odeyenKurumId } : {}),
+      // Basvuruda vade yerine odeyen kurum gonderilir (249); bolum ve hekim
+      //   de basvuruya ozgu (296) - hepsi belge_basvuru uzantisina yazilir.
+      ...(basvuruMu ? { odeyenKurumId, bolumId, hekimId } : {}),
       fiyatListesiId,
       // Kampanya belgeye YAZILIR (274): kurum sonradan kampanya degistirse
       //   eski belgenin hangi anlasmayla kesildigi sabit kalir.
@@ -674,6 +754,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     setCari(null);
     setSatirlar([]);
     setHata(null);
+    // BASVURU (296): odeyen kurum ve hekim SIFIRLANIR - siradaki hastanin
+    //   odeyeni/doktoru bir onceki hastadan devralinirsa yanlis kuruma
+    //   faturalanir. BOLUM KALIR: kayit kabul ayni poliklinikte ardisik hasta
+    //   girer, her seferinde yeniden secmek yorar (kullanici akisi).
+    setHekimId(null);
+    setOdeyenKurumId(null);
+    setOdeyenTip(0);
   }
 
   // --------------------------------------------------------- fiyat listesi ----
@@ -988,6 +1075,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           basvuruMu={basvuruMu} kurumlar={kurumlar}
           odeyenKurumId={odeyenKurumId}
           setOdeyenKurumId={v => void odeyenKurumDegisti(v)}
+          odeyenTip={odeyenTip} setOdeyenTip={setOdeyenTip}
+          bolumler={bolumler} bolumId={bolumId} setBolumId={setBolumId}
+          hekimler={hekimler} hekimId={hekimId} setHekimId={setHekimId}
           teklifDurum={teklifDurum} setTeklifDurum={setTeklifDurum}
           revizeNo={revizeNo} setRevizeNo={setRevizeNo}
           teklifKonusu={teklifKonusu} setTeklifKonusu={setTeklifKonusu}
@@ -1022,6 +1112,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             fiyatListesi={{ listeler: fiyatListeleri, seciliId: fiyatListesiId,
                             sec: v => void listeDegisti(v), kampanyaAdi }}
             basvuruMu={basvuruMu}
+            // DEPO (296): basvuruda baslikta yer Doktor'a verildi, depo buraya.
+            depoSecimi={basvuruMu ? {
+              listeler: depolar,
+              seciliId: depo?.id ?? null,
+              sec: (v: number | null) => setDepo(
+                v ? { id: v, ad: depolar.find(d => d.id === v)?.ad ?? '' } : null),
+            } : undefined}
             // ODEME PAYLASIMI (289): yalniz odeyen kurumlu basvuruda.
             paylasim={{ acik: basvuruMu && !!odeyenKurumId,
                         katkiModu: paylasimModu === 2,

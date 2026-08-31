@@ -137,7 +137,9 @@ public static partial class KaynakKatalogu
             //   basvuru listesi kolonSirasi ile aciyor.
             new("odeyenKurumAdi",
                 "coalesce((select ok.unvan from public.taraf ok " +
-                "           where ok.id = b.odeyen_kurum_id), '')",
+                "           where ok.id = (select bb.odeyen_kurum_id " +
+                "                            from public.belge_basvuru bb " +
+                "                           where bb.id = b.id)), '')",
                                                       "metin", "Ödeyen Kurum", Genislik: 180,
                                                       Varsayilan: false, Siralanabilir: false),
             new("poliklinik",

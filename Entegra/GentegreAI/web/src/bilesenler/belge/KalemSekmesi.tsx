@@ -18,7 +18,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     kilitli, bilgi, onizleme, sonuc, transferBaslikEksigi,
     depoBelgesi, stokFisiMi, talepMi,
     setStokArama, setKalem, seciliSil, satirTikla, sonTiklanan, secimDegis, doviz,
-    fiyatListesi, paylasim, basvuruMu,
+    fiyatListesi, paylasim, basvuruMu, depoSecimi,
   } = p;
 
   /** Tarih kolonu KOD'un solunda mi (basvuru) yoksa miktarin solunda mi. */
@@ -404,6 +404,18 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
           {fiyatListesi.listeler.map(l => <option key={l.id} value={l.id}>{l.ad}</option>)}
         </select>
       </label>
+      {/* DEPO (296): basvuruda baslikta Doktor'a yer acildi, depo buraya indi.
+          Diger turlerde baslikta kaldigi icin burada CIZILMEZ. */}
+      {depoSecimi && (
+        <label className="alan">
+          <span className="etiket">Depo</span>
+          <select value={depoSecimi.seciliId ?? ''} disabled={kilitli}
+                  onChange={e => depoSecimi.sec(e.target.value ? Number(e.target.value) : null)}>
+            <option value="">(depo yok)</option>
+            {depoSecimi.listeler.map(d => <option key={d.id} value={d.id}>{d.ad}</option>)}
+          </select>
+        </label>
+      )}
       {/* KAMPANYA ROZETI (274): SALT OKUNUR - kampanya kurumun sozlesmesinden
           (ya da cariden) gelir, belgede elle secilmez; kullanici yanlislikla
           anlasmadan cikmasin. Liste bazi, kampanya indirimi verir. */}
@@ -522,6 +534,15 @@ export interface KalemSekmesiProps {
     /** SGK modu (291): pay ORAN degil sabit KATILIM PAYI ile bolunur. */
     katkiModu?: boolean;
     uygula(): void;
+  };
+  /**
+   * DEPO SECIMI (296): basvuruda baslikta yer DOKTORA verildi, depo buraya -
+   * fiyat listesinin altina - indi (kullanici). Verilmezse cizilmez.
+   */
+  depoSecimi?: {
+    listeler: { id: number; ad: string }[];
+    seciliId: number | null;
+    sec(v: number | null): void;
   };
   /** Fiyat listesi (205/218): doviz cercevesinin SAGINDA cizilir (kullanici).
       Liste hic kurulmamissa verilmez, kutu cizilmez. */
