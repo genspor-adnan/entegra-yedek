@@ -149,64 +149,6 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   Kayıt Kabul menusunun ust tarafina; icine Randevu ve Randevu Ayarlarini
     //   al; bunlar hbys icin gecerli"). Grup sirasi bu dizideki ILK gorulme
     //   sirasindan gelir - bu yuzden Hasta/Kayıt Kabul girdisinden ONCE durur.
-    // RADYOLOJI CALISMA LISTESI (283): modulun giris ekrani - rapor yazma,
-    //   PACS acma ve onay buradan baslar. Cipler gunun isini bolumler:
-    //   once cekilecekler, sonra raporlanacaklar, sonra onay bekleyenler.
-    kaynak: 'radyoloji-istem', rota: 'radyoloji', baslik: 'Radyoloji Çalışma Listesi',
-    yol: 'Radyoloji › Çalışma Listesi',
-    // Kart rotasi LISTE ROTASINDAN turetilir (/radyoloji/:id) - kartYolu farkli
-    //   yazilirsa cift tik tanimsiz rotaya gider ve ana sayfaya duser.
-    kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi',
-    aksiyonEkrani: 'radyoloji-liste',
-    tarihAlani: 'saat',
-    cipler: [
-      { ad: 'Bekleyen Çekim', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'Raporlanacak',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-      { ad: 'Raporlanıyor',   filtre: { alan: 'durum', op: 'esit', deger: 3 } },
-      { ad: 'Onay Bekleyen',  filtre: { alan: 'durum', op: 'esit', deger: 4 } },
-      { ad: 'Onaylandı',      filtre: { alan: 'durum', op: 'esit', deger: 5 } },
-      { ad: 'Tümü' },
-    ],
-    urunModu: 2,
-    // Nukleer ikon RADYOLOJI ANA MENUSUNUN (Kabuk.GRUP_IKON); calisma listesi
-    //   modalitelerin ekranidir (kullanici).
-    menuGrup: 'Radyoloji', menuAd: 'Çalışma Listesi', ic: '🖥️', yetkiKodu: 'radyoloji',
-    menuSira: 10,
-  },
-  {
-    // KURUM ICMALI (289): SGK payi tek tek faturalanmaz, donem sonu toplanip
-    //   tek fatura kesilir. Liste donemleri ve durumlarini gosterir.
-    kaynak: 'kurum-icmal', rota: 'kurum-icmal', baslik: 'Kurum İcmalleri',
-    yol: 'Cari › Kurum İcmalleri', aksiyonEkrani: 'icmal-liste',
-    cipler: [
-      { ad: 'Hazırlanıyor', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'Faturalandı',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-      { ad: 'Tümü' },
-    ],
-    toplam: ['toplam'],
-    // Yalniz HBYS: donem icmali odeyen kurum (SGK/OSS) akisinin parcasi,
-    //   ERP kurulumunda karsiligi yok (kullanici).
-    urunModu: 2,
-    menuGrup: 'Cari', menuAd: 'Kurum İcmalleri', ic: '🧾', yetkiKodu: 'kurum',
-    menuSira: 45,
-  },
-  {
-    // RAPOR SABLONLARI (283/288): bolum iskeleti, makrolar ve skor alanlari.
-    //   Sablon tetkike baglanir; rapor ekrani varsayilani kendiliginden yukler.
-    kaynak: 'radyoloji-sablon', rota: 'radyoloji-sablon',
-    baslik: 'Rapor Şablonları', yol: 'Radyoloji › Rapor Şablonları',
-    kartYolu: '/radyoloji-sablon', kartBaslik: 'Rapor Şablonu',
-    aksiyonEkrani: 'cari-liste',
-    cipler: [
-      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
-      { ad: 'Tümü' },
-    ],
-    urunModu: 2,
-    menuGrup: 'Radyoloji', menuAd: 'Rapor Şablonları', ic: '📄', yetkiKodu: 'radyoloji',
-    menuSira: 20,
-  },
-  {
     kaynak: 'randevu', baslik: 'Randevular', yol: 'Randevu › Randevular',
     kartYolu: '/randevu', aksiyonEkrani: 'randevu-liste',
     tarihAlani: 'tarih',
@@ -290,6 +232,126 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Kayıt Kabul', menuAd: 'Başvurular', ic: '📝', yetkiKodu: 'belge',
     menuSira: 30,
   },
+  // RADYOLOJI grubu ana menude KAYIT KABUL ile CRM ARASINDA (kullanici):
+  //   grup sirasi bu dizideki ILK gorulme sirasindan gelir.
+  {
+    // RADYOLOJI CALISMA LISTESI (283): modulun giris ekrani - rapor yazma,
+    //   PACS acma ve onay buradan baslar. Cipler gunun isini bolumler:
+    //   once cekilecekler, sonra raporlanacaklar, sonra onay bekleyenler.
+    kaynak: 'radyoloji-istem', rota: 'radyoloji', baslik: 'Radyoloji Çalışma Listesi',
+    yol: 'Radyoloji › Çalışma Listesi',
+    // Kart rotasi LISTE ROTASINDAN turetilir (/radyoloji/:id) - kartYolu farkli
+    //   yazilirsa cift tik tanimsiz rotaya gider ve ana sayfaya duser.
+    kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi',
+    aksiyonEkrani: 'radyoloji-liste',
+    tarihAlani: 'saat',
+    cipler: [
+      { ad: 'Bekleyen Çekim', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Raporlanacak',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Raporlanıyor',   filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Onay Bekleyen',  filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Onaylandı',      filtre: { alan: 'durum', op: 'esit', deger: 5 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2,
+    // Nukleer ikon RADYOLOJI ANA MENUSUNUN (Kabuk.GRUP_IKON); calisma listesi
+    //   modalitelerin ekranidir (kullanici).
+    menuGrup: 'Radyoloji', menuAd: 'Çalışma Listesi', ic: '🖥️', yetkiKodu: 'radyoloji',
+    menuSira: 10,
+  },
+  {
+    // RAPOR SABLONLARI (283/288): bolum iskeleti, makrolar ve skor alanlari.
+    //   Sablon tetkike baglanir; rapor ekrani varsayilani kendiliginden yukler.
+    kaynak: 'radyoloji-sablon', rota: 'radyoloji-sablon',
+    baslik: 'Rapor Şablonları', yol: 'Radyoloji › Rapor Şablonları',
+    kartYolu: '/radyoloji-sablon', kartBaslik: 'Rapor Şablonu',
+    aksiyonEkrani: 'cari-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2,
+    menuGrup: 'Radyoloji', menuAd: 'Rapor Şablonları', ic: '📄', yetkiKodu: 'radyoloji',
+    menuSira: 20,
+  },
+  // CARI grubu ana menude RADYOLOJIDEN SONRA (kullanici).
+  {
+    // KURUM ICMALI (289): SGK payi tek tek faturalanmaz, donem sonu toplanip
+    //   tek fatura kesilir. Liste donemleri ve durumlarini gosterir.
+    kaynak: 'kurum-icmal', rota: 'kurum-icmal', baslik: 'Kurum İcmalleri',
+    yol: 'Cari › Kurum İcmalleri', aksiyonEkrani: 'icmal-liste',
+    cipler: [
+      { ad: 'Hazırlanıyor', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Faturalandı',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Tümü' },
+    ],
+    toplam: ['toplam'],
+    // Yalniz HBYS: donem icmali odeyen kurum (SGK/OSS) akisinin parcasi,
+    //   ERP kurulumunda karsiligi yok (kullanici).
+    urunModu: 2,
+    menuGrup: 'Cari', menuAd: 'Kurum İcmalleri', ic: '🧾', yetkiKodu: 'kurum',
+    menuSira: 45,
+  },
+  {
+    // Kaynak id, API route ve yetki kodu 'cari' KALDI - Musteri Listesi kendi URL'ini
+    // ('/cari') korur (eski link/rota kirilmasin); Tedarikci Listesi asagida AYNI
+    // kaynagi farkli `rota` ile kullanir. Ekran artik SADECE musteri=1 gosterir
+    // (sabitFiltre) - Tedarikci Listesi ayrildigi icin "ikisi birden" gorunumu gerekmiyor.
+    kaynak: 'cari', baslik: 'Müşteriler', yol: 'Cari › Müşteriler', kartYolu: '/cari',
+    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
+    //   "📄 Ekstre", secili carinin hareketleri, cipe basinca liste geri gelir.
+    ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Cari Ekstre',
+              tarihAlani: 'islemTarihi' },
+    sabitFiltre: { alan: 'musteri', op: 'esit', deger: 1 },
+    yeniKayitVarsayilanlari: { musteri: true, tedarikci: false },
+    // Mockup'ta (cari_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
+    yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
+    // Yalniz ERP (kullanici): HBYS'de musterinin karsiligi HASTA listesidir,
+    //   iki liste ayni tarafi iki adla gostermesin.
+    urunModu: 1,
+    menuGrup: 'Cari', menuAd: 'Müşteri Listesi', ic: '👥', yetkiKodu: 'cari',
+  },
+  {
+    // Musteri Listesi'nin BIREBIR kopyasi (kullanici istegi) - ayni kaynak ('cari'),
+    // ayni kart, farkli `rota`/kartYolu ('/tedarikci') + ters sabitFiltre.
+    kaynak: 'cari', rota: 'tedarikci', baslik: 'Tedarikçiler', yol: 'Cari › Tedarikçiler',
+    kartYolu: '/tedarikci',
+    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
+    //   "📄 Ekstre", secili carinin hareketleri, cipe basinca liste geri gelir.
+    ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Cari Ekstre',
+              tarihAlani: 'islemTarihi' },
+    sabitFiltre: { alan: 'tedarikci', op: 'esit', deger: 1 },
+    yeniKayitVarsayilanlari: { musteri: false, tedarikci: true },
+    yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
+    menuGrup: 'Cari', menuAd: 'Tedarikçi Listesi', ic: '🚚', yetkiKodu: 'cari',
+  },
+  {
+    // ANLASMALI KURUMLAR (249, kullanici: "cari altina musteri benzeri Kurumlar
+    //   menusu liste ve karti olustur"). Kurum da bir cari - hastanin odemesini
+    //   ustlenen taraf; sozlesme suresi/turu ve fiyat politikasi kartinda.
+    kaynak: 'kurum', baslik: 'Kurumlar', yol: 'Cari › Kurumlar', kartYolu: '/kurum',
+    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Kurum Ekstresi',
+              tarihAlani: 'islemTarihi' },
+    yeniKayitVarsayilanlari: { kurum: true, musteri: true },
+    // Yalniz HBYS: anlasmali kurum (odeyen taraf) kavrami HBYS'ye ozgu.
+    urunModu: 2,
+    // Cari grubunun EN USTU (kullanici): HBYS'de en cok girilen liste.
+    //   Sirasiz ogeler 900+ ile diziliyor, 10 hepsinin onune gecer.
+    menuSira: 10,
+    menuGrup: 'Cari', menuAd: 'Kurumlar', ic: '🏛️', yetkiKodu: 'kurum',
+  },
+  {
+    // kisi_listesi.html mockup - kullanici "sade grid olsun, altta sekme yanda bilgi
+    // olmasin" dedi; GenGrid zaten duz grid (mockup'taki sag "Secili Kisi" paneli hic
+    // yapilmadi, ozel bir "sadelestirme" gerekmedi).
+    kaynak: 'kisi', baslik: 'Kisiler', yol: 'Cari › Kisiler', kartYolu: '/kisi',
+    aksiyonEkrani: 'kisi-liste', cipler: DURUM_CIPLERI,
+    menuGrup: 'Cari', menuAd: 'Kişi Listesi', ic: '🧑', yetkiKodu: 'cari',
+  },
   {
     kaynak: 'proje', baslik: 'Projeler', yol: 'CRM › Projeler', kartYolu: '/proje',
     aksiyonEkrani: 'proje-liste',
@@ -362,41 +424,6 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'aday', menuSira: 10,
   },
   {
-    // Kaynak id, API route ve yetki kodu 'cari' KALDI - Musteri Listesi kendi URL'ini
-    // ('/cari') korur (eski link/rota kirilmasin); Tedarikci Listesi asagida AYNI
-    // kaynagi farkli `rota` ile kullanir. Ekran artik SADECE musteri=1 gosterir
-    // (sabitFiltre) - Tedarikci Listesi ayrildigi icin "ikisi birden" gorunumu gerekmiyor.
-    kaynak: 'cari', baslik: 'Müşteriler', yol: 'Cari › Müşteriler', kartYolu: '/cari',
-    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
-    // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
-    //   "📄 Ekstre", secili carinin hareketleri, cipe basinca liste geri gelir.
-    ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Cari Ekstre',
-              tarihAlani: 'islemTarihi' },
-    sabitFiltre: { alan: 'musteri', op: 'esit', deger: 1 },
-    yeniKayitVarsayilanlari: { musteri: true, tedarikci: false },
-    // Mockup'ta (cari_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
-    yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
-    // Yalniz ERP (kullanici): HBYS'de musterinin karsiligi HASTA listesidir,
-    //   iki liste ayni tarafi iki adla gostermesin.
-    urunModu: 1,
-    menuGrup: 'Cari', menuAd: 'Müşteri Listesi', ic: '👥', yetkiKodu: 'cari',
-  },
-  {
-    // Musteri Listesi'nin BIREBIR kopyasi (kullanici istegi) - ayni kaynak ('cari'),
-    // ayni kart, farkli `rota`/kartYolu ('/tedarikci') + ters sabitFiltre.
-    kaynak: 'cari', rota: 'tedarikci', baslik: 'Tedarikçiler', yol: 'Cari › Tedarikçiler',
-    kartYolu: '/tedarikci',
-    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
-    // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
-    //   "📄 Ekstre", secili carinin hareketleri, cipe basinca liste geri gelir.
-    ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Cari Ekstre',
-              tarihAlani: 'islemTarihi' },
-    sabitFiltre: { alan: 'tedarikci', op: 'esit', deger: 1 },
-    yeniKayitVarsayilanlari: { musteri: false, tedarikci: true },
-    yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
-    menuGrup: 'Cari', menuAd: 'Tedarikçi Listesi', ic: '🚚', yetkiKodu: 'cari',
-  },
-  {
     // KATEGORILER (270): stok VE hizmet ayni agaci kullanir; sinirsiz derinlik.
     kaynak: 'kategori', baslik: 'Kategoriler', yol: 'Yönetim › Kategoriler',
     kartYolu: '/kategori', aksiyonEkrani: 'cari-liste',
@@ -418,30 +445,6 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'departman', baslik: 'Departman / Görev', yol: 'Yönetim › Departman / Görev',
     ozelSayfa: true,
     menuGrup: 'Yönetim', menuAd: 'Departman / Görev', ic: '🏢', yetkiKodu: 'personel',
-  },
-  {
-    // ANLASMALI KURUMLAR (249, kullanici: "cari altina musteri benzeri Kurumlar
-    //   menusu liste ve karti olustur"). Kurum da bir cari - hastanin odemesini
-    //   ustlenen taraf; sozlesme suresi/turu ve fiyat politikasi kartinda.
-    kaynak: 'kurum', baslik: 'Kurumlar', yol: 'Cari › Kurumlar', kartYolu: '/kurum',
-    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
-    ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Kurum Ekstresi',
-              tarihAlani: 'islemTarihi' },
-    yeniKayitVarsayilanlari: { kurum: true, musteri: true },
-    // Yalniz HBYS: anlasmali kurum (odeyen taraf) kavrami HBYS'ye ozgu.
-    urunModu: 2,
-    // Cari grubunun EN USTU (kullanici): HBYS'de en cok girilen liste.
-    //   Sirasiz ogeler 900+ ile diziliyor, 10 hepsinin onune gecer.
-    menuSira: 10,
-    menuGrup: 'Cari', menuAd: 'Kurumlar', ic: '🏛️', yetkiKodu: 'kurum',
-  },
-  {
-    // kisi_listesi.html mockup - kullanici "sade grid olsun, altta sekme yanda bilgi
-    // olmasin" dedi; GenGrid zaten duz grid (mockup'taki sag "Secili Kisi" paneli hic
-    // yapilmadi, ozel bir "sadelestirme" gerekmedi).
-    kaynak: 'kisi', baslik: 'Kisiler', yol: 'Cari › Kisiler', kartYolu: '/kisi',
-    aksiyonEkrani: 'kisi-liste', cipler: DURUM_CIPLERI,
-    menuGrup: 'Cari', menuAd: 'Kişi Listesi', ic: '🧑', yetkiKodu: 'cari',
   },
   {
     // SATIS TEKLIFI (216, Ekranlar/teklif_listesi.html): belge turu 18 -

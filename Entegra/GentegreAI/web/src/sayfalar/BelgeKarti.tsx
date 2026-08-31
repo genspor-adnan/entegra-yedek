@@ -1021,6 +1021,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             satirTikla={satirTikla} sonTiklanan={sonTiklanan} secimDegis={secimDegis}
             fiyatListesi={{ listeler: fiyatListeleri, seciliId: fiyatListesiId,
                             sec: v => void listeDegisti(v), kampanyaAdi }}
+            basvuruMu={basvuruMu}
             // ODEME PAYLASIMI (289): yalniz odeyen kurumlu basvuruda.
             paylasim={{ acik: basvuruMu && !!odeyenKurumId,
                         katkiModu: paylasimModu === 2,
@@ -1105,8 +1106,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         {/* 0) Cari secimi - yeni belgenin ilk adimi. */}
         <TarafArama
           acik={cariArama}
-          kaynaklar={['cari']}
-          yerTutucu="Müşteri / tedarikçi ara…"
+          // BASVURUDA yalniz HASTALAR (kullanici): basvurunun tarafi hastadir,
+          //   tedarikci/kurum bu pencerede cikmamali. Kaynak 'hasta' sunucuda
+          //   grup = 101 ile suzuluyor; "＋ Yeni" de hasta karti acar.
+          kaynaklar={basvuruMu ? ['hasta'] : ['cari']}
+          yerTutucu={basvuruMu ? 'Hasta ara…' : 'Müşteri / tedarikçi ara…'}
           onKapat={() => setCariArama(false)}
           onSec={sec => {
             setCari({ id: sec.id, unvan: sec.unvan });

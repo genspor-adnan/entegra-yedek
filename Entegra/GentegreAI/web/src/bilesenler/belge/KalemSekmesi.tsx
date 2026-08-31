@@ -18,8 +18,11 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     kilitli, bilgi, onizleme, sonuc, transferBaslikEksigi,
     depoBelgesi, stokFisiMi, talepMi,
     setStokArama, setKalem, seciliSil, satirTikla, sonTiklanan, secimDegis, doviz,
-    fiyatListesi, paylasim,
+    fiyatListesi, paylasim, basvuruMu,
   } = p;
+
+  /** Tarih kolonu KOD'un solunda mi (basvuru) yoksa miktarin solunda mi. */
+  const tarihSolda = !!basvuruMu && bilgi.siparis;
 
   const yerelPara = doviz?.yerelPara ?? 'TL';
 
@@ -120,12 +123,14 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                    e.target.checked ? new Set(satirlar.map(x => x.anahtar)) : new Set())} />
         </th>
         <th style={{ width: 34 }} className="hiza-orta">Tip</th>
+        {/* BASVURUDA tarih en solda (kullanici): islem tarihi kalemin kimligi. */}
+        {tarihSolda && <th className="hiza-orta" style={{ width: 92 }}>Tarih</th>}
         <th style={{ width: 110 }}>Kod</th>
         <th>Stok / Hizmet</th>
         {aciklamaVar && <th style={{ width: 200 }}>Açıklama</th>}
         {/* TESLIM TARIHI (140) miktarin SOLUNDA, yalniz sipariste: satirin
             termini - "ne kadar"dan once "ne zaman" okunuyor. */}
-        {bilgi.siparis && (
+        {bilgi.siparis && !tarihSolda && (
           <th className="hiza-orta" style={{ width: 92 }}>Teslim Tarihi</th>
         )}
         {/* Miktar / iskonto / KDV DAR (kullanici): ikisi de en fazla birkac
@@ -191,6 +196,13 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             <td className="hiza-orta" title={r.satirTur === 2 ? 'Hizmet' : 'Stok'}>
               {r.satirTur === 2 ? '🛠️' : '📦'}
             </td>
+            {tarihSolda && (
+              <td className="hiza-orta">
+                {r.teslimTarihi
+                  ? r.teslimTarihi.split('-').reverse().join('.')
+                  : <span className="sonuk">—</span>}
+              </td>
+            )}
             <td><code>{r.stokKodu}</code></td>
             <td>
               {/* Lotlu kalemde ac/kapa oku - detay satirlari onun altinda. */}
@@ -211,7 +223,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
               {r.stokAdi || <span className="sonuk">(stok seçilmedi)</span>}
             </td>
             {aciklamaVar && <td className="sonuk">{r.aciklama}</td>}
-            {bilgi.siparis && (
+            {bilgi.siparis && !tarihSolda && (
               <td className="hiza-orta">
                 {r.teslimTarihi
                   ? r.teslimTarihi.split('-').reverse().join('.')
@@ -294,7 +306,12 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     </tbody>
     <tfoot>
       <tr className="genel">
-        <td colSpan={aciklamaVar ? 5 : 4} className="hiza-sag">TOPLAM</td>
+        {/* TOPLAM etiketi MIKTAR kolonuna kadarki her seyi kapsar: onay kutusu,
+            Tip, Kod, Ad + varsa Aciklama + varsa TARIH (basvuruda solda, siparişte
+            miktarin solunda - nerede olursa olsun bir kolon). Tarih sayilmadigi
+            icin siparis gridinde toplam satiri bir kolon kayiyordu. */}
+        <td colSpan={4 + (aciklamaVar ? 1 : 0) + (bilgi.siparis ? 1 : 0)}
+            className="hiza-sag">TOPLAM</td>
         <td className="hiza-sag">
           {satirlar.reduce((t, r) => t + (sayi(r.adet)), 0)
                    .toLocaleString('tr-TR')}
@@ -493,6 +510,13 @@ export interface KalemSekmesiProps {
    * payi kolon olarak gorunur. Verilmezse kolonlar hic cizilmez - normal
    * fatura/irsaliyede paylasim kavrami yoktur.
    */
+  /**
+   * BASVURU (279): kalem tarihi kolonu KOD'un soluna alinir ve basligi
+   * "Tarih" olur - hastanin islem tarihi bir TERMIN degil, satirin kendi
+   * tarihidir (kullanici). Normal sipariste kolon eski yerinde ("Teslim
+   * Tarihi", miktarin solunda) kalir.
+   */
+  basvuruMu?: boolean;
   paylasim?: {
     acik: boolean;
     /** SGK modu (291): pay ORAN degil sabit KATILIM PAYI ile bolunur. */
