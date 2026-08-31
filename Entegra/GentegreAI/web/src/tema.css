@@ -329,11 +329,11 @@ table.grid tr.flt input {
 /* Mockup'ta kart MODAL acilir: .kaperde (perde) + .kawin (ortali pencere). */
 /* SECILI HASTA SERIDI (298): kabul boyunca kart basliginin ustunde durur. */
 /* HASTA ARAMA SATIRI (300, mockup): arac cubugu ile hasta bandi arasinda.
-   Alanlar esnek, iki buton sagda sabit. */
+   Alanlar esnek, iki buton sagda sabit. DIS CERCEVE YOK (kullanici): satir
+   kendi kutusunda degil, hemen altindaki hasta bandiyla tek blok okunur. */
 .hasta-arama {
   display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap;
-  padding: 8px 12px; margin-bottom: 8px;
-  background: var(--yuz); border: 1px solid var(--cizgi); border-radius: 6px;
+  padding: 0 2px; margin-bottom: 8px;
 }
 /* Etiket USTTE (mockup) - kartin genel "etiket solda" kuralinin disinda. */
 .hasta-arama .alan {
