@@ -254,6 +254,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Kart rotasi LISTE ROTASINDAN turetilir (/radyoloji/:id) - kartYolu farkli
     //   yazilirsa cift tik tanimsiz rotaya gider ve ana sayfaya duser.
     kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi',
+    // Cekim oncesi kontrol listesi (310) kart DETAYI degil: sorular
+    //   modaliteye gore uretilir, satir ekle/sil'li grid yanlis olurdu.
+    yerTutucuSekmeler: ['Kontrol Listesi'],
     aksiyonEkrani: 'radyoloji-liste',
     tarihAlani: 'saat',
     cipler: [

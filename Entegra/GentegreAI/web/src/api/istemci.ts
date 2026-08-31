@@ -616,10 +616,30 @@ export const api = {
       gecmis: Record<string, unknown>[];
     }>(`/api/radyoloji/istem-secenekleri?hastaId=${hastaId}`),
 
-  /** Coklu tetkik -> her biri AYRI istem (ayri accession no). */
+  /**
+   * Coklu tetkik -> her biri AYRI istem (ayri accession no). Kabul
+   * ekraninda (310) basvuru da acilir; sunucu protokol numarasini ve
+   * tutarlari geri doner - istemci ikinci istek atmasin.
+   */
   radyolojiIstemAc: (govde: unknown) =>
-    gonder<{ idler: number[]; accessionlar: string[]; uyarilar: string[] }>(
+    gonder<{ idler: number[]; accessionlar: string[]; uyarilar: string[];
+             belgeId: number | null;
+             basvuru: Record<string, unknown> | null }>(
       '/api/radyoloji/istem', govde),
+
+  /** Istem akis seridi + ozet (310): istem/randevu/cekim/rapor/onay/teslim. */
+  radyolojiIstemAkis: (istemId: number) =>
+    istek<Record<string, unknown>>(`/api/radyoloji/istem/${istemId}/akis`),
+
+  /** Cekim oncesi kontrol listesi (310) - modaliteye gore sorular + yanitlar. */
+  radyolojiKontrol: (istemId: number) =>
+    istek<{ sorular: Record<string, unknown>[] }>(
+      `/api/radyoloji/istem/${istemId}/kontrol`),
+
+  radyolojiKontrolKaydet: (istemId: number,
+                           yanitlar: { soruId: number; yanit: string }[]) =>
+    gonder<{ kaydedildi: boolean }>(
+      `/api/radyoloji/istem/${istemId}/kontrol`, { yanitlar }),
 
   /** SONUC TESLIMI (304): film/CD/basili rapor kime verildi. */
   radyolojiTeslim: (istemId: number, govde: unknown) =>

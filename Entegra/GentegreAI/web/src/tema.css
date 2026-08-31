@@ -1402,7 +1402,15 @@ input.skt-gecmis {
   padding: 3px 4px; border-radius: 3px; cursor: pointer; font-size: 12px;
 }
 .istem-agac .agac-satir:hover { background: var(--secim, #e8f0fb) }
-.istem-sag { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+/* Kabul ekraninda sag sutun (tetkikler + istem bilgisi + odeme) modal
+   yuksekligini asiyor; tetkik agaci sabit kalsin diye scroll SAG SUTUNDA. */
+.istem-sag {
+  display: flex; flex-direction: column; gap: 10px; min-width: 0;
+  max-height: min(68vh, 640px); overflow: auto; padding-right: 4px;
+}
+/* Kutular SIKISMASIN: flex sutununda cocuklar varsayilan olarak buzulur,
+   scroll varken istem bilgisi yariya kirpilmis gorunuyordu. */
+.istem-sag > * { flex: none }
 .istem-sag .detay-tablo select { height: 22px; font-size: 11.5px }
 
 /* Konsultasyon satirlari - rapor ekraninin sag paneli (304). */
@@ -1467,3 +1475,66 @@ input.skt-gecmis {
 .hekim-bilgi-kutu .alan input,
 .hekim-bilgi-kutu .alan select,
 .hekim-bilgi-kutu .alan textarea { width: 100% }
+
+/* ===== RADYOLOJI: akis seridi, kontrol listesi, kabul odeme paneli (310) ===== */
+
+/* AKIS SERIDI (mockup radyoloji_istem_karti): istem -> ... -> teslim.
+   Tamamlanan adim yesil nokta, simdiki adim vurgulu; cizgi adimlari birlestirir. */
+.rad-akis { margin: 0 0 10px }
+.akis-seridi {
+  display: flex; align-items: flex-start; background: var(--yuz);
+  border: 1px solid var(--cizgi2); border-radius: 4px; padding: 10px 8px 8px;
+}
+.akis-seridi .adim {
+  flex: 1; text-align: center; position: relative; padding-top: 16px;
+  font-size: 11px; color: var(--soluk);
+}
+.akis-seridi .adim::before {
+  content: ""; position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+  width: 11px; height: 11px; border-radius: 50%; background: var(--yuz);
+  border: 2px solid var(--cizgi); z-index: 1;
+}
+.akis-seridi .adim::after {
+  content: ""; position: absolute; top: 7px; left: 50%; width: 100%; height: 2px;
+  background: var(--cizgi2);
+}
+.akis-seridi .adim:last-child::after { display: none }
+.akis-seridi .adim.ok { color: var(--yesil, #2e7d32); font-weight: 700 }
+.akis-seridi .adim.ok::before { background: var(--yesil, #2e7d32); border-color: var(--yesil, #2e7d32) }
+.akis-seridi .adim.simdi { color: var(--mavi, #2f6db3); font-weight: 700 }
+.akis-seridi .adim.simdi::before {
+  background: var(--mavi, #2f6db3); border-color: var(--mavi, #2f6db3);
+  box-shadow: 0 0 0 3px rgba(47, 109, 179, .2);
+}
+.akis-seridi .adim .ad { display: block }
+.akis-seridi .adim .zm { display: block; font-weight: 400; color: var(--soluk); font-size: 10.5px }
+
+.akis-ozet {
+  display: flex; flex-wrap: wrap; gap: 14px; padding: 6px 10px; font-size: 11px;
+  color: var(--soluk); background: var(--yuz2); border: 1px solid var(--cizgi2);
+  border-top: 0; border-radius: 0 0 4px 4px;
+}
+.akis-ozet b { color: var(--yazi) }
+
+/* KONTROL LISTESI: yanitsiz zorunlu satir gozle secilmeli. */
+.rad-kontrol .detay-tablo tr.eksik td { background: #fdf6ec }
+.rad-kontrol .detay-tablo select,
+.rad-kontrol .detay-tablo input { width: 100% }
+
+/* KABUL EKRANI odeme kutusu (mockup radyoloji_kayit_kabul). */
+.kabul-tutar { padding: 8px 10px; border-top: 1px solid var(--cizgi2) }
+.kabul-tutar .tut {
+  display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0;
+}
+.kabul-tutar .tut.buyuk {
+  font-weight: 700; font-size: 13px; border-top: 1px solid var(--cizgi2);
+  margin-top: 4px; padding-top: 5px;
+}
+.kabul-tutar .ind { color: var(--kirmizi, #b3261e) }
+.kabul-sonuc {
+  display: flex; flex-wrap: wrap; gap: 14px; padding: 7px 10px; font-size: 11.5px;
+  background: #eef6ee; border-top: 1px solid var(--cizgi2); color: var(--soluk);
+}
+.kabul-sonuc b { color: var(--yazi) }
+.detay-tablo td.sag, .detay-tablo th.sag { text-align: right }
+.detay-tablo td.ind { color: var(--kirmizi, #b3261e) }

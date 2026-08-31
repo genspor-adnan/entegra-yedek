@@ -22,6 +22,8 @@ import {
 import { TekKayit } from './TekKayit';
 import { GenGrid } from './GenGrid';
 import { HekimGonderimOzeti } from './radyoloji/HekimGonderimOzeti';
+import { IstemAkisi } from './radyoloji/IstemAkisi';
+import { KontrolListesi } from './radyoloji/KontrolListesi';
 export { Modal };
 import { RolYetkiMatrisi } from './RolYetkiMatrisi';
 import { ekKaydetleriCalistir, ekKaydetTemizle } from './kartEkKaydet';
@@ -707,7 +709,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           {salt && <span className="rozet uyari">salt okunur</span>}
         </>
       }
-      ustSerit={kimlikAlanlari.length > 0 && (
+      ustSerit={(
+        <>
+        {kimlikAlanlari.length > 0 && (
         <div className="kaid">
           {/* AVATAR (305, kullanici: "ad soyadin soluna avatar ekle"): ad ve
               soyadin bas harfleri. Kisi kartlarinda kimin karti oldugunu tek
@@ -797,6 +801,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
             </div>
           )}
         </div>
+        )}
+        {/* RADYOLOJI ISTEMI (310): akis seridi + ozet KIMLIK SERIDININ ALTINDA,
+            sekmelerin USTUNDE - hangi sekmede olursan ol "istem nerede"
+            gorunmeli (mockup radyoloji_istem_karti.html). Yeni kayitta yok. */}
+        {kaynak === 'radyoloji-istem' && !yeniMi && <IstemAkisi istemId={id as number} />}
+        </>
       )}
       sekmeBar={sekmeler.length > 1 && (
         <div className="katab">
@@ -1088,6 +1098,18 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           ekranin kayitlari (radyoloji istemleri). Duzenlenebilir satir gridi
           yerine liste ekranlarindaki GenGrid, SALT OKUNUR ve hekim filtreli.
           Sekme yer tutucu olarak aciliyor, icini burasi dolduruyor. */}
+      {/* Cekim oncesi kontrol listesi (310) - yer tutucu sekme. */}
+      {aktif?.tur === 'yerTutucu' && kaynak === 'radyoloji-istem'
+       && aktif.baslik === 'Kontrol Listesi' && (
+        yeniMi ? (
+          <div className="not" style={{ padding: 20 }}>
+            İstem kaydedildikten sonra kontrol listesi doldurulur.
+          </div>
+        ) : (
+          <KontrolListesi istemId={id as number} saltOkunur={salt} />
+        )
+      )}
+
       {aktif?.tur === 'yerTutucu' && kaynak === 'dis-hekim'
        && aktif.baslik === 'Gönderim Geçmişi' && (
         yeniMi ? (
@@ -1111,7 +1133,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       )}
 
       {aktif?.tur === 'yerTutucu'
-       && !(kaynak === 'dis-hekim' && aktif.baslik === 'Gönderim Geçmişi') && (
+       && !(kaynak === 'dis-hekim' && aktif.baslik === 'Gönderim Geçmişi')
+       && !(kaynak === 'radyoloji-istem' && aktif.baslik === 'Kontrol Listesi') && (
         <div style={{ padding: 40, textAlign: 'center', color: 'var(--soluk)' }}>
           {aktif.baslik} sekmesi yakında.
         </div>

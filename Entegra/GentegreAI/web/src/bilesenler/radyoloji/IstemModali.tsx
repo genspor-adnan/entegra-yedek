@@ -4,6 +4,8 @@ import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { TarafArama } from '../TarafArama';
 import { mesaj } from '../mesaj';
+import { para } from '../bicim';
+import { KasaIslemKarti } from '../../sayfalar/KasaIslemKarti';
 
 /**
  * RADYOLOJI ISTEM ACMA (304).
@@ -25,6 +27,13 @@ interface Gecmis { hizmetId: number; tetkikAdi: string; tarih: string }
 
 /** Secili tetkik: listedeki tetkik + isteme ozel secimler. */
 interface Secim { tetkik: Tetkik; oncelik: number; kontrast: number }
+
+/**
+ * Kalem fiyati (mockup radyoloji_kayit_kabul: Liste / Indirim / Tutar).
+ * Sunucudaki kuralin AYNISI (liste -> kampanya) - kabul masasi tutari
+ * kaydetmeden once gormeli, hastaya soylenen rakam faturayla tutmali.
+ */
+interface KalemFiyati { liste: number; tutar: number; kdv: number }
 
 const ONCELIK = [
   { deger: 1, ad: 'Normal' },
@@ -71,6 +80,31 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
   const [onTani, setOnTani] = useState('');
   const [klinikBilgi, setKlinikBilgi] = useState('');
   const [ucretEkle, setUcretEkle] = useState(true);
+  /** KABUL modu (mockup radyoloji_kayit_kabul): basvurusu olmayan dis hasta. */
+  const kabulMu = !!disIstem && !belgeId;
+  const [basvuruAc, setBasvuruAc] = useState(true);
+  const [odeyenKurumId, setOdeyenKurumId] = useState<number | null>(null);
+  const [odeyenKurumAd, setOdeyenKurumAd] = useState('');
+  const [odeyenArama, setOdeyenArama] = useState(false);
+  const [policeNo, setPoliceNo] = useState('');
+  const [fiyatlar, setFiyatlar] = useState<Record<number, KalemFiyati>>({});
+  /** Kabul sonrasi ozet: protokol no ve tutarlar (mockup ozet seridi). */
+  const [sonuc, setSonuc] = useState<{ belgeId: number; belgeNo: string;
+    genelToplam: number; kurumTutar: number; hastaTutar: number } | null>(null);
+  /**
+   * HASTADAN TAHSIL EDILECEK tutar. Pay bolusumu (289) KDV'SIZ net uzerinden
+   * yapilir; kasadan tahsil edilen ise KDV DAHIL tutardir - hastanin payini
+   * net oraniyla genel toplama tasiyoruz, yoksa KDV kadar eksik tahsilat
+   * acilirdi (800 yerine 880).
+   */
+  const hastaTahsil = sonuc
+    ? (() => {
+        const net = sonuc.kurumTutar + sonuc.hastaTutar;
+        if (net <= 0) return sonuc.genelToplam;
+        return Math.round((sonuc.genelToplam * sonuc.hastaTutar / net) * 100) / 100;
+      })()
+    : 0;
+  const [tahsilatAcik, setTahsilatAcik] = useState(false);
   const [kaydediyor, setKaydediyor] = useState(false);
   const [hata, setHata] = useState('');
 
@@ -84,6 +118,74 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
   }, [hastaId]);
 
   useEffect(() => { if (acik) void yukle() }, [acik, yukle]);
+
+  // HASTANIN AKTIF POLICESI (248): kabul masasi police numarasini elle
+  //   yazmasin - hasta kartinda duruyorsa oradan gelir, gerekirse duzeltilir.
+  useEffect(() => {
+    if (!acik || !kabulMu) return;
+    void (async () => {
+      try {
+        const y = await api.liste('hasta-kurum', {
+          sayfa: 1, boyut: 1,
+          filtre: { op: 'and', kosullar: [
+            { alan: 'hastaId', op: 'esit', deger: hastaId },
+          ] },
+        });
+        const k = y.satirlar[0];
+        if (!k) return;
+        if (k.kurumId) {
+          setOdeyenKurumId(Number(k.kurumId));
+          setOdeyenKurumAd(String(k.kurumAdi ?? ''));
+        }
+        if (k.policeNo) setPoliceNo(String(k.policeNo));
+      } catch { /* police yoksa alanlar bos kalir - kabul yine yapilir */ }
+    })();
+  }, [acik, kabulMu, hastaId]);
+
+  // FIYAT: secili tetkikler / odeyen kurum degistikce yeniden cozulur.
+  //   Kurum degisince kampanya ve sozlesme listesi de degisir (302) -
+  //   ekrandaki tutar kaydedilecek tutarla ayni kalmali.
+  useEffect(() => {
+    if (!acik) return;
+    let birak = false;
+    void (async () => {
+      // BAZ LISTE: kampanya -> SOZLESME -> cari -> varsayilan sirasi (302)
+      //   yalniz bu ucta cozuluyor; kalem fiyatina listeyi VERMEZSEK kurum
+      //   sozlesmesindeki liste devreye girmez ve ekran 0 gosterirdi.
+      let listeId: number | null = null;
+      try {
+        listeId = (await api.belgeVarsayilanListe(19, hastaId, odeyenKurumId)).listeId;
+      } catch { /* liste cozulemezse kalem kendi kuralina duser */ }
+      const yeni: Record<number, KalemFiyati> = {};
+      for (const sec of secili) {
+        try {
+          const f = await api.fiyatKalem({ hizmetId: sec.tetkik.id },
+                                         { tarafId: hastaId, kurumId: odeyenKurumId,
+                                           listeId });
+          yeni[sec.tetkik.id] = {
+            liste: Number(f.bazFiyat ?? 0),
+            tutar: Number(f.fiyat ?? f.bazFiyat ?? 0),
+            kdv: Number(sec.tetkik.kdv ?? 0),
+          };
+        } catch { /* fiyat cozulemezse satir 0 gorunur, kabul engellenmez */ }
+      }
+      if (!birak) setFiyatlar(yeni);
+    })();
+    return () => { birak = true };
+  }, [acik, secili, odeyenKurumId, hastaId]);
+
+  /** Mockup'taki tutar kutusu: liste, indirim, KDV, genel toplam. */
+  const toplam = useMemo(() => {
+    let liste = 0, net = 0, kdv = 0;
+    secili.forEach(sec => {
+      const f = fiyatlar[sec.tetkik.id];
+      if (!f) return;
+      liste += f.liste;
+      net += f.tutar;
+      kdv += (f.tutar * f.kdv) / 100;
+    });
+    return { liste, net, kdv, indirim: liste - net, genel: net + kdv };
+  }, [secili, fiyatlar]);
 
   /** Modaliteye gore gruplu, aramayla suzulmus tetkik agaci. */
   const agac = useMemo(() => {
@@ -114,7 +216,7 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
     .map(s => gecmis.find(g => g.hizmetId === s.tetkik.id))
     .filter(Boolean) as Gecmis[];
 
-  const kaydet = async () => {
+  const kaydet = async (tahsilatla = false) => {
     setHata('');
     if (secili.length === 0) { setHata('En az bir tetkik seçilmeli.'); return }
     if (!klinikBilgi.trim()) {
@@ -133,12 +235,31 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
         istekKurumId: disIstem ? istekKurumId : null,
         onTani, klinikBilgi,
         oncelik: 1,
-        ucretEkle: ucretEkle && !!belgeId,
+        // Basvuru ACILIYORSA ucret de yazilir: kabul masasinin urettigi
+        //   kayit "tetkik var ama tutari yok" halinde kalmamali.
+        ucretEkle: ucretEkle && (!!belgeId || (kabulMu && basvuruAc)),
+        basvuruAc: kabulMu && basvuruAc,
+        odeyenKurumId: kabulMu ? odeyenKurumId : null,
+        policeNo: kabulMu ? policeNo : '',
         tetkikler: secili.map(s => ({ hizmetId: s.tetkik.id, oncelik: s.oncelik,
                                       kontrast: s.kontrast })),
       });
       mesaj(`${y.idler.length} istem açıldı: ${y.accessionlar.join(', ')}`);
       onTamam?.(y.accessionlar);
+      // Basvuru acildiysa modal KAPANMAZ: protokol numarasi ve tahsil
+      //   edilecek tutar gosterilir (mockup ozet seridi) - kabul masasi
+      //   hastaya soyleyecegi rakami burada gorur.
+      if (y.basvuru) {
+        setSonuc({
+          belgeId: Number(y.basvuru.id),
+          belgeNo: String(y.basvuru.belgeNo ?? ''),
+          genelToplam: Number(y.basvuru.genelToplam ?? 0),
+          kurumTutar: Number(y.basvuru.kurumTutar ?? 0),
+          hastaTutar: Number(y.basvuru.hastaTutar ?? 0),
+        });
+        if (tahsilatla) setTahsilatAcik(true);
+        return;
+      }
       onKapat();
     } catch (h) { setHata(hataMetni(h)) } finally { setKaydediyor(false) }
   };
@@ -148,12 +269,33 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
   return (
     <Modal baslik={`Radyoloji İstemi — ${hastaAdi}`} onKapat={onKapat}
            alt={
-             <>
-               <button className="d onay" disabled={kaydediyor} onClick={() => void kaydet()}>
-                 {kaydediyor ? '⏳ Açılıyor…' : `✔ İstemi Aç (${secili.length})`}
-               </button>
-               <button className="d" onClick={onKapat}>✖ Vazgeç</button>
-             </>
+             sonuc ? (
+               <>
+                 {/* Kabul bitti: kayit uretildi, kalan is TAHSILAT. */}
+                 {hastaTahsil > 0 && (
+                   <button className="d onay" onClick={() => setTahsilatAcik(true)}>
+                     💵 Tahsilat Al ({para.format(hastaTahsil)} ₺)
+                   </button>
+                 )}
+                 <button className="d" onClick={onKapat}>Kapat</button>
+               </>
+             ) : (
+               <>
+                 <button className="d onay" disabled={kaydediyor} onClick={() => void kaydet()}>
+                   {kaydediyor ? '⏳ Açılıyor…' : `✔ İstemi Aç (${secili.length})`}
+                 </button>
+                 {/* Mockup'taki tek dugmelik kabul: basvuru + istem + tahsilat.
+                     Tahsilat penceresi kayit BITINCE acilir - once kayit, sonra
+                     para; ters sirada "tahsil edildi ama istem yok" kalirdi. */}
+                 {kabulMu && basvuruAc && (
+                   <button className="d" disabled={kaydediyor}
+                           onClick={() => void kaydet(true)}>
+                     💵 Tahsilat Al ve Kabul Et
+                   </button>
+                 )}
+                 <button className="d" onClick={onKapat}>✖ Vazgeç</button>
+               </>
+             )
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}
 
@@ -189,11 +331,13 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
             <h6>Seçilen Tetkikler ({secili.length})</h6>
             <table className="detay-tablo">
               <thead>
-                <tr><th>Kod</th><th>Tetkik</th><th>Öncelik</th><th>Kontrast</th><th /></tr>
+                <tr><th>Kod</th><th>Tetkik</th><th>Öncelik</th><th>Kontrast</th>
+                    <th className="sag">Liste</th><th className="sag">İndirim</th>
+                    <th className="sag">Tutar</th><th /></tr>
               </thead>
               <tbody>
                 {secili.length === 0 && (
-                  <tr><td colSpan={5} className="bos">Soldaki listeden tetkik seçin.</td></tr>
+                  <tr><td colSpan={8} className="bos">Soldaki listeden tetkik seçin.</td></tr>
                 )}
                 {secili.map(s => (
                   <tr key={s.tetkik.id}>
@@ -213,6 +357,24 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
                         {KONTRAST.map(o => <option key={o.deger} value={o.deger}>{o.ad}</option>)}
                       </select>
                     </td>
+                    {/* FIYAT (mockup): liste, indirim ve odenecek tutar satir
+                        satir gorunur - kabul masasi toplami kaydetmeden once
+                        hastaya soyleyebilmeli. */}
+                    <td className="sag">
+                      {fiyatlar[s.tetkik.id]
+                        ? para.format(fiyatlar[s.tetkik.id].liste) : '—'}
+                    </td>
+                    <td className="sag ind">
+                      {fiyatlar[s.tetkik.id]
+                       && fiyatlar[s.tetkik.id].liste > fiyatlar[s.tetkik.id].tutar
+                        ? '−' + para.format(fiyatlar[s.tetkik.id].liste
+                                            - fiyatlar[s.tetkik.id].tutar)
+                        : '—'}
+                    </td>
+                    <td className="sag"><b>
+                      {fiyatlar[s.tetkik.id]
+                        ? para.format(fiyatlar[s.tetkik.id].tutar) : '—'}
+                    </b></td>
                     <td>
                       <button className="d mini teh" title="Listeden çıkar"
                               onClick={() => cikar(s.tetkik.id)}>✕</button>
@@ -315,10 +477,15 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
               <label className="alan">
                 <span className="etiket">Ücret</span>
                 <span className="deger-serit">
-                  <input type="checkbox" checked={ucretEkle} disabled={!belgeId}
+                  {/* Kabul modunda basvuru BU EKRANDA acildigi icin ucret de
+                      yazilabilir; ic istemde mevcut basvuru sarttir. */}
+                  <input type="checkbox" checked={ucretEkle}
+                         disabled={!belgeId && !(kabulMu && basvuruAc)}
                          onChange={e => setUcretEkle(e.target.checked)} />
-                  <span className={belgeId ? '' : 'sonuk'}>
-                    {belgeId ? 'Başvuruya ücret satırı ekle' : 'Başvuru yok — ücret eklenmez'}
+                  <span className={belgeId || (kabulMu && basvuruAc) ? '' : 'sonuk'}>
+                    {belgeId ? 'Başvuruya ücret satırı ekle'
+                     : kabulMu && basvuruAc ? 'Açılacak başvuruya ücret yazılır'
+                     : 'Başvuru yok — ücret eklenmez'}
                   </span>
                 </span>
               </label>
@@ -337,8 +504,106 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
               çalışma listesine düşer.
             </div>
           </div>
+
+          {/* ÖDEME (mockup radyoloji_kayit_kabul): disaridan gelen hastanin
+              basvurusu burada acilir - odeyen kurum fiyati ve pay bolusumunu
+              belirler, kalan tutar hastadan tahsil edilir. */}
+          {kabulMu && (
+            <div className="kagrup kabul-odeme">
+              <h6>Ödeme / Kabul</h6>
+              <div className="alan-izgara dort-sutun">
+                <label className="alan genis-2">
+                  <span className="etiket">Ödeyen Kurum</span>
+                  <span className="ikili">
+                    <input value={odeyenKurumAd} readOnly placeholder="Hasta kendi öder…"
+                           onClick={() => setOdeyenArama(true)} />
+                    <button type="button" className="d mini" title="Kurum ara"
+                            onClick={() => setOdeyenArama(true)}>…</button>
+                    {odeyenKurumId != null && (
+                      <button type="button" className="d mini" title="Seçimi kaldır"
+                              onClick={() => { setOdeyenKurumId(null); setOdeyenKurumAd('') }}>
+                        ✕
+                      </button>
+                    )}
+                  </span>
+                </label>
+                <label className="alan">
+                  <span className="etiket">Poliçe No</span>
+                  <input value={policeNo} maxLength={40}
+                         onChange={e => setPoliceNo(e.target.value)} />
+                </label>
+                <label className="alan">
+                  <span className="etiket">Başvuru</span>
+                  <span className="deger-serit">
+                    <input type="checkbox" checked={basvuruAc}
+                           onChange={e => setBasvuruAc(e.target.checked)} />
+                    <span>Başvuru aç ve ücretlendir</span>
+                  </span>
+                </label>
+              </div>
+
+              <div className="kabul-tutar">
+                <div className="tut"><span>Liste tutarı</span>
+                  <span>{para.format(toplam.liste)} ₺</span></div>
+                <div className="tut"><span>İndirim</span>
+                  <span className="ind">−{para.format(toplam.indirim)} ₺</span></div>
+                <div className="tut"><span>KDV</span>
+                  <span>{para.format(toplam.kdv)} ₺</span></div>
+                <div className="tut buyuk"><span>Genel Toplam</span>
+                  <span>{para.format(toplam.genel)} ₺</span></div>
+              </div>
+
+              {/* KAYIT SONRASI ozet: protokol ve pay bolusumu SUNUCUDAN gelir -
+                  kurum/hasta payi sozlesmeye gore orada hesaplanir (289). */}
+              {sonuc && (
+                <div className="kabul-sonuc">
+                  <span>Protokol: <b>{sonuc.belgeNo || '—'}</b></span>
+                  <span>Genel toplam: <b>{para.format(sonuc.genelToplam)} ₺</b></span>
+                  <span>Kurumdan: <b>{para.format(
+                    Math.round((sonuc.genelToplam - hastaTahsil) * 100) / 100)} ₺</b></span>
+                  {/* KDV DAHIL: kasada tahsil edilecek olan bu tutardir. */}
+                  <span>Hastadan: <b>{para.format(hastaTahsil)} ₺</b></span>
+                </div>
+              )}
+
+              <div className="not">
+                Kaydedince tek işlemde üç kayıt üretilir: <b>başvuru</b> (protokol),
+                tetkik başına <b>istem</b> (accession no) ve seçilirse <b>tahsilat</b>.
+                Kurum payı sözleşmeye göre ayrılır; kalan tutar hastadan tahsil edilir.
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Odeyen kurum aramasi - kurum listesi (249). */}
+      <TarafArama
+        acik={odeyenArama}
+        kaynaklar={['kurum']}
+        yerTutucu="Ödeyen kurum ara…"
+        onKapat={() => setOdeyenArama(false)}
+        onSec={sec => {
+          setOdeyenKurumId(sec.id);
+          setOdeyenKurumAd(sec.unvan);
+          setOdeyenArama(false);
+        }}
+      />
+
+      {/* TAHSILAT: kasa islem karti, hasta payi ve basvuru onyuklu (mockup
+          "Tahsilat Al ve Kabul Et"). Ayri bir tahsilat ekrani yazmak ayni
+          kaydin iki yoldan uretilmesi olurdu. */}
+      {tahsilatAcik && sonuc && (
+        <KasaIslemKarti
+          acilis={{
+            tur: 21,
+            tarafId: hastaId,
+            tarafUnvan: hastaAdi,
+            belgeId: sonuc.belgeId,
+            tutar: String(hastaTahsil || sonuc.genelToplam),
+          }}
+          onKapat={() => setTahsilatAcik(false)}
+        />
+      )}
 
       {/* Dis hekim arama - jenerik taraf arama ekrani, kaynak 'dis-hekim'.
           enUst: bu modalin uzerinde acilmali. */}
