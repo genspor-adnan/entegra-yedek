@@ -483,17 +483,68 @@ public static partial class KaynakKatalogu
     private static KaynakTanimi Hasta()
     {
         var p = Personel();
+
+        // HASTA ARAMA KOLONLARI (kullanici): Dosya No · Ad Soyad · Cinsiyet ·
+        //   Yas · Telefon · Ilce · Il · Son Basvuru. Kayit kabulde hastayi
+        //   ayirt eden bilgiler bunlar; personelin departman/gorev/rol/ise
+        //   giris kolonlarinin hastada karsiligi yok - gizlenir.
+        var personelAlanlari = new[] { "departmanAdi", "gorev", "rolAdi", "iseGirisTarihi" };
+        var kolonlar = p.Kolonlar
+            .Select(k => k.Ad switch
+            {
+                "kod"    => k with { Baslik = "Dosya No" },
+                "cepTel" => k with { Baslik = "Telefon" },
+                _ when personelAlanlari.Contains(k.Ad) => k with { Varsayilan = false },
+                _ => k
+            }).ToList();
+
+        // Ad Soyad'in sagina: cinsiyet, yas, telefon, adres, son basvuru.
+        var ek = new KolonTanimi[]
+        {
+            new("cinsiyetAdi",
+                "case th.cinsiyet when 1 then 'Erkek' when 2 then 'Kadın' else '' end",
+                                   "metin", "Cinsiyet", Hizalama: "orta", Genislik: 90,
+                                   Filtrelenebilir: false),
+            new("cinsiyet",  "th.cinsiyet",  "sayi",  "Cinsiyet (ham)", Varsayilan: false),
+            // Yas dogum tarihinden HESAPLANIR: sabit bir "yas" kolonu tutmak her
+            //   dogum gununde bayatlar.
+            new("yas",
+                "case when th.dogum_tarihi is null then null "
+                + "else extract(year from age(current_date, th.dogum_tarihi))::int end",
+                                   "sayi",  "Yaş", Hizalama: "sag", Genislik: 60,
+                                   Filtrelenebilir: false),
+            new("dogumTarihi", "th.dogum_tarihi", "tarih", "Doğum Tarihi",
+                Hizalama: "orta", Varsayilan: false),
+            new("ilce",      "coalesce(adr.ilce, '')", "metin", "İlçe", Genislik: 120),
+            new("il",        "coalesce(adr.il, '')",   "metin", "İl",   Genislik: 120),
+            // Son basvuru: hastanin en yeni basvuru (tur 19) tarihi.
+            new("sonBasvuru",
+                "(select max(b.belge_tarihi) from public.belge b "
+                + " where b.taraf_id = t.id and b.tur = 19)",
+                                   "tarih", "Son Başvuru", Hizalama: "orta",
+                                   Filtrelenebilir: false),
+        };
+        var unvanSonu = kolonlar.FindIndex(k => k.Ad == "unvan") + 1;
+        kolonlar.InsertRange(unvanSonu, ek);
+
         return p with
         {
             Ad = "hasta",
             // Ayrı hasta yetkisi seed edilmediği için aynı personel yetki yüzeyi kullanılır.
             YetkiKodu = "personel",
             SabitKosul = "t.grup = 101",
-            Kolonlar = p.Kolonlar.Select(k => k.Ad switch
-            {
-                "kod" => k with { Baslik = "Dosya No" },
-                _ => k
-            }).ToArray()
+            // Hasta ozluk (1:1) ve VARSAYILAN adres (1:n'den tek satir - lateral,
+            //   yoksa cok adresli hastada satir cogalirdi).
+            Kaynak = p.Kaynak + """
+
+                left join public.taraf_hasta th on th.id = t.id
+                left join lateral (
+                    select a.ilce, a.il from public.taraf_adres a
+                     where a.taraf_id = t.id and a.aktif = 1
+                     order by a.varsayilan desc, a.id
+                     limit 1) adr on true
+                """,
+            Kolonlar = kolonlar.ToArray()
         };
     }
 

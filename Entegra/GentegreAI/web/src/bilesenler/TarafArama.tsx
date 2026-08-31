@@ -11,6 +11,13 @@ interface TarafSatiri {
   unvan: string;
   bagliKurum: string;
   gorevRol: string;
+  /** HASTA duzeni (kayit kabul): kolonlar taraf yerine hasta bilgileri. */
+  cinsiyet: string;
+  yas: string;
+  telefon: string;
+  ilce: string;
+  il: string;
+  sonBasvuru: string;
 }
 
 const tipEtiketi = (kaynak: string, s: ListeSatiri): string => {
@@ -28,6 +35,12 @@ const tipEtiketi = (kaynak: string, s: ListeSatiri): string => {
   return kaynak;
 };
 
+/** ISO tarihi gg.aa.yyyy (saat kismi varsa atilir). */
+const gun = (v: unknown): string => {
+  const m = String(v ?? '').slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(m) ? m.split('-').reverse().join('.') : '';
+};
+
 const satiraCevir = (kaynak: string, s: ListeSatiri): TarafSatiri => ({
   kaynak,
   id: Number(s.id),
@@ -36,6 +49,12 @@ const satiraCevir = (kaynak: string, s: ListeSatiri): TarafSatiri => ({
   unvan: String(s.unvan ?? ''),
   bagliKurum: String(s.bagliCari ?? ''),
   gorevRol: String(s.gorev ?? ''),
+  cinsiyet: String(s.cinsiyetAdi ?? ''),
+  yas: s.yas != null && s.yas !== '' ? String(s.yas) : '',
+  telefon: String(s.cepTel ?? ''),
+  ilce: String(s.ilce ?? ''),
+  il: String(s.il ?? ''),
+  sonBasvuru: gun(s.sonBasvuru),
 });
 
 interface Props {
@@ -64,6 +83,13 @@ interface Props {
  */
 export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekFiltre,
                              yerTutucu, onKapat, onSec }: Props) {
+  /**
+   * HASTA DUZENI (kullanici): yalniz hasta aranirken kolonlar kayit kabulun
+   * ihtiyaci olan bilgiler olur - Dosya No, Ad Soyad, Cinsiyet, Yas, Telefon,
+   * Ilce, Il, Son Basvuru. Karisik aramada (cari+kisi) taraf duzeni kalir.
+   */
+  const hastaDuzeni = kaynaklar.length === 1 && kaynaklar[0] === 'hasta';
+
   /** Kutuda yazan metin (aninda) - `arama` bunun gecikmeli (debounce) hali. */
   const [metin, setMetin] = useState('');
   const [arama, setArama] = useState('');
@@ -225,7 +251,9 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
             onClick={() => satirlar[secili] && sec(satirlar[secili])}>
             Seç
           </button>
-          <button type="button" className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>
+          {/* Kapat SAGA yaslanir (kullanici): kart modallerindeki duzenin ayni. */}
+          <button type="button" className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
+                  onClick={onKapat}>Kapat</button>
         </div>
 
         {/* Arama kutusu ve Liste/Son/Sik dugmeleri LISTE EKRANLARIYLA ayni
@@ -262,11 +290,28 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
             <thead>
               <tr>
                 <th className="check"></th>
-                <th className="dar">Tip</th>
-                <th className="dar">Kod</th>
-                <th className="genis">Unvan</th>
-                <th className="bagli-kurum">Bağlı Kurum</th>
-                <th className="dar">Görev/Rol</th>
+                {hastaDuzeni ? (
+                  // Genislikler ACIK: 'dar' sinifiyla telefon ve tarih
+                  //   kirpiliyordu ("+90 5336…", "29.08.2…").
+                  <>
+                    <th style={{ width: 96 }}>Dosya No</th>
+                    <th className="genis">Ad Soyad</th>
+                    <th style={{ width: 74 }}>Cinsiyet</th>
+                    <th style={{ width: 46 }} className="hiza-sag">Yaş</th>
+                    <th style={{ width: 132 }}>Telefon</th>
+                    <th style={{ width: 104 }}>İlçe</th>
+                    <th style={{ width: 104 }}>İl</th>
+                    <th style={{ width: 96 }}>Son Başvuru</th>
+                  </>
+                ) : (
+                  <>
+                    <th className="dar">Tip</th>
+                    <th className="dar">Kod</th>
+                    <th className="genis">Unvan</th>
+                    <th className="bagli-kurum">Bağlı Kurum</th>
+                    <th className="dar">Görev/Rol</th>
+                  </>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -278,15 +323,30 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
                   onClick={() => setSecili(i)}
                 >
                   <td className="check"><input type="checkbox" checked={i === secili} readOnly /></td>
-                  <td>{satir.tip}</td>
-                  <td>{satir.kod}</td>
-                  <td>{satir.unvan}</td>
-                  <td>{satir.bagliKurum}</td>
-                  <td>{satir.gorevRol}</td>
+                  {hastaDuzeni ? (
+                    <>
+                      <td>{satir.kod}</td>
+                      <td>{satir.unvan}</td>
+                      <td>{satir.cinsiyet}</td>
+                      <td className="hiza-sag">{satir.yas}</td>
+                      <td>{satir.telefon}</td>
+                      <td>{satir.ilce}</td>
+                      <td>{satir.il}</td>
+                      <td>{satir.sonBasvuru || <span className="sonuk">—</span>}</td>
+                    </>
+                  ) : (
+                    <>
+                      <td>{satir.tip}</td>
+                      <td>{satir.kod}</td>
+                      <td>{satir.unvan}</td>
+                      <td>{satir.bagliKurum}</td>
+                      <td>{satir.gorevRol}</td>
+                    </>
+                  )}
                 </tr>
               ))}
               {!yukleniyor && satirlar.length === 0 && (
-                <tr><td colSpan={6} className="bos">Kayit yok</td></tr>
+                <tr><td colSpan={hastaDuzeni ? 9 : 6} className="bos">Kayıt yok</td></tr>
               )}
             </tbody>
           </table>

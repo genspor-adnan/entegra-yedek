@@ -1110,7 +1110,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           //   tedarikci/kurum bu pencerede cikmamali. Kaynak 'hasta' sunucuda
           //   grup = 101 ile suzuluyor; "＋ Yeni" de hasta karti acar.
           kaynaklar={basvuruMu ? ['hasta'] : ['cari']}
-          yerTutucu={basvuruMu ? 'Hasta ara…' : 'Müşteri / tedarikçi ara…'}
+          yerTutucu={basvuruMu
+            ? 'Hastayı isim/tel ile ara…' : 'Müşteri / tedarikçi ara…'}
           onKapat={() => setCariArama(false)}
           onSec={sec => {
             setCari({ id: sec.id, unvan: sec.unvan });
