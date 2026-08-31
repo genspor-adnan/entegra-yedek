@@ -24,6 +24,7 @@ export function KartGrupSekmesi(p: KartGrupSekmesiProps) {
   const {
     aktif, kaynak, id, yeniMi, meta, salt, personelGibiKart, deger, setDeger,
     detaylar, setDetaylar, alanHatalari, gizliSekmeler, resimYerTutucu, gruplar, altGruplaVar, renderAlanListesi,
+    aramaAc, secilenAdlar,
   } = p;
 const gruplanmis = altGruplaVar(aktif.alanlar);
 const adli = gruplanmis.filter(([b]) => b);
@@ -82,6 +83,8 @@ if (personelIletisimSekmesi) {
               saltOkunur={salt || hekimDetay.saltOkunur}
               onDegis={yeni => setDetaylar(t => ({ ...t, [hekimDetay.ad]: yeni }))}
               baslik="Hekim Bilgisi"
+              aramaAc={aramaAc}
+              secilenAdlar={secilenAdlar}
             />
             </div>
           ) : null;
@@ -662,4 +665,7 @@ export interface KartGrupSekmesiProps {
   /** Alan cizim yardimcilari (kartAlanCizim fabrikasindan). */
   altGruplaVar(alanlar: KartAlanMeta[]): [string, KartAlanMeta[]][];
   renderAlanListesi(alanlar: KartAlanMeta[]): React.ReactNode;
+  /** Jenerik arama modalini acar (305): 1:1 uzanti formundaki kurum secimi. */
+  aramaAc?(alan: string, kaynak: string, uygula?: (deger: string) => void): void;
+  secilenAdlar?: Record<string, string>;
 }

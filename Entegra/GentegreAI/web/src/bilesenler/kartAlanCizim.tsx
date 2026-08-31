@@ -37,7 +37,7 @@ export interface AlanCizimBaglami {
   /** Jenerik arama ekranindan secilen alanlar (260): alan adi -> gorunen ad. */
   secilenAdlar: Record<string, string>;
   /** "…" dugmesi: alan icin arama modalini acar. */
-  aramaAc(alanAdi: string, kaynak: string): void;
+  aramaAc(alanAdi: string, kaynak: string, uygula?: (deger: string) => void): void;
 }
 
 export function alanCizici(b: AlanCizimBaglami) {

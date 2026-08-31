@@ -22,6 +22,14 @@ interface Props {
   /** Kutularin USTUNDE, tek basina cizilecek alanlar (or. ÜTS "Baz Alınacak
       Şube" - iki cercevenin ikisini de yonettigi icin birinin icinde durmasin). */
   ustAlanlar?: string[];
+  /**
+   * JENERIK ARAMA (305): aramaKaynagi tanimli alan combo yerine "secili ad + …"
+   * kutusu olur; tiklayinca cagiran arama modalini acar. Combo, binlerce
+   * kayitli listelerde (cari) kullanilmaz hale geliyor.
+   */
+  aramaAc?(alan: string, kaynak: string, uygula?: (deger: string) => void): void;
+  /** Secili kaydin ADI - id'den cozulen gosterim metni. */
+  secilenAdlar?: Record<string, string>;
 }
 
 /**
@@ -37,7 +45,7 @@ interface Props {
  * doldurup Kaydet derse detay farkinda "eklenen" olarak gider.
  */
 export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, gruplar,
-                           dislar, ustAlanlar }: Props) {
+                           dislar, ustAlanlar, aramaAc, secilenAdlar }: Props) {
   const satir: Satir = durum.guncel[0] ?? {};
 
   const degis = (ad: string, deger: unknown) => {
@@ -49,6 +57,14 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, grupla
     const guncel = durum.guncel.length ? [yeniSatir, ...durum.guncel.slice(1)] : [yeniSatir];
     onDegis({ ...durum, guncel });
   };
+
+  /**
+   * Arama modalini acar ve secimi KENDI satirimiza yazdirir. Uygula'yi
+   * gondermezsek cagiran (GenForm) secimi kartin alanina yazar - burada
+   * gorunur ama kaydedilmez.
+   */
+  const ara = (a: KartAlanMeta) =>
+    aramaAc?.(a.ad, a.aramaKaynagi!, deger => degis(a.ad, deger));
 
   const girdi = (a: KartAlanMeta) => {
     const deger = satir[a.ad];
@@ -66,6 +82,26 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, grupla
         <input type="checkbox" checked={Number(deger) === 1 || deger === true}
                disabled={saltOkunur || !a.yazilabilir}
                onChange={e => degis(a.ad, e.target.checked)} />
+      );
+    // ARAMA ALANI: deger id'dir; ekranda secili kaydin adi gorunur.
+    if (a.aramaKaynagi && aramaAc)
+      return (
+        <span className="ikili">
+          <input readOnly value={String(deger ?? '') === '' ? ''
+                                 : (secilenAdlar?.[a.ad]
+                                    ?? a.kodlar?.[String(deger ?? '')] ?? '')}
+                 placeholder="Seçiniz…"
+                 disabled={saltOkunur || !a.yazilabilir}
+                 onClick={() => !saltOkunur && a.yazilabilir && ara(a)} />
+          <button type="button" className="d mini" title="Ara"
+                  disabled={saltOkunur || !a.yazilabilir}
+                  onClick={() => ara(a)}>…</button>
+          {String(deger ?? '') !== '' && (
+            <button type="button" className="d mini" title="Seçimi kaldır"
+                    disabled={saltOkunur || !a.yazilabilir}
+                    onClick={() => degis(a.ad, '')}>✕</button>
+          )}
+        </span>
       );
     if (a.kodlar)
       return (

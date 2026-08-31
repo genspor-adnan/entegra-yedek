@@ -576,8 +576,11 @@ public static partial class KartKatalogu
                     Baslik: "Branş"),
                 // Calistigi kurum: cari kaydi VARSA baglanir, yoksa adi yazilir.
                 //   Sevk eden hastanelerin cogu cari listesinde olmaz.
+                // Kurum JENERIK ARAMA ile secilir (kullanici): cari listesi
+                //   binlerce kayit icerebiliyor, combo kullanilmaz olurdu.
+                //   KodTablosu yine verilir - secili kaydin ADI ondan cozulur.
                 new("kurumId",  "kurum_id",  "kod", KodTablosu: "public.v_cari_lookup",
-                    Baslik: "Kurum (kayıtlı)"),
+                    AramaKaynagi: "cari", Baslik: "Kurum (kayıtlı)"),
                 new("kurumAd",  "kurum_ad",  "metin", EnFazlaUzunluk: 200,
                     Baslik: "Kurum Adı"),
                 new("tescilNo", "tescil_no", "metin", EnFazlaUzunluk: 30,

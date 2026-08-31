@@ -312,7 +312,14 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",       "t.id",     "sayi",  "Id", Varsayilan: false),
-            new("unvan",    "t.unvan",  "metin", "Ad Soyad", Genislik: 220),
+            // AD SOYAD = unvan oneki + ad + soyad. Onek ayri kolonda DEGIL,
+            //   t.unvan icinde durur (306) - kart kaydederken "Op.Dr. Kerem
+            //   ATALAY" olarak yazilir. Unvan bos kalmis (disaridan/toplu
+            //   eklenmis) kayitta ad+soyada duser, satir bos gorunmesin.
+            new("unvan",
+                "coalesce(nullif(btrim(t.unvan), ''), "
+                + "btrim(coalesce(t.ad, '') || ' ' || coalesce(t.soyad, '')))",
+                                        "metin", "Ad Soyad", Genislik: 220),
             new("bransAdi", "coalesce(kd.ad, '')", "metin", "Branş", Genislik: 200),
             // Kurum: kayitli cari varsa onun unvani, yoksa serbest metin.
             new("kurum",
@@ -336,6 +343,11 @@ public static partial class KaynakKatalogu
                                         "tarih", "Son Gönderim", Hizalama: "orta",
                 Filtrelenebilir: false),
             new("brans",    "po.brans", "metin", "Branş (ham)", Varsayilan: false),
+            // TEMSILCI: hekimi bizim adimiza kim takip ediyor - DURUM'un
+            //   solunda (kullanici). Kod degil ADIYLA gosterilir.
+            new("temsilci",
+                "(select p.unvan from public.taraf p where p.id = t.temsilci)",
+                                        "metin", "Temsilci", Genislik: 160),
             new("durum",    "t.durum",  "kod",   "Durum", Hizalama: "orta"),
         });
 

@@ -171,7 +171,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
    * arama acik + secilen kaydin adi. Ad, lookup haritasinda olmayabilir
    * (yeni secim) - o yuzden ayri tutulur.
    */
-  const [aramaAlani, setAramaAlani] = useState<{ alan: string; kaynak: string } | null>(null);
+  // uygula: secimin NEREYE yazilacagi. Bos birakilirsa kartin kendi alanina
+  //   (alanDegistir) yazilir; 1:1 uzanti formu (TekKayit) kendi satirina
+  //   yazmak icin kendi setter'ini gonderir - yoksa secim kart alanina
+  //   dusup DETAY kaydedilmeden kaybolur.
+  const [aramaAlani, setAramaAlani] =
+    useState<{ alan: string; kaynak: string; uygula?: (deger: string) => void } | null>(null);
   const [secilenAdlar, setSecilenAdlar] = useState<Record<string, string>>({});
   /** Katalogdaki AcilistaTarafSecimi ile acilan cari secimi (yeni kayitta). */
   const [tarafSecimAcik, setTarafSecimAcik] = useState(false);
@@ -347,6 +352,21 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       return yeni;
     });
   }, [meta]);
+
+  /**
+   * Arama modalindan donen secimi YERINE yazar: alan kartin kendi alaniysa
+   * alanDegistir, 1:1 uzanti (TekKayit) alaniysa onun gonderdigi uygula.
+   * Gosterim adi her iki durumda da ortak sozlukte tutulur - kutu id degil
+   * ad gosterir.
+   */
+  const aramaYaz = useCallback(
+    (hedef: { alan: string; uygula?: (deger: string) => void },
+     deger: string, ad: string) => {
+      if (hedef.uygula) hedef.uygula(deger);
+      else alanDegistir(hedef.alan, deger);
+      setSecilenAdlar(o => ({ ...o, [hedef.alan]: ad }));
+      setAramaAlani(null);
+    }, [alanDegistir]);
 
   const gruplar = useMemo(
     () => alanGruplari(meta, { doviz, yerelParada, gizliAlanlar }),
@@ -617,7 +637,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
   const { altGruplaVar, renderAlanListesi } = alanCizici({
     kaynak, salt, meta, deger, setDeger, alanDegistir, alanHatalari, setAlanHatalari,
     doviz, yerelTutar, kurNotu, bagliTarafAdi, setBagliTarafAdi,
-    secilenAdlar, aramaAc: (alanAdi, kaynakAdi) => setAramaAlani({ alan: alanAdi, kaynak: kaynakAdi }),
+    secilenAdlar,
+    aramaAc: (alanAdi, kaynakAdi, uygula) =>
+      setAramaAlani({ alan: alanAdi, kaynak: kaynakAdi, uygula }),
   });
 
   return (
@@ -891,6 +913,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           alanHatalari={alanHatalari} gizliSekmeler={gizliSekmeler}
           resimYerTutucu={resimYerTutucu} gruplar={gruplar}
           altGruplaVar={altGruplaVar} renderAlanListesi={renderAlanListesi}
+          aramaAc={(alan, kaynak, uygula) => setAramaAlani({ alan, kaynak, uygula })}
+          secilenAdlar={secilenAdlar}
         />
         );
         const tam = kaynak === 'randevu' ? (
@@ -1120,9 +1144,20 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           yerTutucu="Hasta ara…"
           onKapat={() => setAramaAlani(null)}
           onSec={secilen => {
-            alanDegistir(aramaAlani.alan, String(secilen.id));
-            setSecilenAdlar(o => ({ ...o, [aramaAlani.alan]: secilen.unvan }));
-            setAramaAlani(null);
+            aramaYaz(aramaAlani, String(secilen.id), secilen.unvan);
+          }}
+        />
+      )}
+      {/* CARI aramasi (305): dis hekimin calistigi kurum - kurum listesi
+          binlerce cari icerdiginden combo kullanilmaz hale geliyordu. */}
+      {aramaAlani?.kaynak === 'cari' && (
+        <TarafArama
+          acik
+          kaynaklar={['cari']}
+          yerTutucu="Kurum / cari ara…"
+          onKapat={() => setAramaAlani(null)}
+          onSec={secilen => {
+            aramaYaz(aramaAlani, String(secilen.id), secilen.unvan);
           }}
         />
       )}
@@ -1132,12 +1167,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           yalnizHizmet
           onKapat={() => setAramaAlani(null)}
           onSec={satir => {
-            alanDegistir(aramaAlani.alan, String(satir.id));
-            setSecilenAdlar(o => ({
-              ...o,
-              [aramaAlani.alan]: String(satir.ad ?? satir.kod ?? ''),
-            }));
-            setAramaAlani(null);
+            aramaYaz(aramaAlani, String(satir.id), String(satir.ad ?? satir.kod ?? ''));
           }}
         />
       )}

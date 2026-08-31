@@ -375,7 +375,12 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'dis-hekim', baslik: 'Dış Doktorlar', yol: 'Cari › Dış Doktorlar',
     kartYolu: '/dis-hekim', kartBaslik: 'Dış Doktor',
     aksiyonEkrani: 'dis-hekim-liste', cipler: DURUM_CIPLERI,
-    gizliKolonlar: ['brans', 'telefonHam'],
+    // Tescil no ve e-posta KARTTA kalir, listede yer kaplamasin (kullanici).
+    gizliKolonlar: ['brans', 'telefonHam', 'tescilNo', 'eposta'],
+    // Kolon sirasi TAM verilir: temsilci DURUM'un solunda olsun istendi ve
+    //   kaydedilmis kolon tercihi olan kullanicida yeni kolon hic gorunmezdi.
+    kolonSirasi: ['unvan', 'bransAdi', 'kurum', 'cepTel',
+                  'istemSayisi', 'sonIstem', 'temsilci', 'durum'],
     // GONDERIM GECMISI sekmesi katalog detayi DEGIL (kullanici: "frame kaldir,
     //   readonly gengrid yap"): sekme yer tutucu olarak acilir, icini
     //   KartGrupSekmesi salt okunur GenGrid ile doldurur.
