@@ -65,7 +65,14 @@ public static class RadyolojiUclari
         /// <summary>Basvuru acilirken odeyen kurum (249) - fiyat ve pay bolusumu buna bagli.</summary>
         int? OdeyenKurumId = null,
         /// <summary>Ozel sigorta police no - basvuru provizyon uzantisina yazilir (299).</summary>
-        string? PoliceNo = null);
+        string? PoliceNo = null,
+        /// <summary>
+        /// KABUL SONRASI (311, mockup sag alt kutusu): cihaz listesine gonder,
+        /// randevu SMS'i, hazirlik talimati, sonuc CD'si. MWL ve SMS
+        /// entegrasyonlari yok - secim ISTEK olarak kayda gecer.
+        /// </summary>
+        short? MwlIstendi = null, short? SmsIstendi = null,
+        short? HazirlikVerildi = null, short? CdIstendi = null);
 
     /// <summary>Cekim oncesi kontrol listesi yaniti (310).</summary>
     public sealed record KontrolYaniti(int SoruId, string Yanit);
@@ -88,10 +95,19 @@ public static class RadyolojiUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
 
+            // HAZIRLIK TALIMATI (311): tetkikin KENDI protokolu varsa o, yoksa
+            //   modalite varsayilani (kod listesi rad.hazirlik) - kabul masasi
+            //   hastaya ne soyleyecegini ekranda gormeli.
             var tetkikler = await baglanti.ListeAsync("""
-                select id, kod, ad, modalite, coalesce(modalite_adi, '') as "modaliteAdi", kdv
-                  from public.v_radyoloji_tetkik
-                 order by modalite, ad
+                select t.id, t.kod, t.ad, t.modalite,
+                       coalesce(t.modalite_adi, '') as "modaliteAdi", t.kdv,
+                       coalesce(nullif(p.hazirlik_metni, ''), kd.ad, '') as hazirlik
+                  from public.v_radyoloji_tetkik t
+                  left join public.radyoloji_protokol p on p.hizmet_id = t.id
+                  left join public.kod_liste kl on kl.kod = 'rad.hazirlik'
+                  left join public.kod_deger kd on kd.liste_id = kl.id
+                                               and kd.deger = t.modalite
+                 order by t.modalite, t.ad
                 """, null, [], Satir, iptal);
 
             // Bolum ve "randevu verilebilir" bayragi TARAF tablosunda
@@ -283,15 +299,20 @@ public static class RadyolojiUclari
                         insert into public.radyoloji_istem
                             (sube_id, belge_id, hasta_id, hizmet_id, modalite, durum, oncelik,
                              istek_hekim_id, istek_kurum_id, dis_hekim_ad, on_tani, klinik_bilgi,
-                             kontrast, ekleyen)
-                        values (@p0, @p1, @p2, @p3, @p4, 1, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12)
+                             kontrast, ekleyen,
+                             mwl_istendi, sms_istendi, hazirlik_verildi, cd_istendi)
+                        values (@p0, @p1, @p2, @p3, @p4, 1, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12,
+                                coalesce(@p13, 1), coalesce(@p14, 1),
+                                coalesce(@p15, 1), coalesce(@p16, 0))
                         returning id
                         """, islem,
                         [baglam.SubeId, belgeId, istek.HastaId, t.HizmetId, modalite,
                          t.Oncelik ?? istek.Oncelik ?? 1,
                          istek.IstekHekimId, istek.IstekKurumId, istek.DisHekimAd ?? "",
                          istek.OnTani ?? "", istek.KlinikBilgi, t.Kontrast ?? 0,
-                         baglam.KullaniciId], iptal);
+                         baglam.KullaniciId,
+                         istek.MwlIstendi, istek.SmsIstendi,
+                         istek.HazirlikVerildi, istek.CdIstendi], iptal);
 
                     idler.Add(id);
                     accessionlar.Add(await baglanti.TekDegerAsync<string>(

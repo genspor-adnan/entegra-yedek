@@ -1544,3 +1544,16 @@ input.skt-gecmis {
   display: flex; align-items: center; gap: 8px; padding: 6px 10px;
   font-size: 11.5px; color: var(--soluk); border-top: 1px solid var(--cizgi2);
 }
+
+/* KABUL SONRASI kutusu (311) - mockup sag alt kutusu. */
+.kabul-sonrasi .secenekler {
+  display: flex; flex-direction: column; gap: 4px; padding: 8px 10px;
+}
+.kabul-sonrasi .onay {
+  display: flex; align-items: center; gap: 7px; font-size: 12px; cursor: pointer;
+}
+.kabul-sonrasi .hazirlik-metin {
+  margin: 0 10px 8px; padding: 7px 9px; border: 1px solid #f2ddbf;
+  background: #fdf9f1; border-radius: 3px; font-size: 11.5px; line-height: 1.55;
+  color: #6b5626; display: flex; flex-direction: column; gap: 5px;
+}

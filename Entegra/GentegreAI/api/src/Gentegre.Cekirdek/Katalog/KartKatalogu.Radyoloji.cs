@@ -55,6 +55,17 @@ public static partial class KartKatalogu
             //   faturasında istendiği için ad yine de yazılır.
             new("disHekimAd", "dis_hekim_ad", "metin", EnFazlaUzunluk: 120,
                 Baslik: "Dış Hekim (kayıtsız)", Grup: "İstem Bilgisi"),
+            // KABUL SONRASI (311): kabul masasinin istekleri - MWL/SMS
+            //   entegrasyonu gelene kadar niyet kaydi, sonradan da
+            //   isaretlenebilir (or. hasta CD istedi).
+            new("mwlIstendi",      "mwl_istendi",      "mantik",
+                Baslik: "Cihaz listesine (MWL) gönder", Grup: "Çekim"),
+            new("smsIstendi",      "sms_istendi",      "mantik",
+                Baslik: "Randevu SMS'i", Grup: "Çekim"),
+            new("hazirlikVerildi", "hazirlik_verildi", "mantik",
+                Baslik: "Hazırlık talimatı verildi", Grup: "Çekim"),
+            new("cdIstendi",       "cd_istendi",       "mantik",
+                Baslik: "Sonuç CD'si hazırlanacak", Grup: "Çekim"),
             new("istekKurumId", "istek_kurum_id", "kod",
                 KodTablosu: "public.v_cari_lookup",
                 Baslik: "İsteyen Kurum", Grup: "İstem Bilgisi"),

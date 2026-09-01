@@ -21,7 +21,9 @@ import { KasaIslemKarti } from '../../sayfalar/KasaIslemKarti';
  */
 
 interface Tetkik { id: number; kod: string; ad: string; modalite: number;
-                   modaliteAdi: string; kdv: number }
+                   modaliteAdi: string; kdv: number;
+                   /** Tetkikin protokol hazirligi, yoksa modalite varsayilani (311). */
+                   hazirlik?: string }
 interface Hekim { id: number; ad: string; bolumAdi: string }
 interface Gecmis { hizmetId: number; tetkikAdi: string; tarih: string }
 
@@ -114,6 +116,16 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
   const [kagit, setKagit] = useState<File | null>(null);
   const kagitGirdi = useRef<HTMLInputElement | null>(null);
   const [kagitDurum, setKagitDurum] = useState('');
+  /**
+   * KABUL SONRASI (311, mockup sag alt kutusu). MWL ve SMS entegrasyonu YOK -
+   * secim kayda ISTEK olarak gecer; entegrasyon gelince ayni bayraklar
+   * tetikleyici olur. Hazirlik talimati ise bugun de calisir: metni kabul
+   * masasi hastaya okur/verir.
+   */
+  const [mwl, setMwl] = useState(true);
+  const [sms, setSms] = useState(true);
+  const [hazirlik, setHazirlik] = useState(true);
+  const [cd, setCd] = useState(false);
   const [kaydediyor, setKaydediyor] = useState(false);
   const [hata, setHata] = useState('');
 
@@ -196,6 +208,19 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
     return { liste, net, kdv, indirim: liste - net, genel: net + kdv };
   }, [secili, fiyatlar]);
 
+  /** Secili tetkiklerin hazirlik talimatlari - AYNI metin tekrar edilmez. */
+  const talimatlar = useMemo(() => {
+    const gorulen = new Set<string>();
+    const liste: { baslik: string; metin: string }[] = [];
+    secili.forEach(sec => {
+      const metin = (sec.tetkik.hazirlik ?? '').trim();
+      if (!metin || gorulen.has(metin)) return;
+      gorulen.add(metin);
+      liste.push({ baslik: sec.tetkik.modaliteAdi || sec.tetkik.ad, metin });
+    });
+    return liste;
+  }, [secili]);
+
   /** Modaliteye gore gruplu, aramayla suzulmus tetkik agaci. */
   const agac = useMemo(() => {
     const k = ara.trim().toLocaleLowerCase('tr');
@@ -248,6 +273,10 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
         //   kayit "tetkik var ama tutari yok" halinde kalmamali.
         ucretEkle: ucretEkle && (!!belgeId || (kabulMu && basvuruAc)),
         basvuruAc: kabulMu && basvuruAc,
+        mwlIstendi: mwl ? 1 : 0,
+        smsIstendi: sms ? 1 : 0,
+        hazirlikVerildi: hazirlik ? 1 : 0,
+        cdIstendi: cd ? 1 : 0,
         odeyenKurumId: kabulMu ? odeyenKurumId : null,
         policeNo: kabulMu ? policeNo : '',
         tetkikler: secili.map(s => ({ hizmetId: s.tetkik.id, oncelik: s.oncelik,
@@ -608,6 +637,54 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
               </div>
             </div>
           )}
+
+          {/* KABUL SONRASI (mockup radyoloji_kayit_kabul sag alt kutusu).
+              Ic istemde de anlamli (hazirlik/CD), o yuzden kabul moduna
+              baglanmadi - MWL/SMS entegrasyonu gelene kadar niyet kaydi. */}
+          <div className="kagrup kabul-sonrasi">
+            <h6>Kabul Sonrası</h6>
+            <div className="secenekler">
+              <label className="onay">
+                <input type="checkbox" checked={mwl}
+                       onChange={e => setMwl(e.target.checked)} />
+                Cihaz listesine (MWL) gönder
+              </label>
+              <label className="onay">
+                <input type="checkbox" checked={sms}
+                       onChange={e => setSms(e.target.checked)} />
+                Randevu / hazırlık SMS'i yolla
+              </label>
+              <label className="onay">
+                <input type="checkbox" checked={hazirlik}
+                       onChange={e => setHazirlik(e.target.checked)} />
+                Hazırlık talimatı ver
+              </label>
+              <label className="onay">
+                <input type="checkbox" checked={cd}
+                       onChange={e => setCd(e.target.checked)} />
+                Sonuç için CD hazırla
+              </label>
+            </div>
+
+            {/* HAZIRLIK METNI seçili tetkiklerden gelir: tetkikin kendi
+                protokolü varsa o, yoksa modalite varsayılanı (311). */}
+            {hazirlik && talimatlar.length > 0 && (
+              <div className="hazirlik-metin">
+                {talimatlar.map(t => (
+                  <div key={t.baslik}>
+                    <b>{t.baslik}</b> — {t.metin}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="not">
+              MWL (cihaz çalışma listesi) ve SMS gönderimi henüz bağlı değil —
+              işaret kayda <b>istek</b> olarak yazılır, entegrasyon eklendiğinde
+              aynı bayraklar tetikler. Hazırlık talimatı ve CD isteği bugün de
+              istem kartında görünür.
+            </div>
+          </div>
         </div>
       </div>
 
