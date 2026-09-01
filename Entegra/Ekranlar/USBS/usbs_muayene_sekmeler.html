@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>USBS — Uzaktan Muayene Sekmeleri (e-Reçete / e-Rapor / Sevk / Dosyalar) — Mockup</title>
+<title>USBS — Uzaktan Muayene: Yedi Sekme (Muayene / Tanı / Not / e-Reçete / e-Rapor / Sevk / Dosyalar)</title>
 <style>
   :root{
     --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
@@ -84,7 +84,231 @@
 </head>
 <body>
 
-<div class="baslik">1 / 4 — e-Reçete sekmesi</div>
+<div class="not" style="margin-bottom:6px">
+  <b>Bu dosya uzaktan muayene ekranının YEDİ sekmesini de gösterir.</b> Sekme
+  şeridi her bölümde aynıdır; aktif sekme beyazdır. Sıra kuralı: tanı girilmeden
+  muayene tamamlanamaz, muayene tamamlanmadan görüşme kapanmış sayılmaz.
+</div>
+
+<div class="baslik">1 / 7 — Muayene sekmesi</div>
+<div class="win">
+  <div class="title">🩺 Uzaktan Muayene — Muayene Bulguları
+    <span class="sp">USG-260901-0042 · Uz. Dr. Eren YILMAZ</span></div>
+  <div class="hasta">
+    <div class="av">AÖ</div>
+    <div><b>AHMET ÖZTÜRK</b><small>41 y · E · 123••••••02</small></div>
+    <div>Görüşme<small>01.09.2026 09:30 · 6 dk 18 sn</small></div>
+    <div>Kayıt<small>Alınmadı (rıza yok)</small></div>
+    <div class="sp"><span class="rozet r-uy">Muayene tamamlanmadı</span></div>
+  </div>
+  <div class="sekmeler">
+    <div class="on">Muayene</div><div>Tanı (ICD-10)</div><div>Hekim Notu</div>
+    <div>e-Reçete</div><div>e-Rapor</div><div>Sevk / Yönlendirme</div><div>Dosyalar</div>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn ok">✔ Muayeneyi Tamamla</div>
+    <div class="btn">📋 Önceki muayeneden kopyala</div>
+    <div class="btn">🎤 Sesli not (dikte)</div>
+    <div class="btn pas sp">☁ e-Nabız'a Gönder <span class="kucuk">(tanı girilince)</span></div>
+  </div>
+
+  <div class="govde">
+    <div class="pan">
+      <h5>Anamnez ve Bulgular <span class="sp">entegrasyonsuz md 4</span></h5>
+      <div class="ic">
+        <label class="alan"><span>Şikâyet / Hikâye</span>
+          <div class="inp cok">Üç gündür süren halsizlik ve baş dönmesi. Yeni ilaç
+            başlanmamış, ateş tarif etmiyor.</div></label>
+        <label class="alan"><span>Öz geçmiş / Kullandığı ilaçlar</span>
+          <div class="inp cok">HT (5 yıl) · Ramipril 5 mg 1x1 · D vitamini.
+            Aktif ilaçlar e-Nabız'dan çekildi.</div></label>
+        <div class="uclu">
+          <label class="alan"><span>Tansiyon (hasta ölçümü)</span><div class="inp">150 / 95 mmHg</div></label>
+          <label class="alan"><span>Nabız</span><div class="inp">88 /dk</div></label>
+          <label class="alan"><span>Ateş</span><div class="inp">36,7 °C</div></label>
+        </div>
+        <label class="alan"><span>Gözlem / Değerlendirme</span>
+          <div class="inp cok">Genel durum iyi, bilinç açık ve oryante. Görüntülü
+            muayenede solukluk ya da siyanoz yok. Tansiyon takibi önerildi.</div></label>
+      </div>
+    </div>
+
+    <div class="pan">
+      <h5>Uzaktan Muayenenin Sınırı</h5>
+      <div class="ic">
+        <div class="uy" style="margin:0 0 8px">
+          <b>Fizik muayene yapılamadı.</b> Bu not muayene kaydına otomatik düşer;
+          hekim gerekli görürse hastayı yüz yüze başvuruya yönlendirir
+          (Sevk sekmesi).
+        </div>
+        <label class="alan"><span>Yapılamayan değerlendirmeler</span>
+          <div class="inp cok">Oskültasyon, palpasyon, EKG. Tansiyon değeri
+            <b>hastanın kendi ölçümüdür</b> - kayıtta bu şekilde işaretlenir.</div></label>
+        <label class="alan"><span>Hastaya verilen öneriler</span>
+          <div class="inp cok">Günlük tansiyon çizelgesi tutulacak; 3 gün üst üste
+            160/100 üzeri ölçümde acile başvurulacak.</div></label>
+        <div class="kucuk">
+          Öneriler muayene özetine yazılır ve hastaya PDF olarak gönderilir.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="baslik">2 / 7 — Tanı (ICD-10) sekmesi</div>
+<div class="win">
+  <div class="title">🔎 Uzaktan Muayene — Tanı (ICD-10)
+    <span class="sp">kayıt bölümü md 8 · 9</span></div>
+  <div class="sekmeler">
+    <div>Muayene</div><div class="on">Tanı (ICD-10)</div><div>Hekim Notu</div>
+    <div>e-Reçete</div><div>e-Rapor</div><div>Sevk / Yönlendirme</div><div>Dosyalar</div>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Tanı Ekle</div>
+    <div class="btn">⭐ Sık kullandıklarıma ekle</div>
+    <div class="btn">📋 Önceki tanıyı getir</div>
+    <div class="btn sp">🏷 Ana tanı yap</div>
+  </div>
+
+  <div class="govde">
+    <div class="pan">
+      <h5>ICD-10 Ağacı <span class="sp">bölüm → blok → kod</span></h5>
+      <div class="ic">
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <div class="inp combo" style="flex:1">Ara: kod ya da tanı adı…</div>
+          <div class="btn">Ara</div>
+        </div>
+        <div>
+          <span class="cip on" style="border:1px solid var(--line);border-radius:11px;
+            padding:2px 10px;font-size:11px;background:var(--accent);color:#fff;
+            display:inline-block;margin:0 4px 4px 0;font-weight:bold">Sık kullandıklarım</span>
+          <span style="border:1px solid var(--line);border-radius:11px;padding:2px 10px;
+            font-size:11px;background:#fff;display:inline-block;margin:0 4px 4px 0">Branşta sık (Dahiliye)</span>
+          <span style="border:1px solid var(--line);border-radius:11px;padding:2px 10px;
+            font-size:11px;background:#fff;display:inline-block;margin:0 4px 4px 0">Bu hastada geçmiş</span>
+          <span style="border:1px solid var(--line);border-radius:11px;padding:2px 10px;
+            font-size:11px;background:#fff;display:inline-block;margin:0 4px 4px 0">Tüm liste</span>
+        </div>
+        <div style="border:1px solid var(--line2);border-radius:3px;padding:6px 8px;
+          font-size:11.5px;line-height:1.9;margin-top:4px">
+          <div style="color:var(--navy);font-weight:bold">I00-I99 · Dolaşım sistemi hastalıkları</div>
+          <div style="padding-left:16px">I10-I15 · Hipertansif hastalıklar</div>
+          <div style="padding-left:34px;background:var(--sel);border-radius:3px">
+            I10 · Esansiyel (primer) hipertansiyon ✓</div>
+          <div style="padding-left:34px">I11 · Hipertansif kalp hastalığı</div>
+          <div style="padding-left:34px">I15 · Sekonder hipertansiyon</div>
+          <div style="color:var(--navy);font-weight:bold">R00-R99 · Belirti ve bulgular</div>
+          <div style="padding-left:16px">R42 · Baş dönmesi ve sersemlik hissi</div>
+          <div style="padding-left:16px">R53 · Halsizlik ve yorgunluk</div>
+        </div>
+        <div class="kucuk" style="margin-top:4px">
+          Arama hem kodda hem tanı adında çalışır; ağaç istenen derinliğe kadar
+          açılır (kayıt md 9).
+        </div>
+      </div>
+    </div>
+
+    <div class="pan">
+      <h5>Bu Muayenenin Tanıları</h5>
+      <table>
+        <thead><tr><th>Kod</th><th>Tanı</th><th>Tip</th><th>Kaynak</th><th></th></tr></thead>
+        <tbody>
+          <tr class="sec"><td><b>I10</b></td><td>Esansiyel (primer) hipertansiyon</td>
+              <td><span class="rozet r-bilgi">Ana tanı</span></td>
+              <td class="kucuk">Hekim</td><td>✖</td></tr>
+          <tr><td>R42</td><td>Baş dönmesi ve sersemlik hissi</td>
+              <td><span class="rozet r-gri">Ek tanı</span></td>
+              <td class="kucuk">Hekim</td><td>✖</td></tr>
+        </tbody>
+      </table>
+      <div class="uy teh" style="margin:9px">
+        <b>Tanı girilmeden muayene tamamlanamaz</b> (kayıt md 8): en az bir
+        <b>ana tanı</b> zorunlu. Kural arayüzde uyarı, sunucuda engeldir;
+        e-Nabız gönderimi de tanısız yapılamaz.
+      </div>
+      <div class="ic" style="padding-top:0">
+        <h5 style="margin:0 -9px 6px;padding-left:9px">Hastanın Geçmiş Tanıları</h5>
+        <table>
+          <tbody>
+            <tr><td>12.05.2026</td><td>I10 · Esansiyel hipertansiyon</td>
+                <td class="kucuk">GenoTIP Poliklinik</td></tr>
+            <tr><td>15.11.2025</td><td>I10 · Esansiyel hipertansiyon</td>
+                <td class="kucuk">Şehir Hastanesi (e-Nabız)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="baslik">3 / 7 — Hekim Notu sekmesi</div>
+<div class="win">
+  <div class="title">📝 Uzaktan Muayene — Hekim Notu
+    <span class="sp">kayıt md 10 · entegrasyonsuz md 5</span></div>
+  <div class="sekmeler">
+    <div>Muayene</div><div>Tanı (ICD-10)</div><div class="on">Hekim Notu</div>
+    <div>e-Reçete</div><div>e-Rapor</div><div>Sevk / Yönlendirme</div><div>Dosyalar</div>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Notu Kaydet</div>
+    <div class="btn">📌 Kalıcı not (her muayenede görünsün)</div>
+    <div class="btn">✉ Hastaya cevap yaz</div>
+    <div class="btn sp">🔎 Notlarda ara</div>
+  </div>
+
+  <div class="govde">
+    <div class="pan">
+      <h5>Bu Görüşmeye Ait Not</h5>
+      <div class="ic">
+        <label class="alan"><span>Hekim notu</span>
+          <div class="inp cok">Tansiyon yüksek seyrediyor; günlük ölçüm çizelgesi
+            istendi. İki hafta sonra kontrol. Ölçümler yüksek seyrederse ilaç
+            dozu gözden geçirilecek, gerekirse kardiyolojiye yönlendirilecek.</div></label>
+        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+          <label style="font-size:11.5px"><input type="checkbox" checked>
+            Yalnız hekim görebilir (özel not)</label>
+          <label style="font-size:11.5px"><input type="checkbox">
+            Muayene özetine yazılsın</label>
+        </div>
+        <div class="kucuk" style="margin-top:8px">
+          <b>Özel not</b> hastaya gönderilen özette yer almaz; iz kaydında
+          "not eklendi" olarak görünür, içeriği yalnız yetkili hekim okur.
+        </div>
+      </div>
+    </div>
+
+    <div class="pan">
+      <h5>Not Geçmişi <span class="sp">tarih bazında erişim</span></h5>
+      <table>
+        <thead><tr><th>Tarih</th><th>Yazan</th><th>Not</th><th>Görünürlük</th></tr></thead>
+        <tbody>
+          <tr class="sec"><td>01.09.2026</td><td>Uz. Dr. E. Yılmaz</td>
+              <td class="genis">Tansiyon takibi istendi, 2 hafta sonra kontrol.</td>
+              <td><span class="rozet r-gri">Özel</span></td></tr>
+          <tr><td>29.08.2026</td><td><b>Hasta</b></td>
+              <td class="genis">İlaçtan sonra öksürük oluyor, görüşmede sormak
+                istiyorum.</td>
+              <td><span class="rozet r-ok">Hastadan</span></td></tr>
+          <tr><td>12.05.2026</td><td>Uz. Dr. E. Yılmaz</td>
+              <td class="genis">Ramipril 5 mg başlandı, 1 ay sonra kontrol.</td>
+              <td><span class="rozet r-gri">Özel</span></td></tr>
+        </tbody>
+      </table>
+      <div class="ic">
+        <div class="uy ok" style="margin:0">
+          Kılavuz <b>iki yönlü</b> not ister: hekimin notu ve <b>hastanın hekimine
+          yazabildiği</b> alan. Hasta notu hekimin gelen kutusuna düşer ve
+          cevaplanabilir (kayıt md 10).
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="baslik">4 / 7 — e-Reçete sekmesi</div>
 <div class="win">
   <div class="title">💊 Uzaktan Muayene — e-Reçete
     <span class="sp">USG-260901-0042 · Uz. Dr. Eren YILMAZ</span></div>
@@ -182,7 +406,7 @@
   </div>
 </div>
 
-<div class="baslik">2 / 4 — e-Rapor sekmesi</div>
+<div class="baslik">5 / 7 — e-Rapor sekmesi</div>
 <div class="win">
   <div class="title">📄 Uzaktan Muayene — e-Rapor <span class="sp">İlaç kullanım raporu</span></div>
   <div class="sekmeler">
@@ -256,7 +480,7 @@
   </div>
 </div>
 
-<div class="baslik">3 / 4 — Sevk / Yönlendirme sekmesi</div>
+<div class="baslik">6 / 7 — Sevk / Yönlendirme sekmesi</div>
 <div class="win">
   <div class="title">↗ Uzaktan Muayene — Sevk / Yönlendirme
     <span class="sp">kayıt bölümü md 12</span></div>
@@ -332,7 +556,7 @@
   </div>
 </div>
 
-<div class="baslik">4 / 4 — Dosyalar sekmesi</div>
+<div class="baslik">7 / 7 — Dosyalar sekmesi</div>
 <div class="win">
   <div class="title">📎 Uzaktan Muayene — Dosyalar
     <span class="sp">md 12 · 13 · görüşmede paylaşılanlar dahil</span></div>
@@ -401,9 +625,9 @@
 </div>
 
 <div class="not">
-  <b>Bu dosya</b> <code>usbs_muayene.html</code> ekranının dört sekmesini ayrı ayrı
-  gösterir: e-Reçete, e-Rapor, Sevk/Yönlendirme, Dosyalar. Muayene, Tanı (ICD-10)
-  ve Hekim Notu sekmeleri ana mockup'ta duruyor.
+  <b>Bu dosya</b> uzaktan muayene ekranının <b>yedi sekmesini de</b> gösterir:
+  Muayene, Tanı (ICD-10), Hekim Notu, e-Reçete, e-Rapor, Sevk/Yönlendirme,
+  Dosyalar. <code>usbs_muayene.html</code> aynı ekranın tek sayfalık özetidir.
   <br><b>Karşılanan maddeler.</b> Entegrasyonsuz bölüm <span class="madde">3</span>
   başka SBYS'ye bağlanmadan e-reçete ve e-rapor · genel
   <span class="madde">md 12</span> dosya transferi ·
