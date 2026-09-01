@@ -14,6 +14,56 @@ namespace Gentegre.Cekirdek.Katalog;
 public static partial class KaynakKatalogu
 {
     /// <summary>
+    /// CİHAZLAR (283/315) - modalite cihazları ve randevu ayarları.
+    ///
+    /// Cihaz radyolojinin KAYNAĞIDIR: randevu ona verilir, MWL ona iner,
+    /// çekim onda yapılır. Liste "bugün kaç iş, ne kadar dolu" sorusunu
+    /// cevaplasın diye günün istem sayısını da taşır.
+    /// </summary>
+    private static KaynakTanimi RadyolojiCihaz() => new(
+        Ad: "radyoloji-cihaz",
+        YetkiKodu: "radyoloji",
+        Kaynak: "public.radyoloji_cihaz c " +
+                "left join public.taraf s on s.id = c.sorumlu_id",
+        SubeKolonu: "c.sube_id",
+        VarsayilanSirala: "c.modalite, c.ad",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",       "c.id",    "sayi",  "Id", Varsayilan: false),
+            new("kod",      "c.kod",   "metin", "Kod", Genislik: 110),
+            new("ad",       "c.ad",    "metin", "Cihaz", Genislik: 260),
+            new("modaliteAdi",
+                "case c.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' " +
+                "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' " +
+                "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                                       "metin", "Modalite", Hizalama: "orta",
+                                       Bicim: "rozet", Genislik: 110, Filtrelenebilir: false),
+            new("modalite", "c.modalite", "kod", "Modalite Kodu", Varsayilan: false),
+            new("aeTitle",  "c.ae_title", "metin", "AE Title", Genislik: 130),
+            new("oda",      "c.oda",   "metin", "Oda", Genislik: 150),
+            new("sorumlu",  "coalesce(s.unvan, '')", "metin", "Sorumlu", Genislik: 160),
+            // Mesai iki kolon yerine TEK okunur metin: listede "08:00-18:00"
+            //   bir bakışta anlaşılır, iki ayrı kolon yer harcardı.
+            new("mesai",
+                "case when c.randevu_verilir = 1 and c.baslangic_saat <> '' " +
+                "     then c.baslangic_saat || '-' || c.bitis_saat else '' end",
+                                       "metin", "Mesai", Hizalama: "orta", Genislik: 110,
+                                       Filtrelenebilir: false),
+            new("slotDk",   "c.slot_dk", "sayi", "Slot (dk)", Hizalama: "sag", Genislik: 90),
+            new("randevuVerilir", "c.randevu_verilir", "mantik", "Randevu", Hizalama: "orta",
+                Genislik: 90),
+            // BUGUNKU IS: cihazin doluluk hissini veren tek sayi.
+            new("bugun",
+                "(select count(*) from public.radyoloji_istem i " +
+                " where i.cihaz_id = c.id and i.durum > 0 " +
+                "   and coalesce(i.cekim_tarihi, i.ekleme_tarihi)::date = current_date)",
+                                       "sayi",  "Bugün", Hizalama: "sag", Genislik: 80,
+                                       Filtrelenebilir: false),
+            new("durum",    "c.durum", "kod",   "Durum", Hizalama: "orta"),
+            new("subeId",   "c.sube_id", "sayi", "Şube", Varsayilan: false),
+        });
+
+    /// <summary>
     /// ÇEKİM PROTOKOLÜ (283/314) - tetkikin NASIL çekileceği.
     ///
     /// Süre randevu kapasitesini, hazırlık metni hastaya verilen talimatı,

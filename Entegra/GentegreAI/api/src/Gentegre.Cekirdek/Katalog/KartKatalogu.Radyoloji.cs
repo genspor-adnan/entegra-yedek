@@ -121,6 +121,79 @@ public static partial class KartKatalogu
     /// surumunu saklar, bu yuzden sablonu duzenleyen surumu artirmali.
     /// </summary>
     /// <summary>
+    /// CİHAZ KARTI (283/315). Üç öbek: kimlik, DICOM/yerleşim, randevu ayarları.
+    /// Randevu alan adları randevu_bolum_ayar ile AYNI - slot üretimi ortak.
+    /// Kapatma/bakım satırları detay gridinde: takvimde "kapalı" olarak çizilir.
+    /// </summary>
+    private static KartTanimi RadyolojiCihaz() => new(
+        Ad: "radyoloji-cihaz",
+        YetkiKodu: "radyoloji",
+        Tablo: "public.radyoloji_cihaz",
+        LogTabloId: 944,
+        SubeKolonu: "sube_id",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["durum"] = (short)1, ["randevu_verilir"] = (short)1,
+            ["slot_dk"] = 15, ["varsayilan_sure"] = 15, ["eszaman"] = 1,
+            ["baslangic_saat"] = "08:00", ["bitis_saat"] = "18:00",
+            ["calisma_gunleri"] = "1,2,3,4,5",
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("kod",      "kod",      "metin", EnFazlaUzunluk: 20,
+                Baslik: "Kod", Grup: "Kimlik"),
+            new("ad",       "ad",       "metin", Zorunlu: true, EnFazlaUzunluk: 120,
+                Baslik: "Cihaz Adı", Grup: "Kimlik"),
+            new("modalite", "modalite", "kod", Zorunlu: true, KodListesi: "rad.modalite",
+                Baslik: "Modalite", Grup: "Kimlik"),
+            new("durum",    "durum",    "kod", SabitKodlar: DurumKodlari,
+                Baslik: "Durum", Grup: "Kimlik"),
+            // AE Title DICOM kimligi: MWL dogru cihaza ancak bununla iner.
+            new("aeTitle",  "ae_title", "metin", EnFazlaUzunluk: 32,
+                Baslik: "AE Title", Grup: "Yerleşim / DICOM"),
+            new("oda",      "oda",      "metin", EnFazlaUzunluk: 60,
+                Baslik: "Oda / Kat", Grup: "Yerleşim / DICOM"),
+            new("sorumluId", "sorumlu_id", "kod", KodTablosu: "public.v_personel_lookup",
+                Baslik: "Cihaz Sorumlusu", Grup: "Yerleşim / DICOM"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300,
+                Baslik: "Açıklama", Grup: "Yerleşim / DICOM"),
+            // RANDEVU: kapaliysa cihaz "walk-in" calisir, takvimde sutunu cikmaz.
+            new("randevuVerilir", "randevu_verilir", "mantik",
+                Baslik: "Randevu Verilir", Grup: "Randevu"),
+            new("baslangicSaat", "baslangic_saat", "metin", EnFazlaUzunluk: 5,
+                Baslik: "Mesai Başlangıç", Grup: "Randevu"),
+            new("bitisSaat",     "bitis_saat",     "metin", EnFazlaUzunluk: 5,
+                Baslik: "Mesai Bitiş", Grup: "Randevu"),
+            new("ogleBaslangic", "ogle_baslangic", "metin", EnFazlaUzunluk: 5,
+                Baslik: "Öğle Başlangıç", Grup: "Randevu"),
+            new("ogleBitis",     "ogle_bitis",     "metin", EnFazlaUzunluk: 5,
+                Baslik: "Öğle Bitiş", Grup: "Randevu"),
+            new("slotDk",        "slot_dk",        "sayi", Baslik: "Slot (dk)", Grup: "Randevu"),
+            // Randevu SURESI oncelikle cekim protokolunden (314) gelir; bu alan
+            //   protokolu olmayan tetkikler icin yedektir.
+            new("varsayilanSure", "varsayilan_sure", "sayi",
+                Baslik: "Varsayılan Süre (dk)", Grup: "Randevu"),
+            new("eszaman",   "eszaman",   "sayi", Baslik: "Aynı Anda (hasta)", Grup: "Randevu"),
+            new("acilSlot",  "acil_slot", "sayi", Baslik: "Acil için Ayrılan Slot", Grup: "Randevu"),
+            new("calismaGunleri", "calisma_gunleri", "metin", EnFazlaUzunluk: 20,
+                Baslik: "Çalışma Günleri", Grup: "Randevu"),
+            new("subeId",    "sube_id",   "kod", Gizli: true),
+        },
+        Detaylar: new DetayTanimi[]
+        {
+            // BAKIM / ARIZA / TATIL: takvimde "kapalı" cizilir, randevu verilemez.
+            new("kapatmalar", "public.radyoloji_cihaz_kapatma", "cihaz_id", new KartAlani[]
+            {
+                new("id",        "id",        "sayi", Yazilabilir: false),
+                new("baslangic", "baslangic", "tarih", Zorunlu: true, Baslik: "Başlangıç"),
+                new("bitis",     "bitis",     "tarih", Zorunlu: true, Baslik: "Bitiş"),
+                new("nedenTur",  "neden_tur", "kod", KodListesi: "rad.kapatma", Baslik: "Neden"),
+                new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama"),
+            }, SubeKolonu: null, Baslik: "Kapatma / Bakım", LogTabloId: 944),
+        });
+
+    /// <summary>
     /// ÇEKİM PROTOKOLÜ KARTI (314). Bir tetkikin TEK protokolü olur
     /// (ux_radyoloji_protokol_hizmet) - kart tetkiği seçtirir, tekrar seçilirse
     /// benzersizlik kısıtı iş kuralı mesajıyla uyarır.

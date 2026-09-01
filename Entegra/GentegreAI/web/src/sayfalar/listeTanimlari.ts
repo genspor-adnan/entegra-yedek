@@ -302,6 +302,18 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Radyoloji', menuAd: 'Çekim Protokolleri', ic: '⚙️',
     yetkiKodu: 'radyoloji', urunModu: 2,
   },
+  {
+    // CİHAZLAR (283/315): radyolojinin kaynağı - randevu ona verilir, MWL
+    //   ona iner, çekim onda yapılır. Kart randevu ayarlarını (mesai, slot,
+    //   çalışma günü) ve kapatma/bakım takvimini taşır.
+    kaynak: 'radyoloji-cihaz', baslik: 'Cihazlar',
+    yol: 'Radyoloji › Cihazlar',
+    kartYolu: '/radyoloji-cihaz', kartBaslik: 'Radyoloji Cihazı',
+    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    gizliKolonlar: ['modalite', 'subeId'],
+    menuGrup: 'Radyoloji', menuAd: 'Cihazlar', ic: '🖥️',
+    yetkiKodu: 'radyoloji', urunModu: 2,
+  },
   // CARI grubu ana menude RADYOLOJIDEN SONRA (kullanici).
   {
     // KURUM ICMALI (289): SGK payi tek tek faturalanmaz, donem sonu toplanip

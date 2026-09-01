@@ -98,6 +98,7 @@ public static partial class KaynakKatalogu
         Ekle(RadyolojiIstem());
         Ekle(RadyolojiSablon());
         Ekle(RadyolojiProtokol());
+        Ekle(RadyolojiCihaz());
         Ekle(KurumIcmal());
         Ekle(PersonelGorev());
         Ekle(Hizmet());
