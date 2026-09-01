@@ -12,6 +12,8 @@ import { Modal } from '../bilesenler/GenForm';
 import { para, yerelAnMetni, bugunIso, sayiOku as sayi, tutarMetni, hamSayi } from '../bilesenler/bicim';
 import { DOVIZ_KODLARI, YEREL_PARA_VARSAYILAN } from './belgeSabitleri';
 import { kasaDogrula, kasaGovdesi, kasaTurBilgisi, type KasaGirdisi } from './kasaKaydet';
+import { TahsilatDagitimi, type DagitimSecimi } from '../bilesenler/TahsilatDagitimi';
+import { mesaj } from '../bilesenler/mesaj';
 
 
 const LOOKUP_HESAP = [
@@ -108,6 +110,13 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const [tutar, setTutar] = useState(tutarMetni(acilis?.tutar ?? sorgu.get('tutar')));
   /** Tahsilatin kapatacagi belge (kasa_islem.belge_id). */
   const belgeBagi = acilis?.belgeId ?? (Number(sorgu.get('belgeId')) || 0);
+  /**
+   * TAHSILAT DAGITIMI (321): odemenin hangi belge SATIRINA gittigi. Prim
+   * "tahsil edildikce" hesaplandigi icin bu kirilim gercek veri olmali.
+   * Panel yalniz belgeye bagli islemde cizilir; secim kayittan SONRA yazilir
+   * (islem id'si o zaman olusur).
+   */
+  const [dagitim, setDagitim] = useState<DagitimSecimi[]>([]);
   const [kur, setKur] = useState('1');
   const [karsiTutar, setKarsiTutar] = useState('');
   const [masrafTutar, setMasrafTutar] = useState('');
@@ -279,6 +288,15 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
             surum: String(sonuc?.islem.surum ?? ''),
           });
       yaniti(y);
+      // DAGITIM (321): islem kaydedildikten sonra yazilir - id burada olusur.
+      //   Dagitim yazilamazsa tahsilat gecerli kalir, yalniz "dagitilmamis"
+      //   olur; kullaniciyi kaydi tekrar yazmaya zorlamak daha kotu olurdu.
+      const yeniId = Number(y.islem?.id) || kayitId;
+      if (belgeBagi > 0 && yeniId && dagitim.length > 0) {
+        try {
+          await api.kasaDagitimYaz(yeniId, { belgeId: belgeBagi, satirlar: dagitim });
+        } catch (h) { mesaj(`Tahsilat kaydedildi ama dağıtım yazılamadı: ${hataMetni(h)}`) }
+      }
       // GENEL KURAL (kullanici): Kaydet'e basilinca form KAPANIR. Modalde cagiran
       //   kapatir (belge kartinin Tahsilat sekmesi), tam sayfada listeye donulur.
       if (modalMi) onKapat?.();
@@ -697,6 +715,18 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
           {/* HAREKET BACAKLARI BOLUMU KALKTI (kullanici): muhasebe kaydinin ham
               hali gunluk tahsilat ekraninda yer kapliyordu. Fis onizlemesi
               (asagida) zaten ayni bilgiyi hesap adlariyla gosteriyor. */}
+          {/* TAHSILAT DAGITIMI (321): yalniz belgeye BAGLI tahsilatta - serbest
+              kasa hareketinin dagitacagi satir yoktur. Prim "tahsil edildikce"
+              hesaplandigi icin dagitim gercek veri olmali. */}
+          {belgeBagi > 0 && !kilitli && (
+            <TahsilatDagitimi
+              belgeId={belgeBagi}
+              kasaIslemId={kayitId}
+              tutar={sayi(tutar) || 0}
+              onDegisti={setDagitim}
+            />
+          )}
+
           {sonuc?.fis && <FisOnizleme fis={sonuc.fis} />}
 
           {!kilitli && (

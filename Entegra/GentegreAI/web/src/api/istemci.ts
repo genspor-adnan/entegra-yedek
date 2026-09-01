@@ -668,6 +668,27 @@ export const api = {
              kritik: Record<string, unknown>[] }>(
       `/api/radyoloji/istem/${istemId}/sarf`, govde),
 
+  /**
+   * TAHSILAT DAGITIMI (321): belgenin satirlari + pay bazinda tahsil edilen /
+   * kalan. kasaIslemId verilirse o islemin mevcut dagitimi da doner.
+   */
+  kasaDagitimSatirlari: (belgeId: number, kasaIslemId?: number) =>
+    istek<{ belge: Record<string, unknown> | null;
+            satirlar: Record<string, unknown>[] }>(
+      `/api/kasa-islem/dagitim-satirlari?belgeId=${belgeId}`
+      + (kasaIslemId ? `&kasaIslemId=${kasaIslemId}` : '')),
+
+  /**
+   * Dagitimi TOPLU yaz (321). otomatik=true ise sunucu kalanlari siraya gore
+   * kapatir - radyoloji kabulu gibi tek tikla akislar bunu kullanir.
+   */
+  kasaDagitimYaz: (kasaIslemId: number,
+                   govde: { belgeId?: number; otomatik?: boolean;
+                            satirlar?: { belgeSatirId: number; pay: number;
+                                         tutar: number }[] }) =>
+    gonder<{ dagitilan: number; avans: number; satirSayisi: number }>(
+      `/api/kasa-islem/${kasaIslemId}/dagitim`, govde),
+
   /** Radyoloji panosu (320): sayaclar + cihaz dolulugu + uyarilar tek uctan. */
   radyolojiPano: <T,>(gun?: string) =>
     istek<T>(`/api/radyoloji/pano${gun ? `?gun=${encodeURIComponent(gun)}` : ''}`),
