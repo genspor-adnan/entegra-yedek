@@ -10,7 +10,7 @@ import { type ListeSatiri, hataMetni } from '../api/sozlesme';
  * Hücreye tıklamak o saat için yeni randevu açar; dolu randevuya tıklamak
  * kartı açar - liste görünümüyle aynı kart, ikinci bir ekran yok.
  */
-type Gorunum = 'gun' | 'hafta' | 'hekim';
+type Gorunum = 'gun' | 'hafta' | 'hekim' | 'cihaz';
 
 interface Ayarlar {
   baslangicSaat: string;
@@ -33,6 +33,8 @@ interface Sutun {
   baslik: string;
   gun: string;
   hekim?: number;
+  /** CIHAZ gorunumunde (316) sutunun cihazi - radyoloji randevusu cihaza verilir. */
+  cihaz?: number;
 }
 
 /** "09:00" -> 540 (dakika). */
@@ -53,7 +55,7 @@ function haftaBasi(t: Date) {
 }
 
 export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
-                                 bolum, hekimId, hekimler = [] }: {
+                                 bolum, hekimId, hekimler = [], cihazlar = [] }: {
   ayarlar?: Partial<Ayarlar>;
   /** Ust seritteki bolum/hekim suzgeci (251) - takvim de ayni secimi gosterir. */
   bolum?: number;
@@ -64,8 +66,14 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
    * seritteki suzgecle AYNI liste - iki yerde farkli kadro gorunmesin.
    */
   hekimler?: { id: number; ad: string }[];
-  /** Boş hücre: o tarih-saatte yeni randevu (hekim görünümünde hekimiyle). */
-  onYeni(baslangic: string, hekimId?: number): void;
+  /**
+   * CIHAZ GORUNUMU (316): radyolojide randevu hekime degil CIHAZA verilir -
+   * sutunlar cihazlardir. Liste bos gelirse buton hic gorunmez (poliklinik
+   * kurulumunda radyoloji cihazi yoktur).
+   */
+  cihazlar?: { id: number; ad: string }[];
+  /** Boş hücre: o tarih-saatte yeni randevu (sütunun hekimi ya da cihazıyla). */
+  onYeni(baslangic: string, hekimId?: number, cihazId?: number): void;
   /** Dolu randevu: kartı aç. */
   onAc(id: number): void;
   /**
@@ -73,7 +81,8 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
    * ve süre "＋ Yeni"ye taşınır. Seçim tek başına kart AÇMAZ - kullanıcı önce
    * aralığı işaretler, sonra Yeni'ye basar.
    */
-  onAralik?(baslangic: string | null, sureDk: number, hekimId?: number): void;
+  onAralik?(baslangic: string | null, sureDk: number, hekimId?: number,
+            cihazId?: number): void;
   /** Dışarıdan tazeleme sayacı (kayıt sonrası). */
   yenile?: number;
 }) {
@@ -137,6 +146,9 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
    * sutunun kendisinde tasiniyor.
    */
   const sutunlar = useMemo<Sutun[]>(() => {
+    if (gorunum === 'cihaz') {
+      return cihazlar.map(c => ({ anahtar: `c${c.id}`, baslik: c.ad, gun, cihaz: c.id }));
+    }
     if (gorunum === 'hekim') {
       const liste = hekimId ? hekimler.filter(h => h.id === hekimId) : hekimler;
       return liste.map(h => ({ anahtar: `h${h.id}`, baslik: h.ad, gun, hekim: h.id }));
@@ -150,7 +162,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
         hekim: undefined,
       };
     });
-  }, [gorunum, gunler, gun, hekimler, hekimId]);
+  }, [gorunum, gunler, gun, hekimler, hekimId, cihazlar]);
 
   /** sutun + slot -> o aralikta baslayan randevular. */
   const hucre = (sutun: Sutun, slot: number) => {
@@ -158,6 +170,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     return satirlar.filter(r => {
       if (String(r.tarih ?? '').slice(0, 10) !== sutun.gun) return false;
       if (sutun.hekim !== undefined && Number(r.hekimId) !== sutun.hekim) return false;
+      if (sutun.cihaz !== undefined && Number(r.cihazId) !== sutun.cihaz) return false;
       const b = dk(String(r.saat ?? ''));
       return b >= slot && b < slot + adim;
     });
@@ -169,7 +182,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
    * davranış korunur - o saate yeni randevu açılır.
    */
   const [secim, setSecim] = useState<
-    { sutun: string; gun: string; hekim?: number; bas: number; bit: number } | null>(null);
+    { sutun: string; gun: string; hekim?: number; cihaz?: number; bas: number; bit: number } | null>(null);
   const [suruklu, setSuruklu] = useState(false);
 
   const araliktaMi = (s: Sutun, slot: number) =>
@@ -177,7 +190,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     && slot >= Math.min(secim.bas, secim.bit) && slot <= Math.max(secim.bas, secim.bit);
 
   const secimBasla = (s: Sutun, slot: number) => {
-    setSecim({ sutun: s.anahtar, gun: s.gun, hekim: s.hekim, bas: slot, bit: slot });
+    setSecim({ sutun: s.anahtar, gun: s.gun, hekim: s.hekim, cihaz: s.cihaz, bas: slot, bit: slot });
     setSuruklu(true);
   };
   const secimGenislet = (s: Sutun, slot: number) => {
@@ -195,12 +208,12 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
       //   gorunumunde SUTUNUN hekimi de forma tasinir.
       setSecim(null);
       onAralik?.(null, 0);
-      if (hucre(s, bas).length === 0) onYeni(`${s.gun}T${saatMetni(bas)}`, s.hekim);
+      if (hucre(s, bas).length === 0) onYeni(`${s.gun}T${saatMetni(bas)}`, s.hekim, s.cihaz);
       return;
     }
     // Son slot da dahil: 09:00-09:30 isaretlenirse sure 45 dk degil 45'tir
     //   (bitis slotunun kendisi de secili sayilir).
-    onAralik?.(`${s.gun}T${saatMetni(bas)}`, bit - bas + adim, s.hekim);
+    onAralik?.(`${s.gun}T${saatMetni(bas)}`, bit - bas + adim, s.hekim, s.cihaz);
   };
 
   const kaydir = (yon: number) => {
@@ -222,6 +235,12 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
         {/* Hekim gorunumu: secili GUN icin sutunlar hekimlerdir (kullanici). */}
         <button type="button" className={`cip${gorunum === 'hekim' ? ' on' : ''}`}
                 onClick={() => setGorunum('hekim')}>Hekim</button>
+        {/* CIHAZ gorunumu yalniz cihaz tanimliysa (316) - poliklinik
+            kurulumunda bu buton hic cikmaz. */}
+        {cihazlar.length > 0 && (
+          <button type="button" className={`cip${gorunum === 'cihaz' ? ' on' : ''}`}
+                  onClick={() => setGorunum('cihaz')}>Cihaz</button>
+        )}
         <button type="button" className="d" onClick={() => kaydir(-1)}>‹</button>
         <input type="date" value={gun} onChange={e => setGun(e.target.value)} />
         <button type="button" className="d" onClick={() => kaydir(1)}>›</button>

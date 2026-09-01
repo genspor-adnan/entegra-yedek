@@ -14,6 +14,7 @@ import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
 import { IstemModali } from '../bilesenler/radyoloji/IstemModali';
 import { TeslimModali } from '../bilesenler/radyoloji/TeslimModali';
+import { RandevuModali } from '../bilesenler/radyoloji/RandevuModali';
 import { TarafArama } from '../bilesenler/TarafArama';
 import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
 import { UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
@@ -88,6 +89,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [istemModali, setIstemModali] = useState<
     { hastaId: number; hastaAdi: string; disIstem: boolean } | null>(null);
   /** Sonuc teslimi (304) - film/CD/rapor kime verildi. */
+  /** Radyoloji: secili isteme randevu verme (316). */
+  const [randevuModali, setRandevuModali] = useState<
+    { istemId: number; accessionNo: string; tetkikAdi: string;
+      modalite: number; sureDk: number } | null>(null);
   const [teslimModali, setTeslimModali] = useState<
     { istemId: number; accessionNo: string } | null>(null);
   // Yeni kart EKLENINCE (duzenlemede degil) grid "Son Aranan"a gecsin - kullanici
@@ -173,7 +178,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   /** Belge olusturmada sube: oturumun calisma subesi. */
   const oturumSubeId = Number(localStorage.getItem('gentegre.sube')) || undefined;
   const [takvimAralik, setTakvimAralik] =
-    useState<{ baslangic: string; sureDk: number; hekimId?: number } | null>(null);
+    useState<{ baslangic: string; sureDk: number; hekimId?: number;
+               cihazId?: number } | null>(null);
+  /**
+   * RADYOLOJI CIHAZLARI (316): takvimin "Cihaz" gorunumunun sutunlari.
+   * Radyoloji kurulu degilse liste bos doner, buton da cikmaz.
+   */
+  const [cihazSecenekleri, setCihazSecenekleri] =
+    useState<{ id: number; ad: string }[]>([]);
   const [hekimSuzgec, setHekimSuzgec] = useState<number | ''>('');
   useEffect(() => {
     if (tanim.kaynak !== 'randevu') return;
@@ -256,6 +268,29 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     return dugumler.flatMap(d =>
       d.hekimler.map(h => ({ id: h.hekimId ?? 0, ad: h.ad, bolum: d.departmanId })));
   }, [randevuAgaci, bolumSuzgec]);
+
+  // Cihaz listesi randevu ekraninda bir kez cekilir; yetki/veri yoksa sessiz
+  //   gecilir - poliklinik kurulumunda cihaz olmamasi hata degildir.
+  useEffect(() => {
+    if (tanim.kaynak !== 'randevu') return;
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.liste('radyoloji-cihaz', {
+          sayfa: 1, boyut: 50,
+          filtre: { op: 'and', kosullar: [
+            { alan: 'durum', op: 'esit', deger: 1 },
+            { alan: 'randevuVerilir', op: 'esit', deger: 1 },
+          ] },
+        });
+        if (!iptal)
+          setCihazSecenekleri(y.satirlar.map(r => ({
+            id: Number(r.id), ad: String(r.ad ?? r.kod ?? ''),
+          })));
+      } catch { /* radyoloji yok ya da yetki yok - cihaz gorunumu cikmaz */ }
+    })();
+    return () => { iptal = true };
+  }, [tanim.kaynak]);
 
   /** Hekimin bolumu (takvim sutunundan gelen hekim icin). */
   const hekimBolumu = (hekim?: number) =>
@@ -810,6 +845,20 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         return;
       }
 
+      // RANDEVU VER (316): istem cihaza baglanir - kayit public.randevu'ya
+      //   gider, kaynagi cihazdir. Sure tetkikin protokolunden gelir.
+      if (kod === 'radyoloji.randevu') {
+        if (!satir) return;
+        setRandevuModali({
+          istemId: Number(satir.id),
+          accessionNo: String(satir.accessionNo ?? ''),
+          tetkikAdi: String(satir.tetkikAdi ?? ''),
+          modalite: Number(satir.modalite ?? 0),
+          sureDk: Number(satir.protokolSure ?? 0),
+        });
+        return;
+      }
+
       // RADYOLOJI (283): worklist durum akisi. "Cekildi" teknisyenin islemi -
       //   cekim zamani da yazilir, cunku bekleme suresi (kalite gostergesi)
       //   oradan hesaplanir. Iptal onay ister: cekilmis istem iptal edilirse
@@ -995,11 +1044,15 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         // RANDEVU (251): takvimde fareyle isaretlenen aralik varsa saat ve sure
         //   karta tasinir - kullanici "yukaridan asagi isaretleyip Yeni'ye
         //   basinca" formda o araligi gormek istiyor.
-        const arBolum = hekimBolumu(takvimAralik?.hekimId) ?? (bolumSuzgec || undefined);
+        // Cihaz sutunundan secildiyse bolum/hekim TASINMAZ - kaynak cihazdir (316).
+        const arBolum = takvimAralik?.cihazId
+          ? undefined
+          : hekimBolumu(takvimAralik?.hekimId) ?? (bolumSuzgec || undefined);
         const ek = tanim.kaynak === 'randevu' && takvimAralik
           ? `?baslangic=${encodeURIComponent(takvimAralik.baslangic)}`
             + `&sure=${takvimAralik.sureDk}`
             + (takvimAralik.hekimId ? `&hekim=${takvimAralik.hekimId}` : '')
+            + (takvimAralik.cihazId ? `&cihaz=${takvimAralik.cihazId}` : '')
             + (arBolum ? `&bolum=${arBolum}` : '')
           : '';
         git(`${tanim.kartYolu}/yeni${ek}`);
@@ -1164,15 +1217,20 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
             yenile={yenile}
             // Hekim gorunumunde sutunun hekimi de karta gecer (251).
             hekimler={hekimSecenekleri}
-            onYeni={(bas, hek) => {
-              const bol = hekimBolumu(hek) ?? (bolumSuzgec || undefined);
+            // CIHAZ gorunumu (316): radyolojide randevu cihaza verilir.
+            cihazlar={cihazSecenekleri}
+            onYeni={(bas, hek, cih) => {
+              // Cihaz sutunundan aciliyorsa bolum/hekim ARANMAZ - kaynak cihaz.
+              const bol = cih ? undefined : (hekimBolumu(hek) ?? (bolumSuzgec || undefined));
               git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`
                   + (hek ? `&hekim=${hek}` : '')
+                  + (cih ? `&cihaz=${cih}` : '')
                   + (bol ? `&bolum=${bol}` : ''));
             }}
             onAc={id => git(`/randevu/${id}`)}
-            onAralik={(bas, sure, hek) =>
-              setTakvimAralik(bas ? { baslangic: bas, sureDk: sure, hekimId: hek } : null)}
+            onAralik={(bas, sure, hek, cih) =>
+              setTakvimAralik(bas
+                ? { baslangic: bas, sureDk: sure, hekimId: hek, cihazId: cih } : null)}
           />
         ),
       } : undefined}
@@ -1300,6 +1358,18 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         onTamam={() => setYenile(t => t + 1)}
       />
     )}
+    {randevuModali && (
+      <RandevuModali
+        istemId={randevuModali.istemId}
+        accessionNo={randevuModali.accessionNo}
+        tetkikAdi={randevuModali.tetkikAdi}
+        modalite={randevuModali.modalite}
+        sureDk={randevuModali.sureDk}
+        onKapat={() => setRandevuModali(null)}
+        onTamam={() => setYenile(t => t + 1)}
+      />
+    )}
+
     {teslimModali && (
       <TeslimModali
         istemId={teslimModali.istemId}
@@ -1372,6 +1442,7 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
               ...(sorgu.get('sure') ? { sureDk: Number(sorgu.get('sure')) } : {}),
               ...(sorgu.get('hekim') ? { hekimId: Number(sorgu.get('hekim')) } : {}),
               ...(sorgu.get('bolum') ? { bolum: Number(sorgu.get('bolum')) } : {}),
+              ...(sorgu.get('cihaz') ? { cihazId: Number(sorgu.get('cihaz')) } : {}),
             }
           : tanim.yeniKayitVarsayilanlari}
         onKapat={() => git(tanim.kartYolu!)}

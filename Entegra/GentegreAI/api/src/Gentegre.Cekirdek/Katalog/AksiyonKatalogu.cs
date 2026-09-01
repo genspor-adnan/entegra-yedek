@@ -130,6 +130,11 @@ public static class AksiyonKatalogu
                 new("radyoloji.duzenle",  "✎ Düzenle", "radyoloji", Kisayol: "Enter",
                     KaynakKodu: "radyoloji", Islem: Islem.Degistir,
                     KayitGerekir: true, Sira: 20),
+                // RANDEVU (316): radyolojide randevu CIHAZA verilir; kayit yine
+                //   public.randevu'ya gider - ayri modul degil.
+                new("radyoloji.randevu",  "📅 Randevu Ver", "radyoloji",
+                    KaynakKodu: "randevu", Islem: Islem.Ekle,
+                    KayitGerekir: true, Sira: 25),
                 new("radyoloji.cekildi",  "✔ Çekildi İşaretle", "radyoloji",
                     KaynakKodu: "radyoloji", Islem: Islem.Degistir,
                     KayitGerekir: true, Sira: 30),

@@ -142,6 +142,12 @@ public static partial class KaynakKatalogu
                                                                                 Bicim: "rozet", Genislik: 80,
                                                                                 Filtrelenebilir: false),
             new("modalite",      "i.modalite",        "kod",   "Modalite Kodu", Varsayilan: false),
+            // Randevu suresi (316): tetkikin cekim protokolu (314) - modal bunu
+            //   onden doldurur, kullanici gerekirse ezer.
+            new("protokolSure",
+                "(select coalesce(p.sure_dk, 0) from public.radyoloji_protokol p " +
+                " where p.hizmet_id = i.hizmet_id)",
+                                                      "sayi", "Protokol Süre", Varsayilan: false),
             new("accessionNo",   "i.accession_no",    "metin", "Accession",     Genislik: 150),
             new("hastaAdi",      "coalesce(h.unvan, '')", "metin", "Hasta",     Genislik: 190),
             new("tetkikKodu",    "coalesce(hz.kod, '')",  "metin", "Tetkik Kodu", Varsayilan: false),

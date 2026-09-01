@@ -74,6 +74,13 @@ public static class RadyolojiUclari
         short? MwlIstendi = null, short? SmsIstendi = null,
         short? HazirlikVerildi = null, short? CdIstendi = null);
 
+    /// <summary>
+    /// RANDEVU VERME (316): istem cihaza baglanir. Sure verilmezse cekim
+    /// protokolunden (314), o da yoksa cihazin varsayilan suresinden gelir.
+    /// </summary>
+    public sealed record RandevuIstegi(int CihazId, DateTime Baslangic, short? SureDk,
+                                       int? TeknikerId, string? Aciklama);
+
     /// <summary>Cekim oncesi kontrol listesi yaniti (310).</summary>
     public sealed record KontrolYaniti(int SoruId, string Yanit);
     public sealed record KontrolIstegi(IReadOnlyList<KontrolYaniti> Yanitlar);
@@ -429,6 +436,107 @@ public static class RadyolojiUclari
 
             uyarilar.InsertRange(0, basvuruUyarilari);
             return Results.Ok(new { idler, accessionlar, uyarilar, belgeId, basvuru = basvuruOzeti });
+        });
+
+        // ------------------------------------------- randevu bekleyenler ----
+        // Randevusu olmayan (ve iptal/cekilmis olmayan) istemler: takvimin
+        //   yan panelinde durur, bos slota surukleyince randevu olur.
+        grup.MapGet("/randevu-bekleyen", async (
+            BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var satirlar = await baglanti.ListeAsync("""
+                select i.id, i.accession_no as "accessionNo", i.modalite,
+                       coalesce(kd.ad, '') as "modaliteAdi",
+                       coalesce(h.unvan, '') as hasta, i.hasta_id as "hastaId",
+                       coalesce(hz.ad, '') as tetkik, i.hizmet_id as "hizmetId",
+                       i.oncelik,
+                       -- SURE: tetkikin protokolu (314) - takvimde slot boyu bu.
+                       coalesce(nullif(p.sure_dk, 0), 0) as "sureDk",
+                       i.ekleme_tarihi as "istemZamani"
+                  from public.radyoloji_istem i
+                  left join public.taraf h on h.id = i.hasta_id
+                  left join public.hizmet hz on hz.id = i.hizmet_id
+                  left join public.radyoloji_protokol p on p.hizmet_id = i.hizmet_id
+                  left join public.kod_liste kl on kl.kod = 'rad.modalite'
+                  left join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = i.modalite
+                 where i.durum = 1 and i.randevu_id is null
+                   and (@p0::int is null or i.sube_id = @p0)
+                 order by i.oncelik desc, i.ekleme_tarihi
+                 limit 100
+                """, null, [baglam.SubeId], Satir, iptal);
+
+            return Results.Ok(satirlar);
+        });
+
+        // İSTEMDEN RANDEVU (316): randevu ayrı modül değil - kayıt yine
+        //   public.randevu'ya gider, yalnız kaynağı CİHAZ olur. Çakışma,
+        //   kapasite ve cihaz kapatma kuralı tetiktedir.
+        grup.MapPost("/istem/{id:int}/randevu", async (
+            int id, RandevuIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("randevu", Islem.Ekle);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var istem = await baglanti.TekAsync("""
+                select i.hasta_id as "hastaId", i.hizmet_id as "hizmetId",
+                       i.randevu_id as "randevuId", i.durum, i.sube_id as "subeId",
+                       coalesce(nullif(p.sure_dk, 0), 0) as "protokolSure",
+                       coalesce(c.varsayilan_sure, 15) as "cihazSure",
+                       coalesce(c.randevu_verilir, 1) as "randevuVerilir"
+                  from public.radyoloji_istem i
+                  left join public.radyoloji_protokol p on p.hizmet_id = i.hizmet_id
+                  left join public.radyoloji_cihaz c on c.id = @p1
+                 where i.id = @p0
+                """, null, [id, istek.CihazId], Satir, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
+
+            if (Convert.ToInt32(istem["durum"]) == 0)
+                throw GentegreHatasi.IsKurali("İptal edilmiş isteme randevu verilemez.");
+            if (istem["randevuId"] is not null)
+                throw GentegreHatasi.IsKurali("Bu istemin zaten randevusu var - önce onu taşıyın ya da iptal edin.");
+            if (Convert.ToInt32(istem["randevuVerilir"]) == 0)
+                throw GentegreHatasi.IsKurali("Bu cihaz randevusuz (walk-in) çalışıyor.");
+
+            // SURE SIRASI: istekte verilen > tetkik protokolu (314) > cihaz varsayilani.
+            var sure = istek.SureDk is > 0 ? istek.SureDk.Value
+                     : Convert.ToInt16(istem["protokolSure"]) > 0
+                        ? Convert.ToInt16(istem["protokolSure"])
+                        : Convert.ToInt16(istem["cihazSure"]);
+
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var randevuId = await baglanti.TekDegerAsync<int>("""
+                insert into public.randevu
+                    (sube_id, hasta_id, cihaz_id, hizmet_id, baslangic, sure_dk,
+                     durum, tip, kaynak, aciklama, ekleyen)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, 1, 3, 1, @p6, @p7)
+                returning id
+                """, islem,
+                [baglam.SubeId ?? istem["subeId"], istem["hastaId"], istek.CihazId,
+                 istem["hizmetId"], istek.Baslangic, sure, istek.Aciklama ?? "",
+                 baglam.KullaniciId], iptal);
+
+            await baglanti.CalistirAsync("""
+                update public.radyoloji_istem
+                   set randevu_id = @p1, tekniker_id = coalesce(@p2, tekniker_id),
+                       degistiren = @p3, degistirme_tarihi = (now())::timestamp
+                 where id = @p0
+                """, islem, [id, randevuId, istek.TeknikerId, baglam.KullaniciId], iptal);
+
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloIstem, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip, null, iptal: iptal);
+
+            await islem.CommitAsync(iptal);
+            return Results.Ok(new { randevuId, sureDk = sure });
         });
 
         // ------------------------------------------ hastanin odeyicisi ----

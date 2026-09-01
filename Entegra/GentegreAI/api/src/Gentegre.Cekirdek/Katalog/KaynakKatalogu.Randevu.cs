@@ -15,6 +15,7 @@ public static partial class KaynakKatalogu
             left join public.taraf p  on p.id = rv.hasta_id
             left join public.belge b  on b.id = rv.belge_id
             left join public.hizmet hz on hz.id = rv.hizmet_id
+            left join public.radyoloji_cihaz cz on cz.id = rv.cihaz_id
             """,
         SubeKolonu: "rv.sube_id",
         VarsayilanSirala: "rv.baslangic desc, rv.id desc",
@@ -25,6 +26,10 @@ public static partial class KaynakKatalogu
             new("bolumAdi", RandevuKatalog.BolumAdi, "metin", "Bölüm", Genislik: 130),
             new("bolum",      "rv.bolum",     "sayi",  "Bölüm Kodu", Varsayilan: false),
             new("hekim",      "coalesce(h.unvan, '')", "metin", "Hekim", Genislik: 160),
+            // KAYNAK (316): poliklinikte hekim, radyolojide cihaz. Tek kolonda
+            //   birlesik gostermek listeyi okunur tutuyor.
+            new("cihaz",      "coalesce(cz.ad, '')", "metin", "Cihaz", Genislik: 160),
+            new("cihazId",    "rv.cihaz_id",  "sayi",  "Cihaz Id", Varsayilan: false),
             new("hekimId",    "rv.hekim_id",  "sayi",  "Hekim Id", Varsayilan: false),
             new("hasta",      "coalesce(p.unvan, '')", "metin", "Hasta", Genislik: 170),
             new("hastaId",    "rv.hasta_id",  "sayi",  "Hasta Id", Varsayilan: false),

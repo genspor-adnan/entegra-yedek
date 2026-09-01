@@ -632,6 +632,21 @@ export const api = {
     istek<{ kurumId?: number | null; kurumAd?: string; policeNo?: string }>(
       `/api/radyoloji/hasta/${hastaId}/odeme`),
 
+  /** Randevusu olmayan istemler (316) - takvimin bekleyen paneli. */
+  radyolojiRandevuBekleyen: () =>
+    istek<Record<string, unknown>[]>('/api/radyoloji/randevu-bekleyen'),
+
+  /**
+   * Isteme randevu ver (316): kayit public.randevu'ya gider, kaynagi CIHAZ.
+   * Sure verilmezse cekim protokolu (314), o da yoksa cihaz varsayilani.
+   */
+  radyolojiRandevuVer: (istemId: number,
+                        govde: { cihazId: number; baslangic: string;
+                                 sureDk?: number; teknikerId?: number;
+                                 aciklama?: string }) =>
+    gonder<{ randevuId: number; sureDk: number }>(
+      `/api/radyoloji/istem/${istemId}/randevu`, govde),
+
   /** Istem akis seridi + ozet (310): istem/randevu/cekim/rapor/onay/teslim. */
   radyolojiIstemAkis: (istemId: number) =>
     istek<Record<string, unknown>>(`/api/radyoloji/istem/${istemId}/akis`),

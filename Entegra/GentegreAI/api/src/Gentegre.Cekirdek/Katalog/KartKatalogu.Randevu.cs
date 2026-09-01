@@ -37,15 +37,24 @@ public static partial class KartKatalogu
                 Baslik: "Durum", Grup: "Kimlik"),
 
             // RANDEVU kutusu - mockup'taki alan sirasi.
-            new("bolum",     "bolum",     "kod",   Zorunlu: true,
+            // KAYNAK ZORUNLULUGU TETIKTE (316): randevu ya HEKIME ya CIHAZA
+            //   verilir - alan bayragi ikisini birden zorunlu tutamazdi
+            //   (radyolojide hekim yok, poliklinikte cihaz yok). Kural
+            //   tg_randevu_cakisma icinde, uc yazma yolunda da gecerli.
+            new("bolum",     "bolum",     "kod",
                 // Yalniz randevu_verilebilir departmanlar (251) - Muhasebe'ye
                 //   randevu verilmez.
                 KodTablosu: "public.v_randevu_bolum_lookup",
                 Baslik: "Bölüm / Poliklinik", Grup: "Randevu"),
-            new("hekimId",   "hekim_id",  "kod",   Zorunlu: true,
+            new("hekimId",   "hekim_id",  "kod",
                 // Tum personel DEGIL: yalniz "randevu verilebilir" isaretli
                 //   olanlar (252) - muhasebeciye randevu verilmez.
                 KodTablosu: "public.v_hekim_lookup", Baslik: "Hekim", Grup: "Randevu"),
+            // RADYOLOJI randevusunun kaynagi (316): cihaz doluysa hekim/bolum
+            //   bos kalir, takvimde cihaz sutununda cizilir.
+            new("cihazId",   "cihaz_id",  "kod",
+                KodTablosu: "public.v_radyoloji_cihaz_lookup",
+                Baslik: "Cihaz (radyoloji)", Grup: "Randevu"),
             // Hizmet de jenerik stok/hizmet aramasindan, yalniz hizmetler (260).
             new("hizmetId",  "hizmet_id", "kod",
                 KodTablosu: "public.v_hizmet_lookup", AramaKaynagi: "hizmet",
