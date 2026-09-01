@@ -230,6 +230,27 @@ public static partial class KartKatalogu
             // PERSONELE uyari: gebelik, metal, kreatinin gibi cekim oncesi kontrol.
             new("ozelUyari", "ozel_uyari", "metin", EnFazlaUzunluk: 400,
                 Baslik: "Özel Uyarı", Grup: "Çekim"),
+        },
+        Detaylar: new DetayTanimi[]
+        {
+            // SARF LISTESI (320): tetkikin stok karsiligi. Cekim tamamlaninca
+            //   dusum penceresi bu satirlari ONERIR - miktar VARSAYILANDIR,
+            //   gercek kullanimi teknisyen onaylar.
+            new DetayTanimi("malzeme", "public.radyoloji_protokol_malzeme", "protokol_id",
+                new KartAlani[]
+                {
+                    new("stokId", "stok_id", "kod", Zorunlu: true,
+                        KodTablosu: "public.v_stok_lookup", AramaKaynagi: "stok",
+                        Baslik: "Stok / Malzeme"),
+                    new("miktar", "miktar", "sayi", Baslik: "Miktar"),
+                    new("dusumTipi", "dusum_tipi", "kod", KodListesi: "rad.dusum_tipi",
+                        Baslik: "Düşüm"),
+                    // Hesap YAPILMAZ: teknisyene gosterilen not ("1,5 mL/kg").
+                    new("kural", "kural", "metin", EnFazlaUzunluk: 200,
+                        Baslik: "Kural / Not"),
+                    new("sira", "sira", "sayi", Baslik: "Sıra"),
+                },
+                SubeKolonu: null, Baslik: "Malzeme / Sarf", LogTabloId: 943),
         });
 
     private static KartTanimi RadyolojiSablon() => new(

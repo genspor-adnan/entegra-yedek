@@ -138,6 +138,12 @@ public static class AksiyonKatalogu
                 new("radyoloji.cekildi",  "✔ Çekildi İşaretle", "radyoloji",
                     KaynakKodu: "radyoloji", Islem: Islem.Degistir,
                     KayitGerekir: true, Sira: 30),
+                // SARF (320): cekimde kullanilan kontrast/malzeme stoktan duser.
+                //   Cekim isaretlenince kendiliginden acilir; buton atlanmis ya
+                //   da sonradan duzeltilecek dusum icin.
+                new("radyoloji.sarf",     "🧪 Sarf Düş", "radyoloji",
+                    KaynakKodu: "stok", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 35),
                 new("radyoloji.rapor",    "✎ Rapor Yaz", "radyoloji",
                     AksiyonYetkisi: "rad.rapor_yaz", KayitGerekir: true, Sira: 40),
                 // TESLIM (304): film/CD/basili rapor kime verildi - sonuc

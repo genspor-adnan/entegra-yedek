@@ -21,6 +21,7 @@ import { KritikBildirimModali } from '../bilesenler/radyoloji/KritikBildirimModa
 import { KonsultasyonCevapModali }
   from '../bilesenler/radyoloji/KonsultasyonCevapModali';
 import { CihazKapatmaModali } from '../bilesenler/radyoloji/CihazKapatmaModali';
+import { SarfOnayModali } from '../bilesenler/radyoloji/SarfOnayModali';
 import { TarafArama } from '../bilesenler/TarafArama';
 import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
 import { UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
@@ -112,6 +113,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [kritikModali, setKritikModali] = useState<
     { istemId: number; accessionNo: string; hasta: string; tetkik: string;
       bulgu: string; bildirilenAd: string } | null>(null);
+  /** Cekim sonrasi sarf onayi (320) - protokol malzemesi onerilir. */
+  const [sarfModali, setSarfModali] = useState<
+    { istemId: number; accessionNo: string; tetkikAdi: string } | null>(null);
   /** Takvimden cihaz kapatma (318): isaretli aralik + cihaz. */
   const [kapatmaModali, setKapatmaModali] = useState<
     { cihazId: number; cihazAdi: string; baslangic: string; bitis: string } | null>(null);
@@ -893,6 +897,19 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         return;
       }
 
+      // SARF DUSUMU (320): cekim tamamlaninca protokoldeki malzeme onerilir.
+      //   Ayri aksiyon olarak da cagrilabilir - cekim sirasinda atlanmis ya da
+      //   sonradan duzeltilmesi gereken dusum icin.
+      if (kod === 'radyoloji.sarf') {
+        if (!satir) return;
+        setSarfModali({
+          istemId: Number(satir.istemId ?? satir.id),
+          accessionNo: String(satir.accessionNo ?? ''),
+          tetkikAdi: String(satir.tetkikAdi ?? satir.tetkik ?? ''),
+        });
+        return;
+      }
+
       // RANDEVU VER (316): istem cihaza baglanir - kayit public.randevu'ya
       //   gider, kaynagi cihazdir. Sure tetkikin protokolunden gelir.
       if (kod === 'radyoloji.randevu') {
@@ -930,6 +947,20 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
           });
           setYenile(t => t + 1);
           mesaj(iptalMi ? 'İstem iptal edildi.' : 'İstem "Çekildi" olarak işaretlendi.');
+          // SARF DUSUMU (320): cekim tamamlandi - protokolde malzeme tanimliysa
+          //   onay penceresi acilir. Iptalde acilmaz; sarf ayari kapaliysa ya da
+          //   liste bossa modal kendi kendini "tanimli degil" diye anlatir.
+          if (!iptalMi) {
+            try {
+              const sarf = await api.radyolojiSarf(Number(satir.id));
+              if (sarf.aktif && (sarf.satirlar ?? []).length > 0)
+                setSarfModali({
+                  istemId: Number(satir.id),
+                  accessionNo: String(satir.accessionNo ?? ''),
+                  tetkikAdi: String(satir.tetkikAdi ?? satir.tetkik ?? ''),
+                });
+            } catch { /* sarf okunamazsa cekim isaretlemesi yine gecerli */ }
+          }
         });
         return;
       }
@@ -1533,6 +1564,16 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         }}
       />
     )}
+    {sarfModali && (
+      <SarfOnayModali
+        istemId={sarfModali.istemId}
+        accessionNo={sarfModali.accessionNo}
+        tetkikAdi={sarfModali.tetkikAdi}
+        onKapat={() => setSarfModali(null)}
+        onTamam={() => setYenile(t => t + 1)}
+      />
+    )}
+
     {kapatmaModali && (
       <CihazKapatmaModali
         cihazId={kapatmaModali.cihazId}

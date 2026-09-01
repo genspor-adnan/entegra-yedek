@@ -47,6 +47,9 @@ public sealed class AyarDeposu
         "randevu.baslangic_saat", "randevu.bitis_saat", "randevu.slot_dk",
         "randevu.varsayilan_sure", "randevu.calisma_gunleri",
         "randevu.ogle_baslangic", "randevu.ogle_bitis",
+        // Radyoloji sarf dusumu (320): stok modulunu kullanmayan kurumda
+        //   kapatilabilir; depo secimi sarf cikis fisinin kaynagidir.
+        "radyoloji.sarf_aktif", "radyoloji.sarf_depo",
         "belge.geri_gun_siniri",
         "liste.sayfa_boyu",
         "stok.negatif_davranis",

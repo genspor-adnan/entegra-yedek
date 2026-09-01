@@ -56,7 +56,12 @@ async function yenile(): Promise<boolean> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken: refresh }),
       });
-      if (!yanit.ok) { oturum.temizle(); return false }
+      // OTURUMU YALNIZ SUNUCU REDDEDINCE SIL (401/403). Sunucu yeniden
+      //   baslarken (502/503) ya da gecici hata verirken token silmek
+      //   calisan herkesi disari atiyordu - kullanici hicbir sey yapmadigi
+      //   halde giris ekranina duser ve yazdigi form kaybolurdu.
+      if (yanit.status === 401 || yanit.status === 403) { oturum.temizle(); return false }
+      if (!yanit.ok) return false;
       oturum.yaz(await yanit.json() as GirisYaniti);
       return true;
     } catch {
@@ -641,6 +646,27 @@ export const api = {
             modaliteAdi: string; protokolSure: number; kontrast: number;
             hazirlikMetni: string } | null>(
       `/api/radyoloji/tetkik-bilgi/${hizmetId}`),
+
+  /**
+   * Cekim sonrasi sarf onerisi (320): protokol malzemesi + depo bakiyesi +
+   * izlemli stoklar icin lot listesi.
+   */
+  radyolojiSarf: (istemId: number) =>
+    istek<{ aktif: boolean; depoId: number | null; depoAdi: string;
+            accessionNo: string; cdIstendi: number; kontrastMl: number;
+            satirlar: Record<string, unknown>[]; lotlar: Record<string, unknown>[];
+            dusulen: Record<string, unknown>[] }>(
+      `/api/radyoloji/istem/${istemId}/sarf`),
+
+  /** Sarfi dus (320): stok cikis fisi uretilir, kritik seviye uyarisi doner. */
+  radyolojiSarfDus: (istemId: number,
+                     govde: { depoId?: number;
+                              satirlar: { stokId: number; miktar: number;
+                                          izlemler?: { seriLotId: number;
+                                                       miktar: number }[] }[] }) =>
+    gonder<{ belgeId: number; uyarilar: string[];
+             kritik: Record<string, unknown>[] }>(
+      `/api/radyoloji/istem/${istemId}/sarf`, govde),
 
   /** Radyoloji panosu (320): sayaclar + cihaz dolulugu + uyarilar tek uctan. */
   radyolojiPano: <T,>(gun?: string) =>
