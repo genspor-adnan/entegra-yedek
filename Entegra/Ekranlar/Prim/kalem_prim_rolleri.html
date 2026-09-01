@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalem Prim Rolleri — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --accent:#2f6db3; --head:#f3f6fa;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --grpbg:#fbfcfd;
+    --ok:#2e7d46; --ind:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1040px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.sp{margin-left:auto}
+  .kalem{display:grid;grid-template-columns:1.6fr .7fr .7fr .7fr .8fr;gap:10px;
+    padding:9px 12px;background:#f7fafc;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 7px;
+    font-size:12px;display:flex;align-items:center}
+  .inp.ro{background:#f4f7fa;color:#48607a}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg)}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line)}
+  .rz.rol{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.dis{background:#fdf3e6;color:#8a5a12;border-color:#f0dcae}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .toplam{display:flex;justify-content:space-between;padding:4px 12px;font-size:12px}
+  .toplam.buyuk{font-weight:bold;border-top:1px solid var(--line2);margin-top:4px;padding-top:6px}
+  .uyari{margin:0 12px 12px;border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;
+    padding:7px 9px;font-size:11px;color:#8a6218;line-height:1.55}
+  .not{max-width:1040px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🏷 Kalem Prim Rolleri — ACC-260901-0008 <span class="sp">Başvuru 000000028 · MERVE DEMİR</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">✔ Uygula</div>
+    <div class="btn">↺ Plandan Yeniden Hesapla</div>
+    <div class="btn sp">✖ Vazgeç</div>
+  </div>
+
+  <div class="kalem">
+    <div class="fld"><label>Kalem</label><div class="inp ro">MR.012 · Lomber Vertebra MR (kontrastsız)</div></div>
+    <div class="fld"><label>Liste</label><div class="inp ro sag">3.200,00</div></div>
+    <div class="fld"><label>İndirim</label><div class="inp ro sag">−800,00</div></div>
+    <div class="fld"><label>Net Tutar</label><div class="inp ro sag"><b>2.400,00</b></div></div>
+    <div class="fld"><label>Tahsil Edilen</label><div class="inp ro sag">2.400,00</div></div>
+  </div>
+
+  <div class="grp">
+    <h4>Roller ve Paylar <span class="mini">＋ Rol Ekle</span></h4>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:26px"></th><th style="width:130px">Rol</th><th>Kişi</th>
+          <th class="orta" style="width:80px">Pay</th><th style="width:150px">Plan / Satır</th>
+          <th class="sag" style="width:110px">Baz Tutar</th><th class="orta" style="width:80px">Oran</th>
+          <th class="sag" style="width:110px">Prim</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>☐</td><td><span class="rz rol">Gönderen</span></td>
+          <td>Op.Dr. Kerem ATALAY <span class="rz dis">dış</span> · Özel Anadolu Hastanesi</td>
+          <td class="orta">%100</td><td class="sonuk">PRM-RAD-01 · MR</td>
+          <td class="sag">2.400,00</td><td class="orta">%12</td><td class="sag"><b>288,00</b></td>
+        </tr>
+        <tr>
+          <td>☐</td><td><span class="rz rol">Raporlayan</span></td>
+          <td>Uzm.Dr. Elif TUNÇ · Radyoloji</td>
+          <td class="orta">%100</td><td class="sonuk">PRM-RAD-02 · MR</td>
+          <td class="sag">2.400,00</td><td class="orta">%8</td><td class="sag"><b>192,00</b></td>
+        </tr>
+        <tr>
+          <td>☐</td><td><span class="rz rol">Uygulayan</span></td>
+          <td>H. ŞAHİN · Teknisyen</td>
+          <td class="orta">%100</td><td class="sonuk">PRM-TEK-01 · MR</td>
+          <td class="sag">2.400,00</td><td class="orta">%2</td><td class="sag"><b>48,00</b></td>
+        </tr>
+        <tr>
+          <td>☐</td><td><span class="rz rol">İsteyen</span></td>
+          <td class="sonuk">— (dış istem, iç hekim yok)</td>
+          <td class="orta sonuk">—</td><td class="sonuk">—</td>
+          <td class="sag sonuk">—</td><td class="orta sonuk">—</td><td class="sag sonuk">0,00</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="padding:8px 12px">
+      <div class="toplam"><span>Kalem net tutarı</span><span>2.400,00 ₺</span></div>
+      <div class="toplam"><span>Toplam prim</span><span>528,00 ₺</span></div>
+      <div class="toplam buyuk"><span>Prim / ciro oranı</span><span>%22,0</span></div>
+    </div>
+
+    <div class="uyari">
+      ⚠ Roller <b>kalem</b> düzeyindedir, belge düzeyinde değil: aynı başvuruda MR'ı bir hekim,
+      röntgeni başka hekim raporlayabilir. Aynı rolde iki kişi varsa <b>Pay</b> toplamı %100
+      olmalı (iki cerrah %50/%50). Prim tutarı <b>önizlemedir</b> — kesin tutar dönem hesabında,
+      kademe ve tahsilat durumu görülerek üretilir.
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>NOT (mockup):</b> Ekran belge kartındaki kalem satırından açılır ("🏷 Prim Rolleri").
+  Roller <b>otomatik dolar</b>: radyoloji isteminde gönderen = <code>istek_hekim_id</code>,
+  raporlayan = onaylayan radyolog, uygulayan = çekimi yapan teknisyen; kullanıcı yalnız
+  eksiği tamamlar ya da payı böler. Kayıt yeri <code>belge_satir_rol</code>
+  (satır + rol + taraf + pay); prim tutarı burada <b>saklanmaz</b>, dönem hesabı
+  <code>hakedis_satir</code>'ı üretirken plandan yeniden çözer — plan değişirse geçmiş
+  hakediş bozulmaz, yalnız <b>açık dönem</b> yeniden hesaplanır.
+</div>
+</body>
+</html>

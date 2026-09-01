@@ -92,9 +92,9 @@
       <div class="fld"><label>Branş</label><div class="inp combo sonuk">— tümü —</div></div>
       <div class="fld"><label>Ödeyen Kurum</label><div class="inp combo sonuk">— tümü —</div></div>
       <div class="fld"><label>Şube</label><div class="inp combo">Merkez</div></div>
-      <div class="fld"><label class="req">Baz</label><div class="inp combo">Tahsil edilen tutar</div></div>
+      <div class="fld"><label class="req">Baz</label><div class="inp combo">Tahsil edilen tutar (matrah)</div></div>
       <div class="fld"><label>Öncelik</label><div class="inp">10</div></div>
-      <div class="fld"><label>KDV</label><div class="inp combo">Hariç</div></div>
+      <div class="fld"><label>KDV</label><div class="inp combo">Hariç (matrah)</div></div>
     </div>
   </div>
 
@@ -187,6 +187,15 @@
         <div class="inp combo">Sonraki döneme düzeltme satırı</div></div>
       <div class="fld"><label>Belge iptal / iade edilirse</label>
         <div class="inp combo">Prim geri alınır (negatif satır)</div></div>
+      <div class="fld tam sonuk" style="line-height:1.65">
+        <b>KDV (kullanıcı kararı: hariç).</b> Hasta kasaya <b>KDV dahil</b> öder;
+        tahsilat dağıtımı da o tutar üzerinden yapılır (323) - yoksa KDV kısmı
+        hiçbir satıra bağlanamaz ve sonsuza kadar "dağıtılmamış avans" görünürdü.
+        Prim tabanı ise dağıtılan tutarın <b>KDV'siz karşılığıdır</b>:
+        <code>tahsil edilen ÷ (1 + KDV/100)</code>. Örnek: %10 KDV'li 5,07 ₺
+        tahsilat → prim tabanı <b>4,61 ₺</b>; %10 prim = <b>0,46 ₺</b>.
+        KDV kurumun geliri değil, devlete aittir.
+      </div>
     </div>
   </div>
 
@@ -210,7 +219,7 @@
   <div class="ozet">
     <span>Satır: <b>4</b></span>
     <span>Kapsam: <b>Dış hekimler · Merkez</b></span>
-    <span>Baz: <b>Tahsil edilen tutar</b> (KDV hariç)</span>
+    <span>Baz: <b>Tahsil edilen tutarın matrahı</b> (KDV hariç)</span>
     <span>Son değişiklik: <b>admin · 01.09.2026</b></span>
   </div>
 </div>

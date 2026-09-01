@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prim / Hakediş Sistemi — İşleyiş — GenoTIP AI</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --accent:#2f6db3; --head:#f3f6fa;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:13px;line-height:1.65;padding:16px}
+  .win{max-width:1080px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:9px 14px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:14px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11.5px}
+  .icerik{padding:6px 18px 22px}
+  h2{font-size:15px;color:#1c4374;border-bottom:1px solid var(--line2);padding-bottom:5px;margin:22px 0 10px}
+  h3{font-size:13.5px;color:#2c4a6b;margin:16px 0 6px}
+  code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:1px 4px;font-size:12px}
+  table{border-collapse:collapse;width:100%;margin:8px 0 14px}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line2);text-align:left;
+    padding:6px 8px;font-size:12px;color:#3a5573}
+  td{border:1px solid var(--line2);padding:6px 8px;font-size:12.5px;vertical-align:top}
+  td.sag{text-align:right} td.orta{text-align:center}
+  .kutu{border:1px solid var(--line2);background:#fbfcfd;border-radius:4px;padding:10px 12px;margin:10px 0}
+  .uyari{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:4px;padding:9px 11px;margin:10px 0;color:var(--uyari)}
+  .ok{border:1px solid #bfe3cb;background:#f1f8f3;border-radius:4px;padding:9px 11px;margin:10px 0;color:#245c37}
+  .akis{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .akis .a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:4px 12px;font-size:12px}
+  .akis .ok2{color:var(--muted)}
+  ul{margin:6px 0 12px 18px;padding:0} li{margin:3px 0}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:11px;border:1px solid #cfe0f5;
+    background:#eef4fc;color:#2f6db3}
+  .kucuk{font-size:11.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">💸 Prim / Hakediş Sistemi — İşleyiş <span class="sp">GenoTIP AI · tasarım notu · 01.09.2026</span></div>
+  <div class="icerik">
+
+    <div class="kutu">
+      <b>Tek cümlede:</b> Ücretlendirme <b>satırına</b> takılan rol etiketleri
+      (<span class="rz">Gönderen</span> <span class="rz">İsteyen</span> <span class="rz">Uygulayan</span> …)
+      ile <b>prim planı</b> eşleştirilir; plan kampanya motorunun ikizidir — kampanya kalemin
+      <b>fiyatını düşürür</b>, prim planı kalemden <b>hakediş üretir</b>.
+      <br><span class="kucuk">İlgili mockuplar: <code>prim_plani_listesi.html</code> ·
+      <code>prim_plani_karti.html</code> · <code>kalem_prim_rolleri.html</code> ·
+      <code>hakedis_listesi.html</code> · <code>hakedis_karti.html</code></span>
+    </div>
+
+    <h2>1. Kavramlar</h2>
+    <table>
+      <tr><th style="width:150px">Kavram</th><th>Anlamı</th></tr>
+      <tr><td><b>Rol</b></td><td>Kalemde kimin ne yaptığı: Gönderen (dışarıdan sevk eden hekim), İsteyen (istemi açan iç hekim), Uygulayan, Yapan, Raporlayan, Onaylayan, Anestezi, Asistan, Teknisyen. Kod listesi <code>prim.rol</code> — kurum kendi rolünü ekleyebilir.</td></tr>
+      <tr><td><b>Prim planı</b></td><td>Kampanya başlığının karşılığı: kapsam (hekim / hekim tipi / branş / ödeyen kurum / şube), tarih aralığı, öncelik, baz.</td></tr>
+      <tr><td><b>Plan satırı</b></td><td>Kampanya satırının karşılığı: hedef (hizmet / modalite / kategori / tümü) + rol + oran tipi (yüzde | sabit tutar) + değer + alt/üst sınır + kademe.</td></tr>
+      <tr><td><b>Baz</b></td><td>Primin neyin üzerinden hesaplandığı: liste fiyatı · net tutar (iskonto sonrası) · kurum payı · hasta payı · <b>tahsil edilen</b>. KDV her zaman hariç.</td></tr>
+      <tr><td><b>Kademe</b></td><td>Dönem içi adede/ciroya göre artan oran (ör. ilk 20 MR %12, sonrası %15). Yalnız dönem hesabında çözülür.</td></tr>
+      <tr><td><b>Hakediş</b></td><td>Hekim × dönem kaydı: brüt prim, kesintiler, net; durumu Hesaplandı → Onaylı → Ödendi.</td></tr>
+    </table>
+
+    <h2>2. Veri modeli (öneri)</h2>
+    <table>
+      <tr><th style="width:210px">Tablo</th><th>Alanlar (özet)</th></tr>
+      <tr><td><code>prim_plani</code></td>
+        <td>id, kod, ad, <b>kapsam</b>: hekim_id? · hekim_tipi (iç/dış/tümü) · brans? · odeyen_kurum_id? · sube_id?,
+            baz smallint, oncelik int, gecerli_bas/bit date, durum smallint, ekleyen/ekleme_tarihi…</td></tr>
+      <tr><td><code>prim_plani_satir</code></td>
+        <td>id, plan_id, <b>rol</b> smallint, hedef_tipi (hizmet/modalite/kategori/tümü), hedef_id?,
+            oran_tipi (yüzde/tutar), deger numeric, alt_sinir?, ust_sinir?,
+            kademe_esik? , kademe_deger? , sira</td></tr>
+      <tr><td><code>belge_satir_rol</code></td>
+        <td>id, belge_satir_id → <code>belge_satir</code>, rol smallint, taraf_id → <code>taraf</code>,
+            pay_yuzde numeric(5,2) default 100, kaynak smallint (otomatik/elle), ekleyen, ekleme_tarihi
+            <br><span class="kucuk">benzersiz: (belge_satir_id, rol, taraf_id)</span></td></tr>
+      <tr><td><code>hakedis</code></td>
+        <td>id, no, taraf_id (hekim/personel), donem_bas/bit date, plan_id?, baz smallint,
+            ciro numeric, tahsil numeric, brut numeric, kesinti numeric, net numeric,
+            durum smallint (1 hesaplandı · 2 onaylı · 3 ödendi · 0 iptal), sube_id, hesaplayan, onaylayan…</td></tr>
+      <tr><td><code>hakedis_satir</code></td>
+        <td>id, hakedis_id, belge_satir_id, belge_id, rol, plan_satir_id, baz_tutar, oran, oran_tipi,
+            pay_yuzde, prim numeric, tahsil_durum smallint
+            <br><span class="kucuk">benzersiz: (hakedis_id, belge_satir_id, rol) — aynı kalem iki kez hakedişe girmez</span></td></tr>
+      <tr><td><code>hakedis_kesinti</code></td>
+        <td>id, hakedis_id, tur (stopaj/komisyon/avans mahsubu/diğer), oran?, tutar, aciklama</td></tr>
+      <tr><td>kod listeleri</td>
+        <td><code>prim.rol</code> · <code>prim.baz</code> · <code>prim.oran_tipi</code> · <code>prim.kesinti</code></td></tr>
+    </table>
+
+    <div class="uyari">
+      <b>Neden prim tutarı kalemde saklanmıyor?</b> Kademe ve tahsilat durumu <b>dönem sonunda</b>
+      belli olur. Kalemde gösterilen tutar <b>önizlemedir</b>; kesin tutar <code>hakedis_satir</code>'a
+      yazılır ve oran/oran tipi de oraya kopyalanır — plan sonradan değişse bile <b>onaylı hakediş</b>
+      değişmez.
+    </div>
+
+    <h2>3. Rol etiketleri nasıl oluşur</h2>
+    <ul>
+      <li><b>Otomatik</b> (kaynak = otomatik): radyoloji isteminde <code>istek_hekim_id</code> → Gönderen
+        (dış hekimse) ya da İsteyen (iç hekim); raporu onaylayan radyolog → Raporlayan;
+        çekimi yapan tekniker → Uygulayan. Ücret satırı istemle bağlı olduğu için
+        (<code>radyoloji_istem.belge_satir_id</code>) eşleme tek join.</li>
+      <li><b>Elle</b>: kalem penceresindeki "🏷 Prim Rolleri" ekranından eklenir/düzeltilir;
+        aynı rolde iki kişi varsa <b>pay</b> bölünür (%50/%50).</li>
+      <li>Rol <b>kalem</b> düzeyindedir; aynı başvuruda MR'ı bir hekim, röntgeni başkası raporlayabilir.</li>
+    </ul>
+
+    <h2>3b. Rol girişi akışta NEREDE yapılır</h2>
+    <p>Kural: rol <b>işi yapan adım</b> tamamlanınca yazılır — kullanıcıya ayrıca "şimdi rol
+    seç" diye sorulmaz. Her adım kendi rolünü bırakır:</p>
+    <table>
+      <tr><th style="width:210px">Akış adımı</th><th style="width:130px">Yazılan rol</th><th>Kişi nereden gelir</th></tr>
+      <tr><td>Kabul / istem açma (dış)</td><td><span class="rz">Gönderen</span></td>
+          <td>"İsteyen Hekim (dış)" alanında seçilen kayıtlı dış hekim (<code>istek_hekim_id</code>).
+              Serbest metin yazıldıysa rol <b>yazılmaz</b> — kişi kaydı yok, prim de yok.</td></tr>
+      <tr><td>İç istem (başvuru kartı)</td><td><span class="rz">İsteyen</span></td>
+          <td>"İsteyen Hekim" combosu (poliklinik hekimi).</td></tr>
+      <tr><td>Çekildi işaretleme</td><td><span class="rz">Uygulayan</span></td>
+          <td>İstem kartındaki <b>Tekniker</b> alanı; boşsa işlemi yapan <b>oturum kullanıcısı</b>
+              (personel kaydı olan).</td></tr>
+      <tr><td>Rapor onayı</td><td><span class="rz">Raporlayan</span></td>
+          <td>Onaylayan radyolog; ön raporu asistan yazdıysa <span class="rz">Asistan</span> ayrıca yazılır.</td></tr>
+      <tr><td>Girişimsel / ameliyat kalemi</td><td><span class="rz">Yapan</span> <span class="rz">Anestezi</span></td>
+          <td>Kalem penceresinden <b>elle</b> — birden çok kişi varsa pay bölünür.</td></tr>
+    </table>
+
+    <h3>Ekranda görünüş</h3>
+    <ul>
+      <li><b>Kabul ekranı</b>: ayrı bir alan yok; zaten seçilen hekim rolü doğurur. Kaydettikten
+        sonra sonuç şeridinde "<i>Roller: Gönderen — Op.Dr. K. ATALAY</i>" satırı gösterilir.</li>
+      <li><b>İstem kartı</b>: "Prim Rolleri" küçük bir bölüm — kim hangi rolde, düzeltilebilir.</li>
+      <li><b>Belge (başvuru/fatura) kartı</b>: kalem satırında <b>🏷</b> düğmesi →
+        <code>kalem_prim_rolleri.html</code> ekranı; eksik rol tamamlanır, pay bölünür.</li>
+      <li><b>Toplu</b>: belge kartında "Rolleri Doldur" — istem/rapor kayıtlarından yeniden türetir
+        (elle girilmiş satırlara dokunmaz).</li>
+    </ul>
+
+    <div class="uyari">
+      <b>Zorlama yok, iz var:</b> rol girilmeden de kabul/çekim/rapor tamamlanır (akış yavaşlamasın).
+      Rolü olmayan kalem hakediş üretmez ve <b>"Rolsüz kalem" raporunda</b> listelenir — dönem
+      kapanmadan önce buradan tamamlanır.
+    </div>
+
+    <div class="ok">
+      <b>Neden böyle:</b> Rol bilgisi zaten akışta var (kim istedi, kim çekti, kim raporladı);
+      ikinci kez sormak veri girişini iki katına çıkarır ve iki kaynak birbirinden sapar.
+      Elle giriş yalnız <b>istisna</b> içindir: çok kişili işlem, pay bölüşümü, sonradan düzeltme.
+    </div>
+
+    <h2>4. Hesap zinciri</h2>
+    <div class="akis">
+      <span class="a">kalem</span><span class="ok2">→</span>
+      <span class="a">rol + kişi</span><span class="ok2">→</span>
+      <span class="a">plan çözümü</span><span class="ok2">→</span>
+      <span class="a">baz tutar</span><span class="ok2">→</span>
+      <span class="a">oran / kademe</span><span class="ok2">→</span>
+      <span class="a">prim satırı</span><span class="ok2">→</span>
+      <span class="a">hakediş</span>
+    </div>
+    <h3>4.1 Plan çözümü (kampanya kuralının aynısı)</h3>
+    <ul>
+      <li>Geçerli planlar: tarih aralığı kalemin belge tarihini kapsayan, durumu aktif olanlar.</li>
+      <li>Kapsam filtresi: hekim → hekim tipi → branş → ödeyen kurum → şube (boş alan "tümü" demektir).</li>
+      <li>Satır seçimi: <b>en dar hedef</b> kazanır — hizmet &gt; modalite &gt; kategori &gt; tümü.</li>
+      <li>Eşitlikte <b>plan önceliği</b> (küçük olan kazanır); yine eşitse en yeni plan.</li>
+      <li>Fonksiyon: <code>fn_prim_hesapla(belge_satir_id, rol, taraf_id, tarih)</code> →
+        (plan_satir_id, baz_tutar, oran_tipi, oran, prim).</li>
+    </ul>
+    <h3>4.2 Baz tutar</h3>
+    <table>
+      <tr><th style="width:150px">Baz</th><th>Kaynak</th><th>Not</th></tr>
+      <tr><td>Liste fiyatı</td><td><code>belge_satir.birim_fiyat × miktar</code> (iskontosuz)</td><td>İndirim hekimi cezalandırmasın isteniyorsa</td></tr>
+      <tr><td>Net tutar</td><td><code>belge_satir.tutar</code></td><td>Varsayılan</td></tr>
+      <tr><td>Kurum payı</td><td><code>belge_satir.kurum_tutar</code></td><td>SGK/sigorta işinde</td></tr>
+      <tr><td>Hasta payı</td><td><code>belge_satir.hasta_tutar</code></td><td>Katılım payı üzerinden prim</td></tr>
+      <tr><td><b>Tahsil edilen</b></td><td>kalemin kapanan tutarı (tahsilat eşleşmesi)</td><td>Kısmi tahsilatta <b>oransal</b>: tahsil/toplam × baz</td></tr>
+    </table>
+    <h3>4.3 Oran, sınır, kademe, pay</h3>
+    <ul>
+      <li>prim = baz × oran (yüzde) <i>veya</i> sabit tutar; ardından <b>alt/üst sınır</b> kırpması.</li>
+      <li><b>Kademe</b>: dönem içindeki sıra numarasına göre (ör. 21. tetkikten sonra %15) — dönem
+        hesabında satırlar tarih sırasına dizilip uygulanır.</li>
+      <li><b>Pay</b>: prim × pay_yuzde / 100 (aynı rolde birden çok kişi).</li>
+      <li>Tutarlar KDV <b>hariç</b> hesaplanır; para birimi belge dövizinden bağımsız olarak yerel paraya çevrilir.</li>
+    </ul>
+
+    <h2>5. Dönem yaşam döngüsü</h2>
+    <div class="akis">
+      <span class="a">Açık dönem</span><span class="ok2">→</span>
+      <span class="a">🧮 Hesapla</span><span class="ok2">→</span>
+      <span class="a">Hesaplandı</span><span class="ok2">→</span>
+      <span class="a">✔ Onayla</span><span class="ok2">→</span>
+      <span class="a">Onaylı</span><span class="ok2">→</span>
+      <span class="a">💵 Ödeme fişi</span><span class="ok2">→</span>
+      <span class="a">Ödendi</span>
+    </div>
+    <ul>
+      <li><b>Hesapla</b> açık dönemi <b>baştan</b> üretir (eski satırlar silinir) — kademe ve tahsilat
+        o an görülür.</li>
+      <li><b>Onaylı</b> dönem yeniden hesaplanamaz; düzeltme için önce onay kaldırılır (yetki:
+        <code>prim.onay_kaldir</code>) ve işlem <code>islem_log</code>'a düşer.</li>
+      <li><b>Ödendi</b> dönem hiç değişmez; hata varsa <b>ters kayıt</b> (negatif hakediş satırı)
+        sonraki döneme yazılır.</li>
+      <li><b>Geç gelen tahsilat</b>: tahsilat bazlı planda kalem tahsil edilene kadar hakedişe girmez;
+        tahsil edildiği dönemde girer (satırda <code>tahsil_durum</code>).</li>
+      <li><b>İade / iptal</b>: iade faturası ya da iptal edilen belge, ilgili kalemin primini
+        <b>negatif satır</b> olarak açık döneme yazar (ödenmiş primi geri almanın tek yolu).</li>
+    </ul>
+
+    <h2>6. Kesintiler ve ödeme</h2>
+    <ul>
+      <li>Kesinti tipleri: stopaj (oran), komisyon, avans mahsubu, diğer — <code>hakedis_kesinti</code>.</li>
+      <li><b>Dış hekim</b>: net hakediş cari hesabına <b>borç</b> yazılır; hekimin serbest meslek
+        makbuzu/faturası ile kapatılır (kasa/banka ödeme işlemi belgeye bağlanır).</li>
+      <li><b>İç personel</b>: net hakediş bordro/avans tarafına aktarılır (İK modülü).</li>
+      <li>Ödeme fişi üretilince hakediş <b>Ödendi</b>ye geçer ve kilitlenir.</li>
+    </ul>
+
+    <h2>7. Yetki ve gizlilik</h2>
+    <ul>
+      <li><code>prim</code> (gör/değiştir) — plan tanımı ve tüm hakedişler; yönetici / muhasebe.</li>
+      <li><code>prim.hesapla</code>, <code>prim.onayla</code>, <code>prim.odeme</code> aksiyon yetkileri ayrı.</li>
+      <li><b>Hekim yalnız kendi hakedişini görür</b>: liste kaynağına kapsam koşulu
+        (<code>taraf_id = oturumun personeli</code>) — başkasının cirosu görünmez.</li>
+      <li>Prim oranları hasta/hekim çıktılarında <b>görünmez</b>; yalnız hakediş dökümünde.</li>
+    </ul>
+
+    <h2>8. Ekranlar</h2>
+    <table>
+      <tr><th style="width:230px">Ekran</th><th>Yol</th><th>İş</th></tr>
+      <tr><td>Prim Planları (liste/kart)</td><td>Yönetim › Prim Planları</td><td>Plan ve satır tanımı, simülasyon</td></tr>
+      <tr><td>Kalem Prim Rolleri</td><td>Belge kartı › kalem › 🏷</td><td>Rol etiketleri, pay, prim önizleme</td></tr>
+      <tr><td>Hekim Hakedişleri (liste)</td><td>Kasa/İK › Hakedişler</td><td>Dönem hesapla, onayla, ödeme fişi</td></tr>
+      <tr><td>Hakediş Kartı</td><td>listeden</td><td>Satır dökümü, kesintiler, döküm çıktısı</td></tr>
+      <tr><td>Hekim kartı › Hakediş sekmesi</td><td>Cari › Dış Doktorlar / İK › Personel</td><td>Hekimin dönem geçmişi (salt okunur)</td></tr>
+    </table>
+
+    <h2>9. Örnek hesaplar</h2>
+    <h3>9.1 Dış sevk (tahsilat bazlı)</h3>
+    <div class="kutu">
+      MR · liste 3.200 → kampanya %25 → net <b>2.400</b> · tahsil edildi.<br>
+      Plan PRM-RAD-01 · rol Gönderen · MR satırı %12 · üst sınır 400 → prim
+      2.400 × %12 = <b>288,00</b> (sınır altında).<br>
+      Aynı hekimin dönemdeki 21. MR'ında kademe devreye girer: %15 → 360,00.
+    </div>
+    <h3>9.2 SGK hastası (kurum payı bazlı)</h3>
+    <div class="kutu">
+      Net 84,11 · kurum payı 58,88 · hasta payı 25,23.<br>
+      Plan PRM-SGK-01 · baz <b>kurum payı</b> · rol Raporlayan %8 → 58,88 × %8 = <b>4,71</b>.
+    </div>
+    <h3>9.3 Girişimsel işlem — iki rol, iki kişi</h3>
+    <div class="kutu">
+      Net 12.000 · Uygulayan iki hekim (%50/%50) sabit 1.500 → her birine <b>750,00</b>;
+      Anestezi %3 → <b>360,00</b>. Kalemin toplam prim yükü 1.860,00 (prim/ciro %15,5).
+    </div>
+
+    <h2>10. Kenar durumlar</h2>
+    <ul>
+      <li><b>Rol atanmamış kalem</b>: prim doğmaz; "Rolsüz kalem" raporu ile takip edilir.</li>
+      <li><b>Plan bulunamadı</b>: prim 0; hakediş satırı yazılmaz (sessiz sıfır yerine rapor).</li>
+      <li><b>Pay toplamı ≠ %100</b>: uyarı verilir, kayıt engellenmez; hesapta yazılan pay kullanılır.</li>
+      <li><b>Belge iptali/iadesi</b>: negatif satır (bkz. §5).</li>
+      <li><b>Plan çakışması</b>: öncelik + en dar hedef; simülasyon ekranı hangi satırın kazandığını gösterir.</li>
+      <li><b>Döviz</b>: baz tutar belge kurundan yerel paraya çevrilir, kur hakediş satırında saklanır.</li>
+      <li><b>Şube</b>: hakediş şube bazlıdır; çok şubeli hekimde her şube ayrı satır/hakediş.</li>
+    </ul>
+
+    <h2>11. Yapım sırası (öneri)</h2>
+    <ul>
+      <li><b>1</b> — <code>belge_satir_rol</code> + kalem rol ekranı + radyolojiden otomatik doldurma (rol izi olmadan prim hesaplanamaz).</li>
+      <li><b>2</b> — <code>prim_plani(+satir)</code> + plan liste/kart + <code>fn_prim_hesapla</code> + kalemde önizleme.</li>
+      <li><b>3</b> — <code>hakedis(+satir/kesinti)</code> + dönem hesapla/onayla + hakediş liste/kart.</li>
+      <li><b>4</b> — ödeme fişi (dış hekim cari / iç personel bordro), hekim kartında hakediş sekmesi.</li>
+      <li><b>5</b> — simülasyon ("bu plan geçen ay ne öderdi"), rolsüz kalem raporu, prim analizi.</li>
+    </ul>
+
+    <div class="ok">
+      <b>Karar özeti:</b> prim <b>ayrı bir motor değil</b> — kampanyanın kapsam/öncelik/hedef
+      mantığı yeniden kullanılır, sonucu hakediş satırıdır. Rol izi ücretlendirme satırında durur,
+      hesap dönemde donar, onay sonrası değişmez.
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

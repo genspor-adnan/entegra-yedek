@@ -172,10 +172,10 @@ export function TahsilatDagitimi({ belgeId, kasaIslemId, tutar, onDegisti }: {
           <thead>
             <tr>
               <th>Kalem</th>
-              <th className="hiza-sag">Hasta payı</th>
+              <th className="hiza-sag">Hasta payı<div className="sonuk">KDV dahil</div></th>
               <th className="hiza-sag">Kalan</th>
               <th className="hiza-sag">Bu tahsilat</th>
-              <th className="hiza-sag">Kurum payı</th>
+              <th className="hiza-sag">Kurum payı<div className="sonuk">KDV dahil</div></th>
               <th className="hiza-sag">Kalan</th>
               <th className="hiza-sag">Bu tahsilat</th>
             </tr>
@@ -210,6 +210,8 @@ export function TahsilatDagitimi({ belgeId, kasaIslemId, tutar, onDegisti }: {
         Dağıtım <b>prim hakedişini</b> besler: prim, tetkik yapıldığında değil
         parası <b>tahsil edildikçe</b> doğar. Dağıtılmayan tutar <b>avans</b> olarak
         kalır - sonraki tahsilatta ya da başka bir kalemde kullanılabilir.
+        <br />Buradaki tutarlar <b>KDV dahildir</b> (hastanın fiilen ödediği tutar);
+        prim tabanı ise <b>KDV hariç matrahtır</b> - KDV kurumun geliri değildir.
       </div>
     </div>
   );
