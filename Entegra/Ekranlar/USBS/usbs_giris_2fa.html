@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USBS — Giriş / İki Aşamalı Doğrulama — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --head2:#e8eef5; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --req:#b23b3b; --uyari:#b5731a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1180px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .ikili{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  @media (max-width:900px){.ikili{grid-template-columns:1fr}}
+  .kutu{padding:16px;border-right:1px solid var(--line2)}
+  .kutu:last-child{border-right:none}
+  .kutu h5{margin:0 0 4px;font-size:12.5px;color:var(--navy)}
+  .kutu .alt{color:var(--muted);font-size:11px;margin-bottom:12px;line-height:1.5}
+  .alan{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}
+  .alan span{font-size:11px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;height:30px;
+    padding:0 9px;font-size:12.5px;display:flex;align-items:center;color:var(--ink)}
+  .inp.buyuk{height:40px;font-size:18px;letter-spacing:8px;justify-content:center;font-weight:bold}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:7px 12px;font-size:12px;cursor:default;display:inline-flex;
+    gap:6px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;
+    font-weight:bold;width:100%;justify-content:center;height:36px}
+  .btn.kucuk{padding:4px 9px;font-size:11px}
+  .captcha{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:3px;
+    padding:8px;background:#fbfcfd}
+  .captcha .kod{font-family:"Courier New",monospace;font-size:20px;letter-spacing:5px;
+    background:repeating-linear-gradient(45deg,#eef2f7,#eef2f7 6px,#e3e9f0 6px,#e3e9f0 12px);
+    padding:6px 12px;border:1px dashed var(--line);color:#33475b;font-weight:bold;
+    text-decoration:line-through}
+  .uy{border:1px solid #f0d9a8;background:#fdf6e6;border-radius:3px;padding:8px 10px;
+    font-size:11.5px;color:#7a5c14;line-height:1.5;margin-bottom:10px}
+  .uy.teh{border-color:#e4b7b2;background:#fdf3f2;color:#8f3d36}
+  .yol{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 4px}
+  .cip{border:1px solid var(--line);border-radius:11px;padding:3px 11px;font-size:11px;background:#fff}
+  .cip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  table{border-collapse:collapse;width:100%;font-size:11.5px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px;white-space:nowrap}
+  .rozet{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .r-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .r-hata{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .not{max-width:1180px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+  .madde{display:inline-block;background:#eef2f7;border:1px solid var(--line);border-radius:3px;
+    padding:0 5px;font-size:10px;color:var(--navy);font-weight:bold;margin-right:3px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🔐 USBS — Güvenli Giriş <span class="sp">Uzaktan Sağlık Bilgi Sistemi · GenoTIP AI</span></div>
+
+  <div class="ikili">
+    <!-- ------------------------------------------------- 1. adim: parola -->
+    <div class="kutu">
+      <h5>1. Adım — Kimlik</h5>
+      <div class="alt">
+        Kılavuz <span class="madde">md 3</span> iki aşamalı doğrulama,
+        <span class="madde">md 4</span> hatalı girişte CAPTCHA,
+        <span class="madde">md 7</span> parolanın geri dönüşümsüz saklanması.
+      </div>
+
+      <label class="alan"><span>T.C. Kimlik No / Kullanıcı</span>
+        <div class="inp">123••••••02</div></label>
+      <label class="alan"><span>Parola</span>
+        <div class="inp">••••••••••</div></label>
+
+      <div class="uy teh">
+        Son giriş denemesi başarısız (2/5). <b>CAPTCHA</b> doğrulaması gerekiyor;
+        5 hatalı denemede hesap 15 dakika kilitlenir.
+      </div>
+
+      <div class="captcha">
+        <span class="kod">7K4M9</span>
+        <div class="alan" style="flex:1;margin:0">
+          <span>Yukarıdaki kodu yazın</span>
+          <div class="inp"></div>
+        </div>
+        <div class="btn kucuk">🔄 Yenile</div>
+      </div>
+
+      <div style="margin-top:12px"><div class="btn primary">Devam →</div></div>
+      <div class="alt" style="margin:10px 0 0">
+        Parola sıfırlama, teyit edilmiş iletişim kanalı üzerinden yapılır.
+      </div>
+    </div>
+
+    <!-- ---------------------------------------------------- 2. adim: OTP -->
+    <div class="kutu">
+      <h5>2. Adım — Doğrulama Kodu</h5>
+      <div class="alt">
+        Kod, hesapta <b>teyit edilmiş</b> kanala gönderilir. Kanal seçimi kurum
+        politikasına göre kısıtlanabilir (yalnız OTP zorunlu tutulabilir).
+      </div>
+
+      <div class="yol">
+        <span class="cip on">SMS · +90 5•• ••• •• 41</span>
+        <span class="cip">e-Posta · a•••@•••.com</span>
+        <span class="cip">Mobil OTP</span>
+        <span class="cip">Şifrematik (offline)</span>
+      </div>
+
+      <label class="alan" style="margin-top:10px"><span>6 haneli kod</span>
+        <div class="inp buyuk">4 2 9 1 7 •</div></label>
+
+      <div class="uy">
+        Kod <b>02:41</b> içinde geçerli. Yanlış kod 3 kez girilirse oturum
+        baştan başlar - kod yeniden gönderilmez, giriş yeniden yapılır.
+      </div>
+
+      <div class="btn primary">🔓 Giriş Yap</div>
+
+      <h5 style="margin-top:16px">Son Giriş Denemeleri <span class="madde">md 5</span> <span class="madde">md 6</span></h5>
+      <table style="margin-top:6px">
+        <thead><tr><th>Zaman</th><th>Kullanıcı</th><th>IP</th><th>Sonuç</th></tr></thead>
+        <tbody>
+          <tr><td>01.09.2026 09:14</td><td>dr.eren</td><td>88.24.117.6</td>
+              <td><span class="rozet r-ok">Başarılı</span></td></tr>
+          <tr><td>01.09.2026 09:13</td><td>dr.eren</td><td>88.24.117.6</td>
+              <td><span class="rozet r-hata">Hatalı parola</span></td></tr>
+          <tr><td>01.09.2026 08:55</td><td>hasta:123••02</td><td>176.55.9.201</td>
+              <td><span class="rozet r-ok">Başarılı</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Karşılanan maddeler.</b> <span class="madde">md 3</span> iki aşamalı doğrulama ·
+  <span class="madde">md 4</span> hatalı girişte CAPTCHA ·
+  <span class="madde">md 5</span> başarılı/başarısız tüm denemelerin iz kaydı ·
+  <span class="madde">md 6</span> iz kaydında IP + kullanıcı ·
+  <span class="madde">md 7</span> parolanın geri dönüşümsüz saklanması (hash) ·
+  <span class="madde">md 8</span> Türkçe arayüz.
+  <br><b>Gentegre tarafındaki karşılığı.</b> Kimlik altyapısı zaten var (JWT + refresh
+  rotasyonu, oturum tablosu, rol tabanlı yetki). Eklenmesi gerekenler: <b>ikinci
+  faktör</b> (SMS/e-posta/OTP), <b>CAPTCHA</b> ve giriş denemelerinin ayrı iz
+  kaydı. Parola zaten hash'li tutuluyor.
+  <br><b>Not.</b> Hasta da bu ekrandan girer: hasta hesabı T.C. kimlik no ile açılır,
+  doğrulama kanalı hasta kartındaki <b>teyit edilmiş</b> telefondur - teyit
+  edilmemiş numaraya kod gönderilmez.
+</div>
+</body>
+</html>

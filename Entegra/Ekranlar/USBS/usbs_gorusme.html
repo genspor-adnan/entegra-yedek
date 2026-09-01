@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USBS — Görüntülü Görüşme — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --head2:#e8eef5; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --teh:#b23b3b; --uyari:#b5731a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1280px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.9;font-size:11px}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 12px;background:var(--head);
+    border-bottom:1px solid var(--line);font-size:11.5px;flex-wrap:wrap}
+  .serit .hekim{display:flex;gap:7px;align-items:center}
+  .av{width:28px;height:28px;border-radius:50%;background:#dfe8f3;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--navy);font-weight:bold}
+  .rozet{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .r-canli{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .r-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .r-kapali{background:#eef1f5;color:#5b6b7c;border:1px solid #d4dde6}
+  .r-uyari{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .sahne{display:grid;grid-template-columns:1fr 320px;gap:10px;padding:10px}
+  @media (max-width:1000px){.sahne{grid-template-columns:1fr}}
+  .video{background:#20303f;border:1px solid #16232e;border-radius:4px;position:relative;
+    min-height:360px;display:flex;align-items:center;justify-content:center;color:#9fb3c6;
+    font-size:12px;overflow:hidden}
+  .video .ad{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.45);color:#fff;
+    padding:3px 9px;border-radius:3px;font-size:11px}
+  .video .kucukvid{position:absolute;right:10px;bottom:10px;width:150px;height:96px;
+    background:#2b3d4d;border:1px solid #16232e;border-radius:3px;display:flex;
+    align-items:center;justify-content:center;color:#9fb3c6;font-size:11px}
+  .video .ucuncu{position:absolute;right:10px;top:10px;width:132px;height:84px;
+    background:#2b3d4d;border:1px solid #16232e;border-radius:3px;display:flex;
+    align-items:center;justify-content:center;color:#9fb3c6;font-size:10.5px;text-align:center}
+  .video .kayit{position:absolute;left:10px;top:10px;background:rgba(178,59,59,.9);color:#fff;
+    padding:3px 9px;border-radius:3px;font-size:10.5px;font-weight:bold}
+  .arac{display:flex;gap:6px;justify-content:center;padding:10px;background:#f7f9fc;
+    border:1px solid var(--line);border-top:none;border-radius:0 0 4px 4px;flex-wrap:wrap}
+  .yuvarlak{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);
+    background:linear-gradient(var(--btnfrom),var(--btnto));display:flex;align-items:center;
+    justify-content:center;font-size:16px}
+  .yuvarlak.kapali{background:#f0d5d3;border-color:#e4b7b2}
+  .yuvarlak.bitir{background:linear-gradient(#d46b6b,#b23b3b);border-color:#b23b3b;color:#fff}
+  .yuvarlak.pas{opacity:.4}
+  .yan{display:flex;flex-direction:column;gap:10px}
+  .pan{border:1px solid var(--line);border-radius:4px;background:#fff;overflow:hidden;
+    display:flex;flex-direction:column}
+  .pan h5{margin:0;padding:6px 9px;background:var(--head2);border-bottom:1px solid var(--line);
+    font-size:11.5px;color:var(--navy);display:flex;gap:6px;align-items:center}
+  .pan h5 .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11px}
+  .mesajlar{padding:8px;display:flex;flex-direction:column;gap:6px;max-height:210px;overflow:auto}
+  .msj{max-width:88%;padding:5px 9px;border-radius:9px;font-size:11.5px;line-height:1.45}
+  .msj.ben{align-self:flex-end;background:#e3ecfa;border:1px solid #bcd2ef}
+  .msj.o{align-self:flex-start;background:#f2f5f8;border:1px solid var(--line2)}
+  .msj small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+  .yaz{display:flex;gap:5px;padding:8px;border-top:1px solid var(--line2)}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;height:28px;padding:0 8px;
+    font-size:11.5px;display:flex;align-items:center;flex:1;color:var(--muted)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .dosya{display:flex;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--line2);
+    font-size:11.5px}
+  .dosya .ik{width:26px;height:26px;border-radius:3px;background:#eef2f7;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center}
+  .dosya .sp{margin-left:auto}
+  .kucuk{font-size:10.5px;color:var(--muted);line-height:1.5}
+  .not{max-width:1280px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+  .madde{display:inline-block;background:#eef2f7;border:1px solid var(--line);border-radius:3px;
+    padding:0 5px;font-size:10px;color:var(--navy);font-weight:bold;margin-right:3px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🎥 Uzaktan Sağlık Görüşmesi
+    <span class="sp">Görüşme No: USG-260901-0042 · süre 06:18</span></div>
+
+  <!-- HEKIM KIMLIGI HER ZAMAN GORUNUR (md 16) -->
+  <div class="serit">
+    <div class="hekim">
+      <div class="av">EY</div>
+      <div>
+        <b>Uz. Dr. Eren YILMAZ</b> · Dahiliye
+        <div class="kucuk">Diploma/tescil ÇKYS'den doğrulandı ✓</div>
+      </div>
+    </div>
+    <span class="rozet r-canli">● CANLI</span>
+    <span class="rozet r-kapali">⏺ Kayıt kapalı — hasta rıza vermedi</span>
+    <span class="rozet r-ok">🔒 Uçtan uca şifreli (SSL/SRTP)</span>
+    <span class="rozet r-uyari">👥 3 katılımcı</span>
+    <span class="kucuk sp">Hasta: AHMET ÖZTÜRK · 41 y · 123••••••02</span>
+  </div>
+
+  <div class="sahne">
+    <!-- ------------------------------------------------------ video ---- -->
+    <div>
+      <div class="video">
+        Hasta görüntüsü (WebRTC)
+        <div class="ad">AHMET ÖZTÜRK · mikrofon açık</div>
+        <div class="kucukvid">Hekim (siz)</div>
+        <div class="ucuncu">Tercüman<br>M. KAYA<br><span style="font-size:9.5px">(onaylı 3. katılımcı)</span></div>
+        <!-- Kayit RIZASI YOKSA bu rozet hic cizilmez -->
+        <div class="kayit" style="display:none">⏺ KAYIT ALINIYOR</div>
+      </div>
+      <div class="arac">
+        <div class="yuvarlak" title="Mikrofonu kapat">🎙</div>
+        <div class="yuvarlak" title="Kamerayı kapat">📷</div>
+        <div class="yuvarlak kapali" title="Ekranı paylaş (kapalı)">🖥</div>
+        <div class="yuvarlak" title="Sohbet">💬</div>
+        <div class="yuvarlak" title="Dosya gönder">📎</div>
+        <div class="yuvarlak pas" title="Kayıt — hasta rıza vermediği için kapalı">⏺</div>
+        <div class="yuvarlak" title="Katılımcı ekle (tercüman / konsültan)">👤➕</div>
+        <div class="yuvarlak bitir" title="Görüşmeyi sonlandır">📵</div>
+      </div>
+      <div class="kucuk" style="margin-top:6px">
+        Ses ve görüntü <b>iki taraf da</b> kapatabilir; görüşmeyi <b>iki taraf da</b>
+        sonlandırabilir. Kayıt düğmesi hastanın açık rızası yoksa pasiftir -
+        sunucu da rızasız kayıt isteğini reddeder.
+      </div>
+    </div>
+
+    <!-- --------------------------------------------------- yan panel --- -->
+    <div class="yan">
+      <div class="pan">
+        <h5>💬 Anlık Mesajlaşma <span class="sp">md 11</span></h5>
+        <div class="mesajlar">
+          <div class="msj o">Merhaba doktor bey, tahlil sonuçlarım elimde.
+            <small>09:31</small></div>
+          <div class="msj ben">Merhaba, ekranı paylaşmanıza gerek yok - dosya olarak
+            gönderebilirsiniz.<small>09:31</small></div>
+          <div class="msj o">Gönderdim.<small>09:32</small></div>
+          <div class="msj ben">Aldım, inceliyorum.<small>09:33</small></div>
+        </div>
+        <div class="yaz">
+          <div class="inp">Mesaj yazın…</div>
+          <div class="btn primary">Gönder</div>
+        </div>
+      </div>
+
+      <div class="pan">
+        <h5>📎 Dosyalar <span class="sp">md 12 · 13</span></h5>
+        <div>
+          <div class="dosya">
+            <div class="ik">📄</div>
+            <div>tahlil_sonuc.pdf<div class="kucuk">1,2 MB · hastadan</div></div>
+            <span class="rozet r-ok sp">Virüs taraması ✓</span>
+          </div>
+          <div class="dosya">
+            <div class="ik">🖼</div>
+            <div>dokuntu.jpg<div class="kucuk">840 KB · hastadan</div></div>
+            <span class="rozet r-ok sp">Temiz</span>
+          </div>
+          <div class="dosya">
+            <div class="ik">⛔</div>
+            <div>rapor.exe<div class="kucuk">2,1 MB · engellendi</div></div>
+            <span class="rozet r-canli sp">Zararlı tür</span>
+          </div>
+        </div>
+        <div class="yaz">
+          <div class="btn">📎 Dosya gönder</div>
+          <div class="kucuk" style="align-self:center">İzinli türler: pdf, jpg, png, dcm</div>
+        </div>
+      </div>
+
+      <div class="pan">
+        <h5>👥 Katılımcılar <span class="sp">md 31</span></h5>
+        <div style="padding:8px">
+          <div class="dosya" style="border:none;padding:4px 0">
+            <div class="av">EY</div><div>Uz. Dr. Eren YILMAZ<div class="kucuk">Hekim · sunucu</div></div>
+          </div>
+          <div class="dosya" style="border:none;padding:4px 0">
+            <div class="av">AÖ</div><div>AHMET ÖZTÜRK<div class="kucuk">Hasta</div></div>
+          </div>
+          <div class="dosya" style="border:none;padding:4px 0">
+            <div class="av">MK</div><div>M. KAYA<div class="kucuk">Tercüman · hasta onayıyla</div></div>
+          </div>
+          <div class="btn" style="margin-top:6px">👤➕ Konsültan hekim davet et</div>
+          <div class="kucuk" style="margin-top:6px">
+            Üçüncü kişi yalnız hastanın onayıyla eklenir; katılım/ayrılma
+            iz kaydına yazılır.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Karşılanan maddeler.</b> <span class="madde">md 9</span> şifreli iletişim ·
+  <span class="madde">md 10</span> çift yönlü sesli/görüntülü görüşme ·
+  <span class="madde">md 11</span> anlık mesajlaşma ·
+  <span class="madde">md 12</span> hasta dosya transferi ·
+  <span class="madde">md 13</span> zararlı içerik engelleme ·
+  <span class="madde">md 16</span> hekimin ad/unvan/uzmanlık gösterimi ·
+  <span class="madde">md 19</span> ses/görüntü kapatma ·
+  <span class="madde">md 20</span> her iki tarafın görüşmeyi sonlandırabilmesi ·
+  <span class="madde">md 31</span> ikiden fazla katılımcı ·
+  kayıt bölümü <span class="madde">3</span> rızasız kaydın engellenmesi.
+  <br><b>Teknik not.</b> Görüntü/ses için WebRTC; sinyalleşme ve TURN sunucuları
+  <b>yurt içinde ve kurum kontrolünde</b> olmalı (<span class="madde">md 27</span>) -
+  hazır bulut servisleri (yurt dışı) bu maddeyi karşılamaz.
+  <br><b>Görüşme sonu.</b> Kapanışta hekim <b>muayene ekranına</b> düşer: tanı
+  (ICD-10) girilmeden görüşme "tamamlandı" sayılmaz (kayıt bölümü
+  <span class="madde">8</span>).
+</div>
+</body>
+</html>

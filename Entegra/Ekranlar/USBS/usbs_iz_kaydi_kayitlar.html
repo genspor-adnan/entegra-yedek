@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USBS — İz Kaydı ve Ses/Görüntü Kayıtları — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --uyari:#b5731a; --teh:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1300px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sp{margin-left:auto}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:11.5px;display:flex;align-items:center;white-space:nowrap}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .cips{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:11px;padding:2px 10px;font-size:11px;background:#fff}
+  .cip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  table{border-collapse:collapse;width:100%;font-size:11.5px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px;white-space:nowrap}
+  td.genis{white-space:normal;max-width:340px;line-height:1.45}
+  tr.sec td{background:var(--sel)}
+  .rozet{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .r-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .r-hata{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .r-uy{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .r-bilgi{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .r-gri{background:#eef1f5;color:#5b6b7c;border:1px solid #d4dde6}
+  .pan{border:1px solid var(--line);border-radius:4px;background:#fff;overflow:hidden;margin:10px}
+  .pan h5{margin:0;padding:6px 9px;background:var(--head2);border-bottom:1px solid var(--line);
+    font-size:11.5px;color:var(--navy);display:flex;gap:6px;align-items:center}
+  .pan h5 .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11px}
+  .kucuk{font-size:10.5px;color:var(--muted);line-height:1.5}
+  .uy{border:1px solid #f0d9a8;background:#fdf6e6;border-radius:3px;padding:8px 10px;
+    font-size:11.5px;color:#7a5c14;line-height:1.55;margin:9px}
+  .uy.teh{border-color:#e4b7b2;background:#fdf3f2;color:#8f3d36}
+  .not{max-width:1300px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+  .madde{display:inline-block;background:#eef2f7;border:1px solid var(--line);border-radius:3px;
+    padding:0 5px;font-size:10px;color:var(--navy);font-weight:bold;margin-right:3px}
+</style>
+</head>
+<body>
+
+<!-- =========================================================== IZ KAYDI == -->
+<div class="win">
+  <div class="title">🧾 USBS — İz Kaydı (Audit Log) <span class="sp">md 5 · 6 · 21</span></div>
+
+  <div class="toolbar">
+    <div class="btn">📤 Dışa Aktar (imzalı)</div>
+    <div class="btn">🔎 Kayıt Detayı</div>
+    <div class="btn pas">🗑 Sil <span class="kucuk">(iz kaydı silinemez)</span></div>
+    <div class="inp combo sp" style="width:150px">Tüm olaylar</div>
+    <div class="inp combo" style="width:150px">Tüm kullanıcılar</div>
+    <div class="inp" style="width:120px">01.09.2026</div>
+  </div>
+
+  <div class="cips">
+    <span class="cip on">Tümü</span>
+    <span class="cip">Kimlik doğrulama</span>
+    <span class="cip">Görüşme</span>
+    <span class="cip">Onam</span>
+    <span class="cip">Kayıt (ses/görüntü)</span>
+    <span class="cip">Veri erişimi</span>
+    <span class="cip">Yetki değişikliği</span>
+    <span class="cip">Başarısız denemeler</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Zaman</th><th>Olay</th><th>Kullanıcı / Sistem</th><th>Kaynak Adres</th>
+          <th>Hedef Adres</th><th>Konu</th><th>Detay</th><th>Sonuç</th></tr>
+    </thead>
+    <tbody>
+      <tr class="sec">
+        <td>09:26:04</td><td>Onam alındı</td><td>hasta:123••••••02</td>
+        <td>176.55.9.201</td><td>usbs-api/onam</td><td>Görüşme USG-260901-0042</td>
+        <td class="genis">Uzaktan sağlık + KVKK + kamera/mikrofon onaylandı;
+          <b>kayıt rızası verilmedi</b>. Metin sürümü 1.3.</td>
+        <td><span class="rozet r-ok">Başarılı</span></td>
+      </tr>
+      <tr>
+        <td>09:30:11</td><td>Görüşme başladı</td><td>dr.eren</td>
+        <td>88.24.117.6</td><td>turn-01.gentegre.local</td><td>USG-260901-0042</td>
+        <td class="genis">WebRTC oturumu açıldı; katılımcı 2. Şifreleme SRTP.</td>
+        <td><span class="rozet r-ok">Başarılı</span></td>
+      </tr>
+      <tr>
+        <td>09:33:47</td><td>Katılımcı eklendi</td><td>dr.eren</td>
+        <td>88.24.117.6</td><td>turn-01.gentegre.local</td><td>USG-260901-0042</td>
+        <td class="genis">Tercüman M. KAYA eklendi (hasta onayı 09:33:40).</td>
+        <td><span class="rozet r-ok">Başarılı</span></td>
+      </tr>
+      <tr>
+        <td>09:34:02</td><td><b>Kayıt denemesi</b></td><td>dr.eren</td>
+        <td>88.24.117.6</td><td>usbs-api/kayit/basla</td><td>USG-260901-0042</td>
+        <td class="genis">Rıza bulunmadığı için kayıt <b>reddedildi</b> (sunucu kuralı).</td>
+        <td><span class="rozet r-hata">Reddedildi</span></td>
+      </tr>
+      <tr>
+        <td>09:35:20</td><td>Dosya yüklendi</td><td>hasta:123••••••02</td>
+        <td>176.55.9.201</td><td>usbs-api/dosya</td><td>tahlil_sonuc.pdf</td>
+        <td class="genis">1,2 MB · virüs taraması temiz · sha256 8f2c…d91</td>
+        <td><span class="rozet r-ok">Başarılı</span></td>
+      </tr>
+      <tr>
+        <td>09:35:58</td><td>Dosya engellendi</td><td>hasta:123••••••02</td>
+        <td>176.55.9.201</td><td>usbs-api/dosya</td><td>rapor.exe</td>
+        <td class="genis">İzinli tür listesinde yok; yükleme reddedildi.</td>
+        <td><span class="rozet r-hata">Engellendi</span></td>
+      </tr>
+      <tr>
+        <td>09:37:12</td><td>e-Nabız kaydı görüntülendi</td><td>dr.eren</td>
+        <td>88.24.117.6</td><td>enabiz-api/tahlil</td><td>Hasta 123••••••02</td>
+        <td class="genis">28.08.2026 tarihli hemogram sonucu açıldı (salt okunur).</td>
+        <td><span class="rozet r-ok">Başarılı</span></td>
+      </tr>
+      <tr>
+        <td>09:41:33</td><td>Görüşme sonlandırıldı</td><td>hasta:123••••••02</td>
+        <td>176.55.9.201</td><td>turn-01.gentegre.local</td><td>USG-260901-0042</td>
+        <td class="genis">Süre 6 dk 18 sn. Sonlandıran: <b>hasta</b>.</td>
+        <td><span class="rozet r-ok">Başarılı</span></td>
+      </tr>
+      <tr>
+        <td>09:13:52</td><td>Giriş denemesi</td><td>dr.eren</td>
+        <td>88.24.117.6</td><td>usbs-api/kimlik</td><td>—</td>
+        <td class="genis">Hatalı parola (2/5). CAPTCHA istendi.</td>
+        <td><span class="rozet r-hata">Başarısız</span></td>
+      </tr>
+      <tr>
+        <td>08:02:10</td><td>Yetki değişikliği</td><td>admin</td>
+        <td>10.10.4.7</td><td>usbs-api/rol</td><td>Kullanıcı: hemsire.ayse</td>
+        <td class="genis">"Kayıt İzleme" yetkisi verildi; onaylayan: kurum yöneticisi.</td>
+        <td><span class="rozet r-uy">Değişiklik</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="uy">
+    İz kaydı <b>silinemez ve değiştirilemez</b>: ekranda silme düğmesi yoktur,
+    veri tabanında da yalnız ekleme yetkisi verilir. Dışa aktarım imzalıdır
+    (bütünlük kontrolü için özet değer eklenir).
+  </div>
+</div>
+
+<!-- ================================================== SES/GORUNTU KAYIT == -->
+<div class="win">
+  <div class="title">⏺ Ses / Görüntü Kayıtları <span class="sp">kayıt bölümü md 4 · 5 · 6 · 7</span></div>
+
+  <div class="toolbar">
+    <div class="btn">▶ Oynat (yetkili)</div>
+    <div class="btn">⬇ İndir <span class="kucuk">(çift onay)</span></div>
+    <div class="btn">🔑 Erişim Talebi</div>
+    <div class="btn pas">🗑 Kalıcı Sil <span class="kucuk">(süre dolunca otomatik)</span></div>
+    <div class="inp combo sp" style="width:170px">Saklama süresi: tümü</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Görüşme</th><th>Tarih</th><th>Hasta</th><th>Hekim</th><th>Süre</th>
+          <th>Rıza</th><th>Şifreleme</th><th>Silinecek</th><th>Erişim</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>USG-260512-0031</td><td>12.05.2026</td><td>AHMET ÖZTÜRK</td>
+        <td>Uz. Dr. E. Yılmaz</td><td>9 dk</td>
+        <td><span class="rozet r-ok">Açık rıza var</span></td>
+        <td><span class="rozet r-bilgi">AES-256 · anahtar HSM</span></td>
+        <td>12.05.2027 <div class="kucuk">253 gün kaldı</div></td>
+        <td class="kucuk">2 erişim · son: 13.05.2026</td>
+      </tr>
+      <tr>
+        <td>USG-260901-0042</td><td>01.09.2026</td><td>AHMET ÖZTÜRK</td>
+        <td>Uz. Dr. E. Yılmaz</td><td>6 dk</td>
+        <td><span class="rozet r-hata">Rıza yok — kayıt alınmadı</span></td>
+        <td><span class="rozet r-gri">—</span></td><td>—</td><td class="kucuk">—</td>
+      </tr>
+      <tr>
+        <td>USG-250820-0114</td><td>20.08.2025</td><td>ZEYNEP KAYA</td>
+        <td>Dr. B. Aladağ</td><td>14 dk</td>
+        <td><span class="rozet r-ok">Açık rıza var</span></td>
+        <td><span class="rozet r-bilgi">AES-256</span></td>
+        <td>20.08.2026 <div class="kucuk">süresi doldu</div></td>
+        <td><span class="rozet r-gri">Otomatik silindi ✓</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="pan">
+    <h5>Saklama ve Silme Kuralı</h5>
+    <div style="padding:9px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div>
+        <div class="kucuk" style="margin-bottom:4px">Saklama süresi (mevzuata göre)</div>
+        <div class="inp" style="height:26px">12 ay</div>
+        <div class="kucuk" style="margin-top:6px">
+          Süre dolduğunda kayıt <b>otomatik ve kalıcı</b> silinir (geri
+          getirilemez); silme işlemi iz kaydına yazılır. Silme elle
+          durdurulamaz - yalnız mevzuat ya da yargı kararıyla uzatılabilir,
+          uzatma da kayda geçer.
+        </div>
+      </div>
+      <div>
+        <div class="kucuk" style="margin-bottom:4px">Erişim kuralı</div>
+        <div class="inp" style="height:26px">Yalnız "Kayıt İzleme" yetkisi + çift onay</div>
+        <div class="kucuk" style="margin-top:6px">
+          Kayda erişen kişi, zaman ve gerekçe kayda geçer; indirme ayrıca
+          kurum yöneticisi onayı ister. Kayıt dosyaları <b>şifreli</b> saklanır,
+          anahtar uygulama sunucusunda tutulmaz.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="uy teh">
+    <b>Rıza yoksa kayıt yok.</b> Kayıt düğmesi arayüzde kapalı olmakla kalmaz;
+    sunucu da rızasız kayıt isteğini reddeder ve bu deneme iz kaydına yazılır
+    (yukarıdaki 09:34 satırı).
+  </div>
+</div>
+
+<div class="not">
+  <b>Karşılanan maddeler.</b> <span class="madde">md 5</span> tüm başarılı/başarısız
+  kimlik doğrulama denemeleri · <span class="madde">md 6</span> iz kaydında IP ve
+  kullanıcı · <span class="madde">md 21</span> olay açıklaması, kaynağı, zamanı,
+  kullanıcı/sistem, kaynak ve hedef adresler, işlem detayları ·
+  kayıt bölümü <span class="madde">4</span> şifreli saklama ·
+  <span class="madde">5</span> yetkisiz erişimin engellenmesi ·
+  <span class="madde">6</span> sürenin sonunda otomatik kalıcı silme ·
+  <span class="madde">7</span> rıza kaydının veri tabanında bulunması.
+  <br><b>Gentegre karşılığı.</b> <code>islem_log</code> altyapısı zaten var
+  (kim, ne zaman, hangi tabloda ne değişti). USBS için genişletilmesi gerekenler:
+  <b>kaynak/hedef adres</b>, <b>oturum ve görüşme kimliği</b> ve
+  <b>başarısız denemeler</b> - bugün yalnız başarılı işlemler loglanıyor.
+  <br><b>Saklama işi.</b> Otomatik silme bir <b>zamanlanmış görev</b> ister
+  (gece çalışan, süresi dolan kaydı silen ve sonucu loglayan). Silmenin kendisi
+  de bir olaydır: "silindi" satırı iz kaydında kalır, dosya kalmaz.
+</div>
+</body>
+</html>

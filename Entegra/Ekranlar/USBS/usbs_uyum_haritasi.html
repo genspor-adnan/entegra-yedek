@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USBS Kılavuzu — Madde / Ekran Uyum Haritası (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --head2:#e8eef5; --ok:#2e7d46; --uyari:#b5731a; --teh:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1320px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .ozet{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  @media (max-width:900px){.ozet{grid-template-columns:repeat(2,1fr)}}
+  .kutu{border:1px solid var(--line);border-radius:4px;background:#fff;padding:9px 11px}
+  .kutu .s{font-size:21px;font-weight:bold;color:var(--navy);line-height:1.15}
+  .kutu .e{font-size:11px;color:var(--muted)}
+  .kutu.ok{border-color:#bfe3cb;background:#f4fbf6} .kutu.ok .s{color:var(--ok)}
+  .kutu.uy{border-color:#f2ddbf;background:#fdf9f1} .kutu.uy .s{color:var(--uyari)}
+  .kutu.teh{border-color:#e4b7b2;background:#fdf3f2} .kutu.teh .s{color:var(--teh)}
+  table{border-collapse:collapse;width:100%;font-size:11.5px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);position:sticky;top:0}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px;vertical-align:top;line-height:1.45}
+  td.no{white-space:nowrap;font-weight:bold;color:var(--navy);width:56px}
+  tr.grup td{background:var(--head);font-weight:bold;color:var(--navy)}
+  .rozet{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold;
+    white-space:nowrap}
+  .r-var{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .r-kismi{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .r-yok{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .ek{font-family:"Courier New",monospace;font-size:10.5px;color:#33475b}
+  .not{max-width:1320px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🗺️ USBS Kılavuzu — Madde / Ekran Uyum Haritası
+    <span class="sp">Uzaktan Sağlık Bilgi Sistemi Kılavuzu · tescil hazırlığı</span></div>
+
+  <div class="ozet">
+    <div class="kutu"><div class="s">51</div><div class="e">Toplam madde (31 genel + 8 kayıt + 12 entegrasyonsuz)</div></div>
+    <div class="kutu ok"><div class="s">18</div><div class="e">Gentegre'de karşılığı VAR (uyarlanır)</div></div>
+    <div class="kutu uy"><div class="s">21</div><div class="e">KISMİ — altyapı var, ekran/servis eklenecek</div></div>
+    <div class="kutu teh"><div class="s">12</div><div class="e">YOK — sıfırdan geliştirme / altyapı yatırımı</div></div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th class="no">Madde</th><th>Kılavuz gereği</th><th>Karşılayan ekran</th>
+          <th>Durum</th><th>Yapılacak iş</th></tr>
+    </thead>
+    <tbody>
+      <tr class="grup"><td colspan="5">GENEL NİTELİKLER (1-31)</td></tr>
+      <tr><td class="no">1-2</td><td>Kullanıcı hesap yönetimi ara yüzü; yalnız yetkili erişim</td>
+          <td class="ek">Yönetim › Kullanıcılar / Roller (mevcut)</td>
+          <td><span class="rozet r-var">Var</span></td>
+          <td>Rol/yetki altyapısı hazır; USBS rolleri eklenecek</td></tr>
+      <tr><td class="no">3</td><td>İki aşamalı kimlik doğrulama (SMS/e-posta/OTP)</td>
+          <td class="ek">usbs_giris_2fa.html</td>
+          <td><span class="rozet r-yok">Yok</span></td>
+          <td>2FA modülü + kanal doğrulama</td></tr>
+      <tr><td class="no">4</td><td>Hatalı girişte CAPTCHA</td>
+          <td class="ek">usbs_giris_2fa.html</td>
+          <td><span class="rozet r-yok">Yok</span></td>
+          <td>CAPTCHA (kendi üretimimiz, yurt içi)</td></tr>
+      <tr><td class="no">5-6</td><td>Tüm başarılı/başarısız giriş denemeleri; IP + kullanıcı</td>
+          <td class="ek">usbs_iz_kaydi_kayitlar.html</td>
+          <td><span class="rozet r-kismi">Kısmi</span></td>
+          <td><code>islem_log</code> var; başarısız denemeler ve IP eklenecek</td></tr>
+      <tr><td class="no">7</td><td>Parolanın geri dönüşümsüz saklanması</td>
+          <td class="ek">mevcut kimlik altyapısı</td>
+          <td><span class="rozet r-var">Var</span></td><td>—</td></tr>
+      <tr><td class="no">8</td><td>Türkçe dil desteği</td><td class="ek">tüm ekranlar</td>
+          <td><span class="rozet r-var">Var</span></td><td>—</td></tr>
+      <tr><td class="no">9</td><td>Taraflar arası şifreli iletişim</td>
+          <td class="ek">usbs_gorusme.html</td>
+          <td><span class="rozet r-kismi">Kısmi</span></td>
+          <td>HTTPS var; WebRTC/SRTP eklenecek</td></tr>
+      <tr><td class="no">10-11</td><td>Çift yönlü sesli/görüntülü görüşme ve anlık mesajlaşma</td>
+          <td class="ek">usbs_gorusme.html</td>
+          <td><span class="rozet r-yok">Yok</span></td>
+          <td>WebRTC + sinyalleşme + TURN (yurt içi)</td></tr>
+      <tr><td class="no">12-13</td><td>Hasta dosya transferi; zararlı içerik engelleme</td>
+          <td class="ek">usbs_gorusme.html · usbs_muayene_sekmeler.html</td>
+          <td><span class="rozet r-kismi">Kısmi</span></td>
+          <td>Doküman deposu var; virüs taraması + tür kısıtı eklenecek</td></tr>
+      <tr><td class="no">14-15</td><td>SBYS ve Bakanlık sistemleriyle güvenli entegrasyon</td>
+          <td class="ek">— (servis katmanı)</td>
+          <td><span class="rozet r-kismi">Kısmi</span></td>
+          <td>e-Belge/ÜTS entegrasyon deseni var; USBS servisleri eklenecek</td></tr>
+      <tr><td class="no">16</td><td>Hekimin ad/soyad/unvan/uzmanlık gösterimi</td>
+          <td class="ek">usbs_gorusme.html · usbs_randevu_bekleme.html</td>
+          <td><span class="rozet r-var">Var</span></td>
+          <td>Personel kartından beslenir</td></tr>
+      <tr><td class="no">17-18</td><td>Bilgilendirme, KVKK ve kamera/mikrofon onayı</td>
+          <td class="ek">usbs_onam.html</td>
+          <td><span class="rozet r-yok">Yok</span></td>
+          <td>Onam metni sürümleme + rıza kaydı</td></tr>
+      <tr><td class="no">19-20</td><td>Ses/görüntü kapatma; iki tarafın da sonlandırabilmesi</td>
+          <td class="ek">usbs_gorusme.html</td>
+          <td><span class="rozet r-yok">Yok</span></td><td>Görüşme istemcisiyle birlikte</td></tr>
+      <tr><td class="no">21</td><td>Tüm işlemler için ayrıntılı iz kaydı</td>
+          <td class="ek">usbs_iz_kaydi_kayitlar.html</td>
+          <td><span class="rozet r-kismi">Kısmi</span></td>
+          <td><code>islem_log</code> genişletilecek (kaynak/hedef adres, oturum)</td></tr>
+      <tr><td class="no">22-23</td><td>Hasta demografik listesi; T.C. doğrulama algoritması</td>
+          <td class="ek">usbs_hasta_dosyasi.html</td>
+          <td><span class="rozet r-var">Var</span></td><td>—</td></tr>
+      <tr><td class="no">24</td><td>ÇKYS Doktor Bilgi Bankası entegrasyonu</td>
+          <td class="ek">usbs_randevu_bekleme.html (hekim listesi)</td>
+          <td><span class="rozet r-yok">Yok</span></td><td>ÇKYS servis bağlantısı</td></tr>
+      <tr><td class="no">25</td><td>e-Nabız'dan geçmiş rapor/reçete/görüntü/tahlil</td>
+          <td class="ek">usbs_hasta_dosyasi.html</td>
+          <td><span class="rozet r-yok">Yok</span></td><td>e-Nabız okuma servisi</td></tr>
+      <tr><td class="no">26-28</td><td>Verilerin ve sunucuların yurt içinde, kurum kontrolünde olması</td>
+          <td class="ek">— (kurulum kararı)</td>
+          <td><span class="rozet r-kismi">Kısmi</span></td>
+          <td>Bugün yurt içi sunucu kullanılıyor; TURN/medya sunucusu eklenecek</td></tr>
+      <tr><td class="no">29</td><td>Diğer SBYS'ler için entegrasyon dokümantasyonu</td>
+          <td class="ek">— (doküman)</td>
+          <td><span class="rozet r-kismi">Kısmi</span></td>
+          <td>API dokümantasyonu USBS bölümüyle genişletilecek</td></tr>
+      <tr><td class="no">30</td><td>Güvenlik testleri ve siber olay tedbirleri taahhüdü</td>
+          <td class="ek">— (idari)</td>
+          <td><span class="rozet r-kismi">Kısmi</span></td><td>Sızma testi + yazılı taahhüt</td></tr>
+      <tr><td class="no">31</td><td>İkiden fazla katılımcı (tercüman, konsültasyon, kurul)</td>
+          <td class="ek">usbs_gorusme.html</td>
+          <td><span class="rozet r-yok">Yok</span></td><td>Çok katılımcılı oda</td></tr>
+
+      <tr class="grup"><td colspan="5">SES / GÖRÜNTÜ KAYDI ALINIYORSA (1-12)</td></tr>
+      <tr><td class="no">1-3</td><td>Kayıt için ayrı bilgilendirme ve açık rıza; rıza yoksa kaydın engellenmesi</td>
+          <td class="ek">usbs_onam.html · usbs_gorusme.html</td>
+          <td><span class="rozet r-yok">Yok</span></td>
+          <td>Rıza kaydı + sunucu tarafında kayıt engeli</td></tr>
+      <tr><td class="no">4-5</td><td>Kayıtların şifreli saklanması; yetkisiz erişimin engellenmesi</td>
+          <td class="ek">usbs_iz_kaydi_kayitlar.html</td>
+          <td><span class="rozet r-yok">Yok</span></td>
+          <td>Şifreli medya deposu + anahtar yönetimi</td></tr>
+      <tr><td class="no">6</td><td>Süre dolunca otomatik kalıcı silme</td>
+          <td class="ek">usbs_iz_kaydi_kayitlar.html</td>
+          <td><span class="rozet r-yok">Yok</span></td><td>Zamanlanmış silme görevi</td></tr>
+      <tr><td class="no">7</td><td>Rızanın veri tabanında kayıtlı olması</td>
+          <td class="ek">usbs_onam.html</td>
+          <td><span class="rozet r-yok">Yok</span></td><td>Onam tablosu</td></tr>
+      <tr><td class="no">8-9</td><td>ICD-10 tanı zorunluluğu; kırılımlı ve sık kullanılan listeler</td>
+          <td class="ek">usbs_muayene.html</td>
+          <td><span class="rozet r-kismi">Kısmi</span></td>
+          <td>ICD-10 kod tablosu + tanı ekranı (kod listesi altyapısı var)</td></tr>
+      <tr><td class="no">10</td><td>Hekim notu ve hastanın hekime not yazabildiği arayüz</td>
+          <td class="ek">usbs_muayene.html</td>
+          <td><span class="rozet r-kismi">Kısmi</span></td>
+          <td>Görev/yorum altyapısı var; tarih bazlı not ekranı eklenecek</td></tr>
+      <tr><td class="no">11</td><td>Rol tabanlı yetkilendirme</td>
+          <td class="ek">Yönetim › Roller (mevcut)</td>
+          <td><span class="rozet r-var">Var</span></td><td>—</td></tr>
+      <tr><td class="no">12</td><td>Yönlendiren/sevk eden hekimin kaydı</td>
+          <td class="ek">usbs_muayene_sekmeler.html (Sevk)</td>
+          <td><span class="rozet r-kismi">Kısmi</span></td>
+          <td>Sevk kaydı tablosu (dış hekim yapısı benzer, uyarlanır)</td></tr>
+
+      <tr class="grup"><td colspan="5">HBYS/MBYS/AHBS OLMADAN ÇALIŞABİLİYORSA (1-6)</td></tr>
+      <tr><td class="no">1-2</td><td>Poliklinik/hekim listesi ve USBS üzerinden randevu</td>
+          <td class="ek">usbs_randevu_bekleme.html</td>
+          <td><span class="rozet r-var">Var</span></td>
+          <td>Randevu motoru hazır; "uzaktan" tipi eklenecek</td></tr>
+      <tr><td class="no">3</td><td>Başka SBYS'ye bağlanmadan e-reçete / e-rapor</td>
+          <td class="ek">usbs_muayene_sekmeler.html</td>
+          <td><span class="rozet r-yok">Yok</span></td><td>Medula entegrasyonu + e-imza</td></tr>
+      <tr><td class="no">4-5</td><td>Muayene bulguları ve hekimin özel notları</td>
+          <td class="ek">usbs_muayene.html</td>
+          <td><span class="rozet r-kismi">Kısmi</span></td><td>Muayene kaydı ekranı</td></tr>
+      <tr><td class="no">6</td><td>e-Nabız'a veri gönderimi</td>
+          <td class="ek">usbs_muayene.html · usbs_muayene_sekmeler.html</td>
+          <td><span class="rozet r-yok">Yok</span></td><td>e-Nabız gönderim servisi</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="not">
+  <b>Bu harita ne işe yarar.</b> Tescil başvurusunda "hangi madde hangi ekranda
+  karşılanıyor" sorusunun cevabıdır; geliştirme sırasında da iş listesidir.
+  Durum sütunu <b>Gentegre AI'nın bugünkü hali</b>ne göre işaretlendi.
+  <br><b>En büyük üç kalem.</b> (1) <b>Görüşme altyapısı</b> — WebRTC, sinyalleşme
+  ve TURN sunucusunun yurt içinde kurulması; (2) <b>Bakanlık servisleri</b> —
+  ÇKYS, e-Nabız, Medula (e-reçete/e-rapor); (3) <b>kayıt ve rıza yönetimi</b> —
+  şifreli medya deposu, otomatik silme, onam kayıtları.
+  <br><b>Hazır gelen taraf.</b> Kimlik/rol/yetki, hasta kartı, randevu motoru,
+  doküman deposu, işlem günlüğü ve belge/tahsilat hattı zaten var; USBS bunların
+  üzerine oturur - sıfırdan bir ürün değil, mevcut ürünün uzaktan sağlık modülü
+  olarak kurgulanabilir.
+  <br><b>Kapsam kararı gerekiyor.</b> Kayıt (ses/görüntü) alınacak mı? Alınmayacaksa
+  8 maddelik bölüm tamamen kapsam dışı kalır ve iş yükü belirgin şekilde azalır.
+</div>
+</body>
+</html>

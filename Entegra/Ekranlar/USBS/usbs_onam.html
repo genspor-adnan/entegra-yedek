@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USBS — Bilgilendirme ve Açık Rıza — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --head2:#e8eef5; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --req:#b23b3b; --uyari:#b5731a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1120px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:6px 11px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fa96b,#2e7d46);color:#fff;font-weight:bold}
+  .btn.teh{border-color:#b23b3b;background:linear-gradient(#d46b6b,#b23b3b);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sp{margin-left:auto}
+  .govde{display:grid;grid-template-columns:1.4fr 1fr;gap:10px;padding:10px}
+  @media (max-width:960px){.govde{grid-template-columns:1fr}}
+  .pan{border:1px solid var(--line);border-radius:4px;background:#fff;overflow:hidden}
+  .pan h5{margin:0;padding:6px 9px;background:var(--head2);border-bottom:1px solid var(--line);
+    font-size:11.5px;color:var(--navy);display:flex;gap:6px;align-items:center}
+  .pan h5 .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11px}
+  .ic{padding:10px}
+  .metin{border:1px solid var(--line2);background:#fbfcfd;border-radius:3px;padding:9px 11px;
+    font-size:11.5px;line-height:1.65;max-height:210px;overflow:auto;color:#33475b}
+  .metin b{color:var(--ink)}
+  .onay{display:flex;gap:8px;align-items:flex-start;padding:8px 9px;border:1px solid var(--line);
+    border-radius:3px;margin-bottom:7px;background:#fff;font-size:11.5px;line-height:1.5}
+  .onay input{margin-top:2px}
+  .onay.zorunlu{border-left:3px solid var(--req)}
+  .onay.secmeli{border-left:3px solid var(--uyari)}
+  .onay small{display:block;color:var(--muted);font-size:10.5px;margin-top:2px}
+  .uy{border:1px solid #f0d9a8;background:#fdf6e6;border-radius:3px;padding:8px 10px;
+    font-size:11.5px;color:#7a5c14;line-height:1.55}
+  .uy.teh{border-color:#e4b7b2;background:#fdf3f2;color:#8f3d36}
+  .uy.ok{border-color:#bfe3cb;background:#f2faf5;color:#2e7d46}
+  table{border-collapse:collapse;width:100%;font-size:11.5px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy)}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px}
+  .rozet{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .r-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .r-red{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .r-bek{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .kucuk{font-size:10.5px;color:var(--muted);line-height:1.5}
+  .not{max-width:1120px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+  .madde{display:inline-block;background:#eef2f7;border:1px solid var(--line);border-radius:3px;
+    padding:0 5px;font-size:10px;color:var(--navy);font-weight:bold;margin-right:3px}
+  .imza{border:1px dashed var(--line);border-radius:3px;height:70px;display:flex;
+    align-items:center;justify-content:center;color:var(--muted);font-size:11px;background:#fbfcfd}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📝 Uzaktan Sağlık — Bilgilendirme ve Açık Rıza
+    <span class="sp">AHMET ÖZTÜRK · 123••••••02 · 01.09.2026 09:26</span></div>
+
+  <div class="toolbar">
+    <div class="btn ok">✔ Onayla ve Görüşmeye Geç</div>
+    <div class="btn">🖨 Metni Yazdır</div>
+    <div class="btn">📄 PDF olarak indir</div>
+    <div class="btn teh sp">✖ Rıza Vermiyorum</div>
+  </div>
+
+  <div class="govde">
+    <!-- ------------------------------------------------ bilgilendirme --- -->
+    <div class="pan">
+      <h5>Bilgilendirme Metni <span class="sp">sürüm 1.3 · 12.06.2026</span></h5>
+      <div class="ic">
+        <div class="metin">
+          <b>Uzaktan sağlık hizmeti nedir?</b> Bu görüşme, Uzaktan Sağlık
+          Hizmetlerinin Sunumu Hakkında Yönetmelik kapsamında, sesli/görüntülü
+          iletişimle yürütülen bir sağlık hizmetidir. <b>Acil durumlarda uzaktan
+          sağlık hizmeti yerine 112'yi arayınız.</b><br><br>
+
+          <b>Sınırları.</b> Fizik muayene gerektiren durumlarda hekim sizi
+          yüz yüze başvuruya yönlendirebilir; görüşme tanı koymayı garanti etmez.<br><br>
+
+          <b>Kişisel verileriniz.</b> Görüşme sırasında paylaştığınız sağlık
+          verileri, 6698 sayılı Kanun ve ilgili mevzuat uyarınca işlenir; veriler
+          <b>yurt içinde, kurum kontrolündeki</b> sistemlerde saklanır ve
+          e-Nabız'a mevzuatın öngördüğü ölçüde bildirilir.<br><br>
+
+          <b>Teknik gereklilikler.</b> Görüşme için kameranıza ve mikrofonunuza
+          erişim izni vermeniz gerekir. İzni görüşme sırasında geri alabilir,
+          görüntü ve sesinizi kapatabilir, görüşmeyi dilediğiniz an
+          sonlandırabilirsiniz.<br><br>
+
+          <b>Kayıt.</b> Görüşmenin ses ve/veya görüntü kaydı <b>yalnızca açık
+          rızanızla</b> alınır. Rıza vermemeniz hizmetten yararlanmanıza engel
+          değildir. Kayıtlar şifreli saklanır ve mevzuatta öngörülen sürenin
+          sonunda kalıcı olarak silinir.
+        </div>
+        <div class="kucuk" style="margin-top:6px">
+          Metin sürümü kayda geçer: hangi hastanın hangi <b>sürümü</b> onayladığı
+          sonradan sorulabilir.
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------------- rizalar -- -->
+    <div class="pan">
+      <h5>Açık Rıza <span class="sp">md 17 · 18 · kayıt md 1-3</span></h5>
+      <div class="ic">
+        <div class="onay zorunlu">
+          <input type="checkbox" checked>
+          <div><b>Bilgilendirme metnini okudum, uzaktan sağlık hizmeti almayı kabul ediyorum.</b>
+            <small>Zorunlu — bu onay olmadan görüşme başlatılamaz.</small></div>
+        </div>
+        <div class="onay zorunlu">
+          <input type="checkbox" checked>
+          <div><b>Kişisel sağlık verilerimin işlenmesine ilişkin aydınlatma metnini okudum.</b>
+            <small>Zorunlu — KVKK aydınlatma yükümlülüğü.</small></div>
+        </div>
+        <div class="onay zorunlu">
+          <input type="checkbox" checked>
+          <div><b>Kamera ve mikrofona erişilmesine izin veriyorum.</b>
+            <small>Zorunlu — görüntülü görüşme için; tarayıcı izni ayrıca sorulur.</small></div>
+        </div>
+        <div class="onay secmeli">
+          <input type="checkbox">
+          <div><b>Görüşmenin ses ve görüntü kaydının alınmasına açık rıza veriyorum.</b>
+            <small>Seçmeli — <b>işaretlenmezse kayıt teknik olarak engellenir</b>;
+              hizmet yine verilir.</small></div>
+        </div>
+        <div class="onay secmeli">
+          <input type="checkbox" checked>
+          <div><b>Görüşmeye tercüman / refakatçi katılmasını kabul ediyorum.</b>
+            <small>Seçmeli — üçüncü katılımcı yalnız bu onayla eklenir.</small></div>
+        </div>
+
+        <div class="uy teh" style="margin-top:8px">
+          <b>Kayıt rızası verilmedi.</b> Görüşme ekranında kayıt düğmesi kapalı
+          gelir; sistem kaydı başlatamaz.
+        </div>
+
+        <h5 style="margin:12px -10px 0;padding-left:9px">Kimlik Doğrulama ve İmza</h5>
+        <div class="ic" style="padding:8px 0 0">
+          <div class="kucuk">Hasta doğrulaması: SMS ile gönderilen kod (2FA) girildi ✓</div>
+          <div class="imza" style="margin-top:6px">e-imza / SMS onay kaydı burada saklanır</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ----------------------------------------------------- onam gecmisi -->
+  <div class="pan" style="margin:0 10px 10px">
+    <h5>Onam Geçmişi <span class="sp">md 21 iz kaydı · kayıt md 7 (veri tabanında rıza kaydı)</span></h5>
+    <table>
+      <thead>
+        <tr><th>Zaman</th><th>Onam Türü</th><th>Metin Sürümü</th><th>Sonuç</th>
+            <th>Doğrulama</th><th>IP</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>01.09.2026 09:26</td><td>Uzaktan sağlık hizmeti</td><td>1.3</td>
+            <td><span class="rozet r-ok">Onaylandı</span></td><td>SMS kodu</td><td>176.55.9.201</td></tr>
+        <tr><td>01.09.2026 09:26</td><td>KVKK aydınlatma</td><td>1.3</td>
+            <td><span class="rozet r-ok">Onaylandı</span></td><td>SMS kodu</td><td>176.55.9.201</td></tr>
+        <tr><td>01.09.2026 09:26</td><td>Kamera / mikrofon erişimi</td><td>—</td>
+            <td><span class="rozet r-ok">Onaylandı</span></td><td>Tarayıcı izni</td><td>176.55.9.201</td></tr>
+        <tr><td>01.09.2026 09:26</td><td><b>Ses / görüntü kaydı</b></td><td>1.3</td>
+            <td><span class="rozet r-red">Rıza verilmedi</span></td><td>—</td><td>176.55.9.201</td></tr>
+        <tr><td>12.05.2026 14:02</td><td>Uzaktan sağlık hizmeti</td><td>1.2</td>
+            <td><span class="rozet r-ok">Onaylandı</span> <span class="kucuk">(önceki görüşme)</span></td>
+            <td>SMS kodu</td><td>88.24.117.6</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="not">
+  <b>Karşılanan maddeler.</b> <span class="madde">md 17</span> KVKK ve hizmet
+  şartları hakkında bilgilendirme arayüzü · <span class="madde">md 18</span>
+  kamera/mikrofon erişim onayı · kayıt bölümü <span class="madde">1-3</span>
+  kayıt için ayrı açık rıza ve rıza yoksa kaydın <b>engellenmesi</b> ·
+  <span class="madde">7</span> rızanın veri tabanında kayıtlı olması ·
+  <span class="madde">md 21</span> onay/ret işlemlerinin iz kaydı.
+  <br><b>Tasarım kararı.</b> Rızalar <b>tek kutuda toplanmaz</b>: kayıt rızası
+  ayrı ve seçmelidir - hizmet almanın şartı değildir. Metin <b>sürümlenir</b>;
+  hangi hastanın hangi sürümü onayladığı sonradan kanıtlanabilmelidir.
+  <br><b>Zorlayıcı kural.</b> Zorunlu üç onay alınmadan "Görüşmeye Geç" pasif
+  kalır; kayıt rızası yoksa görüşme ekranında kayıt düğmesi hiç açılmaz -
+  arayüzde gizlemek yetmez, sunucu da kaydı reddeder.
+</div>
+</body>
+</html>

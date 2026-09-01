@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USBS — Randevu ve Bekleme Odası — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --uyari:#b5731a; --teh:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1240px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fa96b,#2e7d46);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sp{margin-left:auto}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:11.5px;display:flex;align-items:center;white-space:nowrap}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .duzen{display:grid;grid-template-columns:250px 1fr 300px;gap:10px;padding:10px}
+  @media (max-width:1100px){.duzen{grid-template-columns:1fr}}
+  .pan{border:1px solid var(--line);border-radius:4px;background:#fff;overflow:hidden}
+  .pan h5{margin:0;padding:6px 9px;background:var(--head2);border-bottom:1px solid var(--line);
+    font-size:11.5px;color:var(--navy);display:flex;align-items:center;gap:6px}
+  .pan h5 .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11px}
+  .ic{padding:8px}
+  .hekim{display:flex;gap:8px;align-items:center;padding:6px;border:1px solid var(--line2);
+    border-radius:3px;margin-bottom:6px;background:#fbfcfd}
+  .hekim.on{border-color:var(--accent);background:var(--sel)}
+  .av{width:30px;height:30px;border-radius:50%;background:#dfe8f3;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--navy);font-weight:bold}
+  .hekim .ad{display:flex;flex-direction:column;line-height:1.35;font-size:11.5px}
+  .hekim .ad small{color:var(--muted);font-size:10.5px}
+  .durum{margin-left:auto;font-size:10px;font-weight:bold;padding:1px 7px;border-radius:9px}
+  .d-uygun{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .d-mesgul{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .d-yok{background:#eef1f5;color:#6b7a8b;border:1px solid #d4dde6}
+  table{border-collapse:collapse;width:100%;font-size:11.5px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px}
+  tr.sec td{background:var(--sel)}
+  .rozet{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .r-bek{background:#eef1f5;color:#5b6b7c;border:1px solid #d4dde6}
+  .r-hazir{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .r-onam{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .r-gor{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .slot{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+  .slot div{border:1px solid var(--line);border-radius:3px;background:#fff;text-align:center;
+    padding:5px 0;font-size:11px}
+  .slot div.dolu{background:#eef1f5;color:#9aa8b6;text-decoration:line-through}
+  .slot div.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .kucuk{font-size:10.5px;color:var(--muted);line-height:1.5}
+  .not{max-width:1240px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+  .madde{display:inline-block;background:#eef2f7;border:1px solid var(--line);border-radius:3px;
+    padding:0 5px;font-size:10px;color:var(--navy);font-weight:bold;margin-right:3px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📅 USBS — Randevu / Bekleme Odası <span class="sp">01.09.2026 · Uzaktan Sağlık</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Randevu Al</div>
+    <div class="btn">🎥 Görüşmeyi Başlat</div>
+    <div class="btn">✉ Bağlantı Gönder (SMS)</div>
+    <div class="btn pas">✖ Randevu İptal</div>
+    <div class="inp combo sp" style="width:160px">Tüm branşlar</div>
+    <div class="inp" style="width:120px">01.09.2026</div>
+  </div>
+
+  <div class="duzen">
+    <!-- ------------------------------------------- poliklinik / hekim ---- -->
+    <div class="pan">
+      <h5>Poliklinik / Hekim <span class="sp">md 1</span></h5>
+      <div class="ic">
+        <div class="kucuk" style="margin-bottom:6px">
+          Uzaktan sağlık hizmeti verecek hekimler; unvan ve uzmanlık bilgisi
+          <b>ÇKYS Doktor Bilgi Bankası</b>ndan doğrulanır.
+        </div>
+        <div class="hekim on">
+          <div class="av">EY</div>
+          <div class="ad">Uz. Dr. Eren YILMAZ<small>Dahiliye · ÇKYS ✓</small></div>
+          <span class="durum d-uygun">Uygun</span>
+        </div>
+        <div class="hekim">
+          <div class="av">SA</div>
+          <div class="ad">Prof. Dr. Selim ARDA<small>Nöroloji · ÇKYS ✓</small></div>
+          <span class="durum d-mesgul">Görüşmede</span>
+        </div>
+        <div class="hekim">
+          <div class="av">BA</div>
+          <div class="ad">Dr. Bahar ALADAĞ<small>Çocuk Sağlığı · ÇKYS ✓</small></div>
+          <span class="durum d-uygun">Uygun</span>
+        </div>
+        <div class="hekim">
+          <div class="av">MŞ</div>
+          <div class="ad">Dr. Murat ŞEN<small>Kardiyoloji · ÇKYS ✓</small></div>
+          <span class="durum d-yok">Mesai dışı</span>
+        </div>
+        <div class="kucuk" style="margin-top:8px">
+          Uzaktan sağlık hizmeti verilecek branşlar Yönetmelik ekinde sayılıdır;
+          listede yalnız <b>yetkilendirilmiş</b> hekimler görünür.
+        </div>
+      </div>
+    </div>
+
+    <!-- ----------------------------------------------- bekleme odasi ----- -->
+    <div class="pan">
+      <h5>Bekleme Odası <span class="sp">Uz. Dr. Eren YILMAZ · bugün 6 randevu</span></h5>
+      <table>
+        <thead>
+          <tr><th>Saat</th><th>Hasta</th><th>T.C.</th><th>Başvuru Nedeni</th>
+              <th>Onam</th><th>Durum</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr class="sec">
+            <td>09:30</td><td>AHMET ÖZTÜRK<div class="kucuk">41 y · E</div></td>
+            <td>123••••••02</td><td>Kontrol · tahlil sonucu değerlendirme</td>
+            <td><span class="rozet r-hazir">Alındı</span></td>
+            <td><span class="rozet r-hazir">Bekliyor (bağlı)</span></td>
+            <td><div class="btn ok">🎥 Başlat</div></td>
+          </tr>
+          <tr>
+            <td>09:50</td><td>MERVE DEMİR<div class="kucuk">36 y · K</div></td>
+            <td>456••••••18</td><td>Reçete yenileme</td>
+            <td><span class="rozet r-onam">Bekliyor</span></td>
+            <td><span class="rozet r-bek">Bağlanmadı</span></td>
+            <td><div class="btn pas">🎥 Başlat</div></td>
+          </tr>
+          <tr>
+            <td>10:10</td><td>FAİK BULUT<div class="kucuk">55 y · E</div></td>
+            <td>789••••••34</td><td>Rapor uzatma</td>
+            <td><span class="rozet r-hazir">Alındı</span></td>
+            <td><span class="rozet r-bek">Bağlanmadı</span></td>
+            <td><div class="btn">✉ Bağlantı</div></td>
+          </tr>
+          <tr>
+            <td>08:40</td><td>ZEYNEP KAYA<div class="kucuk">29 y · K</div></td>
+            <td>321••••••77</td><td>Tetkik sonrası kontrol</td>
+            <td><span class="rozet r-hazir">Alındı</span></td>
+            <td><span class="rozet r-gor">Tamamlandı · 11 dk</span></td>
+            <td><div class="btn">📄 Muayene</div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="ic kucuk">
+        <b>Onam</b> alınmadan görüşme başlatılamaz: "Başlat" düğmesi onam
+        alınana kadar pasif kalır (bkz. <b>usbs_onam.html</b>).
+        Hastaya gönderilen bağlantı <b>tek kullanımlık</b> ve süreye bağlıdır.
+      </div>
+    </div>
+
+    <!-- --------------------------------------------------- randevu al ---- -->
+    <div class="pan">
+      <h5>Randevu Al <span class="sp">md 2</span></h5>
+      <div class="ic">
+        <div class="kucuk" style="margin-bottom:8px">
+          USBS, HBYS ile entegre çalışıyorsa randevu HBYS'nin randevu
+          modülünden gelir; entegre değilse burada üretilir ve e-Nabız'a
+          bildirilir.
+        </div>
+        <div style="display:grid;gap:8px">
+          <div><div class="kucuk">Hasta</div><div class="inp">MERVE DEMİR · 456••••••18</div></div>
+          <div><div class="kucuk">Branş / Hekim</div><div class="inp combo">Dahiliye · Uz. Dr. Eren YILMAZ</div></div>
+          <div><div class="kucuk">Tarih</div><div class="inp">01.09.2026</div></div>
+          <div>
+            <div class="kucuk" style="margin-bottom:4px">Uygun saatler</div>
+            <div class="slot">
+              <div class="dolu">09:30</div><div class="dolu">09:50</div>
+              <div class="dolu">10:10</div><div class="on">10:30</div>
+              <div>10:50</div><div>11:10</div><div>11:30</div><div>11:50</div>
+            </div>
+          </div>
+          <div><div class="kucuk">Başvuru nedeni</div><div class="inp">Reçete yenileme</div></div>
+          <div><div class="kucuk">İletişim (bağlantı gönderilecek)</div>
+               <div class="inp">+90 5•• ••• •• 18 · doğrulanmış ✓</div></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <div class="btn primary">✔ Randevuyu Oluştur</div>
+          <div class="btn">✖ Vazgeç</div>
+        </div>
+        <div class="kucuk" style="margin-top:8px">
+          Randevu oluşturulunca hastaya <b>bilgilendirme + onam</b> bağlantısı
+          gider; onam görüşmeden önce alınmış olmalıdır.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Karşılanan maddeler.</b> Entegrasyonsuz çalışma bölümü
+  <span class="madde">md 1</span> randevu alınacak poliklinik/hekim listesi ·
+  <span class="madde">md 2</span> USBS üzerinden randevu ·
+  genel <span class="madde">md 16</span> hekimin adı, unvanı ve uzmanlığının görünmesi ·
+  <span class="madde">md 24</span> ÇKYS Doktor Bilgi Bankası doğrulaması.
+  <br><b>Gentegre karşılığı.</b> Randevu motoru zaten var (kaynak = hekim ya da
+  cihaz, çakışma/kapasite kuralları veritabanında). Uzaktan sağlık için eklenecek
+  olan: randevuya <b>"uzaktan"</b> tipi, hastaya giden <b>tek kullanımlık görüşme
+  bağlantısı</b> ve bekleme odasının canlı durumu (hasta bağlandı mı).
+  <br><b>Sıra kuralı.</b> Onam alınmamış hastada "Başlat" pasiftir - kılavuz
+  görüşme öncesi bilgilendirme ve rızayı şart koşuyor.
+</div>
+</body>
+</html>

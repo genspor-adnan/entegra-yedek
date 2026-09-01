@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USBS — Uzaktan Muayene Sekmeleri (e-Reçete / e-Rapor / Sevk / Dosyalar) — Mockup</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --req:#b23b3b; --uyari:#b5731a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1280px;margin:0 auto 16px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fa96b,#2e7d46);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sp{margin-left:auto}
+  .hasta{display:flex;gap:14px;align-items:center;padding:8px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2);flex-wrap:wrap;
+    font-size:11.5px}
+  .hasta .av{width:30px;height:30px;border-radius:50%;background:#dfe8f3;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-weight:bold;color:var(--navy)}
+  .hasta small{color:var(--muted);font-size:10.5px;display:block}
+  .sekmeler{display:flex;gap:2px;padding:6px 8px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekmeler div{border:1px solid var(--line);border-bottom:none;border-radius:3px 3px 0 0;
+    padding:4px 12px;font-size:11.5px;background:linear-gradient(#f7f9fc,#eef2f7);color:var(--muted)}
+  .sekmeler div.on{background:#fff;color:var(--navy);font-weight:bold}
+  .govde{display:grid;grid-template-columns:1.3fr 1fr;gap:10px;padding:10px}
+  .govde.tek{grid-template-columns:1fr}
+  @media (max-width:1050px){.govde{grid-template-columns:1fr}}
+  .pan{border:1px solid var(--line);border-radius:4px;background:#fff;overflow:hidden}
+  .pan h5{margin:0;padding:6px 9px;background:var(--head2);border-bottom:1px solid var(--line);
+    font-size:11.5px;color:var(--navy);display:flex;gap:6px;align-items:center}
+  .pan h5 .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11px}
+  .ic{padding:9px}
+  .alan{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+  .alan span{font-size:11px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:28px;
+    padding:5px 8px;font-size:11.5px;display:flex;align-items:center;color:var(--ink)}
+  .inp.cok{min-height:58px;align-items:flex-start;line-height:1.55;display:block}
+  .combo{position:relative;padding-right:20px}
+  .combo::after{content:"▾";position:absolute;right:7px;top:6px;color:var(--muted);font-size:10px}
+  .ikili{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .uclu{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  table{border-collapse:collapse;width:100%;font-size:11.5px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px}
+  td.genis{white-space:normal;line-height:1.45}
+  tr.sec td{background:var(--sel)}
+  .rozet{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .r-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .r-uy{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .r-teh{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .r-bilgi{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .r-gri{background:#eef1f5;color:#5b6b7c;border:1px solid #d4dde6}
+  .uy{border:1px solid #f0d9a8;background:#fdf6e6;border-radius:3px;padding:8px 10px;
+    font-size:11.5px;color:#7a5c14;line-height:1.55;margin:0 10px 10px}
+  .uy.teh{border-color:#e4b7b2;background:#fdf3f2;color:#8f3d36}
+  .uy.ok{border-color:#bfe3cb;background:#f2faf5;color:#2e7d46}
+  .kucuk{font-size:10.5px;color:var(--muted);line-height:1.5}
+  .dosya{display:flex;gap:8px;align-items:center;padding:7px 9px;border-bottom:1px solid var(--line2)}
+  .dosya .ik{width:28px;height:28px;border-radius:3px;background:#eef2f7;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center}
+  .not{max-width:1280px;margin:10px auto 18px;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+  .madde{display:inline-block;background:#eef2f7;border:1px solid var(--line);border-radius:3px;
+    padding:0 5px;font-size:10px;color:var(--navy);font-weight:bold;margin-right:3px}
+  .baslik{max-width:1280px;margin:18px auto 6px;font-size:12.5px;color:var(--navy);font-weight:bold}
+</style>
+</head>
+<body>
+
+<div class="baslik">1 / 4 — e-Reçete sekmesi</div>
+<div class="win">
+  <div class="title">💊 Uzaktan Muayene — e-Reçete
+    <span class="sp">USG-260901-0042 · Uz. Dr. Eren YILMAZ</span></div>
+  <div class="hasta">
+    <div class="av">AÖ</div>
+    <div><b>AHMET ÖZTÜRK</b><small>41 y · E · 123••••••02</small></div>
+    <div>Tanı<small>I10 Esansiyel hipertansiyon (ana) · R42</small></div>
+    <div>Sigorta<small>SGK · aktif · provizyon alındı</small></div>
+    <div class="sp"><span class="rozet r-uy">Reçete imzalanmadı</span></div>
+  </div>
+  <div class="sekmeler">
+    <div>Muayene</div><div>Tanı (ICD-10)</div><div>Hekim Notu</div>
+    <div class="on">e-Reçete</div><div>e-Rapor</div><div>Sevk / Yönlendirme</div><div>Dosyalar</div>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ İlaç Ekle</div>
+    <div class="btn">📋 Önceki reçeteden kopyala</div>
+    <div class="btn">🔁 Rapora bağla</div>
+    <div class="btn ok sp">✍ e-İmza ile Gönder</div>
+  </div>
+
+  <div class="govde">
+    <div class="pan">
+      <h5>Reçete Kalemleri <span class="sp">Reçete No 3GX7-K92 · Normal reçete</span></h5>
+      <table>
+        <thead>
+          <tr><th>İlaç / Barkod</th><th>Doz</th><th>Kutu</th><th>Süre</th>
+              <th>Kullanım</th><th>Rapor</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr class="sec">
+            <td><b>Ramipril 5 mg tablet</b><div class="kucuk">8699•••••123 · Delix 5 mg</div></td>
+            <td>1x1</td><td>1</td><td>30 gün</td>
+            <td class="genis">Sabah aç karnına</td>
+            <td><span class="rozet r-ok">Rapora bağlı</span></td><td>✖</td>
+          </tr>
+          <tr>
+            <td><b>Betahistin 24 mg tablet</b><div class="kucuk">8699•••••776</div></td>
+            <td>2x1</td><td>1</td><td>15 gün</td>
+            <td class="genis">Baş dönmesi için, tok karnına</td>
+            <td><span class="rozet r-gri">—</span></td><td>✖</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="uy" style="margin:9px">
+        <b>Etkileşim kontrolü:</b> Ramipril + Betahistin arasında bilinen ciddi
+        etkileşim yok. Hastanın e-Nabız'daki aktif ilaçları da kontrole dahil edildi
+        (2 ilaç).
+      </div>
+      <div class="ic" style="padding-top:0">
+        <div class="uclu">
+          <label class="alan"><span>Reçete türü</span><div class="inp combo">Normal</div></label>
+          <label class="alan"><span>Provizyon tipi</span><div class="inp combo">Normal (SGK)</div></label>
+          <label class="alan"><span>Açıklama</span><div class="inp">Kontrol sonrası</div></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="pan">
+      <h5>İlaç Arama <span class="sp">ATC / barkod / ad</span></h5>
+      <div class="ic">
+        <div class="inp combo">ramipril…</div>
+        <table style="margin-top:8px">
+          <thead><tr><th>İlaç</th><th>Etkin madde</th><th>SUT</th></tr></thead>
+          <tbody>
+            <tr class="sec"><td>Delix 5 mg 28 tb</td><td>Ramipril</td>
+                <td><span class="rozet r-ok">Ödenir</span></td></tr>
+            <tr><td>Ramipril-San 5 mg</td><td>Ramipril</td>
+                <td><span class="rozet r-ok">Ödenir</span></td></tr>
+            <tr><td>Delix Plus 5/25</td><td>Ramipril + HCT</td>
+                <td><span class="rozet r-uy">Rapor gerekir</span></td></tr>
+          </tbody>
+        </table>
+
+        <h5 style="margin:12px -9px 0;padding-left:9px">Hastanın Aktif İlaçları
+          <span class="sp">e-Nabız</span></h5>
+        <table style="margin-top:6px">
+          <tbody>
+            <tr><td>Ramipril 5 mg</td><td class="kucuk">12.05.2026 · 30 gün</td></tr>
+            <tr><td>D vitamini 1000 IU</td><td class="kucuk">03.02.2026 · 90 gün</td></tr>
+          </tbody>
+        </table>
+        <div class="kucuk" style="margin-top:8px">
+          Uzaktan sağlıkta reçete edilemeyen ilaç grupları (kırmızı/yeşil reçeteye
+          tabi olanlar vb.) listede <b>seçilemez</b> gösterilir - mevzuat kısıtı
+          arayüzde de görünmeli.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="uy teh">
+    e-İmza olmadan reçete <b>gönderilmez</b>: taslak kalır, hastaya görünmez.
+    İmzalanan reçete Medula'ya iletilir ve e-Nabız'a düşer.
+  </div>
+</div>
+
+<div class="baslik">2 / 4 — e-Rapor sekmesi</div>
+<div class="win">
+  <div class="title">📄 Uzaktan Muayene — e-Rapor <span class="sp">İlaç kullanım raporu</span></div>
+  <div class="sekmeler">
+    <div>Muayene</div><div>Tanı (ICD-10)</div><div>Hekim Notu</div>
+    <div>e-Reçete</div><div class="on">e-Rapor</div><div>Sevk / Yönlendirme</div><div>Dosyalar</div>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni Rapor</div>
+    <div class="btn">📥 Önceki raporu uzat</div>
+    <div class="btn ok sp">✍ e-İmza ile Onayla</div>
+  </div>
+
+  <div class="govde">
+    <div class="pan">
+      <h5>Rapor Bilgileri</h5>
+      <div class="ic">
+        <div class="ikili">
+          <label class="alan"><span>Rapor türü</span>
+            <div class="inp combo">İlaç kullanım raporu</div></label>
+          <label class="alan"><span>Düzenleme şekli</span>
+            <div class="inp combo">Tek hekim</div></label>
+        </div>
+        <label class="alan"><span>Tanı (rapora esas)</span>
+          <div class="inp">I10 · Esansiyel (primer) hipertansiyon</div></label>
+        <div class="uclu">
+          <label class="alan"><span>Başlangıç</span><div class="inp">01.09.2026</div></label>
+          <label class="alan"><span>Süre</span><div class="inp combo">1 yıl</div></label>
+          <label class="alan"><span>Bitiş</span><div class="inp">01.09.2027</div></label>
+        </div>
+        <label class="alan"><span>Rapor içeriği / açıklama</span>
+          <div class="inp cok">Esansiyel hipertansiyon tanısı ile ACE inhibitörü
+            kullanımı uygundur. Yıllık kontrol önerilir.</div></label>
+
+        <div class="uy" style="margin:6px 0 0">
+          <b>Uzaktan düzenlenebilirlik:</b> heyet raporu, engelli sağlık kurulu
+          raporu, ehliyet/silah raporu gibi <b>yüz yüze muayene şartı</b> olan
+          türler listede kapalıdır - kılavuz uzaktan hizmetin sınırlarını
+          mevzuata bırakır, arayüz de o sınırı gösterir.
+        </div>
+      </div>
+    </div>
+
+    <div class="pan">
+      <h5>Rapordaki Etken Maddeler / Malzemeler</h5>
+      <table>
+        <thead><tr><th>Etken madde</th><th>Doz</th><th>Kullanım</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Ramipril</td><td>5 mg 1x1</td><td>Sürekli</td><td>✖</td></tr>
+        </tbody>
+      </table>
+      <div class="ic">
+        <div class="btn">＋ Etken madde ekle</div>
+
+        <h5 style="margin:12px -9px 0;padding-left:9px">Önceki Raporlar</h5>
+        <table style="margin-top:6px">
+          <thead><tr><th>Tarih</th><th>Tür</th><th>Tanı</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr><td>15.11.2025</td><td>İlaç kullanım</td><td>I10</td>
+                <td><span class="rozet r-uy">Süresi doluyor · 75 gün</span></td></tr>
+            <tr><td>02.03.2024</td><td>İlaç kullanım</td><td>I10</td>
+                <td><span class="rozet r-gri">Süresi doldu</span></td></tr>
+          </tbody>
+        </table>
+        <div class="kucuk" style="margin-top:8px">
+          "Önceki raporu uzat" seçilirse tanı, etken madde ve süre kopyalanır;
+          yeni rapor <b>ayrı belge</b> olarak imzalanır - eski rapor değişmez.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="baslik">3 / 4 — Sevk / Yönlendirme sekmesi</div>
+<div class="win">
+  <div class="title">↗ Uzaktan Muayene — Sevk / Yönlendirme
+    <span class="sp">kayıt bölümü md 12</span></div>
+  <div class="sekmeler">
+    <div>Muayene</div><div>Tanı (ICD-10)</div><div>Hekim Notu</div>
+    <div>e-Reçete</div><div>e-Rapor</div><div class="on">Sevk / Yönlendirme</div><div>Dosyalar</div>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Yönlendirme Oluştur</div>
+    <div class="btn">📅 Randevu ile yönlendir</div>
+    <div class="btn">🚑 Acil yönlendirme (112 bilgilendirme)</div>
+    <div class="btn ok sp">✔ Kaydet ve Hastaya Bildir</div>
+  </div>
+
+  <div class="govde">
+    <div class="pan">
+      <h5>Yönlendirme</h5>
+      <div class="ic">
+        <div class="ikili">
+          <label class="alan"><span>Yönlendirme türü</span>
+            <div class="inp combo">Hastaneye yönlendirme</div></label>
+          <label class="alan"><span>Aciliyet</span>
+            <div class="inp combo">Normal (7 gün içinde)</div></label>
+        </div>
+        <div class="ikili">
+          <label class="alan"><span>Hedef kurum</span>
+            <div class="inp combo">GenoTIP Tıp Merkezi</div></label>
+          <label class="alan"><span>Branş</span>
+            <div class="inp combo">Kardiyoloji</div></label>
+        </div>
+        <label class="alan"><span>Gerekçe</span>
+          <div class="inp cok">Dirençli hipertansiyon; uzaktan muayenede fizik
+            muayene ve EKG yapılamadı. Kardiyoloji değerlendirmesi önerilir.</div></label>
+        <div class="ikili">
+          <label class="alan"><span>Yönlendiren hekim <b>(kayda geçer)</b></span>
+            <div class="inp">Uz. Dr. Eren YILMAZ · Dahiliye · Dip. 123456</div></label>
+          <label class="alan"><span>Görüşme</span>
+            <div class="inp">USG-260901-0042 · 01.09.2026</div></label>
+        </div>
+        <div class="uy ok" style="margin:6px 0 0">
+          Yönlendirme kaydı hastanın dosyasına işlenir; hasta o kuruma
+          başvurduğunda <b>kim tarafından yönlendirildiği</b> görünür
+          (kılavuz kayıt bölümü md 12).
+        </div>
+      </div>
+    </div>
+
+    <div class="pan">
+      <h5>Yönlendirme Geçmişi</h5>
+      <table>
+        <thead><tr><th>Tarih</th><th>Tür</th><th>Hedef</th><th>Yönlendiren</th><th>Durum</th></tr></thead>
+        <tbody>
+          <tr class="sec"><td>01.09.2026</td><td>Hastane</td><td>Kardiyoloji</td>
+              <td>Uz. Dr. E. Yılmaz</td><td><span class="rozet r-uy">Bekliyor</span></td></tr>
+          <tr><td>12.05.2026</td><td>Tetkik</td><td>Laboratuvar</td>
+              <td>Uz. Dr. E. Yılmaz</td><td><span class="rozet r-ok">Tamamlandı</span></td></tr>
+        </tbody>
+      </table>
+      <div class="ic">
+        <div class="uy teh" style="margin:0">
+          <b>Acil durum uyarısı.</b> Hastada acil bulgu varsa uzaktan sağlık
+          hizmeti sürdürülmez: hekim "Acil yönlendirme" seçer, ekran hastaya
+          <b>112</b> bilgilendirmesini gösterir ve bu adım iz kaydına yazılır.
+        </div>
+        <div class="kucuk" style="margin-top:8px">
+          Randevu ile yönlendirmede USBS, hedef branşta <b>uygun ilk randevuyu</b>
+          önerir (HBYS entegreyse HBYS randevusundan, değilse kendi
+          randevu modülünden).
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="baslik">4 / 4 — Dosyalar sekmesi</div>
+<div class="win">
+  <div class="title">📎 Uzaktan Muayene — Dosyalar
+    <span class="sp">md 12 · 13 · görüşmede paylaşılanlar dahil</span></div>
+  <div class="sekmeler">
+    <div>Muayene</div><div>Tanı (ICD-10)</div><div>Hekim Notu</div>
+    <div>e-Reçete</div><div>e-Rapor</div><div>Sevk / Yönlendirme</div><div class="on">Dosyalar</div>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">📤 Dosya Yükle</div>
+    <div class="btn">📷 Kamera ile çek</div>
+    <div class="btn">👁 Önizle</div>
+    <div class="btn">☁ e-Nabız'a ekle</div>
+    <div class="btn pas sp">🗑 Sil <span class="kucuk">(yalnız yüklendiği gün)</span></div>
+  </div>
+
+  <div class="govde tek">
+    <div class="pan">
+      <h5>Görüşme ve Muayene Dosyaları</h5>
+      <div>
+        <div class="dosya">
+          <div class="ik">📄</div>
+          <div style="flex:1">tahlil_sonuc.pdf
+            <div class="kucuk">1,2 MB · hastadan · 01.09.2026 09:35 · sha256 8f2c…d91</div></div>
+          <span class="rozet r-ok">Virüs taraması ✓</span>
+          <span class="rozet r-bilgi">Muayeneye eklendi</span>
+        </div>
+        <div class="dosya">
+          <div class="ik">🖼</div>
+          <div style="flex:1">dokuntu.jpg
+            <div class="kucuk">840 KB · hastadan · 01.09.2026 09:36</div></div>
+          <span class="rozet r-ok">Temiz</span>
+          <span class="rozet r-gri">e-Nabız'a eklenmedi</span>
+        </div>
+        <div class="dosya">
+          <div class="ik">⛔</div>
+          <div style="flex:1">rapor.exe
+            <div class="kucuk">2,1 MB · hastadan · 01.09.2026 09:35 · <b>engellendi</b></div></div>
+          <span class="rozet r-teh">İzinli tür değil</span>
+          <span class="rozet r-gri">Saklanmadı</span>
+        </div>
+        <div class="dosya">
+          <div class="ik">📄</div>
+          <div style="flex:1">muayene_ozeti_USG-260901-0042.pdf
+            <div class="kucuk">96 KB · sistem · e-imzalı</div></div>
+          <span class="rozet r-ok">Otomatik üretildi</span>
+          <span class="rozet r-bilgi">Hastaya gönderildi</span>
+        </div>
+      </div>
+      <div class="uy">
+        <b>Dosya kuralları:</b> izinli türler (pdf, jpg, png, dcm, docx) ve boyut
+        sınırı sunucuda uygulanır; her yükleme <b>virüs taramasından</b> geçer ve
+        iz kaydına yazılır. Reddedilen dosya <b>saklanmaz</b> - yalnız denemenin
+        kaydı kalır.
+      </div>
+      <div class="ic" style="padding-top:0">
+        <div class="kucuk">
+          Hastanın gönderdiği dosyalar muayene kaydına iliştirilir; hekim
+          gerekli görürse <b>e-Nabız'a</b> ekler. Silme yalnız yüklendiği gün ve
+          yükleyen tarafından mümkündür - sonrası için "geçersiz işaretle"
+          kullanılır, veri kaybolmaz.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Bu dosya</b> <code>usbs_muayene.html</code> ekranının dört sekmesini ayrı ayrı
+  gösterir: e-Reçete, e-Rapor, Sevk/Yönlendirme, Dosyalar. Muayene, Tanı (ICD-10)
+  ve Hekim Notu sekmeleri ana mockup'ta duruyor.
+  <br><b>Karşılanan maddeler.</b> Entegrasyonsuz bölüm <span class="madde">3</span>
+  başka SBYS'ye bağlanmadan e-reçete ve e-rapor · genel
+  <span class="madde">md 12</span> dosya transferi ·
+  <span class="madde">md 13</span> zararlı içerik engelleme ·
+  kayıt bölümü <span class="madde">12</span> yönlendiren/sevk eden hekimin kaydı ·
+  <span class="madde">md 21</span> her işlemin iz kaydı ·
+  entegrasyonsuz <span class="madde">6</span> e-Nabız gönderimi.
+  <br><b>Gentegre karşılığı.</b> Doküman deposu (polimorfik <code>dokuman</code>
+  tablosu, hash-dedup) hazır: dosya sekmesi bunun üzerine oturur. Eklenecekler:
+  <b>virüs taraması</b>, izinli tür/boyut kuralı, <b>Medula e-reçete/e-rapor</b>
+  ve <b>e-Nabız</b> servis bağlantıları.
+</div>
+</body>
+</html>

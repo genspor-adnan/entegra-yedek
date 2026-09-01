@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USBS — Hasta Dosyası ve e-Nabız Geçmişi — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --uyari:#b5731a; --teh:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1280px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sp{margin-left:auto}
+  .ara{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:12px;
+    background:#fff;height:23px;padding:0 9px;width:280px;color:var(--muted);font-size:11.5px}
+  .duzen{display:grid;grid-template-columns:330px 1fr;gap:10px;padding:10px}
+  @media (max-width:1000px){.duzen{grid-template-columns:1fr}}
+  .pan{border:1px solid var(--line);border-radius:4px;background:#fff;overflow:hidden}
+  .pan h5{margin:0;padding:6px 9px;background:var(--head2);border-bottom:1px solid var(--line);
+    font-size:11.5px;color:var(--navy);display:flex;gap:6px;align-items:center}
+  .pan h5 .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11px}
+  .ic{padding:9px}
+  table{border-collapse:collapse;width:100%;font-size:11.5px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px}
+  tr.sec td{background:var(--sel)}
+  .kimlik{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;font-size:11.5px;line-height:1.6}
+  .kimlik b{color:var(--navy)}
+  .kimlik .e{color:var(--muted)}
+  .rozet{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .r-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .r-uy{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .r-teh{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .r-bilgi{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .cip{border:1px solid var(--line);border-radius:11px;padding:2px 10px;font-size:11px;background:#fff;
+    display:inline-block;margin:0 4px 4px 0}
+  .cip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .kucuk{font-size:10.5px;color:var(--muted);line-height:1.5}
+  .uy{border:1px solid #f0d9a8;background:#fdf6e6;border-radius:3px;padding:8px 10px;
+    font-size:11.5px;color:#7a5c14;line-height:1.55;margin:0 9px 9px}
+  .not{max-width:1280px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+  .madde{display:inline-block;background:#eef2f7;border:1px solid var(--line);border-radius:3px;
+    padding:0 5px;font-size:10px;color:var(--navy);font-weight:bold;margin-right:3px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">👤 USBS — Hasta Dosyası <span class="sp">demografik veri + e-Nabız geçmişi</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">🎥 Görüşme Başlat</div>
+    <div class="btn">📅 Randevu Ver</div>
+    <div class="btn">☁ e-Nabız'dan Yenile</div>
+    <div class="btn">📄 Muayene Geçmişi</div>
+    <div class="ara sp">🔍 T.C. / ad soyad / telefon ara…</div>
+  </div>
+
+  <div class="duzen">
+    <!-- ------------------------------------------------------- kimlik --- -->
+    <div class="pan">
+      <h5>Kimlik <span class="sp">md 22 · 23</span></h5>
+      <div class="ic">
+        <div class="kimlik">
+          <span class="e">T.C. Kimlik No</span><span><b>123••••••02</b>
+            <span class="rozet r-ok">Algoritma ✓</span></span>
+          <span class="e">Ad Soyad</span><b>AHMET ÖZTÜRK</b>
+          <span class="e">Doğum / Cinsiyet</span><span>15.06.1985 · Erkek · 41 y</span>
+          <span class="e">Telefon</span><span>+90 5•• ••• •• 41
+            <span class="rozet r-ok">Doğrulandı</span></span>
+          <span class="e">e-Posta</span><span>a•••@•••.com
+            <span class="rozet r-uy">Doğrulanmadı</span></span>
+          <span class="e">İl / İlçe</span><span>Ankara · Çankaya</span>
+          <span class="e">Kan grubu</span><span>A Rh+ <span class="kucuk">(e-Nabız)</span></span>
+          <span class="e">Sigorta</span><span>SGK · aktif</span>
+        </div>
+        <div class="uy" style="margin:10px 0 0">
+          <b>T.C. kimlik doğrulama algoritması</b> kayıt sırasında çalışır; geçersiz
+          numarayla hasta açılamaz. Kimlik <b>KPS</b> ile teyit edilebiliyorsa
+          ad-soyad da doğrulanır.
+        </div>
+      </div>
+
+      <h5>Onam Durumu <span class="sp">md 17-18 · kayıt md 7</span></h5>
+      <div class="ic">
+        <table>
+          <tbody>
+            <tr><td>Uzaktan sağlık hizmeti</td>
+                <td><span class="rozet r-ok">Var · 01.09.2026</span></td></tr>
+            <tr><td>KVKK aydınlatma</td>
+                <td><span class="rozet r-ok">Var · sürüm 1.3</span></td></tr>
+            <tr><td>Ses / görüntü kaydı</td>
+                <td><span class="rozet r-teh">Rıza yok</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------- e-Nabiz gecmis - -->
+    <div class="pan">
+      <h5>e-Nabız Geçmişi <span class="sp">md 25 · hasta izniyle görüntülenir</span></h5>
+      <div class="ic">
+        <div>
+          <span class="cip on">Tümü</span>
+          <span class="cip">Reçeteler</span>
+          <span class="cip">Raporlar</span>
+          <span class="cip">Tahliller</span>
+          <span class="cip">Görüntülemeler</span>
+          <span class="cip">Muayeneler</span>
+          <span class="cip">Aşılar</span>
+        </div>
+        <table style="margin-top:6px">
+          <thead>
+            <tr><th>Tarih</th><th>Tür</th><th>Kurum</th><th>Özet</th><th>Kaynak</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr class="sec">
+              <td>28.08.2026</td><td><span class="rozet r-bilgi">Tahlil</span></td>
+              <td>Merkez Lab.</td>
+              <td>Hemogram · Kreatinin 1,1 · TSH 2,4</td>
+              <td>e-Nabız</td><td>👁</td>
+            </tr>
+            <tr>
+              <td>12.05.2026</td><td><span class="rozet r-bilgi">Reçete</span></td>
+              <td>GenoTIP Poliklinik</td>
+              <td>Ramipril 5 mg · 30 gün</td>
+              <td>e-Nabız</td><td>👁</td>
+            </tr>
+            <tr>
+              <td>12.05.2026</td><td><span class="rozet r-bilgi">Muayene</span></td>
+              <td>GenoTIP Poliklinik</td>
+              <td>I10 Esansiyel hipertansiyon</td>
+              <td>Yerel</td><td>👁</td>
+            </tr>
+            <tr>
+              <td>03.02.2026</td><td><span class="rozet r-bilgi">Görüntüleme</span></td>
+              <td>Şehir Hastanesi</td>
+              <td>Akciğer grafisi · normal</td>
+              <td>e-Nabız</td><td>👁</td>
+            </tr>
+            <tr>
+              <td>15.11.2025</td><td><span class="rozet r-bilgi">Rapor</span></td>
+              <td>Şehir Hastanesi</td>
+              <td>İlaç kullanım raporu · HT · 1 yıl</td>
+              <td>e-Nabız</td><td>👁</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="kucuk" style="margin-top:6px">
+          e-Nabız verisi <b>salt okunur</b>dur ve USBS veri tabanına kopyalanmaz;
+          görüntüleme <b>iz kaydına</b> yazılır (kim, ne zaman, hangi kaydı açtı).
+        </div>
+      </div>
+
+      <h5>USBS Görüşme Geçmişi</h5>
+      <div class="ic">
+        <table>
+          <thead><tr><th>Tarih</th><th>Hekim</th><th>Süre</th><th>Tanı</th>
+            <th>Kayıt</th><th>Belgeler</th></tr></thead>
+          <tbody>
+            <tr><td>01.09.2026 09:30</td><td>Uz. Dr. E. Yılmaz</td><td>6 dk</td>
+                <td>I10 · R42</td><td><span class="rozet r-teh">Yok (rıza yok)</span></td>
+                <td>e-Reçete · e-Rapor</td></tr>
+            <tr><td>12.05.2026 14:05</td><td>Uz. Dr. E. Yılmaz</td><td>9 dk</td>
+                <td>I10</td><td><span class="rozet r-ok">Var · 12.05.2027'de silinecek</span></td>
+                <td>e-Reçete</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Karşılanan maddeler.</b> <span class="madde">md 22</span> hasta demografik
+  verilerinin listelendiği arayüz · <span class="madde">md 23</span> T.C. kimlik
+  doğrulama algoritması · <span class="madde">md 25</span> e-Nabız üzerinden
+  geçmiş rapor/reçete/görüntü/tahlil görüntüleme · <span class="madde">md 21</span>
+  görüntüleme işlemlerinin iz kaydı · kayıt <span class="madde">7</span> rıza
+  kaydının veri tabanında görünmesi.
+  <br><b>Gentegre karşılığı.</b> Hasta kartı ve arama zaten var (taraf + hasta
+  uzantısı, T.C. doğrulaması dahil). Eklenecek olan <b>e-Nabız okuma servisi</b>:
+  veriyi kopyalamadan, hasta bazında, izinli ve iz kayıtlı gösterim.
+  <br><b>Gizlilik kararı.</b> e-Nabız kayıtları yerel veri tabanına yazılmaz -
+  yalnız görüntülenir. Kopyalamak hem mevzuat hem saklama açısından gereksiz
+  sorumluluk demek.
+</div>
+</body>
+</html>
