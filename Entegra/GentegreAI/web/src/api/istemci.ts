@@ -642,6 +642,10 @@ export const api = {
             hazirlikMetni: string } | null>(
       `/api/radyoloji/tetkik-bilgi/${hizmetId}`),
 
+  /** Radyoloji panosu (320): sayaclar + cihaz dolulugu + uyarilar tek uctan. */
+  radyolojiPano: <T,>(gun?: string) =>
+    istek<T>(`/api/radyoloji/pano${gun ? `?gun=${encodeURIComponent(gun)}` : ''}`),
+
   /**
    * Cihazin kapali araliklari (318): bakim/ariza/tatil + ogle arasi.
    * Takvim bunlari tarali blok olarak cizer - kural zaten tetikte, bu

@@ -1641,3 +1641,64 @@ input.skt-gecmis {
   white-space: nowrap; overflow: hidden; pointer-events: none;
 }
 .randevu-takvim td { position: relative }
+
+/* ------------------------------------------------ radyoloji panosu (320) --
+   Sayaç kutuları TIKLANIR: her biri ilgili listeyi kendi süzgeciyle açar. */
+.pano-sayaclar {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 12px;
+}
+@media (max-width: 1100px) { .pano-sayaclar { grid-template-columns: repeat(3, 1fr) } }
+@media (max-width: 700px)  { .pano-sayaclar { grid-template-columns: repeat(2, 1fr) } }
+.pano-kutu {
+  position: relative; text-align: left; cursor: pointer;
+  border: 1px solid var(--cizgi); border-radius: 4px; background: var(--yuz);
+  padding: 9px 11px; display: flex; flex-direction: column; gap: 1px;
+}
+.pano-kutu:hover { border-color: var(--mor); background: var(--yuz2) }
+.pano-kutu .ik { position: absolute; right: 9px; top: 7px; opacity: .35; font-size: 14px }
+.pano-kutu .s { font-size: 22px; font-weight: 700; color: var(--mor); line-height: 1.15 }
+.pano-kutu .e { font-size: 11px; color: var(--soluk); line-height: 1.3 }
+.pano-kutu.teh { border-color: var(--hatakenar, var(--hata)); background: var(--hatazem) }
+.pano-kutu.teh .s { color: var(--hata) }
+.pano-kutu.uy  { border-color: var(--uyarikenar); background: var(--uyarizem) }
+.pano-kutu.uy .s { color: var(--uyari) }
+.pano-kutu.ok  { border-color: var(--okkenar); background: var(--okzem) }
+.pano-kutu.ok .s { color: var(--ok) }
+
+.pano-satir { display: grid; grid-template-columns: 1.35fr 1fr; gap: 12px; margin-bottom: 12px }
+@media (max-width: 1100px) { .pano-satir { grid-template-columns: 1fr } }
+.pano-ic { padding: 10px }
+.pano-ic .bos { font-size: 11.5px; color: var(--soluk); padding: 6px 2px }
+.pano-not {
+  font-size: 10.5px; color: var(--soluk); line-height: 1.5; margin-top: 6px;
+  border-top: 1px dashed var(--cizgi); padding: 5px 10px 0;
+}
+.pano-cihaz {
+  display: grid; grid-template-columns: 190px 1fr 62px; gap: 8px;
+  align-items: center; margin-bottom: 8px; font-size: 11.5px;
+}
+.pano-cihaz .ad { display: flex; flex-direction: column; line-height: 1.35 }
+.pano-cihaz .ad .sonuk { font-size: 10.5px }
+.pano-cihaz .cubuk {
+  height: 14px; border: 1px solid var(--cizgi); border-radius: 3px;
+  background: var(--yuz2); overflow: hidden; display: flex;
+}
+.pano-cihaz .cubuk i { display: block; height: 100% }
+.pano-cihaz .cubuk .dolu { background: linear-gradient(var(--mor), var(--mor)) }
+.pano-cihaz .cubuk .kap {
+  background: repeating-linear-gradient(45deg,
+    var(--cizgi) 0 4px, var(--yuz2) 4px 8px);
+}
+.pano-cihaz .oran { text-align: right; font-weight: 700; color: var(--mor) }
+.pano-uyari {
+  display: flex; gap: 8px; align-items: flex-start; text-align: left; width: 100%;
+  padding: 6px 8px; margin-bottom: 6px; border-radius: 3px; cursor: pointer;
+  font-size: 11.5px; line-height: 1.45;
+  border: 1px solid var(--uyarikenar); background: var(--uyarizem); color: var(--uyari);
+}
+.pano-uyari.teh { border-color: var(--hata); background: var(--hatazem); color: var(--hata) }
+.pano-uyari:hover { filter: brightness(.97) }
+.pano-mini {
+  display: inline-block; height: 10px; border-radius: 2px;
+  background: var(--mor2); border: 1px solid var(--mor); min-width: 6px;
+}

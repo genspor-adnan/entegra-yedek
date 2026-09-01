@@ -514,6 +514,215 @@ public static class RadyolojiUclari
             return Results.Ok(satir);
         });
 
+        // ------------------------------------------------ radyoloji panosu ----
+        // Modulun "bugun ne durumdayiz" ekrani (320). Her sayac TIKLANIR ve
+        //   ilgili listeyi kendi suzgeciyle acar - pano bakilacak yer degil,
+        //   ise giris kapisidir. Tek uc: alti ayri istek yerine hepsi burada
+        //   toplanir; sube suzmesi baglamdan gelir.
+        grup.MapGet("/pano", async (
+            DateTime? gun, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+
+            var tarih = (gun ?? DateTime.Today).Date;
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            // --------------------------------------------------- sayaclar ----
+            var sayaclar = await baglanti.TekAsync("""
+                select
+                  (select count(*) from public.randevu r
+                    where r.cihaz_id is not null
+                      and r.baslangic::date = @p0
+                      and coalesce(r.durum, 1) <> 4
+                      and (@p1::int is null or r.sube_id = @p1))          as "randevu",
+                  (select count(*) from public.radyoloji_istem i
+                    where i.durum = 1
+                      and (@p1::int is null or i.sube_id = @p1))          as "cekimBekleyen",
+                  (select count(*) from public.radyoloji_istem i
+                    where i.durum in (2, 3, 4)
+                      and (@p1::int is null or i.sube_id = @p1))          as "raporlanacak",
+                  (select count(*) from public.v_radyoloji_kritik_takip k
+                    where k.takip_durum < 4
+                      and (@p1::int is null or k.sube_id = @p1))          as "acikKritik",
+                  (select count(*) from public.v_radyoloji_teslim_takip t
+                    where t.takip_durum = 1
+                      and (@p1::int is null or t.sube_id = @p1))          as "teslimBekleyen",
+                  (select count(*) from public.radyoloji_rapor r
+                     join public.radyoloji_istem i on i.id = r.istem_id
+                    where r.onay_tarihi::date = @p0
+                      and (@p1::int is null or i.sube_id = @p1))          as "tamamlanan",
+                  (select count(*) from public.radyoloji_konsultasyon ks
+                     join public.radyoloji_istem i on i.id = ks.istem_id
+                    where ks.durum = 1
+                      and (@p1::int is null or i.sube_id = @p1))          as "konsultasyon",
+                  (select count(*) from public.radyoloji_istem i
+                    where i.durum = 1 and i.randevu_id is null
+                      and (@p1::int is null or i.sube_id = @p1))          as "randevusuz"
+                """, null, [tarih, baglam.SubeId], Satir, iptal);
+
+            // -------------------------------------------- cihaz dolulugu ----
+            // Payda: cihazin o gunku MESAI dakikasi eksi ogle arasi ve kapatma.
+            //   Randevusuz (walk-in) cihazda mesai hesabi anlamsizdir - ekran
+            //   oran yerine "walk-in" gosterir.
+            var cihazlar = await baglanti.ListeAsync("""
+                with c as (
+                  select c.id, c.ad, c.modalite, c.randevu_verilir,
+                         c.baslangic_saat, c.bitis_saat,
+                         c.ogle_baslangic, c.ogle_bitis
+                    from public.radyoloji_cihaz c
+                   where coalesce(c.durum, 1) = 1
+                     and (@p1::int is null or c.sube_id = @p1)
+                ), m as (
+                  select c.*,
+                         case when c.baslangic_saat <> '' and c.bitis_saat <> ''
+                              then greatest(0, extract(epoch from
+                                     (c.bitis_saat::time - c.baslangic_saat::time)) / 60)
+                              else 0 end as mesai_dk,
+                         case when c.ogle_baslangic <> '' and c.ogle_bitis <> ''
+                              then greatest(0, extract(epoch from
+                                     (c.ogle_bitis::time - c.ogle_baslangic::time)) / 60)
+                              else 0 end as ogle_dk
+                    from c
+                )
+                select m.id, m.ad,
+                       coalesce(kd.ad, '') as "modaliteAdi",
+                       m.randevu_verilir as "randevuVerilir",
+                       case when m.baslangic_saat <> ''
+                            then m.baslangic_saat || '-' || m.bitis_saat else '' end as mesai,
+                       greatest(0, (m.mesai_dk - m.ogle_dk))::int as "mesaiDk",
+                       -- Kapatmanin GUN ICINE dusen kismi (cok gunluk kapatma kirpilir).
+                       coalesce((select sum(extract(epoch from
+                                  (least(k.bitis, @p0::date + interval '1 day')
+                                   - greatest(k.baslangic, @p0::date))) / 60)
+                                   from public.radyoloji_cihaz_kapatma k
+                                  where k.cihaz_id = m.id
+                                    and k.baslangic < (@p0::date + interval '1 day')
+                                    and k.bitis > @p0::date), 0)::int as "kapaliDk",
+                       coalesce((select sum(greatest(coalesce(r.sure_dk, 0), 0))
+                                   from public.randevu r
+                                  where r.cihaz_id = m.id
+                                    and r.baslangic::date = @p0
+                                    and coalesce(r.durum, 1) not in (3, 4)), 0)::int as "doluDk",
+                       (select count(*) from public.radyoloji_istem i
+                         where i.cihaz_id = m.id and i.durum > 0
+                           and coalesce(i.cekim_tarihi, i.ekleme_tarihi)::date = @p0)
+                                                                          as "bugunIs"
+                  from m
+                  left join public.kod_liste kl on kl.kod = 'rad.modalite'
+                  left join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = m.modalite
+                 order by m.modalite, m.ad
+                """, null, [tarih, baglam.SubeId], Satir, iptal);
+
+            // ------------------------------------------- modalite dagilimi ----
+            // Son 30 gun: tek gunluk dagilim kucuk kurumda anlamsiz dalgalanir.
+            var modalite = await baglanti.ListeAsync("""
+                select i.modalite, coalesce(kd.ad, '') as "modaliteAdi",
+                       count(*)                                           as "toplam",
+                       count(*) filter (where coalesce(i.cekim_tarihi, i.ekleme_tarihi)::date = @p0)
+                                                                          as "bugun",
+                       count(*) filter (where i.durum in (2, 3, 4))       as "raporsuz",
+                       -- Cekimden rapor ONAYINA gecen ortalama sure: modulun
+                       --   asil hiz olcusu. Onaylanmamis istem hesaba girmez.
+                       coalesce(avg(extract(epoch from (r.onay_tarihi - i.cekim_tarihi)) / 60)
+                                filter (where r.onay_tarihi is not null
+                                          and i.cekim_tarihi is not null), 0)::int as "ortRaporDk"
+                  from public.radyoloji_istem i
+                  left join lateral (
+                       select max(x.onay_tarihi) as onay_tarihi
+                         from public.radyoloji_rapor x where x.istem_id = i.id) r on true
+                  left join public.kod_liste kl on kl.kod = 'rad.modalite'
+                  left join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = i.modalite
+                 where i.durum > 0
+                   and (@p1::int is null or i.sube_id = @p1)
+                   and coalesce(i.cekim_tarihi, i.ekleme_tarihi) >= (@p0::date - interval '30 day')
+                 group by i.modalite, kd.ad
+                 order by 3 desc
+                """, null, [tarih, baglam.SubeId], Satir, iptal);
+
+            // ---------------------------------------------- radyolog yuku ----
+            // Acik = yazilmis ama onaylanmamis rapor (taslak / on rapor).
+            //   Asistan raporlari onaya duser: "onaylanan" uzman onayini sayar.
+            var radyologlar = await baglanti.ListeAsync("""
+                select coalesce(t.unvan, '(atanmamış)') as radyolog,
+                       count(*) filter (where r.durum < 3)                as "acik",
+                       count(*) filter (where r.onay_tarihi::date = @p0)  as "onaylanan",
+                       coalesce(avg(extract(epoch from (r.onay_tarihi - r.yazma_tarihi)) / 60)
+                                filter (where r.onay_tarihi is not null), 0)::int as "ortDk"
+                  from public.radyoloji_rapor r
+                  join public.radyoloji_istem i on i.id = r.istem_id
+                  left join public.taraf t on t.id = coalesce(r.yazan_id, r.onaylayan_id)
+                 where (@p1::int is null or i.sube_id = @p1)
+                   and (r.durum < 3 or r.onay_tarihi::date = @p0)
+                 group by t.unvan
+                 order by 2 desc, 3 desc
+                """, null, [tarih, baglam.SubeId], Satir, iptal);
+
+            // ------------------------------------------------- uyarilar ----
+            // "Dikkat gerektirenler": her satir bir LISTEYE gider. Sayac
+            //   sifirsa satir hic uretilmez - bos uyari kutusu iyi haberdir.
+            var uyarilar = new List<object>();
+
+            var gecKritik = await baglanti.TekDegerAsync<int>("""
+                select count(*) from public.v_radyoloji_kritik_takip k
+                 where k.takip_durum = 1 and k.gecen_dk > 60
+                   and (@p0::int is null or k.sube_id = @p0)
+                """, null, [baglam.SubeId], iptal);
+            if (gecKritik > 0)
+                uyarilar.Add(new { tip = "teh", ik = "🚨",
+                    metin = $"{gecKritik} kritik bulgu 60 dakikadır bildirilmedi.",
+                    yol = "/radyoloji-kritik" });
+
+            var eskiRandevusuz = await baglanti.TekDegerAsync<int?>("""
+                select (extract(epoch from (now()::timestamp - min(i.ekleme_tarihi))) / 86400)::int
+                  from public.radyoloji_istem i
+                 where i.durum = 1 and i.randevu_id is null
+                   and (@p0::int is null or i.sube_id = @p0)
+                """, null, [baglam.SubeId], iptal);
+            var randevusuz = Convert.ToInt32(sayaclar?["randevusuz"] ?? 0);
+            if (randevusuz > 0)
+                uyarilar.Add(new { tip = "uy", ik = "🕐",
+                    metin = $"{randevusuz} istem randevusuz bekliyor"
+                            + (eskiRandevusuz is > 0 ? $" - en eskisi {eskiRandevusuz} gündür sırada." : "."),
+                    yol = "/randevu" });
+
+            var eskiTeslim = await baglanti.TekDegerAsync<int>("""
+                select count(*) from public.v_radyoloji_teslim_takip t
+                 where t.takip_durum = 1 and t.bekleme_dk > 7 * 24 * 60
+                   and (@p0::int is null or t.sube_id = @p0)
+                """, null, [baglam.SubeId], iptal);
+            if (eskiTeslim > 0)
+                uyarilar.Add(new { tip = "uy", ik = "📦",
+                    metin = $"{eskiTeslim} sonuç 7 günden uzun süredir alınmadı - hasta aranmalı.",
+                    yol = "/radyoloji-teslim" });
+
+            var konsul = Convert.ToInt32(sayaclar?["konsultasyon"] ?? 0);
+            if (konsul > 0)
+                uyarilar.Add(new { tip = "uy", ik = "🧑‍⚕️",
+                    metin = $"{konsul} konsültasyon cevap bekliyor.",
+                    yol = "/radyoloji-konsultasyon" });
+
+            var kapali = await baglanti.ListeAsync("""
+                select coalesce(c.ad, '') as cihaz,
+                       coalesce(nullif(k.aciklama, ''), coalesce(kd.ad, 'Kapalı')) as neden
+                  from public.radyoloji_cihaz_kapatma k
+                  join public.radyoloji_cihaz c on c.id = k.cihaz_id
+                  left join public.kod_liste kl on kl.kod = 'rad.kapatma'
+                  left join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = k.neden_tur
+                 where k.baslangic < (@p0::date + interval '1 day') and k.bitis > @p0::date
+                   and (@p1::int is null or c.sube_id = @p1)
+                 order by k.baslangic
+                """, null, [tarih, baglam.SubeId], Satir, iptal);
+            foreach (var k in kapali)
+                uyarilar.Add(new { tip = "uy", ik = "🔒",
+                    metin = $"{k["cihaz"]} bugün kapalı: {k["neden"]}.",
+                    yol = "/randevu" });
+
+            return Results.Ok(new { tarih = tarih.ToString("yyyy-MM-dd"),
+                                    sayaclar, cihazlar, modalite, radyologlar, uyarilar });
+        });
+
         // ----------------------------------------------- cihaz kapatmalar ----
         // TAKVIMDE GORUNURLUK (318): kapatma kurali randevuyu zaten engelliyordu
         //   (316 tetigi) ama takvim bos gosterdigi icin kullanici o saate

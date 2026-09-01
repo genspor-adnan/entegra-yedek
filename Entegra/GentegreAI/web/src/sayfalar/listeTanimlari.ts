@@ -315,6 +315,16 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     yetkiKodu: 'radyoloji', urunModu: 2,
   },
   {
+    // RADYOLOJİ PANOSU (320): modülün "bugün ne durumdayız" ekranı. Liste
+    //   değil (ozelSayfa) - sayaç, doluluk ve uyarı kutularından oluşur;
+    //   her sayaç ilgili listeye götürür.
+    kaynak: 'radyoloji-pano', rota: 'radyoloji-pano', ozelSayfa: true,
+    baslik: 'Radyoloji Panosu', yol: 'Radyoloji › Pano',
+    urunModu: 2,
+    menuGrup: 'Radyoloji', menuAd: 'Pano', ic: '📊',
+    yetkiKodu: 'radyoloji', menuSira: 5,
+  },
+  {
     // KRİTİK BULGU TAKİBİ (318): hasta güvenliği listesi. Satır bildirim
     //   kaydı değil, kritik işaretli İSTEM - "işaretlendi ama haber
     //   verilmedi" boşluğu tam da burada görünür.
