@@ -558,132 +558,136 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
             </div>
           </div>
 
-          {/* ÖDEME (mockup radyoloji_kayit_kabul): disaridan gelen hastanin
-              basvurusu burada acilir - odeyen kurum fiyati ve pay bolusumunu
-              belirler, kalan tutar hastadan tahsil edilir. */}
-          {kabulMu && (
-            <div className="kagrup kabul-odeme">
-              <h6>Ödeme / Kabul</h6>
-              <div className="alan-izgara dort-sutun">
-                <label className="alan genis-2">
-                  <span className="etiket">Ödeyen Kurum</span>
-                  <span className="ikili">
-                    <input value={odeyenKurumAd} readOnly placeholder="Hasta kendi öder…"
-                           onClick={() => setOdeyenArama(true)} />
-                    <button type="button" className="d mini" title="Kurum ara"
-                            onClick={() => setOdeyenArama(true)}>…</button>
-                    {odeyenKurumId != null && (
-                      <button type="button" className="d mini" title="Seçimi kaldır"
-                              onClick={() => { setOdeyenKurumId(null); setOdeyenKurumAd('') }}>
-                        ✕
-                      </button>
-                    )}
-                  </span>
+          {/* KABUL SONRASI ve ODEME YAN YANA (kullanici): kabul masasi
+              secenekleri solda, tutar/tahsilat sagda - biri otekinin
+              altina dusunce ekran uzuyor ve tutar gozden kaciyordu. */}
+          <div className="kabul-satir">
+            {/* KABUL SONRASI (mockup radyoloji_kayit_kabul sag alt kutusu).
+                Ic istemde de anlamli (hazirlik/CD), o yuzden kabul moduna
+                baglanmadi - MWL/SMS entegrasyonu gelene kadar niyet kaydi. */}
+            <div className="kagrup kabul-sonrasi">
+              <h6>Kabul Sonrası</h6>
+              <div className="secenekler">
+                <label className="onay">
+                  <input type="checkbox" checked={mwl}
+                         onChange={e => setMwl(e.target.checked)} />
+                  Cihaz listesine (MWL) gönder
                 </label>
-                <label className="alan">
-                  <span className="etiket">Poliçe No</span>
-                  <input value={policeNo} maxLength={40}
-                         onChange={e => setPoliceNo(e.target.value)} />
+                <label className="onay">
+                  <input type="checkbox" checked={sms}
+                         onChange={e => setSms(e.target.checked)} />
+                  Randevu / hazırlık SMS'i yolla
                 </label>
-                <label className="alan">
-                  <span className="etiket">Başvuru</span>
-                  <span className="deger-serit">
-                    <input type="checkbox" checked={basvuruAc}
-                           onChange={e => setBasvuruAc(e.target.checked)} />
-                    <span>Başvuru aç ve ücretlendir</span>
-                  </span>
+                <label className="onay">
+                  <input type="checkbox" checked={hazirlik}
+                         onChange={e => setHazirlik(e.target.checked)} />
+                  Hazırlık talimatı ver
+                </label>
+                <label className="onay">
+                  <input type="checkbox" checked={cd}
+                         onChange={e => setCd(e.target.checked)} />
+                  Sonuç için CD hazırla
                 </label>
               </div>
 
-              <div className="kabul-tutar">
-                <div className="tut"><span>Liste tutarı</span>
-                  <span>{para.format(toplam.liste)} ₺</span></div>
-                <div className="tut"><span>İndirim</span>
-                  <span className="ind">−{para.format(toplam.indirim)} ₺</span></div>
-                <div className="tut"><span>KDV</span>
-                  <span>{para.format(toplam.kdv)} ₺</span></div>
-                <div className="tut buyuk"><span>Genel Toplam</span>
-                  <span>{para.format(toplam.genel)} ₺</span></div>
-              </div>
-
-              {/* KAYIT SONRASI ozet: protokol ve pay bolusumu SUNUCUDAN gelir -
-                  kurum/hasta payi sozlesmeye gore orada hesaplanir (289). */}
-              {sonuc && (
-                <div className="kabul-sonuc">
-                  <span>Protokol: <b>{sonuc.belgeNo || '—'}</b></span>
-                  <span>Genel toplam: <b>{para.format(sonuc.genelToplam)} ₺</b></span>
-                  <span>Kurumdan: <b>{para.format(
-                    Math.round((sonuc.genelToplam - hastaTahsil) * 100) / 100)} ₺</b></span>
-                  {/* KDV DAHIL: kasada tahsil edilecek olan bu tutardir. */}
-                  <span>Hastadan: <b>{para.format(hastaTahsil)} ₺</b></span>
-                </div>
-              )}
-
-              {/* Secili kagit: kayit BITINCE yuklenir; burada yalniz izlenir. */}
-              {(kagit || kagitDurum) && (
-                <div className="kabul-kagit">
-                  📎 {kagitDurum || `İstem kâğıdı: ${kagit?.name}`}
-                  {kagit && !kagitDurum && (
-                    <button type="button" className="d mini" title="Kaldır"
-                            onClick={() => setKagit(null)}>✕</button>
-                  )}
+              {/* HAZIRLIK METNI seçili tetkiklerden gelir: tetkikin kendi
+                  protokolü varsa o, yoksa modalite varsayılanı (311). */}
+              {hazirlik && talimatlar.length > 0 && (
+                <div className="hazirlik-metin">
+                  {talimatlar.map(t => (
+                    <div key={t.baslik}>
+                      <b>{t.baslik}</b> — {t.metin}
+                    </div>
+                  ))}
                 </div>
               )}
 
               <div className="not">
-                Kaydedince tek işlemde üç kayıt üretilir: <b>başvuru</b> (protokol),
-                tetkik başına <b>istem</b> (accession no) ve seçilirse <b>tahsilat</b>.
-                Kurum payı sözleşmeye göre ayrılır; kalan tutar hastadan tahsil edilir.
+                MWL (cihaz çalışma listesi) ve SMS gönderimi henüz bağlı değil —
+                işaret kayda <b>istek</b> olarak yazılır, entegrasyon eklendiğinde
+                aynı bayraklar tetikler. Hazırlık talimatı ve CD isteği bugün de
+                istem kartında görünür.
               </div>
             </div>
-          )}
+            {/* ÖDEME (mockup radyoloji_kayit_kabul): disaridan gelen hastanin
+                basvurusu burada acilir - odeyen kurum fiyati ve pay bolusumunu
+                belirler, kalan tutar hastadan tahsil edilir. */}
+            {kabulMu && (
+              <div className="kagrup kabul-odeme">
+                <h6>Ödeme / Kabul</h6>
+                <div className="alan-izgara dort-sutun">
+                  <label className="alan genis-2">
+                    <span className="etiket">Ödeyen Kurum</span>
+                    <span className="ikili">
+                      <input value={odeyenKurumAd} readOnly placeholder="Hasta kendi öder…"
+                             onClick={() => setOdeyenArama(true)} />
+                      <button type="button" className="d mini" title="Kurum ara"
+                              onClick={() => setOdeyenArama(true)}>…</button>
+                      {odeyenKurumId != null && (
+                        <button type="button" className="d mini" title="Seçimi kaldır"
+                                onClick={() => { setOdeyenKurumId(null); setOdeyenKurumAd('') }}>
+                          ✕
+                        </button>
+                      )}
+                    </span>
+                  </label>
+                  <label className="alan">
+                    <span className="etiket">Poliçe No</span>
+                    <input value={policeNo} maxLength={40}
+                           onChange={e => setPoliceNo(e.target.value)} />
+                  </label>
+                  <label className="alan">
+                    <span className="etiket">Başvuru</span>
+                    <span className="deger-serit">
+                      <input type="checkbox" checked={basvuruAc}
+                             onChange={e => setBasvuruAc(e.target.checked)} />
+                      <span>Başvuru aç ve ücretlendir</span>
+                    </span>
+                  </label>
+                </div>
 
-          {/* KABUL SONRASI (mockup radyoloji_kayit_kabul sag alt kutusu).
-              Ic istemde de anlamli (hazirlik/CD), o yuzden kabul moduna
-              baglanmadi - MWL/SMS entegrasyonu gelene kadar niyet kaydi. */}
-          <div className="kagrup kabul-sonrasi">
-            <h6>Kabul Sonrası</h6>
-            <div className="secenekler">
-              <label className="onay">
-                <input type="checkbox" checked={mwl}
-                       onChange={e => setMwl(e.target.checked)} />
-                Cihaz listesine (MWL) gönder
-              </label>
-              <label className="onay">
-                <input type="checkbox" checked={sms}
-                       onChange={e => setSms(e.target.checked)} />
-                Randevu / hazırlık SMS'i yolla
-              </label>
-              <label className="onay">
-                <input type="checkbox" checked={hazirlik}
-                       onChange={e => setHazirlik(e.target.checked)} />
-                Hazırlık talimatı ver
-              </label>
-              <label className="onay">
-                <input type="checkbox" checked={cd}
-                       onChange={e => setCd(e.target.checked)} />
-                Sonuç için CD hazırla
-              </label>
-            </div>
+                <div className="kabul-tutar">
+                  <div className="tut"><span>Liste tutarı</span>
+                    <span>{para.format(toplam.liste)} ₺</span></div>
+                  <div className="tut"><span>İndirim</span>
+                    <span className="ind">−{para.format(toplam.indirim)} ₺</span></div>
+                  <div className="tut"><span>KDV</span>
+                    <span>{para.format(toplam.kdv)} ₺</span></div>
+                  <div className="tut buyuk"><span>Genel Toplam</span>
+                    <span>{para.format(toplam.genel)} ₺</span></div>
+                </div>
 
-            {/* HAZIRLIK METNI seçili tetkiklerden gelir: tetkikin kendi
-                protokolü varsa o, yoksa modalite varsayılanı (311). */}
-            {hazirlik && talimatlar.length > 0 && (
-              <div className="hazirlik-metin">
-                {talimatlar.map(t => (
-                  <div key={t.baslik}>
-                    <b>{t.baslik}</b> — {t.metin}
+                {/* KAYIT SONRASI ozet: protokol ve pay bolusumu SUNUCUDAN gelir -
+                    kurum/hasta payi sozlesmeye gore orada hesaplanir (289). */}
+                {sonuc && (
+                  <div className="kabul-sonuc">
+                    <span>Protokol: <b>{sonuc.belgeNo || '—'}</b></span>
+                    <span>Genel toplam: <b>{para.format(sonuc.genelToplam)} ₺</b></span>
+                    <span>Kurumdan: <b>{para.format(
+                      Math.round((sonuc.genelToplam - hastaTahsil) * 100) / 100)} ₺</b></span>
+                    {/* KDV DAHIL: kasada tahsil edilecek olan bu tutardir. */}
+                    <span>Hastadan: <b>{para.format(hastaTahsil)} ₺</b></span>
                   </div>
-                ))}
+                )}
+
+                {/* Secili kagit: kayit BITINCE yuklenir; burada yalniz izlenir. */}
+                {(kagit || kagitDurum) && (
+                  <div className="kabul-kagit">
+                    📎 {kagitDurum || `İstem kâğıdı: ${kagit?.name}`}
+                    {kagit && !kagitDurum && (
+                      <button type="button" className="d mini" title="Kaldır"
+                              onClick={() => setKagit(null)}>✕</button>
+                    )}
+                  </div>
+                )}
+
+                <div className="not">
+                  Kaydedince tek işlemde üç kayıt üretilir: <b>başvuru</b> (protokol),
+                  tetkik başına <b>istem</b> (accession no) ve seçilirse <b>tahsilat</b>.
+                  Kurum payı sözleşmeye göre ayrılır; kalan tutar hastadan tahsil edilir.
+                </div>
               </div>
             )}
-
-            <div className="not">
-              MWL (cihaz çalışma listesi) ve SMS gönderimi henüz bağlı değil —
-              işaret kayda <b>istek</b> olarak yazılır, entegrasyon eklendiğinde
-              aynı bayraklar tetikler. Hazırlık talimatı ve CD isteği bugün de
-              istem kartında görünür.
-            </div>
           </div>
         </div>
       </div>
