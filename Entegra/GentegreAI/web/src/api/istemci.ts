@@ -689,6 +689,19 @@ export const api = {
     gonder<{ dagitilan: number; avans: number; satirSayisi: number }>(
       `/api/kasa-islem/${kasaIslemId}/dagitim`, govde),
 
+  /** Carinin dagitilmamis tahsilatlari (322) - avans mahsubu seridi. */
+  kasaAvans: (tarafId: number) =>
+    istek<{ satirlar: Record<string, unknown>[]; toplam: number }>(
+      `/api/kasa-islem/avans?tarafId=${tarafId}`),
+
+  /**
+   * Avansi belgenin acik satirlarina dagit (322). Prim tarihi dagitim gunu
+   * DEGIL, tahsilatin islem tarihidir.
+   */
+  kasaAvansMahsup: (govde: { belgeId: number; islemIdler?: number[] }) =>
+    gonder<{ dagitilan: number; islemSayisi: number }>(
+      '/api/kasa-islem/avans-mahsup', govde),
+
   /** Radyoloji panosu (320): sayaclar + cihaz dolulugu + uyarilar tek uctan. */
   radyolojiPano: <T,>(gun?: string) =>
     istek<T>(`/api/radyoloji/pano${gun ? `?gun=${encodeURIComponent(gun)}` : ''}`),

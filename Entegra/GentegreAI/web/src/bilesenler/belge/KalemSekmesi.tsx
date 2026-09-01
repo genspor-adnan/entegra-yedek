@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import { AvansMahsup } from '../AvansMahsup';
 import { para, tarihSaat, hamSayi as sayi } from '../bicim';
 import { iskonatoMetni, satirTutari, type SatirDurumu } from '../../sayfalar/belgeSatir';
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
@@ -580,10 +581,13 @@ export interface KalemSekmesiProps {
  * Kayit YOK: tahsilat kasa ekranindan girilir, burasi ozet gosterir.
  */
 export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsilatAc,
-                                  secili, setSecili, tahsilatAcKart, tahsilatSil }: {
+                                  secili, setSecili, tahsilatAcKart, tahsilatSil,
+                                  onYenile }: {
   sonuc: BelgeYaniti | null;
   tahsilatlar: Record<string, unknown>[];
   kayitliId: number;
+  /** Avans mahsubu satirlari degistirdiginde belgeyi tazelemek icin (322). */
+  onYenile?(): void;
   /** Alis belgesinde "Tahsilat" degil "Ödeme" yazar. */
   alisMi: boolean;
   /** Kasa islem kartini acar (tur: tahsilat 21 / odeme 31); belge kayitli
@@ -602,6 +606,14 @@ const tahsil = tahsilatlar.reduce((t, k) => t + (Number(k.yerelTutar ?? k.tutar 
 const kalan = Math.round((genel - tahsil) * 100) / 100;
 return (
   <div className="kagrup">
+    {/* AVANS MAHSUBU (322): hasta once para yatirip ucret satiri sonra
+        girildiyse o tahsilat hicbir satira bagli degildir - prim de dogmaz.
+        Serit yalniz dagitilmamis tahsilat VARSA cizilir. */}
+    {kayitliId > 0 && Number(sonuc?.belge.tarafId ?? 0) > 0 && (
+      <AvansMahsup belgeId={kayitliId}
+                   tarafId={Number(sonuc?.belge.tarafId)}
+                   onTamam={onYenile} />
+    )}
     {/* Tahsilat araclari: Nakit 21 / Banka 22 / POS 25 - hepsi ayni
         modali (kasa karti) cari + tutar onyuklu acar. Cek/Senet kasa
         planinin F5 fazinda (cek_senet tablosu) baglanacak. */}

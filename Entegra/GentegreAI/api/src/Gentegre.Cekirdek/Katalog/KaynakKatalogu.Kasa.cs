@@ -401,6 +401,13 @@ public static partial class KaynakKatalogu
             new("dovizCinsi",    "ki.doviz_cinsi",       "metin", "Döviz",     Hizalama: "orta"),
             new("dovizKuru",     "ki.doviz_kuru",        "para",  "Kur",       Hizalama: "sag", Varsayilan: false),
             new("yerelTutar",    "ki.yerel_tutar",       "para",  "TL Tutar",  Hizalama: "sag", Bicim: "#,##0.00"),
+            // DAGITILMAMIS (322): belge satirlarina baglanmamis tutar. Avans
+            //   burada gorunur - dagitilmayan tahsilat primi de tetiklemez.
+            new("dagitilmamis",
+                "greatest(ki.tutar - coalesce((select sum(dd.tutar) " +
+                " from public.kasa_islem_dagitim dd where dd.kasa_islem_id = ki.id), 0), 0)",
+                                                    "para",  "Dağıtılmamış", Hizalama: "sag",
+                                                    Bicim: "#,##0.00", Varsayilan: false),
             new("projeAdi",      "p.ad",                 "metin", "Proje",     Varsayilan: false),
             new("planTarihi",    "ki.plan_tarihi",       "tarih", "Vade",      Hizalama: "orta", Bicim: "dd.MM.yyyy", Varsayilan: false),
             new("kalanTutar",    "ki.kalan_tutar",       "para",  "Kalan",     Hizalama: "sag", Bicim: "#,##0.00", Varsayilan: false),

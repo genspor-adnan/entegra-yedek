@@ -26,6 +26,80 @@ public static class KasaUclari
     public sealed record DagitimIstegi(int? BelgeId, bool Otomatik,
                                        IReadOnlyList<DagitimSatiri>? Satirlar);
 
+    /// <summary>
+    /// AVANS MAHSUBU (322): hastanin onceden yatirdigi, henuz hicbir satira
+    /// baglanmamis tahsilatin bu belgenin satirlarina dagitilmasi. Prim
+    /// "tahsil edildikce" dogdugu icin mahsup edilmeyen avans primi de
+    /// tetiklemez - bu yuzden ekranda gorunur olmasi gerekiyor.
+    /// </summary>
+    public sealed record MahsupIstegi(int BelgeId, IReadOnlyList<int>? IslemIdler);
+
+    /// <summary>
+    /// Bir kasa isleminin DAGITILMAMIS kismini belgenin acik satirlarina
+    /// siraya gore yazar (once hasta payi - kasadan gelen para cogunlukla
+    /// hastanindir, kurum payi icmalle kapanir). Mevcut dagitim satirlari
+    /// KORUNUR: mahsup ekleme islemidir, yeniden yazma degil.
+    /// </summary>
+    private static async Task<decimal> AvansDagitAsync(NpgsqlConnection baglanti,
+        int kasaIslemId, int belgeId, int kullaniciId, CancellationToken iptal)
+    {
+        var kalanTutar = await baglanti.TekDegerAsync<decimal>("""
+            select coalesce(v.dagitilmamis, 0) from public.v_kasa_islem_dagitim v
+             where v.kasa_islem_id = @p0
+            """, null, [kasaIslemId], iptal);
+        if (kalanTutar <= 0) return 0;
+
+        var acik = await baglanti.ListeAsync("""
+            select t.satir_id as "satirId", t.hasta_kalan as "hastaKalan",
+                   t.kurum_kalan as "kurumKalan"
+              from public.v_belge_satir_tahsilat t
+             where t.belge_id = @p0 and (t.hasta_kalan + t.kurum_kalan) > 0
+             order by t.sira, t.satir_id
+            """, null, [belgeId], Satir, iptal);
+
+        decimal yazilan = 0;
+        await using var tx = await baglanti.BeginTransactionAsync(iptal);
+
+        foreach (var sa in acik)
+        {
+            if (kalanTutar <= 0) break;
+            var satirId = Convert.ToInt32(sa["satirId"]);
+
+            foreach (var (pay, payKalan) in new[]
+                     { ((short)1, Convert.ToDecimal(sa["hastaKalan"])),
+                       ((short)2, Convert.ToDecimal(sa["kurumKalan"])) })
+            {
+                if (kalanTutar <= 0 || payKalan <= 0) continue;
+                var tutar = Math.Round(Math.Min(payKalan, kalanTutar), 2);
+                if (tutar <= 0) continue;
+
+                // Ayni islem + satir + pay icin satir varsa UZERINE EKLE:
+                //   kismi mahsup ikinci kez calistirilabilir olmali.
+                await baglanti.CalistirAsync("""
+                    insert into public.kasa_islem_dagitim
+                           (kasa_islem_id, belge_satir_id, pay, tutar, ekleyen)
+                    values (@p0, @p1, @p2, @p3, @p4)
+                    on conflict (kasa_islem_id, belge_satir_id, pay)
+                    do update set tutar = public.kasa_islem_dagitim.tutar + excluded.tutar
+                    """, tx, [kasaIslemId, satirId, pay, tutar, kullaniciId], iptal);
+
+                kalanTutar -= tutar;
+                yazilan += tutar;
+            }
+        }
+
+        // Avans belgeye BAGLANIR: "bu para hangi belgeye sayildi" sorusunun
+        //   cevabi kasa isleminin kendisinde de dursun (belgesiz tahsilat).
+        if (yazilan > 0)
+            await baglanti.CalistirAsync("""
+                update public.kasa_islem set belge_id = coalesce(belge_id, @p1)
+                 where id = @p0
+                """, tx, [kasaIslemId, belgeId], iptal);
+
+        await tx.CommitAsync(iptal);
+        return yazilan;
+    }
+
     /// <summary>Okuyucu satiri -> sozluk (kolon adlari JSON alan adi olur).</summary>
     private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
     {
@@ -286,6 +360,14 @@ public static class KasaUclari
                     values (@p0, @p1, @p2, @p3, @p4)
                     """, tx, [id, y.SatirId, y.Pay, y.Tutar, baglam.KullaniciId], iptal);
 
+            // Belgesiz tahsilat dagitilinca belgeye BAGLANIR (322): avansin
+            //   hangi belgeye sayildigi kasa isleminden de okunabilsin.
+            if (yazilacak.Count > 0)
+                await baglanti.CalistirAsync("""
+                    update public.kasa_islem set belge_id = coalesce(belge_id, @p1)
+                     where id = @p0
+                    """, tx, [id, belgeId], iptal);
+
             await tx.CommitAsync(iptal);
 
             var toplam = yazilacak.Sum(x => x.Tutar);
@@ -297,6 +379,92 @@ public static class KasaUclari
                 avans = Math.Max(0, tutar - toplam),
                 satirSayisi = yazilacak.Count,
             });
+        });
+
+        // GET /api/kasa-islem/avans?tarafId=&belgeId=
+        //   Carinin DAGITILMAMIS tahsilatlari. belgeId verilirse o belgeye
+        //   zaten dagitilmis olanlar da (kismi) listede kalir - kullanici
+        //   kalanini gorup mahsup edebilsin.
+        grup.MapGet("/avans", async (
+            int tarafId, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("kasa_islem", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var satirlar = await baglanti.ListeAsync("""
+                select a.kasa_islem_id as "kasaIslemId", a.islem_tarihi as "islemTarihi",
+                       a.islem_adi as "islemAdi", a.tutar, a.dagitilan,
+                       a.dagitilmamis, a.belge_id as "belgeId"
+                  from public.v_taraf_avans a
+                 where a.taraf_id = @p0
+                 order by a.islem_tarihi
+                """, null, [tarafId], Satir, iptal);
+
+            return Results.Ok(new
+            {
+                satirlar,
+                toplam = satirlar.Sum(x => Convert.ToDecimal(x["dagitilmamis"])),
+            });
+        });
+
+        // POST /api/kasa-islem/avans-mahsup
+        //   Secilen (ya da carinin tum) dagitilmamis tahsilatlarini belgenin
+        //   acik satirlarina siraya gore dagitir. Her islem KENDI dagitim
+        //   satirlarini yazar; islem belgeye bagli degilse bag da kurulur -
+        //   avans artik "hangi belgeye sayildi" sorusuna cevap verir.
+        //
+        //   PRIM TARIHI: dagitim tarihi degil, kasa isleminin ISLEM TARIHI
+        //   gecerlidir (kullanici karari) - hakedis parayi girdigi gune yazar.
+        grup.MapPost("/avans-mahsup", async (
+            MahsupIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("kasa_islem", Islem.Degistir);
+
+            if (istek.BelgeId <= 0)
+                throw GentegreHatasi.IsKurali("Mahsup için belge gerekli.");
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var tarafId = await baglanti.TekDegerAsync<int?>(
+                "select taraf_id from public.belge where id = @p0", null, [istek.BelgeId], iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Belge bulunamadı.");
+
+            var islemler = await baglanti.ListeAsync("""
+                select a.kasa_islem_id as "id", a.dagitilmamis
+                  from public.v_taraf_avans a
+                 where a.taraf_id = @p0
+                   and (@p1::int[] is null or a.kasa_islem_id = any(@p1))
+                 order by a.islem_tarihi
+                """, null,
+                [tarafId, istek.IslemIdler is { Count: > 0 } ? istek.IslemIdler.ToArray() : null],
+                Satir, iptal);
+
+            decimal toplam = 0;
+            var sayac = 0;
+
+            foreach (var isl in islemler)
+            {
+                var islemId = Convert.ToInt32(isl["id"]);
+
+                // Belgede kalan yoksa devam etmenin anlami yok: sonraki avans
+                //   da dagitilamaz, bosuna sorgu olur.
+                var kalanVar = await baglanti.TekDegerAsync<decimal>("""
+                    select coalesce(sum(t.hasta_kalan + t.kurum_kalan), 0)
+                      from public.v_belge_satir_tahsilat t where t.belge_id = @p0
+                    """, null, [istek.BelgeId], iptal);
+                if (kalanVar <= 0) break;
+
+                var dagitilan = await AvansDagitAsync(baglanti, islemId, istek.BelgeId,
+                                                      baglam.KullaniciId, iptal);
+                if (dagitilan > 0) { toplam += dagitilan; sayac++; }
+            }
+
+            return Results.Ok(new { dagitilan = toplam, islemSayisi = sayac });
         });
 
         // POST /api/kasa-islem/{id}/kesinlestir

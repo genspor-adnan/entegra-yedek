@@ -847,6 +847,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Ödeme',    filtre: { alan: 'turGrup', op: 'esit', deger: 'odeme' } },
       { ad: 'Taslak',   filtre: { alan: 'durum', op: 'esit', deger: 0 } },
       { ad: 'Plan',     filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      // Dagitilmamis tahsilat (322): satira baglanmamis para - avans olarak
+      //   duruyor ve prim tetiklemiyor demektir.
+      { ad: 'Dağıtılmamış', filtre: { alan: 'dagitilmamis', op: 'buyuk', deger: 0 } },
     ],
     menuGrup: 'Kasa', menuAd: 'Kasa İşlemleri', ic: '🧾', yetkiKodu: 'kasa_islem',
   },

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { para } from './bicim';
+import { mesaj } from './mesaj';
 
 /**
  * TAHSİLAT DAĞITIMI (321) — ödeme hangi belge SATIRINA gitti?
@@ -115,12 +116,42 @@ export function TahsilatDagitimi({ belgeId, kasaIslemId, tutar, onDegisti }: {
 
   const fark = Math.round((tutar - toplam) * 100) / 100;
 
+  /**
+   * DAGITIMI TEK BASINA KAYDET (322): kayitli islemde kartin "Değişiklikleri
+   * Kaydet" yolu belgeyi ve muhasebe fisini yeniden yaziyor - yalniz dagitim
+   * degistiyse bu fazla agir. Bu dugme sadece dagitim satirlarini yazar.
+   */
+  const [kaydediyor, setKaydediyor] = useState(false);
+  const kaydet = async () => {
+    if (!kasaIslemId) return;
+    setHata(''); setKaydediyor(true);
+    try {
+      const secim = Object.entries(deger)
+        .filter(([, v]) => (Number(v) || 0) > 0)
+        .map(([k, v]) => {
+          const [satirId, pay] = k.split('|').map(Number);
+          return { belgeSatirId: satirId, pay, tutar: Number(v) };
+        });
+      const y = await api.kasaDagitimYaz(kasaIslemId, { belgeId, satirlar: secim });
+      mesaj(y.avans > 0
+        ? `Dağıtım kaydedildi. Dağıtılmayan (avans): ${para.format(y.avans)}`
+        : 'Dağıtım kaydedildi.');
+      await yukle();
+    } catch (h) { setHata(hataMetni(h)) } finally { setKaydediyor(false) }
+  };
+
   return (
     <div className="kagrup">
       <div className="numaralama-bas bitisik">
         <h6>Tahsilat Dağıtımı</h6>
         <button type="button" className="d" onClick={otomatik}>⇄ Otomatik Dağıt</button>
         <button type="button" className="d" onClick={() => setDeger({})}>Temizle</button>
+        {kasaIslemId ? (
+          <button type="button" className="d bir" disabled={kaydediyor}
+                  onClick={() => void kaydet()}>
+            {kaydediyor ? '⏳ Kaydediliyor…' : '💾 Dağıtımı Kaydet'}
+          </button>
+        ) : null}
         <span className={`rozet ${fark === 0 ? 'ok' : fark > 0 ? 'uyari' : 'hata'}`}
               style={{ marginLeft: 'auto' }}>
           {fark === 0 ? 'Tam dağıtıldı'

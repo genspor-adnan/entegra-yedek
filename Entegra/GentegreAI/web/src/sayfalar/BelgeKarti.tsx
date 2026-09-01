@@ -1284,7 +1284,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                            secili={tahsilat.seciliTahsilat}
                            setSecili={tahsilat.setSeciliTahsilat}
                            tahsilatAcKart={tahsilat.setTahsilatKayitId}
-                           tahsilatSil={tahsilat.tahsilatSil} />
+                           tahsilatSil={tahsilat.tahsilatSil}
+                           onYenile={() => { if (kayitliId) void api.belgeOku(kayitliId)
+                                              .then(setSonuc).catch(() => {}) }} />
         )}
         {/* ============================================= IMZA / TESLIM ==== */}
         {aktifSekme === 'imza' && (
