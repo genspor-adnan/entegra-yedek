@@ -99,5 +99,15 @@ public static partial class KartKatalogu
                         Baslik: "Açıklama"),
                 },
                 SubeKolonu: null, Baslik: "Prim Satırları", LogTabloId: 950),
+        },
+        // Kullanilmis plan SILINMEZ: hakedis satiri hangi kuraldan dogdugunu
+        //   plan satirinda tasiyor (denetim izi). Engel KARTTA tanimli, cunku
+        //   kart silme once DETAY satirlarini siler - o zaman kullaniciya
+        //   "prim satiri silinemez" diye satir mesaji donuyordu.
+        SilmeEngelleri: new[]
+        {
+            new SilmeEngeli("public.hakedis_satir", "plan_id",
+                            "Bu prim planından hakediş üretilmiş, plan silinemez. "
+                            + "Planı pasife alabilirsiniz (Aktif kutusunu kaldırın)."),
         });
 }

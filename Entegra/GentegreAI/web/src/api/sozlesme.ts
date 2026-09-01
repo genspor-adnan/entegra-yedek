@@ -92,7 +92,11 @@ export function hataAyristir(h: unknown): HataCozumu {
   // Silme/degistirme engeli: "hangi tabloda kac kayit" bilgisi mesaja eklenir,
   //   kullanici neyi temizleyecegini bilsin.
   const engel = h.hata.engel ? ` (${h.hata.engel.tablo}: ${h.hata.engel.adet})` : '';
-  return { mesaj: `${h.hata.kod}: ${h.message}${engel}`, alanlar: {}, ilkAlan: null, cakisma: null };
+  // IS_KURALI mesaji ZATEN kullaniciya yazilmis Turkce bir cumledir ("... 
+  //   silinemez, ... yapabilirsiniz") - basina teknik kod eklemek okumayi
+  //   zorlastiriyordu. Oteki kodlar (SUNUCU, BULUNAMADI...) tani icin kalir.
+  const onek = h.hata.kod === 'IS_KURALI' ? '' : `${h.hata.kod}: `;
+  return { mesaj: `${onek}${h.message}${engel}`, alanlar: {}, ilkAlan: null, cakisma: null };
 }
 
 // --------------------------------------------------------------- kimlik ----

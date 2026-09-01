@@ -761,22 +761,37 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                   ) : primSatiri && a.ad === 'tip' && a.kodlar ? (
                     // Tip degisince KAPSAM temizlenir: "Kategori" secilip urun
                     //   id'si kalirsa satir yanlis kalemlere prim yazar.
+                    //   Kapsamli tipe gecerken kalem turu de belirlenir - "Farketmez"
+                    //   kalirsa kategori listesi ve urun aramasi SUZULEMEZ.
                     <select
-                      value={String(satir.tip ?? '')}
+                      value={String(Number(satir.tip) || 1)}
                       disabled={saltOkunur || !a.yazilabilir}
-                      onChange={e => satirDegis(i, { tip: e.target.value, hedefId: '' })}
+                      onChange={e => satirDegis(i, {
+                        tip: e.target.value, hedefId: '',
+                        ...(Number(e.target.value) !== 1 && !Number(satir.kalemTuru)
+                            ? { kalemTuru: '2' } : {}),
+                      })}
                     >
                       {Object.entries(a.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                     </select>
                   ) : primSatiri && a.ad === 'kalemTuru' && a.kodlar ? (
                     // Kalem turu kapsamin ANLAMINI degistirir (stok kategorisi
                     //   mi hizmet kategorisi mi) - degisince kapsam sifirlanir.
+                    //   "Farketmez" KAPSAMLI satirda gizli: secilirse kategori
+                    //   listesi ve urun aramasi suzulemez, kullanici da hangi
+                    //   taraftan sectigini goremez. Liste (tumu) satirinda kalem
+                    //   turu zaten anlamsizdir - orada secim kapalidir.
                     <select
-                      value={String(satir.kalemTuru ?? '')}
-                      disabled={saltOkunur || !a.yazilabilir}
+                      value={String(Number(satir.tip) === 3 || Number(satir.tip) === 2
+                                    ? (Number(satir.kalemTuru) || 2)
+                                    : (Number(satir.kalemTuru) || 0))}
+                      disabled={saltOkunur || !a.yazilabilir
+                                || (Number(satir.tip) || 1) === 1}
                       onChange={e => satirDegis(i, { kalemTuru: e.target.value, hedefId: '' })}
                     >
-                      {Object.entries(a.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                      {Object.entries(a.kodlar)
+                        .filter(([k]) => (Number(satir.tip) || 1) === 1 || Number(k) !== 0)
+                        .map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                     </select>
                   ) : primSatiri && a.ad === 'hedefId' ? (
                     Number(satir.tip) === 2 ? (
