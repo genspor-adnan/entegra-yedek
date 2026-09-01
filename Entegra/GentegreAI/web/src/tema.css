@@ -1627,3 +1627,17 @@ input.skt-gecmis {
 .randevu-takvim td.birak-hedef {
   background: var(--mor2) !important; outline: 2px dashed var(--mor); outline-offset: -2px;
 }
+
+/* ------------------------------------------- takvimde kapalı aralık (318) --
+   Bakım/arıza/tatil kapatması ve öğle arası. Randevu kutusundan AÇIKÇA farklı
+   görünmeli: kullanıcı "dolu mu, kapalı mı" ayırt edebilmeli. */
+.randevu-takvim td .takvim-kapali {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg,
+    var(--yuz2) 0 5px, var(--yuz) 5px 10px);
+  border: 1px dashed var(--cizgi);
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10.5px; color: var(--soluk); padding: 0 5px;
+  white-space: nowrap; overflow: hidden; pointer-events: none;
+}
+.randevu-takvim td { position: relative }

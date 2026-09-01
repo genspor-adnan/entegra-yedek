@@ -314,6 +314,65 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Radyoloji', menuAd: 'Cihazlar', ic: '🖥️',
     yetkiKodu: 'radyoloji', urunModu: 2,
   },
+  {
+    // KRİTİK BULGU TAKİBİ (318): hasta güvenliği listesi. Satır bildirim
+    //   kaydı değil, kritik işaretli İSTEM - "işaretlendi ama haber
+    //   verilmedi" boşluğu tam da burada görünür.
+    kaynak: 'radyoloji-kritik', rota: 'radyoloji-kritik',
+    baslik: 'Kritik Bulgular', yol: 'Radyoloji › Kritik Bulgular',
+    aksiyonEkrani: 'radyoloji-kritik-liste',
+    // Cift tik ISTEM kartini acar: bu listelerin kendi karti yok, satirin
+    //   kimligi zaten istem_id (kart rotasi radyoloji listesine gider).
+    kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi',
+    gizliKolonlar: ['modalite', 'takipDurum', 'bildirimId', 'hastaId', 'istemId'],
+    cipler: [
+      { ad: 'Bildirilmedi',   filtre: { alan: 'takipDurum', op: 'esit', deger: 1 } },
+      { ad: 'Teyit Bekleyen', filtre: { alan: 'takipDurum', op: 'esit', deger: 2 } },
+      { ad: 'Kapatılan',      filtre: { alan: 'takipDurum', op: 'esit', deger: 4 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2,
+    menuGrup: 'Radyoloji', menuAd: 'Kritik Bulgular', ic: '🚨',
+    yetkiKodu: 'radyoloji', menuSira: 12,
+  },
+  {
+    // KONSÜLTASYON TAKİBİ (318): cevap bekleyen ikinci görüşler. Cevaplanmayan
+    //   konsültasyon raporu da askıda tutar.
+    kaynak: 'radyoloji-konsultasyon', rota: 'radyoloji-konsultasyon',
+    baslik: 'Konsültasyonlar', yol: 'Radyoloji › Konsültasyonlar',
+    aksiyonEkrani: 'radyoloji-konsultasyon-liste',
+    // Cift tik ISTEM kartini acar: bu listelerin kendi karti yok, satirin
+    //   kimligi zaten istem_id (kart rotasi radyoloji listesine gider).
+    kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi',
+    gizliKolonlar: ['tip', 'durum', 'hekimId', 'hastaId', 'istemId'],
+    cipler: [
+      { ad: 'Bekleyen',   filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Cevaplanan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2,
+    menuGrup: 'Radyoloji', menuAd: 'Konsültasyonlar', ic: '🧑‍⚕️',
+    yetkiKodu: 'radyoloji', menuSira: 14,
+  },
+  {
+    // SONUÇ TESLİM TAKİBİ (318): raporu onaylı ama alınmamış işler. "Hastanın
+    //   raporu hazır mı, alındı mı" sorusunun ekranı.
+    kaynak: 'radyoloji-teslim', rota: 'radyoloji-teslim',
+    baslik: 'Sonuç Teslim', yol: 'Radyoloji › Sonuç Teslim',
+    aksiyonEkrani: 'radyoloji-teslim-liste',
+    // Cift tik ISTEM kartini acar: bu listelerin kendi karti yok, satirin
+    //   kimligi zaten istem_id (kart rotasi radyoloji listesine gider).
+    kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi',
+    gizliKolonlar: ['modalite', 'takipDurum', 'hastaId', 'istemId'],
+    cipler: [
+      { ad: 'Teslim Bekleyen', filtre: { alan: 'takipDurum', op: 'esit', deger: 1 } },
+      { ad: 'Teslim Edilen',   filtre: { alan: 'takipDurum', op: 'esit', deger: 2 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2,
+    menuGrup: 'Radyoloji', menuAd: 'Sonuç Teslim', ic: '📦',
+    yetkiKodu: 'radyoloji', menuSira: 16,
+  },
   // CARI grubu ana menude RADYOLOJIDEN SONRA (kullanici).
   {
     // KURUM ICMALI (289): SGK payi tek tek faturalanmaz, donem sonu toplanip

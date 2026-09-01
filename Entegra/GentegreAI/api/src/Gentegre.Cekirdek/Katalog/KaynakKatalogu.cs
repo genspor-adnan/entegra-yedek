@@ -99,6 +99,12 @@ public static partial class KaynakKatalogu
         Ekle(RadyolojiSablon());
         Ekle(RadyolojiProtokol());
         Ekle(RadyolojiCihaz());
+        // TAKIP LISTELERI (318): veri rapor ekranindan giriliyordu ama toplu
+        //   gorulemiyordu - "acik kritik bulgu / cevap bekleyen konsultasyon /
+        //   alinmamis sonuc" sorularinin ekrani.
+        Ekle(RadyolojiKritik());
+        Ekle(RadyolojiKonsultasyon());
+        Ekle(RadyolojiTeslim());
         Ekle(KurumIcmal());
         Ekle(PersonelGorev());
         Ekle(Hizmet());

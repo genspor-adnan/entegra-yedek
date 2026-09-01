@@ -26,18 +26,31 @@ public static class RadyolojiUclari
     public sealed record RaporIstegi(int? SablonId, IReadOnlyList<BolumIstegi>? Bolumler,
                                      IReadOnlyList<AlanIstegi>? Alanlar, short? Kritik);
     public sealed record KritikIstegi(string Bulgu, string BildirilenAd, short Yol,
-                                      string GeriBildirim);
+                                      string GeriBildirim,
+                                      /// <summary>Bildirilen hekim aldigini teyit etti mi (318).</summary>
+                                      short? TeyitAlindi = null,
+                                      /// <summary>Bildirimle birlikte takip kapatilsin mi (318).</summary>
+                                      bool Kapat = false);
 
     /// <summary>SONUC TESLIMI (304): film/CD/basili rapor kime verildi.</summary>
     public sealed record TeslimIstegi(short Tur, string AlanAd, string AlanYakinlik,
-                                      short KimlikDogrulandi, string Aciklama);
+                                      short KimlikDogrulandi, string Aciklama,
+                                      /// <summary>
+                                      /// TESLIM KALEMLERI (318): bir teslimde hastaya ayni anda
+                                      /// rapor + film + CD verilir; tek "tur" kolonu bunu
+                                      /// anlatamiyordu. Tur geriye donuk uyumluluk icin kalir.
+                                      /// </summary>
+                                      short? RaporVerildi = null, short? FilmVerildi = null,
+                                      short? CdVerildi = null, short? DijitalVerildi = null);
 
     /// <summary>
     /// KONSULTASYON (304): ikinci gorus. Istek ve DONEN GORUS ayni ucu kullanir -
     /// gorus dolu gelirse kayit "donmus" sayilir.
     /// </summary>
     public sealed record KonsultasyonIstegi(int? HekimId, int? KurumId, string Gerekce,
-                                            string? Gorus);
+                                            string? Gorus,
+                                            /// <summary>Gorus / ikinci okuma / klinik korelasyon (318).</summary>
+                                            short? Tip = null, short? Acil = null);
 
     /// <summary>islem_log.tablo_id - istem.</summary>
     private const int LogTabloIstem = 940;
@@ -87,6 +100,13 @@ public static class RadyolojiUclari
     /// </summary>
     public sealed record RandevuIstegi(int CihazId, DateTime Baslangic, short? SureDk,
                                        int? TeknikerId, string? Aciklama);
+
+    /// <summary>
+    /// CIHAZ KAPATMA (318): bakim / ariza / tatil. Takvimden secilen aralikla
+    /// acilir; kapatma randevuya kapali saat demektir (kural 316 tetiginde).
+    /// </summary>
+    public sealed record KapatmaIstegi(DateTime Baslangic, DateTime Bitis,
+                                       short? NedenTur, string? Aciklama);
 
     /// <summary>Cekim oncesi kontrol listesi yaniti (310).</summary>
     public sealed record KontrolYaniti(int SoruId, string Yanit);
@@ -492,6 +512,87 @@ public static class RadyolojiUclari
 
             // Radyoloji tetkiki DEGILSE bos doner - randevu karti da uyari cizmez.
             return Results.Ok(satir);
+        });
+
+        // ----------------------------------------------- cihaz kapatmalar ----
+        // TAKVIMDE GORUNURLUK (318): kapatma kurali randevuyu zaten engelliyordu
+        //   (316 tetigi) ama takvim bos gosterdigi icin kullanici o saate
+        //   randevu vermeye calisip hata aliyordu. Takvim bu ucu okuyup
+        //   arali blok cizer. Cihazin ogle arasi da ayni listede doner:
+        //   kullanici acisindan ikisi de "kapali saat".
+        grup.MapGet("/cihaz-kapatma", async (
+            DateTime bas, DateTime bit, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("randevu", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var satirlar = await baglanti.ListeAsync("""
+                select k.id, k.cihaz_id as "cihazId", k.baslangic, k.bitis,
+                       k.neden_tur as "nedenTur",
+                       coalesce(nullif(k.aciklama, ''), coalesce(kd.ad, 'Kapalı')) as aciklama,
+                       coalesce(kd.ad, '') as "nedenAdi",
+                       coalesce(c.ad, '') as cihaz
+                  from public.radyoloji_cihaz_kapatma k
+                  join public.radyoloji_cihaz c on c.id = k.cihaz_id
+                  left join public.kod_liste kl on kl.kod = 'rad.kapatma'
+                  left join public.kod_deger kd
+                         on kd.liste_id = kl.id and kd.deger = k.neden_tur
+                 where k.baslangic < @p1 and k.bitis > @p0
+                   and (@p2::int is null or c.sube_id = @p2)
+                 order by k.cihaz_id, k.baslangic
+                """, null, [bas, bit, baglam.SubeId], Satir, iptal);
+
+            // Cihazin OGLE ARASI: ayri tablo degil cihaz ayari - takvimde ayni
+            //   bicimde cizilsin diye burada aralik satirina cevrilir.
+            var cihazlar = await baglanti.ListeAsync("""
+                select c.id, c.ad, c.ogle_baslangic as "ogleBaslangic",
+                       c.ogle_bitis as "ogleBitis"
+                  from public.radyoloji_cihaz c
+                 where coalesce(c.durum, 1) = 1 and c.randevu_verilir = 1
+                   and c.ogle_baslangic <> '' and c.ogle_bitis <> ''
+                   and (@p0::int is null or c.sube_id = @p0)
+                """, null, [baglam.SubeId], Satir, iptal);
+
+            return Results.Ok(new { kapatmalar = satirlar, ogleArasi = cihazlar });
+        });
+
+        // KAPATMA EKLEME (318): takvimden "Cihazı Kapat". Aralıga düsen
+        //   randevular SAYILIR ve kullaniciya bildirilir - tetik yalniz
+        //   yeni/degisen randevuyu denetler, mevcutlar kapali saatte kalir.
+        grup.MapPost("/cihaz/{id:int}/kapatma", async (
+            int id, KapatmaIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Degistir);
+
+            if (istek.Bitis <= istek.Baslangic)
+                throw GentegreHatasi.IsKurali("Kapatma bitişi başlangıçtan sonra olmalı.");
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var etkilenen = await baglanti.TekDegerAsync<int>("""
+                select count(*) from public.randevu r
+                 where r.cihaz_id = @p0
+                   and coalesce(r.durum, 1) not in (3, 4)
+                   and r.baslangic < @p2
+                   and (r.baslangic + make_interval(mins => greatest(coalesce(r.sure_dk, 0), 1)))
+                       > @p1
+                """, null, [id, istek.Baslangic, istek.Bitis], iptal);
+
+            var yeni = await baglanti.TekDegerAsync<int>("""
+                insert into public.radyoloji_cihaz_kapatma
+                       (cihaz_id, baslangic, bitis, neden_tur, aciklama, ekleyen)
+                values (@p0, @p1, @p2, @p3, @p4, @p5)
+                returning id
+                """, null,
+                [id, istek.Baslangic, istek.Bitis, istek.NedenTur ?? (short)1,
+                 istek.Aciklama ?? "", baglam.KullaniciId], iptal);
+
+            return Results.Ok(new { id = yeni, etkilenenRandevu = etkilenen });
         });
 
         // ------------------------------------------- randevu bekleyenler ----
@@ -1170,18 +1271,50 @@ public static class RadyolojiUclari
             await baglanti.CalistirAsync("""
                 insert into public.radyoloji_kritik_bulgu
                        (istem_id, rapor_id, bulgu, bildiren_id, bildirilen_ad, yol,
-                        geri_bildirim, ekleyen)
+                        geri_bildirim, ekleyen, teyit_alindi,
+                        kapatan_id, kapatma_zamani)
                 select @p0,
                        (select id from public.radyoloji_rapor
                          where istem_id = @p0 and ust_rapor_id is null),
-                       @p1, @p2, @p3, @p4, @p5, @p2
+                       @p1, @p2, @p3, @p4, @p5, @p2, coalesce(@p6, 0),
+                       case when @p7 then @p2 end,
+                       case when @p7 then now()::timestamp end
                 """, islem, [id, istek.Bulgu ?? "", baglam.KullaniciId,
-                             istek.BildirilenAd ?? "", istek.Yol, istek.GeriBildirim ?? ""], iptal);
+                             istek.BildirilenAd ?? "", istek.Yol, istek.GeriBildirim ?? "",
+                             istek.TeyitAlindi, istek.Kapat], iptal);
 
             await baglanti.CalistirAsync(
                 "update public.radyoloji_istem set kritik = 1 where id = @p0", islem, [id], iptal);
 
             await islem.CommitAsync(iptal);
+            return Results.Ok(new { tamam = true });
+        });
+
+        // KRITIK BULGU TAKIBINI KAPAT (318): bildirim yapildi ve karsi taraf
+        //   teyit etti - takip listesinden duser. Bildirim kaydi yoksa
+        //   kapatilacak bir sey de yok: once bildirim yazilmali.
+        grup.MapPost("/istem/{id:int}/kritik-kapat", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("rad.rapor_yaz");
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var etkilenen = await baglanti.TekDegerAsync<int?>("""
+                update public.radyoloji_kritik_bulgu
+                   set teyit_alindi = 1, kapatan_id = @p1,
+                       kapatma_zamani = now()::timestamp
+                 where id = (select max(k.id) from public.radyoloji_kritik_bulgu k
+                              where k.istem_id = @p0)
+                returning id
+                """, null, [id, baglam.KullaniciId], iptal);
+
+            if (etkilenen is null)
+                throw GentegreHatasi.IsKurali(
+                    "Bu istemde bildirim kaydı yok - önce kritik bulgu bildirimini kaydedin.");
+
             return Results.Ok(new { tamam = true });
         });
 
@@ -1212,11 +1345,16 @@ public static class RadyolojiUclari
             await baglanti.CalistirAsync("""
                 insert into public.radyoloji_teslim
                     (istem_id, rapor_id, tur, teslim_zamani, teslim_eden_id,
-                     alan_ad, alan_yakinlik, kimlik_dogrulandi, aciklama, ekleyen)
-                values (@p0, @p1, @p2, now()::timestamp, @p3, @p4, @p5, @p6, @p7, @p3)
+                     alan_ad, alan_yakinlik, kimlik_dogrulandi, aciklama, ekleyen,
+                     rapor_verildi, film_verildi, cd_verildi, dijital_verildi)
+                values (@p0, @p1, @p2, now()::timestamp, @p3, @p4, @p5, @p6, @p7, @p3,
+                        coalesce(@p8, 0), coalesce(@p9, 0),
+                        coalesce(@p10, 0), coalesce(@p11, 0))
                 """, null,
                 [id, raporId, istek.Tur, baglam.KullaniciId, istek.AlanAd,
-                 istek.AlanYakinlik ?? "", istek.KimlikDogrulandi, istek.Aciklama ?? ""], iptal);
+                 istek.AlanYakinlik ?? "", istek.KimlikDogrulandi, istek.Aciklama ?? "",
+                 istek.RaporVerildi, istek.FilmVerildi,
+                 istek.CdVerildi, istek.DijitalVerildi], iptal);
 
             return Results.Ok(new { tamam = true });
         });
@@ -1277,12 +1415,13 @@ public static class RadyolojiUclari
             var yeni = await baglanti.TekDegerAsync<int>("""
                 insert into public.radyoloji_konsultasyon
                     (istem_id, rapor_id, hekim_id, kurum_id, durum,
-                     gonderim_zamani, gerekce, ekleyen)
-                values (@p0, @p1, @p2, @p3, 1, now()::timestamp, @p4, @p5)
+                     gonderim_zamani, gerekce, ekleyen, tip, acil)
+                values (@p0, @p1, @p2, @p3, 1, now()::timestamp, @p4, @p5,
+                        coalesce(@p6, 1), coalesce(@p7, 0))
                 returning id
                 """, null,
                 [id, raporId, istek.HekimId, istek.KurumId, istek.Gerekce,
-                 baglam.KullaniciId], iptal);
+                 baglam.KullaniciId, istek.Tip, istek.Acil], iptal);
 
             return Results.Ok(new { id = yeni });
         });

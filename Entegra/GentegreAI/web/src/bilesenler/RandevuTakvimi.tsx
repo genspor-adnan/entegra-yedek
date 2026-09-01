@@ -56,7 +56,7 @@ function haftaBasi(t: Date) {
 
 export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                                  bolum, hekimId, hekimler = [], cihazlar = [],
-                                 yanPanel, onBirak }: {
+                                 yanPanel, onBirak, onKapatmaIste }: {
   ayarlar?: Partial<Ayarlar>;
   /** Ust seritteki bolum/hekim suzgeci (251) - takvim de ayni secimi gosterir. */
   bolum?: number;
@@ -95,6 +95,12 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
    * Yük ham metin olarak geçer - takvim içeriğini çözmez, panelin işidir.
    */
   onBirak?(veri: string, baslangic: string, cihazId?: number): void;
+  /**
+   * CIHAZI KAPAT (318): takvimde isaretlenen aralik bakim/ariza/tatil olarak
+   * kapatilir. Buton yalniz CIHAZ gorunumunde ve bir aralik secildiginde
+   * etkindir - kapatma her zaman bir cihaza ve bir araliga aittir.
+   */
+  onKapatmaIste?(cihazId: number, baslangic: string, bitis: string): void;
   /** Dışarıdan tazeleme sayacı (kayıt sonrası). */
   yenile?: number;
 }) {
@@ -189,6 +195,56 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     });
   }, [gorunum, gunler, gun, hekimler, hekimId, cihazlar]);
 
+  /**
+   * KAPALI ARALIKLAR (318): cihazin bakim/ariza/tatil kapatmalari ve ogle
+   * arasi. Kural veritabani tetiginde (316) - burada YALNIZ gorunurluk var;
+   * kullanici bos gordugu saate randevu vermeye calisip hata almasin.
+   */
+  const [kapatmalar, setKapatmalar] = useState<
+    { cihazId: number; bas: number; bit: number; gun: string; metin: string }[]>([]);
+
+  const kapatmaYukle = useCallback(async () => {
+    if (gunler.length === 0 || cihazlar.length === 0) { setKapatmalar([]); return }
+    try {
+      const y = await api.radyolojiCihazKapatma(
+        `${gunler[0]}T00:00`, `${gunler[gunler.length - 1]}T23:59`);
+      const liste: { cihazId: number; bas: number; bit: number; gun: string; metin: string }[] = [];
+      y.kapatmalar.forEach(k => {
+        const b = String(k.baslangic ?? ''), s = String(k.bitis ?? '');
+        // Cok gunluk kapatma her gune ayri blok olarak dusurulur: takvim
+        //   gun bazli cizer, aralik gunun disina tasarsa gun sinirina kirpilir.
+        gunler.forEach(g => {
+          if (b.slice(0, 10) > g || s.slice(0, 10) < g) return;
+          liste.push({
+            cihazId: Number(k.cihazId),
+            bas: b.slice(0, 10) === g ? dk(b.slice(11, 16)) : 0,
+            bit: s.slice(0, 10) === g ? dk(s.slice(11, 16)) : 24 * 60,
+            gun: g,
+            metin: String(k.aciklama ?? 'Kapalı'),
+          });
+        });
+      });
+      y.ogleArasi.forEach(c => {
+        const b = String(c.ogleBaslangic ?? ''), s = String(c.ogleBitis ?? '');
+        if (!b || !s) return;
+        gunler.forEach(g => liste.push({
+          cihazId: Number(c.id), bas: dk(b), bit: dk(s), gun: g, metin: 'Öğle arası',
+        }));
+      });
+      setKapatmalar(liste);
+    } catch { /* kapatma okunamazsa takvim eskisi gibi calisir */ }
+  }, [gunler, cihazlar.length]);
+
+  useEffect(() => { void kapatmaYukle() }, [kapatmaYukle, yenile]);
+
+  /** Hucre kapali mi (318): sutunun cihazinda o slotu ortenkapatma. */
+  const kapali = (sutun: Sutun, slot: number) => {
+    if (sutun.cihaz === undefined) return undefined;
+    const adim = Math.max(5, Number(ayar.slotDk) || 15);
+    return kapatmalar.find(k => k.cihazId === sutun.cihaz && k.gun === sutun.gun
+                                && k.bas < slot + adim && k.bit > slot);
+  };
+
   /** sutun + slot -> o aralikta baslayan randevular. */
   const hucre = (sutun: Sutun, slot: number) => {
     const adim = Math.max(5, Number(ayar.slotDk) || 15);
@@ -248,7 +304,8 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
    */
   const [birakHedefi, setBirakHedefi] = useState<string | null>(null);
   const birakilabilir = (s: Sutun, slot: number) =>
-    !!onBirak && s.cihaz !== undefined && hucre(s, slot).length === 0;
+    !!onBirak && s.cihaz !== undefined && hucre(s, slot).length === 0
+    && !kapali(s, slot);
 
   const kaydir = (yon: number) => {
     const t = new Date(gun);
@@ -281,6 +338,22 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
         <button type="button" className="d" onClick={() => setGun(isoGun(new Date()))}>
           Bugün
         </button>
+        {/* CIHAZI KAPAT (318): once aralik isaretlenir, sonra buton. */}
+        {onKapatmaIste && gorunum === 'cihaz' && (
+          <button type="button" className="d"
+                  disabled={!secim || secim.cihaz === undefined || secim.bas === secim.bit}
+                  title={secim && secim.cihaz !== undefined && secim.bas !== secim.bit
+                         ? 'İşaretli aralığı bakım/arıza/tatil olarak kapat'
+                         : 'Önce cihaz sütununda bir saat aralığı işaretleyin'}
+                  onClick={() => {
+                    if (!secim || secim.cihaz === undefined) return;
+                    const adim = Math.max(5, Number(ayar.slotDk) || 15);
+                    const bas = Math.min(secim.bas, secim.bit);
+                    const bit = Math.max(secim.bas, secim.bit) + adim;
+                    onKapatmaIste(secim.cihaz, `${secim.gun}T${saatMetni(bas)}`,
+                                  `${secim.gun}T${saatMetni(bit)}`);
+                  }}>🔒 Cihazı Kapat</button>
+        )}
         {yukleniyor && <span style={{ fontSize: 11, opacity: .7 }}>Yükleniyor…</span>}
       </div>
 
@@ -326,13 +399,20 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                   const kayitlar = hucre(sut, slot);
                   const secili = araliktaMi(sut, slot);
                   const hedef = birakHedefi === sut.anahtar + slot;
+                  const kapaliBlok = kapali(sut, slot);
+                  // Blogun ILK sluttunda metin yazilir, devaminda bos tarama:
+                  //   her satirda "Bakım" tekrar etmesi takvimi okunmaz yapardi.
+                  const kapatmaBasi = kapaliBlok
+                    && kapaliBlok.bas >= slot
+                    && kapaliBlok.bas < slot + Math.max(5, Number(ayar.slotDk) || 15);
                   return (
                     <td key={sut.anahtar + slot}
                         className={hedef ? 'birak-hedef' : undefined}
                         style={{ cursor: 'pointer', verticalAlign: 'top',
                                  background: secili ? 'var(--sec, var(--mor2))' : undefined,
                                  userSelect: 'none' }}
-                        onMouseDown={() => kayitlar.length === 0 && secimBasla(sut, slot)}
+                        onMouseDown={() => kayitlar.length === 0 && !kapaliBlok
+                                           && secimBasla(sut, slot)}
                         onMouseEnter={() => secimGenislet(sut, slot)}
                         onMouseUp={() => secimBitir(sut, slot)}
                         onDragOver={e => {
@@ -350,6 +430,11 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                           e.preventDefault();
                           onBirak?.(veri, `${sut.gun}T${saatMetni(slot)}`, sut.cihaz);
                         }}>
+                      {kapaliBlok && (
+                        <div className="takvim-kapali" title={kapaliBlok.metin}>
+                          {kapatmaBasi && <span>🔒 {kapaliBlok.metin}</span>}
+                        </div>
+                      )}
                       {kayitlar.map(r => (
                         <div key={String(r.id)}
                              onClick={e => { e.stopPropagation(); onAc(Number(r.id)) }}

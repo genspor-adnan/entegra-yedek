@@ -239,4 +239,182 @@ public static partial class KaynakKatalogu
             new("varsayilan", "s.varsayilan", "mantik", "Varsayilan", Hizalama: "orta"),
             new("durum",      "s.durum", "mantik", "Aktif", Hizalama: "orta"),
         });
+
+    /// <summary>
+    /// KRİTİK BULGU TAKİBİ (318) - hasta güvenliği listesi.
+    ///
+    /// Satır bildirim kaydı DEĞİL, kritik işaretli İSTEMDİR: listenin var oluş
+    /// sebebi "işaretlendi ama haber verilmedi" boşluğunu göstermek. Geçen süre
+    /// rapor/çekim anından bildirime (yoksa şimdiye) kadar sayılır.
+    /// </summary>
+    private static KaynakTanimi RadyolojiKritik() => new(
+        Ad: "radyoloji-kritik",
+        YetkiKodu: "radyoloji",
+        Kaynak: "public.v_radyoloji_kritik_takip k",
+        SubeKolonu: "k.sube_id",
+        // Once BILDIRILMEYEN, sonra en uzun bekleyen: listenin ilk satiri her
+        //   zaman "en acil is" olmali.
+        VarsayilanSirala: "k.takip_durum, k.gecen_dk desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",           "k.istem_id",     "sayi",  "Id", Varsayilan: false),
+            new("istemId",      "k.istem_id",     "sayi",  "İstem", Varsayilan: false),
+            new("modaliteAdi",
+                "case k.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' " +
+                "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' " +
+                "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                                                  "metin", "Mod.", Hizalama: "orta",
+                                                  Bicim: "rozet", Genislik: 80,
+                                                  Filtrelenebilir: false),
+            new("modalite",     "k.modalite",     "kod",   "Modalite Kodu", Varsayilan: false),
+            new("accessionNo",  "k.accession_no", "metin", "Accession", Genislik: 150),
+            new("hasta",        "k.hasta",        "metin", "Hasta", Genislik: 190),
+            new("hastaId",      "k.hasta_id",     "sayi",  "Hasta Id", Varsayilan: false),
+            new("tetkik",       "k.tetkik",       "metin", "Tetkik", Genislik: 230),
+            new("bulgu",        "k.bulgu",        "metin", "Kritik Bulgu", Genislik: 300),
+            new("durumAdi",
+                "case k.takip_durum when 1 then 'Bildirilmedi' when 2 then 'Teyit bekliyor' " +
+                "when 3 then 'Teyitli' else 'Kapatıldı' end",
+                                                  "metin", "Durum", Hizalama: "orta",
+                                                  Bicim: "rozet", Genislik: 120,
+                                                  Filtrelenebilir: false),
+            new("takipDurum",   "k.takip_durum",  "sayi",  "Durum Kodu", Varsayilan: false),
+            new("bildirilen",   "k.bildirilen_ad","metin", "Bildirilen Hekim", Genislik: 200),
+            new("bildiren",     "k.bildiren",     "metin", "Bulan Radyolog", Genislik: 170),
+            new("yolAdi",
+                "case k.yol when 1 then 'Telefon' when 2 then 'Yüz yüze' " +
+                "when 3 then 'Mesaj / sistem' else '' end",
+                                                  "metin", "Yol", Hizalama: "orta",
+                                                  Genislik: 110, Filtrelenebilir: false),
+            new("bildirimZamani","k.bildirim_zamani", "zaman", "Bildirim", Genislik: 140),
+            new("teyitAlindi",  "k.teyit_alindi", "mantik", "Teyit", Hizalama: "orta",
+                                                  Genislik: 80),
+            new("gecenDk",      "k.gecen_dk",     "sayi",  "Geçen (dk)", Hizalama: "sag",
+                                                  Genislik: 100),
+            new("cekimTarihi",  "k.cekim_tarihi", "zaman", "Çekim", Varsayilan: false),
+            new("onayTarihi",   "k.onay_tarihi",  "zaman", "Rapor Onayı", Varsayilan: false),
+            new("kapatmaZamani","k.kapatma_zamani","zaman","Kapatma", Varsayilan: false),
+            new("bildirimId",   "k.bildirim_id",  "sayi",  "Bildirim Id", Varsayilan: false),
+        });
+
+    /// <summary>
+    /// KONSÜLTASYON TAKİBİ (318) - istenen ikinci görüşlerin listesi.
+    ///
+    /// İki yönlü okunur: "bana gelenler" (cevap yazmam gereken) ve "benim
+    /// istediklerim" (beklediğim). Cevaplanmayan konsültasyon raporu da askıda
+    /// tutar - bekleme süresi bu yüzden kolon.
+    /// </summary>
+    private static KaynakTanimi RadyolojiKonsultasyon() => new(
+        Ad: "radyoloji-konsultasyon",
+        YetkiKodu: "radyoloji",
+        Kaynak: "public.radyoloji_konsultasyon ks " +
+                "join public.radyoloji_istem i on i.id = ks.istem_id " +
+                "left join public.taraf h on h.id = i.hasta_id " +
+                "left join public.hizmet hz on hz.id = i.hizmet_id " +
+                "left join public.taraf hk on hk.id = ks.hekim_id " +
+                "left join public.taraf ku on ku.id = ks.kurum_id " +
+                "left join public.taraf iste on iste.id = ks.ekleyen",
+        SubeKolonu: "i.sube_id",
+        VarsayilanSirala: "ks.durum, ks.gonderim_zamani",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",           "ks.id",          "sayi",  "Id", Varsayilan: false),
+            new("istemId",      "ks.istem_id",    "sayi",  "İstem", Varsayilan: false),
+            new("gonderimZamani","ks.gonderim_zamani", "zaman", "İstek", Genislik: 140),
+            new("modaliteAdi",
+                "case i.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' " +
+                "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' " +
+                "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                                                  "metin", "Mod.", Hizalama: "orta",
+                                                  Bicim: "rozet", Genislik: 80,
+                                                  Filtrelenebilir: false),
+            new("accessionNo",  "i.accession_no", "metin", "Accession", Genislik: 150),
+            new("hasta",        "coalesce(h.unvan, '')", "metin", "Hasta", Genislik: 180),
+            new("hastaId",      "i.hasta_id",     "sayi",  "Hasta Id", Varsayilan: false),
+            new("tetkik",       "coalesce(hz.ad, '')", "metin", "Tetkik", Genislik: 210),
+            new("isteyen",      "coalesce(iste.unvan, '')", "metin", "İsteyen", Genislik: 160),
+            new("istenen",
+                "coalesce(nullif(hk.unvan, ''), nullif(ku.unvan, ''), '')",
+                                                  "metin", "İstenen", Genislik: 180),
+            new("hekimId",      "ks.hekim_id",    "sayi",  "Hekim Id", Varsayilan: false),
+            new("tipAdi",
+                "case ks.tip when 2 then 'İkinci okuma' when 3 then 'Klinik korelasyon' " +
+                "else 'Görüş' end",               "metin", "Tip", Hizalama: "orta",
+                                                  Genislik: 130, Filtrelenebilir: false),
+            new("tip",          "ks.tip",         "kod",   "Tip Kodu", Varsayilan: false),
+            new("gerekce",      "ks.gerekce",     "metin", "Soru / Gerekçe", Genislik: 280),
+            new("gorus",        "ks.gorus",       "metin", "Cevap", Genislik: 280),
+            new("durumAdi",
+                "case ks.durum when 2 then 'Cevaplandı' when 0 then 'İptal' " +
+                "else 'Bekliyor' end",            "metin", "Durum", Hizalama: "orta",
+                                                  Bicim: "rozet", Genislik: 110,
+                                                  Filtrelenebilir: false),
+            new("durum",        "ks.durum",       "sayi",  "Durum Kodu", Varsayilan: false),
+            new("acil",         "ks.acil",        "mantik","Acil", Hizalama: "orta", Genislik: 70),
+            new("donusZamani",  "ks.donus_zamani","zaman", "Cevap Zamanı", Genislik: 140),
+            // BEKLEME: cevaplanmadiysa SIMDIYE kadar - listenin sirasi bu.
+            new("beklemeDk",
+                "(extract(epoch from (coalesce(ks.donus_zamani, now()::timestamp) " +
+                " - ks.gonderim_zamani)) / 60)::int",
+                                                  "sayi",  "Bekleme (dk)", Hizalama: "sag",
+                                                  Genislik: 110, Filtrelenebilir: false),
+        });
+
+    /// <summary>
+    /// SONUÇ TESLİM TAKİBİ (318) - raporu onaylı ama teslim edilmemiş işler.
+    ///
+    /// Satır teslim kaydı değil İSTEMDİR: teslim satırı yoksa "hazır" olarak
+    /// listede durur. "Hastanın raporu alındı mı" sorusu bugün ancak istem
+    /// istem bakılarak cevaplanabiliyordu.
+    /// </summary>
+    private static KaynakTanimi RadyolojiTeslim() => new(
+        Ad: "radyoloji-teslim",
+        YetkiKodu: "radyoloji",
+        Kaynak: "public.v_radyoloji_teslim_takip t",
+        SubeKolonu: "t.sube_id",
+        VarsayilanSirala: "t.takip_durum, t.bekleme_dk desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",           "t.istem_id",     "sayi",  "Id", Varsayilan: false),
+            new("istemId",      "t.istem_id",     "sayi",  "İstem", Varsayilan: false),
+            new("onayTarihi",   "t.onay_tarihi",  "zaman", "Rapor Onayı", Genislik: 140),
+            new("modaliteAdi",
+                "case t.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' " +
+                "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' " +
+                "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                                                  "metin", "Mod.", Hizalama: "orta",
+                                                  Bicim: "rozet", Genislik: 80,
+                                                  Filtrelenebilir: false),
+            new("modalite",     "t.modalite",     "kod",   "Modalite Kodu", Varsayilan: false),
+            new("accessionNo",  "t.accession_no", "metin", "Accession", Genislik: 150),
+            new("hasta",        "t.hasta",        "metin", "Hasta", Genislik: 190),
+            new("hastaId",      "t.hasta_id",     "sayi",  "Hasta Id", Varsayilan: false),
+            new("telefon",      "t.telefon",      "metin", "Telefon", Genislik: 130),
+            new("tetkik",       "t.tetkik",       "metin", "Tetkik", Genislik: 230),
+            new("radyolog",     "t.radyolog",     "metin", "Radyolog", Genislik: 160),
+            new("durumAdi",
+                "case when t.takip_durum = 1 then 'Hazır' else 'Teslim edildi' end",
+                                                  "metin", "Durum", Hizalama: "orta",
+                                                  Bicim: "rozet", Genislik: 120,
+                                                  Filtrelenebilir: false),
+            new("takipDurum",   "t.takip_durum",  "sayi",  "Durum Kodu", Varsayilan: false),
+            // Teslim edilen KALEMLER tek okunur metin: dort ayri evet/hayir
+            //   kolonu listede yer harcar, "Rapor + Film" bir bakista anlasilir.
+            new("kalemler",
+                "trim(both ' +' from " +
+                " case when t.rapor_verildi = 1 then 'Rapor + ' else '' end || " +
+                " case when t.film_verildi = 1 then 'Film + ' else '' end || " +
+                " case when t.cd_verildi = 1 then 'CD + ' else '' end || " +
+                " case when t.dijital_verildi = 1 then 'Dijital + ' else '' end)",
+                                                  "metin", "Teslim Kalemleri", Genislik: 190,
+                                                  Filtrelenebilir: false),
+            new("cdIstendi",    "t.cd_istendi",   "mantik","CD İstendi", Hizalama: "orta",
+                                                  Genislik: 100),
+            new("alanAd",       "t.alan_ad",      "metin", "Teslim Alan", Genislik: 180),
+            new("alanYakinlik", "t.alan_yakinlik","metin", "Yakınlık", Genislik: 110),
+            new("teslimEden",   "t.teslim_eden",  "metin", "Teslim Eden", Genislik: 160),
+            new("teslimZamani", "t.teslim_zamani","zaman", "Teslim", Genislik: 140),
+            new("beklemeDk",    "t.bekleme_dk",   "sayi",  "Bekleme (dk)", Hizalama: "sag",
+                                                  Genislik: 110),
+        });
 }

@@ -148,6 +148,44 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "rad.istem_iptal", KayitGerekir: true, Sira: 50),
             },
 
+            // KRITIK BULGU TAKIBI (318): rapor ekraninda isaretlenen bulgunun
+            //   HABER VERILDIGININ takibi. Bildirim ve kapatma ayri islemdir:
+            //   kapatma karsi tarafin teyidini ifade eder.
+            ["radyoloji-kritik-liste"] = new AksiyonTanimi[]
+            {
+                new("radyoloji.kritik-bildir", "📞 Bildirimi Kaydet", "radyoloji",
+                    AksiyonYetkisi: "rad.rapor_yaz", KayitGerekir: true, Sira: 10),
+                new("radyoloji.kritik-kapat",  "✔ Kapat (teyit alındı)", "radyoloji",
+                    AksiyonYetkisi: "rad.rapor_yaz", KayitGerekir: true, Sira: 20),
+                new("radyoloji.istem-ac",      "👁 İstemi Aç", "radyoloji",
+                    KaynakKodu: "radyoloji", Islem: Islem.Gor, KayitGerekir: true, Sira: 30),
+                new("radyoloji.rapor",         "📄 Raporu Aç", "radyoloji",
+                    AksiyonYetkisi: "rad.rapor_yaz", KayitGerekir: true, Sira: 40),
+            },
+
+            // KONSULTASYON TAKIBI (318): istenen ikinci gorusler.
+            ["radyoloji-konsultasyon-liste"] = new AksiyonTanimi[]
+            {
+                new("radyoloji.konsultasyon-cevap", "✎ Cevabı Yaz", "radyoloji",
+                    AksiyonYetkisi: "rad.rapor_yaz", KayitGerekir: true, Sira: 10),
+                new("radyoloji.istem-ac",           "👁 İstemi Aç", "radyoloji",
+                    KaynakKodu: "radyoloji", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                new("radyoloji.rapor",              "📄 Raporu Aç", "radyoloji",
+                    AksiyonYetkisi: "rad.rapor_yaz", KayitGerekir: true, Sira: 30),
+            },
+
+            // SONUC TESLIM TAKIBI (318): raporu onayli ama teslim edilmemis
+            //   isler. Teslim modali calisma listesindekiyle AYNI.
+            ["radyoloji-teslim-liste"] = new AksiyonTanimi[]
+            {
+                new("radyoloji.teslim",   "📦 Teslim Et", "radyoloji",
+                    AksiyonYetkisi: "rad.teslim", KayitGerekir: true, Sira: 10),
+                new("radyoloji.istem-ac", "👁 İstemi Aç", "radyoloji",
+                    KaynakKodu: "radyoloji", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                new("radyoloji.rapor",    "📄 Raporu Aç", "radyoloji",
+                    AksiyonYetkisi: "rad.rapor_yaz", KayitGerekir: true, Sira: 30),
+            },
+
             // RANDEVU (243): liste + takvim gorunumu ayni ekranda.
             ["randevu-liste"] = new AksiyonTanimi[]
             {

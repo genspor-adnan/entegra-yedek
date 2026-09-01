@@ -17,6 +17,10 @@ import { TeslimModali } from '../bilesenler/radyoloji/TeslimModali';
 import { RandevuModali } from '../bilesenler/radyoloji/RandevuModali';
 import { RandevuBekleyenPanel, type BekleyenIstem }
   from '../bilesenler/radyoloji/RandevuBekleyenPanel';
+import { KritikBildirimModali } from '../bilesenler/radyoloji/KritikBildirimModali';
+import { KonsultasyonCevapModali }
+  from '../bilesenler/radyoloji/KonsultasyonCevapModali';
+import { CihazKapatmaModali } from '../bilesenler/radyoloji/CihazKapatmaModali';
 import { TarafArama } from '../bilesenler/TarafArama';
 import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
 import { UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
@@ -104,6 +108,17 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [bekleyenSecili, setBekleyenSecili] = useState<BekleyenIstem | null>(null);
   const [teslimModali, setTeslimModali] = useState<
     { istemId: number; accessionNo: string } | null>(null);
+  /** Kritik bulgu bildirimi (318) - takip listesinden acilir. */
+  const [kritikModali, setKritikModali] = useState<
+    { istemId: number; accessionNo: string; hasta: string; tetkik: string;
+      bulgu: string; bildirilenAd: string } | null>(null);
+  /** Takvimden cihaz kapatma (318): isaretli aralik + cihaz. */
+  const [kapatmaModali, setKapatmaModali] = useState<
+    { cihazId: number; cihazAdi: string; baslangic: string; bitis: string } | null>(null);
+  /** Konsultasyon cevabi (318). */
+  const [konsultasyonModali, setKonsultasyonModali] = useState<
+    { istemId: number; konsultasyonId: number; accessionNo: string; hasta: string;
+      tetkik: string; soru: string; gorus: string } | null>(null);
   // Yeni kart EKLENINCE (duzenlemede degil) grid "Son Aranan"a gecsin - kullanici
   //   az once ekledigi kaydi listede otomatik en ustte gorsun.
   const [odaklaSonEklenen, setOdaklaSonEklenen] = useState(0);
@@ -929,9 +944,61 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         return;
       }
 
+      // KRITIK BULGU TAKIBI (318): bildirim ve kapatma AYRI islemdir -
+      //   kapatma "karsi taraf teyit etti" demektir, bildirim yoksa kapatilacak
+      //   bir sey de yoktur (sunucu da reddeder).
+      if (kod === 'radyoloji.kritik-bildir') {
+        if (!satir) return;
+        setKritikModali({
+          istemId: Number(satir.istemId ?? satir.id),
+          accessionNo: String(satir.accessionNo ?? ''),
+          hasta: String(satir.hasta ?? ''),
+          tetkik: String(satir.tetkik ?? ''),
+          bulgu: String(satir.bulgu ?? ''),
+          bildirilenAd: String(satir.bildirilen ?? ''),
+        });
+        return;
+      }
+
+      if (kod === 'radyoloji.kritik-kapat') {
+        if (!satir) return;
+        if (!await onay('Kritik bulgu takibi kapatılsın mı? Kapatma, bildirimin '
+                        + 'yapıldığı ve karşı tarafın teyit ettiği anlamına gelir.'))
+          return;
+        await guvenli(async () => {
+          await api.radyolojiKritikKapat(Number(satir.istemId ?? satir.id));
+          mesaj('Kritik bulgu takibi kapatıldı.');
+          setYenile(t => t + 1);
+        });
+        return;
+      }
+
+      // KONSULTASYON CEVABI (318): cevabi cogunlukla BASKA biri yazar - istek
+      //   rapor ekranindan, cevap bu listeden gelir.
+      if (kod === 'radyoloji.konsultasyon-cevap') {
+        if (!satir) return;
+        setKonsultasyonModali({
+          istemId: Number(satir.istemId),
+          konsultasyonId: Number(satir.id),
+          accessionNo: String(satir.accessionNo ?? ''),
+          hasta: String(satir.hasta ?? ''),
+          tetkik: String(satir.tetkik ?? ''),
+          soru: String(satir.gerekce ?? ''),
+          gorus: String(satir.gorus ?? ''),
+        });
+        return;
+      }
+
+      // Takip listelerinde satirin kimligi ISTEM'dir: istemi ac.
+      if (kod === 'radyoloji.istem-ac') {
+        if (!satir) return;
+        git(`/radyoloji/${Number(satir.istemId ?? satir.id)}`);
+        return;
+      }
+
       if (kod === 'radyoloji.teslim') {
         if (!satir) return;
-        setTeslimModali({ istemId: Number(satir.id),
+        setTeslimModali({ istemId: Number(satir.istemId ?? satir.id),
                           accessionNo: String(satir.accessionNo ?? '') });
         return;
       }
@@ -1298,6 +1365,10 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
                 })}
               />
             ) : undefined}
+            onKapatmaIste={(cihazId, bas, bit) => setKapatmaModali({
+              cihazId, baslangic: bas, bitis: bit,
+              cihazAdi: cihazSecenekleri.find(c => c.id === cihazId)?.ad ?? '',
+            })}
             onBirak={(veri, bas, cih) => {
               // Yuk istemin kendisi (panel JSON yazar) - secili satira bakmayiz.
               try { void bekleyeneRandevuVer(JSON.parse(veri) as BekleyenIstem, bas, cih) }
@@ -1461,6 +1532,44 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         }}
       />
     )}
+    {kapatmaModali && (
+      <CihazKapatmaModali
+        cihazId={kapatmaModali.cihazId}
+        cihazAdi={kapatmaModali.cihazAdi}
+        baslangic={kapatmaModali.baslangic}
+        bitis={kapatmaModali.bitis}
+        onKapat={() => setKapatmaModali(null)}
+        onTamam={() => setYenile(t => t + 1)}
+      />
+    )}
+
+    {kritikModali && (
+      <KritikBildirimModali
+        istemId={kritikModali.istemId}
+        accessionNo={kritikModali.accessionNo}
+        hasta={kritikModali.hasta}
+        tetkik={kritikModali.tetkik}
+        bulgu={kritikModali.bulgu}
+        bildirilenAd={kritikModali.bildirilenAd}
+        onKapat={() => setKritikModali(null)}
+        onTamam={() => setYenile(t => t + 1)}
+      />
+    )}
+
+    {konsultasyonModali && (
+      <KonsultasyonCevapModali
+        istemId={konsultasyonModali.istemId}
+        konsultasyonId={konsultasyonModali.konsultasyonId}
+        accessionNo={konsultasyonModali.accessionNo}
+        hasta={konsultasyonModali.hasta}
+        tetkik={konsultasyonModali.tetkik}
+        soru={konsultasyonModali.soru}
+        mevcutGorus={konsultasyonModali.gorus}
+        onKapat={() => setKonsultasyonModali(null)}
+        onTamam={() => setYenile(t => t + 1)}
+      />
+    )}
+
     {randevuModali && (
       <RandevuModali
         istemId={randevuModali.istemId}

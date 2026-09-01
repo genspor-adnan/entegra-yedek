@@ -642,6 +642,27 @@ export const api = {
             hazirlikMetni: string } | null>(
       `/api/radyoloji/tetkik-bilgi/${hizmetId}`),
 
+  /**
+   * Cihazin kapali araliklari (318): bakim/ariza/tatil + ogle arasi.
+   * Takvim bunlari tarali blok olarak cizer - kural zaten tetikte, bu
+   * GORUNURLUK icin.
+   */
+  radyolojiCihazKapatma: (bas: string, bit: string) =>
+    istek<{ kapatmalar: Record<string, unknown>[]; ogleArasi: Record<string, unknown>[] }>(
+      `/api/radyoloji/cihaz-kapatma?bas=${encodeURIComponent(bas)}`
+      + `&bit=${encodeURIComponent(bit)}`),
+
+  /** Takvimden cihaz kapatma (318) - etkilenen randevu sayisi doner. */
+  radyolojiKapatmaEkle: (cihazId: number,
+                         govde: { baslangic: string; bitis: string;
+                                  nedenTur?: number; aciklama?: string }) =>
+    gonder<{ id: number; etkilenenRandevu: number }>(
+      `/api/radyoloji/cihaz/${cihazId}/kapatma`, govde),
+
+  /** Kritik bulgu takibini kapat (318): teyit alindi, listeden duser. */
+  radyolojiKritikKapat: (istemId: number) =>
+    gonder<{ tamam: boolean }>(`/api/radyoloji/istem/${istemId}/kritik-kapat`, {}),
+
   /** Randevusu olmayan istemler (316) - takvimin bekleyen paneli. */
   radyolojiRandevuBekleyen: () =>
     istek<Record<string, unknown>[]>('/api/radyoloji/randevu-bekleyen'),
