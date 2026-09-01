@@ -632,6 +632,16 @@ export const api = {
     istek<{ kurumId?: number | null; kurumAd?: string; policeNo?: string }>(
       `/api/radyoloji/hasta/${hastaId}/odeme`),
 
+  /**
+   * Tetkikin randevu bilgisi (317): cekim protokolu suresi + modalite.
+   * Radyoloji tetkiki degilse null doner.
+   */
+  radyolojiTetkikBilgi: (hizmetId: number) =>
+    istek<{ hizmetId: number; hizmetAdi: string; modalite: number;
+            modaliteAdi: string; protokolSure: number; kontrast: number;
+            hazirlikMetni: string } | null>(
+      `/api/radyoloji/tetkik-bilgi/${hizmetId}`),
+
   /** Randevusu olmayan istemler (316) - takvimin bekleyen paneli. */
   radyolojiRandevuBekleyen: () =>
     istek<Record<string, unknown>[]>('/api/radyoloji/randevu-bekleyen'),

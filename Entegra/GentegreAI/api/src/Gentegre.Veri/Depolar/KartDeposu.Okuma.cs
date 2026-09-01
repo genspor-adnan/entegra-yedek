@@ -178,6 +178,8 @@ public sealed partial class KartDeposu
             //   ve istem hekimi (ic + dis).
             "public.v_rad_cihaz_lookup", "public.v_rad_tetkik_lookup",
             "public.v_rad_hekim_lookup",
+            // Randevunun CIHAZ kaynagi (316) - radyolojide randevu cihaza verilir.
+            "public.v_radyoloji_cihaz_lookup",
             // Kasa alt sistemi (071/074). Hepsi "id, ad, aktif" kolonlu gorunum -
             //   hizmet/masraf/proje "durum" kullandigi icin gorunumle uyarlandi.
             "public.v_hesap_lookup", "public.v_proje_lookup", "public.v_hesap_plani_lookup",

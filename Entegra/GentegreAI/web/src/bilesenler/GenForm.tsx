@@ -35,6 +35,7 @@ import { TarafArama } from './TarafArama';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { RandevuUygunSaatler } from './RandevuUygunSaatler';
 import { RandevuOzetSeridi } from './RandevuOzetSeridi';
+import { RandevuTetkikUyum } from './RandevuTetkikUyum';
 import { telefonAlaniMi } from './alanBicim';
 import { telefonBicimle } from './bicim';
 
@@ -949,6 +950,15 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
         const tam = kaynak === 'randevu' ? (
           <>
             {govde}
+            {/* TETKİK-CİHAZ uyumu ve protokol süresi (317): hasta gelmeden
+                randevu alındığı için yanlış cihaz ancak hasta geldiğinde fark
+                edilirdi. Engelleme veritabanı tetiğinde, bu erken uyarı. */}
+            <RandevuTetkikUyum
+              hizmetId={Number(deger.hizmetId) || null}
+              cihazId={Number(deger.cihazId) || null}
+              sureDk={Number(deger.sureDk) || 0}
+              onSure={dk => alanDegistir('sureDk', String(dk))}
+            />
             {/* UYGUN SAATLER (mockup): secili hekim + tarih icin o gunun
                 slotlari; bos saate tiklamak kartin baslangicini tasir. */}
             <RandevuUygunSaatler

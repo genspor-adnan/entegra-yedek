@@ -72,7 +72,14 @@ public static class RadyolojiUclari
         /// entegrasyonlari yok - secim ISTEK olarak kayda gecer.
         /// </summary>
         short? MwlIstendi = null, short? SmsIstendi = null,
-        short? HazirlikVerildi = null, short? CdIstendi = null);
+        short? HazirlikVerildi = null, short? CdIstendi = null,
+        /// <summary>
+        /// RANDEVUDAN KABUL (317): hasta cogunlukla kuruma GELMEDEN randevu
+        /// alir - o anda istem/basvuru/odeme yoktur. Hasta gelince "Geldi"
+        /// denir, basvuru ve istem burada dogar; istem randevuya baglanir ki
+        /// takvimdeki plan ile yapilan is ayni kayitta gorunsun.
+        /// </summary>
+        int? RandevuId = null);
 
     /// <summary>
     /// RANDEVU VERME (316): istem cihaza baglanir. Sure verilmezse cekim
@@ -312,10 +319,11 @@ public static class RadyolojiUclari
                             (sube_id, belge_id, hasta_id, hizmet_id, modalite, durum, oncelik,
                              istek_hekim_id, istek_kurum_id, dis_hekim_ad, on_tani, klinik_bilgi,
                              kontrast, ekleyen,
-                             mwl_istendi, sms_istendi, hazirlik_verildi, cd_istendi)
+                             mwl_istendi, sms_istendi, hazirlik_verildi, cd_istendi,
+                             randevu_id)
                         values (@p0, @p1, @p2, @p3, @p4, 1, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12,
                                 coalesce(@p13, 1), coalesce(@p14, 1),
-                                coalesce(@p15, 1), coalesce(@p16, 0))
+                                coalesce(@p15, 1), coalesce(@p16, 0), @p17)
                         returning id
                         """, islem,
                         [baglam.SubeId, belgeId, istek.HastaId, t.HizmetId, modalite,
@@ -324,7 +332,25 @@ public static class RadyolojiUclari
                          istek.OnTani ?? "", istek.KlinikBilgi, t.Kontrast ?? 0,
                          baglam.KullaniciId,
                          istek.MwlIstendi, istek.SmsIstendi,
-                         istek.HazirlikVerildi, istek.CdIstendi], iptal);
+                         istek.HazirlikVerildi, istek.CdIstendi,
+                         // Randevudan kabul (317): plan ile is ayni kayitta bagli.
+                         istek.RandevuId], iptal);
+
+                    // RANDEVUNUN CIHAZI isteme tasinir (317): cekim o cihazda
+                    //   planlandi, MWL de bunu kullanacak. Kabul sirasinda
+                    //   randevudakinden BASKA modalitede tetkik eklendiyse
+                    //   yazilmaz - yanlis cihaza dusmesindense bos kalsin.
+                    if (istek.RandevuId is int randevuId && randevuId > 0)
+                        await baglanti.CalistirAsync("""
+                            update public.radyoloji_istem i
+                               set cihaz_id = c.id
+                              from public.randevu r
+                              join public.radyoloji_cihaz c on c.id = r.cihaz_id
+                             where i.id = @p0 and r.id = @p1
+                               and (coalesce(i.modalite, 0) = 0
+                                    or coalesce(c.modalite, 0) = 0
+                                    or i.modalite = c.modalite)
+                            """, islem, [id, randevuId], iptal);
 
                     idler.Add(id);
                     accessionlar.Add(await baglanti.TekDegerAsync<string>(
@@ -436,6 +462,36 @@ public static class RadyolojiUclari
 
             uyarilar.InsertRange(0, basvuruUyarilari);
             return Results.Ok(new { idler, accessionlar, uyarilar, belgeId, basvuru = basvuruOzeti });
+        });
+
+        // ------------------------------------------------ tetkik bilgisi ----
+        // RANDEVU KARTI (317): tetkik secilince sure ve modalite buradan gelir.
+        //   Randevu ekrani radyoloji modulunu bilmek zorunda kalmasin diye tek
+        //   ucta toplandi; yetki RANDEVU uzerinden - kabul masasinin radyoloji
+        //   yetkisi olmayabilir.
+        grup.MapGet("/tetkik-bilgi/{hizmetId:int}", async (
+            int hizmetId, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("randevu", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var satir = await baglanti.TekAsync("""
+                select t.hizmet_id as "hizmetId", t.hizmet_adi as "hizmetAdi",
+                       t.modalite, t.protokol_sure as "protokolSure",
+                       t.kontrast, t.hazirlik_metni as "hazirlikMetni",
+                       coalesce(kd.ad, '') as "modaliteAdi"
+                  from public.v_randevu_tetkik_sure t
+                  left join public.kod_liste kl on kl.kod = 'rad.modalite'
+                  left join public.kod_deger kd
+                         on kd.liste_id = kl.id and kd.deger = t.modalite
+                 where t.hizmet_id = @p0
+                """, null, [hizmetId], Satir, iptal);
+
+            // Radyoloji tetkiki DEGILSE bos doner - randevu karti da uyari cizmez.
+            return Results.Ok(satir);
         });
 
         // ------------------------------------------- randevu bekleyenler ----

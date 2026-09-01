@@ -55,7 +55,8 @@ const gun = (v: unknown): string => {
   return /^\d{4}-\d{2}-\d{2}$/.test(m) ? m.split('-').reverse().join('.') : '';
 };
 
-export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapat, onTamam }: {
+export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
+                              randevuId, onSeciliHizmetId, onKapat, onTamam }: {
   acik: boolean;
   hastaId: number;
   hastaAdi: string;
@@ -63,8 +64,16 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
   belgeId?: number | null;
   /** DIS istem mi: disaridan gelen hastanin istem kagidi (hekim/kurum adi elle). */
   disIstem?: boolean;
+  /**
+   * RANDEVUDAN KABUL (317): hasta kuruma gelmeden randevu almisti; "Geldi"
+   * denince basvuru + istem burada dogar. Randevu id'si isteme yazilir, boylece
+   * takvimdeki plan ile yapilan is ayni kayitta gorunur.
+   */
+  randevuId?: number | null;
+  /** Randevunun tetkiki - acilista secili gelir, kabul masasi yeniden aramaz. */
+  onSeciliHizmetId?: number | null;
   onKapat(): void;
-  onTamam?(accessionlar: string[]): void;
+  onTamam?(accessionlar: string[], sonuc?: { belgeId: number | null }): void;
 }) {
   const [tetkikler, setTetkikler] = useState<Tetkik[]>([]);
   const [hekimler, setHekimler] = useState<Hekim[]>([]);
@@ -85,7 +94,12 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
   const [klinikBilgi, setKlinikBilgi] = useState('');
   const [ucretEkle, setUcretEkle] = useState(true);
   /** KABUL modu (mockup radyoloji_kayit_kabul): basvurusu olmayan dis hasta. */
-  const kabulMu = !!disIstem && !belgeId;
+  /**
+   * KABUL modu: hastanin acik basvurusu YOK - basvuru, ucret ve tahsilat bu
+   * ekranda dogar. Randevudan gelen hasta da bu moddadir (317): telefonla
+   * randevu alirken ne basvuru ne odeme vardi.
+   */
+  const kabulMu = (!!disIstem || !!randevuId) && !belgeId;
   const [basvuruAc, setBasvuruAc] = useState(true);
   const [odeyenKurumId, setOdeyenKurumId] = useState<number | null>(null);
   const [odeyenKurumAd, setOdeyenKurumAd] = useState('');
@@ -141,6 +155,23 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
   }, [hastaId]);
 
   useEffect(() => { if (acik) void yukle() }, [acik, yukle]);
+
+  /**
+   * RANDEVUNUN TETKIKI (317) acilista secili gelir: hasta o tetkik icin gun
+   * almisti, kabul masasinin listeden yeniden bulmasi hem yavas hem hataya
+   * acik. Tetkikler yuklendikten sonra bir kez uygulanir - kullanici sonra
+   * cikarabilir ya da yenisini ekleyebilir.
+   */
+  const onSecimUygulandi = useRef(false);
+  useEffect(() => { if (!acik) onSecimUygulandi.current = false }, [acik]);
+  useEffect(() => {
+    if (!acik || !onSeciliHizmetId || onSecimUygulandi.current) return;
+    const t = tetkikler.find(x => x.id === onSeciliHizmetId);
+    if (!t) return;
+    onSecimUygulandi.current = true;
+    setSecili(s => (s.some(x => x.tetkik.id === t.id) ? s
+      : [...s, { tetkik: t, oncelik: 1, kontrast: t.varsayilanKontrast ?? 0 }]));
+  }, [acik, onSeciliHizmetId, tetkikler]);
 
   // HASTANIN AKTIF POLICESI (248): kabul masasi police numarasini elle
   //   yazmasin - hasta kartinda duruyorsa oradan gelir, gerekirse duzeltilir.
@@ -291,6 +322,9 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
         cdIstendi: cd ? 1 : 0,
         odeyenKurumId: kabulMu ? odeyenKurumId : null,
         policeNo: kabulMu ? policeNo : '',
+        // Randevudan kabul (317): istem randevuya baglanir, randevunun cihazi
+        //   isteme tasinir - cekim plandaki cihazda yapilacak.
+        randevuId: randevuId ?? null,
         tetkikler: secili.map(s => ({ hizmetId: s.tetkik.id, oncelik: s.oncelik,
                                       kontrast: s.kontrast })),
       });
@@ -306,7 +340,9 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
         } catch (h) { setKagitDurum(`İstem kâğıdı eklenemedi: ${hataMetni(h)}`) }
       }
       mesaj(`${y.idler.length} istem açıldı: ${y.accessionlar.join(', ')}`);
-      onTamam?.(y.accessionlar);
+      // Acilan basvurunun id'si de doner: randevudan gelindiyse randevu ona
+      //   baglanir (317) - randevu ile basvuru arasi kopuk kalmasin.
+      onTamam?.(y.accessionlar, { belgeId: y.belgeId ?? null });
       // Basvuru acildiysa modal KAPANMAZ: protokol numarasi ve tahsil
       //   edilecek tutar gosterilir (mockup ozet seridi) - kabul masasi
       //   hastaya soyleyecegi rakami burada gorur.

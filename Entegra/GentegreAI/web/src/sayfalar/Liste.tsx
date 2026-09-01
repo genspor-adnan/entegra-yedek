@@ -89,7 +89,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
    */
   const [istemHastaArama, setIstemHastaArama] = useState(false);
   const [istemModali, setIstemModali] = useState<
-    { hastaId: number; hastaAdi: string; disIstem: boolean } | null>(null);
+    { hastaId: number; hastaAdi: string; disIstem: boolean;
+      /** Randevudan kabul (317): istem randevuya bağlanır, tetkik ön seçili gelir. */
+      randevuId?: number; hizmetId?: number } | null>(null);
   /** Sonuc teslimi (304) - film/CD/rapor kime verildi. */
   /** Radyoloji: secili isteme randevu verme (316). */
   const [randevuModali, setRandevuModali] = useState<
@@ -942,6 +944,32 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         return;
       }
 
+      /**
+       * RADYOLOJI RANDEVUSUNDA "GELDI" = KABUL (317).
+       *
+       * Hasta cogunlukla kuruma GELMEDEN randevu alir: o an ne basvuru ne
+       * odeme ne istem vardir - yalniz plan. Geldigi an kabul edilmeli:
+       * basvuru acilir, ucret/tahsilat alinir, ISTEM dogar; cihazin calisma
+       * listesine (MWL) dusecek kayit da budur. Bu yuzden cihazli randevuda
+       * "Geldi" durumu tek basina yazmak yerine kabul ekranini acar.
+       */
+      const radyolojiKabulu = (s: ListeSatiri) => {
+        setIstemModali({
+          hastaId: Number(s.hastaId), hastaAdi: String(s.hasta ?? ''),
+          // Isteyen hekim disaridan olabilir - kabul ekraninin tam hali acilir.
+          disIstem: true,
+          randevuId: Number(s.id),
+          hizmetId: Number(s.hizmetId) || undefined,
+        });
+      };
+
+      if (kod === 'randevu.geldi' && satir && Number(satir.cihazId) > 0
+          && !satir.belgeId) {
+        if (!Number(satir.hastaId)) { mesaj('Randevuda hasta yok.'); return }
+        radyolojiKabulu(satir);
+        return;
+      }
+
       if (kod === 'randevu.geldi' || kod === 'randevu.gelmedi' || kod === 'randevu.iptal') {
         if (!satir) return;
         const yeniDurum = kod === 'randevu.geldi' ? 2 : kod === 'randevu.gelmedi' ? 3 : 4;
@@ -956,6 +984,13 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
 
       if (kod === 'randevu.basvuru') {
         if (!satir) return;
+        // CIHAZLI (radyoloji) randevu: duz basvuru yerine kabul ekrani (317) -
+        //   basvuru orada da acilir, ustune ISTEM ve accession uretilir.
+        if (Number(satir.cihazId) > 0 && !satir.belgeId) {
+          if (!Number(satir.hastaId)) { mesaj('Randevuda hasta yok.'); return }
+          radyolojiKabulu(satir);
+          return;
+        }
         await guvenli(async () => {
           const hastaId = Number(satir.hastaId) || 0;
           const hizmetId = Number(satir.hizmetId) || 0;
@@ -1406,8 +1441,24 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         hastaId={istemModali.hastaId}
         hastaAdi={istemModali.hastaAdi}
         disIstem={istemModali.disIstem}
+        randevuId={istemModali.randevuId ?? null}
+        onSeciliHizmetId={istemModali.hizmetId ?? null}
         onKapat={() => setIstemModali(null)}
-        onTamam={() => setYenile(t => t + 1)}
+        onTamam={(_a, sonuc) => {
+          // RANDEVUDAN KABUL (317): acilan basvuru randevuya baglanir, randevu
+          //   "Geldi"ye cekilir - takvim, basvuru ve istem ayni olayi gosterir.
+          const rid = istemModali.randevuId;
+          if (rid && sonuc?.belgeId) {
+            void guvenli(async () => {
+              const mevcut = await api.kartOku('randevu', rid);
+              await api.kartGuncelle('randevu', rid, {
+                surum: mevcut.kart.surum,
+                kart: { belgeId: sonuc.belgeId, durum: 2 },
+              });
+            });
+          }
+          setYenile(t => t + 1);
+        }}
       />
     )}
     {randevuModali && (
