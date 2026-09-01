@@ -48,6 +48,16 @@ export type { ListeTanimi };
  * sunucudan geldigi icin ekran basina kod yazmaya gerek yok — yeni bir liste
  * eklemek katalogda kaynak tanimlamak + burada bir satir demek.
  */
+/**
+ * Yerel saat damgasi (yyyy-MM-ddTHH:mm). Date.toISOString() UTC verir;
+ * TR'de kaydedilen saat 3 saat geriye duser.
+ */
+const yerelZamanDamgasi = () => {
+  const d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+    .toISOString().slice(0, 16);
+};
+
 export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const git = useNavigate();
   const { id } = useParams();
@@ -816,7 +826,10 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
             surum: mevcut.kart.surum,
             kart: iptalMi
               ? { durum: 0 }
-              : { durum: 2, cekimTarihi: new Date().toISOString().slice(0, 16) },
+              // ÇEKIM ZAMANI YEREL saat: toISOString UTC verir, TR'de kayit
+              //   3 saat GERIYE dusuyordu - bekleme suresi (istem->cekim)
+              //   kalite gostergesi buradan hesaplaniyor, negatif bile cikabilir.
+              : { durum: 2, cekimTarihi: yerelZamanDamgasi() },
           });
           setYenile(t => t + 1);
           mesaj(iptalMi ? 'İstem iptal edildi.' : 'İstem "Çekildi" olarak işaretlendi.');

@@ -146,17 +146,10 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
     if (!acik || !kabulMu) return;
     void (async () => {
       try {
-        const y = await api.liste('hasta-kurum', {
-          sayfa: 1, boyut: 1,
-          filtre: { op: 'and', kosullar: [
-            { alan: 'hastaId', op: 'esit', deger: hastaId },
-          ] },
-        });
-        const k = y.satirlar[0];
-        if (!k) return;
+        const k = await api.radyolojiHastaOdeme(hastaId);
         if (k.kurumId) {
           setOdeyenKurumId(Number(k.kurumId));
-          setOdeyenKurumAd(String(k.kurumAdi ?? ''));
+          setOdeyenKurumAd(String(k.kurumAd ?? ''));
         }
         if (k.policeNo) setPoliceNo(String(k.policeNo));
       } catch { /* police yoksa alanlar bos kalir - kabul yine yapilir */ }
@@ -306,7 +299,16 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
           kurumTutar: Number(y.basvuru.kurumTutar ?? 0),
           hastaTutar: Number(y.basvuru.hastaTutar ?? 0),
         });
-        if (tahsilatla) setTahsilatAcik(true);
+        // TAHSILAT yalniz HASTA PAYI varsa acilir: sozlesmeli kurum tutarin
+        //   tamamini karsiliyorsa hastadan tahsilat YOKTUR (mockup notu) -
+        //   pencereyi yine acmak yanlis tutarda tahsilat kaydi uretiyordu.
+        const net = Number(y.basvuru.kurumTutar ?? 0) + Number(y.basvuru.hastaTutar ?? 0);
+        const hastaPayi = net > 0
+          ? Math.round((Number(y.basvuru.genelToplam ?? 0)
+                        * Number(y.basvuru.hastaTutar ?? 0) / net) * 100) / 100
+          : Number(y.basvuru.genelToplam ?? 0);
+        if (tahsilatla && hastaPayi > 0) setTahsilatAcik(true);
+        else if (tahsilatla) mesaj('Kurum tutarın tamamını karşılıyor — hastadan tahsilat yok.');
         return;
       }
       onKapat();
@@ -666,7 +668,8 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
                     <span>Kurumdan: <b>{para.format(
                       Math.round((sonuc.genelToplam - hastaTahsil) * 100) / 100)} ₺</b></span>
                     {/* KDV DAHIL: kasada tahsil edilecek olan bu tutardir. */}
-                    <span>Hastadan: <b>{para.format(hastaTahsil)} ₺</b></span>
+                    <span>Hastadan: <b>{para.format(hastaTahsil)} ₺</b>
+                      {hastaTahsil <= 0 && ' · kurum tamamını karşılıyor'}</span>
                   </div>
                 )}
 
@@ -727,7 +730,7 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
             tarafId: hastaId,
             tarafUnvan: hastaAdi,
             belgeId: sonuc.belgeId,
-            tutar: String(hastaTahsil || sonuc.genelToplam),
+            tutar: String(hastaTahsil),
           }}
           onKapat={() => setTahsilatAcik(false)}
         />

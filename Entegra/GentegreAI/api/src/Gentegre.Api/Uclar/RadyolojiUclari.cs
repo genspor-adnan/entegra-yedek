@@ -426,6 +426,34 @@ public static class RadyolojiUclari
             return Results.Ok(new { idler, accessionlar, uyarilar, belgeId, basvuru = basvuruOzeti });
         });
 
+        // ------------------------------------------ hastanin odeyicisi ----
+        // Kabul ekrani (mockup: "Ödeyen Kurum" + "Poliçe No") hastanin AKTIF
+        //   policesini onden doldurmali - kabul masasi her seferinde kurumu
+        //   elle aramasin. Hasta kartinin detay uctan okunmasi ayni bilgiyi
+        //   dolayli getirirdi; tek satirlik cevap yeter.
+        grup.MapGet("/hasta/{id:int}/odeme", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var odeme = await baglanti.TekAsync("""
+                select k.kurum_id as "kurumId",
+                       coalesce(t.unvan, '') as "kurumAd",
+                       coalesce(k.police_no, '') as "policeNo"
+                  from public.taraf_hasta_kurum k
+                  left join public.taraf t on t.id = k.kurum_id
+                 where k.hasta_id = @p0 and coalesce(k.aktif, 1) = 1
+                 order by k.id desc
+                 limit 1
+                """, null, [id], Satir, iptal);
+
+            return Results.Ok(odeme ?? new Dictionary<string, object?>());
+        });
+
         // ------------------------------------------- akis / ozet seridi ----
         // Mockup radyoloji_istem_karti.html: ustte "Istem -> Randevu -> Cekim ->
         //   Raporlaniyor -> Onay -> Teslim" seridi ve alttaki ozet (bekleme

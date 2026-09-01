@@ -312,6 +312,10 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",       "t.id",     "sayi",  "Id", Varsayilan: false),
+            // KOD gizli ama VAR: jenerik arama serbest metni "kod icerir"
+            //   kosuluyla da ariyor - kolon yoksa arama "Bilinmeyen alan: kod"
+            //   ile 400 donuyor (kisi listesinde ayni cozum).
+            new("kod",      "t.kod",    "metin", "Kod", Varsayilan: false),
             // AD SOYAD = unvan oneki + ad + soyad. Onek ayri kolonda DEGIL,
             //   t.unvan icinde durur (306) - kart kaydederken "Op.Dr. Kerem
             //   ATALAY" olarak yazilir. Unvan bos kalmis (disaridan/toplu

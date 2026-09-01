@@ -627,6 +627,11 @@ export const api = {
              basvuru: Record<string, unknown> | null }>(
       '/api/radyoloji/istem', govde),
 
+  /** Hastanin aktif policesi (kabul ekrani odeyen kurum/police onyukleme). */
+  radyolojiHastaOdeme: (hastaId: number) =>
+    istek<{ kurumId?: number | null; kurumAd?: string; policeNo?: string }>(
+      `/api/radyoloji/hasta/${hastaId}/odeme`),
+
   /** Istem akis seridi + ozet (310): istem/randevu/cekim/rapor/onay/teslim. */
   radyolojiIstemAkis: (istemId: number) =>
     istek<Record<string, unknown>>(`/api/radyoloji/istem/${istemId}/akis`),
