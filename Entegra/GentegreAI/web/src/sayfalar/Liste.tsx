@@ -107,7 +107,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
    */
   const [bekleyenSecili, setBekleyenSecili] = useState<BekleyenIstem | null>(null);
   const [teslimModali, setTeslimModali] = useState<
-    { istemId: number; accessionNo: string } | null>(null);
+    { istemId: number; accessionNo: string; cdIstendi?: boolean } | null>(null);
   /** Kritik bulgu bildirimi (318) - takip listesinden acilir. */
   const [kritikModali, setKritikModali] = useState<
     { istemId: number; accessionNo: string; hasta: string; tetkik: string;
@@ -999,7 +999,8 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
       if (kod === 'radyoloji.teslim') {
         if (!satir) return;
         setTeslimModali({ istemId: Number(satir.istemId ?? satir.id),
-                          accessionNo: String(satir.accessionNo ?? '') });
+                          accessionNo: String(satir.accessionNo ?? ''),
+                          cdIstendi: Number(satir.cdIstendi) === 1 });
         return;
       }
 
@@ -1586,6 +1587,7 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
       <TeslimModali
         istemId={teslimModali.istemId}
         accessionNo={teslimModali.accessionNo}
+        cdIstendi={teslimModali.cdIstendi}
         onKapat={() => setTeslimModali(null)}
         onTamam={() => setYenile(t => t + 1)}
       />

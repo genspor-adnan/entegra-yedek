@@ -328,6 +328,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     cipler: [
       { ad: 'Bildirilmedi',   filtre: { alan: 'takipDurum', op: 'esit', deger: 1 } },
       { ad: 'Teyit Bekleyen', filtre: { alan: 'takipDurum', op: 'esit', deger: 2 } },
+      // Teyit ALINDI ama takip kapatilmadi: is bitmis sayilmaz - kapatma
+      //   ayri bir adim (kapatan kisi ve zamani kayda gecer).
+      { ad: 'Teyitli',        filtre: { alan: 'takipDurum', op: 'esit', deger: 3 } },
       { ad: 'Kapatılan',      filtre: { alan: 'takipDurum', op: 'esit', deger: 4 } },
       { ad: 'Tümü' },
     ],

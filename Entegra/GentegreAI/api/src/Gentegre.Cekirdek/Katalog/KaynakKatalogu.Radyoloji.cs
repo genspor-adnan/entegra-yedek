@@ -286,14 +286,14 @@ public static partial class KaynakKatalogu
                 "when 3 then 'Mesaj / sistem' else '' end",
                                                   "metin", "Yol", Hizalama: "orta",
                                                   Genislik: 110, Filtrelenebilir: false),
-            new("bildirimZamani","k.bildirim_zamani", "zaman", "Bildirim", Genislik: 140),
+            new("bildirimZamani","k.bildirim_zamani", "tarih", "Bildirim", Genislik: 140, Bicim: "dd.MM.yyyy HH:mm"),
             new("teyitAlindi",  "k.teyit_alindi", "mantik", "Teyit", Hizalama: "orta",
                                                   Genislik: 80),
             new("gecenDk",      "k.gecen_dk",     "sayi",  "Geçen (dk)", Hizalama: "sag",
                                                   Genislik: 100),
-            new("cekimTarihi",  "k.cekim_tarihi", "zaman", "Çekim", Varsayilan: false),
-            new("onayTarihi",   "k.onay_tarihi",  "zaman", "Rapor Onayı", Varsayilan: false),
-            new("kapatmaZamani","k.kapatma_zamani","zaman","Kapatma", Varsayilan: false),
+            new("cekimTarihi",  "k.cekim_tarihi", "tarih", "Çekim", Varsayilan: false, Bicim: "dd.MM.yyyy HH:mm"),
+            new("onayTarihi",   "k.onay_tarihi",  "tarih", "Rapor Onayı", Varsayilan: false, Bicim: "dd.MM.yyyy HH:mm"),
+            new("kapatmaZamani","k.kapatma_zamani","tarih","Kapatma", Varsayilan: false, Bicim: "dd.MM.yyyy HH:mm"),
             new("bildirimId",   "k.bildirim_id",  "sayi",  "Bildirim Id", Varsayilan: false),
         });
 
@@ -320,7 +320,7 @@ public static partial class KaynakKatalogu
         {
             new("id",           "ks.id",          "sayi",  "Id", Varsayilan: false),
             new("istemId",      "ks.istem_id",    "sayi",  "İstem", Varsayilan: false),
-            new("gonderimZamani","ks.gonderim_zamani", "zaman", "İstek", Genislik: 140),
+            new("gonderimZamani","ks.gonderim_zamani", "tarih", "İstek", Genislik: 140, Bicim: "dd.MM.yyyy HH:mm"),
             new("modaliteAdi",
                 "case i.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' " +
                 "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' " +
@@ -351,7 +351,7 @@ public static partial class KaynakKatalogu
                                                   Filtrelenebilir: false),
             new("durum",        "ks.durum",       "sayi",  "Durum Kodu", Varsayilan: false),
             new("acil",         "ks.acil",        "mantik","Acil", Hizalama: "orta", Genislik: 70),
-            new("donusZamani",  "ks.donus_zamani","zaman", "Cevap Zamanı", Genislik: 140),
+            new("donusZamani",  "ks.donus_zamani","tarih", "Cevap Zamanı", Genislik: 140, Bicim: "dd.MM.yyyy HH:mm"),
             // BEKLEME: cevaplanmadiysa SIMDIYE kadar - listenin sirasi bu.
             new("beklemeDk",
                 "(extract(epoch from (coalesce(ks.donus_zamani, now()::timestamp) " +
@@ -377,7 +377,7 @@ public static partial class KaynakKatalogu
         {
             new("id",           "t.istem_id",     "sayi",  "Id", Varsayilan: false),
             new("istemId",      "t.istem_id",     "sayi",  "İstem", Varsayilan: false),
-            new("onayTarihi",   "t.onay_tarihi",  "zaman", "Rapor Onayı", Genislik: 140),
+            new("onayTarihi",   "t.onay_tarihi",  "tarih", "Rapor Onayı", Genislik: 140, Bicim: "dd.MM.yyyy HH:mm"),
             new("modaliteAdi",
                 "case t.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' " +
                 "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' " +
@@ -413,7 +413,7 @@ public static partial class KaynakKatalogu
             new("alanAd",       "t.alan_ad",      "metin", "Teslim Alan", Genislik: 180),
             new("alanYakinlik", "t.alan_yakinlik","metin", "Yakınlık", Genislik: 110),
             new("teslimEden",   "t.teslim_eden",  "metin", "Teslim Eden", Genislik: 160),
-            new("teslimZamani", "t.teslim_zamani","zaman", "Teslim", Genislik: 140),
+            new("teslimZamani", "t.teslim_zamani","tarih", "Teslim", Genislik: 140, Bicim: "dd.MM.yyyy HH:mm"),
             new("beklemeDk",    "t.bekleme_dk",   "sayi",  "Bekleme (dk)", Hizalama: "sag",
                                                   Genislik: 110),
         });

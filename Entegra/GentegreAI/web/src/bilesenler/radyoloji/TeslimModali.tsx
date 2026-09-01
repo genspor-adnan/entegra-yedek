@@ -12,21 +12,28 @@ import { mesaj } from '../mesaj';
  * verdik" sorusunun cevabi belgede durmali.
  */
 
-const TESLIM_TURU = [
-  { deger: 2, ad: 'Basılı Rapor' },
-  { deger: 3, ad: 'CD / DVD' },
-  { deger: 4, ad: 'Film' },
-  { deger: 1, ad: 'Hasta Portalı' },
-  { deger: 5, ad: 'e-Posta' },
-];
+/**
+ * TESLIM KALEMLERI (318): bir teslimde hastaya AYNI ANDA rapor + film + CD
+ * verilir - tek "tür" secimi bunu anlatamiyordu. Eski `tur` kolonu geriye
+ * donuk uyumluluk icin ilk isaretli kalemden turetilir.
+ */
+const KALEMLER = [
+  { anahtar: 'rapor',   ad: 'Rapor (basılı)', tur: 2 },
+  { anahtar: 'film',    ad: 'Film',           tur: 4 },
+  { anahtar: 'cd',      ad: 'CD / DVD',       tur: 3 },
+  { anahtar: 'dijital', ad: 'Dijital bağlantı / e-posta', tur: 5 },
+] as const;
 
-export function TeslimModali({ istemId, accessionNo, onKapat, onTamam }: {
+export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam }: {
   istemId: number;
   accessionNo?: string;
+  /** Kabulde "CD istendi" isaretliyse CD kutusu onden isaretli gelir (311). */
+  cdIstendi?: boolean;
   onKapat(): void;
   onTamam?(): void;
 }) {
-  const [tur, setTur] = useState(2);
+  const [secili, setSecili] = useState<Record<string, boolean>>(
+    { rapor: true, film: false, cd: !!cdIstendi, dijital: false });
   const [alanAd, setAlanAd] = useState('');
   const [yakinlik, setYakinlik] = useState('');
   const [kimlik, setKimlik] = useState(true);
@@ -37,10 +44,18 @@ export function TeslimModali({ istemId, accessionNo, onKapat, onTamam }: {
   const kaydet = async () => {
     setHata('');
     if (!alanAd.trim()) { setHata('Teslim alan kişi yazılmalı.'); return }
+    const isaretli = KALEMLER.filter(k => secili[k.anahtar]);
+    if (isaretli.length === 0) { setHata('En az bir teslim kalemi seçilmeli.'); return }
     setKaydediyor(true);
     try {
       await api.radyolojiTeslim(istemId, {
-        tur, alanAd, alanYakinlik: yakinlik,
+        // Eski tek-deger kolonu: ilk isaretli kalem (geriye donuk uyum).
+        tur: isaretli[0].tur,
+        raporVerildi:   secili.rapor ? 1 : 0,
+        filmVerildi:    secili.film ? 1 : 0,
+        cdVerildi:      secili.cd ? 1 : 0,
+        dijitalVerildi: secili.dijital ? 1 : 0,
+        alanAd, alanYakinlik: yakinlik,
         kimlikDogrulandi: kimlik ? 1 : 0, aciklama,
       });
       mesaj('Teslim kaydedildi.');
@@ -62,10 +77,16 @@ export function TeslimModali({ istemId, accessionNo, onKapat, onTamam }: {
       {hata && <div className="hata-kutusu">{hata}</div>}
       <div className="alan-izgara tek-sutun">
         <label className="alan">
-          <span className="etiket">Teslim Türü</span>
-          <select value={tur} onChange={e => setTur(Number(e.target.value))}>
-            {TESLIM_TURU.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
-          </select>
+          <span className="etiket zorunlu-isaret">Teslim edilen</span>
+          <span className="deger-serit" style={{ flexWrap: 'wrap', gap: 12 }}>
+            {KALEMLER.map(k => (
+              <label key={k.anahtar} className="satir-ici">
+                <input type="checkbox" checked={!!secili[k.anahtar]}
+                       onChange={e => setSecili(s => ({ ...s, [k.anahtar]: e.target.checked }))} />
+                {k.ad}
+              </label>
+            ))}
+          </span>
         </label>
         <label className="alan">
           <span className="etiket zorunlu-isaret">Teslim Alan</span>

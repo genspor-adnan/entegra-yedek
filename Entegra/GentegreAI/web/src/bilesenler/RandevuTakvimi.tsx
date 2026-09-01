@@ -430,7 +430,10 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                           e.preventDefault();
                           onBirak?.(veri, `${sut.gun}T${saatMetni(slot)}`, sut.cihaz);
                         }}>
-                      {kapaliBlok && (
+                      {/* Kapali saatte KAYIT varsa (kural oncesi yazilmis ya da
+                          bilerek mesai disina alinmis randevu) blok cizilmez:
+                          randevu tarali zeminin altinda kaybolmamali. */}
+                      {kapaliBlok && kayitlar.length === 0 && (
                         <div className="takvim-kapali" title={kapaliBlok.metin}>
                           {kapatmaBasi && <span>🔒 {kapaliBlok.metin}</span>}
                         </div>
