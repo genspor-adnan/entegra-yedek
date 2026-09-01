@@ -144,6 +144,15 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const kampanyaSatiri = meta.ad === 'satirlar' && meta.alanlar.some(a => a.ad === 'iskontoYeriId');
 
   /**
+   * PRIM PLAN SATIRI (327): hedef UC ayri alandir - hizmet, kategori,
+   * modalite. Kategori/modalite az sayida oldugu icin combo (alanin kendi
+   * kodlariyla), HIZMET binlerce oldugu icin arama penceresiyle secilir -
+   * kampanya urun satiriyla ayni gerekce.
+   */
+  const primSatiri = meta.ad === 'satirlar'
+                     && meta.alanlar.some(a => a.ad === 'hedefHizmetId');
+
+  /**
    * KAYITLI urun satirinda ad (268): sunucu yalniz id tasir, kart acilinca
    * hucrede "4262" gorunuyordu - hangi hizmet oldugu okunamiyordu. Adlar
    * id -> ad sozlugunde tutulur; secim aninda satira yazilan `iskontoYeriAdi`
@@ -182,6 +191,32 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   // urunAdlari bilerek bagimlilikta degil: sozluk buyudukce dongu olurdu.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kampanyaSatiri, durum.guncel]);
+
+  // PRIM (327): kayitli satirda hedef hizmetin ADI - id okunmaz.
+  useEffect(() => {
+    if (!primSatiri) return;
+    const idler = durum.guncel
+      .map(r => Number(r.hedefHizmetId) || 0)
+      .filter(id => id > 0 && !urunAdlari[String(id)]);
+    if (idler.length === 0) return;
+
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.liste('hizmet', {
+          sayfa: 1, boyut: idler.length,
+          filtre: { op: 'or', kosullar: idler.map(id => ({ alan: 'id', op: 'esit', deger: id })) },
+        });
+        const yeni: Record<string, string> = {};
+        y.satirlar.forEach(r => {
+          yeni[String(r.id)] = `${String(r.kod ?? '')} ${String(r.ad ?? '')}`.trim();
+        });
+        if (!iptal && Object.keys(yeni).length) setUrunAdlari(m => ({ ...m, ...yeni }));
+      } catch { /* ad cozulemezse id gorunur */ }
+    })();
+    return () => { iptal = true };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [primSatiri, durum.guncel]);
 
   /**
    * KAMPANYA (268, kullanici): "İskonto Tipi yüzde ise başlıkta İskonto %,
@@ -689,6 +724,52 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                       // Liste satirinda hedef yok: kolon 0 kalir.
                       <input readOnly value="tüm liste" disabled />
                     )
+                  ) : primSatiri && a.ad === 'hedefTur' ? (
+                    // Hedef turu SUNUCUDA turetilir (generated kolon); burada
+                    //   ayni kural anlik gosterilir - secim yapinca hucre
+                    //   kaydetmeyi beklemeden guncellensin.
+                    <input readOnly disabled
+                           value={satir.hedefHizmetId ? 'Hizmet'
+                                  : satir.hedefModalite ? 'Modalite'
+                                  : satir.hedefKategoriId ? 'Kategori' : 'Tümü'} />
+                  ) : primSatiri && a.kodlar
+                        && (a.ad === 'hedefKategoriId' || a.ad === 'hedefModalite') ? (
+                    // Hedef TEK olmali (327): kategori secilince modalite ve
+                    //   hizmet, modalite secilince otekiler temizlenir - yoksa
+                    //   sunucudaki tetik GK422 ile satiri geri cevirir.
+                    <select
+                      value={String(satir[a.ad] ?? '')}
+                      disabled={saltOkunur || !a.yazilabilir}
+                      onChange={e => satirDegis(i, {
+                        hedefHizmetId: '', hedefKategoriId: '', hedefModalite: '',
+                        [a.ad]: e.target.value,
+                      })}
+                    >
+                      <option value="">—</option>
+                      {Object.entries(a.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                    </select>
+                  ) : primSatiri && a.ad === 'hedefHizmetId' ? (
+                    // Hedef hizmet: binlerce kayit combo'ya sigmaz, arama
+                    //   penceresinden secilir. Bos birakilirsa hedef kategori
+                    //   ya da modaliteden gelir (ucu birden dolu OLAMAZ).
+                    <span className="ikili"
+                          style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                      <input readOnly
+                             style={{ flex: '1 1 auto', minWidth: 150 }}
+                             value={urunAdlari[String(satir[a.ad] ?? '')]
+                                    ?? String(satir[a.ad] ?? '')}
+                             placeholder="— tüm hizmetler —"
+                             disabled={saltOkunur || !a.yazilabilir}
+                             onClick={() => !saltOkunur && setUrunAramaSatiri(i)} />
+                      {String(satir[a.ad] ?? '') !== '' && (
+                        <button type="button" className="d mini" title="Hizmet hedefini kaldır"
+                                disabled={saltOkunur || !a.yazilabilir}
+                                onClick={() => hucreDegis(i, a.ad, '')}>✖</button>
+                      )}
+                      <button type="button" className="d mini" title="Hizmet ara"
+                              disabled={saltOkunur || !a.yazilabilir}
+                              onClick={() => setUrunAramaSatiri(i)}>…</button>
+                    </span>
                   ) : a.kodlar ? (
                     <select
                       value={String(satir[a.ad] ?? '')}
@@ -806,7 +887,27 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
       {/* KAMPANYA (268): urun satirinda hedef stok/hizmet jenerik arama
           penceresinden secilir - binlerce kayit combo'ya sigmaz. Secilen id
           iskonto_yeri_id'ye, adi ekranda gostermek icin satira yazilir. */}
-      {urunAramaSatiri !== null && (
+      {urunAramaSatiri !== null && primSatiri && (
+        <StokAramaPenceresi
+          etkin
+          yalnizHizmet
+          onKapat={() => setUrunAramaSatiri(null)}
+          onSec={secilen => {
+            // Hedef TEK olmali: hizmet secilince kategori/modalite temizlenir.
+            satirDegis(urunAramaSatiri, {
+              hedefHizmetId: String(secilen.id),
+              hedefKategoriId: '', hedefModalite: '',
+            });
+            setUrunAdlari(m => ({
+              ...m,
+              [String(secilen.id)]: `${String(secilen.kod ?? '')} ${String(secilen.ad ?? '')}`.trim(),
+            }));
+            setUrunAramaSatiri(null);
+          }}
+        />
+      )}
+
+      {urunAramaSatiri !== null && !primSatiri && (
         <StokAramaPenceresi
           etkin
           onKapat={() => setUrunAramaSatiri(null)}

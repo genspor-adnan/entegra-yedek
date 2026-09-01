@@ -65,12 +65,25 @@ public static partial class KartKatalogu
             new DetayTanimi("satirlar", "public.prim_plani_satir", "plan_id",
                 new KartAlani[]
                 {
+                    // ID SART: yoksa kayitli satir "yeni" sanilip her kayitta
+                    //   yeniden eklenir (satirlar cogalir).
+                    new("id",        "id",        "sayi", Yazilabilir: false),
                     new("rol",       "rol",       "kod", Zorunlu: true,
                         KodListesi: "prim.rol", Baslik: "Rol"),
+                    // HEDEF UC AYRI ALAN (327): her biri kendi listesinden
+                    //   secilir; hedef TURU dolu olandan turetilir (generated
+                    //   kolon), bu yuzden salt okunur. En fazla biri dolu
+                    //   olabilir - ihlali tetik GK422 ile bildirir.
                     new("hedefTur",  "hedef_tur", "kod", KodListesi: "prim.hedef_tur",
-                        Baslik: "Hedef Türü"),
-                    // Hedef kimligi: hizmet id / modalite kodu / grup kodu.
-                    new("hedefId",   "hedef_id",  "sayi", Baslik: "Hedef"),
+                        Yazilabilir: false, Baslik: "Hedef Türü"),
+                    // Hizmet BINLERCE: kod tablosu yerine arama penceresinden
+                    //   secilir (GenDetayTablo'da kampanya urun satiriyla ayni
+                    //   desen) - bu yuzden burada duz sayi alani.
+                    new("hedefHizmetId", "hedef_hizmet_id", "sayi", Baslik: "Hizmet"),
+                    new("hedefKategoriId", "hedef_kategori_id", "kod",
+                        KodTablosu: "public.v_kategori_lookup", Baslik: "Kategori"),
+                    new("hedefModalite", "hedef_modalite", "kod",
+                        KodListesi: "rad.modalite", Baslik: "Modalite"),
                     // BELGE TURU kriteri: virgullu liste, bos = tumu.
                     //   Tur GELIR belgesinden okunur (basvuru 19 ara kayittir).
                     new("belgeTurleri", "belge_turleri", "metin", EnFazlaUzunluk: 60,

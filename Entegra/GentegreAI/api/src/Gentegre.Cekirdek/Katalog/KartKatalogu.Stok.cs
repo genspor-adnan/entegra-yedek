@@ -245,6 +245,8 @@ public static partial class KartKatalogu
             new DetayTanimi("radyolojiProtokol", "public.radyoloji_protokol", "hizmet_id",
             new KartAlani[]
             {
+                // ID SART: tek satirli detayda da fark id ile eslesir.
+                new("id",          "id",             "sayi", Yazilabilir: false),
                 new("modalite",    "modalite",       "kod", KodListesi: "rad.modalite",
                     Baslik: "Modalite"),
                 new("sureDk",      "sure_dk",        "sayi", Baslik: "Süre (dk)"),

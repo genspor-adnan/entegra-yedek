@@ -239,6 +239,8 @@ public static partial class KartKatalogu
             new DetayTanimi("malzeme", "public.radyoloji_protokol_malzeme", "protokol_id",
                 new KartAlani[]
                 {
+                    // ID SART: yoksa kayitli satir "yeni" sanilip cogalir.
+                    new("id", "id", "sayi", Yazilabilir: false),
                     new("stokId", "stok_id", "kod", Zorunlu: true,
                         KodTablosu: "public.v_stok_lookup", AramaKaynagi: "stok",
                         Baslik: "Stok / Malzeme"),
