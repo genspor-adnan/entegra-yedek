@@ -152,5 +152,10 @@ export function sekmeleriKur(secenek: {
   if (dokumanliKart && !yeniMi && !yorumMedyaSekmesiVar) {
     s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'Resim / Doküman' });
   }
+  // RADYOLOJI ISTEMI (310): disaridan gelen hastanin ISTEM KAGIDI - taranip
+  //   isteme eklenir, rapor yazan radyolog ve faturalama burada arar.
+  if (kaynak === 'radyoloji-istem' && !yeniMi) {
+    s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'İstem Kâğıdı' });
+  }
   return s;
 }

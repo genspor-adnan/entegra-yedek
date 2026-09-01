@@ -141,6 +141,8 @@ public static class DokumanUclari
         // Firma gorselleri (193): logo / kase / imza; belge_turu hangisi
         //   oldugunu tasir, kaynak_id sube kimligidir.
         "sube" => "sube",
+        // Radyoloji istem kagidi (310) - kaynak_id istem kimligidir.
+        "radyoloji-istem" => "radyoloji-istem",
         _ => throw new InvalidOperationException($"Bilinmeyen kart: {kartAdi}"),
     };
 
@@ -150,6 +152,7 @@ public static class DokumanUclari
         "kisi" => "cari",
         "hasta" => "personel",
         "ebelge-xslt" => "ebelge_xslt",
+        "radyoloji-istem" => "radyoloji",
         _ => kartAdi
     };
 

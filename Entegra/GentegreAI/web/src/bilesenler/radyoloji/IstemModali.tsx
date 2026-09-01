@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
@@ -105,6 +105,15 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
       })()
     : 0;
   const [tahsilatAcik, setTahsilatAcik] = useState(false);
+  /**
+   * ISTEM KAGIDI (mockup: "📷 İstem Kâğıdını Tara"). Tarayici donanimina
+   * erisim YOK; kabul masasi ya tarayicidan gelen dosyayi secer ya da
+   * telefon/tablette kamerayi acar (capture). Dosya kabul BITINCE yuklenir -
+   * once istem id'si olmali.
+   */
+  const [kagit, setKagit] = useState<File | null>(null);
+  const kagitGirdi = useRef<HTMLInputElement | null>(null);
+  const [kagitDurum, setKagitDurum] = useState('');
   const [kaydediyor, setKaydediyor] = useState(false);
   const [hata, setHata] = useState('');
 
@@ -244,6 +253,17 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
         tetkikler: secili.map(s => ({ hizmetId: s.tetkik.id, oncelik: s.oncelik,
                                       kontrast: s.kontrast })),
       });
+      // ISTEM KAGIDI uretilen HER isteme eklenir: rapor yazan radyolog hangi
+      //   accession'i acarsa acsin kagidi gormeli; tek isteme baglamak
+      //   digerlerini "kagitsiz" gosterirdi.
+      if (kagit && y.idler.length > 0) {
+        setKagitDurum('İstem kâğıdı yükleniyor…');
+        try {
+          for (const istemId of y.idler)
+            await api.dokumanYukle('radyoloji-istem', istemId, kagit, false);
+          setKagitDurum(`İstem kâğıdı eklendi: ${kagit.name}`);
+        } catch (h) { setKagitDurum(`İstem kâğıdı eklenemedi: ${hataMetni(h)}`) }
+      }
       mesaj(`${y.idler.length} istem açıldı: ${y.accessionlar.join(', ')}`);
       onTamam?.(y.accessionlar);
       // Basvuru acildiysa modal KAPANMAZ: protokol numarasi ve tahsil
@@ -287,6 +307,10 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
                  {/* Mockup'taki tek dugmelik kabul: basvuru + istem + tahsilat.
                      Tahsilat penceresi kayit BITINCE acilir - once kayit, sonra
                      para; ters sirada "tahsil edildi ama istem yok" kalirdi. */}
+                 {/* Mockup toolbar: istem kagidini tara/yukle. */}
+                 <button className="d" onClick={() => kagitGirdi.current?.click()}>
+                   📷 {kagit ? 'İstem Kâğıdı ✓' : 'İstem Kâğıdını Tara'}
+                 </button>
                  {kabulMu && basvuruAc && (
                    <button className="d" disabled={kaydediyor}
                            onClick={() => void kaydet(true)}>
@@ -566,6 +590,17 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
                 </div>
               )}
 
+              {/* Secili kagit: kayit BITINCE yuklenir; burada yalniz izlenir. */}
+              {(kagit || kagitDurum) && (
+                <div className="kabul-kagit">
+                  📎 {kagitDurum || `İstem kâğıdı: ${kagit?.name}`}
+                  {kagit && !kagitDurum && (
+                    <button type="button" className="d mini" title="Kaldır"
+                            onClick={() => setKagit(null)}>✕</button>
+                  )}
+                </div>
+              )}
+
               <div className="not">
                 Kaydedince tek işlemde üç kayıt üretilir: <b>başvuru</b> (protokol),
                 tetkik başına <b>istem</b> (accession no) ve seçilirse <b>tahsilat</b>.
@@ -575,6 +610,18 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
           )}
         </div>
       </div>
+
+      {/* ISTEM KAGIDI dosya girdisi: capture ile telefonda dogrudan kamera,
+          masaustunde tarayicinin kaydettigi dosya secilir. */}
+      <input ref={kagitGirdi} type="file" hidden
+             accept="image/*,application/pdf"
+             capture="environment"
+             onChange={e => {
+               const d = e.target.files?.[0] ?? null;
+               setKagit(d);
+               setKagitDurum('');
+               e.target.value = '';
+             }} />
 
       {/* Odeyen kurum aramasi - kurum listesi (249). */}
       <TarafArama

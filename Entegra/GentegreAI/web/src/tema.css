@@ -1538,3 +1538,9 @@ input.skt-gecmis {
 .kabul-sonuc b { color: var(--yazi) }
 .detay-tablo td.sag, .detay-tablo th.sag { text-align: right }
 .detay-tablo td.ind { color: var(--kirmizi, #b3261e) }
+
+/* Kabul ekraninda secilen istem kagidi (310). */
+.kabul-kagit {
+  display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+  font-size: 11.5px; color: var(--soluk); border-top: 1px solid var(--cizgi2);
+}

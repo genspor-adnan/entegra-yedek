@@ -21,7 +21,11 @@ public sealed class DokumanDeposu
         //   kaynak_id belge turu kodudur (1 e-Fatura, 2 e-Arsiv...).
         //   "sube" (193): firma logosu / kase / imza - belge_turu alani hangisi
         //   oldugunu tasir ('Logo' | 'Kaşe' | 'İmza' | 'Antet').
-        new(StringComparer.Ordinal) { "taraf", "stok", "ebelge-xslt", "sube" };
+        //   "radyoloji-istem" (310): ISTEM KAGIDI - disaridan gelen hastanin
+        //   getirdigi hekim istemi taranip/fotograflanip isteme eklenir; SGK ve
+        //   sigorta faturalamasinda "istem belgesi nerede" sorusunun cevabidir.
+        new(StringComparer.Ordinal)
+            { "taraf", "stok", "ebelge-xslt", "sube", "radyoloji-istem" };
 
     private static readonly HashSet<string> IcerikTipiBeyazListe = new(StringComparer.OrdinalIgnoreCase)
     {
