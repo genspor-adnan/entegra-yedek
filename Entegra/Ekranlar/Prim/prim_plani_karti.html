@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prim Planı — Kart — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --accent:#2f6db3; --head:#f3f6fa;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --grpbg:#fbfcfd; --ok:#2e7d46;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1180px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.sp{margin-left:auto}
+  .idstrip{display:grid;grid-template-columns:1.4fr .8fr .8fr .8fr .6fr;gap:10px;
+    padding:9px 12px;background:#f7fafc;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .fld label.req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 7px;
+    font-size:12px;display:flex;align-items:center}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg)}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  /* Belge turu ve pay rozetleri (kriter sutunlari) */
+  .rz.blg{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .rz.pay{background:#efe4fa;color:#6a3fa0;border:1px solid #d8c3ef}
+  .rz.hepsi{background:#eef1f5;color:#5b6b7c;border:1px solid #d4dde6}
+  .zincir{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11.5px;
+    padding:8px 10px;background:#fff;border:1px solid var(--line2);border-radius:3px;
+    margin:0 10px 10px;line-height:1.5}
+  .zincir .kutu{border:1px solid var(--line);border-radius:3px;padding:3px 8px;background:#fbfcfd}
+  .zincir .kutu b{color:#2c4a6b}
+  .zincir .ok{color:#8fa3b6;font-weight:bold}
+  .iz{display:grid;grid-template-columns:repeat(4,1fr);gap:9px 12px;padding:10px}
+  .iz .tam{grid-column:1 / -1}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line)}
+  .rz.rol{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .uyari{margin:0 12px 12px;border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;
+    padding:7px 9px;font-size:11px;color:#8a6218;line-height:1.55}
+  .ozet{display:flex;gap:14px;padding:8px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .ozet b{color:var(--ink)}
+  .not{max-width:1180px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">💸 Prim Planı — PRM-RAD-01 <span class="sp">GenoTIP AI · Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn">⧉ Kopyala</div>
+    <div class="btn">▦ Simülasyon</div>
+    <div class="btn">🗑 Sil</div>
+    <div class="btn sp">Kapat</div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label class="req">Plan Adı</label><div class="inp">Radyoloji — dış sevk primi</div></div>
+    <div class="fld"><label>Kod</label><div class="inp">PRM-RAD-01</div></div>
+    <div class="fld"><label class="req">Başlangıç</label><div class="inp">01.01.2026</div></div>
+    <div class="fld"><label>Bitiş</label><div class="inp sonuk">süresiz</div></div>
+    <div class="fld"><label>Durum</label><div class="inp combo">Aktif</div></div>
+  </div>
+
+  <div class="grp">
+    <h4>Kapsam <span class="mini">kampanya kapsamıyla aynı alanlar</span></h4>
+    <div class="iz">
+      <div class="fld"><label>Hekim</label><div class="inp combo sonuk">— tümü —</div></div>
+      <div class="fld"><label>Hekim Tipi</label><div class="inp combo">Dış hekim</div></div>
+      <div class="fld"><label>Branş</label><div class="inp combo sonuk">— tümü —</div></div>
+      <div class="fld"><label>Ödeyen Kurum</label><div class="inp combo sonuk">— tümü —</div></div>
+      <div class="fld"><label>Şube</label><div class="inp combo">Merkez</div></div>
+      <div class="fld"><label class="req">Baz</label><div class="inp combo">Tahsil edilen tutar</div></div>
+      <div class="fld"><label>Öncelik</label><div class="inp">10</div></div>
+      <div class="fld"><label>KDV</label><div class="inp combo">Hariç</div></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <h4>Prim Satırları <span class="mini">＋ Satır Ekle</span></h4>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:24px"></th><th style="width:104px">Rol</th><th>Hedef</th>
+          <th style="width:150px">Belge Türü</th><th style="width:96px">Pay</th>
+          <th style="width:92px">Oran Tipi</th><th class="sag" style="width:74px">Değer</th>
+          <th class="sag" style="width:88px">Üst Sınır</th>
+          <th style="width:132px">Kademe (aylık)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>☐</td><td><span class="rz rol">Gönderen</span></td>
+          <td>Tüm radyoloji tetkikleri</td>
+          <td><span class="rz blg">Fiş / Fatura</span></td>
+          <td><span class="rz hepsi">Tümü</span></td>
+          <td>Yüzde</td><td class="sag"><b>%10</b></td>
+          <td class="sag">250,00</td><td class="sonuk">—</td>
+        </tr>
+        <tr>
+          <td>☐</td><td><span class="rz rol">Gönderen</span></td>
+          <td>Tüm radyoloji tetkikleri</td>
+          <td><span class="rz blg">Tahakkuk</span></td>
+          <td><span class="rz pay">Kurum payı</span></td>
+          <td>Yüzde</td><td class="sag"><b>%12</b></td>
+          <td class="sag">250,00</td><td class="sonuk">—</td>
+        </tr>
+        <tr>
+          <td>☐</td><td><span class="rz rol">Gönderen</span></td>
+          <td>Modalite: MR</td>
+          <td><span class="rz hepsi">Tümü</span></td>
+          <td><span class="rz hepsi">Tümü</span></td>
+          <td>Yüzde</td><td class="sag"><b>%12</b></td>
+          <td class="sag">400,00</td>
+          <td>0-20 tetkik %12<br>21+ <b>%15</b></td>
+        </tr>
+        <tr>
+          <td>☐</td><td><span class="rz rol">İsteyen</span></td>
+          <td>Hizmet: Girişimsel işlemler</td>
+          <td><span class="rz hepsi">Tümü</span></td>
+          <td><span class="rz pay">Hasta payı</span></td>
+          <td>Sabit tutar</td><td class="sag"><b>150,00</b></td>
+          <td class="sag sonuk">—</td><td class="sonuk">—</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="uyari">
+      ⚠ Satır çözümü kampanyayla aynı: <b>en dar eşleşme</b> kazanır. Özgüllük sırası
+      <b>hizmet &gt; modalite &gt; kategori &gt; tümü</b>, buna <b>belge türü</b> ve <b>pay</b>
+      kriterleri eklenir: dolu kriter sayısı fazla olan satır önce gelir, eşitlikte plan
+      <b>önceliği</b> belirler. Bir kalemde <b>her rol ayrı satır</b> üretir — gönderen dış
+      hekim ile raporlayan radyolog aynı kalemden ayrı prim alır.
+      <br>Yukarıdaki örnekte gönderen hekim, aynı tetkikten <b>fiş/faturada %10</b>,
+      <b>kurum tahakkukunda %12</b> alır; MR satırı belge türü ayırmadığı için
+      MR'da her iki belgede de %12 uygulanır (daha dar hedef).
+    </div>
+  </div>
+
+  <div class="grp">
+    <h4>Belge Türü Nereden Okunur? <span class="mini">kritik ayrım</span></h4>
+    <div class="zincir">
+      <span class="kutu"><b>Tahsilat</b><br>kasa işlemi</span>
+      <span class="ok">➜</span>
+      <span class="kutu"><b>Dağıtım</b><br>hangi satıra, hangi paya (321)</span>
+      <span class="ok">➜</span>
+      <span class="kutu"><b>Başvuru satırı</b><br>tür 19 · ara kayıt</span>
+      <span class="ok">➜</span>
+      <span class="kutu"><b>GELİR BELGESİ</b><br>fatura 15 · irsaliye 14 · fiş 4 · tahakkuk 13</span>
+      <span class="ok">➜</span>
+      <span class="kutu"><b>Prim oranı</b><br>belge türü + pay</span>
+    </div>
+    <div class="iz" style="padding-top:0">
+      <div class="fld tam sonuk" style="line-height:1.65">
+        Belge türü <b>tahsilatın bağlı olduğu belgeden değil</b>, gelirin belgelendiği
+        belgeden okunur: hasta akışında tahsilat başvuruya (tür 19) bağlanır, fatura ya
+        da tahakkuk sonra kesilir. Başvuru türüne bakılsa bütün satırlar aynı türde
+        görünür ve ayrım işlemezdi. Dönüşüm bağı (<code>belge_satir.kaynak_tur = 30</code>)
+        hangi başvuru satırının hangi belgeye döndüğünü zaten tutuyor.
+      </div>
+      <div class="fld"><label>Tahsilat, belge kesilmeden önce yapıldıysa</label>
+        <div class="inp combo">Varsayılan oranla yaz, belge kesilince yeniden hesapla</div></div>
+      <div class="fld"><label>Yeniden hesap sınırı</label>
+        <div class="inp combo">Hakediş dönemi kapanana kadar</div></div>
+      <div class="fld"><label>Dönem kapandıktan sonra fark</label>
+        <div class="inp combo">Sonraki döneme düzeltme satırı</div></div>
+      <div class="fld"><label>Belge iptal / iade edilirse</label>
+        <div class="inp combo">Prim geri alınır (negatif satır)</div></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <h4>Roller <span class="mini">kod listesi: prim.rol · düzenlenebilir</span></h4>
+    <div class="iz">
+      <div class="fld tam">
+        <span class="rz rol">Gönderen</span> <span class="rz rol">İsteyen</span>
+        <span class="rz rol">Uygulayan</span> <span class="rz rol">Yapan</span>
+        <span class="rz rol">Raporlayan</span> <span class="rz rol">Onaylayan</span>
+        <span class="rz rol">Anestezi</span> <span class="rz rol">Asistan</span>
+        <span class="rz rol">Teknisyen</span>
+      </div>
+      <div class="fld tam sonuk" style="line-height:1.6">
+        Roller <b>ücretlendirme satırına</b> (belge kalemi) etiket olarak takılır; bir kalemde
+        birden çok rol ve her rolde birden çok kişi olabilir (iki cerrah = %50/%50 pay).
+      </div>
+    </div>
+  </div>
+
+  <div class="ozet">
+    <span>Satır: <b>4</b></span>
+    <span>Kapsam: <b>Dış hekimler · Merkez</b></span>
+    <span>Baz: <b>Tahsil edilen tutar</b> (KDV hariç)</span>
+    <span>Son değişiklik: <b>admin · 01.09.2026</b></span>
+  </div>
+</div>
+
+<div class="not">
+  <b>NOT (mockup):</b> Plan başlığı <b>kampanya kartının</b> aynısı (kapsam + tarih + öncelik),
+  satırları da kampanya satırı gibi <b>hedef + oran tipi + değer</b> taşır. Eklenenler:
+  <b>rol</b> (primi kimin hak ettiği), <b>baz</b> (liste / net / kurum payı / tahsil edilen),
+  <b>üst sınır</b> ve <b>kademe</b> (aylık adede göre artan oran). Kademe ay sonunda
+  hesaplandığı için hakediş dönemi kapanırken yeniden değerlenir — kalem anında yazılan tutar
+  <b>önizlemedir</b>, kesin tutar dönem hesabında oluşur.
+  <br><b>Belge türü ve pay kriterleri (kullanıcı isteği):</b> aynı rol ve aynı hizmet için
+  <b>fiş/faturada %10, tahakkukta %12</b> gibi ayrım yapılabilir; <b>pay</b> kriteri hasta
+  payı ile kurum payını ayırır (kurum payı zaten çoğunlukla tahakkuk/icmalle tahsil edilir,
+  ikisi birlikte tanımlanabilir). Prim <b>tahsil edildikçe</b> doğduğu için hesap
+  <code>kasa_islem_dagitim</code> (321) satırından başlar; belge türü, o başvuru satırının
+  dönüştüğü <b>gelir belgesinden</b> okunur.
+</div>
+</body>
+</html>
