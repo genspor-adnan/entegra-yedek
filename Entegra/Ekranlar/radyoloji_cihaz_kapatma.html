@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji — Cihaz Kapatma / Takvimde Gösterim — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --req:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1240px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.teh{border-color:#b23b3b;background:linear-gradient(#d46b6b,#b23b3b);color:#fff;font-weight:bold}
+  .sp{margin-left:auto}
+  .cip{border:1px solid var(--line);border-radius:11px;padding:2px 10px;font-size:11px;background:#fff}
+  .cip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:11.5px;display:flex;align-items:center;white-space:nowrap}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+
+  /* --------------------------------------------------------- takvim ---- */
+  .takvim{display:grid;grid-template-columns:170px 1fr;gap:10px;padding:10px}
+  .yan{border:1px solid var(--line);border-radius:4px;background:#fff;overflow:hidden}
+  .yan h5{margin:0;padding:5px 8px;background:var(--head2);border-bottom:1px solid var(--line);
+    font-size:11px;color:var(--navy);display:flex;align-items:center;gap:6px}
+  .yan .ic{padding:6px;display:grid;gap:5px}
+  .kart{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:3px;
+    background:#fbfcfd;padding:4px 6px;font-size:11px;line-height:1.35}
+  .kart.acil{border-left-color:#b23b3b}
+  .kart b{display:block}
+  .kart .alt{color:var(--muted);font-size:10.5px;display:flex;gap:5px}
+  .kart .alt .sag{margin-left:auto}
+
+  table.tk{border-collapse:collapse;width:100%;font-size:11.5px;table-layout:fixed}
+  table.tk th{background:var(--head2);border:1px solid var(--line);padding:4px 6px;
+    font-size:11px;color:var(--navy);text-align:center}
+  table.tk td{border:1px solid var(--line2);height:30px;padding:2px 4px;vertical-align:top}
+  table.tk td.saat{background:var(--head);text-align:center;color:var(--muted);width:56px;
+    border-right:1px solid var(--line)}
+  .rand{border:1px solid #bcd2ef;background:#e9f1fb;border-radius:3px;padding:2px 5px;font-size:10.5px;line-height:1.3}
+  .rand b{font-weight:bold}
+  .rand .s{color:var(--muted)}
+  .rand.tasi{outline:2px dashed var(--accent);outline-offset:-2px;background:#d7e7fb}
+  /* KAPATMA blogu: cizgili desen + kilit. Randevu kutusundan acikca farkli
+     gorunmeli - kullanici "dolu mu kapali mi" ayirmali. */
+  .kapali{background:repeating-linear-gradient(45deg,#eceff3,#eceff3 5px,#f6f8fa 5px,#f6f8fa 10px);
+    border:1px dashed #b9c4d0;border-radius:3px;color:#5b6b7c;font-size:10.5px;padding:2px 5px;
+    display:flex;gap:5px;align-items:center;height:100%}
+  .kapali b{color:#41505f}
+  .hedef{outline:2px dashed var(--accent);outline-offset:-2px;background:#eaf2fd}
+  .kucuk{font-size:10.5px;color:var(--muted)}
+  .grid2{display:grid;grid-template-columns:150px 1fr;gap:8px 10px;padding:12px;align-items:center}
+  table.ls{border-collapse:collapse;width:100%;font-size:12px}
+  table.ls th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  table.ls td{border-bottom:1px solid var(--line2);padding:5px 8px;white-space:nowrap}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .c-bak{background:#eef1f5;color:#5b6b7c;border:1px solid #d4dde6}
+  .c-ari{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .c-tat{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .not{max-width:1240px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+</style>
+</head>
+<body>
+
+<!-- ===================================================== TAKVİM ========= -->
+<div class="win">
+  <div class="title">📅 Randevu Takvimi — Cihaz Görünümü <span class="sp">01.09.2026 · Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn">✔ Geldi</div>
+    <div class="btn teh">🔒 Cihazı Kapat</div>
+    <span class="cip">Günlük</span><span class="cip">Haftalık</span>
+    <span class="cip">Hekim</span><span class="cip on">Cihaz</span>
+    <div class="inp sp" style="width:130px">01.09.2026</div>
+    <div class="btn">Bugün</div>
+  </div>
+
+  <div class="takvim">
+    <!-- randevu bekleyen istemler paneli (yapildi) -->
+    <div class="yan">
+      <h5>Randevu Bekleyen <span style="margin-left:auto;background:#efe4fa;color:#6a3fa0;
+        border-radius:9px;padding:1px 7px;font-size:10px">7</span></h5>
+      <div class="ic">
+        <div class="kart acil"><b>MEHMET ÇELİK</b>Toraks BT (kontrastlı)
+          <div class="alt"><span>BT · 20 dk</span><span class="sag">ACİL</span></div></div>
+        <div class="kart"><b>AYŞE YILMAZ</b>Lomber MR
+          <div class="alt"><span>MR · 30 dk</span><span class="sag">18 sa</span></div></div>
+        <div class="kart"><b>ZEYNEP KAYA</b>Tiroid USG
+          <div class="alt"><span>USG · 15 dk</span><span class="sag">2 gün</span></div></div>
+        <div class="kucuk">Kartı sürükleyip boş saate bırakın ya da seçip saate tıklayın.</div>
+      </div>
+    </div>
+
+    <div>
+      <table class="tk">
+        <thead>
+          <tr><th style="width:56px">Saat</th>
+              <th>Siemens Magnetom 1.5T<div class="kucuk">MR · 08:00–17:00</div></th>
+              <th>GE Revolution BT<div class="kucuk">BT · 08:00–20:00</div></th>
+              <th>Mindray USG<div class="kucuk">USG · 09:00–16:00</div></th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="saat">09:00</td>
+              <td><div class="rand"><b>FAİK BULUT</b><span class="s">09:00–09:30 · Lomber MR</span></div></td>
+              <td><div class="rand"><b>MERVE DEMİR</b><span class="s">09:00–09:20 · Toraks BT</span></div></td>
+              <td></td></tr>
+          <tr><td class="saat">09:30</td>
+              <td></td>
+              <td><div class="rand"><b>A. ODABAŞI</b><span class="s">09:30–09:50 · Batın BT</span></div></td>
+              <td><div class="rand"><b>Z. KAYA</b><span class="s">09:30–09:45 · Tiroid USG</span></div></td></tr>
+          <tr><td class="saat">10:00</td>
+              <td><div class="rand tasi"><b>AHMET ÖZTÜRK</b><span class="s">10:00–10:30 · Beyin MR</span></div></td>
+              <td></td>
+              <td rowspan="4"><div class="kapali">🔒 <div><b>Kapalı — Bakım</b><br>
+                  09:00–13:00 · Yıllık kalibrasyon<br><span class="kucuk">Sorumlu: T. Aksoy</span></div></div></td></tr>
+          <tr><td class="saat">10:30</td><td></td><td class="hedef"></td></tr>
+          <tr><td class="saat">11:00</td>
+              <td><div class="rand"><b>S. DEMİRTAŞ</b><span class="s">11:00–11:30 · Diz MR</span></div></td>
+              <td></td></tr>
+          <tr><td class="saat">11:30</td><td></td>
+              <td><div class="rand"><b>K. TESTÇİ</b><span class="s">11:30–11:50 · Toraks BT</span></div></td></tr>
+          <tr><td class="saat">12:00</td>
+              <td colspan="2"><div class="kapali">🍽 <b>Öğle arası</b> · 12:00–13:00
+                  <span class="kucuk">(cihaz mesai ayarından)</span></div></td>
+              </tr>
+          <tr><td class="saat">13:00</td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+      <div class="kucuk" style="margin-top:6px">
+        <b>Taralı ve kilitli</b> bloklar randevuya kapalıdır: bakım/arıza/tatil kapatmaları ve öğle
+        arası. Bu saatlere bırakma yapılamaz — kural veritabanında da vardır, takvim sadece
+        <b>görünür</b> kılar. <b>Kesik çerçeveli</b> kutu: sürüklenen randevunun düşeceği yer.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================ KAPATMA KAYDI ======= -->
+<div class="win" style="max-width:680px">
+  <div class="title">🔒 Cihaz Kapatma — Mindray USG</div>
+  <div class="grid2">
+    <div style="color:var(--muted)">Neden <span style="color:var(--req)">*</span></div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap">
+      <label><input type="radio" checked> Bakım / kalibrasyon</label>
+      <label><input type="radio"> Arıza</label>
+      <label><input type="radio"> Tatil / izin</label>
+      <label><input type="radio"> Diğer</label>
+    </div>
+
+    <div style="color:var(--muted)">Başlangıç <span style="color:var(--req)">*</span></div>
+    <div style="display:flex;gap:6px"><div class="inp" style="width:120px">01.09.2026</div>
+      <div class="inp" style="width:70px">09:00</div></div>
+
+    <div style="color:var(--muted)">Bitiş <span style="color:var(--req)">*</span></div>
+    <div style="display:flex;gap:6px"><div class="inp" style="width:120px">01.09.2026</div>
+      <div class="inp" style="width:70px">13:00</div></div>
+
+    <div style="color:var(--muted)">Açıklama</div>
+    <div class="inp" style="width:100%">Yıllık kalibrasyon — teknik servis randevusu</div>
+
+    <div style="color:var(--muted)">Sorumlu</div>
+    <div class="inp combo" style="width:240px">T. Aksoy (Biyomedikal)</div>
+
+    <div style="color:var(--muted)">Mevcut randevular</div>
+    <div style="border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;padding:7px 9px;line-height:1.5">
+      Bu aralıkta <b>2 randevu</b> var. Kapatma kaydedilirse bu randevular <b>taşınmalıdır</b>:
+      <div class="kucuk" style="margin-top:4px">
+        • 09:30 Z. KAYA — Tiroid USG &nbsp;•&nbsp; 11:15 A. ODABAŞI — Batın USG</div>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <div class="btn">📅 Randevuları Taşı</div>
+        <div class="btn">✉ Hastalara Haber Ver</div>
+      </div>
+    </div>
+  </div>
+  <div class="toolbar" style="border-top:1px solid var(--line);border-bottom:none">
+    <div class="btn primary">✔ Kapatmayı Kaydet</div>
+    <div class="btn sp">✖ Vazgeç</div>
+  </div>
+</div>
+
+<!-- ================================================ KAPATMA LİSTESİ ===== -->
+<div class="win">
+  <div class="title">🔒 Cihaz Kapatmaları <span class="sp">cihaz kartı › Kapatmalar sekmesi</span></div>
+  <table class="ls">
+    <thead><tr><th style="width:26px"></th><th>Cihaz</th><th>Neden</th><th>Başlangıç</th><th>Bitiş</th>
+      <th>Süre</th><th>Açıklama</th><th>Sorumlu</th><th>Etkilenen Randevu</th></tr></thead>
+    <tbody>
+      <tr><td>☐</td><td>Mindray USG</td><td><span class="chip c-bak">Bakım</span></td>
+        <td>01.09.2026 09:00</td><td>01.09.2026 13:00</td><td>4 sa</td>
+        <td>Yıllık kalibrasyon</td><td>T. Aksoy</td><td>2 (taşındı)</td></tr>
+      <tr><td>☐</td><td>GE Revolution BT</td><td><span class="chip c-ari">Arıza</span></td>
+        <td>28.08.2026 14:20</td><td>29.08.2026 10:00</td><td>19 sa 40 dk</td>
+        <td>Tüp soğutma hatası — servis çağrıldı</td><td>T. Aksoy</td><td>7 (taşındı)</td></tr>
+      <tr><td>☐</td><td>Tüm cihazlar</td><td><span class="chip c-tat">Tatil</span></td>
+        <td>29.10.2026 00:00</td><td>29.10.2026 23:59</td><td>1 gün</td>
+        <td>Resmî tatil</td><td>—</td><td>0</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="not">
+  <b>Bugünkü eksik.</b> <code>radyoloji_cihaz_kapatma</code> kaydı randevuyu <b>engelliyor</b>
+  (veritabanı tetiği, 316) ama takvimde <b>çizilmiyor</b>: kullanıcı boş görünen saate randevu vermeye
+  çalışıp "Cihaz bu aralıkta randevuya kapalı" hatası alıyor. Kural doğru, görünürlük yok.
+  <br><b>Yapılacak.</b> (1) Takvim cihaz görünümü kapatma aralıklarını <b>taralı blok</b> olarak çizsin,
+  o hücrelere tıklama/bırakma kapalı olsun; (2) öğle arası da aynı biçimde görünsün (cihaz mesai
+  ayarından); (3) toolbar'a <b>🔒 Cihazı Kapat</b> — seçili cihaz ve işaretli saat aralığıyla açılır.
+  <br><b>Kapatma kaydedilirken</b> aralığa düşen randevular sayılır ve kullanıcı uyarılır: taşımadan
+  kaydetmek eski randevuları "kapalı saatte" bırakır (tetik yalnız yeni/değişen kaydı denetler).
+  <br><b>Randevu taşıma</b> (ikinci tur): takvimde mevcut randevuyu sürükleyip başka saate/cihaza
+  bırakmak — bugün yalnız <b>bekleyen istem</b> bırakılabiliyor, kayıtlı randevu kartından
+  düzenleniyor.
+</div>
+</body>
+</html>

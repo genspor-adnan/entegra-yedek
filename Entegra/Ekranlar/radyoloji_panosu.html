@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji Panosu — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --head2:#e8eef5; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#b5731a; --teh:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1240px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sp{margin-left:auto}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:11.5px;display:flex;align-items:center;white-space:nowrap}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+
+  .govde{padding:12px;display:grid;gap:12px}
+  .sayaclar{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+  .kutu{border:1px solid var(--line);border-radius:4px;background:#fff;padding:9px 11px;position:relative}
+  .kutu .s{font-size:22px;font-weight:bold;color:var(--navy);line-height:1.15}
+  .kutu .e{font-size:11px;color:var(--muted);line-height:1.3}
+  .kutu .ik{position:absolute;right:9px;top:8px;opacity:.35;font-size:14px}
+  .kutu.teh{border-color:#e4b7b2;background:#fdf3f2} .kutu.teh .s{color:var(--teh)}
+  .kutu.uy{border-color:#f2ddbf;background:#fdf9f1} .kutu.uy .s{color:var(--uyari)}
+  .kutu.ok{border-color:#bfe3cb;background:#f4fbf6} .kutu.ok .s{color:var(--ok)}
+
+  .satir2{display:grid;grid-template-columns:1.35fr 1fr;gap:12px}
+  .pan{border:1px solid var(--line);border-radius:4px;background:#fff;overflow:hidden}
+  .pan h4{margin:0;padding:6px 10px;background:var(--head2);border-bottom:1px solid var(--line);
+    font-size:11.5px;color:var(--navy);display:flex;align-items:center;gap:6px}
+  .pan h4 .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11px}
+  .pan .ic{padding:10px}
+
+  /* cihaz doluluk cubuklari */
+  .cihaz{display:grid;grid-template-columns:150px 1fr 62px;gap:8px;align-items:center;margin-bottom:8px}
+  .bar{height:14px;border:1px solid var(--line);border-radius:3px;background:#f4f7fa;overflow:hidden;display:flex}
+  .bar i{display:block;height:100%}
+  .bar .dolu{background:linear-gradient(#5b93d6,#2f6db3)}
+  .bar .bos{background:transparent}
+  .bar .kap{background:repeating-linear-gradient(45deg,#e0e6ee,#e0e6ee 4px,#eef2f7 4px,#eef2f7 8px)}
+  .yuzde{text-align:right;font-weight:bold;color:var(--navy)}
+  .kucuk{font-size:10.5px;color:var(--muted)}
+
+  /* modalite dagilimi */
+  table{border-collapse:collapse;width:100%;font-size:11.5px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:4px 8px;text-align:left;
+     font-size:11px;color:var(--navy)}
+  td{border-bottom:1px solid var(--line2);padding:4px 8px}
+  td.sag,th.sag{text-align:right}
+  .mod{display:inline-block;min-width:34px;text-align:center;border:1px solid var(--line);
+    border-radius:3px;background:#fff;font-size:10px;font-weight:bold;color:var(--navy);padding:1px 4px}
+  .mini{height:10px;background:#e3ecfa;border:1px solid #bcd2ef;border-radius:2px;display:inline-block}
+  .uyari-satir{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border:1px solid #f2ddbf;
+    background:#fdf9f1;border-radius:3px;margin-bottom:6px;font-size:11.5px;line-height:1.4}
+  .uyari-satir.teh{border-color:#e4b7b2;background:#fdf3f2}
+  .uyari-satir b{color:var(--ink)}
+  .not{max-width:1240px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">📊 Radyoloji Panosu <span class="sp">GenoTIP AI · Merkez · 01.09.2026 11:36</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">🖥️ Çalışma Listesi</div>
+    <div class="btn">📅 Takvim</div>
+    <div class="btn">🚨 Kritik Bulgular</div>
+    <div class="btn">📦 Teslim Bekleyen</div>
+    <div class="inp combo sp" style="width:150px">Bugün</div>
+    <div class="inp combo" style="width:150px">Tüm cihazlar</div>
+  </div>
+
+  <div class="govde">
+    <!-- Sayaclarin hepsi TIKLANIR: ilgili listeyi o suzgecle acar. Pano
+         "bakilacak yer" degil, ise giris kapisidir. -->
+    <div class="sayaclar">
+      <div class="kutu"><div class="ik">📅</div><div class="s">38</div><div class="e">Bugünkü randevu</div></div>
+      <div class="kutu"><div class="ik">🕐</div><div class="s">11</div><div class="e">Çekim bekleyen</div></div>
+      <div class="kutu uy"><div class="ik">✎</div><div class="s">17</div><div class="e">Raporlanacak</div></div>
+      <div class="kutu teh"><div class="ik">🚨</div><div class="s">3</div><div class="e">Açık kritik bulgu</div></div>
+      <div class="kutu"><div class="ik">📦</div><div class="s">14</div><div class="e">Teslim bekleyen</div></div>
+      <div class="kutu ok"><div class="ik">✔</div><div class="s">42</div><div class="e">Bugün tamamlanan</div></div>
+    </div>
+
+    <div class="satir2">
+      <!-- ------------------------------------------------ cihaz doluluk -->
+      <div class="pan">
+        <h4>🖥️ Cihaz Doluluğu <span class="sp">bugün · mesai saatleri üzerinden</span></h4>
+        <div class="ic">
+          <div class="cihaz">
+            <div>Siemens Magnetom 1.5T<div class="kucuk">MR · 08:00–17:00</div></div>
+            <div class="bar"><i class="dolu" style="width:78%"></i><i class="bos" style="width:22%"></i></div>
+            <div class="yuzde">%78</div>
+          </div>
+          <div class="cihaz">
+            <div>GE Revolution BT<div class="kucuk">BT · 08:00–20:00</div></div>
+            <div class="bar"><i class="dolu" style="width:54%"></i><i class="bos" style="width:46%"></i></div>
+            <div class="yuzde">%54</div>
+          </div>
+          <div class="cihaz">
+            <div>Philips DigitalDiagnost<div class="kucuk">Röntgen · randevusuz (walk-in)</div></div>
+            <div class="bar"><i class="dolu" style="width:36%"></i><i class="bos" style="width:64%"></i></div>
+            <div class="yuzde">%36</div>
+          </div>
+          <div class="cihaz">
+            <div>Mindray USG<div class="kucuk">USG · 09:00–16:00</div></div>
+            <div class="bar"><i class="dolu" style="width:41%"></i><i class="kap" style="width:25%"></i><i class="bos" style="width:34%"></i></div>
+            <div class="yuzde">%41</div>
+          </div>
+          <div class="kucuk" style="margin-top:2px">
+            Taralı alan: <b>bakım/tatil kapatması</b> — o aralık randevuya kapalıdır, doluluk payda
+            dışında tutulur.
+          </div>
+        </div>
+      </div>
+
+      <!-- ------------------------------------------------ dikkat kutusu -->
+      <div class="pan">
+        <h4>⚠️ Dikkat Gerektirenler</h4>
+        <div class="ic">
+          <div class="uyari-satir teh">
+            <span>🚨</span><div><b>1 kritik bulgu 60 dk'yı geçti</b> — ACC-260901-0007, MEHMET ÇELİK
+            (Beyin BT). Bildirim yapılmadı.</div>
+          </div>
+          <div class="uyari-satir">
+            <span>🕐</span><div><b>4 istem randevusuz</b> bekliyor — en eskisi 3 gündür sırada.</div>
+          </div>
+          <div class="uyari-satir">
+            <span>📦</span><div><b>3 sonuç 7 günden uzun</b> süredir alınmadı — hasta aranmalı.</div>
+          </div>
+          <div class="uyari-satir">
+            <span>🧑‍⚕️</span><div><b>2 konsültasyon</b> cevap bekliyor (en eskisi 2 sa 56 dk).</div>
+          </div>
+          <div class="uyari-satir">
+            <span>🧪</span><div><b>Kontrast madde kritik seviyede</b>: İyoheksol 350 mg — 4 flakon kaldı.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="satir2">
+      <!-- ------------------------------------------ modalite dagilimi -->
+      <div class="pan">
+        <h4>📈 Modalite Dağılımı <span class="sp">bugün</span></h4>
+        <div class="ic">
+          <table>
+            <thead><tr><th>Modalite</th><th>Dağılım</th><th class="sag">Çekim</th>
+              <th class="sag">Raporsuz</th><th class="sag">Ort. rapor süresi</th></tr></thead>
+            <tbody>
+              <tr><td><span class="mod">MR</span></td>
+                  <td><span class="mini" style="width:120px"></span></td>
+                  <td class="sag">16</td><td class="sag">7</td><td class="sag">3 sa 10 dk</td></tr>
+              <tr><td><span class="mod">BT</span></td>
+                  <td><span class="mini" style="width:96px"></span></td>
+                  <td class="sag">13</td><td class="sag">5</td><td class="sag">1 sa 48 dk</td></tr>
+              <tr><td><span class="mod">DR</span></td>
+                  <td><span class="mini" style="width:64px"></span></td>
+                  <td class="sag">9</td><td class="sag">3</td><td class="sag">42 dk</td></tr>
+              <tr><td><span class="mod">USG</span></td>
+                  <td><span class="mini" style="width:44px"></span></td>
+                  <td class="sag">6</td><td class="sag">2</td><td class="sag">26 dk</td></tr>
+              <tr><td><span class="mod">MG</span></td>
+                  <td><span class="mini" style="width:20px"></span></td>
+                  <td class="sag">3</td><td class="sag">0</td><td class="sag">1 sa 05 dk</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ------------------------------------------ radyolog yuku -->
+      <div class="pan">
+        <h4>🧑‍⚕️ Radyolog Yükü <span class="sp">açık rapor / bugün onaylanan</span></h4>
+        <div class="ic">
+          <table>
+            <thead><tr><th>Radyolog</th><th class="sag">Açık</th><th class="sag">Onaylanan</th>
+              <th class="sag">Ort. süre</th></tr></thead>
+            <tbody>
+              <tr><td>Dr. S. Yıldız</td><td class="sag">8</td><td class="sag">14</td><td class="sag">52 dk</td></tr>
+              <tr><td>Dr. B. Aladağ</td><td class="sag">6</td><td class="sag">11</td><td class="sag">1 sa 08 dk</td></tr>
+              <tr><td>Asis. Dr. E. Tunç</td><td class="sag">3</td><td class="sag">6</td><td class="sag">2 sa 15 dk</td>
+              </tr>
+              <tr><td colspan="4" class="kucuk">Asistan raporları onaya düşer — "onaylanan" sütunu
+                  uzman onayını sayar.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>İşleyiş.</b> Pano ana sayfada radyoloji bloğu olarak durur; her sayaç <b>tıklanır</b> ve ilgili
+  listeyi kendi süzgeciyle açar (örn. "Açık kritik bulgu" → Kritik Bulgu Takibi, "Bildirilmemiş" çipi
+  seçili). Şube ve tarih üstten süzülür.
+  <br><b>Kaynak.</b> Hepsi mevcut tablolardan: <code>radyoloji_istem</code> (durum, çekim/rapor
+  zamanları), <code>radyoloji_rapor</code>, <code>radyoloji_kritik_bulgu</code>,
+  <code>radyoloji_konsultasyon</code>, <code>radyoloji_teslim</code>, <code>randevu</code> +
+  <code>radyoloji_cihaz(_kapatma)</code>. Kontrast uyarısı stok tarafından gelir (sarf düşümü
+  yapıldığında anlamlı olur).
+  <br><b>Not.</b> Doluluk paydası cihazın mesai süresi eksi kapatma aralıkları; walk-in çalışan cihazda
+  doluluk çekim sayısı üzerinden hesaplanır.
+</div>
+</body>
+</html>

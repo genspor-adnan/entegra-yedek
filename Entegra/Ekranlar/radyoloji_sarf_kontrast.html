@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji — Kontrast / Sarf Malzeme Düşümü — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --req:#b23b3b; --uyari:#b5731a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1120px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fa96b,#2e7d46);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sp{margin-left:auto}
+  .sek{display:flex;gap:2px;padding:6px 8px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sek div{border:1px solid var(--line);border-bottom:none;border-radius:3px 3px 0 0;padding:4px 12px;
+    font-size:11.5px;background:linear-gradient(#f7f9fc,#eef2f7);color:var(--muted)}
+  .sek div.on{background:#fff;color:var(--navy);font-weight:bold}
+  .grp{border:1px solid var(--line);border-radius:4px;margin:10px;overflow:hidden}
+  .grp h5{margin:0;padding:5px 9px;background:var(--head2);border-bottom:1px solid var(--line);
+    font-size:11.5px;color:var(--navy);display:flex;align-items:center;gap:6px}
+  .grp h5 .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11px}
+  .ic{padding:10px}
+  .grid2{display:grid;grid-template-columns:170px 1fr;gap:8px 10px;align-items:center}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:11.5px;display:flex;align-items:center;white-space:nowrap}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  table{border-collapse:collapse;width:100%;font-size:11.5px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);padding:4px 8px;white-space:nowrap}
+  td.sag,th.sag{text-align:right}
+  tr.sec td{background:var(--sel)}
+  .kucuk{font-size:10.5px;color:var(--muted)}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .c-otom{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .c-elle{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .c-lot{background:#efe4fa;color:#6a3fa0;border:1px solid #d8c3ef}
+  .uy{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;padding:7px 9px;line-height:1.5;
+    color:#6b5626;font-size:11.5px}
+  .uy.teh{border-color:#e4b7b2;background:#fdf3f2;color:#8f3d36}
+  .not{max-width:1120px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+</style>
+</head>
+<body>
+
+<!-- =========================================== PROTOKOL: MALZEME LİSTESİ = -->
+<div class="win">
+  <div class="title">🧪 Çekim Protokolü — Toraks BT (kontrastlı) <span class="sp">Malzeme sekmesi</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn">＋ Malzeme Ekle</div>
+    <div class="btn pas">🗑 Satırı Sil</div>
+    <div class="btn sp">✖ Kapat</div>
+  </div>
+  <div class="sek">
+    <div>Genel</div><div>Hazırlık</div><div class="on">Malzeme / Sarf</div><div>Uyarılar</div>
+  </div>
+
+  <div class="grp">
+    <h5>🧪 Standart Sarf Listesi <span class="sp">çekim "Çekildi" işaretlenince bu satırlar düşer</span></h5>
+    <div class="ic">
+      <table>
+        <thead><tr><th style="width:26px"></th><th>Stok</th><th>Tip</th><th class="sag">Miktar</th>
+          <th>Birim</th><th>Düşüm</th><th>Kilo/doz kuralı</th><th class="sag">Birim Maliyet</th></tr></thead>
+        <tbody>
+          <tr class="sec"><td>☑</td><td>İyoheksol 350 mg/mL 100 mL flakon</td><td>Kontrast</td>
+            <td class="sag">1,0</td><td>flakon</td>
+            <td><span class="chip c-otom">Otomatik</span></td>
+            <td>1,5 mL/kg — 100 mL üstü 2. flakon</td><td class="sag">248,00</td></tr>
+          <tr><td>☐</td><td>Enjektör 50 mL (otomatik enjektör seti)</td><td>Sarf</td>
+            <td class="sag">1,0</td><td>adet</td>
+            <td><span class="chip c-otom">Otomatik</span></td><td>—</td><td class="sag">62,50</td></tr>
+          <tr><td>☐</td><td>IV kanül 20G</td><td>Sarf</td>
+            <td class="sag">1,0</td><td>adet</td>
+            <td><span class="chip c-otom">Otomatik</span></td><td>—</td><td class="sag">14,20</td></tr>
+          <tr><td>☐</td><td>Serum fizyolojik 100 mL</td><td>Sarf</td>
+            <td class="sag">1,0</td><td>adet</td>
+            <td><span class="chip c-otom">Otomatik</span></td><td>—</td><td class="sag">21,00</td></tr>
+          <tr><td>☐</td><td>CD (sonuç)</td><td>Sarf</td>
+            <td class="sag">1,0</td><td>adet</td>
+            <td><span class="chip c-elle">İstenirse</span></td>
+            <td>Kabulde "CD istendi" işaretliyse</td><td class="sag">6,00</td></tr>
+        </tbody>
+      </table>
+      <div class="kucuk" style="margin-top:6px">
+        Protokolde <b>kontrast tipi</b> zaten var (İV / oral / rektal); malzeme listesi onun
+        <b>stok karşılığını</b> tanımlar. Kontrastsız protokolde liste boş kalır.
+      </div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <h5>⚙️ Düşüm Kuralı</h5>
+    <div class="ic grid2">
+      <div style="color:var(--muted)">Düşüm anı</div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <label><input type="radio" checked> Çekim tamamlanınca ("Çekildi")</label>
+        <label><input type="radio"> Kabulde (peşin)</label>
+      </div>
+      <div style="color:var(--muted)">Depo</div>
+      <div class="inp combo" style="width:260px">Radyoloji Deposu</div>
+      <div style="color:var(--muted)">Onay</div>
+      <div><label><input type="checkbox" checked> Teknisyen miktarları <b>onaylasın</b>
+        (kullanılmayan malzeme çıkarılabilsin)</label></div>
+      <div style="color:var(--muted)">Faturalama</div>
+      <div><label><input type="checkbox"> Kontrast <b>hastaya ayrıca faturalansın</b>
+        (kurum sözleşmesi kontrastı ayrı ödüyorsa)</label></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================ ÇEKİM SONRASI SARF ONAY PENCERESİ ==== -->
+<div class="win" style="max-width:720px">
+  <div class="title">🧪 Sarf Onayı — ACC-260901-0010 <span class="sp">MERVE DEMİR · Toraks BT (kontrastlı)</span></div>
+  <div style="padding:10px">
+    <div class="uy" style="margin-bottom:10px">
+      Çekim <b>tamamlandı</b> olarak işaretlendi. Aşağıdaki malzemeler <b>Radyoloji Deposu</b>ndan
+      düşülecek. Kullanılmayanı çıkarın, fazla kullanılanı artırın.
+    </div>
+    <table>
+      <thead><tr><th style="width:26px"></th><th>Stok</th><th class="sag">Protokol</th>
+        <th class="sag">Kullanılan</th><th>Birim</th><th>Lot / SKT</th><th class="sag">Kalan Stok</th></tr></thead>
+      <tbody>
+        <tr><td>☑</td><td>İyoheksol 350 mg/mL 100 mL</td><td class="sag">1,0</td>
+          <td class="sag"><b>1,0</b></td><td>flakon</td>
+          <td><span class="chip c-lot">LOT-2609A · 05.2027</span></td><td class="sag">4</td></tr>
+        <tr><td>☑</td><td>Enjektör 50 mL seti</td><td class="sag">1,0</td>
+          <td class="sag"><b>1,0</b></td><td>adet</td><td>—</td><td class="sag">37</td></tr>
+        <tr><td>☑</td><td>IV kanül 20G</td><td class="sag">1,0</td>
+          <td class="sag"><b>2,0</b></td><td>adet</td><td>—</td><td class="sag">115</td></tr>
+        <tr><td>☐</td><td>Serum fizyolojik 100 mL</td><td class="sag">1,0</td>
+          <td class="sag" style="opacity:.5">0</td><td>adet</td><td>—</td><td class="sag">64</td></tr>
+        <tr><td>☐</td><td>CD (sonuç)</td><td class="sag">1,0</td>
+          <td class="sag" style="opacity:.5">0</td><td>adet</td>
+          <td class="kucuk">kabulde CD istenmemiş</td><td class="sag">210</td></tr>
+      </tbody>
+    </table>
+    <div class="uy teh" style="margin-top:10px">
+      ⚠️ <b>İyoheksol 350 mg</b> kritik seviyede: bu düşümden sonra <b>4 flakon</b> kalıyor
+      (kritik eşik 5). Satın alma talebi oluşturulsun mu?
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <div class="btn">📝 Satın Alma Talebi Aç</div>
+        <div class="btn">🔕 Bu sefer atla</div>
+      </div>
+    </div>
+  </div>
+  <div class="toolbar" style="border-top:1px solid var(--line);border-bottom:none">
+    <div class="btn ok">✔ Onayla ve Düş</div>
+    <div class="btn">↷ Şimdilik Atla</div>
+    <div class="btn sp">✖ Vazgeç</div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Bugünkü eksik.</b> İstemde <b>kontrast tipi ve ml</b> zaten tutuluyor ama hiçbir şey stoktan
+  düşmüyor: kontrast, enjektör, kanül, film ve CD kayıt dışı gidiyor; maliyet ve tetkik kârlılığı
+  hesaplanamıyor, kritik stok uyarısı çıkmıyor.
+  <br><b>İşleyiş.</b> (1) Çekim protokolüne <b>Malzeme/Sarf</b> sekmesi — tetkik başına standart
+  malzeme listesi; (2) çekim "Çekildi" işaretlenince <b>sarf onay penceresi</b> açılır, teknisyen
+  gerçek kullanımı düzeltir; (3) onayla birlikte depo çıkış fişi üretilir ve isteme bağlanır.
+  <br><b>Neden onay adımı var.</b> Kontrast miktarı hastanın kilosuna göre değişir, damar yolu ikinci
+  kanül gerektirebilir. Protokol <b>varsayılan</b>dır, gerçek kullanım teknisyenin elindedir; sessiz
+  otomatik düşüm stok sayımını bozar.
+  <br><b>Tablolar.</b> Yeni: <code>radyoloji_protokol_malzeme</code> (protokol_id, stok_id, miktar,
+  düşüm tipi, kural), <code>radyoloji_sarf</code> (istem_id, stok_id, miktar, lot, depo, fiş_id).
+  Mevcut stok/depo hareket altyapısı ve seri-lot izleme kullanılır — radyolojiye ayrı stok mantığı
+  yazılmaz.
+</div>
+</body>
+</html>

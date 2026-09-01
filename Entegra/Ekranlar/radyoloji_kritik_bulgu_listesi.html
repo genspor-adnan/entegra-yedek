@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji — Kritik Bulgu Takibi — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --req:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1240px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sp{margin-left:auto}
+  .ara{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:12px;
+    background:#fff;height:23px;padding:0 9px;width:250px;color:var(--muted)}
+  .cips{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:11px;padding:2px 10px;font-size:11px;background:#fff}
+  .cip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .cip.teh{border-color:#e4b7b2;background:#fdf3f2;color:#8f3d36;font-weight:bold}
+  .suz{display:flex;gap:6px;margin-left:auto;align-items:center}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:11.5px;display:flex;align-items:center;white-space:nowrap}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .serit{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .kutu{border:1px solid var(--line);border-radius:4px;background:#fff;padding:8px 10px}
+  .kutu .s{font-size:20px;font-weight:bold;color:var(--navy);line-height:1.1}
+  .kutu .e{font-size:11px;color:var(--muted)}
+  .kutu.teh{border-color:#e4b7b2;background:#fdf3f2}
+  .kutu.teh .s{color:#a3352c}
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px;white-space:nowrap}
+  tr.sec td{background:var(--sel)}
+  tr.gec td{background:#fdf3f2}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .c-bek{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .c-bild{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-den{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .mod{display:inline-block;min-width:34px;text-align:center;border:1px solid var(--line);
+    border-radius:3px;background:#fff;font-size:10px;font-weight:bold;color:var(--navy);padding:1px 4px}
+  .sure{font-weight:bold}
+  .sure.teh{color:#b23b3b}
+  .sure.ok{color:#2e7d46}
+  .bulgu{white-space:normal;max-width:340px;line-height:1.45}
+  .dip{display:flex;gap:14px;padding:6px 10px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted)}
+  .dip b{color:var(--ink)}
+  .not{max-width:1240px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🚨 Radyoloji — Kritik Bulgu Takibi <span class="sp">GenoTIP AI · Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">📞 Bildirimi Kaydet</div>
+    <div class="btn">👁 İstemi Aç</div>
+    <div class="btn">📄 Raporu Aç</div>
+    <div class="btn">✔ Kapat (teyit alındı)</div>
+    <div class="btn pas">🖨 Bildirim Formu</div>
+    <div class="ara sp">🔍 Hasta, accession, bulgu metni…</div>
+  </div>
+
+  <!-- Kritik bulgu bir SAYAÇ isidir: "bulundu" degil "haber verildi mi, ne
+       kadar surede" olcusu tutulur. Sayac seridi listenin ustunde durur. -->
+  <div class="serit">
+    <div class="kutu teh"><div class="s">3</div><div class="e">Bildirilmemiş (açık)</div></div>
+    <div class="kutu teh"><div class="s">1</div><div class="e">60 dk'yı geçen</div></div>
+    <div class="kutu"><div class="s">12</div><div class="e">Bugün bildirilen</div></div>
+    <div class="kutu"><div class="s">18 dk</div><div class="e">Ortalama bildirim süresi</div></div>
+  </div>
+
+  <div class="cips">
+    <span class="cip teh on">Bildirilmemiş (3)</span>
+    <span class="cip">Bildirildi, teyit bekliyor</span>
+    <span class="cip">Kapatılan</span>
+    <span class="cip">Tümü</span>
+    <div class="suz">
+      <div class="inp combo">Tüm modaliteler</div>
+      <div class="inp combo">Tüm radyologlar</div>
+      <div class="inp">01.09.2026</div>
+      <div class="inp">—</div>
+      <div class="inp">01.09.2026</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:26px"></th>
+        <th>Bulgu Zamanı</th><th>Mod.</th><th>Accession</th><th>Hasta</th>
+        <th>Tetkik</th><th>Kritik Bulgu</th>
+        <th>Bulan Radyolog</th><th>Bildirilecek Hekim</th>
+        <th>Durum</th><th>Yol</th><th style="text-align:right">Geçen Süre</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="gec">
+        <td>☐</td><td>08:12</td><td><span class="mod">BT</span></td><td>ACC-260901-0007</td>
+        <td>MEHMET ÇELİK</td><td>Beyin BT (kontrastsız)</td>
+        <td class="bulgu">Akut intrakraniyal kanama — sol frontal, orta hat şifti mevcut.</td>
+        <td>Dr. S. Yıldız</td><td>Acil Servis · Dr. M. Şen</td>
+        <td><span class="chip c-bek">Bildirilmedi</span></td><td>—</td>
+        <td style="text-align:right" class="sure teh">1 sa 24 dk</td>
+      </tr>
+      <tr class="sec">
+        <td>☑</td><td>09:47</td><td><span class="mod">BT</span></td><td>ACC-260901-0010</td>
+        <td>MERVE DEMİR</td><td>Toraks BT (kontrastlı)</td>
+        <td class="bulgu">Pulmoner emboli — sağ ana pulmoner arterde dolum defekti.</td>
+        <td>Dr. S. Yıldız</td><td>Göğüs Hast. · Dr. E. Tunç</td>
+        <td><span class="chip c-bek">Bildirilmedi</span></td><td>—</td>
+        <td style="text-align:right" class="sure teh">32 dk</td>
+      </tr>
+      <tr>
+        <td>☐</td><td>10:05</td><td><span class="mod">USG</span></td><td>ACC-260901-0011</td>
+        <td>AYŞE YILMAZ</td><td>Batın USG</td>
+        <td class="bulgu">Serbest sıvı + splenik laserasyon şüphesi; BT önerilir.</td>
+        <td>Dr. B. Aladağ</td><td>Genel Cerrahi · Dr. O. Çetin</td>
+        <td><span class="chip c-bek">Bildirilmedi</span></td><td>—</td>
+        <td style="text-align:right" class="sure">14 dk</td>
+      </tr>
+      <tr>
+        <td>☐</td><td>08:55</td><td><span class="mod">DR</span></td><td>ACC-260901-0004</td>
+        <td>FAİK BULUT</td><td>Akciğer Grafisi PA</td>
+        <td class="bulgu">Tansiyon pnömotoraks — sağ hemitoraks.</td>
+        <td>Dr. S. Yıldız</td><td>Acil Servis · Dr. M. Şen</td>
+        <td><span class="chip c-den">Teyit bekliyor</span></td><td>Telefon</td>
+        <td style="text-align:right" class="sure ok">6 dk</td>
+      </tr>
+      <tr>
+        <td>☐</td><td>Dün 16:20</td><td><span class="mod">MR</span></td><td>ACC-260831-0022</td>
+        <td>ZEYNEP KAYA</td><td>Beyin MR (difüzyon)</td>
+        <td class="bulgu">Akut enfarkt — sol MCA sulama alanı.</td>
+        <td>Dr. B. Aladağ</td><td>Nöroloji · Dr. A. Kurt</td>
+        <td><span class="chip c-bild">Kapatıldı</span></td><td>Yüz yüze</td>
+        <td style="text-align:right" class="sure ok">4 dk</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="dip">
+    <span>Kayıt: <b>5</b></span>
+    <span>Açık kritik bulgu: <b style="color:#b23b3b">3</b></span>
+    <span>Hedef bildirim süresi: <b>60 dk</b></span>
+    <span class="sp">Son yenileme: 11:36</span>
+  </div>
+</div>
+
+<!-- ------------------------------------------------- bildirim kaydi ------ -->
+<div class="win" style="margin-top:14px;max-width:640px">
+  <div class="title">📞 Kritik Bulgu Bildirimi — ACC-260901-0010 <span class="sp">MERVE DEMİR</span></div>
+  <div style="padding:12px;display:grid;grid-template-columns:150px 1fr;gap:8px 10px;align-items:center">
+    <div style="color:var(--muted)">Bulgu</div>
+    <div class="inp" style="height:auto;padding:6px;white-space:normal">
+      Pulmoner emboli — sağ ana pulmoner arterde dolum defekti.</div>
+
+    <div style="color:var(--muted)">Bildirilen kişi <span style="color:var(--req)">*</span></div>
+    <div class="inp combo">Göğüs Hast. · Dr. E. Tunç</div>
+
+    <div style="color:var(--muted)">Bildirim yolu <span style="color:var(--req)">*</span></div>
+    <div style="display:flex;gap:12px">
+      <label><input type="radio" checked> Telefon</label>
+      <label><input type="radio"> Yüz yüze</label>
+      <label><input type="radio"> Mesaj / sistem</label>
+    </div>
+
+    <div style="color:var(--muted)">Bildirim zamanı</div>
+    <div class="inp" style="width:170px">01.09.2026 &nbsp; 10:19</div>
+
+    <div style="color:var(--muted)">Karşı taraf teyidi</div>
+    <div><label><input type="checkbox" checked> Bulguyu aldığını sözlü olarak teyit etti</label></div>
+
+    <div style="color:var(--muted)">Not</div>
+    <div class="inp" style="height:46px;align-items:flex-start;padding:6px;white-space:normal">
+      Hasta acile alındı, antikoagülan başlandı.</div>
+  </div>
+  <div class="toolbar" style="border-top:1px solid var(--line);border-bottom:none">
+    <div class="btn primary">✔ Bildirimi Kaydet</div>
+    <div class="btn">✔ Kaydet ve Kapat</div>
+    <div class="btn sp">✖ Vazgeç</div>
+  </div>
+</div>
+
+<div class="not">
+  <b>İşleyiş.</b> Kritik bulgu <b>rapor ekranında</b> işaretlenir (radyolog "bu tetkikte kritik bulgu var"
+  der ve bulguyu yazar) — bu ekran onların <b>takip listesidir</b>: kim bildirdi, kime, hangi yolla,
+  kaç dakikada. Bildirilmeyen bulgu listeden düşmez; geçen süre büyüdükçe satır kırmızıya döner.
+  <br><b>Neden ayrı ekran.</b> Bulgunun yazılması yetmez, <b>haber verilmesi</b> ve karşı tarafın
+  <b>teyidi</b> hukuki iz olarak tutulur. Bugün veri giriliyor ama toplu görülemiyor — mesai sonunda
+  "açık kalan var mı" sorusunun cevabı yok.
+  <br><b>Tablo.</b> <code>radyoloji_kritik_bulgu</code> (istem_id, bulgu, bildirilen_ad, yol, zaman) +
+  <code>radyoloji_istem.kritik</code> bayrağı. Ek alan: <b>teyit_alindi</b>, <b>kapatan/kapatma_zamani</b>.
+</div>
+</body>
+</html>

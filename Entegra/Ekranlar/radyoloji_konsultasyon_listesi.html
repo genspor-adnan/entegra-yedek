@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji — Konsültasyon Takibi — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --req:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1240px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sp{margin-left:auto}
+  .ara{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:12px;
+    background:#fff;height:23px;padding:0 9px;width:250px;color:var(--muted)}
+  .cips{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:11px;padding:2px 10px;font-size:11px;background:#fff}
+  .cip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .suz{display:flex;gap:6px;margin-left:auto;align-items:center}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:11.5px;display:flex;align-items:center;white-space:nowrap}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px;white-space:nowrap;vertical-align:top}
+  tr.sec td{background:var(--sel)}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .c-bek{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .c-cev{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-red{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .c-dis{background:#efe4fa;color:#6a3fa0;border:1px solid #d8c3ef}
+  .mod{display:inline-block;min-width:34px;text-align:center;border:1px solid var(--line);
+    border-radius:3px;background:#fff;font-size:10px;font-weight:bold;color:var(--navy);padding:1px 4px}
+  .metin{white-space:normal;max-width:300px;line-height:1.45}
+  .yan{color:var(--muted);font-size:11px}
+  .dip{display:flex;gap:14px;padding:6px 10px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted)}
+  .dip b{color:var(--ink)}
+  .not{max-width:1240px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+  .grid2{display:grid;grid-template-columns:150px 1fr;gap:8px 10px;padding:12px;align-items:center}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🧑‍⚕️ Radyoloji — Konsültasyon Takibi <span class="sp">GenoTIP AI · Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Konsültasyon İste</div>
+    <div class="btn">✎ Cevabı Yaz</div>
+    <div class="btn">👁 İstemi Aç</div>
+    <div class="btn">📄 Raporu Aç</div>
+    <div class="btn pas">✖ İptal</div>
+    <div class="ara sp">🔍 Hasta, accession, hekim…</div>
+  </div>
+
+  <div class="cips">
+    <span class="cip on">Cevap Bekleyen (4)</span>
+    <span class="cip">Bana Gelenler</span>
+    <span class="cip">Benim İstediklerim</span>
+    <span class="cip">Cevaplanan</span>
+    <span class="cip">Tümü</span>
+    <div class="suz">
+      <div class="inp combo">Tüm modaliteler</div>
+      <div class="inp combo">Tüm hekimler</div>
+      <div class="inp">25.08.2026</div>
+      <div class="inp">—</div>
+      <div class="inp">01.09.2026</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:26px"></th>
+        <th>İstek Zamanı</th><th>Mod.</th><th>Accession</th><th>Hasta</th>
+        <th>İsteyen</th><th>İstenen</th><th>Soru</th><th>Cevap</th>
+        <th>Durum</th><th style="text-align:right">Bekleme</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="sec">
+        <td>☑</td><td>Bugün 09:12</td><td><span class="mod">MR</span></td><td>ACC-260901-0009</td>
+        <td>AYŞE YILMAZ<div class="yan">41 / K</div></td>
+        <td>Dr. B. Aladağ<div class="yan">Radyoloji</div></td>
+        <td>Prof. Dr. S. Arda<div class="yan"><span class="chip c-dis">Dış</span> Nöroradyoloji</div></td>
+        <td class="metin">Sol temporal lezyon — düşük dereceli glial tümör mü, displazi mi?</td>
+        <td class="metin yan">—</td>
+        <td><span class="chip c-bek">Bekliyor</span></td>
+        <td style="text-align:right">2 sa 24 dk</td>
+      </tr>
+      <tr>
+        <td>☐</td><td>Bugün 08:40</td><td><span class="mod">BT</span></td><td>ACC-260901-0006</td>
+        <td>MEHMET ÇELİK<div class="yan">67 / E</div></td>
+        <td>Dr. S. Yıldız<div class="yan">Radyoloji</div></td>
+        <td>Dr. O. Çetin<div class="yan">Genel Cerrahi</div></td>
+        <td class="metin">Serbest hava var mı? Cerrahi girişim planı için görüş.</td>
+        <td class="metin yan">—</td>
+        <td><span class="chip c-bek">Bekliyor</span></td>
+        <td style="text-align:right">2 sa 56 dk</td>
+      </tr>
+      <tr>
+        <td>☐</td><td>Dün 15:20</td><td><span class="mod">MG</span></td><td>ACC-260831-0018</td>
+        <td>MERVE DEMİR<div class="yan">48 / K</div></td>
+        <td>Dr. B. Aladağ<div class="yan">Radyoloji</div></td>
+        <td>Dr. E. Tunç<div class="yan">Radyoloji · ikinci okuma</div></td>
+        <td class="metin">BI-RADS 3 mü 4A mı? Sağ üst dış kadran mikrokalsifikasyon.</td>
+        <td class="metin">BI-RADS 4A. Biyopsi önerilir; 6 ay takip yeterli değil.</td>
+        <td><span class="chip c-cev">Cevaplandı</span></td>
+        <td style="text-align:right">3 sa 10 dk</td>
+      </tr>
+      <tr>
+        <td>☐</td><td>30.08 11:05</td><td><span class="mod">USG</span></td><td>ACC-260830-0044</td>
+        <td>ZEYNEP KAYA<div class="yan">29 / K</div></td>
+        <td>Dr. A. Yılmaz<div class="yan">Dahiliye</div></td>
+        <td>Dr. S. Yıldız<div class="yan">Radyoloji</div></td>
+        <td class="metin">Tiroid nodülü TIRADS sınıflaması ve FNAB gerekliliği?</td>
+        <td class="metin">TIRADS 4; 1,8 cm — FNAB endikasyonu var.</td>
+        <td><span class="chip c-cev">Cevaplandı</span></td>
+        <td style="text-align:right">45 dk</td>
+      </tr>
+      <tr>
+        <td>☐</td><td>29.08 17:30</td><td><span class="mod">BT</span></td><td>ACC-260829-0031</td>
+        <td>FAİK BULUT<div class="yan">55 / E</div></td>
+        <td>Dr. S. Yıldız<div class="yan">Radyoloji</div></td>
+        <td>Dr. M. Şen<div class="yan">Acil</div></td>
+        <td class="metin">Klinik korelasyon: hastanın ağrısı sağ alt kadranda mı?</td>
+        <td class="metin yan">Hasta taburcu — konsültasyon iptal edildi.</td>
+        <td><span class="chip c-red">İptal</span></td>
+        <td style="text-align:right">—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="dip">
+    <span>Kayıt: <b>5</b></span>
+    <span>Cevap bekleyen: <b>2</b></span>
+    <span>Ortalama cevap süresi: <b>1 sa 58 dk</b></span>
+    <span class="sp">Son yenileme: 11:36</span>
+  </div>
+</div>
+
+<!-- --------------------------------------------------- konsultasyon kayit -->
+<div class="win" style="margin-top:14px;max-width:680px">
+  <div class="title">＋ Konsültasyon İste — ACC-260901-0009 <span class="sp">AYŞE YILMAZ · Beyin MR</span></div>
+  <div class="grid2">
+    <div style="color:var(--muted)">Kime <span style="color:var(--req)">*</span></div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <div class="inp combo" style="width:280px">Prof. Dr. S. Arda</div>
+      <label><input type="radio" checked> Kurum içi</label>
+      <label><input type="radio"> Dış hekim</label>
+    </div>
+
+    <div style="color:var(--muted)">Konsültasyon tipi</div>
+    <div style="display:flex;gap:12px">
+      <label><input type="radio" checked> Görüş</label>
+      <label><input type="radio"> İkinci okuma</label>
+      <label><input type="radio"> Klinik korelasyon</label>
+    </div>
+
+    <div style="color:var(--muted)">Soru <span style="color:var(--req)">*</span></div>
+    <div class="inp" style="height:56px;align-items:flex-start;padding:6px;white-space:normal">
+      Sol temporal lezyon — düşük dereceli glial tümör mü, displazi mi? Perfüzyon eklensin mi?</div>
+
+    <div style="color:var(--muted)">Görüntü erişimi</div>
+    <div><label><input type="checkbox" checked> Dış hekime <b>süreli görüntü bağlantısı</b> gönderilsin (7 gün)</label></div>
+
+    <div style="color:var(--muted)">Aciliyet</div>
+    <div style="display:flex;gap:12px">
+      <label><input type="radio" checked> Normal</label>
+      <label><input type="radio"> Acil (aynı gün)</label>
+    </div>
+  </div>
+  <div class="toolbar" style="border-top:1px solid var(--line);border-bottom:none">
+    <div class="btn primary">✔ Konsültasyon İste</div>
+    <div class="btn sp">✖ Vazgeç</div>
+  </div>
+</div>
+
+<div class="not">
+  <b>İşleyiş.</b> Konsültasyon <b>rapor ekranından</b> istenir (radyolog raporu yazarken "bu vakada görüş
+  alayım" der); bu ekran isteklerin <b>takip listesidir</b>. İki yönü var: <b>bana gelenler</b> (cevap
+  yazmam gereken) ve <b>benim istediklerim</b> (beklediğim). Cevap yazılınca rapora iliştirilir.
+  <br><b>Neden ayrı ekran.</b> Bugün kayıt tutuluyor ama hiçbir yerde toplu görünmüyor: cevap bekleyen
+  konsültasyon unutulursa rapor da askıda kalır.
+  <br><b>Tablo.</b> <code>radyoloji_konsultasyon</code> (istem_id, isteyen_id, istenen_id, soru, cevap,
+  durum, istek/cevap zamanı). Ek alan: <b>tip</b> (görüş / ikinci okuma / klinik korelasyon),
+  <b>acil</b>, dış hekim için <b>dis_hekim_id</b> ve süreli erişim bağlantısı.
+</div>
+</body>
+</html>

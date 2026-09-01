@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji — Sonuç Teslim Takibi — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --req:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1240px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sp{margin-left:auto}
+  .ara{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:12px;
+    background:#fff;height:23px;padding:0 9px;width:250px;color:var(--muted)}
+  .cips{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:11px;padding:2px 10px;font-size:11px;background:#fff}
+  .cip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .suz{display:flex;gap:6px;margin-left:auto;align-items:center}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:11.5px;display:flex;align-items:center;white-space:nowrap}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .serit{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .kutu{border:1px solid var(--line);border-radius:4px;background:#fff;padding:8px 10px}
+  .kutu .s{font-size:20px;font-weight:bold;color:var(--navy);line-height:1.1}
+  .kutu .e{font-size:11px;color:var(--muted)}
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px;white-space:nowrap}
+  tr.sec td{background:var(--sel)}
+  tr.bekleyen td{background:#fbfcfd}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .c-hazir{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .c-bek{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .c-tes{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-kar{background:#efe4fa;color:#6a3fa0;border:1px solid #d8c3ef}
+  .mod{display:inline-block;min-width:34px;text-align:center;border:1px solid var(--line);
+    border-radius:3px;background:#fff;font-size:10px;font-weight:bold;color:var(--navy);padding:1px 4px}
+  .kalem{display:inline-block;border:1px solid var(--line);border-radius:3px;background:#fff;
+    font-size:10px;padding:1px 5px;margin-right:3px;color:var(--navy)}
+  .kalem.yok{opacity:.35;text-decoration:line-through}
+  .yan{color:var(--muted);font-size:11px}
+  .dip{display:flex;gap:14px;padding:6px 10px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted)}
+  .dip b{color:var(--ink)}
+  .not{max-width:1240px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+  .grid2{display:grid;grid-template-columns:150px 1fr;gap:8px 10px;padding:12px;align-items:center}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">📦 Radyoloji — Sonuç Teslim Takibi <span class="sp">GenoTIP AI · Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">📦 Teslim Et</div>
+    <div class="btn">🖨 Rapor Çıktısı</div>
+    <div class="btn">💿 CD Yaz</div>
+    <div class="btn">📧 E-posta / SMS Bağlantısı</div>
+    <div class="btn pas">↩ Teslimi Geri Al</div>
+    <div class="ara sp">🔍 Hasta, accession, teslim alan…</div>
+  </div>
+
+  <div class="serit">
+    <div class="kutu"><div class="s">14</div><div class="e">Teslim bekleyen (rapor onaylı)</div></div>
+    <div class="kutu"><div class="s">6</div><div class="e">CD isteyen</div></div>
+    <div class="kutu"><div class="s">3</div><div class="e">7 günü geçen (alınmamış)</div></div>
+    <div class="kutu"><div class="s">21</div><div class="e">Bugün teslim edilen</div></div>
+  </div>
+
+  <div class="cips">
+    <span class="cip on">Teslim Bekleyen (14)</span>
+    <span class="cip">CD İsteyenler</span>
+    <span class="cip">Bugün Teslim Edilen</span>
+    <span class="cip">Alınmamış (7+ gün)</span>
+    <span class="cip">Tümü</span>
+    <div class="suz">
+      <div class="inp combo">Tüm modaliteler</div>
+      <div class="inp combo">Tüm ödeyenler</div>
+      <div class="inp">25.08.2026</div>
+      <div class="inp">—</div>
+      <div class="inp">01.09.2026</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:26px"></th>
+        <th>Onay Zamanı</th><th>Mod.</th><th>Accession</th><th>Hasta</th><th>Tetkik</th>
+        <th>Teslim Kalemleri</th><th>Durum</th>
+        <th>Teslim Alan</th><th>Yakınlık</th><th>Teslim Eden</th><th style="text-align:right">Bekleme</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="sec bekleyen">
+        <td>☑</td><td>Bugün 10:40</td><td><span class="mod">MR</span></td><td>ACC-260901-0009</td>
+        <td>AYŞE YILMAZ</td><td>Lomber MR</td>
+        <td><span class="kalem">Rapor</span><span class="kalem">Film</span><span class="kalem">CD</span></td>
+        <td><span class="chip c-hazir">Hazır</span></td>
+        <td>—</td><td>—</td><td>—</td><td style="text-align:right">56 dk</td>
+      </tr>
+      <tr class="bekleyen">
+        <td>☐</td><td>Bugün 09:15</td><td><span class="mod">BT</span></td><td>ACC-260901-0006</td>
+        <td>MEHMET ÇELİK</td><td>Toraks BT</td>
+        <td><span class="kalem">Rapor</span><span class="kalem yok">Film</span><span class="kalem">CD</span></td>
+        <td><span class="chip c-bek">CD yazılacak</span></td>
+        <td>—</td><td>—</td><td>—</td><td style="text-align:right">2 sa 21 dk</td>
+      </tr>
+      <tr>
+        <td>☐</td><td>Bugün 08:05</td><td><span class="mod">DR</span></td><td>ACC-260901-0004</td>
+        <td>FAİK BULUT</td><td>Akciğer Grafisi PA</td>
+        <td><span class="kalem">Rapor</span><span class="kalem">Film</span></td>
+        <td><span class="chip c-tes">Teslim edildi</span></td>
+        <td>FAİK BULUT<div class="yan">TC 123******78</div></td><td>Kendisi</td>
+        <td>S. Yücel<div class="yan">09:12</div></td><td style="text-align:right">1 sa 07 dk</td>
+      </tr>
+      <tr>
+        <td>☐</td><td>Dün 16:50</td><td><span class="mod">USG</span></td><td>ACC-260831-0021</td>
+        <td>ZEYNEP KAYA</td><td>Tiroid USG</td>
+        <td><span class="kalem">Rapor</span></td>
+        <td><span class="chip c-kar">Kuruma gönderildi</span></td>
+        <td>Özel Yaşam Sigorta<div class="yan">e-posta · sistem</div></td><td>Kurum</td>
+        <td>Otomatik<div class="yan">16:52</div></td><td style="text-align:right">2 dk</td>
+      </tr>
+      <tr>
+        <td>☐</td><td>24.08 14:10</td><td><span class="mod">MG</span></td><td>ACC-260824-0009</td>
+        <td>MERVE DEMİR</td><td>Bilateral Mamografi</td>
+        <td><span class="kalem">Rapor</span><span class="kalem">Film</span></td>
+        <td><span class="chip c-bek">Alınmadı (8 gün)</span></td>
+        <td>—</td><td>—</td><td>—</td><td style="text-align:right">8 gün</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="dip">
+    <span>Kayıt: <b>5</b></span>
+    <span>Teslim bekleyen: <b>3</b></span>
+    <span>Ortalama teslim süresi: <b>1 sa 12 dk</b></span>
+    <span class="sp">Son yenileme: 11:36</span>
+  </div>
+</div>
+
+<!-- --------------------------------------------------------- teslim kayit -->
+<div class="win" style="margin-top:14px;max-width:660px">
+  <div class="title">📦 Sonuç Teslimi — ACC-260901-0009 <span class="sp">AYŞE YILMAZ · Lomber MR</span></div>
+  <div class="grid2">
+    <div style="color:var(--muted)">Teslim edilen <span style="color:var(--req)">*</span></div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap">
+      <label><input type="checkbox" checked> Rapor (basılı)</label>
+      <label><input type="checkbox" checked> Film</label>
+      <label><input type="checkbox" checked> CD</label>
+      <label><input type="checkbox"> Dijital bağlantı</label>
+    </div>
+
+    <div style="color:var(--muted)">Teslim alan <span style="color:var(--req)">*</span></div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <div class="inp" style="width:240px">AYŞE YILMAZ</div>
+      <div class="inp combo" style="width:140px">Kendisi</div>
+    </div>
+
+    <div style="color:var(--muted)">Kimlik / Telefon</div>
+    <div style="display:flex;gap:6px">
+      <div class="inp" style="width:180px">123******78</div>
+      <div class="inp" style="width:160px">+90 555 ••• •• 41</div>
+    </div>
+
+    <div style="color:var(--muted)">Teslim eden</div>
+    <div class="inp" style="width:240px">S. Yücel (oturum kullanıcısı)</div>
+
+    <div style="color:var(--muted)">Not</div>
+    <div class="inp" style="height:44px;align-items:flex-start;padding:6px;white-space:normal">
+      Film zarfı 2 adet verildi.</div>
+
+    <div style="color:var(--muted)">İmza</div>
+    <div class="yan">Teslim formu çıktısı hastaya imzalatılır; imzalı form dokümanlara taranır.</div>
+  </div>
+  <div class="toolbar" style="border-top:1px solid var(--line);border-bottom:none">
+    <div class="btn primary">✔ Teslim Et</div>
+    <div class="btn">🖨 Teslim Formu Yazdır</div>
+    <div class="btn sp">✖ Vazgeç</div>
+  </div>
+</div>
+
+<div class="not">
+  <b>İşleyiş.</b> Rapor <b>onaylanınca</b> istem bu listeye düşer ("Hazır"). Kayıt kabul/arşiv masası
+  hastaya rapor + film + CD verir, kim aldığını (kendisi / yakını / kurum kuryesi) yazar. Teslim
+  modalı bugün <b>çalışma listesinden</b> açılıyor; eksik olan, teslim edilmemişlerin listesi.
+  <br><b>Neden ayrı ekran.</b> "Hastanın raporu hazır mı, alındı mı" sorusu bugün ancak tek tek istem
+  açılarak cevaplanıyor. Alınmamış sonuçlar (7+ gün) hem arşivde yer tutuyor hem hasta aranamıyor.
+  <br><b>Tablo.</b> <code>radyoloji_teslim</code> (istem_id, kalemler, teslim_alan, yakinlik, kimlik,
+  teslim_eden, zaman, not). Liste kaynağı: onaylı raporu olan istemler LEFT JOIN teslim —
+  teslim satırı yoksa "Hazır", varsa "Teslim edildi".
+</div>
+</body>
+</html>
