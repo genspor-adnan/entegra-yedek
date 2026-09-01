@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USBS — Çalışma Süreci Şeması (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --head2:#e8eef5; --ok:#2e7d46; --uyari:#b5731a; --teh:#b23b3b;
+    --hasta:#eaf3fb; --hastak:#bcd9f2;
+    --sis:#f1f0fb; --sisk:#cfcbe9;
+    --hekim:#eef7f0; --hekimk:#c3e2cd;
+    --dis:#fdf6e6; --disk:#f0d9a8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1340px;margin:0 auto 16px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .aciklama{padding:9px 12px;background:linear-gradient(#ffffff,#f5f8fb);
+    border-bottom:1px solid var(--line2);font-size:11.5px;line-height:1.6;color:#33475b}
+  .aciklama b{color:var(--ink)}
+
+  /* ---------------------------------------------------------- kulvarlar -- */
+  .kaydir{overflow-x:auto;padding:12px}
+  .kulvar{display:grid;grid-template-columns:118px repeat(8, minmax(140px, 1fr));
+    gap:8px;min-width:1180px}
+  .basl{font-size:11px;color:var(--navy);font-weight:bold;text-align:center;
+    padding:4px 0;background:var(--head2);border:1px solid var(--line);border-radius:3px}
+  .rol{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;
+    border:1px solid var(--line);border-radius:3px;text-align:center;padding:6px 4px;line-height:1.35}
+  .rol.h{background:var(--hasta);border-color:var(--hastak)}
+  .rol.s{background:var(--sis);border-color:var(--sisk)}
+  .rol.d{background:var(--hekim);border-color:var(--hekimk)}
+  .rol.x{background:var(--dis);border-color:var(--disk)}
+  .kutu{border:1px solid var(--line);border-radius:4px;background:#fff;padding:6px 8px;
+    font-size:11px;line-height:1.4;position:relative;min-height:56px}
+  .kutu b{display:block;font-size:11.5px;color:var(--navy);margin-bottom:2px}
+  .kutu small{color:var(--muted);font-size:10px;display:block;margin-top:3px}
+  .kutu.h{background:var(--hasta);border-color:var(--hastak)}
+  .kutu.s{background:var(--sis);border-color:var(--sisk)}
+  .kutu.d{background:var(--hekim);border-color:var(--hekimk)}
+  .kutu.x{background:var(--dis);border-color:var(--disk)}
+  .kutu.karar{background:#fdf3f2;border-color:#e4b7b2}
+  .kutu.karar b{color:#8f3d36}
+  /* akis oku: kutunun sagina */
+  .kutu.ok::after{content:"➜";position:absolute;right:-10px;top:50%;transform:translateY(-50%);
+    color:#8fa3b6;font-size:13px;z-index:2}
+  .bos{border:1px dashed var(--line2);border-radius:4px;background:#fbfcfd}
+  .md{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:3px;
+    padding:0 4px;font-size:9.5px;color:var(--navy);font-weight:bold;margin-top:3px}
+
+  /* ----------------------------------------------------- zaman cizgisi -- */
+  .zaman{display:grid;grid-template-columns:repeat(5,1fr);gap:0;padding:14px 12px 4px;position:relative}
+  .zaman::before{content:"";position:absolute;left:24px;right:24px;top:34px;height:2px;background:var(--line)}
+  .an{text-align:center;position:relative;padding-top:26px}
+  .an .nokta{position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:14px;height:14px;
+    border-radius:50%;background:#fff;border:3px solid var(--accent);z-index:2}
+  .an.teh .nokta{border-color:var(--teh)}
+  .an.ok .nokta{border-color:var(--ok)}
+  .an b{display:block;font-size:11.5px;color:var(--navy)}
+  .an small{display:block;color:var(--muted);font-size:10.5px;line-height:1.45;padding:0 8px;margin-top:3px}
+
+  /* -------------------------------------------------------- mimari ------ */
+  .mimari{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:12px}
+  @media (max-width:1000px){.mimari{grid-template-columns:1fr}}
+  .blok{border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#fff}
+  .blok h6{margin:0;padding:5px 9px;background:var(--head2);border-bottom:1px solid var(--line);
+    font-size:11px;color:var(--navy)}
+  .blok .ic{padding:8px;display:grid;gap:6px}
+  .bilesen{border:1px solid var(--line);border-radius:3px;padding:5px 8px;font-size:11px;
+    background:#fbfcfd;line-height:1.4}
+  .bilesen b{color:var(--navy)}
+  .bilesen small{display:block;color:var(--muted);font-size:10px}
+  .bilesen.yurt{border-left:3px solid var(--ok)}
+  .bilesen.dis{border-left:3px solid var(--uyari)}
+  .bilesen.yeni{border-left:3px solid var(--teh)}
+
+  table{border-collapse:collapse;width:100%;font-size:11.5px}
+  th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+     font-size:11px;color:var(--navy)}
+  td{border-bottom:1px solid var(--line2);padding:5px 8px;vertical-align:top;line-height:1.45}
+  .rozet{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .r-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .r-uy{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .r-teh{background:#f4d9d6;color:#8f3d36;border:1px solid #e4b7b2}
+  .not{max-width:1340px;margin:10px auto 18px;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+  .lejant{display:flex;gap:14px;flex-wrap:wrap;padding:8px 12px;border-top:1px solid var(--line2);
+    font-size:11px;color:var(--muted);background:#fbfcfd}
+  .lejant i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;
+    vertical-align:-1px;border:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<!-- ============================================ 1) UCTAN UCA AKIS ======== -->
+<div class="win">
+  <div class="title">🔄 USBS — Uzaktan Sağlık Hizmeti Çalışma Süreci
+    <span class="sp">randevudan e-Nabız'a kadar · kulvarlı akış</span></div>
+
+  <div class="aciklama">
+    Süreç <b>dört rol</b> arasında yürür: hasta, USBS'nin kendisi (otomatik
+    kurallar), hekim ve Bakanlık servisleri. Kırmızı kutular <b>karar/engel</b>
+    noktalarıdır: kural sağlanmadan sonraki adıma geçilemez — bunlar arayüzde
+    uyarı, sunucuda engeldir.
+  </div>
+
+  <div class="kaydir">
+    <div class="kulvar">
+      <!-- baslik satiri -->
+      <div></div>
+      <div class="basl">1 · Randevu</div>
+      <div class="basl">2 · Bilgilendirme + Onam</div>
+      <div class="basl">3 · Bekleme / Giriş</div>
+      <div class="basl">4 · Görüşme</div>
+      <div class="basl">5 · Muayene + Tanı</div>
+      <div class="basl">6 · Belgeler</div>
+      <div class="basl">7 · Kapanış</div>
+      <div class="basl">8 · Saklama</div>
+
+      <!-- HASTA -->
+      <div class="rol h">HASTA</div>
+      <div class="kutu h ok"><b>Randevu talebi</b>Branş/hekim seçer, saat alır
+        <small>usbs_randevu_bekleme</small></div>
+      <div class="kutu h ok"><b>Metni okur, rıza verir</b>KVKK + hizmet + kamera/mikrofon;
+        kayıt rızası <b>ayrı</b><small>usbs_onam</small></div>
+      <div class="kutu h ok"><b>Bağlantıya tıklar</b>T.C. + SMS kodu ile giriş
+        <small>usbs_giris_2fa</small></div>
+      <div class="kutu h ok"><b>Görüşür</b>Ses/görüntü kapatabilir, dosya gönderir,
+        istediği an bitirir<small>md 12 · 19 · 20</small></div>
+      <div class="bos"></div>
+      <div class="kutu h ok"><b>Belgeleri alır</b>e-Reçete/e-Rapor SMS + e-Nabız
+        <small>hastaya bildirim</small></div>
+      <div class="kutu h"><b>Özet</b>Muayene özeti PDF<small>e-imzalı</small></div>
+      <div class="bos"></div>
+
+      <!-- SISTEM -->
+      <div class="rol s">USBS<br>(otomatik)</div>
+      <div class="kutu s ok"><b>Slot + bağlantı</b>Tek kullanımlık, süreli görüşme
+        bağlantısı üretir<span class="md">ent. md 2</span></div>
+      <div class="kutu karar ok"><b>Onam yoksa DUR</b>Zorunlu üç onay alınmadan
+        görüşme başlatılamaz<span class="md">md 17-18</span></div>
+      <div class="kutu s ok"><b>2FA + CAPTCHA</b>Denemeler (başarılı/başarısız) iz
+        kaydına yazılır<span class="md">md 3-6</span></div>
+      <div class="kutu s ok"><b>Şifreli oda</b>WebRTC/SRTP, yurt içi TURN;
+        dosyalar virüs taramasından geçer<span class="md">md 9 · 13 · 27</span></div>
+      <div class="kutu karar ok"><b>Tanı yoksa DUR</b>ICD-10 girilmeden muayene
+        kapanmaz, e-Nabız'a gidilmez<span class="md">kayıt md 8</span></div>
+      <div class="kutu s ok"><b>İmza kontrolü</b>e-imzasız reçete/rapor taslak
+        kalır, gönderilmez</div>
+      <div class="kutu s ok"><b>İz kaydı</b>Her adım: olay, kaynak/hedef adres,
+        kullanıcı, zaman<span class="md">md 21</span></div>
+      <div class="kutu s"><b>Saklama saati</b>Süre dolunca kaydı kalıcı siler,
+        silmeyi loglar<span class="md">kayıt md 6</span></div>
+
+      <!-- HEKIM -->
+      <div class="rol d">HEKİM</div>
+      <div class="kutu d ok"><b>Takvimi görür</b>Bekleme odasında hastalar
+        <small>usbs_randevu_bekleme</small></div>
+      <div class="bos"></div>
+      <div class="kutu d ok"><b>Hastayı çağırır</b>Kimliği ve onamı ekranda görünür
+        <span class="md">md 16</span></div>
+      <div class="kutu d ok"><b>Görüşür</b>Tercüman/konsültan ekleyebilir;
+        kayıt yalnız rıza varsa<span class="md">md 31</span></div>
+      <div class="kutu d ok"><b>Bulgu + ICD-10</b>Muayene notu, ana/ek tanı, hekim notu
+        <small>usbs_muayene</small></div>
+      <div class="kutu d ok"><b>e-Reçete / e-Rapor / Sevk</b>Yönlendiren hekim kayda
+        geçer<span class="md">kayıt md 12</span></div>
+      <div class="kutu d"><b>Muayeneyi tamamlar</b>Görüşme "tamamlandı" olur</div>
+      <div class="bos"></div>
+
+      <!-- DIS SERVISLER -->
+      <div class="rol x">BAKANLIK<br>SERVİSLERİ</div>
+      <div class="kutu x ok"><b>ÇKYS</b>Hekim unvan/uzmanlık doğrulaması
+        <span class="md">md 24</span></div>
+      <div class="bos"></div>
+      <div class="kutu x ok"><b>KPS</b>Kimlik doğrulama (opsiyonel)
+        <span class="md">md 23</span></div>
+      <div class="kutu x ok"><b>e-Nabız (okuma)</b>Geçmiş reçete, tahlil, görüntü
+        <span class="md">md 25</span></div>
+      <div class="bos"></div>
+      <div class="kutu x ok"><b>Medula</b>e-Reçete / e-Rapor gönderimi
+        <span class="md">ent. md 3</span></div>
+      <div class="kutu x"><b>e-Nabız (yazma)</b>Muayene ve tanı bildirimi
+        <span class="md">ent. md 6</span></div>
+      <div class="bos"></div>
+    </div>
+  </div>
+
+  <div class="lejant">
+    <span><i style="background:var(--hasta);border-color:var(--hastak)"></i>Hasta</span>
+    <span><i style="background:var(--sis);border-color:var(--sisk)"></i>USBS otomatik kural</span>
+    <span><i style="background:var(--hekim);border-color:var(--hekimk)"></i>Hekim</span>
+    <span><i style="background:var(--dis);border-color:var(--disk)"></i>Bakanlık servisi</span>
+    <span><i style="background:#fdf3f2;border-color:#e4b7b2"></i>Karar / engel noktası</span>
+    <span class="sp">➜ akış yönü</span>
+  </div>
+</div>
+
+<!-- ====================================== 2) KAYIT YASAM DONGUSU ========= -->
+<div class="win">
+  <div class="title">⏺ Ses / Görüntü Kaydının Yaşam Döngüsü
+    <span class="sp">yalnız kayıt alınıyorsa — kılavuz kayıt bölümü md 1-7</span></div>
+
+  <div class="aciklama">
+    Kayıt <b>koşullu</b> bir yetenektir: alınmayacaksa bu döngü ve kılavuzun
+    8 maddelik kayıt bölümü tamamen kapsam dışı kalır. Alınacaksa <b>rıza →
+    şifreli saklama → denetimli erişim → otomatik imha</b> zinciri eksiksiz
+    kurulmalıdır.
+  </div>
+
+  <div class="zaman">
+    <div class="an ok"><span class="nokta"></span><b>1. Açık rıza</b>
+      <small>Görüşme öncesi, ayrı ve seçmeli onay. Rıza kaydı veri tabanında
+        tutulur (kayıt md 1-2, 7).</small></div>
+    <div class="an teh"><span class="nokta"></span><b>2. Kayıt izni yoksa</b>
+      <small>Kayıt düğmesi kapalı; sunucu isteği reddeder, deneme iz kaydına
+        yazılır (kayıt md 3).</small></div>
+    <div class="an"><span class="nokta"></span><b>3. Şifreli saklama</b>
+      <small>AES-256; anahtar uygulama sunucusunda değil. Depolama yurt içi
+        (kayıt md 4, genel md 26).</small></div>
+    <div class="an"><span class="nokta"></span><b>4. Denetimli erişim</b>
+      <small>Yalnız "Kayıt İzleme" yetkisi + çift onay; her erişim gerekçesiyle
+        loglanır (kayıt md 5).</small></div>
+    <div class="an ok"><span class="nokta"></span><b>5. Otomatik imha</b>
+      <small>Mevzuat süresi dolunca kalıcı silme; silme işlemi de iz kaydında
+        kalır (kayıt md 6).</small></div>
+  </div>
+
+  <div style="padding:0 12px 12px">
+    <table>
+      <thead><tr><th>Soru</th><th>Cevap</th><th>Sonuç</th></tr></thead>
+      <tbody>
+        <tr><td>Hasta kayda rıza verdi mi?</td><td>Hayır</td>
+            <td><span class="rozet r-teh">Kayıt yok</span> — görüşme normal sürer,
+              hizmet engellenmez</td></tr>
+        <tr><td>Rıza var, kayıt alındı</td><td>Evet</td>
+            <td><span class="rozet r-ok">Şifreli sakla</span> + saklama saati başlar</td></tr>
+        <tr><td>Kayda erişim istendi</td><td>Yetki + gerekçe</td>
+            <td><span class="rozet r-uy">Çift onay</span> ve erişim kaydı</td></tr>
+        <tr><td>Saklama süresi doldu</td><td>—</td>
+            <td><span class="rozet r-ok">Kalıcı sil</span>, silme kaydını bırak</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================ 3) MIMARI / BILESENLER === -->
+<div class="win">
+  <div class="title">🧩 Bileşen Şeması — Ne Var, Ne Eklenecek
+    <span class="sp">Gentegre AI üzerine USBS</span></div>
+
+  <div class="aciklama">
+    USBS sıfırdan bir ürün değil: kimlik, hasta, randevu, doküman ve günlük
+    altyapısı <b>hazır</b>. Eklenecek olan üç kalem <b>görüşme altyapısı</b>,
+    <b>Bakanlık servisleri</b> ve <b>kayıt/rıza yönetimi</b>.
+  </div>
+
+  <div class="mimari">
+    <div class="blok">
+      <h6>İstemci (tarayıcı)</h6>
+      <div class="ic">
+        <div class="bilesen yurt"><b>Web arayüzü</b>React · mevcut kabuk, menü, kartlar
+          <small>Var — USBS ekranları eklenecek</small></div>
+        <div class="bilesen yeni"><b>Görüşme istemcisi</b>WebRTC: kamera/mikrofon,
+          ekran paylaşımı, sohbet<small>Yeni</small></div>
+        <div class="bilesen yeni"><b>Onam akışı</b>Sürümlü metin + rıza toplama
+          <small>Yeni</small></div>
+        <div class="bilesen yeni"><b>2FA / CAPTCHA</b>Giriş ekranı eklentileri
+          <small>Yeni</small></div>
+      </div>
+    </div>
+
+    <div class="blok">
+      <h6>Sunucu (yurt içi, kurum kontrolünde)</h6>
+      <div class="ic">
+        <div class="bilesen yurt"><b>Gentegre API</b>.NET · kimlik, yetki, hasta,
+          randevu, belge<small>Var</small></div>
+        <div class="bilesen yeni"><b>Sinyalleşme servisi</b>Oda kurma, katılımcı
+          yönetimi<small>Yeni</small></div>
+        <div class="bilesen yeni"><b>TURN / medya sunucusu</b>NAT geçişi ve
+          çok katılımcılı akış<small>Yeni — <b>yurt içinde olmak zorunda</b> (md 27)</small></div>
+        <div class="bilesen yurt"><b>PostgreSQL</b>Hasta, randevu, muayene, iz kaydı
+          <small>Var</small></div>
+        <div class="bilesen yurt"><b>Doküman deposu</b>Hash-dedup dosya saklama
+          <small>Var — virüs taraması eklenecek</small></div>
+        <div class="bilesen yeni"><b>Şifreli medya deposu</b>Ses/görüntü kayıtları +
+          anahtar yönetimi<small>Yeni — yalnız kayıt alınacaksa</small></div>
+        <div class="bilesen yeni"><b>Zamanlanmış görevler</b>Süresi dolan kaydı silme,
+          hatırlatma<small>Yeni</small></div>
+      </div>
+    </div>
+
+    <div class="blok">
+      <h6>Dış servisler (Bakanlık)</h6>
+      <div class="ic">
+        <div class="bilesen dis"><b>ÇKYS</b>Hekim tescil/unvan doğrulama
+          <small>md 24 · yeni entegrasyon</small></div>
+        <div class="bilesen dis"><b>e-Nabız</b>Okuma (geçmiş) + yazma (muayene/tanı)
+          <small>md 25 · ent. md 6</small></div>
+        <div class="bilesen dis"><b>Medula</b>e-Reçete, e-Rapor
+          <small>ent. md 3</small></div>
+        <div class="bilesen dis"><b>KPS</b>Kimlik doğrulama
+          <small>md 23 destekleyici</small></div>
+        <div class="bilesen dis"><b>SMS / e-posta sağlayıcı</b>2FA kodu, randevu
+          bağlantısı, bildirim<small>md 3</small></div>
+        <div class="bilesen yurt"><b>e-İmza / KEP</b>Reçete-rapor imzalama
+          <small>Kurumda mevcut altyapı</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lejant">
+    <span><i style="background:#fff;border-left:3px solid var(--ok)"></i>Mevcut (Gentegre'de var)</span>
+    <span><i style="background:#fff;border-left:3px solid var(--teh)"></i>Yeni geliştirme</span>
+    <span><i style="background:#fff;border-left:3px solid var(--uyari)"></i>Dış servis entegrasyonu</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Şemanın okunuşu.</b> Üstteki kulvar diyagramı <b>bir görüşmenin</b> baştan
+  sona yolunu gösterir; kırmızı kutular geçilemeyen kurallardır (onam yoksa
+  görüşme yok, tanı yoksa kapanış yok, imza yoksa gönderim yok). Ortadaki zaman
+  çizgisi <b>yalnız kayıt alınıyorsa</b> işler. Alttaki bileşen şeması işin
+  teknik maliyetini gösterir.
+  <br><b>Kritik bağımlılık.</b> Görüşme altyapısı (sinyalleşme + TURN/medya)
+  <b>yurt içinde ve kurum kontrolünde</b> olmak zorunda (md 27); bu, hazır bulut
+  görüşme servislerini devre dışı bırakır ve projenin en büyük kalemidir.
+  <br><b>Kapsam sorusu.</b> Kayıt alınmayacaksa: şemanın orta bloğu, şifreli medya
+  deposu, anahtar yönetimi ve zamanlanmış silme görevi tamamen düşer - kalan iş
+  görüşme + Bakanlık servisleri + muayene ekranlarıdır.
+  <br><b>İlgili mockuplar.</b> <code>usbs_randevu_bekleme.html</code> ·
+  <code>usbs_onam.html</code> · <code>usbs_giris_2fa.html</code> ·
+  <code>usbs_gorusme.html</code> · <code>usbs_muayene.html</code> ·
+  <code>usbs_muayene_sekmeler.html</code> · <code>usbs_hasta_dosyasi.html</code> ·
+  <code>usbs_iz_kaydi_kayitlar.html</code> · <code>usbs_uyum_haritasi.html</code>
+</div>
+</body>
+</html>
