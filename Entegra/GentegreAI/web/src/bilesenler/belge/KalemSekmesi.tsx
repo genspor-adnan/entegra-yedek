@@ -19,7 +19,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     kilitli, bilgi, onizleme, sonuc, transferBaslikEksigi,
     depoBelgesi, stokFisiMi, talepMi,
     setStokArama, setKalem, seciliSil, satirTikla, sonTiklanan, secimDegis, doviz,
-    fiyatListesi, paylasim, basvuruMu, depoSecimi,
+    fiyatListesi, paylasim, basvuruMu, depoSecimi, onRoller,
   } = p;
 
   /** Tarih kolonu KOD'un solunda mi (basvuru) yoksa miktarin solunda mi. */
@@ -109,6 +109,25 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                 : 'Provizyon / karşılama oranını satırlara uygula'}
               onClick={() => paylasim.uygula()}>
         ⚖
+      </button>
+    )}
+    {/* PRIM ROLLERI (324): primi kim hak ediyor - isteyen/uygulayan/
+        raporlayan. Kalem KAYITLI olmali: rol satirin kimligine baglanir.
+        Kilitli belgede de acilir (salt gorunum degil - rol duzeltmesi
+        kesin belgede de gerekebilir; kesinlesmis prim zaten donuktur). */}
+    {onRoller && (
+      <button type="button" className="d ikon"
+              disabled={seciliSatirlar.size !== 1}
+              title={seciliSatirlar.size !== 1
+                ? 'Rolleri düzenlemek için tek satır seçin'
+                : 'Prim rollerini düzenle (isteyen / uygulayan / raporlayan)'}
+              onClick={() => {
+                const anahtar = [...seciliSatirlar][0];
+                const satir = satirlar.find(x => x.anahtar === anahtar);
+                if (!satir?.satirId) { onRoller(0, ''); return }
+                onRoller(satir.satirId, satir.stokAdi);
+              }}>
+        👥
       </button>
     )}
     <button type="button" className="d teh ikon"
@@ -528,6 +547,12 @@ export interface KalemSekmesiProps {
   /** Son tiklanan satirin SIRASI - Shift araligi bunun uzerinden hesaplanir. */
   sonTiklanan: React.MutableRefObject<number | null>;
   secimDegis(anahtar: number): void;
+  /**
+   * PRIM ROLLERI (324): secili kalemin rollerini acar. Verilmezse dugme hic
+   * cizilmez - prim yetkisi olmayan kullanicida ya da prim kullanilmayan
+   * kurulumda gereksiz. satirId 0 gelirse kalem henuz KAYITLI degildir.
+   */
+  onRoller?(satirId: number, kalemAdi: string): void;
   /**
    * ODEME PAYLASIMI (289): basvuruda odeyen kurum varsa satirin KURUM ve HASTA
    * payi kolon olarak gorunur. Verilmezse kolonlar hic cizilmez - normal

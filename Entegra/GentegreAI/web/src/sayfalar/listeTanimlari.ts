@@ -386,6 +386,56 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Radyoloji', menuAd: 'Sonuç Teslim', ic: '📦',
     yetkiKodu: 'radyoloji', menuSira: 16,
   },
+  {
+    // PRİM PLANLARI (324): kampanyanın prim karşılığı - kapsam + oran
+    //   satırları. Satırda hedef, BELGE TÜRÜ ve PAY birlikte kriter.
+    kaynak: 'prim-plani', rota: 'prim-plani',
+    baslik: 'Prim Planları', yol: 'Prim › Planlar',
+    kartYolu: '/prim-plani', kartBaslik: 'Prim Planı',
+    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    gizliKolonlar: ['baz', 'hekimTipi', 'aciklama'],
+    menuGrup: 'Prim', menuAd: 'Prim Planları', ic: '🎯',
+    yetkiKodu: 'prim', menuSira: 10, urunModu: 2,
+  },
+  {
+    // HAKEDİŞ SATIRLARI (324): "hangi tahsilattan, hangi kaleme, hangi rolle".
+    //   Prim tahsil edildikçe doğduğu için satırın tarihi TAHSİLAT tarihidir.
+    kaynak: 'hakedis-satir', rota: 'hakedis-satir',
+    baslik: 'Hakediş Satırları', yol: 'Prim › Hakediş Satırları',
+    aksiyonEkrani: 'hakedis-liste',
+    kartYolu: undefined,
+    // Kapatılmış dönemin satırlarına başlıktan geçilir: /hakedis-satir?hakedisId=7
+    urlFiltreAlani: 'hakedisId',
+    tarihAlani: 'tarih',
+    toplam: ['tutar'],
+    gizliKolonlar: ['rol', 'pay', 'durum', 'tarafId', 'hakedisId', 'belgeSatirId',
+                    'payYuzde'],
+    cipler: [
+      { ad: 'Açık',        filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Kesinleşmiş', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Ödendi',      filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'Prim', menuAd: 'Hakediş Satırları', ic: '🧾',
+    yetkiKodu: 'prim', menuSira: 20, urunModu: 2,
+  },
+  {
+    // HAKEDİŞLER (324): kapatılmış dönemler. Kapanan satır DONDURULUR -
+    //   sonradan çıkan fark sonraki döneme düzeltme olarak girer.
+    kaynak: 'hakedis', rota: 'hakedis',
+    baslik: 'Hakedişler', yol: 'Prim › Hakedişler',
+    aksiyonEkrani: 'hakedis-donem',
+    tarihAlani: 'donemBitis',
+    toplam: ['toplam'],
+    gizliKolonlar: ['durum', 'tarafId', 'kasaIslemId', 'aciklama', 'eklemeTarihi'],
+    cipler: [
+      { ad: 'Kesinleşmiş', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Ödendi',      filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'Prim', menuAd: 'Hakedişler', ic: '💰',
+    yetkiKodu: 'prim', menuSira: 30, urunModu: 2,
+  },
   // CARI grubu ana menude RADYOLOJIDEN SONRA (kullanici).
   {
     // KURUM ICMALI (289): SGK payi tek tek faturalanmaz, donem sonu toplanip

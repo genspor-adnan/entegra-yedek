@@ -19,6 +19,7 @@ import {
 } from './belgeSabitleri';
 import { KalemPenceresi } from '../bilesenler/belge/KalemPenceresi';
 import { TerminModali } from '../bilesenler/belge/TerminModali';
+import { KalemRolModali } from '../bilesenler/prim/KalemRolModali';
 import {
   TasiyiciSekmesi, EBelgeSekmesi, FaturalamaSekmesi,
 } from '../bilesenler/belge/BelgeSekmeleri';
@@ -225,6 +226,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [aktifSekme, setAktifSekme] = useState('kalem');
   /** Grid satir secimi (kirmizi Sil dugmesi bunlari siler). */
   const [seciliSatirlar, setSeciliSatirlar] = useState<Set<number>>(new Set());
+  /** Prim rolleri (324): kalem gridinden acilan modal - null iken kapali. */
+  const [rolModali, setRolModali] = useState<{ satirId: number; ad: string } | null>(null);
   /** Lot detayi KAPATILMIS kalemler. Lotlu kalem varsayilan ACIK gelir -
       kullanici bakmak icin ayrica tiklamasin; isteyen oku ile kapatir. */
   /** Lot/izlem detayi ACIK olan kalemler - varsayilan KAPALI (kullanici). */
@@ -1218,6 +1221,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             depoBelgesi={depoBelgesi} stokFisiMi={stokFisiMi} talepMi={talepMi}
             setStokArama={iadeMi ? setIadeArama : setStokArama}
             setKalem={setKalem} seciliSil={seciliSil}
+            // PRIM ROLLERI (324): prim HBYS kavrami (hekim hakedisi) -
+            //   ERP modunda dugme hic cizilmez.
+            onRoller={kullanici?.urunModu === URUN_GENOTIP && yetki('prim', 'degistir')
+              ? (satirId, ad) => (satirId > 0
+                  ? setRolModali({ satirId, ad })
+                  : mesaj('Rol tanımlamak için önce belgeyi kaydedin.'))
+              : undefined}
             satirTikla={satirTikla} sonTiklanan={sonTiklanan} secimDegis={secimDegis}
             fiyatListesi={{ listeler: fiyatListeleri, seciliId: fiyatListesiId,
                             sec: v => void listeDegisti(v), kampanyaAdi }}
@@ -1493,6 +1503,16 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             belgeTarihi={tarih}
             onKapat={() => setKalem(null)}
             onKaydet={r => { kalemKaydet(r); setKalem(null) }}
+          />
+        )}
+
+        {/* PRIM ROLLERI (324): kalem gridinden acilir. Rol degisince o kalemin
+            primleri yeniden hesaplanir - belge yeniden kaydedilmez. */}
+        {rolModali && (
+          <KalemRolModali
+            belgeSatirId={rolModali.satirId}
+            kalemAdi={rolModali.ad}
+            onKapat={() => setRolModali(null)}
           />
         )}
 

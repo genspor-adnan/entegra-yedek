@@ -689,6 +689,26 @@ export const api = {
     gonder<{ dagitilan: number; avans: number; satirSayisi: number }>(
       `/api/kasa-islem/${kasaIslemId}/dagitim`, govde),
 
+  /** Kalemin prim rolleri + o kalemden dogmus primler (324). */
+  primKalemRolleri: (belgeSatirId: number) =>
+    istek<{ satirlar: Record<string, unknown>[]; primler: Record<string, unknown>[] }>(
+      `/api/prim/kalem/${belgeSatirId}/roller`),
+
+  /** Rolleri TOPLU yaz; kalemin primleri yeniden hesaplanir (324). */
+  primKalemRolleriYaz: (belgeSatirId: number,
+                        govde: { satirlar: { rol: number; tarafId: number;
+                                             payYuzde?: number }[] }) =>
+    gonder<{ satirSayisi: number; primSatiri: number }>(
+      `/api/prim/kalem/${belgeSatirId}/roller`, govde),
+
+  /** Kisi bazinda acik (donemi kapanmamis) hakedis (324). */
+  primAcikHakedis: () =>
+    istek<Record<string, unknown>[]>('/api/prim/acik'),
+
+  /** Donemi kapat: acik satirlar bir basliga baglanir ve DONDURULUR (324). */
+  primDonemKapat: (govde: { tarafId: number; baslangic: string; bitis: string }) =>
+    gonder<Record<string, unknown>>('/api/prim/donem-kapat', govde),
+
   /** Carinin dagitilmamis tahsilatlari (322) - avans mahsubu seridi. */
   kasaAvans: (tarafId: number) =>
     istek<{ satirlar: Record<string, unknown>[]; toplam: number }>(

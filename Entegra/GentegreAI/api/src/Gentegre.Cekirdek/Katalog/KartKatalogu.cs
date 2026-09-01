@@ -178,7 +178,8 @@ public static partial class KartKatalogu
         Ekle(Kategori());
         Ekle(RadyolojiIstem());
         Ekle(RadyolojiSablon());
-        Ekle(RadyolojiProtokol());
+        Ekle(RadyolojiProtokol());
+        Ekle(PrimPlani());
         Ekle(RadyolojiCihaz());
         Ekle(PersonelGorev());
         Ekle(Rol());

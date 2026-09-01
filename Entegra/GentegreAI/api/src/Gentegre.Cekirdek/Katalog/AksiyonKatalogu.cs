@@ -192,6 +192,29 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "rad.rapor_yaz", KayitGerekir: true, Sira: 30),
             },
 
+            // HAKEDIS SATIRLARI (324): satirlar tahsilattan DOGAR - elle
+            //   eklenmez. Buradaki aksiyonlar kaynaga gitmek ve donem
+            //   kapatmak icindir.
+            ["hakedis-liste"] = new AksiyonTanimi[]
+            {
+                new("hakedis.donem-kapat", "🔒 Dönemi Kapat", "prim",
+                    AksiyonYetkisi: "prim.donem_kapat", Sira: 10),
+                new("hakedis.kalem",       "↗ Kalemi Aç", "prim",
+                    KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                new("hakedis.roller",      "👥 Rolleri Düzenle", "prim",
+                    KaynakKodu: "prim", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 30),
+            },
+
+            // HAKEDIS BASLIKLARI (324): kapatilmis donemler.
+            ["hakedis-donem"] = new AksiyonTanimi[]
+            {
+                new("hakedis.donem-kapat", "🔒 Dönemi Kapat", "prim",
+                    AksiyonYetkisi: "prim.donem_kapat", Sira: 10),
+                new("hakedis.satirlar",    "📄 Satırları Gör", "prim",
+                    KaynakKodu: "prim", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+            },
+
             // RANDEVU (243): liste + takvim gorunumu ayni ekranda.
             ["randevu-liste"] = new AksiyonTanimi[]
             {

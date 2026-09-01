@@ -28,6 +28,8 @@ import { UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
 import { UtsGenelBildirimModali, type UtsBildirimTuru }
   from '../bilesenler/uts/UtsGenelBildirimModali';
 import { UtsBelgeSonucModali } from '../bilesenler/uts/UtsBelgeSonucModali';
+import { KalemRolModali } from '../bilesenler/prim/KalemRolModali';
+import { DonemKapatModali } from '../bilesenler/prim/DonemKapatModali';
 import { UtsHazirlaSonucModali } from '../bilesenler/uts/UtsHazirlaSonucModali';
 import type { UtsBelgeBildirimYaniti, UtsHazirlaYaniti } from '../api/istemci';
 import { dosyaIndirUrl } from '../bilesenler/indir';
@@ -126,6 +128,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // Yeni kart EKLENINCE (duzenlemede degil) grid "Son Aranan"a gecsin - kullanici
   //   az once ekledigi kaydi listede otomatik en ustte gorsun.
   const [odaklaSonEklenen, setOdaklaSonEklenen] = useState(0);
+  /** Prim rolleri (324): hakedis satirindan kalemin rollerine gecis. */
+  const [rolModali, setRolModali] = useState<
+    { satirId: number; ad: string } | null>(null);
+  /** Hakedis donemi kapatma (324) - secili satirin kisisi on dolu gelir. */
+  const [donemModali, setDonemModali] = useState<
+    { tarafId?: number; kisi?: string } | null>(null);
   /** Excel'den iceri alma modali (207) - fiyat listesi; null iken kapali. */
   const [iceriAl, setIceriAl] = useState<{ listeId: number; ad: string } | null>(null);
   // ÜTS alma bildirimi (223): askidaki envanter satirindan modal.
@@ -189,8 +197,19 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // Ekstreden donunce ayni satiri yeniden isaretlemek icin - grid unmount
   //   olurken secim null'a duser, o yuzden SON DOLU deger ayrica saklanir.
   const [sonSeciliId, setSonSeciliId] = useState<number | null>(null);
-  // Ekstreden donunce ayni cip (Aktif/Pasif/Tumu) secili kalsin.
-  const [cipIndeks, setCipIndeks] = useState(0);
+  /**
+   * Ekstreden donunce ayni cip (Aktif/Pasif/Tumu) secili kalsin.
+   *
+   * URL FILTRESIYLE gelindiyse (ör. /hakedis-satir?hakedisId=7) kayit kumesi
+   * ZATEN daraltilmistir; ustune bir durum cipi (Acik/Aktif) binince grid
+   * bos gorunuyordu. Boyle bir acilista suzgecsiz SON cip ("Tümü") secilir -
+   * son cipin filtresi yoksa, yani gercekten hepsini gosteriyorsa.
+   */
+  const cipler = tanim.cipler;
+  const [cipIndeks, setCipIndeks] = useState(() => (
+    urlDegeri && cipler && cipler.length > 1 && !cipler[cipler.length - 1].filtre
+      ? cipler.length - 1
+      : 0));
 
   // RANDEVU TAKVIMI (243) ayarlari: takvim saat araligi/calisma gunleri
   //   Randevu Ayarlari ekranindan (referans) gelir.
@@ -1020,6 +1039,43 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         return;
       }
 
+      // ------------------------------------------------------- PRIM (324) --
+      // Hakedis satiri TAHSILATTAN dogar, elle eklenmez: buradaki aksiyonlar
+      //   satirin kaynagina gitmek ve donemi kapatmak icindir.
+      if (kod === 'hakedis.donem-kapat') {
+        setDonemModali(satir
+          ? { tarafId: Number(satir.tarafId) || undefined,
+              kisi: String(satir.kisi ?? '') }
+          : {});
+        return;
+      }
+
+      if (kod === 'hakedis.roller') {
+        if (!satir) return;
+        const sid = Number(satir.belgeSatirId ?? 0);
+        if (!sid) { mesaj('Satırın kalem bağı yok.'); return }
+        setRolModali({ satirId: sid, ad: String(satir.kalem ?? '') });
+        return;
+      }
+
+      // Belgenin AYRI ROTASI YOK: kart modal olarak bu listenin ustunde acilir
+      //   (donusum zincirindeki "kaynak/hedef belgeyi ac" ile ayni desen).
+      if (kod === 'hakedis.kalem') {
+        if (!satir) return;
+        const bid = Number(satir.belgeId ?? 0);
+        if (!bid) { mesaj('Satırın belge bağı yok.'); return }
+        setAcikBelgeId(bid);
+        return;
+      }
+
+      // Baslikta "Satirlari Gor": ayni donemin satirlarina hakedis
+      //   filtresiyle gecilir.
+      if (kod === 'hakedis.satirlar') {
+        if (!satir) return;
+        git(`/hakedis-satir?hakedisId=${Number(satir.id)}`);
+        return;
+      }
+
       // Takip listelerinde satirin kimligi ISTEM'dir: istemi ac.
       if (kod === 'radyoloji.istem-ac') {
         if (!satir) return;
@@ -1538,6 +1594,22 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         setIstemModali({ hastaId: sec.id, hastaAdi: sec.unvan, disIstem: true });
       }}
     />
+    {rolModali && (
+      <KalemRolModali
+        belgeSatirId={rolModali.satirId}
+        kalemAdi={rolModali.ad}
+        onKapat={() => setRolModali(null)}
+        onTamam={() => setYenile(x => x + 1)}
+      />
+    )}
+    {donemModali && (
+      <DonemKapatModali
+        tarafId={donemModali.tarafId}
+        kisi={donemModali.kisi}
+        onKapat={() => setDonemModali(null)}
+        onTamam={() => setYenile(x => x + 1)}
+      />
+    )}
     {istemModali && (
       <IstemModali
         acik
