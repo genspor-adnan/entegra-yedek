@@ -3367,3 +3367,90 @@ koda müşteri token'ları gömülüydü.
 **Sırada (istenirse):** üretim/ithalat için belge köprüleri (üretim fişi / alış
 faturası), durum-0 mutabakatı ("Bekleyenleri Denetle"), HBYS kullanım
 bildiriminde hasta kartı bağı.
+
+---
+
+## 31.08-01.09.2026 — HBYS: başvuru/provizyon alanları, kurum sözleşmesi fiyatı, Dış Doktor kartı, radyoloji kabul ve istem ekranları (`db/300-313`)
+
+Bu tur dört işten oluştu: (1) başvuru/provizyon alan eksikleri, (2) kurum
+sözleşmesinin fiyat listesini sürmesi, (3) **Dış Doktor** (sevk eden hekim)
+listesi/kartı, (4) radyoloji **kabul** ve **istem** ekranlarının mockup'a göre
+tamamlanması. Sonunda kabul akışı uçtan uca test edildi ve çıkan beş hata
+düzeltildi.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K36 | Provizyonda SGK'nın **başvuru no** ve **takip no** ayrı alanlar; özel sigorta alanları `oss_` önekiyle (`oss_provizyon_no`, `oss_provizyon_tarihi`) | İkisi farklı numara — faturalama takip no ile yapılır. Önek kullanıcının kuralı: "özel sağlık sigortası her zaman oss ile başlar" |
+| K37 | Başvuru ile satış siparişi **aynı tür (19)**, ayıran **tip = 30** | "Tip her zaman türe bağlı" (kullanıcı). Tip 2 (iade) denendi ama tür-kör `tipi = 2` iade sorguları (db/132-133) yüzünden 30'da kalındı |
+| K38 | Fiyat sırası: **kampanya → kurum sözleşmesi → carinin listesi → varsayılan** (`fn_belge_varsayilan_liste`, db/302) | Sözleşme listesi tek yerde çözülür; ekrandaki önizleme ile kaydedilen tutar aynı zinciri kullanır |
+| K39 | Dış hekim **ayrı tablo değil**: `taraf` + `taraf_personel.dis_hekim = 1` | Dış hekim de kişidir; ad/telefon/adres `taraf`ta zaten var, mesleki bilgi (branş, tescil) personel uzantısında. "Hem bizde çalışıyor hem dışarıdan sevk ediyor" durumu ayrı tabloda imkânsız olurdu |
+| K40 | Hekim **ünvan öneki yeni kolon değil** — `taraf.unvan` içinde ("Op.Dr. Kerem ATALAY"); kod listesi `hekim.unvan` (db/306-307) | Ünvan zaten ad+soyaddan türetilen görüntüleme adı; her yerde (arama, liste, rapor) hekim böyle görünür |
+| K41 | Hekimin kurumu **yalnız kayıtlı cari** ve bağ **`taraf.bag_id`** (db/308-309) | Serbest metin + cari birlikte tutulunca "hangi kurumdan kaç hasta geldi" cevaplanamıyordu. `bag_id` ("Bağlı Kurum") zaten taraf düzeyinde var — ikinci kolon açmak aynı bilgiyi iki yerde tutmak olurdu |
+| K42 | Çekim öncesi **kontrol listesi tabloda**, kural **tetikte** (db/310) | Sorular modaliteye göre değişir ve zamanla değişir; "kim, ne zaman yanıtladı" izi adli/kalite denetiminin istediği şey. Kural arayüzde olsaydı jenerik kart güncellemesi onu atlardı |
+| K43 | Kabul sonrası seçenekleri (MWL / SMS / hazırlık / CD) **istek olarak kaydedilir** (db/311) | Entegrasyon yok; seçimi gösterip kaydetmemek "SMS istedim" işinin izini bırakmazdı. Entegrasyon gelince aynı bayraklar tetikleyici olur |
+| K44 | İstem kâğıdı **jenerik doküman deposunda** (`kaynak = 'radyoloji-istem'`) ve kabulde üretilen **her isteme** eklenir | Rapor yazan radyolog hangi accession'ı açarsa açsın kâğıdı görmeli; tek isteme bağlamak diğerlerini "kâğıtsız" gösterirdi. Tarayıcı donanımıyla konuşulmuyor: dosya seçilir ya da `capture` ile kamera açılır |
+
+### Yapılanlar
+
+- **300-301**: `belge_provizyon` alan bölünmesi (SGK başvuru/takip no + tarih,
+  `oss_*` yeniden adlandırma), `belge_basvuru`'ya ambulans hasta/bileklik no;
+  başvuru tipi 30 (`kod_deger`) ve mevcut kayıtların yedekli güncellenmesi.
+- **Başvuru sekmesi mockup düzenine getirildi**: hasta arama satırı (TC / hasta
+  no / ad soyad / protokol + Ara + Yeni Hasta), eşit aralıklı hasta bandı
+  (Sigorta, Açık Borç, Faturalanmadı rozeti), sadeleştirilmiş buton bandı,
+  tek yeşil buton — **"Başvuruyu Aç (Protokol Ver)" → "Değişiklikleri Kaydet"**
+  (başvuru önce açılır, işlemler sonra yapılır), "Provizyon Al" provizyon
+  sekmesindeki ödeyen başlığında.
+- **302**: `taraf_kurum.fiyat_listesi_id` + `fn_belge_varsayilan_liste` yeniden
+  yazımı; kurum sözleşmesinde fiyat listesi kampanyanın soluna eklendi.
+- **303-304**: radyoloji rapor no üreteci; `rad.istem_ac` yetkisi ve
+  `v_radyoloji_tetkik` (modalitesi tanımlı aktif hizmet).
+- **305-309 — Dış Doktor**: liste + kart (mockup `dis_doktor_*.html`), branş
+  kod listesi, `v_dis_hekim_lookup`; kimlik şeridinde avatar + Ünvan + Ad +
+  Soyad + Kod + Temsilci (bizim personel) + Durum; Genel sekmesinde İletişim |
+  Hekim Bilgisi yan yana, altta adres gridi (Muayenehane/Hastane); Gönderim
+  Geçmişi sekmesi salt okunur GenGrid + özet kutuları ve modalite dağılımı.
+  Kurum alanı jenerik cari aramasından seçilir.
+- **310-313 — radyoloji kabul ve istem ekranları**:
+  - **Kabul** (mockup `radyoloji_kayit_kabul.html`): dışarıdan gelen hastanın
+    başvurusu **sunucuda açılır** — tek işlemde başvuru (protokol) + tetkik
+    başına istem (accession) + istenirse tahsilat. Satır bazlı Liste / İndirim
+    / Tutar kolonları, liste-indirim-KDV-genel toplam kutusu, ödeyen kurum
+    (arama) ve poliçe no (hastanın aktif poliçesinden), "📷 İstem Kâğıdını
+    Tara", **Kabul Sonrası** kutusu (ödemenin solunda) ve hazırlık talimatı.
+  - **İstem kartı** (mockup `radyoloji_istem_karti.html`): akış şeridi
+    (İstem → Randevu → Çekim → Raporlanıyor → Onay → Teslim) zaman damgalarıyla,
+    özet (bekleme dk, rapor durumu, oluşturan), **Kontrol Listesi** ve **İstem
+    Kâğıdı** sekmeleri; kabul sonrası bayrakları Çekim sekmesinde.
+
+### Tuzaklar / bulunan hatalar
+
+- **Pay bölüşümü belgenin gövdesinden okunuyor**: ücret satırı yazılırken
+  `odeyenKurumId` gönderilmeyince (uzantıda duruyor, gövdeye konmamıştı) tüm
+  tutar hastaya yazılıyordu. Gövdeye eklendi.
+- **Tahsilat KDV'li tutardır**: pay bölüşümü (289) KDV'siz net üzerinden yapılır;
+  kasadan tahsil edilen KDV dâhil tutardır — hasta payı orana göre genel toplama
+  taşınıyor (800 yerine 880 hatası).
+- **Kurum tamamını karşılıyorsa tahsilat açılmaz**: SGK örneğinde hasta payı 0
+  iken pencere açılıp genel toplam kadar tahsilat kaydı üretmişti.
+- **Kampanya indirimi sunucuda da uygulanmalı**: ekran 92,52 gösterirken sunucu
+  154,20 yazıyordu — ücret satırı yalnız liste fiyatını alıyordu; artık
+  `fn_kampanya_fiyat` ile aynı zincir ve belge başlığında `kampanya_id`.
+- **Kullanıcı tablosu `taraf_kullanici`** (ayrı "kullanici" tablosu yok) — akış
+  sorgusu 500 veriyordu.
+- **DB kuralları `GK422` ile fırlatılmalı**: kontrol listesi tetiği `P0001`
+  kullanınca kullanıcı "Beklenmeyen bir hata oluştu" görüyordu (db/312).
+- **Zaman damgası yerel olmalı**: "Çekildi" `toISOString()` ile UTC yazıyordu,
+  TR'de 3 saat geri — bekleme süresi göstergesi bozuluyordu.
+- **Jenerik arama `kod` kolonunu arar**: dış hekim kaynağında kolon yoktu,
+  arama "Bilinmeyen alan: kod" ile 400 dönüyordu (gizli kolon eklendi).
+- **Hastanın poliçesi liste kaynağı değil**: olmayan `hasta-kurum` kaynağı
+  çağrılıyordu; `/api/radyoloji/hasta/{id}/odeme` ucu yazıldı.
+- **313**: `v_rad_hekim_lookup`'a dış hekimler eklendi — dış istemde seçilen
+  hekim istem kartında boş görünüyordu (kayıt doğru, ekran eksikti).
+
+**Kapsam dışı (entegrasyon bekliyor):** PACS/DICOM ve MWL gönderimi, randevu
+SMS'i, hasta portalı. Kabul sonrası kutusundaki MWL/SMS seçimleri şimdilik
+yalnız kayda geçer.
