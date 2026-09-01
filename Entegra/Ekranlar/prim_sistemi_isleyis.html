@@ -111,6 +111,48 @@
       <li>Rol <b>kalem</b> düzeyindedir; aynı başvuruda MR'ı bir hekim, röntgeni başkası raporlayabilir.</li>
     </ul>
 
+    <h2>3b. Rol girişi akışta NEREDE yapılır</h2>
+    <p>Kural: rol <b>işi yapan adım</b> tamamlanınca yazılır — kullanıcıya ayrıca "şimdi rol
+    seç" diye sorulmaz. Her adım kendi rolünü bırakır:</p>
+    <table>
+      <tr><th style="width:210px">Akış adımı</th><th style="width:130px">Yazılan rol</th><th>Kişi nereden gelir</th></tr>
+      <tr><td>Kabul / istem açma (dış)</td><td><span class="rz">Gönderen</span></td>
+          <td>"İsteyen Hekim (dış)" alanında seçilen kayıtlı dış hekim (<code>istek_hekim_id</code>).
+              Serbest metin yazıldıysa rol <b>yazılmaz</b> — kişi kaydı yok, prim de yok.</td></tr>
+      <tr><td>İç istem (başvuru kartı)</td><td><span class="rz">İsteyen</span></td>
+          <td>"İsteyen Hekim" combosu (poliklinik hekimi).</td></tr>
+      <tr><td>Çekildi işaretleme</td><td><span class="rz">Uygulayan</span></td>
+          <td>İstem kartındaki <b>Tekniker</b> alanı; boşsa işlemi yapan <b>oturum kullanıcısı</b>
+              (personel kaydı olan).</td></tr>
+      <tr><td>Rapor onayı</td><td><span class="rz">Raporlayan</span></td>
+          <td>Onaylayan radyolog; ön raporu asistan yazdıysa <span class="rz">Asistan</span> ayrıca yazılır.</td></tr>
+      <tr><td>Girişimsel / ameliyat kalemi</td><td><span class="rz">Yapan</span> <span class="rz">Anestezi</span></td>
+          <td>Kalem penceresinden <b>elle</b> — birden çok kişi varsa pay bölünür.</td></tr>
+    </table>
+
+    <h3>Ekranda görünüş</h3>
+    <ul>
+      <li><b>Kabul ekranı</b>: ayrı bir alan yok; zaten seçilen hekim rolü doğurur. Kaydettikten
+        sonra sonuç şeridinde "<i>Roller: Gönderen — Op.Dr. K. ATALAY</i>" satırı gösterilir.</li>
+      <li><b>İstem kartı</b>: "Prim Rolleri" küçük bir bölüm — kim hangi rolde, düzeltilebilir.</li>
+      <li><b>Belge (başvuru/fatura) kartı</b>: kalem satırında <b>🏷</b> düğmesi →
+        <code>kalem_prim_rolleri.html</code> ekranı; eksik rol tamamlanır, pay bölünür.</li>
+      <li><b>Toplu</b>: belge kartında "Rolleri Doldur" — istem/rapor kayıtlarından yeniden türetir
+        (elle girilmiş satırlara dokunmaz).</li>
+    </ul>
+
+    <div class="uyari">
+      <b>Zorlama yok, iz var:</b> rol girilmeden de kabul/çekim/rapor tamamlanır (akış yavaşlamasın).
+      Rolü olmayan kalem hakediş üretmez ve <b>"Rolsüz kalem" raporunda</b> listelenir — dönem
+      kapanmadan önce buradan tamamlanır.
+    </div>
+
+    <div class="ok">
+      <b>Neden böyle:</b> Rol bilgisi zaten akışta var (kim istedi, kim çekti, kim raporladı);
+      ikinci kez sormak veri girişini iki katına çıkarır ve iki kaynak birbirinden sapar.
+      Elle giriş yalnız <b>istisna</b> içindir: çok kişili işlem, pay bölüşümü, sonradan düzeltme.
+    </div>
+
     <h2>4. Hesap zinciri</h2>
     <div class="akis">
       <span class="a">kalem</span><span class="ok2">→</span>

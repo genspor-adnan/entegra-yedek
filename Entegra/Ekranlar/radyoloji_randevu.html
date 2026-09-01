@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji Randevu Takvimi — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --accent:#2f6db3; --head:#f3f6fa;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --grpbg:#fbfcfd; --sel:#d7e7fb;
+    --dolu:#dbe9fb; --dolubd:#a9c9ee; --acil:#fbe3e0; --acilbd:#eebab3;
+    --kapali:#e9ecef; --bos:#ffffff; --secili:#d8f0dd; --secilibd:#94ceA4;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .btn.sp{margin-left:auto}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 7px;
+    font-size:11.5px;display:flex;align-items:center;min-width:130px}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .ust{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .ana{display:grid;grid-template-columns:1fr 320px}
+  /* takvim */
+  .tk{overflow-x:auto}
+  .tk table{border-collapse:collapse;width:100%;table-layout:fixed}
+  .tk th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);padding:6px 8px;font-size:11.5px;color:#3a5573;white-space:nowrap}
+  .tk td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:0;height:30px;vertical-align:top}
+  .tk td.saat{background:#fafcfe;color:var(--muted);font-size:11px;text-align:right;padding:5px 7px;width:70px}
+  .slot{height:100%;padding:4px 7px;font-size:11px;line-height:1.35;border-left:3px solid transparent}
+  .slot.bos{background:var(--bos);color:#b9c4cf}
+  .slot.dolu{background:var(--dolu);border-left-color:var(--dolubd)}
+  .slot.acil{background:var(--acil);border-left-color:var(--acilbd)}
+  .slot.kapali{background:var(--kapali);color:#98a3ae}
+  .slot.secili{background:var(--secili);border-left-color:var(--secilibd);font-weight:bold}
+  .slot b{display:block;font-weight:bold}
+  .slot .kucuk{font-size:10.5px;color:#4a6076}
+  /* sag panel */
+  .yan{border-left:1px solid var(--line2);background:var(--grpbg)}
+  .yan h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .kutu{margin:10px;border:1px solid var(--line2);border-radius:4px;background:#fff;padding:8px 10px}
+  .satir{display:flex;justify-content:space-between;font-size:11.5px;padding:2px 0}
+  .satir .sonuk{color:var(--muted)}
+  .bekleyen{border-bottom:1px solid var(--line2);padding:7px 10px;font-size:11.5px;cursor:default}
+  .bekleyen:hover{background:#f2f7fd}
+  .bekleyen b{display:block}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line)}
+  .rz.mod{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.acil{background:#f8e0dc;color:#8f3d36;border-color:#e4b7b2}
+  .lejant{display:flex;gap:14px;padding:6px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap;align-items:center}
+  .kare{display:inline-block;width:11px;height:11px;border-radius:2px;border:1px solid var(--line);margin-right:5px;vertical-align:-1px}
+  /* modal */
+  .modal{max-width:760px;margin:0 auto 18px}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .iz{display:grid;grid-template-columns:repeat(3,1fr);gap:9px 12px;padding:10px}
+  .iz .tam{grid-column:1 / -1}
+  .uyari{margin:0 12px 12px;border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;
+    padding:7px 9px;font-size:11px;color:#8a6218;line-height:1.55}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<!-- ======================= TAKVİM ======================= -->
+<div class="win">
+  <div class="title">📅 Radyoloji Randevu Takvimi <span class="sp">GenoTIP AI · Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Randevu Ver</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn">↔ Taşı</div>
+    <div class="btn">✖ İptal</div>
+    <div class="btn">✔ Geldi</div>
+    <div class="btn pas">📷 Çekildi</div>
+    <div class="btn sp">🖨 Gün Listesi</div>
+  </div>
+
+  <div class="ust">
+    <div class="btn">‹</div>
+    <div class="inp combo">01.09.2026 Salı</div>
+    <div class="btn">›</div>
+    <div class="inp combo">Görünüm: Gün</div>
+    <div class="inp combo">Modalite: Tümü</div>
+    <div class="inp combo">Şube: Merkez</div>
+    <div class="btn sp">Bugün</div>
+  </div>
+
+  <div class="ana">
+    <div class="tk">
+      <table>
+        <thead>
+          <tr>
+            <th class="saat" style="width:70px">Saat</th>
+            <th>MR-01 · Magnetom <span class="rz mod">MR</span></th>
+            <th>BT-01 · Revolution <span class="rz mod">BT</span></th>
+            <th>DR-01 · Dijital Röntgen <span class="rz mod">Röntgen</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="saat">08:00</td>
+            <td><div class="slot dolu"><b>MERVE DEMİR</b><span class="kucuk">Lomber MR · 30 dk · ACC-0008</span></div></td>
+            <td><div class="slot dolu"><b>A. YILMAZ</b><span class="kucuk">Akciğer BT · 10 dk</span></div></td>
+            <td><div class="slot bos">boş</div></td></tr>
+          <tr><td class="saat">08:30</td>
+            <td><div class="slot dolu"><b>K. AYDIN</b><span class="kucuk">Boyun MR · 30 dk</span></div></td>
+            <td><div class="slot bos">boş</div></td>
+            <td><div class="slot dolu"><b>S. KARA</b><span class="kucuk">Akciğer grafisi · 5 dk</span></div></td></tr>
+          <tr><td class="saat">09:00</td>
+            <td><div class="slot secili"><b>+ seçili slot</b><span class="kucuk">MR-01 · 09:00 – 09:30</span></div></td>
+            <td><div class="slot acil"><b>ACİL · H. ÇELİK</b><span class="kucuk">Kraniyal BT <span class="rz acil">acil</span></span></div></td>
+            <td><div class="slot bos">boş</div></td></tr>
+          <tr><td class="saat">09:30</td>
+            <td><div class="slot bos">boş</div></td>
+            <td><div class="slot bos">boş</div></td>
+            <td><div class="slot dolu"><b>M. KAYA</b><span class="kucuk">El bileği · 5 dk</span></div></td></tr>
+          <tr><td class="saat">10:00</td>
+            <td><div class="slot dolu"><b>E. TUNÇ</b><span class="kucuk">Diz MR · 30 dk</span></div></td>
+            <td><div class="slot dolu"><b>B. ŞEN</b><span class="kucuk">Batın BT · 15 dk</span></div></td>
+            <td><div class="slot bos">boş</div></td></tr>
+          <tr><td class="saat">12:30</td>
+            <td><div class="slot kapali">öğle arası</div></td>
+            <td><div class="slot kapali">öğle arası</div></td>
+            <td><div class="slot kapali">öğle arası</div></td></tr>
+          <tr><td class="saat">13:30</td>
+            <td><div class="slot bos">boş</div></td>
+            <td><div class="slot bos">boş</div></td>
+            <td><div class="slot bos">boş</div></td></tr>
+          <tr><td class="saat">14:00</td>
+            <td><div class="slot kapali">bakım (servis)</div></td>
+            <td><div class="slot bos">boş</div></td>
+            <td><div class="slot dolu"><b>F. ATA</b><span class="kucuk">Ayak grafisi · 5 dk</span></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="yan">
+      <h4>Randevu Bekleyen İstemler <span style="float:right;font-weight:normal;font-size:11px">6</span></h4>
+      <div class="bekleyen"><b>MERVE DEMİR · Lomber MR</b>
+        <span class="sonuk">ACC-260901-0011 · MR · 30 dk · <span class="rz mod">bugün</span></span></div>
+      <div class="bekleyen"><b>faik bulut · Beyin MR</b>
+        <span class="sonuk">ACC-260901-0007 · MR · 30 dk</span></div>
+      <div class="bekleyen"><b>AHMET ÖZTÜRK · Akciğer grafisi</b>
+        <span class="sonuk">ACC-260831-0002 · Röntgen · 5 dk · walk-in</span></div>
+      <div class="bekleyen"><b>H. ÇELİK · Kraniyal BT</b>
+        <span class="sonuk">ACC-260901-0004 · BT · <span class="rz acil">acil</span></span></div>
+
+      <div class="kutu">
+        <div class="satir"><span>Bugün toplam</span><b>19 randevu</b></div>
+        <div class="satir"><span>Doluluk (MR-01)</span><b>%82</b></div>
+        <div class="satir"><span>Boş slot</span><b>7</b></div>
+        <div class="satir"><span>Gelmedi</span><b>1</b></div>
+        <div class="satir sonuk" style="margin-top:5px;line-height:1.5">
+          Bekleyen istemi <b>sürükleyip</b> boş slota bırakınca randevu oluşur.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lejant">
+    <span><span class="kare" style="background:var(--bos)"></span>Boş</span>
+    <span><span class="kare" style="background:var(--dolu);border-color:var(--dolubd)"></span>Randevulu</span>
+    <span><span class="kare" style="background:var(--acil);border-color:var(--acilbd)"></span>Acil</span>
+    <span><span class="kare" style="background:var(--kapali)"></span>Kapalı (mola / bakım / tatil)</span>
+    <span><span class="kare" style="background:var(--secili);border-color:var(--secilibd)"></span>Seçili</span>
+  </div>
+</div>
+
+<!-- ======================= RANDEVU VER MODALI ======================= -->
+<div class="win modal">
+  <div class="title">📅 Randevu Ver — MR-01 · 01.09.2026 09:00 <span class="sp">ACC-260901-0011</span></div>
+  <div class="toolbar">
+    <div class="btn primary">✔ Randevuyu Ver</div>
+    <div class="btn">📨 Hastaya SMS</div>
+    <div class="btn sp">✖ Vazgeç</div>
+  </div>
+  <div class="iz">
+    <div class="fld"><label>Hasta</label><div class="inp">MERVE DEMİR · ♀ 34 · ☎ 0532 123 45 67</div></div>
+    <div class="fld"><label>İstem / Tetkik</label><div class="inp">ACC-260901-0011 · Lomber MR</div></div>
+    <div class="fld"><label>Cihaz</label><div class="inp combo">MR-01 · Magnetom 1.5T</div></div>
+    <div class="fld"><label>Tarih</label><div class="inp">01.09.2026</div></div>
+    <div class="fld"><label>Saat</label><div class="inp">09:00</div></div>
+    <div class="fld"><label>Süre (dk)</label><div class="inp">30 <span class="sonuk" style="margin-left:6px">protokolden</span></div></div>
+    <div class="fld"><label>Öncelik</label><div class="inp combo">Normal</div></div>
+    <div class="fld"><label>Tekniker</label><div class="inp combo">H. ŞAHİN</div></div>
+    <div class="fld"><label>Hatırlatma</label><div class="inp">☑ 1 gün önce SMS</div></div>
+    <div class="fld tam"><label>Not</label><div class="inp">Hasta 30 dk önce gelsin; metal kontrolü yapılacak.</div></div>
+  </div>
+  <div class="uyari">
+    ⚠ Süre <b>çekim protokolünden</b> gelir (yoksa cihazın varsayılan süresi). Slot doluysa ya da
+    cihaz o saatte kapalıysa kayıt <b>engellenir</b>; acil istemler cihazın "acil için ayrılan"
+    slotlarını kullanabilir. Randevu verilince istem <code>randevu_id</code> ile bağlanır ve
+    kartındaki akış şeridinde <b>Randevu</b> adımı yeşile döner.
+  </div>
+</div>
+
+<div class="not">
+  <b>NOT (mockup):</b> Takvim <b>cihaz sütunlu gün görünümü</b>; hafta görünümü tek cihaz için
+  açılır. Kayıt yeri mevcut <code>randevu</code> tablosudur — eklenecek alan: <b><code>cihaz_id</code></b>
+  (bugün randevu hekime/bölüme veriliyor, radyolojide kaynak cihazdır) ve
+  <code>radyoloji_istem_id</code> yerine mevcut <code>radyoloji_istem.randevu_id</code> bağı kullanılır.
+  Slotlar cihaz kartındaki mesai/slot ayarından üretilir; kapatma satırları (bakım/tatil) ile
+  cihaz mola aralıkları "kapalı" gösterilir. <b>Bekleyen istemler</b> paneli, randevusu olmayan
+  (durum = Bekliyor, <code>randevu_id is null</code>) istemleri listeler; sürükle-bırak ile slota
+  bağlanır. SMS gönderimi entegrasyon gelene kadar yalnız <b>istek</b> olarak işaretlenir (311).
+</div>
+</body>
+</html>

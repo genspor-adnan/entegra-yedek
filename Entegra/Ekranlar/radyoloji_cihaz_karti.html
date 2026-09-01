@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji Cihazı — Liste + Kart — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --accent:#2f6db3; --head:#f3f6fa;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --grpbg:#fbfcfd; --sel:#d7e7fb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1240px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .btn.sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2)}
+  .arama .kutu{flex:1;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted)}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.sel td{background:var(--sel)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line)}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mod{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .idstrip{display:grid;grid-template-columns:.6fr 1.4fr .8fr .8fr .6fr;gap:10px;
+    padding:9px 12px;background:#f7fafc;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .fld label.req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 7px;
+    font-size:12px;display:flex;align-items:center}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg)}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .iz{display:grid;grid-template-columns:repeat(4,1fr);gap:9px 12px;padding:10px}
+  .iz .tam{grid-column:1 / -1}
+  .gunler{display:flex;gap:6px;flex-wrap:wrap}
+  .gun{border:1px solid var(--line);border-radius:3px;padding:3px 10px;font-size:11.5px;background:#fff;color:var(--muted)}
+  .gun.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .uyari{margin:0 12px 12px;border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;
+    padding:7px 9px;font-size:11px;color:#8a6218;line-height:1.55}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .statusbar b{color:var(--ink)}
+  .not{max-width:1240px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<!-- ============================ LİSTE ============================ -->
+<div class="win">
+  <div class="title">🖥️ Radyoloji Cihazları <span class="sp">GenoTIP AI · Merkez</span></div>
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni Cihaz</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn pas">🗑 Sil</div>
+    <div class="btn">📅 Randevu Takvimi</div>
+    <div class="btn">🔌 MWL Testi</div>
+    <div class="btn sp">🖨 Yazdır ▾</div>
+  </div>
+  <div class="arama">
+    <div class="kutu">🔍 Bu listede ara…</div>
+    <span class="chip on">Aktif</span><span class="chip">Pasif</span><span class="chip">Tümü</span>
+  </div>
+  <table>
+    <thead>
+      <tr><th style="width:26px"></th><th>Kod</th><th>Cihaz</th><th class="orta">Modalite</th>
+        <th>AE Title</th><th>Oda</th><th class="orta">Mesai</th><th class="sag">Slot</th>
+        <th class="sag">Bugün</th><th class="orta">Doluluk</th><th class="orta">Durum</th></tr>
+    </thead>
+    <tbody>
+      <tr class="sel"><td>☑</td><td>MR-01</td><td>Siemens Magnetom 1.5T</td>
+        <td class="orta"><span class="rz mod">MR</span></td><td>MR01_AE</td><td>Zemin / Oda 3</td>
+        <td class="orta">08:00-18:00</td><td class="sag">15 dk</td><td class="sag">18</td>
+        <td class="orta">%82</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+      <tr><td>☐</td><td>BT-01</td><td>GE Revolution 128</td>
+        <td class="orta"><span class="rz mod">BT</span></td><td>BT01_AE</td><td>Zemin / Oda 1</td>
+        <td class="orta">08:00-20:00</td><td class="sag">10 dk</td><td class="sag">34</td>
+        <td class="orta">%64</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+      <tr><td>☐</td><td>DR-01</td><td>Röntgen — Dijital</td>
+        <td class="orta"><span class="rz mod">Röntgen</span></td><td>DR01_AE</td><td>1. Kat</td>
+        <td class="orta">08:00-17:00</td><td class="sag">5 dk</td><td class="sag">57</td>
+        <td class="orta">%41</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+      <tr><td>☐</td><td>US-02</td><td>USG — Portatif</td>
+        <td class="orta"><span class="rz mod">USG</span></td><td class="sonuk">—</td><td>Servis</td>
+        <td class="orta sonuk">randevusuz</td><td class="sag sonuk">—</td><td class="sag">12</td>
+        <td class="orta sonuk">—</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+      <tr><td>☐</td><td>MG-01</td><td>Mamografi (bakımda)</td>
+        <td class="orta"><span class="rz mod">Mamografi</span></td><td>MG01_AE</td><td>Zemin / Oda 5</td>
+        <td class="orta sonuk">—</td><td class="sag">20 dk</td><td class="sag">0</td>
+        <td class="orta sonuk">—</td><td class="orta"><span class="rz pas">Pasif</span></td></tr>
+    </tbody>
+  </table>
+  <div class="statusbar">
+    <span>Kayıt: <b>5</b></span><span>Aktif: <b>4</b></span>
+    <span class="sp">Randevusuz cihazda ("walk-in") istem doğrudan çalışma listesine düşer.</span>
+  </div>
+</div>
+
+<!-- ============================ KART ============================ -->
+<div class="win">
+  <div class="title">🖥️ Cihaz — MR-01 · Siemens Magnetom 1.5T <span class="sp">GenoTIP AI · Merkez</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn">📅 Takvimi Aç</div>
+    <div class="btn">🔌 MWL Testi</div>
+    <div class="btn">🗑 Sil</div>
+    <div class="btn sp">Kapat</div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label>Kod</label><div class="inp">MR-01</div></div>
+    <div class="fld"><label class="req">Cihaz Adı</label><div class="inp">Siemens Magnetom 1.5T</div></div>
+    <div class="fld"><label class="req">Modalite</label><div class="inp combo">MR</div></div>
+    <div class="fld"><label>Şube</label><div class="inp combo">Merkez</div></div>
+    <div class="fld"><label>Durum</label><div class="inp combo">Aktif</div></div>
+  </div>
+
+  <div class="grp">
+    <h4>Yerleşim ve DICOM</h4>
+    <div class="iz">
+      <div class="fld"><label>Oda / Kat</label><div class="inp">Zemin / Oda 3</div></div>
+      <div class="fld"><label>AE Title</label><div class="inp">MR01_AE</div></div>
+      <div class="fld"><label>MWL Hedefi (host:port)</label><div class="inp sonuk">10.0.0.21:104</div></div>
+      <div class="fld"><label>Cihaz Sorumlusu</label><div class="inp combo">H. ŞAHİN</div></div>
+      <div class="fld tam"><label>Açıklama</label><div class="inp">Kontrastlı çekimler için enjektör hattı mevcut.</div></div>
+    </div>
+    <div class="uyari">
+      ⚠ <b>AE Title</b> DICOM kimliğidir: çalışma listesi (MWL) doğru cihaza ancak bununla iner.
+      Entegrasyon açılana kadar alan yalnız kayıt amaçlıdır.
+    </div>
+  </div>
+
+  <div class="grp">
+    <h4>Randevu Ayarları <span class="mini">randevu bölüm ayarıyla aynı desen</span></h4>
+    <div class="iz">
+      <div class="fld"><label>Randevu Verilir</label><div class="inp">☑ Evet</div></div>
+      <div class="fld"><label>Mesai Başlangıç</label><div class="inp">08:00</div></div>
+      <div class="fld"><label>Mesai Bitiş</label><div class="inp">18:00</div></div>
+      <div class="fld"><label>Slot (dk)</label><div class="inp">15</div></div>
+      <div class="fld"><label>Öğle Arası</label><div class="inp">12:30 – 13:30</div></div>
+      <div class="fld"><label>Varsayılan Süre (dk)</label><div class="inp">30</div></div>
+      <div class="fld"><label>Aynı Anda</label><div class="inp">1 hasta</div></div>
+      <div class="fld"><label>Acil için Ayrılan</label><div class="inp">Günde 2 slot</div></div>
+      <div class="fld tam"><label>Çalışma Günleri</label>
+        <div class="gunler">
+          <span class="gun on">Pzt</span><span class="gun on">Sal</span><span class="gun on">Çar</span>
+          <span class="gun on">Per</span><span class="gun on">Cum</span><span class="gun">Cmt</span><span class="gun">Paz</span>
+        </div>
+      </div>
+    </div>
+    <div class="uyari">
+      ⚠ Randevu süresi öncelikle <b>çekim protokolünden</b> (tetkikin <code>sure_dk</code>'sı) gelir;
+      protokol yoksa cihazın <b>varsayılan süresi</b> kullanılır. Slot bunun katları olarak dizilir.
+    </div>
+  </div>
+
+  <div class="grp">
+    <h4>Kapatmalar / Bakım <span class="mini">＋ Satır Ekle</span></h4>
+    <table>
+      <thead><tr><th style="width:26px"></th><th class="orta" style="width:140px">Başlangıç</th>
+        <th class="orta" style="width:140px">Bitiş</th><th>Neden</th><th class="orta" style="width:110px">Randevu</th></tr></thead>
+      <tbody>
+        <tr><td>☐</td><td class="orta">05.09.2026 08:00</td><td class="orta">05.09.2026 12:00</td>
+          <td>Periyodik bakım (servis)</td><td class="orta">Kapalı</td></tr>
+        <tr><td>☐</td><td class="orta">12.09.2026 00:00</td><td class="orta">12.09.2026 23:59</td>
+          <td>Resmî tatil</td><td class="orta">Kapalı</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="statusbar">
+    <span>Bugünkü randevu: <b>18</b></span><span>Doluluk: <b>%82</b></span>
+    <span>Bekleyen istem: <b>6</b></span><span class="sp">Son değişiklik: <b>admin · 01.09.2026</b></span>
+  </div>
+</div>
+
+<div class="not">
+  <b>NOT (mockup):</b> Cihaz tablosu (<code>radyoloji_cihaz</code>, 283) bugün kod/ad/modalite/AE
+  Title/oda taşıyor. Bu ekran için <b>eklenecekler</b>: randevu ayarları
+  (<code>randevu_verilir</code>, <code>mesai_bas</code>, <code>mesai_bit</code>,
+  <code>ogle_bas</code>, <code>ogle_bit</code>, <code>slot_dk</code>,
+  <code>varsayilan_sure</code>, <code>eszaman</code>, <code>acil_slot</code>,
+  <code>calisma_gunleri</code>) — <code>randevu_bolum_ayar</code> ile aynı alan adları, çünkü
+  randevu motoru aynı; ve <b>kapatma/bakım</b> için <code>radyoloji_cihaz_kapatma</code>
+  (cihaz_id, baslangic, bitis, neden). MWL host/port alanı entegrasyon turunda eklenir.
+</div>
+</body>
+</html>
