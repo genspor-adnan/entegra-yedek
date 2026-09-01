@@ -34,9 +34,11 @@
   .hasta .fld{display:flex;flex-direction:column;font-size:11.5px}
   .hasta .fld small{color:var(--muted);font-size:10.5px}
   .sekmeler{display:flex;gap:2px;padding:6px 8px 0;background:var(--head);border-bottom:1px solid var(--line)}
-  .sekmeler div{border:1px solid var(--line);border-bottom:none;border-radius:3px 3px 0 0;
-    padding:4px 12px;font-size:11.5px;background:linear-gradient(#f7f9fc,#eef2f7);color:var(--muted)}
-  .sekmeler div.on{background:#fff;color:var(--navy);font-weight:bold}
+  .sekmeler div,.sekmeler a{border:1px solid var(--line);border-bottom:none;border-radius:3px 3px 0 0;
+    padding:4px 12px;font-size:11.5px;background:linear-gradient(#f7f9fc,#eef2f7);color:var(--muted);
+    text-decoration:none;display:inline-block}
+  .sekmeler a:hover{background:#fff;color:var(--navy)}
+  .sekmeler div.on,.sekmeler a.on{background:#fff;color:var(--navy);font-weight:bold}
   .govde{display:grid;grid-template-columns:1.25fr 1fr;gap:10px;padding:10px}
   @media (max-width:1050px){.govde{grid-template-columns:1fr}}
   .pan{border:1px solid var(--line);border-radius:4px;background:#fff;overflow:hidden}
@@ -100,9 +102,10 @@
     <div class="fld sp">Onam<small>Alındı · metin sürümü 1.3</small></div>
   </div>
 
+  <!-- Sekmeler CALISIR halde usbs_muayene_sekmeler.html dosyasinda; buradaki
+       serit oraya baglanir - bu ekran tek sayfalik ozettir. -->
   <div class="sekmeler">
-    <div class="on">Muayene</div><div>Tanı (ICD-10)</div><div>Hekim Notu</div>
-    <div>e-Reçete</div><div>e-Rapor</div><div>Sevk / Yönlendirme</div><div>Dosyalar</div>
+    <a class="on" href="usbs_muayene_sekmeler.html">Muayene</a><a href="usbs_muayene_sekmeler.html">Tanı (ICD-10)</a><a href="usbs_muayene_sekmeler.html">Hekim Notu</a><a href="usbs_muayene_sekmeler.html">e-Reçete</a><a href="usbs_muayene_sekmeler.html">e-Rapor</a><a href="usbs_muayene_sekmeler.html">Sevk / Yönlendirme</a><a href="usbs_muayene_sekmeler.html">Dosyalar</a>
   </div>
 
   <div class="govde">

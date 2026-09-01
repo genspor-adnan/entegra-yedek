@@ -80,9 +80,38 @@
   .madde{display:inline-block;background:#eef2f7;border:1px solid var(--line);border-radius:3px;
     padding:0 5px;font-size:10px;color:var(--navy);font-weight:bold;margin-right:3px}
   .baslik{max-width:1280px;margin:18px auto 6px;font-size:12.5px;color:var(--navy);font-weight:bold}
+  /* --------------------------------------------------- calisan sekmeler --
+     Mockup olsa da sekmeler GERCEKTEN calisir: ust seritten ya da ekran
+     icindeki seritten tiklanir. "Tümü" hepsini alt alta gosterir - tasarimi
+     bir arada gormek icin. */
+  .ustserit{max-width:1280px;margin:0 auto 10px;background:var(--card);
+    border:1px solid var(--line);border-radius:4px;box-shadow:0 3px 10px rgba(20,40,70,.08);
+    display:flex;gap:4px;padding:7px 9px;flex-wrap:wrap;align-items:center;position:sticky;
+    top:0;z-index:20}
+  .ustserit b{font-size:11.5px;color:var(--navy);margin-right:4px}
+  .ustserit button{border:1px solid var(--line);border-radius:12px;padding:4px 12px;
+    font-size:11.5px;background:#fff;color:var(--ink);cursor:pointer;font-family:inherit}
+  .ustserit button:hover{border-color:var(--accent);background:#f4f8fd}
+  .ustserit button.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .ustserit .tumu{margin-left:auto}
+  .sekmeler div{cursor:pointer}
+  .sekmeler div:hover{background:#fff;color:var(--navy)}
+  .gizli{display:none !important}
 </style>
 </head>
 <body>
+
+<div class="ustserit">
+    <b>Uzaktan Muayene sekmeleri:</b>
+    <button data-git="1" class="on">1 · Muayene</button>
+    <button data-git="2">2 · Tanı (ICD-10)</button>
+    <button data-git="3">3 · Hekim Notu</button>
+    <button data-git="4">4 · e-Reçete</button>
+    <button data-git="5">5 · e-Rapor</button>
+    <button data-git="6">6 · Sevk / Yönlendirme</button>
+    <button data-git="7">7 · Dosyalar</button>
+    <button class="tumu" data-git="0">▤ Tümü</button>
+</div>
 
 <div class="not" style="margin-bottom:6px">
   <b>Bu dosya uzaktan muayene ekranının YEDİ sekmesini de gösterir.</b> Sekme
@@ -90,6 +119,7 @@
   muayene tamamlanamaz, muayene tamamlanmadan görüşme kapanmış sayılmaz.
 </div>
 
+<section data-bolum="1">
 <div class="baslik">1 / 7 — Muayene sekmesi</div>
 <div class="win">
   <div class="title">🩺 Uzaktan Muayene — Muayene Bulguları
@@ -102,8 +132,7 @@
     <div class="sp"><span class="rozet r-uy">Muayene tamamlanmadı</span></div>
   </div>
   <div class="sekmeler">
-    <div class="on">Muayene</div><div>Tanı (ICD-10)</div><div>Hekim Notu</div>
-    <div>e-Reçete</div><div>e-Rapor</div><div>Sevk / Yönlendirme</div><div>Dosyalar</div>
+    <div data-git="1" class="on">Muayene</div><div data-git="2">Tanı (ICD-10)</div><div data-git="3">Hekim Notu</div><div data-git="4">e-Reçete</div><div data-git="5">e-Rapor</div><div data-git="6">Sevk / Yönlendirme</div><div data-git="7">Dosyalar</div>
   </div>
 
   <div class="toolbar">
@@ -156,13 +185,15 @@
   </div>
 </div>
 
+</section>
+
+<section data-bolum="2">
 <div class="baslik">2 / 7 — Tanı (ICD-10) sekmesi</div>
 <div class="win">
   <div class="title">🔎 Uzaktan Muayene — Tanı (ICD-10)
     <span class="sp">kayıt bölümü md 8 · 9</span></div>
   <div class="sekmeler">
-    <div>Muayene</div><div class="on">Tanı (ICD-10)</div><div>Hekim Notu</div>
-    <div>e-Reçete</div><div>e-Rapor</div><div>Sevk / Yönlendirme</div><div>Dosyalar</div>
+    <div data-git="1">Muayene</div><div data-git="2" class="on">Tanı (ICD-10)</div><div data-git="3">Hekim Notu</div><div data-git="4">e-Reçete</div><div data-git="5">e-Rapor</div><div data-git="6">Sevk / Yönlendirme</div><div data-git="7">Dosyalar</div>
   </div>
 
   <div class="toolbar">
@@ -243,13 +274,15 @@
   </div>
 </div>
 
+</section>
+
+<section data-bolum="3">
 <div class="baslik">3 / 7 — Hekim Notu sekmesi</div>
 <div class="win">
   <div class="title">📝 Uzaktan Muayene — Hekim Notu
     <span class="sp">kayıt md 10 · entegrasyonsuz md 5</span></div>
   <div class="sekmeler">
-    <div>Muayene</div><div>Tanı (ICD-10)</div><div class="on">Hekim Notu</div>
-    <div>e-Reçete</div><div>e-Rapor</div><div>Sevk / Yönlendirme</div><div>Dosyalar</div>
+    <div data-git="1">Muayene</div><div data-git="2">Tanı (ICD-10)</div><div data-git="3" class="on">Hekim Notu</div><div data-git="4">e-Reçete</div><div data-git="5">e-Rapor</div><div data-git="6">Sevk / Yönlendirme</div><div data-git="7">Dosyalar</div>
   </div>
 
   <div class="toolbar">
@@ -308,6 +341,9 @@
   </div>
 </div>
 
+</section>
+
+<section data-bolum="4">
 <div class="baslik">4 / 7 — e-Reçete sekmesi</div>
 <div class="win">
   <div class="title">💊 Uzaktan Muayene — e-Reçete
@@ -320,8 +356,7 @@
     <div class="sp"><span class="rozet r-uy">Reçete imzalanmadı</span></div>
   </div>
   <div class="sekmeler">
-    <div>Muayene</div><div>Tanı (ICD-10)</div><div>Hekim Notu</div>
-    <div class="on">e-Reçete</div><div>e-Rapor</div><div>Sevk / Yönlendirme</div><div>Dosyalar</div>
+    <div data-git="1">Muayene</div><div data-git="2">Tanı (ICD-10)</div><div data-git="3">Hekim Notu</div><div data-git="4" class="on">e-Reçete</div><div data-git="5">e-Rapor</div><div data-git="6">Sevk / Yönlendirme</div><div data-git="7">Dosyalar</div>
   </div>
 
   <div class="toolbar">
@@ -406,12 +441,14 @@
   </div>
 </div>
 
+</section>
+
+<section data-bolum="5">
 <div class="baslik">5 / 7 — e-Rapor sekmesi</div>
 <div class="win">
   <div class="title">📄 Uzaktan Muayene — e-Rapor <span class="sp">İlaç kullanım raporu</span></div>
   <div class="sekmeler">
-    <div>Muayene</div><div>Tanı (ICD-10)</div><div>Hekim Notu</div>
-    <div>e-Reçete</div><div class="on">e-Rapor</div><div>Sevk / Yönlendirme</div><div>Dosyalar</div>
+    <div data-git="1">Muayene</div><div data-git="2">Tanı (ICD-10)</div><div data-git="3">Hekim Notu</div><div data-git="4">e-Reçete</div><div data-git="5" class="on">e-Rapor</div><div data-git="6">Sevk / Yönlendirme</div><div data-git="7">Dosyalar</div>
   </div>
 
   <div class="toolbar">
@@ -480,13 +517,15 @@
   </div>
 </div>
 
+</section>
+
+<section data-bolum="6">
 <div class="baslik">6 / 7 — Sevk / Yönlendirme sekmesi</div>
 <div class="win">
   <div class="title">↗ Uzaktan Muayene — Sevk / Yönlendirme
     <span class="sp">kayıt bölümü md 12</span></div>
   <div class="sekmeler">
-    <div>Muayene</div><div>Tanı (ICD-10)</div><div>Hekim Notu</div>
-    <div>e-Reçete</div><div>e-Rapor</div><div class="on">Sevk / Yönlendirme</div><div>Dosyalar</div>
+    <div data-git="1">Muayene</div><div data-git="2">Tanı (ICD-10)</div><div data-git="3">Hekim Notu</div><div data-git="4">e-Reçete</div><div data-git="5">e-Rapor</div><div data-git="6" class="on">Sevk / Yönlendirme</div><div data-git="7">Dosyalar</div>
   </div>
 
   <div class="toolbar">
@@ -556,13 +595,15 @@
   </div>
 </div>
 
+</section>
+
+<section data-bolum="7">
 <div class="baslik">7 / 7 — Dosyalar sekmesi</div>
 <div class="win">
   <div class="title">📎 Uzaktan Muayene — Dosyalar
     <span class="sp">md 12 · 13 · görüşmede paylaşılanlar dahil</span></div>
   <div class="sekmeler">
-    <div>Muayene</div><div>Tanı (ICD-10)</div><div>Hekim Notu</div>
-    <div>e-Reçete</div><div>e-Rapor</div><div>Sevk / Yönlendirme</div><div class="on">Dosyalar</div>
+    <div data-git="1">Muayene</div><div data-git="2">Tanı (ICD-10)</div><div data-git="3">Hekim Notu</div><div data-git="4">e-Reçete</div><div data-git="5">e-Rapor</div><div data-git="6">Sevk / Yönlendirme</div><div data-git="7" class="on">Dosyalar</div>
   </div>
 
   <div class="toolbar">
@@ -624,6 +665,8 @@
   </div>
 </div>
 
+</section>
+
 <div class="not">
   <b>Bu dosya</b> uzaktan muayene ekranının <b>yedi sekmesini de</b> gösterir:
   Muayene, Tanı (ICD-10), Hekim Notu, e-Reçete, e-Rapor, Sevk/Yönlendirme,
@@ -640,5 +683,33 @@
   <b>virüs taraması</b>, izinli tür/boyut kuralı, <b>Medula e-reçete/e-rapor</b>
   ve <b>e-Nabız</b> servis bağlantıları.
 </div>
+
+<script>
+  // Sekme gecisi: ust seritten ya da ekran icindeki seritten. "Tümü" (0)
+  // butonu butun bolumleri alt alta gosterir - tasarimi bir arada gormek icin.
+  (function () {
+    var bolumler = document.querySelectorAll('section[data-bolum]');
+    var ustDugmeler = document.querySelectorAll('.ustserit button');
+
+    function goster(no) {
+      bolumler.forEach(function (b) {
+        var acik = (no === 0) || (b.dataset.bolum === String(no));
+        b.classList.toggle('gizli', !acik);
+      });
+      ustDugmeler.forEach(function (d) {
+        d.classList.toggle('on', d.dataset.git === String(no));
+      });
+      if (no !== 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.addEventListener('click', function (e) {
+      var hedef = e.target.closest('[data-git]');
+      if (!hedef) return;
+      goster(Number(hedef.dataset.git));
+    });
+
+    goster(1);   // acilista ilk sekme
+  })();
+</script>
 </body>
 </html>
