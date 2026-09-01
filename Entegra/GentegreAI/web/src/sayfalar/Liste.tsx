@@ -15,6 +15,8 @@ import { IceriAlModali } from '../bilesenler/IceriAlModali';
 import { IstemModali } from '../bilesenler/radyoloji/IstemModali';
 import { TeslimModali } from '../bilesenler/radyoloji/TeslimModali';
 import { RandevuModali } from '../bilesenler/radyoloji/RandevuModali';
+import { RandevuBekleyenPanel, type BekleyenIstem }
+  from '../bilesenler/radyoloji/RandevuBekleyenPanel';
 import { TarafArama } from '../bilesenler/TarafArama';
 import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
 import { UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
@@ -93,6 +95,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [randevuModali, setRandevuModali] = useState<
     { istemId: number; accessionNo: string; tetkikAdi: string;
       modalite: number; sureDk: number } | null>(null);
+  /**
+   * Takvimin yan panelinde (316) seçili bekleyen istem: takvimde boş saate
+   * tıklanınca yeni randevu formu yerine BU isteme randevu verilir.
+   */
+  const [bekleyenSecili, setBekleyenSecili] = useState<BekleyenIstem | null>(null);
   const [teslimModali, setTeslimModali] = useState<
     { istemId: number; accessionNo: string } | null>(null);
   // Yeni kart EKLENINCE (duzenlemede degil) grid "Son Aranan"a gecsin - kullanici
@@ -228,6 +235,30 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
          : kosullar.length === 1 ? kosullar[0]
          : { op: 'and', kosullar };
   }, [tanim.kaynak, sabitFiltre, bolumSuzgec, hekimSuzgec]);
+
+  /**
+   * BEKLEYEN İSTEME RANDEVU (316): panelden sürükle-bırak ve "seç + boş saate
+   * tıkla" yollarının ortak ucu. Süre istemin çekim protokolünden (314) gelir;
+   * çakışma/kapasite/cihaz kapatma kuralları veritabanı tetiğindedir - buradan
+   * tekrar kontrol edilmez, hata mesajı olduğu gibi gösterilir.
+   */
+  const bekleyeneRandevuVer = async (
+    istem: BekleyenIstem, baslangic: string, cihazId?: number,
+  ) => {
+    if (!cihazId) {
+      mesaj('Randevu cihaza verilir - takvimde bir cihaz sütunu seçin.');
+      return;
+    }
+    const ok = await guvenli(() => api.radyolojiRandevuVer(istem.id, {
+      cihazId, baslangic,
+      sureDk: istem.sureDk > 0 ? istem.sureDk : undefined,
+    }));
+    if (!ok) return;
+    mesaj(`Randevu verildi: ${istem.hasta} · ${baslangic.slice(11)} `
+          + `(${istem.accessionNo})`);
+    setBekleyenSecili(null);
+    setYenile(t => t + 1);
+  };
 
   /**
    * Takvimin kullanacagi ayar: HEKIM -> BÖLÜM -> Genel Ayarlar sirasiyla
@@ -1219,7 +1250,28 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
             hekimler={hekimSecenekleri}
             // CIHAZ gorunumu (316): radyolojide randevu cihaza verilir.
             cihazlar={cihazSecenekleri}
+            // RANDEVU BEKLEYEN ISTEMLER (316): panel yalniz radyoloji cihazi
+            //   tanimliysa cizilir - poliklinik kurulumunda hic gorunmez.
+            yanPanel={cihazSecenekleri.length > 0 ? (
+              <RandevuBekleyenPanel
+                secili={bekleyenSecili}
+                onSecim={setBekleyenSecili}
+                yenile={yenile}
+                onRandevuModali={i => setRandevuModali({
+                  istemId: i.id, accessionNo: i.accessionNo,
+                  tetkikAdi: i.tetkik, modalite: i.modalite, sureDk: i.sureDk,
+                })}
+              />
+            ) : undefined}
+            onBirak={(veri, bas, cih) => {
+              // Yuk istemin kendisi (panel JSON yazar) - secili satira bakmayiz.
+              try { void bekleyeneRandevuVer(JSON.parse(veri) as BekleyenIstem, bas, cih) }
+              catch { /* taninmayan surukleme yuku - yok say */ }
+            }}
             onYeni={(bas, hek, cih) => {
+              // Panelde istem SECILIYSE bos saate tiklamak yeni randevu formu
+              //   degil, o isteme randevu demektir (dokunmatik/erisilebilir yol).
+              if (bekleyenSecili) { void bekleyeneRandevuVer(bekleyenSecili, bas, cih); return }
               // Cihaz sutunundan aciliyorsa bolum/hekim ARANMAZ - kaynak cihaz.
               const bol = cih ? undefined : (hekimBolumu(hek) ?? (bolumSuzgec || undefined));
               git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`

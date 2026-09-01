@@ -491,10 +491,20 @@ public static class RadyolojiUclari
                        i.randevu_id as "randevuId", i.durum, i.sube_id as "subeId",
                        coalesce(nullif(p.sure_dk, 0), 0) as "protokolSure",
                        coalesce(c.varsayilan_sure, 15) as "cihazSure",
-                       coalesce(c.randevu_verilir, 1) as "randevuVerilir"
+                       coalesce(c.randevu_verilir, 1) as "randevuVerilir",
+                       coalesce(c.modalite, 0) as "cihazModalite",
+                       coalesce(c.ad, '') as "cihazAdi",
+                       coalesce(i.modalite, 0) as "istemModalite",
+                       coalesce(km.ad, '') as "istemModaliteAdi",
+                       coalesce(kc.ad, '') as "cihazModaliteAdi"
                   from public.radyoloji_istem i
                   left join public.radyoloji_protokol p on p.hizmet_id = i.hizmet_id
                   left join public.radyoloji_cihaz c on c.id = @p1
+                  left join public.kod_liste kl on kl.kod = 'rad.modalite'
+                  left join public.kod_deger km
+                         on km.liste_id = kl.id and km.deger = i.modalite
+                  left join public.kod_deger kc
+                         on kc.liste_id = kl.id and kc.deger = c.modalite
                  where i.id = @p0
                 """, null, [id, istek.CihazId], Satir, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
@@ -505,6 +515,16 @@ public static class RadyolojiUclari
                 throw GentegreHatasi.IsKurali("Bu istemin zaten randevusu var - önce onu taşıyın ya da iptal edin.");
             if (Convert.ToInt32(istem["randevuVerilir"]) == 0)
                 throw GentegreHatasi.IsKurali("Bu cihaz randevusuz (walk-in) çalışıyor.");
+
+            // MODALITE UYUMU: MR istemi BT cihazina randevulanamaz - surukle-birak
+            //   ile yanlis sutuna dusmesi kolay oldugu icin kural sunucuda.
+            var istemMod = Convert.ToInt32(istem["istemModalite"]);
+            var cihazMod = Convert.ToInt32(istem["cihazModalite"]);
+            if (istemMod != 0 && cihazMod != 0 && istemMod != cihazMod)
+                throw GentegreHatasi.IsKurali(
+                    $"Cihazın modalitesi istemle uyuşmuyor - istem: "
+                    + $"{istem["istemModaliteAdi"]}, cihaz: {istem["cihazAdi"]} "
+                    + $"({istem["cihazModaliteAdi"]}).");
 
             // SURE SIRASI: istekte verilen > tetkik protokolu (314) > cihaz varsayilani.
             var sure = istek.SureDk is > 0 ? istek.SureDk.Value

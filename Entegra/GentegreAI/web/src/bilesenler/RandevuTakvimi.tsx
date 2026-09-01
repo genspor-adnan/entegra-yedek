@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { type ListeSatiri, hataMetni } from '../api/sozlesme';
 
@@ -55,7 +55,8 @@ function haftaBasi(t: Date) {
 }
 
 export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
-                                 bolum, hekimId, hekimler = [], cihazlar = [] }: {
+                                 bolum, hekimId, hekimler = [], cihazlar = [],
+                                 yanPanel, onBirak }: {
   ayarlar?: Partial<Ayarlar>;
   /** Ust seritteki bolum/hekim suzgeci (251) - takvim de ayni secimi gosterir. */
   bolum?: number;
@@ -83,6 +84,17 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
    */
   onAralik?(baslangic: string | null, sureDk: number, hekimId?: number,
             cihazId?: number): void;
+  /**
+   * TAKVİMİN SOLUNDAKİ PANEL (316): radyolojide "randevu bekleyen istemler".
+   * Takvim içeriğini bilmez - yalnız yer verir; sürüklenen yükü onBirak taşır.
+   */
+  yanPanel?: ReactNode;
+  /**
+   * Boş hücreye bırakma (316): dataTransfer'daki istem takvimin o saatine
+   * randevulanır. Yalnız CİHAZ sütununda anlamlıdır (randevunun kaynağı cihaz).
+   * Yük ham metin olarak geçer - takvim içeriğini çözmez, panelin işidir.
+   */
+  onBirak?(veri: string, baslangic: string, cihazId?: number): void;
   /** Dışarıdan tazeleme sayacı (kayıt sonrası). */
   yenile?: number;
 }) {
@@ -129,6 +141,19 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
   }, [gunler, bolum, hekimId]);
 
   useEffect(() => { void yukle() }, [yukle, yenile]);
+
+  /**
+   * Bekleyen istem paneli açıkken takvim CİHAZ görünümüyle açılır: panelden
+   * sürüklenen istem yalnız cihaz sütununa bırakılabilir, kullanıcıyı önce
+   * görünüm değiştirmeye zorlamak gereksiz. Bir kez uygulanır - sonradan
+   * kullanıcı başka görünüme geçerse orada kalır.
+   */
+  const ilkCihazGorunumu = useRef(false);
+  useEffect(() => {
+    if (!yanPanel || cihazlar.length === 0 || ilkCihazGorunumu.current) return;
+    ilkCihazGorunumu.current = true;
+    setGorunum('cihaz');
+  }, [yanPanel, cihazlar.length]);
 
   // Saat dilimleri (slot).
   const slotlar = useMemo(() => {
@@ -216,6 +241,15 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     onAralik?.(`${s.gun}T${saatMetni(bas)}`, bit - bas + adim, s.hekim, s.cihaz);
   };
 
+  /**
+   * SÜRÜKLE-BIRAK HEDEFİ (316): panelden gelen istem yalnız BOŞ hücreye ve
+   * yalnız cihaz sütununa bırakılabilir - poliklinik sütununda cihaz yoktur,
+   * randevunun kaynağı belirsiz kalırdı.
+   */
+  const [birakHedefi, setBirakHedefi] = useState<string | null>(null);
+  const birakilabilir = (s: Sutun, slot: number) =>
+    !!onBirak && s.cihaz !== undefined && hucre(s, slot).length === 0;
+
   const kaydir = (yon: number) => {
     const t = new Date(gun);
     t.setDate(t.getDate() + (gorunum === 'gun' ? yon : yon * 7));
@@ -252,7 +286,24 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
 
       {hata && <div className="hata-kutusu">{hata}</div>}
 
-      <div style={{ overflowX: 'auto' }}>
+      <div className={yanPanel ? 'takvim-duzen' : undefined}>
+      {yanPanel && (
+        <div className="takvim-yan">
+          {gorunum !== 'cihaz' && cihazlar.length > 0 && (
+            // Panelden sürüklenen istem yalnız cihaz sütununa düşer - başka
+            //   görünümdeyken kullanıcı boşuna uğraşmasın.
+            <div className="takvim-yan-uyari">
+              Bırakmak için cihaz görünümü gerekir.
+              <button type="button" className="d" onClick={() => setGorunum('cihaz')}>
+                Cihaz görünümü
+              </button>
+            </div>
+          )}
+          {yanPanel}
+        </div>
+      )}
+
+      <div style={{ overflowX: 'auto', flex: 1, minWidth: 0 }}>
         <table className="grid randevu-takvim">
           <thead>
             <tr>
@@ -274,14 +325,31 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                 {sutunlar.map(sut => {
                   const kayitlar = hucre(sut, slot);
                   const secili = araliktaMi(sut, slot);
+                  const hedef = birakHedefi === sut.anahtar + slot;
                   return (
                     <td key={sut.anahtar + slot}
+                        className={hedef ? 'birak-hedef' : undefined}
                         style={{ cursor: 'pointer', verticalAlign: 'top',
                                  background: secili ? 'var(--sec, var(--mor2))' : undefined,
                                  userSelect: 'none' }}
                         onMouseDown={() => kayitlar.length === 0 && secimBasla(sut, slot)}
                         onMouseEnter={() => secimGenislet(sut, slot)}
-                        onMouseUp={() => secimBitir(sut, slot)}>
+                        onMouseUp={() => secimBitir(sut, slot)}
+                        onDragOver={e => {
+                          if (!birakilabilir(sut, slot)) return;
+                          e.preventDefault();
+                          e.dataTransfer.dropEffect = 'move';
+                          setBirakHedefi(sut.anahtar + slot);
+                        }}
+                        onDragLeave={() => setBirakHedefi(o => (hedef ? null : o))}
+                        onDrop={e => {
+                          setBirakHedefi(null);
+                          if (!birakilabilir(sut, slot)) return;
+                          const veri = e.dataTransfer.getData('application/x-radyoloji-istem');
+                          if (!veri) return;
+                          e.preventDefault();
+                          onBirak?.(veri, `${sut.gun}T${saatMetni(slot)}`, sut.cihaz);
+                        }}>
                       {kayitlar.map(r => (
                         <div key={String(r.id)}
                              onClick={e => { e.stopPropagation(); onAc(Number(r.id)) }}
@@ -306,6 +374,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
             ))}
           </tbody>
         </table>
+      </div>
       </div>
     </div>
   );
