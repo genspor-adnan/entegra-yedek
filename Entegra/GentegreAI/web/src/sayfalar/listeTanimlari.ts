@@ -289,6 +289,19 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Radyoloji', menuAd: 'Rapor Şablonları', ic: '📄', yetkiKodu: 'radyoloji',
     menuSira: 20,
   },
+  {
+    // ÇEKİM PROTOKOLÜ (314): tetkikin nasıl çekileceği - süre randevu
+    //   kapasitesini, hazırlık metni hastaya verilen talimatı, özel uyarı
+    //   da çekim öncesi sorulması gerekeni besler. Protokolü olmayan
+    //   tetkikte modalite varsayılanı (311) devreye girer.
+    kaynak: 'radyoloji-protokol', baslik: 'Çekim Protokolleri',
+    yol: 'Radyoloji › Çekim Protokolleri',
+    kartYolu: '/radyoloji-protokol', kartBaslik: 'Çekim Protokolü',
+    aksiyonEkrani: 'cari-liste',
+    gizliKolonlar: ['modalite', 'hizmetId', 'hazirlikMetni', 'ozelUyari'],
+    menuGrup: 'Radyoloji', menuAd: 'Çekim Protokolleri', ic: '⚙️',
+    yetkiKodu: 'radyoloji', urunModu: 2,
+  },
   // CARI grubu ana menude RADYOLOJIDEN SONRA (kullanici).
   {
     // KURUM ICMALI (289): SGK payi tek tek faturalanmaz, donem sonu toplanip

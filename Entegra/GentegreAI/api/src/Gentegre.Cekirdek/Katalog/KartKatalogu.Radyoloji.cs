@@ -120,6 +120,45 @@ public static partial class KartKatalogu
     /// SURUM: sablon degisince gecmis raporlar degismemeli - rapor kendi
     /// surumunu saklar, bu yuzden sablonu duzenleyen surumu artirmali.
     /// </summary>
+    /// <summary>
+    /// ÇEKİM PROTOKOLÜ KARTI (314). Bir tetkikin TEK protokolü olur
+    /// (ux_radyoloji_protokol_hizmet) - kart tetkiği seçtirir, tekrar seçilirse
+    /// benzersizlik kısıtı iş kuralı mesajıyla uyarır.
+    /// </summary>
+    private static KartTanimi RadyolojiProtokol() => new(
+        Ad: "radyoloji-protokol",
+        YetkiKodu: "radyoloji",
+        Tablo: "public.radyoloji_protokol",
+        LogTabloId: 943,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["sure_dk"] = 15, ["kontrast"] = (short)0,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            // Tetkik binlerce hizmet arasindan JENERIK ARAMA ile secilir.
+            new("hizmetId", "hizmet_id", "kod", Zorunlu: true,
+                KodTablosu: "public.v_rad_tetkik_lookup", AramaKaynagi: "hizmet",
+                Baslik: "Tetkik", Grup: "Kimlik"),
+            // Bos birakilirsa hizmetin kendi modalitesi gecerlidir.
+            new("modalite", "modalite", "kod", KodListesi: "rad.modalite",
+                Baslik: "Modalite", Grup: "Kimlik"),
+            new("sureDk",   "sure_dk",  "sayi", Baslik: "Çekim Süresi (dk)", Grup: "Kimlik"),
+            new("kontrast", "kontrast", "kod", KodListesi: "rad.kontrast",
+                Baslik: "Varsayılan Kontrast", Grup: "Kimlik"),
+            new("seriTarifi", "seri_tarifi", "metin", EnFazlaUzunluk: 400,
+                Baslik: "Seri / Pozisyon Tarifi", Grup: "Çekim"),
+            // HASTAYA verilen metin: kabul ekraninda "Hazırlık talimatı ver"
+            //   isaretliyken bu metin gosterilir (311 modalite varsayilanini ezer).
+            new("hazirlikMetni", "hazirlik_metni", "metin", EnFazlaUzunluk: 600,
+                Baslik: "Hazırlık Talimatı", Grup: "Çekim"),
+            // PERSONELE uyari: gebelik, metal, kreatinin gibi cekim oncesi kontrol.
+            new("ozelUyari", "ozel_uyari", "metin", EnFazlaUzunluk: 400,
+                Baslik: "Özel Uyarı", Grup: "Çekim"),
+        });
+
     private static KartTanimi RadyolojiSablon() => new(
         Ad: "radyoloji-sablon",
         YetkiKodu: "radyoloji",

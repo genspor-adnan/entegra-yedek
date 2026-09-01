@@ -23,7 +23,9 @@ import { KasaIslemKarti } from '../../sayfalar/KasaIslemKarti';
 interface Tetkik { id: number; kod: string; ad: string; modalite: number;
                    modaliteAdi: string; kdv: number;
                    /** Tetkikin protokol hazirligi, yoksa modalite varsayilani (311). */
-                   hazirlik?: string }
+                   hazirlik?: string;
+                   /** Cekim protokolunden (314): personele uyari ve varsayilan kontrast. */
+                   ozelUyari?: string; varsayilanKontrast?: number; sureDk?: number }
 interface Hekim { id: number; ad: string; bolumAdi: string }
 interface Gecmis { hizmetId: number; tetkikAdi: string; tarih: string }
 
@@ -201,6 +203,19 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
     return { liste, net, kdv, indirim: liste - net, genel: net + kdv };
   }, [secili, fiyatlar]);
 
+  /** Protokoldeki PERSONEL uyarilari (314) - hastaya degil, kabul masasina. */
+  const uyarilar = useMemo(() => {
+    const gorulen = new Set<string>();
+    const liste: { baslik: string; metin: string }[] = [];
+    secili.forEach(sec => {
+      const metin = (sec.tetkik.ozelUyari ?? '').trim();
+      if (!metin || gorulen.has(metin)) return;
+      gorulen.add(metin);
+      liste.push({ baslik: sec.tetkik.kod, metin });
+    });
+    return liste;
+  }, [secili]);
+
   /** Secili tetkiklerin hazirlik talimatlari - AYNI metin tekrar edilmez. */
   const talimatlar = useMemo(() => {
     const gorulen = new Set<string>();
@@ -232,7 +247,11 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
 
   const ekle = (t: Tetkik) => {
     if (secili.some(s => s.tetkik.id === t.id)) return;
-    setSecili(x => [...x, { tetkik: t, oncelik: 1, kontrast: 0 }]);
+    // KONTRAST varsayilani cekim protokolunden (314) gelir: "kontrastli mi"
+    //   sorusunun dogru cevabi tetkikin protokolunde yazilidir, kabul masasi
+    //   her seferinde secmesin.
+    setSecili(x => [...x, { tetkik: t, oncelik: 1,
+                            kontrast: Number(t.varsayilanKontrast ?? 0) }]);
   };
   const cikar = (id: number) => setSecili(x => x.filter(s => s.tetkik.id !== id));
   const degistir = (id: number, y: Partial<Secim>) =>
@@ -439,6 +458,16 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem, onKapa
               </tbody>
             </table>
           </div>
+
+          {/* PROTOKOL UYARISI (314): gebelik/metal/kreatinin gibi cekim oncesi
+              sorulacaklar - tetkik secilir secilmez gorunur. */}
+          {uyarilar.length > 0 && (
+            <div className="uyari-kutusu">
+              {uyarilar.map(u => (
+                <div key={u.baslik}><b>{u.baslik}</b> — {u.metin}</div>
+              ))}
+            </div>
+          )}
 
           {/* MUKERRER TETKIK: engel degil UYARI - hekim gerekcelendirsin. */}
           {mukerrer.length > 0 && (

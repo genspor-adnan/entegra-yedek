@@ -101,7 +101,12 @@ public static class RadyolojiUclari
             var tetkikler = await baglanti.ListeAsync("""
                 select t.id, t.kod, t.ad, t.modalite,
                        coalesce(t.modalite_adi, '') as "modaliteAdi", t.kdv,
-                       coalesce(nullif(p.hazirlik_metni, ''), kd.ad, '') as hazirlik
+                       coalesce(nullif(p.hazirlik_metni, ''), kd.ad, '') as hazirlik,
+                       -- PERSONELE uyari (314): gebelik/metal/kreatinin gibi cekim
+                       --   oncesi sorulacaklar; hastaya verilen hazirliktan ayridir.
+                       coalesce(p.ozel_uyari, '') as "ozelUyari",
+                       coalesce(p.kontrast, 0) as "varsayilanKontrast",
+                       coalesce(p.sure_dk, 0) as "sureDk"
                   from public.v_radyoloji_tetkik t
                   left join public.radyoloji_protokol p on p.hizmet_id = t.id
                   left join public.kod_liste kl on kl.kod = 'rad.hazirlik'

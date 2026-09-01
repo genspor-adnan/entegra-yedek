@@ -13,6 +13,52 @@ namespace Gentegre.Cekirdek.Katalog;
 /// </summary>
 public static partial class KaynakKatalogu
 {
+    /// <summary>
+    /// ÇEKİM PROTOKOLÜ (283/314) - tetkikin NASIL çekileceği.
+    ///
+    /// Süre randevu kapasitesini, hazırlık metni hastaya verilen talimatı,
+    /// özel uyarı da kabul masasının sorması gerekeni besler. Protokolü olmayan
+    /// tetkikte modalite varsayılanı (311) kullanılır - liste bunu "modaliteden"
+    /// diye gösterir ki eksik protokol görünür olsun.
+    /// </summary>
+    private static KaynakTanimi RadyolojiProtokol() => new(
+        Ad: "radyoloji-protokol",
+        YetkiKodu: "radyoloji",
+        Kaynak: "public.radyoloji_protokol p " +
+                "join public.hizmet hz on hz.id = p.hizmet_id",
+        SubeKolonu: null,
+        VarsayilanSirala: "hz.ad asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",         "p.id",        "sayi",  "Id", Varsayilan: false),
+            new("hizmetId",   "p.hizmet_id", "sayi",  "Tetkik Id", Varsayilan: false),
+            new("tetkikKodu", "coalesce(hz.kod, '')", "metin", "Kod", Genislik: 110),
+            new("tetkikAdi",  "coalesce(hz.ad, '')",  "metin", "Tetkik", Genislik: 280),
+            new("modaliteAdi",
+                "case coalesce(p.modalite, hz.modalite) when 1 then 'BT' when 2 then 'MR' " +
+                "when 3 then 'USG' when 4 then 'Röntgen' when 5 then 'Mamografi' " +
+                "when 6 then 'DEXA' when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                                             "metin", "Modalite", Hizalama: "orta",
+                                             Bicim: "rozet", Genislik: 100, Filtrelenebilir: false),
+            new("modalite",   "coalesce(p.modalite, hz.modalite)", "kod", "Modalite Kodu",
+                Varsayilan: false),
+            new("sureDk",     "p.sure_dk",   "sayi",  "Süre (dk)", Hizalama: "sag", Genislik: 90),
+            new("kontrast",   "p.kontrast",  "kod",   "Kontrast", Hizalama: "orta", Genislik: 110),
+            // Metnin KENDISI listede yer kaplar; "var mı" sorusu yeter - eksik
+            //   protokol tek bakista gorunur.
+            new("hazirlikVar",
+                "case when coalesce(p.hazirlik_metni, '') <> '' then 1 else 0 end",
+                                             "mantik", "Hazırlık", Hizalama: "orta", Genislik: 90),
+            new("uyariVar",
+                "case when coalesce(p.ozel_uyari, '') <> '' then 1 else 0 end",
+                                             "mantik", "Uyarı", Hizalama: "orta", Genislik: 80),
+            new("hazirlikMetni", "coalesce(p.hazirlik_metni, '')", "metin", "Hazırlık Talimatı",
+                Varsayilan: false),
+            new("ozelUyari",  "coalesce(p.ozel_uyari, '')", "metin", "Özel Uyarı", Varsayilan: false),
+            new("seriTarifi", "coalesce(p.seri_tarifi, '')", "metin", "Seri / Pozisyon",
+                Genislik: 260),
+        });
+
     private static KaynakTanimi RadyolojiIstem() => new(
         Ad: "radyoloji-istem",
         YetkiKodu: "radyoloji",
