@@ -150,7 +150,8 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
    * kampanya urun satiriyla ayni gerekce.
    */
   const primSatiri = meta.ad === 'satirlar'
-                     && meta.alanlar.some(a => a.ad === 'hedefHizmetId');
+                     && meta.alanlar.some(a => a.ad === 'rol')
+                     && meta.alanlar.some(a => a.ad === 'hedefId');
 
   /**
    * KAYITLI urun satirinda ad (268): sunucu yalniz id tasir, kart acilinca
@@ -192,31 +193,62 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kampanyaSatiri, durum.guncel]);
 
-  // PRIM (327): kayitli satirda hedef hizmetin ADI - id okunmaz.
+  // PRIM (328): URUN kapsamli satirda kalemin ADI - hucrede id okunmaz.
   useEffect(() => {
     if (!primSatiri) return;
-    const idler = durum.guncel
-      .map(r => Number(r.hedefHizmetId) || 0)
-      .filter(id => id > 0 && !urunAdlari[String(id)]);
-    if (idler.length === 0) return;
+    const eksik = durum.guncel
+      .filter(r => Number(r.tip) === 3 && Number(r.hedefId) > 0
+                   && !urunAdlari[String(r.hedefId)])
+      .map(r => ({ id: Number(r.hedefId), hizmet: Number(r.kalemTuru) !== 1 }));
+    if (eksik.length === 0) return;
 
     let iptal = false;
     void (async () => {
-      try {
-        const y = await api.liste('hizmet', {
-          sayfa: 1, boyut: idler.length,
-          filtre: { op: 'or', kosullar: idler.map(id => ({ alan: 'id', op: 'esit', deger: id })) },
-        });
-        const yeni: Record<string, string> = {};
-        y.satirlar.forEach(r => {
-          yeni[String(r.id)] = `${String(r.kod ?? '')} ${String(r.ad ?? '')}`.trim();
-        });
-        if (!iptal && Object.keys(yeni).length) setUrunAdlari(m => ({ ...m, ...yeni }));
-      } catch { /* ad cozulemezse id gorunur */ }
+      const yeni: Record<string, string> = {};
+      for (const kaynak of ['stok', 'hizmet'] as const) {
+        const idler = eksik.filter(e => (kaynak === 'hizmet') === e.hizmet).map(e => e.id);
+        if (idler.length === 0) continue;
+        try {
+          const y = await api.liste(kaynak, {
+            sayfa: 1, boyut: idler.length,
+            filtre: { op: 'or', kosullar: idler.map(id => ({ alan: 'id', op: 'esit', deger: id })) },
+          });
+          y.satirlar.forEach(r => {
+            yeni[String(r.id)] = `${String(r.kod ?? '')} ${String(r.ad ?? '')}`.trim();
+          });
+        } catch { /* ad cozulemezse id gorunur */ }
+      }
+      if (!iptal && Object.keys(yeni).length) setUrunAdlari(m => ({ ...m, ...yeni }));
     })();
     return () => { iptal = true };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [primSatiri, durum.guncel]);
+
+  /**
+   * KATEGORI SECENEKLERI (328, kullanici: "kategori combo hizmet/stok
+   * secimine gore"). Kategori tablosu stok ve hizmet icin ORTAK; hangisinde
+   * kullanildigi ancak SAYIMLA anlasilir - kategori LISTESI bu iki sayimi
+   * zaten donduruyor, o yuzden kod tablosu yerine liste ucundan cekilir.
+   */
+  const [kategoriler, setKategoriler] = useState<
+    { id: number; ad: string; stok: number; hizmet: number }[]>([]);
+
+  useEffect(() => {
+    if (!primSatiri) return;
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.liste('kategori', { sayfa: 1, boyut: 500 });
+        if (!iptal) setKategoriler(y.satirlar.map(r => ({
+          id: Number(r.id),
+          // Kod + ad: kampanyadaki kategori combosuyla ayni okunus ("K1 - Genel").
+          ad: `${String(r.kod ?? '')} ${String(r.ad ?? '')}`.trim(),
+          stok: Number(r.stokSayisi ?? 0), hizmet: Number(r.hizmetSayisi ?? 0),
+        })));
+      } catch { /* liste alinamazsa kategori combosu bos kalir */ }
+    })();
+    return () => { iptal = true };
+  }, [primSatiri]);
 
   /**
    * KAMPANYA (268, kullanici): "İskonto Tipi yüzde ise başlıkta İskonto %,
@@ -708,8 +740,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                         ))}
                       </select>
                     ) : Number(satir.tip) === 3 ? (
-                      <span className="ikili">
+                      <span className="ikili"
+                            style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                         <input readOnly
+                               style={{ flex: '1 1 auto', minWidth: 150 }}
                                value={String(satir.iskontoYeriAdi
                                              ?? urunAdlari[String(satir[a.ad] ?? '')]
                                              ?? satir[a.ad] ?? '')}
@@ -724,52 +758,62 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                       // Liste satirinda hedef yok: kolon 0 kalir.
                       <input readOnly value="tüm liste" disabled />
                     )
-                  ) : primSatiri && a.ad === 'hedefTur' ? (
-                    // Hedef turu SUNUCUDA turetilir (generated kolon); burada
-                    //   ayni kural anlik gosterilir - secim yapinca hucre
-                    //   kaydetmeyi beklemeden guncellensin.
-                    <input readOnly disabled
-                           value={satir.hedefHizmetId ? 'Hizmet'
-                                  : satir.hedefModalite ? 'Modalite'
-                                  : satir.hedefKategoriId ? 'Kategori' : 'Tümü'} />
-                  ) : primSatiri && a.kodlar
-                        && (a.ad === 'hedefKategoriId' || a.ad === 'hedefModalite') ? (
-                    // Hedef TEK olmali (327): kategori secilince modalite ve
-                    //   hizmet, modalite secilince otekiler temizlenir - yoksa
-                    //   sunucudaki tetik GK422 ile satiri geri cevirir.
+                  ) : primSatiri && a.ad === 'tip' && a.kodlar ? (
+                    // Tip degisince KAPSAM temizlenir: "Kategori" secilip urun
+                    //   id'si kalirsa satir yanlis kalemlere prim yazar.
                     <select
-                      value={String(satir[a.ad] ?? '')}
+                      value={String(satir.tip ?? '')}
                       disabled={saltOkunur || !a.yazilabilir}
-                      onChange={e => satirDegis(i, {
-                        hedefHizmetId: '', hedefKategoriId: '', hedefModalite: '',
-                        [a.ad]: e.target.value,
-                      })}
+                      onChange={e => satirDegis(i, { tip: e.target.value, hedefId: '' })}
                     >
-                      <option value="">—</option>
                       {Object.entries(a.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                     </select>
-                  ) : primSatiri && a.ad === 'hedefHizmetId' ? (
-                    // Hedef hizmet: binlerce kayit combo'ya sigmaz, arama
-                    //   penceresinden secilir. Bos birakilirsa hedef kategori
-                    //   ya da modaliteden gelir (ucu birden dolu OLAMAZ).
-                    <span className="ikili"
-                          style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                      <input readOnly
-                             style={{ flex: '1 1 auto', minWidth: 150 }}
-                             value={urunAdlari[String(satir[a.ad] ?? '')]
-                                    ?? String(satir[a.ad] ?? '')}
-                             placeholder="— tüm hizmetler —"
-                             disabled={saltOkunur || !a.yazilabilir}
-                             onClick={() => !saltOkunur && setUrunAramaSatiri(i)} />
-                      {String(satir[a.ad] ?? '') !== '' && (
-                        <button type="button" className="d mini" title="Hizmet hedefini kaldır"
+                  ) : primSatiri && a.ad === 'kalemTuru' && a.kodlar ? (
+                    // Kalem turu kapsamin ANLAMINI degistirir (stok kategorisi
+                    //   mi hizmet kategorisi mi) - degisince kapsam sifirlanir.
+                    <select
+                      value={String(satir.kalemTuru ?? '')}
+                      disabled={saltOkunur || !a.yazilabilir}
+                      onChange={e => satirDegis(i, { kalemTuru: e.target.value, hedefId: '' })}
+                    >
+                      {Object.entries(a.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                    </select>
+                  ) : primSatiri && a.ad === 'hedefId' ? (
+                    Number(satir.tip) === 2 ? (
+                      // KATEGORI: kalem turune gore suzulur - stok secilmisse
+                      //   stokta, hizmet secilmisse hizmette kullanilan
+                      //   kategoriler ("Farketmez"te hepsi).
+                      <select
+                        value={String(satir.hedefId ?? '')}
+                        disabled={saltOkunur || !a.yazilabilir}
+                        onChange={e => hucreDegis(i, 'hedefId', e.target.value)}
+                      >
+                        <option value="">— kategori —</option>
+                        {kategoriler
+                          .filter(k => (Number(satir.kalemTuru) === 1 ? k.stok > 0
+                                        : Number(satir.kalemTuru) === 2 ? k.hizmet > 0
+                                        : true))
+                          .map(k => <option key={k.id} value={k.id}>{k.ad}</option>)}
+                      </select>
+                    ) : Number(satir.tip) === 3 ? (
+                      // URUN: stok/hizmet binlerce - jenerik arama penceresi.
+                      <span className="ikili"
+                            style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <input readOnly
+                               style={{ flex: '1 1 auto', minWidth: 150 }}
+                               value={urunAdlari[String(satir.hedefId ?? '')]
+                                      ?? String(satir.hedefId ?? '')}
+                               placeholder="— ürün seç —"
+                               disabled={saltOkunur || !a.yazilabilir}
+                               onClick={() => !saltOkunur && setUrunAramaSatiri(i)} />
+                        <button type="button" className="d mini" title="Ürün ara"
                                 disabled={saltOkunur || !a.yazilabilir}
-                                onClick={() => hucreDegis(i, a.ad, '')}>✖</button>
-                      )}
-                      <button type="button" className="d mini" title="Hizmet ara"
-                              disabled={saltOkunur || !a.yazilabilir}
-                              onClick={() => setUrunAramaSatiri(i)}>…</button>
-                    </span>
+                                onClick={() => setUrunAramaSatiri(i)}>…</button>
+                      </span>
+                    ) : (
+                      // LISTE: kapsam yok - satir tum kalemlerde gecerli.
+                      <input readOnly value="tüm liste" disabled />
+                    )
                   ) : a.kodlar ? (
                     <select
                       value={String(satir[a.ad] ?? '')}
@@ -890,13 +934,16 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
       {urunAramaSatiri !== null && primSatiri && (
         <StokAramaPenceresi
           etkin
-          yalnizHizmet
+          // Kalem turu secilmisse arama da ONA gore suzulur: "Hizmet" deyip
+          //   stok secilmesi kapsami sessizce bosa dusururdu.
+          yalnizStok={Number(durum.guncel[urunAramaSatiri]?.kalemTuru) === 1}
+          yalnizHizmet={Number(durum.guncel[urunAramaSatiri]?.kalemTuru) === 2}
           onKapat={() => setUrunAramaSatiri(null)}
           onSec={secilen => {
-            // Hedef TEK olmali: hizmet secilince kategori/modalite temizlenir.
+            // Kalem turu de secimden yazilir - kullanici ayrica isaretlemesin.
             satirDegis(urunAramaSatiri, {
-              hedefHizmetId: String(secilen.id),
-              hedefKategoriId: '', hedefModalite: '',
+              hedefId: String(secilen.id),
+              kalemTuru: String(secilen.tip) === 'hizmet' ? '2' : '1',
             });
             setUrunAdlari(m => ({
               ...m,

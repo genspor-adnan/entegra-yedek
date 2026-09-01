@@ -70,20 +70,19 @@ public static partial class KartKatalogu
                     new("id",        "id",        "sayi", Yazilabilir: false),
                     new("rol",       "rol",       "kod", Zorunlu: true,
                         KodListesi: "prim.rol", Baslik: "Rol"),
-                    // HEDEF UC AYRI ALAN (327): her biri kendi listesinden
-                    //   secilir; hedef TURU dolu olandan turetilir (generated
-                    //   kolon), bu yuzden salt okunur. En fazla biri dolu
-                    //   olabilir - ihlali tetik GK422 ile bildirir.
-                    new("hedefTur",  "hedef_tur", "kod", KodListesi: "prim.hedef_tur",
-                        Yazilabilir: false, Baslik: "Hedef Türü"),
-                    // Hizmet BINLERCE: kod tablosu yerine arama penceresinden
-                    //   secilir (GenDetayTablo'da kampanya urun satiriyla ayni
-                    //   desen) - bu yuzden burada duz sayi alani.
-                    new("hedefHizmetId", "hedef_hizmet_id", "sayi", Baslik: "Hizmet"),
-                    new("hedefKategoriId", "hedef_kategori_id", "kod",
-                        KodTablosu: "public.v_kategori_lookup", Baslik: "Kategori"),
-                    new("hedefModalite", "hedef_modalite", "kod",
-                        KodListesi: "rad.modalite", Baslik: "Modalite"),
+                    // KAPSAM = KAMPANYA SATIRIYLA AYNI UCLU (328): tip +
+                    //   kalem turu + kapsam. Ayni ekran iki yerde tanidik olsun
+                    //   diye ayni kod listeleri kullanilir.
+                    new("tip",       "tip",       "kod", Zorunlu: true,
+                        KodListesi: "kampanya.satir_tip", Baslik: "Tipi"),
+                    new("kalemTuru", "kalem_turu", "kod",
+                        KodListesi: "kampanya.kalem_turu", Baslik: "Stok / Hizmet"),
+                    // Liste satirinda bos; kategoride kategori id, urunde
+                    //   stok/hizmet id. KodTablosu KATEGORI listesini tasir -
+                    //   urun secimi arama penceresinden yapilir (binlerce kayit
+                    //   combo'ya sigmaz), tipe gore hucre GenDetayTablo'da cizilir.
+                    new("hedefId",   "hedef_id",  "kod",
+                        KodTablosu: "public.v_kategori_lookup", Baslik: "Kapsam"),
                     // BELGE TURU kriteri: virgullu liste, bos = tumu.
                     //   Tur GELIR belgesinden okunur (basvuru 19 ara kayittir).
                     new("belgeTurleri", "belge_turleri", "metin", EnFazlaUzunluk: 60,
