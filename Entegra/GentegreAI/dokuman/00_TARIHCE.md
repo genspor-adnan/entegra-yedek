@@ -3454,3 +3454,446 @@ düzeltildi.
 **Kapsam dışı (entegrasyon bekliyor):** PACS/DICOM ve MWL gönderimi, randevu
 SMS'i, hasta portalı. Kabul sonrası kutusundaki MWL/SMS seçimleri şimdilik
 yalnız kayda geçer.
+
+---
+
+## 01-02.09.2026 — Radyoloji tamamlama, tahsilatın satıra dağıtılması, prim/hakediş sistemi, hasta kimliği ve entegrasyon hesapları (`db/314-336`)
+
+Beş iş: (1) radyolojinin eksik ekranları — çekim protokolü, cihaz tanımı,
+randevu, takip listeleri, pano, sarf düşümü; (2) **tahsilatın belge satırına
+dağıtılması** ve avans mahsubu; (3) **prim / hakediş** şeması, ekranları ve
+kural motoru; (4) hasta kimlik alanlarının tamamlanması; (5) **entegrasyon
+hesapları** ekranı (SKRS ilk müşteri). Ayrıca USBS (Uzaktan Sağlık Bilgi
+Sistemi) kılavuzundan mockup seti çıkarıldı — kod yazılmadı, uyum haritası
+tescil başvurusu için.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K45 | Radyoloji randevusu **ayrı modül değil**: mevcut randevu motoruna `randevu.cihaz_id` kaynağı (db/316); cihazın randevu alanları `randevu_bolum_ayar` ile **birebir aynı adlarla** (db/315) | Fark yalnız kaynak: poliklinikte randevu hekime, radyolojide cihaza verilir. Takvim, durum akışı, çakışma, taşıma ortak kalmalı; aynı iş iki ayrı isimle iki yerde dururken zamanla ayrışır |
+| K46 | **İstem (MWL kaydı) randevuda değil, hasta GELİNCE doğar**: "✓ Geldi" = başvuru + istem (+ istenirse tahsilat) tek işlemde (db/317) | Randevu anında ne başvuru ne ödeme ne istem vardır — yalnız plan. Erken düşen istem cihazın çalışma listesini gelmeyen hastalarla doldurur ve teknisyene yanlış hasta seçtirir |
+| K47 | Radyolojiye **ayrı stok mantığı yazılmaz**: çekim sonrası sarf, mevcut belge hattından **stok çıkış fişi** (tür 4, carisiz) üretir; düşüm otomatik değil, teknisyen **onaylar** (db/320) | `stok_durum`, lot bakiyesi, maliyet ve yetersizlik kuralları belge hattında zaten çözülü. Kontrast miktarı hastanın kilosuna göre değişir, ikinci kanül gerekebilir, CD herkese verilmez — sessiz otomatik düşüm stok sayımını bozar |
+| K48 | Tahsilat artık **belge satırına** dağıtılır (`kasa_islem_dagitim`, db/321) | Tahsilat yalnız belgeye bağlıydı: "bu başvuruya 500 alındı" biliniyor, "hangi tetkiğin parası alındı" bilinmiyordu. `hasta_kapatilan/kurum_kapatilan` **faturalandı** demek, tahsil edildi demek değil — prim oransal tahminle hesaplanamaz |
+| K49 | **Dağıtım tabanı KDV DAHİL, prim tabanı KDV HARİÇ** (db/323) | Satır payları matrahtır (11,84), hasta kasaya genel toplamı öder (13,02); aradaki KDV hiçbir satıra bağlanamayıp sonsuza kadar "dağıtılmamış avans" görünüyordu. Tahsilat gerçek ödemedir, tabanı da ödenen tutar olmalı |
+| K50 | **Avans mahsubu** dağıtılmamış tahsilatı satıra bağlar; **primin tarihi paranın girdiği gündür** (`kasa_islem.islem_tarihi`), mahsup günü değil (db/322) | Gerçek akış çoğu zaman "önce para, sonra ücret satırı". Dağıtım satırına ayrı tarih kolonu konmadı — tarih hep bağlı olduğu kasa işleminden okunur, iki yerde tutulup sapmasın |
+| K51 | **Prim tahsil edildikçe doğar**; tabanı KDV hariç matrah, oranı **belge türüne ve PAYA** göre değişir; zincirde **en dar eşleşme** kazanır (db/324) | Kullanıcı kararı. Belge türü tahsilatın bağlandığı belgeden değil, gelirin **belgelendiği** belgeden okunur: başvuru (19) ara kayıttır, fatura/tahakkuk dönüşümle sonra oluşur |
+| K52 | Prim rolleri **radyoloji isteminden otomatik türetilir**; **elle girilen ezilmez** (`kaynak=1` varsa o rol hiç yönetilmez) (db/326) | Kim gönderdi / çekti / raporladı / onayladı bilgisi istemde zaten duruyor; ikinci kez elle girmek hem angarya hem hata kaynağı. Ama "raporu başkası yazdı, prim başhekimin" düzeltmesi kullanıcının bilinçli kararıdır |
+| K53 | Prim plan satırında kapsam **kampanya satırıyla aynı desen**: tip + kalem türü + kapsam (db/328); önce denenen "üç ayrı hedef kolonu" (db/327) bırakıldı, **modalite hedefi kaldırıldı** | Aynı iş kampanya kartında zaten çözülmüştü; iki farklı desen öğretmek yerine mevcut desen alındı — kullanıcı aynı ekranı iki yerde tanıyor, hücre çizimi de tek kodda (`GenDetayTablo`) |
+| K54 | Hakediş **durum makinesi**: 1 taslak (gelir belgesi kesilmemiş) · 2 kesin · 3 onaylı (**kilitli**) · 4 ödendi; oran **tahsilat türüne** de bağlı (nakit %12 / POS %10) (db/330) | "Belge dönüşümlerinde primi tekrar gözden geçir" kuralının karşılığı; yeniden hesap yalnız 1-2 durumundakileri değiştirir, onaylı/ödenmiş satıra dokunmaz. POS komisyonu kurumda kaldığı için nakit tahsilat daha değerli |
+| K55 | **Kurum tahakkuku tahsilat değildir** — prim doğurmaz; belge türü **paya göre** okunur (db/331) | Hastadan para alınmaz, kurum payı kuruma kesilen belgeye dönüşür ve kurum carisine borç yazılır. Aynı kalem iki belgeye bölünebildiği için "zincirin son halkası" kuralı hasta payının primini de tahakkuk oranıyla hesaplayabiliyordu |
+| K56 | **Prim zamanı planın İLK KAPISI** ve zorunlu: 1 tahsilatta (varsayılan) / 2 faturalamada; faturalama zamanlı planda **tahsilat türü kriteri yasak** (GK422) (db/332-333) | SGK gibi geç ödeyen kurumda tahsilat beklemek primi aylarca geciktirir; faturada prim ise tahsil edilmemiş alacağın primini peşin ödemektir — karar kurumundur. Faturalamada para henüz gelmediği için tahsilat türü anlamsızdır; kriter sessizce temizlenseydi planı yanlışlıkla çevirip geri alan kullanıcının satırları yok olurdu |
+| K57 | Tahakkuk tür kodları takas: **13 ALIŞ, 17 SATIŞ** (db/334) | Numaralandırma deseni "küçük rakam alış, büyük rakam satış" (alış 9/10/11/12/13 · satış 19/14/15/16/17). Seed tersti; kodların anlamı düzeltildi ve üretilmiş 8 tahakkuk 17'ye taşındı |
+| K58 | **SKRS kodları doğrudan `kod_deger.deger` içinde** tutulur; ayrı "yerel kod → SKRS kodu" eşleme tablosu yok (db/335-336) | eNabız/MEDULA gönderiminde çeviri katmanı gerekmesin. Resmî liste elde edilince tablo yapısı değişmeden yalnız değerler güncellenir |
+| K59 | Dış servis kimlikleri **tek tabloda**: `entegrasyon_hesap` — kod + şube + ortam (test/canlı) benzersiz, servise özgü alanlar `jsonb` (db/336) | Her entegrasyon kimliğini kendi tablosunda tutuyordu (ÜTS `uts_hesap`, e-Belge `sube_ebelge_mukellef`); SKRS/eNabız/MEDULA derken dağınıklık büyüyor, test/canlı ayrımı ve şube kırılımı her tabloda yeniden yazılıyordu |
+| K60 | Kullanılmış prim planı/satırı **silinemez**, bağ da **koparılmaz** (`on delete set null` yapılmadı) — GK422 ile anlaşılır mesaj (db/329) | Prim tutarının hangi kuraldan doğduğu kaydın kendisi kadar önemli: kural sonradan değişse bile geçmiş hakediş açıklanabilir kalmalı. Kullanıcı satırı silmek yerine oranı değiştirir ya da planı pasife alır |
+
+### Yapılanlar
+
+**Radyoloji (`db/314-320`)**
+
+- **314 — Çekim protokolü ekranı** (Radyoloji > Çekim Protokolleri): tablo 283'te
+  açılmıştı ama ekranı yoktu ve tek satır bile girilmemişti. Tabloya yapay
+  anahtar (`id` identity) eklendi, hizmet bağı tekil kısıt olarak korundu.
+  Kabul ekranı protokolü kullanıyor: hazırlık metni modalite varsayılanını
+  **ezer**, özel uyarı (gebelik/metal/kreatinin) tetkik seçilir seçilmez çıkar,
+  kontrast varsayılanı protokolden gelir.
+- **315 — Cihaz tanımı ekranı**: randevu alanları (mesai, öğle, slot, eşzaman,
+  acil slot, çalışma günleri, sorumlu) + `radyoloji_cihaz_kapatma`
+  (bakım/arıza/tatil). Liste bugünkü iş sayısını da gösterir.
+- **316-317 — Randevu**: `randevu.cihaz_id`, dördüncü takvim görünümü **Cihaz**,
+  radyolojide "📅 Randevu Ver" (süre çekim protokolünden), **çakışma kuralı**
+  (bugüne kadar hiç yoktu — aynı hekime/cihaza aynı saate iki randevu
+  yazılabiliyordu), tetkik-cihaz **modalite uyumu** tetikte, randevu kartında
+  tetkik seçilince süre protokolden dolar.
+- **Bekleyen istemler paneli + sürükle-bırak**: takvimin solunda randevusuz
+  radyoloji istemleri; kart boş saate sürüklenir ya da seçilip tıklanır
+  (dokunmatik yolu). Bırakma yalnız boş hücreye ve yalnız cihaz sütununa.
+- **Randevudan kabul**: "✓ Geldi" kabul ekranını açar (hasta ve tetkik ön
+  dolu); istem randevuya bağlanır, randevunun cihazı isteme taşınır (modalite
+  uyuşmuyorsa taşınmaz).
+- **318-319 — Takip listeleri**: Kritik Bulgular, Konsültasyonlar, Sonuç
+  Teslim. `v_radyoloji_kritik_takip` satırı bildirim değil **kritik işaretli
+  istem** — "işaretlendi ama haber verilmedi" boşluğu ancak böyle görünür.
+  Teslimde tek "tür" yerine **kalem kutuları** (rapor/film/CD/dijital).
+  Takvimde cihaz kapatması artık **taralı blok** olarak çizilir (kural
+  316'dan beri engelliyordu ama saat boş görünüyordu). Üç örnek rapor şablonu
+  (BT/MR/USG) eklendi.
+- **Radyoloji panosu**: altı tıklanır sayaç, cihaz doluluğu (payda mesai eksi
+  öğle arası ve o günün kapatmaları), "dikkat gerektirenler" kutusu, 30 günlük
+  modalite dağılımı ve çekim-rapor onayı ortalama süresi, radyolog yükü.
+  Hepsi tek uçtan (`/api/radyoloji/pano`).
+- **320 — Kontrast / sarf düşümü**: `radyoloji_protokol_malzeme` +
+  `radyoloji_sarf`, çekim protokolüne "Malzeme / Sarf" sekmesi, "Çekildi"
+  işaretlenince **sarf onay penceresi** (protokol miktarları varsayılan),
+  lot takipli malzemede miadı önce dolan lot başta, kritik seviye uyarısı.
+
+**Tahsilat dağıtımı ve avans (`db/321-323`)**
+
+- **321**: `kasa_islem_dagitim` (kasa işlemi -> belge satırı, pay 1 hasta / 2
+  kurum), `belge_satir.hasta_tahsil/kurum_tahsil`, toplamlar **her seferinde
+  yeniden hesaplanır** (iptal/düzeltme/silme aynı yoldan geçsin), aşım
+  koruması GK422. Kasa işlem kartında "Tahsilat Dağıtımı" paneli ("Otomatik
+  Dağıt", dağıtılmayan tutar **avans** olarak gösterilir).
+- **322**: `v_kasa_islem_dagitim` + `v_taraf_avans`; belge/başvuru kartının
+  Tahsilat sekmesinde **avans şeridi** ("… dağıtılmamış tahsilat var —
+  mahsup edilmezse prim doğmaz") ve tek tık mahsup; kasa listesinde
+  "Dağıtılmamış" çipi. Dağıtımı tek başına yazan "💾 Dağıtımı Kaydet"
+  (kartın kaydetme yolu belgeyi ve muhasebe fişini yeniden yazıyordu).
+- **323**: `v_belge_satir_tahsilat` yeniden yazıldı; dağıtım tabanı KDV dahil
+  pay, prim tabanı `hasta_tahsil_matrah` / `kurum_tahsil_matrah`.
+
+**Prim / hakediş (`db/324-334`)**
+
+- **324-325 — Şema ve yetkiler**: `prim_plani` / `_satir` / `_kademe`,
+  `belge_satir_rol` (bir kalemde çok rol, bir rolde çok kişi `pay_yuzde` ile),
+  `hakedis` + `hakedis_satir`. Satırlar önce **başlıksız** doğar; dönem
+  kapatılırken başlığa bağlanır ve dondurulur. `fn_prim_belge_turu`,
+  `fn_prim_plan_satiri` (en dar eşleşme), `fn_prim_uret` + tetikler,
+  `fn_hakedis_kapat`. Yetkiler `prim` ve `prim.donem_kapat` ayrı —
+  prim listesini görebilen herkes dönem kapatamamalı.
+- **Ekranlar**: Prim Planları listesi/kartı, Hakediş Satırları listesi (Dönemi
+  Kapat, Kalemi Aç, Rolleri Düzenle), Hakedişler listesi, kalem prim rolleri
+  modalı, dönem kapatma modalı. Planın şubesi boş = kurum geneli (liste
+  `sube_id is null or sube_id = @sube` ile süzer).
+- **326**: `fn_rad_rol_tazele` + tetikler — istek hekimi dış hekimse Gönderen,
+  kurum personeliyse İsteyen; sevk kurumu yalnız hekim yokken Gönderen (çift
+  sayım olmasın); tekniker Teknisyen, yazan Raporlayan, onaylayan Onaylayan.
+- **327-329**: hedef seçilebilir hale geldi, sonra kampanya desenine
+  (tip / kalem türü / kapsam) çevrildi; kapsamlı satırda kapsam ve kalem türü
+  zorunlu (GK422), Liste satırında kapsam temizlenir; kullanılmış plan/satır
+  silinince anlaşılır mesaj.
+- **330**: tahsilat türüne göre oran (`prim_plani_satir.tahsilat_turu`, 0 =
+  farketmez), durum makinesi, `fn_prim_onayla` (+ onayı kaldır), belge türü
+  artık **dönüşüm zincirinin sonundan** okunur, `belge.tur` değişince primler
+  yeniden üretilir. `/api/prim/onayla`, listede çoklu seçimle "✔ Onayla".
+- **331**: başvuru kartının Tahsilat sekmesinde **"🏥 Kurum Tahakkuku"**
+  düğmesi (dönüşüm modalı hedef ve pay seçili açılır); `fn_prim_belge_turu`
+  paya duyarlı.
+- **332-333**: `prim_plani.prim_zamani` + `fn_prim_uret_belge` (faturalama
+  yolu); iki yol birbirinin planını atlar, dönüşüm silinince faturalama primi
+  de düşer; `v_hakedis_satir`'a **Kaynak** (Tahsilat / Faturalama) kolonu.
+  Plan kartında "Prim Zamanı" Kimlik grubunun en başında ve zorunlu.
+- **334**: `kasa_islem_turu` 13 "Alış Tahakkuku" (yön -1) / 17 "Satış
+  Tahakkuku" (yön 1); mevcut 8 belge, numara şablonları, prim kriterleri ve
+  `hakedis_satir.belge_tur` taşındı; `BelgeTuru.CikisTurleri`, web
+  `belgeTuru.ts`, rota haritaları ve liste tanımları güncellendi.
+
+**Hasta kimliği ve entegrasyon (`db/335-336`)**
+
+- **335**: `taraf_hasta`ya pasaport no, medeni hal, ana/baba adı ve TCKN,
+  vefat, kimliksiz, yabancı hasta türü, ülkeye giriş tarihi, mahremiyet notu
+  (kaynak: `Ekranlar/Genotıp_TabloAlanGereksinimleri.xlsx` KIMLIK sayfası);
+  `personel_acil_kisi` -> **`taraf_acil_kisi`** (ortak: personelin acil kişisi
+  ile hastanın yakını aynı bilgi), eski ad güncellenebilir view olarak durur.
+  Hasta kartına "Kimlik Detayı" kutusu ve "Acil Durumda Aranacak Kişiler"
+  gridi.
+- **336**: `entegrasyon_hesap` (kod + şube + ortam benzersiz; kullanıcı adı,
+  şifre, uygulama/kurum kodu, test/canlı adres, `ayarlar` jsonb, son kullanım
+  ve sonuç), yetki `entegrasyon`. **Yönetim > Ayarlar > Genel** ekranında
+  **Entegrasyon** sekmesi — Güvenlik'in sağında (önce Kayıt Kabul ayarlarında
+  açılmıştı, entegrasyon yalnız kayıt kabule ait olmadığı için taşındı ve
+  içeriksiz kalan Kayıt Kabul Ayarları ekranı kaldırıldı); gömülü liste + kart, `/api/entegrasyon/{id}/sina` ve `/skrs-senkron`
+  (SKRS SOAP kimliği üç HTTP başlığı: KullaniciAdi / Sifre / UygulamaKodu).
+  Şifre listede değer olarak dönmez, yalnız "dolu mu".
+
+**Mockup / doküman**
+
+- **USBS** (Uzaktan Sağlık Bilgi Sistemi, Bakanlık kılavuzu): 2FA, randevu ve
+  bekleme odası, onam, görüşme, muayene (yedi sekme: muayene, ICD-10 tanı,
+  hekim notu, e-Reçete, e-Rapor, sevk, dosyalar), hasta dosyası, iz kaydı ve
+  **51 maddelik uyum haritası** + çalışma süreci şeması. Kılavuzdan çıkan
+  kritik nokta: **görüşme sunucuları (TURN/medya) yurt içinde ve kurum
+  kontrolünde olmalı** (md 27) — hazır bulut görüşme servisleri bu maddeyi
+  karşılamaz.
+- Prim/hakediş işleyiş notu ve mockup'ları (plan kartı, kalem rolleri,
+  hakediş), radyoloji cihaz/randevu/kritik bulgu/konsültasyon/teslim/pano
+  mockup'ları.
+
+### Tuzaklar / bulunan hatalar
+
+- **`sube_id = 0` tohumu listeyi boşaltıyor**: 283'ten gelen cihazlar (315) ve
+  kurulumla gelen 6 rapor şablonu (319) şubesizdi; liste şube süzdüğü için
+  ekranda hiç görünmüyorlardı. İkisi de ilk şubeye taşındı.
+- **Detay tanımında `id` yoksa satırlar çoğalır**: prim satırları, radyoloji
+  protokol malzemesi ve stok kartındaki protokol detayında `id` alanı yoktu;
+  fark `id` ile eşleştiği için kayıtlı satırlar "yeni" sayılıp her kayıtta
+  yeniden ekleniyordu.
+- **Detay yazıcısı denetim kolonlarını bekliyor**: `prim_plani_satir`'da
+  `ekleyen/degistiren` yoktu, satır kaydı `column ekleyen does not exist` ile
+  patlıyordu.
+- **`on conflict do update` kesinleşmiş satırı da güncelliyordu**:
+  `fn_prim_uret` artık yalnız açık (1-2) satırları siler/günceller; onaylı ve
+  ödenmiş satır dondurulmuş kalır.
+- **Belge türü tek adım okunuyordu**: sipariş -> irsaliye -> fatura zincirinde
+  faturayı göremiyordu; ayrıca paylaşımlı satırda paya uygun dal yoksa
+  **öteki payın belgesine** düşüyor, hasta payının primi tahakkuk oranıyla
+  hesaplanabiliyordu.
+- **`toISOString()` yine UTC**: dönem kapatma varsayılan tarihleri ayın ilk
+  gününde bir önceki aya kayıyordu (aynı hata 313 turunda "Çekildi"
+  damgasında çıkmıştı) — tarih yerel parçalardan kuruluyor.
+- **URL filtresiyle açılan listede çip çakışması**: `/hakedis-satir?hakedisId=7`
+  açılışında durum çipi üstüne binince grid boş kalıyordu; süzgeçsiz son çip
+  ("Tümü") seçiliyor.
+- **Çip/sayfa değişince grid seçimi kalıyordu**: işaretli satırlar yeni
+  filtrede ekranda değil; sayaç görünenle uyuşmuyor ve toplu aksiyon
+  **ekranda olmayan satırı** işleyebiliyordu (prim onayında görüldü).
+- **Silme engeli mesajında ham tablo adı**: "(hakedis_satir: 2 kayit)" —
+  merkezi `TabloAdlari` sözlüğü eklendi, gövdeye `ad` alanı kondu (`tablo` ham
+  adı tanı için duruyor), `IS_KURALI` hatalarında teknik kod öneki
+  gösterilmiyor.
+- **Geniş detay gridinde silme düğmesi erişilemez**: prim satırları modal
+  genişliğini aşınca en sağdaki kolonlar kayboluyordu; tablo yatay kaydırma
+  sarmalayıcısına alındı.
+- **Refresh 5xx'te tüm token'lar siliniyordu**: sunucu yeniden başlarken
+  çalışan herkes giriş ekranına düşüyordu — artık yalnız 401/403.
+- **Takvimde kapatma bloğu randevunun üstünü örtüyordu**: kural öncesi
+  yazılmış ya da bilerek mesai dışına alınmış randevu taralı zeminin altında
+  kayboluyordu; hücrede randevu varsa blok çizilmiyor.
+- **"zaman" tipi biçimlendirilmiyor**: takip listelerinde saatler ham ISO
+  (`2026-09-01T17:10`) görünüyordu — kolonlar "tarih" tipine +
+  `dd.MM.yyyy HH:mm`.
+- **Kod tablosu okuması id'yi integer bekliyor**: entegrasyon kodu metin
+  (SKRS, MEDULA…) olduğu için kart açılışı `operator does not exist: text =
+  integer` veriyordu; kod alanı sabit kod sözlüğünden besleniyor.
+- **`v_radyoloji_cihaz_lookup` kart deposu beyaz listesinde değildi**: randevu
+  kartı 500 dönüyordu ("Bilinmeyen kod tablosu") — 316'da alan eklenmiş ama
+  kart bir kez bile açılmamıştı.
+- **Kalem türü "Farketmez" kalınca ürün araması hem stok hem hizmet
+  gösteriyordu**; kapsamlı satırda kalem türü artık hizmet varsayılır ve
+  "Farketmez" seçeneği gizlenir.
+
+**Kapsam dışı (bekleyen):** PACS/DICOM ve gerçek MWL gönderimi, randevu SMS'i,
+hasta portalı; SKRS senkronu kurum kullanıcı adı/şifre/uygulama kodu girilince
+doğrulanacak (servis kimlik doğrulamasız cevap vermiyor); USBS yalnız mockup ve
+uyum haritası düzeyinde — görüşme altyapısı (yurt içi TURN/medya) yazılmadı.
+
+### Ek — 02.09.2026: ÜTS ve e-Fatura hesapları da Entegrasyon ekranında (`db/337`)
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K61 | **Tüm dış servis kimlikleri tek ekranda**: ÜTS (`uts_hesap`) ve e-Belge entegratör hesabı (`sube.entegrator_*` / `test_*`) `entegrasyon_hesap`a taşındı; şube kartındaki **ÜTS sekmesi** ve **e-Belge > Mükellef Hesabı / Test Ortamı** alanları kaldırıldı | Aynı iş üç ekranda üç ayrı düzenle yapılıyordu ve test/canlı ayrımı üç farklı şekilde çözülmüştü (`uts_hesap.test_ortami`, `sube.test_ortami`, `entegrasyon_hesap.test_mi`). 336'nın kurduğu sözleşme zaten bunun için vardı |
+| K62 | Taşınan **yalnız hesap**tır; şubede **kimlik** kalır (gönderici unvan/VKN/alias/Mersis, mükellefiyet bayrakları, varsayılan seri) | Bunlar belgenin kimliği; entegratör hesabı değişse de aynı kalırlar. Kimlik şubesi seçimi (169, `ust_sube_id`) da yerinde |
+| K63 | e-Belge hesabında **varsayılan şubeye düşülmez** (ÜTS'te düşülür) | "Merkezin kimliğiyle gönder" kararı 169'da zaten veriliyor; hesabı sessizce merkeze düşürmek, kendi VKN'siyle gönderen şubeyi başkasının entegratör hesabına bağlardı. Kurum geneli satır (şube boş) açık bir tercihtir, o kullanılır |
+| K64 | Entegratör seçimi **tipli kolon** (`entegrasyon_hesap.entegrator_id`), `ayarlar` jsonb değil | Entegratör kartta açılır listeden seçilir (`v_ebelge_entegrator_lookup`); jsonb'nin jenerik kartta seçim arayüzü yok. jsonb kuralı uzun kuyruk içindir |
+| K65 | Listede ve açılır listede **e-Fatura en üstte** (kullanıcı) | En sık kullanılan entegrasyon; `v_entegrasyon_kod_lookup`a `sira` eklendi, liste sıralaması da onu izliyor |
+
+**Yapılanlar**
+
+- `entegrasyon_hesap.sifre` **text**e çevrildi (ÜTS sistem token'ı 200 karakteri aşıyor),
+  `entegrator_id smallint` eklendi; kartta alan adı "Şifre / Token".
+- Göç: `uts_hesap` → kod `UTS`, `sube.entegrator_*` → kod `EBELGE`. Eski tek satır
+  (canlı alanlar + test alanları + "test ortamı" bayrağı) **iki satıra** bölünür;
+  hangisinin kullanılacağını `aktif` söyler. ÜTS'in baz şube yönlendirmesi (227)
+  `ayarlar->>'baz_sube_id'` içinde korundu.
+- `fn_uts_hesap` ve `fn_ebelge_hesap` yeniden yazıldı (çözüm sırası: şubenin satırı →
+  kurum geneli satır → [yalnız ÜTS] varsayılan şube). İmzalar değişmedi, C# tarafı
+  yalnız hata metinlerini yeni ekrana çevirdi.
+- `uts_hesap` → `uts_hesap_337_yedek` (veri göç doğrulanana kadar duruyor);
+  `sube`'deki entegratör kolonları kolon yorumlarıyla "DEVRE DIŞI" işaretlendi.
+- Şube listesindeki **Entegratör / Test Ortamı** kolonları artık `entegrasyon_hesap`
+  satırından okunuyor (lateral join).
+
+**Test (dev, uçtan uca)**
+
+- Göç öncesi/sonrası `fn_uts_hesap(null)`, `fn_uts_hesap(3)` ve `fn_ebelge_hesap(1)`
+  **birebir aynı** sonucu verdi (kurum no, token, ortam, adres).
+- Entegrasyon listesi sırası: e-Fatura (test/canlı) → ÜTS (test/canlı) → SKRS;
+  Entegratör kolonu e-Belge satırlarında "İzibiz", ötekilerde boş.
+- Kart açma/kaydetme: `entegratorId` 1 → 2 → 1 yazıldı, DB'de doğrulandı; ÜTS
+  kartında token (42 karakter) tam geldi.
+- Şube kartı: detay sekmeleri yalnız "Depolar", entegratör/test alanları yok.
+- Şube listesi: Merkez "İzibiz / test", Ankara Şube boş + "Eksik" (davranış aynı).
+- Tek davranış farkı: hesabı hiç olmayan şubede `fn_ebelge_hesap` artık **boş satır
+  yerine hiç satır** döndürüyor; API mesajı "Şubenin e-Belge hesabı tanımlı değil.
+  Yönetim › Ayarlar › Genel › Entegrasyon".
+
+**Ek (`db/338`) — "Baz Alınacak Şube"**
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K66 | Entegrasyon hesabına **`baz_sube_id`** (0 = Kendisi, 227 deseni); şube alanı **boş bırakılabilir olarak kaldı** (boş = Tümü, kullanıcı kararı) | Önce "şube zorunlu olsun" denendi, sonra kullanıcı "boş = Tümü kalsın" dedi. İkisi birlikte çalışıyor: kurum geneli satır ortak hesap, baz şube ise "bu şube şu şubenin hesabıyla çalışır" kararını ÖRTÜK kural olmaktan çıkarıp satıra yazıyor |
+
+- Tek çözüm noktası `fn_entegrasyon_hesap_id(kod, sube, varsayilana_dus)`:
+  **kendi satırı → baz şubenin satırı → kurum geneli (şube boş) satır →
+  [yalnız ÜTS] varsayılan şube**. Tek sıçrama (baz şubenin bazı izlenmez —
+  zincir, yanlış yapılandırmada döngü riski).
+- `fn_uts_hesap` ve `fn_ebelge_hesap` bu fonksiyonu çağırıyor; şube listesindeki
+  Entegratör / Test Ortamı kolonları da aynı fonksiyondan okuyor (ekran ile
+  gönderim aynı kuralı görsün).
+- 337'de `ayarlar` jsonb'sine yazılan ÜTS baz şubesi tipli kolona taşındı.
+- Test: baz şube = Merkez verilen Ankara satırı Merkez'in kullanıcısıyla
+  çözüldü (kimlik şubesi 3 kaldı — kendi VKN'si); kurum geneli satır eklenince
+  kendi satırı olmayan şube onu kullandı, kendi satırı olan Merkez kendininkini
+  kullandı; kart üzerinden baz şube yazıldı/geri alındı; şube listesi
+  kolonları doğru değişti.
+
+### Ek — 02.09.2026: başvuru/sipariş kaleminden prim doğmaz (`db/339`)
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K67 | Prim satırı **yalnız gelir belgesi varken** üretilir: kalem hâlâ başvuru/sipariş/teklif (tür 9/18/19/30) ise tahsilat alınmış olsa bile hakediş satırı **hiç doğmaz**; dönüşümde (satış tahakkuku 17 / fatura 15 / fiş 16 / irsaliye 14) tetik `fn_prim_uret`'i yeniden çağırır ve prim o an **Kesin** doğar | 330'daki "Taslak" (durum 1) satırı izlenebilirlik için vardı ama hakediş listesi henüz hak edilmemiş primi gösteriyor, toplamlar şişiyordu; üstelik başvuru türüne göre eşleşen oran geçiciydi — fatura kesilince değişebiliyordu. Faturalama zamanlı plan (332) zaten böyle çalışıyordu, iki yol aynı kurala geldi |
+
+- `fn_prim_uret`: belge türü çözüldükten sonra `fn_prim_taslak_mi` ise 0 döner
+  (yeniden üretilebilir satırlar yine silinir — iptal/düzeltme aynı yoldan geçer).
+  Üretilen satırın durumu artık her zaman **2 (Kesin)**.
+- Durum kodları **korundu** (2/3/4); 1 yalnız eski kayıtlarda kalabilir. Göç,
+  mevcut taslak satırları (durum 1) siler — hak edilmiş prim değillerdi ve
+  dönüşümde yeniden üretilecekler.
+- Ekran: hakediş listesindeki **"Taslak" çipi** ve dönem kapatma modalındaki
+  **"Taslak (girmez)"** kolonu kaldırıldı; kalem rol modalindeki açıklama yeni
+  kurala göre yazıldı (sunucudaki `taslak*` özet alanları eski kayıtlar için
+  duruyor).
+- Test: tür 19 başvurunun dağıtımında `fn_prim_uret` **0 satır**; belge türü 16
+  (satış fişi) yapılınca iki satır **durum 2**, nakit oranı %12 ile doğdu; tür 17
+  (satış tahakkuku) ile de doğdu; tür 19'a geri alınınca satırlar düştü.
+- Not: daha önce kapatılmış dönemdeki iki satır (belge türü 19, durum 3 "Onaylı")
+  dondurulmuş olduğu için **olduğu gibi bırakıldı** — kapanmış hakediş geriye
+  dönük değiştirilmez.
+
+### Ek — 02.09.2026: SKRS listeleri genişletildi + entegrasyon ekranı mockup'a getirildi (`db/340`)
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K68 | SKRS'den **il / ilçe / ülke** de senkronlanır ama SKRS kodu `id` yerine geçmez: tablolara ayrı **`skrs_kod`** kolonu (db/340); eşleme **ada göre** (`fn_ara_metin`), ilçede **(il, ad)** çiftiyle | Bu üçü kod listesi değil dolu ve referans verilen tablolar (81 il, 970 ilçe, 232 ülke; `ilce.il_id`, `stok_uts.mensei_ulke`, adres kayıtları). SKRS numaralandırmasını `id`ye yazmak mevcut bağları sessizce bozardı. İlçe adı tek başına benzersiz değil — 51 kayıt "MERKEZ" |
+| K69 | **Branş** ve **sigorta türü** kod listesi olarak kalır (`hekim.brans`, `taraf.sigorta_turu`); SKRS kodu doğrudan `kod_deger.deger` (K58 devamı) | İkisi de sayısal kodlu, referans bağı olmayan basit listeler — tablo açmaya gerek yok |
+
+- `SkrsListeleri` dizisine `BRANS` ve `SIGORTATURU` eklendi; yeni `SkrsTablolari`
+  (IL → ILCE → ÜLKE, **bu sırayla**: ilçe ancak ilin `skrs_kod`u dolduktan sonra
+  bağlanabilir). SOAP cevabından artık **üst kod** da ayıklanıyor
+  (`ustkod / ilkodu / parentCode…`); üst kodu çözülemeyen ilçe **atlanır** ve
+  rapora yazılır — yanlış ile bağlamak adres kayıtlarını bozardı.
+- SKRS'de olup bizde olmayan satır **yeni kayıt** olarak eklenir (`id = max + 1`;
+  bu tablolarda identity yok).
+- **Entegrasyon ekranı mockup'a getirildi**: listede arama + çipler
+  (Tümü / Aktif / Test / Canlı), mockup'la aynı kolon sırası (Entegrasyon · Ad ·
+  Şube · Baz Şube · Ortam · Kullanıcı · Şifre · Uygulama Kodu · Entegratör ·
+  Aktif · Son Kullanım · Son Sonuç) ve altında kural notu; kartta gruplar
+  Kimlik (üst şerit) · Hesap · Adres ve Durum.
+- Mockup: `Ekranlar/Ayarlar/entegrasyon_hesaplari.html` (liste + kart + servise
+  göre alan kullanımı tablosu).
+- Test: eşleme mantığı gerçek veriyle denendi (transaction içinde, geri alındı) —
+  "Ankara"→ANKARA ve "İSTANBUL" Türkçe-duyarsız eşleşti, bilinmeyen il yeni
+  kayıt (id 82) oldu, "Çankaya" ilçesi doğru ile bağlandı, ülke eşleşti. Çip
+  filtreleri ve kart alan/grup metası uçtan uca doğrulandı. Gerçek SKRS çağrısı
+  hâlâ kurum kimliği bekliyor (servis kimliksiz cevap vermiyor).
+
+**Ek — entegrasyon ekranı mockup düzenine getirildi**
+
+- **Kart tek sayfa**: "Hesap" ve "Adres ve Durum" artık ayrı SEKME değil, aynı
+  sayfada iki kutu (`Grup: "Genel"` + `AltGrup`) — beş alanlık kart için sekme
+  açmak ekranı bölüyordu. Kimlik grubu üst şeritte (mockup idstrip): Entegrasyon ·
+  Ad · Şube · Baz Alınacak Şube · Test Ortamı · Aktif.
+- **Kart araç çubuğuna** "🔌 Bağlantıyı Sına" (+ SKRS satırında "⟳ SKRS
+  Listelerini Güncelle") eklendi — hesabı kaydeden kullanıcı listeye dönmeden
+  sınayabiliyor.
+- Kartın altında mockup'taki iki kutu: test/canlı ayrı satır uyarısı ve hesap
+  çözüm zinciri.
+- **Sınama artık servise göre** (340): SKRS'de gerçek kod listesi çağrısı;
+  ötekilerde SKRS SOAP gövdesi göndermek anlamsızdı (İzibiz "Servis
+  kullanılmamaktadır" dönüyordu) — adres yanıt veriyor mu + kimlik alanları dolu
+  mu bakılır, 5xx "servis yanıt veremiyor" olarak raporlanır. Gerçek oturum açma
+  denenmez: her entegratörün login sözleşmesi farklı ve yanlış istek kimi
+  serviste hesabı kilitliyor.
+- **Sınamada adres üç noktadan** çözülür (satırın adresi → entegratör kataloğu /
+  ÜTS referans ayarı → resmî sabit): satırda adres boş bırakmak normaldir,
+  gönderim de aynı sırayı izliyordu; "Sına" bunu bilmeyip "adres boş" diyordu.
+- Kimlik kontrolü de servise göre: ÜTS'te kullanıcı adı yoktur (yalnız token) —
+  eski toplu kontrol ÜTS hesabının sınanmasını engelliyordu.
+
+### Ek — 02.09.2026: "İletişim & AI" menüsü (`db/341`)
+
+- Kullanıcı: "Ana Sayfa'dan sonra **İletişim & AI** ana menüsü, altına
+  **Mesajlar** ve **Yapay Zeka** — tüm modlar için." Mockup karşılığı
+  `Ekranlar/gentegre_data.js` → MODULLER[0] (`umesajlar.html`, `ai_asistan.html`).
+- Menü grubu sırası `LISTELER` dizisindeki ilk görülme sırasından geldiği için
+  iki tanım dizinin **başına** kondu; grup Ana Sayfa'nın hemen altında çıkıyor.
+  `urunModu` verilmedi — hem Gentegre AI (ERP) hem GenoTIP AI (HBYS) kurulumunda
+  görünür.
+- **341**: `mesaj` ve `ai` yetkileri + yönetici rolüne açılması. Menü yetkiyle
+  süzüldüğü için bu kodlar olmadan girdiler hiç çizilmezdi. `rol.yetki_surumu`
+  tetikle arttı (1892 → 1894), açık oturumlar yetkiyi kendiliğinden tazeliyor.
+- Ekranlar şimdilik **kapsam sayfası**: ne yapacakları ve mockup dosyaları
+  yazılı. Kanal/mesaj şeması, yazışma ekranı ve AI asistanı (sohbet, araç
+  kataloğu, kayıt izi) sıradaki işte gelecek — boş grid göstermek yerine niyet
+  açık yazıldı.
+- Ayrıca listede **Ortam / Şube / Baz Şube rozet** oldu (TEST sarı · CANLI yeşil ·
+  Tümü ve Kendisi gri) ve **baz şube varsayılanı "Kendisi"** (hem sunucu
+  varsayılanı hem kart açılışı).
+
+### Ek — 02.09.2026: Mesajlar ekranı mockup'a göre kuruldu (`db/342`)
+
+Kullanıcı: "umesajlar.html mockup'ı ile Mesajlar bölümünü **üç turda** karşılaştır,
+benzemeyen kısımları düzelt." 341'de yalnız menü ve yetki vardı; ekran bu turda yazıldı.
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K70 | **Okundu bilgisi mesaj başına tutulmaz**: `mesaj_uye.son_okuma` damgası (mockup'ın kendi kuralı) | 200 kişilik grupta her mesaj için 200 satır demekti. Grupta en küçük `son_okuma` "herkes okudu" sınırıdır |
+| K71 | **Favori / sabit / sessiz / arşiv bayrakları SOHBETTE değil ÜYEDE** | "Bu sohbeti ben sabitledim" kişisel tercihtir; sohbette tutulunca birinin sabitlemesi herkesin listesini değiştirirdi |
+| K72 | **Mesajlar şubeler arası** (`sube_id` yok) | Şube filtresi uygulanırsa merkezdeki kullanıcı şubedeki meslektaşına yazamaz |
+| K73 | Kişi sohbeti **tekildir**: aynı iki kişi arasında ikinci sohbet açılmaz | Yazışma iki listeye bölününce "yazdım ama görmedi" durumu doğar |
+| K74 | Kayıt iliştirmede **kart kopyalanmaz**: `mesaj_kayit` yalnız modül + kayıt kimliği tutar | "Kartı Aç" ilgili ekranı çalıştırır, yetki orada kontrol edilir; kopyalanan özet zamanla yanlışlaşırdı |
+| K75 | Silinen mesaj satırı **durur** (`durum = 2`, metin gizlenir) | Okundu hesabı ve yanıt zinciri bozulmasın; akışta "bu mesaj silindi" görünür |
+
+**Tur 1 — kuruluş**: `db/342` (mesaj_sohbet · mesaj_uye · mesaj · mesaj_ek ·
+mesaj_kayit + `v_mesaj_sohbet`), `MesajUclari.cs` (sohbet listesi, yeni sohbet/grup,
+akış, gönder, okundu, bayrak, bilgi, sabitle, sil, kişi arama) ve üç panelli
+`Mesajlar.tsx` (sol liste + çipler, orta akış + balonlar, sağ bilgi).
+
+**Tur 2 — mockup farkları**: sol üstte "benim" şeridi (avatar + hızlı düğmeler),
+üst şeritte kişi künyesi (görev · departman · şube), yazma satırında 📎 **ek menüsü**
+(beş madde; bugün çalışan **Gentegre Kaydı İliştir**, ötekiler pasif), sağ panelde
+**künye** kutusu ve ek/iliştirilen kayıt listeleri, durum çubuğunda **bugün** sayaçları
+(mesaj · ek · iliştirilen kayıt).
+
+**Tur 3 — kalan farklar**: gün ayracı (Bugün/Dün/tarih), **sohbet içinde arama**
+(ℹ/🔎/📎/📌 ikonları mockup'taki gibi), sağ panel açılır-kapanır (ℹ), balonda
+**sabitle** işlemi, sistem mesajı balonu, emoji seçici, mockup'ın alt notu
+(okundu kuralı + iliştirmenin ne yapmadığı).
+
+**Test**: kişi sohbeti açıldı, üç mesaj + bir yanıt gönderildi, okunmamış sayacı ve
+"okundu" tiki doğrulandı; kayıt iliştirme (belge #114325) sağ panelde ve bugün
+sayacında göründü; mesaj sabitlendi, grup açıldı (3 üye), favori çipi süzdü.
+`dotnet build`, `tsc --noEmit` ve `npm run build` temiz. Test verisi sonra silindi.
+
+**Bilerek yapılmayanlar** (mockup'ta var, altyapı bekliyor): "yazıyor…" göstergesi ve
+çevrimiçi durumu (gerçek zamanlı kanal yok - ekran 8 sn'de bir tazeliyor), dosya/görsel
+eki yükleme, görev oluşturma, onay isteği, rapor paylaşma, sesli not, grup üye
+yönetimi. Bunlar pasif görünüyor - ekranda durup çalışmayan düğme bırakmamak için.
+
+### Ek — 02.09.2026: Yapay Zeka asistanı mockup'a göre kuruldu (`db/343-344`)
+
+Kullanıcı: "ai_asistan.html ile **üç turda** karşılaştır, farklılıkları gider."
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K76 | **Model veritabanına doğrudan bağlanmaz**: veri yalnız `ai_arac` kataloğundaki izinli fonksiyonlardan okunur ve her çağrı ÇAĞIRANIN uygulama yetkisiyle çalışır | Mockup'ın kendi kuralı. Serbest SQL üreten bir asistan, yetki katmanını baypas eden en kısa yoldur |
+| K77 | **Yazan işlem yok, taslak var**: görev/metin çıktısı `ai_taslak` satırıdır; kayıt kullanıcı ONAYLAYINCA oluşur (`hedef_modul` + `hedef_id`) | "Gönderim yapmadım - onaylarsan oluştururum" (mockup). Onayı kimin ne zaman verdiği kayıtta |
+| K78 | Her çağrı `ai_arac_log`'a: fonksiyon · parametre · kayıt sayısı · süre | Denetim izi model cevabından bağımsız durur; cevap yeniden üretilse de ne okunduğu bellidir |
+| K79 | Araç kataloğunda **kaynak tablo + liste rotası** (db/344) | Kullanıcı asistanın sayısına güvenecekse veriyi nereden okuduğunu ve kendi gözüyle nerede doğrulayacağını görmeli ("📄 mali_hareket · 20 kayıt · 🔗 Cari Listesi'nde aç") |
+| K80 | Model bağlantısı yokken de ekran **çalışır**: hazır komutlar fonksiyonları doğrudan çağırır, serbest metin sorusuna ne yapılabileceğini söyleyen yanıt döner | Boş/ sessiz bir asistan "bozuk mu" diye arattırır; model kimliği `entegrasyon_hesap` (kod AI) ile tanımlanınca aynı fonksiyon katmanı kullanılacak |
+
+**Tur 1 — kuruluş**: `db/343` (`ai_sohbet · ai_mesaj · ai_arac · ai_arac_log ·
+ai_taslak` + dört araç), `AiUclari.cs` (sohbetler, sohbet aç, akış, sor, taslak
+onay/iptal, geri bildirim) ve üç panelli `YapayZeka.tsx`. Çalışan fonksiyonlar:
+vadesi geçen cariler, kritik stok, bugünün özeti, görev taslağı.
+
+**Tur 2 — mockup farkları**: üst çubukta İzinli Fonksiyonlar / Kullanım-Maliyet /
+Güvenlik Kuralları / AI Log düğmeleri (sağ paneldeki kutuya kaydırır — aynı bilgiyi
+iki yerde tutmamak için), "Asistan çalışıyor…" göstergesi, yazma satırında
+**fonksiyon seç** menüsü ve **bağlam** anahtarı, sağ panelde güvenlik kuralları ve
+kullanım kutusu.
+
+**Tur 3 — kalan farklar**: `db/344` ile araç kaynağı/rotası; cevabın altında
+**kaynak rozetleri** (okunan tablo + kayıt sayısı), **listede aç** bağlantısı,
+**Excel'e aktar** (görünen tabloyu CSV — BOM'lu, Excel Türkçeyi bozmasın) ve
+**yeniden üret**.
+
+**Test**: dört fonksiyon çalıştı (vadesi geçen 20 kayıt / 26 ms, kritik stok 0,
+bugün özeti 3 satır), görev taslağı üretildi → onaylanınca **gorev #12 oluştu**,
+geri bildirim yazıldı, AI log kaynak bilgisiyle döndü. `dotnet build`, `tsc`,
+`npm run build` temiz; test verisi ve oluşan görev silindi.
+
+**Bilerek yapılmayanlar** (model bağlanınca): serbest metin yanıtı, token/maliyet
+sayaçlarının gerçek değerleri, RAG (doküman arama), e-posta/WhatsApp metni üretimi,
+sesli soru, TR→EN çeviri. Ekranda pasif ya da açıkça "tanımlı değil" olarak duruyor.

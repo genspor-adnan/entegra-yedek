@@ -519,6 +519,13 @@ table.grid tr.flt input {
 .kagrup > .detay-tablo { width: calc(100% - 20px); margin: 10px }
 /* Kolonu cok olan detay gridi yatay kaydirilir; sigan gridde cubuk cikmaz. */
 .detay-kaydir { overflow-x: auto; margin: 10px }
+/* Cok satirli detay gridi (fiyat listesi satirlari): kendi dikey kaydirmasi +
+   sabit baslik - modal govdesinde kaybolup alt satirlar erisilemez kaliyordu. */
+.detay-uzun { max-height: 52vh; overflow: auto }
+.detay-uzun > .detay-tablo thead th {
+  position: sticky; top: 0; z-index: 2;
+  background: linear-gradient(var(--serit1), var(--serit2));
+}
 .detay-kaydir > .detay-tablo { width: 100%; min-width: max-content; margin: 0 }
 /* Mockup (.row > .col > .grp): birden fazla alt-basликlı kutu AYNI SATIRDA yan yana. */
 .kasira { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 12px }
@@ -1705,3 +1712,334 @@ input.skt-gecmis {
   display: inline-block; height: 10px; border-radius: 2px;
   background: var(--mor2); border: 1px solid var(--mor); min-width: 6px;
 }
+
+/* ================================================================ MESAJLAR ==
+   Ekranlar/umesajlar.html (341/342): uc panel - sohbet listesi / akis /
+   sohbet bilgisi. Renkler tema degiskenlerinden; gece temasinda da calisir
+   (dogrudan hex yazilan zemin koyu temada yaziyi okunmaz yapiyordu). */
+.msj-arac {
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  padding: 6px 10px; background: var(--yuz2);
+  border: 1px solid var(--cizgi); border-bottom: 0; border-radius: var(--r) var(--r) 0 0;
+}
+.msj-arac .msj-durum { margin-left: auto; font-size: 11px; color: var(--soluk) }
+
+.msj-govde {
+  display: flex; align-items: stretch; gap: 0;
+  border: 1px solid var(--cizgi); border-radius: 0 0 var(--r) var(--r);
+  background: var(--yuz); overflow: hidden; height: calc(100vh - 190px); min-height: 420px;
+}
+.msj-sol { width: 300px; flex: none; border-right: 1px solid var(--cizgi); display: flex; flex-direction: column }
+.msj-orta { flex: 1; min-width: 0; display: flex; flex-direction: column }
+.msj-sag { width: 260px; flex: none; border-left: 1px solid var(--cizgi); overflow: auto; padding: 8px }
+
+.msj-ara { padding: 8px; border-bottom: 1px solid var(--cizgi2) }
+.msj-ara input {
+  width: 100%; height: 26px; padding: 0 8px; font: inherit;
+  border: 1px solid var(--cizgi); border-radius: 12px; background: var(--yuz); color: var(--yazi);
+}
+.msj-cipler { display: flex; gap: 4px; flex-wrap: wrap; padding: 6px 8px; border-bottom: 1px solid var(--cizgi2) }
+.msj-cip {
+  border: 1px solid var(--cizgi); border-radius: 12px; padding: 2px 9px;
+  font-size: 11px; color: var(--soluk); cursor: pointer; background: var(--yuz);
+}
+.msj-cip.on { background: var(--mor); border-color: var(--mor); color: #fff; font-weight: 700 }
+
+.msj-liste { flex: 1; overflow: auto }
+.msj-satir {
+  display: flex; gap: 8px; padding: 7px 8px; cursor: pointer;
+  border-bottom: 1px solid var(--cizgi2); align-items: center;
+}
+.msj-satir:hover { background: var(--yuz2) }
+.msj-satir.on { background: var(--mor2) }
+.msj-satir-ic { min-width: 0; flex: 1 }
+.msj-satir-ust { display: flex; gap: 6px; align-items: baseline }
+.msj-satir-ust .ad { font-weight: 700; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.msj-satir-ust .sa { margin-left: auto; font-size: 10.5px; color: var(--soluk); flex: none }
+.msj-satir-alt { display: flex; gap: 6px; align-items: center; margin-top: 2px }
+.msj-satir-alt .pv {
+  font-size: 11px; color: var(--soluk); overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; flex: 1;
+}
+.msj-sayac {
+  background: var(--mor); color: #fff; border-radius: 9px; font-size: 10px;
+  font-weight: 700; padding: 0 6px; min-width: 17px; text-align: center;
+}
+.msj-av {
+  width: 30px; height: 30px; border-radius: 50%; flex: none; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+}
+
+.msj-ust {
+  display: flex; gap: 8px; align-items: center; padding: 7px 10px;
+  border-bottom: 1px solid var(--cizgi); background: var(--yuz2);
+}
+.msj-ust .nm { font-weight: 700 }
+.msj-ust .du { font-size: 11px }
+.msj-ikonlar { margin-left: auto; display: flex; gap: 8px }
+.msj-ikonlar span { cursor: pointer; opacity: .55; font-size: 14px }
+.msj-ikonlar span:hover { opacity: 1 }
+.msj-ikonlar span.on { opacity: 1; filter: drop-shadow(0 0 1px var(--mor)) }
+
+.msj-akis { flex: 1; overflow: auto; padding: 12px; background: var(--zem); display: flex; flex-direction: column; gap: 8px }
+.msj-balon {
+  max-width: 70%; align-self: flex-start; background: var(--yuz);
+  border: 1px solid var(--cizgi2); border-radius: 8px; padding: 6px 9px;
+  font-size: 12px; line-height: 1.45;
+}
+.msj-balon.benim { align-self: flex-end; background: var(--okzem); border-color: var(--okkenar) }
+.msj-balon .kim { font-size: 10.5px; font-weight: 700; color: var(--mor); margin-bottom: 2px }
+.msj-balon .alinti {
+  border-left: 3px solid var(--mor); background: var(--yuz2);
+  padding: 3px 7px; margin-bottom: 4px; font-size: 11px; color: var(--soluk); border-radius: 3px;
+}
+.msj-balon .metin { white-space: pre-wrap; word-break: break-word }
+.msj-balon .alt {
+  display: flex; gap: 6px; align-items: center; justify-content: flex-end;
+  margin-top: 3px; font-size: 10px; color: var(--soluk);
+}
+.msj-balon .alt .tik { color: var(--soluk) }
+.msj-balon .alt .tik.ok { color: var(--mor) }
+.msj-balon .alt .islem { cursor: pointer; opacity: .6 }
+.msj-balon .alt .islem:hover { opacity: 1 }
+
+.msj-yanit {
+  display: flex; gap: 8px; align-items: center; padding: 6px 10px;
+  border-top: 1px solid var(--cizgi2); background: var(--yuz2); font-size: 11px;
+}
+.msj-yanit .bar { width: 3px; align-self: stretch; background: var(--mor); border-radius: 2px }
+.msj-yanit .a { font-weight: 700; color: var(--mor) }
+.msj-yanit .t { color: var(--soluk); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.msj-yanit .x { margin-left: auto; cursor: pointer; color: var(--soluk) }
+
+.msj-yazma { display: flex; gap: 6px; padding: 8px; border-top: 1px solid var(--cizgi); background: var(--yuz2) }
+.msj-yazma input {
+  flex: 1; height: 30px; padding: 0 10px; font: inherit;
+  border: 1px solid var(--cizgi); border-radius: 15px; background: var(--yuz); color: var(--yazi);
+}
+.msj-uye { display: flex; gap: 6px; align-items: baseline; padding: 3px 0; font-size: 11.5px }
+.msj-uye .ad { font-weight: 700 }
+.msj-secim { max-height: 320px; overflow: auto; border: 1px solid var(--cizgi); border-radius: var(--r) }
+
+/* Mesajlar - pass 2: "benim" seridi, atac menusu, kunye satirlari. */
+.msj-benim {
+  display: flex; gap: 8px; align-items: center; padding: 8px;
+  border-bottom: 1px solid var(--cizgi); background: var(--yuz2);
+}
+.msj-benim .ad { font-weight: 700; font-size: 12px }
+.msj-benim .sonuk { font-size: 10.5px }
+.msj-atac { position: relative; display: flex; align-items: center }
+.msj-atac > span { cursor: pointer; font-size: 16px; opacity: .6; padding: 0 4px }
+.msj-atac > span:hover { opacity: 1 }
+.msj-atac-menu {
+  position: absolute; bottom: 30px; left: 0; z-index: 30; min-width: 210px;
+  background: var(--yuz); border: 1px solid var(--cizgi); border-radius: var(--r);
+  box-shadow: var(--golge); padding: 4px 0; font-size: 11.5px;
+}
+.msj-atac-menu > div { padding: 5px 10px; cursor: pointer; white-space: nowrap }
+.msj-atac-menu > div:hover { background: var(--mor2) }
+.msj-atac-menu > div.pasif { color: var(--soluk); cursor: default; opacity: .6 }
+.msj-atac-menu > div.pasif:hover { background: transparent }
+.msj-kv { display: flex; gap: 8px; font-size: 11px; padding: 2px 0 }
+.msj-kv span { color: var(--soluk) }
+.msj-kv b { margin-left: auto; text-align: right; color: var(--yazi2); word-break: break-all }
+
+/* Mesajlar - pass 3: gun ayraci, sistem mesaji, sohbet ici arama, emoji. */
+.msj-satirkap { display: flex; flex-direction: column; gap: 6px }
+.msj-gun {
+  align-self: center; font-size: 10.5px; color: var(--soluk);
+  background: var(--yuz); border: 1px solid var(--cizgi2);
+  border-radius: 10px; padding: 1px 10px;
+}
+.msj-sistem {
+  align-self: center; font-size: 11px; color: var(--soluk);
+  background: var(--yuz2); border: 1px solid var(--cizgi2);
+  border-radius: 10px; padding: 2px 10px;
+}
+.msj-akisara {
+  display: flex; gap: 8px; align-items: center;
+  padding: 6px 10px; border-bottom: 1px solid var(--cizgi2); background: var(--yuz2);
+}
+.msj-akisara input {
+  flex: 1; height: 24px; padding: 0 8px; font: inherit;
+  border: 1px solid var(--cizgi); border-radius: 12px; background: var(--yuz); color: var(--yazi);
+}
+.msj-akisara .x { cursor: pointer; color: var(--soluk) }
+.msj-emoji { display: flex; flex-wrap: wrap; gap: 2px; min-width: 170px; padding: 6px }
+.msj-emoji span { cursor: pointer; font-size: 16px; padding: 2px 4px; border-radius: 3px }
+.msj-emoji span:hover { background: var(--mor2) }
+.msj-altnot { margin-top: 6px; line-height: 1.55 }
+
+/* ============================================================= YAPAY ZEKA ==
+   Ekranlar/ai_asistan.html (341/343): sohbet akisi + arac cagrisi cipi +
+   veri tablosu + onay bekleyen taslak karti. Uc panel duzeni Mesajlar ile
+   ORTAK (.msj-govde/.msj-sol/.msj-orta/.msj-sag) - iki ekran ayni iskelet. */
+.ai-komut {
+  display: flex; gap: 6px; align-items: center; width: 100%; text-align: left;
+  margin: 3px 0; padding: 5px 8px; font: inherit; cursor: pointer;
+  border: 1px solid var(--cizgi); border-radius: var(--r);
+  background: linear-gradient(var(--dug1), var(--dug2)); color: var(--yazi);
+}
+.ai-komut:hover:enabled { border-color: var(--dugkenar); background: linear-gradient(var(--dugh1), var(--dugh2)) }
+.ai-komut:disabled { opacity: .5; cursor: default }
+.ai-komut .rozet { margin-left: auto; font-size: 9.5px; padding: 1px 6px }
+
+.ai-blok {
+  background: var(--yuz); border: 1px solid var(--cizgi2); border-radius: 8px;
+  padding: 8px 10px; max-width: 92%; align-self: flex-start;
+}
+.ai-blok.benim { align-self: flex-end; background: var(--yuz2); max-width: 70% }
+.ai-bas { display: flex; gap: 6px; align-items: center; font-size: 11px; margin-bottom: 4px }
+.ai-cip {
+  margin-left: auto; font-size: 10.5px; color: var(--mor);
+  background: var(--mor2); border: 1px solid var(--cizgi); border-radius: 10px; padding: 1px 8px;
+}
+.ai-metin { white-space: pre-wrap; font-size: 12px; line-height: 1.5 }
+.ai-tablo { margin-top: 6px; overflow: auto; border: 1px solid var(--cizgi); border-radius: 3px }
+.ai-tablo table { border-collapse: collapse; width: 100% }
+.ai-tablo th {
+  background: linear-gradient(var(--serit1), var(--serit2)); text-align: left;
+  padding: 4px 7px; font-size: 10.5px; color: var(--yazi2); white-space: nowrap;
+  border-bottom: 1px solid var(--cizgi);
+}
+.ai-tablo td { padding: 3px 7px; font-size: 11.5px; border-bottom: 1px solid var(--cizgi2); white-space: nowrap }
+.ai-taslak {
+  margin-top: 8px; border: 1px solid var(--uyarikenar); background: var(--uyarizem);
+  border-radius: var(--r); padding: 7px 9px;
+}
+.ai-taslak.onayli { border-color: var(--okkenar); background: var(--okzem) }
+.ai-taslak .bas { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 11.5px }
+.ai-taslak .bas .rozet { margin-left: auto }
+.ai-taslak .icerik { white-space: pre-wrap; font-size: 11.5px; line-height: 1.5 }
+.ai-taslak .tuslar { display: flex; gap: 6px; margin-top: 7px }
+.ai-alt { display: flex; gap: 10px; align-items: center; margin-top: 6px; font-size: 11px; color: var(--soluk) }
+.ai-alt span { cursor: pointer; opacity: .7 }
+.ai-alt span:hover { opacity: 1 }
+.ai-alt span.on { opacity: 1; color: var(--mor); font-weight: 700 }
+.ai-kural { border-top: 1px solid var(--cizgi2); padding: 7px 10px; line-height: 1.5 }
+
+/* Yapay Zeka - pass 2: "calisiyor" gostergesi ve baglam anahtari. */
+.ai-yaziyor {
+  display: flex; gap: 8px; align-items: center; padding: 6px 12px;
+  font-size: 11px; color: var(--soluk); border-top: 1px solid var(--cizgi2);
+}
+.ai-yaziyor .nk { display: inline-flex; gap: 3px }
+.ai-yaziyor .nk i {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--soluk);
+  animation: ainokta 1s infinite ease-in-out;
+}
+.ai-yaziyor .nk i:nth-child(2) { animation-delay: .15s }
+.ai-yaziyor .nk i:nth-child(3) { animation-delay: .3s }
+@keyframes ainokta { 0%, 80%, 100% { opacity: .25 } 40% { opacity: 1 } }
+.ai-baglam {
+  display: flex; align-items: center; padding: 0 8px; height: 30px; cursor: pointer;
+  border: 1px solid var(--cizgi); border-radius: 15px; font-size: 11px;
+  color: var(--soluk); background: var(--yuz);
+}
+.ai-baglam.on { border-color: var(--mor); color: var(--mor); background: var(--mor2); font-weight: 700 }
+
+/* Yapay Zeka - pass 3: kaynak rozetleri (kaynak tablo · listede ac · disa aktar). */
+.ai-kaynak { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px }
+.ai-kaynak .rz {
+  font-size: 10.5px; color: var(--soluk); background: var(--yuz2);
+  border: 1px solid var(--cizgi2); border-radius: 10px; padding: 1px 8px;
+  text-decoration: none;
+}
+.ai-kaynak .rz.bag { cursor: pointer; color: var(--mor); border-color: var(--cizgi) }
+.ai-kaynak .rz.bag:hover { background: var(--mor2) }
+
+/* Mesajlar - kunye kutusu (mockup "Sohbet Bilgisi"): buyuk avatar + ad +
+   unvan + mini dugmeler. Avatara tiklamak kunyeyi acar/kapatir. */
+.msj-kunye { text-align: center; padding: 10px 8px; border-bottom: 1px solid var(--cizgi2) }
+.msj-kunye-av {
+  width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 6px; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700; cursor: pointer;
+}
+.msj-kunye-av:hover { filter: brightness(1.08) }
+.msj-kunye .nm { font-weight: 700; font-size: 12.5px }
+.msj-kunye .mt { font-size: 11px }
+.tuslar { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; margin-top: 7px }
+.minibtn {
+  border: 1px solid var(--cizgi); border-radius: 3px; padding: 3px 8px; font-size: 11px;
+  background: linear-gradient(var(--dug1), var(--dug2)); color: var(--yazi);
+  cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+}
+.minibtn:hover { border-color: var(--dugkenar); background: linear-gradient(var(--dugh1), var(--dugh2)) }
+.minibtn.on { background: linear-gradient(#4d8fd6, var(--mor)); border-color: var(--mor); color: #fff; font-weight: 700 }
+.msj-av.kk { width: 22px; height: 22px; font-size: 9.5px }
+
+/* Cip seridine gomulu arac cubugu (kullanici: dugmeler cip hizasinda):
+   dugmeler serit yuksekligine gore kuculur, kendi golgesi/bosluğu olmaz. */
+.cipler > .arac-cubugu {
+  margin-left: auto; align-self: center; flex-wrap: nowrap; gap: 4px;
+  /* Ciplerle TAM AYNI HIZADA (kullanici): serit `align-items:center` oldugu
+     icin ek kaydirma gerekmiyor - dugme yuksekligi cip yuksekligine (22px)
+     esitlenince iki oge ayni cizgide oturuyor. */
+}
+.cipler > .arac-cubugu .d { height: 22px; padding: 0 10px; font-size: 11px; line-height: 1 }
+
+/* ============================================================ KATEGORILER ==
+   Iki bolmeli AGAC (345/346): alt kategoriler tiklaninca acilir, varsayilan
+   kapali. Grid degil - hiyerarsi duz listede ancak siralama dogruysa
+   goruluyordu. */
+.kat-agac {
+  border: 1px solid var(--cizgi); border-radius: var(--r); background: var(--yuz);
+  max-height: 60vh; overflow: auto; margin-top: 6px;
+}
+.kat-satir {
+  /* Satir SIK (kullanici: "satir yukseklikleri cok yuksek"): agacta bir
+     ekranda daha cok dal gorunsun - line-height acikca sabitlendi, yoksa
+     kart govdesinin genel satir araligi satiri 26px'e cikariyordu. */
+  display: flex; gap: 8px; align-items: center; padding: 1px 8px;
+  border-bottom: 1px solid var(--cizgi2); cursor: pointer;
+  font-size: 11.5px; line-height: 18px; height: 20px; white-space: nowrap;
+}
+.kat-satir:hover { background: var(--yuz2) }
+.kat-satir.on { background: var(--mor2) }
+.kat-satir .ok {
+  /* Ok kutusu SABIT: dolu (▸/▾) ve bos satirlarda ayni genislik - yoksa alt
+     kategorisi olmayan satirin adi ok kadar saga kayiyordu (kullanici).
+     flex: 0 0 14px + overflow: hidden -> karakter genisligi kutuyu buyutemez. */
+  flex: 0 0 14px; width: 14px; height: 14px; overflow: hidden;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--soluk); font-size: 10px; line-height: 1;
+}
+.kat-satir .ok.bos { visibility: hidden }
+.kat-satir .kod {
+  /* Alt kategoride kod uzun ("RAD-Kontrast-BT An. Kontrast") ve sarinca satir
+     iki katina cikiyordu - kod TEK SATIR, tasan kismi kirpilir; tam hali
+     satirin title'inda. */
+  color: var(--soluk); font-size: 10.5px; min-width: 64px; max-width: 190px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: none;
+}
+.kat-satir .ad {
+  font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  flex: 1; min-width: 0;
+}
+.kat-satir .sayi { margin-left: auto; font-size: 10.5px }
+.kat-satir .rozet { padding: 0 6px; font-size: 9.5px; line-height: 15px }
+
+/* Cip seridindeki kategori agaci combosu (hizmet listesi). */
+.kat-suzgec {
+  height: 22px; border: 1px solid var(--cizgi); border-radius: 11px;
+  background: var(--yuz); color: var(--yazi); font: inherit; font-size: 11.5px;
+  padding: 0 8px; max-width: 260px;
+}
+
+/* Liste + kategori agaci yan yana (kullanici: "hizmet listesi de kategori
+   agacina bagli acilir kapanir olsun"). Panel kapaliyken sarmalayici hic
+   sinif almaz - oteki listelerde duzen degismesin. */
+.kat-duzen { display: flex; gap: 12px; align-items: flex-start }
+.kat-duzen .kat-duzen-ic { flex: 1; min-width: 0 }
+.kat-panel {
+  width: 240px; flex: none; border: 1px solid var(--cizgi); border-radius: var(--r);
+  background: var(--yuz); overflow: hidden; margin-top: 6px;
+}
+.kat-panel-bas {
+  display: flex; gap: 6px; align-items: center; padding: 5px 8px; font-size: 11.5px;
+  background: var(--yuz2); border-bottom: 1px solid var(--cizgi);
+}
+.kat-panel-bas .minibtn { margin-left: auto; font-size: 10.5px; padding: 1px 6px }
+.kat-panel-agac { max-height: 62vh; overflow: auto }

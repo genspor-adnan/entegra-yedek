@@ -53,6 +53,16 @@ export const KASA_ARAC_MENUSU: Record<string, { kod: string; ad: string }[]> = {
 };
 
 export interface ListeTanimi {
+  /**
+   * Ciplerin sagina KATEGORI AGACI combosu koyar (kullanici): deger kategori
+   * TURUdur (1 stok / 2 hizmet, 346). Secilen dal ALT AGACIYLA birlikte suzer.
+   */
+  kategoriSuzgeci?: number;
+  /**
+   * Kategori suzgecinin SUZDUGU alan. Varsayilan 'kategori' (hizmet listesi);
+   * stok listesinde gorunen kolon YOL metni oldugu icin id kolonu verilir.
+   */
+  kategoriSuzgecAlani?: string;
   kaynak: string;
   baslik: string;
   yol: string;
@@ -144,6 +154,22 @@ const DURUM_CIPLERI: ListeTanimi['cipler'] = [
     menuGrup verilirse Kabuk.tsx'te ayni gruptaki ogeler "Cari" gibi acilir-kapanir bir
     ana menu altinda TOPLANIR. */
 export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: string; menuGrup?: string })[] = [
+  // ILETISIM & AI (341) — mockup Ekranlar/gentegre_data.js'teki ilk modul.
+  //   Grup sirasi bu dizideki ILK gorulme sirasindan geldigi icin en basta:
+  //   menude "Ana Sayfa"nin hemen altinda cikar. urunModu YOK - hem ERP hem
+  //   HBYS kurulumunda gorunur (kullanici: "tum modlar icin").
+  {
+    kaynak: 'mesajlar', rota: 'mesajlar', baslik: 'Mesajlar',
+    yol: 'İletişim & AI › Mesajlar', ozelSayfa: true,
+    menuGrup: 'İletişim & AI', menuAd: 'Mesajlar', ic: '💬',
+    yetkiKodu: 'mesaj', menuSira: 10,
+  },
+  {
+    kaynak: 'yapay-zeka', rota: 'yapay-zeka', baslik: 'Yapay Zeka',
+    yol: 'İletişim & AI › Yapay Zeka', ozelSayfa: true,
+    menuGrup: 'İletişim & AI', menuAd: 'Yapay Zeka', ic: '✨',
+    yetkiKodu: 'ai', menuSira: 20,
+  },
   {
     // RANDEVU kendi menu grubu (kullanici: "Randevu diye yeni menu olustur,
     //   Kayıt Kabul menusunun ust tarafina; icine Randevu ve Randevu Ayarlarini
@@ -410,10 +436,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     toplam: ['tutar'],
     gizliKolonlar: ['rol', 'pay', 'durum', 'tarafId', 'hakedisId', 'belgeSatirId',
                     'payYuzde'],
-    // Durum (330): taslak = gelir belgesi henüz kesilmemiş; kesin = tahakkuk/
-    //   fiş/faturaya dönüşmüş; onaylı = kilitli; ödendi = hakedişi ödenmiş.
+    // Durum (330/339): kesin = gelir belgesine (tahakkuk/fiş/fatura) dönüşmüş;
+    //   onaylı = kilitli; ödendi = hakedişi ödenmiş. "Taslak" (durum 1) ÇİPİ
+    //   YOK: 339'dan beri gelir belgesi olmadan prim satırı hiç üretilmiyor.
     cipler: [
-      { ad: 'Taslak', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
       { ad: 'Kesin',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
       { ad: 'Onaylı', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Ödendi', filtre: { alan: 'durum', op: 'esit', deger: 4 } },
@@ -616,10 +642,16 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'aday', menuSira: 10,
   },
   {
-    // KATEGORILER (270): stok VE hizmet ayni agaci kullanir; sinirsiz derinlik.
+    // KATEGORILER (270/345): stok VE hizmet ayni agaci kullanir (sinirsiz
+    //   derinlik) ama ekran IKI BOLMELI - solda stok, sagda hizmet
+    //   kategorileri; "ortak" tur iki tarafta da gorunur (ozelSayfa).
     kaynak: 'kategori', baslik: 'Kategoriler', yol: 'Yönetim › Kategoriler',
-    kartYolu: '/kategori', aksiyonEkrani: 'cari-liste',
-    menuGrup: 'Yönetim', menuAd: 'Kategoriler', ic: '🌳', yetkiKodu: 'stok',
+    ozelSayfa: true,
+    // Menude STOK & HIZMET grubunda, Hizmet Listesi'nin (20) hemen ardinda
+    //   (kullanici): kategori bu iki listenin siniflandirmasi - Yonetim
+    //   altinda ararken kimse bulamiyordu.
+    menuGrup: 'Stok & Hizmet', menuAd: 'Kategoriler', ic: '🌳', yetkiKodu: 'stok',
+    menuSira: 25,
   },
   {
     // KAMPANYALAR (268, kullanici: "ayarlara liste ve kart olarak ekle"):
@@ -1040,6 +1072,11 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Kullanici: "Stok altına Stok Listesi [taşı]" - tek ogeli grup, digerleriyle ayni desen.
     kaynak: 'stok', baslik: 'Stoklar', yol: 'Stok › Stok Karti', kartYolu: '/stok',
     aksiyonEkrani: 'stok-liste', cipler: DURUM_CIPLERI,
+    // Kategori KOD'un SOLUNDA (kullanici) - hizmet listesiyle ayni duzen.
+    kolonSirasi: ['kategori', 'kod', 'ad', 'kalan', 'anaBirim', 'durum'],
+    // Ciplerin sagina STOK kategori agaci (1 = stok, 346).
+    kategoriSuzgeci: 1,
+    kategoriSuzgecAlani: 'kategoriId',
     // Mockup'ta (stok_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
     //   Stok Durumu icin gercek tablo (stok_durum) var ama PK'si (stok_id,depo_id) -
     //   detay tablosu id kolonu varsayar, o yuzden bu da simdilik yer tutucu.
@@ -1057,6 +1094,12 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   generic GenForm ile acilir, aksiyonlar hizmet-liste Crud'undan gelir.
     kaynak: 'hizmet', baslik: 'Hizmetler', yol: 'Stok › Hizmetler', kartYolu: '/hizmet',
     aksiyonEkrani: 'hizmet-liste', cipler: DURUM_CIPLERI,
+    // Ciplerin sagina KATEGORI AGACI combosu (kullanici): secilen dal alt
+    //   agaciyla birlikte suzer.
+    kategoriSuzgeci: 2,
+    // Kategori KOD'un SOLUNDA (kullanici): listede once "hangi grup", sonra
+    //   kod ve ad okunuyor.
+    kolonSirasi: ['kategoriAdi', 'kod', 'ad', 'durum'],
     menuGrup: 'Stok & Hizmet', menuAd: 'Hizmet Listesi', ic: '🛠️', yetkiKodu: 'hizmet',
     menuSira: 20,
   },
@@ -1066,9 +1109,11 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   satirlari yeniden yazar; MANUEL girilen satirlar korunur.
     kaynak: 'fiyat-listesi', baslik: 'Fiyat Listeleri', yol: 'Yönetim › Fiyat Listeleri',
     kartYolu: '/fiyat-listesi', aksiyonEkrani: 'fiyat-listesi-liste', cipler: DURUM_CIPLERI,
-    // Kullanici: fiyat listeleri Yonetim altinda (tanim ekrani, gunluk stok isi degil).
-    menuGrup: 'Yönetim', menuAd: 'Fiyat Listeleri', ic: '🏷️', yetkiKodu: 'fiyat_listesi',
-    menuSira: 950,
+    // Menude STOK & HIZMET grubunda, KATEGORILER'in (25) hemen ardinda
+    //   (kullanici): fiyat listesi de stok/hizmetin tanim ekrani - Yonetim
+    //   altinda ararken bulunmuyordu.
+    menuGrup: 'Stok & Hizmet', menuAd: 'Fiyat Listeleri', ic: '🏷️',
+    yetkiKodu: 'fiyat_listesi', menuSira: 27,
   },
   {
     // Liste SATIRLARI ayri ekran: bir listenin binlerce satiri kart icinde
@@ -1314,16 +1359,6 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ozelSayfa: true,
     menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Satış Belgeleri', menuSira: 4,
     ic: '🧾', yetkiKodu: 'belge',
-  },
-  {
-    // KAYIT KABUL ayarlari (336): Genel + Entegrasyon. Entegrasyon sekmesi
-    //   dis servis hesaplarini (SKRS, e-Nabiz, MEDULA, UTS...) tek yerde
-    //   toplar - kullanici karari.
-    kaynak: 'kayit-kabul-ayarlar', baslik: 'Kayıt Kabul Ayarları',
-    yol: 'Yonetim › Ayarlar › Kayıt Kabul',
-    ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Kayıt Kabul', menuSira: 7,
-    ic: '🏥', yetkiKodu: 'entegrasyon', urunModu: 2,
   },
   {
     // IK ayarlari (kullanici): Departman + Pozisyon kod listeleri duzenlenir.

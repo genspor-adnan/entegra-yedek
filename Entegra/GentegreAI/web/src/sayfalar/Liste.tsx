@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { c, cm } from '../dil/ceviri';
 import { guvenli, mesaj, metinSor, onay } from '../bilesenler/mesaj';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -23,6 +23,8 @@ import { KonsultasyonCevapModali }
 import { CihazKapatmaModali } from '../bilesenler/radyoloji/CihazKapatmaModali';
 import { SarfOnayModali } from '../bilesenler/radyoloji/SarfOnayModali';
 import { TarafArama } from '../bilesenler/TarafArama';
+import { KategoriSuzgeci } from '../bilesenler/KategoriSuzgeci';
+import { KategoriAgacPaneli } from '../bilesenler/KategoriAgacPaneli';
 import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
 import { UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
 import { UtsGenelBildirimModali, type UtsBildirimTuru }
@@ -90,6 +92,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // Kart kaydedilince (ekleme ya da duzenleme) grid'i yeniden yukletmek icin - GenForm
   //   onKaydedildi'de bir arttirilir, GenGrid bu degisimi izleyip yukle() cagirir.
   const [yenile, setYenile] = useState(0);
+  /** Kategori suzgeci (kullanici): secilen dal + alt agaci. */
+  const [kategoriDal, setKategoriDal] = useState<{ id: number; agac: number[] } | null>(null);
+  /** Sol kategori AGAC paneli acik mi (kullanici: "acilir kapanir olsun"). */
+  const [kategoriPaneli, setKategoriPaneli] = useState(false);
   /**
    * RADYOLOJI ISTEM ACMA (304): listeden acilinca once HASTA secilir
    * (istem hastaya aittir), sonra tetkik modali gelir.
@@ -265,6 +271,16 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
    * Randevu suzgecleri (251) gride ve takvime AYNI kosulu verir: ust seritte
    * ne seciliyse alttaki takvim de onu gosterir - iki ayri suzgec kafa karistirir.
    */
+  /** Kategori secimi sabit filtreye AND'lenir - cip ve arama ile birlikte. */
+  const kategoriliFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
+    if (!kategoriDal || kategoriDal.agac.length === 0) return temel;
+    const kosul: Kosul = {
+      alan: tanim.kategoriSuzgecAlani ?? 'kategori',
+      op: 'icinde', deger: kategoriDal.agac,
+    };
+    return temel ? { op: 'and', kosullar: [temel, kosul] } : kosul;
+  }, [kategoriDal, tanim.kategoriSuzgecAlani]);
+
   const randevuFiltresi = useMemo<Kosul | undefined>(() => {
     if (tanim.kaynak !== 'randevu') return sabitFiltre;
     const kosullar: Kosul[] = [];
@@ -1366,6 +1382,19 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
       />
     ) : (
     <>
+    {/* KATEGORI AGACI PANELI (kullanici): acikken listenin SOLUNDA durur ve
+        secilen dal listeyi suzer. Kapali varsayilan - her listede yer
+        kaplamasin. */}
+    <div className={tanim.kategoriSuzgeci && kategoriPaneli ? 'kat-duzen' : undefined}>
+      {tanim.kategoriSuzgeci && kategoriPaneli && (
+        <KategoriAgacPaneli
+          tur={tanim.kategoriSuzgeci}
+          secili={kategoriDal?.id ?? null}
+          sayacAlani={tanim.kategoriSuzgeci === 1 ? 'stokSayisi' : 'hizmetSayisi'}
+          onSec={(id, agac) => setKategoriDal(id === null ? null : { id, agac })}
+        />
+      )}
+      <div className="kat-duzen-ic">
     <GenGrid
       // key: kaynak degisince (baska liste ekranina gecince) GenGrid TAMAMEN yeniden
       //   kurulsun - Route ayni tree konumunda kaldigi icin React bilesen orneğini
@@ -1378,7 +1407,7 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
       yol={tanim.yol}
       toplam={tanim.toplam}
       cipler={tanim.cipler}
-      sabitFiltre={randevuFiltresi}
+      sabitFiltre={kategoriliFiltre(randevuFiltresi)}
       aksiyonEkrani={tanim.aksiyonEkrani}
       ebelgeMenusu={tanim.ebelgeMenusu}
       gizliKolonlar={tanim.gizliKolonlar}
@@ -1411,7 +1440,25 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
       onCipSecildi={setCipIndeks}
       onCipRota={r => git(`/${r}`)}
       onSecimDegisti={s => { setSeciliSatir(s); if (s) setSonSeciliId(Number(s.id)) }}
-      cipSonu={tanim.kaynak === 'randevu' ? (
+      cipSonu={tanim.kategoriSuzgeci ? (
+        // Ciplerin SAGINDA: agac panelini acan dugme + (panel kapaliyken)
+        //   ayni suzgecin combo hali. Panel acikken combo cizilmez - ayni
+        //   secim iki yerde durursa hangisinin gecerli oldugu belirsizlesir.
+        <>
+          <button className={kategoriPaneli ? 'on' : ''}
+                  title="Kategori ağacını aç / kapat"
+                  onClick={() => setKategoriPaneli(a => !a)}>
+            🌳 Kategoriler
+          </button>
+          {!kategoriPaneli && (
+            <KategoriSuzgeci
+              tur={tanim.kategoriSuzgeci}
+              deger={kategoriDal?.id ?? null}
+              onDegis={(id, agac) => setKategoriDal(id === null ? null : { id, agac })}
+            />
+          )}
+        </>
+      ) : tanim.kaynak === 'randevu' ? (
         // Bolum/hekim suzgeci TARIH ARALIGININ SAGINDA (kullanici) - grid ve
         //   altindaki takvim ayni secimi kullanir.
         <>
@@ -1502,6 +1549,8 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         ),
       } : undefined}
     />
+      </div>
+    </div>
     </>
     )}
 

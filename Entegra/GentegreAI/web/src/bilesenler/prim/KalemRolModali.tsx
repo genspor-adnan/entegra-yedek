@@ -167,7 +167,9 @@ export function KalemRolModali({ belgeSatirId, kalemAdi, onKapat, onTamam }: {
                   <td className="hiza-sag">{para.format(p.deger)}</td>
                   <td className="hiza-sag"><b>{para.format(p.tutar)}</b></td>
                   <td>
-                    {/* Durum (330): 1 taslak · 2 kesin · 3 onaylı · 4 ödendi. */}
+                    {/* Durum (330/339): 2 kesin · 3 onaylı · 4 ödendi.
+                        1 (taslak) yalnız eski kayıtlarda olabilir - 339'dan
+                        beri gelir belgesi olmadan prim üretilmiyor. */}
                     <span className={`rozet ${p.durum >= 3 ? 'ok' : 'gri'}`}>
                       {p.durum === 1 ? 'Taslak' : p.durum === 2 ? 'Kesin'
                        : p.durum === 3 ? 'Onaylı' : 'Ödendi'}
@@ -180,8 +182,8 @@ export function KalemRolModali({ belgeSatirId, kalemAdi, onKapat, onTamam }: {
           <div className="not">
             <b>Onaylı</b> ve <b>ödenmiş</b> satırlar kilitlidir - rol değişse de
             yeniden hesaplanmaz; fark sonraki döneme düzeltme olarak girer.
-            <b> Taslak</b> satır, kalem gelir belgesine dönüşünce kendiliğinden
-            kesinleşir.
+            Kalem hâlâ başvuru / sipariş ise prim <b>hiç doğmaz</b>; satış
+            tahakkuku, fişi ya da faturasına dönüşünce kendiliğinden üretilir.
           </div>
         </div>
       )}

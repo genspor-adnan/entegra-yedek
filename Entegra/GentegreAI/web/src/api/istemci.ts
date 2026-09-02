@@ -705,6 +705,82 @@ export const api = {
   primAcikHakedis: () =>
     istek<Record<string, unknown>[]>('/api/prim/acik'),
 
+  // -------------------------------------------------------- YAPAY ZEKA ---
+  // Mockup: Ekranlar/ai_asistan.html (341/343). Model bagli degilken de
+  //   izinli fonksiyonlar (hazir komutlar) calisir.
+  aiSohbetler: () =>
+    istek<{ sohbetler: Record<string, unknown>[];
+            araclar: { kod: string; ad: string; aciklama: string;
+                       yetkiKodu: string; yazar: number }[];
+            bekleyenTaslak: number }>('/api/ai/sohbetler'),
+
+  aiSohbetAc: () => gonder<{ id: number }>('/api/ai/sohbet', {}),
+
+  aiSohbet: (id: number) =>
+    istek<{ sohbet: Record<string, unknown>;
+            mesajlar: Record<string, unknown>[];
+            taslaklar: Record<string, unknown>[];
+            gunluk: Record<string, unknown>[] }>(`/api/ai/${id}`),
+
+  aiSor: (sohbetId: number, metin: string, arac?: string,
+          parametre?: Record<string, unknown>, baglam?: Record<string, unknown>) =>
+    gonder<{ mesajId: number; kayit: number }>(`/api/ai/${sohbetId}/sor`,
+      { metin, arac: arac ?? null, parametre: parametre ?? null, baglam: baglam ?? null }),
+
+  aiTaslak: (taslakId: number, iptal: boolean) =>
+    gonder<{ durum: number; hedefModul: string; hedefId: number | null }>(
+      '/api/ai/taslak', { taslakId, iptal }),
+
+  aiGeriBildirim: (mesajId: number, deger: number) =>
+    gonder<{ tamam: boolean }>('/api/ai/geribildirim', { mesajId, deger }),
+
+  // ---------------------------------------------------------- MESAJLAR ---
+  // Mockup: Ekranlar/umesajlar.html (341/342). Gercek zamanli iletim yok;
+  //   ekran kisa arayla tazeliyor.
+  /** Kullanicinin sohbet listesi + okunmamis sayaclari. */
+  mesajSohbetler: (filtre: string, ara: string) =>
+    istek<{ sohbetler: Record<string, unknown>[];
+            ozet: { okunmamisMesaj: number; okunmamisSohbet: number;
+                    bugunMesaj: number; bugunEk: number; bugunKayit: number } | null }>(
+      `/api/mesaj/sohbetler?filtre=${encodeURIComponent(filtre)}`
+      + `&ara=${encodeURIComponent(ara)}`),
+
+  /** Sohbetin mesajlari; `sonrasi` verilirse yalniz yeni gelenler. */
+  mesajAkis: (sohbetId: number, sonrasi = 0) =>
+    istek<{ sohbet: Record<string, unknown> | null; mesajlar: Record<string, unknown>[] }>(
+      `/api/mesaj/${sohbetId}/mesajlar?sonrasi=${sonrasi}`),
+
+  mesajGonder: (sohbetId: number, metin: string, yanitId?: number,
+                kayit?: { modul: string; kayitId: number; ozet?: string }) =>
+    gonder<{ id: number; tarih: string }>(`/api/mesaj/${sohbetId}/gonder`,
+      { metin, yanitId: yanitId ?? null, kayit: kayit ?? null }),
+
+  mesajOkundu: (sohbetId: number) =>
+    gonder<{ tamam: boolean }>(`/api/mesaj/${sohbetId}/okundu`, {}),
+
+  mesajBayrak: (sohbetId: number,
+                govde: { favori?: number; sabit?: number; sessiz?: number; arsiv?: number }) =>
+    gonder<{ tamam: boolean }>(`/api/mesaj/${sohbetId}/bayrak`, govde),
+
+  mesajBilgi: (sohbetId: number) =>
+    istek<{ kunye: Record<string, unknown> | null;
+            uyeler: Record<string, unknown>[]; ekler: Record<string, unknown>[];
+            kayitlar: Record<string, unknown>[]; sabitler: Record<string, unknown>[] }>(
+      `/api/mesaj/${sohbetId}/bilgi`),
+
+  mesajSabit: (mesajId: number, geriAl: boolean) =>
+    gonder<{ tamam: boolean }>(`/api/mesaj/mesaj/${mesajId}/sabit?geriAl=${geriAl}`, {}),
+
+  mesajSil: (mesajId: number) =>
+    istek<{ tamam: boolean }>(`/api/mesaj/mesaj/${mesajId}`, { method: 'DELETE' }),
+
+  mesajKisiler: (ara: string) =>
+    istek<{ kisiler: { id: number; ad: string; gorev: string }[] }>(
+      `/api/mesaj/kisiler?ara=${encodeURIComponent(ara)}`),
+
+  mesajSohbetAc: (govde: { tip: number; ad?: string; uyeler: number[] }) =>
+    gonder<{ id: number; mevcutMu: boolean }>('/api/mesaj/sohbet', govde),
+
   /** Entegrasyon hesabinin baglantisini sinar (336). */
   entegrasyonSina: (id: number) =>
     gonder<{ basarili: boolean; mesaj: string }>(`/api/entegrasyon/${id}/sina`, {}),

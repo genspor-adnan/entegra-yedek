@@ -421,13 +421,21 @@ public static partial class KartKatalogu
         Tablo: "public.kategori",
         LogTabloId: 916,
         SubeKolonu: "sube_id",
-        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["aktif"] = (short)1 },
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+            { ["aktif"] = (short)1, ["tur"] = (short)1 },
         Alanlar: new KartAlani[]
         {
             new("id",     "id",     "sayi",  Yazilabilir: false),
             new("kod",    "kod",    "metin", EnFazlaUzunluk: 20, Baslik: "Kod", Grup: "Kimlik"),
             new("ad",     "ad",     "metin", Zorunlu: true, EnFazlaUzunluk: 100,
                 Baslik: "Kategori", Grup: "Kimlik"),
+            // TUR (345/346) ARKA PLAN ALANI (kullanici: "karta girince tur
+            //   gorunmesine gerek yok, girilen gride gore belli"): kart hangi
+            //   bolmeden acildiysa deger oradan gelir ve kayitla birlikte
+            //   gonderilir - ekranda yer kaplamasi gereksiz, yanlis secim
+            //   kapisi da acardi.
+            new("tur",    "tur",    "kod",   SabitKodlar: KategoriTurKodlari,
+                Baslik: "Tür", Grup: "Kimlik", Gizli: true),
             // Bos ise KOK kategori; secilirse altina gecer (sinirsiz derinlik).
             new("ustId",  "ust_id", "kod",   KodTablosu: "public.v_kategori_lookup",
                 Baslik: "Üst Kategori", Grup: "Kimlik"),

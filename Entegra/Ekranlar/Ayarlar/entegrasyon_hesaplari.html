@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entegrasyon Hesapları — Ayarlar › Genel — Mockup (Gentegre AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1180px;margin:0 auto 16px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;
+    box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);
+    align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pasif{opacity:.45}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .ara{margin-left:auto;border:1px solid var(--line);border-radius:3px;background:#fff;height:24px;
+    padding:0 8px;font-size:11.5px;color:var(--muted);display:flex;align-items:center;min-width:190px}
+  .cipler{display:flex;gap:6px;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .cip{border:1px solid var(--line);background:#fff;border-radius:12px;padding:2px 10px;font-size:11px;color:var(--muted)}
+  .cip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.sel td{background:var(--sel)}
+  tr:hover td{background:#f2f7fd}
+  .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line)}
+  .rz.test{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .rz.canli{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.kod{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.pasif{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted)}
+  /* ---- kart ---- */
+  .kart{max-width:920px}
+  .idstrip{display:grid;grid-template-columns:1.3fr 1.3fr 1fr 1fr .7fr .6fr;gap:10px;
+    padding:9px 12px;background:#f7fafc;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .fld label.req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 7px;
+    font-size:12px;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.ro{background:#f4f6f9;color:var(--muted)}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .chk{display:flex;align-items:center;gap:7px;font-size:11.5px;height:26px}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg)}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .iz{display:grid;grid-template-columns:repeat(4,1fr);gap:9px 12px;padding:10px}
+  .iz .tam{grid-column:1 / -1}
+  .iz .yari{grid-column:span 2}
+  .uyari{margin:0 12px 12px;border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;
+    padding:7px 9px;font-size:11px;color:#8a6218;line-height:1.55}
+  .zincir{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11.5px;
+    padding:8px 10px;background:#fff;border:1px solid var(--line2);border-radius:3px;margin:0 12px 12px;line-height:1.6}
+  .zincir .kutu{border:1px solid var(--line);border-radius:3px;padding:3px 8px;background:#fbfcfd}
+  .zincir .kutu b{color:#2c4a6b}
+  .zincir .ok{color:#8fa3b6;font-weight:bold}
+  .not{padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.6;background:#fff;
+    border-top:1px solid var(--line2)}
+  .not b{color:#3d6294}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;
+    border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+</style>
+</head>
+<body>
+
+<!-- ==================================================== LİSTE (sekme içi) === -->
+<div class="win">
+  <div class="title"><span class="dot"></span> Genel Ayarlar
+    <span class="sp">Yönetim › Ayarlar › Genel · yetki: entegrasyon · db/336-338</span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab">Genel</div>
+    <div class="tab">Güvenlik</div>
+    <div class="tab active">Entegrasyon</div>
+    <div class="tab">Belge No</div>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">🔌 Bağlantıyı Sına</div>
+    <div class="btn pasif">🔄 SKRS Listelerini Güncelle</div>
+    <div class="ara">🔎 Ara… (kod, ad, kullanıcı)</div>
+  </div>
+
+  <div class="cipler">
+    <div class="cip on">Tümü</div>
+    <div class="cip">Aktif</div>
+    <div class="cip">Test</div>
+    <div class="cip">Canlı</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Entegrasyon</th><th>Ad</th><th>Şube</th><th>Baz Şube</th>
+          <th class="orta">Ortam</th><th>Kullanıcı</th><th class="orta">Şifre</th>
+          <th>Uygulama Kodu</th><th>Entegratör</th><th class="orta">Aktif</th>
+          <th>Son Kullanım</th><th>Son Sonuç</th></tr>
+    </thead>
+    <tbody>
+      <tr class="sel">
+        <td><span class="rz kod">EBELGE</span> e-Fatura / e-Belge Entegratörü</td>
+        <td>e-Fatura (test) - Merkez</td><td>Merkez</td><td class="sonuk">—</td>
+        <td class="orta"><span class="rz test">TEST</span></td><td>izibiz-test2</td>
+        <td class="orta">✔</td><td class="sonuk">—</td><td>İzibiz</td>
+        <td class="orta">✔</td><td class="sonuk">02.09.2026 16:41</td>
+        <td class="sonuk">Bağlantı doğrulandı</td>
+      </tr>
+      <tr>
+        <td><span class="rz kod">EBELGE</span> e-Fatura / e-Belge Entegratörü</td>
+        <td>e-Fatura - Merkez</td><td>Merkez</td><td class="sonuk">—</td>
+        <td class="orta"><span class="rz canli">CANLI</span></td><td>genyazilim</td>
+        <td class="orta sonuk">—</td><td class="sonuk">—</td><td>İzibiz</td>
+        <td class="orta"><span class="rz pasif">Pasif</span></td><td class="sonuk">—</td><td class="sonuk">—</td>
+      </tr>
+      <tr>
+        <td><span class="rz kod">EBELGE</span> e-Fatura / e-Belge Entegratörü</td>
+        <td>e-Fatura - Ankara Şube</td><td>Ankara Şube</td><td><b>Merkez</b></td>
+        <td class="orta"><span class="rz test">TEST</span></td><td class="sonuk">— (baz şubeden)</td>
+        <td class="orta sonuk">—</td><td class="sonuk">—</td><td class="sonuk">—</td>
+        <td class="orta">✔</td><td class="sonuk">—</td><td class="sonuk">—</td>
+      </tr>
+      <tr>
+        <td><span class="rz kod">UTS</span> ÜTS (Ürün Takip Sistemi)</td>
+        <td>ÜTS - Merkez</td><td>Merkez</td><td class="sonuk">—</td>
+        <td class="orta"><span class="rz canli">CANLI</span></td><td class="sonuk">—</td>
+        <td class="orta">✔</td><td class="sonuk">—</td><td class="sonuk">—</td>
+        <td class="orta">✔</td><td class="sonuk">01.09.2026 09:12</td>
+        <td class="sonuk">Bildirim gönderildi</td>
+      </tr>
+      <tr>
+        <td><span class="rz kod">UTS</span> ÜTS (Ürün Takip Sistemi)</td>
+        <td>ÜTS (test) - Merkez</td><td>Merkez</td><td class="sonuk">—</td>
+        <td class="orta"><span class="rz test">TEST</span></td><td class="sonuk">—</td>
+        <td class="orta sonuk">—</td><td class="sonuk">—</td><td class="sonuk">—</td>
+        <td class="orta"><span class="rz pasif">Pasif</span></td><td class="sonuk">—</td><td class="sonuk">—</td>
+      </tr>
+      <tr>
+        <td><span class="rz kod">SKRS</span> SKRS / Sağlık.NET Kod Sunucusu</td>
+        <td>SKRS Kod Sunucusu</td><td class="sonuk">Tümü</td><td class="sonuk">—</td>
+        <td class="orta"><span class="rz test">TEST</span></td><td>kurum_kullanici</td>
+        <td class="orta">✔</td><td>SAGLIKNET</td><td class="sonuk">—</td>
+        <td class="orta">✔</td><td class="sonuk">02.09.2026 11:05</td>
+        <td class="sonuk">14 kod listesi güncellendi</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="statusbar">
+    <span>6 kayıt</span><span>Seçili: e-Fatura (test) - Merkez</span>
+    <span>Sıra: e-Fatura → ÜTS → SKRS → e-Nabız → MEDULA → SMS</span>
+  </div>
+
+  <div class="not">
+    <b>Şifre değeri listede gösterilmez</b> — yalnız "dolu mu" işareti; gerçek değer
+    yalnız kartı açan yetkili kullanıcıya gider. <b>Şube boş = Tümü</b> (kurum geneli
+    hesap). <b>Baz Şube</b> dolu ise o şubenin işlemleri baz alınan şubenin hesabıyla
+    (kullanıcı/şifre/token) gider; satırın kendi kimlik alanları boş kalabilir.
+  </div>
+
+  <div class="maprow">
+    <span><b>Tablo:</b> entegrasyon_hesap</span>
+    <span><b>Benzersiz:</b> kod + şube + ortam</span>
+    <span><b>Uçlar:</b> /api/entegrasyon/{id}/sina · /skrs-senkron</span>
+    <span><b>Göç:</b> 336 (kuruluş) · 337 (ÜTS + e-Fatura taşındı) · 338 (baz şube)</span>
+  </div>
+</div>
+
+<!-- ============================================================== KART ===== -->
+<div class="win kart">
+  <div class="title"><span class="dot"></span> Entegrasyon Hesabı
+    <span class="sp">EBELGE · Merkez · TEST · sürüm 18118</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn">✖ Kapat</div>
+    <div class="sepv"></div>
+    <div class="btn">🔌 Bağlantıyı Sına</div>
+    <div class="btn">🗑 Sil</div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label class="req">Entegrasyon</label>
+      <div class="inp combo">e-Fatura / e-Belge Entegratörü</div></div>
+    <div class="fld"><label>Ad</label><div class="inp">e-Fatura (test) - Merkez</div></div>
+    <div class="fld"><label>Şube (boş = tümü)</label><div class="inp combo">Merkez</div></div>
+    <div class="fld"><label>Baz Alınacak Şube</label><div class="inp combo">Kendisi</div></div>
+    <div class="fld"><label>Test Ortamı</label><div class="chk"><input type="checkbox" checked> Test</div></div>
+    <div class="fld"><label>Aktif</label><div class="chk"><input type="checkbox" checked> Aktif</div></div>
+  </div>
+
+  <div class="grp">
+    <h4>Hesap <span class="mini">şifre yalnız bu kartta görünür</span></h4>
+    <div class="iz">
+      <div class="fld"><label>Kullanıcı Adı</label><div class="inp">izibiz-test2</div></div>
+      <div class="fld"><label>Şifre / Token</label><div class="inp">••••••••</div></div>
+      <div class="fld"><label>Uygulama Kodu</label><div class="inp"></div></div>
+      <div class="fld"><label>Kurum / Tesis Kodu</label><div class="inp"></div></div>
+      <div class="fld yari"><label>Entegratör (e-Fatura)</label><div class="inp combo">İzibiz</div></div>
+      <div class="fld yari sonuk" style="align-self:end;font-size:10.5px;padding-bottom:5px">
+        Entegratör yalnız e-Fatura satırlarında doldurulur; ÜTS / SKRS satırlarında boş kalır.
+      </div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <h4>Adres ve Durum</h4>
+    <div class="iz">
+      <div class="fld yari"><label>Canlı Adres</label>
+        <div class="inp ro">boş → entegratör kataloğundaki varsayılan (api.izibiz.com.tr)</div></div>
+      <div class="fld yari"><label>Test Adresi</label>
+        <div class="inp ro">boş → apitest.izibiz.com.tr</div></div>
+      <div class="fld tam"><label>Açıklama</label>
+        <div class="inp">e-Belge test hesabı şube kartından taşındı (337).</div></div>
+      <div class="fld"><label>Son Kullanım</label><div class="inp ro">02.09.2026 16:41</div></div>
+      <div class="fld"><label>Son Sonuç</label><div class="inp ro">Bağlantı doğrulandı</div></div>
+    </div>
+  </div>
+
+  <div class="uyari">
+    <b>Test ve canlı AYRI SATIRDIR.</b> Kurum canlıya geçerken test hesabını silmez —
+    test satırının "Aktif" kutusunu kaldırır, canlı satırınkini işaretler. Aynı
+    entegrasyon + şube + ortam üçlüsünden ikinci satır açılamaz.
+  </div>
+
+  <div class="zincir">
+    <span class="sonuk">Hesap çözümü (fn_entegrasyon_hesap_id):</span>
+    <span class="kutu"><b>1.</b> şubenin kendi satırı</span><span class="ok">→</span>
+    <span class="kutu"><b>2.</b> baz alınan şubenin satırı</span><span class="ok">→</span>
+    <span class="kutu"><b>3.</b> kurum geneli satır (şube boş)</span><span class="ok">→</span>
+    <span class="kutu"><b>4.</b> varsayılan şube <span class="sonuk">(yalnız ÜTS)</span></span>
+  </div>
+
+  <div class="not">
+    <b>e-Fatura'da varsayılan şubeye düşülmez:</b> "merkezin kimliğiyle gönder" kararı
+    şube kartındaki <b>Baz Alınacak Şube</b> (gönderici kimliği) ile verilir; hesap
+    kararı da bu satırda açıkça yazılır. Sessiz düşüş, kendi VKN'siyle gönderen şubeyi
+    başkasının entegratör hesabına bağlardı.<br>
+    <b>Şubede kalanlar:</b> gönderici kimliği (unvan/VKN/alias/Mersis), mükellefiyet
+    bayrakları, varsayılan seri. Burada tutulan yalnız <b>hesap</b> bilgisidir.
+  </div>
+
+  <div class="maprow">
+    <span><b>Kimlik:</b> kod · ad · sube_id · baz_sube_id · test_mi · aktif</span>
+    <span><b>Hesap:</b> kullanici_adi · sifre (text) · uygulama_kodu · kurum_kodu · entegrator_id</span>
+    <span><b>Adres:</b> url · test_url · aciklama · son_kullanim · son_sonuc · ayarlar (jsonb)</span>
+  </div>
+</div>
+
+<!-- ==================================================== SERVİS NOTLARI ===== -->
+<div class="win">
+  <div class="title"><span class="dot"></span> Servise göre alan kullanımı
+    <span class="sp">aynı kart, farklı anlamlar</span>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Entegrasyon</th><th>Kullanıcı Adı</th><th>Şifre / Token</th>
+          <th>Uygulama Kodu</th><th>Kurum / Tesis Kodu</th><th>Entegratör</th><th>Aksiyon</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="rz kod">EBELGE</span> e-Fatura</td><td>entegratör kullanıcısı</td>
+          <td>entegratör şifresi</td><td class="sonuk">—</td><td class="sonuk">—</td>
+          <td>İzibiz / Uyumsoft…</td><td>Bağlantıyı Sına</td></tr>
+      <tr><td><span class="rz kod">UTS</span> ÜTS</td><td class="sonuk">—</td>
+          <td>sistem token'ı (e-imza ile üretilir, uzun)</td><td class="sonuk">—</td>
+          <td>ÜTS kurum no (KUN)</td><td class="sonuk">—</td><td>Bağlantıyı Sına</td></tr>
+      <tr><td><span class="rz kod">SKRS</span> SKRS / Sağlık.NET</td><td>Sağlık.NET kullanıcısı</td>
+          <td>Sağlık.NET şifresi</td><td>uygulama kodu</td><td class="sonuk">—</td>
+          <td class="sonuk">—</td><td>SKRS Listelerini Güncelle</td></tr>
+      <tr><td><span class="rz kod">MEDULA</span> MEDULA</td><td>tesis kullanıcısı</td>
+          <td>tesis şifresi</td><td class="sonuk">—</td><td>tesis kodu</td>
+          <td class="sonuk">—</td><td class="sonuk">(planlanıyor)</td></tr>
+      <tr><td><span class="rz kod">ENABIZ</span> e-Nabız</td><td>—</td><td>servis anahtarı</td>
+          <td class="sonuk">—</td><td>tesis kodu</td><td class="sonuk">—</td>
+          <td class="sonuk">(planlanıyor)</td></tr>
+      <tr><td><span class="rz kod">SMS</span> SMS Sağlayıcı</td><td>API kullanıcısı</td>
+          <td>API şifresi</td><td>başlık (originator)</td><td class="sonuk">—</td>
+          <td class="sonuk">—</td><td class="sonuk">(planlanıyor)</td></tr>
+    </tbody>
+  </table>
+  <div class="not">
+    Servise özgü ek alanlar <b>ayarlar (jsonb)</b> içinde tutulur — her yeni
+    entegrasyon için şema değişikliği gerekmez. Kart üzerinde açılır liste gerektiren
+    tek istisna entegratördür; o yüzden tipli kolon (338).
+  </div>
+</div>
+
+</body>
+</html>

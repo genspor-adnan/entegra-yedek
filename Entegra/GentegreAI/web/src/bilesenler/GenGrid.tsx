@@ -93,8 +93,23 @@ interface Props {
   /** ☰/🕓/⭐ (Tum/Son/Sik) gorunum ikonlarini gizle (ör. ÜTS listeleri -
       kart acma aliskanligi olmayan ekranlarda anlamsizlar). */
   aramaGorunumGizli?: boolean;
+  /** Liste / Grup / Analiz gorunum cipleri cizilmesin (kullanici): Grup ve
+      Analiz backend'de yok - birkac satirlik ayar listesinde "yakinda" yer
+      tutucu gostermek gurultu. */
+  gorunumSecimGizli?: boolean;
+  /** "Aksiyon Seç" kombosu cizilmesin: ayni aksiyonlar zaten arac cubugunda
+      dugme olarak duruyor (kullanici) - ikinci bir yol karisiklik. */
+  aksiyonKomboGizli?: boolean;
+  /** Seritteki hizli ARAMA kutusu cizilmesin (kullanici): birkac satirlik
+      ayar listesinde arama kutusu yer kapliyor, cipler zaten yetiyor.
+      `seritGizli`den farki: cipler ve toplu aksiyon serit olarak KALIR. */
+  aramaGizli?: boolean;
   /** Gomulu gridin arac cubugu saga degil SOLA yaslanir (gridin sol ust kosesi). */
   aracCubuguSol?: boolean;
+  /** Arac cubugu AYRI SATIR degil, cip seridinin SAGINDA cizilir (kullanici:
+      "Yeni/Duzenle dugmeleri Tumu/Aktif cipleri hizasinda olsun"). Az satirli
+      ayar listelerinde iki ayri serit bosuna yer kapliyordu. */
+  aracCubuguSeritte?: boolean;
   /**
    * DOVIZSIZ EKRANDA GIZLENECEK kolonlar (ekstreler): yuklenen satirlarin
    * hicbirinde doviz hareketi yoksa (kur her satirda 1) bu kolonlar cizilmez -
@@ -126,7 +141,8 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           aksiyonEkrani, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
                           dovizsizGizle,
                           gizliKolonlar, kolonSirasi, altSecenekler, tarihAlani, tarihVarsayilan,
-                          aramaGorunumGizli,
+                          aramaGorunumGizli, gorunumSecimGizli, aksiyonKomboGizli, aramaGizli,
+                          aracCubuguSeritte,
                           seciliBaslangicId, cipSonu, cipBaslangic, altPanel, ekGorunum,
                           onCipSecildi, onCipRota, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik }: Props) {
@@ -568,7 +584,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
           </div>
         </div>
       )}
-      {gomulu && aksiyonEkrani && (
+      {gomulu && aksiyonEkrani && !aracCubuguSeritte && (
         <div style={aracCubuguSol
           // Sola yaslidayken sekme cubuguna yapismasin: biraz asagi ve iceri.
           ? { display: 'flex', justifyContent: 'flex-start',
@@ -580,6 +596,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
 
       {!seritGizli && (
       <div className="cipler">
+        {!aramaGizli && (
         <div className="ara" style={{
           maxWidth: 225, margin: 0, height: 23, borderRadius: 12,
           background: 'var(--yuz)', color: 'var(--yazi)', border: '1px solid var(--cizgi)',
@@ -591,6 +608,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
             onChange={e => aramaDegisti(e.target.value)}
           />
         </div>
+        )}
 
         {ekGorunum && (
           <button className={`cip ${gorunum === 'ek' ? 'on' : ''}`}
@@ -598,7 +616,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
             {ekGorunum.ik} {ekGorunum.ad}
           </button>
         )}
-        {GORUNUMLER.map(g => (
+        {!gorunumSecimGizli && GORUNUMLER.map(g => (
           <button
             key={g.v}
             className={`cip ${gorunum === g.v ? 'on' : ''}`}
@@ -608,8 +626,21 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
           </button>
         ))}
 
+        {/* ARAC CUBUGU cip seridinin dogrudan cocugu (kullanici: "Tümü/Aktif
+            cipleriyle ayni hizada, saga yanasik"). Ayri bir sarmalayici span
+            icinde dururken iki ic ice flex + iki `margin-left:auto` cakisip
+            dugmeleri kaydiriyordu. */}
+        {aracCubuguSeritte && aksiyonEkrani && (
+          <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir}
+                      altSecenekler={toolbarAltSecenekler} />
+        )}
+
+        {/* Sag blok YALNIZ icerigi varken cizilir: bos bir `margin-left:auto`
+            span, arac cubuguyla bosluğu paylasip onu tam saga yanasmaktan
+            alikoyuyordu. */}
+        {((aksiyonEkrani && !aksiyonKomboGizli && aksiyonKombo.length > 0) || icerikAlani) && (
         <span className="cipsag">
-          {aksiyonEkrani && aksiyonKombo.length > 0 && (
+          {aksiyonEkrani && !aksiyonKomboGizli && aksiyonKombo.length > 0 && (
             <>
               <select
                 className="aksk"
@@ -645,6 +676,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
             </button>
           )}
         </span>
+        )}
       </div>
       )}
 

@@ -21,7 +21,15 @@ public sealed record AksiyonTanimi(
     string? AksiyonYetkisi = null,
     /// <summary>Kayit secilmeden calismaz (sag tus / liste secimi).</summary>
     bool KayitGerekir = false,
-    int Sira = 0);
+    int Sira = 0,
+    /// <summary>
+    /// URUN MODU SUZGECI (342/345): 0 tum kurulumlar, 1 yalniz Gentegre AI
+    /// (ERP), 2 yalniz GenoTIP AI (HBYS). Saglik entegrasyonlarina ozgu
+    /// aksiyonlar (SKRS senkronu) ERP kurulumunda ARAC CUBUGUNDA HIC
+    /// gorunmesin diye var - pasif gosterip "neden calismiyor" sorusu
+    /// urettirmek yerine listeden dusuruluyor.
+    /// </summary>
+    int UrunModu = 0);
 
 /// <summary>Ekran basina aksiyon listesi.</summary>
 public static class AksiyonKatalogu
@@ -193,6 +201,18 @@ public static class AksiyonKatalogu
             },
 
             // ENTEGRASYON HESAPLARI (336): Ayarlar > Kayit Kabul > Entegrasyon.
+            // KATEGORILER (345): iki bolmeli ekran - her iki gridin de kendi
+            //   arac cubugu var, aksiyonlar ortak.
+            ["kategori-liste"] = new AksiyonTanimi[]
+            {
+                new("kategori.yeni",    "＋ Yeni", "stok",
+                    Islem: Islem.Ekle, Sira: 10),
+                new("kategori.duzenle", "✎ Düzenle", "stok",
+                    Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("kategori.sil",     "🗑 Sil", "stok",
+                    Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+            },
+
             ["entegrasyon-liste"] = new AksiyonTanimi[]
             {
                 new("entegrasyon.yeni",     "＋ Yeni", "entegrasyon",
@@ -206,7 +226,8 @@ public static class AksiyonKatalogu
                     Islem: Islem.Gor, KayitGerekir: true, Sira: 40),
                 // SKRS: kod listelerini servisten cekip yerel listeleri tazeler.
                 new("entegrasyon.skrs-senkron", "⟳ SKRS Listelerini Güncelle",
-                    "entegrasyon", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50),
+                    "entegrasyon", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50,
+                    UrunModu: 2),
             },
 
             // HAKEDIS SATIRLARI (324): satirlar tahsilattan DOGAR - elle

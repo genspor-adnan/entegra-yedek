@@ -95,6 +95,27 @@ public static partial class KartKatalogu
                     Baslik: "Stok"),
                 new("hizmetId",  "hizmet_id", "kod",  KodTablosu: "public.v_hizmet_lookup",
                     Baslik: "Hizmet"),
+                // KATEGORI ve KOD (kullanici: "tip sutunu saginda kategori
+                //   (alt/ust) ve kod"): satirin kaleminden TURETILIR - stok mu
+                //   hizmet mi olduguna bakip ilgili karttan okur. Yazilamaz:
+                //   kalem degisince kendiliginden degisir, kopyalanmaz.
+                new("kategoriYolu",
+                    "(select case when u.id is null then k.ad " +
+                    "              else u.ad || ' > ' || k.ad end " +
+                    "   from public.kategori k " +
+                    "   left join public.kategori u on u.id = k.ust_id " +
+                    "  where k.id = coalesce(" +
+                    "        (select s2.kategori from public.stok s2 " +
+                    "          where s2.id = fiyat_listesi_satir.stok_id), " +
+                    "        (select h2.kategori from public.hizmet h2 " +
+                    "          where h2.id = fiyat_listesi_satir.hizmet_id)))",
+                    "metin", Yazilabilir: false, Baslik: "Kategori"),
+                new("kalemKodu",
+                    "coalesce((select s3.kod from public.stok s3 " +
+                    "           where s3.id = fiyat_listesi_satir.stok_id), " +
+                    "         (select h3.kod from public.hizmet h3 " +
+                    "           where h3.id = fiyat_listesi_satir.hizmet_id), '')",
+                    "metin", Yazilabilir: false, Baslik: "Kod"),
                 new("fiyat",     "fiyat",     "para", Zorunlu: true, Baslik: "Fiyat"),
                 // KATILIM PAYI (291): SUT bedeliyle AYNI SATIRDA durur - islem
                 //   secilince ikisi birlikte gelsin. 0 ise listenin varsayilani.

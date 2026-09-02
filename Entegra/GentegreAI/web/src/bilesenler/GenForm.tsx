@@ -12,6 +12,7 @@ import { PaketSekmesi } from './PaketSekmesi';
 import { KartGrupSekmesi } from './kart/KartGrupSekmesi';
 import { alanCizici, type Deger } from './kartAlanCizim';
 import { kartDogrula } from './kartDogrulama';
+import { guvenli, mesaj as bilgiMesaji, onay as onaySor } from './mesaj';
 import {
   degisenAlanlar as degisenAlanlarHesapla, kartDegistiMi,
 } from './kartDegisim';
@@ -884,6 +885,28 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
                       onClick={() => alanDegistir('durum', '4')}>⊘ İptal</button>
             </>
           )}
+          {/* ENTEGRASYON HESABI (336-340) - mockup'taki kart arac cubugu:
+              hesap kaydedildikten sonra AYNI ekrandan sinanabilsin, kullanici
+              listeye donmek zorunda kalmasin. SKRS senkronu yalniz SKRS
+              hesabinda anlamli. */}
+          {kaynak === 'entegrasyon-hesap' && !yeniMi && (
+            <>
+              <button className="d" onClick={() => void guvenli(async () => {
+                const y = await api.entegrasyonSina(Number(id));
+                bilgiMesaji(y.mesaj);
+              })}>🔌 Bağlantıyı Sına</button>
+              {/* SKRS senkronu YALNIZ HBYS kurulumunda (345): ERP'de eski bir
+                  SKRS satiri duruyor olsa da dugme gosterilmez. */}
+              {String(deger.kod ?? '') === 'SKRS' && kullanici?.urunModu === 2 && (
+                <button className="d" onClick={() => void guvenli(async () => {
+                  if (!await onaySor('SKRS kod listeleri servisten çekilip yerel '
+                                     + 'listeler güncellenecek. Devam edilsin mi?')) return;
+                  const y = await api.skrsListeSenkron(Number(id));
+                  bilgiMesaji(y.mesaj);
+                })}>⟳ SKRS Listelerini Güncelle</button>
+              )}
+            </>
+          )}
           <button className="d kapat-dugmesi" onClick={kapatIstendi}>Kapat</button>
           {/* Cari'ye ozel: Musteri/Tedarikci rolleri hizlı erisim icin arac cubuguna,
               Kaydet/Sil ile ayni satira, saga yanasik olarak da tasindi (Roller sekmesindeki
@@ -1013,27 +1036,6 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
         />
       )}
 
-      {/* Şube > ÜTS: uts_hesap 1:1 uzanti (223) - grid degil TEK kayit formu.
-          Bir subenin bir ÜTS hesabi olur; token buraya kullanici yapistirir. */}
-      {aktif?.tur === 'detay' && kaynak === 'sube' && aktif.detay.ad === 'uts' && (
-        <TekKayit
-          meta={aktif.detay}
-          durum={detaylar[aktif.detay.ad] ?? bosDetay()}
-          saltOkunur={salt || aktif.detay.saltOkunur}
-          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
-          // SOLDA canli hesap, SAGDA test cercevesi (kullanici).
-          gruplar={[
-            { baslik: 'ÜTS Hesabı', alanlar: ['aktif', 'kurumNo', 'token'] },
-            { baslik: 'ÜTS Hesabı Test',
-              alanlar: ['testOrtami', 'testKurumNo', 'testToken'] },
-          ]}
-          // Canli/test SECIMDIR (kullanici): biri isaretlenince digeri kalkar.
-          dislar={{ aktif: ['testOrtami'], testOrtami: ['aktif'] }}
-          // Baz sube IKI cerceveyi de yonetir - kutularin USTUNDE durur.
-          ustAlanlar={['bazSubeId']}
-        />
-      )}
-
       {/* Stok > Paket: icerik satiri stok arama penceresinden gelir (grid salt
           gorunum) - baslik/cerceve yok, sekmenin adi zaten "Paket". */}
       {aktif?.tur === 'detay' && kaynak === 'stok' && aktif.detay.ad === 'paket' && (
@@ -1047,7 +1049,6 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
 
       {aktif?.tur === 'detay' && !(personelGibiKart && aktif.detay.ad === 'ozluk')
         && !(kaynak === 'stok' && (aktif.detay.ad === 'uts' || aktif.detay.ad === 'paket'))
-        && !(kaynak === 'sube' && aktif.detay.ad === 'uts')
         // Dis hekim "Hekim Bilgisi" TekKayit ile cizildi (305) - generic grid
         //   ayrica cizilirse ayni detay iki kez gorunur.
         && !(kaynak === 'dis-hekim' && aktif.detay.ad === 'hekim')

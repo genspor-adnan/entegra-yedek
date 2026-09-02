@@ -413,19 +413,27 @@ public static partial class KaynakKatalogu
         Ad: "kategori",
         YetkiKodu: "stok",
         Kaynak: "public.kategori k",
-        VarsayilanSirala: "coalesce((select u.ad from public.kategori u " +
-                          "           where u.id = k.ust_id), k.ad) asc, " +
-                          "k.ust_id nulls first, k.ad asc",
+        // Sira KOD (kullanici): agac ekrani zaten hiyerarsiyi kendisi kuruyor,
+        //   liste ise kod sirasinda okunuyor.
+        VarsayilanSirala: "k.kod asc, k.ad asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",       "k.id",     "sayi",  "Id", Varsayilan: false),
             new("kod",      "k.kod",    "metin", "Kod", Genislik: 110),
-            new("ad",       "case when k.ust_id is null then k.ad else '— ' || k.ad end",
-                            "metin", "Kategori"),
+            // Ad HAM: girintiyi agac ekrani veriyor (345/346) - metne '— '
+            //   eklemek agacta cift girinti gosteriyordu.
+            new("ad",       "k.ad", "metin", "Kategori"),
             new("ustAdi",   "coalesce((select u.ad from public.kategori u " +
                             "           where u.id = k.ust_id), '')",
                             "metin", "Üst Kategori", Filtrelenebilir: false),
             new("ustId",    "k.ust_id", "sayi",  "Üst Id", Varsayilan: false),
+            // TUR (345): 1 stok / 2 hizmet / 3 ortak - ekran iki gride bunun
+            //   uzerinden bolunuyor, kolon da rozet olarak gorunur.
+            new("tur",      "k.tur",    "sayi",  "Tür Kodu", Varsayilan: false),
+            new("turAdi",
+                "case k.tur when 2 then 'Hizmet' else 'Stok' end",
+                            "metin", "Tür", Hizalama: "orta", Bicim: "rozet",
+                            Genislik: 80, Filtrelenebilir: false),
             new("stokSayisi", "(select count(*) from public.stok s where s.kategori = k.id)",
                             "sayi", "Stok", Hizalama: "sag", Filtrelenebilir: false),
             new("hizmetSayisi", "(select count(*) from public.hizmet h where h.kategori = k.id)",

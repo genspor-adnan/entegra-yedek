@@ -30,8 +30,19 @@ public static partial class KaynakKatalogu
             new("ad",        "s.ad",        "metin", "Stok Adi"),
             // Kategori ve birim ADIYLA gosterilir: kolonlar "kod" tipindeydi ve
             //   listede kod ad'a cevrilmedigi icin ekranda ham id goruluyordu.
-            new("kategori",  "(select k.ad from public.kategori k where k.id = s.kategori)",
+            // KATEGORI YOLU (kullanici: "kategori icinde alt ust bilgileri de
+            //   bulunsun"): yalniz yaprak adi hangi dalda oldugunu
+            //   soylemiyordu - ust dal varsa "Dental El Aletleri > Frezeler".
+            new("kategori",
+                "(select case when u.id is null then k.ad " +
+                "              else u.ad || ' > ' || k.ad end " +
+                "   from public.kategori k " +
+                "   left join public.kategori u on u.id = k.ust_id " +
+                "  where k.id = s.kategori)",
                                             "metin", "Kategori"),
+            // Kategori KIMLIGI (gizli): agac suzgeci id listesiyle suzuyor -
+            //   gorunen kolon YOL metni oldugu icin onunla suzulemez.
+            new("kategoriId", "s.kategori", "sayi",  "Kategori Id", Varsayilan: false),
             new("marka",     "s.marka",     "kod",   "Marka",    Varsayilan: false),
             new("model",     "s.model",     "metin", "Model",    Varsayilan: false),
             new("kdv",       "s.kdv",       "sayi",  "KDV %",    Hizalama: "sag"),
@@ -70,12 +81,19 @@ public static partial class KaynakKatalogu
             new("paket",     "s.paket",     "mantik","Paket",     Hizalama: "orta", Varsayilan: false),
             // Fiyat: kural TEK YERDE - fn_stok_kart_fiyat (128). Alis/satis ayri
             //   satirdir, -1 "girilmemis" demektir, en dusuk fiyat_adi esastir.
+            // FIYAT ve DOVIZ stok listesinde GORUNMEZ (kullanici, hizmet
+            //   listesiyle ayni karar): fiyat artik fiyat listelerinden
+            //   geliyor. Kolonlar KALDIRILMADI - kalem/arama penceresi ve kur
+            //   cevrimi bu alanlari okumaya devam ediyor, isteyen uc nokta
+            //   menusunden geri acar.
             new("fiyat",       StokFiyatSql(satis: true),
                                             "para",  "Fiyat",    Hizalama: "sag", Bicim: "#,##0.00",
-                                            Siralanabilir: false, Filtrelenebilir: false),
+                                            Siralanabilir: false, Filtrelenebilir: false,
+                                            Varsayilan: false),
             new("fiyatDovizi", $"public.fn_doviz_iso({StokFiyatSql(satis: true, doviz: true)})",
                                             "metin", "Döviz",    Hizalama: "orta",
-                                            Siralanabilir: false, Filtrelenebilir: false),
+                                            Siralanabilir: false, Filtrelenebilir: false,
+                                            Varsayilan: false),
             new("alisFiyat",   StokFiyatSql(satis: false),
                                             "para",  "Alış Fiyatı", Hizalama: "sag", Bicim: "#,##0.00",
                                             Siralanabilir: false, Filtrelenebilir: false, Varsayilan: false),
@@ -313,25 +331,56 @@ public static partial class KaynakKatalogu
             new("ad",      "h.ad",       "metin", "Hizmet Adi"),
             // Eski `grubu` kolonu hic kullanilmamis (hepsi 0) - yerine 269'da
             //   eklenen kategori gosteriliyor.
-            new("kategoriAdi", "coalesce((select k.ad from public.kategori k " +
-                               "           where k.id = h.kategori), '')",
+            // KATEGORI YOLU (350/351, kullanici: "hizmet listesine de yansit"):
+            //   yalniz yaprak adi ("BT", "LAB") hangi dalda oldugunu
+            //   soylemiyordu - ust dal varsa "Radyoloji > BT" olarak gosterilir.
+            new("kategoriAdi",
+                "coalesce((select case when u.id is null then k.ad " +
+                "                      else u.ad || ' > ' || k.ad end " +
+                "            from public.kategori k " +
+                "            left join public.kategori u on u.id = k.ust_id " +
+                "           where k.id = h.kategori), '')",
                                "metin", "Kategori", Filtrelenebilir: false),
             new("kategori", "h.kategori", "sayi", "Kategori Id", Varsayilan: false),
-            new("kdv",     "h.kdv",      "sayi",  "KDV %",      Hizalama: "sag"),
+            // KDV ve BIRIM listede GORUNMEZ (kullanici): hizmet listesinde
+            //   kategori/kod/ad okunuyor, oran ve birim kartin ve kalem
+            //   penceresinin isi. Kolonlar kaldirilmadi - arama/kalem
+            //   pencereleri bu alanlari okumaya devam ediyor.
+            new("kdv",     "h.kdv",      "sayi",  "KDV %",      Hizalama: "sag",
+                                            Varsayilan: false),
             // Hizmette satis/alis ayrimi yok - tek fiyat listesi.
+            // FIYAT ve DOVIZ hizmet listesinde GORUNMEZ (kullanici): fiyat artik
+            //   fiyat listelerinden geliyor, listedeki "ilk fiyat" hangi listeden
+            //   geldigi belirsiz bir sayiydi. Kolonlar KALDIRILMADI, yalniz
+            //   varsayilan gorunumden cikarildi: kalem/arama penceresi (kur
+            //   cevrimi dahil) bu alanlari okumaya devam ediyor.
             new("fiyat",
                 "(select f.fiyat from public.hizmet_fiyat f " +
                 " where f.hizmet_id = h.id and f.fiyat > 0 order by f.fiyat_adi limit 1)",
                                             "para",  "Fiyat",      Hizalama: "sag", Bicim: "#,##0.00",
-                                            Siralanabilir: false, Filtrelenebilir: false),
+                                            Siralanabilir: false, Filtrelenebilir: false,
+                                            Varsayilan: false),
             // ISO'ya cevrilir: fiyat tablolarinda kod SEMBOL olabiliyor ('$', '€'),
             //   doviz_kur ise ISO tutuyor - kalem penceresi kuru bu kodla ariyor.
             new("fiyatDovizi",
                 "public.fn_doviz_iso((select f.doviz_cinsi from public.hizmet_fiyat f " +
                 " where f.hizmet_id = h.id and f.fiyat > 0 order by f.fiyat_adi limit 1))",
                                             "metin", "Döviz",      Hizalama: "orta",
-                                            Siralanabilir: false, Filtrelenebilir: false),
-            new("birim",   "h.birim",    "kod",   "Birim",      Hizalama: "orta"),
+                                            Siralanabilir: false, Filtrelenebilir: false,
+                                            Varsayilan: false),
+            // BIRIM ADIYLA (kullanici: "birimi de kod disinda anlasilir yap"):
+            //   kolon "kod" tipindeyken listede 51 / 57 gibi ham sayi cikiyordu.
+            //   Stok listesindeki desenin aynisi (anaBirim).
+            new("birim",
+                "(select kd.ad from public.kod_deger kd" +
+                "   join public.kod_liste kl on kl.id = kd.liste_id" +
+                "  where kl.kod = 'stok.ana_birim' and kd.deger = h.birim)",
+                                            "metin", "Birim",      Hizalama: "orta",
+                                            Filtrelenebilir: false, Varsayilan: false),
+            // Birim KODU gizli: kalem/arama penceresi satirdan birimi
+            //   yazabilsin - ad ile kod eslestirmek kirilgan olurdu.
+            new("birimKod", "h.birim",   "sayi",  "Birim Kodu", Hizalama: "orta",
+                                            Varsayilan: false),
             new("muhKodu", "h.muh_kodu", "metin", "Muh. Kodu",  Varsayilan: false),
             new("durum",   "h.durum",    "kod",   "Durum",      Hizalama: "orta")
         });

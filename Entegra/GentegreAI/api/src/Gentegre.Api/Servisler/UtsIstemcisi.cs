@@ -37,7 +37,7 @@ public static class UtsIstemcisi
         await using var o = await komut.ExecuteReaderAsync(iptal);
         if (!await o.ReadAsync(iptal))
             throw GentegreHatasi.IsKurali(
-                "ÜTS hesabı tanımlı değil. Yönetim › Firma Bilgileri › şube kartı › ÜTS.");
+                "ÜTS hesabı tanımlı değil. Yönetim › Ayarlar › Genel › Entegrasyon (337).");
 
         var hesap = new UtsHesabi(
             o.IsDBNull(0) ? "" : o.GetString(0),

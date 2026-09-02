@@ -120,6 +120,7 @@ public static class KartUclari
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Ekle);
 
             var degerler = Degerler(tanim, istek.Kart, baglam, yeni: true);
+            await EntegrasyonModKuraliAsync(tanim, degerler, depo, iptal);
             var yeniId = await depo.EkleAsync(tanim, degerler, istek.Detaylar,
                 baglam.Yazma, iptal);
 
@@ -226,7 +227,16 @@ public static class KartUclari
             var listeSecenekleri = listeGorevleri.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
             var ustHaritalari = ustGorevleri.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
 
-            KartAlanMeta MetaOptions(KartAlani a) => Meta(a, tanim, baglam,
+            // ENTEGRASYON KOD LISTESI URUN MODUNA GORE (342): ERP kurulumunda
+            //   SKRS / e-Nabiz / MEDULA secilemez - kullanici secip kaydetse
+            //   bile calisacak bir servis yok, listede durmasi gurultu.
+            var entegrasyonKodlari = tanim.Ad == "entegrasyon-hesap"
+                ? KartKatalogu.EntegrasyonKodlariMod(await depo.UrunModuAsync(iptal))
+                : null;
+
+            KartAlanMeta MetaOptions(KartAlani a) => a.Ad == "kod" && entegrasyonKodlari is not null
+                ? Meta(a, tanim, baglam, entegrasyonKodlari)
+                : Meta(a, tanim, baglam,
                 a.KodTablosu is { } t ? tabloSecenekleri[t]
                 : a.KodListesi is { } l ? listeSecenekleri[l]
                 : null,
@@ -303,6 +313,33 @@ public static class KartUclari
             alan.BagliAlan,
             alan.AramaKaynagi,
             ustHaritasi);
+
+
+    /// <summary>
+    /// SAGLIK ENTEGRASYONU KURALI (342): SKRS / e-Nabiz / MEDULA hesabi yalniz
+    /// GenoTIP AI (HBYS) kurulumunda ACILABILIR. Liste zaten suzuluyor; kural
+    /// burada da var cunku istek dogrudan API'ye gelebilir ve calisacak servisi
+    /// olmayan hesap kaydi kullaniciyi "neden gonderilmiyor" diye aratirdi.
+    ///
+    /// YALNIZ YENI KAYITTA: modu sonradan ERP'ye cevrilmis (ya da HBYS'den
+    /// klonlanmis) kurulumda MEVCUT saglik hesabinin duzenlenmesi/pasife
+    /// alinmasi engellenmemeli - kullaniciyi kendi kaydini temizleyemez
+    /// duruma dusururdu.
+    /// </summary>
+    private static async Task EntegrasyonModKuraliAsync(
+        KartTanimi tanim, IDictionary<string, object?> degerler,
+        KartDeposu depo, CancellationToken iptal)
+    {
+        if (tanim.Ad != "entegrasyon-hesap") return;
+        if (!degerler.TryGetValue("kod", out var kod)) return;
+
+        var metin = kod?.ToString() ?? "";
+        if (!KartKatalogu.SaglikEntegrasyonlari.Contains(metin)) return;
+
+        if (await depo.UrunModuAsync(iptal) != 2)
+            throw GentegreHatasi.IsKurali(
+                $"{metin} hesabı yalnız GenoTIP AI (sağlık) kurulumunda tanımlanır.");
+    }
 
     private static KartTanimi KartBul(string ad)
         => KartKatalogu.Bul(ad) ?? throw GentegreHatasi.Bulunamadi($"Bilinmeyen kart: {ad}");

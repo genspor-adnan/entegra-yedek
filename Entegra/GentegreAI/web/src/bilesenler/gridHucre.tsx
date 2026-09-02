@@ -80,13 +80,20 @@ const ROZET_SINIFI: Record<string, string> = {
   // Randevu durumlari (243, kullanici: "randevu listesi durum rozet olsun").
   'Planlandı': 'bilgi', 'Geldi': 'ok', 'Gelmedi': 'hata',
   'Bilinmiyor': 'hata',
+  // Entegrasyon hesaplari (336-340): ortam TEST sari / CANLI yesil - yanlis
+  //   ortamda gonderim en pahali hata, listede bir bakista ayrilsin.
+  //   Sube rozetlerinde "Tümü" (kurum geneli hesap) notr gri.
+  'TEST': 'uyari', 'CANLI': 'ok', 'Tümü': 'gri', 'Kendisi': 'gri',
 };
 
 export function rozetHucre(deger: unknown, kolon: KolonMeta) {
   if (kolon.bicim !== 'rozet') return null;
   const metin = String(deger ?? '').trim();
   if (metin === '') return null;
-  return <span className={`rozet ${ROZET_SINIFI[metin] ?? ''}`}>{metin}</span>;
+  // Sozlukte olmayan metin (sube adi gibi degisken deger) NOTR GRI rozet:
+  //   sinifsiz rozet yalniz "kalin yazi" gibi gorunuyordu, kolon rozet
+  //   istendigi halde duz metinden ayirt edilemiyordu (kullanici).
+  return <span className={`rozet ${ROZET_SINIFI[metin] ?? 'gri'}`}>{metin}</span>;
 }
 
 /** "İçerik" penceresi (ör. islem-log > bilgi) - JSON ise okunakli bicimde, degilse duz metin. */

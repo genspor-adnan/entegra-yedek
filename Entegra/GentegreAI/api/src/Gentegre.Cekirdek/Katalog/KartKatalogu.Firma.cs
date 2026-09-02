@@ -141,24 +141,11 @@ public static partial class KartKatalogu
             new("ebelgeKimlik", "ebelge_kimlik", "kod", KodListesi: "sube.ebelge_kimlik",
                 Baslik: "Gönderici Kimliği", Grup: "e-Belge", AltGrup: "Gönderici",
                 Gizli: true),
-            // MUKELLEF HESABI (171): entegrator baglantisi mukellefe aittir -
-            //   ayri VKN'li sube ayri kullanici/sifre ile baglanir. Onceden firma
-            //   geneli ayardaydi, cok mukellefli kurulum mumkun degildi.
-            new("entegratorId",  "entegrator_id", "kod",
-                KodTablosu: "public.v_ebelge_entegrator_lookup",
-                Baslik: "Entegratör", Grup: "e-Belge", AltGrup: "Mükellef Hesabı"),
-            new("entegratorKullanici", "entegrator_kullanici", "metin", EnFazlaUzunluk: 120,
-                Baslik: "Kullanıcı", Grup: "e-Belge", AltGrup: "Mükellef Hesabı"),
-            new("entegratorSifre",     "entegrator_sifre",     "metin", EnFazlaUzunluk: 200,
-                Baslik: "Şifre", Grup: "e-Belge", AltGrup: "Mükellef Hesabı"),
-            // Test ortami SUBE BAZLI: bir mukellef canliya gecmisken yeni acilan
-            //   sube hala testte olabilir.
-            new("testOrtami",    "test_ortami",    "mantik",
-                Baslik: "Test Ortamı", Grup: "e-Belge", AltGrup: "Test Ortamı"),
-            new("testKullanici", "test_kullanici", "metin", EnFazlaUzunluk: 120,
-                Baslik: "Test Kullanıcısı", Grup: "e-Belge", AltGrup: "Test Ortamı"),
-            new("testSifre",     "test_sifre",     "metin", EnFazlaUzunluk: 200,
-                Baslik: "Test Şifresi", Grup: "e-Belge", AltGrup: "Test Ortamı"),
+            // MUKELLEF HESABI (171) BURADAN KALKTI (337): entegrator
+            //   kullanici/sifre ve test ortami artik Yonetim > Ayarlar > Genel >
+            //   Entegrasyon ekraninda (entegrasyon_hesap kod = EBELGE, sube +
+            //   ortam basina bir satir). Subede KIMLIK kalir: gonderici,
+            //   mukellefiyet, alias, seri.
 
             new("efaturaAlias",      "efatura_alias",       "metin", EnFazlaUzunluk: 500,
                 Baslik: "e-Fatura Gönderici Etiketi", Grup: "e-Belge", AltGrup: "Gönderici"),
@@ -270,36 +257,11 @@ public static partial class KartKatalogu
         //   ait olanlari gosterir ve yenisini buradan acmayi saglar.
         Detaylar: new[]
         {
-            // ÜTS hesabi (223) - sube bazli (kullanici: "e-fatura gibi hem
-            //   merkez hem subeye ozel"): subenin kaydi yoksa fn_uts_hesap
-            //   varsayilan subenin (merkez) hesabina duser. Tek satirlik form
-            //   (stok_uts deseni). TOKEN e-imza ile ÜTS arayuzunde uretilir ve
-            //   buraya kullanici yapistirir - koda/loga asla yazilmaz.
-            new DetayTanimi("uts", "public.uts_hesap", "sube_id", new KartAlani[]
-            {
-                // 'id' = sube_id (tablonun kendi kimligi yok, 1:1): okuma bu
-                //   alani satira koymazsa guncelleme "id yok" diye eklemeye
-                //   doner ve PK cakisir.
-                new("id",          "sube_id",       "sayi",  Yazilabilir: false),
-                new("aktif",       "aktif",         "mantik",
-                    Baslik: "ÜTS Hesabı Aktif"),
-                // 0 = Kendisi (227): dolu ise bildirimler o subenin hesabiyla.
-                new("bazSubeId",   "baz_sube_id",   "kod",
-                    KodTablosu: "public.v_sube_baz_lookup",
-                    Baslik: "Baz Alınacak Şube"),
-                new("testOrtami",  "test_ortami",   "mantik",
-                    Baslik: "Test Ortamı"),
-                new("kurumNo",     "kurum_no",      "metin", EnFazlaUzunluk: 30,
-                    Baslik: "Kurum No (canlı)"),
-                new("token",       "token",         "metin", EnFazlaUzunluk: 4000,
-                    Baslik: "Sistem Token'ı (canlı)"),
-                new("testKurumNo", "test_kurum_no", "metin", EnFazlaUzunluk: 30,
-                    Baslik: "Test Kurum No"),
-                new("testToken",   "test_token",    "metin", EnFazlaUzunluk: 4000,
-                    Baslik: "Test Token'ı")
-            // uts_hesap'in kendi 'id'si YOK - PK dogrudan sube_id (1:1).
-            }, IdKolonu: "sube_id", Sirala: "sube_id", SubeKolonu: null,
-               LogTabloId: 930, Baslik: "ÜTS"),
+            // ÜTS hesabi (223) BURADAN KALKTI (337): kurum no + token artik
+            //   Yonetim > Ayarlar > Genel > Entegrasyon ekraninda
+            //   (entegrasyon_hesap kod = UTS, sube + ortam basina bir satir).
+            //   Sube kartinda ayri bir kimlik sekmesi tutmanin gerekcesi
+            //   kalmadi - ayni is uc ekranda uc ayri duzenle yapiliyordu.
 
             new DetayTanimi(
                 Ad: "depolar",

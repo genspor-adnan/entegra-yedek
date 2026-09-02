@@ -6,7 +6,6 @@ import { BelgeKarti } from './sayfalar/BelgeKarti';
 import { KasaIslemKarti } from './sayfalar/KasaIslemKarti';
 import { Liste, LISTELER } from './sayfalar/Liste';
 import { StokAyarlar } from './sayfalar/StokAyarlar';
-import { KayitKabulAyarlar } from './sayfalar/KayitKabulAyarlar';
 import { KasaAyarlar } from './sayfalar/KasaAyarlar';
 import { IKAyarlar } from './sayfalar/IKAyarlar';
 import { RandevuAyarlar } from './sayfalar/RandevuAyarlar';
@@ -14,6 +13,9 @@ import { DepartmanGorev } from './sayfalar/DepartmanGorev';
 import { FirmaBilgileri } from './sayfalar/FirmaBilgileri';
 import { MesajKatmani } from './bilesenler/MesajKatmani';
 import { GenelAyarlar } from './sayfalar/GenelAyarlar';
+import { Mesajlar } from './sayfalar/Mesajlar';
+import { Kategoriler } from './sayfalar/Kategoriler';
+import { YapayZeka } from './sayfalar/YapayZeka';
 import { UtsSorgu } from './sayfalar/UtsSorgu';
 import { RadyolojiPanosu } from './sayfalar/RadyolojiPanosu';
 import { RadyolojiRapor } from './sayfalar/RadyolojiRapor';
@@ -73,12 +75,16 @@ function Yollar() {
             giris sonrasi yine ana sayfa aciliyordu (kullanici). */}
         {yetki('panel') && <Route path="/panel" element={<Panel />} />}
 
+        {/* İletişim & AI (341): menude Ana Sayfa'nin hemen altinda, her iki
+            urun modunda. Ekranlar simdilik kapsam sayfasi. */}
+        {yetki('mesaj') && <Route path="/mesajlar" element={<Mesajlar />} />}
+        {yetki('ai') && <Route path="/yapay-zeka" element={<YapayZeka />} />}
+
         {/* Ayar ekranlari liste degil (ozelSayfa) - rotalari burada. */}
         {yetki('ayar') && <Route path="/genel-ayarlar" element={<GenelAyarlar />} />}
         {yetki('stok') && <Route path="/stok-ayarlar" element={<StokAyarlar />} />}
-        {yetki('entegrasyon') && (
-          <Route path="/kayit-kabul-ayarlar" element={<KayitKabulAyarlar />} />
-        )}
+        {/* Kategoriler iki bolmeli ozel ekran (345) - duz liste degil. */}
+        {yetki('stok') && <Route path="/kategori" element={<Kategoriler />} />}
         {yetki('kasa_islem') && <Route path="/kasa-ayarlar" element={<KasaAyarlar />} />}
         {yetki('personel') && <Route path="/ik-ayarlar" element={<IKAyarlar />} />}
         {yetki('randevu') && <Route path="/randevu-ayarlar" element={<RandevuAyarlar />} />}

@@ -87,13 +87,38 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> EntegrasyonKodlari =
         new()
         {
+            // Sira kullanici istegi (337): e-Fatura en ustte.
+            ["EBELGE"] = "e-Fatura / e-Belge Entegratörü",
+            ["UTS"]    = "ÜTS (Ürün Takip Sistemi)",
             ["SKRS"]   = "SKRS / Sağlık.NET Kod Sunucusu",
             ["ENABIZ"] = "e-Nabız",
             ["MEDULA"] = "MEDULA (SGK)",
-            ["UTS"]    = "ÜTS (Ürün Takip Sistemi)",
-            ["EBELGE"] = "e-Belge Entegratörü",
             ["SMS"]    = "SMS Sağlayıcı",
         };
+
+    /// <summary>
+    /// SAGLIK entegrasyonlari (342): yalniz GenoTIP AI (HBYS, urun modu 2)
+    /// kurulumunda anlamli - ERP kurulumunda hesap secim listesinde
+    /// GORUNMEZLER (kullanici). Kod tarafinda tek dogruluk kaynagi burasi:
+    /// hem kart metasi hem kaydetme kurali bunu okur.
+    /// </summary>
+    public static readonly IReadOnlySet<string> SaglikEntegrasyonlari =
+        new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "SKRS", "ENABIZ", "MEDULA" };
+
+    /// <summary>Urun moduna gore gecerli entegrasyon kodlari (342).</summary>
+    public static IReadOnlyDictionary<string, string> EntegrasyonKodlariMod(int urunModu)
+        => urunModu == 2
+            ? EntegrasyonKodlari
+            : EntegrasyonKodlari.Where(k => !SaglikEntegrasyonlari.Contains(k.Key))
+                                .ToDictionary(k => k.Key, k => k.Value);
+
+    /// <summary>
+    /// Kategori turu (345/346): kategori TEK listeye aittir - "ortak" tur
+    /// kaldirildi (kullanici), iki listede birden gorunen kayit "hangisi
+    /// benim listemde" sorusunu belirsiz birakiyordu.
+    /// </summary>
+    private static readonly Dictionary<string, string> KategoriTurKodlari =
+        new() { ["1"] = "Stok", ["2"] = "Hizmet" };
 
     private static readonly Dictionary<string, string> CinsiyetKodlari =
         new() { ["1"] = "Erkek", ["2"] = "Kadın" };

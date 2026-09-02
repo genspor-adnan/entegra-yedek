@@ -15,7 +15,7 @@ public static class AksiyonUclari
         //   Arac cubugu, sag tus ve komut paleti bu tek uctan beslenir.
         grup.MapGet("/{ekran}", async (
             string ekran, long? kayitId, BaglamCozucu cozucu, BelgeDeposu belgeler,
-            HttpContext ctx, CancellationToken iptal) =>
+            KartDeposu kartlar, HttpContext ctx, CancellationToken iptal) =>
         {
             var tanimlar = AksiyonKatalogu.Ekran(ekran)
                 ?? throw GentegreHatasi.Bulunamadi($"Bilinmeyen ekran: {ekran}");
@@ -33,12 +33,18 @@ public static class AksiyonUclari
             //   calismiyor" sorusu uretmesin.
             var eBelgeVar = await belgeler.EBelgeKullanimdaAsync(baglam.SubeId, iptal);
 
+            // URUN MODU (345): saglik entegrasyonlarina ozgu aksiyonlar (SKRS
+            //   liste senkronu) ERP kurulumunda gorunmez - calisacagi bir
+            //   servis yok, arac cubugunda durmasi gurultu.
+            var urunModu = await kartlar.UrunModuAsync(iptal);
+
             var sonuc = tanimlar
                 // "gelen" grubu da e-Belgeye baglidir: mukellef olmayan sirkette
                 //   gelen kutusu diye bir sey yoktur (kullanici istegi).
                 .Where(a => eBelgeVar
                             || !(a.Grup.Equals("ebelge", StringComparison.OrdinalIgnoreCase)
                                  || a.Grup.Equals("gelen", StringComparison.OrdinalIgnoreCase)))
+                .Where(a => a.UrunModu == 0 || a.UrunModu == urunModu)
                 .Where(a => AksiyonKatalogu.Yetkili(a, baglam.Yetkiler))
                 .OrderBy(a => a.Sira)
                 .Select(a =>

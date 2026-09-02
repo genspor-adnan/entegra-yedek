@@ -18,7 +18,8 @@ import { para } from '../bicim';
 
 interface AcikSatir {
   tarafId: number; kisi: string; acikSatir: number; acikTutar: number;
-  /** Gelir belgesi kesilmemis (taslak) prim - hakedise GIRMEZ (330). */
+  /** Gelir belgesi kesilmemis (taslak) prim - 339'dan beri URETILMIYOR;
+      alanlar eski kayitlar icin sunucuda duruyor, ekranda gosterilmiyor. */
   taslakSatir: number; taslakTutar: number;
   kapananTutar: number; ilkTarih?: string | null; sonTarih?: string | null;
 }
@@ -126,7 +127,6 @@ export function DonemKapatModali({ tarafId, kisi, onKapat, onTamam }: {
             <tr><th style={{ width: 32 }} /><th>Kişi</th>
                 <th className="hiza-sag">Kapatılabilir satır</th>
                 <th className="hiza-sag">Kapatılabilir tutar</th>
-                <th className="hiza-sag">Taslak (girmez)</th>
                 <th className="hiza-sag">Kapanmış</th>
                 <th>Tarih aralığı</th></tr>
           </thead>
@@ -140,10 +140,6 @@ export function DonemKapatModali({ tarafId, kisi, onKapat, onTamam }: {
                 <td>{r.kisi}</td>
                 <td className="hiza-sag">{r.acikSatir}</td>
                 <td className="hiza-sag"><b>{para.format(r.acikTutar)}</b></td>
-                <td className="hiza-sag sonuk">
-                  {r.taslakTutar > 0
-                    ? `${para.format(r.taslakTutar)} (${r.taslakSatir})` : '—'}
-                </td>
                 <td className="hiza-sag sonuk">{para.format(r.kapananTutar)}</td>
                 <td className="sonuk">
                   {r.ilkTarih ? String(r.ilkTarih).slice(0, 10).split('-').reverse().join('.') : ''}
@@ -152,15 +148,15 @@ export function DonemKapatModali({ tarafId, kisi, onKapat, onTamam }: {
               </tr>
             ))}
             {acik.length === 0 && (
-              <tr><td colSpan={7} className="bos">Açık hakediş satırı yok.</td></tr>
+              <tr><td colSpan={6} className="bos">Açık hakediş satırı yok.</td></tr>
             )}
           </tbody>
         </table>
         <div className="not">
           Listedeki tutarlar <b>dönemden bağımsız</b> toplamlardır; kapatma
-          yalnız seçilen tarih aralığındaki satırları bağlar. <b>Taslak</b>
-          primler hakedişe girmez: kalem satış tahakkuku / fişi / faturasına
-          dönüşünce kendiliğinden "kesin" olur.
+          yalnız seçilen tarih aralığındaki satırları bağlar. Prim, kalem satış
+          tahakkuku / fişi / faturasına dönüşünce doğar (339); başvuru ya da
+          sipariş aşamasındaki kalemden hakediş satırı üretilmez.
         </div>
       </div>
     </Modal>

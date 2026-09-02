@@ -232,6 +232,18 @@ public sealed partial class KartDeposu
     }
 
     /// <summary>
+    /// Urun modu (referans genel.urun_modu): 1 Gentegre AI (ERP),
+    /// 2 GenoTIP AI (HBYS). Kart metasi bazi secenekleri moda gore suzuyor
+    /// (or. saglik entegrasyonlari ERP kurulumunda listelenmez).
+    /// </summary>
+    public async Task<int> UrunModuAsync(CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        // Varsayilan (1 = ERP) AyarDeposu.Varsayilan sozlugunden gelir.
+        return await AyarDeposu.SayiAsync(baglanti, null, "genel.urun_modu", iptal);
+    }
+
+    /// <summary>
     /// DOVIZ UCGENI (katalogdaki DovizKurali): kur ve yerel karsilik SUNUCUDA
     /// belirlenir.
     ///

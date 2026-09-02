@@ -86,8 +86,8 @@ public sealed class EBelgeGonderimi(VeriKaynagi veri, IHttpClientFactory istemci
         if (string.IsNullOrWhiteSpace(hesap.Kullanici) || string.IsNullOrWhiteSpace(hesap.Sifre))
             throw GentegreHatasi.IsKurali(
                 hesap.TestMi
-                    ? "Test kullanıcı adı / şifresi girilmemiş (Firma Bilgileri › e-Belge)."
-                    : "Entegratör kullanıcı adı / şifresi girilmemiş (Firma Bilgileri › e-Belge).");
+                    ? "Test kullanıcı adı / şifresi girilmemiş (Ayarlar › Genel › Entegrasyon)."
+                    : "Entegratör kullanıcı adı / şifresi girilmemiş (Ayarlar › Genel › Entegrasyon).");
 
         // 3) Gonderim govdesi - adaptor secimi veritabaninda (167/171).
         var (entegrator, _, govde) = await GovdeUretAsync(baglanti, belgeId, iptal);

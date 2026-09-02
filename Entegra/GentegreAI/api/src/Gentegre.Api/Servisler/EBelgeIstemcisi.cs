@@ -46,7 +46,7 @@ public static class EBelgeIstemcisi
             subeId);
         await using var o = await komut.ExecuteReaderAsync(iptal);
         if (!await o.ReadAsync(iptal))
-            throw GentegreHatasi.IsKurali("Şubenin e-Belge hesabı çözülemedi.");
+            throw GentegreHatasi.IsKurali("Şubenin e-Belge hesabı tanımlı değil. Yönetim › Ayarlar › Genel › Entegrasyon (337).");
 
         var hesap = new EBelgeHesabi(
             o.IsDBNull(0) ? "" : o.GetString(0), o.IsDBNull(1) ? "" : o.GetString(1),
@@ -55,7 +55,7 @@ public static class EBelgeIstemcisi
 
         if (string.IsNullOrWhiteSpace(hesap.Entegrator) || string.IsNullOrWhiteSpace(hesap.Url))
             throw GentegreHatasi.IsKurali(
-                "Entegratör ayarları eksik. Yönetim › Firma Bilgileri › e-Belge.");
+                "Entegratör ayarları eksik. Yönetim › Ayarlar › Genel › Entegrasyon (337).");
         if (hesap.Entegrator != "izibiz")
             throw GentegreHatasi.IsKurali(
                 $"\"{hesap.Entegrator}\" için {islevAdi} henüz desteklenmiyor.");

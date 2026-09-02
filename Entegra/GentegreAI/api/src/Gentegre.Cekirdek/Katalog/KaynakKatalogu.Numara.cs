@@ -100,7 +100,11 @@ public static partial class KaynakKatalogu
         YetkiKodu: "sube",
         Kaynak: """
             public.sube s
-              left join public.ebelge_entegrator ent on ent.id = s.entegrator_id
+              -- Subenin AKTIF e-Belge hesabi (337/338): cozum EKRANDA DA ayni
+              --   fonksiyondan gelsin - kendi satiri, baz sube, kurum geneli.
+              left join public.entegrasyon_hesap eh
+                     on eh.id = public.fn_entegrasyon_hesap_id('EBELGE', s.id, 0::smallint)
+              left join public.ebelge_entegrator ent on ent.id = eh.entegrator_id
             """,
         VarsayilanSirala: "s.varsayilan desc, s.ad asc",
         Kolonlar: new KolonTanimi[]
@@ -134,7 +138,7 @@ public static partial class KaynakKatalogu
             // Mukellef hesabi (171): hangi entegrator, hangi ortam.
             new("entegratorAdi", "coalesce(ent.ad, '')", "metin", "Entegratör",
                                           Genislik: 140, Filtrelenebilir: false),
-            new("testOrtami",    "s.test_ortami",        "kod",   "Test Ortamı",
+            new("testOrtami",    "coalesce(eh.test_mi, 0)", "kod",   "Test Ortamı",
                                           Hizalama: "orta", Varsayilan: false),
             // ANA SALTER (179): isaretli degilse o subeden e-Belge cikmaz.
             new("efaturaMukellef", "s.efatura_mukellef", "mantik", "e-Fatura Mükellefi",

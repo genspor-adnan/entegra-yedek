@@ -421,9 +421,23 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const stokAlani   = alanlar.find(a => a.ad === 'stokId');
   const hizmetAlani = alanlar.find(a => a.ad === 'hizmetId');
   const tumGridAlanlari = satirlarGrid
-    ? alanlar.filter(a => a.ad !== 'stokId' && a.ad !== 'hizmetId')
+    ? alanlar.filter(a => a.ad !== 'stokId' && a.ad !== 'hizmetId'
+                          // Kategori ve Kod, Tip'in hemen saginda ELLE cizilir
+                          //   (kullanici) - listenin sonunda tekrar cikmasin.
+                          && a.ad !== 'kategoriYolu' && a.ad !== 'kalemKodu')
     : alanlar;
   const gridAlanlari = tumGridAlanlari.filter(a => !gizliKolonlar.has(a.ad));
+  /** Rozet cizilecek kolonlar (satirlar gridi): KDV ve Durum. */
+  const rozetHucresi = (ad: string) =>
+    satirlarGrid && (ad === 'kdvDahil' || ad === 'durum');
+
+  /** Rozet rengi: Aktif/Dahil yesil, Pasif gri, oteki notr. */
+  const rozetSinifi = (ad: string, metin: string) => {
+    const m = metin.toLocaleLowerCase('tr');
+    if (ad === 'durum') return m.startsWith('aktif') ? 'ok' : 'gri';
+    return m.includes('dahil') ? 'mor' : 'gri';
+  };
+
   const kalemAdi = (satir: Record<string, unknown>) =>
     satir.stokId != null && satir.stokId !== '' && stokAlani
       ? gorunum(satir, stokAlani)
@@ -433,12 +447,13 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   //   Listelerin menusuyle ayni cizim (GridMenu); ogeler grid'e ozgu.
   const csvIndir = () => {
     const b = [
-      ...(satirlarGrid ? ['Tip', 'Adı'] : []),
+      ...(satirlarGrid ? ['Tip', 'Kategori', 'Kod', 'Adı'] : []),
       ...gridAlanlari.map(a => a.baslik),
     ].join(';');
     const govde = gorunurler.map(({ satir }) => [
       ...(satirlarGrid
-        ? [satir.stokId != null && satir.stokId !== '' ? 'Stok' : 'Hizmet', kalemAdi(satir)]
+        ? [satir.stokId != null && satir.stokId !== '' ? 'Stok' : 'Hizmet',
+           String(satir.kategoriYolu ?? ''), String(satir.kalemKodu ?? ''), kalemAdi(satir)]
         : []),
       ...gridAlanlari.map(a => gorunum(satir, a).replace(/;/g, ',')),
     ].join(';')).join('\n');
@@ -564,7 +579,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
       {/* KOLONU COK OLAN DETAY GRIDI (prim satirlari): tablo modal genisligini
           asinca en sagdaki kolonlar (satir silme ✖ dahil) ERISILEMEZ oluyordu.
           Yatay kaydirma sarmalayicisi - sigan gridlerde cubuk hic cikmaz. */}
-      <div className="detay-kaydir">
+      {/* SATIRLAR gridi (fiyat listesi) YUZLERCE satir olabiliyor: kendi dikey
+          kaydirma alani - modal govdesi tasip alt satirlar ekranin altinda
+          kirpiliyordu (kullanici). Baslik satiri sabit kalir. */}
+      <div className={`detay-kaydir${satirlarGrid ? ' detay-uzun' : ''}`}>
       <table className={`detay-tablo${adresGrid ? ' adres-tablo' : ''}`} style={adresGrid ? { tableLayout: 'fixed' } : undefined}>
         {adresGrid && (
           <colgroup>
@@ -575,7 +593,16 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
         <thead>
           <tr>
             {modalDuzenle && !saltOkunur && <th style={{ width: 30 }} />}
-            {satirlarGrid && <><th style={{ width: 36 }}>Tip</th><th>Adı</th></>}
+            {satirlarGrid && (
+              <>
+                <th style={{ width: 36 }}>Tip</th>
+                {/* Kullanici: kategori ve kod kolonlari yarisi kadar dar -
+                    asil okunan "Adı" ve fiyat, bunlar destek bilgisi. */}
+                <th style={{ width: '9%' }}>Kategori</th>
+                <th style={{ width: '6%' }}>Kod</th>
+                <th>Adı</th>
+              </>
+            )}
             {gridAlanlari.map(a => (
               <th key={a.ad}>{kolonBasligi(a)}{a.zorunlu && ' *'}</th>
             ))}
@@ -599,6 +626,16 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                 <>
                   <td className="hiza-orta" title={satir.stokId != null && satir.stokId !== '' ? 'Stok' : 'Hizmet'}>
                     {satir.stokId != null && satir.stokId !== '' ? '📦' : '🛠️'}
+                  </td>
+                  <td className="sonuk" title={String(satir.kategoriYolu ?? '')}
+                      style={{ maxWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis',
+                               whiteSpace: 'nowrap' }}>
+                    {String(satir.kategoriYolu ?? '')}
+                  </td>
+                  <td className="sonuk" title={String(satir.kalemKodu ?? '')}
+                      style={{ maxWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis',
+                               whiteSpace: 'nowrap' }}>
+                    {String(satir.kalemKodu ?? '')}
                   </td>
                   <td>{kalemAdi(satir)}</td>
                 </>
@@ -633,6 +670,12 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                       }}
                       onBlur={e => fiyatHucreIsle(i, e.target.value, a.ad)}
                     />
+                  ) : rozetHucresi(a.ad) ? (
+                    // KDV ve DURUM ROZET (kullanici): iki degerli/az degerli
+                    //   kolonlar duz metinde satir arasinda kayboluyordu.
+                    <span className={`rozet ${rozetSinifi(a.ad, gorunum(satir, a))}`}>
+                      {gorunum(satir, a)}
+                    </span>
                   ) : gorunum(satir, a)}
                 </td>
               ))}
