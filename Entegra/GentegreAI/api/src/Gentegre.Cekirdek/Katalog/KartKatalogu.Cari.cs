@@ -310,13 +310,16 @@ public static partial class KartKatalogu
             // ik_karti.html İletişim sekmesi: "Acil Durumda Aranacak Kişiler"
             // REHBERILETISIM (1:N) mockup karsiligi. Ayrı sekme degil, İletişim
             // sekmesinde Ev Adresi'nin altina gomulu grid olarak render edilir.
-            new DetayTanimi("acilKisiler", "public.personel_acil_kisi", "taraf_id", new KartAlani[]
+            // 335: tablo ORTAK (taraf_acil_kisi) - personelin acil kisisi ile
+            //   hastanin yakini ayni bilgidir, iki karttan da ayni tabloya yazilir.
+            new DetayTanimi("acilKisiler", "public.taraf_acil_kisi", "taraf_id", new KartAlani[]
             {
                 new("id",         "id",          "sayi",  Yazilabilir: false),
                 new("varsayilan", "varsayilan",  "mantik", Baslik: "★"),
                 new("adSoyad",    "ad_soyad",    "metin", EnFazlaUzunluk: 120, Baslik: "Ad Soyad", Zorunlu: true),
                 new("yakinlik",   "yakinlik",    "metin", EnFazlaUzunluk: 60,  Baslik: "Yakınlık"),
-                new("telefon",    "telefon",     "metin", EnFazlaUzunluk: 30,  Baslik: "Telefon")
+                new("telefon",    "telefon",     "metin", EnFazlaUzunluk: 30,  Baslik: "Telefon"),
+                new("eposta",     "eposta",      "metin", EnFazlaUzunluk: 120, Baslik: "e-Posta")
             }, Sirala: "varsayilan desc, sira, id", LogTabloId: 906, Baslik: "Acil Durumda Aranacak Kişiler"),
             // Ozluk - taraf_personel 1:1 (id = taraf.id). Kisi'nin TekAdres'i gibi TEK SATIR gosterilir
             //   (TekOzluk.tsx) - satir ekle/sil YOK, tek satir hep var/yok.
@@ -825,7 +828,31 @@ public static partial class KartKatalogu
                 // Odeyen kurum (266) hastanin kendisinde: cok policeli izleme
                 //   ayri sekmede (taraf_hasta_kurum), burada tek alan yeter.
                 new("kurumId",     "kurum_id",     "kod",   KodTablosu: "public.v_kurum_lookup",
-                    Baslik: "Kurum / Ödeyen")
+                    Baslik: "Kurum / Ödeyen"),
+                // 335 (Genotıp alan gereksinimleri): SKRS/eNabız icin gereken
+                //   kimlik alanlari. Kod listelerinin DEGERI dogrudan SKRS
+                //   kodudur - ayri eslestirme tablosu yok (kullanici karari).
+                new("pasaportNo",  "pasaport_no",  "metin", EnFazlaUzunluk: 20,
+                    Baslik: "Pasaport No"),
+                new("medeniHal",   "medeni_hal",   "kod",   KodListesi: "hasta.medeni_hal",
+                    Baslik: "Medeni Hal"),
+                new("anaAdi",      "ana_adi",      "metin", EnFazlaUzunluk: 60, Baslik: "Ana Adı"),
+                new("babaAdi",     "baba_adi",     "metin", EnFazlaUzunluk: 60, Baslik: "Baba Adı"),
+                new("anneTckn",    "anne_tckn",    "metin", EnFazlaUzunluk: 11,
+                    Baslik: "Anne T.C. No"),
+                new("babaTckn",    "baba_tckn",    "metin", EnFazlaUzunluk: 11,
+                    Baslik: "Baba T.C. No"),
+                // Kimligi belirsiz hasta: TCKN olmadan kayit acilir.
+                new("kimliksiz",   "kimliksiz",    "mantik", Baslik: "Kimliksiz Hasta"),
+                new("yabanciHastaTuru", "yabanci_hasta_turu", "kod",
+                    KodListesi: "hasta.yabanci_turu", Baslik: "Yabancı Hasta Türü"),
+                new("ulkeyeGirisTarihi", "ulkeye_giris_tarihi", "tarih",
+                    Baslik: "Ülkeye Giriş Tarihi"),
+                new("vefat",       "vefat",        "mantik", Baslik: "Vefat"),
+                new("vefatTarihi", "vefat_tarihi", "tarih", Baslik: "Vefat Tarihi"),
+                // Dosya acilirken gosterilecek uyari - KLINIK nottan ayri.
+                new("mahremiyetNotu", "mahremiyet_notu", "metin", EnFazlaUzunluk: 500,
+                    Baslik: "Mahremiyet Notu")
             }, SubeKolonu: null, Baslik: "Hasta Bilgisi", LogTabloId: 907)
             : d).ToList();
 
@@ -834,6 +861,11 @@ public static partial class KartKatalogu
         //   basvuruda guncel poliçe girilir, eskisi tarihçe olarak kalir.
         //   "Sonuncusu aktif" kurali DB tetiginde (tg_taraf_hasta_kurum_tek_aktif) -
         //   yeni satir eklenince oncekiler kendiliginden pasife duser.
+        // HASTA YAKINI (335): ayri tanim EKLENMEZ - hasta karti personel
+        //   kartindan turuyor ve "acilKisiler" detayini ZATEN miras aliyor.
+        //   Tablo artik ortak (taraf_acil_kisi), yani hastanin yakini ile
+        //   personelin acil kisisi ayni yere yaziliyor.
+
         detaylar?.Add(new DetayTanimi("kurum", "public.taraf_hasta_kurum", "hasta_id",
         new KartAlani[]
         {

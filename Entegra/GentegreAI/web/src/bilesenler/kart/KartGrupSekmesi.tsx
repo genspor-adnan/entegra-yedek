@@ -354,6 +354,83 @@ const adliBlok = (
             />
           );
         })()}
+        {/* HASTA KIMLIK DETAYI (335): pasaport, ana/baba, vefat, kimliksiz,
+            yabanci hasta turu, mahremiyet notu. Kimlik ozeti kutusu sabit
+            duzenli oldugu icin bu alanlar orada cizilmiyor; hasta ozluk
+            detayinin GERI KALAN alanlari burada jenerik olarak gosterilir. */}
+        {kaynak === 'hasta' && aktif.baslik === 'Genel' && (() => {
+          const ozlukDetay = meta.detaylar.find(d => d.ad === 'ozluk');
+          if (!ozlukDetay) return null;
+          const ozetteCizilen = ['id', 'dogumTarihi', 'dogumYeri', 'cinsiyet',
+                                 'uyruk', 'kanGrubu', 'meslek', 'medeniHal', 'kurumId'];
+          const alanlar = ozlukDetay.alanlar.filter(a => !ozetteCizilen.includes(a.ad));
+          if (alanlar.length === 0) return null;
+
+          const durum = detaylar[ozlukDetay.ad] ?? bosDetay();
+          const satir = durum.guncel[0] ?? {};
+          const degis = (ad: string, deger: unknown) => setDetaylar(t => {
+            const d = t[ozlukDetay.ad] ?? bosDetay();
+            const yeni = { ...(d.guncel[0] ?? {}), [ad]: deger };
+            return { ...t, [ozlukDetay.ad]: { ...d, guncel: [yeni, ...d.guncel.slice(1)] } };
+          });
+          const kilitli = salt || ozlukDetay.saltOkunur;
+
+          return (
+            <div className="kagrup" key="KimlikDetay">
+              <h6>Kimlik Detayı</h6>
+              <div className="alan-izgara">
+                {alanlar.map(a => (
+                  <label key={a.ad}
+                         className={`alan${a.tip === 'kod' ? ' tip-kod' : ''}`
+                                    + (a.tip === 'mantik' ? ' onay-satiri' : '')}>
+                    {a.tip === 'mantik' ? (
+                      <>
+                        <input type="checkbox" disabled={kilitli}
+                               checked={Number(satir[a.ad] ?? 0) === 1}
+                               onChange={e => degis(a.ad, e.target.checked ? 1 : 0)} />
+                        <span>{a.baslik}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="etiket">{a.baslik}</span>
+                        {a.kodlar ? (
+                          <select value={String(satir[a.ad] ?? '')} disabled={kilitli}
+                                  onChange={e => degis(a.ad, e.target.value)}>
+                            <option value="">—</option>
+                            {Object.entries(a.kodlar)
+                              .map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                          </select>
+                        ) : a.tip === 'tarih' ? (
+                          <input type="date" disabled={kilitli}
+                                 value={String(satir[a.ad] ?? '').slice(0, 10)}
+                                 onChange={e => degis(a.ad, e.target.value)} />
+                        ) : (
+                          <input type="text" disabled={kilitli}
+                                 maxLength={a.enFazlaUzunluk ?? undefined}
+                                 value={String(satir[a.ad] ?? '')}
+                                 onChange={e => degis(a.ad, e.target.value)} />
+                        )}
+                      </>
+                    )}
+                  </label>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+        {/* HASTA YAKINLARI (335): personelde bu grid Iletisim SEKMESINDE cizilir
+            (personelIletisimSekmesi dali); hastada Iletisim ayri sekme degil
+            Genel'de bir kutu oldugu icin oraya dusmuyordu - burada, kimlik
+            detayinin altinda tam genislikte gosterilir. */}
+        {kaynak === 'hasta' && aktif.baslik === 'Genel' && acilDetay && (
+          <GenDetayTablo
+            meta={acilDetay}
+            durum={detaylar[acilDetay.ad] ?? bosDetay()}
+            saltOkunur={salt || acilDetay.saltOkunur}
+            hatalar={alanHatalari}
+            onDegis={yeni => setDetaylar(t => ({ ...t, [acilDetay.ad]: yeni }))}
+          />
+        )}
         {!iletisim && notlar && kaynak !== 'cari' && (
           <div className="kagrup" key="Notlar">
             <h6>{notlar[0]}</h6>
