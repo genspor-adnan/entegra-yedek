@@ -705,6 +705,14 @@ export const api = {
   primAcikHakedis: () =>
     istek<Record<string, unknown>[]>('/api/prim/acik'),
 
+  /** Entegrasyon hesabinin baglantisini sinar (336). */
+  entegrasyonSina: (id: number) =>
+    gonder<{ basarili: boolean; mesaj: string }>(`/api/entegrasyon/${id}/sina`, {}),
+
+  /** SKRS kod listelerini servisten cekip yerel listeleri gunceller (336). */
+  skrsListeSenkron: (id: number) =>
+    gonder<{ satirSayisi: number; mesaj: string }>(`/api/entegrasyon/${id}/skrs-senkron`, {}),
+
   /** Prim satirlarini ONAYLA / onayi kaldir (330) - onayli satir kilitlidir. */
   primOnayla: (govde: { satirlar: number[]; geriAl?: boolean }) =>
     gonder<{ satirSayisi: number; geriAl: boolean }>('/api/prim/onayla', govde),

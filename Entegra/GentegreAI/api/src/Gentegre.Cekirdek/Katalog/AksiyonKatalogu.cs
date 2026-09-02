@@ -192,6 +192,23 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "rad.rapor_yaz", KayitGerekir: true, Sira: 30),
             },
 
+            // ENTEGRASYON HESAPLARI (336): Ayarlar > Kayit Kabul > Entegrasyon.
+            ["entegrasyon-liste"] = new AksiyonTanimi[]
+            {
+                new("entegrasyon.yeni",     "＋ Yeni", "entegrasyon",
+                    Islem: Islem.Ekle, Sira: 10),
+                new("entegrasyon.duzenle",  "✎ Düzenle", "entegrasyon",
+                    Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("entegrasyon.sil",      "🗑 Sil", "entegrasyon",
+                    Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+                // Baglanti sinama: kimlik dogru mu, adres ayakta mi.
+                new("entegrasyon.sina",     "🔌 Bağlantıyı Sına", "entegrasyon",
+                    Islem: Islem.Gor, KayitGerekir: true, Sira: 40),
+                // SKRS: kod listelerini servisten cekip yerel listeleri tazeler.
+                new("entegrasyon.skrs-senkron", "⟳ SKRS Listelerini Güncelle",
+                    "entegrasyon", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50),
+            },
+
             // HAKEDIS SATIRLARI (324): satirlar tahsilattan DOGAR - elle
             //   eklenmez. Buradaki aksiyonlar kaynaga gitmek ve donem
             //   kapatmak icindir.

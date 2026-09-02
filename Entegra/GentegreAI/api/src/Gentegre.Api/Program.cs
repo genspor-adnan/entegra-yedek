@@ -121,6 +121,8 @@ Saat.DilimAyarla(kurucu.Configuration["Kurulus:SaatDilimi"]);
 kurucu.Services.AddHttpClient("ebelge", i => i.Timeout = TimeSpan.FromMinutes(2));
 // ÜTS (Saglik Bakanligi Urun Takip Sistemi) - ayni desen (223).
 kurucu.Services.AddHttpClient("uts", i => i.Timeout = TimeSpan.FromMinutes(2));
+// SKRS (Saglik.NET kod sunucusu, 336): kod listeleri buyuk olabiliyor.
+kurucu.Services.AddHttpClient("skrs", i => i.Timeout = TimeSpan.FromMinutes(2));
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.UtsServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EBelgeGonderimi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EBelgeSorgu>();
@@ -159,6 +161,7 @@ uygulama.RandevuUclariniEkle();
 uygulama.RadyolojiUclariniEkle();
 uygulama.IcmalUclariniEkle();
 uygulama.PrimUclariniEkle();
+uygulama.EntegrasyonUclariniEkle();
 uygulama.AyarUclariniEkle();
 uygulama.PanelUclariniEkle();
 uygulama.RolYetkiUclariniEkle();

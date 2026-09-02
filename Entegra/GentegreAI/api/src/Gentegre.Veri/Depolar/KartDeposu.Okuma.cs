@@ -165,7 +165,7 @@ public sealed partial class KartDeposu
             // Anlasmali kurum (249): hasta policesinde odeyen, kurum sozlesmesi
             //   satirinda kategori secimi.
             "public.v_kurum_lookup", "public.v_kategori_lookup",
-            "public.v_tahsilat_turu_lookup",
+            "public.v_tahsilat_turu_lookup", "public.v_entegrasyon_kod_lookup",
             // Departman/bolum (251): personel kartinda tum departmanlar, randevu
             //   kartinda yalniz randevu verilebilen bolumler.
             "public.v_departman_lookup", "public.v_randevu_bolum_lookup",

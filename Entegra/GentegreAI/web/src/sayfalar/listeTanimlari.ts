@@ -1316,6 +1316,16 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ic: '🧾', yetkiKodu: 'belge',
   },
   {
+    // KAYIT KABUL ayarlari (336): Genel + Entegrasyon. Entegrasyon sekmesi
+    //   dis servis hesaplarini (SKRS, e-Nabiz, MEDULA, UTS...) tek yerde
+    //   toplar - kullanici karari.
+    kaynak: 'kayit-kabul-ayarlar', baslik: 'Kayıt Kabul Ayarları',
+    yol: 'Yonetim › Ayarlar › Kayıt Kabul',
+    ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Kayıt Kabul', menuSira: 7,
+    ic: '🏥', yetkiKodu: 'entegrasyon', urunModu: 2,
+  },
+  {
     // IK ayarlari (kullanici): Departman + Pozisyon kod listeleri duzenlenir.
     kaynak: 'ik-ayarlar', baslik: 'İK Ayarları', yol: 'Yonetim › Ayarlar › İK',
     ozelSayfa: true,
