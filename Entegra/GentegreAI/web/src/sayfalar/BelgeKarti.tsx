@@ -411,7 +411,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   })();
   /**
    * e-BELGE OLMAYAN turler: satis fisi (16 - perakende fis, GIB'e gitmez),
-   * konsinye (109/119 - mal birakma, faturasi ayri kesilir) ve tahakkuk (13/17).
+   * konsinye (109/119 - mal birakma, faturasi ayri kesilir) ve tahakkuk (17/13).
    * Bunlarda e-Belge sekmesi, baslik alani ve gonderim dugmeleri gosterilmez.
    */
   //   SIPARIS de e-Belge degil: hicbir siparis GIB'e gitmez.
@@ -1303,10 +1303,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                            onYenile={() => { if (kayitliId) void api.belgeOku(kayitliId)
                                               .then(setSonuc).catch(() => {}) }}
                            // KURUM TAHAKKUKU (331): yalniz odeyen kurumlu
-                           //   basvuruda; kurum payini Satış Tahakkukuna (13)
+                           //   basvuruda; kurum payini Satış Tahakkukuna (17)
                            //   donusturur - tahsilat DEGIL.
                            kurumTahakkukAc={basvuruMu && odeyenKurumId
-                             ? () => { setDonusumPay(2); setDonusum(13) }
+                             ? () => { setDonusumPay(2); setDonusum(17) }
                              : undefined}
                            kurumKalan={satirlar.reduce((t, r) =>
                              t + Math.max(hamSayi(r.kurumTutar) - (r.kurumKapatilan ?? 0), 0), 0)} />

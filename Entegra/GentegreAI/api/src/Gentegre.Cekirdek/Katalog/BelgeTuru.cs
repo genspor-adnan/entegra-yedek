@@ -17,13 +17,13 @@ public static class BelgeTuru
     /// Stok CIKISI yonundeki turler. Cari tarafi olan turlerde ayni liste
     /// "satis mi" sorusunu da cevaplar (cari BORCLANIR).
     ///
-    /// 13 (Alacak Tahakkuku) stok ETKILEMEZ ama SATIS tarafindadir: musteri
-    /// borclanir. Listede olmadigi icin alis gibi davranip cariyi
-    /// ALACAKLANDIRIYORDU - bakiye ters cikiyordu (17 Borc Tahakkuku alis
-    /// tarafinda oldugu icin dogru sekilde disarida).
+    /// 17 (Satis Tahakkuku) stok ETKILEMEZ ama SATIS tarafindadir: musteri
+    /// borclanir. Numaralandirma deseni kucuk kod = ALIS, buyuk kod = SATIS
+    /// (334): alis 9/10/11/12/13, satis 19/14/15/16/17 - bu yuzden alis
+    /// tahakkuku (13) listede YOK, satis tahakkuku (17) VAR.
     /// </summary>
     private static readonly HashSet<int> CikisTurleri =
-        new() { 13, 14, 15, 16, 119, 29, 105, 133, 4 };
+        new() { 17, 14, 15, 16, 119, 29, 105, 133, 4 };
 
     /// <summary>Depolar arasi transfer: TEK satir iki depoyu birden oynatir.</summary>
     public const int Transfer = 20;

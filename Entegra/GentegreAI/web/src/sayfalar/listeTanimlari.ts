@@ -773,13 +773,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Satış', menuAd: 'Satış Fişleri', ic: '🧾', yetkiKodu: 'belge',
   },
   {
-    // TAHAKKUK (13 alacak / 17 borc): cari bakiyeyi ve ekstreyi etkiler ama
-    //   MUHASEBE FISI URETMEZ (db/098) - gerceklesen islem geldiginde muhasebe
-    //   onunla yazilir. Stok da etkilemez.
-    // SATIS tarafi: ALACAK tahakkuku (13). Borc tahakkuku (17) Alis grubunda.
-    kaynak: 'belge', rota: 'tahakkuk', baslik: 'Alacak Tahakkukları',
-    yol: 'Satis › Tahakkuklar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 13,
-    sabitFiltre: { alan: 'tur', op: 'esit', deger: 13 },
+    // TAHAKKUK (17 satis / 13 alis - 334: kucuk kod ALIS, buyuk kod SATIS):
+    //   cari bakiyeyi ve ekstreyi etkiler ama MUHASEBE FISI URETMEZ (db/098)
+    //   - gerceklesen islem geldiginde muhasebe onunla yazilir. Stok da
+    //   etkilemez.
+    kaynak: 'belge', rota: 'tahakkuk', baslik: 'Satış Tahakkukları',
+    yol: 'Satis › Tahakkuklar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 17,
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 17 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
     menuGrup: 'Satış', menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge',
@@ -859,10 +859,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Alış', menuAd: 'Alış Fişleri', ic: '🧾', yetkiKodu: 'belge',
   },
   {
-    // ALIS tarafi: BORC tahakkuku (17) - tedarikciye borc.
-    kaynak: 'belge', rota: 'borc-tahakkuk', baslik: 'Borç Tahakkukları',
-    yol: 'Alis › Tahakkuklar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 17,
-    sabitFiltre: { alan: 'tur', op: 'esit', deger: 17 },
+    // ALIS tarafi: alis tahakkuku (13) - tedarikciye borc.
+    kaynak: 'belge', rota: 'borc-tahakkuk', baslik: 'Alış Tahakkukları',
+    yol: 'Alis › Tahakkuklar', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 13,
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 13 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
     menuGrup: 'Alış', menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge',

@@ -20,7 +20,7 @@ const DIS_NUMARALI = new Set([11]);
  * hedef olabilir (kullanici):
  *   - Fis (12/16): fatura kesilmeden stok/cari hareketi yazilan ic belge
  *     (perakende satis, numune cikisi gibi) - e-Belge'ye gitmez.
- *   - Tahakkuk (13/17): mal hareketi olmayan alacak/borc kaydi; siparis ya da
+ *   - Tahakkuk (17 satis / 13 alis): mal hareketi olmayan alacak/borc kaydi; siparis ya da
  *     irsaliye tutari faturalanmadan cari hesaba islenmek istendiginde.
  * Yon KAYNAKTAN gelir: alis zincirinde alis hedefleri, satista satis.
  */
@@ -30,22 +30,22 @@ const HEDEFLER: Record<number, { kod: number; ad: string }[]> = {
   18: [{ kod: 19, ad: 'Satış Siparişi' }],
   // Alis siparisi
   9:  [{ kod: 10, ad: 'Alış İrsaliyesi' }, { kod: 11, ad: 'Alış Faturası' },
-       { kod: 12, ad: 'Alış Fişi' }, { kod: 17, ad: 'Alış Tahakkuku' }],
+       { kod: 12, ad: 'Alış Fişi' }, { kod: 13, ad: 'Alış Tahakkuku' }],
   // Satis siparisi
   // BASVURU (246, kullanici): fatura / fis / tahakkuk.
   30: [{ kod: 15, ad: 'Satış Faturası' }, { kod: 16, ad: 'Satış Fişi' },
-       { kod: 13, ad: 'Satış Tahakkuku' }],
+       { kod: 17, ad: 'Satış Tahakkuku' }],
   19: [{ kod: 14, ad: 'Satış İrsaliyesi' }, { kod: 15, ad: 'Satış Faturası' },
-       { kod: 16, ad: 'Satış Fişi' }, { kod: 13, ad: 'Satış Tahakkuku' }],
+       { kod: 16, ad: 'Satış Fişi' }, { kod: 17, ad: 'Satış Tahakkuku' }],
   // Irsaliyeler (konsinye dahil): mal zaten cikti/girdi, sirada belgelenmesi var
   10:  [{ kod: 11, ad: 'Alış Faturası' }, { kod: 12, ad: 'Alış Fişi' },
-        { kod: 17, ad: 'Alış Tahakkuku' }],
+        { kod: 13, ad: 'Alış Tahakkuku' }],
   14:  [{ kod: 15, ad: 'Satış Faturası' }, { kod: 16, ad: 'Satış Fişi' },
-        { kod: 13, ad: 'Satış Tahakkuku' }],
+        { kod: 17, ad: 'Satış Tahakkuku' }],
   109: [{ kod: 11, ad: 'Alış Faturası' }, { kod: 12, ad: 'Alış Fişi' },
-        { kod: 17, ad: 'Alış Tahakkuku' }],
+        { kod: 13, ad: 'Alış Tahakkuku' }],
   119: [{ kod: 15, ad: 'Satış Faturası' }, { kod: 16, ad: 'Satış Fişi' },
-        { kod: 13, ad: 'Satış Tahakkuku' }],
+        { kod: 17, ad: 'Satış Tahakkuku' }],
 };
 
 interface Props {

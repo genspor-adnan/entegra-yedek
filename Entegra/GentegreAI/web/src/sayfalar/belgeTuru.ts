@@ -72,7 +72,8 @@ export interface BelgeTuruBilgisi {
 }
 
 /** Turden turetilen ortak gruplar - tablo satirlari bunlarla kisaliyor. */
-const ALIS_TURLERI      = new Set([9, 10, 11, 12, 17, 109]);
+// 334: tahakkuk kodlari takas - kucuk kod ALIS (13), buyuk kod SATIS (17).
+const ALIS_TURLERI      = new Set([9, 10, 11, 12, 13, 109]);
 const SIPARIS_TURLERI   = new Set([9, 19]);
 const IRSALIYE_TURLERI  = new Set([10, 14, 109, 119]);
 const FATURA_TURLERI    = new Set([11, 12, 15, 16]);
@@ -87,10 +88,10 @@ const LISTE_YOLU: Record<number, string> = {
   // SATIS
   18: '/teklif',
   19: '/siparis', 14: '/satis-irsaliye', 15: '/belge', 16: '/satis-fisi',
-  13: '/tahakkuk', 119: '/satis-konsinye',
+  17: '/tahakkuk', 119: '/satis-konsinye',
   // ALIS
   9: '/alis-siparis', 10: '/alis-irsaliye', 11: '/alis-fatura', 12: '/alis-fisi',
-  17: '/borc-tahakkuk', 109: '/alis-konsinye',
+  13: '/borc-tahakkuk', 109: '/alis-konsinye',
   // STOK
   20: '/stok-transfer', 105: '/stok-talep', 3: '/giris-fis', 4: '/cikis-fis',
 };

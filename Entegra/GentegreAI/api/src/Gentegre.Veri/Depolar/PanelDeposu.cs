@@ -284,9 +284,9 @@ public sealed class PanelDeposu
     private static string BelgeYolu(int tur) => tur switch
     {
         19 => "/siparis", 14 => "/satis-irsaliye", 15 => "/belge", 16 => "/satis-fisi",
-        13 => "/tahakkuk", 119 => "/satis-konsinye",
+        17 => "/tahakkuk", 119 => "/satis-konsinye",
         9 => "/alis-siparis", 10 => "/alis-irsaliye", 11 => "/alis-fatura",
-        12 => "/alis-fisi", 17 => "/borc-tahakkuk", 109 => "/alis-konsinye",
+        12 => "/alis-fisi", 13 => "/borc-tahakkuk", 109 => "/alis-konsinye",
         20 => "/stok-transfer", 105 => "/stok-talep", 3 => "/giris-fis", 4 => "/cikis-fis",
         _ => "/belge",
     };
