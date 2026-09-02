@@ -253,7 +253,7 @@ public sealed partial class KartDeposu
                 await islem.RollbackAsync(iptal);
                 var tabloAdi = engel.Tablo.Replace("public.", "", StringComparison.Ordinal);
                 throw GentegreHatasi.IsKurali(engel.Aciklama,
-                    new SilmeEngelBilgisi(tabloAdi, adet));
+                    new SilmeEngelBilgisi(tabloAdi, adet, TabloAdlari.Coz(engel.Tablo)));
             }
         }
 

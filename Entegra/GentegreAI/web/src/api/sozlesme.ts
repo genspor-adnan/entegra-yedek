@@ -17,7 +17,7 @@ export interface HataGovdesi {
   alanlar?: AlanHatasi[];
   cakisanAlanlar?: string[];
   guncelDeger?: Record<string, unknown>;
-  engel?: { tablo: string; adet: number };
+  engel?: { tablo: string; adet: number; ad?: string };
   /** Excel iceri alma (207): satir numarali dogrulama hatalari. */
   satirHatalari?: { satirNo: number; alan: string; mesaj: string }[];
   toplamHata?: number;
@@ -91,7 +91,9 @@ export function hataAyristir(h: unknown): HataCozumu {
 
   // Silme/degistirme engeli: "hangi tabloda kac kayit" bilgisi mesaja eklenir,
   //   kullanici neyi temizleyecegini bilsin.
-  const engel = h.hata.engel ? ` (${h.hata.engel.tablo}: ${h.hata.engel.adet})` : '';
+  // Kullaniciya TABLO ADI degil, Turkce karsiligi gosterilir (sunucu cozer).
+  const engel = h.hata.engel
+    ? ` (${h.hata.engel.ad || h.hata.engel.tablo}: ${h.hata.engel.adet} kayıt)` : '';
   // IS_KURALI mesaji ZATEN kullaniciya yazilmis Turkce bir cumledir ("... 
   //   silinemez, ... yapabilirsiniz") - basina teknik kod eklemek okumayi
   //   zorlastiriyordu. Oteki kodlar (SUNUCU, BULUNAMADI...) tani icin kalir.

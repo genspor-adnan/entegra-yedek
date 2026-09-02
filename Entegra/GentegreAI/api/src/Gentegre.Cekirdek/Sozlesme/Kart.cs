@@ -111,5 +111,9 @@ public sealed record DovizMetasi(
     string? TarihAlani,
     string YerelPara);
 
-/// <summary>Silme engeli govdesi (§3.3): hata.engel = { tablo, adet }.</summary>
-public sealed record SilmeEngelBilgisi(string Tablo, long Adet);
+/// <summary>
+/// Silme engeli govdesi (§3.3): hata.engel = { tablo, adet, ad }.
+/// `ad` KULLANICIYA gosterilen Turkce karsiliktir ("hakediş satırı");
+/// `tablo` ham adi tasimaya devam eder - tani ve gunluk icin gerekli.
+/// </summary>
+public sealed record SilmeEngelBilgisi(string Tablo, long Adet, string Ad);

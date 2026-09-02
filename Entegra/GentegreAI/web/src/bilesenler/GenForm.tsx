@@ -575,7 +575,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
     } catch (h) {
       if (h instanceof ApiHatasi) {
         setHata(h.hata.engel
-          ? `${h.message} (${h.hata.engel.tablo}: ${h.hata.engel.adet} kayit)`
+          ? `${h.message} (${h.hata.engel.ad || h.hata.engel.tablo}: `
+            + `${h.hata.engel.adet} kayıt)`
           : `${h.hata.kod}: ${h.message}`);
       }
     }
