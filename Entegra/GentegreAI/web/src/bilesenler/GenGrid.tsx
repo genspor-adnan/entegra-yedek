@@ -680,6 +680,11 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                   // Rotali cip: kendi listesine gider, secili cip DEGISMEZ -
                   //   geri donuldugunde onceki filtre korunur.
                   if (c.rota) { onCipRota?.(c.rota); return }
+                  // Cip DEGISINCE secim temizlenir: isaretli satirlar yeni
+                  //   filtrede genellikle listede degildir; kalinca sayac
+                  //   ("Secili: 3") gorunenle uyusmuyor ve toplu aksiyon
+                  //   ekranda OLMAYAN satiri isliyordu.
+                  secimiUygula(new Set());
                   setCipIndeks(i); setSayfa(1); onCipSecildi?.(i);
                 }}
               >
