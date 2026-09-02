@@ -42,6 +42,11 @@ public static partial class KaynakKatalogu
                                            Filtrelenebilir: false),
             new("baz",       "p.baz",       "kod",   "Baz Kodu", Varsayilan: false),
             new("kdvHaric",  "p.kdv_haric", "mantik","KDV Hariç", Hizalama: "orta", Genislik: 90),
+            new("primZamaniAdi",
+                "case p.prim_zamani when 2 then 'Faturalamada' else 'Tahsilatta' end",
+                                           "metin", "Prim Zamanı", Genislik: 130,
+                                           Filtrelenebilir: false),
+            new("primZamani", "p.prim_zamani", "sayi", "Zaman Kodu", Varsayilan: false),
             new("satirSayisi",
                 "(select count(*) from public.prim_plani_satir s where s.plan_id = p.id)",
                                            "sayi",  "Satır", Hizalama: "sag", Genislik: 70,
@@ -81,6 +86,11 @@ public static partial class KaynakKatalogu
                                            Genislik: 130, Filtrelenebilir: false),
             // Tahsilatin turu (330): oran nakitte ve POS'ta farkli olabilir,
             //   "neden bu tutar" sorusunun bir parcasi.
+            // Prim NEREDEN dogdu (332): tahsilattan mi, faturalamadan mi.
+            new("kaynakAdi", "v.kaynak_adi", "metin", "Kaynak", Hizalama: "orta",
+                                           Bicim: "rozet", Genislik: 110,
+                                           Filtrelenebilir: false),
+            new("kaynakTur", "v.kaynak_tur", "sayi", "Kaynak Kodu", Varsayilan: false),
             new("tahsilatTuruAdi", "v.tahsilat_turu_adi", "metin", "Tahsilat",
                                            Genislik: 150, Filtrelenebilir: false),
             new("tahsilatTuru", "v.tahsilat_turu", "sayi", "Tahsilat Kodu",

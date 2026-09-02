@@ -23,7 +23,7 @@ public static partial class KartKatalogu
         {
             ["durum"] = (short)1, ["oncelik"] = (short)10,
             // Kullanici kararlari: tahsil edilen matrah, KDV haric.
-            ["baz"] = (short)4, ["kdv_haric"] = (short)1,
+            ["baz"] = (short)4, ["kdv_haric"] = (short)1, ["prim_zamani"] = (short)1,
             ["hekim_tipi"] = (short)0, ["baslangic"] = "@bugun",
         },
         Alanlar: new KartAlani[]
@@ -55,6 +55,12 @@ public static partial class KartKatalogu
                 Baslik: "Baz", Grup: "Kapsam"),
             new("kdvHaric",  "kdv_haric", "mantik",
                 Baslik: "KDV Hariç (matrah)", Grup: "Kapsam"),
+            // PRIM ZAMANI (332): tahsilatta mi, faturalamada mi. Tahsilatta
+            //   prim tahsil edildikce dogar (kesinti otomatik yansir);
+            //   faturalamada kalem gelir belgesine donusunce doğar - SGK gibi
+            //   gec odeyen kurumda hekimi bekletmemek icin.
+            new("primZamani", "prim_zamani", "kod", KodListesi: "prim.zaman",
+                Baslik: "Prim Zamanı", Grup: "Kapsam"),
             new("subeId",    "sube_id",   "kod", KodTablosu: "public.sube",
                 Baslik: "Şube (boş = tümü)", Grup: "Kapsam"),
             new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 300,
