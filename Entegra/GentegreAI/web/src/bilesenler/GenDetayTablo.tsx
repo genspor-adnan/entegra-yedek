@@ -561,6 +561,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
         )}
       </h6>
 
+      {/* KOLONU COK OLAN DETAY GRIDI (prim satirlari): tablo modal genisligini
+          asinca en sagdaki kolonlar (satir silme ✖ dahil) ERISILEMEZ oluyordu.
+          Yatay kaydirma sarmalayicisi - sigan gridlerde cubuk hic cikmaz. */}
+      <div className="detay-kaydir">
       <table className={`detay-tablo${adresGrid ? ' adres-tablo' : ''}`} style={adresGrid ? { tableLayout: 'fixed' } : undefined}>
         {adresGrid && (
           <colgroup>
@@ -885,6 +889,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           )}
         </tbody>
       </table>
+      </div>
 
       {satirlarGrid && (
         <GridMenu konum={menuKonum} ogeler={menuOgeleri}

@@ -517,6 +517,9 @@ table.grid tr.flt input {
 .kagrup > h6 .d.sag { margin-left: auto; height: 20px; font-size: 11px }
 .kagrup > .alan-izgara, .kagrup > .resim-kutusu { margin: 10px }
 .kagrup > .detay-tablo { width: calc(100% - 20px); margin: 10px }
+/* Kolonu cok olan detay gridi yatay kaydirilir; sigan gridde cubuk cikmaz. */
+.detay-kaydir { overflow-x: auto; margin: 10px }
+.detay-kaydir > .detay-tablo { width: 100%; min-width: max-content; margin: 0 }
 /* Mockup (.row > .col > .grp): birden fazla alt-basликlı kutu AYNI SATIRDA yan yana. */
 .kasira { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 12px }
 .kasira .kagrup { flex: 1; min-width: 0; margin-bottom: 0 }
