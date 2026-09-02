@@ -705,6 +705,10 @@ export const api = {
   primAcikHakedis: () =>
     istek<Record<string, unknown>[]>('/api/prim/acik'),
 
+  /** Prim satirlarini ONAYLA / onayi kaldir (330) - onayli satir kilitlidir. */
+  primOnayla: (govde: { satirlar: number[]; geriAl?: boolean }) =>
+    gonder<{ satirSayisi: number; geriAl: boolean }>('/api/prim/onayla', govde),
+
   /** Donemi kapat: acik satirlar bir basliga baglanir ve DONDURULUR (324). */
   primDonemKapat: (govde: { tarafId: number; baslangic: string; bitis: string }) =>
     gonder<Record<string, unknown>>('/api/prim/donem-kapat', govde),

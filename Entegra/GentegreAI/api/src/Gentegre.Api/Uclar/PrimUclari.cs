@@ -23,6 +23,9 @@ public static class PrimUclari
     /// <summary>Dönem kapatma: kişinin açık hakediş satırlarını dondurur.</summary>
     public sealed record DonemIstegi(int TarafId, DateTime Baslangic, DateTime Bitis);
 
+    /// <summary>Prim satırı onayı (330): onaylı satır yeniden hesaplanmaz.</summary>
+    public sealed record OnayIstegi(IReadOnlyList<int> Satirlar, bool GeriAl);
+
     private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
     {
         var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
@@ -158,6 +161,36 @@ public static class PrimUclari
             return Results.Ok(kayit);
         });
 
+        // ------------------------------------------------------- onay (330) --
+        // Onay, primi KILITLER: rol ya da belge türü sonradan değişse bile
+        //   satır yeniden hesaplanmaz. Taslak satır onaylanamaz - önce kalem
+        //   gelir belgesine dönüşmeli (kural veritabanında).
+        grup.MapPost("/onayla", async (
+            OnayIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("prim", Islem.Degistir);
+            baglam.AksiyonIste("prim.onayla");
+
+            var idler = (istek.Satirlar ?? []).Where(x => x > 0).Distinct().ToList();
+            if (idler.Count == 0)
+                throw GentegreHatasi.IsKurali("Onaylanacak satır seçilmeli.");
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var sayac = 0;
+            foreach (var id in idler)
+            {
+                await baglanti.TekDegerAsync<short>(
+                    "select public.fn_prim_onayla(@p0, @p1)", null,
+                    [id, istek.GeriAl ? (short)1 : (short)0], iptal);
+                sayac++;
+            }
+
+            return Results.Ok(new { satirSayisi = sayac, geriAl = istek.GeriAl });
+        });
+
         // ------------------------------------------------ açık hakedişler ---
         // Dönem kapatma ekranı için: kişi bazında açık (dondurulmamış) tutar.
         grup.MapGet("/acik", async (
@@ -168,13 +201,17 @@ public static class PrimUclari
             baglam.YetkiIste("prim", Islem.Gor);
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // TASLAK satirlar da dondurulur (tutar 0 olsa bile): kullanici
+            //   "neden kapatamiyorum" sorusunun cevabini ekranda gormeli.
             return Results.Ok(await baglanti.ListeAsync("""
                 select o.taraf_id as "tarafId", o.kisi, o.acik_satir as "acikSatir",
-                       o.acik_tutar as "acikTutar", o.kesin_tutar as "kesinTutar",
+                       o.acik_tutar as "acikTutar", o.taslak_satir as "taslakSatir",
+                       o.taslak_tutar as "taslakTutar",
+                       o.kapanan_tutar as "kapananTutar",
                        o.ilk_tarih as "ilkTarih", o.son_tarih as "sonTarih"
                   from public.v_hakedis_ozet o
-                 where o.acik_tutar > 0
-                 order by o.acik_tutar desc
+                 where o.acik_tutar > 0 or o.taslak_tutar > 0
+                 order by o.acik_tutar desc, o.taslak_tutar desc
                 """, null, [], Satir, iptal));
         });
     }

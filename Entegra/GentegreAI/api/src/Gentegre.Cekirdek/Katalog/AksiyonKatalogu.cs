@@ -204,6 +204,12 @@ public static class AksiyonKatalogu
                 new("hakedis.roller",      "👥 Rolleri Düzenle", "prim",
                     KaynakKodu: "prim", Islem: Islem.Degistir,
                     KayitGerekir: true, Sira: 30),
+                // ONAY (330): satiri kilitler - sonradan rol/belge turu
+                //   degisse bile prim yeniden hesaplanmaz.
+                new("hakedis.onayla",      "✔ Onayla", "prim",
+                    AksiyonYetkisi: "prim.onayla", KayitGerekir: true, Sira: 40),
+                new("hakedis.onay-kaldir", "↩ Onayı Kaldır", "prim",
+                    AksiyonYetkisi: "prim.onayla", KayitGerekir: true, Sira: 50),
             },
 
             // HAKEDIS BASLIKLARI (324): kapatilmis donemler.

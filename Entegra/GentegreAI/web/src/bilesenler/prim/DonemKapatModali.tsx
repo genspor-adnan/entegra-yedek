@@ -18,7 +18,9 @@ import { para } from '../bicim';
 
 interface AcikSatir {
   tarafId: number; kisi: string; acikSatir: number; acikTutar: number;
-  kesinTutar: number; ilkTarih?: string | null; sonTarih?: string | null;
+  /** Gelir belgesi kesilmemis (taslak) prim - hakedise GIRMEZ (330). */
+  taslakSatir: number; taslakTutar: number;
+  kapananTutar: number; ilkTarih?: string | null; sonTarih?: string | null;
 }
 
 /**
@@ -61,7 +63,9 @@ export function DonemKapatModali({ tarafId, kisi, onKapat, onTamam }: {
       setAcik(y.map(r => ({
         tarafId: Number(r.tarafId), kisi: String(r.kisi ?? ''),
         acikSatir: Number(r.acikSatir ?? 0), acikTutar: Number(r.acikTutar ?? 0),
-        kesinTutar: Number(r.kesinTutar ?? 0),
+        taslakSatir: Number(r.taslakSatir ?? 0),
+        taslakTutar: Number(r.taslakTutar ?? 0),
+        kapananTutar: Number(r.kapananTutar ?? 0),
         ilkTarih: (r.ilkTarih as string) ?? null, sonTarih: (r.sonTarih as string) ?? null,
       })));
     } catch (h) { setHata(hataMetni(h)) }
@@ -120,9 +124,10 @@ export function DonemKapatModali({ tarafId, kisi, onKapat, onTamam }: {
         <table className="detay-tablo">
           <thead>
             <tr><th style={{ width: 32 }} /><th>Kişi</th>
-                <th className="hiza-sag">Açık satır</th>
-                <th className="hiza-sag">Açık tutar</th>
-                <th className="hiza-sag">Kesinleşmiş</th>
+                <th className="hiza-sag">Kapatılabilir satır</th>
+                <th className="hiza-sag">Kapatılabilir tutar</th>
+                <th className="hiza-sag">Taslak (girmez)</th>
+                <th className="hiza-sag">Kapanmış</th>
                 <th>Tarih aralığı</th></tr>
           </thead>
           <tbody>
@@ -135,7 +140,11 @@ export function DonemKapatModali({ tarafId, kisi, onKapat, onTamam }: {
                 <td>{r.kisi}</td>
                 <td className="hiza-sag">{r.acikSatir}</td>
                 <td className="hiza-sag"><b>{para.format(r.acikTutar)}</b></td>
-                <td className="hiza-sag sonuk">{para.format(r.kesinTutar)}</td>
+                <td className="hiza-sag sonuk">
+                  {r.taslakTutar > 0
+                    ? `${para.format(r.taslakTutar)} (${r.taslakSatir})` : '—'}
+                </td>
+                <td className="hiza-sag sonuk">{para.format(r.kapananTutar)}</td>
                 <td className="sonuk">
                   {r.ilkTarih ? String(r.ilkTarih).slice(0, 10).split('-').reverse().join('.') : ''}
                   {r.sonTarih ? ` – ${String(r.sonTarih).slice(0, 10).split('-').reverse().join('.')}` : ''}
@@ -143,13 +152,15 @@ export function DonemKapatModali({ tarafId, kisi, onKapat, onTamam }: {
               </tr>
             ))}
             {acik.length === 0 && (
-              <tr><td colSpan={6} className="bos">Açık hakediş satırı yok.</td></tr>
+              <tr><td colSpan={7} className="bos">Açık hakediş satırı yok.</td></tr>
             )}
           </tbody>
         </table>
         <div className="not">
           Listedeki tutarlar <b>dönemden bağımsız</b> toplamlardır; kapatma
-          yalnız seçilen tarih aralığındaki satırları bağlar.
+          yalnız seçilen tarih aralığındaki satırları bağlar. <b>Taslak</b>
+          primler hakedişe girmez: kalem satış tahakkuku / fişi / faturasına
+          dönüşünce kendiliğinden "kesin" olur.
         </div>
       </div>
     </Modal>

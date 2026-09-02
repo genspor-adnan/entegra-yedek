@@ -167,8 +167,10 @@ export function KalemRolModali({ belgeSatirId, kalemAdi, onKapat, onTamam }: {
                   <td className="hiza-sag">{para.format(p.deger)}</td>
                   <td className="hiza-sag"><b>{para.format(p.tutar)}</b></td>
                   <td>
-                    <span className={`rozet ${p.durum === 2 ? 'ok' : 'gri'}`}>
-                      {p.durum === 2 ? 'Kesinleşti' : 'Açık'}
+                    {/* Durum (330): 1 taslak · 2 kesin · 3 onaylı · 4 ödendi. */}
+                    <span className={`rozet ${p.durum >= 3 ? 'ok' : 'gri'}`}>
+                      {p.durum === 1 ? 'Taslak' : p.durum === 2 ? 'Kesin'
+                       : p.durum === 3 ? 'Onaylı' : 'Ödendi'}
                     </span>
                   </td>
                 </tr>
@@ -176,9 +178,10 @@ export function KalemRolModali({ belgeSatirId, kalemAdi, onKapat, onTamam }: {
             </tbody>
           </table>
           <div className="not">
-            <b>Kesinleşmiş</b> satırlar dönem kapanışında dondurulmuştur -
-            rol değişse de yeniden hesaplanmaz; fark sonraki döneme düzeltme
-            olarak girer.
+            <b>Onaylı</b> ve <b>ödenmiş</b> satırlar kilitlidir - rol değişse de
+            yeniden hesaplanmaz; fark sonraki döneme düzeltme olarak girer.
+            <b> Taslak</b> satır, kalem gelir belgesine dönüşünce kendiliğinden
+            kesinleşir.
           </div>
         </div>
       )}

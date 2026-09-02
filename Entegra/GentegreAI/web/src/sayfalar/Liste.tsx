@@ -1050,6 +1050,27 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
         return;
       }
 
+      // ONAY (330): satiri kilitler. Toplu secim varsa hepsi islenir.
+      if (kod === 'hakedis.onayla' || kod === 'hakedis.onay-kaldir') {
+        const geriAl = kod === 'hakedis.onay-kaldir';
+        const idler = (secililer && secililer.length > 0 ? secililer
+                       : satir ? [satir] : []).map(x => Number(x.id));
+        if (idler.length === 0) return;
+        if (!await onay(geriAl
+          ? `${idler.length} prim satırının onayı kaldırılacak. Onaylıyor musunuz?`
+          : `${idler.length} prim satırı ONAYLANACAK. Onaylanan satır kilitlenir: `
+            + 'rol ya da belge türü sonradan değişse bile prim yeniden hesaplanmaz.'))
+          return;
+        await guvenli(async () => {
+          const y = await api.primOnayla({ satirlar: idler, geriAl });
+          mesaj(geriAl
+            ? `${y.satirSayisi} satırın onayı kaldırıldı.`
+            : `${y.satirSayisi} satır onaylandı (kilitlendi).`);
+          setYenile(t => t + 1);
+        });
+        return;
+      }
+
       if (kod === 'hakedis.roller') {
         if (!satir) return;
         const sid = Number(satir.belgeSatirId ?? 0);

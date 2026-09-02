@@ -89,6 +89,12 @@ public static partial class KartKatalogu
                         Baslik: "Belge Türleri"),
                     new("pay",       "pay",       "kod", KodListesi: "prim.pay",
                         Baslik: "Pay"),
+                    // TAHSILAT TURU (330): "nakitte %12, POS'ta %10". Bos =
+                    //   farketmez. Oran, paranin hangi araçla tahsil edildigine
+                    //   de baglanabilir - POS komisyonu kurumda kalir.
+                    new("tahsilatTuru", "tahsilat_turu", "kod",
+                        KodTablosu: "public.v_tahsilat_turu_lookup",
+                        Baslik: "Tahsilat Türü"),
                     new("oranTipi",  "oran_tipi", "kod", KodListesi: "prim.oran_tipi",
                         Baslik: "Oran Tipi"),
                     new("deger",     "deger",     "para", Baslik: "Değer"),

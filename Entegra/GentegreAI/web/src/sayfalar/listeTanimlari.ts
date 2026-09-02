@@ -410,10 +410,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     toplam: ['tutar'],
     gizliKolonlar: ['rol', 'pay', 'durum', 'tarafId', 'hakedisId', 'belgeSatirId',
                     'payYuzde'],
+    // Durum (330): taslak = gelir belgesi henüz kesilmemiş; kesin = tahakkuk/
+    //   fiş/faturaya dönüşmüş; onaylı = kilitli; ödendi = hakedişi ödenmiş.
     cipler: [
-      { ad: 'Açık',        filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'Kesinleşmiş', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-      { ad: 'Ödendi',      filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Taslak', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Kesin',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Onaylı', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Ödendi', filtre: { alan: 'durum', op: 'esit', deger: 4 } },
       { ad: 'Tümü' },
     ],
     menuGrup: 'Prim', menuAd: 'Hakediş Satırları', ic: '🧾',

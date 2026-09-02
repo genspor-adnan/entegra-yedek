@@ -58,11 +58,8 @@ public static partial class KaynakKatalogu
     private static KaynakTanimi HakedisSatir() => new(
         Ad: "hakedis-satir",
         YetkiKodu: "prim",
-        // Belge turunun ADI kasa_islem_turu'nden gelir (belge listesindeki
-        //   gibi): prim orani belge turune gore degisebildigi icin satirda
-        //   "hangi belgeden" okunabilmeli.
-        Kaynak: "public.v_hakedis_satir v " +
-                "left join public.kasa_islem_turu bt on bt.kod = v.belge_tur",
+        // Belge turu ve tahsilat turu adlari GORUNUMDEN gelir (330).
+        Kaynak: "public.v_hakedis_satir v",
         SubeKolonu: "v.sube_id",
         VarsayilanSirala: "v.tarih desc, v.id desc",
         Kolonlar: new KolonTanimi[]
@@ -80,8 +77,14 @@ public static partial class KaynakKatalogu
             new("payAdi",    "v.pay_adi",   "metin", "Pay", Hizalama: "orta", Genislik: 100,
                                            Filtrelenebilir: false),
             new("pay",       "v.pay",       "sayi",  "Pay Kodu", Varsayilan: false),
-            new("belgeTurAdi", "coalesce(bt.ad, '')", "metin", "Belge Türü",
+            new("belgeTurAdi", "v.belge_tur_adi", "metin", "Belge Türü",
                                            Genislik: 130, Filtrelenebilir: false),
+            // Tahsilatin turu (330): oran nakitte ve POS'ta farkli olabilir,
+            //   "neden bu tutar" sorusunun bir parcasi.
+            new("tahsilatTuruAdi", "v.tahsilat_turu_adi", "metin", "Tahsilat",
+                                           Genislik: 150, Filtrelenebilir: false),
+            new("tahsilatTuru", "v.tahsilat_turu", "sayi", "Tahsilat Kodu",
+                                           Varsayilan: false),
             new("belgeTur",  "v.belge_tur", "sayi",  "Tür Kodu", Hizalama: "orta",
                                            Genislik: 90, Varsayilan: false),
             // Taban KDV HARIC matrah (323) - "neden bu tutar" sorusunun ilk yarisi.
@@ -93,9 +96,8 @@ public static partial class KaynakKatalogu
                                            Varsayilan: false),
             new("tutar",     "v.tutar",     "para",  "Prim", Hizalama: "sag",
                                            Bicim: "#,##0.00", Genislik: 110),
-            new("durumAdi",
-                "case v.durum when 2 then 'Kesinleşti' when 3 then 'Ödendi' else 'Açık' end",
-                                           "metin", "Durum", Hizalama: "orta",
+            // Durum (330): 1 taslak · 2 kesin · 3 onaylı (kilitli) · 4 ödendi.
+            new("durumAdi",  "v.durum_adi", "metin", "Durum", Hizalama: "orta",
                                            Bicim: "rozet", Genislik: 110,
                                            Filtrelenebilir: false),
             new("durum",     "v.durum",     "sayi",  "Durum Kodu", Varsayilan: false),
