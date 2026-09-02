@@ -607,7 +607,7 @@ export interface KalemSekmesiProps {
  */
 export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsilatAc,
                                   secili, setSecili, tahsilatAcKart, tahsilatSil,
-                                  onYenile }: {
+                                  onYenile, kurumTahakkukAc, kurumKalan }: {
   sonuc: BelgeYaniti | null;
   tahsilatlar: Record<string, unknown>[];
   kayitliId: number;
@@ -625,6 +625,15 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
   tahsilatAcKart(id: number): void;
   /** Secili kasa islemini siler - gerceklesmisse sunucu "İptal kullanın" der. */
   tahsilatSil(id: number): Promise<void>;
+  /**
+   * KURUM TAHAKKUKU (331): basvuruda kurum payini kuruma kesilen belgeye
+   * (Satış Tahakkuku) dönüştürür. TAHSILAT DEGILDIR - hastadan para alinmaz,
+   * kasa hareketi olusmaz; alacak kurum carisine yazilir ve prim de dogmaz
+   * (prim yalniz tahsilattan uretilir). Verilmezse dugme cizilmez.
+   */
+  kurumTahakkukAc?(): void;
+  /** Henuz belgelesmemis kurum payi - dugme yalniz bu > 0 iken etkin. */
+  kurumKalan?: number;
 }) {
 const genel = Number(sonuc?.belge.genelToplam ?? 0);
 const tahsil = tahsilatlar.reduce((t, k) => t + (Number(k.yerelTutar ?? k.tutar ?? 0) || 0), 0);
@@ -654,6 +663,21 @@ return (
               onClick={() => void tahsilatAc(alisMi ? 31 : 21)}>
         💵 Nakit
       </button>
+      {/* KURUM TAHAKKUKU (331): tahsilat ARACI DEGIL - bu yuzden oteki
+          dugmelerden ayri durur ve "tahsil edildi" saymaz. Kurum payi
+          kuruma kesilen Satış Tahakkuku belgesine doner; para kurumdan
+          gelince normal tahsilat islenir ve prim O ZAMAN dogar. */}
+      {kurumTahakkukAc && (
+        <button className="d"
+                disabled={!kayitliId || !(kurumKalan && kurumKalan > 0)}
+                title={!kayitliId ? 'Önce belgeyi kaydedin'
+                       : !(kurumKalan && kurumKalan > 0)
+                       ? 'Belgelenmemiş kurum payı yok'
+                       : 'Kurum payını Satış Tahakkukuna dönüştür (tahsilat değil)'}
+                onClick={kurumTahakkukAc}>
+          🏥 Kurum Tahakkuku
+        </button>
+      )}
       <button className="d bir"
               title={kayitliId ? `Banka (havale/EFT) ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç`
                                : 'Belge kaydedilip banka işlemi açılır'}

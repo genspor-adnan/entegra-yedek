@@ -219,6 +219,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   const [aciliyor, setAciliyor] = useState(!!belgeId);
   /** Donusum modali: null = kapali, sayi = ON SECILI hedef tur (0 = ilk hedef). */
   const [donusum, setDonusum] = useState<number | null>(null);
+  /**
+   * KURUM TAHAKKUKU (331): donusum modali PAY secili acilir (2 = kurum payi).
+   * Normal F8 donusumunde pay secimi kullaniciya birakilir (0).
+   */
+  const [donusumPay, setDonusumPay] = useState(0);
   /** Termin (teslim tarihi) modali - siparis satirlarinin taahhudu (140). */
   const [terminAcik, setTerminAcik] = useState(false);
   /** Rezervasyon (142) islemi surerken dugme bekler. */
@@ -1296,7 +1301,15 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                            tahsilatAcKart={tahsilat.setTahsilatKayitId}
                            tahsilatSil={tahsilat.tahsilatSil}
                            onYenile={() => { if (kayitliId) void api.belgeOku(kayitliId)
-                                              .then(setSonuc).catch(() => {}) }} />
+                                              .then(setSonuc).catch(() => {}) }}
+                           // KURUM TAHAKKUKU (331): yalniz odeyen kurumlu
+                           //   basvuruda; kurum payini Satış Tahakkukuna (13)
+                           //   donusturur - tahsilat DEGIL.
+                           kurumTahakkukAc={basvuruMu && odeyenKurumId
+                             ? () => { setDonusumPay(2); setDonusum(13) }
+                             : undefined}
+                           kurumKalan={satirlar.reduce((t, r) =>
+                             t + Math.max(hamSayi(r.kurumTutar) - (r.kurumKapatilan ?? 0), 0), 0)} />
         )}
         {/* ============================================= IMZA / TESLIM ==== */}
         {aktifSekme === 'imza' && (
@@ -1544,7 +1557,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             belgeId={kayitliId}
             belgeTur={tur}
             varsayilanHedef={donusum}
-            onKapat={() => setDonusum(null)}
+            varsayilanPay={donusumPay}
+            onKapat={() => { setDonusum(null); setDonusumPay(0) }}
             onTamam={() => onKaydedildi?.()}
           />
         )}

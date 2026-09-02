@@ -412,7 +412,6 @@
                   <span class="s">Kredi Kartı</span>
                   <span class="s">Banka / Havale</span>
                   <span class="s">Senet</span>
-                  <span class="s">Kurum Tahakkuku</span>
                 </span>
               </div>
 
@@ -432,8 +431,15 @@
               <span class="btn ok">💳 Tahsilatı Kaydet</span>
               <span class="btn">🖨️ Makbuz Yazdır</span>
               <span class="btn">↩ İade / İptal</span>
+              <!-- KURUM TAHAKKUKU tahsilat ARACI DEGIL: hastadan para alinmaz,
+                   kurum payi kuruma kesilen Satış Tahakkukuna doner ve kurum
+                   carisine borc yazilir. Kasa hareketi olusmadigi icin PRIM de
+                   dogmaz - prim, para kurumdan tahsil edilince doğar. -->
+              <span class="btn">🏥 Kurum Tahakkuku</span>
               <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">
                 Tahsilat <b>kasa işlemine</b> dönüşür; muhasebe fişi otomatik oluşur.
+                <b>Kurum Tahakkuku</b> tahsilat değildir: kurum payı
+                <b>Satış Tahakkuku</b> belgesine döner, prim doğmaz.
               </span>
             </div>
           </div>

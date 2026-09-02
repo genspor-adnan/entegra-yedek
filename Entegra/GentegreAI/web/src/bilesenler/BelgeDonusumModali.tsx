@@ -58,6 +58,11 @@ interface Props {
   varsayilanHedef?: number;
   /** Hedef listede secildi: combo degistirilemez (kullanici). */
   hedefKilitli?: boolean;
+  /**
+   * KURUM TAHAKKUKU (289/331): kisayoldan acilinca hangi PAYIN kapatilacagi
+   * onceden secili gelir - 0 tum satir · 1 hasta payi · 2 kurum payi.
+   */
+  varsayilanPay?: number;
   onKapat(): void;
   /** Donusum bittiginde cagrilir - cagiran yalnizca grid'i tazeler. */
   onTamam(yeni: BelgeYaniti): void;
@@ -71,7 +76,7 @@ interface Props {
  * kilitlenerek) - buradaki sinir yalnizca kullaniciyi erken uyarmak icindir.
  */
 export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKilitli,
-                                    onKapat, onTamam }: Props) {
+                                    varsayilanPay, onKapat, onTamam }: Props) {
   const [satirlar, setSatirlar] = useState<AcikSatir[]>([]);
   const [miktarlar, setMiktarlar] = useState<Record<number, string>>({});
   const [secili, setSecili] = useState<Record<number, boolean>>({});
@@ -111,7 +116,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
    * donusum HANGI PAYI kapatacagini sorar. Kurum payi kuruma faturalanir,
    * hasta payi hastaya - ayni satir iki ayri belgeye boluner.
    */
-  const [pay, setPay] = useState(0);
+  const [pay, setPay] = useState(varsayilanPay ?? 0);
   const paylasimVar = satirlar.some(
     s => Number(s.kurumTutar ?? 0) > 0 && Number(s.hastaTutar ?? 0) > 0);
 
