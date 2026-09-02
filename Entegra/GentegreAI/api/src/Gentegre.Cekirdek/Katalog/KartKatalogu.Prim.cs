@@ -29,6 +29,12 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id",        "id",        "sayi", Yazilabilir: false),
+            // PRIM ZAMANI ILK KAPI (332/333, kullanici): planin geri kalani
+            //   bu karara gore okunur - tahsilatta mi faturalamada mi prim
+            //   dogacak. Tahsilatta kesinti otomatik yansir; faturalamada
+            //   hekim SGK'yi beklemez. Bu yuzden kartin EN BASINDA ve zorunlu.
+            new("primZamani", "prim_zamani", "kod", Zorunlu: true,
+                KodListesi: "prim.zaman", Baslik: "Prim Zamanı", Grup: "Kimlik"),
             new("kod",       "kod",       "metin", EnFazlaUzunluk: 30,
                 Baslik: "Kod", Grup: "Kimlik"),
             new("ad",        "ad",        "metin", Zorunlu: true, EnFazlaUzunluk: 120,
@@ -55,12 +61,6 @@ public static partial class KartKatalogu
                 Baslik: "Baz", Grup: "Kapsam"),
             new("kdvHaric",  "kdv_haric", "mantik",
                 Baslik: "KDV Hariç (matrah)", Grup: "Kapsam"),
-            // PRIM ZAMANI (332): tahsilatta mi, faturalamada mi. Tahsilatta
-            //   prim tahsil edildikce dogar (kesinti otomatik yansir);
-            //   faturalamada kalem gelir belgesine donusunce doğar - SGK gibi
-            //   gec odeyen kurumda hekimi bekletmemek icin.
-            new("primZamani", "prim_zamani", "kod", KodListesi: "prim.zaman",
-                Baslik: "Prim Zamanı", Grup: "Kapsam"),
             new("subeId",    "sube_id",   "kod", KodTablosu: "public.sube",
                 Baslik: "Şube (boş = tümü)", Grup: "Kapsam"),
             new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 300,
