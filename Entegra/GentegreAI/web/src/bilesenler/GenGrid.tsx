@@ -381,6 +381,21 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   };
 
   /**
+   * SAYFA DEGISINCE SECIM TEMIZLENIR (cip degisimiyle ayni gerekce):
+   * isaretli satirlar artik ekranda degildir; secim kalinca sayac gorunenle
+   * uyusmuyor ve toplu aksiyon EKRANDA OLMAYAN satiri isliyordu.
+   */
+  const oncekiSayfaRef = useRef(sayfa);
+  useEffect(() => {
+    if (oncekiSayfaRef.current === sayfa) return;
+    oncekiSayfaRef.current = sayfa;
+    secimiUygula(new Set());
+  // secimiUygula her render'da yeniden kuruluyor - bagimliliga girerse
+  //   effect her render calisir ve secimi aninda siler.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sayfa]);
+
+  /**
    * GENEL KURAL — UYGULAMADAKI TUM GRIDLERDE AYNI (kullanici karari):
    *   duz tik      : YALNIZ o satir secili kalir, onceki isaretler kalkar
    *   Ctrl/Cmd+tik : o satiri secime ekler / cikarir
