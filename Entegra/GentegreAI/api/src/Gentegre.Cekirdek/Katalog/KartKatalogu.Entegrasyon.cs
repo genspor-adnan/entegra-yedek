@@ -27,7 +27,7 @@ public static partial class KartKatalogu
         {
             new("id",   "id",   "sayi", Yazilabilir: false),
             new("kod",  "kod",  "kod",  Zorunlu: true,
-                KodTablosu: "public.v_entegrasyon_kod_lookup",
+                SabitKodlar: EntegrasyonKodlari,
                 Baslik: "Entegrasyon", Grup: "Kimlik"),
             new("ad",   "ad",   "metin", EnFazlaUzunluk: 120,
                 Baslik: "Ad", Grup: "Kimlik"),

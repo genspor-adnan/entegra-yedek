@@ -82,6 +82,19 @@ public static partial class KartKatalogu
     // taraf_personel.CINSIYET - GENINI karsiligi yok, yeni tablo (046_personel_kart.sql).
 
     // taraf_personel.CINSIYET - GENINI karsiligi yok, yeni tablo (046_personel_kart.sql).
+    // ENTEGRASYON KODLARI (336): kod METINDIR (SKRS, MEDULA...); kod tablosu
+    //   mekanizmasi sayisal id bekledigi icin sabit sozluk kullanilir.
+    private static readonly Dictionary<string, string> EntegrasyonKodlari =
+        new()
+        {
+            ["SKRS"]   = "SKRS / Sağlık.NET Kod Sunucusu",
+            ["ENABIZ"] = "e-Nabız",
+            ["MEDULA"] = "MEDULA (SGK)",
+            ["UTS"]    = "ÜTS (Ürün Takip Sistemi)",
+            ["EBELGE"] = "e-Belge Entegratörü",
+            ["SMS"]    = "SMS Sağlayıcı",
+        };
+
     private static readonly Dictionary<string, string> CinsiyetKodlari =
         new() { ["1"] = "Erkek", ["2"] = "Kadın" };
 
