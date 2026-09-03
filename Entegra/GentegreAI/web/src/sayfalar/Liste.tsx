@@ -473,7 +473,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
         case 'kasa.iptal': {
           if (!satir) return;
-          const sebep = window.prompt('İptal sebebi:');
+          const sebep = await metinSor('İptal sebebi:', '');
           if (!sebep) return;
           await api.kasaIptal(Number(satir.id), sebep);
           setYenile(t => t + 1);
@@ -1265,7 +1265,10 @@ Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
               // Basvuru BUGUNUN tarihiyle acilir: hasta simdi geldi. Randevu
               //   ileri tarihliyse sunucu "belge tarihi ileri tarihli olamaz"
               //   diyordu; randevunun kendi tarihi aciklamada duruyor.
-              belgeTarihi: new Date().toISOString().slice(0, 16),
+              // YEREL an (kullanici): toISOString UTC verdigi icin belge
+              //   saati TR'de 3 saat geriye kayiyordu; basvuru saatinin
+              //   dogru olmasi kayit kabul icin sart.
+              belgeTarihi: yerelZamanDamgasi(),
               subeId: oturumSubeId,
               fiyatListesiId,
               aciklama: `Randevu #${satir.id}`

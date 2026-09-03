@@ -47,6 +47,9 @@ public sealed class AyarDeposu
         "randevu.baslangic_saat", "randevu.bitis_saat", "randevu.slot_dk",
         "randevu.varsayilan_sure", "randevu.calisma_gunleri",
         "randevu.ogle_baslangic", "randevu.ogle_bitis",
+        // KAYIT KABUL (355): basvuruda POS tahsilati alininca ne olacak -
+        //   0 aksiyon yok, 1 otomatik satis fisi kesilsin, 2 kullaniciya sorulsun.
+        "basvuru.pos_aksiyon",
         // Radyoloji sarf dusumu (320): stok modulunu kullanmayan kurumda
         //   kapatilabilir; depo secimi sarf cikis fisinin kaynagidir.
         "radyoloji.sarf_aktif", "radyoloji.sarf_depo",
@@ -114,6 +117,9 @@ public sealed class AyarDeposu
         ["kasa.duzenleme_gun"] = 7,
         ["liste.sayfa_boyu"] = 50,
         ["stok.negatif_davranis"] = 1,
+        // POS tahsilatinda varsayilan AKSIYON YOK: kurulumu yapilmamis bir
+        //   sistemde kendiliginden fis kesmek yanlis olurdu.
+        ["basvuru.pos_aksiyon"] = 0,
         ["guvenlik.jwt_dakika"] = 30,
         ["guvenlik.refresh_gun"] = 30,
         ["guvenlik.parola_min_uzunluk"] = 8,
@@ -138,6 +144,7 @@ public sealed class AyarDeposu
         //   10'un altinda sayfalama ekrani surekli istek atmaya cevirir.
         ["liste.sayfa_boyu"] = (10, 500),
         ["stok.negatif_davranis"] = (0, 2),          // serbest / uyar / engelle
+        ["basvuru.pos_aksiyon"] = (0, 2),            // yok / otomatik fis / sor
         ["efatura.senaryo"] = (1, 8),                // 1 Temel / 2 Ticari / 8 Ilac
         ["belge.satis.vade_gun"] = (0, 3650),
         ["belge.alis.vade_gun"] = (0, 3650),

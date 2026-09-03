@@ -54,7 +54,7 @@ public static class KimlikUclari
 
         grup.MapGet("/ben", async (
             BaglamCozucu cozucu, KullaniciDeposu kullanicilar, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            KurumProfilDeposu kurum, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             var kullanici = await kullanicilar.IdIleBulAsync(baglam.KullaniciId, iptal)
@@ -82,7 +82,11 @@ public static class KimlikUclari
                     SubeId = baglam.SubeId,
                     SubeYazma = baglam.SubeYazma,
                     Subeler = subeler,
-                    UrunModu = urunModu
+                    UrunModu = urunModu,
+                    // Acik moduller (359): menu ve rotalar bunlara gore suzulur.
+                    Moduller = await kurum.AcikModullerAsync(baglam.SubeId ?? 0, iptal),
+                    // Basvuruda sorulan hekim rolu (361/364) - aktif subeye gore.
+                    HekimRolu = await kurum.HekimRoluAsync(baglam.SubeId ?? 0, iptal)
                 },
                 // Yetkisiz aksiyon HIC donmez (API §7).
                 Aksiyonlar = baglam.Yetkiler.Tumu.Where(y => y.Tur == 1 && y.Gor)

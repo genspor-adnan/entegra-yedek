@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { onay } from '../mesaj';
 import { api } from '../../api/istemci';
 import { hataMetni, type ListeSatiri } from '../../api/sozlesme';
 import { GenGrid } from '../GenGrid';
@@ -23,7 +24,7 @@ export function SeriKurallari() {
   const sil = async () => {
     if (!secili) return;
     const ad = `${secili.seri ?? ''}`.trim();
-    if (!window.confirm(`"${ad}" seri kuralı silinecek. Onaylıyor musunuz?`)) return;
+    if (!await onay(`"${ad}" seri kuralı silinecek. Onaylıyor musunuz?`, true)) return;
     setHata(null);
     try {
       await api.kartSil('ebelge-seri', Number(secili.id));

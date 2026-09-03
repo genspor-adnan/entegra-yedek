@@ -294,6 +294,19 @@ public static partial class KartKatalogu
         },
         Detaylar: new[]
         {
+            // PRIM ROLLERI (361): kisi hangi rolde prim alabilir. Bir kisi hem
+            //   isteyen hem yapan hem uygulayan olabilir - o yuzden GRID, tek
+            //   secim degil. DIS HEKIM yalniz "Gonderen" alabilir; kurali DB
+            //   dogrular (tg_taraf_prim_rol_dogrula).
+            new DetayTanimi("primRolleri", "public.taraf_prim_rol", "taraf_id", new KartAlani[]
+            {
+                new("rol", "rol", "kod", Zorunlu: true, KodListesi: "prim.rol",
+                    Baslik: "Prim Rolü"),
+                // Onerilen: basvuru hekim combosu ve prim rol modali once
+                //   isaretlileri gosterir (uzun listede aranan kisi ustte olsun).
+                new("varsayilan", "varsayilan", "mantik", Baslik: "Önerilen"),
+                new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama")
+            }, SubeKolonu: null, Sirala: "rol", Baslik: "Prim Rolleri", LogTabloId: 963),
             // Kisi ile AYNI taraf_adres tablosu, AYNI Ev/İş tur listesi (kisisel adres).
             new DetayTanimi("adresler", "public.taraf_adres", "taraf_id", new KartAlani[]
             {
@@ -567,6 +580,12 @@ public static partial class KartKatalogu
             //   iliskiyi yuruten kisi - hekimin kendi kurumundaki biri degil.
             new("temsilci", "temsilci", "kod",   KodTablosu: "public.v_personel_lookup",
                 Baslik: "Temsilci", Grup: "Kimlik"),
+            // BOLUM (367, kullanici: "seçtim ama bölüm dolmadı"): gonderen
+            //   hekimin hastayi HANGI BOLUME gonderdigi. Basvuruda hekim
+            //   secilince Bölüm alani bundan doldurulur - memur ayni bilgiyi
+            //   ikinci kez secmesin. Bos birakilabilir (o zaman bolum elle).
+            new("departman", "departman", "kod", KodTablosu: "public.v_departman_lookup",
+                Baslik: "Bölüm", Grup: "Kimlik"),
             new("cepTel",   "cep_tel",  "metin", EnFazlaUzunluk: 30, Baslik: "Cep"),
             new("telefon",  "telefon",  "metin", EnFazlaUzunluk: 30, Baslik: "Telefon"),
             new("eposta",   "eposta",   "metin", EnFazlaUzunluk: 200, Baslik: "E-posta"),
@@ -794,7 +813,11 @@ public static partial class KartKatalogu
         var alanlar = p.Alanlar.Select(a => a.Ad switch
         {
             "personel" => new KartAlani("hasta", "hasta", "mantik", Baslik: "Hasta"),
-            "kod" => a with { Baslik = "Dosya No" },
+            // 358: numara_sablonu (tur 900) otomatikse bos birakilabilir - DB
+            //   trigger'i numarayi verir; elle modda ayni trigger bos birakmayi
+            //   reddeder. Kart tarafinda zorunluluk kalkti ki otomatik modda
+            //   kullanici gereksiz yere numara uydurmasin.
+            "kod" => a with { Baslik = "Dosya No", Zorunlu = false },
             "vkno" => a with { Baslik = "TC No", Grup = "Kimlik", AltGrup = null },
             // Hastada zorunluluklar GEVSEK: gorev/e-posta personel alanlaridir,
             //   hasta kaydi acilirken istenmez (kayit kabul hizli olmali).

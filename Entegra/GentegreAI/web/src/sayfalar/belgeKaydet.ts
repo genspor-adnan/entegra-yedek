@@ -100,6 +100,12 @@ export interface BelgeGirdisi {
   disNumarali: boolean;
   /** Basvuru (300): kalemsiz acilabilir - once protokol, hizmetler sonra. */
   basvuruMu?: boolean;
+  /**
+   * Kart SALT OKUNUR mu (kesin/kapanmis belge). Zorunluluk kurallari yalniz
+   * DUZENLENEBILIR kartta calisir: alani degistiremeyen kullaniciya "boş
+   * bırakılamaz" demek, belgeyi hic kaydedilemez hale getirir.
+   */
+  kilitli?: boolean;
 }
 
 /**
@@ -111,7 +117,8 @@ export interface BelgeGirdisi {
 export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
   const { cari, depoBelgesi, stokFisiMi, fisTipi, fisCikisMi, depo, tarih,
           tarihEnGec, tarihEnErken, geriGun, talepMi, teslimAlan, girisDepo,
-          transferMi, teslimEden, disNumarali, belgeNo, satirlar, basvuruMu } = g;
+          transferMi, teslimEden, disNumarali, belgeNo, satirlar, basvuruMu,
+          odeyenKurumId, kilitli } = g;
 
   // Transferde cari YOK (sunucu da katalogtan ayni karari veriyor).
   if (!cari && !depoBelgesi && !stokFisiMi) {
@@ -122,6 +129,12 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
     if (!depo) {
       return { [fisCikisMi ? 'cikisDepoId' : 'girisDepoId']: 'Depo seçilmeli.' };
     }
+  }
+  // ZORUNLU (kullanici): tarih bos gonderilemez - kalem fiyati, prim ve numara
+  //   serisi bu tarihe bagli. Kart alani zaten bosalinca simdiki ani yaziyor;
+  //   bu kontrol dis yollardan (or. eski taslak) gelen bos tarihi yakalar.
+  if (!tarih) {
+    return { belgeTarihi: 'Belge tarihi zorunlu.' };
   }
   // Tarih penceresi (tum belge turleri): ileri tarih ve 7 gunden eski yasak.
   if (tarih > tarihEnGec) {
@@ -160,6 +173,16 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
   //   hizmetler muayene sirasinda eklenir. Diger turlerde bos belge anlamsiz.
   if (!basvuruMu && satirlar.filter(s => s.stokId || s.hizmetId).length === 0)
     return { genel: 'En az bir satırda stok ya da hizmet seçilmeli.' };
+
+  // ODEYEN KURUM ZORUNLU (kullanici): basvuruda "kim odeyecek" bastan bellidir -
+  //   hasta kendi odese bile bunun KARSILIGI olan kurum secilir ("Özel (Hasta
+  //   Kendi Öder)"). Bos birakilinca fiyat listesi, pay dagilimi ve provizyon
+  //   sekmesi hangi kurala gore calisacagini bilemiyordu.
+  //   ESKI KAYITLAR (kullanici: "ödeyen kurum dolu olmalı diyor ama her taraf
+  //   donmuş"): kilitli belgede alan degistirilemedigi icin kural UYGULANMAZ -
+  //   kayit oldugu gibi kaydedilir.
+  if (basvuruMu && !kilitli && !odeyenKurumId)
+    return { odeyenKurumId: 'Ödeyen kurum seçilmeli.' };
 
   return null;
 }

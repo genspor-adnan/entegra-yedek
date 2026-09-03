@@ -196,6 +196,12 @@ public sealed partial class KartDeposu
             // e-Belge entegrator secimi (171) - firma/sube kartinda.
             "public.v_ebelge_entegrator_lookup",
             "public.v_numara_turu_tahsilat", "public.v_numara_turu_odeme",
+            // Kayit kabul numaralari (358): hasta dosya no + basvuru protokol no.
+            //   Beyaz listede olmayinca kart 500 veriyordu ("Bilinmeyen kod tablosu")
+            //   ve numara satiri cift tikla acilamiyordu.
+            "public.v_numara_turu_kimlik",
+            // Prim plani rol combosu (362) - rolun yaninda isaretli kisi sayisi.
+            "public.v_prim_rol_lookup",
             // e-Belge seri kurallari (156).
             "public.v_ebelge_turu_lookup", "public.v_kullanici_lookup",
             "public.v_ebelge_yon_lookup",

@@ -268,7 +268,10 @@ public sealed partial class BelgeDeposu
     /// </summary>
     private static Dictionary<string, JsonElement> SatirJson(
         IDictionary<string, object?> k, decimal miktar, int kaynakSatirId, int stokDurumDegis,
-        IReadOnlyList<object>? izlemler = null, short pay = 0)
+        IReadOnlyList<object>? izlemler = null, short pay = 0,
+        // TUTAR SECIMI (352): pay donusumunde payin kalaninin TAMAMI yerine
+        //   verilen tutar kadar - "tahsil edilen 300 TL'si fis". Kalan kaynakta.
+        decimal? payTutarSecim = null)
     {
         var birimFiyat = k["birim_fiyat"];
         var dovizBirimFiyat = k["doviz_birim_fiyat"];
@@ -284,6 +287,7 @@ public sealed partial class BelgeDeposu
             var kapanan = Convert.ToDecimal(
                 (pay == 1 ? k["hasta_kapatilan"] : k["kurum_kapatilan"]) ?? 0m);
             var kalan = payTutar - kapanan;
+            if (payTutarSecim is { } secim && secim > 0 && secim < kalan) kalan = secim;
             payKalan = kalan;
             birimFiyat = miktar > 0 ? decimal.Round(kalan / miktar, 6) : kalan;
             // DOVIZ FIYATI DA PAYDAN: kaynaktan aynen kopyalaninca dip toplamin

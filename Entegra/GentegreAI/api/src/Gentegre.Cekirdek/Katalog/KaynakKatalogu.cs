@@ -104,7 +104,8 @@ public static partial class KaynakKatalogu
         //   alinmamis sonuc" sorularinin ekrani.
         Ekle(RadyolojiKritik());
         Ekle(RadyolojiKonsultasyon());
-        Ekle(RadyolojiTeslim());
+        Ekle(RadyolojiTeslim());
+
         // PRIM / HAKEDIS (324): prim tahsil edildikce dogar - hakedis satiri
         //   tahsilat dagitimindan uretilir.
         Ekle(PrimPlani());
@@ -132,6 +133,11 @@ public static partial class KaynakKatalogu
         Ekle(HesapPlani());
 
         // Numaralama (152): Genel Ayarlar > Numaralama ekranindaki dort grid.
+        Ekle(PrimRolAday());
+        Ekle(Muayene());
+        Ekle(LabIstem());
+        Ekle(NumaraHasta());
+        Ekle(NumaraBasvuru());
         Ekle(NumaraSatis());
         Ekle(NumaraAlis());
         Ekle(NumaraTahsilat());

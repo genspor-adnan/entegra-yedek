@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal } from '../Modal';
 import { api } from '../../api/istemci';
-import { para, hamSayi } from '../bicim';
+import { para, hamSayi, yerelAnMetni } from '../bicim';
 import {
   type SatirDurumu, satirTutari, adetKaydir, KDV_ORANLARI,
 } from '../../sayfalar/belgeSatir';
@@ -300,14 +300,16 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                 da serbest metin lot iki ayri yerde tutulan, birbirini tutmayan
                 kayit uretiyordu. */}
 
-            {/* TESLIM TARIHI (140) yalniz SIPARISTE: satirin termini. Ayni
-                siparisin kalemleri farkli gunlerde sevk edilebilir - stokta
-                olan hemen, uretilecek olan haftalar sonra. Bos = termin yok. */}
+            {/* KALEM TARIHI (140/368): siparişte satirin TERMINI, basvuruda
+                ISLEM ZAMANI - "islem ne zaman yapildi". SAATLI ve BOS OLMAZ
+                (kullanici): temizlenirse o anki zaman geri yazilir; ayni gun
+                icindeki sira ancak saatle anlasiliyor. */}
             {siparisMi && (
               <label className="alan">
-                <span className="etiket">Teslim Tarihi</span>
-                <input type="date" value={r.teslimTarihi ?? ''} onKeyDown={tus}
-                       onChange={e => degis('teslimTarihi', e.target.value)} />
+                <span className="etiket zorunlu-isaret">Tarih</span>
+                <input type="datetime-local" value={r.teslimTarihi ?? ''} onKeyDown={tus}
+                       onChange={e => degis('teslimTarihi',
+                                            e.target.value || yerelAnMetni(new Date()))} />
               </label>
             )}
 

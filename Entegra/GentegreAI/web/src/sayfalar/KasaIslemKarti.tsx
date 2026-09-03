@@ -13,7 +13,7 @@ import { para, yerelAnMetni, bugunIso, sayiOku as sayi, tutarMetni, hamSayi } fr
 import { DOVIZ_KODLARI, YEREL_PARA_VARSAYILAN } from './belgeSabitleri';
 import { kasaDogrula, kasaGovdesi, kasaTurBilgisi, type KasaGirdisi } from './kasaKaydet';
 import { TahsilatDagitimi, type DagitimSecimi } from '../bilesenler/TahsilatDagitimi';
-import { mesaj } from '../bilesenler/mesaj';
+import { mesaj , metinSor } from '../bilesenler/mesaj';
 
 
 const LOOKUP_HESAP = [
@@ -318,7 +318,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
 
   async function iptalEt() {
     if (!kayitId) return;
-    const sebep = window.prompt('İptal sebebi:');
+    const sebep = await metinSor('İptal sebebi:', '');
     if (!sebep) return;
     setHata(null);
     setCalisiyor(true);

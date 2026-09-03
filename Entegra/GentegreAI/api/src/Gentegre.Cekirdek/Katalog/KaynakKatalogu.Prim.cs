@@ -80,6 +80,15 @@ public static partial class KaynakKatalogu
                                            Bicim: "rozet", Genislik: 120,
                                            Filtrelenebilir: false),
             new("rol",       "v.rol",       "kod",   "Rol Kodu", Varsayilan: false),
+            // ROL ISARETI KONTROLU (363): kisi BUGUN bu rolde isaretli mi
+            //   (361/362 - personelde "Prim Rolleri" gridi, dis hekimde
+            //   Calisma Sekli "Gönderen"). Satir TARIHSEL kayittir; isaret
+            //   sonradan kalkinca silinmez, burada gorunur - kullanici ya
+            //   isareti geri koyar ya satiri iptal eder.
+            new("isaretAdi", "v.isaret_adi", "metin", "Rol İşareti", Hizalama: "orta",
+                                           Bicim: "rozet", Genislik: 120,
+                                           Filtrelenebilir: false),
+            new("rolIsaretli", "v.rol_isaretli", "kod", "İşaretli", Varsayilan: false),
             new("hasta",     "v.hasta",     "metin", "Hasta / Cari", Genislik: 190),
             new("kalem",     "v.kalem",     "metin", "Kalem", Genislik: 240),
             new("payAdi",    "v.pay_adi",   "metin", "Pay", Hizalama: "orta", Genislik: 100,

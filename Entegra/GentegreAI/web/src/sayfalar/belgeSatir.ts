@@ -8,7 +8,7 @@
  * KURAL: buradaki hesaplar ONIZLEMEDIR - kesin tutari sunucu (BelgeHesap)
  * hesaplar. Ikisi ayni sirayi izler ki ekran ile kayit uyusun.
  */
-import { hamSayi } from '../bilesenler/bicim';
+import { hamSayi, yerelAnMetni } from '../bilesenler/bicim';
 
 export interface SatirDurumu {
   anahtar: number;
@@ -148,6 +148,9 @@ export const bosSatir = (anahtar: number): SatirDurumu => ({
   adet: '1', birimFiyat: '', fiyatDovizi: '', dovizFiyat: '', kur: '1',
   iskonto: '0', iskonto2: '0', kdv: '20', aciklama: '', izlemeKodu: '',
   izleme: 0, izlemler: [],
+  // KALEM TARIHI BOS OLMAZ (368, kullanici): islem ne zaman yapildi - yeni
+  //   satir O ANKI zamanla acilir, kullanici gerekirse degistirir.
+  teslimTarihi: yerelAnMetni(new Date()),
 });
 /**
  * Satir tutari ONIZLEMESI - sunucudaki BelgeHesap.SatirTutari ile ayni sira:
@@ -201,7 +204,8 @@ export function yanittanSatirlar(
     aciklama: String(r.aciklama ?? ''),
     izlemeKodu: String(r.izlemeKodu ?? ''),
     // Termin (140): sunucu tam tarih doner, ekran gun bekliyor.
-    teslimTarihi: String(r.teslimTarihi ?? '').slice(0, 10),
+    // 368: alan artik SAATLI (timestamp) - datetime-local 16 karakter ister.
+    teslimTarihi: String(r.teslimTarihi ?? '').slice(0, 16),
     // Ambalaj (143): GIRILEN miktar `adet`tir; `miktar` ana birim karsiligidir
     //   (2 kutu / 24 adet) - kart girileni gosterir.
     birim: Number(r.birim ?? 0),

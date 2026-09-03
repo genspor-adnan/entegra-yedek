@@ -21,7 +21,7 @@ export function BelgeTahsilatModallari({ tahsilat, cari, genelToplam }: {
   const {
     cekTuru, setCekTuru, tahsilatAcilis, setTahsilatAcilis,
     tahsilatAcik, setTahsilatAcik, tahsilatKayitId, setTahsilatKayitId,
-    tazele, cekKartKaydedildi,
+    tazele, cekKartKaydedildi, onPencereKapandi,
   } = tahsilat;
   const senetMi = cekTuru?.tur === 24 || cekTuru?.tur === 34;
 
@@ -67,7 +67,8 @@ export function BelgeTahsilatModallari({ tahsilat, cari, genelToplam }: {
       {tahsilatAcilis !== null && (
         <KasaIslemKarti
           acilis={tahsilatAcilis}
-          onKapat={() => { setTahsilatAcilis(null); tazele() }}
+          onKapat={() => { const t = tahsilatAcilis.tur;
+                           setTahsilatAcilis(null); tazele(); onPencereKapandi?.(t) }}
         />
       )}
 
@@ -80,7 +81,8 @@ export function BelgeTahsilatModallari({ tahsilat, cari, genelToplam }: {
             belgeId: tahsilat.belgeId,
             tutar: onyukluTutar,
           }}
-          onKapat={() => { setTahsilatAcik(null); tazele() }}
+          onKapat={() => { const t = tahsilatAcik;
+                           setTahsilatAcik(null); tazele(); onPencereKapandi?.(t) }}
         />
       )}
     </>

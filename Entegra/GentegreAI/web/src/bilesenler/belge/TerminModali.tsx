@@ -3,7 +3,7 @@ import { api } from '../../api/istemci';
 import { type BelgeYaniti, hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import type { SatirDurumu } from '../../sayfalar/belgeSatir';
-import { hamSayi } from '../bicim';
+import { hamSayi , tarihSaat } from '../bicim';
 
 /**
  * TERMIN GUNCELLEME (140) - siparis satirlarinin teslim tarihi.
@@ -74,7 +74,8 @@ export function TerminModali({ belgeId, satirlar, onKapat, onTamam }: {
           <div className="alan-izgara" style={{ margin: 10 }}>
             <label className="alan">
               <span className="etiket">Hepsine Uygula</span>
-              <input type="date" value={toplu}
+              {/* 368: kolon SAATLI - toplu uygulamada da saat girilebilir. */}
+              <input type="datetime-local" value={toplu}
                      onChange={e => hepsineUygula(e.target.value)} />
             </label>
             <span className="alan-notu">
@@ -102,10 +103,10 @@ export function TerminModali({ belgeId, satirlar, onKapat, onTamam }: {
                     {(hamSayi(s.adet)).toLocaleString('tr-TR')}
                   </td>
                   <td className="hiza-orta sonuk">
-                    {s.teslimTarihi ? s.teslimTarihi.split('-').reverse().join('.') : '—'}
+                    {s.teslimTarihi ? tarihSaat(s.teslimTarihi) : '—'}
                   </td>
                   <td className="hiza-orta">
-                    <input type="date" value={tarihler[s.satirId!] ?? ''}
+                    <input type="datetime-local" value={tarihler[s.satirId!] ?? ''}
                            onChange={e => setTarihler(t => ({ ...t, [s.satirId!]: e.target.value }))} />
                   </td>
                 </tr>

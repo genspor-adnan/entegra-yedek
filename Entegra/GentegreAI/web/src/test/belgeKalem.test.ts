@@ -137,8 +137,11 @@ describe('yanittanSatirlar', () => {
     expect(s.birimCarpan).toBe(12);      // x12 = 24 adet
   });
 
-  it('termini gune kirpar (140)', () => {
-    expect(yanittanSatirlar(yanit, 'TL')[0].teslimTarihi).toBe('2026-09-01');
+  // 368: kalem tarihi artik SAATLI (belge_satir.teslim_tarihi timestamp) -
+  //   basvuruda "islem ne zaman yapildi" demek. Gun bazli eski kayitlar 00:00
+  //   ile geliyor; datetime-local girdisi 16 karakter ister.
+  it('kalem tarihini SAATIYLE tasir (368)', () => {
+    expect(yanittanSatirlar(yanit, 'TL')[0].teslimTarihi).toBe('2026-09-01T00:00');
   });
 
   it('bos para birimini yerel paraya dusurur', () => {

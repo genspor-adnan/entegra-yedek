@@ -74,8 +74,14 @@ public static partial class KartKatalogu
                     // ID SART: yoksa kayitli satir "yeni" sanilip her kayitta
                     //   yeniden eklenir (satirlar cogalir).
                     new("id",        "id",        "sayi", Yazilabilir: false),
+                    // ROL COMBOSU ISARETLERLE UYUMLU (362): kod listesi yerine
+                    //   v_prim_rol_lookup - her rolun yaninda o rolde ISARETLI
+                    //   kisi sayisi yazar ("Yapan (15 kişi)" / "İsteyen — kişi
+                    //   işaretlenmemiş") ve kurum tipinin varsayilan rolu ustte
+                    //   durur. Kimse isaretlenmemis role plan yazilirsa hakedis
+                    //   hic dogmaz; bu ancak ay sonunda fark edilirdi.
                     new("rol",       "rol",       "kod", Zorunlu: true,
-                        KodListesi: "prim.rol", Baslik: "Rol"),
+                        KodTablosu: "public.v_prim_rol_lookup", Baslik: "Rol"),
                     // KAPSAM = KAMPANYA SATIRIYLA AYNI UCLU (328): tip +
                     //   kalem turu + kapsam. Ayni ekran iki yerde tanidik olsun
                     //   diye ayni kod listeleri kullanilir.

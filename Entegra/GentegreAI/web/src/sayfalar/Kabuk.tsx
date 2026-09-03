@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { modulAcikMi } from './listeTanimlari';
 import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -56,6 +57,9 @@ const GRUP_IKON: Record<string, string> = {
   'Randevu': '📅',
   'Kayıt Kabul': '🚑',
   'Radyoloji': '☢️',
+  // Klinik moduller (360): kurum profilinde kapaliysa menude hic gorunmezler.
+  'Muayene': '🩺',
+  'Laboratuvar': '🧪',
   'Cari':    '🤝',
   'Satış':   '🛍️',
   'Alış':    '🛒',
@@ -63,6 +67,9 @@ const GRUP_IKON: Record<string, string> = {
   'Banka':   '🏦',
   'CRM':     '📈',
   'Stok & Hizmet': '📦',
+  // Muhasebe ana menusu (kullanici): Stok'tan sonra gelir - hesap plani, fisler,
+  //   fis satirlari, masraf merkezleri ve islem turleri Yonetim'den buraya alindi.
+  'Muhasebe': '📚',
   'İK':      '👥',
   'Yönetim': '🛠️',
 };
@@ -74,12 +81,15 @@ const GRUP_IKON_CEV: Record<string, string> = {
   'Appointments': '📅', 'Termine': '📅',
   'Admissions': '🚑', 'Aufnahme': '🚑',
   'Radiology': '☢️', 'Radiologie': '☢️',
+  'Examination': '🩺', 'Untersuchung': '🩺',
+  'Laboratory': '🧪', 'Labor': '🧪',
   'Accounts': '🤝', 'Geschäftspartner': '🤝',
   'Sales': '🛍️', 'Verkauf': '🛍️',
   'Purchasing': '🛒', 'Einkauf': '🛒',
   'Cash': '💵', 'Kasse': '💵',
   'Bank': '🏦',
   'Items & Services': '📦', 'Artikel & Leistungen': '📦',
+  'Accounting': '📚', 'Buchhaltung': '📚',
   'HR': '👥', 'Personal': '👥',
   'Administration': '🛠️', 'Verwaltung': '🛠️',
 };
@@ -103,7 +113,9 @@ export function Kabuk() {
   //   altinda TOPLANIR; menuGrup'suz ogeler eskisi gibi duz sirada kalir.
   const yetkiliListeler = LISTELER.filter(l => yetki(l.yetkiKodu) && !l.menuGizli
     // Urun modu suzmesi (215): Kayit Kabul yalniz GenoTIP AI'da.
-    && (!l.urunModu || l.urunModu === (kullanici?.urunModu ?? 1)));
+    && (!l.urunModu || l.urunModu === (kullanici?.urunModu ?? 1))
+    // MODUL suzmesi (359): kurum profilinde kapali modulun menusu cizilmez.
+    && modulAcikMi(l, kullanici?.moduller));
   const moduller: MenuOgesi[] =
     yetkiliListeler.map(l => ({
       yol: `/${l.rota ?? l.kaynak}`, ad: cm(l.menuAd), ic: l.ic,
@@ -116,6 +128,15 @@ export function Kabuk() {
   // Iki seviye: grup (Cari, Kasa, Yönetim…) ve grubun icinde alt grup
   //   (Yönetim › Ayarlar). Ayni yardimci iki seviyede de kullanilir.
   const satirlar = grupla(moduller, m => m.grup);
+  // YONETIM HER ZAMAN EN SONDA (kullanici): grup sirasi tanim dizisindeki ILK
+  //   ogeden gelir, Yonetim'in ilk ogesi (Kampanyalar) dizinin ortasinda oldugu
+  //   icin menunun ortasina dusuyordu. Ayarlar/roller gibi seyrek kullanilan
+  //   ekranlar en altta olsun diye grup burada sona alinir - dil degisince ad
+  //   da degistiginden cevirili adlar da kontrol edilir.
+  const YONETIM_ADLARI = ['Yönetim', 'Administration', 'Verwaltung'];
+  const yonetimIndeks = satirlar.findIndex(
+    s => s.tur === 'grup' && YONETIM_ADLARI.includes(s.ad));
+  if (yonetimIndeks >= 0) satirlar.push(...satirlar.splice(yonetimIndeks, 1));
   // Sira YALNIZ grup icinde uygulanir: gruplarin kendi sirasi (Hasta, Cari,
   //   Satis...) tanim sirasindan gelir, menuSira onu kaydirmamali.
   satirlar.forEach(sat => {

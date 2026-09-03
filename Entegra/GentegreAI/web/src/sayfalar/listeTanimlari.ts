@@ -68,6 +68,13 @@ export interface ListeTanimi {
   yol: string;
   /** Yalniz bu urun modunda gorunur (215): 2 = GenoTIP AI (HBYS). Bos = ortak. */
   urunModu?: number;
+  /**
+   * Bagli oldugu MODUL kodu (359, public.kurum_modul). Modul kurum profilinde
+   * kapaliysa liste menude cizilmez ve rotasi acilmaz. Verilmezse menu grubunun
+   * varsayilan modulu (MENU_GRUP_MODUL) kullanilir; ikisi de yoksa liste her
+   * kurulumda gorunur (Yonetim ekranlari gibi).
+   */
+  modul?: string;
   /** Kart ekrani olan kaynaklarda cift tik karta gider. */
   kartYolu?: string;
   /**
@@ -272,6 +279,42 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   // RADYOLOJI grubu ana menude KAYIT KABUL ile CRM ARASINDA (kullanici):
   //   grup sirasi bu dizideki ILK gorulme sirasindan gelir.
   {
+    // MUAYENE (360): tip merkezindeki uzman hekim muayenesi - basvurudan
+    //   dogar, sikayet/oyku/bulgu/tani/tedavi tasir. Cipler gunun isini
+    //   bolumler: acik muayeneler once, tamamlananlar arkada.
+    kaynak: 'muayene', rota: 'muayene', baslik: 'Muayeneler',
+    yol: 'Muayene › Muayeneler',
+    kartYolu: '/muayene', kartBaslik: 'Muayene',
+    aksiyonEkrani: 'cari-liste',
+    tarihAlani: 'muayeneTarihi',
+    cipler: [
+      { ad: 'Açık',        filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tamamlanan',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Muayene', menuAd: 'Muayeneler', ic: '🩺', yetkiKodu: 'muayene',
+  },
+  {
+    // LABORATUVAR ISTEMLERI (360): biyokimya / mikrobiyoloji / genetik.
+    //   Satir = istem; testler ve sonuclari kartin "Testler" detayinda.
+    kaynak: 'lab-istem', rota: 'lab-istem', baslik: 'Laboratuvar İstemleri',
+    yol: 'Laboratuvar › İstemler',
+    kartYolu: '/lab-istem', kartBaslik: 'Laboratuvar İstemi',
+    aksiyonEkrani: 'cari-liste',
+    tarihAlani: 'istemTarihi',
+    cipler: [
+      { ad: 'İstendi',     filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Numune',      filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Çalışılıyor', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Sonuçlandı',  filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Onaylandı',   filtre: { alan: 'durum', op: 'esit', deger: 5 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'İstemler', ic: '🧪', yetkiKodu: 'lab',
+  },
+  {
     // RADYOLOJI CALISMA LISTESI (283): modulun giris ekrani - rapor yazma,
     //   PACS acma ve onay buradan baslar. Cipler gunun isini bolumler:
     //   once cekilecekler, sonra raporlanacaklar, sonra onay bekleyenler.
@@ -443,6 +486,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Kesin',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
       { ad: 'Onaylı', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Ödendi', filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      // ROL ISARETI (363): kisinin BUGUN o rolde isareti yoksa satir burada
+      //   toplanir - isaret kaldirilmis ya da yanlis role prim dogmus demektir.
+      { ad: 'İşaret yok', filtre: { alan: 'rolIsaretli', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
     ],
     menuGrup: 'Prim', menuAd: 'Hakediş Satırları', ic: '🧾',
@@ -652,6 +698,53 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   altinda ararken kimse bulamiyordu.
     menuGrup: 'Stok & Hizmet', menuAd: 'Kategoriler', ic: '🌳', yetkiKodu: 'stok',
     menuSira: 25,
+  },
+  {
+    kaynak: 'hesap-plani', baslik: 'Hesap Planı', yol: 'Yonetim › Hesap Plani',
+    kartYolu: '/hesap-plani',
+    cipler: [
+      { ad: 'Çalışan', filtre: { alan: 'calisirMi', op: 'esit', deger: 1 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Muhasebe', menuAd: 'Hesap Planı', ic: '📒', yetkiKodu: 'hesap_plani',
+    menuSira: 10,
+  },
+  {
+    // Muhasebe fisleri: kasa islemi/belge kesinlestikce OTOMATIK uretilir; buradan
+    //   yalniz izlenir (elle fis girisi F4/F7 kapsaminda degil).
+    kaynak: 'muhasebe-fis', baslik: 'Muhasebe Fişleri', yol: 'Yonetim › Muhasebe Fisleri',
+    aksiyonEkrani: 'fis-liste', toplam: ['toplamBorc', 'toplamAlacak'],
+    cipler: [
+      { ad: 'Kayıtlı', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Muhasebe', menuAd: 'Muhasebe Fişleri', ic: '📕', yetkiKodu: 'muhasebe_fis',
+    menuSira: 20,
+  },
+  {
+    kaynak: 'muhasebe-fis-satir', baslik: 'Fiş Satırları', yol: 'Yonetim › Fis Satirlari',
+    // Belgeden "Muhasebe Fişini Aç" bu ekrana fisId ile gelir.
+    urlFiltreAlani: 'fisId',
+    toplam: ['borc', 'alacak'],
+    menuGrup: 'Muhasebe', menuAd: 'Fiş Satırları', ic: '📗', yetkiKodu: 'muhasebe_fis',
+    menuSira: 30,
+  },
+  {
+    kaynak: 'masraf-merkezi', baslik: 'Masraf Merkezleri', yol: 'Yonetim › Masraf Merkezleri',
+    kartYolu: '/masraf-merkezi', cipler: DURUM_CIPLERI,
+    menuGrup: 'Muhasebe', menuAd: 'Masraf Merkezleri', ic: '🏷️', yetkiKodu: 'masraf_merkezi',
+    menuSira: 40,
+  },
+  {
+    // Islem turu katalogu: kasa hareketlerinin ekstre/fis davranisini VERI olarak
+    //   tasir (bkz. 073). Salt gorunum - duzenleme yonetici isi, kart yok.
+    kaynak: 'kasa-islem-turu', baslik: 'İşlem Türleri', yol: 'Yonetim › Islem Turleri',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Tumu' },
+    ],
+    menuGrup: 'Muhasebe', menuAd: 'İşlem Türleri', ic: '⚙️', yetkiKodu: 'kasa_islem_turu',
+    menuSira: 50,
   },
   {
     // KAMPANYALAR (268, kullanici: "ayarlara liste ve kart olarak ekle"):
@@ -1254,7 +1347,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   {
     // Kullanici: "e-Belge'yi de bir Yönetim altına".
     kaynak: 'e-belge', baslik: 'e-Belge Kuyrugu', yol: 'e-Belge › Kuyruk',
-    menuGrup: 'Yönetim', menuAd: 'e-Belge', ic: '📨', yetkiKodu: 'e_belge',
+    // Kullanici: "e-Belge menusunu Satis ana menu altinda en sona tasi" -
+    //   gonderilen belgelerin kuyrugu satis akisinin devami.
+    menuGrup: 'Satış', menuAd: 'e-Belge', ic: '📨', yetkiKodu: 'e_belge',
+    menuSira: 999,
   },
   {
     // Kullanici: "Yönetim altına Roller ve İşlem Günlüğü al".
@@ -1270,48 +1366,6 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ],
     tarihAlani: 'tarih',
     menuGrup: 'Yönetim', menuAd: 'İşlem Günlüğü', ic: '📋', yetkiKodu: 'islem_log',
-  },
-  {
-    // Muhasebe fisleri: kasa islemi/belge kesinlestikce OTOMATIK uretilir; buradan
-    //   yalniz izlenir (elle fis girisi F4/F7 kapsaminda degil).
-    kaynak: 'muhasebe-fis', baslik: 'Muhasebe Fişleri', yol: 'Yonetim › Muhasebe Fisleri',
-    aksiyonEkrani: 'fis-liste', toplam: ['toplamBorc', 'toplamAlacak'],
-    cipler: [
-      { ad: 'Kayıtlı', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'Tumu' },
-    ],
-    menuGrup: 'Yönetim', menuAd: 'Muhasebe Fişleri', ic: '📕', yetkiKodu: 'muhasebe_fis',
-  },
-  {
-    kaynak: 'muhasebe-fis-satir', baslik: 'Fiş Satırları', yol: 'Yonetim › Fis Satirlari',
-    // Belgeden "Muhasebe Fişini Aç" bu ekrana fisId ile gelir.
-    urlFiltreAlani: 'fisId',
-    toplam: ['borc', 'alacak'],
-    menuGrup: 'Yönetim', menuAd: 'Fiş Satırları', ic: '📗', yetkiKodu: 'muhasebe_fis',
-  },
-  {
-    kaynak: 'hesap-plani', baslik: 'Hesap Planı', yol: 'Yonetim › Hesap Plani',
-    kartYolu: '/hesap-plani',
-    cipler: [
-      { ad: 'Çalışan', filtre: { alan: 'calisirMi', op: 'esit', deger: 1 } },
-      { ad: 'Tumu' },
-    ],
-    menuGrup: 'Yönetim', menuAd: 'Hesap Planı', ic: '📒', yetkiKodu: 'hesap_plani',
-  },
-  {
-    kaynak: 'masraf-merkezi', baslik: 'Masraf Merkezleri', yol: 'Yonetim › Masraf Merkezleri',
-    kartYolu: '/masraf-merkezi', cipler: DURUM_CIPLERI,
-    menuGrup: 'Yönetim', menuAd: 'Masraf Merkezleri', ic: '🏷️', yetkiKodu: 'masraf_merkezi',
-  },
-  {
-    // Islem turu katalogu: kasa hareketlerinin ekstre/fis davranisini VERI olarak
-    //   tasir (bkz. 073). Salt gorunum - duzenleme yonetici isi, kart yok.
-    kaynak: 'kasa-islem-turu', baslik: 'İşlem Türleri', yol: 'Yonetim › Islem Turleri',
-    cipler: [
-      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
-      { ad: 'Tumu' },
-    ],
-    menuGrup: 'Yönetim', menuAd: 'İşlem Türleri', ic: '⚙️', yetkiKodu: 'kasa_islem_turu',
   },
   {
     // Rol'un durum kolonu "durum" degil "aktif" - DURUM_CIPLERI (alan:'durum') buraya
@@ -1335,43 +1389,87 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Firma geneli DAVRANIS ayarlari (public.referans). Liste degil (ozelSayfa).
     kaynak: 'genel-ayarlar', baslik: 'Genel Ayarlar', yol: 'Yonetim › Ayarlar › Genel',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Genel', menuSira: 1,
+    menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'Genel', menuSira: 1,
     ic: '⚙️', yetkiKodu: 'ayar',
+  },
+  {
+    // KAYIT KABUL ayarlari (kullanici): Genel / Hasta / Başvuru sekmeleri.
+    //   Basvuru sekmesindeki "Tahsilatta POS" ayari POS tahsilatindan sonra
+    //   satis fisi kesilip kesilmeyecegini belirler.
+    kaynak: 'kayit-kabul-ayarlar', baslik: 'Kayıt Kabul Ayarları',
+    yol: 'Yonetim › Modül Ayarları › Kayit Kabul', ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'Kayıt Kabul', menuSira: 2,
+    ic: '🩺', yetkiKodu: 'ayar', urunModu: 2,
   },
   {
     // Sekmeli AYAR ekrani - liste degil (ozelSayfa): Genel + Depolar. Menude
     //   Yönetim grubunun altinda "Ayarlar" alt basligiyla toplanir.
     kaynak: 'stok-ayarlar', baslik: 'Stok Ayarları', yol: 'Yonetim › Ayarlar › Stok Ayarlari',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Stok Ayarları', menuSira: 2,
+    menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'Stok Ayarları', menuSira: 3,
     ic: '📦', yetkiKodu: 'stok',
   },
   {
     // Kasa modulu ayarlari (149) - simdilik tek sekme: duzeltme gun siniri.
     kaynak: 'kasa-ayarlar', baslik: 'Kasa Ayarları', yol: 'Yonetim › Ayarlar › Kasa',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Kasa', menuSira: 3,
+    menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'Kasa', menuSira: 4,
     ic: '💵', yetkiKodu: 'kasa_islem',
   },
   {
     // Satis belgesi ayarlari: Genel + e-Belge (e-Belge yalniz GIDEN belgede).
     kaynak: 'satis-ayarlar', baslik: 'Satış Belgeleri', yol: 'Yonetim › Ayarlar › Satış Belgeleri',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Satış Belgeleri', menuSira: 4,
+    menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'Satış Belgeleri', menuSira: 5,
     ic: '🧾', yetkiKodu: 'belge',
   },
   {
     // IK ayarlari (kullanici): Departman + Pozisyon kod listeleri duzenlenir.
     kaynak: 'ik-ayarlar', baslik: 'İK Ayarları', yol: 'Yonetim › Ayarlar › İK',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'İK', menuSira: 6,
+    menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'İK', menuSira: 7,
     ic: '👥', yetkiKodu: 'personel',
   },
   {
     // Alis belgesi ayarlari: yalniz Genel - alis faturasini GIB'e biz gondermeyiz.
     kaynak: 'alis-ayarlar', baslik: 'Alış Belgeleri', yol: 'Yonetim › Ayarlar › Alış Belgeleri',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ayarlar', menuAd: 'Alış Belgeleri', menuSira: 5,
+    menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'Alış Belgeleri', menuSira: 6,
     ic: '📥', yetkiKodu: 'belge',
   },
 ];
+
+
+/**
+ * MENU GRUBU -> MODUL (359). Listeye ayri ayri `modul` yazmak yerine grubun
+ * varsayilani kullanilir; istisna olan liste kendi `modul` alanini verir.
+ *
+ * Burada OLMAYAN grup (Yonetim, Ana Sayfa...) hicbir kuruluma kapatilamaz:
+ * ayar ve kullanici ekranlari her zaman erisilebilir kalmali - yoksa kapatilan
+ * modul geri acilamazdi.
+ */
+export const MENU_GRUP_MODUL: Record<string, string> = {
+  'Kayıt Kabul':   'kayit_kabul',
+  'Randevu':       'randevu',
+  'Radyoloji':     'radyoloji',
+  'Prim':          'prim',
+  'Stok & Hizmet': 'stok',
+  'Kasa':          'kasa',
+  'Banka':         'kasa',
+  'Muhasebe':      'muhasebe',
+  'Satış':         'erp_satis',
+  'Alış':          'erp_satis',
+  'İletişim & AI': 'mesaj',
+};
+
+/**
+ * Liste bu kurulumda gorunur mu (359). `acikModuller` giris/`/ben` yanitindan
+ * gelir; bos dizi = bilgi yok demektir ve HICBIR SEY suzulmez (eski kurulumda
+ * profil satiri olmayabilir - ekranin kaybolmasindansa gorunmesi yeglenir).
+ */
+export function modulAcikMi(l: ListeTanimi & { menuGrup?: string },
+                            acikModuller?: readonly string[]) {
+  if (!acikModuller || acikModuller.length === 0) return true;
+  const kod = l.modul ?? (l.menuGrup ? MENU_GRUP_MODUL[l.menuGrup] : undefined);
+  return !kod || acikModuller.includes(kod);
+}

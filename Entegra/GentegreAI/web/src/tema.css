@@ -370,6 +370,9 @@ table.grid tr.flt input {
 .hasta-serit .hs.sag { text-align: right }
 .hasta-serit .hs .v .rozet { margin-left: 6px }
 .hasta-serit .hs .v.teh { color: var(--teh, #b23c3c) }
+/* Hasta LEHINE bakiye (tahsilat ucretten fazla): yesil "Alacaklı". Esitlikte
+   hicbir sinif verilmez - deger normal yazi renginde kalir (kullanici). */
+.hasta-serit .hs .v.olumlu { color: var(--ok) }
 
 .kaperde { position: fixed; inset: 0; background: rgba(20, 40, 70, .45); z-index: 320 }
 /* Mesaj/onay penceresi HER ZAMAN en ustte: kart modali acikken sorulan onay
@@ -762,6 +765,9 @@ input.skt-gecmis {
 }
 /* Isaret kutusu kolonu TUM secim pencerelerinde ayni (cari/stok aramasi ve
    GenLookup) - kural artik .taraf-arama'ya bagli degil. */
+/* ONAY KUTUSU SUTUNU her gridde AYNI GENISLIKTE (kullanici): kalem gridi
+   30px kullaniyor, tahsilat/faturalama gridleri sinifla ayni olcuye gelir. */
+.detay-tablo th.check, .detay-tablo td.check { width: 30px; text-align: center; padding-left: 0; padding-right: 0 }
 .lookup-liste th.check { width: 28px }
 .lookup-liste td.check { text-align: center }
 .taraf-arama .lookup-liste th.dar { width: 80px }
@@ -2043,3 +2049,10 @@ input.skt-gecmis {
 }
 .kat-panel-bas .minibtn { margin-left: auto; font-size: 10.5px; padding: 1px 6px }
 .kat-panel-agac { max-height: 62vh; overflow: auto }
+
+/* Tahsilat gridinde TIKLANABILIR TUTAR (kullanici): hucreye tiklayinca satir
+   ici duzenleme acilir - kismi tahsilat icin kart acmaya gerek kalmaz. */
+.detay-tablo .tiklanir-tutar {
+  cursor: text; border-bottom: 1px dashed var(--cizgi); padding-bottom: 1px;
+}
+.detay-tablo .tiklanir-tutar:hover { background: var(--mor2); border-bottom-color: var(--mor) }

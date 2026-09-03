@@ -1,5 +1,4 @@
-using System.Text;
-using System.Xml.Linq;
+using System.Text.Json;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -23,16 +22,23 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static class EntegrasyonUclari
 {
-    /// <summary>SKRS kod sistemi -> yerel kod listesi eşlemesi.</summary>
+    /// <summary>
+    /// SKRS kod sistemi -> yerel kod listesi eşlemesi.
+    ///
+    /// Anahtar, SKRS'nin KOD SİSTEMİ ADIDIR (GetSkrsList'ten gelen `adi`) -
+    /// servis listeyi adla değil GUID ile veriyor, GUID de kurulumdan kuruluma
+    /// sabit ama listede aranarak bulunuyor. Adlar SKRS'de büyük harf ve
+    /// Türkçe: "CİNSİYET", "MEDENİ HALİ", "KAN GRUBU"…
+    /// </summary>
     private static readonly (string SkrsAd, string YerelListe)[] SkrsListeleri =
     {
-        ("CINSIYET",            "hasta.cinsiyet"),
-        ("MEDENIHAL",           "hasta.medeni_hal"),
-        ("YABANCIHASTATURU",    "hasta.yabanci_turu"),
-        ("KANGRUBU",            "taraf.kan_grubu"),
+        ("CİNSİYET",            "hasta.cinsiyet"),
+        ("MEDENİ HALİ",         "hasta.medeni_hal"),
+        ("YABANCI HASTA TÜRÜ",  "hasta.yabanci_turu"),
+        ("KAN GRUBU",           "taraf.kan_grubu"),
         // 340: hekim branşı ve sigorta türü de SKRS'den gelir.
-        ("BRANS",               "hekim.brans"),
-        ("SIGORTATURU",         "taraf.sigorta_turu"),
+        ("PERSONEL BRANŞ KODU", "hekim.brans"),
+        ("SİGORTALI TÜRÜ",      "taraf.sigorta_turu"),
     };
 
     /// <summary>
@@ -41,7 +47,12 @@ public static class EntegrasyonUclari
     /// `skrs_kod` kolonuna yazılır, `id` yerine geçmez. Sıra ÖNEMLİ: ilçe,
     /// ilin `skrs_kod`u dolduktan sonra bağlanabilir.
     /// </summary>
-    private static readonly string[] SkrsTablolari = { "IL", "ILCE", "ULKE" };
+    private static readonly (string SkrsAd, string Hedef)[] SkrsTablolari =
+    {
+        ("İL",           "IL"),
+        ("İLÇE",         "ILCE"),
+        ("ÜLKE KODLARI", "ULKE"),
+    };
 
     private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
     {
@@ -95,11 +106,32 @@ public static class EntegrasyonUclari
             if (!string.Equals(hesap.Kod, "SKRS", StringComparison.OrdinalIgnoreCase))
                 throw GentegreHatasi.IsKurali("Bu işlem yalnız SKRS hesabında çalışır.");
 
+            // KOD SISTEMI KATALOGU (GetSkrsList): ad -> GUID. Servis degerleri
+            //   yalniz GUID ile veriyor; katalog tek kez cekilir.
+            var katalog = await SkrsKatalogAsync(hesap, istemciler, iptal);
+
             var toplam = 0;
             var raporlar = new List<string>();
             foreach (var (skrsAd, yerelListe) in SkrsListeleri)
             {
-                var degerler = await SkrsListesiCekAsync(hesap, skrsAd, istemciler, iptal);
+                if (!katalog.TryGetValue(Anahtar(skrsAd), out var guid))
+                {
+                    raporlar.Add($"{skrsAd}: SKRS kod listesinde yok");
+                    continue;
+                }
+                // TEK LISTENIN HATASI SENKRONU DURDURMAZ: SKRS bazi listelerde
+                //   (or. ILCE) HTTP 500 donuyor; oteki listeler yazilabilsin,
+                //   hata da rapora dussun - kullanici neyin gelmedigini gorsun.
+                List<(string Kod, string Ad, string? Ust)> degerler;
+                try
+                {
+                    degerler = await SkrsListesiCekAsync(hesap, guid, istemciler, iptal);
+                }
+                catch (Exception h)
+                {
+                    raporlar.Add($"{skrsAd}: {Kisalt(h.Message, 60)}");
+                    continue;
+                }
                 if (degerler.Count == 0)
                 {
                     raporlar.Add($"{skrsAd}: boş döndü");
@@ -113,16 +145,30 @@ public static class EntegrasyonUclari
             }
 
             // Tablo listeleri (340): il -> ilçe -> ülke sırasıyla.
-            foreach (var skrsAd in SkrsTablolari)
+            foreach (var (skrsAd, hedef) in SkrsTablolari)
             {
-                var degerler = await SkrsListesiCekAsync(hesap, skrsAd, istemciler, iptal);
+                if (!katalog.TryGetValue(Anahtar(skrsAd), out var guid))
+                {
+                    raporlar.Add($"{skrsAd}: SKRS kod listesinde yok");
+                    continue;
+                }
+                List<(string Kod, string Ad, string? Ust)> degerler;
+                try
+                {
+                    degerler = await SkrsListesiCekAsync(hesap, guid, istemciler, iptal);
+                }
+                catch (Exception h)
+                {
+                    raporlar.Add($"{skrsAd}: {Kisalt(h.Message, 60)}");
+                    continue;
+                }
                 if (degerler.Count == 0)
                 {
                     raporlar.Add($"{skrsAd}: boş döndü");
                     continue;
                 }
 
-                var (yazilan, atlanan) = skrsAd switch
+                var (yazilan, atlanan) = hedef switch
                 {
                     "IL"   => await IlYazAsync(baglanti, degerler, iptal),
                     "ILCE" => await IlceYazAsync(baglanti, degerler, iptal),
@@ -213,18 +259,55 @@ public static class EntegrasyonUclari
     {
         try
         {
-            var degerler = await SkrsListesiCekAsync(hesap, SkrsListeleri[0].SkrsAd,
-                                                     istemciler, iptal);
-            return degerler.Count > 0
-                ? (true, $"Bağlantı başarılı - {SkrsListeleri[0].SkrsAd} listesinde "
-                         + $"{degerler.Count} kod okundu.")
-                : (false, "Bağlantı kuruldu ama servis boş liste döndü "
-                          + "(kullanıcı/uygulama kodu yetkisiz olabilir).");
+            // En ucuz gercek cagri: kod sistemi katalogu (parametresiz).
+            var katalog = await SkrsKatalogAsync(hesap, istemciler, iptal);
+            if (katalog.Count == 0)
+                return (false, "Bağlantı kuruldu ama servis boş liste döndü "
+                               + "(kullanıcı / şifre / uygulama kodu yetkisiz olabilir).");
+
+            var eksik = SkrsListeleri.Select(x => x.SkrsAd)
+                .Concat(SkrsTablolari.Select(x => x.SkrsAd))
+                .Where(ad => !katalog.ContainsKey(Anahtar(ad)))
+                .ToList();
+
+            return (true, $"Bağlantı başarılı - {katalog.Count} SKRS kod listesi görüldü."
+                          + (eksik.Count > 0
+                             ? $" Eşleşmeyen: {string.Join(", ", eksik)}."
+                             : ""));
         }
         catch (Exception h)
         {
             return (false, $"Bağlantı kurulamadı: {h.Message}");
         }
+    }
+
+    /// <summary>Ad karsilastirmasi: buyuk/kucuk ve bosluk farkini yok sayar.</summary>
+    private static string Anahtar(string ad)
+        => string.Join(' ', (ad ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                 .ToUpperInvariant();
+
+    /// <summary>
+    /// SKRS KOD SISTEMI KATALOGU: GetSkrsList (parametresiz) -> ad -> GUID.
+    /// 499 liste doner; bizim ilgilendiklerimiz adla bulunur.
+    /// </summary>
+    private static async Task<Dictionary<string, string>> SkrsKatalogAsync(
+        Hesap hesap, IHttpClientFactory istemciler, CancellationToken iptal)
+    {
+        var govde = await SkrsIstekAsync(hesap, "GetSkrsList", istemciler, iptal);
+        var sonuc = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        using var belge = JsonDocument.Parse(govde);
+        if (!belge.RootElement.TryGetProperty("sonuc", out var liste)
+            || liste.ValueKind != JsonValueKind.Array)
+            return sonuc;
+
+        foreach (var x in liste.EnumerateArray())
+        {
+            var ad = x.TryGetProperty("adi", out var a) ? a.GetString() ?? "" : "";
+            var kod = x.TryGetProperty("kodu", out var k) ? k.GetString() ?? "" : "";
+            if (ad != "" && kod != "") sonuc[Anahtar(ad)] = kod;
+        }
+        return sonuc;
     }
 
 
@@ -273,70 +356,119 @@ public static class EntegrasyonUclari
     }
 
     /// <summary>
-    /// SKRS kod listesini çeker. Servis SOAP: kimlik üç HTTP başlığında
-    /// gider (KullaniciAdi / Sifre / UygulamaKodu), gövde GetSkrsList
-    /// çağrısıdır. Cevap XML'inden kod + ad çiftleri ayıklanır.
+    /// SKRS KOD LISTESI DEGERLERI: GetSkrsObject?skrsCodeSystemGuid=..&amp;page=N
+    ///
+    /// SERVIS REST'TIR, SOAP DEGIL (doc/index.html): GET + JSON, kimlik uc HTTP
+    /// basliginda (KullaniciAdi / Sifre / UygulamaKodu). Onceki surum SOAP
+    /// zarfi POST ediyordu ve servis HTTP 404 donuyordu.
+    ///
+    /// SAYFALAMA: her sayfada 1000 kayit, cevapta `sonrakiSayfa` gelir; deger
+    /// 1 ise son sayfadir (dokumanin kendi kurali). Donguye ust sinir konur -
+    /// servis yanlis sayfa numarasi dondurse bile istek yagmuru olmasin.
     /// </summary>
     private static async Task<List<(string Kod, string Ad, string? Ust)>> SkrsListesiCekAsync(
-        Hesap hesap, string skrsAd, IHttpClientFactory istemciler, CancellationToken iptal)
+        Hesap hesap, string guid, IHttpClientFactory istemciler, CancellationToken iptal)
+    {
+        var liste = new List<(string, string, string?)>();
+        var sayfa = 1;
+
+        while (sayfa > 0 && sayfa <= 200)
+        {
+            var govde = await SkrsIstekAsync(hesap,
+                $"GetSkrsObject?skrsCodeSystemGuid={Uri.EscapeDataString(guid)}&page={sayfa}",
+                istemciler, iptal);
+
+            using var belge = JsonDocument.Parse(govde);
+            if (!belge.RootElement.TryGetProperty("sonuc", out var sonuc)
+                || sonuc.ValueKind != JsonValueKind.Object) break;
+            if (!sonuc.TryGetProperty("kayit", out var kayitlar)
+                || kayitlar.ValueKind != JsonValueKind.Array) break;
+
+            foreach (var k in kayitlar.EnumerateArray())
+            {
+                // PASIF kodlar alinmaz: SKRS gecmisi de doner (AKTIF=false).
+                if (k.TryGetProperty("AKTIF", out var aktif)
+                    && aktif.ValueKind == JsonValueKind.False) continue;
+
+                var kod = Metin(k, "KODU");
+                var ad  = Metin(k, "ADI");
+                // ULKE listesinde KODU harflidir ("TR", "AF"); bizim eslesme
+                //   kolonlari sayisal - MERNIS kodu (9840...) kullanilir.
+                //   Hasta kayitlarinda uyruk da MERNIS kodudur, ayni dil.
+                if (kod is not null && !int.TryParse(kod, out _))
+                    kod = Metin(k, "MERNISKODU") ?? kod;
+                if (kod is null || ad is null) continue;
+                // UST KOD: ilce listesinde ilin kodu (alan adi surume gore degisiyor).
+                liste.Add((kod, ad, Metin(k, "USTKODU", "ILKODU", "USTKOD", "PARENTKODU")));
+            }
+
+            var sonraki = sonuc.TryGetProperty("sonrakiSayfa", out var sy)
+                          && sy.ValueKind == JsonValueKind.Number ? sy.GetInt32() : 1;
+            if (sonraki <= 1 || sonraki == sayfa) break;   // 1 = son sayfa
+            sayfa = sonraki;
+        }
+
+        return liste;
+    }
+
+    /// <summary>SKRS REST cagrisi: taban adres + yol, kimlik uc HTTP basliginda.</summary>
+    private static async Task<string> SkrsIstekAsync(Hesap hesap, string yol,
+        IHttpClientFactory istemciler, CancellationToken iptal)
     {
         var istemci = istemciler.CreateClient("skrs");
-
-        var govde = $"""
-            <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
-              <s:Body>
-                <GetSkrsList xmlns="http://tempuri.org/">
-                  <skrsCodeSystemName>{skrsAd}</skrsCodeSystemName>
-                </GetSkrsList>
-              </s:Body>
-            </s:Envelope>
-            """;
-
-        using var istek = new HttpRequestMessage(HttpMethod.Post, hesap.Adres)
+        var taban = hesap.Adres.TrimEnd('/');
+        // Hesap kartina dokuman/portal adresi yazilmis olabilir; servis tabani
+        //   ".../api/SkrsService". Yol zaten iceriyorsa oldugu gibi kullanilir.
+        if (!taban.EndsWith("/api/SkrsService", StringComparison.OrdinalIgnoreCase))
         {
-            Content = new StringContent(govde, Encoding.UTF8, "text/xml"),
-        };
+            var kok = taban;
+            var i = kok.IndexOf("/api/", StringComparison.OrdinalIgnoreCase);
+            if (i > 0) kok = kok[..i];
+            else
+            {
+                var u = new Uri(kok);
+                kok = $"{u.Scheme}://{u.Host}";
+            }
+            taban = kok + "/api/SkrsService";
+        }
+
+        using var istek = new HttpRequestMessage(HttpMethod.Get, $"{taban}/{yol}");
         istek.Headers.TryAddWithoutValidation("KullaniciAdi", hesap.KullaniciAdi);
         istek.Headers.TryAddWithoutValidation("Sifre", hesap.Sifre);
         istek.Headers.TryAddWithoutValidation("UygulamaKodu", hesap.UygulamaKodu);
-        istek.Headers.TryAddWithoutValidation("SOAPAction", "http://tempuri.org/ISKRSServis/GetSkrsList");
 
         using var yanit = await istemci.SendAsync(istek, iptal);
         var metin = await yanit.Content.ReadAsStringAsync(iptal);
 
         if (!yanit.IsSuccessStatusCode)
+            throw new InvalidOperationException($"HTTP {(int)yanit.StatusCode} - {Kisalt(metin)}");
+        if (metin.TrimStart().StartsWith("<"))
             throw new InvalidOperationException(
-                $"HTTP {(int)yanit.StatusCode} - {Kisalt(metin)}");
+                "Servis JSON yerine HTML dondurdu - adres SKRS servis ucu olmayabilir "
+                + $"({taban}).");
 
-        // Cevap şeması sürümle değişebiliyor: "kod/ad" ya da "value/name"
-        //   adlı düğümler aranır, ad alanı eşleşmezse düğüm atlanır.
-        // ÜST KOD (340): ilçe listesinde ilin kodu; ad karşılığı sürüme göre
-        //   farklı yazıldığı için birkaç aday birden denenir.
-        var liste = new List<(string, string, string?)>();
-        var belge = XDocument.Parse(metin);
-        foreach (var dugum in belge.Descendants())
-        {
-            var kod = AltDeger(dugum, "kod", "code", "value", "deger");
-            var ad = AltDeger(dugum, "ad", "aciklama", "name", "text");
-            if (kod is null || ad is null) continue;
-            var ust = AltDeger(dugum, "ustkod", "ilkodu", "il_kodu", "parentcode",
-                               "parent", "ustdeger");
-            liste.Add((kod, ad, ust));
-        }
-        return liste;
+        return metin;
     }
 
-    private static string? AltDeger(XElement dugum, params string[] adlar)
+    /// <summary>JSON nesnesinden ilk dolu alani okur (alan adlari surume gore degisir).</summary>
+    private static string? Metin(JsonElement nesne, params string[] adlar)
     {
-        foreach (var alt in dugum.Elements())
-            if (adlar.Contains(alt.Name.LocalName, StringComparer.OrdinalIgnoreCase)
-                && !string.IsNullOrWhiteSpace(alt.Value))
-                return alt.Value.Trim();
+        foreach (var ad in adlar)
+            if (nesne.TryGetProperty(ad, out var d))
+            {
+                var v = d.ValueKind switch
+                {
+                    JsonValueKind.String => d.GetString(),
+                    JsonValueKind.Number => d.ToString(),
+                    _ => null,
+                };
+                if (!string.IsNullOrWhiteSpace(v)) return v!.Trim();
+            }
         return null;
     }
 
-    private static string Kisalt(string s)
-        => s.Length <= 200 ? s : s[..200] + "…";
+    private static string Kisalt(string s, int uzunluk = 200)
+        => s.Length <= uzunluk ? s : s[..uzunluk] + "…";
 
     /// <summary>
     /// Yerel kod listesini SKRS değerleriyle günceller. SAYISAL olmayan SKRS
@@ -361,7 +493,9 @@ public static class EntegrasyonUclari
             await baglanti.CalistirAsync("""
                 insert into public.kod_deger (liste_id, deger, ad, ekleyen)
                 select kl.id, @p1, @p2, @p3 from public.kod_liste kl where kl.kod = @p0
-                on conflict (liste_id, deger) do update set ad = excluded.ad
+                -- Benzersizlik (liste_id, deger, DIL) - dil kolonu varsayilanla
+                --   gelir ama ON CONFLICT hedefi tam eslesmeli (42P10).
+                on conflict (liste_id, deger, dil) do update set ad = excluded.ad
                 """, null, [listeKodu, sayi, ad, kullanici], iptal);
             sayac++;
         }

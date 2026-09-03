@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { para, tarihSaat } from '../bicim';
+import { TarafSecici } from '../TarafArama';
 
 /**
  * BASVURU / PROVIZYON / ONCEKI BASVURULAR sekmeleri (298).
@@ -186,8 +187,14 @@ function ZamanAlani({ etiket, deger, onDeger, kilitli }: {
  * "son basvuru" uyarisi cizilir.
  */
 export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, kapanma,
-                              onAra, onYeniHasta }: {
+                              kurumAdi, acikBorc, onAra, onYeniHasta }: {
   tarafId?: number | null;
+  /** BELGENIN odeyen kurumu (kullanici): serit hastanin sigortasini degil,
+      bu basvuruyu odeyecek kurumu gosterir - ikisi farkli olabilir. */
+  kurumAdi?: string;
+  /** Bu BASVURUNUN acik borcu = ucretlendirme genel toplami - tahsilat.
+      Verilmezse hastanin genel acik bakiyesi gosterilir. */
+  acikBorc?: number;
   /** Belgenin kapanma rozeti (KAPANMA_ETIKET) - seridin en saginda. */
   kapanma?: { ad: string; sinif?: string } | null;
   /** Belgenin SGK mustehaklik durumu (299) - sigortanin yanina rozet. */
@@ -233,6 +240,12 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, kapanma
   const ad = String(h?.unvan ?? '');
   const bas = ad.split(/\s+/).filter(Boolean).slice(0, 2)
                 .map(x => x[0]?.toLocaleUpperCase('tr') ?? '').join('');
+  /* Cinsiyet seritte IKON + TEK HARF (kullanici): "Erkek"/"Kadın" hucrede
+     yer kapliyordu, ikon tek bakista okunuyor. Kayitsizsa hic yazilmaz. */
+  const cinsiyetAdi = String(h?.cinsiyetAdi ?? '');
+  const cinsiyet = cinsiyetAdi.startsWith('E') ? '♂ E'
+                 : cinsiyetAdi.startsWith('K') ? '♀ K' : '';
+  const borc = acikBorc != null ? acikBorc : Number(h?.acikBorc ?? 0);
   const dogum = String(h?.dogumTarihi ?? '').slice(0, 10);
   const yas = h?.yas != null && h.yas !== '' ? `${h.yas} y` : '';
 
@@ -319,16 +332,17 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, kapanma
         <span className="k">Doğum / Cinsiyet</span>
         <span className="v">
           {[dogum ? dogum.split('-').reverse().join('.') : '',
-            String(h?.cinsiyetAdi ?? ''), yas].filter(Boolean).join(' · ') || '—'}
+            cinsiyet, yas].filter(Boolean).join(' · ') || '—'}
         </span>
       </span>
-      {/* Mockup'taki SIGORTA hucresi: hastanin bagli kurumu + belgenin
-          mustehaklik rozeti. Mustehaklik BELGEYE ait (her basvuruda yeniden
+      {/* ODEYEN KURUM (kullanici): eski "Sigorta" hucresi hastanin kayitli
+          sigortasini yaziyordu; kabul memurunun gormesi gereken bu basvuruyu
+          ODEYECEK kurum. Mustehaklik BELGEYE ait (her basvuruda yeniden
           sorgulanir), kuruma degil - o yuzden rozet disaridan gelir. */}
       <span className="hs">
-        <span className="k">Sigorta</span>
+        <span className="k">Ödeyen Kurum</span>
         <span className="v">
-          {String(h?.sigortaAdi ?? '') || '—'}
+          {kurumAdi || String(h?.sigortaAdi ?? '') || '—'}
           {mustehaklik != null && mustehaklik > 0 && (
             <span className={`rozet ${MUSTEHAKLIK[mustehaklik]?.sinif ?? ''}`}>
               {MUSTEHAKLIK[mustehaklik]?.ad}
@@ -340,11 +354,17 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, kapanma
           durumda - ikisi de arama penceresinde ise yarar, kabul ekraninda yer
           kaplar. Kalan hucreler seride esit araliklarla dagitilir. */}
       {/* ACIK BORC saga yaslanir (mockup): kabul memuru "tahsilat gerekiyor
-          mu" sorusunu tek bakista gorsun. */}
+          mu" sorusunu tek bakista gorsun. Deger BU BASVURUNUN farkidir
+          (ucretlendirme genel toplami - tahsilat, kullanici) ve ucret/tahsilat
+          girildikce ANINDA degisir; disaridan gelmezse hastanin genel acik
+          bakiyesine duser. */}
       <span className="hs sag">
-        <span className="k">Açık Borç</span>
-        <span className={`v ${Number(h?.acikBorc ?? 0) > 0 ? 'teh' : ''}`}>
-          {para.format(Number(h?.acikBorc ?? 0))} ₺
+        {/* Isaret hucrenin ADINI da degistirir (kullanici): ucret > tahsilat
+            ise KIRMIZI "Açık Borç", tahsilat > ucret ise YESIL "Alacaklı"
+            (hasta lehine bakiye - iade/mahsup gerekir), esitse notr siyah. */}
+        <span className="k">{borc < 0 ? 'Alacaklı' : 'Açık Borç'}</span>
+        <span className={`v ${borc > 0 ? 'teh' : borc < 0 ? 'olumlu' : ''}`}>
+          {para.format(Math.abs(borc))} ₺
         </span>
       </span>
       {/* Kapanma ("Faturalanmadı" / "Kısmi" / "Kapandı") rozeti seridin en
@@ -360,16 +380,33 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, kapanma
 }
 
 // ============================================================ BASVURU ====
-export function BasvuruSekmesi({ bilgi, degistir, kilitli, protokolNo, randevuBilgi,
+export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                                  tarih, setTarih, tarihEnGec, tarihEnErken, tarihHatasi,
                                  bolumler, bolumId, setBolumId,
                                  gorevliler, personelId, setPersonelId,
                                  kurumlar, odeyenKurumId, setOdeyenKurumId,
-                                 aciklama, setAciklama }: {
+                                 aciklama, setAciklama, gonderenModu,
+                                 personelAd, onPersonelSec, kurumHatasi }: {
   bilgi: BasvuruBilgi;
+  /**
+   * LAB / GORUNTULEME KURUMU (364, kullanici): bu kurumlarda basvuru zaten
+   * "Laboratuvar / Görüntüleme"dir - tur sorulmaz, poliklinik odasi yoktur ve
+   * hekim alani hastayi GONDEREN dis doktordur. Bayrak kurum profilinden gelir
+   * (fn_basvuru_hekim_rolu = 1 -> Gönderen).
+   */
+  gonderenModu?: boolean;
+  /** Odeyen kurum secilmediyse kaydetmede donen hata (zorunlu alan). */
+  kurumHatasi?: string;
+  /** Secili hekim/gonderen adi - arama ekranindan gelen kisi listede olmayabilir. */
+  personelAd?: string;
+  /**
+   * Arama ekranindan hekim/gonderen secildi. Bolumu de KART cozer (secilen
+   * kisinin bolumu varsa Bölüm alani doldurulur) - burada tek is secimi
+   * yukari bildirmek.
+   */
+  onPersonelSec?(id: number, ad: string): void;
   degistir(y: Partial<BasvuruBilgi>): void;
   kilitli: boolean;
-  protokolNo: string;
   /** Belgeye bagli randevu varsa ozeti (tarih · kaynak) - salt okunur. */
   randevuBilgi?: string;
   /**
@@ -409,38 +446,17 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, protokolNo, randevuBi
   return (
     <div className="kagrup">
       <h6>Başvuru Bilgileri</h6>
-      <div className="alan-izgara dort-sutun">
+      {/* PROTOKOL NO BURADA YOK (kullanici): kartin BASLIK seridinde zaten
+          "Protokol No" hucresi var - ayni salt okunur numarayi iki yerde
+          gostermek sekmede bos yer harciyordu. */}
+      <div className="alan-izgara uc-sutun">
+        {/* ILK SATIR (kullanici): Bölüm · Gönderen · Ödeyen Kurum · Başvuru
+            Tarihi. Kayit kabul memurunun sirasiyla sordugu dort alan; tur,
+            gelis sekli ve oda arkaya duser. */}
         <label className="alan">
-          <span className="etiket">Protokol No</span>
-          <input value={protokolNo || '(kaydedince atanacak)'} readOnly />
-        </label>
-        <label className="alan">
-          <span className="etiket zorunlu-isaret">Başvuru Tarihi / Saati</span>
-          <input type="datetime-local" value={tarih} disabled={kilitli}
-                 max={tarihEnGec} min={tarihEnErken}
-                 onChange={e => setTarih(e.target.value)} />
-          {tarihHatasi && <span className="alan-hata">{tarihHatasi}</span>}
-        </label>
-        <label className="alan">
-          <span className="etiket">Ödeyen Kurum</span>
-          <select value={odeyenKurumId ?? ''} disabled={kilitli}
-                  onChange={e => setOdeyenKurumId?.(
-                    e.target.value ? Number(e.target.value) : null)}>
-            <option value="">— Hasta kendi öder —</option>
-            {(kurumlar ?? []).map(k => (
-              <option key={k.id} value={k.id}>{k.ad}</option>
-            ))}
-          </select>
-        </label>
-
-        {/* Basvuru turu SEGMENT (mockup): etiketten sonra TAM SATIR - besinci
-            secenek ("Laboratuvar / Görüntüleme") iki sutuna sigmiyordu. */}
-        <KodSegment etiket="Başvuru Türü" listeKod="basvuru.tur" zorunlu vurgu={2}
-                    deger={bilgi.basvuruTuru} kilitli={kilitli}
-                    onDeger={v => degistir({ basvuruTuru: v })} />
-
-        <label className="alan">
-          <span className="etiket">Başvurulan Bölüm</span>
+          {/* Lab/goruntulemede "Başvurulan Bölüm" degil sadece "Bölüm"
+              (kullanici): hasta bir poliklinige basvurmuyor, tetkik yaptiriyor. */}
+          <span className="etiket">{gonderenModu ? 'Bölüm' : 'Başvurulan Bölüm'}</span>
           <select value={bolumId ?? ''} disabled={kilitli}
                   onChange={e => {
                     const y = e.target.value ? Number(e.target.value) : null;
@@ -457,6 +473,30 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, protokolNo, randevuBi
             ))}
           </select>
         </label>
+        {/* GONDEREN: JENERIK ARAMA EKRANI (kullanici) - dis hekim sayisi
+            combo'ya sigmaz; arama penceresinde brans, kurum ve gonderdigi
+            tetkik sayisi da gorunur (305 dis hekim duzeni). Secilince Bölüm de
+            kisinin bolumunden doldurulur. */}
+        {gonderenModu ? (
+          <TarafSecici etiket="Gönderen" kaynaklar={['dis-hekim']}
+                       deger={personelAd}
+                       kilitli={kilitli}
+                       /* ONCE BOLUM SECILDIYSE (kullanici): arama O BOLUME
+                          gonderen hekimlerle sinirlanir; bolum bosken hepsi
+                          gelir. Hekim once secilirse bolum ondan dolar - iki
+                          yon de calisir. */
+                       ekFiltre={bolumId
+                         ? { alan: 'departman', op: 'esit', deger: bolumId }
+                         : undefined}
+                       /* GONDEREN YOKSA "Kendi İsteği" (kullanici): hasta
+                          sevksiz gelmistir - alan bos degil, ANLAMLI bostur.
+                          "×" ile bu duruma donulur. */
+                       bosMetin="Kendi İsteği (sevksiz)"
+                       yerTutucu={bolumId ? 'Bu bölüme gönderen hekim ara…'
+                                          : 'Gönderen hekim ara…'}
+                       onSec={sec => onPersonelSec?.(sec.id, sec.unvan)}
+                       onTemizle={() => onPersonelSec?.(0, '')} />
+        ) : (
         <label className="alan">
           <span className="etiket">Hekim / Personel</span>
           <select value={personelId ?? ''} disabled={kilitli}
@@ -474,6 +514,34 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, protokolNo, randevuBi
             ))}
           </select>
         </label>
+        )}
+        <label className="alan">
+          <span className="etiket zorunlu-isaret">Başvuru Tarihi / Saati</span>
+          <input type="datetime-local" value={tarih} disabled={kilitli}
+                 max={tarihEnGec} min={tarihEnErken}
+                 onChange={e => setTarih(e.target.value)} />
+          {tarihHatasi && <span className="alan-hata">{tarihHatasi}</span>}
+        </label>
+
+        {/* 2. SIRA (kullanici): Ödeyen Kurum · Geliş Şekli · Geliş Nedeni. */}
+        <label className="alan">
+          {/* ZORUNLU (kullanici): "hasta kendi öder" de bir KURUMDUR - kurum
+              listesinde karsiligi secilir. Bos birakilinca fiyat listesi, pay
+              dagilimi (289) ve provizyon sekmesi hangi kurala gore calisacagini
+              bilemiyordu. */}
+          <span className="etiket zorunlu-isaret">Ödeyen Kurum</span>
+          <select value={odeyenKurumId ?? ''} disabled={kilitli}
+                  onChange={e => setOdeyenKurumId?.(
+                    e.target.value ? Number(e.target.value) : null)}>
+            <option value="">— Seçiniz —</option>
+            {(kurumlar ?? []).map(k => (
+              <option key={k.id} value={k.id}>{k.ad}</option>
+            ))}
+          </select>
+          {kurumHatasi && <span className="alan-hata">{kurumHatasi}</span>}
+        </label>
+
+
         <KodSecim etiket="Geliş Şekli" listeKod="basvuru.gelis_sekli"
                   deger={bilgi.gelisSekli} kilitli={kilitli}
                   onDeger={v => degistir({ gelisSekli: v })} />
@@ -481,9 +549,23 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, protokolNo, randevuBi
                   deger={bilgi.gelisNedeni} kilitli={kilitli}
                   onDeger={v => degistir({ gelisNedeni: v })} />
 
-        <KodSecim etiket="Poliklinik Odası" listeKod="basvuru.oda"
-                  deger={bilgi.oda} kilitli={kilitli}
-                  onDeger={v => degistir({ oda: v })} />
+        {/* Basvuru turu SEGMENT (mockup): etiketten sonra TAM SATIR - besinci
+            secenek ("Laboratuvar / Görüntüleme") iki sutuna sigmiyordu.
+            LAB / GORUNTULEME kurumunda HIC SORULMAZ (kullanici): tur zaten
+            "Laboratuvar / Görüntüleme"dir, kayitta 5 olarak yazilir. */}
+        {!gonderenModu && (
+          <KodSegment etiket="Başvuru Türü" listeKod="basvuru.tur" zorunlu vurgu={2}
+                      deger={bilgi.basvuruTuru} kilitli={kilitli}
+                      onDeger={v => degistir({ basvuruTuru: v })} />
+        )}
+
+        {/* Poliklinik odasi lab/goruntulemede YOK (kullanici): numune alma /
+            cekim birimi ayri kavram, "oda" alani bos duruyordu. */}
+        {!gonderenModu && (
+          <KodSecim etiket="Poliklinik Odası" listeKod="basvuru.oda"
+                    deger={bilgi.oda} kilitli={kilitli}
+                    onDeger={v => degistir({ oda: v })} />
+        )}
         <MetinAlani etiket="Sıra No" deger={bilgi.siraNo} kilitli={kilitli}
                     ipucu="örn. A-037" onDeger={v => degistir({ siraNo: v })} />
         {/* Randevu SALT OKUNUR: bag randevu tarafinda kurulur (randevu.belge_id),
@@ -533,10 +615,13 @@ const MUSTEHAKLIK: Record<number, { ad: string; sinif: string }> = {
   2: { ad: 'Müstehak değil', sinif: 'teh' },
 };
 
-export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar }: {
+export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
+                                  kurumTuru }: {
   bilgi: BasvuruBilgi;
   degistir(y: Partial<BasvuruBilgi>): void;
   kilitli: boolean;
+  /** Odeyen kurumun turu (taraf_kurum.tur): 1 Özel / 2 ÖSS / 3 SGK. */
+  kurumTuru?: number;
   /** Belgenin odeyen kurumu - SGK bloÄunda bilgi olarak gosterilir. */
   kurumAdi?: string;
   /** Anlasmali kurumlar: ozel sigorta sirketi buradan secilir (tur 2). */
@@ -544,12 +629,23 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar 
 }) {
   const m = MUSTEHAKLIK[Number(bilgi.sgkMustehaklik ?? 0)] ?? MUSTEHAKLIK[0];
 
+  /*
+   * ALANLAR KURUM TURUNE GORE (kullanici): eskiden iki provizyon grubu da her
+   * zaman ciziliyordu; ÖSS hastasinda MEDULA alanlari, SGK hastasinda police
+   * alanlari bos duruyordu.
+   *   SGK (3)  : MEDULA grubu. Hastanin TAMAMLAYICI policesi de olabilir -
+   *              o grup istege bagli acilir (kayitli police varsa acik gelir).
+   *   ÖSS (2)  : yalniz ozel sigorta grubu; MEDULA alanlari hic cizilmez.
+   */
+  const sgkVar = kurumTuru !== 2;
+  const [tamamlayici, setTamamlayici] = useState(false);
+  const ossVar = kurumTuru === 2 || tamamlayici
+                 || (bilgi.ossKurumId ?? null) !== null
+                 || !!bilgi.ossProvizyonNo || !!bilgi.ossPoliceNo;
+
   return (
     <>
-      {/* IKI PROVIZYON AYNI ANDA (kullanici): hasta hem SGK'li olabilir hem
-          tamamlayici policesi bulunabilir - SGK karsilamadigi farki ozel
-          sigorta ustlenir. Bu yuzden gruplar kurum turune gore GIZLENMEZ,
-          ikisi de acik durur; doldurulmayan grup bos kalir. */}
+      {sgkVar && (
       <div className="kagrup">
         {/* "Provizyon Al" dugmesi GRUP BASLIGINDA saga yasli (kullanici):
             arac cubugundan alindi - hangi odeyiciden provizyon alindigi
@@ -644,11 +740,25 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar 
           numarası girildikten sonra faturalanmalıdır. Müstehaklık sorgusu
           (MEDULA) henüz bağlı değil — alanlar elle doldurulur.
         </div>
+        {/* TAMAMLAYICI SIGORTA: SGK'li hastada police de olabilir - SGK'nin
+            karsilamadigi farki ozel sigorta ustlenir. Grup istege bagli acilir. */}
+        {!ossVar && (
+          <div className="katoolbar" style={{ borderTop: '1px solid var(--cizgi)' }}>
+            <button type="button" className="d" disabled={kilitli}
+                    title="Hastanın tamamlayıcı/özel sigorta poliçesi varsa alanları aç"
+                    onClick={() => setTamamlayici(true)}>
+              ＋ Tamamlayıcı Sigorta Provizyonu
+            </button>
+          </div>
+        )}
       </div>
+      )}
 
+      {ossVar && (
       <div className="kagrup">
         <h6>
-          Özel / Tamamlayıcı Sigorta Provizyonu
+          {kurumTuru === 2 ? 'Özel Sigorta Provizyonu'
+                           : 'Tamamlayıcı Sigorta Provizyonu'}
           <button type="button" className="d bir sag" disabled
                   title="Sigorta şirketi provizyon servisi henüz bağlı değil - alanlar elle doldurulur.">
             🧾 Provizyon Al
@@ -704,6 +814,7 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar 
                       onDeger={v => degistir({ ossRedNedeni: v })} />
         </div>
       </div>
+      )}
     </>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { onay } from './mesaj';
 import { api } from '../api/istemci';
 import { type DokumanSatiri, hataMetni } from '../api/sozlesme';
 import { tarihYaz } from './bicim';
@@ -221,7 +222,9 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
 
   const seciliSil = async () => {
     if (secili.size === 0) return;
-    if (!window.confirm(`${secili.size} dosya silinsin mi?`)) return;
+    // Uygulama penceresi (tarayici confirm'i "localhost diyor ki" basligiyla
+    //   cikiyordu, kullanici).
+    if (!await onay(`${secili.size} dosya silinsin mi?`, true)) return;
     let liste: DokumanSatiri[] | null = null;
     try {
       for (const id of secili) liste = await api.dokumanSil(kartAdi, kaynakId, id);

@@ -293,7 +293,11 @@ public sealed partial class BelgeDeposu
                    v.kurum_kalan as "kurumKalan", v.hasta_kalan as "hastaKalan",
                    -- Kalem adi (293): stok disi satirlarda (hizmet/masraf) ad
                    --   yoktu, donusum penceresinde satir BOS gorunuyordu.
-                   v.kalem_kodu as "kalemKodu", v.kalem_adi as "kalemAdi"
+                   v.kalem_kodu as "kalemKodu", v.kalem_adi as "kalemAdi",
+                   -- Tutar bazli donusum (352): matrah, tahsil edilen matrah ve
+                   --   acik kalan tutar - "tahsil edilen kadar fis" onerisi.
+                   v.tutar, v.hasta_tahsil_matrah as "hastaTahsilMatrah",
+                   v.kurum_tahsil_matrah as "kurumTahsilMatrah", v.tutar_kalan as "tutarKalan"
               from public.v_belge_acik_satir v
              where v.belge_id = @p0 order by v.sira
             """, null,
@@ -363,6 +367,7 @@ public sealed partial class BelgeDeposu
             select hb.id                       as "belgeId",
                    hb.belge_no                 as "belgeNo",
                    hb.belge_tarihi             as "belgeTarihi",
+                   hb.tur                      as tur,
                    coalesce(ht.ad, '')         as "turAdi",
                    hb.taraf_unvan              as "tarafUnvan",
                    sum(hs.miktar)              as miktar,
@@ -374,7 +379,7 @@ public sealed partial class BelgeDeposu
               join public.belge hb       on hb.id = hs.belge_id
               left join public.kasa_islem_turu ht on ht.kod = hb.tur
              where ks.belge_id = @p0
-             group by hb.id, hb.belge_no, hb.belge_tarihi, ht.ad, hb.taraf_unvan, hb.durum
+             group by hb.id, hb.belge_no, hb.belge_tarihi, hb.tur, ht.ad, hb.taraf_unvan, hb.durum
              order by hb.belge_tarihi, hb.id
             """, null,
             belgeId);

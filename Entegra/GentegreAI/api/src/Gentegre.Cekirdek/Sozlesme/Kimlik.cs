@@ -70,6 +70,18 @@ public sealed class KullaniciOzeti
     /// <summary>Urun modu (referans genel.urun_modu): 1 Gentegre AI (ERP),
     /// 2 GenoTIP AI (HBYS). Ad, menu ve mesaj basliklari buna gore degisir.</summary>
     public int UrunModu { get; set; } = 1;
+    /// <summary>
+    /// KURULUMDA ACIK MODULLER (359): kurum profilinin secili tipinden ve
+    /// override'larindan cozulur (fn_kurum_modul_acik). Menu ve rotalar buna
+    /// gore suzulur - kapali modulun ekrani hic cizilmez.
+    /// </summary>
+    public IReadOnlyList<string> Moduller { get; set; } = Array.Empty<string>();
+    /// <summary>
+    /// AKTIF SUBEDE basvuruda sorulan hekim rolu (361/364): lab/goruntuleme
+    /// subesinde 1 "Gönderen" (dis doktor), digerlerinde 4 "Yapan" (personel).
+    /// Basvuru karti doktor combosunu bu role gore doldurur.
+    /// </summary>
+    public int HekimRolu { get; set; } = 4;
 }
 
 public sealed record SubeOzeti(int Id, string Ad, bool Varsayilan, bool Yazma);

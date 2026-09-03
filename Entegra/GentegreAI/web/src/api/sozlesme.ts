@@ -114,6 +114,16 @@ export interface KullaniciOzeti {
   subeler: SubeOzeti[];
   /** Urun modu (215): 1 Gentegre AI (ERP), 2 GenoTIP AI (HBYS). */
   urunModu?: number;
+  /**
+   * KURULUMDA ACIK MODULLER (359): kurum profilinden cozulur. Menu ve rotalar
+   * bunlara gore suzulur; bos dizi = bilgi yok, hicbir sey suzulmez.
+   */
+  moduller?: string[];
+  /**
+   * AKTIF SUBEDE basvuruda sorulan hekim rolu (361/364): 1 "Gönderen"
+   * (lab/goruntuleme subesi - dis doktor), 4 "Yapan" (digerleri - personel).
+   */
+  hekimRolu?: number;
 }
 
 /** Urun modlari (215). Ad sol ust marka, mesaj basligi ve menu suzmede kullanilir. */
@@ -429,6 +439,11 @@ export interface AcikSatir {
   hastaTutar?: number;
   kurumKalan?: number;
   hastaKalan?: number;
+  /** 352: satır matrahı, tahsil edilen matrah ve açık kalan TUTAR (tutar bazlı dönüşüm). */
+  tutar?: number;
+  hastaTahsilMatrah?: number;
+  kurumTahsilMatrah?: number;
+  tutarKalan?: number;
   birim: number;
   birimFiyat: number;
   iskonto: number;
@@ -692,3 +707,40 @@ export interface RandevuBolumDugumu {
 
 /** Bolum/hekim ayar yazma istegi - bos alan ust seviyeden miras alinir. */
 export type RandevuAyarYazma = Omit<RandevuAyarSatiri, 'id' | 'ad'>;
+
+// ------------------------------------------------------- kurum profili ----
+/** Kurum tipi / modul katalog satiri (359). */
+export interface KurumKatalogSatiri { kod: string; ad: string; sira: number }
+
+/** Tip x modul varsayilani: 0 gizli · 1 acik · 2 opsiyonel. */
+export interface KurumTipiModul { kurumTipi: string; modul: string; varsayilan: number }
+
+/** Kurulumun kurum profili - tek satir (kurum_profil.id = 1). */
+export interface KurumProfil {
+  urunModu: number;
+  kurumTipi: string;
+  altTip: string;
+  basamak: string;
+  tesisKodu: string;
+  subeYapisi: number;
+  hekimSayisi: number;
+  uniteSayisi: number;
+  dil: string;
+  paraBirimi: string;
+  /** Modul OVERRIDE'lari: {"lab": 1, "teletip": 0} - yoksa tipin varsayilani. */
+  moduller: Record<string, number>;
+  /** Profilin subesi (364): 0 = kurum geneli, N = o sube. */
+  subeId?: number;
+  /**
+   * Bu sube icin AYRI SATIR YOK, deger kurum genelinden geldi (364). Ekran
+   * "devralindi" der ve "bu sube icin ayri ayar" onerir.
+   */
+  devralindi?: boolean;
+}
+
+export interface KurumProfilYaniti {
+  profil: KurumProfil;
+  tipler: KurumKatalogSatiri[];
+  moduller: KurumKatalogSatiri[];
+  matris: KurumTipiModul[];
+}

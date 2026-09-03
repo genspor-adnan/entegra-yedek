@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { KurumTipiAyarlari } from '../bilesenler/KurumTipiAyarlari';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import type { ListeSatiri } from '../api/sozlesme';
@@ -11,6 +12,10 @@ import { TurAyarlari, type EBelgeTuru } from '../bilesenler/ebelge/TurAyarlari';
 //   subenin deposu oldugu ancak kartin icinde belli oluyor.
 const SEKMELER = [
   { anahtar: 'subeler', baslik: 'Şube Tanımları' },
+  // KURUM TIPI & SISTEM AYARLARI (kullanici): kurulum profili - kurum tipi,
+  //   modul matrisi, kayit/ucretlendirme kurallari, entegrasyonlar. Duzen
+  //   Ekranlar/Ayarlar/kurum_tipi_ayarlari.html mockup'indan.
+  { anahtar: 'kurumTipi', baslik: 'Kurum Tipi & Sistem Ayarları' },
 ] as const;
 
 /**
@@ -53,7 +58,7 @@ const SERIT_ALANLARI = ['unvan', 'ad', 'aktif'];
  * eksikse listede gorunur - eksik bilgi ancak fatura gonderilirken fark ediliyordu.
  */
 export function FirmaBilgileri() {
-  const [aktif] = useState<Sekme>('subeler');
+  const [aktif, setAktif] = useState<Sekme>('subeler');
   const [subeler, setSubeler] = useState<ListeSatiri[]>([]);
   /** Karti acan kayit: sayi = duzenle, 'yeni' = ekle, null = kart kapali. */
   const [kart, setKart] = useState<number | 'yeni' | null>(null);
@@ -146,10 +151,23 @@ export function FirmaBilgileri() {
         </div>
       </div>
 
-      {/* Tek sekme vardi ("Şube Tanımları") - sekme cubugu kaldirildi
-          (kullanici); baslik zaten kutunun kendisinde. */}
+      {/* SEKME CUBUGU (kullanici): "Şube Tanımları" ekranin bir sekmesi -
+          oteki ayar ekranlariyla ayni desen; firma geneline ait yeni bolumler
+          (unvan/logo, vergi kimligi...) buraya sekme olarak eklenecek. */}
+      <div className="katab">
+        {SEKMELER.map(x => (
+          <div key={x.anahtar}
+               className={`kat${x.anahtar === aktif ? ' on' : ''}`}
+               onClick={() => setAktif(x.anahtar)}>
+            {x.baslik}
+          </div>
+        ))}
+      </div>
+
       {hata && <div className="hata-kutusu">{hata}</div>}
       {yukleniyor && <div className="yukleniyor">Yükleniyor…</div>}
+
+      {aktif === 'kurumTipi' && <KurumTipiAyarlari />}
 
       {!yukleniyor && aktif === 'subeler' && (
         <div className="kagrup">

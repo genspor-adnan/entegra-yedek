@@ -1,3 +1,10 @@
+import {
+  kdvCarpan,
+  payKalan as hesapPayKalan,
+  payKalanDahil as hesapPayKalanDahil,
+  tahsilDahil as hesapTahsilDahil,
+  onerilenTutar as hesapOnerilen,
+} from '../sayfalar/belgeDonusumHesap';
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import { type AcikSatir, type BelgeYaniti, hataMetni } from '../api/sozlesme';
@@ -121,6 +128,39 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
     s => Number(s.kurumTutar ?? 0) > 0 && Number(s.hastaTutar ?? 0) > 0);
 
   /**
+   * TUTAR BAZLI DONUSUM (352): "1000 TL'lik kalemin tahsil edilen 300'u
+   * satis fisi, kalan 700'u tahakkuk". Satis siparisi/basvurudan fis, fatura
+   * ve tahakkuka giderken acilir; kaynak satir tutarla kismi kapanir (289
+   * pay sayaclari). Onerilen tutar: fis/faturada tahsil edilen matrah (payin
+   * kalanini asmaz), tahakkukta payin kalani.
+   */
+  const tutarModOlur = belgeTur === 19 && [15, 16, 17].includes(hedefTur);
+  const [tutarMod, setTutarMod] = useState(false);
+  const [tutarlar, setTutarlar] = useState<Record<number, string>>({});
+  const [kalaniTahakkuk, setKalaniTahakkuk] = useState(true);
+  /**
+   * TUTAR MODUNDA EKRAN KDV DAHIL calisir (kullanici: "10.000 TL kdv dahil
+   * islem; sadece faturaya/fise gecince kdv haric"). Pay tutarlari ve API
+   * MATRAH ister; giris/gosterim burada carpan ile cevrilir - tahsilat da
+   * KDV dahil dagitildigi icin (323) oneri gercek odenen tutari verir.
+   */
+  // Hesap ORTAK dosyada (belgeDonusumHesap): otomatik POS fisi ayni kurali
+  //   kullaniyor - iki yerde ayri formul kalmasin.
+  const payKalan = (s: AcikSatir) => hesapPayKalan(s, pay);
+  const payKalanDahil = (s: AcikSatir) => hesapPayKalanDahil(s, pay);
+  const tahsilDahil = (s: AcikSatir) => hesapTahsilDahil(s, pay);
+  const onerilenTutar = (s: AcikSatir, hedef: number) => hesapOnerilen(s, hedef, pay);
+  const tutarModuDegistir = (acik: boolean) => {
+    setTutarMod(acik);
+    if (acik) setTutarlar(Object.fromEntries(
+      satirlar.map(s => [s.satirId, onerilenTutar(s, hedefTur).toFixed(2)])));
+  };
+  useEffect(() => {
+    if (!tutarModOlur && tutarMod) setTutarMod(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tutarModOlur]);
+
+  /**
    * ONIZLEME FIYATI: pay secilince satirin birim fiyati DEGISIR - hedef belge
    * o payin KALANIYLA uretilir (BelgeDeposu.SatirJson). Kaynak fiyatini
    * gostermek "30 TL'lik hasta tahakkuku" icin 150 TL yaziyordu.
@@ -134,27 +174,45 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
 
   const toplam = useMemo(() =>
     satirlar.reduce((t, s) => secili[s.satirId]
-      ? t + sayi(miktarlar[s.satirId] ?? '0') * payliFiyat(s) : t, 0),
+      ? t + (tutarMod ? sayi(tutarlar[s.satirId] ?? '0')
+                      : sayi(miktarlar[s.satirId] ?? '0') * payliFiyat(s)) : t, 0),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [satirlar, secili, miktarlar, pay]);
+    [satirlar, secili, miktarlar, tutarlar, tutarMod, pay]);
 
-  const seciliSayi = satirlar.filter(s => secili[s.satirId] && sayi(miktarlar[s.satirId] ?? '0') > 0).length;
+  const seciliSayi = satirlar.filter(s => secili[s.satirId]
+    && sayi((tutarMod ? tutarlar : miktarlar)[s.satirId] ?? '0') > 0).length;
 
   async function donustur() {
     setHata(null);
-    const gonderilecek = satirlar
-      .filter(s => secili[s.satirId] && sayi(miktarlar[s.satirId] ?? '0') > 0)
-      .map(s => ({ satirId: s.satirId, miktar: sayi(miktarlar[s.satirId]) }));
+    // TUTAR MODU (352): satirdan miktar degil TUTAR gonderilir; miktar
+    //   sunucuda kaynagin miktari olur. Tutar payin kalanini asamaz.
+    const gonderilecek: { satirId: number; miktar: number; tutar?: number }[] = tutarMod
+      ? satirlar
+          .filter(s => secili[s.satirId] && sayi(tutarlar[s.satirId] ?? '0') > 0)
+          // Ekranda KDV DAHIL girilir, sunucu MATRAH ister (pay tutarlari matrah).
+          .map(s => ({ satirId: s.satirId, miktar: Number(s.miktar),
+                       tutar: Math.round(sayi(tutarlar[s.satirId]) / kdvCarpan(s) * 10000) / 10000 }))
+      : satirlar
+          .filter(s => secili[s.satirId] && sayi(miktarlar[s.satirId] ?? '0') > 0)
+          .map(s => ({ satirId: s.satirId, miktar: sayi(miktarlar[s.satirId]) }));
 
     if (gonderilecek.length === 0) { setHata('En az bir satır seçilmeli.'); return }
     if (!hedefTur) { setHata('Hedef belge türü seçilmeli.'); return }
 
-    // PAY donusumunde sinir miktar degil TUTAR - kontrol sunucuda (289).
-    const asan = pay > 0 ? undefined : gonderilecek.find(g => {
-      const s = satirlar.find(x => x.satirId === g.satirId)!;
-      return g.miktar > Number(s.kalanMiktar);
-    });
-    if (asan) { setHata('Bir satırda girilen miktar kalanı aşıyor.'); return }
+    if (tutarMod) {
+      const asanT = gonderilecek.find(g => {
+        const s = satirlar.find(x => x.satirId === g.satirId)!;
+        return (g.tutar ?? 0) > payKalan(s) + 0.01;   // matrah duzleminde
+      });
+      if (asanT) { setHata('Bir satırda girilen tutar payın kalanını aşıyor.'); return }
+    } else {
+      // PAY donusumunde sinir miktar degil TUTAR - kontrol sunucuda (289).
+      const asan = pay > 0 ? undefined : gonderilecek.find(g => {
+        const s = satirlar.find(x => x.satirId === g.satirId)!;
+        return g.miktar > Number(s.kalanMiktar);
+      });
+      if (asan) { setHata('Bir satırda girilen miktar kalanı aşıyor.'); return }
+    }
     if (disNumarali && !taslak && belgeNo.trim() === '') {
       setHata('Tedarikçi belge numarası girilmeli.'); return;
     }
@@ -163,7 +221,8 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
     try {
       const yeni = await api.belgeDonustur(belgeId, hedefTur, gonderilecek, tarih, taslak,
                                            disNumarali ? belgeNo.trim() : undefined,
-                                           paylasimVar ? pay : 0);
+                                           tutarMod ? (pay || 1) : paylasimVar ? pay : 0,
+                                           tutarMod && kalaniTahakkuk && hedefTur !== 17);
       setSonuc(yeni);
       setSonucAd(hedefler.find(h => h.kod === hedefTur)?.ad ?? 'Belge');
       setBelgeNo('');
@@ -237,6 +296,25 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                   </select>
                 </label>
               )}
+              {/* TUTAR BAZLI DONUSUM (352): "1000 TL'lik kalemin tahsil edilen
+                  300'u satis fisi, kalan 700'u tahakkuk". Yalniz satis
+                  tarafinda (fis/fatura/tahakkuk); miktar yerine tutar girilir. */}
+              {tutarModOlur && (
+                <label className="alan">
+                  <span className="etiket">Dönüşüm Ölçüsü</span>
+                  <select value={tutarMod ? 1 : 0} onChange={e => tutarModuDegistir(e.target.value === '1')}>
+                    <option value={0}>Miktar (adet)</option>
+                    <option value={1}>Tutar (tahsil edilen kadar)</option>
+                  </select>
+                </label>
+              )}
+              {tutarMod && hedefTur !== 17 && (
+                <label className="alan onay-kutusu">
+                  <input type="checkbox" checked={kalaniTahakkuk}
+                         onChange={e => setKalaniTahakkuk(e.target.checked)} />
+                  <span>Kalanı satış tahakkukuna çevir</span>
+                </label>
+              )}
               {/* Alis faturasinda numara TEDARIKCININ - sayac uretmez, sorulur. */}
               {disNumarali && (
                 <label className="alan">
@@ -265,8 +343,8 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                     <th className="hiza-sag" style={{ width: 90 }}>Miktar</th>
                     <th className="hiza-sag" style={{ width: 90 }}>Dönüşen</th>
                     <th className="hiza-sag" style={{ width: 90 }}>Kalan</th>
-                    <th className="hiza-sag" style={{ width: 120 }}>Bu Belgeye</th>
-                    <th className="hiza-sag" style={{ width: 110 }}>Birim Fiyat</th>
+                    <th className="hiza-sag" style={{ width: 120 }}>{tutarMod ? 'Bu Belgeye (₺ KDV dahil)' : 'Bu Belgeye'}</th>
+                    <th className="hiza-sag" style={{ width: 110 }}>{tutarMod ? 'Tahsil / Kalan (KDV dahil)' : 'Birim Fiyat'}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -298,15 +376,29 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                       <td className="hiza-sag">{say4.format(Number(s.kapatilanMiktar))}</td>
                       <td className="hiza-sag"><b>{say4.format(Number(s.kalanMiktar))}</b></td>
                       <td>
-                        <input
-                          className="hiza-sag"
-                          value={miktarlar[s.satirId] ?? ''}
-                          disabled={!secili[s.satirId]}
-                          onClick={e => e.stopPropagation()}
-                          onChange={e => setMiktarlar(x => ({ ...x, [s.satirId]: e.target.value }))}
-                        />
+                        {tutarMod ? (
+                          <input
+                            className="hiza-sag"
+                            value={tutarlar[s.satirId] ?? ''}
+                            disabled={!secili[s.satirId]}
+                            onClick={e => e.stopPropagation()}
+                            onChange={e => setTutarlar(x => ({ ...x, [s.satirId]: e.target.value }))}
+                          />
+                        ) : (
+                          <input
+                            className="hiza-sag"
+                            value={miktarlar[s.satirId] ?? ''}
+                            disabled={!secili[s.satirId]}
+                            onClick={e => e.stopPropagation()}
+                            onChange={e => setMiktarlar(x => ({ ...x, [s.satirId]: e.target.value }))}
+                          />
+                        )}
                       </td>
-                      <td className="hiza-sag">{para.format(payliFiyat(s))}</td>
+                      <td className="hiza-sag">
+                        {tutarMod
+                          ? <>{para.format(tahsilDahil(s))} <span className="sonuk">/ {para.format(payKalanDahil(s))}</span></>
+                          : para.format(payliFiyat(s))}
+                      </td>
                     </tr>
                   ))}
                   {satirlar.length === 0 && (

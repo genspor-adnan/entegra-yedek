@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 /**
  * Kart/pencere kabugu - kart ekranlari ve secim pencereleri ayni cerceveyi
@@ -59,17 +60,48 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
 
   const govdeRef = useRef<HTMLDivElement | null>(null);
   const enYuksek = useRef(0);
+
+  /**
+   * YUKSEKLIK KILIDI - EKRANLA SINIRLI (kullanici: "form alt kismi kirpiliyor").
+   *
+   * Kilit eskiden govdeye ham `scrollHeight`i minHeight olarak yaziyordu.
+   * Pencere bir flex sutunu ve `max-height: 88vh` ile sinirli; govde
+   * KUCULEMEYINCE tasan kisim pencerenin altindan tasip ekran disinda kaliyor
+   * ve kaydirma cubugu da olusmuyordu - uzun sekmelerde (basvuru) alt satirlar
+   * hic gorulemiyordu.
+   *
+   * Simdi kilit her zaman KULLANILABILIR yukseklikle kirpiliyor: govde en fazla
+   * "pencere tavani - (baslik + arac cubugu + serit + sekme)" kadar uzar,
+   * gerisi govdenin kendi kaydirmasina duser. Sekme degisince pencerenin
+   * alcalmamasi ozelligi korunur.
+   */
   useLayoutEffect(() => {
-    const el = govdeRef.current;
-    if (!el) return;
-    const h = el.scrollHeight;
-    if (h > enYuksek.current) {
-      enYuksek.current = h;
-      el.style.minHeight = `${h}px`;
-    }
+    const uygula = () => {
+      const el = govdeRef.current;
+      if (!el) return;
+      const pencere = el.parentElement;            // .kawin
+      // Govde disinda kalan sabit seritler (baslik/toolbar/ustSerit/sekme).
+      const disi = pencere ? pencere.offsetHeight - el.offsetHeight : 0;
+      // .kawin max-height'i ile ayni oran; en az 160px govde birakilir.
+      const tavan = Math.max(160, window.innerHeight * 0.88 - disi);
+      if (el.scrollHeight > enYuksek.current) enYuksek.current = el.scrollHeight;
+      el.style.minHeight = `${Math.min(enYuksek.current, tavan)}px`;
+      el.style.maxHeight = `${tavan}px`;
+    };
+    uygula();
+    // Pencere boyutu degisince tavan da degisir (kilit ekrana sigmali).
+    window.addEventListener('resize', uygula);
+    return () => window.removeEventListener('resize', uygula);
   });
 
-  return (
+  /*
+   * PERDE BODY'YE PORTALLANIR. `.kawin` her zaman `transform` tasiyor (ortalama)
+   * ve transform, icindeki `position: fixed` ogeler icin KAPSAYICI BLOK olur:
+   * kart icinden acilan ikinci pencere (or. Faturalama sekmesinden acilan fis
+   * karti) ekrana degil ACAN KARTIN kutusuna gore konumlanip kirpiliyordu.
+   * Portal ile her pencere gercekten ekrana gore ortalanir.
+   */
+  return createPortal(
     <div className={`kaperde${enUst ? ' enust' : ''}`}
          onMouseDown={e => { if (e.target === e.currentTarget) onKapat?.() }}>
       <div className={`kawin${dar ? '' : ' genis'}${ekSinif ? ' ' + ekSinif : ''}`}
@@ -92,7 +124,8 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
         {sekmeBar}
         <div className="kagov" ref={govdeRef}>{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

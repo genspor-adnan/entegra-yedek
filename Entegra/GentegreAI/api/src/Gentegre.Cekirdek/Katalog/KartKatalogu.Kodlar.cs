@@ -126,8 +126,14 @@ public static partial class KartKatalogu
     // taraf_personel.CALISMA_SEKLI - GENINI karsiligi yok (047_personel_ozluk_ogrenim.sql).
 
     // taraf_personel.CALISMA_SEKLI - GENINI karsiligi yok (047_personel_ozluk_ogrenim.sql).
+    /// <summary>
+    /// Calisma sekli. "GONDEREN" (3) DIS HEKIM icindir (361/362, kullanici):
+    /// kurumda calismaz, HASTA GONDERIR - primi gonderdigi hastanin islemi
+    /// uzerinden dogar. Tam/yari zamanli isaretli bir hekim hasta GONDERMIYOR
+    /// sayilir; prim rol adaylarina yalniz "Gönderen" secili olanlar girer.
+    /// </summary>
     private static readonly Dictionary<string, string> CalismaSekliKodlari =
-        new() { ["1"] = "Tam Zamanlı", ["2"] = "Yarı Zamanlı" };
+        new() { ["1"] = "Tam Zamanlı", ["2"] = "Yarı Zamanlı", ["3"] = "Gönderen" };
 
     // taraf_personel.VARDIYA_TURU - GENINI karsiligi yok (048_personel_ozluk_uyruk_vardiya_sgk.sql).
 

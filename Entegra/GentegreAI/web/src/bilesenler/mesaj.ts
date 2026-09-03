@@ -21,8 +21,17 @@ export interface MesajIstegi {
   girdiMi?: boolean;
   girdiVarsayilan?: string;
   girdiEtiket?: string;
+  /**
+   * UC (ya da daha cok) SECENEKLI soru - "Kaydet / İptal / Geri Dön"
+   * (kullanici). Verilirse Tamam/Vazgeç yerine bu dugmeler cizilir ve secilen
+   * kod `cozumSecim`e gider; pencere Escape ile kapatilirsa ILK dugme degil,
+   * `varsayilanKod` doner (geri don = guvenli secenek).
+   */
+  secenekler?: { kod: string; ad: string; sinif?: string }[];
+  varsayilanKod?: string;
   cozum(sonuc: boolean): void;
   cozumMetin?(deger: string | null): void;
+  cozumSecim?(kod: string): void;
 }
 
 type Dinleyici = (istek: MesajIstegi) => void;
@@ -60,6 +69,31 @@ export function onay(metin: string, tehlike = false): Promise<boolean> {
   if (!dinleyici) return Promise.resolve(confirm(metin));
   return new Promise<boolean>(cozum => {
     dinleyici!({ metin, onayMi: true, tehlike, cozum });
+  });
+}
+
+/**
+ * COK SECENEKLI soru. Dondugu deger secilen dugmenin kodudur; pencere
+ * Escape/perde ile kapatilirsa `varsayilan` doner.
+ *
+ * Ornek (kaydedilmemis kart kapatilirken, kullanici):
+ *     const c = await secimSor('Değişiklikler kaydedilsin mi?', [
+ *       { kod: 'kaydet', ad: '💾 Kaydet', sinif: 'bir' },
+ *       { kod: 'atla',   ad: '✖ Kaydetme', sinif: 'teh' },
+ *       { kod: 'geri',   ad: '↩ Geri Dön' },
+ *     ], 'geri');
+ */
+export function secimSor(metin: string,
+                         secenekler: { kod: string; ad: string; sinif?: string }[],
+                         varsayilan = ''): Promise<string> {
+  const kod0 = varsayilan || secenekler[secenekler.length - 1]?.kod || '';
+  // Katman yoksa (teorik) en guvenli secenek: hicbir sey yapma.
+  if (!dinleyici) return Promise.resolve(kod0);
+  return new Promise<string>(cozum => {
+    dinleyici!({
+      metin, onayMi: true, secenekler, varsayilanKod: kod0,
+      cozum: () => {}, cozumSecim: cozum,
+    });
   });
 }
 

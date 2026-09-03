@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
+import { mesaj, onay } from '../bilesenler/mesaj';
+import { yerelAnMetni } from '../bilesenler/bicim';
 import { type ListeSatiri, hataMetni } from '../api/sozlesme';
 
 /**
@@ -26,12 +28,19 @@ export interface TahsilatAcilisi {
   cekSenetId?: number;
 }
 
-export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, setHata }: {
+export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, setHata,
+                                  onPencereKapandi }: {
   kayitliId: number;
   aktifSekme: string;
   cari: { id: number; unvan: string } | null;
   onKaydedildi?(): void;
   setHata(mesaj: string | null): void;
+  /**
+   * Tahsilat penceresi kapandi (tur = kasa islem turu). Kart kaydedilmis de
+   * olabilir vazgecilmis de - cagiran taraf tahsilat listesine bakarak karar
+   * verir. POS aksiyonu (355) buna baglidir.
+   */
+  onPencereKapandi?(tur: number): void;
 }) {
   /** Bu belgeye baglanmis kasa islemleri (Tahsilat sekmesi). */
   const [tahsilatlar, setTahsilatlar] = useState<ListeSatiri[]>([]);
@@ -43,18 +52,76 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
   const [cekTuru, setCekTuru] = useState<{ tur: number; belgeId: number } | null>(null);
   /** Kiymet kaydedildikten sonra acilan kasa islemi (ayni kiymete bagli). */
   const [tahsilatAcilis, setTahsilatAcilis] = useState<TahsilatAcilisi | null>(null);
-  /** Tahsilat listesinde secili kasa islemi (duzelt/sil dugmeleri bunu kullanir). */
-  const [seciliTahsilat, setSeciliTahsilat] = useState<number | null>(null);
+  /** Tahsilat listesinde SECILI kasa islemleri (duzelt/sil dugmeleri bunu
+      kullanir). Coklu (kullanici): basliktaki "tumunu sec" kutusu ve yanlis
+      girilen birden cok tahsilati birlikte silmek icin - duzeltme yine tek
+      satirda calisir. */
+  const [seciliTahsilatlar, setSeciliTahsilatlar] = useState<number[]>([]);
   /** DUZELTME icin acilan MEVCUT kasa islemi - yeni tahsilattan ayri state:
       biri tur ile acar, oteki kayit kimligiyle. */
   const [tahsilatKayitId, setTahsilatKayitId] = useState<number | null>(null);
 
   const tazele = () => setTahsilatYenile(t => t + 1);
 
+  /**
+   * HIZLI TAHSILAT (kullanici): kasa kartini ACMADAN gride satir ekler -
+   * nakitte varsayilan kasa, banka/POS'ta secilen hesap. Tutar cagirandan
+   * gelir (varsayilan: belgenin acik borcu); satir eklendikten sonra tutar
+   * gridde tiklanip degistirilebilir.
+   *
+   * Tahsilat GERCEKLESMIS kaydedilir (taslak degil): kasa kartindaki normal
+   * akisla ayni - yalniz alan sorma adimi atlanir.
+   */
+  const hizliTahsilat = async (tur: number, hesapId: number, tutar: number,
+                               hesapAdi = '') => {
+    // Hata SESSIZ KALMASIN (kullanici: "seçtim ama satıra eklenmedi"): hizli
+    //   akista kart acilmadigi icin sekmedeki hata kutusu gorunmuyordu -
+    //   uyarilar pencereyle verilir.
+    if (!kayitliId) { mesaj('Önce belgeyi kaydedin.'); return }
+    if (!hesapId) { mesaj('Kasa / hesap seçilmeli.'); return }
+    if (!(tutar > 0)) { mesaj('Tahsilat tutarı sıfırdan büyük olmalı.'); return }
+    setHata(null);
+    try {
+      await api.kasaEkle({
+        islem: {
+          tur,
+          islemTarihi: yerelAnMetni(new Date()),
+          tarafId: cari?.id ?? null,
+          hesapId,
+          tutar,
+          dovizCinsi: 'TL',
+          dovizKuru: 1,
+          aciklama: hesapAdi ? `Hızlı tahsilat · ${hesapAdi}` : 'Hızlı tahsilat',
+        },
+        secenekler: { taslak: false, plan: false, kurKontrolu: true, belgeId: kayitliId },
+      });
+      tazele();
+      onKaydedildi?.();
+    } catch (h) { setHata(hataMetni(h)); mesaj(hataMetni(h)) }
+  };
+
+  /** Gridde tutar hucresi degistirildi: kasa islemini gunceller. */
+  const tutarGuncelle = async (id: number, tutar: number) => {
+    if (!(tutar > 0)) { setHata('Tahsilat tutarı sıfırdan büyük olmalı.'); return }
+    setHata(null);
+    try {
+      const mevcut = await api.kasaOku(id);
+      await api.kasaGuncelle(id, {
+        surum: String(mevcut.islem.surum ?? ''),
+        islem: { tutar },
+      });
+      tazele();
+      onKaydedildi?.();
+    } catch (h) { setHata(hataMetni(h)) }
+  };
+
   // Bu belgeye bagli kasa islemleri (kasa_islem.belge_id). Iptal edilenler
   //   (durum 3) haric - odenmis gibi gorunmesinler.
+  // SEKMEDEN BAGIMSIZ yuklenir (kullanici): hasta seridindeki "Açık Borç"
+  //   ucretlendirme - tahsilat farkidir, tahsilat sekmesi acilmadan da dogru
+  //   gorunmeli. Istek kucuk (tek belgenin kasa islemleri).
   useEffect(() => {
-    if (!kayitliId || aktifSekme !== 'tahsilat') return;
+    if (!kayitliId) { setTahsilatlar([]); return }
     void (async () => {
       try {
         const y = await api.liste('kasa-islem', {
@@ -78,17 +145,22 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
    * "İptal kullanın" der ve mesaj oldugu gibi gosterilir; kart burada
    * ikinci bir kural uydurmaz.
    */
-  const tahsilatSil = async (id: number) => {
-    if (!window.confirm('Seçili tahsilat/ödeme silinecek. Onaylıyor musunuz?')) return;
+  const tahsilatSil = async (idler: number[]) => {
+    if (!idler.length) return;
+    if (!await onay(idler.length === 1
+        ? 'Seçili tahsilat/ödeme silinecek. Onaylıyor musunuz?'
+        : `Seçili ${idler.length} tahsilat/ödeme silinecek. Onaylıyor musunuz?`, true)) return;
     setHata(null);
-    try {
-      await api.kasaSil(id);
-      setSeciliTahsilat(null);
-      tazele();
-      onKaydedildi?.();
-    } catch (h) {
-      setHata(hataMetni(h));
+    // Biri silinemezse (muhasebe fisi disa aktarilmis, belge donusmus...)
+    //   sunucunun sebebi gosterilir ama digerlerinin silinmesi surer (354).
+    const hatalar: string[] = [];
+    for (const id of idler) {
+      try { await api.kasaSil(id) } catch (h) { hatalar.push(hataMetni(h)) }
     }
+    setSeciliTahsilatlar([]);
+    tazele();
+    onKaydedildi?.();
+    if (hatalar.length) setHata([...new Set(hatalar)].join(' | '));
   };
 
   /**
@@ -140,9 +212,11 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
     tahsilatAcik, setTahsilatAcik,
     cekTuru, setCekTuru,
     tahsilatAcilis, setTahsilatAcilis,
-    seciliTahsilat, setSeciliTahsilat,
+    seciliTahsilatlar, setSeciliTahsilatlar,
+    onPencereKapandi,
     tahsilatKayitId, setTahsilatKayitId,
     tazele, tahsilatSil, tahsilatAdimi, cekKartKaydedildi,
+    hizliTahsilat, tutarGuncelle,
   };
 }
 

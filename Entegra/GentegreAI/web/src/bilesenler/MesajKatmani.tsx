@@ -29,7 +29,15 @@ export function MesajKatmani() {
   const kapat = (sonuc: boolean) => {
     // Metin istegi ise degeri (iptalde null) ayri geri cagirimla veririz.
     if (istek.girdiMi) istek.cozumMetin?.(sonuc ? girdi : null);
+    else if (istek.secenekler) istek.cozumSecim?.(istek.varsayilanKod ?? '');
     else istek.cozum(sonuc);
+    setIstek(null);
+    setGirdi('');
+  };
+
+  /** Cok secenekli soruda dugmeye basildi (Kaydet / İptal / Geri Dön). */
+  const secildi = (kod: string) => {
+    istek.cozumSecim?.(kod);
     setIstek(null);
     setGirdi('');
   };
@@ -41,6 +49,20 @@ export function MesajKatmani() {
       enUst
       onKapat={() => kapat(false)}
       alt={
+        istek.secenekler ? (
+          // COK SECENEKLI soru (or. "Kaydet / İptal / Geri Dön"): dugmeler
+          //   verildigi SIRADA cizilir, ilki one cikan secimdir.
+          <>
+            {istek.secenekler.map((x, i) => (
+              <button key={x.kod} type="button"
+                      className={`d ${x.sinif ?? ''}`.trim()}
+                      autoFocus={i === 0}
+                      onClick={() => secildi(x.kod)}>
+                {x.ad}
+              </button>
+            ))}
+          </>
+        ) : (
         <>
           {istek.onayMi && (
             <button type="button" className="d kapat-dugmesi"
@@ -53,6 +75,7 @@ export function MesajKatmani() {
             {istek.onayMi ? 'Tamam' : 'Kapat'}
           </button>
         </>
+        )
       }
     >
       {/* Satir sonlari korunur: sunucudan gelen cok satirli aciklamalar

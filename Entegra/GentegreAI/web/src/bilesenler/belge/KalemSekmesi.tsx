@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import { AvansMahsup } from '../AvansMahsup';
 import { para, tarihSaat, hamSayi as sayi } from '../bicim';
 import { iskonatoMetni, satirTutari, type SatirDurumu } from '../../sayfalar/belgeSatir';
@@ -100,6 +100,14 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             }}>
       ✎
     </button>
+    <button type="button" className="d teh ikon"
+            disabled={kilitli || seciliSatirlar.size === 0}
+            title={kilitli ? 'Kesin belgeden satır silinemez.'
+                  : seciliSatirlar.size === 0 ? 'Önce satır seçin'
+                  : `Seçili ${seciliSatirlar.size} satırı sil`}
+            onClick={seciliSil}>
+      🗑
+    </button>
     {/* PROVIZYON UYGULA (289): kurumun karsilama oranini butun satirlara isler.
         Yalniz odeyen kurumlu basvuruda gorunur. */}
     {paylasim?.acik && (
@@ -130,14 +138,6 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         👥
       </button>
     )}
-    <button type="button" className="d teh ikon"
-            disabled={kilitli || seciliSatirlar.size === 0}
-            title={kilitli ? 'Kesin belgeden satır silinemez.'
-                  : seciliSatirlar.size === 0 ? 'Önce satır seçin'
-                  : `Seçili ${seciliSatirlar.size} satırı sil`}
-            onClick={seciliSil}>
-      🗑
-    </button>
   </h6>
 
   {/* Grid SALT GORUNUM (mockup deseni): hucre ici input yok, satir secimi
@@ -229,7 +229,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             {tarihSolda && (
               <td className="hiza-orta">
                 {r.teslimTarihi
-                  ? r.teslimTarihi.split('-').reverse().join('.')
+                  ? tarihSaat(r.teslimTarihi)
                   : <span className="sonuk">—</span>}
               </td>
             )}
@@ -256,7 +256,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             {bilgi.siparis && !tarihSolda && (
               <td className="hiza-orta">
                 {r.teslimTarihi
-                  ? r.teslimTarihi.split('-').reverse().join('.')
+                  ? tarihSaat(r.teslimTarihi)
                   : <span className="sonuk">—</span>}
               </td>
             )}
@@ -607,7 +607,8 @@ export interface KalemSekmesiProps {
  */
 export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsilatAc,
                                   secili, setSecili, tahsilatAcKart, tahsilatSil,
-                                  onYenile, kurumTahakkukAc, kurumKalan }: {
+                                  onYenile, kurumTahakkukAc, kurumKalan,
+                                  hizliNakit, hesapSecAc, tutarGuncelle, acikBorc }: {
   sonuc: BelgeYaniti | null;
   tahsilatlar: Record<string, unknown>[];
   kayitliId: number;
@@ -618,13 +619,23 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
   /** Kasa islem kartini acar (tur: tahsilat 21 / odeme 31); belge kayitli
       degilse ONCE kaydeder. */
   tahsilatAc(tur: number): Promise<void>;
-  /** Listede secili kasa isleminin kimligi (satir onay kutusu). */
-  secili: number | null;
-  setSecili(v: number | null): void;
+  /** Listede SECILI kasa islemleri (satir onay kutulari, coklu secim). */
+  secili: number[];
+  setSecili(v: number[]): void;
   /** MEVCUT kasa islemini duzeltmek icin karti acar (cift tik da bunu cagirir). */
   tahsilatAcKart(id: number): void;
-  /** Secili kasa islemini siler - gerceklesmisse sunucu "İptal kullanın" der. */
-  tahsilatSil(id: number): Promise<void>;
+  /** Secili kasa islemlerini siler - silinemeyende sunucunun sebebi gosterilir (354). */
+  tahsilatSil(idler: number[]): Promise<void>;
+  /**
+   * HIZLI TAHSILAT (kullanici): kasa karti ACILMADAN gride satir ekler.
+   * Nakitte varsayilan kasa, banka/POS'ta modal aramadan secilen hesap.
+   */
+  hizliNakit?(): void;
+  hesapSecAc?(tur: 'B' | 'P'): void;
+  /** Gridde tutar hucresine tiklaninca cagrilir (satir ici duzenleme). */
+  tutarGuncelle?(id: number, tutar: number): Promise<void>;
+  /** Belgenin ACIK BORCU - yeni tahsilat satiri bu tutarla acilir. */
+  acikBorc?: number;
   /**
    * KURUM TAHAKKUKU (331): basvuruda kurum payini kuruma kesilen belgeye
    * (Satış Tahakkuku) dönüştürür. TAHSILAT DEGILDIR - hastadan para alinmaz,
@@ -635,6 +646,33 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
   /** Henuz belgelesmemis kurum payi - dugme yalniz bu > 0 iken etkin. */
   kurumKalan?: number;
 }) {
+/* SECIM: faturalama gridiyle AYNI desen - duz tik tek satir secer, Ctrl/Cmd
+   ekler-cikarir, Shift aralik secer; basliktaki kutu tumunu secer. */
+const idler = tahsilatlar.map(k => Number(k.id ?? 0)).filter(Boolean);
+const hepsi = idler.length > 0 && secili.length === idler.length;
+const cevir = (id: number) =>
+  setSecili(secili.includes(id) ? secili.filter(x => x !== id) : [...secili, id]);
+const tekSecili = secili.length === 1 ? secili[0] : 0;
+const capa = useRef<number | null>(null);   // son tiklanan satirin sirasi
+/** Satir ici tutar duzenleme: hangi kasa islemi ve o anki metin. */
+const [tutarDuzenlenen, setTutarDuzenlenen] = useState<number | null>(null);
+const [tutarMetni, setTutarMetni] = useState('');
+const tutarBitir = (id: number) => {
+  const yeni = sayi(tutarMetni);
+  setTutarDuzenlenen(null);
+  if (yeni > 0) void tutarGuncelle?.(id, yeni);
+};
+const satirTikla = (e: React.MouseEvent, sira: number, id: number) => {
+  if (!id) return;
+  if (e.shiftKey && capa.current != null) {
+    const [bas, son] = capa.current <= sira ? [capa.current, sira] : [sira, capa.current];
+    setSecili(tahsilatlar.slice(bas, son + 1).map(k => Number(k.id ?? 0)).filter(Boolean));
+    return;
+  }
+  capa.current = sira;
+  if (e.ctrlKey || e.metaKey) { cevir(id); return }
+  setSecili(secili.length === 1 && secili[0] === id ? [] : [id]);
+};
 const genel = Number(sonuc?.belge.genelToplam ?? 0);
 const tahsil = tahsilatlar.reduce((t, k) => t + (Number(k.yerelTutar ?? k.tutar ?? 0) || 0), 0);
 const kalan = Math.round((genel - tahsil) * 100) / 100;
@@ -657,37 +695,28 @@ return (
       {/* Alista ODEME turleri (31/32/35), satista tahsilat (21/22/25). */}
       {/* Kayitli olma sarti YOK: kaydedilmemis belgede kart once KAYDEDER,
           sonra tahsilati acar (tahsilatAc). */}
-      <button className="d bir"
-              title={kayitliId ? `Nakit ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç`
-                               : `Belge kaydedilip nakit ${alisMi ? 'ödeme' : 'tahsilat'} açılır`}
-              onClick={() => void tahsilatAc(alisMi ? 31 : 21)}>
+      {/* HIZLI TAHSILAT (kullanici): kart ACILMAZ - satir dogrudan gride
+          duser. Nakitte VARSAYILAN KASA, banka/POS'ta modal aramadan secilen
+          hesap kullanilir; tutar acik borcun tamami gelir ve gridde
+          tiklanarak degistirilir. */}
+      <button className="d bir" disabled={!kayitliId}
+              title={kayitliId
+                ? `Varsayılan kasaya nakit ${alisMi ? 'ödeme' : 'tahsilat'} satırı ekler`
+                  + (acikBorc && acikBorc > 0 ? ` (${para.format(acikBorc)} ₺)` : '')
+                : 'Önce belgeyi kaydedin'}
+              onClick={() => hizliNakit?.()}>
         💵 Nakit
       </button>
-      {/* KURUM TAHAKKUKU (331): tahsilat ARACI DEGIL - bu yuzden oteki
-          dugmelerden ayri durur ve "tahsil edildi" saymaz. Kurum payi
-          kuruma kesilen Satış Tahakkuku belgesine doner; para kurumdan
-          gelince normal tahsilat islenir ve prim O ZAMAN dogar. */}
-      {kurumTahakkukAc && (
-        <button className="d"
-                disabled={!kayitliId || !(kurumKalan && kurumKalan > 0)}
-                title={!kayitliId ? 'Önce belgeyi kaydedin'
-                       : !(kurumKalan && kurumKalan > 0)
-                       ? 'Belgelenmemiş kurum payı yok'
-                       : 'Kurum payını Satış Tahakkukuna dönüştür (tahsilat değil)'}
-                onClick={kurumTahakkukAc}>
-          🏥 Kurum Tahakkuku
-        </button>
-      )}
-      <button className="d bir"
-              title={kayitliId ? `Banka (havale/EFT) ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç`
-                               : 'Belge kaydedilip banka işlemi açılır'}
-              onClick={() => void tahsilatAc(alisMi ? 32 : 22)}>
+      <button className="d bir" disabled={!kayitliId}
+              title={kayitliId ? 'Banka hesabı seç ve satır ekle'
+                               : 'Önce belgeyi kaydedin'}
+              onClick={() => hesapSecAc?.('B')}>
         🏦 Banka
       </button>
-      <button className="d bir"
-              title={kayitliId ? `Kredi kartı / POS ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç`
-                               : 'Belge kaydedilip POS işlemi açılır'}
-              onClick={() => void tahsilatAc(alisMi ? 35 : 25)}>
+      <button className="d bir" disabled={!kayitliId}
+              title={kayitliId ? 'POS hesabı seç ve satır ekle'
+                               : 'Önce belgeyi kaydedin'}
+              onClick={() => hesapSecAc?.('P')}>
         💳 POS
       </button>
       {/* CEK ve SENET ayri dugme (kullanici): ikisi ayri kasa islem turu
@@ -702,20 +731,49 @@ return (
               onClick={() => void tahsilatAc(alisMi ? 34 : 24)}>
         📜 Senet
       </button>
+      {/* KURUM TAHAKKUKU (331): tahsilat ARACI DEGIL - "tahsil edildi"
+          saymaz; bu yuzden tahsilat araclarinin SONUNDA, Senet'in saginda
+          durur (kullanici). Kurum payi
+          kuruma kesilen Satış Tahakkuku belgesine doner; para kurumdan
+          gelince normal tahsilat islenir ve prim O ZAMAN dogar. */}
+      {kurumTahakkukAc && (
+        <button className="d"
+                disabled={!kayitliId || !(kurumKalan && kurumKalan > 0)}
+                title={!kayitliId ? 'Önce belgeyi kaydedin'
+                       : !(kurumKalan && kurumKalan > 0)
+                       ? 'Belgelenmemiş kurum payı yok'
+                       : 'Kurum payını Satış Tahakkukuna dönüştür (tahsilat değil)'}
+                onClick={kurumTahakkukAc}>
+          🏥 Kurum Tahakkuku
+        </button>
+      )}
       <span className="ayrac" />
       {/* Secili satir uzerinde islem - kalem gridiyle ayni desen: yalniz ikon,
           secim yoksa pasif. Cift tik da duzeltmeyi acar. */}
-      <button className="d" disabled={!secili}
-              title={secili ? 'Seçili işlemi düzelt' : 'Önce satır seçin'}
-              onClick={() => secili && tahsilatAcKart(secili)}>✎</button>
-      <button className="d teh" disabled={!secili}
-              title={secili ? 'Seçili işlemi sil' : 'Önce satır seçin'}
-              onClick={() => secili && void tahsilatSil(secili)}>🗑</button>
+      {/* EKLE (kullanici): duzenle ikonunun SOLUNDA - tam tahsilat ekranini
+          acar (arac secimi, doviz, dagitim gibi ayrintilar orada). */}
+      <button className="d" disabled={!kayitliId}
+              title={kayitliId ? 'Tahsilat ekranını aç (tüm alanlarla)'
+                               : 'Önce belgeyi kaydedin'}
+              onClick={() => void tahsilatAc(alisMi ? 31 : 21)}>＋</button>
+      <button className="d" disabled={!tekSecili}
+              title={!secili.length ? 'Önce satır seçin'
+                     : secili.length > 1 ? 'Düzeltme için tek satır seçin'
+                     : 'Seçili işlemi düzelt'}
+              onClick={() => tekSecili && tahsilatAcKart(tekSecili)}>✎</button>
+      <button className="d teh" disabled={!secili.length}
+              title={secili.length ? 'Seçili işlemleri sil' : 'Önce satır seçin'}
+              onClick={() => { void tahsilatSil(secili) }}>🗑</button>
+      {secili.length > 1 && <span className="kapt">{secili.length} işlem seçili</span>}
     </div>
     <table className="detay-tablo">
       <thead>
         <tr>
-          <th className="check" />
+          <th className="check">
+            <input type="checkbox" checked={hepsi} disabled={!idler.length}
+                   title="Tümünü seç"
+                   onChange={() => setSecili(hepsi ? [] : idler)} />
+          </th>
           <th style={{ width: 140 }}>Tarih / Saat</th>
           <th style={{ width: 120 }}>Makbuz No</th>
           <th style={{ width: 180 }}>Tür</th>
@@ -727,12 +785,13 @@ return (
         {tahsilatlar.map((k, i) => {
           const kid = Number(k.id ?? 0);
           return (
-          <tr key={i} className={kid && kid === secili ? 'secili' : ''}
-              onClick={() => setSecili(kid || null)}
+          <tr key={i} className={kid && secili.includes(kid) ? 'secili' : ''}
+              style={{ userSelect: 'none' }}
+              onClick={e => satirTikla(e, i, kid)}
               onDoubleClick={() => kid && tahsilatAcKart(kid)}>
             <td className="check" onClick={e => e.stopPropagation()}>
-              <input type="checkbox" checked={kid === secili} disabled={!kid}
-                     onChange={() => setSecili(kid === secili ? null : kid)} />
+              <input type="checkbox" checked={!!kid && secili.includes(kid)} disabled={!kid}
+                     onChange={() => { if (kid) { capa.current = i; cevir(kid) } }} />
             </td>
             {/* Tarih + saat: ayni gun birden fazla tahsilat olunca
                 sira ancak saatle anlasiliyordu. */}
@@ -740,7 +799,31 @@ return (
             <td>{String(k.islemNo ?? '')}</td>
             <td>{String(k.turAdi ?? '')}</td>
             <td>{String(k.hesapAdi ?? '') || <span className="sonuk">—</span>}</td>
-            <td className="hiza-sag">{para.format(Number(k.yerelTutar ?? k.tutar ?? 0))}</td>
+            {/* TUTAR HUCRESI TIKLANINCA DUZENLENIR (kullanici): hizli
+                tahsilatta satir ACIK BORCUN TAMAMIYLA aciliyor - kismi tahsilat
+                icin kart acmak yerine hucreye tiklanip yazilir. */}
+            <td className="hiza-sag" onClick={e => e.stopPropagation()}>
+              {tutarDuzenlenen === kid ? (
+                <input className="hiza-sag" autoFocus value={tutarMetni}
+                       style={{ width: 110 }}
+                       onChange={e => setTutarMetni(e.target.value)}
+                       onKeyDown={e => {
+                         if (e.key === 'Enter') { e.preventDefault(); tutarBitir(kid) }
+                         if (e.key === 'Escape') { setTutarDuzenlenen(null) }
+                       }}
+                       onBlur={() => tutarBitir(kid)} />
+              ) : (
+                <span className={tutarGuncelle && kid ? 'tiklanir-tutar' : ''}
+                      title={tutarGuncelle && kid ? 'Tutarı değiştirmek için tıklayın' : undefined}
+                      onClick={() => {
+                        if (!tutarGuncelle || !kid) return;
+                        setTutarDuzenlenen(kid);
+                        setTutarMetni(String(Number(k.yerelTutar ?? k.tutar ?? 0)));
+                      }}>
+                  {para.format(Number(k.yerelTutar ?? k.tutar ?? 0))}
+                </span>
+              )}
+            </td>
           </tr>
           );
         })}

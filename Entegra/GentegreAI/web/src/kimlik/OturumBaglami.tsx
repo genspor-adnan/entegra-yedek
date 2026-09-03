@@ -11,6 +11,12 @@ interface OturumDurumu {
   cikisYap(): Promise<void>;
   subeDegistir(subeId: number): Promise<void>;
   dilDegistir(dil: number): Promise<void>;
+  /**
+   * Oturumu SUNUCUDAN tazeler (359/364): kurum profili degisince acik modul
+   * kumesi de degisir - menu ve rotalar yeniden cizilsin diye kart ekrani
+   * kaydettikten sonra bunu cagirir.
+   */
+  tazele(): Promise<void>;
   /** Kaynak yetkisi: yetki('cari','ekle'). Sunucu da ayrica dogrular - bu yalniz arayuz icin. */
   yetki(kaynak: string, islem?: 'gor' | 'ekle' | 'degistir' | 'sil'): boolean;
   aksiyonVar(kod: string): boolean;
@@ -55,6 +61,8 @@ export function OturumSaglayici({ children }: { children: ReactNode }) {
       await api.dilDegistir(dil);
       setBen(await api.ben());
     },
+
+    async tazele() { setBen(await api.ben()) },
 
     yetki(kaynak, islem = 'gor') {
       const k = ben?.kaynaklar.find(x => x.kod === kaynak);

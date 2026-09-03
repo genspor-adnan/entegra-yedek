@@ -135,7 +135,9 @@ public sealed class KimlikServisi
             SonaErme = sonaErme,
             ParolaDegismeli = kullanici.ParolaDegismeli,
             Kullanici = KullaniciOzetiKur(kullanici, subeler, subeId,
-                await AyarAsync("genel.urun_modu", 1, iptal))
+                await AyarAsync("genel.urun_modu", 1, iptal),
+                await AcikModullerAsync(subeId, iptal),
+                await HekimRoluAsync(subeId, iptal))
         };
     }
 
@@ -280,12 +282,35 @@ public sealed class KimlikServisi
             RefreshSonaErme = refreshBitis,
             ParolaDegismeli = kullanici.ParolaDegismeli,
             Kullanici = KullaniciOzetiKur(kullanici, subeler, subeId,
-                await AyarAsync("genel.urun_modu", 1, iptal))
+                await AyarAsync("genel.urun_modu", 1, iptal),
+                await AcikModullerAsync(subeId, iptal),
+                await HekimRoluAsync(subeId, iptal))
         };
     }
 
+    /// <summary>
+    /// Acik moduller (359) - giris yanitinda da doner: menu ilk cizimde dogru
+    /// olsun, /ben yanitini beklemek zorunda kalmasin.
+    /// </summary>
+    /// <summary>Aktif subenin basvuru hekim rolu (361/364).</summary>
+    private async Task<int> HekimRoluAsync(int? subeId, CancellationToken iptal)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        return await KurumProfilDeposu.HekimRoluAsync(baglanti, subeId ?? 0, iptal);
+    }
+
+    private async Task<IReadOnlyList<string>> AcikModullerAsync(int? subeId,
+        CancellationToken iptal)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        // AKTIF SUBENIN profili (364): sube secimi giriste yapiliyor, menu de
+        //   o subenin modulleriyle cizilsin.
+        return await KurumProfilDeposu.AcikModullerAsync(baglanti, subeId ?? 0, iptal);
+    }
+
     private static KullaniciOzeti KullaniciOzetiKur(KullaniciKaydi kullanici,
-        IReadOnlyList<SubeOzeti> subeler, int? subeId, int urunModu) => new()
+        IReadOnlyList<SubeOzeti> subeler, int? subeId, int urunModu,
+        IReadOnlyList<string> moduller, int hekimRolu) => new()
     {
         Id = kullanici.TarafId,
         Kod = kullanici.Kod,
@@ -297,7 +322,9 @@ public sealed class KimlikServisi
         SubeId = subeId,
         SubeYazma = subeId is null || subeler.FirstOrDefault(s => s.Id == subeId)?.Yazma != false,
         Subeler = subeler,
-        UrunModu = urunModu
+        UrunModu = urunModu,
+        Moduller = moduller,
+        HekimRolu = hekimRolu
     };
 
     private static int? SubeSec(int? istenen, IReadOnlyList<SubeOzeti> subeler)

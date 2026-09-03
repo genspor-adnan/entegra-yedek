@@ -178,7 +178,8 @@ public static partial class KartKatalogu
         Ekle(Kategori());
         Ekle(RadyolojiIstem());
         Ekle(RadyolojiSablon());
-        Ekle(RadyolojiProtokol());
+        Ekle(RadyolojiProtokol());
+
         Ekle(PrimPlani());
         Ekle(EntegrasyonHesap());
         Ekle(RadyolojiCihaz());
@@ -196,6 +197,10 @@ public static partial class KartKatalogu
         Ekle(HesapPlani());
 
         // Numaralama (152): Genel Ayarlar > Numaralama ekranindaki dort grid.
+        Ekle(MuayeneKarti());
+        Ekle(LabIstemKarti());
+        Ekle(NumaraHasta());
+        Ekle(NumaraBasvuru());
         Ekle(NumaraSatis());
         Ekle(NumaraAlis());
         Ekle(NumaraTahsilat());

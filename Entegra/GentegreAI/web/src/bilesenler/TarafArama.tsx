@@ -426,7 +426,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
  */
 export function TarafSecici({
   etiket, deger, kilitli, zorunlu, hata, kaynaklar = ['cari'], yerTutucu, ipucu,
-  otomatikAc = false, onSec, onTemizle,
+  otomatikAc = false, ekFiltre, bosMetin, onSec, onTemizle,
 }: {
   etiket: string;
   deger?: string;
@@ -438,6 +438,13 @@ export function TarafSecici({
   ipucu?: string;
   /** Acilista modali kendiliginden ac (ör. yeni belgede "kime?" sorusu). */
   otomatikAc?: boolean;
+  /** Aramayi daraltan sabit kosul (ör. secili bolumun hekimleri, 367). */
+  ekFiltre?: Kosul;
+  /**
+   * Secim YOKKEN kutuda gorunen metin. Bos secim bir ANLAM tasiyorsa yazilir -
+   * ör. basvuruda gonderen yoksa "Kendi İsteği" (kullanici).
+   */
+  bosMetin?: string;
   onSec(secilen: { kaynak: string; id: number; unvan: string }): void;
   /** Verilirse "×" dugmesi cikar ve secimi bosaltir. */
   onTemizle?(): void;
@@ -448,7 +455,8 @@ export function TarafSecici({
     <label className="alan">
       <span className={`etiket${zorunlu ? ' zorunlu-isaret' : ''}`}>{etiket}</span>
       <span className="lookup-kutu">
-        <input readOnly value={deger ?? ''} placeholder="Seçiniz…" disabled={kilitli}
+        <input readOnly value={deger ?? ''} placeholder={bosMetin ?? 'Seçiniz…'}
+               disabled={kilitli}
                onMouseDown={e => { if (!kilitli) { e.preventDefault(); setAcik(true) } }} />
         {!kilitli && onTemizle && deger && (
           <button type="button" className="mini" title="Boşalt"
@@ -464,6 +472,7 @@ export function TarafSecici({
       <TarafArama
         acik={acik}
         kaynaklar={kaynaklar}
+        ekFiltre={ekFiltre}
         yerTutucu={yerTutucu}
         onKapat={() => setAcik(false)}
         onSec={sec => { onSec(sec); setAcik(false) }}

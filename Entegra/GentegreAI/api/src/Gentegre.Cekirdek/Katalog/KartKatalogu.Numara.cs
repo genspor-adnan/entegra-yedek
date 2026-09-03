@@ -47,6 +47,12 @@ public static partial class KartKatalogu
             // Bos ise tum subeler; sube secilirse o subede bu satir onceliklidir.
             new("subeId", "sube_id", "kod", KodTablosu: "public.sube",
                 Baslik: "Şube", Grup: "Numaralama"),
+            // NUMARAYI KIM VERIR (358): kapali = sistem uretir (on ek + hane +
+            //   sayac), acik = kullanici elle yazar. Hasta dosya no ve basvuru
+            //   protokol no ayarlari da burada tutulur - ayri bir "otomatik mi"
+            //   ayari yok, numara ile ilgili her sey tek tabloda.
+            new("elleGirilir", "elle_girilir", "mantik",
+                Baslik: "Numarayı kullanıcı elle yazsın", Grup: "Numaralama"),
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
                 Baslik: "Açıklama", Grup: "Numaralama"),
             new("durum", "durum", "kod", SabitKodlar: DurumKodlari,
@@ -90,6 +96,10 @@ public static partial class KartKatalogu
                 Baslik: "Durum", Grup: "Seri")
         });
 
+    private static KartTanimi NumaraHasta() =>
+        NumaraKarti("numara-hasta", "public.v_numara_turu_kimlik", "Numara Türü");
+    private static KartTanimi NumaraBasvuru() =>
+        NumaraKarti("numara-basvuru", "public.v_numara_turu_kimlik", "Numara Türü");
     private static KartTanimi NumaraSatis() =>
         NumaraKarti("numara-satis", "public.v_numara_turu_satis", "Satış Belgesi Türü");
     private static KartTanimi NumaraAlis() =>

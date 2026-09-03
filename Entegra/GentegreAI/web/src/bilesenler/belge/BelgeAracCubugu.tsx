@@ -131,9 +131,8 @@ export function BelgeAracCubugu({
 
       <span className="ayrac" />
 
-      <button className="d" disabled title="Yatan hasta (yatış) modülü henüz yok.">
-        🔁 Yatışa Çevir
-      </button>
+      {/* "Yatışa Çevir" KALDIRILDI (kullanici): yatan hasta modulu yok,
+          pasif dugme yer kapliyordu. Modul gelince geri konur. */}
       {/* TAHSILAT ve FATURAYA DONUSTUR arac cubugunda YOK (kullanici):
           tahsilat kendi sekmesinden yapiliyor, faturaya donusum ise
           Basvurular listesindeki "→ Dönüştür" aksiyonundan - kayit kabul

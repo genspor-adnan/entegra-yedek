@@ -188,10 +188,16 @@ export function KalemRolModali({ belgeSatirId, kalemAdi, onKapat, onTamam }: {
         </div>
       )}
 
+      {/* ARAMA KAYNAGI ROLE GORE (361): "Gönderen" DIS hekimdir - kurumda is
+          yapmaz, hasta gonderir; oteki roller kurum personelinden secilir.
+          Yanlis secim DB'de de reddedilir (tg_belge_satir_rol_dogrula), ama
+          kullanici yanlis listede aramasin. */}
       <TarafArama
         acik={arama !== null}
-        kaynaklar={['personel', 'dis-hekim']}
-        yerTutucu="Hekim / personel ara…"
+        kaynaklar={arama !== null && satirlar[arama]?.rol === 1
+          ? ['dis-hekim'] : ['personel']}
+        yerTutucu={arama !== null && satirlar[arama]?.rol === 1
+          ? 'Gönderen dış hekim ara…' : 'Hekim / personel ara…'}
         onKapat={() => setArama(null)}
         onSec={sec => {
           if (arama !== null) yaz(arama, { tarafId: sec.id, kisi: sec.unvan });

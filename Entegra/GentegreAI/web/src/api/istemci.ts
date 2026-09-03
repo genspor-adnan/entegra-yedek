@@ -13,6 +13,7 @@ import {
   type EBelgeMesaji,
   type TopluEBelgeSonucu,
   type RandevuBolumDugumu, type RandevuAyarYazma,
+  type KurumProfil, type KurumProfilYaniti,
 } from './sozlesme';
 
 const TABAN = import.meta.env.VITE_API ?? 'http://localhost:5180';
@@ -303,6 +304,14 @@ export const api = {
     istek<AksiyonListesi>(`/api/aksiyon/${ekran}` + (kayitId ? `?kayitId=${kayitId}` : '')),
 
   // -------------------------------------------------------------- belge ----
+  // ----------------------------------------------------- kurum profili ----
+  /** Kurum tipi & sistem ayarlari (359): profil + tip/modul kataloglari. */
+  kurumProfil: (sube?: number) =>
+    istek<KurumProfilYaniti>(`/api/kurum-profil${sube === undefined ? '' : `?sube=${sube}`}`),
+  /** Profili yazar - verilmeyen alanlar mevcut degerini korur. */
+  kurumProfilYaz: (govde: Partial<KurumProfil>) =>
+    gonder<{ profil: KurumProfil }>('/api/kurum-profil', govde, 'PUT'),
+
   belgeOku: (id: number) => istek<BelgeYaniti>(`/api/belge/${id}`),
   belgeEkle: (govde: unknown) => gonder<BelgeYaniti>('/api/belge', govde),
 
@@ -439,11 +448,11 @@ export const api = {
    * 2 yalniz KURUM payi - kurum payinda hedef belgenin carisi odeyen kurum olur.
    */
   belgeDonustur: (id: number, hedefTur: number,
-                  satirlar: { satirId: number; miktar: number }[],
+                  satirlar: { satirId: number; miktar: number; tutar?: number }[],
                   belgeTarihi?: string, taslak = false, belgeNo?: string,
-                  pay = 0) =>
+                  pay = 0, kalaniTahakkuk = false) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/donustur`,
-                        { hedefTur, satirlar, belgeTarihi, taslak, belgeNo, pay }),
+                        { hedefTur, satirlar, belgeTarihi, taslak, belgeNo, pay, kalaniTahakkuk }),
 
   // ------------------------------------------ stok karti: Stok Durumu ----
   /** Depo bazli miktar/rezerve/kullanilabilir + KPI seridi (salt okunur). */

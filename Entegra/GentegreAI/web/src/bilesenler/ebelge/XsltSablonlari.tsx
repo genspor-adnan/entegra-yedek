@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { onay } from '../mesaj';
 import { api } from '../../api/istemci';
 import { hataMetni, type ListeSatiri } from '../../api/sozlesme';
 import { GenGrid } from '../GenGrid';
@@ -34,7 +35,7 @@ export function XsltSablonlari() {
 
   const sil = async () => {
     if (!secili) return;
-    if (!window.confirm(`"${secili.ad ?? ''}" şablonu silinecek. Onaylıyor musunuz?`)) return;
+    if (!await onay(`"${secili.ad ?? ''}" şablonu silinecek. Onaylıyor musunuz?`, true)) return;
     setHata(null);
     try {
       await api.dokumanSil('ebelge-xslt', Number(secili.turKodu ?? 0), Number(secili.id));

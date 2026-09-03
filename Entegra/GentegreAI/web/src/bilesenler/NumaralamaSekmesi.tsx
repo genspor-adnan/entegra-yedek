@@ -23,6 +23,46 @@ const GRIDLER = [
 
 type Kaynak = typeof GRIDLER[number]['kaynak'];
 
+/**
+ * TEK NUMARA GRIDI - Kayit Kabul Ayarlari (Hasta / Başvuru sekmeleri) ayni
+ * tabloyu kendi turleriyle gosterir; numaralandirma tek yerde toplanmis olsun
+ * diye grid burada, iki ekranda paylasiliyor (kullanici: "dosyano/protokolno
+ * ayarları da onun içinde tutulabilir").
+ */
+export function NumaraGridi({ kaynak, baslik }: { kaynak: string; baslik: string }) {
+  const [kart, setKart] = useState<{ kaynak: string; id: number | 'yeni' } | null>(null);
+  const [yenile, setYenile] = useState(0);
+  return (
+    <>
+      <div className="kagrup">
+        <div className="numaralama-bas">
+          <h6>{baslik}</h6>
+          <button className="d bir mini" onClick={() => setKart({ kaynak, id: 'yeni' })}>
+            ＋ Yeni
+          </button>
+        </div>
+        <GenGrid
+          key={`${kaynak}-${yenile}`}
+          kaynak={kaynak}
+          gomulu
+          seritGizli
+          boyut={25}
+          onSatirAc={satir => setKart({ kaynak, id: Number(satir.id) })}
+        />
+      </div>
+      {kart && (
+        <GenForm
+          kaynak={kart.kaynak}
+          id={kart.id}
+          baslik="Numaralama"
+          onKapat={() => setKart(null)}
+          onKaydedildi={() => { setKart(null); setYenile(t => t + 1) }}
+        />
+      )}
+    </>
+  );
+}
+
 export function NumaralamaSekmesi() {
   /** Acik kart: hangi grid ve hangi kayit ("yeni" = ekleme). */
   const [kart, setKart] = useState<{ kaynak: Kaynak; id: number | 'yeni' } | null>(null);

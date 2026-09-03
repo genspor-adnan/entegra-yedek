@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { GenLookup } from '../GenLookup';
 import { api } from '../../api/istemci';
 import { KodListesiModali } from '../KodListesiModali';
+import { yerelAnMetni } from '../bicim';
 import { TarafAlani } from '../../sayfalar/BelgeKarti';
 import {
   LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, SEKMELER, TEKLIF_DURUMLARI,
@@ -49,7 +50,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     kapanmaAlani, bagliSiparisAlani, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
     tahakkukMu, depoBelgesi, stokFisiMi, fisCikisMi, transferMi, talepMi, disNumarali,
     eBelgeYok, teklifDurum, setTeklifDurum, revizeNo, setRevizeNo,
-    teklifKonusu, setTeklifKonusu, teklifTeslim, setTeklifTeslim,
+    teklifKonusu, setTeklifKonusu, teklifTeslim, setTeklifTeslim, provizyonVar,
+    numaraElle,
   } = p;
 
   /** Teklif (216): katalog adi 'Teklif' - durum combosu ve sekme adi degisir. */
@@ -76,10 +78,13 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   /** Tarih hucresi: basvuruda bolum/hekimden SONRA cizildigi icin degisken. */
   const tarihHucresi = (
     <label className="alan">
-      <span className="etiket">{belgeSozu} Tarihi</span>
+      {/* ZORUNLU (kullanici): belge/siparis tarihi bos kalamaz - kalem, prim ve
+          numara serisi hep bu tarihe bagli. Alan temizlenirse SIMDIKI AN geri
+          yazilir; kullanici gecmis bir tarih secmek isterse ustune yazar. */}
+      <span className="etiket zorunlu-isaret">{belgeSozu} Tarihi</span>
       <input type="datetime-local" value={tarih} disabled={baslikKilitli}
              max={tarihEnGec} min={tarihEnErken}
-             onChange={e => setTarih(e.target.value)} />
+             onChange={e => setTarih(e.target.value || yerelAnMetni(new Date()))} />
       {alanHatalari.belgeTarihi && <span className="alan-hata">{alanHatalari.belgeTarihi}</span>}
     </label>
   );
@@ -155,9 +160,10 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         {disNumarali ? 'Tedarikçi Fatura No'
           : teklifMi ? `${belgeSozu} No / Revize No` : `${numaraSozu} No`}
       </span>
-      {disNumarali && !kilitli ? (
+      {(disNumarali || numaraElle) && !kilitli ? (
         <input className="one-cikan" value={belgeNo} maxLength={20}
-               placeholder="örn. ABC2026000001234"
+               placeholder={disNumarali ? 'örn. ABC2026000001234'
+                                        : '(boş bırakılırsa sistem verir)'}
                onChange={e => setBelgeNo(e.target.value)} />
       ) : teklifMi ? (
         <span className="ikili">
@@ -365,7 +371,11 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
               //   yanlisti, irsaliyeyi de gizliyordu.
               && !((bilgi.depoBelgesi || bilgi.stokFisi) && x.anahtar === 'fatura')
               // Teklifte Siparis sekmesi yalniz KABUL (3) durumunda (kullanici).
-              && !(teklifMi && x.anahtar === 'fatura' && teklifDurum !== '3'))
+              && !(teklifMi && x.anahtar === 'fatura' && teklifDurum !== '3')
+              // PROVIZYON yalniz ÖSS/SGK odeyen kurumda (kullanici): ozel
+              //   kurumda ya da hasta kendi oderken alinacak provizyon yok,
+              //   sekme bos duruyordu.
+              && !(x.anahtar === 'provizyon' && !provizyonVar))
     .map(x => (
     <div key={x.anahtar}
          className={`kat${x.anahtar === aktifSekme ? ' on' : ''}`}
@@ -402,6 +412,18 @@ export interface BelgeBaslikProps {
   setTarih(v: string): void;
   tarihEnGec: string;
   tarihEnErken?: string;
+  /**
+   * Provizyon sekmesi cizilsin mi (kullanici): yalniz odeyen kurumun turu
+   * ÖSS (2) ya da SGK (3) iken. Özel kurumda / hasta kendi oderken alinacak
+   * provizyon yoktur.
+   */
+  provizyonVar?: boolean;
+  /**
+   * Numarayi KULLANICI yazar (358, numara_sablonu.elle_girilir): numara alani
+   * duzenlenebilir gelir. Bos birakilirsa sunucu yine uretir - belge numarasiz
+   * kalmaz.
+   */
+  numaraElle?: boolean;
   /** Teklif durumu (218) - yalniz teklifte cizilir (Hazirlaniyor/Sunuldu/...). */
   teklifDurum: string;
   setTeklifDurum(v: string): void;

@@ -23,6 +23,10 @@ public static partial class KaynakKatalogu
         //   varsayilan kolonlarda degil.
         new("hane",          "n.hane",            "sayi",  "Hane", Hizalama: "orta", Varsayilan: false),
         new("subeAdi",       "s.ad",              "metin", "Şube", Varsayilan: false),
+        // NUMARAYI KIM VERIR (358): 0 sistem uretir, 1 kullanici elle yazar.
+        //   Dosya no / protokol no ayarlari da bu kolonda tutulur.
+        new("elleGirilir",   "n.elle_girilir",    "mantik", "Elle Girilir",
+                                                  Hizalama: "orta", Genislik: 110),
         // SON SUTUN: durum rozeti (kullanici). "kod" tipli 0/1 kolonu gridHucre
         //   otomatik yesil "Aktif" / kirmizi "Pasif" olarak cizer.
         new("durum",         "n.durum",           "kod",   "Durum", Hizalama: "orta")
@@ -178,6 +182,25 @@ public static partial class KaynakKatalogu
             new("sira",      "e.sira",         "sayi",  "Sıra", Hizalama: "orta", Genislik: SeriDarKolon),
             new("durum",     "e.durum",        "kod",   "Durum", Hizalama: "orta", Genislik: SeriDarKolon)
         });
+
+    /// <summary>
+    /// KAYIT KABUL numaralari (358): tur adlari kasa_islem_turu'nda degil kendi
+    /// gorunumunde (hasta dosya no bir belge turu degil).
+    /// </summary>
+    private static KaynakTanimi NumaraKimlik(string ad, string turSuzgeci) => new(
+        Ad: ad,
+        YetkiKodu: "numara_sablonu",
+        Kaynak: """
+            public.numara_sablonu n
+              join public.v_numara_turu_kimlik t on t.id = n.tur
+              left join public.sube s on s.id = n.sube_id
+            """,
+        VarsayilanSirala: "t.ad asc, n.baslama_tarihi desc",
+        SabitKosul: $"n.tur in ({turSuzgeci})",
+        Kolonlar: NumaraKolonlari());
+
+    private static KaynakTanimi NumaraHasta()   => NumaraKimlik("numara-hasta", "900");
+    private static KaynakTanimi NumaraBasvuru() => NumaraKimlik("numara-basvuru", "19");
 
     private static KaynakTanimi NumaraSatis()    => NumaraKaynagi("numara-satis", NumaraSatisTurleri);
     private static KaynakTanimi NumaraAlis()     => NumaraKaynagi("numara-alis", NumaraAlisTurleri);

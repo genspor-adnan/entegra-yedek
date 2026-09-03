@@ -1,0 +1,139 @@
+/* Kurum Tipi & Sistem Ayarlari ekrani - mockup CSS'i (.kt-kok altina kapsullendi).
+   Ekranlar/Ayarlar/kurum_tipi_ayarlari.html ile ayni gorunum. */
+.kt-kok{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+.kt-kok *{box-sizing:border-box}
+.kt-kok [hidden]{display:none!important}
+.kt-kok{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+.kt-kok .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+.kt-kok .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+.kt-kok .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+.kt-kok .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+.kt-kok .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+.kt-kok .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+.kt-kok .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+.kt-kok .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+.kt-kok .btn.pas{opacity:.45}
+.kt-kok .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+.kt-kok .sp{margin-left:auto}
+.kt-kok .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+.kt-kok .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+.kt-kok .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+.kt-kok .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+.kt-kok .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+.kt-kok .dg table{border-collapse:collapse;width:100%}
+.kt-kok .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+.kt-kok .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+.kt-kok .dg tr.sel td{background:var(--sel)}
+.kt-kok .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+.kt-kok .sag{text-align:right}
+.kt-kok .orta{text-align:center}
+.kt-kok .sonuk{color:var(--muted)}
+.kt-kok .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+.kt-kok .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+.kt-kok .rz.pas{background:#eceff2;color:#6b7a8b}
+.kt-kok .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+.kt-kok .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+.kt-kok .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+.kt-kok .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+.kt-kok .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+.kt-kok .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+.kt-kok .not b{color:var(--ink)}
+.kt-kok .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+.kt-kok /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+.kt-kok .hdr.k4{grid-template-columns:repeat(4,1fr)}
+.kt-kok .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+.kt-kok .fld label.req::after{content:" *";color:#c0392b}
+.kt-kok .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+.kt-kok .inp.big{font-weight:bold;font-size:12.5px}
+.kt-kok .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+.kt-kok .inp.ro{background:#f4f6f9;color:#4d5d6e}
+.kt-kok .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+.kt-kok .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+.kt-kok .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+.kt-kok .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+.kt-kok .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+.kt-kok .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+.kt-kok .ic{padding:8px 10px}
+.kt-kok .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+.kt-kok .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+.kt-kok .kart .b{font-size:10.5px;color:var(--muted)}
+.kt-kok .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+.kt-kok .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+.kt-kok .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+.kt-kok .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+.kt-kok .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+.kt-kok .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+.kt-kok /* agac */
+  .agac td.ad{white-space:nowrap}
+.kt-kok .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+.kt-kok .s1{padding-left:18px}
+.kt-kok .s2{padding-left:36px}
+.kt-kok .s3{padding-left:54px}
+.kt-kok .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+.kt-kok .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.kt-kok .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+.kt-kok .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+.kt-kok .ucPanel>div{border-right:1px solid var(--line2)}
+.kt-kok .ucPanel>div:last-child{border-right:none}
+.kt-kok .liste{list-style:none;margin:0;padding:0}
+.kt-kok .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+.kt-kok .liste li.sel{background:var(--sel)}
+.kt-kok .liste li .sp{color:var(--muted);font-size:10.5px}
+.kt-kok .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+.kt-kok .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+.kt-kok .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+.kt-kok .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+.kt-kok .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+.kt-kok .is b{display:block;color:var(--navy)}
+.kt-kok .is .sonuk{font-size:10.5px}
+.kt-kok .tipler{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:10px 12px}
+.kt-kok .tip{border:1px solid var(--line2);border-radius:6px;padding:10px 12px;background:#fbfcfd;position:relative}
+.kt-kok .tip.sec{border:2px solid #2f6db3;background:#eef4fc}
+.kt-kok .tip .ad{font-weight:bold;color:#1c4374;font-size:12.5px}
+.kt-kok .tip .ic{font-size:22px;margin-bottom:4px}
+.kt-kok .tip .k{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+.kt-kok .tip .rz{position:absolute;right:8px;top:8px}
+.kt-kok .matris td.orta{font-size:12px}
+.kt-kok .m-on{color:#2e7d46;font-weight:bold}
+.kt-kok .m-off{color:#c9d1da}
+.kt-kok .m-ops{color:#8a6218;font-weight:bold}
+
+/* --- Canli forma ozgu kucuk eklemeler (mockup'ta statik metin olan yerler) --- */
+.kt-kok .hdr .fld select.inp, .kt-kok .hdr .fld input.inp {
+  font: inherit; color: inherit; width: 100%;
+}
+.kt-kok .ikili-sayi { display: flex; gap: 6px }
+.kt-kok .ikili-sayi > * { flex: 1; min-width: 0 }
+.kt-kok .tip { cursor: pointer }
+.kt-kok .modul-kutulari {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 6px 12px; padding: 10px;
+}
+.kt-kok .modul-kutu {
+  display: flex; align-items: center; gap: 6px; padding: 4px 8px;
+  border: 1px solid var(--line2); border-radius: 3px; background: #fff; cursor: pointer;
+}
+.kt-kok .modul-kutu.acik { border-color: var(--accent); background: var(--sel) }
+.kt-kok .modul-kutu > span:nth-of-type(1) { flex: 1; min-width: 0 }
+
+/* AKTIF SUBE UYARISI (364): menu aktif subenin profilinden cizilir - kurum
+   genelini duzenleyen kullanici bunu gorsun. */
+.kt-kok .uyari {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+  border: 1px solid #e0cf9a; background: #fdf6e3; color: #6d5320;
+  border-radius: 3px; padding: 7px 10px; font-size: 11.5px;
+}
+.kt-kok .uyari .btn { padding: 3px 9px; font-size: 11px }

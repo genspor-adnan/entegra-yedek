@@ -3897,3 +3897,556 @@ geri bildirim yazıldı, AI log kaynak bilgisiyle döndü. `dotnet build`, `tsc`
 **Bilerek yapılmayanlar** (model bağlanınca): serbest metin yanıtı, token/maliyet
 sayaçlarının gerçek değerleri, RAG (doküman arama), e-posta/WhatsApp metni üretimi,
 sesli soru, TR→EN çeviri. Ekranda pasif ya da açıkça "tanımlı değil" olarak duruyor.
+
+## 03.09.2026 — Tutar bazlı kısmi dönüşüm: tahsil edilen kadar fiş, kalanı tahakkuk (`db/352`)
+
+**Soru**: "başvuruda 1 kalemden birden fazla dönüşüm yapılır mı? 1000 TL işlem ekledim,
+300 TL POS tahsilatı aldım; 300 TL'lik satış fişi, 700 TL için de tahakkuk oluşabilir mi?"
+→ "dönüşüm işini yap".
+
+**Durum**: kısmi dönüşüm **miktar** üzerinden (082 `kalan_miktar`); paylaşımlı satırda
+**tutar** üzerinden (289 `hasta_kapatilan/kurum_kapatilan`, hedef satır `pay`). Pay
+dönüşümü payın kalanının **tamamını** alıyordu; 1 adetlik hizmet miktarla bölünemiyordu.
+Tahsilat ise satıra tutar olarak dağıtılıyordu (321) ama dönüşüm bunu kullanmıyordu.
+
+**Karar**: yeni bir kapanma mekanizması açılmadı; pay dönüşümüne **tutar seçimi** eklendi.
+- `DonusumSatiri.Tutar` (matrah): verilirse satırdan o tutar kadar dönüştürülür; pay boşsa
+  hasta payı (1) sayılır. Hedef satır miktarı kaynağın miktarı, birim fiyat = tutar/miktar
+  (`SatirJson(payTutarSecim)`); kalan tutar kaynakta açık kalır, 289 sayaçları çalışır.
+- 289 öncesi satır (kurum 0, hasta 0) tutar bazlı dönüştürülürse dönüşüm anında
+  `hasta_tutar = tutar, karsilama 0` işaretlenir — sayaçlar bu satırda da tutarla ilerler.
+- `DonusumIstegi.KalaniTahakkuk`: ilk belge kesildikten sonra aynı satırların açık kalan
+  hasta payı **satış tahakkukuna (17)** çevrilir (ikinci transaction; başarısızsa uyarı).
+- `v_belge_acik_satir` (352): `tutar`, `hasta/kurum_tahsil_matrah` (KDV dahil tahsilat →
+  matrah), `tutar_kalan`; where-koşulu paylaşımlı satırda pay kalanına bakar.
+- Dönüşüm penceresi: satış siparişi/başvuru → fiş/fatura/tahakkukta **"Dönüşüm ölçüsü:
+  Miktar / Tutar"** seçimi; tutar modunda "Bu Belgeye (₺)" girişi (öneri: fiş/faturada
+  tahsil edilen matrah, tahakkukta payın kalanı), "Tahsil / Kalan ₺" sütunu,
+  **"Kalanı satış tahakkukuna çevir"** kutusu.
+
+**Tuzaklar**: `taskkill` git-bash'te PID'yi çözmüyor — API `Stop-Process` ile durdurulup
+yeniden başlatıldı. `dotnet build` ve `tsc` temiz.
+
+### Ek — 03.09.2026: özel hasta ile 300/700 dönüşüm testi + Muhasebe menüsü (`db/353`)
+
+**Test (kullanıcının örneği)**: özel (kendi ödeyen) hasta açıldı → başvuru (tür 19)
+1 kalem **1.000 TL** (KDV 0) → **300 TL POS tahsilatı** (kasa işlem türü 25, başvuruya
+bağlı, satıra otomatik dağıtıldı: `hasta_tahsil 300`) → dönüşüm penceresinde **tutar
+modu**: 300 TL → **satış fişi (16)**, "kalanı tahakkuka çevir" ile **700 TL satış
+tahakkuku (17)**. Sonuç: kaynak satır `hasta_kapatilan 1.000`, başvuru
+`kapanma_durum 2`, açık satır kalmadı; cari bakiye **700 TL** (1.000 hizmet − 300
+tahsilat). Prim satırı doğmadı (bu hizmette plan yok). Test verisi (hasta 5008,
+belgeler 114341-114343, kasa 247) **duruyor** — ekranda incelenebilir.
+
+**Menü** (kullanıcı): Stok & Hizmet'ten sonra **Muhasebe** ana menüsü; altında sırayla
+Hesap Planı · Muhasebe Fişleri · Fiş Satırları · Masraf Merkezleri · İşlem Türleri
+(Yönetim'den taşındı, `menuSira` 10-50). **e-Belge** menüsü Yönetim'den **Satış**
+grubunun **en sonuna** alındı (`menuSira: 999`). Grup sırası dizideki İLK görünme
+yerinden geldiği için bloklar fiziksel olarak Kategoriler'in ardına taşındı; ikon
+`GRUP_IKON['Muhasebe'] = 📚` + EN/DE karşılıkları, çeviri `db/353`.
+
+**Yönetim en sonda** (kullanıcı): grup sırası tanım dizisindeki İLK öğeden geldiği için
+Yönetim (ilk öğesi Kampanyalar) menünün ortasına düşüyordu. `Kabuk.tsx` grupları
+oluşturduktan sonra Yönetim satırını **diziden çıkarıp sona ekliyor**; dil değişince ad
+da değiştiğinden çevirili adlar (`Administration`, `Verwaltung`) da kontrol ediliyor.
+Menü sırası artık: … Stok & Hizmet · **Muhasebe** · Satış (sonunda e-Belge) · Alış ·
+Kasa · Banka · İK · **Yönetim**.
+
+**Örnek (ekranda duruyor)**: özel hasta **ALİ DÖNMEZ** (5011 · 18 yaş · ödeyen kurum: Özel/Kendi)
+→ başvuru **114346** (no 000000034) 1 kalem **10.000 TL KDV dahil** (matrah 9.090,91 + KDV %10)
+→ **3.000 POS** (kasa 250) + **7.000 nakit** (kasa 251) tahsil, ikisi de satıra dağıtıldı (323: dağıtım
+tabanı KDV dahil) → tutar modunda **3.000** girilerek **satış fişi 114347** (no 000012 · matrah
+2.727,27 + KDV 272,73 = 3.000) ve "kalanı tahakkuka" ile **satış tahakkuku 114348** (no 000000004 ·
+6.363,64 + 636,36 = 7.000). Kaynak satır tamamen kapandı, başvuru `kapanma_durum 2`, cari bakiye 0.
+
+**Ek düzeltme**: dönüşüm penceresinde tutar modu artık **KDV DAHİL** çalışır (kullanıcı: "10.000 TL
+kdv dahil işlem; sadece faturaya/fişe geçince kdv hariç"). Girilen tutar satırın KDV oranıyla matraha
+çevrilip gönderilir; öneri ve "Tahsil / Kalan" sütunu da KDV dahil gösterilir. Sunucu tarafı
+değişmedi (pay tutarları matrah).
+
+**Hasta listesi — "Son Başvuru" saatiyle** (kullanıcı): kolon tanımına `Bicim: "dd.MM.yyyy HH:mm"`
++ `Genislik: 130` eklendi (`KaynakKatalogu.Cari.cs`); grid biçimde `HH` görünce saati de yazıyor
+(`bicim.ts`). Aynı gün birden çok başvuruda "ne zaman geldi" artık okunuyor.
+
+**Tuzak**: API'den açılan başvuruda `belge.tipi` verilmezse **1 (ERP siparişi)** kalıyor; Başvurular
+listesinin sabit filtresi `tur=19 AND tipi=30` (301) olduğu için kayıt listede görünmüyordu —
+örnek belgeler (114341, 114346) `tipi=30` yapılıp `belge_basvuru` satırları açıldı, belge tarihleri
+gerçek kayıt saatine çekildi.
+
+**Faturalama sekmesi: coklu secim + duzenle/sil** (kullanici): satir basina onay kutusu,
+baslikta "tumunu sec", ust seritte ✎ (tek satir, turetilmis belgenin kartini kendi rotasinda acar)
+ve 🗑 (secili belgeleri siler). Silmede kaynak satirin kapatilan/kalan sayaci DB tetigiyle
+(`fn_belge_satir_kapatma_tazele`) tam yeniden hesaplanir; silinemeyen belgede sunucunun sebebi
+gosterilir, digerleri silinmeye devam eder. Donusum sorgusuna `hb.tur` eklendi (rota secimi icin).
+
+**Basvuru arac cubugu**: pasif "🔁 Yatışa Çevir" dugmesi kaldirildi (yatan hasta modulu yok).
+
+**Hasta seridi**: "Sigorta" hucresi **"Ödeyen Kurum"** oldu ve degeri belgenin odeyen kurumu
+(hastanin kayitli sigortasi degil). "Açık Borç" artik BU BASVURUNUN farki:
+ucretlendirme genel toplami − tahsilat toplami; kalem/tahsilat girildikce aninda degisir
+(tahsilat listesi artik sekmeden bagimsiz yuklenir).
+
+**Kart penceresi alt kirpilmasi — GENEL DUZELTME** (kullanici: "basvuru page alt kismi kirpiliyor",
+"tum formlar icin gecerli"): `Modal` yukseklik kilidi govdeye ham `scrollHeight`i minHeight olarak
+yaziyordu; pencere `max-height: 88vh` flex sutunu oldugu icin govde kuculemiyor, tasan kisim
+pencerenin altindan ekran disina cikiyor ve kaydirma cubugu da olusmuyordu. Kilit artik
+KULLANILABILIR yukseklikle kirpiliyor (`min(en yuksek icerik, 88vh - baslik/toolbar/serit/sekme)`),
+ayrica govdeye ayni tavan `maxHeight` olarak veriliyor ve pencere yeniden boyutlaninca tazeleniyor.
+"Sekme degisince pencere alcalmasin" davranisi korundu. Tum kart/secim pencereleri ayni `Modal`i
+kullandigi icin duzeltme geneldir.
+
+**Yeni belgede tarih SAATIYLE** (kullanici: "başvuruda yeni ücretlendirme yaparken sipariş tarihine
+tarih saat mutlaka gelmeli"): randevudan basvuru acan yol `new Date().toISOString()` kullaniyordu -
+UTC oldugu icin saat TR'de 3 saat geriye kayiyordu; yerel damgaya cevrildi (`yerelZamanDamgasi`).
+Ayrica POST /api/belge artik `BelgeTarihiSaatle` ile tarihi hic gelmeyen ya da BUGUNUN 00:00'i olarak
+gelen belgeye o anki saati damgaliyor (radyoloji istemi, dis cagrilar da saatli olsun). Gecmis bir
+gunun 00:00'i elle secilmis sayilir, dokunulmaz.
+
+**Faturalama sekmesi**: ✎ / 🗑 ikonlari ayri seritten alinip "Faturaya Dönüştür" dugmesinin SAGINA
+(baslik seridine) tasindi.
+
+**Faturalama ✎ "belge açılmıyor" duzeltmesi** (kullanici): dugme turun liste rotasina gidiyordu
+(`/satis-fisi/114347`) ama belge listelerinde `kartYolu` yok - App o rotayi hic uretmiyor, tiklama
+bosa gidiyordu. Artik turetilmis belge BU KARTIN USTUNDE ikinci `BelgeKarti` olarak aciliyor
+(id + onKapat); kapaninca donusum listesi ve belge yeniden okunuyor.
+
+**Modal artik BODY'ye portallanir** (genel): `.kawin` daima `transform` tasidigi icin icinden acilan
+`position: fixed` pencereler ekrana degil ACAN KARTIN kutusuna gore konumlanip kirpiliyordu.
+`createPortal(document.body)` ile ic ice acilan tum pencereler (fis karti, donusum modali, secim
+pencereleri) gercekten ekrana gore ortalanir.
+
+**Faturalama satir secimi grid deseni** (kullanici): duz tik TEK satir secer (onceki isaretler
+kalkar; ayni satira tekrar tiklamak secimi birakir), **Ctrl/Cmd+tik** satir ekler/cikarir,
+**Shift+tik** son tiklanan satirdan aralik secer. Onay kutusu her zaman ekle/cikar yapar,
+basliktaki kutu tumunu secer. Shift+tik metin secmesin diye satirda `user-select: none`.
+
+**db/354 — tahsilat/odeme SILME KOSULLARI** (kullanici: "tahsilat silemedim.. dönüşüm hiç yoksa
+silebilmem lazım"): 076'daki "durum >= 2 ise silinemez" ve "muhasebe fisi olan silinemez" kurallari
+her tahsilati silinemez yapiyordu (tahsilat kaydedilir kaydedilmez durum 2). Yeni kural: gerceklesmis
+islem de silinebilir; engel yalniz isleme BAGLANMIS IZLER'dir - iptal kaydi/ters kayit, onayli ya da
+odenmis prim (hakedis_satir.durum >= 3), **belgenin fis/fatura/tahakkuka donusmus olmasi**, cek-senet,
+kredi taksiti, plan bagi ve disa aktarilmis / ters fisle iptal edilmis / KILITLI donemdeki muhasebe
+fisi. Engel yoksa turemis muhasebe fisi islemle birlikte silinir - fis silme AFTER DELETE tetiginde
+yapilir, cunku `kasa_islem.muhasebe_fis_id` FK'si satir dururken fise dokunmayi engelliyor. Ayrica
+`kasa_islem_dagitim` AFTER DELETE ile satirin tahsil edilen tutari yeniden hesaplaniyor (eskiden
+yalnizca UPDATE tetigi tazeliyordu, silmede sayac eski kaliyordu).
+
+**Tahsilat sekmesi**: "🏥 Kurum Tahakkuku" dugmesi Senet'in SAGINA alindi (tahsilat araci degil).
+**Hasta seridi**: cinsiyet "Erkek/Kadın" yerine ikon + tek harf (♂ E / ♀ K).
+**Ücretlendirme (kalem) arac cubugu**: 🗑 Sil, ✎ Düzenle'nin hemen SAGINA alindi; provizyon (⚖)
+ve prim rolleri (👥) dugmeleri arkasina gecti.
+**Hasta seridi bakiye hucresi**: ucret > tahsilat -> KIRMIZI "Açık Borç"; tahsilat > ucret ->
+YESIL "Alacaklı" (hasta lehine bakiye, mutlak deger yazilir); esitse notr renkte "Açık Borç" 0,00.
+**Grid onay kutusu sutunu**: `.detay-tablo th/td.check` 30px + ortali (kalem gridiyle ayni olcu) -
+tahsilat ve faturalama gridlerinde sutun genisligi artik standart.
+
+**Tahsilat gridi coklu secim** (kullanici): baslikta "tumunu sec" kutusu; satir tiklama faturalama
+gridiyle ayni (duz tik tek satir, Ctrl/Cmd ekle-cikar, Shift aralik). `tahsilatSil` artik id LISTESI
+aliyor - biri silinemezse sunucunun sebebi gosteriliyor, digerleri siliniyor; ✎ yine tek satirda.
+`seciliTahsilat` -> `seciliTahsilatlar` (number[]).
+
+**Provizyon sekmesi kosullu** (kullanici): yalniz odeyen kurumun turu ÖSS (2) ya da SGK (3) iken
+cizilir (`taraf_kurum.tur`: 1 Özel / 2 ÖSS / 3 SGK). Ozel kurumda ya da hasta kendi oderken sekme
+gizlenir; uzerindeyken kurum ozele donerse Basvuru sekmesine donulur.
+
+**Provizyon sekmesi alanlari kurum turune gore** (kullanici): eskiden MEDULA ve ozel sigorta gruplari
+her zaman birlikte ciziliyordu.
+  * **SGK (3)**: SGK/MEDULA grubu. Hastanin tamamlayici policesi de olabilir - "＋ Tamamlayıcı
+    Sigorta Provizyonu" dugmesiyle acilir; kayitli police/provizyon no varsa grup zaten acik gelir.
+  * **ÖSS (2)**: yalniz "Özel Sigorta Provizyonu" grubu; MEDULA alanlari hic cizilmez ve
+    "Sigorta Şirketi" ODEYEN KURUMLA on-doldurulur (farkliysa degistirilebilir).
+Sekmenin kendisi zaten yalniz ÖSS/SGK'da goruluyor.
+**db/355**: "Yönetim › Ayarlar" alt menusu **"Modül Ayarları"** oldu (6 liste tanimi + EN
+"Module Settings" / DE "Moduleinstellungen" cevirileri; eski 'Ayarlar' anahtari korunuyor).
+
+**Kayıt Kabul Ayarları ekrani** (kullanici): Yönetim › Modül Ayarları altinda **Genel'den sonra**
+"Kayıt Kabul" (menuSira 2, digerleri kaydirildi; yalniz HBYS - urunModu 2). Sekmeler
+**Genel / Hasta / Başvuru**; Genel ve Hasta simdilik kapsam notu tasiyor.
+
+**Başvuru sekmesi — "Tahsilatta POS"** ayari `basvuru.pos_aksiyon` (AyarDeposu beyaz listesi,
+varsayilan 0, aralik 0-2):
+  * 0 Aksiyon Yok
+  * 1 Otomatik Fiş Oluşsun
+  * 2 Fatura/Fiş kesilmesin mi sorusu sorulsun
+Basvuruda POS (tur 25) tahsilat penceresi kapaninca `posSonrasi` calisir: acik satirlarda
+**tahsil edilen kadar** (min(hasta payi kalani, satira dagitilmis tahsilat), KDV dahil) satis fisi
+(tur 16) kesilir; 2'de once onay sorulur. Kalan tutar basvuruda acik kalir.
+Donusum tutar hesabi modalden ayiklanip ORTAK dosyaya alindi (`sayfalar/belgeDonusumHesap.ts`) -
+modal ve otomatik fis ayni formulu kullaniyor. Tahsilat kancasina `onPencereKapandi(tur)` eklendi.
+
+**db/358 — dosya no / protokol no NUMARALANDIRMA TABLOSUNDA** (kullanici: "satış/alış
+numaralandırma tablosu yapmıştın.. dosyano/protokolno ayarları da onun içinde tutulabilir"):
+`numara_sablonu` tablosuna **`elle_girilir`** (0 sistem uretir / 1 kullanici yazar) eklendi; boylece
+on ek, hane, baslangic, yururluk tarihi, sube ve "numarayi kim verir" karari TEK SATIRDA.
+356'da referansa yazilan `hasta.dosya_no_otomatik` / `basvuru.protokol_no_otomatik` ayarlari
+(ve yardim metinleri) SILINDI. Yeni tur gorunumu `v_numara_turu_kimlik`: 900 Hasta Dosya No,
+19 Basvuru Protokol No (kasa_islem_turu'na satir eklenmedi). `fn_hasta_dosya_no(sube)` sablondan
+okuyor (ortak `fn_numara_sirada` sayaci; 356'nin sequence'i kaldirildi); `taraf` BEFORE INSERT
+tetigi hasta kodu bossa otomatik modda numara verir, elle modda "Hasta dosya numarası zorunlu" der.
+Kaynak/kart: `numara-hasta`, `numara-basvuru`; dort mevcut gride "Elle Girilir" kolonu, karta
+"Numarayı kullanıcı elle yazsın" kutusu. Hasta kartinda Dosya No artik Zorunlu DEGIL.
+Basvuru kartinda numara alani elle modda duzenlenebilir (bos birakilirsa sunucu yine uretir).
+Kayit Kabul Ayarlari: Hasta sekmesi "Dosya No Numaralandırma", Basvuru sekmesi POS ayari +
+"Protokol No Numaralandırma" (grid `NumaraGridi` olarak paylasildi).
+
+**POS aciklamasi help'e** (kullanici): `db/357` `ayar.basvuru.pos_aksiyon` yardim metni; ayarin
+altindaki paragraf kaldirildi - aciklama artik editin sagindaki "?" ikonunda.
+
+**Firma Bilgileri sekmeleri** (kullanici): sekme cubugu geri geldi - "Şube Tanımları" ve yanina
+**"Kurum Tipi & Sistem Ayarları"**. Ikinci sekme `bilesenler/KurumTipiAyarlari.tsx`:
+Ekranlar/Ayarlar/kurum_tipi_ayarlari.html mockup'i React'e cevrildi (7 ic sekme: Kurum Tipi,
+Moduller, Kayit & Ucretlendirme, Klinik Ayarlar, Entegrasyonlar, Kaynaklar, Ozet & Kurulum),
+mockup CSS'i `kurumTipiAyarlari.css` icinde `.kt-kok` altina kapsullendi. Secimler henuz
+`kurum_profil` tablosuna BAGLANMADI - simdilik gorunum.
+
+**db/359 — KURUM PROFILI** (kullanici: "kurum tipi seçimlerini kurum_profil tablosuna bağla"):
+dort tablo — `kurum_tipi` (10 tip), `kurum_modul` (20 modul), `kurum_tipi_modul` (200 satirlik
+tip x modul VARSAYILANI: 0 gizli / 1 acik / 2 opsiyonel, mockup matrisinin aynisi) ve tek satirlik
+`kurum_profil` (urun modu, secili tip, alt tip, basamak, tesis kodu, sube yapisi, hekim/unite,
+dil, para birimi + `moduller` jsonb OVERRIDE'lari). `fn_kurum_modul_acik(modul)` iki katmanli
+cozer: once profil override'i, yoksa tipin varsayilani.
+
+API: `KurumProfilDeposu` + `GET/PUT /api/kurum-profil` (okuma yetki istemez - modul gorunurlugu
+ekran davranisi; yazma "ayar" yetkisi. PUT'ta verilmeyen alan mevcut degerini korur).
+
+Ekran (Firma Bilgileri › Kurum Tipi & Sistem Ayarları): 1. sekmedeki kurum tipi KARTLARI ve butun
+kimlik alanlari canli - kart tiklanabilir, "Kaydet & Uygula" profili yazar; tip degisince modul
+override'lari temizlenir (yeni tipin paketi gecerli olur). Varsayilan paket ozeti matristen
+uretiliyor. 2. sekmedeki matris DB'den ciziliyor, altina "Bu kurumda açık modüller" kutucuklari
+eklendi (varsayilandan ayrilan modul "özel" rozetiyle). 3-7. sekmeler mockup gorunumu olarak duruyor.
+
+**Menu MODUL bayraklarina gore suzuluyor** (359, kullanici): giris ve `/ben` yanitlari artik
+`kullanici.moduller` (acik modul kodlari) tasiyor - cozum sunucuda (`fn_kurum_modul_acik`), istemci
+ayni kurali ikinci kez yazmiyor. `listeTanimlari` icine `modul?` alani ve `MENU_GRUP_MODUL`
+haritasi eklendi (Kayıt Kabul/Randevu/Radyoloji/Prim/Stok/Kasa/Banka/Muhasebe/Satış/Alış/İletişim);
+`modulAcikMi()` hem Kabuk menusunde hem App ROTA uretiminde suzuyor - menude gizleyip rotayi acik
+birakmak yetmiyordu (241). Yonetim ve haritada olmayan gruplar HIC suzulmez: kapatilan modul geri
+acilamazdi. Modul listesi bos gelirse (eski kurulum) suzme yapilmaz.
+
+**db/360 — MUAYENE ve LABORATUVAR cekirdegi** (kullanici: "Laboratuvar ve Muayene menüleri de
+ekle"): `muayene` (basvuru bagi, hasta, bolum/hekim, tur, sikayet/oyku/bulgu, ICD + tani, tedavi,
+oneri, durum) ve `lab_istem` + `lab_istem_test` (bolum: biyokimya/mikro/genetik/patoloji, numune ve
+sonuc zamanlari, test satirinda sonuc/birim/referans/degerlendirme/cihaz). Yetkiler `muayene` ve
+`lab` olarak acildi, radyoloji yetkisi olan rollere kopyalandi. Katalog: `KaynakKatalogu.Saglik.cs`
+(liste) + `KartKatalogu.Saglik.cs` (kart; lab kartinda "Testler" detay gridi). Menu: **Muayene ›
+Muayeneler** (modul `muayene`) ve **Laboratuvar › İstemler** (modul `lab`), ikisi de urunModu 2;
+ikon ve EN/DE menu cevirileri eklendi. UCRET BURADA YOK - fiyat basvuru belgesinde durur, kart
+yalniz `belgeId` bagini tasir (radyoloji istemiyle ayni kural).
+
+**db/361 — PRIM ROL ISARETLERI** (kullanici: "prim alacak personeli prim türüne göre işaretlemek
+istiyorum... dış doktorlar sadece gönderen olabilir"): rol isareti KISININ KARTINDA durur -
+`taraf_prim_rol (taraf_id, rol, varsayilan)`; bir kisi hem isteyen hem yapan hem uygulayan olabilir.
+DB kurallari: rol yalniz personele verilir ve **dis hekim (taraf_personel.dis_hekim=1) yalniz
+"Gönderen" (1)** alabilir - ayni kural kalem rolune de kondu (`belge_satir_rol` tetigi), rol isareti
+kartta unutulsa bile yanlis hakedis dogmasin.
+
+`v_prim_rol_aday` (kisi x rol, dis_mi, varsayilan, bolum) ve `fn_basvuru_hekim_rolu()`:
+**lab / goruntuleme / goruntuleme_lab -> 1 Gönderen (dis doktor), digerleri -> 4 Yapan (personel)**;
+karar kurum profilinden (359) gelir. Yeni kaynaklar: `prim-rol-aday` (yonetim listesi) ve
+`basvuru-hekim` (SabitKosul `rol = fn_basvuru_hekim_rolu()`), boylece basvuru kartinin hekim combosu
+kurum tipini BILMEDEN dogru listeyi alir - kurum tipi degisince ekran kodu degismez.
+
+Ekran: personel ve dis hekim kartlarina "Prim Rolleri" gridi (rol + Önerilen + aciklama);
+basvurudaki hekim combosu artik `basvuru-hekim` kaynagindan besleniyor (bolum secilince o bolume
+suzuluyor); prim rol modalinde arama kaynagi role gore ('Gönderen' -> dis hekim, digerleri personel).
+Gecis: mevcut randevu verilebilir 15 personel "Yapan", 4 dis hekim "Gönderen" olarak isaretlendi -
+ekranlar 361 sonrasi ayni listeyi gosteriyor.
+
+**db/362 — dis hekimde "Gönderen" isareti CALISMA SEKLINDE** (kullanici): dis hekim kartindaki
+"Prim Rolleri" gridi KALDIRILDI; isaret artik `taraf_personel.calisma_sekli` -
+**1 Tam Zamanlı / 2 Yarı Zamanlı = hasta göndermiyor · 3 Gönderen = hasta gönderiyor**
+(`CalismaSekliKodlari`'na 3 eklendi). Dis hekimin zaten tek rolu vardi (Gönderen), ayri grid ayni
+bilgiyi ikinci kez soruyordu. `taraf_prim_rol` dis hekim satirlari silindi ve tetik artik dis hekime
+rol satiri girilmesini reddediyor ("kartındaki Çalışma Şekli 'Gönderen' olmalıdır"). Ic personel
+degismedi - rolleri kendi kartlarindaki gridde (bir kisi hem isteyen hem yapan hem uygulayan
+olabilir).
+
+`v_prim_rol_aday` yeniden kuruldu: ic personel `taraf_prim_rol`'den, dis hekim `calisma_sekli = 3`
+isaretinden. `fn_prim_rol_aday_sayisi(rol)` + `v_prim_rol_lookup` eklendi.
+
+**Prim plani ekrani isaretlerle uyumlu**: plan satirindaki Rol combosu kod listesi yerine
+`v_prim_rol_lookup` - her rolun yaninda o rolde ISARETLI KISI SAYISI yazar
+("Yapan (15 kişi)" / "İsteyen — kişi işaretlenmemiş") ve kurum tipinin varsayilan rolu (359/361)
+en ustte durur. Kimse isaretlenmemis role plan yazilirsa hakedis hic dogmaz - bu eskiden ancak ay
+sonunda fark edilirdi.
+
+**db/363 — hakedis satirinda ROL ISARETI kontrolu** (kullanici: "hakediş ekranını da bu işaretlere
+göre kontrol et"): `v_hakedis_satir` iki kolon kazandi - `rol_isaretli` (0/1) ve `isaret_adi`
+("Uygun" / "İşaret yok"): satirin kisisi BUGUN o rolde isaretli mi (361 personel gridi / 362 dis
+hekim calisma sekli). Hakedis satiri TARIHSEL kayittir - isaret sonradan kalkinca satir silinmez,
+listede rozetle gorunur; kullanici ya isareti geri koyar ya satiri iptal eder. Prim URETIMI bilerek
+engellenmedi: kalem rolu zaten isaretli kisilerden seciliyor, tek delik gecmise donuk duzeltmeler.
+Ekran: hakedis satirlari listesine "Rol İşareti" kolonu ve **"İşaret yok"** cipi eklendi.
+Mevcut veride 2 satir uyumsuz cikti (rol 5 Raporlayan - o rolde isaretli kimse yok).
+**Rol isareti tamamlama**: hakedis satirlarindaki iki "İşaret yok" kaydi (Sistem Yoneticisi ve
+UFUK ÇETİN, rol 5 Raporlayan) kisilerin kartina Raporlayan rolu eklenerek "Uygun"a cevrildi.
+Ikisi de `taraf.durum = 0` (pasif) oldugu icin prim rol combosundaki sayac onlari SAYMIYOR -
+metin bu yuzden "kişi işaretlenmemiş" yerine **"aktif kişi işaretlenmemiş"** oldu (362 view'i
+guncellendi): sayac combolarda cikacak AKTIF kisileri sayar, hakedis kontrolu ise gecmis kayit
+oldugu icin pasif kisiyi de uygun sayar.
+
+**db/364 — KURUM PROFILI SUBEYE GORE** (kullanici: "kurum tipi & sistem ayarları şubelere göre
+değişebiliyor"): `kurum_profil` artik sube bazli - **sube_id = 0 KURUM GENELI**, `sube_id = N` o
+subenin kendi profili; eski tek satir (id=1) kurum geneline tasindi ve anlamsizlasan `id` kolonu
+dusuruldu. Cozum sirasi TEK YERDE: `fn_kurum_profil(sube)` once subenin satirini, yoksa kurum
+genelini verir; `fn_kurum_modul_acik(modul, sube)` ve `fn_basvuru_hekim_rolu(sube)` bunu kullanir
+(parametresiz cagrilar kurum genelini verir - eski kod kirilmaz). Ornek dogrulama: sube 3
+"goruntuleme" iken hekim rolu 1/radyoloji acik, merkez (devralan) rol 4/radyoloji kapali.
+
+API: `KurumProfilDeposu` sube parametreli okuyup yaziyor (`Devralindi` = bu sube icin ayri satir
+yok); `GET/PUT /api/kurum-profil` `sube` parametresi alir, verilmezse AKTIF sube. Giris ve `/ben`
+yanitlarindaki `moduller` artik AKTIF SUBENIN profilinden cozuluyor - sube degisince menu de degisir.
+Ayrica `kullanici.hekimRolu` eklendi (aktif subede basvuruda sorulan rol).
+
+Ekran: Kurum Tipi & Sistem Ayarları arac cubuguna **Profil** secici (Kurum geneli / kullanicinin
+subeleri) + "kurum genelinden devralındı" / "bu şubenin kendi profili" rozeti; kaydetme secili
+subeye yazar. Basvuru kartinin hekim combosu artik `prim-rol-aday` listesini `kullanici.hekimRolu`
+ile suzuyor (sube bazli rol SabitKosul'de cozulemedigi icin `basvuru-hekim` kaynagi kaldirildi);
+`prim-rol-aday` yetkisi "prim" yerine "belge" - kayit kabul memurunda prim yetkisi olmasi gerekmiyor,
+liste prim tutari tasimiyor.
+**Sube bazli menu TESTI** (364): gecici kullanici ile iki subede dogrulandi -
+Merkez (tip_merkezi) 13 modul / hekim rolu 4; Ankara Sube (goruntuleme) 11 modul / hekim rolu 1.
+`POST /api/kimlik/sube` sonrasi yanit ve sonraki `/ben` ayni modul kumesini veriyor. Menu farki:
+**Muayene** ve **Laboratuvar** gruplari Ankara subesinde GIZLI, **Teleradyoloji** aciliyor
+(teletip kapaniyor). Satış/Alış iki subede de kapali (goruntuleme/tip merkezi paketlerinde
+erp_satis yok). Gecici kullanici silindi.
+
+**db/365 — Satış/Alış (ERP) HER kurum tipinde acik** (kullanici): 359 matrisi satis/alisi yalniz
+ERP tipinde aciyordu (mockup varsayimi); gercekte her saglik kurumu fatura keser, malzeme alir,
+cari calisir - hasta faturasi da satis belgesidir. 10 tipin hepsinde `erp_satis` varsayilan 1 oldu.
+364 testinde Merkez subesine elle konan override kaldirildi (varsayilan zaten acik; override
+durursa ekranda "özel" rozeti yaniltirdi). Modul yine sube bazinda override ile kapatilabilir.
+
+**Mockup: Hasta ve Başvuru için GRUP & ANALİZ sekmeleri** (kullanici) - iki yeni dosya,
+`Ekranlar/Kayıt Kabul/` altinda, mevcut kart mockuplariyla ayni CSS/JS deseni (tab -> pane):
+  * **hasta_grup_analiz.html** — GRUP: segment/sadakat, coklu etiket (VIP, kronik, personel yakini...),
+    risk notu, gelis kaynagi + gonderen hekim (361 isaretinden), kampanya/fiyat listesi, KVKK ve
+    iletisim izinleri, TARIHLI grup gecmisi. ANALİZ: KPI seridi (basvuru, ciro, tahsilat, acik borc,
+    ortalama, no-show), aylik ciro/tahsilat grafigi, en cok alinan hizmetler, odeyen kurum dagilimi,
+    acik borc YASLANDIRMA (90+ "Riskli" etiketi onerir), ICD dagilimi, son hareketler.
+  * **basvuru_grup_analiz.html** — GRUP: basvuru turu/gelis sekli/oncelik/vaka tipi/is kolu,
+    kampanya-paket-fiyat listesi, etiketler, kaynak-sevk ve **bu basvurunun prim rolleri**
+    (aday listesi kurum tipine gore, "İşaret yok" rozeti 363 ile ayni dil). ANALİZ: parasal ozet
+    (matrah/KDV, hasta-kurum payi, tahsil, kalan, prim, net katki), kalem kirilimi (maliyet + prim +
+    marj), tahsilat zaman cizelgesi (355 POS aksiyonu sonucuyla), donusum zinciri, bolum ortalamasiyla
+    karsilastirma, klinik ozet.
+Her iki dosyada "Gereken tablo ve alanlar" bolumu var: yeni `taraf_grup`, `taraf_izin`, `belge_grup`,
+`hizmet_maliyet` tablolari ve `v_hasta_analiz` / `v_hasta_aylik` / `v_hasta_yaslandirma` /
+`v_basvuru_analiz` gorunumleri; gerisi mevcut tablolardan (belge, belge_satir, kasa_islem_dagitim,
+hakedis_satir, muayene, lab_istem) besleniyor.
+
+**Mockup: Liste ekranlarinda GORUNUM sekmeleri (Liste / Grup / Analiz)** (kullanici: "hasta listesi
+ve başvuru listesinde liste butonu yanındaki grup ve analiz sekmeleri"):
+  * **hasta_listesi_grup_analiz.html** — GRUP: 1. ve 2. KIRILIM secici (hasta grubu, segment, odeyen
+    kurum, gelis kaynagi, yas, cinsiyet, sube) + iki seviyeli pivot (hasta, basvuru, ciro, tahsilat,
+    acik borc, ort., pay) + "Grupsuz" satiri (etiketlenmemis kutle) + etiket bulutu + toplu islem
+    kutusu (izin/yetki kontrollu). ANALİZ: KPI seridi, yeni hasta/basvuru grafigi, yas-cinsiyet,
+    odeyen kurum, borc yaslandirma (90+ tik -> Riskli suzgeci), kaynak/referans (Gonderen hekim bagi).
+  * **basvuru_listesi_grup_analiz.html** — GRUP: kirilim (bolum, hekim, kurum, basvuru turu, kampanya,
+    etiket, GONDEREN HEKIM, sube, gun) + pivot (basvuru, hasta, tutar, tahsil, kalan, kapanma orani)
+    + etiket/kampanya ve gonderen hekim (prim) kirilimlari. ANALİZ: KPI (basvuru, tutar, tahsilat,
+    kalan, belgeye donusum %, prim, ort. kabul suresi), gunluk seri, saatlik yogunluk, kapanma durumu,
+    tahsilat araci (355 POS notu), odeyen kurum/pay dagilimi.
+Uc gorunum AYNI suzgeci paylasir; grup/analiz satirina tiklamak suzgeci daraltip Liste'ye doner.
+Gereken yeni gorunumler: `v_hasta_kirilim`, `v_basvuru_kirilim` (+ karttakiler `v_hasta_analiz`,
+`v_basvuru_analiz`, `v_hasta_yaslandirma`) ve yeni tablolar `taraf_grup`, `belge_grup`, `taraf_izin`.
+
+**Numara satiri cift tikla acilmiyordu** (kullanici): `numara-hasta` / `numara-basvuru` kartlari
+`public.v_numara_turu_kimlik` kod tablosunu kullaniyor ama `KartDeposu.KodTablosuDogrula` BEYAZ
+LISTESINDE yoktu - kart okuma 500 veriyor, cift tik sessiz kaliyordu ("Bilinmeyen kod tablosu",
+hata_log). Beyaz listeye `v_numara_turu_kimlik` ve `v_prim_rol_lookup` (362) eklendi.
+
+**db/366 — numara on ekinde YIL yer tutucusu** (kullanici: "önekte YYYY varsa bulunulan yıl,
+YY varsa son iki rakam"; "YYYY- varsa 2026-000005 gibi olur"): `fn_numara_onek_coz(on_ek, tarih)`
+YYYY -> 2026, YY -> 26 (once YYYY sonra YY - ters sirada "26 26" olurdu). Belge numarasi
+(`fn_belge_no_uret`) ve hasta dosya no (`fn_hasta_dosya_no`) bu cozumden geciyor; tarih kaynagi
+belgede BELGE TARIHI (152 kurali), dosya noda bugun. **Yil yer tutucusu varsa SAYAC da yila
+baglaniyor**: 2026-000002'den sonra yil donunce 2027-000001. Yer tutucu yoksa davranis degismedi
+(surekli artan numara). Kayit Kabul Ayarlari ekranindaki notlara ornek eklendi.
+
+**"Kurum tipi görüntüleme ama lab ve muayene görünüyor"** (kullanici) - HATA DEGIL, EKRAN EKSIGI:
+menu AKTIF SUBENIN profilinden cizilir (364). Kurum geneli `goruntuleme` iken Merkez subesinin
+KENDI profili `tip_merkezi` oldugu icin lab/muayene aciktir. Kurum Tipi & Sistem Ayarlari ekranina
+iki uyari seridi eklendi: kurum genelini duzenlerken "menunuz aktif subenizin profilinden gelir"
+(+ "Aktif şubeye geç" dugmesi) ve baska subenin profili duzenlenirken "kendi menunuz degismez".
+Ayrica **Kaydet & Uygula** aktif subeyi (ya da kurum genelini) etkiliyorsa oturum sunucudan
+tazeleniyor (`useOturum().tazele`) - menu ve rotalar aninda degisiyor, yeniden giris gerekmiyor.
+
+**Basvuru sekmesi LAB / GORUNTULEME kurumunda sadelesti** (kullanici): kurum profilinin verdigi
+hekim rolu "Gönderen" (1) ise (`kullanici.hekimRolu`, sube bazli - 364) basvuru sekmesi:
+  * **Başvuru Türü** sorulmaz - tur zaten "Laboratuvar / Görüntüleme"dir; kart kayitta
+    `basvuruTuru = 5` olarak damgalar (alan bos kalmasin).
+  * **Poliklinik Odası** cizilmez (numune alma / cekim birimi ayri kavram).
+  * **Hekim / Personel** etiketi **"Gönderen"** olur - aday listesi zaten "Gönderen" isaretli dis
+    doktorlardan geliyor (361/362).
+  * **Başvurulan Bölüm** etiketi sadece **"Bölüm"** olur (hasta poliklinige basvurmuyor, tetkik
+    yaptiriyor).
+Diger kurum tiplerinde ekran aynen kaldi.
+**Basvuru sekmesinden "Protokol No" kaldirildi** (kullanici): ayni salt okunur numara kartin BASLIK
+seridinde zaten var; sekmede ikinci kez gostermek bos yer harciyordu. Prop ve cagri yeri de temizlendi
+(HastaSeridi'ndeki arama satiri protokolu ayri kavram - orada kaldi).
+
+**Basvuruda GÖNDEREN jenerik arama ekranindan** (kullanici): lab/goruntuleme kurumunda hekim alani
+combo yerine `TarafSecici` (kaynak `dis-hekim`) - dis hekim sayisi combo'ya sigmaz, arama
+penceresinde brans/kurum/gonderdigi tetkik sayisi da gorunur (305 dis hekim duzeni).
+**Secilince BÖLÜM de doluyor**: kart secilen kisinin `bolumId`'sini `prim-rol-aday`'dan cozup
+Bölüm alanina yaziyor (bolumu olmayan kiside alan degismez). Secili kisinin ADI ayri state'te
+(`personelAd`) - arama ile secilen kisi combo listesinde olmayabilir; belge acilisinda ad
+listeden, yoksa tek satir sorgu ile cozuluyor.
+
+**Basvuru sekmesi ILK SATIR sirasi** (kullanici): **Bölüm · Gönderen (Hekim/Personel) · Ödeyen Kurum
+· Başvuru Tarihi/Saati**; basvuru turu, gelis sekli, oda ve sira no arkaya alindi.
+
+**db/367 + kart: gonderen secilince BÖLÜM dolmasi** (kullanici: "seçtim ama bölüm dolmadı"):
+kok neden `v_prim_rol_aday.bolum_id` bolumu **`taraf_personel.departman`**'dan okuyordu; bolum
+aslinda **`taraf.departman`** (251 - departman tablosuna isaret eder). View duzeltildi. Ayrica dis
+hekimlerde bolum HIC girilmiyordu: dis hekim kartina **"Bölüm"** alani eklendi (taraf.departman,
+v_departman_lookup) - gonderen hekimin hastayi hangi bolume gonderdigi bir kez secilir.
+
+**Bolum secilince arama O BOLUME suzuluyor** (kullanici): `dis-hekim` kaynagina gizli `departman`
+kolonu, `TarafSecici`'ye `ekFiltre` prop'u eklendi; basvuruda bolum doluysa Gönderen aramasi
+`departman = bolumId` ile aciliyor (yer tutucu da "Bu bölüme gönderen hekim ara…"). Iki yon de
+calisiyor: once hekim secilirse bolum ondan dolar.
+
+**Basvuru sekmesi 3 SUTUN** (kullanici: "sığmıyor"): 1. sira **Bölüm · Gönderen · Başvuru Tarihi**,
+2. sira **Ödeyen Kurum · Geliş Şekli · Geliş Nedeni**; Başvuru Türü segmenti ve Poliklinik Odası
+arkaya alindi.
+**Sipariş / Başvuru tarihi ZORUNLU + otomatik** (kullanici: "ücretlendirmede sipariş tarihi zorunlu
+ve otomatik bulunulan zamanı atar"): baslikta etiket zorunlu isaretli; alan TEMIZLENIRSE simdiki an
+geri yaziliyor (`yerelAnMetni`), kayitli belge bos tarihle acilirsa yine simdiki an ile doluyor ve
+`belgeKaydet` bos tarihi "Belge tarihi zorunlu." ile reddediyor. Yeni kartta zaten simdiki an
+geliyordu; sunucu tarafinda da POST /api/belge bos ya da bugunun 00:00'i olan tarihe o anki saati
+damgaliyor (366 oncesi 355 notu).
+
+**Basvuruda ÖDEYEN KURUM zorunlu + varsayilan** (kullanici): alan zorunlu isaretli, bos secenek
+"— Hasta kendi öder —" yerine "— Seçiniz —"; `belgeDogrula` basvuruda kurum yoksa
+"Ödeyen kurum seçilmeli." donuyor (hata alanin altinda gorunuyor). **Varsayilan**: yeni basvuruda
+hasta secilince onun kayitli kurumu (`taraf_hasta.kurum_id`, hasta listesine gizli `kurumId` kolonu
+eklendi) otomatik geliyor; hastanin kurumu yoksa kurum listesindeki **tur 1 "Özel"** satiri seciliyor.
+Kayitli belgede secim EZILMEZ.
+
+**Gönderen yoksa "Kendi İsteği"** (kullanici): `TarafSecici`'ye `bosMetin` prop'u eklendi; basvuruda
+gonderen bos oldugunda kutuda **"Kendi İsteği (sevksiz)"** yaziyor - bos secim ANLAMLI bos, "×" ile
+bu duruma donuluyor.
+**"Kendi İsteği" -> Geliş Şekli "Kendi imkânıyla"** (kullanici): gonderen "×" ile temizlenince
+`gelisSekli = 1` yaziliyor; ayrica gonderen HIC secilmemis basvuruda alan BOSSA yine 1 ile doluyor
+(dolu deger EZILMEZ - ambulans/kurum araci elle secilebilir).
+**Gönderen secilirse Geliş Şekli "Sevkli"** (kullanici): gonderen hekim secilince `gelisSekli = 3`;
+temizlenince 1 ("Kendi imkânıyla"). Ikisi de acik eylem - kullanici sonra ambulans/kurum aracina
+cevirebilir.
+**"Kendi İsteği"nde BÖLÜM de bosalir** (kullanici): bolum gonderenin bolumunden doluyordu; gonderen
+kalkinca o bilgi gecersiz - alan temizleniyor (ve arama yeniden tum gonderenlere aciliyor).
+
+**db/368 — kalem tarihi SAATLI ve zorunlu** (kullanici: "+ ile işlem seçtiğimde gelen fiyat
+ekranında Teslim Tarihi rename Tarih, şu anki tarih saat olmalı, boş olmaz"):
+`belge_satir.teslim_tarihi` DATE -> **timestamp** (eski gun degerleri 00:00 olarak korundu).
+Alan HBYS'de "islem ne zaman yapildi" demek - ayni basvuruda sabahki kan ile ogleden sonraki tetkik
+ayni gun farkli saattedir; prim ve calisma listesi sirasi saate bakar.
+Kalem penceresinde etiket **"Tarih"** (zorunlu isaretli), girdi `datetime-local`; temizlenirse o anki
+zaman geri yaziliyor ve YENI SATIR o anki zamanla aciliyor (`bosSatir`). Kalem gridinde ve termin
+modalinda tarih artik saatiyle gosteriliyor; termin modali da `datetime-local`.
+**Zorunluluk kurali KILITLI kartta uygulanmaz** (kullanici: "ödeyen kurum dolu olmalı diyor ama her
+taraf donmuş"): kesin/kapanmis basvuruda alanlar salt okunur oldugu icin "Ödeyen kurum seçilmeli."
+belgeyi kaydedilemez hale getiriyordu. `belgeDogrula` artik `kilitli` bayragini aliyor ve kurum
+kontrolunu yalniz DUZENLENEBILIR kartta yapiyor. Mevcut veride 21 basvurudan 5'inde odeyen kurum bos
+(eski kayitlar) - istenirse toplu olarak "Özel (Ücretli)" ile doldurulabilir.
+**KOK NEDEN: dogrulama hatasi kartI KILITLIYORDU** (kullanici: "ödeyen kurum dolu olmalı diyor ama
+her taraf donmuş"): `kes()` basinda `setSonuc(null)` yapiliyordu; `duzenlenebilir` hesabi `!!sonuc`a
+bagli oldugu icin dogrulama hatasinda kart SALT OKUNUR'a duşüyor ve kullanici hatayi duzeltemiyordu
+(kaydet -> hata -> alanlar donuk -> tekrar kaydet -> ayni hata). Artik `sonuc` kaydetme basinda
+sifirlanmiyor; basarili kayitta zaten yeni yanit yaziliyor. Yani basvuru "ucret/tahsilat/donusum
+yapilmadan" kilitlenmiyor - kullanicinin itirazi hakliydi.
+**Bos odeyen kurumlu 5 basvuru dolduruldu** (kullanici): 114280, 114281, 114282, 114283, 114341 ->
+**Özel (Ücretli)** (taraf 4990). Basvurularin tamami (21/21) artik odeyen kurumlu; yeni kayitlarda
+alan zaten zorunlu.
+**Hizmet arama kutusu kalem penceresi kapaninca BOSALIYOR** (kullanici): ard arda ucret girerken
+eski arama metni kaliyor, memur her seferinde eliyle siliyordu. `StokAramaPenceresi` artik `etkin`
+false -> true gecisinde (kalem penceresi kapandi) aramayi temizliyor, secimi basa aliyor, listeyi
+tazeliyor ve imleci kutuya koyuyor.
+
+**Tahsilat sekmesi HIZLI TAHSILAT** (kullanici): arac cubuguna ✎'nin SOLUNA **＋** eklendi (tam
+tahsilat ekranini acar). **Nakit** artik kart ACMADAN gride satir ekliyor: varsayilan kasa = ilk
+AKTIF yerel para kasasi (kod sirasi; kurulumda "varsayilan" bayragi yok). **Banka** ve **POS**
+`HesapSecModali` ile hesap sordurup ayni sekilde satir ekliyor (38 banka / 13 POS hesabi combo'ya
+sigmiyordu; Enter secer, ↑↓ gezer). Tutar **acik borcun tamami** geliyor; gridde tutar hucresine
+TIKLANINCA satir ici duzenleme aciliyor (Enter kaydeder, Esc vazgecer) ve `kasaGuncelle` ile
+yaziliyor. Kanca: `belgeTahsilat.hizliTahsilat(tur, hesapId, tutar)` + `tutarGuncelle(id, tutar)`.
+**Varsayilan kasa ayari** (kullanici): Kayıt Kabul Ayarları › **Genel** sekmesine "Tahsilat" kutusu
+ve **Varsayılan kasa (hızlı nakit tahsilat)** alani eklendi. Secenekler API'den (hesap tur 'K',
+durum 1; kod · ad) + "(otomatik — ilk aktif kasa)". Ayar anahtari `basvuru.varsayilan_kasa`
+(AyarDeposu beyaz listesi, varsayilan 0 = otomatik) ve yardim metni `ayar.basvuru.varsayilan_kasa`.
+Belge kartindaki hizli NAKIT once bu ayara bakiyor, 0 ise kod sirasindaki ilk aktif yerel para
+kasasina dusuyor. Banka/POS'ta hesap her seferinde arama penceresinden secildigi icin varsayilan
+tutulmuyor.
+
+**Varsayilan kasa AYARI IPTAL** (kullanici: "kasa tanımlarında atama sütunu koymuştuk, gerek
+kalmadı"): `basvuru.varsayilan_kasa` ayari, ekran alani ve yardim metni geri alindi. Hizli NAKIT
+artik **hesap.atama** (200) kuralini kullaniyor: 1) oturumu acan kullaniciya ATANMIS kasa
+(atama = kullanici id), 2) yoksa atamasi **Ana Kasa** (-1) olan kasa, 3) o da yoksa kod sirasindaki
+ilk aktif yerel para kasasi.
+
+**"Banka / POS seçtim ama satıra eklenmedi"** (kullanici) - KOK NEDEN: hizli tahsilat tutari
+belgenin ACIK BORCUNDAN geliyor; belge tam (hatta fazla) tahsil edilmisse tutar 0 cikiyor ve
+`hizliTahsilat` "tutar sifirdan buyuk olmali" ile SESSIZCE duruyordu (hata kutusu tahsilat
+sekmesinde gorunmuyordu). Iki duzeltme: (1) acik borc yoksa tutar KULLANICIYA SORULUYOR
+("bu belgede açık borç yok, tutarı yazın"), iptal edilirse satir eklenmiyor; (2) hizli akistaki tum
+uyarilar artik `mesaj()` penceresiyle gorunuyor. API tarafi dogrulandi (kasaEkle 201).
+**Hesap secim listeleri YEREL PARA** (kullanici: "pos, kasa, banka listesi yerel para birimi olanlar
+gelmeli"): `HesapSecModali` yeni `doviz` prop'u ile suzuyor; belge karti `yerelPara` gonderiyor.
+Nakit secimi zaten yerel para kasasini ariyordu. Dovizli hesap hizli tahsilatta secilirse islem
+dovizi tutmuyor ve sunucu reddediyordu.
+
+**Native "localhost diyor ki" pencereleri kaldirildi** (kullanici: "localhost:3000 mesajı diye
+soruyor, onun yerine moda göre GenoTIP AI / Gentegre AI Mesajı"): 7 cagri hala tarayicinin
+`window.confirm` / `window.prompt`'unu kullaniyordu - DokumanGalerisi (dosya silme), e-Belge seri
+kurallari, XSLT sablonlari, KasaIslemKarti ve Liste (iptal sebebi), belge donusum silme ve tahsilat
+silme. Hepsi uygulamanin `onay()` / `metinSor()` cagrilarina cevrildi; bunlar `MesajKatmani`
+uzerinden URUN MODUNA gore basliklanan pencereyi aciyor ("GenoTIP AI Mesajı" / "Gentegre AI
+Mesajı"). `MesajKatmani` zaten App kokunde ve giris ekraninda da cizildigi icin native yedege
+dusulmuyor. Kodda artik window.confirm/prompt/alert cagrisi YOK.
+
+**Faturalama sekmesi HIZLI DONUSUM** (kullanici): "Faturaya Dönüştür"un SOLUNA **🧾 Fiş · 📄 Fatura ·
+📑 Tahakkuk** dugmeleri, SAGINA **Adet / Tutar** olcu secici (varsayilan **Adet**) eklendi. Bir
+dugmeye basinca modal ACILMADAN belge uretiliyor ve alttaki listeye dusuyor (tahsilat sekmesindeki
+hizli akisin aynisi); ayrintili secim (satir/kismi/tarih/taslak) yine "Faturaya Dönüştür"de.
+OLCU: **adet** her acik satirin KALAN MIKTARI; **tutar** fis/faturada TAHSIL EDILEN kadar,
+tahakkukta kalanin TAMAMI (352 hesabi, ortak `belgeDonusumHesap`; pay=1 hasta payi).
+Cevrilecek sey yoksa sebebi pencereyle soyleniyor ("tahsil edilmiş ve henüz belgelenmemiş tutar
+bulunmuyor" / "açık satır yok") - sessiz durmuyor.
+**Hizli donusum ONCE KAYDEDIYOR** (kullanici: "fiş butonuna bastım, ücret ve tahsilat satırlarını
+henüz kayıtlı olmadığı için göremedi"): 🧾/📄/📑 dugmeleri artik `kes(false)` ile belgeyi kaydedip
+(kart KAPANMAZ) donen kimlikle acik satirlari okuyor - ekrandaki kalemler sunucuya yazilmadan
+donusum bos kaliyordu. Kaydetme hatasi olursa (or. zorunlu alan) mesaj zaten gorunuyor ve donusum
+yapilmiyor. `donusumleriYukle(id?)` artik disaridan kimlik alabiliyor: yeni kaydedilen belgede
+`kayitliId` state'i henuz guncellenmemis oluyordu.
+
+**Kaydedilmemis degisiklikte KAPAT UYARISI** (kullanici: "başvuruya herhangi bir ekleme veya değişim
+yaptığımda kaydetmeden kapat dersem uyarsın"): kartin anlamli durumu tek metne cevriliyor
+(`kartImzasi`: tarih, cari, satirlar, basvuru alanlari, odeyen kurum, bolum/hekim, fiyat listesi,
+kampanya, doviz...); kart ACILISINDA ve her BASARILI kayitta bu metin "temiz" sayiliyor. Kapatirken
+imza farkliysa **"Kaydedilmemiş değişiklikler var. Kaydetmeden kapatılsın mı?"** (tehlike) soruluyor -
+Escape ve perde tiklamasi dahil butun kapatma yollari bu kontrolden geciyor. Alan alan bayrak yerine
+imza kullanildi: yeni alan eklendiginde kontrol kendiliginden kapsiyor.
+**Kapat uyarisi TESTLENDI ve saglamlastirildi**: imza uretimi saf fonksiyona alindi
+(`sayfalar/belgeImza.ts`) ve 16 vaka ile testlendi (`test/belgeImza.test.ts`) - sahte fark
+(sayinin farkli yazimi "1500.0000"/"1500", null/0 kimlik, bas-son bosluk, basvuru alan SIRASI, bos
+alan eklenmesi, satir ANAHTARININ degismesi) uyari URETMEZ; gercek degisiklik (kalem ekle/sil/tutar,
+odeyen kurum, gonderen, bolum, tarih, gelis sekli, kalem tarihi) uyari URETIR.
+ACILIS YARISI kapatildi: kart acilirken gelis sekli / odeyen kurum / fiyat listesi / depo EFEKTLE
+(kimi API ile) doluyor; imza hemen alinsa kart kullanici dokunmadan "kirli" gorunurdu - acilistan
+sonra 1,5 sn boyunca imza surekli tazeleniyor. Ayrica 368 sonrasi eskiyen `belgeKalem` testi
+guncellendi (kalem tarihi artik saatli). Tum takim: **138 test gecti**.
+**Özel kurumda pay kolonlari GIZLENDI** (kullanici: "ödeyen kurum özel ama ücret gridinde hasta/kurum
+payları var"): kalem gridindeki "Kurum Payı / Hasta Payı" kolonlari ve "⚖ Provizyon Uygula" dugmesi
+`paylasim.acik = basvuruMu && !!odeyenKurumId` kosuluyla ciziliyordu - "Özel (Ücretli)" de bir KURUM
+oldugu icin acik kaliyordu. Kosul `provizyonVar`a baglandi (kurum turu **2 ÖSS** ya da **3 SGK**);
+Özel kurumda hasta kendi odedigi icin pay paylasimi, provizyon ve kurum payi kavrami yok. Veri
+tarafinda zaten hasta payi = tutar, kurum payi 0 yaziliyor (289) - yalniz gorunum sadelesti.
+**Kapat sorusu UC SECENEKLI** (kullanici: "kaydetmeden çıkışta soru da 3 seçenek
+Kaydet/İptal/Geri Dön"): mesaj altyapisina `secimSor(metin, secenekler, varsayilan)` eklendi
+(MesajIstegi.secenekler + cozumSecim); `MesajKatmani` secenek verildiginde Tamam/Vazgeç yerine o
+dugmeleri ciziyor, Escape/perde ile kapanista GUVENLI secenek ("geri") donuyor. Belge kartinda kirli
+kapanista **💾 Kaydet · ✖ İptal (kaydetme) · ↩ Geri Dön** soruluyor: Kaydet'te `kes(false)` calisip
+basariliysa kapaniyor (zorunlu alan hatasinda kart ACIK kaliyor), İptal degisiklikleri atiyor, Geri
+Dön kartta birakiyor. `kapat(zorla)` parametresi eklendi - KAYIT SONRASI cagride soru sorulmuyor
+(temizImza state'i henuz guncellenmemis oluyordu). Delphi'deki "KaydetmeSorusu" deseniyle ayni.

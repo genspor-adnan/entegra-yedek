@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { TarafSecici } from '../TarafArama';
 import { TESLIM_SEKLI, SENARYO_SECENEK, eBelgeTipi } from '../../sayfalar/belgeSabitleri';
 import type { BelgeYaniti } from '../../api/sozlesme';
@@ -191,7 +192,8 @@ export function EBelgeSekmesi({
 }
 
 export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
-                                    teklifDurum }: {
+                                    teklifDurum, donusumAc, donusumSil,
+                                    hizliDonustur, olcu = 'adet', setOlcu }: {
   donusumler: Record<string, unknown>[];
   kayitliId: number;
   /** Donusum modalini acar; 0 = hedefi modal secsin (ilk hedef). */
@@ -201,12 +203,75 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
   /** Teklif YALNIZ Kabul (3) durumundayken donusur (kullanici) - sunucu da
       ayni kurali dogrular. */
   teklifDurum?: string;
+  /** Turetilmis belgenin kartini USTTE acar (cift tik ve ✎ dugmesi). */
+  donusumAc?(belgeId: number): void;
+  /** Secili turetilmis belgeleri siler; kaynak satirin kalani geri doner. */
+  donusumSil?(idler: number[]): Promise<void>;
+  /**
+   * HIZLI DONUSUM (kullanici): modal ACMADAN hedef belgeyi uretir ve alttaki
+   * listeye ekler - tahsilat sekmesindeki hizli akisin aynisi.
+   * hedefTur: 16 Fiş · 15 Fatura · 17 Tahakkuk.
+   */
+  hizliDonustur?(hedefTur: number): void;
+  /** Donusum olcusu: 'adet' kalan MIKTAR, 'tutar' tahsil edilen/kalan TUTAR. */
+  olcu?: 'adet' | 'tutar';
+  setOlcu?(v: 'adet' | 'tutar'): void;
 }) {
   const donusumKapali = !!teklifMi && teklifDurum !== '3';
+  /* COKLU SECIM (kullanici): bir basvurudan birden cok belge turuyor
+     (kismi fis + kalan tahakkuk) - yanlis dogan iki belgeyi tek tek
+     silmek yerine isaretleyip birlikte silmek gerekiyor. */
+  const [secili, setSecili] = useState<number[]>([]);
+  const idler = donusumler.map(d => Number(d.belgeId ?? 0)).filter(Boolean);
+  const hepsi = idler.length > 0 && secili.length === idler.length;
+  const cevir = (id: number) =>
+    setSecili(o => (o.includes(id) ? o.filter(x => x !== id) : [...o, id]));
+  const tekSecili = secili.length === 1 ? secili[0] : 0;
+
+  /* SATIR TIKLAMA GRID DAVRANISI (kullanici): duz tik TEK satir secer -
+     onceki isaretler kalkar; Ctrl (Cmd) tek satir ekler/cikarir; Shift son
+     tiklanan satirdan buraya kadar ARALIK secer. Onay kutusunun kendisi her
+     zaman ekle/cikar yapar (fare ile tek tek isaretlemenin yolu). */
+  const capa = useRef<number | null>(null);   // son tiklanan satirin sirasi
+  const satirTikla = (e: React.MouseEvent, sira: number, id: number) => {
+    if (!id) return;
+    if (e.shiftKey && capa.current != null) {
+      const [bas, son] = capa.current <= sira ? [capa.current, sira] : [sira, capa.current];
+      const aralik = donusumler.slice(bas, son + 1)
+        .map(d => Number(d.belgeId ?? 0)).filter(Boolean);
+      // Shift SECIMI YENILER (grid deseni): capa sabit kalir ki aralik
+      //   ayni noktadan buyuyup kuculsun.
+      setSecili(aralik);
+      return;
+    }
+    capa.current = sira;
+    if (e.ctrlKey || e.metaKey) { cevir(id); return }
+    // Duz tik: yalniz bu satir. Zaten tek basina seciliyse secim kalkar.
+    setSecili(o => (o.length === 1 && o[0] === id ? [] : [id]));
+  };
+
   return (
   <div className="kagrup">
     <h6>
       {teklifMi ? 'Sipariş' : 'Faturalama'}
+
+      {/* HIZLI DONUSUM (kullanici): modal ACMADAN hedef belgeyi uretir ve
+          alttaki listeye ekler - tahsilat sekmesindeki hizli akisin aynisi.
+          Ayrintili secim (satir/tutar/kismi) yine "Faturaya Dönüştür"de. */}
+      {kayitliId > 0 && !teklifMi && (
+        <>
+          <button type="button" className="d bir" disabled={donusumKapali}
+                  title={`Tüm açık satırları ${olcu === 'adet' ? 'kalan miktarla' : 'tahsil edilen tutarla'} satış FİŞİNE çevirir`}
+                  onClick={() => hizliDonustur?.(16)}>🧾 Fiş</button>
+          <button type="button" className="d bir" disabled={donusumKapali}
+                  title={`Tüm açık satırları ${olcu === 'adet' ? 'kalan miktarla' : 'tahsil edilen tutarla'} FATURAYA çevirir`}
+                  onClick={() => hizliDonustur?.(15)}>📄 Fatura</button>
+          <button type="button" className="d bir" disabled={donusumKapali}
+                  title="Tüm açık satırları TAHAKKUKA çevirir (kalanın tamamı)"
+                  onClick={() => hizliDonustur?.(17)}>📑 Tahakkuk</button>
+        </>
+      )}
+
       {kayitliId > 0 && (
         <button type="button" className="d bir" disabled={donusumKapali}
                 title={donusumKapali
@@ -215,10 +280,40 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
           {teklifMi ? '📋 Siparişe Dönüştür' : '🧾 Faturaya Dönüştür'}
         </button>
       )}
+
+      {/* DONUSUM OLCUSU (kullanici): varsayilan ADET - satirin kalan miktari
+          cevrilir. TUTAR olcusunde fis/faturada TAHSIL EDILEN kadar,
+          tahakkukta kalanin tamami cevrilir (352). */}
+      {kayitliId > 0 && !teklifMi && (
+        <span className="seg" title="Hızlı dönüşümün ölçüsü">
+          <span className={`s${olcu === 'adet' ? ' on' : ''}`}
+                onClick={() => setOlcu?.('adet')}>Adet</span>
+          <span className={`s${olcu === 'tutar' ? ' on' : ''}`}
+                onClick={() => setOlcu?.('tutar')}>Tutar</span>
+        </span>
+      )}
+      {/* Secili satir islemleri donusum dugmesinin SAGINDA (kullanici):
+          yalniz ikon, secim yoksa pasif. Duzenleme TEK satirda calisir. */}
+      <button type="button" className="d bir" disabled={!tekSecili}
+              title={!secili.length ? 'Önce satır seçin'
+                     : secili.length > 1 ? 'Düzenleme için tek satır seçin'
+                     : 'Seçili belgenin kartını aç'}
+              onClick={() => tekSecili && donusumAc?.(tekSecili)}>✎</button>
+      <button type="button" className="d bir teh" disabled={!secili.length}
+              title={secili.length ? 'Seçili belgeleri sil' : 'Önce satır seçin'}
+              onClick={() => { void donusumSil?.(secili).then(() => setSecili([])) }}>🗑</button>
+      {secili.length > 1 && (
+        <span className="kapt">{secili.length} belge seçili</span>
+      )}
     </h6>
     <table className="detay-tablo">
       <thead>
         <tr>
+          <th className="check">
+            <input type="checkbox" checked={hepsi} disabled={!idler.length}
+                   title="Tümünü seç"
+                   onChange={() => setSecili(hepsi ? [] : idler)} />
+          </th>
           <th style={{ width: 160 }}>Belge No</th>
           <th style={{ width: 100 }}>Tarih</th>
           <th>Tür</th>
@@ -228,8 +323,19 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
         </tr>
       </thead>
       <tbody>
-        {donusumler.map((d, i) => (
-          <tr key={i}>
+        {donusumler.map((d, i) => {
+          const bid = Number(d.belgeId ?? 0);
+          return (
+          <tr key={i} className={bid && secili.includes(bid) ? 'secili' : ''}
+              /* Shift+tik metin secmesin - aralik secimi okunmaz oluyordu. */
+              style={{ userSelect: 'none' }}
+              onClick={e => satirTikla(e, i, bid)}
+              onDoubleClick={() => bid && donusumAc?.(bid)}>
+            <td className="check" onClick={e => e.stopPropagation()}>
+              <input type="checkbox" checked={!!bid && secili.includes(bid)}
+                     disabled={!bid}
+                     onChange={() => { if (bid) { capa.current = i; cevir(bid) } }} />
+            </td>
             <td><b>{String(d.belgeNo ?? '')}</b></td>
             <td>{String(d.belgeTarihi ?? '').slice(0, 10).split('-').reverse().join('.')}</td>
             <td>{String(d.turAdi ?? '')}</td>
@@ -237,9 +343,10 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
             <td className="hiza-sag">{para.format(Number(d.tutar ?? 0))}</td>
             <td>{String(d.durumAdi ?? '')}</td>
           </tr>
-        ))}
+          );
+        })}
         {donusumler.length === 0 && (
-          <tr><td colSpan={6} className="bos">
+          <tr><td colSpan={7} className="bos">
             {kayitliId > 0 ? 'Bu belgeden henüz belge türetilmemiş.' : 'Önce belgeyi kaydedin.'}
           </td></tr>
         )}

@@ -34,7 +34,10 @@ public sealed partial class BelgeDeposu
     /// </summary>
     public async Task<(int Id, List<string> Uyarilar)> DonusturAsync(
         int kaynakBelgeId, int hedefTur,
-        IReadOnlyList<(int SatirId, decimal Miktar)> secilen,
+        // Tutar (352): doluysa satirdan miktar degil o TUTAR (matrah) kadar
+        //   donusturulur - tutar bazli kismi donusum. Miktar hedef satirin
+        //   miktaridir (kaynak miktari), birim fiyat tutar/miktar olur.
+        IReadOnlyList<(int SatirId, decimal Miktar, decimal? Tutar)> secilen,
         DateTime? belgeTarihi, bool taslak,
         YazmaBaglami baglam, CancellationToken iptal = default,
         string? belgeNo = null,
@@ -46,6 +49,12 @@ public sealed partial class BelgeDeposu
         if (secilen.Count == 0)
             throw GentegreHatasi.Dogrulama("Dönüştürülecek satır seçilmeli.",
                 new AlanHatasi("satirlar", "Boş bırakılamaz."));
+
+        // TUTAR BAZLI donusum pay mekanizmasiyla yurur (289 sayaclari tutar
+        //   uzerinden): pay secilmemisse HASTA payi (1) sayilir - odeyen kurum
+        //   yoksa satirin tamami zaten hasta payidir (Yazma: hastaTutar = tutar).
+        var tutarBazli = secilen.Any(s => (s.Tutar ?? 0) > 0);
+        if (tutarBazli && pay == 0) pay = 1;
 
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
@@ -109,7 +118,8 @@ public sealed partial class BelgeDeposu
                    s.doviz_cinsi, s.doviz_birim_fiyat, s.doviz_kuru,
                    s.giris_depo_id, s.cikis_depo_id, s.izleme, s.izleme_kodu,
                    s.stok_durum_degis, s.proje_id, s.kalan_miktar, s.belge_id,
-                   s.kurum_tutar, s.hasta_tutar, s.kurum_kapatilan, s.hasta_kapatilan
+                   s.kurum_tutar, s.hasta_tutar, s.kurum_kapatilan, s.hasta_kapatilan,
+                   s.tutar
               from public.belge_satir s
              where s.id = any(@p0)
              order by s.sira
@@ -125,7 +135,7 @@ public sealed partial class BelgeDeposu
             }
         }
 
-        foreach (var (satirId, miktar) in secilen)
+        foreach (var (satirId, miktarSecim, tutarSecim) in secilen)
         {
             if (!kaynakSatirlar.TryGetValue(satirId, out var ks2))
                 throw GentegreHatasi.Bulunamadi($"Kaynak satır bulunamadı: {satirId}");
@@ -134,21 +144,57 @@ public sealed partial class BelgeDeposu
                     new AlanHatasi($"satirlar[{satirId}]", "Başka belgenin satırı."));
 
             var kalan = Convert.ToDecimal(ks2["kalan_miktar"] ?? 0m);
+            // Tutar bazli satirda hedef miktar kaynagin miktaridir: 1 adet
+            //   1000 TL'lik hizmet "1 adet 300 TL" olarak gider, 0,3 adet degil.
+            var miktar = tutarBazli && (tutarSecim ?? 0) > 0
+                ? Convert.ToDecimal(ks2["miktar"] ?? 0m) : miktarSecim;
             if (miktar <= 0)
                 throw GentegreHatasi.Dogrulama("Miktar sıfırdan büyük olmalı.",
                     new AlanHatasi($"satirlar[{satirId}].miktar", "Sıfırdan büyük olmalı."));
 
+            decimal? payTutarSecim = null;
             if (pay > 0)
             {
+                // ESKI SATIR (289 oncesi): pay tutarlari hic yazilmamis olabilir
+                //   (kurum 0, hasta 0). Tutar bazli donusum istenince satir o
+                //   anda HASTA PAYI = matrah olarak isaretlenir; 289 sayaclari
+                //   boylece bu satirda da tutar uzerinden calisir.
+                var kurumT = Convert.ToDecimal(ks2["kurum_tutar"] ?? 0m);
+                var hastaT = Convert.ToDecimal(ks2["hasta_tutar"] ?? 0m);
+                if (tutarBazli && pay == 1 && kurumT + hastaT == 0)
+                {
+                    var matrah = Convert.ToDecimal(ks2["tutar"] ?? 0m);
+                    await using var payKomut = new NpgsqlCommand(
+                        "update public.belge_satir set hasta_tutar = @p1, kurum_tutar = 0, karsilama = 0 where id = @p0",
+                        baglanti, islem);
+                    payKomut.Parameters.AddWithValue("p0", satirId);
+                    payKomut.Parameters.AddWithValue("p1", matrah);
+                    await payKomut.ExecuteNonQueryAsync(iptal);
+                    ks2["hasta_tutar"] = matrah;
+                    ks2["kurum_tutar"] = 0m;
+                }
+
                 // PAY DONUSUMU: sinir miktar degil TUTAR. Ayni pay ikinci kez
                 //   donusturulemez - yoksa kurum payi iki faturaya girerdi.
                 var payTutar = Convert.ToDecimal((pay == 1 ? ks2["hasta_tutar"] : ks2["kurum_tutar"]) ?? 0m);
                 var payKapanan = Convert.ToDecimal(
                     (pay == 1 ? ks2["hasta_kapatilan"] : ks2["kurum_kapatilan"]) ?? 0m);
-                if (payTutar - payKapanan <= 0)
+                var payKalan = payTutar - payKapanan;
+                if (payKalan <= 0)
                     throw GentegreHatasi.IsKurali(
                         pay == 1 ? "Bu satırın hasta payı zaten kapatılmış."
                                  : "Bu satırın kurum payı zaten kapatılmış.");
+
+                // TUTAR SECIMI (352): payin kalanindan KUCUK bir tutar da
+                //   donusturulebilir (tahsil edilen kadar fis); kalan kaynakta
+                //   acik kalir ve sonra tahakkuka/fise cevrilir.
+                if ((tutarSecim ?? 0) > 0)
+                {
+                    if (tutarSecim > payKalan + 0.005m)
+                        throw GentegreHatasi.IsKurali(
+                            $"Seçilen tutar payın kalanını aşıyor (istenen {tutarSecim:0.00}, kalan {payKalan:0.00}).");
+                    payTutarSecim = decimal.Round(tutarSecim!.Value, 4);
+                }
             }
             else if (miktar > kalan)
                 throw GentegreHatasi.IsKurali(
@@ -179,7 +225,7 @@ public sealed partial class BelgeDeposu
             }
 
             satirlar.Add(SatirJson(ks2, miktar, satirId,
-                stokDurumDegis: stokDusecek ? 1 : 0, izlemler, pay));
+                stokDurumDegis: stokDusecek ? 1 : 0, izlemler, pay, payTutarSecim));
         }
 
         // --------------------------------------------------- 3) hedef baslik ----

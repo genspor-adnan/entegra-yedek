@@ -325,6 +325,11 @@ public static partial class KaynakKatalogu
                 + "btrim(coalesce(t.ad, '') || ' ' || coalesce(t.soyad, '')))",
                                         "metin", "Ad Soyad", Genislik: 220),
             new("bransAdi", "coalesce(kd.ad, '')", "metin", "Branş", Genislik: 200),
+            // BOLUM (367): basvuruda once bolum secilirse arama O BOLUMDEKI
+            //   hekimlerle sinirlanir - kolon olmadan filtre "Bilinmeyen alan"
+            //   ile 400 doner. Listede gizli, yalniz suzme icin.
+            new("departman", "coalesce(t.departman, 0)", "sayi", "Bölüm Id",
+                Varsayilan: false),
             // Kurum: artik yalniz KAYITLI cari (308) - serbest metin alani yok.
             new("kurum",    "coalesce(k.unvan, '')",
                                         "metin", "Kurum", Genislik: 220),
@@ -605,15 +610,25 @@ public static partial class KaynakKatalogu
             new("ilce",      "coalesce(adr.ilce, '')", "metin", "İlçe", Genislik: 120),
             new("il",        "coalesce(adr.il, '')",   "metin", "İl",   Genislik: 120),
             // Son basvuru: hastanin en yeni basvuru (tur 19) tarihi.
+            //   SAAT DE GOSTERILIR (kullanici): ayni gun icinde birden cok
+            //   basvuru olabiliyor, yalniz tarih "bugun mu geldi" sorusuna
+            //   cevap verse de "ne zaman geldi"ye vermiyordu. Bicimde 'HH'
+            //   gecmesi grid'e saati de yazdirir (bicim.ts).
             new("sonBasvuru",
                 "(select max(b.belge_tarihi) from public.belge b "
                 + " where b.taraf_id = t.id and b.tur = 19)",
                                    "tarih", "Son Başvuru", Hizalama: "orta",
+                                   Bicim: "dd.MM.yyyy HH:mm", Genislik: 130,
                                    Filtrelenebilir: false),
             // Hasta seridinin (mockup) iki alani: SIGORTA ve ACIK BORC.
             //   Sigorta = hastanin bagli oldugu anlasmali kurum (taraf_hasta.kurum_id).
             new("sigortaAdi", "coalesce(sg.unvan, '')", "metin", "Sigorta / Kurum",
                 Genislik: 180),
+            // VARSAYILAN ODEYEN KURUM (kullanici): basvuru acilirken hastanin
+            //   kayitli kurumu kendiliginden secilsin - memur ayni bilgiyi her
+            //   basvuruda yeniden aramasin. Listede gizli, yalniz kart kullanir.
+            new("kurumId",    "coalesce(th.kurum_id, 0)", "sayi", "Kurum Id",
+                Varsayilan: false),
             // Acik borc CARI EKSTRE ile ayni kurali kullanir (v_mali_hareket_ek):
             //   yalniz cari hesap hareketleri, ekstreye giren islem turleri ve
             //   iptal olmayan (durum 1-2) islemler. Ayri bir formul yazmak

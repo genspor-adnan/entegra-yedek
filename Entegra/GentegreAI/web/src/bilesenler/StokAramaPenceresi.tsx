@@ -12,12 +12,19 @@ import { para } from './bicim';
  * o kapaninca kullanici buradan siradaki stogu secer. Boylece on kalemlik bir
  * irsaliye tek arama penceresiyle girilir.
  */
-export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHizmet, yon }: {
+export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHizmet, yon,
+                                    eklenen }: {
   /** Ustunde kalem penceresi acikken false olur; true'ya donunce arama
       kutusuna odak GERI GELIR (ardisik girişte fare gerekmesin). */
   etkin: boolean;
   onSec(satir: ListeSatiri): void;
   onKapat(): void;
+  /**
+   * Bu pencere acikken EKLENEN kalemler (kullanici): arama penceresi ard arda
+   * giris icin acik kaldigindan, satirin gride dustugu buradan gorunmeli -
+   * yoksa "eklendi mi?" diye pencereyi kapatip bakmak gerekiyordu.
+   */
+  eklenen?: { sayi: number; son: string };
   /** Yalniz STOK aranir (paket icerigi gibi hizmet kabul etmeyen yerler). */
   yalnizStok?: boolean;
   /** Yalniz HIZMET aranir (260: randevunun konusu bir hizmettir, stok degil). */
@@ -87,8 +94,27 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
 
   useEffect(() => { void ara(arama, aramaGorunumu) }, [ara, aramaGorunumu]);  // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Pencere one gelince (acilista ve kalem penceresi kapaninca) imlec aramada.
-  useEffect(() => { if (etkin) kutu.current?.focus() }, [etkin]);
+  /**
+   * Pencere one gelince (acilista ve kalem penceresi kapaninca) imlec aramada.
+   *
+   * KALEM PENCERESI KAPANINCA ARAMA KUTUSU BOSALIR (kullanici: "fiyat ekranı
+   * kapandığında hizmet arama editi boşalmalı"): ard arda ucret girerken eski
+   * arama metni kaliyordu, memur her seferinde elle siliyordu. Bosalinca liste
+   * de basa doner (tum / son aranan gorunumu).
+   */
+  const oncekiEtkin = useRef(etkin);
+  useEffect(() => {
+    if (etkin) {
+      if (!oncekiEtkin.current) {
+        setArama('');
+        setSecili(0);
+        void ara('', aramaGorunumu);
+      }
+      kutu.current?.focus();
+    }
+    oncekiEtkin.current = etkin;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [etkin]);
 
   const yaz = (metin: string) => {
     setArama(metin);
@@ -106,7 +132,16 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
     <Modal
       baslik={yalnizStok ? "Stok Ara" : yalnizHizmet ? "Hizmet Ara" : "Stok / Hizmet Ara"}
       onKapat={onKapat}
-      alt={<button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>}
+      alt={
+        <>
+          {eklenen && eklenen.sayi > 0 && (
+            <span className="kapt" style={{ marginRight: 'auto' }}>
+              ✓ {eklenen.sayi} kalem eklendi{eklenen.son ? ` · son: ${eklenen.son}` : ''}
+            </span>
+          )}
+          <button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>
+        </>
+      }
     >
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}

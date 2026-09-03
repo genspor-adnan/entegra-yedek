@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { modulAcikMi } from './sayfalar/listeTanimlari';
 import { OturumSaglayici, useOturum } from './kimlik/OturumBaglami';
 import { Giris } from './sayfalar/Giris';
 import { Kabuk } from './sayfalar/Kabuk';
@@ -9,6 +10,7 @@ import { StokAyarlar } from './sayfalar/StokAyarlar';
 import { KasaAyarlar } from './sayfalar/KasaAyarlar';
 import { IKAyarlar } from './sayfalar/IKAyarlar';
 import { RandevuAyarlar } from './sayfalar/RandevuAyarlar';
+import { KayitKabulAyarlar } from './sayfalar/KayitKabulAyarlar';
 import { DepartmanGorev } from './sayfalar/DepartmanGorev';
 import { FirmaBilgileri } from './sayfalar/FirmaBilgileri';
 import { MesajKatmani } from './bilesenler/MesajKatmani';
@@ -35,7 +37,8 @@ function Yollar() {
   // Yetkisiz kullanici ana sayfaya dusmesin: ilk erisilebilir ekran.
   const ilkErisilebilir = LISTELER.find(l =>
     yetki(l.yetkiKodu) && !l.menuGizli
-    && (!l.urunModu || l.urunModu === (kullanici?.urunModu ?? 1)));
+    && (!l.urunModu || l.urunModu === (kullanici?.urunModu ?? 1))
+    && modulAcikMi(l, kullanici?.moduller));
   const ilkYol = yetki('panel')
     ? '/panel'
     : `/${ilkErisilebilir?.rota ?? ilkErisilebilir?.kaynak ?? 'panel'}`;
@@ -51,7 +54,10 @@ function Yollar() {
         {LISTELER.filter(l => yetki(l.yetkiKodu) && !l.ozelSayfa
           // Urun modu suzmesi (215): moda ozel ekranlar (Kayit Kabul = GenoTIP)
           //   diger urunde rotasiyla birlikte yok olur.
-          && (!l.urunModu || l.urunModu === (kullanici.urunModu ?? 1))).flatMap(l => {
+          && (!l.urunModu || l.urunModu === (kullanici.urunModu ?? 1))
+          // MODUL suzmesi (359): kapali modulun ROTASI da acilmaz - menude
+          //   gizlemek yetmiyor, adres cubuguna yazilinca ekran yine acilirdi.
+          && modulAcikMi(l, kullanici.moduller)).flatMap(l => {
           const rota = l.rota ?? l.kaynak;
           return [
             <Route key={rota} path={`/${rota}`} element={<Liste tanim={l} />} />,
@@ -82,6 +88,7 @@ function Yollar() {
 
         {/* Ayar ekranlari liste degil (ozelSayfa) - rotalari burada. */}
         {yetki('ayar') && <Route path="/genel-ayarlar" element={<GenelAyarlar />} />}
+        {yetki('ayar') && <Route path="/kayit-kabul-ayarlar" element={<KayitKabulAyarlar />} />}
         {yetki('stok') && <Route path="/stok-ayarlar" element={<StokAyarlar />} />}
         {/* Kategoriler iki bolmeli ozel ekran (345) - duz liste degil. */}
         {yetki('stok') && <Route path="/kategori" element={<Kategoriler />} />}

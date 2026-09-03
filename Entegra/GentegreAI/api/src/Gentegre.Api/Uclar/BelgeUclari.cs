@@ -23,6 +23,7 @@ public static class BelgeUclari
             baglam.YetkiIste("belge", Islem.Ekle);
 
             var belge = BaslikDegerleri(istek.Belge);
+            BelgeTarihiSaatle(belge);
             var satirlar = istek.Satirlar ?? new List<Dictionary<string, JsonElement>>();
 
             var (id, uyarilar) = await depo.KaydetAsync(belge, satirlar, istek.Secenekler,
@@ -432,14 +433,44 @@ public static class BelgeUclari
                     new AlanHatasi("hedefTur", "Zorunlu."));
 
             var secilen = (istek.Satirlar ?? new List<DonusumSatiri>())
-                .Where(s => s.SatirId > 0 && s.Miktar > 0)
-                .Select(s => (s.SatirId, s.Miktar))
+                .Where(s => s.SatirId > 0 && (s.Miktar > 0 || (s.Tutar ?? 0) > 0))
+                .Select(s => (s.SatirId, s.Miktar, s.Tutar))
                 .ToList();
 
             var (yeniId, uyarilar) = await depo.DonusturAsync(id, istek.HedefTur, secilen,
                 istek.BelgeTarihi, istek.Taslak,
                 baglam.Yazma, iptal,
                 istek.BelgeNo, (short)(istek.Pay ?? 0));
+
+            // KALANI TAHAKKUKA CEVIR (352): "300'u fis, 700'u tahakkuk" tek
+            //   tiklamayla. Ilk donusum bitince ayni satirlarin acik kalan
+            //   HASTA payi satis tahakkukuna (17) cevrilir. Ikinci adim ayri
+            //   transaction'dir: basarisiz olursa ilk belge durur, kullanici
+            //   uyariyla gorur ve kalanı elle donusturur.
+            if (istek.KalaniTahakkuk && istek.HedefTur != 17)
+            {
+                var secilenIdler = secilen.Select(s => s.SatirId).ToHashSet();
+                var kalanlar = (await depo.AcikSatirlarAsync(id, iptal))
+                    .Where(s => secilenIdler.Contains(Convert.ToInt32(s["satirId"]))
+                                && Convert.ToDecimal(s["hastaKalan"] ?? 0m) > 0)
+                    .Select(s => (Convert.ToInt32(s["satirId"]),
+                                  Convert.ToDecimal(s["kalanMiktar"] ?? 0m),
+                                  (decimal?)Convert.ToDecimal(s["hastaKalan"] ?? 0m)))
+                    .ToList();
+                if (kalanlar.Count > 0)
+                {
+                    try
+                    {
+                        var (tahakkukId, _) = await depo.DonusturAsync(id, 17, kalanlar,
+                            istek.BelgeTarihi, istek.Taslak, baglam.Yazma, iptal, null, 1);
+                        uyarilar.Add($"Kalan tutar satış tahakkukuna çevrildi (belge {tahakkukId}).");
+                    }
+                    catch (GentegreHatasi h)
+                    {
+                        uyarilar.Add($"Kalan tutar tahakkuka çevrilemedi: {h.Message}");
+                    }
+                }
+            }
 
             var kayit = await depo.OkuAsync(yeniId, iptal) ?? throw GentegreHatasi.Bulunamadi();
             return Results.Created($"/api/belge/{yeniId}", new BelgeYaniti
@@ -493,12 +524,27 @@ public static class BelgeUclari
         /// kurumdur - fatura sigortaya/SGK'ya kesilir.
         /// </summary>
         public int? Pay { get; set; }
+
+        /// <summary>
+        /// TUTAR BAZLI donusumde (352) ilk belge kesildikten sonra satirlarin
+        /// acik kalan hasta payini satis tahakkukuna (17) cevir - "tahsil
+        /// edilen kadar fis, kalani tahakkuk" tek adimda.
+        /// </summary>
+        public bool KalaniTahakkuk { get; set; }
     }
 
     public sealed class DonusumSatiri
     {
         public int SatirId { get; set; }
         public decimal Miktar { get; set; }
+
+        /// <summary>
+        /// TUTAR BAZLI KISMI DONUSUM (352): verilirse satirdan miktar degil bu
+        /// TUTAR (KDV haric matrah) kadar donusturulur - or. 1000 TL'lik
+        /// kalemin tahsil edilen 300 TL'si satis fisine. Pay verilmemisse
+        /// hasta payi (1) sayilir; kalan tutar kaynakta acik kalir.
+        /// </summary>
+        public decimal? Tutar { get; set; }
     }
 
     /// <summary>Rezervasyon istegi - 142. Ac=false rezervi kaldirir.</summary>
@@ -537,6 +583,27 @@ public static class BelgeUclari
         public int SatirId { get; set; }
         /// <summary>Bos (null) = termin kaldirildi, tarih belirsiz.</summary>
         public DateTime? TeslimTarihi { get; set; }
+    }
+
+    /// <summary>
+    /// YENI belgede tarih SAATIYLE yazilir (kullanici: "başvuruda yeni
+    /// ücretlendirme yaparken sipariş tarihine tarih saat mutlaka gelmeli").
+    ///
+    /// Tarih hic gelmediyse ya da BUGUNUN gece yarisi (00:00) olarak geldiyse
+    /// (tarih-only gonderen cagrilar: randevudan basvuru, radyoloji istemi,
+    /// dis sistemler) o anki saat damgalanir. Gecmis bir gunun 00:00'i ELLE
+    /// secilmis kabul edilir ve dokunulmaz.
+    /// </summary>
+    private static void BelgeTarihiSaatle(Dictionary<string, object?> belge)
+    {
+        var simdi = DateTime.Now;
+        if (!belge.TryGetValue("belgeTarihi", out var deger) || deger is null)
+        {
+            belge["belgeTarihi"] = simdi;
+            return;
+        }
+        if (deger is DateTime t && t.TimeOfDay == TimeSpan.Zero && t.Date == simdi.Date)
+            belge["belgeTarihi"] = simdi;
     }
 
     /// <summary>
