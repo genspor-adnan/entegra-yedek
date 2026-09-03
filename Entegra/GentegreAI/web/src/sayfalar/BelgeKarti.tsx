@@ -32,8 +32,11 @@ import { IadeSatirPenceresi } from '../bilesenler/belge/IadeSatirPenceresi';
 import { BelgeAracCubugu } from '../bilesenler/belge/BelgeAracCubugu';
 import { BelgeBaslik } from '../bilesenler/belge/BelgeBaslik';
 import { useBelgeTahsilat, tahsilToplami } from './belgeTahsilat';
-import { onerilenTutar, matrahaCevir } from './belgeDonusumHesap';
 import { kartImzasi } from './belgeImza';
+import {
+  provizyonVarMi, donusumSatirlari, posFisiSecimi, kasaAramaSirasi,
+  gelisSekliKarari, acikBorcHesapla,
+} from './belgeKartiKurallari';
 import {
   iadeSatirlari, kampanyaFiyatiUygula, paketIcerigiUygula, sonAnahtar, stokSecimindenKalem,
 } from './belgeKalem';
@@ -382,10 +385,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * taraf_kurum.tur: 1 Özel / 2 ÖSS / 3 SGK). Kurum secili degilse hasta kendi
    * oder - provizyon alinacak bir kurum yok.
    */
-  const provizyonVar = (() => {
-    const k = kurumlar.find(x => x.id === odeyenKurumId);
-    return k?.tur === 2 || k?.tur === 3;
-  })();
+  const provizyonVar = provizyonVarMi(kurumlar, odeyenKurumId);
   const {
     alis: alisMi, siparis: siparisMi, irsaliye: irsaliyeMi, fatura: faturaMi,
     tahakkuk: tahakkukMu, konsinye: konsinyeMi, transfer: transferMi,
@@ -530,7 +530,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       // "Kendi İsteği" (gonderen yok, kullanici): hasta sevksiz gelmistir -
       //   gelis sekli "Kendi imkânıyla" (1) olur. Sevkli hasta seciminde bu
       //   alan ELLE degistirilebilir (ambulans, kurum araci...).
-      setBasvuruBilgi(o => ({ ...o, gelisSekli: 1 }));
+      setBasvuruBilgi(o => ({ ...o, gelisSekli: gelisSekliKarari(false) }));
       // BOLUM DE BOSALIR (kullanici): bolum gonderenin bolumunden doluyordu -
       //   gonderen kalkinca o bilgi de gecersiz. Bos bolum aramayi da
       //   genisletir (butun gonderenler gorunur).
@@ -540,7 +540,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     // GONDEREN SECILDI = SEVKLI (kullanici): hastayi bir hekim gonderdiyse
     //   gelis sekli "Sevkli" (3) olur. Ikisi de ACIK eylemdir - kullanici
     //   sonra ambulans/kurum aracina cevirebilir.
-    setBasvuruBilgi(o => ({ ...o, gelisSekli: 3 }));
+    setBasvuruBilgi(o => ({ ...o, gelisSekli: gelisSekliKarari(true) }));
     void (async () => {
       try {
         const y = await api.liste('prim-rol-aday', {
@@ -602,7 +602,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   //   dokunulmaz - yalniz BOS alan doldurulur.
   useEffect(() => {
     if (!basvuruMu || personelId) return;
-    setBasvuruBilgi(o => (Number(o.gelisSekli ?? 0) ? o : { ...o, gelisSekli: 1 }));
+    setBasvuruBilgi(o => (Number(o.gelisSekli ?? 0)
+      ? o : { ...o, gelisSekli: gelisSekliKarari(false) }));
   }, [basvuruMu, personelId]);
 
   // Protokol numarasini kim verir (358): basvuru turunun numara sablonu.
@@ -878,15 +879,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     if (!id) return;
     try {
       const acik = await api.belgeAcikSatirlar(id);
-      const gonderilecek = donusumOlcusu === 'tutar'
-        ? acik
-            .map(s => ({ s, dahil: onerilenTutar(s, hedefTur, 1) }))
-            .filter(x => x.dahil > 0.005)
-            .map(x => ({ satirId: x.s.satirId, miktar: Number(x.s.miktar),
-                         tutar: matrahaCevir(x.s, x.dahil) }))
-        : acik
-            .filter(s => Number(s.kalanMiktar) > 0)
-            .map(s => ({ satirId: s.satirId, miktar: Number(s.kalanMiktar) }));
+      const gonderilecek = donusumSatirlari(acik, hedefTur, donusumOlcusu);
 
       if (gonderilecek.length === 0) {
         mesaj(donusumOlcusu === 'tutar'
@@ -920,19 +913,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     if (tur !== 25 || !basvuruMu || !kayitliId || posAksiyon === 0) return;
     try {
       const acik = await api.belgeAcikSatirlar(kayitliId);
-      const secim = acik
-        .map(s => ({ s, dahil: onerilenTutar(s, 16, 1) }))
-        .filter(x => x.dahil > 0.005);
+      const { satirlar: secim, toplamDahil: toplam } = posFisiSecimi(acik);
       if (secim.length === 0) return;
-
-      const toplam = secim.reduce((t, x) => t + x.dahil, 0);
       if (posAksiyon === 2 && !(await onay(
             `POS tahsilatı için ${para.format(toplam)} ₺ tutarında satış fişi kesilsin mi?`)))
         return;
 
-      const yeni = await api.belgeDonustur(kayitliId, 16,
-        secim.map(x => ({ satirId: x.s.satirId, miktar: Number(x.s.miktar),
-                          tutar: matrahaCevir(x.s, x.dahil) })),
+      const yeni = await api.belgeDonustur(kayitliId, 16, secim,
         undefined, false, undefined, 1, false);
 
       await donusumleriYukle();
@@ -976,25 +963,16 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    */
   const hizliNakit = async () => {
     try {
-      const kasaAra = async (atama?: number) => {
-        const y = await api.liste('hesap', {
-          sayfa: 1, boyut: 1, sirala: [{ alan: 'kod', yon: 'asc' }],
-          filtre: { op: 'and', kosullar: [
-            { alan: 'tur', op: 'esit', deger: 'K' },
-            { alan: 'durum', op: 'esit', deger: 1 },
-            { alan: 'dovizCinsi', op: 'esit', deger: yerelPara },
-            ...(atama !== undefined
-              ? [{ alan: 'atama', op: 'esit' as const, deger: atama }] : []),
-          ] },
-        });
-        return y.satirlar[0] ?? null;
-      };
-
       const tutar = await tahsilatTutariSor('Nakit');
       if (!(tutar > 0)) return;
-      const h = (kullanici?.id ? await kasaAra(kullanici.id) : null)
-                ?? await kasaAra(-1)
-                ?? await kasaAra();
+      // Kasa secim SIRASI kural dosyasinda (atama > ana kasa > herhangi biri).
+      let h: Record<string, unknown> | null = null;
+      for (const filtre of kasaAramaSirasi(kullanici?.id ?? null, yerelPara)) {
+        const y = await api.liste('hesap', {
+          sayfa: 1, boyut: 1, sirala: [{ alan: 'kod', yon: 'asc' }], filtre,
+        });
+        if (y.satirlar[0]) { h = y.satirlar[0]; break }
+      }
       if (!h) { mesaj('Aktif kasa hesabı bulunamadı - Kasa tanımlarından bir kasa açın.'); return }
       await tahsilat.hizliTahsilat(alisMi ? 31 : 21, Number(h.id), tutar,
                                    String(h.ad ?? ''));
@@ -1070,10 +1048,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * kaydedilmemis satirlarda onizleme toplami kullanilir; satir yoksa
    * sunucunun kayitli genel toplami esas alinir.
    */
-  const basvuruAcikBorc = useMemo(() => {
-    const genel = satirlar.length ? onizleme.genel : Number(sonuc?.belge.genelToplam ?? 0);
-    return Math.round((genel - tahsilToplami(tahsilat.tahsilatlar)) * 100) / 100;
-  }, [satirlar.length, onizleme.genel, sonuc, tahsilat.tahsilatlar]);
+  const basvuruAcikBorc = useMemo(() => acikBorcHesapla(
+      satirlar.length, onizleme.genel, Number(sonuc?.belge.genelToplam ?? 0),
+      tahsilToplami(tahsilat.tahsilatlar)),
+    [satirlar.length, onizleme.genel, sonuc, tahsilat.tahsilatlar]);
 
 
   /**
