@@ -5605,3 +5605,27 @@ Uctan uca (basvuru 114382, 2.200 TL brut / 2.000 matrah, UC ROL birden):
     Selim Aydın   Yapan     2.000 x  %8 = 160,00
 
 Ayni kisinin IKI ROLDEN ayri prim almasi da boylece dogrulandi.
+
+### "Raporlayan" rollu plan testi - CIFT PRIM YOK, ama sessiz bir susturma var
+
+Plan 19 "MR — Raporlayan %7" (FATURALAMADA) acildi; ayni rolde plan 12 zaten
+vardi ve TAHSILATTA calisiyordu (nakitte %12, tur 25'te %10).
+
+Basvuru 114384 (3.300 brut / 3.000 matrah) faturaya cevrildi:
+
+    UFUK ÇETİN  Raporlayan  Faturalama  3.000 x %7 = 210,00
+
+Sonra 3.300 TL NAKIT tahsil edildi ve dagitildi. IKINCI PRIM DOGMADI - yani
+"hem faturalamada hem tahsilatta prim" gibi bir cift odeme YOK.
+
+SEBEBI ONEMLI: `fn_prim_plan_satiri` her zaman TEK plan dondurur - en OZEL
+olani. MR kategorisine yazilmis plan 19, plan 12'nin genel satirlarindan daha
+ozeldir ve tahsilat yolunda da O secilir; secilen planin zamani "Faturalamada"
+oldugu icin tahsilat yolu satiri atlar. Dogrulandi: nakit (tur 21) sorgusu
+plan 19'u donduruyor.
+
+**Sessiz yan etki:** daha ozel bir FATURALAMA plani, ayni roldeki TAHSILAT
+planini o kalem icin TAMAMEN SUSTURUR. "MR'da raporlayana %7 faturalamada"
+demek, "MR'da nakit tahsilat primi %12 artik gecerli degil" demektir - dogru
+davranis ama ekranda bunu soyleyen bir sey yok. Plan listesinde ayni rol +
+ayni kapsam icin farkli ZAMANLI planlar varsa uyarmak gerekebilir; ayri is.
