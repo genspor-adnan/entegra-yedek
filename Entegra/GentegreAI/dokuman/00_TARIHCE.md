@@ -4970,3 +4970,9 @@ DOM'da. Yani kod dogru; sorun tarayicidaki eski pakette.
 NOT: vite gelistirme sunucusu 25.08'den beri ayakta (10 gun) ve bu oturumda `menuSonKullanilan.ts`
 gibi YENI dosyalar eklendi - HMR uzun oturumlarda yeni modulleri alamayabiliyor. Sunucunun yeniden
 baslatilmasi gerekiyor.
+
+**Kimlik kutusu hizalamasi (kullanici).** *Bos satir tuzagi:* kutunun ilk `.adres-satir`i hastada
+HEM TC No HEM Rol gizli oldugu icin BOS kaliyordu; gorunmez ama grid'in satir araligi kadar (8px)
+yer tutuyor ve yanindaki İletişim kutusuyla yukseklikleri kaydiriyordu. Satir artik ici bossa hic
+cizilmiyor - bos ama gorunmez bir satir, hizalamayi bozan en sinsi seydir.
+*Yas yaninda "yaş" kelimesi kalkti:* deger dogum tarihinin hemen saginda, kelime tekrar bilgiydi.

@@ -46,7 +46,10 @@ function yasHesapla(tarihStr: string): string | null {
   let yas = simdi.getFullYear() - dogum.getFullYear();
   const ayFarki = simdi.getMonth() - dogum.getMonth();
   if (ayFarki < 0 || (ayFarki === 0 && simdi.getDate() < dogum.getDate())) yas -= 1;
-  return yas >= 0 ? `${yas} yaş` : null;
+  // YALNIZ SAYI (kullanici: "yaş gelmesin sadece yıl"): kutu dogum tarihinin
+  //   hemen saginda, "yaş" kelimesi orada tekrar bilgi - sayinin ne oldugu
+  //   zaten belli.
+  return yas >= 0 ? String(yas) : null;
 }
 
 /**
@@ -131,20 +134,28 @@ export function PersonelKimlikOzet({
         <div className="kagrup">
           <h6>Kimlik Bilgileri</h6>
           <div className="alan-izgara tek-sutun">
-            <div className="adres-satir">
-              {!vknoGizli && (
-                <label className="alan tip-metin">
-                  <span className="etiket">{vknoAlan.baslik}{vknoAlan.zorunlu && ' *'}</span>
-                  <input value={vkno} maxLength={vknoAlan.enFazlaUzunluk ?? undefined} disabled={saltOkunur}
-                    onChange={e => onVknoDegis(e.target.value)} />
-                </label>
-              )}
-              {/* ROL burada (kullanici: gorev ile yer degistirdi) - gorev
-                  kimlik seridinde. Kullanici hesabi yoksa alan cizilmez. */}
-              {!ozetGizli && kaynakId && (
-                <KartKullaniciRolu sade kartId={kaynakId} saltOkunur={saltOkunur} />
-              )}
-            </div>
+            {/* SATIR ICI BOSSA HIC CIZILMEZ (kullanici: "kimlik ilk sıranın
+                üstünde iletişim ilk sırasına göre daha fazla boşluk var, o
+                yüzden yükseklikler tutmuyor"): HASTADA hem TC No hem Rol
+                gizli - geriye bos bir `.adres-satir` kaliyor ve grid'in satir
+                araligi kadar (8px) fazladan bosluk uretiyordu. Bos ama
+                gorunmez bir satir, hizalamayi bozan en sinsi seydir. */}
+            {(!vknoGizli || (!ozetGizli && kaynakId)) && (
+              <div className="adres-satir">
+                {!vknoGizli && (
+                  <label className="alan tip-metin">
+                    <span className="etiket">{vknoAlan.baslik}{vknoAlan.zorunlu && ' *'}</span>
+                    <input value={vkno} maxLength={vknoAlan.enFazlaUzunluk ?? undefined} disabled={saltOkunur}
+                      onChange={e => onVknoDegis(e.target.value)} />
+                  </label>
+                )}
+                {/* ROL burada (kullanici: gorev ile yer degistirdi) - gorev
+                    kimlik seridinde. Kullanici hesabi yoksa alan cizilmez. */}
+                {!ozetGizli && kaynakId && (
+                  <KartKullaniciRolu sade kartId={kaynakId} saltOkunur={saltOkunur} />
+                )}
+              </div>
+            )}
             <div className="adres-satir">
               <label className="alan tip-tarih">
                 <span className="etiket">Doğum Tarihi *</span>
