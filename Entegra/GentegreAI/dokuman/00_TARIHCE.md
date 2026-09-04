@@ -5961,3 +5961,26 @@ Bu akis, turda yapilan duzeltmelerin HEPSINI birden dogruluyor:
 
 Not: kart basligi ve uyari metinlerini okuyan secicilerim zayifti (".kabaslik"
 bulunamadi, ".uyari" rozet metnini yakaladi) - dogrulama DB'den yapildi.
+
+### Kademe EKRANDAN girildi ve UCTAN UCA calisti
+
+Plan 25'in satirina tarayicidan iki kademe yazildi (satir modali > Kademeler):
+
+    1 - 3 is  -> %4
+    4 ve uzeri -> %7
+
+"2 kademe kaydedildi" mesaji cikti; modal kapatilip yeniden acildiginda
+degerler yerinde (1,3,4 / 4,(bos),7) - yani KALICI. `fn_prim_kademe_orani`
+dogrulandi: adet 1 ve 3 icin %4, 4 ve 12 icin %7, adet 0 icin NULL (aralik
+disi = satirin kendi orani gecerli).
+
+GERCEK ETKI: ayni plandan BAHAR ALADAĞ icin dort is uretildi. Kalem aninda
+dordu de %4 yazdi (40,00 x 4 = 160,00) - ONIZLEME. Donem kapatilinca
+(hakediş 6) dordu birden %7'ye yukseldi:
+
+    70,00 x 4 = 280,00
+
+Yani kademe "bu ay kacinci is" sorusunu DONEM SONUNDA cevapliyor ve gecmis
+satirlari da yeniden degerliyor - tasarimin (324) soyledigi davranis birebir.
+Ayni kisinin ONCEKI hakedisi (4, 620,00) DOKUNULMADAN kaldi: kapanmis donem
+yeniden hesaplanmiyor.
