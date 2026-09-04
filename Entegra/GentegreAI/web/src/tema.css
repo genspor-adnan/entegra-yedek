@@ -2147,6 +2147,14 @@ input.skt-gecmis {
    disina tasiyordu. */
 /* Iletisim | Kimlik Bilgileri | Fotograf ayni satirda (kullanici). */
 .kimlik-foto-satiri { display: flex; gap: 10px; min-width: 0; flex: 1 }
+/* KUTU BOYLARI ESIT (kullanici: "kimlik bilgileri çerçevesini iletişim
+   yüksekliğine getir"). `.kasira` ogeleri flex-start ile hizalar, yani her
+   kutu KENDI icerigi kadar yuksek olur ve iki kutu farkli sayida alan
+   tasidigi icin alt kenarlari tutmuyordu. Sutunlar gerilir, kutu da sutunu
+   doldurur. Fotograf kutusu DISARIDA: sabit boyutlu, gerilirse altinda bos
+   zemin kalir. */
+.kimlik-foto-satiri { align-items: stretch }
+.kimlik-foto-satiri > .kasutun > .kagrup:not(.kagrup-resim) { height: 100% }
 
 /* IL / ILCE HIZALI (kullanici: "editler dağınık duruyor"). Daha once bu iki
    combo genisletilsin diye etiket kolonu 84px'den 34px'e indirilmisti; sonuc
