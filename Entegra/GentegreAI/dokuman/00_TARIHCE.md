@@ -4879,3 +4879,19 @@ duzeltilir. `tutarGuncelle` propu, satir ici state ve `.tiklanir-tutar` stili ka
 (`onPencereKapandi`); POS dugmesiyle tahsil edilince fis HIC kesilmiyordu - ayni ayar iki yolda
 farkli davraniyordu. Artik hizli POS tahsilatindan sonra da `posSonrasi` calisiyor.
 2 test. Toplam: **347 test gecti**.
+
+**MENUDE "EN SON" BOLUMU (kullanici).** Favori'nin hemen altinda, son 10 secilmis menu. Favoriler
+kullanicinin BILEREK isaretledikleri; bu liste kendiliginden birikir - gunun isi hep ayni birkac
+ekranda geciyor ama hangileri oldugu onceden bilinmiyor. Ikisi ust uste durunca "hep gittiklerim"
+ve "bugun gittiklerim" ayni yerde.
+*Kayit noktasi ROTA DEGISIMI, menu tiklamasi DEGIL:* ayni ekrana favoriden, dogrudan URL'den, geri
+tusundan ya da kart icindeki bir baglantidan da gelinebiliyor - menuye onClick baglamak bunlarin
+cogunu kacirirdi. En UZUN eslesen yol alinir ("/kasa-islem" ile "/kasa" ayni anda eslesirse
+derindeki).
+*Kurallar:* ayni yol ikinci kez secilirse kopya birikmez, yukari tasinir ("son 10 FARKLI ekran",
+"son 10 tiklama" degil); zaten en ustteyse liste aynen doner (gereksiz render ve localStorage
+yazimi olmasin); favorideki oge burada TEKRARLANMAZ; yetkisi kalkan / kaldirilan menu listede
+kalabilir, cizilmez. Siralama SON KULLANIM sirasi (favoride ANA MENU sirasi) - listenin isi "az
+once neredeydim" sorusuna cevap vermek.
+Liste kullanici basina localStorage'da (favorilerle ayni desen; sunucuya tasinmasi ileriki is).
+Kural saf modulde (`menuSonKullanilan.ts`), 9 test. Toplam: **356 test gecti**.

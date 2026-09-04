@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { sonMenuEkle, sonMenuGorunen } from './menuSonKullanilan';
 import { modulAcikMi } from './listeTanimlari';
 import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
@@ -164,6 +165,47 @@ export function Kabuk() {
     try { localStorage.setItem(favoriAnahtar, JSON.stringify(y)) } catch { /* dolu/kapali depo */ }
     return y;
   });
+  /**
+   * EN SON KULLANILANLAR (kullanici: "Favori'den sonra 'En Son' ekle, son 10
+   * secilmis menu listelensin").
+   *
+   * Favoriler kullanicinin BILEREK isaretledikleri; bu liste ise kendiliginden
+   * birikir - gunun isi hep ayni birkac ekranda geciyor ama hangileri oldugu
+   * onceden bilinmiyor. Yol EN BASA yazilir, ayni yol ikinci kez secilince
+   * yukari tasinir (kopya birikmez), liste ONDA kirpilir.
+   *
+   * Favoride ZATEN olan oge burada TEKRARLANMAZ: iki liste ust uste durdugu
+   * icin ayni satiri iki kez gostermek menuyu uzatmaktan baska ise yaramaz.
+   */
+  const sonAnahtar = `sonMenuler.${kullanici?.id ?? 0}`;
+  const [sonMenuler, setSonMenuler] = useState<string[]>([]);
+  useEffect(() => {
+    try { setSonMenuler(JSON.parse(localStorage.getItem(sonAnahtar) ?? '[]') as string[]) }
+    catch { setSonMenuler([]) }
+  }, [sonAnahtar]);
+  const sonKaydet = (yol: string) => setSonMenuler(o => {
+    const y = sonMenuEkle(o, yol) as string[];
+    if (y === o) return o;                       // degismediyse yazma
+    try { localStorage.setItem(sonAnahtar, JSON.stringify(y)) } catch { /* dolu/kapali depo */ }
+    return y;
+  });
+
+  /**
+   * KAYIT NOKTASI ROTA DEGISIMI (menu tiklamasi DEGIL): ayni ekrana favoriden,
+   * dogrudan URL'den, geri tusundan ya da bir kart icindeki baglantidan da
+   * gelinebiliyor. Menuye onClick baglamak bunlarin cogunu kacirirdi.
+   * En UZUN eslesen yol alinir - "/kasa-islem" ile "/kasa" ayni anda eslesirse
+   * dogru olan derindeki.
+   */
+  useEffect(() => {
+    const hepsi = satirlar.flatMap(sat => (sat.tur === 'duz' ? [sat.m] : sat.alt));
+    const eslesen = hepsi
+      .filter(m => konum.pathname === m.yol || konum.pathname.startsWith(m.yol + '/'))
+      .sort((a, b) => b.yol.length - a.yol.length)[0];
+    if (eslesen) sonKaydet(eslesen.yol);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [konum.pathname, moduller]);
+
   /** "liste" rozetinin yerine yildiz: bos = ekle, dolu = cikar. */
   const yildiz = (yol: string) => (
     <button type="button" className="rz"
@@ -401,6 +443,39 @@ export function Kabuk() {
                     </NavLink>
                   );
                 })}
+              </div>
+            )}
+
+            {/* EN SON: favorilerin HEMEN ALTINDA (kullanici). Favoriler bilerek
+                isaretlenir, bu liste kendiliginden birikir - ikisi ust uste
+                durunca "hep gittiklerim" ile "bugun gittiklerim" ayni yerde
+                olur. Favorideki oge burada TEKRARLANMAZ. */}
+            {sonMenuGorunen(sonMenuler, favoriler).length > 0 && (
+              <div>
+                <button type="button" className="mi"
+                        style={{ width: '100%', border: 0, background: 'transparent', cursor: 'pointer' }}
+                        onClick={() => setAcikGruplar(g => ({ ...g, '🕓En Son': !(g['🕓En Son'] ?? true) }))}>
+                  <span className="ic">🕓</span>
+                  <span>{cm('En Son')}</span>
+                  <span className="rz">{(acikGruplar['🕓En Son'] ?? true) ? '▾' : '▸'}</span>
+                </button>
+                {/* Siralama SON KULLANIM sirasidir (favorideki gibi menu sirasi
+                    DEGIL): en son acilan en ustte - listenin isi zaten "az once
+                    neredeydim" sorusuna cevap vermek. */}
+                {(acikGruplar['🕓En Son'] ?? true) && sonMenuGorunen(sonMenuler, favoriler)
+                  .map(yol => satirlar
+                    .flatMap(sat => (sat.tur === 'duz' ? [sat.m] : sat.alt))
+                    .find(m => m.yol === yol))
+                  // Yetkisi kalkan / kaldirilan menu listede kalabilir - cizilmez.
+                  .filter((m): m is NonNullable<typeof m> => !!m)
+                  .map(m => (
+                    <NavLink key={`son-${m.yol}`} to={m.yol} style={{ paddingLeft: 34 }}
+                             className={() => `mi ${konum.pathname.startsWith(m.yol) ? 'on' : ''}`}>
+                      <span className="ic">{m.ic}</span>
+                      <span>{m.ad}</span>
+                      {yildiz(m.yol)}
+                    </NavLink>
+                  ))}
               </div>
             )}
 
