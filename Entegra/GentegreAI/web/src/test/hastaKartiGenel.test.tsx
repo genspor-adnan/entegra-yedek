@@ -137,9 +137,12 @@ describe('hasta kartinda Yakınlar gridi', () => {
     });
     expect(basliklar.indexOf('İletişim'))
       .toBeLessThan(basliklar.indexOf('Kimlik Bilgileri'));
-    // YAKINLAR IKISININ DE USTUNDE (kullanici): altta kaldiginda kartin
-    //   gorunur alanindan tasiyor ve "grid yok" gibi gorunuyordu.
-    expect(basliklar.indexOf('Yakınlar / Acil Durumda Aranacak'))
-      .toBeLessThan(basliklar.indexOf('İletişim'));
+    // YAKINLAR ILETISIM / KIMLIK / FOTOGRAF SATIRININ ALTINDA (kullanici).
+    //   Gorunurlugu saglayan sey sira DEGIL, kutunun .kasira satirinin
+    //   DISINDA olmasi - onu ayri test tutuyor.
+    // GenDetayTablo basligi eylem dugmelerini de tasiyor - tam esitlik degil,
+    //   ONEK aranir.
+    expect(basliklar.findIndex(x => x.startsWith('Yakınlar')))
+      .toBeGreaterThan(basliklar.indexOf('Kimlik Bilgileri'));
   });
 });
