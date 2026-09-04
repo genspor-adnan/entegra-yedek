@@ -2143,3 +2143,9 @@ input.skt-gecmis {
    yuksekligini esitler - kutunun KENDISI de esnemeli. */
 .hasta-kimlik-satiri > .kasutun { display: flex; flex-direction: column }
 .hasta-kimlik-satiri > .kasutun > .kagrup { flex: 1 }
+
+/* IL / ILCE combolari %30 daha genis (kullanici): il adlari
+   ("KAHRAMANMARAŞ") ve ilce adlari dar kutuya sigmiyor, secili deger
+   kirpiliyordu. `.adres-satir .alan { flex: 1 }` esit boler; bu ikisi
+   metinlerinin uzunlugu kadar pay alsin. */
+.adres-satir .alan.tip-kod.genis-yer { flex: 1.3 }

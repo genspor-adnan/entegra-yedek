@@ -72,8 +72,15 @@ describe('hasta kartinda Yakınlar gridi', () => {
       const g = document.body.textContent ?? '';
       expect(g).toContain('Acil Durumda Aranacak Kişiler');
     });
-    // Gridin kendisi de cizilmis olmali - yalniz baslik degil.
+    // Gridin KENDISI de cizilmis olmali - yalniz baslik degil.
     expect([...document.querySelectorAll('table')].some(t =>
       (t.textContent ?? '').includes('Yakınlık'))).toBe(true);
+    // KUTU KIMLIK DETAYI'NIN USTUNDE (kullanici gormedi: altta kalinca
+    //   kaydirma gerekiyordu) - h6 sirasi bunu sabitler.
+    const basliklar = [...document.querySelectorAll('h6')].map(x => x.textContent ?? '');
+    const yakin = basliklar.findIndex(x => x.startsWith('Yakınlar'));
+    const detayIdx = basliklar.indexOf('Kimlik Detayı');
+    expect(yakin).toBeGreaterThanOrEqual(0);
+    if (detayIdx >= 0) expect(yakin).toBeLessThan(detayIdx);
   });
 });

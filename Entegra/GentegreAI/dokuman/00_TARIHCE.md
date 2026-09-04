@@ -4976,3 +4976,11 @@ HEM TC No HEM Rol gizli oldugu icin BOS kaliyordu; gorunmez ama grid'in satir ar
 yer tutuyor ve yanindaki İletişim kutusuyla yukseklikleri kaydiriyordu. Satir artik ici bossa hic
 cizilmiyor - bos ama gorunmez bir satir, hizalamayi bozan en sinsi seydir.
 *Yas yaninda "yaş" kelimesi kalkti:* deger dogum tarihinin hemen saginda, kelime tekrar bilgiydi.
+
+**Yakınlar gridi Kimlik Detayı'nin USTUNE alindi.** Kullanici uc kez "gorunmuyor" dedi; DOM dokumu
+gridin GENEL sekmesinde ve tam da beklenen yerde oldugunu gosterdi (kutu basligi + "Yakınlık"
+kolonlu tablo). Sorun gorunurluk: Kimlik Bilgileri + Fotoğraf + Kimlik Detayı'ndan SONRA geldigi
+icin modal icinde KAYDIRMA gerektiriyordu. Kimlik Detayı seyrek kullanilan alanlar tasiyor
+(pasaport, vefat, kimliksiz, mahremiyet notu); Yakinlar daha sik - sira degistirildi. Testte h6
+sirasi da sabitlendi, ileride kayarsa yakalanir.
+*Il / Ilce combolari %30 genisletildi* - "KAHRAMANMARAŞ" gibi adlar dar kutuda kirpiliyordu.

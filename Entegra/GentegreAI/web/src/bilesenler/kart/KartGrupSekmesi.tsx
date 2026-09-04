@@ -362,6 +362,24 @@ const adliBlok = (
             />
           );
         })()}
+        {kaynak === 'hasta' && aktif.baslik === 'Genel' && acilDetay && (
+          /* BASLIKLI KUTU (kullanici "yakınları gridi görünmüyor"): grid
+             basliksiz cizilince ustundeki kutularin devami gibi duruyor,
+             kullanici onu ayri bir bolum olarak SECEMIYORDU. */
+          <div className="kagrup" key="Yakinlar">
+            {/* Mockup basligi: "Yakınlar / Acil Durumda Aranacak" - katalog
+                adi personel icin yazilmis ("Acil Durumda Aranacak Kişiler"),
+                hastada aranan sey YAKIN. */}
+            <h6>Yakınlar / Acil Durumda Aranacak</h6>
+            <GenDetayTablo
+              meta={acilDetay}
+              durum={detaylar[acilDetay.ad] ?? bosDetay()}
+              saltOkunur={salt || acilDetay.saltOkunur}
+              hatalar={alanHatalari}
+              onDegis={yeni => setDetaylar(t => ({ ...t, [acilDetay.ad]: yeni }))}
+            />
+          </div>
+        )}
         {/* HASTA KIMLIK DETAYI (335): pasaport, ana/baba, vefat, kimliksiz,
             yabanci hasta turu, mahremiyet notu. Kimlik ozeti kutusu sabit
             duzenli oldugu icin bu alanlar orada cizilmiyor; hasta ozluk
@@ -433,24 +451,6 @@ const adliBlok = (
             (personelIletisimSekmesi dali); hastada Iletisim ayri sekme degil
             Genel'de bir kutu oldugu icin oraya dusmuyordu - burada, kimlik
             detayinin altinda tam genislikte gosterilir. */}
-        {kaynak === 'hasta' && aktif.baslik === 'Genel' && acilDetay && (
-          /* BASLIKLI KUTU (kullanici "yakınları gridi görünmüyor"): grid
-             basliksiz cizilince ustundeki kutularin devami gibi duruyor,
-             kullanici onu ayri bir bolum olarak SECEMIYORDU. */
-          <div className="kagrup" key="Yakinlar">
-            {/* Mockup basligi: "Yakınlar / Acil Durumda Aranacak" - katalog
-                adi personel icin yazilmis ("Acil Durumda Aranacak Kişiler"),
-                hastada aranan sey YAKIN. */}
-            <h6>Yakınlar / Acil Durumda Aranacak</h6>
-            <GenDetayTablo
-              meta={acilDetay}
-              durum={detaylar[acilDetay.ad] ?? bosDetay()}
-              saltOkunur={salt || acilDetay.saltOkunur}
-              hatalar={alanHatalari}
-              onDegis={yeni => setDetaylar(t => ({ ...t, [acilDetay.ad]: yeni }))}
-            />
-          </div>
-        )}
         {!iletisim && notlar && kaynak !== 'cari' && (
           <div className="kagrup" key="Notlar">
             <h6>{notlar[0]}</h6>
