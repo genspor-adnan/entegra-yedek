@@ -86,13 +86,22 @@ interface Props {
   id?: number;
   /** Acilis turu; verilmezse URL'deki ?tur= ya da satis faturasi (15). */
   tur?: number;
+  /**
+   * YENI belgede TARAF ON-DOLGU (hasta kartindan "＋ Yeni Başvuru"): pencere
+   * cari aramasiyla degil, hasta SECILI olarak acilir. `id` verildiginde
+   * (mevcut belge) yok sayilir - belgenin kendi tarafi gecerlidir.
+   */
+  tarafId?: number;
+  /** On-dolgu tarafin ekranda gosterilecek unvani - ikinci bir istek atmamak icin. */
+  tarafUnvan?: string;
   /** Liste icinden acildiginda: modal kapanisi cagirani ilgilendirir. */
   onKapat?(): void;
   /** Kayit sonrasi cagirani (grid) tazelemek icin. */
   onKaydedildi?(): void;
 }
 
-export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi }: Props = {}) {
+export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTarafId,
+                            tarafUnvan: onDolguUnvan, onKapat, onKaydedildi }: Props = {}) {
   const git = useNavigate();
   const [sorgu] = useSearchParams();
   const { yetki, kullanici } = useOturum();
@@ -132,7 +141,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * (numara_sablonu tur 19, `elle_girilir`) - ayri bir ayar yok. Elle ise kayit
    * kabul memuru numarayi kartta yazabilir; bos birakirsa sunucu yine uretir.
    */
-  const [cari, setCari] = useState<{ id: number; unvan: string } | null>(null);
+  // ON-DOLGU: hasta kartindan acilan yeni basvuruda taraf HAZIR gelir.
+  const [cari, setCari] = useState<{ id: number; unvan: string } | null>(
+    !belgeId && onDolguTarafId ? { id: onDolguTarafId, unvan: onDolguUnvan ?? '' } : null);
   // Tarih SAATIYLE tutulur: ayni gun icindeki hareket sirasi buna gore.
   const [tarih, setTarih] = useState(() => yerelAnMetni(new Date()));
   const [seri, setSeri] = useState('WEB');
@@ -271,7 +282,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   //   acilmaz (kullanici: "yeni dediginde cari sormasin").
   // Cari YOKSA arama da acilmaz: transfer (20), talep (105), stok fisleri (3/4).
   // Cari YOKSA arama da acilmaz (transfer/talep/stok fisi) - tablodan.
-  const [cariArama, setCariArama] = useState(!belgeId && belgeTuruBilgisi(tur).cariVar);
+  // ON-DOLGU varsa arama ACILMAZ - taraf zaten belli.
+  const [cariArama, setCariArama] = useState(
+    !belgeId && !onDolguTarafId && belgeTuruBilgisi(tur).cariVar);
   /**
    * Hasta arama seridinden (300) gelen acilis istegi: kutuya yazilan metin
    * pencereye ON-DOLGU gecer, "＋ Yeni Hasta Kaydi" ise dogrudan kart acar.

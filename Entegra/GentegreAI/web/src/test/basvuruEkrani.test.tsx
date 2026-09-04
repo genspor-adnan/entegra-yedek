@@ -85,7 +85,7 @@ beforeEach(() => {
   });
 });
 
-const ciz = (p: { id?: number } = {}) =>
+const ciz = (p: { id?: number; tarafId?: number; tarafUnvan?: string } = {}) =>
   render(<MemoryRouter><BelgeKarti tur={19} {...p} onKapat={() => {}} /></MemoryRouter>);
 
 /**
@@ -111,6 +111,20 @@ describe('yeni basvuru karti', () => {
     expect(await sekme('Faturalama')).toBeInTheDocument();
     // YENI basvuruda dugme "protokol ver" der - kayitli belgede "kaydet".
     expect(screen.getByText(/Başvuruyu Aç \(Protokol Ver\)/)).toBeInTheDocument();
+  });
+
+  it('HASTA ON-DOLGU: taraf hazir gelir, arama penceresi ACILMAZ', async () => {
+    // Hasta kartindaki "＋ Yeni Başvuru" bu yoldan acilir: hasta zaten belli,
+    //   kullaniciya bir kez daha "hastayi ara" dedirtmek gereksiz adimdi.
+    ciz({ tarafId: 5023, tarafUnvan: 'TEST ÖZEL HASTA' });
+    expect(await screen.findByText(/Başvuruyu Aç \(Protokol Ver\)/)).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/Hastayı isim\/tel ile ara/)).toBeNull();
+  });
+
+  it('ON-DOLGU YOKSA arama penceresi acilir (eski davranis korunur)', async () => {
+    ciz();
+    expect(await screen.findByPlaceholderText(/Hastayı isim\/tel ile ara/))
+      .toBeInTheDocument();
   });
 
   it('GORUNTULEME kurumunda (hekimRolu 1) hekim alani "Gönderen" olur', async () => {

@@ -1201,7 +1201,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
       {/* 0 = YENI basvuru (bu hastayla acilir), >0 = mevcut basvuru. */}
       {acilanBasvuru !== null && (
         <BelgeKarti
-          {...(acilanBasvuru > 0 ? { id: acilanBasvuru } : { tur: 19 })}
+          {...(acilanBasvuru > 0
+               ? { id: acilanBasvuru }
+               // YENI basvuru bu hastayla acilir - cari aramasi cikmaz.
+               : { tur: 19, tarafId: id as number,
+                   tarafUnvan: String(deger.unvan
+                     ?? `${deger.ad ?? ''} ${deger.soyad ?? ''}`.trim()) })}
           onKapat={() => setAcilanBasvuru(null)}
         />
       )}

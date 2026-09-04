@@ -5080,3 +5080,16 @@ taraf on-dolgu prop'u yok. Bunu istersen ayri is.
 Ince ayarlar: Yakinlar gridi 8px yukari (`kutuSinif` prop'u eklendi -
 GenDetayTablo'ya disaridan yerlesim sinifi verilebiliyor), Il alani 12px saga
 (etiketi ustundeki Telefon/e-Posta ile hizalanir), Il/Ilce combolari %5 dar.
+
+### "＋ Yeni Başvuru" hastayi on-dolgu alir
+
+BelgeKarti'na `tarafId` / `tarafUnvan` props'lari eklendi: verilirse yeni belge
+taraf SECILI acilir ve cari arama penceresi HIC acilmaz. `id` (mevcut belge)
+verilmisse yok sayilir - belgenin kendi tarafi gecerlidir.
+
+Normal secim akisi da zaten yalnizca `{id, unvan}` yaziyordu (`setCari`);
+kurum/fiyat listesi/hasta seridi bunun uzerine kurulu efektlerden geliyor - bu
+yuzden on-dolgu ilk state olarak verilince akisin geri kalani aynen isliyor.
+
+Iki test: on-dolguyla arama penceresi acilmaz; on-dolgu YOKSA eski davranis
+(arama acilir) korunur.
