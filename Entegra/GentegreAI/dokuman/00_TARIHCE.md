@@ -4515,3 +4515,38 @@ suzulmesi (satis 2 / alis 1), kayitli belgede varsayilan listenin sorulmamasi, l
 kalemin "fiyatı DEĞİŞMEDİ" uyarisi, "Kaydet ile kalıcı olur" uyarisinin yalniz kayitli belgede
 cikmasi.
 Toplam: **232 test gecti** (197 + 19 + 16).
+
+**BASVURU EKRANI TESTI - iki kusur bulundu ve duzeltildi.**
+Refaktordan sonra ekran uc katmanda denendi: (a) kartin BUTUNU jsdom'da cizilerek, (b) gercek
+sunucu yaniti uzerinde cevrim denkligi, (c) calisan API'ye karsi ucbastan akis (gecici kullanici
+`zztest2` acildi, test sonunda butun kayitlarla birlikte silindi).
+
+*Test dosyalari.* `basvuruEkrani.test.tsx` (9 test) kartin kendisini cizer: basvuru sekmeleri,
+goruntuleme kurumunda (hekimRolu 1) hekim alaninin "Gönderen" olmasi, Basvuru Turu / Poliklinik
+Odasi'nin sorulmamasi, "Bölüm" etiketi ("Başvurulan Bölüm" degil), Protokol No'nun sekmede DEGIL
+baslik seridinde olmasi, kurum/bolum combolarinin dolmasi, gonderen adaylarinin rol=1 ile
+sorulmasi, kayitli belgede baslikta yil onekli protokolun gorunmesi. `basvuruYanitiCevrimi.test.ts`
+(12 test) kartin ESKI satir ici cevrimini birebir tekrar yazar ve uc GERCEK sunucu yaniti uzerinde
+yeni `belgeOkuma.ts` ile karsilastirir - tasima refaktorunun sessiz kayma yapmadigi boyle
+kanitlandi. Fixture'lar API'den alindi, kisi/vergi alanlari maskelendi.
+
+*Kusur 1 - HIZLI TAHSILAT SATIRLARA DAGITILMIYORDU.* `hizliTahsilat` kasa islemini olusturup
+belgeye BAGLIYOR ama `kasa_islem_dagitim` satirlarini yazmiyordu (kasa KARTI 321'de yaziyor, hizli
+akista atlanmis). Fis/fatura donusumu "tahsil edilen kadar" hesabini o satirlardan okudugu icin
+(`v_belge_acik_satir.hasta_tahsil_matrah`) para tahsil edilmis gorunuyor ama **"Dönüştürülecek
+tutar yok"** deniyordu; POS sonrasi otomatik fis de sessizce hic kesilmiyordu. API ile kanitlandi:
+500 TL nakit sonrasi onerilen tutar 0,00; otomatik dagitim uygulaninca 500,00. Duzeltme
+(`belgeTahsilat.ts`): `kasaEkle` sonrasi `kasaDagitimYaz(..., otomatik: true)`. Dagitim basarisiz
+olursa tahsilat DURUR ve kullanici uyarilir - para kasada ve belgeye bagli kalir.
+
+*Kusur 2 - TUTAR BAZLI DONUSUMDE 1 KURUS FAZLA.* `matrahaCevir` matrahi 4 haneye yuvarliyordu;
+sunucu matrahi 2 haneye kirpip KDV'yi ONUN uzerinden hesapliyor. 500,00 TL tahsilat icin 454,5455
+gidiyor, sunucu 454,55 yaziyor, fis **500,01** cikiyordu - tahsil edilenden fazla. Kural "tahsil
+edilen KADAR" oldugu icin sapma asagi olmali: kurusa ASAGI yuvarlandi (1 kurus acik kalir, belge
+fazla kapanmaz). Kayan nokta artigi tahakkukta bir kurus kaybettirmesin diye once 6 haneye
+yuvarlaniyor. 11 test (`belgeDonusumHesap.test.ts`). Duzeltilmis akis API'de dogrulandi: 200 TL
+ek tahsilat -> fis tam 600,00.
+
+Toplam: **264 test gecti** (232 + 32).
+NOT: `taraf_kullanici` icinde onceki bir oturumdan kalma `zztest` (id 4964, rol Yonetici, AKTIF)
+kullanicisi var - bu oturumda acilmadi, silinmedi.

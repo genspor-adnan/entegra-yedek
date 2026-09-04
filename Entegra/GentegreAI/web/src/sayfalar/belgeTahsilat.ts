@@ -82,7 +82,7 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
     if (!(tutar > 0)) { mesaj('Tahsilat tutarı sıfırdan büyük olmalı.'); return }
     setHata(null);
     try {
-      await api.kasaEkle({
+      const y = await api.kasaEkle({
         islem: {
           tur,
           islemTarihi: yerelAnMetni(new Date()),
@@ -95,6 +95,22 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
         },
         secenekler: { taslak: false, plan: false, kurKontrolu: true, belgeId: kayitliId },
       });
+
+      // TAHSILATI SATIRLARA DAGIT (321/352): belgeye baglamak YETMEZ - fis /
+      //   fatura donusumu "tahsil edilen kadar" hesabini `kasa_islem_dagitim`
+      //   satirlarindan okur. Dagitim yazilmazsa para tahsil edilmis gorunur
+      //   ama "Dönüştürülecek tutar yok" denir; POS sonrasi otomatik fis de
+      //   sessizce hic kesilmezdi. Kasa KARTI bunu zaten yaziyor (321), hizli
+      //   akista atlaniyordu.
+      // Otomatik = satir sirasina gore once hasta payi, sonra kurum payi.
+      const yeniId = Number(y.islem?.id ?? 0);
+      if (yeniId) {
+        try { await api.kasaDagitimYaz(yeniId, { belgeId: kayitliId, otomatik: true }) }
+        // Dagitim basarisiz olursa TAHSILAT DURUR: para kasada, belgeye bagli.
+        //   Kullanici dagitimi Tahsilat ekranindan elle yapabilir.
+        catch { mesaj('Tahsilat kaydedildi ancak satırlara dağıtılamadı - '
+                    + 'Tahsilat ekranından dağıtımı kontrol edin.') }
+      }
       tazele();
       onKaydedildi?.();
     } catch (h) { setHata(hataMetni(h)); mesaj(hataMetni(h)) }

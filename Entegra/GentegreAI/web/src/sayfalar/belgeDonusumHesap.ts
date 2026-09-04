@@ -42,6 +42,18 @@ export function onerilenTutar(s: AcikSatir, hedefTur: number, pay: number) {
   return Math.max(0, Math.min(kalan, tahsilDahil(s, pay)));
 }
 
-/** KDV dahil ekran tutarindan API'nin bekledigi matrahi uretir. */
+/**
+ * KDV dahil ekran tutarindan API'nin bekledigi MATRAHI uretir.
+ *
+ * KURUSA ASAGI yuvarlanir, dorde degil: sunucu matrahi 2 haneye yuvarlayip
+ * KDV'yi ONUN uzerinden hesapliyor. 4 haneli matrah gonderilince 500,00 TL
+ * tahsilat icin 454,5455 gidiyor, sunucu 454,55 yaziyor ve fis 500,01 TL
+ * cikiyordu - TAHSIL EDILENDEN FAZLA. Kural "tahsil edilen KADAR" oldugu
+ * icin sapma asagi olmali: 1 kurus acik kalir, belge fazla kapanmaz.
+ *
+ * Kayan nokta artigi (500,005 / 1,1 = 454,55000000000007) asagi yuvarlamayi
+ * bir kurus asagi kaydirmasin diye once 6 haneye yuvarlanir - tahakkukta
+ * kalanin TAMAMI gonderildiginde matrah birebir geri donmeli.
+ */
 export const matrahaCevir = (s: AcikSatir, dahilTutar: number) =>
-  Math.round(dahilTutar / kdvCarpan(s) * 10000) / 10000;
+  Math.floor(Number((dahilTutar / kdvCarpan(s)).toFixed(6)) * 100) / 100;
