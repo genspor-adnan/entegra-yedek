@@ -118,7 +118,7 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
   const { cari, depoBelgesi, stokFisiMi, fisTipi, fisCikisMi, depo, tarih,
           tarihEnGec, tarihEnErken, geriGun, talepMi, teslimAlan, girisDepo,
           transferMi, teslimEden, disNumarali, belgeNo, satirlar, basvuruMu,
-          odeyenKurumId, kilitli } = g;
+          odeyenKurumId, bolumId, personelId, kilitli } = g;
 
   // Transferde cari YOK (sunucu da katalogtan ayni karari veriyor).
   if (!cari && !depoBelgesi && !stokFisiMi) {
@@ -183,6 +183,19 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
   //   kayit oldugu gibi kaydedilir.
   if (basvuruMu && !kilitli && !odeyenKurumId)
     return { odeyenKurumId: 'Ödeyen kurum seçilmeli.' };
+
+  // BOLUM ve HEKIM de ZORUNLU (kullanici): basvuru "kim, nereye, kimin
+  //   istegiyle geldi" sorusunun kaydidir. Bolum fiyat listesini ve prim
+  //   dagitimini, hekim ise primin kime yazilacagini belirler - ikisi de bos
+  //   birakilinca islem sonradan sahiplenilemiyordu.
+  //   Alan hatalari BIRLIKTE dondurulur: memur uc alani tek tek deneyerek
+  //   bulmasin.
+  if (basvuruMu && !kilitli) {
+    const eksik: Record<string, string> = {};
+    if (!bolumId) eksik.bolumId = 'Bölüm seçilmeli.';
+    if (!personelId) eksik.personelId = 'Hekim / gönderen seçilmeli.';
+    if (Object.keys(eksik).length > 0) return eksik;
+  }
 
   return null;
 }

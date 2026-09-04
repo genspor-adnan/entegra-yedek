@@ -4605,3 +4605,30 @@ Her asamanin ipucunda eksigin SEBEBI yaziyor ("Açık borç 250,00 ₺") - memur
 seritten anlasin. Hesap saf ve testli (`belgeKarti/basvuruAsamalari.ts`, 20 test); serit kartta
 cizilerek de denendi (3 test).
 Toplam: **295 test gecti** (272 + 23).
+
+**Hasta listesi kolon duzeni + basvuru akis kurallari (kullanici).**
+1. *Hasta listesi:* "Bölüm Id" kaldirildi (gorunmez yapildi - hastanin bolumu yoktur, kolon
+personelden mirasla geliyordu; secicide duruyor), TCKN **Ad Soyad'in hemen sagina**, Telefon
+**İlçe'nin soluna** alindi. Kolonlar personelden miras oldugu icin sira da personelinkiydi (TCKN ve
+Cep, departman/gorev/rol bloguyla adres kolonlarindan SONRA kaliyordu). Yeni gorunur sira:
+Dosya No · Ad Soyad · TCKN · Cinsiyet · Yaş · Telefon · İlçe · İl · Son Başvuru · E-posta · Durum.
+Calisan API'den dogrulandi.
+2. *Acilista aktif sekme:* YENI basvuruda **Başvuru** (once hasta/bolum/gonderen/odeyen girilir),
+KAYITLI basvuruda **Ücretlendirme** (kayit acilmis, memur islem eklemeye doner). Karar effect ile
+veriliyor - `basvuruMu` OTURUMA bagli (urun modu) ve oturum kart mount edilirken henuz yuklenmemis
+olabilir; bayrak bir kez doner, sonra kullanicinin sekme secimi ezilmez. "Yeni" dugmesi de yeni
+kayit sayilir.
+3. *BOLUM ve HEKIM de ZORUNLU* (odeyen kurum zatendi): ucu de sonradan telafi edilemeyen bilgi -
+bolum fiyat listesini ve prim dagitimini, hekim primin kime yazilacagini belirler. Bolum ve hekim
+eksigi BIRLIKTE dondurulur (memur uc alani tek tek deneyerek bulmasin); kilitli belgede ve basvuru
+disi turlerde kural islemez.
+4. *UCRET EKLEMENIN ILK KAPISI:* kalem eklemeden once basvuru KAYDEDILIR ve protokol verilir.
+Protokolsuz belgeye islem yazmak "bu ucret hangi basvurunun" sorusunu cevapsiz birakiyordu; ustelik
+hizli fis/tahsilat akislarinin hepsi KAYITLI id ariyor - kalemi once gride koyup kaydetmeyi sona
+birakmak o dugmeleri sessizce bozuyordu. Dogrulama gecmezse arama penceresi ACILMAZ ve kart Başvuru
+sekmesine doner (eksik alanlar orada, kirmizi yazi gorunur yerde).
+Toplam: **309 test gecti** (295 + 14).
+
+*ACIK KONU:* "Gönderen" artik zorunlu oldugu icin daha once eklenen **"Kendi İsteği (sevksiz)"**
+secenegi kullanilamaz hale geldi - o secim `personelId = null` demekti ve zorunluluk tam da onu
+reddediyor. Kullaniciya soruldu.

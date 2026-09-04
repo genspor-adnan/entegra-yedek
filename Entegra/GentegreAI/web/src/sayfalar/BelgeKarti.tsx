@@ -381,6 +381,22 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    */
   const basvuruMu = tur === 19 && kullanici?.urunModu === URUN_GENOTIP;
 
+  /**
+   * ILK SEKME (kullanici): YENI basvuruda "Başvuru" - once hasta, bolum,
+   * gonderen ve odeyen kurum girilir. KAYITLI basvuruda "Ücretlendirme":
+   * kayit zaten acilmis, memur karta islem eklemek icin doner.
+   *
+   * Effect ile veriliyor cunku `basvuruMu` OTURUMA bagli (urun modu) ve
+   * oturum kart mount edilirken henuz yuklenmemis olabilir. Bayrak bir kez
+   * doner - sonra kullanicinin sekme secimi ezilmez.
+   */
+  const ilkSekmeVerildi = useRef(false);
+  useEffect(() => {
+    if (ilkSekmeVerildi.current || !basvuruMu) return;
+    ilkSekmeVerildi.current = true;
+    setAktifSekme(belgeId ? 'kalem' : 'basvuru');
+  }, [basvuruMu, belgeId]);
+
   // Basvuru combolarinin (kurum · bolum · depo · gorevli) ve protokol numara
   //   sablonunun yuklenmesi ayri dosyada: hepsi ayni desendeki bes effect'ti.
   const { kurumlar, bolumler, depolar, gorevliler, protokolElle } =
@@ -1082,6 +1098,26 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     return 0;
   }
 
+  /**
+   * UCRET EKLEMENIN ILK KAPISI (kullanici: "ücret ekleyeceği zaman kayıt
+   * yapıp protokol no versin ve ondan sonra ücret eklemeye başlasın").
+   *
+   * Basvuru KAYDEDILMEDEN kalem eklenmiyor: protokolsuz bir belgeye islem
+   * yazmak, sonradan "bu ucret hangi basvurunun" sorusunu cevapsiz birakiyordu.
+   * Ustelik hizli fis/tahsilat akislarinin hepsi KAYITLI id ariyor - kalemi
+   * once gride koyup kaydetmeyi sona birakmak o dugmeleri sessizce bozuyordu.
+   *
+   * Dogrulama gecmezse (bolum / gonderen / odeyen kurum bos) arama penceresi
+   * ACILMAZ ve kart Başvuru sekmesine doner: eksik alanlar orada, memur kirmizi
+   * yaziyi gordugu yerde duzeltsin.
+   */
+  const ucretEklemeAc = async (ac: boolean) => {
+    if (!ac || !basvuruMu || kayitliId) { setStokArama(ac); return }
+    const id = await kes(false);
+    if (!id) { setAktifSekme('basvuru'); return }
+    setStokArama(true);
+  };
+
   function yeniBelge() {
     setSonuc(null);
     setAcilanId(null);
@@ -1095,6 +1131,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     setPersonelId(null);
     setOdeyenKurumId(null);
     setBasvuruBilgi({});
+    // "Yeni" de bir YENI KAYITTIR: ilk sekme yine Başvuru olsun (kullanici) -
+    //   ucretlendirmede kalmak, hastasi secilmemis karta islem ekletirdi.
+    if (basvuruMu) setAktifSekme('basvuru');
   }
 
   /**
@@ -1360,7 +1399,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             sonuc={kalemDegisti ? null : sonuc}
             transferBaslikEksigi={transferBaslikEksigi}
             depoBelgesi={depoBelgesi} stokFisiMi={stokFisiMi} talepMi={talepMi}
-            setStokArama={iadeMi ? setIadeArama : setStokArama}
+            setStokArama={iadeMi ? setIadeArama : ucretEklemeAc}
             setKalem={setKalem} seciliSil={seciliSil}
             // PRIM ROLLERI (324): prim HBYS kavrami (hekim hakedisi) -
             //   ERP modunda dugme hic cizilmez.
@@ -1490,6 +1529,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             gonderenModu={gonderenModu}
             personelAd={personelAd} onPersonelSec={personelSecildi}
             kurumHatasi={alanHatalari.odeyenKurumId}
+            bolumHatasi={alanHatalari.bolumId}
+            personelHatasi={alanHatalari.personelId}
             randevuBilgi={sonuc?.belge.randevuOzet
               ? String(sonuc.belge.randevuOzet) : undefined}
           />

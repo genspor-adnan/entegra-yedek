@@ -33,6 +33,7 @@ const SUBE_GORUNTULEME = {
 
 const liste = vi.fn();
 const belgeOku = vi.fn();
+const belgeEkle = vi.fn();
 
 vi.mock('../api/istemci', () => ({
   api: {
@@ -56,6 +57,7 @@ vi.mock('../api/istemci', () => ({
     kodListe: () => Promise.resolve({ degerler: [] }),
     aramaIsaretle: () => Promise.resolve({}),
     belgeAcikSatirlar: () => Promise.resolve({ satirlar: [] }),
+    belgeEkle: (govde: unknown) => belgeEkle(govde),
   },
 }));
 
@@ -70,6 +72,10 @@ const kayitlar = kaynaklar as Record<string, Record<string, unknown>[]>;
 
 beforeEach(() => {
   vi.clearAllMocks();
+  belgeEkle.mockResolvedValue({
+    belge: { ...(yanitlar as Record<string, Record<string, unknown>>)['114349'], id: 999 },
+    satirlar: [], dipToplam: [], izlemeNo: '',
+  });
   // Kaynak adina gore GERCEK sunucu satirlari; tanimsiz kaynak bos doner.
   liste.mockImplementation((kaynak: string) =>
     Promise.resolve({ satirlar: kayitlar[kaynak] ?? [] }));
@@ -208,5 +214,67 @@ describe('tamamlanma seridi (370)', () => {
     ciz({ id: 114349 });
     await waitFor(() => expect(document.querySelector('.basvuru-asama')).toBeTruthy());
     expect(asamalar().map(a => a.textContent)).not.toContain('Provizyon');
+  });
+});
+
+describe('acilista aktif sekme', () => {
+  // Aktif sekme `.kat.on` sinifiyla isaretlenir (BelgeBaslik). Sekme metni
+  //   satir sayaci rozetini de tasiyabilir ("Ücretlendirme0") - basi yeter.
+  const aktif = () => document.querySelector('.kat.on')?.textContent ?? '';
+
+  it('YENI basvuruda "Başvuru" sekmesi acik gelir - once hasta/kurum girilir', async () => {
+    ciz();
+    await waitFor(() => expect(aktif()).toMatch(/^Başvuru/));
+  });
+
+  it('KAYITLI basvuruda "Ücretlendirme" acik gelir - memur islem eklemeye doner', async () => {
+    ciz({ id: 114349 });
+    await waitFor(() => expect(aktif()).toMatch(/^Ücretlendirme/));
+  });
+});
+
+describe('ucret eklemenin ilk kapisi', () => {
+  const ucretEkle = async () => {
+    (await sekme('Ücretlendirme')).click();
+    const dugme = await waitFor(() => {
+      const d = [...document.querySelectorAll('button')]
+        .find(b => b.getAttribute('title') === 'Satır ekle');
+      if (!d) throw new Error('"Satır ekle" dugmesi yok');
+      return d;
+    });
+    dugme.click();
+  };
+
+  // NOT: dolu ve GECERLI bir yeni basvurunun kaydedilmesi burada
+  //   surulemiyor (hasta/bolum/gonderen secimi dort ayri arama penceresi
+  //   ister); kaydetme kurallari `basvuruDogrulama.test.ts`te tek tek
+  //   deneniyor. Burada denenen sey KAPININ kendisi: gecersiz kartta arama
+  //   ACILMIYOR ve eksik alanin sekmesine donuluyor mu.
+  it('EKSIK kartta kayit denenmez, arama ACILMAZ ve Başvuru sekmesine donulur', async () => {
+    ciz();                                   // hasta secilmemis yeni kart
+    await ucretEkle();
+    await waitFor(() =>
+      expect(document.querySelector('.kat.on')?.textContent).toMatch(/^Başvuru/));
+    expect(belgeEkle).not.toHaveBeenCalled();
+    // Kalem protokolsuz belgeye yazilmasin: stok arama penceresi acilmamali.
+    expect(document.querySelector('[data-testid="stok"]')).toBeNull();
+  });
+
+  it('ODEYEN KURUM secilemiyorsa da kapi kapali kalir', async () => {
+    // Kurum listesi bos donerse zorunlu alan doldurulamaz.
+    liste.mockImplementation((kaynak: string) =>
+      Promise.resolve({ satirlar: kaynak === 'kurum' ? [] : (kayitlar[kaynak] ?? []) }));
+    ciz();
+    await ucretEkle();
+    await waitFor(() =>
+      expect(document.querySelector('.kat.on')?.textContent).toMatch(/^Başvuru/));
+    expect(belgeEkle).not.toHaveBeenCalled();
+  });
+
+  it('KAYITLI basvuruda dogrudan arama acilir - tekrar kaydedilmez', async () => {
+    ciz({ id: 114349 });
+    await waitFor(() => expect(belgeOku).toHaveBeenCalled());
+    await ucretEkle();
+    expect(belgeEkle).not.toHaveBeenCalled();
   });
 });

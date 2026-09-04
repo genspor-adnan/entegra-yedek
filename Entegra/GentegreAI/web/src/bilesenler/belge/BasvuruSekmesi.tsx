@@ -386,7 +386,8 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                                  gorevliler, personelId, setPersonelId,
                                  kurumlar, odeyenKurumId, setOdeyenKurumId,
                                  aciklama, setAciklama, gonderenModu,
-                                 personelAd, onPersonelSec, kurumHatasi }: {
+                                 personelAd, onPersonelSec, kurumHatasi,
+                                 bolumHatasi, personelHatasi }: {
   bilgi: BasvuruBilgi;
   /**
    * LAB / GORUNTULEME KURUMU (364, kullanici): bu kurumlarda basvuru zaten
@@ -397,6 +398,9 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
   gonderenModu?: boolean;
   /** Odeyen kurum secilmediyse kaydetmede donen hata (zorunlu alan). */
   kurumHatasi?: string;
+  /** Bolum ve hekim de ZORUNLU (kullanici) - hata alanin altinda yazar. */
+  bolumHatasi?: string;
+  personelHatasi?: string;
   /** Secili hekim/gonderen adi - arama ekranindan gelen kisi listede olmayabilir. */
   personelAd?: string;
   /**
@@ -456,7 +460,8 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
         <label className="alan">
           {/* Lab/goruntulemede "Başvurulan Bölüm" degil sadece "Bölüm"
               (kullanici): hasta bir poliklinige basvurmuyor, tetkik yaptiriyor. */}
-          <span className="etiket">{gonderenModu ? 'Bölüm' : 'Başvurulan Bölüm'}</span>
+          <span className="etiket zorunlu-isaret">
+            {gonderenModu ? 'Bölüm' : 'Başvurulan Bölüm'}</span>
           <select value={bolumId ?? ''} disabled={kilitli}
                   onChange={e => {
                     const y = e.target.value ? Number(e.target.value) : null;
@@ -472,6 +477,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
               <option key={b.id} value={b.id}>{b.ad}</option>
             ))}
           </select>
+          {bolumHatasi && <span className="alan-hata">{bolumHatasi}</span>}
         </label>
         {/* GONDEREN: JENERIK ARAMA EKRANI (kullanici) - dis hekim sayisi
             combo'ya sigmaz; arama penceresinde brans, kurum ve gonderdigi
@@ -481,6 +487,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
           <TarafSecici etiket="Gönderen" kaynaklar={['dis-hekim']}
                        deger={personelAd}
                        kilitli={kilitli}
+                       zorunlu hata={personelHatasi}
                        /* ONCE BOLUM SECILDIYSE (kullanici): arama O BOLUME
                           gonderen hekimlerle sinirlanir; bolum bosken hepsi
                           gelir. Hekim once secilirse bolum ondan dolar - iki
@@ -498,7 +505,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                        onTemizle={() => onPersonelSec?.(0, '')} />
         ) : (
         <label className="alan">
-          <span className="etiket">Hekim / Personel</span>
+          <span className="etiket zorunlu-isaret">Hekim / Personel</span>
           <select value={personelId ?? ''} disabled={kilitli}
                   onChange={e => {
                     const y = e.target.value ? Number(e.target.value) : null;
@@ -513,6 +520,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
               <option key={g.id} value={g.id}>{g.ad}</option>
             ))}
           </select>
+          {personelHatasi && <span className="alan-hata">{personelHatasi}</span>}
         </label>
         )}
         <label className="alan">

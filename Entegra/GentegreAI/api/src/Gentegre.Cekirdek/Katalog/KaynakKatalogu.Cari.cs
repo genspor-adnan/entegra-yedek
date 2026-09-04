@@ -580,7 +580,12 @@ public static partial class KaynakKatalogu
         //   Yas · Telefon · Ilce · Il · Son Basvuru. Kayit kabulde hastayi
         //   ayirt eden bilgiler bunlar; personelin departman/gorev/rol/ise
         //   giris kolonlarinin hastada karsiligi yok - gizlenir.
-        var personelAlanlari = new[] { "departmanAdi", "gorev", "rolAdi", "iseGirisTarihi" };
+        // BOLUM ID hastada HIC kullanilmaz (kullanici: "Bolum Id kaldir"):
+        //   ham kolon personelde var cunku basvuruda hekim secilince bolum
+        //   ondan doldurulur - hastanin bolumu yoktur. Gorunmez yapilir
+        //   (silinmez: kolon secicisinden istenirse yine acilabilir).
+        var personelAlanlari = new[] { "departmanAdi", "gorev", "rolAdi",
+                                       "iseGirisTarihi", "departmanId" };
         var kolonlar = p.Kolonlar
             .Select(k => k.Ad switch
             {
@@ -590,9 +595,18 @@ public static partial class KaynakKatalogu
                 _ => k
             }).ToList();
 
-        // Ad Soyad'in sagina: cinsiyet, yas, telefon, adres, son basvuru.
-        var ek = new KolonTanimi[]
+        // SIRA HASTAYA GORE KURULUR (kullanici): TCKN Ad Soyad'in HEMEN saginda,
+        //   Telefon Ilce'nin solunda. Kolonlar personelden miras geldigi icin
+        //   sira da personelinkiydi - orada TCKN ve Cep, departman/gorev/rol
+        //   bloguyla birlikte adres kolonlarindan SONRA geliyordu.
+        var tckn = kolonlar.First(k => k.Ad == "vkno");
+        var telefon = kolonlar.First(k => k.Ad == "cepTel");
+        kolonlar.RemoveAll(k => k.Ad is "vkno" or "cepTel");
+
+        // Ad Soyad'in sagina: TCKN, cinsiyet, yas, telefon, adres, son basvuru.
+        var ek = new List<KolonTanimi>
         {
+            tckn,
             new("cinsiyetAdi",
                 "case th.cinsiyet when 1 then 'Erkek' when 2 then 'Kadın' else '' end",
                                    "metin", "Cinsiyet", Hizalama: "orta", Genislik: 90,
@@ -607,6 +621,7 @@ public static partial class KaynakKatalogu
                                    Filtrelenebilir: false),
             new("dogumTarihi", "th.dogum_tarihi", "tarih", "Doğum Tarihi",
                 Hizalama: "orta", Varsayilan: false),
+            telefon,
             new("ilce",      "coalesce(adr.ilce, '')", "metin", "İlçe", Genislik: 120),
             new("il",        "coalesce(adr.il, '')",   "metin", "İl",   Genislik: 120),
             // Son basvuru: hastanin en yeni basvuru (tur 19) tarihi.
