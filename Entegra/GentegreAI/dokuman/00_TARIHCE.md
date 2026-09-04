@@ -5285,3 +5285,26 @@ kazandiran desen budur.
 
 NOT: aramayla YENI eklenen satirda iki kolon KAYIT EDILENE KADAR bostur -
 degerler sunucudan okunuyor, kart kaydedilip yeniden okununca dolar.
+
+### "Enter dedim eklemedi": engel yanlis yerdeydi (db/377)
+
+Kullanici jenerik aramadan bir personel secip Enter'ladiginda satir
+eklenmiyordu. Sebep 375'te koydugum ikinci engel: secilen kisi kod listesinde
+(`v_prim_taraf_lookup`) yoksa secim alinmiyordu - ve o gorunum YALNIZ prim rolu
+isaretli 21 kisiyi tasiyordu, oysa arama 159 personel gosteriyor.
+
+Engel yanlis yerdeydi. Prim rolu AYRI BIR KARTTA (personelin "Prim Rolleri"
+sekmesi) isaretlenir ve sonradan da doldurulabilir; plan kurarken kisiyi
+eklemeyi yasaklamak kullaniciyi iki kart arasinda mekik dokumaya zorluyordu.
+Ustelik engelin sebebi ekranda yaziyordu ama kullanici bunu "eklemedi" diye
+yasadi - yasak, eksik bilgiden daha kotu bir geri bildirim.
+
+Uc degisiklik:
+  - **db/377**: `v_prim_taraf_lookup` artik TUM personel + dis hekim (371 kisi).
+  - **Engel kaldirildi**: `tarafSecimEngeli` yalniz MUKERRER kaydi durdurur.
+  - **Yerine gorunur kolon**: gridde "Prim Rolü". Kaynagi `v_prim_rol_aday` -
+    ham `taraf_prim_rol` DEGIL: dis hekimin "Gönderen" rolu tabloda yazmaz,
+    calisma sekli "Primli" olmasindan dogar; ham tabloya bakan kolon Akın ve
+    Mert'i "rolsuz" gosterirdi, oysa ikisi de prim uretiyor.
+
+Grid kolonlari: Tipi · Kişi · Prim Rolü · Bölüm · Açıklama.

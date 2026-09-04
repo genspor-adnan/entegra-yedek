@@ -1033,7 +1033,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           kaynaklar={tarafAlani.aramaKaynagi!.split(',').map(x => x.trim()).filter(Boolean)}
           yerTutucu={`${tarafAlani.baslik} ara…`}
           secimDenetimi={secilen =>
-            tarafSecimEngeli(durum.guncel, tarafAlani.ad, tarafAlani.kodlar, secilen)}
+            tarafSecimEngeli(durum.guncel, tarafAlani.ad, secilen)}
           onSec={secilen => {
             const yeni: Satir = {};
             alanlar.forEach(a => { yeni[a.ad] = a.tip === 'mantik' ? 0 : '' });

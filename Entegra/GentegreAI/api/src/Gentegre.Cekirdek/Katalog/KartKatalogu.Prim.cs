@@ -146,6 +146,25 @@ public static partial class KartKatalogu
                         //   penceresi ikisini de tarar; virgul iki listeyi
                         //   ayirir.
                         AramaKaynagi: "personel,dis-hekim", Baslik: "Kişi"),
+                    // PRIM ROLU (377): kisinin ISARETLI rolleri. Bos ise plan
+                    //   o kisi icin hicbir hakedis uretmez - eskiden bu durum
+                    //   EKLEMEYI ENGELLIYORDU (kullanici: "enter dedim
+                    //   eklemedi"). Engel yanlis yerdeydi: rol isaretlemesi
+                    //   ayri bir kart ve sonradan doldurulabilir. Artik
+                    //   engellemek yerine GORUNUR kilinir.
+                    // KAYNAK v_prim_rol_aday - taraf_prim_rol DEGIL: dis
+                    //   hekimin "Gönderen" rolu tabloda YAZMAZ, calisma sekli
+                    //   "Primli" olmasindan dogar. Ham tabloya bakan bir kolon
+                    //   Akın/Mert'i "rolsuz" gosterirdi - oysa ikisi de prim
+                    //   uretiyor.
+                    new("primRolu",
+                        "(select string_agg(kd.ad, ', ' order by kd.ad) "
+                        + "from public.v_prim_rol_aday a "
+                        + "join public.kod_liste kl on kl.kod = 'prim.rol' "
+                        + "join public.kod_deger kd on kd.liste_id = kl.id "
+                        + "and kd.deger = a.rol "
+                        + "where a.id = prim_plani_taraf.taraf_id)",
+                        "metin", Yazilabilir: false, Baslik: "Prim Rolü"),
                     new("bolum",
                         "(select d.ad from public.departman d "
                         + "join public.taraf t on t.departman = d.id "
