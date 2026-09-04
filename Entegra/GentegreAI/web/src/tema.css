@@ -2135,3 +2135,11 @@ input.skt-gecmis {
    "Başvuru Geçmişi"): secim yok, yalniz acilabilirlik belli olsun. */
 .detay-tablo tr.tiklanir { cursor: pointer }
 .detay-tablo tr.tiklanir:hover td { background: var(--mor2) }
+
+/* HASTA GENEL SEKMESI: "Kimlik Bilgileri" ve "İletişim" kutulari YAN YANA ve
+   AYNI YUKSEKLIKTE (kullanici). Iki kutu ayni satirda ama farkli sayida alan
+   tasidigi icin biri kisa kaliyor, aralarindaki bosluk kartta bir "delik"
+   gibi duruyordu. `align-items: stretch` (flex varsayilani) yalniz kapsayici
+   yuksekligini esitler - kutunun KENDISI de esnemeli. */
+.hasta-kimlik-satiri > .kasutun { display: flex; flex-direction: column }
+.hasta-kimlik-satiri > .kasutun > .kagrup { flex: 1 }

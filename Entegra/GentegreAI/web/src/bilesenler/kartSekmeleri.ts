@@ -157,6 +157,16 @@ export function sekmeleriKur(secenek: {
     if (kaynak === 'dis-hekim' && (d.ad === 'hekim' || d.ad === 'adresler')) return;
     s.push({ tur: 'detay', anahtar: detaySekmeAnahtari(d.ad), baslik: d.baslik, detay: d });
   });
+  // HASTA GENEL SEKMESI HER ZAMAN VAR (kullanici: "yakınları gridi
+  //   görünmüyor"): kartin Kimlik Bilgileri kutusu, kimlik detayi ve Yakinlar
+  //   gridi "Genel" sekmesine cizilir - ama o sekme yalniz GRUPSUZ GORUNUR bir
+  //   alan varsa olusuyordu. Hastada tek gorunur grupsuz alan
+  //   "randevuVerilebilir"di; o gizlenince sekme de yok oldu ve icindeki uc
+  //   bolum birden kayboldu. Sekme artik alan sayisindan bagimsiz.
+  if (kaynak === 'hasta' && !s.some(x => x.tur === 'grup' && x.baslik === 'Genel')) {
+    s.unshift({ tur: 'grup', anahtar: grupSekmeAnahtari('Genel'),
+                baslik: 'Genel', alanlar: [] });
+  }
   // HASTA: BASVURULAR sekmesi "Kurum / Ödeyen"in SAGINDA (mockup
   //   hasta_kimlik_karti.html). Kartin DETAYI DEGIL - baska bir ekranin
   //   kayitlari (bu hastanin basvuru belgeleri), salt okunur liste; cift tik

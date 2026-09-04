@@ -43,7 +43,11 @@ const gizli = kaynak === 'cari' ? new Set(['ad', 'soyad', 'musteri', 'tedarikci'
   //   kutusunda cizilir (252, kullanici) - PersonelKimlikOzet'e prop olarak gider.
   : kaynak === 'personel'
     ? new Set(['personel', 'unvan', 'vkno', 'gorevId', 'subeId', 'randevuVerilebilir'])
-  : kaynak === 'hasta' ? new Set(['hasta', 'grup', 'unvan', 'gorevId'])
+  // "randevuVerilebilir" HASTADA ANLAMSIZ (kullanici): randevu VEREN taraf
+  //   personeldir, hasta randevu alir - kutu yanlislikla isaretlenirse hasta
+  //   hekim listelerine dusebilirdi.
+  : kaynak === 'hasta'
+    ? new Set(['hasta', 'grup', 'unvan', 'gorevId', 'randevuVerilebilir'])
   // Sube: baz sube combosu Depolar dalinda ELLE cizilir (tek satir etiket).
   : kaynak === 'sube' ? new Set(['depoBazSubeId'])
   : new Set<string>();
@@ -361,8 +365,11 @@ const adliBlok = (
         {kaynak === 'hasta' && aktif.baslik === 'Genel' && (() => {
           const ozlukDetay = meta.detaylar.find(d => d.ad === 'ozluk');
           if (!ozlukDetay) return null;
+          // Kimlik ozeti kutusunda ZATEN cizilenler burada TEKRARLANMAZ;
+          //   ana/baba adi ve pasaport oraya alindi (kullanici).
           const ozetteCizilen = ['id', 'dogumTarihi', 'dogumYeri', 'cinsiyet',
-                                 'uyruk', 'kanGrubu', 'meslek', 'medeniHal', 'kurumId'];
+                                 'uyruk', 'kanGrubu', 'meslek', 'medeniHal', 'kurumId',
+                                 'anaAdi', 'babaAdi', 'pasaportNo'];
           const alanlar = ozlukDetay.alanlar.filter(a => !ozetteCizilen.includes(a.ad));
           if (alanlar.length === 0) return null;
 
@@ -423,13 +430,19 @@ const adliBlok = (
             Genel'de bir kutu oldugu icin oraya dusmuyordu - burada, kimlik
             detayinin altinda tam genislikte gosterilir. */}
         {kaynak === 'hasta' && aktif.baslik === 'Genel' && acilDetay && (
-          <GenDetayTablo
-            meta={acilDetay}
-            durum={detaylar[acilDetay.ad] ?? bosDetay()}
-            saltOkunur={salt || acilDetay.saltOkunur}
-            hatalar={alanHatalari}
-            onDegis={yeni => setDetaylar(t => ({ ...t, [acilDetay.ad]: yeni }))}
-          />
+          /* BASLIKLI KUTU (kullanici "yakınları gridi görünmüyor"): grid
+             basliksiz cizilince ustundeki kutularin devami gibi duruyor,
+             kullanici onu ayri bir bolum olarak SECEMIYORDU. */
+          <div className="kagrup" key="Yakinlar">
+            <h6>{acilDetay.baslik ?? 'Yakınlar'}</h6>
+            <GenDetayTablo
+              meta={acilDetay}
+              durum={detaylar[acilDetay.ad] ?? bosDetay()}
+              saltOkunur={salt || acilDetay.saltOkunur}
+              hatalar={alanHatalari}
+              onDegis={yeni => setDetaylar(t => ({ ...t, [acilDetay.ad]: yeni }))}
+            />
+          </div>
         )}
         {!iletisim && notlar && kaynak !== 'cari' && (
           <div className="kagrup" key="Notlar">

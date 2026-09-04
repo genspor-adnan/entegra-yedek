@@ -108,13 +108,22 @@ export function PersonelKimlikOzet({
   const medeniHalAlan = alan('medeniHal');
   const kanGrubuAlan = alan('kanGrubu');
   const meslekAlan = alan('meslek');
+  // HASTA KIMLIK ALANLARI (335) - personel ozlugunde YOK, o yuzden alan
+  //   bulunamazsa satir hic cizilmez (meslek/medeni hal ile ayni desen).
+  const anaAdiAlan = alan('anaAdi');
+  const babaAdiAlan = alan('babaAdi');
+  const pasaportAlan = alan('pasaportNo');
 
   const yas = yasHesapla(String(satir.dogumTarihi ?? ''));
 
   return (
     // "etiket-sag": kart govdesindeki alan etiketleri saga yaslanir (kullanici);
     //   kimlik seridi (.kaid) bu sarmalayicinin DISINDA, orada etiketler solda.
-    <div className="kasira etiket-sag">
+    // "hasta-kimlik-satiri": HASTADA iletisim ve kimlik kutulari yan yana ve
+    //   AYNI YUKSEKLIKTE (kullanici) - farkli sayida alan tasidiklari icin biri
+    //   kisa kalip aralarinda bosluk birakiyordu.
+    <div className={'kasira etiket-sag'
+                    + (kartAdi === 'hasta' ? ' hasta-kimlik-satiri' : '')}>
       {fotoSolEkOnce && fotoSolEk}
       <div className="kasutun"
            style={{ flex: kimlikSutunGenisligi ? `0 0 ${kimlikSutunGenisligi}` : 1,
@@ -193,9 +202,34 @@ export function PersonelKimlikOzet({
                 </select>
               </label>
             </div>
-            {/* UYRUK tek basina satirda: genisligi MESLEK kadar olsun
-                (kullanici) - tek alan satiri kaplayinca oteki combolardan
-                farkli, orantisiz genis duruyordu. */}
+            {/* ANA / BABA ADI uyrugun USTUNDE (kullanici, mockup
+                hasta_kimlik_karti.html "Nüfus Bilgileri"): nufus bilgisi
+                kimligin parcasi - "Kimlik Detayı" kutusunda jenerik
+                cizilirken pasaport/vefat/mahremiyet gibi seyrek alanlarin
+                arasinda kayboluyordu. */}
+            {(babaAdiAlan || anaAdiAlan) && (
+              <div className="adres-satir">
+                {babaAdiAlan && (
+                  <label className="alan tip-metin">
+                    <span className="etiket">{babaAdiAlan.baslik}</span>
+                    <input value={String(satir.babaAdi ?? '')} disabled={saltOkunur}
+                      maxLength={babaAdiAlan.enFazlaUzunluk ?? undefined}
+                      onChange={e => ozlukDegis({ babaAdi: e.target.value })} />
+                  </label>
+                )}
+                {anaAdiAlan && (
+                  <label className="alan tip-metin">
+                    <span className="etiket">{anaAdiAlan.baslik}</span>
+                    <input value={String(satir.anaAdi ?? '')} disabled={saltOkunur}
+                      maxLength={anaAdiAlan.enFazlaUzunluk ?? undefined}
+                      onChange={e => ozlukDegis({ anaAdi: e.target.value })} />
+                  </label>
+                )}
+              </div>
+            )}
+            {/* UYRUK ve PASAPORT yan yana (kullanici): ikisi ayni soruyu
+                soruyor - "bu kisi yabanci mi, kimligi nerede kayitli". Uyruk
+                tek basina satiri kaplayinca orantisiz genis duruyordu. */}
             <div className="adres-satir">
               <label className="alan tip-kod" style={{ flex: '0 1 50%' }}>
                 <span className="etiket">Uyruk</span>
@@ -204,6 +238,14 @@ export function PersonelKimlikOzet({
                   {(yerler?.ulkeler ?? []).map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
                 </select>
               </label>
+              {pasaportAlan && (
+                <label className="alan tip-metin">
+                  <span className="etiket">{pasaportAlan.baslik}</span>
+                  <input value={String(satir.pasaportNo ?? '')} disabled={saltOkunur}
+                    maxLength={pasaportAlan.enFazlaUzunluk ?? undefined}
+                    onChange={e => ozlukDegis({ pasaportNo: e.target.value })} />
+                </label>
+              )}
             </div>
           </div>
         </div>

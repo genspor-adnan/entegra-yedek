@@ -38,3 +38,27 @@ describe('hasta kartinda "Başvurular" sekmesi', () => {
       .not.toContain('Başvurular');
   });
 });
+
+describe('hasta "Genel" sekmesi', () => {
+  // Kimlik Bilgileri kutusu, kimlik detayi ve Yakinlar gridi bu sekmeye
+  //   ciziliyor - ama sekme yalniz GRUPSUZ GORUNUR bir alan varsa olusuyordu.
+  //   Hastada tek gorunur grupsuz alan "randevuVerilebilir"di; gizlenince
+  //   sekme de yok oldu ve icindeki uc bolum birden kayboldu.
+  it('GORUNUR GRUPSUZ ALAN OLMASA DA cizilir', () => {
+    const b = kur('hasta', false, [detay('kurum', 'Kurum / Ödeyen')]);
+    expect(b).toContain('Genel');
+  });
+
+  it('Genel EN BASTA durur', () => {
+    const b = kur('hasta', false, [detay('kurum', 'Kurum / Ödeyen')]);
+    expect(b[0]).toBe('Genel');
+  });
+
+  it('zaten varsa IKINCI KEZ eklenmez', () => {
+    const b = sekmeleriKur({
+      gruplar: [['Genel', []]], meta: meta([detay('kurum', 'Kurum / Ödeyen')]),
+      kaynak: 'hasta', deger: {}, yeniMi: false, personelGibiKart: true,
+    }).map(x => x.baslik);
+    expect(b.filter(x => x === 'Genel')).toHaveLength(1);
+  });
+});

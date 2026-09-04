@@ -4932,3 +4932,21 @@ yeni kayitta yok, personelde yok.
 yalniz faturayi anlatiyordu. Grup adi ic ANAHTAR olarak da kullaniliyor (sekme sirasi, gizli sekme
 listesi, ozel render dallari) - katalogdaki 13 alan ve web'deki 10 string eslesmesi BIRLIKTE
 guncellendi, yoksa sekme sirasi ve Aday kartindaki gizleme sessizce bozulurdu.
+
+**Hasta kimlik kutusu ve Genel sekmesi (kullanici).**
+*Kimlik Bilgileri kutusuna eklendi:* Ana Adı · Baba Adı (uyrugun USTUNDE) ve Pasaport / Yabancı
+Kimlik (uyrugun SAGINDA) - mockup'taki "Nüfus Bilgileri" duzeni. Bu alanlar "Kimlik Detayı"
+kutusunda jenerik ciziliyordu, vefat/mahremiyet gibi seyrek alanlarin arasinda kayboluyorlardi;
+oradan CIKARILDI (yoksa iki yerde gorunurlerdi). Alan bulunamazsa satir hic cizilmez - personel
+ozlugunde bu alanlar yok, o kart etkilenmiyor.
+*"Randevu Verilebilir" hastada gizlendi:* randevu VEREN taraf personeldir, hasta randevu alir -
+kutu yanlislikla isaretlenirse hasta hekim listelerine dusebilirdi.
+*BULUNAN TUZAK:* o kutu hastanin TEK gorunur GRUPSUZ alaniydi ve "Genel" sekmesi yalniz boyle bir
+alan varsa olusuyordu. Gizleyince sekme de yok olacak, icindeki UC BOLUM (Kimlik Bilgileri kutusu,
+Kimlik Detayı, Yakınlar gridi) birden kaybolacakti. Genel sekmesi artik alan sayisindan BAGIMSIZ -
+hastada her zaman var, en basta. 3 test.
+*Yakınlar gridi BASLIKLI KUTUYA alindi* (kullanici "görünmüyor"): basliksiz grid ustundeki
+kutularin devami gibi duruyor, ayri bir bolum olarak secilemiyordu.
+*Kimlik Bilgileri ve İletişim kutulari AYNI YUKSEKLIKTE:* farkli sayida alan tasidiklari icin biri
+kisa kalip aralarinda "delik" birakiyordu.
+Toplam: **362 test gecti**.
