@@ -73,9 +73,15 @@ public static partial class KartKatalogu
             // KİŞİ ALANI BURADA DEĞİL (375, kullanıcı): plan tek bir kişiye
             //   değil bir KİŞİ LİSTESİNE bağlanır - "Prim Alanlar" sekmesi.
             //   Aynı oranı alan otuz kişi için otuz plan açmak gerekiyordu.
+            // COMBO - arama penceresi DEGIL (kullanici: "seçilmiyor ki").
+            //   Alanda `AramaKaynagi: "kurum"` yaziyordu ama boyle bir LISTE
+            //   KAYNAGI yok; aramaKaynagi dolu olunca alan combo yerine
+            //   "… ara" kutusu olarak ciziliyor ve acilan pencere olmayan
+            //   kaynagi sorguladigi icin bos kaliyordu. Anlasmali kurum sayisi
+            //   avuc ici kadar - combo zaten dogru olan.
             new("odeyenKurumId", "odeyen_kurum_id", "kod",
-                KodTablosu: "public.v_kurum_lookup", AramaKaynagi: "kurum",
-                Baslik: "Ödeyen Kurum", Grup: "Kimlik"),
+                KodTablosu: "public.v_kurum_lookup",
+                Baslik: "Ödeyen Kurum (boş = tümü)", Grup: "Kimlik"),
             // BAZ ALANI KALDIRILDI (kullanici). Kolon duruyor ama HICBIR YERDE
             //   OKUNMUYORDU: primi hesaplayan iki fonksiyon da tabani sabit
             //   aliyor - faturalamada satirin pay tutari (hasta/kurum/tutar),
