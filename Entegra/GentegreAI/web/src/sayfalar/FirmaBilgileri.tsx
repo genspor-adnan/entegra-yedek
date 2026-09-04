@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { onay } from '../bilesenler/mesaj';
 import { KurumTipiAyarlari } from '../bilesenler/KurumTipiAyarlari';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
@@ -101,7 +102,9 @@ export function FirmaBilgileri() {
   /** Secili subeyi siler - sunucu engelleri (belge/kullanici bagi) mesajla doner. */
   const subeSil = async (id: number) => {
     const ad = String(subeler.find(x => Number(x.id) === id)?.ad ?? id);
-    if (!confirm(`"${ad}" şubesi silinecek. Onaylıyor musunuz?`)) return;
+    // Uygulama penceresi (tarayici confirm'i "localhost diyor ki" basligiyla
+    //   cikiyordu, kullanici).
+    if (!await onay(`"${ad}" şubesi silinecek. Onaylıyor musunuz?`, true)) return;
     try {
       await api.kartSil('sube', id);
       setSeciliSube(null);

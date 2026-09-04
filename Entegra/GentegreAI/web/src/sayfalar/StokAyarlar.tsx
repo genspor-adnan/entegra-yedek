@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { onay } from '../bilesenler/mesaj';
 import { api } from '../api/istemci';
 import { type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { GenGrid } from '../bilesenler/GenGrid';
@@ -35,7 +36,8 @@ export function StokAyarlar() {
         case 'depo.duzenle': if (satir) setDepoKart(Number(satir.id)); return;
         case 'depo.sil':
           if (!satir) return;
-          if (!confirm(`"${String(satir.ad ?? '')}" deposu silinecek. Onaylıyor musunuz?`)) return;
+          if (!await onay(`"${String(satir.ad ?? '')}" deposu silinecek. Onaylıyor musunuz?`,
+                          true)) return;
           await api.kartSil('depo', Number(satir.id));
           setYenile(t => t + 1);
           return;

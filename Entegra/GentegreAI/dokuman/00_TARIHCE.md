@@ -4450,3 +4450,15 @@ kapanista **💾 Kaydet · ✖ İptal (kaydetme) · ↩ Geri Dön** soruluyor: K
 basariliysa kapaniyor (zorunlu alan hatasinda kart ACIK kaliyor), İptal degisiklikleri atiyor, Geri
 Dön kartta birakiyor. `kapat(zorla)` parametresi eklendi - KAYIT SONRASI cagride soru sorulmuyor
 (temizImza state'i henuz guncellenmemis oluyordu). Delphi'deki "KaydetmeSorusu" deseniyle ayni.
+
+**REFAKTOR: Liste.tsx aksiyonlari konu bazli dosyalara** - `aksiyon()` fonksiyonu **950 satir /
+44 case** olmustu; her yeni modul buraya bir case daha ekliyordu. Konu bloklari `sayfalar/liste/`
+altina alindi: **utsAksiyonlari** (10 case, 138 satir), **kasaAksiyonlari** (11 case + "kasa.yeni.<tur>"
+oneki, 101), **fiyatListesiAksiyonlari** (4 case, 60), **ebelgeAksiyonlari** (5 case, 119). Her modul
+"ele aldim mi" (boolean) doner, `Liste.tsx` sirayla deniyor - e-Belge ciktilari ve gelen belge zaten
+bu desendeydi (`ebelgeIslem` / `gelenBelgeIslem`). Ekran state'ine dokunan isler BAGLAM nesnesiyle
+geciyor, moduller ekrandan bagimsiz. **Liste.tsx 1860 -> 1620 satir**, davranis degismedi
+(165 test gecti).
+Refaktor sirasinda iki NATIVE `confirm` daha bulundu (ciplak cagri oldugu icin onceki taramada
+kacmisti): Firma Bilgileri sube silme ve Stok Ayarlari depo silme - ikisi de `onay()` penceresine
+cevrildi. Ayrica e-Belge SERI adiminda `prompt(` kalmisti, `metinSor` oldu.

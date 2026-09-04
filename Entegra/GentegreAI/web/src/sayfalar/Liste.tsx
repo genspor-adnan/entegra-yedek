@@ -34,9 +34,12 @@ import { KalemRolModali } from '../bilesenler/prim/KalemRolModali';
 import { DonemKapatModali } from '../bilesenler/prim/DonemKapatModali';
 import { UtsHazirlaSonucModali } from '../bilesenler/uts/UtsHazirlaSonucModali';
 import type { UtsBelgeBildirimYaniti, UtsHazirlaYaniti } from '../api/istemci';
-import { dosyaIndirUrl } from '../bilesenler/indir';
 import { ebelgeCiktisi } from './ebelgeIslem';
 import { gelenBelgeAksiyonu } from './gelenBelgeIslem';
+import { utsAksiyonu } from './liste/utsAksiyonlari';
+import { kasaAksiyonu } from './liste/kasaAksiyonlari';
+import { fiyatListesiAksiyonu } from './liste/fiyatListesiAksiyonlari';
+import { ebelgeAksiyonu } from './liste/ebelgeAksiyonlari';
 import { Modal } from '../bilesenler/Modal';
 import { BelgeKarti } from './BelgeKarti';
 import { KasaIslemKarti } from './KasaIslemKarti';
@@ -383,8 +386,20 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const hekimBolumu = (hekim?: number) =>
     hekim ? hekimSecenekleri.find(h => h.id === hekim)?.bolum : undefined;
 
-  // Aksiyon yonlendirme. Kasa aksiyonlari API cagirir (kesinlestir/iptal/sil) ve
-  //   sonrasinda grid'i tazeler; digerleri kart rotasina gider.
+  /**
+   * AKSIYON YONLENDIRME - grid arac cubugu ve sag tus menusu buraya duser.
+   *
+   * Fonksiyon 950 satira ve 44 case'e ulasmisti; konu bazli bloklar AYRI
+   * dosyalara alindi (refactor) ve burada sirayla deneniyor:
+   *     liste/utsAksiyonlari · liste/kasaAksiyonlari
+   *     liste/fiyatListesiAksiyonlari · liste/ebelgeAksiyonlari
+   * Her modul "ele aldim mi" doner; ele aldiysa burada isimiz biter. e-Belge
+   * CIKTILARI (onizleme/XML/PDF) ve gelen belge adimlari zaten ayriydi
+   * (ebelgeIslem / gelenBelgeIslem) - ayni desen surduruldu.
+   *
+   * Burada kalanlar: belge/kart acma, silme, donusum, randevu akisi, radyoloji
+   * ve listeye ozel tek tuk isler - hepsi ekranin kendi state'ine sikica bagli.
+   */
   async function aksiyon(kod: string, satir?: ListeSatiri | null,
                          secililer?: ListeSatiri[]) {
     const kartaGit = (kayitId: unknown) => git(`${tanim.kartYolu}/${kayitId}`);
@@ -440,53 +455,31 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         return;
       }
 
+      // KONU BAZLI AKSIYONLAR ayri dosyalarda (refactor): `aksiyon()` 950
+      //   satira ve 44 case'e ulasmisti. Her modul "ele aldim mi" doner;
+      //   ele aldiysa burada isimiz biter. e-Belge ve gelen belge zaten
+      //   ayriydi (ebelgeIslem / gelenBelgeIslem) - ayni desen surduruldu.
+      if (await utsAksiyonu(kod, satir, secililer, {
+        tazele: () => setYenile(t => t + 1),
+        setUtsHazirla, setUtsKullanim, setUtsGenel, setUtsAlma,
+      })) return;
+
+      if (await kasaAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+        setKasaTuru, setCekTuru, setAcikKasaId,
+      })) return;
+
+      if (await fiyatListesiAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+        setIceriAl,
+      })) return;
+
+      if (await ebelgeAksiyonu(kod, satir, { tazele: () => setYenile(t => t + 1) })) return;
+
       switch (kod) {
         // Grup basina bir giris: kart tur seridini o grubun turleriyle acar.
-        // Tahsilat/odeme dugmeleri ARAC (nakit/banka/pos/cek/senet) menusu acar;
-        //   secilen aracin kodu "kasa.yeni.<tur>" olarak geri gelir ve kart MODAL
-        //   olarak acilir (liste arkada kalsin, kullanici listeden kopmasin).
-        case 'kasa.tahsilat.yeni': setKasaTuru(21); return;
-        case 'kasa.odeme.yeni':    setKasaTuru(31); return;
-        case 'kasa.virman.yeni':   setKasaTuru(41); return;
-        case 'kasa.doviz.yeni':    setKasaTuru(45); return;
-        case 'kasa.plan.yeni':     setKasaTuru(61); return;
-        case 'kasa.gerceklestir':
-          // Gerceklestirme hesap/tutar secimi ister - plan kartindaki panele goturur.
-          if (satir) git(`/kasa-islem/${satir.id}`);
-          return;
-        case 'kasa.ac':
-          // MODAL acilir (kullanici): kart kaydin KENDI turuyle gelir
-          //   (tahsilat / odeme / cek / virman...) ve liste arkada kalir -
-          //   tam sayfaya gidince kullanici listedeki yerini kaybediyordu.
-          if (satir) setAcikKasaId(Number(satir.id));
-          return;
-        case 'kasa.fis-gor':
-          if (satir) git(`/kasa-islem/${satir.id}`);
-          return;
-
-        case 'kasa.kesinlestir':
-          if (!satir) return;
-          if (!await onay('İşlem kesinleştirilecek: makbuz numarası verilir ve muhasebe fişi yazılır. Onaylıyor musunuz?')) return;
-          await api.kasaKesinlestir(Number(satir.id));
-          setYenile(t => t + 1);
-          return;
-
-        case 'kasa.iptal': {
-          if (!satir) return;
-          const sebep = await metinSor('İptal sebebi:', '');
-          if (!sebep) return;
-          await api.kasaIptal(Number(satir.id), sebep);
-          setYenile(t => t + 1);
-          return;
-        }
-
-        case 'kasa.sil':
-          if (!satir) return;
-          if (!await onay('Taslak/plan kaydı silinecek. Onaylıyor musunuz?')) return;
-          await api.kasaSil(Number(satir.id));
-          setYenile(t => t + 1);
-          return;
-
         case 'belge.yeni': setYeniBelgeTuru(tanim.yeniBelgeTuru ?? 15); return;
         case 'belge.ac':
           if (satir) setAcikBelgeId(Number(satir.id));
@@ -494,95 +487,6 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         // e-BELGE HAZIRLA (163): numara/seri verir ve kuyruga alir. Sonuc
         //   mesaji sunucudan gelir (hangi tur, hangi numara) - istemci karar
         //   uretmez, yalniz gosterir.
-        case 'ebelge.hazirla': {
-          if (!satir) return;
-          const belgeNo = String(satir.belgeNo ?? satir.id);
-          if (!await onay(`"${belgeNo}" için e-Belge hazırlansın mı? `
-                     + 'Belgeye seri ve e-Belge numarası verilir.')) return;
-          await guvenli(async () => {
-            const y = await api.belgeEBelgeHazirla(Number(satir.id));
-            mesaj((y.uyarilar ?? []).join(' • ') || 'e-Belge hazırlandı.');
-            setYenile(t => t + 1);
-          });
-          return;
-        }
-        // e-BELGE GONDER: GERI ALINAMAZ, bu yuzden onay metni acik yazilir -
-        //   GIB'e giden belge iptal edilmez, yalniz iade faturasiyla duzeltilir.
-        case 'ebelge.gonder': {
-          if (!satir) return;
-          const no = String(satir.belgeNo ?? satir.id);
-          await guvenli(async () => {
-            // e-ARSIVDE ALICI E-POSTASI SORULUR (184, Delphi ile ayni): alias
-            //   alani e-Faturada GIB posta kutusu, e-Arsivde e-posta adresidir.
-            //   Bos gonderilirse entegrator belgeyi KAGIT olarak isaretliyor.
-            let alias: string | undefined;
-            const a = await api.belgeEBelgeAlici(Number(satir.id));
-            if (a.belgeTuru === 2) {
-              const girilen = await metinSor(
-                `"${no}" e-Arşiv olarak gönderilecek.
-
-`
-                + 'Belge alıcıya e-postayla iletilir. Boş bırakırsanız kâğıt '
-                + 'belge olarak işaretlenir.',
-                a.alias || a.onerilenMail, 'Alıcı e-postası');
-              if (girilen === null) return;              // vazgecildi
-              alias = girilen.trim();
-            } else if (!await onay(`"${no}" entegratöre GÖNDERİLECEK.
-
-`
-                                 + 'Gönderilen belge geri alınamaz; düzeltme ancak iade '
-                                 + 'faturasıyla yapılır. Onaylıyor musunuz?', true)) {
-              return;
-            }
-            const y = await api.belgeEBelgeGonder(Number(satir.id), alias);
-            mesaj((y.uyarilar ?? []).join(' • ') || 'Gönderildi.');
-            setYenile(t => t + 1);
-          });
-          return;
-        }
-        // e-Belge menusunun oteki adimlari (164): seri degistir ve sifirla.
-        case 'ebelge.seri': {
-          if (!satir) return;
-          const seri = prompt('Yeni seri (boş bırakırsanız sıradaki seriye geçilir):', '') ?? undefined;
-          await guvenli(async () => {
-            const y = await api.belgeEBelgeSeri(Number(satir.id), seri?.trim() || undefined);
-            mesaj((y.uyarilar ?? []).join(' • ') || 'Seri değişti.');
-            setYenile(t => t + 1);
-          });
-          return;
-        }
-        case 'ebelge.sifirla': {
-          if (!satir) return;
-          if (!await onay('e-Belge geri alınacak; belge yeniden hazırlanabilir hale gelir. '
-                     + 'Numara boşa düşer. Onaylıyor musunuz?')) return;
-          await guvenli(async () => {
-            const y = await api.belgeEBelgeSifirla(Number(satir.id));
-            mesaj((y.uyarilar ?? []).join(' • ') || 'e-Belge geri alındı.');
-            setYenile(t => t + 1);
-          });
-          return;
-        }
-        // e-BELGE IPTALI (188): e-Arsivde dogrudan iptal, e-Faturada GIB'e
-        //   iptal TALEBI. Ikisi de geri alinamaz; gerekce zorunlu.
-        case 'ebelge.iptal': {
-          if (!satir) return;
-          const belgeNo = String(satir.belgeNo ?? satir.id);
-          if (!await onay(`"${belgeNo}" için e-Belge iptali başlatılacak.
-
-`
-                        + 'e-Arşiv doğrudan iptal edilir; e-Faturada GİB’e iptal talebi '
-                        + 'gönderilir ve alıcı onayına kalır. Geri alınamaz. Onaylıyor musunuz?',
-                          true)) return;
-          const gerekce = await metinSor('İptal gerekçesi (zorunlu):', '');
-          if (gerekce === null) return;
-          if (!gerekce.trim()) { mesaj('İptal gerekçesi zorunlu.'); return }
-          await guvenli(async () => {
-            const y = await api.belgeEBelgeIptal(Number(satir.id), gerekce);
-            mesaj(y.mesaj);
-            setYenile(t => t + 1);
-          });
-          return;
-        }
         // MUHASEBE FISI (190): belgenin fis satirlarini acar. Fis kartı ayri
         //   bir ekran degil - "Fiş Satırları" listesi fisId ile filtrelenir.
         case 'belge.fis-gor': {
@@ -697,36 +601,6 @@ Bu işlem geri alınamaz. `
         // FIYAT LISTESI URETIMI (202): kurali yeniden isletip satirlari yazar.
         //   Onay ISTENIR - binlerce satiri degistirir ve taban fiyat degistiyse
         //   liste fiyatlari toptan degisir.
-        case 'fiyat-listesi.uret': {
-          if (!satir) return;
-          const ad = String(satir.ad ?? satir.id);
-          if (!await onay(`"${ad}" listesinin satırları yeniden üretilecek.
-
-`
-                     + 'Kural (taban liste × çarpan → yuvarlama) yeniden işletilir. '
-                     + 'Elle girilmiş (Manuel) satırlar KORUNUR.')) return;
-          await guvenli(async () => {
-            const y = await api.fiyatListesiUret(Number(satir.id));
-            mesaj(y.mesaj);
-            setYenile(t => t + 1);
-          });
-          return;
-        }
-        case 'fiyat-listesi.satirlar':
-          if (satir) git(`/fiyat-listesi-satir?listeId=${satir.id}`);
-          return;
-
-        // EXCEL AKISI (207): modal sablon indirme + yukleme + hata tablosunu tasir.
-        case 'fiyat-listesi.iceri-al':
-          if (satir) setIceriAl({ listeId: Number(satir.id), ad: String(satir.ad ?? satir.id) });
-          return;
-        case 'fiyat-listesi.sablon':
-          if (!satir) return;
-          await guvenli(async () =>
-            dosyaIndirUrl(await api.fiyatListesiSablon(Number(satir.id), true),
-                          `${String(satir.ad ?? satir.id)}.xlsx`, true));
-          return;
-
         // ÜTS (223): senkron + alma + iptal + yeniden gonder + detay.
         case 'belge.uts-bildir': {
           // COKLU SECIM desteklenir (230): isaretli belgeler sirayla bildirilir.
@@ -752,108 +626,6 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
           });
           return;
         }
-        // Iki asamali verme (kullanici): 1) hazirla - e-Belgeli satis
-        //   faturalarindan BEKLEYEN kayitlar gride dolar (UTS'ye gitmez),
-        //   2) gridde secilenler "📤 Gönder" ile cikar.
-        case 'uts.verme':
-          await guvenli(async () => {
-            const y = await api.utsVermeHazirla();
-            // Atlananlar GRIDDE (kullanici): siralanir + CSV kaydedilir.
-            if (y.atlanan.length > 0) setUtsHazirla(y); else mesaj(y.mesaj);
-            setYenile(t => t + 1);
-          });
-          return;
-        case 'uts.kullanim': setUtsKullanim(true); return;
-        case 'uts.uretim':   setUtsGenel('uretim'); return;
-        case 'uts.ithalat':  setUtsGenel('ithalat'); return;
-        case 'uts.hek':      setUtsGenel('hek'); return;
-        case 'uts.imha':     setUtsGenel('imha'); return;
-        case 'uts.senkron':
-          await guvenli(async () => {
-            const y = await api.utsAskidakilerSenkron();
-            mesaj(y.mesaj);
-            setYenile(t => t + 1);
-          });
-          return;
-        case 'uts.al':
-          if (!satir) return;
-          if (Number(satir.durum) !== 1) { mesaj('Bu kayıt askıda değil.'); return }
-          setUtsAlma({
-            envanterId: Number(satir.id),
-            urunNo: String(satir.urunNo ?? ''),
-            kurumUnvan: String(satir.kurumUnvan ?? ''),
-            askiAdet: Number(satir.askiAdet ?? 1),
-            seriNo: String(satir.seriNo ?? ''),
-          });
-          return;
-        case 'uts.iptal': {
-          if (!satir) return;
-          if (Number(satir.tur) === 1) {
-            mesaj("Alma bildirimi ÜTS'de iptal edilemez (karşı taraf verme bildirimini iptal etmelidir).");
-            return;
-          }
-          if (!await onay(`"${String(satir.utsBildirimId ?? satir.id)}" bildirimi ÜTS'de İPTAL edilecek.
-
-Onaylıyor musunuz?`)) return;
-          await guvenli(async () => {
-            const y = await api.utsIptal(Number(satir.id));
-            mesaj(y.mesaj);
-            setYenile(t => t + 1);
-          });
-          return;
-        }
-        case 'uts.yeniden-gonder': {
-          // GONDER: coklu secim - isaretli bekleyen/hatali bildirimler
-          //   sirayla UTS'ye cikar, satirlar guncellenir.
-          const hedefler = (secililer && secililer.length > 0 ? secililer
-                            : satir ? [satir] : []);
-          if (hedefler.length === 0) return;
-          if (!await onay(`${hedefler.length} bildirim ÜTS'ye GÖNDERİLECEK.
-
-Gönderilen bildirim resmî işlemdir. Onaylıyor musunuz?`, true)) return;
-          await guvenli(async () => {
-            let tamam = 0; const hatalar: string[] = [];
-            for (const h of hedefler) {
-              try {
-                const y = await api.utsYenidenGonder(Number(h.id));
-                if (y.basarili) tamam++;
-                else hatalar.push(`#${h.id}: ${y.mesaj}`);
-              } catch (hh) {
-                hatalar.push(`#${h.id}: ${hataMetni(hh)}`);
-              }
-            }
-            mesaj(hedefler.length === 1 && hatalar.length === 0
-              ? 'Bildirim başarıyla gönderildi.'
-              : `${tamam}/${hedefler.length} bildirim gönderildi.`
-                + (hatalar.length > 0 ? '\n\n' + hatalar.join('\n') : ''));
-            setYenile(t => t + 1);
-          });
-          return;
-        }
-        case 'uts.detay':
-          if (!satir) return;
-          await guvenli(async () => {
-            const y = await api.utsBildirimDetay(Number(satir.id));
-            const ozet = y.mesajlar.map(m => `${m.tip ?? ''}: ${m.met ?? ''}`).join('\n');
-            mesaj(y.sonuc != null
-              ? JSON.stringify(y.sonuc, null, 2).slice(0, 1500)
-              : (ozet || 'ÜTS detay dönmedi.'));
-          });
-          return;
-
-        case 'genel.yazdir': mesaj('Yazdirma henuz baglanmadi.'); return;
-      }
-
-      // Alt menuden gelen arac secimi: "kasa.yeni.22" -> tur 22 ile modal.
-      if (kod.startsWith('kasa.yeni.')) {
-        const t = Number(kod.slice(10));
-        // CEK / SENET (23/24/33/34): once KIYMET KARTI acilir (kullanici) -
-        //   banka, sube, kesideci, seri no, vade... kasa kartinda sorulamayacak
-        //   kadar cok alan var. Kart kaydedilince kasa islemi o kiymete
-        //   BAGLANARAK olusturulur (asagida cekKartKaydedildi).
-        if (t === 23 || t === 24 || t === 33 || t === 34) { setCekTuru(t); return }
-        setKasaTuru(t);
-        return;
       }
 
       // RANDEVU durum akisi (243) ve BASVURUYA DONUSUM (265). Durum
