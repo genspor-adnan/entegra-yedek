@@ -5207,3 +5207,43 @@ Iki engel (`tarafSecimEngeli`, 6 test):
     kod listesinden okunur - listede olmayan kisi gridde ADSIZ gorunur ve
     kayit sessizce ise yaramaz olur (prim rolu isaretlenmemis personel hicbir
     hakedis uretmez).
+
+### Prim senaryosu - canli kayitlar (SILINMEYECEK)
+
+Kullanici istegi: iki dis hekim MR'dan farkli oran alsin, iki hasta (biri kendi
+odeyen biri OSS %20 hasta payli), prim FATURALAMADA dogsun.
+
+    dis hekim   Akın YILDIRIM  5030   (calisma sekli PRIMLI, Radyoloji)
+                Mert ÇELİK     5031
+    prim plani  10  "MR — Gönderen %20"   kisi: Akın
+                11  "MR — Gönderen %25"   kisi: Mert
+                ikisi de: rol Gönderen · Kategori MR (32) · Yüzde · baz
+                "tahsil edilen matrah" · prim zamani FATURALAMADA
+    hasta       HASAN ÖZEL   5032  kendi odeyen
+                HÜSEYİN ÖSS  5033  kurum 4987
+    basvuru     114372 Hasan/Akın  1.100 TL brut
+                114377 Hüseyin/Mert 2.200 TL brut, satir karsilama %80
+    belge       114374 fatura (Hasan)
+                114378 fatura + 114379 tahakkuk (Hüseyin)
+
+Prim satirlari:
+
+    Akın   Gönderen  Hasta payı   1.000 x %20 = 200,00   Kesin
+    Mert   Gönderen  Hasta payı     400 x %25 = 100,00   Kesin
+    Mert   Gönderen  Kurum payı   1.600 x %25 = 400,00   Kesin
+
+Iki not:
+
+1. **Rol ayri bir kayittir.** Basvurudaki "Gönderen" (belge_basvuru.personel_id)
+   prim uretmez; prim `belge_satir_rol` satirindan dogar ve o satir
+   `POST /api/prim/kalem/{satirId}/roller` ile yazilir. Ekranda ikisi ayni
+   sey gibi durabiliyor - senaryoda rol acikca yazildi.
+
+2. **Karsilama BELGEDE ezildi.** Kurum 4987'nin `varsayilan_karsilama` degeri
+   %70 (hasta %30) ve o ORTAK VERI - baska testler de kullaniyor. Kullanicinin
+   istedigi %20 hasta payi icin kurum kaydi degistirilmedi, basvuru satirinda
+   `karsilama = 80` verildi. Satir bazli karsilama tam bunun icin var.
+
+ACIK BULGU: donusumden cikan SATIS FATURASI (tur 15) `belge_no = '0'` aliyor -
+numara sablonu (id 35, durum 1) uygulanmiyor. Tahakkuk (17) numara aliyor.
+Ayri is olarak bakilmali.
