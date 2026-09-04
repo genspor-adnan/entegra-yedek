@@ -5519,3 +5519,37 @@ bozulmaz - kisiyi isten cikarmak, gecmis primini silmek demek degildir.
 Onceki "engelleme, gorunur yap" karari (377) BOZULMADI: o karar, engeli
 KOR bir yerde koymakla ilgiliydi (secim sessizce dusuyordu). Simdi engel
 aramanin kendisinde - kullanici neyi neden goremedigini bilir.
+
+### "Yapan" rollu plan testi - iki gercek hata cikardi
+
+Plan 17 "MR — Yapan %8" acildi (kisi: Dr. Selim Aydın, Kardiyoloji) ve uctan
+uca denendi. Test iki hatayi ortaya cikardi:
+
+**1. HICBIR PLANA YENI SATIR EKLENEMIYORDU (db/385).** 379'da rol satir
+kartindan kaldirildi ama `prim_plani_satir.rol` NOT NULL ve varsayilani yok -
+kart rol gondermeyince insert "rol bos birakilamaz" (23502) ile patliyordu.
+Kullanicinin gordugu sey "plan kaydedilmedi"; tarafi tutmayan bir hata, cunku
+kolon UI'dan cikarilirken DB tarafi guncellenmemisti. Cozum: `tg_prim_satir_rol`
+- satirin rolu PLANDAN dolar, kolon tarihsel/denetim amaciyla durur.
+
+**2. KURAL DOGRU CALISIP YANLIS KONUSUYORDU (db/386).** 383/384 tetigi
+`check_violation` firlatiyordu; API onu "Deger kurala uymuyor." diye ceviriyor
+ve tetigin yazdigi aciklama KAYBOLUYORDU. Projede bunun icin ayrilmis kod var:
+`GK422` - "tetiklerin bilerek firlattigi is kurali, mesaj kullaniciya
+gosterilmek uzere yazilmistir". Artik kullanici sunu goruyor:
+"Dr. Akın YILDIRIM kisisi "Yapan" rolunde prim adayi degil. Personel
+kartindaki Prim Rolleri sekmesinden bu rolu isaretleyin; dis hekimlerde
+yalnizca "Gonderen" rolu vardir."
+
+**Uctan uca sonuc** (basvuru 114380, 1.100 TL brut / 1.000 matrah):
+Yapan primi 80,00 (1.000 x %8) DOGDU.
+
+Gönderen primi DOGMADI ve bu DOGRU: plan 10 (%20) ODEYEN TIPI = ÖSS'e
+ayarlanmis, hasta ise kendi odeyen (tip 1). Kural calisiyor.
+
+**ACIK BULGU - rol SONRADAN yazilirsa faturalama primi dogmaz.**
+`POST /api/prim/kalem/{id}/roller` yalnizca `fn_prim_uret` (tahsilat yolu)
+cagiriyor; faturalama primi `tg_prim_donusum` ile, yani DONUSUM aninda
+doguyor. Belge zaten faturalanmissa rol eklemek prim uretmez - yeni satirlar
+icin sira "once rol, sonra donusum" olmali. Ucun sonuna
+`fn_prim_uret_belge(satirId)` eklenmesi gerekiyor; ayri is.
