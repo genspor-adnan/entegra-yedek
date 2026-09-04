@@ -1,0 +1,1045 @@
+{
+ "meta": {
+  "varsayilanlar": {
+   "grup": 101,
+   "hasta": 1,
+   "musteri": 1,
+   "durum": 1
+  },
+  "kaynak": "hasta",
+  "alanlar": [
+   {
+    "ad": "id",
+    "baslik": "Id",
+    "tip": "sayi",
+    "yazilabilir": false,
+    "zorunlu": false,
+    "gizli": false
+   },
+   {
+    "ad": "hasta",
+    "baslik": "Hasta",
+    "tip": "mantik",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "gizli": false
+   },
+   {
+    "ad": "unvan",
+    "baslik": "Unvan",
+    "tip": "metin",
+    "yazilabilir": true,
+    "zorunlu": true,
+    "enFazlaUzunluk": 120,
+    "gizli": false
+   },
+   {
+    "ad": "kod",
+    "baslik": "Dosya No",
+    "tip": "metin",
+    "grup": "Kimlik",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "enFazlaUzunluk": 20,
+    "gizli": false
+   },
+   {
+    "ad": "ad",
+    "baslik": "Ad",
+    "tip": "metin",
+    "grup": "Kimlik",
+    "yazilabilir": true,
+    "zorunlu": true,
+    "enFazlaUzunluk": 50,
+    "gizli": false
+   },
+   {
+    "ad": "soyad",
+    "baslik": "Soyad",
+    "tip": "metin",
+    "grup": "Kimlik",
+    "yazilabilir": true,
+    "zorunlu": true,
+    "enFazlaUzunluk": 60,
+    "gizli": false
+   },
+   {
+    "ad": "randevuVerilebilir",
+    "baslik": "Randevu Verilebilir",
+    "tip": "mantik",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "gizli": false
+   },
+   {
+    "ad": "gorevId",
+    "baslik": "Görev",
+    "tip": "kod",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "kodlar": {
+     "19": "Anestezi Teknisyeni",
+     "27": "Asistan Hekim",
+     "2": "CEO",
+     "16": "Dahiliye Hemşiresi",
+     "14": "Dahiliye Uzmanı",
+     "29": "Diyetisyen",
+     "25": "Eczacı",
+     "3": "Eğitim Yöneticisi",
+     "18": "Fizyoterapist",
+     "4": "Genel Müdür",
+     "21": "Hasta Kabul Görevlisi",
+     "15": "Hemşire",
+     "5": "IT Destek",
+     "6": "İthalat İhracat Sorumlusu",
+     "26": "Laborant",
+     "7": "Muhasebe",
+     "1": "müdür",
+     "22": "Pratisyen Hekim",
+     "28": "Radyoloji Teknisyeni",
+     "24": "Sağlık Memuru",
+     "8": "Satınalma Sorumlusu",
+     "9": "Satış Destek",
+     "10": "Satış Sorumlusu",
+     "11": "Servis Müdürü",
+     "12": "Servis Mühendisi",
+     "23": "Tıbbi Sekreter",
+     "17": "Uzman Dr.",
+     "20": "Uzman Hekim",
+     "13": "Yönetici Asistanı"
+    },
+    "gizli": true,
+    "bagliAlan": "departman",
+    "kodUst": {
+     "14": "1",
+     "16": "1",
+     "17": "1",
+     "19": "146",
+     "26": "147",
+     "28": "151",
+     "29": "142"
+    }
+   },
+   {
+    "ad": "vkno",
+    "baslik": "TC No",
+    "tip": "metin",
+    "grup": "Kimlik",
+    "yazilabilir": true,
+    "zorunlu": true,
+    "enFazlaUzunluk": 20,
+    "gizli": false
+   },
+   {
+    "ad": "durum",
+    "baslik": "Durum",
+    "tip": "kod",
+    "grup": "Kimlik",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "kodlar": {
+     "1": "Aktif",
+     "0": "Pasif",
+     "2": "Aday",
+     "3": "Vefat"
+    },
+    "gizli": false
+   },
+   {
+    "ad": "cepTel",
+    "baslik": "Telefon",
+    "tip": "metin",
+    "grup": "İletişim",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "enFazlaUzunluk": 30,
+    "gizli": false
+   },
+   {
+    "ad": "eposta",
+    "baslik": "E-posta (İş)",
+    "tip": "metin",
+    "grup": "İletişim",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "enFazlaUzunluk": 120,
+    "gizli": false
+   },
+   {
+    "ad": "subeId",
+    "baslik": "Şube",
+    "tip": "kod",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "kodlar": {
+     "3": "Ankara Sube",
+     "1": "Merkez"
+    },
+    "gizli": false
+   },
+   {
+    "ad": "eklemeTarihi",
+    "baslik": "Ekleme Tarihi",
+    "tip": "tarih",
+    "yazilabilir": false,
+    "zorunlu": false,
+    "gizli": false
+   },
+   {
+    "ad": "faturaUnvan",
+    "baslik": "Fatura Unvani",
+    "tip": "metin",
+    "grup": "Adres / Fatura Bilgisi",
+    "altGrup": "Fatura / Vergi Kimligi",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "enFazlaUzunluk": 200,
+    "gizli": false
+   },
+   {
+    "ad": "vd",
+    "baslik": "Vergi Dairesi",
+    "tip": "metin",
+    "grup": "Adres / Fatura Bilgisi",
+    "altGrup": "Fatura / Vergi Kimligi",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "enFazlaUzunluk": 60,
+    "gizli": false
+   },
+   {
+    "ad": "efatura",
+    "baslik": "e-Fatura mukellefi",
+    "tip": "mantik",
+    "grup": "Adres / Fatura Bilgisi",
+    "altGrup": "e-Belge Ayarlari",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "gizli": false
+   },
+   {
+    "ad": "aliasEposta",
+    "baslik": "Alias / e-Posta",
+    "tip": "metin",
+    "grup": "Adres / Fatura Bilgisi",
+    "altGrup": "e-Belge Ayarlari",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "enFazlaUzunluk": 200,
+    "gizli": false
+   },
+   {
+    "ad": "grup",
+    "baslik": "Grup",
+    "tip": "kod",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "gizli": false
+   }
+  ],
+  "detaylar": [
+   {
+    "ad": "adresler",
+    "baslik": "Adresler",
+    "saltOkunur": false,
+    "alanlar": [
+     {
+      "ad": "id",
+      "baslik": "Id",
+      "tip": "sayi",
+      "yazilabilir": false,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "tur",
+      "baslik": "Adres Tipi",
+      "tip": "kod",
+      "yazilabilir": true,
+      "zorunlu": true,
+      "kodlar": {
+       "1": "Ev Adresi",
+       "2": "İş Adresi"
+      },
+      "gizli": false
+     },
+     {
+      "ad": "adres",
+      "baslik": "Adres",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 300,
+      "gizli": false
+     },
+     {
+      "ad": "il",
+      "baslik": "Il",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 60,
+      "gizli": false
+     },
+     {
+      "ad": "ilce",
+      "baslik": "Ilce",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 60,
+      "gizli": false
+     },
+     {
+      "ad": "ulke",
+      "baslik": "Ulke",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 60,
+      "gizli": false
+     },
+     {
+      "ad": "postaKodu",
+      "baslik": "Posta Kodu",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 10,
+      "gizli": false
+     },
+     {
+      "ad": "varsayilan",
+      "baslik": "Varsayilan",
+      "tip": "mantik",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "aktif",
+      "baslik": "Aktif",
+      "tip": "mantik",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "gizli": false
+     }
+    ],
+    "tekSatir": false
+   },
+   {
+    "ad": "acilKisiler",
+    "baslik": "Acil Durumda Aranacak Kişiler",
+    "saltOkunur": false,
+    "alanlar": [
+     {
+      "ad": "id",
+      "baslik": "Id",
+      "tip": "sayi",
+      "yazilabilir": false,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "varsayilan",
+      "baslik": "★",
+      "tip": "mantik",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "adSoyad",
+      "baslik": "Ad Soyad",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": true,
+      "enFazlaUzunluk": 120,
+      "gizli": false
+     },
+     {
+      "ad": "yakinlik",
+      "baslik": "Yakınlık",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 60,
+      "gizli": false
+     },
+     {
+      "ad": "telefon",
+      "baslik": "Telefon",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 30,
+      "gizli": false
+     },
+     {
+      "ad": "eposta",
+      "baslik": "e-Posta",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 120,
+      "gizli": false
+     }
+    ],
+    "tekSatir": false
+   },
+   {
+    "ad": "ozluk",
+    "baslik": "Hasta Bilgisi",
+    "saltOkunur": false,
+    "alanlar": [
+     {
+      "ad": "id",
+      "baslik": "Id",
+      "tip": "sayi",
+      "yazilabilir": false,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "dogumTarihi",
+      "baslik": "Dogum Tarihi",
+      "tip": "tarih",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "dogumYeri",
+      "baslik": "Dogum Yeri",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 60,
+      "gizli": false
+     },
+     {
+      "ad": "cinsiyet",
+      "baslik": "Cinsiyet",
+      "tip": "kod",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "kodlar": {
+       "1": "Erkek",
+       "2": "Kadın"
+      },
+      "gizli": false
+     },
+     {
+      "ad": "uyruk",
+      "baslik": "Uyrugu",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 60,
+      "gizli": false
+     },
+     {
+      "ad": "kanGrubu",
+      "baslik": "Kan Grubu",
+      "tip": "kod",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "kodlar": {
+       "9": "BELİRLENEMEDİ",
+       "10": "DİĞER",
+       "1": "A RH +",
+       "2": "B RH +",
+       "3": "AB RH +",
+       "4": "0 RH +",
+       "5": "0 RH -",
+       "6": "A RH -",
+       "7": "B RH -",
+       "8": "AB RH -"
+      },
+      "gizli": false
+     },
+     {
+      "ad": "meslek",
+      "baslik": "Meslek",
+      "tip": "kod",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "kodlar": {
+       "1": "Ev Hanımı",
+       "2": "İşçi",
+       "3": "Memur",
+       "4": "Öğrenci",
+       "5": "Serbest",
+       "6": "Emekli",
+       "9": "Diğer"
+      },
+      "gizli": false
+     },
+     {
+      "ad": "kurumId",
+      "baslik": "Kurum / Ödeyen",
+      "tip": "kod",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "kodlar": {
+       "4987": "KRM-OZEL - Özel Yaşam Sigorta A.Ş.",
+       "4990": "OZEL - Özel (Ücretli)",
+       "4968": "SGK - Sosyal Güvenlik Kurumu"
+      },
+      "gizli": false
+     },
+     {
+      "ad": "pasaportNo",
+      "baslik": "Pasaport No",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 20,
+      "gizli": false
+     },
+     {
+      "ad": "medeniHal",
+      "baslik": "Medeni Hal",
+      "tip": "kod",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "kodlar": {
+       "1": "BEKÂR",
+       "2": "EVLİ (RESMEN EVLİ YA DA BİRLİKTE YAŞIYOR)",
+       "3": "BOŞANMIŞ / DUL / AYRI YAŞIYOR",
+       "4": "Eşi Ölmüş",
+       "99": "BELİRTİLMEDİ"
+      },
+      "gizli": false
+     },
+     {
+      "ad": "anaAdi",
+      "baslik": "Ana Adı",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 60,
+      "gizli": false
+     },
+     {
+      "ad": "babaAdi",
+      "baslik": "Baba Adı",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 60,
+      "gizli": false
+     },
+     {
+      "ad": "anneTckn",
+      "baslik": "Anne T.C. No",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 11,
+      "gizli": false
+     },
+     {
+      "ad": "babaTckn",
+      "baslik": "Baba T.C. No",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 11,
+      "gizli": false
+     },
+     {
+      "ad": "kimliksiz",
+      "baslik": "Kimliksiz Hasta",
+      "tip": "mantik",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "yabanciHastaTuru",
+      "baslik": "Yabancı Hasta Türü",
+      "tip": "kod",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "kodlar": {
+       "1": "SAĞLIK TURİZMİ",
+       "2": "TURİSTİN SAĞLIĞI",
+       "4": "İkamet İzinli",
+       "5": "Çalışma İzinli",
+       "6": "EĞİTİM, ÖĞRETİM  İÇİN GELEN KİŞİLER VE BUNLARIN EĞİTİMLERİ SÜRESİNCE BAKMAKLA YÜKÜMLÜ OLDUKLARI YAKINLARI",
+       "9": "Diğer",
+       "10": "TÜRK SOYLU YABANCILAR",
+       "11": "GEÇİCİ KORUMA KAPSAMINA ALINAN KİŞİLER",
+       "13": "ULUSLARARASI KORUMA BAŞVURUSU VEYA STATÜSÜ SAHİBİ KİŞİLER (MÜLTECİ/ ŞARTLI MÜLTECİ/ İKİNCİL KORUMA)",
+       "14": "İNSAN TİCARETİ MAĞDURU",
+       "15": "MAVİ KARTLILAR",
+       "16": "ÇİFTE VATANDAŞLAR",
+       "17": "VATANSIZ OLARAK TANINAN KİŞİLER",
+       "3": "SGK KAPSAMINDA YER ALAN YABANCI UYRUKLU  KİŞİLER / İKİLİ SOSYAL GÜVENLİK SÖZLEŞMELERİ KAPSAMINDAKİ KİŞİLER",
+       "7": "TİKA TARAFINDAN GETİRİLEN HASTALAR",
+       "12": "T.C. SAĞLIK BAKANLIĞI SAĞLIK VE TIP ALANINDA İKİLİ İŞ BİRLİĞİ ANLAŞMALARI KAPSAMINDAKİ HASTALAR"
+      },
+      "gizli": false
+     },
+     {
+      "ad": "ulkeyeGirisTarihi",
+      "baslik": "Ülkeye Giriş Tarihi",
+      "tip": "tarih",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "vefat",
+      "baslik": "Vefat",
+      "tip": "mantik",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "vefatTarihi",
+      "baslik": "Vefat Tarihi",
+      "tip": "tarih",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "mahremiyetNotu",
+      "baslik": "Mahremiyet Notu",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 500,
+      "gizli": false
+     }
+    ],
+    "tekSatir": false
+   },
+   {
+    "ad": "izinler",
+    "baslik": "İzinler",
+    "saltOkunur": false,
+    "alanlar": [
+     {
+      "ad": "id",
+      "baslik": "Id",
+      "tip": "sayi",
+      "yazilabilir": false,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "tur",
+      "baslik": "Tür",
+      "tip": "kod",
+      "yazilabilir": true,
+      "zorunlu": true,
+      "kodlar": {
+       "1": "Yıllık İzin",
+       "2": "Mazeret",
+       "3": "Rapor",
+       "4": "Ücretsiz İzin",
+       "9": "Diğer"
+      },
+      "gizli": false
+     },
+     {
+      "ad": "baslangicTarihi",
+      "baslik": "Başlama",
+      "tip": "tarih",
+      "yazilabilir": true,
+      "zorunlu": true,
+      "gizli": false
+     },
+     {
+      "ad": "bitisTarihi",
+      "baslik": "Bitiş",
+      "tip": "tarih",
+      "yazilabilir": true,
+      "zorunlu": true,
+      "gizli": false
+     },
+     {
+      "ad": "gun",
+      "baslik": "Gün",
+      "tip": "sayi",
+      "yazilabilir": false,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "aciklama",
+      "baslik": "Açıklama",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 300,
+      "gizli": false
+     },
+     {
+      "ad": "durum",
+      "baslik": "Durum",
+      "tip": "kod",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "kodlar": {
+       "1": "Bekliyor",
+       "2": "Onaylı",
+       "3": "Reddedildi"
+      },
+      "gizli": false
+     }
+    ],
+    "tekSatir": false
+   },
+   {
+    "ad": "egitimler",
+    "baslik": "Eğitim / Sertifika",
+    "saltOkunur": false,
+    "alanlar": [
+     {
+      "ad": "id",
+      "baslik": "Id",
+      "tip": "sayi",
+      "yazilabilir": false,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "tur",
+      "baslik": "Tür",
+      "tip": "kod",
+      "yazilabilir": true,
+      "zorunlu": true,
+      "kodlar": {
+       "1": "Diploma",
+       "2": "Sertifika",
+       "3": "Eğitim"
+      },
+      "gizli": false
+     },
+     {
+      "ad": "ad",
+      "baslik": "Ad",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": true,
+      "enFazlaUzunluk": 200,
+      "gizli": false
+     },
+     {
+      "ad": "kurum",
+      "baslik": "Kurum",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 150,
+      "gizli": false
+     },
+     {
+      "ad": "tarih",
+      "baslik": "Tarih/Yıl",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 10,
+      "gizli": false
+     },
+     {
+      "ad": "gecerlilik",
+      "baslik": "Geçerlilik",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 60,
+      "gizli": false
+     }
+    ],
+    "tekSatir": false
+   },
+   {
+    "ad": "randevuAyar",
+    "baslik": "Randevu Ayarları",
+    "saltOkunur": false,
+    "alanlar": [
+     {
+      "ad": "id",
+      "baslik": "Id",
+      "tip": "sayi",
+      "yazilabilir": false,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "departmanId",
+      "baslik": "Bölüm",
+      "tip": "kod",
+      "yazilabilir": true,
+      "zorunlu": true,
+      "kodlar": {
+       "6": "Çocuk",
+       "1": "Dahiliye",
+       "2": "Diş",
+       "7": "Fizik Tedavi",
+       "8": "Genel Cerrahi",
+       "3": "Göz",
+       "143": "HST-DRM - Dermatoloji",
+       "142": "HST-DYT - Beslenme ve Diyet",
+       "141": "HST-KBB - Kulak Burun Boğaz",
+       "137": "HST-KRD - Kardiyoloji",
+       "140": "HST-NRL - Nöroloji",
+       "139": "HST-PSK - Psikiyatri",
+       "138": "HST-URO - Üroloji",
+       "5": "Kadın Doğum",
+       "4": "Ortopedi"
+      },
+      "gizli": false
+     },
+     {
+      "ad": "baslangicSaat",
+      "baslik": "Başlama",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 5,
+      "gizli": false
+     },
+     {
+      "ad": "bitisSaat",
+      "baslik": "Bitiş",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 5,
+      "gizli": false
+     },
+     {
+      "ad": "ogleBaslangic",
+      "baslik": "Öğle Başl.",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 5,
+      "gizli": false
+     },
+     {
+      "ad": "ogleBitis",
+      "baslik": "Öğle Bitiş",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 5,
+      "gizli": false
+     },
+     {
+      "ad": "slotDk",
+      "baslik": "Aralık (dk)",
+      "tip": "sayi",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "varsayilanSure",
+      "baslik": "Süre (dk)",
+      "tip": "sayi",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "calismaGunleri",
+      "baslik": "Günler (1 Pzt … 7 Paz)",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 20,
+      "gizli": false
+     },
+     {
+      "ad": "aktif",
+      "baslik": "Randevuya Açık",
+      "tip": "mantik",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "aciklama",
+      "baslik": "Açıklama",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 300,
+      "gizli": false
+     }
+    ],
+    "kosulAlani": "randevuVerilebilir",
+    "tekSatir": false
+   },
+   {
+    "ad": "kurum",
+    "baslik": "Kurum / Ödeyen",
+    "saltOkunur": false,
+    "alanlar": [
+     {
+      "ad": "id",
+      "baslik": "Id",
+      "tip": "sayi",
+      "yazilabilir": false,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "tur",
+      "baslik": "Kurum Türü",
+      "tip": "kod",
+      "yazilabilir": true,
+      "zorunlu": true,
+      "kodlar": {
+       "1": "Özel (Kendi)",
+       "2": "ÖSS (Özel Sağlık Sigortası)",
+       "3": "SGK"
+      },
+      "gizli": false
+     },
+     {
+      "ad": "kurumId",
+      "baslik": "Kurum / Sigorta",
+      "tip": "kod",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "kodlar": {
+       "4987": "KRM-OZEL - Özel Yaşam Sigorta A.Ş.",
+       "4990": "OZEL - Özel (Ücretli)",
+       "4968": "SGK - Sosyal Güvenlik Kurumu"
+      },
+      "gizli": false
+     },
+     {
+      "ad": "policeNo",
+      "baslik": "Poliçe No",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 40,
+      "gizli": false
+     },
+     {
+      "ad": "gecerlilik",
+      "baslik": "Geçerlilik",
+      "tip": "tarih",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "gizli": false
+     },
+     {
+      "ad": "kapsam",
+      "baslik": "Kapsam",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 200,
+      "gizli": false
+     },
+     {
+      "ad": "aciklama",
+      "baslik": "Açıklama",
+      "tip": "metin",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "enFazlaUzunluk": 300,
+      "gizli": false
+     },
+     {
+      "ad": "aktif",
+      "baslik": "Aktif",
+      "tip": "mantik",
+      "yazilabilir": true,
+      "zorunlu": false,
+      "gizli": false
+     }
+    ],
+    "tekSatir": false
+   }
+  ],
+  "yetki": {
+   "duzenle": true,
+   "sil": true,
+   "gizliAlanlar": []
+  }
+ },
+ "kart": {
+  "kart": {
+   "id": 5023,
+   "hasta": 1,
+   "unvan": "TEST HASTA",
+   "kod": "E2E-OZEL",
+   "ad": "TEST",
+   "soyad": "HASTA",
+   "randevuVerilebilir": 0,
+   "gorevId": null,
+   "vkno": "11111111111",
+   "durum": 1,
+   "cepTel": "",
+   "eposta": "",
+   "subeId": 1,
+   "eklemeTarihi": "2026-09-04T13:09:00.980097",
+   "faturaUnvan": "",
+   "vd": null,
+   "efatura": 0,
+   "aliasEposta": null,
+   "grup": 101,
+   "surum": "32264"
+  },
+  "detaylar": {
+   "adresler": [],
+   "acilKisiler": [],
+   "ozluk": [
+    {
+     "id": 5023,
+     "dogumTarihi": "1985-06-15T00:00:00",
+     "dogumYeri": "",
+     "cinsiyet": 1,
+     "uyruk": "TC",
+     "kanGrubu": 0,
+     "meslek": "",
+     "kurumId": 4990,
+     "pasaportNo": null,
+     "medeniHal": null,
+     "anaAdi": null,
+     "babaAdi": null,
+     "anneTckn": null,
+     "babaTckn": null,
+     "kimliksiz": 0,
+     "yabanciHastaTuru": null,
+     "ulkeyeGirisTarihi": null,
+     "vefat": 0,
+     "vefatTarihi": null,
+     "mahremiyetNotu": null
+    }
+   ],
+   "izinler": [],
+   "egitimler": [],
+   "randevuAyar": [],
+   "kurum": []
+  },
+  "kodAd": {
+   "durum": {
+    "1": "Aktif"
+   },
+   "subeId": {
+    "1": "Merkez"
+   }
+  },
+  "yetki": {
+   "duzenle": true,
+   "sil": true,
+   "gizliAlanlar": []
+  },
+  "izlemeNo": "01M1P3SQBCHY46XV5G1RH27ASV"
+ }
+}

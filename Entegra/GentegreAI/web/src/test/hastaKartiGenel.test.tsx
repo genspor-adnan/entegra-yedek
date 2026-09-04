@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { GenForm } from '../bilesenler/GenForm';
+import gercek from './veri/hastaKartMeta.json';
 
 /**
  * HASTA KARTI "GENEL" SEKMESI.
@@ -41,53 +42,18 @@ vi.mock('../kimlik/OturumBaglami', () => ({
   }),
 }));
 
-const alan = (ad: string, baslik: string, y: Record<string, unknown> = {}) =>
-  ({ ad, baslik, tip: 'metin', yazilabilir: true, zorunlu: false, gizli: false, ...y });
-
-const detay = (ad: string, baslik: string, alanlar: unknown[] = []) =>
-  ({ ad, baslik, alanlar, kosulAlani: null, tekSatir: false, saltOkunur: false });
-
 beforeEach(() => {
   vi.clearAllMocks();
-  // GERCEK hasta kartinin sekli: kimlik alanlari grupta, grupsuz gorunur alan
-  //   YOK (randevuVerilebilir gizlendi) - "Genel" sekmesi bu yuzden alan
-  //   sayisindan bagimsiz olmali.
+  // GERCEK SUNUCU META'SI ve gercek bir hasta kaydi (kimlik alanlari
+  //   maskelendi). Uydurma meta ile test GECIYOR ama ekranda grid
+  //   gorunmuyordu - fark ancak gercek veriyle ortaya cikar.
   const yetki = { duzenle: true, sil: true, gizliAlanlar: [] };
-  kartAlanlari.mockResolvedValue({
-    yetki,
-    alanlar: [
-      alan('id', 'Id', { yazilabilir: false }),
-      alan('kod', 'Dosya No', { grup: 'Kimlik' }),
-      alan('ad', 'Ad', { grup: 'Kimlik' }),
-      alan('soyad', 'Soyad', { grup: 'Kimlik' }),
-      alan('vkno', 'TC No', { grup: 'Kimlik' }),
-      alan('durum', 'Durum', { grup: 'Kimlik', tip: 'kod', kodlar: { 1: 'Aktif' } }),
-      alan('cepTel', 'Telefon', { grup: 'İletişim' }),
-      alan('gorevId', 'Görev', { tip: 'kod', kodlar: {} }),
-      alan('faturaUnvan', 'Fatura Unvanı', { grup: 'Adres / Fatura Bilgisi' }),
-    ],
-    detaylar: [
-      detay('ozluk', 'Hasta Bilgisi', [
-        alan('dogumTarihi', 'Doğum Tarihi', { tip: 'tarih' }),
-        alan('cinsiyet', 'Cinsiyet', { tip: 'kod', kodlar: { 1: 'Erkek' } }),
-      ]),
-      detay('acilKisiler', 'Acil Durumda Aranacak Kişiler', [
-        alan('adSoyad', 'Ad Soyad'), alan('yakinlik', 'Yakınlık'),
-      ]),
-      detay('adresler', 'Adresler', [alan('adres', 'Adres')]),
-      detay('kurum', 'Kurum / Ödeyen', [alan('policeNo', 'Poliçe No')]),
-    ],
-  });
-  kartOku.mockResolvedValue({
-    kart: { id: 77, kod: 'H-77', ad: 'Test', soyad: 'Hasta', vkno: '11111111111', durum: 1 },
-    detaylar: { ozluk: [{ id: 77, dogumTarihi: '1979-03-14', cinsiyet: 1 }], acilKisiler: [] },
-    surum: '1',
-    yetki,
-  });
+  kartAlanlari.mockResolvedValue({ ...gercek.meta, yetki });
+  kartOku.mockResolvedValue({ ...gercek.kart, yetki });
 });
 
 const ciz = () => render(
-  <MemoryRouter><GenForm kaynak="hasta" id={77} baslik="Hasta" onKapat={() => {}} /></MemoryRouter>,
+  <MemoryRouter><GenForm kaynak="hasta" id={Number(gercek.kart.kart.id)} baslik="Hasta" onKapat={() => {}} /></MemoryRouter>,
 );
 
 describe('hasta kartinda Yakınlar gridi', () => {

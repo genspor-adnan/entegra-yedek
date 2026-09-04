@@ -4961,3 +4961,12 @@ hasta İletişim kutusundaki alanlar YAN YANA alindi (kullanici: "telefondakinde
 var, çerçeve boyları aynı değil") - tek sutunda alt alta dizilince kutu yanindaki Kimlik
 Bilgileri'nden uzun kaliyordu.
 Toplam: **364 test gecti**.
+
+**"Yakınlar gridi yok" - GERCEK SUNUCU META'SIYLA dogrulandi.** Uydurma meta ile gecen test yeterli
+sayilmadi (ekranda gorunmuyorsa test gercegi yansitmiyor demektir): `/api/kart/hasta/alanlar`
+yaniti ve gercek bir hasta kaydi FIXTURE olarak alindi (kimlik alanlari maskelendi), test onlarla
+kosuldu - **yine geciyor**. Genel sekmesi olusuyor, Yakınlar kutusu ve "Yakınlık" kolonlu tablo
+DOM'da. Yani kod dogru; sorun tarayicidaki eski pakette.
+NOT: vite gelistirme sunucusu 25.08'den beri ayakta (10 gun) ve bu oturumda `menuSonKullanilan.ts`
+gibi YENI dosyalar eklendi - HMR uzun oturumlarda yeni modulleri alamayabiliyor. Sunucunun yeniden
+baslatilmasi gerekiyor.
