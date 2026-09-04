@@ -5778,3 +5778,19 @@ uretirdi.
 Gridin basinda kalici bir not var: kademe DONEM KAPANISINDA uygulanir, kalem
 anindaki tutar onizlemedir. Bu yazilmazsa "girdim ama tutar degismedi" sorusu
 kacinilmaz.
+
+### Kademe gridi testleri (7)
+
+Kademe DONEM KAPANISINDA isledigi icin ekranda aninda etki gostermez -
+"dogru mu calisiyor" sorusunu gozle cevaplamak zor. Testin isi tam burada:
+
+  - satir kaydedilmemisse UYARIR, grid cizmez ve SUNUCUYA ISTEK ATMAZ
+  - acik uc ("ve yukarisi") BOS kutu gelir - null'i 0 gostermek "3-0 arasi"
+    gibi okunurdu
+  - "dönem kapanışında / önizlemedir" notu HER ZAMAN gorunur (kalici uyari)
+  - ekle+kaydet: bos ust sinir NULL gider, "9,5" ondaligi cozulur
+  - sil satiri kaldirir ama KAYDEDILENE KADAR sunucuya gitmez
+  - hepsini silip kaydetmek BOS LISTE gonderir (kademeleri kaldirma yolu)
+  - sunucu hatasi (cakisan aralik) ekranda gorunur
+
+410 test.
