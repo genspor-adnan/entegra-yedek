@@ -62,9 +62,8 @@ export function TekAdres({
   };
 
   const turAlan = meta.alanlar.find(a => a.ad === 'tur');
-  // IL / ILCE %30 daha genis (kullanici): il-ilce adlari dar kutuda kirpiliyor.
   const ilSecimi = (
-    <label className="alan tip-kod genis-yer il-secimi">
+    <label className="alan tip-kod">
       <span className="etiket">İl</span>
       <select value={String(satir.il ?? '')} disabled={saltOkunur}
         onChange={e => degis({ il: e.target.value, ilce: '' })}>
@@ -74,7 +73,7 @@ export function TekAdres({
     </label>
   );
   const ilceSecimi = (
-    <label className="alan tip-kod genis-yer">
+    <label className="alan tip-kod">
       <span className="etiket">İlçe</span>
       <select value={String(satir.ilce ?? '')} disabled={saltOkunur || !satir.il}
         onChange={e => degis({ ilce: e.target.value })}>

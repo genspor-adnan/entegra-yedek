@@ -5107,3 +5107,18 @@ bekliyor.
 
 Dugme renkleri (kullanici): MERNİS notr, "＋ Yeni Başvuru" YESIL (yeni kayit
 baslatan eylem). Turuncu sinifi kaldirildi.
+
+### Iletisim kutusu hizalandi (ekran goruntusu)
+
+Kullanici ekran goruntusu gonderdi: kutuda DORT ayri sol kenar vardi.
+Telefon / e-Posta / Adres / Ülke editleri ayni x'te basliyordu, Il ve Ilce ise
+baska iki x'te. Sebep benim onceki ayarlarim: "Il/Ilce %30 genis" istegini
+etiket kolonunu 84px'den 34px'e indirerek karsilamistim (satir payi tek basina
+yetmiyordu, cunku `.alan` bir etiket|deger izgarasi ve etiket kolonu sabit),
+sonra da kayan etiketi 12px margin ile geri itmeye calismistim - ikisi birlikte
+hizayi tamamen dagitti.
+
+Genislik kazanci hizanin bedeline degmiyor: Il ve Ilce artik ortak `.alan`
+izgarasini (84px etiket) kullaniyor, kutudaki HER edit ayni x'te basliyor ve
+sag kenarlar da esit. Il/Ilce %5 daraltma kurali da kaldirildi - tek basina
+duran iki dar combo yeni bir duzensizlikti.

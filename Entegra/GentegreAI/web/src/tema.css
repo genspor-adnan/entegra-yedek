@@ -2148,21 +2148,13 @@ input.skt-gecmis {
 /* Iletisim | Kimlik Bilgileri | Fotograf ayni satirda (kullanici). */
 .kimlik-foto-satiri { display: flex; gap: 10px; min-width: 0; flex: 1 }
 
-/* IL / ILCE combolari %30 daha genis (kullanici): il adlari
-   ("KAHRAMANMARAŞ") dar kutuya sigmiyor, secili deger kirpiliyordu.
-   SATIR PAYI TEK BASINA YETMEZ: `.alan` bir etiket|deger gridi ve etiket
-   kolonu SABIT genislikte - satira daha cok pay verilse bile combo ayni
-   kaliyordu. Etiket kolonu da daraltilir. */
-.adres-satir .alan.tip-kod.genis-yer { flex: 1.3 }
-.alan.tip-kod.genis-yer { grid-template-columns: 34px minmax(0, 1fr) }
-/* IL ALANI BIRAZ SAGA (kullanici): etiket kolonu daraltilinca satirin en
-   basina yapisiyor ve ustundeki Telefon / e-Posta etiketleriyle hizasi
-   kaciyordu - etiket ve edit birlikte kayar. */
-.adres-satir .alan.il-secimi { margin-left: 12px }
+/* IL / ILCE HIZALI (kullanici: "editler dağınık duruyor"). Daha once bu iki
+   combo genisletilsin diye etiket kolonu 84px'den 34px'e indirilmisti; sonuc
+   Il/Ilce satirinin ustundeki Telefon / e-Posta / Adres / Ülke satirlarindan
+   KAYMASIYDI - kutuda dort ayri sol kenar olusuyordu. Genislik kazanci
+   hizanin bedeline degmez: iki combo da artik ortak `.alan` izgarasini
+   (84px etiket) kullanir, kutudaki her edit ayni x'te baslar. */
 
 /* Yakinlar gridi biraz YUKARI (kullanici): ustundeki .kasira satiri kendi
    alt bosluguna sahip, aradaki 12px fazla duruyordu. */
 .yakinlar-kutusu { margin-top: -8px }
-/* Il / Ilce combolari %5 kucuk (kullanici) - etiketler yerinde kalir,
-   yalnizca kutu daralir. */
-.alan.tip-kod.genis-yer > select { width: 95%; min-width: 0 }
