@@ -94,11 +94,14 @@ const ROZET_SINIFI: Record<string, string> = {
   //   sey soylemiyordu. Renk AYIRT ETMEK icin - "iyi/kotu" degil.
   //   DOKUZ ROLUN HER BIRI AYRI RENK (kullanici: "hep aynı renk olmasın") -
   //   ayni listede yan yana okunuyorlar, ayni renk rozeti anlamsiz kiliyordu.
-  'Gönderen': 'mor', 'İsteyen': 'pembe', 'Uygulayan': 'turkuaz',
-  'Yapan': 'bilgi', 'Raporlayan': 'mavi', 'Onaylayan': 'lacivert',
-  'Anestezi': 'zeytin', 'Asistan': 'turuncu', 'Teknisyen': 'gri',
+  //   NOT: "mor" / "bilgi" / "mavi" siniflari GOZLE AYNI mavi (tema
+  //   degiskeni --mor aslinda #2f6db3 mavi) - roller bu yuzden ayni renk
+  //   gorunuyordu. Ucunden yalniz BIRI (mavi) kullanilir.
+  'Gönderen': 'eflatun', 'İsteyen': 'turkuaz', 'Uygulayan': 'zeytin',
+  'Yapan': 'turuncu', 'Raporlayan': 'mavi', 'Onaylayan': 'lacivert',
+  'Anestezi': 'pembe', 'Asistan': 'uyari', 'Teknisyen': 'gri',
   // Prim zamani: para NE ZAMAN dogar - faturalama pesin, tahsilat beklemeli.
-  'Faturalamada': 'turuncu', 'Tahsilatta': 'ok',
+  'Faturalamada': 'uyari', 'Tahsilatta': 'ok',
   // Odeyen tipi ("SGK" yukarida zaten bilgi).
   'Özel (Ücretli)': 'turkuaz', 'ÖSS': 'uyari',
 };

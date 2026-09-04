@@ -1279,6 +1279,10 @@ input.skt-gecmis {
 .rozet.lacivert { background: #e2e5f6; color: #3a3f8f; border: 1px solid #c3c9ec }
 .rozet.zeytin   { background: #eef3dc; color: #5f6f22; border: 1px solid #d8e3b6 }
 .rozet.turuncu  { background: #fdeddc; color: #a35b16; border: 1px solid #f6d3ae }
+/* GERCEK MOR: tema degiskeni `--mor` aslinda MAVI (#2f6db3) - "mor", "bilgi"
+   ve "mavi" rozet siniflarinin ucu de ayni mavi tonuna dusuyordu ve roller
+   ayni renk gorunuyordu (kullanici). Bu sinif gercekten mor. */
+.rozet.eflatun  { background: #f1e7fb; color: #6b3fa0; border: 1px solid #ddc9f2 }
 /* Kimlik seridindeki durum rozeti kutuyu kaplamasin - mockup'ta kucuk chip. */
 .kaid .alan > .rozet { align-self: flex-start }
 
