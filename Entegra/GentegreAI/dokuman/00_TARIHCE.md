@@ -5384,3 +5384,24 @@ gorunsun" icindir.
 
 "Prim Rolü" kolonu kaydedilene kadar bos kalir: o bilgi arama listesinde yok
 (gorev/rol ile ayni sey degil) ve uydurmak yerine bos birakildi.
+
+### Prim rolu PLAN BASLIGINA (db/379)
+
+Kullanici: "bir prim planı sadece bir prim rolü için çalışır" - rol satirdan
+kalkti, Prim Zamanı'nin sagina ZORUNLU alan olarak geldi. Prim Alanlar
+gridindeki "Prim Rolü" kolonu da kaldirildi: rol artik planin kendisinde.
+
+COK ROLLU PLAN BOLUNDU. Plan 1 hem Gönderen (2 satir) hem Raporlayan (3 satir)
+tasiyordu. Basliga TEK rol yazip satirlari oldugu gibi birakmak, Raporlayan
+satirlarini sessizce Gönderen primi haline getirirdi - yanlis para. Goc her rol
+icin AYRI PLAN uretti, satirlari ve kisi listesini tasidi:
+
+    1  PRM-RAD-01    Radyoloji — dış sevk primi                Gönderen   2 satir
+    12 PRM-RAD-01-5  Radyoloji — dış sevk primi — Raporlayan   Raporlayan 3 satir
+
+Davranis birebir korundu; dogrulandi: Akın %20, Mert %25, Raporlayan plani
+%12 (hepsi eskisi gibi).
+
+`prim_plani_satir.rol` kolonu TARIHSEL olarak duruyor (eski hakedis satirlari
+hangi kuraldan dogdugunu plan satirinda tasiyor); eslestirme artik `p.rol`
+okuyor. Listede plan adinin yaninda "Prim Rolü" kolonu var.

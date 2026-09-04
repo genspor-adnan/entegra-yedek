@@ -33,6 +33,14 @@ public static partial class KaynakKatalogu
                                            Bicim: "rozet", Genislik: 130,
                                            Filtrelenebilir: false),
             new("primZamani", "p.prim_zamani", "sayi", "Zaman Kodu", Varsayilan: false),
+            // ROL (379): plan artik TEK rol icin calisir - listede de plan
+            //   adinin yaninda durur.
+            new("rolAdi",
+                "coalesce((select kd.ad from public.kod_liste kl"
+                + " join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = p.rol"
+                + " where kl.kod = 'prim.rol'), '')",
+                                           "metin", "Prim Rolü", Genislik: 120),
+            new("rol",       "p.rol",       "sayi",  "Rol Kodu", Varsayilan: false),
             new("baslangic", "p.baslangic", "tarih", "Başlangıç", Genislik: 110),
             new("bitis",     "p.bitis",     "tarih", "Bitiş", Genislik: 110),
             // KIM KAPSANIYOR (375): plan artik tek hekime degil KISI LISTESINE

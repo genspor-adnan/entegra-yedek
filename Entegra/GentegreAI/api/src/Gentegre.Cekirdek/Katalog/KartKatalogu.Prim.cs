@@ -21,7 +21,7 @@ public static partial class KartKatalogu
         SubeKolonu: null,
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
-            ["durum"] = (short)1, ["oncelik"] = (short)10,
+            ["durum"] = (short)1, ["oncelik"] = (short)10, ["rol"] = (short)1,
             // Kullanici kararlari: tahsil edilen matrah, KDV haric.
             ["baz"] = (short)4, ["kdv_haric"] = (short)1, ["prim_zamani"] = (short)1,
             ["baslangic"] = "@bugun",
@@ -35,6 +35,16 @@ public static partial class KartKatalogu
             //   hekim SGK'yi beklemez. Bu yuzden kartin EN BASINDA ve zorunlu.
             new("primZamani", "prim_zamani", "kod", Zorunlu: true,
                 KodListesi: "prim.zaman", Baslik: "Prim Zamanı", Grup: "Kimlik"),
+            // PRIM ROLU (379, kullanici: "bir prim planı sadece bir prim rolü
+            //   için çalışır"). Eskiden her SATIRDA soruluyordu; plan "kime
+            //   hangi sifatla" sorusunun cevabi oldugu icin basliga alindi -
+            //   oranlar okunurken hangi satirin kime ait oldugunu aramak
+            //   gerekmiyor. Combo rolun yaninda ISARETLI KISI SAYISINI da
+            //   yazar: kimse isaretlenmemis role plan yazilirsa hakedis hic
+            //   dogmaz ve bu ancak ay sonunda fark edilirdi.
+            new("rol",       "rol",       "kod", Zorunlu: true,
+                KodTablosu: "public.v_prim_rol_lookup",
+                Baslik: "Prim Rolü", Grup: "Kimlik"),
             new("kod",       "kod",       "metin", EnFazlaUzunluk: 30,
                 Baslik: "Kod", Grup: "Kimlik"),
             new("ad",        "ad",        "metin", Zorunlu: true, EnFazlaUzunluk: 120,
@@ -85,14 +95,8 @@ public static partial class KartKatalogu
                     // ID SART: yoksa kayitli satir "yeni" sanilip her kayitta
                     //   yeniden eklenir (satirlar cogalir).
                     new("id",        "id",        "sayi", Yazilabilir: false),
-                    // ROL COMBOSU ISARETLERLE UYUMLU (362): kod listesi yerine
-                    //   v_prim_rol_lookup - her rolun yaninda o rolde ISARETLI
-                    //   kisi sayisi yazar ("Yapan (15 kişi)" / "İsteyen — kişi
-                    //   işaretlenmemiş") ve kurum tipinin varsayilan rolu ustte
-                    //   durur. Kimse isaretlenmemis role plan yazilirsa hakedis
-                    //   hic dogmaz; bu ancak ay sonunda fark edilirdi.
-                    new("rol",       "rol",       "kod", Zorunlu: true,
-                        KodTablosu: "public.v_prim_rol_lookup", Baslik: "Rol"),
+                    // ROL SATIRDA SORULMAZ (379): plan basliginda - bir plan
+                    //   tek rol icin calisir. Kolon tarihsel olarak duruyor.
                     // KAPSAM = KAMPANYA SATIRIYLA AYNI UCLU (328): tip +
                     //   kalem turu + kapsam. Ayni ekran iki yerde tanidik olsun
                     //   diye ayni kod listeleri kullanilir.
@@ -165,19 +169,6 @@ public static partial class KartKatalogu
                     //   eklemedi"). Engel yanlis yerdeydi: rol isaretlemesi
                     //   ayri bir kart ve sonradan doldurulabilir. Artik
                     //   engellemek yerine GORUNUR kilinir.
-                    // KAYNAK v_prim_rol_aday - taraf_prim_rol DEGIL: dis
-                    //   hekimin "Gönderen" rolu tabloda YAZMAZ, calisma sekli
-                    //   "Primli" olmasindan dogar. Ham tabloya bakan bir kolon
-                    //   Akın/Mert'i "rolsuz" gosterirdi - oysa ikisi de prim
-                    //   uretiyor.
-                    new("primRolu",
-                        "(select string_agg(kd.ad, ', ' order by kd.ad) "
-                        + "from public.v_prim_rol_aday a "
-                        + "join public.kod_liste kl on kl.kod = 'prim.rol' "
-                        + "join public.kod_deger kd on kd.liste_id = kl.id "
-                        + "and kd.deger = a.rol "
-                        + "where a.id = prim_plani_taraf.taraf_id)",
-                        "metin", Yazilabilir: false, Baslik: "Prim Rolü"),
                     new("bolum",
                         "(select d.ad from public.departman d "
                         + "join public.taraf t on t.departman = d.id "
