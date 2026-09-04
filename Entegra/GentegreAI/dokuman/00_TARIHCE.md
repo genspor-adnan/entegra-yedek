@@ -5553,3 +5553,27 @@ cagiriyor; faturalama primi `tg_prim_donusum` ile, yani DONUSUM aninda
 doguyor. Belge zaten faturalanmissa rol eklemek prim uretmez - yeni satirlar
 icin sira "once rol, sonra donusum" olmali. Ucun sonuna
 `fn_prim_uret_belge(satirId)` eklenmesi gerekiyor; ayri is.
+
+### Rol degisikligi faturalama primini de tazeler
+
+`POST /api/prim/kalem/{id}/roller` yalnizca `fn_prim_uret` (TAHSILAT yolu)
+cagiriyordu. Faturalama zamanli prim ise yalnizca DONUSUM aninda
+(`tg_prim_donusum`) doguyordu; yani "hekimi yazmayi unutmusuz, ekleyelim"
+denip fatura kesildikten SONRA rol yazilirsa hicbir prim olusmuyor - ve
+eksiklik ancak ay sonunda fark ediliyordu. Ters yonu daha kotu: rol
+KALDIRILDIGINDA eski hakedis satiri duruyordu, yani artik o iste rolu olmayan
+kisiye prim yazili kaliyordu.
+
+Uc artik iki yolu da calistiriyor. `fn_prim_uret_belge` kendi icinde once
+yeniden uretilebilir satirlari siler (durum 1-2, dagitim_id null), onayli /
+odenmis satirlara dokunmaz - cift satir uretmez.
+
+Dogrulandi (satir 3557931, fatura KESILMIS belge):
+    yalniz "Yapan"  -> 1 satir, Gönderen satiri SILINDI
+    iki rol         -> 2 satir: Mert %25 = 250,00 · Selim %8 = 80,00
+
+**Yontem notu (kendime):** ilk denemede uc calismiyor gorundu; sebep API
+CALISIRKEN build yapmam ve cikti suzgecimin yalnizca "error CS" aramasiydi -
+MSBuild'in DLL KILIDI hatasi (MSB3027) suzgecten kacti, ben "derlendi" deyip
+ESKI DLL ile test ettim. Derleme dogrulamasi dil hatasina degil BUILD
+BASARISINA bakmali; API once durdurulmali.

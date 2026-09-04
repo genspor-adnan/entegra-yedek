@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -117,9 +117,28 @@ public static class PrimUclari
             await tx.CommitAsync(iptal);
 
             // Primi tazele: rol degisti, hakedis satiri da degismeli.
+            //
+            // IKI YOL DA CALISTIRILIR:
+            //   fn_prim_uret        TAHSILAT zamanli planlar - kasa dagitimi
+            //                       basina bir hakedis satiri.
+            //   fn_prim_uret_belge  FATURALAMA zamanli planlar - kalemin gelir
+            //                       belgesi (fis/fatura/tahakkuk) uzerinden.
+            //
+            // IKINCISI EKSIKTI ve sessiz bir bosluk uretiyordu: faturalama
+            // zamanli prim yalnizca DONUSUM aninda (tg_prim_donusum) doguyordu,
+            // yani rol SONRADAN yazilirsa - "hekimi yazmayi unutmusuz, ekleyelim"
+            // - hicbir prim olusmuyor ve eksiklik ancak ay sonunda fark
+            // ediliyordu. Rol degisikligi primin KENDISINI degistirir; tazeleme
+            // her iki yolu da kapsamak zorunda.
+            //
+            // fn_prim_uret_belge kendi icinde ONCE yeniden uretilebilir
+            // satirlari siler (durum 1-2, dagitim_id null), yani cift satir
+            // uretmez; onayli/odenmis satirlara dokunmaz.
             var uretilen = await baglanti.TekDegerAsync<int>("""
-                select coalesce(sum(public.fn_prim_uret(d.id)), 0)
-                  from public.kasa_islem_dagitim d where d.belge_satir_id = @p0
+                select coalesce((select sum(public.fn_prim_uret(d.id))
+                                   from public.kasa_islem_dagitim d
+                                  where d.belge_satir_id = @p0), 0)
+                     + coalesce(public.fn_prim_uret_belge(@p0), 0)
                 """, null, [satirId], iptal);
 
             return Results.Ok(new { satirSayisi = satirlar.Count, primSatiri = uretilen });
