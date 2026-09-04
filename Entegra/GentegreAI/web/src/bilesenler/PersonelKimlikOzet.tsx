@@ -119,6 +119,7 @@ export function PersonelKimlikOzet({
   // UYRUK adres kutusuna (ulkenin yanina) tasindi; yerine YABANCI HASTA TURU
   //   geldi (kullanici) - pasaportla ayni soruyu tamamliyor.
   const yabanciTurAlan = alan('yabanciHastaTuru');
+  const mahremiyetAlan = alan('mahremiyetNotu');
 
   const yas = yasHesapla(String(satir.dogumTarihi ?? ''));
 
@@ -284,6 +285,18 @@ export function PersonelKimlikOzet({
                   </label>
                 )}
               </div>
+            )}
+            {/* MAHREMIYET NOTU EN ALTTA (kullanici): kimlik kutusunun serbest
+                metni - "kimlige bakan herkesin gormesi gereken uyari" (or.
+                kayit gizli, refakatci bilgilendirilmeyecek). Tek satir olarak
+                degil TAM GENISLIKTE cizilir, cunku cumle yazilir. */}
+            {mahremiyetAlan && (
+              <label className="alan tip-metin">
+                <span className="etiket">{mahremiyetAlan.baslik}</span>
+                <input value={String(satir.mahremiyetNotu ?? '')} disabled={saltOkunur}
+                  maxLength={mahremiyetAlan.enFazlaUzunluk ?? undefined}
+                  onChange={e => ozlukDegis({ mahremiyetNotu: e.target.value })} />
+              </label>
             )}
           </div>
         </div>
