@@ -1,4 +1,7 @@
-import { defineConfig } from 'vite'
+// `vitest/config` (vite'in kendisi degil): `test` bolumunun tipi ancak
+//   buradan gelir - yoksa `tsc -b` derlemeyi "test does not exist in type
+//   UserConfigExport" ile kirar.
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
@@ -11,4 +14,9 @@ export default defineConfig({
   //   durduruyordu. Paket tek parca (SPA, tamami girişte gerekiyor) - siniri
   //   gercek boyutun uzerine alip uyariyi susturuyoruz.
   build: { chunkSizeWarningLimit: 1500 },
+  // TEST ORTAMI: varsayilan `node` - saf mantik testleri (bicim, kurallar,
+  //   imza, pay hesabi) hizli kossun. jsdom PAHALIDIR: hepsine acilinca takim
+  //   1,7 sn'den 33 sn'ye cikti. DOM gerektiren BILESEN testleri kendi
+  //   dosyasinin basinda `// @vitest-environment jsdom` ile ortami secer.
+  test: { setupFiles: ['./src/test/kurulum.ts'] },
 })

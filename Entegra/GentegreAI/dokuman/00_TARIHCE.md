@@ -4472,3 +4472,21 @@ katilim payinin satir tutarini asmamasi (ucuz kalem), mod degisince karsilama or
 Ayrica stok/hizmet secimi JSX icindeki 25 satirlik inline `async` bloktan `stokSecildi()`
 fonksiyonuna alindi (fiyat once cozulur, pencere sonra acilir kurali orada yaziyor).
 Toplam: **177 test gecti** (165 + 12).
+
+**REFAKTOR: BelgeKarti - pencereler ayri bilesende, bilesen testleriyle korunuyor** -
+`@testing-library/react` + `jest-dom` + `user-event` + `jsdom` kuruldu. **jsdom'u herkese acmak
+pahali**: takim 1,7 sn'den 33 sn'ye ciktigi icin ortam varsayilani `node` birakildi, DOM gereken
+dosya kendi basinda `// @vitest-environment jsdom` yaziyor. Kurulum dosyasi (`src/test/kurulum.ts`)
+matcher'lari ve `cleanup()`u yalniz `document` varsa yukluyor. `vite.config.ts` artik
+`vitest/config`ten `defineConfig` aliyor - yoksa `tsc -b` "test does not exist in type
+UserConfigExport" ile kiriliyordu.
+Kartin son **217 satiri** sirf pencere cizimiydi (cari/stok/kalem/iade/tahsilat/hesap/donusum/
+termin/prim/istem). `bilesenler/belge/BelgeKartiModallari.tsx` icine alindi; kart yalniz "hangi
+pencere acik" durumunu tutuyor. Proplar tek nesnede (`BelgeKartiModalProps`) - 50 ayri parametre
+siralamak yerine alan eklenince derleyici yakaliyor. **BelgeKarti.tsx 2056 -> 1864 satir.**
+Yonlendirme kararlari **20 bilesen testiyle** sabitlendi (`belgeKartiModallari.test.tsx`): basvuruda
+hasta / normal belgede cari kaynagi, secim sonrasi hasta arama durumunun temizlenmesi, teslim
+eden-alan ayrimi, iade turleri (fatura 15/16-11/12, irsaliye 14/119-10/109), stok yon suzgeci
+(depo/stok fisinde yok), kalem penceresinin pay alanlari (yalniz odeyen kurumlu basvuru), banka/POS
+baslik ve yerel para suzgeci, kaydedilmemis belgede termin/donusum acilmamasi, turetilmis belgenin
+kartin ustunde acilmasi. Toplam: **197 test gecti** (177 + 20).
