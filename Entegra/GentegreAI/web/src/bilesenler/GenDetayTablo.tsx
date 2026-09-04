@@ -1039,10 +1039,24 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
             // TEK STATE GUNCELLEMESI: her secilen icin ayri `onDegis`
             //   cagrilsaydi hepsi AYNI `durum` uzerinden turetilir ve yalniz
             //   sonuncusu kalirdi.
+            // ARAMADAN GELEN GORUNUR DEGERLER de yazilir: yeni satir yalniz
+            //   adla, oteki hucreler bos gorunuyordu (kullanici). Bunlar
+            //   SALT OKUNUR alanlar - sunucuya gitmez, kayit sonrasi kart
+            //   yeniden okununca ayni degerler kaynagindan gelir; buradaki
+            //   yazim sadece "kaydetmeden once de dolu gorunsun" icindir.
+            //   Eslesme ALAN ADIYLA: detayda 'tipi' / 'bolum' / 'gorev' varsa
+            //   doldurulur, yoksa dokunulmaz.
+            const aramaKarsiliklari: Record<string, (x: typeof secilenler[number]) => string> = {
+              tipi: x => x.tip, bolum: x => x.bolum, gorev: x => x.gorev,
+            };
             const yeniler = secilenler.map(secilen => {
               const satir: Satir = {};
               alanlar.forEach(a => { satir[a.ad] = a.tip === 'mantik' ? 0 : '' });
               satir[tarafAlani.ad] = String(secilen.id);
+              alanlar.forEach(a => {
+                const cevir = aramaKarsiliklari[a.ad];
+                if (cevir && !a.yazilabilir) satir[a.ad] = cevir(secilen);
+              });
               return satir;
             });
             onDegis({ ...durum, guncel: [...durum.guncel, ...yeniler] });

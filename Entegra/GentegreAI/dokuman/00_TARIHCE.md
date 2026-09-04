@@ -5368,3 +5368,19 @@ Iki teknik nokta:
     sonuncusu kalirdi.
   - Mukerrer denetimi ISARET ANINDA calisir: "Seç"e bastiktan sonra degil,
     isaretlerken ogrenilir.
+
+### Yeni eklenen satir sadece adla gorunuyordu
+
+Isaretle-sonra-ekle calisti; ama gride giren satirda yalniz Kişi doluydu,
+Tipi / Bölüm / Prim Rolü bostu - o kolonlar SUNUCUDAN okunan alt sorgular ve
+kart yeniden okunana kadar degerleri yok.
+
+Arama penceresi bu bilgilerin ikisini ZATEN gosteriyordu (Tip, Bölüm), o yuzden
+secim yukune eklendi: `onSecCoklu` artik `tip` / `bolum` / `gorev` de tasiyor
+ve `GenDetayTablo` bunlari SALT OKUNUR alanlara ADIYLA eslestirip yazar
+('tipi', 'bolum', 'gorev'). Sunucuya gitmezler - kayittan sonra ayni degerler
+kendi kaynagindan gelir; buradaki yazim yalnizca "kaydetmeden once de dolu
+gorunsun" icindir.
+
+"Prim Rolü" kolonu kaydedilene kadar bos kalir: o bilgi arama listesinde yok
+(gorev/rol ile ayni sey degil) ve uydurmak yerine bos birakildi.

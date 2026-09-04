@@ -106,8 +106,16 @@ interface Props {
    * ne ekleyecegini gorur, vazgecerse hicbiri yazilmaz.
    */
   cokluSecim?: boolean;
-  /** Coklu kipte "Seç": isaretlilerin TAMAMI tek seferde verilir. */
-  onSecCoklu?(secilenler: { kaynak: string; id: number; unvan: string }[]): void;
+  /**
+   * Coklu kipte "Seç": isaretlilerin TAMAMI tek seferde verilir.
+   * Satirda GORUNEN alanlar da gecer (tip / bolum / gorev): cagiran, kayit
+   * sunucudan geri okunmadan once gridi doldurabilsin - aksi halde yeni satir
+   * yalniz adla, oteki hucreler bos gorunuyor (kullanici).
+   */
+  onSecCoklu?(secilenler: {
+    kaynak: string; id: number; unvan: string;
+    tip: string; bolum: string; gorev: string;
+  }[]): void;
   /**
    * Secimi KABUL ETMEME sebebi. Bos/null donerse secim gecerlidir; bir metin
    * donerse secim ALINMAZ ve metin pencerede uyari olarak gosterilir
@@ -261,7 +269,10 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
   /** "Seç": isaretlilerin tamami eklenir, pencere kapanir. */
   const isaretliyiOnayla = () => {
     if (isaretli.length === 0) return;
-    const secilenler = isaretli.map(x => ({ kaynak: x.kaynak, id: x.id, unvan: x.unvan }));
+    const secilenler = isaretli.map(x => ({
+      kaynak: x.kaynak, id: x.id, unvan: x.unvan,
+      tip: x.tip, bolum: x.bolum, gorev: x.gorevRol,
+    }));
     secilenler.forEach(x => void api.aramaIsaretle(x.kaynak, x.id));
     // Tek cagriyla verilir: cagiran satirlari TEK state guncellemesiyle
     //   ekleyebilsin - tek tek `onSec` cagrilsaydi her cagri bir onceki

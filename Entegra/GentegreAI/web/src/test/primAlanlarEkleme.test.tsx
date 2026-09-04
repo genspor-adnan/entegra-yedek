@@ -32,8 +32,10 @@ beforeEach(() => {
     // Arama SIRASI kaynaklar dizisiyle ayni: once 'personel', sonra
     //   'dis-hekim' - listedeki ilk satir bu yuzden personeldir.
     satirlar: kaynak === 'dis-hekim'
-      ? [{ id: 5030, kod: 'DH-AKIN', unvan: 'Dr. Akın YILDIRIM' }]
-      : [{ id: 4888, kod: 'P-4888', unvan: 'aaa ooo' }],
+      ? [{ id: 5030, kod: 'DH-AKIN', unvan: 'Dr. Akın YILDIRIM',
+           departmanAdi: 'Radyoloji' }]
+      : [{ id: 4888, kod: 'P-4888', unvan: 'aaa ooo',
+           departmanAdi: 'Muhasebe', gorev: 'Muhasebeci' }],
   }));
 });
 
@@ -92,6 +94,10 @@ describe('Prim Alanlar - isaretleyip toplu ekleme', () => {
     // TEK guncelleme, IKI satir: her secilen icin ayri onDegis cagrilsaydi
     //   hepsi ayni durumdan turetilir ve yalniz sonuncusu kalirdi.
     expect(son.guncel.map(r => String(r.tarafId))).toEqual(['4888', '5030']);
+    // SATIR ADLA SINIRLI KALMAZ (kullanici): aramada gorunen tip ve bolum de
+    //   yazilir - kayit sunucudan geri okunmadan once hucreler bos durmasin.
+    expect(son.guncel.map(r => r.tipi)).toEqual(['Personel', 'Dış Hekim']);
+    expect(son.guncel.map(r => r.bolum)).toEqual(['Muhasebe', 'Radyoloji']);
     expect(screen.queryByPlaceholderText(/Kişi ara/)).toBeNull();
   });
 
