@@ -111,10 +111,17 @@ public sealed partial class BelgeDeposu
             if (!belge.TryGetValue(ad, out var deger)) continue;
             kolonlar.Add(kolon);
             degerler.Add(deger);
+            // "Bu gruba ait dolu alan var mi" - hepsi bossa uzanti satiri
+            //   SILINIR. Kontrol sayisal alanlar icin 0'i bos sayar.
+            //   TARIH ve MANTIK degerleri sayiya CEVRILEMEZ: `Convert.ToDecimal`
+            //   bir DateTime gorunce "Invalid cast from 'DateTime' to 'Decimal'"
+            //   atiyordu - provizyon tarihi girilen her ÖSS/SGK basvurusu 500
+            //   veriyordu (gercek vaka). Boyle bir deger VARSA doludur.
             doluVar |= deger switch
             {
                 null => false,
                 string m => m.Trim().Length > 0,
+                DateTime or DateTimeOffset or bool => true,
                 _ => Convert.ToDecimal(deger, CultureInfo.InvariantCulture) != 0,
             };
         }

@@ -4823,3 +4823,23 @@ belge) hem onizlemede (kaydedilmemis) ayni.
 rakami iki kez, ustelik biri MATRAH digeri BRUT gostermek "hangisi dogru" sorusu doguruyordu. ERP
 belgelerinde duruyor (orada dip toplam matrah/KDV kirilimini, grid satiri miktar toplamini verir).
 4 test. Toplam: **345 test gecti**.
+
+**UCTAN UCA TEST VERISI - uc odeyen tipi (kullanici: "onlari silme bakacagim").**
+Kayitlar DURUYOR; yalniz betigi kosturan gecici kullanici silindi.
+| senaryo | hasta | basvuru (protokol) | brut | hasta payi | kurum payi | tahsilat | fis | tahakkuk |
+|---|---|---|---|---|---|---|---|---|
+| Özel | 5023 TEST OZEL HASTA | 114364 · 2026-000000043 | 1.100 | 1.000 | 0 | 1.100 | 114365 · 1.100 | - |
+| ÖSS %70 | 5025 TEST OSS HASTA | 114367 · 2026-000000044 | 2.200 | 600 | 1.400 | 660 | 114368 · 660 | 114369 · 1.540 |
+| SGK katilim | 5026 TEST SGK HASTA | 114370 · 2026-000000045 | 3.300 | 0 | 3.000 | - | - | 114371 · 3.300 |
+Basvurular `kdv_durum='Dahil'`, turetilen FISLER 'Hariç', TAHAKKUKLAR 'Dahil' - kural dogru
+isliyor. Toplamlar birebir: 660 + 1.540 = 2.200. Uc basvuru da kapanma_durum 2 (tam faturalandi).
+Prim: kalem rolleri isaretlendi (rol 1 Gönderen dis hekim 4997, rol 5 Raporlayan 1087); tahsilat
+olan iki senaryoda prim dogdu (Özel 1.000 x %12 = 120, ÖSS 600 x %12 = 72), SGK'da tahsilat
+olmadigi icin DOGMADI - plan "tahsil edildikce" (prim_zamani 1). Hakedis donemi kapatildi:
+**hakedis 3, UFUK ÇETİN, 01-30.09.2026, 192,00 TL, 2 satir.**
+
+**GERCEK KUSUR BULUNDU VE DUZELTILDI:** provizyon tarihi girilen her ÖSS/SGK basvurusu **500**
+veriyordu - `UzantiYazAsync`in "bu gruba ait dolu alan var mi" kontrolu her degeri
+`Convert.ToDecimal` ile sinamaya calisiyor, DateTime gorunce *"Invalid cast from 'DateTime' to
+'Decimal'"* atiyordu. Tarih/mantik degerleri artik VARSA dolu sayiliyor. Kusur ancak provizyon
+tarihi DOLU gonderilince ciktigi icin bugune kadar goze carpmamisti.
