@@ -43,8 +43,12 @@ public static partial class KartKatalogu
                 Baslik: "Başlangıç", Grup: "Kimlik"),
             new("bitis",     "bitis",     "tarih", Baslik: "Bitiş", Grup: "Kimlik"),
             new("durum",     "durum",     "mantik", Baslik: "Aktif", Grup: "Kimlik"),
-            new("oncelik",   "oncelik",   "sayi",
-                Baslik: "Öncelik", Grup: "Kimlik"),
+            // ÖNCELİK KARTTA YOK (kullanıcı). Kolon DURUYOR ve eşleştirme onu
+            //   hâlâ okuyor; yeni planlar varsayılan 10 ile açılır, yani tüm
+            //   planlar eşit öncelikte olur ve seçimi ÖZGÜLLÜK belirler -
+            //   asıl kural zaten oydu. Alan, ancak bilinçli kurulmuş bir
+            //   çakışmada anlamlıydı; ekranda durunca "büyük yazarsam kazanır"
+            //   sanılıp özgüllüğü ezmeye çalışan ayarlar üretiyordu.
 
             // KAPSAM ARTIK AYRI KUTU DEĞİL (kullanıcı): aynı başlık bölümünün
             //   İKİNCİ SIRASI. Beş alan için ayrı bir çerçeve, kartı ikiye

@@ -57,7 +57,10 @@ public static partial class KaynakKatalogu
                 "(select count(*) from public.prim_plani_satir s where s.plan_id = p.id)",
                                            "sayi",  "Satır", Hizalama: "sag", Genislik: 70,
                                            Filtrelenebilir: false),
-            new("oncelik",   "p.oncelik",   "sayi",  "Öncelik", Hizalama: "sag", Genislik: 80),
+            // Kartta girilmiyor (varsayilan 10) - listede de VARSAYILAN GORUNUR
+            //   DEGIL; kolon menusunden acilabilir, veri kaybolmuyor.
+            new("oncelik",   "p.oncelik",   "sayi",  "Öncelik", Hizalama: "sag",
+                                            Genislik: 80, Varsayilan: false),
             new("durum",     "p.durum",     "mantik","Aktif", Hizalama: "orta", Genislik: 80),
             new("aciklama",  "p.aciklama",  "metin", "Açıklama", Varsayilan: false),
         });
