@@ -80,8 +80,8 @@ public static partial class KartKatalogu
             //   Prim tahsil edildikce dogar; taban KDV'siz karsiliktir.
             new("baz",       "baz",       "kod", KodListesi: "prim.baz",
                 Baslik: "Baz", Grup: "Kimlik"),
-            new("kdvHaric",  "kdv_haric", "mantik",
-                Baslik: "KDV Hariç (matrah)", Grup: "Kimlik"),
+            new("kdvHaric",  "kdv_haric", "kod", SabitKodlar: PrimKdvKodlari,
+                Baslik: "KDV", Grup: "Kimlik"),
             new("subeId",    "sube_id",   "kod", KodTablosu: "public.sube",
                 Baslik: "Şube (boş = tümü)", Grup: "Kimlik"),
             new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 300,

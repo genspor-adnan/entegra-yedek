@@ -136,6 +136,16 @@ public static partial class KartKatalogu
             ["Akrabası"] = "Akrabası", ["Arkadaşı"] = "Arkadaşı",
         };
 
+    /// <summary>
+    /// PRIM TABANINDA KDV (kullanici: onay kutusu yerine combo). Kolon
+    /// `prim_plani.kdv_haric` smallint - 1 = matrah, 0 = brut; kodlar AYNI
+    /// degerleri kullanir, kolon degismedi. Kutu yalniz "isaretli mi" derdi;
+    /// hangi tabanin secildigi ancak etiketi okuyup tersini dusunmekle
+    /// anlasiliyordu.
+    /// </summary>
+    private static readonly Dictionary<string, string> PrimKdvKodlari =
+        new() { ["1"] = "Hariç (matrah)", ["0"] = "Dahil (brüt)" };
+
     private static readonly Dictionary<string, string> CinsiyetKodlari =
         new() { ["1"] = "Erkek", ["2"] = "Kadın" };
 
