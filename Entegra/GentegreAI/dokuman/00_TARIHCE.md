@@ -4654,3 +4654,17 @@ isaret geri geldi; hekim yazmayi deneyince DB kisiti reddetti. Kayit silindi.
 `basvuruYanitiCevrimi` testindeki REFERANS kopya da bilerek guncellendi - o testin isi "cevrim
 degismedi mi" degil, "cevrim YANLISLIKLA degismedi mi".
 Toplam: **312 test gecti** (309 + 3). **CLOUD (ekspert) BEKLIYOR** (db/369 ve db/370).
+
+**HIZLI TAHSILAT DUGMELERI KAYIT BEKLETMIYOR** - kullanici: "yeni başvuru deyip hasta seçtim,
+ücretleme yaptım tahsilat sekmede nakit/banka/pos basamıyorum". Uc dugme de `disabled={!kayitliId}`
+idi ve ipucunda "Önce belgeyi kaydedin" yaziyordu - yani kullaniciyi karti birakip yesil dugmeye
+gitmeye zorluyordu. Oysa AYNI dosyada duran yorum "kayitli olma sarti YOK: kaydedilmemis belgede
+kart once KAYDEDER" diyordu; kural tahsilat KARTI icin (tahsilatAc) yazilmis, HIZLI dugmelere
+uygulanmamisti.
+Tahsilat kasaya BELGE KIMLIGIYLE baglandigi icin kayit gercekten sart - ama bunu kullaniciya IS
+olarak vermek gereksiz. Ucret eklemedeki kapi (`ucretEklemeAc`) ortak bir yardimciya cikarildi
+(`kayitSart`) ve uc dugme de onu kullaniyor: kayitliysa dogrudan gecer, degilse `kes(false)` ile
+kaydeder ve protokolu verir. Dogrulama gecmezse hesap secimi ACILMAZ ve basvuruda Başvuru sekmesine
+donulur. Dugmeler artik hic pasif olmuyor; ipucu kaydedilmemis belgede "— belge önce kaydedilir"
+ekliyor. 4 test.
+Toplam: **316 test gecti** (312 + 4).

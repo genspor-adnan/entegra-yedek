@@ -278,3 +278,43 @@ describe('ucret eklemenin ilk kapisi', () => {
     expect(belgeEkle).not.toHaveBeenCalled();
   });
 });
+
+describe('hizli tahsilat dugmeleri (nakit / banka / pos)', () => {
+  const tahsilatDugmesi = async (ad: string) => {
+    (await sekme('Tahsilat')).click();
+    return waitFor(() => {
+      const d = [...document.querySelectorAll('button')]
+        .find(b => (b.textContent ?? '').includes(ad));
+      if (!d) throw new Error(`"${ad}" dugmesi yok`);
+      return d as HTMLButtonElement;
+    });
+  };
+
+  // Kullanici: "ücretleme yaptım tahsilat sekmede nakit/banka/pos
+  //   basamıyorum" - dugmeler kaydedilmemis belgede PASIFTI. Artik kart
+  //   kendisi kaydediyor, dugme hic pasif olmuyor.
+  it('KAYDEDILMEMIS belgede de BASILABILIR - kart once kaydeder', async () => {
+    ciz();
+    for (const ad of ['Nakit', 'Banka', 'POS'])
+      expect(await tahsilatDugmesi(ad)).not.toBeDisabled();
+  });
+
+  it('kaydedilmemis belgede ipucu "belge önce kaydedilir" der', async () => {
+    ciz();
+    expect((await tahsilatDugmesi('Banka')).title).toContain('belge önce kaydedilir');
+  });
+
+  it('KAYITLI belgede o ek uyari cikmaz', async () => {
+    ciz({ id: 114349 });
+    await waitFor(() => expect(belgeOku).toHaveBeenCalled());
+    expect((await tahsilatDugmesi('Banka')).title).not.toContain('önce kaydedilir');
+  });
+
+  it('EKSIK kartta banka basilinca hesap secimi ACILMAZ, Başvuru sekmesine donulur', async () => {
+    ciz();
+    (await tahsilatDugmesi('Banka')).click();
+    await waitFor(() =>
+      expect(document.querySelector('.kat.on')?.textContent).toMatch(/^Başvuru/));
+    expect(belgeEkle).not.toHaveBeenCalled();
+  });
+});

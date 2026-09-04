@@ -699,23 +699,29 @@ return (
           duser. Nakitte VARSAYILAN KASA, banka/POS'ta modal aramadan secilen
           hesap kullanilir; tutar acik borcun tamami gelir ve gridde
           tiklanarak degistirilir. */}
-      <button className="d bir" disabled={!kayitliId}
-              title={kayitliId
-                ? `Varsayılan kasaya nakit ${alisMi ? 'ödeme' : 'tahsilat'} satırı ekler`
-                  + (acikBorc && acikBorc > 0 ? ` (${para.format(acikBorc)} ₺)` : '')
-                : 'Önce belgeyi kaydedin'}
+      {/* KAYITLI OLMA SARTI YOK (kullanici: "ücretleme yaptım tahsilat
+          sekmede nakit/banka/pos basamıyorum"): dugmeler kaydedilmemis
+          belgede pasifti ve "Önce belgeyi kaydedin" diyordu - kullaniciyi
+          karti birakip yesil dugmeye gitmeye zorluyordu. Tahsilat kasaya
+          belge kimligiyle baglandigi icin kayit gercekten sart, ama kart
+          KENDISI kaydediyor (BelgeKarti.kayitSart) - tipki ucret eklemede
+          oldugu gibi. */}
+      <button className="d bir"
+              title={`Varsayılan kasaya nakit ${alisMi ? 'ödeme' : 'tahsilat'} satırı ekler`
+                + (acikBorc && acikBorc > 0 ? ` (${para.format(acikBorc)} ₺)` : '')
+                + (kayitliId ? '' : ' — belge önce kaydedilir')}
               onClick={() => hizliNakit?.()}>
         💵 Nakit
       </button>
-      <button className="d bir" disabled={!kayitliId}
-              title={kayitliId ? 'Banka hesabı seç ve satır ekle'
-                               : 'Önce belgeyi kaydedin'}
+      <button className="d bir"
+              title={'Banka hesabı seç ve satır ekle'
+                     + (kayitliId ? '' : ' — belge önce kaydedilir')}
               onClick={() => hesapSecAc?.('B')}>
         🏦 Banka
       </button>
-      <button className="d bir" disabled={!kayitliId}
-              title={kayitliId ? 'POS hesabı seç ve satır ekle'
-                               : 'Önce belgeyi kaydedin'}
+      <button className="d bir"
+              title={'POS hesabı seç ve satır ekle'
+                     + (kayitliId ? '' : ' — belge önce kaydedilir')}
               onClick={() => hesapSecAc?.('P')}>
         💳 POS
       </button>

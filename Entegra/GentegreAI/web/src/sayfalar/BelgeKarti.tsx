@@ -835,6 +835,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * Boylece veznedar kendi kasasina, oteki kullanicilar ana kasaya yazar.
    */
   const hizliNakit = async () => {
+    // Tahsilat kasaya BELGE KIMLIGIYLE baglanir - kayit sart; kart kendisi
+    //   kaydeder, kullanici once yesil dugmeye gitmek zorunda kalmasin.
+    if (!await kayitSart()) return;
     try {
       const tutar = await tahsilatTutariSor('Nakit');
       if (!(tutar > 0)) return;
@@ -1131,9 +1134,28 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    */
   const ucretEklemeAc = async (ac: boolean) => {
     if (!ac || !basvuruMu || kayitliId) { setStokArama(ac); return }
-    const id = await kes(false);
-    if (!id) { setAktifSekme('basvuru'); return }
+    if (!await kayitSart()) return;
     setStokArama(true);
+  };
+
+  /**
+   * BELGEYI KAYDETTIRIR, kaydedilene kadar isleme izin vermez.
+   *
+   * Kullanici: "ücretleme yaptım tahsilat sekmede nakit/banka/pos
+   * basamıyorum" - dugmeler kaydedilmemis belgede PASIFTI ve "Önce belgeyi
+   * kaydedin" diyordu. Tahsilat kasaya BELGE KIMLIGIYLE baglandigi icin kayit
+   * gercekten sart; ama bunu kullaniciya IS olarak vermek gereksiz - kart
+   * kendisi kaydeder, tipki ucret eklemede oldugu gibi.
+   *
+   * Dogrulama gecmezse basvuruda Başvuru sekmesine donulur: eksik alanlar
+   * (bolum / gonderen / odeyen kurum) orada ve kirmizi yazi gorunur yerde
+   * olsun.
+   */
+  const kayitSart = async (): Promise<boolean> => {
+    if (kayitliId) return true;
+    const id = await kes(false);
+    if (!id) { if (basvuruMu) setAktifSekme('basvuru'); return false }
+    return true;
   };
 
   function yeniBelge() {
@@ -1500,7 +1522,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                            tahsilatAcKart={tahsilat.setTahsilatKayitId}
                            tahsilatSil={tahsilat.tahsilatSil}
                            hizliNakit={() => void hizliNakit()}
-                           hesapSecAc={t => setHesapSecim(t)}
+                           hesapSecAc={t => void (async () => {
+                             if (await kayitSart()) setHesapSecim(t);
+                           })()}
                            tutarGuncelle={tahsilat.tutarGuncelle}
                            acikBorc={hizliTutar()}
                            onYenile={() => { if (kayitliId) void api.belgeOku(kayitliId)
