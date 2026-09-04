@@ -441,9 +441,12 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
                     <th className="dar">Tip</th>
                     <th className="dar">Kod</th>
                     <th className="genis">Unvan</th>
-                    <th className="bagli-kurum">Bağlı Kurum</th>
+                    {/* BAGLI KURUM EN SONDA (kullanici): kisiyi ayirt eden
+                        bilgi bolum ve gorev; bagli kurum cogu personelde bos,
+                        ortada durunca satiri bosluga bolüyordu. */}
                     <th className="dar">Bölüm</th>
                     <th className="dar">Görev</th>
+                    <th className="bagli-kurum">Bağlı Kurum</th>
                   </>
                 )}
               </tr>
@@ -488,9 +491,9 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
                       <td>{satir.tip}</td>
                       <td>{satir.kod}</td>
                       <td>{satir.unvan}</td>
-                      <td>{satir.bagliKurum}</td>
                       <td>{satir.bolum}</td>
                       <td>{satir.gorevRol}</td>
+                      <td>{satir.bagliKurum}</td>
                     </>
                   )}
                 </tr>
