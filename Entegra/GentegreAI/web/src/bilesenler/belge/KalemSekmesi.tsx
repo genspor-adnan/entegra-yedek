@@ -72,6 +72,17 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
 
   /** Dip toplam / TOPLAM satiri icin yerel -> rapor dovizi. */
   const dovizeCevir = (yerel: number) => (raporDovizli ? yerel / raporKur : yerel);
+
+  /**
+   * BASVURU DIP TOPLAMI KDV DAHIL SUTUNDAN (371/372): iskontosuz brut, iskonto
+   * ve iskontolu genel toplam. Matrahtan turetmek kurus kaydiriyordu - hastaya
+   * soylenen rakam saklanan bruttur.
+   */
+  const brutSatir = (r: SatirDurumu) => sayi(r.birimFiyatKdvli) || bruta(sayi(r.birimFiyat), r.kdv);
+  const brutHam = satirlar.reduce((t, r) => t + sayi(r.adet) * brutSatir(r), 0);
+  const brutGenel = satirlar.reduce(
+    (t, r) => t + satirTutari(sayi(r.adet), brutSatir(r), r.iskonto, r.iskonto2), 0);
+  const brutIskonto = Math.round((brutHam - brutGenel) * 100) / 100;
   return (
     <>
 <div className="kagrup">
@@ -514,6 +525,35 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         </thead>
       )}
       <tbody>
+        {/* BASVURUDA KDV SATIRI YOK (kullanici): fiyatlar zaten KDV DAHIL
+            konusuluyor - matrah/KDV kirilimi hastayi ilgilendirmiyor, fatura
+            kesilirken dogar. Iskonto varsa uc satir kalir: Toplam · İskonto ·
+            Genel Toplam. Rakamlar KDV DAHIL SUTUNDAN gelir (371) - matrahtan
+            turetmek kurus kaydiriyordu. */}
+        {basvuruMu ? (
+          <>
+            {brutIskonto > 0.004 && (
+              <>
+                <tr>
+                  <td>Toplam</td>
+                  <td className="hiza-sag">{para.format(brutHam)}</td>
+                  {raporDovizli && <td className="hiza-sag sonuk" />}
+                </tr>
+                <tr>
+                  <td>İskonto</td>
+                  <td className="hiza-sag ind">−{para.format(brutIskonto)}</td>
+                  {raporDovizli && <td className="hiza-sag sonuk" />}
+                </tr>
+              </>
+            )}
+            <tr className="genel">
+              <td>Genel Toplam</td>
+              <td className="hiza-sag">{para.format(brutGenel)}</td>
+              {raporDovizli && <td className="hiza-sag sonuk" />}
+            </tr>
+          </>
+        ) : (
+        <>
         <tr>
           <td>Ara Toplam</td><td className="hiza-sag">{para.format(onizleme.matrah)}</td>
           {raporDovizli && <td className="hiza-sag sonuk">{para.format(dovizeCevir(onizleme.matrah))}</td>}
@@ -526,6 +566,8 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
           <td>Genel Toplam</td><td className="hiza-sag">{para.format(onizleme.genel)}</td>
           {raporDovizli && <td className="hiza-sag sonuk">{para.format(dovizeCevir(onizleme.genel))}</td>}
         </tr>
+        </>
+        )}
       </tbody>
     </table>
   )}

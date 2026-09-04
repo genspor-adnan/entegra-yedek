@@ -281,6 +281,8 @@ public sealed partial class BelgeDeposu
         var iskonto = k["iskonto"];
         var iskonto2 = k["iskonto2"];
         var payKalan = 0m;
+        /** Payin KDV DAHIL karsiligi (372) - 0 ise hedef matrahtan turetir. */
+        decimal birimFiyatKdvli = 0m;
 
         if (pay > 0)
         {
@@ -293,6 +295,18 @@ public sealed partial class BelgeDeposu
             if (payTutarSecim is { } secim && secim > 0 && secim < kalan) kalan = secim;
             payKalan = kalan;
             birimFiyat = miktar > 0 ? decimal.Round(kalan / miktar, 6) : kalan;
+            // KURUS FARKI OLMASIN (372, kullanici): pay tutarlari MATRAH
+            //   cinsinden ve satir tutari 2 haneye yuvarli - 100,00 brut
+            //   tahsil edilen bir satirdan 84,75 tasiniyor, hedef KDV'yi
+            //   yeniden hesaplayinca 100,01 cikiyordu. Kaynakta BRUT tutar
+            //   sakliysa payin BRUT karsiligi orantiyla tasinir; hedefin
+            //   matrahi ondan turetilir (yazma hatti, 4 hane) ve toplam
+            //   birebir tutar.
+            var kaynakTutar = Convert.ToDecimal(k["tutar"] ?? 0m);
+            var kaynakBrut  = k.TryGetValue("tutar_kdvli", out var tk)
+                            ? Convert.ToDecimal(tk ?? 0m) : 0m;
+            if (kaynakBrut > 0 && kaynakTutar > 0 && miktar > 0)
+                birimFiyatKdvli = decimal.Round(kalan * kaynakBrut / kaynakTutar / miktar, 6);
             // DOVIZ FIYATI DA PAYDAN: kaynaktan aynen kopyalaninca dip toplamin
             //   doviz sutunu KAYNAK fiyatiyla hesaplaniyor, belge.doviz_tutari
             //   oradan doluyor ve mali_hareket.borc onu kullaniyordu - 30 TL'lik
@@ -321,6 +335,8 @@ public sealed partial class BelgeDeposu
             ["miktar"] = miktar,
             ["birim"] = k["birim"],
             ["birimFiyat"] = birimFiyat,
+            // 0 ise yazma hatti brutu matrahtan uretir (eski davranis).
+            ["birimFiyatKdvli"] = birimFiyatKdvli > 0 ? birimFiyatKdvli : (object?)null,
             ["iskonto"] = iskonto,
             ["iskonto2"] = iskonto2,
             ["kdv"] = k["kdv"],

@@ -119,7 +119,7 @@ public sealed partial class BelgeDeposu
                    s.giris_depo_id, s.cikis_depo_id, s.izleme, s.izleme_kodu,
                    s.stok_durum_degis, s.proje_id, s.kalan_miktar, s.belge_id,
                    s.kurum_tutar, s.hasta_tutar, s.kurum_kapatilan, s.hasta_kapatilan,
-                   s.tutar
+                   s.tutar, s.tutar_kdvli, s.birim_fiyat_kdvli
               from public.belge_satir s
              where s.id = any(@p0)
              order by s.sira

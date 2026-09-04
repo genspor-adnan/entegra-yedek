@@ -4797,3 +4797,18 @@ kdv_durum='Dahil' yoktu; o dallar olu koddu.)
 PAY TUTARI olmasi: `hasta_tutar` 2 haneli matrah (84,75) olarak saklaniyor, fis onu alip KDV'yi
 yeniden hesapliyor (84,75 x %18 = 15,26). Hastadan 100,00 tahsil edilip fise 100,01 yazilmasi
 dogru degil - pay dagitiminin da brut tabanina gecmesi gerekiyor (adim 5). Kullaniciya bildirildi.
+
+**KURUS FARKI KAPANDI + basvuru dip toplami sadelesti (kullanici).**
+1. *Dip toplam:* basvuruda KDV satiri YOK - fiyatlar zaten KDV dahil konusuluyor, matrah/KDV
+kirilimi hastayi ilgilendirmiyor (fatura kesilirken dogar). Iskonto varsa uc satir: Toplam ·
+İskonto · Genel Toplam. Rakamlar KDV DAHIL SUTUNDAN geliyor (371) - matrahtan turetmek kurus
+kaydiriyordu.
+2. *"Kurus farki olmasin":* basvurudan kesilen fis 100,01 cikiyordu. KOK NEDEN donusumde tasinan
+tutarin PAY TUTARI olmasi: satirin `tutar` kolonu 2 haneye yuvarli matrah (84,75), hasta payi da
+oradan geliyor; hedef KDV'yi yeniden hesaplayinca (84,75 x %18 = 15,26) toplam 100,01 oluyordu.
+Artik kaynakta BRUT tutar sakliysa payin BRUT karsiligi ORANTIYLA tasiniyor
+(`kalan x tutar_kdvli / tutar`), hedefin matrahi ondan 4 haneyle turetiliyor. Kaynakta brut yoksa
+alan bos gider ve eski davranis aynen surer.
+*Canli dogrulama (ucbastan):* brut 100,00 / %18 basvuru -> GENEL **100,00**; ayni satirdan kesilen
+fis -> birim fiyat 84,7458 · brut 100,00 · GENEL **100,00**. Birebir, kurus farki YOK.
+Toplam: **341 test gecti.**
