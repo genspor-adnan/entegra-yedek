@@ -221,7 +221,12 @@ export function PersonelKimlikOzet({
                 kimligin parcasi - "Kimlik Detayı" kutusunda jenerik
                 cizilirken pasaport/vefat/mahremiyet gibi seyrek alanlarin
                 arasinda kayboluyordu. */}
-            {(babaAdiAlan || anaAdiAlan) && (
+            {/* HASTADA BABA/ANA ADI CIZILMEZ (kullanici): "bunlar gridde var" -
+                yakin bilgisi Yakınlar gridinde ad-soyad + yakinlik (Annesi /
+                Babası) olarak zaten tutuluyor, kimlik kutusunda ikinci kez
+                sorulmasi ayni bilgiyi iki yere yazdiriyordu. Personelde
+                ozluk alani olarak kaliyor. */}
+            {kartAdi !== 'hasta' && (babaAdiAlan || anaAdiAlan) && (
               <div className="adres-satir">
                 {babaAdiAlan && (
                   <label className="alan tip-metin">
