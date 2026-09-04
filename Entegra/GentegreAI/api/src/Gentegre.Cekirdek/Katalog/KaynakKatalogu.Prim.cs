@@ -23,38 +23,38 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",        "p.id",        "sayi",  "Id", Varsayilan: false),
+
+            // KOLON SIRASI = KART SIRASI (kullanici): once planin KIMLIGI
+            //   (Kod · Plan Adı · Prim Rolü · Prim Zamanı · Durum), sonra
+            //   KAPSAM (Ödeyen Tipi · Şube · Başlangıç · Bitiş). Ayni bilgiyi
+            //   iki ekranda farkli sirada okumak, kullaniciyi her gecis
+            //   sonrasi yeniden yer aramaya zorluyordu.
             new("kod",       "p.kod",       "metin", "Kod", Genislik: 120),
             new("ad",        "p.ad",        "metin", "Plan Adı", Genislik: 260),
-            // ILK KAPI (333): planin nasil okunacagini belirler - listede de
-            //   plan adinin hemen yaninda.
-            new("primZamaniAdi",
-                "case p.prim_zamani when 2 then 'Faturalamada' else 'Tahsilatta' end",
-                                           "metin", "Prim Zamanı", Hizalama: "orta",
-                                           Bicim: "rozet", Genislik: 130,
-                                           Filtrelenebilir: false),
-            new("primZamani", "p.prim_zamani", "sayi", "Zaman Kodu", Varsayilan: false),
-            // ROL (379): plan artik TEK rol icin calisir - listede de plan
-            //   adinin yaninda durur.
+            // ROL (379): plan TEK rol icin calisir.
             new("rolAdi",
                 "coalesce((select kd.ad from public.kod_liste kl"
                 + " join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = p.rol"
                 + " where kl.kod = 'prim.rol'), '')",
                                            "metin", "Prim Rolü", Genislik: 120),
             new("rol",       "p.rol",       "sayi",  "Rol Kodu", Varsayilan: false),
-            new("baslangic", "p.baslangic", "tarih", "Başlangıç", Genislik: 110),
-            new("bitis",     "p.bitis",     "tarih", "Bitiş", Genislik: 110),
-            // KIM KAPSANIYOR (375): plan artik tek hekime degil KISI LISTESINE
-            //   baglanir. Listede kac kisi oldugu tek basina yeterli bilgi -
-            //   isimler kartin "Prim Alanlar" sekmesinde.
-            new("kapsananlar",
-                "case when exists (select 1 from public.prim_plani_taraf t"
-                + " where t.plan_id = p.id)"
-                + " then (select count(*)::text || ' kişi' from public.prim_plani_taraf t"
-                + " where t.plan_id = p.id) else 'Tümü' end",
-                                           "metin", "Kapsanan", Hizalama: "orta",
-                                           Genislik: 110, Filtrelenebilir: false),
-            // Kartta artik TIP soruluyor (380) - listede de o gorunur; kurum
-            //   adi kolonu duruyor ama varsayilan degil.
+            // ILK KAPI (333): planin nasil okunacagini belirler.
+            new("primZamaniAdi",
+                "case p.prim_zamani when 2 then 'Faturalamada' else 'Tahsilatta' end",
+                                           "metin", "Prim Zamanı", Hizalama: "orta",
+                                           Bicim: "rozet", Genislik: 130,
+                                           Filtrelenebilir: false),
+            new("primZamani", "p.prim_zamani", "sayi", "Zaman Kodu", Varsayilan: false),
+            new("durumAdi",
+                "case when coalesce(p.durum, 1) = 1 then 'Aktif' else 'Pasif' end",
+                                           "metin", "Durum", Hizalama: "orta",
+                                           Bicim: "rozet", Genislik: 90,
+                                           Filtrelenebilir: false),
+            new("durum",     "p.durum",     "sayi",  "Durum Kodu", Varsayilan: false),
+
+            // --------------------------------------------------- kapsam ----
+            // Kartta artik TIP soruluyor (380); kurum adi kolonu duruyor ama
+            //   varsayilan degil.
             new("odeyenTipiAdi",
                 "case coalesce(p.odeyen_tipi, 0) when 1 then 'Özel (Ücretli)' "
                 + "when 2 then 'ÖSS' when 3 then 'SGK' else 'Tümü' end",
@@ -64,39 +64,40 @@ public static partial class KaynakKatalogu
                                            Varsayilan: false),
             new("kurum",     "coalesce(ku.unvan, '')", "metin", "Ödeyen Kurum",
                                            Genislik: 190, Varsayilan: false),
-            // BAZ kartta sorulmuyor (uygulanmayan ayardi) - listede de
-            //   VARSAYILAN GORUNUR DEGIL; kolon menusunden acilabilir.
+            new("baslangic", "p.baslangic", "tarih", "Başlangıç", Genislik: 110),
+            new("bitis",     "p.bitis",     "tarih", "Bitiş", Genislik: 110),
+
+            // ------------------------------------------------ ozet / sayac --
+            // KIM KAPSANIYOR (375): isimler kartin "Prim Alanlar" sekmesinde,
+            //   listede sayisi yeter.
+            new("kapsananlar",
+                "case when exists (select 1 from public.prim_plani_taraf t"
+                + " where t.plan_id = p.id)"
+                + " then (select count(*)::text || ' kişi' from public.prim_plani_taraf t"
+                + " where t.plan_id = p.id) else 'Tümü' end",
+                                           "metin", "Kapsanan", Hizalama: "orta",
+                                           Genislik: 110, Filtrelenebilir: false),
+            new("satirSayisi",
+                "(select count(*) from public.prim_plani_satir s where s.plan_id = p.id)",
+                                           "sayi",  "Satır", Hizalama: "sag", Genislik: 70,
+                                           Filtrelenebilir: false),
+
+            // ------------------------------- kartta sorulmayan (gizli) -----
+            //   Hepsi kolon menusunden acilabilir; veri kaybolmuyor.
             new("bazAdi",
                 "case p.baz when 1 then 'Liste fiyatı' when 2 then 'Net tutar' " +
                 "when 3 then 'Kurum payı' else 'Tahsil edilen (matrah)' end",
                                            "metin", "Baz", Genislik: 180,
                                            Filtrelenebilir: false, Varsayilan: false),
             new("baz",       "p.baz",       "kod",   "Baz Kodu", Varsayilan: false),
-            // Kartta sorulmuyor (uygulanmayan ayar) - listede de varsayilan
-            //   gorunur degil; kolon menusunden acilabilir.
             new("kdvAdi",
                 "case when coalesce(p.kdv_haric, 1) = 1 then 'Hariç' else 'Dahil' end",
                                            "metin", "KDV", Hizalama: "orta",
                                            Genislik: 80, Filtrelenebilir: false,
                                            Varsayilan: false),
             new("kdvHaric",  "p.kdv_haric", "sayi",  "KDV Kodu", Varsayilan: false),
-            new("satirSayisi",
-                "(select count(*) from public.prim_plani_satir s where s.plan_id = p.id)",
-                                           "sayi",  "Satır", Hizalama: "sag", Genislik: 70,
-                                           Filtrelenebilir: false),
-            // Kartta girilmiyor (varsayilan 10) - listede de VARSAYILAN GORUNUR
-            //   DEGIL; kolon menusunden acilabilir, veri kaybolmuyor.
             new("oncelik",   "p.oncelik",   "sayi",  "Öncelik", Hizalama: "sag",
                                             Genislik: 80, Varsayilan: false),
-            // Kartta combo oldu (1 Aktif / 0 Pasif) - listede de METIN olarak
-            //   yazilir; onay kutusu rozeti "pasif" durumunu bos hucre gibi
-            //   gosteriyordu.
-            new("durumAdi",
-                "case when coalesce(p.durum, 1) = 1 then 'Aktif' else 'Pasif' end",
-                                           "metin", "Durum", Hizalama: "orta",
-                                           Bicim: "rozet", Genislik: 90,
-                                           Filtrelenebilir: false),
-            new("durum",     "p.durum",     "sayi",  "Durum Kodu", Varsayilan: false),
             new("aciklama",  "p.aciklama",  "metin", "Açıklama", Varsayilan: false),
         });
 
