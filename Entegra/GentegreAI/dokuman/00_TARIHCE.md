@@ -5268,3 +5268,20 @@ Iki duzeltme:
     calisir. Yan fayda: iskonto 0 iken sunucunun urettigi bos "İskonto(%0.00)"
     satiri da kayboldu (kodun yorumu "sunucu o satiri uretmez" diyordu, oysa
     0 degeriyle uretiyor).
+
+### Prim Alanlar gridi: Tipi ve Bölüm kolonlari
+
+Kisinin SOLUNDA "Tipi" (Dış Hekim / Personel), SAGINDA "Bölüm" (kullanici).
+
+Ikisi de SALT OKUNUR ve tarafin KENDI kaydindan okunur - plan satirina
+KOPYALANMAZ. Kopyalansaydi kisi dis hekimken ic personele gecince (ya da bolumu
+degisince) plan satirinda eski deger kalir, iki kayit sessizce ayrisirdi.
+
+Teknik: `KartDeposu.Okuma` detay select'ini `alan.Kolon` ifadelerini oldugu
+gibi yazarak kurar - yani bir alanin "kolonu" ALT SORGU olabilir. Boyle alanlar
+`Yazilabilir: false` verilir ve `DetayDegerleri` onlari insert/update'e hic
+almaz. Detay tablosuna kolon eklemeden, gorunum de yazmadan okunur kolon
+kazandiran desen budur.
+
+NOT: aramayla YENI eklenen satirda iki kolon KAYIT EDILENE KADAR bostur -
+degerler sunucudan okunuyor, kart kaydedilip yeniden okununca dolar.

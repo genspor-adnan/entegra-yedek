@@ -128,6 +128,17 @@ public static partial class KartKatalogu
                 new KartAlani[]
                 {
                     new("id",       "id",       "sayi", Yazilabilir: false),
+                    // TIPI ve BOLUM (kullanici) - SALT OKUNUR, tarafin kendi
+                    //   kaydindan okunur. Kopyalanmaz: kisi dis hekimken ic
+                    //   personele gecerse (ya da bolumu degisirse) plan
+                    //   satirinda eski deger kalirdi. Yazilabilir:false oldugu
+                    //   icin insert/update'e girmez, yalniz select'te cizilir.
+                    new("tipi",
+                        "(select case when coalesce(pp.dis_hekim, 0) = 1 "
+                        + "then 'Dış Hekim' else 'Personel' end "
+                        + "from public.taraf_personel pp "
+                        + "where pp.id = prim_plani_taraf.taraf_id)",
+                        "metin", Yazilabilir: false, Baslik: "Tipi"),
                     new("tarafId",  "taraf_id", "kod", Zorunlu: true,
                         KodTablosu: "public.v_prim_taraf_lookup",
                         // IKI KAYNAK BIRDEN (375, kullanici): prim alan kisi
@@ -135,6 +146,11 @@ public static partial class KartKatalogu
                         //   penceresi ikisini de tarar; virgul iki listeyi
                         //   ayirir.
                         AramaKaynagi: "personel,dis-hekim", Baslik: "Kişi"),
+                    new("bolum",
+                        "(select d.ad from public.departman d "
+                        + "join public.taraf t on t.departman = d.id "
+                        + "where t.id = prim_plani_taraf.taraf_id)",
+                        "metin", Yazilabilir: false, Baslik: "Bölüm"),
                     new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
                         Baslik: "Açıklama"),
                 },
