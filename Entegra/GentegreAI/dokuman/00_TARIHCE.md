@@ -5648,3 +5648,23 @@ Ayni satirin iki dali ayri ayri degerlendiriliyor: fatura dali plani bulamadi
 
 Tum roller artik uctan uca dogrulanmis oldu: Gönderen (10/11), Yapan (17),
 İsteyen (18), Raporlayan (19), Uygulayan (20).
+
+### "Onaylayan" rollu plan testi - SABIT TUTAR + IKI KISI PAYLASIMI
+
+Plan 21 "MR — Onaylayan 300 TL" iki yeni boyutu birden denedi:
+
+**SABIT TUTAR** (`oran_tipi = 2`): prim matrahtan BAGIMSIZ. 1.100 TL brut /
+1.000 matrah bir iste bile kural "onay basina 300 TL" der - yuzdeyle
+anlatilamayan bir odeme sekli (imza/onay emegi kalemin fiyatiyla artmaz).
+
+**PAY YUZDESI**: ayni rolde IKI kisi (%50 / %50). Iki onaylayan varsa 300 TL
+ikiye bolunur - kurum ayni is icin iki kez odemez.
+
+    ARİF YILMAZ    Onaylayan  sabit 300  x %50 = 150,00
+    BAHAR ALADAĞ   Onaylayan  sabit 300  x %50 = 150,00
+
+Ustelik sinir da tutuyor: %70 + %70 denendiginde uc reddetti -
+"Aynı roldeki pay yüzdeleri toplamı %100'ü aşamaz (bulunan: %140)."
+
+Alti prim rolunun HEPSI artik uctan uca dogrulandi:
+Gönderen · İsteyen · Uygulayan · Yapan · Raporlayan · Onaylayan.
