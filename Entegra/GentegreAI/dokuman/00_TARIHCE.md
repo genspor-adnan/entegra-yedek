@@ -5490,3 +5490,32 @@ salt okunur olmasi. Fixture GERCEK sunucudan alinir; bayatlayinca test
 kirilir - nitekim ilk kosuda kirildi ve tazelendi.
 
 403 test.
+
+### Plana kim eklenebilir: ROL ADAYLIGI + AKTIFLIK (db/382-384)
+
+Uc adimda genellesti:
+
+  382  dis hekim yalnizca "Gönderen" rollu plana
+  383  DAHA GENELI: kisi PLANIN ROLUNDE aday olmali (`v_prim_rol_aday`)
+  384  ve AKTIF olmali (kullanici: "tabii ki aktifse şartı da var")
+
+383, 382'yi KAPSAR: aday gorunumunde dis hekimin tek rolu zaten Gönderen, o
+yuzden ayri bir istisna yazmaya gerek kalmadi.
+
+Gerekce ayni: rolu isaretlenmemis (ya da isten ayrilmis) birine yazilan satir
+`belge_satir_rol`'de hic gorunmez - hakedis HIC dogmaz ve eksik prim ancak ay
+sonunda fark edilir.
+
+**Kural iki yerde.** Arayuz: arama kaynagi artik `prim-aday` (yeni liste
+kaynagi, `v_prim_rol_aday` uzerine) ve planin rolu ile SUZULUYOR - kullanici
+uygun olmayan kisiyi GORMUYOR bile, hatayla karsilasmiyor. Veritabani:
+`tg_prim_plani_taraf_dogrula` garanti - istek dogrudan API'ye gelebilir,
+gocler arayuzden gecmez.
+
+ONEMLI SINIR: tetik yalniz EKLEME/DEGISTIRME aninda calisir. Bugun ekli olan
+biri yarin pasife alinirsa PLANDAKI SATIRI DURUR ve gecmis hakedisleri
+bozulmaz - kisiyi isten cikarmak, gecmis primini silmek demek degildir.
+
+Onceki "engelleme, gorunur yap" karari (377) BOZULMADI: o karar, engeli
+KOR bir yerde koymakla ilgiliydi (secim sessizce dusuyordu). Simdi engel
+aramanin kendisinde - kullanici neyi neden goremedigini bilir.

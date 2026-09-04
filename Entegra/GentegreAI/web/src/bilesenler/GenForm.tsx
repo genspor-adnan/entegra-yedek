@@ -1194,6 +1194,15 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           //   alani ekranda tutmak, uygulanmayan bir ayar uretiyordu.
           gizliAlanlar={kaynak === 'prim-plani' && Number(deger.primZamani) === 2
             ? new Set(['tahsilatTuru']) : undefined}
+          // ARAMA PLANIN ROLUNE BAGLI (383, kullanici): yalnizca O ROLDE ADAY
+          //   olan kisiler listelenir. Rolu isaretlenmemis birine yazilan
+          //   satir `belge_satir_rol`'de hic gorunmez, hakedis HIC dogmaz ve
+          //   eksik prim ancak ay sonunda fark edilir.
+          //   "Dis hekim yalniz Gönderen planina" kurali bundan KENDILIGINDEN
+          //   cikar: aday gorunumunde dis hekimin tek rolu Gönderen.
+          aramaEkFiltre={kaynak === 'prim-plani' && aktif.detay.ad === 'taraflar'
+            ? { alan: 'rol', op: 'esit' as const, deger: Number(deger.rol) || 1 }
+            : undefined}
           taslakKural={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
             ? fiyatSatirKurali : undefined}
           // Tumu / Stok / Hizmet cipleri (kullanici) - karma listede tek tur gorunur.

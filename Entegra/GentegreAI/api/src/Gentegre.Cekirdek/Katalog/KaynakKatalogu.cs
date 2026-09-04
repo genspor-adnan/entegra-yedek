@@ -109,6 +109,7 @@ public static partial class KaynakKatalogu
         // PRIM / HAKEDIS (324): prim tahsil edildikce dogar - hakedis satiri
         //   tahsilat dagitimindan uretilir.
         Ekle(PrimPlani());
+        Ekle(PrimAday());
         Ekle(EntegrasyonHesap());
         Ekle(HakedisSatir());
         Ekle(Hakedis());

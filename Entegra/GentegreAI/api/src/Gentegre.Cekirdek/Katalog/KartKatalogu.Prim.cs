@@ -161,11 +161,13 @@ public static partial class KartKatalogu
                         "metin", Yazilabilir: false, Baslik: "Tipi"),
                     new("tarafId",  "taraf_id", "kod", Zorunlu: true,
                         KodTablosu: "public.v_prim_taraf_lookup",
-                        // IKI KAYNAK BIRDEN (375, kullanici): prim alan kisi
-                        //   ic personel de olabilir DIS HEKIM de. Arama
-                        //   penceresi ikisini de tarar; virgul iki listeyi
-                        //   ayirir.
-                        AramaKaynagi: "personel,dis-hekim", Baslik: "Kişi"),
+                        // ARAMA KAYNAGI = ROL ADAYLARI (383, kullanici: "prim
+                        //   rolüne göre personeldeki prim rolü eşleşmesi ile
+                        //   alanlara eklenebilir"). `prim-aday` gorunumu ic
+                        //   personel + dis hekimi BIRLIKTE tasir ve rol
+                        //   kolonuyla suzulur; boylece rolu isaretlenmemis
+                        //   kisi aramada HIC cikmaz.
+                        AramaKaynagi: "prim-aday", Baslik: "Kişi"),
                     // PRIM ROLU (377): kisinin ISARETLI rolleri. Bos ise plan
                     //   o kisi icin hicbir hakedis uretmez - eskiden bu durum
                     //   EKLEMEYI ENGELLIYORDU (kullanici: "enter dedim

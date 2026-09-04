@@ -10,6 +10,45 @@
 /// </summary>
 public static partial class KaynakKatalogu
 {
+    /// <summary>
+    /// PRİM ROLÜ ADAYLARI (383) - "Prim Alanlar" sekmesindeki arama kaynağı.
+    ///
+    /// Plana eklenecek kişi, PLANIN ROLÜNDE aday olmalı: rolü işaretlenmemiş
+    /// birine yazılan satır `belge_satir_rol`'de hiç görünmez, hakediş hiç
+    /// doğmaz ve eksik prim ancak ay sonunda fark edilir. Arama bu yüzden
+    /// doğrudan aday listesini tarar - kullanıcı uygun olmayanı görmez bile.
+    ///
+    /// `v_prim_rol_aday` iki kaynağı birleştirir: prim rolü işaretli İÇ
+    /// personel ve çalışma şekli "Primli" olan DIŞ hekimler (onların tek rolü
+    /// Gönderen'dir - "dış hekim yalnız Gönderen planına" kuralı bu listeden
+    /// kendiliğinden çıkar, ayrı bir istisna yazmaya gerek yok).
+    /// </summary>
+    private static KaynakTanimi PrimAday() => new(
+        Ad: "prim-aday",
+        YetkiKodu: "prim",
+        Kaynak: "public.v_prim_rol_aday a join public.taraf t on t.id = a.id",
+        SabitKosul: "coalesce(a.durum, 1) = 1",
+        VarsayilanSirala: "t.unvan asc",
+        SubeKolonu: null,
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",    "a.id",  "sayi",  "Id", Varsayilan: false),
+            // KOD arama icin gerekli: jenerik arama serbest metni "kod icerir"
+            //   kosuluyla da ariyor - kolon yoksa "Bilinmeyen alan: kod".
+            new("kod",   "t.kod", "metin", "Kod", Genislik: 110),
+            new("unvan", "t.unvan", "metin", "Ad Soyad", Genislik: 260),
+            // ROL: arama BU KOLONLA suzuluyor (ekFiltre) - planin rolu.
+            new("rol",   "a.rol", "sayi",  "Rol Kodu", Varsayilan: false),
+            new("tip",
+                "case when coalesce(a.dis_mi, 0) = 1 then 'Dış Hekim' else 'Personel' end",
+                                 "metin", "Tipi", Hizalama: "orta", Genislik: 110),
+            new("departmanAdi", TarafKatalog.DepartmanAdi, "metin", "Bölüm", Genislik: 160),
+            new("gorev", TarafKatalog.PozisyonAdi, "metin", "Görev", Genislik: 160),
+            new("telefonHam", TarafKatalog.TelefonHam, "metin", "Telefon (ham)",
+                Varsayilan: false),
+            new("cepTel", "t.cep_tel", "metin", "Cep", Genislik: 130),
+        });
+
     /// <summary>Prim planları - kapsam ve baz; satırlar kartın detayında.</summary>
     private static KaynakTanimi PrimPlani() => new(
         Ad: "prim-plani",

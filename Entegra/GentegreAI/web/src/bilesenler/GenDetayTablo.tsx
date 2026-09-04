@@ -90,6 +90,14 @@ interface Props {
    * durumda kullaniciya sorulmasi, uygulanmayan bir ayar uretir.
    */
   gizliAlanlar?: ReadonlySet<string>;
+  /**
+   * Arama pencerelerinin KAYNAKLARINI daraltir (ör. prim planinin rolu
+   * "Gönderen" degilse dis hekimler hic listelenmesin). Alanin kendi
+   * `aramaKaynagi` degerini EZER; verilmezse o kullanilir.
+   */
+  aramaKaynaklari?: readonly string[];
+  /** Arama penceresine EKLENEN sabit kosul (ör. prim planinin rolu). */
+  aramaEkFiltre?: { alan: string; op: 'esit'; deger: string | number };
   /** Baslik ve satir eylemleri IKON olarak cizilir (＋ / ✎ / 🗑) - seri ve XSLT
       gridleriyle ayni gorunum (kullanici). Metin dugmeler dar gridlerde
       satiri tasiriyordu. */
@@ -144,7 +152,7 @@ function gunFarki(bas: string, bit: string): number | null {
 
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler, kutuSinif,
-                               gizliAlanlar }: Props) {
+                               gizliAlanlar, aramaKaynaklari, aramaEkFiltre }: Props) {
   /**
    * KAMPANYA SATIRI (268): "Kapsam" TEK kolondur (iskonto_yeri_id) ama
    * anlami satirin TIPINE gore degisir - Liste'de 0, Kategori'de kategori id,
@@ -1059,9 +1067,13 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           acik
           cokluSecim
           // aramaKaynagi VIRGULLU olabilir: prim alan kisi ic personel de
-          //   olabilir dis hekim de, ikisi ayri liste kaynagi.
-          kaynaklar={tarafAlani.aramaKaynagi!.split(',').map(x => x.trim()).filter(Boolean)}
+          //   olabilir dis hekim de, ikisi ayri liste kaynagi. Cagiran
+          //   daraltabilir (382: dis hekim yalniz "Gönderen" planinda).
+          kaynaklar={aramaKaynaklari
+            ? [...aramaKaynaklari]
+            : tarafAlani.aramaKaynagi!.split(',').map(x => x.trim()).filter(Boolean)}
           yerTutucu={`${tarafAlani.baslik} ara…`}
+          ekFiltre={aramaEkFiltre}
           secimDenetimi={secilen =>
             tarafSecimEngeli(durum.guncel, tarafAlani.ad, secilen)}
           onSec={() => { /* coklu kipte kullanilmaz - onSecCoklu calisir */ }}
