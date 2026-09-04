@@ -328,7 +328,11 @@ const adliBlok = (
                 <div className="kasutun" style={{ flex: '1 1 260px' }}>
                   <div className="kagrup">
                     <h6>İletişim</h6>
-                    <div className="alan-izgara tek-sutun">{renderAlanListesi(hastaIletisimAlanlari)}</div>
+                    {/* HASTADA ALANLAR YAN YANA (kullanici: "telefondakinde
+                        daha fazla yükseklik var, çerçeve boyları aynı değil"):
+                        tek sutunda iki alan alt alta dizilince kutu yanindaki
+                        Kimlik Bilgileri'nden uzun kaliyordu. */}
+                    <div className="alan-izgara">{renderAlanListesi(hastaIletisimAlanlari)}</div>
                   {kaynak === 'hasta' && adresDetay && (
                     <TekAdres
                       meta={adresDetay}
@@ -434,7 +438,10 @@ const adliBlok = (
              basliksiz cizilince ustundeki kutularin devami gibi duruyor,
              kullanici onu ayri bir bolum olarak SECEMIYORDU. */
           <div className="kagrup" key="Yakinlar">
-            <h6>{acilDetay.baslik ?? 'Yakınlar'}</h6>
+            {/* Mockup basligi: "Yakınlar / Acil Durumda Aranacak" - katalog
+                adi personel icin yazilmis ("Acil Durumda Aranacak Kişiler"),
+                hastada aranan sey YAKIN. */}
+            <h6>Yakınlar / Acil Durumda Aranacak</h6>
             <GenDetayTablo
               meta={acilDetay}
               durum={detaylar[acilDetay.ad] ?? bosDetay()}

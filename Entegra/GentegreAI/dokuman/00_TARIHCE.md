@@ -4950,3 +4950,14 @@ kutularin devami gibi duruyor, ayri bir bolum olarak secilemiyordu.
 *Kimlik Bilgileri ve İletişim kutulari AYNI YUKSEKLIKTE:* farkli sayida alan tasidiklari icin biri
 kisa kalip aralarinda "delik" birakiyordu.
 Toplam: **362 test gecti**.
+
+**"Yakınlar gridi görünmüyor" - GERCEKLIK TESTI yazildi.** Tahmin etmek yerine hasta karti jsdom'da
+CIZILDI (`hastaKartiGenel.test.tsx`, GenForm + taklit sunucu): Genel sekmesi olusuyor ve Yakınlar
+gridi DOM'da - basligi ve "Yakınlık" kolonuyla birlikte. Yani kod dogru calisiyor; onceki commit'te
+Genel sekmesinin garanti altina alinmasi sorunu cozmus.
+Iki iyilestirme yapildi: kutu basligi mockup'a yaklastirildi ("Yakınlar / Acil Durumda Aranacak" -
+katalog adi "Acil Durumda Aranacak Kişiler" PERSONEL icin yazilmisti, hastada aranan sey YAKIN) ve
+hasta İletişim kutusundaki alanlar YAN YANA alindi (kullanici: "telefondakinde daha fazla yükseklik
+var, çerçeve boyları aynı değil") - tek sutunda alt alta dizilince kutu yanindaki Kimlik
+Bilgileri'nden uzun kaliyordu.
+Toplam: **364 test gecti**.
