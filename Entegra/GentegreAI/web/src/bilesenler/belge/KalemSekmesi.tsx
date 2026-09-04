@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { AvansMahsup } from '../AvansMahsup';
-import { para, tarihSaat, hamSayi as sayi } from '../bicim';
+import { para, say4, tarihSaat, hamSayi as sayi } from '../bicim';
 import { iskonatoMetni, satirTutari, type SatirDurumu } from '../../sayfalar/belgeSatir';
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
 import { bruta } from '../../sayfalar/belgeKarti/kdvModu';
@@ -83,6 +83,19 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
   const brutGenel = satirlar.reduce(
     (t, r) => t + satirTutari(sayi(r.adet), brutSatir(r), r.iskonto, r.iskonto2), 0);
   const brutIskonto = Math.round((brutHam - brutGenel) * 100) / 100;
+  /**
+   * ISKONTO ORANI (kullanici): satirlarin orani AYNI OLMAYABILIR (her satirin
+   * kendi iskontosu var, ustelik iki kademeli) - bu yuzden tek bir satirin
+   * orani degil ETKIN oran yazilir: iskonto / iskontosuz toplam. Tek oranli
+   * belgede zaten o oranin kendisi cikar; karma belgede de dogru olan budur.
+   */
+  const brutIskontoOran = brutHam > 0
+    ? Math.round(brutIskonto / brutHam * 10000) / 100 : 0;
+  /** Ayni oran SUNUCU dip toplami icin (kayitli belge): iskonto / Toplam. */
+  const dipToplamHam = sonuc?.dipToplam.find(d => d.tur === 1)?.deger ?? 0;
+  const dipIskonto = sonuc?.dipToplam.find(d => d.tur === 3)?.deger ?? 0;
+  const dipIskontoOran = dipToplamHam > 0
+    ? Math.round(dipIskonto / dipToplamHam * 10000) / 100 : 0;
   return (
     <>
 <div className="kagrup">
@@ -362,32 +375,39 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         </td></tr>
       )}
     </tbody>
-    <tfoot>
-      <tr className="genel">
-        {/* TOPLAM etiketi MIKTAR kolonuna kadarki her seyi kapsar: onay kutusu,
-            Tip, Kod, Ad + varsa Aciklama + varsa TARIH (basvuruda solda, siparişte
-            miktarin solunda - nerede olursa olsun bir kolon). Tarih sayilmadigi
-            icin siparis gridinde toplam satiri bir kolon kayiyordu. */}
-        <td colSpan={4 + (aciklamaVar ? 1 : 0) + (bilgi.siparis ? 1 : 0)}
-            className="hiza-sag">TOPLAM</td>
-        <td className="hiza-sag">
-          {satirlar.reduce((t, r) => t + (sayi(r.adet)), 0)
-                   .toLocaleString('tr-TR')}
-        </td>
-        {bilgi.kalem !== 'miktar' && <td colSpan={bilgi.kalem === 'sade' ? 1 : 3} />}
-        {bilgi.kalem !== 'miktar' && <td className="hiza-sag">{para.format(onizleme.matrah)}</td>}
-        {bilgi.kalem !== 'miktar' && dovizKolon && <td />}
-        {bilgi.kalem !== 'miktar' && dovizKolon && (
+    {/* GRIDIN KENDI TOPLAM SATIRI BASVURUDA CIZILMEZ (kullanici): hemen
+        altinda zaten dip toplam tablosu var (Genel Toplam / iskonto) - ayni
+        rakami iki kez, ustelik biri MATRAH digeri BRUT olarak gostermek
+        "hangisi dogru" sorusu doguruyordu. ERP belgelerinde duruyor: orada dip
+        toplam matrah/KDV kirilimini veriyor, grid satiri da miktar toplamini. */}
+    {!basvuruMu && (
+      <tfoot>
+        <tr className="genel">
+          {/* TOPLAM etiketi MIKTAR kolonuna kadarki her seyi kapsar: onay kutusu,
+              Tip, Kod, Ad + varsa Aciklama + varsa TARIH (basvuruda solda, siparişte
+              miktarin solunda - nerede olursa olsun bir kolon). Tarih sayilmadigi
+              icin siparis gridinde toplam satiri bir kolon kayiyordu. */}
+          <td colSpan={4 + (aciklamaVar ? 1 : 0) + (bilgi.siparis ? 1 : 0)}
+              className="hiza-sag">TOPLAM</td>
           <td className="hiza-sag">
-            {para.format(satirlar.reduce((t, r) => {
-              const f = sayi(r.birimFiyat);
-              const d = satirDoviz(r, satirTutari(sayi(r.adet), f, r.iskonto, r.iskonto2), f);
-              return t + (d?.tutar ?? 0);
-            }, 0))}
+            {satirlar.reduce((t, r) => t + (sayi(r.adet)), 0)
+                     .toLocaleString('tr-TR')}
           </td>
-        )}
-      </tr>
-    </tfoot>
+          {bilgi.kalem !== 'miktar' && <td colSpan={bilgi.kalem === 'sade' ? 1 : 3} />}
+          {bilgi.kalem !== 'miktar' && <td className="hiza-sag">{para.format(onizleme.matrah)}</td>}
+          {bilgi.kalem !== 'miktar' && dovizKolon && <td />}
+          {bilgi.kalem !== 'miktar' && dovizKolon && (
+            <td className="hiza-sag">
+              {para.format(satirlar.reduce((t, r) => {
+                const f = sayi(r.birimFiyat);
+                const d = satirDoviz(r, satirTutari(sayi(r.adet), f, r.iskonto, r.iskonto2), f);
+                return t + (d?.tutar ?? 0);
+              }, 0))}
+            </td>
+          )}
+        </tr>
+      </tfoot>
+    )}
   </table>
   {!kilitli && satirlar.length > 0 && (
     <div className="not">
@@ -503,9 +523,24 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         </thead>
       )}
       <tbody>
-        {sonuc.dipToplam.map((d, i) => (
+        {/* BASVURUDA SUNUCU DIP TOPLAMI DA SADE (kullanici): fiyatlar KDV
+            dahil konusuldugu icin Ara Toplam / KDV kirilimi hastayi
+            ilgilendirmiyor - o kirilim fatura kesilirken dogar. Iskonto (3) ve
+            Genel Toplam (20) kalir; iskonto YOKSA sunucu o satiri zaten
+            uretmez, tek satir gorunur. */}
+        {sonuc.dipToplam
+          .filter(d => !basvuruMu
+            // ISKONTO YOKSA "Toplam" da cizilmez: Genel Toplam ile ayni
+            //   rakami iki kez gostermek olurdu. Iskonto varsa uclu kalir.
+            || (d.tur === 1 && sonuc.dipToplam.some(x => x.tur === 3))
+            || d.tur === 3 || d.tur === 20)
+          .map((d, i) => (
           <tr key={i} className={d.tur === 20 ? 'genel' : ''}>
-            <td>{d.aciklama}</td>
+            {/* ISKONTO SATIRINDA ORAN DA (kullanici): tutarin yaninda "%10".
+                Satirlarin orani farkli olabildigi icin ETKIN oran yazilir -
+                iskonto / iskontosuz toplam. */}
+            <td>{d.aciklama}{d.tur === 3 && dipIskontoOran > 0 && (
+              <span className="sonuk"> %{say4.format(dipIskontoOran)}</span>)}</td>
             <td className="hiza-sag">{para.format(d.deger)}</td>
             {/* Dovizli belgede IKINCI kolon: kur ile yerel karsilik (kullanici). */}
             {raporDovizli && (
@@ -540,7 +575,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                   {raporDovizli && <td className="hiza-sag sonuk" />}
                 </tr>
                 <tr>
-                  <td>İskonto</td>
+                  <td>İskonto <span className="sonuk">%{say4.format(brutIskontoOran)}</span></td>
                   <td className="hiza-sag ind">−{para.format(brutIskonto)}</td>
                   {raporDovizli && <td className="hiza-sag sonuk" />}
                 </tr>

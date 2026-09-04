@@ -4812,3 +4812,14 @@ alan bos gider ve eski davranis aynen surer.
 *Canli dogrulama (ucbastan):* brut 100,00 / %18 basvuru -> GENEL **100,00**; ayni satirdan kesilen
 fis -> birim fiyat 84,7458 · brut 100,00 · GENEL **100,00**. Birebir, kurus farki YOK.
 Toplam: **341 test gecti.**
+
+**Basvuru dip toplami sadelesti + iskonto ORANI (kullanici).** Basvuruda KDV ve Ara Toplam satirlari
+CIZILMIYOR - fiyatlar zaten KDV dahil konusuluyor, kirilim fatura kesilirken dogar. Iskonto yoksa
+tek satir (Genel Toplam); varsa uc satir: Toplam · İskonto **%oran** · Genel Toplam. Oran ETKIN
+orandir (iskonto / iskontosuz toplam) - her satirin kendi iskontosu var, ustelik iki kademeli;
+tek satirin oranini yazmak karma belgede yaniltirdi. Kural hem sunucu dip toplaminda (kayitli
+belge) hem onizlemede (kaydedilmemis) ayni.
+**Gridin kendi TOPLAM satiri basvuruda cizilmiyor:** hemen altinda dip toplam tablosu var; ayni
+rakami iki kez, ustelik biri MATRAH digeri BRUT gostermek "hangisi dogru" sorusu doguruyordu. ERP
+belgelerinde duruyor (orada dip toplam matrah/KDV kirilimini, grid satiri miktar toplamini verir).
+4 test. Toplam: **345 test gecti**.

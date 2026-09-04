@@ -414,3 +414,78 @@ describe('ucretlendirme KDV DAHIL gosterir (kullanici)', () => {
     });
   });
 });
+
+describe('basvuru dip toplami sadelesti (kullanici)', () => {
+  // Sunucunun dip toplam satirlari (fn_belge_diptoplam): 1 Toplam · 3 İskonto ·
+  //   4 Ara Toplam · 5 kdv%x · 15 kdv Toplam · 20 Genel Toplam.
+  const satirliBelge = (kdv: number, birimFiyat: number, iskonto = 0) => {
+    const brut = Math.round(birimFiyat * (1 + kdv / 100) * 10000) / 10000;
+    const ind = Math.round(brut * iskonto) / 100;
+    const genel = brut - ind;
+    const d = (tur: number, aciklama: string, deger: number) =>
+      ({ tur, aciklama, deger, dovizTutari: 0, kur: '', belgeDovizi: 'TL' });
+    belgeOku.mockResolvedValue({
+      belge: (yanitlar as Record<string, Record<string, unknown>>)['114349'],
+      satirlar: [{ id: 1, sira: 1, tur: 2, hizmetId: 900, adet: 1, birimFiyat,
+                   birimFiyatKdvli: brut, kdv, iskonto, iskonto2: 0, aciklama: '' }],
+      dipToplam: [
+        d(1, 'Toplam', brut),
+        ...(iskonto ? [d(3, 'İskonto', ind)] : []),
+        d(4, 'Ara Toplam', genel / (1 + kdv / 100)),
+        d(15, 'kdv Toplam', genel - genel / (1 + kdv / 100)),
+        d(20, 'Genel Toplam', genel),
+      ],
+      izlemeNo: '',
+    });
+  };
+  const ucret = async () => { (await sekme('Ücretlendirme')).click() };
+  /** Ekranda birden cok `.dip-tablo` olabilir - DOLU olani alinir. */
+  const dip = () => waitFor(() => {
+    const t = [...document.querySelectorAll('.dip-tablo')]
+      .map(x => x.textContent ?? '').find(x => x.includes('Genel Toplam'));
+    if (!t) throw new Error('dip toplam tablosu yok');
+    return t;
+  });
+
+  it('KDV satiri YOK - fiyat zaten KDV dahil konusuluyor', async () => {
+    satirliBelge(20, 100);
+    ciz({ id: 114349 });
+    await waitFor(() => expect(belgeOku).toHaveBeenCalled());
+    await ucret();
+    const t = await dip();
+    expect(t).toContain('Genel Toplam');
+    expect(t).not.toContain('KDV');
+    expect(t).not.toContain('Ara Toplam');
+  });
+
+  it('ISKONTO yoksa tek satir: yalniz Genel Toplam', async () => {
+    satirliBelge(20, 100);
+    ciz({ id: 114349 });
+    await waitFor(() => expect(belgeOku).toHaveBeenCalled());
+    await ucret();
+    expect(await dip()).not.toContain('İskonto');
+  });
+
+  it('ISKONTO varsa Toplam · İskonto (ORANIYLA) · Genel Toplam', async () => {
+    satirliBelge(20, 100, 10);          // brut 120, %10 iskonto -> 108
+    ciz({ id: 114349 });
+    await waitFor(() => expect(belgeOku).toHaveBeenCalled());
+    await ucret();
+    const t = await dip();
+    expect(t).toContain('İskonto');
+    expect(t).toContain('120,00');    // iskontosuz brut
+    expect(t).toContain('12,00');     // iskonto tutari
+    expect(t).toContain('%10');       // ETKIN oran
+    expect(t).toContain('108,00');    // genel toplam
+  });
+
+  it('GRIDIN kendi TOPLAM satiri basvuruda cizilmez', async () => {
+    satirliBelge(20, 100);
+    ciz({ id: 114349 });
+    await waitFor(() => expect(belgeOku).toHaveBeenCalled());
+    await ucret();
+    await dip();
+    expect([...document.querySelectorAll('tfoot')]
+      .some(f => f.textContent?.includes('TOPLAM'))).toBe(false);
+  });
+});
