@@ -5714,3 +5714,37 @@ Dokuz prim rolunun TAMAMI artik uctan uca dogrulandi.
 HICBIR fonksiyonda okunmuyor ve kartta da yok - tablo bos. Ya baglanmali ya
 dusurulmeli; ekranda gorunmedigi icin `baz`/`kdv_haric` kadar zararli degil
 ama semada yaniltici duruyor.
+
+### Kademe BAGLANDI (db/388-389)
+
+`prim_plani_kademe` 324'te tanimlanmis ama hicbir yerde okunmuyordu. 324'un
+kendi yorumu isi tarif ediyordu: "aylik adede gore artan oran; DONEM
+KAPANISINDA degerlendirilir, kalem aninda yazilan tutar ONIZLEMEDIR."
+
+Neden kalem aninda degil: kademe "bu ay kacinci is" sorusuna bakar ve kalem
+islenirken cevap HENUZ YOKTUR - ayin 3'undeki tetkik, ay sonunda 50. tetkik
+olabilir. Her kalemde yeniden hesaplamak gecmis satirlarin tutarini surekli
+oynatirdi.
+
+Iki fonksiyon:
+  `fn_prim_kademe_orani(satir_id, adet)` - adedin dustugu araligi bulur.
+      Hicbiri tutmazsa NULL: kademe bir ISTISNA listesidir, satirin kendi
+      degeri (taban oran) gecerli kalir.
+  `fn_prim_kademe_uygula(taraf, bas, bit)` - donemdeki kademeli satirlari
+      adet bazinda yeniden degerler. Onaylanmis/odenmis satirlara DOKUNMAZ.
+
+`fn_hakedis_kapat` artik toplami almadan ONCE bunu cagiriyor - yoksa hakedis
+BASLIGI onizleme tutariyla kapanir ve satirlarla tutmaz.
+
+DOGRULANDI: Teknisyen nakit satirina kademe (1-2 is %5, 3+ is %9). Uc nakit is
+onizlemede %5 x 3 = 150,00 yaziyordu; donem kapatilinca ucu birden %9'a
+yukseldi (90 x 3 = 270) ve hakedis basligi 620,00 ile ACILDI (hakedis 4).
+
+**389 - 388'deki iki hata:** `count(*)` BIGINT donuyordu (fonksiyon INTEGER
+bekliyor) ve IC DONGU DIS DONGUNUN `r` degiskenini eziyordu - dis dongunun
+`oran_tipi`'i ic dongunun satirindan geliyordu. Ikincisi sessiz bir hataydi;
+ilki patladigi icin ikincisi de yakalandi.
+
+**UI EKSIGI:** kademe satirlari SQL'den kuruluyor - kartta gridi yok. Kart
+cercevesi detayin detayini (plan > satir > kademe) desteklemiyor. Ya satir
+modaline gomulu kucuk bir grid ya da ayri bir "Kademeler" penceresi gerekir.
