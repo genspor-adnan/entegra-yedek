@@ -24,7 +24,7 @@ public static partial class KartKatalogu
             ["durum"] = (short)1, ["oncelik"] = (short)10,
             // Kullanici kararlari: tahsil edilen matrah, KDV haric.
             ["baz"] = (short)4, ["kdv_haric"] = (short)1, ["prim_zamani"] = (short)1,
-            ["hekim_tipi"] = (short)0, ["baslangic"] = "@bugun",
+            ["baslangic"] = "@bugun",
         },
         Alanlar: new KartAlani[]
         {
@@ -50,8 +50,6 @@ public static partial class KartKatalogu
             // KİŞİ ALANI BURADA DEĞİL (375, kullanıcı): plan tek bir kişiye
             //   değil bir KİŞİ LİSTESİNE bağlanır - "Prim Alanlar" sekmesi.
             //   Aynı oranı alan otuz kişi için otuz plan açmak gerekiyordu.
-            new("hekimTipi", "hekim_tipi","kod", KodListesi: "prim.hekim_tipi",
-                Baslik: "Hekim Tipi", Grup: "Kapsam"),
             new("odeyenKurumId", "odeyen_kurum_id", "kod",
                 KodTablosu: "public.v_kurum_lookup", AramaKaynagi: "kurum",
                 Baslik: "Ödeyen Kurum", Grup: "Kapsam"),

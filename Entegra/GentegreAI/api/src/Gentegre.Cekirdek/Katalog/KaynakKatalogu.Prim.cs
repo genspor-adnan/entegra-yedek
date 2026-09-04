@@ -45,11 +45,6 @@ public static partial class KaynakKatalogu
                 + " where t.plan_id = p.id) else 'Tümü' end",
                                            "metin", "Kapsanan", Hizalama: "orta",
                                            Genislik: 110, Filtrelenebilir: false),
-            new("hekimTipiAdi",
-                "case p.hekim_tipi when 1 then 'İç hekim' when 2 then 'Dış hekim' else 'Tümü' end",
-                                           "metin", "Hekim Tipi", Hizalama: "orta",
-                                           Genislik: 110, Filtrelenebilir: false),
-            new("hekimTipi", "p.hekim_tipi", "sayi", "Hekim Tipi Kodu", Varsayilan: false),
             new("kurum",     "coalesce(ku.unvan, '')", "metin", "Ödeyen Kurum", Genislik: 190),
             new("bazAdi",
                 "case p.baz when 1 then 'Liste fiyatı' when 2 then 'Net tutar' " +

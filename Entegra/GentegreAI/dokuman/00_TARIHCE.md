@@ -5158,3 +5158,22 @@ herkese uyar. Kisi listesi bu ihtiyaci zaten karsiliyor; alan ya filtreye
 baglanmali ya karttan kalkmali.
 
 YALNIZ DOCKER'A uygulandi; bulut (ekspert) 369-375 bekliyor.
+
+### Prim plani acilmiyordu: kod tablosu beyaz listesi
+
+375'te eklenen `v_prim_taraf_lookup` **beyaz listeye** (KartDeposu.Okuma
+`KodTablosuBeyazListe`) yazilmamisti. Liste disi her gorunum
+"Bilinmeyen kod tablosu" istisnasi uretiyor - kart hic acilmiyordu. 358'de
+ayni tuzaga dusulmus ve yorumu orada duruyordu; yeni bir KodTablosu eklerken
+beyaz liste ADIMI ATLANMAMALI.
+
+Ayrica (kullanici) **Hekim Tipi karttan kaldirildi** ve `db/376` ile kolon da
+dustu (`hekim_tipi`, yaninda hic kullanilmayan `departman_id`). Kolon kartta
+girilebiliyordu ama `fn_prim_plan_satiri` onu OKUMUYORDU: "sadece dış
+hekimler" plani sessizce herkese uyuyordu - kullanicinin gordugu ayar ile
+sistemin uyguladigi kural tutmuyordu. 375'teki kisi listesi ayni ihtiyaci daha
+kesin karsiliyor.
+
+Dogrulandi (gecici yonetici hesabiyla, sonra silindi): kart meta 200,
+"Prim Alanlar" sekmesi geliyor, kisi combosu 19 aday tasiyor, hekim alanlari
+yok; liste 200 ve "Kapsanan" kolonu `Tümü` donuyor.

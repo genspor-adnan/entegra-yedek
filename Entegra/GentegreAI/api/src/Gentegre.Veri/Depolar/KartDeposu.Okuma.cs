@@ -202,6 +202,10 @@ public sealed partial class KartDeposu
             "public.v_numara_turu_kimlik",
             // Prim plani rol combosu (362) - rolun yaninda isaretli kisi sayisi.
             "public.v_prim_rol_lookup",
+            // Prim plani "Prim Alanlar" sekmesi (375): prim rolu ISARETLI
+            //   kisiler. Beyaz listeye eklenmedigi icin kart hic acilmadi
+            //   ("Bilinmeyen kod tablosu" -> 500) - 358'deki ayni tuzak.
+            "public.v_prim_taraf_lookup",
             // e-Belge seri kurallari (156).
             "public.v_ebelge_turu_lookup", "public.v_kullanici_lookup",
             "public.v_ebelge_yon_lookup",
