@@ -47,8 +47,13 @@ const gizli = kaynak === 'cari' ? new Set(['ad', 'soyad', 'musteri', 'tedarikci'
   // "randevuVerilebilir" HASTADA ANLAMSIZ (kullanici): randevu VEREN taraf
   //   personeldir, hasta randevu alir - kutu yanlislikla isaretlenirse hasta
   //   hekim listelerine dusebilirdi.
+  //   "subeId" / "eklemeTarihi" de HASTADA gizli (kullanici): ikisi de
+  //   salt-okunur sistem bilgisi, kayit kabul memurunun ilgilenmedigi iki
+  //   satiri kartin en altinda tutuyorlardi. Kaydedilen degerler DEGISMIYOR -
+  //   yalnizca cizilmiyorlar; sube kayit sirasinda oturumdan geliyor.
   : kaynak === 'hasta'
-    ? new Set(['hasta', 'grup', 'unvan', 'gorevId', 'randevuVerilebilir'])
+    ? new Set(['hasta', 'grup', 'unvan', 'gorevId', 'randevuVerilebilir',
+               'subeId', 'eklemeTarihi'])
   // Sube: baz sube combosu Depolar dalinda ELLE cizilir (tek satir etiket).
   : kaynak === 'sube' ? new Set(['depoBazSubeId'])
   : new Set<string>();
@@ -140,6 +145,27 @@ if (personelIletisimSekmesi) {
 }
 const adliBlok = (
   <>
+    {/* YAKINLAR (kullanici: ayri sekme OLMASIN) - Genel sekmesinde, Iletisim
+        ve Kimlik kutularinin USTUNDE ve KENDI SATIRINDA.
+
+        .kasira BIR FLEX SATIRIDIR ve SARMAZ. Bu kutu oranin icindeyken
+        Iletisim/Kimlik/Fotograf'in YANINA ucuncu sutun olarak diziliyor,
+        genislik kalmayinca da kartin gorunur alanindan tasiyordu - grid
+        DOM'da vardi ama ekranda yoktu (kullanici uc kez "görünmüyor" dedi;
+        DOM'a bakan test bunu goremez, cunku sira DOGRUYDU). Cozum kutuyu
+        satirin DISINA almak. */}
+      {kaynak === 'hasta' && aktif.baslik === 'Genel' && acilDetay && (
+        <div className="kagrup kagrup-cercevesiz" key="Yakinlar">
+          <h6>Yakınlar / Acil Durumda Aranacak</h6>
+          <GenDetayTablo
+            meta={acilDetay}
+            durum={detaylar[acilDetay.ad] ?? bosDetay()}
+            saltOkunur={salt || acilDetay.saltOkunur}
+            hatalar={alanHatalari}
+            onDegis={yeni => setDetaylar(t => ({ ...t, [acilDetay.ad]: yeni }))}
+          />
+        </div>
+      )}
     {/* Mockup: Tanım/Sınıflandırma · Vergi & Ana Birim ... AYNI SATIRDA yan yana (.row > .col > .grp).
         Personel'de bu sarmalayici, AltGrup'lu (adli) alan olmasa BILE acik kalmali -
         PersonelKimlikOzet/TekAdres gibi ozel bilesenler AltGrup'a bagli DEGIL, asagida
@@ -271,21 +297,6 @@ const adliBlok = (
             </>
           );
         })()}
-        {/* YAKINLAR (kullanici: ayri sekme OLMASIN) - Genel sekmesinde,
-            ILETISIM ve KIMLIK kutularinin USTUNDE (kullanici) - alta
-            alindiginda kart penceresinin gorunur alanindan tasiyordu. */}
-        {kaynak === 'hasta' && aktif.baslik === 'Genel' && acilDetay && (
-          <div className="kagrup" key="Yakinlar">
-            <h6>Yakınlar / Acil Durumda Aranacak</h6>
-            <GenDetayTablo
-              meta={acilDetay}
-              durum={detaylar[acilDetay.ad] ?? bosDetay()}
-              saltOkunur={salt || acilDetay.saltOkunur}
-              hatalar={alanHatalari}
-              onDegis={yeni => setDetaylar(t => ({ ...t, [acilDetay.ad]: yeni }))}
-            />
-          </div>
-        )}
         {/* Personel'e ozel: ik_karti.html mockup'ta Genel sekmesinde "Kimlik
             Bilgileri" (TCKN + Ozluk'ten dogum/cinsiyet/vb) + "Özet" (Pozisyon +
             İşe Giriş) kutulari - iki farkli veri kaynagini (taraf + personel_ozluk)

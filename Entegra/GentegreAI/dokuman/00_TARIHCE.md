@@ -5025,3 +5025,24 @@ Dort istek arka arkaya geldi ve ayni ekrani yeniden dizdi:
 deneme) kaldirildi; geriye tek satirlik `.kimlik-foto-satiri` kaldi.
 Testler (hastaKartiGenel) sirayi sabitliyor: Yakinlar < Iletisim < Kimlik,
 "Kimlik Detayı" basligi YOK, "Uyruk" etiketi TEK ve Ulke ile ayni satirda.
+
+### Yakinlar gridi neden dort turdur "gorunmuyordu"
+
+Kok neden nihayet bulundu: kutu `.kasira` icindeydi. `.kasira` SARMAYAN bir
+flex satiri (`display:flex`, `flex-wrap` yok) ve `.kasira .kagrup { flex: 1 }`.
+Yani Yakinlar kutusu Iletisim / Kimlik Bilgileri / Fotograf'in YANINA dorduncu
+sutun olarak diziliyor, genislik kalmayinca kartin gorunur alanindan tasiyordu.
+
+Grid HER ZAMAN DOM'daydi - bu yuzden "sira dogru mu" diye bakan test uc kez
+yesil kaldi ve ben uc kez "kod dogru" dedim. DOM sirasini olcen bir test
+GORUNURLUGU olcmez. Kutuyu satir icinde bir ust bir alt tasimak da iste bu
+yuzden hicbir sey degistirmedi.
+
+Cozum: kutu `.kasira`nin DISINA, `adliBlok` fragmentinin en basina alindi -
+kendi tam-genislikte satiri. Test artik dogru invaryanti tutuyor:
+`kutu.closest('.kasira')` NULL olmali.
+
+Ayrica: kutu cercevesi kaldirildi (`.kagrup-cercevesiz`) - grid kendi
+cizgilerini tasiyor, ustune kutu koymak ic ice iki cerceveydi. `subeId` ve
+`eklemeTarihi` hasta kartinda gizlendi (salt-okunur sistem bilgisi; kayitli
+degerler degismiyor, yalnizca cizilmiyorlar).

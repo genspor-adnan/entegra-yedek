@@ -101,6 +101,32 @@ describe('hasta kartinda Yakınlar gridi', () => {
     expect(ulke?.textContent).toContain('Uyruk');
   });
 
+  it('YAKINLAR kutusu FLEX SATIRININ DISINDA - kendi satirinda', async () => {
+    ciz();
+    await waitFor(() => expect(kartOku).toHaveBeenCalled());
+    // ASIL HATA BUYDU: kutu ".kasira" (sarmayan flex satiri) icindeyken
+    //   Iletisim/Kimlik/Fotograf'in yanina ucuncu sutun olarak diziliyor ve
+    //   kartin gorunur alanindan tasiyordu. DOM SIRASI DOGRUYDU - bu yuzden
+    //   sadece sirayi olcen test uc kez yesil kalirken ekranda grid yoktu.
+    const kutu = await waitFor(() => {
+      const k = [...document.querySelectorAll('.kagrup')].find(x =>
+        (x.querySelector('h6')?.textContent ?? '').startsWith('Yakınlar'));
+      if (!k) throw new Error('Yakınlar kutusu yok');
+      return k;
+    });
+    expect(kutu.closest('.kasira')).toBeNull();
+  });
+
+  it('SUBE ve EKLEME TARIHI cizilmez (kullanici)', async () => {
+    ciz();
+    await waitFor(() => expect(kartOku).toHaveBeenCalled());
+    await waitFor(() => expect([...document.querySelectorAll('h6')]
+      .map(x => x.textContent)).toContain('Kimlik Bilgileri'));
+    const etiketler = [...document.querySelectorAll('.etiket')].map(x => x.textContent ?? '');
+    expect(etiketler.some(x => x.includes('Şube'))).toBe(false);
+    expect(etiketler.some(x => x.includes('Ekleme Tarihi'))).toBe(false);
+  });
+
   it('ILETISIM kutusu KIMLIGIN SOLUNDA (kullanici)', async () => {
     ciz();
     await waitFor(() => expect(kartOku).toHaveBeenCalled());
