@@ -787,6 +787,17 @@ input.skt-gecmis {
 .taraf-arama .lookup-liste td { overflow: hidden; text-overflow: ellipsis }
 .lookup-liste tbody tr { cursor: pointer }
 .lookup-liste tbody tr.secili td { background: var(--mor2) }
+/* COKLU EKLEME SERIDI (375): pencere acik kalirken ne eklendigi ve son uyari
+   burada gorunur - kart gridi pencerenin ARKASINDA kaldigi icin baska turlu
+   "sunu ekledim mi" sorusu kacinilmazdi. */
+.lookup-eklenen {
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  padding: 5px 8px; margin-bottom: 6px; font-size: 11px;
+  border: 1px solid var(--cizgi2); border-radius: 3px; background: var(--yuz2);
+}
+.lookup-uyari { color: var(--hata); font-weight: 700 }
+.lookup-eklenen-liste { color: var(--soluk); min-width: 0; word-break: break-word }
+
 .lookup-alt { display: flex; justify-content: space-between; align-items: center; color: var(--soluk); font-size: 11px }
 .lookup-alt button { height: 27px; padding: 0 11px; border: 1px solid var(--cizgi); border-radius: 3px; background: linear-gradient(var(--dug1), var(--dug2)) }
 

@@ -5177,3 +5177,33 @@ kesin karsiliyor.
 Dogrulandi (gecici yonetici hesabiyla, sonra silindi): kart meta 200,
 "Prim Alanlar" sekmesi geliyor, kisi combosu 19 aday tasiyor, hekim alanlari
 yok; liste 200 ve "Kapsanan" kolonu `Tümü` donuyor.
+
+### Prim Alanlar: aramayla coklu ekleme (alternatif 2)
+
+Kullanici: "dr aranıp enter basıldıkça ekran kapanmasın, tüm doktorlar aranıp
+enter basılır sonra arama kapatılır" + "daha önce eklendiyse mesaj ver engelle".
+
+`TarafArama` iki yeni prop aldi ve MEVCUT TEKLI CAGIRANLARIN HICBIRI
+ETKILENMEDI (ikisi de opsiyonel):
+
+    kapanmasin      secim pencereyi kapatmaz; kutu temizlenir, odak geri gelir
+    secimDenetimi   metin donerse secim ALINMAZ, sebep pencerede yazar
+
+Pencerenin altina "N eklendi: ad · ad · ad" seridi ve uyari satiri kondu.
+Bu serit susluk degil: kart gridi pencerenin ARKASINDA kalir, onsuz "sunu
+ekledim mi" sorusu kacinilmazdi.
+
+`GenDetayTablo` artik detayda `aramaKaynagi` tanimli bir KOD alani gorurse
+basliga 🔍 dugmesi koyar; secilen her kisi icin YENI SATIR ekler. Jeneriktir -
+prime ozel dal degil, ayni desen baska N:N gridlerde de calisir.
+`aramaKaynagi` VIRGULLU olabilir: prim alan kisi ic personel de olabilir dis
+hekim de ("personel,dis-hekim"), pencere ikisini birden tarar.
+
+Iki engel (`tarafSecimEngeli`, 6 test):
+  - ZATEN EKLI: pencere kapanmadigi icin en olasi hata. Veritabanindaki
+    `unique(plan_id, taraf_id)` bunu KAYIT ANINDA anlamsiz bir kisit hatasiyla
+    soyluyordu - kullanici o ana kadar on kisi daha eklemis olurdu.
+  - KOD LISTESINDE YOK: jenerik arama tum personeli tarar, oysa grid degeri
+    kod listesinden okunur - listede olmayan kisi gridde ADSIZ gorunur ve
+    kayit sessizce ise yaramaz olur (prim rolu isaretlenmemis personel hicbir
+    hakedis uretmez).

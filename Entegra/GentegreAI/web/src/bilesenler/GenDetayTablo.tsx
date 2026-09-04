@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Modal } from './Modal';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
+import { TarafArama } from './TarafArama';
+import { tarafSecimEngeli } from './tarafSecimEngeli';
 import { api } from '../api/istemci';
 import { para4 } from './bicim';
 import { GridMenu, type MenuOgesi } from './grid/GridMenu';
@@ -265,6 +267,14 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
     return a.baslik;
   };
   const [urunAramaSatiri, setUrunAramaSatiri] = useState<number | null>(null);
+  /**
+   * TARAF ARAMASIYLA SATIR EKLEME (375). Detayda `aramaKaynagi` tanimli bir
+   * KOD alani varsa (ör. prim planinin "Prim Alanlar" sekmesindeki Kişi),
+   * grid basligina bir arama dugmesi gelir: pencere ACIK KALIR, her Enter
+   * yeni bir satir ekler. Combo ile 30 kisi eklemek her seferinde listeyi
+   * acip kaydirmak demekti.
+   */
+  const [tarafAramaAcik, setTarafAramaAcik] = useState(false);
   const alanlar = meta.alanlar.filter(a => a.ad !== 'id');
   const yerler = useYerler(meta.ad === 'adresler');
   const adresGrid = meta.ad === 'adresler';
@@ -364,6 +374,9 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   //   ayni oldugu icin ikinci satir DB'ye yazilamaz - dugmeyi hic acmayalim.
   const tekSatirDolu = !!meta.tekSatir && durum.guncel.length >= 1;
   const satirEklenebilir = !saltOkunur && !acikAdresSatiriVar && !tekSatirDolu;
+
+  // Detayin "arama ile secilen" alani: tipi kod + aramaKaynagi dolu.
+  const tarafAlani = alanlar.find(a => a.tip === 'kod' && a.aramaKaynagi);
 
   /** Yeni satirin baslangic degerleri - satir ici ve modal ekleme ayni kumeyi kullanir. */
   const bosSatir = (): Record<string, unknown> => Object.fromEntries(
@@ -522,6 +535,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               <button type="button" className="d bir ikon-dugme" title="Yeni satır"
                       disabled={!satirEklenebilir}
                       onClick={() => (modalDuzenle ? modalAc('yeni') : satirEkle())}>＋</button>
+              {tarafAlani && (
+                <button type="button" className="d ikon-dugme" title={`${tarafAlani.baslik} ara ve ekle`}
+                        onClick={() => setTarafAramaAcik(true)}>🔍</button>
+              )}
               {/* Duzenle / Sil USTTE (kullanici): satir sonunda her satirda
                   tekrar edip gridi kalabaliklastiriyordu. Secim yoksa pasif ve
                   sebebi title'da - seri/XSLT gridleriyle ayni desen. */}
@@ -991,6 +1008,30 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
             </div>
           </div>
         </Modal>
+      )}
+
+      {/* TARAF ARAMASIYLA EKLEME (375, kullanici alternatif 2): pencere secimde
+          KAPANMAZ - "dr" arayip Enter, sonra baska ad arayip Enter... Kapatmayi
+          kullanici yapar. Zaten ekli olan ya da kod listesinde bulunmayan kisi
+          ALINMAZ ve sebebi pencerede yazar. */}
+      {tarafAlani && tarafAramaAcik && (
+        <TarafArama
+          acik
+          kapanmasin
+          // aramaKaynagi VIRGULLU olabilir: prim alan kisi ic personel de
+          //   olabilir dis hekim de, ikisi ayri liste kaynagi.
+          kaynaklar={tarafAlani.aramaKaynagi!.split(',').map(x => x.trim()).filter(Boolean)}
+          yerTutucu={`${tarafAlani.baslik} ara…`}
+          secimDenetimi={secilen =>
+            tarafSecimEngeli(durum.guncel, tarafAlani.ad, tarafAlani.kodlar, secilen)}
+          onSec={secilen => {
+            const yeni: Satir = {};
+            alanlar.forEach(a => { yeni[a.ad] = a.tip === 'mantik' ? 0 : '' });
+            yeni[tarafAlani.ad] = String(secilen.id);
+            onDegis({ ...durum, guncel: [...durum.guncel, yeni] });
+          }}
+          onKapat={() => setTarafAramaAcik(false)}
+        />
       )}
 
       {/* KAMPANYA (268): urun satirinda hedef stok/hizmet jenerik arama

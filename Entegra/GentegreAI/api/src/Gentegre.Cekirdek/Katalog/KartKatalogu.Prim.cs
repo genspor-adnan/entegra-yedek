@@ -130,7 +130,11 @@ public static partial class KartKatalogu
                     new("id",       "id",       "sayi", Yazilabilir: false),
                     new("tarafId",  "taraf_id", "kod", Zorunlu: true,
                         KodTablosu: "public.v_prim_taraf_lookup",
-                        AramaKaynagi: "personel", Baslik: "Kişi"),
+                        // IKI KAYNAK BIRDEN (375, kullanici): prim alan kisi
+                        //   ic personel de olabilir DIS HEKIM de. Arama
+                        //   penceresi ikisini de tarar; virgul iki listeyi
+                        //   ayirir.
+                        AramaKaynagi: "personel,dis-hekim", Baslik: "Kişi"),
                     new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
                         Baslik: "Açıklama"),
                 },

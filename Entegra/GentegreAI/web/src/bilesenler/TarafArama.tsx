@@ -93,6 +93,20 @@ interface Props {
    * arama penceresi arada gorunmez.
    */
   baslangicKartId?: number | null;
+  /**
+   * COKLU EKLEME KIPI (375): secim pencereyi KAPATMAZ - kullanici arar,
+   * Enter'lar, tekrar arar. Kapatmayi kendisi yapar (Esc / Kapat).
+   * Eklenenler pencerenin altinda serit halinde birikir, cunku aksi halde
+   * "sunu ekledim mi" sorusu kaciniImaz olur: kart gridi pencerenin
+   * ARKASINDA kalir.
+   */
+  kapanmasin?: boolean;
+  /**
+   * Secimi KABUL ETMEME sebebi. Bos/null donerse secim gecerlidir; bir metin
+   * donerse secim ALINMAZ ve metin pencerede uyari olarak gosterilir
+   * (ör. "zaten ekli", "bu kiside prim rolu isaretli degil").
+   */
+  secimDenetimi?(secilen: { kaynak: string; id: number; unvan: string }): string | null;
   onKapat(): void;
   onSec(secilen: { kaynak: string; id: number; unvan: string }): void;
 }
@@ -107,6 +121,7 @@ interface Props {
  */
 export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekFiltre,
                              yerTutucu, baslangicMetni, baslangicYeni, baslangicKartId,
+                             kapanmasin = false, secimDenetimi,
                              onKapat, onSec }: Props) {
   /**
    * HASTA DUZENI (kullanici): yalniz hasta aranirken kolonlar kayit kabulun
@@ -123,6 +138,9 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
 
   /** Kutuda yazan metin (aninda) - `arama` bunun gecikmeli (debounce) hali. */
   const [metin, setMetin] = useState('');
+  /** Coklu kipte bu acilista eklenenler + son uyari. */
+  const [eklenenler, setEklenenler] = useState<string[]>([]);
+  const [uyari, setUyari] = useState<string | null>(null);
   const [arama, setArama] = useState('');
   /** Tum Liste / Son Aranan / Sik Aranan - liste ekranlariyla ayni (kullanici_arama). */
   const [gorunum, setGorunum] = useState<'tum' | 'son' | 'sik'>('tum');
@@ -197,6 +215,8 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
     setGorunum('tum');
     setSatirlar([]);
     setKartAcik(null);
+    setEklenenler([]);
+    setUyari(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [acik]);
 
@@ -207,10 +227,30 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
   };
 
   const sec = (satir: TarafSatiri) => {
+    const secilen = { kaynak: satir.kaynak, id: satir.id, unvan: satir.unvan };
+    // ENGEL VARSA HIC EKLENMEZ: sessizce yutmak yerine sebebi yazilir -
+    //   mukerrer kayit veritabani kisitina carpip anlamsiz bir hata
+    //   dondurmesin.
+    const engel = secimDenetimi?.(secilen) ?? null;
+    if (engel) {
+      setUyari(engel);
+      if (!kapanmasin) return;
+      setTimeout(() => kutu.current?.focus(), 0);
+      return;
+    }
     // Secim "Son / Sik Aranan" sayacina islensin - listede oldugu gibi.
     void api.aramaIsaretle(satir.kaynak, satir.id);
-    onSec({ kaynak: satir.kaynak, id: satir.id, unvan: satir.unvan });
-    onKapat();
+    onSec(secilen);
+    if (!kapanmasin) { onKapat(); return }
+    // COKLU KIP: pencere kalir, kutu temizlenir ve odak geri gelir -
+    //   kullanici bir sonraki adi yazmaya hazir.
+    setUyari(null);
+    setEklenenler(e => [...e, satir.unvan]);
+    setMetin('');
+    setArama('');
+    setSatirlar([]);
+    setSecili(0);
+    setTimeout(() => kutu.current?.focus(), 0);
   };
 
   const tus = (e: React.KeyboardEvent) => {
@@ -410,8 +450,22 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
           {yukleniyor && <div className="yukleniyor">Araniyor…</div>}
         </div>
 
+        {(uyari || eklenenler.length > 0) && (
+          <div className="lookup-eklenen">
+            {uyari && <span className="lookup-uyari">{uyari}</span>}
+            {eklenenler.length > 0 && (
+              <span className="lookup-eklenen-liste">
+                <b>{eklenenler.length} eklendi:</b> {eklenenler.join(' · ')}
+              </span>
+            )}
+          </div>
+        )}
         <div className="lookup-alt">
-          <span>↑↓ gez · çift tık/Enter seç · Esc kapat</span>
+          <span>
+            {kapanmasin
+              ? '↑↓ gez · çift tık/Enter ekle (pencere açık kalır) · Esc kapat'
+              : '↑↓ gez · çift tık/Enter seç · Esc kapat'}
+          </span>
         </div>
       </div>
     </>
