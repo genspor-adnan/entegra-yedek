@@ -5415,9 +5415,9 @@ aliyor:
     fn_prim_uret_belge  (faturalamada)  pay'a gore hasta_tutar/kurum_tutar/tutar
     fn_prim_uret        (tahsilatta)    dagitim tutarinin matrahi
 
-`kdv_haric` de ayni durumda - hicbir fonksiyon okumuyor, taban zaten her yolda
-matrah. (Bu alan combo'ya cevrildi, karttan kaldirilmadi; kullanici oyle
-istedi. Uygulanmadigi NOT EDILDI.)
+`kdv_haric` de ayni durumdaydi - hicbir fonksiyon okumuyor, taban zaten her
+yolda matrah - ve kullanici onu da kaldirtti. Iki kolon da DURUYOR; yalnizca
+kartta sorulmuyor ve listede varsayilan gorunur degiller.
 
 Ekranda duran ama uygulanmayan ayar, yanlis hesaplanan primden daha sinsi:
 kimse bakmadikca dogru gorunur - hekim_tipi'nde de ayni tuzaga dusulmustu.

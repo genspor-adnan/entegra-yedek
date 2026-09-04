@@ -62,12 +62,13 @@ public static partial class KaynakKatalogu
                                            "metin", "Baz", Genislik: 180,
                                            Filtrelenebilir: false, Varsayilan: false),
             new("baz",       "p.baz",       "kod",   "Baz Kodu", Varsayilan: false),
-            // Kartta combo oldu - listede de METIN: onay kutusu rozeti "hangi
-            //   taban" sorusunu tersinden okutuyordu.
+            // Kartta sorulmuyor (uygulanmayan ayar) - listede de varsayilan
+            //   gorunur degil; kolon menusunden acilabilir.
             new("kdvAdi",
                 "case when coalesce(p.kdv_haric, 1) = 1 then 'Hariç' else 'Dahil' end",
                                            "metin", "KDV", Hizalama: "orta",
-                                           Genislik: 80, Filtrelenebilir: false),
+                                           Genislik: 80, Filtrelenebilir: false,
+                                           Varsayilan: false),
             new("kdvHaric",  "p.kdv_haric", "sayi",  "KDV Kodu", Varsayilan: false),
             new("satirSayisi",
                 "(select count(*) from public.prim_plani_satir s where s.plan_id = p.id)",

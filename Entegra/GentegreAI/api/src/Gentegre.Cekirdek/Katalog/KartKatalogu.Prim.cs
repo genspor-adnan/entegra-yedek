@@ -84,8 +84,9 @@ public static partial class KartKatalogu
             //   dogru gorunur. Taban secimi gercekten istenirse once
             //   fn_prim_uret / fn_prim_uret_belge baglanmali, sonra alan geri
             //   gelmeli.
-            new("kdvHaric",  "kdv_haric", "kod", SabitKodlar: PrimKdvKodlari,
-                Baslik: "KDV", Grup: "Kimlik"),
+            // KDV ALANI DA KALDIRILDI (kullanici) - BAZ ile ayni sebep:
+            //   `kdv_haric` hicbir uretim fonksiyonunda okunmuyor, taban her
+            //   yolda MATRAH aliniyor. Kolon duruyor.
             new("subeId",    "sube_id",   "kod", KodTablosu: "public.sube",
                 Baslik: "Şube (boş = tümü)", Grup: "Kimlik"),
             new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 300,
