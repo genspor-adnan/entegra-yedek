@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
-import { guvenli, mesaj, metinSor, onay, secimSor } from '../bilesenler/mesaj';
+import { mesaj, metinSor, onay, secimSor } from '../bilesenler/mesaj';
 import { type BelgeYaniti, type KasaIslemTuru, URUN_GENOTIP, hataMetni, hataAyristir } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { belgeTuruBilgisi, GIRILEBILIR_TURLER, VARSAYILAN_TUR } from './belgeTuru';
@@ -25,7 +25,9 @@ import { BelgeAracCubugu } from '../bilesenler/belge/BelgeAracCubugu';
 import { BelgeBaslik } from '../bilesenler/belge/BelgeBaslik';
 import { useBelgeTahsilat, tahsilToplami } from './belgeTahsilat';
 import { kartImzasi } from './belgeImza';
-import { karsilamaUygula, katilimUygula } from './belgeKarti/provizyonPaylari';
+import { yanittanBaslik, yanittanBasvuruBilgi } from './belgeKarti/belgeOkuma';
+import { useBasvuruKaynaklari } from './belgeKarti/useBasvuruKaynaklari';
+import { useBelgeFiyatlandirma } from './belgeKarti/useBelgeFiyatlandirma';
 import {
   provizyonVarMi, donusumSatirlari, posFisiSecimi, kasaAramaSirasi,
   gelisSekliKarari, acikBorcHesapla,
@@ -129,7 +131,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * (numara_sablonu tur 19, `elle_girilir`) - ayri bir ayar yok. Elle ise kayit
    * kabul memuru numarayi kartta yazabilir; bos birakirsa sunucu yine uretir.
    */
-  const [protokolElle, setProtokolElle] = useState(false);
   const [cari, setCari] = useState<{ id: number; unvan: string } | null>(null);
   // Tarih SAATIYLE tutulur: ayni gun icindeki hareket sirasi buna gore.
   const [tarih, setTarih] = useState(() => yerelAnMetni(new Date()));
@@ -153,7 +154,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   // BASVURU (249): vade yerine "Ödeyen Kurum" - hizmeti kim odeyecek
   //   (anlasmali kurum / sigorta / SGK). Bos = hasta kendi oder.
   const [odeyenKurumId, setOdeyenKurumId] = useState<number | null>(null);
-  const [kurumlar, setKurumlar] = useState<{ id: number; ad: string; tur: number }[]>([]);
   /**
    * BASVURU BASLIGI (296/297): basvurulan BOLUM ve karsilayan PERSONEL.
    * Personel HEKIM OLMAK ZORUNDA DEGIL (kullanici): diyetisyen,
@@ -170,38 +170,29 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * state tutmak karti sisiriyordu; hepsi belge_basvuru uzantisina gider.
    */
   const [basvuruBilgi, setBasvuruBilgi] = useState<BasvuruBilgi>({});
-  const [bolumler, setBolumler] = useState<{ id: number; ad: string }[]>([]);
-  /** Basvuruda depo combosu dip bolumde cizilir - liste burada tutulur. */
-  const [depolar, setDepolar] = useState<{ id: number; ad: string }[]>([]);
-  const [gorevliler, setGorevliler] = useState<{ id: number; ad: string }[]>([]);
   /**
    * YURURLUKTEKI KAMPANYA (274). Fiyat listesiyle YARISMAZ: liste BAZ fiyati,
    * kampanya INDIRIMI verir. Baslikta rozet olarak gorunur ve belgeye YAZILIR -
    * kurum sonradan kampanya degistirse eski belge kendi kampanyasini tasir.
    * Kayitli belgede COZULMEZ, kayittan okunur.
    */
-  const [kampanyaId, setKampanyaId] = useState<number | null>(null);
-  const [kampanyaAdi, setKampanyaAdi] = useState('');
   /**
    * ODEYEN KURUMUN PAY HESABI (291): 1 karsilama ORANI (ozel sigorta),
    * 2 KATILIM PAYI sabit tutar (SGK). Provizyon dugmesi buna gore davranir -
    * SGK'da oran sormak yanlis olurdu: SUT bedelinin tamami kuruma, hastadan
    * yalniz katilim payi alinir.
    */
-  const [paylasimModu, setPaylasimModu] = useState(1);
   /**
    * FIYAT LISTESI (205). Acilista belge TURUNUN yonune gore cariden cozulur
    * (cari listesi > yonun varsayilani). Kullanici degistirince satirlar
    * yeniden fiyatlanir - kaydedilmis belgede sunucuda, kaydedilmemis belgede
    * satir satir listeden okunarak.
    */
-  const [fiyatListesiId, setFiyatListesiIdHam] = useState<number | null>(null);
   /** Teklif durumu (218): 1 Hazirlaniyor / 2 Sunuldu / 3 Kabul / 4 Red / 5 Iptal. */
   const [teklifDurum, setTeklifDurum] = useState('1');
   const [revizeNo, setRevizeNo] = useState('');
   const [teklifKonusu, setTeklifKonusu] = useState('');
   const [teklifTeslim, setTeklifTeslim] = useState('');
-  const [fiyatListeleri, setFiyatListeleri] = useState<{ id: number; ad: string }[]>([]);
   const [depo, setDepo] = useState<{ id: number; ad: string } | null>(null);
   /** Yalniz transferde (20): malin GIDECEGI depo. Tekil belgelerde kullanilmaz. */
   const [girisDepo, setGirisDepo] = useState<{ id: number; ad: string } | null>(null);
@@ -372,12 +363,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    */
   const gonderenModu = (kullanici?.hekimRolu ?? 4) === 1;
 
-  /**
-   * PROVIZYON SEKMESI yalniz ÖSS/SGK odeyen kurumda (kullanici,
-   * taraf_kurum.tur: 1 Özel / 2 ÖSS / 3 SGK). Kurum secili degilse hasta kendi
-   * oder - provizyon alinacak bir kurum yok.
-   */
-  const provizyonVar = provizyonVarMi(kurumlar, odeyenKurumId);
   const {
     alis: alisMi, siparis: siparisMi, irsaliye: irsaliyeMi, fatura: faturaMi,
     tahakkuk: tahakkukMu, konsinye: konsinyeMi, transfer: transferMi,
@@ -394,6 +379,29 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * ERP'de ayni belge normal satis siparisidir.
    */
   const basvuruMu = tur === 19 && kullanici?.urunModu === URUN_GENOTIP;
+
+  // Basvuru combolarinin (kurum · bolum · depo · gorevli) ve protokol numara
+  //   sablonunun yuklenmesi ayri dosyada: hepsi ayni desendeki bes effect'ti.
+  const { kurumlar, bolumler, depolar, gorevliler, protokolElle } =
+    useBasvuruKaynaklari(basvuruMu, bolumId, kullanici?.hekimRolu);
+
+  // Fiyat listesi · kampanya · pay modu · provizyon uygulamasi ayri dosyada:
+  //   hepsi "bu satir kaca yazilacak" sorusunun parcasi (belgeKarti/
+  //   useBelgeFiyatlandirma), karta dagilinca kural kaciyordu.
+  const {
+    fiyatListeleri, fiyatListesiId, setFiyatListesiId: setFiyatListesiIdHam,
+    kampanyaId, setKampanyaId, kampanyaAdi, setKampanyaAdi, paylasimModu,
+    kampanyaCoz, satirlariYenidenFiyatla, listeDegisti, provizyonUygula,
+  } = useBelgeFiyatlandirma({
+    belgeId, tur, alisMi, cariId: cari?.id ?? null, odeyenKurumId, satirlar, setSatirlar,
+  });
+
+  /**
+   * PROVIZYON SEKMESI yalniz ÖSS/SGK odeyen kurumda (kullanici,
+   * taraf_kurum.tur: 1 Özel / 2 ÖSS / 3 SGK). Kurum secili degilse hasta kendi
+   * oder - provizyon alinacak bir kurum yok.
+   */
+  const provizyonVar = provizyonVarMi(kurumlar, odeyenKurumId);
 
   // Tur SORULMADIGI icin kayitta bos kalmasin: lab/goruntuleme kurumunda
   //   basvuru turu 5 ("Laboratuvar / Görüntüleme") olarak damgalanir.
@@ -598,109 +606,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       ? o : { ...o, gelisSekli: gelisSekliKarari(false) }));
   }, [basvuruMu, personelId]);
 
-  // Protokol numarasini kim verir (358): basvuru turunun numara sablonu.
-  useEffect(() => {
-    if (!basvuruMu) return;
-    void (async () => {
-      try {
-        const y = await api.liste('numara-basvuru', {
-          sayfa: 1, boyut: 1,
-          filtre: { alan: 'durum', op: 'esit', deger: 1 },
-        });
-        setProtokolElle(Number(y.satirlar[0]?.elleGirilir ?? 0) === 1);
-      } catch { /* sablon okunamazsa otomatik varsayilir - numara yine verilir */ }
-    })();
-  }, [basvuruMu]);
-
-  // BASVURU (249): odeyen kurum combosu - yalniz anlasmali kurumlar
-  //   (taraf.kurum = 1), tum cariler degil.
-  useEffect(() => {
-    if (!basvuruMu || kurumlar.length > 0) return;
-    void (async () => {
-      try {
-        const y = await api.liste('kurum', {
-          sayfa: 1, boyut: 500, sirala: [{ alan: 'unvan', yon: 'asc' }],
-          filtre: { op: 'and', kosullar: [{ alan: 'durum', op: 'esit', deger: 1 }] },
-        });
-        setKurumlar(y.satirlar.map(r => ({
-          id: Number(r.id), ad: String(r.unvan ?? ''), tur: Number(r.tur ?? 0) })));
-      } catch { /* kurum listesi okunamazsa combo bos kalir, kayit engellenmez */ }
-    })();
-  }, [basvuruMu, kurumlar.length]);
-
-  // BASVURU (296): randevu verilebilen BOLUMLER - basvurunun yapildigi
-  //   poliklinik/klinik. Randevu ekraniyla ayni kume.
-  useEffect(() => {
-    if (!basvuruMu || bolumler.length > 0) return;
-    void (async () => {
-      try {
-        const y = await api.liste('departman', {
-          sayfa: 1, boyut: 300, sirala: [{ alan: 'ad', yon: 'asc' }],
-          filtre: { op: 'and', kosullar: [
-            { alan: 'durum', op: 'esit', deger: 1 },
-            { alan: 'randevuVerilebilir', op: 'esit', deger: 1 },
-          ] },
-        });
-        // Departman kaynagi alt birimleri "— Dahiliye" gibi GIRINTILI dondurur
-        //   (257, Bölüm/Görev ekranindaki agac gorunumu icin). Combo'da agac
-        //   yok - onek kirpilir, yoksa her bolum tire ile basliyormus gibi durur.
-        setBolumler(y.satirlar.map(r => ({
-          id: Number(r.id), ad: String(r.ad ?? '').replace(/^—\s*/, '') })));
-      } catch { /* bolum listesi okunamazsa combo bos kalir, kayit engellenmez */ }
-    })();
-  }, [basvuruMu, bolumler.length]);
-
-  // Basvuruda depo combosu (296) icin aktif depolar.
-  useEffect(() => {
-    if (!basvuruMu || depolar.length > 0) return;
-    void (async () => {
-      try {
-        const y = await api.liste('depo', {
-          sayfa: 1, boyut: 200, sirala: [{ alan: 'ad', yon: 'asc' }],
-          filtre: { alan: 'durum', op: 'esit', deger: 1 },
-        });
-        setDepolar(y.satirlar.map(r => ({ id: Number(r.id), ad: String(r.ad ?? '') })));
-      } catch { /* depo listesi okunamazsa combo bos kalir */ }
-    })();
-  }, [basvuruMu, depolar.length]);
-
-  /**
-   * BASVURUDA SORULAN HEKIM (361): liste PRIM ROL ISARETINDEN gelir ve hangi
-   * ROLUN adaylari oldugunu KURUM TIPI belirler (sunucu: fn_basvuru_hekim_rolu)
-   *   · Laboratuvar / Görüntüleme merkezi -> DIS DOKTORLARDAN "Gönderen"
-   *   · Muayenehane / Dal merkezi / Tıp merkezi / Hastane -> personelden "Yapan"
-   * Kural sunucuda oldugu icin kart kurum tipini bilmez; kurum tipi degisince
-   * burada kod degismez.
-   *
-   * Bolum SECILIYSE o bolumle sinirlanir, BOS ise hepsi gelir (297, kullanici:
-   * "bolum secilmeden dr listesine tum doktorlar gelir"). Her satir kendi
-   * bolumunu tasir - kisi secilince bolum ondan doldurulur.
-   */
-  useEffect(() => {
-    if (!basvuruMu) { setGorevliler([]); return }
-    let iptal = false;
-    void (async () => {
-      try {
-        // ROL AKTIF SUBEDEN gelir (364): merkez tip merkezi olup yan bina
-        //   goruntuleme merkezi olabilir - her subenin profili kendi rolunu
-        //   verir (kullanici.hekimRolu, sunucuda fn_basvuru_hekim_rolu).
-        const kosullar = [
-          { alan: 'rol', op: 'esit' as const, deger: kullanici?.hekimRolu ?? 4 },
-          { alan: 'durum', op: 'esit' as const, deger: 1 },
-          ...(bolumId ? [{ alan: 'bolumId', op: 'esit' as const, deger: bolumId }] : []),
-        ];
-        const y = await api.liste('prim-rol-aday', {
-          sayfa: 1, boyut: 500, sirala: [{ alan: 'ad', yon: 'asc' }],
-          filtre: { op: 'and' as const, kosullar },
-        });
-        if (!iptal) setGorevliler(y.satirlar.map(r => ({
-          id: Number(r.id), ad: String(r.ad ?? ''),
-          bolumId: r.bolumId ? Number(r.bolumId) : null })));
-      } catch { if (!iptal) setGorevliler([]) }
-    })();
-    return () => { iptal = true };
-  }, [basvuruMu, bolumId, kullanici?.hekimRolu]);
-
   // Mevcut belgeyi ac: baslik + satirlar + dip toplam sunucudan gelir.
   useEffect(() => {
     if (!belgeId) return;
@@ -708,103 +613,44 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       try {
         const y = await api.belgeOku(belgeId);
         setSonuc(y);
-        setTur(Number(y.belge.tur));
-        setCari({ id: Number(y.belge.tarafId), unvan: String(y.belge.tarafUnvan ?? '') });
-        // Bos tarihle kayitli (eski/dis kaynakli) belgede alan bos kalmasin:
-        //   zorunlu alan, simdiki an ile acilir (kullanici).
-        setTarih(String(y.belge.belgeTarihi ?? '').slice(0, 16) || yerelAnMetni(new Date()));
-        setSeri(String(y.belge.belgeSeri ?? ''));
-        setVadeGun(String(y.belge.vadeGun ?? 0));
-        setAciklama(String(y.belge.aciklama ?? ''));
-        setOdeyenKurumId(y.belge.odeyenKurumId != null ? Number(y.belge.odeyenKurumId) : null);
-        setFiyatListesiIdHam(Number(y.belge.fiyatListesiId) || null);
-        setBolumId(y.belge.bolumId != null ? Number(y.belge.bolumId) : null);
-        setPersonelId(y.belge.personelId != null ? Number(y.belge.personelId) : null);
-        setBasvuruBilgi({
-          basvuruTuru: y.belge.basvuruTuru != null ? Number(y.belge.basvuruTuru) : null,
-          gelisSekli: y.belge.gelisSekli != null ? Number(y.belge.gelisSekli) : null,
-          gelisNedeni: y.belge.gelisNedeni != null ? Number(y.belge.gelisNedeni) : null,
-          oda: y.belge.oda != null ? Number(y.belge.oda) : null,
-          siraNo: String(y.belge.siraNo ?? ''),
-          refakatci: String(y.belge.refakatci ?? ''),
-          ambulansHastaNo: String(y.belge.ambulansHastaNo ?? ''),
-          ambulansBileklikNo: String(y.belge.ambulansBileklikNo ?? ''),
-          // PROVIZYON (299) - belge_provizyon 1:1; SGK ve ozel sigorta ayri.
-          sgkDurum: y.belge.sgkDurum != null ? Number(y.belge.sgkDurum) : 0,
-          sgkProvizyonNo: String(y.belge.sgkProvizyonNo ?? ''),
-          sgkProvizyonTipi: y.belge.sgkProvizyonTipi != null
-            ? Number(y.belge.sgkProvizyonTipi) : null,
-          sgkProvizyonTarihi: y.belge.sgkProvizyonTarihi
-            ? String(y.belge.sgkProvizyonTarihi).slice(0, 16) : null,
-          sgkGecerlilik: y.belge.sgkGecerlilik
-            ? String(y.belge.sgkGecerlilik).slice(0, 16) : null,
-          sgkKarsilama: y.belge.sgkKarsilama != null ? String(y.belge.sgkKarsilama) : '',
-          sgkTutar: y.belge.sgkTutar != null ? String(y.belge.sgkTutar) : '',
-          sgkRedNedeni: String(y.belge.sgkRedNedeni ?? ''),
-          sgkSigortaTuru: String(y.belge.sgkSigortaTuru ?? ''),
-          sgkBasvuruNo: String(y.belge.sgkBasvuruNo ?? ''),
-          sgkTakipNo: String(y.belge.sgkTakipNo ?? ''),
-          sgkTakipTarihi: y.belge.sgkTakipTarihi
-            ? String(y.belge.sgkTakipTarihi).slice(0, 16) : null,
-          sgkTakipTuru: y.belge.sgkTakipTuru != null ? Number(y.belge.sgkTakipTuru) : null,
-          sgkTesisKodu: String(y.belge.sgkTesisKodu ?? ''),
-          sgkMustehaklik: y.belge.sgkMustehaklik != null
-            ? Number(y.belge.sgkMustehaklik) : 0,
-          sgkMustehaklikZaman: y.belge.sgkMustehaklikZaman
-            ? String(y.belge.sgkMustehaklikZaman) : null,
-          sgkSevkli: y.belge.sgkSevkli != null ? Number(y.belge.sgkSevkli) : 0,
-          sgkSevkKurum: String(y.belge.sgkSevkKurum ?? ''),
-          ossKurumId: y.belge.ossKurumId != null ? Number(y.belge.ossKurumId) : null,
-          ossKurumAdi: String(y.belge.ossKurumAdi ?? ''),
-          ossDurum: y.belge.ossDurum != null ? Number(y.belge.ossDurum) : 0,
-          ossProvizyonNo: String(y.belge.ossProvizyonNo ?? ''),
-          ossProvizyonTarihi: y.belge.ossProvizyonTarihi
-            ? String(y.belge.ossProvizyonTarihi).slice(0, 16) : null,
-          ossGecerlilik: y.belge.ossGecerlilik
-            ? String(y.belge.ossGecerlilik).slice(0, 16) : null,
-          ossKarsilama: y.belge.ossKarsilama != null ? String(y.belge.ossKarsilama) : '',
-          ossTutar: y.belge.ossTutar != null ? String(y.belge.ossTutar) : '',
-          ossRedNedeni: String(y.belge.ossRedNedeni ?? ''),
-          ossPoliceNo: String(y.belge.ossPoliceNo ?? ''),
-          ossHasarNo: String(y.belge.ossHasarNo ?? ''),
-          ossBrans: String(y.belge.ossBrans ?? ''),
-          provizyonAciklama: String(y.belge.provizyonAciklama ?? ''),
-        });
-        setKampanyaId(y.belge.kampanyaId != null ? Number(y.belge.kampanyaId) : null);
-        setKampanyaAdi(String(y.belge.kampanyaAdi ?? ''));
-        setTeklifDurum(String(y.belge.teklifDurum ?? '1'));
-        setRevizeNo(String(y.belge.revizeNo ?? ''));
-        setTeklifKonusu(String(y.belge.teklifKonusu ?? ''));
-        setTeklifTeslim(String(y.belge.teklifTeslim ?? ''));
-        // Alis belgesi GIRIS deposunu, satis CIKIS deposunu kullanir.
-        // Transferde "depo" CIKIS deposudur, girisDepo ayri alanda tutulur;
-        //   digerlerinde hangisi doluysa o tek depo alanina yansir.
-        const cikisD = y.belge.cikisDepoId
-          ? { id: Number(y.belge.cikisDepoId), ad: String(y.belge.cikisDepoAdi ?? '') } : null;
-        const girisD = y.belge.girisDepoId
-          ? { id: Number(y.belge.girisDepoId), ad: String(y.belge.girisDepoAdi ?? '') } : null;
-        setDepo(Number(y.belge.tur) === 20 ? cikisD : girisD ?? cikisD);
-        setGirisDepo(Number(y.belge.tur) === 20 ? girisD : null);
-        setSatici(y.belge.saticiId
-          ? { id: Number(y.belge.saticiId), ad: String(y.belge.saticiAdi ?? '') } : null);
-        setTeslimSekli(Number(y.belge.teslimSekli ?? 0));
-        setSenaryo(Number(y.belge.senaryo ?? 0));
-        setSevkTarihi(y.belge.irsaliyeTarihi ? String(y.belge.irsaliyeTarihi).slice(0, 16) : '');
-        setSoforTckn(String(y.belge.soforTckn ?? ''));
-        setAracPlaka(String(y.belge.aracPlaka ?? ''));
-        setSoforAd(String(y.belge.soforAd ?? ''));
-        setTeslimEden(y.belge.teslimEdenId
-          ? { id: Number(y.belge.teslimEdenId), ad: String(y.belge.teslimEdenAdi ?? '') } : null);
-        setFisTipi(Number(y.belge.tipi ?? 0));
-        // Faturada ayni alan FATURA TIPI'dir (130); eski kayitlarda 0 ise
-        //   varsayilan "Alış / Satış" (1) gosterilir.
-        setFaturaTipi(Number(y.belge.tipi) || 1);
-        setRaporDovizi(String(y.belge.raporDovizi ?? y.belge.belgeDovizi ?? '') || yerelPara);
-        setEkstreDovizi(String(y.belge.ekstreDovizi ?? y.belge.raporDovizi ?? '') || yerelPara);
-        setBelgeKuru(String(y.belge.dovizKuru ?? 1));
+        // Yanit -> kart durumu cevrimi SAF fonksiyonda (belgeKarti/belgeOkuma):
+        //   40 alanin tarih/null/doviz kurallari burada setX yiginina
+        //   karismasin, tek tek denenebilsin.
+        const d = yanittanBaslik(y.belge, yerelPara);
+        setTur(d.tur);
+        setCari(d.cari);
+        setTarih(d.tarih);
+        setSeri(d.seri);
+        setVadeGun(d.vadeGun);
+        setAciklama(d.aciklama);
+        setOdeyenKurumId(d.odeyenKurumId);
+        setFiyatListesiIdHam(d.fiyatListesiId);
+        setBolumId(d.bolumId);
+        setPersonelId(d.personelId);
+        setBasvuruBilgi(yanittanBasvuruBilgi(y.belge));
+        setKampanyaId(d.kampanyaId);
+        setKampanyaAdi(d.kampanyaAdi);
+        setTeklifDurum(d.teklifDurum);
+        setRevizeNo(d.revizeNo);
+        setTeklifKonusu(d.teklifKonusu);
+        setTeklifTeslim(d.teklifTeslim);
+        setDepo(d.depo);
+        setGirisDepo(d.girisDepo);
+        setSatici(d.satici);
+        setTeslimEden(d.teslimEden);
+        setTeslimAlan(d.teslimAlan);
+        setTeslimSekli(d.teslimSekli);
+        setSenaryo(d.senaryo);
+        setSevkTarihi(d.sevkTarihi);
+        setSoforTckn(d.soforTckn);
+        setAracPlaka(d.aracPlaka);
+        setSoforAd(d.soforAd);
+        setFisTipi(d.fisTipi);
+        setFaturaTipi(d.faturaTipi);
+        setRaporDovizi(d.raporDovizi);
+        setEkstreDovizi(d.ekstreDovizi);
+        setBelgeKuru(d.belgeKuru);
         setKalemDegisti(false);
-        setTeslimAlan(y.belge.teslimAlanId
-          ? { id: Number(y.belge.teslimAlanId), ad: String(y.belge.teslimAlanAdi ?? '') } : null);
         setSatirlar(yanittanSatirlar(y.satirlar, yerelPara));
       } catch (h) {
         setHata(hataMetni(h));
@@ -1250,141 +1096,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     setBasvuruBilgi({});
   }
 
-  // --------------------------------------------------------- fiyat listesi ----
-  /**
-   * Belge YONUNDEKI listeler + acilista gelecek liste. Cari ya da tur
-   * degisince yeniden cozulur: alis belgesinde alis listeleri, satista satis.
-   */
-  useEffect(() => {
-    let iptal = false;
-    void (async () => {
-      try {
-        // YON SUZMESI SART: alis belgesinde satis listesi secilememeli -
-        //   satis fiyatiyla mal girisi yapmak maliyeti bozar.
-        const y = await api.liste('fiyat-listesi', {
-          sayfa: 1, boyut: 200,
-          filtre: { op: 'and', kosullar: [
-            // 'durum' HAM KOD kolonudur (sayi) - metin 'Aktif' gondermek
-            //   sunucuda tip hatasiyla 500 veriyordu, kutu hic dolmuyordu.
-            { alan: 'durum',   op: 'esit', deger: 1 },
-            { alan: 'yonKodu', op: 'esit', deger: alisMi ? 1 : 2 },
-          ] },
-        });
-        if (iptal) return;
-        setFiyatListeleri(y.satirlar.map(r => ({ id: Number(r.id), ad: String(r.ad ?? '') })));
-      } catch { if (!iptal) setFiyatListeleri([]) }
-    })();
-    return () => { iptal = true };
-  }, [alisMi]);
-
-  // Acilista / cari degisince belgenin listesi cariden cozulur. KAYITLI
-  //   belgede DOKUNULMAZ: belge hangi listeyle kesildiyse onu tasir.
-  useEffect(() => {
-    if (belgeId || !cari?.id) return;
-    let iptal = false;
-    void (async () => {
-      try {
-        const y = await api.belgeVarsayilanListe(tur, cari.id, odeyenKurumId);
-        if (!iptal) setFiyatListesiIdHam(y.listeId ?? null);
-      } catch { /* liste kurulmamis olabilir - fiyatlar kart fiyatindan gelir */ }
-    })();
-    return () => { iptal = true };
-  }, [belgeId, tur, cari?.id, odeyenKurumId]);
-
-  /**
-   * KAMPANYAYI COZ ve baslik alanlarina isle (274/291). Uc yerden cagrilir
-   * (yeni belge acilisi, kayitli belgede pay modu, odeyen kurum degisimi);
-   * uceye ayri ayri yazilinca "modu da set etmeyi unutma" hatasi kacinilmazdi.
-   *
-   * @param kampanyaYaz kampanya kimligini/listesini de yaz. KAYITLI belgede
-   *   FALSE gecilir: belge hangi kampanyayla kesildiyse onu tasir, yalniz
-   *   PAY MODU tazelenir (mod kampanyanin degil KURUMUN ozelligi, belgeye
-   *   yazilmaz - kayitli basvuruda provizyon dugmesi de dogru davranmali).
-   * @returns kampanyanin fiyat listesi (varsa) - cagiran satirlari o listeyle
-   *   yeniden fiyatlayabilsin.
-   */
-  async function kampanyaCoz(
-    kurumId: number | null, kampanyaYaz: boolean,
-  ): Promise<number | null> {
-    try {
-      const y = await api.fiyatKampanya({
-        tarafId: kampanyaYaz ? cari?.id ?? null : null, kurumId,
-      });
-      setPaylasimModu(y.paylasimModu ?? 1);
-      if (!kampanyaYaz) return null;
-
-      setKampanyaId(y.kampanyaId);
-      setKampanyaAdi(y.kampanyaId ? `${y.kod ? y.kod + ' · ' : ''}${y.ad}` : '');
-      // Kampanyanin kendi fiyat listesi varsa belgenin listesi ONA cekilir:
-      //   baslik neyle fiyatlandigini dogru gostersin (kullanici degistirebilir).
-      if (y.fiyatListesiId) { setFiyatListesiIdHam(y.fiyatListesiId); return y.fiyatListesiId }
-      return null;
-    } catch {
-      if (kampanyaYaz) { setKampanyaId(null); setKampanyaAdi('') } else setPaylasimModu(1);
-      return null;
-    }
-  }
-
-  /**
-   * KAMPANYA COZUMU (274). Odeyen kurum varsa kampanya ONUN sozlesmesinden
-   * gelir - odemeyi yapan taraf fiyati belirler; yoksa carinin kendi
-   * kampanyasi, o da yoksa genel kampanya.
-   *
-   * KAYITLI belgede kampanya DEGISMEZ; o durumda yalniz pay modu okunur.
-   */
-  useEffect(() => {
-    const kampanyaYaz = !belgeId;
-    if (kampanyaYaz && !cari?.id && !odeyenKurumId) {
-      setKampanyaId(null); setKampanyaAdi(''); setPaylasimModu(1); return;
-    }
-    if (!kampanyaYaz && !odeyenKurumId) { setPaylasimModu(1); return }
-    void kampanyaCoz(odeyenKurumId, kampanyaYaz);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [belgeId, cari?.id, odeyenKurumId]);
-
-  /**
-   * Liste DEGISTI: butun satirlar EKRANDA yeniden fiyatlanir (kullanici
-   * kurali); Kaydet kalicilastirir. Kayitli belgede de ayni yol - sunucuda
-   * fiyatlayan fn_belge_fiyatlandir KALDIRILDI: durum=0 butun normal
-   * belgelerde "Kesin" oldugundan hepsini reddediyordu, ustelik yalniz
-   * birim_fiyat yazip tutar/matrah/genel_toplami bayat birakiyordu (satir
-   * matematigi banker's rounding ile BelgeHesap'ta - PG round'u farkli
-   * yuvarlar, kurus paritesi DB'de tutturulamaz). Kaydetme hatti zaten tum
-   * toplamlari satirlardan yeniden hesaplar.
-   */
-  /**
-   * Butun satirlari verilen liste + gecerli kampanya ile yeniden fiyatlar.
-   * Liste degisimi ve ODEYEN KURUM degisimi ayni yolu kullanir: kurum degisince
-   * gecerli kampanya da degisir - satirlar eski kurumun fiyatinda kalirsa belge
-   * "SGK anlasmasi" fiyatiyla Ozel Yasam'a kesilirdi.
-   */
-  async function satirlariYenidenFiyatla(
-    listeId: number | null, kurumId: number | null, kaynakAdi: string,
-  ) {
-    if (!listeId) return;
-    await guvenli(async () => {
-      let degisen = 0, bulunamayan = 0;
-      const yeniSatirlar = await Promise.all(satirlar.map(async r => {
-        if (!r.stokId && !r.hizmetId) return r;
-        const f = await api.fiyatKalem(
-          r.stokId ? { stokId: r.stokId } : { hizmetId: r.hizmetId! },
-          { tarafId: cari?.id ?? null, kurumId, listeId });
-        const y = kampanyaFiyatiUygula(r, f);
-        if (y === r) bulunamayan++; else degisen++;
-        return y;
-      }));
-      setSatirlar(yeniSatirlar);
-      mesaj(`${degisen} satırın fiyatı ${kaynakAdi} güncellendi.`
-          + (bulunamayan ? ` ${bulunamayan} kalem listede bulunamadı, fiyatı DEĞİŞMEDİ.` : '')
-          + (belgeId && degisen ? ' Kaydet ile kalıcı olur.' : ''));
-    });
-  }
-
-  async function listeDegisti(yeni: number | null) {
-    setFiyatListesiIdHam(yeni);
-    await satirlariYenidenFiyatla(yeni, odeyenKurumId, 'listeden');
-  }
-
   /**
    * ODEYEN KURUM degisti (274): kampanya kurumun sozlesmesinden geldigi icin
    * once kampanya yeniden cozulur (listesi varsa belgenin listesi ona cekilir),
@@ -1400,44 +1111,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
     if (satirlar.some(r => r.stokId || r.hizmetId))
       await satirlariYenidenFiyatla(liste, yeni, 'ödeyen kuruma göre');
-  }
-
-  /**
-   * PROVIZYON UYGULA (289): kurumun karsilama oranini butun satirlara isler.
-   * Tutarlar EKRANDA hesaplanir, Kaydet kalicilastirir - liste degisiminde
-   * oldugu gibi. Oran 0 verilirse tamami hastaya yazilir (kendi oder).
-   */
-  async function provizyonUygula() {
-    // KATILIM PAYI MODU (291, SGK): oran sorulmaz. Her satir KENDI katilim
-    //   payiyla bolunur (fiyat listesinden kalemle birlikte gelir); kullanici
-    //   tek tip bir tutar dayatmak isterse kutuya yazar.
-    if (paylasimModu === 2) {
-      const cevapKatki = await metinSor(
-        'Katılım payı (TL) — boş bırakılırsa her satırın kendi katılım payı uygulanır',
-        '', 'Katılım payı');
-      if (cevapKatki === null) return;
-      const elle = cevapKatki.trim() === '' ? null : Math.max(0, hamSayi(cevapKatki));
-
-      // Yeni satirlar ONCE hesaplanir: toplami setSatirlar geri cagriminda
-      //   biriktirmek mesaji "0.00" gosteriyordu (state guncellemesi ertelenir).
-      const { satirlar: yeniler, toplamHasta } = katilimUygula(satirlar, elle);
-      setSatirlar(yeniler);
-      mesaj(`Katılım payı uygulandı: hastadan ${toplamHasta.toFixed(2)} TL, `
-          + 'kalanı kuruma. Kaydet ile kalıcı olur.');
-      return;
-    }
-
-    // Varsayilan olarak KURUMUN sozlesmedeki orani gelir - hekim/kayit
-    //   gorevlisi provizyon farkliysa degistirir.
-    const cevap = await metinSor(
-      'Kurumun karşılama oranı (%) — 0 girilirse tamamı hastaya yazılır',
-      String(satirlar.find(r => hamSayi(r.karsilama ?? '0') > 0)?.karsilama ?? ''),
-      'Karşılama %');
-    if (cevap === null || cevap.trim() === '') return;
-    const oran = Math.min(100, Math.max(0, hamSayi(cevap)));
-
-    setSatirlar(eski => karsilamaUygula(eski, oran).satirlar);
-    mesaj(`Karşılama oranı %${oran} uygulandı. Kaydet ile kalıcı olur.`);
   }
 
   /** Modal icinde acildiysa cagiran kapatir; dogrudan URL ile acildiysa listeye doner. */

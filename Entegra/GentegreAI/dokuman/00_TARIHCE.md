@@ -4490,3 +4490,28 @@ eden-alan ayrimi, iade turleri (fatura 15/16-11/12, irsaliye 14/119-10/109), sto
 (depo/stok fisinde yok), kalem penceresinin pay alanlari (yalniz odeyen kurumlu basvuru), banka/POS
 baslik ve yerel para suzgeci, kaydedilmemis belgede termin/donusum acilmamasi, turetilmis belgenin
 kartin ustunde acilmasi. Toplam: **197 test gecti** (177 + 20).
+
+**REFAKTOR: BelgeKarti ikinci tur - okuma cevrimi, basvuru kaynaklari, fiyatlandirma**
+(1864 -> 1537 satir, uc dosya ayrildi.)
+1. `belgeKarti/belgeOkuma.ts` - sunucu yaniti -> kart durumu cevrimi SAF fonksiyona alindi
+(`yanittanBaslik`, `yanittanBasvuruBilgi`). Belge acilis effect'i 113 satirdi ve icinde 40 `setX`
+vardi; her alanin kurali (tarih 16'ya kirpma, `null` vs `0`, doviz zinciri, transfer depo takasi)
+o yiginin arasinda kayboluyordu. Cevrim hatalari SESSIZ: yanlis kirpilmis tarih ekranda dogru
+gorunur, hata belge yeniden kaydedilince cikar. **19 test**: bos tarih -> simdiki an, transfer (20)
+cikis/giris takasi, alista giris deposunun tek alana yansimasi, fiyat listesi 0 -> null, secilmemis
+kimligin null kalmasi, `belge.tipi` iki ekranda farkli okunmasi (faturada 0 -> 1, stok fisinde 0
+gecerli), doviz zinciri (kendi > ustteki > yerel), provizyon tarihlerinin dakikaya kirpilmasi ama
+mustehaklik ZAMANININ kirpilmamasi, karsilama 0 degerinin kaybolmamasi.
+2. `belgeKarti/useBasvuruKaynaklari.ts` - kurum · bolum · depo · gorevli combolari ve protokol
+numara sablonu: bes ayni desendeki effect (110 satir) tek hook'a alindi. Ortak kural yazildi: liste
+okunamazsa combo bos kalir, KAYIT ENGELLENMEZ.
+3. `belgeKarti/useBelgeFiyatlandirma.ts` - fiyat listesi, kampanya, pay modu ve provizyon
+uygulamasi tek yerde (190 satir). Hepsi TEK soruyu cevapliyor: "bu satir kaca yazilacak". Dagildikca
+kural kaciyordu - odeyen kurum degisince kampanyayi cozup satirlari yeniden fiyatlamayi unutmak,
+belgeyi "SGK anlasmasi" fiyatiyla ozel hastaya kesmek demekti. **16 test**: kampanya adi "KOD · AD"
+bicimi, kodsuz kampanyada bos ayrac kalmamasi, KAYITLI belgede kampanyanin degismeyip yalniz pay
+modunun tazelenmesi, sunucu hatasinda kampanyanin temizlenmesi, liste combosunun belge yonune gore
+suzulmesi (satis 2 / alis 1), kayitli belgede varsayilan listenin sorulmamasi, listede bulunamayan
+kalemin "fiyatı DEĞİŞMEDİ" uyarisi, "Kaydet ile kalıcı olur" uyarisinin yalniz kayitli belgede
+cikmasi.
+Toplam: **232 test gecti** (197 + 19 + 16).
