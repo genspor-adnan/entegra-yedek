@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 public static partial class KartKatalogu
 {
@@ -47,9 +47,9 @@ public static partial class KartKatalogu
                 Baslik: "Öncelik", Grup: "Kimlik"),
 
             // KAPSAM: boş alan "tümü" demektir (kampanya kartıyla aynı mantık).
-            new("hekimId",   "hekim_id",  "kod",
-                KodTablosu: "public.v_hekim_lookup", AramaKaynagi: "personel",
-                Baslik: "Hekim", Grup: "Kapsam"),
+            // KİŞİ ALANI BURADA DEĞİL (375, kullanıcı): plan tek bir kişiye
+            //   değil bir KİŞİ LİSTESİNE bağlanır - "Prim Alanlar" sekmesi.
+            //   Aynı oranı alan otuz kişi için otuz plan açmak gerekiyordu.
             new("hekimTipi", "hekim_tipi","kod", KodListesi: "prim.hekim_tipi",
                 Baslik: "Hekim Tipi", Grup: "Kapsam"),
             new("odeyenKurumId", "odeyen_kurum_id", "kod",
@@ -117,6 +117,26 @@ public static partial class KartKatalogu
                         Baslik: "Açıklama"),
                 },
                 SubeKolonu: null, Baslik: "Prim Satırları", LogTabloId: 950),
+
+            // PRİM ALANLAR (375, kullanıcı): planın kapsadığı kişiler.
+            //   BOŞ = plan o roldeki HERKESE uyar; DOLU = yalnızca listedekilere.
+            //   Listesi dolu plan, listesi boş olandan DAHA ÖZELDİR ve onu ezer -
+            //   "MR Gönderen %20 (şu kişiler)" ile "%25 (bu kişiler)" böyle
+            //   iki planla kurulur.
+            //   Kişiler PRİM ROLÜ İŞARETLİ olanlardan seçilir (v_prim_taraf_lookup):
+            //   rolsüz birine yazılan plan hiç hakediş üretmez ve bu ancak ay
+            //   sonunda fark edilirdi.
+            new DetayTanimi("taraflar", "public.prim_plani_taraf", "plan_id",
+                new KartAlani[]
+                {
+                    new("id",       "id",       "sayi", Yazilabilir: false),
+                    new("tarafId",  "taraf_id", "kod", Zorunlu: true,
+                        KodTablosu: "public.v_prim_taraf_lookup",
+                        AramaKaynagi: "personel", Baslik: "Kişi"),
+                    new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
+                        Baslik: "Açıklama"),
+                },
+                SubeKolonu: null, Baslik: "Prim Alanlar", LogTabloId: 950),
         },
         // Kullanilmis plan SILINMEZ: hakedis satiri hangi kuraldan dogdugunu
         //   plan satirinda tasiyor (denetim izi). Engel KARTTA tanimli, cunku

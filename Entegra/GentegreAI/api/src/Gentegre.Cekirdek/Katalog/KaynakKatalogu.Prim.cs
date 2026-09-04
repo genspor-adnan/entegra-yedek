@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// PRİM / HAKEDİŞ listeleri (324).
@@ -15,7 +15,6 @@ public static partial class KaynakKatalogu
         Ad: "prim-plani",
         YetkiKodu: "prim",
         Kaynak: "public.prim_plani p " +
-                "left join public.taraf hk on hk.id = p.hekim_id " +
                 "left join public.taraf ku on ku.id = p.odeyen_kurum_id",
         // Planin subesi BOS birakilabilir = "tüm şubeler" (kurum geneli prim
         //   politikasi). Duz esitlik boyle planlari listeden dusuruyordu.
@@ -36,7 +35,16 @@ public static partial class KaynakKatalogu
             new("primZamani", "p.prim_zamani", "sayi", "Zaman Kodu", Varsayilan: false),
             new("baslangic", "p.baslangic", "tarih", "Başlangıç", Genislik: 110),
             new("bitis",     "p.bitis",     "tarih", "Bitiş", Genislik: 110),
-            new("hekim",     "coalesce(hk.unvan, '')", "metin", "Hekim", Genislik: 180),
+            // KIM KAPSANIYOR (375): plan artik tek hekime degil KISI LISTESINE
+            //   baglanir. Listede kac kisi oldugu tek basina yeterli bilgi -
+            //   isimler kartin "Prim Alanlar" sekmesinde.
+            new("kapsananlar",
+                "case when exists (select 1 from public.prim_plani_taraf t"
+                + " where t.plan_id = p.id)"
+                + " then (select count(*)::text || ' kişi' from public.prim_plani_taraf t"
+                + " where t.plan_id = p.id) else 'Tümü' end",
+                                           "metin", "Kapsanan", Hizalama: "orta",
+                                           Genislik: 110, Filtrelenebilir: false),
             new("hekimTipiAdi",
                 "case p.hekim_tipi when 1 then 'İç hekim' when 2 then 'Dış hekim' else 'Tümü' end",
                                            "metin", "Hekim Tipi", Hizalama: "orta",

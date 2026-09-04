@@ -5122,3 +5122,39 @@ Genislik kazanci hizanin bedeline degmiyor: Il ve Ilce artik ortak `.alan`
 izgarasini (84px etiket) kullaniyor, kutudaki HER edit ayni x'te basliyor ve
 sag kenarlar da esit. Il/Ilce %5 daraltma kurali da kaldirildi - tek basina
 duran iki dar combo yeni bir duzensizlikti.
+
+### Prim plani: tek hekim yerine KISI LISTESI (db/375)
+
+Kullanici: "dış hekimlerin bazısı MR için %20 alacak bazısı %25 alacak,
+gönderen olarak" + "hekim listesi demeyelim, teknisyen vb olabilir".
+
+Eskiden plan TEK kisiye baglaniyordu (`prim_plani.hekim_id`). Ayni orani alan
+30 kisi = 30 ayri plan; oran degisince otuz kaydi tek tek duzeltmek gerekiyordu.
+Ad da yaniltiyordu: prim rolleri yalniz hekim degil - Teknisyen, Asistan,
+Raporlayan, Anestezi de prim alir.
+
+Artik plan bir KISI LISTESI tasiyor (`prim_plani_taraf`, kartta **Prim Alanlar**
+sekmesi):
+
+    liste BOS  -> plan o roldeki HERKESE uyar
+    liste DOLU -> yalnizca listedekilere, ve listesiz plani EZER
+
+Ozgulluk puani hekim_id'den listeye tasindi - davranis birebir korundu.
+`hekim_id` kolonu KALDIRILDI (varsa degeri once listeye gocuruldu): iki yerden
+ayni soruya cevap vermek "hangisi gecerli" belirsizligi uretirdi.
+
+Kisiler `v_prim_taraf_lookup`tan secilir = prim rolu ISARETLI olanlar. Rolsuz
+birine yazilan plan hicbir hakedis uretmez ve bu ancak ay sonunda fark
+edilirdi.
+
+Liste ekranindaki "Hekim" kolonu "Kapsanan" oldu: `Tümü` ya da `N kişi`.
+
+DOGRULANDI (rollback'li islem): ayni MR hizmetinde 4997 -> %20, 4999 -> %25,
+listede olmayan 5004 -> genel planin %10'u.
+
+ACIK KALAN: `prim_plani.hekim_tipi` (İç/Dış) hala kartta duruyor ama
+`fn_prim_plan_satiri` onu OKUMUYOR - "sadece dış hekimler" plani sessizce
+herkese uyar. Kisi listesi bu ihtiyaci zaten karsiliyor; alan ya filtreye
+baglanmali ya karttan kalkmali.
+
+YALNIZ DOCKER'A uygulandi; bulut (ekspert) 369-375 bekliyor.
