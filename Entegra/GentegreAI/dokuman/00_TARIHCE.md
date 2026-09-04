@@ -4984,3 +4984,17 @@ icin modal icinde KAYDIRMA gerektiriyordu. Kimlik Detayı seyrek kullanilan alan
 (pasaport, vefat, kimliksiz, mahremiyet notu); Yakinlar daha sik - sira degistirildi. Testte h6
 sirasi da sabitlendi, ileride kayarsa yakalanir.
 *Il / Ilce combolari %30 genisletildi* - "KAHRAMANMARAŞ" gibi adlar dar kutuda kirpiliyordu.
+
+**Hasta Genel sekmesi yerlesimi (kullanici ekran goruntusuyle cozuldu).** Kullanici uc kez
+"Yakınlar gridi görünmüyor" dedi; DOM dokumu gridin var oldugunu gosterdi ama EKRAN GORUNTUSU
+sorunu netlestirdi: grid kart penceresinin GORUNUR ALANI DISINDA kaliyordu - İletişim ve Kimlik
+Bilgileri yan yana, sagda Fotoğraf, altta Kimlik Detayı, en altta Yakınlar.
+Once ayri sekmeye alindi (mockup'ta da oyle), kullanici "ayri sekme olmasin" deyince geri alindi ve
+asil duzeltme yapildi: **İletişim kutusu KIMLIGIN USTUNE** alindi (tam genislikte), altinda Kimlik
+Bilgileri + Fotoğraf yan yana. Yan yanayken ikisi de dar kaliyor ve alttakileri asagi itiyordu.
+Yakınlar artik Kimlik Detayı'nin da ustunde.
+*Il / Ilce combolari:* satir payi tek basina yetmiyordu - `.alan` bir etiket|deger gridi ve etiket
+kolonu SABIT 84px; satira daha cok pay verilse de combo ayni kaliyordu. Etiket kolonu 34px'e
+indirildi.
+Testler bu duzeni sabitliyor (İletişim'in Kimlik'ten once gelmesi, gridin Genel'de olmasi, sekme
+olarak cizilmemesi). Toplam: **365 test gecti**.

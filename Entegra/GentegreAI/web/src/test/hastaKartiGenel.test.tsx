@@ -65,22 +65,25 @@ describe('hasta kartinda Yakınlar gridi', () => {
       .toEqual(expect.arrayContaining([expect.stringContaining('Genel')])));
   });
 
-  it('YAKINLAR gridi Genel sekmesinde GORUNUR', async () => {
+  it('YAKINLAR gridi GENEL sekmesinde (ayri sekme DEGIL - kullanici)', async () => {
     ciz();
     await waitFor(() => expect(kartOku).toHaveBeenCalled());
-    await waitFor(() => {
-      const g = document.body.textContent ?? '';
-      expect(g).toContain('Acil Durumda Aranacak Kişiler');
+    await waitFor(() => expect([...document.querySelectorAll('table')].some(t =>
+      (t.textContent ?? '').includes('Yakınlık'))).toBe(true));
+    // Sekme olarak DA cizilmemeli - ayni grid iki yerde olmasin.
+    expect([...document.querySelectorAll('.kat')].map(x => x.textContent ?? '')
+      .some(x => x.includes('Acil Durumda Aranacak'))).toBe(false);
+  });
+
+  it('ILETISIM kutusu KIMLIGIN USTUNDE (kullanici)', async () => {
+    ciz();
+    await waitFor(() => expect(kartOku).toHaveBeenCalled());
+    const basliklar = await waitFor(() => {
+      const b = [...document.querySelectorAll('h6')].map(x => x.textContent ?? '');
+      if (!b.includes('İletişim')) throw new Error('İletişim kutusu yok');
+      return b;
     });
-    // Gridin KENDISI de cizilmis olmali - yalniz baslik degil.
-    expect([...document.querySelectorAll('table')].some(t =>
-      (t.textContent ?? '').includes('Yakınlık'))).toBe(true);
-    // KUTU KIMLIK DETAYI'NIN USTUNDE (kullanici gormedi: altta kalinca
-    //   kaydirma gerekiyordu) - h6 sirasi bunu sabitler.
-    const basliklar = [...document.querySelectorAll('h6')].map(x => x.textContent ?? '');
-    const yakin = basliklar.findIndex(x => x.startsWith('Yakınlar'));
-    const detayIdx = basliklar.indexOf('Kimlik Detayı');
-    expect(yakin).toBeGreaterThanOrEqual(0);
-    if (detayIdx >= 0) expect(yakin).toBeLessThan(detayIdx);
+    expect(basliklar.indexOf('İletişim'))
+      .toBeLessThan(basliklar.indexOf('Kimlik Bilgileri'));
   });
 });

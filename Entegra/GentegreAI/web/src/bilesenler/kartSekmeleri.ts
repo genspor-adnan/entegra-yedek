@@ -147,6 +147,8 @@ export function sekmeleriKur(secenek: {
     if (personelGibiKart && d.ad === 'ozluk') return;
     // Personel'de acil kişiler ik_karti.html mockup'ta İletişim sekmesinin altında
     // gömülü grid; ayrı sekme açılmasın.
+    // YAKINLAR SEKME DEGIL (kullanici): hastada Genel sekmesinde grid,
+    //   personelde Iletisim sekmesine gomulu.
     if (personelGibiKart && d.ad === 'acilKisiler') return;
     // Sube kartinda depolar "Depolar" GRUP sekmesine gomulu cizilir (merkez
     //   deposu kutusuyla birlikte, 173) - ayni adla iki sekme acilmasin.

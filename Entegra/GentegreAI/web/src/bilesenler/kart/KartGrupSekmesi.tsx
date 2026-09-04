@@ -362,14 +362,11 @@ const adliBlok = (
             />
           );
         })()}
+        {/* YAKINLAR (kullanici: ayri sekme OLMASIN) - Genel sekmesinde,
+            Kimlik Detayı'nin ustunde. Iletisim kutusu kimligin USTUNE
+            alindigi icin artik gorunur alanda kaliyor. */}
         {kaynak === 'hasta' && aktif.baslik === 'Genel' && acilDetay && (
-          /* BASLIKLI KUTU (kullanici "yakınları gridi görünmüyor"): grid
-             basliksiz cizilince ustundeki kutularin devami gibi duruyor,
-             kullanici onu ayri bir bolum olarak SECEMIYORDU. */
           <div className="kagrup" key="Yakinlar">
-            {/* Mockup basligi: "Yakınlar / Acil Durumda Aranacak" - katalog
-                adi personel icin yazilmis ("Acil Durumda Aranacak Kişiler"),
-                hastada aranan sey YAKIN. */}
             <h6>Yakınlar / Acil Durumda Aranacak</h6>
             <GenDetayTablo
               meta={acilDetay}

@@ -125,9 +125,14 @@ export function PersonelKimlikOzet({
     // "hasta-kimlik-satiri": HASTADA iletisim ve kimlik kutulari yan yana ve
     //   AYNI YUKSEKLIKTE (kullanici) - farkli sayida alan tasidiklari icin biri
     //   kisa kalip aralarinda bosluk birakiyordu.
-    <div className={'kasira etiket-sag'
-                    + (kartAdi === 'hasta' ? ' hasta-kimlik-satiri' : '')}>
+    <div className={kartAdi === 'hasta'
+                    ? 'hasta-kimlik-dikey etiket-sag'
+                    : 'kasira etiket-sag'}>
+      {/* HASTADA ILETISIM KIMLIGIN USTUNDE (kullanici): yan yanayken ikisi de
+          dar kaliyor ve altlarindaki Yakınlar gridi kart penceresinin disina
+          tasiyordu. Ustte tam genislikte iletisim, altinda kimlik + fotograf. */}
       {fotoSolEkOnce && fotoSolEk}
+      <div className="kasira kimlik-foto-satiri">
       <div className="kasutun"
            style={{ flex: kimlikSutunGenisligi ? `0 0 ${kimlikSutunGenisligi}` : 1,
                     minWidth: 0 }}>
@@ -314,6 +319,7 @@ export function PersonelKimlikOzet({
         {/* Kullanici rolu (kullanici): karta bagli kullanici hesabinin rolu -
             gorulur ve degistirilebilir. Yeni kayitta id yok, gosterilmez. */}
 
+      </div>
       </div>
     </div>
   );
