@@ -1045,6 +1045,19 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                           };
                           return (
                             <span className="cok-secim">
+                              {/* "TÜMÜ" ACIK BIR SECENEK (kullanici: "tümü
+                                  seçemedim"). Bos deger zaten "tumu" demek ama
+                                  bunu ekranda hicbir sey soylemiyordu: butun
+                                  kutulari tek tek temizlemek bir SECIM gibi
+                                  hissettirmiyor. Isaretlenince deger bosalir;
+                                  herhangi bir tur isaretlenince kendiliginden
+                                  kalkar. */}
+                              <label className="cok-secim-oge">
+                                <input type="checkbox" disabled={!a.yazilabilir}
+                                       checked={secili.length === 0}
+                                       onChange={() => taslakYaz(a.ad, '')} />
+                                <span><b>Tümü</b></span>
+                              </label>
                               {Object.entries(a.kodlar!).map(([k, v]) => (
                                 <label key={k} className="cok-secim-oge">
                                   <input type="checkbox" disabled={!a.yazilabilir}
@@ -1053,9 +1066,6 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                                   <span>{v}</span>
                                 </label>
                               ))}
-                              {secili.length === 0 && (
-                                <span className="sonuk">— tümü</span>
-                              )}
                             </span>
                           );
                         })() : a.aramaKaynagi ? (
