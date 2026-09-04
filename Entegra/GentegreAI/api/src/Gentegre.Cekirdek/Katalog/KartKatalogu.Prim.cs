@@ -46,23 +46,27 @@ public static partial class KartKatalogu
             new("oncelik",   "oncelik",   "sayi",
                 Baslik: "Öncelik", Grup: "Kimlik"),
 
-            // KAPSAM: boş alan "tümü" demektir (kampanya kartıyla aynı mantık).
+            // KAPSAM ARTIK AYRI KUTU DEĞİL (kullanıcı): aynı başlık bölümünün
+            //   İKİNCİ SIRASI. Beş alan için ayrı bir çerçeve, kartı ikiye
+            //   bölüp Prim Satırları'nı aşağı itiyordu; kapsam alanları da
+            //   planın kimliğinin parçası - "ne zaman, kime, hangi kurumda".
+            //   Boş alan "tümü" demektir (kampanya kartıyla aynı mantık).
             // KİŞİ ALANI BURADA DEĞİL (375, kullanıcı): plan tek bir kişiye
             //   değil bir KİŞİ LİSTESİNE bağlanır - "Prim Alanlar" sekmesi.
             //   Aynı oranı alan otuz kişi için otuz plan açmak gerekiyordu.
             new("odeyenKurumId", "odeyen_kurum_id", "kod",
                 KodTablosu: "public.v_kurum_lookup", AramaKaynagi: "kurum",
-                Baslik: "Ödeyen Kurum", Grup: "Kapsam"),
+                Baslik: "Ödeyen Kurum", Grup: "Kimlik"),
             // BAZ ve KDV: kullanici karari - tahsil edilen matrah, KDV haric.
             //   Prim tahsil edildikce dogar; taban KDV'siz karsiliktir.
             new("baz",       "baz",       "kod", KodListesi: "prim.baz",
-                Baslik: "Baz", Grup: "Kapsam"),
+                Baslik: "Baz", Grup: "Kimlik"),
             new("kdvHaric",  "kdv_haric", "mantik",
-                Baslik: "KDV Hariç (matrah)", Grup: "Kapsam"),
+                Baslik: "KDV Hariç (matrah)", Grup: "Kimlik"),
             new("subeId",    "sube_id",   "kod", KodTablosu: "public.sube",
-                Baslik: "Şube (boş = tümü)", Grup: "Kapsam"),
+                Baslik: "Şube (boş = tümü)", Grup: "Kimlik"),
             new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 300,
-                Baslik: "Açıklama", Grup: "Kapsam"),
+                Baslik: "Açıklama", Grup: "Kimlik"),
         },
         Detaylar: new DetayTanimi[]
         {
