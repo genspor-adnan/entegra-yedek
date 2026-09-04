@@ -4861,3 +4861,9 @@ yazim artik KAYIT ANINDA patlar, aylar sonra veri temizligiyle degil - canli den
 yazma girisimi reddedildi.
 *Dogrulama:* betik iki kez calistirildi (idempotent) ve 532 belgenin genel toplami db/024'teki ESKI
 fonksiyonla karsilastirildi - **0 fark**.
+
+**Ucretlendirme gridi kolon duzeni (kullanici).** "Birim Fiyat (TL) · KDV Dahil" -> sade
+"Birim Fiyat (TL)": kayit kabulde fiyat zaten hep KDV dahil konusuluyor, her satirda hatirlatmak
+yer kapliyordu. "İskonto %" -> "İsk.%". Miktar · İsk.% · KDV % AYNI genislikte (52px) - ucu de kisa
+sayi tasiyor, farkli genislikler gride duzensiz gorunum veriyordu. Tarih kolonu %10 genisledi
+(92 -> 101).

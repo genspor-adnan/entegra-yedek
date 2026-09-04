@@ -179,7 +179,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         </th>
         <th style={{ width: 34 }} className="hiza-orta">Tip</th>
         {/* BASVURUDA tarih en solda (kullanici): islem tarihi kalemin kimligi. */}
-        {tarihSolda && <th className="hiza-orta" style={{ width: 92 }}>Tarih</th>}
+        {tarihSolda && <th className="hiza-orta" style={{ width: 101 }}>Tarih</th>}
         <th style={{ width: 110 }}>Kod</th>
         <th>Stok / Hizmet</th>
         {aciklamaVar && <th style={{ width: 200 }}>Açıklama</th>}
@@ -190,15 +190,20 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         )}
         {/* Miktar / iskonto / KDV DAR (kullanici): ikisi de en fazla birkac
             hane; genis birakinca stok adi sikisiyordu. */}
-        <th className="hiza-sag" style={{ width: 60 }}>Miktar</th>
-        {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 68 }}>İskonto %</th>}
-        {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 58 }}>KDV %</th>}
+        {/* Miktar · İsk.% · KDV % AYNI GENISLIKTE (kullanici): ucu de kisa
+            sayi tasiyor, farkli genislikte olmalari gride duzensiz gorunum
+            veriyordu. */}
+        <th className="hiza-sag" style={{ width: 52 }}>Miktar</th>
+        {/* Kisa basliklar (kullanici): iki kolon da dar - "İskonto %" tam
+            sigmiyordu, KDV kolonu da gereginden genisti. */}
+        {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 52 }}>İsk.%</th>}
+        {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 52 }}>KDV %</th>}
         {/* Transferde FIYAT YOK: mal satilmiyor, depo degistiriyor. */}
-        {/* BASVURUDA baslikta "KDV Dahil" yazar: ayni kolon iki belgede farkli
-            sey gosterdiginde kullanici hangisine baktigini bilmeli. */}
+        {/* Basvuruda deger KDV DAHILDIR ama baslikta yazmiyor (kullanici):
+            kayit kabulde fiyat zaten hep KDV dahil konusuluyor - her satirda
+            hatirlatmak yer kapliyordu. */}
         {bilgi.kalem !== 'miktar' && (
-          <th className="hiza-sag" style={{ width: 110 }}>
-            Birim Fiyat ({yerelPara}){basvuruMu ? ' · KDV Dahil' : ''}</th>
+          <th className="hiza-sag" style={{ width: 110 }}>Birim Fiyat ({yerelPara})</th>
         )}
         {bilgi.kalem !== 'miktar' && (
           <th className="hiza-sag" style={{ width: 120 }}>Tutar ({yerelPara})</th>

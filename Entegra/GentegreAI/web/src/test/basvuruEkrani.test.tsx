@@ -390,14 +390,18 @@ describe('ucretlendirme KDV DAHIL gosterir (kullanici)', () => {
     });
   };
 
-  it('kolon basliginda "KDV Dahil" yazar', async () => {
+  it('kolon basligi SADE: "Birim Fiyat (TL)" - deger KDV dahil ama yazmaz', async () => {
+    // Kayit kabulde fiyat zaten hep KDV dahil konusuluyor; her satirda
+    //   hatirlatmak yer kapliyordu (kullanici).
     satirliBelge(20, 100);
     ciz({ id: 114349 });
     await waitFor(() => expect(belgeOku).toHaveBeenCalled());
     (await sekme('Ücretlendirme')).click();
     await waitFor(() =>
       expect([...document.querySelectorAll('th')]
-        .some(t => t.textContent?.includes('KDV Dahil'))).toBe(true));
+        .some(t => (t.textContent ?? '').startsWith('Birim Fiyat'))).toBe(true));
+    expect([...document.querySelectorAll('th')]
+      .some(t => t.textContent?.includes('KDV Dahil'))).toBe(false);
   });
 
   it('MATRAH 100 / %20 satiri gridde 120,00 gorunur', async () => {
