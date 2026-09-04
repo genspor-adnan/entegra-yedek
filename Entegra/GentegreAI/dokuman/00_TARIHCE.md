@@ -4558,3 +4558,30 @@ anlamsiz hem yanlis veri kapisiydi (hastaya rol isaretlenirse `v_prim_rol_aday` 
 hekim combosuna dusebilirdi). Dis hekimde de yok - orada rol "Çalışma Şekli" combosuyla veriliyor
 (362). Detay kopyalanirken suzuluyor. DB kontrol edildi: hasta tarafinda kayitli prim rolu YOK
 (17 satirin hepsi personel), temizlik gerekmedi.
+
+**"Gönderen" isareti "Primli" oldu (369) - anlami iki karti da kapsayacak sekilde genisledi.**
+Kullanici: "personel kartinda calisma sekli combosunda Gönderen var onun yerine Primli rename.. Bu
+secilirse personel kartinda Prim Rolleri sekmesi gorunsun.. Dis doktorda ise bu secilince Gönderen
+olarak primden yararlansin".
+`calisma_sekli = 3` 362'de yalnizca DIS HEKIM icin vardi ve "hasta gonderiyor" demekti. Artik iki
+kartta da ayni soruyu soruyor - BU KISI PRIM ALIYOR MU: ic personelde isaret konunca kartta
+**Prim Rolleri** sekmesi acilir ve roller orada isaretlenir (bir kisi isteyen+yapan+uygulayan
+olabilir); dis hekimde rol sorulmaz, tek rolu "Gönderen"dir.
+
+*Kosullu sekme mekanizmasi genisletildi.* `DetayTanimi.KosulAlani` yalniz kartin KENDI mantik
+alanina bakabiliyordu (`"paket"`); isaret 1:1 uzantida (`taraf_personel` = ozluk detayi) durdugu
+icin yetmedi. Yeni bicim: `"ozluk.calismaSekli=3"` - detay satirindaki alan su degere esit mi.
+Karsilastirma metin uzerinden (kod alani sunucudan kimi zaman 3 kimi zaman "3" gelir). `GenForm`
+detay satirlarini `sekmeleriKur`a veriyor, isaret degisince sekme ANINDA gorunur/kaybolur.
+8 test (`sekmeKosulu.test.ts`).
+
+*IC PERSONELDE DE ISARET ARANIR OLDU (v_prim_rol_aday).* Rol satiri var ama kisi "Primli" degilse
+artik aday sayilmaz - yoksa isaret kaldirilinca satirlar goze gorunmez olurdu (sekme kapanir) ama
+kisi prim almaya devam ederdi; sessiz ve ancak hakedis ekraninda fark edilen bir hata.
+*VERI GOCU ZORUNLUYDU:* bugun rol satiri olan herkes zaten prim aliyor - isaret konmasa (a)
+kartlarindaki sekme kaybolur, (b) aday listesinden duserlerdi. 17 personel "Primli" isaretlendi
+(tahmin degil, kaydin kendi kaniti: rol satiri var). 14'unun `taraf_personel` (1:1) satiri hic
+yoktu, acildi. Docker'da uygulandi, iki kez calistirildi (idempotent) ve aday sayisi degismedi:
+oncesi 19 aktif aday, sonrasi 19 (15 Yapan + 1 Raporlayan + 3 dis hekim Gönderen).
+Tetik mesaji da guncellendi. **CLOUD (ekspert) BEKLIYOR.**
+Toplam: **272 test gecti** (264 + 8).

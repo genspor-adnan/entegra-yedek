@@ -414,9 +414,13 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
   /** Mockup'taki gibi sekmeli kart: Kimlik disindaki her alan grubu + her detay tablosu ayri sekme. */
   const sekmeler = useMemo<SekmeTanimi[]>(
     () => sekmeleriKur({ gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
-                         yerTutucuSekmeler, gizliSekmeler, seritAlanlari }),
+                         yerTutucuSekmeler, gizliSekmeler, seritAlanlari,
+                         // Kosullu sekme DETAY alanina da bakabilir (ör. personelde
+                         //   "Prim Rolleri" yalniz ozluk.calismaSekli = 3 iken):
+                         //   isaret degisince sekme ANINDA gorunur/kaybolur.
+                         detaySatirlari: ad => detaylar[ad]?.guncel ?? [] }),
     [gruplar, meta, kaynak, deger, yeniMi, personelGibiKart, yerTutucuSekmeler,
-     gizliSekmeler, seritAlanlari]);
+     gizliSekmeler, seritAlanlari, detaylar]);
 
   const [aktifSekme, setAktifSekme] = useState<string | null>(null);
   const kayitAnahtari = `${kaynak}:${id}`;

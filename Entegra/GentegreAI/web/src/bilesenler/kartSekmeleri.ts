@@ -14,6 +14,36 @@ export const grupSekmeAnahtari = (grupAd: string) => `g:${grupAd}`;
 /** Sekme DEGIL, ust seritte sabit gorunen grup (mockup idstrip). */
 export const KIMLIK_GRUP = 'Kimlik';
 
+/**
+ * KOSULLU SEKME kurali (`DetayTanimi.KosulAlani`) iki bicimde yazilabilir:
+ *
+ *   "paket"                -> kartin KENDI mantik alani isaretli mi
+ *   "ozluk.calismaSekli=3" -> bir DETAY satirindaki alan su degere esit mi
+ *
+ * Ikinci bicim, isaret kartin kendisinde degil 1:1 uzantisinda dururken
+ * gerekli: personelin "Primli" isareti `taraf_personel` (ozluk) satirinda,
+ * ona bagli "Prim Rolleri" sekmesi ise ayri bir detay.
+ *
+ * Karsilastirma METIN uzerinden: kod alanlari sunucudan kimi zaman sayi kimi
+ * zaman metin gelir ("3" ile 3 ayni sayilmali).
+ */
+export function sekmeKosuluSaglandi(
+  kosul: string,
+  deger: Record<string, Deger>,
+  detaySatirlari: (detayAd: string) => Record<string, unknown>[],
+): boolean {
+  const nokta = kosul.indexOf('.');
+  if (nokta < 0) return !!deger[kosul];
+
+  const detayAd = kosul.slice(0, nokta);
+  const [alan, beklenen] = kosul.slice(nokta + 1).split('=');
+  const satirlar = detaySatirlari(detayAd);
+  // Beklenen deger verilmediyse "alan dolu mu" sorusu (mantik alani gibi).
+  return satirlar.some(r => (beklenen === undefined
+    ? !!r[alan]
+    : String(r[alan] ?? '') === beklenen));
+}
+
 // Az alanli ayar kartlari: alanlar yan yana degil ALT ALTA (tek sutun) - 4-5 alan
 //   genis izgaraya yayilinca form dagilmis gorunuyor, sira da okunmuyordu.
 export const TEK_SUTUN_KARTLAR = new Set(['depo']);
@@ -61,9 +91,12 @@ export function sekmeleriKur(secenek: {
       grubunun GERI KALANI normal bir sekme olur - Firma Bilgileri'nde serit
       yalniz ünvan/kısa ad/durum tasir, kimligin geri kalani kendi sekmesinde. */
   seritAlanlari?: string[];
+  /** Detay satirlarini okur - "ozluk.calismaSekli=3" gibi kosullu sekmeler icin. */
+  detaySatirlari?: (detayAd: string) => Record<string, unknown>[];
 }): SekmeTanimi[] {
   const { gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
-          yerTutucuSekmeler, gizliSekmeler, seritAlanlari } = secenek;
+          yerTutucuSekmeler, gizliSekmeler, seritAlanlari,
+          detaySatirlari = () => [] } = secenek;
   const dokumanliKart = personelGibiKart || kaynak === 'kisi' || kaynak === 'cari' || kaynak === 'stok';
   const yorumMedyaSekmesiVar = (yerTutucuSekmeler ?? []).includes('Yorum / Medya');
   const s: SekmeTanimi[] = gruplar
@@ -91,7 +124,7 @@ export function sekmeleriKur(secenek: {
     // KOSULLU sekme (ör. stok "Paket"): ilgili kutu isaretli degilse sekme
     //   hic acilmaz - bos sekme "burada doldurulacak bir sey var" izlenimi
     //   verir. Kutu isaretlenince ANINDA gorunur (deger state'i degisir).
-    if (d.kosulAlani && !deger[d.kosulAlani]) return;
+    if (d.kosulAlani && !sekmeKosuluSaglandi(d.kosulAlani, deger, detaySatirlari)) return;
     // Cari/Kisi/Personel'e ozel: Adresler mockup'ta ayri sekme DEGIL, ilgili grup
     //   sekmesinin icine gomulu bir tek-satir form - kendi sekmesi acilmasin (bkz.
     //   asagida grup render'i - Personel'de İletişim sekmesine gomulu, ik_karti.html).

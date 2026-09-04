@@ -132,8 +132,13 @@ public static partial class KartKatalogu
     /// uzerinden dogar. Tam/yari zamanli isaretli bir hekim hasta GONDERMIYOR
     /// sayilir; prim rol adaylarina yalniz "Gönderen" secili olanlar girer.
     /// </summary>
+    // 3 = PRIMLI (kullanici): "bu kisi prim aliyor" isareti. Eskiden "Gönderen"
+    //   yaziyordu ama o, ROLLERDEN yalnizca biri (361) - ic personel isteyen /
+    //   yapan / uygulayan da olabilir. Isaret secilince PERSONEL kartinda
+    //   "Prim Rolleri" sekmesi acilir ve roller orada isaretlenir; DIS HEKIMDE
+    //   rol sorulmaz, tek rolu zaten "Gönderen"dir (362).
     private static readonly Dictionary<string, string> CalismaSekliKodlari =
-        new() { ["1"] = "Tam Zamanlı", ["2"] = "Yarı Zamanlı", ["3"] = "Gönderen" };
+        new() { ["1"] = "Tam Zamanlı", ["2"] = "Yarı Zamanlı", ["3"] = "Primli" };
 
     // taraf_personel.VARDIYA_TURU - GENINI karsiligi yok (048_personel_ozluk_uyruk_vardiya_sgk.sql).
 

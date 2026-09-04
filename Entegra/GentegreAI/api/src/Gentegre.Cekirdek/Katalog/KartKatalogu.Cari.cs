@@ -306,7 +306,13 @@ public static partial class KartKatalogu
                 //   isaretlileri gosterir (uzun listede aranan kisi ustte olsun).
                 new("varsayilan", "varsayilan", "mantik", Baslik: "Önerilen"),
                 new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama")
-            }, SubeKolonu: null, Sirala: "rol", Baslik: "Prim Rolleri", LogTabloId: 963),
+            }, SubeKolonu: null, Sirala: "rol", Baslik: "Prim Rolleri", LogTabloId: 963,
+               // SEKME YALNIZ "PRIMLI" PERSONELDE (kullanici): prim almayan
+               //   kadrolu personelde bos bir rol gridi gostermek, doldurulacak
+               //   bir sey varmis izlenimi veriyordu. Isaret ozluk (1:1
+               //   taraf_personel) satirinda oldugu icin kosul DETAY ALANINA
+               //   bakar - "ozluk.calismaSekli=3".
+               KosulAlani: "ozluk.calismaSekli=3"),
             // Kisi ile AYNI taraf_adres tablosu, AYNI Ev/İş tur listesi (kisisel adres).
             new DetayTanimi("adresler", "public.taraf_adres", "taraf_id", new KartAlani[]
             {
