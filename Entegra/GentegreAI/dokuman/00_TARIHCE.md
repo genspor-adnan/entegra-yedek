@@ -4865,5 +4865,5 @@ fonksiyonla karsilastirildi - **0 fark**.
 **Ucretlendirme gridi kolon duzeni (kullanici).** "Birim Fiyat (TL) · KDV Dahil" -> sade
 "Birim Fiyat (TL)": kayit kabulde fiyat zaten hep KDV dahil konusuluyor, her satirda hatirlatmak
 yer kapliyordu. "İskonto %" -> "İsk.%". Miktar · İsk.% · KDV % AYNI genislikte (52px) - ucu de kisa
-sayi tasiyor, farkli genislikler gride duzensiz gorunum veriyordu. Tarih kolonu %10 genisledi
-(92 -> 101).
+sayi tasiyor, farkli genislikler gride duzensiz gorunum veriyordu. Genislikler kullaniciyla
+birlikte oturtuldu: Tarih 92 -> 111, Kod 110 -> 94, Birim Fiyat 110 -> 99, Tutar 120 -> 108.

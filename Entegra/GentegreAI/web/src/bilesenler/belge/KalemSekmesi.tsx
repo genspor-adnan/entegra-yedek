@@ -179,8 +179,8 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         </th>
         <th style={{ width: 34 }} className="hiza-orta">Tip</th>
         {/* BASVURUDA tarih en solda (kullanici): islem tarihi kalemin kimligi. */}
-        {tarihSolda && <th className="hiza-orta" style={{ width: 101 }}>Tarih</th>}
-        <th style={{ width: 110 }}>Kod</th>
+        {tarihSolda && <th className="hiza-orta" style={{ width: 111 }}>Tarih</th>}
+        <th style={{ width: 94 }}>Kod</th>
         <th>Stok / Hizmet</th>
         {aciklamaVar && <th style={{ width: 200 }}>Açıklama</th>}
         {/* TESLIM TARIHI (140) miktarin SOLUNDA, yalniz sipariste: satirin
@@ -203,10 +203,10 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             kayit kabulde fiyat zaten hep KDV dahil konusuluyor - her satirda
             hatirlatmak yer kapliyordu. */}
         {bilgi.kalem !== 'miktar' && (
-          <th className="hiza-sag" style={{ width: 110 }}>Birim Fiyat ({yerelPara})</th>
+          <th className="hiza-sag" style={{ width: 99 }}>Birim Fiyat ({yerelPara})</th>
         )}
         {bilgi.kalem !== 'miktar' && (
-          <th className="hiza-sag" style={{ width: 120 }}>Tutar ({yerelPara})</th>
+          <th className="hiza-sag" style={{ width: 108 }}>Tutar ({yerelPara})</th>
         )}
         {/* PAYLASIM (289): kurum ve hasta payi - yalniz odeyen kurumlu
             basvuruda. Provizyon degisince tutarlar burada okunur. */}
