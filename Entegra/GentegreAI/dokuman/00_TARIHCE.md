@@ -5629,3 +5629,22 @@ planini o kalem icin TAMAMEN SUSTURUR. "MR'da raporlayana %7 faturalamada"
 demek, "MR'da nakit tahsilat primi %12 artik gecerli degil" demektir - dogru
 davranis ama ekranda bunu soyleyen bir sey yok. Plan listesinde ayni rol +
 ayni kapsam icin farkli ZAMANLI planlar varsa uyarmak gerekebilir; ayri is.
+
+### "Uygulayan" rollu plan testi - PAY KRITERI (kurum payi)
+
+Plan 20 "MR — Uygulayan %9 (kurum payı)" acildi; satirda `pay = 2` yani prim
+YALNIZ KURUM PAYINDAN dogar. Kisi Dr. Nazlı Ergün - Uygulayan rolu once
+personel kartindan isaretlendi (db/387 sonrasi grid calisiyor).
+
+Basvuru 114386: HÜSEYİN (ÖSS, karsilama %80), 2.200 brut ->
+hasta payi 400 / kurum payi 1.600 (matrah). Iki dalin ikisi de kesildi:
+fatura (hasta payi, 440 brut) ve tahakkuk (kurum payi, 1.760 brut).
+
+    Dr. Nazlı Ergün  Uygulayan  Kurum payı  Satış Tahakkuku  1.600 x %9 = 144,00
+
+HASTA PAYINDAN PRIM DOGMADI - `pay = 2` kriteri tam olarak bunu yapiyor.
+Ayni satirin iki dali ayri ayri degerlendiriliyor: fatura dali plani bulamadi
+(pay 1 <> 2), tahakkuk dali buldu.
+
+Tum roller artik uctan uca dogrulanmis oldu: Gönderen (10/11), Yapan (17),
+İsteyen (18), Raporlayan (19), Uygulayan (20).
