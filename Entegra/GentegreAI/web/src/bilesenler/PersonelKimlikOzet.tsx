@@ -36,22 +36,6 @@ interface Props {
   kaynakId?: number;
 }
 
-/** "01.09.2019" -> "6 yıl 11 ay" */
-
-/** "14.06.1992" -> "33 yaş" */
-function yasHesapla(tarihStr: string): string | null {
-  const dogum = new Date(tarihStr);
-  if (!tarihStr || Number.isNaN(dogum.getTime())) return null;
-  const simdi = new Date();
-  let yas = simdi.getFullYear() - dogum.getFullYear();
-  const ayFarki = simdi.getMonth() - dogum.getMonth();
-  if (ayFarki < 0 || (ayFarki === 0 && simdi.getDate() < dogum.getDate())) yas -= 1;
-  // YALNIZ SAYI (kullanici: "yaş gelmesin sadece yıl"): kutu dogum tarihinin
-  //   hemen saginda, "yaş" kelimesi orada tekrar bilgi - sayinin ne oldugu
-  //   zaten belli.
-  return yas >= 0 ? String(yas) : null;
-}
-
 /**
  * Personel/Hasta kartı Genel sekmesi kimlik özeti. TCKN/Görev taraf alanlarından,
  * diğer kimlik alanları 1:1 detay kaydından gelir.
@@ -121,7 +105,6 @@ export function PersonelKimlikOzet({
   const yabanciTurAlan = alan('yabanciHastaTuru');
   const mahremiyetAlan = alan('mahremiyetNotu');
 
-  const yas = yasHesapla(String(satir.dogumTarihi ?? ''));
 
   return (
     // "etiket-sag": kart govdesindeki alan etiketleri saga yaslanir (kullanici);
@@ -163,15 +146,13 @@ export function PersonelKimlikOzet({
             <div className="adres-satir">
               <label className="alan tip-tarih">
                 <span className="etiket">Doğum Tarihi *</span>
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                  {/* Tarih kutusu biraz DAR (kullanici): icerigi sabit
-                      genislikte (gg.aa.yyyy), esneyip yanindaki yas etiketini
-                      kenara itmesine gerek yok. */}
-                  <input type="date" style={{ flex: '0 0 118px', width: 118 }}
-                    value={String(satir.dogumTarihi ?? '').slice(0, 10)} disabled={saltOkunur}
-                    onChange={e => ozlukDegis({ dogumTarihi: e.target.value })} />
-                  {yas && <span style={{ fontSize: 10, color: 'var(--soluk)', whiteSpace: 'nowrap' }}>{yas}</span>}
-                </div>
+                {/* Tarih kutusu biraz DAR (kullanici): icerigi sabit
+                    genislikte (gg.aa.yyyy). YAS BURADA GOSTERILMEZ
+                    (kullanici) - kimlik seridindeki "Doğum Tarihi / Yaş"
+                    hucresinde zaten var, iki yerde tekrarlaniyordu. */}
+                <input type="date" style={{ width: 118 }}
+                  value={String(satir.dogumTarihi ?? '').slice(0, 10)} disabled={saltOkunur}
+                  onChange={e => ozlukDegis({ dogumTarihi: e.target.value })} />
               </label>
               <label className="alan tip-metin">
                 <span className="etiket">Doğum Yeri</span>
