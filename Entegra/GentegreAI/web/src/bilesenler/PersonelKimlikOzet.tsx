@@ -164,7 +164,11 @@ export function PersonelKimlikOzet({
               <label className="alan tip-tarih">
                 <span className="etiket">Doğum Tarihi *</span>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                  <input type="date" value={String(satir.dogumTarihi ?? '').slice(0, 10)} disabled={saltOkunur}
+                  {/* Tarih kutusu biraz DAR (kullanici): icerigi sabit
+                      genislikte (gg.aa.yyyy), esneyip yanindaki yas etiketini
+                      kenara itmesine gerek yok. */}
+                  <input type="date" style={{ flex: '0 0 118px', width: 118 }}
+                    value={String(satir.dogumTarihi ?? '').slice(0, 10)} disabled={saltOkunur}
                     onChange={e => ozlukDegis({ dogumTarihi: e.target.value })} />
                   {yas && <span style={{ fontSize: 10, color: 'var(--soluk)', whiteSpace: 'nowrap' }}>{yas}</span>}
                 </div>
