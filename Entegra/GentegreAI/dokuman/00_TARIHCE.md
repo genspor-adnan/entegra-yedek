@@ -4895,3 +4895,14 @@ kalabilir, cizilmez. Siralama SON KULLANIM sirasi (favoride ANA MENU sirasi) - l
 once neredeydim" sorusuna cevap vermek.
 Liste kullanici basina localStorage'da (favorilerle ayni desen; sunucuya tasinmasi ileriki is).
 Kural saf modulde (`menuSonKullanilan.ts`), 9 test. Toplam: **356 test gecti**.
+
+**Hasta karti kimlik seridi ve kimlik kutusu duzeni (kullanici).**
+*Seritte GÖREV kaldirildi:* alan katalogda hasta icin ZATEN gizliydi (`gorevId` -> `Gizli`), ama
+`GenForm`in personel-benzeri serit dali onu `meta.alanlar`dan ACIKCA cizerek o gizlemeyi
+atliyordu - gizli bayragina guvenip kaldirmaya calisan biri neden kalktigini bulamazdi. Artik
+yalniz personelde ciziliyor.
+*DURUM seride geldi, TC No'nun saginda:* ayni dalda "durum seritte YOK, baslikta rozet" kurali
+vardi - personelde dogru (Aktif/Pasif), hastada DEGIL: hasta durumu dort degerli
+(Aktif/Pasif/Aday/Vefat) ve rozet tek basina yetmiyor.
+*Kimlik Bilgileri kutusu sirasi:* Doğum Tarihi · Doğum Yeri / Cinsiyet · Medeni Hal / Meslek ·
+Kan Grubu / Uyruk. Satirlar IKILI - onceki duzende ucuncu alan (Meslek) satiri sikistiriyordu.

@@ -792,13 +792,19 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
                  style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}>
               {renderAlanListesi(kimlikAlanlari.filter(a =>
                 ['kod', 'ad', 'soyad', 'departman'].includes(a.ad)))}
-              {/* Serit'in 5. alani GÖREV (kullanici: rol ile yer degistirdi);
-                  Rol combosu Kimlik Bilgileri kutusunda. */}
-              {renderAlanListesi(
+              {/* GOREV seritte YALNIZ PERSONELDE (kullanici: "hasta kartında en
+                  üstte görev kaldır"): hastanin gorevi yoktur - alan katalogda
+                  zaten GIZLI, buraya ACIKCA cizildigi icin o gizlemeyi
+                  atliyordu. Personelde serit'in 5. alani odur (rol ile yer
+                  degistirdi; Rol combosu Kimlik Bilgileri kutusunda). */}
+              {kaynak !== 'hasta' && renderAlanListesi(
                 (meta?.alanlar ?? []).filter(a => a.ad === 'gorevId'))}
-              {/* "durum" seritte YOK - baslikta rozet olarak gosteriliyor. */}
+              {/* DURUM: personelde seritte YOK (baslikta rozet), HASTADA VAR ve
+                  TC No'nun SAGINDA (kullanici) - hasta durumu dort degerli
+                  (Aktif/Pasif/Aday/Vefat), rozet tek basina yetmiyor. */}
               {renderAlanListesi(kimlikAlanlari.filter(a =>
-                !['kod', 'ad', 'soyad', 'departman', 'durum'].includes(a.ad)))}
+                !['kod', 'ad', 'soyad', 'departman'].includes(a.ad)
+                && (kaynak === 'hasta' || a.ad !== 'durum')))}
             </div>
           ) : (
             <div className={`alan-izgara${kaynak === 'kisi' ? ' kaid-kisi' : ''}`

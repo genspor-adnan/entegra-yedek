@@ -151,6 +151,8 @@ export function PersonelKimlikOzet({
                   onChange={e => ozlukDegis({ dogumYeri: e.target.value })} />
               </label>
             </div>
+            {/* SIRA (kullanici): Cinsiyet · Medeni Hal / Meslek · Kan Grubu /
+                Uyruk. Ikili satirlar - ucuncu alan satiri sikistiriyordu. */}
             <div className="adres-satir">
               <label className="alan tip-kod">
                 <span className="etiket">Cinsiyet</span>
@@ -160,16 +162,6 @@ export function PersonelKimlikOzet({
                   {cinsiyetAlan?.kodlar && Object.entries(cinsiyetAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </select>
               </label>
-              {meslekAlan && (
-                <label className="alan tip-kod">
-                  <span className="etiket">Meslek</span>
-                  <select value={String(satir.meslek ?? '')} disabled={saltOkunur}
-                    onChange={e => ozlukDegis({ meslek: e.target.value })}>
-                    <option value="">-</option>
-                    {meslekAlan.kodlar && Object.entries(meslekAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                  </select>
-                </label>
-              )}
               {medeniHalAlan && (
                 <label className="alan tip-kod">
                   <span className="etiket">Medeni Hal</span>
@@ -182,19 +174,31 @@ export function PersonelKimlikOzet({
               )}
             </div>
             <div className="adres-satir">
-              <label className="alan tip-kod">
-                <span className="etiket">Uyruk</span>
-                <select value={String(satir.uyruk ?? '')} disabled={saltOkunur}
-                  onChange={e => ozlukDegis({ uyruk: e.target.value })}>
-                  {(yerler?.ulkeler ?? []).map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
-                </select>
-              </label>
+              {meslekAlan && (
+                <label className="alan tip-kod">
+                  <span className="etiket">Meslek</span>
+                  <select value={String(satir.meslek ?? '')} disabled={saltOkunur}
+                    onChange={e => ozlukDegis({ meslek: e.target.value })}>
+                    <option value="">-</option>
+                    {meslekAlan.kodlar && Object.entries(meslekAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  </select>
+                </label>
+              )}
               <label className="alan tip-kod">
                 <span className="etiket">Kan Grubu</span>
                 <select value={String(satir.kanGrubu ?? '')} disabled={saltOkunur}
                   onChange={e => ozlukDegis({ kanGrubu: e.target.value })}>
                   <option value="">-</option>
                   {kanGrubuAlan?.kodlar && Object.entries(kanGrubuAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                </select>
+              </label>
+            </div>
+            <div className="adres-satir">
+              <label className="alan tip-kod">
+                <span className="etiket">Uyruk</span>
+                <select value={String(satir.uyruk ?? '')} disabled={saltOkunur}
+                  onChange={e => ozlukDegis({ uyruk: e.target.value })}>
+                  {(yerler?.ulkeler ?? []).map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
                 </select>
               </label>
             </div>
