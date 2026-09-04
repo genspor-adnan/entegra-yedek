@@ -5247,3 +5247,24 @@ Iki not:
 ACIK BULGU: donusumden cikan SATIS FATURASI (tur 15) `belge_no = '0'` aliyor -
 numara sablonu (id 35, durum 1) uygulanmiyor. Tahakkuk (17) numara aliyor.
 Ayri is olarak bakilmali.
+
+### Basvuruda karisik birim: 2.200 tutar, 1.600 + 400 pay, 2.000 alt toplam
+
+Kullanici 114377'de yakaladi: birim fiyat 2.200, kurum payi 1.600, hasta payi
+400, alt toplam 2.000. Uc rakam DOGRU ama IKI FARKLI BIRIMDE - ayni tabloda
+yan yana durunca toplam tutmuyordu.
+
+Kok neden ikili: basvuruda fiyat/tutar KDV DAHIL gosterilir (371), buna karsin
+  - kurum/hasta paylari saklandigi gibi (MATRAH) yaziliyordu,
+  - KAYITLI belgede dip toplam SUNUCUDAN geliyordu ve sunucu matrah konusur
+    ("Toplam" 2.000), Genel Toplam ise brut (2.200).
+
+Iki duzeltme:
+  - `payBrute(deger, tutar, brutTutar)`: pay, satirin KENDI tutar oraniyla
+    brute cevrilir. KDV orani YENIDEN UYGULANMAZ - saklanan brut, iskonto ve
+    yuvarlama o orana zaten islenmis; KDV'yi tekrar carpmak kurus kaydirirdi.
+    Iki payin toplami brut tutara birebir esit kalir (test).
+  - Basvuruda sunucu dip toplami HIC kullanilmaz; brut hesaplayan dal
+    calisir. Yan fayda: iskonto 0 iken sunucunun urettigi bos "İskonto(%0.00)"
+    satiri da kayboldu (kodun yorumu "sunucu o satiri uretmez" diyordu, oysa
+    0 degeriyle uretiyor).

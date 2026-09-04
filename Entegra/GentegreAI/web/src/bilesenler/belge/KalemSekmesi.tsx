@@ -3,7 +3,7 @@ import { AvansMahsup } from '../AvansMahsup';
 import { para, say4, tarihSaat, hamSayi as sayi } from '../bicim';
 import { iskonatoMetni, satirTutari, type SatirDurumu } from '../../sayfalar/belgeSatir';
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
-import { bruta } from '../../sayfalar/belgeKarti/kdvModu';
+import { bruta, payBrute } from '../../sayfalar/belgeKarti/kdvModu';
 import type { BelgeYaniti } from '../../api/sozlesme';
 
 /**
@@ -242,6 +242,9 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         const gosterFiyat = basvuruMu ? brutFiyat : fiyat;
         const gosterTutar = basvuruMu
           ? satirTutari(adet, brutFiyat, r.iskonto, r.iskonto2) : tutar;
+        /** Matrah pay -> gosterim birimi (basvuruda brut, digerinde aynen). */
+        const payGoster = (deger: number) =>
+          basvuruMu ? payBrute(deger, tutar, gosterTutar) : deger;
         const secili = seciliSatirlar.has(r.anahtar);
         // Izlemli kalemin lotlari ALTINDA acilir (master-detail):
         //   hangi lottan kac adet oldugu kalemi acmadan gorunsun.
@@ -314,14 +317,20 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             )}
             {/* Pay hucreleri (289): kapanan pay YESIL - hangi payin
                 faturalandigi listeye bakinca gorunsun. */}
+            {/* PAYLAR DA GOSTERIM BIRIMINDE (kullanici): saklanan pay MATRAHTIR
+                ama basvuruda fiyat ve tutar KDV DAHIL gorunuyor - ayni satirda
+                2.200 TL tutar ile 1.600 + 400 pay yan yana durunca toplam
+                tutmuyordu. Brute cevrilirken satirin KENDI tutar orani
+                kullanilir (tutar -> gosterTutar), boylece kurus artigi paylar
+                arasinda kaymaz. */}
             {paylasim?.acik && (
               <td className={`hiza-sag${(r.kurumKapatilan ?? 0) > 0 ? ' basari' : ''}`}>
-                {para.format(sayi(r.kurumTutar ?? '0'))}
+                {para.format(payGoster(sayi(r.kurumTutar ?? '0')))}
               </td>
             )}
             {paylasim?.acik && (
               <td className={`hiza-sag${(r.hastaKapatilan ?? 0) > 0 ? ' basari' : ''}`}>
-                {para.format(sayi(r.hastaTutar ?? '0'))}
+                {para.format(payGoster(sayi(r.hastaTutar ?? '0')))}
               </td>
             )}
             {bilgi.kalem !== 'miktar' && dovizKolon && (() => {
@@ -518,7 +527,12 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
 <div className="kagrup dip-toplam">
   {/* BASLIK YOK (kullanici): cerceve ve kolon basliklari zaten neyin ne
       oldugunu soyluyor; "Dip Toplam" satiri yer kapliyordu. */}
-  {sonuc ? (
+  {/* BASVURUDA SUNUCU DIP TOPLAMI KULLANILMAZ (kullanici: "birim fiyat 2200,
+      paylar 1600+400, alt toplam 2000 - bu nasil olur"). Sunucu toplami
+      MATRAH konusur (Toplam 2000), ekranin geri kalani ise KDV DAHIL (2200) -
+      ayni tabloda iki ayri birim yan yana duruyordu. Basvuruda her rakam
+      brut: asagidaki dal zaten brut hesaplar. */}
+  {sonuc && !basvuruMu ? (
     <table className="dip-tablo">
       {raporDovizli && (
         <thead>

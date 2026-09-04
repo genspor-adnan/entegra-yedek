@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { kdvCarpani, matraha, bruta, moduCevir } from '../sayfalar/belgeKarti/kdvModu';
+import { kdvCarpani, matraha, bruta, moduCevir, payBrute } from '../sayfalar/belgeKarti/kdvModu';
 
 /**
  * KDV DAHIL / HARIC GIRIS MODU.
@@ -67,5 +67,28 @@ describe('moduCevir - kutudaki metni karsi moda cevirir', () => {
 
   it('VIRGULLU giris nokta gibi okunur', () => {
     expect(moduCevir('100,5', 0, true)).toBe('100.5');
+  });
+});
+
+describe('payBrute - kurum / hasta payi gosterimi', () => {
+  it('MATRAH payi satirin brut oraniyla cevrilir', () => {
+    // 114377: tutar 2.000 matrah / 2.200 brut; kurum 1.600 -> 1.760.
+    expect(payBrute(1600, 2000, 2200)).toBe(1760);
+    expect(payBrute(400, 2000, 2200)).toBe(440);
+  });
+
+  it('iki pay toplami BRUT TUTARA esit kalir', () => {
+    const brut = payBrute(1600, 2000, 2200) + payBrute(400, 2000, 2200);
+    expect(brut).toBe(2200);
+  });
+
+  it('KDV orani DEGIL tutar orani kullanilir - iskontolu satirda da tutar', () => {
+    // Iskonto brut tutara zaten islenmis: 1.000 matrah / 1.045 brut (%10 KDV,
+    //   %5 iskonto sonrasi) -> yarim pay 522,50.
+    expect(payBrute(500, 1000, 1045)).toBe(522.5);
+  });
+
+  it('tutar 0 ise deger AYNEN doner (bos satir)', () => {
+    expect(payBrute(400, 0, 0)).toBe(400);
   });
 });
