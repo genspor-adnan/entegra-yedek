@@ -4693,3 +4693,14 @@ cerceve kalkti; serit artik kartin BASLIGI degil DURUM CIZGISI: her asama ince (
 altinda kucuk yazi. Tamamlanan asama cizgisini kendi rengiyle boyar, yapilmayan soluk gri kalir.
 Yuzde cubugu kalkti, yalniz sayi kaldi; %100'de yanina ✔ gelir. Yukseklik ~52px'ten ~22px'e indi.
 Toplam: **322 test gecti** (316 + 6).
+
+**Tahsilat arac cubugu sadelesti (kullanici).** Serit artik **Nakit · POS · ⋯**; banka, cek ve senet
+uc noktanin altindaki menude. Kayit kabulde tahsilatin neredeyse tamami nakit ya da POS, banka
+havalesi ve cek/senet ayda birkac kez - bes dugme yan yana durunca en cok kullanilan ikisi
+kalabaligin icinde kayboluyordu. Menu `GenToolbar`in `.dugme-menu` desenini kullaniyor (disari
+tiklaninca kapanir), yani uygulamanin geri kalaniyla ayni gorunuyor. Cek ve senet ayri secenek
+kaldi: ikisi ayri kasa islem turu (23/24 tahsilat, 33/34 odeme) ve portfoyde ayri izlenir.
+**KURUM TAHAKKUKU kendi odeyende (Özel, tur 1) artik CIZILMIYOR:** hasta kendi odedigi icin kurum
+payi hep 0 ve dugme her zaman pasif duruyordu - "neden basamiyorum" sorusu doguruyordu. Kosul
+`odeyenKurumId` yerine `provizyonVar` (ÖSS/SGK) oldu. 3 test.
+Toplam: **325 test gecti** (322 + 3).

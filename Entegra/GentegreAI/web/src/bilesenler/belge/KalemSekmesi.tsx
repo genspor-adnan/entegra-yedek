@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { AvansMahsup } from '../AvansMahsup';
 import { para, tarihSaat, hamSayi as sayi } from '../bicim';
 import { iskonatoMetni, satirTutari, type SatirDurumu } from '../../sayfalar/belgeSatir';
@@ -654,6 +654,18 @@ const cevir = (id: number) =>
   setSecili(secili.includes(id) ? secili.filter(x => x !== id) : [...secili, id]);
 const tekSecili = secili.length === 1 ? secili[0] : 0;
 const capa = useRef<number | null>(null);   // son tiklanan satirin sirasi
+/**
+ * "⋯" MENUSU (banka / cek / senet): seyrek kullanilan tahsilat araclari.
+ * Disari tiklaninca kapanir - acik menu ekranda unutulmasin (GenToolbar ile
+ * ayni desen).
+ */
+const [aracMenu, setAracMenu] = useState(false);
+useEffect(() => {
+  if (!aracMenu) return;
+  const kapat = () => setAracMenu(false);
+  window.addEventListener('click', kapat);
+  return () => window.removeEventListener('click', kapat);
+}, [aracMenu]);
 /** Satir ici tutar duzenleme: hangi kasa islemi ve o anki metin. */
 const [tutarDuzenlenen, setTutarDuzenlenen] = useState<number | null>(null);
 const [tutarMetni, setTutarMetni] = useState('');
@@ -714,29 +726,38 @@ return (
         💵 Nakit
       </button>
       <button className="d bir"
-              title={'Banka hesabı seç ve satır ekle'
-                     + (kayitliId ? '' : ' — belge önce kaydedilir')}
-              onClick={() => hesapSecAc?.('B')}>
-        🏦 Banka
-      </button>
-      <button className="d bir"
               title={'POS hesabı seç ve satır ekle'
                      + (kayitliId ? '' : ' — belge önce kaydedilir')}
               onClick={() => hesapSecAc?.('P')}>
         💳 POS
       </button>
-      {/* CEK ve SENET ayri dugme (kullanici): ikisi ayri kasa islem turu
-          (23/24 tahsilat, 33/34 odeme) ve portfoyde ayri izlenir. */}
-      <button className="d bir"
-              title={`Çek ile ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç`}
-              onClick={() => void tahsilatAc(alisMi ? 33 : 23)}>
-        🧾 Çek
-      </button>
-      <button className="d bir"
-              title={`Senet ile ${alisMi ? 'ödeme' : 'tahsilat'} işlemi aç`}
-              onClick={() => void tahsilatAc(alisMi ? 34 : 24)}>
-        📜 Senet
-      </button>
+      {/* SEYREK ARACLAR MENUDE (kullanici: "sağında ... şeklinde 3 nokta
+          buton olsun basınca alta doğru menüde Banka/Çek/Senet"): kayit
+          kabulde tahsilatin neredeyse tamami nakit ya da POS; banka havalesi
+          ve cek/senet ayda birkac kez. Bes dugme yan yana durunca en cok
+          kullanilan ikisi kalabaligin icinde kayboluyordu.
+          Cek ve senet AYRI SECENEK: ikisi ayri kasa islem turu (23/24
+          tahsilat, 33/34 odeme) ve portfoyde ayri izlenir. */}
+      <span className="dugme-menu">
+        <button className="d" title="Diğer tahsilat araçları"
+                onClick={e => { e.stopPropagation(); setAracMenu(v => !v) }}>⋯</button>
+        {aracMenu && (
+          <div className="dugme-menu-liste">
+            <button type="button" className="mi"
+                    onClick={() => { setAracMenu(false); hesapSecAc?.('B') }}>
+              🏦 Banka
+            </button>
+            <button type="button" className="mi"
+                    onClick={() => { setAracMenu(false); void tahsilatAc(alisMi ? 33 : 23) }}>
+              🧾 Çek
+            </button>
+            <button type="button" className="mi"
+                    onClick={() => { setAracMenu(false); void tahsilatAc(alisMi ? 34 : 24) }}>
+              📜 Senet
+            </button>
+          </div>
+        )}
+      </span>
       {/* KURUM TAHAKKUKU (331): tahsilat ARACI DEGIL - "tahsil edildi"
           saymaz; bu yuzden tahsilat araclarinin SONUNDA, Senet'in saginda
           durur (kullanici). Kurum payi

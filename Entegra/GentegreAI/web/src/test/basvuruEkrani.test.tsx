@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { BelgeKarti } from '../sayfalar/BelgeKarti';
 import kaynaklar from './veri/basvuruKaynaklari.json';
@@ -280,8 +280,18 @@ describe('ucret eklemenin ilk kapisi', () => {
 });
 
 describe('hizli tahsilat dugmeleri (nakit / banka / pos)', () => {
+  /** Cubuktaki dugme; Banka menude oldugu icin once "⋯" acilir. */
   const tahsilatDugmesi = async (ad: string) => {
     (await sekme('Tahsilat')).click();
+    if (ad === 'Banka') {
+      const ucNokta = await waitFor(() => {
+        const d = [...document.querySelectorAll('.katoolbar button')]
+          .find(b => b.textContent?.trim() === '⋯');
+        if (!d) throw new Error('"⋯" dugmesi yok');
+        return d as HTMLButtonElement;
+      });
+      await act(async () => { ucNokta.click() });
+    }
     return waitFor(() => {
       const d = [...document.querySelectorAll('button')]
         .find(b => (b.textContent ?? '').includes(ad));
@@ -295,19 +305,19 @@ describe('hizli tahsilat dugmeleri (nakit / banka / pos)', () => {
   //   kendisi kaydediyor, dugme hic pasif olmuyor.
   it('KAYDEDILMEMIS belgede de BASILABILIR - kart once kaydeder', async () => {
     ciz();
-    for (const ad of ['Nakit', 'Banka', 'POS'])
+    for (const ad of ['Nakit', 'POS'])
       expect(await tahsilatDugmesi(ad)).not.toBeDisabled();
   });
 
   it('kaydedilmemis belgede ipucu "belge önce kaydedilir" der', async () => {
     ciz();
-    expect((await tahsilatDugmesi('Banka')).title).toContain('belge önce kaydedilir');
+    expect((await tahsilatDugmesi('POS')).title).toContain('belge önce kaydedilir');
   });
 
   it('KAYITLI belgede o ek uyari cikmaz', async () => {
     ciz({ id: 114349 });
     await waitFor(() => expect(belgeOku).toHaveBeenCalled());
-    expect((await tahsilatDugmesi('Banka')).title).not.toContain('önce kaydedilir');
+    expect((await tahsilatDugmesi('POS')).title).not.toContain('önce kaydedilir');
   });
 
   it('EKSIK kartta banka basilinca hesap secimi ACILMAZ, Başvuru sekmesine donulur', async () => {
@@ -316,5 +326,54 @@ describe('hizli tahsilat dugmeleri (nakit / banka / pos)', () => {
     await waitFor(() =>
       expect(document.querySelector('.kat.on')?.textContent).toMatch(/^Başvuru/));
     expect(belgeEkle).not.toHaveBeenCalled();
+  });
+});
+
+describe('tahsilat arac cubugu duzeni', () => {
+  // Kartta birden cok `.katoolbar` var (ust arac cubugu + tahsilat) - dogru
+  //   olani ICERIGINDEN bulunur.
+  const araclar = async () => {
+    (await sekme('Tahsilat')).click();
+    return waitFor(() => {
+      const c = [...document.querySelectorAll('.katoolbar')]
+        .find(x => x.textContent?.includes('Nakit'));
+      if (!c) throw new Error('tahsilat arac cubugu yok');
+      return c;
+    });
+  };
+  const dugmeler = (c: Element) =>
+    [...c.querySelectorAll(':scope > button, :scope > .dugme-menu > button')]
+      .map(b => (b.textContent ?? '').trim());
+
+  it('NAKIT · POS · ⋯ sirasi (banka/cek/senet menuye tasindi)', async () => {
+    ciz();
+    const c = await araclar();
+    const ilkUc = dugmeler(c).slice(0, 3);
+    expect(ilkUc[0]).toContain('Nakit');
+    expect(ilkUc[1]).toContain('POS');
+    expect(ilkUc[2]).toBe('⋯');
+    // Banka / Çek / Senet artik cubukta DEGIL.
+    expect(c.textContent).not.toContain('Banka');
+    expect(c.textContent).not.toContain('Senet');
+  });
+
+  it('"⋯" basilinca Banka / Çek / Senet menusu acilir', async () => {
+    ciz();
+    const c = await araclar();
+    expect(document.querySelector('.dugme-menu-liste')).toBeNull();
+    const ucNokta = [...c.querySelectorAll('button')]
+      .find(b => b.textContent?.trim() === '⋯')!;
+    await act(async () => { ucNokta.click() });
+    const menu = document.querySelector('.dugme-menu-liste')!;
+    expect([...menu.querySelectorAll('button')].map(b => (b.textContent ?? '').trim()))
+      .toEqual(['🏦 Banka', '🧾 Çek', '📜 Senet']);
+  });
+
+  it('KENDI ODEYENDE (Özel) Kurum Tahakkuku dugmesi CIZILMEZ', async () => {
+    // Fixture belgenin odeyeni "Özel (Ücretli)" (tur 1) - kurum payi hep 0.
+    ciz({ id: 114349 });
+    await waitFor(() => expect(belgeOku).toHaveBeenCalled());
+    const c = await araclar();
+    expect(c.textContent).not.toContain('Kurum Tahakkuku');
   });
 });

@@ -1533,10 +1533,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                            acikBorc={hizliTutar()}
                            onYenile={() => { if (kayitliId) void api.belgeOku(kayitliId)
                                               .then(setSonuc).catch(() => {}) }}
-                           // KURUM TAHAKKUKU (331): yalniz odeyen kurumlu
-                           //   basvuruda; kurum payini Satış Tahakkukuna (17)
-                           //   donusturur - tahsilat DEGIL.
-                           kurumTahakkukAc={basvuruMu && odeyenKurumId
+                           // KURUM TAHAKKUKU (331): kurum payini Satış
+                           //   Tahakkukuna (17) donusturur - tahsilat DEGIL.
+                           //   KENDI ODEYENDE (Özel, tur 1) GORUNMEZ
+                           //   (kullanici): hasta kendi odedigi icin kurum
+                           //   payi hep 0'dir - dugme her zaman pasif duruyor
+                           //   ve "neden basamiyorum" sorusu doguruyordu.
+                           //   `provizyonVar` tam bu kumeyi veriyor: ÖSS/SGK.
+                           kurumTahakkukAc={basvuruMu && provizyonVar
                              ? () => { setDonusumPay(2); setDonusum(17) }
                              : undefined}
                            kurumKalan={satirlar.reduce((t, r) =>
