@@ -36,7 +36,9 @@ public static partial class KaynakKatalogu
                 "coalesce((select kd.ad from public.kod_liste kl"
                 + " join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = p.rol"
                 + " where kl.kod = 'prim.rol'), '')",
-                                           "metin", "Prim Rolü", Genislik: 120),
+                                           "metin", "Prim Rolü", Hizalama: "orta",
+                                           Bicim: "rozet", Genislik: 120,
+                                           Filtrelenebilir: false),
             new("rol",       "p.rol",       "sayi",  "Rol Kodu", Varsayilan: false),
             // ILK KAPI (333): planin nasil okunacagini belirler.
             new("primZamaniAdi",
