@@ -5577,3 +5577,31 @@ CALISIRKEN build yapmam ve cikti suzgecimin yalnizca "error CS" aramasiydi -
 MSBuild'in DLL KILIDI hatasi (MSB3027) suzgecten kacti, ben "derlendi" deyip
 ESKI DLL ile test ettim. Derleme dogrulamasi dil hatasina degil BUILD
 BASARISINA bakmali; API once durdurulmali.
+
+### "İsteyen" rollu plan testi - personel prim rolleri gridi KIRIKMIS (db/387)
+
+Plan 18 "MR — İsteyen %6" acildi. Rol adayi HIC yoktu, dolayisiyla once kural
+calisti (dogru): "Dr. Selim Aydın kisisi 'İsteyen' rolunde prim adayi degil.
+Personel kartindaki Prim Rolleri sekmesinden bu rolu isaretleyin."
+
+Kullanicinin yapacagi sey tam da bu - ve O YOL KIRIKTI: personel kartindaki
+Prim Rolleri gridine satir eklemek 500 veriyordu:
+
+    42703: column "id" does not exist
+
+Kart cercevesi her detay satirini `id` ile adresler (insert'te `returning id`,
+update/delete'te `where id = ...`); `taraf_prim_rol` tablosunun anahtari
+(taraf_id, rol) ikilisiydi ve `id` kolonu YOKTU. Yani grid HIC calismiyordu -
+rol isaretlemek nadir bir islem oldugu icin aylarca sessiz kalabilirdi.
+Ancak "isteyen rollu plan ac" denendiginde ortaya cikti.
+
+**db/387**: teknik `id` kolonu + benzersiz indeks. IS ANAHTARI bozulmadi -
+(taraf_id, rol) PK olarak duruyor, ayni role iki kayit hala yazilamaz.
+
+Uctan uca (basvuru 114382, 2.200 TL brut / 2.000 matrah, UC ROL birden):
+
+    Mert ÇELİK    Gönderen  2.000 x %25 = 500,00
+    Selim Aydın   İsteyen   2.000 x  %6 = 120,00
+    Selim Aydın   Yapan     2.000 x  %8 = 160,00
+
+Ayni kisinin IKI ROLDEN ayri prim almasi da boylece dogrulandi.

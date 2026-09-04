@@ -300,6 +300,10 @@ public static partial class KartKatalogu
             //   dogrular (tg_taraf_prim_rol_dogrula).
             new DetayTanimi("primRolleri", "public.taraf_prim_rol", "taraf_id", new KartAlani[]
             {
+                // ID SART (387): cerceve detay satirlarini `id` ile adresler
+                //   (insert'te returning id). Tabloda kolon YOKTU ve grid
+                //   "column id does not exist" ile 500 veriyordu.
+                new("id", "id", "sayi", Yazilabilir: false),
                 new("rol", "rol", "kod", Zorunlu: true, KodListesi: "prim.rol",
                     Baslik: "Prim Rolü"),
                 // Onerilen: basvuru hekim combosu ve prim rol modali once
