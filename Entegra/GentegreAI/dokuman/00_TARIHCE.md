@@ -5690,3 +5690,27 @@ satirda tanimlanabiliyor.
 
 DOKUZ PRIM ROLUNUN HEPSI artik uctan uca dogrulandi (Teknisyen disinda -
 o da ayni mekanizma, ayri kod yolu yok).
+
+### "Teknisyen" plani - TAHSILAT ZAMANI ve TAHSILAT TURUNE GORE ORAN
+
+Plan 24 "MR — Teknisyen (nakit %5 / POS %3)": bu turda hic denenmemis olan
+IKINCI YOLU calistirdi - `fn_prim_uret` (tahsilat), oteki dokuz plan
+faturalama yolundaydi. Ayni planda iki satir, tek fark TAHSILAT TURU.
+
+Iki basvuru, ayni tutar (1.100 brut / 1.000 matrah), fise cevrildi ve
+farkli araclarla tahsil edildi:
+
+    NAKIT (tur 21)  1.000 x %5 = 50,00
+    POS   (tur 25)  1.000 x %3 = 30,00
+
+Kural gercekten para karsiligi: POS komisyonu kurumda kalir, o yuzden ayni is
+icin POS'ta daha az prim yazilir - ve bu ancak TAHSILAT zamanli planda
+anlamlidir (faturalamada odeme aracinin ne olacagi henuz bilinmez; eslestirme
+zaten o kipte bu kriteri yok sayiyor).
+
+Dokuz prim rolunun TAMAMI artik uctan uca dogrulandi.
+
+**OLU YAPI BULGUSU:** `prim_plani_kademe` tablosu (adet bazli kademeli oran)
+HICBIR fonksiyonda okunmuyor ve kartta da yok - tablo bos. Ya baglanmali ya
+dusurulmeli; ekranda gorunmedigi icin `baz`/`kdv_haric` kadar zararli degil
+ama semada yaniltici duruyor.
