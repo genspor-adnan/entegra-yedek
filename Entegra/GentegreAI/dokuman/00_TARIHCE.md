@@ -4462,3 +4462,13 @@ geciyor, moduller ekrandan bagimsiz. **Liste.tsx 1860 -> 1620 satir**, davranis 
 Refaktor sirasinda iki NATIVE `confirm` daha bulundu (ciplak cagri oldugu icin onceki taramada
 kacmisti): Firma Bilgileri sube silme ve Stok Ayarlari depo silme - ikisi de `onay()` penceresine
 cevrildi. Ayrica e-Belge SERI adiminda `prompt(` kalmisti, `metinSor` oldu.
+
+**REFAKTOR: BelgeKarti - provizyon paylari saf ve testli** - `provizyonUygula` icindeki iki formul
+(karsilama orani 289 / katilim payi 291) bilesenin icinde yasiyordu; PARA hesabi oldugu halde
+dogrulanamiyordu. `sayfalar/belgeKarti/provizyonPaylari.ts` icine `karsilamaUygula` ve
+`katilimUygula` olarak alindi, **12 vaka** ile testlendi: oran sinirlari (150 -> %100, -20 -> %0),
+iki payin toplaminin satir tutarina esitligi (kurus kaybi yok), iskontolu ve cok adetli satir,
+katilim payinin satir tutarini asmamasi (ucuz kalem), mod degisince karsilama oraninin sifirlanmasi.
+Ayrica stok/hizmet secimi JSX icindeki 25 satirlik inline `async` bloktan `stokSecildi()`
+fonksiyonuna alindi (fiyat once cozulur, pencere sonra acilir kurali orada yaziyor).
+Toplam: **177 test gecti** (165 + 12).

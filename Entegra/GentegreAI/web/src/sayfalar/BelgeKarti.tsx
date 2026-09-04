@@ -33,6 +33,7 @@ import { BelgeAracCubugu } from '../bilesenler/belge/BelgeAracCubugu';
 import { BelgeBaslik } from '../bilesenler/belge/BelgeBaslik';
 import { useBelgeTahsilat, tahsilToplami } from './belgeTahsilat';
 import { kartImzasi } from './belgeImza';
+import { karsilamaUygula, katilimUygula } from './belgeKarti/provizyonPaylari';
 import {
   provizyonVarMi, donusumSatirlari, posFisiSecimi, kasaAramaSirasi,
   gelisSekliKarari, acikBorcHesapla,
@@ -1064,6 +1065,33 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * fiyatlanirsa belge toplami sisirdi. Icerik satirlari duzenlenebilir -
    * kullanici pakette olmayan bir sey cikarabilir/ekleyebilir.
    */
+  /**
+   * STOK / HIZMET SECILDI (arama penceresinden): kalem penceresini acar.
+   *
+   * FIYAT once cozulur, PENCERE sonra acilir: pencere `satir` prop'unu
+   * acilista kopyalar (useState), sonradan gonderilen fiyat guncellemesi ona
+   * ULASMAZ - once fiyat, sonra pencere.
+   */
+  async function stokSecildi(sec: Record<string, unknown>) {
+    // Secim "Son / Sik Aranan" sayacina islensin - listede oldugu gibi.
+    void api.aramaIsaretle(sec.tip === 'hizmet' ? 'hizmet' : 'stok', Number(sec.id));
+    let yeni = stokSecimindenKalem(sec, sonAnahtar(satirlar) + 1, yerelPara);
+
+    // FIYAT LISTESI ONCELIKLI (205/207): belgenin listesi varsa fiyat ORADAN
+    //   gelir; kartin kendi fiyati yalniz listede kalem yoksa kalir.
+    if (fiyatListesiId || kampanyaId) {
+      try {
+        // Fiyat LISTE + KAMPANYA (274): baz listeden, indirim kampanyadan.
+        //   Kampanya yoksa uc liste fiyatini doner.
+        const f = await api.fiyatKalem(
+          sec.tip === 'hizmet' ? { hizmetId: Number(sec.id) } : { stokId: Number(sec.id) },
+          { tarafId: cari?.id ?? null, kurumId: odeyenKurumId, listeId: fiyatListesiId });
+        yeni = kampanyaFiyatiUygula(yeni, f);
+      } catch { /* liste fiyati alinamazsa kart fiyati kalir */ }
+    }
+    setKalem(yeni);
+  }
+
   const kalemKaydet = (satir: SatirDurumu) => {
     // PAKET SATIRI FIYATSIZ: icerik satirlari kendi fiyatlariyla geldigi icin
     //   pakete de fiyat yazilsa belge toplami IKI KEZ sayardi. Paket satiri
@@ -1401,13 +1429,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
 
       // Yeni satirlar ONCE hesaplanir: toplami setSatirlar geri cagriminda
       //   biriktirmek mesaji "0.00" gosteriyordu (state guncellemesi ertelenir).
-      const yeniler = satirlar.map(r => {
-        const tutar = satirTutari(hamSayi(r.adet), hamSayi(r.birimFiyat), r.iskonto, r.iskonto2);
-        const katki = Math.min(elle ?? hamSayi(r.katkiTutar ?? '0'), tutar);
-        return { ...r, karsilama: '0', katkiTutar: String(katki),
-                 kurumTutar: (tutar - katki).toFixed(2), hastaTutar: katki.toFixed(2) };
-      });
-      const toplamHasta = yeniler.reduce((t, r) => t + hamSayi(r.hastaTutar ?? '0'), 0);
+      const { satirlar: yeniler, toplamHasta } = katilimUygula(satirlar, elle);
       setSatirlar(yeniler);
       mesaj(`Katılım payı uygulandı: hastadan ${toplamHasta.toFixed(2)} TL, `
           + 'kalanı kuruma. Kaydet ile kalıcı olur.');
@@ -1423,12 +1445,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
     if (cevap === null || cevap.trim() === '') return;
     const oran = Math.min(100, Math.max(0, hamSayi(cevap)));
 
-    setSatirlar(eski => eski.map(r => {
-      const tutar = satirTutari(hamSayi(r.adet), hamSayi(r.birimFiyat), r.iskonto, r.iskonto2);
-      const kurum = Math.round(tutar * oran) / 100;
-      return { ...r, karsilama: String(oran),
-               kurumTutar: kurum.toFixed(2), hastaTutar: (tutar - kurum).toFixed(2) };
-    }));
+    setSatirlar(eski => karsilamaUygula(eski, oran).satirlar);
     mesaj(`Karşılama oranı %${oran} uygulandı. Kaydet ile kalıcı olur.`);
   }
 
@@ -1925,29 +1942,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             //   yonsuz belgelerde suzme yok.
             yon={depoBelgesi || stokFisiMi ? undefined : alisMi ? 'alis' : 'satis'}
             onKapat={() => { setStokArama(false); setAramaEklenen({ sayi: 0, son: '' }) }}
-            onSec={sec => void (async () => {
-              // Secim "Son / Sik Aranan" sayacina islensin - listede oldugu gibi.
-              void api.aramaIsaretle(
-                sec.tip === 'hizmet' ? 'hizmet' : 'stok', Number(sec.id));
-              let yeni = stokSecimindenKalem(sec, sonAnahtar(satirlar) + 1, yerelPara);
-              // FIYAT LISTESI ONCELIKLI (205/207): belgenin listesi varsa fiyat
-              //   ORADAN gelir; kartin kendi fiyati yalniz listede kalem yoksa
-              //   kalir. Fiyat kalem penceresi ACILMADAN once beklenir - pencere
-              //   `satir` prop'unu acilista kopyalar (useState), sonradan
-              //   gonderilen guncelleme pencereye ulasmaz.
-              if (fiyatListesiId || kampanyaId) {
-                try {
-                  // Fiyat LISTE + KAMPANYA (274): baz listeden, indirim
-                  //   kampanyadan. Kampanya yoksa uc liste fiyatini doner.
-                  const f = await api.fiyatKalem(
-                    sec.tip === 'hizmet' ? { hizmetId: Number(sec.id) } : { stokId: Number(sec.id) },
-                    { tarafId: cari?.id ?? null, kurumId: odeyenKurumId,
-                      listeId: fiyatListesiId });
-                  yeni = kampanyaFiyatiUygula(yeni, f);
-                } catch { /* liste fiyati alinamazsa kart fiyati kalir */ }
-              }
-              setKalem(yeni);
-            })()}
+            onSec={sec => void stokSecildi(sec)}
           />
         )}
 
