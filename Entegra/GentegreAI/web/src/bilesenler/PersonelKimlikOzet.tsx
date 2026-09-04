@@ -193,8 +193,11 @@ export function PersonelKimlikOzet({
                 </select>
               </label>
             </div>
+            {/* UYRUK tek basina satirda: genisligi MESLEK kadar olsun
+                (kullanici) - tek alan satiri kaplayinca oteki combolardan
+                farkli, orantisiz genis duruyordu. */}
             <div className="adres-satir">
-              <label className="alan tip-kod">
+              <label className="alan tip-kod" style={{ flex: '0 1 50%' }}>
                 <span className="etiket">Uyruk</span>
                 <select value={String(satir.uyruk ?? '')} disabled={saltOkunur}
                   onChange={e => ozlukDegis({ uyruk: e.target.value })}>

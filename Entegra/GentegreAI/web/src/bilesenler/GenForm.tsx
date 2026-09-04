@@ -400,6 +400,33 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
    * "Kimlik" grubu sekme DEGIL — mockup'taki idstrip gibi ust seritte, her sekmede
    * sabit gorunur (kod/unvan/durum gibi karti tanimlayan alanlar).
    */
+  /**
+   * HASTA SERIDINDEKI "Doğum Tarihi / Yaş" hucresi (kullanici): uc bilgi tek
+   * yerde - "14.03.1979 ♂ E 47 y". Cinsiyet IKON + TEK HARF (hasta seridiyle
+   * ayni desen): "Erkek"/"Kadın" hucrede yer kapliyor, ikon tek bakista
+   * okunuyor. Kayitsiz alanlar sessizce atlanir - "— / — / —" yazmak bos
+   * hucreden daha kotu.
+   */
+  const dogumYasMetni = useMemo(() => {
+    const o = detaylar.ozluk?.guncel[0] ?? {};
+    const gun = String((o.dogumTarihi as string | undefined) ?? '').slice(0, 10);
+    const parcalar: string[] = [];
+    if (gun) parcalar.push(gun.split('-').reverse().join('.'));
+    const c = String((o.cinsiyet as string | number | undefined) ?? '');
+    if (c === '1') parcalar.push('♂ E'); else if (c === '2') parcalar.push('♀ K');
+    if (gun) {
+      const d = new Date(gun);
+      if (!Number.isNaN(d.getTime())) {
+        const b = new Date();
+        let y = b.getFullYear() - d.getFullYear();
+        const ayFark = b.getMonth() - d.getMonth();
+        if (ayFark < 0 || (ayFark === 0 && b.getDate() < d.getDate())) y--;
+        if (y >= 0 && y < 130) parcalar.push(`${y} y`);
+      }
+    }
+    return parcalar.join('   ');
+  }, [detaylar.ozluk]);
+
   const kimlikAlanlari = useMemo(
     () => {
       const grup = gruplar.find(([ad]) => ad === KIMLIK_GRUP)?.[1] ?? [];
@@ -682,7 +709,16 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
               "aktif" gorunmesin. Serit alani olarak ayrica cizilmez. */}
           {/* DIS HEKIMDE baslik rozeti YOK (kullanici): durum seritte combo -
               ayni bilgiyi iki yerde gostermek gereksiz. */}
-          {personelGibiKart && kaynak !== 'dis-hekim' && !yeniMi && (() => {
+          {/* HASTADA BASLIK ROZETI YOK (kullanici): durum artik SERITTE combo
+              (dort degerli: Aktif/Pasif/Aday/Vefat) - ayni bilgiyi iki yerde
+              gostermek gereksiz. Yerine DOSYA NO yaziyor: kartin kimligi
+              "Hasta #123" degil hastanenin verdigi dosya numarasidir. */}
+          {kaynak === 'hasta' && !yeniMi && (
+            <span style={{ margin: '0 auto', fontWeight: 400, fontSize: 12 }}>
+              Dosya No : <b>{String(deger.kod ?? '') || '—'}</b>
+            </span>
+          )}
+          {personelGibiKart && kaynak !== 'hasta' && kaynak !== 'dis-hekim' && !yeniMi && (() => {
             const ozluk = detaylar.ozluk?.guncel[0];
             const cikis = String((ozluk?.istenCikisTarihi as string | undefined) ?? '');
             const pasif = cikis.length > 0 || Number(deger.durum) === 0;
@@ -790,8 +826,15 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           ) : personelGibiKart ? (
             <div className="alan-izgara"
                  style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}>
+              {/* HASTADA "Dosya No" EDITI YOK (kullanici): numara basliktan
+                  okunuyor - duzenlenecek bir alan degil, seritte yer
+                  kapliyordu.
+                  YENI KAYITTA DURUYOR: numara sablonu "elle girilir" modunda
+                  olabiliyor (358) ve o zaman alan gizlenirse kullanici
+                  "Hasta dosya numarasi zorunlu" hatasini alip DUZELTEMEZ. */}
               {renderAlanListesi(kimlikAlanlari.filter(a =>
-                ['kod', 'ad', 'soyad', 'departman'].includes(a.ad)))}
+                ['kod', 'ad', 'soyad', 'departman'].includes(a.ad)
+                && !(kaynak === 'hasta' && !yeniMi && a.ad === 'kod')))}
               {/* GOREV seritte YALNIZ PERSONELDE (kullanici: "hasta kartında en
                   üstte görev kaldır"): hastanin gorevi yoktur - alan katalogda
                   zaten GIZLI, buraya ACIKCA cizildigi icin o gizlemeyi
@@ -802,9 +845,26 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
               {/* DURUM: personelde seritte YOK (baslikta rozet), HASTADA VAR ve
                   TC No'nun SAGINDA (kullanici) - hasta durumu dort degerli
                   (Aktif/Pasif/Aday/Vefat), rozet tek basina yetmiyor. */}
+              {/* DURUM burada DEGIL, seridin EN SAGINDA (kullanici) - once
+                  kimlik alanlari okunur, durum kartin ozeti olarak sona kalir. */}
               {renderAlanListesi(kimlikAlanlari.filter(a =>
-                !['kod', 'ad', 'soyad', 'departman'].includes(a.ad)
-                && (kaynak === 'hasta' || a.ad !== 'durum')))}
+                !['kod', 'ad', 'soyad', 'departman', 'durum'].includes(a.ad)))}
+              {/* DOGUM TARIHI / YAS - TC No'nun saginda, SALT OKUNUR
+                  (kullanici): uc bilgi tek hucrede "14.03.1979 ♂ E 47 y".
+                  Kaynak ozluk detayi; duzenlemesi Kimlik Bilgileri kutusunda -
+                  ayni alani iki yerde yazdirmak ikisini ayirmaya calismak
+                  demekti. */}
+              {kaynak === 'hasta' && (
+                <label className="alan tip-metin">
+                  <span className="etiket">Doğum Tarihi / Yaş</span>
+                  <input readOnly tabIndex={-1} value={dogumYasMetni}
+                         title="Doğum bilgileri Kimlik Bilgileri kutusundan girilir" />
+                </label>
+              )}
+              {/* DURUM yalniz HASTADA seritte (dort degerli: Aktif/Pasif/Aday/
+                  Vefat); personelde baslikta rozet. */}
+              {kaynak === 'hasta'
+                && renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
             </div>
           ) : (
             <div className={`alan-izgara${kaynak === 'kisi' ? ' kaid-kisi' : ''}`

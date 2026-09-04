@@ -4906,3 +4906,17 @@ vardi - personelde dogru (Aktif/Pasif), hastada DEGIL: hasta durumu dort degerli
 (Aktif/Pasif/Aday/Vefat) ve rozet tek basina yetmiyor.
 *Kimlik Bilgileri kutusu sirasi:* Doğum Tarihi · Doğum Yeri / Cinsiyet · Medeni Hal / Meslek ·
 Kan Grubu / Uyruk. Satirlar IKILI - onceki duzende ucuncu alan (Meslek) satiri sikistiriyordu.
+
+**Hasta karti seridi sadelesti (kullanici).** Serit sirasi: **Ad · Soyad · TC No · Doğum Tarihi/Yaş
+· Durum**.
+*Dosya No editi KALKTI* - numara basliktan okunuyor (`Dosya No : xxxxx`, durum rozetinin yerine).
+YENI KAYITTA DURUYOR: numara sablonu "elle girilir" modunda olabiliyor (358) ve o zaman alan
+gizlenirse kullanici "Hasta dosya numarasi zorunlu" hatasini alip DUZELTEMEZDI.
+*Baslik rozeti (Aktif/Pasif) hastada KALKTI:* durum artik seritte combo ve dort degerli
+(Aktif/Pasif/Aday/Vefat) - ayni bilgiyi iki yerde, ustelik biri iki degerliymis gibi gostermek
+yaniltiyordu. Personelde rozet duruyor.
+*"Doğum Tarihi / Yaş" hucresi* TC No'nun saginda, SALT OKUNUR: "14.03.1979 ♂ E 47 y". Cinsiyet
+ikon + tek harf (hasta seridiyle ayni desen). Kaynak ozluk detayi; DUZENLEMESI Kimlik Bilgileri
+kutusunda - ayni alani iki yerde yazdirmak ikisini ayirmaya calismak demekti. Kayitsiz parcalar
+sessizce atlanir.
+*Uyruk genisligi Meslek kadar* - tek basina satirda kalinca orantisiz genis duruyordu.
