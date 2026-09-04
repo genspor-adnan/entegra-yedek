@@ -201,7 +201,10 @@ public static partial class KartKatalogu
         SilmeEngelleri: new[]
         {
             new SilmeEngeli("public.hakedis_satir", "plan_id",
+                            // "Aktif kutusu" DEGIL: alan combo oldu (Durum:
+                            //   Aktif / Pasif). Mesaj kullaniciyi olmayan bir
+                            //   kutuyu aramaya gonderiyordu.
                             "Bu prim planından hakediş üretilmiş, plan silinemez. "
-                            + "Planı pasife alabilirsiniz (Aktif kutusunu kaldırın)."),
+                            + "Planı pasife alabilirsiniz (Durum alanını \"Pasif\" yapın)."),
         });
 }

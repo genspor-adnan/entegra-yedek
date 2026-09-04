@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Katalog;
@@ -255,8 +256,18 @@ public static class KartUclari
                 // Yeni kayit varsayilanlari ARAYUZE de gonderilir: kullanici
                 //   formu acar acmaz dogru degerleri gorur ve zorunlu kod
                 //   alanlari bos kalmaz (bkz. KartMetaYaniti.Varsayilanlar).
-                Varsayilanlar = tanim.YeniKayitVarsayilanlari
-                    ?? new Dictionary<string, object?>(),
+                // "@bugun" SEMBOLU BURADA COZULUR: katalogda sabit bir tarih
+                //   yazilamaz (dosya bir kez derlenir, tarih donar) ama sembol
+                //   HICBIR YERDE de cozulmuyordu - prim planinda "Yeni" karti
+                //   Başlangıç alanina ham "@bugun" yaziyor ve kayit
+                //   "tarih cozulemedi (@bugun)" ile reddediliyordu, yani yeni
+                //   plan HIC acilamiyordu. Meta her istekte uretildigi icin
+                //   tarih de her acilista gunceldir.
+                Varsayilanlar = (tanim.YeniKayitVarsayilanlari
+                    ?? new Dictionary<string, object?>())
+                    .ToDictionary(x => x.Key, x => x.Value as string == "@bugun"
+                        ? DateTime.Today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
+                        : x.Value),
                 AcilistaTarafSecimi = tanim.AcilistaTarafSecimi,
                 Doviz = dovizMeta,
                 Alanlar = okunabilir.Select(MetaOptions).ToList(),

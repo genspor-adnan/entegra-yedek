@@ -5908,3 +5908,31 @@ Yontem notu: ilk kosuda mesaj penceresini kapatmadigim icin sonraki tiklamalar
 "kaperde intercepts pointer events" ile takildi; ayrica testin adimlari
 KOSULAR ARASI DURUMA baglanmisti (onceki kosuda geri alinan satiri ikinci
 kosuda aramak). Tarayici testi yazarken her adim kendi on kosulunu kurmali.
+
+### Prim Planları ekrani - iki hata: "@bugun" cozulmuyordu, silme mesaji yaniltiyordu
+
+**Cipler**: Aktif 12 · Pasif 0 · Tümü 12 - DB ile birebir.
+
+**Rozet renkleri GERCEKTEN ayrisiyor.** Tarayicida hesaplanan zeminler
+okundu; dokuz rolun her biri farkli:
+    Gönderen #f1e7fb · İsteyen #dff5f1 · Uygulayan #eef3dc · Yapan #fdeddc
+    Raporlayan #e3ecfa · Onaylayan #e2e5f6 · Anestezi #fce7f0
+    Asistan #fdf6e3 · Teknisyen #f3f6fa
+"Hep ayni renk" sikayetinin cozuldugu boylece OLCULDU - goz karariyla degil.
+
+**HATA 1 - yeni plan HIC acilamiyordu.** Katalogdaki
+`["baslangic"] = "@bugun"` sembolu HICBIR YERDE cozulmuyordu (ne API'de ne
+web'de): Başlangıç alanina ham "@bugun" gidiyor, kayit
+"baslangic: tarih cozulemedi (@bugun)" ile reddediliyordu. Yani "+ Yeni"
+ile prim plani acmak MUMKUN DEGILDI. Sembol artik KartUclari'nda meta
+uretilirken cozuluyor - katalogda sabit tarih yazilamaz (dosya bir kez
+derlenir, tarih donar), meta ise her istekte uretilir. Dogrulandi: alan
+05.09.2026 dolu geliyor ve hata artik anlamli - "Plan Adı zorunlu."
+
+**HATA 2 - silme mesaji olmayan bir kutuyu isaret ediyordu.** "Planı pasife
+alabilirsiniz (Aktif kutusunu kaldırın)" diyordu; oysa alan combo oldu
+(Durum: Aktif / Pasif). Mesaj duzeltildi ve dogrulandi:
+"...(Durum alanını "Pasif" yapın)."
+
+Silme engelinin kendisi calisiyor: hakedis uretilmis plan silinemiyor
+(kart icinde kirmizi uyari + kac hakedis satiri oldugu yaziyor).
