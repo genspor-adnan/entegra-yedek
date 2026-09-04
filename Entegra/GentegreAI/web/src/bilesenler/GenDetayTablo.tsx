@@ -310,9 +310,14 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
     // COK SECIMLI metin alani (virgullu kod listesi): kodlar ADLARINA cevrilir.
     //   Ham "15,16" gridde okunmuyordu; bos ise kriter YOK demektir - "Tümü".
     if (a.tip === 'metin' && a.kodlar) {
-      const kodlar = String(d ?? '').split(',').map(x => x.trim()).filter(Boolean);
-      if (kodlar.length === 0) return 'Tümü';
-      return kodlar.map(k => a.kodlar![k] ?? k).join(', ');
+      const ham = String(d ?? '').trim();
+      if (ham === '') return 'Tümü';
+      // Once TAM ESLESME (secenegin kendisi), yoksa tek tek kodlar: eski
+      //   kayitlar baska kombinasyonlar tasiyor olabilir ve ham "15,16"
+      //   gridde okunmuyordu.
+      return a.kodlar[ham]
+        ?? ham.split(',').map(x => x.trim()).filter(Boolean)
+              .map(k => a.kodlar![k] ?? k).join(', ');
     }
     if (a.kodlar) return a.kodlar[String(d ?? '')] ?? '';
     if (a.tip === 'para' && d !== null && d !== undefined && d !== '') {
@@ -1025,50 +1030,20 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                             satiri silip yenisini eklemek. Combo yerine duz
                             metin: kapali bir combo "acilmiyor mu" diye
                             tiklatir. */}
-                        {/* COK SECIMLI KRITER (kullanici: prim satirinda
-                            "belge türleri seçimi"): alan METIN ama kodlari var -
-                            deger virgullu liste, BOS = tumu. Combo yerine onay
-                            kutusu: "hem fatura hem fis" tek combo ile
-                            anlatilamaz, coklu <select> ise fare tutuslarini
-                            (Ctrl+tik) bilmeyi gerektirir. */}
-                        {a.tip === 'metin' && a.kodlar ? (() => {
-                          const secili = String(taslak[a.ad] ?? '')
-                            .split(',').map(x => x.trim()).filter(Boolean);
-                          const degis = (kod: string, acik: boolean) => {
-                            const yeni = acik
-                              ? [...secili, kod]
-                              : secili.filter(x => x !== kod);
-                            // SIRA KOD SIRASI: "16,15" ile "15,16" ayni sey;
-                            //   sabit sira, gereksiz "degisti" farkini onler.
-                            const sirali = Object.keys(a.kodlar!).filter(k => yeni.includes(k));
-                            taslakYaz(a.ad, sirali.join(','));
-                          };
-                          return (
-                            <span className="cok-secim">
-                              {/* "TÜMÜ" ACIK BIR SECENEK (kullanici: "tümü
-                                  seçemedim"). Bos deger zaten "tumu" demek ama
-                                  bunu ekranda hicbir sey soylemiyordu: butun
-                                  kutulari tek tek temizlemek bir SECIM gibi
-                                  hissettirmiyor. Isaretlenince deger bosalir;
-                                  herhangi bir tur isaretlenince kendiliginden
-                                  kalkar. */}
-                              <label className="cok-secim-oge">
-                                <input type="checkbox" disabled={!a.yazilabilir}
-                                       checked={secili.length === 0}
-                                       onChange={() => taslakYaz(a.ad, '')} />
-                                <span><b>Tümü</b></span>
-                              </label>
-                              {Object.entries(a.kodlar!).map(([k, v]) => (
-                                <label key={k} className="cok-secim-oge">
-                                  <input type="checkbox" disabled={!a.yazilabilir}
-                                         checked={secili.includes(k)}
-                                         onChange={e => degis(k, e.target.checked)} />
-                                  <span>{v}</span>
-                                </label>
-                              ))}
-                            </span>
-                          );
-                        })() : a.aramaKaynagi ? (
+                        {/* KODLU METIN ALANI (prim satirinda Belge Türleri):
+                            kolon VIRGULLU LISTE tasir ("15,16") ama secenek
+                            sayisi az ve birbirini disliyor - kullanici combo
+                            istedi. Anahtarlar kolona yazilan degerin KENDISI;
+                            bos = tumu. */}
+                        {a.tip === 'metin' && a.kodlar ? (
+                          <select value={String(taslak[a.ad] ?? '')} disabled={!a.yazilabilir}
+                                  onChange={e => taslakYaz(a.ad, e.target.value)}>
+                            <option value="">Tümü</option>
+                            {Object.entries(a.kodlar).map(([k, v]) => (
+                              <option key={k} value={k}>{v}</option>
+                            ))}
+                          </select>
+                        ) : a.aramaKaynagi ? (
                           <span className="sonuk">
                             {a.kodlar?.[String(taslak[a.ad] ?? '')] ?? String(taslak[a.ad] ?? '')}
                           </span>

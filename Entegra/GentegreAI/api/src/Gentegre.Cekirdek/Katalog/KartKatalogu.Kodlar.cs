@@ -146,9 +146,12 @@ public static partial class KartKatalogu
     /// join maliyeti demekti. Alan metin + kodlar oldugu icin arayuz onay
     /// kutusu grubu cizer; BOS = tumu.
     /// </summary>
+    /// ANAHTAR = KOLONA YAZILAN DEGERIN KENDISI (virgullu liste). Uc secenek
+    /// yeter (kullanici): hasta payi FATURA ya da FIS ile kapanir - ikisi ayni
+    /// seydir, hangisinin kesildigi kasa tercihidir; kurum payi TAHAKKUK'a
+    /// gider. Bos deger = tumu, arayuz onu "Tümü" diye gosterir.
     private static readonly Dictionary<string, string> PrimBelgeTuruKodlari =
-        new() { ["15"] = "Satış Faturası", ["16"] = "Satış Fişi",
-                ["17"] = "Satış Tahakkuku" };
+        new() { ["15,16"] = "Fatura / Fiş", ["17"] = "Tahakkuk" };
 
     private static readonly Dictionary<string, string> CinsiyetKodlari =
         new() { ["1"] = "Erkek", ["2"] = "Kadın" };
