@@ -42,7 +42,12 @@ public static partial class KartKatalogu
             new("baslangic", "baslangic", "tarih", Zorunlu: true,
                 Baslik: "Başlangıç", Grup: "Kimlik"),
             new("bitis",     "bitis",     "tarih", Baslik: "Bitiş", Grup: "Kimlik"),
-            new("durum",     "durum",     "mantik", Baslik: "Aktif", Grup: "Kimlik"),
+            // DURUM COMBO (kullanici) - onay kutusu degil. Kutu yalniz "isaretli
+            //   mi" der; combo PASIF secenegini de adiyla gosterir ve plan
+            //   yururlukten kaldirilirken ne yapildigi acik olur. Kodlar
+            //   diger kartlarla ayni (1 Aktif / 0 Pasif).
+            new("durum",     "durum",     "kod", SabitKodlar: DurumKodlari,
+                Baslik: "Durum", Grup: "Kimlik"),
             // ÖNCELİK KARTTA YOK (kullanıcı). Kolon DURUYOR ve eşleştirme onu
             //   hâlâ okuyor; yeni planlar varsayılan 10 ile açılır, yani tüm
             //   planlar eşit öncelikte olur ve seçimi ÖZGÜLLÜK belirler -

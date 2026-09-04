@@ -61,7 +61,15 @@ public static partial class KaynakKatalogu
             //   DEGIL; kolon menusunden acilabilir, veri kaybolmuyor.
             new("oncelik",   "p.oncelik",   "sayi",  "Öncelik", Hizalama: "sag",
                                             Genislik: 80, Varsayilan: false),
-            new("durum",     "p.durum",     "mantik","Aktif", Hizalama: "orta", Genislik: 80),
+            // Kartta combo oldu (1 Aktif / 0 Pasif) - listede de METIN olarak
+            //   yazilir; onay kutusu rozeti "pasif" durumunu bos hucre gibi
+            //   gosteriyordu.
+            new("durumAdi",
+                "case when coalesce(p.durum, 1) = 1 then 'Aktif' else 'Pasif' end",
+                                           "metin", "Durum", Hizalama: "orta",
+                                           Bicim: "rozet", Genislik: 90,
+                                           Filtrelenebilir: false),
+            new("durum",     "p.durum",     "sayi",  "Durum Kodu", Varsayilan: false),
             new("aciklama",  "p.aciklama",  "metin", "Açıklama", Varsayilan: false),
         });
 
