@@ -5424,3 +5424,25 @@ kimse bakmadikca dogru gorunur - hekim_tipi'nde de ayni tuzaga dusulmustu.
 Baz karttan kalkti, listede varsayilan gorunur degil; kolon ve kod listesi
 duruyor. Taban secimi gercekten istenirse once iki uretim fonksiyonu
 baglanmali, sonra alan geri gelmeli.
+
+### Odeyen KURUM yerine ODEYEN TIPI (db/380)
+
+Once kurum alani secilemiyordu: `AramaKaynagi: "kurum"` yaziliydi ama boyle bir
+LISTE KAYNAGI yok - aramaKaynagi dolu olunca alan combo yerine "… ara" kutusu
+olarak ciziliyor, pencere de olmayan kaynagi sorguladigi icin bos kaliyordu.
+(Repo'da bu degeri kullanan tek yer burasiydi.)
+
+Kullanici duzeltmenin otesini istedi: "kurumlar ayrı ayrı olmasın - Tümü /
+Özel (Ücretli) / ÖSS / SGK, 4 tane yeter". Dogru olan da bu: prim orani kurumun
+KIMLIGINE degil TURUNE gore degisiyor. Kurum bazli plan, yeni bir sigorta
+sozlesmesi eklendiginde o kurumu SESSIZCE plansiz birakirdi.
+
+`prim_plani.odeyen_tipi` (0 tümü / 1 Özel / 2 ÖSS / 3 SGK) - kodlar
+`taraf_kurum.tur` ile AYNI, prim yeni bir siniflandirma uydurmuyor. Kurumu
+olmayan basvuru (kendi odeyen) tip 1 sayilir. Kurum bazli kolon ve filtre
+DURUYOR (tek bir kuruma istisna gerekirse yol acik), yalnizca kartta
+sorulmuyor.
+
+Dogrulandi (rollback'li): ayni kisi listesine sahip iki plandan SGK'lisi
+yalniz SGK basvurusunda kazaniyor (5), kendi odeyen ve OSS'de genel plan
+uygulaniyor (20). Tip kisiti ozgulluk puanina da giriyor.

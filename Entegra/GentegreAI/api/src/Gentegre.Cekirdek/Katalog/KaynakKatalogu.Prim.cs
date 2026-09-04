@@ -53,7 +53,17 @@ public static partial class KaynakKatalogu
                 + " where t.plan_id = p.id) else 'Tümü' end",
                                            "metin", "Kapsanan", Hizalama: "orta",
                                            Genislik: 110, Filtrelenebilir: false),
-            new("kurum",     "coalesce(ku.unvan, '')", "metin", "Ödeyen Kurum", Genislik: 190),
+            // Kartta artik TIP soruluyor (380) - listede de o gorunur; kurum
+            //   adi kolonu duruyor ama varsayilan degil.
+            new("odeyenTipiAdi",
+                "case coalesce(p.odeyen_tipi, 0) when 1 then 'Özel (Ücretli)' "
+                + "when 2 then 'ÖSS' when 3 then 'SGK' else 'Tümü' end",
+                                           "metin", "Ödeyen Tipi", Hizalama: "orta",
+                                           Genislik: 130, Filtrelenebilir: false),
+            new("odeyenTipi", "p.odeyen_tipi", "sayi", "Ödeyen Tipi Kodu",
+                                           Varsayilan: false),
+            new("kurum",     "coalesce(ku.unvan, '')", "metin", "Ödeyen Kurum",
+                                           Genislik: 190, Varsayilan: false),
             // BAZ kartta sorulmuyor (uygulanmayan ayardi) - listede de
             //   VARSAYILAN GORUNUR DEGIL; kolon menusunden acilabilir.
             new("bazAdi",
