@@ -5936,3 +5936,28 @@ alabilirsiniz (Aktif kutusunu kaldırın)" diyordu; oysa alan combo oldu
 
 Silme engelinin kendisi calisiyor: hakedis uretilmis plan silinemiyor
 (kart icinde kirmizi uyari + kac hakedis satiri oldugu yaziyor).
+
+### Yeni prim plani UCTAN UCA EKRANDAN acildi
+
+Tarayicida, tek akista: "+ Yeni" -> baslik alanlari -> Prim Satırları sekmesi
+-> "＋" -> satir modali -> Prim Alanlar sekmesi -> "＋ Kişi Ekle" -> arama ->
+isaretle -> "Seç" -> Kaydet.
+
+Kaydedilen (plan 25, DB'den dogrulandi):
+
+    kod PRM-EKRAN-TEST · "MR — Teknisyen %4 (ekran)"
+    rol 9 Teknisyen · prim_zamani 2 Faturalamada · baslangic 2026-09-05
+    satir: tip 2 (kategori) · kalem 2 (hizmet) · hedef 32 (MR) · %4
+    kisi: BAHAR ALADAĞ
+
+Bu akis, turda yapilan duzeltmelerin HEPSINI birden dogruluyor:
+  - `@bugun` cozuluyor (baslangic bugunun tarihiyle dolu geldi)
+  - satirin rolu PLANDAN doldu (db/385) - kartta rol alani yok
+  - kisi aramasi PLANIN ROLUYLE suzuldu: Teknisyen adayi TEK kisi listelendi
+    (383) ve o kisi de rolu isaretli olan
+  - satir modalinde "Kademe tanımlamak için önce satırı kaydedin" notu -
+    yeni satirda kademe yazilamaz, dogru uyari
+  - kaydetme sirasinda hata yok
+
+Not: kart basligi ve uyari metinlerini okuyan secicilerim zayifti (".kabaslik"
+bulunamadi, ".uyari" rozet metnini yakaladi) - dogrulama DB'den yapildi.
