@@ -4920,3 +4920,15 @@ ikon + tek harf (hasta seridiyle ayni desen). Kaynak ozluk detayi; DUZENLEMESI K
 kutusunda - ayni alani iki yerde yazdirmak ikisini ayirmaya calismak demekti. Kayitsiz parcalar
 sessizce atlanir.
 *Uyruk genisligi Meslek kadar* - tek basina satirda kalinca orantisiz genis duruyordu.
+
+**Hasta kartinda "Başvurular" sekmesi (mockup hasta_kimlik_karti.html).** "Kurum / Ödeyen"in
+saginda; kartin DETAYI degil - baska bir ekranin kayitlari (bu hastanin basvuru belgeleri), salt
+okunur liste. Cift tik basvuruyu KARTIN USTUNDE acar (liste ekranina gitmek hasta kartindan kopmak
+demekti), "＋ Yeni Başvuru" dugmesi bu hastayla yeni basvuru acar. Yeni kayitta hic cizilmez -
+hasta kimligi henuz yok. Mevcut `OncekiBasvurular` bileseni yeniden kullanildi (baslik, cift tik ve
+yeni-kayit uclari eklendi). 3 test (`kartSekmeleriHasta.test.ts`): Kurum/Ödeyen'in HEMEN saginda,
+yeni kayitta yok, personelde yok.
+**"Fatura Bilgileri" -> "Adres / Fatura Bilgisi"** (kullanici): adres zaten o sekmede duruyor, ad
+yalniz faturayi anlatiyordu. Grup adi ic ANAHTAR olarak da kullaniliyor (sekme sirasi, gizli sekme
+listesi, ozel render dallari) - katalogdaki 13 alan ve web'deki 10 string eslesmesi BIRLIKTE
+guncellendi, yoksa sekme sirasi ve Aday kartindaki gizleme sessizce bozulurdu.

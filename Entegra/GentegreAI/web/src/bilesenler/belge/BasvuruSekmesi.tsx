@@ -853,10 +853,16 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
 }
 
 // ================================================== ONCEKI BASVURULAR ====
-export function OncekiBasvurular({ tarafId, haricBelgeId }: {
+export function OncekiBasvurular({ tarafId, haricBelgeId, baslik, onAc, onYeni }: {
   tarafId?: number | null;
   /** Acik olan basvuru listede tekrar gosterilmez. */
   haricBelgeId?: number;
+  /** Kutu basligi - hasta kartinda "Başvuru Geçmişi". */
+  baslik?: string;
+  /** Satira CIFT TIK: basvuruyu acar (mockup hasta_kimlik_karti.html). */
+  onAc?(belgeId: number): void;
+  /** "＋ Yeni Başvuru" - verilirse dugme cizilir. */
+  onYeni?(): void;
 }) {
   const [satirlar, setSatirlar] = useState<Record<string, unknown>[]>([]);
   const [yukleniyor, setYukleniyor] = useState(false);
@@ -887,7 +893,14 @@ export function OncekiBasvurular({ tarafId, haricBelgeId }: {
 
   return (
     <div className="kagrup">
-      <h6>Önceki Başvurular {satirlar.length > 0 && <span className="b">{satirlar.length}</span>}</h6>
+      <h6>
+        {baslik ?? 'Önceki Başvurular'}
+        {satirlar.length > 0 && <span className="b">{satirlar.length}</span>}
+        {onYeni && (
+          <button type="button" className="d bir" style={{ marginLeft: 'auto' }}
+                  onClick={onYeni}>＋ Yeni Başvuru</button>
+        )}
+      </h6>
       {hata && <div className="hata-kutusu">{hata}</div>}
       <table className="detay-tablo">
         <thead>
@@ -903,7 +916,12 @@ export function OncekiBasvurular({ tarafId, haricBelgeId }: {
         </thead>
         <tbody>
           {satirlar.map(r => (
-            <tr key={String(r.id)}>
+            /* CIFT TIK basvuruyu acar (mockup): tek tik secim degil - liste
+               salt okunur, secilecek bir sey yok. */
+            <tr key={String(r.id)}
+                className={onAc ? 'tiklanir' : undefined}
+                onDoubleClick={onAc ? () => onAc(Number(r.id)) : undefined}
+                title={onAc ? 'Başvuruyu açmak için çift tıklayın' : undefined}>
               <td><code>{String(r.belgeNo ?? '')}</code></td>
               <td>{tarihSaat(String(r.belgeTarihi ?? ''))}</td>
               <td>{String(r.poliklinik ?? '') || <span className="sonuk">—</span>}</td>

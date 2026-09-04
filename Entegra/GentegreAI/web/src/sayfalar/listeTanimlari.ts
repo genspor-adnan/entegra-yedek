@@ -680,7 +680,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   Cep telefonu ve Web de yok: adayda tek telefon + e-posta yeter,
     //   ayrinti musteri olunca girilir.
     gizliKartAlanlari: ['kod', 'musteri', 'tedarikci', 'aday', 'cepTel', 'epostaWeb'],
-    gizliKartSekmeleri: ['Fatura Bilgileri'],
+    gizliKartSekmeleri: ['Adres / Fatura Bilgisi'],
     //   Temsilci ZORUNLU: sahipsiz aday takipsiz kalir (varsayilan karti acan
     //   kullanici). Musteri kartinda zorunlu DEGIL - eski kayitlarin cogunda bos.
     zorunluKartAlanlari: ['temsilci'],

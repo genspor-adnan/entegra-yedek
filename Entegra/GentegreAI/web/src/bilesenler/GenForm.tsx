@@ -39,6 +39,8 @@ import { RandevuOzetSeridi } from './RandevuOzetSeridi';
 import { RandevuTetkikUyum } from './RandevuTetkikUyum';
 import { telefonAlaniMi } from './alanBicim';
 import { telefonBicimle } from './bicim';
+import { OncekiBasvurular } from './belge/BasvuruSekmesi';
+import { BelgeKarti } from '../sayfalar/BelgeKarti';
 
 interface Props {
   kaynak: string;
@@ -106,7 +108,7 @@ interface Props {
  */
 const SEKME_IKON: Record<string, string> = {
   'Genel': '📋', 'Kimlik': '🪪', 'İletişim': '📞', 'Adresler': '📍',
-  'Notlar': '📝', 'Mali': '💰', 'Fatura Bilgileri': '🧾', 'Banka': '🏦',
+  'Notlar': '📝', 'Mali': '💰', 'Adres / Fatura Bilgisi': '🧾', 'Banka': '🏦',
   'Depolar': '🏬', 'Logo & Kaşe': '🖼️', 'e-Belge': '📨', 'ÜTS': '🩺',
   'İzinler': '🌴', 'Eğitimler': '🎓', 'Resim / Doküman': '📎',
   'Yorum / Medya': '💬', 'Yetki Matrisi': '🛡️', 'Kullanıcılar': '👥',
@@ -179,6 +181,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
   //   (alanDegistir) yazilir; 1:1 uzanti formu (TekKayit) kendi satirina
   //   yazmak icin kendi setter'ini gonderir - yoksa secim kart alanina
   //   dusup DETAY kaydedilmeden kaybolur.
+  /** Hasta kartindan acilan basvuru: 0 = yeni, >0 = mevcut, null = kapali. */
+  const [acilanBasvuru, setAcilanBasvuru] = useState<number | null>(null);
   const [aramaAlani, setAramaAlani] =
     useState<{ alan: string; kaynak: string; uygula?: (deger: string) => void } | null>(null);
   const [secilenAdlar, setSecilenAdlar] = useState<Record<string, string>>({});
@@ -460,8 +464,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
   const sekmeBul = useCallback((alanAdi: string): string | null => {
     if (alanAdi.includes('.')) {
       const detayAd = alanAdi.split('.')[0];
-      if (kaynak === 'cari' && detayAd === 'adresler') return grupSekmeAnahtari('Fatura Bilgileri');
-      if (kaynak === 'hasta' && detayAd === 'adresler') return grupSekmeAnahtari('Fatura Bilgileri');
+      if (kaynak === 'cari' && detayAd === 'adresler') return grupSekmeAnahtari('Adres / Fatura Bilgisi');
+      if (kaynak === 'hasta' && detayAd === 'adresler') return grupSekmeAnahtari('Adres / Fatura Bilgisi');
       if (kaynak === 'kisi' && detayAd === 'adresler') return grupSekmeAnahtari('Genel');
       if (personelGibiKart && detayAd === 'adresler') return grupSekmeAnahtari('İletişim');
       if (personelGibiKart && detayAd === 'egitimler') return grupSekmeAnahtari('Genel');
@@ -1163,6 +1167,22 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
         <RolYetkiMatrisi rolId={id as number} saltOkunur={salt} />
       )}
 
+
+      {/* HASTA "Başvurular" (mockup hasta_kimlik_karti.html): hastanin
+          basvuru gecmisi. Cift tik basvuruyu KARTIN USTUNDE acar - liste
+          ekranina gitmek hasta kartindan kopmak demekti. */}
+      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:basvurular' && (
+        <OncekiBasvurular tarafId={id as number} baslik="Başvuru Geçmişi"
+                          onAc={b => setAcilanBasvuru(b)}
+                          onYeni={() => setAcilanBasvuru(0)} />
+      )}
+      {/* 0 = YENI basvuru (bu hastayla acilir), >0 = mevcut basvuru. */}
+      {acilanBasvuru !== null && (
+        <BelgeKarti
+          {...(acilanBasvuru > 0 ? { id: acilanBasvuru } : { tur: 19 })}
+          onKapat={() => setAcilanBasvuru(null)}
+        />
+      )}
 
       {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:dokuman' && (
         <DokumanGalerisi kartAdi={kaynak} kaynakId={id as number} saltOkunur={salt} />

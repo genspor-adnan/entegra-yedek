@@ -59,34 +59,34 @@ public static partial class KartKatalogu
             //   listesinde gorunmezdi.
             new("aday",        "aday",         "mantik", Baslik: "Aday", Gizli: true),
             new("kisi",        "kisi",         "mantik", Baslik: "Kisi"),
-            // "Mali" -> "Fatura Bilgileri" (mockup adi birebir; AltGrup ile mockup'un iki
+            // "Mali" -> "Adres / Fatura Bilgisi" (kullanici: adres de bu sekmede duruyor; AltGrup ile
             //   kutusuna ayrildi: Fatura / Vergi Kimligi + e-Belge Ayarlari. Mockup'taki XSLT/
             //   Alias alanlari (E-Fatura XSLT, E-Irsaliye XSLT, E-Arsiv XSLT, Alias/e-Posta)
             //   backend'de kolon karsiligi yok (taraf tablosunda yok) - eklenmedi.
-            new("faturaUnvan", "fatura_unvan", "metin", EnFazlaUzunluk: 200, Baslik: "Fatura Unvani", Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
-            new("vkno",        "vkno",         "metin", EnFazlaUzunluk: 20,  Baslik: "VKN / TCKN",     Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
-            new("vd",          "vd",           "metin", EnFazlaUzunluk: 60,  Baslik: "Vergi Dairesi",  Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
+            new("faturaUnvan", "fatura_unvan", "metin", EnFazlaUzunluk: 200, Baslik: "Fatura Unvani", Grup: "Adres / Fatura Bilgisi", AltGrup: "Fatura / Vergi Kimligi"),
+            new("vkno",        "vkno",         "metin", EnFazlaUzunluk: 20,  Baslik: "VKN / TCKN",     Grup: "Adres / Fatura Bilgisi", AltGrup: "Fatura / Vergi Kimligi"),
+            new("vd",          "vd",           "metin", EnFazlaUzunluk: 60,  Baslik: "Vergi Dairesi",  Grup: "Adres / Fatura Bilgisi", AltGrup: "Fatura / Vergi Kimligi"),
             // ÜTS verme bildiriminde KUN buradan okunur (225).
-            new("utsKurumNo",  "uts_kurum_no", "metin", EnFazlaUzunluk: 30,  Baslik: "ÜTS Kurum No",   Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
-            new("efatura",     "efatura",      "mantik", Baslik: "e-Fatura mukellefi", Grup: "Fatura Bilgileri", AltGrup: "e-Belge Ayarlari"),
-            new("aliasEposta", "alias_eposta", "metin", EnFazlaUzunluk: 200, Baslik: "Alias / e-Posta", Grup: "Fatura Bilgileri", AltGrup: "e-Belge Ayarlari"),
+            new("utsKurumNo",  "uts_kurum_no", "metin", EnFazlaUzunluk: 30,  Baslik: "ÜTS Kurum No",   Grup: "Adres / Fatura Bilgisi", AltGrup: "Fatura / Vergi Kimligi"),
+            new("efatura",     "efatura",      "mantik", Baslik: "e-Fatura mukellefi", Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari"),
+            new("aliasEposta", "alias_eposta", "metin", EnFazlaUzunluk: 200, Baslik: "Alias / e-Posta", Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari"),
             // FIYAT LISTESI (204). IKI AYRI ALAN: bir cari hem musteri hem
             //   tedarikci olabiliyor; tek alan olsaydi ayni cariye satarken de
             //   alirken de ayni liste uygulanirdi. Bos ise yonun VARSAYILAN
             //   listesi gecerli - her cariye tek tek atamak gerekmez.
             new("satisFiyatListesiId", "satis_fiyat_listesi_id", "kod",
                 KodTablosu: "public.v_fiyat_listesi_satis_lookup",
-                Baslik: "Satış Fiyat Listesi", Grup: "Fatura Bilgileri", AltGrup: "Fiyatlandırma"),
+                Baslik: "Satış Fiyat Listesi", Grup: "Adres / Fatura Bilgisi", AltGrup: "Fiyatlandırma"),
             new("alisFiyatListesiId",  "alis_fiyat_listesi_id",  "kod",
                 KodTablosu: "public.v_fiyat_listesi_alis_lookup",
-                Baslik: "Alış Fiyat Listesi", Grup: "Fatura Bilgileri", AltGrup: "Fiyatlandırma"),
+                Baslik: "Alış Fiyat Listesi", Grup: "Adres / Fatura Bilgisi", AltGrup: "Fiyatlandırma"),
             // KAMPANYA (274): listenin YERINE gecmez, USTUNE isler - liste baz
             //   fiyati, kampanya indirimi verir. Bos ise genel kampanya (varsa)
             //   gecerli olur; anlasmali kurumda kampanya sozlesmeden gelir ve
             //   bunu ezer (fn_taraf_kampanya).
             new("kampanyaId", "kampanya_id", "kod",
                 KodTablosu: "public.v_kampanya_lookup",
-                Baslik: "Kampanya", Grup: "Fatura Bilgileri", AltGrup: "Fiyatlandırma"),
+                Baslik: "Kampanya", Grup: "Adres / Fatura Bilgisi", AltGrup: "Fiyatlandırma"),
             // "Iletisim"/"Siniflandirma"/"Diger" SEKME DEGIL - mockup'ta Genel'in alt-kutulari
             //   (Kart Bilgileri / İletişim / Notlar). Grup kaldirildi, AltGrup ile Genel'e katlandi.
             new("telefon",     "telefon",      "metin", EnFazlaUzunluk: 30,  Baslik: "Telefon",        AltGrup: "İletişim"),
@@ -844,10 +844,10 @@ public static partial class KartKatalogu
         }
         alanlar.AddRange(new[]
         {
-            new KartAlani("faturaUnvan", "fatura_unvan", "metin", EnFazlaUzunluk: 200, Baslik: "Fatura Unvani", Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
-            new KartAlani("vd", "vd", "metin", EnFazlaUzunluk: 60, Baslik: "Vergi Dairesi", Grup: "Fatura Bilgileri", AltGrup: "Fatura / Vergi Kimligi"),
-            new KartAlani("efatura", "efatura", "mantik", Baslik: "e-Fatura mukellefi", Grup: "Fatura Bilgileri", AltGrup: "e-Belge Ayarlari"),
-            new KartAlani("aliasEposta", "alias_eposta", "metin", EnFazlaUzunluk: 200, Baslik: "Alias / e-Posta", Grup: "Fatura Bilgileri", AltGrup: "e-Belge Ayarlari"),
+            new KartAlani("faturaUnvan", "fatura_unvan", "metin", EnFazlaUzunluk: 200, Baslik: "Fatura Unvani", Grup: "Adres / Fatura Bilgisi", AltGrup: "Fatura / Vergi Kimligi"),
+            new KartAlani("vd", "vd", "metin", EnFazlaUzunluk: 60, Baslik: "Vergi Dairesi", Grup: "Adres / Fatura Bilgisi", AltGrup: "Fatura / Vergi Kimligi"),
+            new KartAlani("efatura", "efatura", "mantik", Baslik: "e-Fatura mukellefi", Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari"),
+            new KartAlani("aliasEposta", "alias_eposta", "metin", EnFazlaUzunluk: 200, Baslik: "Alias / e-Posta", Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari"),
             // YeniKayitVarsayilanlari'ndaki grup=101 kayda yazılsın; UI'da gizlenir.
             new KartAlani("grup", "grup", "kod", Baslik: "Grup")
         });

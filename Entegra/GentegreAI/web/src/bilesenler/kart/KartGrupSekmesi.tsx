@@ -151,7 +151,7 @@ const adliBlok = (
                   devami - adres, altinda İl ve saginda İlçe. Ayri bir
                   "Adres" kutusu iki kisa alan icin fazladan bir kat
                   gorsel gurultuydu. */}
-              {kaynak === 'cari' && gizliSekmeler?.includes('Fatura Bilgileri') && (() => {
+              {kaynak === 'cari' && gizliSekmeler?.includes('Adres / Fatura Bilgisi') && (() => {
                 const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
                 if (!adresDetay) return null;
                 return (
@@ -216,7 +216,7 @@ const adliBlok = (
           const ciftliAlanlar = ciftler.map(cift =>
             cift.map(ad => alanlar.find(a => a.ad === ad)).filter(a => a !== undefined));
           const digerAlanlar = alanlar.filter(a => !ciftliAlanlar.flat().includes(a));
-          const hastaVergiNoAlan = kaynak === 'hasta' && aktif.baslik === 'Fatura Bilgileri' && altBaslik === 'Fatura / Vergi Kimligi'
+          const hastaVergiNoAlan = kaynak === 'hasta' && aktif.baslik === 'Adres / Fatura Bilgisi' && altBaslik === 'Fatura / Vergi Kimligi'
             ? meta.alanlar.find(a => a.ad === 'vkno')
             : undefined;
           return (
@@ -665,11 +665,11 @@ return (
       );
     })()}
     {kaynak === 'cari' && aktif.baslik === 'Genel' && !yeniMi
-      && gizliSekmeler?.includes('Fatura Bilgileri') && (
+      && gizliSekmeler?.includes('Adres / Fatura Bilgisi') && (
       <IlgiliKisiler tarafId={id as number} saltOkunur={salt} />
     )}
     {kaynak === 'cari' && aktif.baslik === 'Genel' && !yeniMi
-      && !gizliSekmeler?.includes('Fatura Bilgileri') && (
+      && !gizliSekmeler?.includes('Adres / Fatura Bilgisi') && (
       <IlgiliKisiler tarafId={id as number} saltOkunur={salt} />
     )}
     {/* YENI kartta kisi eklenemez (henuz taraf id'si yok) ama kutu
@@ -701,7 +701,7 @@ return (
     )}
     {/* Cari'ye ozel: Adresler mockup'ta ayri sekme degil, Fatura Bilgileri'nin icine
         gomulu GRID (birden fazla adres - fatura/sevkiyat/vb). */}
-    {(kaynak === 'cari' || kaynak === 'hasta') && aktif.baslik === 'Fatura Bilgileri' && (() => {
+    {(kaynak === 'cari' || kaynak === 'hasta') && aktif.baslik === 'Adres / Fatura Bilgisi' && (() => {
       const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
       if (!adresDetay) return null;
       return (

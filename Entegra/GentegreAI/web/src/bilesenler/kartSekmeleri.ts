@@ -113,7 +113,7 @@ export function sekmeleriKur(secenek: {
     .map(([ad, alanlar]) => ({ tur: 'grup', anahtar: grupSekmeAnahtari(ad), baslik: ad, alanlar }));
   if (kaynak === 'cari' || kaynak === 'hasta') {
     const genel = s.findIndex(sekme => sekme.tur === 'grup' && sekme.baslik === 'Genel');
-    const fatura = s.findIndex(sekme => sekme.tur === 'grup' && sekme.baslik === 'Fatura Bilgileri');
+    const fatura = s.findIndex(sekme => sekme.tur === 'grup' && sekme.baslik === 'Adres / Fatura Bilgisi');
     if (genel >= 0 && fatura >= 0 && fatura !== genel + 1) {
       const [sekme] = s.splice(fatura, 1);
       const yeniGenel = s.findIndex(x => x.tur === 'grup' && x.baslik === 'Genel');
@@ -157,6 +157,13 @@ export function sekmeleriKur(secenek: {
     if (kaynak === 'dis-hekim' && (d.ad === 'hekim' || d.ad === 'adresler')) return;
     s.push({ tur: 'detay', anahtar: detaySekmeAnahtari(d.ad), baslik: d.baslik, detay: d });
   });
+  // HASTA: BASVURULAR sekmesi "Kurum / Ödeyen"in SAGINDA (mockup
+  //   hasta_kimlik_karti.html). Kartin DETAYI DEGIL - baska bir ekranin
+  //   kayitlari (bu hastanin basvuru belgeleri), salt okunur liste; cift tik
+  //   basvuruyu acar. Yeni kayitta hasta id'si yok, hic cizilmez.
+  if (kaynak === 'hasta' && !yeniMi) {
+    s.push({ tur: 'ozel', anahtar: 'ozel:basvurular', baslik: 'Başvurular' });
+  }
   (yerTutucuSekmeler ?? []).forEach(baslik => {
     if (dokumanliKart && !yeniMi && baslik === 'Yorum / Medya') {
       s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'Resim / Doküman' });

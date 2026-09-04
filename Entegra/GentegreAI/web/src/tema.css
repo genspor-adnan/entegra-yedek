@@ -2130,3 +2130,8 @@ input.skt-gecmis {
   font-size: 11px; color: var(--soluk); cursor: pointer;
 }
 .gonderen-alani .kendi-istegi input { margin: 0 }
+
+/* Salt okunur listede CIFT TIK ile acilan satir (ör. hasta kartindaki
+   "Başvuru Geçmişi"): secim yok, yalniz acilabilirlik belli olsun. */
+.detay-tablo tr.tiklanir { cursor: pointer }
+.detay-tablo tr.tiklanir:hover td { background: var(--mor2) }
