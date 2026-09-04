@@ -538,13 +538,6 @@ table.grid tr.flt input {
 .personel-iletisim-yerlesim { flex: 1; min-width: 0; width: 100% }
 .personel-iletisim-yerlesim > .kagrup { margin-bottom: 0 }
 
-/* CERCEVESIZ KUTU (kullanici - hasta Yakınlar gridi): DIS cerceve kalkar,
-   BASLIK SERIDI KALIR. Grid kendi cizgilerini tasiyor, ustune ikinci bir kutu
-   cercevesi ic ice iki cerceveydi; baslik olmadan da gridin ne oldugu
-   anlasilmiyor. */
-.kagrup-cercevesiz { border: none; background: none; overflow: visible }
-.kagrup-cercevesiz > .detay-tablo { width: 100%; margin: 0 }
-
 .kagrup-resim { flex: 0 0 150px; width: 150px; max-width: 150px }
 .resim-kutusu {
   width: 130px; height: 130px; border: 1px dashed var(--cizgi); border-radius: 3px; background: var(--satiralt);

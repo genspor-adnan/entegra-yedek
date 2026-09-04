@@ -155,16 +155,18 @@ const adliBlok = (
         DOM'a bakan test bunu goremez, cunku sira DOGRUYDU). Cozum kutuyu
         satirin DISINA almak. */}
       {kaynak === 'hasta' && aktif.baslik === 'Genel' && acilDetay && (
-        <div className="kagrup kagrup-cercevesiz" key="Yakinlar">
-          <h6>Yakınlar / Acil Durumda Aranacak</h6>
-          <GenDetayTablo
-            meta={acilDetay}
-            durum={detaylar[acilDetay.ad] ?? bosDetay()}
-            saltOkunur={salt || acilDetay.saltOkunur}
-            hatalar={alanHatalari}
-            onDegis={yeni => setDetaylar(t => ({ ...t, [acilDetay.ad]: yeni }))}
-          />
-        </div>
+      // GenDetayTablo KENDI `.kagrup` kutusunu ve basligini cizer - ustune
+      //   ikinci bir kutu koymak IC ICE IKI CERCEVE demekti (kullanici: "dış
+      //   çerçeve duruyor" - benim kaldirdigim DIS kutuydu, ekranda gorunen
+      //   gridin KENDI kutusu). Sarmalayici kaldirildi; baslik meta uzerinden.
+      <GenDetayTablo
+        key="Yakinlar"
+        meta={{ ...acilDetay, baslik: 'Yakınlar / Acil Durumda Aranacak' }}
+        durum={detaylar[acilDetay.ad] ?? bosDetay()}
+        saltOkunur={salt || acilDetay.saltOkunur}
+        hatalar={alanHatalari}
+        onDegis={yeni => setDetaylar(t => ({ ...t, [acilDetay.ad]: yeni }))}
+      />
       )}
     {/* Mockup: Tanım/Sınıflandırma · Vergi & Ana Birim ... AYNI SATIRDA yan yana (.row > .col > .grp).
         Personel'de bu sarmalayici, AltGrup'lu (adli) alan olmasa BILE acik kalmali -
