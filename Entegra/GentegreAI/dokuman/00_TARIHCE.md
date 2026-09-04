@@ -5668,3 +5668,25 @@ Ustelik sinir da tutuyor: %70 + %70 denendiginde uc reddetti -
 
 Alti prim rolunun HEPSI artik uctan uca dogrulandi:
 Gönderen · İsteyen · Uygulayan · Yapan · Raporlayan · Onaylayan.
+
+### "Anestezi" ve "Asistan" planlari - ALT / UST SINIR
+
+Plan 22 "MR — Anestezi %15 (üst sınır 200)" ve plan 23 "MR — Asistan %4
+(alt sınır 50)" acildi. Yeni boyut: `alt_sinir` / `ust_sinir` - orana KIRPMA.
+
+Ayni iki rol, IKI FARKLI FIYATTA denendi:
+
+    PAHALI (3.300 brut / 3.000 matrah)
+      Anestezi  3.000 x %15 = 450  ->  UST SINIR 200,00   (kirpildi)
+      Asistan   3.000 x  %4 = 120  ->  120,00             (sinir etkisiz)
+
+    UCUZ (550 brut / 500 matrah)
+      Anestezi    500 x %15 =  75  ->   75,00             (sinir etkisiz)
+      Asistan     500 x  %4 =  20  ->  ALT SINIR 50,00    (tabana cikti)
+
+Sinirlarin isi tam da bu: yuksek tutarli iste primin kuruma maliyetini
+kapatmak, dusuk tutarli iste emegin karsiligini tabanda tutmak. Ikisi de tek
+satirda tanimlanabiliyor.
+
+DOKUZ PRIM ROLUNUN HEPSI artik uctan uca dogrulandi (Teknisyen disinda -
+o da ayni mekanizma, ayri kod yolu yok).
