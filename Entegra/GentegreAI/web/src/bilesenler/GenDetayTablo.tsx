@@ -83,6 +83,13 @@ interface Props {
   onDegis(yeni: DetayDurumu): void;
   /** Kutuya eklenecek ek sinif (yerlesim ince ayari; ör. daha dar ust bosluk). */
   kutuSinif?: string;
+  /**
+   * KART DEGERINE GORE gizlenen detay alanlari (ör. prim zamani
+   * "Faturalamada" ise satirdaki Tahsilat Türü). Alan katalogda duruyor ve
+   * kayitli degeri korunuyor - yalniz cizilmiyor: o kriterin ANLAMSIZ oldugu
+   * durumda kullaniciya sorulmasi, uygulanmayan bir ayar uretir.
+   */
+  gizliAlanlar?: ReadonlySet<string>;
   /** Baslik ve satir eylemleri IKON olarak cizilir (＋ / ✎ / 🗑) - seri ve XSLT
       gridleriyle ayni gorunum (kullanici). Metin dugmeler dar gridlerde
       satiri tasiriyordu. */
@@ -136,7 +143,8 @@ function gunFarki(bas: string, bit: string): number | null {
 }
 
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
-                               modalDuzenle, taslakKural, cipler, kutuSinif }: Props) {
+                               modalDuzenle, taslakKural, cipler, kutuSinif,
+                               gizliAlanlar }: Props) {
   /**
    * KAMPANYA SATIRI (268): "Kapsam" TEK kolondur (iskonto_yeri_id) ama
    * anlami satirin TIPINE gore degisir - Liste'de 0, Kategori'de kategori id,
@@ -275,7 +283,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
    * acip kaydirmak demekti.
    */
   const [tarafAramaAcik, setTarafAramaAcik] = useState(false);
-  const alanlar = meta.alanlar.filter(a => a.ad !== 'id');
+  const alanlar = meta.alanlar.filter(a => a.ad !== 'id' && !gizliAlanlar?.has(a.ad));
   const yerler = useYerler(meta.ad === 'adresler');
   const adresGrid = meta.ad === 'adresler';
   const acilKisiGrid = meta.ad === 'acilKisiler';
@@ -299,6 +307,13 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const gorunum = (satir: Record<string, unknown>, a: typeof alanlar[number]) => {
     const d = satir[a.ad];
     if (a.tip === 'mantik') return Number(d) === 1 || d === true ? '✓' : '';
+    // COK SECIMLI metin alani (virgullu kod listesi): kodlar ADLARINA cevrilir.
+    //   Ham "15,16" gridde okunmuyordu; bos ise kriter YOK demektir - "Tümü".
+    if (a.tip === 'metin' && a.kodlar) {
+      const kodlar = String(d ?? '').split(',').map(x => x.trim()).filter(Boolean);
+      if (kodlar.length === 0) return 'Tümü';
+      return kodlar.map(k => a.kodlar![k] ?? k).join(', ');
+    }
     if (a.kodlar) return a.kodlar[String(d ?? '')] ?? '';
     if (a.tip === 'para' && d !== null && d !== undefined && d !== '') {
       const s = Number(d);
@@ -1010,7 +1025,40 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                             satiri silip yenisini eklemek. Combo yerine duz
                             metin: kapali bir combo "acilmiyor mu" diye
                             tiklatir. */}
-                        {a.aramaKaynagi ? (
+                        {/* COK SECIMLI KRITER (kullanici: prim satirinda
+                            "belge türleri seçimi"): alan METIN ama kodlari var -
+                            deger virgullu liste, BOS = tumu. Combo yerine onay
+                            kutusu: "hem fatura hem fis" tek combo ile
+                            anlatilamaz, coklu <select> ise fare tutuslarini
+                            (Ctrl+tik) bilmeyi gerektirir. */}
+                        {a.tip === 'metin' && a.kodlar ? (() => {
+                          const secili = String(taslak[a.ad] ?? '')
+                            .split(',').map(x => x.trim()).filter(Boolean);
+                          const degis = (kod: string, acik: boolean) => {
+                            const yeni = acik
+                              ? [...secili, kod]
+                              : secili.filter(x => x !== kod);
+                            // SIRA KOD SIRASI: "16,15" ile "15,16" ayni sey;
+                            //   sabit sira, gereksiz "degisti" farkini onler.
+                            const sirali = Object.keys(a.kodlar!).filter(k => yeni.includes(k));
+                            taslakYaz(a.ad, sirali.join(','));
+                          };
+                          return (
+                            <span className="cok-secim">
+                              {Object.entries(a.kodlar!).map(([k, v]) => (
+                                <label key={k} className="cok-secim-oge">
+                                  <input type="checkbox" disabled={!a.yazilabilir}
+                                         checked={secili.includes(k)}
+                                         onChange={e => degis(k, e.target.checked)} />
+                                  <span>{v}</span>
+                                </label>
+                              ))}
+                              {secili.length === 0 && (
+                                <span className="sonuk">— tümü</span>
+                              )}
+                            </span>
+                          );
+                        })() : a.aramaKaynagi ? (
                           <span className="sonuk">
                             {a.kodlar?.[String(taslak[a.ad] ?? '')] ?? String(taslak[a.ad] ?? '')}
                           </span>

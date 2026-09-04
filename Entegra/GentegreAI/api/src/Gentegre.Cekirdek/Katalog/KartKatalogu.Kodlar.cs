@@ -136,6 +136,20 @@ public static partial class KartKatalogu
             ["Akrabası"] = "Akrabası", ["Arkadaşı"] = "Arkadaşı",
         };
 
+    /// <summary>
+    /// PRIM SATIRINDA BELGE TURU kriteri (kullanici: "belge türleri seçimi
+    /// yaptır"). Yalnizca GELIR belgeleri: prim bunlardan dogar - basvuru
+    /// (19) ARA KAYITTIR, ondan prim dogmaz.
+    ///
+    /// Kolon `belge_turleri` VIRGULLU METIN olarak kalir ("15,16") - cok
+    /// secimli kriteri ayri bir tabloya tasimak, tek satirlik bir suzgec icin
+    /// join maliyeti demekti. Alan metin + kodlar oldugu icin arayuz onay
+    /// kutusu grubu cizer; BOS = tumu.
+    /// </summary>
+    private static readonly Dictionary<string, string> PrimBelgeTuruKodlari =
+        new() { ["15"] = "Satış Faturası", ["16"] = "Satış Fişi",
+                ["17"] = "Satış Tahakkuku" };
+
     private static readonly Dictionary<string, string> CinsiyetKodlari =
         new() { ["1"] = "Erkek", ["2"] = "Kadın" };
 

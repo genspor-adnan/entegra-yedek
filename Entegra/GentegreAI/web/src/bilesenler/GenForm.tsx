@@ -1188,6 +1188,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           //   kutular yerine modal duzenleme daha okunakli (kullanici).
           modalDuzenle={gridKipi}
           ikonlu={gridKipi}
+          // PRIM ZAMANI "Faturalamada" ISE TAHSILAT TURU SORULMAZ (kullanici):
+          //   fatura kesilirken paranin hangi araçla tahsil edilecegi HENUZ
+          //   BELLI DEGIL. Eslestirme zaten bu kriteri o kipte yok sayiyor;
+          //   alani ekranda tutmak, uygulanmayan bir ayar uretiyordu.
+          gizliAlanlar={kaynak === 'prim-plani' && Number(deger.primZamani) === 2
+            ? new Set(['tahsilatTuru']) : undefined}
           taslakKural={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
             ? fiyatSatirKurali : undefined}
           // Tumu / Stok / Hizmet cipleri (kullanici) - karma listede tek tur gorunur.

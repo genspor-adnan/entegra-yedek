@@ -1283,6 +1283,13 @@ input.skt-gecmis {
    ve "mavi" rozet siniflarinin ucu de ayni mavi tonuna dusuyordu ve roller
    ayni renk gorunuyordu (kullanici). Bu sinif gercekten mor. */
 .rozet.eflatun  { background: #f1e7fb; color: #6b3fa0; border: 1px solid #ddc9f2 }
+
+/* COK SECIMLI KRITER (prim satirinda Belge Türleri): onay kutulari yan yana,
+   sigmazsa alt satira sarar - coklu <select> yerine, cunku Ctrl+tik bilmeyi
+   gerektiriyor ve secili olmayanlar gorunmuyor. */
+.cok-secim { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center }
+.cok-secim-oge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px }
+.cok-secim-oge input { margin: 0 }
 /* Kimlik seridindeki durum rozeti kutuyu kaplamasin - mockup'ta kucuk chip. */
 .kaid .alan > .rozet { align-self: flex-start }
 

@@ -113,8 +113,10 @@ public static partial class KartKatalogu
                         KodTablosu: "public.v_kategori_lookup", Baslik: "Kapsam"),
                     // BELGE TURU kriteri: virgullu liste, bos = tumu.
                     //   Tur GELIR belgesinden okunur (basvuru 19 ara kayittir).
+                    // COK SECIMLI (kullanici): metin + kodlar = onay kutusu
+                    //   grubu. Deger virgullu liste ("15,16"), BOS = tumu.
                     new("belgeTurleri", "belge_turleri", "metin", EnFazlaUzunluk: 60,
-                        Baslik: "Belge Türleri"),
+                        SabitKodlar: PrimBelgeTuruKodlari, Baslik: "Belge Türleri"),
                     new("pay",       "pay",       "kod", KodListesi: "prim.pay",
                         Baslik: "Pay"),
                     // TAHSILAT TURU (330): "nakitte %12, POS'ta %10". Bos =
