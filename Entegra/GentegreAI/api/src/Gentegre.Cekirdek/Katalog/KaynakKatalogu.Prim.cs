@@ -54,11 +54,13 @@ public static partial class KaynakKatalogu
                                            "metin", "Kapsanan", Hizalama: "orta",
                                            Genislik: 110, Filtrelenebilir: false),
             new("kurum",     "coalesce(ku.unvan, '')", "metin", "Ödeyen Kurum", Genislik: 190),
+            // BAZ kartta sorulmuyor (uygulanmayan ayardi) - listede de
+            //   VARSAYILAN GORUNUR DEGIL; kolon menusunden acilabilir.
             new("bazAdi",
                 "case p.baz when 1 then 'Liste fiyatı' when 2 then 'Net tutar' " +
                 "when 3 then 'Kurum payı' else 'Tahsil edilen (matrah)' end",
                                            "metin", "Baz", Genislik: 180,
-                                           Filtrelenebilir: false),
+                                           Filtrelenebilir: false, Varsayilan: false),
             new("baz",       "p.baz",       "kod",   "Baz Kodu", Varsayilan: false),
             // Kartta combo oldu - listede de METIN: onay kutusu rozeti "hangi
             //   taban" sorusunu tersinden okutuyordu.

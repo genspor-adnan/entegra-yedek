@@ -5405,3 +5405,22 @@ Davranis birebir korundu; dogrulandi: Akın %20, Mert %25, Raporlayan plani
 `prim_plani_satir.rol` kolonu TARIHSEL olarak duruyor (eski hakedis satirlari
 hangi kuraldan dogdugunu plan satirinda tasiyor); eslestirme artik `p.rol`
 okuyor. Listede plan adinin yaninda "Prim Rolü" kolonu var.
+
+### Baz alani karttan kaldirildi (uygulanmayan ayar)
+
+Kullanici "baz combosu ne amaçla" diye sordu; kontrol edince `prim_plani.baz`
+HICBIR YERDE OKUNMUYOR cikti. Primi hesaplayan iki fonksiyon da tabani SABIT
+aliyor:
+
+    fn_prim_uret_belge  (faturalamada)  pay'a gore hasta_tutar/kurum_tutar/tutar
+    fn_prim_uret        (tahsilatta)    dagitim tutarinin matrahi
+
+`kdv_haric` de ayni durumda - hicbir fonksiyon okumuyor, taban zaten her yolda
+matrah. (Bu alan combo'ya cevrildi, karttan kaldirilmadi; kullanici oyle
+istedi. Uygulanmadigi NOT EDILDI.)
+
+Ekranda duran ama uygulanmayan ayar, yanlis hesaplanan primden daha sinsi:
+kimse bakmadikca dogru gorunur - hekim_tipi'nde de ayni tuzaga dusulmustu.
+Baz karttan kalkti, listede varsayilan gorunur degil; kolon ve kod listesi
+duruyor. Taban secimi gercekten istenirse once iki uretim fonksiyonu
+baglanmali, sonra alan geri gelmeli.

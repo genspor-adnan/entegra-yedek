@@ -22,8 +22,8 @@ public static partial class KartKatalogu
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
             ["durum"] = (short)1, ["oncelik"] = (short)10, ["rol"] = (short)1,
-            // Kullanici kararlari: tahsil edilen matrah, KDV haric.
-            ["baz"] = (short)4, ["kdv_haric"] = (short)1, ["prim_zamani"] = (short)1,
+            // Baz kartta sorulmuyor; kolonun kendi varsayilani (4) gecerli.
+            ["kdv_haric"] = (short)1, ["prim_zamani"] = (short)1,
             ["baslangic"] = "@bugun",
         },
         Alanlar: new KartAlani[]
@@ -76,10 +76,14 @@ public static partial class KartKatalogu
             new("odeyenKurumId", "odeyen_kurum_id", "kod",
                 KodTablosu: "public.v_kurum_lookup", AramaKaynagi: "kurum",
                 Baslik: "Ödeyen Kurum", Grup: "Kimlik"),
-            // BAZ ve KDV: kullanici karari - tahsil edilen matrah, KDV haric.
-            //   Prim tahsil edildikce dogar; taban KDV'siz karsiliktir.
-            new("baz",       "baz",       "kod", KodListesi: "prim.baz",
-                Baslik: "Baz", Grup: "Kimlik"),
+            // BAZ ALANI KALDIRILDI (kullanici). Kolon duruyor ama HICBIR YERDE
+            //   OKUNMUYORDU: primi hesaplayan iki fonksiyon da tabani sabit
+            //   aliyor - faturalamada satirin pay tutari (hasta/kurum/tutar),
+            //   tahsilatta dagitimin matrahi. Ekranda duran ama uygulanmayan
+            //   ayar, yanlis hesaplanan primden daha sinsi: kimse bakmadikca
+            //   dogru gorunur. Taban secimi gercekten istenirse once
+            //   fn_prim_uret / fn_prim_uret_belge baglanmali, sonra alan geri
+            //   gelmeli.
             new("kdvHaric",  "kdv_haric", "kod", SabitKodlar: PrimKdvKodlari,
                 Baslik: "KDV", Grup: "Kimlik"),
             new("subeId",    "sube_id",   "kod", KodTablosu: "public.sube",
