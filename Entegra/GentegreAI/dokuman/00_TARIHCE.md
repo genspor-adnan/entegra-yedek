@@ -5879,3 +5879,32 @@ Onayla · Onayı Kaldır. "Rolleri Düzenle" penceresi acildi: kalemin rolleri
 kalemde cok rol, bir rolde cok kisi olabilir".
 
 Sayfa hatasi yok.
+
+### Hakediş Satırları ekrani - cipler, onay ve kalem gecisi
+
+Gercek tarayicida denendi; sayilar VERITABANIYLA karsilastirildi.
+
+**Cipler** (24 satir): Kesin 12 · Onaylı 12 · Ödendi 0 · İşaret yok 0 ·
+Tümü 24 - hepsi DB ile birebir. "İşaret yok" bos olmasi DOGRU: bu turda plana
+eklenen herkesin rolu isaretli (383/384 kurali zaten bunu zorunlu kiliyor).
+
+**Onayla**: satir secilip onaylandi. Once ANLAMLI BIR UYARI cikiyor -
+"Onaylanan satır kilitlenir: rol ya da belge türü sonradan değişse bile prim
+yeniden hesaplanmaz" - sonra "1 satır onaylandı (kilitlendi)". Kesin cipi
+12 -> 11, DB'de satir 59 durum 2 -> 3.
+
+**Onayı Kaldır**: acik (hakedise baglanmamis) satirda calisiyor, 3 -> 2.
+
+KAPANMIS DONEM SATIRINDA ISE ENGELLENIYOR - dogrudan uca istek atarak
+dogrulandi:
+    422 IS_KURALI "Dönemi kapanmış prim satırının onayı kaldırılamaz."
+Satir dokunulmadan kaldi. Bu onemli: aksi halde hakedis BASLIGININ toplami
+satirlariyla tutmazdi.
+
+**Kalemi Aç**: satirin kaynagina gidiyor - "Başvuru #114401 — 2026-000000059"
+karti acildi.
+
+Yontem notu: ilk kosuda mesaj penceresini kapatmadigim icin sonraki tiklamalar
+"kaperde intercepts pointer events" ile takildi; ayrica testin adimlari
+KOSULAR ARASI DURUMA baglanmisti (onceki kosuda geri alinan satiri ikinci
+kosuda aramak). Tarayici testi yazarken her adim kendi on kosulunu kurmali.
