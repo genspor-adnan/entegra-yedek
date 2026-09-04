@@ -74,14 +74,16 @@ describe('Prim Planı kartı - Prim Alanlar', () => {
     await sekmeAc('Prim Alanlar');
 
     fireEvent.click(await screen.findByRole('button', { name: /Kişi Ekle/ }));
-    const kutu = await screen.findByPlaceholderText(/Kişi ara/);
+    await screen.findByPlaceholderText(/Kişi ara/);
     // Ad hem arama listesinde hem gridin kod combosunda gecebilir - arama
     //   listesi icinde beklenir.
     await waitFor(() => expect(
       document.querySelector('.lookup-liste')?.textContent).toContain('aaa ooo'));
-    fireEvent.keyDown(kutu, { key: 'Enter' });
-    // Pencereyi kapat - kullanicinin akisi da bu.
-    fireEvent.keyDown(kutu, { key: 'Escape' });
+    // ISARETLE, sonra "Seç" - pencere kapanir ve satir gride girer.
+    const satir = [...document.querySelectorAll('.lookup-liste tbody tr')]
+      .find(x => (x.textContent ?? '').includes('aaa ooo'))!;
+    fireEvent.click(satir);
+    fireEvent.click(screen.getByRole('button', { name: /^Seç \(1\)$/ }));
 
     // Birden fazla "Kaydet" olabilir (kart alti + modal) - KART altindaki.
     const kaydet = screen.getAllByRole('button', { name: 'Kaydet' });

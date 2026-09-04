@@ -50,77 +50,68 @@ const ciz = () => {
   return degisenler;
 };
 
-describe('Prim Alanlar - aramayla ekleme', () => {
+describe('Prim Alanlar - isaretleyip toplu ekleme', () => {
+  const araya = async () => {
+    fireEvent.click(screen.getByRole('button', { name: /Kişi Ekle/ }));
+    await screen.findByPlaceholderText(/Kişi ara/);
+    await waitFor(() => expect(
+      document.querySelector('.lookup-liste')?.textContent).toContain('aaa ooo'));
+  };
+  const listedeSatir = (ad: string) => {
+    const tr = [...document.querySelectorAll('.lookup-liste tbody tr')]
+      .find(x => (x.textContent ?? '').includes(ad));
+    if (!tr) throw new Error(`listede "${ad}" yok`);
+    return tr;
+  };
+
   it('+ dugmesi ARAMAYI acar', async () => {
     ciz();
     fireEvent.click(screen.getByRole('button', { name: /Kişi Ekle/ }));
     expect(await screen.findByPlaceholderText(/Kişi ara/)).toBeInTheDocument();
   });
 
-  it('SATIRA TIKLAYIP Enter: kullanicinin dogal akisi', async () => {
-    // Kullanici once listeden kisiyi TIKLAR, sonra Enter'lar. Enter dinleyicisi
-    //   pencerenin tamaminda oldugu icin odak satira gecse de calismali.
+  it('TIK ISARETLER, satir HENUZ EKLENMEZ', async () => {
     const degisenler = ciz();
-    fireEvent.click(screen.getByRole('button', { name: /Kişi Ekle/ }));
-    await screen.findByPlaceholderText(/Kişi ara/);
-    const satir = await screen.findByText('aaa ooo');
-    fireEvent.click(satir);
-    fireEvent.keyDown(satir, { key: 'Enter' });
-    await waitFor(() => expect(degisenler.length).toBeGreaterThan(0));
-    expect(String(degisenler[degisenler.length - 1].guncel[0].tarafId)).toBe('4888');
+    await araya();
+    fireEvent.click(listedeSatir('aaa ooo'));
+    // Isaret koymak kayit degildir: "Seç"e basilana kadar grid degismez,
+    //   kullanici vazgecebilir.
+    expect(degisenler).toHaveLength(0);
+    expect(await screen.findByText(/1 işaretli/)).toBeInTheDocument();
   });
 
-  it('KOD LISTESINDE OLMAYAN kisi eklenirse hucre BOS kalmaz uyarisi (378)', () => {
-    // Regresyon notu: kod listesi `aktif = 1` ile suzuluyor. Gorunum kisilerin
-    //   bir bolumune aktif=0 dondugunde, aramadan secilen kisi listede
-    //   bulunmadigi icin gridde ADSIZ ciziliyor ve kullanici "eklenmedi"
-    //   diye okuyor. Cozum db/378: gorunum herkesi aktif=1 dondurur.
-    //   Burada metanin bunu tasidigi sabitlenir.
-    const alan = (meta.alanlar as { ad: string; kodlar?: Record<string, string> }[])
-      .find(a => a.ad === 'tarafId');
-    expect(Object.keys(alan?.kodlar ?? {}).length).toBeGreaterThan(0);
-  });
-
-  it('SEC dugmesi de ekler', async () => {
+  it('SEC: isaretlilerin HEPSI tek seferde eklenir ve pencere KAPANIR', async () => {
     const degisenler = ciz();
-    fireEvent.click(screen.getByRole('button', { name: /Kişi Ekle/ }));
-    await screen.findByPlaceholderText(/Kişi ara/);
-    await screen.findByText('aaa ooo');
-    fireEvent.click(screen.getByRole('button', { name: 'Seç' }));
-    await waitFor(() => expect(degisenler.length).toBeGreaterThan(0));
-    expect(String(degisenler[degisenler.length - 1].guncel[0].tarafId)).toBe('4888');
-  });
-
-  it('AYNI KISI ikinci kez: uyari, satir eklenmez', async () => {
-    const degisenler = ciz();
-    fireEvent.click(screen.getByRole('button', { name: /Kişi Ekle/ }));
-    const kutu = await screen.findByPlaceholderText(/Kişi ara/);
-    await screen.findByText('aaa ooo');
-    fireEvent.keyDown(kutu, { key: 'Enter' });
-    await waitFor(() => expect(degisenler.length).toBe(1));
-    // LISTE KORUNUR (kullanici): eklemeden sonra bosalmamali - ayni listeden
-    //   pes pese secim yapilabilsin ve ekran "hicbir sey olmadi" gibi
-    //   gorunmesin.
-    expect(document.querySelector('.lookup-liste')?.textContent).toContain('aaa ooo');
-    fireEvent.keyDown(kutu, { key: 'Enter' });
-    expect(await screen.findByText(/zaten ekli/)).toBeInTheDocument();
-    expect(degisenler).toHaveLength(1);
-  });
-
-  it('ENTER secili satiri EKLER ve pencere ACIK KALIR', async () => {
-    const degisenler = ciz();
-    fireEvent.click(screen.getByRole('button', { name: /Kişi Ekle/ }));
-    const kutu = await screen.findByPlaceholderText(/Kişi ara/);
-    await waitFor(() => expect(liste).toHaveBeenCalled());
-    await screen.findByText('aaa ooo');
-
-    fireEvent.keyDown(kutu, { key: 'Enter' });
+    await araya();
+    fireEvent.click(listedeSatir('aaa ooo'));
+    fireEvent.click(listedeSatir('Dr. Akın YILDIRIM'));
+    fireEvent.click(screen.getByRole('button', { name: /^Seç \(2\)$/ }));
 
     await waitFor(() => expect(degisenler.length).toBeGreaterThan(0));
     const son = degisenler[degisenler.length - 1];
-    expect(son.guncel).toHaveLength(1);
-    expect(String(son.guncel[0].tarafId)).toBe('4888');
-    // Pencere kapanmaz - sonraki ad aranabilsin.
-    expect(screen.getByPlaceholderText(/Kişi ara/)).toBeInTheDocument();
+    // TEK guncelleme, IKI satir: her secilen icin ayri onDegis cagrilsaydi
+    //   hepsi ayni durumdan turetilir ve yalniz sonuncusu kalirdi.
+    expect(son.guncel.map(r => String(r.tarafId))).toEqual(['4888', '5030']);
+    expect(screen.queryByPlaceholderText(/Kişi ara/)).toBeNull();
+  });
+
+  it('ISARET GERI ALINIR (ikinci tik)', async () => {
+    ciz();
+    await araya();
+    fireEvent.click(listedeSatir('aaa ooo'));
+    expect(await screen.findByText(/1 işaretli/)).toBeInTheDocument();
+    fireEvent.click(listedeSatir('aaa ooo'));
+    expect(screen.queryByText(/işaretli/)).toBeNull();
+  });
+
+  it('ZATEN EKLI kisi ISARETLENEMEZ - sebebi yazar', async () => {
+    const durum = { ...bosDetay(), ilk: [{ id: 1, tarafId: '4888' }],
+                    guncel: [{ id: 1, tarafId: '4888' }] };
+    render(<GenDetayTablo meta={meta} durum={durum} saltOkunur={false}
+                          hatalar={{}} onDegis={() => {}} />);
+    await araya();
+    fireEvent.click(listedeSatir('aaa ooo'));
+    expect(await screen.findByText(/zaten ekli/)).toBeInTheDocument();
+    expect(screen.queryByText(/işaretli/)).toBeNull();
   });
 });

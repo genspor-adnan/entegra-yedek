@@ -5348,3 +5348,23 @@ yanlisti - bugun aktif olan kisi yarin pasife alininca PLANDA DURAN eski satir
 da adsiz kalirdi.
 
 db/378: gorunum herkesi `aktif = 1` dondurur.
+
+### Prim Alanlar: isaretle-sonra-ekle (alternatif 1'e gecis)
+
+"Her Enter aninda ekle, pencere acik kalsin" (alternatif 2) sahada
+tutmadi: eklenen satir pencerenin ARKASINDAKI gridde oldugu icin kullanici ne
+olup bittigini goremedi ve uc turdur "eklenmedi" dedi - jsdom testleri ve
+sunucuya elle attigim PUT gectigi halde. Kullanici alternatif 1'e gecelim
+dedi.
+
+Yeni akis: satirlar KUTUCUKLA isaretlenir (satirin herhangi bir yerine tik),
+isaretler ARAMA DEGISSE DE KORUNUR, "Seç (N)" hepsini TEK SEFERDE ekler ve
+pencere kapanir. Vazgecilirse hicbiri yazilmaz - karar penceredeyken
+tamamlanir, ekranin arkasinda degil.
+
+Iki teknik nokta:
+  - `onSecCoklu`: secilenler TEK cagriyla verilir. Tek tek `onSec`
+    cagrilsaydi her cagri ayni `durum` uzerinden turetilir ve yalniz
+    sonuncusu kalirdi.
+  - Mukerrer denetimi ISARET ANINDA calisir: "Seç"e bastiktan sonra degil,
+    isaretlerken ogrenilir.

@@ -94,13 +94,18 @@ interface Props {
    */
   baslangicKartId?: number | null;
   /**
-   * COKLU EKLEME KIPI (375): secim pencereyi KAPATMAZ - kullanici arar,
-   * Enter'lar, tekrar arar. Kapatmayi kendisi yapar (Esc / Kapat).
-   * Eklenenler pencerenin altinda serit halinde birikir, cunku aksi halde
-   * "sunu ekledim mi" sorusu kaciniImaz olur: kart gridi pencerenin
-   * ARKASINDA kalir.
+   * COKLU ISARETLEME KIPI (375, kullanici alternatif 1): satirlar KUTUCUKLA
+   * isaretlenir - arama degistirilse bile isaretler KORUNUR - ve "Seç"e
+   * basilinca hepsi birden eklenip pencere kapanir.
+   *
+   * Once "her Enter aninda ekle, pencere acik kalsin" denenmisti; eklenen
+   * satir pencerenin ARKASINDAKI gridde oldugu icin kullanici ne olup
+   * bittigini goremiyordu. Isaretleme, kararin tamamini pencerede tutar:
+   * ne ekleyecegini gorur, vazgecerse hicbiri yazilmaz.
    */
-  kapanmasin?: boolean;
+  cokluSecim?: boolean;
+  /** Coklu kipte "Seç": isaretlilerin TAMAMI tek seferde verilir. */
+  onSecCoklu?(secilenler: { kaynak: string; id: number; unvan: string }[]): void;
   /**
    * Secimi KABUL ETMEME sebebi. Bos/null donerse secim gecerlidir; bir metin
    * donerse secim ALINMAZ ve metin pencerede uyari olarak gosterilir
@@ -121,7 +126,7 @@ interface Props {
  */
 export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekFiltre,
                              yerTutucu, baslangicMetni, baslangicYeni, baslangicKartId,
-                             kapanmasin = false, secimDenetimi,
+                             cokluSecim = false, onSecCoklu, secimDenetimi,
                              onKapat, onSec }: Props) {
   /**
    * HASTA DUZENI (kullanici): yalniz hasta aranirken kolonlar kayit kabulun
@@ -138,8 +143,12 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
 
   /** Kutuda yazan metin (aninda) - `arama` bunun gecikmeli (debounce) hali. */
   const [metin, setMetin] = useState('');
-  /** Coklu kipte bu acilista eklenenler + son uyari. */
-  const [eklenenler, setEklenenler] = useState<string[]>([]);
+  /**
+   * Coklu kipte ISARETLILER. Anahtar "kaynak-id" - ayni id iki farkli
+   * kaynakta (personel / dis hekim) cikabilir. ARAMA DEGISINCE SILINMEZ:
+   * kullanici "kerem" arayip isaretler, "halil" arayip isaretler, sonra Seç.
+   */
+  const [isaretli, setIsaretli] = useState<TarafSatiri[]>([]);
   const [uyari, setUyari] = useState<string | null>(null);
   const [arama, setArama] = useState('');
   /** Tum Liste / Son Aranan / Sik Aranan - liste ekranlariyla ayni (kullanici_arama). */
@@ -215,7 +224,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
     setGorunum('tum');
     setSatirlar([]);
     setKartAcik(null);
-    setEklenenler([]);
+    setIsaretli([]);
     setUyari(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [acik]);
@@ -226,32 +235,51 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
     zamanlayici.current = window.setTimeout(() => setArama(yeni), 300);
   };
 
-  const sec = (satir: TarafSatiri) => {
-    const secilen = { kaynak: satir.kaynak, id: satir.id, unvan: satir.unvan };
-    // ENGEL VARSA HIC EKLENMEZ: sessizce yutmak yerine sebebi yazilir -
-    //   mukerrer kayit veritabani kisitina carpip anlamsiz bir hata
-    //   dondurmesin.
-    const engel = secimDenetimi?.(secilen) ?? null;
-    if (engel) {
-      setUyari(engel);
-      if (!kapanmasin) return;
-      setTimeout(() => kutu.current?.focus(), 0);
+  const anahtar = (x: { kaynak: string; id: number }) => `${x.kaynak}-${x.id}`;
+
+  /**
+   * COKLU KIPTE ISARETI ACAR/KAPATIR. Engel (mukerrer kayit) varsa isaret
+   * KONULMAZ ve sebebi yazilir - kullanici "Seç"e bastiktan sonra degil,
+   * isaretlerken ogrensin.
+   */
+  const isaretDegis = (satir: TarafSatiri) => {
+    const k = anahtar(satir);
+    if (isaretli.some(x => anahtar(x) === k)) {
+      setIsaretli(l => l.filter(x => anahtar(x) !== k));
+      setUyari(null);
       return;
     }
+    const engel = secimDenetimi?.({ kaynak: satir.kaynak, id: satir.id, unvan: satir.unvan })
+                  ?? null;
+    if (engel) { setUyari(engel); return }
+    setUyari(null);
+    setIsaretli(l => [...l, satir]);
+  };
+
+  /** "Seç": isaretlilerin tamami eklenir, pencere kapanir. */
+  const isaretliyiOnayla = () => {
+    if (isaretli.length === 0) return;
+    const secilenler = isaretli.map(x => ({ kaynak: x.kaynak, id: x.id, unvan: x.unvan }));
+    secilenler.forEach(x => void api.aramaIsaretle(x.kaynak, x.id));
+    // Tek cagriyla verilir: cagiran satirlari TEK state guncellemesiyle
+    //   ekleyebilsin - tek tek `onSec` cagrilsaydi her cagri bir onceki
+    //   state uzerinden calisir ve yalniz sonuncusu kalirdi.
+    if (onSecCoklu) onSecCoklu(secilenler); else secilenler.forEach(onSec);
+    onKapat();
+  };
+
+  const sec = (satir: TarafSatiri) => {
+    if (cokluSecim) { isaretDegis(satir); return }
+    const secilen = { kaynak: satir.kaynak, id: satir.id, unvan: satir.unvan };
+    // ENGEL VARSA HIC EKLENMEZ: sessizce yutmak yerine sebebi yazilir.
+    const engel = secimDenetimi?.(secilen) ?? null;
+    if (engel) { setUyari(engel); return }
     // Secim "Son / Sik Aranan" sayacina islensin - listede oldugu gibi.
     void api.aramaIsaretle(satir.kaynak, satir.id);
     onSec(secilen);
-    if (!kapanmasin) { onKapat(); return }
-    // COKLU KIP: pencere kalir. LISTE VE ARAMA METNI KORUNUR (kullanici:
-    //   "arama açılıyor ama ekleme yapamıyorum") - eskiden secimden sonra ikisi
-    //   de temizleniyordu ve ekranda hicbir sey olmamis gibi gorunuyordu:
-    //   eklenen satir modalin ARKASINDAKI gridde, liste ise bosalmis.
-    //   Artik ayni listeden pes pese secim yapilabilir; ne eklendigi alttaki
-    //   seritte yazar, ayni kisi ikinci kez secilirse "zaten ekli" der.
-    setUyari(null);
-    setEklenenler(e => [...e, satir.unvan]);
-    setTimeout(() => kutu.current?.focus(), 0);
+    onKapat();
   };
+
 
   const tus = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') { e.preventDefault(); setSecili(s => Math.min(s + 1, satirlar.length - 1)) }
@@ -328,9 +356,12 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
               </button>
             </>
           )}
-          <button type="button" className="d bir" disabled={!satirlar[secili]}
-            onClick={() => satirlar[secili] && sec(satirlar[secili])}>
-            Seç
+          <button type="button" className="d bir"
+            disabled={cokluSecim ? isaretli.length === 0 : !satirlar[secili]}
+            onClick={() => (cokluSecim
+              ? isaretliyiOnayla()
+              : satirlar[secili] && sec(satirlar[secili]))}>
+            {cokluSecim ? `Seç (${isaretli.length})` : 'Seç'}
           </button>
           {/* Kapat SAGA yaslanir (kullanici): kart modallerindeki duzenin ayni. */}
           <button type="button" className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
@@ -409,9 +440,16 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
                   key={`${satir.kaynak}-${satir.id}`}
                   className={i === secili ? 'secili' : ''}
                   onDoubleClick={() => sec(satir)}
-                  onClick={() => setSecili(i)}
+                  // COKLU KIPTE TEK TIK ISARETLER (kullanici): kutucugu
+                  //   tutturmaya calismak yerine satirin herhangi bir yeri.
+                  onClick={() => { setSecili(i); if (cokluSecim) isaretDegis(satir) }}
                 >
-                  <td className="check"><input type="checkbox" checked={i === secili} readOnly /></td>
+                  <td className="check">
+                    <input type="checkbox" readOnly
+                           checked={cokluSecim
+                             ? isaretli.some(x => anahtar(x) === anahtar(satir))
+                             : i === secili} />
+                  </td>
                   {hastaDuzeni ? (
                     <>
                       <td>{satir.kod}</td>
@@ -450,20 +488,20 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
           {yukleniyor && <div className="yukleniyor">Araniyor…</div>}
         </div>
 
-        {(uyari || eklenenler.length > 0) && (
+        {(uyari || isaretli.length > 0) && (
           <div className="lookup-eklenen">
             {uyari && <span className="lookup-uyari">{uyari}</span>}
-            {eklenenler.length > 0 && (
+            {isaretli.length > 0 && (
               <span className="lookup-eklenen-liste">
-                <b>{eklenenler.length} eklendi:</b> {eklenenler.join(' · ')}
+                <b>{isaretli.length} işaretli:</b> {isaretli.map(x => x.unvan).join(' · ')}
               </span>
             )}
           </div>
         )}
         <div className="lookup-alt">
           <span>
-            {kapanmasin
-              ? '↑↓ gez · çift tık/Enter ekle (pencere açık kalır) · Esc kapat'
+            {cokluSecim
+              ? '↑↓ gez · tık/Enter işaretle · Seç ile hepsini ekle · Esc kapat'
               : '↑↓ gez · çift tık/Enter seç · Esc kapat'}
           </span>
         </div>

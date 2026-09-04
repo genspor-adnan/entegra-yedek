@@ -1027,18 +1027,25 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
       {tarafAlani && tarafAramaAcik && (
         <TarafArama
           acik
-          kapanmasin
+          cokluSecim
           // aramaKaynagi VIRGULLU olabilir: prim alan kisi ic personel de
           //   olabilir dis hekim de, ikisi ayri liste kaynagi.
           kaynaklar={tarafAlani.aramaKaynagi!.split(',').map(x => x.trim()).filter(Boolean)}
           yerTutucu={`${tarafAlani.baslik} ara…`}
           secimDenetimi={secilen =>
             tarafSecimEngeli(durum.guncel, tarafAlani.ad, secilen)}
-          onSec={secilen => {
-            const yeni: Satir = {};
-            alanlar.forEach(a => { yeni[a.ad] = a.tip === 'mantik' ? 0 : '' });
-            yeni[tarafAlani.ad] = String(secilen.id);
-            onDegis({ ...durum, guncel: [...durum.guncel, yeni] });
+          onSec={() => { /* coklu kipte kullanilmaz - onSecCoklu calisir */ }}
+          onSecCoklu={secilenler => {
+            // TEK STATE GUNCELLEMESI: her secilen icin ayri `onDegis`
+            //   cagrilsaydi hepsi AYNI `durum` uzerinden turetilir ve yalniz
+            //   sonuncusu kalirdi.
+            const yeniler = secilenler.map(secilen => {
+              const satir: Satir = {};
+              alanlar.forEach(a => { satir[a.ad] = a.tip === 'mantik' ? 0 : '' });
+              satir[tarafAlani.ad] = String(secilen.id);
+              return satir;
+            });
+            onDegis({ ...durum, guncel: [...durum.guncel, ...yeniler] });
           }}
           onKapat={() => setTarafAramaAcik(false)}
         />
