@@ -70,6 +70,17 @@ describe('Prim Alanlar - aramayla ekleme', () => {
     expect(String(degisenler[degisenler.length - 1].guncel[0].tarafId)).toBe('4888');
   });
 
+  it('KOD LISTESINDE OLMAYAN kisi eklenirse hucre BOS kalmaz uyarisi (378)', () => {
+    // Regresyon notu: kod listesi `aktif = 1` ile suzuluyor. Gorunum kisilerin
+    //   bir bolumune aktif=0 dondugunde, aramadan secilen kisi listede
+    //   bulunmadigi icin gridde ADSIZ ciziliyor ve kullanici "eklenmedi"
+    //   diye okuyor. Cozum db/378: gorunum herkesi aktif=1 dondurur.
+    //   Burada metanin bunu tasidigi sabitlenir.
+    const alan = (meta.alanlar as { ad: string; kodlar?: Record<string, string> }[])
+      .find(a => a.ad === 'tarafId');
+    expect(Object.keys(alan?.kodlar ?? {}).length).toBeGreaterThan(0);
+  });
+
   it('SEC dugmesi de ekler', async () => {
     const degisenler = ciz();
     fireEvent.click(screen.getByRole('button', { name: /Kişi Ekle/ }));

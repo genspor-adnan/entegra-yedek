@@ -5328,3 +5328,23 @@ bosalmamali").
 
 Ders: "calisiyor mu" testi yetmiyor - "kullanici calistigini GORUYOR mu"
 ayri bir soru. Ilk dort testim mekanizmayi olctugu icin hepsi yesildi.
+
+### "Eklenmedi" - satir geliyordu, ADI gelmiyordu (db/378)
+
+Iki test yazdim: bilesen seviyesinde (＋ -> arama -> Enter/cift tik/Seç ->
+satir) ve KART seviyesinde (gercek meta + gercek kayitla, Kaydet'e basip
+`kartGuncelle` govdesinde `taraflar.eklenen[0].tarafId` aranarak). Ikisi de
+GECTI - ekleme zinciri saglamdi. Sunucuya da elle PUT attim, kabul etti.
+
+Kalan tek fark GORUNUM: kod listesi `KodTablosuSecenekleri` icinde
+`where aktif = 1` ile suzuluyor ve 377'de gorunume koydugum `durum` bazli
+aktif kolonu yuzunden 371 kisinin 212'si listeye HIC girmiyordu. Jenerik arama
+ise durum suzgeci uygulamiyor: kullanici arayip sectigi kisi kod listesinde
+olmayinca satir gride ADSIZ ciziliyor - ekranda "eklenmemis" gibi duruyor.
+
+IKI AYRI SORU KARISMIS: "kimi arayip secebilirim" arama ekraninin isi,
+"id'yi ada cevirebiliyor muyum" kod listesinin isi. Ikincisinde suzmek
+yanlisti - bugun aktif olan kisi yarin pasife alininca PLANDA DURAN eski satir
+da adsiz kalirdi.
+
+db/378: gorunum herkesi `aktif = 1` dondurur.
