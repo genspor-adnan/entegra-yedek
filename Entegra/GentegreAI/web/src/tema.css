@@ -537,11 +537,11 @@ table.grid tr.flt input {
 .kasutun .kagrup { flex: initial }
 .personel-iletisim-yerlesim { flex: 1; min-width: 0; width: 100% }
 .personel-iletisim-yerlesim > .kagrup { margin-bottom: 0 }
-/* CERCEVESIZ KUTU (kullanici - hasta Yakınlar gridi): baslik kalir, kutu
-   cizgisi/zemini kalkar. Grid kendi cerceve cizgilerini zaten tasiyor;
-   ustune kutu koymak ic ice iki cerceve demekti. */
+/* CERCEVESIZ KUTU (kullanici - hasta Yakınlar gridi): DIS cerceve kalkar,
+   BASLIK SERIDI KALIR (kullanici: "başlık da kalsın") - grid kendi
+   cizgilerini tasiyor, ustune ikinci kutu cercevesi ic ice iki cerceveydi;
+   ama baslik olmadan gridin ne oldugu anlasilmiyor. */
 .kagrup-cercevesiz { border: none; background: none; overflow: visible }
-.kagrup-cercevesiz > h6 { background: none; border-bottom: none; padding-left: 0 }
 .kagrup-cercevesiz > .detay-tablo { width: 100%; margin: 0 }
 
 .kagrup-resim { flex: 0 0 150px; width: 150px; max-width: 150px }
