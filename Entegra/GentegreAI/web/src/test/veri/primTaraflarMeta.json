@@ -1,0 +1,63 @@
+{
+ "ad": "taraflar",
+ "baslik": "Prim Alanlar",
+ "saltOkunur": false,
+ "alanlar": [
+  {
+   "ad": "id",
+   "baslik": "Id",
+   "tip": "sayi",
+   "yazilabilir": false,
+   "zorunlu": false,
+   "gizli": false
+  },
+  {
+   "ad": "tipi",
+   "baslik": "Tipi",
+   "tip": "metin",
+   "yazilabilir": false,
+   "zorunlu": false,
+   "gizli": false
+  },
+  {
+   "ad": "tarafId",
+   "baslik": "Kişi",
+   "tip": "kod",
+   "yazilabilir": true,
+   "zorunlu": true,
+   "kodlar": {
+    "4888": "aaa ooo",
+    "3235": "ABDULKADİR POLAT",
+    "4339": "ABDULLATİF MACARTAY"
+   },
+   "gizli": false,
+   "aramaKaynagi": "personel,dis-hekim"
+  },
+  {
+   "ad": "primRolu",
+   "baslik": "Prim Rolü",
+   "tip": "metin",
+   "yazilabilir": false,
+   "zorunlu": false,
+   "gizli": false
+  },
+  {
+   "ad": "bolum",
+   "baslik": "Bölüm",
+   "tip": "metin",
+   "yazilabilir": false,
+   "zorunlu": false,
+   "gizli": false
+  },
+  {
+   "ad": "aciklama",
+   "baslik": "Açıklama",
+   "tip": "metin",
+   "yazilabilir": true,
+   "zorunlu": false,
+   "enFazlaUzunluk": 200,
+   "gizli": false
+  }
+ ],
+ "tekSatir": false
+}

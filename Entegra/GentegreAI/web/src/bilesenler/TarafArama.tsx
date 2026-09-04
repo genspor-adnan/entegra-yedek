@@ -242,14 +242,14 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
     void api.aramaIsaretle(satir.kaynak, satir.id);
     onSec(secilen);
     if (!kapanmasin) { onKapat(); return }
-    // COKLU KIP: pencere kalir, kutu temizlenir ve odak geri gelir -
-    //   kullanici bir sonraki adi yazmaya hazir.
+    // COKLU KIP: pencere kalir. LISTE VE ARAMA METNI KORUNUR (kullanici:
+    //   "arama açılıyor ama ekleme yapamıyorum") - eskiden secimden sonra ikisi
+    //   de temizleniyordu ve ekranda hicbir sey olmamis gibi gorunuyordu:
+    //   eklenen satir modalin ARKASINDAKI gridde, liste ise bosalmis.
+    //   Artik ayni listeden pes pese secim yapilabilir; ne eklendigi alttaki
+    //   seritte yazar, ayni kisi ikinci kez secilirse "zaten ekli" der.
     setUyari(null);
     setEklenenler(e => [...e, satir.unvan]);
-    setMetin('');
-    setArama('');
-    setSatirlar([]);
-    setSecili(0);
     setTimeout(() => kutu.current?.focus(), 0);
   };
 

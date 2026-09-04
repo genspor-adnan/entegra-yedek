@@ -5308,3 +5308,23 @@ Uc degisiklik:
     Mert'i "rolsuz" gosterirdi, oysa ikisi de prim uretiyor.
 
 Grid kolonlari: Tipi · Kişi · Prim Rolü · Bölüm · Açıklama.
+
+### "Arama açılıyor ama ekleme yapamıyorum" - liste bosaliyordu
+
+Kullanici test etmemi istedi; gercek sunucu metasiyla (kirpilmis kod listesi,
+`src/test/veri/primTaraflarMeta.json`) uctan uca bir test yazdim: ＋ ile arama
+acilir, Enter / cift tik / "Seç" ile satir eklenir, ayni kisi ikinci kez
+secilirse "zaten ekli" der. Bes senaryo da GECTI - yani ekleme MEKANIZMASI
+calisiyordu.
+
+Bozuk olan GERI BILDIRIMDI: coklu kipte secimden sonra arama METNI ve SONUC
+LISTESI temizleniyordu. Eklenen satir modalin ARKASINDAKI gridde oldugu ve
+liste de bosaldigi icin ekranda hicbir sey olmamis gibi gorunuyor, kullanici
+"eklemedi" sonucuna variyordu.
+
+Artik liste ve metin KORUNUR: ayni listeden pes pese secim yapilir, ne
+eklendigi alttaki seritte yazar. Testte de bu davranis sabit ("liste
+bosalmamali").
+
+Ders: "calisiyor mu" testi yetmiyor - "kullanici calistigini GORUYOR mu"
+ayri bir soru. Ilk dort testim mekanizmayi olctugu icin hepsi yesildi.
