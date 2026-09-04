@@ -911,6 +911,14 @@ input.skt-gecmis {
    1) Cari . No . Tarih . e-Belge
    2) Temsilci . Depo . Fat.Durumu . Bagli Siparis
    (Doviz/Kur grid altindaki kutuda.) */
+/* BES SUTUN (prim plani basligi): on alan iki esit sirada. Etiket kolonu da
+   daraltilir - 84px sabit etiket, bes sutunda kutuya yer birakmiyordu. */
+.alan-izgara.bes-sutun { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px 12px }
+.alan-izgara.bes-sutun .alan { grid-template-columns: 76px minmax(0, 1fr) }
+.alan-izgara.bes-sutun .alan > select,
+.alan-izgara.bes-sutun .alan > input { width: 100%; min-width: 0 }
+@media (max-width: 1200px) { .alan-izgara.bes-sutun { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
+
 .alan-izgara.dort-sutun { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 14px }
 .alan-izgara.dort-sutun .genis-2 { grid-column: span 2 }
 /* Tam satir kaplayan alan (ör. Başvuru Notu) - dort sutunun hepsi. */
