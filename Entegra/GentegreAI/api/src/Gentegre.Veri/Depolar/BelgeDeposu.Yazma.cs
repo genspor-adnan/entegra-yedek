@@ -302,6 +302,24 @@ public sealed partial class BelgeDeposu
         if (dovizBirimFiyat == 0 && birimFiyat != 0)
             dovizBirimFiyat = BelgeHesap.DovizKarsiligi(birimFiyat, kur, 6);
 
+        // KDV DAHIL BIRIM FIYAT (371). HBYS'de fiyat HEP KDV DAHIL konusulur
+        //   (hastaya soylenen rakam odur), muhasebe MATRAH ister. Ikisi
+        //   arasinda her seferinde gidip gelmek KAYIPLI - 100,00 brut / %18
+        //   matraha inip geri cikinca 100,0050 oluyor. Bu yuzden brut de
+        //   SAKLANIR ve GIRIS DEGERI odur:
+        //     brut verildiyse  -> matrah ONDAN turetilir (tek yon, kayipsiz)
+        //     brut verilmediyse-> matrahtan bir kez uretilir (ERP akisi)
+        //   Boylece iki kolon her zaman ayni parayi soyler; DB kisiti da
+        //   (ck_belge_satir_kdvli_tutarli) bunu bir kurus icinde tutar.
+        var kdvCarpani = 1m + kdv / 100m;
+        var birimFiyatKdvli = JsonOndalik(satir, "birimFiyatKdvli", 0);
+        if (birimFiyatKdvli > 0)
+            birimFiyat = Math.Round(birimFiyatKdvli / kdvCarpani, 4,
+                                    MidpointRounding.AwayFromZero);
+        else if (birimFiyat != 0)
+            birimFiyatKdvli = Math.Round(birimFiyat * kdvCarpani, 4,
+                                         MidpointRounding.AwayFromZero);
+
         // TUTAR: Delphi formulu birebir (ic yuvarlama + carpimsal iskonto + banker's).
         var tutar      = BelgeHesap.SatirTutari(adet, birimFiyat, iskonto, iskonto2);
         var dovizTutar = BelgeHesap.SatirTutari(adet, dovizBirimFiyat, iskonto, iskonto2);
@@ -347,7 +365,10 @@ public sealed partial class BelgeDeposu
         var kolonlar = new List<string>
         {
             "belge_id", "sira", "tur", "stok_id", "hizmet_id", "masraf_id", "aciklama",
-            "adet", "miktar", "birim", "birim_carpan", "birim_fiyat", "iskonto", "iskonto2", "kdv",
+            "adet", "miktar", "birim", "birim_carpan", "birim_fiyat",
+            // KDV DAHIL birim fiyat (371) - ekranda gosterilen ve hastaya
+            //   soylenen rakam; matrah bundan turetilir.
+            "birim_fiyat_kdvli", "iskonto", "iskonto2", "kdv",
             "otv_yuzde", "otv_miktar", "kdv_muafiyeti", "tutar",
             "doviz_cinsi", "doviz_birim_fiyat", "doviz_tutari", "doviz_kuru",
             "giris_depo_id", "cikis_depo_id", "izleme", "izleme_kodu", "stok_durum_degis",
@@ -368,7 +389,7 @@ public sealed partial class BelgeDeposu
         {
             belgeId, sira, tur, stokId, hizmetId, masrafId, JsonMetin(satir, "aciklama"),
             adet, miktar, (int)JsonSayi(satir, "birim", 0), birimCarpan,
-            birimFiyat, iskonto, iskonto2, (short)kdv,
+            birimFiyat, birimFiyatKdvli, iskonto, iskonto2, (short)kdv,
             (short)JsonSayi(satir, "otvYuzde", 0), JsonOndalik(satir, "otvMiktar", 0),
             (short)JsonSayi(satir, "kdvMuafiyeti", 0), tutar,
             dovizCinsi, dovizBirimFiyat, dovizTutar, kur,

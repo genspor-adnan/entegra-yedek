@@ -95,6 +95,13 @@ export interface SatirDurumu {
    * "Dahil/Hariç" combosunu bununla acar; kullanici degistirebilir.
    */
   kdvDahil?: number;
+  /**
+   * KDV DAHIL BIRIM FIYAT (371) - SAKLANAN deger, turetilmis degil.
+   * `birimFiyat` matrahtir; brutu her seferinde ondan uretmek yuvarlama artigi
+   * biriktiriyordu (100,00 brut -> matrah -> 100,0050). Hastaya soylenen rakam
+   * bu kolondan gelir.
+   */
+  birimFiyatKdvli?: string;
   /** Payin ne kadari belgeye donustu (sunucudan gelir, salt okunur). */
   kurumKapatilan?: number;
   hastaKapatilan?: number;
@@ -202,6 +209,7 @@ export function yanittanSatirlar(
     hastaTutar: r.hastaTutar != null ? String(r.hastaTutar) : undefined,
     karsilama: r.karsilama != null ? String(r.karsilama) : undefined,
     katkiTutar: r.katkiTutar != null ? String(r.katkiTutar) : undefined,
+    birimFiyatKdvli: r.birimFiyatKdvli != null ? String(r.birimFiyatKdvli) : undefined,
     kurumKapatilan: r.kurumKapatilan != null ? Number(r.kurumKapatilan) : undefined,
     hastaKapatilan: r.hastaKapatilan != null ? Number(r.hastaKapatilan) : undefined,
     // "??" DEGIL "||": sunucu bos alani '' donduruyor ve nullish operatoru bos

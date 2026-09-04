@@ -4747,3 +4747,31 @@ kaynaktan kopyaliyor - ama pay dagilimi (289), acik borc, tahsilat dagitimi (321
 "KDV dahil" varsayiyor) ve tutar bazli donusum hesabi (352) hep matrah varsayimiyla yazilmis;
 saklamayi cevirmek bunlarin hepsini elden gecirmeyi gerektirir. Kullaniciya soruldu.
 2 test. Toplam: **341 test gecti** (339 + 2).
+
+**KDV DAHIL BIRIM FIYAT AYRI KOLONDA (371) - kullanicinin onerisi, (a) secenegi.**
+Kullanici: "birim_fiyat hep kdv haric, yanina birim_fiyat_kdvli eklesen.. ekran gosterimi ve
+tahsilata yansimasi bunun uzerinden olsa.. cunku kdv haric/dahil donusumunde kuruslar fark
+edebiliyor". Gerekce dogru: brutu her seferinde matrahtan URETMEK, hastaya soylenen tutari yuvarlama
+artigina baglar (100,00 brut / %18 -> matrah 84,75 -> geri 100,0050).
+*Yapilan (1-2. adim):* `belge_satir.birim_fiyat_kdvli` kolonu; roller net - `birim_fiyat` MATRAH
+(muhasebe/dip toplam/e-Belge dayanagi), `birim_fiyat_kdvli` BRUT (ekranda gosterilen, hastaya
+soylenen). GIRIS DEGERI brut: verilirse matrah ONDAN turetilir, verilmezse (ERP akisi) matrahtan bir
+kez uretilir - iki kolon her zaman ayni parayi soyler. Eski 1774 satirin brutu bir kez uretildi.
+*Tutarlilik kisiti:* iki kolon ayni parayi tuttugu icin birbirinden kopabilirler (API, goc, baska
+ekran). `ck_belge_satir_kdvli_tutarli` ikisini bir kurus icinde tutar; canli denendi, tutarsiz
+degeri REDDETTI.
+Kalem penceresi kullanicinin YAZDIGI brutu saklıyor, grid saklanan brutu gosteriyor (yoksa
+matrahtan turetiyor - eski satirlar).
+*Canli dogrulama:* brut 100,00 / %18 gonderildi -> birim_fiyat 84,7458 · birim_fiyat_kdvli 100,0000
+saklandi, okundugunda ikisi de aynen geldi.
+
+*KALAN (3-5. adim) - BELGE TOPLAMI HENUZ BRUTTEN CIKMIYOR:* ayni testte belge matrah 84,75 +
+KDV 15,26 = **100,01** cikti; hastaya soylenen 100,00. Kuruş sapmasi henuz duruyor, yalnizca yer
+degistirdi (ekran artik dogru, BELGE TOPLAMI degil).
+*Onemli bulgu:* `fn_belge_diptoplam` bu kurali ZATEN isletiyor - ama `kdv_durum='Dahil'` dalinda ve
+BRUTU `birim_fiyat`ta bekleyerek: tur 1 (Toplam) `birim_fiyat*adet*(100/(100+kdv))` ile matrahi
+bruttan turetiyor, tur 5 (KDV) `tutar - tutar*(100/(100+kdv))` ile KDV'yi "brut - matrah" olarak
+aliyor; toplam tam brut cikiyor (kurusu KDV satiri emiyor - standart fatura pratigi). Yani Delphi
+tarafi (a) secenegini bastan uygulamis, ama brutu `birim_fiyat`a yazarak - kullanicinin
+istemedigi model. Yeni kolonu bu fonksiyona baglamak ONU DEGISTIRMEYI gerektiriyor (buyuk, ORTAK
+ve ÖTV/tevkifat/doviz/muafiyet dallariyla ic ice bir Delphi portu) - kullaniciya soruldu.

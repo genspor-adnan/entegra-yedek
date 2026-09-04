@@ -234,9 +234,18 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                        onKeyDown={tus}
                        onChange={e => {
                          const alan = dovizli ? 'dovizFiyat' : 'birimFiyat';
-                         if (!kdvDahil) { degis(alan, e.target.value); return }
+                         if (!kdvDahil) {
+                           // HARIC modda brut TURETILIR - kullanici matrah yaziyor.
+                           setR(x => ({ ...x, [alan]: e.target.value,
+                                        birimFiyatKdvli: moduCevir(e.target.value,
+                                                                   x.kdv, true) }));
+                           return;
+                         }
                          setBrutMetni(e.target.value);
-                         degis(alan, moduCevir(e.target.value, r.kdv, false));
+                         // Kullanicinin YAZDIGI brut oldugu gibi saklanir;
+                         //   matrah ondan turetilir (371).
+                         setR(x => ({ ...x, birimFiyatKdvli: e.target.value,
+                                      [alan]: moduCevir(e.target.value, x.kdv, false) }));
                        }} />
                 {/* Para birimi SECILEBILIR (kullanici): stok kartindan gelen doviz
                     degistirilebilmeli - ayni urun bir belgede USD, otekinde TL
@@ -315,7 +324,9 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                           //   100 aslinda KDV dahildi" demek matrahi dusurur.
                           if (yeniDahil) setBrutMetni(yazili);
                           setR(x => ({ ...x, kdvDahil: yeniDahil ? 1 : 0,
-                                       [alan]: moduCevir(yazili, x.kdv, !yeniDahil) }));
+                                       [alan]: moduCevir(yazili, x.kdv, !yeniDahil),
+                                       birimFiyatKdvli: yeniDahil
+                                         ? yazili : moduCevir(yazili, x.kdv, true) }));
                         }}>
                   <option value="0">Hariç</option>
                   <option value="1">Dahil</option>

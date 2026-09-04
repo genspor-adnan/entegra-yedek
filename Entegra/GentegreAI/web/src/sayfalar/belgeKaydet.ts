@@ -305,6 +305,10 @@ return {
     //   demekti, o yuzden `miktar` GONDERILMEZ (143).
     adet: hamSayi(s.adet),
     birimFiyat: hamSayi(s.birimFiyat),
+    // KDV DAHIL fiyat (371): kullanicinin YAZDIGI brut deger. Sunucu bunu
+    //   saklar ve matrahi ONDAN turetir - brutu her seferinde matrahtan
+    //   uretmek yuvarlama artigi biriktiriyordu.
+    birimFiyatKdvli: s.birimFiyatKdvli ? hamSayi(s.birimFiyatKdvli) : undefined,
     // SATIR BAZLI DOVIZ: bir kalem 100 USD, digeri 100 TL olabilir (kullanici).
     //   Yerel birim fiyat her zaman yazilir; doviz alanlari yalniz satir kendi
     //   para biriminde girildiyse gider (sunucu ikisini birbirinden turetiyor).

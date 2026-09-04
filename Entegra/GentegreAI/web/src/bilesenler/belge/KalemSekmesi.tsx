@@ -207,8 +207,12 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         //   deger MATRAHTIR - satir matematigi, dip toplam ve e-Belge onun
         //   uzerinden yurur; burada yalniz GOSTERIM brute cevrilir. Fis/fatura
         //   dogal olarak matrahla kesilir, tahakkuk brut toplami tasir.
-        const gosterFiyat = basvuruMu ? bruta(fiyat, r.kdv) : fiyat;
-        const gosterTutar = basvuruMu ? bruta(tutar, r.kdv) : tutar;
+        //   SAKLANAN brut varsa O kullanilir (371) - turetmek kurus kaydiriyor;
+        //   eski satirda kolon bos, o zaman matrahtan uretilir.
+        const brutFiyat = sayi(r.birimFiyatKdvli) || bruta(fiyat, r.kdv);
+        const gosterFiyat = basvuruMu ? brutFiyat : fiyat;
+        const gosterTutar = basvuruMu
+          ? satirTutari(adet, brutFiyat, r.iskonto, r.iskonto2) : tutar;
         const secili = seciliSatirlar.has(r.anahtar);
         // Izlemli kalemin lotlari ALTINDA acilir (master-detail):
         //   hangi lottan kac adet oldugu kalemi acmadan gorunsun.
