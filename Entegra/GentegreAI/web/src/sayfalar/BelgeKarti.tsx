@@ -1263,7 +1263,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
   useEffect(() => { setTemizImza(imza) },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [imzaTazele]);
-  const kirli = temizImza !== null && temizImza !== imza;
+  // ACILIS PENCERESI kirli SAYILMAZ: imza tazelemesi effect'lerin bir adim
+  //   gerisinde kaldigi icin acilisin ilk render'larinda kart kisa sure
+  //   "kirli" gorunuyordu - o anda Kapat'a basan kullanici hicbir sey
+  //   degistirmedigi halde uyari aliyordu.
+  const kirli = !acilisPenceresi && temizImza !== null && temizImza !== imza;
 
   /**
    * Karti kapatir. Kaydedilmemis degisiklik varsa UC SECENEK sorulur

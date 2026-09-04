@@ -59,10 +59,17 @@ describe('basvuruda zorunlu alanlar', () => {
     expect(Object.keys(h).sort()).toEqual(['bolumId', 'personelId']);
   });
 
-  it('KENDI ISTEGI bolum zorunlulugunu KALDIRMAZ - hasta yine bir bolume gelir', () => {
+  it('KENDI ISTEGI bolum zorunlulugunu da KALDIRIR (kullanici)', () => {
+    // Bolum "hangi bolume gonderildi" demektir - gonderen yoksa dayanagi da
+    //   yok; doldurulmasi istenirse memur olmayan bir bilgiyi uydurur.
     expect(belgeDogrula(g({
       bolumId: null, personelId: null, basvuruAlanlari: { kendiIstegi: 1 },
-    }))).toEqual({ bolumId: 'Bölüm seçilmeli.' });
+    }))).toBeNull();
+  });
+
+  it('GONDEREN varsa bolum yine ZORUNLU', () => {
+    expect(belgeDogrula(g({ bolumId: null, basvuruAlanlari: { kendiIstegi: 0 } })))
+      .toEqual({ bolumId: 'Bölüm seçilmeli.' });
   });
 
   it('ODEYEN KURUM once sorulur - o eksikken oteki ikisi beklemeye alinir', () => {

@@ -2061,61 +2061,44 @@ input.skt-gecmis {
    BASVURU TAMAMLANMA SERIDI (370, kullanici) - radyoloji akis seridinin
    (.akis-seridi) kayit kabul karsiligi. Fark: her asamanin KENDI RENGI var ve
    yapilmayan asama GRI kalir - memur "ne eksik" sorusunu tek bakista gorsun.
+
+   INCE ve ZARIF (kullanici): serit kartin BASLIGI degil, DURUM CIZGISIDIR -
+   dolu renkli kutular gozu ana veriden caliyordu. Artik yalniz ince bir
+   cizgi + kucuk nokta: tamamlanan asama kendi rengiyle CIZGISINI boyar,
+   yapilmayan soluk gri kalir. Kutu/cerceve yok, yukseklik ~22px.
    ============================================================================ */
 .basvuru-asama {
-  display: flex; align-items: center; gap: 12px; margin: 0 0 8px;
-  background: var(--yuz); border: 1px solid var(--cizgi2); border-radius: 4px;
-  padding: 8px 10px;
+  display: flex; align-items: center; gap: 14px; margin: 0 0 6px; padding: 0 2px;
 }
-.basvuru-asama .asama-seridi { display: flex; flex: 1; align-items: stretch; gap: 0 }
+.basvuru-asama .asama-seridi { display: flex; flex: 1; gap: 10px }
 .basvuru-asama .asama {
-  flex: 1; position: relative; text-align: center; padding: 5px 6px;
-  font-size: 11px; font-weight: 600; letter-spacing: .2px;
-  /* YAPILMAYAN asama gri: renk bir bilgi, dolmadan verilmemeli. */
-  color: var(--soluk); background: var(--yuz2);
-  border: 1px solid var(--cizgi2); border-right: 0;
+  flex: 1; min-width: 0; padding-top: 7px; position: relative;
+  font-size: 10.5px; letter-spacing: .2px; text-align: center;
+  color: var(--soluk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.basvuru-asama .asama:first-child { border-radius: 3px 0 0 3px }
-.basvuru-asama .asama:last-child { border-right: 1px solid var(--cizgi2); border-radius: 0 3px 3px 0 }
-/* Asamalar OK ucu gibi zincirlenir: sira akisin kendisidir (ÖSS'de provizyon
-   ucretten once, SGK'da sonra) - bakan kisi sirayi da gormeli. */
-.basvuru-asama .asama::after {
-  content: ""; position: absolute; top: 50%; right: -7px; z-index: 2;
-  width: 12px; height: 12px; transform: translateY(-50%) rotate(45deg);
-  background: inherit; border-top: 1px solid var(--cizgi2);
-  border-right: 1px solid var(--cizgi2);
+/* Asamanin CIZGISI - durumu tasiyan asil ogedir. */
+.basvuru-asama .asama::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  border-radius: 1px; background: var(--cizgi2);
 }
-.basvuru-asama .asama:last-child::after { display: none }
-
-/* TAMAMLANAN asama kendi rengiyle dolar (kullanici):
-   Başvuru kirmizi · Provizyon turuncu · Ücretlendirme sari · Tahsilat mavi ·
-   Faturalama yesil. */
-.basvuru-asama .asama.ok { color: #fff; border-color: transparent }
-.basvuru-asama .asama.ok::after { border-color: transparent }
-.basvuru-asama .asama.ok.kirmizi { background: #c2413b }
-.basvuru-asama .asama.ok.turuncu { background: #d9822b }
-/* Sari zeminde beyaz yazi okunmuyor - bu asamada yazi koyu kalir. */
-.basvuru-asama .asama.ok.sari    { background: #e3b322; color: #3d2f00 }
-.basvuru-asama .asama.ok.mavi    { background: #2f6db3 }
-.basvuru-asama .asama.ok.yesil   { background: #2e7d46 }
+/* TAMAMLANAN asama kendi rengiyle: Başvuru kirmizi · Provizyon turuncu ·
+   Ücretlendirme sari · Tahsilat mavi · Faturalama yesil. */
+.basvuru-asama .asama.ok { color: var(--yazi); font-weight: 600 }
+.basvuru-asama .asama.ok.kirmizi::before { background: #c2413b }
+.basvuru-asama .asama.ok.turuncu::before { background: #d9822b }
+.basvuru-asama .asama.ok.sari::before    { background: #dca71a }
+.basvuru-asama .asama.ok.mavi::before    { background: #2f6db3 }
+.basvuru-asama .asama.ok.yesil::before   { background: #2e7d46 }
 
 .basvuru-asama .asama-yuzde {
-  display: flex; align-items: center; gap: 7px; font-size: 11.5px;
-  color: var(--soluk); flex: none; min-width: 108px;
+  display: flex; align-items: center; gap: 6px; flex: none;
+  font-size: 10.5px; color: var(--soluk);
 }
-.basvuru-asama .asama-yuzde .cubuk {
-  display: block; width: 62px; height: 6px; border-radius: 3px;
-  background: var(--cizgi2); overflow: hidden;
-}
-.basvuru-asama .asama-yuzde .cubuk i {
-  display: block; height: 100%; background: var(--vurgu); transition: width .2s;
-}
-.basvuru-asama .asama-yuzde b { color: var(--yazi) }
-/* %100: serit tamamlandigini kendisi soylesin - memur yuzdeyi okumak zorunda
-   kalmasin. */
-.basvuru-asama.bitti { border-color: #2e7d46; background: #f2f9f4 }
-.basvuru-asama.bitti .asama-yuzde .cubuk i { background: #2e7d46 }
+.basvuru-asama .asama-yuzde .cubuk { display: none }
+.basvuru-asama .asama-yuzde b { color: var(--soluk); font-weight: 600 }
+/* %100: tek isaret yeter - serit yesile boyanmaz, yalniz yuzde onaylanir. */
 .basvuru-asama.bitti .asama-yuzde b { color: #2e7d46 }
+.basvuru-asama.bitti .asama-yuzde::after { content: "✔"; color: #2e7d46 }
 
 /* GONDEREN + "Kendi İsteği" (370): isaret alanin ALTINDA durur - gonderen
    zorunlu oldugu icin "hekim yok" cevabi da gorunur bir secim olmali. */

@@ -246,7 +246,12 @@ export function BelgeAracCubugu({
   {/* BASVURUDA arac cubugunda ROZET YOK (kullanici): protokol no hasta arama
       satirinda, kapanma ("Faturalanmadı") rozeti ise hasta bandinda acik
       borcun saginda duruyor. */}
-  <button className="d kapat-dugmesi" onClick={kapat}>✖ Kapat</button>
+  {/* ARGUMANSIZ cagrilir: `onClick={kapat}` yazilirsa React MouseEvent'i ilk
+      parametreye verir - kartin `kapat(zorla = false)` imzasinda o event
+      `zorla = true` demek olur ve kaydedilmemis degisiklik uyarisi HIC
+      cikmadan kart kapanirdi (kullanici: "değişiklik yaptım kapat deyince
+      uyarı gelmedi"). */}
+  <button className="d kapat-dugmesi" onClick={() => kapat()}>✖ Kapat</button>
 
   {/* FATURA TIPI (130) burada, DUGMELERIN SAGINDA (kullanici): basliktan
       alindi - irsaliyedeki IADE kutusuyla ayni yeri kullanir. Faturanin cinsi

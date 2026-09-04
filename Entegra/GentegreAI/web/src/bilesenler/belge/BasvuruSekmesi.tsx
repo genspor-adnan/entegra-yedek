@@ -470,9 +470,13 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
         <label className="alan">
           {/* Lab/goruntulemede "Başvurulan Bölüm" degil sadece "Bölüm"
               (kullanici): hasta bir poliklinige basvurmuyor, tetkik yaptiriyor. */}
-          <span className="etiket zorunlu-isaret">
+          {/* KENDI ISTEGIYLE gelen hastada bolum ZORUNLU DEGIL ve
+              ISARETLENMEZ (kullanici): bolum "hangi bolume gonderildi"
+              demektir - gonderen yoksa dayanagi da yok. Alan kilitlenir ve
+              bos kalir, zorunluluk yildizi da duser. */}
+          <span className={'etiket' + (kendiIstegi ? '' : ' zorunlu-isaret')}>
             {gonderenModu ? 'Bölüm' : 'Başvurulan Bölüm'}</span>
-          <select value={bolumId ?? ''} disabled={kilitli}
+          <select value={bolumId ?? ''} disabled={kilitli || kendiIstegi}
                   onChange={e => {
                     const y = e.target.value ? Number(e.target.value) : null;
                     setBolumId?.(y);
@@ -482,7 +486,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                     const g = (gorevliler ?? []).find(x => x.id === personelId);
                     if (y && g && (g.bolumId ?? null) !== y) setPersonelId?.(null);
                   }}>
-            <option value="">— Seçiniz —</option>
+            <option value="">{kendiIstegi ? '— Gerekmiyor —' : '— Seçiniz —'}</option>
             {(bolumler ?? []).map(b => (
               <option key={b.id} value={b.id}>{b.ad}</option>
             ))}

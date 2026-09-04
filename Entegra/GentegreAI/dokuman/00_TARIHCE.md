@@ -4668,3 +4668,28 @@ kaydeder ve protokolu verir. Dogrulama gecmezse hesap secimi ACILMAZ ve basvurud
 donulur. Dugmeler artik hic pasif olmuyor; ipucu kaydedilmemis belgede "— belge önce kaydedilir"
 ekliyor. 4 test.
 Toplam: **316 test gecti** (312 + 4).
+
+**Kendi istegiyle gelen hastada BOLUM de zorunlu degil** (kullanici). Bolum "hangi bolume
+gonderildi" demektir - gonderen yoksa dayanagi da yok; doldurulmasi istenirse memur olmayan bir
+bilgiyi uydurur. Isaret konunca bolum alani KILITLENIR, bosalir ("— Gerekmiyor —") ve zorunluluk
+yildizi duser. Gonderen varsa bolum yine zorunlu.
+
+**KAPATIRKEN UYARI HIC CIKMIYORDU (gercek kusur).** Kullanici: "başvuru kartında değişiklik yaptım
+kapat deyince uyarı gelmedi". Arac cubugundaki dugme `onClick={kapat}` yaziyordu; React tikla
+birlikte MouseEvent'i ILK PARAMETREYE veriyor ve kartin imzasi `kapat(zorla = false)` oldugu icin
+o event `zorla = true` demek oluyordu - yani her Kapat tiklamasi "sorma, kapat" cagrisiydi.
+Kaydedilmemis degisiklik SESSIZCE gidiyordu. Uc secenekli soru, imza hesabi, kirli bayragi -
+hepsi dogru calisiyordu; kusur tek bir baglama satirindaydi. Fix: `onClick={() => kapat()}`.
+TypeScript yakalayamazdi: prop tipi `kapat(): void` ve argumansiz imza, event alan bir handler'a
+sorunsuz atanir.
+Ayrica ACILIS PENCERESI artik kirli SAYILMIYOR: imza tazelemesi effect'lerin bir adim gerisinde
+kaldigi icin acilisin ilk render'larinda kart kisa sure "kirli" gorunuyor, o anda Kapat'a basan
+kullanici hicbir sey degistirmedigi halde uyari aliyordu.
+5 test (`basvuruKapat.test.tsx`): uyarinin CIKTIGI, HAKSIZ YERE cikmadigi, Geri Dön'de kartin
+kapanmadigi, İptal'de kapandigi, acilis penceresinde sorulmadigi.
+
+**Tamamlanma seridi INCELDI** (kullanici: "daha ince ve zarif olsun"). Dolu renkli kutular ve
+cerceve kalkti; serit artik kartin BASLIGI degil DURUM CIZGISI: her asama ince (2px) bir cizgi ve
+altinda kucuk yazi. Tamamlanan asama cizgisini kendi rengiyle boyar, yapilmayan soluk gri kalir.
+Yuzde cubugu kalkti, yalniz sayi kaldi; %100'de yanina ✔ gelir. Yukseklik ~52px'ten ~22px'e indi.
+Toplam: **322 test gecti** (316 + 6).

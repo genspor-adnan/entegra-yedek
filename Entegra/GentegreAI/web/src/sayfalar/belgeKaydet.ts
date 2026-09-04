@@ -192,7 +192,6 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
   //   bulmasin.
   if (basvuruMu && !kilitli) {
     const eksik: Record<string, string> = {};
-    if (!bolumId) eksik.bolumId = 'Bölüm seçilmeli.';
     // GONDEREN ZORUNLU ama "Kendi İsteği" de GECERLI BIR CEVAPTIR (370,
     //   kullanici): hasta bir hekim tarafindan gonderilmediyse bu isaretlenir.
     //   Isaret ayri bir kolonda tutuluyor - yoklugu secim yerine kullanmak
@@ -200,6 +199,11 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
     const kendiIstegi = Number(basvuruAlanlari?.kendiIstegi ?? 0) === 1;
     if (!personelId && !kendiIstegi)
       eksik.personelId = 'Gönderen seçilmeli — hasta kendi geldiyse "Kendi İsteği" işaretleyin.';
+    // BOLUM, GONDERENE BAGLI bir bilgidir (kullanici: "kendi isteği ile
+    //   geldiyse bölüm de zorunlu değil, işaretlenmez"): hangi bolume
+    //   gonderildigi ancak GONDEREN varsa anlamlidir. Kendi gelen hastada alan
+    //   bos kalir - doldurulmasi istenirse memur olmayan bir bilgiyi uydurur.
+    if (!bolumId && !kendiIstegi) eksik.bolumId = 'Bölüm seçilmeli.';
     if (Object.keys(eksik).length > 0) return eksik;
   }
 
