@@ -432,7 +432,15 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   //   Hizmet lookup'lari iki ayri kolon yerine TIP IKONU + tek "Adı" kolonu
   //   (kullanici) - belge kalem gridiyle ayni okuma. Modal duzenlemede iki
   //   secim kutusu ayri durur; yalniz GRID gorunumu birlesir.
-  const satirlarGrid = !!modalDuzenle && meta.ad === 'satirlar';
+  /**
+   * FIYAT LISTESI SATIRLARI gridi. "satirlar" adini PRIM ve KAMPANYA detaylari
+   * da tasiyor; bu bayrak fiyat listesine OZEL cizimi (Tip/Kategori/Kod/Adı
+   * kolonlari, hizli fiyat hucreleri, KDV-durum rozetleri) actigi icin
+   * onlari DISARIDA birakir - yoksa prim satiri gridine ait olmayan dort
+   * kolon eklenirdi.
+   */
+  const satirlarGrid = !!modalDuzenle && meta.ad === 'satirlar'
+                       && !primSatiri && !kampanyaSatiri;
   const stokAlani   = alanlar.find(a => a.ad === 'stokId');
   const hizmetAlani = alanlar.find(a => a.ad === 'hizmetId');
   const tumGridAlanlari = satirlarGrid
@@ -996,7 +1004,17 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                     <>
                       <span className={`etiket${a.zorunlu ? ' zorunlu-isaret' : ''}`}>{a.baslik}</span>
                       <span className="ikili">
-                        {a.kodlar ? (
+                        {/* ARAMAYLA SECILEN ALAN DEGISTIRILEMEZ (kullanici):
+                            satirin KIMLIGI odur - baskasiyla degistirmek
+                            "ayni satir, baska kisi" demek olurdu; dogrusu
+                            satiri silip yenisini eklemek. Combo yerine duz
+                            metin: kapali bir combo "acilmiyor mu" diye
+                            tiklatir. */}
+                        {a.aramaKaynagi ? (
+                          <span className="sonuk">
+                            {a.kodlar?.[String(taslak[a.ad] ?? '')] ?? String(taslak[a.ad] ?? '')}
+                          </span>
+                        ) : a.kodlar ? (
                           <select value={String(taslak[a.ad] ?? '')} disabled={!a.yazilabilir}
                                   onChange={e => taslakYaz(a.ad, e.target.value)}>
                             <option value="">—</option>

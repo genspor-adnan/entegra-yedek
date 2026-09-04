@@ -1150,7 +1150,21 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
         && !(kaynak === 'dis-hekim' && aktif.detay.ad === 'hekim')
         // Hizmet > Fiyatlar: kartin kendi fiyat gridi KALKTI (kullanici) -
         //   sekme yalniz fiyat listelerindeki fiyatlari gosterir (asagida).
-        && !(kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar') && (
+        && !(kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar') && (() => {
+        /**
+         * GRID KIPI: satir ici duzenleme yerine SECIM KUTUSU + ust satirda
+         * ekle/duzenle/sil + grid menusu (kolonlar / CSV) - liste
+         * ekranlarindaki grid davranisi.
+         *   - fiyat listesi satirlari: satir ici kip 1.400 satirda milyonlarca
+         *     DOM dugumu uretiyordu,
+         *   - aramayla dolan detaylar (375): alanlarin cogu salt okunur,
+         *   - prim plani detaylari (kullanici): kod/oran alanlari satir ici
+         *     kutularda okunaksizdi.
+         */
+        const gridKipi = (kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar')
+          || kaynak === 'prim-plani'
+          || aktif.detay.alanlar.some(a => a.tip === 'kod' && a.aramaKaynagi);
+        return (
         <GenDetayTablo
           meta={aktif.detay}
           durum={detaylar[aktif.detay.ad] ?? bosDetay()}
@@ -1167,10 +1181,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           //   "burayi degistirebilirsin" izlenimi veriyordu. Ikonlu baslik
           //   ayrica secim kutusunu, sil ikonunu ve grid menusunu (kolonlar /
           //   CSV) getirir - liste ekranlarindaki grid ile ayni davranis.
-          modalDuzenle={(kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar')
-            || aktif.detay.alanlar.some(a => a.tip === 'kod' && a.aramaKaynagi)}
-          ikonlu={(kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar')
-            || aktif.detay.alanlar.some(a => a.tip === 'kod' && a.aramaKaynagi)}
+          // GRID KIPI (secim kutusu, ust satirda ekle/duzenle/sil, grid menusu):
+          //   fiyat listesi satirlari, aramayla dolan detaylar ve PRIM PLANI
+          //   detaylari. Prim satirinda alanlarin cogu kod/oran - satir ici
+          //   kutular yerine modal duzenleme daha okunakli (kullanici).
+          modalDuzenle={gridKipi}
+          ikonlu={gridKipi}
           taslakKural={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
             ? fiyatSatirKurali : undefined}
           // Tumu / Stok / Hizmet cipleri (kullanici) - karma listede tek tur gorunur.
@@ -1180,7 +1196,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
                { ad: '🛠️ Hizmet', suz: s => s.hizmetId != null && s.hizmetId !== '' }]
             : undefined}
         />
-      )}
+        );
+      })()}
 
       {/* Hizmet > Fiyatlar: kalemin gectigi fiyat listesi satirlari
           (kullanici: "bu hizmete ait tum fiyatlar gelsin"; kartin kendi
