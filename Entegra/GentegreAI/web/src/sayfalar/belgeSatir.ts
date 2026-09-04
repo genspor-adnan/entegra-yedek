@@ -88,6 +88,13 @@ export interface SatirDurumu {
    * buna gore yapar (hasta = katki, kurum = tutar - katki).
    */
   katkiTutar?: string;
+  /**
+   * FIYAT GIRIS MODU (kullanici): kalemin fiyati KDV DAHIL bir listeden mi
+   * geldi. Yalniz EKRAN icin - sunucuya GONDERILMEZ (`belgeGovdesi` alanlari
+   * tek tek sayar) ve `birimFiyat` her zaman MATRAHTIR. Fiyat penceresi
+   * "Dahil/Hariç" combosunu bununla acar; kullanici degistirebilir.
+   */
+  kdvDahil?: number;
   /** Payin ne kadari belgeye donustu (sunucudan gelir, salt okunur). */
   kurumKapatilan?: number;
   hastaKapatilan?: number;

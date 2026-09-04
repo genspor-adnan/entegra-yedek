@@ -1,8 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import {
-  iadeSatirlari, paketIcerigiUygula, sonAnahtar, stokSecimindenKalem,
+  iadeSatirlari, kampanyaFiyatiUygula, paketIcerigiUygula, sonAnahtar,
+  stokSecimindenKalem,
 } from '../sayfalar/belgeKalem';
-import { yanittanSatirlar, satirTutari, adetKaydir, iskonatoMetni } from '../sayfalar/belgeSatir';
+import {
+  yanittanSatirlar, satirTutari, adetKaydir, iskonatoMetni, bosSatir,
+} from '../sayfalar/belgeSatir';
 import type { SatirDurumu } from '../sayfalar/belgeSatir';
 import type { IadeSatiri } from '../bilesenler/belge/IadeSatirPenceresi';
 
@@ -189,5 +192,28 @@ describe('satir hesaplari (onizleme)', () => {
     expect(iskonatoMetni({ iskonto: '10', iskonto2: '0' })).toBe('%10');
     expect(iskonatoMetni({ iskonto: '10', iskonto2: '5' })).toBe('%10 + %5');
     expect(iskonatoMetni({ iskonto: '0', iskonto2: '0' })).toBe('');
+  });
+});
+
+describe('KDV DAHIL liste fiyati (kullanici)', () => {
+  it('dahil listede brut fiyat MATRAHA cevrilerek yazilir', () => {
+    // Sunucu kdvDahil'i bastan beri donuyordu ama ekran yok sayiyordu: 120 TL
+    //   brut fiyat dogrudan matrah yazilinca kalem %20 pahali kaydediliyordu.
+    const s = { ...bosSatir(1), hizmetId: 900, kdv: '20' };
+    const y = kampanyaFiyatiUygula(s, { fiyat: 120, kdvDahil: 1 });
+    expect(Number(y.birimFiyat)).toBeCloseTo(100, 4);
+    expect(y.kdvDahil).toBe(1);
+  });
+
+  it('HARIC listede fiyat oldugu gibi kalir', () => {
+    const s = { ...bosSatir(1), hizmetId: 900, kdv: '20' };
+    const y = kampanyaFiyatiUygula(s, { fiyat: 120, kdvDahil: 0 });
+    expect(Number(y.birimFiyat)).toBe(120);
+    expect(y.kdvDahil).toBe(0);
+  });
+
+  it('kdvDahil HIC gelmezse haric varsayilir - eski davranis korunur', () => {
+    const s = { ...bosSatir(1), hizmetId: 900, kdv: '20' };
+    expect(Number(kampanyaFiyatiUygula(s, { fiyat: 120 }).birimFiyat)).toBe(120);
   });
 });

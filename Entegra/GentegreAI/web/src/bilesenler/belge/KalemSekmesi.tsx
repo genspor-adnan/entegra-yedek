@@ -607,8 +607,10 @@ export interface KalemSekmesiProps {
  */
 export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsilatAc,
                                   secili, setSecili, tahsilatAcKart, tahsilatSil,
-                                  onYenile, kurumTahakkukAc, kurumKalan,
+                                  onYenile, kurumTahakkukAc, kurumKalan, basvuruMu,
                                   hizliNakit, hesapSecAc, tutarGuncelle, acikBorc }: {
+  /** Basvuru kartinda arac cubugu SADE: "＋" (tam ekran) cizilmez. */
+  basvuruMu?: boolean;
   sonuc: BelgeYaniti | null;
   tahsilatlar: Record<string, unknown>[];
   kayitliId: number;
@@ -777,12 +779,18 @@ return (
       <span className="ayrac" />
       {/* Secili satir uzerinde islem - kalem gridiyle ayni desen: yalniz ikon,
           secim yoksa pasif. Cift tik da duzeltmeyi acar. */}
-      {/* EKLE (kullanici): duzenle ikonunun SOLUNDA - tam tahsilat ekranini
-          acar (arac secimi, doviz, dagitim gibi ayrintilar orada). */}
-      <button className="d" disabled={!kayitliId}
-              title={kayitliId ? 'Tahsilat ekranını aç (tüm alanlarla)'
-                               : 'Önce belgeyi kaydedin'}
-              onClick={() => void tahsilatAc(alisMi ? 31 : 21)}>＋</button>
+      {/* "＋" BASVURUDA CIZILMEZ (kullanici): tam tahsilat ekranini acan
+          ikinci bir yol, Nakit / POS / ⋯ araclari dururken yalniz karisiklik
+          yaratiyordu - hangi dugmenin ne actigi belirsizlesiyordu. Kayit
+          kabulde tahsilat araclardan biriyle baslar; ayrintili duzeltme
+          mevcut satirin ✎ ikonundan. ERP belgelerinde (satis siparisi,
+          fatura) tam ekran hala gerekli - orada duruyor. */}
+      {!basvuruMu && (
+        <button className="d" disabled={!kayitliId}
+                title={kayitliId ? 'Tahsilat ekranını aç (tüm alanlarla)'
+                                 : 'Önce belgeyi kaydedin'}
+                onClick={() => void tahsilatAc(alisMi ? 31 : 21)}>＋</button>
+      )}
       <button className="d" disabled={!tekSecili}
               title={!secili.length ? 'Önce satır seçin'
                      : secili.length > 1 ? 'Düzeltme için tek satır seçin'

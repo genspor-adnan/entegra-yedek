@@ -592,6 +592,12 @@ table.grid tr.flt input {
 .alan .ikili select.birim-alti { flex: none; width: 72px; text-align: center }
 /* Ucuncu satirdaki kucuk aciklama (ör. "Ekstre dövizi") - kutu degil, etiket. */
 .alan .ikili .alan-notu { flex: 1; align-self: center; margin: 0 }
+/* ESIT IKILI (kullanici): iki combo alani ORTADAN bolusur ve alanin sol/sag
+   siniri oteki alanlarla (ör. Açıklama) AYNI kalir - ör. kalem penceresinde
+   "KDV %" orani + "Dahil/Hariç". `.ikili select` varsayilani 64px sabittir,
+   burada o kural gecersiz kilinir. */
+.alan .ikili.esit > select,
+.alan .ikili.esit > input { flex: 1 1 0; width: auto; min-width: 0 }
 /* Miktar +/- dugmeleri edit yuksekliginde. */
 /* Iki onay kutusu yan yana - her biri kendi adiyla (İnternet Satış | Paket). */
 .ikili-mantik { display: flex; align-items: center; gap: 18px }
@@ -2062,33 +2068,55 @@ input.skt-gecmis {
    (.akis-seridi) kayit kabul karsiligi. Fark: her asamanin KENDI RENGI var ve
    yapilmayan asama GRI kalir - memur "ne eksik" sorusunu tek bakista gorsun.
 
-   INCE ve ZARIF (kullanici): serit kartin BASLIGI degil, DURUM CIZGISIDIR -
-   dolu renkli kutular gozu ana veriden caliyordu. Artik yalniz ince bir
-   cizgi + kucuk nokta: tamamlanan asama kendi rengiyle CIZGISINI boyar,
-   yapilmayan soluk gri kalir. Kutu/cerceve yok, yukseklik ~22px.
+   INCE ve ZARIF (kullanici): serit kartin BASLIGI degil, DURUM CIZGISIDIR.
+   Cizgi + ARALARDA NOKTA (kullanici): noktalar asamalari birbirinden ayirir,
+   cizgi tek parca gorunmesin. Etiket de cizgiyle AYNI RENKTE - renk asamanin
+   kimligi, yaziyi notr birakmak ikisini birbirinden koparyordu.
    ============================================================================ */
 .basvuru-asama {
   display: flex; align-items: center; gap: 14px; margin: 0 0 6px; padding: 0 2px;
 }
-.basvuru-asama .asama-seridi { display: flex; flex: 1; gap: 10px }
+.basvuru-asama .asama-seridi { display: flex; flex: 1; gap: 0 }
 .basvuru-asama .asama {
-  flex: 1; min-width: 0; padding-top: 7px; position: relative;
+  flex: 1; min-width: 0; padding: 9px 8px 0; position: relative;
   font-size: 10.5px; letter-spacing: .2px; text-align: center;
   color: var(--soluk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 /* Asamanin CIZGISI - durumu tasiyan asil ogedir. */
 .basvuru-asama .asama::before {
-  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  border-radius: 1px; background: var(--cizgi2);
+  content: ""; position: absolute; top: 3px; left: 0; right: 0; height: 2px;
+  background: var(--cizgi2);
 }
-/* TAMAMLANAN asama kendi rengiyle: Başvuru kirmizi · Provizyon turuncu ·
-   Ücretlendirme sari · Tahsilat mavi · Faturalama yesil. */
-.basvuru-asama .asama.ok { color: var(--yazi); font-weight: 600 }
+.basvuru-asama .asama:first-child::before { border-radius: 1px 0 0 1px }
+.basvuru-asama .asama:last-child::before  { border-radius: 0 1px 1px 0 }
+/* ARALARDAKI NOKTA: asamanin BASINDA durur; ilkinde de var (seridin basi). */
+.basvuru-asama .asama::after {
+  content: ""; position: absolute; top: 0; left: -4px; z-index: 1;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--yuz); border: 2px solid var(--cizgi2); box-sizing: border-box;
+}
+.basvuru-asama .asama:first-child::after { left: 0 }
+
+/* TAMAMLANAN asama: cizgi, nokta ve YAZI kendi rengiyle.
+   Başvuru kirmizi · Provizyon turuncu · Ücretlendirme sari · Tahsilat mavi ·
+   Faturalama yesil. */
+.basvuru-asama .asama.ok { font-weight: 600 }
+.basvuru-asama .asama.ok.kirmizi { color: #c2413b }
 .basvuru-asama .asama.ok.kirmizi::before { background: #c2413b }
+.basvuru-asama .asama.ok.kirmizi::after  { background: #c2413b; border-color: #c2413b }
+.basvuru-asama .asama.ok.turuncu { color: #b96a15 }
 .basvuru-asama .asama.ok.turuncu::before { background: #d9822b }
-.basvuru-asama .asama.ok.sari::before    { background: #dca71a }
-.basvuru-asama .asama.ok.mavi::before    { background: #2f6db3 }
-.basvuru-asama .asama.ok.yesil::before   { background: #2e7d46 }
+.basvuru-asama .asama.ok.turuncu::after  { background: #d9822b; border-color: #d9822b }
+/* Sari yazi beyaz zeminde okunmuyor - etikette bir ton koyusu kullanilir. */
+.basvuru-asama .asama.ok.sari { color: #9a7407 }
+.basvuru-asama .asama.ok.sari::before { background: #dca71a }
+.basvuru-asama .asama.ok.sari::after  { background: #dca71a; border-color: #dca71a }
+.basvuru-asama .asama.ok.mavi { color: #2f6db3 }
+.basvuru-asama .asama.ok.mavi::before { background: #2f6db3 }
+.basvuru-asama .asama.ok.mavi::after  { background: #2f6db3; border-color: #2f6db3 }
+.basvuru-asama .asama.ok.yesil { color: #2e7d46 }
+.basvuru-asama .asama.ok.yesil::before { background: #2e7d46 }
+.basvuru-asama .asama.ok.yesil::after  { background: #2e7d46; border-color: #2e7d46 }
 
 .basvuru-asama .asama-yuzde {
   display: flex; align-items: center; gap: 6px; flex: none;

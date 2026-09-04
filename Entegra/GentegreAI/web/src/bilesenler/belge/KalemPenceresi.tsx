@@ -6,6 +6,7 @@ import {
   type SatirDurumu, satirTutari, adetKaydir, KDV_ORANLARI,
 } from '../../sayfalar/belgeSatir';
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
+import { moduCevir } from '../../sayfalar/belgeKarti/kdvModu';
 import { IzlemPenceresi } from './IzlemPenceresi';
 
 export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi, paylasimli,
@@ -42,6 +43,22 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   onKaydet(r: SatirDurumu): void;
 }) {
   const [r, setR] = useState<SatirDurumu>(satir);
+  /**
+   * KDV GIRIS MODU (kullanici): fiyat kutusuna BRUT mu MATRAH mi yaziliyor.
+   * Varsayilan FIYAT LISTESINDEN gelir (`satir.kdvDahil` - fiyat cozulurken
+   * yazilir); kullanici degistirebilir, cunku liste yanlis kurulmus ya da o
+   * kalem istisna olabilir. Saklanan `birimFiyat` HER ZAMAN matrahtir.
+   */
+  const [kdvDahil, setKdvDahil] = useState(Number(satir.kdvDahil ?? 0) === 1);
+  /**
+   * DAHIL modunda kutuda gorunen BRUT METIN. Kullanicinin yazdigi metin
+   * oldugu gibi tutulur; satira MATRAH yazilir. Her tusa basista matrahtan
+   * geri uretmek "12," gibi ara yazimlarda ondalik ayracini yiyordu.
+   */
+  const [brutMetni, setBrutMetni] = useState(() =>
+    moduCevir(String((Number(satir.kdvDahil ?? 0) === 1
+      ? (satir.fiyatDovizi && satir.fiyatDovizi !== '' ? satir.dovizFiyat : satir.birimFiyat)
+      : '') ?? ''), satir.kdv, true));
   const [hata, setHata] = useState<string | null>(null);
   /** Lot penceresi acik mi - miktar/fiyat girildikten SONRA acilir. */
   const [izlemAcik, setIzlemAcik] = useState(false);
@@ -199,9 +216,18 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
             <label className="alan">
               <span className="etiket">Birim Fiyat</span>
               <span className="ikili">
+                {/* DAHIL modunda kutuda BRUT deger durur; satira yazilan
+                    her zaman MATRAHTIR (satir matematigi, dip toplam ve
+                    e-Belge matrah uzerinden yurur). */}
                 <input className="hiza-sag"
-                       value={dovizli ? r.dovizFiyat : r.birimFiyat} onKeyDown={tus}
-                       onChange={e => degis(dovizli ? 'dovizFiyat' : 'birimFiyat', e.target.value)} />
+                       value={kdvDahil ? brutMetni : (dovizli ? r.dovizFiyat : r.birimFiyat)}
+                       onKeyDown={tus}
+                       onChange={e => {
+                         const alan = dovizli ? 'dovizFiyat' : 'birimFiyat';
+                         if (!kdvDahil) { degis(alan, e.target.value); return }
+                         setBrutMetni(e.target.value);
+                         degis(alan, moduCevir(e.target.value, r.kdv, false));
+                       }} />
                 {/* Para birimi SECILEBILIR (kullanici): stok kartindan gelen doviz
                     degistirilebilmeli - ayni urun bir belgede USD, otekinde TL
                     fiyatlanabiliyor. Yerel paraya donunce kur 1'e cekilir. */}
@@ -249,13 +275,39 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
             {!transferMi && !vergisiz && (
             <label className="alan">
               <span className="etiket">KDV %</span>
-              <select value={r.kdv} onKeyDown={tus}
-                      onChange={e => degis('kdv', e.target.value)}>
-                {/* Stok kartindan gelen oran listede yoksa kaybolmasin. */}
-                {(KDV_ORANLARI as readonly number[]).includes(Number(r.kdv))
-                  ? null : <option value={r.kdv}>%{r.kdv}</option>}
-                {KDV_ORANLARI.map(o => <option key={o} value={o}>%{o}</option>)}
-              </select>
+              {/* ORAN ve GIRIS MODU yan yana, ESIT GENISLIKTE (kullanici):
+                  ikisi de ayni soruya ait - "bu fiyatin KDV'si ne ve iceride
+                  mi". Mod listenin ayarindan gelir, kullanici degistirebilir.
+                  `.esit` ikisini ortadan boler; alanin sol/sag siniri
+                  Açıklama gibi oteki alanlarla ayni hizada kalir. */}
+              <span className="ikili esit">
+                <select value={r.kdv} onKeyDown={tus}
+                        onChange={e => degis('kdv', e.target.value)}>
+                  {/* Stok kartindan gelen oran listede yoksa kaybolmasin. */}
+                  {(KDV_ORANLARI as readonly number[]).includes(Number(r.kdv))
+                    ? null : <option value={r.kdv}>%{r.kdv}</option>}
+                  {KDV_ORANLARI.map(o => <option key={o} value={o}>%{o}</option>)}
+                </select>
+                {/* Mod DEGISINCE kutudaki sayi DEGISMEZ, anlami degisir:
+                    "yazdigim 100 aslinda KDV dahildi" demek matrahi dusurur.
+                    Bu yuzden satirdaki matrah yeniden hesaplanir. */}
+                <select value={kdvDahil ? '1' : '0'}
+                        title="Girilen fiyat KDV dahil mi?"
+                        onChange={e => {
+                          const yeniDahil = e.target.value === '1';
+                          setKdvDahil(yeniDahil);
+                          const alan = dovizli ? 'dovizFiyat' : 'birimFiyat';
+                          const yazili = String(r[alan] ?? '');
+                          // Kutudaki SAYI DEGISMEZ, anlami degisir: "yazdigim
+                          //   100 aslinda KDV dahildi" demek matrahi dusurur.
+                          if (yeniDahil) setBrutMetni(yazili);
+                          setR(x => ({ ...x, kdvDahil: yeniDahil ? 1 : 0,
+                                       [alan]: moduCevir(yazili, x.kdv, !yeniDahil) }));
+                        }}>
+                  <option value="0">Hariç</option>
+                  <option value="1">Dahil</option>
+                </select>
+              </span>
             </label>
             )}
 

@@ -1,6 +1,7 @@
 import { type SatirDurumu, bosSatir } from './belgeSatir';
 import type { IadeSatiri } from '../bilesenler/belge/IadeSatirPenceresi';
 import { hamSayi } from '../bilesenler/bicim';
+import { matraha } from './belgeKarti/kdvModu';
 
 /**
  * KALEM URETIMI - secimden belge satirina.
@@ -76,6 +77,13 @@ export interface KalemFiyati {
   iskonto?: number | null;
   /** Katilim payi (291) - SGK modunda hastadan alinacak sabit tutar. */
   katki?: number | null;
+  /**
+   * Listenin fiyati KDV DAHIL mi (`fiyat_listesi.kdv_dahil`). Sunucu bunu
+   * bastan beri donuyordu ama ekran yok sayiyordu: dahil bir listenin brut
+   * fiyati dogrudan MATRAH olarak yaziliyor, kalem KDV orani kadar pahali
+   * kaydediliyordu.
+   */
+  kdvDahil?: number | null;
 }
 
 /**
@@ -115,9 +123,16 @@ export function kampanyaFiyatiUygula(satir: SatirDurumu, f: KalemFiyati): SatirD
   const y = kampanyaKalemFiyati(f);
   if (!y) return satir;
 
-  const metin = String(y.birimFiyat);
+  // KDV DAHIL LISTE: liste fiyati BRUTTUR, belgede saklanan ise MATRAH.
+  //   Cevrim yapilmazsa %20 KDV'li bir kalem dogrudan %20 pahali yazilir ve
+  //   hata ancak faturada goze carpar. Mod satirda saklanir - fiyat penceresi
+  //   "Dahil/Hariç" combosunu bununla acar (kullanici degistirebilir).
+  const dahil = Number(f.kdvDahil ?? 0) === 1;
+  const kdvOrani = dahil ? (satir.kdv ?? 0) : 0;
+  const metin = String(dahil ? matraha(y.birimFiyat, kdvOrani) : y.birimFiyat);
   return {
     ...satir,
+    kdvDahil: dahil ? 1 : 0,
     birimFiyat: metin, dovizFiyat: metin,
     fiyatDovizi: y.dovizCinsi || satir.fiyatDovizi,
     iskonto: y.iskonto !== undefined ? String(y.iskonto) : satir.iskonto,

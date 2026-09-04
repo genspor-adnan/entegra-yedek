@@ -1521,6 +1521,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
         {aktifSekme === 'tahsilat' && (
           <TahsilatSekmesi sonuc={sonuc} tahsilatlar={tahsilat.tahsilatlar}
                            kayitliId={kayitliId} alisMi={alisMi} tahsilatAc={tahsilatAc}
+                           basvuruMu={basvuruMu}
                            secili={tahsilat.seciliTahsilatlar}
                            setSecili={tahsilat.setSeciliTahsilatlar}
                            tahsilatAcKart={tahsilat.setTahsilatKayitId}

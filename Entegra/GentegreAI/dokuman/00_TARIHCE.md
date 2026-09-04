@@ -4704,3 +4704,28 @@ kaldi: ikisi ayri kasa islem turu (23/24 tahsilat, 33/34 odeme) ve portfoyde ayr
 payi hep 0 ve dugme her zaman pasif duruyordu - "neden basamiyorum" sorusu doguruyordu. Kosul
 `odeyenKurumId` yerine `provizyonVar` (ÖSS/SGK) oldu. 3 test.
 Toplam: **325 test gecti** (322 + 3).
+
+**FIYAT EKRANINDA KDV DAHIL/HARIC (kullanici).** "KDV %" alani artik IKI COMBO tasiyor: oran ve
+giris modu (Dahil/Hariç), ESIT genislikte ve alanin sol/sag siniri Açıklama gibi oteki alanlarla
+ayni hizada (`.ikili.esit`).
+*Arkasinda duran gercek kusur:* sunucu `fiyat/kalem` yanitinda `kdvDahil`i BASTAN BERI donuyordu
+ama ekran yok sayiyordu - KDV DAHIL bir listenin BRUT fiyati dogrudan MATRAH olarak yaziliyor,
+kalem KDV orani kadar (ör. %20) PAHALI kaydediliyordu ve hata ancak faturada goze carpiyordu.
+Artik `kampanyaFiyatiUygula` brut fiyati matraha ceviriyor ve modu satirda tasiyor; pencere combosu
+o modla aciliyor, kullanici degistirebiliyor (liste yanlis kurulmus ya da kalem istisna olabilir).
+*Saklanan `birimFiyat` HER ZAMAN MATRAHTIR* - satir matematigi, dip toplam ve e-Belge matrah
+uzerinden yurur; `kdvDahil` yalniz EKRAN alani, sunucuya gonderilmez.
+Mod degisince kutudaki SAYI DEGISMEZ, ANLAMI degisir ("yazdigim 100 aslinda KDV dahildi" demek
+matrahi dusurur). Dahil modunda yazilan metin yerel state'te tutuluyor: her tusa basista matrahtan
+geri uretmek "12," gibi ara yazimlarda ondalik ayracini yiyordu. Cevrim 4 haneye yuvarlaniyor -
+erken yuvarlama toplamda kurus kaydiriyor. 11 + 3 test (`kdvModu.test.ts`, `belgeKalem.test.ts`).
+
+**Tahsilatta "＋" BASVURUDA cizilmiyor** (kullanici): tam tahsilat ekranini acan ikinci bir yol,
+Nakit / POS / ⋯ araclari dururken hangi dugmenin ne actigini belirsizlestiriyordu. ERP
+belgelerinde (satis siparisi, fatura) tam ekran hala gerekli - orada duruyor. Ayrintili duzeltme
+mevcut satirin ✎ ikonundan.
+
+**Tamamlanma seridine NOKTALAR eklendi** ve etiketler cizgiyle AYNI RENGE alindi (kullanici): renk
+asamanin kimligi, yaziyi notr birakmak ikisini birbirinden koparyordu. Noktalar asamalari ayirir,
+cizgi tek parca gorunmez. Sari etikette bir ton koyusu kullaniliyor - beyaz zeminde sari okunmuyor.
+Toplam: **339 test gecti** (325 + 14).
