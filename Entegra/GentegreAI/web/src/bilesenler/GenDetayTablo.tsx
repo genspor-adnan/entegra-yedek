@@ -177,9 +177,13 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
    * kodlariyla), HIZMET binlerce oldugu icin arama penceresiyle secilir -
    * kampanya urun satiriyla ayni gerekce.
    */
+  // TESPIT 'rol' ALANINA BAGLANMAZ (379): rol satirdan plan basligina tasindi
+  //   ve bu kontrol sessizce yanlisa dondu - prim satiri gridi kendini FIYAT
+  //   LISTESI sanip Tip/Kategori/Kod/Adı kolonlarini cizmeye basladi.
+  //   Satirin kendi alanlari kullanilir: hedef + oran.
   const primSatiri = meta.ad === 'satirlar'
-                     && meta.alanlar.some(a => a.ad === 'rol')
-                     && meta.alanlar.some(a => a.ad === 'hedefId');
+                     && meta.alanlar.some(a => a.ad === 'hedefId')
+                     && meta.alanlar.some(a => a.ad === 'oranTipi');
 
   /**
    * KAYITLI urun satirinda ad (268): sunucu yalniz id tasir, kart acilinca

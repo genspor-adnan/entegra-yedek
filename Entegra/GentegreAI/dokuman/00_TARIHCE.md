@@ -5794,3 +5794,28 @@ Kademe DONEM KAPANISINDA isledigi icin ekranda aninda etki gostermez -
   - sunucu hatasi (cakisan aralik) ekranda gorunur
 
 410 test.
+
+### Kademe gridi GERCEK TARAYICIDA test edildi
+
+jsdom testleri gecerken ekranin calismadigini bu oturumda bir kez yasadik
+(prim alanlar). Bu yuzden kademe gridi gercek tarayicida denendi: Playwright
+kuruldu ve SISTEMDEKI EDGE kullanildi (`channel: 'msedge'`) - Chromium
+indirmeye gerek kalmadi.
+
+Akis: giris -> sube secimi -> Prim Planları listesi -> plan cift tik ->
+Prim Satırları sekmesi -> satiri isaretle -> ✎ -> modalin altinda KADEMELER.
+
+Gorulen:
+  - "Kademeler" kutusu, ＋ ve "Kademeleri Kaydet" dugmeleri YERINDE
+  - "dönem kapanışında uygulanır... önizlemedir" notu gorunuyor
+  - bos halde "Kademe yok — satırın kendi oranı geçerli."
+  - 1-4 / 6,5 girilip kaydedildi -> "1 kademe kaydedildi" + DB'de satir
+  - ustune 3-8 eklenip kaydedilince SUNUCU KURALI ekranda:
+    "Kademe aralıkları çakışıyor: 1-4 ile 3-8."
+
+**BULUNAN HATA:** Prim Satırları gridi kendini FIYAT LISTESI sanip
+Tip/Kategori/Kod/Adı kolonlarini ciziyordu. `primSatiri` tespiti `rol`
+alanina bakiyordu; 379'da rol satirdan plan basligina tasinince kontrol
+sessizce yanlisa dondu. Tespit satirin KENDI alanlarina baglandi
+(hedefId + oranTipi). Ekran goruntusu olmadan fark edilmesi zor bir
+gerileme - jsdom testleri kolon adlarini sormuyordu.
