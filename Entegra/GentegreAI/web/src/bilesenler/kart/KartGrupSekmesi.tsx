@@ -434,12 +434,7 @@ const adsizAlt = adsiz.filter(a => enAltAd.has(a.ad));
 const adsizBlok = adsizUst.length > 0 && (
   // RANDEVU (mockup randevu_karti.html): iki sutun, etiketler alanlarin
   //   USTUNDE, Açıklama tam satir - kart mockup'la ayni duzende gorunsun.
-  // PRIM PLANI (kullanici): SATIRDA TAM 5 ALAN - on alan iki esit sirada
-  //   okunsun. Otomatik dolgu (auto-fill) pencere genisligine gore 3-4-5
-  //   arasi degisiyordu ve "kimlik / kapsam" ayrimi her ekranda baska yerden
-  //   bolunuyordu.
   <div className={`alan-izgara${kaynak === 'kisi' ? ' kisi-ust-satir' : ''}` +
-                  (kaynak === 'prim-plani' ? ' bes-sutun' : '') +
                   (kaynak === 'randevu' ? ' randevu-alanlar' : '') +
                   (TEK_SUTUN_KARTLAR.has(kaynak) ? ' tek-sutun ayar-formu' : '')}>
     {renderAlanListesi(adsizUst)}

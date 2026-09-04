@@ -911,14 +911,6 @@ input.skt-gecmis {
    1) Cari . No . Tarih . e-Belge
    2) Temsilci . Depo . Fat.Durumu . Bagli Siparis
    (Doviz/Kur grid altindaki kutuda.) */
-/* BES SUTUN (prim plani basligi): on alan iki esit sirada. Etiket kolonu da
-   daraltilir - 84px sabit etiket, bes sutunda kutuya yer birakmiyordu. */
-.alan-izgara.bes-sutun { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px 12px }
-.alan-izgara.bes-sutun .alan { grid-template-columns: 76px minmax(0, 1fr) }
-.alan-izgara.bes-sutun .alan > select,
-.alan-izgara.bes-sutun .alan > input { width: 100%; min-width: 0 }
-@media (max-width: 1200px) { .alan-izgara.bes-sutun { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
-
 .alan-izgara.dort-sutun { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 14px }
 .alan-izgara.dort-sutun .genis-2 { grid-column: span 2 }
 /* Tam satir kaplayan alan (ör. Başvuru Notu) - dort sutunun hepsi. */
@@ -1318,6 +1310,18 @@ input.skt-gecmis {
 /* Tarih sutunu 250 -> 205: %30 daraltmada (175) tarih kutusu "29.08.20" diye
    kirpiliyordu - tarih + 78px saat icin en az bu kadar yer gerekiyor. */
 .kaid .alan-izgara.kaid-randevu { grid-template-columns: minmax(0, 600px) 205px 150px }
+/* PRIM PLANI KIMLIK SERIDI: satirda TAM 5 alan (kullanici) - on alan iki esit
+   sirada okunsun. Serit varsayilani auto-fill'di ve pencere genisligine gore
+   3-4-5 arasi degisiyordu; "kimlik / kapsam" ayrimi her ekranda baska yerden
+   bolunuyordu. Etiket kolonu da daraltilir: 84px sabit etiket bes sutunda
+   kutuya yer birakmiyor. */
+.kaid .alan-izgara.kaid-prim { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px 12px }
+.kaid .alan-izgara.kaid-prim .alan { grid-template-columns: 76px minmax(0, 1fr) }
+.kaid .alan-izgara.kaid-prim .alan > select,
+.kaid .alan-izgara.kaid-prim .alan > input { width: 100%; min-width: 0 }
+@media (max-width: 1200px) {
+  .kaid .alan-izgara.kaid-prim { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+}
 
 /* Randevu karti mockup genisliginde (randevu_karti.html .win: 760px) - alan
    sayisi az, 1080px'te sag taraf bos kaliyordu. */
