@@ -3,7 +3,7 @@
   "varsayilanlar": {
    "durum": 1,
    "oncelik": 10,
-   "baz": 4,
+   "rol": 1,
    "kdv_haric": 1,
    "prim_zamani": 1,
    "baslangic": "@bugun"
@@ -16,19 +16,6 @@
     "tip": "sayi",
     "yazilabilir": false,
     "zorunlu": false,
-    "gizli": false
-   },
-   {
-    "ad": "primZamani",
-    "baslik": "Prim Zamanı",
-    "tip": "kod",
-    "grup": "Kimlik",
-    "yazilabilir": true,
-    "zorunlu": true,
-    "kodlar": {
-     "1": "Tahsilatta",
-     "2": "Faturalamada"
-    },
     "gizli": false
    },
    {
@@ -52,6 +39,74 @@
     "gizli": false
    },
    {
+    "ad": "rol",
+    "baslik": "Prim Rolü",
+    "tip": "kod",
+    "grup": "Kimlik",
+    "yazilabilir": true,
+    "zorunlu": true,
+    "kodlar": {
+     "7": "Anestezi — aktif kişi işaretlenmemiş",
+     "8": "Asistan — aktif kişi işaretlenmemiş",
+     "1": "Gönderen (5 kişi)"
+    },
+    "gizli": false
+   },
+   {
+    "ad": "primZamani",
+    "baslik": "Prim Zamanı",
+    "tip": "kod",
+    "grup": "Kimlik",
+    "yazilabilir": true,
+    "zorunlu": true,
+    "kodlar": {
+     "1": "Tahsilatta",
+     "2": "Faturalamada"
+    },
+    "gizli": false
+   },
+   {
+    "ad": "durum",
+    "baslik": "Durum",
+    "tip": "kod",
+    "grup": "Kimlik",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "kodlar": {
+     "1": "Aktif",
+     "0": "Pasif"
+    },
+    "gizli": false
+   },
+   {
+    "ad": "odeyenTipi",
+    "baslik": "Ödeyen Tipi",
+    "tip": "kod",
+    "grup": "Kimlik",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "kodlar": {
+     "0": "Tümü",
+     "1": "Özel (Ücretli)",
+     "2": "ÖSS",
+     "3": "SGK"
+    },
+    "gizli": false
+   },
+   {
+    "ad": "subeId",
+    "baslik": "Şube (boş = tümü)",
+    "tip": "kod",
+    "grup": "Kimlik",
+    "yazilabilir": true,
+    "zorunlu": false,
+    "kodlar": {
+     "3": "Ankara Sube",
+     "1": "Merkez"
+    },
+    "gizli": false
+   },
+   {
     "ad": "baslangic",
     "baslik": "Başlangıç",
     "tip": "tarih",
@@ -70,80 +125,10 @@
     "gizli": false
    },
    {
-    "ad": "durum",
-    "baslik": "Aktif",
-    "tip": "mantik",
-    "grup": "Kimlik",
-    "yazilabilir": true,
-    "zorunlu": false,
-    "gizli": false
-   },
-   {
-    "ad": "oncelik",
-    "baslik": "Öncelik",
-    "tip": "sayi",
-    "grup": "Kimlik",
-    "yazilabilir": true,
-    "zorunlu": false,
-    "gizli": false
-   },
-   {
-    "ad": "odeyenKurumId",
-    "baslik": "Ödeyen Kurum",
-    "tip": "kod",
-    "grup": "Kapsam",
-    "yazilabilir": true,
-    "zorunlu": false,
-    "kodlar": {
-     "4987": "KRM-OZEL - Özel Yaşam Sigorta A.Ş.",
-     "4990": "OZEL - Özel (Ücretli)",
-     "4968": "SGK - Sosyal Güvenlik Kurumu"
-    },
-    "gizli": false,
-    "aramaKaynagi": "kurum"
-   },
-   {
-    "ad": "baz",
-    "baslik": "Baz",
-    "tip": "kod",
-    "grup": "Kapsam",
-    "yazilabilir": true,
-    "zorunlu": false,
-    "kodlar": {
-     "4": "Tahsil edilen (matrah)",
-     "3": "Kurum payı",
-     "2": "Net tutar",
-     "1": "Liste fiyatı"
-    },
-    "gizli": false
-   },
-   {
-    "ad": "kdvHaric",
-    "baslik": "KDV Hariç (matrah)",
-    "tip": "mantik",
-    "grup": "Kapsam",
-    "yazilabilir": true,
-    "zorunlu": false,
-    "gizli": false
-   },
-   {
-    "ad": "subeId",
-    "baslik": "Şube (boş = tümü)",
-    "tip": "kod",
-    "grup": "Kapsam",
-    "yazilabilir": true,
-    "zorunlu": false,
-    "kodlar": {
-     "3": "Ankara Sube",
-     "1": "Merkez"
-    },
-    "gizli": false
-   },
-   {
     "ad": "aciklama",
     "baslik": "Açıklama",
     "tip": "metin",
-    "grup": "Kapsam",
+    "grup": "Kimlik",
     "yazilabilir": true,
     "zorunlu": false,
     "enFazlaUzunluk": 300,
@@ -162,25 +147,6 @@
       "tip": "sayi",
       "yazilabilir": false,
       "zorunlu": false,
-      "gizli": false
-     },
-     {
-      "ad": "rol",
-      "baslik": "Rol",
-      "tip": "kod",
-      "yazilabilir": true,
-      "zorunlu": true,
-      "kodlar": {
-       "7": "Anestezi — aktif kişi işaretlenmemiş",
-       "8": "Asistan — aktif kişi işaretlenmemiş",
-       "1": "Gönderen (5 kişi)",
-       "2": "İsteyen — aktif kişi işaretlenmemiş",
-       "6": "Onaylayan — aktif kişi işaretlenmemiş",
-       "5": "Raporlayan (1 kişi)",
-       "9": "Teknisyen — aktif kişi işaretlenmemiş",
-       "3": "Uygulayan — aktif kişi işaretlenmemiş",
-       "4": "Yapan (15 kişi)"
-      },
       "gizli": false
      },
      {
@@ -218,96 +184,7 @@
       "kodlar": {
        "73": "DIG - Diğer",
        "89": "DIG - Diğer > DIG-MR - MR",
-       "90": "DIG - Diğer > DIG-Röntgen - Röntgen",
-       "15": "DYI - DIŞARIDA YAPILAN İŞÇİLİK",
-       "74": "ILAC - İlaç",
-       "91": "ILAC - İlaç > ILAC-Kontrast - Kontrast",
-       "119": "ILAC - İlaç > ILAC-Kontrast - Kontrast > ILAC-Kontrast-BTKontrast - BTKontrast",
-       "120": "ILAC - İlaç > ILAC-Kontrast - Kontrast > ILAC-Kontrast-MR Kontrast - MR Kontrast",
-       "121": "ILAC - İlaç > ILAC-Kontrast - Kontrast > ILAC-Kontrast-RöntgenKontrast - RöntgenKontrast",
-       "92": "ILAC - İlaç > ILAC-LAB - LAB",
-       "122": "ILAC - İlaç > ILAC-LAB - LAB > ILAC-LAB-Kontrast - Kontrast",
-       "4": "K1 - Genel",
-       "10": "K10 - Hammadde",
-       "13": "K13 - Seçili tüm depolar",
-       "17": "K17 - Yok",
-       "18": "K18 - Var",
-       "5": "K5 - Dental El Aletleri",
-       "19": "K5 - Dental El Aletleri > K5-1 - Frezeler",
-       "6": "K6 - Üstyapı ve Ekipmanları",
-       "7": "K7 - İmplant Gövde",
-       "8": "K8 - Dental Drill",
-       "9": "K9 - Ortodontik Mini Vidalar",
-       "75": "KRD - Kardiyoloji",
-       "16": "KTL - Kesici Takım Listesi",
-       "30": "LAB - Laboratuvar",
-       "126": "LAB - Laboratuvar > Biyokimya - Biyokimya",
-       "127": "LAB - Laboratuvar > Biyokimya - Biyokimya",
-       "128": "LAB - Laboratuvar > Genetik - Genetik",
-       "129": "LAB - Laboratuvar > Hematoloji - Hematoloji",
-       "130": "LAB - Laboratuvar > Hormon - Hormon",
-       "96": "LAB - Laboratuvar > LAB-KRD - KRD",
-       "125": "LAB - Laboratuvar > LAB-KRD - KRD > LAB-KRD-Hormon - Hormon",
-       "133": "LAB - Laboratuvar > LAB-Seroloji - Seroloji",
-       "98": "LAB - Laboratuvar > LAB-SSK - SSK",
-       "134": "LAB - Laboratuvar > LAB-SSK - SSK > LAB-SSK-LAB - LAB",
-       "132": "LAB - Laboratuvar > Mikrobiyoloji - Mikrobiyoloji",
-       "76": "NT - Nükleer Tıp",
-       "99": "NT - Nükleer Tıp > NT-Kontrast - Kontrast",
-       "136": "NT - Nükleer Tıp > NT-Miyokard - Miyokard",
-       "137": "NT - Nükleer Tıp > NT-NukTıp - NukTıp",
-       "101": "NT - Nükleer Tıp > NT-PET - PET",
-       "77": "OPR - Ameliyat",
-       "102": "OPR - Ameliyat > OPR-MR - MR",
-       "78": "PAKET - Paketler",
-       "104": "PAKET - Paketler > PAKET-LAB - LAB",
-       "105": "PAKET - Paketler > PAKET-MR - MR",
-       "79": "PANEL - Panel",
-       "106": "PANEL - Panel > PANEL-LAB - LAB",
-       "143": "PANEL - Panel > PANEL-LAB - LAB > PANEL-LAB-Mikrobiyoloji - Mikrobiyoloji",
-       "20": "RAD - Radyoloji",
-       "22": "RAD - Radyoloji > RAD-Angio - Angio",
-       "23": "RAD - Radyoloji > RAD-BT - BT",
-       "39": "RAD - Radyoloji > RAD-BT - BT > RAD-BT-BTKontTetFark - BTKontTetFark",
-       "24": "RAD - Radyoloji > RAD-BTA - BTA",
-       "40": "RAD - Radyoloji > RAD-BTA - BTA > RAD-BTA-BT - BT",
-       "41": "RAD - Radyoloji > RAD-BTA - BTA > RAD-BTA-BT Koroner Angio - BT Koroner Angio",
-       "25": "RAD - Radyoloji > RAD-EKO - EKO",
-       "42": "RAD - Radyoloji > RAD-EKO - EKO > RAD-EKO-E-EKO - E-EKO",
-       "44": "RAD - Radyoloji > RAD-EKO - EKO > RAD-EKO-F-EKO - F-EKO",
-       "45": "RAD - Radyoloji > RAD-EKO - EKO > RAD-EKO-P-EKO - P-EKO",
-       "46": "RAD - Radyoloji > RAD-EKO - EKO > RAD-EKO-P-EKO-M - P-EKO-M",
-       "26": "RAD - Radyoloji > RAD-Girişimsel - Girişimsel",
-       "48": "RAD - Radyoloji > RAD-Girişimsel - Girişimsel > RAD-Girişimsel-US - US",
-       "27": "RAD - Radyoloji > RAD-HSG - HSG",
-       "49": "RAD - Radyoloji > RAD-HSG - HSG > RAD-HSG-Röntgen - Röntgen",
-       "28": "RAD - Radyoloji > RAD-KemDn - KemDn",
-       "29": "RAD - Radyoloji > RAD-Kontrast - Kontrast",
-       "51": "RAD - Radyoloji > RAD-Kontrast - Kontrast > RAD-Kontrast-Anestezi - Anestezi",
-       "52": "RAD - Radyoloji > RAD-Kontrast - Kontrast > RAD-Kontrast-BT An. Kontrast - BT An. Kontrast",
-       "53": "RAD - Radyoloji > RAD-Kontrast - Kontrast > RAD-Kontrast-BT Kontrast - BT Kontrast",
-       "55": "RAD - Radyoloji > RAD-Kontrast - Kontrast > RAD-Kontrast-Malzeme - Malzeme",
-       "56": "RAD - Radyoloji > RAD-Kontrast - Kontrast > RAD-Kontrast-MR Kontrast - MR Kontrast",
-       "57": "RAD - Radyoloji > RAD-Kontrast - Kontrast > RAD-Kontrast-NT Kontrast - NT Kontrast",
-       "58": "RAD - Radyoloji > RAD-Kontrast - Kontrast > RAD-Kontrast-Patoloji - Patoloji",
-       "107": "RAD - Radyoloji > RAD-LAB - LAB",
-       "31": "RAD - Radyoloji > RAD-Mammografi - Mammografi",
-       "32": "RAD - Radyoloji > RAD-MR - MR",
-       "62": "RAD - Radyoloji > RAD-MR - MR > RAD-MR-MRKontTetFark - MRKontTetFark",
-       "33": "RAD - Radyoloji > RAD-RES - RES",
-       "63": "RAD - Radyoloji > RAD-RES - RES > RAD-RES-RESMR - RESMR",
-       "34": "RAD - Radyoloji > RAD-Röntgen - Röntgen",
-       "35": "RAD - Radyoloji > RAD-SSK - SSK",
-       "65": "RAD - Radyoloji > RAD-SSK - SSK > RAD-SSK-BT - BT",
-       "66": "RAD - Radyoloji > RAD-SSK - SSK > RAD-SSK-KZY Kontrast - KZY Kontrast",
-       "67": "RAD - Radyoloji > RAD-SSK - SSK > RAD-SSK-RESBT - RESBT",
-       "68": "RAD - Radyoloji > RAD-SSK - SSK > RAD-SSK-RESMR - RESMR",
-       "36": "RAD - Radyoloji > RAD-US - US",
-       "14": "SM - Sarf",
-       "84": "TED - Tedavi",
-       "112": "TED - Tedavi > TED-DİŞ - DİŞ",
-       "11": "YM - Yarı Mamül",
-       "12": "YMK - Yardımcı Malzeme ve Kimyasallar"
+       "90": "DIG - Diğer > DIG-Röntgen - Röntgen"
       },
       "gizli": false
      },
@@ -318,6 +195,10 @@
       "yazilabilir": true,
       "zorunlu": false,
       "enFazlaUzunluk": 60,
+      "kodlar": {
+       "15,16": "Fatura / Fiş",
+       "17": "Tahakkuk"
+      },
       "gizli": false
      },
      {
@@ -342,10 +223,7 @@
       "kodlar": {
        "22": "Banka Tahsilat (Havale/EFT)",
        "23": "Çek ile Tahsilat",
-       "25": "Kredi Kartı / POS Tahsilat",
-       "26": "Kupon ile Tahsilat",
-       "21": "Nakit Tahsilat",
-       "24": "Senet ile Tahsilat"
+       "25": "Kredi Kartı / POS Tahsilat"
       },
       "gizli": false
      },
@@ -435,22 +313,22 @@
       "kodlar": {
        "4888": "aaa ooo",
        "3235": "ABDULKADİR POLAT",
-       "4339": "ABDULLATİF MACARTAY"
+       "4286": "ABDULLAH ÖZCİHAN (STAJYER)"
       },
       "gizli": false,
       "aramaKaynagi": "personel,dis-hekim"
      },
      {
-      "ad": "primRolu",
-      "baslik": "Prim Rolü",
+      "ad": "bolum",
+      "baslik": "Bölüm",
       "tip": "metin",
       "yazilabilir": false,
       "zorunlu": false,
       "gizli": false
      },
      {
-      "ad": "bolum",
-      "baslik": "Bölüm",
+      "ad": "gorev",
+      "baslik": "Görev",
       "tip": "metin",
       "yazilabilir": false,
       "zorunlu": false,
@@ -478,25 +356,22 @@
  "kart": {
   "kart": {
    "id": 10,
-   "primZamani": 2,
    "kod": "PRM-MR-20",
    "ad": "MR — Gönderen %20",
+   "rol": 1,
+   "primZamani": 2,
+   "durum": 1,
+   "odeyenTipi": 2,
+   "subeId": null,
    "baslangic": "2026-09-04T00:00:00",
    "bitis": null,
-   "durum": 1,
-   "oncelik": 10,
-   "odeyenKurumId": null,
-   "baz": 4,
-   "kdvHaric": 1,
-   "subeId": null,
    "aciklama": "",
-   "surum": "32680"
+   "surum": "32761"
   },
   "detaylar": {
    "satirlar": [
     {
      "id": 14,
-     "rol": 1,
      "tip": 2,
      "kalemTuru": 2,
      "hedefId": 32,
@@ -516,18 +391,24 @@
      "id": 5,
      "tipi": "Dış Hekim",
      "tarafId": 5030,
-     "primRolu": "Gönderen",
      "bolum": "Radyoloji",
+     "gorev": "",
      "aciklama": ""
     }
    ]
   },
   "kodAd": {
+   "rol": {
+    "1": "Gönderen (5 kişi)"
+   },
    "primZamani": {
     "2": "Faturalamada"
    },
-   "baz": {
-    "4": "Tahsil edilen (matrah)"
+   "durum": {
+    "1": "Aktif"
+   },
+   "odeyenTipi": {
+    "2": "ÖSS"
    }
   },
   "yetki": {
@@ -535,6 +416,6 @@
    "sil": true,
    "gizliAlanlar": []
   },
-  "izlemeNo": "01M1PV8KAYVXS4TKJJVQVQMWQ9"
+  "izlemeNo": "01M1Q1VDWJ7MG5RANY184CMCXJ"
  }
 }

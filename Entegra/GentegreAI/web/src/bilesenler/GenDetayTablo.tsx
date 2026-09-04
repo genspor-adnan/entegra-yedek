@@ -3,8 +3,8 @@ import { Modal } from './Modal';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { TarafArama } from './TarafArama';
 import { tarafSecimEngeli } from './tarafSecimEngeli';
+import { detayHucreMetni } from './detayGorunum';
 import { api } from '../api/istemci';
-import { para4 } from './bicim';
 import { GridMenu, type MenuOgesi } from './grid/GridMenu';
 import { dosyaIndirUrl } from './indir';
 import type { DetayFarki, KartAlanMeta, KartDetayMeta } from '../api/sozlesme';
@@ -303,31 +303,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const [menuKonum, setMenuKonum] = useState<{ x: number; y: number } | null>(null);
   const [gizliKolonlar, setGizliKolonlar] = useState<Set<string>>(new Set());
 
-  /** Salt gorunum hucresi: kod alani etiketiyle, mantik ✓, para TR bicimiyle. */
-  const gorunum = (satir: Record<string, unknown>, a: typeof alanlar[number]) => {
-    const d = satir[a.ad];
-    if (a.tip === 'mantik') return Number(d) === 1 || d === true ? '✓' : '';
-    // COK SECIMLI metin alani (virgullu kod listesi): kodlar ADLARINA cevrilir.
-    //   Ham "15,16" gridde okunmuyordu; bos ise kriter YOK demektir - "Tümü".
-    if (a.tip === 'metin' && a.kodlar) {
-      const ham = String(d ?? '').trim();
-      if (ham === '') return 'Tümü';
-      // Once TAM ESLESME (secenegin kendisi), yoksa tek tek kodlar: eski
-      //   kayitlar baska kombinasyonlar tasiyor olabilir ve ham "15,16"
-      //   gridde okunmuyordu.
-      return a.kodlar[ham]
-        ?? ham.split(',').map(x => x.trim()).filter(Boolean)
-              .map(k => a.kodlar![k] ?? k).join(', ');
-    }
-    if (a.kodlar) return a.kodlar[String(d ?? '')] ?? '';
-    if (a.tip === 'para' && d !== null && d !== undefined && d !== '') {
-      const s = Number(d);
-      // para4: iki haneye EZMEZ - carpan 7,0092'yi 7,01 gostermek yaniltir;
-      //   tutarlar zaten iki hanede gelir, fazladan hane basilmaz.
-      if (Number.isFinite(s)) return para4.format(s);
-    }
-    return String(d ?? '');
-  };
+  /** Salt gorunum hucresi - kural `detayGorunum.ts`'te (saf, testli). */
+  const gorunum = (satir: Record<string, unknown>, a: typeof alanlar[number]) =>
+    detayHucreMetni(satir, a);
+
 
   const modalAc = (i: number | 'yeni') => {
     setTaslak(i === 'yeni' ? bosSatir() : { ...durum.guncel[i] });

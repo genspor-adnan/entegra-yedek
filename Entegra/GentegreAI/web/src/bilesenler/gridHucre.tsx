@@ -45,7 +45,13 @@ export function durumRozeti(deger: unknown, kolon: KolonMeta) {
  * digerleri notr. Eslesmeyen metin notr rozet olur - yeni bir durum kodu
  * eklenince ekran bozulmaz, yalnizca rengi notr kalir.
  */
-const ROZET_SINIFI: Record<string, string> = {
+/**
+ * Rozet metni -> renk sinifi. DISA ACIK: renklerin gercekten AYRISTIGINI
+ * tutan test bunu okur (bkz. rozetRenkleri.test.ts). "mor" / "bilgi" / "mavi"
+ * siniflarinin ucu de ayni maviye dustugu icin prim rolleri ayni renk
+ * gorunuyordu - gozle fark edilmesi zor, testle kolay.
+ */
+export const ROZET_SINIFI: Record<string, string> = {
   'Alınan': 'ok', 'Verilen': 'uyari',
   'Portföyde': 'bilgi', 'Ciro Edildi': 'uyari', 'Tahsilde': 'bilgi',
   'Teminatta': 'bilgi', 'Tahsil Edildi': 'ok', 'Ödendi': 'ok',

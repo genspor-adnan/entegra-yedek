@@ -5465,3 +5465,28 @@ arasinda cevrim yok.
 Dusen turler (4 stok fisi, 14 siparis, 13 ALIS tahakkugu) prim URETMEZ - prim
 yalniz gelir belgesinden dogar - yani hicbir hakedis degismedi. Dogrulandi:
 plan 1 fatura %10, tahakkuk %12 (eskisi gibi).
+
+### Prim ekranlari: refaktor + testler
+
+Uzun bir tur boyunca prim planinda "gorunen ama uygulanmayan ayar" birikmisti
+(hekim_tipi, baz, kdv_haric) ve GenDetayTablo 1163 satira cikmisti. Uc parca
+ayrildi ve gercek hatalardan dogan testler yazildi:
+
+**`detayGorunum.ts`** - detay gridinde hucre metni. Dort kural (mantik / kodlu
+metin / kod / para) inline duruyordu; prim satirina "Belge Türleri" kodlu metin
+olarak eklenince ayirmak kacinilmaz oldu. 7 test - ozellikle bos degerin
+"Tümü" okunmasi ve db/381 oncesi kombinasyonlarin ('17,99') hala cozulmesi.
+
+**`ROZET_SINIFI` disa acildi + `rozetRenkleri.test.ts`** - prim rolleri once
+"mor" / "bilgi" / "mavi" siniflarina dagitilmis ve ekranda HEPSI AYNI MAVI
+gorunmustu: tema degiskeni `--mor` aslinda #2f6db3 mavi. Test, gozle ayirt
+edilemeyen siniflari bir grup sayip dokuz rolun GERCEKTEN ayristigini tutuyor.
+"Farkli sinif verdim" demek yetmiyordu.
+
+**`primPlaniKatalog.test.ts`** - kart metasinin sozlesmesi: baslik sirasi
+(kimlik 5 + kapsam 5), kaldirilan alanlarin GERI SIZMAMASI, rol/prim zamani
+zorunlulugu, satirda rol OLMAMASI, Prim Alanlar'da kisi disindaki kolonlarin
+salt okunur olmasi. Fixture GERCEK sunucudan alinir; bayatlayinca test
+kirilir - nitekim ilk kosuda kirildi ve tazelendi.
+
+403 test.
