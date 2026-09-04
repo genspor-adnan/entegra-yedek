@@ -885,7 +885,14 @@ public static partial class KartKatalogu
                 new("mahremiyetNotu", "mahremiyet_notu", "metin", EnFazlaUzunluk: 500,
                     Baslik: "Mahremiyet Notu")
             }, SubeKolonu: null, Baslik: "Hasta Bilgisi", LogTabloId: 907)
-            : d).ToList();
+            : d)
+            // PRIM ROLLERI HASTADA YOK (kullanici): rol "bu kisi hangi isten
+            //   prim alir" demektir - isteyen/yapan/uygulayan hep PERSONELDIR.
+            //   Sekme yalnizca personel kartindan mirasla geliyordu; hasta
+            //   kartinda anlamsiz ve yanlis veri kapisi (hastaya prim rolu
+            //   isaretlenirse basvuru hekim combosuna dusebilirdi).
+            //   Dis hekimde de yok - orada rol "Çalışma Şekli" ile veriliyor.
+            .Where(d => d.Ad != "primRolleri").ToList();
 
         // KURUM / ÖDEYEN (248, kullanici): hastanin sponsoru - Özel (kendi),
         //   ÖSS (sigorta sirketi) ya da SGK. 1:N: police ZAMANLA DEGISIR, her

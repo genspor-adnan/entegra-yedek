@@ -4550,3 +4550,11 @@ ek tahsilat -> fis tam 600,00.
 Toplam: **264 test gecti** (232 + 32).
 NOT: `taraf_kullanici` icinde onceki bir oturumdan kalma `zztest` (id 4964, rol Yonetici, AKTIF)
 kullanicisi var - bu oturumda acilmadi, silinmedi.
+
+**Prim Rolleri sekmesi HASTA kartindan kaldirildi (kullanici).** Hasta karti personel kartindan
+turedigi icin (`Hasta()` = `Personel() with ...`) `primRolleri` detayini de MIRAS ALIYORDU. Rol
+"bu kisi hangi isten prim alir" demektir - isteyen/yapan/uygulayan hep PERSONELDIR; hastada hem
+anlamsiz hem yanlis veri kapisiydi (hastaya rol isaretlenirse `v_prim_rol_aday` uzerinden basvuru
+hekim combosuna dusebilirdi). Dis hekimde de yok - orada rol "Çalışma Şekli" combosuyla veriliyor
+(362). Detay kopyalanirken suzuluyor. DB kontrol edildi: hasta tarafinda kayitli prim rolu YOK
+(17 satirin hepsi personel), temizlik gerekmedi.
