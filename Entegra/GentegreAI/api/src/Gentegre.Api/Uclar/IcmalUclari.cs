@@ -188,7 +188,12 @@ public static class IcmalUclari
                 ["tarafUnvan"] = icmal["kurumAdi"],
                 ["belgeTarihi"] = DateTime.Now,
                 ["belgeDovizi"] = "TL",
-                ["kdvDurum"] = "Haric",
+                // "Haric" DEGIL "Hariç" (373): c-sedilsiz yazim veriye ucuncu
+                //   bir varyant sokuyordu - kolon serbest metin oldugu icin
+                //   sessizce kabul ediliyor, sonra "hangi yazim" sorusu her
+                //   yeni kuralda yeniden cikiyordu. Artik DB kisiti da
+                //   yanlis yazimi reddeder.
+                ["kdvDurum"] = "Hariç",
                 ["subeId"] = icmal["subeId"],
                 ["aciklama"] = $"Dönem icmali: {Convert.ToDateTime(icmal["donemBas"]):dd.MM.yyyy}"
                              + $" – {Convert.ToDateTime(icmal["donemBit"]):dd.MM.yyyy}",

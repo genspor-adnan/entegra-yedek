@@ -4843,3 +4843,21 @@ veriyordu - `UzantiYazAsync`in "bu gruba ait dolu alan var mi" kontrolu her dege
 `Convert.ToDecimal` ile sinamaya calisiyor, DateTime gorunce *"Invalid cast from 'DateTime' to
 'Decimal'"* atiyordu. Tarih/mantik degerleri artik VARSA dolu sayiliyor. Kusur ancak provizyon
 tarihi DOLU gonderilince ciktigi icin bugune kadar goze carpmamisti.
+
+**belge.kdv_durum TEMIZLENDI ve KISITLANDI (373).** Kolon serbest metin oldugu icin dort ayri yazim
+birikmisti: Hariç 493 · (bos) 34 · Haric 3 · Hari? 1 · Muaf 1. Davranis acisindan hepsi ayniydi
+(`fn_belge_diptoplam` yalniz 'Dahil' dalini ayirir) - yani kayitlar YANLIS HESAPLANMIYORDU; sorun
+kolonun guvenilmez olmasi, ona bakan her yeni kuralin once "hangi yazim" sorusunu cozmek zorunda
+kalmasiydi (372 tam bunu yasadi).
+*KOK NEDEN kodda bulundu ve duzeltildi:* `IcmalUclari.cs` doneme icmal faturasini `"Haric"` (c
+sedilsiz) yaziyordu - temizlik yapilip birakilsa bir sonraki icmalde yeniden bozulacakti.
+'Hari?' ise bir aktarimda 'ç' kaybetmis mojibake.
+*Onarim yalniz PROVABLY ayni degerin bozuk yazimlarinda:* 'Haric' ve 'Hari?' -> 'Hariç' (4 satir),
+bos -> 'Hariç' (34 satir; kolon sonradan zorunlu oldu, davranis degismiyor). **'Muaf' DEGISTIRILMEDI**
+- anlamini bilmedigimiz, kullanicinin bilerek yazmis olabilecegi tek kayit; uydurmak yerine kisitta
+izinli birakildi. Dokunulan 38 satir `_yedek_kdv_durum_373` tablosuna yedeklendi.
+*Tekrari onlendi:* `ck_belge_kdv_durum` kisiti ('Dahil','Hariç','Muaf') + default 'Hariç'. Yanlis
+yazim artik KAYIT ANINDA patlar, aylar sonra veri temizligiyle degil - canli denendi, 'Haric'
+yazma girisimi reddedildi.
+*Dogrulama:* betik iki kez calistirildi (idempotent) ve 532 belgenin genel toplami db/024'teki ESKI
+fonksiyonla karsilastirildi - **0 fark**.
