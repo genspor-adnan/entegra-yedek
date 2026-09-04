@@ -4998,3 +4998,30 @@ kolonu SABIT 84px; satira daha cok pay verilse de combo ayni kaliyordu. Etiket k
 indirildi.
 Testler bu duzeni sabitliyor (İletişim'in Kimlik'ten once gelmesi, gridin Genel'de olmasi, sekme
 olarak cizilmemesi). Toplam: **365 test gecti**.
+
+## Hasta karti Genel sekmesi - son duzen (kullanici)
+
+Dort istek arka arkaya geldi ve ayni ekrani yeniden dizdi:
+
+- **Uyruk, Ulke'nin sagina** (Iletisim kutusu). Uyruk `ozluk` detayinda, ulke
+  `adresler` detayinda - farkli kaynaklar ama ayni soruyu tamamliyorlar.
+  `TekAdres` artik `uyruk` / `onUyrukDegis` props'u aliyor: combo orada
+  ciziliyor cunku ulke listesi ZATEN orada yuklu, ikinci kez yuklenmiyor.
+  Veri disaridan (KartGrupSekmesi ozluk detayina yaziyor).
+  Hasta DISI kartlarda uyruk eskisi gibi Kimlik Bilgileri kutusunda - iki
+  yerde birden cizilmesi ayni alani iki farkli degerle yazmak olurdu.
+- **Uyrugun yerine Yabanci Hasta Turu** - pasaportun yaninda, ayni soruyu
+  (kisi yabanci mi, kimligi nerede kayitli) tamamliyor.
+- **Kimlik Detayi kutusu kaldirildi.** Bu kutu ozluk detayinin "ozette
+  cizilmeyen" alanlarini jenerik olarak gosteriyordu; icindeki anlamli alanlar
+  (ana/baba adi, pasaport, yabanci hasta turu) tek tek Kimlik Bilgileri'ne
+  tasindiktan sonra geriye kalan artik kutuyu hak etmiyordu.
+- **Iletisim solda, Kimlik Bilgileri saginda, Yakinlar ikisinin de USTUNDE.**
+  Yakinlar gridi bir onceki turda altta kalmisti ve kartin gorunur alanindan
+  tasiyordu - kullanici ucuncu kez "grid gorunmuyor" dedi. Grid DOM'da vardi;
+  eksik olan gorunur alandi. Ustte oldugu icin artik ilk goze carpan sey.
+
+`hasta-kimlik-dikey` CSS'i (Iletisim'i tam genislikte uste alan onceki
+deneme) kaldirildi; geriye tek satirlik `.kimlik-foto-satiri` kaldi.
+Testler (hastaKartiGenel) sirayi sabitliyor: Yakinlar < Iletisim < Kimlik,
+"Kimlik Detayı" basligi YOK, "Uyruk" etiketi TEK ve Ulke ile ayni satirda.

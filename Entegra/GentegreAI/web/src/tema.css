@@ -2140,9 +2140,8 @@ input.skt-gecmis {
    genislikte; altinda "Kimlik Bilgileri" + "Fotoğraf" yan yana. Yan yanayken
    ikisi de dar kaliyor ve altlarindaki Yakınlar gridi kart penceresinin
    disina tasiyordu. */
-.hasta-kimlik-dikey { display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 0 }
-.hasta-kimlik-dikey > .kasutun { flex: none }
-.hasta-kimlik-dikey .kimlik-foto-satiri { display: flex; gap: 10px; min-width: 0 }
+/* Iletisim | Kimlik Bilgileri | Fotograf ayni satirda (kullanici). */
+.kimlik-foto-satiri { display: flex; gap: 10px; min-width: 0; flex: 1 }
 
 /* IL / ILCE combolari %30 daha genis (kullanici): il adlari
    ("KAHRAMANMARAŞ") dar kutuya sigmiyor, secili deger kirpiliyordu.

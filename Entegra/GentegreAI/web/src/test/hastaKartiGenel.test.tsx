@@ -75,7 +75,33 @@ describe('hasta kartinda Yakınlar gridi', () => {
       .some(x => x.includes('Acil Durumda Aranacak'))).toBe(false);
   });
 
-  it('ILETISIM kutusu KIMLIGIN USTUNDE (kullanici)', async () => {
+  it('KIMLIK DETAYI kutusu KALDIRILDI (kullanici)', async () => {
+    ciz();
+    await waitFor(() => expect(kartOku).toHaveBeenCalled());
+    await waitFor(() => expect([...document.querySelectorAll('h6')]
+      .map(x => x.textContent)).toContain('Kimlik Bilgileri'));
+    expect([...document.querySelectorAll('h6')].map(x => x.textContent))
+      .not.toContain('Kimlik Detayı');
+  });
+
+  it('UYRUK adres kutusunda, ULKENIN saginda (kullanici)', async () => {
+    ciz();
+    await waitFor(() => expect(kartOku).toHaveBeenCalled());
+    // Uyruk ozluk detayinda ama ULKE ile ayni satirda soruluyor; kimlik
+    //   kutusunda ARTIK OLMAMALI - iki yerde birden cizilirse ikisi ayni
+    //   alani farkli degerle yazar.
+    const etiketler = await waitFor(() => {
+      const e = [...document.querySelectorAll('.etiket')].map(x => x.textContent ?? '');
+      if (!e.includes('Uyruk')) throw new Error('Uyruk alani yok');
+      return e;
+    });
+    expect(etiketler.filter(x => x === 'Uyruk')).toHaveLength(1);
+    const ulke = [...document.querySelectorAll('.adres-satir')]
+      .find(r => (r.textContent ?? '').includes('Ülke'));
+    expect(ulke?.textContent).toContain('Uyruk');
+  });
+
+  it('ILETISIM kutusu KIMLIGIN SOLUNDA (kullanici)', async () => {
     ciz();
     await waitFor(() => expect(kartOku).toHaveBeenCalled());
     const basliklar = await waitFor(() => {
@@ -85,5 +111,9 @@ describe('hasta kartinda Yakınlar gridi', () => {
     });
     expect(basliklar.indexOf('İletişim'))
       .toBeLessThan(basliklar.indexOf('Kimlik Bilgileri'));
+    // YAKINLAR IKISININ DE USTUNDE (kullanici): altta kaldiginda kartin
+    //   gorunur alanindan tasiyor ve "grid yok" gibi gorunuyordu.
+    expect(basliklar.indexOf('Yakınlar / Acil Durumda Aranacak'))
+      .toBeLessThan(basliklar.indexOf('İletişim'));
   });
 });

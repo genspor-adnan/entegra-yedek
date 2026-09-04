@@ -98,7 +98,7 @@ export function PersonelKimlikOzet({
     }
   };
 
-  const satir: Satir = { uyruk: VARSAYILAN_ULKE, ...(ozlukDurum.guncel[0] ?? {}) };
+  const satir: Satir = { ...(ozlukDurum.guncel[0] ?? {}) };
 
   const ozlukDegis = (degisiklik: Record<string, unknown>) => {
     const yeniSatir = { ...satir, ...degisiklik };
@@ -116,23 +116,21 @@ export function PersonelKimlikOzet({
   const anaAdiAlan = alan('anaAdi');
   const babaAdiAlan = alan('babaAdi');
   const pasaportAlan = alan('pasaportNo');
+  // UYRUK adres kutusuna (ulkenin yanina) tasindi; yerine YABANCI HASTA TURU
+  //   geldi (kullanici) - pasaportla ayni soruyu tamamliyor.
+  const yabanciTurAlan = alan('yabanciHastaTuru');
 
   const yas = yasHesapla(String(satir.dogumTarihi ?? ''));
 
   return (
     // "etiket-sag": kart govdesindeki alan etiketleri saga yaslanir (kullanici);
     //   kimlik seridi (.kaid) bu sarmalayicinin DISINDA, orada etiketler solda.
-    // "hasta-kimlik-satiri": HASTADA iletisim ve kimlik kutulari yan yana ve
-    //   AYNI YUKSEKLIKTE (kullanici) - farkli sayida alan tasidiklari icin biri
-    //   kisa kalip aralarinda bosluk birakiyordu.
-    <div className={kartAdi === 'hasta'
-                    ? 'hasta-kimlik-dikey etiket-sag'
-                    : 'kasira etiket-sag'}>
-      {/* HASTADA ILETISIM KIMLIGIN USTUNDE (kullanici): yan yanayken ikisi de
-          dar kaliyor ve altlarindaki Yakınlar gridi kart penceresinin disina
-          tasiyordu. Ustte tam genislikte iletisim, altinda kimlik + fotograf. */}
-      {fotoSolEkOnce && fotoSolEk}
+    <div className="kasira etiket-sag">
       <div className="kasira kimlik-foto-satiri">
+      {/* HASTADA ILETISIM SOLDA, KIMLIK BILGILERI SAGINDA (kullanici) -
+          fotoSolEkOnce bu sirayi belirler. Kutular ayni satirda ve ayni
+          yukseklikte akar; altlarinda Yakınlar gridi tam genislikte kalir. */}
+      {fotoSolEkOnce && fotoSolEk}
       <div className="kasutun"
            style={{ flex: kimlikSutunGenisligi ? `0 0 ${kimlikSutunGenisligi}` : 1,
                     minWidth: 0 }}>
@@ -243,26 +241,45 @@ export function PersonelKimlikOzet({
                 )}
               </div>
             )}
-            {/* UYRUK ve PASAPORT yan yana (kullanici): ikisi ayni soruyu
-                soruyor - "bu kisi yabanci mi, kimligi nerede kayitli". Uyruk
-                tek basina satiri kaplayinca orantisiz genis duruyordu. */}
-            <div className="adres-satir">
-              <label className="alan tip-kod" style={{ flex: '0 1 50%' }}>
-                <span className="etiket">Uyruk</span>
-                <select value={String(satir.uyruk ?? '')} disabled={saltOkunur}
-                  onChange={e => ozlukDegis({ uyruk: e.target.value })}>
-                  {(yerler?.ulkeler ?? []).map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
-                </select>
-              </label>
-              {pasaportAlan && (
-                <label className="alan tip-metin">
-                  <span className="etiket">{pasaportAlan.baslik}</span>
-                  <input value={String(satir.pasaportNo ?? '')} disabled={saltOkunur}
-                    maxLength={pasaportAlan.enFazlaUzunluk ?? undefined}
-                    onChange={e => ozlukDegis({ pasaportNo: e.target.value })} />
-                </label>
-              )}
-            </div>
+            {/* YABANCI HASTA TURU ve PASAPORT yan yana (kullanici): ikisi ayni
+                soruyu tamamliyor - "bu kisi yabanci mi, kimligi nerede
+                kayitli". UYRUK buradan ADRES kutusuna, ULKENIN YANINA tasindi:
+                uyruk ile ulke birbirini aciklayan iki alan. */}
+            {(yabanciTurAlan || pasaportAlan || kartAdi !== 'hasta') && (
+              <div className="adres-satir">
+                {/* UYRUK yalniz HASTA DISI kartlarda burada: hasta kartinda
+                    ulkenin yanina (Iletisim kutusu) tasindi - iki yerde
+                    cizilirse ayni alani iki kutu farkli degerle yazar. */}
+                {kartAdi !== 'hasta' && (
+                  <label className="alan tip-kod" style={{ flex: '0 1 50%' }}>
+                    <span className="etiket">Uyruk</span>
+                    <select value={String(satir.uyruk ?? VARSAYILAN_ULKE)} disabled={saltOkunur}
+                      onChange={e => ozlukDegis({ uyruk: e.target.value })}>
+                      {(yerler?.ulkeler ?? []).map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
+                    </select>
+                  </label>
+                )}
+                {kartAdi === 'hasta' && yabanciTurAlan && (
+                  <label className="alan tip-kod">
+                    <span className="etiket">{yabanciTurAlan.baslik}</span>
+                    <select value={String(satir.yabanciHastaTuru ?? '')} disabled={saltOkunur}
+                      onChange={e => ozlukDegis({ yabanciHastaTuru: e.target.value })}>
+                      <option value="">-</option>
+                      {yabanciTurAlan.kodlar && Object.entries(yabanciTurAlan.kodlar)
+                        .map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                    </select>
+                  </label>
+                )}
+                {pasaportAlan && (
+                  <label className="alan tip-metin">
+                    <span className="etiket">{pasaportAlan.baslik}</span>
+                    <input value={String(satir.pasaportNo ?? '')} disabled={saltOkunur}
+                      maxLength={pasaportAlan.enFazlaUzunluk ?? undefined}
+                      onChange={e => ozlukDegis({ pasaportNo: e.target.value })} />
+                  </label>
+                )}
+              </div>
+            )}
           </div>
         </div>
         {egitimler}

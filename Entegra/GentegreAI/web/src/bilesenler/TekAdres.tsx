@@ -16,6 +16,15 @@ interface Props {
   /** Ulke satirini hic cizme (ör. Aday karti - yurt ici varsayilani yeterli). */
   ulkeGizli?: boolean;
   ilIlceAyniSatir?: boolean;
+  /**
+   * UYRUK - ULKE'nin SAGINDA cizilir (kullanici). Uyruk adres degil KIMLIK
+   * bilgisidir (taraf_hasta.uyruk, ozluk detayi) ama sorulacagi yer ulkenin
+   * yani: ikisi ayni soruyu tamamliyor ve ayni ulke listesini kullaniyor -
+   * listeyi ikinci kez yuklememek icin combo burada, veri disaridan.
+   * onUyrukDegis verilmezse uyruk hic cizilmez.
+   */
+  uyruk?: string;
+  onUyrukDegis?: (deger: string) => void;
   baslikGizli?: boolean;
 }
 
@@ -34,6 +43,8 @@ export function TekAdres({
   grupYok = false,
   ulkeGizli = false,
   ilIlceAyniSatir = false,
+  uyruk,
+  onUyrukDegis,
   baslikGizli = false,
 }: Props) {
   const yerler = useYerler(true);
@@ -123,6 +134,15 @@ export function TekAdres({
               {(yerler?.ulkeler ?? []).map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
             </select>
           </label>
+          {onUyrukDegis && (
+            <label className="alan tip-kod">
+              <span className="etiket">Uyruk</span>
+              <select value={String(uyruk ?? VARSAYILAN_ULKE)} disabled={saltOkunur}
+                onChange={e => onUyrukDegis(e.target.value)}>
+                {(yerler?.ulkeler ?? []).map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
+              </select>
+            </label>
+          )}
         </div>
         )}
       </div>
