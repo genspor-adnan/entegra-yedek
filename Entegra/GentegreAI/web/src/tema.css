@@ -1270,6 +1270,15 @@ input.skt-gecmis {
 
 /* Randevu durum rozeti "Planlandı" - mockup'taki mavi chip (.c-plan). */
 .rozet.mavi { background: #e3ecfa; color: #2f5c9e; border: 1px solid #bcd2ef }
+/* EK ROZET RENKLERI (kullanici: "hep aynı renk olmasın"). Prim rolleri dokuz
+   tane; elde alti sinif varken cogu ayni renge dusuyordu ve rozet olmalari
+   hicbir sey soylemiyordu. Renkler AYIRT ETMEK icin - "iyi/kotu" anlami yok,
+   o yuzden hepsi ayni doygunlukta pastel. */
+.rozet.turkuaz  { background: #dff5f1; color: #1d7a6b; border: 1px solid #b6e5dc }
+.rozet.pembe    { background: #fce7f0; color: #a63a6b; border: 1px solid #f4c4da }
+.rozet.lacivert { background: #e2e5f6; color: #3a3f8f; border: 1px solid #c3c9ec }
+.rozet.zeytin   { background: #eef3dc; color: #5f6f22; border: 1px solid #d8e3b6 }
+.rozet.turuncu  { background: #fdeddc; color: #a35b16; border: 1px solid #f6d3ae }
 /* Kimlik seridindeki durum rozeti kutuyu kaplamasin - mockup'ta kucuk chip. */
 .kaid .alan > .rozet { align-self: flex-start }
 

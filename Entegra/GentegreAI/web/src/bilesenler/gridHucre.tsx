@@ -84,6 +84,23 @@ const ROZET_SINIFI: Record<string, string> = {
   //   ortamda gonderim en pahali hata, listede bir bakista ayrilsin.
   //   Sube rozetlerinde "Tümü" (kurum geneli hesap) notr gri.
   'TEST': 'uyari', 'CANLI': 'ok', 'Tümü': 'gri', 'Kendisi': 'gri',
+  // AKTIF/PASIF her yerde ayni: yesil / KIRMIZI (kullanici: "pasifler hep
+  //   kırmızı"). `durumRozeti` bunu zaten boyle ciziyordu ama o yalniz 0/1
+  //   kolonlarini biliyor - METIN uretip rozet isteyen kolonlar (prim plani
+  //   Durum'u gibi) sozlukten gectigi icin GRI dusuyordu.
+  'Aktif': 'ok', 'Pasif': 'hata',
+  // PRIM PLANI (kullanici: "rozet farklarda renk olsun"). Ayni listede dort
+  //   rozet kolonu yan yana duruyor; hepsi gri olunca rozet olmalari hicbir
+  //   sey soylemiyordu. Renk AYIRT ETMEK icin - "iyi/kotu" degil.
+  //   DOKUZ ROLUN HER BIRI AYRI RENK (kullanici: "hep aynı renk olmasın") -
+  //   ayni listede yan yana okunuyorlar, ayni renk rozeti anlamsiz kiliyordu.
+  'Gönderen': 'mor', 'İsteyen': 'pembe', 'Uygulayan': 'turkuaz',
+  'Yapan': 'bilgi', 'Raporlayan': 'mavi', 'Onaylayan': 'lacivert',
+  'Anestezi': 'zeytin', 'Asistan': 'turuncu', 'Teknisyen': 'gri',
+  // Prim zamani: para NE ZAMAN dogar - faturalama pesin, tahsilat beklemeli.
+  'Faturalamada': 'turuncu', 'Tahsilatta': 'ok',
+  // Odeyen tipi ("SGK" yukarida zaten bilgi).
+  'Özel (Ücretli)': 'turkuaz', 'ÖSS': 'uyari',
 };
 
 export function rozetHucre(deger: unknown, kolon: KolonMeta) {
