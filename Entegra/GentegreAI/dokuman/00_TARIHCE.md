@@ -5046,3 +5046,17 @@ Ayrica: kutu cercevesi kaldirildi (`.kagrup-cercevesiz`) - grid kendi
 cizgilerini tasiyor, ustune kutu koymak ic ice iki cerceveydi. `subeId` ve
 `eklemeTarihi` hasta kartinda gizlendi (salt-okunur sistem bilgisi; kayitli
 degerler degismiyor, yalnizca cizilmiyorlar).
+
+### Hasta karti - iletisim genisligi, Yakinlik combosu
+
+- **Iletisim sutunu %20 genis** (kullanici). Uc sutunun ikisi SABIT genislikte,
+  iletisim ise tek ESNEK sutun - artan yer zaten hep ona gidiyordu, yani onu
+  buyutmenin tek yolu sabitlerden yer almak: kimlik 420->380, fotograf
+  210->180 (hastada). ~1000px kartta iletisim 350->420 = %20.
+- **Yakinlik artik combo**: Annesi / Babası / Eşi / Oğlu / Kızı / Akrabası /
+  Arkadaşı. ANAHTAR = METNIN KENDISI - kolon serbest metin (varchar 60) olarak
+  dogdu; sayisal koda gecmek eski kayitlari ve bu tabloyu okuyan her yeri
+  gocurmeyi gerektirirdi. Anahtari metin tutunca kolon DEGISMEDEN combo'ya
+  donuyor ve listede olmayan eski bir deger de okunakli kaliyor. (Tabloda su an
+  kayit yok, ama kural gocten bagimsiz dogru olan.)
+- Il combosu biraz saga: `.alan.tip-kod.genis-yer` etiket kolonu 34px->46px.

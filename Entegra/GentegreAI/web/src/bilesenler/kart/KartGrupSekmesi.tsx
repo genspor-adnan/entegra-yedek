@@ -287,6 +287,11 @@ const adliBlok = (
           const gorevAlan = meta.alanlar.find(a => a.ad === 'gorevId');
           if (!ozlukDetay || !vknoAlan || !gorevAlan) return null;
           const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
+          // ILETISIM SUTUNU %20 GENIS (kullanici: "telefon, eposta, adres %20
+          //   büyüsün"). Uc sutunun ikisi SABIT genislikte, iletisim ise tek
+          //   ESNEK sutun - artan yer zaten hep ona gidiyor, tek buyutme yolu
+          //   sabitlerden yer almak: kimlik 420->380, fotograf 210->180
+          //   (toplam 70px; ~1000px kartta iletisim 350->420 = %20).
           const hastaIletisimAlanlari = kaynak === 'hasta'
             ? (gruplar.find(([ad]) => ad === 'İletişim')?.[1] ?? [])
             : [];
@@ -328,10 +333,10 @@ const adliBlok = (
               })()}
               ozetGizli={kaynak === 'hasta'}
               vknoGizli={kaynak === 'hasta'}
-              kimlikSutunGenisligi={kaynak === 'hasta' ? '420px' : undefined}
+              kimlikSutunGenisligi={kaynak === 'hasta' ? '380px' : undefined}
               fotoSolEkOnce={kaynak === 'hasta'}
               fotoSolEk={hastaIletisimAlanlari.length > 0 && (
-                <div className="kasutun" style={{ flex: '1 1 260px' }}>
+                <div className="kasutun" style={{ flex: '1 1 330px' }}>
                   <div className="kagrup">
                     <h6>İletişim</h6>
                     {/* HASTADA ALANLAR YAN YANA (kullanici: "telefondakinde

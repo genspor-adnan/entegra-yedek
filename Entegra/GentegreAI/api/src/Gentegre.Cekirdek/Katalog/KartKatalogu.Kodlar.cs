@@ -120,6 +120,22 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> KategoriTurKodlari =
         new() { ["1"] = "Stok", ["2"] = "Hizmet" };
 
+    /// <summary>
+    /// Hasta yakini / acil durumda aranacak kisinin YAKINLIGI (kullanici).
+    /// ANAHTAR = METNIN KENDISI: kolon serbest metin (varchar 60) olarak
+    /// dogdu, sayisal koda gecmek eski kayitlari ve bu tabloyu okuyan her
+    /// yeri gocurmeyi gerektirirdi. Anahtari metnin kendisi tutunca kolon
+    /// degismeden combo'ya donusuyor; listede olmayan eski bir deger de
+    /// okunakli kaliyor.
+    /// </summary>
+    private static readonly Dictionary<string, string> YakinlikKodlari =
+        new()
+        {
+            ["Annesi"] = "Annesi", ["Babası"] = "Babası", ["Eşi"] = "Eşi",
+            ["Oğlu"] = "Oğlu", ["Kızı"] = "Kızı",
+            ["Akrabası"] = "Akrabası", ["Arkadaşı"] = "Arkadaşı",
+        };
+
     private static readonly Dictionary<string, string> CinsiyetKodlari =
         new() { ["1"] = "Erkek", ["2"] = "Kadın" };
 

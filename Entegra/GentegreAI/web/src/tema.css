@@ -2150,5 +2150,5 @@ input.skt-gecmis {
    kolonu SABIT genislikte - satira daha cok pay verilse bile combo ayni
    kaliyordu. Etiket kolonu da daraltilir. */
 .adres-satir .alan.tip-kod.genis-yer { flex: 1.3 }
-.alan.tip-kod.genis-yer { grid-template-columns: 34px minmax(0, 1fr) }
+.alan.tip-kod.genis-yer { grid-template-columns: 46px minmax(0, 1fr) }
 .alan.tip-kod.genis-yer > select { width: 100%; min-width: 0 }

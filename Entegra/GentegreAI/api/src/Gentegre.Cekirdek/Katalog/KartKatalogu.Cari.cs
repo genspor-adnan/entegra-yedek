@@ -336,7 +336,7 @@ public static partial class KartKatalogu
                 new("id",         "id",          "sayi",  Yazilabilir: false),
                 new("varsayilan", "varsayilan",  "mantik", Baslik: "★"),
                 new("adSoyad",    "ad_soyad",    "metin", EnFazlaUzunluk: 120, Baslik: "Ad Soyad", Zorunlu: true),
-                new("yakinlik",   "yakinlik",    "metin", EnFazlaUzunluk: 60,  Baslik: "Yakınlık"),
+                new("yakinlik",   "yakinlik",    "kod",   SabitKodlar: YakinlikKodlari, Baslik: "Yakınlık"),
                 new("telefon",    "telefon",     "metin", EnFazlaUzunluk: 30,  Baslik: "Telefon"),
                 new("eposta",     "eposta",      "metin", EnFazlaUzunluk: 120, Baslik: "e-Posta")
             }, Sirala: "varsayilan desc, sira, id", LogTabloId: 906, Baslik: "Acil Durumda Aranacak Kişiler"),
