@@ -4585,3 +4585,23 @@ yoktu, acildi. Docker'da uygulandi, iki kez calistirildi (idempotent) ve aday sa
 oncesi 19 aktif aday, sonrasi 19 (15 Yapan + 1 Raporlayan + 3 dis hekim Gönderen).
 Tetik mesaji da guncellendi. **CLOUD (ekspert) BEKLIYOR.**
 Toplam: **272 test gecti** (264 + 8).
+
+**BASVURU TAMAMLANMA SERIDI (370, kullanici).** "Bu basvuruda daha ne eksik" sorusu sekmeler
+gezilerek cevaplaniyordu (ucret var mi, tahsilat tam mi, fis kesildi mi). Radyoloji istem kartindaki
+akis seridinin (310) kayit kabul karsiligi eklendi: yapilmayan asama GRI, yapilan KENDI RENGIYLE
+dolar, sagda yuzde cubugu - %100 olunca serit yesile doner ve "tamamlandi" der.
+*Sira ODEYEN KURUMA gore degisir* ve kozmetik degil, akisin kendisidir:
+  Özel (1)  Başvuru(kırmızı) · Ücretlendirme(sarı) · Tahsilat(mavi) · Faturalama(yeşil)
+  ÖSS  (2)  Başvuru · **Provizyon(turuncu)** · Ücretlendirme · Tahsilat · Faturalama
+  SGK  (3)  Başvuru · Ücretlendirme · **Provizyon** · Tahsilat · Faturalama
+Ozel sigortada provizyon ONCE alinir (police kapsami bilinmeden islem fiyatlanmaz); SGK'da once
+hizmet girilir, takip o hizmetler uzerinden alinir. Ozel odemede provizyon asamasi HIC cizilmez -
+kullanilmayan asama yuzdeyi de bozmasin diye yuzde CIZILEN asamalardan hesaplanir.
+*Tamamlanma kurallari:* Başvuru = protokol verildi · Provizyon = durum Onaylandı (1) ya da Kısmi
+Onay (3) — REDDEDILDI (2) isin bittigi degil DURDUGU anlamina gelir, tamamlamaz · Ücretlendirme =
+kalem tutari var · Tahsilat = acik borc kalmadi (kurus altindaki yuvarlama artigi kapanmis sayilir;
+ucret girilmeden 0 TL "tahsil edildi" SAYILMAZ) · Faturalama = kapanma_durum 2 (kismi yetmez).
+Her asamanin ipucunda eksigin SEBEBI yaziyor ("Açık borç 250,00 ₺") - memur hangi sekmeye gidecegini
+seritten anlasin. Hesap saf ve testli (`belgeKarti/basvuruAsamalari.ts`, 20 test); serit kartta
+cizilerek de denendi (3 test).
+Toplam: **295 test gecti** (272 + 23).

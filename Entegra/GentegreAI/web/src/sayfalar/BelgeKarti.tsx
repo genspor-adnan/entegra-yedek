@@ -36,6 +36,7 @@ import {
   kampanyaFiyatiUygula, paketIcerigiUygula, sonAnahtar, stokSecimindenKalem,
 } from './belgeKalem';
 import { BelgeKartiModallari } from '../bilesenler/belge/BelgeKartiModallari';
+import { BasvuruAsamaSeridi } from '../bilesenler/belge/BasvuruAsamaSeridi';
 
 /**
  * TarafArama ile doldurulan baslik alani (cari, satis temsilcisi...).
@@ -1280,6 +1281,27 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           )}
         </div>
       )}
+
+        {/* TAMAMLANMA SERIDI (370, kullanici): "bu basvuruda daha ne eksik"
+            sorusu sekmeler gezilerek cevaplaniyordu. Asama sirasi ODEYEN
+            KURUMA gore degisir - hesap belgeKarti/basvuruAsamalari'nda. */}
+        {basvuruMu && (
+          <BasvuruAsamaSeridi
+            kurumTuru={kurumlar.find(k => k.id === odeyenKurumId)?.tur}
+            kayitliId={kayitliId}
+            // Kaydedilmemis kalemler de sayilsin: serit ucret girildikce
+            //   ANINDA dolsun (acik borc seridiyle ayni kural).
+            ucretGenel={satirlar.length > 0
+              ? onizleme.genel : Number(sonuc?.belge.genelToplam ?? 0)}
+            tahsilToplam={tahsilToplami(tahsilat.tahsilatlar)}
+            // Provizyon durumu ODEYENIN kendi alanindan: SGK'da sgkDurum,
+            //   ozel sigortada ossDurum (299 - ikisi ayri tutulur).
+            provizyonDurum={kurumlar.find(k => k.id === odeyenKurumId)?.tur === 3
+              ? Number(basvuruBilgi.sgkDurum ?? 0)
+              : Number(basvuruBilgi.ossDurum ?? 0)}
+            kapanmaDurum={Number(sonuc?.belge.kapanmaDurum ?? 0)}
+          />
+        )}
 
         {/* SECILI HASTA SERIDI (298, mockup): basligin USTUNDE - kabul memuru
             dogru hastada oldugunu surekli gorsun. */}

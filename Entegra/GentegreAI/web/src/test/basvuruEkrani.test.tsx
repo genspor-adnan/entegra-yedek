@@ -180,3 +180,33 @@ describe('kayitli basvuru karti', () => {
     await waitFor(() => expect(screen.getByText('Açık Borç')).toBeInTheDocument());
   });
 });
+
+describe('tamamlanma seridi (370)', () => {
+  // Kart MODAL olarak `document.body`ye portallanir (Modal.tsx) - sorgular
+  //   render kabindan degil BELGEDEN yapilmali.
+  const asamalar = () => [...document.querySelectorAll('.basvuru-asama .asama')];
+
+  it('yeni basvuruda butun asamalar GRI - %0', async () => {
+    ciz();
+    await waitFor(() => expect(document.querySelector('.basvuru-asama')).toBeTruthy());
+    expect(asamalar().map(a => a.textContent))
+      .toEqual(['Başvuru', 'Ücretlendirme', 'Tahsilat', 'Faturalama']);
+    expect(document.querySelectorAll('.basvuru-asama .asama.ok')).toHaveLength(0);
+    expect(document.querySelector('.asama-yuzde b')?.textContent).toBe('%0');
+  });
+
+  it('KAYITLI basvuruda "Başvuru" asamasi kendi rengiyle dolar', async () => {
+    ciz({ id: 114349 });
+    await waitFor(() =>
+      expect(document.querySelector('.basvuru-asama .asama.ok')).toBeTruthy());
+    const ilk = asamalar()[0];
+    expect(ilk.className).toContain('kirmizi');
+    expect(ilk.className).toContain('ok');
+  });
+
+  it('ODEYEN KURUM ozel (tur 1) oldugu icin PROVIZYON asamasi cizilmez', async () => {
+    ciz({ id: 114349 });
+    await waitFor(() => expect(document.querySelector('.basvuru-asama')).toBeTruthy());
+    expect(asamalar().map(a => a.textContent)).not.toContain('Provizyon');
+  });
+});
