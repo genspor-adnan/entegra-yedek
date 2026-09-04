@@ -11,6 +11,7 @@ interface TarafSatiri {
   unvan: string;
   bagliKurum: string;
   gorevRol: string;
+  bolum: string;
   /** HASTA duzeni (kayit kabul): kolonlar taraf yerine hasta bilgileri. */
   cinsiyet: string;
   yas: string;
@@ -54,6 +55,7 @@ const satiraCevir = (kaynak: string, s: ListeSatiri): TarafSatiri => ({
   unvan: String(s.unvan ?? ''),
   bagliKurum: String(s.bagliCari ?? ''),
   gorevRol: String(s.gorev ?? ''),
+  bolum: String(s.departmanAdi ?? ''),
   cinsiyet: String(s.cinsiyetAdi ?? ''),
   yas: s.yas != null && s.yas !== '' ? String(s.yas) : '',
   telefon: String(s.cepTel ?? ''),
@@ -429,7 +431,8 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
                     <th className="dar">Kod</th>
                     <th className="genis">Unvan</th>
                     <th className="bagli-kurum">Bağlı Kurum</th>
-                    <th className="dar">Görev/Rol</th>
+                    <th className="dar">Bölüm</th>
+                    <th className="dar">Görev</th>
                   </>
                 )}
               </tr>
@@ -475,13 +478,16 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
                       <td>{satir.kod}</td>
                       <td>{satir.unvan}</td>
                       <td>{satir.bagliKurum}</td>
+                      <td>{satir.bolum}</td>
                       <td>{satir.gorevRol}</td>
                     </>
                   )}
                 </tr>
               ))}
+              {/* Genel duzende kolon sayisi 7: isaret · Tip · Kod · Unvan ·
+                  Bağlı Kurum · Bölüm · Görev. */}
               {!yukleniyor && satirlar.length === 0 && (
-                <tr><td colSpan={hastaDuzeni ? 9 : disHekimDuzeni ? 6 : 6} className="bos">Kayıt yok</td></tr>
+                <tr><td colSpan={hastaDuzeni ? 9 : disHekimDuzeni ? 6 : 7} className="bos">Kayıt yok</td></tr>
               )}
             </tbody>
           </table>

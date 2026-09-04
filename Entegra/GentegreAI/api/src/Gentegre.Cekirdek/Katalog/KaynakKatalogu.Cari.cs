@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// Cari / kisi / firsat / gorev listeleri - CRM tarafi.
@@ -328,6 +328,11 @@ public static partial class KaynakKatalogu
             // BOLUM (367): basvuruda once bolum secilirse arama O BOLUMDEKI
             //   hekimlerle sinirlanir - kolon olmadan filtre "Bilinmeyen alan"
             //   ile 400 doner. Listede gizli, yalniz suzme icin.
+            // BOLUM ADI (kullanici): jenerik arama ekraninda dis hekim de
+            //   ic personel de Bölüm kolonuyla listelenir - ikisi ayni
+            //   listede yan yana geldigi icin alanlarin ADI da ayni olmali.
+            new("departmanAdi", TarafKatalog.DepartmanAdi,
+                                       "metin", "Bölüm", Genislik: 160),
             new("departman", "coalesce(t.departman, 0)", "sayi", "Bölüm Id",
                 Varsayilan: false),
             // Kurum: artik yalniz KAYITLI cari (308) - serbest metin alani yok.
