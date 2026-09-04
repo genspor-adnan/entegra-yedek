@@ -215,10 +215,24 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
    * son cipin filtresi yoksa, yani gercekten hepsini gosteriyorsa.
    */
   const cipler = tanim.cipler;
+  const suzgecsizCip = cipler && cipler.length > 1 && !cipler[cipler.length - 1].filtre
+    ? cipler.length - 1 : null;
   const [cipIndeks, setCipIndeks] = useState(() => (
-    urlDegeri && cipler && cipler.length > 1 && !cipler[cipler.length - 1].filtre
-      ? cipler.length - 1
-      : 0));
+    urlDegeri && suzgecsizCip !== null ? suzgecsizCip : 0));
+
+  /**
+   * URL FILTRESI SONRADAN GELIRSE de suzgecsiz cipe gec.
+   *
+   * Yukaridaki `useState` baslatici YALNIZ ILK RENDER'da calisir; oysa bu
+   * ekranlara cogunlukla SPA ICI gecisle gelinir (Hakedişler > "Satırları
+   * Gör" -> /hakedis-satir?hakedisId=4). O gecişte bilesen ayakta kaliyor,
+   * cip eski degerinde ("Kesin") duruyordu ve kapatilmis hakedisin satirlari
+   * ONAYLI oldugu icin grid "Kayıt yok" gosteriyordu: kullanici hakedisi
+   * kapatir, satirlarina bakar ve HICBIR SEY GOREMEZ.
+   */
+  useEffect(() => {
+    if (urlDegeri && suzgecsizCip !== null) setCipIndeks(suzgecsizCip);
+  }, [urlDegeri, suzgecsizCip]);
 
   // RANDEVU TAKVIMI (243) ayarlari: takvim saat araligi/calisma gunleri
   //   Randevu Ayarlari ekranindan (referans) gelir.

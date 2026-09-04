@@ -194,6 +194,18 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const [sirala, setSirala] = useState<Siralama[]>([]);
   const [arama, setArama] = useState('');
   const [cipIndeks, setCipIndeks] = useState(cipBaslangic ?? 0);
+  /**
+   * DISARIDAN GELEN CIP degisince ic state de gecmeli.
+   *
+   * `useState` baslatici yalniz ILK render'da calisir; cagiran (Liste) SPA
+   * ici gecişte cipi degistirdiginde grid eski cipte kaliyordu. Somut vaka:
+   * Hakedişler > "Satırları Gör" -> /hakedis-satir?hakedisId=4 - URL filtresi
+   * kayit kumesini zaten daraltmisken ustune "Kesin" cipi biniyor ve
+   * kapatilmis hakedisin ONAYLI satirlari icin grid "Kayıt yok" gosteriyordu.
+   */
+  useEffect(() => {
+    if (cipBaslangic !== undefined) setCipIndeks(cipBaslangic);
+  }, [cipBaslangic]);
   /** Tarih araligi (bos = sinir yok). Tek uc verilmesi de gecerli.
       'yilbasindanBugune': 1 Ocak - bugun. Ust sinir SUNUCUDA gun sonuna kadar
       kapsanir (SorguUretici 'arasinda' + 1 gun), yani bugun 23:59'daki hareket

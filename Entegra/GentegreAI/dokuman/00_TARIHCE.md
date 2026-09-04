@@ -5819,3 +5819,36 @@ alanina bakiyordu; 379'da rol satirdan plan basligina tasinince kontrol
 sessizce yanlisa dondu. Tespit satirin KENDI alanlarina baglandi
 (hedefId + oranTipi). Ekran goruntusu olmadan fark edilmesi zor bir
 gerileme - jsdom testleri kolon adlarini sormuyordu.
+
+### Hakedişler ekrani gercek tarayicida - "Satırları Gör" BOS GELIYORDU
+
+Iki liste ve aralarindaki gecis denendi.
+
+**Hakedişler** (4 kayit, toplam 857,00): kolonlar Kişi · Dönem Başı · Dönem
+Sonu · Satır · Toplam · Durum; alt toplam satiri dogru; "Dönemi Kapat" ve
+"Satırları Gör" arac cubugu yerinde. Kapatilan hakedis (BAHAR ALADAĞ,
+620,00 / 7 satir) listede goruldu.
+
+**Hakediş Satırları** (13 kayit): Rol, ROL ISARETI, Hasta/Cari, Kalem, Pay,
+Belge Türü, Kaynak, Tahsilat, Taban, Oran, Prim, Durum.
+
+**BULUNAN HATA - iki katmanli, ikisi de ayni kok:** "Satırları Gör" ile
+`/hakedis-satir?hakedisId=4` acildiginda grid **"Kayıt yok"** gosteriyordu.
+Kapatilmis hakedisin satirlari ONAYLI (durum 3), ustteki cip ise "Kesin"
+(durum 2) - kesisim bos. Yani kullanici hakedisi kapatir, satirlarina bakar
+ve HICBIR SEY GOREMEZ.
+
+Kod bunu ZATEN dusunmustu: URL filtresiyle gelindiginde suzgecsiz son cip
+("Tümü") secilir. Ama iki yerde de `useState` BASLATICISIYLA yazilmisti ve o
+YALNIZ ILK RENDER'da calisir; bu ekranlara SPA ICI gecisle gelindigi icin
+bilesenler ayakta kaliyor, cip eski degerinde donuyordu:
+
+    Liste.tsx   cipIndeks  - URL degeri sonradan gelince guncellenmiyordu
+    GenGrid.tsx cipIndeks  - `cipBaslangic` prop'u degisince umursamiyordu
+
+Ikisine de senkron efekt eklendi. Sonra: 7 satir, toplam 620,00 - hakedis
+basligiyla birebir. Kademe de goruldu: uc nakit is %9 (90,00 x 3), POS %3
+(30,00), Asistan alt sinir 50,00, Onaylayan sabit 300 x %50 = 150,00.
+
+jsdom testi bunu YAKALAYAMAZDI: hata SPA gecisinde ortaya cikiyor ve iki
+ayri bilesenin state omrunden doguyor.
