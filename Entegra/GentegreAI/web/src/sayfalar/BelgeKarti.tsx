@@ -1325,9 +1325,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       //   "Satış Siparişi" - hasta ekraninda o basligi gostermek yanlis olurdu.
       baslik={(() => {
         const ad = basvuruMu ? 'Başvuru' : seciliTurAdi;
-        return mevcutBelge
-          ? `${ad}${sonuc?.belge.belgeNo ? ` — ${sonuc.belge.belgeNo}` : ''}`
-          : ad;
+        if (!mevcutBelge) return ad;
+        // KAYIT ID'si BASLIKTA (kullanici): belge no is numarasidir (protokol,
+        //   fatura no) ve seriye/yila gore tekrar edebilir; destek ya da kayit
+        //   izi surerken aranan sey KAYIT ID'sidir. Ikisi birlikte durur -
+        //   "#114377 — 2026-000000048".
+        const no = sonuc?.belge.belgeNo ? ` — ${sonuc.belge.belgeNo}` : '';
+        return `${ad} #${kayitliId}${no}`;
       })()}
       ustBilgi={kullanici?.subeYazma === false
         ? <span className="rozet uyari">salt okuma şubesi</span>

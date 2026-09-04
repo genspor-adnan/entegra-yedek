@@ -180,10 +180,11 @@ describe('kayitli basvuru karti', () => {
   it('sunucudan okunan basvuru basliga yansir (belge no · hasta · kurum)', async () => {
     ciz({ id: 114349 });
     await waitFor(() => expect(belgeOku).toHaveBeenCalledWith(114349));
-    // Belge numarasi YIL ONEKLI uretildi (366): "2026-000000035" - pencere
-    //   basliginda gorunur.
+    // Baslikta KAYIT ID'si ve BELGE NO birlikte durur (kullanici): belge no
+    //   is numarasidir ve seriye/yila gore tekrar edebilir; kayit izi
+    //   surerken aranan sey id'dir.
     await waitFor(() =>
-      expect(screen.getByText('Başvuru — 2026-000000035')).toBeInTheDocument());
+      expect(screen.getByText('Başvuru #114349 — 2026-000000035')).toBeInTheDocument());
     // Hasta karta yansidi: arac cubugundaki "Hasta Kartını Aç" acildi
     //   (hasta secilmeden pasiftir).
     expect(screen.getByTitle('Seçili hastanın kartını aç')).toBeEnabled();
