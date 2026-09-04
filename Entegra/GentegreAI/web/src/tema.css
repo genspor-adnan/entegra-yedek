@@ -146,6 +146,10 @@ input, select { font: inherit; color: inherit }
 .d.onay { color: #fff; background: linear-gradient(#4fae68, #2e7d46); border-color: #2e7d46; font-weight: 700 }
 .d.onay:hover:not(:disabled) { background: linear-gradient(#5cbb75, #2e7d46) }
 .d.teh:hover:not(:disabled) { background: linear-gradient(#e0605c, #c0413d) }
+/* TURUNCU dugme (kullanici - "MERNİS'ten getir"): kaydet (mavi) ve sil
+   (kirmizi) disinda, DIS SERVISE giden eylem. */
+.d.turuncu { color: #fff; background: linear-gradient(#f0932b, #d97b12); border-color: #c26f10; font-weight: 700 }
+.d.turuncu:hover:not(:disabled) { background: linear-gradient(#f5a340, #e0830f) }
 .d:disabled { opacity: .45; cursor: default }
 /* Yalniz-ikon dugme (grid arac cubugu): kare, metin yok - anlami title'da. */
 .d.ikon { width: 27px; padding: 0; justify-content: center; font-size: 13px }
@@ -2150,5 +2154,15 @@ input.skt-gecmis {
    kolonu SABIT genislikte - satira daha cok pay verilse bile combo ayni
    kaliyordu. Etiket kolonu da daraltilir. */
 .adres-satir .alan.tip-kod.genis-yer { flex: 1.3 }
-.alan.tip-kod.genis-yer { grid-template-columns: 46px minmax(0, 1fr) }
-.alan.tip-kod.genis-yer > select { width: 100%; min-width: 0 }
+.alan.tip-kod.genis-yer { grid-template-columns: 34px minmax(0, 1fr) }
+/* IL ALANI BIRAZ SAGA (kullanici): etiket kolonu daraltilinca satirin en
+   basina yapisiyor ve ustundeki Telefon / e-Posta etiketleriyle hizasi
+   kaciyordu - etiket ve edit birlikte kayar. */
+.adres-satir .alan.il-secimi { margin-left: 12px }
+
+/* Yakinlar gridi biraz YUKARI (kullanici): ustundeki .kasira satiri kendi
+   alt bosluguna sahip, aradaki 12px fazla duruyordu. */
+.yakinlar-kutusu { margin-top: -8px }
+/* Il / Ilce combolari %5 kucuk (kullanici) - etiketler yerinde kalir,
+   yalnizca kutu daralir. */
+.alan.tip-kod.genis-yer > select { width: 95%; min-width: 0 }

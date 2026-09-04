@@ -79,6 +79,8 @@ interface Props {
   saltOkunur: boolean;
   hatalar: Record<string, string>;
   onDegis(yeni: DetayDurumu): void;
+  /** Kutuya eklenecek ek sinif (yerlesim ince ayari; ör. daha dar ust bosluk). */
+  kutuSinif?: string;
   /** Baslik ve satir eylemleri IKON olarak cizilir (＋ / ✎ / 🗑) - seri ve XSLT
       gridleriyle ayni gorunum (kullanici). Metin dugmeler dar gridlerde
       satiri tasiriyordu. */
@@ -132,7 +134,7 @@ function gunFarki(bas: string, bit: string): number | null {
 }
 
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
-                               modalDuzenle, taslakKural, cipler }: Props) {
+                               modalDuzenle, taslakKural, cipler, kutuSinif }: Props) {
   /**
    * KAMPANYA SATIRI (268): "Kapsam" TEK kolondur (iskonto_yeri_id) ama
    * anlami satirin TIPINE gore degisir - Liste'de 0, Kategori'de kategori id,
@@ -511,7 +513,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const aramaVar = modalDuzenle && (durum.guncel.length > 20 || arama !== '');
 
   return (
-    <div className="kagrup">
+    <div className={`kagrup${kutuSinif ? ` ${kutuSinif}` : ''}`}>
       <h6>
         {meta.baslik}
         {!saltOkunur && (

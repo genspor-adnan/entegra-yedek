@@ -910,6 +910,28 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           {!yeniMi && yetki.sil && (
             <button className="d teh" onClick={() => void sil()}>Sil</button>
           )}
+          {/* HASTA KARTI EYLEM DUGMELERI (kullanici) - Sil'in saginda.
+              MERNIS ve provizyon/mustehaklik sorgusu DIS SERVISE gider; o
+              servisler henuz bagli DEGIL, dugmeler yerlesimde duruyor ve
+              basilinca bunu acikca soyluyor - sessizce hicbir sey yapmayan
+              bir dugme, bozuk bir dugmeden daha kotu. */}
+          {kaynak === 'hasta' && !yeniMi && (
+            <>
+              <button className="d turuncu" type="button"
+                      title="Kimlik bilgilerini MERNİS'ten günceller"
+                      onClick={() => setHata('MERNİS servisi henüz bağlı değil.')}>
+                MERNİS'ten getir
+              </button>
+              <button className="d" type="button"
+                      title="SGK provizyon / müstehaklık sorgusu"
+                      onClick={() => setHata('Provizyon/müstehaklık servisi henüz bağlı değil.')}>
+                Provizyon/Müstehaklık Sorgula
+              </button>
+              <button className="d" type="button" onClick={() => setAcilanBasvuru(0)}>
+                ＋ Yeni Başvuru
+              </button>
+            </>
+          )}
           {/* Kisi'ye ozel: "Bagli Cari" alani artik salt-okunur gorunum (asagida renderGirdi),
               tek degistirme yolu bu buton + TarafArama modali. Kisi zaten bagliysa (bagId
               dolu) buton GORUNMEZ (kullanici) - once "x" ile bag bosaltilmali. */}

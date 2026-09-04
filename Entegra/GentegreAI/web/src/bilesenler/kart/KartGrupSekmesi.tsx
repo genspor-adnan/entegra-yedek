@@ -411,6 +411,7 @@ const adliBlok = (
       //   gridin KENDI kutusu). Sarmalayici kaldirildi; baslik meta uzerinden.
       <GenDetayTablo
         key="Yakinlar"
+        kutuSinif="yakinlar-kutusu"
         meta={{ ...acilDetay, baslik: 'Yakınlar / Acil Durumda Aranacak' }}
         durum={detaylar[acilDetay.ad] ?? bosDetay()}
         saltOkunur={salt || acilDetay.saltOkunur}

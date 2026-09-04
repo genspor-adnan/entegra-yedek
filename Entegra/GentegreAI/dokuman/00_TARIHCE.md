@@ -5060,3 +5060,23 @@ degerler degismiyor, yalnizca cizilmiyorlar).
   donuyor ve listede olmayan eski bir deger de okunakli kaliyor. (Tabloda su an
   kayit yok, ama kural gocten bagimsiz dogru olan.)
 - Il combosu biraz saga: `.alan.tip-kod.genis-yer` etiket kolonu 34px->46px.
+
+### Hasta karti arac cubugu + yerlesim ince ayarlari
+
+Sil'in saginda uc dugme (kullanici): **MERNİS'ten getir** (turuncu - dis
+servise giden eylem, mavi kaydet / kirmizi sil disinda kendi rengi),
+**Provizyon/Müstehaklık Sorgula**, **＋ Yeni Başvuru**.
+
+Ilk ikisi DIS SERVISE gider ve o servisler HENUZ BAGLI DEGIL: API'de ne MERNIS
+sorgusu ne provizyon ucu var. Dugmeler yerlesimde duruyor ve basilinca bunu
+acikca soyluyor - sessizce hicbir sey yapmayan bir dugme, bozuk bir dugmeden
+daha kotu. Servisler gelince tek yapilacak `onClick` govdesini degistirmek.
+
+"＋ Yeni Başvuru" CALISIYOR: kart uzerinde bos basvuru penceresi acar
+(`setAcilanBasvuru(0)`) - Başvurular sekmesindeki "Yeni" ile ayni yol.
+NOT: pencere hastayi ON-DOLGU ALMIYOR, cari aramasi aciliyor - BelgeKarti'nin
+taraf on-dolgu prop'u yok. Bunu istersen ayri is.
+
+Ince ayarlar: Yakinlar gridi 8px yukari (`kutuSinif` prop'u eklendi -
+GenDetayTablo'ya disaridan yerlesim sinifi verilebiliyor), Il alani 12px saga
+(etiketi ustundeki Telefon/e-Posta ile hizalanir), Il/Ilce combolari %5 dar.
