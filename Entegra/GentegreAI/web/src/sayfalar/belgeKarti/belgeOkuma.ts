@@ -42,6 +42,8 @@ export function yanittanBasvuruBilgi(b: Belge): BasvuruBilgi {
     refakatci: metin(b.refakatci),
     ambulansHastaNo: metin(b.ambulansHastaNo),
     ambulansBileklikNo: metin(b.ambulansBileklikNo),
+    // Kendi istegiyle geldi (370) - isaret, secilmemis degil "hayir" (0).
+    kendiIstegi: b.kendiIstegi != null ? Number(b.kendiIstegi) : 0,
 
     // PROVIZYON (299) - belge_provizyon 1:1; SGK ve ozel sigorta ayri.
     sgkDurum: b.sgkDurum != null ? Number(b.sgkDurum) : 0,

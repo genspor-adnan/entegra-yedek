@@ -80,6 +80,7 @@ public sealed partial class BelgeDeposu
                    -- Ambulans (300): odeyiciden bagimsiz, basvuruya ait kimlik.
                    bb.ambulans_hasta_no as "ambulansHastaNo",
                    bb.ambulans_bileklik_no as "ambulansBileklikNo",
+                   coalesce(bb.kendi_istegi, 0) as "kendiIstegi",
                    -- PROVIZYON (299) ayri 1:1 tabloda. SGK ve ozel sigorta
                    --   AYNI ANDA olabilir: iki ayri alan takimi.
                    bp.sgk_durum as "sgkDurum", bp.sgk_provizyon_no as "sgkProvizyonNo",

@@ -34,17 +34,35 @@ describe('basvuruda zorunlu alanlar', () => {
     expect(belgeDogrula(g({ bolumId: null }))).toEqual({ bolumId: 'Bölüm seçilmeli.' });
   });
 
-  it('HEKIM / gonderen bos ise kendi alaninda hata verir', () => {
-    expect(belgeDogrula(g({ personelId: null }))).toEqual(
-      { personelId: 'Hekim / gönderen seçilmeli.' });
+  it('GONDEREN bos ise hata verir ve "Kendi İsteği"ni ONERIR', () => {
+    const h = belgeDogrula(g({ personelId: null }))!;
+    expect(h.personelId).toContain('Gönderen seçilmeli');
+    expect(h.personelId).toContain('Kendi İsteği');
   });
 
-  it('BOLUM ve HEKIM birlikte eksikse IKISI BIRDEN dondurulur', () => {
+  it('"KENDI ISTEGI" isareti gonderen zorunlulugunu KARSILAR (370)', () => {
+    // Hasta bir hekim tarafindan gonderilmediyse bu bir eksiklik degil, cevap.
+    expect(belgeDogrula(g({
+      personelId: null, basvuruAlanlari: { kendiIstegi: 1 },
+    }))).toBeNull();
+  });
+
+  it('isaret 0 ise gonderen yine zorunlu - "henuz secilmedi" demektir', () => {
+    expect(belgeDogrula(g({
+      personelId: null, basvuruAlanlari: { kendiIstegi: 0 },
+    }))!.personelId).toBeTruthy();
+  });
+
+  it('BOLUM ve GONDEREN birlikte eksikse IKISI BIRDEN dondurulur', () => {
     // Memur uc alani tek tek deneyerek bulmasin - hepsi ayni anda kizarsin.
-    expect(belgeDogrula(g({ bolumId: null, personelId: null }))).toEqual({
-      bolumId: 'Bölüm seçilmeli.',
-      personelId: 'Hekim / gönderen seçilmeli.',
-    });
+    const h = belgeDogrula(g({ bolumId: null, personelId: null }))!;
+    expect(Object.keys(h).sort()).toEqual(['bolumId', 'personelId']);
+  });
+
+  it('KENDI ISTEGI bolum zorunlulugunu KALDIRMAZ - hasta yine bir bolume gelir', () => {
+    expect(belgeDogrula(g({
+      bolumId: null, personelId: null, basvuruAlanlari: { kendiIstegi: 1 },
+    }))).toEqual({ bolumId: 'Bölüm seçilmeli.' });
   });
 
   it('ODEYEN KURUM once sorulur - o eksikken oteki ikisi beklemeye alinir', () => {

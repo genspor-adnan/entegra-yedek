@@ -540,9 +540,27 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
    * ardindan kisinin BOLUMU cozulup Bölüm alani doldurulur - memur ayni bilgiyi
    * ikinci kez secmesin. Bolumu olmayan (or. dis hekim) kiside alan degismez.
    */
+  /**
+   * "KENDI ISTEGI" ISARETI (370): gonderen zorunlu oldugu icin "hekim yok"
+   * ancak boyle soylenebilir - alanin bosluğu bir cevap degildi.
+   *
+   * Isaret konunca gonderen TEMIZLENIR: hasta ya bir hekim tarafindan
+   * gonderildi ya kendi geldi, ikisi birden olamaz (DB kisiti da bunu tutar).
+   * Temizleme `personelSecildi(0)` uzerinden gider - gelis sekli ve bolum
+   * kurallari orada tek yerde yaziyor.
+   */
+  const kendiIstegiDegisti = (v: boolean) => {
+    setBasvuruBilgi(o => ({ ...o, kendiIstegi: v ? 1 : 0 }));
+    if (v) personelSecildi(0, '');
+  };
+
   const personelSecildi = (id: number, ad: string) => {
     setPersonelId(id || null);
     setPersonelAd(ad);
+    // HEKIM SECILDI = kendi istegi DEGIL: isaret kendiliginden kalkar, yoksa
+    //   iki bilgi ayni anda dogru gorunur ve sunucu kisiti reddederdi.
+    if (id) setBasvuruBilgi(o => (Number(o.kendiIstegi ?? 0) === 0
+      ? o : { ...o, kendiIstegi: 0 }));
     if (!id) {
       // "Kendi İsteği" (gonderen yok, kullanici): hasta sevksiz gelmistir -
       //   gelis sekli "Kendi imkânıyla" (1) olur. Sevkli hasta seciminde bu
@@ -1531,6 +1549,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
             kurumHatasi={alanHatalari.odeyenKurumId}
             bolumHatasi={alanHatalari.bolumId}
             personelHatasi={alanHatalari.personelId}
+            kendiIstegi={Number(basvuruBilgi.kendiIstegi ?? 0) === 1}
+            onKendiIstegi={kendiIstegiDegisti}
             randevuBilgi={sonuc?.belge.randevuOzet
               ? String(sonuc.belge.randevuOzet) : undefined}
           />

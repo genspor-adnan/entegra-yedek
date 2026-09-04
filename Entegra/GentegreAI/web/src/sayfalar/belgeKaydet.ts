@@ -118,7 +118,7 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
   const { cari, depoBelgesi, stokFisiMi, fisTipi, fisCikisMi, depo, tarih,
           tarihEnGec, tarihEnErken, geriGun, talepMi, teslimAlan, girisDepo,
           transferMi, teslimEden, disNumarali, belgeNo, satirlar, basvuruMu,
-          odeyenKurumId, bolumId, personelId, kilitli } = g;
+          odeyenKurumId, bolumId, personelId, basvuruAlanlari, kilitli } = g;
 
   // Transferde cari YOK (sunucu da katalogtan ayni karari veriyor).
   if (!cari && !depoBelgesi && !stokFisiMi) {
@@ -193,7 +193,13 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
   if (basvuruMu && !kilitli) {
     const eksik: Record<string, string> = {};
     if (!bolumId) eksik.bolumId = 'Bölüm seçilmeli.';
-    if (!personelId) eksik.personelId = 'Hekim / gönderen seçilmeli.';
+    // GONDEREN ZORUNLU ama "Kendi İsteği" de GECERLI BIR CEVAPTIR (370,
+    //   kullanici): hasta bir hekim tarafindan gonderilmediyse bu isaretlenir.
+    //   Isaret ayri bir kolonda tutuluyor - yoklugu secim yerine kullanmak
+    //   "henuz secilmedi" ile "gonderen yok"u ayirt edilemez kiliyordu.
+    const kendiIstegi = Number(basvuruAlanlari?.kendiIstegi ?? 0) === 1;
+    if (!personelId && !kendiIstegi)
+      eksik.personelId = 'Gönderen seçilmeli — hasta kendi geldiyse "Kendi İsteği" işaretleyin.';
     if (Object.keys(eksik).length > 0) return eksik;
   }
 

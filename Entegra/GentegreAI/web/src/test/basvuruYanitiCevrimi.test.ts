@@ -77,6 +77,11 @@ function eskiBasvuru(b: Belge) {
     refakatci: String(b.refakatci ?? ''),
     ambulansHastaNo: String(b.ambulansHastaNo ?? ''),
     ambulansBileklikNo: String(b.ambulansBileklikNo ?? ''),
+    // 370'te EKLENEN alan: "Kendi İsteği" isareti. Referans kopya BILEREK
+    //   guncellendi - bu dosyanin isi "cevrim degismedi mi" degil, "cevrim
+    //   YANLISLIKLA degismedi mi". Yeni bir alan eklendiginde buraya da
+    //   yazilir; test o zaman yeni alanin kuralini da korumaya baslar.
+    kendiIstegi: b.kendiIstegi != null ? Number(b.kendiIstegi) : 0,
     sgkDurum: b.sgkDurum != null ? Number(b.sgkDurum) : 0,
     sgkProvizyonNo: String(b.sgkProvizyonNo ?? ''),
     sgkProvizyonTipi: b.sgkProvizyonTipi != null ? Number(b.sgkProvizyonTipi) : null,

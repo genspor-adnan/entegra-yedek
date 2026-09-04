@@ -32,6 +32,12 @@ export interface BasvuruBilgi {
   // Ambulans (300) - odeyiciden bagimsiz, hastaya ait kimlik bilgisi.
   ambulansHastaNo?: string;
   ambulansBileklikNo?: string;
+  /**
+   * KENDI ISTEGIYLE GELDI (370): gonderen hekim YOK ama bu bir eksiklik degil,
+   * bir SECIM. Gonderen zorunlulugu "hekim secili VEYA bu isaret" ile
+   * karsilanir - yoksa "henuz secilmedi" ile "gonderen yok" ayirt edilemezdi.
+   */
+  kendiIstegi?: number | null;
   // PROVIZYON (299) - belge_provizyon 1:1. SGK ve ozel sigorta AYNI ANDA
   // olabilir (SGK ana odeyici, tamamlayici police farki ustlenir), o yuzden
   // her odeyicinin kendi durumu/numarasi/orani var.
@@ -387,7 +393,8 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                                  kurumlar, odeyenKurumId, setOdeyenKurumId,
                                  aciklama, setAciklama, gonderenModu,
                                  personelAd, onPersonelSec, kurumHatasi,
-                                 bolumHatasi, personelHatasi }: {
+                                 bolumHatasi, personelHatasi,
+                                 kendiIstegi, onKendiIstegi }: {
   bilgi: BasvuruBilgi;
   /**
    * LAB / GORUNTULEME KURUMU (364, kullanici): bu kurumlarda basvuru zaten
@@ -401,6 +408,9 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
   /** Bolum ve hekim de ZORUNLU (kullanici) - hata alanin altinda yazar. */
   bolumHatasi?: string;
   personelHatasi?: string;
+  /** "Kendi İsteği" isareti (370) - gonderen zorunlulugunu bu da karsilar. */
+  kendiIstegi?: boolean;
+  onKendiIstegi?(v: boolean): void;
   /** Secili hekim/gonderen adi - arama ekranindan gelen kisi listede olmayabilir. */
   personelAd?: string;
   /**
@@ -484,9 +494,10 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
             tetkik sayisi da gorunur (305 dis hekim duzeni). Secilince Bölüm de
             kisinin bolumunden doldurulur. */}
         {gonderenModu ? (
+          <div className="alan gonderen-alani">
           <TarafSecici etiket="Gönderen" kaynaklar={['dis-hekim']}
                        deger={personelAd}
-                       kilitli={kilitli}
+                       kilitli={kilitli || kendiIstegi}
                        zorunlu hata={personelHatasi}
                        /* ONCE BOLUM SECILDIYSE (kullanici): arama O BOLUME
                           gonderen hekimlerle sinirlanir; bolum bosken hepsi
@@ -503,6 +514,16 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                                           : 'Gönderen hekim ara…'}
                        onSec={sec => onPersonelSec?.(sec.id, sec.unvan)}
                        onTemizle={() => onPersonelSec?.(0, '')} />
+          {/* KENDI ISTEGI (370) bir SECIMDIR, alanin bosluğu degil: gonderen
+              zorunlu oldugu icin "hekim yok" ancak boyle soylenebilir. Isaret
+              konunca gonderen alani kilitlenir ve temizlenir - hasta ya
+              gonderildi ya kendi geldi, ikisi birden olmaz. */}
+          <label className="kendi-istegi">
+            <input type="checkbox" checked={kendiIstegi} disabled={kilitli}
+                   onChange={e => onKendiIstegi?.(e.target.checked)} />
+            Kendi isteğiyle geldi (gönderen yok)
+          </label>
+          </div>
         ) : (
         <label className="alan">
           <span className="etiket zorunlu-isaret">Hekim / Personel</span>

@@ -78,7 +78,11 @@ public sealed partial class BelgeDeposu
         // Ambulans (300): 112 kayit no + acilde takilan bileklik no. Odeyiciye
         // degil HASTAYA ait bilgi oldugu icin provizyonda degil burada.
         ["ambulansHastaNo"] = "ambulans_hasta_no",
-        ["ambulansBileklikNo"] = "ambulans_bileklik_no"
+        ["ambulansBileklikNo"] = "ambulans_bileklik_no",
+        // KENDI ISTEGI (370): gonderen hekim YOK ama bu bir eksiklik degil,
+        //   bir SECIM - zorunluluk "personelId dolu VEYA kendiIstegi = 1"
+        //   ile karsilanir.
+        ["kendiIstegi"] = "kendi_istegi"
     };
 
     /// <summary>

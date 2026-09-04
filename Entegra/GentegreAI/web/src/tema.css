@@ -2116,3 +2116,12 @@ input.skt-gecmis {
 .basvuru-asama.bitti { border-color: #2e7d46; background: #f2f9f4 }
 .basvuru-asama.bitti .asama-yuzde .cubuk i { background: #2e7d46 }
 .basvuru-asama.bitti .asama-yuzde b { color: #2e7d46 }
+
+/* GONDEREN + "Kendi İsteği" (370): isaret alanin ALTINDA durur - gonderen
+   zorunlu oldugu icin "hekim yok" cevabi da gorunur bir secim olmali. */
+.gonderen-alani { display: flex; flex-direction: column; gap: 0 }
+.gonderen-alani .kendi-istegi {
+  display: flex; align-items: center; gap: 5px; margin-top: 3px;
+  font-size: 11px; color: var(--soluk); cursor: pointer;
+}
+.gonderen-alani .kendi-istegi input { margin: 0 }

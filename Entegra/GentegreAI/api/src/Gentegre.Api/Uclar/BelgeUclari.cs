@@ -629,6 +629,8 @@ public static class BelgeUclari
         // Basvuru sekmesi (298) - kod/sayi alanlari.
         "kampanyaId" or "bolumId" or "personelId" or "basvuruTuru" or "gelisSekli"
         or "gelisNedeni" or "oda"
+        // Kendi istegiyle geldi (370) - 0/1 isaret.
+        or "kendiIstegi"
         // Provizyon (299) - kod/sayi alanlari (SGK ve ozel sigorta ayri).
         or "sgkDurum" or "sgkProvizyonTipi" or "sgkTakipTuru" or "sgkMustehaklik"
         or "sgkSevkli" or "ossDurum" or "ossKurumId"

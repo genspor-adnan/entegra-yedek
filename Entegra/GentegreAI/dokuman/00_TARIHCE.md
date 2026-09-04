@@ -4632,3 +4632,25 @@ Toplam: **309 test gecti** (295 + 14).
 *ACIK KONU:* "Gönderen" artik zorunlu oldugu icin daha once eklenen **"Kendi İsteği (sevksiz)"**
 secenegi kullanilamaz hale geldi - o secim `personelId = null` demekti ve zorunluluk tam da onu
 reddediyor. Kullaniciya soruldu.
+
+**"KENDI ISTEGI" AYRI BIR ISARET OLDU (370)** - kullanici: "kendi isteği olmalı, gönderen zorunlu
+olsun". Onceki gunku iki karar CELISIYORDU: "Kendi İsteği" secimi `belge_basvuru.personel_id = null`
+demekti, yeni konan gonderen zorunlulugu ise tam da null'i reddediyordu - yani kural konunca hasta
+"kendi istegiyle geldi" DIYEMIYORDU.
+*Kok sorun:* yoklugu bir SECIM olarak kullanmak. "Hasta kendi istegiyle geldi" bir BILGIDIR, bir
+eksiklik degil. Ustelik bu ayrim olmadan "gonderen henuz secilmedi" ile "gonderen YOK" birbirinden
+ayirt edilemiyordu; ikisi de null gorunuyordu.
+`belge_basvuru.kendi_istegi` kolonu eklendi; zorunluluk artik **"gonderen secili VEYA kendi istegi
+isaretli"** ile karsilanir. Ekranda Gönderen alaninin altinda kutu: isaretlenince gonderen alani
+kilitlenir ve temizlenir (gelis sekli / bolum kurallari `personelSecildi(0)` uzerinden, tek yerde),
+hekim secilince isaret kendiliginden kalkar. DB'de de CHECK kisiti var
+(`kendi_istegi = 0 or personel_id is null`) - iki bilgi ayni anda dogru olamaz, kural ekrandan
+bagimsiz da tutulur (dis kaynakli kayit, toplu aktarim).
+BOLUM zorunlulugu KALKMAZ: kendi istegiyle gelen hasta da bir bolume gelir (isaret yalniz gonderen
+alanini bosaltir - o bolum gonderenden turetiliyordu, dayanagi kalmadi).
+Veri gocu yok (eski kayitlarda isaret 0; kural kilitli/kayitli belgede zaten islemez).
+Calisan API'de dogrulandi: gonderensiz + isaretli basvuru kaydedildi (2026-000000037), okundugunda
+isaret geri geldi; hekim yazmayi deneyince DB kisiti reddetti. Kayit silindi.
+`basvuruYanitiCevrimi` testindeki REFERANS kopya da bilerek guncellendi - o testin isi "cevrim
+degismedi mi" degil, "cevrim YANLISLIKLA degismedi mi".
+Toplam: **312 test gecti** (309 + 3). **CLOUD (ekspert) BEKLIYOR** (db/369 ve db/370).
