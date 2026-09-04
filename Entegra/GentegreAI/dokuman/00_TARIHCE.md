@@ -5852,3 +5852,30 @@ basligiyla birebir. Kademe de goruldu: uc nakit is %9 (90,00 x 3), POS %3
 
 jsdom testi bunu YAKALAYAMAZDI: hata SPA gecisinde ortaya cikiyor ve iki
 ayri bilesenin state omrunden doguyor.
+
+### Hakediş "kartı" YOK - dönem penceresi ve satır aksiyonları test edildi
+
+Kullanici hakedis KARTINI istedi; boyle bir ekran yok ve olmamasi da tutarli:
+`hakedis` listesinde `kartYolu` tanimsiz, `KartKatalogu`'nda hakedis karti
+bulunmuyor. Hakedis ELLE YAZILAN bir kayit degil - donem kapatilinca dogar,
+satirlari dondurulur. Duzenlenecek bir alani olmadigi icin kart da yok.
+
+Yerine iki yuzey var, ikisi de gercek tarayicida denendi:
+
+**Hakediş Dönemi Kapat** penceresi - donem tarihleri + ACIK HAKEDISLER
+tablosu (kisi, kapatilabilir satir/tutar, kapanmis, tarih araligi). Bu turda
+uretilen tum primler dogru topluydu:
+    Mert 1.250,00 (4) · Arif 425,00 (3) · Selim 360,00 (3)
+    Ufuk 210,00 (1) · Akın 200,00 (1) · Nazlı 144,00 (1)
+Pencere ayrica kapatmanin GERI ALINAMAZ oldugunu ve farkin sonraki doneme
+duzeltme olarak gireceğini yaziyor.
+
+GERCEK KAPATMA yapildi: Akın YILDIRIM (dis hekim) 01-30.09.2026 -> hakediş 5,
+200,00, "Kesinleşti". Dis hekim hakedisi de boylece uctan uca dogrulandi.
+
+**Hakediş satırı aksiyonlari**: Dönemi Kapat · Kalemi Aç · Rolleri Düzenle ·
+Onayla · Onayı Kaldır. "Rolleri Düzenle" penceresi acildi: kalemin rolleri
+(rol / kisi / pay %) duzenlenebiliyor ve basliginda kural yaziyor - "bir
+kalemde cok rol, bir rolde cok kisi olabilir".
+
+Sayfa hatasi yok.
