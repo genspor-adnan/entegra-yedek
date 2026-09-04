@@ -6,6 +6,7 @@ import {
   ApiHatasi, hataAyristir, urunAdi,
   type KartMetaYaniti, type KartYetkisi, hataMetni } from '../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, bosDetay, detayFarki } from './GenDetayTablo';
+import { KademeGridi } from './prim/KademeGridi';
 import { Modal } from './Modal';
 import { yerelAnMetni, bugunIso, hamSayi, kidemMetni } from './bicim';
 import { PaketSekmesi } from './PaketSekmesi';
@@ -1200,6 +1201,11 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           //   eksik prim ancak ay sonunda fark edilir.
           //   "Dis hekim yalniz Gönderen planina" kurali bundan KENDILIGINDEN
           //   cikar: aday gorunumunde dis hekimin tek rolu Gönderen.
+          // KADEMELER (388): plan SATIRININ cocugu - satir modalinin altinda.
+          //   Ayri sekme yapilamiyor cunku cerceve detayi kartin id'siyle
+          //   baglar, kademe ise satir_id'ye bagli (torun).
+          modalAltBilesen={kaynak === 'prim-plani' && aktif.detay.ad === 'satirlar'
+            ? (satirId => <KademeGridi planSatirId={satirId} />) : undefined}
           aramaEkFiltre={kaynak === 'prim-plani' && aktif.detay.ad === 'taraflar'
             ? { alan: 'rol', op: 'esit' as const, deger: Number(deger.rol) || 1 }
             : undefined}

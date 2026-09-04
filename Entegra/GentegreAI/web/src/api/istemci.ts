@@ -710,6 +710,21 @@ export const api = {
     gonder<{ satirSayisi: number; primSatiri: number }>(
       `/api/prim/kalem/${belgeSatirId}/roller`, govde),
 
+  /**
+   * Plan satirinin KADEMELERI (388): adede gore artan oran. Kademe satirin
+   * cocugu - kart cercevesi torun detayi baglamadigi icin kendi ucu var.
+   */
+  primKademeler: (planSatirId: number) =>
+    istek<{ satirlar: { id: number; adetAlt: number; adetUst: number | null;
+                        deger: number }[] }>(
+      `/api/prim/satir/${planSatirId}/kademeler`),
+
+  /** Kademeleri TOPLU yaz (tam liste yerine konur) - aralik kumesi butun halinde. */
+  primKademeYaz: (planSatirId: number,
+                  satirlar: { adetAlt: number; adetUst: number | null; deger: number }[]) =>
+    gonder<{ satirSayisi: number }>(
+      `/api/prim/satir/${planSatirId}/kademeler`, { satirlar }, 'PUT'),
+
   /** Kisi bazinda acik (donemi kapanmamis) hakedis (324). */
   primAcikHakedis: () =>
     istek<Record<string, unknown>[]>('/api/prim/acik'),

@@ -98,6 +98,13 @@ interface Props {
   aramaKaynaklari?: readonly string[];
   /** Arama penceresine EKLENEN sabit kosul (ör. prim planinin rolu). */
   aramaEkFiltre?: { alan: string; op: 'esit'; deger: string | number };
+  /**
+   * SATIR MODALININ ALTINA cizilen ek bilesen (388: prim satirinin
+   * KADEMELERI). Detayin DETAYI icindir - kart cercevesi torun seviyesini
+   * baglamaz, ama kullanici o satiri duzenlerken cocugunu da gormeli.
+   * Satir henuz kaydedilmemisse `null` gelir; bilesen buna gore uyarir.
+   */
+  modalAltBilesen?: (satirId: number | null) => React.ReactNode;
   /** Baslik ve satir eylemleri IKON olarak cizilir (＋ / ✎ / 🗑) - seri ve XSLT
       gridleriyle ayni gorunum (kullanici). Metin dugmeler dar gridlerde
       satiri tasiriyordu. */
@@ -152,7 +159,8 @@ function gunFarki(bas: string, bit: string): number | null {
 
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler, kutuSinif,
-                               gizliAlanlar, aramaKaynaklari, aramaEkFiltre }: Props) {
+                               gizliAlanlar, aramaKaynaklari, aramaEkFiltre,
+                               modalAltBilesen }: Props) {
   /**
    * KAMPANYA SATIRI (268): "Kapsam" TEK kolondur (iskonto_yeri_id) ama
    * anlami satirin TIPINE gore degisir - Liste'de 0, Kategori'de kategori id,
@@ -996,6 +1004,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
             <button type="button" className="d bir" onClick={modalKaydet}>Tamam</button>
           </>}
         >
+          <>
           <div className="kagrup">
             <div className="alan-izgara tek-sutun ayar-formu">
               {alanlar.map(a => (
@@ -1055,6 +1064,14 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               ))}
             </div>
           </div>
+          {/* SATIRIN COCUGU (388: kademeler) - kart cercevesi torun detayi
+              baglamaz, ama kullanici satiri duzenlerken cocugunu da gormeli.
+              Yeni satirda id yok: bilesen "once satiri kaydedin" der. */}
+          {modalAltBilesen?.(
+            modalSatir !== 'yeni' && modalSatir !== null
+              ? (Number(durum.guncel[modalSatir]?.id) || null)
+              : null)}
+          </>
         </Modal>
       )}
 

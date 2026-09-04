@@ -5748,3 +5748,33 @@ ilki patladigi icin ikincisi de yakalandi.
 **UI EKSIGI:** kademe satirlari SQL'den kuruluyor - kartta gridi yok. Kart
 cercevesi detayin detayini (plan > satir > kademe) desteklemiyor. Ya satir
 modaline gomulu kucuk bir grid ya da ayri bir "Kademeler" penceresi gerekir.
+
+### Kademe gridi satir modalinde (kullanici: "a yı yap")
+
+Kademe plan SATIRININ cocugu, kartin TORUNU; kart cercevesi bir detayi yalnizca
+kartin kendi id'siyle baglar, torun seviyesine ulasmaz. Uc secenek tartisildi
+(satir modaline gomulu grid / ayri pencere / prim satirini kendi karti yapmak);
+kullanici satir modalini secti - dogru olan da o: kullanici zaten orani
+duzenlemek icin o pencereyi aciyor, kademe de oranin devami.
+
+**API**: `GET|PUT /api/prim/satir/{id}/kademeler`. PUT TAM LISTEYI yerine koyar
+- kademeler bir ARALIK KUMESIDIR, tek tek satir eklemek/silmek kumeyi gecici
+olarak tutarsiz birakir ("1-2 %5" silinip "1-5 %9" yazilana kadar 3. is orani
+kaybeder).
+
+Uc, kaydetmeden ONCE dogrular:
+  - araliklar CAKISAMAZ ("1-5" ile "3-8" ayni adete iki cevap verir ve
+    hangisinin gecerli oldugu SIRALAMAYA kalirdi - kullanicinin goremeyecegi
+    bir kural),
+  - ust siniri bos ("ve yukarisi") EN FAZLA BIR kademe olabilir,
+  - ters aralik (5-2) reddedilir.
+Ucu de dogrulandi.
+
+**Arayuz**: `GenDetayTablo`'ya jenerik `modalAltBilesen` kancasi eklendi
+(detayin detayi icin), icerik prime ozel `KademeGridi`. Yeni satirda id yok -
+bilesen "once satiri kaydedin" der; bos grid gostermek "yazdim ama gitmedi"
+uretirdi.
+
+Gridin basinda kalici bir not var: kademe DONEM KAPANISINDA uygulanir, kalem
+anindaki tutar onizlemedir. Bu yazilmazsa "girdim ama tutar degismedi" sorusu
+kacinilmaz.

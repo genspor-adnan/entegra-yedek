@@ -26,6 +26,10 @@ public static class PrimUclari
     /// <summary>Prim satırı onayı (330): onaylı satır yeniden hesaplanmaz.</summary>
     public sealed record OnayIstegi(IReadOnlyList<int> Satirlar, bool GeriAl);
 
+    /// <summary>Kademe satırı: adet aralığı ve o aralıkta geçerli oran/tutar.</summary>
+    public sealed record KademeSatiri(int AdetAlt, int? AdetUst, decimal Deger);
+    public sealed record KademeIstegi(IReadOnlyList<KademeSatiri> Satirlar);
+
     private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
     {
         var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
@@ -142,6 +146,94 @@ public static class PrimUclari
                 """, null, [satirId], iptal);
 
             return Results.Ok(new { satirSayisi = satirlar.Count, primSatiri = uretilen });
+        });
+
+        // ------------------------------------------------------ kademeler ----
+        // Kademe, plan satirinin COCUGU (prim_plani_kademe.satir_id) - yani
+        //   kartin TORUNU. Kart cercevesi bir detayi yalnizca kartin kendi
+        //   id'siyle baglar, torun seviyesine ulasmaz; bu yuzden kademe kendi
+        //   uclariyla okunup yazilir ve arayuzde SATIR MODALINE gomulur
+        //   (kullanici: "a yı yap").
+        //
+        // TAM LISTE YAZILIR (replace): kademeler bir ARALIK KUMESIDIR, tek tek
+        //   satir eklemek/silmek araligi gecici olarak tutarsiz birakir
+        //   ("1-2 %5" silinip "1-5 %9" yazilana kadar 3. is orana dusmez).
+        //   Kullanici pencerede tabloyu tamamlar, tek islemde yerine konur.
+
+        // GET /api/prim/satir/{satirId}/kademeler
+        grup.MapGet("/satir/{satirId:int}/kademeler", async (
+            int satirId, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("prim", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var satirlar = await baglanti.ListeAsync("""
+                select k.id, k.adet_alt as "adetAlt", k.adet_ust as "adetUst",
+                       k.deger
+                  from public.prim_plani_kademe k
+                 where k.satir_id = @p0
+                 order by k.adet_alt, k.id
+                """, null, [satirId], Satir, iptal);
+
+            return Results.Ok(new { satirlar });
+        });
+
+        // PUT /api/prim/satir/{satirId}/kademeler
+        grup.MapPut("/satir/{satirId:int}/kademeler", async (
+            int satirId, KademeIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("prim", Islem.Degistir);
+
+            var satirlar = istek.Satirlar ?? [];
+
+            // ARALIKLAR CAKISMAMALI: "1-5 %10" ile "3-8 %12" ayni adet icin iki
+            //   cevap verir ve hangisinin gecerli oldugu SIRALAMAYA kalir -
+            //   kullanicinin goremeyecegi bir kural. Ust siniri bos olan
+            //   aralik "ve yukarisi" demektir, en fazla BIR tane olabilir.
+            var acikUclu = satirlar.Count(x => x.AdetUst is null);
+            if (acikUclu > 1)
+                throw GentegreHatasi.IsKurali(
+                    "Üst sınırı boş (\"ve yukarısı\") yalnızca BİR kademe olabilir.");
+
+            foreach (var k in satirlar)
+            {
+                if (k.AdetAlt < 0)
+                    throw GentegreHatasi.Dogrulama("Adet alt sınırı eksi olamaz.");
+                if (k.AdetUst is { } ust && ust < k.AdetAlt)
+                    throw GentegreHatasi.Dogrulama(
+                        $"Kademe aralığı ters: {k.AdetAlt} - {ust}.");
+            }
+
+            foreach (var (a, i) in satirlar.Select((x, i) => (x, i)))
+            foreach (var b in satirlar.Skip(i + 1))
+            {
+                var aUst = a.AdetUst ?? int.MaxValue;
+                var bUst = b.AdetUst ?? int.MaxValue;
+                if (a.AdetAlt <= bUst && b.AdetAlt <= aUst)
+                    throw GentegreHatasi.IsKurali(
+                        $"Kademe aralıkları çakışıyor: {a.AdetAlt}-{(a.AdetUst?.ToString() ?? "üstü")} "
+                        + $"ile {b.AdetAlt}-{(b.AdetUst?.ToString() ?? "üstü")}.");
+            }
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var tx = await baglanti.BeginTransactionAsync(iptal);
+
+            await baglanti.CalistirAsync(
+                "delete from public.prim_plani_kademe where satir_id = @p0",
+                tx, [satirId], iptal);
+
+            foreach (var k in satirlar)
+                await baglanti.CalistirAsync("""
+                    insert into public.prim_plani_kademe (satir_id, adet_alt, adet_ust, deger)
+                    values (@p0, @p1, @p2, @p3)
+                    """, tx, [satirId, k.AdetAlt, k.AdetUst, k.Deger], iptal);
+
+            await tx.CommitAsync(iptal);
+            return Results.Ok(new { satirSayisi = satirlar.Count });
         });
 
         // --------------------------------------------------- dönem kapat ----
