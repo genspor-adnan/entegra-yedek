@@ -1530,7 +1530,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
                            hesapSecAc={t => void (async () => {
                              if (await kayitSart()) setHesapSecim(t);
                            })()}
-                           tutarGuncelle={tahsilat.tutarGuncelle}
                            acikBorc={hizliTutar()}
                            onYenile={() => { if (kayitliId) void api.belgeOku(kayitliId)
                                               .then(setSonuc).catch(() => {}) }}
@@ -1637,6 +1636,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
           kalem={kalem} setKalem={setKalem} kalemKaydet={kalemKaydet}
           iadeArama={iadeArama} setIadeArama={setIadeArama}
           tahsilat={tahsilat} tahsilatTutariSor={tahsilatTutariSor}
+          posSonrasi={posSonrasi}
           hesapSecim={hesapSecim} setHesapSecim={setHesapSecim}
           donusum={donusum} setDonusum={setDonusum}
           donusumPay={donusumPay} setDonusumPay={setDonusumPay}

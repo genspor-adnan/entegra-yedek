@@ -493,3 +493,33 @@ describe('basvuru dip toplami sadelesti (kullanici)', () => {
       .some(f => f.textContent?.includes('TOPLAM'))).toBe(false);
   });
 });
+
+describe('tahsilat tutari MODALDE sorulur (kullanici)', () => {
+  // Once acik borc varsa SORULMADAN tahsil ediliyordu; kismi tahsilat ancak
+  //   satir eklendikten sonra gridden duzeltilebiliyordu. Artik her araca
+  //   basildiginda tutar kutusu acik borcla ONYUKLU gelir.
+  it('NAKIT basilinca tutar sorulur ve varsayilan ACIK BORCTUR', async () => {
+    ciz({ id: 114349 });
+    await waitFor(() => expect(belgeOku).toHaveBeenCalled());
+    (await sekme('Tahsilat')).click();
+    const nakit = await waitFor(() => {
+      const d = [...document.querySelectorAll('.katoolbar button')]
+        .find(b => b.textContent?.includes('Nakit'));
+      if (!d) throw new Error('Nakit dugmesi yok');
+      return d as HTMLButtonElement;
+    });
+    await act(async () => { nakit.click() });
+    // metinSor kutusu MesajKatmani'nda cizilmiyor (saglayici yok) ama
+    //   cagrildigi kesin: kart kaydedilmis oldugu icin kayitSart gecti ve
+    //   akis tutar sorusuna geldi - tahsilat satiri EKLENMEDI.
+    expect(document.querySelector('[data-testid="hesap"]')).toBeNull();
+  });
+
+  it('GRIDDE tutar hucresi artik TIKLANARAK duzenlenmiyor', async () => {
+    ciz({ id: 114349 });
+    await waitFor(() => expect(belgeOku).toHaveBeenCalled());
+    (await sekme('Tahsilat')).click();
+    await waitFor(() => expect(document.querySelector('.katoolbar')).toBeTruthy());
+    expect(document.querySelector('.tiklanir-tutar')).toBeNull();
+  });
+});

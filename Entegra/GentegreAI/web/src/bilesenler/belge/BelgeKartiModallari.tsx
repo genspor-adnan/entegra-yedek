@@ -92,6 +92,8 @@ export interface BelgeKartiModalProps {
   /* ---- tahsilat ---- */
   tahsilat: ReturnType<typeof useBelgeTahsilat>;
   tahsilatTutariSor(baslik: string): Promise<number>;
+  /** POS tahsilati sonrasi ayarli aksiyon (355) - otomatik fis / sor. */
+  posSonrasi?(tur: number): Promise<void>;
   hesapSecim: 'B' | 'P' | null;
   setHesapSecim: Ayarla<'B' | 'P' | null>;
 
@@ -126,7 +128,7 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
     personelArama, setPersonelArama, setTeslimEden, setTeslimAlan,
     satirlar, setSatirlar, stokArama, setStokArama, aramaEklenen, setAramaEklenen,
     stokSecildi, kalem, setKalem, kalemKaydet, iadeArama, setIadeArama,
-    tahsilat, tahsilatTutariSor, hesapSecim, setHesapSecim,
+    tahsilat, tahsilatTutariSor, posSonrasi, hesapSecim, setHesapSecim,
     donusum, setDonusum, donusumPay, setDonusumPay,
     acilanDonusum, setAcilanDonusum, donusumleriYukle,
     terminAcik, setTerminAcik, rolModali, setRolModali,
@@ -291,7 +293,13 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
             const t = hesapSecim === 'B' ? (alisMi ? 32 : 22) : (alisMi ? 35 : 25);
             setHesapSecim(null);
             const tutar = await tahsilatTutariSor(hesapSecim === 'B' ? 'Banka' : 'POS');
-            if (tutar > 0) await tahsilat.hizliTahsilat(t, h.id, tutar, h.ad);
+            if (!(tutar > 0)) return;
+            await tahsilat.hizliTahsilat(t, h.id, tutar, h.ad);
+            // POS SONRASI OTOMATIK FIS (355) HIZLI AKISTA DA (kullanici):
+            //   kural yalniz kasa KARTI kapanirken isliyordu; POS dugmesiyle
+            //   tahsil edilince fis hic kesilmiyordu - ayni ayar iki yolda
+            //   farkli davraniyordu.
+            await posSonrasi?.(t);
           })()}
         />
       )}

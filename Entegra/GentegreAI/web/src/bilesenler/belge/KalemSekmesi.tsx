@@ -707,7 +707,7 @@ export interface KalemSekmesiProps {
 export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsilatAc,
                                   secili, setSecili, tahsilatAcKart, tahsilatSil,
                                   onYenile, kurumTahakkukAc, kurumKalan, basvuruMu,
-                                  hizliNakit, hesapSecAc, tutarGuncelle, acikBorc }: {
+                                  hizliNakit, hesapSecAc, acikBorc }: {
   /** Basvuru kartinda arac cubugu SADE: "＋" (tam ekran) cizilmez. */
   basvuruMu?: boolean;
   sonuc: BelgeYaniti | null;
@@ -734,7 +734,6 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
   hizliNakit?(): void;
   hesapSecAc?(tur: 'B' | 'P'): void;
   /** Gridde tutar hucresine tiklaninca cagrilir (satir ici duzenleme). */
-  tutarGuncelle?(id: number, tutar: number): Promise<void>;
   /** Belgenin ACIK BORCU - yeni tahsilat satiri bu tutarla acilir. */
   acikBorc?: number;
   /**
@@ -767,14 +766,6 @@ useEffect(() => {
   window.addEventListener('click', kapat);
   return () => window.removeEventListener('click', kapat);
 }, [aracMenu]);
-/** Satir ici tutar duzenleme: hangi kasa islemi ve o anki metin. */
-const [tutarDuzenlenen, setTutarDuzenlenen] = useState<number | null>(null);
-const [tutarMetni, setTutarMetni] = useState('');
-const tutarBitir = (id: number) => {
-  const yeni = sayi(tutarMetni);
-  setTutarDuzenlenen(null);
-  if (yeni > 0) void tutarGuncelle?.(id, yeni);
-};
 const satirTikla = (e: React.MouseEvent, sira: number, id: number) => {
   if (!id) return;
   if (e.shiftKey && capa.current != null) {
@@ -933,30 +924,13 @@ return (
             <td>{String(k.islemNo ?? '')}</td>
             <td>{String(k.turAdi ?? '')}</td>
             <td>{String(k.hesapAdi ?? '') || <span className="sonuk">—</span>}</td>
-            {/* TUTAR HUCRESI TIKLANINCA DUZENLENIR (kullanici): hizli
-                tahsilatta satir ACIK BORCUN TAMAMIYLA aciliyor - kismi tahsilat
-                icin kart acmak yerine hucreye tiklanip yazilir. */}
-            <td className="hiza-sag" onClick={e => e.stopPropagation()}>
-              {tutarDuzenlenen === kid ? (
-                <input className="hiza-sag" autoFocus value={tutarMetni}
-                       style={{ width: 110 }}
-                       onChange={e => setTutarMetni(e.target.value)}
-                       onKeyDown={e => {
-                         if (e.key === 'Enter') { e.preventDefault(); tutarBitir(kid) }
-                         if (e.key === 'Escape') { setTutarDuzenlenen(null) }
-                       }}
-                       onBlur={() => tutarBitir(kid)} />
-              ) : (
-                <span className={tutarGuncelle && kid ? 'tiklanir-tutar' : ''}
-                      title={tutarGuncelle && kid ? 'Tutarı değiştirmek için tıklayın' : undefined}
-                      onClick={() => {
-                        if (!tutarGuncelle || !kid) return;
-                        setTutarDuzenlenen(kid);
-                        setTutarMetni(String(Number(k.yerelTutar ?? k.tutar ?? 0)));
-                      }}>
-                  {para.format(Number(k.yerelTutar ?? k.tutar ?? 0))}
-                </span>
-              )}
+            {/* TUTAR ARTIK GRIDDE DUZENLENMIYOR (kullanici): tutar tahsilat
+                aracina basildigi anda MODALDE soruluyor (acik borc onyuklu,
+                Enter kaydediyor). Iki ayri duzenleme yolu -hucre ici ve
+                modal- ayni alani farkli kurallarla yaziyordu; girilen satir
+                yanlissa ✎ ile tahsilat ekrani acilir. */}
+            <td className="hiza-sag">
+              {para.format(Number(k.yerelTutar ?? k.tutar ?? 0))}
             </td>
           </tr>
           );

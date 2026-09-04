@@ -4867,3 +4867,15 @@ fonksiyonla karsilastirildi - **0 fark**.
 yer kapliyordu. "İskonto %" -> "İsk.%". Miktar · İsk.% · KDV % AYNI genislikte (52px) - ucu de kisa
 sayi tasiyor, farkli genislikler gride duzensiz gorunum veriyordu. Genislikler kullaniciyla
 birlikte oturtuldu: Tarih 92 -> 111, Kod 110 -> 94, Birim Fiyat 110 -> 99, Tutar 120 -> 108.
+
+**TAHSILAT TUTARI HER ZAMAN MODALDE SORULUYOR (kullanici).** Once acik borc varsa SORULMADAN tahsil
+ediliyordu; kismi tahsilat (hasta "bugun 500 vereyim" dedi) ancak satir eklendikten sonra gridden
+duzeltilebiliyordu. Artik Nakit / POS / Banka'ya basildiginda kutu ACIK BORCLA ONYUKLU aciliyor -
+tam tahsilatta tek Enter yeter, kismide rakam yazilir (kutu zaten autoFocus + Enter'li).
+**GRIDDE TUTAR HUCRESI ARTIK DUZENLENMIYOR** (kullanici): iki ayri duzenleme yolu -hucre ici ve
+modal- ayni alani farkli kurallarla yaziyordu. Yanlis girilen satir ✎ ile tahsilat ekranindan
+duzeltilir. `tutarGuncelle` propu, satir ici state ve `.tiklanir-tutar` stili kaldirildi.
+**POS SONRASI OTOMATIK FIS (355) HIZLI AKISTA DA:** kural yalniz kasa KARTI kapanirken isliyordu
+(`onPencereKapandi`); POS dugmesiyle tahsil edilince fis HIC kesilmiyordu - ayni ayar iki yolda
+farkli davraniyordu. Artik hizli POS tahsilatindan sonra da `posSonrasi` calisiyor.
+2 test. Toplam: **347 test gecti**.

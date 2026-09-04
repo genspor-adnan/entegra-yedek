@@ -2056,12 +2056,6 @@ input.skt-gecmis {
 .kat-panel-bas .minibtn { margin-left: auto; font-size: 10.5px; padding: 1px 6px }
 .kat-panel-agac { max-height: 62vh; overflow: auto }
 
-/* Tahsilat gridinde TIKLANABILIR TUTAR (kullanici): hucreye tiklayinca satir
-   ici duzenleme acilir - kismi tahsilat icin kart acmaya gerek kalmaz. */
-.detay-tablo .tiklanir-tutar {
-  cursor: text; border-bottom: 1px dashed var(--cizgi); padding-bottom: 1px;
-}
-.detay-tablo .tiklanir-tutar:hover { background: var(--mor2); border-bottom-color: var(--mor) }
 
 /* ============================================================================
    BASVURU TAMAMLANMA SERIDI (370, kullanici) - radyoloji akis seridinin
