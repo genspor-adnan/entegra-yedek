@@ -592,8 +592,14 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               )}
             </span>
           ) : (
-            <button type="button" className="d bir" disabled={!satirEklenebilir} onClick={satirEkle}>
-              {acilKisiGrid ? '＋ Kişi Ekle' : '+ Satir'}
+            // IKONSUZ BASLIKTA DA AYNI KURAL: aramali detayda dugme dogrudan
+            //   arama penceresini acar. Prim Alanlar bu daldan ciziliyordu -
+            //   yalniz ikonlu dali degistirmek yetmedi (kullanici: "+ satır
+            //   basınca arama açılmıyor").
+            <button type="button" className="d bir" disabled={!satirEklenebilir}
+                    onClick={() => (tarafAlani ? setTarafAramaAcik(true) : satirEkle())}>
+              {tarafAlani ? `＋ ${tarafAlani.baslik} Ekle`
+                          : acilKisiGrid ? '＋ Kişi Ekle' : '+ Satir'}
             </button>
           )
         )}
