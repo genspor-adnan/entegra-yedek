@@ -5446,3 +5446,22 @@ sorulmuyor.
 Dogrulandi (rollback'li): ayni kisi listesine sahip iki plandan SGK'lisi
 yalniz SGK basvurusunda kazaniyor (5), kendi odeyen ve OSS'de genel plan
 uygulaniyor (20). Tip kisiti ozgulluk puanina da giriyor.
+
+### Belge turleri: cok secim -> UC SECENEKLI combo (db/381)
+
+Once onay kutusu grubu yapmistim; kullanici "combo yap (Tümü, Fatura/Fiş,
+Tahakkuk) bu ucunden biri olabilir" dedi - ve hakli: secenekler birbirini
+disliyor. Hasta payi FATURA ya da FIS ile kapanir (hangisinin kesildigi kasa
+tercihidir, prim acisindan ayni sey), kurum payi TAHAKKUK'a gider.
+
+Kolon degismedi: `belge_turleri` virgullu metin. Kod ANAHTARLARI kolona
+yazilan degerin KENDISI ('15,16' / '17'), bos = tumu. Boylece combo ile kolon
+arasinda cevrim yok.
+
+**db/381** iki eski satiri gocurdu (yedegiyle):
+
+    '4,14,15' -> '15,16'    '13,17' -> '17'
+
+Dusen turler (4 stok fisi, 14 siparis, 13 ALIS tahakkugu) prim URETMEZ - prim
+yalniz gelir belgesinden dogar - yani hicbir hakedis degismedi. Dogrulandi:
+plan 1 fatura %10, tahakkuk %12 (eskisi gibi).
