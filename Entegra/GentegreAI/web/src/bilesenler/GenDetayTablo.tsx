@@ -532,13 +532,17 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
         {!saltOkunur && (
           ikonlu ? (
             <span className="baslik-eylem">
-              <button type="button" className="d bir ikon-dugme" title="Yeni satır"
+              {/* ARAMALI DETAYDA "＋" DOGRUDAN ARAMAYI ACAR (kullanici): satirin
+                  tek anlamli alani secilecek KISI - once bos satir acip sonra
+                  hucreden arama penceresini actirmak fazladan bir adimdi.
+                  Ayri bir arama dugmesi de yok: iki dugme ayni isi yapiyordu. */}
+              <button type="button" className="d bir ikon-dugme"
+                      title={tarafAlani ? `${tarafAlani.baslik} ara ve ekle` : 'Yeni satır'}
                       disabled={!satirEklenebilir}
-                      onClick={() => (modalDuzenle ? modalAc('yeni') : satirEkle())}>＋</button>
-              {tarafAlani && (
-                <button type="button" className="d ikon-dugme" title={`${tarafAlani.baslik} ara ve ekle`}
-                        onClick={() => setTarafAramaAcik(true)}>🔍</button>
-              )}
+                      onClick={() => {
+                        if (tarafAlani) { setTarafAramaAcik(true); return }
+                        if (modalDuzenle) modalAc('yeni'); else satirEkle();
+                      }}>＋</button>
               {/* Duzenle / Sil USTTE (kullanici): satir sonunda her satirda
                   tekrar edip gridi kalabaliklastiriyordu. Secim yoksa pasif ve
                   sebebi title'da - seri/XSLT gridleriyle ayni desen. */}
