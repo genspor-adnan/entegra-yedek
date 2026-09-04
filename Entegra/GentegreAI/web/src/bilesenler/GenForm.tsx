@@ -917,7 +917,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
               bir dugme, bozuk bir dugmeden daha kotu. */}
           {kaynak === 'hasta' && !yeniMi && (
             <>
-              <button className="d turuncu" type="button"
+              <button className="d" type="button"
                       title="Kimlik bilgilerini MERNİS'ten günceller"
                       onClick={() => setHata('MERNİS servisi henüz bağlı değil.')}>
                 MERNİS'ten getir
@@ -927,7 +927,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
                       onClick={() => setHata('Provizyon/müstehaklık servisi henüz bağlı değil.')}>
                 Provizyon/Müstehaklık Sorgula
               </button>
-              <button className="d" type="button" onClick={() => setAcilanBasvuru(0)}>
+              <button className="d yesil" type="button" onClick={() => setAcilanBasvuru(0)}>
                 ＋ Yeni Başvuru
               </button>
             </>

@@ -5093,3 +5093,17 @@ yuzden on-dolgu ilk state olarak verilince akisin geri kalani aynen isliyor.
 
 Iki test: on-dolguyla arama penceresi acilmaz; on-dolgu YOKSA eski davranis
 (arama acilir) korunur.
+
+### Yakin KIMLIK NO + dugme renkleri
+
+**db/374** `taraf_acil_kisi.kimlik_no varchar(20)` - yakinin kimlik numarasi
+kayit kabulde ISLEVSEL: refakatci kaydi, muvafakat/onam formu ve fatura
+sorumlulugu bu numaraya bagli; bugune kadar `aciklama` notuna yaziliyordu,
+orada aranamiyor ve dogrulanamiyordu. METIN ve ZORUNSUZ: yakin YABANCI
+olabilir (11 haneli TC yok, pasaport/yabanci kimlik gelir) ve cogu basvuruda
+zaten sorulmaz - zorunlu kilmak var olan kayitlari kirardi.
+Grid'de e-Posta'nin saginda. YALNIZ DOCKER'A uygulandi, bulut (ekspert)
+bekliyor.
+
+Dugme renkleri (kullanici): MERNİS notr, "＋ Yeni Başvuru" YESIL (yeni kayit
+baslatan eylem). Turuncu sinifi kaldirildi.

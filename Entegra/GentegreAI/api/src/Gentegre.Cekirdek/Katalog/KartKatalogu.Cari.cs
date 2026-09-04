@@ -338,7 +338,10 @@ public static partial class KartKatalogu
                 new("adSoyad",    "ad_soyad",    "metin", EnFazlaUzunluk: 120, Baslik: "Ad Soyad", Zorunlu: true),
                 new("yakinlik",   "yakinlik",    "kod",   SabitKodlar: YakinlikKodlari, Baslik: "Yakınlık"),
                 new("telefon",    "telefon",     "metin", EnFazlaUzunluk: 30,  Baslik: "Telefon"),
-                new("eposta",     "eposta",      "metin", EnFazlaUzunluk: 120, Baslik: "e-Posta")
+                new("eposta",     "eposta",      "metin", EnFazlaUzunluk: 120, Baslik: "e-Posta"),
+                // 374: TC kimlik ya da yabanci kimlik/pasaport - metin, 11 hane
+                //   zorunlulugu yok (yakin yabanci olabilir).
+                new("kimlikNo",   "kimlik_no",   "metin", EnFazlaUzunluk: 20,  Baslik: "Kimlik No")
             }, Sirala: "varsayilan desc, sira, id", LogTabloId: 906, Baslik: "Acil Durumda Aranacak Kişiler"),
             // Ozluk - taraf_personel 1:1 (id = taraf.id). Kisi'nin TekAdres'i gibi TEK SATIR gosterilir
             //   (TekOzluk.tsx) - satir ekle/sil YOK, tek satir hep var/yok.
