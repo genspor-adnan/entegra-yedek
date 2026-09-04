@@ -59,7 +59,8 @@ public static partial class KaynakKatalogu
                 "case coalesce(p.odeyen_tipi, 0) when 1 then 'Özel (Ücretli)' "
                 + "when 2 then 'ÖSS' when 3 then 'SGK' else 'Tümü' end",
                                            "metin", "Ödeyen Tipi", Hizalama: "orta",
-                                           Genislik: 130, Filtrelenebilir: false),
+                                           Bicim: "rozet", Genislik: 130,
+                                           Filtrelenebilir: false),
             new("odeyenTipi", "p.odeyen_tipi", "sayi", "Ödeyen Tipi Kodu",
                                            Varsayilan: false),
             new("kurum",     "coalesce(ku.unvan, '')", "metin", "Ödeyen Kurum",
