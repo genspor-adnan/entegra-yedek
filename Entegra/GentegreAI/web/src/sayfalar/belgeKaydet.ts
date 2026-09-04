@@ -100,6 +100,8 @@ export interface BelgeGirdisi {
   disNumarali: boolean;
   /** Basvuru (300): kalemsiz acilabilir - once protokol, hizmetler sonra. */
   basvuruMu?: boolean;
+  /** Tahakkuk (17/13): basvuru gibi KDV DAHIL belgedir (372). */
+  tahakkukMu?: boolean;
   /**
    * Kart SALT OKUNUR mu (kesin/kapanmis belge). Zorunluluk kurallari yalniz
    * DUZENLENEBILIR kartta calisir: alani degistiremeyen kullaniciya "boş
@@ -214,6 +216,7 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
 export function belgeGovdesi(g: BelgeGirdisi, dolu: SatirDurumu[], taslak: boolean) {
   const { tur, cari, tarih, depoBelgesi, stokFisiMi, seri, disNumarali, belgeNo,
           vadeGun, aciklama, odeyenKurumId, bolumId, personelId, basvuruAlanlari, basvuruMu,
+          tahakkukMu,
           subeId, fisCikisMi, depo, girisDepo, alisMi, faturaMi, fisTipi, faturaTipi,
           raporDovizi, ekstreDovizi, belgeKuru, yerelPara, satici,
           senaryo, irsaliyeMi, teslimSekli, aracPlaka, soforAd, sevkTarihi,
@@ -233,6 +236,10 @@ return {
     // TUTARLAR YEREL PARADA yazilir (kalem fiyatlari yerel girilir): belge
     //   dovizi yerel, RAPOR DOVIZI ayri kolon. Kur = 1 rapor dovizi kac yerel
     //   para eder; doviz karsiligi sunucuda genel_toplam / kur olarak hesaplanir.
+    // KDV DURUMU (372): BASVURU ve TAHAKKUK "Dahil" belgelerdir - hastaya /
+    //   kuruma soylenen rakam brut, matrah ondan turetilir ve yuvarlama
+    //   artigini KDV satiri emer. Fatura ve fis matrahla kesilir.
+    kdvDurum: basvuruMu || tahakkukMu ? 'Dahil' : 'Hariç',
     belgeDovizi: yerelPara,
     raporDovizi,
     ekstreDovizi,

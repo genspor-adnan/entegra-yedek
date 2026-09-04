@@ -4775,3 +4775,25 @@ aliyor; toplam tam brut cikiyor (kurusu KDV satiri emiyor - standart fatura prat
 tarafi (a) secenegini bastan uygulamis, ama brutu `birim_fiyat`a yazarak - kullanicinin
 istemedigi model. Yeni kolonu bu fonksiyona baglamak ONU DEGISTIRMEYI gerektiriyor (buyuk, ORTAK
 ve ÖTV/tevkifat/doviz/muafiyet dallariyla ic ice bir Delphi portu) - kullaniciya soruldu.
+
+**BELGE TOPLAMI ARTIK BRUTTEN CIKIYOR (372).** 371 brut fiyati sakliyordu ama toplam hala matrahtan
+hesaplaniyordu: brut 100,00 / %18 -> matrah 84,75 + KDV 15,26 = **100,01**. Kurus sapmasi yok
+olmamis, ekrandan BELGEYE tasinmisti.
+*Bulgu:* `fn_belge_diptoplam` istenen kurali ZATEN isletiyordu - `kdv_durum='Dahil'` dallari matrahi
+bruttan turetip KDV'yi "brut - matrah" olarak aliyor, genel toplam tam brut cikiyor (kurusu KDV
+satiri emiyor - fatura duzenlemede standart). Tek sorun brutu `birim_fiyat`/`tutar`dan okumasiydi.
+Artik 371/372 kolonlarindan okuyor (`COALESCE(NULLIF(...,0), eski)` - kolon bosken davranis birebir
+eski). `belge_satir.tutar_kdvli` eklendi: "KDV = brut tutar - matrah tutar" esitliginin tutmasi icin
+iki tarafin da AYNI yuvarlamadan gecmesi gerekiyor. Iki kolon icin de tutarlilik kisiti var.
+Basvuru ve TAHAKKUK artik `kdv_durum='Dahil'` kaydediliyor; donusumde kdv_durum kaynaktan
+KOPYALANMIYOR, HEDEF TURE gore veriliyor (fatura/fis 'Hariç', tahakkuk 'Dahil') - kopyalansaydi
+basvurudan cikan fatura da "Dahil" dogar ve KDV iki kez sayilirdi.
+*REGRESYON KANITI:* db/024'teki ESKI fonksiyon gecici adla kuruldu ve mevcut **531 belgenin
+hepsinde** yeni fonksiyonla genel toplam karsilastirildi - **0 fark**. (Zaten hicbir belgede
+kdv_durum='Dahil' yoktu; o dallar olu koddu.)
+*Canli dogrulama:* brut 100,00 / %18 basvuru -> matrah 84,75 + KDV 15,25 = **GENEL 100,00** (tam).
+
+*KALAN SAPMA (5. adim):* ayni basvurudan kesilen FIS 100,01 cikiyor. Sebep donusumde tasinan tutarin
+PAY TUTARI olmasi: `hasta_tutar` 2 haneli matrah (84,75) olarak saklaniyor, fis onu alip KDV'yi
+yeniden hesapliyor (84,75 x %18 = 15,26). Hastadan 100,00 tahsil edilip fise 100,01 yazilmasi
+dogru degil - pay dagitiminin da brut tabanina gecmesi gerekiyor (adim 5). Kullaniciya bildirildi.

@@ -1071,7 +1071,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, onKapat, onKaydedildi
       aracPlaka, soforAd, soforTckn, sevkTarihi, teslimSekli, fisTipi, satirlar,
       subeId: kullanici?.subeId ?? undefined,
       alisMi, irsaliyeMi, faturaMi, depoBelgesi, stokFisiMi, fisCikisMi, transferMi,
-      talepMi, disNumarali, basvuruMu,
+      talepMi, disNumarali, basvuruMu, tahakkukMu,
       // Zorunluluk kurallari yalniz duzenlenebilir kartta (bkz. belgeDogrula).
       kilitli,
     };

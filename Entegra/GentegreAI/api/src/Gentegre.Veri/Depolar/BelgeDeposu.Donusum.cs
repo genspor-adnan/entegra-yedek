@@ -250,7 +250,14 @@ public sealed partial class BelgeDeposu
             //   cinsinden hesaplanmis ama etiketi TL kalmisti (gercek vaka).
             ["raporDovizi"] = kaynak["rapor_dovizi"],
             ["ekstreDovizi"] = kaynak["ekstre_dovizi"],
-            ["kdvDurum"] = kaynak["kdv_durum"],
+            // KDV DURUMU HEDEF TURE GORE (372) - kaynaktan KOPYALANMAZ.
+            //   Basvuru ve tahakkuk KDV DAHIL belgelerdir (hastaya/kuruma
+            //   soylenen rakam brut); FATURA ve FIS ise matrahla kesilir -
+            //   "fis/faturaya cevirirken birim fiyattan kdv cikacak"
+            //   (kullanici). Kopyalansaydi basvurudan cikan fatura da "Dahil"
+            //   dogar ve KDV iki kez sayilirdi.
+            //   Tahakkuk turleri: 17 satis, 13 alis.
+            ["kdvDurum"] = hedefTur is 17 or 13 ? "Dahil" : "Hariç",
             // FIYAT LISTESI + KAMPANYA + ODEYEN KURUM (274): satirlar zaten
             //   kaynagin fiyatiyla kopyalanir, tutar degismez - tasinan sey
             //   KIMLIK. Kopyalanmazsa basvurudan cikan fatura kurumsuz ve

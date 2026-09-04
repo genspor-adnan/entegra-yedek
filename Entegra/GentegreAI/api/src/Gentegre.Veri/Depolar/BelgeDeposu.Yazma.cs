@@ -323,6 +323,11 @@ public sealed partial class BelgeDeposu
         // TUTAR: Delphi formulu birebir (ic yuvarlama + carpimsal iskonto + banker's).
         var tutar      = BelgeHesap.SatirTutari(adet, birimFiyat, iskonto, iskonto2);
         var dovizTutar = BelgeHesap.SatirTutari(adet, dovizBirimFiyat, iskonto, iskonto2);
+        // BRUT SATIR TUTARI (372) matrahla AYNI formulden gecer: dip toplam
+        //   KDV'yi "brut tutar - matrah tutar" olarak aliyor, iki tarafin da
+        //   ayni yuvarlamayi gormesi gerek.
+        var tutarKdvli = birimFiyatKdvli > 0
+            ? BelgeHesap.SatirTutari(adet, birimFiyatKdvli, iskonto, iskonto2) : 0m;
 
         // ODEME PAYLASIMI (289): odeyen kurum varsa satir tutari KURUM ve HASTA
         //   payina bolunur. Istemci acikca tutar gonderdiyse ona dokunulmaz
@@ -370,6 +375,8 @@ public sealed partial class BelgeDeposu
             //   soylenen rakam; matrah bundan turetilir.
             "birim_fiyat_kdvli", "iskonto", "iskonto2", "kdv",
             "otv_yuzde", "otv_miktar", "kdv_muafiyeti", "tutar",
+            // KDV dahil satir tutari (372) - belge toplaminin dayanagi.
+            "tutar_kdvli",
             "doviz_cinsi", "doviz_birim_fiyat", "doviz_tutari", "doviz_kuru",
             "giris_depo_id", "cikis_depo_id", "izleme", "izleme_kodu", "stok_durum_degis",
             // Donusum bagi (F8): kaynak_tur=30 -> kaynak belge_satir. Kapatma
@@ -391,7 +398,7 @@ public sealed partial class BelgeDeposu
             adet, miktar, (int)JsonSayi(satir, "birim", 0), birimCarpan,
             birimFiyat, birimFiyatKdvli, iskonto, iskonto2, (short)kdv,
             (short)JsonSayi(satir, "otvYuzde", 0), JsonOndalik(satir, "otvMiktar", 0),
-            (short)JsonSayi(satir, "kdvMuafiyeti", 0), tutar,
+            (short)JsonSayi(satir, "kdvMuafiyeti", 0), tutar, tutarKdvli,
             dovizCinsi, dovizBirimFiyat, dovizTutar, kur,
             JsonSayiNull(satir, "girisDepoId") ?? SayiNull(belge, "girisDepoId"),
             JsonSayiNull(satir, "cikisDepoId") ?? SayiNull(belge, "cikisDepoId"),
