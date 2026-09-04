@@ -170,6 +170,16 @@ public static partial class KartKatalogu
                         + "join public.taraf t on t.departman = d.id "
                         + "where t.id = prim_plani_taraf.taraf_id)",
                         "metin", Yazilabilir: false, Baslik: "Bölüm"),
+                    // GOREV (kullanici) - bolumun saginda. Personel karti hem
+                    //   gorev_id (tanimli kadro) hem serbest metin 'gorev'
+                    //   tasiyor; ikisi de doluysa TANIMLI olan gecerlidir.
+                    new("gorev",
+                        "(select coalesce("
+                        + "(select g.ad from public.personel_gorev g "
+                        + "where g.id = t.gorev_id), t.gorev, '') "
+                        + "from public.taraf t "
+                        + "where t.id = prim_plani_taraf.taraf_id)",
+                        "metin", Yazilabilir: false, Baslik: "Görev"),
                     new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
                         Baslik: "Açıklama"),
                 },

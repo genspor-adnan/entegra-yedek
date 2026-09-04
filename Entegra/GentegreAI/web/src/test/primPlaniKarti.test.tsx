@@ -73,7 +73,8 @@ describe('Prim Planı kartı - Prim Alanlar', () => {
     await waitFor(() => expect(kartOku).toHaveBeenCalled());
     await sekmeAc('Prim Alanlar');
 
-    fireEvent.click(await screen.findByRole('button', { name: /Kişi Ekle/ }));
+    // Ikonlu baslikta dugme "＋" - basligi title'da ("Kişi ara ve ekle").
+    fireEvent.click(await screen.findByTitle(/Kişi ara ve ekle/));
     await screen.findByPlaceholderText(/Kişi ara/);
     // Ad hem arama listesinde hem gridin kod combosunda gecebilir - arama
     //   listesi icinde beklenir.

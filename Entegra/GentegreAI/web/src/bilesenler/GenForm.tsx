@@ -1161,8 +1161,16 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           //   kipte her satir stok (5.000+) ve hizmet (3.700+) lookup'unu ayri
           //   <select> olarak cizer - 1.438 satirlik listede ~12 MILYON DOM
           //   dugumu sekmeyi donduruyordu ("Satirlar acilmiyor").
-          modalDuzenle={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'}
-          ikonlu={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'}
+          // ARAMAYLA DOLAN DETAY (375) da SALT GORUNUM + ikonlu baslik: satirin
+          //   tek yazilabilir alani aciklama, geri kalani tarafin kendi
+          //   kaydindan okunuyor - satir ici duzenleme kutulari yanlis bir
+          //   "burayi degistirebilirsin" izlenimi veriyordu. Ikonlu baslik
+          //   ayrica secim kutusunu, sil ikonunu ve grid menusunu (kolonlar /
+          //   CSV) getirir - liste ekranlarindaki grid ile ayni davranis.
+          modalDuzenle={(kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar')
+            || aktif.detay.alanlar.some(a => a.tip === 'kod' && a.aramaKaynagi)}
+          ikonlu={(kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar')
+            || aktif.detay.alanlar.some(a => a.tip === 'kod' && a.aramaKaynagi)}
           taslakKural={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
             ? fiyatSatirKurali : undefined}
           // Tumu / Stok / Hizmet cipleri (kullanici) - karma listede tek tur gorunur.
