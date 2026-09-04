@@ -29,73 +29,64 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id",        "id",        "sayi", Yazilabilir: false),
-            // PRIM ZAMANI ILK KAPI (332/333, kullanici): planin geri kalani
-            //   bu karara gore okunur - tahsilatta mi faturalamada mi prim
-            //   dogacak. Tahsilatta kesinti otomatik yansir; faturalamada
-            //   hekim SGK'yi beklemez. Bu yuzden kartin EN BASINDA ve zorunlu.
-            new("primZamani", "prim_zamani", "kod", Zorunlu: true,
-                KodListesi: "prim.zaman", Baslik: "Prim Zamanı", Grup: "Kimlik"),
-            // PRIM ROLU (379, kullanici: "bir prim planı sadece bir prim rolü
-            //   için çalışır"). Eskiden her SATIRDA soruluyordu; plan "kime
-            //   hangi sifatla" sorusunun cevabi oldugu icin basliga alindi -
-            //   oranlar okunurken hangi satirin kime ait oldugunu aramak
-            //   gerekmiyor. Combo rolun yaninda ISARETLI KISI SAYISINI da
-            //   yazar: kimse isaretlenmemis role plan yazilirsa hakedis hic
-            //   dogmaz ve bu ancak ay sonunda fark edilirdi.
-            new("rol",       "rol",       "kod", Zorunlu: true,
-                KodTablosu: "public.v_prim_rol_lookup",
-                Baslik: "Prim Rolü", Grup: "Kimlik"),
+
+            // ---------------------------------------------------- 1. SIRA ---
+            // Kullanici: Kod · Plan Adı · Prim Rolü · Prim Zamanı · Durum.
+            //   Planin KIMLIGI: hangi kural, kime, ne zaman dogar, yururlukte
+            //   mi. Kapsam (kime/nerede/ne zaman gecerli) ikinci sirada.
             new("kod",       "kod",       "metin", EnFazlaUzunluk: 30,
                 Baslik: "Kod", Grup: "Kimlik"),
             new("ad",        "ad",        "metin", Zorunlu: true, EnFazlaUzunluk: 120,
                 Baslik: "Plan Adı", Grup: "Kimlik"),
-            new("baslangic", "baslangic", "tarih", Zorunlu: true,
-                Baslik: "Başlangıç", Grup: "Kimlik"),
-            new("bitis",     "bitis",     "tarih", Baslik: "Bitiş", Grup: "Kimlik"),
-            // DURUM COMBO (kullanici) - onay kutusu degil. Kutu yalniz "isaretli
-            //   mi" der; combo PASIF secenegini de adiyla gosterir ve plan
-            //   yururlukten kaldirilirken ne yapildigi acik olur. Kodlar
-            //   diger kartlarla ayni (1 Aktif / 0 Pasif).
+            // PRIM ROLU (379): "bir prim plani sadece bir prim rolu icin
+            //   calisir" - eskiden her SATIRDA soruluyordu. Combo rolun
+            //   yaninda ISARETLI KISI SAYISINI da yazar: kimse isaretlenmemis
+            //   role plan yazilirsa hakedis hic dogmaz, bu ancak ay sonunda
+            //   fark edilirdi.
+            new("rol",       "rol",       "kod", Zorunlu: true,
+                KodTablosu: "public.v_prim_rol_lookup",
+                Baslik: "Prim Rolü", Grup: "Kimlik"),
+            // PRIM ZAMANI (332/333): planin geri kalani bu karara gore okunur -
+            //   tahsilatta mi faturalamada mi prim dogacak. Tahsilatta kesinti
+            //   otomatik yansir; faturalamada hekim SGK'yi beklemez.
+            new("primZamani", "prim_zamani", "kod", Zorunlu: true,
+                KodListesi: "prim.zaman", Baslik: "Prim Zamanı", Grup: "Kimlik"),
+            // DURUM COMBO - onay kutusu degil: kutu yalniz "isaretli mi" der,
+            //   combo PASIF secenegini de adiyla gosterir.
             new("durum",     "durum",     "kod", SabitKodlar: DurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),
-            // ÖNCELİK KARTTA YOK (kullanıcı). Kolon DURUYOR ve eşleştirme onu
-            //   hâlâ okuyor; yeni planlar varsayılan 10 ile açılır, yani tüm
-            //   planlar eşit öncelikte olur ve seçimi ÖZGÜLLÜK belirler -
-            //   asıl kural zaten oydu. Alan, ancak bilinçli kurulmuş bir
-            //   çakışmada anlamlıydı; ekranda durunca "büyük yazarsam kazanır"
-            //   sanılıp özgüllüğü ezmeye çalışan ayarlar üretiyordu.
 
-            // KAPSAM ARTIK AYRI KUTU DEĞİL (kullanıcı): aynı başlık bölümünün
-            //   İKİNCİ SIRASI. Beş alan için ayrı bir çerçeve, kartı ikiye
-            //   bölüp Prim Satırları'nı aşağı itiyordu; kapsam alanları da
-            //   planın kimliğinin parçası - "ne zaman, kime, hangi kurumda".
-            //   Boş alan "tümü" demektir (kampanya kartıyla aynı mantık).
-            // KİŞİ ALANI BURADA DEĞİL (375, kullanıcı): plan tek bir kişiye
-            //   değil bir KİŞİ LİSTESİNE bağlanır - "Prim Alanlar" sekmesi.
-            //   Aynı oranı alan otuz kişi için otuz plan açmak gerekiyordu.
-            // ODEYEN TIPI (380, kullanici: "kurumlar ayrı ayrı olmasın -
-            //   Tümü / Özel (Ücretli) / ÖSS / SGK"). Prim orani kurumun
-            //   KIMLIGINE degil TURUNE gore degisiyor; kurum bazli plan yeni
-            //   sozlesmeyi SESSIZCE plansiz birakirdi. Kaynak taraf_kurum.tur -
-            //   prim yeni bir siniflandirma uydurmuyor.
+            // ---------------------------------------------------- 2. SIRA ---
+            // Kullanici: Ödeyen · Şube · Başlangıç · Bitiş · Açıklama.
+            //   KAPSAM - hepsinde BOS = "tumu" (kampanya kartiyla ayni mantik).
+            //   Ayri kutu DEGIL: bes alan icin ikinci bir cerceve karti bolup
+            //   Prim Satirlari'ni asagi itiyordu.
+            // ODEYEN TIPI (380): prim orani kurumun KIMLIGINE degil TURUNE
+            //   gore degisir; kurum bazli plan yeni sozlesmeyi SESSIZCE
+            //   plansiz birakirdi. Kaynak taraf_kurum.tur.
             new("odeyenTipi", "odeyen_tipi", "kod",
                 KodListesi: "prim.odeyen_tipi",
                 Baslik: "Ödeyen Tipi", Grup: "Kimlik"),
-            // BAZ ALANI KALDIRILDI (kullanici). Kolon duruyor ama HICBIR YERDE
-            //   OKUNMUYORDU: primi hesaplayan iki fonksiyon da tabani sabit
-            //   aliyor - faturalamada satirin pay tutari (hasta/kurum/tutar),
-            //   tahsilatta dagitimin matrahi. Ekranda duran ama uygulanmayan
-            //   ayar, yanlis hesaplanan primden daha sinsi: kimse bakmadikca
-            //   dogru gorunur. Taban secimi gercekten istenirse once
-            //   fn_prim_uret / fn_prim_uret_belge baglanmali, sonra alan geri
-            //   gelmeli.
-            // KDV ALANI DA KALDIRILDI (kullanici) - BAZ ile ayni sebep:
-            //   `kdv_haric` hicbir uretim fonksiyonunda okunmuyor, taban her
-            //   yolda MATRAH aliniyor. Kolon duruyor.
             new("subeId",    "sube_id",   "kod", KodTablosu: "public.sube",
                 Baslik: "Şube (boş = tümü)", Grup: "Kimlik"),
+            new("baslangic", "baslangic", "tarih", Zorunlu: true,
+                Baslik: "Başlangıç", Grup: "Kimlik"),
+            new("bitis",     "bitis",     "tarih", Baslik: "Bitiş", Grup: "Kimlik"),
             new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 300,
                 Baslik: "Açıklama", Grup: "Kimlik"),
+
+            // KARTTA SORULMAYAN AMA KOLONU DURAN ALANLAR:
+            //   oncelik   - esitlik bozucu; tum planlar 10 ile acilir, secimi
+            //               OZGULLUK belirler. Ekranda durunca "buyuk yazarsam
+            //               kazanir" sanilip ozgullugu ezmeye calisiliyordu.
+            //   baz       - HICBIR uretim fonksiyonunda okunmuyor: taban
+            //               faturalamada satirin pay tutari, tahsilatta
+            //               dagitimin matrahi olarak SABIT aliniyor.
+            //   kdv_haric - ayni sebep; taban her yolda matrah.
+            //   odeyen_kurum_id - tek bir kuruma istisna gerekirse yol acik,
+            //               ama normalde TIP sorulur (380).
+            //   Uygulanmayan bir ayari ekranda tutmak, yanlis hesaplanan
+            //   primden daha sinsi: kimse bakmadikca dogru gorunur.
         },
         Detaylar: new DetayTanimi[]
         {
