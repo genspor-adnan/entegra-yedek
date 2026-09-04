@@ -3,6 +3,7 @@ import { AvansMahsup } from '../AvansMahsup';
 import { para, tarihSaat, hamSayi as sayi } from '../bicim';
 import { iskonatoMetni, satirTutari, type SatirDurumu } from '../../sayfalar/belgeSatir';
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
+import { bruta } from '../../sayfalar/belgeKarti/kdvModu';
 import type { BelgeYaniti } from '../../api/sozlesme';
 
 /**
@@ -169,8 +170,11 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 68 }}>İskonto %</th>}
         {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 58 }}>KDV %</th>}
         {/* Transferde FIYAT YOK: mal satilmiyor, depo degistiriyor. */}
+        {/* BASVURUDA baslikta "KDV Dahil" yazar: ayni kolon iki belgede farkli
+            sey gosterdiginde kullanici hangisine baktigini bilmeli. */}
         {bilgi.kalem !== 'miktar' && (
-          <th className="hiza-sag" style={{ width: 110 }}>Birim Fiyat ({yerelPara})</th>
+          <th className="hiza-sag" style={{ width: 110 }}>
+            Birim Fiyat ({yerelPara}){basvuruMu ? ' · KDV Dahil' : ''}</th>
         )}
         {bilgi.kalem !== 'miktar' && (
           <th className="hiza-sag" style={{ width: 120 }}>Tutar ({yerelPara})</th>
@@ -198,6 +202,13 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         const adet = sayi(r.adet);
         const fiyat = sayi(r.birimFiyat);
         const tutar = satirTutari(adet, fiyat, r.iskonto, r.iskonto2);
+        // BASVURUDA FIYAT KDV DAHIL GORUNUR (kullanici: "hbys'de fiyatlar hep
+        //   kdv dahil veriliyor, ücretlemede o görülmek isteniyor"). Saklanan
+        //   deger MATRAHTIR - satir matematigi, dip toplam ve e-Belge onun
+        //   uzerinden yurur; burada yalniz GOSTERIM brute cevrilir. Fis/fatura
+        //   dogal olarak matrahla kesilir, tahakkuk brut toplami tasir.
+        const gosterFiyat = basvuruMu ? bruta(fiyat, r.kdv) : fiyat;
+        const gosterTutar = basvuruMu ? bruta(tutar, r.kdv) : tutar;
         const secili = seciliSatirlar.has(r.anahtar);
         // Izlemli kalemin lotlari ALTINDA acilir (master-detail):
         //   hangi lottan kac adet oldugu kalemi acmadan gorunsun.
@@ -264,8 +275,10 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             {/* Iki iskonto varsa ikisi de gorunsun: "%10 + %5". */}
             {bilgi.kalem === 'tam' && <td className="hiza-sag">{iskonatoMetni(r)}</td>}
             {bilgi.kalem === 'tam' && <td className="hiza-sag">%{r.kdv}</td>}
-            {bilgi.kalem !== 'miktar' && <td className="hiza-sag">{para.format(fiyat)}</td>}
-            {bilgi.kalem !== 'miktar' && <td className="hiza-sag"><b>{para.format(tutar)}</b></td>}
+            {bilgi.kalem !== 'miktar' && <td className="hiza-sag">{para.format(gosterFiyat)}</td>}
+            {bilgi.kalem !== 'miktar' && (
+              <td className="hiza-sag"><b>{para.format(gosterTutar)}</b></td>
+            )}
             {/* Pay hucreleri (289): kapanan pay YESIL - hangi payin
                 faturalandigi listeye bakinca gorunsun. */}
             {paylasim?.acik && (

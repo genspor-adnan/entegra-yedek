@@ -4729,3 +4729,21 @@ mevcut satirin ✎ ikonundan.
 asamanin kimligi, yaziyi notr birakmak ikisini birbirinden koparyordu. Noktalar asamalari ayirir,
 cizgi tek parca gorunmez. Sari etikette bir ton koyusu kullaniliyor - beyaz zeminde sari okunmuyor.
 Toplam: **339 test gecti** (325 + 14).
+
+**BASVURUDA FIYAT KDV DAHIL GORUNUR** - kullanici: "başvuruda birim fiyat her zaman kdv dahil
+olacak.. fiş/faturaya çevirirken birim fiyattan kdv çıkacak.. tahakkukta yine kdv dahil kalacak" +
+"hbys'de fiyatlar hep kdv dahil veriliyor, ücretlemede o görülmek isteniyor".
+*GOSTERIM olarak yapildi, SAKLAMA degismedi:* `belge_satir.birim_fiyat` her zaman MATRAHTIR - satir
+matematigi, dip toplam, pay dagilimi, tahsilat dagitimi ve e-Belge hep matrah uzerinden yurur.
+Ucretlendirme gridi ve kalem penceresi basvuruda brut gosterir/girdirir; kolon basligi
+"Birim Fiyat (TL) · KDV Dahil" der - ayni kolon iki belgede farkli sey gosterdiginde kullanici
+hangisine baktigini bilmeli. Kalem penceresindeki Dahil/Hariç combosu basvuruda KILITLI "Dahil".
+*Istenen uc kural da bu haliyle saglaniyor:* basvuru toplami = matrah + KDV = brut (ekranda gorulen
+tutar); fis/fatura donusumu zaten MATRAH gonderiyor (`matrahaCevir`), yani "KDV cikiyor"; tahakkuk
+brut toplami tasiyor.
+*Yapilmayan:* belgeyi `kdv_durum = 'Dahil'` olarak SAKLAMAK (birim_fiyat'a brut yazmak). Altyapi
+buna hazir - `fn_belge_diptoplam` `kdv_durum='Dahil'` dalini zaten isletiyor ve donusum kdv_durum'u
+kaynaktan kopyaliyor - ama pay dagilimi (289), acik borc, tahsilat dagitimi (321/323, tabani
+"KDV dahil" varsayiyor) ve tutar bazli donusum hesabi (352) hep matrah varsayimiyla yazilmis;
+saklamayi cevirmek bunlarin hepsini elden gecirmeyi gerektirir. Kullaniciya soruldu.
+2 test. Toplam: **341 test gecti** (339 + 2).

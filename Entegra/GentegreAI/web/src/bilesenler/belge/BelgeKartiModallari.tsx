@@ -255,6 +255,8 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           transferMi={bilgi.kalem === 'miktar'}
           siparisMi={siparisMi}
           paylasimli={basvuruMu && !!odeyenKurumId}
+          // Basvuruda fiyat HER ZAMAN KDV dahil girilir (kullanici).
+          basvuruMu={basvuruMu}
           anaBirimKod={kalem?.birim ?? 0}
           anaBirimAdi={kalem?.birimAdi ?? ''}
           vergisiz={bilgi.kalem === 'sade' && stokFisiMi}

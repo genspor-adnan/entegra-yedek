@@ -377,3 +377,40 @@ describe('tahsilat arac cubugu duzeni', () => {
     expect(c.textContent).not.toContain('Kurum Tahakkuku');
   });
 });
+
+describe('ucretlendirme KDV DAHIL gosterir (kullanici)', () => {
+  // HBYS'de fiyatlar hep KDV dahil veriliyor; saklanan deger MATRAHTIR,
+  //   ekranda brute cevrilir. Fis/fatura dogal olarak matrahla kesilir.
+  const satirliBelge = (kdv: number, birimFiyat: number) => {
+    belgeOku.mockResolvedValue({
+      belge: (yanitlar as Record<string, Record<string, unknown>>)['114349'],
+      satirlar: [{ id: 1, sira: 1, tur: 2, hizmetId: 900, adet: 1,
+                   birimFiyat, kdv, iskonto: 0, iskonto2: 0, aciklama: '' }],
+      dipToplam: [], izlemeNo: '',
+    });
+  };
+
+  it('kolon basliginda "KDV Dahil" yazar', async () => {
+    satirliBelge(20, 100);
+    ciz({ id: 114349 });
+    await waitFor(() => expect(belgeOku).toHaveBeenCalled());
+    (await sekme('Ücretlendirme')).click();
+    await waitFor(() =>
+      expect([...document.querySelectorAll('th')]
+        .some(t => t.textContent?.includes('KDV Dahil'))).toBe(true));
+  });
+
+  it('MATRAH 100 / %20 satiri gridde 120,00 gorunur', async () => {
+    satirliBelge(20, 100);
+    ciz({ id: 114349 });
+    await waitFor(() => expect(belgeOku).toHaveBeenCalled());
+    (await sekme('Ücretlendirme')).click();
+    await waitFor(() => {
+      const hucreler = [...document.querySelectorAll('tbody td')]
+        .map(t => (t.textContent ?? '').trim());
+      expect(hucreler).toContain('120,00');
+      // Matrah degeri gride YAZILMAZ - kullanici brut gorur.
+      expect(hucreler).not.toContain('100,00');
+    });
+  });
+});

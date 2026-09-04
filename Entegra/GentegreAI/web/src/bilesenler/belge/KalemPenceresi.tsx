@@ -10,6 +10,7 @@ import { moduCevir } from '../../sayfalar/belgeKarti/kdvModu';
 import { IzlemPenceresi } from './IzlemPenceresi';
 
 export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi, paylasimli,
+                         basvuruMu,
                          anaBirimKod = 0, anaBirimAdi = '',
                          girisIzlemi, cikisIzlemi, cikisDepoId, belgeTarihi,
                          onKapat, onKaydet }: {
@@ -34,6 +35,8 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * tutarin TAMAMI hastaya yazilir - o satir kurum icmaline hic girmez.
    */
   paylasimli?: boolean;
+  /** Basvuru (kayit kabul): fiyat HER ZAMAN KDV dahil girilir. */
+  basvuruMu?: boolean;
   /** Stok kartinin ANA BIRIMI (143) - ambalaj listesinin ilk ogesi, carpan 1. */
   anaBirimKod?: number;
   anaBirimAdi?: string;
@@ -49,7 +52,14 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * yazilir); kullanici degistirebilir, cunku liste yanlis kurulmus ya da o
    * kalem istisna olabilir. Saklanan `birimFiyat` HER ZAMAN matrahtir.
    */
-  const [kdvDahil, setKdvDahil] = useState(Number(satir.kdvDahil ?? 0) === 1);
+  /**
+   * BASVURUDA MOD HEP "DAHIL" (kullanici: "hbys'de fiyatlar hep kdv dahil
+   * veriliyor, ücretlemede o görülmek isteniyor") - combo cizilir ama
+   * kilitlidir; oteki belge turlerinde fiyat listesinin ayarindan gelir ve
+   * kullanici degistirebilir.
+   */
+  const [kdvDahil, setKdvDahil] = useState(
+    basvuruMu || Number(satir.kdvDahil ?? 0) === 1);
   /**
    * DAHIL modunda kutuda gorunen BRUT METIN. Kullanicinin yazdigi metin
    * oldugu gibi tutulur; satira MATRAH yazilir. Her tusa basista matrahtan
@@ -292,7 +302,10 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                     "yazdigim 100 aslinda KDV dahildi" demek matrahi dusurur.
                     Bu yuzden satirdaki matrah yeniden hesaplanir. */}
                 <select value={kdvDahil ? '1' : '0'}
-                        title="Girilen fiyat KDV dahil mi?"
+                        disabled={basvuruMu}
+                        title={basvuruMu
+                          ? 'Başvuruda fiyatlar her zaman KDV dahil girilir'
+                          : 'Girilen fiyat KDV dahil mi?'}
                         onChange={e => {
                           const yeniDahil = e.target.value === '1';
                           setKdvDahil(yeniDahil);
