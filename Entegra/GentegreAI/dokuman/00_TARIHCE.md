@@ -5984,3 +5984,101 @@ Yani kademe "bu ay kacinci is" sorusunu DONEM SONUNDA cevapliyor ve gecmis
 satirlari da yeniden degerliyor - tasarimin (324) soyledigi davranis birebir.
 Ayni kisinin ONCEKI hakedisi (4, 620,00) DOKUNULMADAN kaldi: kapanmis donem
 yeniden hesaplanmiyor.
+
+### Kademe alt/ust siniri eziyordu (db/390)
+
+Sinirlar iki yolda uygulaniyordu ama biri eksikti: uretim (fn_prim_uret_belge)
+pay yuzdesinden sonra alt/ust siniri uyguluyor, donem kapanisi
+(fn_prim_kademe_uygula) tutari `taban * kademe_orani` ile yeniden yazarken
+sinirlari hic okumuyordu. Iki yonde de kacak:
+
+    ust_sinir 50,  kademe %7, taban 1000 -> 70,00 (sinir asiliyor)
+    alt_sinir 100, kademe %7, taban 1000 -> 70,00 (altina dusuluyor)
+
+390 ayni iki kontrolu URETIM YOLUNDAKI SIRAYLA ekler (once pay yuzdesi, sonra
+alt, sonra ust). Ters sirada yarim paya dusen kisi ust siniri hic goremezdi.
+
+Dogrulama: ust sinir 50 -> 200,00 · alt sinir 100 -> 400,00 · sinirsiz
+regresyon -> 280,00 · yarim pay + ust sinir -> 140,00. Gercek veriyle plan 25 /
+BAHAR ALADAG: hakedis 7 = 200,00 (duzeltmeden once 280,00 olurdu), kapanmis
+hakedis 4 ve 6 dokunulmadi.
+
+### v_prim_rol_lookup TAMAMEN KIRIKMIS (db/391)
+
+364 fn_basvuru_hekim_rolu'nu sube parametreli yapip kurum_profil.id kolonunu
+kaldirdi ama 361'den kalan PARAMETRESIZ imzayi silmedi; govdesi hâlâ
+`where p.id = 1` diyordu. View onu parametresiz cagirdigi icin eski imzaya
+bagliydi:
+
+    ERROR: column p.id does not exist
+    CONTEXT: SQL function "fn_basvuru_hekim_rolu" during inlining
+
+Etkisi view'i kullanan HER yer - prim plani rol combosu, "Prim Alanlar"
+sekmesi, hakedis seridi. 391 once view'i acik cagriya cevirir
+(`fn_basvuru_hekim_rolu(0)`), sonra bozuk imzayi dusurur; ters sirada DROP
+"other objects depend on it" ile reddedilir.
+
+### Basvuru listesi yeniden kuruldu: dort filtre + Tamamlanma %
+
+Cipler (Acik/Kismi/Kapanan/Tumu) kalkti, yerlerine Tamamlanma / Tahsilat /
+Donusum combolari geldi; saglarinda ayracla hazir TARIH araligi (varsayilan
+BUGUN), Odeyen, Bolum AGACI ve Doktor. Combo secenekleri tanim tablolarindan
+degil ARALIKTAKI BASVURULARDAN uretilir (yeni uc
+`GET /api/belge/basvuru-suzgec`) - secilince bos liste veren secenek gorunmez.
+
+Tamamlanma kolonu YUZDE: karttaki tamamlanma seridinin (370) asama tanimi
+SQL'e tasindi, payda CIZILEN asama sayisi (Ozel 4, OSS/SGK 5).
+
+Kolon adlari: "Rol" -> "Prim Rolü", "Poliklinik" -> "Bölüm", "Belge No" ->
+"Protokol No". Sonuncusu icin ekrana ozel baslik mekanizmasi
+(`kolonBasliklari`) eklendi - `belge` kaynagini 13 liste paylasiyor.
+
+Bu isin yan hatasi: filtre durumlari Liste bileseninde yasadigi ve tarih
+varsayilani 'bugun' oldugu icin kosul HER listeye gidiyordu; hasta listesi
+"Bilinmeyen alan: belgeTarihi" ile 400 donuyordu (kullanici bildirdi). Uc
+sarmalayici da artik kendi ekrani disinda hic kosul eklemiyor.
+
+### Tahsilat ekstreden dusuyordu - uc ayri hata (db/392, db/393)
+
+Kullanici: "satis fisi 114356'ya nakit tahsilat ekledim, Eren'in ekstresinde
+cikmadi."
+
+1. **Belge kaydi tahsilatin cari hareketini siliyordu.** Taslak belgenin eski
+   etkisi geri alinirken `delete from mali_hareket where belge_id = @p0`
+   kosulsuz calisiyordu; belgeye baglanmis TAHSILATLARIN bacaklari da ayni
+   belge_id'yi tasidigi icin onlar da gidiyordu. Kasa islemi duruyor, ekstre ve
+   bakiye bos. Fix: `and kasa_islem_id is null`. Bacaksiz kalmis 6 gerceklesmis
+   tahsilat yeniden uretildi.
+
+2. **Iptal isareti tersine ceviriyordu (392).** Iptal ters kayit uretir
+   (orijinal durum 3, aynasi durum 2) ama ekstreler `islem_durum` ile suzuyor:
+   orijinal disarida, ters kayit iceride kaliyordu - 12.500,01 tahsilat iptal
+   edilince ekstreye 12.500,01 BORC olarak giriyordu. Karar: zincirin iki ucu da
+   gorunmesin (`kaynak_tur <> 6`), tek noktadan - bu gorunumu bes gorunum
+   besliyor.
+
+3. **Bacaklarda belge_no bostu (393).** belge_id tasiniyor, belge_no bos sabit
+   yaziliyordu; ekstrede "Belge No" hucresi bostu. Numara VERILMISTI, bacaga
+   tasinmiyordu. Uretici + API duzeltildi, gecmis 40 satir dolduruldu.
+
+Ayrica ekstre tarih kolonu artik SAAT de gosteriyor: ayni gun icindeki
+hareketlerin sirasi ancak saatle okunuyordu.
+
+### Tahsilat aciklamasi belgenin cinsinden kurulur (db/394)
+
+"Hızlı tahsilat · TL KASASI" tahsilatin NASIL girildigini anlatiyordu, ne
+oldugunu degil. Artik "Fiş Tahsilatı" / "Fatura Tahsilatı" / "Tahakkuk
+Tahsilatı" / "Başvuru Tahsilatı" - yon (Satis/Alis) yazilmaz, tahsilat zaten
+belgeye bagli. Kisa ad iki yerde tek tanim: istemcide `belgeKisaAdi`,
+veritabaninda `fn_belge_kisa_adi`. 394 gecmisi de cevirdi (6 kasa islemi +
+12 mali hareket).
+
+### Test verisi temizligi
+
+Tamamlanma yuzdesi bos kalan 16 basvuru (belge_basvuru satiri olmayanlar) ve
+onlardan turemis 7 fis/fatura silindi. Koruma tetigi ilk denemede hakli olarak
+durdurdu ("bu tahsilatin belgesi fise donusturulmus"); zincir once ileri uctan
+temizlendi. Muhasebe fisi olan iki belgede fis `fn_belge_fis_geri_al` ile
+duzgun yolla geri alindi - elle silmek yetim fis satiri birakirdi. Klinik
+kayitlar (3 radyoloji istemi, 1 randevu) SILINMEDI, yalniz belge baglari
+koparildi. Yetim satir kontrolu: 0.
