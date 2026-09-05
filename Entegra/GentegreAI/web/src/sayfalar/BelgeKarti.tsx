@@ -1086,6 +1086,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       posAksiyon, setPosAksiyon, acikBorc: basvuruAcikBorc,
       kullaniciId: kullanici?.id ?? null, yerelPara,
       setHata, setSonuc, donusumleriYukle,
+      // Dogrulama duserse eksik alanlarin oldugu sekmeye don ve SOYLE.
+      kayitBasarisiz: () => {
+        if (basvuruMu) setAktifSekme('basvuru');
+        mesaj('Belge kaydedilemedi - kırmızı işaretli zorunlu alanları tamamlayın.');
+      },
     });
   paraRef.current.posSonrasi = posSonrasi;
 

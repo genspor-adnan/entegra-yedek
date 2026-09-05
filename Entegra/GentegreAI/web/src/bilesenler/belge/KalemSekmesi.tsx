@@ -96,6 +96,14 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
   const dipIskonto = sonuc?.dipToplam.find(d => d.tur === 3)?.deger ?? 0;
   const dipIskontoOran = dipToplamHam > 0
     ? Math.round(dipIskonto / dipToplamHam * 10000) / 100 : 0;
+  /** Belgede gercekten iskonto var mi - Iskonto (3) ve Ara Toplam (4) buna bagli. */
+  const iskontoVar = () => Math.abs(dipIskonto) > 0.004;
+  /**
+   * KAC FARKLI KDV ORANI VAR (dip toplamda her oran ayri satir: tur 5).
+   * Tek oran varsa "kdv Toplam" (15) o satirin AYNISIDIR - kullanici:
+   * "tek kdv varsa kdv toplama da gerek yok".
+   */
+  const kdvSatirSayisi = (sonuc?.dipToplam ?? []).filter(d => d.tur === 5).length;
   return (
     <>
 <div className="kagrup">
@@ -389,44 +397,19 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         </td></tr>
       )}
     </tbody>
-    {/* GRIDIN KENDI TOPLAM SATIRI BASVURUDA CIZILMEZ (kullanici): hemen
-        altinda zaten dip toplam tablosu var (Genel Toplam / iskonto) - ayni
-        rakami iki kez, ustelik biri MATRAH digeri BRUT olarak gostermek
-        "hangisi dogru" sorusu doguruyordu. ERP belgelerinde duruyor: orada dip
-        toplam matrah/KDV kirilimini veriyor, grid satiri da miktar toplamini. */}
-    {!basvuruMu && (
-      <tfoot>
-        <tr className="genel">
-          {/* TOPLAM etiketi MIKTAR kolonuna kadarki her seyi kapsar: onay kutusu,
-              Tip, Kod, Ad + varsa Aciklama + varsa TARIH (basvuruda solda, siparişte
-              miktarin solunda - nerede olursa olsun bir kolon). Tarih sayilmadigi
-              icin siparis gridinde toplam satiri bir kolon kayiyordu. */}
-          <td colSpan={4 + (aciklamaVar ? 1 : 0) + (bilgi.siparis ? 1 : 0)}
-              className="hiza-sag">TOPLAM</td>
-          <td className="hiza-sag">
-            {satirlar.reduce((t, r) => t + (sayi(r.adet)), 0)
-                     .toLocaleString('tr-TR')}
-          </td>
-          {bilgi.kalem !== 'miktar' && <td colSpan={bilgi.kalem === 'sade' ? 1 : 3} />}
-          {bilgi.kalem !== 'miktar' && <td className="hiza-sag">{para.format(onizleme.matrah)}</td>}
-          {bilgi.kalem !== 'miktar' && dovizKolon && <td />}
-          {bilgi.kalem !== 'miktar' && dovizKolon && (
-            <td className="hiza-sag">
-              {para.format(satirlar.reduce((t, r) => {
-                const f = sayi(r.birimFiyat);
-                const d = satirDoviz(r, satirTutari(sayi(r.adet), f, r.iskonto, r.iskonto2), f);
-                return t + (d?.tutar ?? 0);
-              }, 0))}
-            </td>
-          )}
-        </tr>
-      </tfoot>
-    )}
+    {/* GRIDIN KENDI TOPLAM SATIRI KALKTI (kullanici): hemen altinda dip
+        toplam tablosu duruyor - ayni rakami iki kez, ustelik biri MATRAH
+        digeri BRUT olarak gostermek "hangisi dogru" sorusunu doguruyordu.
+        Miktar toplami da bununla birlikte gitti; kalem sayisi grid basliginda
+        ("N kalem") yaziyor. */}
   </table>
-  {!kilitli && satirlar.length > 0 && (
+  {/* "Satırı düzenlemek için çift tıklayın." KALKTI (kullanici): her belgede,
+      her zaman duran bir ipucu satiriydi - ogrenildikten sonra yalniz yer
+      kapliyor. Cift tik da ✎ dugmesi de yerinde. BASLIK KILIDI notu KALIR:
+      o, kullanicinin o an karsilastigi bir DURUMU acikliyor. */}
+  {!kilitli && satirlar.length > 0 && (depoBelgesi || stokFisiMi) && (
     <div className="not">
-      Satırı düzenlemek için çift tıklayın.
-      {(depoBelgesi || stokFisiMi) && ` Kalem eklendiği için başlık (${stokFisiMi ? 'tip, depo' : talepMi ? 'depolar, talep eden' : 'depolar, teslim eden/alan'}, tarih) kilitlendi — değiştirmek için kalemleri silin.`}
+      {`Kalem eklendiği için başlık (${stokFisiMi ? 'tip, depo' : talepMi ? 'depolar, talep eden' : 'depolar, teslim eden/alan'}, tarih) kilitlendi — değiştirmek için kalemleri silin.`}
     </div>
   )}
 </div>
@@ -552,12 +535,18 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
           //   halde dip toplamda görünüyor"): indirimsiz belgede "İskonto 0,00"
           //   satiri bilgi vermez, dip toplami uzatir. Diger satirlar (Toplam /
           //   KDV / Genel Toplam) sifir da olsa kalir - belgenin iskeleti.
-          .filter(d => d.tur !== 3 || Math.abs(d.deger) > 0.004)
+          // ARA TOPLAM da ISKONTOYA baglidir (kullanici: "belge içinde iskonto
+          //   yoksa ara toplama gerek yok"): Ara Toplam = Toplam - Iskonto,
+          //   indirimsiz belgede Toplam ile AYNI sayidir - ayni rakam ust uste
+          //   iki satir olarak yaziliyordu.
+          .filter(d => (d.tur !== 3 && d.tur !== 4) || iskontoVar())
+          // Tek KDV oraninda toplam satiri tekrar: "kdv%10" ile "kdv Toplam"
+          //   ayni rakam. Birden cok oranda (8 + 20) toplam ANLAMLI, kalir.
+          .filter(d => d.tur !== 15 || kdvSatirSayisi > 1)
           .filter(d => !basvuruMu
             // ISKONTO YOKSA "Toplam" da cizilmez: Genel Toplam ile ayni
             //   rakami iki kez gostermek olurdu. Iskonto varsa uclu kalir.
-            || (d.tur === 1 && sonuc.dipToplam.some(x => x.tur === 3
-                                                     && Math.abs(x.deger) > 0.004))
+            || (d.tur === 1 && iskontoVar())
             || d.tur === 3 || d.tur === 20)
           .map((d, i) => (
           <tr key={i} className={d.tur === 20 ? 'genel' : ''}>

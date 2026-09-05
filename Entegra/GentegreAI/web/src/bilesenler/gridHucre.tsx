@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
 import type { KolonMeta } from '../api/sozlesme';
+import { sayi } from './bicim';
 
 /**
  * GRID HUCRE YARDIMCILARI - durum rozeti, JSON/log govdesi cozumleme,
@@ -111,6 +112,28 @@ export const ROZET_SINIFI: Record<string, string> = {
   // Odeyen tipi ("SGK" yukarida zaten bilgi).
   'Özel (Ücretli)': 'turkuaz', 'ÖSS': 'uyari',
 };
+
+/**
+ * TAMAMLANMA YUZDESI ROZETI (kullanici: "içerdeki renklerle aynı rozet
+ * olsun") - basvuru listesindeki "%" kolonu, kartin ustundeki asama seridiyle
+ * AYNI renkleri kullanir:
+ *
+ *   Başvuru kırmızı · Provizyon turuncu · Ücretlendirme sarı ·
+ *   Tahsilat mavi · Belge Kesimi yeşil
+ *
+ * Yuzde hangi asamaya kadar gelindigini soyler; esikler iki asama kurgusunu da
+ * karsilar - provizyonsuz akista 4 asama (25/50/75/100), provizyonlu akista 5
+ * (20/40/60/80/100). Boylece ayni renk listede ve kartta ayni anlama gelir.
+ */
+export function yuzdeRozeti(deger: unknown, kolon: KolonMeta) {
+  if (kolon.ad !== 'tamamlanma' || kolon.bicim !== 'yuzde') return null;
+  if (deger === null || deger === undefined || deger === '') return null;
+  const p = Number(deger);
+  if (!Number.isFinite(p)) return null;
+  const renk = p >= 100 ? 'yesil' : p >= 70 ? 'mavi' : p >= 45 ? 'sari'
+             : p >= 33 ? 'turuncu' : 'kirmizi';
+  return <span className={`rozet asama-${renk}`}>%{sayi.format(p)}</span>;
+}
 
 export function rozetHucre(deger: unknown, kolon: KolonMeta) {
   if (kolon.bicim !== 'rozet') return null;

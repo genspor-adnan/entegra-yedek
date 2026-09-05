@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sigortaya Gönderim ve Mutabakat (Mockup)</title>
+<style>
+  :root{
+    --card:#fff; --line:#d2dae3; --line2:#e6ebf1; --ink:#1f2d3a; --muted:#6b7a8b;
+    --navy:#14315a; --accent:#2f6db3; --sel:#dcebfb; --head:#f1f5f9; --head2:#e7eef5;
+    --btnfrom:#fff; --btnto:#eef2f7; --ok:#2e7d46; --uyari:#b5731a; --hata:#b23b3b;
+    --okZem:#e9f4ed; --uyariZem:#fdf6e3; --hataZem:#fbeaea; --maviZem:#eaf1fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#dfe4ea;color:var(--ink);font-family:"Segoe UI",Tahoma,sans-serif;
+    font-size:12.5px;padding:12px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:6px;box-shadow:0 8px 26px rgba(20,40,70,.16);overflow:hidden}
+  .title{background:linear-gradient(#1c4478,#14315a);color:#fff;padding:7px 12px;display:flex;
+    align-items:center;gap:8px;font-weight:600}
+  .title .sp{margin-left:auto;font-weight:400;opacity:.85;font-size:11px}
+  .sekmeler{display:flex;gap:2px;padding:8px 10px 0;background:linear-gradient(#fff,#f4f7fb);
+    border-bottom:1px solid var(--line)}
+  .sk{padding:7px 14px;border:1px solid var(--line);border-bottom:none;border-radius:5px 5px 0 0;
+    background:#f2f6fa;color:#3d5169}
+  .sk.on{background:#fff;font-weight:600;color:var(--navy);box-shadow:0 -2px 0 var(--accent) inset}
+  .serit{display:flex;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line);
+    background:#fbfcfe;flex-wrap:wrap}
+  .kutucuk{display:flex;flex-direction:column;gap:2px}
+  .kutucuk .et{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutucuk .kt{border:1px solid var(--line);border-radius:4px;padding:4px 8px;background:#fff;min-width:130px}
+  .d{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:5px;padding:6px 11px;color:#33465c;font-size:11.5px}
+  .d.bir{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:600}
+  .govde{padding:12px;display:flex;flex-direction:column;gap:12px}
+  .grp{border:1px solid var(--line);border-radius:6px;background:#fff}
+  .grp > h6{margin:0;padding:8px 10px;border-bottom:1px solid var(--line2);background:var(--head);
+    font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:#5b6f86;display:flex;gap:8px;
+    align-items:center}
+  .grp > h6 .sag{margin-left:auto;display:flex;gap:6px;align-items:center}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{background:linear-gradient(var(--head),var(--head2));text-align:left;padding:6px 8px;
+    border-bottom:1px solid var(--line);font-size:11px;color:#5b6f86;font-weight:600}
+  td{padding:6px 8px;border-bottom:1px solid var(--line2)}
+  td.sag,th.sag{text-align:right}
+  tr.on td{background:var(--sel)}
+  tfoot td{font-weight:700;background:#f3f7fb}
+  .rozet{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;border:1px solid}
+  .rz-ok{background:var(--okZem);color:var(--ok);border-color:#c2e0cd}
+  .rz-uy{background:var(--uyariZem);color:#9a7407;border-color:#eeddb4}
+  .rz-ht{background:var(--hataZem);color:var(--hata);border-color:#efc9c7}
+  .rz-mv{background:var(--maviZem);color:var(--accent);border-color:#c6d8ef}
+  .rz-gri{background:#f0f3f7;color:#63788e;border-color:#dbe3ec}
+  .not{margin:10px;padding:8px 10px;border:1px solid var(--line2);border-radius:5px;
+    background:#f7f9fc;color:#54687e;font-size:11.5px;line-height:1.55}
+  .ikili{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+  .ikili > .grp{flex:1;min-width:430px}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">📦 Sigortaya Gönderim ve Mutabakat
+    <span class="sp">Kayıt Kabul › Gönderim İşlemleri · MOCKUP</span></div>
+
+  <div class="sekmeler">
+    <div class="sk on">Gönderilecekler</div>
+    <div class="sk">Gönderilenler</div>
+    <div class="sk">Kurum Ekstresi</div>
+    <div class="sk">Mutabakat Farkları</div>
+  </div>
+
+  <div class="serit">
+    <div class="kutucuk"><span class="et">Sigorta</span><span class="kt">Anadolu Sigorta (ASMED)</span></div>
+    <div class="kutucuk"><span class="et">Poliçe Türü</span><span class="kt">ÖSS</span></div>
+    <div class="kutucuk"><span class="et">Tedavi Tipi</span><span class="kt">Ayakta</span></div>
+    <div class="kutucuk"><span class="et">Başlangıç</span><span class="kt">01.09.2026</span></div>
+    <div class="kutucuk"><span class="et">Bitiş</span><span class="kt">05.09.2026</span></div>
+    <button class="d">🔍 Listele</button>
+    <span style="margin-left:auto"></span>
+    <span class="rozet rz-uy">TEST ORTAMI</span>
+  </div>
+
+  <div class="govde">
+
+    <div class="grp">
+      <h6>Gönderime Uygun Provizyonlar
+        <span class="sag">
+          <span class="rozet rz-gri">3 seçili · 3.870,00 ₺</span>
+          <button class="d">🧾 Fatura Bilgisi</button>
+          <button class="d bir">📤 Sigortaya Gönder</button>
+        </span>
+      </h6>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:28px">☑</th>
+            <th style="width:170px">Provizyon No</th>
+            <th style="width:90px">Tarih</th>
+            <th>Sigortalı</th>
+            <th style="width:120px">Protokol</th>
+            <th class="sag" style="width:110px">Talep</th>
+            <th class="sag" style="width:110px">Şirket Payı</th>
+            <th class="sag" style="width:100px">Tevkifat</th>
+            <th style="width:110px">Durum</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="on"><td>☑</td><td>P04092026073150702</td><td>03.09.2026</td>
+            <td>ADEM DERE</td><td>2026-000000073</td>
+            <td class="sag">1.620,00</td><td class="sag">1.250,00</td><td class="sag">0,00</td>
+            <td><span class="rozet rz-ok">Onaylı</span></td></tr>
+          <tr class="on"><td>☑</td><td>P04092026073150703</td><td>04.09.2026</td>
+            <td>AYŞE KAYA</td><td>2026-000000074</td>
+            <td class="sag">2.100,00</td><td class="sag">1.890,00</td><td class="sag">0,00</td>
+            <td><span class="rozet rz-ok">Onaylı</span></td></tr>
+          <tr class="on"><td>☑</td><td>P04092026073150704</td><td>05.09.2026</td>
+            <td>MEHMET DEMİR</td><td>2026-000000075</td>
+            <td class="sag">900,00</td><td class="sag">730,00</td><td class="sag">0,00</td>
+            <td><span class="rozet rz-uy">Kısmi</span></td></tr>
+          <tr><td>☐</td><td>P04092026073150705</td><td>05.09.2026</td>
+            <td>ZEYNEP AK</td><td>2026-000000076</td>
+            <td class="sag">450,00</td><td class="sag">0,00</td><td class="sag">0,00</td>
+            <td><span class="rozet rz-ht">Red</span></td></tr>
+        </tbody>
+        <tfoot><tr><td colspan="5">Seçili 3 provizyon</td><td class="sag">4.620,00</td>
+          <td class="sag">3.870,00</td><td class="sag">0,00</td><td></td></tr></tfoot>
+      </table>
+      <div class="not">
+        Gönderim = <b>icmal</b>. Seçilen provizyonlar tek pakette şirkete iletilir; bizde
+        <b>kurum icmali</b> ve kurum payı için <b>Satış Tahakkuku</b> oluşur. Reddedilen
+        provizyon listelenir ama seçilemez — nedeni provizyon kartındaki şirket notunda.
+      </div>
+    </div>
+
+    <div class="ikili">
+      <div class="grp">
+        <h6>Gönderilenler (Paketler)</h6>
+        <table>
+          <thead><tr><th style="width:120px">Paket No</th><th style="width:90px">Gönderim</th>
+            <th style="width:110px">Fatura No</th><th class="sag" style="width:110px">Tutar</th>
+            <th style="width:120px">Durum</th></tr></thead>
+          <tbody>
+            <tr><td>PK-2026-0041</td><td>02.09.2026</td><td>FT-000124</td>
+              <td class="sag">12.400,00</td><td><span class="rozet rz-ok">Kabul</span></td></tr>
+            <tr><td>PK-2026-0042</td><td>04.09.2026</td><td>FT-000131</td>
+              <td class="sag">8.150,00</td><td><span class="rozet rz-mv">Şirkette</span></td></tr>
+            <tr><td>PK-2026-0043</td><td>05.09.2026</td><td>FT-000138</td>
+              <td class="sag">3.870,00</td><td><span class="rozet rz-uy">Kısmi</span></td></tr>
+          </tbody>
+        </table>
+        <div class="not">Paket satırında <b>her provizyonun kendi sonucu</b> durur:
+          başarısız olan tek provizyon paketin tamamını geçersiz kılmaz, yeniden gönderilir.</div>
+      </div>
+
+      <div class="grp">
+        <h6>Paket İçeriği — PK-2026-0043</h6>
+        <table>
+          <thead><tr><th style="width:170px">Provizyon</th><th>Sigortalı</th>
+            <th class="sag" style="width:110px">Tutar</th><th style="width:150px">Sonuç</th></tr></thead>
+          <tbody>
+            <tr><td>P04092026073150702</td><td>ADEM DERE</td><td class="sag">1.250,00</td>
+              <td><span class="rozet rz-ok">Kabul</span></td></tr>
+            <tr><td>P04092026073150703</td><td>AYŞE KAYA</td><td class="sag">1.890,00</td>
+              <td><span class="rozet rz-ok">Kabul</span></td></tr>
+            <tr><td>P04092026073150704</td><td>MEHMET DEMİR</td><td class="sag">730,00</td>
+              <td><span class="rozet rz-ht">Eksik evrak: epikriz</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h6>Kurum Ekstresi — şirketin ödeme beyanı
+        <span class="sag">
+          <button class="d">⬇ Ekstreyi Çek</button>
+          <button class="d bir">🔗 Tahsilatla Eşle</button>
+        </span></h6>
+      <table>
+        <thead>
+          <tr><th style="width:120px">Paket</th><th style="width:170px">Provizyon</th>
+            <th style="width:110px">Fatura</th><th>Sigortalı</th>
+            <th class="sag" style="width:120px">Şirket Ödeyecek</th>
+            <th class="sag" style="width:120px">Kuruma Ödenecek</th>
+            <th style="width:100px">Talimat</th><th style="width:100px">Ödeme</th>
+            <th style="width:130px">Durum</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>PK-2026-0041</td><td>P04092026073150688</td><td>FT-000124</td><td>SELİM YILMAZ</td>
+            <td class="sag">4.200,00</td><td class="sag">4.200,00</td><td>28.08.2026</td><td>01.09.2026</td>
+            <td><span class="rozet rz-ok">Ödendi</span></td></tr>
+          <tr><td>PK-2026-0041</td><td>P04092026073150689</td><td>FT-000124</td><td>NUR ÇELİK</td>
+            <td class="sag">8.200,00</td><td class="sag">7.950,00</td><td>28.08.2026</td><td>01.09.2026</td>
+            <td><span class="rozet rz-uy">Kısmi ödeme</span></td></tr>
+          <tr><td>PK-2026-0042</td><td>P04092026073150691</td><td>FT-000131</td><td>HASAN AY</td>
+            <td class="sag">1.100,00</td><td class="sag">0,00</td><td>—</td><td>—</td>
+            <td><span class="rozet rz-ht">İade: eksik evrak</span></td></tr>
+        </tbody>
+        <tfoot><tr><td colspan="4">Toplam</td><td class="sag">13.500,00</td>
+          <td class="sag">12.150,00</td><td colspan="3">Fark: 1.350,00 ₺</td></tr></tfoot>
+      </table>
+      <div class="not">
+        Ödenen tutar <b>tahsilat</b> olarak kurumun tahakkukuna işlenir; eksik ödeme ve iadeler
+        “Mutabakat Farkları” sekmesinde kalır. IBAN ve ödeme talimat tarihi ekstreden gelir —
+        banka ekstresiyle karşılaştırma buradan yapılır.
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

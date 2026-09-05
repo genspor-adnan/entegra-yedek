@@ -138,6 +138,13 @@ public static partial class KaynakKatalogu
         Ekle(PrimRolAday());
         Ekle(Muayene());
         Ekle(LabIstem());
+        // FAZ 0 ortak platform (398-401): onam, bildirim, klinik kataloglar.
+        Ekle(OnamMetni());
+        Ekle(Onam());
+        Ekle(BildirimSablon());
+        Ekle(Bildirim());
+        Ekle(Icd());
+        Ekle(Ilac());
         Ekle(NumaraHasta());
         Ekle(NumaraBasvuru());
         Ekle(NumaraSatis());

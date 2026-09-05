@@ -6207,3 +6207,55 @@ Sonuç her iki turda da aynı: başvuru ve fiş 1.100,00; kapanma "Belge Kesildi
 hakediş satırları 5×100 (Yapan) ve 5×50 (İsteyen); onay ve dönem kapatma
 500,00 / 250,00. Ayrıca dağıtım koruması ayrıca sınandı: satırsız PUT sonrası
 kalem ve hakediş satırları yerinde kaldı.
+
+## 05.09.2026 — FAZ 0 başladı: ortak platform şeması (`db/398-401`)
+
+Yol haritasındaki (`Ekranlar/Ayarlar/yol_haritasi.html`) **Faz 0 — Temel ve
+kapılar**ın kod tarafı. Üçü de tek bir dikeye ait değil: onamı teletıp da
+genetik de ister, bildirimi randevu da panik değer de, ICD'yi muayene de
+provizyon da. Faz 0'da bir kez kurulmazsa her modül kendi kopyasını yazar —
+Delphi'de `IMAJ`/`DOKUMAN`/`GOREVYORUM`'un başına gelen.
+
+### 398 — Onam altyapısı
+
+`onam_metni` (metin + **sürüm**) ve `onam` (verilen/reddedilen/geri çekilen
+cevap). Metin değişince satır güncellenmez, **yeni sürüm** açılır: verilmiş
+onam hangi metne verildiğini bilmek zorundadır. Kaynak generic
+(`kaynak_tur` + `kaynak_id`): hasta, başvuru, muayene, teletıp görüşmesi,
+genetik vaka, radyoloji istemi. İmzalı PDF mevcut **doküman** deposuna gider,
+ikinci bir içerik deposu açılmadı. Kısmi tekil indeks aynı kaynağa aynı onamın
+iki kez "verildi" yazılmasını engeller (geri çekilen hariç).
+
+### 399 — Bildirim altyapısı
+
+`bildirim_sablon` (kanal + metin + `{{degisken}}` sözlüğü + gönderim saati
+penceresi), `bildirim` (kuyruk: alıcı, öncelik, deneme, planlanan, durum) ve
+`bildirim_log` (her denemenin sonucu). **Sağlayıcı = mevcut entegrasyon
+hesabı** — ÜTS, e-Belge ve sigorta ile aynı tablo; kimlik/URL orada durur.
+Kuyruk taraması için kısmi indeks (`durum in (1,2)`). Dört hazır şablon:
+randevu hatırlatma, sonuç hazır, panik değer, onam isteği. Panik değerin saat
+penceresi yok — gece de gider.
+
+### 400 — Klinik kod listeleri + ICD-10 / ilaç kataloğu
+
+Küçük kümeler (`muayene.turu`, `muayene.vaka_turu`, `kabul.sekli`,
+`cikis.sekli`, `klinik.kod`, `ilac.recete_turu`) `kod_liste`/`kod_deger`'e;
+**büyük kataloglar kendi tablosuna**: `icd` (~20 bin satır, ağaç + cinsiyet/yaş
+kısıtı) ve `ilac` (barkod birincil, ATC, etken madde, reçete türü, stok kartı
+eşlemesi). 20 bin satırı `kod_deger`'e doldurmak arama/indeks ihtiyacını
+karşılamaz ve her combo çağrısını ağırlaştırırdı. `katalog_senkron` "bu katalog
+en son ne zaman, kaç satırla güncellendi" sorusunu tek yerde tutar.
+
+### 401 — Yetkiler
+
+`onam`, `bildirim`, `bildirim_sablon`, `katalog` yetki kodları + Yönetici
+rolüne tam yetki + `yetki_surumu` ilerletildi. Yetki kodu şemayla **aynı
+fazda** açıldı: kod yoksa kaynak hiçbir role verilemez, ekran açılır ama her
+istek 403 döner — sessiz bir "çalışmıyor" hali.
+
+### Katalog ve ekranlar
+
+`KaynakKatalogu.Onam.cs` (altı liste: onam-metni, onam, bildirim-sablon,
+bildirim, icd, ilac) + `KartKatalogu.Onam.cs` (onam metni ve bildirim şablonu
+kartları). Web'de **Yönetim › Ortak Platform** alt grubu altında altı menü
+öğesi; ICD ve ilaç `urunModu: 2` (yalnız HBYS). Altı uç de canlı denendi.

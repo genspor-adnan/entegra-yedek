@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gentegre AI — Yol Haritası (ERP + HBYS) — Mockup (Gentegre AI · Yol Haritası)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .win{max-width:1080px}
+  .icerik{padding:6px 18px 22px;font-size:13px;line-height:1.65}
+  h2{font-size:15px;color:#1c4374;border-bottom:1px solid var(--line2);padding-bottom:5px;margin:22px 0 10px}
+  h3{font-size:13.5px;color:#2c4a6b;margin:16px 0 6px}
+  code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:1px 4px;font-size:12px}
+  .icerik table{border-collapse:collapse;width:100%;margin:8px 0 14px}
+  .icerik th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:12px;color:#3a5573}
+  .icerik td{border:1px solid var(--line2);padding:6px 8px;font-size:12.5px;vertical-align:top}
+  .kutu{border:1px solid var(--line2);background:#fbfcfd;border-radius:4px;padding:10px 12px;margin:10px 0}
+  .uyari{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:4px;padding:9px 11px;margin:10px 0;color:var(--uyari)}
+  .tamam{border:1px solid #bfe3cb;background:#f1f8f3;border-radius:4px;padding:9px 11px;margin:10px 0;color:#245c37}
+  .akis{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .akis .a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:4px 12px;font-size:12px}
+  .akis .a.v{background:#eef4fc;border-color:#cfe0f5;color:#2f6db3;font-weight:bold}
+  .akis .ok2{color:var(--muted)}
+  ul{margin:6px 0 12px 18px;padding:0} li{margin:3px 0}
+  .kucuk{font-size:11.5px;color:var(--muted)}
+  .durumlar{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+
+  .win{max-width:1180px}
+  .faz{border:1px solid var(--line2);border-radius:5px;margin:14px 0;overflow:hidden}
+  .faz .fb{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;gap:10px;align-items:center;font-weight:bold}
+  .faz .fb .sp{margin-left:auto;font-weight:normal;opacity:.9;font-size:11.5px}
+  .faz .fi{padding:8px 12px}
+  .hatlar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:8px 0}
+  .hat{border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfd}
+  .hat b{display:block;color:#1c4374;margin-bottom:4px}
+  .hat.erp{border-top:3px solid #2f6db3} .hat.hbys{border-top:3px solid #3f9a5e} .hat.ortak{border-top:3px solid #d9a12b}
+  .hat ul{margin:0 0 0 16px}
+  .zaman{display:grid;grid-template-columns:150px repeat(6,1fr);gap:2px;font-size:11px;margin:10px 0}
+  .zaman div{padding:4px 6px;border-radius:3px}
+  .zaman .b{font-weight:bold;color:#3a5573;background:#f4f7fb}
+  .zaman .e{background:#dbe8f8} .zaman .h{background:#e2f3e8} .zaman .o{background:#fdf1d6} .zaman .x{background:transparent}
+  .olcut{border:1px solid #bfe3cb;background:#f1f8f3;border-radius:4px;padding:6px 10px;margin:6px 0;font-size:12px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🗺 Gentegre AI — Yol Haritası ve Fazlar <span class="sp">ERP + HBYS eş zamanlı · mockup envanteri → fazlar · 03.09.2026 · göç 351</span></div>
+  <div class="icerik">
+
+    <div class="kutu">
+      <b>Tek cümlede:</b> Tek çekirdek (taraf · belge · stok · fiyat · kasa/banka · e-belge · ayar/yetki · mesaj/AI · doküman) iki ürün modunda (ERP / HBYS) yayınlanır;
+      önce <b>ortak platform katmanları</b> (doküman, bildirim, onam, cihaz ara katmanı, tıbbi geçmiş, e-Nabız kuyruğu) kurulur, sonra dikey modüller
+      iki paralel hatta (ERP: Üretim · HBYS: Muayene → Lab → Teletıp/Teleradyoloji → Göz) <b>her fazda yayınlanabilir</b> parçalar halinde çıkar.
+      Delphi/MSSQL ürünü müşterilerde sürer; Gentegre AI yeni müşteri + pilot göçle büyür.
+    </div>
+
+    <h2>0. Bugün neredeyiz (envanter)</h2>
+    <table>
+      <tr><th style="width:170px">Alan</th><th>Yapıldı (db/001–351 · API · web)</th><th style="width:300px">Mockup var, yapılmadı</th></tr>
+      <tr><td><b>Çekirdek / ERP</b></td><td>Taraf (cari/kişi/personel/tedarikçi/hasta rol bayrakları), stok + barkod/birim/paket/seri-lot/depo durum, kategori ağacı, fiyat listeleri + kampanya, belge (sipariş/irsaliye/fatura/fiş/tahakkuk/teklif/iade, dönüşüm + FIFO lot, sevkiyat, termin, rezervasyon), kasa/banka/çek-senet, muhasebe fiş/eşleştirme, e-Fatura/e-Arşiv/e-İrsaliye (İzibiz, XSLT dokümanda), gelen belge, numaralama, mali dönem, ÜTS (223–230, 337), prim/hakediş (314–336, 339), entegrasyon hesapları (337–340), mesajlaşma + AI asistan (341–344), doküman 057–060/160, rol/yetki/kapsam, ayarlar sekmeleri, sayfalı liste/grid altyapısı, katalog-güdümlü kart/liste.</td><td>Üretim (7) · Doküman yönetimi katmanı (5)</td></tr>
+      <tr><td><b>HBYS</b></td><td>Hasta kimliği (kimliksiz/yabancı/vefat), başvuru + provizyon, kurum sözleşmesi fiyatı, randevu + bölüm ayarı, radyoloji (istem/rapor/şablon/kritik bulgu/PACS olay/cihaz/protokol/sarf/teslim/konsültasyon/pano), dış hekim, SKRS senkron (cinsiyet…branş, il/ilçe/ülke), tahsilatın satıra dağıtılması, hasta başvurusundan prim.</td><td>Muayene (5) · Lab (10) · e-Nabız (8) · Teletıp (7) + USBS (11) · Teleradyoloji (6) · Göz (7) · Kayıt Kabul/Randevu ekran farkları</td></tr>
+      <tr><td><b>Platform</b></td><td>PG18 docker + bulut yayını (yayinla.ps1), göç betikleri (goc_al), tarihçe, kod listeleri, çeviri, panel, help.</td><td>Bildirim (SMS/e-posta/push) · Onam · Cihaz ara katmanı · Nesne depo · e-imza · Sanal POS · Hasta portalı · Dış kurum portalı</td></tr>
+    </table>
+    <div class="uyari"><b>Gözlem:</b> mockup'lardaki 8 modülün ortak ihtiyaçları aynı: onam, bildirim, doküman/ek, cihaz mesajı, e-Nabız paketi, prim rolü, KVKK sınıfı. Bunlar dikeylerden önce <b>bir kez</b> yapılmazsa her modül kendi kopyasını yazar (Delphi'de IMAJ/DOKUMAN/GOREVYORUM'un başına gelen).</div>
+
+    <h2>1. İlkeler</h2>
+    <ul>
+      <li><b>Üç hat paralel:</b> Ortak platform (küçük, tam zamanlı) · ERP hattı · HBYS hattı. Her hat kendi fazını bağımsız yayınlar; ortak katman değişiklikleri sürümlenir.</li>
+      <li><b>Her faz yayınlanabilir:</b> faz sonu = buluta yayın + pilot kurumda kullanım + tarihçe. "İlk sürüm kapsamı" her süreç dokümanında zaten yazılı; fazlar bunları alır, "sonraya" listesi bir sonraki faza kayar.</li>
+      <li><b>Mevcut deseni koru:</b> katalog-güdümlü kart/liste, numaralı göç, `entegrasyon_hesap`, `dokuman`, `belge_satir_rol` (prim), `kod_liste/kod_deger` (SKRS kodlu). Yeni modül önce bu desenlere bağlanır, kendi altyapısını açmaz.</li>
+      <li><b>Mockup → süreç dokümanı → göç (db/) → uç (API) → sayfa (web) → sınama verisi → bulut.</b> Mockup'ta olmayan ekran yazılmaz; ekran değişecekse önce mockup değişir.</li>
+      <li><b>Mevzuat/dış servis kapıları erken:</b> USS test ortamı ve KTS tescili, Medula test, USBS başvurusu, sanal POS ve e-imza sağlayıcı sözleşmeleri, cihaz üreticisi protokol dokümanları — Faz 0'da başlatılır, kod bunları beklemez (sahte servisle geliştirilir).</li>
+      <li><b>Delphi ürünü:</b> bakım + kritik düzeltme (bu hafta: belge dönüşüm hizmet satırı gibi); yeni özellik Gentegre AI'da. Göç aracı (goc_al) her fazda yeni tablolarla genişler.</li>
+    </ul>
+
+    <h2>2. Fazlar</h2>
+
+    <div class="faz"><div class="fb">Faz 0 — Temel ve kapılar <span class="sp">2 hafta · tüm hatlar</span></div><div class="fi">
+      <div class="hatlar">
+        <div class="hat ortak"><b>Ortak platform</b><ul><li>Kod listeleri: ICD-10, ilaç (barkod), klinik, muayene/vaka/kabul/çıkış türleri → SKRS senkronuna ekle (tablo hedefli)</li><li>Bildirim altyapısı (`bildirim`: SMS/e-posta/push, sağlayıcı = entegrasyon hesabı)</li><li>Onam tabloları (`onam`, `onam_metni`) — Teletıp/Genetik/İşlem hepsi buna bağlanır</li><li>Nesne depo kararı (bytea eşiği + S3/MinIO), e-imza sağlayıcı seçimi, sanal POS seçimi</li><li>Sınama verisi seti (ERP + HBYS) ve otomatik uç testleri; bulut yayınına düz akış</li></ul></div>
+        <div class="hat erp"><b>ERP hattı</b><ul><li>Delphi kritik düzeltmeler (GenUpdate 186 gibi) ve müşteri yayını</li><li>Üretim süreç dokümanındaki "ilk sürüm" kapsamının göç taslağı (ağaç/emir/satır/operasyon)</li></ul></div>
+        <div class="hat hbys"><b>HBYS hattı</b><ul><li>USS test hesabı + KTS tescil başvurusu; Medula test; USBS başvuru dosyası</li><li><b>Özel sigorta (ÖSS) kapısı</b>: Anadolu/ASMED test hesabı <b>alındı</b> (<code>Sigorta/Asmed</code>); <b>ikinci şirketin</b> servis dokümanı istenir — kanonik model tek örnekle doğrulanamaz</li><li>Muayene süreç dokümanı → göç taslağı (muayene/tani/recete/hasta_* tıbbi geçmiş)</li><li>Pilot tıp merkezi seçimi (poliklinik + lab + göz olan)</li></ul></div>
+      </div>
+      <div class="olcut">Ölçüt: kod listeleri dolu (ICD-10, ilaç), bildirim gönderimi çalışıyor, onam kaydı alınıyor, dış servis başvuruları yapıldı.</div>
+    </div>
+
+    <div class="faz"><div class="fb">Faz 1 — Ortak katmanlar + ilk dikeyler <span class="sp">6 hafta</span></div><div class="fi">
+      <div class="hatlar">
+        <div class="hat ortak"><b>Ortak platform</b><ul><li><b>Doküman v1</b>: ek kolonlar, tür/klasör, sürüm, basit 2 adımlı onay, liste/kart, gizlilik sınıfları, günlük (mevcut galeri aynen)</li><li><b>Cihaz ara katmanı iskeleti</b>: dinleyici + sürücü (HL7 v2 MLLP, ASTM, dosya/klasör, DICOM alım) → ortak `*_cihaz_mesaj` modeli; Lab ve Göz bunu kullanır</li><li>Hasta tıbbi geçmişi tabloları (alerji/kronik/ilaç/olay/aile/alışkanlık) + Tıbbi Özet ekranı</li><li>e-Nabız kuyruk çekirdeği (`enabiz_paket_turu/paket/alan/gonderim`) + 101 Hasta Kayıt</li></ul></div>
+        <div class="hat erp"><b>ERP hattı — Üretim v1</b><ul><li>Ürün ağacı (tek seviye + yarı mamul), sürüm</li><li>Üretim emri: açma, malzeme kontrolü/rezerv, tek seferde sarf, kısmi mamul girişi, basit maliyet (malzeme + işçilik)</li><li>Emir listesi/kartı, ağaç listesi/kartı; belge türleri: sarf çıkış, üretim giriş, fire</li><li>Prim değil; Delphi URETIM* göç eşlemesi</li></ul></div>
+        <div class="hat hbys"><b>HBYS hattı — Muayene v1</b><ul><li>Hekim listesi + sıra çağırma, muayene kartı (anamnez, vital, şablonlu fizik muayene, ICD-10, istem bağı, ücret, tamamla)</li><li>e-Reçete (ilaç kataloğu, alerji/etkileşim kontrolü, Medula test)</li><li>Sık tanı, makro, şablon ayarları</li><li>e-Nabız 103 Muayene + 106 Çıkış kuyruğa; başvuru listesi rozeti</li><li>Radyoloji istem → muayene "İstem &amp; Sonuçlar" sekmesi bağlantısı</li><li><b>Özel Sigorta v1</b>: sağlayıcı katmanı (<code>ISigortaSaglayici</code>) + kod eşleme, poliçe sorgu ve provizyon al/güncelle/iptal, doküman gönderimi; provizyon kırılımı belgenin hasta/kurum payını yazar (<code>Sigorta/SIGORTA_ENTEGRASYON_TASARIM.md</code> F1-F2)</li></ul></div>
+      </div>
+      <div class="olcut">Ölçüt: pilot kurumda poliklinik muayenesi uçtan uca (kabul → muayene → reçete → e-Nabız gönderildi); ERP pilotunda bir üretim emri kapanıp mamul maliyeti stok kartına işlendi; doküman kartı + onay canlı.</div>
+    </div>
+
+    <div class="faz"><div class="fb">Faz 2 — Laboratuvar + Üretim v2 + Doküman v2 <span class="sp">8 hafta</span></div><div class="fi">
+      <div class="hatlar">
+        <div class="hat ortak"><b>Ortak platform</b><ul><li>Doküman v2: tam metin/OCR, nesne depo, okuma görevleri, saklama/imha, şablondan üretme</li><li>Prim rolleri genişleme (İsteyen/Onaylayan/Raporlayan otomatik yazım)</li><li>Hasta portalı v1 (giriş, belgelerim, randevu) — Teletıp'ın ön koşulu</li><li>e-Nabız Reçete + Tetkik Sonuç paketleri, veri kalitesi panosu</li></ul></div>
+        <div class="hat erp"><b>ERP hattı — Üretim v2</b><ul><li>Geri-yıkama sarf, operasyon/terminal ekranı, personel-zaman, KK akışı</li><li>Planlama (MRP, çok seviyeli patlatma, satınalma talebi)</li><li>Fason operasyon (irsaliye), kapasite görünümü, üretim panosu</li><li>Maliyet kapanışı (GÜG, plan/gerçek raporu)</li></ul></div>
+        <div class="hat hbys"><b>HBYS hattı — Lab v1</b><ul><li>Tetkik kataloğu (hizmet 1:1, referans aralıkları, panik, TAT), istem/numune/barkod/etiket, kabul-ret</li><li>2–3 biyokimya/hematoloji cihazı çift yön (host query) — ara katman üzerinden</li><li>Kural motoru (referans/delta/panik/serum indeksi), iki aşamalı + oto-onay, panik bildirimi</li><li>Sonuç raporu (Akılcı Lab formu), muayene sekmesine sonuç, İKK (Levey-Jennings/Westgard)</li><li><b>Özel Sigorta v2</b>: gönderime uygun provizyonlar → paket/icmal → sigortaya gönderim ve paket durumu takibi (<code>kurum_icmal</code> bağlı, kurum payı Satış Tahakkukuna) — F3</li></ul></div>
+      </div>
+      <div class="olcut">Ölçüt: pilotta lab sonuçları cihazdan otomatik, %60+ oto-onay, panik teyit kayıtlı, e-Nabız tetkik paketi gidiyor; ERP'de planlamadan emir üretiliyor, terminal kullanılıyor.</div>
+    </div>
+
+    <div class="faz"><div class="fb">Faz 3 — Uzaktan hizmetler + Mikrobiyoloji <span class="sp">8 hafta</span></div><div class="fi">
+      <div class="hatlar">
+        <div class="hat ortak"><b>Ortak platform</b><ul><li>Görüşme altyapısı (WebRTC SFU + yurt içi TURN), oda/jeton servisi</li><li>Sanal POS + iade akışı; e-imza (PAdES) servisi</li><li>Dış kurum portalı çerçevesi (Teleradyoloji ve dış lab için ortak)</li><li>DICOM alım/gönderim + PACS/VNA bağlantısı (ara katmana)</li></ul></div>
+        <div class="hat erp"><b>ERP hattı</b><ul><li>Üretim: alt emir zinciri, alternatif bileşen, ölçüm/kalite raporları, OEE</li><li>Doküman: ERP bağlantıları (çizim, sözleşme, demirbaş garanti)</li><li>Delphi müşterilerinden pilot göç (stok/cari/belge) — göç aracı olgunlaşması</li></ul></div>
+        <div class="hat hbys"><b>HBYS hattı</b><ul><li><b>Teletıp v1</b>: hizmet/müsaitlik, portal randevu + onam + ödeme, hekim paneli, görüşme ekranı (muayene kartı yan panel), tamamla → e-Nabız; USBS iz kaydı/2FA</li><li><b>Teleradyoloji v1</b>: kurum/sözleşme/tarife, DICOM alım + erişim no eşleme, SLA'lı çalışma listesi, mevcut raporlama, PDF/portal teslim, dönem faturası + hakediş</li><li><b>Lab mikrobiyoloji</b>: kültür/okuma/ID/antibiyogram (VITEK/MALDI), kademeli rapor</li><li><b>Özel Sigorta v3</b>: kurum ekstresi (ödeme talimatı/ödenen/iade) → tahsilat eşleme ve mutabakat farkları — sanal POS ile aynı fazda, para hattı birlikte kapanır (F4)</li></ul></div>
+      </div>
+      <div class="olcut">Ölçüt: ilk online muayene ödeme dahil tamamlandı; dış kurumdan gelen BT SLA içinde raporlanıp HL7/portal ile teslim edildi; idrar kültürü antibiyogramla raporlandı.</div>
+    </div>
+
+    <div class="faz"><div class="fb">Faz 4 — Dal merkezi (Göz) + Genetik + Kalite <span class="sp">8 hafta</span></div><div class="fi">
+      <div class="hatlar">
+        <div class="hat ortak"><b>Ortak platform</b><ul><li>Cihaz ara katmanı: DICOM MWL, XML/CSV ayrıştırıcılar (OCT/GA/biyometri), seri metin (otoref/tonometre)</li><li>Trend/progresyon motoru (ölçüm zaman serileri — lab ve göz ortak)</li><li>e-Nabız Tıbbi Görüntüleme + Sevk paketleri; silme/güncelleme</li></ul></div>
+        <div class="hat erp"><b>ERP hattı</b><ul><li>Üretim maliyet–muhasebe entegrasyonu, fason faturası eşleme</li><li>Doküman onay akışlarının ERP süreçlerine (sözleşme, satınalma) yayılması</li><li>Genel: ERP raporlama/pano olgunlaşması, mobil saha (sonra)</li></ul></div>
+        <div class="hat hbys"><b>HBYS hattı</b><ul><li><b>Göz v1</b>: ünite akışı listesi, OD/OS detaylı muayene, otoref/tonometre entegrasyonu, gözlük reçetesi, OCT/GA kaydı + ölçüm, hasta göz özeti, enjeksiyon listesi/uygulama (UTS), katarakt planı (biyometri → IOL → checklist), postop protokol</li><li><b>Lab genetik v1</b>: vaka/onam, örnek/run kalite, VCF içe aktarma, varyant değerlendirme (ACMG), rapor</li><li>DKK, ISO 15189 raporları; teleoftalmoloji (teleradyoloji deseni)</li></ul></div>
+      </div>
+      <div class="olcut">Ölçüt: göz pilotunda ziyaret istasyonlardan geçip OCT sonucu trendle görüntülendi, katarakt ameliyatı checklist ile planlandı; genetik panel raporu e-imzalı çıktı.</div>
+    </div>
+
+    <div class="faz"><div class="fb">Faz 5 — Olgunlaştırma (sürekli) <span class="sp">faz 4 sonrası · ürün yönetimi önceliğine göre</span></div><div class="fi">
+      <ul>
+        <li>AI: muayene özeti/dikte, DR tarama ön okuma, radyoloji/lab rapor taslağı, doküman özeti — hepsi hekim onaylı; `ai_arac_log`.</li>
+        <li>Lab: dış lab akışı, mikropuls/LIS2-A2 tam uyum, middleware entegrasyonları; Göz: kontakt lens, lazer kütüphanesi, DR panosu, optik portalı.</li>
+        <li>Teletıp: kayıt + erişim zinciri, tercüman/konsültan, mobil push; Teleradyoloji: otomatik atama/nöbet, giden yön, peer review.</li>
+        <li>ERP: mobil depo/saha, ileri planlama (sonlu kapasite), B2B portal; MHRS/HIMSS uyum çalışmaları.</li>
+        <li><b>Sigorta:</b> ikinci ve üçüncü şirketin adapter'ı (yalnız kod eşleme + adapter sınıfı; şema/ekran değişmez) — yapının gerçekten genel olduğunun kanıtı.</li><li>Delphi → Gentegre AI göç dalgaları; MSSQL ürünün bakım modu.</li>
+      </ul>
+    </div></div>
+
+    <h2>3. Zaman çizgisi (hafta · 3 hat)</h2>
+    <div class="zaman">
+      <div class="b">Hat</div><div class="b">0–2</div><div class="b">3–8</div><div class="b">9–16</div><div class="b">17–24</div><div class="b">25–32</div><div class="b">33+</div>
+      <div class="b">Ortak platform</div><div class="o">kod listeleri · bildirim · onam · kapılar</div><div class="o">Doküman v1 · cihaz ara katmanı · tıbbi geçmiş · e-Nabız çekirdek</div><div class="o">Doküman v2 · portal v1 · e-Nabız paketler</div><div class="o">WebRTC · POS · e-imza · DICOM/PACS · dış portal</div><div class="o">MWL/ayrıştırıcılar · trend motoru</div><div class="o">AI · olgunlaştırma</div>
+      <div class="b">ERP</div><div class="e">Delphi düzeltmeler · üretim göç taslağı</div><div class="e">Üretim v1</div><div class="e">Üretim v2 (MRP, terminal, KK)</div><div class="e">fason · OEE · pilot göç</div><div class="e">maliyet-muhasebe · onay akışları</div><div class="e">mobil · B2B</div>
+      <div class="b">HBYS</div><div class="h">USS/Medula/USBS başvuru · <b>ÖSS kapısı</b> · muayene göç taslağı</div><div class="h">Muayene v1 + e-Reçete + e-Nabız 101/103/106 · <b>Sigorta v1</b></div><div class="h">Lab v1 (biyokimya/hematoloji) · <b>Sigorta v2</b></div><div class="h">Teletıp v1 · Teleradyoloji v1 · Mikrobiyoloji · <b>Sigorta v3</b></div><div class="h">Göz v1 · Genetik v1 · DKK</div><div class="h">AI · dal merkezi genişleme</div>
+    </div>
+    <p class="kucuk">Süreler 2 ERP + 2 HBYS + 1 platform geliştirici varsayımıyla; tek kişi hattında fazlar ardışık olur (~2×). Mevcut hız referansı: 01–03.09 arasında 314–351 göç + 4 modül (prim, entegrasyon, mesaj, AI, kategori) yayınlandı.</p>
+
+    <h2>4. Mockup → faz eşlemesi</h2>
+    <table>
+      <tr><th style="width:170px">Dizin</th><th>Faz 1</th><th>Faz 2</th><th>Faz 3</th><th>Faz 4</th><th>Faz 5</th></tr>
+      <tr><td>Uretim (7)</td><td>urun_agaci_listesi/karti · uretim_emri_listesi/karti (temel sekmeler)</td><td>uretim_planlama · is_merkezi_terminali · emir kartı KK/maliyet/zaman sekmeleri</td><td>fason, OEE (pano)</td><td>maliyet-muhasebe</td><td></td></tr>
+      <tr><td>Dokuman (5)</td><td>dokuman_listesi · dokuman_karti (sürüm, basit onay, erişim, günlük) · dokuman_ayarlar (klasör/tür)</td><td>dokuman_onay_kuyrugu · metin/AI · şablon · saklama</td><td></td><td></td><td>AI özet</td></tr>
+      <tr><td>Muayene (5)</td><td>muayene_listesi · muayene_karti · hasta_tibbi_ozet · muayene_sablonlari</td><td>rapor türleri/Medula · konsültasyon · takip göstergeleri</td><td></td><td>cihaz vital</td><td>dikte/AI · bekleme salonu</td></tr>
+      <tr><td>E-Nabız (8)</td><td>enabiz_gonderim_kuyrugu · enabiz_paket_karti · enabiz_paket_101 · enabiz_ayarlar_esleme · paket listesi</td><td>reçete/tetkik paketleri · enabiz_veri_kalitesi</td><td>hasta geçmişi okuma</td><td>görüntüleme/sevk · silme-güncelleme</td><td></td></tr>
+      <tr><td>Lab (10)</td><td></td><td>istem_numune_kabul · biyokimya_sonuc_onay · cihaz_entegrasyonu · kalite_kontrol (İKK) · sonuç formu biyokimya</td><td>mikrobiyoloji + formu</td><td>genetik + formu · DKK</td><td>dış lab</td></tr>
+      <tr><td>Teletıp (7) + USBS (11)</td><td></td><td>hasta portalı (ortak)</td><td>hizmet_ve_musaitlik · online_randevu · hekim_paneli · gorusme_ekrani · gorusme_listesi · hasta_portali · USBS onam/2FA/iz kaydı</td><td></td><td>kayıt, tercüman, push</td></tr>
+      <tr><td>Sigorta (3)</td><td>sigorta_ayarlari · sigorta_provizyon</td><td>sigorta_gonderim (paket)</td><td>sigorta_gonderim (kurum ekstresi · mutabakat)</td><td></td><td>ikinci/üçüncü şirket adapter'ı</td></tr>
+      <tr><td>Teleradyoloji (6)</td><td></td><td></td><td>kurum_sozlesme · calisma_listesi · raporlama · kurum_portali · pano</td><td>teleoftalmoloji</td><td>atama/nöbet · giden yön</td></tr>
+      <tr><td>Goz (7)</td><td></td><td></td><td></td><td>hasta_listesi · hasta_karti · detayli_muayene · gozluk_recetesi · goruntuleme_cihazlar · islem_planlama</td><td>kontakt lens · lazer kütüphanesi · DR panosu</td></tr>
+      <tr><td>Radyoloji / Kayıt Kabul / Randevu / Prim / Ayarlar</td><td colspan="5">Büyük ölçüde yapıldı; kalan ekran farkları ilgili fazda (kayıt kabul → Muayene v1, randevu kanal/kapasite → Teletıp, prim rolleri → Faz 2).</td></tr>
+    </table>
+
+    <h2>5. Kesişen işler (her fazda dokunulur)</h2>
+    <table>
+      <tr><th style="width:200px">Konu</th><th>Kural</th></tr>
+      <tr><td>SKRS / kod listeleri</td><td>Yeni modül gelmeden liste eklenir (Faz 0 büyük parti; sonra modül başına).</td></tr>
+      <tr><td>Prim rolleri</td><td>Her klinik/işlem tablosu onayında `belge_satir_rol` yazımı — Muayene (Uygulayan), Lab/Rad (İsteyen/Onaylayan/Raporlayan), Göz işlemleri.</td></tr>
+      <tr><td>e-Nabız</td><td>Her klinik olay bir paket türüne eşlenir; kuyruk tek. Modül teslimi = paketi de teslim.</td></tr>
+      <tr><td>UTS / stok</td><td>İmplant/ilaç kullanan her işlem (enjeksiyon, IOL, sarf) `stok_seri_lot` + UTS bildirimi.</td></tr>
+      <tr><td>KVKK sınıfı</td><td>Hasta/personel kaynaklı doküman ve kayıtlar otomatik "özel nitelikli"; erişim günlüğü.</td></tr>
+      <tr><td>Göç (Delphi → AI)</td><td>Yeni tablo = goc_al eşlemesi; tarihçe (00_TARIHCE) her göç dosyasında.</td></tr>
+      <tr><td>Test / yayın</td><td>Her faz sonu: sınama verisi güncel, bulut yayını, pilot geri bildirimi, mockup güncellemesi.</td></tr>
+    </table>
+
+    <h2>6. Riskler ve kararlar</h2>
+    <table>
+      <tr><th style="width:240px">Risk</th><th>Önlem</th></tr>
+      <tr><td>USS/KTS tescili ve test ortamı gecikmesi</td><td>Faz 0'da başvuru; kuyruk sahte servisle geliştirilir, canlı geçiş tescil sonrası.</td></tr>
+      <tr><td>Cihaz protokolleri (üretici dokümanı, test cihazı erişimi)</td><td>Pilot kurumun cihazlarıyla başlanır; ara katman kayıt-oynat (ham mesaj) ile geliştirilir; middleware varsa tek HL7.</td></tr>
+      <tr><td>USBS/Teletıp mevzuat kapsamı (kayıt, saklama, TURN yurt içi)</td><td>Kayıt özelliği ilk sürümde kapalı; USBS uyum haritası kontrol listesi olarak fazda.</td></tr>
+      <tr><td>Aynı anda iki ürün — ortak katman değişikliklerinin çakışması</td><td>Ortak platform tek sahip; sürümlü API; modüller katalog/ek kolonla genişler, çekirdek tabloyu kırmaz.</td></tr>
+      <tr><td>Kapsam şişmesi (mockup'ta 56 ekran)</td><td>Her modülün "ilk sürüm" kapsamı bağlayıcı; "sonraya" listesi Faz 5 havuzu; yeni istek → mockup → faz.</td></tr>
+      <tr><td>Delphi müşteri bakım yükü</td><td>Haftalık sabit bakım dilimi; büyük Delphi geliştirme yok, göç teşviki.</td></tr>
+      <tr><td>Pilot kurum bulunamaması</td><td>ERP için mevcut Delphi müşterisi; HBYS için poliklinik+lab+göz olan tıp merkezi; pilot sözleşmesi Faz 0.</td></tr>
+    </table>
+
+    <div class="tamam"><b>Özet sıra:</b> Faz 0 kapılar/kod listeleri → Faz 1 Doküman + cihaz iskeleti + Üretim v1 + Muayene v1 (e-Nabız 101/103) → Faz 2 Lab v1 + Üretim v2 + Doküman v2 → Faz 3 Teletıp + Teleradyoloji + Mikrobiyoloji → Faz 4 Göz + Genetik + DKK → Faz 5 AI ve olgunlaştırma. ERP ve HBYS her fazda birlikte yayınlanır; ortak platform hattı her fazın önünde koşar.</div>
+  </div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

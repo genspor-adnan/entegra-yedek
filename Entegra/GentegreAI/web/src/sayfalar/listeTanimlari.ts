@@ -303,9 +303,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   menusunden de kaybolurdu - gerektiginde kullanici acar.
     //   Sira: once belgenin kimligi (no, tarih, hasta), sonra basvuru bilgisi
     //   (odeyen kurum, poliklinik, hekim) - kullanici.
-    //   TARIH EN SOLDA, solunda da TAMAMLANMA rozeti (kullanici): gunluk
-    //   listede once "bitti mi", sonra "ne zaman", sonra kimlik bilgileri.
-    kolonSirasi: ['tamamlanma', 'belgeTarihi', 'belgeNo', 'tarafUnvan',
+    //   TAMAMLANMA rozeti PROTOKOL NO'NUN SAGINDA (kullanici): once belgenin
+    //   kimligi (tarih, protokol), hemen ardindan "nerede kaldi" rozeti.
+    kolonSirasi: ['belgeTarihi', 'belgeNo', 'tamamlanma', 'tarafUnvan',
                   'odeyenKurumAdi', 'poliklinik', 'doktor',
                   'genelToplam', 'tahsilat'],
     // TAHSILAT da toplanir (kullanici): "ne kadari geldi" sorusu genel
@@ -324,7 +324,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   liste paylasiyor.
     //   "Ödeyen Kurum" da bu ekranda yalnizca KURUM (kullanici) - basvuruda
     //   zaten odemeyi ustlenen kurumdan baskasi yazilmiyor.
-    kolonBasliklari: { belgeNo: 'Protokol No', odeyenKurumAdi: 'Kurum' },
+    //   "Cari" ise burada HASTA (kullanici): kayit kabulde belgenin tarafi
+    //   her zaman hastadir, "Cari" ERP dilidir.
+    kolonBasliklari: { belgeNo: 'Protokol No', odeyenKurumAdi: 'Kurum',
+                       tarafUnvan: 'Hasta' },
     urunModu: 2,
     menuGrup: 'Kayıt Kabul', menuAd: 'Başvurular', ic: '📝', yetkiKodu: 'belge',
     menuSira: 30,
@@ -1429,6 +1432,60 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ],
     tarihAlani: 'tarih',
     menuGrup: 'Yönetim', menuAd: 'İşlem Günlüğü', ic: '📋', yetkiKodu: 'islem_log',
+  },
+  {
+    // ONAM METINLERI (398, Faz 0): metin + surum. Teletip, genetik, girisimsel
+    //   islem ve KVKK aydinlatmasi ayni tablodan beslenir - her modul kendi
+    //   onam kopyasini yazmasin diye ortak platformda.
+    kaynak: 'onam-metni', baslik: 'Onam Metinleri', yol: 'Yonetim › Onam Metinleri',
+    kartYolu: '/onam-metni', cipler: DURUM_CIPLERI,
+    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuAd: 'Onam Metinleri', ic: '📜', yetkiKodu: 'onam',
+  },
+  {
+    // VERILEN ONAMLAR (398): salt gorunum - onam kart ekranindan degil, akisin
+    //   icinden (hasta kabul, teletip gorusmesi) alinir.
+    kaynak: 'onam', baslik: 'Onamlar', yol: 'Yonetim › Onamlar',
+    aksiyonEkrani: 'cikti-liste', tarihAlani: 'tarih',
+    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuAd: 'Onam Kayıtları', ic: '✍️', yetkiKodu: 'onam',
+  },
+  {
+    // BILDIRIM SABLONLARI (399): kod SABIT (kodla cagrilir), metin serbest.
+    kaynak: 'bildirim-sablon', baslik: 'Bildirim Şablonları',
+    yol: 'Yonetim › Bildirim Şablonları', kartYolu: '/bildirim-sablon',
+    cipler: DURUM_CIPLERI,
+    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuAd: 'Bildirim Şablonları', ic: '💬', yetkiKodu: 'bildirim_sablon',
+  },
+  {
+    // BILDIRIM KUYRUGU (399): "gitti mi" sorusunun TEK yeri. Cipler durum
+    //   kolonundan degil kendi kodlarindan - bildirim.durum alti degerli.
+    kaynak: 'bildirim', baslik: 'Bildirim Kuyruğu', yol: 'Yonetim › Bildirim Kuyruğu',
+    aksiyonEkrani: 'cikti-liste', tarihAlani: 'planlanan',
+    cipler: [
+      { ad: 'Tümü' },
+      { ad: 'Kuyrukta',    filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Gönderildi',  filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Hata',        filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+    ],
+    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuAd: 'Bildirim Kuyruğu', ic: '📨', yetkiKodu: 'bildirim',
+  },
+  {
+    // ICD-10 (400): senkron doldurur, ekran SALT GORUNUM - elle tani kodu
+    //   yazmak katalogu bozar (e-Nabiz ve provizyon ayni kodu bekler).
+    kaynak: 'icd', baslik: 'ICD-10 Tanı Kataloğu', yol: 'Yonetim › ICD-10',
+    aksiyonEkrani: 'cikti-liste',
+    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuAd: 'ICD-10 Tanı', ic: '🩺', yetkiKodu: 'katalog', urunModu: 2,
+  },
+  {
+    // ILAC (400): barkod birincil; e-Recete ve sarf bunu okur.
+    kaynak: 'ilac', baslik: 'İlaç Kataloğu', yol: 'Yonetim › İlaç Kataloğu',
+    aksiyonEkrani: 'cikti-liste',
+    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuAd: 'İlaç Kataloğu', ic: '💊', yetkiKodu: 'katalog', urunModu: 2,
   },
   {
     // Rol'un durum kolonu "durum" degil "aktif" - DURUM_CIPLERI (alan:'durum') buraya

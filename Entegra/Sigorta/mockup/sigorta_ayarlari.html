@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sigorta Entegrasyonları — Ayarlar (Mockup)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#d2dae3; --line2:#e6ebf1; --ink:#1f2d3a; --muted:#6b7a8b;
+    --navy:#14315a; --accent:#2f6db3; --sel:#dcebfb; --selbd:#9cc4ee; --head:#f1f5f9; --head2:#e7eef5;
+    --btnfrom:#fff; --btnto:#eef2f7; --ok:#2e7d46; --uyari:#b5731a; --hata:#b23b3b;
+    --okZem:#e9f4ed; --uyariZem:#fdf6e3; --hataZem:#fbeaea;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#dfe4ea;color:var(--ink);font-family:"Segoe UI",Tahoma,sans-serif;
+    font-size:12.5px;padding:12px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:6px;box-shadow:0 8px 26px rgba(20,40,70,.16);overflow:hidden}
+  .title{background:linear-gradient(#1c4478,#14315a);color:#fff;padding:7px 12px;display:flex;
+    align-items:center;gap:8px;font-weight:600}
+  .title .sp{margin-left:auto;font-weight:400;opacity:.85;font-size:11px}
+  .sekmeler{display:flex;gap:2px;padding:8px 10px 0;background:linear-gradient(#fff,#f4f7fb);
+    border-bottom:1px solid var(--line)}
+  .sk{padding:7px 14px;border:1px solid var(--line);border-bottom:none;border-radius:5px 5px 0 0;
+    background:#f2f6fa;color:#3d5169}
+  .sk.on{background:#fff;font-weight:600;color:var(--navy);box-shadow:0 -2px 0 var(--accent) inset}
+  .govde{padding:12px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+  .grp{border:1px solid var(--line);border-radius:6px;background:#fff;flex:1;min-width:420px}
+  .grp > h6{margin:0;padding:8px 10px;border-bottom:1px solid var(--line2);background:var(--head);
+    font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:#5b6f86;display:flex;
+    align-items:center;gap:8px}
+  .grp > h6 .sag{margin-left:auto;display:flex;gap:6px}
+  .d{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:5px;padding:5px 10px;color:#33465c;font-size:11.5px}
+  .d.bir{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:600}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{background:linear-gradient(var(--head),var(--head2));text-align:left;padding:6px 8px;
+    border-bottom:1px solid var(--line);font-size:11px;color:#5b6f86;font-weight:600}
+  td{padding:6px 8px;border-bottom:1px solid var(--line2)}
+  tr.on td{background:var(--sel)}
+  .rozet{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;border:1px solid}
+  .rz-ok{background:var(--okZem);color:var(--ok);border-color:#c2e0cd}
+  .rz-uy{background:var(--uyariZem);color:#9a7407;border-color:#eeddb4}
+  .rz-ht{background:var(--hataZem);color:var(--hata);border-color:#efc9c7}
+  .rz-gri{background:#f0f3f7;color:#63788e;border-color:#dbe3ec}
+  .alanlar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:10px}
+  .alan{display:flex;flex-direction:column;gap:3px}
+  .alan .et{font-size:10.5px;color:var(--muted)}
+  .alan .kt{border:1px solid var(--line);border-radius:4px;padding:5px 7px;background:#fff;min-height:26px}
+  .alan .kt.ro{background:#f7f9fc;color:#54687e}
+  .not{margin:10px;padding:8px 10px;border:1px solid var(--line2);border-radius:5px;
+    background:#f7f9fc;color:#54687e;font-size:11.5px;line-height:1.55}
+  .yet{display:flex;gap:5px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🛡️ Sigorta Entegrasyonları
+    <span class="sp">Yönetim › Modül Ayarları › Sigorta · MOCKUP</span></div>
+
+  <div class="sekmeler">
+    <div class="sk on">Sağlayıcılar</div>
+    <div class="sk">Kurum Hesapları</div>
+    <div class="sk">Kod Eşleme</div>
+    <div class="sk">İstek Günlüğü</div>
+  </div>
+
+  <div class="govde">
+    <div class="grp">
+      <h6>Sağlayıcılar
+        <span class="sag"><button class="d">🔄 Bağlantıyı Test Et</button></span>
+      </h6>
+      <table>
+        <thead><tr><th style="width:150px">Kod</th><th>Şirket</th><th style="width:330px">Yetenekler</th><th style="width:90px">Durum</th></tr></thead>
+        <tbody>
+          <tr class="on">
+            <td>ANADOLU_ASMED</td><td>Anadolu Sigorta (ASMED)</td>
+            <td class="yet">
+              <span class="rozet rz-ok">Poliçe</span><span class="rozet rz-ok">Provizyon</span>
+              <span class="rozet rz-ok">Doküman</span><span class="rozet rz-ok">Paket</span>
+              <span class="rozet rz-ok">Ekstre</span>
+            </td>
+            <td><span class="rozet rz-ok">Aktif</span></td>
+          </tr>
+          <tr>
+            <td>ALLIANZ</td><td>Allianz Sigorta</td>
+            <td class="yet"><span class="rozet rz-ok">Poliçe</span><span class="rozet rz-ok">Provizyon</span>
+              <span class="rozet rz-gri">Paket yok</span></td>
+            <td><span class="rozet rz-uy">Hazırlanıyor</span></td>
+          </tr>
+          <tr>
+            <td>ELLE</td><td>Entegrasyonsuz (elle provizyon)</td>
+            <td class="yet"><span class="rozet rz-gri">Servis yok</span></td>
+            <td><span class="rozet rz-ok">Aktif</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="not">
+        <b>Yetenekler ekranı sürer:</b> paketleme desteklemeyen şirkette “Sigortaya Gönder”
+        düğmesi <b>çizilmez</b> — pasif düğme “neden çalışmıyor” sorusu doğurur.
+        Entegrasyonu olmayan kurumda provizyon ekranı elle çalışır (bugünkü davranış).
+      </div>
+    </div>
+
+    <div class="grp" style="min-width:520px">
+      <h6>Hesap — Anadolu Sigorta (ASMED)
+        <span class="sag"><span class="rozet rz-uy">TEST ORTAMI</span>
+          <button class="d bir">💾 Kaydet</button></span>
+      </h6>
+      <div class="alanlar">
+        <div class="alan"><span class="et">Anlaşmalı Kurum</span><span class="kt">Anadolu Sigorta A.Ş.</span></div>
+        <div class="alan"><span class="et">Şube</span><span class="kt">(tümü)</span></div>
+        <div class="alan"><span class="et">Ortam</span><span class="kt">Test</span></div>
+        <div class="alan"><span class="et">Kullanıcı Adı</span><span class="kt">WS_ASMED_521896001</span></div>
+        <div class="alan"><span class="et">Parola</span><span class="kt">••••••••</span></div>
+        <div class="alan"><span class="et">Kurum Kodu (SKRS)</span><span class="kt">190707</span></div>
+        <div class="alan"><span class="et">Client Id</span><span class="kt">c9a8980063e8…1146</span></div>
+        <div class="alan"><span class="et">Client Secret</span><span class="kt">••••••••</span></div>
+        <div class="alan"><span class="et">Scope</span><span class="kt">agency</span></div>
+        <div class="alan" style="grid-column:span 3"><span class="et">Token adresi</span>
+          <span class="kt ro">https://apitest.anadolusigorta.com.tr/api/agency/asmedoauthapi/oauth2/token</span></div>
+        <div class="alan" style="grid-column:span 3"><span class="et">Servis kökü</span>
+          <span class="kt ro">https://apitest.anadolusigorta.com.tr/api/agency/healthclaimprovision</span></div>
+        <div class="alan"><span class="et">Son Kullanım</span><span class="kt ro">05.09.2026 16:41</span></div>
+        <div class="alan"><span class="et">Son Sonuç</span><span class="kt ro">✔ Token alındı (312 ms)</span></div>
+        <div class="alan"><span class="et">Jeton Bitişi</span><span class="kt ro">05.09.2026 17:41</span></div>
+      </div>
+      <div class="not">
+        Kimlik bilgileri <b>mevcut “Entegrasyon Hesapları” altyapısında</b> saklanır
+        (ÜTS ve e-Belge ile aynı tablo): parola ve secret şifreli, test/canlı ayrı satır.
+        Jeton önbellekte tutulur; 401 alınırsa bir kez yenilenip istek tekrarlanır.
+      </div>
+    </div>
+
+    <div class="grp" style="min-width:100%">
+      <h6>Kod Eşleme — kanonik değer ↔ şirketin sözlüğü
+        <span class="sag"><button class="d">＋ Satır</button><button class="d">⬇ Şablondan Doldur</button></span></h6>
+      <table>
+        <thead><tr><th style="width:190px">Alan</th><th style="width:230px">Bizim değer</th>
+          <th>Şirket değeri</th><th style="width:260px">Açıklama</th></tr></thead>
+        <tbody>
+          <tr><td>provizyon_tipi</td><td>Ayakta Tedavi</td><td>OUTPATIENT_TREATMENT</td><td></td></tr>
+          <tr><td>provizyon_tipi</td><td>Yatarak Tedavi</td><td>INPATIENT_TREATMENT</td><td></td></tr>
+          <tr><td>provizyon_alt_tipi</td><td>Genel</td><td>GENERAL</td><td></td></tr>
+          <tr><td>provizyon_alt_tipi</td><td>Check-up</td><td>CHECK_UP</td><td></td></tr>
+          <tr><td>vaka_tipi</td><td>Trafik Kazası</td><td>TRAFFIC_ACCIDENT</td><td></td></tr>
+          <tr><td>doktor_unvani</td><td>Uzman Dr.</td><td>SPECIALIST</td><td></td></tr>
+          <tr><td>islem_kaynagi</td><td>SUT</td><td>SUT</td><td>HUV / TTB / Cari / HUV++ / TTB++</td></tr>
+          <tr><td>malzeme_tipi</td><td>İlaç</td><td>MEDICINE</td><td></td></tr>
+          <tr><td>dokuman_tipi</td><td>Epikriz</td><td>EpikrizNotu</td><td>18 tip</td></tr>
+        </tbody>
+      </table>
+      <div class="not">
+        Yeni sigorta şirketi bağlamak = <b>bu tabloyu doldurmak + bir adapter sınıfı yazmak</b>.
+        Şema, ekran ve iş kuralları değişmez.
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

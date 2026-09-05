@@ -108,7 +108,7 @@ describe('yeni basvuru karti', () => {
     expect(await sekme('Başvuru')).toBeInTheDocument();
     expect(await sekme('Ücretlendirme')).toBeInTheDocument();
     expect(await sekme('Tahsilat')).toBeInTheDocument();
-    expect(await sekme('Dönüşüm')).toBeInTheDocument();
+    expect(await sekme('Belgeye Dönüşüm')).toBeInTheDocument();
     // YENI basvuruda dugme "protokol ver" der - kayitli belgede "kaydet".
     expect(screen.getByText(/Başvuruyu Aç \(Protokol Ver\)/)).toBeInTheDocument();
   });

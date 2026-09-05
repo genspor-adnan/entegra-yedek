@@ -530,6 +530,13 @@ table.grid tr.flt input {
 .seg .s.on { background: linear-gradient(#4d8fd6, #2f6db3); color: #fff; font-weight: 700 }
 /* Acil secenegi secilince KIRMIZI - kayit kabulde acil basvuru goze carpsin. */
 .seg .s.acil.on { background: linear-gradient(#e0605c, #c0413d) }
+/* OLCU segmenti (Adet / Tutar) secilince SARI (kullanici): mavi, ekrandaki
+   birincil eylem dugmeleriyle ayni renkti - bu bir EYLEM degil, yanindaki
+   Fiş/Fatura/Tahakkuk dugmelerinin NASIL calisacagini soyleyen bir anahtar. */
+.seg.olcu .s.on {
+  background: linear-gradient(#f3ca4a, #dfae1f); color: #4a3a00;
+  text-shadow: none;
+}
 .seg.kilitli .s { cursor: default; opacity: .7 }
 
 /* Grup basligindaki eylem dugmesi (ör. "Provizyon Al") SAGA yaslanir; serit
@@ -2179,6 +2186,15 @@ input.skt-gecmis {
 /* %100: tek isaret yeter - serit yesile boyanmaz, yalniz yuzde onaylanir. */
 .basvuru-asama.bitti .asama-yuzde b { color: #2e7d46 }
 .basvuru-asama.bitti .asama-yuzde::after { content: "✔"; color: #2e7d46 }
+
+/* ASAMA RENKLI ROZET (kullanici): basvuru listesindeki Tamamlanma yuzdesi,
+   kartin ustundeki asama seridiyle AYNI renkleri tasir - ayni bilgi iki
+   ekranda ayni renkle okunsun. Hex degerleri serit kurallarindan kopyadir. */
+.rozet.asama-kirmizi { background: #fbeaea; color: #c2413b; border: 1px solid #efc9c7 }
+.rozet.asama-turuncu { background: #fdf1e3; color: #b96a15; border: 1px solid #f0d6b4 }
+.rozet.asama-sari    { background: #fdf6e3; color: #9a7407; border: 1px solid #eeddb4 }
+.rozet.asama-mavi    { background: #eaf1fa; color: #2f6db3; border: 1px solid #c6d8ef }
+.rozet.asama-yesil   { background: #e9f4ed; color: #2e7d46; border: 1px solid #c2e0cd }
 
 /* GONDEREN + "Kendi İsteği" (370): isaret alanin ALTINDA durur - gonderen
    zorunlu oldugu icin "hekim yok" cevabi da gorunur bir secim olmali. */

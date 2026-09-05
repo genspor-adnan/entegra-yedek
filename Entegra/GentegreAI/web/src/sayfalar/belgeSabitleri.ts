@@ -161,7 +161,7 @@ export const SEKMELER: {
   //   Faturada "Faturalama" (bu belgeden turetilenler) zaten anlamsiz - fatura
   //   zincirin SONU (faturaYok).
   { anahtar: 'tahsilat', baslik: 'Tahsilat',   faturaMi: true },   // alista "Ödeme" olur
-  { anahtar: 'fatura',   baslik: 'Dönüşüm', faturaYok: true },
+  { anahtar: 'fatura',   baslik: 'Belgeye Dönüşüm', faturaYok: true },
   { anahtar: 'imza',     baslik: 'İmza / Teslim', irsaliye: true },
   // "Yorum / Medya" -> "Resim / Doküman" (kullanici, 218).
   { anahtar: 'yorum',    baslik: 'Resim / Doküman' },

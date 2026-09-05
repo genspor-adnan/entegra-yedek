@@ -253,7 +253,9 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
   return (
   <div className="kagrup">
     <h6>
-      {teklifMi ? 'Sipariş' : 'Dönüşüm'}
+      {/* Baslik degil ETIKET (kullanici): saginda duran Fiş / Fatura /
+          Tahakkuk dugmelerini niteler - "hangi belgeyi keseyim". */}
+      {teklifMi ? 'Sipariş' : 'Belge seç :'}
 
       {/* HIZLI DONUSUM (kullanici): modal ACMADAN hedef belgeyi uretir ve
           alttaki listeye ekler - tahsilat sekmesindeki hizli akisin aynisi.
@@ -272,12 +274,18 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
         </>
       )}
 
-      {kayitliId > 0 && (
+      {/* "Faturaya Dönüştür" KALKTI (kullanici): ayrintili secim modalini acan
+          ikinci yol, yanindaki Fiş / Fatura / Tahakkuk dugmeleriyle ayni isi
+          yapiyormus gibi duruyordu - hangisinin ne yaptigi belirsizdi. Modal
+          yine arac cubugundaki "Belge Kes" ile aciliyor.
+          TEKLIFTE KALIR: teklif -> siparis donusumunun BASKA yolu yok (hizli
+          dugmeler teklifte hic cizilmiyor). */}
+      {kayitliId > 0 && teklifMi && (
         <button type="button" className="d bir" disabled={donusumKapali}
                 title={donusumKapali
                   ? 'Yalnız KABUL durumundaki teklif siparişe dönüştürülebilir.' : undefined}
                 onClick={() => setDonusum(0)}>
-          {teklifMi ? '📋 Siparişe Dönüştür' : '🧾 Faturaya Dönüştür'}
+          📋 Siparişe Dönüştür
         </button>
       )}
 
@@ -285,7 +293,7 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
           cevrilir. TUTAR olcusunde fis/faturada TAHSIL EDILEN kadar,
           tahakkukta kalanin tamami cevrilir (352). */}
       {kayitliId > 0 && !teklifMi && (
-        <span className="seg" title="Hızlı dönüşümün ölçüsü">
+        <span className="seg olcu" title="Hızlı dönüşümün ölçüsü">
           <span className={`s${olcu === 'adet' ? ' on' : ''}`}
                 onClick={() => setOlcu?.('adet')}>Adet</span>
           <span className={`s${olcu === 'tutar' ? ' on' : ''}`}

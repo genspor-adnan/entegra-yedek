@@ -46,6 +46,11 @@ export interface ParaAkisGirdisi {
   kullaniciId: number | null;
   yerelPara: string;
   setHata(m: string | null): void;
+  /**
+   * Kayit DOGRULAMADAN gectiyse cagrilmaz; gecmediyse kart eksik alanlarin
+   * oldugu sekmeye doner ve kullaniciya sebebi soylenir.
+   */
+  kayitBasarisiz(): void;
   setSonuc(y: BelgeYaniti): void;
   donusumleriYukle(id?: number): Promise<void>;
 }
@@ -122,7 +127,12 @@ export function useParaAkislari(g: ParaAkisGirdisi) {
     //   SUNUCUDAN okunuyor - ekrandaki kalemler yazilmadan donusum bos kalir.
     //   `kes(false)` karti KAPATMAZ; hata varsa 0 doner ve mesaji zaten gosterir.
     const id = await ref.current.kes(false);
-    if (!id) return;
+    // KAYIT DUSERSE SESSIZ KALMA (kullanici: "fişi sildim, hiçbir belge
+    //   ekleyemiyorum - Faturaya Dönüştür çalışıyor"): hizli donusum once
+    //   belgeyi kaydeder; dogrulama duserse (basvuruda bolum / gonderen /
+    //   odeyen kurum bos) buradan sessizce donuluyordu. Modal yol kaydetmedigi
+    //   icin calisiyor gorunuyor, hizli dugmeler "hicbir sey yapmiyor"du.
+    if (!id) { gRef.current.kayitBasarisiz(); return }
     try {
       const acik = await api.belgeAcikSatirlar(id);
       // BASVURUDA TUTAR SORULUR (kullanici: "dönüşüm ve tahsilat seçildiğinde

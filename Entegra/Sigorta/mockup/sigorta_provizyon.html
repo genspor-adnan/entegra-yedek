@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Başvuru — Provizyon (Mockup)</title>
+<style>
+  :root{
+    --card:#fff; --line:#d2dae3; --line2:#e6ebf1; --ink:#1f2d3a; --muted:#6b7a8b;
+    --navy:#14315a; --accent:#2f6db3; --sel:#dcebfb; --head:#f1f5f9; --head2:#e7eef5;
+    --btnfrom:#fff; --btnto:#eef2f7; --ok:#2e7d46; --uyari:#b5731a; --hata:#b23b3b;
+    --okZem:#e9f4ed; --uyariZem:#fdf6e3; --hataZem:#fbeaea; --maviZem:#eaf1fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#dfe4ea;color:var(--ink);font-family:"Segoe UI",Tahoma,sans-serif;
+    font-size:12.5px;padding:12px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:6px;box-shadow:0 8px 26px rgba(20,40,70,.16);overflow:hidden}
+  .title{background:linear-gradient(#1c4478,#14315a);color:#fff;padding:7px 12px;display:flex;
+    align-items:center;gap:8px;font-weight:600}
+  .title .sp{margin-left:auto;font-weight:400;opacity:.85;font-size:11px}
+  .arac{display:flex;gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);
+    background:linear-gradient(#fff,#f4f7fb);flex-wrap:wrap;align-items:center}
+  .d{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:5px;padding:6px 11px;color:#33465c;font-size:11.5px}
+  .d.bir{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:600}
+  .d.teh{color:var(--hata)}
+  .d[disabled]{opacity:.5}
+  .ayr{width:1px;height:22px;background:var(--line);margin:0 3px}
+  /* hasta seridi */
+  .serit{display:flex;gap:0;border-bottom:1px solid var(--line);background:#f7f9fc}
+  .hs{padding:7px 12px;border-right:1px solid var(--line2);display:flex;flex-direction:column;gap:2px}
+  .hs .k{font-size:10px;color:var(--muted);letter-spacing:.3px;text-transform:uppercase}
+  .hs .v{font-weight:600}
+  .sekmeler{display:flex;gap:2px;padding:8px 10px 0;background:#fff;border-bottom:1px solid var(--line)}
+  .sk{padding:7px 13px;border:1px solid var(--line);border-bottom:none;border-radius:5px 5px 0 0;
+    background:#f2f6fa;color:#3d5169;font-size:12px}
+  .sk.on{background:#fff;font-weight:600;color:var(--navy);box-shadow:0 -2px 0 var(--accent) inset}
+  .govde{padding:12px;display:flex;flex-direction:column;gap:12px}
+  .satir{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+  .grp{border:1px solid var(--line);border-radius:6px;background:#fff;flex:1;min-width:380px}
+  .grp > h6{margin:0;padding:8px 10px;border-bottom:1px solid var(--line2);background:var(--head);
+    font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:#5b6f86;display:flex;gap:8px;
+    align-items:center}
+  .grp > h6 .sag{margin-left:auto;display:flex;gap:6px}
+  .alanlar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;padding:10px}
+  .alan{display:flex;flex-direction:column;gap:3px}
+  .alan .et{font-size:10.5px;color:var(--muted)}
+  .alan .kt{border:1px solid var(--line);border-radius:4px;padding:5px 7px;background:#fff;min-height:26px}
+  .alan .kt.ro{background:#f7f9fc;color:#54687e}
+  .alan.gen{grid-column:span 2}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{background:linear-gradient(var(--head),var(--head2));text-align:left;padding:6px 8px;
+    border-bottom:1px solid var(--line);font-size:11px;color:#5b6f86;font-weight:600}
+  td{padding:6px 8px;border-bottom:1px solid var(--line2)}
+  td.sag,th.sag{text-align:right}
+  .rozet{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;border:1px solid}
+  .rz-ok{background:var(--okZem);color:var(--ok);border-color:#c2e0cd}
+  .rz-uy{background:var(--uyariZem);color:#9a7407;border-color:#eeddb4}
+  .rz-ht{background:var(--hataZem);color:var(--hata);border-color:#efc9c7}
+  .rz-mv{background:var(--maviZem);color:var(--accent);border-color:#c6d8ef}
+  .rz-gri{background:#f0f3f7;color:#63788e;border-color:#dbe3ec}
+  .not{margin:10px;padding:8px 10px;border:1px solid var(--line2);border-radius:5px;
+    background:#f7f9fc;color:#54687e;font-size:11.5px;line-height:1.55}
+  .kutu-uyari{border-color:#eeddb4;background:var(--uyariZem);color:#8a6a12}
+  .dip{display:flex;justify-content:flex-end}
+  .dip table{width:420px}
+  .dip td{border-bottom:1px solid var(--line2)}
+  .dip tr.genel td{font-weight:700;background:#f3f7fb}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">📝 Başvuru — 2026-000000073 · adem dere
+    <span class="sp">Provizyon · Anadolu Sigorta (ASMED) · MOCKUP</span></div>
+
+  <div class="arac">
+    <button class="d bir">💾 Kaydet</button>
+    <span class="ayr"></span>
+    <button class="d">🔍 Poliçe Sorgula</button>
+    <button class="d bir">🛡️ Provizyon Al</button>
+    <button class="d">🔄 Durumu Tazele</button>
+    <button class="d">📎 Belge Gönder</button>
+    <button class="d teh">✖ Provizyonu İptal Et</button>
+    <span class="ayr"></span>
+    <span class="rozet rz-ok">Provizyon: P04022026073150702</span>
+    <span class="rozet rz-mv">Ayakta Tedavi · Genel</span>
+    <span class="rozet rz-uy">Kısmi Onay</span>
+  </div>
+
+  <div class="serit">
+    <div class="hs"><span class="k">Hasta</span><span class="v">adem dere</span></div>
+    <div class="hs"><span class="k">T.C. / Dosya No</span><span class="v">111******10 · A/00000002</span></div>
+    <div class="hs"><span class="k">Sigorta</span><span class="v">Anadolu Sigorta — ÖSS</span></div>
+    <div class="hs"><span class="k">Poliçe</span><span class="v">1234567890 · Bireysel Sağlık</span></div>
+    <div class="hs"><span class="k">Kart No</span><span class="v">9988776655</span></div>
+    <div class="hs"><span class="k">Geçerlilik</span><span class="v">31.12.2026</span></div>
+    <div class="hs"><span class="k">Açık Borç</span><span class="v">250,00 ₺</span></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sk">Başvuru</div>
+    <div class="sk on">Provizyon</div>
+    <div class="sk">Ücretlendirme</div>
+    <div class="sk">Tahsilat</div>
+    <div class="sk">Belgeye Dönüşüm</div>
+    <div class="sk">Resim / Doküman</div>
+  </div>
+
+  <div class="govde">
+
+    <div class="satir">
+      <div class="grp">
+        <h6>Poliçe Sorgusu <span class="sag"><span class="rozet rz-ok">Geçerli</span>
+          <span class="rozet rz-gri">05.09.2026 16:38</span></span></h6>
+        <div class="alanlar">
+          <div class="alan"><span class="et">Poliçe No</span><span class="kt ro">1234567890</span></div>
+          <div class="alan"><span class="et">Poliçe Türü</span><span class="kt ro">ÖSS</span></div>
+          <div class="alan"><span class="et">Poliçe Tipi</span><span class="kt ro">Bireysel</span></div>
+          <div class="alan"><span class="et">Ağ Kodu</span><span class="kt ro">NW-01</span></div>
+          <div class="alan gen"><span class="et">Sigortalı</span><span class="kt ro">ADEM DERE · TCKN</span></div>
+          <div class="alan gen"><span class="et">Kurum Kodu (SKRS)</span><span class="kt ro">190707</span></div>
+        </div>
+        <div class="not kutu-uyari">
+          <b>Şirket notu:</b> “Poliçeniz bu kurumda geçerlidir. Check-up işlemleri sorgulamaya
+          dâhil değildir.” — <i>Sorgu, hekim bilgisiyle birlikte yapılır: sistemdeki hekimle
+          gönderilen hekim farklıysa provizyon aşamasında hata alınır.</i>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h6>Provizyon Bilgisi</h6>
+        <div class="alanlar">
+          <div class="alan"><span class="et">Provizyon Türü</span><span class="kt">Provizyon</span></div>
+          <div class="alan"><span class="et">Tip</span><span class="kt">Ayakta Tedavi</span></div>
+          <div class="alan"><span class="et">Alt Tip</span><span class="kt">Genel</span></div>
+          <div class="alan"><span class="et">Vaka Tipi</span><span class="kt">Genel Başvuru</span></div>
+          <div class="alan"><span class="et">Acil</span><span class="kt">Hayır</span></div>
+          <div class="alan"><span class="et">Provizyon Tarihi</span><span class="kt">05.09.2026</span></div>
+          <div class="alan"><span class="et">Hastane Ref. No</span><span class="kt ro">BSV-114431</span></div>
+          <div class="alan"><span class="et">TSS Takip No</span><span class="kt">—</span></div>
+          <div class="alan gen"><span class="et">Hekim</span><span class="kt">Ayşe Yapan · Uzman Dr. · Diploma 123456</span></div>
+          <div class="alan"><span class="et">Branş</span><span class="kt">İç Hastalıkları</span></div>
+          <div class="alan"><span class="et">Kadro / SGK</span><span class="kt">Kadrolu · SGK anlaşmalı</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="satir">
+      <div class="grp" style="min-width:520px">
+        <h6>Klinik Bilgi (şirkete gönderilen)</h6>
+        <div class="alanlar">
+          <div class="alan gen"><span class="et">Şikâyet</span>
+            <span class="kt">Yemeklerden sonra artan bulantı atakları</span></div>
+          <div class="alan"><span class="et">Şikâyet Başlangıcı</span><span class="kt">02.09.2026</span></div>
+          <div class="alan"><span class="et">Gebelik</span><span class="kt">Hayır</span></div>
+          <div class="alan gen"><span class="et">Fizik Muayene</span><span class="kt">Şikâyetleri 3 gündür mevcut</span></div>
+          <div class="alan gen"><span class="et">Özgeçmiş</span><span class="kt">Özellik yok</span></div>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h6>Tanılar (ICD) <span class="sag"><button class="d">＋</button><button class="d">🗑</button></span></h6>
+        <table>
+          <thead><tr><th style="width:80px">Kod</th><th>Tanı</th></tr></thead>
+          <tbody>
+            <tr><td>A09</td><td>Diyare ve gastroenterit, enfeksiyöz kaynaklı olduğu tahmin edilen</td></tr>
+            <tr><td>R11</td><td>Bulantı ve kusma</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h6>İşlem / Sarf ve Şirket Kararı
+        <span class="sag">
+          <span class="rozet rz-gri">Ücretlendirmeden gelir</span>
+          <button class="d">🔄 Kalemleri Yenile</button>
+        </span></h6>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:70px">Kaynak</th><th style="width:90px">Kod</th><th>Kalem</th>
+            <th class="sag" style="width:60px">Adet</th>
+            <th class="sag" style="width:100px">Talep</th>
+            <th class="sag" style="width:100px">Şirket Payı</th>
+            <th class="sag" style="width:100px">Katılım Payı</th>
+            <th class="sag" style="width:95px">İstisna</th>
+            <th class="sag" style="width:95px">Limit Üstü</th>
+            <th style="width:110px">Kapsam</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SUT</td><td>P520030</td><td>Alt Abdomen MR</td><td class="sag">1</td>
+            <td class="sag">1.000,00</td><td class="sag">800,00</td><td class="sag">200,00</td>
+            <td class="sag">0,00</td><td class="sag">0,00</td><td><span class="rozet rz-ok">Kapsamda</span></td>
+          </tr>
+          <tr>
+            <td>SUT</td><td>P100010</td><td>Dahiliye muayenesi</td><td class="sag">1</td>
+            <td class="sag">500,00</td><td class="sag">450,00</td><td class="sag">50,00</td>
+            <td class="sag">0,00</td><td class="sag">0,00</td><td><span class="rozet rz-ok">Kapsamda</span></td>
+          </tr>
+          <tr>
+            <td>İlaç</td><td>—</td><td>Feniramin 45,5 mg amp.</td><td class="sag">1</td>
+            <td class="sag">120,00</td><td class="sag">0,00</td><td class="sag">0,00</td>
+            <td class="sag">120,00</td><td class="sag">0,00</td><td><span class="rozet rz-ht">İstisna</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="dip">
+        <table>
+          <tr><td>Talep Toplamı</td><td class="sag">1.620,00 ₺</td></tr>
+          <tr><td>Şirketin Karşıladığı</td><td class="sag">1.250,00 ₺</td></tr>
+          <tr><td>Hasta Payı (katılım + istisna + limit üstü)</td><td class="sag">370,00 ₺</td></tr>
+          <tr class="genel"><td>Ücretlendirmeye Yazılacak</td><td class="sag">1.620,00 ₺</td></tr>
+        </table>
+      </div>
+      <div class="not">
+        <b>Tek doğru kaynağı:</b> provizyon yanıtındaki kırılım, belgenin <b>kurum payı /
+        hasta payı</b> dağılımını doğrudan yazar. Elle girilmiş karşılama oranı varsa üzerine
+        yazılır — sigorta ne diyorsa fatura odur. Kalem satırı provizyona bağlandığı için
+        belge yeniden kaydedilse de <b>silinmez</b> (dönüşmüş satır kuralının aynısı).
+      </div>
+    </div>
+
+    <div class="satir">
+      <div class="grp">
+        <h6>Şirket Notları / Karar</h6>
+        <table>
+          <thead><tr><th style="width:130px">Tip</th><th>Metin</th></tr></thead>
+          <tbody>
+            <tr><td><span class="rozet rz-uy">UYARI</span></td>
+                <td>İlaç bedeli poliçe istisnasındadır, sigortalıdan tahsil ediniz.</td></tr>
+            <tr><td><span class="rozet rz-mv">BİLGİ</span></td>
+                <td>Provizyon 7 gün geçerlidir; işlem tarihinde değişiklik olursa güncelleyiniz.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grp">
+        <h6>Gönderilen Belgeler <span class="sag"><button class="d">📎 Belge Ekle</button></span></h6>
+        <table>
+          <thead><tr><th style="width:150px">Tip</th><th>Dosya</th><th style="width:120px">Durum</th></tr></thead>
+          <tbody>
+            <tr><td>Epikriz</td><td>epikriz_114431.pdf</td><td><span class="rozet rz-ok">Gönderildi</span></td></tr>
+            <tr><td>Tetkik Sonucu</td><td>mr_sonuc.pdf</td><td><span class="rozet rz-ok">Gönderildi</span></td></tr>
+            <tr><td>Fatura</td><td>—</td><td><span class="rozet rz-gri">Fiş kesilince</span></td></tr>
+          </tbody>
+        </table>
+        <div class="not">Doküman içeriği mevcut dosya deposundan gider (yeniden yüklenmez);
+          gönderim sonucu (<code>piId</code>) satırda saklanır.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

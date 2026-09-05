@@ -1,0 +1,38 @@
+Username:WS_ASMED_521896001
+Password: Hatay123
+Client-id: c9a8980063e853092c995b02c1c81146
+Client-secret: 9ecd7c7699a01fee54da8630be79a6e4
+
+TCKN: 
+
+18347446030
+15349145596
+28339501012
+token;
+https://apitest.anadolusigorta.com.tr/api/agency/asmedoauthapi/oauth2/token 
+provizyon;
+https://apitest.anadolusigorta.com.tr/api/agency/healthclaimprovision/createProvision
+
+
+Token isteği:
+
+curl --location --request POST 'https://apitest.anadolusigorta.com.tr/api/agency/asmedoauthapi/oauth2/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'client_id=YOUR_CLIENT_ID' \
+--data-urlencode 'client_secret=YOUR_CLIENT_SECRET' \
+--data-urlencode 'grant_type=password' \
+--data-urlencode 'username=YOUR_USERNAME' \
+--data-urlencode 'password=YOUR_PASSWORD' \
+--data-urlencode 'scope=agency' 
+
+
+Servis isteği:
+
+curl --request POST \
+  --url https://apitest.anadolusigorta.com.tr/api/agency/healthclaimprovision/createProvision \
+  --header 'Authorization: Bearer REPLACE_BEARER_TOKEN' \
+  --header 'X-IBM-Client-Id: clientId' \
+  --header 'X-IBM-Client-Secret: clientSecret' \
+  --header 'accept: application/json' \
+  --header 'content-type: application/json' \
+  --data REPLACE_BODY
