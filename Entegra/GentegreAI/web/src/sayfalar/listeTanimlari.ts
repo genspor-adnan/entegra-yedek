@@ -74,6 +74,17 @@ export interface ListeTanimi {
    * olmayan kullanicida combo hic cizilmez, liste calismaya devam eder.
    */
   rolSuzgeci?: boolean;
+  /**
+   * Tarih araliginin ACILIS degeri. 'buAy' = bulunulan ayin 1'i - son gunu
+   * (kullanici, hakedis satirlari); 'yilbasindanBugune' = 1 Ocak - bugun.
+   * Verilmezse aralik BOS acilir (sinir yok).
+   */
+  tarihVarsayilan?: 'yilbasindanBugune' | 'buAy';
+  /**
+   * Ciplerin sagina PRIM ROLU + KISI combolari koyar (kullanici, hakedis
+   * satirlari). Kisi listesi secili role gore daralir.
+   */
+  primSuzgeci?: boolean;
   kaynak: string;
   baslik: string;
   yol: string;
@@ -1318,6 +1329,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Kapatılmış dönemin satırlarına başlıktan geçilir: /hakedis-satir?hakedisId=7
     urlFiltreAlani: 'hakedisId',
     tarihAlani: 'tarih',
+    // Acilista bulunulan AY (kullanici): tum zamanlarin satirlari bir arada
+    //   anlamsizdi - hakedis zaten ay ay kapanir.
+    tarihVarsayilan: 'buAy',
+    primSuzgeci: true,
     toplam: ['tutar'],
     gizliKolonlar: ['rol', 'pay', 'durum', 'tarafId', 'hakedisId', 'belgeSatirId',
                     'payYuzde'],

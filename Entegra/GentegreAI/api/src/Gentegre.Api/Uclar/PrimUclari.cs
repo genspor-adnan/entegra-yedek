@@ -42,6 +42,51 @@ public static class PrimUclari
     {
         var grup = yol.MapGroup("/api/prim").WithTags("Prim").RequireAuthorization();
 
+        // --------------------------------------------- serit suzgecleri ----
+        // GET /api/prim/hakedis-suzgec?bas=&bit=&rol=
+        //
+        // Hakedis satirlari seridindeki Prim Rolu / Kisi combolarini doldurur.
+        // Kullanici: "tum kisiler ve tum roller listesine O TARIHLER ARASINDA
+        // olanlar gelsin" - combo'da secilince BOS grid veren secenek
+        // bulunmasin. Bu yuzden seceneklerin kaynagi rol/aday tanimlari degil,
+        // ARALIKTAKI SATIRLARIN KENDISI.
+        //
+        // Kisi listesi rol verilirse ayrica daralir (rol combosu once secilir).
+        grup.MapGet("/hakedis-suzgec", async (
+            DateTime? bas, DateTime? bit, short? rol,
+            BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("prim", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            // TARIH YOKSA TUMU (kullanici): bos uc "sinir yok" demek - grid ile
+            //   ayni davranis. Bos aralikta combo TUM roller/kisiler ile dolar.
+            //   Cast'lar acik: tipsiz NULL'i PG bazi baglamlarda cikaramiyor.
+            var roller = await baglanti.ListeAsync("""
+                select v.rol as id, min(v.rol_adi) as ad, count(*) as adet
+                  from public.v_hakedis_satir v
+                 where (@p0::date is null or v.tarih >= @p0::date)
+                   and (@p1::date is null or v.tarih <= @p1::date)
+                 group by v.rol
+                 order by v.rol
+                """, null, [bas, bit], Satir, iptal);
+
+            var kisiler = await baglanti.ListeAsync("""
+                select v.taraf_id as id, min(v.kisi) as ad, count(*) as adet
+                  from public.v_hakedis_satir v
+                 where (@p0::date is null or v.tarih >= @p0::date)
+                   and (@p1::date is null or v.tarih <= @p1::date)
+                   and (@p2::smallint is null or v.rol = @p2::smallint)
+                 group by v.taraf_id
+                 order by min(v.kisi)
+                """, null, [bas, bit, rol], Satir, iptal);
+
+            return Results.Ok(new { roller, kisiler });
+        });
+
         // ------------------------------------------------- kalem rolleri ----
         // GET /api/prim/kalem/{belgeSatirId}/roller
         grup.MapGet("/kalem/{satirId:int}/roller", async (

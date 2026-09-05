@@ -269,6 +269,47 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   }, [rolSuzgeciVar]);
   // Liste degisince secimler sifirlanir: yeni kaynakta o alanlar yok.
   useEffect(() => { setPersonelBolum(null); setPersonelRol('') }, [tanim.kaynak]);
+
+  /**
+   * HAKEDIS SATIRLARI SERIT SUZGECLERI (kullanici: "tarihin sagina Prim Rolu
+   * combo ve onun da sagina Kisi filtre"). Kisi listesi SECILI ROLE gore
+   * daralir - "Raporlayan" secildiginde raporlamayan kisiyi listelemek,
+   * secilince bos grid vermekten baska ise yaramaz.
+   */
+  const [primRol, setPrimRol] = useState<number | ''>('');
+  const [primKisi, setPrimKisi] = useState<number | ''>('');
+  const [primRolleri, setPrimRolleri] = useState<{ id: number; ad: string; adet: number }[]>([]);
+  const [primKisiler, setPrimKisiler] = useState<{ id: number; ad: string; adet: number }[]>([]);
+  /** Griddeki tarih araligi (GenGrid bildirir) - secenekler buna gore uretilir. */
+  const [primAralik, setPrimAralik] = useState<{ bas: string; bit: string }>({ bas: '', bit: '' });
+  const primAraligiBildir = useCallback((bas: string, bit: string) => {
+    setPrimAralik(o => (o.bas === bas && o.bit === bit ? o : { bas, bit }));
+  }, []);
+  // Secenekler ARALIKTAKI SATIRLARDAN gelir (kullanici: "tum kisiler ve tum
+  //   roller listesine o tarihler arasinda olanlar gelsin") - rol/aday
+  //   tanimlarindan degil. Boylece combo'da secilince bos grid veren secenek
+  //   olmaz. Kisi listesi ayrica secili role gore daralir.
+  useEffect(() => {
+    if (!tanim.primSuzgeci) return;
+    void guvenli(async () => {
+      const y = await api.hakedisSuzgecSecenekleri(
+        primAralik.bas || undefined, primAralik.bit || undefined,
+        primRol === '' ? undefined : primRol);
+      setPrimRolleri(y.roller ?? []);
+      setPrimKisiler(y.kisiler ?? []);
+    });
+  }, [tanim.primSuzgeci, primAralik.bas, primAralik.bit, primRol]);
+  // Aralik/rol degisince secim listede kalmayabilir: filtre sessizce bos grid
+  //   verirdi - secimi birakmak yerine temizliyoruz.
+  useEffect(() => {
+    if (primKisi !== '' && primKisiler.length > 0 && !primKisiler.some(k => k.id === primKisi))
+      setPrimKisi('');
+  }, [primKisiler, primKisi]);
+  useEffect(() => {
+    if (primRol !== '' && primRolleri.length > 0 && !primRolleri.some(r => r.id === primRol))
+      setPrimRol('');
+  }, [primRolleri, primRol]);
+  useEffect(() => { setPrimRol(''); setPrimKisi('') }, [tanim.kaynak]);
   /** Takvimde fareyle secilen aralik (251): "＋ Yeni" bunu karta tasir. */
   /** Belge olusturmada sube: oturumun calisma subesi. */
   const oturumSubeId = Number(localStorage.getItem('gentegre.sube')) || undefined;
@@ -336,6 +377,17 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
          : kosullar.length === 1 ? kosullar[0]
          : { op: 'and', kosullar };
   }, [personelBolum, personelRol]);
+
+  /** Prim rolu / kisi secimi de sabit filtreye AND'lenir. */
+  const primliFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
+    const kosullar: Kosul[] = [];
+    if (temel) kosullar.push(temel);
+    if (primRol !== '') kosullar.push({ alan: 'rol', op: 'esit', deger: primRol });
+    if (primKisi !== '') kosullar.push({ alan: 'tarafId', op: 'esit', deger: primKisi });
+    return kosullar.length === 0 ? undefined
+         : kosullar.length === 1 ? kosullar[0]
+         : { op: 'and', kosullar };
+  }, [primRol, primKisi]);
 
   const randevuFiltresi = useMemo<Kosul | undefined>(() => {
     if (tanim.kaynak !== 'randevu') return sabitFiltre;
@@ -1235,7 +1287,9 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       yol={tanim.yol}
       toplam={tanim.toplam}
       cipler={tanim.cipler}
-      sabitFiltre={personelliFiltre(kategoriliFiltre(randevuFiltresi))}
+      sabitFiltre={primliFiltre(personelliFiltre(kategoriliFiltre(randevuFiltresi)))}
+      tarihVarsayilan={tanim.tarihVarsayilan}
+      onTarihAraligi={tanim.primSuzgeci ? primAraligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
       ebelgeMenusu={tanim.ebelgeMenusu}
       gizliKolonlar={tanim.gizliKolonlar}
@@ -1306,6 +1360,30 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
           {(bolumSuzgec !== '' || hekimSuzgec !== '') && (
             <button type="button" title="Bölüm/hekim filtresini kaldır"
                     onClick={() => { setBolumSuzgec(''); setHekimSuzgec('') }}>×</button>
+          )}
+        </>
+      ) : tanim.primSuzgeci ? (
+        // HAKEDIS SATIRLARI (kullanici): tarih araliginin SAGINDA once Prim
+        //   Rolu, onun saginda Kisi. Suzme sunucuda; kisi listesi secili role
+        //   gore daralir.
+        <>
+          <select className="kat-suzgec" value={primRol} title="Prim rolüne göre süz"
+                  onChange={e => setPrimRol(e.target.value ? Number(e.target.value) : '')}>
+            <option value="">Tüm prim rolleri</option>
+            {primRolleri.map(r => (
+              <option key={r.id} value={r.id}>{r.ad} ({r.adet})</option>
+            ))}
+          </select>
+          <select className="kat-suzgec" value={primKisi} title="Kişiye göre süz"
+                  onChange={e => setPrimKisi(e.target.value ? Number(e.target.value) : '')}>
+            <option value="">Tüm kişiler</option>
+            {primKisiler.map(k => (
+              <option key={k.id} value={k.id}>{k.ad} ({k.adet})</option>
+            ))}
+          </select>
+          {(primRol !== '' || primKisi !== '') && (
+            <button type="button" title="Prim rolü/kişi filtresini kaldır"
+                    onClick={() => { setPrimRol(''); setPrimKisi('') }}>×</button>
           )}
         </>
       ) : (tanim.bolumSuzgeci || rolSuzgeciVar) ? (

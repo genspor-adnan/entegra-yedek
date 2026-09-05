@@ -160,7 +160,7 @@ public static partial class KaynakKatalogu
             new("tarih",     "v.tarih",     "tarih", "Tarih", Genislik: 110),
             new("kisi",      "v.kisi",      "metin", "Kişi", Genislik: 200),
             new("tarafId",   "v.taraf_id",  "sayi",  "Kişi Id", Varsayilan: false),
-            new("rolAdi",    "v.rol_adi",   "metin", "Rol", Hizalama: "orta",
+            new("rolAdi",    "v.rol_adi",   "metin", "Prim Rolü", Hizalama: "orta",
                                            Bicim: "rozet", Genislik: 120,
                                            Filtrelenebilir: false),
             new("rol",       "v.rol",       "kod",   "Rol Kodu", Varsayilan: false),
@@ -213,6 +213,27 @@ public static partial class KaynakKatalogu
         });
 
     /// <summary>Hakediş başlıkları - kapatılmış dönemler.</summary>
+    /// <summary>
+    /// PRIM ROLU COMBOSU (391) - hakedis satirlari seridindeki suzgec.
+    ///
+    /// Roller sabit dokuz deger; tek dogruluk kaynagi `v_prim_rol_lookup`
+    /// (rol adinin yaninda o rolde ISARETLI kisi sayisi da gelir). Istemciye
+    /// kopyalanirsa iki liste zamanla birbirinden kayar.
+    /// </summary>
+    private static KaynakTanimi PrimRol() => new(
+        Ad: "prim-rol",
+        YetkiKodu: "prim",
+        Kaynak: "public.v_prim_rol_lookup l",
+        SubeKolonu: null,
+        VarsayilanSirala: "l.sira",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",    "l.id",    "sayi",  "Id"),
+            new("ad",    "l.ad",    "metin", "Prim Rolü"),
+            new("aktif", "l.aktif", "mantik","Aktif", Varsayilan: false),
+            new("sira",  "l.sira",  "sayi",  "Sıra",  Varsayilan: false),
+        });
+
     private static KaynakTanimi Hakedis() => new(
         Ad: "hakedis",
         YetkiKodu: "prim",

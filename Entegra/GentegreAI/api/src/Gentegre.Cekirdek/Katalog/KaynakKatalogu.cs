@@ -111,6 +111,7 @@ public static partial class KaynakKatalogu
         Ekle(PrimPlani());
         Ekle(PrimAday());
         Ekle(EntegrasyonHesap());
+        Ekle(PrimRol());
         Ekle(HakedisSatir());
         Ekle(Hakedis());
         Ekle(KurumIcmal());

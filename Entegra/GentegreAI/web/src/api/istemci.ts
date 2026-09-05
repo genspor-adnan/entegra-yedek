@@ -698,6 +698,23 @@ export const api = {
     gonder<{ dagitilan: number; avans: number; satirSayisi: number }>(
       `/api/kasa-islem/${kasaIslemId}/dagitim`, govde),
 
+  /**
+   * Hakedis satirlari seridindeki Prim Rolu / Kisi combo secenekleri.
+   * Secenekler ARALIKTAKI SATIRLARDAN uretilir (kullanici): combo'da
+   * secilince bos grid veren secenek gorunmesin. `rol` verilirse kisi
+   * listesi o rolde satiri olanlara daralir.
+   */
+  hakedisSuzgecSecenekleri: (bas?: string, bit?: string, rol?: number) => {
+    const p = new URLSearchParams();
+    if (bas) p.set('bas', bas);
+    if (bit) p.set('bit', bit);
+    if (rol !== undefined) p.set('rol', String(rol));
+    const q = p.toString();
+    return istek<{ roller: { id: number; ad: string; adet: number }[];
+                   kisiler: { id: number; ad: string; adet: number }[] }>(
+      `/api/prim/hakedis-suzgec${q ? `?${q}` : ''}`);
+  },
+
   /** Kalemin prim rolleri + o kalemden dogmus primler (324). */
   primKalemRolleri: (belgeSatirId: number) =>
     istek<{ satirlar: Record<string, unknown>[]; primler: Record<string, unknown>[] }>(

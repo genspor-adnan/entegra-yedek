@@ -49,7 +49,10 @@ interface Props {
       'arasinda' filtresi kurulur (ör. ekstrede 'islemTarihi'). */
   tarihAlani?: string;
   /** Acilista dolu gelen tarih araligi (ör. ekstre: 1 Ocak - bugun). */
-  tarihVarsayilan?: 'yilbasindanBugune';
+  tarihVarsayilan?: 'yilbasindanBugune' | 'buAy';
+  /** Tarih araligi degisince haber verir: serit suzgecleri (hakedis satirlari
+      Prim Rolu / Kisi) seceneklerini ARALIGA gore yeniler. */
+  onTarihAraligi?: (bas: string, bit: string) => void;
   /** Acilista secili gelecek satirin id'si (ör. ekstreden listeye donunce
       ayni hesap yine secili kalsin). */
   seciliBaslangicId?: number | null;
@@ -141,6 +144,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           aksiyonEkrani, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
                           dovizsizGizle,
                           gizliKolonlar, kolonSirasi, altSecenekler, tarihAlani, tarihVarsayilan,
+                          onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aksiyonKomboGizli, aramaGizli,
                           aracCubuguSeritte,
                           seciliBaslangicId, cipSonu, cipBaslangic, altPanel, ekGorunum,
@@ -210,13 +214,26 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       'yilbasindanBugune': 1 Ocak - bugun. Ust sinir SUNUCUDA gun sonuna kadar
       kapsanir (SorguUretici 'arasinda' + 1 gun), yani bugun 23:59'daki hareket
       de listeye girer. */
-  const [tarihBas, setTarihBas] = useState(
-    tarihVarsayilan === 'yilbasindanBugune' ? `${new Date().getFullYear()}-01-01` : '');
-  const [tarihBit, setTarihBit] = useState(() => {
-    if (tarihVarsayilan !== 'yilbasindanBugune') return '';
-    const t = new Date();  // YEREL gun (toISOString UTC'ye kayar, gece yarisi tuzagi)
-    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+  // YEREL gun (toISOString UTC'ye kayar, gece yarisi tuzagi).
+  const gunMetni = (t: Date) =>
+    `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+  const [tarihBas, setTarihBas] = useState(() => {
+    const t = new Date();
+    if (tarihVarsayilan === 'yilbasindanBugune') return `${t.getFullYear()}-01-01`;
+    // 'buAy' (kullanici, hakedis satirlari): bulunulan ayin 1'i.
+    if (tarihVarsayilan === 'buAy') return gunMetni(new Date(t.getFullYear(), t.getMonth(), 1));
+    return '';
   });
+  const [tarihBit, setTarihBit] = useState(() => {
+    const t = new Date();
+    if (tarihVarsayilan === 'yilbasindanBugune') return gunMetni(t);
+    // Ayin SONU: gelecek ayin 0. gunu = bu ayin son gunu (28/29/30/31 dert degil).
+    if (tarihVarsayilan === 'buAy') return gunMetni(new Date(t.getFullYear(), t.getMonth() + 1, 0));
+    return '';
+  });
+  // Acilistaki varsayilan da bildirilir - suzgec ilk yuklemede dogru araligi
+  //   gorsun (efekt ilk render'da da calisir).
+  useEffect(() => { onTarihAraligi?.(tarihBas, tarihBit) }, [tarihBas, tarihBit, onTarihAraligi]);
   // "Tum Liste / Son Aranan / Sik Aranan" (eski KULLANICI_ARAMA) - sunucuya `gorunum`
   //   olarak gider, kart acilis/ekleme sikligina gore filtreler+siralar.
   const [aramaGorunumu, setAramaGorunumu] = useState<'tum' | 'son' | 'sik'>('tum');
