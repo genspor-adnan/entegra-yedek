@@ -6513,3 +6513,39 @@ okunur — kod değişse satır kodda karşılığı olmayan bir işe dönüşü
 gösterdi; Şimdi Çalıştır 5 saniyede TİTCK'yi çekti (23.002 ürün) ve satır
 "Başarılı" + sonuç metniyle güncellendi.
 
+### Test projesi (`api/tests/Gentegre.Testler`)
+
+Faz 0'ın "otomatik uç testleri" maddesi. `api/tests` bugüne kadar boştu; 37
+test eklendi (dördü canlı veritabanına dokunuyor).
+
+**Saf kural testleri** (veritabanı gerekmez):
+- **Para matematiği** — satır tutarı önce yuvarlanır, iskontolar sonra ve
+  **çarpımsaldır** (%10 + %10 = %19, %20 değil); yuvarlama **banker's**
+  (0,005 → 0,00). Delphi ile aynı sonucu vermezse aynı fatura iki üründe bir
+  kuruş ayrışır.
+- **Zamanlama** — haftalık iş doğru güne düşüyor mu, aynı günün **geçmiş**
+  saatine iş konmuyor mu, Pazar ISO 7 mi, ayın günü 28'e kırpılıyor mu.
+  Hesap bu iş için `ZamanliIsIscisi`'nin içinden `Cekirdek/Zamanlama`'ya
+  taşındı: yanlış hesaplanan bir zamanlama ancak haftalar sonra fark edilirdi.
+- **Liste SQL'i** — sözleşmenin iki taahhüdü: istekten gelen metin SQL'e
+  **gömülmez** (parametre olur) ve bilinmeyen alan **sessizce geçilmez**.
+  İkincisi en sinsi hata olurdu: filtre uygulanmadan tüm satırlar döner, ekran
+  doğru görünürdü. Ayrıca şube sunucuda ekleniyor, boyut 500'e kırpılıyor,
+  sıralama beyaz listeden geçiyor (`order by; drop table` denendi).
+- **Katalog bütünlüğü** — her kaynağın yetki kodu, kimlik kolonu ve varsayılan
+  sıralaması var; kaynak/kolon/aksiyon adları tekil; Faz 0 kaynakları katalogda.
+  Kuralı doğruluyor, tek tek kaynağı değil — yeni kaynak kendiliğinden kapsanır.
+
+**Uçtan uca** (`BildirimKuyruguTestleri`): şablon değişkenleri doluyor mu, aynı
+satır iki kez alınıyor mu (`for update skip locked`), başarısız gönderim
+kuyrukta kalıp ileri atılıyor mu, pasif şablon kuyruğa giriyor mu. Bu kuralların
+hepsi SQL'de yaşıyor; C# okuyarak doğruluğu görülmez, ancak çalıştırarak.
+
+Veritabanı bağlantısı `GENTEGRE_TEST_DB`'den; yoksa yerel dev DB denenir,
+o da yoksa test **atlanır ve sebebi konsola yazılır** — veritabanı olmayan bir
+makinede kırmızı görmek gürültü, "sessizce yeşil" ise yanıltıcı olurdu.
+
+Bir bulgu: kimlik kolonu kuralı yazılırken `belge-acik-satir` kaynağının
+`id`'si olmadığı görüldü — kimliği `satirId`. Kural buna göre yazıldı
+(`id` · `kod` · `barkod` · `satirId`), kaynak değiştirilmedi.
+

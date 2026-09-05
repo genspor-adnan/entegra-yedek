@@ -203,15 +203,8 @@ public sealed class ZamanliIsIscisi : BackgroundService
             o => new Plan(o.GetInt16(0), o.GetInt16(1), o.GetInt16(2), o.GetInt16(3)), iptal);
         if (s is null) return;
 
-        var (periyot, gun, saat, dakika) = (s.Periyot, s.Gun, s.Saat, s.Dakika);
-        var simdi = DateTime.Now;
-        var hedef = periyot switch
-        {
-            1 => simdi.AddHours(1),                                  // saatlik
-            2 => Gunluk(simdi, saat, dakika),                        // günlük
-            4 => Aylik(simdi, Math.Clamp((int)gun, 1, 28), saat, dakika), // aylık
-            _ => Haftalik(simdi, Math.Clamp((int)gun, 1, 7), saat, dakika),
-        };
+        var hedef = Cekirdek.Zamanlama.ZamanlamaHesabi.Sonraki(
+            DateTime.Now, s.Periyot, s.Gun, s.Saat, s.Dakika);
 
         await veri.CalistirAsync("update public.zamanli_is set sonraki = @p1 where kod = @p0",
             new object?[] { kod, hedef }, iptal);
@@ -220,26 +213,8 @@ public sealed class ZamanliIsIscisi : BackgroundService
     /// <summary>Zamanlama alanlari - deger tipi (tuple) generic kisitina uymuyor.</summary>
     private sealed record Plan(short Periyot, short Gun, short Saat, short Dakika);
 
-    private static DateTime Gunluk(DateTime simdi, int saat, int dakika)
-    {
-        var h = simdi.Date.AddHours(saat).AddMinutes(dakika);
-        return h > simdi ? h : h.AddDays(1);
-    }
 
-    private static DateTime Haftalik(DateTime simdi, int gun, int saat, int dakika)
-    {
-        // 1 Pazartesi … 7 Pazar (ISO); DayOfWeek'te Pazar 0.
-        var bugun = (int)simdi.DayOfWeek == 0 ? 7 : (int)simdi.DayOfWeek;
-        var fark = (gun - bugun + 7) % 7;
-        var h = simdi.Date.AddDays(fark).AddHours(saat).AddMinutes(dakika);
-        return h > simdi ? h : h.AddDays(7);
-    }
 
-    private static DateTime Aylik(DateTime simdi, int gun, int saat, int dakika)
-    {
-        var h = new DateTime(simdi.Year, simdi.Month, gun, saat, dakika, 0);
-        return h > simdi ? h : h.AddMonths(1);
-    }
 
     private static string Kirp(string m, int n) => m.Length <= n ? m : m[..n];
 }
