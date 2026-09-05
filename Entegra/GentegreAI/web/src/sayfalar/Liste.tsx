@@ -45,6 +45,7 @@ import { kasaAksiyonu } from './liste/kasaAksiyonlari';
 import { bildirimAksiyonu } from './liste/bildirimAksiyonlari';
 import { zamanliIsAksiyonu } from './liste/zamanliIsAksiyonlari';
 import { ilacAksiyonu } from './liste/ilacAksiyonlari';
+import { muayeneAksiyonu } from './liste/muayeneAksiyonlari';
 import { fiyatListesiAksiyonu } from './liste/fiyatListesiAksiyonlari';
 import { ebelgeAksiyonu } from './liste/ebelgeAksiyonlari';
 import { Modal } from '../bilesenler/Modal';
@@ -674,6 +675,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       })) return;
 
       if (await zamanliIsAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+      })) return;
+
+      if (await muayeneAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
       })) return;
 

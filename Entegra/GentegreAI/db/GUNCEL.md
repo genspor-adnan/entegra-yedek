@@ -192,7 +192,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (82 ad, 36 tanesi birden cok dosyada)
+## Gorunumler (85 ad, 36 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -239,6 +239,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_hesap_plani_lookup` | `074_muhasebe.sql` | — |
 | `v_hizmet_lookup` | `071_kasa_master.sql` | — |
 | `v_iade_edilebilir_satir` | `133_iade_irsaliye.sql` | 132_iade_satirlari.sql |
+| `v_icd_lookup` | `409_muayene_v1.sql` | — |
 | `v_kampanya_lookup` | `268_kampanya.sql` | — |
 | `v_kasa_islem_dagitim` | `322_avans_mahsup.sql` | — |
 | `v_kategori_lookup` | `347_sonomed_rad_kategori.sql` | 250_kategori_lookup.sql, 270_kategori_agaci.sql |
@@ -249,6 +250,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_masraf_lookup` | `071_kasa_master.sql` | — |
 | `v_masraf_merkezi_lookup` | `071_kasa_master.sql` | — |
 | `v_mesaj_sohbet` | `342_mesajlasma.sql` | — |
+| `v_muayene_sablon_alan_lookup` | `409_muayene_v1.sql` | — |
+| `v_muayene_sablon_lookup` | `409_muayene_v1.sql` | — |
 | `v_numara_turu_alis` | `334_tahakkuk_tur_takas.sql` | 152_numara_sablonu.sql, 153_numara_turu_gorunum_tip.sql |
 | `v_numara_turu_kimlik` | `358_numara_sablonu_elle_girilir.sql` | — |
 | `v_numara_turu_odeme` | `153_numara_turu_gorunum_tip.sql` | 152_numara_sablonu.sql |

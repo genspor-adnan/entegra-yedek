@@ -226,6 +226,15 @@ export const api = {
     gonder<{ barkod: string; perakende: number; stokId: number | null; yururluk: string }>(
       `/api/katalog/ilac/${ilacId}/fiyat`, { perakende, kdv }),
 
+  /** Muayeneye Al (409): baslangic zamani - ikinci tikta ezilmez (sunucu). */
+  muayeneyeAl: (id: number) =>
+    gonder<{ id: number; baslangic: string; mesaj: string }>(`/api/muayene/${id}/al`, {}),
+
+  /** Muayeneyi tamamla: kayit kilitlenir, eksikse 400 ile reddedilir. */
+  muayeneTamamla: (id: number) =>
+    gonder<{ id: number; belgeId: number | null; uyari: string | null; mesaj: string }>(
+      `/api/muayene/${id}/tamamla`, {}),
+
   kolonlar: (kaynak: string) =>
     istek<{ kaynak: string; kolonlar: KolonMeta[] }>(`/api/liste/${kaynak}/kolonlar`),
 

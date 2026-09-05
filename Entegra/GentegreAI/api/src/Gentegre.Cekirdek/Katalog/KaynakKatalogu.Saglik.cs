@@ -38,23 +38,50 @@ public static partial class KaynakKatalogu
             new("bolumAdi",      "coalesce(d.ad, '')", "metin", "Bölüm", Genislik: 150),
             new("hekimAdi",      "coalesce(p.ad, '')", "metin", "Hekim", Genislik: 180),
             new("turAdi",
-                "case m.tur when 2 then 'Kontrol' when 3 then 'Konsültasyon' "
-                + "else 'İlk Muayene' end",
+                "case m.tur when 2 then 'Uzaktan' when 3 then 'Konsültasyon' "
+                + "when 4 then 'Kontrol' else 'Yüz Yüze' end",
                                                      "metin", "Tür", Hizalama: "orta",
                                                      Bicim: "rozet", Genislik: 120,
                                                      Filtrelenebilir: false),
             new("tur",           "m.tur",            "kod",   "Tür Kodu", Varsayilan: false),
-            new("tani",          "m.tani",           "metin", "Tanı", Genislik: 240),
-            new("taniKodlari",   "m.tani_kodlari",   "metin", "ICD", Genislik: 120,
-                                                     Varsayilan: false),
+            // TANI ARTIK SATIRDA (409): listede ANA tanı gösterilir - hekim
+            //   listeye "hangi hasta neyle geldi" diye bakar, tanı kümesine
+            //   değil. Ek tanılar kartın Tanı sekmesinde.
+            new("anaTani",
+                "coalesce((select i.ad from public.tani t "
+                + "join public.icd i on i.kod = t.icd_kod "
+                + "where t.muayene_id = m.id and t.tur = 1 limit 1), '')",
+                                                     "metin", "Ana Tanı", Genislik: 240),
+            new("anaTaniKodu",
+                "coalesce((select t.icd_kod from public.tani t "
+                + "where t.muayene_id = m.id and t.tur = 1 limit 1), '')",
+                                                     "metin", "ICD", Hizalama: "orta",
+                                                     Genislik: 100, Varsayilan: false),
+            new("taniSayisi",
+                "(select count(*) from public.tani t where t.muayene_id = m.id)",
+                                                     "sayi",  "Tanı", Hizalama: "orta",
+                                                     Genislik: 70, Varsayilan: false),
+            // Bekleyen istem: "sonuç bekliyor" durumunun görünür karşılığı.
+            new("bekleyenIstem",
+                "(select count(*) from public.muayene_istem s "
+                + "where s.muayene_id = m.id and s.sonuc_durum in (0, 1))",
+                                                     "sayi",  "Bekleyen İstem", Hizalama: "orta",
+                                                     Genislik: 120, Varsayilan: false),
             new("durumAdi",
-                "case m.durum when 2 then 'Tamamlandı' when 3 then 'İptal' else 'Açık' end",
+                "case m.durum when 0 then 'İptal' when 2 then 'Sonuç Bekliyor' "
+                + "when 3 then 'Tamamlandı' when 4 then 'Ek Not' else 'Açık' end",
                                                      "metin", "Durum", Hizalama: "orta",
-                                                     Bicim: "rozet", Genislik: 110,
+                                                     Bicim: "rozet", Genislik: 130,
                                                      Filtrelenebilir: false),
             new("durum",         "m.durum",          "kod",   "Durum Kodu", Varsayilan: false),
             new("tarafId",       "m.taraf_id",       "sayi",  "Hasta Id", Varsayilan: false),
-            new("belgeId",       "m.belge_id",       "sayi",  "Başvuru Id", Varsayilan: false)
+            new("belgeId",       "m.belge_id",       "sayi",  "Başvuru Id", Varsayilan: false),
+            new("baslangic",     "m.baslangic",      "tarih", "Muayeneye Alındı",
+                                                     Hizalama: "orta", Bicim: "HH:mm",
+                                                     Genislik: 110, Varsayilan: false),
+            new("tamamlanma",    "m.tamamlanma",     "tarih", "Tamamlandı", Hizalama: "orta",
+                                                     Bicim: "HH:mm", Genislik: 110,
+                                                     Varsayilan: false)
         });
 
     private static KaynakTanimi LabIstem() => new(

@@ -311,6 +311,25 @@ public static class AksiyonKatalogu
             //   "Yazdır" dugmesi acilir menusunde CSV Kaydet de var (GenGrid ekler).
             ["cikti-liste"] = [Yazdir()],
 
+            // MUAYENE (409, Faz 1): hekimin gunluk isi iki dugmeye baglidir.
+            //   "Muayeneye Al" baslangic zamanini yazar (USS Muayene
+            //   Baslangic) - hasta ne zaman iceri girdi sorusunun tek cevabi
+            //   budur; kartin acilma zamani degil. "Tamamla" kaydi KILITLER,
+            //   basvuruyu tahakkuka dondurur ve e-Nabiz kuyruguna atar; bu
+            //   yuzden eksik kayitta reddedilir (ana tani + sikayet + karar).
+            ["muayene-liste"] =
+            [
+                new("muayene.al", "▶ Muayeneye Al", "muayene",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 10),
+                new("muayene.tamamla", "✔ Tamamla", "muayene",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("kart.duzenle", "✎ Düzenle", "muayene", Kisayol: "F2",
+                    KaynakKodu: "muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30),
+                Yazdir(),
+            ],
+
             // ILAC KATALOGU (406/407): katalog senkronla dolar, AMA FIYAT
             //   DOLMAZ - TITCK Detayli Fiyat Listesi kurumsal portal hesabi
             //   istiyor. O kapi acilana kadar fiyati elle girmenin bir yolu

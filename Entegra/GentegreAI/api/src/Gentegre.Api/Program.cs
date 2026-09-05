@@ -189,6 +189,7 @@ uygulama.AyarUclariniEkle();
 uygulama.TercihUclariniEkle();
 uygulama.BildirimUclariniEkle();
 uygulama.KatalogUclariniEkle();
+uygulama.MuayeneUclariniEkle();
 uygulama.ZamanliIsUclariniEkle();
 uygulama.KurumProfilUclariniEkle();
 uygulama.PanelUclariniEkle();

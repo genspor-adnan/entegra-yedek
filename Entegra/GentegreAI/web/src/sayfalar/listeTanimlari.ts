@@ -335,17 +335,19 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   // RADYOLOJI grubu ana menude KAYIT KABUL ile CRM ARASINDA (kullanici):
   //   grup sirasi bu dizideki ILK gorulme sirasindan gelir.
   {
-    // MUAYENE (360): tip merkezindeki uzman hekim muayenesi - basvurudan
-    //   dogar, sikayet/oyku/bulgu/tani/tedavi tasir. Cipler gunun isini
-    //   bolumler: acik muayeneler once, tamamlananlar arkada.
+    // MUAYENE (409, Faz 1): tip merkezindeki uzman hekim muayenesi -
+    //   basvurudan dogar; anamnez, vital, sablonlu bulgu, ICD-10 tani ve
+    //   istemler kartin sekmelerinde. Cipler gunun isini bolumler: once
+    //   hekimin siradaki isi (acik), sonra sonuc bekleyenler.
     kaynak: 'muayene', rota: 'muayene', baslik: 'Muayeneler',
     yol: 'Muayene › Muayeneler',
     kartYolu: '/muayene', kartBaslik: 'Muayene',
-    aksiyonEkrani: 'cari-liste',
+    aksiyonEkrani: 'muayene-liste',
     tarihAlani: 'muayeneTarihi',
     cipler: [
-      { ad: 'Açık',        filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'Tamamlanan',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Açık',            filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Sonuç Bekleyen',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Tamamlanan',      filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
