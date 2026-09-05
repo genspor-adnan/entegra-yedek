@@ -114,7 +114,8 @@ public static class KartUclari
         // ------------------------------------------------------------ ekle ----
         grup.MapPost("/{kaynak}", async (
             string kaynak, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo, KullaniciAramaDeposu arama,
-            KullaniciDeposu kullanicilar, HttpContext ctx, CancellationToken iptal) =>
+            KullaniciDeposu kullanicilar, Servisler.RandevuHatirlatmasi hatirlatma,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -132,6 +133,16 @@ public static class KartUclari
             //   rolu "Rol Atanmamış"; kisi ilk giriste kendi parolasini belirler.
             if (tanim.Ad == "personel")
                 await kullanicilar.OtomatikHesapAcAsync((int)yeniId, iptal);
+
+            // RANDEVU HATIRLATMASI (399): kayit aninda kuyruga konur, isci
+            //   zamani gelince gonderir. HATIRLATMA KAYDI DUSURMEZ - telefon
+            //   yok / sablon pasif / SMS hesabi eksik olabilir; randevunun
+            //   kendisi bu yuzden kaydedilmemis sayilmamali.
+            if (tanim.Ad == "randevu")
+                try { await hatirlatma.TazeleAsync(yeniId, baglam.KullaniciId, iptal); }
+                catch (Exception h) { ctx.RequestServices
+                    .GetRequiredService<ILoggerFactory>().CreateLogger("Randevu")
+                    .LogError(h, "Randevu {Id}: hatirlatma kuyruga konamadi.", yeniId); }
 
             var (okunabilir, _) = Alanlar(tanim, baglam);
             var kart = await depo.OkuAsync(tanim, yeniId, okunabilir, null, iptal);
@@ -151,6 +162,7 @@ public static class KartUclari
         // -------------------------------------------------------- guncelle ----
         grup.MapPut("/{kaynak}/{id:long}", async (
             string kaynak, long id, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo,
+            Servisler.RandevuHatirlatmasi hatirlatma,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
@@ -166,6 +178,14 @@ public static class KartUclari
 
             await depo.GuncelleAsync(tanim, id, istek.Surum!, degerler, istek.Detaylar,
                 okunabilir, baglam.Yazma, iptal);
+
+            // Randevu saati / durumu degismis olabilir: eski hatirlatma iptal
+            //   edilip yenisi konur (RandevuHatirlatmasi.TazeleAsync).
+            if (tanim.Ad == "randevu")
+                try { await hatirlatma.TazeleAsync(id, baglam.KullaniciId, iptal); }
+                catch (Exception h) { ctx.RequestServices
+                    .GetRequiredService<ILoggerFactory>().CreateLogger("Randevu")
+                    .LogError(h, "Randevu {Id}: hatirlatma tazelenemedi.", id); }
 
             var kart = await depo.OkuAsync(tanim, id, okunabilir, baglam.Kapsam, iptal)
                        ?? throw GentegreHatasi.Bulunamadi();

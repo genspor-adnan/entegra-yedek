@@ -47,6 +47,9 @@ public sealed class AyarDeposu
         "randevu.baslangic_saat", "randevu.bitis_saat", "randevu.slot_dk",
         "randevu.varsayilan_sure", "randevu.calisma_gunleri",
         "randevu.ogle_baslangic", "randevu.ogle_bitis",
+        // RANDEVU HATIRLATMASI (399): acik mi ve randevudan KAC SAAT once.
+        //   Kapatilabilir olmasi sart - SMS ucretli, her kurum istemez.
+        "randevu.hatirlatma_acik", "randevu.hatirlatma_saat",
         // KAYIT KABUL (355): basvuruda POS tahsilati alininca ne olacak -
         //   0 aksiyon yok, 1 otomatik satis fisi kesilsin, 2 kullaniciya sorulsun.
         "basvuru.pos_aksiyon",

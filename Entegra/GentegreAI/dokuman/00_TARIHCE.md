@@ -6312,3 +6312,32 @@ destekli, iptal onay ister, toplu tekrar da sorar. Uç yalnız UYGUN DURUMDAKİ
 satırı değiştirdiği için sonuç sayıyla raporlanır — "0 satır etkilendi" sessiz
 kalırsa kullanıcı düğmeyi bozuk sanır.
 
+### Randevu hatırlatması akışa bağlandı (db/402)
+
+Randevu kaydedilince hatırlatma bildirimi **kayıt anında** kuyruğa konur
+(`planlanan = randevu saati − N saat`); gece tarayan ayrı bir zamanlayıcı
+yazılmadı çünkü kuyruk zaten `planlanan`'ı biliyor ve işçi zamanı gelmeden
+satırı almıyor. Böylece "hangi randevuya hatırlatma gitti / gidecek" sorusu
+tek tabloda cevaplanıyor.
+
+Kanca `KartUclari`'nda, personelin otomatik kullanıcı hesabıyla aynı yerde
+(`tanim.Ad == "randevu"`), hem eklemede hem güncellemede. **Her kayıtta
+tazelenir:** eski bekleyen hatırlatma iptal edilip yenisi konur — yoksa saat
+değişince hasta eski saat için mesaj alırdı. Randevu iptal/gelmedi durumuna
+geçerse yalnız iptal edilir.
+
+**Hatırlatma randevu kaydını düşürmez:** telefon yok, şablon pasif ya da SMS
+hesabı eksik olabilir; bunlar randevunun kaydedilmemesi için sebep değil —
+çağrı try/catch ile sarılı, sebep günlüğe yazılır. Telefon yoksa kuyruğa satır
+konmaz ama "neden gitmedi" günlükte durur.
+
+Kuyruğa konmama kuralları: ayar kapalı (`randevu.hatirlatma_acik = 0`),
+hatırlatma zamanı geçmiş, ya da randevuya 2 saatten az kalmış (o mesajın
+anlamı yok). Ayarlar `db/402` ile açıldı ve ayar beyaz listesine eklendi:
+`randevu.hatirlatma_acik` (SMS ücretli — kapatılabilmeli) ve
+`randevu.hatirlatma_saat` (varsayılan 24).
+
+**Denendi (uçtan uca):** randevu açıldı → kuyrukta 1 satır, doğru metin ve
+`baslangic − 24s` planı; saat 2 saat ileri alındı → eski satır **İptal**, yeni
+satır doğru saatle; randevu iptal edildi → bekleyen satır **İptal**.
+
