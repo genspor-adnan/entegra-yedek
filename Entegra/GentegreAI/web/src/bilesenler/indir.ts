@@ -31,3 +31,35 @@ export function dosyaIndir(icerik: BlobPart | Blob, ad: string, tip = 'applicati
 
 /** Dosya adinda kullanilamayan karakterleri temizler (Windows kisitlari). */
 export const dosyaAdiTemiz = (ad: string) => ad.replace(/[/\\:*?"<>|]/g, '').trim();
+
+/**
+ * DOKUMAN ADINDAN INDIRME DOSYA ADI.
+ *
+ * Kartta gorunen ad kullanicinin verdigi addir ve UZANTISI OLMAYABILIR
+ * ("PR-07 Numune Kabul Proseduru"). Uzantisiz inen dosyayi isletim sistemi
+ * hicbir programla acamiyor; bu yuzden ad uzantisizsa icerik tipinden
+ * tamamlanir.
+ *
+ * Dosya sisteminde gecersiz karakterler de temizlenir - Windows'ta ':' ya da
+ * '/' iceren ad indirmeyi sessizce basarisiz yapar.
+ */
+const TIP_UZANTI: Record<string, string> = {
+  'application/pdf': 'pdf', 'image/png': 'png', 'image/jpeg': 'jpg',
+  'image/gif': 'gif', 'image/webp': 'webp', 'text/plain': 'txt',
+  'text/csv': 'csv', 'application/xml': 'xml', 'text/xml': 'xml',
+  'application/xslt+xml': 'xslt', 'application/zip': 'zip',
+  'application/json': 'json',
+  'application/msword': 'doc',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+  'application/vnd.ms-excel': 'xls',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+};
+
+export function dokumanDosyaAdi(ad: string, contentType?: string | null): string {
+  const temiz = (ad || 'dokuman').replace(/[\/:*?"<>|]/g, '-').trim() || 'dokuman';
+  // Zaten uzantisi varsa dokunma: kullanicinin yazdigi ".pdf" ikinci kez
+  //   eklenmemeli ("rapor.pdf.pdf").
+  if (/\.[a-z0-9]{2,5}$/i.test(temiz)) return temiz;
+  const uzanti = TIP_UZANTI[(contentType ?? '').split(';')[0].trim().toLowerCase()];
+  return uzanti ? `${temiz}.${uzanti}` : temiz;
+}

@@ -1,6 +1,6 @@
 import { api } from '../../api/istemci';
 import { guvenli, mesaj, metinSor, onay, secimSor } from '../../bilesenler/mesaj';
-import { dosyaIndirUrl } from '../../bilesenler/indir';
+import { dokumanDosyaAdi, dosyaIndirUrl } from '../../bilesenler/indir';
 import type { ListeSatiri } from '../../api/sozlesme';
 
 /**
@@ -50,7 +50,9 @@ export async function dokumanAksiyonu(
     //   URL'e de sizmaz. Galeri de ayni yolu kullaniyor.
     await guvenli(async () => {
       const url = await api.dokumanIcerikUrl(dokumanId);
-      const ad = String(satir?.ad ?? 'dokuman');
+      // DOKUMAN ADIYLA iner (kullanici). Ad uzantisiz olabilir - icerik
+      //   tipinden tamamlanir, yoksa isletim sistemi dosyayi acamiyor.
+      const ad = dokumanDosyaAdi(String(satir?.ad ?? ''), String(satir?.contentType ?? ''));
       // Tarayicinin gosterebildigi tipler YENI SEKMEDE acilir (onizleme),
       //   otekiler indirilir: PDF icin indirme zorlamak gereksiz bir adim.
       const tip = String(satir?.contentType ?? '');

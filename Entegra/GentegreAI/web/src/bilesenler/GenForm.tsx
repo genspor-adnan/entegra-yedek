@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { c } from '../dil/ceviri';
 import { api, oturum } from '../api/istemci';
-import { dosyaIndirUrl } from './indir';
+import { dokumanDosyaAdi, dosyaIndirUrl } from './indir';
 import { useOturum } from '../kimlik/OturumBaglami';
 import {
   ApiHatasi, hataAyristir, urunAdi,
@@ -1048,7 +1048,10 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
 
               <button className="d" onClick={() => void guvenli(async () => {
                 const url = await api.dokumanIcerikUrl(Number(id));
-                dosyaIndirUrl(url, String(deger.ad ?? 'dokuman'), true);
+                // DOKUMAN ADIYLA iner; ad uzantisizsa icerik tipinden
+                //   tamamlanir (uzantisiz dosya acilamiyor).
+                dosyaIndirUrl(url, dokumanDosyaAdi(String(deger.ad ?? ''),
+                                                   String(deger.contentType ?? '')), true);
               })}>⬇ İndir</button>
 
               {/* ONAYA GONDERILEN SURUMDUR, dokuman degil: taslak surum yoksa

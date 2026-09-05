@@ -783,8 +783,10 @@ public static partial class KartKatalogu
             new("surumlu", "surumlu", "mantik", Baslik: "Sürüm Takibi", Grup: "İçerik"),
             new("contentType", "content_type", "metin", Yazilabilir: false,
                 EnFazlaUzunluk: 100, Baslik: "Dosya Türü", Grup: "İçerik"),
-            new("boyut", "boyut", "sayi", Yazilabilir: false, Baslik: "Boyut (bayt)",
-                Grup: "İçerik"),
+            // BOYUT KB (kullanici): bayt cinsinden 318.464 gibi bir sayi
+            //   dosyanin buyuklugunu anlatmiyor; KB okunabilir olan.
+            new("boyutKb", "((boyut + 1023) / 1024)", "sayi", Yazilabilir: false,
+                Baslik: "Boyut (KB)", Grup: "İçerik"),
             new("hash", "hash", "metin", Yazilabilir: false, EnFazlaUzunluk: 64,
                 Baslik: "İçerik Hash", Grup: "İçerik"),
             // Birincil bag: dosyanin NEREDEN yuklendigi. Degistirilemez -
@@ -832,7 +834,8 @@ public static partial class KartKatalogu
                     Baslik: "Yayın"),
                 new("arsivTarihi", "arsiv_tarihi", "tarih", Yazilabilir: false,
                     Baslik: "Arşiv"),
-                new("boyut", "boyut", "sayi", Yazilabilir: false, Baslik: "Boyut"),
+                new("boyutKb", "((boyut + 1023) / 1024)", "sayi", Yazilabilir: false,
+                    Baslik: "Boyut (KB)"),
             }, SubeKolonu: null, Sirala: "surum_no desc",
                Baslik: "Sürümler", SaltOkunur: true, LogTabloId: 976),
 
