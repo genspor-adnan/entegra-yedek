@@ -328,6 +328,78 @@ public static class KatalogUclari
                                     yururluk = gun.ToString("dd.MM.yyyy"),
                                     izlemeNo = baglam.IzlemeNo });
         });
+
+        // POST /api/katalog/ilac-fiyat-yukle - TOPLU FIYAT (kaynak 9)
+        //   Tek tek girmek 23 bin ilac icin bir yol degil. Sutunlar:
+        //     barkod ; perakende [; kdv]
+        //   Kaynak ne olursa olsun (depo fiyat listesi, ecza deposu ekstresi)
+        //   ayni yerden gecer; resmi TITCK listesi geldiginde onun satirlari
+        //   KAYNAK 1 ile ayri durur, bunlarin uzerine yazmaz.
+        grup.MapPost("/ilac-fiyat-yukle", async (
+            YuklemeIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("katalog", Islem.Degistir);
+
+            var gun = DateTime.Today;
+            var barkodlar = new List<string>();
+            var fiyatlar = new List<decimal>();
+            var kdvler = new List<decimal>();
+
+            foreach (var satir in Satirlar(istek))
+            {
+                var barkod = new string(Alan(satir, 0).Where(char.IsDigit).ToArray());
+                var fiyat = Gentegre.Cekirdek.Katalog.IlacListeCozumleme.Ondalik(Alan(satir, 1));
+                if (barkod.Length is < 8 or > 20 || fiyat <= 0) continue;
+                barkodlar.Add(barkod);
+                fiyatlar.Add(fiyat);
+                var kdv = Gentegre.Cekirdek.Katalog.IlacListeCozumleme.Ondalik(Alan(satir, 2));
+                kdvler.Add(kdv > 0 ? kdv : 10m);
+            }
+            if (barkodlar.Count == 0)
+                throw GentegreHatasi.Dogrulama("Yüklenecek satır bulunamadı.",
+                    [new("icerik", "Sütunlar: barkod ; fiyat ; kdv(ops).")]);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var yazilan = await baglanti.CalistirAsync("""
+                insert into public.ilac_fiyat (barkod, kaynak, yururluk_bas, perakende_fiyat,
+                                               kdv_oran, kaynak_surum, ekleyen)
+                select t.barkod, 9, @p3::date, t.fiyat, t.kdv, 'toplu', @p4
+                  from unnest(@p0::varchar[], @p1::numeric[], @p2::numeric[])
+                       as t(barkod, fiyat, kdv)
+                on conflict (barkod, kaynak, yururluk_bas) do update
+                   set perakende_fiyat = excluded.perakende_fiyat,
+                       kdv_oran = excluded.kdv_oran
+                """, null,
+                [barkodlar.ToArray(), fiyatlar.ToArray(), kdvler.ToArray(), gun,
+                 baglam.KullaniciId], iptal);
+
+            await baglanti.TekDegerAsync<int>(
+                "select public.fn_ilac_fiyat_golge_tazele()", null, [], iptal);
+
+            // Bagli stok kartlarinin satis fiyati da tazelenir: belge satiri
+            //   fiyati stok fiyat listesinden okunuyor.
+            var stokGuncellenen = await baglanti.CalistirAsync("""
+                insert into public.stok_fiyat (stok_id, fiyat_adi, birim, fiyat,
+                                               doviz_cinsi, satis, ekleyen)
+                select i.stok_id, 0, 51, t.fiyat, 'TL', 1, @p2
+                  from unnest(@p0::varchar[], @p1::numeric[]) as t(barkod, fiyat)
+                  join public.ilac i on i.barkod = t.barkod and i.stok_id is not null
+                on conflict (stok_id, fiyat_adi, birim, satis, doviz_cinsi)
+                do update set fiyat = excluded.fiyat, degistiren = excluded.ekleyen
+                """, null,
+                [barkodlar.ToArray(), fiyatlar.ToArray(), baglam.KullaniciId], iptal);
+
+            var eslesmeyen = await baglanti.TekDegerAsync<int>("""
+                select count(*) from unnest(@p0::varchar[]) b(barkod)
+                 where not exists (select 1 from public.ilac i where i.barkod = b.barkod)
+                """, null, [barkodlar.ToArray()], iptal);
+
+            return Results.Ok(new { okunan = barkodlar.Count, yazilan, stokGuncellenen,
+                                    eslesmeyen, izlemeNo = baglam.IzlemeNo });
+        });
     }
 
     /// <summary>Elle ilaç fiyatı: KDV dahil perakende satış fiyatı.</summary>
