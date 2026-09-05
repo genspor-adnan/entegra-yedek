@@ -486,10 +486,10 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",        "d.id",        "sayi",  "Id", Varsayilan: false),
+            new("klasorYolu","coalesce(k.yol, '')", "metin", "Klasör", Genislik: 180),
             new("kod",       "d.kod",       "metin", "Kod", Hizalama: "orta", Genislik: 110),
             new("ad",        "d.ad",        "metin", "Doküman", Genislik: 280),
             new("turAdi",    "coalesce(t.ad, d.belge_turu)", "metin", "Tür", Genislik: 150),
-            new("klasorYolu","coalesce(k.yol, '')", "metin", "Klasör", Genislik: 180),
             // SOL PANEL FILTRESI bu alandan gecer (419): kurumsal klasor
             //   `klasorId` ile, kaynak klasoru `kaynak` ile suzulur - ikisi
             //   ayri alan cunku kaynak klasoru SANALDIR.
