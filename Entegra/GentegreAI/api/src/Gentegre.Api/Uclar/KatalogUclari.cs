@@ -259,9 +259,9 @@ public static class KatalogUclari
                     insert into public.stok_fiyat (stok_id, fiyat_adi, birim, fiyat,
                                                    doviz_cinsi, satis, ekleyen)
                     select @p0, 0, 51, f.fiyat, 'TL', 1, @p1
-                      from (select coalesce(i.guncel_perakende, i.guncel_kamu, 0) as fiyat
+                      from (select public.fn_ilac_stok_fiyati(i.barkod) as fiyat
                               from public.ilac i where i.id = @p2) f
-                     where f.fiyat > 0
+                     where coalesce(f.fiyat, 0) > 0
                     on conflict (stok_id, fiyat_adi, birim, satis, doviz_cinsi) do nothing
                     """, islem, [stokId, baglam.KullaniciId, id], iptal);
             }
@@ -274,9 +274,9 @@ public static class KatalogUclari
                 insert into public.stok_fiyat (stok_id, fiyat_adi, birim, fiyat,
                                                doviz_cinsi, satis, ekleyen)
                 select @p0, 0, 51, f.fiyat, 'TL', 1, @p1
-                  from (select coalesce(i.guncel_perakende, i.guncel_kamu, 0) as fiyat
+                  from (select public.fn_ilac_stok_fiyati(i.barkod) as fiyat
                           from public.ilac i where i.id = @p2) f
-                 where f.fiyat > 0
+                 where coalesce(f.fiyat, 0) > 0
                    and not exists (select 1 from public.stok_fiyat sf
                                     where sf.stok_id = @p0 and sf.satis = 1 and sf.fiyat > 0)
                 on conflict (stok_id, fiyat_adi, birim, satis, doviz_cinsi)
@@ -340,10 +340,12 @@ public static class KatalogUclari
                 await baglanti.CalistirAsync("""
                     insert into public.stok_fiyat (stok_id, fiyat_adi, birim, fiyat,
                                                    doviz_cinsi, satis, ekleyen)
-                    values (@p0, 0, 51, @p1, 'TL', 1, @p2)
+                    -- Girilen tutar KDV DAHIL; stok karti MATRAH tutar (408).
+                    values (@p0, 0, 51, round(@p1 / (1 + @p3 / 100.0), 4), 'TL', 1, @p2)
                     on conflict (stok_id, fiyat_adi, birim, satis, doviz_cinsi)
                     do update set fiyat = excluded.fiyat, degistiren = excluded.ekleyen
-                    """, islem, [stokId, istek.Perakende, baglam.KullaniciId], iptal);
+                    """, islem, [stokId, istek.Perakende, baglam.KullaniciId,
+                                 istek.Kdv ?? 10m], iptal);
 
             await islem.CommitAsync(iptal);
             return Results.Ok(new { barkod, istek.Perakende, stokId,
@@ -406,9 +408,11 @@ public static class KatalogUclari
             var stokGuncellenen = await baglanti.CalistirAsync("""
                 insert into public.stok_fiyat (stok_id, fiyat_adi, birim, fiyat,
                                                doviz_cinsi, satis, ekleyen)
-                select i.stok_id, 0, 51, t.fiyat, 'TL', 1, @p2
+                -- Yuklenen tutar KDV DAHIL; stok karti MATRAH tutar (408).
+                select i.stok_id, 0, 51, public.fn_ilac_stok_fiyati(i.barkod), 'TL', 1, @p2
                   from unnest(@p0::varchar[], @p1::numeric[]) as t(barkod, fiyat)
                   join public.ilac i on i.barkod = t.barkod and i.stok_id is not null
+                 where public.fn_ilac_stok_fiyati(i.barkod) is not null
                 on conflict (stok_id, fiyat_adi, birim, satis, doviz_cinsi)
                 do update set fiyat = excluded.fiyat, degistiren = excluded.ekleyen
                 """, null,
