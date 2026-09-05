@@ -201,7 +201,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (91 ad, 37 tanesi birden cok dosyada)
+## Gorunumler (93 ad, 37 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -225,6 +225,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_depo_lookup` | `093_depo_kurallar.sql` | 088_belge_irsaliye_alanlari.sql |
 | `v_dis_hekim_lookup` | `309_dis_hekim_kurum_taraf_bag.sql` | 305_dis_hekim.sql, 308_dis_hekim_kurum_ad_kaldir.sql |
 | `v_dokuman_baglanti` | `423_dokuman_iliski.sql` | — |
+| `v_dokuman_erisim` | `425_dokuman_erisim.sql` | — |
 | `v_dokuman_klasor_lookup` | `421_dokuman_lookup.sql` | — |
 | `v_dokuman_onay_adim` | `422_dokuman_kart_gorunumleri.sql` | — |
 | `v_dokuman_paylasim` | `424_dokuman_paylasim.sql` | — |
@@ -290,6 +291,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_radyoloji_worklist` | `296_belge_basvuru.sql` | 283_radyoloji_cekirdek.sql |
 | `v_randevu_bolum_lookup` | `256_departman_durum.sql` | 251_departman.sql, 254_departman_kod.sql |
 | `v_randevu_tetkik_sure` | `317_randevu_tetkik_uyum.sql` | — |
+| `v_rol_lookup` | `425_dokuman_erisim.sql` | — |
 | `v_stok_kullanilabilir` | `142_siparis_rezervasyon.sql` | — |
 | `v_stok_lookup` | `121_firsat.sql` | — |
 | `v_sube_baz_lookup` | `227_baz_sube.sql` | — |

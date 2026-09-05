@@ -753,8 +753,18 @@ public static partial class KartKatalogu
                 Grup: "Kimlik"),
             new("gecerliBit", "gecerli_bit", "tarih", Baslik: "Geçerlilik Bitişi",
                 Grup: "Kimlik"),
-            new("gozdenGecirmeAy", "gozden_gecirme_ay", "sayi",
-                Baslik: "Gözden Geçirme (ay)", Grup: "Kimlik"),
+
+            // SAKLAMA / IMHA (mockup ust blok): kural tablosu Faz 2'de
+            //   (dokuman_saklama); simdilik GIZLILIK SINIFINDAN turetilen
+            //   bilgi metni. Alani hic gostermemek, KVKK acisindan en kritik
+            //   sorunun ("bu dosya ne kadar sure saklanacak") kartta hic
+            //   sorulmamasi olurdu.
+            new("saklamaBilgi",
+                "case gizlilik when 4 then 'Özel nitelikli · KVKK süresi (kural Faz 2)' "
+                + "when 3 then 'Gizli · kurum saklama politikası' "
+                + "when 1 then 'Herkese açık · süre sınırı yok' "
+                + "else 'Kurum içi · süresiz (kalite kaydı)' end",
+                "metin", Yazilabilir: false, Baslik: "Saklama / İmha", Grup: "Kimlik"),
             new("dil", "dil", "metin", EnFazlaUzunluk: 5, Baslik: "Dil", Grup: "Kimlik"),
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 400, Baslik: "Açıklama",
                 Grup: "Kimlik"),
@@ -783,6 +793,11 @@ public static partial class KartKatalogu
                 Baslik: "Bağlı Kaynak", Grup: "İçerik"),
             new("kaynakId", "kaynak_id", "sayi", Yazilabilir: false,
                 Baslik: "Kaynak Id", Grup: "İçerik"),
+            // GOZDEN GECIRME PERIYODU KARTTAN KALDIRILDI (kullanici).
+            //   Kolon (dokuman.gozden_gecirme_ay) ve turdeki varsayilan
+            //   DURUYOR: periyot belge turunden gelir, dokuman basina elle
+            //   girilmesi gerekmiyordu. Kolonu dusurmek, Faz 2'deki gozden
+            //   gecirme gorevini kaynaksiz birakirdi.
             new("sonGozdenGecirme", "son_gozden_gecirme", "tarih",
                 Baslik: "Son Gözden Geçirme", Grup: "İçerik"),
             new("sonrakiGozdenGecirme", "sonraki_gozden_gecirme", "tarih",
@@ -861,6 +876,34 @@ public static partial class KartKatalogu
                     EnFazlaUzunluk: 400, Baslik: "Not"),
             }, SubeKolonu: null, Sirala: "surum_no desc, sira asc",
                Baslik: "Onay Akışı", SaltOkunur: true, LogTabloId: 978),
+
+            // ERISIM (425): izin UC KATMANDAN gelir - klasor izni (devralinir),
+            //   dokumana ozel istisna ve SAHIP. Kaynak kolonu "bu izin nereden
+            //   geliyor" sorusunu cevaplar; tek tabloya sikistirmak o cevabi
+            //   yok ederdi.
+            //   GIZLILIK SINIFI burada YOK: izinden bagimsiz ust kisittir
+            //   (ozel nitelikli dokumanda izin olsa bile gerekce zorunlu) ve
+            //   dokumanin kendisinde durur.
+            new("erisimler", "public.v_dokuman_erisim", "dokuman_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("rolId", "rol_id", "kod", KodTablosu: "public.v_rol_lookup",
+                    Yazilabilir: false, Baslik: "Rol"),
+                new("kullaniciId", "kullanici_id", "kod",
+                    KodTablosu: "public.v_kullanici_lookup", Yazilabilir: false,
+                    Baslik: "Kullanıcı"),
+                new("oku", "oku", "mantik", Yazilabilir: false, Baslik: "Oku"),
+                new("indir", "indir", "mantik", Yazilabilir: false, Baslik: "İndir"),
+                new("duzenle", "duzenle", "mantik", Yazilabilir: false, Baslik: "Düzenle"),
+                new("paylas", "paylas", "mantik", Yazilabilir: false, Baslik: "Paylaş"),
+                new("sil", "sil", "mantik", Yazilabilir: false, Baslik: "Sil"),
+                new("onayla", "onayla", "mantik", Yazilabilir: false, Baslik: "Onayla"),
+                new("kaynak", "kaynak", "metin", Yazilabilir: false, EnFazlaUzunluk: 20,
+                    Baslik: "Kaynak"),
+                new("gecerliBit", "gecerli_bit", "tarih", Yazilabilir: false,
+                    Baslik: "Süreli İzin"),
+            }, SubeKolonu: null, Sirala: "kaynak asc, id asc",
+               Baslik: "Erişim", SaltOkunur: true, LogTabloId: 981),
 
             // PAYLASIM LINKLERI (424). SALT OKUNUR: link URETMEK kod uretimi
             //   ister (tahmin edilemez 128 bit) ve iptal bir DUGMEDIR -

@@ -2305,10 +2305,25 @@ input.skt-gecmis {
 .kaid .alan-izgara.kaid-dokuman .alan.tip-metin:last-of-type { grid-column: auto }
 /* GEÇERLİLİK TEK HÜCREDE: başlangıç — bitiş · gözden geçirme. Üç ayrı kutu
    üçte bir satır kaplayıp ilgisiz alanları birbirinden ayırıyordu. */
-.kaid .gecerlilik-hucre { grid-column: span 2 }
+.kaid .gecerlilik-hucre { grid-column: span 1 }
 .kaid .gecerlilik-kutu { display: flex; align-items: center; gap: 6px }
 .kaid .gecerlilik-kutu .alan { flex: 1; min-width: 0 }
 /* İç alanların kendi etiketleri gizli - dış etiket "Geçerlilik" yeterli;
    üç etiket üst üste gelince hücre iki kat yükseliyordu. */
 .kaid .gecerlilik-kutu .alan > .etiket { display: none }
 .kaid .gecerlilik-kutu .ayrac { color: var(--sonuk-yazi, #7a869a); font-size: 12px }
+/* Tek kolona sigmasi icin ic kutular dar: tarih alanlari zaten sabit
+   genislikte, gozden gecirme ayi iki hane. */
+.kaid .gecerlilik-kutu .alan input { min-width: 0; padding: 0 4px }
+
+/* Doküman kartındaki detay gridleri: EN DIŞ ÇERÇEVE YOK (kullanıcı).
+   Sekme içeriğini saran kutunun kenarlığı, grid'in kendi başlık şeridiyle
+   çift çizgi oluşturuyordu - sekme zaten bir çerçeve, ikincisi gürültü. */
+.kagrup.kutu-cercevesiz { border: 0; border-radius: 0; background: transparent }
+.kagrup.kutu-cercevesiz > .detay-tablo { width: 100%; margin: 0 }
+/* Kutu BASLIGI da gizli (kullanıcı): sekme adıyla birebir aynı metni ikinci
+   kez yazmak yalnız yer kaplıyordu - hangi sekmede olduğu zaten üstte. */
+.kagrup.kutu-cercevesiz > h6 { display: none }
+/* Grid kipinde başlık şeridi (seçim, ekle/sil, kolon menüsü) kutu başlığının
+   yerine geçer; onun üst kenarlığı da gereksiz. */
+.kagrup.kutu-cercevesiz > .detay-arac { border-top: 0; padding-top: 0 }

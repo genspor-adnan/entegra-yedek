@@ -445,7 +445,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
   );
 
   /** Dokuman seridinde TEK HUCREDE toplanan gecerlilik alanlari (mockup). */
-const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit', 'gozdenGecirmeAy'];
+const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
 
 /** Mockup'taki gibi sekmeli kart: Kimlik disindaki her alan grubu + her detay tablosu ayri sekme. */
   const sekmeler = useMemo<SekmeTanimi[]>(
@@ -757,6 +757,25 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit', 'gozdenGecirmeAy'];
               </span>
             );
           })()}
+          {/* DOKUMAN DURUM ROZETI UST BASLIKTA (kullanici): "Yayında v1"
+              kartin kimligidir - hangi sekmede olursan ol gorunmeli. Arac
+              cubugunda dururken Kaydet/Kapat dugmelerinin arasinda kayboluyordu.
+              HASH GOSTERILMEZ (kullanici): 64 haneli ozet kullaniciya bir sey
+              anlatmiyor; icerik kimligi gerektiginde Icerik sekmesinde. */}
+          {kaynak === 'dokuman' && !yeniMi && (
+            <span style={{ margin: '0 auto', display: 'flex', gap: 6,
+                           alignItems: 'center' }}>
+              <span className={`rozet ${Number(deger.durum) === 3 ? 'ok'
+                                : Number(deger.durum) === 2 ? 'mavi'
+                                : Number(deger.durum) === 4 ? 'gri' : 'uyari'}`}>
+                {meta?.alanlar.find(a => a.ad === 'durum')?.kodlar?.[String(deger.durum ?? '')]
+                 ?? 'Taslak'} v{String(deger.surumNo ?? 1)}
+              </span>
+              {Number(deger.onaydakiSurum) > 0 && (
+                <span className="rozet mavi">v{String(deger.onaydakiSurum)} onayda</span>
+              )}
+            </span>
+          )}
           {surum && <span className="rozet gri">surum {surum}</span>}
           {salt && <span className="rozet uyari">salt okunur</span>}
         </>
@@ -881,18 +900,23 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit', 'gozdenGecirmeAy'];
                gozden gecirme 12 ay" tek satir; uc ayri kutu ucte bir satir
                kaplayip ilgisiz alanlari birbirinden ayiriyordu. */
             <div className="alan-izgara kaid-dokuman">
-              {renderAlanListesi(kimlikAlanlari.filter(
-                a => !GECERLILIK_ALANLARI.includes(a.ad)))}
+              {/* GECERLILIK HUCRESI KENDI YERINDE kalir (mockup 3. satirin
+                  BASI): alanlari filtreleyip hucreyi sona eklemek, Gecerlilik'i
+                  Aciklama'nin arkasina atiyordu. Once ondan ONCEKI alanlar,
+                  sonra hucre, sonra kalanlar cizilir. */}
+              {renderAlanListesi(kimlikAlanlari.slice(
+                0, kimlikAlanlari.findIndex(a => GECERLILIK_ALANLARI.includes(a.ad))))}
               <label className="alan tip-metin gecerlilik-hucre">
                 <span className="etiket">Geçerlilik</span>
                 <span className="gecerlilik-kutu">
                   {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'gecerliBas'))}
                   <span className="ayrac">—</span>
                   {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'gecerliBit'))}
-                  <span className="ayrac">·</span>
-                  {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'gozdenGecirmeAy'))}
                 </span>
               </label>
+              {renderAlanListesi(kimlikAlanlari.slice(
+                kimlikAlanlari.findIndex(a => GECERLILIK_ALANLARI.includes(a.ad)))
+                .filter(a => !GECERLILIK_ALANLARI.includes(a.ad)))}
             </div>
           ) : (
             <div className={`alan-izgara${kaynak === 'kisi' ? ' kaid-kisi' : ''}`
@@ -1006,31 +1030,6 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit', 'gozdenGecirmeAy'];
                       onClick={() => alanDegistir('durum', '4')}>⊘ İptal</button>
             </>
           )}
-          {/* DOKUMAN KIMLIK SERIDI (mockup basligi): "v4 yayinda · v5 onay
-              bekliyor · hash 9c1f…". Yayindaki surum ile ONAYDAKI surum AYRI
-              rozetler - ikisi ayri sorunun cevabi ve karistirilirsa kullanici
-              yururlukte olmayan bir metni gecerli sanar. */}
-          {kaynak === 'dokuman' && !yeniMi && (
-            <span className="satir-ici" style={{ alignSelf: 'center', gap: 6 }}>
-              <span className={`rozet ${Number(deger.durum) === 3 ? 'ok'
-                                : Number(deger.durum) === 2 ? 'mavi'
-                                : Number(deger.durum) === 4 ? 'gri' : 'uyari'}`}>
-                {meta.alanlar.find(a => a.ad === 'durum')?.kodlar?.[String(deger.durum ?? '')]
-                 ?? 'Taslak'} v{String(deger.surumNo ?? 1)}
-              </span>
-              {Number(deger.onaydakiSurum) > 0 && (
-                <span className="rozet mavi">
-                  v{String(deger.onaydakiSurum)} onayda
-                </span>
-              )}
-              {String(deger.hash ?? '') !== '' && (
-                <span className="kapt" title={String(deger.hash)}>
-                  hash {String(deger.hash).slice(0, 8)}…
-                </span>
-              )}
-            </span>
-          )}
-
           {/* DOKUMAN KART ARAC CUBUGU (419, mockup dokuman_karti.html).
               Surum/onay dongusu KARTTAN yurumeli: kullanici dosyayi acip
               inceledikten sonra listeye donup aksiyon aramasin.
@@ -1273,11 +1272,21 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit', 'gozdenGecirmeAy'];
          */
         const gridKipi = (kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar')
           || kaynak === 'prim-plani'
+          // DOKUMAN (419, kullanici: "gridleri gengrid readonly yap"): tum
+          //   detaylari SALT GORUNUM + grid kipi. Surum, onay, baglanti,
+          //   paylasim ve gunluk zaten elle duzenlenmez - satir ici kutular
+          //   yanlis bir "burayi degistirebilirsin" izlenimi veriyordu.
+          //   Grid kipi ayrica kolon menusu ve CSV'yi getirir: liste
+          //   ekranlarindaki grid ile ayni davranis.
+          || kaynak === 'dokuman'
           || aktif.detay.alanlar.some(a => a.tip === 'kod' && a.aramaKaynagi);
         return (
         <GenDetayTablo
           meta={aktif.detay}
           durum={detaylar[aktif.detay.ad] ?? bosDetay()}
+          // DOKUMAN: en dis cerceve YOK (kullanici) - sekme zaten bir
+          //   cercevedir, grid'in kendi baslik seridiyle cift cizgi olusuyordu.
+          kutuSinif={kaynak === 'dokuman' ? 'kutu-cercevesiz' : undefined}
           saltOkunur={salt || aktif.detay.saltOkunur}
           hatalar={alanHatalari}
           onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
