@@ -373,6 +373,23 @@ GET /api/referans/{anahtar}   // tekil ayar
 
 Göç sırasında adlar otomatik üretildi (`liste_11110`, `ops_24121`); gerçek adlar kullanıldıkça verilecek — sözleşme değişmez, yalnız `kod` değerleri anlamlanır.
 
+### 6.2 Bildirim kuyruğu (399)
+
+Bildirim GÖNDERİLMEZ, kuyruğa konur; arka plan işçisi gönderir (sağlayıcı
+beklemesi kullanıcıyı bekletmesin).
+
+```http
+POST /api/bildirim              // { sablonKodu | kanal+govde, alici, degiskenler?, oncelik?, planlanan? }
+GET  /api/bildirim/{id}/log     // deneme günlüğü
+POST /api/bildirim/{id}/tekrar  // hatalı/vazgeçilmiş satırı yeniden kuyruğa al
+POST /api/bildirim/{id}/iptal
+```
+
+Şablon pasifse yanıt `{ "id": null, "kuyruga": false }` — hata değil, kurulum
+o bildirimi kapatmıştır. Yetki: `bildirim` (Ekle / Gör / Değiştir).
+
+---
+
 ### 6.1 Kullanıcı tercihleri (397)
 
 Kullanıcının kendi arayüz tercihleri — bugün menü favorileri. Yetki istemez;

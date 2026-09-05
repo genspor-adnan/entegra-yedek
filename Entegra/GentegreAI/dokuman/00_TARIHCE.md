@@ -6259,3 +6259,47 @@ istek 403 döner — sessiz bir "çalışmıyor" hali.
 bildirim, icd, ilac) + `KartKatalogu.Onam.cs` (onam metni ve bildirim şablonu
 kartları). Web'de **Yönetim › Ortak Platform** alt grubu altında altı menü
 öğesi; ICD ve ilaç `urunModu: 2` (yalnız HBYS). Altı uç de canlı denendi.
+
+### Bildirim gönderici servisi (Faz 0)
+
+Şema 399'la açılmıştı; gönderen taraf da yazıldı.
+
+**İşçi** (`BildirimIscisi`, `BackgroundService`): bildirimi DOĞURAN istek
+(randevu kaydı, panik değer) sağlayıcıyı beklemez — kuyruğa satır konur,
+kullanıcı işine devam eder. Kuyruk `for update skip locked` ile alınır: iki
+sunucu çalışsa da aynı SMS iki kez gitmez. Satır alınır alınmaz durumu 2
+(Gönderiliyor) olur; işçi çökerse orada donan satırları açılışta
+`AskidakileriKurtarAsync` kuyruğa geri alır — aksi hâlde o bildirim hiç gitmez
+ve kimse fark etmez. Tek turun hatası işçiyi düşürmez. Sonuç yazımı
+`CancellationToken.None` ile yapılır: uygulama kapanırken bile satırın akıbeti
+yazılmalı.
+
+**Tekrar deneme:** başarısızsa hak kaldıysa durum 1'e döner ve planlanan zaman
+`deneme × 5 dk` ileri atılır — sağlayıcı geçici düştüyse aynı saniyede üç kez
+denemek yalnız üç hata üretir. Hak bitince durum 6 (vazgeçildi), her denemenin
+sonucu `bildirim_log`'da.
+
+**Sağlayıcılar:** seçim hâlâ bir Faz 0 kapısı (sözleşme işi), bu yüzden kod
+sağlayıcıya değil `IBildirimGonderici`'ye bağlandı.
+- `SmtpGonderici` — sağlayıcıdan bağımsız, her kurum kendi SMTP hesabını verir.
+- `HttpSmsGonderici` — **şablonlu**: istek gövdesi `ayarlar.govde` içinde
+  `{{alici}} {{mesaj}} {{kullanici}} {{sifre}} {{baslik}}` yer tutucularıyla
+  yazılır (`tip`: json/form, `basarili`: yanıtta aranacak metin). Yeni SMS
+  sağlayıcısı bağlamak **kod değil ayar** işi; gerçekten farklı bir protokol
+  isteyen (SOAP/imzalı) için kendi sınıfı yazılır.
+- `KayitGonderici` — hesap yoksa. Varsayılan davranış **hata**: sessizce
+  "gönderildi" demek en kötüsüydü, randevu hatırlatması gitmediği hâlde sistem
+  gitmiş görünürdü. `Bildirim:KayitModu=true` ile geliştirmede gövde günlüğe
+  yazılır ve gönderilmiş sayılır.
+
+Sağlayıcı = mevcut `entegrasyon_hesap` (ÜTS/e-Belge/sigorta ile aynı tablo);
+kanal eşlemesi `ayarlar.bildirim_kanal` alanından.
+
+**Uçlar:** `POST /api/bildirim` (şablon kodu ya da doğrudan gövde ile kuyruğa),
+`GET /api/bildirim/{id}/log`, `POST /api/bildirim/{id}/tekrar`,
+`POST /api/bildirim/{id}/iptal`. Pasif şablona istek `id: null, kuyruga: false`
+döner — hata değil, kurulum o bildirimi kapatmıştır.
+
+**Denendi:** şablondan kuyruğa (değişkenler doğru dolduruldu), öncelikli
+panik satırı, kayıt modunda gönderim, sağlayıcısız hata yolu (durum kuyrukta,
+planlanan +5 dk ileri), tekrar/iptal uçları.

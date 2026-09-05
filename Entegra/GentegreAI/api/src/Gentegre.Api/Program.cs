@@ -34,6 +34,13 @@ kurucu.Services.AddScoped<ListeDeposu>();
 kurucu.Services.AddScoped<KartDeposu>();
 kurucu.Services.AddScoped<KullaniciAramaDeposu>();
 kurucu.Services.AddScoped<TercihDeposu>();
+// FAZ 0 - BILDIRIM (399): kuyruk deposu, saglayici fabrikasi ve arka plan iscisi.
+//   Iscinin kendisi SINGLETON, deposu her turda scope'tan alinir.
+kurucu.Services.AddScoped<BildirimDeposu>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.BildirimHesaplari>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.BildirimGondericiFabrikasi>();
+kurucu.Services.AddHttpClient("bildirim");
+kurucu.Services.AddHostedService<Gentegre.Api.Servisler.BildirimIscisi>();
 kurucu.Services.AddScoped<KisiDeposu>();
 kurucu.Services.AddScoped<StokDurumDeposu>();
 kurucu.Services.AddScoped<RandevuAyarDeposu>();
@@ -169,6 +176,7 @@ uygulama.MesajUclariniEkle();
 uygulama.AiUclariniEkle();
 uygulama.AyarUclariniEkle();
 uygulama.TercihUclariniEkle();
+uygulama.BildirimUclariniEkle();
 uygulama.KurumProfilUclariniEkle();
 uygulama.PanelUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
