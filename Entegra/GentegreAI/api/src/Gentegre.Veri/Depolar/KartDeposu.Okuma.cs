@@ -218,6 +218,8 @@ public sealed partial class KartDeposu
             //   ("Bilinmeyen kod tablosu" -> 500) - 358 ve 375'teki ayni tuzak.
             "public.v_icd_lookup",
             "public.v_muayene_sablon_lookup", "public.v_muayene_sablon_alan_lookup",
+            // Dokuman v1 (419): belge turu ve klasor secici.
+            "public.v_dokuman_turu_lookup", "public.v_dokuman_klasor_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

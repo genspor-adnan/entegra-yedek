@@ -49,6 +49,7 @@ import { muayeneAksiyonu } from './liste/muayeneAksiyonlari';
 import { hekimListesiAksiyonu } from './liste/hekimListesiAksiyonlari';
 import { enabizAksiyonu } from './liste/enabizAksiyonlari';
 import { dokumanAksiyonu } from './liste/dokumanAksiyonlari';
+import { DokumanKlasorPaneli, type KlasorSecimi } from '../bilesenler/DokumanKlasorPaneli';
 import { fiyatListesiAksiyonu } from './liste/fiyatListesiAksiyonlari';
 import { ebelgeAksiyonu } from './liste/ebelgeAksiyonlari';
 import { Modal } from '../bilesenler/Modal';
@@ -464,6 +465,23 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
          : { op: 'and', kosullar };
   }, [tanim.primSuzgeci, primRol, primKisi]);
 
+  /**
+   * DOKUMAN SOL PANELI (419): secilen klasor listeye SABIT FILTRE olarak gecer.
+   *
+   * Kurumsal klasor `klasorId` ile, KAYNAK klasoru `kaynak` ile suzulur -
+   * ikisi ayri alan cunku kaynak klasoru SANALDIR (tablo kaydi yok, dokumanin
+   * kaynak alanindan turer).
+   */
+  const [klasorSecim, setKlasorSecim] = useState<KlasorSecimi>({ tur: 'tum', ad: 'Tümü' });
+
+  const klasorluFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
+    if (tanim.kaynak !== 'dokuman' || klasorSecim.tur === 'tum') return temel;
+    const kosul: Kosul = klasorSecim.tur === 'klasor'
+      ? { alan: 'klasorId', op: 'esit', deger: klasorSecim.id ?? 0 }
+      : { alan: 'kaynak', op: 'esit', deger: klasorSecim.kod ?? '' };
+    return temel ? { op: 'and', kosullar: [temel, kosul] } : kosul;
+  }, [tanim.kaynak, klasorSecim]);
+
   /** Basvuru suzgecleri: tarih araligi + odeyen + bolum agaci + doktor. */
   const basvuruluFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
     // SUZGEC KAPALI EKRANDA HIC KOSUL EKLENMEZ: durumlar Liste bileseninde
@@ -683,6 +701,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
       if (await dokumanAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
       })) return;
 
       if (await enabizAksiyonu(kod, satir, {
@@ -1429,6 +1448,11 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         />
       )}
       <div className="kat-duzen-ic">
+    {/* DOKUMAN: solda klasor agaci (mockup dokuman_listesi.html). Kaynak
+        klasorleri sanal - dokumanin kaynak alanindan turer. */}
+    {tanim.kaynak === 'dokuman' && (
+      <DokumanKlasorPaneli secim={klasorSecim} onSecim={setKlasorSecim} yenile={yenile} />
+    )}
     <GenGrid
       // key: kaynak degisince (baska liste ekranina gecince) GenGrid TAMAMEN yeniden
       //   kurulsun - Route ayni tree konumunda kaldigi icin React bilesen orneğini
@@ -1441,8 +1465,8 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       yol={tanim.yol}
       toplam={tanim.toplam}
       cipler={tanim.cipler}
-      sabitFiltre={basvuruluFiltre(
-        primliFiltre(personelliFiltre(kategoriliFiltre(randevuFiltresi))))}
+      sabitFiltre={klasorluFiltre(basvuruluFiltre(
+        primliFiltre(personelliFiltre(kategoriliFiltre(randevuFiltresi)))))}
       tarihVarsayilan={tanim.tarihVarsayilan}
       onTarihAraligi={tanim.primSuzgeci ? primAraligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}

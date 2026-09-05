@@ -26,6 +26,34 @@ public static partial class KartKatalogu
         ["4"] = "Ek Not Eklendi", ["0"] = "İptal"
     };
 
+    /// <summary>Dokuman durumu (419).</summary>
+    private static readonly Dictionary<string, string> DokumanDurumKodlari = new()
+    {
+        ["1"] = "Taslak", ["2"] = "Onayda", ["3"] = "Yayında", ["4"] = "Arşiv",
+        ["5"] = "İmha Edildi", ["0"] = "Silindi"
+    };
+
+    private static readonly Dictionary<string, string> DokumanSurumDurumKodlari = new()
+    {
+        ["1"] = "Taslak", ["2"] = "Onayda", ["3"] = "Yayında", ["4"] = "Arşiv",
+        ["5"] = "Reddedildi"
+    };
+
+    /// <summary>KVKK erisim sinifi (419): izinden BAGIMSIZ ust kisit.</summary>
+    private static readonly Dictionary<string, string> DokumanGizlilikKodlari = new()
+    {
+        ["1"] = "Herkese Açık", ["2"] = "Kurum İçi", ["3"] = "Gizli",
+        ["4"] = "Özel Nitelikli (KVKK)"
+    };
+
+    private static readonly Dictionary<string, string> DokumanOlayKodlari = new()
+    {
+        ["1"] = "Yükleme", ["2"] = "Görüntüleme", ["3"] = "İndirme", ["4"] = "Düzenleme",
+        ["5"] = "Yeni Sürüm", ["6"] = "Onaya Gönderme", ["7"] = "Onay", ["8"] = "Ret",
+        ["9"] = "Yayın", ["10"] = "Arşiv", ["11"] = "Paylaşım", ["12"] = "Link Açılma",
+        ["13"] = "İmha", ["14"] = "Erişim Reddi"
+    };
+
     /// <summary>Kronik tani durumu (420).</summary>
     private static readonly Dictionary<string, string> KronikDurumKodlari = new()
     {
@@ -652,6 +680,113 @@ public static partial class KartKatalogu
                 Grup: "Olay"),
             new("kaynak", "kaynak", "kod", SabitKodlar: TibbiKaynakKodlari, Baslik: "Kaynak",
                 Grup: "Olay")
+        });
+
+    /// <summary>
+    /// DOKÜMAN KARTI (419) — meta düzenleme, sürümler, günlük.
+    ///
+    /// YENİ KAYIT BURADAN AÇILMAZ: doküman bir DOSYADIR, önce içerik yüklenir
+    /// (kart galerisi ya da doküman listesi "Yükle") ve kaynak+kaynak_id o
+    /// anda belirlenir. Boş bir doküman satırı açmak, içeriği olmayan bir
+    /// başlık bırakırdı.
+    ///
+    /// İçerik alanları (hash, boyut, sürüm no, durum) SALT OKUNUR: onları
+    /// değiştiren şey sürüm/onay döngüsüdür, elle yazmak başlığı gerçek
+    /// dosyadan koparırdı.
+    /// </summary>
+    private static KartTanimi DokumanKarti() => new(
+        Ad: "dokuman",
+        YetkiKodu: "dokuman",
+        Tablo: "public.dokuman",
+        LogTabloId: 975,
+        SubeKolonu: "sube_id",
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 200,
+                Baslik: "Doküman Adı", Grup: "Tanım"),
+            new("kod", "kod", "metin", EnFazlaUzunluk: 30, Baslik: "Kod", Grup: "Tanım"),
+            new("belgeTuruId", "belge_turu_id", "kod",
+                KodTablosu: "public.v_dokuman_turu_lookup", Baslik: "Belge Türü",
+                Grup: "Tanım"),
+            new("klasorId", "klasor_id", "kod", KodTablosu: "public.v_dokuman_klasor_lookup",
+                Baslik: "Klasör", Grup: "Tanım"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 400, Baslik: "Açıklama",
+                Grup: "Tanım"),
+            new("sahipId", "sahip_id", "kod", KodTablosu: "public.v_kullanici_lookup",
+                Baslik: "Sahip", Grup: "Tanım"),
+
+            // ---------------------------------------------------- erişim ----
+            // GIZLILIK sinifi izinden BAGIMSIZ ust kisittir: ozel nitelikli
+            //   dokumanda gerekce zorunlu, erisim gunluge yazilir.
+            new("gizlilik", "gizlilik", "kod", SabitKodlar: DokumanGizlilikKodlari,
+                Baslik: "Gizlilik Sınıfı", Grup: "Erişim"),
+            new("kaynak", "kaynak", "metin", Yazilabilir: false, EnFazlaUzunluk: 20,
+                Baslik: "Bağlı Kaynak", Grup: "Erişim"),
+            new("kaynakId", "kaynak_id", "sayi", Yazilabilir: false,
+                Baslik: "Kaynak Id", Grup: "Erişim"),
+
+            // ----------------------------------------------------- içerik ----
+            new("durum", "durum", "kod", SabitKodlar: DokumanDurumKodlari, Yazilabilir: false,
+                Baslik: "Durum", Grup: "İçerik"),
+            new("surumNo", "surum_no", "sayi", Yazilabilir: false, Baslik: "Yayındaki Sürüm",
+                Grup: "İçerik"),
+            new("surumlu", "surumlu", "mantik", Baslik: "Sürüm Takibi", Grup: "İçerik"),
+            new("contentType", "content_type", "metin", Yazilabilir: false,
+                EnFazlaUzunluk: 100, Baslik: "Dosya Türü", Grup: "İçerik"),
+            new("boyut", "boyut", "sayi", Yazilabilir: false, Baslik: "Boyut (bayt)",
+                Grup: "İçerik"),
+
+            // ------------------------------------------------ geçerlilik ----
+            new("gecerliBas", "gecerli_bas", "tarih", Baslik: "Geçerlilik Başlangıcı",
+                Grup: "Geçerlilik"),
+            new("gecerliBit", "gecerli_bit", "tarih", Baslik: "Geçerlilik Bitişi",
+                Grup: "Geçerlilik"),
+            new("gozdenGecirmeAy", "gozden_gecirme_ay", "sayi",
+                Baslik: "Gözden Geçirme (ay)", Grup: "Geçerlilik"),
+            new("sonGozdenGecirme", "son_gozden_gecirme", "tarih",
+                Baslik: "Son Gözden Geçirme", Grup: "Geçerlilik"),
+            new("sonrakiGozdenGecirme", "sonraki_gozden_gecirme", "tarih",
+                Baslik: "Sonraki Gözden Geçirme", Grup: "Geçerlilik"),
+            new("ozet", "ozet", "metin", EnFazlaUzunluk: 1000, Baslik: "Özet",
+                Grup: "Geçerlilik")
+        },
+        Detaylar: new DetayTanimi[]
+        {
+            // SURUMLER SALT OKUNUR: surum acmak ve yayinlamak bir DUGMENIN isi
+            //   (dokuman-yonetim uclari). Satiri elle "yayinda" yapmak, iki
+            //   yayin surumu dogurup "hangisi gecerli"yi cevapsiz birakirdi.
+            new("surumler", "public.dokuman_surum", "dokuman_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("surumNo", "surum_no", "sayi", Yazilabilir: false, Baslik: "Sürüm"),
+                new("durum", "durum", "kod", SabitKodlar: DokumanSurumDurumKodlari,
+                    Yazilabilir: false, Baslik: "Durum"),
+                new("degisiklikNotu", "degisiklik_notu", "metin", EnFazlaUzunluk: 400,
+                    Baslik: "Değişiklik Notu"),
+                new("yukleme", "yukleme", "tarih", Yazilabilir: false, Baslik: "Yükleme"),
+                new("yayinTarihi", "yayin_tarihi", "tarih", Yazilabilir: false,
+                    Baslik: "Yayın"),
+                new("arsivTarihi", "arsiv_tarihi", "tarih", Yazilabilir: false,
+                    Baslik: "Arşiv"),
+                new("boyut", "boyut", "sayi", Yazilabilir: false, Baslik: "Boyut"),
+            }, SubeKolonu: null, Sirala: "surum_no desc",
+               Baslik: "Sürümler", SaltOkunur: true, LogTabloId: 976),
+
+            // GUNLUK SILINMEZ (KVKK erisim kaydi) - bu yuzden salt okunur.
+            new("gunluk", "public.dokuman_olay", "dokuman_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("zaman", "zaman", "tarih", Yazilabilir: false, Baslik: "Zaman"),
+                new("olay", "olay", "kod", SabitKodlar: DokumanOlayKodlari,
+                    Yazilabilir: false, Baslik: "Olay"),
+                new("kullaniciId", "kullanici_id", "kod",
+                    KodTablosu: "public.v_kullanici_lookup", Yazilabilir: false,
+                    Baslik: "Kullanıcı"),
+                new("gerekce", "gerekce", "metin", Yazilabilir: false, EnFazlaUzunluk: 200,
+                    Baslik: "Gerekçe"),
+            }, SubeKolonu: null, Sirala: "zaman desc, id desc",
+               Baslik: "Günlük", SaltOkunur: true, LogTabloId: 977)
         });
 
     private static KartTanimi LabIstemKarti() => new(

@@ -490,6 +490,13 @@ public static partial class KaynakKatalogu
             new("ad",        "d.ad",        "metin", "Doküman", Genislik: 280),
             new("turAdi",    "coalesce(t.ad, d.belge_turu)", "metin", "Tür", Genislik: 150),
             new("klasorYolu","coalesce(k.yol, '')", "metin", "Klasör", Genislik: 180),
+            // SOL PANEL FILTRESI bu alandan gecer (419): kurumsal klasor
+            //   `klasorId` ile, kaynak klasoru `kaynak` ile suzulur - ikisi
+            //   ayri alan cunku kaynak klasoru SANALDIR.
+            new("klasorId",  "coalesce(d.klasor_id, 0)", "sayi", "Klasör Id",
+                                            Varsayilan: false),
+            new("etiketler", "array_to_string(d.etiketler, ', ')", "metin", "Etiketler",
+                                            Genislik: 160, Varsayilan: false),
             // KAYNAK: dokuman polimorfik - kart galerisinden gelen satirin
             //   nereye bagli oldugu listede gorunmeli.
             new("kaynak",    "d.kaynak",    "metin", "Kaynak", Hizalama: "orta",

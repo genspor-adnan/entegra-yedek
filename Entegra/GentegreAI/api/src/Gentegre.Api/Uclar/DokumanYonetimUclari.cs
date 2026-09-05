@@ -32,10 +32,115 @@ public static class DokumanYonetimUclari
     /// <summary>Onay adımı kararı: 1 uygun/onay · 2 düzelt/ret.</summary>
     public sealed record KararIstegi(int Karar, string? Not);
 
+    /// <summary>Taşıma / etiketleme: verilmeyen alan DEĞİŞMEZ.</summary>
+    public sealed record TasiIstegi(int? KlasorId, string[]? Etiketler, int? Gizlilik);
+
     public static void DokumanYonetimUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/dokuman-yonetim").WithTags("Doküman")
                       .RequireAuthorization();
+
+
+        // GET /api/dokuman-yonetim/klasorler - sol paneldeki ağaç + sayaçlar
+        //   İKİ TÜR KLASÖR: kullanıcının açtığı KURUMSAL klasörler (tablo) ve
+        //   KAYNAK klasörleri (taraf / stok / hasta …) - ikincisi SANALDIR,
+        //   kaynak+kaynak_id'den türer. Her yeni personel için klasör açmak
+        //   gerekmesin diye böyle.
+        grup.MapGet("/klasorler", async (
+            BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("dokuman", Islem.Gor);
+
+            var kurumsal = await veri.ListeAsync("""
+                select k.id, k.ad, k.yol, coalesce(k.ust_id, 0),
+                       (select count(*) from public.dokuman d
+                         where d.klasor_id = k.id and d.durum <> 0)
+                  from public.dokuman_klasor k
+                 where k.aktif = 1
+                 order by k.yol, k.sira
+                """, null,
+                o => new { tur = "klasor", id = o.GetInt32(0), ad = o.GetString(1),
+                           yol = o.GetString(2), ustId = o.GetInt32(3),
+                           sayi = o.GetInt64(4) }, iptal);
+
+            // Kaynak klasorleri: dokumanin kendi kaynak alanindan GRUPLANIR.
+            var kaynaklar = await veri.ListeAsync("""
+                select d.kaynak, count(*)
+                  from public.dokuman d
+                 where d.durum <> 0
+                 group by d.kaynak
+                 order by count(*) desc
+                """, null,
+                o => new { tur = "kaynak", kod = o.GetString(0), sayi = o.GetInt64(1) }, iptal);
+
+            var toplam = await veri.TekDegerAsync<long>(
+                "select count(*) from public.dokuman where durum <> 0", null, iptal);
+
+            return Results.Ok(new { toplam, kurumsal, kaynaklar, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // GET /api/dokuman-yonetim/depo - dedup tasarrufu ve depo kullanımı
+        //   Hash-dedup'ın değeri ancak ölçülünce görünür: aynı dosya on kartta
+        //   bir kez saklanıyor ve bu ekranda kaç MB kazandırdığı yazıyor.
+        grup.MapGet("/depo", async (
+            BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("dokuman", Islem.Gor);
+
+            var s = await veri.TekAsync("""
+                select coalesce(sum(i.boyut), 0) as fiziksel,
+                       coalesce((select sum(d.boyut) from public.dokuman d
+                                  where d.durum <> 0), 0) as mantiksal,
+                       count(*) as icerik_sayisi,
+                       coalesce((select count(*) from public.dokuman where durum <> 0), 0)
+                  from public.dokuman_icerik i
+                """, null,
+                o => new { Fiziksel = o.GetInt64(0), Mantiksal = o.GetInt64(1),
+                           IcerikSayisi = o.GetInt64(2), DokumanSayisi = o.GetInt64(3) }, iptal);
+
+            return Results.Ok(new
+            {
+                fizikselBayt = s!.Fiziksel, mantikselBayt = s.Mantiksal,
+                tasarrufBayt = Math.Max(0, s.Mantiksal - s.Fiziksel),
+                s.IcerikSayisi, s.DokumanSayisi, izlemeNo = baglam.IzlemeNo,
+            });
+        });
+
+        // POST /api/dokuman-yonetim/{id}/tasi - klasör / etiket / gizlilik değişimi
+        //   Kart üzerinden de yapılabilir; liste ekranında toplu iş için ayrı uç.
+        grup.MapPost("/{id:int}/tasi", async (
+            int id, TasiIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("dokuman", Islem.Degistir);
+
+            var etkilenen = await veri.CalistirAsync("""
+                update public.dokuman
+                   set klasor_id = coalesce(@p1, klasor_id),
+                       etiketler = case when @p2::varchar[] is null then etiketler
+                                        else @p2::varchar[] end,
+                       gizlilik = coalesce(@p3, gizlilik),
+                       degistiren = @p4, degistirme_tarihi = now()
+                 where id = @p0 and durum <> 0
+                """, [id, istek.KlasorId,
+                      istek.Etiketler is { Length: > 0 } ? istek.Etiketler : null,
+                      istek.Gizlilik is > 0 ? (short?)istek.Gizlilik : null,
+                      baglam.KullaniciId], iptal);
+
+            if (etkilenen == 0)
+                throw GentegreHatasi.IsKurali("Dokuman bulunamadi ya da silinmis.");
+
+            await veri.CalistirAsync("""
+                insert into public.dokuman_olay (dokuman_id, kullanici_id, olay, gerekce)
+                values (@p0, @p1, 4, 'Klasor / etiket / gizlilik degisikligi')
+                """, [id, baglam.KullaniciId], iptal);
+
+            return Results.Ok(new { id, mesaj = "Dokuman guncellendi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
 
         // POST /api/dokuman-yonetim/{id}/surum - yeni sürüm aç (taslak)
         grup.MapPost("/{id:int}/surum", async (

@@ -237,6 +237,25 @@ export const api = {
   muayeneOzetDerle: (muayeneId: number) =>
     gonder<{ bulguOzet: string }>(`/api/muayene/${muayeneId}/ozet-derle`, {}),
 
+  /** Sol paneldeki klasor agaci + sayaclar (419). Kaynak klasorleri SANAL:
+      dokumanin kaynak alanindan turer, tablo kaydi yoktur. */
+  dokumanKlasorleri: () =>
+    istek<{ toplam: number;
+            kurumsal: { tur: string; id: number; ad: string; yol: string;
+                        ustId: number; sayi: number }[];
+            kaynaklar: { tur: string; kod: string; sayi: number }[] }>(
+      '/api/dokuman-yonetim/klasorler'),
+
+  /** Depo kullanimi: hash-dedup'in kazandirdigi yer ancak olculunce gorunur. */
+  dokumanDepo: () =>
+    istek<{ fizikselBayt: number; mantikselBayt: number; tasarrufBayt: number;
+            icerikSayisi: number; dokumanSayisi: number }>('/api/dokuman-yonetim/depo'),
+
+  /** Klasor / etiket / gizlilik degisimi - verilmeyen alan DEGISMEZ. */
+  dokumanTasi: (id: number, istekGovdesi: { klasorId?: number; etiketler?: string[];
+                                            gizlilik?: number }) =>
+    gonder<{ mesaj: string }>(`/api/dokuman-yonetim/${id}/tasi`, istekGovdesi),
+
   /** Surumu onaya gonderir (419): akis adimlari SABLONDAN KOPYALANIR, akis
       sonradan degisirse suren onay etkilenmez. */
   dokumanOnayaGonder: (surumId: number) =>

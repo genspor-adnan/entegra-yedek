@@ -328,12 +328,33 @@ public static class AksiyonKatalogu
                 Yazdir(),
             ],
 
-            // DOKUMAN LISTESI (419): surum ve onay dongusunun giris noktasi.
+            // DOKUMAN LISTESI (419) - mockup dokuman_listesi.html dugmeleri.
+            //   YUKLE ve SABLONDAN URET burada YOK: ikisi de dosya secimi ve
+            //   kaynak belirlemesi ister, kart galerisinden yurur. Buraya
+            //   koymak, listede kaynagi olmayan bir dokuman acmak olurdu.
             ["dokuman-liste"] =
             [
-                new("dokuman.onaya-gonder", "📤 Onaya Gönder", "dokuman",
+                new("dokuman.ac", "📂 Aç / İndir", "dokuman",
                     Hedef: "araccubugu,sagtus,palet",
-                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true, Sira: 10),
+                    KaynakKodu: "dokuman", Islem: Islem.Gor, KayitGerekir: true, Sira: 10),
+                new("dokuman.surum", "🧾 Sürüm Geçmişi", "dokuman",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "dokuman", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                new("dokuman.onaya-gonder", "✔ Onaya Gönder", "dokuman",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30),
+                new("dokuman.tasi", "🗂 Taşı (klasör)", "dokuman",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40),
+                new("dokuman.etiket", "🏷 Etiket", "dokuman",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50),
+                new("dokuman.gizlilik", "🔒 Gizlilik Sınıfı", "dokuman",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true, Sira: 60),
+                new("dokuman.depo", "📊 Depo Kullanımı", "dokuman",
+                    Hedef: "araccubugu,palet",
+                    KaynakKodu: "dokuman", Islem: Islem.Gor, Sira: 70),
                 Yazdir(),
             ],
 

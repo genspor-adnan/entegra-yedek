@@ -335,51 +335,6 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   // RADYOLOJI grubu ana menude KAYIT KABUL ile CRM ARASINDA (kullanici):
   //   grup sirasi bu dizideki ILK gorulme sirasindan gelir.
   {
-    // DOKUMAN LISTESI (419) - KAYNAK USTU gorunum. Kart galerileri ayni
-    //   tabloyu gormeye devam eder; burasi klasor/tur/surum/durum ile kurum
-    //   genelinde bakilan liste.
-    kaynak: 'dokuman', rota: 'dokuman', baslik: 'Dokümanlar',
-    yol: 'Yonetim › Dokümanlar',
-    aksiyonEkrani: 'dokuman-liste',
-    tarihAlani: 'eklemeTarihi',
-    cipler: [
-      { ad: 'Yayında', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
-      { ad: 'Taslak',  filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'Onayda',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-      { ad: 'Arşiv',   filtre: { alan: 'durum', op: 'esit', deger: 4 } },
-      { ad: 'Tümü' },
-    ],
-    menuGrup: 'Yönetim', menuAltGrup: 'Doküman',
-    menuAd: 'Dokümanlar', ic: '📁', yetkiKodu: 'dokuman',
-  },
-  {
-    // DOKUMAN ONAY KUYRUGU (419) - satir = ADIM, dokuman degil: ayni dokuman
-    //   iki adimda iki farkli kisiyi bekliyor olabilir.
-    kaynak: 'dokuman-onay', rota: 'dokuman-onay', baslik: 'Doküman Onay Kuyruğu',
-    yol: 'Yonetim › Doküman Onayları',
-    aksiyonEkrani: 'dokuman-onay-liste',
-    tarihAlani: 'baslama',
-    menuGrup: 'Yönetim', menuAltGrup: 'Doküman',
-    menuAd: 'Onay Kuyruğu', ic: '✅', yetkiKodu: 'dokuman.onayla',
-  },
-  {
-    // DOKUMAN TURLERI (419) - surumlu mu, hangi akis, hangi gizlilik.
-    kaynak: 'dokuman-turu', rota: 'dokuman-turu', baslik: 'Doküman Türleri',
-    yol: 'Ayarlar › Doküman Türleri',
-    aksiyonEkrani: 'cikti-liste',
-    menuGrup: 'Yönetim', menuAltGrup: 'Doküman',
-    menuAd: 'Doküman Türleri', ic: '🏷️', yetkiKodu: 'dokuman',
-  },
-  {
-    // DOKUMAN KLASORLERI (419) - kurumsal agac; kaynak klasorleri SANAL
-    //   (kaynak+kaynak_id'den turer, klasor kaydi gerekmez).
-    kaynak: 'dokuman-klasor', rota: 'dokuman-klasor', baslik: 'Doküman Klasörleri',
-    yol: 'Ayarlar › Doküman Klasörleri',
-    aksiyonEkrani: 'cikti-liste',
-    menuGrup: 'Yönetim', menuAltGrup: 'Doküman',
-    menuAd: 'Klasörler', ic: '🗂️', yetkiKodu: 'dokuman',
-  },
-  {
     // e-NABIZ GONDERIM KUYRUGU (415) - uretilen paketler ve durumlari.
     //   "Eksik Alan" bir HATA DEGIL: paket uretildi ama zorunlu alani bos
     //   oldugu icin kuyruga girmedi; duzeltilince kaynaktan yeniden uretilir.
@@ -1610,6 +1565,58 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kartYolu: '/demirbas', aksiyonEkrani: 'demirbas-liste', cipler: DURUM_CIPLERI,
     yerTutucuSekmeler: ['Zimmet Geçmişi', 'Bakım / Servis', 'Amortisman'],
     menuAd: 'Demirbaş', ic: '🖥️', yetkiKodu: 'demirbas',
+  },
+  {
+    // DOKUMAN ANA MENUSU (419) - kullanici: "ana menulerde Demirbastan
+    //   sonraya tasi". Grup sirasi TANIM DIZISINDEKI ilk ogeden geldigi icin
+    //   konum burada belirlenir; asagi/yukari tasimak menuyu degistirir.
+    // DOKUMAN LISTESI - KAYNAK USTU gorunum. Kart galerileri ayni
+    //   tabloyu gormeye devam eder; burasi klasor/tur/surum/durum ile kurum
+    //   genelinde bakilan liste.
+    kaynak: 'dokuman', rota: 'dokuman', baslik: 'Dokümanlar',
+    yol: 'Doküman › Dokümanlar',
+    // Cift tiklama kartı acar (kullanici). Kart YENI KAYIT ACMAZ: dokuman bir
+    //   DOSYADIR, once icerik yuklenir ve kaynak o anda belirlenir.
+    kartYolu: '/dokuman', kartBaslik: 'Doküman',
+    aksiyonEkrani: 'dokuman-liste',
+    tarihAlani: 'eklemeTarihi',
+    cipler: [
+      { ad: 'Yayında', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Taslak',  filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Onayda',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Arşiv',   filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Tümü' },
+    ],
+    // ORTAK MOD (kullanici): urunModu VERILMEZ - dokuman yonetimi hem ERP
+    //   hem HBYS'de ayni; moda baglamak, ayni tabloyu bir urunde gorunmez
+    //   kilardi.
+    menuGrup: 'Doküman', menuAd: 'Dokümanlar', ic: '🗄️', yetkiKodu: 'dokuman',
+  },
+  {
+    // DOKUMAN ONAY KUYRUGU (419) - satir = ADIM, dokuman degil: ayni dokuman
+    //   iki adimda iki farkli kisiyi bekliyor olabilir.
+    kaynak: 'dokuman-onay', rota: 'dokuman-onay', baslik: 'Doküman Onay Kuyruğu',
+    yol: 'Doküman › Onay Kuyruğu',
+    aksiyonEkrani: 'dokuman-onay-liste',
+    tarihAlani: 'baslama',
+    menuGrup: 'Doküman', menuAd: 'Onay Kuyruğu', ic: '✅', yetkiKodu: 'dokuman.onayla',
+  },
+  {
+    // DOKUMAN TURLERI (419) - surumlu mu, hangi akis, hangi gizlilik.
+    kaynak: 'dokuman-turu', rota: 'dokuman-turu', baslik: 'Doküman Türleri',
+    yol: 'Doküman › Ayarlar › Türler',
+    aksiyonEkrani: 'cikti-liste',
+    menuGrup: 'Doküman', menuAltGrup: 'Ayarlar',
+    menuAd: 'Doküman Türleri', ic: '🏷️', yetkiKodu: 'dokuman',
+  },
+  {
+    // DOKUMAN KLASORLERI (419) - kurumsal agac; kaynak klasorleri SANAL
+    //   (kaynak+kaynak_id'den turer, klasor kaydi gerekmez).
+    kaynak: 'dokuman-klasor', rota: 'dokuman-klasor', baslik: 'Doküman Klasörleri',
+    yol: 'Doküman › Ayarlar › Klasörler',
+    aksiyonEkrani: 'cikti-liste',
+    menuGrup: 'Doküman', menuAltGrup: 'Ayarlar',
+    menuAd: 'Klasörler', ic: '🗂️', yetkiKodu: 'dokuman',
   },
   {
     // Kullanici: "e-Belge'yi de bir Yönetim altına".
