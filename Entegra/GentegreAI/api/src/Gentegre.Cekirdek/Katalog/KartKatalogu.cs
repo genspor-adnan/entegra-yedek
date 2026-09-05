@@ -198,6 +198,8 @@ public static partial class KartKatalogu
 
         // Numaralama (152): Genel Ayarlar > Numaralama ekranindaki dort grid.
         Ekle(MuayeneKarti());
+        Ekle(MuayeneSablonKarti());
+        Ekle(MetinMakroKarti());
         Ekle(LabIstemKarti());
         // FAZ 0 ortak platform (398-401): onam metni ve bildirim sablonu.
         Ekle(OnamMetniKarti());

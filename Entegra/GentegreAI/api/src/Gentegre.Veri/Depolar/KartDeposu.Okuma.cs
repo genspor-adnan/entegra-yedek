@@ -213,6 +213,11 @@ public sealed partial class KartDeposu
             "public.v_fiyat_listesi_lookup",
             // Yon bazli: cari kartinda satis alani alis listesini gostermemeli (204).
             "public.v_fiyat_listesi_satis_lookup", "public.v_fiyat_listesi_alis_lookup",
+            // Muayene v1 (409/411): ICD-10 tani secici, muayene sablonu ve
+            //   sablon alani. Beyaz listeye eklemeden kart HIC ACILMAZ
+            //   ("Bilinmeyen kod tablosu" -> 500) - 358 ve 375'teki ayni tuzak.
+            "public.v_icd_lookup",
+            "public.v_muayene_sablon_lookup", "public.v_muayene_sablon_alan_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

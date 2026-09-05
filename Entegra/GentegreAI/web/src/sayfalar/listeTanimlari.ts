@@ -335,6 +335,37 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   // RADYOLOJI grubu ana menude KAYIT KABUL ile CRM ARASINDA (kullanici):
   //   grup sirasi bu dizideki ILK gorulme sirasindan gelir.
   {
+    // MUAYENE SABLONLARI (411) - brans/kisisel fizik muayene sablonlari.
+    //   Alanlar kartin "Alanlar" detayinda; sablon uygulaninca her alan bir
+    //   bulgu satiri olarak acilir ve "normal" isaretlenir.
+    kaynak: 'muayene-sablon', rota: 'muayene-sablon', baslik: 'Muayene Şablonları',
+    yol: 'Ayarlar › Muayene Şablonları',
+    kartYolu: '/muayene-sablon', kartBaslik: 'Muayene Şablonu',
+    aksiyonEkrani: 'cari-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Yönetim', menuAltGrup: 'Muayene',
+    menuAd: 'Muayene Şablonları', ic: '📋', yetkiKodu: 'muayene',
+  },
+  {
+    // METIN MAKROLARI (411) - kisayoldan hazir metin. Sablon ALAN tanimlar,
+    //   makro METIN uretir: biri yapiyi, oteki hizi cozer.
+    kaynak: 'metin-makro', rota: 'metin-makro', baslik: 'Metin Makroları',
+    yol: 'Ayarlar › Metin Makroları',
+    kartYolu: '/metin-makro', kartBaslik: 'Metin Makrosu',
+    aksiyonEkrani: 'cari-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Yönetim', menuAltGrup: 'Muayene',
+    menuAd: 'Metin Makroları', ic: '⌨️', yetkiKodu: 'muayene',
+  },
+  {
     // HEKIM CALISMA LISTESI (410, Faz 1) - hekimin gun icindeki isi.
     //   Satir = BASVURU (belge tur 19), muayene henuz acilmamis olabilir;
     //   "Muayeneye Al" onu acar. Ayri bir liste tablosu YOK - kayit kabulun

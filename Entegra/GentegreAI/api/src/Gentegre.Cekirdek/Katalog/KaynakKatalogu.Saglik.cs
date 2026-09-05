@@ -187,6 +187,88 @@ public static partial class KaynakKatalogu
                                                     Varsayilan: false)
         });
 
+    /// <summary>
+    /// MUAYENE ŞABLONLARI (411) — branş/kişisel fizik muayene şablonları.
+    ///
+    /// Kapsam tek tabloda: hekim dolu = kişisel, boş + bölüm dolu = branş,
+    /// ikisi de boş = kurum. Kişisel şablonu ayrı tabloya koymak aynı şablon
+    /// motorunu iki kez yazdırırdı; kurum şablonu gibi tutmak ise bir hekimin
+    /// alıştığı düzeni herkese dayatırdı.
+    /// </summary>
+    private static KaynakTanimi MuayeneSablon() => new(
+        Ad: "muayene-sablon",
+        YetkiKodu: "muayene",
+        Kaynak: "public.muayene_sablon s "
+              + "  left join public.v_personel_lookup p on p.id = s.hekim_id "
+              + "  left join public.v_departman_lookup d on d.id = s.bolum_id",
+        VarsayilanSirala: "s.sira asc, s.ad asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",       "s.id",       "sayi",  "Id", Varsayilan: false),
+            new("kod",      "s.kod",      "metin", "Kod", Hizalama: "orta", Genislik: 110),
+            new("ad",       "s.ad",       "metin", "Şablon", Genislik: 240),
+            new("kapsamAdi",
+                "case when s.hekim_id is not null then coalesce(p.ad, 'Kişisel') "
+                + "when s.bolum_id is not null then coalesce(d.ad, 'Branş') "
+                + "else 'Kurum' end",
+                                          "metin", "Kapsam", Hizalama: "orta",
+                                          Bicim: "rozet", Genislik: 160,
+                                          Filtrelenebilir: false),
+            new("turAdi",
+                "case s.tur when 2 then 'Anamnez' when 3 then 'Sistem Sorgusu' "
+                + "else 'Fizik Muayene' end",
+                                          "metin", "Tür", Hizalama: "orta", Genislik: 130,
+                                          Filtrelenebilir: false),
+            new("tur",      "s.tur",      "kod",   "Tür Kodu", Varsayilan: false),
+            new("alanSayisi",
+                "(select count(*) from public.muayene_sablon_alan a where a.sablon_id = s.id)",
+                                          "sayi",  "Alan", Hizalama: "orta", Genislik: 70),
+            new("aciklama", "s.aciklama", "metin", "Açıklama", Genislik: 280,
+                                          Varsayilan: false),
+            new("sira",     "s.sira",     "sayi",  "Sıra", Hizalama: "orta", Genislik: 70,
+                                          Varsayilan: false),
+            new("durum",    "s.durum",    "mantik","Aktif", Hizalama: "orta", Genislik: 80),
+            new("hekimId",  "coalesce(s.hekim_id, 0)", "sayi", "Hekim Id", Varsayilan: false),
+            new("bolumId",  "coalesce(s.bolum_id, 0)", "sayi", "Bölüm Id", Varsayilan: false)
+        });
+
+    /// <summary>
+    /// METİN MAKROLARI (411) — kısayoldan hazır metin.
+    ///
+    /// Şablonun yerine geçmez: şablon ALAN tanımlar, makro METİN üretir -
+    /// biri yapıyı, öteki hızı çözer.
+    /// </summary>
+    private static KaynakTanimi MetinMakro() => new(
+        Ad: "metin-makro",
+        YetkiKodu: "muayene",
+        Kaynak: "public.metin_makro m "
+              + "  left join public.v_personel_lookup p on p.id = m.hekim_id "
+              + "  left join public.v_departman_lookup d on d.id = m.bolum_id",
+        // SUBE SUZMESI YOK: makro kurumun metin kutuphanesidir, hekim baska
+        //   subede calisirken de kisayollari gecerli olmali.
+        VarsayilanSirala: "m.kisayol asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",       "m.id",       "sayi",  "Id", Varsayilan: false),
+            new("kisayol",  "m.kisayol",  "metin", "Kısayol", Hizalama: "orta", Genislik: 100),
+            new("alan",     "m.alan",     "metin", "Alan", Hizalama: "orta", Genislik: 120),
+            new("metin",    "m.metin",    "metin", "Metin", Genislik: 420),
+            new("aciklama", "m.aciklama", "metin", "Açıklama", Genislik: 200,
+                                          Varsayilan: false),
+            new("kapsamAdi",
+                "case when m.hekim_id is not null then coalesce(p.ad, 'Kişisel') "
+                + "when m.bolum_id is not null then coalesce(d.ad, 'Branş') "
+                + "else 'Kurum' end",
+                                          "metin", "Kapsam", Hizalama: "orta",
+                                          Bicim: "rozet", Genislik: 160,
+                                          Filtrelenebilir: false),
+            // Kullanim sayaci: "kullanim sikligindan oner" bunu okur.
+            new("kullanim", "m.kullanim", "sayi",  "Kullanım", Hizalama: "sag", Genislik: 90),
+            new("durum",    "m.durum",    "mantik","Aktif", Hizalama: "orta", Genislik: 80),
+            new("hekimId",  "coalesce(m.hekim_id, 0)", "sayi", "Hekim Id", Varsayilan: false),
+            new("bolumId",  "coalesce(m.bolum_id, 0)", "sayi", "Bölüm Id", Varsayilan: false)
+        });
+
     private static KaynakTanimi LabIstem() => new(
         Ad: "lab-istem",
         YetkiKodu: "lab",

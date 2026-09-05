@@ -1,5 +1,5 @@
 import { api } from '../../api/istemci';
-import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
+import { guvenli, mesaj, onay, secimSor } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 
 /**
@@ -24,11 +24,47 @@ export async function muayeneAksiyonu(
   satir: ListeSatiri | null | undefined,
   b: MuayeneBaglam,
 ): Promise<boolean> {
-  if (kod !== 'muayene.al' && kod !== 'muayene.tamamla') return false;
+  if (kod !== 'muayene.al' && kod !== 'muayene.tamamla'
+      && kod !== 'muayene.sablon' && kod !== 'muayene.ozet') return false;
 
   const id = Number(satir?.id ?? 0);
   if (!id) { mesaj('Önce bir muayene seçin.'); return true }
   const hasta = String(satir?.hastaAdi ?? '');
+
+  // SABLON UYGULA: alanlar bulgu satiri olarak acilir ve hepsi "normal"
+  //   isaretlenir. Hekimin isi boylece "hepsini yaz" degil "sapani duzelt"
+  //   olur - poliklinikte fark buradadir. Var olan bulgular korunur, yani
+  //   sablonu ikinci kez uygulamak yazilmis bulguyu silmez.
+  if (kod === 'muayene.sablon') {
+    await guvenli(async () => {
+      const liste = await api.liste('muayene-sablon', { sayfa: 1, boyut: 50,
+        filtre: { alan: 'durum', op: 'esit', deger: 1 } });
+      if (liste.satirlar.length === 0) { mesaj('Tanımlı şablon yok.'); return }
+
+      const secim = await secimSor('Hangi şablon uygulansın?',
+        liste.satirlar.map(r => ({
+          kod: String(r.id),
+          ad: `${r.ad} · ${r.kapsamAdi} · ${r.alanSayisi} alan`,
+        })));
+      if (!secim) return;
+
+      const y = await api.muayeneSablonUygula(id, Number(secim));
+      mesaj(y.mesaj);
+      b.tazele();
+    });
+    return true;
+  }
+
+  if (kod === 'muayene.ozet') {
+    await guvenli(async () => {
+      const y = await api.muayeneOzetDerle(id);
+      mesaj(y.bulguOzet
+        ? `Muayene bulguları derlendi:\n\n${y.bulguOzet}`
+        : 'Derlenecek bulgu yok - önce şablon uygulayın.');
+      b.tazele();
+    });
+    return true;
+  }
 
   if (kod === 'muayene.al') {
     await guvenli(async () => {

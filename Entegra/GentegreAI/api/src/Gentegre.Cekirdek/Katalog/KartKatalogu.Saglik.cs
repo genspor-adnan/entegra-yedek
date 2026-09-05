@@ -26,6 +26,26 @@ public static partial class KartKatalogu
         ["4"] = "Ek Not Eklendi", ["0"] = "İptal"
     };
 
+    /// <summary>Sablon turu (411).</summary>
+    private static readonly Dictionary<string, string> SablonTuruKodlari = new()
+    {
+        ["1"] = "Fizik Muayene", ["2"] = "Anamnez", ["3"] = "Sistem Sorgusu"
+    };
+
+    /// <summary>Sablon alan tipi (409): tip ALAN basinadir, sablon basina degil.</summary>
+    private static readonly Dictionary<string, string> SablonAlanTipKodlari = new()
+    {
+        ["1"] = "Metin", ["2"] = "Sayı", ["3"] = "Seçenekli", ["4"] = "Evet / Hayır",
+        ["5"] = "Vücut Şeması"
+    };
+
+    /// <summary>Makronun gecerli oldugu alan (411); bos = her alan.</summary>
+    private static readonly Dictionary<string, string> MakroAlanKodlari = new()
+    {
+        [""] = "Tüm alanlar", ["sikayet"] = "Şikayet", ["hikaye"] = "Hikaye",
+        ["bulguOzet"] = "Muayene Bulguları", ["karar"] = "Değerlendirme / Plan"
+    };
+
     /// <summary>Tani turu (409): muayene basina TEK ana tani (db kisiti).</summary>
     private static readonly Dictionary<string, string> TaniTuruKodlari = new()
     {
@@ -280,6 +300,96 @@ public static partial class KartKatalogu
                 new("hekimGordu", "hekim_gordu", "tarih", Baslik: "Görüldü"),
             }, SubeKolonu: null, Sirala: "istem_zamani desc, id desc",
                Baslik: "İstem & Sonuçlar", LogTabloId: 965)
+        });
+
+    /// <summary>
+    /// MUAYENE ŞABLONU KARTI (411) — alanlar detayda.
+    ///
+    /// Alan tipleri (metin / sayı / seçenekli / mantık / vücut şeması) kartın
+    /// kendisinde değil ALAN SATIRINDA: bir şablonda farklı tipte alanlar
+    /// birlikte bulunur ve tipi şablona bağlamak her sisteme ayrı şablon
+    /// açtırırdı.
+    /// </summary>
+    private static KartTanimi MuayeneSablonKarti() => new(
+        Ad: "muayene-sablon",
+        YetkiKodu: "muayene",
+        Tablo: "public.muayene_sablon",
+        LogTabloId: 966,
+        SubeKolonu: "sube_id",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["tur"] = (short)1,
+            ["durum"] = (short)1,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("kod", "kod", "metin", Zorunlu: true, EnFazlaUzunluk: 30,
+                Baslik: "Kod", Grup: "Tanım"),
+            new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 120,
+                Baslik: "Şablon Adı", Grup: "Tanım"),
+            new("tur", "tur", "kod", SabitKodlar: SablonTuruKodlari,
+                Baslik: "Tür", Grup: "Tanım"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300,
+                Baslik: "Açıklama", Grup: "Tanım"),
+            new("sira", "sira", "sayi", Baslik: "Sıra", Grup: "Tanım"),
+            new("durum", "durum", "mantik", Baslik: "Aktif", Grup: "Tanım"),
+            // KAPSAM: hekim dolu = kisisel, bolum dolu = brans, ikisi bos =
+            //   kurum. Ucu de tek tabloda - ayni sablon motoru iki kez
+            //   yazilmasin.
+            new("hekimId", "hekim_id", "kod", KodTablosu: "public.v_personel_lookup",
+                Baslik: "Hekim (kişisel)", Grup: "Kapsam"),
+            new("bolumId", "bolum_id", "kod", KodTablosu: "public.v_departman_lookup",
+                Baslik: "Bölüm (branş)", Grup: "Kapsam")
+        },
+        Detaylar: new DetayTanimi[]
+        {
+            new("alanlar", "public.muayene_sablon_alan", "sablon_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("sira", "sira", "sayi", Baslik: "Sıra"),
+                new("grup", "grup", "metin", EnFazlaUzunluk: 60, Baslik: "Sistem / Grup"),
+                new("kod", "kod", "metin", Zorunlu: true, EnFazlaUzunluk: 30, Baslik: "Kod"),
+                new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 120, Baslik: "Alan"),
+                new("tip", "tip", "kod", SabitKodlar: SablonAlanTipKodlari, Baslik: "Tip"),
+                new("birim", "birim", "metin", EnFazlaUzunluk: 20, Baslik: "Birim"),
+                // "Normal" isaretlenince rapora yazilacak hazir cumle: hekim
+                //   her normal bulgu icin ayni metni yazmasin.
+                new("normalMetni", "normal_metni", "metin", EnFazlaUzunluk: 200,
+                    Baslik: "Normal Metni"),
+                new("tarafSorulur", "taraf_sorulur", "mantik", Baslik: "Taraf Sorulur"),
+                new("zorunlu", "zorunlu", "mantik", Baslik: "Zorunlu"),
+            }, SubeKolonu: null, Sirala: "sira asc, id asc",
+               Baslik: "Alanlar", LogTabloId: 967)
+        });
+
+    /// <summary>METİN MAKROSU KARTI (411) — kısayoldan hazır metin.</summary>
+    private static KartTanimi MetinMakroKarti() => new(
+        Ad: "metin-makro",
+        YetkiKodu: "muayene",
+        Tablo: "public.metin_makro",
+        LogTabloId: 968,
+        SubeKolonu: "sube_id",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["durum"] = (short)1 },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("kisayol", "kisayol", "metin", Zorunlu: true, EnFazlaUzunluk: 20,
+                Baslik: "Kısayol", Grup: "Tanım"),
+            // Alan bos ise HER alanda gecerli: ayni kisayol karar alaninda
+            //   baska, hikayede baska metin uretebilsin.
+            new("alan", "alan", "kod", SabitKodlar: MakroAlanKodlari,
+                Baslik: "Alan", Grup: "Tanım"),
+            new("metin", "metin", "metin", Zorunlu: true, Baslik: "Metin", Grup: "Tanım"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
+                Baslik: "Açıklama", Grup: "Tanım"),
+            new("durum", "durum", "mantik", Baslik: "Aktif", Grup: "Tanım"),
+            new("kullanim", "kullanim", "sayi", Yazilabilir: false,
+                Baslik: "Kullanım", Grup: "Tanım"),
+            new("hekimId", "hekim_id", "kod", KodTablosu: "public.v_personel_lookup",
+                Baslik: "Hekim (kişisel)", Grup: "Kapsam"),
+            new("bolumId", "bolum_id", "kod", KodTablosu: "public.v_departman_lookup",
+                Baslik: "Bölüm (branş)", Grup: "Kapsam")
         });
 
     private static KartTanimi LabIstemKarti() => new(

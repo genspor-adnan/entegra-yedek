@@ -226,6 +226,17 @@ export const api = {
     gonder<{ barkod: string; perakende: number; stokId: number | null; yururluk: string }>(
       `/api/katalog/ilac/${ilacId}/fiyat`, { perakende, kdv }),
 
+  /** Sablonu muayeneye uygula (411): alanlar bulgu satiri olarak acilir,
+      hepsi "normal" isaretlenir - hekimin isi "hepsini yaz" degil "sapani
+      duzelt" olsun. Var olan bulgular korunur. */
+  muayeneSablonUygula: (muayeneId: number, sablonId: number) =>
+    gonder<{ acilan: number; bulguOzet: string; mesaj: string }>(
+      `/api/muayene/${muayeneId}/sablon/${sablonId}`, {}),
+
+  /** Bulgulardan muayene ozetini yeniden derler (rapora/e-Nabiz'a giden metin). */
+  muayeneOzetDerle: (muayeneId: number) =>
+    gonder<{ bulguOzet: string }>(`/api/muayene/${muayeneId}/ozet-derle`, {}),
+
   /** Sirayi cagir (410): belge verilmezse hekimin SIRADAKI hastasi. */
   siraCagir: (istek: { belgeId?: number; hekimId?: number }) =>
     gonder<{ belgeId: number; siraNo?: string; hasta?: string; ekranAdi?: string;

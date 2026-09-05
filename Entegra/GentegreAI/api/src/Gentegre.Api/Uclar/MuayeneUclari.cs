@@ -115,6 +115,68 @@ public static class MuayeneUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
+        // POST /api/muayene/{id}/sablon/{sablonId} - şablonu muayeneye uygula
+        //   Şablon alanları bulgu satırı olarak AÇILIR ve hepsi "normal"
+        //   işaretlenir. Hekimin işi böylece "hepsini yaz" değil "sapanı
+        //   düzelt" olur - poliklinikte fark buradadır.
+        //   Var olan bulgular KORUNUR: şablon değiştirmek yazılmış bulguyu
+        //   silmemeli.
+        grup.MapPost("/{id:int}/sablon/{sablonId:int}", async (
+            int id, int sablonId, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var varMi = await baglanti.TekDegerAsync<int>(
+                "select count(*) from public.muayene where id = @p0", islem, [id], iptal);
+            if (varMi == 0) return Results.NotFound(new { hata = new
+                { kod = "BULUNAMADI", mesaj = "Muayene bulunamadi." } });
+
+            var acilan = await baglanti.CalistirAsync("""
+                insert into public.muayene_bulgu (muayene_id, sablon_alan_id, normal)
+                select @p0, a.id, 1
+                  from public.muayene_sablon_alan a
+                 where a.sablon_id = @p1
+                on conflict (muayene_id, sablon_alan_id) do nothing
+                """, islem, [id, sablonId], iptal);
+
+            await baglanti.CalistirAsync("""
+                update public.muayene
+                   set sablon_id = @p1, degistiren = @p2, degistirme_tarihi = now()
+                 where id = @p0
+                """, islem, [id, sablonId, baglam.KullaniciId], iptal);
+
+            var ozet = await OzetDerleAsync(baglanti, islem, id, iptal);
+            await islem.CommitAsync(iptal);
+
+            return Results.Ok(new { id, sablonId, acilan, bulguOzet = ozet,
+                                    mesaj = $"{acilan} alan sablondan acildi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/muayene/{id}/ozet-derle - bulgulardan metin üret
+        //   Rapora ve e-Nabız 103'e giden metin BUDUR. Hekim üzerine yazabilir;
+        //   derleme metni EZER çünkü çağıran zaten "bulgulardan yeniden üret"
+        //   demektedir.
+        grup.MapPost("/{id:int}/ozet-derle", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            var ozet = await OzetDerleAsync(baglanti, islem, id, iptal);
+            await islem.CommitAsync(iptal);
+
+            return Results.Ok(new { id, bulguOzet = ozet, izlemeNo = baglam.IzlemeNo });
+        });
+
         // POST /api/muayene/sira/cagir - "Sıradakini Çağır" / seçili hastayı çağır
         //   Sıra kuralı SQL'de (fn_siradaki_hasta): önce öncelik, sonra kayıt
         //   sırası. İstemcinin sırayı hesaplaması, iki hekimin aynı anda
@@ -240,6 +302,48 @@ public static class MuayeneUclari
                                     mesaj = $"Muayeneye alindi ({baslangic:HH:mm}).",
                                     izlemeNo = baglam.IzlemeNo });
         });
+    }
+
+
+    /// <summary>
+    /// Bulgulardan MUAYENE ÖZETİ metnini derler ve karta yazar.
+    ///
+    /// Kural: alan "normal" işaretliyse şablonun hazır cümlesi, değilse
+    /// hekimin yazdığı metin. Sistem başlığı (grup) satırın önüne düşer -
+    /// rapor okunurken hangi sistemin anlatıldığı belli olsun.
+    ///
+    /// Boş bırakılan ve normal işaretlenmemiş alan metne HİÇ GİRMEZ: "Batın:"
+    /// diye boş bir satır, muayene edilmediğini değil özensizliği gösterirdi.
+    /// </summary>
+    private static async Task<string> OzetDerleAsync(Npgsql.NpgsqlConnection baglanti,
+        Npgsql.NpgsqlTransaction islem, int muayeneId, CancellationToken iptal)
+    {
+        var satirlar = await baglanti.ListeAsync("""
+            select coalesce(nullif(a.grup, ''), a.ad) as baslik,
+                   case when b.normal = 1 and a.normal_metni <> '' then a.normal_metni
+                        else coalesce(nullif(btrim(b.deger_metin), ''),
+                                      case when b.deger_sayi is null then ''
+                                           else b.deger_sayi::text || ' ' || a.birim end) end,
+                   case b.taraf when 1 then 'Sag' when 2 then 'Sol'
+                                when 3 then 'Bilateral' else '' end
+              from public.muayene_bulgu b
+              join public.muayene_sablon_alan a on a.id = b.sablon_alan_id
+             where b.muayene_id = @p0
+             order by a.sira asc, a.id asc
+            """, islem, [muayeneId],
+            o => (Baslik: o.GetString(0), Deger: o.GetString(1), Taraf: o.GetString(2)),
+            iptal);
+
+        var metin = string.Join("\n", satirlar
+            .Where(x => x.Deger.Trim().Length > 0)
+            .Select(x => x.Taraf.Length > 0
+                ? $"{x.Baslik} ({x.Taraf}): {x.Deger}"
+                : $"{x.Baslik}: {x.Deger}"));
+
+        await baglanti.CalistirAsync(
+            "update public.muayene set bulgu_ozet = @p1 where id = @p0",
+            islem, [muayeneId, metin], iptal);
+        return metin;
     }
 
     /// <summary>İstek gövdesi: belge verilmezse hekimin SIRADAKİ hastası çağrılır.</summary>
