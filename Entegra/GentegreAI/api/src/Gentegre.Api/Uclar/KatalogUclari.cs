@@ -82,7 +82,8 @@ public static class KatalogUclari
                            ust_kod = coalesce(excluded.ust_kod, public.icd.ust_kod),
                            cinsiyet = excluded.cinsiyet,
                            aktif = 1, kaynak_surum = 'dosya', guncelleme = now()
-                    """, null, [kod, ad, Alan(s, 2), Alan(s, 3)], iptal);
+                    """, null,
+                    [kod, Kirp(ad, 300), Kirp(Alan(s, 2), 12), Alan(s, 3)], iptal);
                 yazilan++;
             }
 
@@ -94,7 +95,9 @@ public static class KatalogUclari
 
         // POST /api/katalog/ilac-yukle
         //   Sütunlar: barkod ; ad ; etken_madde(ops) ; atc(ops) ; firma(ops) ;
-        //             recete_turu(ops 0-4) ; ambalaj(ops)
+        //             recete_turu(ops 0-4) ; ambalaj(ops) ; aktif(ops 0/1)
+        //   AKTİF sütunu ruhsatı ASKIDA ürünler için: katalogdan silmek yanlış
+        //   olur (stokta kalmış olabilir, geçmiş reçetede geçer), pasif işaretlenir.
         grup.MapPost("/ilac-yukle", async (
             YuklemeIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
@@ -117,7 +120,8 @@ public static class KatalogUclari
                     insert into public.ilac (barkod, ad, etken_madde, atc_kod, firma,
                                              recete_turu, ambalaj, aktif, kaynak_surum, guncelleme)
                     values (@p0, @p1, @p2, @p3, @p4,
-                            coalesce(nullif(@p5, '')::smallint, 0), @p6, 1, 'dosya', now())
+                            coalesce(nullif(@p5, '')::smallint, 0), @p6,
+                            coalesce(nullif(@p7, '')::smallint, 1), 'dosya', now())
                     on conflict (barkod) do update
                        set ad = excluded.ad,
                            etken_madde = excluded.etken_madde,
@@ -125,9 +129,14 @@ public static class KatalogUclari
                            firma = excluded.firma,
                            recete_turu = excluded.recete_turu,
                            ambalaj = excluded.ambalaj,
-                           aktif = 1, kaynak_surum = 'dosya', guncelleme = now()
+                           aktif = excluded.aktif, kaynak_surum = 'dosya', guncelleme = now()
                     """, null,
-                    [barkod, ad, Alan(s, 2), Alan(s, 3), Alan(s, 4), Alan(s, 5), Alan(s, 6)],
+                    // DOSYADAN GELEN DEGER KOLONU TASABILIR (TITCK listesinde
+                    //   etken madde kombinasyonlari ve firma unvanlari uzun):
+                    //   23 bin satirin biri yuzunden yukleme durmamali, deger
+                    //   kolon sinirina KIRPILIR.
+                    [barkod, Kirp(ad, 300), Kirp(Alan(s, 2), 300), Kirp(Alan(s, 3), 20),
+                     Kirp(Alan(s, 4), 200), Alan(s, 5), Kirp(Alan(s, 6), 60), Alan(s, 7)],
                     iptal);
                 yazilan++;
             }
@@ -166,14 +175,26 @@ public static class KatalogUclari
         }
     }
 
+    /// <summary>Kolon sinirina kirpar (dosya kaynagi kolon boyunu bilmez).</summary>
+    private static string Kirp(string metin, int en)
+        => string.IsNullOrEmpty(metin) || metin.Length <= en ? metin : metin[..en];
+
     private static string Alan(string[] satir, int sira)
         => sira < satir.Length ? satir[sira].Trim().Trim('"') : "";
 
+    /// <summary>
+    /// Katalog izleme satırını tazeler.
+    ///
+    /// `satir_sayisi` TABLODAN SAYILIR, "bu istekte yazılan" değil: büyük
+    /// listeler parça parça yükleniyor (23 bin ilaç = 6 istek) ve son parçanın
+    /// sayısını yazmak "3.053 ilaç" gibi yanıltıcı bir rakam bırakıyordu.
+    /// </summary>
     private static Task SenkronYazAsync(Npgsql.NpgsqlConnection baglanti, string kod, string ad,
                                         int satir, string sonuc, CancellationToken iptal)
-        => baglanti.CalistirAsync("""
+        => baglanti.CalistirAsync($"""
             insert into public.katalog_senkron (kod, ad, son_calisma, satir_sayisi, sonuc, basarili)
-            values (@p0, @p1, now(), @p2, @p3, 1)
+            values (@p0, @p1, now(),
+                    (select count(*) from public.{(kod == "icd" ? "icd" : "ilac")}), @p3, 1)
             on conflict (kod) do update
                set son_calisma = now(), satir_sayisi = excluded.satir_sayisi,
                    sonuc = excluded.sonuc, basarili = 1

@@ -6436,3 +6436,25 @@ Upsert'te `seviye` de tazeleniyor: kod önce dosyadan (üstsüz) yüklenmiş
 olabilir, SKRS üst kodu getirince satır ağaçta doğru yere otursun;
 `kaynak_surum` artık `skrs` / `dosya` ayrımını taşıyor.
 
+### TİTCK ilaç listesi yüklendi (23.005 barkod)
+
+Kaynak: **TİTCK Ruhsatlı Beşerî Tıbbî Ürünler Listesi**, 04.09.2026 sürümü
+(`titck.gov.tr/dinamikmodul/85`, XLSX). SKRS'de ilaç barkod listesi yok; bu
+yüzden dosya yolu Faz 0'da açılmıştı.
+
+Sütun eşlemesi: `BARKOD → barkod`, `ÜRÜN ADI → ad`, `ETKİN MADDE → etken_madde`,
+`ATC KODU → atc_kod`, `RUHSAT SAHİBİ → firma`. Listenin
+"RUHSATI ASKIDA OLMAYAN ÜRÜN" sütunu **aktif** alanına çevrildi: askıdaki 829
+ürün **silinmedi, pasif** yazıldı — stokta kalmış olabilir ve geçmiş reçetede
+geçer. Sonuç: 23.005 satır (22.176 aktif · 829 askıda · 1.917 ayrı ATC).
+
+İki düzeltme yükleme sırasında çıktı:
+- **Alanlar kolon sınırına kırpılıyor.** TİTCK'de etken madde kombinasyonları ve
+  firma unvanları uzun; ilk denemede 400 `Girilen deger alanin izin
+  verdiginden uzun` ile düştü. 23 bin satırın biri yüzünden yükleme durmamalı.
+- **`katalog_senkron.satir_sayisi` artık tablodan sayılıyor**, "bu istekte
+  yazılan" değil: büyük liste parça parça yükleniyor (23 bin ilaç = 6 istek) ve
+  son parçanın sayısı "3.053 ilaç" gibi yanıltıcı bir rakam bırakıyordu.
+
+Yükleyiciye 8. sütun `aktif` eklendi (boş = 1).
+
