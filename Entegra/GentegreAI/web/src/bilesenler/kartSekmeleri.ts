@@ -111,6 +111,18 @@ export function sekmeleriKur(secenek: {
     .filter(([ad]) => !gizliSekmeler?.includes(ad))
     .filter(([ad]) => !(kaynak === 'hasta' && ad === 'İletişim'))
     .map(([ad, alanlar]) => ({ tur: 'grup', anahtar: grupSekmeAnahtari(ad), baslik: ad, alanlar }));
+  // DOKUMAN (419): mockup sirasi Surumler - Baglantilar - Onay Akisi -
+  //   Paylasim - Gunluk; alan grubu ("Icerik") EN SONA. Mockupta grup sekmesi
+  //   yok, meta zaten seritte; dosyanin degistirilemez bilgileri en sonda
+  //   dursun ki hekim/kullanici once surum ve onay durumunu gorsun.
+  if (kaynak === 'dokuman') {
+    const grupIndeks = s.findIndex(x => x.tur === 'grup');
+    if (grupIndeks >= 0) {
+      const [grup] = s.splice(grupIndeks, 1);
+      s.push(grup);
+    }
+  }
+
   if (kaynak === 'cari' || kaynak === 'hasta') {
     const genel = s.findIndex(sekme => sekme.tur === 'grup' && sekme.baslik === 'Genel');
     const fatura = s.findIndex(sekme => sekme.tur === 'grup' && sekme.baslik === 'Adres / Fatura Bilgisi');
