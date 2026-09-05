@@ -11,6 +11,7 @@ import { KasaAyarlar } from './sayfalar/KasaAyarlar';
 import { IKAyarlar } from './sayfalar/IKAyarlar';
 import { RandevuAyarlar } from './sayfalar/RandevuAyarlar';
 import { KayitKabulAyarlar } from './sayfalar/KayitKabulAyarlar';
+import { KatalogAyarlar } from './sayfalar/KatalogAyarlar';
 import { DepartmanGorev } from './sayfalar/DepartmanGorev';
 import { FirmaBilgileri } from './sayfalar/FirmaBilgileri';
 import { MesajKatmani } from './bilesenler/MesajKatmani';
@@ -89,6 +90,7 @@ function Yollar() {
         {/* Ayar ekranlari liste degil (ozelSayfa) - rotalari burada. */}
         {yetki('ayar') && <Route path="/genel-ayarlar" element={<GenelAyarlar />} />}
         {yetki('ayar') && <Route path="/kayit-kabul-ayarlar" element={<KayitKabulAyarlar />} />}
+        {yetki('katalog') && <Route path="/katalog-ayarlar" element={<KatalogAyarlar />} />}
         {yetki('stok') && <Route path="/stok-ayarlar" element={<StokAyarlar />} />}
         {/* Kategoriler iki bolmeli ozel ekran (345) - duz liste degil. */}
         {yetki('stok') && <Route path="/kategori" element={<Kategoriler />} />}

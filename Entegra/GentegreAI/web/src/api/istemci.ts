@@ -970,6 +970,20 @@ export const api = {
     gonder<{ ayarlar: AyarSatiri[] }>(`/api/ayar/${encodeURIComponent(anahtar)}`,
                                       { deger }, 'PUT').then(y => y.ayarlar),
 
+  // --------------------------------------------------------- katalog ----
+  /** Klinik katalogların durumu (ICD / ilaç): son senkron, satır sayısı. */
+  katalogDurum: () =>
+    istek<{ satirlar: {
+      kod: string; ad: string; sonCalisma?: string | null; satirSayisi: number;
+      sonuc: string; basarili: boolean; mevcutSatir: number }[] }>('/api/katalog/durum')
+      .then(y => y.satirlar),
+  /** ICD-10 listesini dosyadan yükler (upsert; gelmeyen kod pasife çekilmez). */
+  katalogIcdYukle: (icerik: string) =>
+    gonder<{ yazilan: number; atlanan: number }>('/api/katalog/icd-yukle', { icerik }),
+  /** İlaç (barkod) listesini dosyadan yükler. */
+  katalogIlacYukle: (icerik: string) =>
+    gonder<{ yazilan: number; atlanan: number }>('/api/katalog/ilac-yukle', { icerik }),
+
   // -------------------------------------------------------- bildirim ----
   /** Kuyruğa bildirim koyar (399); gönderimi arka plan işçisi yapar. */
   bildirimKuyruga: (govde: {

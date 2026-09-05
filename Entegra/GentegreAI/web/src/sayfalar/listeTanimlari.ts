@@ -1473,6 +1473,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuAd: 'Bildirim Kuyruğu', ic: '📨', yetkiKodu: 'bildirim',
   },
   {
+    // KLINIK KATALOGLAR (400): durum + dosyadan yukleme. Liste degil,
+    //   ozel sayfa - iki katalog ve iki dosya kutusu.
+    kaynak: 'katalog-ayarlar', rota: 'katalog-ayarlar', baslik: 'Klinik Kataloglar',
+    yol: 'Yonetim › Ortak Platform › Klinik Kataloglar', ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuAd: 'Klinik Kataloglar', ic: '📚', yetkiKodu: 'katalog', urunModu: 2,
+  },
+  {
     // ICD-10 (400): senkron doldurur, ekran SALT GORUNUM - elle tani kodu
     //   yazmak katalogu bozar (e-Nabiz ve provizyon ayni kodu bekler).
     kaynak: 'icd', baslik: 'ICD-10 Tanı Kataloğu', yol: 'Yonetim › ICD-10',

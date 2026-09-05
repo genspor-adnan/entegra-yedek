@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -39,6 +39,11 @@ public static class EntegrasyonUclari
         // 340: hekim branşı ve sigorta türü de SKRS'den gelir.
         ("PERSONEL BRANŞ KODU", "hekim.brans"),
         ("SİGORTALI TÜRÜ",      "taraf.sigorta_turu"),
+        // FAZ 0 (400): klinik listesi muayene/yatis ekranlarinin bolum kaynagi.
+        //   SKRS'de ad kuruluma gore degisebiliyor - iki aday da denenir,
+        //   bulunamayan rapora "yok" olarak duser (senkronu durdurmaz).
+        ("KLİNİK KODLARI",      "klinik.kod"),
+        ("KLİNİKLER",           "klinik.kod"),
     };
 
     /// <summary>
@@ -52,6 +57,13 @@ public static class EntegrasyonUclari
         ("İL",           "IL"),
         ("İLÇE",         "ILCE"),
         ("ÜLKE KODLARI", "ULKE"),
+        // FAZ 0 (400): ICD-10 KENDI TABLOSUNDA (public.icd) - 20 bin satir
+        //   kod_deger'e konmaz, arama/indeks ihtiyacini karsilamaz ve her
+        //   combo cagrisini agirlastirirdi. SKRS'deki ad kuruluma gore
+        //   degisiyor; uc aday denenir.
+        ("ICD-10 TANI KODLARI", "ICD"),
+        ("TANI KODLARI",        "ICD"),
+        ("ICD10",               "ICD"),
     };
 
     private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
@@ -172,6 +184,7 @@ public static class EntegrasyonUclari
                 {
                     "IL"   => await IlYazAsync(baglanti, degerler, iptal),
                     "ILCE" => await IlceYazAsync(baglanti, degerler, iptal),
+                    "ICD"  => await IcdYazAsync(baglanti, degerler, iptal),
                     _      => await UlkeYazAsync(baglanti, degerler, iptal),
                 };
                 toplam += yazilan;
@@ -507,6 +520,55 @@ public static class EntegrasyonUclari
     //   (340). Bu yüzden SKRS kodu `id`nin yerine yazılmaz: önce ADA göre
     //   eşleşen satır aranır ve ona `skrs_kod` işlenir; eşleşme yoksa satır
     //   YENİ kayıt olarak eklenir (id = max + 1, tablolarda identity yok).
+
+    /// <summary>
+    /// SKRS ICD listesi -> public.icd (400).
+    ///
+    /// KOD BURADA ANAHTARDIR (il/ilçenin tersine): "A09" hem SKRS'nin hem
+    /// bizim kimliğimiz - ad eşlemesi aramaya gerek yok, kod üzerinden upsert
+    /// edilir. `Ust` alanı doluysa ağaç bağı (blok → tanı) yazılır ve satır
+    /// 4. seviye sayılır; SKRS bunu vermezse seviye 3 (tanı) kalır.
+    ///
+    /// AKTİFLİK: bu turda GELMEYEN kod pasife çekilmez. SKRS bazı listeleri
+    /// sayfalı/eksik döndürebiliyor; tek eksik yanıt yüzünden binlerce tanıyı
+    /// pasife almak, ertesi gün "tanı bulunamıyor" olarak geri gelirdi.
+    /// Pasifleme, kaynak güvenilir olduğunda ayrı bir bakım işidir.
+    /// </summary>
+    private static async Task<(int Yazilan, int Atlanan)> IcdYazAsync(
+        NpgsqlConnection baglanti, List<(string Kod, string Ad, string? Ust)> degerler,
+        CancellationToken iptal)
+    {
+        int yazilan = 0, atlanan = 0;
+        foreach (var (kod, ad, ust) in degerler)
+        {
+            var k = (kod ?? "").Trim();
+            if (k.Length is 0 or > 12 || string.IsNullOrWhiteSpace(ad)) { atlanan++; continue; }
+
+            await baglanti.CalistirAsync("""
+                insert into public.icd (kod, ad, ust_kod, seviye, aktif, guncelleme)
+                values (@p0, @p1, nullif(@p2, ''), case when nullif(@p2, '') is null then 3 else 4 end,
+                        1, now())
+                on conflict (kod) do update
+                   set ad = excluded.ad,
+                       ust_kod = coalesce(excluded.ust_kod, public.icd.ust_kod),
+                       aktif = 1,
+                       guncelleme = now()
+                """, null, [k, ad.Trim(), (ust ?? "").Trim()], iptal);
+            yazilan++;
+        }
+
+        // KATALOG IZLEME (400): "ICD listesi ne zaman, kaç satırla güncellendi"
+        //   sorusu tek yerden cevaplanır.
+        await baglanti.CalistirAsync("""
+            insert into public.katalog_senkron (kod, ad, son_calisma, satir_sayisi, sonuc, basarili)
+            values ('icd', 'ICD-10 Tanı', now(), @p0, @p1, 1)
+            on conflict (kod) do update
+               set son_calisma = now(), satir_sayisi = excluded.satir_sayisi,
+                   sonuc = excluded.sonuc, basarili = 1
+            """, null, [yazilan, $"SKRS: {yazilan} kod yazıldı, {atlanan} atlandı."], iptal);
+
+        return (yazilan, atlanan);
+    }
 
     /// <summary>SKRS IL listesi -> public.il (ad eşlemesi + skrs_kod).</summary>
     private static async Task<(int Yazilan, int Atlanan)> IlYazAsync(

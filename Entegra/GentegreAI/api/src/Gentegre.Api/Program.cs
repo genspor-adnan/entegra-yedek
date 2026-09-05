@@ -179,6 +179,7 @@ uygulama.AiUclariniEkle();
 uygulama.AyarUclariniEkle();
 uygulama.TercihUclariniEkle();
 uygulama.BildirimUclariniEkle();
+uygulama.KatalogUclariniEkle();
 uygulama.KurumProfilUclariniEkle();
 uygulama.PanelUclariniEkle();
 uygulama.RolYetkiUclariniEkle();

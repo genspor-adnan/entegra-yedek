@@ -6375,3 +6375,34 @@ eşitlendi (dört denetim kolonu).
 girilince → 1 satır, öncelik 1, doğru metin; istem tekrar kaydedilince → ikinci
 satır **yok**.
 
+### SKRS katalog senkronu + dosyadan yükleme (Faz 0)
+
+Faz 0'ın "ICD-10, ilaç (barkod), klinik → SKRS senkronuna ekle" maddesi.
+
+**SKRS senkronu genişletildi** (mevcut `/api/entegrasyon/{id}/skrs-senkron`,
+yeni bir senkron yazılmadı): kod listesi eşlemesine **klinik**, tablo
+hedeflerine **ICD** eklendi. SKRS'de liste adı kurulumdan kuruluma değiştiği
+için birden çok aday ad denenir (`ICD-10 TANI KODLARI` / `TANI KODLARI` /
+`ICD10`); bulunamayan rapora düşer, senkronu durdurmaz — mevcut davranışın
+aynısı. `IcdYazAsync` kodu anahtar sayar (il/ilçenin tersine ad eşlemesi
+gerekmez), `ust_kod` doluysa ağaç bağı yazar ve satırı 4. seviye sayar.
+
+**Gelmeyen kod pasife çekilmez:** SKRS bazı listeleri eksik/sayfalı
+döndürebiliyor; tek eksik yanıt yüzünden binlerce tanıyı pasife almak, ertesi
+gün "tanı bulunamıyor" olarak geri gelirdi.
+
+**Dosyadan yükleme** (`/api/katalog/icd-yukle`, `/api/katalog/ilac-yukle`) —
+çünkü SKRS hesabı bir **kapı** ve kapanmadan katalog boş kalır; ilaç barkod
+listesi ise zaten SKRS'de yok (İTS/TİTCK kaynağı). Ayraç ilk satırdan anlaşılır
+(`;` · sekme · `,`), başlık satırı atlanır, barkodsuz/adsız satır sayılıp
+raporlanır. `GET /api/katalog/durum` her katalog için son çalışma, yazılan ve
+**mevcut** satır sayısını verir (`katalog_senkron` + canlı sayım).
+
+Ekran: **Yönetim › Ortak Platform › Klinik Kataloglar** — iki kutu (ICD, ilaç),
+kayıt sayısı rozeti, sütun düzeni açıklaması ve "Dosyadan Yükle".
+
+**Denendi:** 5 satırlık ICD dosyası → ağaç bağı (`A09.0 → A09`, seviye 4) ve
+cinsiyet kısıtı (`O80` = 2) doğru yazıldı; 4 satırlık ilaç dosyası → 3 yazıldı,
+barkodsuz satır atlandı; ikinci yükleme → var olan kodun adı güncellendi, yeni
+kod eklendi, satır sayısı 5 → 6 (upsert doğru).
+
