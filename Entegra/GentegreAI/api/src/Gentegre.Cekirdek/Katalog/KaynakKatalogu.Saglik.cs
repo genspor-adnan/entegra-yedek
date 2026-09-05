@@ -523,6 +523,10 @@ public static partial class KaynakKatalogu
                                             Varsayilan: false),
             new("boyutKb",   "(d.boyut / 1024)", "sayi", "Boyut (KB)", Hizalama: "sag",
                                             Genislik: 100, Varsayilan: false),
+            // Icerik tipi listede gorunmez ama AKSIYON okur: onizlenebilir
+            //   tipler yeni sekmede acilir, otekiler indirilir.
+            new("contentType", "d.content_type", "metin", "Dosya Türü", Genislik: 140,
+                                            Varsayilan: false),
             new("gecerliBit","d.gecerli_bit","tarih", "Geçerlilik", Hizalama: "orta",
                                             Bicim: "dd.MM.yyyy", Genislik: 110),
             new("eklemeTarihi", "d.ekleme_tarihi", "tarih", "Yükleme", Hizalama: "orta",

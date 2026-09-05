@@ -1473,7 +1473,12 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       onTarihAraligi={tanim.primSuzgeci ? primAraligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
       ebelgeMenusu={tanim.ebelgeMenusu}
-      gizliKolonlar={tanim.gizliKolonlar}
+      // KLASOR KOLONU YALNIZ "TUMU"DE (kullanici): belli bir klasor
+      //   secildiginde her satirda ayni klasor adi yazmak, dar ekranda
+      //   yer harcayan bir tekrar olurdu.
+      gizliKolonlar={tanim.kaynak === 'dokuman' && klasorSecim.tur !== 'tum'
+        ? [...(tanim.gizliKolonlar ?? []), 'klasorYolu']
+        : tanim.gizliKolonlar}
       kolonBasliklari={tanim.kolonBasliklari}
       aramaGorunumGizli={tanim.aramaGorunumGizli}
       kolonSirasi={tanim.kolonSirasi}

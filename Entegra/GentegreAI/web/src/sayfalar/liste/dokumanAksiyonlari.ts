@@ -1,5 +1,6 @@
 import { api } from '../../api/istemci';
 import { guvenli, mesaj, metinSor, onay, secimSor } from '../../bilesenler/mesaj';
+import { dosyaIndirUrl } from '../../bilesenler/indir';
 import type { ListeSatiri } from '../../api/sozlesme';
 
 /**
@@ -43,10 +44,20 @@ export async function dokumanAksiyonu(
 
   if (kod === 'dokuman.ac') {
     if (!dokumanId) { mesaj('Önce bir doküman seçin.'); return true }
-    // Indirme ucu KIMLIK ISTER; yeni sekmede acmak tarayicinin kendi
-    //   oturumunu kullanir - uygulama icinde ayri bir indirme akisi kurmak
-    //   ayni dosyayi iki yoldan servis etmek olurdu.
-    window.open(`${import.meta.env.VITE_API ?? ''}/api/dokuman-icerik/${dokumanId}`, '_blank');
+    // ICERIK UCU KIMLIK ISTER (Authorization). Adresi yeni sekmede acmak
+    //   token tasimadigi icin 401 doner - bu yuzden icerik BLOB olarak
+    //   cekilir (api.dokumanIcerikUrl) ve oradan indirilir/acilir; token
+    //   URL'e de sizmaz. Galeri de ayni yolu kullaniyor.
+    await guvenli(async () => {
+      const url = await api.dokumanIcerikUrl(dokumanId);
+      const ad = String(satir?.ad ?? 'dokuman');
+      // Tarayicinin gosterebildigi tipler YENI SEKMEDE acilir (onizleme),
+      //   otekiler indirilir: PDF icin indirme zorlamak gereksiz bir adim.
+      const tip = String(satir?.contentType ?? '');
+      if (tip.startsWith('image/') || tip === 'application/pdf' || tip.startsWith('text/'))
+        window.open(url, '_blank');
+      else dosyaIndirUrl(url, ad, true);
+    });
     return true;
   }
 
