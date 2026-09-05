@@ -75,6 +75,13 @@ const GRUP_IKON: Record<string, string> = {
   'Yönetim': '🛠️',
 };
 
+/** ALT GRUP ikonu: ikinci seviye eskiden HEP ⚙️ ciziyordu, ayar olmayan alt
+    gruplarda yanlis okunuyordu (kullanici: Prim'in logosu % olsun). Tabloda
+    olmayan alt grup eskisi gibi ⚙️ kalir. */
+const ALTGRUP_IKON: Record<string, string> = {
+  'Prim': '%',
+};
+
 /** Cevrilmis grup adindan ikona: menu adi dile gore degisince Turkce anahtarli
     GRUP_IKON eslesmiyordu (194). Ceviriyi burada TERSINE cevirmek yerine
     cevrilmis adlari da tabloya ekliyoruz - liste kisa ve dil eklendikce buyur. */
@@ -525,7 +532,7 @@ export function Kabuk() {
                       onClick={() => setAcikGruplar(g => ({
                         ...g, [`${s.ad}/${a.ad}`]: !grupAcikMi(`${s.ad}/${a.ad}`, a.alt) }))}
                     >
-                      <span className="ic">⚙️</span>
+                      <span className="ic">{ALTGRUP_IKON[a.ad] ?? '⚙️'}</span>
                       <span>{a.ad}</span>
                       <span className="rz">{grupAcikMi(`${s.ad}/${a.ad}`, a.alt) ? '▾' : '▸'}</span>
                     </button>

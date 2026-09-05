@@ -63,6 +63,17 @@ export interface ListeTanimi {
    * stok listesinde gorunen kolon YOL metni oldugu icin id kolonu verilir.
    */
   kategoriSuzgecAlani?: string;
+  /**
+   * Ciplerin sagina BOLUM AGACI combosu koyar (kullanici, personel listesi):
+   * secilen dal ALT BIRIMLERIYLE birlikte suzer. Suzulen alan `departmanId`.
+   */
+  bolumSuzgeci?: boolean;
+  /**
+   * Ciplerin sagina ROL combosu koyar: kullanici hesabinin yetki rolu
+   * (taraf_kullanici.rol_id). Rol listesi `rol` yetkisi ister - yetkisi
+   * olmayan kullanicida combo hic cizilmez, liste calismaya devam eder.
+   */
+  rolSuzgeci?: boolean;
   kaynak: string;
   baslik: string;
   yol: string;
@@ -454,62 +465,6 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     urunModu: 2,
     menuGrup: 'Radyoloji', menuAd: 'Sonuç Teslim', ic: '📦',
     yetkiKodu: 'radyoloji', menuSira: 16,
-  },
-  {
-    // PRİM PLANLARI (324): kampanyanın prim karşılığı - kapsam + oran
-    //   satırları. Satırda hedef, BELGE TÜRÜ ve PAY birlikte kriter.
-    kaynak: 'prim-plani', rota: 'prim-plani',
-    baslik: 'Prim Planları', yol: 'Prim › Planlar',
-    kartYolu: '/prim-plani', kartBaslik: 'Prim Planı',
-    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
-    gizliKolonlar: ['baz', 'hekimTipi', 'aciklama'],
-    menuGrup: 'Prim', menuAd: 'Prim Planları', ic: '🎯',
-    yetkiKodu: 'prim', menuSira: 10, urunModu: 2,
-  },
-  {
-    // HAKEDİŞ SATIRLARI (324): "hangi tahsilattan, hangi kaleme, hangi rolle".
-    //   Prim tahsil edildikçe doğduğu için satırın tarihi TAHSİLAT tarihidir.
-    kaynak: 'hakedis-satir', rota: 'hakedis-satir',
-    baslik: 'Hakediş Satırları', yol: 'Prim › Hakediş Satırları',
-    aksiyonEkrani: 'hakedis-liste',
-    kartYolu: undefined,
-    // Kapatılmış dönemin satırlarına başlıktan geçilir: /hakedis-satir?hakedisId=7
-    urlFiltreAlani: 'hakedisId',
-    tarihAlani: 'tarih',
-    toplam: ['tutar'],
-    gizliKolonlar: ['rol', 'pay', 'durum', 'tarafId', 'hakedisId', 'belgeSatirId',
-                    'payYuzde'],
-    // Durum (330/339): kesin = gelir belgesine (tahakkuk/fiş/fatura) dönüşmüş;
-    //   onaylı = kilitli; ödendi = hakedişi ödenmiş. "Taslak" (durum 1) ÇİPİ
-    //   YOK: 339'dan beri gelir belgesi olmadan prim satırı hiç üretilmiyor.
-    cipler: [
-      { ad: 'Kesin',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-      { ad: 'Onaylı', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
-      { ad: 'Ödendi', filtre: { alan: 'durum', op: 'esit', deger: 4 } },
-      // ROL ISARETI (363): kisinin BUGUN o rolde isareti yoksa satir burada
-      //   toplanir - isaret kaldirilmis ya da yanlis role prim dogmus demektir.
-      { ad: 'İşaret yok', filtre: { alan: 'rolIsaretli', op: 'esit', deger: 0 } },
-      { ad: 'Tümü' },
-    ],
-    menuGrup: 'Prim', menuAd: 'Hakediş Satırları', ic: '🧾',
-    yetkiKodu: 'prim', menuSira: 20, urunModu: 2,
-  },
-  {
-    // HAKEDİŞLER (324): kapatılmış dönemler. Kapanan satır DONDURULUR -
-    //   sonradan çıkan fark sonraki döneme düzeltme olarak girer.
-    kaynak: 'hakedis', rota: 'hakedis',
-    baslik: 'Hakedişler', yol: 'Prim › Hakedişler',
-    aksiyonEkrani: 'hakedis-donem',
-    tarihAlani: 'donemBitis',
-    toplam: ['toplam'],
-    gizliKolonlar: ['durum', 'tarafId', 'kasaIslemId', 'aciklama', 'eklemeTarihi'],
-    cipler: [
-      { ad: 'Kesinleşmiş', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-      { ad: 'Ödendi',      filtre: { alan: 'durum', op: 'esit', deger: 3 } },
-      { ad: 'Tümü' },
-    ],
-    menuGrup: 'Prim', menuAd: 'Hakedişler', ic: '💰',
-    yetkiKodu: 'prim', menuSira: 30, urunModu: 2,
   },
   // CARI grubu ana menude RADYOLOJIDEN SONRA (kullanici).
   {
@@ -1333,8 +1288,70 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     aksiyonEkrani: 'personel-liste', cipler: DURUM_CIPLERI,
     // Ham bolum id API'den geliyor (basvuruda personel -> bolum doldurmak icin)
     //   ama gridde gorunmesin: orada departmanAdi var.
-    gizliKolonlar: ['departmanId'],
-    menuGrup: 'İK', menuAd: 'Personel Listesi', ic: '🧑‍🤝‍🧑', yetkiKodu: 'personel',
+    gizliKolonlar: ['departmanId', 'rolId'],
+    // Serit suzgecleri (kullanici: "aktif/pasif/durum saginda Bolum agac combo
+    //   ve Rol combo"): ikisi de cip ve arama ile AND'lenir.
+    bolumSuzgeci: true, rolSuzgeci: true,
+    menuGrup: 'İK', menuAd: 'Personel Listesi', ic: '🧑‍🤝‍🧑', yetkiKodu: 'personel', menuSira: 10,
+  },
+  // PRIM (kullanici): ana menude kendi basina grup degil, IK'nin ALTINDA
+  //   ve Personel Listesi'nden SONRA. menuSira 20/30/40 personelin 10'unun
+  //   ardina dizer; grubun menudeki yeri IK'nin ilk ogesinden (personel) gelir.
+  {
+    // PRİM PLANLARI (324): kampanyanın prim karşılığı - kapsam + oran
+    //   satırları. Satırda hedef, BELGE TÜRÜ ve PAY birlikte kriter.
+    kaynak: 'prim-plani', rota: 'prim-plani',
+    baslik: 'Prim Planları', yol: 'Prim › Planlar',
+    kartYolu: '/prim-plani', kartBaslik: 'Prim Planı',
+    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    gizliKolonlar: ['baz', 'hekimTipi', 'aciklama'],
+    menuGrup: 'İK', menuAltGrup: 'Prim', menuAd: 'Prim Planları', ic: '🎯',
+    yetkiKodu: 'prim', menuSira: 20, urunModu: 2,
+  },
+  {
+    // HAKEDİŞ SATIRLARI (324): "hangi tahsilattan, hangi kaleme, hangi rolle".
+    //   Prim tahsil edildikçe doğduğu için satırın tarihi TAHSİLAT tarihidir.
+    kaynak: 'hakedis-satir', rota: 'hakedis-satir',
+    baslik: 'Hakediş Satırları', yol: 'Prim › Hakediş Satırları',
+    aksiyonEkrani: 'hakedis-liste',
+    kartYolu: undefined,
+    // Kapatılmış dönemin satırlarına başlıktan geçilir: /hakedis-satir?hakedisId=7
+    urlFiltreAlani: 'hakedisId',
+    tarihAlani: 'tarih',
+    toplam: ['tutar'],
+    gizliKolonlar: ['rol', 'pay', 'durum', 'tarafId', 'hakedisId', 'belgeSatirId',
+                    'payYuzde'],
+    // Durum (330/339): kesin = gelir belgesine (tahakkuk/fiş/fatura) dönüşmüş;
+    //   onaylı = kilitli; ödendi = hakedişi ödenmiş. "Taslak" (durum 1) ÇİPİ
+    //   YOK: 339'dan beri gelir belgesi olmadan prim satırı hiç üretilmiyor.
+    cipler: [
+      { ad: 'Kesin',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Onaylı', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Ödendi', filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      // ROL ISARETI (363): kisinin BUGUN o rolde isareti yoksa satir burada
+      //   toplanir - isaret kaldirilmis ya da yanlis role prim dogmus demektir.
+      { ad: 'İşaret yok', filtre: { alan: 'rolIsaretli', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'İK', menuAltGrup: 'Prim', menuAd: 'Hakediş Satırları', ic: '🧾',
+    yetkiKodu: 'prim', menuSira: 30, urunModu: 2,
+  },
+  {
+    // HAKEDİŞLER (324): kapatılmış dönemler. Kapanan satır DONDURULUR -
+    //   sonradan çıkan fark sonraki döneme düzeltme olarak girer.
+    kaynak: 'hakedis', rota: 'hakedis',
+    baslik: 'Hakedişler', yol: 'Prim › Hakedişler',
+    aksiyonEkrani: 'hakedis-donem',
+    tarihAlani: 'donemBitis',
+    toplam: ['toplam'],
+    gizliKolonlar: ['durum', 'tarafId', 'kasaIslemId', 'aciklama', 'eklemeTarihi'],
+    cipler: [
+      { ad: 'Kesinleşmiş', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Ödendi',      filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'İK', menuAltGrup: 'Prim', menuAd: 'Hakedişler', ic: '💰',
+    yetkiKodu: 'prim', menuSira: 40, urunModu: 2,
   },
   {
     // DEMIRBAS (216, Ekranlar/demirbas_listesi.html) - ana menude IK'nin

@@ -264,6 +264,11 @@ public static partial class KaynakKatalogu
                                                    "metin", "Bölüm"),
             new("gorev",        TarafKatalog.PozisyonAdi, "metin", "Görev"),
             new("rolAdi",       "coalesce(r.ad, '')", "metin", "Rol"),
+            // Ham rol id ISTEMCIYE GELIR: seritteki Rol suzgeci ad yerine id ile
+            //   suzsun - ayni adli iki rol ya da rol adi degisince filtre kaymaz.
+            //   Gridde gizli (listeTanimlari.gizliKolonlar), orada rolAdi var.
+            new("rolId",        "coalesce(tk.rol_id, 0)", "sayi", "Rol Id",
+                Varsayilan: false),
             new("iseGirisTarihi", "po.ise_giris_tarihi", "tarih", "İşe Giriş",
                 Hizalama: "orta"),
             new("vkno",         TarafKatalog.TcknMaske, "metin", "TCKN",

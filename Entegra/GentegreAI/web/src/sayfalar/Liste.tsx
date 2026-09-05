@@ -24,6 +24,8 @@ import { CihazKapatmaModali } from '../bilesenler/radyoloji/CihazKapatmaModali';
 import { SarfOnayModali } from '../bilesenler/radyoloji/SarfOnayModali';
 import { TarafArama } from '../bilesenler/TarafArama';
 import { KategoriSuzgeci } from '../bilesenler/KategoriSuzgeci';
+import { BolumSuzgeci } from '../bilesenler/BolumSuzgeci';
+import { useOturum } from '../kimlik/OturumBaglami';
 import { KategoriAgacPaneli } from '../bilesenler/KategoriAgacPaneli';
 import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
 import { UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
@@ -244,6 +246,29 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   //   listesi gelir (Randevu Ayarlari > Bölümler ile ayni kaynak).
   const [randevuAgaci, setRandevuAgaci] = useState<RandevuBolumDugumu[]>([]);
   const [bolumSuzgec, setBolumSuzgec] = useState<number | ''>('');
+  /**
+   * PERSONEL SERIT SUZGECLERI (kullanici: "aktif/pasif/durum saginda Bolum
+   * agac combo ve Rol combo"). Randevununkinden AYRI durum: o ekranda secim
+   * takvimi de suruyor, buradaki yalniz gridi suzer.
+   */
+  const [personelBolum, setPersonelBolum] = useState<{ id: number; agac: number[] } | null>(null);
+  const [personelRol, setPersonelRol] = useState<number | ''>('');
+  const [roller, setRoller] = useState<{ id: number; ad: string }[]>([]);
+  const { yetki } = useOturum();
+  // Rol listesi `rol` yetkisi ister; yetkisi olmayanda combo hic cizilmez -
+  //   403 alip bos combo gostermektense sormuyoruz.
+  const rolSuzgeciVar = !!tanim.rolSuzgeci && yetki('rol');
+  useEffect(() => {
+    if (!rolSuzgeciVar) { setRoller([]); return }
+    void guvenli(async () => {
+      const y = await api.liste('rol', { sayfa: 1, boyut: 500 });
+      setRoller((y.satirlar ?? [])
+        .filter(r => Number(r.aktif ?? 1) === 1)
+        .map(r => ({ id: Number(r.id), ad: String(r.ad ?? '') })));
+    });
+  }, [rolSuzgeciVar]);
+  // Liste degisince secimler sifirlanir: yeni kaynakta o alanlar yok.
+  useEffect(() => { setPersonelBolum(null); setPersonelRol('') }, [tanim.kaynak]);
   /** Takvimde fareyle secilen aralik (251): "＋ Yeni" bunu karta tasir. */
   /** Belge olusturmada sube: oturumun calisma subesi. */
   const oturumSubeId = Number(localStorage.getItem('gentegre.sube')) || undefined;
@@ -297,6 +322,20 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     };
     return temel ? { op: 'and', kosullar: [temel, kosul] } : kosul;
   }, [kategoriDal, tanim.kategoriSuzgecAlani]);
+
+  /** Bolum/rol secimleri de sabit filtreye AND'lenir (cip ve arama ile birlikte). */
+  const personelliFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
+    const kosullar: Kosul[] = [];
+    if (temel) kosullar.push(temel);
+    // Bolum: secilen dal + TUM ALT BIRIMLERI.
+    if (personelBolum && personelBolum.agac.length > 0)
+      kosullar.push({ alan: 'departmanId', op: 'icinde', deger: personelBolum.agac });
+    if (personelRol !== '')
+      kosullar.push({ alan: 'rolId', op: 'esit', deger: personelRol });
+    return kosullar.length === 0 ? undefined
+         : kosullar.length === 1 ? kosullar[0]
+         : { op: 'and', kosullar };
+  }, [personelBolum, personelRol]);
 
   const randevuFiltresi = useMemo<Kosul | undefined>(() => {
     if (tanim.kaynak !== 'randevu') return sabitFiltre;
@@ -1196,7 +1235,7 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       yol={tanim.yol}
       toplam={tanim.toplam}
       cipler={tanim.cipler}
-      sabitFiltre={kategoriliFiltre(randevuFiltresi)}
+      sabitFiltre={personelliFiltre(kategoriliFiltre(randevuFiltresi))}
       aksiyonEkrani={tanim.aksiyonEkrani}
       ebelgeMenusu={tanim.ebelgeMenusu}
       gizliKolonlar={tanim.gizliKolonlar}
@@ -1267,6 +1306,30 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
           {(bolumSuzgec !== '' || hekimSuzgec !== '') && (
             <button type="button" title="Bölüm/hekim filtresini kaldır"
                     onClick={() => { setBolumSuzgec(''); setHekimSuzgec('') }}>×</button>
+          )}
+        </>
+      ) : (tanim.bolumSuzgeci || rolSuzgeciVar) ? (
+        // PERSONEL (kullanici): ciplerin SAGINDA bolum agac combosu + rol
+        //   combosu. Ikisi de sunucuda suzer - istemci listeyi kendi
+        //   sirasindan ayiklamaz, sayfali listede yanlis olurdu.
+        <>
+          {tanim.bolumSuzgeci && (
+            <BolumSuzgeci
+              deger={personelBolum?.id ?? null}
+              onDegis={(id, agac) => setPersonelBolum(id === null ? null : { id, agac })}
+            />
+          )}
+          {rolSuzgeciVar && (
+            <select className="kat-suzgec" value={personelRol}
+                    title="Kullanıcı rolüne göre süz"
+                    onChange={e => setPersonelRol(e.target.value ? Number(e.target.value) : '')}>
+              <option value="">Tüm roller</option>
+              {roller.map(r => <option key={r.id} value={r.id}>{r.ad}</option>)}
+            </select>
+          )}
+          {(personelBolum !== null || personelRol !== '') && (
+            <button type="button" title="Bölüm/rol filtresini kaldır"
+                    onClick={() => { setPersonelBolum(null); setPersonelRol('') }}>×</button>
           )}
         </>
       ) : tanim.ekstre && (
