@@ -50,6 +50,9 @@ public sealed class AyarDeposu
         // RANDEVU HATIRLATMASI (399): acik mi ve randevudan KAC SAAT once.
         //   Kapatilabilir olmasi sart - SMS ucretli, her kurum istemez.
         "randevu.hatirlatma_acik", "randevu.hatirlatma_saat",
+        // PANIK DEGER (399): bildirim acik mi ve nobet numarasi. Esik katalogu
+        //   Faz 2'de; tetik bugun satirin "Panik" isareti.
+        "lab.panik_bildirim_acik", "lab.panik_ek_numara",
         // KAYIT KABUL (355): basvuruda POS tahsilati alininca ne olacak -
         //   0 aksiyon yok, 1 otomatik satis fisi kesilsin, 2 kullaniciya sorulsun.
         "basvuru.pos_aksiyon",

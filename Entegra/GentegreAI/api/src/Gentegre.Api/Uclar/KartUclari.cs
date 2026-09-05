@@ -115,6 +115,7 @@ public static class KartUclari
         grup.MapPost("/{kaynak}", async (
             string kaynak, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo, KullaniciAramaDeposu arama,
             KullaniciDeposu kullanicilar, Servisler.RandevuHatirlatmasi hatirlatma,
+            Servisler.PanikDegerBildirimi panik,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
@@ -144,6 +145,15 @@ public static class KartUclari
                     .GetRequiredService<ILoggerFactory>().CreateLogger("Randevu")
                     .LogError(h, "Randevu {Id}: hatirlatma kuyruga konamadi.", yeniId); }
 
+            // PANIK DEGER (399): isareti "Panik" olan test satiri icin isteyen
+            //   hekime bildirim. Bildirim LAB KAYDINI DUSURMEZ - sonuc girisi
+            //   telefon eksikliginden geri cevrilmemeli.
+            if (tanim.Ad == "lab-istem")
+                try { await panik.TazeleAsync(yeniId, baglam.KullaniciId, iptal); }
+                catch (Exception h) { ctx.RequestServices
+                    .GetRequiredService<ILoggerFactory>().CreateLogger("Lab")
+                    .LogError(h, "Lab istem {Id}: panik bildirimi konamadi.", yeniId); }
+
             var (okunabilir, _) = Alanlar(tanim, baglam);
             var kart = await depo.OkuAsync(tanim, yeniId, okunabilir, null, iptal);
             var govde = new Dictionary<string, object?>(kart!.Value.Kart, StringComparer.Ordinal)
@@ -162,7 +172,7 @@ public static class KartUclari
         // -------------------------------------------------------- guncelle ----
         grup.MapPut("/{kaynak}/{id:long}", async (
             string kaynak, long id, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo,
-            Servisler.RandevuHatirlatmasi hatirlatma,
+            Servisler.RandevuHatirlatmasi hatirlatma, Servisler.PanikDegerBildirimi panik,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
@@ -186,6 +196,13 @@ public static class KartUclari
                 catch (Exception h) { ctx.RequestServices
                     .GetRequiredService<ILoggerFactory>().CreateLogger("Randevu")
                     .LogError(h, "Randevu {Id}: hatirlatma tazelenemedi.", id); }
+
+            // Sonuc SONRADAN girilir: panik isareti guncellemede dogar.
+            if (tanim.Ad == "lab-istem")
+                try { await panik.TazeleAsync(id, baglam.KullaniciId, iptal); }
+                catch (Exception h) { ctx.RequestServices
+                    .GetRequiredService<ILoggerFactory>().CreateLogger("Lab")
+                    .LogError(h, "Lab istem {Id}: panik bildirimi konamadi.", id); }
 
             var kart = await depo.OkuAsync(tanim, id, okunabilir, baglam.Kapsam, iptal)
                        ?? throw GentegreHatasi.Bulunamadi();

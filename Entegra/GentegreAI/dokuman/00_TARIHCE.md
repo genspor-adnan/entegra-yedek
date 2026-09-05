@@ -6341,3 +6341,37 @@ anlamı yok). Ayarlar `db/402` ile açıldı ve ayar beyaz listesine eklendi:
 `baslangic − 24s` planı; saat 2 saat ileri alındı → eski satır **İptal**, yeni
 satır doğru saatle; randevu iptal edildi → bekleyen satır **İptal**.
 
+### Panik değer bildirimi akışa bağlandı (db/403-404)
+
+Lab isteminde bir test **"Panik" (isaret = 3)** işaretli ve **sonucu girilmiş**
+ise isteyen hekime bildirim kuyruğa konur — öncelik 1, `panik.deger` şablonunun
+saat penceresi yok (gece de gider).
+
+**Tetik neden `isaret` alanından:** panik eşiklerinin kataloğu (referans
+aralıkları, oto-onay, TAT) Faz 2'nin işi. Faz 0'da eşiği hesaplamaya kalkmak,
+sonradan gelecek katalogla çakışan ikinci bir kural yazmak olurdu. Bugün sonucu
+giren/onaylayan kişi satırı işaretliyor; bildirim onu izliyor. Faz 2'de işareti
+kural motoru koyacak, **bildirim tarafı değişmeyecek**.
+
+**Tekrar göndermez:** aynı test satırı için kuyrukta/gönderilmiş (iptal
+edilmemiş) bildirim varsa yenisi konmaz — istem her kaydedildiğinde aynı panik
+mesajı gitse üçüncüsünden sonra kimse okumaz. Alıcı: isteyen hekimin cebi;
+`lab.panik_ek_numara` doluysa nöbet hattına da gider. İkisi de yoksa kuyruğa
+satır konmaz ama **uyarı günlüğe yazılır** — panik değerin haber verilememesi
+sessiz kalmamalı. Bildirim lab kaydını düşürmez.
+
+Ayarlar (`db/403`, beyaz listede): `lab.panik_bildirim_acik`,
+`lab.panik_ek_numara`.
+
+### Mevcut kusur: lab istemine test satırı eklenemiyordu (db/404)
+
+Panik akışı uçtan uca denenirken çıktı: kart çerçevesi her detay satırına
+`ekleyen` yazıyor (bütün detay tablolarında olduğu gibi) ama `lab_istem_test`'te
+o kolon yoktu — istek `42703: column "ekleyen" ... does not exist` ile **500**
+düşüyordu, yani laboratuvara test satırı hiç eklenemiyordu. Şema diğerleriyle
+eşitlendi (dört denetim kolonu).
+
+**Denendi:** panik işaretli ama **sonuçsuz** test → kuyruk boş (doğru); sonuç
+girilince → 1 satır, öncelik 1, doğru metin; istem tekrar kaydedilince → ikinci
+satır **yok**.
+
