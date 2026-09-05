@@ -189,8 +189,16 @@ public sealed partial class BelgeDeposu
         if (eskiDurum == 0)                            // taslak stok/cari yazmaz
         {
             await StokDurumGeriAlAsync(baglanti, islem, belgeId, tur, tipi, iptal);
+            // YALNIZ BELGENIN KENDI cari satiri silinir (`kasa_islem_id is null`).
+            //   Kosulsuz silme, belgeye baglanmis TAHSILATLARIN bacaklarini da
+            //   siliyordu: taslak fise nakit tahsilat girilip fis tekrar
+            //   kaydedilince kasa islemi duruyor ama cari ekstrede ve hesap
+            //   bakiyesinde hicbir iz kalmiyordu (kullanici bildirimi: satis
+            //   fisi 114356 - tahsilat Eren'in ekstresinde yok). Tahsilatin
+            //   bacaklari kasa islemine aittir, belge onlari yeniden yazmaz.
             await using var sil = baglanti.Komut(
-                "delete from public.mali_hareket where belge_id = @p0", islem,
+                "delete from public.mali_hareket " +
+                " where belge_id = @p0 and kasa_islem_id is null", islem,
                 belgeId);
             await sil.ExecuteNonQueryAsync(iptal);
         }

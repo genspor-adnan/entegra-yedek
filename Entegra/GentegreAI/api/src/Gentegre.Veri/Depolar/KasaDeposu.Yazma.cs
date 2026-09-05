@@ -230,7 +230,7 @@ public sealed partial class KasaDeposu
                     (kasa_islem_id, sira, rol, tur, hesap_turu, hesap_id, taraf_id,
                      islem_tarihi, plan_tarihi, borc, alacak, yerel_borc, yerel_alacak,
                      doviz_cinsi, doviz_kuru, durum, masraf_id, hizmet_id, proje_id, merkez_id,
-                     belge_id, aciklama, sube_id, giris_kaynak, ekleyen)
+                     belge_id, belge_no, aciklama, sube_id, giris_kaynak, ekleyen)
                 select @p0, @p1, @p2, ki.tur,
                        case when @p3 is not null
                             then coalesce((select h.tur from public.hesap h where h.id = @p3), @p4)
@@ -238,6 +238,11 @@ public sealed partial class KasaDeposu
                        @p3, @p5, ki.islem_tarihi::timestamp, ki.plan_tarihi,
                        @p6, @p7, @p8, @p9, @p10, @p11, ki.durum, @p12, @p13,
                        coalesce(@p14, ki.proje_id), ki.merkez_id, ki.belge_id,
+                       -- BELGE NO da tasinir: ekstrede tahsilat satirinin
+                       --   "Belge No" hucresi bos kaliyordu (393 ile ayni hata,
+                       --   uretici tarafi orada duzeltildi).
+                       coalesce((select b.belge_no from public.belge b
+                                  where b.id = ki.belge_id), ''),
                        @p15, ki.sube_id, coalesce(ki.giris_kaynak, 1), @p16
                   from public.kasa_islem ki where ki.id = @p0
                 """, baglanti, tx);
