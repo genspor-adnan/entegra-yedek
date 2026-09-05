@@ -217,7 +217,8 @@ export const api = {
    * hale getirirdi. Kart ilk kullanimda acilir.
    */
   ilacStokKarti: (ilacId: number) =>
-    gonder<{ stokId: number; barkod: string; ad: string }>(`/api/katalog/ilac/${ilacId}/stok`, {}),
+    gonder<{ stokId: number; barkod: string; ad: string; fiyat: number }>(
+      `/api/katalog/ilac/${ilacId}/stok`, {}),
 
   /** Elle ilac fiyati (kaynak 9): TITCK Detayli Fiyat Listesi kapisi acilana
       kadar tek yol. Bagli stok kartinin satis fiyatini da gunceller. */

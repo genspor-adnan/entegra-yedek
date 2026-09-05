@@ -172,13 +172,18 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
     setUretiliyor(true);
     setHata(null);
     try {
-      const { stokId } = await api.ilacStokKarti(Number(r.id));
+      const { stokId, fiyat } = await api.ilacStokKarti(Number(r.id));
       const stok = await api.liste('stok', { sayfa: 1, boyut: 1,
         filtre: { alan: 'id', op: 'esit', deger: stokId } });
       // Stok satiri bulunamazsa (yetki suzmesi) ilac satiriyla devam etmek
       //   yanlis olurdu: satir stok kimligi tasimadan gride dusemez.
       if (!stok.satirlar[0]) throw new Error('İlaç için stok kartı okunamadı.');
-      onSec({ ...stok.satirlar[0], tip: 'stok' });
+      // Fiyat kart satirindan gelir; uc de kartin GUNCEL satis fiyatini
+      //   dondurur (ayni islemde yazmis olabilir - liste sorgusu onu
+      //   gormeden okunursa kalem penceresi bos acilirdi).
+      onSec({ ...stok.satirlar[0], tip: 'stok',
+              fiyat: Number(stok.satirlar[0].fiyat ?? 0) > 0
+                     ? stok.satirlar[0].fiyat : (fiyat || undefined) });
     } catch (h) {
       setHata(hataMetni(h));
     } finally { setUretiliyor(false) }

@@ -266,8 +266,30 @@ public static class KatalogUclari
                     """, islem, [stokId, baglam.KullaniciId, id], iptal);
             }
 
+            // KART VARDI AMA FIYATSIZDI: ilaca fiyat sonradan girilmis olabilir
+            //   (once kart acilip sonra fiyat yuklenen sira). Listede ilac
+            //   fiyatli gorunup kalem penceresine bos gelmesinin sebebi buydu.
+            //   VAR OLAN FIYAT EZILMEZ - kullanici elle degistirmis olabilir.
+            await baglanti.CalistirAsync("""
+                insert into public.stok_fiyat (stok_id, fiyat_adi, birim, fiyat,
+                                               doviz_cinsi, satis, ekleyen)
+                select @p0, 0, 51, f.fiyat, 'TL', 1, @p1
+                  from (select coalesce(i.guncel_perakende, i.guncel_kamu, 0) as fiyat
+                          from public.ilac i where i.id = @p2) f
+                 where f.fiyat > 0
+                   and not exists (select 1 from public.stok_fiyat sf
+                                    where sf.stok_id = @p0 and sf.satis = 1 and sf.fiyat > 0)
+                on conflict (stok_id, fiyat_adi, birim, satis, doviz_cinsi)
+                do update set fiyat = excluded.fiyat, degistiren = excluded.ekleyen
+                """, islem, [stokId, baglam.KullaniciId, id], iptal);
+
+            var kartFiyati = await baglanti.TekDegerAsync<decimal>(
+                "select coalesce((select fiyat from public.fn_stok_kart_fiyat(@p0, 1::smallint)), 0)",
+                islem, [stokId], iptal);
+
             await islem.CommitAsync(iptal);
-            return Results.Ok(new { stokId, ilac.Barkod, ilac.Ad, izlemeNo = baglam.IzlemeNo });
+            return Results.Ok(new { stokId, ilac.Barkod, ilac.Ad, fiyat = kartFiyati,
+                                    izlemeNo = baglam.IzlemeNo });
         });
 
         // POST /api/katalog/ilac/{id}/fiyat - ELLE FIYAT (kaynak 9)
