@@ -145,6 +145,7 @@ public static partial class KaynakKatalogu
         Ekle(Bildirim());
         Ekle(Icd());
         Ekle(Ilac());
+        Ekle(ZamanliIs());
         Ekle(NumaraHasta());
         Ekle(NumaraBasvuru());
         Ekle(NumaraSatis());

@@ -1473,6 +1473,15 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuAd: 'Bildirim Kuyruğu', ic: '📨', yetkiKodu: 'bildirim',
   },
   {
+    // ZAMANLI ISLER (405): TITCK haftalik guncelleme gibi kendiliginden
+    //   calisan isler. Kart yalniz ZAMANLAMAYI duzenler - isin kendisi kodda.
+    kaynak: 'zamanli-is', baslik: 'Zamanlanmış İşler',
+    yol: 'Yonetim › Ortak Platform › Zamanlanmış İşler', kartYolu: '/zamanli-is',
+    aksiyonEkrani: 'zamanli-is-liste',
+    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuAd: 'Zamanlanmış İşler', ic: '⏱️', yetkiKodu: 'zamanli_is',
+  },
+  {
     // KLINIK KATALOGLAR (400): durum + dosyadan yukleme. Liste degil,
     //   ozel sayfa - iki katalog ve iki dosya kutusu.
     kaynak: 'katalog-ayarlar', rota: 'katalog-ayarlar', baslik: 'Klinik Kataloglar',

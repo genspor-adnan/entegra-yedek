@@ -6480,3 +6480,36 @@ dosyayı bulur, indirir, XLSX'i okur ve kataloğu tazeler.
 Canlı sonuç: `TİTCK 04.09.2026: 23.002 ürün (829 askıda), 51 atlandı` —
 `kaynak_surum = titck`.
 
+### Zamanlanmış işler (db/405) — TİTCK güncellemesi haftalık kendiliğinden
+
+TİTCK listesi haftalık yayınlanıyordu ve birinin her hafta düğmeye basması
+gerekiyordu. Aynı ihtiyaç sırada bekleyen işler için de var (SKRS senkronu,
+e-Nabız kuyruğu, dönem kapanış hatırlatması) — bu yüzden tek bir işe değil
+**küçük bir zamanlayıcıya** bağlandı.
+
+`zamanli_is` tablosu işin **ne zaman** çalışacağını ve son durumunu tutar;
+**işin kendisi kodda** (`ZamanliIsler` kayıt defteri). Böylece kimse tabloya
+kodda karşılığı olmayan bir satır ekleyip "çalışmıyor" diye aramaz: bilinmeyen
+kod çalıştırılmaz, sebebi son sonuç alanına yazılır.
+
+İşçi bildirim işçisiyle aynı disiplinde: satır **kilitlenerek** alınır
+(`calisiyor = 1`, `for update skip locked`) — iki sunucu aynı işi aynı anda
+çalıştırmaz; tek işin hatası işçiyi düşürmez, hata satıra yazılır ve iş bir
+sonraki periyoda ertelenir; yarıda kalan (servis çöktü) satır 6 saat sonra
+serbest bırakılır. Sonuç yazımı iptal edilemez, yoksa satır "çalışıyor"da
+kalırdı.
+
+**Cron yazılmadı:** ihtiyaç "haftada bir, gece" ölçüsünde. Cron ifadesi
+ekranda kullanıcıya anlatılması gereken ikinci bir dil olurdu; periyot + gün +
+saat üç alanla anlaşılıyor. Kaçan iş açılışta **hemen değil** bir sonraki
+normal saatinde çalışır — gece işi mesai içinde başlamasın.
+
+Kurulumda gelen tek iş: **`titck.ilac` — Pazartesi 04:00**. Ekran: Yönetim ›
+Ortak Platform › **Zamanlanmış İşler** (durum rozeti, sıradaki çalışma, son
+sonuç) + **▶ Şimdi Çalıştır** ve zamanlamayı düzenleyen kart (kod ve ad salt
+okunur — kod değişse satır kodda karşılığı olmayan bir işe dönüşürdü).
+
+**Denendi:** liste "Pazartesi 04:00 · sıradaki 07.09 04:00 · Hiç çalışmadı"
+gösterdi; Şimdi Çalıştır 5 saniyede TİTCK'yi çekti (23.002 ürün) ve satır
+"Başarılı" + sonuç metniyle güncellendi.
+

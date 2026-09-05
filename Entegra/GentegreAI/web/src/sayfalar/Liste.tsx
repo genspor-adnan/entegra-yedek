@@ -43,6 +43,7 @@ import { gelenBelgeAksiyonu } from './gelenBelgeIslem';
 import { utsAksiyonu } from './liste/utsAksiyonlari';
 import { kasaAksiyonu } from './liste/kasaAksiyonlari';
 import { bildirimAksiyonu } from './liste/bildirimAksiyonlari';
+import { zamanliIsAksiyonu } from './liste/zamanliIsAksiyonlari';
 import { fiyatListesiAksiyonu } from './liste/fiyatListesiAksiyonlari';
 import { ebelgeAksiyonu } from './liste/ebelgeAksiyonlari';
 import { Modal } from '../bilesenler/Modal';
@@ -669,6 +670,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       if (await utsAksiyonu(kod, satir, secililer, {
         tazele: () => setYenile(t => t + 1),
         setUtsHazirla, setUtsKullanim, setUtsGenel, setUtsAlma,
+      })) return;
+
+      if (await zamanliIsAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
       })) return;
 
       if (await bildirimAksiyonu(kod, satir, secililer, {

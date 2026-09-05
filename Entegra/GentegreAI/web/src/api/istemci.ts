@@ -970,6 +970,12 @@ export const api = {
     gonder<{ ayarlar: AyarSatiri[] }>(`/api/ayar/${encodeURIComponent(anahtar)}`,
                                       { deger }, 'PUT').then(y => y.ayarlar),
 
+  // ----------------------------------------------------- zamanli isler ----
+  /** Zamanlı işi zamanını beklemeden çalıştırır (kilit sunucuda). */
+  zamanliIsCalistir: (kod: string) =>
+    gonder<{ kod: string; sonuc: string }>(
+      `/api/zamanli-is/${encodeURIComponent(kod)}/calistir`, {}),
+
   // --------------------------------------------------------- katalog ----
   /** Klinik katalogların durumu (ICD / ilaç): son senkron, satır sayısı. */
   katalogDurum: () =>

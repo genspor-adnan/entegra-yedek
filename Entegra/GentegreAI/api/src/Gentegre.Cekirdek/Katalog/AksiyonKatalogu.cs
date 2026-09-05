@@ -311,6 +311,19 @@ public static class AksiyonKatalogu
             //   "Yazdır" dugmesi acilir menusunde CSV Kaydet de var (GenGrid ekler).
             ["cikti-liste"] = [Yazdir()],
 
+            // ZAMANLI ISLER (405): zamani beklemeden calistir + zamanlamayi
+            //   duzenle. "Simdi Calistir" KayitGerekir - satir secilmeden
+            //   pasif gelir; is zaten calisiyorsa sunucu ikinci kez baslatmaz.
+            ["zamanli-is-liste"] =
+            [
+                new("zamanli-is.calistir", "▶ Şimdi Çalıştır", "zamanli-is",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "zamanli_is", Islem: Islem.Degistir, KayitGerekir: true, Sira: 10),
+                new("kart.duzenle", "✎ Düzenle", "zamanli-is", Kisayol: "F2",
+                    KaynakKodu: "zamanli_is", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                Yazdir(),
+            ],
+
             // BILDIRIM KUYRUGU (399): gitmeyeni yeniden dene, gitmesini
             //   istemedigini iptal et. Ikisi de KayitGerekir - satir secilmeden
             //   pasif gelir ve sebebi sunucudan yazilir. Toplu secim destekli:

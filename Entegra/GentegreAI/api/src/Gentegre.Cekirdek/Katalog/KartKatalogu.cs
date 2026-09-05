@@ -202,6 +202,7 @@ public static partial class KartKatalogu
         // FAZ 0 ortak platform (398-401): onam metni ve bildirim sablonu.
         Ekle(OnamMetniKarti());
         Ekle(BildirimSablonKarti());
+        Ekle(ZamanliIsKarti());
         Ekle(NumaraHasta());
         Ekle(NumaraBasvuru());
         Ekle(NumaraSatis());
