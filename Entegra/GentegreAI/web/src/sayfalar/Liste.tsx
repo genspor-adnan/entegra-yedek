@@ -1438,7 +1438,14 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
     {/* KATEGORI AGACI PANELI (kullanici): acikken listenin SOLUNDA durur ve
         secilen dal listeyi suzer. Kapali varsayilan - her listede yer
         kaplamasin. */}
-    <div className={tanim.kategoriSuzgeci && kategoriPaneli ? 'kat-duzen' : undefined}>
+    <div className={(tanim.kategoriSuzgeci && kategoriPaneli) || tanim.kaynak === 'dokuman'
+                    ? 'kat-duzen' : undefined}>
+      {/* DOKUMAN KLASOR PANELI (419): listenin SOLUNDA durur - kat-duzen flex
+          oldugu icin panel `kat-duzen-ic`in KARDESI olmali; icine konunca
+          blok akista gridin USTUNDE kaliyordu. */}
+      {tanim.kaynak === 'dokuman' && (
+        <DokumanKlasorPaneli secim={klasorSecim} onSecim={setKlasorSecim} yenile={yenile} />
+      )}
       {tanim.kategoriSuzgeci && kategoriPaneli && (
         <KategoriAgacPaneli
           tur={tanim.kategoriSuzgeci}
@@ -1448,11 +1455,6 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         />
       )}
       <div className="kat-duzen-ic">
-    {/* DOKUMAN: solda klasor agaci (mockup dokuman_listesi.html). Kaynak
-        klasorleri sanal - dokumanin kaynak alanindan turer. */}
-    {tanim.kaynak === 'dokuman' && (
-      <DokumanKlasorPaneli secim={klasorSecim} onSecim={setKlasorSecim} yenile={yenile} />
-    )}
     <GenGrid
       // key: kaynak degisince (baska liste ekranina gecince) GenGrid TAMAMEN yeniden
       //   kurulsun - Route ayni tree konumunda kaldigi icin React bilesen orneğini
