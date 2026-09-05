@@ -29,8 +29,11 @@ export interface TahsilatAcilisi {
 }
 
 export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, setHata,
-                                  onPencereKapandi }: {
+                                  onPencereKapandi, belgeAdi = 'Belge' }: {
   kayitliId: number;
+  /** Belgenin KISA adi (Fiş / Fatura / Tahakkuk...) - tahsilat aciklamasi
+      bundan kurulur: "Fiş Tahsilatı" (kullanici). */
+  belgeAdi?: string;
   aktifSekme: string;
   cari: { id: number; unvan: string } | null;
   onKaydedildi?(): void;
@@ -72,8 +75,10 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
    * Tahsilat GERCEKLESMIS kaydedilir (taslak degil): kasa kartindaki normal
    * akisla ayni - yalniz alan sorma adimi atlanir.
    */
+  // hesapAdi imzada KALIR (cagiran veriyor) ama aciklamada kullanilmaz:
+  //   aciklama artik belgenin cinsinden kuruluyor.
   const hizliTahsilat = async (tur: number, hesapId: number, tutar: number,
-                               hesapAdi = '') => {
+                               _hesapAdi = '') => {
     // Hata SESSIZ KALMASIN (kullanici: "seçtim ama satıra eklenmedi"): hizli
     //   akista kart acilmadigi icin sekmedeki hata kutusu gorunmuyordu -
     //   uyarilar pencereyle verilir.
@@ -91,7 +96,10 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
           tutar,
           dovizCinsi: 'TL',
           dovizKuru: 1,
-          aciklama: hesapAdi ? `Hızlı tahsilat · ${hesapAdi}` : 'Hızlı tahsilat',
+          // Aciklama BELGEDEN gelir (kullanici): "Hızlı tahsilat" tahsilatin
+          //   nasil girildigini anlatiyordu, NE OLDUGUNU degil - ekstrede ve
+          //   kasa listesinde okunan sey belgenin cinsi.
+          aciklama: `${belgeAdi} Tahsilatı`,
         },
         secenekler: { taslak: false, plan: false, kurKontrolu: true, belgeId: kayitliId },
       });

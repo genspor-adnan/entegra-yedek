@@ -4,7 +4,8 @@ import { api } from '../api/istemci';
 import { mesaj, metinSor, onay, secimSor } from '../bilesenler/mesaj';
 import { type BelgeYaniti, type KasaIslemTuru, URUN_GENOTIP, hataMetni, hataAyristir } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
-import { belgeTuruBilgisi, GIRILEBILIR_TURLER, VARSAYILAN_TUR } from './belgeTuru';
+import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR }
+  from './belgeTuru';
 import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { para, yerelAnMetni, hamSayi } from '../bilesenler/bicim';
@@ -529,6 +530,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   // Tahsilat sekmesinin tum durumu ve akisi ayri dosyada (belgeTahsilat.ts):
   //   liste, cek/senet karti, kasa islemi acilislari ve silme.
   const tahsilat = useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, setHata,
+                                     // Tahsilat aciklamasi belgenin cinsinden kurulur:
+                                     //   "Fiş Tahsilatı" / "Fatura Tahsilatı" (kullanici).
+                                     belgeAdi: belgeKisaAdi(tur, basvuruMu),
                                      onPencereKapandi: tur => { void posSonrasi(tur) } });
   const { tahsilatAdimi } = tahsilat;
 

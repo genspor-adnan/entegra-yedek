@@ -108,6 +108,32 @@ function turAdi(tur: number): string {
 }
 
 /**
+ * BELGENIN KISA ADI - yon (Satis / Alis) YOK, yalniz belge cinsi.
+ *
+ * Tahsilat aciklamasinda kullanilir (kullanici: "hangi belgedeysem ismi +
+ * Tahsilatı yazsın - Fiş Tahsilatı / Fatura Tahsilatı / Tahakkuk Tahsilatı").
+ * Yonu yazmak gereksiz: tahsilat zaten belgeye bagli ve carinin ekstresinde
+ * duruyor.
+ *
+ * `basvuruMu` disaridan gelir: basvuru ile satis siparisi AYNI TUR (19),
+ * ayirt eden belge TIPIDIR (301) ve o bilgi burada yok.
+ */
+export function belgeKisaAdi(tur: number, basvuruMu = false): string {
+  if (basvuruMu) return 'Başvuru';
+  if (tur === 18) return 'Teklif';
+  if (tur === 20) return 'Transfer';
+  if (tur === 105) return 'Talep';
+  if (SIPARIS_TURLERI.has(tur)) return 'Sipariş';
+  if (KONSINYE_TURLERI.has(tur)) return 'Konsinye';
+  if (TAHAKKUK_TURLERI.has(tur)) return 'Tahakkuk';
+  if (IRSALIYE_TURLERI.has(tur)) return 'İrsaliye';
+  // 16 satis / 12 alis FISI - katalogda fatura ailesinde ama adi "Fiş".
+  if (tur === 16 || tur === 12 || STOK_FISI_TURLERI.has(tur)) return 'Fiş';
+  if (FATURA_TURLERI.has(tur)) return 'Fatura';
+  return 'Belge';
+}
+
+/**
  * Turun ekran davranisi. Bilinmeyen tur gelirse fatura gibi davranilir -
  * eksik tanim yuzunden ekranin bos acilmasindansa en genel bicim gosterilir.
  */
