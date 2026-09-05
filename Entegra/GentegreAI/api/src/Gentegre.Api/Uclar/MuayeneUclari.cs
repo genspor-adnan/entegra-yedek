@@ -114,5 +114,149 @@ public static class MuayeneUclari
                                     mesaj = "Muayene tamamlandi.",
                                     izlemeNo = baglam.IzlemeNo });
         });
+
+        // POST /api/muayene/sira/cagir - "Sıradakini Çağır" / seçili hastayı çağır
+        //   Sıra kuralı SQL'de (fn_siradaki_hasta): önce öncelik, sonra kayıt
+        //   sırası. İstemcinin sırayı hesaplaması, iki hekimin aynı anda
+        //   basmasında aynı hastayı iki kez çağırmak olurdu.
+        grup.MapPost("/sira/cagir", async (
+            CagirIstegi? istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var belgeId = istek?.BelgeId ?? 0;
+            if (belgeId == 0)
+            {
+                var hekim = istek?.HekimId ?? 0;
+                if (hekim == 0)
+                    throw GentegreHatasi.Dogrulama("Hekim secilmeli.",
+                        [new("hekimId", "Siradakini cagirmak icin hekim gerekli.")]);
+
+                belgeId = await baglanti.TekDegerAsync<int>(
+                    "select coalesce(public.fn_siradaki_hasta(@p0, @p1), 0)",
+                    islem, [hekim, baglam.SubeId], iptal);
+                if (belgeId == 0)
+                    return Results.Ok(new { belgeId = 0, mesaj = "Bekleyen hasta yok.",
+                                            izlemeNo = baglam.IzlemeNo });
+            }
+
+            // Cagirma zamani IKINCI TIKTA EZILMEZ: bekleme suresi olcusu
+            //   cagirma anindan hesaplaniyor, tekrar cagirmak onu bozmamali.
+            //   Tekrar cagirma yine de anons icin gecerli bir istektir.
+            var kayit = await baglanti.TekAsync("""
+                update public.belge_basvuru bb
+                   set cagirma_zamani = coalesce(bb.cagirma_zamani, now()),
+                       cagiran_id = coalesce(bb.cagiran_id, @p1),
+                       degistiren = @p1, degistirme_tarihi = now()
+                 where bb.id = @p0
+                returning bb.cagirma_zamani, bb.sira_no,
+                          (select t.unvan from public.belge b
+                             join public.taraf t on t.id = b.taraf_id where b.id = bb.id)
+                """, islem, [belgeId, baglam.KullaniciId], o => new
+                {
+                    Zaman = o.GetDateTime(0), SiraNo = o.GetString(1),
+                    Hasta = o.IsDBNull(2) ? "" : o.GetString(2),
+                }, iptal);
+
+            if (kayit is null) return Results.NotFound(new { hata = new
+                { kod = "BULUNAMADI", mesaj = "Basvuru bulunamadi." } });
+
+            await islem.CommitAsync(iptal);
+
+            // Bekleme ekraninda KISALTILMIS ad gosterilir (KVKK): salonda
+            //   herkesin duydugu bir listede tam ad okunmamali.
+            return Results.Ok(new { belgeId, kayit.SiraNo, cagirma = kayit.Zaman,
+                                    hasta = kayit.Hasta, ekranAdi = AdiKisalt(kayit.Hasta),
+                                    mesaj = $"{kayit.Hasta} cagrildi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/muayene/basvuru/{belgeId}/al - "Muayeneye Al"
+        //   Muayene kaydi YOKSA ACILIR: hekim once "muayene ekle" deyip sonra
+        //   hastayi secmek zorunda kalmasin - kart basvurudan turer.
+        grup.MapPost("/basvuru/{belgeId:int}/al", async (
+            int belgeId, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Ekle);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var b = await baglanti.TekAsync("""
+                select b.taraf_id, bb.personel_id, bb.bolum_id, b.sube_id,
+                       (select m.id from public.muayene m
+                         where m.belge_id = b.id and m.ust_muayene_id is null)
+                  from public.belge b
+                  join public.belge_basvuru bb on bb.id = b.id
+                 where b.id = @p0 and b.tur = 19
+                 for update of b
+                """, islem, [belgeId], o => new
+                {
+                    TarafId = o.GetInt32(0),
+                    PersonelId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1),
+                    BolumId = o.IsDBNull(2) ? (int?)null : o.GetInt32(2),
+                    SubeId = o.GetInt32(3),
+                    MuayeneId = o.IsDBNull(4) ? (int?)null : o.GetInt32(4),
+                }, iptal);
+
+            if (b is null) return Results.NotFound(new { hata = new
+                { kod = "BULUNAMADI", mesaj = "Basvuru bulunamadi." } });
+
+            var muayeneId = b.MuayeneId ?? await baglanti.TekDegerAsync<int>("""
+                insert into public.muayene (belge_id, taraf_id, sube_id, bolum_id, personel_id,
+                                            muayene_tarihi, tur, durum, ekleyen)
+                values (@p0, @p1, @p2, @p3, @p4, now(), 1, 1, @p5)
+                returning id
+                """, islem, [belgeId, b.TarafId, b.SubeId, b.BolumId, b.PersonelId,
+                             baglam.KullaniciId], iptal);
+
+            // Cagirilmadan "Muayeneye Al" denirse cagirma zamani da yazilir:
+            //   hasta zaten iceride, bekleme suresi o an bitmistir.
+            await baglanti.CalistirAsync("""
+                update public.belge_basvuru
+                   set cagirma_zamani = coalesce(cagirma_zamani, now()),
+                       cagiran_id = coalesce(cagiran_id, @p1)
+                 where id = @p0
+                """, islem, [belgeId, baglam.KullaniciId], iptal);
+
+            var baslangic = await baglanti.TekDegerAsync<DateTime>("""
+                update public.muayene
+                   set baslangic = coalesce(baslangic, now()),
+                       degistiren = @p1, degistirme_tarihi = now()
+                 where id = @p0
+                returning baslangic
+                """, islem, [muayeneId, baglam.KullaniciId], iptal);
+
+            await islem.CommitAsync(iptal);
+            return Results.Ok(new { belgeId, muayeneId, baslangic,
+                                    yeni = b.MuayeneId is null,
+                                    mesaj = $"Muayeneye alindi ({baslangic:HH:mm}).",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+    }
+
+    /// <summary>İstek gövdesi: belge verilmezse hekimin SIRADAKİ hastası çağrılır.</summary>
+    public sealed record CagirIstegi(int? BelgeId, int? HekimId);
+
+    /// <summary>
+    /// Bekleme ekranı için adı kısaltır: "Ayşe Yılmaz" → "A. Y***".
+    ///
+    /// Salonda herkesin gördüğü bir ekranda tam ad okunmamalı; çağrılan kişi
+    /// kendini tanısın yeter.
+    /// </summary>
+    private static string AdiKisalt(string ad)
+    {
+        var parcalar = (ad ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parcalar.Length == 0) return "";
+        var bas = string.Join(" ", parcalar[..^1].Select(x => x[..1] + "."));
+        var son = parcalar[^1];
+        return (bas.Length > 0 ? bas + " " : "") + son[..1] + new string('*', Math.Min(3, son.Length));
     }
 }

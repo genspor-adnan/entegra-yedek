@@ -311,6 +311,23 @@ public static class AksiyonKatalogu
             //   "Yazdır" dugmesi acilir menusunde CSV Kaydet de var (GenGrid ekler).
             ["cikti-liste"] = [Yazdir()],
 
+            // HEKIM CALISMA LISTESI (410): gunun isi tek ekranda. Cagirma ve
+            //   muayeneye alma AYRI dugmelerdir - hasta cagrilip gelmeyebilir,
+            //   ikisini birlestirmek "geldi mi" sorusunu olculemez yapardi.
+            ["hekim-liste"] =
+            [
+                new("hekim.cagir", "📢 Sıradakini Çağır", "hekim-listesi",
+                    Hedef: "araccubugu,palet",
+                    KaynakKodu: "muayene", Islem: Islem.Degistir, Sira: 10),
+                new("hekim.secileni-cagir", "🔔 Seçileni Çağır", "hekim-listesi",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                new("hekim.al", "🩺 Muayeneye Al", "hekim-listesi",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "muayene", Islem: Islem.Ekle, KayitGerekir: true, Sira: 30),
+                Yazdir(),
+            ],
+
             // MUAYENE (409, Faz 1): hekimin gunluk isi iki dugmeye baglidir.
             //   "Muayeneye Al" baslangic zamanini yazar (USS Muayene
             //   Baslangic) - hasta ne zaman iceri girdi sorusunun tek cevabi

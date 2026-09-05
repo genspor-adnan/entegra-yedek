@@ -226,6 +226,16 @@ export const api = {
     gonder<{ barkod: string; perakende: number; stokId: number | null; yururluk: string }>(
       `/api/katalog/ilac/${ilacId}/fiyat`, { perakende, kdv }),
 
+  /** Sirayi cagir (410): belge verilmezse hekimin SIRADAKI hastasi. */
+  siraCagir: (istek: { belgeId?: number; hekimId?: number }) =>
+    gonder<{ belgeId: number; siraNo?: string; hasta?: string; ekranAdi?: string;
+             cagirma?: string; mesaj: string }>('/api/muayene/sira/cagir', istek),
+
+  /** Basvurudan muayeneye al: muayene kaydi yoksa ACILIR. */
+  basvurudanMuayeneyeAl: (belgeId: number) =>
+    gonder<{ belgeId: number; muayeneId: number; baslangic: string; yeni: boolean;
+             mesaj: string }>(`/api/muayene/basvuru/${belgeId}/al`, {}),
+
   /** Muayeneye Al (409): baslangic zamani - ikinci tikta ezilmez (sunucu). */
   muayeneyeAl: (id: number) =>
     gonder<{ id: number; baslangic: string; mesaj: string }>(`/api/muayene/${id}/al`, {}),

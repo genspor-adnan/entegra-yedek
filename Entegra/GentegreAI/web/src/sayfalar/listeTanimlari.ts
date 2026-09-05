@@ -335,6 +335,27 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   // RADYOLOJI grubu ana menude KAYIT KABUL ile CRM ARASINDA (kullanici):
   //   grup sirasi bu dizideki ILK gorulme sirasindan gelir.
   {
+    // HEKIM CALISMA LISTESI (410, Faz 1) - hekimin gun icindeki isi.
+    //   Satir = BASVURU (belge tur 19), muayene henuz acilmamis olabilir;
+    //   "Muayeneye Al" onu acar. Ayri bir liste tablosu YOK - kayit kabulun
+    //   actigi basvurudan turer, yoksa ayni hasta iki yerde iki durumda
+    //   gorunurdu.
+    kaynak: 'hekim-listesi', rota: 'hekim-listesi', baslik: 'Hekim Çalışma Listesi',
+    yol: 'Muayene › Çalışma Listesi',
+    aksiyonEkrani: 'hekim-liste',
+    tarihAlani: 'saat',
+    cipler: [
+      { ad: 'Bekleyen',       filtre: { alan: 'durumKod', op: 'esit', deger: 0 } },
+      { ad: 'Çağrıldı',       filtre: { alan: 'durumKod', op: 'esit', deger: 1 } },
+      { ad: 'Muayenede',      filtre: { alan: 'durumKod', op: 'esit', deger: 2 } },
+      { ad: 'Sonuç Bekleyen', filtre: { alan: 'durumKod', op: 'esit', deger: 3 } },
+      { ad: 'Tamamlanan',     filtre: { alan: 'durumKod', op: 'esit', deger: 4 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Muayene', menuAd: 'Çalışma Listesi', ic: '📋', yetkiKodu: 'muayene',
+  },
+  {
     // MUAYENE (409, Faz 1): tip merkezindeki uzman hekim muayenesi -
     //   basvurudan dogar; anamnez, vital, sablonlu bulgu, ICD-10 tani ve
     //   istemler kartin sekmelerinde. Cipler gunun isini bolumler: once

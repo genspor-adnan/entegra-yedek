@@ -137,6 +137,7 @@ public static partial class KaynakKatalogu
         // Numaralama (152): Genel Ayarlar > Numaralama ekranindaki dort grid.
         Ekle(PrimRolAday());
         Ekle(Muayene());
+        Ekle(HekimCalismaListesi());
         Ekle(LabIstem());
         // FAZ 0 ortak platform (398-401): onam, bildirim, klinik kataloglar.
         Ekle(OnamMetni());

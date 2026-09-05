@@ -84,6 +84,109 @@ public static partial class KaynakKatalogu
                                                      Varsayilan: false)
         });
 
+    /// <summary>
+    /// HEKİM ÇALIŞMA LİSTESİ (410, Faz 1) — hekimin gün içindeki işi.
+    ///
+    /// AYRI BİR TABLO YOK: liste kayıt kabulün açtığı başvurulardan (belge
+    /// tür 19 + belge_basvuru) türer. Ayrı bir "çalışma listesi" tablosu,
+    /// aynı hastanın iki yerde iki farklı durumda görünmesi demekti.
+    ///
+    /// Durum ÜÇ ZAMANDAN türetilir ve üçü ayrı soruların cevabıdır:
+    /// kayıt (belge_tarihi) · çağırma (cagirma_zamani) · içeri giriş
+    /// (muayene.baslangic). Tek alanla idare etmek hem "bekleme süresi"
+    /// hem "muayene süresi" ölçüsünü kaybettirirdi.
+    /// </summary>
+    private static KaynakTanimi HekimCalismaListesi() => new(
+        Ad: "hekim-listesi",
+        YetkiKodu: "muayene",
+        Kaynak: "public.belge b "
+              + "  join public.belge_basvuru bb on bb.id = b.id "
+              + "  join public.taraf h on h.id = b.taraf_id "
+              + "  left join public.muayene m on m.belge_id = b.id and m.ust_muayene_id is null "
+              + "  left join public.v_personel_lookup p on p.id = bb.personel_id "
+              + "  left join public.v_departman_lookup d on d.id = bb.bolum_id "
+              + "  left join public.taraf k on k.id = bb.odeyen_kurum_id",
+        SabitKosul: "b.tur = 19 and coalesce(b.durum, 0) <> 2",
+        SubeKolonu: "b.sube_id",
+        // Once oncelik (acil/oncelikli), sonra kayit sirasi - listedeki sira
+        //   cagirma sirasidir; kullanicinin siralamayi bilmesi gerekmesin.
+        VarsayilanSirala: "bb.oncelik desc, b.belge_tarihi asc, b.id asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",          "b.id",              "sayi",  "Id", Varsayilan: false),
+            new("siraNo",      "bb.sira_no",        "metin", "Sıra", Hizalama: "orta",
+                                                    Genislik: 70),
+            new("saat",        "b.belge_tarihi",    "tarih", "Saat", Hizalama: "orta",
+                                                    Bicim: "HH:mm", Genislik: 70),
+            new("protokolNo",  "coalesce(b.belge_no, '')", "metin", "Protokol",
+                                                    Hizalama: "orta", Genislik: 130),
+            new("hastaAdi",    "h.unvan",           "metin", "Hasta", Genislik: 220),
+            new("dosyaNo",     "h.kod",             "metin", "Dosya No", Hizalama: "orta",
+                                                    Genislik: 110, Varsayilan: false),
+            new("tcNo",        "coalesce(h.vkno, '')", "metin", "T.C. No", Hizalama: "orta",
+                                                    Genislik: 110, Varsayilan: false),
+            new("hekimAdi",    "coalesce(p.ad, '')", "metin", "Hekim", Genislik: 170),
+            new("bolumAdi",    "coalesce(d.ad, '')", "metin", "Bölüm", Genislik: 140),
+            new("kurumAdi",    "coalesce(k.unvan, 'Özel')", "metin", "Kurum", Genislik: 150),
+            new("oncelikAdi",
+                "case bb.oncelik when 2 then 'Acil' when 1 then 'Öncelikli' else '' end",
+                                                    "metin", "Öncelik", Hizalama: "orta",
+                                                    Bicim: "rozet", Genislik: 90,
+                                                    Filtrelenebilir: false),
+            new("oncelik",     "bb.oncelik",        "kod",   "Öncelik Kodu",
+                                                    Varsayilan: false),
+            // BEKLEME: cagrilmadiysa SU ANA kadar, cagrildiysa cagirma anina
+            //   kadar gecen sure. Cagrildiktan sonra da buyumeye devam etseydi
+            //   liste "45 dk bekliyor" derken hasta iceride olurdu.
+            new("beklemeDk",
+                "greatest(0, (extract(epoch from "
+                + "coalesce(bb.cagirma_zamani, now()) - b.belge_tarihi) / 60)::int)",
+                                                    "sayi",  "Bekleme (dk)", Hizalama: "sag",
+                                                    Genislik: 110),
+            new("cagirmaZamani", "bb.cagirma_zamani", "tarih", "Çağrıldı", Hizalama: "orta",
+                                                    Bicim: "HH:mm", Genislik: 90),
+            new("durumAdi",
+                """
+                case
+                  when m.durum = 3 then 'Tamamlandı'
+                  when m.durum = 2 then 'Sonuç Bekliyor'
+                  when m.baslangic is not null then 'Muayenede'
+                  when bb.cagirma_zamani is not null then 'Çağrıldı'
+                  else 'Bekliyor'
+                end
+                """,                                "metin", "Durum", Hizalama: "orta",
+                                                    Bicim: "rozet", Genislik: 130,
+                                                    Filtrelenebilir: false),
+            // SAYISAL DURUM: cipler ve siralama bunun uzerinden yurur -
+            //   metin karsilastirmasi dile bagimli olurdu.
+            //   0 bekliyor · 1 cagrildi · 2 muayenede · 3 sonuc bekliyor · 4 tamamlandi
+            new("durumKod",
+                """
+                case
+                  when m.durum = 3 then 4
+                  when m.durum = 2 then 3
+                  when m.baslangic is not null then 2
+                  when bb.cagirma_zamani is not null then 1
+                  else 0
+                end
+                """,                                "sayi",  "Durum Kodu", Varsayilan: false),
+            new("anaTani",
+                "coalesce((select i.ad from public.tani t "
+                + "join public.icd i on i.kod = t.icd_kod "
+                + "where t.muayene_id = m.id and t.tur = 1 limit 1), '')",
+                                                    "metin", "Ana Tanı", Genislik: 200,
+                                                    Varsayilan: false),
+            new("bekleyenIstem",
+                "coalesce((select count(*) from public.muayene_istem s "
+                + "where s.muayene_id = m.id and s.sonuc_durum in (0, 1)), 0)",
+                                                    "sayi",  "Bekleyen İstem", Hizalama: "orta",
+                                                    Genislik: 120, Varsayilan: false),
+            new("muayeneId",   "coalesce(m.id, 0)", "sayi",  "Muayene Id", Varsayilan: false),
+            new("tarafId",     "b.taraf_id",        "sayi",  "Hasta Id", Varsayilan: false),
+            new("personelId",  "coalesce(bb.personel_id, 0)", "sayi", "Hekim Id",
+                                                    Varsayilan: false)
+        });
+
     private static KaynakTanimi LabIstem() => new(
         Ad: "lab-istem",
         YetkiKodu: "lab",
