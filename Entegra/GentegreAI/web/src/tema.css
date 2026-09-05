@@ -201,6 +201,13 @@ input, select { font: inherit; color: inherit }
 .durumseg button.on { background: var(--mor); border-color: var(--mor); color: #fff; font-weight: 700 }
 /* Delphi "Tum Liste / Son Aranan / Sik Aranan" — sadece ikon, kare dugme. */
 .durumseg .ikon-liste { width: 22px; padding: 1px 0; text-align: center; font-size: 11px }
+/* Serit KAPAT dugmeleri (ekstreden cikis, filtre temizleme): ikon kadar
+   yer kaplasin - normal dugme genisligi yaninda iri duruyordu. */
+.durumseg .kapat, .tarih-araligi .kapat {
+  width: 20px; padding: 1px 0; text-align: center; font-size: 11px; line-height: 1.6;
+  border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz);
+  color: var(--yazi); cursor: pointer;
+}
 .durumseg-ayrac { width: 1px; align-self: stretch; background: var(--cizgi); margin: 0 2px }
 
 .sahne { flex: 1; overflow: auto; padding: 12px 20px 16px; min-height: 0 }

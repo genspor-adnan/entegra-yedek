@@ -704,6 +704,21 @@ export const api = {
    * secilince bos grid veren secenek gorunmesin. `rol` verilirse kisi
    * listesi o rolde satiri olanlara daralir.
    */
+  /**
+   * Basvuru listesi seridindeki Odeyen / Bolum / Doktor combo secenekleri.
+   * Secenekler ARALIKTAKI BASVURULARDAN uretilir (kullanici) - tanim
+   * tablolarindan degil, yani secilince bos liste veren secenek gorunmez.
+   */
+  basvuruSuzgecSecenekleri: (bas?: string, bit?: string) => {
+    const p = new URLSearchParams();
+    if (bas) p.set('bas', bas);
+    if (bit) p.set('bit', bit);
+    const q = p.toString();
+    type Secenek = { id: number; ad: string; adet: number };
+    return istek<{ odeyenler: Secenek[]; bolumler: Secenek[]; doktorlar: Secenek[] }>(
+      `/api/belge/basvuru-suzgec${q ? `?${q}` : ''}`);
+  },
+
   hakedisSuzgecSecenekleri: (bas?: string, bit?: string, rol?: number) => {
     const p = new URLSearchParams();
     if (bas) p.set('bas', bas);

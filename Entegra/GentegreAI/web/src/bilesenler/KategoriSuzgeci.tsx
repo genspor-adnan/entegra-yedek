@@ -73,7 +73,7 @@ export function KategoriSuzgeci({ tur, deger, onDegis }: {
               const id = Number(v);
               onDegis(id, altAgac(id));
             }}>
-      <option value="">Tüm kategoriler</option>
+      <option value="">Tüm Kategoriler</option>
       {secenekler.map(s => <option key={s.id} value={s.id}>{s.etiket}</option>)}
     </select>
   );

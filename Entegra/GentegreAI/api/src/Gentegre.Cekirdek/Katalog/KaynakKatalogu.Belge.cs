@@ -152,7 +152,7 @@ public static partial class KaynakKatalogu
                 "         (select d.ad from public.randevu r " +
                 "            join public.departman d on d.id = r.bolum " +
                 "           where r.belge_id = b.id order by r.id limit 1), '')",
-                                                      "metin", "Poliklinik", Genislik: 150,
+                                                      "metin", "Bölüm", Genislik: 150,
                                                       Varsayilan: false, Siralanabilir: false,
                                                       Filtrelenebilir: false),
             new("doktor",
@@ -165,6 +165,85 @@ public static partial class KaynakKatalogu
                                                       "metin", "Doktor", Genislik: 160,
                                                       Varsayilan: false, Siralanabilir: false,
                                                       Filtrelenebilir: false),
+            // BASVURU TAMAMLANMA YUZDESI (kullanici: liste kolonu "%"). Kart
+            //   uzerindeki tamamlanma seridinin (370) AYNI kurallari - hesap
+            //   iki yerde ayri yazilmasin diye asama tanimi birebir taşındı
+            //   (web: belgeKarti/basvuruAsamalari.ts):
+            //     Basvuru      - kayit var (listedeki her satir)
+            //     Provizyon    - YALNIZ OSS(2)/SGK(3) akisinda; durum 1 ya da 3
+            //     Ucretlendirme- genel toplam > 0
+            //     Tahsilat     - ucret var ve acik borc <= 0,005 (kurus artigi)
+            //     Faturalama   - kapanma_durum = 2
+            //   Yuzde CIZILEN asamalardan hesaplanir: provizyonsuz kurumda
+            //   (Ozel) asama sayisi 4, otekilerde 5 - kullanilmayan asama
+            //   yuzdeyi asagi cekmemeli.
+            new("tamamlanma",
+                """
+                (
+                  select round(100.0 * (
+                           1
+                         + case when b.genel_toplam > 0 then 1 else 0 end
+                         + case when b.genel_toplam > 0
+                                 and b.genel_toplam - coalesce((
+                                       select sum(ki.tutar) from public.kasa_islem ki
+                                        where ki.belge_id = b.id and ki.durum = 2), 0) <= 0.005
+                                then 1 else 0 end
+                         + case when coalesce(b.kapanma_durum, 0) = 2 then 1 else 0 end
+                         + case when k.tur in (2, 3)
+                                 and (case when k.tur = 2 then bp.oss_durum else bp.sgk_durum end)
+                                     in (1, 3)
+                                then 1 else 0 end
+                         ) / case when k.tur in (2, 3) then 5 else 4 end)
+                    from public.belge_basvuru bb2
+                    left join public.taraf_kurum k on k.id = bb2.odeyen_kurum_id
+                    left join public.belge_provizyon bp on bp.id = b.id
+                   where bb2.id = b.id
+                )
+                """,                              "sayi", "Tamamlanma", Hizalama: "sag",
+                                                  Bicim: "yuzde", Genislik: 110,
+                                                  Varsayilan: false),
+            // TAHSILAT DURUMU (kullanici: serit "Tahsilat" combosu):
+            //   0 yok · 1 kismi · 2 tamamlandi. Kolonun kendisi gorunmez -
+            //   listede zaten Tahsilat TUTARI var; bu yalniz suzme icin.
+            //   Esik tamamlanma seridiyle AYNI: kurusun altindaki fark
+            //   kapanmis sayilir (yuvarlama artigi "kismi" gostermesin).
+            new("tahsilatDurum",
+                """
+                case
+                  when coalesce((select sum(ki.tutar) from public.kasa_islem ki
+                                  where ki.belge_id = b.id and ki.durum = 2), 0) <= 0 then 0
+                  when b.genel_toplam - coalesce((select sum(ki.tutar) from public.kasa_islem ki
+                                  where ki.belge_id = b.id and ki.durum = 2), 0) <= 0.005 then 2
+                  else 1
+                end
+                """,                              "sayi", "Tahsilat Durumu",
+                                                  Hizalama: "orta", Varsayilan: false),
+            // BASVURU SERIT SUZGECLERI icin HAM ID'ler (kullanici: "Odeyen
+            //   combo, bolum agac combo, Doktor combo"). Adlar metin kolonu
+            //   olarak zaten var ama filtre ADA gore calisamaz: ayni adli iki
+            //   kurum ya da unvan degisikligi filtreyi kaydirirdi. Gorunur
+            //   kolon degil - yalniz suzme icin (gizliKolonlar'da da tutulur).
+            //   Ada cozen kolonlarla AYNI kaynaklardan okunur: once belgenin
+            //   kendi basvuru satiri, yoksa belgeye bagli randevu.
+            new("odeyenKurumId",
+                "(select bb.odeyen_kurum_id from public.belge_basvuru bb " +
+                "  where bb.id = b.id)",
+                                                      "sayi", "Ödeyen Kurum Id",
+                                                      Varsayilan: false, Siralanabilir: false),
+            new("bolumId",
+                "coalesce((select bb.bolum_id from public.belge_basvuru bb " +
+                "           where bb.id = b.id), " +
+                "         (select r.bolum from public.randevu r " +
+                "           where r.belge_id = b.id order by r.id limit 1))",
+                                                      "sayi", "Bölüm Id",
+                                                      Varsayilan: false, Siralanabilir: false),
+            new("doktorId",
+                "coalesce((select bb.personel_id from public.belge_basvuru bb " +
+                "           where bb.id = b.id), " +
+                "         (select r.hekim_id from public.randevu r " +
+                "           where r.belge_id = b.id order by r.id limit 1))",
+                                                      "sayi", "Doktor Id",
+                                                      Varsayilan: false, Siralanabilir: false),
             // TAHSILAT (basvuru listesi): belgeye baglanmis kasa islemlerinin
             //   toplami - hasta pesin oderse "ne kadari tahsil edildi" genel
             //   toplamin yaninda okunur.

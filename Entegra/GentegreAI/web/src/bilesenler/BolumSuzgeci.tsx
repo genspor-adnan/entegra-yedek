@@ -23,9 +23,16 @@ type Bolum = { id: number; ad: string; ustId: number | null };
     çift girinti olur. */
 const adTemizle = (ad: string) => ad.replace(/^—\s*/, '');
 
-export function BolumSuzgeci({ deger, onDegis }: {
+export function BolumSuzgeci({ deger, onDegis, izinliIdler }: {
   deger: number | null;
   onDegis(id: number | null, altlarDahil: number[]): void;
+  /**
+   * Verilirse combo YALNIZ bu bolumleri (ve onlara giden ust dallari) gosterir
+   * - basvuru listesinde "o tarih araliginda YER ALAN" bolumler (kullanici).
+   * Ust dallar agac yapisi bozulmasin diye kalir; secilince zaten alt agaciyla
+   * birlikte suzer, yani onlar da anlamli secim.
+   */
+  izinliIdler?: number[];
 }) {
   const [kayitlar, setKayitlar] = useState<Bolum[]>([]);
 
@@ -43,8 +50,20 @@ export function BolumSuzgeci({ deger, onDegis }: {
 
   /** Ağaç sırası: kök -> altları, girinti derinlikle. */
   const secenekler = useMemo(() => {
+    // İzin listesi varsa: izinli düğümler + onların TÜM ÜST dalları kalır.
+    //   Üst dal atılırsa alttaki bölüm ağaçta asılı kalır ve hiç çizilmez.
+    let gorunur = kayitlar;
+    if (izinliIdler) {
+      const izin = new Set(izinliIdler);
+      const ustler = new Map(kayitlar.map(k => [k.id, k.ustId]));
+      izinliIdler.forEach(id => {
+        let u = ustler.get(id) ?? null;
+        while (u !== null && !izin.has(u)) { izin.add(u); u = ustler.get(u) ?? null }
+      });
+      gorunur = kayitlar.filter(k => izin.has(k.id));
+    }
     const cocuk = new Map<number, Bolum[]>();
-    kayitlar.forEach(b => {
+    gorunur.forEach(b => {
       const ust = b.ustId ?? 0;
       cocuk.set(ust, [...(cocuk.get(ust) ?? []), b]);
     });
@@ -62,7 +81,7 @@ export function BolumSuzgeci({ deger, onDegis }: {
     };
     gez(0, 0);
     return sonuc;
-  }, [kayitlar]);
+  }, [kayitlar, izinliIdler]);
 
   /** Seçilen dalın kendisi + tüm altları. */
   const altAgac = (id: number): number[] => {
@@ -84,7 +103,7 @@ export function BolumSuzgeci({ deger, onDegis }: {
               const id = Number(v);
               onDegis(id, altAgac(id));
             }}>
-      <option value="">Tüm bölümler</option>
+      <option value="">Tüm Bölümler</option>
       {secenekler.map(s => <option key={s.id} value={s.id}>{s.etiket}</option>)}
     </select>
   );

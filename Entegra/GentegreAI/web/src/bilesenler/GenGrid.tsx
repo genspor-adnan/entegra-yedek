@@ -87,6 +87,8 @@ interface Props {
       Ayni kaynak farkli ekranlarda kullaniliyor: Satis Faturalari'nda tur/turAdi
       gereksiz (hepsi ayni tur), Siparisler'de gerekli. */
   gizliKolonlar?: string[];
+  /** Ekrana ozel kolon basligi (bkz. useKolonTercihi). */
+  kolonBasliklari?: Record<string, string>;
   /** Bu ekranda ONE alinacak kolonlar (soldan saga). Verilmeyenler katalog
       sirasinda arkada kalir - kolon sirasi kaynak tanimina bagli olmasin. */
   kolonSirasi?: string[];
@@ -143,7 +145,8 @@ interface Props {
 export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSatirAc,
                           aksiyonEkrani, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
                           dovizsizGizle,
-                          gizliKolonlar, kolonSirasi, altSecenekler, tarihAlani, tarihVarsayilan,
+                          gizliKolonlar, kolonBasliklari, kolonSirasi, altSecenekler,
+                          tarihAlani, tarihVarsayilan,
                           onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aksiyonKomboGizli, aramaGizli,
                           aracCubuguSeritte,
@@ -245,7 +248,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
 
   // Kolon gorunurlugu/sirasi ve tercihin saklanmasi grid/kolonTercihi.ts'te.
   const { kolonlar, tumKolonlar, kolonTasi, kolonDegistir, kolonlariSifirla } =
-    useKolonTercihi({ kaynak, gizliKolonlar, kolonSirasi, setHata });
+    useKolonTercihi({ kaynak, gizliKolonlar, kolonBasliklari, kolonSirasi, setHata });
 
   const [sureMs, setSureMs] = useState(0);
 
@@ -712,7 +715,11 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       <div className="sahne">
         {hata && <div className="hata-kutusu">{hata}</div>}
 
-        {((cipler && cipler.length > 0) || ebelgeKombo.length > 0) && (
+        {/* Serit, CIP OLMASA DA cizilir: basvuru listesinde cipler yerini
+            combolara birakti (kullanici) ve kosul yalniz ciplere baksaydi
+            "Tum Liste / Son / Sik" dugmeleriyle birlikte o combolar da
+            kaybolurdu. */}
+        {((cipler && cipler.length > 0) || ebelgeKombo.length > 0 || !!cipSonu) && (
           // Kutu varken serit tam genislik: `width: fit-content` saga yanasmayi
           //   engelliyordu (kullanici: "Tümü/Sık/Son hizasinda saga yanasik").
           <div className={`durumseg${ebelgeKombo.length > 0 ? ' genis' : ''}`}>
@@ -811,7 +818,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                   <input type="date" value={tarihBit} title="Bitiş tarihi"
                          onChange={e => { setTarihBit(e.target.value); setSayfa(1) }} />
                   {(tarihBas || tarihBit) && (
-                    <button type="button" title="Tarih filtresini kaldır"
+                    <button type="button" className="kapat" title="Tarih filtresini kaldır"
                             onClick={() => { setTarihBas(''); setTarihBit(''); setSayfa(1) }}>×</button>
                   )}
                 </span>
@@ -864,7 +871,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
               <span>Secili: <b>{String(seciliSatir.unvan ?? seciliSatir.ad ?? seciliSatir.belgeNo ?? seciliSatir.id)}</b></span>
             )}
             <span className="sag">
-              <button className="d" disabled={sayfa <= 1} onClick={() => setSayfa(s => s - 1)}>‹ Onceki</button>
+              <button className="d" disabled={sayfa <= 1} onClick={() => setSayfa(s => s - 1)}>‹ Önceki</button>
               <span>{sayfa} / {sonSayfa}</span>
               <button className="d" disabled={sayfa >= sonSayfa} onClick={() => setSayfa(s => s + 1)}>{cev('Sonraki')} ›</button>
             </span>

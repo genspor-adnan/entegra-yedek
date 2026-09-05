@@ -4,7 +4,9 @@ using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
+using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
+using Npgsql;
 
 namespace Gentegre.Api.Uclar;
 
@@ -40,6 +42,87 @@ public static class BelgeUclari
                 Uyarilar = uyarilar,
                 IzlemeNo = baglam.IzlemeNo
             });
+        });
+
+        // ------------------------------------------- basvuru suzgecleri ----
+        // GET /api/belge/basvuru-suzgec?bas=&bit=
+        //
+        // Basvuru listesi seridindeki Odeyen / Bolum / Doktor combolarini
+        // doldurur. Kullanici: "bu filtrelere o tarih araligindaki yer alan
+        // item'lar gelsin" - secenekler tanim tablolarindan degil, ARALIKTAKI
+        // BASVURULARDAN uretilir, boylece secilince bos liste veren secenek
+        // gorunmez. Tarih uclari bossa sinir yoktur.
+        //
+        // Bolum/doktor ada cozen kolonlarla AYNI kuralla okunur: once belgenin
+        // kendi basvuru satiri, yoksa belgeye bagli randevu.
+        grup.MapGet("/basvuru-suzgec", async (
+            DateTime? bas, DateTime? bit, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            IDictionary<string, object?> Satir(NpgsqlDataReader o)
+            {
+                var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
+                for (var i = 0; i < o.FieldCount; i++)
+                    satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
+                return satir;
+            }
+
+            // Basvuru = tur 19 + tipi 30 (liste tanimindaki sabit filtrenin ayni).
+            //   Ad cozumu her sorguda KENDI join'i ile: ortak bir FROM parcasi
+            //   uc farkli tabloya (kurum / departman / hekim) baglanamaz.
+            //   Ust sinir gun SONUNA kadar kapsar (< bit + 1): belge_tarihi
+            //   saat de tasir, `<= bit` o gunun ogleden sonrasini disarida
+            //   birakirdi.
+            const string suz = """
+                 where b.tur = 19 and b.tipi = 30
+                   and (@p0::date is null or b.belge_tarihi >= @p0::date)
+                   and (@p1::date is null or b.belge_tarihi < @p1::date + 1)
+                """;
+
+            var odeyenler = await baglanti.ListeAsync($"""
+                select bb.odeyen_kurum_id as id, min(ok.unvan) as ad, count(*) as adet
+                  from public.belge b
+                  join public.belge_basvuru bb on bb.id = b.id
+                  join public.taraf ok on ok.id = bb.odeyen_kurum_id
+                {suz}
+                 group by bb.odeyen_kurum_id
+                 order by min(ok.unvan)
+                """, null, [bas, bit], Satir, iptal);
+
+            var bolumler = await baglanti.ListeAsync($"""
+                select x.bolum_id as id, min(d.ad) as ad, count(*) as adet
+                  from (select coalesce(bb.bolum_id, r.bolum) as bolum_id
+                          from public.belge b
+                          left join public.belge_basvuru bb on bb.id = b.id
+                          left join lateral (select r.bolum from public.randevu r
+                                              where r.belge_id = b.id
+                                              order by r.id limit 1) r on true
+                        {suz}) x
+                  join public.departman d on d.id = x.bolum_id
+                 group by x.bolum_id
+                 order by min(d.ad)
+                """, null, [bas, bit], Satir, iptal);
+
+            var doktorlar = await baglanti.ListeAsync($"""
+                select x.hekim_id as id, min(hk.unvan) as ad, count(*) as adet
+                  from (select coalesce(bb.personel_id, r.hekim_id) as hekim_id
+                          from public.belge b
+                          left join public.belge_basvuru bb on bb.id = b.id
+                          left join lateral (select r.hekim_id from public.randevu r
+                                              where r.belge_id = b.id
+                                              order by r.id limit 1) r on true
+                        {suz}) x
+                  join public.taraf hk on hk.id = x.hekim_id
+                 group by x.hekim_id
+                 order by min(hk.unvan)
+                """, null, [bas, bit], Satir, iptal);
+
+            return Results.Ok(new { odeyenler, bolumler, doktorlar });
         });
 
         // GET /api/belge/{id}

@@ -85,6 +85,17 @@ export interface ListeTanimi {
    * satirlari). Kisi listesi secili role gore daralir.
    */
   primSuzgeci?: boolean;
+  /**
+   * Ciplerin sagina BASVURU suzgecleri koyar (kullanici): hazir tarih
+   * araligi, Odeyen kurum, Bolum agaci ve Doktor. Hepsi sunucuda suzer.
+   */
+  basvuruSuzgeci?: boolean;
+  /**
+   * EKRANA OZEL kolon basliklari: ayni kaynagi paylasan listelerde
+   * katalogdaki basligi degistirmeden bu ekranda baska ad gosterir
+   * (kullanici: basvuruda "Belge No" degil "Protokol No").
+   */
+  kolonBasliklari?: Record<string, string>;
   kaynak: string;
   baslik: string;
   yol: string;
@@ -278,22 +289,33 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   Matrah/KDV basvuruda okunmuyor: hastaya soylenen rakam GENEL TOPLAM,
     //   yaninda ne kadari tahsil edildigi (kullanici).
                     'tarafId', 'acikKapali', 'maliyetOrt', 'tipiAdi',
+                    'odeyenKurumId', 'bolumId', 'doktorId', 'tahsilatDurum',
                     'matrah', 'kdvTutari'],
     // Kaynak kolonunun yerine ODEYEN KURUM / POLIKLINIK / DOKTOR (kullanici).
     //   SERI listede yok ama katalogda DURUYOR: gizliKolonlar'a konsa kolon
     //   menusunden de kaybolurdu - gerektiginde kullanici acar.
     //   Sira: once belgenin kimligi (no, tarih, hasta), sonra basvuru bilgisi
     //   (odeyen kurum, poliklinik, hekim) - kullanici.
-    kolonSirasi: ['belgeNo', 'belgeTarihi', 'tarafUnvan',
+    //   TARIH EN SOLDA, solunda da TAMAMLANMA rozeti (kullanici): gunluk
+    //   listede once "bitti mi", sonra "ne zaman", sonra kimlik bilgileri.
+    kolonSirasi: ['tamamlanma', 'belgeTarihi', 'belgeNo', 'tarafUnvan',
                   'odeyenKurumAdi', 'poliklinik', 'doktor',
                   'genelToplam', 'tahsilat'],
-    toplam: ['genelToplam'],
-    cipler: [
-      { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
-      { ad: 'Kısmi',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
-      { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
-      { ad: 'Tümü' },
-    ],
+    // TAHSILAT da toplanir (kullanici): "ne kadari geldi" sorusu genel
+    //   toplamin yaninda okunsun - ikisinin farki gunun acik borcudur.
+    toplam: ['genelToplam', 'tahsilat'],
+    // CIP YOK (kullanici): Acik/Kismi/Kapanan cipleri yerine seritte uc
+    //   combo - Tamamlanma, Tahsilat ve Donusum. Eski cipler Donusum
+    //   combosunun secenekleri oldu.
+
+    // "Tümü"nun saginda ayracla: tarih araligi, Odeyen, Bolum agaci, Doktor
+    //   (kullanici). Ham id kolonlari gizli tutulur - suzme ADA gore
+    //   calisamaz (ayni adli kurum / unvan degisikligi filtreyi kaydirir).
+    basvuruSuzgeci: true,
+    // Basvuruda belge numarasi PROTOKOL NUMARASIDIR (kullanici); kart da
+    //   oyle adlandiriyor. Katalogda "Belge No" kalir - ayni kaynagi 13
+    //   liste paylasiyor.
+    kolonBasliklari: { belgeNo: 'Protokol No' },
     urunModu: 2,
     menuGrup: 'Kayıt Kabul', menuAd: 'Başvurular', ic: '📝', yetkiKodu: 'belge',
     menuSira: 30,

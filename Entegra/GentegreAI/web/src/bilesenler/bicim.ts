@@ -97,7 +97,11 @@ export function bicimle(deger: unknown, kolon: KolonMeta): string {
     }
     case 'sayi': {
       const s = Number(deger);
-      return Number.isFinite(s) ? sayi.format(s) : String(deger);
+      if (!Number.isFinite(s)) return String(deger);
+      // Yuzde kolonu (basvuru tamamlanmasi): deger 0-100 tam sayi gelir,
+      //   ekranda "%" ile okunur. Bolme/carpma YOK - sunucu zaten yuzde
+      //   gonderiyor, burada ikinci bir hesap iki kaynak demek olurdu.
+      return kolon.bicim === 'yuzde' ? `%${sayi.format(s)}` : sayi.format(s);
     }
     case 'tarih': {
       const metin = String(deger);

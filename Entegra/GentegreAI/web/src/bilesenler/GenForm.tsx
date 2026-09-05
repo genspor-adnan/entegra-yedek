@@ -1045,12 +1045,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           <b>Bu kaydi baska bir kullanici degistirdi.</b>
           {cakisma.alanlar.length > 0 && <div>Cakisan alanlar: {cakisma.alanlar.join(', ')}</div>}
           <div className="cakisma-arac">
-            <button className="d" onClick={() => { setCakisma(null); void yukle() }}>Guncel hali al (degisikliklerim gider)</button>
+            <button className="d" onClick={() => { setCakisma(null); void yukle() }}>Güncel Hâli Al (Değişikliklerim Gider)</button>
             <button className="d" onClick={() => {
               // Sunucudaki guncel surumu alip kendi degisikliklerimi UZERINE yaz
               setSurum(String(cakisma.guncel.surum ?? ''));
               setCakisma(null);
-            }}>Benim degisikliklerimi uygula</button>
+            }}>Benim Değişikliklerimi Uygula</button>
           </div>
         </div>
       )}

@@ -25,6 +25,8 @@ import { SarfOnayModali } from '../bilesenler/radyoloji/SarfOnayModali';
 import { TarafArama } from '../bilesenler/TarafArama';
 import { KategoriSuzgeci } from '../bilesenler/KategoriSuzgeci';
 import { BolumSuzgeci } from '../bilesenler/BolumSuzgeci';
+import { TARIH_ON_AYARLAR, tarihAraligi, type TarihOnAyar }
+  from './liste/tarihAralik';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { KategoriAgacPaneli } from '../bilesenler/KategoriAgacPaneli';
 import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
@@ -310,6 +312,55 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       setPrimRol('');
   }, [primRolleri, primRol]);
   useEffect(() => { setPrimRol(''); setPrimKisi('') }, [tanim.kaynak]);
+
+  /**
+   * BASVURU SERIT SUZGECLERI (kullanici): hazir tarih araligi, Odeyen kurum,
+   * Bolum agaci ve Doktor. Dordu de sunucuda suzer ve sabit filtreye AND'lenir.
+   *
+   * Tarih HAZIR ARALIK olarak secilir (Bugun / Son 3 gun / Bu yil...): kabul
+   * ekraninda iki tarih kutusu doldurmak yerine tek tiklama.
+   */
+  // Acilista BUGUN (kullanici): kabul ekraninda gunun basvurulari beklenir,
+  //   tum gecmis bir arada anlamsizdi.
+  const [bvTarih, setBvTarih] = useState<TarihOnAyar | ''>('bugun');
+  const [bvOdeyen, setBvOdeyen] = useState<number | ''>('');
+  const [bvBolum, setBvBolum] = useState<{ id: number; agac: number[] } | null>(null);
+  const [bvDoktor, setBvDoktor] = useState<number | ''>('');
+  // CIPLERIN YERINE UC COMBO (kullanici): Tamamlanma, Tahsilat, Donusum.
+  //   Donusum'un secenekleri eski ciplerin ta kendisi (kapanma_durum).
+  const [bvTamamlanma, setBvTamamlanma] = useState<'' | 'tamam' | 'devam'>('');
+  const [bvTahsilat, setBvTahsilat] = useState<'' | '0' | '1' | '2'>('');
+  const [bvDonusum, setBvDonusum] = useState<'' | '0' | '1' | '2'>('');
+  const [bvKurumlar, setBvKurumlar] = useState<{ id: number; ad: string; adet: number }[]>([]);
+  const [bvBolumler, setBvBolumler] = useState<{ id: number; ad: string; adet: number }[]>([]);
+  const [bvDoktorlar, setBvDoktorlar] = useState<{ id: number; ad: string; adet: number }[]>([]);
+  // Secenekler ARALIKTAKI BASVURULARDAN gelir (kullanici: "bu filtrelere o
+  //   tarih araligindaki yer alan item'lar gelsin") - tanim tablolarindan
+  //   degil. Tarih secimi degisince listeler yenilenir.
+  useEffect(() => {
+    if (!tanim.basvuruSuzgeci) return;
+    const aralik = bvTarih === '' ? undefined : tarihAraligi(bvTarih);
+    void guvenli(async () => {
+      const y = await api.basvuruSuzgecSecenekleri(aralik?.bas, aralik?.bit);
+      setBvKurumlar(y.odeyenler ?? []);
+      setBvBolumler(y.bolumler ?? []);
+      setBvDoktorlar(y.doktorlar ?? []);
+    });
+  }, [tanim.basvuruSuzgeci, bvTarih]);
+  // Aralik degisince listede kalmayan secim temizlenir: filtre sessizce bos
+  //   liste verirdi.
+  useEffect(() => {
+    if (bvOdeyen !== '' && bvKurumlar.length > 0 && !bvKurumlar.some(k => k.id === bvOdeyen))
+      setBvOdeyen('');
+  }, [bvKurumlar, bvOdeyen]);
+  useEffect(() => {
+    if (bvDoktor !== '' && bvDoktorlar.length > 0 && !bvDoktorlar.some(d => d.id === bvDoktor))
+      setBvDoktor('');
+  }, [bvDoktorlar, bvDoktor]);
+  useEffect(() => {
+    setBvTarih('bugun'); setBvOdeyen(''); setBvBolum(null); setBvDoktor('');
+    setBvTamamlanma(''); setBvTahsilat(''); setBvDonusum('');
+  }, [tanim.kaynak]);
   /** Takvimde fareyle secilen aralik (251): "＋ Yeni" bunu karta tasir. */
   /** Belge olusturmada sube: oturumun calisma subesi. */
   const oturumSubeId = Number(localStorage.getItem('gentegre.sube')) || undefined;
@@ -366,6 +417,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
   /** Bolum/rol secimleri de sabit filtreye AND'lenir (cip ve arama ile birlikte). */
   const personelliFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
+    if (!tanim.bolumSuzgeci && !tanim.rolSuzgeci) return temel;   // bkz. basvuruluFiltre
     const kosullar: Kosul[] = [];
     if (temel) kosullar.push(temel);
     // Bolum: secilen dal + TUM ALT BIRIMLERI.
@@ -376,10 +428,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     return kosullar.length === 0 ? undefined
          : kosullar.length === 1 ? kosullar[0]
          : { op: 'and', kosullar };
-  }, [personelBolum, personelRol]);
+  }, [tanim.bolumSuzgeci, tanim.rolSuzgeci, personelBolum, personelRol]);
 
   /** Prim rolu / kisi secimi de sabit filtreye AND'lenir. */
   const primliFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
+    if (!tanim.primSuzgeci) return temel;          // bkz. basvuruluFiltre
     const kosullar: Kosul[] = [];
     if (temel) kosullar.push(temel);
     if (primRol !== '') kosullar.push({ alan: 'rol', op: 'esit', deger: primRol });
@@ -387,7 +440,40 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     return kosullar.length === 0 ? undefined
          : kosullar.length === 1 ? kosullar[0]
          : { op: 'and', kosullar };
-  }, [primRol, primKisi]);
+  }, [tanim.primSuzgeci, primRol, primKisi]);
+
+  /** Basvuru suzgecleri: tarih araligi + odeyen + bolum agaci + doktor. */
+  const basvuruluFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
+    // SUZGEC KAPALI EKRANDA HIC KOSUL EKLENMEZ: durumlar Liste bileseninde
+    //   yasadigi icin baska bir listeye gecildiginde de doluydu ve tarih
+    //   varsayilani 'bugun' oldugu icin KOSUL HEP VARDI - hasta listesi
+    //   "Bilinmeyen alan: belgeTarihi" ile 400 donuyordu.
+    if (!tanim.basvuruSuzgeci) return temel;
+    const kosullar: Kosul[] = [];
+    if (temel) kosullar.push(temel);
+    if (bvTarih !== '') {
+      const { bas, bit } = tarihAraligi(bvTarih);
+      kosullar.push({ alan: 'belgeTarihi', op: 'arasinda', deger: [bas, bit] });
+    }
+    if (bvOdeyen !== '') kosullar.push({ alan: 'odeyenKurumId', op: 'esit', deger: bvOdeyen });
+    // Bolum: secilen dal + TUM ALT BIRIMLERI (agac combosu).
+    if (bvBolum && bvBolum.agac.length > 0)
+      kosullar.push({ alan: 'bolumId', op: 'icinde', deger: bvBolum.agac });
+    if (bvDoktor !== '') kosullar.push({ alan: 'doktorId', op: 'esit', deger: bvDoktor });
+    // Tamamlanma: %100 tamamlandi ya da altindaki her sey "devam ediyor".
+    if (bvTamamlanma === 'tamam')
+      kosullar.push({ alan: 'tamamlanma', op: 'esit', deger: 100 });
+    if (bvTamamlanma === 'devam')
+      kosullar.push({ alan: 'tamamlanma', op: 'kucuk', deger: 100 });
+    if (bvTahsilat !== '')
+      kosullar.push({ alan: 'tahsilatDurum', op: 'esit', deger: Number(bvTahsilat) });
+    if (bvDonusum !== '')
+      kosullar.push({ alan: 'kapanmaDurum', op: 'esit', deger: Number(bvDonusum) });
+    return kosullar.length === 0 ? undefined
+         : kosullar.length === 1 ? kosullar[0]
+         : { op: 'and', kosullar };
+  }, [tanim.basvuruSuzgeci, bvTarih, bvOdeyen, bvBolum, bvDoktor,
+      bvTamamlanma, bvTahsilat, bvDonusum]);
 
   const randevuFiltresi = useMemo<Kosul | undefined>(() => {
     if (tanim.kaynak !== 'randevu') return sabitFiltre;
@@ -1255,9 +1341,17 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         // Cip'e basmak = listeye don (secilen filtreyle).
         onCipSecildi={i => { setCipIndeks(i); setEkstre(null) }}
         cipSonu={
-          <button className="on" disabled title="Ekstre gösteriliyor">
-            📄 {ekstre.ad}
-          </button>
+          <>
+            <button className="on" disabled title="Ekstre gösteriliyor">
+              📄 {ekstre.ad}
+            </button>
+            {/* EKSTREDEN CIKIS (kullanici): ad dugmesi pasif oldugu icin
+                ekstreyi kapatmanin tek yolu bir cipe basmakti - filtreyi de
+                degistiriyordu. Bu dugme YALNIZ ekstreyi kapatir, secili cip
+                oldugu gibi kalir. */}
+            <button className="kapat" title="Ekstreyi kapat"
+                    onClick={() => setEkstre(null)}>×</button>
+          </>
         }
       />
     ) : (
@@ -1287,12 +1381,14 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       yol={tanim.yol}
       toplam={tanim.toplam}
       cipler={tanim.cipler}
-      sabitFiltre={primliFiltre(personelliFiltre(kategoriliFiltre(randevuFiltresi)))}
+      sabitFiltre={basvuruluFiltre(
+        primliFiltre(personelliFiltre(kategoriliFiltre(randevuFiltresi))))}
       tarihVarsayilan={tanim.tarihVarsayilan}
       onTarihAraligi={tanim.primSuzgeci ? primAraligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
       ebelgeMenusu={tanim.ebelgeMenusu}
       gizliKolonlar={tanim.gizliKolonlar}
+      kolonBasliklari={tanim.kolonBasliklari}
       aramaGorunumGizli={tanim.aramaGorunumGizli}
       kolonSirasi={tanim.kolonSirasi}
       altSecenekler={{ ...KASA_ARAC_MENUSU, ...DONUSUM_MENUSU,
@@ -1347,19 +1443,81 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
           <select value={bolumSuzgec} title="Bölüm"
                   onChange={e => { setBolumSuzgec(e.target.value ? Number(e.target.value) : '');
                                    setHekimSuzgec('') }}>
-            <option value="">Tüm bölümler</option>
+            <option value="">Tüm Bölümler</option>
             {randevuAgaci.map(d => (
               <option key={d.departmanId} value={d.departmanId}>{d.ad}</option>
             ))}
           </select>
           <select value={hekimSuzgec} title="Hekim"
                   onChange={e => setHekimSuzgec(e.target.value ? Number(e.target.value) : '')}>
-            <option value="">Tüm hekimler</option>
+            <option value="">Tüm Hekimler</option>
             {hekimSecenekleri.map(h => <option key={h.id} value={h.id}>{h.ad}</option>)}
           </select>
           {(bolumSuzgec !== '' || hekimSuzgec !== '') && (
-            <button type="button" title="Bölüm/hekim filtresini kaldır"
+            <button type="button" className="kapat" title="Bölüm/hekim filtresini kaldır"
                     onClick={() => { setBolumSuzgec(''); setHekimSuzgec('') }}>×</button>
+          )}
+        </>
+      ) : tanim.basvuruSuzgeci ? (
+        // BASVURU (kullanici): "Tumu"nun saginda ayracla tarih araligi,
+        //   Odeyen, Bolum agaci, Doktor. Ayraci serit zaten cipSonu'ndan
+        //   once koyuyor.
+        <>
+          <select className="kat-suzgec" value={bvTamamlanma} title="Tamamlanmaya göre süz"
+                  onChange={e => setBvTamamlanma(e.target.value as '' | 'tamam' | 'devam')}>
+            <option value="">Tamamlanma: Tümü</option>
+            <option value="tamam">Tamamlandı (%100)</option>
+            <option value="devam">Devam Ediyor</option>
+          </select>
+          <select className="kat-suzgec" value={bvTahsilat} title="Tahsilat durumuna göre süz"
+                  onChange={e => setBvTahsilat(e.target.value as '' | '0' | '1' | '2')}>
+            <option value="">Tahsilat: Tümü</option>
+            <option value="2">Tahsil Edildi</option>
+            <option value="1">Kısmi Tahsilat</option>
+            <option value="0">Tahsilat Yok</option>
+          </select>
+          {/* Eski cipler: belgenin fis/faturaya DONUSUM durumu. */}
+          <select className="kat-suzgec" value={bvDonusum} title="Dönüşüm durumuna göre süz"
+                  onChange={e => setBvDonusum(e.target.value as '' | '0' | '1' | '2')}>
+            <option value="">Dönüşüm: Tümü</option>
+            <option value="0">Açık</option>
+            <option value="1">Kısmi</option>
+            <option value="2">Kapanan</option>
+          </select>
+          <span className="durumseg-ayrac" />
+          <select className="kat-suzgec" value={bvTarih} title="Tarih aralığı"
+                  onChange={e => setBvTarih(e.target.value as TarihOnAyar | '')}>
+            <option value="">Tüm Tarihler</option>
+            {TARIH_ON_AYARLAR.map(t => (
+              <option key={t.deger} value={t.deger}>{t.ad}</option>
+            ))}
+          </select>
+          <select className="kat-suzgec" value={bvOdeyen} title="Ödeyen kuruma göre süz"
+                  onChange={e => setBvOdeyen(e.target.value ? Number(e.target.value) : '')}>
+            <option value="">Tüm Kurumlar</option>
+            {bvKurumlar.map(k => (
+              <option key={k.id} value={k.id}>{k.ad} ({k.adet})</option>
+            ))}
+          </select>
+          <BolumSuzgeci
+            deger={bvBolum?.id ?? null}
+            izinliIdler={bvBolumler.map(x => x.id)}
+            onDegis={(id, agac) => setBvBolum(id === null ? null : { id, agac })}
+          />
+          <select className="kat-suzgec" value={bvDoktor} title="Doktora göre süz"
+                  onChange={e => setBvDoktor(e.target.value ? Number(e.target.value) : '')}>
+            <option value="">Tüm Doktorlar</option>
+            {bvDoktorlar.map(d => (
+              <option key={d.id} value={d.id}>{d.ad} ({d.adet})</option>
+            ))}
+          </select>
+          {(bvTarih !== 'bugun' || bvOdeyen !== '' || bvBolum !== null || bvDoktor !== ''
+            || bvTamamlanma !== '' || bvTahsilat !== '' || bvDonusum !== '') && (
+            <button type="button" className="kapat" title="Başvuru filtrelerini kaldır (tarih bugüne döner)"
+                    onClick={() => { setBvTarih('bugun'); setBvOdeyen('');
+                                     setBvBolum(null); setBvDoktor('');
+                                     setBvTamamlanma(''); setBvTahsilat('');
+                                     setBvDonusum('') }}>×</button>
           )}
         </>
       ) : tanim.primSuzgeci ? (
@@ -1369,20 +1527,20 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         <>
           <select className="kat-suzgec" value={primRol} title="Prim rolüne göre süz"
                   onChange={e => setPrimRol(e.target.value ? Number(e.target.value) : '')}>
-            <option value="">Tüm prim rolleri</option>
+            <option value="">Tüm Prim Rolleri</option>
             {primRolleri.map(r => (
               <option key={r.id} value={r.id}>{r.ad} ({r.adet})</option>
             ))}
           </select>
           <select className="kat-suzgec" value={primKisi} title="Kişiye göre süz"
                   onChange={e => setPrimKisi(e.target.value ? Number(e.target.value) : '')}>
-            <option value="">Tüm kişiler</option>
+            <option value="">Tüm Kişiler</option>
             {primKisiler.map(k => (
               <option key={k.id} value={k.id}>{k.ad} ({k.adet})</option>
             ))}
           </select>
           {(primRol !== '' || primKisi !== '') && (
-            <button type="button" title="Prim rolü/kişi filtresini kaldır"
+            <button type="button" className="kapat" title="Prim rolü/kişi filtresini kaldır"
                     onClick={() => { setPrimRol(''); setPrimKisi('') }}>×</button>
           )}
         </>
@@ -1401,12 +1559,12 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
             <select className="kat-suzgec" value={personelRol}
                     title="Kullanıcı rolüne göre süz"
                     onChange={e => setPersonelRol(e.target.value ? Number(e.target.value) : '')}>
-              <option value="">Tüm roller</option>
+              <option value="">Tüm Roller</option>
               {roller.map(r => <option key={r.id} value={r.id}>{r.ad}</option>)}
             </select>
           )}
           {(personelBolum !== null || personelRol !== '') && (
-            <button type="button" title="Bölüm/rol filtresini kaldır"
+            <button type="button" className="kapat" title="Bölüm/rol filtresini kaldır"
                     onClick={() => { setPersonelBolum(null); setPersonelRol('') }}>×</button>
           )}
         </>

@@ -204,7 +204,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
                 <option value="3">Yıl</option>
               </select>
               <button type="button" className="d bir" onClick={() => void rafKaydet()}>Kaydet</button>
-              <button type="button" className="d" onClick={() => setRafSoruluyor(false)}>Şimdilik geç</button>
+              <button type="button" className="d" onClick={() => setRafSoruluyor(false)}>Şimdilik Geç</button>
             </div>
           </div>
         )}
