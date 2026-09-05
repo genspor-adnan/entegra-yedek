@@ -312,6 +312,12 @@ table.grid tr.flt input {
 /* rozetler */
 .rozet { padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 700; display: inline-block }
 .rozet.ok { background: var(--okzem); color: var(--ok); border: 1px solid var(--okkenar) }
+/* `olumlu` rozet sinifi HIC TANIMLI DEGILDI: taban .rozet dolgusu geliyor ama
+   arka plan/renk gelmiyordu, rozet band zemininde duz yazi gibi kaliyordu.
+   Bes yeri birden etkiliyordu - basvuruda "Faturalandı", mustehaklik
+   "Müstehak", e-Belge "✓ Gönderildi", kasa denge ve kasa islem durumu.
+   `ok` ile ayni yesil: ikisi de "olumlu sonuc" anlaminda kullaniliyor. */
+.rozet.olumlu { background: var(--okzem); color: var(--ok); border: 1px solid var(--okkenar) }
 .rozet.hata { background: var(--hatazem); color: var(--hata) }
 .rozet.uyari { background: var(--uyarizem); color: var(--uyari); border: 1px solid var(--uyarikenar) }
 .rozet.mor { background: var(--mor2); color: var(--mor) }

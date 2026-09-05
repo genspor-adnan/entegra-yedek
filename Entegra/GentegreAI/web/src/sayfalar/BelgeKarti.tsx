@@ -1382,9 +1382,25 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         </div>
       )}
 
+        {/* SECILI HASTA SERIDI (298, mockup): kartin EN USTUNDE - kabul memuru
+            dogru hastada oldugunu surekli gorsun. Tamamlanma seridinin de
+            ustunde (kullanici): once KIM, sonra ne eksik. */}
+        {basvuruMu && (
+          <HastaSeridi tarafId={cari?.id}
+                       kurumAdi={kurumlar.find(k => k.id === odeyenKurumId)?.ad}
+                       acikBorc={basvuruAcikBorc}
+                       mustehaklik={Number(basvuruBilgi.sgkMustehaklik ?? 0)}
+                       protokolNo={belgeNo || String(sonuc?.belge.belgeNo ?? '')}
+                       kilitli={kilitli}
+                       kapanma={KAPANMA_ETIKET[Number(sonuc?.belge.kapanmaDurum ?? 0)]}
+                       onAra={metin => { setHastaAramaMetni(metin); setCariArama(true) }}
+                       onYeniHasta={() => { setHastaAramaYeni(true); setCariArama(true) }} />
+        )}
+
         {/* TAMAMLANMA SERIDI (370, kullanici): "bu basvuruda daha ne eksik"
             sorusu sekmeler gezilerek cevaplaniyordu. Asama sirasi ODEYEN
-            KURUMA gore degisir - hesap belgeKarti/basvuruAsamalari'nda. */}
+            KURUMA gore degisir - hesap belgeKarti/basvuruAsamalari'nda.
+            Hasta seridinin ALTINDA (kullanici). */}
         {basvuruMu && (
           <BasvuruAsamaSeridi
             kurumTuru={kurumlar.find(k => k.id === odeyenKurumId)?.tur}
@@ -1401,20 +1417,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
               : Number(basvuruBilgi.ossDurum ?? 0)}
             kapanmaDurum={Number(sonuc?.belge.kapanmaDurum ?? 0)}
           />
-        )}
-
-        {/* SECILI HASTA SERIDI (298, mockup): basligin USTUNDE - kabul memuru
-            dogru hastada oldugunu surekli gorsun. */}
-        {basvuruMu && (
-          <HastaSeridi tarafId={cari?.id}
-                       kurumAdi={kurumlar.find(k => k.id === odeyenKurumId)?.ad}
-                       acikBorc={basvuruAcikBorc}
-                       mustehaklik={Number(basvuruBilgi.sgkMustehaklik ?? 0)}
-                       protokolNo={belgeNo || String(sonuc?.belge.belgeNo ?? '')}
-                       kilitli={kilitli}
-                       kapanma={KAPANMA_ETIKET[Number(sonuc?.belge.kapanmaDurum ?? 0)]}
-                       onAra={metin => { setHastaAramaMetni(metin); setCariArama(true) }}
-                       onYeniHasta={() => { setHastaAramaYeni(true); setCariArama(true) }} />
         )}
 
         <BelgeBaslik
