@@ -39,11 +39,10 @@ public static class EntegrasyonUclari
         // 340: hekim branşı ve sigorta türü de SKRS'den gelir.
         ("PERSONEL BRANŞ KODU", "hekim.brans"),
         ("SİGORTALI TÜRÜ",      "taraf.sigorta_turu"),
-        // FAZ 0 (400): klinik listesi muayene/yatis ekranlarinin bolum kaynagi.
-        //   SKRS'de ad kuruluma gore degisebiliyor - iki aday da denenir,
-        //   bulunamayan rapora "yok" olarak duser (senkronu durdurmaz).
-        ("KLİNİK KODLARI",      "klinik.kod"),
-        ("KLİNİKLER",           "klinik.kod"),
+        // KLINIK: SKRS'de BOYLE BIR LISTE YOK (499 listenin tamami tarandi -
+        //   /api/entegrasyon/{id}/skrs-listeler). Bolum/klinik kumesi kurumun
+        //   kendi departman agacindan geliyor; aday ad birakmak her senkronda
+        //   sahte bir "yok" raporu uretirdi.
     };
 
     /// <summary>
@@ -59,10 +58,10 @@ public static class EntegrasyonUclari
         ("ÜLKE KODLARI", "ULKE"),
         // FAZ 0 (400): ICD-10 KENDI TABLOSUNDA (public.icd) - 20 bin satir
         //   kod_deger'e konmaz, arama/indeks ihtiyacini karsilamaz ve her
-        //   combo cagrisini agirlastirirdi. SKRS'deki ad kuruluma gore
-        //   degisiyor; uc aday denenir.
-        ("ICD-10 TANI KODLARI", "ICD"),
-        ("TANI KODLARI",        "ICD"),
+        //   combo cagrisini agirlastirirdi.
+        //   SKRS'deki gercek ad "ICD10" (canli katalogdan dogrulandi; ayrica
+        //   ICD-O morfoloji/yerlesim ve ICD10MSVS iliskisi listeleri var -
+        //   onlar baska islerin kaynagi, tani katalogu degil).
         ("ICD10",               "ICD"),
     };
 
@@ -78,6 +77,34 @@ public static class EntegrasyonUclari
     {
         var grup = yol.MapGroup("/api/entegrasyon").WithTags("Entegrasyon")
                       .RequireAuthorization();
+
+        // ------------------------------------------- SKRS liste katalogu ----
+        // SKRS'nin 499 kod listesinin ADLARI. Eslemeyi kuran kisi (ya da bu
+        //   kodu yazan) hangi listenin gercekte hangi adla durdugunu ancak
+        //   boyle gorur: adlar kurulumdan kuruluma degisiyor ("TANI KODLARI"
+        //   mi "ICD10" mi?) ve yanlis ad sessiz bir "yok" raporu uretiyor.
+        grup.MapGet("/{id:int}/skrs-listeler", async (
+            int id, string? ara, BaglamCozucu cozucu, VeriKaynagi veri,
+            IHttpClientFactory istemciler, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("entegrasyon", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var hesap = await HesapOkuAsync(baglanti, id, iptal);
+            if (!string.Equals(hesap.Kod, "SKRS", StringComparison.OrdinalIgnoreCase))
+                throw GentegreHatasi.IsKurali("Bu işlem yalnız SKRS hesabında çalışır.");
+
+            var katalog = await SkrsKatalogAsync(hesap, istemciler, iptal);
+            var suz = Anahtar(ara ?? "");
+            var satirlar = katalog
+                .Where(x => suz.Length == 0 || x.Key.Contains(suz, StringComparison.Ordinal))
+                .OrderBy(x => x.Key, StringComparer.Ordinal)
+                .Select(x => new { ad = x.Key, guid = x.Value })
+                .ToList();
+
+            return Results.Ok(new { toplam = katalog.Count, satirlar, izlemeNo = baglam.IzlemeNo });
+        });
 
         // ---------------------------------------------------- bağlantı sına --
         // Kimlik ve adres doğru mu: servise en ucuz çağrı yapılır, sonuç
@@ -545,13 +572,18 @@ public static class EntegrasyonUclari
             if (k.Length is 0 or > 12 || string.IsNullOrWhiteSpace(ad)) { atlanan++; continue; }
 
             await baglanti.CalistirAsync("""
-                insert into public.icd (kod, ad, ust_kod, seviye, aktif, guncelleme)
+                insert into public.icd (kod, ad, ust_kod, seviye, aktif, kaynak_surum, guncelleme)
                 values (@p0, @p1, nullif(@p2, ''), case when nullif(@p2, '') is null then 3 else 4 end,
-                        1, now())
+                        1, 'skrs', now())
                 on conflict (kod) do update
                    set ad = excluded.ad,
                        ust_kod = coalesce(excluded.ust_kod, public.icd.ust_kod),
-                       aktif = 1,
+                       -- SEVIYE de tazelenir: kod once dosyadan (ustsuz)
+                       --   yuklenmis olabilir; SKRS ust kodu getirince satir
+                       --   agacta dogru yere otursun.
+                       seviye = case when coalesce(excluded.ust_kod, public.icd.ust_kod) is null
+                                     then 3 else 4 end,
+                       aktif = 1, kaynak_surum = 'skrs',
                        guncelleme = now()
                 """, null, [k, ad.Trim(), (ust ?? "").Trim()], iptal);
             yazilan++;

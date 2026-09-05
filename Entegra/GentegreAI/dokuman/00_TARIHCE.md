@@ -6406,3 +6406,33 @@ cinsiyet kısıtı (`O80` = 2) doğru yazıldı; 4 satırlık ilaç dosyası →
 barkodsuz satır atlandı; ikinci yükleme → var olan kodun adı güncellendi, yeni
 kod eklendi, satır sayısı 5 → 6 (upsert doğru).
 
+### SKRS'ye gerçekten bağlanıldı: ICD-10 canlı çekildi (15.799 kod)
+
+Kurulu SKRS hesabıyla (kullanıcı 500154) bağlanıldı ve senkron **gerçek
+veriyle** çalıştırıldı — 25 saniyede **17.218 kod**:
+
+| Liste | Hedef | Satır |
+|---|---|---|
+| CİNSİYET · MEDENİ HALİ · YABANCI HASTA TÜRÜ · KAN GRUBU · PERSONEL BRANŞ · SİGORTALI TÜRÜ | kod listeleri | 2 · 4 · 13 · 10 · 106 · 4 |
+| İL · İLÇE · ÜLKE | tablolar | 81 · 973 · 226 |
+| **ICD10** | **public.icd** | **15.799** |
+
+**Liste adları tahminle bulunmaz:** yeni uç `GET /api/entegrasyon/{id}/skrs-listeler?ara=`
+499 listenin adını (ve GUID'ini) döndürür. Onunla doğrulandı:
+- ICD'nin gerçek adı **`ICD10`** — "ICD-10 TANI KODLARI" / "TANI KODLARI"
+  diye bir liste yok (ayrıca `ICD-O (MORFOLOJİ)`, `ICD-O (YERLEŞİM)`,
+  `ICD10MSVS İLİŞKİSİ` var; onlar tanı kataloğu değil).
+- **Klinik listesi SKRS'de YOK.** Aday adlar kaldırıldı — bırakılsa her
+  senkronda sahte bir "yok" raporu üretirdi. Bölüm/klinik kümesi kurumun kendi
+  departman ağacından geliyor.
+- İlaç barkod listesi de yok (beklendiği gibi; İTS/TİTCK kaynağı → dosyadan
+  yükleme yolu bunun için var).
+
+**SKRS aralıklı `HTTP 500` veriyor** (kendi IIS'i): sınama beş denemenin
+dördünde düştü, beşincide geçti; senkron ilk denemede tamam. Mevcut tasarım bu
+yüzden doğru — tek listenin hatası senkronu durdurmuyor, rapora düşüyor.
+
+Upsert'te `seviye` de tazeleniyor: kod önce dosyadan (üstsüz) yüklenmiş
+olabilir, SKRS üst kodu getirince satır ağaçta doğru yere otursun;
+`kaynak_surum` artık `skrs` / `dosya` ayrımını taşıyor.
+
