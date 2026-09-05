@@ -32,6 +32,13 @@ public static class DokumanYonetimUclari
     /// <summary>Onay adımı kararı: 1 uygun/onay · 2 düzelt/ret.</summary>
     public sealed record KararIstegi(int Karar, string? Not);
 
+    /// <summary>
+    /// Paylaşım linki: gün sayısı / açılma kotası verilmezse SINIRSIZ olur -
+    /// eski tek kodlu davranışla aynı, ama artık iptal edilebilir ve sayılır.
+    /// </summary>
+    public sealed record PaylasimIstegi(int? GunSayisi, int? AzamiAcilma, bool? IndirmeIzni,
+                                        string? AliciEposta, string? Gerekce);
+
     /// <summary>Ek bağlantı: birincil bağ (dokuman.kaynak) buradan değişmez.</summary>
     public sealed record BaglantiIstegi(string Kaynak, int KaynakId, string? Rol);
 
@@ -142,6 +149,79 @@ public static class DokumanYonetimUclari
                 """, [id, baglam.KullaniciId], iptal);
 
             return Results.Ok(new { id, mesaj = "Dokuman guncellendi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/dokuman-yonetim/{id}/paylasim - süreli / sayaçlı link üret
+        //   Mevcut tek kodlu paylaşım (058) yerini çoklu linke bırakır; eski
+        //   kod ilk satır olarak taşındı, kimliksiz uç aynen çalışıyor.
+        grup.MapPost("/{id:int}/paylasim", async (
+            int id, PaylasimIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("dokuman", Islem.Degistir);
+
+            var gizlilik = await veri.TekDegerAsync<short>(
+                "select gizlilik from public.dokuman where id = @p0", [id], iptal);
+
+            // OZEL NITELIKLI (KVKK) dokuman icin ayri yetki: hasta/personel
+            //   dosyasini kimliksiz bir linkle disari acmak, sizintinin en
+            //   kolay yolu - bu yuzden ayri bir yetki kapisi.
+            if (gizlilik == 4) baglam.YetkiIste("dokuman.ozel_nitelikli", Islem.Degistir);
+
+            // 128 bit: tahmin edilemez kod TEK erisim kontrolu (058 deseni).
+            var kod = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator
+                                            .GetBytes(16)).ToLowerInvariant();
+
+            var paylasimId = await veri.TekDegerAsync<int>("""
+                insert into public.dokuman_paylasim
+                       (dokuman_id, kod, olusturan_id, son_kullanma, indirme_izni,
+                        azami_acilma, alici_eposta)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+                returning id
+                """,
+                [id, kod, baglam.KullaniciId,
+                 istek.GunSayisi is > 0 ? DateTime.Now.AddDays(istek.GunSayisi.Value) : null,
+                 (short)(istek.IndirmeIzni == false ? 0 : 1),
+                 istek.AzamiAcilma ?? 0, istek.AliciEposta ?? ""], iptal);
+
+            await veri.CalistirAsync("""
+                insert into public.dokuman_olay (dokuman_id, kullanici_id, olay, gerekce)
+                values (@p0, @p1, 11, @p2)
+                """, [id, baglam.KullaniciId,
+                      istek.Gerekce ?? "Paylasim linki uretildi"], iptal);
+
+            return Results.Ok(new { paylasimId, kod, mesaj = "Paylasim linki uretildi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/dokuman-yonetim/paylasim/{paylasimId}/iptal
+        grup.MapPost("/paylasim/{paylasimId:int}/iptal", async (
+            int paylasimId, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("dokuman", Islem.Degistir);
+
+            // Kod SILINMEZ, iptal DAMGALANIR: silinen kod bir sure sonra
+            //   yeniden uretilebilir ve eski alici erisim kazanirdi.
+            var d = await veri.TekDegerAsync<int?>("""
+                update public.dokuman_paylasim
+                   set iptal = coalesce(iptal, now())
+                 where id = @p0
+                returning dokuman_id
+                """, [paylasimId], iptal);
+
+            if (d is null)
+                throw GentegreHatasi.IsKurali("Paylasim linki bulunamadi.");
+
+            await veri.CalistirAsync("""
+                insert into public.dokuman_olay (dokuman_id, kullanici_id, olay, gerekce)
+                values (@p0, @p1, 11, 'Paylasim linki iptal edildi')
+                """, [d, baglam.KullaniciId], iptal);
+
+            return Results.Ok(new { paylasimId, mesaj = "Link iptal edildi.",
                                     izlemeNo = baglam.IzlemeNo });
         });
 

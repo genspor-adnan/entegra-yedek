@@ -52,6 +52,12 @@ public static partial class KartKatalogu
         ["1"] = "Uygulama", ["2"] = "Portal", ["3"] = "Paylaşım Linki", ["4"] = "API"
     };
 
+    /// <summary>Paylasim linkinin YASAYAN durumu (424).</summary>
+    private static readonly Dictionary<string, string> PaylasimDurumKodlari = new()
+    {
+        ["1"] = "Aktif", ["2"] = "Süresi Geçti / Kota Doldu", ["3"] = "İptal"
+    };
+
     /// <summary>Onay adimi karari (419).</summary>
     private static readonly Dictionary<string, string> OnayKararKodlari = new()
     {
@@ -756,6 +762,19 @@ public static partial class KartKatalogu
                 EnFazlaUzunluk: 100, Baslik: "Dosya Türü", Grup: "İçerik"),
             new("boyut", "boyut", "sayi", Yazilabilir: false, Baslik: "Boyut (bayt)",
                 Grup: "İçerik"),
+            // HASH kimlik seridinde gorunur (mockup: "hash 9c1f…"): ayni hash,
+            //   ayni dosya - dedup'un ve "hangi surum hangi icerik" sorusunun
+            //   tek isareti.
+            new("hash", "hash", "metin", Yazilabilir: false, EnFazlaUzunluk: 64,
+                Baslik: "İçerik Hash", Grup: "İçerik"),
+            // ONAYDAKI SURUM: mockup basliginda "v4 yayinda · v5 onay bekliyor"
+            //   yaziyor. Iki sayi ayri sorulari cevapliyor - yururlukteki
+            //   surum ile bekleyen surum karistirilmamali.
+            new("onaydakiSurum",
+                "coalesce((select s.surum_no from public.dokuman_surum s "
+                + "where s.dokuman_id = dokuman.id and s.durum = 2 "
+                + "order by s.surum_no desc limit 1), 0)",
+                "sayi", Yazilabilir: false, Baslik: "Onaydaki Sürüm", Grup: "İçerik"),
 
             // ------------------------------------------------ geçerlilik ----
             new("gecerliBas", "gecerli_bas", "tarih", Baslik: "Geçerlilik Başlangıcı",
@@ -860,7 +879,36 @@ public static partial class KartKatalogu
                 new("eklemeTarihi", "ekleme_tarihi", "tarih", Yazilabilir: false,
                     Baslik: "Eklendi"),
             }, SubeKolonu: null, Sirala: "birincil desc, ekleme_tarihi asc",
-               Baslik: "Bağlantılar", SaltOkunur: true, LogTabloId: 979)
+               Baslik: "Bağlantılar", SaltOkunur: true, LogTabloId: 979),
+
+            // PAYLASIM LINKLERI (424). SALT OKUNUR: link URETMEK kod uretimi
+            //   ister (tahmin edilemez 128 bit) ve iptal bir DUGMEDIR -
+            //   satiri elle duzenlemek, kodu bilen birine erisimi sessizce
+            //   geri vermek olurdu.
+            new("paylasimlar", "public.v_dokuman_paylasim", "dokuman_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("kod", "kod", "metin", Yazilabilir: false, EnFazlaUzunluk: 40,
+                    Baslik: "Link Kodu"),
+                new("olusturanId", "olusturan_id", "kod",
+                    KodTablosu: "public.v_kullanici_lookup", Yazilabilir: false,
+                    Baslik: "Oluşturan"),
+                new("olusturma", "olusturma", "tarih", Yazilabilir: false,
+                    Baslik: "Oluşturma"),
+                new("sonKullanma", "son_kullanma", "tarih", Yazilabilir: false,
+                    Baslik: "Son Kullanma"),
+                new("indirmeIzni", "indirme_izni", "mantik", Yazilabilir: false,
+                    Baslik: "İndirilebilir"),
+                new("acilmaSayisi", "acilma_sayisi", "sayi", Yazilabilir: false,
+                    Baslik: "Açılma"),
+                new("azamiAcilma", "azami_acilma", "sayi", Yazilabilir: false,
+                    Baslik: "Azami Açılma"),
+                new("aliciEposta", "alici_eposta", "metin", Yazilabilir: false,
+                    EnFazlaUzunluk: 120, Baslik: "Alıcı"),
+                new("durum", "durum", "kod", SabitKodlar: PaylasimDurumKodlari,
+                    Yazilabilir: false, Baslik: "Durum"),
+            }, SubeKolonu: null, Sirala: "olusturma desc",
+               Baslik: "Paylaşım", SaltOkunur: true, LogTabloId: 980)
         });
 
     private static KartTanimi LabIstemKarti() => new(

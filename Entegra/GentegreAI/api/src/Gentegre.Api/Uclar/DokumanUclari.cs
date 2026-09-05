@@ -1,4 +1,5 @@
 ﻿using Gentegre.Api.AraKatman;
+using Gentegre.Veri;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri.Depolar;
@@ -119,16 +120,51 @@ public static class DokumanUclari
                 : Results.File(icerik.Veri, icerik.ContentType, icerik.Ad);
         }).RequireAuthorization();
 
-        // Kimliksiz paylaşım ucu - tahmin edilemez paylasim_kodu (128 bit) TEK erişim kontrolü.
-        // Linki alan herkes içeriği görebilir, süresiz - bilerek boyle (Google Drive tarzi
-        // "linki bilen goruntuler"). Auth YOK.
+        // Kimliksiz paylaşım ucu - tahmin edilemez kod (128 bit) TEK erişim
+        // kontrolü. Auth YOK: linki bilen görüntüler.
+        //
+        // 424 ile link artık SINIRLI olabiliyor (süre, açılma kotası, iptal).
+        // Kural BURADA uygulanır ve AÇILMA SAYILIR: sınırları yalnız üretim
+        // anında yazıp okuma anında bakmamak, iptal edilmiş bir linki sonsuza
+        // kadar çalışır bırakırdı.
         yol.MapGet("/api/dokuman-paylasim/{kod}", async (
-            string kod, DokumanDeposu depo, CancellationToken iptal) =>
+            string kod, DokumanDeposu depo, VeriKaynagi veri, CancellationToken iptal) =>
         {
-            var icerik = await depo.IcerikPaylasimKoduIleAsync(kod, iptal);
-            return icerik is null
-                ? Results.NotFound()
-                : Results.File(icerik.Veri, icerik.ContentType, icerik.Ad);
+            // Yeni tabloda kayıtlıysa sınırlar uygulanır; kayıtlı değilse eski
+            //   davranış (dokuman.paylasim_kodu) sürer - taşınmamış kod da
+            //   çalışmaya devam etsin.
+            var p = await veri.TekAsync("""
+                select v.id, v.durum, v.dokuman_id
+                  from public.v_dokuman_paylasim v where v.kod = @p0
+                """, [kod],
+                o => new { Id = o.GetInt32(0), Durum = o.GetInt16(1),
+                           DokumanId = o.GetInt32(2) }, iptal);
+
+            if (p is not null && p.Durum != 1) return Results.NotFound();
+
+            // ICERIK IKI YOLDAN COZULUR: yeni tabloda kayitli link dokuman
+            //   kimligini tasidigi icin dogrudan okunur; eski tek kodlu
+            //   paylasim (dokuman.paylasim_kodu) icin eski yol surer. Yalniz
+            //   eski yola bakmak, 424 ile uretilen her linki 404 yapardi.
+            var icerik = p is not null
+                ? await depo.IcerikAsync(p.DokumanId, iptal)
+                : await depo.IcerikPaylasimKoduIleAsync(kod, iptal);
+            if (icerik is null) return Results.NotFound();
+
+            if (p is not null)
+            {
+                await veri.CalistirAsync("""
+                    update public.dokuman_paylasim
+                       set acilma_sayisi = acilma_sayisi + 1 where id = @p0
+                    """, [p.Id], iptal);
+                // KVKK: link açılması da erişimdir, günlüğe yazılır (kanal 3).
+                await veri.CalistirAsync("""
+                    insert into public.dokuman_olay (dokuman_id, olay, kanal, gerekce)
+                    values (@p0, 12, 3, 'Paylasim linki acildi')
+                    """, [p.DokumanId], iptal);
+            }
+
+            return Results.File(icerik.Veri, icerik.ContentType, icerik.Ad);
         });
     }
 

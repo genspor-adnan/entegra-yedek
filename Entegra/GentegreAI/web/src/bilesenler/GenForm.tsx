@@ -982,6 +982,31 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
                       onClick={() => alanDegistir('durum', '4')}>⊘ İptal</button>
             </>
           )}
+          {/* DOKUMAN KIMLIK SERIDI (mockup basligi): "v4 yayinda · v5 onay
+              bekliyor · hash 9c1f…". Yayindaki surum ile ONAYDAKI surum AYRI
+              rozetler - ikisi ayri sorunun cevabi ve karistirilirsa kullanici
+              yururlukte olmayan bir metni gecerli sanar. */}
+          {kaynak === 'dokuman' && !yeniMi && (
+            <span className="satir-ici" style={{ alignSelf: 'center', gap: 6 }}>
+              <span className={`rozet ${Number(deger.durum) === 3 ? 'ok'
+                                : Number(deger.durum) === 2 ? 'mavi'
+                                : Number(deger.durum) === 4 ? 'gri' : 'uyari'}`}>
+                {meta.alanlar.find(a => a.ad === 'durum')?.kodlar?.[String(deger.durum ?? '')]
+                 ?? 'Taslak'} v{String(deger.surumNo ?? 1)}
+              </span>
+              {Number(deger.onaydakiSurum) > 0 && (
+                <span className="rozet mavi">
+                  v{String(deger.onaydakiSurum)} onayda
+                </span>
+              )}
+              {String(deger.hash ?? '') !== '' && (
+                <span className="kapt" title={String(deger.hash)}>
+                  hash {String(deger.hash).slice(0, 8)}…
+                </span>
+              )}
+            </span>
+          )}
+
           {/* DOKUMAN KART ARAC CUBUGU (419, mockup dokuman_karti.html).
               Surum/onay dongusu KARTTAN yurumeli: kullanici dosyayi acip
               inceledikten sonra listeye donup aksiyon aramasin.
@@ -1019,6 +1044,18 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
                   bilgiMesaji(y.mesaj);
                 })}>✔ Onaya Gönder</button>
               )}
+
+              {/* PAYLASIM LINKI (424): sureli ve sayacli. Ozel nitelikli
+                  dokumanda ayri yetki gerekir - sunucu reddeder. */}
+              <button className="d" onClick={() => void guvenli(async () => {
+                const y = await api.dokumanPaylasimUret(Number(id), { gunSayisi: 30 });
+                // Kod PANOYA kopyalanir: kullanicidan 32 haneli bir dizeyi
+                //   ekrandan elle yazmasini beklemek gercekci degil.
+                const adres = `${location.origin}/api/dokuman-paylasim/${y.kod}`;
+                try { await navigator.clipboard.writeText(adres) } catch { /* yoksay */ }
+                bilgiMesaji(`Paylaşım linki üretildi (30 gün):\n\n${adres}\n\n`
+                          + 'Adres panoya kopyalandı.');
+              })}>🔗 Paylaş</button>
 
               <button className="d" onClick={() => void guvenli(async () => {
                 const d = await api.dokumanDepo();

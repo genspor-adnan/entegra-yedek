@@ -256,6 +256,20 @@ export const api = {
                                             gizlilik?: number }) =>
     gonder<{ mesaj: string }>(`/api/dokuman-yonetim/${id}/tasi`, istekGovdesi),
 
+  /** Sureli / sayacli paylasim linki uretir (424). Ozel nitelikli dokumanda
+      sunucu ayri yetki ister (dokuman.ozel_nitelikli). */
+  dokumanPaylasimUret: (id: number, istekGovdesi: { gunSayisi?: number;
+                                                    azamiAcilma?: number;
+                                                    indirmeIzni?: boolean;
+                                                    aliciEposta?: string }) =>
+    gonder<{ paylasimId: number; kod: string; mesaj: string }>(
+      `/api/dokuman-yonetim/${id}/paylasim`, istekGovdesi),
+
+  /** Link SILINMEZ, iptal DAMGALANIR: silinen kod yeniden uretilebilir ve
+      eski alici erisim kazanirdi. */
+  dokumanPaylasimIptal: (paylasimId: number) =>
+    gonder<{ mesaj: string }>(`/api/dokuman-yonetim/paylasim/${paylasimId}/iptal`, {}),
+
   /** Surumu onaya gonderir (419): akis adimlari SABLONDAN KOPYALANIR, akis
       sonradan degisirse suren onay etkilenmez. */
   dokumanOnayaGonder: (surumId: number) =>
