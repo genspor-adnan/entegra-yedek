@@ -34,6 +34,17 @@ public static class ZamanliIsler
             var s = await titck.ReceteTuruGuncelleAsync(iptal);
             return $"SKRS e-Reçete {s.Tarih}: {s.Yazilan} ilacın reçete türü güncellendi.";
         },
+
+        // e-NABIZ KUYRUĞU: sık çalışır (USS olaydan sonra saatlerle ölçülen bir
+        //   süre sınırı koyuyor). Hesap tanımlı değilse iş SESSİZCE BAŞARILI
+        //   sayılmaz - sonuç metni durumu söyler, yoksa kurum gönderim
+        //   yapıldığını sanırdı.
+        ["enabiz.gonder"] = async (servisler, iptal) =>
+        {
+            var gonderim = servisler.GetRequiredService<EnabizGonderimi>();
+            var s = await gonderim.CalistirAsync(50, null, null, iptal);
+            return s.Aciklama;
+        },
     };
 }
 

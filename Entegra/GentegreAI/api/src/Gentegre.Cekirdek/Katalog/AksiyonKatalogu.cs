@@ -316,6 +316,10 @@ public static class AksiyonKatalogu
             //   veriyle kayittaki veriyi ayirirdi.
             ["enabiz-liste"] =
             [
+                new("enabiz.gonder", "📤 Şimdi Gönder", "enabiz-paket",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "entegrasyon", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 5),
                 new("enabiz.yeniden-uret", "↻ Kaynaktan Yeniden Üret", "enabiz-paket",
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "entegrasyon", Islem: Islem.Degistir, KayitGerekir: true,

@@ -436,6 +436,21 @@ public static class MuayeneUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
+        // POST /api/enabiz/paket/{id}/gonder - "Şimdi Gönder" (elle)
+        //   Zamanlayıcıyı beklemeden denemek için. Hesap tanımlı değilse
+        //   sonuç bunu SÖYLER; sahte başarı yok.
+        grup.MapPost("/paket/{id:long}/gonder", async (
+            long id, BaglamCozucu cozucu, Servisler.EnabizGonderimi gonderim,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("entegrasyon", Islem.Degistir);
+
+            var s = await gonderim.CalistirAsync(1, id, baglam.KullaniciId, iptal);
+            return Results.Ok(new { id, s.Alinan, s.Gonderilen, s.Hatali,
+                                    mesaj = s.Aciklama, izlemeNo = baglam.IzlemeNo });
+        });
+
         // POST /api/enabiz/paket/{id}/iptal
         grup.MapPost("/paket/{id:long}/iptal", async (
             long id, BaglamCozucu cozucu, VeriKaynagi veri,

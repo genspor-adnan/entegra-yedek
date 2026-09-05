@@ -243,6 +243,11 @@ export const api = {
     gonder<{ yeni: string; durum: number; eksikler: string[]; mesaj: string }>(
       `/api/enabiz/paket/${paketId}/yeniden-uret`, {}),
 
+  /** Paketi simdi gonder (415): hesap tanimli degilse sonuc bunu SOYLER. */
+  enabizGonder: (paketId: number) =>
+    gonder<{ alinan: number; gonderilen: number; hatali: number; mesaj: string }>(
+      `/api/enabiz/paket/${paketId}/gonder`, {}),
+
   enabizPaketIptal: (paketId: number) =>
     gonder<{ mesaj: string }>(`/api/enabiz/paket/${paketId}/iptal`, {}),
 

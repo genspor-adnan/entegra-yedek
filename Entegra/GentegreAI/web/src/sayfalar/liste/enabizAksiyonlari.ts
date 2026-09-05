@@ -22,11 +22,21 @@ export async function enabizAksiyonu(
   satir: ListeSatiri | null | undefined,
   b: EnabizBaglam,
 ): Promise<boolean> {
-  if (kod !== 'enabiz.yeniden-uret' && kod !== 'enabiz.iptal') return false;
+  if (kod !== 'enabiz.yeniden-uret' && kod !== 'enabiz.iptal'
+      && kod !== 'enabiz.gonder') return false;
 
   const id = Number(satir?.id ?? 0);
   if (!id) { mesaj('Önce bir paket seçin.'); return true }
   const no = String(satir?.paketNo ?? id);
+
+  if (kod === 'enabiz.gonder') {
+    await guvenli(async () => {
+      const y = await api.enabizGonder(id);
+      mesaj(y.mesaj);
+      b.tazele();
+    });
+    return true;
+  }
 
   if (kod === 'enabiz.iptal') {
     if (!await onay(`${no} paketi iptal edilsin mi?\n\n`
