@@ -199,6 +199,108 @@ public static class MuayeneUclari
             return Results.Ok(new { id, bulguOzet = ozet, izlemeNo = baglam.IzlemeNo });
         });
 
+        // POST /api/muayene/{id}/istem - muayeneden istem aç
+        //   Asıl kayıt MODÜL TABLOSUNDA açılır (radyoloji_istem); muayene_istem
+        //   bağ ve durum satırıdır. Modülü atlayıp yalnız bağ satırı yazmak,
+        //   radyolojinin çalışma listesinde görünmeyen bir istem üretirdi.
+        grup.MapPost("/{id:int}/istem", async (
+            int id, IstemIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var m = await baglanti.TekAsync("""
+                select m.taraf_id, m.belge_id, m.personel_id, m.sube_id, m.durum,
+                       coalesce((select t.icd_kod from public.tani t
+                                  where t.muayene_id = m.id and t.tur = 1 limit 1), '')
+                  from public.muayene m where m.id = @p0
+                """, islem, [id], o => new
+                {
+                    HastaId = o.GetInt32(0),
+                    BelgeId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1),
+                    HekimId = o.IsDBNull(2) ? (int?)null : o.GetInt32(2),
+                    SubeId = o.GetInt32(3), Durum = o.GetInt16(4), OnTani = o.GetString(5),
+                }, iptal);
+
+            if (m is null) return Results.NotFound(new { hata = new
+                { kod = "BULUNAMADI", mesaj = "Muayene bulunamadi." } });
+            if (m.Durum == 3)
+                throw GentegreHatasi.IsKurali("Tamamlanmis muayeneye istem eklenemez.");
+
+            string hedefTablo = "";
+            int? hedefId = null;
+
+            // GORUNTULEME: radyoloji istemi acilir. On tani ve klinik bilgi
+            //   BIRLIKTE gider - radyolog "neden cekiyoruz" bilmeden rapor
+            //   yazamaz.
+            if (istek.Tur == 2)
+            {
+                if (istek.HizmetId is not > 0)
+                    throw GentegreHatasi.Dogrulama("Goruntuleme istemi icin hizmet secilmeli.",
+                        [new("hizmetId", "Tetkik (hizmet) secin.")]);
+
+                hedefId = await baglanti.TekDegerAsync<int>("""
+                    insert into public.radyoloji_istem
+                           (sube_id, belge_id, hasta_id, hizmet_id, durum, oncelik,
+                            istek_hekim_id, on_tani, klinik_bilgi, aciklama, accession_no)
+                    values (@p0, @p1, @p2, @p3, 1, @p4, @p5, @p6, @p7, @p7, '')
+                    returning id
+                    """, islem,
+                    [m.SubeId, m.BelgeId, m.HastaId, istek.HizmetId,
+                     (short)(istek.Aciliyet ?? 1), m.HekimId, m.OnTani,
+                     istek.Aciklama ?? "", istek.Aciklama ?? ""], iptal);
+                hedefTablo = "radyoloji_istem";
+            }
+
+            var istemId = await baglanti.TekDegerAsync<int>("""
+                insert into public.muayene_istem
+                       (muayene_id, tur, hedef_tablo, hedef_id, aciliyet, sonuc_durum, ekleyen)
+                values (@p0, @p1, @p2, @p3, @p4, 0, @p5)
+                returning id
+                """, islem,
+                [id, (short)istek.Tur, hedefTablo, hedefId, (short)(istek.Aciliyet ?? 0),
+                 baglam.KullaniciId], iptal);
+
+            await islem.CommitAsync(iptal);
+
+            // Muayene durumu (sonuc bekliyor) TETIKLE yansiyor (418): modul
+            //   kodlarina "muayene_istem'i de guncelle" satiri eklemek, birini
+            //   unutunca sessizce bozulan bir bag birakirdi.
+            return Results.Ok(new { istemId, hedefTablo, hedefId,
+                                    mesaj = hedefTablo.Length > 0
+                                        ? "Istem acildi ve modul calisma listesine dustu."
+                                        : "Istem kaydedildi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/muayene/istem/{id}/gordu - hekim sonucu gördü
+        //   Panik değer teyidi ve "sonuç bekliyor" rozetinin kapanması bunun
+        //   üzerinden yürür: sonucun gelmesi ile hekimin görmesi ayrı olaylar.
+        grup.MapPost("/istem/{id:int}/gordu", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+
+            var zaman = await veri.TekDegerAsync<DateTime?>("""
+                update public.muayene_istem
+                   set hekim_gordu = coalesce(hekim_gordu, now()),
+                       degistiren = @p1, degistirme_tarihi = now()
+                 where id = @p0
+                returning hekim_gordu
+                """, [id, baglam.KullaniciId], iptal);
+
+            if (zaman is null) return Results.NotFound(new { hata = new
+                { kod = "BULUNAMADI", mesaj = "Istem bulunamadi." } });
+
+            return Results.Ok(new { id, hekimGordu = zaman, izlemeNo = baglam.IzlemeNo });
+        });
+
         // POST /api/muayene/sira/cagir - "Sıradakini Çağır" / seçili hastayı çağır
         //   Sıra kuralı SQL'de (fn_siradaki_hasta): önce öncelik, sonra kayıt
         //   sırası. İstemcinin sırayı hesaplaması, iki hekimin aynı anda
@@ -473,6 +575,14 @@ public static class MuayeneUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
     }
+
+    /// <summary>
+    /// Muayeneden açılan istem.
+    ///
+    /// <c>Tur</c>: 1 lab · 2 görüntüleme · 3 konsültasyon · 4 işlem · 5 dış tetkik.
+    /// Görüntülemede <c>HizmetId</c> zorunlu - radyoloji istemi hizmetsiz açılamaz.
+    /// </summary>
+    public sealed record IstemIstegi(int Tur, int? HizmetId, int? Aciliyet, string? Aciklama);
 
     /// <summary>İstek gövdesi: belge verilmezse hekimin SIRADAKİ hastası çağrılır.</summary>
     public sealed record CagirIstegi(int? BelgeId, int? HekimId);

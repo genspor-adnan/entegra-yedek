@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (188 ad, 60 tanesi birden cok dosyada)
+## Fonksiyonlar (191 ad, 60 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -142,6 +142,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_radyoloji_accession` | `283_radyoloji_cekirdek.sql` | — |
 | `fn_radyoloji_rapor_no` | `303_radyoloji_rapor_no.sql` | — |
 | `fn_radyoloji_rapor_onaylanabilir` | `284_radyoloji_operasyon.sql` | — |
+| `fn_radyoloji_sonuc_durumu` | `418_muayene_istem_bagi.sql` | — |
 | `fn_siradaki_hasta` | `410_hekim_calisma_listesi.sql` | — |
 | `fn_sls_carpan_manuel` | `214_yazim_olusma_import.sql` | 209_taban_fiyat_izi.sql, 212_yazim_gecis_kurali.sql, 213_fiyat_elle_degisim.sql |
 | `fn_slug` | `021_goc_kimlik.sql` | — |
@@ -172,6 +173,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_kasa_islem_tahsil_tazele` | `321_tahsilat_satir_dagitim.sql` | — |
 | `tg_kategori_dongu_engel` | `270_kategori_agaci.sql` | — |
 | `tg_mesaj_sohbet_tazele` | `342_mesajlasma.sql` | — |
+| `tg_muayene_durum_istemden` | `418_muayene_istem_bagi.sql` | — |
+| `tg_muayene_istem_radyoloji` | `418_muayene_istem_bagi.sql` | — |
 | `tg_prim_belge_tur` | `332_prim_zamani.sql` | 330_prim_tahsilat_turu_durum.sql |
 | `tg_prim_dagitim` | `324_prim_semasi.sql` | — |
 | `tg_prim_donusum` | `332_prim_zamani.sql` | 324_prim_semasi.sql |

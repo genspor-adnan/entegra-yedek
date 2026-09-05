@@ -25,7 +25,8 @@ export async function muayeneAksiyonu(
   b: MuayeneBaglam,
 ): Promise<boolean> {
   if (kod !== 'muayene.al' && kod !== 'muayene.tamamla'
-      && kod !== 'muayene.sablon' && kod !== 'muayene.ozet') return false;
+      && kod !== 'muayene.sablon' && kod !== 'muayene.ozet'
+      && kod !== 'muayene.istem') return false;
 
   const id = Number(satir?.id ?? 0);
   if (!id) { mesaj('Önce bir muayene seçin.'); return true }
@@ -49,6 +50,28 @@ export async function muayeneAksiyonu(
       if (!secim) return;
 
       const y = await api.muayeneSablonUygula(id, Number(secim));
+      mesaj(y.mesaj);
+      b.tazele();
+    });
+    return true;
+  }
+
+  // ISTEM AC: asil kayit MODUL tablosunda acilir (radyoloji calisma listesi);
+  //   muayene_istem yalnizca bag ve durum satiridir. Sonuc geldiginde durum
+  //   TETIKLE yansir (418) - modul kodlarina "muayene_istem'i de guncelle"
+  //   satiri eklemek, birini unutunca sessizce bozulan bir bag birakirdi.
+  if (kod === 'muayene.istem') {
+    await guvenli(async () => {
+      const hizmetler = await api.liste('hizmet', { sayfa: 1, boyut: 50 });
+      if (hizmetler.satirlar.length === 0) { mesaj('Tanımlı hizmet yok.'); return }
+
+      const secim = await secimSor('Hangi tetkik istensin?',
+        hizmetler.satirlar.slice(0, 20).map(r => ({
+          kod: String(r.id), ad: String(r.ad ?? ''),
+        })));
+      if (!secim) return;
+
+      const y = await api.muayeneIstemAc(id, { tur: 2, hizmetId: Number(secim), aciliyet: 1 });
       mesaj(y.mesaj);
       b.tazele();
     });

@@ -261,6 +261,13 @@ export const api = {
     gonder<{ belgeId: number; muayeneId: number; baslangic: string; yeni: boolean;
              mesaj: string }>(`/api/muayene/basvuru/${belgeId}/al`, {}),
 
+  /** Muayeneden istem ac (418): asil kayit MODUL tablosunda acilir,
+      muayene_istem bag ve durum satiridir. */
+  muayeneIstemAc: (muayeneId: number, istek: { tur: number; hizmetId?: number;
+                                               aciliyet?: number; aciklama?: string }) =>
+    gonder<{ istemId: number; hedefTablo: string; hedefId: number | null; mesaj: string }>(
+      `/api/muayene/${muayeneId}/istem`, istek),
+
   /** Muayeneye Al (409): baslangic zamani - ikinci tikta ezilmez (sunucu). */
   muayeneyeAl: (id: number) =>
     gonder<{ id: number; baslangic: string; mesaj: string }>(`/api/muayene/${id}/al`, {}),
