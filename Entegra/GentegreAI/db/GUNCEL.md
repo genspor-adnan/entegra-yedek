@@ -187,7 +187,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (82 ad, 34 tanesi birden cok dosyada)
+## Gorunumler (82 ad, 35 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -252,7 +252,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_personel_lookup` | `054_personel_ozluk_mockup_uyum.sql` | — |
 | `v_plan_vade` | `077_v_ekstre.sql` | — |
 | `v_prim_rol_aday` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql, 367_prim_rol_aday_bolum.sql |
-| `v_prim_rol_lookup` | `362_gonderen_calisma_sekli.sql` | — |
+| `v_prim_rol_lookup` | `391_prim_rol_lookup_onarim.sql` | 362_gonderen_calisma_sekli.sql |
 | `v_prim_taraf_lookup` | `378_prim_taraf_lookup_aktif.sql` | 375_prim_plani_taraf.sql, 377_prim_taraf_lookup_genis.sql |
 | `v_proje_ekstre` | `077_v_ekstre.sql` | — |
 | `v_proje_lookup` | `071_kasa_master.sql` | — |
