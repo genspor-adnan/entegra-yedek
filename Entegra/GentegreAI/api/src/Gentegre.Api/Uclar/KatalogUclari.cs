@@ -146,6 +146,20 @@ public static class KatalogUclari
 
             return Results.Ok(new { yazilan, atlanan, izlemeNo = baglam.IzlemeNo });
         });
+        // POST /api/katalog/titck-guncelle
+        //   TİTCK'nin haftalık yayınından EN GÜNCEL dosyayı bulur, indirir ve
+        //   kataloğu tazeler - elle indirip CSV'ye çevirme adımı kalkar.
+        grup.MapPost("/titck-guncelle", async (
+            BaglamCozucu cozucu, Servisler.TitckIlacGuncelleme titck,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("katalog", Islem.Degistir);
+
+            var s = await titck.GuncelleAsync(iptal);
+            return Results.Ok(new { s.Yazilan, s.Askida, s.Atlanan, s.Dosya, s.Tarih,
+                                    izlemeNo = baglam.IzlemeNo });
+        });
     }
 
     // ---------------------------------------------------------------- yardımcı

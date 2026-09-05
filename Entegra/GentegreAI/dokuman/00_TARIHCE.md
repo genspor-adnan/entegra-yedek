@@ -6458,3 +6458,25 @@ geçer. Sonuç: 23.005 satır (22.176 aktif · 829 askıda · 1.917 ayrı ATC).
 
 Yükleyiciye 8. sütun `aktif` eklendi (boş = 1).
 
+### "TİTCK'den Güncelle" düğmesi
+
+Haftalık listeyi elle indirip CSV'ye çevirmek her hafta tekrarlanan bir
+angaryaydı. Düğme bunu sunucuya yaptırıyor: yayın sayfasından **en güncel**
+dosyayı bulur, indirir, XLSX'i okur ve kataloğu tazeler.
+
+- **En güncel dosya ADA GÖMÜLÜ TARİHTEN seçilir**, sayfadaki sıraya
+  güvenilmez — düzen değişirse sessizce eski dosya yüklenirdi.
+- **XLSX ek pakete başvurmadan okunur:** dosya bir zip, sayfa ve paylaşılan
+  metinler XML. Tam bir Excel okuyucusuna gerek yok, bağımlılık da eklenmiyor.
+- **Sütunlar BAŞLIK ADIYLA eşleşir**, harf sırasıyla değil (TİTCK sütun
+  ekleyip çıkarabiliyor; sabit "B = barkod" varsayımı sessizce yanlış veri
+  yüklerdi). Türkçe başlıklar sadeleştirilerek karşılaştırılır.
+- **Toplu upsert (`unnest`)**: 23 bin satır tek tek 35 saniye sürüyordu,
+  düğmeye basan kullanıcı o kadar bekleyemez. Şimdi **indirme dâhil 5 saniye**.
+- Aynı barkod listede iki kez geçebiliyor (farklı ruhsat satırı); tek komutta
+  iki kez upsert hata verdiği için sonuncusu kalacak şekilde tekleniyor
+  (bu turda 51 satır).
+
+Canlı sonuç: `TİTCK 04.09.2026: 23.002 ürün (829 askıda), 51 atlandı` —
+`kaynak_surum = titck`.
+

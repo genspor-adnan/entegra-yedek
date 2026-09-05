@@ -980,6 +980,10 @@ export const api = {
   /** ICD-10 listesini dosyadan yükler (upsert; gelmeyen kod pasife çekilmez). */
   katalogIcdYukle: (icerik: string) =>
     gonder<{ yazilan: number; atlanan: number }>('/api/katalog/icd-yukle', { icerik }),
+  /** TİTCK'nin haftalık yayınından en güncel listeyi çekip kataloğu tazeler. */
+  katalogTitckGuncelle: () =>
+    gonder<{ yazilan: number; askida: number; atlanan: number; dosya: string; tarih: string }>(
+      '/api/katalog/titck-guncelle', {}),
   /** İlaç (barkod) listesini dosyadan yükler. */
   katalogIlacYukle: (icerik: string) =>
     gonder<{ yazilan: number; atlanan: number }>('/api/katalog/ilac-yukle', { icerik }),

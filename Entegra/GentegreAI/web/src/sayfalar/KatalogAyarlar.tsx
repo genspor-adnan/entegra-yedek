@@ -57,6 +57,24 @@ export function KatalogAyarlar() {
 
   const satir = (kod: string) => durum.find(d => d.kod === kod);
 
+  /**
+   * TİTCK'DEN GÜNCELLE: haftalık yayından en güncel dosyayı sunucu bulur,
+   * indirir ve kataloğu tazeler. Elle indirip CSV'ye çevirme adımı kalkar.
+   * Uzun sürebilir (indirme + 23 bin satır), düğme beklerken kilitlenir.
+   */
+  const [titckCalisiyor, setTitckCalisiyor] = useState(false);
+  const titckGuncelle = async () => {
+    setTitckCalisiyor(true);
+    try {
+      await guvenli(async () => {
+        const y = await api.katalogTitckGuncelle();
+        mesaj(`TİTCK ${y.tarih} listesi yüklendi: ${y.yazilan.toLocaleString('tr-TR')} ürün`
+            + (y.askida ? ` (${y.askida} askıda)` : '') + '.');
+        await oku();
+      });
+    } finally { setTitckCalisiyor(false) }
+  };
+
   const kutu = (kod: string, baslik: string, aciklama: string,
                 sutunlar: string, girdi: React.RefObject<HTMLInputElement | null>,
                 tur: 'icd' | 'ilac') => {
@@ -68,6 +86,11 @@ export function KatalogAyarlar() {
             <span className={`rozet ${d && d.mevcutSatir > 0 ? 'ok' : 'uyari'}`}>
               {d ? `${d.mevcutSatir.toLocaleString('tr-TR')} kayıt` : 'boş'}
             </span>
+            {tur === 'ilac' && (
+              <button className="d bir" disabled={titckCalisiyor} onClick={() => void titckGuncelle()}>
+                {titckCalisiyor ? '⏳ İndiriliyor…' : '⤓ TİTCK’den Güncelle'}
+              </button>
+            )}
             <button className="d" onClick={() => girdi.current?.click()}>⬆ Dosyadan Yükle</button>
           </span>
         </h6>
