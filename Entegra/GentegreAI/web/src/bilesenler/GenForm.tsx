@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { c } from '../dil/ceviri';
 import { api, oturum } from '../api/istemci';
+import { dosyaIndirUrl } from './indir';
 import { useOturum } from '../kimlik/OturumBaglami';
 import {
   ApiHatasi, hataAyristir, urunAdi,
@@ -981,6 +982,54 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
                       onClick={() => alanDegistir('durum', '4')}>⊘ İptal</button>
             </>
           )}
+          {/* DOKUMAN KART ARAC CUBUGU (419, mockup dokuman_karti.html).
+              Surum/onay dongusu KARTTAN yurumeli: kullanici dosyayi acip
+              inceledikten sonra listeye donup aksiyon aramasin.
+
+              "Yeni Surum Yukle" BURADA YOK: dosya secimi ve icerik yukleme
+              kart galerisinin isi; buraya ikinci bir yukleme yolu koymak ayni
+              dosyayi iki akistan gecirmek olurdu. */}
+          {kaynak === 'dokuman' && !yeniMi && (
+            <>
+              <button className="d" onClick={() => void guvenli(async () => {
+                // Icerik ucu KIMLIK ister; adresi yeni sekmede acmak token
+                //   tasimadigi icin 401 doner - blob olarak cekilir.
+                const url = await api.dokumanIcerikUrl(Number(id));
+                window.open(url, '_blank');
+              })}>📂 Aç / Önizle</button>
+
+              <button className="d" onClick={() => void guvenli(async () => {
+                const url = await api.dokumanIcerikUrl(Number(id));
+                dosyaIndirUrl(url, String(deger.ad ?? 'dokuman'), true);
+              })}>⬇ İndir</button>
+
+              {/* ONAYA GONDERILEN SURUMDUR, dokuman degil: taslak surum yoksa
+                  gonderilecek bir sey de yok. */}
+              {Number(deger.surumlu) === 1 && (
+                <button className="d" onClick={() => void guvenli(async () => {
+                  const k = await api.kartOku('dokuman', Number(id));
+                  const taslak = (k.detaylar?.surumler ?? [])
+                    .find(x => Number(x.durum) === 1);
+                  if (!taslak) {
+                    bilgiMesaji('Onaya gönderilecek taslak sürüm yok. '
+                              + 'Önce yeni sürüm yükleyin.');
+                    return;
+                  }
+                  const y = await api.dokumanOnayaGonder(Number(taslak.id));
+                  bilgiMesaji(y.mesaj);
+                })}>✔ Onaya Gönder</button>
+              )}
+
+              <button className="d" onClick={() => void guvenli(async () => {
+                const d = await api.dokumanDepo();
+                const mb = (b: number) => (b / 1024 / 1024).toFixed(1) + ' MB';
+                bilgiMesaji(`Depo kullanımı\n\nFiziksel: ${mb(d.fizikselBayt)}\n`
+                          + `Mantıksal: ${mb(d.mantikselBayt)}\n`
+                          + `Dedup tasarrufu: ${mb(d.tasarrufBayt)}`);
+              })}>📊 Depo</button>
+            </>
+          )}
+
           {/* ENTEGRASYON HESABI (336-340) - mockup'taki kart arac cubugu:
               hesap kaydedildikten sonra AYNI ekrandan sinanabilsin, kullanici
               listeye donmek zorunda kalmasin. SKRS senkronu yalniz SKRS

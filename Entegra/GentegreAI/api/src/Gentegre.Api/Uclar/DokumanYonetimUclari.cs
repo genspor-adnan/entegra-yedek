@@ -32,6 +32,9 @@ public static class DokumanYonetimUclari
     /// <summary>Onay adımı kararı: 1 uygun/onay · 2 düzelt/ret.</summary>
     public sealed record KararIstegi(int Karar, string? Not);
 
+    /// <summary>Ek bağlantı: birincil bağ (dokuman.kaynak) buradan değişmez.</summary>
+    public sealed record BaglantiIstegi(string Kaynak, int KaynakId, string? Rol);
+
     /// <summary>Taşıma / etiketleme: verilmeyen alan DEĞİŞMEZ.</summary>
     public sealed record TasiIstegi(int? KlasorId, string[]? Etiketler, int? Gizlilik);
 
@@ -139,6 +142,56 @@ public static class DokumanYonetimUclari
                 """, [id, baglam.KullaniciId], iptal);
 
             return Results.Ok(new { id, mesaj = "Dokuman guncellendi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/dokuman-yonetim/{id}/baglanti - ek bağlantı ekle
+        //   BİRİNCİL bağ (dokuman.kaynak) buradan değiştirilemez: o, dosyanın
+        //   nereden yüklendiğidir ve değişirse kart galerisi dosyayı kaybeder.
+        grup.MapPost("/{id:int}/baglanti", async (
+            int id, BaglantiIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("dokuman", Islem.Degistir);
+
+            if (string.IsNullOrWhiteSpace(istek.Kaynak) || istek.KaynakId <= 0)
+                throw GentegreHatasi.Dogrulama("Kaynak ve kayit gerekli.",
+                    [new("kaynak", "Baglanacak kayit secilmeli.")]);
+
+            var eklenen = await veri.CalistirAsync("""
+                insert into public.dokuman_iliski (dokuman_id, kaynak, kaynak_id, rol, ekleyen)
+                select @p0, @p1, @p2, @p3, @p4
+                 where not exists (select 1 from public.dokuman d
+                                    where d.id = @p0 and d.kaynak = @p1
+                                      and d.kaynak_id = @p2)
+                on conflict (dokuman_id, kaynak, kaynak_id) do nothing
+                """, [id, istek.Kaynak, istek.KaynakId, istek.Rol ?? "", baglam.KullaniciId],
+                iptal);
+
+            // Sifir satir: ya birincil bagin kendisi ya da zaten var. Ikisi de
+            //   hata degil, ama kullanici "eklendi" sanmamali.
+            return Results.Ok(new { id, eklenen,
+                mesaj = eklenen > 0 ? "Baglanti eklendi."
+                      : "Bu kayit zaten bagli (ya da birincil baglantinin kendisi).",
+                izlemeNo = baglam.IzlemeNo });
+        });
+
+        // DELETE /api/dokuman-yonetim/baglanti/{iliskiId}
+        grup.MapDelete("/baglanti/{iliskiId:int}", async (
+            int iliskiId, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("dokuman", Islem.Degistir);
+
+            var silinen = await veri.CalistirAsync(
+                "delete from public.dokuman_iliski where id = @p0", [iliskiId], iptal);
+            if (silinen == 0)
+                throw GentegreHatasi.IsKurali(
+                    "Baglanti bulunamadi. Birincil baglanti kaldirilamaz.");
+
+            return Results.Ok(new { iliskiId, mesaj = "Baglanti kaldirildi.",
                                     izlemeNo = baglam.IzlemeNo });
         });
 

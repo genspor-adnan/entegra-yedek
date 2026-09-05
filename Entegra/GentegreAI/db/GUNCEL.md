@@ -201,7 +201,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (88 ad, 37 tanesi birden cok dosyada)
+## Gorunumler (90 ad, 37 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -224,7 +224,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_departman_lookup` | `256_departman_durum.sql` | 251_departman.sql, 254_departman_kod.sql |
 | `v_depo_lookup` | `093_depo_kurallar.sql` | 088_belge_irsaliye_alanlari.sql |
 | `v_dis_hekim_lookup` | `309_dis_hekim_kurum_taraf_bag.sql` | 305_dis_hekim.sql, 308_dis_hekim_kurum_ad_kaldir.sql |
+| `v_dokuman_baglanti` | `423_dokuman_iliski.sql` | — |
 | `v_dokuman_klasor_lookup` | `421_dokuman_lookup.sql` | — |
+| `v_dokuman_onay_adim` | `422_dokuman_kart_gorunumleri.sql` | — |
 | `v_dokuman_turu_lookup` | `421_dokuman_lookup.sql` | — |
 | `v_ebelge_entegrator_lookup` | `171_sube_ebelge_mukellef.sql` | — |
 | `v_ebelge_gonderici` | `169_sube_ebelge_kimlik.sql` | 165_firma_bilgileri.sql |

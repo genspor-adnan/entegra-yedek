@@ -46,6 +46,19 @@ public static partial class KartKatalogu
         ["4"] = "Özel Nitelikli (KVKK)"
     };
 
+    /// <summary>Erisim kanali (419): KVKK kaydinda "nereden" sorusunun cevabi.</summary>
+    private static readonly Dictionary<string, string> DokumanKanalKodlari = new()
+    {
+        ["1"] = "Uygulama", ["2"] = "Portal", ["3"] = "Paylaşım Linki", ["4"] = "API"
+    };
+
+    /// <summary>Onay adimi karari (419).</summary>
+    private static readonly Dictionary<string, string> OnayKararKodlari = new()
+    {
+        ["0"] = "Bekliyor", ["1"] = "Uygun / Onay", ["2"] = "Düzelt / Ret",
+        ["3"] = "Geri Gönderildi"
+    };
+
     private static readonly Dictionary<string, string> DokumanOlayKodlari = new()
     {
         ["1"] = "Yükleme", ["2"] = "Görüntüleme", ["3"] = "İndirme", ["4"] = "Düzenleme",
@@ -715,6 +728,13 @@ public static partial class KartKatalogu
                 Grup: "Tanım"),
             new("sahipId", "sahip_id", "kod", KodTablosu: "public.v_kullanici_lookup",
                 Baslik: "Sahip", Grup: "Tanım"),
+            // ETIKET metin olarak girilir, dizi olarak saklanir (dokuman.etiketler
+            //   varchar[]): kullanicidan dizi sozdizimi beklemek yerine virgullu
+            //   yazim kabul edilir - donusum sunucu tarafinda.
+            new("etiketMetni", "array_to_string(etiketler, ', ')", "metin",
+                EnFazlaUzunluk: 300, Baslik: "Etiketler", Grup: "Tanım",
+                Yazilabilir: false),
+            new("dil", "dil", "metin", EnFazlaUzunluk: 5, Baslik: "Dil", Grup: "Tanım"),
 
             // ---------------------------------------------------- erişim ----
             // GIZLILIK sinifi izinden BAGIMSIZ ust kisittir: ozel nitelikli
@@ -765,6 +785,15 @@ public static partial class KartKatalogu
                 new("degisiklikNotu", "degisiklik_notu", "metin", EnFazlaUzunluk: 400,
                     Baslik: "Değişiklik Notu"),
                 new("yukleme", "yukleme", "tarih", Yazilabilir: false, Baslik: "Yükleme"),
+                new("yukleyenId", "yukleyen_id", "kod",
+                    KodTablosu: "public.v_kullanici_lookup", Yazilabilir: false,
+                    Baslik: "Yükleyen"),
+                // HASH gorunur: mockupta "icerik v3 ile ayni (dedup)" bilgisi
+                //   buradan okunuyor - ayni hash, ayni dosya demek.
+                new("hash", "hash", "metin", Yazilabilir: false, EnFazlaUzunluk: 64,
+                    Baslik: "İçerik Hash"),
+                new("contentType", "content_type", "metin", Yazilabilir: false,
+                    EnFazlaUzunluk: 100, Baslik: "Dosya Türü"),
                 new("yayinTarihi", "yayin_tarihi", "tarih", Yazilabilir: false,
                     Baslik: "Yayın"),
                 new("arsivTarihi", "arsiv_tarihi", "tarih", Yazilabilir: false,
@@ -785,8 +814,53 @@ public static partial class KartKatalogu
                     Baslik: "Kullanıcı"),
                 new("gerekce", "gerekce", "metin", Yazilabilir: false, EnFazlaUzunluk: 200,
                     Baslik: "Gerekçe"),
+                new("ip", "ip", "metin", Yazilabilir: false, EnFazlaUzunluk: 45,
+                    Baslik: "IP"),
+                new("kanal", "kanal", "kod", SabitKodlar: DokumanKanalKodlari,
+                    Yazilabilir: false, Baslik: "Kanal"),
             }, SubeKolonu: null, Sirala: "zaman desc, id desc",
-               Baslik: "Günlük", SaltOkunur: true, LogTabloId: 977)
+               Baslik: "Günlük", SaltOkunur: true, LogTabloId: 977),
+
+            // ONAY AKISI (mockup): adimlar, kararlar, notlar. SALT OKUNUR -
+            //   karar vermek bir DUGMENIN isi; satiri elle "onaylandi" yapmak
+            //   onay zincirini anlamsiz kilardi.
+            new("onayAkisi", "public.v_dokuman_onay_adim", "dokuman_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("surumNo", "surum_no", "sayi", Yazilabilir: false, Baslik: "Sürüm"),
+                new("sira", "sira", "sayi", Yazilabilir: false, Baslik: "Adım"),
+                new("ad", "ad", "metin", Yazilabilir: false, Baslik: "Aşama"),
+                new("karar", "karar", "kod", SabitKodlar: OnayKararKodlari,
+                    Yazilabilir: false, Baslik: "Karar"),
+                new("kararVerenId", "karar_veren_id", "kod",
+                    KodTablosu: "public.v_kullanici_lookup", Yazilabilir: false,
+                    Baslik: "Karar Veren"),
+                new("kararZamani", "karar_zamani", "tarih", Yazilabilir: false,
+                    Baslik: "Tarih"),
+                new("notMetni", "not_metni", "metin", Yazilabilir: false,
+                    EnFazlaUzunluk: 400, Baslik: "Not"),
+            }, SubeKolonu: null, Sirala: "surum_no desc, sira asc",
+               Baslik: "Onay Akışı", SaltOkunur: true, LogTabloId: 978),
+
+            // BAGLANTILAR (423): birincil (dokuman.kaynak) + ek baglar tek
+            //   listede. Bir sozlesme hem cari kartinda hem "Sozlesmeler"
+            //   klasorunde gorunmeli - ikinci kopya yuklemek ayni dosyayi iki
+            //   yerde ayri ayri surumlemek olurdu.
+            //   SALT OKUNUR: birincil satir dokumanin kendi kaynagidir,
+            //   silinemez; ek bag ekleme/kaldirma ayri uctan yurur.
+            new("baglantilar", "public.v_dokuman_baglanti", "dokuman_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("kaynak", "kaynak", "metin", Yazilabilir: false, EnFazlaUzunluk: 20,
+                    Baslik: "Kaynak"),
+                new("kaynakId", "kaynak_id", "sayi", Yazilabilir: false, Baslik: "Kayıt Id"),
+                new("birincil", "birincil", "mantik", Yazilabilir: false, Baslik: "Birincil"),
+                new("rol", "rol", "metin", Yazilabilir: false, EnFazlaUzunluk: 60,
+                    Baslik: "Rol"),
+                new("eklemeTarihi", "ekleme_tarihi", "tarih", Yazilabilir: false,
+                    Baslik: "Eklendi"),
+            }, SubeKolonu: null, Sirala: "birincil desc, ekleme_tarihi asc",
+               Baslik: "Bağlantılar", SaltOkunur: true, LogTabloId: 979)
         });
 
     private static KartTanimi LabIstemKarti() => new(
