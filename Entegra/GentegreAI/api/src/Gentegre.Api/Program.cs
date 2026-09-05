@@ -199,6 +199,7 @@ uygulama.KurumProfilUclariniEkle();
 uygulama.PanelUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
 uygulama.DokumanUclariniEkle();
+uygulama.DokumanYonetimUclariniEkle();
 uygulama.GelenBelgeUclariniEkle();
 uygulama.CeviriUclariniEkle();
 uygulama.DokumanIcerikUcunuEkle();

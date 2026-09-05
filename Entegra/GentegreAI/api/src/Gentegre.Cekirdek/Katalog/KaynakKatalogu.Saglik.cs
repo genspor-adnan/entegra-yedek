@@ -464,6 +464,162 @@ public static partial class KaynakKatalogu
                                               Varsayilan: false)
         });
 
+
+    /// <summary>
+    /// DOKÜMAN LİSTESİ (419) — kaynak üstü görünüm.
+    ///
+    /// Kart galerileri aynı tabloyu görmeye devam eder; burası klasör/tür/
+    /// sürüm/durum ile KURUM GENELİNDE bakılan liste. Ayrı bir "kurumsal
+    /// doküman" tablosu açmak, aynı dosyanın iki kopyasını ve iki farklı izin
+    /// modelini doğururdu.
+    /// </summary>
+    private static KaynakTanimi Dokuman() => new(
+        Ad: "dokuman",
+        YetkiKodu: "dokuman",
+        Kaynak: "public.dokuman d "
+              + "  left join public.dokuman_turu t on t.id = d.belge_turu_id "
+              + "  left join public.dokuman_klasor k on k.id = d.klasor_id "
+              + "  left join public.v_kullanici_lookup u on u.id = d.sahip_id",
+        SubeKolonu: "d.sube_id",
+        SabitKosul: "d.durum <> 0",
+        VarsayilanSirala: "d.ekleme_tarihi desc, d.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",        "d.id",        "sayi",  "Id", Varsayilan: false),
+            new("kod",       "d.kod",       "metin", "Kod", Hizalama: "orta", Genislik: 110),
+            new("ad",        "d.ad",        "metin", "Doküman", Genislik: 280),
+            new("turAdi",    "coalesce(t.ad, d.belge_turu)", "metin", "Tür", Genislik: 150),
+            new("klasorYolu","coalesce(k.yol, '')", "metin", "Klasör", Genislik: 180),
+            // KAYNAK: dokuman polimorfik - kart galerisinden gelen satirin
+            //   nereye bagli oldugu listede gorunmeli.
+            new("kaynak",    "d.kaynak",    "metin", "Kaynak", Hizalama: "orta",
+                                            Genislik: 130),
+            new("kaynakId",  "d.kaynak_id", "sayi",  "Kaynak Id", Varsayilan: false),
+            new("surumNo",   "d.surum_no",  "sayi",  "Sürüm", Hizalama: "orta", Genislik: 70),
+            new("durumAdi",
+                """
+                case d.durum when 1 then 'Taslak' when 2 then 'Onayda' when 3 then 'Yayında'
+                             when 4 then 'Arşiv' when 5 then 'İmha Edildi' else 'Silindi' end
+                """,                        "metin", "Durum", Hizalama: "orta",
+                                            Bicim: "rozet", Genislik: 110,
+                                            Filtrelenebilir: false),
+            new("durum",     "d.durum",     "kod",   "Durum Kodu", Varsayilan: false),
+            new("gizlilikAdi",
+                """
+                case d.gizlilik when 1 then 'Herkese Açık' when 3 then 'Gizli'
+                                when 4 then 'Özel Nitelikli' else 'Kurum İçi' end
+                """,                        "metin", "Gizlilik", Hizalama: "orta",
+                                            Bicim: "rozet", Genislik: 130,
+                                            Filtrelenebilir: false),
+            new("gizlilik",  "d.gizlilik",  "kod",   "Gizlilik Kodu", Varsayilan: false),
+            new("sahipAdi",  "coalesce(u.ad, '')", "metin", "Sahip", Genislik: 150,
+                                            Varsayilan: false),
+            new("boyutKb",   "(d.boyut / 1024)", "sayi", "Boyut (KB)", Hizalama: "sag",
+                                            Genislik: 100, Varsayilan: false),
+            new("gecerliBit","d.gecerli_bit","tarih", "Geçerlilik", Hizalama: "orta",
+                                            Bicim: "dd.MM.yyyy", Genislik: 110),
+            new("eklemeTarihi", "d.ekleme_tarihi", "tarih", "Yükleme", Hizalama: "orta",
+                                            Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
+            new("surumlu",   "d.surumlu",   "mantik","Sürümlü", Hizalama: "orta",
+                                            Genislik: 90, Varsayilan: false),
+            // Bekleyen onay: "onay kuyrugu" cipinin dayanagi.
+            new("onaydaSurum",
+                "(select count(*) from public.dokuman_surum s "
+                + "where s.dokuman_id = d.id and s.durum = 2)",
+                                            "sayi",  "Onayda", Hizalama: "orta",
+                                            Genislik: 80, Varsayilan: false)
+        });
+
+    /// <summary>DOKÜMAN TÜRLERİ (419) — sürümlü mü, hangi akış, hangi gizlilik.</summary>
+    private static KaynakTanimi DokumanTuru() => new(
+        Ad: "dokuman-turu",
+        YetkiKodu: "dokuman",
+        Kaynak: "public.dokuman_turu t left join public.dokuman_akis a on a.id = t.akis_id",
+        VarsayilanSirala: "t.sira asc, t.ad asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",       "t.id",       "sayi",  "Id", Varsayilan: false),
+            new("ad",       "t.ad",       "metin", "Tür", Genislik: 200),
+            new("kisaltma", "t.kisaltma", "metin", "Kısaltma", Hizalama: "orta", Genislik: 90),
+            new("surumlu",  "t.surumlu",  "mantik","Sürümlü", Hizalama: "orta", Genislik: 90),
+            new("akisAdi",  "coalesce(a.ad, '')", "metin", "Onay Akışı", Genislik: 170),
+            new("gizlilikAdi",
+                "case t.gizlilik when 1 then 'Herkese Açık' when 3 then 'Gizli' "
+                + "when 4 then 'Özel Nitelikli' else 'Kurum İçi' end",
+                                          "metin", "Gizlilik", Hizalama: "orta",
+                                          Bicim: "rozet", Genislik: 130,
+                                          Filtrelenebilir: false),
+            new("gizlilik", "t.gizlilik", "kod",   "Gizlilik Kodu", Varsayilan: false),
+            new("gozdenGecirmeAy", "t.gozden_gecirme_ay", "sayi", "Gözden Geçirme (ay)",
+                                          Hizalama: "orta", Genislik: 150, Varsayilan: false),
+            new("aktif",    "t.aktif",    "mantik","Aktif", Hizalama: "orta", Genislik: 80),
+            new("sira",     "t.sira",     "sayi",  "Sıra", Hizalama: "orta", Genislik: 70,
+                                          Varsayilan: false)
+        });
+
+    /// <summary>DOKÜMAN KLASÖRLERİ (419) — kurumsal ağaç (kaynak klasörleri sanal).</summary>
+    private static KaynakTanimi DokumanKlasor() => new(
+        Ad: "dokuman-klasor",
+        YetkiKodu: "dokuman",
+        Kaynak: "public.dokuman_klasor k "
+              + "  left join public.dokuman_klasor ust on ust.id = k.ust_id "
+              + "  left join public.dokuman_turu t on t.id = k.varsayilan_tur_id",
+        VarsayilanSirala: "k.yol asc, k.sira asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",       "k.id",       "sayi",  "Id", Varsayilan: false),
+            new("ad",       "k.ad",       "metin", "Klasör", Genislik: 220),
+            new("yol",      "k.yol",      "metin", "Yol", Genislik: 300),
+            new("ustAdi",   "coalesce(ust.ad, '')", "metin", "Üst Klasör", Genislik: 180),
+            new("varsayilanTurAdi", "coalesce(t.ad, '')", "metin", "Varsayılan Tür",
+                                          Genislik: 160),
+            new("dokumanSayisi",
+                "(select count(*) from public.dokuman d "
+                + "where d.klasor_id = k.id and d.durum <> 0)",
+                                          "sayi",  "Doküman", Hizalama: "orta", Genislik: 90),
+            new("aktif",    "k.aktif",    "mantik","Aktif", Hizalama: "orta", Genislik: 80),
+            new("sira",     "k.sira",     "sayi",  "Sıra", Hizalama: "orta", Genislik: 70,
+                                          Varsayilan: false)
+        });
+
+    /// <summary>
+    /// ONAY KUYRUĞU (419) — bekleyen onay adımları.
+    ///
+    /// Satır = ADIM, doküman değil: aynı doküman iki adımda iki farklı kişiyi
+    /// bekliyor olabilir ve herkes yalnız kendi adımını görmeli.
+    /// </summary>
+    private static KaynakTanimi DokumanOnayKuyrugu() => new(
+        Ad: "dokuman-onay",
+        YetkiKodu: "dokuman.onayla",
+        Kaynak: "public.dokuman_onay_adim a "
+              + "  join public.dokuman_onay o on o.id = a.onay_id "
+              + "  join public.dokuman d on d.id = o.dokuman_id "
+              + "  left join public.dokuman_surum s on s.id = o.surum_id "
+              + "  left join public.dokuman_turu t on t.id = d.belge_turu_id "
+              + "  left join public.v_kullanici_lookup u on u.id = a.atanan_kullanici_id",
+        SabitKosul: "o.durum = 1 and a.sira = o.guncel_adim",
+        VarsayilanSirala: "o.baslama asc, a.sira asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",        "a.id",        "sayi",  "Id", Varsayilan: false),
+            new("onayId",    "o.id",        "sayi",  "Onay Id", Varsayilan: false),
+            new("dokumanId", "d.id",        "sayi",  "Doküman Id", Varsayilan: false),
+            new("dokumanAd", "d.ad",        "metin", "Doküman", Genislik: 280),
+            new("kod",       "d.kod",       "metin", "Kod", Hizalama: "orta", Genislik: 110),
+            new("turAdi",    "coalesce(t.ad, '')", "metin", "Tür", Genislik: 150),
+            new("surumNo",   "coalesce(s.surum_no, 0)", "sayi", "Sürüm", Hizalama: "orta",
+                                            Genislik: 70),
+            new("adimAd",    "a.ad",        "metin", "Adım", Hizalama: "orta", Genislik: 120),
+            new("atananAdi", "coalesce(u.ad, '')", "metin", "Atanan", Genislik: 160),
+            new("baslama",   "o.baslama",   "tarih", "Başlama", Hizalama: "orta",
+                                            Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
+            // BEKLEME GUNU: onay kuyrugunda gecikeni one cikarmanin tek yolu.
+            new("beklemeGun",
+                "greatest(0, (extract(epoch from now() - o.baslama) / 86400)::int)",
+                                            "sayi",  "Bekleme (gün)", Hizalama: "sag",
+                                            Genislik: 110)
+        });
+
     private static KaynakTanimi LabIstem() => new(
         Ad: "lab-istem",
         YetkiKodu: "lab",

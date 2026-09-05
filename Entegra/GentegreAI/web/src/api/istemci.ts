@@ -237,6 +237,17 @@ export const api = {
   muayeneOzetDerle: (muayeneId: number) =>
     gonder<{ bulguOzet: string }>(`/api/muayene/${muayeneId}/ozet-derle`, {}),
 
+  /** Surumu onaya gonderir (419): akis adimlari SABLONDAN KOPYALANIR, akis
+      sonradan degisirse suren onay etkilenmez. */
+  dokumanOnayaGonder: (surumId: number) =>
+    gonder<{ onayId: number; mesaj: string }>(
+      `/api/dokuman-yonetim/surum/${surumId}/onaya-gonder`, {}),
+
+  /** Onay adimi karari (419): 1 onay · 2 ret. Son adim onaylaninca YAYINLANIR. */
+  dokumanOnayKarar: (onayId: number, karar: number, not?: string) =>
+    gonder<{ mesaj: string }>(`/api/dokuman-yonetim/onay/${onayId}/karar`,
+                              { karar, not }),
+
   /** e-Nabiz paketini KAYNAKTAN yeniden uretir (415): paket satirini elle
       duzeltmek, gonderilen veriyle kayittaki veriyi ayirirdi. */
   enabizYenidenUret: (paketId: number) =>

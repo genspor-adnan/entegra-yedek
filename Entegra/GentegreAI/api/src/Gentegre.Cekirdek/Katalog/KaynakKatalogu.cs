@@ -144,6 +144,11 @@ public static partial class KaynakKatalogu
         Ekle(HastaAlerji());
         Ekle(HastaIlac());
         Ekle(EnabizPaket());
+        // Dokuman v1 (419): kaynak ustu liste + katalog + onay kuyrugu.
+        Ekle(Dokuman());
+        Ekle(DokumanTuru());
+        Ekle(DokumanKlasor());
+        Ekle(DokumanOnayKuyrugu());
         Ekle(LabIstem());
         // FAZ 0 ortak platform (398-401): onam, bildirim, klinik kataloglar.
         Ekle(OnamMetni());

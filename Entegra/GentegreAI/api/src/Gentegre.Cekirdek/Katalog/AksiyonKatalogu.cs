@@ -311,6 +311,32 @@ public static class AksiyonKatalogu
             //   "Yazdır" dugmesi acilir menusunde CSV Kaydet de var (GenGrid ekler).
             ["cikti-liste"] = [Yazdir()],
 
+            // DOKUMAN ONAY KUYRUGU (419): satir = ADIM. Karar iki secenek -
+            //   onay ya da ret; ret dokumani TASLAGA dondurur, hazirlayan
+            //   duzeltip yeni surum acar (reddedilen surumu yeniden onaya
+            //   gondermek, neyin degistigini gorunmez kilardi).
+            ["dokuman-onay-liste"] =
+            [
+                new("dokuman.onay", "✔ Onayla", "dokuman-onay",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "dokuman.onayla", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 10),
+                new("dokuman.ret", "✖ Reddet", "dokuman-onay",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "dokuman.onayla", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 20),
+                Yazdir(),
+            ],
+
+            // DOKUMAN LISTESI (419): surum ve onay dongusunun giris noktasi.
+            ["dokuman-liste"] =
+            [
+                new("dokuman.onaya-gonder", "📤 Onaya Gönder", "dokuman",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true, Sira: 10),
+                Yazdir(),
+            ],
+
             // e-NABIZ KUYRUGU (415): eksik duzeltilince paket KAYNAKTAN
             //   YENIDEN URETILIR - paket satirini elle duzeltmek, gonderilen
             //   veriyle kayittaki veriyi ayirirdi.
