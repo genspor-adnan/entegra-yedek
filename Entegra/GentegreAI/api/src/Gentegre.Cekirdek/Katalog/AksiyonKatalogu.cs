@@ -311,6 +311,17 @@ public static class AksiyonKatalogu
             //   "Yazdır" dugmesi acilir menusunde CSV Kaydet de var (GenGrid ekler).
             ["cikti-liste"] = [Yazdir()],
 
+            // ILAC KATALOGU (406/407): katalog senkronla dolar, AMA FIYAT
+            //   DOLMAZ - TITCK Detayli Fiyat Listesi kurumsal portal hesabi
+            //   istiyor. O kapi acilana kadar fiyati elle girmenin bir yolu
+            //   olmali, yoksa ilac cikisi fiyatsiz kalir.
+            ["ilac-liste"] =
+            [
+                new("ilac.fiyat", "₺ Fiyat Gir", "ilac", Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "katalog", Islem: Islem.Degistir, KayitGerekir: true, Sira: 10),
+                Yazdir(),
+            ],
+
             // ZAMANLI ISLER (405): zamani beklemeden calistir + zamanlamayi
             //   duzenle. "Simdi Calistir" KayitGerekir - satir secilmeden
             //   pasif gelir; is zaten calisiyorsa sunucu ikinci kez baslatmaz.

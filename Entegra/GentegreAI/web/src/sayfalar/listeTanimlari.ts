@@ -1500,7 +1500,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   {
     // ILAC (400): barkod birincil; e-Recete ve sarf bunu okur.
     kaynak: 'ilac', baslik: 'İlaç Kataloğu', yol: 'Yonetim › İlaç Kataloğu',
-    aksiyonEkrani: 'cikti-liste',
+    aksiyonEkrani: 'ilac-liste',
     menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
     menuAd: 'İlaç Kataloğu', ic: '💊', yetkiKodu: 'katalog', urunModu: 2,
   },

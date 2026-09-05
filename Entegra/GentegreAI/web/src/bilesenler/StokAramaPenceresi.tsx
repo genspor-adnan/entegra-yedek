@@ -7,6 +7,10 @@ import { aramaSirala } from './aramaSirasi';
 import { useOturum } from '../kimlik/OturumBaglami';
 
 
+/** Satir turu: yalniz ikon gosterilir, adi baslikta (title) kalir. */
+const TUR_IKONU: Record<string, string> = { stok: '📦', hizmet: '🧾', ilac: '💊' };
+const TUR_ADI: Record<string, string> = { stok: 'Stok', hizmet: 'Hizmet', ilac: 'İlaç' };
+
 /**
  * Stok / hizmet arama penceresi - satir eklemenin ilk adimi.
  *
@@ -239,7 +243,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
           <table className="detay-tablo secilebilir">
             <thead>
               <tr>
-                <th style={{ width: 70 }} className="hiza-orta">Tip</th>
+                <th style={{ width: 34 }} className="hiza-orta" title="Tür"></th>
                 <th style={{ width: 130 }}>Kod</th>
                 <th>Ad</th>
                 <th className="hiza-sag" style={{ width: 90 }}>Kalan</th>
@@ -254,11 +258,12 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                 <tr key={`${r.tip}-${r.id}`} className={i === secili ? 'secili' : ''}
                     onMouseEnter={() => setSecili(i)}
                     onClick={() => void sec(r)}>
-                  <td className="hiza-orta">
-                    <span className={`rozet ${r.tip === 'hizmet' ? 'bilgi'
-                                            : r.tip === 'ilac' ? 'olumlu' : ''}`}>
-                      {r.tip === 'hizmet' ? 'Hizmet' : r.tip === 'ilac' ? '💊 İlaç' : 'Stok'}
-                    </span>
+                  {/* TUR YALNIZ IKON (kullanici): uc satir tipini ayirmak icin
+                      rozet metni gereksiz genislik yiyordu. Ad yine erisilebilir
+                      - imlec ustune gelince baslik cikar. */}
+                  <td className="hiza-orta" title={TUR_ADI[String(r.tip)] ?? 'Stok'}
+                      aria-label={TUR_ADI[String(r.tip)] ?? 'Stok'}>
+                    <span style={{ fontSize: 15 }}>{TUR_IKONU[String(r.tip)] ?? '📦'}</span>
                   </td>
                   <td><code>{String(r.kod ?? '')}</code></td>
                   <td>{String(r.ad ?? '')}</td>

@@ -219,6 +219,12 @@ export const api = {
   ilacStokKarti: (ilacId: number) =>
     gonder<{ stokId: number; barkod: string; ad: string }>(`/api/katalog/ilac/${ilacId}/stok`, {}),
 
+  /** Elle ilac fiyati (kaynak 9): TITCK Detayli Fiyat Listesi kapisi acilana
+      kadar tek yol. Bagli stok kartinin satis fiyatini da gunceller. */
+  ilacFiyatGir: (ilacId: number, perakende: number, kdv = 10) =>
+    gonder<{ barkod: string; perakende: number; stokId: number | null; yururluk: string }>(
+      `/api/katalog/ilac/${ilacId}/fiyat`, { perakende, kdv }),
+
   kolonlar: (kaynak: string) =>
     istek<{ kaynak: string; kolonlar: KolonMeta[] }>(`/api/liste/${kaynak}/kolonlar`),
 
