@@ -6590,3 +6590,34 @@ stok kartı açmak stok listesini kullanılamaz hale getirirdi. Seçilince
 `POST /api/katalog/ilac/{id}/stok` kartı **ilk kullanımda** üretir (varsa
 mevcut kartı döndürür — uç tekrarlanabilir), belgeye o **stok** düşer. Kart
 kodu barkoddur, izleme **Karekod** (İTS), KDV %10.
+
+### Fiyatın birimi: ilan KDV dahil, kart matrah (408)
+
+Bir kalem üç yerde fiyat taşıyor ve üçü aynı sayı değil: `ilac_fiyat` ilan
+edilen **KDV dahil** perakende fiyatı, `stok_fiyat` **matrah**, kalem penceresi
+başvuruda yine **KDV dahil** gösterim. İlan edilen tutar olduğu gibi stok
+kartına yazılınca pencere onu matrah sanıp bir kez daha brütleştirdi:
+148,50 → 163,35. Hata sessiz - rakam makul görünür, yalnız KDV kadar fazladır.
+
+Çevrim artık tek yerde: `fn_ilac_stok_fiyati(barkod)` (KDV oranı fiyat
+tarihçesinden, yoksa stok kartından, yoksa %10). 408 ayrıca yanlış yazılmış
+satırları onarır — yalnız stok fiyatı ilanla **birebir eşit** olanları, yani
+kullanıcının elle değiştirdiğine dokunmaz.
+
+Aynı kural kalem penceresinde de kırılmıştı: pencere başvuruda KDV dahil modda
+açılır ama kutuya yazılacak brüt metin yalnız satırın kendi `kdvDahil` bayrağına
+bakıyordu. Fiyat listesinden gelen kalem o bayrağı taşır, **kart fiyatıyla**
+gelen kalem taşımaz - kutu boş açılıyor, fiyat satırda duruyordu. Koşul artık
+`kdvDahil` state'iyle aynı ve saf bir fonksiyonda (`baslangicBrutMetni`).
+
+**Refaktör.** Dört uç (kart üretimi, eksik fiyat tamamlama, elle giriş, toplu
+yükleme) aynı `stok_fiyat` upsert'ini ve aynı `ilac_fiyat` upsert'ini
+kopyalıyordu; 408 düzeltmesini dördüne birden uygulamak gerekti. Hepsi
+`Servisler/IlacKartFiyat` altında toplandı, uçlar yetki + biçimlendirmeye indi
+(KatalogUclari 488 → 341 satır). Tekil fiyat girişi de toplu yükleme de aynı
+`FiyatYazAsync`'ten geçer.
+
+Yol üstünde bulunan tuzak: `VeriKaynagi.TekDegerAsync<T>` Nullable'ı
+desteklemiyordu (`int?` → *Invalid cast from Int32*), oysa bağlantı alan
+uzantı sürümünde koruma zaten vardı. Aynı adlı iki metottan birinin
+desteklemesi kendi başına bir tuzaktı; ikisi de eşitlendi.

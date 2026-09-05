@@ -37,13 +37,23 @@ public sealed class VeriKaynagi : IAsyncDisposable
         return komut;
     }
 
+    /// <summary>
+    /// Tek hucre; satir yoksa ya da NULL ise <c>default</c>.
+    ///
+    /// T NULLABLE olabilir (<c>int?</c>): Convert.ChangeType Nullable&lt;T&gt;'yi
+    /// ceviremiyor ve cagri yeri "Invalid cast from Int32 to Nullable`1" ile
+    /// 500 veriyordu. Baglanti alan uzantida ayni koruma zaten vardi - iki
+    /// ayni adli metodun biri destekleyip oteki desteklememesi tuzakti.
+    /// </summary>
     public async Task<T?> TekDegerAsync<T>(string sql, IReadOnlyList<object?>? par = null,
                                            CancellationToken iptal = default)
     {
         await using var baglanti = await AcAsync(iptal);
         await using var komut = Komut(baglanti, sql, par);
         var sonuc = await komut.ExecuteScalarAsync(iptal);
-        return sonuc is null or DBNull ? default : (T)Convert.ChangeType(sonuc, typeof(T));
+        if (sonuc is null or DBNull) return default;
+        var tip = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
+        return (T)Convert.ChangeType(sonuc, tip);
     }
 
     public async Task<int> CalistirAsync(string sql, IReadOnlyList<object?>? par = null,

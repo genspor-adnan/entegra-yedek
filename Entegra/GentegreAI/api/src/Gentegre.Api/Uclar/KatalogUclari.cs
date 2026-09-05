@@ -1,4 +1,5 @@
 using Gentegre.Api.AraKatman;
+using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -199,156 +200,53 @@ public static class KatalogUclari
         //   listesini kullanılamaz hale getirirdi. Kart İLK KULLANIMDA açılır
         //   ve ilac.stok_id ile bağlanır; ikinci kez basıldığında var olan
         //   kart döner (bu yüzden uç tekrarlanabilir).
+        // POST /api/katalog/ilac/{id}/stok - ilac katalogundan STOK KARTI
+        //   Kural ve SQL Servisler/IlacKartFiyat'te; burasi yalniz yetki
+        //   kontrolu yapip cevabi bicimlendirir.
         grup.MapPost("/ilac/{id:int}/stok", async (
-            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, BaglamCozucu cozucu, Servisler.IlacKartFiyat ilaclar,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("stok", Islem.Ekle);
 
-            await using var baglanti = await veri.AcAsync(iptal);
-            await using var islem = await baglanti.BeginTransactionAsync(iptal);
-
-            var ilac = await baglanti.TekAsync("""
-                select i.id, i.barkod, i.ad, i.stok_id
-                  from public.ilac i where i.id = @p0 for update
-                """, islem, [id], o => new
-                {
-                    Barkod = o.GetString(1), Ad = o.GetString(2),
-                    StokId = o.IsDBNull(3) ? (int?)null : o.GetInt32(3),
-                }, iptal);
-            if (ilac is null) return Results.NotFound(new { hata = new { kod = "BULUNAMADI",
-                                        mesaj = "İlaç bulunamadı." } });
-
-            var stokId = ilac.StokId;
-            if (stokId is null)
-            {
-                // Aynı barkodla elle açılmış bir kart olabilir: yenisini açmak
-                //   depoyu ikiye bölerdi, önce o aranır.
-                stokId = await baglanti.TekDegerAsync<int?>("""
-                    select s.id from public.stok s
-                     where s.kod = @p0
-                        or exists (select 1 from public.stok_barkod b
-                                    where b.stok_id = s.id and b.barkod = @p0)
-                     limit 1
-                    """, islem, [ilac.Barkod], iptal);
-
-                stokId ??= await baglanti.TekDegerAsync<int>("""
-                    insert into public.stok (kod, ad, tipi, ana_birim, kdv, izleme, durum,
-                                             sube_id, satilan, alinan, giris_kaynak, ekleyen)
-                    values (@p0, @p1, 51, 51, 10, 4, 1, @p2, 1, 1, 2, @p3)
-                    returning id
-                    """, islem, [ilac.Barkod, ilac.Ad, baglam.SubeId ?? 1, baglam.KullaniciId], iptal);
-
-                await baglanti.CalistirAsync("""
-                    insert into public.stok_barkod (stok_id, barkod, varsayilan)
-                    select @p0, @p1, 1
-                     where not exists (select 1 from public.stok_barkod b where b.barkod = @p1)
-                    """, islem, [stokId, ilac.Barkod], iptal);
-
-                await baglanti.CalistirAsync(
-                    "update public.ilac set stok_id = @p1, guncelleme = now() where id = @p0",
-                    islem, [id, stokId], iptal);
-
-                // FIYAT VARSA SATIS LISTESINE DUSER. Bugun TITCK Detayli Fiyat
-                //   Listesi kurumsal hesap istedigi icin bu deger cogunlukla
-                //   BOSTUR; kart fiyatsiz acilir ve fiyat elle girilir
-                //   (POST .../fiyat). Kapi acildiginda burasi kendiliginden
-                //   calisir - kart uretimini o gune ertelemek gerekmesin.
-                await baglanti.CalistirAsync("""
-                    insert into public.stok_fiyat (stok_id, fiyat_adi, birim, fiyat,
-                                                   doviz_cinsi, satis, ekleyen)
-                    select @p0, 0, 51, f.fiyat, 'TL', 1, @p1
-                      from (select public.fn_ilac_stok_fiyati(i.barkod) as fiyat
-                              from public.ilac i where i.id = @p2) f
-                     where coalesce(f.fiyat, 0) > 0
-                    on conflict (stok_id, fiyat_adi, birim, satis, doviz_cinsi) do nothing
-                    """, islem, [stokId, baglam.KullaniciId, id], iptal);
-            }
-
-            // KART VARDI AMA FIYATSIZDI: ilaca fiyat sonradan girilmis olabilir
-            //   (once kart acilip sonra fiyat yuklenen sira). Listede ilac
-            //   fiyatli gorunup kalem penceresine bos gelmesinin sebebi buydu.
-            //   VAR OLAN FIYAT EZILMEZ - kullanici elle degistirmis olabilir.
-            await baglanti.CalistirAsync("""
-                insert into public.stok_fiyat (stok_id, fiyat_adi, birim, fiyat,
-                                               doviz_cinsi, satis, ekleyen)
-                select @p0, 0, 51, f.fiyat, 'TL', 1, @p1
-                  from (select public.fn_ilac_stok_fiyati(i.barkod) as fiyat
-                          from public.ilac i where i.id = @p2) f
-                 where coalesce(f.fiyat, 0) > 0
-                   and not exists (select 1 from public.stok_fiyat sf
-                                    where sf.stok_id = @p0 and sf.satis = 1 and sf.fiyat > 0)
-                on conflict (stok_id, fiyat_adi, birim, satis, doviz_cinsi)
-                do update set fiyat = excluded.fiyat, degistiren = excluded.ekleyen
-                """, islem, [stokId, baglam.KullaniciId, id], iptal);
-
-            var kartFiyati = await baglanti.TekDegerAsync<decimal>(
-                "select coalesce((select fiyat from public.fn_stok_kart_fiyat(@p0, 1::smallint)), 0)",
-                islem, [stokId], iptal);
-
-            await islem.CommitAsync(iptal);
-            return Results.Ok(new { stokId, ilac.Barkod, ilac.Ad, fiyat = kartFiyati,
-                                    izlemeNo = baglam.IzlemeNo });
+            var k = await ilaclar.StokKartiAsync(id, baglam.KullaniciId, baglam.SubeId, iptal);
+            return k is null
+                ? Results.NotFound(new { hata = new { kod = "BULUNAMADI",
+                                                      mesaj = "Ilac bulunamadi." } })
+                : Results.Ok(new { k.StokId, k.Barkod, k.Ad, k.Fiyat,
+                                   izlemeNo = baglam.IzlemeNo });
         });
 
         // POST /api/katalog/ilac/{id}/fiyat - ELLE FIYAT (kaynak 9)
         //   TITCK Detayli Fiyat Listesi kurumsal portal hesabi istiyor; o kapi
-        //   acilana kadar ilac fiyatsiz kalir ve ilac cikisi yapilamaz. Elle
-        //   girilen fiyat tarihceye KAYNAK 9 ile yazilir: resmi liste geldiginde
-        //   ustune yazilmaz, hangi tarihte neyin gecerli oldugu izlenebilir.
+        //   acilana kadar ilac fiyatsiz kalir ve ilac cikisi fiyatsiz duser.
         grup.MapPost("/ilac/{id:int}/fiyat", async (
             int id, IlacFiyatIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            Servisler.IlacKartFiyat ilaclar, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("katalog", Islem.Degistir);
 
             if (istek.Perakende <= 0)
-                throw GentegreHatasi.Dogrulama("Fiyat sıfırdan büyük olmalı.",
-                    [new("perakende", "Sıfırdan büyük bir tutar girin.")]);
+                throw GentegreHatasi.Dogrulama("Fiyat sifirdan buyuk olmali.",
+                    [new("perakende", "Sifirdan buyuk bir tutar girin.")]);
 
-            await using var baglanti = await veri.AcAsync(iptal);
-            await using var islem = await baglanti.BeginTransactionAsync(iptal);
-
-            var barkod = await baglanti.TekDegerAsync<string>(
-                "select barkod from public.ilac where id = @p0", islem, [id], iptal);
+            var barkod = await veri.TekDegerAsync<string>(
+                "select barkod from public.ilac where id = @p0", [id], iptal);
             if (barkod is null) return Results.NotFound(new { hata = new
-                { kod = "BULUNAMADI", mesaj = "İlaç bulunamadı." } });
+                { kod = "BULUNAMADI", mesaj = "Ilac bulunamadi." } });
 
             var gun = DateOnly.TryParse(istek.Yururluk, out var g)
                     ? g : DateOnly.FromDateTime(DateTime.Today);
+            var s = await ilaclar.FiyatYazAsync(
+                [new(barkod, istek.Perakende, istek.Kdv ?? 10m)],
+                gun, "elle", baglam.KullaniciId, iptal);
 
-            await baglanti.CalistirAsync("""
-                insert into public.ilac_fiyat (barkod, kaynak, yururluk_bas, perakende_fiyat,
-                                               kdv_oran, kaynak_surum, ekleyen)
-                values (@p0, 9, @p1::date, @p2, @p3, 'elle', @p4)
-                on conflict (barkod, kaynak, yururluk_bas) do update
-                   set perakende_fiyat = excluded.perakende_fiyat,
-                       kdv_oran = excluded.kdv_oran
-                """, islem, [barkod, gun.ToDateTime(TimeOnly.MinValue), istek.Perakende,
-                             istek.Kdv ?? 10m, baglam.KullaniciId], iptal);
-
-            await baglanti.CalistirAsync(
-                "select public.fn_ilac_fiyat_golge_tazele()", islem, [], iptal);
-
-            // Bagli stok karti varsa satis fiyati da guncellenir: belge satiri
-            //   fiyati stok fiyat listesinden okunur, ilac tablosundan degil.
-            var stokId = await baglanti.TekDegerAsync<int?>(
-                "select stok_id from public.ilac where id = @p0", islem, [id], iptal);
-            if (stokId is not null)
-                await baglanti.CalistirAsync("""
-                    insert into public.stok_fiyat (stok_id, fiyat_adi, birim, fiyat,
-                                                   doviz_cinsi, satis, ekleyen)
-                    -- Girilen tutar KDV DAHIL; stok karti MATRAH tutar (408).
-                    values (@p0, 0, 51, round(@p1 / (1 + @p3 / 100.0), 4), 'TL', 1, @p2)
-                    on conflict (stok_id, fiyat_adi, birim, satis, doviz_cinsi)
-                    do update set fiyat = excluded.fiyat, degistiren = excluded.ekleyen
-                    """, islem, [stokId, istek.Perakende, baglam.KullaniciId,
-                                 istek.Kdv ?? 10m], iptal);
-
-            await islem.CommitAsync(iptal);
+            var stokId = await veri.TekDegerAsync<int?>(
+                "select stok_id from public.ilac where id = @p0", [id], iptal);
             return Results.Ok(new { barkod, istek.Perakende, stokId,
+                                    stokGuncellendi = s.StokGuncellenen > 0,
                                     yururluk = gun.ToString("dd.MM.yyyy"),
                                     izlemeNo = baglam.IzlemeNo });
         });
@@ -356,75 +254,30 @@ public static class KatalogUclari
         // POST /api/katalog/ilac-fiyat-yukle - TOPLU FIYAT (kaynak 9)
         //   Tek tek girmek 23 bin ilac icin bir yol degil. Sutunlar:
         //     barkod ; perakende [; kdv]
-        //   Kaynak ne olursa olsun (depo fiyat listesi, ecza deposu ekstresi)
-        //   ayni yerden gecer; resmi TITCK listesi geldiginde onun satirlari
-        //   KAYNAK 1 ile ayri durur, bunlarin uzerine yazmaz.
         grup.MapPost("/ilac-fiyat-yukle", async (
-            YuklemeIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            YuklemeIstegi istek, BaglamCozucu cozucu, Servisler.IlacKartFiyat ilaclar,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("katalog", Islem.Degistir);
 
-            var gun = DateTime.Today;
-            var barkodlar = new List<string>();
-            var fiyatlar = new List<decimal>();
-            var kdvler = new List<decimal>();
-
+            var satirlar = new List<Servisler.IlacKartFiyat.FiyatSatiri>();
             foreach (var satir in Satirlar(istek))
             {
                 var barkod = new string(Alan(satir, 0).Where(char.IsDigit).ToArray());
-                var fiyat = Gentegre.Cekirdek.Katalog.IlacListeCozumleme.Ondalik(Alan(satir, 1));
+                var fiyat = IlacListeCozumleme.Ondalik(Alan(satir, 1));
                 if (barkod.Length is < 8 or > 20 || fiyat <= 0) continue;
-                barkodlar.Add(barkod);
-                fiyatlar.Add(fiyat);
-                var kdv = Gentegre.Cekirdek.Katalog.IlacListeCozumleme.Ondalik(Alan(satir, 2));
-                kdvler.Add(kdv > 0 ? kdv : 10m);
+                var kdv = IlacListeCozumleme.Ondalik(Alan(satir, 2));
+                satirlar.Add(new(barkod, fiyat, kdv > 0 ? kdv : 10m));
             }
-            if (barkodlar.Count == 0)
-                throw GentegreHatasi.Dogrulama("Yüklenecek satır bulunamadı.",
-                    [new("icerik", "Sütunlar: barkod ; fiyat ; kdv(ops).")]);
+            if (satirlar.Count == 0)
+                throw GentegreHatasi.Dogrulama("Yuklenecek satir bulunamadi.",
+                    [new("icerik", "Sutunlar: barkod ; fiyat ; kdv(ops).")]);
 
-            await using var baglanti = await veri.AcAsync(iptal);
-
-            var yazilan = await baglanti.CalistirAsync("""
-                insert into public.ilac_fiyat (barkod, kaynak, yururluk_bas, perakende_fiyat,
-                                               kdv_oran, kaynak_surum, ekleyen)
-                select t.barkod, 9, @p3::date, t.fiyat, t.kdv, 'toplu', @p4
-                  from unnest(@p0::varchar[], @p1::numeric[], @p2::numeric[])
-                       as t(barkod, fiyat, kdv)
-                on conflict (barkod, kaynak, yururluk_bas) do update
-                   set perakende_fiyat = excluded.perakende_fiyat,
-                       kdv_oran = excluded.kdv_oran
-                """, null,
-                [barkodlar.ToArray(), fiyatlar.ToArray(), kdvler.ToArray(), gun,
-                 baglam.KullaniciId], iptal);
-
-            await baglanti.TekDegerAsync<int>(
-                "select public.fn_ilac_fiyat_golge_tazele()", null, [], iptal);
-
-            // Bagli stok kartlarinin satis fiyati da tazelenir: belge satiri
-            //   fiyati stok fiyat listesinden okunuyor.
-            var stokGuncellenen = await baglanti.CalistirAsync("""
-                insert into public.stok_fiyat (stok_id, fiyat_adi, birim, fiyat,
-                                               doviz_cinsi, satis, ekleyen)
-                -- Yuklenen tutar KDV DAHIL; stok karti MATRAH tutar (408).
-                select i.stok_id, 0, 51, public.fn_ilac_stok_fiyati(i.barkod), 'TL', 1, @p2
-                  from unnest(@p0::varchar[], @p1::numeric[]) as t(barkod, fiyat)
-                  join public.ilac i on i.barkod = t.barkod and i.stok_id is not null
-                 where public.fn_ilac_stok_fiyati(i.barkod) is not null
-                on conflict (stok_id, fiyat_adi, birim, satis, doviz_cinsi)
-                do update set fiyat = excluded.fiyat, degistiren = excluded.ekleyen
-                """, null,
-                [barkodlar.ToArray(), fiyatlar.ToArray(), baglam.KullaniciId], iptal);
-
-            var eslesmeyen = await baglanti.TekDegerAsync<int>("""
-                select count(*) from unnest(@p0::varchar[]) b(barkod)
-                 where not exists (select 1 from public.ilac i where i.barkod = b.barkod)
-                """, null, [barkodlar.ToArray()], iptal);
-
-            return Results.Ok(new { okunan = barkodlar.Count, yazilan, stokGuncellenen,
-                                    eslesmeyen, izlemeNo = baglam.IzlemeNo });
+            var s = await ilaclar.FiyatYazAsync(satirlar,
+                DateOnly.FromDateTime(DateTime.Today), "toplu", baglam.KullaniciId, iptal);
+            return Results.Ok(new { s.Okunan, s.Yazilan, s.StokGuncellenen, s.Eslesmeyen,
+                                    izlemeNo = baglam.IzlemeNo });
         });
     }
 
