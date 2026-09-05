@@ -1,5 +1,5 @@
 import type { AcikSatir, Kosul } from '../api/sozlesme';
-import { onerilenTutar, matrahaCevir } from './belgeDonusumHesap';
+import { onerilenTutar, matrahaCevir, kurusTamamla } from './belgeDonusumHesap';
 
 /**
  * BELGE KARTININ IS KURALLARI - saf fonksiyonlar.
@@ -51,12 +51,15 @@ export function donusumSatirlari(
   pay = 1,
 ): DonusumSatiri[] {
   if (olcu === 'tutar') {
-    return acik
+    const secim = acik
       .map(s => ({ s, dahil: onerilenTutar(s, hedefTur, pay) }))
       // Kurusun altindaki artiklar satir acmaya degmez.
       .filter(x => x.dahil > 0.005)
-      .map(x => ({ satirId: x.s.satirId, miktar: Number(x.s.miktar),
-                   tutar: matrahaCevir(x.s, x.dahil) }));
+      .map(x => ({ s: x.s, dahil: x.dahil, matrah: matrahaCevir(x.s, x.dahil) }));
+    // Satir bazinda asagi yuvarlanan kuruslar geri konur (hedefi asmadan).
+    kurusTamamla(secim, secim.reduce((t, x) => t + x.dahil, 0));
+    return secim.map(x => ({ satirId: x.s.satirId, miktar: Number(x.s.miktar),
+                             tutar: x.matrah }));
   }
   return acik
     .filter(s => Number(s.kalanMiktar) > 0)
@@ -68,15 +71,42 @@ export function donusumSatirlari(
  * Donusum satirlariyla AYNI hesap - "tutar" olcusunun fis (16) hali.
  * Toplam, kullaniciya sorulan onay metninde gosterilir.
  */
-export function posFisiSecimi(acik: AcikSatir[]):
+export function posFisiSecimi(acik: AcikSatir[], ustSinir?: number):
     { satirlar: DonusumSatiri[]; toplamDahil: number } {
-  const secim = acik
-    .map(s => ({ s, dahil: onerilenTutar(s, 16, 1) }))
-    .filter(x => x.dahil > 0.005);
+  return sinirliDonusumSecimi(acik, 16, ustSinir);
+}
+
+/**
+ * TUTAR SINIRLI donusum secimi: satirlara sirayla dagitir, sinir dolunca
+ * durur. Sinir verilmezse her satirin onerilen tutarinin tamami alinir.
+ * Basvuruda "Belge Kes" ve POS sonrasi otomatik fis bunu kullanir.
+ */
+export function sinirliDonusumSecimi(acik: AcikSatir[], hedefTur: number,
+                                     ustSinir?: number):
+    { satirlar: DonusumSatiri[]; toplamDahil: number } {
+  // UST SINIR = tetikleyen POS tahsilatinin tutari (kullanici karari).
+  //   Sinirsizken satira DAGITILMIS tum tahsilat belgeleniyordu: onceki
+  //   bir tahsilattan kalan 90,00 TL de fise giriyor ve 2.200 cekilen
+  //   POS'a 2.290 TL'lik fis kesiliyordu (basvuru 114317). Eski tahsilatin
+  //   belgelenmemis kalani yerinde durur - elle tahakkuk/fis ile kapatilir.
+  let kalanSinir = ustSinir === undefined ? Number.POSITIVE_INFINITY : ustSinir;
+  const secim: { s: AcikSatir; dahil: number }[] = [];
+  for (const s of acik) {
+    if (kalanSinir <= 0.005) break;
+    const dahil = Math.min(onerilenTutar(s, hedefTur, 1), kalanSinir);
+    if (dahil <= 0.005) continue;
+    secim.push({ s, dahil });
+    kalanSinir -= dahil;
+  }
+  // Satir bazinda asagi yuvarlanan kuruslar toplamda gorunur bir eksik yapar
+  //   (kullanici: POS 75.000 -> fis 74.999,99); hedefi asmadan geri konur.
+  const matrahli = secim.map(x => ({ s: x.s, matrah: matrahaCevir(x.s, x.dahil) }));
+  const hedef = secim.reduce((t, x) => t + x.dahil, 0);
+  kurusTamamla(matrahli, hedef);
   return {
-    satirlar: secim.map(x => ({ satirId: x.s.satirId, miktar: Number(x.s.miktar),
-                                tutar: matrahaCevir(x.s, x.dahil) })),
-    toplamDahil: secim.reduce((t, x) => t + x.dahil, 0),
+    satirlar: matrahli.map(x => ({ satirId: x.s.satirId, miktar: Number(x.s.miktar),
+                                   tutar: x.matrah })),
+    toplamDahil: hedef,
   };
 }
 

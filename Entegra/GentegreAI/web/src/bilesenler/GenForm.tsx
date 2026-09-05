@@ -831,15 +831,13 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
           ) : personelGibiKart ? (
             <div className="alan-izgara"
                  style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}>
-              {/* HASTADA "Dosya No" EDITI YOK (kullanici): numara basliktan
-                  okunuyor - duzenlenecek bir alan degil, seritte yer
-                  kapliyordu.
-                  YENI KAYITTA DURUYOR: numara sablonu "elle girilir" modunda
-                  olabiliyor (358) ve o zaman alan gizlenirse kullanici
-                  "Hasta dosya numarasi zorunlu" hatasini alip DUZELTEMEZ. */}
+              {/* HASTADA "Dosya No" EDITI HIC YOK (kullanici): numara
+                  OTOMATIK verilir - yeni kayitta da sorulmaz. Kayitli kartta
+                  numara basliktan okunur; duzenlenecek bir alan degil,
+                  seritte yer kapliyordu. */}
               {renderAlanListesi(kimlikAlanlari.filter(a =>
                 ['kod', 'ad', 'soyad', 'departman'].includes(a.ad)
-                && !(kaynak === 'hasta' && !yeniMi && a.ad === 'kod')))}
+                && !(kaynak === 'hasta' && a.ad === 'kod')))}
               {/* GOREV seritte YALNIZ PERSONELDE (kullanici: "hasta kartında en
                   üstte görev kaldır"): hastanin gorevi yoktur - alan katalogda
                   zaten GIZLI, buraya ACIKCA cizildigi icin o gizlemeyi

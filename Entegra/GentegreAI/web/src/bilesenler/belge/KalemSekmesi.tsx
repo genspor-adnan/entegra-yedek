@@ -548,10 +548,16 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             Genel Toplam (20) kalir; iskonto YOKSA sunucu o satiri zaten
             uretmez, tek satir gorunur. */}
         {sonuc.dipToplam
+          // SIFIR ISKONTO YAZILMAZ (kullanici: "fişe girdim, iskonto 0 olduğu
+          //   halde dip toplamda görünüyor"): indirimsiz belgede "İskonto 0,00"
+          //   satiri bilgi vermez, dip toplami uzatir. Diger satirlar (Toplam /
+          //   KDV / Genel Toplam) sifir da olsa kalir - belgenin iskeleti.
+          .filter(d => d.tur !== 3 || Math.abs(d.deger) > 0.004)
           .filter(d => !basvuruMu
             // ISKONTO YOKSA "Toplam" da cizilmez: Genel Toplam ile ayni
             //   rakami iki kez gostermek olurdu. Iskonto varsa uclu kalir.
-            || (d.tur === 1 && sonuc.dipToplam.some(x => x.tur === 3))
+            || (d.tur === 1 && sonuc.dipToplam.some(x => x.tur === 3
+                                                     && Math.abs(x.deger) > 0.004))
             || d.tur === 3 || d.tur === 20)
           .map((d, i) => (
           <tr key={i} className={d.tur === 20 ? 'genel' : ''}>

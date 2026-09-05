@@ -311,6 +311,12 @@ public static class AksiyonKatalogu
             //   "Yazdır" dugmesi acilir menusunde CSV Kaydet de var (GenGrid ekler).
             ["cikti-liste"] = [Yazdir()],
 
+            // HASTA EKSTRESI: cikti aksiyonlari + secili satirin belgesine
+            //   gidis (kullanici: "bir satiri isaretledigimde ustte Yazdır'in
+            //   solunda Başvuru Aç aktif olsun"). KayitGerekir ile satir
+            //   secilmeden pasif gelir - sebebi sunucudan yazilir.
+            ["hasta-ekstre"] = [BasvuruAc(), Yazdir()],
+
             // Stok Ayarlari > Depolar sekmesi.
             ["sube-liste"] = Crud("sube", "sube", "sube", "＋ Ekle", silHedef: null, yazdir: false),
 
@@ -493,7 +499,7 @@ public static class AksiyonKatalogu
                     KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
                 new("belge.sil",      "🗑 Sil",          "belge", Kisayol: "Del",
                     KaynakKodu: "belge", Islem: Islem.Sil, KayitGerekir: true, Sira: 25),
-                new("belge.donustur", "⇢ Dönüştür",      "belge",
+                new("belge.donustur", "⇢ Belge Kes",     "belge",
                     AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 30),
                 // Tahsilat: hasta odemesi (nakit/banka/POS) basvurudan alinir.
                 new("kasa.tahsilat.yeni", "＋ Tahsilat", "kasa",
@@ -518,7 +524,7 @@ public static class AksiyonKatalogu
                 //   Izi olmayan (kesinlesmemis) belge silinir; digerinde "İptal Et".
                 new("belge.sil",      "🗑 Sil",          "belge", Kisayol: "Del",
                     KaynakKodu: "belge", Islem: Islem.Sil, KayitGerekir: true, Sira: 25),
-                new("belge.donustur", "⇢ Dönüştür",      "belge",
+                new("belge.donustur", "⇢ Belge Kes",     "belge",
                     AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 30),
                 new("belge.iptal",    "İptal Et",        "belge", Hedef: "sagtus,palet",
                     AksiyonYetkisi: "belge.iptal", KayitGerekir: true, Sira: 40),
@@ -731,6 +737,14 @@ public static class AksiyonKatalogu
     }
 
     /// <summary>Yazdir / CSV kaydet - salt gorunum ekranlarinda tek basina da kullanilir.</summary>
+    /// <summary>
+    /// Ekstre satirindan onu URETEN belgeye gider (kullanici: "başvurusuna
+    /// gidebileyim"). Sira 10 - arac cubugunda Yazdır'in (90) SOLUNDA.
+    /// </summary>
+    private static AksiyonTanimi BasvuruAc()
+        => new("basvuru.ac", "📝 Başvuru Aç", "belge", Hedef: "araccubugu,sagtus,palet",
+               KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 10);
+
     private static AksiyonTanimi Yazdir()
         => new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
                AksiyonYetkisi: "veri.disa-aktar", Sira: 90);

@@ -206,12 +206,18 @@ public sealed partial class BelgeDeposu
         // DONUSMUS SATIRLAR SILINMEZ: hedef belgenin satirlari bunlara
         //   (belge_satir.kaynak_id) bagli; silinirse zincir kopar ve
         //   kapatilan_miktar tetigi bozulur.
+        // BASKA KAYITLARIN KULLANDIGI SATIR DA SILINMEZ: radyoloji istemi,
+        //   UTS bildirimi, konsultasyon ve kurum icmali satiri belge_satir'a
+        //   NO ACTION ile bagli - silinmeye calisilinca istek 23503 ile
+        //   dusuyordu ("Baglantili kayit bulunamadi ya da baska kayitlar
+        //   tarafindan kullaniliyor"; basvuru 114317: kalemlerinden radyoloji
+        //   istemi acilmisti ve kart bir daha KAYDEDILEMIYORDU - Dönüşüm
+        //   sekmesinden "Fiş" demek de once kaydettigi icin ayni hataya
+        //   dusuyordu). Korunan satir donusmus satirla ayni muameleyi gorur:
+        //   yerinde kalir, istemcinin kopyasi atilir.
         var korunan = new List<int>();
-        if (kapanma > 0)
+        await using (var oku = baglanti.Komut(KorunanSatirSql, islem, belgeId, kapanma > 0))
         {
-            await using var oku = baglanti.Komut(
-                "select id from public.belge_satir where belge_id = @p0 and coalesce(kapatilan_miktar, 0) > 0", islem,
-                belgeId);
             await using var o = await oku.ExecuteReaderAsync(iptal);
             while (await o.ReadAsync(iptal)) korunan.Add(o.GetInt32(0));
         }
@@ -714,4 +720,25 @@ public sealed partial class BelgeDeposu
         Parametre.Ekle(komut, parametreler);
         return komut;
     }
+
+    /// <summary>
+    /// Silinmemesi gereken belge satirlari: donusmus (kapatilan_miktar) ya da
+    /// baska bir kaydin (radyoloji istemi / konsultasyon / UTS bildirimi /
+    /// kurum icmali) isaret ettigi satirlar.
+    /// </summary>
+    private const string KorunanSatirSql = """
+        select s.id from public.belge_satir s
+         where s.belge_id = @p0
+           and (
+                (@p1 and coalesce(s.kapatilan_miktar, 0) > 0)
+             or exists (select 1 from public.radyoloji_istem r
+                         where r.belge_satir_id = s.id)
+             or exists (select 1 from public.radyoloji_konsultasyon k
+                         where k.belge_satir_id = s.id)
+             or exists (select 1 from public.uts_bildirim u
+                         where u.belge_satir_id = s.id)
+             or exists (select 1 from public.kurum_icmal_satir i
+                         where i.belge_satir_id = s.id)
+           )
+        """;
 }

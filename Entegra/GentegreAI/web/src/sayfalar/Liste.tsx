@@ -205,6 +205,21 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   }
   // "Ekstre" modu (A secenegi): ayni grid ekstre kaynagina doner. null = liste.
   const [ekstre, setEkstre] = useState<{ id: number; ad: string } | null>(null);
+  /** Ekstre gridinde SECILI satir - "Başvuru Aç" bunu kullanir. */
+  const [ekstreSatir, setEkstreSatir] = useState<ListeSatiri | null>(null);
+  useEffect(() => { setEkstreSatir(null) }, [ekstre?.id]);
+  /**
+   * Ekstre satirindan onu URETEN kayda gider: once kasa islemi, yoksa belge.
+   * `yalnizBelge` (Başvuru Aç) tahsilat kartini degil DOGRUDAN belgeyi acar -
+   * dugmenin adi belge vaat ediyor. Acilacak kayit yoksa false doner.
+   */
+  const ekstreSatirinaGit = (satir: ListeSatiri, yalnizBelge = false): boolean => {
+    const kasaId = Number(satir.kasaIslemId ?? 0);
+    const belgeId = Number(satir.belgeId ?? 0);
+    if (belgeId && (yalnizBelge || !kasaId)) { setAcikBelgeId(belgeId); return true }
+    if (!yalnizBelge && kasaId) { setAcikKasaId(kasaId); return true }
+    return false;
+  };
   // Ekstre dugmesinin aktifligi icin gridden gelen secili satir.
   const [seciliSatir, setSeciliSatir] = useState<ListeSatiri | null>(null);
   // Ekstreden donunce ayni satiri yeniden isaretlemek icin - grid unmount
@@ -1315,6 +1330,7 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         //   hepsi TL ise "Borç" ile "Yerel Borç" ayni sayiyi iki kez gosterir.
         //   Kur kolonu da ayni sebeple gizlenir (her satirda 1).
         dovizsizGizle={['dovizKuru', 'yerelBorc', 'yerelAlacak', 'yerelBakiye']}
+        kolonBasliklari={tanim.ekstre.kolonBasliklari}
         // Cari ekstresinde kolonlar borc/alacak, hesap ekstresinde giris/cikis;
         //   ikisinin de yerel karsiligi toplanir (genel toplam yerel parada).
         toplam={tanim.ekstre.kaynak === 'cari-ekstre'
@@ -1327,16 +1343,24 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         tarihAlani={tanim.ekstre.tarihAlani}
         tarihVarsayilan="yilbasindanBugune"
         // Ekstrede yalniz cikti aksiyonlari (Yazdir ▾ = CSV Kaydet / Yazdir);
-        //   Ekle/Duzenle/Sil hesap listesine ait.
-        aksiyonEkrani="cikti-liste"
+        //   Ekle/Duzenle/Sil hesap listesine ait. HASTA ekstresinde ustune
+        //   "Başvuru Aç" gelir (kullanici) - satir secilmeden pasif, sebebi
+        //   sunucudan (KayitGerekir).
+        aksiyonEkrani={tanim.kaynak === 'hasta' ? 'hasta-ekstre' : 'cikti-liste'}
         // Cift tik: satiri URETEN kayda git - once kasa islemi, yoksa belge.
-        onSatirAc={satir => {
-          const kasaId = Number(satir.kasaIslemId ?? 0);
-          const belgeId = Number(satir.belgeId ?? 0);
-          if (kasaId) setAcikKasaId(kasaId);
-          else if (belgeId) setAcikBelgeId(belgeId);
+        onSatirAc={satir => ekstreSatirinaGit(satir)}
+        onSecimDegisti={s => setEkstreSatir(s)}
+        onAksiyon={kod => {
+          if (kod === 'genel.yazdir') { mesaj('Yazdirma henuz baglanmadi.'); return }
+          // "Başvuru Aç": secili satirin belgesini acar. Ekstre satiri
+          //   tahsilattan gelmis olabilir - o zaman belge, tahsilatin bagli
+          //   oldugu belgedir; ikisi de yoksa acilacak kayit yok.
+          if (kod === 'basvuru.ac') {
+            if (!ekstreSatir) { mesaj('Önce bir satır seçin.'); return }
+            if (!ekstreSatirinaGit(ekstreSatir, true))
+              mesaj('Bu satırın bağlı olduğu bir belge yok.');
+          }
         }}
-        onAksiyon={kod => { if (kod === 'genel.yazdir') mesaj('Yazdirma henuz baglanmadi.') }}
         cipBaslangic={cipIndeks}
         // Cip'e basmak = listeye don (secilen filtreyle).
         onCipSecildi={i => { setCipIndeks(i); setEkstre(null) }}

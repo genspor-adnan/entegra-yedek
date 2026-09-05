@@ -970,6 +970,15 @@ export const api = {
     gonder<{ ayarlar: AyarSatiri[] }>(`/api/ayar/${encodeURIComponent(anahtar)}`,
                                       { deger }, 'PUT').then(y => y.ayarlar),
 
+  // ------------------------------------------------- kullanici tercihi ----
+  /** Kullanicinin KENDI arayuz tercihleri (397): menu favorileri gibi.
+      Deger istemcinin yazdigi JSON metni - sunucu yorumlamaz, saklar. */
+  tercihler: () =>
+    istek<{ tercihler: Record<string, string> }>('/api/tercih').then(y => y.tercihler),
+  tercihYaz: (anahtar: string, deger: string) =>
+    gonder<{ izlemeNo?: string }>(`/api/tercih/${encodeURIComponent(anahtar)}`,
+                                  { deger }, 'PUT'),
+
   // Kod listesi yonetimi (219) - ayar combolarinin icerigi.
   // ÜTS (223) - Saglik Bakanligi Urun Takip Sistemi.
   utsHesapDurum: () =>

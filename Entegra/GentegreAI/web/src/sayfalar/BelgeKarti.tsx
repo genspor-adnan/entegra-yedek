@@ -8,7 +8,7 @@ import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR }
   from './belgeTuru';
 import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { useOturum } from '../kimlik/OturumBaglami';
-import { para, yerelAnMetni, hamSayi } from '../bilesenler/bicim';
+import { para, yerelAnMetni, hamSayi, tutarOku } from '../bilesenler/bicim';
 import { type SatirDurumu, satirTutari, yanittanSatirlar } from './belgeSatir';
 import { belgeDogrula, belgeGovdesi, doluSatirlar, type BelgeGirdisi } from './belgeKaydet';
 import {
@@ -30,7 +30,7 @@ import { yanittanBaslik, yanittanBasvuruBilgi } from './belgeKarti/belgeOkuma';
 import { useBasvuruKaynaklari } from './belgeKarti/useBasvuruKaynaklari';
 import { useBelgeFiyatlandirma } from './belgeKarti/useBelgeFiyatlandirma';
 import {
-  provizyonVarMi, donusumSatirlari, posFisiSecimi, kasaAramaSirasi,
+  provizyonVarMi, donusumSatirlari, posFisiSecimi, sinirliDonusumSecimi, kasaAramaSirasi,
   gelisSekliKarari, acikBorcHesapla,
 } from './belgeKartiKurallari';
 import {
@@ -537,7 +537,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   const { tahsilatAdimi } = tahsilat;
 
   const tahsilatAc = async (tahsilatTuru = 21) => {
-    if (kayitliId) { tahsilatAdimi(tahsilatTuru, kayitliId); return }
+    if (kayitliId) {
+      // Bekleyen kalem degisikligi ONCE kaydedilir: tahsilat kartindan
+      //   donuldugunde kart tazeleniyor ve kaydedilmemis satirlar kayboluyordu.
+      if (kalemDegisti && !(await kayitSart())) return;
+      tahsilatAdimi(tahsilatTuru, kayitliId);
+      return;
+    }
 
     // Belge kaydedilecegi icin KALEM sart. Kaydetmeye birakirsak kullanici
     //   "En az bir satırda stok ya da hizmet seçilmeli." gibi tahsilatla
@@ -769,7 +775,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     if (!id) return;
     try {
       const acik = await api.belgeAcikSatirlar(id);
-      const gonderilecek = donusumSatirlari(acik, hedefTur, donusumOlcusu);
+      // BASVURUDA TUTAR SORULUR (kullanici: "dönüşüm ve tahsilat seçildiğinde
+      //   modal olarak tutar sorsun, o miktar kadar eklesin"): kabul memuru
+      //   kismi fis/fatura kesebilsin. Onerilen deger olcunun tamami;
+      //   iptal edilirse islem durur. Diger belgelerde eski davranis surer.
+      let gonderilecek = donusumSatirlari(acik, hedefTur, donusumOlcusu);
+      if (basvuruMu && gonderilecek.length > 0) {
+        const tamami = sinirliDonusumSecimi(acik, hedefTur).toplamDahil;
+        const sinir = await tutarSor(`${belgeKisaAdi(hedefTur)} tutarı (₺)`, tamami);
+        if (sinir === null) return;
+        gonderilecek = sinirliDonusumSecimi(acik, hedefTur, sinir).satirlar;
+      }
 
       if (gonderilecek.length === 0) {
         mesaj(donusumOlcusu === 'tutar'
@@ -803,7 +819,22 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     if (tur !== 25 || !basvuruMu || !kayitliId || posAksiyon === 0) return;
     try {
       const acik = await api.belgeAcikSatirlar(kayitliId);
-      const { satirlar: secim, toplamDahil: toplam } = posFisiSecimi(acik);
+      // TETIKLEYEN POS TUTARI ust sinir (kullanici): fis o cekimden fazlasini
+      //   belgelemesin. Kasa islemi pencerede kaydedildigi icin tutari
+      //   listeden okuyoruz - en son POS (25) hareketi.
+      const posListe = await api.liste('kasa-islem', {
+        sayfa: 1, boyut: 1, sirala: [{ alan: 'id', yon: 'desc' }],
+        filtre: { op: 'and', kosullar: [
+          { alan: 'belgeId', op: 'esit', deger: kayitliId },
+          { alan: 'tur', op: 'esit', deger: 25 },
+          { alan: 'durum', op: 'esit', deger: 2 },
+        ] },
+      });
+      const posTutar = Number(posListe.satirlar?.[0]?.tutar ?? 0);
+      // Tutar okunamazsa eski davranisa DUSMEYIZ: fis kesmeyip kullaniciyi
+      //   Tahsilat ekranina birakmak, fazla belge kesmekten iyidir.
+      if (!(posTutar > 0)) return;
+      const { satirlar: secim, toplamDahil: toplam } = posFisiSecimi(acik, posTutar);
       if (secim.length === 0) return;
       if (posAksiyon === 2 && !(await onay(
             `POS tahsilatı için ${para.format(toplam)} ₺ tutarında satış fişi kesilsin mi?`)))
@@ -833,12 +864,36 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * edilmisti, tutar 0 cikiyor ve islem sessizce duruyordu). Iptal edilirse
    * 0 doner ve satir eklenmez.
    */
+  /**
+   * TUTAR SORAN MODAL (kullanici): varsayilan deger onerilen tutardir,
+   * kullanici azaltabilir. Iptalde null doner - cagiran islemi durdurur.
+   */
+  const tutarSor = async (baslik: string, varsayilan: number): Promise<number | null> => {
+    const metin = await metinSor(baslik, para.format(varsayilan));
+    if (metin === null) return null;
+    // KUTUDAKI METIN EKRAN BICIMINDE ("50.000,00", bazen "50.000,00 ₺"):
+    //   binlik ayraci, para isareti ve bosluk hosgorulur. hamSayi yalniz JSON
+    //   bicimini (binliksiz) cozup 0 donduruyordu - kullanici onerilen tutari
+    //   degistirmeden Enter'a bastiginda "Tutar sıfırdan büyük olmalı" hatasi
+    //   aliyordu.
+    const t = tutarOku(metin);
+    if (!(t > 0)) { mesaj('Tutar sıfırdan büyük olmalı.'); return null }
+    if (t > varsayilan + 0.005) {
+      mesaj(`En fazla ${para.format(varsayilan)} ₺ girilebilir.`);
+      return null;
+    }
+    return t;
+  };
+
   const tahsilatTutariSor = async (baslik: string) => {
     const kalan = hizliTutar();
+    // BASVURUDA HER ZAMAN SORULUR (kullanici): kismi tahsilat alinabilsin.
+    if (kalan > 0 && basvuruMu) return await tutarSor(`${baslik} tutarı (₺)`, kalan) ?? 0;
     if (kalan > 0) return kalan;
     const metin = await metinSor(
       `${baslik}: bu belgede açık borç yok. Tahsilat tutarını yazın (₺)`, '');
-    const t = metin === null ? 0 : hamSayi(metin);
+    // Kullanici "50.000,00", "50000" ya da "50.000,00 ₺" yazabilir.
+    const t = metin === null ? 0 : tutarOku(metin);
     if (metin !== null && !(t > 0)) mesaj('Tutar sıfırdan büyük olmalı.');
     return t;
   };
@@ -1113,6 +1168,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         : await api.belgeEkle(govde);
       setSonuc(yanit);
       // Kayit sonrasi kart TEMIZ sayilir (kaydedilmemis degisiklik uyarisi).
+      setKalemDegisti(false);
       setImzaTazele(n => n + 1);
       onKaydedildi?.();
       // GENEL KURAL (kullanici): Kaydet'e basilinca form KAPANIR. Belgeye sonradan
@@ -1169,7 +1225,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * olsun.
    */
   const kayitSart = async (): Promise<boolean> => {
-    if (kayitliId) return true;
+    // KAYDEDILMEMIS KALEM DE KAYDEDILIR (kullanici: "114413 ücretler
+    //   kaybolmuş ama tahsilat duruyor"): basvuru ilk ＋'de kaydedilip
+    //   protokol aliyor, sonra ucret satirlari gride giriliyor. Nakit/POS'a
+    //   basildiginda burasi "zaten kayitli" deyip DONUYORDU; tahsilat yazilip
+    //   kart sunucudan tazelenince o satirlar (hic gonderilmedikleri icin)
+    //   ekrandan siliniyordu - para duruyor, ucret yok.
+    if (kayitliId && !kalemDegisti) return true;
     const id = await kes(false);
     if (!id) { if (basvuruMu) setAktifSekme('basvuru'); return false }
     return true;

@@ -102,16 +102,34 @@ public sealed partial class KartDeposu
 
         // Kod zorunlu degilse (cari/kisi) ve bos birakildiysa, ID numarasi kod olarak
         // atanir (kullanici: "kod verilmediyse ID no atasın") - bos kodla kart kalmasin.
+        //
+        // VERITABANI NUMARA VERDIYSE DOKUNULMAZ (396): hasta dosya numarasini
+        //   taraf tetigi (tg_taraf_hasta_dosya_no) uretiyor - istekte kod bos
+        //   geldigi icin burasi onun uzerine ID'yi yaziyordu ve "A/00000001"
+        //   bekleyen kart "5057" ile aciliyordu. Guncelleme artik yalniz kod
+        //   HALA BOSKEN calisir; gercek kod veritabanindan geri okunur.
         if (tanim.Alan("kod") is { Zorunlu: false } kodAlan &&
             string.IsNullOrWhiteSpace(degerler.TryGetValue("kod", out var kodDeger) ? kodDeger as string : null))
         {
             var kodMetni = yeniId.ToString(CultureInfo.InvariantCulture);
             await using (var kodKomut = new NpgsqlCommand(
-                $"update {tanim.Tablo} set {kodAlan.Kolon} = @p0 where {tanim.IdKolonu} = @p1", baglanti, islem))
+                $"update {tanim.Tablo} set {kodAlan.Kolon} = @p0 "
+                + $" where {tanim.IdKolonu} = @p1 and coalesce(btrim({kodAlan.Kolon}), '') = '' "
+                + $"returning {kodAlan.Kolon}", baglanti, islem))
             {
                 kodKomut.Parameters.AddWithValue("p0", kodMetni);
                 kodKomut.Parameters.AddWithValue("p1", yeniId);
-                await kodKomut.ExecuteNonQueryAsync(iptal);
+                var yazilan = await kodKomut.ExecuteScalarAsync(iptal) as string;
+                if (yazilan is null)
+                {
+                    // Satir guncellenmedi = kod zaten dolu (tetik verdi): oku.
+                    await using var okuKod = new NpgsqlCommand(
+                        $"select {kodAlan.Kolon} from {tanim.Tablo} where {tanim.IdKolonu} = @p0",
+                        baglanti, islem);
+                    okuKod.Parameters.AddWithValue("p0", yeniId);
+                    yazilan = await okuKod.ExecuteScalarAsync(iptal) as string;
+                }
+                kodMetni = yazilan ?? kodMetni;
             }
             degerler["kod"] = kodMetni;
         }

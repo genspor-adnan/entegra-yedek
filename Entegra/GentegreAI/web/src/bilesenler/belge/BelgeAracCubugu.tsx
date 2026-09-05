@@ -171,7 +171,7 @@ export function BelgeAracCubugu({
               title={kayitliId ? 'Seçili satırları faturaya / fişe / tahakkuka aktar'
                                : 'Önce siparişi kaydedin.'}
               onClick={() => setDonusum(alisMi ? 11 : 15)}>
-        🧾 Faturaya Dönüştür
+        🧾 Belge Kes
       </button>
       {!basvuruMu &&
         <button className="d" disabled title="Üretim emri henüz bağlanmadı.">🏭 Üretime Aktar</button>}
@@ -208,7 +208,7 @@ export function BelgeAracCubugu({
               title={kayitliId ? 'Sevk edilen satırları faturaya / fişe / tahakkuka aktar'
                                : 'Önce irsaliyeyi kaydedin.'}
               onClick={() => setDonusum(alisMi ? 11 : 15)}>
-        🧾 Faturaya Dönüştür
+        🧾 Belge Kes
       </button>
       <button className="d" disabled title="Sevk fişi yazdırma henüz bağlanmadı.">
         🖨️ Sevk Fişi Yazdır

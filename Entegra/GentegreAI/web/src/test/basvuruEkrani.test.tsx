@@ -108,7 +108,7 @@ describe('yeni basvuru karti', () => {
     expect(await sekme('Başvuru')).toBeInTheDocument();
     expect(await sekme('Ücretlendirme')).toBeInTheDocument();
     expect(await sekme('Tahsilat')).toBeInTheDocument();
-    expect(await sekme('Faturalama')).toBeInTheDocument();
+    expect(await sekme('Dönüşüm')).toBeInTheDocument();
     // YENI basvuruda dugme "protokol ver" der - kayitli belgede "kaydet".
     expect(screen.getByText(/Başvuruyu Aç \(Protokol Ver\)/)).toBeInTheDocument();
   });
@@ -211,7 +211,7 @@ describe('tamamlanma seridi (370)', () => {
     ciz();
     await waitFor(() => expect(document.querySelector('.basvuru-asama')).toBeTruthy());
     expect(asamalar().map(a => a.textContent))
-      .toEqual(['Başvuru', 'Ücretlendirme', 'Tahsilat', 'Faturalama']);
+      .toEqual(['Başvuru', 'Ücretlendirme', 'Tahsilat', 'Belge Kesimi']);
     expect(document.querySelectorAll('.basvuru-asama .asama.ok')).toHaveLength(0);
     expect(document.querySelector('.asama-yuzde b')?.textContent).toBe('%0');
   });

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (178 ad, 59 tanesi birden cok dosyada)
+## Fonksiyonlar (179 ad, 59 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -20,7 +20,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_fisle_toplu` | `190_belge_fisle.sql` | — |
 | `fn_belge_fiyatlandir` | `205_belge_fiyat_listesi.sql` | — |
 | `fn_belge_kalem_fiyati` | `204_cari_fiyat_listesi.sql` | — |
-| `fn_belge_kapanma_tazele` | `289_odeme_paylasimi.sql` | 191_kapanma_tazele.sql |
+| `fn_belge_kapanma_tazele` | `395_kapanma_miktarla.sql` | 191_kapanma_tazele.sql, 289_odeme_paylasimi.sql |
+| `fn_belge_kisa_adi` | `394_tahsilat_aciklama_belgeden.sql` | — |
 | `fn_belge_no_anahtar` | `025_fn_belge_no.sql` | — |
 | `fn_belge_no_uret` | `366_numara_onek_yil.sql` | 025_fn_belge_no.sql, 087_numara_kesme_duzeltmesi.sql, 152_numara_sablonu.sql |
 | `fn_belge_rezerve` | `142_siparis_rezervasyon.sql` | — |
@@ -93,7 +94,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_hesap_plani_alt_ac` | `076_fn_kasa.sql` | — |
 | `fn_kalem_kart_fiyati` | `202_fn_fiyat_listesi.sql` | — |
 | `fn_kampanya_fiyat` | `275_kampanya_liste_kalem_turu.sql` | 272_kampanya_fiyat.sql |
-| `fn_kasa_islem_bacak_uret` | `139_kasa_ekstre_dovizi.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql, 096_kasa_bacak_rol_kontrol.sql |
+| `fn_kasa_islem_bacak_uret` | `393_bacak_belge_no.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql, 096_kasa_bacak_rol_kontrol.sql, 139_kasa_ekstre_dovizi.sql |
 | `fn_kasa_islem_dogrula` | `085_fn_kasa_f3.sql` | 076_fn_kasa.sql |
 | `fn_kasa_islem_duzelt_hazirla` | `148_kasa_islem_duzelt.sql` | — |
 | `fn_kasa_islem_fisle` | `148_kasa_islem_duzelt.sql` | 076_fn_kasa.sql |
@@ -182,12 +183,12 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_radyoloji_istem_hazirla` | `287_radyoloji_accession_tetik.sql` | — |
 | `tg_randevu_cakisma` | `317_randevu_tetkik_uyum.sql` | 316_randevu_cihaz_kaynagi.sql |
 | `tg_sube_vkn_dogrula` | `170_sube_vkn_dogrula.sql` | — |
-| `tg_taraf_hasta_dosya_no` | `358_numara_sablonu_elle_girilir.sql` | 356_hasta_dosya_no_otomatik.sql |
+| `tg_taraf_hasta_dosya_no` | `396_hasta_dosya_no_otomatik.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |
 | `tg_taraf_hasta_kurum_tek_aktif` | `248_taraf_hasta_kurum.sql` | — |
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (82 ad, 35 tanesi birden cok dosyada)
+## Gorunumler (82 ad, 36 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -239,7 +240,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_kategori_lookup` | `347_sonomed_rad_kategori.sql` | 250_kategori_lookup.sql, 270_kategori_agaci.sql |
 | `v_kullanici_lookup` | `156_ebelge_seri.sql` | — |
 | `v_kurum_lookup` | `250_kategori_lookup.sql` | 249_kurum_sozlesme.sql |
-| `v_mali_hareket_ek` | `077_v_ekstre.sql` | — |
+| `v_mali_hareket_ek` | `392_iptal_ters_kayit_ekstre.sql` | 077_v_ekstre.sql |
 | `v_masraf_ekstre` | `077_v_ekstre.sql` | — |
 | `v_masraf_lookup` | `071_kasa_master.sql` | — |
 | `v_masraf_merkezi_lookup` | `071_kasa_master.sql` | — |

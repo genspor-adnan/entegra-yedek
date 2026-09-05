@@ -204,6 +204,28 @@ export function yerelAnMetni(d: Date): string {
 export const sayiOku = (metin: unknown) =>
   Number(String(metin ?? '').replace(/\./g, '').replace(',', '.')) || 0;
 
+/**
+ * KULLANICININ YAZDIGI TUTAR: ekran bicimi, para isareti ve bosluk serbest.
+ * "50.000,00", "50.000,00 ₺", "50 000,00", "50000" hepsi ayni sayidir.
+ *
+ * `sayiOku` yalniz temiz ekran bicimini cozer; kutuya para isareti ya da
+ * bosluk karisinca 0 donuyor ve cagiran "Tutar sıfırdan büyük olmalı" diyordu
+ * (kullanici, POS tahsilati). Once sayi disi her sey atilir, sonra ayni kural
+ * uygulanir: nokta binlik, virgul ondalik.
+ */
+export const tutarOku = (metin: unknown): number => {
+  const t = String(metin ?? '').replace(/[^\d.,-]/g, '');
+  if (t === '') return 0;
+  // Yalniz NOKTA varsa ve son grup 3 haneyse binlik ayracidir ("50.000");
+  //   aksi halde ondalik kabul edilir ("50.5").
+  const noktaBinlik = !t.includes(',') && /^-?\d{1,3}(\.\d{3})+$/.test(t);
+  const sade = t.includes(',') || noktaBinlik
+    ? t.replace(/\./g, '').replace(',', '.')
+    : t;
+  const n = Number(sade);
+  return Number.isFinite(n) ? n : 0;
+};
+
 /** `sayiOku`nun bos/gecersiz degeri 0 yerine null dondurdugu surumu. */
 export const sayiOkuNull = (metin: unknown): number | null => {
   const t = String(metin ?? '').trim();

@@ -104,11 +104,11 @@ export function basvuruAsamalari(g: AsamaGirdisi): AsamaSonucu {
 
   const kapanma = Number(g.kapanmaDurum ?? 0);
   const fatura: Asama = {
-    kod: 'fatura', ad: 'Faturalama', renk: 'yesil',
+    kod: 'fatura', ad: 'Belge Kesimi', renk: 'yesil',
     tamam: kapanma === 2,
     ipucu: kapanma === 2 ? ''
-         : kapanma === 1 ? 'Kısmi faturalandı.'
-         : 'Fiş / fatura kesilmedi.',
+         : kapanma === 1 ? 'Kısmi belge kesildi.'
+         : 'Fiş / fatura / tahakkuk kesilmedi.',
   };
 
   // ÖSS'de provizyon UCRETTEN ONCE, SGK'da SONRA (kullanici).

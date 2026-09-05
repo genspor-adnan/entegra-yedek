@@ -25,17 +25,17 @@ const tamam = (y: Partial<AsamaGirdisi>, kod: string) =>
 describe('asama sirasi odeyen kuruma gore', () => {
   it('ÖZELDE provizyon HIC cizilmez - hasta kendi oder', () => {
     expect(adlar({ kurumTuru: KURUM_OZEL }))
-      .toEqual(['Başvuru', 'Ücretlendirme', 'Tahsilat', 'Faturalama']);
+      .toEqual(['Başvuru', 'Ücretlendirme', 'Tahsilat', 'Belge Kesimi']);
   });
 
   it('ÖSS: provizyon UCRETLENDIRMEDEN ONCE (police kapsami once bilinmeli)', () => {
     expect(adlar({ kurumTuru: KURUM_OSS }))
-      .toEqual(['Başvuru', 'Provizyon', 'Ücretlendirme', 'Tahsilat', 'Faturalama']);
+      .toEqual(['Başvuru', 'Provizyon', 'Ücretlendirme', 'Tahsilat', 'Belge Kesimi']);
   });
 
   it('SGK: provizyon UCRETLENDIRMEDEN SONRA (takip girilen hizmetler uzerinden)', () => {
     expect(adlar({ kurumTuru: KURUM_SGK }))
-      .toEqual(['Başvuru', 'Ücretlendirme', 'Provizyon', 'Tahsilat', 'Faturalama']);
+      .toEqual(['Başvuru', 'Ücretlendirme', 'Provizyon', 'Tahsilat', 'Belge Kesimi']);
   });
 
   it('kurum SECILMEMISSE ozel akisi cizilir', () => {

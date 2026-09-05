@@ -57,3 +57,36 @@ export function onerilenTutar(s: AcikSatir, hedefTur: number, pay: number) {
  */
 export const matrahaCevir = (s: AcikSatir, dahilTutar: number) =>
   Math.floor(Number((dahilTutar / kdvCarpan(s)).toFixed(6)) * 100) / 100;
+
+/**
+ * Matrahtan satirin KDV DAHIL tutari - SUNUCUYLA AYNI kural: KDV once kurusa
+ * yuvarlanir, sonra matraha eklenir (BelgeHesap).
+ */
+export const dahilTutar = (s: AcikSatir, matrah: number) =>
+  matrah + Math.round(matrah * Number(s.kdv ?? 0)) / 100;
+
+/**
+ * KURUS FARKINI TAMAMLAR (kullanici: "POS 75.000, satis fisi 74.999,99").
+ *
+ * `matrahaCevir` her satirda KURUSA ASAGI yuvarlar - amaci fisin tahsil
+ * edilenden FAZLA cikmamasi. Bedeli, satir sayisi kadar kurusluk bir eksiktir
+ * ve toplamda gozle gorunur: 75.000 cekilmisken fis 74.999,99 kesiliyordu.
+ *
+ * Burasi eksigi geri koyar: satirlara sirayla birer kurus matrah eklenir,
+ * yalniz eklenen kurus hedefi ASMADIGI surece. Boylece fis tahsil edileni
+ * birebir tutar, asla gecmez.
+ */
+export function kurusTamamla(
+  secim: { s: AcikSatir; matrah: number }[], hedefDahil: number,
+): void {
+  let toplam = secim.reduce((t, x) => t + dahilTutar(x.s, x.matrah), 0);
+  for (const x of secim) {
+    while (hedefDahil - toplam >= 0.005) {
+      const yeniMatrah = Math.round((x.matrah + 0.01) * 100) / 100;
+      const artis = dahilTutar(x.s, yeniMatrah) - dahilTutar(x.s, x.matrah);
+      if (toplam + artis > hedefDahil + 0.005) break;   // hedefi asma
+      x.matrah = yeniMatrah;
+      toplam += artis;
+    }
+  }
+}

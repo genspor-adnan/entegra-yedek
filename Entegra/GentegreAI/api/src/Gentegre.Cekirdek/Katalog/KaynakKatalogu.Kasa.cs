@@ -347,11 +347,16 @@ public static partial class KaynakKatalogu
             //   Kolon secicide duruyor - tum carilerin hareketi listelenmek
             //   istendiginde acilabilir.
             new("tarafUnvan",   "e.taraf_unvan",  "metin", "Cari", Genislik: 220, Varsayilan: false),
+            // BELGE NO, TARIHIN SOLUNDA (kullanici, hasta ekstresi): hasta
+            //   ekraninda bu numara PROTOKOL numarasidir - hangi basvurunun
+            //   hareketi oldugu once okunur. Ekran basligi listeTanimlari'nda
+            //   (`ekstreKolonBasliklari`) veriliyor, katalogda "Belge No" kalir:
+            //   ayni kaynagi cari ekstresi de kullaniyor.
+            new("belgeNo",      "e.belge_no",     "metin", "Belge No", Genislik: 140),
             new("islemTarihi",  "e.islem_tarihi", "tarih", "Tarih", Hizalama: "orta",
                                                   Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
             new("turAdi",       "e.tur_adi",      "metin", "Islem"),
             new("islemNo",      "e.islem_no",     "metin", "Makbuz No", Varsayilan: false),
-            new("belgeNo",      "e.belge_no",     "metin", "Belge No"),
             new("aciklama",     "e.aciklama",     "metin", "Aciklama", Genislik: 220),
             // GRUP para biriminde: satirin kendi biriminde borc/alacak/bakiye.
             //   Grup basligi hangi birim oldugunu soyler, kolon basliginda tekrar

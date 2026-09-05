@@ -72,7 +72,12 @@ export function GenToolbar({ aksiyonlar, calistir, altSecenekler }: CalistirProp
               disabled={!a.aktif}
               title={a.aktif ? (a.kisayol ?? a.ad) : (a.pasifSebep ?? '')}
               // Yalniz "Yeni" birincil (dolu mor); Duzenle/Yazdir/... renksiz-transparan kalir.
-              className={`d ${a.kod.endsWith('.yeni') ? 'bir' : ''}`}
+              // VURGU (mavi) yalniz ekranin BIRINCIL yeni kaydinda: "＋ Yeni
+              //   Başvuru" gibi. `kasa.*` eklemeleri (Tahsilat) ikincil islem -
+              //   mavi olunca ekranin ana eylemi sanilıyordu (kullanici:
+              //   "başvuru listesi tahsilat butonu mavi rengi kaldır").
+              className={`d ${a.kod.endsWith('.yeni') && !a.kod.startsWith('kasa.')
+                              ? 'bir' : ''}`}
               onClick={e => {
                 if (!alt) { calistir(a.kod); return }
                 e.stopPropagation();

@@ -371,7 +371,14 @@ public sealed partial class BelgeDeposu
                    coalesce(ht.ad, '')         as "turAdi",
                    hb.taraf_unvan              as "tarafUnvan",
                    sum(hs.miktar)              as miktar,
-                   sum(hs.tutar)               as tutar,
+                   -- KDV DAHIL (kullanici: "3190 ucretlendirme var ama
+                   --   donusumde 2900 gorunuyor"): kaynaktaki ucretlendirme
+                   --   KDV dahil okunuyor, burada satir tutari KDV HARICTI -
+                   --   ayni isin iki farkli sayisi kafa karistiriyordu.
+                   --   Belgenin genel_toplam'i kullanilamaz: bir fatura birden
+                   --   cok kaynaktan satir toplayabilir, o zaman bu kaynagin
+                   --   payindan fazlasini gosterirdi.
+                   sum(round(hs.tutar * (1 + coalesce(hs.kdv, 0) / 100.0), 2)) as tutar,
                    hb.durum,
                    case hb.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end as "durumAdi"
               from public.belge_satir hs

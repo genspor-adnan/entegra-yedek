@@ -3,6 +3,7 @@ import { Modal } from './Modal';
 import { api } from '../api/istemci';
 import { type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { para } from './bicim';
+import { aramaSirala } from './aramaSirasi';
 
 
 /**
@@ -79,10 +80,15 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                    : api.liste('hizmet', { sayfa: 1, boyut: 25, filtre, gorunum }),
       ]);
 
-      const birlesik: ListeSatiri[] = [
+      // SIRA GORUNUME GORE (ortak kural, aramaSirasi.ts): "Tüm Liste"de ada
+      //   gore, Son/Sik'ta sunucunun verdigi anahtarlarla. Iki kaynak AYRI
+      //   istekle geldigi icin siralama birlestirmeden SONRA yapilmali -
+      //   alfabetik siralama sunucunun sirasini eziyor ve en son secilen kayit
+      //   en uste gelmiyordu (kullanici).
+      const birlesik = aramaSirala<ListeSatiri>([
         ...stoklar.satirlar.map((r): ListeSatiri => ({ ...r, tip: 'stok' })),
         ...hizmetler.satirlar.map((r): ListeSatiri => ({ ...r, tip: 'hizmet' })),
-      ].sort((a, b) => String(a.ad ?? '').localeCompare(String(b.ad ?? ''), 'tr'));
+      ], gorunumSecimi);
 
       setSatirlar(birlesik);
       setSecili(0);

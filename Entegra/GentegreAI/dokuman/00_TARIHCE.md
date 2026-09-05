@@ -6082,3 +6082,89 @@ temizlendi. Muhasebe fisi olan iki belgede fis `fn_belge_fis_geri_al` ile
 duzgun yolla geri alindi - elle silmek yetim fis satiri birakirdi. Klinik
 kayitlar (3 radyoloji istemi, 1 randevu) SILINMEDI, yalniz belge baglari
 koparildi. Yetim satir kontrolu: 0.
+
+## 05.09.2026 — Hasta dosya no otomatik, menü favorileri sunucuda (`db/396-397`)
+
+### Yeni hasta kaydında "Dosya No" alanı kalktı (db/396)
+
+Kullanıcı: "yeni hasta eklemede dosya no editini kaldır — otomatik verilecek."
+Alan kayıtlı kartta zaten gizliydi (numara başlıktan okunuyor); yeni kayıtta
+"numara şablonu elle girilir olabilir" gerekçesiyle duruyordu.
+
+Alanı kaldırmak tek başına kaydı kırardı: `tg_taraf_hasta_dosya_no` tetiği boş
+kod görünce `numara_sablonu` (tür 900) `elle_girilir = 1` olduğu için
+`Hasta dosya numarası zorunlu` fırlatıyor, kullanıcının numarayı yazacağı bir
+alan kalmıyordu. 396 tetikten `elle_girilir` kontrolünü çıkardı — hasta kodu
+boşsa numara **daima** üretilir; göç/entegrasyonla dışarıdan gelen kod aynen
+korunur. Ayar satırı da yeni davranışa getirildi (`elle_girilir = 0`).
+Kayıt Kabul Ayarları'ndaki not, işaretin hastada dikkate alınmadığını yazıyor.
+
+### Menü favorileri artık sunucuda (db/397)
+
+Kullanıcı: "menüde Favoriler menüsü kaybolmuş." Kodda kayıp yoktu — grup
+yalnız liste boş değilken çiziliyor; liste `localStorage`'ta yaşıyordu
+(`favoriler.<kullaniciId>`). Site verisi silinince, başka makineden ya da
+başka adresten (dev `localhost:5173` ile sunucudaki `/ai` **ayrı origin, ayrı
+depo**) girilince liste boş geliyor ve menü bölümü hiç çizilmiyordu.
+
+397 `public.kullanici_tercih` (kullanıcı, anahtar, değer) tablosunu açtı;
+değer istemcinin yazdığı JSON metnidir — sunucu yorumlamaz, saklar. Yeni uç
+`GET/PUT /api/tercih` yetki İSTEMEZ (kullanıcı kendi tercihi; kullanıcı kimliği
+daima jetondan, istekten değil), yazılabilir anahtarlar beyaz listeli
+(`favoriler`, `sonMenuler`) ve değer 8 000 karakterle sınırlı — tablo
+istemcinin serbest deposu olmasın.
+
+İstemcide `localStorage` **çevrimdışı kopya** olarak kaldı: sunucuya
+ulaşılamazsa menü yine dolu açılır. Sunucuda hiç kayıt yoksa tarayıcıdaki eski
+liste bir kez taşınır; sunucuda `"[]"` yazılıysa taşınmaz — kullanıcı
+favorilerini bilerek boşaltmıştır.
+
+### Başvuruda ücret satırları kaydedilmeden kayboluyordu
+
+Kullanıcı: "114413 ücretler kaybolmuş ama tahsilat duruyor." Log tek satır
+diyordu: belge `satirAdedi: 0` ile eklenmiş, sonra tahsilat yazılmış — silme
+yok, satır hiç gelmemiş.
+
+Akış şöyleydi: başvuruda ilk `＋` (ücret ekle) belgeyi kaydedip protokol
+veriyor — o kayıt haklı olarak kalemsiz. Sonra ücret satırları gride giriliyor
+ama kaydedilmiyor. Nakit/POS'a basınca `kayitSart()` "zaten kayıtlı" deyip
+dönüyordu; tahsilat yazılıyor, ardından kart sunucudan tazeleniyor ve
+sunucuda olmayan satırlar ekrandan siliniyordu. `kayitSart` artık **bekleyen
+kalem değişikliğini de kaydeder** (`kalemDegisti`), `kes()` başarılı olunca
+bayrağı temizler, `tahsilatAc` da aynı kapıdan geçer.
+
+### metinSor kutusu varsayılanı GERİ DÖNMÜYORDU
+
+"POS ekledim, 50.000,00 geldi, Enter'a basınca *Tutar sıfırdan büyük olmalı*
+dedi." Kutunun `value`'su `girdi || girdiVarsayilan` idi: görünen değer
+varsayılandan geliyor, state boş kalıyor ve çağırana `''` dönüyordu. Varsayılan
+artık pencere açılırken state'e yazılır — görünen ile dönen aynı. Bu tüm
+`metinSor` çağrılarını düzeltir, yalnız tahsilatı değil.
+
+Yanında iki okuma düzeltmesi: yazılan tutar `tutarOku` ile çözülüyor (binlik
+ayracı, `₺`, boşluk hoş görülür; `hamSayi` "50.000,00"u NaN yapıyordu).
+
+### POS fişi 1 kuruş eksik kesiliyordu
+
+POS 75.000 → satış fişi 74.999,99. `matrahaCevir` her satırda kuruşa **aşağı**
+yuvarlıyor (fiş tahsil edilenden fazla çıkmasın); iki satırlı belgede bu
+toplamda görünür bir eksik yapıyordu (50.000,00 + 18.181,81 → 74.999,99).
+`kurusTamamla` eksiği geri koyar: satırlara sırayla birer kuruş matrah eklenir,
+yalnız hedefi **aşmadığı** sürece. Hem POS otomatik fişi hem dönüşüm modali
+aynı hesabı kullanır.
+
+### Arama pencerelerinde "Son / Sık" sırası kayboluyordu
+
+Kullanıcı: "son eklenene basınca en üstte o gelmedi." Yapı zaten jenerikti
+(`kullanici_arama`, her kart açılış/eklemede işaretlenir) ve sunucu doğru
+sıralıyordu — sıra istemcide bozuluyordu: Stok/Hizmet penceresi iki kaynağı
+birleştirip **ada göre yeniden sıralıyor**, TarafArama ise kaynakları alt alta
+ekliyordu. Sunucu artık son/sık görünümünde sıralama anahtarlarını da döner
+(`aramaSonTarih`, `aramaSay` — SorguUretici), ortak kural tek dosyada
+(`bilesenler/aramaSirasi.ts`): Tüm Liste'de ada göre, Son = en yeni önce,
+Sık = en çok kullanılan önce. İki pencere de buna bağlandı.
+
+### Sıfır iskonto satırı dip toplamda yazılmıyor
+
+İndirimsiz belgede "İskonto 0,00" satırı bilgi vermiyordu (kullanıcı); tür 3
+satırı yalnız değeri varsa çizilir.

@@ -67,11 +67,13 @@ export function KayitKabulAyarlar() {
               ayri bir "otomatik uretilsin" ayari yok. */}
           <NumaraGridi kaynak="numara-hasta" baslik="Dosya No Numaralandırma" />
           <div className="not">
-            <b>Numarayı kullanıcı elle yazsın</b> işaretliyse hasta kartında Dosya No
-            zorunludur. İşaret kaldırılırsa alan boş bırakılabilir; kayıt sırasında
-            <b> Ön Ek + Başlama No</b> düzenine göre sıradaki numara verilir
-            (örn. <b>H-</b> ve <b>00000100</b> → <b>H-00000100</b>). Elle numara
-            yazılırsa her iki durumda da yazılan numara korunur.
+            Hasta dosya numarası <b>her zaman otomatik</b> verilir (396): hasta
+            kartında yazılacak bir alan yoktur, bu yüzden buradaki
+            <b> Numarayı kullanıcı elle yazsın</b> işareti hastada dikkate
+            alınmaz. Numara, kayıt sırasında <b>Ön Ek + Başlama No</b> düzenine
+            göre sıradan verilir (örn. <b>H-</b> ve <b>00000100</b> →
+            <b>H-00000100</b>). Göç / entegrasyon ile dışarıdan gelen numara
+            varsa o korunur.
             {' '}Ön ekte <b>YYYY</b> yılın tamamını, <b>YY</b> son iki hanesini yazar
             (<b>YYYY-</b> + <b>000005</b> → <b>2026-000005</b>); yıl yer tutucusu
             varsa sayaç da yıl başında <b>1’den</b> başlar.

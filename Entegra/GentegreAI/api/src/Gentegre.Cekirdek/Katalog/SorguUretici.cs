@@ -31,6 +31,13 @@ public sealed class SorguUretici
     {
         var secim = string.Join(", ", kolonlar.Select(k => $"{k.Sql} as \"{k.Ad}\""));
         var kaynakIfadesi = KaynakIfadesi(istek, kullaniciId);
+        // SON/SIK GORUNUMUNDE SIRALAMA ANAHTARLARI DA DONER: arama pencereleri
+        //   IKI kaynagi (stok + hizmet) birlestirip tek liste gosteriyor;
+        //   sunucunun her istek icindeki sirasi birlestirmede kayboluyordu
+        //   (kullanici: "son eklenene basinca en ustte o gelmedi"). Alanlar
+        //   katalogda tanimli degil, gorunume ozgudur - istemci varsa kullanir.
+        if (KullaniciGorunumu(istek, kullaniciId))
+            secim += ", ka.son_tarih as \"aramaSonTarih\", ka.say as \"aramaSay\"";
         var nerede = Nerede(istek, subeId, kapsamTarafIdleri);
         // "son"/"sik" siralamasi yalniz KaynakIfadesi'nin gercekten "ka" join'i
         //   eklediginde anlamli - kullaniciId eksikken normal siralamaya duser.
@@ -143,9 +150,13 @@ public sealed class SorguUretici
     /// bu kullanicinin kullanici_arama satirlarina INNER JOIN eklenir - sonuc yalniz
     /// bu kullanicinin daha once actigi/eklediği kayitlarla sinirlanir.
     /// </summary>
+    /// <summary>Son/Sik gorunumu bu istek icin gercekten uygulanabilir mi.</summary>
+    private static bool KullaniciGorunumu(ListeIstegi istek, int? kullaniciId)
+        => istek.Gorunum is "son" or "sik" && kullaniciId is not null;
+
     private string KaynakIfadesi(ListeIstegi istek, int? kullaniciId)
     {
-        if (istek.Gorunum is not ("son" or "sik") || kullaniciId is null) return _kaynak.Kaynak;
+        if (!KullaniciGorunumu(istek, kullaniciId)) return _kaynak.Kaynak;
 
         var idKolon = _kaynak.Kolon("id")?.Sql
             ?? throw new InvalidOperationException($"'{_kaynak.Ad}' kaynaginda 'id' kolonu yok.");

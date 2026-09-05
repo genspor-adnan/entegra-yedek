@@ -639,16 +639,18 @@ public static partial class KaynakKatalogu
             //   basvuru olabiliyor, yalniz tarih "bugun mu geldi" sorusuna
             //   cevap verse de "ne zaman geldi"ye vermiyordu. Bicimde 'HH'
             //   gecmesi grid'e saati de yazdirir (bicim.ts).
+            // KURUM, Son Basvuru'nun SOLUNDA (kullanici). Katalog sirasi gridin
+            //   varsayilan sirasidir; kolon menusundeki tasima bunu ezer.
+            //   Sigorta = hastanin bagli oldugu anlasmali kurum
+            //   (taraf_hasta.kurum_id) - hasta seridi de bunu okur.
+            new("sigortaAdi", "coalesce(sg.unvan, '')", "metin", "Sigorta / Kurum",
+                Genislik: 180),
             new("sonBasvuru",
                 "(select max(b.belge_tarihi) from public.belge b "
                 + " where b.taraf_id = t.id and b.tur = 19)",
                                    "tarih", "Son Başvuru", Hizalama: "orta",
                                    Bicim: "dd.MM.yyyy HH:mm", Genislik: 130,
                                    Filtrelenebilir: false),
-            // Hasta seridinin (mockup) iki alani: SIGORTA ve ACIK BORC.
-            //   Sigorta = hastanin bagli oldugu anlasmali kurum (taraf_hasta.kurum_id).
-            new("sigortaAdi", "coalesce(sg.unvan, '')", "metin", "Sigorta / Kurum",
-                Genislik: 180),
             // VARSAYILAN ODEYEN KURUM (kullanici): basvuru acilirken hastanin
             //   kayitli kurumu kendiliginden secilsin - memur ayni bilgiyi her
             //   basvuruda yeniden aramasin. Listede gizli, yalniz kart kullanir.

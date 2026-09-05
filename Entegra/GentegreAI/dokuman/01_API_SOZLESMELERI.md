@@ -373,6 +373,21 @@ GET /api/referans/{anahtar}   // tekil ayar
 
 Göç sırasında adlar otomatik üretildi (`liste_11110`, `ops_24121`); gerçek adlar kullanıldıkça verilecek — sözleşme değişmez, yalnız `kod` değerleri anlamlanır.
 
+### 6.1 Kullanıcı tercihleri (397)
+
+Kullanıcının kendi arayüz tercihleri — bugün menü favorileri. Yetki istemez;
+kullanıcı kimliği daima jetondan çözülür, istekte taşınmaz, dolayısıyla bir
+kullanıcı yalnız kendi satırlarını okur/yazar.
+
+```http
+GET /api/tercih                  // { "tercihler": { "favoriler": "[\"/hasta\"]" } }
+PUT /api/tercih/{anahtar}        // { "deger": "<istemcinin JSON metni>" }
+```
+
+`deger` sunucu tarafından **yorumlanmaz**, olduğu gibi saklanır. Yazılabilir
+anahtarlar beyaz listeli (`favoriler`, `sonMenuler`) — bilinmeyen anahtar
+`400 DOGRULAMA`; değer 8 000 karakteri aşarsa yine `400`.
+
 ---
 
 ## 7. Aksiyon kataloğu

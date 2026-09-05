@@ -158,18 +158,53 @@ export function Kabuk() {
   /**
    * FAVORILER (kullanici): alt menu ogelerinin sagindaki yildiz ☆ tiklaninca
    * oge menunun EN USTUNDEKI "Favoriler" bolumune de girer; asil yerinde ★
-   * dolu gorunur, tekrar tiklaninca cikar. Kullanici BASINA tarayicida
-   * saklanir (localStorage) - sunucu tarafina tasinmasi ileriki is.
+   * dolu gorunur, tekrar tiklaninca cikar.
+   *
+   * SUNUCUDA saklanir (397, public.kullanici_tercih): localStorage'ta iken
+   * site verisi silinince, baska makineden ya da baska adresten (dev
+   * localhost:5173 ile sunucudaki /ai AYRI origin) girilince liste bos
+   * geliyordu - kullanicinin gozunde "Favoriler menusu kayboldu".
+   * localStorage artik yalniz CEVRIMDISI KOPYA: sunucuya ulasilamazsa menu
+   * yine dolu acilir, ilk yazmada sunucu tekrar dogruyu ogrenir.
    */
   const favoriAnahtar = `favoriler.${kullanici?.id ?? 0}`;
   const [favoriler, setFavoriler] = useState<string[]>([]);
+  const yerelFavori = (anahtar: string): string[] => {
+    try { return JSON.parse(localStorage.getItem(anahtar) ?? '[]') as string[] }
+    catch { return [] }
+  };
   useEffect(() => {
-    try { setFavoriler(JSON.parse(localStorage.getItem(favoriAnahtar) ?? '[]') as string[]) }
-    catch { setFavoriler([]) }
-  }, [favoriAnahtar]);
+    if (!kullanici?.id) return;
+    let iptal = false;
+    void (async () => {
+      const yerel = yerelFavori(favoriAnahtar);
+      let liste = yerel;
+      try {
+        const tercihler = await api.tercihler();
+        const ham = tercihler.favoriler;
+        if (ham === undefined) {
+          // Sunucuda HIC kayit yok: tarayicidaki eski liste bir kez tasinir.
+          //   (Bos liste "[]" olarak yazilmis olabilir - o zaman kullanici
+          //   favorilerini bilerek bosaltmistir, geri getirilmez.)
+          if (yerel.length > 0)
+            await api.tercihYaz('favoriler', JSON.stringify(yerel)).catch(() => {});
+        } else {
+          liste = JSON.parse(ham) as string[];
+          try { localStorage.setItem(favoriAnahtar, ham) } catch { /* dolu/kapali depo */ }
+        }
+      } catch { /* sunucuya ulasilamadi - yerel kopya ile devam */ }
+      if (!iptal) setFavoriler(Array.isArray(liste) ? liste : []);
+    })();
+    return () => { iptal = true };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kullanici?.id, favoriAnahtar]);
   const favoriToggle = (yol: string) => setFavoriler(t => {
     const y = t.includes(yol) ? t.filter(x => x !== yol) : [...t, yol];
-    try { localStorage.setItem(favoriAnahtar, JSON.stringify(y)) } catch { /* dolu/kapali depo */ }
+    const metin = JSON.stringify(y);
+    try { localStorage.setItem(favoriAnahtar, metin) } catch { /* dolu/kapali depo */ }
+    // Yazma sessizce denenir: ag koparsa yildiz yine de degisir, yerel kopya
+    //   dogru kalir; sonraki basarili yazmada sunucu ile esitlenir.
+    void api.tercihYaz('favoriler', metin).catch(() => {});
     return y;
   });
   /**

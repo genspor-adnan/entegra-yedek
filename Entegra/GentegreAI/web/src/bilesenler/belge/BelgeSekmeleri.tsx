@@ -253,7 +253,7 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
   return (
   <div className="kagrup">
     <h6>
-      {teklifMi ? 'Sipariş' : 'Faturalama'}
+      {teklifMi ? 'Sipariş' : 'Dönüşüm'}
 
       {/* HIZLI DONUSUM (kullanici): modal ACMADAN hedef belgeyi uretir ve
           alttaki listeye ekler - tahsilat sekmesindeki hizli akisin aynisi.

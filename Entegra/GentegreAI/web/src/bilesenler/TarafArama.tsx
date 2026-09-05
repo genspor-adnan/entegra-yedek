@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { type Kosul, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { GenForm } from './GenForm';
+import { aramaSirala } from './aramaSirasi';
 
 interface TarafSatiri {
   kaynak: string;
@@ -23,6 +24,9 @@ interface TarafSatiri {
   brans: string;
   kurum: string;
   istemSayisi: string;
+  /** Son/Sik siralama anahtarlari - sunucudan gelir, ekranda gorunmez. */
+  aramaSonTarih?: unknown;
+  aramaSay?: unknown;
 }
 
 const tipEtiketi = (kaynak: string, s: ListeSatiri): string => {
@@ -65,6 +69,10 @@ const satiraCevir = (kaynak: string, s: ListeSatiri): TarafSatiri => ({
   brans: String(s.bransAdi ?? ''),
   kurum: String(s.kurum ?? ''),
   istemSayisi: s.istemSayisi != null ? String(s.istemSayisi) : '',
+  // Son/Sik gorunumunun siralama anahtarlari (sunucu doner) - listede
+  //   gosterilmez, yalniz birlesik siralamada kullanilir.
+  aramaSonTarih: s.aramaSonTarih,
+  aramaSay: s.aramaSay,
 });
 
 interface Props {
@@ -202,7 +210,12 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
       const yanitlar = await Promise.all(
         kaynaklar.map(k => api.liste(k, { sayfa: 1, boyut: 20, filtre: tamFiltre,
                                           gorunum: gorunumParam })));
-      setSatirlar(yanitlar.flatMap((y, i) => y.satirlar.map(s => satiraCevir(kaynaklar[i], s))));
+      // Kaynaklar (musteri / kisi / hasta) AYRI isteklerle gelir; Son/Sik
+      //   gorunumunde birlesik listenin sirasi sunucunun anahtarlariyla
+      //   yeniden kurulur - yoksa liste kaynak kaynak dizilir ve "en son
+      //   secilen en ustte" kurali kaybolur (ortak: aramaSirasi.ts).
+      const tumu = yanitlar.flatMap((y, i) => y.satirlar.map(s => satiraCevir(kaynaklar[i], s)));
+      setSatirlar(gorunumSecimi === 'tum' ? tumu : aramaSirala(tumu, gorunumSecimi, 'unvan'));
       setSecili(0);
     } catch (h) {
       setHata(hataMetni(h));

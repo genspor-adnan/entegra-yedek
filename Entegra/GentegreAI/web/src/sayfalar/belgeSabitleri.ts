@@ -132,9 +132,12 @@ export const CIKIS_FIS_TIPLERI = [
 ] as const;
 
 export const KAPANMA_ETIKET: Record<number, { ad: string; sinif: string }> = {
-  0: { ad: 'Faturalanmadı', sinif: 'uyari' },
-  1: { ad: 'Kısmi faturalandı', sinif: '' },
-  2: { ad: 'Faturalandı', sinif: 'olumlu' },
+  // DIL BIRLIGI (kullanici): durum/filtre adi DONUSUM, eylem BELGE KES.
+  //   Eski "Faturalandı" yaniltiyordu - hedef fis ya da tahakkuk da
+  //   olabiliyor, ikisi de fatura degil.
+  0: { ad: 'Belge Kesilmedi', sinif: 'uyari' },
+  1: { ad: 'Kısmi Kesildi', sinif: '' },
+  2: { ad: 'Belge Kesildi', sinif: 'olumlu' },
 };
 
 /** Kart sekmeleri (mockup satis_irsaliye_karti.html / satis_faturasi.html .tabs).
@@ -158,7 +161,7 @@ export const SEKMELER: {
   //   Faturada "Faturalama" (bu belgeden turetilenler) zaten anlamsiz - fatura
   //   zincirin SONU (faturaYok).
   { anahtar: 'tahsilat', baslik: 'Tahsilat',   faturaMi: true },   // alista "Ödeme" olur
-  { anahtar: 'fatura',   baslik: 'Faturalama', faturaYok: true },
+  { anahtar: 'fatura',   baslik: 'Dönüşüm', faturaYok: true },
   { anahtar: 'imza',     baslik: 'İmza / Teslim', irsaliye: true },
   // "Yorum / Medya" -> "Resim / Doküman" (kullanici, 218).
   { anahtar: 'yorum',    baslik: 'Resim / Doküman' },

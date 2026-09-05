@@ -170,7 +170,12 @@ export interface ListeTanimi {
   menuAltGrup?: string;
   /** Cip seridine "📄 Ekstre" dugmesi ekler: secili satirin ekstresi AYNI
       ekranda acilir (grid ekstre kaynagina doner), cip'e basinca liste geri gelir. */
-  ekstre?: { kaynak: string; alan: string; baslik: string; tarihAlani?: string };
+  ekstre?: {
+    kaynak: string; alan: string; baslik: string; tarihAlani?: string;
+    /** Ekstre gridinde ekrana ozel kolon basliklari (bkz. kolonBasliklari):
+        hasta ekstresinde "Belge No" PROTOKOL NUMARASIDIR. */
+    kolonBasliklari?: Record<string, string>;
+  };
   /** Liste ekraninda tarih araligi filtresi (cip seridinde iki tarih kutusu). */
   tarihAlani?: string;
   /** Bu ekranda gizlenecek kolonlar (ör. Satis Faturalari'nda tur / turAdi). */
@@ -242,13 +247,15 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Listesi ekle") - Cari grubunun HEMEN USTUNDE, ayni acilir-kapanir desende.
     kaynak: 'hasta', baslik: 'Hastalar', yol: 'Hasta › Hastalar', kartYolu: '/hasta',
     aksiyonEkrani: 'hasta-liste', cipler: DURUM_CIPLERI,
-    // Sigorta ve acik borc HASTA SERIDI icin katalogda duruyor (basvuru
-    //   kartinin ustundeki serit onlari okuyor); listenin kolon duzeni
-    //   kullanicinin belirledigi haliyle kalsin diye gridde gizli.
-    gizliKolonlar: ['sigortaAdi', 'acikBorc'],
+    // Acik borc HASTA SERIDI icin katalogda duruyor (basvuru kartinin
+    //   ustundeki serit onu okuyor) ama gridde gosterilmez.
+    //   KURUM (sigortaAdi) ARTIK GORUNUR (kullanici: "son basvuru soluna
+    //   Kurumu ekle") - katalogda da Son Basvuru'nun oncesine alindi.
+    gizliKolonlar: ['acikBorc'],
     // Hasta da bir TARAF - cari ekstresi aynen gecerli (hasta hesabi hareketleri).
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Hasta Ekstresi',
-              tarihAlani: 'islemTarihi' },
+              tarihAlani: 'islemTarihi',
+              kolonBasliklari: { belgeNo: 'Protokol No' } },
     // Kayit Kabul YALNIZ GenoTIP AI'da (kullanici, 215) - diger moduller ortak.
     menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Listesi', ic: '🏥', yetkiKodu: 'personel',
     urunModu: 2,
@@ -315,7 +322,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Basvuruda belge numarasi PROTOKOL NUMARASIDIR (kullanici); kart da
     //   oyle adlandiriyor. Katalogda "Belge No" kalir - ayni kaynagi 13
     //   liste paylasiyor.
-    kolonBasliklari: { belgeNo: 'Protokol No' },
+    //   "Ödeyen Kurum" da bu ekranda yalnizca KURUM (kullanici) - basvuruda
+    //   zaten odemeyi ustlenen kurumdan baskasi yazilmiyor.
+    kolonBasliklari: { belgeNo: 'Protokol No', odeyenKurumAdi: 'Kurum' },
     urunModu: 2,
     menuGrup: 'Kayıt Kabul', menuAd: 'Başvurular', ic: '📝', yetkiKodu: 'belge',
     menuSira: 30,

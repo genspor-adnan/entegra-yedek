@@ -24,6 +24,17 @@ export function MesajKatmani() {
     return () => mesajDinleyiciAta(null);
   }, []);
 
+  /**
+   * KUTU VARSAYILANLA DOLU BASLAR (kullanici: POS/dönüşüm tutarı soruldugunda
+   * "50.000,00" yaziyordu ama Enter'a basinca "Tutar sıfırdan büyük olmalı"
+   * diyordu). Kutuda GORUNEN deger `girdi || girdiVarsayilan` idi: kullanici
+   * uzerine yazmadikca state BOS kaliyor ve cagirana bos metin donuyordu.
+   * Varsayilan artik state'e yazilir - gorunen ile donen ayni degerdir.
+   */
+  useEffect(() => {
+    setGirdi(istek?.girdiMi ? (istek.girdiVarsayilan ?? '') : '');
+  }, [istek]);
+
   if (!istek) return null;
 
   const kapat = (sonuc: boolean) => {
@@ -90,7 +101,7 @@ export function MesajKatmani() {
               {istek.girdiEtiket && <span className="etiket">{istek.girdiEtiket}</span>}
               <span className="ikili">
                 <input className="genis-deger" autoFocus
-                       value={girdi || istek.girdiVarsayilan || ''}
+                       value={girdi}
                        onChange={e => setGirdi(e.target.value)}
                        onKeyDown={e => { if (e.key === 'Enter') kapat(true) }} />
               </span>
