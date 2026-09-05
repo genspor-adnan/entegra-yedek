@@ -397,6 +397,73 @@ public static partial class KaynakKatalogu
             new("hastaId",    "i.hasta_id",   "sayi",  "Hasta Id", Varsayilan: false)
         });
 
+    /// <summary>
+    /// e-NABIZ GÖNDERİM KUYRUĞU (415) — üretilen paketler ve durumları.
+    ///
+    /// "Eksik alan" (durum 0) ayrı bir durumdur, hata değil: paket üretildi
+    /// ama zorunlu alanı boş olduğu için kuyruğa GİRMEDİ. Eksiği gönderim
+    /// anında bulmak, hatayı hekim ekrandan ayrıldıktan saatler sonra geri
+    /// getirirdi - bu yüzden liste eksikleri ayrı çipte gösterir.
+    /// </summary>
+    private static KaynakTanimi EnabizPaket() => new(
+        Ad: "enabiz-paket",
+        YetkiKodu: "entegrasyon",
+        Kaynak: "public.enabiz_paket p "
+              + "  join public.enabiz_paket_turu t on t.id = p.paket_turu_id "
+              + "  left join public.taraf h on h.id = p.hasta_id "
+              + "  left join public.v_personel_lookup k on k.id = p.hekim_id",
+        SubeKolonu: "p.sube_id",
+        VarsayilanSirala: "p.uretim_tarihi desc, p.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",        "p.id",          "sayi",  "Id", Varsayilan: false),
+            new("paketNo",   "p.paket_no",    "metin", "Paket No", Hizalama: "orta",
+                                              Genislik: 150),
+            new("ussPaket",  "t.uss_paket_kodu", "metin", "USS", Hizalama: "orta",
+                                              Genislik: 70),
+            new("turAdi",    "t.ad",          "metin", "Paket Türü", Genislik: 190),
+            new("turKod",    "t.kod",         "metin", "Tür Kodu", Varsayilan: false),
+            new("hastaAdi",  "coalesce(h.unvan, '')", "metin", "Hasta", Genislik: 200),
+            new("hekimAdi",  "coalesce(k.ad, '')", "metin", "Hekim", Genislik: 170,
+                                              Varsayilan: false),
+            new("olayTarihi","p.olay_tarihi", "tarih", "Olay", Hizalama: "orta",
+                                              Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
+            new("durumAdi",
+                """
+                case p.durum
+                     when 0 then 'Eksik Alan' when 1 then 'Bekliyor'
+                     when 2 then 'Gönderiliyor' when 3 then 'Gönderildi'
+                     when 4 then 'Hatalı' when 5 then 'İptal' when 6 then 'Silindi'
+                     else 'Bilinmiyor' end
+                """,                          "metin", "Durum", Hizalama: "orta",
+                                              Bicim: "rozet", Genislik: 120,
+                                              Filtrelenebilir: false),
+            new("durum",     "p.durum",       "kod",   "Durum Kodu", Varsayilan: false),
+            // Eksik alan sayisi: "neyi duzeltmem lazim" sorusunun ilk cevabi.
+            new("eksikAlan",
+                "(select count(*) from public.enabiz_paket_alan a "
+                + "where a.paket_id = p.id and a.gecerli = 0)",
+                                              "sayi",  "Eksik", Hizalama: "orta",
+                                              Genislik: 70),
+            new("deneme",    "p.deneme",      "sayi",  "Deneme", Hizalama: "orta",
+                                              Genislik: 80, Varsayilan: false),
+            // SURE SINIRI: USS olaydan sonra belli sure icinde bildirim ister;
+            //   gecikeni listede one cikarmak icin kalan saat hesaplanir.
+            new("kalanSaat",
+                "case when p.durum in (3, 5, 6) then null "
+                + "else floor(extract(epoch from p.son_tarih - now()) / 3600)::int end",
+                                              "sayi",  "Kalan (saat)", Hizalama: "sag",
+                                              Genislik: 110),
+            new("hataMesaj", "p.hata_mesaj",  "metin", "Hata", Genislik: 300,
+                                              Varsayilan: false),
+            new("ussPaketId","p.uss_paket_id","metin", "USS Kimlik", Genislik: 200,
+                                              Varsayilan: false),
+            new("kaynakTur", "p.kaynak_tur",  "sayi",  "Kaynak Tür", Varsayilan: false),
+            new("kaynakId",  "p.kaynak_id",   "sayi",  "Kaynak Id", Varsayilan: false),
+            new("belgeId",   "coalesce(p.belge_id, 0)", "sayi", "Başvuru Id",
+                                              Varsayilan: false)
+        });
+
     private static KaynakTanimi LabIstem() => new(
         Ad: "lab-istem",
         YetkiKodu: "lab",

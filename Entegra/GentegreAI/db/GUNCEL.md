@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (187 ad, 60 tanesi birden cok dosyada)
+## Fonksiyonlar (188 ad, 60 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -72,6 +72,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ebelge_ubl` | `182_ebelge_ubl.sql` | — |
 | `fn_ebelge_url` | `167_ebelge_entegrator.sql` | — |
 | `fn_ebelge_xslt_bul` | `160_xslt_dokumana_tasindi.sql` | 159_ebelge_xslt.sql |
+| `fn_enabiz_siradakiler` | `415_enabiz_cekirdek.sql` | — |
 | `fn_entegrasyon_hesap_id` | `338_entegrasyon_baz_sube.sql` | — |
 | `fn_etiket_anahtar` | `003_goc_taraf.sql` | — |
 | `fn_firsat_asama_izle` | `121_firsat.sql` | — |

@@ -237,6 +237,15 @@ export const api = {
   muayeneOzetDerle: (muayeneId: number) =>
     gonder<{ bulguOzet: string }>(`/api/muayene/${muayeneId}/ozet-derle`, {}),
 
+  /** e-Nabiz paketini KAYNAKTAN yeniden uretir (415): paket satirini elle
+      duzeltmek, gonderilen veriyle kayittaki veriyi ayirirdi. */
+  enabizYenidenUret: (paketId: number) =>
+    gonder<{ yeni: string; durum: number; eksikler: string[]; mesaj: string }>(
+      `/api/enabiz/paket/${paketId}/yeniden-uret`, {}),
+
+  enabizPaketIptal: (paketId: number) =>
+    gonder<{ mesaj: string }>(`/api/enabiz/paket/${paketId}/iptal`, {}),
+
   /** Sirayi cagir (410): belge verilmezse hekimin SIRADAKI hastasi. */
   siraCagir: (istek: { belgeId?: number; hekimId?: number }) =>
     gonder<{ belgeId: number; siraNo?: string; hasta?: string; ekranAdi?: string;

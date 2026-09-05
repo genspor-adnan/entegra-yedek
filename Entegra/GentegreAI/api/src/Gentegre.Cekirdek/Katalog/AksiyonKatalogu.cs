@@ -311,6 +311,22 @@ public static class AksiyonKatalogu
             //   "Yazdır" dugmesi acilir menusunde CSV Kaydet de var (GenGrid ekler).
             ["cikti-liste"] = [Yazdir()],
 
+            // e-NABIZ KUYRUGU (415): eksik duzeltilince paket KAYNAKTAN
+            //   YENIDEN URETILIR - paket satirini elle duzeltmek, gonderilen
+            //   veriyle kayittaki veriyi ayirirdi.
+            ["enabiz-liste"] =
+            [
+                new("enabiz.yeniden-uret", "↻ Kaynaktan Yeniden Üret", "enabiz-paket",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "entegrasyon", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 10),
+                new("enabiz.iptal", "✖ İptal Et", "enabiz-paket",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "entegrasyon", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 20),
+                Yazdir(),
+            ],
+
             // HEKIM CALISMA LISTESI (410): gunun isi tek ekranda. Cagirma ve
             //   muayeneye alma AYRI dugmelerdir - hasta cagrilip gelmeyebilir,
             //   ikisini birlestirmek "geldi mi" sorusunu olculemez yapardi.

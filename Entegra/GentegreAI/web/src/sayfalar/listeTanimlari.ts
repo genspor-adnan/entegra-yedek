@@ -335,6 +335,25 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   // RADYOLOJI grubu ana menude KAYIT KABUL ile CRM ARASINDA (kullanici):
   //   grup sirasi bu dizideki ILK gorulme sirasindan gelir.
   {
+    // e-NABIZ GONDERIM KUYRUGU (415) - uretilen paketler ve durumlari.
+    //   "Eksik Alan" bir HATA DEGIL: paket uretildi ama zorunlu alani bos
+    //   oldugu icin kuyruga girmedi; duzeltilince kaynaktan yeniden uretilir.
+    kaynak: 'enabiz-paket', rota: 'enabiz-paket', baslik: 'e-Nabız Kuyruğu',
+    yol: 'Yonetim › e-Nabız Kuyruğu',
+    aksiyonEkrani: 'enabiz-liste',
+    tarihAlani: 'olayTarihi',
+    cipler: [
+      { ad: 'Eksik Alan',  filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Bekleyen',    filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Gönderildi',  filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Hatalı',      filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuAd: 'e-Nabız Kuyruğu', ic: '🇹🇷', yetkiKodu: 'entegrasyon',
+  },
+  {
     // RECETELER (413) - muayenede yazilan ilaclar. Recete bir BELGEDIR:
     //   imzalaninca degismez, ilac adi satira kopyalanir.
     kaynak: 'recete', rota: 'recete', baslik: 'Reçeteler',

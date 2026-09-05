@@ -56,6 +56,7 @@ public static class MuayeneUclari
         // POST /api/muayene/{id}/tamamla
         grup.MapPost("/{id:int}/tamamla", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            Servisler.EnabizPaketUretici enabiz,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -105,12 +106,33 @@ public static class MuayeneUclari
 
             await islem.CommitAsync(iptal);
 
+            // e-NABIZ 103 + 106 KUYRUGA (415). Gonderim USS kapisi acilinca;
+            //   uretim simdi yapilir, yoksa kapi acildiginda gecmis veri
+            //   kaybolurdu. Paket uretimi muayeneyi TAMAMLAMAYI DUSURMEZ:
+            //   e-Nabiz bir bildirim yoludur, klinik kaydin sarti degil.
+            var paketler = new List<object>();
+            try
+            {
+                foreach (var kod in new[] { "MUAYENE", "HASTA_CIKIS" })
+                {
+                    var s = await enabiz.UretAsync(kod, id, baglam.KullaniciId, iptal);
+                    if (s is not null)
+                        paketler.Add(new { kod, s.PaketNo, s.Durum, s.Eksikler });
+                }
+            }
+            catch (Exception h)
+            {
+                ctx.RequestServices.GetRequiredService<ILoggerFactory>()
+                   .CreateLogger("enabiz").LogError(h,
+                       "e-Nabiz paketi uretilemedi (muayene {Id})", id);
+            }
+
             // Bekleyen istem varsa hekim bunu BILMELI: sonuc gelmeden kapanan
             //   muayenede tetkik sahipsiz kalir. Engel degil, uyari.
             var uyari = m.BekleyenIstem > 0
                 ? $"{m.BekleyenIstem} istem hala sonuc bekliyor."
                 : null;
-            return Results.Ok(new { id, m.BelgeId, uyari,
+            return Results.Ok(new { id, m.BelgeId, uyari, paketler,
                                     mesaj = "Muayene tamamlandi.",
                                     izlemeNo = baglam.IzlemeNo });
         });
@@ -243,6 +265,7 @@ public static class MuayeneUclari
         //   hastayi secmek zorunda kalmasin - kart basvurudan turer.
         grup.MapPost("/basvuru/{belgeId:int}/al", async (
             int belgeId, BaglamCozucu cozucu, VeriKaynagi veri,
+            Servisler.EnabizPaketUretici enabiz,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -297,6 +320,18 @@ public static class MuayeneUclari
                 """, islem, [muayeneId, baglam.KullaniciId], iptal);
 
             await islem.CommitAsync(iptal);
+
+            // e-NABIZ 101 HASTA KAYIT: kabul paketi. Basvuru acilirken degil
+            //   MUAYENEYE ALINIRKEN uretilir - kayit kabulde hekim/klinik
+            //   henuz kesin degil, paket eksik alanla acilirdi.
+            try { await enabiz.UretAsync("HASTA_KABUL", belgeId, baglam.KullaniciId, iptal); }
+            catch (Exception h)
+            {
+                ctx.RequestServices.GetRequiredService<ILoggerFactory>()
+                   .CreateLogger("enabiz").LogError(h,
+                       "e-Nabiz 101 paketi uretilemedi (basvuru {Id})", belgeId);
+            }
+
             return Results.Ok(new { belgeId, muayeneId, baslangic,
                                     yeni = b.MuayeneId is null,
                                     mesaj = $"Muayeneye alindi ({baslangic:HH:mm}).",
@@ -344,6 +379,84 @@ public static class MuayeneUclari
             "update public.muayene set bulgu_ozet = @p1 where id = @p0",
             islem, [muayeneId, metin], iptal);
         return metin;
+    }
+
+
+    /// <summary>
+    /// e-NABIZ KUYRUK İŞLEMLERİ (415).
+    ///
+    /// Paket satırını ELLE DÜZELTMEK yok: eksik kaynakta düzeltilir ve paket
+    /// kaynaktan yeniden üretilir. Paketi elle düzeltmek, gönderilen veriyle
+    /// kayıttaki veriyi birbirinden ayırırdı - USS'ye giden ile hastanın
+    /// dosyasındaki farklı olurdu.
+    /// </summary>
+    public static void EnabizUclariniEkle(this IEndpointRouteBuilder yol)
+    {
+        var grup = yol.MapGroup("/api/enabiz").WithTags("e-Nabız").RequireAuthorization();
+
+        // POST /api/enabiz/paket/{id}/yeniden-uret
+        grup.MapPost("/paket/{id:long}/yeniden-uret", async (
+            long id, BaglamCozucu cozucu, VeriKaynagi veri,
+            Servisler.EnabizPaketUretici enabiz, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("entegrasyon", Islem.Degistir);
+
+            var p = await veri.TekAsync("""
+                select t.kod, p.kaynak_id, p.durum
+                  from public.enabiz_paket p
+                  join public.enabiz_paket_turu t on t.id = p.paket_turu_id
+                 where p.id = @p0
+                """, [id],
+                o => new { Kod = o.GetString(0), KaynakId = o.GetInt32(1),
+                           Durum = o.GetInt16(2) }, iptal);
+
+            if (p is null) return Results.NotFound(new { hata = new
+                { kod = "BULUNAMADI", mesaj = "Paket bulunamadi." } });
+            if (p.Durum == 3)
+                throw GentegreHatasi.IsKurali(
+                    "Gonderilmis paket yeniden uretilemez; duzeltme icin guncelleme paketi gerekir.");
+
+            // ESKI PAKET IPTAL EDILIR, yenisi acilir: ayni kaynaktan iki
+            //   bekleyen paket kalirsa USS'ye ayni olay iki kez giderdi.
+            await veri.CalistirAsync("""
+                update public.enabiz_paket set durum = 5, degistiren = @p1,
+                       degistirme_tarihi = now()
+                 where id = @p0 and durum in (0, 1, 4)
+                """, [id, baglam.KullaniciId], iptal);
+
+            var s = await enabiz.UretAsync(p.Kod, p.KaynakId, baglam.KullaniciId, iptal);
+            return Results.Ok(new { eskiPaket = id, yeni = s?.PaketNo ?? "",
+                                    durum = s?.Durum ?? (short)0,
+                                    eksikler = s?.Eksikler ?? [],
+                                    mesaj = s is null ? "Paket uretilemedi."
+                                          : s.Durum == 0
+                                              ? "Paket uretildi ama zorunlu alan hala eksik."
+                                              : "Paket yeniden uretildi, kuyrukta.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/enabiz/paket/{id}/iptal
+        grup.MapPost("/paket/{id:long}/iptal", async (
+            long id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("entegrasyon", Islem.Degistir);
+
+            var etkilenen = await veri.CalistirAsync("""
+                update public.enabiz_paket set durum = 5, degistiren = @p1,
+                       degistirme_tarihi = now()
+                 where id = @p0 and durum in (0, 1, 4)
+                """, [id, baglam.KullaniciId], iptal);
+
+            if (etkilenen == 0)
+                throw GentegreHatasi.IsKurali(
+                    "Yalniz bekleyen, eksik ya da hatali paket iptal edilebilir.");
+
+            return Results.Ok(new { id, mesaj = "Paket iptal edildi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
     }
 
     /// <summary>İstek gövdesi: belge verilmezse hekimin SIRADAKİ hastası çağrılır.</summary>
