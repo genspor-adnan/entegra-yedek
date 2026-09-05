@@ -311,6 +311,21 @@ public static class AksiyonKatalogu
             //   "Yazdır" dugmesi acilir menusunde CSV Kaydet de var (GenGrid ekler).
             ["cikti-liste"] = [Yazdir()],
 
+            // BILDIRIM KUYRUGU (399): gitmeyeni yeniden dene, gitmesini
+            //   istemedigini iptal et. Ikisi de KayitGerekir - satir secilmeden
+            //   pasif gelir ve sebebi sunucudan yazilir. Toplu secim destekli:
+            //   gece bosa dusmus butun bildirimler tek seferde denenebilsin.
+            ["bildirim-liste"] =
+            [
+                new("bildirim.tekrar", "🔄 Tekrar Dene", "bildirim",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "bildirim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 10),
+                new("bildirim.iptal", "✖ İptal Et", "bildirim",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "bildirim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                Yazdir(),
+            ],
+
             // HASTA EKSTRESI: cikti aksiyonlari + secili satirin belgesine
             //   gidis (kullanici: "bir satiri isaretledigimde ustte Yazdır'in
             //   solunda Başvuru Aç aktif olsun"). KayitGerekir ile satir

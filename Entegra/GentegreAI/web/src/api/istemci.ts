@@ -970,6 +970,25 @@ export const api = {
     gonder<{ ayarlar: AyarSatiri[] }>(`/api/ayar/${encodeURIComponent(anahtar)}`,
                                       { deger }, 'PUT').then(y => y.ayarlar),
 
+  // -------------------------------------------------------- bildirim ----
+  /** Kuyruğa bildirim koyar (399); gönderimi arka plan işçisi yapar. */
+  bildirimKuyruga: (govde: {
+      sablonKodu?: string; kanal?: number; alici: string;
+      degiskenler?: Record<string, string>; konu?: string; govde?: string;
+      tarafId?: number; kaynakTur?: number; kaynakId?: number;
+      oncelik?: number; planlanan?: string; hesapId?: number }) =>
+    gonder<{ id: number | null; kuyruga: boolean }>('/api/bildirim', govde),
+  /** Hatalı / iptal / vazgeçilmiş satırı yeniden kuyruğa alır. */
+  bildirimTekrar: (id: number) =>
+    gonder<{ tekrar: boolean }>(`/api/bildirim/${id}/tekrar`, {}),
+  /** Gönderilmemiş satırı iptal eder. */
+  bildirimIptal: (id: number) =>
+    gonder<{ iptal: boolean }>(`/api/bildirim/${id}/iptal`, {}),
+  /** Tek bildirimin deneme günlüğü. */
+  bildirimLog: (id: number) =>
+    istek<{ satirlar: Record<string, unknown>[] }>(`/api/bildirim/${id}/log`)
+      .then(y => y.satirlar),
+
   // ------------------------------------------------- kullanici tercihi ----
   /** Kullanicinin KENDI arayuz tercihleri (397): menu favorileri gibi.
       Deger istemcinin yazdigi JSON metni - sunucu yorumlamaz, saklar. */

@@ -6303,3 +6303,12 @@ döner — hata değil, kurulum o bildirimi kapatmıştır.
 **Denendi:** şablondan kuyruğa (değişkenler doğru dolduruldu), öncelikli
 panik satırı, kayıt modunda gönderim, sağlayıcısız hata yolu (durum kuyrukta,
 planlanan +5 dk ileri), tekrar/iptal uçları.
+
+**Kuyruk ekranı düğmeleri:** aksiyon kataloğunda yeni ekran `bildirim-liste`
+(**🔄 Tekrar Dene** · **✖ İptal Et** · Yazdır). İkisi de `KayitGerekir` —
+satır seçilmeden pasif gelir, sebebi sunucudan yazılır. İş
+`liste/bildirimAksiyonlari.ts`'te (ÜTS/kasa ile aynı desen): toplu seçim
+destekli, iptal onay ister, toplu tekrar da sorar. Uç yalnız UYGUN DURUMDAKİ
+satırı değiştirdiği için sonuç sayıyla raporlanır — "0 satır etkilendi" sessiz
+kalırsa kullanıcı düğmeyi bozuk sanır.
+

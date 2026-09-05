@@ -1462,7 +1462,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // BILDIRIM KUYRUGU (399): "gitti mi" sorusunun TEK yeri. Cipler durum
     //   kolonundan degil kendi kodlarindan - bildirim.durum alti degerli.
     kaynak: 'bildirim', baslik: 'Bildirim Kuyruğu', yol: 'Yonetim › Bildirim Kuyruğu',
-    aksiyonEkrani: 'cikti-liste', tarihAlani: 'planlanan',
+    aksiyonEkrani: 'bildirim-liste', tarihAlani: 'planlanan',
     cipler: [
       { ad: 'Tümü' },
       { ad: 'Kuyrukta',    filtre: { alan: 'durum', op: 'esit', deger: 1 } },
