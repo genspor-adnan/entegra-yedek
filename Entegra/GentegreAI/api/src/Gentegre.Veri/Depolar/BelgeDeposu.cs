@@ -739,6 +739,14 @@ public sealed partial class BelgeDeposu
                          where u.belge_satir_id = s.id)
              or exists (select 1 from public.kurum_icmal_satir i
                          where i.belge_satir_id = s.id)
+             -- TAHSILAT DAGITIMI OLAN SATIR: kasa_islem_dagitim satira
+             --   CASCADE ile bagli; satir silinip yeniden yazilinca dagitim
+             --   (ve ona bagli hakedis_satir) sessizce yok oluyordu. Basvuru
+             --   yeniden kaydedilince "tahsil edilen kadar" hesabi sifira
+             --   dusuyor, kesilen fis geri alinamiyor ve prim kayboluyordu
+             --   (kullanici: fisi silip basvuruyu kaydettikten sonra).
+             or exists (select 1 from public.kasa_islem_dagitim d
+                         where d.belge_satir_id = s.id)
            )
         """;
 }

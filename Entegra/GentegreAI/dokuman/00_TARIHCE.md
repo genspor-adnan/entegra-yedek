@@ -6168,3 +6168,42 @@ Sık = en çok kullanılan önce. İki pencere de buna bağlandı.
 
 İndirimsiz belgede "İskonto 0,00" satırı bilgi vermiyordu (kullanıcı); tür 3
 satırı yalnız değeri varsa çizilir.
+
+### Fişi silip başvuruyu kaydetmek tahsilat dağıtımını siliyordu
+
+`kasa_islem_dagitim`, `belge_satir`'a **ON DELETE CASCADE** ile bağlı. Belge
+kaydı satırları silip yeniden yazdığı için dağıtım (ve ona bağlı
+`hakedis_satir` primi) sessizce yok oluyordu: satır bazlı "tahsil edilen" 0'a
+düşüyor, aynı tahsilattan yeniden fiş kesilemiyor, prim kayboluyordu.
+`KorunanSatirSql`'e eklendi — dağıtımı olan satır dönüşmüş satırla aynı
+muameleyi görür (yerinde kalır, istemcinin kopyası atılır).
+
+Yanında iki koruma daha: **otomatik kayıt belgeyi boşaltamaz** (`kes(...,
+otomatik)` — ekranda kalem yokken sunucuda varsa PUT hiç gönderilmez; kullanıcı
+Kaydet'e basarsa isteği geçerli), ve **POS ayarı okunamazsa sessizce
+atlanmaz** (`posSonrasi` ayarı bir kez daha okur; kart açılışındaki tek istek
+düştüğünde kural hiç işlemiyordu ve hiçbir belirti vermiyordu).
+
+### Refaktör: kartın para akışları tek dosyaya
+
+`BelgeKarti.tsx` 1.765 satırdı; hızlı dönüşüm, POS sonrası fiş, tutar sorma ve
+hızlı nakit kartın ortasında birbirinden uzak yerlerdeydi — üçü de aynı soruyu
+cevaplıyor: *bu belgede ne kadar para hareket edecek, karşılığında hangi belge
+kesilecek*. Aynı gün çıkan üç hata da tam bu banttaydı. Hepsi
+`sayfalar/belgeKarti/useParaAkislari.ts`'e taşındı (kart 1.606 satır).
+
+Tanım sırası döngüsü ref ile kırıldı: akışlar kartın ilerisindeki
+`kes`/`kayitSart`'ı, tahsilat kancası da `posSonrasi`yi ister.
+`bicim.ts`'e üç okuyucunun ayrımı yazıldı (`hamSayi` JSON · `sayiOku` grid ·
+`tutarOku` serbest metin) — karıştırılınca sessizce yanlış sayı çıkıyor.
+
+### Uçtan uca test (2 doktor · 5 hasta · iki tur)
+
+API üzerinden: 2 doktor (Yapan / İsteyen prim rolleriyle), iki prim planı
+(%10 ve %5, tahsilat zamanlı), 5 hasta → başvuru → ücret (1.000 + %10 KDV) →
+kalem prim rolleri → nakit tahsilat + otomatik dağıtım → satış fişi.
+
+Sonuç her iki turda da aynı: başvuru ve fiş 1.100,00; kapanma "Belge Kesildi";
+hakediş satırları 5×100 (Yapan) ve 5×50 (İsteyen); onay ve dönem kapatma
+500,00 / 250,00. Ayrıca dağıtım koruması ayrıca sınandı: satırsız PUT sonrası
+kalem ve hakediş satırları yerinde kaldı.

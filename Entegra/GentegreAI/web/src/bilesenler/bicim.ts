@@ -200,6 +200,11 @@ export function yerelAnMetni(d: Date): string {
  *
  * Sunucudan gelen ham degeri ("1234.56") BURAYA VERMEYIN - `hamSayi` kullanin
  * ya da once `tutarMetni` ile ekran bicimine cevirin.
+ *
+ * UC OKUYUCU, UC KAYNAK (karistirilirsa sessizce yanlis sayi cikar):
+ *   hamSayi  - SUNUCU/JSON degeri, binlik ayraci YOK  ("1234.56")
+ *   sayiOku  - GRID/FORM kutusu, Turkce bicim         ("1.234,56")
+ *   tutarOku - kullanicinin SERBEST yazdigi tutar     ("1.234,56 ₺", "1234")
  */
 export const sayiOku = (metin: unknown) =>
   Number(String(metin ?? '').replace(/\./g, '').replace(',', '.')) || 0;
