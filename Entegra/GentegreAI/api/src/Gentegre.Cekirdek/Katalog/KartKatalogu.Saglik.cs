@@ -26,6 +26,43 @@ public static partial class KartKatalogu
         ["4"] = "Ek Not Eklendi", ["0"] = "İptal"
     };
 
+    /// <summary>Recete turu (413) - ilac.recete_turu ile ayni kodlar.</summary>
+    private static readonly Dictionary<string, string> ReceteTuruKodlari = new()
+    {
+        ["0"] = "Normal", ["1"] = "Kırmızı", ["2"] = "Yeşil", ["3"] = "Mor", ["4"] = "Turuncu"
+    };
+
+    /// <summary>Recete durumu (413): Medula kapisi acilana kadar 3'e gecilmez.</summary>
+    private static readonly Dictionary<string, string> ReceteDurumKodlari = new()
+    {
+        ["1"] = "Taslak", ["2"] = "İmzalı", ["3"] = "Medula Kabul", ["4"] = "İptal"
+    };
+
+    private static readonly Dictionary<string, string> AlerjiTuruKodlari = new()
+    {
+        ["1"] = "İlaç", ["2"] = "Gıda", ["3"] = "Çevresel", ["4"] = "Lateks", ["5"] = "Kontrast"
+    };
+
+    private static readonly Dictionary<string, string> AlerjiSiddetKodlari = new()
+    {
+        ["1"] = "Hafif", ["2"] = "Orta", ["3"] = "Şiddetli", ["4"] = "Anafilaksi"
+    };
+
+    private static readonly Dictionary<string, string> KayitKaynakKodlari = new()
+    {
+        ["1"] = "Hasta Beyanı", ["2"] = "Hekim", ["3"] = "e-Nabız"
+    };
+
+    private static readonly Dictionary<string, string> IlacKaynakKodlari = new()
+    {
+        ["1"] = "Reçete", ["2"] = "Hasta Beyanı", ["3"] = "e-Nabız", ["4"] = "Dış Kurum"
+    };
+
+    private static readonly Dictionary<string, string> IlacUyumKodlari = new()
+    {
+        ["1"] = "Düzenli", ["2"] = "Aralıklı", ["3"] = "Bırakmış"
+    };
+
     /// <summary>Sablon turu (411).</summary>
     private static readonly Dictionary<string, string> SablonTuruKodlari = new()
     {
@@ -390,6 +427,144 @@ public static partial class KartKatalogu
                 Baslik: "Hekim (kişisel)", Grup: "Kapsam"),
             new("bolumId", "bolum_id", "kod", KodTablosu: "public.v_departman_lookup",
                 Baslik: "Bölüm (branş)", Grup: "Kapsam")
+        });
+
+    /// <summary>
+    /// REÇETE KARTI (413) — ilaçlar detayda.
+    ///
+    /// İmza ve Medula alanları SALT OKUNUR: reçetenin imzalanması bir düğmenin
+    /// işidir (uç), elle "imzalı" yazmak belgeyi sahte yapardı.
+    /// </summary>
+    private static KartTanimi ReceteKarti() => new(
+        Ad: "recete",
+        YetkiKodu: "muayene",
+        Tablo: "public.recete",
+        LogTabloId: 969,
+        SubeKolonu: "sube_id",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["durum"] = (short)1,
+            ["tur"] = (short)0,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("muayeneId", "muayene_id", "sayi", Zorunlu: true,
+                Baslik: "Muayene Id", Grup: "Kimlik"),
+            new("hastaId", "hasta_id", "kod", Zorunlu: true,
+                KodTablosu: "public.v_hasta_lookup", AramaKaynagi: "hasta",
+                Baslik: "Hasta", Grup: "Kimlik"),
+            new("hekimId", "hekim_id", "kod", KodTablosu: "public.v_personel_lookup",
+                Baslik: "Hekim", Grup: "Kimlik"),
+            new("tur", "tur", "kod", SabitKodlar: ReceteTuruKodlari,
+                Baslik: "Reçete Türü", Grup: "Kimlik"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
+                Baslik: "Açıklama", Grup: "Kimlik"),
+            new("durum", "durum", "kod", SabitKodlar: ReceteDurumKodlari, Yazilabilir: false,
+                Baslik: "Durum", Grup: "Kimlik"),
+            // Imza ve Medula: DUGMENIN yazdigi alanlar.
+            new("receteNo", "recete_no", "metin", EnFazlaUzunluk: 20, Yazilabilir: false,
+                Baslik: "Reçete No", Grup: "Gönderim"),
+            new("imzaZamani", "imza_zamani", "tarih", Yazilabilir: false,
+                Baslik: "İmza", Grup: "Gönderim"),
+            new("medulaGonderim", "medula_gonderim", "tarih", Yazilabilir: false,
+                Baslik: "Medula Gönderim", Grup: "Gönderim"),
+            new("medulaSonuc", "medula_sonuc", "metin", EnFazlaUzunluk: 200,
+                Yazilabilir: false, Baslik: "Medula Sonucu", Grup: "Gönderim")
+        },
+        Detaylar: new DetayTanimi[]
+        {
+            new("ilaclar", "public.recete_satir", "recete_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("sira", "sira", "sayi", Baslik: "Sıra"),
+                new("ilacBarkod", "ilac_barkod", "metin", Zorunlu: true, EnFazlaUzunluk: 20,
+                    Baslik: "Barkod"),
+                // Ad KOPYA: katalog guncellenince eski recetenin metni
+                //   degismemeli - recete tarihte donmus bir belgedir.
+                new("ilacAd", "ilac_ad", "metin", EnFazlaUzunluk: 200, Baslik: "İlaç"),
+                new("doz", "doz", "metin", EnFazlaUzunluk: 20, Baslik: "Doz"),
+                new("periyot", "periyot", "metin", EnFazlaUzunluk: 20, Baslik: "Periyot"),
+                new("sureGun", "sure_gun", "sayi", Baslik: "Süre (gün)"),
+                new("kutu", "kutu", "sayi", Baslik: "Kutu"),
+                new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200, Baslik: "Tarif"),
+                // Uyari GECILDIYSE metni kalir: hekimin neyi gorup gectigini
+                //   sonradan bilmek, uyariyi hic gostermemekten onemli.
+                new("etkilesimUyari", "etkilesim_uyari", "metin", EnFazlaUzunluk: 200,
+                    Yazilabilir: false, Baslik: "Uyarı"),
+            }, SubeKolonu: null, Sirala: "sira asc, id asc",
+               Baslik: "İlaçlar", LogTabloId: 970)
+        });
+
+    /// <summary>HASTA ALERJİSİ KARTI (413) — etken madde bazlı.</summary>
+    private static KartTanimi HastaAlerjiKarti() => new(
+        Ad: "hasta-alerji",
+        YetkiKodu: "muayene",
+        Tablo: "public.hasta_alerji",
+        LogTabloId: 971,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["tur"] = (short)1, ["siddet"] = (short)1, ["kaynak"] = (short)1, ["aktif"] = (short)1,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("hastaId", "hasta_id", "kod", Zorunlu: true,
+                KodTablosu: "public.v_hasta_lookup", AramaKaynagi: "hasta",
+                Baslik: "Hasta", Grup: "Kayıt"),
+            new("tur", "tur", "kod", SabitKodlar: AlerjiTuruKodlari, Baslik: "Tür",
+                Grup: "Kayıt"),
+            new("etken", "etken", "metin", EnFazlaUzunluk: 200,
+                Baslik: "Etken / Ürün", Grup: "Kayıt"),
+            // KONTROLUN ASIL ANAHTARI: marka degil etken madde.
+            new("etkenMadde", "etken_madde", "metin", EnFazlaUzunluk: 200,
+                Baslik: "Etken Madde", Grup: "Kayıt"),
+            new("reaksiyon", "reaksiyon", "metin", EnFazlaUzunluk: 200,
+                Baslik: "Reaksiyon", Grup: "Kayıt"),
+            new("siddet", "siddet", "kod", SabitKodlar: AlerjiSiddetKodlari,
+                Baslik: "Şiddet", Grup: "Kayıt"),
+            new("kaynak", "kaynak", "kod", SabitKodlar: KayitKaynakKodlari,
+                Baslik: "Kaynak", Grup: "Kayıt"),
+            new("dogrulandi", "dogrulandi", "mantik", Baslik: "Doğrulandı", Grup: "Kayıt"),
+            new("kayitMuayeneId", "kayit_muayene_id", "sayi",
+                Baslik: "Kayıt Muayenesi", Grup: "Kayıt"),
+            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Kayıt")
+        });
+
+    /// <summary>HASTA İLACI KARTI (413) — kullanılan ilaç, reçeteden bağımsız.</summary>
+    private static KartTanimi HastaIlacKarti() => new(
+        Ad: "hasta-ilac",
+        YetkiKodu: "muayene",
+        Tablo: "public.hasta_ilac",
+        LogTabloId: 972,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["kaynak"] = (short)2, ["uyum"] = (short)1, ["aktif"] = (short)1,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("hastaId", "hasta_id", "kod", Zorunlu: true,
+                KodTablosu: "public.v_hasta_lookup", AramaKaynagi: "hasta",
+                Baslik: "Hasta", Grup: "İlaç"),
+            new("ilacBarkod", "ilac_barkod", "metin", EnFazlaUzunluk: 20,
+                Baslik: "Barkod", Grup: "İlaç"),
+            new("ilacAd", "ilac_ad", "metin", EnFazlaUzunluk: 200, Baslik: "İlaç",
+                Grup: "İlaç"),
+            new("etkenMadde", "etken_madde", "metin", EnFazlaUzunluk: 200,
+                Baslik: "Etken Madde", Grup: "İlaç"),
+            new("doz", "doz", "metin", EnFazlaUzunluk: 20, Baslik: "Doz", Grup: "Kullanım"),
+            new("periyot", "periyot", "metin", EnFazlaUzunluk: 20, Baslik: "Periyot",
+                Grup: "Kullanım"),
+            new("baslangic", "baslangic", "tarih", Baslik: "Başlangıç", Grup: "Kullanım"),
+            new("bitis", "bitis", "tarih", Baslik: "Bitiş", Grup: "Kullanım"),
+            new("kaynak", "kaynak", "kod", SabitKodlar: IlacKaynakKodlari,
+                Baslik: "Kaynak", Grup: "Kullanım"),
+            new("uyum", "uyum", "kod", SabitKodlar: IlacUyumKodlari,
+                Baslik: "Uyum", Grup: "Kullanım"),
+            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Kullanım")
         });
 
     private static KartTanimi LabIstemKarti() => new(

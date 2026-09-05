@@ -335,6 +335,52 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   // RADYOLOJI grubu ana menude KAYIT KABUL ile CRM ARASINDA (kullanici):
   //   grup sirasi bu dizideki ILK gorulme sirasindan gelir.
   {
+    // RECETELER (413) - muayenede yazilan ilaclar. Recete bir BELGEDIR:
+    //   imzalaninca degismez, ilac adi satira kopyalanir.
+    kaynak: 'recete', rota: 'recete', baslik: 'Reçeteler',
+    yol: 'Muayene › Reçeteler',
+    kartYolu: '/recete', kartBaslik: 'Reçete',
+    aksiyonEkrani: 'cari-liste',
+    tarihAlani: 'tarih',
+    cipler: [
+      { ad: 'Taslak',       filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'İmzalı',       filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Medula Kabul', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Muayene', menuAd: 'Reçeteler', ic: '💊', yetkiKodu: 'muayene',
+  },
+  {
+    // HASTA ALERJILERI (413) - ETKEN MADDE bazli. Marka uzerinden tutmak
+    //   ayni etkeni tasiyan baska markayi kacirirdi.
+    kaynak: 'hasta-alerji', rota: 'hasta-alerji', baslik: 'Hasta Alerjileri',
+    yol: 'Muayene › Alerjiler',
+    kartYolu: '/hasta-alerji', kartBaslik: 'Alerji Kaydı',
+    aksiyonEkrani: 'cari-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Muayene', menuAd: 'Alerjiler', ic: '⚠️', yetkiKodu: 'muayene',
+  },
+  {
+    // HASTANIN KULLANDIGI ILACLAR (413) - recete satirlarinin kopyasi DEGIL:
+    //   hasta baska kurumdan aldigini da kullanir, bizim yazdigimizin bir
+    //   kismini kullanmaz. Etkilesim kontrolu KULLANILANA bakar.
+    kaynak: 'hasta-ilac', rota: 'hasta-ilac', baslik: 'Kullanılan İlaçlar',
+    yol: 'Muayene › Kullanılan İlaçlar',
+    kartYolu: '/hasta-ilac', kartBaslik: 'İlaç Kaydı',
+    aksiyonEkrani: 'cari-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Muayene', menuAd: 'Kullanılan İlaçlar', ic: '🧾', yetkiKodu: 'muayene',
+  },
+  {
     // MUAYENE SABLONLARI (411) - brans/kisisel fizik muayene sablonlari.
     //   Alanlar kartin "Alanlar" detayinda; sablon uygulaninca her alan bir
     //   bulgu satiri olarak acilir ve "normal" isaretlenir.

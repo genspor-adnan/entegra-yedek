@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (184 ad, 59 tanesi birden cok dosyada)
+## Fonksiyonlar (187 ad, 60 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -92,6 +92,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_hasta_dosya_no` | `366_numara_onek_yil.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |
 | `fn_hesap_atama_adi` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
 | `fn_hesap_plani_alt_ac` | `076_fn_kasa.sql` | — |
+| `fn_ilac_alerji_kontrol` | `414_metin_sadelestir.sql` | 413_recete.sql |
 | `fn_ilac_fiyat` | `406_ilac_fiyat.sql` | — |
 | `fn_ilac_fiyat_golge_tazele` | `406_ilac_fiyat.sql` | — |
 | `fn_ilac_kamu_iskonto` | `407_sgk_ek4a_iskonto.sql` | — |
@@ -112,6 +113,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kurum_kampanya` | `274_belge_kampanya.sql` | 272_kampanya_fiyat.sql |
 | `fn_kurum_modul_acik` | `364_kurum_profil_sube.sql` | 359_kurum_profil.sql |
 | `fn_kurum_profil` | `364_kurum_profil_sube.sql` | — |
+| `fn_metin_anahtar` | `414_metin_sadelestir.sql` | — |
+| `fn_metin_sadelestir` | `414_metin_sadelestir.sql` | — |
 | `fn_mizan` | `077_v_ekstre.sql` | — |
 | `fn_muh_hesap_coz` | `138_ceksenet_muhasebe_eslestirme.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql |
 | `fn_muhasebe_donem_kontrol` | `147_donem_kontrol_timestamp.sql` | 074_muhasebe.sql |

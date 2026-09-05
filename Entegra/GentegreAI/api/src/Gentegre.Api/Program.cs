@@ -190,6 +190,7 @@ uygulama.TercihUclariniEkle();
 uygulama.BildirimUclariniEkle();
 uygulama.KatalogUclariniEkle();
 uygulama.MuayeneUclariniEkle();
+uygulama.ReceteUclariniEkle();
 uygulama.ZamanliIsUclariniEkle();
 uygulama.KurumProfilUclariniEkle();
 uygulama.PanelUclariniEkle();
