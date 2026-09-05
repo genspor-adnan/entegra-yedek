@@ -444,7 +444,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
     [gruplar, seritAlanlari],
   );
 
-  /** Mockup'taki gibi sekmeli kart: Kimlik disindaki her alan grubu + her detay tablosu ayri sekme. */
+  /** Dokuman seridinde TEK HUCREDE toplanan gecerlilik alanlari (mockup). */
+const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit', 'gozdenGecirmeAy'];
+
+/** Mockup'taki gibi sekmeli kart: Kimlik disindaki her alan grubu + her detay tablosu ayri sekme. */
   const sekmeler = useMemo<SekmeTanimi[]>(
     () => sekmeleriKur({ gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
                          yerTutucuSekmeler, gizliSekmeler, seritAlanlari,
@@ -869,6 +872,27 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarma
                   Vefat); personelde baslikta rozet. */}
               {kaynak === 'hasta'
                 && renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
+            </div>
+          ) : kaynak === 'dokuman' ? (
+            /* DOKUMAN SERIDI (mockup dokuman_karti.html): DORT SUTUN sabit -
+               otomatik akista alanlar ekran genisligine gore 2-6 sutun
+               arasinda ziplayip mockup duzenini bozuyordu.
+               GECERLILIK TEK HUCREDE: mockupta "28.08.2026 — 01.09.2027 ·
+               gozden gecirme 12 ay" tek satir; uc ayri kutu ucte bir satir
+               kaplayip ilgisiz alanlari birbirinden ayiriyordu. */
+            <div className="alan-izgara kaid-dokuman">
+              {renderAlanListesi(kimlikAlanlari.filter(
+                a => !GECERLILIK_ALANLARI.includes(a.ad)))}
+              <label className="alan tip-metin gecerlilik-hucre">
+                <span className="etiket">Geçerlilik</span>
+                <span className="gecerlilik-kutu">
+                  {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'gecerliBas'))}
+                  <span className="ayrac">—</span>
+                  {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'gecerliBit'))}
+                  <span className="ayrac">·</span>
+                  {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'gozdenGecirmeAy'))}
+                </span>
+              </label>
             </div>
           ) : (
             <div className={`alan-izgara${kaynak === 'kisi' ? ' kaid-kisi' : ''}`

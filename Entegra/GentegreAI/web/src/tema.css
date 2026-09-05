@@ -2295,3 +2295,20 @@ input.skt-gecmis {
   padding: 12px 10px 0;
   line-height: 1.4;
 }
+
+/* --------------------------------------------------- doküman kart şeridi
+   DÖRT SÜTUN SABİT (mockup dokuman_karti.html): otomatik akışta alanlar
+   ekran genişliğine göre 2-6 sütun arasında zıplayıp mockup düzenini
+   bozuyordu - kart her açılışta farklı görünmemeli. */
+.kaid .alan-izgara.kaid-dokuman { grid-template-columns: repeat(4, minmax(0, 1fr)) }
+/* Açıklama satırın tamamını kaplar: tek satırlık kutuda uzun metin okunmuyor. */
+.kaid .alan-izgara.kaid-dokuman .alan.tip-metin:last-of-type { grid-column: auto }
+/* GEÇERLİLİK TEK HÜCREDE: başlangıç — bitiş · gözden geçirme. Üç ayrı kutu
+   üçte bir satır kaplayıp ilgisiz alanları birbirinden ayırıyordu. */
+.kaid .gecerlilik-hucre { grid-column: span 2 }
+.kaid .gecerlilik-kutu { display: flex; align-items: center; gap: 6px }
+.kaid .gecerlilik-kutu .alan { flex: 1; min-width: 0 }
+/* İç alanların kendi etiketleri gizli - dış etiket "Geçerlilik" yeterli;
+   üç etiket üst üste gelince hücre iki kat yükseliyordu. */
+.kaid .gecerlilik-kutu .alan > .etiket { display: none }
+.kaid .gecerlilik-kutu .ayrac { color: var(--sonuk-yazi, #7a869a); font-size: 12px }
