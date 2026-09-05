@@ -722,73 +722,73 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id", "id", "sayi", Yazilabilir: false),
+
+            // META ALANLARI SEKMELERIN USTUNDE (mockup dokuman_karti.html,
+            //   kullanici): kart acilinca ad/kod/tur/klasor/gizlilik hemen
+            //   gorunmeli. GenForm "Kimlik" grubunu SERIT olarak cizer,
+            //   otekileri sekme yapar - bu yuzden meta alanlari Kimlik'te.
+            //   Sekmede duran bir "Ad" alani, dokumani tanimak icin sekme
+            //   degistirtirdi.
             new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 200,
-                Baslik: "Doküman Adı", Grup: "Tanım"),
-            new("kod", "kod", "metin", EnFazlaUzunluk: 30, Baslik: "Kod", Grup: "Tanım"),
+                Baslik: "Doküman Adı", Grup: "Kimlik"),
+            new("kod", "kod", "metin", EnFazlaUzunluk: 30, Baslik: "Kod", Grup: "Kimlik"),
             new("belgeTuruId", "belge_turu_id", "kod",
                 KodTablosu: "public.v_dokuman_turu_lookup", Baslik: "Belge Türü",
-                Grup: "Tanım"),
+                Grup: "Kimlik"),
+            new("durum", "durum", "kod", SabitKodlar: DokumanDurumKodlari, Yazilabilir: false,
+                Baslik: "Durum", Grup: "Kimlik"),
             new("klasorId", "klasor_id", "kod", KodTablosu: "public.v_dokuman_klasor_lookup",
-                Baslik: "Klasör", Grup: "Tanım"),
-            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 400, Baslik: "Açıklama",
-                Grup: "Tanım"),
+                Baslik: "Klasör", Grup: "Kimlik"),
             new("sahipId", "sahip_id", "kod", KodTablosu: "public.v_kullanici_lookup",
-                Baslik: "Sahip", Grup: "Tanım"),
-            // ETIKET metin olarak girilir, dizi olarak saklanir (dokuman.etiketler
-            //   varchar[]): kullanicidan dizi sozdizimi beklemek yerine virgullu
-            //   yazim kabul edilir - donusum sunucu tarafinda.
-            new("etiketMetni", "array_to_string(etiketler, ', ')", "metin",
-                EnFazlaUzunluk: 300, Baslik: "Etiketler", Grup: "Tanım",
-                Yazilabilir: false),
-            new("dil", "dil", "metin", EnFazlaUzunluk: 5, Baslik: "Dil", Grup: "Tanım"),
-
-            // ---------------------------------------------------- erişim ----
+                Baslik: "Sahip", Grup: "Kimlik"),
             // GIZLILIK sinifi izinden BAGIMSIZ ust kisittir: ozel nitelikli
-            //   dokumanda gerekce zorunlu, erisim gunluge yazilir.
+            //   dokumanda gerekce zorunlu, erisim gunluge yazilir - bu yuzden
+            //   ustte, gozden kacmayacak yerde.
             new("gizlilik", "gizlilik", "kod", SabitKodlar: DokumanGizlilikKodlari,
-                Baslik: "Gizlilik Sınıfı", Grup: "Erişim"),
-            new("kaynak", "kaynak", "metin", Yazilabilir: false, EnFazlaUzunluk: 20,
-                Baslik: "Bağlı Kaynak", Grup: "Erişim"),
-            new("kaynakId", "kaynak_id", "sayi", Yazilabilir: false,
-                Baslik: "Kaynak Id", Grup: "Erişim"),
+                Baslik: "Gizlilik Sınıfı", Grup: "Kimlik"),
+            new("etiketMetni", "array_to_string(etiketler, ', ')", "metin",
+                EnFazlaUzunluk: 300, Baslik: "Etiketler", Grup: "Kimlik",
+                Yazilabilir: false),
+            new("gecerliBas", "gecerli_bas", "tarih", Baslik: "Geçerlilik Başlangıcı",
+                Grup: "Kimlik"),
+            new("gecerliBit", "gecerli_bit", "tarih", Baslik: "Geçerlilik Bitişi",
+                Grup: "Kimlik"),
+            new("gozdenGecirmeAy", "gozden_gecirme_ay", "sayi",
+                Baslik: "Gözden Geçirme (ay)", Grup: "Kimlik"),
+            new("dil", "dil", "metin", EnFazlaUzunluk: 5, Baslik: "Dil", Grup: "Kimlik"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 400, Baslik: "Açıklama",
+                Grup: "Kimlik"),
 
             // ----------------------------------------------------- içerik ----
-            new("durum", "durum", "kod", SabitKodlar: DokumanDurumKodlari, Yazilabilir: false,
-                Baslik: "Durum", Grup: "İçerik"),
+            // Dosyanin kendisine ait, DEGISTIRILEMEZ bilgiler ayri sekmede:
+            //   onlari degistiren sey surum/onay dongusudur, elle yazmak
+            //   basligi gercek dosyadan koparirdi.
             new("surumNo", "surum_no", "sayi", Yazilabilir: false, Baslik: "Yayındaki Sürüm",
                 Grup: "İçerik"),
-            new("surumlu", "surumlu", "mantik", Baslik: "Sürüm Takibi", Grup: "İçerik"),
-            new("contentType", "content_type", "metin", Yazilabilir: false,
-                EnFazlaUzunluk: 100, Baslik: "Dosya Türü", Grup: "İçerik"),
-            new("boyut", "boyut", "sayi", Yazilabilir: false, Baslik: "Boyut (bayt)",
-                Grup: "İçerik"),
-            // HASH kimlik seridinde gorunur (mockup: "hash 9c1f…"): ayni hash,
-            //   ayni dosya - dedup'un ve "hangi surum hangi icerik" sorusunun
-            //   tek isareti.
-            new("hash", "hash", "metin", Yazilabilir: false, EnFazlaUzunluk: 64,
-                Baslik: "İçerik Hash", Grup: "İçerik"),
-            // ONAYDAKI SURUM: mockup basliginda "v4 yayinda · v5 onay bekliyor"
-            //   yaziyor. Iki sayi ayri sorulari cevapliyor - yururlukteki
-            //   surum ile bekleyen surum karistirilmamali.
             new("onaydakiSurum",
                 "coalesce((select s.surum_no from public.dokuman_surum s "
                 + "where s.dokuman_id = dokuman.id and s.durum = 2 "
                 + "order by s.surum_no desc limit 1), 0)",
                 "sayi", Yazilabilir: false, Baslik: "Onaydaki Sürüm", Grup: "İçerik"),
-
-            // ------------------------------------------------ geçerlilik ----
-            new("gecerliBas", "gecerli_bas", "tarih", Baslik: "Geçerlilik Başlangıcı",
-                Grup: "Geçerlilik"),
-            new("gecerliBit", "gecerli_bit", "tarih", Baslik: "Geçerlilik Bitişi",
-                Grup: "Geçerlilik"),
-            new("gozdenGecirmeAy", "gozden_gecirme_ay", "sayi",
-                Baslik: "Gözden Geçirme (ay)", Grup: "Geçerlilik"),
+            new("surumlu", "surumlu", "mantik", Baslik: "Sürüm Takibi", Grup: "İçerik"),
+            new("contentType", "content_type", "metin", Yazilabilir: false,
+                EnFazlaUzunluk: 100, Baslik: "Dosya Türü", Grup: "İçerik"),
+            new("boyut", "boyut", "sayi", Yazilabilir: false, Baslik: "Boyut (bayt)",
+                Grup: "İçerik"),
+            new("hash", "hash", "metin", Yazilabilir: false, EnFazlaUzunluk: 64,
+                Baslik: "İçerik Hash", Grup: "İçerik"),
+            // Birincil bag: dosyanin NEREDEN yuklendigi. Degistirilemez -
+            //   degisirse kart galerisi dosyayi kaybeder.
+            new("kaynak", "kaynak", "metin", Yazilabilir: false, EnFazlaUzunluk: 20,
+                Baslik: "Bağlı Kaynak", Grup: "İçerik"),
+            new("kaynakId", "kaynak_id", "sayi", Yazilabilir: false,
+                Baslik: "Kaynak Id", Grup: "İçerik"),
             new("sonGozdenGecirme", "son_gozden_gecirme", "tarih",
-                Baslik: "Son Gözden Geçirme", Grup: "Geçerlilik"),
+                Baslik: "Son Gözden Geçirme", Grup: "İçerik"),
             new("sonrakiGozdenGecirme", "sonraki_gozden_gecirme", "tarih",
-                Baslik: "Sonraki Gözden Geçirme", Grup: "Geçerlilik"),
+                Baslik: "Sonraki Gözden Geçirme", Grup: "İçerik"),
             new("ozet", "ozet", "metin", EnFazlaUzunluk: 1000, Baslik: "Özet",
-                Grup: "Geçerlilik")
+                Grup: "İçerik")
         },
         Detaylar: new DetayTanimi[]
         {
