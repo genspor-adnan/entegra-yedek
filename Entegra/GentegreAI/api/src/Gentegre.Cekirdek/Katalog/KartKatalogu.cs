@@ -203,6 +203,8 @@ public static partial class KartKatalogu
         Ekle(ReceteKarti());
         Ekle(HastaAlerjiKarti());
         Ekle(HastaIlacKarti());
+        Ekle(HastaKronikTaniKarti());
+        Ekle(HastaGecmisOlayKarti());
         Ekle(LabIstemKarti());
         // FAZ 0 ortak platform (398-401): onam metni ve bildirim sablonu.
         Ekle(OnamMetniKarti());

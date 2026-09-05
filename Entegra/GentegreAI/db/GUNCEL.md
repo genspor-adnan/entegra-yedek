@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (191 ad, 60 tanesi birden cok dosyada)
+## Fonksiyonlar (192 ad, 60 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -195,12 +195,13 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_radyoloji_istem_hazirla` | `287_radyoloji_accession_tetik.sql` | — |
 | `tg_randevu_cakisma` | `317_randevu_tetkik_uyum.sql` | 316_randevu_cihaz_kaynagi.sql |
 | `tg_sube_vkn_dogrula` | `170_sube_vkn_dogrula.sql` | — |
+| `tg_tani_kronik_yansit` | `420_hasta_tibbi_gecmis.sql` | — |
 | `tg_taraf_hasta_dosya_no` | `396_hasta_dosya_no_otomatik.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |
 | `tg_taraf_hasta_kurum_tek_aktif` | `248_taraf_hasta_kurum.sql` | — |
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (85 ad, 37 tanesi birden cok dosyada)
+## Gorunumler (86 ad, 37 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -239,6 +240,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_hakedis_ozet` | `330_prim_tahsilat_turu_durum.sql` | 324_prim_semasi.sql |
 | `v_hakedis_satir` | `363_hakedis_rol_isaret_kontrolu.sql` | 324_prim_semasi.sql, 330_prim_tahsilat_turu_durum.sql, 332_prim_zamani.sql |
 | `v_hasta_lookup` | `266_aday_hasta.sql` | 244_hasta_lookup.sql, 262_hasta_lookup_kimlik.sql, 263_hasta_lookup_cinsiyet_yas.sql, 264_hasta_lookup_cinsiyet_bos.sql |
+| `v_hasta_tibbi_ozet` | `420_hasta_tibbi_gecmis.sql` | — |
 | `v_hekim_lookup` | `253_hekim_pasif_dislama.sql` | 252_personel_randevu_verilebilir.sql |
 | `v_hesap_atama_lookup` | `199_kasa_atama_listesi.sql` | 197_kasa_atama_tek_alan.sql |
 | `v_hesap_bakiye` | `077_v_ekstre.sql` | — |

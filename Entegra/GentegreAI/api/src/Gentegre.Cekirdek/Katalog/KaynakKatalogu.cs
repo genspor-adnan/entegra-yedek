@@ -143,6 +143,10 @@ public static partial class KaynakKatalogu
         Ekle(Recete());
         Ekle(HastaAlerji());
         Ekle(HastaIlac());
+        // Hasta tibbi gecmisi (420): kronik tani, gecmis olay, ozet.
+        Ekle(HastaKronikTani());
+        Ekle(HastaGecmisOlay());
+        Ekle(HastaTibbiOzet());
         Ekle(EnabizPaket());
         // Dokuman v1 (419): kaynak ustu liste + katalog + onay kuyrugu.
         Ekle(Dokuman());

@@ -26,6 +26,25 @@ public static partial class KartKatalogu
         ["4"] = "Ek Not Eklendi", ["0"] = "İptal"
     };
 
+    /// <summary>Kronik tani durumu (420).</summary>
+    private static readonly Dictionary<string, string> KronikDurumKodlari = new()
+    {
+        ["1"] = "Aktif", ["2"] = "Kontrol Altında", ["3"] = "Geçmiş (remisyon)"
+    };
+
+    /// <summary>Tibbi gecmis kaydinin kaynagi (420).</summary>
+    private static readonly Dictionary<string, string> TibbiKaynakKodlari = new()
+    {
+        ["1"] = "Hekim", ["2"] = "Hasta Beyanı", ["3"] = "e-Nabız", ["4"] = "Dış Kurum"
+    };
+
+    /// <summary>Gecmis olay turu (420).</summary>
+    private static readonly Dictionary<string, string> GecmisOlayTuruKodlari = new()
+    {
+        ["1"] = "Ameliyat", ["2"] = "Girişim", ["3"] = "Yatış", ["4"] = "Aşı",
+        ["5"] = "Travma", ["6"] = "Transfüzyon"
+    };
+
     /// <summary>Recete turu (413) - ilac.recete_turu ile ayni kodlar.</summary>
     private static readonly Dictionary<string, string> ReceteTuruKodlari = new()
     {
@@ -565,6 +584,74 @@ public static partial class KartKatalogu
             new("uyum", "uyum", "kod", SabitKodlar: IlacUyumKodlari,
                 Baslik: "Uyum", Grup: "Kullanım"),
             new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Kullanım")
+        });
+
+    /// <summary>HASTA KRONİK TANISI KARTI (420).</summary>
+    private static KartTanimi HastaKronikTaniKarti() => new(
+        Ad: "hasta-kronik",
+        YetkiKodu: "muayene",
+        Tablo: "public.hasta_kronik_tani",
+        LogTabloId: 973,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["durum"] = (short)1, ["kaynak"] = (short)2,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("hastaId", "hasta_id", "kod", Zorunlu: true,
+                KodTablosu: "public.v_hasta_lookup", AramaKaynagi: "hasta",
+                Baslik: "Hasta", Grup: "Tanı"),
+            new("icdKod", "icd_kod", "kod", Zorunlu: true,
+                KodTablosu: "public.v_icd_lookup", AramaKaynagi: "icd",
+                Baslik: "ICD-10", Grup: "Tanı"),
+            // Ad KOPYA: katalog guncellenirse ozetteki metin degismesin.
+            new("taniAd", "tani_ad", "metin", EnFazlaUzunluk: 300, Baslik: "Tanı",
+                Grup: "Tanı"),
+            new("baslangic", "baslangic", "tarih", Baslik: "Başlangıç", Grup: "Takip"),
+            new("bitis", "bitis", "tarih", Baslik: "Bitiş (remisyon)", Grup: "Takip"),
+            new("takipHekimId", "takip_hekim_id", "kod",
+                KodTablosu: "public.v_personel_lookup", Baslik: "Takip Eden", Grup: "Takip"),
+            new("durum", "durum", "kod", SabitKodlar: KronikDurumKodlari,
+                Baslik: "Durum", Grup: "Takip"),
+            new("kaynak", "kaynak", "kod", SabitKodlar: TibbiKaynakKodlari,
+                Baslik: "Kaynak", Grup: "Takip"),
+            new("kayitMuayeneId", "kayit_muayene_id", "sayi", Baslik: "Kayıt Muayenesi",
+                Grup: "Takip"),
+            new("notMetni", "not_metni", "metin", EnFazlaUzunluk: 300, Baslik: "Not",
+                Grup: "Takip")
+        });
+
+    /// <summary>HASTA GEÇMİŞ OLAYI KARTI (420) — ameliyat · aşı · yatış.</summary>
+    private static KartTanimi HastaGecmisOlayKarti() => new(
+        Ad: "hasta-gecmis",
+        YetkiKodu: "muayene",
+        Tablo: "public.hasta_gecmis_olay",
+        LogTabloId: 974,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["tur"] = (short)1, ["kaynak"] = (short)2,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("hastaId", "hasta_id", "kod", Zorunlu: true,
+                KodTablosu: "public.v_hasta_lookup", AramaKaynagi: "hasta",
+                Baslik: "Hasta", Grup: "Olay"),
+            new("tur", "tur", "kod", SabitKodlar: GecmisOlayTuruKodlari, Baslik: "Tür",
+                Grup: "Olay"),
+            new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 200, Baslik: "Olay",
+                Grup: "Olay"),
+            new("kod", "kod", "metin", EnFazlaUzunluk: 20, Baslik: "Kod (SUT / aşı)",
+                Grup: "Olay"),
+            new("tarih", "tarih", "tarih", Baslik: "Tarih", Grup: "Olay"),
+            new("kurum", "kurum", "metin", EnFazlaUzunluk: 120, Baslik: "Kurum", Grup: "Olay"),
+            new("notMetni", "not_metni", "metin", EnFazlaUzunluk: 400, Baslik: "Not",
+                Grup: "Olay"),
+            new("kaynak", "kaynak", "kod", SabitKodlar: TibbiKaynakKodlari, Baslik: "Kaynak",
+                Grup: "Olay")
         });
 
     private static KartTanimi LabIstemKarti() => new(

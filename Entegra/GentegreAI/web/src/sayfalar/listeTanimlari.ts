@@ -416,6 +416,43 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Muayene', menuAd: 'Reçeteler', ic: '💊', yetkiKodu: 'muayene',
   },
   {
+    // TIBBI OZET (420) - hasta basina tek satir: alerji / kronik / ilac.
+    //   Muayene kartinin ust seridi ve bu ekran AYNI kaynagi okur; iki ayri
+    //   sorgu, iki farkli "aktif ilac" tanimi uretirdi.
+    kaynak: 'hasta-tibbi-ozet', rota: 'hasta-tibbi-ozet', baslik: 'Tıbbi Özet',
+    yol: 'Muayene › Tıbbi Özet',
+    aksiyonEkrani: 'cikti-liste',
+    tarihAlani: 'sonMuayene',
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Muayene', menuAd: 'Tıbbi Özet', ic: '📖', yetkiKodu: 'muayene',
+  },
+  {
+    // KRONIK TANILAR (420) - muayenede "kronik" isaretlenen tani buraya
+    //   TETIKLE duser; hekime "bir de tibbi ozete ekle" dedirtmek,
+    //   unutuldugunda sonraki hekimin eksik bilgiyle karar vermesi demekti.
+    kaynak: 'hasta-kronik', rota: 'hasta-kronik', baslik: 'Kronik Tanılar',
+    yol: 'Muayene › Kronik Tanılar',
+    kartYolu: '/hasta-kronik', kartBaslik: 'Kronik Tanı',
+    aksiyonEkrani: 'cari-liste',
+    cipler: [
+      { ad: 'Aktif',  filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Geçmiş', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Muayene', menuAd: 'Kronik Tanılar', ic: '🩹', yetkiKodu: 'muayene',
+  },
+  {
+    // GECMIS OLAYLAR (420) - ameliyat / girisim / yatis / asi / travma.
+    kaynak: 'hasta-gecmis', rota: 'hasta-gecmis', baslik: 'Geçmiş Olaylar',
+    yol: 'Muayene › Geçmiş Olaylar',
+    kartYolu: '/hasta-gecmis', kartBaslik: 'Geçmiş Olay',
+    aksiyonEkrani: 'cari-liste',
+    tarihAlani: 'tarih',
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Muayene', menuAd: 'Geçmiş Olaylar', ic: '🏥', yetkiKodu: 'muayene',
+  },
+  {
     // HASTA ALERJILERI (413) - ETKEN MADDE bazli. Marka uzerinden tutmak
     //   ayni etkeni tasiyan baska markayi kacirirdi.
     kaynak: 'hasta-alerji', rota: 'hasta-alerji', baslik: 'Hasta Alerjileri',
