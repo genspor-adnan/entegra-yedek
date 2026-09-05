@@ -6,7 +6,7 @@ import {
   type SatirDurumu, satirTutari, adetKaydir, KDV_ORANLARI,
 } from '../../sayfalar/belgeSatir';
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
-import { moduCevir } from '../../sayfalar/belgeKarti/kdvModu';
+import { baslangicBrutMetni, moduCevir } from '../../sayfalar/belgeKarti/kdvModu';
 import { IzlemPenceresi } from './IzlemPenceresi';
 
 export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi, paylasimli,
@@ -65,10 +65,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * oldugu gibi tutulur; satira MATRAH yazilir. Her tusa basista matrahtan
    * geri uretmek "12," gibi ara yazimlarda ondalik ayracini yiyordu.
    */
-  const [brutMetni, setBrutMetni] = useState(() =>
-    moduCevir(String((Number(satir.kdvDahil ?? 0) === 1
-      ? (satir.fiyatDovizi && satir.fiyatDovizi !== '' ? satir.dovizFiyat : satir.birimFiyat)
-      : '') ?? ''), satir.kdv, true));
+  const [brutMetni, setBrutMetni] = useState(() => baslangicBrutMetni(satir, basvuruMu));
   const [hata, setHata] = useState<string | null>(null);
   /** Lot penceresi acik mi - miktar/fiyat girildikten SONRA acilir. */
   const [izlemAcik, setIzlemAcik] = useState(false);

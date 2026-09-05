@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { kdvCarpani, matraha, bruta, moduCevir, payBrute } from '../sayfalar/belgeKarti/kdvModu';
+import { baslangicBrutMetni, kdvCarpani, matraha, bruta, moduCevir, payBrute } from '../sayfalar/belgeKarti/kdvModu';
 
 /**
  * KDV DAHIL / HARIC GIRIS MODU.
@@ -90,5 +90,33 @@ describe('payBrute - kurum / hasta payi gosterimi', () => {
 
   it('tutar 0 ise deger AYNEN doner (bos satir)', () => {
     expect(payBrute(400, 0, 0)).toBe(400);
+  });
+});
+
+describe('baslangicBrutMetni - kalem penceresi acilis fiyati', () => {
+  it('basvuruda kart fiyati (kdvDahil bayragi YOK) brute cevrilir', () => {
+    // ILAC/STOK kart fiyatiyla gelen kalem: satirda matrah durur, bayrak 0.
+    //   Basvuruda kutu dahil modda acildigi icin brut gosterilmeli - eskiden
+    //   bos kaliyordu ("fiyat gelmedi").
+    expect(baslangicBrutMetni({ birimFiyat: '135', kdv: 10 }, true)).toBe('148.5');
+  });
+
+  it('fiyat listesinden gelen kalem (kdvDahil=1) basvuru disinda da dolar', () => {
+    expect(baslangicBrutMetni({ birimFiyat: '100', kdv: 20, kdvDahil: 1 }, false))
+      .toBe('120');
+  });
+
+  it('dahil modda degilse BOS - kutu haric fiyati gosterir', () => {
+    expect(baslangicBrutMetni({ birimFiyat: '100', kdv: 20 }, false)).toBe('');
+  });
+
+  it('dovizli kalemde doviz fiyati okunur', () => {
+    expect(baslangicBrutMetni(
+      { birimFiyat: '100', dovizFiyat: '10', fiyatDovizi: 'USD', kdv: 20 }, true))
+      .toBe('12');
+  });
+
+  it('fiyatsiz kalem bos kalir', () => {
+    expect(baslangicBrutMetni({ birimFiyat: '', kdv: 10 }, true)).toBe('');
   });
 });

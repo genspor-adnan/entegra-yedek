@@ -53,6 +53,33 @@ export function moduCevir(metin: string, kdvOrani: unknown, dahilOldu: boolean):
 }
 
 /**
+ * KALEM PENCERESI ACILISINDA "KDV DAHIL" KUTUSUNA YAZILACAK METIN.
+ *
+ * Satirda saklanan `birimFiyat` HER ZAMAN MATRAHTIR; dahil modunda kutuda
+ * brut gorunur. Kutunun dahil modda acilmasinin IKI sebebi var:
+ *   * satirin kendi bayragi (`kdvDahil = 1`, fiyat listesinden gelen kalem),
+ *   * BASVURU belgesi - orada fiyat her zaman KDV dahil girilir ve combo
+ *     kilitlidir.
+ *
+ * Ilk halinde yalnizca birinci sebep dolduruyordu: basvuruda kart fiyatiyla
+ * gelen kalem (fiyat listesi disi - or. ilac) kutuyu BOS aciyordu. Fiyat
+ * satirda duruyor, ekranda yok; kullanici "fiyat gelmedi" goruyordu.
+ *
+ * Kosul `kdvDahil` state'iyle AYNI olmali - ikisi ayrildiginda hata sessizdir.
+ */
+export function baslangicBrutMetni(
+  satir: { kdvDahil?: number | null; kdv?: unknown;
+           birimFiyat?: string | null; dovizFiyat?: string | null;
+           fiyatDovizi?: string | null },
+  basvuruMu?: boolean,
+): string {
+  const dahil = !!basvuruMu || Number(satir.kdvDahil ?? 0) === 1;
+  if (!dahil) return '';
+  const ham = satir.fiyatDovizi ? satir.dovizFiyat : satir.birimFiyat;
+  return moduCevir(String(ham ?? ''), satir.kdv, true);
+}
+
+/**
  * MATRAH PAYINI GOSTERIM BIRIMINE CEVIRIR (kurum / hasta payi).
  *
  * Paylar veritabaninda MATRAH olarak durur; basvuru ekraninda ise fiyat ve
