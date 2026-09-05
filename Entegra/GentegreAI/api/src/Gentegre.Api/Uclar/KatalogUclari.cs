@@ -160,7 +160,103 @@ public static class KatalogUclari
             return Results.Ok(new { s.Yazilan, s.Askida, s.Atlanan, s.Dosya, s.Tarih,
                                     izlemeNo = baglam.IzlemeNo });
         });
+        // POST /api/katalog/recete-turu-guncelle
+        //   SKRS e-Reçete listesinden reçete türü + temel ilaç işaretleri.
+        grup.MapPost("/recete-turu-guncelle", async (
+            BaglamCozucu cozucu, Servisler.TitckIlacGuncelleme titck,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("katalog", Islem.Degistir);
+
+            var s = await titck.ReceteTuruGuncelleAsync(iptal);
+            return Results.Ok(new { s.Yazilan, s.Atlanan, s.Dosya, s.Tarih,
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+        // POST /api/katalog/sgk-ek4a-yukle
+        //   Ek-4/A FIYAT VERMEZ, ISKONTO verir; kamu fiyati TITCK perakende
+        //   fiyatindan bu iskontolar dusulerek bulunur. Adres duyurudan
+        //   yapistirilir (SGK her duzenlemede yeni GUID'li adrese koyuyor).
+        grup.MapPost("/sgk-ek4a-yukle", async (
+            SgkIstegi istek, BaglamCozucu cozucu, Servisler.SgkIlacListesi sgk,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("katalog", Islem.Degistir);
+
+            byte[]? icerik = string.IsNullOrWhiteSpace(istek.Icerik)
+                ? null : Convert.FromBase64String(istek.Icerik);
+            DateOnly? yururluk = DateOnly.TryParse(istek.Yururluk, out var g) ? g : null;
+
+            var s = await sgk.YukleAsync(istek.Adres, icerik, yururluk, iptal);
+            return Results.Ok(new { s.Okunan, s.FiyatSatiri, s.IlacGuncellenen, s.Eslesmeyen,
+                                    s.Yururluk, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/katalog/ilac/{id}/stok - ilaç kataloğundan STOK KARTI üretir
+        //   İlaç kataloğu 23 bin satır; hepsine peşinen stok kartı açmak stok
+        //   listesini kullanılamaz hale getirirdi. Kart İLK KULLANIMDA açılır
+        //   ve ilac.stok_id ile bağlanır; ikinci kez basıldığında var olan
+        //   kart döner (bu yüzden uç tekrarlanabilir).
+        grup.MapPost("/ilac/{id:int}/stok", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("stok", Islem.Ekle);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var ilac = await baglanti.TekAsync("""
+                select i.id, i.barkod, i.ad, i.stok_id
+                  from public.ilac i where i.id = @p0 for update
+                """, islem, [id], o => new
+                {
+                    Barkod = o.GetString(1), Ad = o.GetString(2),
+                    StokId = o.IsDBNull(3) ? (int?)null : o.GetInt32(3),
+                }, iptal);
+            if (ilac is null) return Results.NotFound(new { hata = new { kod = "BULUNAMADI",
+                                        mesaj = "İlaç bulunamadı." } });
+
+            var stokId = ilac.StokId;
+            if (stokId is null)
+            {
+                // Aynı barkodla elle açılmış bir kart olabilir: yenisini açmak
+                //   depoyu ikiye bölerdi, önce o aranır.
+                stokId = await baglanti.TekDegerAsync<int?>("""
+                    select s.id from public.stok s
+                     where s.kod = @p0
+                        or exists (select 1 from public.stok_barkod b
+                                    where b.stok_id = s.id and b.barkod = @p0)
+                     limit 1
+                    """, islem, [ilac.Barkod], iptal);
+
+                stokId ??= await baglanti.TekDegerAsync<int>("""
+                    insert into public.stok (kod, ad, tipi, ana_birim, kdv, izleme, durum,
+                                             sube_id, satilan, alinan, giris_kaynak, ekleyen)
+                    values (@p0, @p1, 51, 51, 10, 4, 1, @p2, 1, 1, 2, @p3)
+                    returning id
+                    """, islem, [ilac.Barkod, ilac.Ad, baglam.SubeId ?? 1, baglam.KullaniciId], iptal);
+
+                await baglanti.CalistirAsync("""
+                    insert into public.stok_barkod (stok_id, barkod, varsayilan)
+                    select @p0, @p1, 1
+                     where not exists (select 1 from public.stok_barkod b where b.barkod = @p1)
+                    """, islem, [stokId, ilac.Barkod], iptal);
+
+                await baglanti.CalistirAsync(
+                    "update public.ilac set stok_id = @p1, guncelleme = now() where id = @p0",
+                    islem, [id, stokId], iptal);
+            }
+
+            await islem.CommitAsync(iptal);
+            return Results.Ok(new { stokId, ilac.Barkod, ilac.Ad, izlemeNo = baglam.IzlemeNo });
+        });
     }
+
+    /// <summary>Ek-4/A yükleme: duyurudaki adres ya da doğrudan dosya (base64).</summary>
+    public sealed record SgkIstegi(string? Adres, string? Icerik, string? Yururluk);
 
     // ---------------------------------------------------------------- yardımcı
     /// <summary>

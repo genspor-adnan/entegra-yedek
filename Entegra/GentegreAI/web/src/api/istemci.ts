@@ -209,6 +209,16 @@ export const api = {
   liste: (kaynak: string, istekGovdesi: ListeIstegi) =>
     gonder<ListeYaniti>(`/api/liste/${kaynak}`, istekGovdesi),
 
+  /**
+   * Ilac katalogundan STOK KARTI uretir (ya da varsa dondurur).
+   *
+   * Belge satiri daima bir STOK'a baglanir; ilac katalogu 23 bin satirlik bir
+   * REFERANS listedir, hepsine pesinen kart acmak stok listesini kullanilamaz
+   * hale getirirdi. Kart ilk kullanimda acilir.
+   */
+  ilacStokKarti: (ilacId: number) =>
+    gonder<{ stokId: number; barkod: string; ad: string }>(`/api/katalog/ilac/${ilacId}/stok`, {}),
+
   kolonlar: (kaynak: string) =>
     istek<{ kaynak: string; kolonlar: KolonMeta[] }>(`/api/liste/${kaynak}/kolonlar`),
 

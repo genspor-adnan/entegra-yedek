@@ -204,6 +204,13 @@ public static partial class KaynakKatalogu
             new("receteTuru",  "i.recete_turu", "kod",   "Reçete Kodu", Varsayilan: false),
             new("stokAdi",     "coalesce(s.ad, '')", "metin", "Stok Kartı", Genislik: 200,
                                                 Varsayilan: false),
+            new("stokId",      "coalesce(i.stok_id, 0)", "sayi", "Stok Id", Varsayilan: false),
+            // Fiyat golge kolondan okunur (406): arama penceresi ilaci
+            //   fiyatiyla gostersin diye - dogruluk kaynagi ilac_fiyat.
+            new("fiyat",       "coalesce(i.guncel_perakende, 0)", "para", "Fiyat",
+                                                Hizalama: "sag", Genislik: 110),
+            new("kamuFiyat",   "coalesce(i.guncel_kamu, 0)", "para", "Kamu Fiyatı",
+                                                Hizalama: "sag", Genislik: 110, Varsayilan: false),
             new("aktif",       "i.aktif",       "mantik","Aktif", Hizalama: "orta", Genislik: 80)
         });
 }

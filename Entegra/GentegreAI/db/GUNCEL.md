@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (179 ad, 59 tanesi birden cok dosyada)
+## Fonksiyonlar (182 ad, 59 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -92,6 +92,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_hasta_dosya_no` | `366_numara_onek_yil.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |
 | `fn_hesap_atama_adi` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
 | `fn_hesap_plani_alt_ac` | `076_fn_kasa.sql` | — |
+| `fn_ilac_fiyat` | `406_ilac_fiyat.sql` | — |
+| `fn_ilac_fiyat_golge_tazele` | `406_ilac_fiyat.sql` | — |
+| `fn_ilac_kamu_iskonto` | `407_sgk_ek4a_iskonto.sql` | — |
 | `fn_kalem_kart_fiyati` | `202_fn_fiyat_listesi.sql` | — |
 | `fn_kampanya_fiyat` | `275_kampanya_liste_kalem_turu.sql` | 272_kampanya_fiyat.sql |
 | `fn_kasa_islem_bacak_uret` | `393_bacak_belge_no.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql, 096_kasa_bacak_rol_kontrol.sql, 139_kasa_ekstre_dovizi.sql |

@@ -6549,3 +6549,44 @@ Bir bulgu: kimlik kolonu kuralı yazılırken `belge-acik-satir` kaynağının
 `id`'si olmadığı görüldü — kimliği `satirId`. Kural buna göre yazıldı
 (`id` · `kod` · `barkod` · `satirId`), kaynak değiştirilmedi.
 
+
+## İlaç fiyatı, SGK Ek-4/A ve ilaç çıkışı (406 · 407)
+
+**Üç fiyat, üç kaynak.** Kullanıcı üçünü de istedi: hastaya yazılacak
+**perakende** fiyat, stok maliyeti için **alış** fiyatı, sigortaya faturalama
+için **kamu** fiyatı/iskontosu. `ilac_fiyat` (406) tarihçe tablosudur —
+TİTCK fiyatı her Cuma ilan edilip Salı yürürlüğe girdiği için "tek güncel
+fiyat" kolonu bir ay sonra eski faturayı yeniden hesaplayamazdı. Alış fiyatı
+**buraya girmez**: o stok maliyeti tarafında yaşıyor, perakende fiyatı maliyet
+saymak ay sonunda "kâr neden yanlış" sorusunu doğururdu.
+
+**Ek-4/A fiyat vermez, iskonto verir** — ve tek oran da vermez: iskonto ilacın
+depocuya satış fiyatı **kademesine** göre değişir ve kademe sınırları her
+yayında değişip **sütun başlığında** yazar. Bu yüzden sınırlar başlıktan
+okunup satırla saklanıyor (`ilac_fiyat.iskonto_kademe`, 407); koda gömülen bir
+sınır bir sonraki listede sessizce yanlış iskonto uygulardı.
+`fn_ilac_kamu_iskonto(barkod, depocu, tarih)` fiyat bilinince doğru kademeyi
+seçer, bilinmiyorsa en yüksek oranı döner (eksik ödeme riski, fazla ödemeye
+yeğdir). TİTCK **Detaylı Fiyat Listesi** kurumsal portal hesabı istediği için
+perakende/depocu fiyatı hâlâ bir **kapıdır**.
+
+Yükleyicide iki hata canlı veride sessizce yanlış sayı üretti; ikisi de artık
+birim testli (`IlacListeCozumleme`, Çekirdek'e taşındı):
+
+- Excel iskontoyu `7.0000000000000007E-2` diye yazabiliyor, eczacı iskontosu
+  ise `0-2,5%` gibi bir **aralık**. İkisi de `-` taşıyor: aralık kuralını önce
+  uygulamak %7'yi %200 yapıyordu.
+- `ToUpperInvariant` noktasız `ı`'yı `I` yapmaz. "Eczacı İskonto Oranı"
+  başlığı `ECZACı ISKONTO ORANı` olarak çıkıyor, sütun eşleşmiyor ve alan
+  **sessizce 0** kalıyordu.
+
+Ayrıca `ilac.esdeger_grup` 20 karaktere sığmıyordu: bir ilaç birden çok
+eşdeğer gruba girebiliyor (`E798A/E798B/...`), yükleme 22001 ile duruyordu.
+
+**İlaç çıkışı (HBYS).** Stok/hizmet arama penceresi ürün modu HBYS ise **ilacı
+da** arar (barkod · ad · etken madde), satır 💊 İlaç rozetiyle görünür. İlaç
+bir stok değil, 23 bin satırlık TİTCK **referans** kataloğudur; hepsine peşinen
+stok kartı açmak stok listesini kullanılamaz hale getirirdi. Seçilince
+`POST /api/katalog/ilac/{id}/stok` kartı **ilk kullanımda** üretir (varsa
+mevcut kartı döndürür — uç tekrarlanabilir), belgeye o **stok** düşer. Kart
+kodu barkoddur, izleme **Karekod** (İTS), KDV %10.

@@ -44,6 +44,7 @@ kurucu.Services.AddHostedService<Gentegre.Api.Servisler.BildirimIscisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RandevuHatirlatmasi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.PanikDegerBildirimi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.TitckIlacGuncelleme>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.SgkIlacListesi>();
 kurucu.Services.AddHttpClient("katalog");
 // FAZ 0 - ZAMANLI ISLER (405): TITCK haftalik guncelleme gibi isler.
 //   Isci SINGLETON (hosted) ama elle calistirma ucundan da cagriliyor -

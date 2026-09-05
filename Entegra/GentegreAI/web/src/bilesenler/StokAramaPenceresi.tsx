@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal } from './Modal';
 import { api } from '../api/istemci';
-import { type ListeSatiri, hataMetni } from '../api/sozlesme';
+import { type ListeSatiri, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
 import { para } from './bicim';
 import { aramaSirala } from './aramaSirasi';
+import { useOturum } from '../kimlik/OturumBaglami';
 
 
 /**
@@ -39,6 +40,16 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
    */
   yon?: 'satis' | 'alis';
 }) {
+  const { kullanici } = useOturum();
+  /**
+   * HBYS'de ILAC da aranir (kullanici: "mod hbys ise ilaç da eklenecek").
+   *
+   * Ilac bir STOK DEGIL, TITCK referans katalogudur: 23 bin satir. Arama
+   * sonucunda gorunur, secilince arka planda stok karti uretilip belgeye o
+   * stok girer - boylece ne katalog stok listesini bogar, ne de eczane
+   * cikisi icin memurun once elle stok karti acmasi gerekir.
+   */
+  const ilacAranir = kullanici?.urunModu === URUN_GENOTIP && !yalnizHizmet;
   const [arama, setArama] = useState('');
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [yukleniyor, setYukleniyor] = useState(false);
@@ -73,11 +84,20 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
 
       // gorunum: Son/Sik Aranan sunucuda kullanici_arama ile suzulur+siralanir.
       const gorunum = gorunumSecimi === 'tum' ? undefined : gorunumSecimi;
-      const [stoklar, hizmetler] = await Promise.all([
+      // Ilac barkodla da aranir: eczane cikisinda memur kutunun ustundeki
+      //   barkodu okutur, adini yazmaz.
+      const ilacFiltresi = metin.trim()
+        ? { op: 'or' as const, kosullar: ['barkod', 'ad', 'etkenMadde'].map(alan => ({
+            alan, op: 'icerir' as const, deger: metin.trim() })) }
+        : undefined;
+
+      const [stoklar, hizmetler, ilaclar] = await Promise.all([
         yalnizHizmet ? Promise.resolve({ satirlar: [] as ListeSatiri[] })
                      : api.liste('stok', { sayfa: 1, boyut: 25, filtre: stokFiltresi, gorunum }),
         yalnizStok ? Promise.resolve({ satirlar: [] as ListeSatiri[] })
                    : api.liste('hizmet', { sayfa: 1, boyut: 25, filtre, gorunum }),
+        ilacAranir ? api.liste('ilac', { sayfa: 1, boyut: 25, filtre: ilacFiltresi, gorunum })
+                   : Promise.resolve({ satirlar: [] as ListeSatiri[] }),
       ]);
 
       // SIRA GORUNUME GORE (ortak kural, aramaSirasi.ts): "Tüm Liste"de ada
@@ -88,6 +108,11 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
       const birlesik = aramaSirala<ListeSatiri>([
         ...stoklar.satirlar.map((r): ListeSatiri => ({ ...r, tip: 'stok' })),
         ...hizmetler.satirlar.map((r): ListeSatiri => ({ ...r, tip: 'hizmet' })),
+        // Ilac satiri stok satiri gibi gorunsun: kod = barkod (ilacin kimligi
+        //   barkodudur), izleme karekod (ITS).
+        ...ilaclar.satirlar.map((r): ListeSatiri => ({
+          ...r, tip: 'ilac', kod: r.barkod, izlemeAdi: 'Karekod',
+        })),
       ], gorunumSecimi);
 
       setSatirlar(birlesik);
@@ -96,7 +121,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
       setHata(hataMetni(h));
       setSatirlar([]);
     } finally { setYukleniyor(false) }
-  }, [yalnizStok, yalnizHizmet, yon]);
+  }, [yalnizStok, yalnizHizmet, yon, ilacAranir]);
 
   useEffect(() => { void ara(arama, aramaGorunumu) }, [ara, aramaGorunumu]);  // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -128,15 +153,44 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
     zamanlayici.current = window.setTimeout(() => void ara(metin, aramaGorunumu), 250);
   };
 
+  /**
+   * ILAC SECIMI STOK SATIRINA CEVRILIR.
+   *
+   * Belge satiri daima bir stoga baglanir; ilac referans katalogudur. Secilince
+   * stok karti (yoksa) uretilir ve gride O STOK duser - kullanici arada bir
+   * "stok karti ac" adimi gormez. Uretim SUNUCUDA tek islemde yapilir, bu
+   * yuzden ard arda ayni ilaca basmak ikinci kart acmaz.
+   */
+  const [uretiliyor, setUretiliyor] = useState(false);
+  const sec = async (r: ListeSatiri) => {
+    if (r.tip !== 'ilac') { onSec(r); return }
+    if (uretiliyor) return;
+    setUretiliyor(true);
+    setHata(null);
+    try {
+      const { stokId } = await api.ilacStokKarti(Number(r.id));
+      const stok = await api.liste('stok', { sayfa: 1, boyut: 1,
+        filtre: { alan: 'id', op: 'esit', deger: stokId } });
+      // Stok satiri bulunamazsa (yetki suzmesi) ilac satiriyla devam etmek
+      //   yanlis olurdu: satir stok kimligi tasimadan gride dusemez.
+      if (!stok.satirlar[0]) throw new Error('İlaç için stok kartı okunamadı.');
+      onSec({ ...stok.satirlar[0], tip: 'stok' });
+    } catch (h) {
+      setHata(hataMetni(h));
+    } finally { setUretiliyor(false) }
+  };
+
   const tus = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') { e.preventDefault(); setSecili(i => Math.min(i + 1, satirlar.length - 1)) }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setSecili(i => Math.max(i - 1, 0)) }
-    else if (e.key === 'Enter' && satirlar[secili]) { e.preventDefault(); onSec(satirlar[secili]) }
+    else if (e.key === 'Enter' && satirlar[secili]) { e.preventDefault(); void sec(satirlar[secili]) }
   };
 
   return (
     <Modal
-      baslik={yalnizStok ? "Stok Ara" : yalnizHizmet ? "Hizmet Ara" : "Stok / Hizmet Ara"}
+      baslik={yalnizHizmet ? "Hizmet Ara"
+              : ilacAranir ? (yalnizStok ? "Stok / İlaç Ara" : "Stok / Hizmet / İlaç Ara")
+              : yalnizStok ? "Stok Ara" : "Stok / Hizmet Ara"}
       onKapat={onKapat}
       alt={
         <>
@@ -165,7 +219,8 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                 ref={kutu}
                 autoFocus
                 style={{ border: 0, background: 'transparent', outline: 'none', width: '100%', color: 'inherit' }}
-                placeholder="Stok ya da hizmet ara…"
+                placeholder={ilacAranir ? "Stok, hizmet ya da ilaç (barkod) ara…"
+                                        : "Stok ya da hizmet ara…"}
                 value={arama}
                 onChange={e => yaz(e.target.value)}
                 onKeyDown={tus}
@@ -198,17 +253,18 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
               {satirlar.map((r, i) => (
                 <tr key={`${r.tip}-${r.id}`} className={i === secili ? 'secili' : ''}
                     onMouseEnter={() => setSecili(i)}
-                    onClick={() => onSec(r)}>
+                    onClick={() => void sec(r)}>
                   <td className="hiza-orta">
-                    <span className={`rozet ${r.tip === 'hizmet' ? 'bilgi' : ''}`}>
-                      {r.tip === 'hizmet' ? 'Hizmet' : 'Stok'}
+                    <span className={`rozet ${r.tip === 'hizmet' ? 'bilgi'
+                                            : r.tip === 'ilac' ? 'olumlu' : ''}`}>
+                      {r.tip === 'hizmet' ? 'Hizmet' : r.tip === 'ilac' ? '💊 İlaç' : 'Stok'}
                     </span>
                   </td>
                   <td><code>{String(r.kod ?? '')}</code></td>
                   <td>{String(r.ad ?? '')}</td>
                   {/* Kalan ve izleme yalniz STOKTA anlamli - hizmette stok bakiyesi yok. */}
                   <td className="hiza-sag">
-                    {r.tip === 'hizmet' ? <span className="sonuk">—</span>
+                    {r.tip !== 'stok' ? <span className="sonuk">—</span>
                       : Number(r.kalan ?? 0).toLocaleString('tr-TR')}
                   </td>
                   <td className="hiza-sag">

@@ -24,6 +24,16 @@ public static class ZamanliIsler
             var s = await titck.GuncelleAsync(iptal);
             return $"TİTCK {s.Tarih}: {s.Yazilan} ürün ({s.Askida} askıda), {s.Atlanan} atlandı.";
         },
+
+        // SKRS e-Reçete listesi: REÇETE TÜRÜNÜN kaynağı (ruhsat listesinde yok).
+        //   Haftalık yayın; ilaç listesinden BIR GUN SONRA çalışır ki yeni
+        //   barkodlar önce katalogda olsun, sonra türü yazılsın.
+        ["titck.recete"] = async (servisler, iptal) =>
+        {
+            var titck = servisler.GetRequiredService<TitckIlacGuncelleme>();
+            var s = await titck.ReceteTuruGuncelleAsync(iptal);
+            return $"SKRS e-Reçete {s.Tarih}: {s.Yazilan} ilacın reçete türü güncellendi.";
+        },
     };
 }
 
