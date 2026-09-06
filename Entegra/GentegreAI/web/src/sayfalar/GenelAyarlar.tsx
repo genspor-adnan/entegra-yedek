@@ -174,7 +174,6 @@ export function GenelAyarlar() {
               aramaGizli
               aracCubuguSeritte
               gorunumSecimGizli
-              aksiyonKomboGizli
               aksiyonEkrani="entegrasyon-liste"
               cipler={[
                 { ad: 'Tümü' },

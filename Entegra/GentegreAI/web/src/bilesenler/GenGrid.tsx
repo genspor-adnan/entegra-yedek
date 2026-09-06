@@ -102,9 +102,6 @@ interface Props {
       Analiz backend'de yok - birkac satirlik ayar listesinde "yakinda" yer
       tutucu gostermek gurultu. */
   gorunumSecimGizli?: boolean;
-  /** "Aksiyon Seç" kombosu cizilmesin: ayni aksiyonlar zaten arac cubugunda
-      dugme olarak duruyor (kullanici) - ikinci bir yol karisiklik. */
-  aksiyonKomboGizli?: boolean;
   /** Seritteki hizli ARAMA kutusu cizilmesin (kullanici): birkac satirlik
       ayar listesinde arama kutusu yer kapliyor, cipler zaten yetiyor.
       `seritGizli`den farki: cipler ve toplu aksiyon serit olarak KALIR. */
@@ -148,7 +145,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           gizliKolonlar, kolonBasliklari, kolonSirasi, altSecenekler,
                           tarihAlani, tarihVarsayilan,
                           onTarihAraligi,
-                          aramaGorunumGizli, gorunumSecimGizli, aksiyonKomboGizli, aramaGizli,
+                          aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
                           aracCubuguSeritte,
                           seciliBaslangicId, cipSonu, cipBaslangic, altPanel, ekGorunum,
                           onCipSecildi, onCipRota, onSecimDegisti, yenile, odaklaSonEklenen,
@@ -296,9 +293,6 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
     ],
   }), [altSecenekler]);
 
-  // Mockup'taki "Aksiyon Sec + Uygula" (cip seridiyle ayni satir, saga yanasik) -
-  //   sag tus menusuyle AYNI katalog seti (ayni ekranda iki farkli tetikleme yolu).
-  const [aksiyonSecim, setAksiyonSecim] = useState('');
   // GENEL aksiyonlar ile e-BELGE menusu AYRI kutularda (kullanici): e-Belge'nin
   //   dokuz adimi genel listeye karisinca "Aç / Yeni / Sil" arasinda kayboluyordu.
   //   e-Belge kutusu, sunucu bu aksiyonlari donduruyorsa cizilir - donmesi
@@ -314,8 +308,6 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   //   kutusuna aitler; genel listede "Aç / Yeni / Sil" arasina karisinca hem
   //   uzuyor hem hangi komutun hangi akisa ait oldugu kayboluyordu. Sag tus
   //   menusu ve komut paleti onlari GOSTERMEYE devam eder - oralarda gruplu.
-  const aksiyonKombo = useMemo(
-    () => aksiyonlar.filter(a => hedefte(a, 'sagtus') && !ebelgeGrubu(a)), [aksiyonlar]);
   // Kutu yalniz satis fatura listesinde cizilir (liste tanimindaki bayrak).
   const ebelgeKombo = useMemo(
     () => (ebelgeKutusuVar ? aksiyonlar.filter(a => hedefte(a, 'sagtus') && ebelgeGrubu(a)) : []),
@@ -327,8 +319,6 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const ebelgeMukellef = useMemo(
     () => aksiyonlar.some(a => ebelgeGrubu(a) || a.grup === 'gelen'), [aksiyonlar]);
   const [ebelgeSecim, setEbelgeSecim] = useState('');
-  useEffect(() => { if (!aksiyonKombo.some(a => a.kod === aksiyonSecim)) setAksiyonSecim('') }, [aksiyonKombo, aksiyonSecim]);
-  const secilenAksiyon = aksiyonKombo.find(a => a.kod === aksiyonSecim);
   const aramaZamanlayici = useRef<number | undefined>(undefined);
 
   // Kosul kurma SAF fonksiyonlarda (gridSorgu): listeleme ve disa aktarma ayni
@@ -670,31 +660,12 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
         {/* Sag blok YALNIZ icerigi varken cizilir: bos bir `margin-left:auto`
             span, arac cubuguyla bosluğu paylasip onu tam saga yanasmaktan
             alikoyuyordu. */}
-        {((aksiyonEkrani && !aksiyonKomboGizli && aksiyonKombo.length > 0) || icerikAlani) && (
+        {/* AKSIYON SEC + UYGULA KUTUSU KALDIRILDI (kullanici): ayni komutlar
+            arac cubugunda, sag tus menusunde ve komut paletinde zaten var;
+            dorduncu bir tetikleme yolu seridi doldurup hangi komutun nereden
+            calistigini belirsizlestiriyordu. */}
+        {icerikAlani && (
         <span className="cipsag">
-          {aksiyonEkrani && !aksiyonKomboGizli && aksiyonKombo.length > 0 && (
-            <>
-              <select
-                className="aksk"
-                value={aksiyonSecim}
-                onChange={e => setAksiyonSecim(e.target.value)}
-              >
-                <option value="">— {cev('Aksiyon Seç')} —</option>
-                {aksiyonKombo.map(a => (
-                  <option key={a.kod} value={a.kod}>{cev(a.ad)}</option>
-                ))}
-              </select>
-              <button
-                type="button"
-                className="uygd"
-                disabled={!secilenAksiyon || !secilenAksiyon.aktif}
-                title={secilenAksiyon && !secilenAksiyon.aktif ? (secilenAksiyon.pasifSebep ?? '') : ''}
-                onClick={() => { if (secilenAksiyon?.aktif) aksiyonCalistir(secilenAksiyon.kod) }}
-              >
-                {cev('Uygula')}
-              </button>
-            </>
-          )}
 
           {icerikAlani && (
             <button
