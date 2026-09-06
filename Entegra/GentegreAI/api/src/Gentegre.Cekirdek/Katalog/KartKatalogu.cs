@@ -262,6 +262,9 @@ public static partial class KartKatalogu
         Ekle(LabDkkKarti());
         Ekle(LabCihazOlayKarti());
         Ekle(LabIndeksEsikKarti());
+        // DIS LABORATUVAR (445). GONDERIMIN KARTI YOK: gonderim bir surectir
+        //   ve "teslim edildi" zamani geriye donuk degistirilememeli.
+        Ekle(LabDisLabKarti());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
 

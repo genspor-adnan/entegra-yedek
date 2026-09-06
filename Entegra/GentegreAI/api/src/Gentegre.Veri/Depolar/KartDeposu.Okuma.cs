@@ -244,6 +244,8 @@ public sealed partial class KartDeposu
             "public.v_lab_genetik_run_lookup",
             // Kalite kontrol (442): kontrol lotu secimi.
             "public.v_lab_kk_lot_lookup",
+            // Dis laboratuvar (445): tetkik kartinda ve gonderimde secim.
+            "public.v_lab_dis_lab_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

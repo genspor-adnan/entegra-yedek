@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (224 ad, 65 tanesi birden cok dosyada)
+## Fonksiyonlar (225 ad, 65 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -128,6 +128,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_lab_bayrak` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |
 | `fn_lab_cihaz_calisma_listesi` | `434_lab_cihaz_esleme.sql` | — |
 | `fn_lab_cihaz_tetkik` | `434_lab_cihaz_esleme.sql` | — |
+| `fn_lab_dis_gonderim_no` | `445_lab_dis_gonderim.sql` | — |
 | `fn_lab_genetik_ozet` | `439_lab_genetik.sql` | — |
 | `fn_lab_indeks_etki` | `444_lab_serum_indeksi.sql` | — |
 | `fn_lab_kk_gecerli` | `442_lab_kalite_kontrol.sql` | — |
@@ -233,7 +234,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (115 ad, 37 tanesi birden cok dosyada)
+## Gorunumler (117 ad, 37 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -301,6 +302,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_lab_antibiyotik_lookup` | `436_lab_mikrobiyoloji.sql` | — |
 | `v_lab_besiyeri_lookup` | `436_lab_mikrobiyoloji.sql` | — |
 | `v_lab_cihaz_esleme` | `434_lab_cihaz_esleme.sql` | — |
+| `v_lab_dis_geciken` | `445_lab_dis_gonderim.sql` | — |
+| `v_lab_dis_lab_lookup` | `445_lab_dis_gonderim.sql` | — |
 | `v_lab_gen_lookup` | `439_lab_genetik.sql` | — |
 | `v_lab_genetik_panel_lookup` | `439_lab_genetik.sql` | — |
 | `v_lab_genetik_run_lookup` | `439_lab_genetik.sql` | — |

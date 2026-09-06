@@ -361,6 +361,45 @@ export const api = {
     gonder<{ id: number; zaman: string; mesaj: string }>(
       `/api/muayene/istem/${bagId}/gordu`, {}),
 
+  // ------------------------------------------------ DIS LABORATUVAR (445)
+  /** Secilen tetkikleri dis laboratuvara sevk eder (kurye + soguk zincir). */
+  disLabGonder: (govde: { disLabId: number; istemSatirIdler: number[];
+                          kuryeFirma?: string; kuryeAd?: string; kuryeTel?: string;
+                          tasimaKosulu?: number; sicaklik?: number;
+                          kapSayisi?: number; aciklama?: string }) =>
+    gonder<{ id: number; gonderimNo: string; satir: number; mesaj: string }>(
+      '/api/lab/dis/gonder', govde),
+
+  disLabOku: (id: number) =>
+    istek<{ gonderim: Record<string, unknown>;
+            satirlar: Record<string, unknown>[] }>(`/api/lab/dis/${id}`),
+
+  disLabYolda: (id: number) =>
+    gonder<{ mesaj: string }>(`/api/lab/dis/${id}/yolda`, {}),
+
+  /** Dis kabul no: sonuc eslestirmesinde iki laboratuvarin ortak referansi. */
+  disLabTeslim: (id: number, teslimAlan: string, disKabulNo: string) =>
+    gonder<{ mesaj: string }>(`/api/lab/dis/${id}/teslim`,
+      { teslimAlan, disKabulNo }),
+
+  /** Dis lab sonucu: kurallar isler ama OTO-ONAY KAPALI. */
+  disLabSonuc: (id: number, govde: { istemSatirId: number; deger: string;
+                                     birim?: string; yorum?: string;
+                                     sonucZamani?: string }) =>
+    gonder<{ mesaj: string }>(`/api/lab/dis/${id}/sonuc`, govde),
+
+  /** durum: 3 dis lab reddetti · 4 numune kayboldu. */
+  disLabRet: (id: number, istemSatirId: number, durum: number, neden: string) =>
+    gonder<{ mesaj: string }>(`/api/lab/dis/${id}/ret`,
+      { istemSatirId, durum, neden }),
+
+  disLabFatura: (id: number, belgeId: number, tutar?: number) =>
+    gonder<{ mesaj: string }>(`/api/lab/dis/${id}/fatura`, { belgeId, tutar }),
+
+  /** Sozlesme TAT'ini asan gonderimler - hastanin sonucu baska binada. */
+  disLabGeciken: () =>
+    istek<{ liste: Record<string, unknown>[] }>('/api/lab/dis/geciken'),
+
   // -------------------------------------------------- KALITE KONTROL (442)
   /** KK olcumu: z skoru ve Westgard degerlendirmesi SUNUCUDA hesaplanir. */
   kkOlcum: (govde: { lotId: number; tetkikId: number; seviye: number;

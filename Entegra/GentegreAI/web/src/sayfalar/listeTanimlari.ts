@@ -850,6 +850,39 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ic: '🧴', yetkiKodu: 'lab.kk',
   },
   {
+    // DIS LAB GONDERIMLERI (445) - numune binadan cikinca elimizdeki tek iz.
+    //   Varsayilan cip "Acik": sonucu bekleyen gonderim masadaki istir.
+    kaynak: 'lab-dis-gonderim', rota: 'lab-dis-gonderim',
+    baslik: 'Dış Lab Gönderimleri', yol: 'Laboratuvar › Dış Lab Gönderimleri',
+    aksiyonEkrani: 'lab-dis-gonderim-liste',
+    tarihAlani: 'gonderimZamani',
+    cipler: [
+      { ad: 'Açık',        filtre: { alan: 'durum', op: 'icinde', deger: [1, 2, 3, 4] } },
+      { ad: 'Hazırlanıyor',filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Yolda',       filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Sonuçlandı',  filtre: { alan: 'durum', op: 'esit', deger: 5 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Dış Lab Gönderimleri', menuSira: 45,
+    ic: '📦', yetkiKodu: 'lab.dislab',
+  },
+  {
+    // DIS LABORATUVARLAR (445): cari bagi + anlasmali test listesi kartta.
+    kaynak: 'lab-dis-lab', rota: 'lab-dis-lab', baslik: 'Dış Laboratuvarlar',
+    yol: 'Laboratuvar › Dış Laboratuvarlar',
+    kartYolu: '/lab-dis-lab', kartBaslik: 'Dış Laboratuvar',
+    aksiyonEkrani: 'lab-dis-lab-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Dış Laboratuvarlar', menuSira: 80,
+    ic: '🏥', yetkiKodu: 'lab.dislab',
+  },
+  {
     // SERUM INDEKSI ESIKLERI (444): test bazli HIL sinirlari. Potasyum
     //   hemolizden 20 indekste etkilenir, sodyum 200'de bile etkilenmez.
     kaynak: 'lab-indeks-esik', rota: 'lab-indeks-esik',

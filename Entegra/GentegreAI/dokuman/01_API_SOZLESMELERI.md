@@ -908,6 +908,67 @@ ayrı yetki istemez.
 
 ---
 
+## 9.11 Dış laboratuvar gönderimi (445)
+
+Kurumda çalışılmayan tetkik anlaşmalı bir referans laboratuvara sevk edilir.
+**Numune binadan çıkar**: o andan sonra laboratuvarın elinde olan tek şey
+kayıttır - hangi tüp, kime, ne zaman, hangi kurye ile, hangi sıcaklıkta gitti.
+Numune kaybolduğunda ya da sonuç geciktiğinde cevabı verecek olan bu zincirdir;
+istem satırına bir "dış lab" bayrağı koymak, sorumluluğun devredildiği anı
+kaydetmezdi.
+
+| Uç | Gövde | Ne yapar |
+|---|---|---|
+| `POST /api/lab/dis/gonder` | `disLabId`, `istemSatirIdler[]`, `kuryeFirma`, `kuryeAd`, `kuryeTel`, `tasimaKosulu`, `sicaklik`, `kapSayisi`, `aciklama` | Gönderim açar (`DL-YYYY/NNNNN`), satırları `lab_dis_gonderim_satir`'a yazar, istem satırlarını **dış lab (7)** durumuna alır, numune hareketi (olay 7) düşer |
+| `POST /api/lab/dis/{id}/yolda` | — | Kurye teslim aldı (durum 2) |
+| `POST /api/lab/dis/{id}/teslim` | `teslimAlan`, `disKabulNo` | Karşı taraf kabul etti (durum 3); **dış kabul no** iki laboratuvarın ortak referansı |
+| `POST /api/lab/dis/{id}/sonuc` | `istemSatirId`, `deger`, `birim`, `yorum`, `sonucZamani` | Sonucu normal sonuç hattından yazar (referans, bayrak, delta, panik işler) ve `lab_sonuc.dis_lab_id` damgalar |
+| `POST /api/lab/dis/{id}/ret` | `istemSatirId`, `durum` (3 ret · 4 kayıp), `neden` | Satırı kapatır, istem satırını **tekrar numune bekliyor (6)** durumuna alır |
+| `POST /api/lab/dis/{id}/fatura` | `belgeId`, `tutar` | Alış faturası eşleştirir |
+| `GET /api/lab/dis/{id}` | — | Gönderim başlığı + satırları |
+| `GET /api/lab/dis/geciken` | — | Sözleşme TAT'ını aşmış, hâlâ sonucu bekleyen gönderimler |
+
+**Yalnız kabul edilmiş numune gönderilir**: reddedilecek bir tüpü kuryeye
+vermek, hem parayı hem hastanın gününü harcar.
+
+**Aynı tetkik iki kez gönderilemez** (`ux_lab_dis_gonderim_satir`, kısmi
+indeks `where durum <> 3`): mükerrer gönderim hem ikinci kez faturalanır hem
+iki farklı sonuç döndürür. Dış laboratuvar **reddettiyse** (durum 3) satır
+indeksin dışında kalır - yeni numune alınıp tekrar gönderilebilir.
+
+**Dış lab sonucu oto-onaya GİRMEZ**: başka bir laboratuvarın yöntemini,
+referans aralığını ve kalite kontrolünü biz doğrulamadık. Sonuç kaydedilir,
+uzman görüp onaylar (`otoOnaySerbest: false`). Kural motoru yine çalışır -
+panik değer bildirimi ve delta kontrolü dış sonuç için de geçerlidir.
+
+**Soğuk zincir kaydı** ISO 15189 gereği: -20 °C isteyen bir testin numunesi
+oda sıcaklığında gittiyse sonuç geçersizdir ve bunu **sonradan** bilmek
+gerekir.
+
+**Gecikme** `v_lab_dis_geciken` ile hesaplanır: `(bugün - gönderim) >
+sözleşme TAT`ı **ve** hâlâ bekleyen satır varsa listeye düşer. Sonuç gelince
+listeden çıkar - hastanın sonucu başka bir binada bekliyor ve bunu kimse elle
+takip edemez.
+
+**Fatura eşleşmesi**: dış lab satın alınan bir hizmettir; belge **alış
+faturası** (tür 10) olmalı ve **aynı cariye** kesilmiş olmalı, yoksa "kime ne
+ödedik" cevapsız kalır.
+
+**Gönderimin kartı yok**: gönderim bir süreçtir (hazırla → yolda → teslim →
+sonuç) ve adımları uçlardan yürür. Serbest düzenlenebilir bir kart, "teslim
+edildi" zamanını geriye dönük değiştirilebilir kılardı - oysa numunenin
+binadan çıktığı an, kayıp tartışmasında tek dayanaktır. Dış laboratuvarın
+**kendi test kodu** kartın "Anlaşmalı Testler" detayında eşlenir (cihaz
+eşlemesiyle aynı desen, 434).
+
+**Ekranlar**: Numune Kabul listesinde **📦 Dış Lab'a Gönder**, Laboratuvar ›
+**Dış Lab Gönderimleri** (Açık / Hazırlanıyor / Yolda / Sonuçlandı çipleri,
+gecikme kolonu), Laboratuvar › **Dış Laboratuvarlar** kartı.
+
+**Yetki**: `lab.dislab` (kaynak); sonuç girişi `lab.sonuc`.
+
+---
+
 ---
 
 ## 10. Sürümleme

@@ -678,6 +678,36 @@ public static class AksiyonKatalogu
             ["lab-indeks-esik-liste"] =
                 Crud("lab-indeks-esik", "lab-indeks-esik", "lab.tetkik"),
 
+            // DIS LABORATUVAR (445). Gonderim bir surec: her adim ayri dugme.
+            //   "Sonuc Gir" burada cunku dis lab sonucu PDF/portal ile gelir
+            //   ve elle yazilir; oto-onaya girmez.
+            ["lab-dis-gonderim-liste"] =
+            [
+                new("lab.dis-yolda", "🚚 Yola Çıktı", "lab-dis-gonderim",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.dislab", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 10),
+                new("lab.dis-teslim", "📦 Teslim Edildi", "lab-dis-gonderim",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.dislab", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 20),
+                new("lab.dis-sonuc", "🧾 Sonuç Gir", "lab-dis-gonderim",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.sonuc", Islem: Islem.Ekle, KayitGerekir: true,
+                    Sira: 30),
+                new("lab.dis-ret", "✖ Dış Lab Reddetti", "lab-dis-gonderim",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "lab.dislab", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 40),
+                new("lab.dis-fatura", "🧾 Alış Faturası Eşleştir", "lab-dis-gonderim",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "lab.dislab", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 50),
+                Yazdir(),
+            ],
+
+            ["lab-dis-lab-liste"] = Crud("lab-dis-lab", "lab-dis-lab", "lab.dislab"),
+
             ["lab-gen-liste"] = Crud("lab-gen", "lab-gen", "lab.gen"),
             ["lab-genetik-panel-liste"] =
                 Crud("lab-genetik-panel", "lab-genetik-panel", "lab.gen"),
@@ -711,6 +741,12 @@ public static class AksiyonKatalogu
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "lab.numune", Islem: Islem.Degistir, KayitGerekir: true,
                     Sira: 30),
+                // DIS LABA GONDER: numune kabul bankosundan - tup elde
+                //   iken sevk edilir (mockup: "📦 Dis Lab'a Gonder").
+                new("lab.dis-gonder", "📦 Dış Lab'a Gönder", "lab-numune",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.dislab", Islem: Islem.Ekle, KayitGerekir: true,
+                    Sira: 35),
                 new("lab.barkod-yazdir", "🏷 Barkod Etiketi", "lab-numune",
                     Hedef: "sagtus,palet",
                     KaynakKodu: "lab.numune", Islem: Islem.Gor, KayitGerekir: true,

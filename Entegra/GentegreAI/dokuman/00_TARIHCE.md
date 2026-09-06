@@ -7207,3 +7207,55 @@ yazıldı (sonuç satırı açılmadı), **Na** normal → oto-onay (satır 5),
 **K** `HH` panik görünmesine rağmen *"Hemoliz indeksi 45 · yalancı yükseklik
 (RET eşiği - yeni numune gerekir)"* ile bekleyen duruma alındı ve tetkik
 **tekrar numune bekliyor** (satır 6) oldu — mockuptaki senaryonun aynısı.
+
+---
+
+## 06.09.2026 — Dış laboratuvar gönderimi (`db/445`)
+
+Kurumda çalışılmayan tetkik anlaşmalı bir referans laboratuvara sevk edilir.
+Bugüne kadar bu iş sistemin dışındaydı: tetkik "bekliyor" durumunda kalıyor,
+tüpün nereye gittiği kâğıt bir sevk defterinde duruyordu.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K166 | Gönderim **ayrı tablo** (`lab_dis_gonderim` + satır), istem satırında bayrak değil | Numune binadan çıkar; o andan sonra elimizdeki tek şey kayıttır - hangi tüp, kime, ne zaman, hangi kurye ile, hangi sıcaklıkta. Bayrak, sorumluluğun devredildiği anı kaydetmezdi |
+| K167 | **Kurye ve soğuk zincir** gönderim anında zorunlu alan | ISO 15189: -20 °C isteyen bir testin numunesi oda sıcaklığında gittiyse sonuç geçersizdir ve bunu **sonradan** bilmek gerekir. "Sonra gireriz" bırakılan alan hiç dolmaz |
+| K168 | Dış lab sonucu **oto-onaya girmez** | Başka bir laboratuvarın yöntemini, referans aralığını ve kalite kontrolünü biz doğrulamadık. Kural motoru yine çalışır (panik, delta) ama onayı uzman verir |
+| K169 | Aynı tetkik iki kez gönderilemez (kısmi benzersiz indeks, `where durum <> 3`) | Mükerrer gönderim hem ikinci kez faturalanır hem iki farklı sonuç döndürür. Dış lab **reddettiyse** satır indeksin dışında kalır - yeni numune alınıp tekrar gönderilebilir |
+| K170 | Yalnız **kabul edilmiş** numune gönderilir | Reddedilecek bir tüpü kuryeye vermek hem parayı hem hastanın gününü harcar (cihaz çalışma listesindeki kuralla aynı) |
+| K171 | Gönderimin **kartı yok**, süreç uçlardan yürür | Serbest düzenlenebilir bir kart "teslim edildi" zamanını geriye dönük değiştirilebilir kılardı; oysa numunenin binadan çıktığı an, kayıp tartışmasında tek dayanaktır |
+| K172 | Dış labın **kendi test kodu** eşlenir (`lab_dis_test`) | Sonuç PDF/HL7 ile onların koduyla gelir; eşleme olmadan hangi tetkiğe yazılacağı belirsiz kalır (cihaz eşlemesiyle aynı desen, 434) |
+| K173 | Alış faturası **aynı cariye** kesilmiş olmalı | Dış lab satın alınan bir hizmettir; fatura ile gönderim eşleşmezse "kime ne ödedik" cevapsız kalır |
+| K174 | Gecikme **görünümden** okunur (`v_lab_dis_geciken`), elle takip edilmez | Hastanın sonucu başka bir binada bekliyor; sözleşme TAT'ı aşıldığında aranacak yer bellidir ve bunu kimse elle izleyemez |
+
+### Yapılanlar
+
+- **`db/445`**: `lab_dis_lab`, `lab_dis_test`, `lab_dis_gonderim`,
+  `lab_dis_gonderim_satir`, `lab_istem_satir.dis_gonderim_id`,
+  `lab_sonuc.dis_lab_id`, `fn_lab_dis_gonderim_no` (`DL-YYYY/NNNNN`),
+  `v_lab_dis_geciken`, `v_lab_dis_lab_lookup`, yetki `lab.dislab`.
+- **`DisLabServisi`**: gönder / yolda / teslim / sonuç / ret / fatura.
+  Sonuç normal sonuç hattından (`SonucYazAsync`, `otoOnaySerbest: false`)
+  geçer; ret istem satırını **tekrar numune bekliyor (6)** durumuna alır.
+- **Uçlar** §9.11; **ekranlar**: Numune Kabul'de **📦 Dış Lab'a Gönder**,
+  Laboratuvar › **Dış Lab Gönderimleri** (gecikme kolonu, durum çipleri),
+  Laboratuvar › **Dış Laboratuvarlar** kartı + "Anlaşmalı Testler" detayı.
+- **Testler**: `DisLabTestleri` (5 durum) — gönderim numarası yıla göre
+  artar, aynı tetkik iki kez gönderilemez, dış lab reddedince yeniden
+  gönderilebilir, geciken görünümü sözleşme TAT'ını aşanı listeler ve sonuç
+  gelince listeden düşer, gönderilen satır **dış lab (7)** durumuna geçer.
+  Toplam **123 test** geçiyor.
+
+### Uçtan uca (yerel)
+
+"Referans Laboratuvarlar A.Ş." tanımlandı (cari bağı + 2 anlaşmalı test,
+sözleşme TAT 3 gün). Yeni hastanın başvurusuna ALT + AST istendi, tüp kabul
+edildi ve **DL-2026/00010** ile MNG Kargo'ya soğuk zincirde (5,5 °C) verildi;
+istem satırları **dış lab (7)** durumuna geçti. Aynı tetkik ikinci kez
+gönderilmek istendiğinde uç *"Bu tetkikler zaten dış laboratuvara
+gönderilmiş: ALT"* ile reddetti. Yolda → teslim (dış kabul no
+`RL-2026/118342`) → sonuç girildi: iki sonuç da *"uzman onayı bekliyor"*
+mesajıyla kaydedildi, `lab_sonuc.dis_lab_id` damgalandı ve **hiçbiri
+oto-onaydan geçmedi**.
