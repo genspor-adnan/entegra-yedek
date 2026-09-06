@@ -1759,7 +1759,7 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       // LABORATUVAR (446): mockup'larda tablo ile secili kaydin ayrintisi
       //   AYNI ekranda durur (tetkik/tup plani, antibiyogram, varyantlar).
       //   Teknisyen listeyi kaybetmeden ayrintiya bakabilmeli.
-      altPanel={labDetayVarMi(tanim.kaynak)
+      altPanel={labDetayVarMi(tanim.kaynak) && seciliSatir
         ? <LabDetayPaneli kaynak={tanim.kaynak} satir={seciliSatir} />
         : undefined}
       ekGorunum={tanim.kaynak === 'randevu' ? {

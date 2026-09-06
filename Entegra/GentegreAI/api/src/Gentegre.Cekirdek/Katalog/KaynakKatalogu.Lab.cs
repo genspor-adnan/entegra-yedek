@@ -238,14 +238,39 @@ public static partial class KaynakKatalogu
                 + "when 'H' then '↑ Yüksek' else 'Normal' end",
                                  "metin", "Değerlendirme", Hizalama: "orta",
                                  Bicim: "rozet", Genislik: 140, Filtrelenebilir: false),
+            // REFERANS okunur biçimde: ham numeric ::text "0.000000 - 33.000000"
+            //   diye çıkıyordu ve kolona sığmayıp kırpılıyordu. trim_scale
+            //   gereksiz sıfırları atar, ondalık ayraç Türkçe.
+            //   Tek taraflı sınır "≤ 35" / "≥ 60" yazılır: "0 - 35" alt sınır
+            //   varmış gibi görünürdü.
             new("referans",
                 "case when ls.referans_metin <> '' then ls.referans_metin "
-                + "when ls.referans_alt is not null or ls.referans_ust is not null "
-                + "then coalesce(ls.referans_alt::text, '') || ' - ' "
-                + "     || coalesce(ls.referans_ust::text, '') else '' end",
+                + "when ls.referans_alt is not null and ls.referans_ust is not null "
+                + "then replace(trim_scale(ls.referans_alt)::text, '.', ',') || ' – ' "
+                + "     || replace(trim_scale(ls.referans_ust)::text, '.', ',') "
+                + "when ls.referans_ust is not null "
+                + "then '≤ ' || replace(trim_scale(ls.referans_ust)::text, '.', ',') "
+                + "when ls.referans_alt is not null "
+                + "then '≥ ' || replace(trim_scale(ls.referans_alt)::text, '.', ',') "
+                + "else '' end",
                                  "metin", "Referans", Hizalama: "orta", Genislik: 140,
                                  Filtrelenebilir: false),
             new("panik", "ls.panik", "mantik", "Panik", Hizalama: "orta", Genislik: 80),
+            // ONCEKI DEGER ve DELTA (mockup: "Önceki (12.03.25)" ve "Δ"):
+            //   uzman sonuca degil DEGISIME bakar - 142 mg/dL tek basina bir
+            //   sey soylemez, 98'den 142'ye cikmis olmasi soyler.
+            new("deltaOnceki",
+                "case when ls.delta_onceki is null then '' "
+                + "else replace(trim_scale(ls.delta_onceki)::text, '.', ',') end",
+                                 "metin", "Önceki", Hizalama: "sag", Genislik: 90,
+                                 Filtrelenebilir: false, Siralanabilir: false),
+            new("deltaYuzdeMetin",
+                "case when ls.delta_yuzde is null then '' "
+                + "else case when ls.delta_yuzde > 0 then '+' else '' end "
+                + "     || replace(trim_scale(round(ls.delta_yuzde))::text, '.', ',') "
+                + "     || '%' end",
+                                 "metin", "Δ", Hizalama: "sag", Genislik: 80,
+                                 Filtrelenebilir: false, Siralanabilir: false),
             new("deltaUyari", "ls.delta_uyari", "mantik", "Delta", Hizalama: "orta",
                                  Genislik: 80),
             new("olcumZamani", "ls.olcum_zamani", "tarih", "Ölçüm", Hizalama: "orta",

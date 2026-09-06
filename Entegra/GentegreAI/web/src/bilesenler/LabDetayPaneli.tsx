@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { tarihSaat } from './bicim';
@@ -43,6 +44,15 @@ export function labDetayVarMi(kaynak: string): boolean {
 
 const dizi = (v: unknown): Satir[] => (Array.isArray(v) ? v as Satir[] : []);
 const metin = (v: unknown): string => String(v ?? '').trim();
+
+/**
+ * Tetkik adının yanına kodu YALNIZ ayırt ediyorsa yazar: "ALT (SGPT) ALT"
+ * gibi tekrar, dar bir kolonda yer yiyor ve okumayı zorlaştırıyordu.
+ */
+function kodEki(ad: unknown, kod: unknown): string {
+  const a = metin(ad).toLocaleUpperCase('tr'), k = metin(kod).toLocaleUpperCase('tr');
+  return k !== '' && !a.includes(k) ? metin(kod) : '';
+}
 
 /** Boş panel de bir bilgidir: "satır seç" demek, boş kutu bırakmaktan iyidir. */
 function Bos({ ne }: { ne: string }) {
@@ -101,6 +111,7 @@ export function LabDetayPaneli({ kaynak, satir }: {
 function IstemDetayi({ veri, secili, kaynak }: {
   veri: Kayit; secili: Satir | null; kaynak: string;
 }) {
+  const git = useNavigate();
   const satirlar = dizi(veri.satirlar);
   const numuneler = dizi(veri.numuneler);
   // Numune kabul ekranında seçili TÜPÜN satırları öne alınır: banko o tüple
@@ -143,7 +154,8 @@ function IstemDetayi({ veri, secili, kaynak }: {
                       <td>{BOLUM[Number(s.bolum ?? 0)] ?? ''}</td>
                       <td>
                         <b>{metin(s.ad)}</b>
-                        <span className="not"> {metin(s.kod)}</span>
+                        {kodEki(s.ad, s.kod) &&
+                          <span className="not"> {kodEki(s.ad, s.kod)}</span>}
                       </td>
                       <td>
                         {barkod ? (
@@ -227,6 +239,12 @@ function IstemDetayi({ veri, secili, kaynak }: {
           <h6>
             Tüpler
             <span className="sp">{numuneler.length} numune</span>
+            {/* Mockup'ta bu kutunun altında "Etiketleri Bas" duruyor: tüp
+                planı burada görünüyor, etiket de buradan basılmalı. */}
+            <button className="d"
+                    onClick={() => git(`/lab/etiket?istem=${Number(veri.id ?? 0)}`)}>
+              🏷 Etiket
+            </button>
           </h6>
           <div className="detay-kaydir">
             <table className="detay-tablo">
@@ -330,7 +348,9 @@ function KulturDetayi({ veri }: { veri: Kayit }) {
               {antibiyogram.map(a => (
                 <tr key={String(a.id)}>
                   <td>
-                    {metin(a.ad)}<span className="not"> {metin(a.kod)}</span>
+                    {metin(a.ad)}
+                    {kodEki(a.ad, a.kod) &&
+                      <span className="not"> {kodEki(a.ad, a.kod)}</span>}
                   </td>
                   <td className="sag">
                     {metin(a.micIsaret)}{a.mic === null || a.mic === undefined
@@ -413,7 +433,8 @@ function KulturDetayi({ veri }: { veri: Kayit }) {
                   <td className="orta">{String(i.izolatNo ?? '')}</td>
                   <td>
                     <b><i>{metin(i.organizma)}</i></b>
-                    <span className="not"> {metin(i.organizmaKod)}</span>
+                    {kodEki(i.organizma, i.organizmaKod) &&
+                      <span className="not"> {kodEki(i.organizma, i.organizmaKod)}</span>}
                     {/* DİRENÇ İŞARETLERİ enfeksiyon kontrolünün konusudur:
                         MRSA/VRE/ESBL/karbapenemaz gizlenirse bildirim
                         yapılmaz. */}
@@ -613,7 +634,11 @@ function DisDetayi({ veri }: { veri: Kayit }) {
                 <tr key={String(s.id)}
                     className={Number(s.durum ?? 1) >= 3 ? 'panik' : ''}>
                   <td>{metin(s.hasta)}</td>
-                  <td><b>{metin(s.ad)}</b><span className="not"> {metin(s.kod)}</span></td>
+                  <td>
+                    <b>{metin(s.ad)}</b>
+                    {kodEki(s.ad, s.kod) &&
+                      <span className="not"> {kodEki(s.ad, s.kod)}</span>}
+                  </td>
                   <td className="orta not">{metin(s.barkod) || '—'}</td>
                   <td className="sag">{metin(s.deger) || <span className="not">bekliyor</span>}</td>
                   <td className="orta not">

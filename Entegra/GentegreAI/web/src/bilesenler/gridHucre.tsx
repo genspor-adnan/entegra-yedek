@@ -111,6 +111,26 @@ export const ROZET_SINIFI: Record<string, string> = {
   'Faturalamada': 'uyari', 'Tahsilatta': 'ok',
   // Odeyen tipi ("SGK" yukarida zaten bilgi).
   'Özel (Ücretli)': 'turkuaz', 'ÖSS': 'uyari',
+  // TUP TIPLERI (446, mockup Ekranlar/Lab): renk SUS DEGIL - teknisyen rafta
+  //   etikete degil kapak rengine bakarak tupu secer. Gri rozet hepsini
+  //   ayni gosteriyordu.
+  'Sarı (Jelli)': 'uyari', 'Mor (EDTA)': 'eflatun', 'Mavi (Sitrat)': 'mavi',
+  'Gri (Florür)': 'gri', 'Yeşil (Heparin)': 'zeytin', 'İdrar Kabı': 'turuncu',
+  // Numune kalitesi: uygun disindaki her kod RET sebebidir.
+  'Uygun': 'ok', 'Hemolizli': 'hata', 'Lipemik': 'hata', 'İkterik': 'hata',
+  'Yetersiz': 'hata', 'Pıhtılı': 'hata', 'Yanlış Tüp': 'hata', 'Etiketsiz': 'hata',
+  // Lab istem/numune durumlari (mockup: bekleyen sari, kabul mavi, ret kirmizi).
+  'Numune bekliyor': 'uyari', 'Etiketlendi': 'gri', 'Alındı': 'bilgi',
+  'Cihazda': 'bilgi', 'Saklamada': 'gri', 'İmha': 'hata', 'Reddedildi': 'hata',
+  'Bekliyor': 'uyari', 'Sonuçlandı': 'bilgi', 'Teknik Onay': 'bilgi',
+  'Onaylı': 'ok', 'İptal (düzeltildi)': 'gri',
+  // Sonuc degerlendirmesi: panik KIRMIZI, tek yon SARI, normal notr.
+  '↓↓ Panik Düşük': 'hata', '↑↑ Panik Yüksek': 'hata',
+  '↓ Düşük': 'uyari', '↑ Yüksek': 'uyari', 'Normal': 'gri',
+  // Oncelik: acil kirmizi (mockup .rz kir "ACİL").
+  'Acil': 'hata', 'Öncelikli': 'uyari',
+  // Kultur okuma zamani: gecen okuma bekleyen istir.
+  'ZAMANI GELDİ': 'hata', 'birazdan': 'uyari',
 };
 
 /**

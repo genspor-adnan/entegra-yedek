@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { LabDetayPaneli, labDetayVarMi } from '../bilesenler/LabDetayPaneli';
 
 /**
@@ -50,8 +51,10 @@ describe('LabDetayPaneli', () => {
       }],
     });
 
-    render(<LabDetayPaneli kaynak="lab-numune"
-                           satir={{ id: 5, istemId: 77, barkod: '2603187701' }} />);
+    render(<MemoryRouter>
+      <LabDetayPaneli kaynak="lab-numune"
+                      satir={{ id: 5, istemId: 77, barkod: '2603187701' }} />
+    </MemoryRouter>);
 
     await waitFor(() => expect(labIstemOku).toHaveBeenCalledWith(77));
     expect(await screen.findByText('C-Reaktif Protein')).toBeTruthy();
@@ -82,7 +85,7 @@ describe('LabDetayPaneli', () => {
       ],
     });
 
-    render(<LabDetayPaneli kaynak="lab-kultur" satir={{ id: 4 }} />);
+    render(<MemoryRouter><LabDetayPaneli kaynak="lab-kultur" satir={{ id: 4 }} /></MemoryRouter>);
 
     await waitFor(() => expect(labKulturOku).toHaveBeenCalledWith(4));
     expect(await screen.findByText('Ampisilin')).toBeTruthy();
@@ -103,7 +106,7 @@ describe('LabDetayPaneli', () => {
                      vaf: 49.5, sinif: 5, raporla: true, acmg: ['PVS1', 'PM2'] }],
     });
 
-    render(<LabDetayPaneli kaynak="lab-genetik-vaka" satir={{ id: 8 }} />);
+    render(<MemoryRouter><LabDetayPaneli kaynak="lab-genetik-vaka" satir={{ id: 8 }} /></MemoryRouter>);
 
     expect(await screen.findByText('BRCA1')).toBeTruthy();
     expect(screen.getByText('alınmadı')).toBeTruthy();
@@ -112,7 +115,7 @@ describe('LabDetayPaneli', () => {
   });
 
   it('satır seçilmemişse boş kutu yerine yönlendirme yazar', () => {
-    render(<LabDetayPaneli kaynak="lab-kultur" satir={null} />);
+    render(<MemoryRouter><LabDetayPaneli kaynak="lab-kultur" satir={null} /></MemoryRouter>);
     expect(screen.getByText(/listeden bir satır seçin/i)).toBeTruthy();
     expect(labKulturOku).not.toHaveBeenCalled();
   });

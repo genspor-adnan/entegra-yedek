@@ -286,10 +286,10 @@ export function LabKkGrafik() {
                   {veri.olaylar.map((o, i) => (
                     <tr key={i}>
                       <td className="orta not">{tarihSaat(o.zaman)}</td>
-                      <td>{String(o.cihaz ?? '—')}</td>
+                      <td>{String(o.cihaz ?? '') || '—'}</td>
                       <td>{OLAY[Number(o.olay ?? 1)] ?? '—'}</td>
                       <td className="orta">{String(o.lot ?? '') || '—'}</td>
-                      <td className="not">{String(o.aciklama ?? '')}</td>
+                      <td className="not">{String(o.aciklama ?? '') || '—'}</td>
                     </tr>
                   ))}
                   {veri.olaylar.length === 0 && (

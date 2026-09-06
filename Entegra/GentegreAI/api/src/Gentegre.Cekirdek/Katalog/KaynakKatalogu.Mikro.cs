@@ -51,7 +51,21 @@ public static partial class KaynakKatalogu
             new("okumaGecikmeDk",
                 "case when k.sonraki_okuma is null then null "
                 + "else floor(extract(epoch from (now() - k.sonraki_okuma)) / 60)::int end",
-                                 "sayi", "Okuma (dk)", Hizalama: "sag", Genislik: 100),
+                                 "sayi", "Okuma (dk)", Hizalama: "sag", Genislik: 100,
+                                 Varsayilan: false),
+            // OKUMA ZAMANI okunur biçimde: ham dakika ("-1.214") ekranda
+            //   anlamsız - teknisyen "ne zaman bakacağım" sorusunu saat
+            //   cinsinden sorar. Ham dakika kolonu çip filtresi için
+            //   duruyor ama gridde varsayılan gösterilmez.
+            new("okumaDurum",
+                "case when k.sonraki_okuma is null then '—' "
+                + "when k.sonraki_okuma <= now() then 'ZAMANI GELDİ' "
+                + "when k.sonraki_okuma < now() + interval '1 hour' then 'birazdan' "
+                + "else ceil(extract(epoch from (k.sonraki_okuma - now())) / 3600)::int "
+                + "     || ' sa sonra' end",
+                                 "metin", "Okuma", Hizalama: "orta", Bicim: "rozet",
+                                 Genislik: 120, Filtrelenebilir: false,
+                                 Siralanabilir: false),
             new("sonrakiOkuma", "k.sonraki_okuma", "tarih", "Sonraki Okuma",
                                  Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm",
                                  Genislik: 130),

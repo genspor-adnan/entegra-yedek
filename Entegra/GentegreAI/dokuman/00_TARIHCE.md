@@ -7333,3 +7333,23 @@ panik, TAT aşımı, cihaz durumu) ekranın kendisinde durmalı.
   "onay bekleyen azaldı" gibi görünür; bağ ancak yan yana durunca kurulur.
 - **Şerit zorunlu değil**: uç düşerse çizilmez, liste açılmaya devam eder.
 - **Testler**: `labOzetSeridi` (4) - web **444 test**.
+
+### Ek: ekran görüntüsüyle mockup karşılaştırması (446)
+
+Ekranlar headless Chrome (Playwright) ile çekilip mockup'larla yan yana
+konuldu. Yapı uyuyordu; **veri sunumunda** dört kusur çıktı:
+
+| Bulgu | Neydi | Düzeltme |
+|---|---|---|
+| Referans aralığı okunmuyordu | `numeric::text` ham geliyordu: "0.000000 - 33.000000", kolona sığmayıp kırpılıyordu | `trim_scale` + Türkçe ondalık; tek taraflı sınır "≤ 35" / "≥ 60" (0'lı aralık alt sınır varmış gibi görünüyordu) |
+| Rozetler renksizdi | Tüp tipi, numune kalitesi, öncelik ve sonuç değerlendirmesi hep nötr gri çıkıyordu | `ROZET_SINIFI`'ne lab sözlükleri: sarı jel sarı, mor EDTA eflatun, ACİL kırmızı, panik kırmızı. **Renk süs değil**: teknisyen rafta kapak rengine bakar |
+| Kültürde "Okuma (dk)" ham sayıydı | "-1.214" yazıyordu | Okunur "21 sa sonra" / "ZAMANI GELDİ" rozeti; ham dakika kolonu çip filtresi için kalır ama varsayılan gösterilmez |
+| Tetkik adı kodu tekrarlıyordu | "ALT (SGPT) ALT" | Kod yalnız adın içinde geçmiyorsa yazılır |
+
+Mockup'ta olup eksik kalan iki şey de eklendi: sonuç kuyruğunda **Önceki
+değer + Δ%** kolonları (uzman sonuca değil değişime bakar) ve tüpler
+kutusunda **🏷 Etiket** düğmesi (tüp planı orada görünüyor, etiket de
+oradan basılmalı). Seçili satır yokken detay paneli artık hiç çizilmiyor.
+
+Görüntüler: `lab-sonuc`, `lab-numune`, `lab-kultur`, `lab-kk` ve karşılık
+gelen mockup'lar (oturum çalışma klasörü).
