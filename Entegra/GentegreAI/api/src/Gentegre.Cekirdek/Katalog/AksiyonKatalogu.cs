@@ -332,34 +332,69 @@ public static class AksiyonKatalogu
             //   YUKLE ve SABLONDAN URET burada YOK: ikisi de dosya secimi ve
             //   kaynak belirlemesi ister, kart galerisinden yurur. Buraya
             //   koymak, listede kaynagi olmayan bir dokuman acmak olurdu.
+            // DOKUMAN LISTESI - dugme SIRASI mockuptaki gibi
+            //   (Ekranlar/Dokuman/dokuman_listesi.html): Yukle · Duzenle · Sil ·
+            //   Indir · Paylas · Bagla · Tasi · Etiket · Onaya Gonder ·
+            //   Surum Gecmisi · Depo. "Sablondan Olustur" YOK: sablon
+            //   ozelligi henuz kurulmadi, calismayan dugme koymuyoruz.
             ["dokuman-liste"] =
             [
                 new("dokuman.yukle", "＋ Yükle", "dokuman",
                     Hedef: "araccubugu,palet",
                     KaynakKodu: "dokuman", Islem: Islem.Ekle, Sira: 5),
-                new("dokuman.ac", "📂 Aç / İndir", "dokuman",
-                    Hedef: "araccubugu,sagtus,palet",
-                    KaynakKodu: "dokuman", Islem: Islem.Gor, KayitGerekir: true, Sira: 10),
-                new("dokuman.surum", "🧾 Sürüm Geçmişi", "dokuman",
+                new("dokuman.duzenle", "✎ Düzenle", "dokuman",
+                    Hedef: "araccubugu,sagtus,palet", Kisayol: "Enter",
+                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 10),
+                new("dokuman.sil", "🗑 Sil", "dokuman",
+                    Hedef: "araccubugu,sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "dokuman", Islem: Islem.Sil, KayitGerekir: true, Sira: 15),
+                new("dokuman.ac", "⬇ Aç / İndir", "dokuman",
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "dokuman", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
-                new("dokuman.onaya-gonder", "✔ Onaya Gönder", "dokuman",
+                new("dokuman.paylas", "🔗 Paylaş", "dokuman",
                     Hedef: "araccubugu,sagtus,palet",
-                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30),
-                new("dokuman.tasi", "🗂 Taşı (klasör)", "dokuman",
+                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 25),
+                new("dokuman.bagla", "🔀 Bağla (kaynak)", "dokuman",
                     Hedef: "sagtus,palet",
-                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40),
+                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 30),
+                new("dokuman.tasi", "🗂 Taşı (klasör)", "dokuman",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 35),
                 new("dokuman.etiket", "🏷 Etiket", "dokuman",
                     Hedef: "sagtus,palet",
-                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50),
+                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 40),
                 new("dokuman.gizlilik", "🔒 Gizlilik Sınıfı", "dokuman",
                     Hedef: "sagtus,palet",
-                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true, Sira: 60),
+                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 45),
+                new("dokuman.onaya-gonder", "✔ Onaya Gönder", "dokuman",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 50),
+                new("dokuman.surum", "🧾 Sürüm Geçmişi", "dokuman",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "dokuman", Islem: Islem.Gor, KayitGerekir: true, Sira: 55),
                 new("dokuman.depo", "📊 Depo Kullanımı", "dokuman",
                     Hedef: "araccubugu,palet",
-                    KaynakKodu: "dokuman", Islem: Islem.Gor, Sira: 70),
+                    KaynakKodu: "dokuman", Islem: Islem.Gor, Sira: 60),
                 Yazdir(),
             ],
+
+            // DOKUMAN AYARLARI (431): kategori ve klasor artik EKLENIP
+            //   DEGISTIRILEBILIYOR. Kullanilan kayit silinemez - kural
+            //   SilmeEngelleri'nde (sunucu), dugme yine gosterilir ki
+            //   kullanici sebebini ogrensin.
+            ["dokuman-kategori-liste"] = Crud("dokuman-kategori", "dokuman-kategori",
+                                              "dokuman", "＋ Yeni", silHedef: null,
+                                              yazdir: false),
+            ["dokuman-klasor-liste"]   = Crud("dokuman-klasor", "dokuman-klasor",
+                                              "dokuman", "＋ Yeni", silHedef: null,
+                                              yazdir: false),
 
             // SIGORTA v1 (430). Provizyon BASVURU KARTINDAN alinir; buradaki
             //   liste takip ve duzeltme icindir: tazele (searchProvisions),

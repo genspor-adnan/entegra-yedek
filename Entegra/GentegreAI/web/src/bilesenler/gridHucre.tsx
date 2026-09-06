@@ -135,6 +135,38 @@ export function yuzdeRozeti(deger: unknown, kolon: KolonMeta) {
   return <span className={`rozet asama-${renk}`}>%{sayi.format(p)}</span>;
 }
 
+/**
+ * DOSYA TIPI IKONU (431, kullanici: "pdf/doc/xls/png olduğu anlaşılacak").
+ *
+ * Sunucu KANONIK TIP doner (fn_dokuman_tipi: pdf/doc/xls/resim...), istemci
+ * yalnizca ikonu secer. Uzantiyi istemcide cozmek, ayni kurali iki yerde
+ * (grid + kart + galeri) tekrarlamak olurdu; sunucu zaten icerik tipini de
+ * goruyor - tarayici uzantisiz yukledi diye tip kaybolmasin.
+ *
+ * Baslik (title) tipin adini yazar: ikon tek basina "hangi tip" sorusunu
+ * ekran okuyucuya cevaplamaz.
+ */
+const DOSYA_TIPI: Record<string, { ikon: string; ad: string }> = {
+  pdf:   { ikon: '📕', ad: 'PDF' },
+  doc:   { ikon: '📘', ad: 'Word belgesi' },
+  xls:   { ikon: '📗', ad: 'Excel tablosu' },
+  ppt:   { ikon: '📙', ad: 'Sunum' },
+  resim: { ikon: '🖼️', ad: 'Resim' },
+  arsiv: { ikon: '🗜️', ad: 'Arşiv' },
+  metin: { ikon: '📄', ad: 'Metin' },
+  video: { ikon: '🎬', ad: 'Video' },
+  ses:   { ikon: '🎵', ad: 'Ses' },
+  diger: { ikon: '📎', ad: 'Diğer' },
+};
+
+export function ikonHucre(deger: unknown, kolon: KolonMeta) {
+  if (kolon.bicim !== 'ikon') return null;
+  const kod = String(deger ?? '').trim().toLowerCase();
+  if (kod === '') return null;
+  const t = DOSYA_TIPI[kod] ?? DOSYA_TIPI.diger;
+  return <span title={t.ad} aria-label={t.ad}>{t.ikon}</span>;
+}
+
 export function rozetHucre(deger: unknown, kolon: KolonMeta) {
   if (kolon.bicim !== 'rozet') return null;
   const metin = String(deger ?? '').trim();

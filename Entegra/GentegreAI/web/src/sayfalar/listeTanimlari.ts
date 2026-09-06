@@ -1716,11 +1716,15 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kartYolu: '/dokuman', kartBaslik: 'Doküman',
     aksiyonEkrani: 'dokuman-liste',
     tarihAlani: 'eklemeTarihi',
+    // CIP SERIDI MOCKUPTAN: Aktif · Taslak · Onay bekliyor · Arşiv ·
+    //   Paylaşılmış · Tümü ("Süresi dolacak" sunucu tarafi gorece tarih
+    //   suzgeci ister - cip sabit deger tasiyor, o yuzden burada yok).
     cipler: [
-      { ad: 'Yayında', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
-      { ad: 'Taslak',  filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'Onayda',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-      { ad: 'Arşiv',   filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Aktif',         filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Taslak',        filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Onay bekliyor', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Arşiv',         filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Paylaşılmış',   filtre: { alan: 'paylasimSayisi', op: 'buyuk', deger: 0 } },
       { ad: 'Tümü' },
     ],
     // ORTAK MOD (kullanici): urunModu VERILMEZ - dokuman yonetimi hem ERP
@@ -1738,19 +1742,30 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Doküman', menuAd: 'Onay Kuyruğu', ic: '✅', yetkiKodu: 'dokuman.onayla',
   },
   {
-    // DOKUMAN TURLERI (419) - surumlu mu, hangi akis, hangi gizlilik.
-    kaynak: 'dokuman-turu', rota: 'dokuman-turu', baslik: 'Doküman Türleri',
-    yol: 'Doküman › Ayarlar › Türler',
-    aksiyonEkrani: 'cikti-liste',
+    // DOKUMAN KATEGORILERI (419/431) - agac yapili; surumlu mu, hangi akis,
+    //   hangi gizlilik. Stok/hizmet kategorisiyle ayni desen.
+    kaynak: 'dokuman-kategori', rota: 'dokuman-kategori',
+    baslik: 'Doküman Kategorileri', yol: 'Doküman › Ayarlar › Kategoriler',
+    kartYolu: '/dokuman-kategori', kartBaslik: 'Doküman Kategorisi',
+    aksiyonEkrani: 'dokuman-kategori-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
     menuGrup: 'Doküman', menuAltGrup: 'Ayarlar',
-    menuAd: 'Doküman Türleri', ic: '🏷️', yetkiKodu: 'dokuman',
+    menuAd: 'Kategoriler', ic: '🏷️', yetkiKodu: 'dokuman',
   },
   {
     // DOKUMAN KLASORLERI (419) - kurumsal agac; kaynak klasorleri SANAL
     //   (kaynak+kaynak_id'den turer, klasor kaydi gerekmez).
     kaynak: 'dokuman-klasor', rota: 'dokuman-klasor', baslik: 'Doküman Klasörleri',
     yol: 'Doküman › Ayarlar › Klasörler',
-    aksiyonEkrani: 'cikti-liste',
+    kartYolu: '/dokuman-klasor', kartBaslik: 'Doküman Klasörü',
+    aksiyonEkrani: 'dokuman-klasor-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
     menuGrup: 'Doküman', menuAltGrup: 'Ayarlar',
     menuAd: 'Klasörler', ic: '🗂️', yetkiKodu: 'dokuman',
   },

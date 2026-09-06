@@ -67,7 +67,11 @@ public static class DokumanYonetimUclari
             var dosya = form.Files.GetFile("dosya")
                 ?? throw GentegreHatasi.Dogrulama("Dosya gerekli.",
                        new AlanHatasi("dosya", "Dosya secilmedi."));
-            _ = int.TryParse(form["belgeTuruId"].ToString(), out var turId);
+            // Alan adi 431'de "kategoriId" oldu; eski ad da okunur ki yayin
+            //   sirasinda acik kalan bir sekme hata vermesin.
+            _ = int.TryParse(
+                    (form["kategoriId"].ToString() is { Length: > 0 } k1 ? k1
+                     : form["belgeTuruId"].ToString()), out var turId);
             var ad = form["ad"].ToString();
 
             using var akis = new MemoryStream();
@@ -88,8 +92,8 @@ public static class DokumanYonetimUclari
             await veri.CalistirAsync("""
                 update public.dokuman d
                    set klasor_id = @p1,
-                       belge_turu_id = coalesce(nullif(@p2, 0), k.varsayilan_tur_id,
-                                                d.belge_turu_id),
+                       kategori_id = coalesce(nullif(@p2, 0), k.varsayilan_kategori_id,
+                                              d.kategori_id),
                        sahip_id = coalesce(d.sahip_id, @p3),
                        surumlu = coalesce(t.surumlu, 0),
                        akis_id = t.akis_id,
@@ -97,8 +101,8 @@ public static class DokumanYonetimUclari
                                            coalesce(k.varsayilan_gizlilik, 2)),
                        durum = case when coalesce(t.surumlu, 0) = 1 then 1 else 3 end
                   from public.dokuman_klasor k
-                  left join public.dokuman_turu t
-                         on t.id = coalesce(nullif(@p2, 0), k.varsayilan_tur_id)
+                  left join public.dokuman_kategori t
+                         on t.id = coalesce(nullif(@p2, 0), k.varsayilan_kategori_id)
                  where d.id = @p0 and k.id = @p1
                 """, [dokumanId, klasorId, turId, baglam.KullaniciId], iptal);
 

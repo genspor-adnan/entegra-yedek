@@ -56,6 +56,65 @@ export async function dokumanAksiyonu(
     return true;
   }
 
+  // SIL: kart hattindan gider (api.dokumanSil) - icerik REFERANS SAYILI,
+  //   satiri dogrudan silmek ayni dosyayi paylasan oteki dokumani da
+  //   kirardi (hash-dedup).
+  if (kod === 'dokuman.sil') {
+    const id = Number(satir?.id ?? 0);
+    if (!id) { mesaj('Önce bir doküman seçin.'); return true }
+    const ad = String(satir?.ad ?? '');
+    if (!await onay(`"${ad}" silinsin mi?`, true)) return true;
+    await guvenli(async () => {
+      await api.dokumanSil(String(satir?.kaynak ?? 'klasor'),
+                           Number(satir?.kaynakId ?? satir?.klasorId ?? 0), id);
+      mesaj('Doküman silindi.');
+      b.tazele();
+    });
+    return true;
+  }
+
+  // PAYLAS: sureli link. Ozel nitelikli dokumanda sunucu ayri yetki ister -
+  //   burada engellenmez, sebebi sunucudan gelir.
+  if (kod === 'dokuman.paylas') {
+    const id = Number(satir?.id ?? 0);
+    if (!id) { mesaj('Önce bir doküman seçin.'); return true }
+    const gun = await metinSor('Link kaç gün geçerli olsun?', '7', 'Gün');
+    if (gun === null) return true;
+    await guvenli(async () => {
+      const y = await api.dokumanPaylasimUret(id, {
+        gunSayisi: Number(gun) || 7, indirmeIzni: true,
+      });
+      mesaj(`${y.mesaj}
+
+Kod: ${y.kod}`);
+      b.tazele();
+    });
+    return true;
+  }
+
+  // BAGLA: ikinci bir kayda baglar (birincil bag degismez).
+  if (kod === 'dokuman.bagla') {
+    const id = Number(satir?.id ?? 0);
+    if (!id) { mesaj('Önce bir doküman seçin.'); return true }
+    const kaynak = await secimSor('Hangi kayda bağlansın?', [
+      { kod: 'cari', ad: 'Cari / Müşteri' },
+      { kod: 'stok', ad: 'Stok' },
+      { kod: 'personel', ad: 'Personel' },
+      { kod: 'hasta', ad: 'Hasta' },
+      { kod: 'proje', ad: 'Proje' },
+      { kod: 'belge', ad: 'Belge' },
+    ]);
+    if (!kaynak) return true;
+    const kayit = await metinSor(`${kaynak} kaydının numarası (Id):`, '', 'Kayıt Id');
+    const kaynakId = Number((kayit ?? '').trim());
+    if (!kaynakId) { mesaj('Kayıt seçilmedi.'); return true }
+    await guvenli(async () => {
+      mesaj((await api.dokumanBaglantiEkle(id, kaynak, kaynakId)).mesaj);
+      b.tazele();
+    });
+    return true;
+  }
+
   if (kod === 'dokuman.depo') {
     await guvenli(async () => {
       const d = await api.dokumanDepo();

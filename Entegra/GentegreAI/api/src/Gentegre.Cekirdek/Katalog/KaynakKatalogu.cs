@@ -161,7 +161,7 @@ public static partial class KaynakKatalogu
         Ekle(IsMerkezi());
         // Dokuman v1 (419): kaynak ustu liste + katalog + onay kuyrugu.
         Ekle(Dokuman());
-        Ekle(DokumanTuru());
+        Ekle(DokumanKategori());
         Ekle(DokumanKlasor());
         Ekle(DokumanOnayKuyrugu());
         Ekle(LabIstem());

@@ -219,7 +219,8 @@ public sealed partial class KartDeposu
             "public.v_icd_lookup",
             "public.v_muayene_sablon_lookup", "public.v_muayene_sablon_alan_lookup",
             // Dokuman v1 (419): belge turu ve klasor secici.
-            "public.v_dokuman_turu_lookup", "public.v_dokuman_klasor_lookup",
+            "public.v_dokuman_kategori_lookup", "public.v_dokuman_klasor_lookup",
+            "public.v_dokuman_akis_lookup",
             // Erisim sekmesi (425): rol adi.
             "public.v_rol_lookup",
             // Uretim v1 (429): is merkezi, urun agaci (kod + surum), uretim emri

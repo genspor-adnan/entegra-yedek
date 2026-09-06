@@ -713,6 +713,108 @@ public static partial class KartKatalogu
     /// değiştiren şey sürüm/onay döngüsüdür, elle yazmak başlığı gerçek
     /// dosyadan koparırdı.
     /// </summary>
+    /// <summary>
+    /// DOKÜMAN KATEGORİSİ KARTI (431) — ağaç yapılı, stok/hizmet kategorisiyle
+    /// aynı desen.
+    ///
+    /// <para><b>Kullanılan kategori silinemez.</b> Silinseydi dokümanlar
+    /// kategorisiz kalır, sürümlü olup olmadıkları ve gizlilik sınıfları
+    /// belirsizleşirdi - gizlilik doküman düzeyinde de saklanıyor ama
+    /// "neden gizli" cevabı kaybolurdu.</para>
+    /// </summary>
+    private static KartTanimi DokumanKategoriKarti() => new(
+        Ad: "dokuman-kategori",
+        YetkiKodu: "dokuman",
+        Tablo: "public.dokuman_kategori",
+        LogTabloId: 1002,
+        SubeKolonu: null,                     // ana veri - subeler arasi ORTAK
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["aktif"] = (short)1,
+            ["gizlilik"] = (short)2,          // Kurum içi
+        },
+        SilmeEngelleri: new SilmeEngeli[]
+        {
+            new("public.dokuman", "kategori_id",
+                "Bu kategoride doküman var."),
+            new("public.dokuman_kategori", "ust_id",
+                "Bu kategorinin altında başka kategori var."),
+            new("public.dokuman_klasor", "varsayilan_kategori_id",
+                "Bu kategori bir klasörün varsayılanı."),
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 100,
+                Baslik: "Kategori", Grup: "Kimlik"),
+            new("kisaltma", "kisaltma", "metin", EnFazlaUzunluk: 10,
+                Baslik: "Kod", Grup: "Kimlik"),
+            // Boş ise KÖK kategori; seçilirse altına geçer (sınırsız derinlik).
+            //   Kendi altına taşıma tetikte engellenir (fn_dokuman_kategori_yol).
+            new("ustId", "ust_id", "kod", KodTablosu: "public.v_dokuman_kategori_lookup",
+                Baslik: "Üst Kategori", Grup: "Kimlik"),
+            new("yol", "yol", "metin", Yazilabilir: false,
+                Baslik: "Yol", Grup: "Kimlik"),
+            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Kimlik"),
+
+            // Davranış: bu kategorideki dokümanların varsayılanı.
+            new("surumlu", "surumlu", "mantik",
+                Baslik: "Sürümlü (onaydan geçer)", Grup: "Davranış"),
+            new("akisId", "akis_id", "kod", KodTablosu: "public.v_dokuman_akis_lookup",
+                Baslik: "Onay Akışı", Grup: "Davranış"),
+            new("gizlilik", "gizlilik", "kod", SabitKodlar: DokumanGizlilikKodlari,
+                Baslik: "Gizlilik Sınıfı", Grup: "Davranış"),
+            new("gozdenGecirmeAy", "gozden_gecirme_ay", "sayi",
+                Baslik: "Gözden Geçirme (ay)", Grup: "Davranış"),
+            new("sira", "sira", "sayi", Baslik: "Sıra", Grup: "Davranış"),
+        });
+
+    /// <summary>
+    /// DOKÜMAN KLASÖRÜ KARTI (431) — kurumsal ağaç.
+    ///
+    /// KAYNAK KLASÖRLERİ (taraf / stok / hasta) burada YOK: onlar sanaldır,
+    /// kaynak + kaynak_id'den türer. Her personel için klasör açmak gerekmesin
+    /// diye böyle kuruldu (419).
+    /// </summary>
+    private static KartTanimi DokumanKlasorKarti() => new(
+        Ad: "dokuman-klasor",
+        YetkiKodu: "dokuman",
+        Tablo: "public.dokuman_klasor",
+        LogTabloId: 1003,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["aktif"] = (short)1,
+            ["varsayilan_gizlilik"] = (short)2,
+        },
+        SilmeEngelleri: new SilmeEngeli[]
+        {
+            new("public.dokuman", "klasor_id", "Bu klasörde doküman var."),
+            new("public.dokuman_klasor", "ust_id",
+                "Bu klasörün altında başka klasör var."),
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 100,
+                Baslik: "Klasör", Grup: "Kimlik"),
+            new("ustId", "ust_id", "kod", KodTablosu: "public.v_dokuman_klasor_lookup",
+                Baslik: "Üst Klasör", Grup: "Kimlik"),
+            new("yol", "yol", "metin", Yazilabilir: false, Baslik: "Yol", Grup: "Kimlik"),
+            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Kimlik"),
+
+            new("varsayilanKategoriId", "varsayilan_kategori_id", "kod",
+                KodTablosu: "public.v_dokuman_kategori_lookup",
+                Baslik: "Varsayılan Kategori", Grup: "Varsayılanlar"),
+            new("varsayilanGizlilik", "varsayilan_gizlilik", "kod",
+                SabitKodlar: DokumanGizlilikKodlari,
+                Baslik: "Varsayılan Gizlilik", Grup: "Varsayılanlar"),
+            // Doküman kodu bu şablondan üretilir (419): {YIL}, {SIRA} gibi.
+            new("kodSablonu", "kod_sablonu", "metin", EnFazlaUzunluk: 40,
+                Baslik: "Kod Şablonu", Grup: "Varsayılanlar"),
+            new("sira", "sira", "sayi", Baslik: "Sıra", Grup: "Varsayılanlar"),
+        });
+
     private static KartTanimi DokumanKarti() => new(
         Ad: "dokuman",
         YetkiKodu: "dokuman",
@@ -732,8 +834,8 @@ public static partial class KartKatalogu
             new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 200,
                 Baslik: "Doküman Adı", Grup: "Kimlik"),
             new("kod", "kod", "metin", EnFazlaUzunluk: 30, Baslik: "Kod", Grup: "Kimlik"),
-            new("belgeTuruId", "belge_turu_id", "kod",
-                KodTablosu: "public.v_dokuman_turu_lookup", Baslik: "Belge Türü",
+            new("kategoriId", "kategori_id", "kod",
+                KodTablosu: "public.v_dokuman_kategori_lookup", Baslik: "Kategori",
                 Grup: "Kimlik"),
             new("durum", "durum", "kod", SabitKodlar: DokumanDurumKodlari, Yazilabilir: false,
                 Baslik: "Durum", Grup: "Kimlik"),

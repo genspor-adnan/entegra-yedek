@@ -206,6 +206,10 @@ public static partial class KartKatalogu
         Ekle(HastaKronikTaniKarti());
         Ekle(HastaGecmisOlayKarti());
         Ekle(DokumanKarti());
+        // Dokuman kategorisi ve klasoru (431): ekle/degistir/sil,
+        //   kullanilan kayit SilmeEngelleri ile korunur.
+        Ekle(DokumanKategoriKarti());
+        Ekle(DokumanKlasorKarti());
         Ekle(LabIstemKarti());
         // FAZ 0 ortak platform (398-401): onam metni ve bildirim sablonu.
         Ekle(OnamMetniKarti());

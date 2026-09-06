@@ -240,10 +240,10 @@ export const api = {
   /** Kurumsal klasore dokuman yukler (419): kaynagi bir KART OLMAYAN
       dokuman (prosedur, talimat, sozlesme). Tur/gizlilik klasor
       varsayilanindan gelir - her yuklemede ayni soru sorulmasin. */
-  dokumanKlasoreYukle: async (klasorId: number, dosya: File, belgeTuruId?: number) => {
+  dokumanKlasoreYukle: async (klasorId: number, dosya: File, kategoriId?: number) => {
     const govde = new FormData();
     govde.append('dosya', dosya);
-    if (belgeTuruId) govde.append('belgeTuruId', String(belgeTuruId));
+    if (kategoriId) govde.append('kategoriId', String(kategoriId));
     return istek<{ dokumanId: number; mesaj: string }>(
       `/api/dokuman-yonetim/klasor/${klasorId}/yukle`, { method: 'POST', body: govde });
   },
@@ -415,6 +415,12 @@ export const api = {
       eski alici erisim kazanirdi. */
   dokumanPaylasimIptal: (paylasimId: number) =>
     gonder<{ mesaj: string }>(`/api/dokuman-yonetim/paylasim/${paylasimId}/iptal`, {}),
+
+  /** Ek baglanti (419): birincil bag (dokuman.kaynak) DEGISMEZ, dokuman
+      ikinci bir kayda da baglanir - ayni sozlesme hem cariye hem projeye. */
+  dokumanBaglantiEkle: (id: number, kaynak: string, kaynakId: number, rol?: string) =>
+    gonder<{ mesaj: string }>(`/api/dokuman-yonetim/${id}/baglanti`,
+      { kaynak, kaynakId, rol }),
 
   /** Surumu onaya gonderir (419): akis adimlari SABLONDAN KOPYALANIR, akis
       sonradan degisirse suren onay etkilenmez. */
