@@ -2,6 +2,7 @@ using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
+using Gentegre.Veri.Depolar;
 
 namespace Gentegre.Api.Uclar;
 
@@ -50,6 +51,77 @@ public static class DokumanYonetimUclari
         var grup = yol.MapGroup("/api/dokuman-yonetim").WithTags("Doküman")
                       .RequireAuthorization();
 
+
+        // POST /api/dokuman-yonetim/klasor/{klasorId}/yukle - kurumsal doküman
+        //   Kaynağı bir KART OLMAYAN doküman: prosedür, talimat, sözleşme.
+        //   İçerik yükleme mevcut depoya gider (hash-dedup aynen); burada
+        //   yalnız klasör/tür/gizlilik damgalanır ve sürüm 1 açılır.
+        grup.MapPost("/klasor/{klasorId:int}/yukle", async (
+            int klasorId, BaglamCozucu cozucu, VeriKaynagi veri, DokumanDeposu depo,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("dokuman", Islem.Ekle);
+
+            var form = await ctx.Request.ReadFormAsync(iptal);
+            var dosya = form.Files.GetFile("dosya")
+                ?? throw GentegreHatasi.Dogrulama("Dosya gerekli.",
+                       new AlanHatasi("dosya", "Dosya secilmedi."));
+            _ = int.TryParse(form["belgeTuruId"].ToString(), out var turId);
+            var ad = form["ad"].ToString();
+
+            using var akis = new MemoryStream();
+            await dosya.CopyToAsync(akis, iptal);
+
+            var liste = await depo.EkleAsync("klasor", klasorId,
+                string.IsNullOrWhiteSpace(ad) ? dosya.FileName : ad,
+                dosya.ContentType, akis.ToArray(), false, baglam.Yazma, iptal);
+
+            // En son eklenen satir: depo listeyi doner, kimligi ondan alinir.
+            var dokumanId = liste.Count > 0 ? liste.Max(x => x.Id) : 0;
+            if (dokumanId == 0)
+                throw GentegreHatasi.IsKurali("Dokuman kaydedilemedi.");
+
+            // TUR VARSAYILANLARI: surumlu mu, hangi akis, hangi gizlilik.
+            //   Klasorun varsayilan turu varsa o kullanilir - kullaniciya her
+            //   yuklemede ayni soruyu sormamak icin.
+            await veri.CalistirAsync("""
+                update public.dokuman d
+                   set klasor_id = @p1,
+                       belge_turu_id = coalesce(nullif(@p2, 0), k.varsayilan_tur_id,
+                                                d.belge_turu_id),
+                       sahip_id = coalesce(d.sahip_id, @p3),
+                       surumlu = coalesce(t.surumlu, 0),
+                       akis_id = t.akis_id,
+                       gizlilik = greatest(coalesce(t.gizlilik, 2),
+                                           coalesce(k.varsayilan_gizlilik, 2)),
+                       durum = case when coalesce(t.surumlu, 0) = 1 then 1 else 3 end
+                  from public.dokuman_klasor k
+                  left join public.dokuman_turu t
+                         on t.id = coalesce(nullif(@p2, 0), k.varsayilan_tur_id)
+                 where d.id = @p0 and k.id = @p1
+                """, [dokumanId, klasorId, turId, baglam.KullaniciId], iptal);
+
+            await veri.CalistirAsync("""
+                insert into public.dokuman_surum (dokuman_id, surum_no, hash, content_type,
+                                                  boyut, yukleyen_id, durum, yayin_tarihi)
+                select d.id, 1, d.hash, d.content_type, d.boyut, @p1,
+                       case when d.surumlu = 1 then 1 else 3 end,
+                       case when d.surumlu = 1 then null else now() end
+                  from public.dokuman d
+                 where d.id = @p0
+                   and not exists (select 1 from public.dokuman_surum s
+                                    where s.dokuman_id = d.id)
+                """, [dokumanId, baglam.KullaniciId], iptal);
+
+            await veri.CalistirAsync("""
+                insert into public.dokuman_olay (dokuman_id, kullanici_id, olay, gerekce)
+                values (@p0, @p1, 1, 'Kurumsal klasore yuklendi')
+                """, [dokumanId, baglam.KullaniciId], iptal);
+
+            return Results.Ok(new { dokumanId, mesaj = "Dokuman yuklendi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
 
         // GET /api/dokuman-yonetim/klasorler - sol paneldeki ağaç + sayaçlar
         //   İKİ TÜR KLASÖR: kullanıcının açtığı KURUMSAL klasörler (tablo) ve

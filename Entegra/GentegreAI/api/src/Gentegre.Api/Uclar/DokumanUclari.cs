@@ -179,6 +179,11 @@ public static class DokumanUclari
         "sube" => "sube",
         // Radyoloji istem kagidi (310) - kaynak_id istem kimligidir.
         "radyoloji-istem" => "radyoloji-istem",
+        // KURUMSAL KLASOR (419): kaynagi bir KART OLMAYAN dokuman. Prosedur,
+        //   talimat, sozlesme sablonu... kaynak_id klasor kimligidir. Bu
+        //   olmadan kurumsal dokuman yuklenemiyordu - her dokumanin bir karta
+        //   asilmasi gerekiyordu.
+        "klasor" => "klasor",
         _ => throw new InvalidOperationException($"Bilinmeyen kart: {kartAdi}"),
     };
 
@@ -189,6 +194,8 @@ public static class DokumanUclari
         "hasta" => "personel",
         "ebelge-xslt" => "ebelge_xslt",
         "radyoloji-istem" => "radyoloji",
+        // Kurumsal klasore yukleme DOKUMAN yetkisiyle (kaynak kart yok).
+        "klasor" => "dokuman",
         _ => kartAdi
     };
 

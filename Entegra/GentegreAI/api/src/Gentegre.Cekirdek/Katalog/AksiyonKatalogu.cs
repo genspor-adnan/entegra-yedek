@@ -334,6 +334,9 @@ public static class AksiyonKatalogu
             //   koymak, listede kaynagi olmayan bir dokuman acmak olurdu.
             ["dokuman-liste"] =
             [
+                new("dokuman.yukle", "＋ Yükle", "dokuman",
+                    Hedef: "araccubugu,palet",
+                    KaynakKodu: "dokuman", Islem: Islem.Ekle, Sira: 5),
                 new("dokuman.ac", "📂 Aç / İndir", "dokuman",
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "dokuman", Islem: Islem.Gor, KayitGerekir: true, Sira: 10),

@@ -486,7 +486,6 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",        "d.id",        "sayi",  "Id", Varsayilan: false),
-            new("klasorYolu","coalesce(k.yol, '')", "metin", "Klasör", Genislik: 180),
             new("kod",       "d.kod",       "metin", "Kod", Hizalama: "orta", Genislik: 110),
             new("ad",        "d.ad",        "metin", "Doküman", Genislik: 280),
             new("turAdi",    "coalesce(t.ad, d.belge_turu)", "metin", "Tür", Genislik: 150),
@@ -531,6 +530,10 @@ public static partial class KaynakKatalogu
                                             Bicim: "dd.MM.yyyy", Genislik: 110),
             new("eklemeTarihi", "d.ekleme_tarihi", "tarih", "Yükleme", Hizalama: "orta",
                                             Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
+            // KLASOR EN SONDA (kullanici): kolon secilen klasorde zaten
+            //   gizleniyor; "Tumu"de de listenin sonunda dursun - ad ve tur
+            //   once okunur.
+            new("klasorYolu","coalesce(k.yol, '')", "metin", "Klasör", Genislik: 180),
             new("surumlu",   "d.surumlu",   "mantik","Sürümlü", Hizalama: "orta",
                                             Genislik: 90, Varsayilan: false),
             // Bekleyen onay: "onay kuyrugu" cipinin dayanagi.

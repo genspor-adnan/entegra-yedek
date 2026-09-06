@@ -237,6 +237,17 @@ export const api = {
   muayeneOzetDerle: (muayeneId: number) =>
     gonder<{ bulguOzet: string }>(`/api/muayene/${muayeneId}/ozet-derle`, {}),
 
+  /** Kurumsal klasore dokuman yukler (419): kaynagi bir KART OLMAYAN
+      dokuman (prosedur, talimat, sozlesme). Tur/gizlilik klasor
+      varsayilanindan gelir - her yuklemede ayni soru sorulmasin. */
+  dokumanKlasoreYukle: async (klasorId: number, dosya: File, belgeTuruId?: number) => {
+    const govde = new FormData();
+    govde.append('dosya', dosya);
+    if (belgeTuruId) govde.append('belgeTuruId', String(belgeTuruId));
+    return istek<{ dokumanId: number; mesaj: string }>(
+      `/api/dokuman-yonetim/klasor/${klasorId}/yukle`, { method: 'POST', body: govde });
+  },
+
   /** Sol paneldeki klasor agaci + sayaclar (419). Kaynak klasorleri SANAL:
       dokumanin kaynak alanindan turer, tablo kaydi yoktur. */
   dokumanKlasorleri: () =>

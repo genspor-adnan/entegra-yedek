@@ -26,6 +26,36 @@ export async function dokumanAksiyonu(
   if (!kod.startsWith('dokuman.')) return false;
 
   // ---------------------------------------------------------------- liste
+  // YUKLE: kurumsal klasore dokuman ekler. Kart galerisinden yukleme kaynagi
+  //   bir KARTA baglar (personel, stok...); burasi kaynagi OLMAYAN kurumsal
+  //   dokuman icin - prosedur bir kartin eki degil.
+  if (kod === 'dokuman.yukle') {
+    await guvenli(async () => {
+      const k = await api.dokumanKlasorleri();
+      if (k.kurumsal.length === 0) {
+        mesaj('Önce bir kurumsal klasör tanımlayın (Doküman › Ayarlar › Klasörler).');
+        return;
+      }
+      const klasor = await secimSor('Hangi klasöre yüklensin?',
+        k.kurumsal.map(x => ({ kod: String(x.id), ad: x.yol })));
+      if (!klasor) return;
+
+      // Dosya secimi: gizli <input type=file>. Tarayicida dosya sectirmenin
+      //   baska yolu yok; secim iptal edilirse hicbir sey olmaz.
+      const girdi = document.createElement('input');
+      girdi.type = 'file';
+      girdi.onchange = () => void guvenli(async () => {
+        const dosya = girdi.files?.[0];
+        if (!dosya) return;
+        const y = await api.dokumanKlasoreYukle(Number(klasor), dosya);
+        mesaj(y.mesaj);
+        b.tazele();
+      });
+      girdi.click();
+    });
+    return true;
+  }
+
   if (kod === 'dokuman.depo') {
     await guvenli(async () => {
       const d = await api.dokumanDepo();

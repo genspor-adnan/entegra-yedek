@@ -24,8 +24,11 @@ public sealed class DokumanDeposu
         //   "radyoloji-istem" (310): ISTEM KAGIDI - disaridan gelen hastanin
         //   getirdigi hekim istemi taranip/fotograflanip isteme eklenir; SGK ve
         //   sigorta faturalamasinda "istem belgesi nerede" sorusunun cevabidir.
+        //   "klasor" (419): KURUMSAL dokuman - kaynagi bir kart DEGIL, klasor.
+        //   Prosedur, talimat, sozlesme sablonu bir personelin ya da stogun
+        //   eki degildir; bu kaynak olmadan kurumsal dokuman hic yuklenemezdi.
         new(StringComparer.Ordinal)
-            { "taraf", "stok", "ebelge-xslt", "sube", "radyoloji-istem" };
+            { "taraf", "stok", "ebelge-xslt", "sube", "radyoloji-istem", "klasor" };
 
     private static readonly HashSet<string> IcerikTipiBeyazListe = new(StringComparer.OrdinalIgnoreCase)
     {

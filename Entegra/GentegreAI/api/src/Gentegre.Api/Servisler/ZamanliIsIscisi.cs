@@ -224,8 +224,15 @@ public sealed class ZamanliIsIscisi : BackgroundService
             o => new Plan(o.GetInt16(0), o.GetInt16(1), o.GetInt16(2), o.GetInt16(3)), iptal);
         if (s is null) return;
 
+        // ZAMAN VERITABANINDAN OKUNUR, uygulamanin saatinden DEGIL.
+        //   Kuyruk "sonraki <= now()" ile taraniyor (PG saati); sonraki ise
+        //   uygulamanin saatiyle yaziliyordu. Konteyner UTC, veritabani yerel
+        //   saat dilimindeyse fark kadar GERIDE bir zaman yaziliyor ve is
+        //   HER TURDA yeniden calisiyordu - sunucuda enabiz.gonder dakikada
+        //   bir calisip gunlugu dolduruyordu.
+        var simdi = await veri.TekDegerAsync<DateTime>("select now()", null, iptal);
         var hedef = Cekirdek.Zamanlama.ZamanlamaHesabi.Sonraki(
-            DateTime.Now, s.Periyot, s.Gun, s.Saat, s.Dakika);
+            simdi, s.Periyot, s.Gun, s.Saat, s.Dakika);
 
         await veri.CalistirAsync("update public.zamanli_is set sonraki = @p1 where kod = @p0",
             new object?[] { kod, hedef }, iptal);
