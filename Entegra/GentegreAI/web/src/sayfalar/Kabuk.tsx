@@ -72,11 +72,12 @@ const GRUP_IKON: Record<string, string> = {
   //   fis satirlari, masraf merkezleri ve islem turleri Yonetim'den buraya alindi.
   'Muhasebe': '⚖️',
   'İK':      '👥',
-  // Gemi dumeni (kullanici): emoji setinde ayri bir "dumen" karakteri yok.
-  //   U+1F6DE (tekerlek) Segoe UI Emoji'de kollu bir dumen gibi cizilir;
-  //   onceki ☸️ (dharma cakri) daha ince kollu ve dini bir sembol.
-  //   ⎈ (U+2388) anlamca en dogrusu ama cogu yazi tipinde bos kare gorunur.
-  'Yönetim': '🛞',
+  // Gemi dumeni (kullanici, ucuncu deneme): Unicode'da GERCEK bir gemi
+  //   dumeni emojisi YOK. Denenenler: ☸️ (dharma cakri - dini sembol),
+  //   🛞 (tekerlek - lastik gibi cizilir). ⎈ (U+2388) anlamca dogru ama
+  //   cogu yazi tipinde bos kare. Pusula denizcilik cagrisimini koruyor
+  //   ve her platformda ayni cizilir.
+  'Yönetim': '🧭',
 };
 
 /** ALT GRUP ikonu: ikinci seviye eskiden HEP ⚙️ ciziyordu, ayar olmayan alt

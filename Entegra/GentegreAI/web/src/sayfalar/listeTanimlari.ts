@@ -647,7 +647,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAd: 'İstemler', menuSira: 10,
-    ic: '🧪', yetkiKodu: 'lab',
+    // Enjektor (kullanici): grup ikonu zaten tup (🧪), istem satiri ayrisiyor.
+    ic: '💉', yetkiKodu: 'lab',
   },
   {
     // NUMUNE KABUL (433): laboratuvarin giris kapisi. Varsayilan cip
