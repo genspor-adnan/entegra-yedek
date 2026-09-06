@@ -72,10 +72,11 @@ const GRUP_IKON: Record<string, string> = {
   //   fis satirlari, masraf merkezleri ve islem turleri Yonetim'den buraya alindi.
   'Muhasebe': '⚖️',
   'İK':      '👥',
-  // Gemi dumeni (kullanici): emoji setinde ayri bir "dumen" yok;
-  //   sekiz kollu tekerlek (U+2638) her yerde dumen gibi cizilir -
-  //   ⎈ (U+2388) daha dogru ama cogu yazi tipinde bos kare gorunur.
-  'Yönetim': '☸️',
+  // Gemi dumeni (kullanici): emoji setinde ayri bir "dumen" karakteri yok.
+  //   U+1F6DE (tekerlek) Segoe UI Emoji'de kollu bir dumen gibi cizilir;
+  //   onceki ☸️ (dharma cakri) daha ince kollu ve dini bir sembol.
+  //   ⎈ (U+2388) anlamca en dogrusu ama cogu yazi tipinde bos kare gorunur.
+  'Yönetim': '🛞',
 };
 
 /** ALT GRUP ikonu: ikinci seviye eskiden HEP ⚙️ ciziyordu, ayar olmayan alt
@@ -102,7 +103,7 @@ const GRUP_IKON_CEV: Record<string, string> = {
   'Items & Services': '📦', 'Artikel & Leistungen': '📦',
   'Accounting': '⚖️', 'Buchhaltung': '⚖️',
   'HR': '👥', 'Personal': '👥',
-  'Administration': '☸️', 'Verwaltung': '☸️',
+  'Administration': '🛞', 'Verwaltung': '🛞',
 };
 
 /** Arayuz dilleri - db/081: taraf_kullanici.dil (0 TR / 1 EN / 2 DE).
