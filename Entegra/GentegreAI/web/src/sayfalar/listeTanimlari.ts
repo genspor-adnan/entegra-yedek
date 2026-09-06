@@ -633,7 +633,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'lab-istem', rota: 'lab-istem', baslik: 'Laboratuvar İstemleri',
     yol: 'Laboratuvar › İstemler',
     kartYolu: '/lab-istem', kartBaslik: 'Laboratuvar İstemi',
-    aksiyonEkrani: 'cari-liste',
+    // 433'e kadar aksiyonlar 'cari-liste'den geliyordu (kopyala-yapistir
+    //   kalintisi): listede lab isine ait tek dugme yoktu.
+    aksiyonEkrani: 'lab-istem-liste',
     tarihAlani: 'istemTarihi',
     cipler: [
       { ad: 'İstendi',     filtre: { alan: 'durum', op: 'esit', deger: 1 } },

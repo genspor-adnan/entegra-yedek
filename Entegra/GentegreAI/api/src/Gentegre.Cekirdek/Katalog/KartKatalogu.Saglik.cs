@@ -204,6 +204,18 @@ public static partial class KartKatalogu
         ["4"] = "Sonuçlandı", ["5"] = "Onaylandı", ["9"] = "İptal"
     };
 
+    /// <summary>
+    /// Lab istem SATIRI durumu (433/434). Servis, katalog ve ekran ayni
+    /// listeye bakmali - yoksa listede "onayli" gorunen satirin sonucu
+    /// bekliyor olur.
+    /// </summary>
+    private static readonly Dictionary<string, string> LabSatirDurumKodlari = new()
+    {
+        ["0"] = "İptal", ["1"] = "İstendi", ["2"] = "Çalışılıyor",
+        ["3"] = "Sonuçlandı", ["4"] = "Teknik Onay", ["5"] = "Onaylı",
+        ["6"] = "Tekrar numune bekliyor",
+    };
+
     /// <summary>Test sonucunun degerlendirmesi - sonuc formunda rozet olur.</summary>
     private static readonly Dictionary<string, string> LabIsaretKodlari = new()
     {
@@ -1105,13 +1117,30 @@ public static partial class KartKatalogu
             // TESTLER: istemin satirlari. Sonuc girisi de burada - ayri bir
             //   "sonuc girisi" ekrani, teknisyeni ayni kaydin iki yuzu arasinda
             //   gezdirirdi.
-            new("testler", "public.lab_istem_test", "istem_id", new KartAlani[]
+            // 433: tablo lab_istem_test -> lab_istem_satir olarak adlandirildi.
+            //   Kart eski ada bakmaya devam ettigi icin lab istemi ACILMIYORDU
+            //   ("relation public.lab_istem_test does not exist"). Yeniden
+            //   adlandirma yapan gocun, o tabloyu okuyan HER yeri (liste
+            //   katalogu + kart katalogu) taramasi gerekiyordu.
+            //
+            //   Satirdaki sonuc/birim/referans/isaret alanlari 433 oncesinden
+            //   kalan ELLE GIRIS alanlaridir; asil sonuc lab_sonuc'ta durur
+            //   (onay ve duzeltme gecmisi tek satira sigmiyordu) ve Sonuclar
+            //   ekranindan yonetilir.
+            new("satirlar", "public.lab_istem_satir", "istem_id", new KartAlani[]
             {
                 new("id", "id", "sayi", Yazilabilir: false),
+                new("sira", "sira", "sayi", Baslik: "Sıra"),
+                new("tetkikId", "tetkik_id", "kod",
+                    KodTablosu: "public.v_lab_tetkik_lookup", Baslik: "Tetkik"),
+                new("panelId", "panel_id", "kod",
+                    KodTablosu: "public.v_lab_panel_lookup", Baslik: "Panel"),
                 new("stokId", "stok_id", "kod", KodTablosu: "public.v_hizmet_lookup",
-                    AramaKaynagi: "hizmet", Baslik: "Test (Hizmet)"),
+                    AramaKaynagi: "hizmet", Baslik: "Hizmet"),
                 new("kod", "kod", "metin", EnFazlaUzunluk: 30, Baslik: "Kod"),
                 new("ad", "ad", "metin", EnFazlaUzunluk: 200, Baslik: "Test Adı"),
+                new("durum", "durum", "kod", SabitKodlar: LabSatirDurumKodlari,
+                    Baslik: "Durum"),
                 new("sonuc", "sonuc", "metin", EnFazlaUzunluk: 100, Baslik: "Sonuç"),
                 new("birim", "birim", "metin", EnFazlaUzunluk: 20, Baslik: "Birim"),
                 new("referans", "referans", "metin", EnFazlaUzunluk: 60,
@@ -1121,6 +1150,7 @@ public static partial class KartKatalogu
                 new("cihaz", "cihaz", "metin", EnFazlaUzunluk: 60, Baslik: "Cihaz"),
                 new("sonucTarihi", "sonuc_tarihi", "tarih", Baslik: "Sonuç Zamanı"),
                 new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama")
-            }, SubeKolonu: null, Sirala: "id", Baslik: "Testler", LogTabloId: 962)
+            }, SubeKolonu: null, Sirala: "sira, id", Baslik: "Tetkikler",
+               LogTabloId: 962)
         });
 }

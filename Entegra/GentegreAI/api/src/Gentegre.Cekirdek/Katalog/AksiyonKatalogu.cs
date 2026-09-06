@@ -530,6 +530,17 @@ public static class AksiyonKatalogu
 
             // LAB v1 (433/434). Tetkik ve panel sirandan CRUD; numune, sonuc
             //   ve cihaz eslemesi is akisi dugmeleri tasir.
+            // LAB ISTEM (360 + 433): kart CRUD'u + kartla acilan isteme barkod
+            //   uretimi. Uc uzerinden acilan istemde tup plani zaten calisir.
+            ["lab-istem-liste"] =
+            [
+                .. Crud("lab-istem", "lab-istem", "lab"),
+                new("lab.numune-plani", "🏷 Barkod Üret", "lab-istem",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.numune", Islem: Islem.Ekle, KayitGerekir: true,
+                    Sira: 40),
+            ],
+
             ["lab-tetkik-liste"] = Crud("lab-tetkik", "lab-tetkik", "lab.tetkik"),
             ["lab-panel-liste"] = Crud("lab-panel", "lab-panel", "lab.tetkik"),
             ["lab-cihaz-esleme-liste"] =

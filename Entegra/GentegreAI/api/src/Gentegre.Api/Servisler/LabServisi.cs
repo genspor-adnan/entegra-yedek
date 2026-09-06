@@ -137,6 +137,72 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
         return istemId;
     }
 
+    /// <summary>
+    /// Numunesi olmayan istem satirlari icin tüp planı ve barkod üretir.
+    ///
+    /// Kart ekranından açılan istemde (uç yerine kartla kayıt) satırlar
+    /// numunesiz kalır; barkodsuz istem kan alma biriminde "hangi tüp"
+    /// sorusunu cevapsız bırakır. Aynı tüp tipindekiler yine TEK barkoda
+    /// bağlanır ve zaten numunesi olan satıra dokunulmaz.
+    /// </summary>
+    public async Task<List<string>> NumunePlaniAsync(int istemId, IstekBaglami baglam,
+                                                     CancellationToken iptal)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+        var i = await baglanti.TekAsync("""
+            select taraf_id, sube_id, durum from public.lab_istem where id = @p0
+            """, islem, [istemId],
+            o => new { HastaId = o.GetInt32(0), SubeId = o.GetInt32(1),
+                       Durum = o.GetInt16(2) }, iptal)
+            ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
+
+        if (i.Durum == 9)
+            throw GentegreHatasi.IsKurali("İptal edilmiş isteme numune üretilemez.");
+
+        var satirlar = await baglanti.ListeAsync("""
+            select s.id, coalesce(nullif(t.tup_tipi, 0), 1) as tup, t.numune_tipi
+              from public.lab_istem_satir s
+              join public.lab_tetkik t on t.id = s.tetkik_id
+             where s.istem_id = @p0 and s.numune_id is null and s.durum <> 0
+             order by s.sira, s.id
+            """, islem, [istemId],
+            o => new { Id = o.GetInt32(0), Tup = o.GetInt16(1), Numune = o.GetInt16(2) },
+            iptal);
+
+        if (satirlar.Count == 0)
+            throw GentegreHatasi.IsKurali(
+                "Numunesi olmayan tetkik yok - barkodlar zaten üretilmiş "
+                + "(tetkiği olmayan satır varsa önce tetkik seçin).");
+
+        var barkodlar = new List<string>();
+        foreach (var grup in satirlar.GroupBy(x => x.Tup))
+        {
+            var barkod = await baglanti.TekDegerAsync<string>(
+                "select public.fn_lab_barkod_uret(@p0)", islem, [i.SubeId], iptal) ?? "";
+            var numuneId = await baglanti.TekDegerAsync<int>("""
+                insert into public.lab_numune
+                       (barkod, istem_id, hasta_id, numune_tipi, tup_tipi, durum,
+                        sube_id, ekleyen)
+                values (@p0, @p1, @p2, @p3, @p4, 1, @p5, @p6)
+                returning id
+                """, islem,
+                [barkod, istemId, i.HastaId, grup.First().Numune, grup.Key, i.SubeId,
+                 baglam.KullaniciId], iptal);
+
+            await baglanti.CalistirAsync("""
+                update public.lab_istem_satir set numune_id = @p0
+                 where id = any(@p1)
+                """, islem, [numuneId, grup.Select(x => x.Id).ToArray()], iptal);
+
+            barkodlar.Add(barkod);
+        }
+
+        await islem.CommitAsync(iptal);
+        return barkodlar;
+    }
+
     // ================================================================= numune
 
     /// <summary>

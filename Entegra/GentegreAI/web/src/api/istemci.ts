@@ -280,6 +280,11 @@ export const api = {
     gonder<{ id: number; istemNo: string; barkodlar: string[];
              tetkikSayisi: number; mesaj: string }>('/api/lab/istem', govde),
 
+  /** Kartla acilan istemin barkodlarini uretir (uc yolunda plan zaten calisir). */
+  labNumunePlani: (istemId: number) =>
+    gonder<{ id: number; barkodlar: string[]; mesaj: string }>(
+      `/api/lab/istem/${istemId}/numune-plani`, {}),
+
   labIstemOku: (id: number) =>
     istek<Record<string, unknown>>(`/api/lab/istem/${id}`),
 

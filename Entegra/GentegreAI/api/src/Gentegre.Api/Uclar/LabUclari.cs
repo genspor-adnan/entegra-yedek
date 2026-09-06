@@ -174,6 +174,24 @@ public static class LabUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
+        // POST /api/lab/istem/{id}/numune-plani - kart ekranından açılmış
+        //   istemin barkodlarını üretir. Kart yolu tüp planını çalıştırmaz;
+        //   barkodsuz istem kan alma biriminde "hangi tüp" sorusunu cevapsız
+        //   bırakırdı.
+        grup.MapPost("/istem/{id:int}/numune-plani", async (
+            int id, BaglamCozucu cozucu, LabServisi servis, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab.numune", Islem.Ekle);
+
+            var barkodlar = await servis.NumunePlaniAsync(id, baglam, iptal);
+            return Results.Ok(new { id, barkodlar,
+                mesaj = $"{barkodlar.Count} tüp barkodu üretildi: "
+                      + string.Join(", ", barkodlar),
+                izlemeNo = baglam.IzlemeNo });
+        });
+
         // ----------------------------------------------------------- numune ---
 
         // POST /api/lab/numune/{id}/durum - alındı (2) / kabul (3) / ret (0).

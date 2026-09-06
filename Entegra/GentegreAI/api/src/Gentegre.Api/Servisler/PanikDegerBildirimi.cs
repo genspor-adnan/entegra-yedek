@@ -38,29 +38,44 @@ public sealed class PanikDegerBildirimi
     /// <summary>Bildirim kaynağı: 5 = lab testi (kuyruk `kaynak_tur`).</summary>
     private const short KaynakLabTesti = 5;
 
-    /// <summary>Panik işareti (lab_istem_test.isaret): 0 normal · 1 düşük · 2 yüksek · 3 panik.</summary>
+    /// <summary>
+    /// Elle girilen satırdaki panik işareti (`lab_istem_satir.isaret`):
+    /// 0 normal · 1 düşük · 2 yüksek · 3 panik. 433'ten sonra asıl kaynak
+    /// <c>lab_sonuc.panik</c> - kural motoru orada karar veriyor; eski satır
+    /// alanı yalnız elle girişte dolu kalıyor.
+    /// </summary>
     private const short PanikIsareti = 3;
 
     public async Task TazeleAsync(long istemId, int kullaniciId, CancellationToken iptal)
     {
         if (await AyarAsync("lab.panik_bildirim_acik", "1", iptal) == "0") return;
 
+        // IKI KAYNAK: kural motorunun yazdigi lab_sonuc.panik VE eski elle
+        //   giris satirindaki isaret. 433'te tablo adi degisti
+        //   (lab_istem_test -> lab_istem_satir); yalniz eski ada bakan sorgu
+        //   "relation does not exist" ile patliyordu ve panik bildirimi hic
+        //   calismiyordu.
         var panikler = await _veri.ListeAsync("""
-            select t.id, coalesce(t.ad, t.kod) as test, coalesce(t.sonuc, '') as sonuc,
-                   coalesce(t.birim, '')       as birim,
+            select t.id, coalesce(nullif(t.ad, ''), t.kod) as test,
+                   coalesce(nullif(ls.deger_metin, ''), t.sonuc, '') as sonuc,
+                   coalesce(nullif(ls.birim, ''), t.birim, '') as birim,
                    coalesce(h.unvan, '')       as hasta,
                    coalesce(b.belge_no, '')    as protokol,
                    coalesce(p.cep_tel, '')     as hekim_tel,
                    coalesce(p.unvan, '')       as hekim,
                    coalesce(i.sube_id, 0)      as sube_id
-              from public.lab_istem_test t
+              from public.lab_istem_satir t
               join public.lab_istem i on i.id = t.istem_id
+              left join lateral (
+                    select x.deger_metin, x.birim, x.panik
+                      from public.lab_sonuc x
+                     where x.istem_satir_id = t.id and x.durum <> 4
+                     order by x.id desc limit 1) ls on true
               left join public.taraf h on h.id = i.taraf_id
               left join public.taraf p on p.id = i.personel_id
               left join public.belge b on b.id = i.belge_id
              where t.istem_id = @p0
-               and t.isaret = @p1
-               and coalesce(t.sonuc, '') <> ''
+               and (ls.panik = 1 or (t.isaret = @p1 and coalesce(t.sonuc, '') <> ''))
                -- Ayni test icin ZATEN bildirim varsa (iptal edilmemis) atla.
                and not exists (
                      select 1 from public.bildirim n

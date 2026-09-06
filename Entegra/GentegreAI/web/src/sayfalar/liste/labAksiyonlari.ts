@@ -38,6 +38,15 @@ export async function labAksiyonu(
   if (!id) { mesaj('Önce bir kayıt seçin.'); return true }
 
   switch (kod) {
+    // ------------------------------------------------------------ istem ---
+    case 'lab.numune-plani':
+      await guvenli(async () => {
+        const y = await api.labNumunePlani(id);
+        mesaj(y.mesaj);
+        b.tazele();
+      });
+      return true;
+
     // ----------------------------------------------------------- numune ---
     case 'lab.numune-alindi':
       await guvenli(async () => {
