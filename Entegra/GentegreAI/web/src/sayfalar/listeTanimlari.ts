@@ -729,6 +729,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     aksiyonEkrani: 'lab-kultur-liste',
     tarihAlani: 'ekimZamani',
     cipler: [
+      // VARSAYILAN "Açık Kültürler": ekran acilir acilmaz masadaki isi
+      //   gostermeli. "Okuma Zamani Geldi" cipi dogru ama cogu saat bos
+      //   doner - ilk acilista bos liste, ekrani calismiyor gosterir.
+      { ad: 'Açık Kültürler', filtre: { alan: 'durum', op: 'icinde', deger: [1, 2, 3, 4, 5, 6] } },
       { ad: 'Okuma Zamanı Geldi', filtre: { alan: 'okumaGecikmeDk', op: 'buyukEsit', deger: 0 } },
       { ad: 'İnkübasyon',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
       { ad: 'Üreme',        filtre: { alan: 'durum', op: 'esit', deger: 3 } },

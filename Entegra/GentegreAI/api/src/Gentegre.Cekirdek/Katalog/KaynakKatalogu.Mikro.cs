@@ -44,11 +44,14 @@ public static partial class KaynakKatalogu
                                  Filtrelenebilir: false),
             new("gramSonuc", "k.gram_sonuc", "metin", "Gram / Direkt", Genislik: 180),
             // OKUMA GECİKMESİ: negatif sayı "daha var", pozitif "gecikti".
+            //   FİLTRELENEBİLİR olmak zorunda: ekranın varsayılan çipi
+            //   ("Okuma Zamanı Geldi") bu alana >= 0 koşulu koyuyor. Kapalı
+            //   bırakılınca liste açılır açılmaz "bu alanda filtre
+            //   kullanılamaz" hatası veriyordu.
             new("okumaGecikmeDk",
                 "case when k.sonraki_okuma is null then null "
                 + "else floor(extract(epoch from (now() - k.sonraki_okuma)) / 60)::int end",
-                                 "sayi", "Okuma (dk)", Hizalama: "sag", Genislik: 100,
-                                 Filtrelenebilir: false),
+                                 "sayi", "Okuma (dk)", Hizalama: "sag", Genislik: 100),
             new("sonrakiOkuma", "k.sonraki_okuma", "tarih", "Sonraki Okuma",
                                  Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm",
                                  Genislik: 130),
