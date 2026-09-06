@@ -143,33 +143,33 @@ export function LabEtiket() {
           const acil = Number(e.oncelik ?? 1) === 3;
           const barkod = String(e.barkod ?? '');
           return (
-            <div className={`etiket${acil ? ' acil' : ''}`} key={`${e.id}-${k}`}>
-              <div className="serit" style={{ background: tup.renk }} />
-              <div className="govde">
-                <div className="ust">
-                  <b className="tup" style={{ color: tup.renk === '#e8c33a'
+            <div className={`tup-etiket${acil ? ' acil' : ''}`} key={`${e.id}-${k}`}>
+              <div className="et-serit" style={{ background: tup.renk }} />
+              <div className="et-govde">
+                <div className="et-ust">
+                  <b className="et-tup" style={{ color: tup.renk === '#e8c33a'
                                                      ? '#8a6d0b' : tup.renk }}>
                     {tup.ad}
                   </b>
-                  {acil && <span className="acil-rozet">ACİL / STAT</span>}
-                  <span className="tarih">{gunAy(e.istemTarihi)}</span>
+                  {acil && <span className="et-acil-rozet">ACİL / STAT</span>}
+                  <span className="et-tarih">{gunAy(e.istemTarihi)}</span>
                 </div>
 
                 <Barkod metin={barkod} />
                 <div className="barkod-metin">{barkod}</div>
 
-                <div className="hasta">
+                <div className="et-hasta">
                   {kisaAd(String(e.hasta ?? ''))}
                   {' · '}
                   {[yas(e.dogumTarihi), CINSIYET[Number(e.cinsiyet ?? 0)] ?? '']
                     .filter(Boolean).join('')}
                   {gun(e.dogumTarihi) ? ` · ${gun(e.dogumTarihi)}` : ''}
                 </div>
-                <div className="alt">
+                <div className="et-alt">
                   {String(e.istemNo ?? '')}
                   {String(e.tetkikler ?? '') ? ` · ${e.tetkikler}` : ''}
                 </div>
-                <div className="alt2">
+                <div className="et-alt2">
                   {NUMUNE[Number(e.numuneTipi ?? 0)] ?? ''}
                   {String(e.bolumler ?? '') ? ` · ${e.bolumler}` : ''}
                   {kopya > 1 ? ` · ${k + 1}/${kopya}` : ''}

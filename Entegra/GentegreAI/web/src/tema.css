@@ -1464,45 +1464,53 @@ input.skt-gecmis {
   font-weight: 700; color: #1c4374; margin-top: 8px; font-size: 12px;
 }
 .cikti-sayfa .not { font-size: 10.5px; color: #6b7a8d; line-height: 1.5; margin: 4px 0 0 }
-/* TUP BARKOD ETIKETI (444). Olcu 50x25 mm: piyasadaki termal etiket
+/* TUP BARKOD ETIKETI (444). SINIF ADI `.tup-etiket`: kisa `.etiket`
+   ADI ZATEN FORM ETIKETININ (label) sinifi - ayni ad, butun kartlardaki
+   alan etiketlerini 50x25 mm'lik kutuya cevirmisti (Genel Ayarlar,
+   Entegrasyon Hesabi... hepsi bozuluyordu). Genel adli sinifa boyut
+   vermek, uygulamanin baska ucundaki ekrani sessizce bozar.
+   Olcu 50x25 mm: piyasadaki termal etiket
    ruloların yaygin boyu. Kagida basildiginda da ayni olculerde cikar -
    yazicida "sayfaya sigdir" secilirse barkod okunmaz hale gelirdi. */
 .etiket-sayfa { padding: 10px }
 .etiket-sayfa .etiketler {
   display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
 }
-.etiket {
+.tup-etiket {
   width: 50mm; height: 25mm; border: 1px solid #d6dfe9; border-radius: 2px;
   display: flex; overflow: hidden; background: #fff; page-break-inside: avoid;
 }
-/* TUP RENGI SERIT: teknisyen etikete degil, renge bakarak dogru tupu secer. */
-.etiket .serit { width: 4mm; flex: 0 0 4mm }
-.etiket.acil { border-color: #c0392b; border-width: 2px }
-.etiket .govde { flex: 1; padding: 1mm 1.5mm; display: flex; flex-direction: column;
+/* IC SINIFLAR `et-` ONEKLI: kisa adlar (ust / govde / serit / alt) uygulama
+   kabugunun sinif adlariyla ayni - `.ust` uygulamanin UST SERIDIDIR ve
+   etiketin ic satirini 52 px lacivert bloga ceviriyordu.
+   TUP RENGI SERIT: teknisyen etikete degil, renge bakarak dogru tupu secer. */
+.tup-etiket .et-serit { width: 4mm; flex: 0 0 4mm }
+.tup-etiket.acil { border-color: #c0392b; border-width: 2px }
+.tup-etiket .et-govde { flex: 1; padding: 1mm 1.5mm; display: flex; flex-direction: column;
                  justify-content: space-between; min-width: 0 }
-.etiket .ust { display: flex; align-items: baseline; gap: 3px; font-size: 6.5pt }
-.etiket .tup { font-weight: 700; white-space: nowrap; overflow: hidden }
-.etiket .acil-rozet {
+.tup-etiket .et-ust { display: flex; align-items: baseline; gap: 3px; font-size: 6.5pt }
+.tup-etiket .et-tup { font-weight: 700; white-space: nowrap; overflow: hidden }
+.tup-etiket .et-acil-rozet {
   background: #c0392b; color: #fff; border-radius: 2px; padding: 0 2px;
   font-weight: 700; font-size: 6pt;
 }
-.etiket .tarih { margin-left: auto; color: #555 }
-.etiket .etiket-barkod { display: block; width: 100%; height: 8mm }
-.etiket .barkod-metin {
+.tup-etiket .et-tarih { margin-left: auto; color: #555 }
+.tup-etiket .etiket-barkod { display: block; width: 100%; height: 8mm }
+.tup-etiket .barkod-metin {
   font-family: 'Courier New', monospace; font-size: 7.5pt; letter-spacing: 0.5px;
   text-align: center; line-height: 1;
 }
-.etiket .hasta { font-size: 8pt; font-weight: 700; white-space: nowrap;
+.tup-etiket .et-hasta { font-size: 8pt; font-weight: 700; white-space: nowrap;
                  overflow: hidden; text-overflow: ellipsis }
-.etiket .alt, .etiket .alt2 {
+.tup-etiket .et-alt, .tup-etiket .et-alt2 {
   font-size: 6.5pt; color: #333; white-space: nowrap; overflow: hidden;
   text-overflow: ellipsis;
 }
-.etiket .alt2 { color: #667 }
+.tup-etiket .et-alt2 { color: #667 }
 @media print {
   .etiket-sayfa .cikti-arac, .etiket-sayfa .yazdirma { display: none !important }
   .etiket-sayfa { padding: 0 }
-  .etiket { border: none }
+  .tup-etiket { border: none }
   .etiket-sayfa .etiketler { gap: 0 }
 }
 

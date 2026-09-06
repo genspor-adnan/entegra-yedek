@@ -7385,3 +7385,31 @@ Sayı rozetleri için `rozetHucre`'ye **desen** eşleşmesi eklendi ("3 gün
 GECİKTİ" sözlükte tam eşleşemez).
 
 Testler: `bicim` (3 yeni) — web **447**, API **123**.
+
+### Ek: "Bozuk ekran" — sınıf adı çakışması (446)
+
+Kullanıcı `Dosya/Bozuk ekran.png` ile bildirdi: **Entegrasyon Hesabı** kartında
+alan etiketleri devasa boş kutulara dönmüştü. Yeniden üretildi; Genel Ayarlar
+da aynı hâldeydi.
+
+**Kök neden:** tüp barkod etiketi (444) iç kutularına **kısa, genel adlar**
+verilmişti — `.etiket`, `.ust`, `.govde`. Üçü de temada zaten global:
+`.etiket` **her formun alan etiketi**, `.ust` **uygulamanın üst şeridi**.
+`.alan .etiket` kuralı yazı tipini/rengini ezdiği için sorun görünmüyordu ama
+`width: 50mm; height: 25mm; border` miras kalıyordu: ölçülen kutu 184×94 px =
+50×25 mm. Etiketin kendi iç satırı da global `.ust`'tan 52 px lacivert
+gradyan alıyordu.
+
+Hata **laboratuvarda** yazıldı, **Genel Ayarlar'da** görüldü - bir ekranın
+kendi görünümüne genel bir ad koymak, uygulamanın başka ucunu sessizce bozar.
+
+**Düzeltme:** `.tup-etiket` kök sınıfı + `et-` önekli iç sınıflar
+(`et-serit`, `et-govde`, `et-ust`, `et-tup`, `et-tarih`, `et-hasta`,
+`et-alt`, `et-alt2`, `et-acil-rozet`); `LabEtiket.tsx` buna göre güncellendi.
+Etiket çıktısı doğrulandı (sarı şerit, barkod, hasta, istem satırı).
+
+**Testler:** `temaSinifCakismasi` (2) — etiket ekranı temanın global bir
+sınıf adını sahiplenemez; iç sınıflar global tanımlı olamaz. Test yanlış
+sebeple yeşile dönmesin diye global adların (`ust`, `etiket-sayfa`) hâlâ
+durduğu da doğrulanıyor. `tsconfig.app.json`'a `node` tipleri eklendi (test
+kaynak dosyayı okuyor). Web **449** test.
