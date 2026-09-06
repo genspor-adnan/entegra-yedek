@@ -387,11 +387,19 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
         }
 
         var panik = bayrak is "LL" or "HH";
+
+        // KALİTE KONTROL (442): testin son KK ölçümü RET ise oto-onay kapanır.
+        //   Kural motorunun "temiz sonuç" kararı, cihazın o gün doğru ölçtüğü
+        //   varsayımına dayanır; kontrol tutmuyorsa varsayım çürümüştür.
+        //   Sonuç yine KAYDEDİLİR - uzman görüp karar verir.
+        var kkGecerli = await baglanti.TekDegerAsync<bool>(
+            "select public.fn_lab_kk_gecerli(@p0)", islem, [s.TetkikId], iptal);
+
         // Oto-onay: kural motoru TEMİZ dediyse. DÜZELTMEDE kapalıdır -
         //   daha önce onaylanmış bir sonucu değiştiren satırın ikinci bir göz
         //   görmeden yayınlanması, düzeltmenin kendisini denetimsiz bırakırdı.
         var otoOnay = otoOnaySerbest && s.OtoOnay == 1 && bayrak == "N"
-                      && !panik && !deltaUyari;
+                      && !panik && !deltaUyari && kkGecerli;
 
         var sonucId = await baglanti.TekDegerAsync<long>("""
             insert into public.lab_sonuc
@@ -428,7 +436,10 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
             : deltaUyari
                 ? $"Delta uyarısı: önceki {oncekiDeger:0.##}, değişim %{deltaYuzde:0.#}"
                 : otoOnay ? "Sonuç girildi ve otomatik onaylandı."
-                          : $"Sonuç girildi ({bayrak}).";
+                : !kkGecerli
+                    ? $"Sonuç girildi ({bayrak}) - KALİTE KONTROL RET durumunda "
+                      + "olduğu için otomatik onaylanmadı."
+                    : $"Sonuç girildi ({bayrak}).";
         return new SonucSonucu(sonucId, bayrak, panik, deltaUyari, mesaj);
     }
 

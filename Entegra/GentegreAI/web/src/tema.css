@@ -1464,6 +1464,12 @@ input.skt-gecmis {
   font-weight: 700; color: #1c4374; margin-top: 8px; font-size: 12px;
 }
 .cikti-sayfa .not { font-size: 10.5px; color: #6b7a8d; line-height: 1.5; margin: 4px 0 0 }
+/* LEVEY-JENNINGS (442): kagida da basilabilsin diye SVG - ayri bir
+   grafik kutuphanesi yuklemek, tek grafik icin 200 KB demekti. */
+.lj-grafik { width: 100%; height: auto; margin-top: 10px; background: #fcfdfe;
+             border: 1px solid #e6edf5; border-radius: 6px }
+.lj-eksen { font-size: 9px; fill: #6b7a8d }
+.lj-ihlal { font-size: 8.5px; fill: #c0392b; font-weight: 700 }
 .cikti-sayfa .uyari-satir {
   font-size: 11px; color: #a33; margin-top: 6px; font-weight: 600;
 }

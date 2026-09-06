@@ -188,6 +188,13 @@ public static partial class KaynakKatalogu
         Ekle(LabGenetikRun());
         Ekle(LabGen());
         Ekle(LabGenetikPanel());
+        // KALITE KONTROL (442): IKK olcumleri, kontrol lotlari, Westgard
+        //   kural seti, dis kalite ve cihaz olaylari.
+        Ekle(LabKkOlcum());
+        Ekle(LabKkLot());
+        Ekle(LabKkKural());
+        Ekle(LabDkk());
+        Ekle(LabCihazOlay());
         // FAZ 0 ortak platform (398-401): onam, bildirim, klinik kataloglar.
         Ekle(OnamMetni());
         Ekle(Onam());

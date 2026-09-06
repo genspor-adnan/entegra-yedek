@@ -336,6 +336,46 @@ export const api = {
     gonder<{ yazilan: number; atlanan: number; mesaj: string }>(
       `/api/lab/cihaz-mesaj/${mesajId}/isle`, {}),
 
+  // -------------------------------------------------- KALITE KONTROL (442)
+  /** KK olcumu: z skoru ve Westgard degerlendirmesi SUNUCUDA hesaplanir. */
+  kkOlcum: (govde: { lotId: number; tetkikId: number; seviye: number;
+                     deger: number; cihazId?: number; zaman?: string;
+                     kaynak?: number; tekrar?: boolean }) =>
+    gonder<{ id: number; z: number | null; durum: number; ihlaller: string[];
+             mesaj: string }>('/api/lab/kk/olcum', govde),
+
+  /** Ret/uyari sonrasi duzeltici faaliyet (ISO 15189) - metin ZORUNLU. */
+  kkAksiyon: (olcumId: number, govde: { aksiyon: string; gozdenGecirilen?: number;
+                                        duzeltilen?: number; olay?: number }) =>
+    gonder<{ mesaj: string }>(`/api/lab/kk/olcum/${olcumId}/aksiyon`, govde),
+
+  /** Levey-Jennings serisi + ayni donemin cihaz olaylari. */
+  labKkLj: (tetkikId: number, ek?: { lotId?: number; seviye?: number; gun?: number }) => {
+    const s = new URLSearchParams({ tetkikId: String(tetkikId) });
+    if (ek?.lotId) s.set('lotId', String(ek.lotId));
+    if (ek?.seviye) s.set('seviye', String(ek.seviye));
+    if (ek?.gun) s.set('gun', String(ek.gun));
+    return istek<{ tetkik: Record<string, unknown> | null;
+                   seri: Record<string, unknown>[];
+                   olaylar: Record<string, unknown>[] }>(`/api/lab/kk/lj?${s}`);
+  },
+
+  /** Dis kalite sonucu; SDI = (bizim - hedef) / grup SD, sunucuda. */
+  kkDkk: (govde: { program: string; donem: string; tetkikId: number;
+                   numuneKodu?: string; sonucumuz: number; hedef: number;
+                   grupSd?: number; grupN?: number; yontem?: string;
+                   raporTarihi?: string }) =>
+    gonder<{ id: number; sdi: number | null; degerlendirme: number; mesaj: string }>(
+      '/api/lab/kk/dkk', govde),
+
+  /** Cihazdan gelen KONTROL mesajini KK olcumune cevirir. */
+  kkCihazMesaj: (mesajId: number) =>
+    gonder<{ yazilan: number; mesaj: string }>(`/api/lab/kk/cihaz-mesaj/${mesajId}`, {}),
+
+  /** Testlerin KK gecerliligi - oto-onay penceresi. */
+  kkDurum: () =>
+    istek<{ liste: Record<string, unknown>[] }>('/api/lab/kk/durum'),
+
   // --------------------------------------------------------- GENETIK (439)
   /** Istem satirindan genetik vaka acar; rapor icin ONAM sart (KVKK md. 6). */
   genetikVakaAc: (istemSatirId: number, istek?: { panelId?: number;

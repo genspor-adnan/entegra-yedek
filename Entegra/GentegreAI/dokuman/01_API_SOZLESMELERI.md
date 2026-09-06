@@ -727,6 +727,58 @@ numarasıyla açılır, çünkü aynı istemdeki diğer tetkikler de aynı kâğ
 
 ---
 
+## 9.7 Kalite kontrol uçları (442)
+
+```http
+POST /api/lab/kk/olcum                  // { lotId, tetkikId, seviye, deger, cihazId?, kaynak? }
+POST /api/lab/kk/olcum/{id}/aksiyon     // { aksiyon, gozdenGecirilen?, duzeltilen?, olay? }
+GET  /api/lab/kk/lj?tetkikId=&lotId=&seviye=&gun=   // Levey-Jennings serisi + cihaz olayları
+POST /api/lab/kk/dkk                    // { program, donem, tetkikId, sonucumuz, hedef, grupSd? }
+POST /api/lab/kk/cihaz-mesaj/{id}       // cihazdan gelen KONTROL mesajını ölçüme çevirir
+GET  /api/lab/kk/durum                  // testlerin KK geçerliliği (oto-onay penceresi)
+```
+
+**Z skoru ve Westgard kararı sunucuda** hesaplanır ve ölçüm satırında
+saklanır. Kural seti sonradan değişse geçmiş değerlendirme aynı kalır -
+hasta sonucundaki bayrakla tamamen aynı gerekçe.
+
+**Yürürlükteki hedef/SD tek yerde** (`fn_lab_kk_hedef`): laboratuvarın
+kümülatifi eşiği (varsayılan 20 ölçüm) geçtiyse o, geçmediyse üretici
+değeri. Kümülatif hesaba **ret edilen ölçümler girmez** — ret bir ölçüm
+hatasıdır, hedefi kaydırmamalı.
+
+**Westgard kuralları**: 1₃ₛ (tek ölçüm ±3 SD dışında) · 2₂ₛ (ardışık iki
+ölçüm aynı yönde ±2 SD dışında) · R₄ₛ (aynı çalışmada iki seviye arası 4 SD
+açıklık) · 4₁ₛ ve 10ₓ (kayma uyarıları) · 1₂ₛ (uyarı). Kural seti **test
+bazlı**; `tetkik_id` boş satırlar varsayılan settir. Kural **davranışı**
+(0 kapalı · 1 uyarı · 2 ret) ile ölçüm **durumu** (1 kabul · 2 uyarı ·
+3 ret) ayrı kod uzaylarıdır.
+
+**En önemli bağ — oto-onay**: `fn_lab_kk_gecerli(tetkikId)` son 24 saatteki
+KK ölçümü RET ise `false` döner ve `SonucYazAsync` o testin sonucunu
+**otomatik onaylamaz** (sonuç yine kaydedilir, uzman görür). Kalite
+kontrolünü ayrı bir kayıt defteri olarak tutup sonuç hattına bağlamamak,
+kuralı süse çevirirdi. Hiç KK tanımlı değilse "geçerli" sayılır — kurulum
+aşamasındaki laboratuvarı kilitlememek için.
+
+**Ret düzeltici faaliyet ister** (TS EN ISO 15189): metin zorunlu; kaç hasta
+sonucunun gözden geçirildiği ve kaçının düzeltildiği de kayda geçer.
+İsteğe bağlı olarak bir **cihaz olayı** (kalibrasyon, reaktif lot değişimi,
+bakım, arıza) yazılır — Levey-Jennings'teki kaymanın nedeni çoğu zaman odur.
+
+**DKK**: SDI = (bizim − hedef) / grup SD; |SDI| ≤ 2 kabul, 2–3 uyarı, > 3
+kabul edilemez. SDI sunucuda hesaplanır, elle girilemez.
+
+**Ekran**: `/lab/kk/grafik?tetkik=&lot=&seviye=` — ±1/2/3 SD bantlı SVG
+Levey-Jennings, ihlal etiketleri, ölçüm tablosu ve aynı dönemin cihaz
+olayları. Kapatılmamış ret satırında düzeltici faaliyet "KAYDEDİLMEDİ"
+olarak görünür.
+
+**Yetkiler**: `lab.kk` (ölçüm, lot, kural, DKK, cihaz olayı),
+`lab.kk.onay` (ret sonrası serbest bırakma - ileride kullanılacak).
+
+---
+
 ---
 
 ## 10. Sürümleme

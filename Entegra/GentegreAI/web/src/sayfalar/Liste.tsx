@@ -56,6 +56,7 @@ import { cihazAksiyonu } from './liste/cihazAksiyonlari';
 import { labAksiyonu } from './liste/labAksiyonlari';
 import { mikroAksiyonu } from './liste/mikroAksiyonlari';
 import { genetikAksiyonu } from './liste/genetikAksiyonlari';
+import { kkAksiyonu } from './liste/kkAksiyonlari';
 import { DokumanKlasorPaneli, type KlasorSecimi } from '../bilesenler/DokumanKlasorPaneli';
 import { fiyatListesiAksiyonu } from './liste/fiyatListesiAksiyonlari';
 import { ebelgeAksiyonu } from './liste/ebelgeAksiyonlari';
@@ -758,6 +759,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       })) return;
 
       if (await genetikAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+      })) return;
+
+      if (await kkAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
       })) return;

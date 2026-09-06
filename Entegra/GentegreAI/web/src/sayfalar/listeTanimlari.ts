@@ -799,6 +799,86 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ic: '📚', yetkiKodu: 'lab.genetik',
   },
   {
+    // KK OLCUMLERI (442) - laboratuvarin gunluk kontrol defteri.
+    //   Varsayilan cip "Ret / Uyari": kapatilmamis ret once gorunmeli,
+    //   cunku o testin hasta sonuclari oto-onaya girmiyor.
+    kaynak: 'lab-kk-olcum', rota: 'lab-kk-olcum', baslik: 'Kalite Kontrol (İKK)',
+    yol: 'Laboratuvar › Kalite Kontrol',
+    aksiyonEkrani: 'lab-kk-liste',
+    tarihAlani: 'olcumZamani',
+    cipler: [
+      { ad: 'Ret / Uyarı', filtre: { alan: 'durum', op: 'icinde', deger: [2, 3] } },
+      { ad: 'Ret',         filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Kabul',       filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Kalite Kontrol', menuSira: 39,
+    ic: '📉', yetkiKodu: 'lab.kk',
+  },
+  {
+    // DIS KALITE (442): donem bazli, SDI ile degerlendirilir.
+    kaynak: 'lab-dkk', rota: 'lab-dkk', baslik: 'Dış Kalite (DKK)',
+    yol: 'Laboratuvar › Dış Kalite',
+    kartYolu: '/lab-dkk', kartBaslik: 'DKK Sonucu',
+    aksiyonEkrani: 'lab-dkk-liste',
+    cipler: [
+      { ad: 'Uyarı / Red', filtre: { alan: 'degerlendirme', op: 'icinde', deger: [2, 3] } },
+      { ad: 'Kabul',       filtre: { alan: 'degerlendirme', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Dış Kalite', menuSira: 41,
+    ic: '🌍', yetkiKodu: 'lab.kk',
+  },
+  {
+    // KONTROL LOTLARI (442): hedef/SD lot basinadir, kart detayinda.
+    kaynak: 'lab-kk-lot', rota: 'lab-kk-lot', baslik: 'Kontrol Lotları',
+    yol: 'Laboratuvar › Kontrol Lotları',
+    kartYolu: '/lab-kk-lot', kartBaslik: 'Kontrol Lotu',
+    aksiyonEkrani: 'lab-kk-lot-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Kontrol Lotları', menuSira: 74,
+    ic: '🧴', yetkiKodu: 'lab.kk',
+  },
+  {
+    // WESTGARD KURAL SETI (442): tetkik bos = varsayilan set.
+    kaynak: 'lab-kk-kural', rota: 'lab-kk-kural', baslik: 'Westgard Kuralları',
+    yol: 'Laboratuvar › Westgard Kuralları',
+    kartYolu: '/lab-kk-kural', kartBaslik: 'Westgard Kuralı',
+    aksiyonEkrani: 'lab-kk-kural-liste',
+    cipler: [
+      { ad: 'Ret Kuralları', filtre: { alan: 'davranis', op: 'esit', deger: 2 } },
+      { ad: 'Uyarı',         filtre: { alan: 'davranis', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Westgard Kuralları', menuSira: 76,
+    ic: '⚙️', yetkiKodu: 'lab.kk',
+  },
+  {
+    // CIHAZ OLAYLARI (442): LJ'deki kaymanin nedeni cogu zaman burada.
+    kaynak: 'lab-cihaz-olay', rota: 'lab-cihaz-olay', baslik: 'Cihaz Olayları',
+    yol: 'Laboratuvar › Cihaz Olayları',
+    kartYolu: '/lab-cihaz-olay', kartBaslik: 'Cihaz Olayı',
+    aksiyonEkrani: 'lab-cihaz-olay-liste',
+    tarihAlani: 'zaman',
+    cipler: [
+      { ad: 'Kalibrasyon', filtre: { alan: 'olay', op: 'esit', deger: 1 } },
+      { ad: 'Reaktif Lot', filtre: { alan: 'olay', op: 'esit', deger: 3 } },
+      { ad: 'Arıza',       filtre: { alan: 'olay', op: 'esit', deger: 4 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Cihaz Olayları', menuSira: 78,
+    ic: '🔧', yetkiKodu: 'lab.kk',
+  },
+  {
     // GEN KATALOGU (439): transkript zorunlu - HGVS gosterimi ona goredir.
     kaynak: 'lab-gen', rota: 'lab-gen', baslik: 'Gen Kataloğu',
     yol: 'Laboratuvar › Genler',

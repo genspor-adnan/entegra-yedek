@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (219 ad, 65 tanesi birden cok dosyada)
+## Fonksiyonlar (223 ad, 65 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -129,8 +129,12 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_lab_cihaz_calisma_listesi` | `434_lab_cihaz_esleme.sql` | — |
 | `fn_lab_cihaz_tetkik` | `434_lab_cihaz_esleme.sql` | — |
 | `fn_lab_genetik_ozet` | `439_lab_genetik.sql` | — |
+| `fn_lab_kk_gecerli` | `442_lab_kalite_kontrol.sql` | — |
+| `fn_lab_kk_hedef` | `442_lab_kalite_kontrol.sql` | — |
+| `fn_lab_kk_kumulatif` | `442_lab_kalite_kontrol.sql` | — |
 | `fn_lab_kultur_ozet` | `436_lab_mikrobiyoloji.sql` | — |
 | `fn_lab_referans` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |
+| `fn_lab_westgard` | `442_lab_kalite_kontrol.sql` | — |
 | `fn_metin_anahtar` | `414_metin_sadelestir.sql` | — |
 | `fn_metin_sadelestir` | `414_metin_sadelestir.sql` | — |
 | `fn_mizan` | `077_v_ekstre.sql` | — |
@@ -228,7 +232,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (113 ad, 37 tanesi birden cok dosyada)
+## Gorunumler (115 ad, 37 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -299,6 +303,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_lab_gen_lookup` | `439_lab_genetik.sql` | — |
 | `v_lab_genetik_panel_lookup` | `439_lab_genetik.sql` | — |
 | `v_lab_genetik_run_lookup` | `439_lab_genetik.sql` | — |
+| `v_lab_kk_lj` | `442_lab_kalite_kontrol.sql` | — |
+| `v_lab_kk_lot_lookup` | `442_lab_kalite_kontrol.sql` | — |
 | `v_lab_organizma_lookup` | `436_lab_mikrobiyoloji.sql` | — |
 | `v_lab_panel_lookup` | `433_lab_v1.sql` | — |
 | `v_lab_tetkik_lookup` | `433_lab_v1.sql` | — |

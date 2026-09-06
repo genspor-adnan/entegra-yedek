@@ -7015,3 +7015,71 @@ Mockuplar: `Ekranlar/Lab/lab_sonuc_formu_biyokimya.html`,
 onaylayan dolu), MURAT AYDIN (kültür özeti + izolat + **9 raporlanan**
 antibiyotik), ZEYNEP KOÇ (vaka GEN-2026/0004, onam sürümü, kapsama %99,1,
 derinlik 212×, **2 raporlanan varyant**; olası benign TTN raporda yok).
+
+---
+
+## 06.09.2026 — İç ve dış kalite kontrol: Westgard ve oto-onay bağı (`db/442`)
+
+Mockup: `Ekranlar/Lab/lab_kalite_kontrol.html`. Lab v1'de açık kalan son
+büyük başlık.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K135 | Hedef/SD **lot başına** (`lab_kk_hedef`), üretici + laboratuvar kümülatifi ayrı kolonlarda | Yeni lotta değerler değişir; tek bir "test hedefi" lot geçişinde bütün grafiği kaydırırdı. Laboratuvarın kendi kümülatifi yöntem/cihaz/teknisyen etkisini içerir, üreticininki göremez |
+| K136 | Kümülatif hesaba **ret edilen ölçüm girmez** | Ret bir ölçüm hatasıdır; hedefi kaydırması, hatayı normalleştirmek olurdu |
+| K137 | Z skoru ve ihlal listesi **ölçümle birlikte saklanır** | Kural seti ya da hedef sonradan değişse geçmiş değerlendirme ve grafikteki nokta yerinden oynamamalı |
+| K138 | Kural seti **test bazlı**, `tetkik_id` boş satırlar varsayılan set | Bir HbA1c ile bir troponinin tolere ettiği sapma aynı değil; ama her test için ayrı set zorunlu tutmak kurulumda yüzlerce satır elle giriş demekti |
+| K139 | 1₂ₛ **uyarıdır, ret değil** | Her 20 ölçümden biri şansa ±2 SD dışına düşer; ret sayılsaydı laboratuvar durmadan kalibrasyon yapardı |
+| K140 | **KK ret iken oto-onay kapanır** (`fn_lab_kk_gecerli`), sonuç yine kaydedilir | Kural motorunun "temiz sonuç" kararı, cihazın o gün doğru ölçtüğü varsayımına dayanır; kontrol tutmuyorsa varsayım çürümüştür. Sonucu hiç kaydetmemek ise çalışılmış testi yok saymak olurdu |
+| K141 | Hiç KK tanımlı değilse test **geçerli** sayılır | Kalite kontrolü tanımlanmamış bir testi çalıştırmamak ayrı bir karardır; burada zorlansaydı kurulum aşamasındaki laboratuvar kilitlenirdi |
+| K142 | Ret hâlinde **düzeltici faaliyet zorunlu** + gözden geçirilen/düzeltilen hasta sonucu sayısı | ISO 15189: ne yapıldığı yazılmayan ret denetimde savunulamaz. "Kontrol tutmadı" demek, o aralıktaki hasta sonuçlarının şüpheli olduğunu söylemektir |
+| K143 | **KK ölçümünün kartı yok**; ölçüm uçtan girilir | Kalite kaydının değeri değiştirilememesinden gelir; serbest kart z skorunu ve kural kararını elle ezilebilir kılardı |
+| K144 | Cihaz olayları **ayrı tablo** ve grafikle birlikte gösterilir | Levey-Jennings'teki kaymanın nedeni çoğu zaman kalibrasyon ya da reaktif lot değişimidir; ayrı ekranda dursaydı bağ kurulamazdı |
+| K145 | Levey-Jennings **SVG olarak** çizilir, grafik kütüphanesi yok | Tek grafik için 200 KB'lık bağımlılık; SVG hem yazdırılabiliyor hem tema renklerini kullanıyor |
+
+### Yapılanlar
+
+- **`db/442`**: `lab_kk_lot`, `lab_kk_hedef`, `lab_kk_kural`, `lab_kk_olcum`,
+  `lab_dkk_sonuc`, `lab_cihaz_olay`; `fn_lab_kk_hedef`, `fn_lab_westgard`,
+  `fn_lab_kk_gecerli`, `fn_lab_kk_kumulatif`; `v_lab_kk_lj` görünümü;
+  `lab.kk` / `lab.kk.onay` yetkileri; varsayılan Westgard seti (6 kural).
+- **API**: `KaliteKontrolServisi` + uçlar (sözleşme §9.7). `LabServisi`
+  oto-onay kararına KK geçerliliği eklendi.
+- **Ekranlar**: Kalite Kontrol (İKK), Dış Kalite, Kontrol Lotları (+ hedef
+  detayı), Westgard Kuralları, Cihaz Olayları; `/lab/kk/grafik`
+  Levey-Jennings sayfası (±1/2/3 SD bantları, ihlal etiketleri, ölçüm
+  tablosu, cihaz olayları).
+- **Testler**: `KaliteKontrolTestleri` (7 durum) — 1₃ₛ/2₂ₛ/4₁ₛ/R₄ₛ,
+  oto-onayın kapanıp açılması, kümülatifin reti dışlaması, yürürlükteki
+  hedefin eşikte kaynak değiştirmesi. Toplam **113 test** geçiyor.
+
+### Uygulama sırasında çıkan iki kusur
+
+**`text[] || 'metin'`** PostgreSQL'de dizi sabiti sanılıp
+*"malformed array literal"* veriyordu; `array_append` ile düzeltildi.
+
+**Kural davranışı ile ölçüm durumu farklı kod uzayları** (0/1/2 ve 1/2/3);
+doğrudan atama, 1₃ₛ ihlalini "uyarı" olarak kaydediyor ve **oto-onayı
+kapatmıyordu**. Testler bunu ilk koşuda yakaladı.
+
+Ayrıca `fn_lab_kk_gecerli(tetkik, now())` çağrısı `timestamptz` imzası
+aradığı için 42883 veriyordu; fonksiyon `localtimestamp` kullanacak şekilde
+düzeltildi ve çağrılar tek argümana indirildi.
+
+### Uçtan uca (yerel, veri ekranda duruyor)
+
+Kontrol lotu **PCCM1-552211** (PreciControl ClinChem Multi 1, iki seviye:
+92 ± 2,8 ve 248 ± 6,2) açıldı; sekiz gün ölçüm girildi. **101 mg/dL
+(z = +3,21)** ölçümü `1_3s` ile **RET** oldu ve `GLU` için oto-onay kapandı.
+Düzeltici faaliyet (kalibrasyon, 14 hasta sonucu gözden geçirildi) + geçerli
+tekrar ölçümü sonrası açıldı.
+
+**Bağ ayrıca hasta sonucuyla gösterildi**: KK ret durumundayken girilen
+normal (N) bir glukoz sonucu *"KALİTE KONTROL RET durumunda olduğu için
+otomatik onaylanmadı"* diyerek satırı beklemede bıraktı (durum 3); düzeltme
+ve tekrar ölçümünden sonra aynı test *"otomatik onaylandı"* (durum 5).
+
+DKK: KBUDEK GLU (SDI +0,50) ve KRE (SDI +1,90), RIQAS TSH (SDI −0,30) —
+üçü de kabul.

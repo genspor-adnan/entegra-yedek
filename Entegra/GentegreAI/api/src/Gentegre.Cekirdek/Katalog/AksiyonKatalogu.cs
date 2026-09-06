@@ -645,6 +645,31 @@ public static class AksiyonKatalogu
             ],
 
             ["lab-genetik-run-liste"] = [Yazdir()],
+            // KALITE KONTROL (442). Olcumun kendi karti yok; girise ve
+            //   duzeltici faaliyete uctan gidilir. RET satirinda aksiyon
+            //   zorunlu (ISO 15189) - kapatilmamis ret listede kalir.
+            ["lab-kk-liste"] =
+            [
+                new("lab.kk-olcum", "＋ KK Sonucu (elle)", "lab-kk-olcum",
+                    Hedef: "araccubugu,palet",
+                    KaynakKodu: "lab.kk", Islem: Islem.Ekle, Sira: 10),
+                new("lab.kk-aksiyon", "🛠 Düzeltici Faaliyet", "lab-kk-olcum",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.kk", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 20),
+                new("lab.kk-grafik", "📈 Levey-Jennings", "lab-kk-olcum",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.kk", Islem: Islem.Gor, KayitGerekir: true,
+                    Sira: 30),
+                Yazdir(),
+            ],
+
+            ["lab-kk-lot-liste"] = Crud("lab-kk-lot", "lab-kk-lot", "lab.kk"),
+            ["lab-kk-kural-liste"] = Crud("lab-kk-kural", "lab-kk-kural", "lab.kk"),
+            ["lab-dkk-liste"] = Crud("lab-dkk", "lab-dkk", "lab.kk"),
+            ["lab-cihaz-olay-liste"] =
+                Crud("lab-cihaz-olay", "lab-cihaz-olay", "lab.kk"),
+
             ["lab-gen-liste"] = Crud("lab-gen", "lab-gen", "lab.gen"),
             ["lab-genetik-panel-liste"] =
                 Crud("lab-genetik-panel", "lab-genetik-panel", "lab.gen"),

@@ -254,6 +254,13 @@ public static partial class KartKatalogu
         //   yok - ikisi de surec kaydi, uclardan yurur.
         Ekle(LabGenKarti());
         Ekle(LabGenetikPanelKarti());
+        // KALITE KONTROL (442). KK OLCUMUNUN KARTI YOK: olcum serbest
+        //   duzenlenebilir olsaydi z skoru ve kural degerlendirmesi elle
+        //   ezilebilirdi - kalite kaydinin degeri degistirilememesinden gelir.
+        Ekle(LabKkLotKarti());
+        Ekle(LabKkKuralKarti());
+        Ekle(LabDkkKarti());
+        Ekle(LabCihazOlayKarti());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
 

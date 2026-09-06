@@ -24,6 +24,7 @@ import { RadyolojiPanosu } from './sayfalar/RadyolojiPanosu';
 import { RadyolojiRapor } from './sayfalar/RadyolojiRapor';
 import { RadyolojiRaporCikti } from './sayfalar/RadyolojiRaporCikti';
 import { LabRaporCikti } from './sayfalar/LabRaporCikti';
+import { LabKkGrafik } from './sayfalar/LabKkGrafik';
 import { SatisAyarlar, AlisAyarlar } from './sayfalar/BelgeAyarlar';
 import { Panel } from './sayfalar/Panel';
 
@@ -116,6 +117,8 @@ function Yollar() {
         {/* Lab sonuc raporu (441): istem numarasiyla acilir - bir istemdeki
             sayisal sonuc, kultur ve genetik ayni kagida basilir. */}
         {yetki('lab') && <Route path="/lab/rapor/:id" element={<LabRaporCikti />} />}
+        {/* Levey-Jennings (442): tetkik/lot/seviye sorgu parametresiyle. */}
+        {yetki('lab.kk') && <Route path="/lab/kk/grafik" element={<LabKkGrafik />} />}
 
         {/* Bilinmeyen yol: Ana Sayfa yetkisi varsa panele, yoksa kullanicinin
             girebildigi ILK ekrana (yetkisi hic yoksa oldugu yerde kalir). */}

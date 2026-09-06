@@ -87,6 +87,7 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.CihazServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.LabServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.KulturServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.GenetikServisi>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.KaliteKontrolServisi>();
 kurucu.Services.AddHostedService<Gentegre.Api.Servisler.CihazDinleyici>();
 kurucu.Services.AddScoped<KasaDeposu>();
 kurucu.Services.AddScoped<GunlukDeposu>();
