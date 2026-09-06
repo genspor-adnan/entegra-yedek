@@ -539,7 +539,50 @@ public static class AksiyonKatalogu
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "lab.numune", Islem: Islem.Ekle, KayitGerekir: true,
                     Sira: 40),
+                // Kultur tetkiginin EKIMI istem satirindan baslar (436):
+                //   ayri bir "kultur ac" ekrani, teknisyeni ayni kaydin iki
+                //   yuzu arasinda gezdirirdi.
+                new("lab.ekim", "🧫 Ekim Yap (kültür)", "lab-istem",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "lab.kultur", Islem: Islem.Ekle, KayitGerekir: true,
+                    Sira: 50),
             ],
+
+            // MIKROBIYOLOJI (436). Kultur bir SUREC: her adim ayri dugme.
+            //   Tek "kaydet" dugmesi, hangi asamada olundugunu gizlerdi.
+            //   Yapilamayacak adim GIZLENMEZ - sunucu sebebini soyler.
+            ["lab-kultur-liste"] =
+            [
+                new("lab.kultur-okuma", "👁 Okuma Kaydet", "lab-kultur",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.kultur", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 10),
+                new("lab.kultur-izolat", "🔬 İzolat / İdentifikasyon", "lab-kultur",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.kultur", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 20),
+                new("lab.kultur-antibiyogram", "💊 Antibiyogram", "lab-kultur",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.kultur", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 30),
+                new("lab.kultur-on-rapor", "📄 Ön Rapor (Gram)", "lab-kultur",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "lab.kultur", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 40),
+                new("lab.kultur-onayla", "✔ Raporu Onayla", "lab-kultur",
+                    Hedef: "araccubugu,sagtus,palet",
+                    AksiyonYetkisi: "lab.onay", KayitGerekir: true, Sira: 50),
+                new("lab.kultur-iptal", "✖ Kültürü İptal Et", "lab-kultur",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "lab.kultur", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 60),
+                Yazdir(),
+            ],
+
+            ["lab-besiyeri-liste"] = Crud("lab-besiyeri", "lab-besiyeri", "lab.mikro"),
+            ["lab-organizma-liste"] = Crud("lab-organizma", "lab-organizma", "lab.mikro"),
+            ["lab-antibiyotik-liste"] =
+                Crud("lab-antibiyotik", "lab-antibiyotik", "lab.mikro"),
 
             ["lab-tetkik-liste"] = Crud("lab-tetkik", "lab-tetkik", "lab.tetkik"),
             ["lab-panel-liste"] = Crud("lab-panel", "lab-panel", "lab.tetkik"),

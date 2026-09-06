@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (214 ad, 64 tanesi birden cok dosyada)
+## Fonksiyonlar (216 ad, 64 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -121,11 +121,13 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kurum_kampanya` | `274_belge_kampanya.sql` | 272_kampanya_fiyat.sql |
 | `fn_kurum_modul_acik` | `364_kurum_profil_sube.sql` | 359_kurum_profil.sql |
 | `fn_kurum_profil` | `364_kurum_profil_sube.sql` | — |
+| `fn_lab_antibiyogram_bildirim` | `436_lab_mikrobiyoloji.sql` | — |
 | `fn_lab_barkod_kontrol` | `433_lab_v1.sql` | — |
 | `fn_lab_barkod_uret` | `433_lab_v1.sql` | — |
 | `fn_lab_bayrak` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |
 | `fn_lab_cihaz_calisma_listesi` | `434_lab_cihaz_esleme.sql` | — |
 | `fn_lab_cihaz_tetkik` | `434_lab_cihaz_esleme.sql` | — |
+| `fn_lab_kultur_ozet` | `436_lab_mikrobiyoloji.sql` | — |
 | `fn_lab_referans` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |
 | `fn_metin_anahtar` | `414_metin_sadelestir.sql` | — |
 | `fn_metin_sadelestir` | `414_metin_sadelestir.sql` | — |
@@ -223,7 +225,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (106 ad, 37 tanesi birden cok dosyada)
+## Gorunumler (109 ad, 37 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -288,7 +290,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_kategori_lookup` | `347_sonomed_rad_kategori.sql` | 250_kategori_lookup.sql, 270_kategori_agaci.sql |
 | `v_kullanici_lookup` | `156_ebelge_seri.sql` | — |
 | `v_kurum_lookup` | `250_kategori_lookup.sql` | 249_kurum_sozlesme.sql |
+| `v_lab_antibiyotik_lookup` | `436_lab_mikrobiyoloji.sql` | — |
+| `v_lab_besiyeri_lookup` | `436_lab_mikrobiyoloji.sql` | — |
 | `v_lab_cihaz_esleme` | `434_lab_cihaz_esleme.sql` | — |
+| `v_lab_organizma_lookup` | `436_lab_mikrobiyoloji.sql` | — |
 | `v_lab_panel_lookup` | `433_lab_v1.sql` | — |
 | `v_lab_tetkik_lookup` | `433_lab_v1.sql` | — |
 | `v_mali_hareket_ek` | `392_iptal_ters_kayit_ekstre.sql` | 077_v_ekstre.sql |

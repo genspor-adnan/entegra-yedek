@@ -720,6 +720,74 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ic: '🧬', yetkiKodu: 'lab.tetkik',
   },
   {
+    // KULTUR CALISMA LISTESI (436) - mikrobiyolojinin gunluk ekrani.
+    //   Varsayilan cip "Okuma Zamani Geldi": 24 saatlik plakayi 3. gunde
+    //   okumak negatif raporu guvenilmez yapar, gecikme once gorunmeli.
+    kaynak: 'lab-kultur', rota: 'lab-kultur', baslik: 'Kültür Çalışma Listesi',
+    yol: 'Laboratuvar › Mikrobiyoloji',
+    aksiyonEkrani: 'lab-kultur-liste',
+    tarihAlani: 'ekimZamani',
+    cipler: [
+      { ad: 'Okuma Zamanı Geldi', filtre: { alan: 'okumaGecikmeDk', op: 'buyukEsit', deger: 0 } },
+      { ad: 'İnkübasyon',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Üreme',        filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Antibiyogram', filtre: { alan: 'durum', op: 'esit', deger: 5 } },
+      { ad: 'Rapor Bekliyor', filtre: { alan: 'durum', op: 'esit', deger: 6 } },
+      { ad: 'Kritik',       filtre: { alan: 'kritik', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Mikrobiyoloji', menuSira: 35,
+    ic: '🦠', yetkiKodu: 'lab.kultur',
+  },
+  {
+    // ORGANIZMA KATALOGU (436): rapor ve direnc surveyansi buna dayanir.
+    kaynak: 'lab-organizma', rota: 'lab-organizma', baslik: 'Organizma Kataloğu',
+    yol: 'Laboratuvar › Organizmalar',
+    kartYolu: '/lab-organizma', kartBaslik: 'Organizma',
+    aksiyonEkrani: 'lab-organizma-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Bildirimi Zorunlu', filtre: { alan: 'bildirimiZorunlu', op: 'esit', deger: 1 } },
+      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Organizmalar', menuSira: 64,
+    ic: '🧫', yetkiKodu: 'lab.mikro',
+  },
+  {
+    // ANTIBIYOTIK KATALOGU (436): "basamak" kademeli bildirimi yonetir.
+    kaynak: 'lab-antibiyotik', rota: 'lab-antibiyotik', baslik: 'Antibiyotik Kataloğu',
+    yol: 'Laboratuvar › Antibiyotikler',
+    kartYolu: '/lab-antibiyotik', kartBaslik: 'Antibiyotik',
+    aksiyonEkrani: 'lab-antibiyotik-liste',
+    cipler: [
+      { ad: '1. Basamak', filtre: { alan: 'basamak', op: 'esit', deger: 1 } },
+      { ad: '2. Basamak', filtre: { alan: 'basamak', op: 'esit', deger: 2 } },
+      { ad: 'Kısıtlı',    filtre: { alan: 'basamak', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Antibiyotikler', menuSira: 66,
+    ic: '💊', yetkiKodu: 'lab.mikro',
+  },
+  {
+    // BESIYERI KATALOGU (436): okuma plani buradaki saatlerden kurulur.
+    kaynak: 'lab-besiyeri', rota: 'lab-besiyeri', baslik: 'Besiyeri Kataloğu',
+    yol: 'Laboratuvar › Besiyerleri',
+    kartYolu: '/lab-besiyeri', kartBaslik: 'Besiyeri',
+    aksiyonEkrani: 'lab-besiyeri-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Besiyerleri', menuSira: 68,
+    ic: '🧪', yetkiKodu: 'lab.mikro',
+  },
+  {
     // CIHAZ TEST ESLEME (434): kayit YALNIZ cihaz kodu tetkik kodundan
     //   farkliysa gerekir; listenin bos olmasi normaldir.
     kaynak: 'lab-cihaz-esleme', rota: 'lab-cihaz-esleme',

@@ -571,6 +571,61 @@ düzeltme), `lab.cihaz` (eşleme).
 
 ---
 
+## 9.4 Mikrobiyoloji uçları (436)
+
+```http
+POST /api/lab/satir/{id}/ekim                  // { besiyeriIdler?, sicaklik?, atmosfer?, direktBaki?, gramSonuc?, numuneKalite? }
+GET  /api/lab/kultur/{id}                      // kültür + besiyeri + okuma + izolat + antibiyogram
+POST /api/lab/kultur/{id}/okuma                // { saat?, uremeVar, bulgu?, sonrakiAdim? }
+POST /api/lab/kultur/{id}/on-rapor             // { metin, kritik? }  - kültür bitmeden hekime
+POST /api/lab/kultur/{id}/izolat               // { organizmaId, koloniSayisi?, esbl?, karbapenemaz?, mrsa?, vre?, ampc? }
+POST /api/lab/izolat/{id}/antibiyogram         // { standart?, standartSurum?, satirlar:[{antibiyotikId, mic?, micIsaret?, zonMm?, yorum, kaynak?}] }
+POST /api/lab/antibiyogram/{id}/yorum          // { yorum, neden, bildir? }  - uzman S/I/R değişikliği
+POST /api/lab/kultur/{id}/onayla               // { yorum? }
+POST /api/lab/kultur/{id}/iptal                // { neden }
+```
+
+**Kültür bir SÜREÇTİR, kayıt değil.** Biyokimya sonucu tek değerdir
+(`lab_sonuc`); kültürde ekim → planlı okumalar → birden çok izolat →
+izolat başına antibiyogram vardır. Bu yüzden kültürün kartı yok, adımları
+uçlardan yürür — serbest düzenlenen bir kart "48. saatte okundu" kaydını
+geriye dönük değiştirilebilir kılardı.
+
+**Özet yine tek sonuç hattına düşer.** Onayda `fn_lab_kultur_ozet` metni
+(`Escherichia coli — 100.000 CFU/mL`) istem satırına `lab_sonuc` olarak
+yazılır ve uzman onayıyla yayınlanır; istem durumu, muayene sekmesi, panik
+akışı ve e-Nabız mikrobiyolojiyi ayrıca tanımak zorunda kalmaz.
+
+**Kabul edilmemiş numune ekilmez** ve **izolatsız kültür onaylanamaz**:
+"üreme yok" da bir izolat satırıdır (organizma kataloğunda durum satırı
+olarak durur).
+
+**Kademeli bildirim (Akılcı Antibiyotik Kullanımı)** sunucuda hesaplanır
+(`fn_lab_antibiyogram_bildirim`): 1. basamak her zaman raporlanır; 2.
+basamak yalnız 1. basamakta duyarlı seçenek yoksa; 3. basamak (kısıtlı /
+geniş spektrum) yalnız ikisinde de yoksa. Üriner-özel ajanlar (nitrofurantoin,
+fosfomisin) idrar dışı numunede hiç raporlanmaz. **Uzmanın elle açtığı satır
+kapanmaz** — kural klinik kararın yerine geçmez, yalnız varsayılanı belirler.
+Gizlenen satırlar da uçtan `bildir: false` ile döner: uzman neyin
+gizlendiğini görebilmeli.
+
+**Yorum standardı ve sürümü satırda saklanır** (EUCAST 2026 v16): kesim
+noktaları yıllık değişir, sürüm yazılmazsa eski rapor bugünün kuralıyla
+okunur. Uzman S/I/R'yi değiştirebilir ama **gerekçe zorunludur**; cihaz
+yorumu `cihaz_yorum` alanında durur.
+
+**Direnç mekanizmasında "bakılmadı" (0) ile "negatif" (1) ayrıdır**;
+yapılmamış testi negatif raporlamak yanlış güven verir. Bildirimi zorunlu
+etken ya da MRSA/VRE/ESBL/karbapenemaz pozitifliği kültürü enfeksiyon
+kontrol komitesi bildirimi olarak işaretler — hastanın tedavisi ile
+hastanenin salgın yönetimi ayrı olaylardır.
+
+**Yetkiler**: `lab.kultur` (ekim/okuma/izolat/antibiyogram), `lab.mikro`
+(besiyeri, organizma, antibiyotik katalogları), `lab.onay` (rapor onayı ve
+uzman S/I/R değişikliği).
+
+---
+
 ---
 
 ## 10. Sürümleme

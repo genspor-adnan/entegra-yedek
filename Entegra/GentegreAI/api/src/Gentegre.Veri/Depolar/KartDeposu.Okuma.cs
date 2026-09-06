@@ -235,6 +235,10 @@ public sealed partial class KartDeposu
             // Lab v1 (433/434): tetkik ve panel secimi (panel satiri, cihaz
             //   eslemesi ve tetkik kartinin varsayilan cihazi).
             "public.v_lab_tetkik_lookup", "public.v_lab_panel_lookup",
+            // Mikrobiyoloji (436): besiyeri seti, izolat organizmasi ve
+            //   antibiyogram antibiyotigi.
+            "public.v_lab_besiyeri_lookup", "public.v_lab_organizma_lookup",
+            "public.v_lab_antibiyotik_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

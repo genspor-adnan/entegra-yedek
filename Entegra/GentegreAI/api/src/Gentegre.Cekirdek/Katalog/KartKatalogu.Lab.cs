@@ -169,6 +169,19 @@ public static partial class KartKatalogu
                 new("gecerliBas", "gecerli_bas", "tarih", Baslik: "Geçerlilik"),
             }, SubeKolonu: null, Sirala: "cinsiyet, yas_alt_gun, id",
                Baslik: "Referans Aralıkları", LogTabloId: 1011),
+
+            // KÜLTÜR TETKİĞİNİN VARSAYILAN BESİYERİ SETİ (436): ekim
+            //   açılırken buradan kopyalanır. Kopyalanır çünkü katalog
+            //   sonradan değişse geçmiş kültürün hangi besiyerine ekildiği
+            //   değişmemeli.
+            new("besiyeriler", "public.lab_tetkik_besiyeri", "tetkik_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("sira", "sira", "sayi", Baslik: "Sıra"),
+                new("besiyeriId", "besiyeri_id", "kod", Zorunlu: true,
+                    KodTablosu: "public.v_lab_besiyeri_lookup", Baslik: "Besiyeri"),
+            }, SubeKolonu: null, Sirala: "sira, id", Baslik: "Besiyeri Seti (kültür)",
+               LogTabloId: 1018),
         });
 
     /// <summary>PANEL KARTI — istemde tek kalemde açılan tetkik grubu.</summary>

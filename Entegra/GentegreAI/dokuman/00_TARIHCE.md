@@ -6834,3 +6834,58 @@ oto-onay, HGB 6.4 → `LL` **panik**, onay bekliyor. Panik bildirimi kaydedildi,
 teknik + uzman onayı verildi, ikinci onay `IS_KURALI` ile reddedildi;
 düzeltme eski satırı iptal edip `tekrar_no = 1` ile yeni satır açtı.
 **Test verisi silinmedi** (kullanıcının isteği: ekranda görünsün).
+
+---
+
+## 06.09.2026 — Mikrobiyoloji: kültür, identifikasyon, antibiyogram (`db/436`)
+
+Lab v1 yalnız sayısal (biyokimya/hematoloji) hattı kurmuştu; `lab_tetkik.tur`
+içindeki "4 kültür / 5 genetik" kodları yer tutucuydu. Mikrobiyoloji tetkiki
+açılabiliyor ama sonucu tek satır metin olarak giriliyordu. Bu sürüm kültür
+sürecini modelliyor (mockup: `Ekranlar/Lab/lab_mikrobiyoloji.html` ve
+`lab_sonuc_formu_mikrobiyoloji.html`).
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K104 | Kültür için **ayrı tablolar** (`lab_kultur`, `_okuma`, `_ureme`, `lab_antibiyogram`) | Biyokimya sonucu tek değerdir, kültür bir süreçtir: ekim → okumalar → birden çok izolat → izolat başına antibiyogram. `lab_sonuc`'a sığdırmak, tek metne "E. coli, AMP R, SXT R…" yazmak olurdu; ne aranabilir ne direnç istatistiği çıkarılabilirdi |
+| K105 | **Özet yine `lab_sonuc`'a düşer** (onayda) | İstem durumu, muayene sekmesi, panik akışı ve e-Nabız tek sonuç hattından okur; mikrobiyolojiyi ayrıca tanımak zorunda kalmazlar |
+| K106 | Kültürün **kartı yok**, adımları uçlardan yürür | Serbest düzenlenebilir kart, "48. saatte okundu" kaydını geriye dönük değiştirilebilir kılardı |
+| K107 | Organizma **katalogdan** seçilir, serbest metin değil | "E.coli" / "E. coli" / "Escherichia coli" üç ayrı etken sayılır, direnç sürveyansı imkânsız olurdu |
+| K108 | Her planlı okuma **ayrı satır** | "48 saatte de üreme yok" ile "hiç okunmadı" arasındaki fark, negatif raporun güvenilirliğidir |
+| K109 | Besiyeri seti tetkikten **kopyalanır**, bağ tutulmaz | Katalog sonradan değişse geçmiş kültürün hangi besiyerine ekildiği değişmemeli. Lot kaydı ISO 15189 gereği: bozuk lot, yanlış "üreme yok" raporunun tek açıklaması olabilir |
+| K110 | **Kademeli bildirim sunucuda** (`fn_lab_antibiyogram_bildirim`) | Geniş spektrumlu ajanı gereksiz raporlamak klinisyeni karbapeneme yönlendirir ve direnç seçilimini hızlandırır. Ekranda hesaplansaydı rapor ile ekran ayrışırdı |
+| K111 | Uzmanın elle açtığı satır **kapanmaz** (kaynak 4) | Kural klinik kararın yerine geçmez, yalnız varsayılanı belirler |
+| K112 | Antibiyogram satırında **standart + sürüm** saklanır (EUCAST 2026 v16) | Kesim noktaları yıllık değişir; sürüm yazılmazsa eski rapor bugünün kuralıyla okunur ve "S" sanılan sonuç aslında "R" olurdu |
+| K113 | Uzman S/I/R değişikliğinde **gerekçe zorunlu**, cihaz yorumu ayrı kolonda | Cihaz sonucunu sessizce ezmek, "bu neden R yazıyordu" sorusunu cevapsız bırakır |
+| K114 | Direnç mekanizmasında **"bakılmadı" ≠ "negatif"** | Yapılmamış testi negatif raporlamak yanlış güven verir |
+| K115 | Kabul edilmemiş numune **ekilmez**; izolatsız kültür **onaylanamaz** | Reddedilecek tüpten üreyen etken hastaya ait olmayabilir. "Üreme yok" da bir izolat satırıdır - boş onay, hekime hiçbir şey söylemeyen rapor üretirdi |
+
+### Yapılanlar
+
+- **`db/436`**: `lab_besiyeri`, `lab_organizma`, `lab_antibiyotik`,
+  `lab_tetkik_besiyeri`, `lab_kultur`, `lab_kultur_besiyeri`,
+  `lab_kultur_okuma`, `lab_kultur_ureme`, `lab_antibiyogram`;
+  `fn_lab_antibiyogram_bildirim`, `fn_lab_kultur_ozet`; üç lookup;
+  `lab.kultur` / `lab.mikro` yetkileri. Başlangıç kataloğu: 8 besiyeri,
+  20 organizma (üreme yok / normal flora dahil), 27 antibiyotik (basamaklı),
+  6 kültür tetkiki ve besiyeri setleri.
+- **API**: `KulturServisi` + uçlar (sözleşme §9.4).
+- **Ekranlar**: Kültür Çalışma Listesi (varsayılan çip "Okuma Zamanı Geldi",
+  gecikme dakikası kolonu), organizma / antibiyotik / besiyeri katalogları;
+  ekim, okuma, izolat, antibiyogram, ön rapor, onay ve iptal aksiyonları.
+  Tetkik kartına "Besiyeri Seti" detayı eklendi.
+- **Testler**: `MikroTestleri` (6 durum) — kademeli bildirimin dört senaryosu,
+  uzman kararının korunması, kültür özeti. Toplam 97 test geçiyor.
+
+### Uçtan uca doğrulama (yerel, veri ekranda duruyor)
+
+Başvuru 114461 (ZEYNEP DEMİR) · idrar kültürü: istem `LAB-2026/00003`,
+barkod `26000000393` → kabul → ekim (CLED + kanlı agar, tetkiğin varsayılan
+seti) → ön rapor ("Gram negatif basil üremesi") → 24. saat okuması (üreme
+var) → izolat *E. coli* 100.000 CFU/mL, ESBL negatif → 7 antibiyotik
+girildi, **kademeli bildirim 4'ünü raporladı** (1. basamak: AMP R, AMC S,
+NIT S, SXT R; seftriakson/siprofloksasin/meropenem gizlendi çünkü 1.
+basamakta duyarlı seçenek var) → uzman onayı: özet `lab_sonuc`'a düştü ve
+istem "Onaylandı"ya geçti.

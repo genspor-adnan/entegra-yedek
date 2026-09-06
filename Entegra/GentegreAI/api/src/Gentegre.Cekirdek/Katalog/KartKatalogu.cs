@@ -244,6 +244,12 @@ public static partial class KartKatalogu
         Ekle(LabTetkikKarti());
         Ekle(LabPanelKarti());
         Ekle(LabCihazEslemeKarti());
+        // MIKROBIYOLOJI (436): besiyeri, organizma, antibiyotik kataloglari.
+        //   Kulturun KENDI karti yok - kultur bir surectir, adimlari uclardan
+        //   yurur (bkz. KartKatalogu.Mikro.cs).
+        Ekle(LabBesiyeriKarti());
+        Ekle(LabOrganizmaKarti());
+        Ekle(LabAntibiyotikKarti());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
 

@@ -176,6 +176,11 @@ public static partial class KaynakKatalogu
         Ekle(LabNumune());
         Ekle(LabSonuc());
         Ekle(LabCihazEsleme());
+        // MIKROBIYOLOJI (436): kultur calisma listesi + kataloglar.
+        Ekle(LabKultur());
+        Ekle(LabBesiyeri());
+        Ekle(LabOrganizma());
+        Ekle(LabAntibiyotik());
         // FAZ 0 ortak platform (398-401): onam, bildirim, klinik kataloglar.
         Ekle(OnamMetni());
         Ekle(Onam());

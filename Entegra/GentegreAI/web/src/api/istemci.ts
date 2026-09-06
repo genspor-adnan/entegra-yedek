@@ -336,6 +336,55 @@ export const api = {
     gonder<{ yazilan: number; atlanan: number; mesaj: string }>(
       `/api/lab/cihaz-mesaj/${mesajId}/isle`, {}),
 
+  // --------------------------------------------------- MIKROBIYOLOJI (436)
+  /** Kulturu acar: besiyeri seti verilmezse tetkigin varsayilani kullanilir. */
+  labEkim: (istemSatirId: number, istek?: { besiyeriIdler?: number[];
+                                            sicaklik?: number; atmosfer?: number;
+                                            direktBaki?: string; gramSonuc?: string;
+                                            numuneKalite?: string }) =>
+    gonder<{ kulturId: number; mesaj: string }>(
+      `/api/lab/satir/${istemSatirId}/ekim`, istek ?? {}),
+
+  /** Kultur calisma alani: besiyeri + okuma + izolat + antibiyogram. */
+  labKulturOku: (id: number) =>
+    istek<Record<string, unknown>>(`/api/lab/kultur/${id}`),
+
+  labKulturOkuma: (id: number, govde: { saat?: number; uremeVar: boolean;
+                                        bulgu?: string; sonrakiAdim?: string }) =>
+    gonder<{ mesaj: string }>(`/api/lab/kultur/${id}/okuma`, govde),
+
+  /** Gram / erken bulgu hekime: kultur bitmeden gider. */
+  labKulturOnRapor: (id: number, metin: string, kritik = false) =>
+    gonder<{ mesaj: string }>(`/api/lab/kultur/${id}/on-rapor`, { metin, kritik }),
+
+  labKulturIzolat: (id: number, govde: { organizmaId: number; koloniSayisi?: number;
+                                         koloniBirim?: string; idYontem?: number;
+                                         idGuven?: number; esbl?: number;
+                                         karbapenemaz?: number; mrsa?: number;
+                                         vre?: number; ampc?: number;
+                                         direncNotu?: string; anlamli?: boolean }) =>
+    gonder<{ uremeId: number; mesaj: string }>(`/api/lab/kultur/${id}/izolat`, govde),
+
+  /** Kademeli bildirimi SUNUCU hesaplar; yanit kac satirin raporlanacagini soyler. */
+  labAntibiyogram: (uremeId: number, govde: {
+      standart?: string; standartSurum?: string;
+      satirlar: { antibiyotikId: number; mic?: number; micIsaret?: string;
+                  zonMm?: number; yorum: string; kaynak?: number;
+                  aciklama?: string }[] }) =>
+    gonder<{ satir: number; bildirilen: number; mesaj: string }>(
+      `/api/lab/izolat/${uremeId}/antibiyogram`, govde),
+
+  /** Uzman S/I/R degistirir - GEREKCE zorunlu. */
+  labAntibiyogramYorum: (id: number, yorum: string, neden: string, bildir = true) =>
+    gonder<{ mesaj: string }>(`/api/lab/antibiyogram/${id}/yorum`,
+      { yorum, neden, bildir }),
+
+  labKulturOnayla: (id: number, yorum?: string) =>
+    gonder<{ mesaj: string }>(`/api/lab/kultur/${id}/onayla`, { yorum }),
+
+  labKulturIptal: (id: number, neden: string) =>
+    gonder<{ mesaj: string }>(`/api/lab/kultur/${id}/iptal`, { neden }),
+
   // --------------------------------------------------------------- SIGORTA
   /** Sağlayıcı kataloğu + yetenekler (430): ekran düğmeleri buna göre çizilir. */
   sigortaSaglayicilar: () =>

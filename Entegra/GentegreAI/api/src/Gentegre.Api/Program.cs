@@ -85,6 +85,7 @@ kurucu.Services.AddSingleton<Gentegre.Cekirdek.Cihaz.ICihazSurucu,
                              Gentegre.Cekirdek.Cihaz.AstmSurucu>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.CihazServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.LabServisi>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.KulturServisi>();
 kurucu.Services.AddHostedService<Gentegre.Api.Servisler.CihazDinleyici>();
 kurucu.Services.AddScoped<KasaDeposu>();
 kurucu.Services.AddScoped<GunlukDeposu>();
