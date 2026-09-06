@@ -145,7 +145,7 @@ public sealed class RehberServisi(VeriKaynagi veri)
                       + "sırayla verebilirim.";
             await LogAsync(baglanti, baglam, soru, 2, "", 0.35m, istek, kronometre, iptal);
             return new Yanit(cevap, [], ekranlar,
-                             await AksiyonlariAsync(e.Kaynak, baglam), 0.35m,
+                             Aksiyonlar(null, e.Kaynak, baglam), 0.35m,
                              "Hangi işlemi yapmak istiyorsunuz: kayıt açma, listeleme "
                              + "yoksa belge gönderme?",
                              uyarilar, "", 2, kontorBakiye);
@@ -183,7 +183,8 @@ public sealed class RehberServisi(VeriKaynagi veri)
 
         var ekran = await baglanti.TekAsync("""
             select e.kaynak, e.baslik, e.rota, e.yol, e.menu_grup as "menuGrup",
-                   e.yetki_kodu as "yetkiKodu", e.modul, e.aciklama
+                   e.yetki_kodu as "yetkiKodu", e.modul, e.aciklama,
+                   e.aksiyon_ekrani as "aksiyonEkrani"
               from public.ai_rehber_ekran e
              where (e.rota = @p0 or e.rota = @p1) and e.durum = 0
              order by case when e.rota = @p0 then 0 else 1 end, e.id
@@ -228,7 +229,7 @@ public sealed class RehberServisi(VeriKaynagi veri)
         }
 
         // -------------------------------------------- "bu ekranda ne yapılır"
-        var aksiyonlar = await AksiyonlariAsync(kaynak, baglam);
+        var aksiyonlar = Aksiyonlar(ekran["aksiyonEkrani"]?.ToString(), kaynak, baglam);
         var konular = await baglanti.ListeAsync("""
             select k.kod, k.baslik
               from public.ai_rehber_konu k
@@ -373,9 +374,15 @@ public sealed class RehberServisi(VeriKaynagi veri)
             cevap = $"Sanırım **{baslik}** konusunu soruyorsunuz. Farklı bir şey "
                   + "kastettiyseniz sorunuzu biraz açar mısınız?";
 
+        var anaAksiyon = await baglanti.TekDegerAsync<string>(
+            "select aksiyon_ekrani from public.ai_rehber_ekran "
+            + " where (rota = @p0 or rota = '/' || @p0 or kaynak = @p0) "
+            + "   and durum = 0 order by menu_gizli, id limit 1",
+            null, [anaEkran], iptal);
+
         await LogAsync(baglanti, baglam, soru, 1, kod, guven, null, kronometre, iptal);
         return new Yanit(cevap, adimlar, oneriler,
-                         await AksiyonlariAsync(anaEkran, baglam), guven,
+                         Aksiyonlar(anaAksiyon, anaEkran, baglam), guven,
                          guven < 0.45m ? "Aradığınız bu değilse hangi ekranda "
                                        + "çalıştığınızı yazın." : null,
                          uyarilar, kod, 1, kontorBakiye);
@@ -442,23 +449,27 @@ public sealed class RehberServisi(VeriKaynagi veri)
 
     /// <summary>
     /// Ekranın araç çubuğundaki, kullanıcının YETKİLİ olduğu aksiyonlar.
-    /// Aksiyon kataloğu ekran adını `&lt;kaynak&gt;-liste` kalıbıyla tutuyor.
+    ///
+    /// Aksiyon ekranının adı katalogda saklanır (`aksiyon_ekrani`); yoksa
+    /// `&lt;kaynak&gt;-liste` kalıbına düşülür. Kalıp her ekranda tutmuyor:
+    /// Radyoloji Çalışma Listesi'nin kaynağı `radyoloji-istem`, aksiyon
+    /// ekranı `radyoloji-liste` - tahminle o ekranda hiçbir düğme
+    /// sayılamıyordu ve asistan "size açık işlem yok" diyordu.
     /// </summary>
-    private static Task<IReadOnlyList<AksiyonOnerisi>> AksiyonlariAsync(
-        string kaynak, IstekBaglami baglam)
+    private static IReadOnlyList<AksiyonOnerisi> Aksiyonlar(
+        string? aksiyonEkrani, string kaynak, IstekBaglami baglam)
     {
-        if (string.IsNullOrEmpty(kaynak))
-            return Task.FromResult<IReadOnlyList<AksiyonOnerisi>>([]);
-        var ekranAdi = kaynak + "-liste";
-        var aksiyonlar = AksiyonKatalogu.Ekran(ekranAdi);
-        if (aksiyonlar is null)
-            return Task.FromResult<IReadOnlyList<AksiyonOnerisi>>([]);
-        IReadOnlyList<AksiyonOnerisi> sonuc = aksiyonlar
+        var ad = string.IsNullOrWhiteSpace(aksiyonEkrani)
+            ? (string.IsNullOrEmpty(kaynak) ? "" : kaynak + "-liste")
+            : aksiyonEkrani!;
+        if (ad.Length == 0) return [];
+        var aksiyonlar = AksiyonKatalogu.Ekran(ad);
+        if (aksiyonlar is null) return [];
+        return aksiyonlar
             .Where(a => AksiyonKatalogu.Yetkili(a, baglam.Yetkiler))
             .Take(6)
-            .Select(a => new AksiyonOnerisi(a.Kod, a.Ad, ekranAdi))
+            .Select(a => new AksiyonOnerisi(a.Kod, a.Ad, ad))
             .ToList();
-        return Task.FromResult(sonuc);
     }
 
     // ---------------------------------------------------------------- log --

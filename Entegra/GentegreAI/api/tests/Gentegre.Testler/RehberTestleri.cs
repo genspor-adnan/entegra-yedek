@@ -244,4 +244,22 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
 
         Assert.NotEqual(3, y.KaynakTuru);
     }
+
+    [Fact]
+    public async Task Aksiyon_ekrani_KATALOGDAN_gelir_tahminle_degil()
+    {
+        if (!_olgu.Baglandi(nameof(Aksiyon_ekrani_KATALOGDAN_gelir_tahminle_degil))) return;
+        var servis = new RehberServisi(_olgu.Gerekli());
+
+        // Radyoloji Çalışma Listesi'nin KAYNAĞI `radyoloji-istem`, aksiyon
+        //   ekranı `radyoloji-liste`. "<kaynak>-liste" tahmini burada tutmuyor
+        //   ve asistan "size açık işlem yok" diyordu (448).
+        var y = await servis.CevaplaAsync(
+            new RehberServisi.Istek("bu ekranda ne yapabilirim", null, "/radyoloji", null),
+            Baglam("radyoloji"), CancellationToken.None);
+
+        Assert.Equal(3, y.KaynakTuru);
+        Assert.NotEmpty(y.OnerilenAksiyonlar);
+        Assert.Contains(y.OnerilenAksiyonlar, a => a.Kod.StartsWith("radyoloji."));
+    }
 }

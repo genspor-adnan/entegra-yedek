@@ -7548,3 +7548,37 @@ sayım yarışa açıktı): servis kaynağındaki her `insert/update/delete` hed
   listedeki ilk kolon kazanıp **yanlış alanı** anlatıyordu.
 
 API **135** test.
+
+## 07.09.2026 — HBYS akışı uçtan uca ve rehberin aksiyon ekranı (`db/448`)
+
+Randevu → kayıt kabul → muayene → laboratuvar → radyoloji zinciri tek
+oturumda, **gerçek uçlardan** koşuldu (doğrudan SQL yok).
+
+### Bulgu ve düzeltme
+
+**`ai_rehber_ekran.aksiyon_ekrani` eklendi (448).** Rehber "bu ekranda ne
+yapabilirsiniz" derken aksiyonları `<kaynak>-liste` kalıbıyla arıyordu. Kalıp
+tutmuyor: Radyoloji Çalışma Listesi'nin kaynağı `radyoloji-istem`, aksiyon
+ekranı `radyoloji-liste` - o ekranda **hiçbir düğme sayılamıyor**, asistan
+"size açık bir işlem görünmüyor" diyordu. Ad artık tahmin değil, istemcideki
+`aksiyonEkrani` tanımından geliyor (115 ekran).
+
+### Uçtan uca sonuç (yerel)
+
+| Adım | Sonuç |
+|---|---|
+| Hasta kartı | açıldı, dosya no otomatik |
+| Randevu | hekim + saat ile açıldı; **çakışma kuralı çalıştı** (aynı saate ikinci randevu reddedildi) |
+| Başvuru | protokol no verildi |
+| Muayene | başvurudan alındı, özet derlendi |
+| Laboratuvar | muayeneden istem, tüp planı + barkod, numune alındı/kabul, 3 sonuç — **üçü de oto-onaydan geçti** (bayrak yok, panik yok, delta yok) |
+| Radyoloji | istem + accession no, rapor yazıldı, akış şeridi döndü |
+| AI Rehber | beş ekranın beşinde de cevap verdi (konu + bağlamsal) |
+
+Test senaryosunun kendi hataları da ayıklandı: randevu kartında alan adı
+`bolum`, muayene isteminin lab karşılığı `hedefId`, radyoloji yanıtında
+`idler[]`. Oto-onaydan geçen sonuca ikinci kez "uzman onayla" demek "zaten
+onaylı" hatası veriyor - bu bir kural, hata değil.
+
+**Testler**: `Aksiyon_ekrani_KATALOGDAN_gelir_tahminle_degil` regresyonu
+eklendi. API **136** test.
