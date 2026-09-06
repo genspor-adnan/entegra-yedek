@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
+import { guvenli, mesaj } from '../mesaj';
 import { para, tarihSaat } from '../bicim';
 import { TarafSecici } from '../TarafArama';
 
@@ -649,10 +650,18 @@ const MUSTEHAKLIK: Record<number, { ad: string; sinif: string }> = {
 };
 
 export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
-                                  kurumTuru }: {
+                                  kurumTuru, belgeId, tarafId, hekimId,
+                                  onTazele }: {
   bilgi: BasvuruBilgi;
   degistir(y: Partial<BasvuruBilgi>): void;
   kilitli: boolean;
+  /** Kayitli basvuru id'si - servis cagrisi ancak KAYITLI belgede yapilir. */
+  belgeId?: number;
+  /** Hasta (belge.taraf_id) ve karsilayan hekim - police sorgusu ikisini ister. */
+  tarafId?: number;
+  hekimId?: number | null;
+  /** Provizyon paylari belge satirlarina yazar - kart yeniden okunmali. */
+  onTazele?(): void;
   /** Odeyen kurumun turu (taraf_kurum.tur): 1 Özel / 2 ÖSS / 3 SGK. */
   kurumTuru?: number;
   /** Belgenin odeyen kurumu - SGK bloÄunda bilgi olarak gosterilir. */
@@ -661,6 +670,48 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
   kurumlar?: { id: number; ad: string; tur?: number }[];
 }) {
   const m = MUSTEHAKLIK[Number(bilgi.sgkMustehaklik ?? 0)] ?? MUSTEHAKLIK[0];
+  const [sigortaMesgul, setSigortaMesgul] = useState(false);
+
+  /**
+   * POLICE SORGUSU (430) - checkPolicy. Poliçe numarasi ZORUNLU: sigorta
+   * sirketi kimlik numarasini tek basina kabul etmiyor ("poliçe null olamaz"),
+   * numarayi bulan searchPolicy servisi ise test ortaminda yayinlanmamis.
+   */
+  const policeSorgula = async () => {
+    const kurumId = Number(bilgi.ossKurumId ?? 0);
+    if (!kurumId) { mesaj('Önce sigorta şirketini seçin.'); return }
+    if (!bilgi.ossPoliceNo) { mesaj('Poliçe numarası girilmeli.'); return }
+    setSigortaMesgul(true);
+    await guvenli(async () => {
+      const y = await api.sigortaPoliceSorgu({
+        tarafId: Number(tarafId ?? 0), kurumId, hekimId: hekimId ?? undefined,
+        policeNo: String(bilgi.ossPoliceNo ?? ''),
+      });
+      // Sirketin dondugu poliçe adi/numarasi karta yazilir: elle girilen
+      //   numara eksik/hatali yazilmis olabilir.
+      degistir({ ossPoliceNo: y.policeNo || bilgi.ossPoliceNo });
+      const notlar = y.notlar?.length ? y.notlar.join(String.fromCharCode(10)) : '';
+      mesaj(notlar ? y.mesaj + String.fromCharCode(10, 10) + notlar : y.mesaj);
+    });
+    setSigortaMesgul(false);
+  };
+
+  /**
+   * PROVIZYON AL / GUNCELLE (430) - createProvision. Yanittaki tutar kirilimi
+   * belge satirlarinin kurum/hasta payini SUNUCUDA yazar; kart yeniden
+   * okunmali, yoksa ekranda eski paylar durur.
+   */
+  const provizyonAl = async () => {
+    if (!belgeId) { mesaj('Önce başvuruyu kaydedin.'); return }
+    if (!Number(bilgi.ossKurumId ?? 0)) { mesaj('Önce sigorta şirketini seçin.'); return }
+    setSigortaMesgul(true);
+    await guvenli(async () => {
+      const y = await api.sigortaProvizyon({ belgeId });
+      mesaj(y.mesaj);
+      onTazele?.();
+    });
+    setSigortaMesgul(false);
+  };
 
   /*
    * ALANLAR KURUM TURUNE GORE (kullanici): eskiden iki provizyon grubu da her
@@ -792,9 +843,23 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
         <h6>
           {kurumTuru === 2 ? 'Özel Sigorta Provizyonu'
                            : 'Tamamlayıcı Sigorta Provizyonu'}
-          <button type="button" className="d bir sag" disabled
-                  title="Sigorta şirketi provizyon servisi henüz bağlı değil - alanlar elle doldurulur.">
+          {/* SERVIS BAGLI (430): kurumun sigorta hesabi tanimliysa poliçe
+              sorgusu ve provizyon buradan alinir. Hesabi olmayan kurumda uc
+              "hesap tanimli degil" der ve alanlar ELLE doldurulmaya devam
+              eder - eski davranis bozulmuyor.
+              Kaydedilmemis basvuruda dugmeler pasif: servise gonderilecek
+              kalemler henuz veritabaninda yok. */}
+          <button type="button" className="d bir sag" disabled={sigortaMesgul || !belgeId}
+                  title={belgeId ? 'Provizyon al / güncelle (sigorta servisi)'
+                                 : 'Önce başvuruyu kaydedin.'}
+                  onClick={provizyonAl}>
             🧾 Provizyon Al
+          </button>
+          <button type="button" className="d bir sag" disabled={sigortaMesgul || !belgeId}
+                  title={belgeId ? 'Poliçe bu kurumda geçerli mi (checkPolicy)'
+                                 : 'Önce başvuruyu kaydedin.'}
+                  onClick={policeSorgula}>
+            🔎 Poliçe Sorgula
           </button>
         </h6>
         <div className="alan-izgara dort-sutun">

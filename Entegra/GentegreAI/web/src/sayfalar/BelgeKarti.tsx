@@ -1554,6 +1554,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
             kurumAdi={kurumlar.find(k => k.id === odeyenKurumId)?.ad}
             kurumlar={kurumlar}
             kurumTuru={kurumlar.find(k => k.id === odeyenKurumId)?.tur}
+            belgeId={kayitliId || undefined}
+            tarafId={cari?.id}
+            hekimId={personelId}
+            // Provizyon paylari belge SATIRLARINA yazildi: kart yeniden
+            //   okunmazsa ekranda eski kurum/hasta payi kalir.
+            onTazele={() => { if (kayitliId) void api.belgeOku(kayitliId).then(setSonuc) }}
           />
         )}
 
