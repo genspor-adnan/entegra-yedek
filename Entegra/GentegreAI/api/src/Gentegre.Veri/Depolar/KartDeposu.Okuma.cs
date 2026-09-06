@@ -232,6 +232,9 @@ public sealed partial class KartDeposu
             "public.v_entegrasyon_hesap_lookup",
             // Cihaz ara katmani (432).
             "public.v_cihaz_lookup",
+            // Lab v1 (433/434): tetkik ve panel secimi (panel satiri, cihaz
+            //   eslemesi ve tetkik kartinin varsayilan cihazi).
+            "public.v_lab_tetkik_lookup", "public.v_lab_panel_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

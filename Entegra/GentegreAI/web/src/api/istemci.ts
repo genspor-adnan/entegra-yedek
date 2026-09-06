@@ -272,6 +272,65 @@ export const api = {
     gonder<{ okunan: number; hatali: number; mesaj: string }>(
       '/api/cihaz/klasor-tara', {}),
 
+  // ------------------------------------------------------------------- LAB
+  /** Basvurudan istem acar; tup planini ve barkodlari sunucu uretir (433). */
+  labIstemAc: (govde: { belgeId: number;
+                        satirlar: { tetkikId?: number; panelId?: number }[];
+                        oncelik?: number; klinikBilgi?: string; taniIcd?: string }) =>
+    gonder<{ id: number; istemNo: string; barkodlar: string[];
+             tetkikSayisi: number; mesaj: string }>('/api/lab/istem', govde),
+
+  labIstemOku: (id: number) =>
+    istek<Record<string, unknown>>(`/api/lab/istem/${id}`),
+
+  /** Muayene "Istem & Sonuclar" sekmesi: basvurunun istemleri. */
+  labBasvuruIstemleri: (belgeId: number) =>
+    istek<{ belgeId: number; istemler: Record<string, unknown>[] }>(
+      `/api/lab/basvuru/${belgeId}/istemler`),
+
+  /** durum: 2 alindi · 3 kabul · 0 ret (ret nedeni ZORUNLU). */
+  labNumuneDurum: (id: number, durum: number, ek?: { kalite?: number;
+                                                     retNeden?: number;
+                                                     aciklama?: string }) =>
+    gonder<{ id: number; mesaj: string }>(`/api/lab/numune/${id}/durum`,
+      { durum, ...(ek ?? {}) }),
+
+  labNumuneBarkod: (barkod: string) =>
+    istek<Record<string, unknown>>(
+      `/api/lab/numune/barkod/${encodeURIComponent(barkod)}`),
+
+  /** Kural motoru sunucuda calisir: bayrak/panik/delta yanitla doner. */
+  labSonucYaz: (govde: { istemSatirId: number; deger: string; birim?: string;
+                         yorum?: string; dilusyon?: number }) =>
+    gonder<{ sonucId: number; bayrak: string; panik: boolean;
+             deltaUyari: boolean; mesaj: string }>('/api/lab/sonuc', govde),
+
+  /** asama 1 teknik, 2 uzman (yayin). */
+  labSonucOnayla: (id: number, asama = 2) =>
+    gonder<{ mesaj: string }>(`/api/lab/sonuc/${id}/onayla`, { asama }),
+
+  labSonucDuzelt: (id: number, deger: string, neden: string) =>
+    gonder<{ sonucId: number; bayrak: string; mesaj: string }>(
+      `/api/lab/sonuc/${id}/duzelt`, { deger, neden }),
+
+  labPanikBildir: (sonucId: number, bildirilenAd: string, kanal = 1,
+                   aciklama?: string) =>
+    gonder<{ bildirimId: number; mesaj: string }>(
+      `/api/lab/sonuc/${sonucId}/panik`, { bildirilenAd, kanal, aciklama }),
+
+  labPanikTeyit: (bildirimId: number, teyitEden: string) =>
+    gonder<{ mesaj: string }>(`/api/lab/panik/${bildirimId}/teyit`, { teyitEden }),
+
+  /** Host query: cihaz "bu barkodda ne calisacagim" der. */
+  labCalismaListesi: (cihazId: number, barkod: string) =>
+    istek<{ satirlar: Record<string, unknown>[] }>(
+      `/api/lab/cihaz/${cihazId}/calisma-listesi/${encodeURIComponent(barkod)}`),
+
+  /** Cozumlenmis cihaz mesajini lab sonucuna aktarir. */
+  labCihazMesajIsle: (mesajId: number) =>
+    gonder<{ yazilan: number; atlanan: number; mesaj: string }>(
+      `/api/lab/cihaz-mesaj/${mesajId}/isle`, {}),
+
   // --------------------------------------------------------------- SIGORTA
   /** Sağlayıcı kataloğu + yetenekler (430): ekran düğmeleri buna göre çizilir. */
   sigortaSaglayicilar: () =>
@@ -484,7 +543,9 @@ export const api = {
   /** Muayeneden istem ac (418): asil kayit MODUL tablosunda acilir,
       muayene_istem bag ve durum satiridir. */
   muayeneIstemAc: (muayeneId: number, istek: { tur: number; hizmetId?: number;
-                                               aciliyet?: number; aciklama?: string }) =>
+                                               aciliyet?: number; aciklama?: string;
+                                               tetkikIdler?: number[];
+                                               panelIdler?: number[] }) =>
     gonder<{ istemId: number; hedefTablo: string; hedefId: number | null; mesaj: string }>(
       `/api/muayene/${muayeneId}/istem`, istek),
 

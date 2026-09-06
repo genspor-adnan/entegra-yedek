@@ -640,7 +640,95 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'İstemler', ic: '🧪', yetkiKodu: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'İstemler', menuSira: 10,
+    ic: '🧪', yetkiKodu: 'lab',
+  },
+  {
+    // NUMUNE KABUL (433): laboratuvarin giris kapisi. Varsayilan cip
+    //   "Kabul Bekleyen": kabul edilmemis tup TAT saatini baslatmaz, ekran
+    //   acilir acilmaz o kuyruk gorunmeli.
+    kaynak: 'lab-numune', rota: 'lab-numune', baslik: 'Numune Kabul',
+    yol: 'Laboratuvar › Numune Kabul',
+    aksiyonEkrani: 'lab-numune-liste',
+    tarihAlani: 'alimZamani',
+    cipler: [
+      { ad: 'Kabul Bekleyen', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Etiketlendi',    filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Kabul',          filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Reddedilen',     filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Numune Kabul', menuSira: 20,
+    ic: '🩸', yetkiKodu: 'lab.numune',
+  },
+  {
+    // SONUC ONAY KUYRUGU (433): panik ve delta uyarilari once gorunsun diye
+    //   ayri cipler; oto-onaylanan temiz sonuclar kuyrukta hic beklemez.
+    kaynak: 'lab-sonuc', rota: 'lab-sonuc', baslik: 'Sonuç Onay Kuyruğu',
+    yol: 'Laboratuvar › Sonuçlar',
+    aksiyonEkrani: 'lab-sonuc-liste',
+    tarihAlani: 'olcumZamani',
+    cipler: [
+      { ad: 'Onay Bekleyen', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Panik',         filtre: { alan: 'panik', op: 'esit', deger: 1 } },
+      { ad: 'Delta Uyarı',   filtre: { alan: 'deltaUyari', op: 'esit', deger: 1 } },
+      { ad: 'Teknik Onay',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Onaylı',        filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Sonuçlar', menuSira: 30,
+    ic: '📊', yetkiKodu: 'lab.sonuc',
+  },
+  {
+    // TETKIK KATALOGU (433): referans araligi OLMAYAN tetkik bayrak
+    //   uretemez - "Referans" kolonu bu eksigi listede gosterir.
+    kaynak: 'lab-tetkik', rota: 'lab-tetkik', baslik: 'Tetkik Kataloğu',
+    yol: 'Laboratuvar › Tetkik Kataloğu',
+    kartYolu: '/lab-tetkik', kartBaslik: 'Tetkik',
+    aksiyonEkrani: 'lab-tetkik-liste',
+    cipler: [
+      { ad: 'Aktif',    filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Oto Onay', filtre: { alan: 'otoOnay', op: 'esit', deger: 1 } },
+      { ad: 'Pasif',    filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Tetkik Kataloğu', menuSira: 40,
+    ic: '📚', yetkiKodu: 'lab.tetkik',
+  },
+  {
+    // PANELLER (433): istemde tek kalemde acilan tetkik gruplari.
+    kaynak: 'lab-panel', rota: 'lab-panel', baslik: 'Lab Panelleri',
+    yol: 'Laboratuvar › Paneller',
+    kartYolu: '/lab-panel', kartBaslik: 'Panel',
+    aksiyonEkrani: 'lab-panel-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Paneller', menuSira: 50,
+    ic: '🧬', yetkiKodu: 'lab.tetkik',
+  },
+  {
+    // CIHAZ TEST ESLEME (434): kayit YALNIZ cihaz kodu tetkik kodundan
+    //   farkliysa gerekir; listenin bos olmasi normaldir.
+    kaynak: 'lab-cihaz-esleme', rota: 'lab-cihaz-esleme',
+    baslik: 'Cihaz Test Eşleme',
+    yol: 'Laboratuvar › Cihaz Eşleme',
+    kartYolu: '/lab-cihaz-esleme', kartBaslik: 'Cihaz Test Eşlemesi',
+    aksiyonEkrani: 'lab-cihaz-esleme-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Cihaz Eşleme', menuSira: 60,
+    ic: '🔌', yetkiKodu: 'lab.cihaz',
   },
   {
     // RADYOLOJI CALISMA LISTESI (283): modulun giris ekrani - rapor yazma,

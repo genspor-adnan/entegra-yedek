@@ -168,7 +168,14 @@ public static partial class KaynakKatalogu
         Ekle(DokumanKategori());
         Ekle(DokumanKlasor());
         Ekle(DokumanOnayKuyrugu());
+        // LAB v1 (433/434): istem + tetkik katalogu, panel, numune, sonuc,
+        //   cihaz test eslemesi.
         Ekle(LabIstem());
+        Ekle(LabTetkik());
+        Ekle(LabPanel());
+        Ekle(LabNumune());
+        Ekle(LabSonuc());
+        Ekle(LabCihazEsleme());
         // FAZ 0 ortak platform (398-401): onam, bildirim, klinik kataloglar.
         Ekle(OnamMetni());
         Ekle(Onam());

@@ -6766,3 +6766,71 @@ olarak güncellendi; doküman gönderimi `piId` ile kaydedildi; iptalde paylar
 geri alındı (kurum 0, tamamı hastaya) ve durum 6 oldu. İstek günlüğünde 9 satır
 (başarısızlar dahil). Test verisi ve geçici kullanıcı sonra **silindi**;
 sağlayıcı ve 73 kod eşleme satırı kaldı (kurulum verisi).
+
+---
+
+## 06.09.2026 — Laboratuvar v1: tetkik kataloğu, numune, kural motoru (`db/433-434`)
+
+Yol haritasındaki Lab v1 kapsamı: tetkik kataloğu (hizmet 1:1, referans
+aralıkları, panik, TAT), istem/numune/barkod/etiket ve kabul-ret; cihaz çift
+yön (host query) ara katman üzerinden; kural motoru (referans/delta/panik),
+iki aşamalı + oto-onay, panik bildirimi; sonuç raporu ve muayene sekmesine
+sonuç.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K91 | **Tetkik ile hizmet ayrı kartlar** (1:1 bağ) | Hizmet kartı fiyat/faturalama taşır; tetkik kartı numune, tüp, TAT, panik, delta, oto-onay taşır. Tek kartta birleşseydi muhasebe alanı düzenleyen kişi panik sınırını da değiştirebilirdi |
+| K92 | **Numune planı sunucuda**: aynı tüp tipindeki tetkikler tek barkoda | Her tetkiğe ayrı tüp, hastadan gereksiz kan almak demekti. İstemci "kaç tüp" hesaplamaz |
+| K93 | Barkod `YY + 8 hane + Luhn` | Tek hane hatası barkodu geçersiz kılar; elle okunan barkodun **başka hastanın** numunesine bağlanmasını önler |
+| K94 | **TAT kabulde başlar**, istem anında değil | Numune laboratuvara ulaşmadan lab süresi işlemez; aksi hâlde geç alınan numune labı geciktirmiş gösterir |
+| K95 | Bayrak/panik/delta/referans **sonuçla birlikte saklanır** | Rapor ve ekran hesaplama yapmaz: referans aralığı sonradan değişse o gün verilen rapor aynı kalır |
+| K96 | **Referans yoksa bayrak boş** (`fn_lab_bayrak`, 434'te düzeltildi) | 433'te sınırsız tetkik "N" (normal) dönüyordu: referansı girilmemiş bir tetkiğin her sonucu hekime normal görünürdü |
+| K97 | Doğum tarihi bilinmeyen hasta **erişkin** sayılır (434) | 433'te yaş günü `coalesce(..., 0)` ile sıfırlanıp 0-28 günlük **yenidoğan** aralığına düşüyordu |
+| K98 | Oto-onay yalnız temiz sonuçta; **düzeltmede kapalı** | Bayraklı sonucu otomatik onaylamak kural motorunu süse çevirirdi; daha önce onaylanmış bir değeri değiştiren satır da ikinci göz görmeden yayınlanmamalı |
+| K99 | Onaylı sonuç **güncellenmez**: düzeltme = eski satır iptal (durum 4) + yeni satır (`tekrar_no + 1`), neden zorunlu | Üzerine yazmak, hekimin gördüğü değeri geçmişe dönük değiştirirdi |
+| K100 | Cihaz test eşlemesi **opsiyonel**: kod eşitliği varsayılan çözüm (434) | Her cihaz için 200 satır eşleme girdirmek kurulumu haftalara yayardı. Tablo yalnız farklı kod ve birim çevrimi (çarpan/ofset) için |
+| K101 | **İstemde olmayan test yazılmaz**; atlanan kodlar mesaj hatasına yazılır | Cihaz paneli komple çalışır: istenmemiş testi hasta dosyasına eklemek faturalanmamış sonuç üretir. Sessizce atmak ise sonucu kaybolmuş gösterirdi |
+| K102 | Host query yalnız **kabul edilmiş** numuneyi verir | Reddedilecek tüpü çalıştırmak, sonradan silinecek sonuç üretir |
+| K103 | Tetkik/panel/eşleme **şubeler arası ortak** (liste ve kartta `SubeKolonu: null`) | Şube başına ayrı katalog, aynı tetkiğin iki farklı panik sınırını doğururdu |
+
+### Yapılanlar
+
+- **`db/433`**: `lab_tetkik` (+ `lab_tetkik_referans` yaş/cinsiyet/gebelik
+  kırılımı), `lab_panel(+satir)`, `lab_numune` (+ `lab_numune_hareket` zincir
+  kaydı), `lab_istem_test → lab_istem_satir` adlandırması ve yeni kolonlar,
+  `lab_istem` genişletmeleri (öncelik/kaynak/klinik bilgi/tanı/hedef bitiş),
+  `lab_sonuc`, `lab_panik_bildirim`; `fn_lab_barkod_uret/_kontrol`,
+  `fn_lab_referans`, `fn_lab_bayrak`; yetkiler ve lookup'lar; 14 tetkik +
+  18 referans + 3 panel başlangıç kataloğu.
+- **`db/434`**: `lab_cihaz_test_esleme`, `fn_lab_cihaz_tetkik` (eşleme yoksa
+  kod eşitliği), `fn_lab_cihaz_calisma_listesi` (host query),
+  `v_lab_cihaz_esleme`, `lab.cihaz` yetkisi; K96/K97 düzeltmeleri; satır durum
+  ve ret nedeni kod uzaylarının `comment on column` ile belgelenmesi.
+- **API**: `LabServisi` (istem açma + tüp planı, numune durumları, kural
+  motoru, onay/düzeltme, panik, cihaz mesajını sonuca aktarma) ve `LabUclari`
+  (§9.3). Muayeneden **laboratuvar istemi** artık gerçekten `lab_istem`'de
+  açılıyor (`tur = 1`); önce yalnız görüntüleme bağlanmıştı.
+- **Kataloglar/ekranlar**: `lab-tetkik`, `lab-panel`, `lab-numune`,
+  `lab-sonuc`, `lab-cihaz-esleme` listeleri; tetkik (referans detaylı), panel
+  ve eşleme kartları; numune kabul/ret, iki aşamalı onay, düzeltme ve panik
+  bildirimi aksiyonları. `lab-istem` listesi 433 adlandırmasına uyarlandı
+  (eski `lab_istem_test` alt sorguları kırıktı) ve panik/öncelik kolonları
+  eklendi.
+- **Testler**: `LabTestleri` (11 durum) — barkod kontrol hanesi tek hane
+  hatasını yakalıyor, bayrak/panik önceliği, en dar yaş aralığının seçilmesi,
+  cihaz kodu çözümü ve host query'nin yalnız kabul edilmiş numuneyi vermesi.
+  Toplam 91 test geçiyor.
+
+### Uçtan uca doğrulama (yerel)
+
+Başvuru 114460 (MEHMET KAYA) için GLU + PNL-HEMO istendi: **5 tetkik, 3 tüp**
+(sarı/mor/mavi) — aynı tüpteki tetkikler tek barkoda bağlandı. Mor tüp
+(`26000000237`) alındı → kabul edildi; host query o barkod için üç testi
+döndürdü (kabul öncesi **boş** dönüyordu). COBAS cihazından ORU^R01 mesajı
+alındı ve lab sonucuna aktarıldı: WBC 7.8 → `N` **oto-onay**, PLT 250 → `N`
+oto-onay, HGB 6.4 → `LL` **panik**, onay bekliyor. Panik bildirimi kaydedildi,
+teknik + uzman onayı verildi, ikinci onay `IS_KURALI` ile reddedildi;
+düzeltme eski satırı iptal edip `tekrar_no = 1` ile yeni satır açtı.
+**Test verisi silinmedi** (kullanıcının isteği: ekranda görünsün).

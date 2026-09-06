@@ -515,6 +515,62 @@ anlamı belirsiz bir provizyon oluştururdu.
 **Sağlayıcısı olmayan kurumda** uçlar 422 ile "hesap tanımlı değil" der;
 başvuru kartındaki elle provizyon alanları çalışmaya devam eder.
 
+## 9.3 Laboratuvar uçları (433 · 434)
+
+```http
+POST /api/lab/istem                            // { belgeId, satirlar:[{tetkikId}|{panelId}], oncelik?, klinikBilgi?, taniIcd? }
+GET  /api/lab/istem/{id}                       // istem + numuneler + satır/sonuç (rapor kaynağı)
+GET  /api/lab/basvuru/{belgeId}/istemler       // muayene "İstem & Sonuçlar" sekmesi
+POST /api/lab/numune/{id}/durum                // { durum: 2 alındı | 3 kabul | 0 ret, kalite?, retNeden?, aciklama? }
+GET  /api/lab/numune/barkod/{barkod}           // barkod okutunca kabul ekranı
+POST /api/lab/sonuc                            // { istemSatirId, deger, birim?, yorum?, dilusyon? }
+POST /api/lab/sonuc/{id}/onayla                // { asama: 1 teknik | 2 uzman }
+POST /api/lab/sonuc/{id}/duzelt                // { deger, neden }  - eski satır İPTAL, yenisi açılır
+POST /api/lab/sonuc/{id}/panik                 // { bildirilenAd, kanal?, aciklama? }
+POST /api/lab/panik/{id}/teyit                 // { teyitEden }
+GET  /api/lab/cihaz/{id}/calisma-listesi/{barkod}   // HOST QUERY (çift yön)
+POST /api/lab/cihaz-mesaj/{id}/isle            // çözümlenmiş cihaz mesajını sonuca aktarır
+```
+
+**Numune planı sunucuda üretilir.** İstem açılırken panel satırları
+tetkiklerine açılır, aynı tetkik iki panelden gelse bir kez istenir ve **aynı
+tüp tipindeki tetkikler tek barkoda** bağlanır — istemci "kaç tüp" hesaplamaz.
+Barkod `YY + 8 hane + Luhn kontrol hanesi`; tek hane hatası barkodu geçersiz
+kılar, elle okunan barkodun başka numuneye bağlanmasını önler.
+
+**TAT kabulde başlar**, istemde değil: numune laboratuvara ulaşmadan süre
+işlemez. Ret numuneyi kapatır ve satırları "tekrar numune bekliyor"a alır;
+sessiz bırakmak, sonucu hiç gelmeyen bir istem üretirdi.
+
+**Kural motoru sonuç YAZILIRKEN çalışır** ve sonucun kendisiyle saklanır:
+yaş/cinsiyete göre referans (`fn_lab_referans`), bayrak (`fn_lab_bayrak`:
+L/H/LL/HH), panik ve delta check (önceki **onaylı** sonuçla). Rapor ve ekran
+yeniden hesaplamaz — referans sonradan değişse eski rapor aynı kalır.
+Referans ve panik sınırı yoksa bayrak **boştur**: uydurulmuş "normal" hekimi
+yanıltır.
+
+**Oto-onay yalnız temiz sonuçta**: bayrak N, panik yok, delta uyarısı yok ve
+tetkikte `oto_onay = 1`. **Düzeltmede oto-onay kapalıdır** — daha önce
+onaylanmış bir değeri değiştiren satır ikinci bir göz görmeden yayınlanmaz.
+
+**Onaylı sonuç güncellenmez**: `duzelt` eski satırı `durum = 4` yapar, yeni
+satırı `tekrar_no + 1` ile açar; neden zorunludur.
+
+**Cihaz eşlemesi opsiyoneldir** (434): cihaz test kodu tetkik koduyla aynıysa
+kod üzerinden bulunur; `lab_cihaz_test_esleme` yalnız farklı kod ve birim
+çevrimi (çarpan/ofset) için. Ham değer sonuçta ayrıca saklanır. **İstemde
+olmayan test yazılmaz** — cihaz paneli komple çalışır, faturalanmamış sonuç
+üretmemek için atlanan kodlar mesaj hatasına yazılır.
+
+**Host query yalnız KABUL EDİLMİŞ numuneyi döner**: reddedilebilecek tüpü
+çalıştırmak, sonradan silinecek sonuç üretir.
+
+**Yetkiler**: `lab` (istem), `lab.tetkik` (katalog/panel), `lab.numune`
+(kabul/ret), `lab.sonuc` (giriş + teknik onay), `lab.onay` (uzman onayı,
+düzeltme), `lab.cihaz` (eşleme).
+
+---
+
 ---
 
 ## 10. Sürümleme

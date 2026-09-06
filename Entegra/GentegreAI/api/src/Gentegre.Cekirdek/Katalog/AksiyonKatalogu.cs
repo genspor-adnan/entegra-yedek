@@ -416,6 +416,13 @@ public static class AksiyonKatalogu
                 new("cihaz.yeniden-isle", "↻ Yeniden İşle", "cihaz-mesaj",
                     Hedef: "araccubugu,sagtus,palet",
                     AksiyonYetkisi: "cihaz.isle", KayitGerekir: true, Sira: 10),
+                // COZUMLEME ile SONUCA YAZMA ayri adimlar (433): mesaj
+                //   cozumlenmis olabilir ama barkod hic eslesmemistir.
+                //   Tek dugmede birlesseydi, eslesmeyen mesaj "islendi"
+                //   gorunur ve sonuc kaybolurdu.
+                new("lab.mesaj-sonuca-aktar", "🧪 Lab Sonucuna Aktar", "cihaz-mesaj",
+                    Hedef: "araccubugu,sagtus,palet",
+                    AksiyonYetkisi: "lab.sonuc", KayitGerekir: true, Sira: 15),
                 Yazdir(),
             ],
 
@@ -520,6 +527,61 @@ public static class AksiyonKatalogu
 
             ["is-merkezi-liste"] = Crud("is-merkezi", "is-merkezi", "uretim",
                                         "＋ Yeni", silHedef: null, yazdir: false),
+
+            // LAB v1 (433/434). Tetkik ve panel sirandan CRUD; numune, sonuc
+            //   ve cihaz eslemesi is akisi dugmeleri tasir.
+            ["lab-tetkik-liste"] = Crud("lab-tetkik", "lab-tetkik", "lab.tetkik"),
+            ["lab-panel-liste"] = Crud("lab-panel", "lab-panel", "lab.tetkik"),
+            ["lab-cihaz-esleme-liste"] =
+                Crud("lab-cihaz-esleme", "lab-cihaz-esleme", "lab.cihaz",
+                     "＋ Yeni", silHedef: "sagtus,palet", yazdir: false),
+
+            // NUMUNE KABUL: ret AYRI dugme ve neden ister - "kabul etmedim"
+            //   ile "reddettim" farkli seylerdir; ret istem satirlarini
+            //   "tekrar bekliyor"a alir, sessiz birakmak sonucu hic
+            //   gelmeyen istem uretirdi.
+            ["lab-numune-liste"] =
+            [
+                new("lab.numune-alindi", "🩸 Alındı İşaretle", "lab-numune",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.numune", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 10),
+                new("lab.numune-kabul", "✔ Kabul Et", "lab-numune",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.numune", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 20),
+                new("lab.numune-ret", "✖ Reddet", "lab-numune",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.numune", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 30),
+                new("lab.barkod-yazdir", "🏷 Barkod Etiketi", "lab-numune",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "lab.numune", Islem: Islem.Gor, KayitGerekir: true,
+                    Sira: 40),
+                Yazdir(),
+            ],
+
+            // SONUC ONAY KUYRUGU: iki asama ayri dugme (teknik / uzman).
+            //   Onayli sonuc GUNCELLENMEZ - "Duzelt" eski satiri iptal edip
+            //   yenisini acar, bu yuzden ayri dugme.
+            ["lab-sonuc-liste"] =
+            [
+                new("lab.teknik-onay", "✔ Teknik Onay", "lab-sonuc",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.sonuc", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 10),
+                new("lab.onayla", "✅ Uzman Onayı (yayınla)", "lab-sonuc",
+                    Hedef: "araccubugu,sagtus,palet",
+                    AksiyonYetkisi: "lab.onay", KayitGerekir: true, Sira: 20),
+                new("lab.duzelt", "✎ Sonucu Düzelt", "lab-sonuc",
+                    Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "lab.onay", KayitGerekir: true, Sira: 30),
+                new("lab.panik-bildir", "☎ Panik Bildirimi", "lab-sonuc",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.sonuc", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 40),
+                Yazdir(),
+            ],
 
             // ITS KUYRUGU (427): gonderilmis bildirim IPTAL EDILEMEZ - ITS'de
             //   kayit olustu, geri almak ayri bir bildirim turudur (iade /

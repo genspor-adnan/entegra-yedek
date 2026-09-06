@@ -84,6 +84,7 @@ kurucu.Services.AddSingleton<Gentegre.Cekirdek.Cihaz.ICihazSurucu,
 kurucu.Services.AddSingleton<Gentegre.Cekirdek.Cihaz.ICihazSurucu,
                              Gentegre.Cekirdek.Cihaz.AstmSurucu>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.CihazServisi>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.LabServisi>();
 kurucu.Services.AddHostedService<Gentegre.Api.Servisler.CihazDinleyici>();
 kurucu.Services.AddScoped<KasaDeposu>();
 kurucu.Services.AddScoped<GunlukDeposu>();
@@ -232,6 +233,7 @@ uygulama.UtsUclariniEkle();
 uygulama.UretimUclariniEkle();
 uygulama.SigortaUclariniEkle();
 uygulama.CihazUclariniEkle();
+uygulama.LabUclariniEkle();
 
 // YETKI SENKRONU (kullanici: "menulerdeki ekle/sil/degisimlerde yetki matrisini
 //   update et"): katalogdaki ekran/aksiyon yetkileri ile `yetki` tablosu her

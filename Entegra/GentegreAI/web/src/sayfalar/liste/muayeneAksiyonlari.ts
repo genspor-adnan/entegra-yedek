@@ -62,6 +62,40 @@ export async function muayeneAksiyonu(
   //   satiri eklemek, birini unutunca sessizce bozulan bir bag birakirdi.
   if (kod === 'muayene.istem') {
     await guvenli(async () => {
+      // ISTEM TURU ONCE SORULUR: laboratuvar istemi lab_istem'de acilir ve
+      //   tup plani + barkod uretir; goruntuleme radyoloji calisma listesine
+      //   duser. Tek listede birlestirmek, iki farkli surece ayni ekrandan
+      //   yanlis kayit acmak demekti.
+      const tur = await secimSor('İstem türü?', [
+        { kod: '1', ad: '🧪 Laboratuvar' },
+        { kod: '2', ad: '📷 Görüntüleme' },
+      ]);
+      if (!tur) return;
+
+      if (tur === '1') {
+        const paneller = await api.liste('lab-panel', { sayfa: 1, boyut: 50 });
+        const tetkikler = await api.liste('lab-tetkik', { sayfa: 1, boyut: 100 });
+        const secenekler = [
+          ...paneller.satirlar.map(r => ({
+            kod: `P${r.id}`, ad: `📦 ${String(r.ad ?? '')}` })),
+          ...tetkikler.satirlar.map(r => ({
+            kod: `T${r.id}`, ad: `${String(r.kod ?? '')} · ${String(r.ad ?? '')}` })),
+        ];
+        if (secenekler.length === 0) { mesaj('Tetkik kataloğu boş.'); return }
+
+        const secim = await secimSor('Hangi tetkik / panel istensin?', secenekler);
+        if (!secim) return;
+
+        const y = await api.muayeneIstemAc(id, {
+          tur: 1, aciliyet: 1,
+          tetkikIdler: secim.startsWith('T') ? [Number(secim.slice(1))] : [],
+          panelIdler: secim.startsWith('P') ? [Number(secim.slice(1))] : [],
+        });
+        mesaj(y.mesaj);
+        b.tazele();
+        return;
+      }
+
       const hizmetler = await api.liste('hizmet', { sayfa: 1, boyut: 50 });
       if (hizmetler.satirlar.length === 0) { mesaj('Tanımlı hizmet yok.'); return }
 

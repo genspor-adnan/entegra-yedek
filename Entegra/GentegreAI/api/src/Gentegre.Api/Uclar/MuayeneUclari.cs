@@ -205,7 +205,7 @@ public static class MuayeneUclari
         //   radyolojinin çalışma listesinde görünmeyen bir istem üretirdi.
         grup.MapPost("/{id:int}/istem", async (
             int id, IstemIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            Servisler.LabServisi lab, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("muayene", Islem.Degistir);
@@ -254,6 +254,47 @@ public static class MuayeneUclari
                      (short)(istek.Aciliyet ?? 1), m.HekimId, m.OnTani,
                      istek.Aciklama ?? "", istek.Aciklama ?? ""], iptal);
                 hedefTablo = "radyoloji_istem";
+            }
+
+            // LABORATUVAR (433): asil kayit lab_istem'de acilir; tup plani ve
+            //   barkodlar orada uretilir. Muayeneden istenen tetkigin numune
+            //   plani olmadan acilmasi, kan alma biriminde "hangi tup" sorusunu
+            //   cevapsiz birakirdi.
+            if (istek.Tur == 1)
+            {
+                if (m.BelgeId is not > 0)
+                    throw GentegreHatasi.IsKurali(
+                        "Laboratuvar istemi icin muayenenin basvurusu olmali.");
+
+                var satirlar = new List<Servisler.LabServisi.IstemSatiriIstegi>();
+                foreach (var t in istek.TetkikIdler ?? [])
+                    satirlar.Add(new(t, null));
+                foreach (var p in istek.PanelIdler ?? [])
+                    satirlar.Add(new(null, p));
+                if (satirlar.Count == 0)
+                    throw GentegreHatasi.Dogrulama("Laboratuvar istemi icin tetkik secilmeli.",
+                        [new("tetkikIdler", "En az bir tetkik ya da panel secin.")]);
+
+                // Lab istemi KENDI islemini acar; bag satiri onun ardindan
+                //   yazilir - lab istemi acilamazsa bag satiri da olusmaz.
+                await islem.CommitAsync(iptal);
+                hedefId = await lab.IstemAcAsync(m.BelgeId.Value, satirlar,
+                    (short)(istek.Aciliyet ?? 1), istek.Aciklama ?? "", m.OnTani,
+                    baglam, iptal);
+                hedefTablo = "lab_istem";
+
+                var bagId = await veri.TekDegerAsync<int>("""
+                    insert into public.muayene_istem
+                           (muayene_id, tur, hedef_tablo, hedef_id, aciliyet,
+                            sonuc_durum, ekleyen)
+                    values (@p0, 1, 'lab_istem', @p1, @p2, 0, @p3)
+                    returning id
+                    """,
+                    [id, hedefId, (short)(istek.Aciliyet ?? 0), baglam.KullaniciId], iptal);
+
+                return Results.Ok(new { istemId = bagId, hedefTablo, hedefId,
+                                        mesaj = "Laboratuvar istemi acildi, barkodlar uretildi.",
+                                        izlemeNo = baglam.IzlemeNo });
             }
 
             var istemId = await baglanti.TekDegerAsync<int>("""
@@ -582,7 +623,8 @@ public static class MuayeneUclari
     /// <c>Tur</c>: 1 lab · 2 görüntüleme · 3 konsültasyon · 4 işlem · 5 dış tetkik.
     /// Görüntülemede <c>HizmetId</c> zorunlu - radyoloji istemi hizmetsiz açılamaz.
     /// </summary>
-    public sealed record IstemIstegi(int Tur, int? HizmetId, int? Aciliyet, string? Aciklama);
+    public sealed record IstemIstegi(int Tur, int? HizmetId, int? Aciliyet, string? Aciklama,
+                                     int[]? TetkikIdler, int[]? PanelIdler);
 
     /// <summary>İstek gövdesi: belge verilmezse hekimin SIRADAKİ hastası çağrılır.</summary>
     public sealed record CagirIstegi(int? BelgeId, int? HekimId);

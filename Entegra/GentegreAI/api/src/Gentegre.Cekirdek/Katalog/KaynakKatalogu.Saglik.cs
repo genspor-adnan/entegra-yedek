@@ -888,15 +888,32 @@ public static partial class KaynakKatalogu
             new("bolum",        "i.bolum",        "kod",   "Bölüm Kodu", Varsayilan: false),
             new("hekimAdi",     "coalesce(p.ad, '')", "metin", "İsteyen Hekim", Genislik: 180),
             // Kac test var / kaci sonuclandi: teknisyen listede "bitti mi" gorsun.
+            // 433'te lab_istem_test -> lab_istem_satir olarak adlandirildi;
+            //   sonuc artik satirda degil lab_sonuc'ta durur (onay/duzeltme
+            //   gecmisi tek satira sigmiyordu).
             new("testSayisi",
-                "(select count(*) from public.lab_istem_test t where t.istem_id = i.id)",
+                "(select count(*) from public.lab_istem_satir t "
+                + " where t.istem_id = i.id and t.durum <> 0)",
                                                   "sayi",  "Test", Hizalama: "sag", Genislik: 70,
                                                   Filtrelenebilir: false),
             new("sonuclanan",
-                "(select count(*) from public.lab_istem_test t "
-                + " where t.istem_id = i.id and t.sonuc <> '')",
+                "(select count(*) from public.lab_istem_satir t "
+                + " where t.istem_id = i.id and t.durum in (3, 4, 5))",
                                                   "sayi",  "Sonuçlanan", Hizalama: "sag",
                                                   Genislik: 100, Filtrelenebilir: false),
+            // PANIK: onay kuyrugunda oncelik bu satirda; listede gorunmezse
+            //   panik deger sirasini bekler.
+            new("panikSayisi",
+                "(select count(*) from public.lab_istem_satir t "
+                + "  join public.lab_sonuc ls on ls.istem_satir_id = t.id "
+                + " where t.istem_id = i.id and ls.panik = 1 and ls.durum <> 4)",
+                                                  "sayi",  "Panik", Hizalama: "sag",
+                                                  Genislik: 80, Filtrelenebilir: false),
+            new("oncelikAdi",
+                "case i.oncelik when 2 then 'Öncelikli' when 3 then 'Acil' "
+                + "else 'Normal' end",            "metin", "Öncelik", Hizalama: "orta",
+                                                  Bicim: "rozet", Genislik: 100,
+                                                  Filtrelenebilir: false),
             new("durumAdi",
                 "case i.durum when 2 then 'Numune Alındı' when 3 then 'Çalışılıyor' "
                 + "when 4 then 'Sonuçlandı' when 5 then 'Onaylandı' when 9 then 'İptal' "

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (207 ad, 62 tanesi birden cok dosyada)
+## Fonksiyonlar (214 ad, 64 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -38,6 +38,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_cari_fiyat_listesi` | `204_cari_fiyat_listesi.sql` | — |
 | `fn_ceviri` | `194_ceviri.sql` | — |
 | `fn_ceviri_sozluk` | `194_ceviri.sql` | — |
+| `fn_cihaz_siradakiler` | `432_cihaz_ara_katman.sql` | — |
 | `fn_degistirme_tarihi` | `015_sema_log_ebelge.sql` | — |
 | `fn_depo_kural_kontrol` | `093_depo_kurallar.sql` | — |
 | `fn_depo_varsayilan_tek` | `090_depo_varsayilan.sql` | — |
@@ -120,6 +121,12 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kurum_kampanya` | `274_belge_kampanya.sql` | 272_kampanya_fiyat.sql |
 | `fn_kurum_modul_acik` | `364_kurum_profil_sube.sql` | 359_kurum_profil.sql |
 | `fn_kurum_profil` | `364_kurum_profil_sube.sql` | — |
+| `fn_lab_barkod_kontrol` | `433_lab_v1.sql` | — |
+| `fn_lab_barkod_uret` | `433_lab_v1.sql` | — |
+| `fn_lab_bayrak` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |
+| `fn_lab_cihaz_calisma_listesi` | `434_lab_cihaz_esleme.sql` | — |
+| `fn_lab_cihaz_tetkik` | `434_lab_cihaz_esleme.sql` | — |
+| `fn_lab_referans` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |
 | `fn_metin_anahtar` | `414_metin_sadelestir.sql` | — |
 | `fn_metin_sadelestir` | `414_metin_sadelestir.sql` | — |
 | `fn_mizan` | `077_v_ekstre.sql` | — |
@@ -216,7 +223,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (102 ad, 37 tanesi birden cok dosyada)
+## Gorunumler (106 ad, 37 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -236,6 +243,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_cari_ekstre` | `111_ekstre_doviz_gruplu.sql` | 077_v_ekstre.sql, 097_ekstre_kaynak_kayit.sql |
 | `v_cari_lookup` | `122_aday_musteri.sql` | 037_kisi_karti.sql |
 | `v_cek_senet_portfoy` | `072_cek_senet.sql` | — |
+| `v_cihaz_lookup` | `432_cihaz_ara_katman.sql` | — |
 | `v_departman_lookup` | `256_departman_durum.sql` | 251_departman.sql, 254_departman_kod.sql |
 | `v_depo_lookup` | `093_depo_kurallar.sql` | 088_belge_irsaliye_alanlari.sql |
 | `v_dis_hekim_lookup` | `309_dis_hekim_kurum_taraf_bag.sql` | 305_dis_hekim.sql, 308_dis_hekim_kurum_ad_kaldir.sql |
@@ -280,6 +288,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_kategori_lookup` | `347_sonomed_rad_kategori.sql` | 250_kategori_lookup.sql, 270_kategori_agaci.sql |
 | `v_kullanici_lookup` | `156_ebelge_seri.sql` | — |
 | `v_kurum_lookup` | `250_kategori_lookup.sql` | 249_kurum_sozlesme.sql |
+| `v_lab_cihaz_esleme` | `434_lab_cihaz_esleme.sql` | — |
+| `v_lab_panel_lookup` | `433_lab_v1.sql` | — |
+| `v_lab_tetkik_lookup` | `433_lab_v1.sql` | — |
 | `v_mali_hareket_ek` | `392_iptal_ters_kayit_ekstre.sql` | 077_v_ekstre.sql |
 | `v_masraf_ekstre` | `077_v_ekstre.sql` | — |
 | `v_masraf_lookup` | `071_kasa_master.sql` | — |

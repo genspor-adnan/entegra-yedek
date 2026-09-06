@@ -240,6 +240,10 @@ public static partial class KartKatalogu
         Ekle(UrunAgaciKarti());
         Ekle(UretimEmriKarti());
         Ekle(IsMerkeziKarti());
+        // LAB v1 (433/434): tetkik katalogu (+referans), panel, cihaz eslemesi.
+        Ekle(LabTetkikKarti());
+        Ekle(LabPanelKarti());
+        Ekle(LabCihazEslemeKarti());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
 
