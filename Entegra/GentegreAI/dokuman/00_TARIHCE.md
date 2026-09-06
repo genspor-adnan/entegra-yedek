@@ -7117,3 +7117,47 @@ ELİF ŞAHİN'in başvurusundan muayene açıldı (id 13): sekme, başvurunun **
 lab istemini** getirdi — biri tam onaylı (GLU 28 **LL panik**, KRE N, ALT/AST
 H), ikisi "sonuç bekleniyor". Muayeneden TSH istendi; bağ satırı oluştu,
 **👁 Gördüm** damgası yazıldı ve sekmede göründü.
+
+---
+
+## 06.09.2026 — Tüp barkod etiketi (444) ve INR bölüm düzeltmesi (`db/443`)
+
+Numune listesindeki "Barkod Etiketi" düğmesi barkod METNİNİ gösteriyordu;
+tüpe yapışacak fiziksel etiket yoktu.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K152 | **Code 128**, kendi kodlayıcımız (`barkod128.ts`), SVG çizim | Cihazlar Code 128 bekler; hazır kütüphane tek barkod için onlarca KB ve tüm sembolojileri getirir. Raster görüntüde dar barlar yazıcıda kaybolur |
+| K153 | Sayısal barkodda ilk hane SET B, kalan çiftler SET C | 11 hane: 11 simge yerine 6 — etiket yarı genişlikte. Sağlama hanesi birim testle sabitlendi; yanlış sağlama barkodu okunmaz yapar |
+| K154 | Ad **kısaltılır** (Yılmaz A.), yaş/cinsiyet ve **doğum tarihi kalır** | 50 mm'ye tam ad sığmaz; aynı adlı iki hasta laboratuvarın klasik kazası, ayırt eden bilgi doğum tarihi |
+| K155 | Tüp rengi **renkli şerit** olarak | Teknisyen etiketi okumadan, renge bakarak doğru tüpü seçer |
+| K156 | Acil istemde kırmızı çerçeve + STAT rozeti | Cihazda öncelik alacak tüp bankoda da bakışta ayrılmalı (mockup kuralı) |
+| K157 | Hasta hazırlığı etikete değil **sayfaya** yazılır | Etikette yer yok; ama açlık gerektiren tetkikte tüp alınmadan önce sorulmalı |
+| K158 | Etiket **ayrı sayfada**, `@media print` ile yalnız etiketler | Ekran çerçevesiyle basılan etiket tüpe yapışmaz |
+
+### Yapılanlar
+
+- **API**: `GET /api/lab/etiket?istemId=|numuneId=` (sözleşme §9.9).
+- **Kodlayıcı**: `barkod128.ts` (SET B/C geçişi, ağırlıklı sağlama, desen
+  tablosu) + `barkod128.test.ts` (6 durum).
+- **Ekran**: `/lab/etiket` — 50×25 mm etiketler, tüp rengi şeridi, SVG
+  barkod, kopya sayısı seçimi, hazırlık uyarısı.
+- **Aksiyonlar**: Numune Kabul'de "🏷 Barkod Etiketi" (tek tüp), lab istem
+  listesinde "🏷 Etiket Bas" (tüm tüpler).
+
+### Etiket yazılırken çıkan veri kusuru (`db/443`)
+
+MEHMET AYDIN'ın acil isteminin etiketlerinde mavi sitratlı tüpün bölümü
+**"İdrar"** yazıyordu: `db/433` başlangıç kataloğunda INR `bolum = 7`
+açılmış, doğrusu `6` (Koagülasyon). Bölüm yalnız etiketi değil rapordaki
+gruplamayı ve çalışma listesi filtresini de belirler — koagülasyon testinin
+idrar bölümünde listelenmesi, o tüpü bekleyen teknisyenin onu hiç görmemesi
+demekti. Düzeltme dar kapsamlı: yalnız kodu INR olan ve hâlâ 7 yazan satır.
+
+### Doğrulama
+
+MEHMET KAYA'nın acil istemi (LAB-2026/00019 · üç tüp): mor (WBC, HGB, PLT ·
+Hematoloji), mavi (INR · Koagülasyon), sarı (GLU · Biyokimya) — üçü de acil
+işaretli. 113 API testi + 429 web testi geçiyor.

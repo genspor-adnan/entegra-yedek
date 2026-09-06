@@ -25,6 +25,7 @@ import { RadyolojiRapor } from './sayfalar/RadyolojiRapor';
 import { RadyolojiRaporCikti } from './sayfalar/RadyolojiRaporCikti';
 import { LabRaporCikti } from './sayfalar/LabRaporCikti';
 import { LabKkGrafik } from './sayfalar/LabKkGrafik';
+import { LabEtiket } from './sayfalar/LabEtiket';
 import { SatisAyarlar, AlisAyarlar } from './sayfalar/BelgeAyarlar';
 import { Panel } from './sayfalar/Panel';
 
@@ -119,6 +120,8 @@ function Yollar() {
         {yetki('lab') && <Route path="/lab/rapor/:id" element={<LabRaporCikti />} />}
         {/* Levey-Jennings (442): tetkik/lot/seviye sorgu parametresiyle. */}
         {yetki('lab.kk') && <Route path="/lab/kk/grafik" element={<LabKkGrafik />} />}
+        {/* Tup barkod etiketi (444): ?istem= tum tupler, ?numune= tek tup. */}
+        {yetki('lab.numune') && <Route path="/lab/etiket" element={<LabEtiket />} />}
 
         {/* Bilinmeyen yol: Ana Sayfa yetkisi varsa panele, yoksa kullanicinin
             girebildigi ILK ekrana (yetkisi hic yoksa oldugu yerde kalir). */}

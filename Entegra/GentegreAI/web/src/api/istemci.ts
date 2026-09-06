@@ -336,6 +336,15 @@ export const api = {
     gonder<{ yazilan: number; atlanan: number; mesaj: string }>(
       `/api/lab/cihaz-mesaj/${mesajId}/isle`, {}),
 
+  /** Tup barkod etiketi (444): istemin TUM tupleri ya da tek numune. */
+  labEtiket: (ek: { istemId?: number; numuneId?: number }) => {
+    const q = new URLSearchParams();
+    if (ek.istemId) q.set('istemId', String(ek.istemId));
+    if (ek.numuneId) q.set('numuneId', String(ek.numuneId));
+    return istek<{ etiketler: Record<string, unknown>[];
+                   kurum: Record<string, unknown> | null }>(`/api/lab/etiket?${q}`);
+  },
+
   /** Muayene karti "Istem & Sonuclar" sekmesi (443): bag + SONUCUN KENDISI. */
   muayeneSonuclari: (muayeneId: number) =>
     istek<{ muayeneId: number; belgeId: number | null;

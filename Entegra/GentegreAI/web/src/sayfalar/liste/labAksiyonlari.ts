@@ -47,6 +47,12 @@ export async function labAksiyonu(
       });
       return true;
 
+    // ETIKET: istemin TUM tupleri tek sayfada - kan alma bankosu tupleri
+    //   birlikte hazirlar, tek tek basmak siraya girer.
+    case 'lab.etiket':
+      b.git(`/lab/etiket?istem=${id}`);
+      return true;
+
     // RAPOR: hastaya verilen belge ayri sayfada acilir (yazdirma
     //   tarayicinin kendi diyalogu; ayri bir PDF ureticisi yok).
     case 'lab.rapor':
@@ -102,11 +108,9 @@ export async function labAksiyonu(
     }
 
     case 'lab.barkod-yazdir': {
-      const barkod = String(satir?.barkod ?? '');
-      if (!barkod) { mesaj('Bu satırda barkod yok.'); return true }
-      // Etiket yazdirma tarayici yazdirma penceresinden gecer; barkod
-      //   metnini gostermek, elle okutma gerektiginde de ise yarar.
-      mesaj(`Barkod: ${barkod}`);
+      // ETIKET AYRI SAYFADA: tup uzerine yapisan fiziksel belge, ekran
+      //   cercevesiyle birlikte basilmamali (@media print).
+      b.git(`/lab/etiket?numune=${id}`);
       return true;
     }
 

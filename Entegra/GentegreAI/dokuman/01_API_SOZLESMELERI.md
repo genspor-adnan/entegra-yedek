@@ -818,6 +818,51 @@ raporu açar.
 
 ---
 
+## 9.9 Tüp barkod etiketi (444)
+
+```http
+GET /api/lab/etiket?istemId=...          // istemin TÜM tüpleri
+GET /api/lab/etiket?numuneId=...         // tek tüp
+```
+
+**Etiket fiziksel bir belgedir**: tüpün üstüne yapışır, cihaz onu okur, kabul
+ekranı onu arar. Bu yüzden ayrı sayfada (`/lab/etiket?istem=…`) açılır ve
+`@media print` ile yalnız etiketler basılır.
+
+**Barkod Code 128**, tarayıcıda SVG olarak çizilir (`bilesenler/barkod128.ts`).
+Laboratuvar cihazları (Cobas, VITEK, BACTEC) bu sembolojiyi bekler; Code 39
+daha basit ama %40 daha geniş ve kontrol hanesi taşımaz. 11 haneli sayısal
+barkodda ilk hane SET B, kalan çiftler SET C ile kodlanır — 11 simge yerine
+6 simge, yani yarı genişlik. Sağlama hanesi standarttaki ağırlıklı toplamla
+hesaplanır; yanlış sağlama barkodu **okunmaz** yapar ve sahada "etiket bastı
+ama cihaz okumuyor" olarak görünür (birim testle sabitlendi).
+
+**Hazır barkod kütüphanesi yok**: tek ihtiyaç bir sembolojiyi çizmek, en
+küçük paket bile onlarca KB ve tüm sembolojileri getiriyor. Raster (PNG)
+yerine SVG: dar barlar yazıcıda kayboluyor.
+
+**Etikette ne var**: tüp rengi/tipi (renkli şerit), barkod + okunur numara,
+**kısaltılmış hasta adı** (Yılmaz A.) + yaş/cinsiyet + **doğum tarihi**,
+istem no, tüpteki tetkik kodları, numune tipi ve bölüm. Ad kısaltılır çünkü
+50 mm'lik etikete tam ad sığmaz; doğum tarihi kalır çünkü aynı adlı iki hasta
+laboratuvarın klasik kazasıdır.
+
+**Acil istemde kırmızı çerçeve + "ACİL / STAT" rozeti** (mockup kuralı):
+cihazda öncelik alacak tüp bankoda da bakışta ayrılmalı.
+
+**Hasta hazırlığı** (açlık vb.) etikete basılmaz — yer yok — ama sayfada
+uyarı olarak görünür: tüp alınmadan önce sorulması gereken şey.
+
+**Kopya sayısı** seçilebilir (1-3): biri tüpe, biri isteme/arşive yaygın
+uygulama.
+
+**Ekran/aksiyon**: Numune Kabul listesinde "🏷 Barkod Etiketi" (tek tüp),
+lab istem listesinde "🏷 Etiket Bas" (istemin tüm tüpleri).
+
+**Yetki**: `lab.numune` (Gör).
+
+---
+
 ---
 
 ## 10. Sürümleme

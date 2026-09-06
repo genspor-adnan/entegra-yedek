@@ -549,6 +549,12 @@ public static class AksiyonKatalogu
                 // SONUC RAPORU: hastaya verilen belge. Istem numarasiyla
                 //   acilir - ayni istemdeki sayisal sonuc, kultur ve genetik
                 //   TEK kagida basilir.
+                // ETIKET: istemin TUM tupleri tek sayfada basilir - kan alma
+                //   bankosu tupleri birlikte hazirlar.
+                new("lab.etiket", "🏷 Etiket Bas", "lab-istem",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.numune", Islem: Islem.Gor, KayitGerekir: true,
+                    Sira: 25),
                 new("lab.rapor", "🖨 Sonuç Raporu", "lab-istem",
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "lab", Islem: Islem.Gor, KayitGerekir: true, Sira: 30),

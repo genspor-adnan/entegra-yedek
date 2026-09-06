@@ -1286,6 +1286,90 @@ public static class LabUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
+        // ----------------------------------------------------------- etiket ---
+
+        // GET /api/lab/etiket?istemId=... | numuneId=...
+        //
+        // TÜP ETİKETİ: kan alma bankosunun bastığı fiziksel etiket. Barkod
+        // numunenin kimliğidir; cihaz da, kabul ekranı da onu okur.
+        //
+        // <b>Etikette hasta adı KISALTILIR</b> (35 mm'lik tüp etiketine tam
+        // ad sığmaz) ama yaş ve cinsiyet KALIR: yanlış tüpü fark etmenin en
+        // hızlı yolu budur. Doğum tarihi de gider - aynı adlı iki hasta
+        // laboratuvarın klasik kazasıdır.
+        grup.MapGet("/etiket", async (
+            int? istemId, int? numuneId, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab.numune", Islem.Gor);
+
+            if (istemId is not > 0 && numuneId is not > 0)
+                throw GentegreHatasi.Dogrulama("İstem ya da numune belirtilmeli.",
+                    [new("istemId", "İstem ya da numune id'si verin.")]);
+
+            var etiketler = await veri.ListeAsync("""
+                select n.id, n.barkod, n.numune_tipi as "numuneTipi",
+                       n.tup_tipi as "tupTipi", n.durum, n.alim_zamani as "alimZamani",
+                       i.id as "istemId", i.istem_no as "istemNo",
+                       i.istem_tarihi as "istemTarihi", i.oncelik,
+                       i.klinik_bilgi as "klinikBilgi",
+                       h.id as "hastaId",
+                       coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''), h.unvan) as hasta,
+                       coalesce(h.kod, '') as "hastaNo",
+                       hs.dogum_tarihi as "dogumTarihi",
+                       coalesce(hs.cinsiyet, 0) as cinsiyet,
+                       coalesce(b.belge_no, '') as protokol,
+                       coalesce(p.unvan, '') as hekim,
+                       -- Tüpteki tetkikler: teknisyen "bu tüpe ne çalışılacak"
+                       --   sorusunu etiketten cevaplayabilmeli.
+                       coalesce((select string_agg(t2.kod, ', ' order by s2.sira)
+                                   from public.lab_istem_satir s2
+                                   join public.lab_tetkik t2 on t2.id = s2.tetkik_id
+                                  where s2.numune_id = n.id and s2.durum <> 0), '') as tetkikler,
+                       coalesce((select string_agg(distinct
+                                    case t3.bolum when 2 then 'Hematoloji'
+                                         when 3 then 'Hormon' when 4 then 'Mikrobiyoloji'
+                                         when 5 then 'Seroloji' when 6 then 'Koagülasyon'
+                                         when 7 then 'İdrar' when 9 then 'Diğer'
+                                         else 'Biyokimya' end, ' · ')
+                                   from public.lab_istem_satir s3
+                                   join public.lab_tetkik t3 on t3.id = s3.tetkik_id
+                                  where s3.numune_id = n.id and s3.durum <> 0), '') as bolumler,
+                       -- HASTA HAZIRLIĞI (açlık vb.) etikette değil, ekranda
+                       --   uyarı olarak gösterilir; tüpe basmak yer kaplar.
+                       coalesce((select string_agg(distinct t4.hazirlik_notu, ' · ')
+                                   from public.lab_istem_satir s4
+                                   join public.lab_tetkik t4 on t4.id = s4.tetkik_id
+                                  where s4.numune_id = n.id and s4.durum <> 0
+                                    and t4.hazirlik_notu <> ''), '') as hazirlik
+                  from public.lab_numune n
+                  join public.lab_istem i on i.id = n.istem_id
+                  join public.taraf h on h.id = n.hasta_id
+                  left join public.taraf_hasta hs on hs.id = n.hasta_id
+                  left join public.belge b on b.id = i.belge_id
+                  left join public.taraf p on p.id = i.personel_id
+                 where (@p0::int is null or n.istem_id = @p0)
+                   and (@p1::int is null or n.id = @p1)
+                 order by n.id
+                """, [istemId, numuneId], RaporSatiri, iptal);
+
+            if (etiketler.Count == 0)
+                throw GentegreHatasi.Bulunamadi("Etiket basılacak numune bulunamadı.");
+
+            var kurum = await veri.TekAsync("""
+                select coalesce(nullif(s.unvan, ''), s.ad) as unvan
+                  from public.sube s
+                 where s.id = coalesce(
+                        (select n.sube_id from public.lab_numune n
+                          where (@p0::int is null or n.istem_id = @p0)
+                            and (@p1::int is null or n.id = @p1) limit 1),
+                        (select id from public.sube where varsayilan = 1 limit 1))
+                """, [istemId, numuneId], RaporSatiri, iptal);
+
+            return Results.Ok(new { etiketler, kurum, izlemeNo = baglam.IzlemeNo });
+        });
+
         // ------------------------------------------------------------ cihaz ---
 
         // GET /api/lab/cihaz/{id}/calisma-listesi/{barkod} - HOST QUERY.

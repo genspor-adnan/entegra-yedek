@@ -1464,6 +1464,48 @@ input.skt-gecmis {
   font-weight: 700; color: #1c4374; margin-top: 8px; font-size: 12px;
 }
 .cikti-sayfa .not { font-size: 10.5px; color: #6b7a8d; line-height: 1.5; margin: 4px 0 0 }
+/* TUP BARKOD ETIKETI (444). Olcu 50x25 mm: piyasadaki termal etiket
+   ruloların yaygin boyu. Kagida basildiginda da ayni olculerde cikar -
+   yazicida "sayfaya sigdir" secilirse barkod okunmaz hale gelirdi. */
+.etiket-sayfa { padding: 10px }
+.etiket-sayfa .etiketler {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+}
+.etiket {
+  width: 50mm; height: 25mm; border: 1px solid #d6dfe9; border-radius: 2px;
+  display: flex; overflow: hidden; background: #fff; page-break-inside: avoid;
+}
+/* TUP RENGI SERIT: teknisyen etikete degil, renge bakarak dogru tupu secer. */
+.etiket .serit { width: 4mm; flex: 0 0 4mm }
+.etiket.acil { border-color: #c0392b; border-width: 2px }
+.etiket .govde { flex: 1; padding: 1mm 1.5mm; display: flex; flex-direction: column;
+                 justify-content: space-between; min-width: 0 }
+.etiket .ust { display: flex; align-items: baseline; gap: 3px; font-size: 6.5pt }
+.etiket .tup { font-weight: 700; white-space: nowrap; overflow: hidden }
+.etiket .acil-rozet {
+  background: #c0392b; color: #fff; border-radius: 2px; padding: 0 2px;
+  font-weight: 700; font-size: 6pt;
+}
+.etiket .tarih { margin-left: auto; color: #555 }
+.etiket .etiket-barkod { display: block; width: 100%; height: 8mm }
+.etiket .barkod-metin {
+  font-family: 'Courier New', monospace; font-size: 7.5pt; letter-spacing: 0.5px;
+  text-align: center; line-height: 1;
+}
+.etiket .hasta { font-size: 8pt; font-weight: 700; white-space: nowrap;
+                 overflow: hidden; text-overflow: ellipsis }
+.etiket .alt, .etiket .alt2 {
+  font-size: 6.5pt; color: #333; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis;
+}
+.etiket .alt2 { color: #667 }
+@media print {
+  .etiket-sayfa .cikti-arac, .etiket-sayfa .yazdirma { display: none !important }
+  .etiket-sayfa { padding: 0 }
+  .etiket { border: none }
+  .etiket-sayfa .etiketler { gap: 0 }
+}
+
 /* MUAYENE > ISTEM & SONUCLAR (443): kart sekmesinin icinde, gridin
    altinda duran sonuc paneli. Tablo dar - muayene sirasinda hekim uzun
    satir okumaz, bakisi bayraga ve degere gider. */
