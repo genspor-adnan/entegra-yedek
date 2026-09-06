@@ -6973,3 +6973,45 @@ uçlardan yürütüldü:
 İki kural sahada denendi ve **sunucu reddetti**: onamsız onay ("KVKK md. 6,
 onamsız rapor verilemez") ve doğrulanmamış patojenik varyantla onay ("Sanger
 doğrulaması tamamlanmadan rapor onaylanamaz").
+
+---
+
+## 06.09.2026 — Laboratuvar sonuç raporu: üç bölüm tek kâğıtta (441)
+
+Üç bölümün işi bitiyordu ama hastanın/hekimin eline gidecek çıktı yoktu.
+Mockuplar: `Ekranlar/Lab/lab_sonuc_formu_biyokimya.html`,
+`lab_sonuc_formu_mikrobiyoloji.html`, `lab_sonuc_formu_genetik.html`.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K126 | **Tek uç + tek sayfa**, üç bölüm (`/api/lab/rapor/{istemId}`, `/lab/rapor/:id`) | Bir istemde sayısal tetkik, kültür ve genetik birlikte bulunabilir; üç ayrı çıktı aynı hastanın aynı istemini üç kâğıda bölerdi |
+| K127 | Rapor **istem numarasıyla** açılır (kültür/genetik satırından bile) | Aynı istemdeki diğer tetkikler de aynı kâğıda girer |
+| K128 | Yalnız **onaylı** sonuçlar basılır; eksik onay çıktıyı engellemez, **TASLAK** damgası koyar | Onaylanmamış değer hastaya verilen belgeye giremez; ama teknisyenin ara çıktı alması meşru bir ihtiyaç |
+| K129 | Bayrak/referans **saklandığı gibi** basılır, yeniden hesaplanmaz | Bugünkü referansla iki yıl önceki sonucu yeniden yorumlamak, verilmiş raporu geçmişe dönük değiştirmektir |
+| K130 | Referans yoksa "Referans tanımlı değil" yazılır | Boş hücre "normal" gibi okunur |
+| K131 | Kademeli bildirim **raporda da** uygulanır (yalnız `bildir = 1`) | Gizlenen ajanı basmak kuralı anlamsız kılardı |
+| K132 | Onam bilgisi ve yöntem/kalite/sınırlılıklar genetik raporun **zorunlu** parçası | Neyin raporlanmadığını onam açıklar (KVKK md. 6); kapsanamayan bölgede "varyant yok" demek bakılamayanı temiz saymaktır |
+| K133 | PDF üreticisi YOK; yazdırma tarayıcının | Aynı çıktının iki üretim yolu, birinin diğerinden sapması demektir (radyoloji çıktısıyla aynı karar) |
+| K134 | Panik/patojenik satır kâğıtta **sol şerit + kalın yazı** ile ayrılır, dolgu renkle değil | Dolgu renk yazıcıda gri lekeye dönüp değeri okunmaz yapıyor |
+
+### Yapılanlar
+
+- **API**: `GET /api/lab/rapor/{istemId}` — istem/hasta/kurum başlığı, onaylı
+  sayısal sonuçlar (bayrak, referans, delta, düzeltme işareti), kültürler +
+  izolatlar + raporlanan antibiyogram, genetik vakalar + raporlanan varyantlar
+  + kalite metrikleri ve gen listesi.
+- **Ekran** `LabRaporCikti.tsx`: kurum anteti, kimlik ızgarası, bölüme göre
+  gruplanmış sonuç tablosu, kültür ve genetik bölümleri, imza ve dipnot;
+  yazdırma araç çubuğu `@media print` ile gizli.
+- **Aksiyonlar**: lab istem, kültür ve genetik listelerinde "🖨 Sonuç Raporu".
+- `tema.css`: rapor tabloları için ortak biçim (üç bölüm tek kâğıtta art arda
+  bastığı için farklı tablo biçimleri raporu dağıtırdı).
+
+### Doğrulama (yerel, uçtan uca verisiyle)
+
+Üç istem de raporu döndürdü: ELİF ŞAHİN (4 sonuç, GLU panik LL, referanslar ve
+onaylayan dolu), MURAT AYDIN (kültür özeti + izolat + **9 raporlanan**
+antibiyotik), ZEYNEP KOÇ (vaka GEN-2026/0004, onam sürümü, kapsama %99,1,
+derinlik 212×, **2 raporlanan varyant**; olası benign TTN raporda yok).

@@ -410,6 +410,19 @@ export const api = {
     istek<{ liste: Record<string, unknown>[] }>(
       '/api/lab/genetik/yeniden-degerlendirme'),
 
+  /** Hastaya verilen SONUC RAPORU (441): uc bolum de tek uctan gelir. */
+  labRaporCikti: (istemId: number) =>
+    istek<{
+      istem: Record<string, unknown>;
+      sonuclar: Record<string, unknown>[];
+      kulturler: Record<string, unknown>[];
+      izolatlar: Record<string, unknown>[];
+      antibiyogram: Record<string, unknown>[];
+      vakalar: Record<string, unknown>[];
+      varyantlar: Record<string, unknown>[];
+      kurum: Record<string, unknown> | null;
+    }>(`/api/lab/rapor/${istemId}`),
+
   // --------------------------------------------------- MIKROBIYOLOJI (436)
   /** Kulturu acar: besiyeri seti verilmezse tetkigin varsayilani kullanilir. */
   labEkim: (istemSatirId: number, istek?: { besiyeriIdler?: number[];

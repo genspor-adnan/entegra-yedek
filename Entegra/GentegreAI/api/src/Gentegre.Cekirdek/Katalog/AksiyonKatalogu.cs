@@ -546,6 +546,12 @@ public static class AksiyonKatalogu
                     Hedef: "sagtus,palet",
                     KaynakKodu: "lab.kultur", Islem: Islem.Ekle, KayitGerekir: true,
                     Sira: 50),
+                // SONUC RAPORU: hastaya verilen belge. Istem numarasiyla
+                //   acilir - ayni istemdeki sayisal sonuc, kultur ve genetik
+                //   TEK kagida basilir.
+                new("lab.rapor", "🖨 Sonuç Raporu", "lab-istem",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab", Islem: Islem.Gor, KayitGerekir: true, Sira: 30),
                 new("lab.genetik-vaka", "🧬 Genetik Vaka Aç", "lab-istem",
                     Hedef: "sagtus,palet",
                     KaynakKodu: "lab.genetik", Islem: Islem.Ekle, KayitGerekir: true,
@@ -573,6 +579,9 @@ public static class AksiyonKatalogu
                     Hedef: "sagtus,palet",
                     KaynakKodu: "lab.kultur", Islem: Islem.Degistir, KayitGerekir: true,
                     Sira: 40),
+                new("lab.kultur-rapor", "🖨 Sonuç Raporu", "lab-kultur",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab", Islem: Islem.Gor, KayitGerekir: true, Sira: 45),
                 new("lab.kultur-onayla", "✔ Raporu Onayla", "lab-kultur",
                     Hedef: "araccubugu,sagtus,palet",
                     AksiyonYetkisi: "lab.onay", KayitGerekir: true, Sira: 50),
@@ -609,6 +618,9 @@ public static class AksiyonKatalogu
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "lab.genetik", Islem: Islem.Degistir, KayitGerekir: true,
                     Sira: 50),
+                new("lab.genetik-rapor", "🖨 Sonuç Raporu", "lab-genetik-vaka",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab", Islem: Islem.Gor, KayitGerekir: true, Sira: 55),
                 new("lab.genetik-onayla", "✔ Raporu Onayla", "lab-genetik-vaka",
                     Hedef: "araccubugu,sagtus,palet",
                     AksiyonYetkisi: "lab.onay", KayitGerekir: true, Sira: 60),

@@ -1433,6 +1433,40 @@ input.skt-gecmis {
 /* Ek rapor orijinalden ayirt edilsin - metin degismedi, EKLENDI. */
 .cikti-sayfa .ek-rapor { border-left: 3px solid #4d8fd6; padding-left: 10px }
 .cikti-alan { border-collapse: collapse; font-size: 11.5px; margin-top: 4px }
+/* LAB RAPOR TABLOSU (441): sonuc/antibiyogram/varyant tablolari ayni
+   gorunumu paylasir - uc bolum tek kagitta art arda basildigi icin farkli
+   tablo bicimleri raporu dagitirdi. */
+.cikti-sayfa .cikti-tablo {
+  width: 100%; border-collapse: collapse; font-size: 11.5px; margin-top: 6px;
+}
+.cikti-sayfa .cikti-tablo th {
+  text-align: left; border-bottom: 1.5px solid #c9d6e5; padding: 4px 8px 4px 0;
+  color: #4a5b6e; font-weight: 700;
+}
+.cikti-sayfa .cikti-tablo td {
+  border-bottom: 1px solid #eef2f6; padding: 4px 8px 4px 0; vertical-align: top;
+}
+.cikti-sayfa .cikti-tablo td.sag { text-align: right }
+.cikti-sayfa .cikti-tablo td.et { color: #6b7a8d; width: 150px }
+.cikti-sayfa .cikti-tablo td.vurgu { font-weight: 700 }
+/* PANIK/PATOJENIK satir: kagitta da ayirt edilebilsin diye yalniz sol
+   serit + kalin yazi - dolgu renk yazicida gri lekeye donuyor. */
+.cikti-sayfa .cikti-tablo tr.panik td { font-weight: 700 }
+.cikti-sayfa .cikti-tablo tr.panik td:first-child {
+  border-left: 3px solid #c0392b; padding-left: 6px;
+}
+.cikti-sayfa .cikti-tablo .kod { color: #90a0b3; font-weight: 400 }
+.cikti-sayfa .cikti-tablo .bolum-ayrac {
+  background: #f4f7fb; font-weight: 700; color: #4a5b6e; font-size: 11px;
+  padding: 3px 8px 3px 0; border-bottom: 1px solid #d9e3ef;
+}
+.cikti-sayfa .alt-baslik {
+  font-weight: 700; color: #1c4374; margin-top: 8px; font-size: 12px;
+}
+.cikti-sayfa .not { font-size: 10.5px; color: #6b7a8d; line-height: 1.5; margin: 4px 0 0 }
+.cikti-sayfa .uyari-satir {
+  font-size: 11px; color: #a33; margin-top: 6px; font-weight: 600;
+}
 .cikti-alan td { border-bottom: 1px solid #eef2f6; padding: 3px 10px 3px 0 }
 .cikti-sayfa .imza { margin-top: 26px; display: flex; justify-content: flex-end }
 .cikti-sayfa .imzak { width: 290px; text-align: center; font-size: 11.5px; line-height: 1.6 }

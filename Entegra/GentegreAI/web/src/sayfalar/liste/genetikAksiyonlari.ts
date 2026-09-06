@@ -215,6 +215,13 @@ export async function genetikAksiyonu(
       return true;
     }
 
+    case 'lab.genetik-rapor': {
+      const istemId = Number(satir?.istemId ?? 0);
+      if (!istemId) { mesaj('İstem bulunamadı.'); return true }
+      b.git(`/lab/rapor/${istemId}`);
+      return true;
+    }
+
     // ---------------------------------------------------------- varyant ---
     case 'lab.varyant-sinif': {
       const sinif = await secimSor('Uzman sınıflaması:', [

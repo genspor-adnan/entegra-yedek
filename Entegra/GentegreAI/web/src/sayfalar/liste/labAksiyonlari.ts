@@ -47,6 +47,12 @@ export async function labAksiyonu(
       });
       return true;
 
+    // RAPOR: hastaya verilen belge ayri sayfada acilir (yazdirma
+    //   tarayicinin kendi diyalogu; ayri bir PDF ureticisi yok).
+    case 'lab.rapor':
+      b.git(`/lab/rapor/${id}`);
+      return true;
+
     // ----------------------------------------------------------- numune ---
     case 'lab.numune-alindi':
       await guvenli(async () => {

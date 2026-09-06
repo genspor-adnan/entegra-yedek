@@ -169,6 +169,15 @@ export async function mikroAksiyonu(
       return true;
     }
 
+    case 'lab.kultur-rapor': {
+      // Kultur listesinde secili satir KULTUR; rapor ISTEM numarasiyla
+      //   acilir cunku ayni istemdeki diger tetkikler de ayni kagida girer.
+      const istemId = Number(satir?.istemId ?? 0);
+      if (!istemId) { mesaj('İstem bulunamadı.'); return true }
+      b.git(`/lab/rapor/${istemId}`);
+      return true;
+    }
+
     case 'lab.kultur-on-rapor': {
       // ÖN RAPOR KÜLTÜR BİTMEDEN GİDER: sepsiste tedavi ilk saatte başlar.
       const metin = await metinSor(

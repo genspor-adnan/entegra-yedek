@@ -685,6 +685,48 @@ katalogları), `lab.onay` (rapor onayı ve uzman sınıf değişikliği).
 
 ---
 
+## 9.6 Laboratuvar sonuç raporu (441)
+
+```http
+GET /api/lab/rapor/{istemId}    // istem + sonuclar + kulturler + izolatlar
+                                //      + antibiyogram + vakalar + varyantlar + kurum
+```
+
+**Tek uç, üç bölüm.** Bir istemde sayısal tetkik, kültür ve genetik birlikte
+bulunabilir; sayfa hangi bölüm doluysa onu basar. Üç ayrı uç, aynı hastanın
+aynı istemini üç kâğıda bölerdi.
+
+**Yalnız ONAYLI sonuçlar döner** (`lab_sonuc.durum = 3`): onaylanmamış değer
+hastaya verilen belgeye giremez. Kültür ya da genetik vakası hâlâ açıksa
+sayfa **TASLAK** damgası basar — çıktının alınmasını engellemek yerine ne
+olduğunu söyler (teknisyen ara çıktı almak isteyebilir).
+
+**Bayrak, referans ve ölçüm zamanı sonuçla birlikte saklandığı gibi basılır**;
+rapor yeniden hesaplamaz. Aksi hâlde bugünkü referans aralığıyla iki yıl
+önceki sonuç yeniden yorumlanmış olurdu. Referans ve panik sınırı yoksa
+"Referans tanımlı değil" yazılır — boş hücre "normal" gibi okunur.
+
+**Kademeli bildirim raporda da geçerli**: antibiyogramda yalnız `bildir = 1`
+satırlar döner. Gizlenen ajanı basmak, kuralı anlamsız kılardı.
+
+**Genetikte yalnız `raporla = 1` varyantlar** döner; hastanın istemediği
+ikincil bulgular zaten kapalıdır. Onam bilgisi (sürüm + tesadüfi bulgu
+tercihi) rapora basılır: neyin raporlanmadığını açıklar (KVKK md. 6). Yöntem,
+kalite metrikleri, gen listesi ve sınırlılıklar raporun zorunlu parçasıdır —
+kapsanamayan bölgede "varyant yok" demek, bakılamayanı temiz saymaktır.
+
+**Yazdırma tarayıcınındır** ("PDF olarak kaydet" orada); ayrı bir sunucu PDF
+üreticisi yoktur. Aynı çıktının iki üretim yolu, birinin diğerinden sapması
+demektir (radyoloji çıktısıyla aynı karar).
+
+**Ekran**: `/lab/rapor/:istemId`. Aksiyonlar: lab istem, kültür ve genetik
+listelerinde "🖨 Sonuç Raporu" — kültür/genetik satırından da İSTEM
+numarasıyla açılır, çünkü aynı istemdeki diğer tetkikler de aynı kâğıda girer.
+
+**Yetki**: `lab` (Gör).
+
+---
+
 ---
 
 ## 10. Sürümleme

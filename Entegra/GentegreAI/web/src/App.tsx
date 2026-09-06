@@ -23,6 +23,7 @@ import { UtsSorgu } from './sayfalar/UtsSorgu';
 import { RadyolojiPanosu } from './sayfalar/RadyolojiPanosu';
 import { RadyolojiRapor } from './sayfalar/RadyolojiRapor';
 import { RadyolojiRaporCikti } from './sayfalar/RadyolojiRaporCikti';
+import { LabRaporCikti } from './sayfalar/LabRaporCikti';
 import { SatisAyarlar, AlisAyarlar } from './sayfalar/BelgeAyarlar';
 import { Panel } from './sayfalar/Panel';
 
@@ -112,6 +113,9 @@ function Yollar() {
         {/* Rapor CIKTISI (303): hastaya verilen belge - yazma ekranindan ayri
             sayfa, yazdirma tarayicinin kendi diyalogu. */}
         {yetki('radyoloji') && <Route path="/radyoloji/cikti/:id" element={<RadyolojiRaporCikti />} />}
+        {/* Lab sonuc raporu (441): istem numarasiyla acilir - bir istemdeki
+            sayisal sonuc, kultur ve genetik ayni kagida basilir. */}
+        {yetki('lab') && <Route path="/lab/rapor/:id" element={<LabRaporCikti />} />}
 
         {/* Bilinmeyen yol: Ana Sayfa yetkisi varsa panele, yoksa kullanicinin
             girebildigi ILK ekrana (yetkisi hic yoksa oldugu yerde kalir). */}
