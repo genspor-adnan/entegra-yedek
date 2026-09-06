@@ -123,7 +123,36 @@ public static class DokumanYonetimUclari
                 values (@p0, @p1, 1, 'Kurumsal klasore yuklendi')
                 """, [dokumanId, baglam.KullaniciId], iptal);
 
-            return Results.Ok(new { dokumanId, mesaj = "Dokuman yuklendi.",
+            // YUKLENEN BELGE TASLAK DOGABILIR: kategorisi "sürümlü" ise durum
+            //   1 (Taslak) olur ve liste VARSAYILAN "Aktif" cipinde onu
+            //   GOSTERMEZ - kullanici "eklendi" mesajini gorup listede
+            //   bulamiyordu. Yanit artik nereye, hangi kategoriyle ve hangi
+            //   durumda dustugunu soyluyor.
+            var ozet = await veri.TekAsync("""
+                select coalesce(kl.yol, kl.ad, ''), coalesce(nullif(kt.yol, ''), kt.ad, ''),
+                       d.durum
+                  from public.dokuman d
+                  left join public.dokuman_klasor kl on kl.id = d.klasor_id
+                  left join public.dokuman_kategori kt on kt.id = d.kategori_id
+                 where d.id = @p0
+                """, [dokumanId],
+                o => new { Klasor = o.GetString(0), Kategori = o.GetString(1),
+                           Durum = o.GetInt16(2) }, iptal);
+
+            var durumAdi = ozet?.Durum switch
+            {
+                1 => "Taslak", 2 => "Onayda", 4 => "Arşiv", 5 => "İmha Edildi",
+                _ => "Yayında",
+            };
+            var mesaj = $"Doküman yüklendi: {ozet?.Klasor} · "
+                      + (string.IsNullOrEmpty(ozet?.Kategori) ? "" : ozet!.Kategori + " · ")
+                      + durumAdi
+                      + (ozet?.Durum == 1
+                         ? " — sürümlü kategori olduğu için TASLAK açıldı; listede "
+                           + "\"Taslak\" ya da \"Tümü\" filtresinde görünür."
+                         : "");
+
+            return Results.Ok(new { dokumanId, durum = ozet?.Durum ?? 0, mesaj,
                                     izlemeNo = baglam.IzlemeNo });
         });
 

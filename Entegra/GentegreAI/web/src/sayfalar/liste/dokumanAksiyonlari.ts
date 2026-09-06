@@ -50,6 +50,11 @@ export async function dokumanAksiyonu(
         const y = await api.dokumanKlasoreYukle(Number(klasor), dosya);
         mesaj(y.mesaj);
         b.tazele();
+        // TASLAK ACILDIYSA KARTI AC: liste varsayilan "Aktif" cipinde
+        //   duruyor ve taslak orada gorunmuyor - kullanici "eklendi" deyip
+        //   listede bulamiyordu. Kart hem belgeyi gosterir hem onaya
+        //   gonderme adimini elinin altina koyar.
+        if (y.durum === 1) b.git(`/dokuman/${y.dokumanId}`);
       });
       girdi.click();
     });

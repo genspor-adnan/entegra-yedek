@@ -249,7 +249,7 @@ export const api = {
     //   multipart SINIRINI (boundary) yazamiyor ve sunucu istegi
     //   "Incorrect Content-Type" ile reddediyordu - yukleme HER SEFERINDE
     //   "beklenmeyen hata" veriyordu.
-    return dosyaYukle<{ dokumanId: number; mesaj: string }>(
+    return dosyaYukle<{ dokumanId: number; durum: number; mesaj: string }>(
       `/api/dokuman-yonetim/klasor/${klasorId}/yukle`, govde);
   },
 
