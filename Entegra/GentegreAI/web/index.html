@@ -1,10 +1,39 @@
 <!doctype html>
-<html lang="en">
+<html lang="tr">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>web</title>
+    <!-- BU SAYFA ONBELLEKLENMEZ. Dosya adi sabit (index.html), icindeki JS'in
+         adi ise her yayinda degisiyor (index-<hash>.js) ve eski dosya
+         siliniyor. Tarayici bu sayfayi onbellekte tutunca ARTIK OLMAYAN bir
+         JS'i istiyor, 404 aliyor ve ekran BOS aciliyordu ("projeye girmiyor").
+         Asil yer nginx (bkz. asagidaki yedek kurtarma); bu etiketler
+         nginx'e dokunulamadigi kurulumlarda da isi goruyor. -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Gentegre AI</title>
+    <script>
+      /*
+       * YEDEK KURTARMA: ana betik yuklenemezse (eski onbellekli index.html,
+       * silinmis hash'li dosya) sayfa BIR KEZ onbellek atlanarak yeniden
+       * yuklenir. Tek sefer: sessionStorage isareti sonsuz doguyu onler -
+       * gercekten sunucu erisilemiyorsa kullanici bos ekranla degil, en
+       * azindan tarayicinin hatasiyla kalir.
+       */
+      window.addEventListener('error', function (o) {
+        var e = o && o.target;
+        if (!e || e.tagName !== 'SCRIPT' && e.tagName !== 'LINK') return;
+        if (sessionStorage.getItem('gai-tazelendi')) return;
+        sessionStorage.setItem('gai-tazelendi', '1');
+        location.replace(location.pathname + '?v=' + Date.now() + location.hash);
+      }, true);
+      // Basarili acilista isaret silinir: sonraki yayinda kurtarma yine calissin.
+      window.addEventListener('load', function () {
+        setTimeout(function () { sessionStorage.removeItem('gai-tazelendi'); }, 3000);
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
