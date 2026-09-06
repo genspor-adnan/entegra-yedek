@@ -113,26 +113,36 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
     }
 
     [Fact]
-    public async Task Rehber_VERI_YAZMAZ()
+    public void Rehber_YALNIZ_KENDI_GUNLUGUNE_yazar()
     {
-        if (!_olgu.Baglandi(nameof(Rehber_VERI_YAZMAZ))) return;
-        var veri = _olgu.Gerekli();
-        var servis = new RehberServisi(veri);
+        // Faz 1'in sınırı: asistan operatör değil. Bunu satır sayısıyla ölçmek
+        //   yarışa açık (başka testler aynı anda kayıt açıyor); onun yerine
+        //   SERVİSİN KENDİSİ okunur: kaynakta iş tablosuna yazan tek bir SQL
+        //   bile olmamalı.
+        var kaynak = ServisKaynagi();
+        var yazanlar = System.Text.RegularExpressions.Regex
+            .Matches(kaynak, @"(insert\s+into|update|delete\s+from)\s+public\.(\w+)",
+                     System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+            .Select(m => m.Groups[2].Value)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
-        // Faz 1'in sınırı: yalnız `ai_rehber_log` büyür; iş verisine dokunulmaz.
-        var oncekiHasta = await veri.TekDegerAsync<long>(
-            "select count(*) from public.taraf where hasta = 1");
-        var oncekiBelge = await veri.TekDegerAsync<long>(
-            "select count(*) from public.belge");
+        Assert.All(yazanlar, t => Assert.StartsWith("ai_", t, StringComparison.Ordinal));
+        // Bugün yalnız günlüğe yazıyor; kontör model bağlanınca eklenecek.
+        Assert.Contains("ai_rehber_log", yazanlar);
+    }
 
-        await servis.CevaplaAsync(
-            new RehberServisi.Istek("hasta kaydı aç", null, null, null),
-            Baglam("personel"), CancellationToken.None);
-
-        Assert.Equal(oncekiHasta, await veri.TekDegerAsync<long>(
-            "select count(*) from public.taraf where hasta = 1"));
-        Assert.Equal(oncekiBelge, await veri.TekDegerAsync<long>(
-            "select count(*) from public.belge"));
+    /// <summary>Servis kaynağını diskten okur (bin/Debug'dan yukarı çıkarak).</summary>
+    private static string ServisKaynagi()
+    {
+        var dizin = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dizin is not null && !Directory.Exists(Path.Combine(dizin.FullName, "src")))
+            dizin = dizin.Parent;
+        Assert.NotNull(dizin);
+        var yol = Path.Combine(dizin!.FullName, "src", "Gentegre.Api", "Servisler",
+                               "RehberServisi.cs");
+        Assert.True(File.Exists(yol), $"servis kaynağı bulunamadı: {yol}");
+        return File.ReadAllText(yol);
     }
 
     [Fact]
@@ -155,5 +165,71 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
 
         await veri.CalistirAsync("delete from public.ai_rehber_log where soru = @p0",
                                  [isaret]);
+    }
+
+    // ------------------------------------------------ FAZ 2: bağlamsal yardım
+
+    [Fact]
+    public async Task Bu_ekranda_ne_yapabilirim_AKTIF_EKRANI_anlatir()
+    {
+        if (!_olgu.Baglandi(nameof(Bu_ekranda_ne_yapabilirim_AKTIF_EKRANI_anlatir))) return;
+        var servis = new RehberServisi(_olgu.Gerekli());
+
+        // Aynı soru, farklı ekran = farklı cevap. Bağlam olmadan bu soru
+        //   cevaplanamaz; katalog araması "ekran" kelimesine takılırdı.
+        var y = await servis.CevaplaAsync(
+            new RehberServisi.Istek("Bu ekranda ne yapabilirim?", null, "/lab-sonuc", null),
+            Baglam("lab.sonuc", "lab.onay"), CancellationToken.None);
+
+        Assert.Equal(3, y.KaynakTuru);
+        Assert.Contains("Sonuçlar", y.Cevap);
+        Assert.NotEmpty(y.OnerilenAksiyonlar);
+    }
+
+    [Fact]
+    public async Task Baglamsal_yardim_YETKILI_dugmeleri_sayar()
+    {
+        if (!_olgu.Baglandi(nameof(Baglamsal_yardim_YETKILI_dugmeleri_sayar))) return;
+        var servis = new RehberServisi(_olgu.Gerekli());
+
+        // Onay yetkisi OLMAYAN kullanıcıya "Uzman Onayı" düğmesi sayılmaz:
+        //   yapamayacağı işlemi saymak, ekranı yanlış tarif etmektir.
+        var y = await servis.CevaplaAsync(
+            new RehberServisi.Istek("bu ekranda ne yapabilirim", null, "/lab-sonuc", null),
+            Baglam("lab.sonuc"), CancellationToken.None);
+
+        Assert.Equal(3, y.KaynakTuru);
+        Assert.DoesNotContain(y.OnerilenAksiyonlar, a => a.Kod.Contains("onay.uzman"));
+    }
+
+    [Fact]
+    public async Task Alan_sorusu_KOLON_METADATASINDAN_cevaplanir()
+    {
+        if (!_olgu.Baglandi(nameof(Alan_sorusu_KOLON_METADATASINDAN_cevaplanir))) return;
+        var servis = new RehberServisi(_olgu.Gerekli());
+
+        var y = await servis.CevaplaAsync(
+            new RehberServisi.Istek("referans alanı ne demek", null, "/lab-sonuc", null),
+            Baglam("lab.sonuc"), CancellationToken.None);
+
+        Assert.Equal(3, y.KaynakTuru);
+        Assert.Contains("Referans", y.Cevap);
+        Assert.Empty(y.Adimlar);          // alan açıklaması adım değildir
+    }
+
+    [Fact]
+    public async Task Baglamsal_soru_YETKISIZ_ekranda_katalog_yoluna_duser()
+    {
+        if (!_olgu.Baglandi(nameof(Baglamsal_soru_YETKISIZ_ekranda_katalog_yoluna_duser)))
+            return;
+        var servis = new RehberServisi(_olgu.Gerekli());
+
+        // Kullanıcı o ekranı göremiyorsa ekran yardımı verilmez; soru genel
+        //   rehber yoluna düşer (uydurma "bu ekranda şunlar var" olmaz).
+        var y = await servis.CevaplaAsync(
+            new RehberServisi.Istek("bu ekranda ne yapabilirim", null, "/lab-sonuc", null),
+            Baglam("stok"), CancellationToken.None);
+
+        Assert.NotEqual(3, y.KaynakTuru);
     }
 }

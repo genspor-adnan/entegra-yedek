@@ -26,11 +26,14 @@ interface Yanit {
   uyarilar: string[]; konuKod: string; kaynakTuru: number; kontorBakiye: number;
 }
 
-/** Sık sorulanlar: boş panel "ne yazsam" diye baktırır. */
+/**
+ * Sık sorulanlar: boş panel "ne yazsam" diye baktırır. İlk sıra BAĞLAMSAL -
+ * kullanıcı çoğu zaman durduğu ekranı sorar (Faz 2).
+ */
 const ORNEKLER = [
+  'Bu ekranda ne yapabilirim?',
   'Yeni hasta kaydı nasıl açılır?',
   'Bir cariye fatura nasıl keserim?',
-  'Randevu oluşturmak istiyorum',
   'Hastanın laboratuvar sonucuna nereden bakarım?',
 ];
 
@@ -159,6 +162,7 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
               </span>
               {yanit.kaynakTuru === 1 && <span className="rehber-not">rehber kataloğu</span>}
               {yanit.kaynakTuru === 2 && <span className="rehber-not">ekran eşleşmesi</span>}
+              {yanit.kaynakTuru === 3 && <span className="rehber-not">bu ekranın yardımı</span>}
               {yanit.kaynakTuru === 0 && <span className="rehber-not">eşleşme yok</span>}
             </div>
           </>

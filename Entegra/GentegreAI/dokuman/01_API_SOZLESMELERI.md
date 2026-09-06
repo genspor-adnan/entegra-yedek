@@ -1079,6 +1079,20 @@ soruyorsunuz" olur ve `eksikBilgiSorusu` döner; hiç eşleşme yoksa cevap
 uydurulmaz. Her soru `ai_rehber_log`'a yazılır - cevapsız soru, eksik rehber
 konusu demektir.
 
+**Faz 2 — bağlamsal yardım.** Soru "bu ekranda ne yapabilirim", "burada ne
+var", "şu alan ne demek" kalıbındaysa ve `aktifSayfa` doluysa cevap
+**durduğunuz ekrana** göre üretilir (`kaynakTuru = 3`):
+
+- **Ekran yardımı**: ekranın adı/yolu + o ekranda **yetkiniz olan** düğmeler
+  (aksiyon kataloğu) + o ekranla ilgili rehber konuları. Kart rotası
+  (`/hasta/5057`) listenin ekranına indirgenir.
+- **Alan yardımı**: sorudaki kelimeye en çok uyan kolon, kaynak
+  kataloğundan bulunur (başlık + tip + süzgeçte kullanılabilir mi) ve varsa
+  `help` metni eklenir. **Alan yetkisi kapalı kolon hiç aranmaz** - görmediği
+  alanı tarif etmek de bir sızıntıdır.
+- Kullanıcı o ekranı göremiyorsa bağlamsal yol atlanır, soru genel rehber
+  yoluna düşer: uydurma "bu ekranda şunlar var" cevabı üretilmez.
+
 **Kontör (`ai_kontor`).** Katalogdan üretilen cevap **ücretsizdir** (dış
 maliyet yok). Dil modeli bağlandığında çağrı başına `cagri_ucreti` düşülür ve
 `ai_kontor_hareket`e yazılır; bakiye bitince asistan kapanmaz, katalog

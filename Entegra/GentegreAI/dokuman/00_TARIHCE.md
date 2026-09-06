@@ -7510,3 +7510,23 @@ sınırla kuruldu.
    alan gerekli" (okur, yazmaz).
 4. **Onaylı işlem asistanı** — form hazırlar, kayıt ancak kullanıcı
    onaylayınca oluşur (`ai_taslak` deseni 341'den beri hazır).
+
+### Faz 2 aynı gün: bağlamsal yardım (447)
+
+"Bu ekranda ne yapabilirim?" sorusunun cevabı **durduğunuz ekrana** bağlıdır;
+katalog araması bunu bilemez (soru hep aynı kelimelerden oluşur).
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K189 | Bağlamsal soru kalıbı + `aktifSayfa` varsa AYRI yol (`kaynakTuru = 3`) | Aynı soru farklı ekranda farklı cevap almalı; tek bir "ekran" konusu bunu veremez |
+| K190 | Ekran yardımı **yetkili düğmeleri** sayar | Yapamayacağı işlemi saymak, ekranı yanlış tarif etmektir |
+| K191 | Alan yardımı **kaynak kataloğundan**, alan yetkisi kapalı kolon hiç aranmaz | Görmediği alanı tarif etmek de sızıntıdır |
+| K192 | Kullanıcı ekranı göremiyorsa bağlamsal yol ATLANIR | Uydurma "bu ekranda şunlar var" cevabı üretmemek için; soru genel rehbere düşer |
+
+Kart rotası (`/hasta/5057`) listenin ekranına indirgenir. Panelin ilk örnek
+sorusu artık "Bu ekranda ne yapabilirim?".
+
+**Testler**: dört bağlamsal test eklendi. "Rehber veri yazmaz" testi satır
+sayımından **statik güvenceye** çevrildi (eşzamanlı testler kayıt açtığı için
+sayım yarışa açıktı): servis kaynağındaki her `insert/update/delete` hedefi
+`ai_` ile başlamalı. API **134** test.
