@@ -7312,3 +7312,24 @@ benzemiyor"*). Önce kod değiştirmeden karşılaştırma yapıldı; farklar
   (`refAlt` → `referansAlt` …) ve satıra `bolum` eklendi.
 - **Testler**: `labKodlari` (6) ve `labDetayPaneli` (5, jsdom - uçların
   gerçek alan adlarıyla) eklendi; web **440 test**, API **123 test** geçiyor.
+
+### Ek: KPI özet şeridi (446)
+
+Mockup'ta Sonuç Onay ekranının üstünde altı sayaç kartı vardı; uygulamada
+hiç yoktu. Kuyruğun neden uzun olduğunu söyleyen bilgi (oto-onay oranı,
+panik, TAT aşımı, cihaz durumu) ekranın kendisinde durmalı.
+
+- **`GET /api/lab/ozet`** (yeni): tek sorguda altı sayaç + lab cihazlarının
+  durumu, şube süzgeciyle. Radyoloji panosuyla (320) aynı desen.
+- **`LabOzetSeridi`**: çipler ile tablo arasında. Çip karşılığı olan kutu
+  **düğmedir** - tıklanınca listeyi o süzgeçle açar; olmayan kutu bilgi
+  olarak durur. `GenGrid.ustPanel` bunun için eklendi (mockup'ta da sıra
+  arama şeridi → özet → tablo).
+- **Oran paydası sıfırken "—"**: `%0` "kural hiç çalışmıyor" der, oysa gün
+  henüz başlamamış olabilir. Panik/TAT kutuları sıfırken **nötr** kalır -
+  her zaman kırmızı duran bir kutu, gerçekten kırmızı olduğunda fark
+  edilmez.
+- **Cihaz rozeti şeritte**: cihaz sessizce durduğunda sonuç gelmez ve ekran
+  "onay bekleyen azaldı" gibi görünür; bağ ancak yan yana durunca kurulur.
+- **Şerit zorunlu değil**: uç düşerse çizilmez, liste açılmaya devam eder.
+- **Testler**: `labOzetSeridi` (4) - web **444 test**.

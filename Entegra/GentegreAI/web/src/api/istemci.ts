@@ -285,6 +285,11 @@ export const api = {
     gonder<{ id: number; barkodlar: string[]; mesaj: string }>(
       `/api/lab/istem/${istemId}/numune-plani`, {}),
 
+  /** Sonuc onay ekraninin ust serit sayaclari (446, mockup ".ozet"). */
+  labOzet: () =>
+    istek<{ sayaclar: Record<string, number>;
+            cihazlar: Record<string, unknown>[] }>('/api/lab/ozet'),
+
   labIstemOku: (id: number) =>
     istek<Record<string, unknown>>(`/api/lab/istem/${id}`),
 

@@ -1007,6 +1007,25 @@ kaydın ayrıntısı **aynı ekrandadır**. `GenGrid.altPanel` bunun yeri;
 kuralları sunucuda işler. Panelde iş kuralı yoktur - yalnız sunucudan gelen
 kayıt çizilir.
 
+**Özet şeridi** (`GET /api/lab/ozet`, Sonuç Onay ekranı): çipler ile tablo
+arasında, mockup'taki `.ozet` kartları. Tek uçtan gelir - altı sayaç için altı
+istek hem yavaş hem de şeridin yarısını boş gösterirdi.
+
+| Kutu | Kaynak | Tıklanınca |
+|---|---|---|
+| Cihazda | `lab_istem_satir.durum = 2` | — (bilgi) |
+| Onay bekliyor | `lab_sonuc.durum in (1,2)` | "Onay Bekleyen" çipi |
+| Otomatik onaylanan (bugün) | bugün onaylananın içinde `oto_onay = 1` oranı | — |
+| Panik açık | `panik = 1`, teyidi alınmamış | "Panik" çipi |
+| TAT aşımı | `lab_istem.hedef_bitis < now()`, durum 1-4 | — |
+| Tekrar numune | `lab_istem_satir.durum = 6` | "Numune Uygunsuz" çipi |
+| Cihaz durumu | `cihaz` (tür 1) rozetleri, son hata kırmızı | — |
+
+**Sayaç işe giriş kapısıdır**: çip karşılığı olan kutu düğmedir, listeyi o
+süzgeçle açar (radyoloji panosuyla aynı desen). Payda sıfırken oran **%0
+değil "—"**: gün henüz başlamamış olabilir. Şerit **zorunlu değildir** - uç
+düşerse çizilmez, liste çalışmaya devam eder. Sayaçlar şube süzgecine tabidir.
+
 **Kalite kontrol ekranı bir çalışma ekranıdır, rapor değil** (mockup
 `lab_kalite_kontrol.html`): üstte test/materyal/hedef şeridi, solda
 Levey-Jennings, sağda ölçümler ve cihaz olayları. Kâğıt görünümlü rapor

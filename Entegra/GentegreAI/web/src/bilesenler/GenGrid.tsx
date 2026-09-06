@@ -66,6 +66,12 @@ interface Props {
    */
   altPanel?: React.ReactNode;
   /**
+   * Ciplerin ALTINA, gridin USTUNE eklenecek serit - lab sonuc onay
+   * ekraninin sayac seridi gibi (mockup'ta da tam bu sirada: arama seridi,
+   * ozet kutulari, tablo).
+   */
+  ustPanel?: React.ReactNode;
+  /**
    * Arama seridine (Liste/Grup/Analiz'in yanina) EK GORUNUM dugmesi: secilince
    * grid yerine `icerik` cizilir - randevu takvimi boyle acilir (kullanici:
    * "arama editi sagina takvim butonu, basinca takvim listeye bassin").
@@ -147,7 +153,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
                           aracCubuguSeritte,
-                          seciliBaslangicId, cipSonu, cipBaslangic, altPanel, ekGorunum,
+                          seciliBaslangicId, cipSonu, cipBaslangic, altPanel, ustPanel, ekGorunum,
                           onCipSecildi, onCipRota, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik }: Props) {
   // Sayfa boyu: cagiran acikca verdiyse o, yoksa Genel Ayarlar'daki
@@ -798,6 +804,8 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
             {cipSonu && <><span className="durumseg-ayrac" />{cipSonu}</>}
           </div>
         )}
+
+        {gorunum === 'liste' && ustPanel}
 
         {gorunum === 'ek' && ekGorunum ? (
           ekGorunum.icerik

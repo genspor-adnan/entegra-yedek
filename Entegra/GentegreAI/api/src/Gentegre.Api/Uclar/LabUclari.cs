@@ -1134,6 +1134,85 @@ public static class LabUclari
             return Results.Ok(new { liste, izlemeNo = baglam.IzlemeNo });
         });
 
+        // ------------------------------------------------------ ekran özeti ---
+
+        // GET /api/lab/ozet - Sonuç Onay ekranının ÜST ŞERİDİ
+        //   (mockup Ekranlar/Lab/lab_biyokimya_sonuc_onay.html ".ozet").
+        //
+        // <b>Neden tek uç:</b> altı sayaç için altı istek atmak hem yavaş hem
+        // de şeridin yarısı dolu yarısı boş görünür. Radyoloji panosuyla (320)
+        // aynı desen.
+        //
+        // <b>Sayaçlar İŞE GİRİŞ KAPISIDIR</b>, süs değil: her biri listenin
+        // bir çipine karşılık gelir; tıklanınca o süzgeç açılır.
+        grup.MapGet("/ozet", async (
+            BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab.sonuc", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var sayaclar = await baglanti.TekAsync("""
+                select
+                  -- CIHAZDA: numunesi kabul edilmiş, çalışılan tetkik.
+                  (select count(*) from public.lab_istem_satir s
+                     join public.lab_istem i on i.id = s.istem_id
+                    where s.durum = 2
+                      and (@p0::int is null or i.sube_id = @p0))       as "cihazda",
+                  -- ONAY BEKLEYEN: girilmiş ama uzman onayı görmemiş sonuç
+                  --   (1 girildi · 2 teknik onaylı). İptal (4) sayılmaz.
+                  (select count(*) from public.lab_sonuc ls
+                    where ls.durum in (1, 2)
+                      and (@p0::int is null or ls.sube_id = @p0))      as "onayBekleyen",
+                  -- BUGÜN ONAYLANAN ve bunların kaçı OTO-ONAY: oran, kural
+                  --   motorunun ne kadar iş çıkardığını söyler.
+                  (select count(*) from public.lab_sonuc ls
+                    where ls.onay_zamani::date = current_date
+                      and (@p0::int is null or ls.sube_id = @p0))      as "bugunOnaylanan",
+                  (select count(*) from public.lab_sonuc ls
+                    where ls.onay_zamani::date = current_date and ls.oto_onay = 1
+                      and (@p0::int is null or ls.sube_id = @p0))      as "bugunOtoOnay",
+                  -- PANİK AÇIK: bildirilmiş ama okuma-geri TEYİDİ alınmamış
+                  --   ya da hiç bildirilmemiş panik değer. İkisi de açıktır.
+                  (select count(*) from public.lab_sonuc ls
+                    where ls.panik = 1 and ls.durum <> 4
+                      and not exists (select 1 from public.lab_panik_bildirim b
+                                       where b.sonuc_id = ls.id
+                                         and b.teyit_zamani is not null)
+                      and (@p0::int is null or ls.sube_id = @p0))      as "panikAcik",
+                  -- TAT AŞIMI: hedef bitişi geçmiş, hâlâ onaylanmamış istem.
+                  (select count(*) from public.lab_istem i
+                    where i.hedef_bitis is not null and i.hedef_bitis < now()
+                      and i.durum between 1 and 4
+                      and (@p0::int is null or i.sube_id = @p0))       as "tatAsimi",
+                  -- TEKRAR NUMUNE: serum indeksi ya da dış lab reddi yüzünden
+                  --   hastadan yeniden numune bekleyen tetkik.
+                  (select count(*) from public.lab_istem_satir s
+                     join public.lab_istem i on i.id = s.istem_id
+                    where s.durum = 6
+                      and (@p0::int is null or i.sube_id = @p0))       as "tekrarNumune"
+                """, null, [baglam.SubeId], RaporSatiri, iptal);
+
+            // CIHAZ DURUMU: mockup'taki yeşil/kırmızı rozetler. Cihaz sessizce
+            //   durduğunda sonuçlar gelmez ve bu ekranda "onay bekleyen
+            //   azaldı" gibi görünür - bağı burada kuruyoruz.
+            var cihazlar = await baglanti.ListeAsync("""
+                select c.kod, c.ad, c.durum, c.son_mesaj as "sonMesaj",
+                       c.son_hata as "sonHata",
+                       (select count(*) from public.cihaz_mesaj m
+                         where m.cihaz_id = c.id
+                           and m.ekleme_tarihi::date = current_date) as "bugunMesaj"
+                  from public.cihaz c
+                 where c.tur = 1 and c.durum = 0
+                   and (@p0::int is null or c.sube_id = @p0)
+                 order by c.kod
+                """, null, [baglam.SubeId], RaporSatiri, iptal);
+
+            return Results.Ok(new { sayaclar, cihazlar, izlemeNo = baglam.IzlemeNo });
+        });
+
         // --------------------------------------------- muayene istem & sonuç ---
 
         // GET /api/lab/muayene/{id}/sonuclar - muayene kartının

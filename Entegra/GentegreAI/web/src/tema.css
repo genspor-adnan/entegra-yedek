@@ -1527,6 +1527,29 @@ input.skt-gecmis {
 .lab-ana-yan { display: grid; grid-template-columns: 1fr 420px; gap: 10px; align-items: start }
 @media (max-width: 1250px) { .lab-ana-yan { grid-template-columns: 1fr } }
 
+/* OZET SERIDI (mockup .ozet + .kart): gridin USTUNDE, ciplerin altinda.
+   Kutu bir SAYAC degil, ise giris kapisi: cipi olan kutu dugmedir. */
+.lab-ozet { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px }
+.lab-ozet-kutu {
+  flex: 1; min-width: 150px; border: 1px solid var(--cizgi2); border-radius: var(--r);
+  padding: 8px 10px; background: var(--kartzem); color: var(--yazi);
+  display: flex; flex-direction: column; gap: 2px; text-align: left;
+  font: inherit; cursor: pointer;
+}
+.lab-ozet-kutu.bilgi { cursor: default }
+.lab-ozet-kutu:not(.bilgi):hover {
+  border-color: var(--dugkenar); background: linear-gradient(var(--dugh1), var(--dugh2));
+}
+.lab-ozet-kutu .b { font-size: 10.5px; color: var(--soluk) }
+.lab-ozet-kutu .d { font-size: 16px; font-weight: 700; color: var(--yazi2) }
+.lab-ozet-kutu .d small { font-size: 10.5px; font-weight: 400; color: var(--soluk); margin-left: 5px }
+/* Panik ve TAT asimi RENKLE ayrilir: sifirken notr kalir - her zaman kirmizi
+   duran bir kutu, gercekten kirmizi oldugunda fark edilmez. */
+.lab-ozet-kutu .d.hata { color: var(--hata) }
+.lab-ozet-kutu .d.uyari { color: var(--uyari) }
+.lab-ozet-kutu .d.cihazlar { display: flex; gap: 4px; flex-wrap: wrap; font-size: 11px }
+@media (max-width: 900px) { .lab-ozet-kutu { min-width: 130px } }
+
 /* GRID ALTI DETAY PANELI: secili satirin ayrintisi. Mockup'ta tablo ile
    panel ayni ekranda durur - teknisyen tetkik listesini gormek icin kart
    acmak zorunda kalmamali. */
