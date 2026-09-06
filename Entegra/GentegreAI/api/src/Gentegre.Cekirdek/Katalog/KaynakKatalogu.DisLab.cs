@@ -44,10 +44,24 @@ public static partial class KaynakKatalogu
                                  "sayi", "Bekleyen", Hizalama: "orta", Genislik: 90,
                                  Filtrelenebilir: false),
             // GECİKME: sözleşme TAT'ı aşıldıysa pozitif. Negatif = süre var.
+            //   Ham sayı ("-3") ekranda okunmuyordu; sıralama ve süzgeç için
+            //   kolon duruyor ama gridde METİN gösterilir.
             new("gecikmeGun",
                 "(current_date - g.gonderim_zamani::date) - d.sozlesme_tat_gun",
                                  "sayi", "Gecikme (gün)", Hizalama: "sag", Genislik: 110,
-                                 Filtrelenebilir: false),
+                                 Filtrelenebilir: false, Varsayilan: false),
+            new("sureDurum",
+                "case when g.durum >= 5 then 'Tamamlandı' "
+                + "when (current_date - g.gonderim_zamani::date) - d.sozlesme_tat_gun > 0 "
+                + "then ((current_date - g.gonderim_zamani::date) "
+                + "      - d.sozlesme_tat_gun)::text || ' gün GECİKTİ' "
+                + "when (current_date - g.gonderim_zamani::date) - d.sozlesme_tat_gun = 0 "
+                + "then 'bugün dolacak' "
+                + "else (d.sozlesme_tat_gun - (current_date - g.gonderim_zamani::date))::text "
+                + "     || ' gün var' end",
+                                 "metin", "Süre", Hizalama: "orta", Bicim: "rozet",
+                                 Genislik: 130, Filtrelenebilir: false,
+                                 Siralanabilir: false),
             new("tasimaAdi",
                 "case g.tasima_kosulu when 2 then 'Soğuk (2-8 °C)' "
                 + "when 3 then 'Dondurulmuş (-20)' when 4 then 'Kuru buz (-70)' "

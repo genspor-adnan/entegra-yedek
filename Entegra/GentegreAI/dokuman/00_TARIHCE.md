@@ -7353,3 +7353,35 @@ oradan basılmalı). Seçili satır yokken detay paneli artık hiç çizilmiyor.
 
 Görüntüler: `lab-sonuc`, `lab-numune`, `lab-kultur`, `lab-kk` ve karşılık
 gelen mockup'lar (oturum çalışma klasörü).
+
+### Ek: genetik ve dış lab ekranlarının karşılaştırması (446)
+
+**Genetik** (mockup `lab_genetik.html`) — mockup sekmeli tek ekran (Vaka
+Listesi / Vaka / Run-Kalite / Rapor); bizde Genetik Vakalar, Varyantlar ve
+Dizileme Runları ayrı listeler + grid altı panel. **Zorunlu sapma**: her
+liste sunucu kataloğundan gelir, yetkiye göre değişir ve kendi süzgeçlerini
+taşır; dört sekmeyi tek ekrana bağlamak metadata modelini kırardı. İçerik
+aynı, kutular aynı ailedendir.
+
+**Dış lab** — ekran mockup'ı **yok** (`lab_sureci.html` §10 yalnız süreci ve
+`lab_dis_gonderim` tablosunu tarif ediyor). Ekran mockup ailesinin
+kurallarıyla kuruldu: gönderim listesi + gönderilen tetkikler + kurye/soğuk
+zincir paneli.
+
+Karşılaştırmada çıkan kusurlar:
+
+| Bulgu | Neydi | Düzeltme |
+|---|---|---|
+| Varyant tablosu yarım sütunda kırpılıyordu | Sınıf/doğrulama/rapor kolonları görünmüyordu | Mockup'taki gibi **tam genişlik**, on iki kolon (Kalıtım, gnomAD, ClinVar, ACMG ayrı kolon); Vaka + Run/kalite kutuları altına ikili düzende |
+| VAF yüz kat küçük görünüyordu | Oran (0,49) yüzdeymiş gibi "%0,5" basılıyordu | Mockup biçimi: `184× · 0,49` |
+| gnomAD frekansı **0** görünüyordu | Sayı kolonları `bicim` desenini yok sayıyordu | `bicimle` artık deseni okuyor (`#,##0.00000` → `0,00002`). Nadirlik ACMG sınıflandırmasının en önemli girdisi |
+| Dış lab "Gecikme (gün)" ham sayıydı | `-3` | "3 gün var" / "2 gün GECİKTİ" / "Tamamlandı" rozeti; ham kolon süzgeç için kalıyor |
+| Run ve varyant sınıfı rozetleri renksizdi | Hepsi nötr gri | Dizilemede/Analizde mavi, Patojenik kırmızı, VUS sarı, benign yeşil |
+
+Ayrıca vaka panelinde **Run / kalite** kutusu açıldı (kapsama, kontaminasyon,
+cinsiyet doğrulama, pipeline/referans genom, öneriler, sınırlılıklar):
+varyantın hangi koşullarda çağrıldığı sonucun kendisi kadar bağlayıcıdır.
+Sayı rozetleri için `rozetHucre`'ye **desen** eşleşmesi eklendi ("3 gün
+GECİKTİ" sözlükte tam eşleşemez).
+
+Testler: `bicim` (3 yeni) — web **447**, API **123**.

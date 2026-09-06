@@ -474,6 +474,11 @@ function KulturDetayi({ veri }: { veri: Kayit }) {
 
 /* --------------------------------------------------------------- genetik --
    Mockup lab_genetik.html: varyant tablosu + vaka/kalite bilgisi.        */
+/** `lab_varyant.kalitim` / `lab_gen.kalitim` (439). */
+const KALITIM: Record<number, string> = {
+  1: 'OD', 2: 'OR', 3: 'X’e bağlı', 4: 'Mitokondriyal', 5: 'Somatik',
+};
+
 function GenetikDetayi({ veri }: { veri: Kayit }) {
   const v = (veri.vaka ?? {}) as Kayit;
   const varyantlar = dizi(veri.varyantlar);
@@ -489,7 +494,10 @@ function GenetikDetayi({ veri }: { veri: Kayit }) {
   };
 
   return (
-    <div className="lab-ikili">
+    <>
+      {/* VARYANT TABLOSU TAM GENİŞLİK (mockup lab_genetik.html): on bir
+          kolonu yarım sütuna sıkıştırınca sınıf ve rapor işareti kırpılıyor -
+          oysa raporlanacak varyantı seçmek bu ekranın işi. */}
       <div className="kagrup">
         <h6>
           🧬 Varyantlar
@@ -499,32 +507,45 @@ function GenetikDetayi({ veri }: { veri: Kayit }) {
           <table className="detay-tablo">
             <thead>
               <tr>
-                <th>Gen</th><th>Varyant</th><th className="orta">Zigosite</th>
-                <th className="sag">VAF</th><th className="orta">Sınıf</th>
-                <th className="orta">Doğrulama</th><th className="orta">Raporlanır</th>
+                <th>Gen</th><th>Transkript · HGVS c.</th><th>HGVS p.</th>
+                <th className="orta">Zigosite</th><th className="orta">Kalıtım</th>
+                <th className="sag">Derinlik / VAF</th><th className="sag">gnomAD AF</th>
+                <th>ClinVar</th><th>ACMG kriterleri</th>
+                <th className="orta">Sınıf</th><th className="orta">Doğrulama</th>
+                <th className="orta">Rapor</th>
               </tr>
             </thead>
             <tbody>
               {varyantlar.map(x => (
                 <tr key={String(x.id)}>
-                  <td><b>{metin(x.genSembol)}</b>
-                      <span className="not"> {metin(x.transkript)}</span></td>
+                  <td><b>{metin(x.genSembol)}</b></td>
                   <td>
+                    {metin(x.transkript) ? `${metin(x.transkript)}:` : ''}
                     {metin(x.hgvsC) || '—'}
-                    {metin(x.hgvsP)
-                      ? <span className="not"> · {metin(x.hgvsP)}</span> : null}
-                    {/* ACMG KANIT KODLARI sınıfın gerekçesidir: sınıf tek
-                        başına "neden patojenik" sorusunu cevaplamaz. */}
-                    {Array.isArray(x.acmg) && (x.acmg as string[]).length > 0 && (
-                      <span className="not"> · {(x.acmg as string[]).join(', ')}</span>
-                    )}
                   </td>
+                  <td>{metin(x.hgvsP) || '—'}</td>
                   <td className="orta">{ZIGOSITE[Number(x.zigosite ?? 0)] ?? '—'}</td>
-                  <td className="sag">{x.vaf ? `%${sayi(x.vaf, 1)}` : '—'}</td>
+                  <td className="orta">{KALITIM[Number(x.kalitim ?? 0)] ?? '—'}</td>
+                  {/* VAF ORAN olarak saklanır (0,49 = %49): başına yüzde
+                      işareti koymak değeri yüz kat küçük gösteriyordu. */}
+                  <td className="sag">
+                    {x.derinlik ? `${sayi(x.derinlik, 0)}×` : '—'}
+                    {x.vaf ? ` · ${sayi(x.vaf, 2)}` : ''}
+                  </td>
+                  <td className="sag">{x.gnomadAf ? sayi(x.gnomadAf, 5) : '—'}</td>
+                  <td>{metin(x.clinVar) || '—'}</td>
+                  {/* ACMG KANIT KODLARI sınıfın gerekçesidir: sınıf tek
+                      başına "neden patojenik" sorusunu cevaplamaz. */}
+                  <td className="not">
+                    {Array.isArray(x.acmg) && (x.acmg as string[]).length > 0
+                      ? (x.acmg as string[]).join(' · ') : '—'}
+                  </td>
                   <td className="orta">
                     <span className={sinif(x.sinif)}>
                       {SINIF[Number(x.sinif ?? 0)] ?? '—'}
                     </span>
+                    {x.sinifElle ? <span className="not" title="Uzman değiştirdi"> ✎</span>
+                                 : null}
                   </td>
                   <td className="orta not">
                     {Number(x.dogrulama ?? 0) === 2 ? `Sanger · ${metin(x.dogrulamaYontem)}`
@@ -537,13 +558,14 @@ function GenetikDetayi({ veri }: { veri: Kayit }) {
                 </tr>
               ))}
               {varyantlar.length === 0 && (
-                <tr><td colSpan={7} className="not">Varyant kaydedilmedi.</td></tr>
+                <tr><td colSpan={12} className="not">Varyant kaydedilmedi.</td></tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
 
+      <div className="lab-ikili">
       <div className="kagrup">
         <h6>Vaka</h6>
         <div className="lab-alanlar">
@@ -583,20 +605,56 @@ function GenetikDetayi({ veri }: { veri: Kayit }) {
             <label>Run</label>
             <div className="deger">{metin(v.run) || '—'}</div>
           </div>
-          <div className="fld">
-            <label>Kapsama</label>
-            <div className="deger">
-              {v.kapsamaYuzde ? `%${sayi(v.kapsamaYuzde, 1)}` : '—'}
-            </div>
-          </div>
-          <div className="fld">
-            <label>Ortalama derinlik</label>
-            <div className="deger">{v.ortDerinlik ? `${sayi(v.ortDerinlik, 0)}×` : '—'}</div>
-          </div>
         </div>
         {metin(v.uzmanYorum) && <div className="ic sonuk">{metin(v.uzmanYorum)}</div>}
       </div>
-    </div>
+
+      {/* RUN / KALİTE (mockup "Run / kalite · RUN-0931"): varyantın hangi
+          koşullarda çağrıldığı sonucun kendisi kadar bağlayıcıdır - düşük
+          kapsama, kontaminasyon ya da cinsiyet uyumsuzluğu varyantı
+          şüpheli yapar. */}
+      <div className="kagrup">
+        <h6>Run / kalite <span className="sp">{metin(v.run) || 'run atanmadı'}</span></h6>
+        <div className="lab-alanlar">
+          <div className="fld">
+            <label>Kapsama / ort. derinlik</label>
+            <div className="deger">
+              {v.kapsamaYuzde ? `%${sayi(v.kapsamaYuzde, 1)}` : '—'}
+              {v.ortDerinlik ? ` · ${sayi(v.ortDerinlik, 0)}×` : ''}
+            </div>
+          </div>
+          <div className="fld">
+            <label>Kontaminasyon</label>
+            <div className="deger">
+              {v.kontaminasyon ? `%${sayi(v.kontaminasyon, 2)}` : '—'}
+            </div>
+          </div>
+          <div className="fld">
+            <label>Cinsiyet doğrulama</label>
+            <div className="deger">
+              {Number(v.cinsiyetDogrulama ?? 0) === 1
+                ? <span className="rozet olumlu">uyumlu</span>
+                : Number(v.cinsiyetDogrulama ?? 0) === 2
+                  ? <span className="rozet hata">uyumsuz</span>
+                  : '—'}
+            </div>
+          </div>
+          <div className="fld">
+            <label>Pipeline / referans</label>
+            <div className="deger">
+              {[metin(v.pipeline), metin(v.referansGenom)].filter(Boolean).join(' · ') || '—'}
+            </div>
+          </div>
+        </div>
+        {metin(v.oneriler) && (
+          <div className="ic"><b>Öneriler:</b> {metin(v.oneriler)}</div>
+        )}
+        {metin(v.sinirliliklar) && (
+          <div className="ic sonuk"><b>Sınırlılıklar:</b> {metin(v.sinirliliklar)}</div>
+        )}
+      </div>
+      </div>
+    </>
   );
 }
 

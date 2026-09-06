@@ -131,6 +131,13 @@ export const ROZET_SINIFI: Record<string, string> = {
   'Acil': 'hata', 'Öncelikli': 'uyari',
   // Kultur okuma zamani: gecen okuma bekleyen istir.
   'ZAMANI GELDİ': 'hata', 'birazdan': 'uyari',
+  // Dis lab sozlesme suresi: gecikme kirmizi, son gun sari, tamam notr.
+  'bugün dolacak': 'uyari', 'Tamamlandı': 'gri',
+  // Dizileme run durumu (439): calisan run mavi, biten notr.
+  'Dizilemede': 'bilgi', 'Analizde': 'bilgi',
+  // Varyant sinifi (ACMG): patojenik kirmizi, VUS sari, benign yesil.
+  'Patojenik': 'hata', 'Olası patojenik': 'hata', 'VUS': 'uyari',
+  'Olası benign': 'ok', 'Benign': 'ok',
 };
 
 /**
@@ -187,6 +194,17 @@ export function ikonHucre(deger: unknown, kolon: KolonMeta) {
   return <span title={t.ad} aria-label={t.ad}>{t.ikon}</span>;
 }
 
+/**
+ * SAYI ICEREN durum metinleri sozlukte tam eslesemez ("3 gün GECİKTİ",
+ * "21 sa sonra"). Bunlar KURALLA renklenir: gecikme kirmizi, bekleyen sure
+ * notr. Sozluk once bakilir - tam eslesme her zaman onceliklidir.
+ */
+const ROZET_DESENI: { desen: RegExp; sinif: string }[] = [
+  { desen: /GECİKTİ/i, sinif: 'hata' },
+  { desen: /gün var$/i, sinif: 'gri' },
+  { desen: /sa sonra$/i, sinif: 'gri' },
+];
+
 export function rozetHucre(deger: unknown, kolon: KolonMeta) {
   if (kolon.bicim !== 'rozet') return null;
   const metin = String(deger ?? '').trim();
@@ -194,7 +212,9 @@ export function rozetHucre(deger: unknown, kolon: KolonMeta) {
   // Sozlukte olmayan metin (sube adi gibi degisken deger) NOTR GRI rozet:
   //   sinifsiz rozet yalniz "kalin yazi" gibi gorunuyordu, kolon rozet
   //   istendigi halde duz metinden ayirt edilemiyordu (kullanici).
-  return <span className={`rozet ${ROZET_SINIFI[metin] ?? 'gri'}`}>{metin}</span>;
+  const sinif = ROZET_SINIFI[metin]
+    ?? ROZET_DESENI.find(d => d.desen.test(metin))?.sinif ?? 'gri';
+  return <span className={`rozet ${sinif}`}>{metin}</span>;
 }
 
 /** "İçerik" penceresi (ör. islem-log > bilgi) - JSON ise okunakli bicimde, degilse duz metin. */

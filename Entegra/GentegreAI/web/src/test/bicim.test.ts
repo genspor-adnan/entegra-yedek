@@ -1,6 +1,37 @@
 import { describe, it, expect } from 'vitest';
 import { ApiHatasi, hataMetni } from '../api/sozlesme';
 import { gunMetni, kidemMetni, sayiOku, tutarMetni, tarihSaat, hamSayi, bugunIso } from '../bilesenler/bicim';
+import { bicimHanesi, bicimle, ondalikSayi } from '../bilesenler/bicim';
+
+/**
+ * ONDALIK HANE (446): sayı kolonları `bicim` desenini yok sayıyordu ve
+ * gnomAD frekansı 0,00002 ekranda **0** görünüyordu - varyantın nadir mi
+ * yaygın mı olduğu ACMG sınıflandırmasının en önemli girdisi.
+ */
+describe('ondalikli sayi kolonu', () => {
+  it('bicim desenindeki hane sayisi okunur', () => {
+    expect(bicimHanesi('#,##0.00000')).toBe(5);
+    expect(bicimHanesi('#,##0.0')).toBe(1);
+    expect(bicimHanesi('#,##0')).toBe(0);
+    expect(bicimHanesi(undefined)).toBe(0);
+    expect(bicimHanesi(null)).toBe(0);
+  });
+
+  it('kucuk frekans sifira yuvarlanmaz', () => {
+    expect(ondalikSayi(0.00002, 5)).toBe('0,00002');
+    expect(ondalikSayi(0.49, 2)).toBe('0,49');
+  });
+
+  it('hucre metni kolonun bicimine uyar', () => {
+    const kolon = { ad: 'gnomadAf', baslik: 'gnomAD AF', tip: 'sayi',
+                    bicim: '#,##0.00000' } as never;
+    expect(bicimle(0.00002, kolon)).toBe('0,00002');
+    // Bicim vermeyen sayi kolonu ESKISI GIBI: Intl varsayilani (uc haneye
+    //   kadar) - davranis degismedi.
+    const sade = { ad: 'adet', baslik: 'Adet', tip: 'sayi' } as never;
+    expect(bicimle(12.7, sade)).toBe('12,7');
+  });
+});
 
 import { tariheEkle } from '../sayfalar/belgeSatir';
 

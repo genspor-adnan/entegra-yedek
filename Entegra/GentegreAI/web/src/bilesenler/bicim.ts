@@ -13,6 +13,30 @@ export const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, m
 export const para4 = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
 export const say4 = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 4 });
 export const sayi = new Intl.NumberFormat('tr-TR');
+
+/**
+ * ONDALIKLI SAYI KOLONU: kolonun `bicim` deseni ("#,##0.00000") kaç hane
+ * istiyorsa o kadar gösterilir. Önceden `sayi` (tam sayı) kullanılıyordu ve
+ * gnomAD frekansı 0,00002 ekranda **0** görünüyordu - varyantın nadir mi
+ * yaygın mı olduğu, sınıflandırmanın en önemli girdisidir.
+ */
+const ondalikBicimler = new Map<number, Intl.NumberFormat>();
+export function ondalikSayi(deger: number, hane: number): string {
+  const h = Math.max(0, Math.min(10, hane));
+  let b = ondalikBicimler.get(h);
+  if (!b) {
+    b = new Intl.NumberFormat('tr-TR',
+      { minimumFractionDigits: h, maximumFractionDigits: h });
+    ondalikBicimler.set(h, b);
+  }
+  return b.format(deger);
+}
+
+/** "#,##0.000" -> 3. Desen yoksa ya da ondalık istemiyorsa 0. */
+export function bicimHanesi(bicim: string | null | undefined): number {
+  const n = bicim?.split('.')[1]?.length ?? 0;
+  return Number.isFinite(n) ? n : 0;
+}
 const tarih = new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 const tarihSaatBicim = new Intl.DateTimeFormat('tr-TR', {
   day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
@@ -101,7 +125,9 @@ export function bicimle(deger: unknown, kolon: KolonMeta): string {
       // Yuzde kolonu (basvuru tamamlanmasi): deger 0-100 tam sayi gelir,
       //   ekranda "%" ile okunur. Bolme/carpma YOK - sunucu zaten yuzde
       //   gonderiyor, burada ikinci bir hesap iki kaynak demek olurdu.
-      return kolon.bicim === 'yuzde' ? `%${sayi.format(s)}` : sayi.format(s);
+      if (kolon.bicim === 'yuzde') return `%${sayi.format(s)}`;
+      const hane = bicimHanesi(kolon.bicim);
+      return hane > 0 ? ondalikSayi(s, hane) : sayi.format(s);
     }
     case 'tarih': {
       const metin = String(deger);
