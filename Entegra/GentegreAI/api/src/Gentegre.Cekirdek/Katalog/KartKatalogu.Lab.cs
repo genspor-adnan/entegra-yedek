@@ -193,8 +193,13 @@ public static partial class KartKatalogu
                 Baslik: "Panel Adı", Grup: "Kimlik"),
             new("hizmetId", "hizmet_id", "kod", KodTablosu: "public.v_hizmet_lookup",
                 Baslik: "Hizmet (paket fiyat)", Grup: "Kimlik"),
+            new("bolum", "bolum", "kod", SabitKodlar: LabTetkikBolumKodlari,
+                Baslik: "Bölüm", Grup: "Kimlik"),
             new("durum", "durum", "kod", SabitKodlar: LabKayitDurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),
+            // aciklama kolonu 433'te yoktu, 435'te eklendi: kartta tanimli
+            //   olmasi SELECT'i "column aciklama does not exist" ile
+            //   dusuruyor ve panel karti HIC ACILMIYORDU.
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300,
                 Baslik: "Açıklama", Grup: "Kimlik"),
         },
