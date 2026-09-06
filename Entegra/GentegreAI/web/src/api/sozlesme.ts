@@ -45,7 +45,16 @@ export class ApiHatasi extends Error {
  * "[object Object]" cikmasin. `kodlu` hata kodunu one ekler (BELGE_KURALI: ...).
  */
 export function hataMetni(h: unknown, kodlu = false): string {
-  if (h instanceof ApiHatasi) return kodlu ? `${h.hata.kod}: ${h.message}` : h.message;
+  if (h instanceof ApiHatasi) {
+    const metin = kodlu ? `${h.hata.kod}: ${h.message}` : h.message;
+    // IZLEME NUMARASI BEKLENMEYEN HATADA GOSTERILIR: sunucu "izleme
+    //   numarasini bildirin" diyor ama numara ekranda hic gorunmuyordu -
+    //   kullanicinin bildirebilecegi bir sey yoktu. Is kurali / dogrulama
+    //   hatalarinda GOSTERILMEZ: orada mesajin kendisi zaten yeterli,
+    //   numara gurultu olur.
+    return h.hata.kod === 'SUNUCU' && h.hata.izlemeNo
+      ? `${metin} (izleme: ${h.hata.izlemeNo})` : metin;
+  }
   return h instanceof Error ? h.message : String(h);
 }
 
