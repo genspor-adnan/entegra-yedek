@@ -361,6 +361,21 @@ public static class AksiyonKatalogu
                 Yazdir(),
             ],
 
+            // ITS KUYRUGU (427): gonderilmis bildirim IPTAL EDILEMEZ - ITS'de
+            //   kayit olustu, geri almak ayri bir bildirim turudur (iade /
+            //   deaktivasyon). Kural sunucuda, dugme yine de gosterilir ki
+            //   kullanici sebebini ogrensin.
+            ["its-liste"] =
+            [
+                new("its.gonder", "📤 Şimdi Gönder", "its-bildirim",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "stok", Islem: Islem.Degistir, KayitGerekir: true, Sira: 10),
+                new("its.iptal", "✖ İptal Et", "its-bildirim",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "stok", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                Yazdir(),
+            ],
+
             // e-NABIZ KUYRUGU (415): eksik duzeltilince paket KAYNAKTAN
             //   YENIDEN URETILIR - paket satirini elle duzeltmek, gonderilen
             //   veriyle kayittaki veriyi ayirirdi.

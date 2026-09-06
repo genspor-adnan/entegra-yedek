@@ -48,6 +48,8 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.SgkIlacListesi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.IlacKartFiyat>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizPaketUretici>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizGonderimi>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.ItsServisi>();
+kurucu.Services.AddScoped<Gentegre.Api.Uclar.ItsServisiKisayol>();
 kurucu.Services.AddHttpClient("katalog");
 // FAZ 0 - ZAMANLI ISLER (405): TITCK haftalik guncelleme gibi isler.
 //   Isci SINGLETON (hosted) ama elle calistirma ucundan da cagriliyor -
@@ -194,6 +196,7 @@ uygulama.KatalogUclariniEkle();
 uygulama.MuayeneUclariniEkle();
 uygulama.ReceteUclariniEkle();
 uygulama.EnabizUclariniEkle();
+uygulama.ItsUclariniEkle();
 uygulama.ZamanliIsUclariniEkle();
 uygulama.KurumProfilUclariniEkle();
 uygulama.PanelUclariniEkle();

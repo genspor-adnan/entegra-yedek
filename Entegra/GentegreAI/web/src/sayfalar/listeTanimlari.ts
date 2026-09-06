@@ -335,6 +335,24 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   // RADYOLOJI grubu ana menude KAYIT KABUL ile CRM ARASINDA (kullanici):
   //   grup sirasi bu dizideki ILK gorulme sirasindan gelir.
   {
+    // ITS BILDIRIM KUYRUGU (427) - ilac karekod bildirimleri.
+    //   UTS ile KARISTIRILMAZ: UTS tibbi cihaz, ITS ilac; ayri kurum, ayri
+    //   servis, ayri ekran.
+    kaynak: 'its-bildirim', rota: 'its-bildirim', baslik: 'İTS Bildirimleri',
+    yol: 'Yonetim › İTS Bildirimleri',
+    aksiyonEkrani: 'its-liste',
+    tarihAlani: 'islemTarihi',
+    cipler: [
+      { ad: 'Bekleyen',    filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Gönderildi',  filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Hatalı',      filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuAd: 'İTS Bildirimleri', ic: '💊', yetkiKodu: 'stok',
+  },
+  {
     // e-NABIZ GONDERIM KUYRUGU (415) - uretilen paketler ve durumlari.
     //   "Eksik Alan" bir HATA DEGIL: paket uretildi ama zorunlu alani bos
     //   oldugu icin kuyruga girmedi; duzeltilince kaynaktan yeniden uretilir.

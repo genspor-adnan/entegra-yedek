@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (192 ad, 60 tanesi birden cok dosyada)
+## Fonksiyonlar (193 ad, 62 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -72,7 +72,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ebelge_ubl` | `182_ebelge_ubl.sql` | — |
 | `fn_ebelge_url` | `167_ebelge_entegrator.sql` | — |
 | `fn_ebelge_xslt_bul` | `160_xslt_dokumana_tasindi.sql` | 159_ebelge_xslt.sql |
-| `fn_enabiz_siradakiler` | `415_enabiz_cekirdek.sql` | — |
+| `fn_enabiz_siradakiler` | `428_kuyruk_takili_satir.sql` | 415_enabiz_cekirdek.sql |
 | `fn_entegrasyon_hesap_id` | `338_entegrasyon_baz_sube.sql` | — |
 | `fn_etiket_anahtar` | `003_goc_taraf.sql` | — |
 | `fn_firsat_asama_izle` | `121_firsat.sql` | — |
@@ -98,6 +98,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ilac_fiyat_golge_tazele` | `406_ilac_fiyat.sql` | — |
 | `fn_ilac_kamu_iskonto` | `407_sgk_ek4a_iskonto.sql` | — |
 | `fn_ilac_stok_fiyati` | `408_ilac_stok_fiyat_matrah.sql` | — |
+| `fn_its_siradakiler` | `428_kuyruk_takili_satir.sql` | 427_its_bildirim.sql |
 | `fn_kalem_kart_fiyati` | `202_fn_fiyat_listesi.sql` | — |
 | `fn_kampanya_fiyat` | `275_kampanya_liste_kalem_turu.sql` | 272_kampanya_fiyat.sql |
 | `fn_kasa_islem_bacak_uret` | `393_bacak_belge_no.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql, 096_kasa_bacak_rol_kontrol.sql, 139_kasa_ekstre_dovizi.sql |

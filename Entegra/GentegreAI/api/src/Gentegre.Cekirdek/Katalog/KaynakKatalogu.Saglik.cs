@@ -741,6 +741,70 @@ public static partial class KaynakKatalogu
                                                   Bicim: "dd.MM.yyyy", Genislik: 120)
         });
 
+    /// <summary>
+    /// İTS BİLDİRİM KUYRUĞU (427) — ilaç karekod bildirimleri.
+    ///
+    /// ÜTS ile karıştırılmaz: ÜTS tıbbi cihaz, İTS ilaç. Ayrı kurum, ayrı
+    /// servis, ayrı liste - tek ekranda toplamak iki farklı mevzuatı aynı
+    /// kolonlara sıkıştırmak olurdu.
+    /// </summary>
+    private static KaynakTanimi ItsBildirim() => new(
+        Ad: "its-bildirim",
+        YetkiKodu: "stok",
+        Kaynak: "public.its_bildirim b "
+              + "  left join public.belge bg on bg.id = b.belge_id "
+              + "  left join public.taraf k on k.vkno = b.karsi_gln",
+        SubeKolonu: "b.sube_id",
+        VarsayilanSirala: "b.ekleme_tarihi desc, b.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",         "b.id",          "sayi",  "Id", Varsayilan: false),
+            new("turAdi",
+                "case b.tur when 2 then 'Tüketim' when 3 then 'İade' "
+                + "when 4 then 'Deaktivasyon' when 5 then 'Transfer' else 'Mal Alım' end",
+                                               "metin", "Tür", Hizalama: "orta",
+                                               Bicim: "rozet", Genislik: 120,
+                                               Filtrelenebilir: false),
+            new("tur",        "b.tur",         "kod",   "Tür Kodu", Varsayilan: false),
+            new("islemTarihi","b.islem_tarihi","tarih", "İşlem", Hizalama: "orta",
+                                               Bicim: "dd.MM.yyyy", Genislik: 110),
+            // KUTU SAYISI: bildirimin buyuklugu satir sayisiyla olculur -
+            //   "kac kutu bildirildi" en sik sorulan sey.
+            new("kutuSayisi",
+                "(select count(*) from public.its_bildirim_satir s where s.bildirim_id = b.id)",
+                                               "sayi",  "Kutu", Hizalama: "orta", Genislik: 70),
+            new("karsiGln",   "b.karsi_gln",   "metin", "Karşı GLN", Hizalama: "orta",
+                                               Genislik: 130),
+            new("karsiAd",    "coalesce(k.unvan, '')", "metin", "Karşı Taraf", Genislik: 200),
+            new("belgeNo",    "coalesce(bg.belge_no, '')", "metin", "Belge", Hizalama: "orta",
+                                               Genislik: 140, Varsayilan: false),
+            new("durumAdi",
+                """
+                case b.durum when 0 then 'Hazırlanıyor' when 1 then 'Bekliyor'
+                             when 2 then 'Gönderiliyor' when 3 then 'Gönderildi'
+                             when 4 then 'Hatalı' when 5 then 'İptal' else '' end
+                """,                           "metin", "Durum", Hizalama: "orta",
+                                               Bicim: "rozet", Genislik: 120,
+                                               Filtrelenebilir: false),
+            new("durum",      "b.durum",       "kod",   "Durum Kodu", Varsayilan: false),
+            new("itsNo",      "b.its_bildirim_no", "metin", "İTS No", Hizalama: "orta",
+                                               Genislik: 160),
+            new("deneme",     "b.deneme",      "sayi",  "Deneme", Hizalama: "orta",
+                                               Genislik: 80, Varsayilan: false),
+            new("hataMesaj",  "b.hata_mesaj",  "metin", "Hata", Genislik: 300,
+                                               Varsayilan: false),
+            // TEST ORTAMI ROZETI: canli ve test bildirimleri ayni listede
+            //   durur; hangisinin gercek oldugu gorunmezse "gonderdik" sanip
+            //   yasal yukumluluk atlanabilir.
+            new("ortam",
+                "case when b.test_mi = 1 then 'Test' else 'Canlı' end",
+                                               "metin", "Ortam", Hizalama: "orta",
+                                               Bicim: "rozet", Genislik: 80),
+            new("eklemeTarihi","b.ekleme_tarihi","tarih","Oluşturma", Hizalama: "orta",
+                                               Bicim: "dd.MM.yyyy HH:mm", Genislik: 130,
+                                               Varsayilan: false)
+        });
+
     private static KaynakTanimi LabIstem() => new(
         Ad: "lab-istem",
         YetkiKodu: "lab",

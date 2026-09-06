@@ -248,6 +248,28 @@ export const api = {
       `/api/dokuman-yonetim/klasor/${klasorId}/yukle`, { method: 'POST', body: govde });
   },
 
+  /** ITS karekod cozumleme (427): GS1 ayristirma SUNUCUDA - her ekranda ayri
+      cozumleyici, ayirici gondermeyen okuyucuda birinde calisip otekinde
+      bozulurdu. */
+  itsKarekod: (karekod: string, dogrula = false) =>
+    gonder<{ gtin: string; barkod: string; seriNo: string; partiNo: string;
+             sonKullanma: string | null; ilacAd: string; stokId: number;
+             katalogda: boolean;
+             dogrulama: { gecerli: boolean; durum: string; mesaj: string } | null }>(
+      '/api/its/karekod', { karekod, dogrula }),
+
+  /** Mal alim (kabul) bildirimi kuyruga. */
+  itsBildirim: (istekGovdesi: { tur: number; belgeId?: number; karsiGln?: string;
+                                karekodlar: string[]; islemTarihi?: string }) =>
+    gonder<{ bildirimId: number; eklenen: number; mesaj: string }>(
+      '/api/its/bildirim', istekGovdesi),
+
+  itsGonder: (id: number) =>
+    gonder<{ mesaj: string }>(`/api/its/bildirim/${id}/gonder`, {}),
+
+  itsIptal: (id: number) =>
+    gonder<{ mesaj: string }>(`/api/its/bildirim/${id}/iptal`, {}),
+
   /** Sol paneldeki klasor agaci + sayaclar (419). Kaynak klasorleri SANAL:
       dokumanin kaynak alanindan turer, tablo kaydi yoktur. */
   dokumanKlasorleri: () =>

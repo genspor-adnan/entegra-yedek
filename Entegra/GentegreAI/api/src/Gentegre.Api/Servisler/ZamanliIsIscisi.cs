@@ -35,6 +35,16 @@ public static class ZamanliIsler
             return $"SKRS e-Reçete {s.Tarih}: {s.Yazilan} ilacın reçete türü güncellendi.";
         },
 
+        // İTS KUYRUĞU: ilaç bildirimleri (mal alım). Hesap tanımlı değilse iş
+        //   yine çalışır ve durumu SÖYLER - kapı açıldığı gün kimsenin fark
+        //   etmemesi olmasın.
+        ["its.gonder"] = async (servisler, iptal) =>
+        {
+            var its = servisler.GetRequiredService<ItsServisi>();
+            var s = await its.CalistirAsync(50, null, iptal);
+            return s.Aciklama;
+        },
+
         // e-NABIZ KUYRUĞU: sık çalışır (USS olaydan sonra saatlerle ölçülen bir
         //   süre sınırı koyuyor). Hesap tanımlı değilse iş SESSİZCE BAŞARILI
         //   sayılmaz - sonuç metni durumu söyler, yoksa kurum gönderim

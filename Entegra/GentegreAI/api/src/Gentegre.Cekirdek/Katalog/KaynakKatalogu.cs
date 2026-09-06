@@ -148,6 +148,8 @@ public static partial class KaynakKatalogu
         Ekle(HastaGecmisOlay());
         Ekle(HastaTibbiOzet());
         Ekle(EnabizPaket());
+        // ITS ilac bildirimleri (427) - UTS ile ayri liste.
+        Ekle(ItsBildirim());
         // Dokuman v1 (419): kaynak ustu liste + katalog + onay kuyrugu.
         Ekle(Dokuman());
         Ekle(DokumanTuru());
