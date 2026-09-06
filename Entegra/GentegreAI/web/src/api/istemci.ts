@@ -336,6 +336,80 @@ export const api = {
     gonder<{ yazilan: number; atlanan: number; mesaj: string }>(
       `/api/lab/cihaz-mesaj/${mesajId}/isle`, {}),
 
+  // --------------------------------------------------------- GENETIK (439)
+  /** Istem satirindan genetik vaka acar; rapor icin ONAM sart (KVKK md. 6). */
+  genetikVakaAc: (istemSatirId: number, istek?: { panelId?: number;
+                                                  endikasyon?: string;
+                                                  taniIcd?: string;
+                                                  aileOykusu?: string;
+                                                  anaVakaId?: number;
+                                                  aileRolu?: number }) =>
+    gonder<{ vakaId: number; vakaNo: string; mesaj: string }>(
+      `/api/lab/satir/${istemSatirId}/genetik-vaka`, istek ?? {}),
+
+  /** Vaka calisma alani: onam, kalite, varyantlar. */
+  genetikVakaOku: (id: number) =>
+    istek<Record<string, unknown>>(`/api/lab/genetik/${id}`),
+
+  /** tesadufiBulgu: 1 istiyor · 2 istemiyor - raporlamayi dogrudan degistirir. */
+  genetikOnam: (id: number, govde: { surum: string; tesadufiBulgu: number;
+                                     veriSaklamaYil?: number;
+                                     arastirmaIzni?: boolean }) =>
+    gonder<{ mesaj: string }>(`/api/lab/genetik/${id}/onam`, govde),
+
+  genetikIzolasyon: (id: number, konsantrasyon: number, saflik: number,
+                     not?: string) =>
+    gonder<{ mesaj: string }>(`/api/lab/genetik/${id}/izolasyon`,
+      { konsantrasyon, saflik, not }),
+
+  genetikRunaAl: (id: number, govde: { runId?: number; runKodu?: string;
+                                       cihazAdi?: string; kit?: string;
+                                       kitLot?: string; flowCell?: string;
+                                       barkodIndex?: string }) =>
+    gonder<{ runId: number; runKodu: string; mesaj: string }>(
+      `/api/lab/genetik/${id}/run`, govde),
+
+  genetikKalite: (id: number, govde: { q30?: number; okumaSayisi?: number;
+                                       ortDerinlik?: number; kapsamaYuzde?: number;
+                                       kontaminasyon?: number;
+                                       cinsiyetDogrulama?: number; kalite?: number;
+                                       fastqYol?: string; bamYol?: string;
+                                       vcfYol?: string; hamHash?: string }) =>
+    gonder<{ mesaj: string }>(`/api/lab/genetik/${id}/kalite`, govde),
+
+  /** Sinif ACMG kanitlarindan SUNUCUDA turetilir; banka uyarisi yanitla doner. */
+  genetikVaryant: (id: number, govde: { genSembol: string; transkript?: string;
+                                        hgvsC: string; hgvsP?: string;
+                                        zigosite?: number; derinlik?: number;
+                                        vaf?: number; gnomadAf?: number;
+                                        clinVar?: string; clinVarId?: string;
+                                        acmgKriterler?: string[];
+                                        ikincilBulgu?: boolean; yorum?: string }) =>
+    gonder<{ id: number; sinif: number; sinifAdi: string; raporlanir: boolean;
+             bankaUyarisi: string | null; mesaj: string }>(
+      `/api/lab/genetik/${id}/varyant`, govde),
+
+  varyantSinif: (id: number, sinif: number, neden: string, raporla?: boolean) =>
+    gonder<{ mesaj: string }>(`/api/lab/varyant/${id}/sinif`,
+      { sinif, neden, raporla }),
+
+  /** durum: 1 istendi · 2 dogrulandi · 3 dogrulanamadi (rapordan cikar). */
+  varyantDogrulama: (id: number, durum: number, yontem?: string) =>
+    gonder<{ mesaj: string }>(`/api/lab/varyant/${id}/dogrulama`, { durum, yontem }),
+
+  genetikOnayla: (id: number, yorum?: string, oneriler?: string,
+                  sinirliliklar?: string) =>
+    gonder<{ mesaj: string }>(`/api/lab/genetik/${id}/onayla`,
+      { yorum, oneriler, sinirliliklar }),
+
+  genetikIptal: (id: number, neden: string) =>
+    gonder<{ mesaj: string }>(`/api/lab/genetik/${id}/iptal`, { neden }),
+
+  /** Bilgi bankasindaki sinif degisince etkilenen ONAYLI vakalar. */
+  genetikYenidenDegerlendirme: () =>
+    istek<{ liste: Record<string, unknown>[] }>(
+      '/api/lab/genetik/yeniden-degerlendirme'),
+
   // --------------------------------------------------- MIKROBIYOLOJI (436)
   /** Kulturu acar: besiyeri seti verilmezse tetkigin varsayilani kullanilir. */
   labEkim: (istemSatirId: number, istek?: { besiyeriIdler?: number[];

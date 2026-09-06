@@ -181,6 +181,13 @@ public static partial class KaynakKatalogu
         Ekle(LabBesiyeri());
         Ekle(LabOrganizma());
         Ekle(LabAntibiyotik());
+        // GENETIK (439): vaka calisma alani, varyant havuzu, run'lar,
+        //   gen ve panel kataloglari.
+        Ekle(LabGenetikVaka());
+        Ekle(LabVaryant());
+        Ekle(LabGenetikRun());
+        Ekle(LabGen());
+        Ekle(LabGenetikPanel());
         // FAZ 0 ortak platform (398-401): onam, bildirim, klinik kataloglar.
         Ekle(OnamMetni());
         Ekle(Onam());

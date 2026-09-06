@@ -626,6 +626,65 @@ uzman S/I/R değişikliği).
 
 ---
 
+## 9.5 Genetik uçları (439 · 440)
+
+```http
+POST /api/lab/satir/{id}/genetik-vaka          // { panelId?, endikasyon?, taniIcd?, aileOykusu?, anaVakaId?, aileRolu? }
+GET  /api/lab/genetik/{id}                     // vaka + kalite + varyantlar
+POST /api/lab/genetik/{id}/onam                // { surum, tesadufiBulgu: 1|2, veriSaklamaYil?, arastirmaIzni? }
+POST /api/lab/genetik/{id}/izolasyon           // { konsantrasyon, saflik, not? }
+POST /api/lab/genetik/{id}/run                 // { runId? } | { cihazAdi, kit, kitLot, flowCell? }
+POST /api/lab/genetik/{id}/kalite              // { q30?, okumaSayisi?, ortDerinlik?, kapsamaYuzde?, kontaminasyon?, cinsiyetDogrulama?, vcfYol?, hamHash? }
+POST /api/lab/genetik/{id}/varyant             // { genSembol, hgvsC, hgvsP?, zigosite?, vaf?, gnomadAf?, clinVar?, acmgKriterler[], ikincilBulgu? }
+POST /api/lab/varyant/{id}/sinif               // { sinif, neden, raporla? }  - uzman kararı
+POST /api/lab/varyant/{id}/dogrulama           // { durum: 1 istendi | 2 doğrulandı | 3 doğrulanamadı }
+POST /api/lab/genetik/{id}/onayla              // { yorum?, oneriler?, sinirliliklar? }
+POST /api/lab/genetik/{id}/iptal               // { neden }
+GET  /api/lab/genetik/yeniden-degerlendirme    // bilgi bankası sınıfı değişen ONAYLI vakalar
+```
+
+**Sınıf kanıttan türetilir, saklanmaz.** ACMG/AMP 2015 kanıt kodları
+(`acmg_kriterler` metin dizisi) yazılır; `fn_lab_acmg_sinif` sınıfı hesaplar
+ve tetikleyici satıra yazar. Güç ekleri dikkate alınır (`PP1_Strong`,
+`PM2_Supporting`) — ClinGen'in kanıt gücü ayarlama pratiği budur; ekleri yok
+saymak patojenik varyantı VUS'a düşürürdü. **Çelişkili kanıt VUS'tur**: hem
+patojenik hem benign ölçüt sağlanıyorsa birini seçmek kanıtın yarısını
+görmezden gelmektir.
+
+**Uzman sınıfı ezebilir** (`sinif_elle = 1`, gerekçe zorunlu); bu satırda
+kural bir daha çalışmaz — kanıt listesi sonradan değişse bile uzman kararı
+korunur.
+
+**Onam olmadan rapor yok** (KVKK md. 6, genetik veri özel nitelikli kişisel
+veri): `onayla` onam kaydı yoksa 422 döner. Tesadüfi bulgu tercihi
+raporlamayı doğrudan değiştirir — "istemiyorum" seçildiği anda ikincil
+bulgular (`ikincil_bulgu = 1`) raporlamadan çıkar.
+
+**Doğrulanmamış patojenik varyantla rapor kapanmaz**: tek yöntemle saptanmış
+patojenik varyant hastaya kalıcı tanı koyar; Sanger doğrulaması
+tamamlanmadan `onayla` reddeder. Doğrulanamayan varyant (`durum = 3`)
+rapordan çıkarılır — dizileme artefaktı olabilir.
+
+**Raporlama varsayılanı**: VUS ve üstü raporlanır, benign/olası benign
+raporlanmaz (1.284 varyantı basmak asıl bulgunun görülmemesine yol açar).
+Sonuç cümlesi `fn_lab_genetik_ozet` ile tek yerde kurulur: patojenik/olası
+patojenik varsa POZİTİF, yalnız VUS varsa BELİRSİZ, hiçbiri yoksa NEGATİF.
+
+**Laboratuvar varyant bilgi bankası** (`lab_varyant_bilgi`) aynı varyantı
+ikinci kez gören laboratuvara önceki yorumu getirir; farklı sınıflarsa uç
+`bankaUyarisi` döner. Onayda banka bu vakanın sınıfıyla güncellenir ve sürüm
+artar; sınıfı değişen varyantın eski ONAYLI vakaları
+`/genetik/yeniden-degerlendirme` listesine düşer — VUS'un yıllar sonra
+patojenik çıkması hastayı doğrudan ilgilendirir ve elle takip edilemez.
+
+**Ham veri nesne depoda**: FASTQ/BAM/VCF gigabaytlarca; veritabanında yalnız
+yol + hash durur.
+
+**Yetkiler**: `lab.genetik` (vaka süreci), `lab.gen` (gen ve panel
+katalogları), `lab.onay` (rapor onayı ve uzman sınıf değişikliği).
+
+---
+
 ---
 
 ## 10. Sürümleme

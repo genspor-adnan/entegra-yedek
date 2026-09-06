@@ -6919,3 +6919,57 @@ raporlanandan daha tehlikelidir (hasta tedavisiz kalır). Test eklendi
 | 26000000575 · MEHMET KAYA | Boğaz kültürü | 24 ve 48. saat okundu, **üreme yok** (normal flora) · "antibiyotik endikasyonu yok" |
 | 26000000583 · ZEYNEP DEMİR | Yara kültürü (diyabetik ayak) | **Polimikrobiyal**: ESBL (+) *K. pneumoniae* + *E. faecalis* · EKK bildirimi · Klebsiella'da karbapenem açıldı, enterokokta ampisilin duyarlı olduğu için vankomisin gizli |
 | 26000000393 · ZEYNEP DEMİR | İdrar kültürü | *E. coli* 100.000 CFU/mL, ESBL negatif · 1. basamak duyarlı olduğu için üst basamaklar gizli |
+
+---
+
+## 06.09.2026 — Genetik: vaka, dizileme run'ı, varyant, ACMG (`db/439-440`)
+
+Mikrobiyolojiden sonra laboratuvarın üçüncü ayağı. Mockup:
+`Ekranlar/Lab/lab_genetik.html` ve `lab_sonuc_formu_genetik.html`.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K116 | Genetik için ayrı tablolar (`lab_genetik_vaka`, `lab_varyant`, `lab_genetik_run(_ornek)`, `lab_gen`, `lab_genetik_panel`) | Vaka bazlı, TAT gün/hafta; ham veri gigabaytlarca; varyant yorumu sürümlü. Kültürdeki desen: ayrıntı kendi tablosunda, **özet `lab_sonuc`'a düşer** |
+| K117 | **Sınıf kanıttan türetilir** (`fn_lab_acmg_sinif` + tetikleyici), saklanan bir karar değil | Yalnız "patojenik" yazsaydık "neden" sorusu cevapsız kalır, yeniden değerlendirme imkânsızlaşırdı |
+| K118 | Kanıt gücü ekleri (`PP1_Strong`, `PM2_Supporting`) dikkate alınır | ClinGen pratiği; ekleri yok saymak patojenik varyantı VUS'a düşürür - yani hastanın tanısını kaldırır |
+| K119 | **Çelişkili kanıt VUS'tur** | Hem patojenik hem benign ölçüt sağlanıyorsa birini seçmek, kanıtın yarısını görmezden gelmektir (ACMG'nin açık kuralı) |
+| K120 | Uzman sınıfı ezebilir ama **gerekçe zorunlu**; ezilen satırda kural bir daha çalışmaz | Kural motorunun sonucunu sessizce değiştirmek raporun dayanağını görünmez kılar |
+| K121 | **Onam olmadan rapor yok**; tesadüfi bulgu tercihi raporlamayı anında değiştirir | Genetik veri özel nitelikli kişisel veridir (KVKK md. 6). Tercihi kaydedip raporda bırakmak, onamı kâğıt üstünde bırakırdı |
+| K122 | **Doğrulanmamış patojenik varyantla rapor kapanmaz**; doğrulanamayan varyant rapordan çıkar | Tek yöntemle saptanmış patojenik varyant hastaya kalıcı tanı koyar; dizileme artefaktı olabilir |
+| K123 | Benign/olası benign **raporlanmaz** (varsayılan) | Bin küsur varyantı basmak asıl bulgunun görülmemesine yol açar |
+| K124 | Laboratuvar **varyant bilgi bankası** + yeniden değerlendirme görünümü | Aynı varyantın iki hastada farklı sınıflanması laboratuvarın en sık kalite kusuru; VUS'un sonradan patojenik çıkması elle takip edilemez |
+| K125 | Ham veri (FASTQ/BAM/VCF) nesne depoda, DB'de yalnız yol + hash | Gigabaytlarca veri veritabanına konsa yedekleme imkânsız hale gelir |
+
+### Yapılanlar
+
+- **`db/439`**: dokuz tablo, `fn_lab_acmg_sinif`, `fn_lab_genetik_ozet`,
+  `tg_lab_varyant_sinif`, `v_lab_varyant_yeniden`, üç lookup, `lab.genetik` /
+  `lab.gen` yetkileri; başlangıç kataloğu 25 gen, 3 panel (kardiyomiyopati,
+  BRCA, trombofili), 3 genetik tetkik.
+- **`db/440`**: `onam_surum` 20 hane yetmiyordu - "Genetik test onamı v2"
+  (21 karakter) bile sığmıyor ve kayıt reddediliyordu; 80 haneye çıkarıldı.
+- **API**: `GenetikServisi` + uçlar (sözleşme §9.5).
+- **Ekranlar**: Genetik Vakalar (çip: "Onam Eksik"), Varyantlar, Dizileme
+  Runları, Gen Kataloğu, Genetik Panelleri + onam/izolasyon/run/kalite/
+  varyant/onay aksiyonları ve varyant sınıf/doğrulama düğmeleri.
+- **Testler**: `GenetikTestleri` (8 durum) — ACMG kombinasyonları, güç ekleri,
+  çelişkili kanıt, türetilen sınıf ve raporlama varsayılanı, uzman ezmesi,
+  özet ayrımı (POZİTİF/BELİRSİZ/NEGATİF), ikincil bulgu, yeniden
+  değerlendirme listesi. Toplam **106 test** geçiyor.
+
+### Uçtan uca (yerel, üç hasta · üç bölüm)
+
+Üç hasta kart ucundan açıldı, başvuru + istem + numune kabul zinciri gerçek
+uçlardan yürütüldü:
+
+| Hasta | Bölüm | Sonuç |
+|---|---|---|
+| ELİF ŞAHİN (A/00000030) | Biyokimya | GLU 28 → **LL panik** (bildirim kaydedildi), ALT 96 / AST 41 → H, KRE 0,9 → N oto-onay. İstem "Onaylandı" |
+| MURAT AYDIN (A/00000031) | Mikrobiyoloji | İdrar kültürü → ekim → ön rapor → 24 s okuma → **ESBL (+) K. pneumoniae** 100.000 CFU/mL; 1. ve 2. basamak tükendiği için **karbapenemler raporlandı** |
+| ZEYNEP KOÇ (A/00000032) | Genetik | Onam (tesadüfi bulgu: istemiyor) → izolasyon → RUN-0002 → kalite → 3 varyant: MYBPC3 **patojenik** (raporda), MYH7 **VUS** (raporda), TTN olası benign (raporlanmaz) → Sanger doğrulama → **POZİTİF** rapor |
+
+İki kural sahada denendi ve **sunucu reddetti**: onamsız onay ("KVKK md. 6,
+onamsız rapor verilemez") ve doğrulanmamış patojenik varyantla onay ("Sanger
+doğrulaması tamamlanmadan rapor onaylanamaz").

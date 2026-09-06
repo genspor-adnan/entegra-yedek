@@ -250,6 +250,10 @@ public static partial class KartKatalogu
         Ekle(LabBesiyeriKarti());
         Ekle(LabOrganizmaKarti());
         Ekle(LabAntibiyotikKarti());
+        // GENETIK (439): gen ve panel kataloglari. Vakanin/varyantin karti
+        //   yok - ikisi de surec kaydi, uclardan yurur.
+        Ekle(LabGenKarti());
+        Ekle(LabGenetikPanelKarti());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
 

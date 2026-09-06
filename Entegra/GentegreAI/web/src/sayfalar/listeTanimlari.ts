@@ -746,6 +746,89 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ic: '🦠', yetkiKodu: 'lab.kultur',
   },
   {
+    // GENETIK VAKA LISTESI (439) - laboratuvarin gunluk ekrani.
+    //   Varsayilan cip "Acik Vakalar": onaylanmis vaka masada is degildir.
+    kaynak: 'lab-genetik-vaka', rota: 'lab-genetik-vaka',
+    baslik: 'Genetik Vakalar', yol: 'Laboratuvar › Genetik',
+    aksiyonEkrani: 'lab-genetik-liste',
+    tarihAlani: 'eklemeTarihi',
+    cipler: [
+      { ad: 'Açık Vakalar', filtre: { alan: 'durum', op: 'icinde', deger: [1, 2, 3, 4, 5, 6] } },
+      // ONAM EKSIK ayri cip: rapor asamasina gelmis vakanin haftalarca
+      //   suren isi, onam eksikligi yuzunden bekler.
+      { ad: 'Onam Eksik',   filtre: { alan: 'tesadufiBulgu', op: 'esit', deger: 0 } },
+      { ad: 'Analiz',       filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Doğrulama',    filtre: { alan: 'durum', op: 'esit', deger: 5 } },
+      { ad: 'Rapor Bekliyor', filtre: { alan: 'durum', op: 'esit', deger: 6 } },
+      { ad: 'Onaylı',       filtre: { alan: 'durum', op: 'esit', deger: 7 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Genetik', menuSira: 37,
+    ic: '🧬', yetkiKodu: 'lab.genetik',
+  },
+  {
+    // VARYANT HAVUZU (439): ACMG kanitlari ve sinif birlikte durur -
+    //   "neden patojenik" sorusu listeden cevaplanir.
+    kaynak: 'lab-varyant', rota: 'lab-varyant', baslik: 'Varyantlar',
+    yol: 'Laboratuvar › Varyantlar',
+    aksiyonEkrani: 'lab-varyant-liste',
+    cipler: [
+      { ad: 'Raporlanan', filtre: { alan: 'raporla', op: 'esit', deger: 1 } },
+      { ad: 'Patojenik',  filtre: { alan: 'sinif', op: 'icinde', deger: [4, 5] } },
+      { ad: 'VUS',        filtre: { alan: 'sinif', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Varyantlar', menuSira: 38,
+    ic: '🔬', yetkiKodu: 'lab.genetik',
+  },
+  {
+    // DIZILEME RUN'LARI (439): kontroller gecmediyse run raporlanamaz.
+    kaynak: 'lab-genetik-run', rota: 'lab-genetik-run', baslik: 'Dizileme Runları',
+    yol: 'Laboratuvar › Runlar',
+    aksiyonEkrani: 'lab-genetik-run-liste',
+    tarihAlani: 'tarih',
+    cipler: [
+      { ad: 'Açık',        filtre: { alan: 'durum', op: 'icinde', deger: [1, 2, 3] } },
+      { ad: 'Tamamlanan',  filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Dizileme Runları', menuSira: 62,
+    ic: '📚', yetkiKodu: 'lab.genetik',
+  },
+  {
+    // GEN KATALOGU (439): transkript zorunlu - HGVS gosterimi ona goredir.
+    kaynak: 'lab-gen', rota: 'lab-gen', baslik: 'Gen Kataloğu',
+    yol: 'Laboratuvar › Genler',
+    kartYolu: '/lab-gen', kartBaslik: 'Gen',
+    aksiyonEkrani: 'lab-gen-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Genler', menuSira: 70,
+    ic: '🧬', yetkiKodu: 'lab.gen',
+  },
+  {
+    // GENETIK PANEL KATALOGU (439): gen listesi raporun ekidir.
+    kaynak: 'lab-genetik-panel', rota: 'lab-genetik-panel',
+    baslik: 'Genetik Panelleri', yol: 'Laboratuvar › Genetik Panelleri',
+    kartYolu: '/lab-genetik-panel', kartBaslik: 'Genetik Paneli',
+    aksiyonEkrani: 'lab-genetik-panel-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Genetik Panelleri', menuSira: 72,
+    ic: '🗂️', yetkiKodu: 'lab.gen',
+  },
+  {
     // ORGANIZMA KATALOGU (436): rapor ve direnc surveyansi buna dayanir.
     kaynak: 'lab-organizma', rota: 'lab-organizma', baslik: 'Organizma Kataloğu',
     yol: 'Laboratuvar › Organizmalar',

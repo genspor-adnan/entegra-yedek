@@ -239,6 +239,9 @@ public sealed partial class KartDeposu
             //   antibiyogram antibiyotigi.
             "public.v_lab_besiyeri_lookup", "public.v_lab_organizma_lookup",
             "public.v_lab_antibiyotik_lookup",
+            // Genetik (439): panel gen listesi, vaka paneli ve run secimi.
+            "public.v_lab_gen_lookup", "public.v_lab_genetik_panel_lookup",
+            "public.v_lab_genetik_run_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

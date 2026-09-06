@@ -55,6 +55,7 @@ import { sigortaAksiyonu } from './liste/sigortaAksiyonlari';
 import { cihazAksiyonu } from './liste/cihazAksiyonlari';
 import { labAksiyonu } from './liste/labAksiyonlari';
 import { mikroAksiyonu } from './liste/mikroAksiyonlari';
+import { genetikAksiyonu } from './liste/genetikAksiyonlari';
 import { DokumanKlasorPaneli, type KlasorSecimi } from '../bilesenler/DokumanKlasorPaneli';
 import { fiyatListesiAksiyonu } from './liste/fiyatListesiAksiyonlari';
 import { ebelgeAksiyonu } from './liste/ebelgeAksiyonlari';
@@ -752,6 +753,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       })) return;
 
       if (await mikroAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+      })) return;
+
+      if (await genetikAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
       })) return;

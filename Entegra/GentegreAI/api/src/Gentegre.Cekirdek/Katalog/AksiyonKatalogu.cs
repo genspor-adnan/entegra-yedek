@@ -546,6 +546,10 @@ public static class AksiyonKatalogu
                     Hedef: "sagtus,palet",
                     KaynakKodu: "lab.kultur", Islem: Islem.Ekle, KayitGerekir: true,
                     Sira: 50),
+                new("lab.genetik-vaka", "🧬 Genetik Vaka Aç", "lab-istem",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "lab.genetik", Islem: Islem.Ekle, KayitGerekir: true,
+                    Sira: 55),
             ],
 
             // MIKROBIYOLOJI (436). Kultur bir SUREC: her adim ayri dugme.
@@ -578,6 +582,60 @@ public static class AksiyonKatalogu
                     Sira: 60),
                 Yazdir(),
             ],
+
+            // GENETIK (439). Vaka bir SUREC: onam -> izolasyon -> run ->
+            //   varyant -> dogrulama -> onay. ONAM ayri dugme cunku raporun
+            //   on kosulu (KVKK md. 6) ve tesadufi bulgu tercihi raporlamayi
+            //   dogrudan degistirir.
+            ["lab-genetik-liste"] =
+            [
+                new("lab.genetik-onam", "📋 Onam Kaydet", "lab-genetik-vaka",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.genetik", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 10),
+                new("lab.genetik-izolasyon", "🧪 DNA İzolasyon", "lab-genetik-vaka",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.genetik", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 20),
+                new("lab.genetik-run", "📚 Run'a Al", "lab-genetik-vaka",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.genetik", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 30),
+                new("lab.genetik-kalite", "📊 Kalite Metrikleri", "lab-genetik-vaka",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "lab.genetik", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 40),
+                new("lab.genetik-varyant", "🧬 Varyant Ekle", "lab-genetik-vaka",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.genetik", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 50),
+                new("lab.genetik-onayla", "✔ Raporu Onayla", "lab-genetik-vaka",
+                    Hedef: "araccubugu,sagtus,palet",
+                    AksiyonYetkisi: "lab.onay", KayitGerekir: true, Sira: 60),
+                new("lab.genetik-iptal", "✖ Vakayı İptal Et", "lab-genetik-vaka",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "lab.genetik", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 70),
+                Yazdir(),
+            ],
+
+            // VARYANT HAVUZU: sinif ezme ve Sanger dogrulama.
+            ["lab-varyant-liste"] =
+            [
+                new("lab.varyant-sinif", "🏷 Sınıfı Değiştir (uzman)", "lab-varyant",
+                    Hedef: "araccubugu,sagtus,palet",
+                    AksiyonYetkisi: "lab.onay", KayitGerekir: true, Sira: 10),
+                new("lab.varyant-dogrulama", "🔁 Sanger Doğrulama", "lab-varyant",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.genetik", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 20),
+                Yazdir(),
+            ],
+
+            ["lab-genetik-run-liste"] = [Yazdir()],
+            ["lab-gen-liste"] = Crud("lab-gen", "lab-gen", "lab.gen"),
+            ["lab-genetik-panel-liste"] =
+                Crud("lab-genetik-panel", "lab-genetik-panel", "lab.gen"),
 
             ["lab-besiyeri-liste"] = Crud("lab-besiyeri", "lab-besiyeri", "lab.mikro"),
             ["lab-organizma-liste"] = Crud("lab-organizma", "lab-organizma", "lab.mikro"),

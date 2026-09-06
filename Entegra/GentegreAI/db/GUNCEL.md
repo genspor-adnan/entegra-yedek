@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (216 ad, 65 tanesi birden cok dosyada)
+## Fonksiyonlar (219 ad, 65 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -121,12 +121,14 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kurum_kampanya` | `274_belge_kampanya.sql` | 272_kampanya_fiyat.sql |
 | `fn_kurum_modul_acik` | `364_kurum_profil_sube.sql` | 359_kurum_profil.sql |
 | `fn_kurum_profil` | `364_kurum_profil_sube.sql` | — |
+| `fn_lab_acmg_sinif` | `439_lab_genetik.sql` | — |
 | `fn_lab_antibiyogram_bildirim` | `437_lab_kombinasyon_ajani.sql` | 436_lab_mikrobiyoloji.sql |
 | `fn_lab_barkod_kontrol` | `433_lab_v1.sql` | — |
 | `fn_lab_barkod_uret` | `433_lab_v1.sql` | — |
 | `fn_lab_bayrak` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |
 | `fn_lab_cihaz_calisma_listesi` | `434_lab_cihaz_esleme.sql` | — |
 | `fn_lab_cihaz_tetkik` | `434_lab_cihaz_esleme.sql` | — |
+| `fn_lab_genetik_ozet` | `439_lab_genetik.sql` | — |
 | `fn_lab_kultur_ozet` | `436_lab_mikrobiyoloji.sql` | — |
 | `fn_lab_referans` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |
 | `fn_metin_anahtar` | `414_metin_sadelestir.sql` | — |
@@ -196,6 +198,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_kasa_islem_sil_fis` | `354_kasa_islem_silme_kosullari.sql` | — |
 | `tg_kasa_islem_tahsil_tazele` | `321_tahsilat_satir_dagitim.sql` | — |
 | `tg_kategori_dongu_engel` | `270_kategori_agaci.sql` | — |
+| `tg_lab_varyant_sinif` | `439_lab_genetik.sql` | — |
 | `tg_mesaj_sohbet_tazele` | `342_mesajlasma.sql` | — |
 | `tg_muayene_durum_istemden` | `418_muayene_istem_bagi.sql` | — |
 | `tg_muayene_istem_radyoloji` | `418_muayene_istem_bagi.sql` | — |
@@ -225,7 +228,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (109 ad, 37 tanesi birden cok dosyada)
+## Gorunumler (113 ad, 37 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -293,9 +296,13 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_lab_antibiyotik_lookup` | `436_lab_mikrobiyoloji.sql` | — |
 | `v_lab_besiyeri_lookup` | `436_lab_mikrobiyoloji.sql` | — |
 | `v_lab_cihaz_esleme` | `434_lab_cihaz_esleme.sql` | — |
+| `v_lab_gen_lookup` | `439_lab_genetik.sql` | — |
+| `v_lab_genetik_panel_lookup` | `439_lab_genetik.sql` | — |
+| `v_lab_genetik_run_lookup` | `439_lab_genetik.sql` | — |
 | `v_lab_organizma_lookup` | `436_lab_mikrobiyoloji.sql` | — |
 | `v_lab_panel_lookup` | `433_lab_v1.sql` | — |
 | `v_lab_tetkik_lookup` | `433_lab_v1.sql` | — |
+| `v_lab_varyant_yeniden` | `439_lab_genetik.sql` | — |
 | `v_mali_hareket_ek` | `392_iptal_ters_kayit_ekstre.sql` | 077_v_ekstre.sql |
 | `v_masraf_ekstre` | `077_v_ekstre.sql` | — |
 | `v_masraf_lookup` | `071_kasa_master.sql` | — |
