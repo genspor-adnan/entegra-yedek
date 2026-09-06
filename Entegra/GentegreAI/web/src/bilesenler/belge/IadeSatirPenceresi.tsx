@@ -129,14 +129,10 @@ export function IadeSatirPenceresi({ tarafId, tarafUnvan, belgeId, turler, onSec
         {hata && <div className="hata-kutusu">{hata}</div>}
         <div className="kagrup">
           <div className="cipler" style={{ margin: 10 }}>
-            <div className="ara" style={{
-              maxWidth: 320, margin: 0, height: 23, borderRadius: 12,
-              background: 'var(--yuz)', color: 'var(--yazi)', border: '1px solid var(--cizgi)',
-            }}>
+            <div className="ara-kutu genis">
               <span>🔍</span>
               <input
                 autoFocus
-                style={{ border: 0, background: 'transparent', outline: 'none', width: '100%', color: 'inherit' }}
                 placeholder="Stok / belge no ara…"
                 value={arama}
                 onChange={e => yaz(e.target.value)}

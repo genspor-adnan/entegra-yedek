@@ -219,15 +219,11 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
               (GenGrid deseni) - kullanici ayni araci iki farkli bicimde
               ogrenmek zorunda kalmasin. */}
           <div className="cipler" style={{ margin: 10 }}>
-            <div className="ara" style={{
-              maxWidth: 260, margin: 0, height: 23, borderRadius: 12,
-              background: 'var(--yuz)', color: 'var(--yazi)', border: '1px solid var(--cizgi)',
-            }}>
+            <div className="ara-kutu">
               <span>🔍</span>
               <input
                 ref={kutu}
                 autoFocus
-                style={{ border: 0, background: 'transparent', outline: 'none', width: '100%', color: 'inherit' }}
                 placeholder={ilacAranir ? "Stok, hizmet ya da ilaç (barkod) ara…"
                                         : "Stok ya da hizmet ara…"}
                 value={arama}

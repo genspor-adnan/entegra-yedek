@@ -154,14 +154,9 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
           </>}>
           <div style={{ padding: 10 }}>
             {/* Listelerdeki oval arama kutusu. */}
-            <div className="ara" style={{
-              maxWidth: 260, margin: '0 0 8px', height: 23, borderRadius: 12,
-              background: 'var(--yuz)', color: 'var(--yazi)', border: '1px solid var(--cizgi)',
-            }}>
+            <div className="ara-kutu alt-bosluk">
               <span>🔍</span>
               <input autoFocus value={arama}
-                     style={{ border: 0, background: 'transparent', outline: 'none',
-                              width: '100%', color: 'inherit' }}
                      placeholder="Kullanıcı ara (ad, kod, e-posta)…"
                      onChange={e => setArama(e.target.value)} />
             </div>

@@ -127,6 +127,17 @@ describe('iki anlamlı sınıf adları', () => {
     expect(bulunan).toEqual([...IKI_ANLAMLI].sort());
   });
 
+  it('arama kutusu ikiye ayrıldı: üst şerit ve liste ayrı sınıf', () => {
+    // `.ara` üst şeridin KOYU kutusuydu; sekiz bileşen aynı adı kullanıp
+    //   zemini/rengi inline eziyordu. Biri unutulsa beyaz zeminde açık mavi
+    //   yazı kalıyordu - artık iki ayrı sınıf var.
+    const global = globalSiniflar(temaCss);
+    expect(global.has('ara')).toBe(false);
+    expect(global.has('ust-ara')).toBe(true);
+    expect(global.has('ara-kutu')).toBe(true);
+    expect(temaCss).toMatch(/\.ara-kutu input/);
+  });
+
   it('rapor bölümü artık sol menü başlığının adını taşımıyor', () => {
     // `.cikti-sayfa .bolum` metni 10 px BÜYÜK HARF yapıyordu.
     expect(temaCss).not.toMatch(/\.cikti-sayfa\s+\.bolum\b/);

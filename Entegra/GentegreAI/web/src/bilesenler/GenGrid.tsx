@@ -625,13 +625,9 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       {!seritGizli && (
       <div className="cipler">
         {!aramaGizli && (
-        <div className="ara" style={{
-          maxWidth: 225, margin: 0, height: 23, borderRadius: 12,
-          background: 'var(--yuz)', color: 'var(--yazi)', border: '1px solid var(--cizgi)',
-        }}>
+        <div className="ara-kutu dar">
           <span>🔍</span>
           <input
-            style={{ border: 0, background: 'transparent', outline: 'none', width: '100%', color: 'inherit' }}
             placeholder={cev('Bu listede ara…')}
             onChange={e => aramaDegisti(e.target.value)}
           />

@@ -385,7 +385,7 @@ export function Kabuk() {
           {urunAdi(kullanici?.urunModu)}
         </div>
 
-        <button className="ara" onClick={paletiAc} title="Komut paleti">
+        <button className="ust-ara" onClick={paletiAc} title="Komut paleti">
           <span>🔍</span>
           <span>Ara ya da komut yaz…</span>
           <kbd>Ctrl K</kbd>

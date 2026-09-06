@@ -595,16 +595,9 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               ))}
               {aramaVar && (
                 // Listedeki "Bu listede ara" kutusuyla AYNI oval gorunum.
-                <span className="ara" style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 4,
-                  marginLeft: 10, width: 220, height: 23, padding: '0 8px',
-                  borderRadius: 12, background: 'var(--yuz)',
-                  border: '1px solid var(--cizgi)', verticalAlign: 'middle',
-                }}>
+                <span className="ara-kutu satir-arasi">
                   <span>🔍</span>
                   <input value={arama} placeholder="Satırlarda ara…"
-                         style={{ border: 0, background: 'transparent', outline: 'none',
-                                  width: '100%', color: 'inherit', font: 'inherit' }}
                          onChange={e => { setArama(e.target.value); setSecili(null); }} />
                 </span>
               )}

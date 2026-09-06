@@ -308,14 +308,9 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
       </h6>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '0 10px 8px' }}>
         {/* Listelerdeki oval arama kutusuyla ayni gorunum (kullanici). */}
-        <div className="ara" style={{
-          maxWidth: 225, margin: 0, height: 23, borderRadius: 12,
-          background: 'var(--yuz)', color: 'var(--yazi)', border: '1px solid var(--cizgi)',
-        }}>
+        <div className="ara-kutu dar">
           <span>🔍</span>
           <input
-            style={{ border: 0, background: 'transparent', outline: 'none',
-                     width: '100%', color: 'inherit' }}
             placeholder="Yetki ara…" value={arama}
             onChange={e => setArama(e.target.value)} />
         </div>

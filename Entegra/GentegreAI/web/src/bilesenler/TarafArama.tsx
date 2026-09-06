@@ -397,14 +397,10 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
         {/* Arama kutusu ve Liste/Son/Sik dugmeleri LISTE EKRANLARIYLA ayni
             (GenGrid deseni) - ayni arac her yerde ayni gorunsun. */}
         <div className="cipler" style={{ margin: 0 }}>
-          <div className="ara" style={{
-            maxWidth: 260, margin: 0, height: 23, borderRadius: 12,
-            background: 'var(--yuz)', color: 'var(--yazi)', border: '1px solid var(--cizgi)',
-          }}>
+          <div className="ara-kutu">
             <span>🔍</span>
             <input
               ref={kutu}
-              style={{ border: 0, background: 'transparent', outline: 'none', width: '100%', color: 'inherit' }}
               placeholder={yerTutucu ?? 'Ara…'}
               value={metin}
               onChange={e => yaz(e.target.value)}

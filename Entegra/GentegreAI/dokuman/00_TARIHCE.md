@@ -7439,3 +7439,22 @@ sekiz bileşende yeniden kullanılıyor ama her kullanımda zemin/renk/ölçü
 sahiplenemez, iç sınıfları global tanımlı olamaz, **iki anlamlı ad listesi
 kilitli** (yeni bir ad iki anlama gelirse test kırılır), rapor bölümü artık
 menü başlığının adını taşımıyor. Web **451** test.
+
+### Ek: `.ara` ikiye ayrıldı (446)
+
+Taramada "kırılgan ama çalışıyor" diye not düşülen desen düzeltildi. `.ara`
+**üst şeridin komut paleti kutusuydu** (yarı saydam beyaz zemin, açık mavi
+yazı, 30 px); liste, lookup, taraf/stok arama pencereleri ve detay tablosu -
+sekiz yer - aynı sınıfı kullanıp zemini, rengi, yüksekliği ve köşeyi her
+çağrı yerinde **inline `style`** ile eziyordu. Biri unutulsa beyaz zeminde
+açık mavi yazı kalırdı; kutunun ölçüsü de sekiz yerde ayrı yazılıydı.
+
+- `.ust-ara` — yalnız üst şerit (Kabuk).
+- `.ara-kutu` — liste/lookup araması: beyaz zemin, `--cizgi` kenarlık, 23 px,
+  oval; `.dar` (225 px), `.genis` (320 px), `.alt-bosluk`, `.satir-arasi`
+  (detay tablo başlığında metin akışı içinde) değişkeleri. İç `input`un
+  çerçevesiz/şeffaf görünümü de artık `.ara-kutu input` kuralında.
+- Sekiz çağrı yerindeki inline `style` blokları kaldırıldı.
+
+**Test**: `temaSinifCakismasi`'a beşinci kontrol - `.ara` global sınıfı
+yeniden doğmamalı, `.ust-ara` ve `.ara-kutu` durmalı. Web **452** test.

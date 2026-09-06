@@ -73,15 +73,41 @@ input, select { font: inherit; color: inherit }
   background: none; border: 0; padding: 0; flex: none;
 }
 .marka .lg img { height: 26px; width: auto; display: block }
-.ara {
+/* UST SERIT KOMUT PALETI kutusu. Adi `ust-ara`: kisa `.ara` KOYU SERIDIN
+   kutusudur (yari saydam beyaz zemin, acik mavi yazi) ve listelerde/lookup'ta
+   yeniden kullanildiginda beyaz zeminde okunmaz yazi veriyordu - sekiz
+   bilesen bunu inline `style` ile eziyordu. Liste aramasi artik `.ara-kutu`. */
+.ust-ara {
   flex: 1; max-width: 400px; margin: 0 auto; display: flex; align-items: center; gap: 10px;
   height: 30px; padding: 0 12px; border: 1px solid rgba(255, 255, 255, .25); border-radius: var(--r);
   background: rgba(255, 255, 255, .12); color: #dce8f6; cursor: pointer;
 }
-.ara:hover { background: rgba(255, 255, 255, .2) }
-.ara kbd {
+.ust-ara:hover { background: rgba(255, 255, 255, .2) }
+.ust-ara kbd {
   margin-left: auto; font-family: inherit; font-size: 10.5px; background: rgba(255, 255, 255, .16);
   border: 1px solid rgba(255, 255, 255, .3); border-radius: 3px; padding: 2px 6px; color: #fff;
+}
+
+/* LISTE / LOOKUP ARAMA KUTUSU: gridin cip seridinde, lookup penceresinde ve
+   detay tablolarinda ayni kutu. Renk ve olcu BURADA - her cagri yerinde
+   inline yazilinca biri unutulunca koyu serit stili sizeriyordu. */
+.ara-kutu {
+  display: flex; align-items: center; gap: 8px; max-width: 260px; height: 23px;
+  padding: 0 10px; border: 1px solid var(--cizgi); border-radius: 12px;
+  background: var(--yuz); color: var(--yazi);
+}
+.ara-kutu.dar { max-width: 225px }
+.ara-kutu.genis { max-width: 320px }
+/* Panel basliginin altinda duran arama (rol kullanicilari). */
+.ara-kutu.alt-bosluk { margin-bottom: 8px }
+/* Detay tablo baslik seridinde METIN AKISI icinde durur. */
+.ara-kutu.satir-arasi {
+  display: inline-flex; width: 220px; max-width: none; margin-left: 10px;
+  vertical-align: middle;
+}
+.ara-kutu input {
+  border: 0; background: transparent; outline: none; width: 100%; height: 100%;
+  color: inherit; font: inherit; min-width: 0;
 }
 .ustsag { margin-left: auto; display: flex; align-items: center; gap: 6px }
 .ib {
