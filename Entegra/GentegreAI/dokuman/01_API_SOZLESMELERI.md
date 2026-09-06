@@ -486,6 +486,37 @@ rezerve/sarf edilen miktar, plan ve gerçek maliyet sunucuda yazılır.
 
 ---
 
+## 9.2 Sigorta uçları (430)
+
+```http
+GET  /api/sigorta/saglayicilar                 // adapter kataloğu + yetenek bayrakları
+POST /api/sigorta/hesap/{id}/test              // YALNIZ jeton alır, iş çağrısı yapmaz
+POST /api/sigorta/police-sorgu                 // { tarafId, kurumId, hekimId?, policeNo, tarih? }
+POST /api/sigorta/provizyon                    // { belgeId, tip?, altTip?, hizmetTipi?, vakaTipi?, talepTuru?, acil?, not? }
+GET  /api/sigorta/provizyon/{id}               // özet + satır + tanı + not + doküman
+POST /api/sigorta/provizyon/{id}/tazele        // searchProvisions
+POST /api/sigorta/provizyon/{id}/iptal         // { nedenKodu, aciklama }
+POST /api/sigorta/provizyon/{id}/dokuman       // { tipKodu, dokumanId } | { tipKodu, dosyaAdi, mime, icerikBase64 }
+```
+
+**Kanonik model**: istek/yanıt gövdeleri BİZİM kodlarımızı taşır (provizyon
+tipi 1/2/3, durum 1-6); sağlayıcının sözlüğüne çeviri `sigorta_kod_esleme` +
+adapter'da yapılır. Eşleme yoksa alan **gönderilmez** — uydurma kod, şirkette
+anlamı belirsiz bir provizyon oluştururdu.
+
+**Pay dağıtımı**: provizyon yanıtı belgenin tek pay kaynağıdır; satır bazında
+`belge_satir.kurum_tutar / hasta_tutar / karsilama` yazılır
+(`fn_sigorta_pay_dagit`), `belge_provizyon.oss_*` özeti türetilir
+(`fn_sigorta_ozet_tazele`).
+
+**Yetkiler**: `sigorta` (Gör/Değiştir) + aksiyonlar `sigorta.provizyon`,
+`sigorta.iptal`, `sigorta.ayar`.
+
+**Sağlayıcısı olmayan kurumda** uçlar 422 ile "hesap tanımlı değil" der;
+başvuru kartındaki elle provizyon alanları çalışmaya devam eder.
+
+---
+
 ## 10. Sürümleme
 
 - Yol tabanlı sürüm yok; sözleşme **geriye uyumlu** genişletilir (yeni alan eklenir, alan silinmez).

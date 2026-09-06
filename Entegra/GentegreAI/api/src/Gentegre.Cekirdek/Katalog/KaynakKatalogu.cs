@@ -150,6 +150,11 @@ public static partial class KaynakKatalogu
         Ekle(EnabizPaket());
         // ITS ilac bildirimleri (427) - UTS ile ayri liste.
         Ekle(ItsBildirim());
+        // SIGORTA v1 (430): provizyonlar, kurum hesaplari, kod eslemesi, gunluk.
+        Ekle(SigortaProvizyon());
+        Ekle(SigortaHesap());
+        Ekle(SigortaKodEsleme());
+        Ekle(SigortaIstekLog());
         // URETIM v1 (429): urun agaci (BOM), uretim emri, is merkezi.
         Ekle(UrunAgaci());
         Ekle(UretimEmri());

@@ -335,6 +335,67 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   // RADYOLOJI grubu ana menude KAYIT KABUL ile CRM ARASINDA (kullanici):
   //   grup sirasi bu dizideki ILK gorulme sirasindan gelir.
   {
+    // SIGORTA PROVIZYONLARI (430). Provizyon burada ALINMAZ - basvuru
+    //   kartindan alinir (kalemler orada); bu ekran takip ve duzeltmedir.
+    kaynak: 'sigorta-provizyon', rota: 'sigorta-provizyon',
+    baslik: 'Sigorta Provizyonları', yol: 'Yonetim › Sigorta Provizyonları',
+    aksiyonEkrani: 'sigorta-provizyon-liste',
+    tarihAlani: 'provizyonTarihi',
+    cipler: [
+      { ad: 'Onaylı',      filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Kısmi',       filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Red',         filtre: { alan: 'durum', op: 'esit', deger: 5 } },
+      { ad: 'Gönderildi',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Tümü' },
+    ],
+    toplam: ['talepToplam', 'sirketPayi', 'hastaPayi'],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Yönetim', menuAltGrup: 'Sigorta',
+    menuAd: 'Provizyonlar', ic: '🛡️', yetkiKodu: 'sigorta', menuSira: 10,
+  },
+  {
+    // KURUM HESAPLARI (430): hangi sigorta sirketi hangi saglayici uzerinden.
+    //   Parola/istemci sirri BURADA GORUNMEZ - entegrasyon hesabi kartinda.
+    kaynak: 'sigorta-hesap', rota: 'sigorta-hesap', baslik: 'Sigorta Hesapları',
+    yol: 'Yonetim › Sigorta Hesapları',
+    kartYolu: '/sigorta-hesap', kartBaslik: 'Sigorta Hesabı',
+    aksiyonEkrani: 'sigorta-hesap-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Yönetim', menuAltGrup: 'Sigorta',
+    menuAd: 'Kurum Hesapları', ic: '🔌', yetkiKodu: 'sigorta', menuSira: 20,
+  },
+  {
+    // KOD ESLEME (430): kanonik deger <-> saglayici degeri. Yeni sirket
+    //   baglanirken doldurulan TEK tablo; sema ve ekran degismez.
+    kaynak: 'sigorta-kod-esleme', rota: 'sigorta-kod-esleme',
+    baslik: 'Sigorta Kod Eşleme', yol: 'Yonetim › Sigorta Kod Eşleme',
+    kartYolu: '/sigorta-kod-esleme', kartBaslik: 'Kod Eşlemesi',
+    aksiyonEkrani: 'sigorta-kod-esleme-liste',
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Yönetim', menuAltGrup: 'Sigorta',
+    menuAd: 'Kod Eşleme', ic: '🔤', yetkiKodu: 'sigorta', menuSira: 30,
+  },
+  {
+    // ISTEK GUNLUGU (430): "biz ne gonderdik, onlar ne dedi". Ihtilafta kanit.
+    kaynak: 'sigorta-istek-log', rota: 'sigorta-istek-log',
+    baslik: 'Sigorta İstek Günlüğü', yol: 'Yonetim › Sigorta İstek Günlüğü',
+    aksiyonEkrani: 'sigorta-istek-log-liste',
+    tarihAlani: 'tarih',
+    icerikAlani: 'yanitMetni', icerikBaslik: 'Servis Yanıtı',
+    cipler: [
+      { ad: 'Hatalı',   filtre: { alan: 'basarili', op: 'esit', deger: 0 } },
+      { ad: 'Başarılı', filtre: { alan: 'basarili', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Yönetim', menuAltGrup: 'Sigorta',
+    menuAd: 'İstek Günlüğü', ic: '🧾', yetkiKodu: 'sigorta', menuSira: 40,
+  },
+  {
     // ITS BILDIRIM KUYRUGU (427) - ilac karekod bildirimleri.
     //   UTS ile KARISTIRILMAZ: UTS tibbi cihaz, ITS ilac; ayri kurum, ayri
     //   servis, ayri ekran.

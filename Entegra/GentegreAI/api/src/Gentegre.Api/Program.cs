@@ -69,6 +69,14 @@ kurucu.Services.AddScoped<YetkiSenkronu>();
 kurucu.Services.AddScoped<DokumanDeposu>();
 kurucu.Services.AddSingleton<ReferansDeposu>();
 kurucu.Services.AddScoped<BelgeDeposu>();
+// SIGORTA (430): kod cevirici + adapterler + is akisi servisi. Adapter'lar
+//   ISigortaSaglayici olarak kayitli; servis kod eslesmesiyle dogrusunu secer.
+kurucu.Services.AddScoped<Gentegre.Veri.Depolar.SigortaKodDeposu>();
+kurucu.Services.AddScoped<Gentegre.Cekirdek.Sigorta.ISigortaKodCevirici>(
+    s => s.GetRequiredService<Gentegre.Veri.Depolar.SigortaKodDeposu>());
+kurucu.Services.AddScoped<Gentegre.Cekirdek.Sigorta.ISigortaSaglayici,
+                          Gentegre.Api.Servisler.AsmedSaglayici>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.SigortaServisi>();
 kurucu.Services.AddScoped<KasaDeposu>();
 kurucu.Services.AddScoped<GunlukDeposu>();
 kurucu.Services.AddScoped<UtsDeposu>();
@@ -214,6 +222,7 @@ uygulama.AksiyonUclariniEkle();
 uygulama.KodListeUclariniEkle();
 uygulama.UtsUclariniEkle();
 uygulama.UretimUclariniEkle();
+uygulama.SigortaUclariniEkle();
 
 // YETKI SENKRONU (kullanici: "menulerdeki ekle/sil/degisimlerde yetki matrisini
 //   update et"): katalogdaki ekran/aksiyon yetkileri ile `yetki` tablosu her

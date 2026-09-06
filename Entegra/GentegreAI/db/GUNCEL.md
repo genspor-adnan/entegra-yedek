@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (199 ad, 62 tanesi birden cok dosyada)
+## Fonksiyonlar (202 ad, 62 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -144,6 +144,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_radyoloji_rapor_no` | `303_radyoloji_rapor_no.sql` | — |
 | `fn_radyoloji_rapor_onaylanabilir` | `284_radyoloji_operasyon.sql` | — |
 | `fn_radyoloji_sonuc_durumu` | `418_muayene_istem_bagi.sql` | — |
+| `fn_sigorta_ozet_tazele` | `430_sigorta_v1.sql` | — |
+| `fn_sigorta_pay_dagit` | `430_sigorta_v1.sql` | — |
+| `fn_sigorta_ref_no` | `430_sigorta_v1.sql` | — |
 | `fn_siradaki_hasta` | `410_hekim_calisma_listesi.sql` | — |
 | `fn_sls_carpan_manuel` | `214_yazim_olusma_import.sql` | 209_taban_fiyat_izi.sql, 212_yazim_gecis_kurali.sql, 213_fiyat_elle_degisim.sql |
 | `fn_slug` | `021_goc_kimlik.sql` | — |
@@ -208,7 +211,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (97 ad, 37 tanesi birden cok dosyada)
+## Gorunumler (100 ad, 37 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -241,6 +244,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_ebelge_gonderici` | `169_sube_ebelge_kimlik.sql` | 165_firma_bilgileri.sql |
 | `v_ebelge_turu_lookup` | `156_ebelge_seri.sql` | — |
 | `v_ebelge_yon_lookup` | `159_ebelge_xslt.sql` | — |
+| `v_entegrasyon_hesap_lookup` | `430_sigorta_v1.sql` | — |
 | `v_entegrasyon_kod_lookup` | `337_entegrasyon_uts_ebelge.sql` | 336_entegrasyon_hesap.sql |
 | `v_firsat_asama_gecmis` | `121_firsat.sql` | — |
 | `v_firsat_liste` | `121_firsat.sql` | — |
@@ -300,6 +304,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_randevu_bolum_lookup` | `256_departman_durum.sql` | 251_departman.sql, 254_departman_kod.sql |
 | `v_randevu_tetkik_sure` | `317_randevu_tetkik_uyum.sql` | — |
 | `v_rol_lookup` | `425_dokuman_erisim.sql` | — |
+| `v_sigorta_hesap_lookup` | `430_sigorta_v1.sql` | — |
+| `v_sigorta_saglayici_lookup` | `430_sigorta_v1.sql` | — |
 | `v_stok_kullanilabilir` | `142_siparis_rezervasyon.sql` | — |
 | `v_stok_lookup` | `121_firsat.sql` | — |
 | `v_sube_baz_lookup` | `227_baz_sube.sql` | — |

@@ -226,6 +226,9 @@ public sealed partial class KartDeposu
             //   ve DEPO - uretim karti sarf/mamul/fire deposunu secer.
             "public.v_is_merkezi_lookup", "public.v_urun_agaci_lookup",
             "public.v_uretim_emri_lookup", "public.v_depo_lookup",
+            // Sigorta v1 (430): saglayici, kurum hesabi ve entegrasyon hesabi.
+            "public.v_sigorta_saglayici_lookup", "public.v_sigorta_hesap_lookup",
+            "public.v_entegrasyon_hesap_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

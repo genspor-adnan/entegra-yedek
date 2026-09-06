@@ -361,6 +361,45 @@ public static class AksiyonKatalogu
                 Yazdir(),
             ],
 
+            // SIGORTA v1 (430). Provizyon BASVURU KARTINDAN alinir; buradaki
+            //   liste takip ve duzeltme icindir: tazele (searchProvisions),
+            //   iptal (cancelProvision), dokuman gonderimi.
+            //   Yapilamayacak adim GIZLENMEZ - sunucu sebebini soyler.
+            ["sigorta-provizyon-liste"] =
+            [
+                new("sigorta.tazele", "↻ Durumu Tazele", "sigorta-provizyon",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "sigorta", Islem: Islem.Gor, KayitGerekir: true, Sira: 10),
+                new("sigorta.dokuman", "📎 Doküman Gönder", "sigorta-provizyon",
+                    Hedef: "araccubugu,sagtus,palet",
+                    AksiyonYetkisi: "sigorta.provizyon", KayitGerekir: true, Sira: 20),
+                new("sigorta.basvuru", "📝 Başvuruya Git", "sigorta-provizyon",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "sigorta", Islem: Islem.Gor, KayitGerekir: true, Sira: 30),
+                new("sigorta.iptal", "✖ Provizyonu İptal Et", "sigorta-provizyon",
+                    Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "sigorta.iptal", KayitGerekir: true, Sira: 40),
+                Yazdir(),
+            ],
+
+            ["sigorta-hesap-liste"] =
+            [
+                .. Crud("sigorta-hesap", "sigorta-hesap", "sigorta", "＋ Yeni",
+                        silHedef: null, yazdir: false),
+                // BAGLANTI TESTI: jeton akisini ve kimlik bilgilerini dogrular,
+                //   hicbir kayit olusturmaz. Kapinin acik olup olmadigi ancak
+                //   boyle anlasilir - ilk provizyonda ogrenmek gec olur.
+                new("sigorta.hesap-test", "🔌 Bağlantıyı Test Et", "sigorta-hesap",
+                    Hedef: "araccubugu,sagtus,palet",
+                    AksiyonYetkisi: "sigorta.ayar", KayitGerekir: true, Sira: 40),
+            ],
+
+            ["sigorta-kod-esleme-liste"] = Crud("sigorta-kod-esleme", "sigorta-kod-esleme",
+                                                "sigorta", "＋ Yeni", silHedef: null,
+                                                yazdir: false),
+
+            ["sigorta-istek-log-liste"] = [Yazdir()],
+
             // URETIM v1 (429). Dugme SIRASI akisin sirasidir: emri ac,
             //   malzemeyi rezerve et, onayla, baslat (sarf), mamul gir, maliyeti
             //   kapat, emri kapat. Yapilamayacak adim GIZLENMEZ - sunucu sebebini

@@ -51,6 +51,7 @@ import { enabizAksiyonu } from './liste/enabizAksiyonlari';
 import { dokumanAksiyonu } from './liste/dokumanAksiyonlari';
 import { itsAksiyonu } from './liste/itsAksiyonlari';
 import { uretimAksiyonu } from './liste/uretimAksiyonlari';
+import { sigortaAksiyonu } from './liste/sigortaAksiyonlari';
 import { DokumanKlasorPaneli, type KlasorSecimi } from '../bilesenler/DokumanKlasorPaneli';
 import { fiyatListesiAksiyonu } from './liste/fiyatListesiAksiyonlari';
 import { ebelgeAksiyonu } from './liste/ebelgeAksiyonlari';
@@ -706,6 +707,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       })) return;
 
       if (await uretimAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+      })) return;
+
+      if (await sigortaAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
       })) return;

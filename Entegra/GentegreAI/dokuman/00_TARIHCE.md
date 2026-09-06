@@ -6690,3 +6690,79 @@ kod tablosu kartı 500 ile düşürüyor — 358/375/409'daki aynı tuzak.
 
 Test verisi (ağaç, emirler, üretim belgeleri, test stokları ve geçici kullanıcı)
 doğrulamadan sonra geliştirme veritabanından **silindi**.
+
+
+---
+
+## 06.09.2026 — Özel sigorta (ÖSS) v1: sağlayıcı katmanı ve provizyon (`db/430`)
+
+Faz 1'in Üretim'den sonraki adımı. Tasarım `Sigorta/SIGORTA_ENTEGRASYON_TASARIM.md`
+(F1 + F2), örnek sağlayıcı ASMED / Anadolu Sigorta.
+
+### Kapsam
+
+Sağlayıcı katmanı (`ISigortaSaglayici`) + kod eşleme, poliçe sorgu
+(`checkPolicy`), provizyon oluştur/güncelle (`createProvision`), tazele
+(`searchProvisions`), iptal (`cancelProvision`), doküman gönderimi
+(`organizationCreateDocument`). Provizyon yanıtındaki tutar kırılımı belgenin
+hasta/kurum payını yazar. Paketleme (F3) ve kurum ekstresi (F4) v1 dışında —
+tabloları da **açılmadı**: kullanılmayan tablo, alanları doğrulanmamış tablodur.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| — | **Sağlayıcıya özel kolon yok.** Şema kanonik (tip 1/2/3), şirketin sözlüğü yalnız `sigorta_kod_esleme`'de | Yeni şirket = yeni eşleme satırları + yeni adapter; şema ve ekran değişmez. ÜTS ve e-Belge'de kurulan desenin aynısı |
+| — | **Provizyonun kartı yok** | Provizyon bir belge değil, dış servisin yanıtı; elle düzenlenirse şirketin dediği ile bizdeki kayıt ayrışır |
+| — | Provizyon yanıtı **belgenin tek pay kaynağı** (`fn_sigorta_pay_dagit`) | Kullanıcı elle karşılama oranı girse bile üzerine yazılır: iki farklı doğru olmaz, sigorta ne diyorsa fatura odur |
+| — | Satır eşleşmesi **`hospitalRowNumber` = belge satırı id** | Sıraya güvenilseydi şirketin farklı sırada (ve eksik) döndürdüğü satırlar yanlış kaleme yazılırdı |
+| — | `belge_provizyon.oss_*` **özet olarak kalır**, `fn_sigorta_ozet_tazele` ile türetilir | Başvuru şeridi ve tamamlanma yüzdesi o kolonları okuyor; tek kaynak yeni tablo, özet türev |
+| — | Kimlik bilgisi **mevcut `entegrasyon_hesap`'ta** | İkinci bir kimlik tablosu, parolayı iki yerde saklamak olurdu. Sigorta hesabı kartında parola alanı yok |
+| — | Jeton **veritabanında** önbelleklenir | Süreç içi statik alan, ikinci sunucuda ayrı jeton demek; şirket "çok fazla token isteği" der |
+| — | Ağ/servis hatasında provizyon **taslak kalır** | Yarım provizyon "onaylı" görünmemeli |
+| — | İptalde **kurum payı geri alınır** | Bırakılsaydı iptal edilmiş provizyonun tutarı kurumdan tahsil edilecekmiş gibi görünürdü |
+
+### Tuzaklar
+
+**Bağlantı testi iş çağrısı yapmamalı.** İlk sürüm "kapı açık mı" sorusunu
+sahte bir kimlik numarasıyla `checkPolicy` çağırarak soruyordu; ASMED test
+ortamı sıfırlardan oluşan kimliğe **hiç yanıt vermiyor**, istek 90 sn sonra
+zaman aşımına düşüyordu ve "servis çalışmıyor" sanılıyordu. Aynı gövde curl ile
+de yanıtsız kaldı — yani bizim değil, servisin davranışı. Test artık yalnız
+jeton alır (`ISigortaSaglayici.BaglantiTestAsync`).
+
+**Hata üç ayrı kabukta geliyor, ikisi HTTP 500 ile.** İş kuralı
+`{"faultstring": …}`, alan hatası `{"fieldErrorList": [...]}`, ağ geçidi
+`{"httpMessage", "moreInformation"}`. Yalnız sonuncusuna bakmak kullanıcıya
+"Servis hatası (500)" gösteriyordu; oysa asıl sebep yazıyor:
+*"Seçmiş olduğunuz 1517201423 numaralı poliçe, EMİNE ÇAVUŞ isimli sigortalıya
+ait değildir!"*
+
+**Günlükte sahte HTTP durumu yazmayın.** İlk sürüm her çağrıya `200` yazıyordu;
+iş kuralı hatası 500 ile geldiği için günlük yalan söylüyordu. Adapter kanonik
+sonuç döndürüyor, HTTP durumunu taşımıyor - bilinmiyorsa **0**.
+
+**`taraf_personel.brans` varchar.** `coalesce(brans, 0)` PG'de
+*"character varying ve integer eşleşemez"* ile patlıyordu; kod metin taşınıyor,
+adı yalnız sayısal kodlarda `kod_liste 'hekim.brans'` üzerinden çözülüyor.
+Aynı sorgudaki `v_icd_lookup` de `kod` kolonu taşımıyor (id/ad/aktif) — tanı
+adı `public.icd`'den okunuyor.
+
+### Uçtan uca doğrulama
+
+**Gerçek servise karşı** (apitest.anadolusigorta.com.tr, `Sigorta/Asmed`
+kimlik bilgileri): jeton alındı, `checkPolicy` bizim gövdemizle çağrıldı,
+şirketin iş kuralı hatası nota çevrildi, `sigorta_police` ve
+`sigorta_istek_log` satırları yazıldı. **Geçerli bir (TCKN, poliçe no) çifti
+elde edilemedi**: `searchPolicy` test ortamında yayınlanmamış (404 / bağlantı
+yok), poliçe numarası ise `checkPolicy` için zorunlu — bu bir **kapı**, kod
+eksiği değil.
+
+**Sahte ASMED ucuyla** (`scratchpad/sahte_asmed.py`) provizyon zinciri
+doğrulandı: 1.500 ₺ talep → kurum **1.200** / hasta **300**, satırlar belge
+satırlarına (`3558023/3558024`) eşleşti, `belge_satir.kurum_tutar/hasta_tutar/
+karsilama` ve `belge_provizyon.oss_*` yazıldı; tazelemede kırılım **1.350/150**
+olarak güncellendi; doküman gönderimi `piId` ile kaydedildi; iptalde paylar
+geri alındı (kurum 0, tamamı hastaya) ve durum 6 oldu. İstek günlüğünde 9 satır
+(başarısızlar dahil). Test verisi ve geçici kullanıcı sonra **silindi**;
+sağlayıcı ve 73 kod eşleme satırı kaldı (kurulum verisi).

@@ -226,6 +226,9 @@ public static partial class KartKatalogu
         Ekle(FiyatListesi());
         // Demirbas (216)
         Ekle(Demirbas());
+        // SIGORTA v1 (430): kurum hesabi ve kod eslemesi (provizyonun karti YOK).
+        Ekle(SigortaHesapKarti());
+        Ekle(SigortaKodEslemeKarti());
         // URETIM v1 (429): urun agaci (BOM), uretim emri, is merkezi.
         Ekle(UrunAgaciKarti());
         Ekle(UretimEmriKarti());
