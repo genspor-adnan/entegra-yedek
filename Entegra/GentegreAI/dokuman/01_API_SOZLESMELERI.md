@@ -565,6 +565,12 @@ olmayan test yazılmaz** — cihaz paneli komple çalışır, faturalanmamış s
 **Host query yalnız KABUL EDİLMİŞ numuneyi döner**: reddedilebilecek tüpü
 çalıştırmak, sonradan silinecek sonuç üretir.
 
+**`GET /api/lab/istem/{id}` alan adları** (446): satırlar `referansAlt`,
+`referansUst`, `referansMetin` ve `bolum` döner. Önceki `refAlt/refUst/
+refMetin` adları diğer lab uçlarıyla uyuşmuyordu; aynı bilgiyi iki farklı
+adla okuyan ekran, alan adı kayınca sessizce boş kalır. `bolum` tetkik
+kataloğundan gelir - grid altı detay paneli satırları bölüme göre gösterir.
+
 **Yetkiler**: `lab` (istem), `lab.tetkik` (katalog/panel), `lab.numune`
 (kabul/ret), `lab.sonuc` (giriş + teknik onay), `lab.onay` (uzman onayı,
 düzeltme), `lab.cihaz` (eşleme).
@@ -966,6 +972,46 @@ eşlemesiyle aynı desen, 434).
 gecikme kolonu), Laboratuvar › **Dış Laboratuvarlar** kartı.
 
 **Yetki**: `lab.dislab` (kaynak); sonuç girişi `lab.sonuc`.
+
+---
+
+## 9.12 Laboratuvar ekran düzeni (446)
+
+Lab ekranlarının **kendi tasarım dili yoktur**: mockup'lar
+(`Ekranlar/Lab/*.html`) uygulamanın genel diliyle aynı aileden gelir - aynı
+palet, aynı `.grp` / `.dg` / `.rz` desenleri. Karşılıkları:
+
+| Mockup | Uygulama |
+|---|---|
+| `.grp` + `.gb` (başlıklı kutu) | `.kagrup` + `<h6>` |
+| `.dg table` (çalışma tablosu) | `.detay-tablo` (geniş tablo `.detay-kaydir` içinde) |
+| `.rz` (rozet) | `.rozet` (`olumlu` / `uyari` / `hata` / `gri`) |
+| `.ikiPanel` | `.lab-ikili` (1100 px altında tek sütun) |
+| `.ucPanel` (1fr + yan panel) | `.lab-ana-yan` (1250 px altında tek sütun) |
+| `.hdr` (etiket üstte, salt-okunur kutu) | `.lab-alanlar` (`.dort` = dört sütun) |
+| `.statusbar` | `.lab-durum-serit` |
+
+**Grid altı detay paneli**: mockup'ların hepsinde çalışma tablosu ile seçili
+kaydın ayrıntısı **aynı ekrandadır**. `GenGrid.altPanel` bunun yeri;
+`LabDetayPaneli` seçili satıra göre çizer ve mevcut okuma uçlarını kullanır
+(yeni uç yok):
+
+| Liste | Okunan uç | Panel |
+|---|---|---|
+| İstemler · Numune Kabul · Sonuçlar | `GET /api/lab/istem/{id}` (`istemId`) | tetkik + tüp planı, hasta/klinik bilgisi, tüp listesi |
+| Kültür Çalışma Listesi | `GET /api/lab/kultur/{id}` | antibiyogram (kademeli bildirim işaretli), okumalar, izolatlar + direnç işaretleri |
+| Genetik Vakaları | `GET /api/lab/genetik/{id}` | varyantlar (ACMG kanıtlarıyla), vaka/onam/kalite |
+| Dış Lab Gönderimleri | `GET /api/lab/dis/{id}` | gönderim satırları, kurye ve soğuk zincir |
+
+**Panel salt okunurdur**: işlemler araç çubuğu aksiyonlarıyla yapılır ve
+kuralları sunucuda işler. Panelde iş kuralı yoktur - yalnız sunucudan gelen
+kayıt çizilir.
+
+**Kalite kontrol ekranı bir çalışma ekranıdır, rapor değil** (mockup
+`lab_kalite_kontrol.html`): üstte test/materyal/hedef şeridi, solda
+Levey-Jennings, sağda ölçümler ve cihaz olayları. Kâğıt görünümlü rapor
+sayfası olarak çizmek, günde onlarca kez bakılan bir ekranı belgeye
+çevirirdi; ISO 15189 dosyası için yazdırma `@media print` ile korunur.
 
 ---
 

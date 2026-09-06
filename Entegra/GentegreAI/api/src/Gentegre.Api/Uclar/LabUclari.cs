@@ -112,9 +112,14 @@ public static class LabUclari
                        ls.id as sonuc_id, ls.deger_metin, ls.birim, ls.bayrak,
                        ls.referans_alt, ls.referans_ust, ls.referans_metin, ls.panik,
                        ls.delta_uyari, ls.durum as sonuc_durum, ls.olcum_zamani,
-                       ls.onay_zamani, ls.yorum
+                       ls.onay_zamani, ls.yorum,
+                       -- BOLUM ekranin gruplama olcusu (mockup: "Biyokimya /
+                       --   Hematoloji / Mikrobiyoloji"): satirin kendisinde
+                       --   yok, tetkik katalogundan gelir.
+                       coalesce(t.bolum, 0) as bolum
                   from public.lab_istem_satir s
                   left join public.lab_numune n on n.id = s.numune_id
+                  left join public.lab_tetkik t on t.id = s.tetkik_id
                   left join lateral (
                         select * from public.lab_sonuc x
                          where x.istem_satir_id = s.id and x.durum <> 4
@@ -131,15 +136,18 @@ public static class LabUclari
                     Deger = o.IsDBNull(7) ? "" : o.GetString(7),
                     Birim = o.IsDBNull(8) ? "" : o.GetString(8),
                     Bayrak = o.IsDBNull(9) ? "" : o.GetString(9),
-                    RefAlt = o.IsDBNull(10) ? (decimal?)null : o.GetDecimal(10),
-                    RefUst = o.IsDBNull(11) ? (decimal?)null : o.GetDecimal(11),
-                    RefMetin = o.IsDBNull(12) ? "" : o.GetString(12),
+                    // Alan adlari diger lab uclariyla AYNI: ekran ayni
+                    //   bilgiyi iki farkli adla okumak zorunda kalmasin.
+                    ReferansAlt = o.IsDBNull(10) ? (decimal?)null : o.GetDecimal(10),
+                    ReferansUst = o.IsDBNull(11) ? (decimal?)null : o.GetDecimal(11),
+                    ReferansMetin = o.IsDBNull(12) ? "" : o.GetString(12),
                     Panik = !o.IsDBNull(13) && o.GetInt16(13) == 1,
                     DeltaUyari = !o.IsDBNull(14) && o.GetInt16(14) == 1,
                     SonucDurum = o.IsDBNull(15) ? (short)0 : o.GetInt16(15),
                     OlcumZamani = o.IsDBNull(16) ? (DateTime?)null : o.GetDateTime(16),
                     OnayZamani = o.IsDBNull(17) ? (DateTime?)null : o.GetDateTime(17),
-                    Yorum = o.IsDBNull(18) ? "" : o.GetString(18) }, iptal);
+                    Yorum = o.IsDBNull(18) ? "" : o.GetString(18),
+                    Bolum = o.GetInt16(19) }, iptal);
 
             var numuneler = await veri.ListeAsync("""
                 select id, barkod, numune_tipi, tup_tipi, durum, alim_zamani,

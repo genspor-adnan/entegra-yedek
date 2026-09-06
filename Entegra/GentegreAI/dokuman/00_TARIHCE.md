@@ -7259,3 +7259,56 @@ gönderilmiş: ALT"* ile reddetti. Yolda → teslim (dış kabul no
 `RL-2026/118342`) → sonuç girildi: iki sonuç da *"uzman onayı bekliyor"*
 mesajıyla kaydedildi, `lab_sonuc.dis_lab_id` damgalandı ve **hiçbiri
 oto-onaydan geçmedi**.
+
+---
+
+## 06.09.2026 — Laboratuvar ekranlarının mockup'a yaklaştırılması (446)
+
+Lab özelliklerinin hepsi çalışıyordu ama ekranlar mockup ailesinden
+kopuyordu (kullanıcı: *"laboratuvara ait ekranlar mockuplara yeterince
+benzemiyor"*). Önce kod değiştirmeden karşılaştırma yapıldı; farklar
+**zorunlu** ve **gereksiz** diye ayrıldı.
+
+### Gereksiz sapmalar (düzeltildi)
+
+| # | Sapma | Neden gereksizdi |
+|---|---|---|
+| K175 | Lab bileşenleri kendi kutu/tablo bicimini kurmuştu (`.kart-bolum`, `.gen-tablo.dar`, `.alt-kutu`), sabit hex renkler ve 6 px köşe ile | Mockup'ın `.grp`/`.dg`/`.rz` deseni zaten temada var (`.kagrup`, `.detay-tablo`, `.rozet`) - ikinci bir dil kurmak aileyi böler. Ayrıca doğrudan yazılan `#fff` **gece modunda** açık kalıp yazıyı okunmaz yapıyordu |
+| K176 | Kalite kontrol ekranı A4 "rapor kâğıdı" (`.cikti-sayfa`) olarak çiziliyordu | Mockup'ta KK bir **çalışma ekranı**: alan şeridi + iki panel + durum şeridi. Günde onlarca kez bakılan ekranı belgeye çevirmek, hem yanlış görünüm hem yanlış davranış |
+| K177 | Levey-Jennings bantları kesikli ÇİZGİ idi | Mockup'ta bantlar dolgu: nokta hangi bölgede diye çizgi saymak yerine renge bakılır |
+| K178 | Tüp rengi / numune tipi sözlükleri iki dosyada kopyaydı | Aynı tüp bir ekranda mor, diğerinde gri görünürse teknisyen elindeki tüpü doğrulayamaz. Tek sözlük (`labKodlari.ts`) + test |
+| K179 | Mockup'taki **grid altı detay paneli** hiç yoktu; ayrıntıya yalnız arka arkaya açılan sorularla ulaşılıyordu | Teknisyen elinde tüple bankoda duruyor; tetkik/tüp planını görmek için listeyi kaybetmemeli. Mockup'ların hepsinde tablo ve ayrıntı aynı ekranda |
+
+### Zorunlu sapmalar (korundu, gerekçesiyle)
+
+- **Kolonlar, başlıklar ve araç çubuğu sunucudan gelir** (kaynak/aksiyon
+  kataloğu). Mockup'taki sabit kolon dizisi birebir kopyalanamaz: yetkisi
+  olmayan kolon hiç dönmez, HBYS/ERP moduna göre liste değişir. Ekran
+  mockup'ın *düzenini* alır, içeriğini sunucudan.
+- **Mockup'taki kanban/süreç görünümü** (lab_sureci.html) ayrı bir ekran
+  olarak yapılmadı: aynı bilgi çip süzgeçleri + durum kolonuyla veriliyor.
+- **Sonuç raporu** kâğıt görünümünde kaldı (`.cikti-sayfa`) - o gerçekten
+  hastaya verilen belge (mockup `lab_sonuc_formu_*.html`).
+- **Yan panel genişlikleri** mockup'ta sabit (420 px / 330 px); burada dar
+  ekranda tek sütuna düşüyor - iki tabloyu 600 px'e sıkıştırmak ikisini de
+  okunmaz yapardı.
+
+### Yapılanlar
+
+- **`tema.css`**: lab bölümü yeniden yazıldı - `.lab-ikili` (mockup
+  `.ikiPanel`), `.lab-ana-yan` (`.ucPanel`), `.lab-alanlar` (`.hdr`),
+  `.lab-durum-serit` (`.statusbar`), `.lab-detay`; bütün renkler değişken
+  üzerinden. `.istem-sonuc` kendi tablo/kutu biçimini bıraktı.
+- **`LabDetayPaneli`** (yeni): İstemler / Numune Kabul / Sonuçlar,
+  Kültür, Genetik ve Dış Lab listelerinin altında seçili kaydın ayrıntısı.
+  `GenGrid.altPanel` ilk kez kullanılıyor. **Yeni uç yok** - mevcut okuma
+  uçları çiziliyor, panelde iş kuralı yok.
+- **`LabKkGrafik`** çalışma ekranına çevrildi; bantlar dolgu, ölçümler ve
+  cihaz olayları sağ sütunda, altta durum şeridi. Yazdırma `@media print`
+  ile korundu (ISO 15189 dosyası).
+- **`labKodlari.ts`** (yeni): tüp/numune/bölüm/durum/zigosite sözlükleri ve
+  rozet sınıfı yardımcıları; etiket, rapor ve panel aynı kaynaktan okuyor.
+- **`GET /api/lab/istem/{id}`** alan adları diğer lab uçlarıyla eşitlendi
+  (`refAlt` → `referansAlt` …) ve satıra `bolum` eklendi.
+- **Testler**: `labKodlari` (6) ve `labDetayPaneli` (5, jsdom - uçların
+  gerçek alan adlarıyla) eklendi; web **440 test**, API **123 test** geçiyor.

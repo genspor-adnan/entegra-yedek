@@ -1506,39 +1506,88 @@ input.skt-gecmis {
   .etiket-sayfa .etiketler { gap: 0 }
 }
 
-/* MUAYENE > ISTEM & SONUCLAR (443): kart sekmesinin icinde, gridin
-   altinda duran sonuc paneli. Tablo dar - muayene sirasinda hekim uzun
-   satir okumaz, bakisi bayraga ve degere gider. */
-.istem-sonuc { margin-top: 10px; display: flex; flex-direction: column; gap: 10px }
-.istem-sonuc .kart-bolum {
-  border: 1px solid #e6edf5; border-radius: 6px; padding: 8px 10px; background: #fff;
+/* ============================================== LABORATUVAR EKRANLARI (446) ==
+   Kaynak: Ekranlar/Lab/*.html. O mockup'lar UYGULAMANIN GENEL tasarim diliyle
+   ayni ailedendir (ayni renkler, ayni .grp/.dg/.rz desenleri); bu yuzden lab
+   ekranlarinin kendi kutu/tablo bicimi YOKTUR - `.kagrup` (mockup .grp),
+   `.detay-tablo` (mockup .dg) ve `.rozet` (mockup .rz) oldugu gibi kullanilir.
+   Buradaki kurallar yalnizca lab'a OZGU yerlesimi tarif eder.
+
+   Renkler degisken uzerinden: gece modunda yeniden tanimlanan yuzeyler
+   dogrudan hex yazilirsa acik kalip yaziyi okunmaz yapiyordu. */
+
+/* MOCKUP .ikiPanel: gridin ALTINDA yan yana iki kutu (antibiyogram +
+   okuma kaydi, olcumler + dis kalite...). Dar ekranda alt alta duser -
+   iki tabloyu 600 px'e sikistirmak ikisini de okunmaz yapardi. */
+.lab-ikili { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start }
+@media (max-width: 1100px) { .lab-ikili { grid-template-columns: 1fr } }
+
+/* MOCKUP .ucPanel (1fr 420px): solda calisma tablosu, sagda secili kaydin
+   kimlik/ozet paneli (numune kabul ekrani). */
+.lab-ana-yan { display: grid; grid-template-columns: 1fr 420px; gap: 10px; align-items: start }
+@media (max-width: 1250px) { .lab-ana-yan { grid-template-columns: 1fr } }
+
+/* GRID ALTI DETAY PANELI: secili satirin ayrintisi. Mockup'ta tablo ile
+   panel ayni ekranda durur - teknisyen tetkik listesini gormek icin kart
+   acmak zorunda kalmamali. */
+.lab-detay { margin-top: 10px }
+.lab-detay .kagrup { margin-bottom: 10px }
+.lab-detay .kagrup > h6 .sp { margin-left: auto; font-weight: 400; color: var(--soluk) }
+.lab-detay .bos { padding: 14px; text-align: center; color: var(--soluk); font-size: 11.5px }
+/* Mockup .grp .ic: tablo olmayan serbest metin kutusu (rapor onizleme,
+   kural notu, on rapor). */
+.lab-detay .ic { padding: 8px 10px; font-size: 11.5px; line-height: 1.6 }
+.lab-detay .ic.sonuk { color: var(--soluk) }
+.lab-detay .detay-tablo tr.panik td { background: var(--hatazem) }
+.lab-detay .detay-tablo td.vurgu { color: var(--hata); font-weight: 700 }
+.lab-detay .detay-tablo td.sag, .lab-detay .detay-tablo th.sag { text-align: right }
+.lab-detay .detay-tablo td.orta, .lab-detay .detay-tablo th.orta { text-align: center }
+/* Mockup .hdr: etiket USTTE, deger salt-okunur kutu icinde (kimlik seridi). */
+.lab-alanlar { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 12px; padding: 10px }
+.lab-alanlar.dort { grid-template-columns: repeat(4, 1fr) }
+@media (max-width: 900px) { .lab-alanlar, .lab-alanlar.dort { grid-template-columns: 1fr } }
+.lab-alanlar .fld label {
+  display: block; font-size: 10.5px; color: var(--soluk); margin-bottom: 2px;
 }
-.istem-sonuc .bolum-baslik {
-  display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;
+.lab-alanlar .fld .deger {
+  border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz2);
+  color: var(--yazi); min-height: 24px; padding: 3px 7px; font-size: 11.5px;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
 }
-.istem-sonuc .gen-tablo.dar { width: 100%; border-collapse: collapse; font-size: 12px }
-.istem-sonuc .gen-tablo.dar th {
-  text-align: left; color: #6b7a8d; font-weight: 600; border-bottom: 1px solid #e6edf5;
-  padding: 3px 6px 3px 0;
+.lab-alanlar .fld .deger.buyuk { font-weight: 700; font-size: 12.5px }
+/* Mockup .statusbar: ekranin altinda sayim ozeti. */
+.lab-durum-serit {
+  display: flex; gap: 14px; flex-wrap: wrap; padding: 5px 10px; font-size: 11px;
+  color: var(--soluk); background: var(--yuz2); border: 1px solid var(--cizgi2);
+  border-radius: var(--r);
 }
-.istem-sonuc .gen-tablo.dar td {
-  border-bottom: 1px solid #f2f6fa; padding: 3px 6px 3px 0; vertical-align: top;
-}
-.istem-sonuc .gen-tablo.dar td.sag { text-align: right }
-.istem-sonuc .gen-tablo.dar td.vurgu { color: #c0392b; font-weight: 700 }
-.istem-sonuc .gen-tablo.dar tr.panik td { background: #fdf4f3 }
-.istem-sonuc .alt-kutu {
-  margin-top: 6px; padding: 6px 8px; background: #f7fafd; border-radius: 4px;
-  font-size: 12px;
-}
-.istem-sonuc .not { color: #6b7a8d; font-size: 11px }
+.lab-durum-serit b { color: var(--yazi) }
+.lab-durum-serit .sp { margin-left: auto }
+
+/* MUAYENE > ISTEM & SONUCLAR (443): kart sekmesinin icinde duran sonuc
+   paneli. Kutu ve tablo bicimi ORTAK (.kagrup + .detay-tablo); burada
+   yalnizca sekme icindeki bosluk ayarlanir. */
+.istem-sonuc { margin-top: 10px }
+.istem-sonuc .kagrup { margin-bottom: 10px }
+.istem-sonuc .kagrup > h6 { flex-wrap: wrap; gap: 6px }
+.istem-sonuc .kagrup > h6 .d { height: 20px; font-size: 11px }
+.istem-sonuc .detay-tablo { width: calc(100% - 20px); margin: 10px }
+.istem-sonuc .detay-tablo td.sag { text-align: right }
+.istem-sonuc .detay-tablo td.vurgu { color: var(--hata); font-weight: 700 }
+.istem-sonuc .detay-tablo tr.panik td { background: var(--hatazem) }
+.istem-sonuc .ic { padding: 8px 10px; font-size: 11.5px; line-height: 1.6 }
+.istem-sonuc .not { color: var(--soluk); font-size: 11px }
 
 /* LEVEY-JENNINGS (442): kagida da basilabilsin diye SVG - ayri bir
-   grafik kutuphanesi yuklemek, tek grafik icin 200 KB demekti. */
-.lj-grafik { width: 100%; height: auto; margin-top: 10px; background: #fcfdfe;
-             border: 1px solid #e6edf5; border-radius: 6px }
-.lj-eksen { font-size: 9px; fill: #6b7a8d }
-.lj-ihlal { font-size: 8.5px; fill: #c0392b; font-weight: 700 }
+   grafik kutuphanesi yuklemek, tek grafik icin 200 KB demekti.
+   Mockup'ta bantlar DOLGU (yesil ±1SD, sari ±2SD, kirmizi ±3SD): nokta
+   hangi bolgede diye cizgi saymak yerine renge bakilir. */
+.lj-grafik { width: 100%; height: auto; display: block; background: var(--yuz) }
+.lj-eksen { font-size: 9px; fill: var(--soluk) }
+.lj-ihlal { font-size: 8.5px; fill: var(--hata); font-weight: 700 }
+.lj-bant-ok  { fill: var(--okzem) }
+.lj-bant-uy  { fill: var(--uyarizem) }
+.lj-bant-ret { fill: var(--hatazem) }
 .cikti-sayfa .uyari-satir {
   font-size: 11px; color: #a33; margin-top: 6px; font-weight: 600;
 }
@@ -1565,6 +1614,15 @@ input.skt-gecmis {
     border: none; box-shadow: none; padding: 0;
   }
   .cikti-arac { display: none }
+  /* KK EKRANI (446) bir calisma ekrani ama ISO 15189 dosyasi icin
+     basilir: grafik + olcum tablosu kagida ayni duzende gider. */
+  .kk-basim, .kk-basim * { visibility: visible }
+  .kk-basim {
+    position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0;
+    overflow: visible;
+  }
+  .kk-basim .lab-ikili { grid-template-columns: 1fr; gap: 8px }
+  .kk-basim .kagrup { break-inside: avoid }
   @page { size: A4; margin: 14mm }
 }
 

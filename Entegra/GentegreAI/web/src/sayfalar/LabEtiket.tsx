@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { code128Desen } from '../bilesenler/barkod128';
+import { NUMUNE, TUP } from '../bilesenler/labKodlari';
 
 /**
  * TÜP BARKOD ETİKETİ (444, mockup: Ekranlar/Lab/lab_istem_numune_kabul.html).
@@ -23,21 +24,6 @@ import { code128Desen } from '../bilesenler/barkod128';
  */
 
 type Satir = Record<string, unknown>;
-
-const TUP: Record<number, { ad: string; renk: string; yazi?: string }> = {
-  1: { ad: 'SARI (jelli)', renk: '#e8c33a' },
-  2: { ad: 'MOR (EDTA)', renk: '#8d6bb5', yazi: '#fff' },
-  3: { ad: 'MAVİ (sitrat)', renk: '#4d8fd6', yazi: '#fff' },
-  4: { ad: 'GRİ (florür)', renk: '#9aa5b1' },
-  5: { ad: 'YEŞİL (heparin)', renk: '#4e9e72', yazi: '#fff' },
-  6: { ad: 'İDRAR KABI', renk: '#d9b871' },
-  9: { ad: 'DİĞER', renk: '#c9d6e5' },
-};
-
-const NUMUNE: Record<number, string> = {
-  1: 'Serum', 2: 'Plazma', 3: 'Tam kan', 4: 'İdrar', 5: 'Gaita',
-  6: 'BOS', 7: 'Sürüntü', 9: 'Diğer',
-};
 
 const CINSIYET: Record<number, string> = { 1: 'E', 2: 'K' };
 

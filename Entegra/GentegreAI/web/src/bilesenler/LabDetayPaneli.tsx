@@ -1,0 +1,697 @@
+import { useCallback, useEffect, useState } from 'react';
+import { api } from '../api/istemci';
+import { hataMetni } from '../api/sozlesme';
+import { tarihSaat } from './bicim';
+import {
+  BAYRAK_OK, BOLUM, ISTEM_DURUM, NUMUNE, NUMUNE_DURUM, SATIR_DURUM,
+  ZIGOSITE, bayrakSinifi, referansMetni, sayi, sirSinifi, tup,
+} from './labKodlari';
+
+/**
+ * LABORATUVAR GRİD ALTI DETAY PANELİ (446).
+ *
+ * Mockup'ların hepsinde (Ekranlar/Lab/*.html) aynı düzen var: üstte çalışma
+ * tablosu, <b>altında seçili kaydın ayrıntısı</b> - numune kabulde tetkik/tüp
+ * planı, mikrobiyolojide antibiyogram ve okuma kaydı, genetikte varyantlar.
+ *
+ * <b>Neden gridin altında, kartta değil:</b> teknisyen elinde tüple bankoda
+ * duruyor; hangi tetkiklerin hangi tüpe gittiğini görmek için kart açıp
+ * kapatmak zorunda kalırsa listeyi kaybeder. Mockup bu yüzden ikisini aynı
+ * ekranda gösteriyor.
+ *
+ * <b>Panel salt okunurdur.</b> İşlemler (kabul, ret, okuma, antibiyogram…)
+ * araç çubuğu aksiyonlarıyla yapılır ve kuralları sunucuda işler; burada
+ * hiçbir iş kuralı yoktur - yalnız sunucudan gelen kayıt çizilir.
+ */
+
+type Satir = Record<string, unknown>;
+type Kayit = Record<string, unknown>;
+
+/** Panelin desteklediği listeler ve detayın okunacağı anahtar. */
+const KAYNAKLAR: Record<string, 'istem' | 'kultur' | 'genetik' | 'dis'> = {
+  'lab-istem': 'istem',
+  'lab-numune': 'istem',
+  'lab-sonuc': 'istem',
+  'lab-kultur': 'kultur',
+  'lab-genetik-vaka': 'genetik',
+  'lab-dis-gonderim': 'dis',
+};
+
+export function labDetayVarMi(kaynak: string): boolean {
+  return kaynak in KAYNAKLAR;
+}
+
+const dizi = (v: unknown): Satir[] => (Array.isArray(v) ? v as Satir[] : []);
+const metin = (v: unknown): string => String(v ?? '').trim();
+
+/** Boş panel de bir bilgidir: "satır seç" demek, boş kutu bırakmaktan iyidir. */
+function Bos({ ne }: { ne: string }) {
+  return <div className="kagrup"><div className="bos">{ne}</div></div>;
+}
+
+export function LabDetayPaneli({ kaynak, satir }: {
+  kaynak: string;
+  satir: Satir | null;
+}) {
+  const tur = KAYNAKLAR[kaynak];
+  // İstem tabanlı listelerde detay İSTEMİN kendisidir: numune ve sonuç
+  //   satırları da aynı istemin parçası (barkod tek başına yetmez - bir
+  //   istemde birden çok tüp olur).
+  const id = tur === 'istem'
+    ? Number(satir?.istemId ?? (kaynak === 'lab-istem' ? satir?.id : 0) ?? 0)
+    : Number(satir?.id ?? 0);
+
+  const [veri, setVeri] = useState<Kayit | null>(null);
+  const [hata, setHata] = useState('');
+  const [yukleniyor, setYukleniyor] = useState(false);
+
+  const yukle = useCallback(async () => {
+    if (!tur || !id) { setVeri(null); return }
+    setYukleniyor(true); setHata('');
+    try {
+      const y = tur === 'istem' ? await api.labIstemOku(id)
+              : tur === 'kultur' ? await api.labKulturOku(id)
+              : tur === 'genetik' ? await api.genetikVakaOku(id)
+              : await api.disLabOku(id) as unknown as Kayit;
+      setVeri(y as Kayit);
+    } catch (h) { setHata(hataMetni(h)); setVeri(null) }
+    finally { setYukleniyor(false) }
+  }, [tur, id]);
+
+  useEffect(() => { void yukle() }, [yukle]);
+
+  if (!tur) return null;
+  if (!id) return <div className="lab-detay"><Bos ne="Ayrıntı için listeden bir satır seçin." /></div>;
+
+  return (
+    <div className="lab-detay">
+      {hata && <div className="hata-kutusu">{hata}</div>}
+      {!veri && yukleniyor && <Bos ne="Yükleniyor…" />}
+      {veri && tur === 'istem' && <IstemDetayi veri={veri} secili={satir} kaynak={kaynak} />}
+      {veri && tur === 'kultur' && <KulturDetayi veri={veri} />}
+      {veri && tur === 'genetik' && <GenetikDetayi veri={veri} />}
+      {veri && tur === 'dis' && <DisDetayi veri={veri} />}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ istem --
+   Mockup lab_istem_numune_kabul.html: solda "LAB-…/… · Tetkikler" tablosu
+   (tüp planı otomatik), sağda hasta/klinik bilgisi ve etiketler.        */
+function IstemDetayi({ veri, secili, kaynak }: {
+  veri: Kayit; secili: Satir | null; kaynak: string;
+}) {
+  const satirlar = dizi(veri.satirlar);
+  const numuneler = dizi(veri.numuneler);
+  // Numune kabul ekranında seçili TÜPÜN satırları öne alınır: banko o tüple
+  //   çalışıyor, listedeki diğer tüpler bağlam olarak kalır.
+  const seciliBarkod = kaynak === 'lab-numune' ? metin(secili?.barkod) : '';
+
+  return (
+    <div className="lab-ana-yan">
+      <div>
+        <div className="kagrup">
+          <h6>
+            {metin(veri.istemNo)} · Tetkikler
+            <span className="rozet gri">
+              {ISTEM_DURUM[Number(veri.durum ?? 1)] ?? ''}
+            </span>
+            {Number(veri.oncelik ?? 1) === 3 && <span className="rozet hata">ACİL</span>}
+            <span className="sp">tüp/numune planı tetkik kataloğundan</span>
+          </h6>
+          <div className="detay-kaydir">
+            <table className="detay-tablo">
+              <thead>
+                <tr>
+                  <th>Bölüm</th><th>Tetkik</th><th>Tüp / Barkod</th>
+                  <th className="sag">Sonuç</th><th>Birim</th><th>Referans</th>
+                  <th className="orta">Bayrak</th><th className="orta">Ölçüm</th>
+                  <th className="orta">Durum</th>
+                </tr>
+              </thead>
+              <tbody>
+                {satirlar.map(s => {
+                  const barkod = metin(s.barkod);
+                  const n = numuneler.find(x => metin(x.barkod) === barkod);
+                  const t = tup(n?.tupTipi);
+                  const bayrak = metin(s.bayrak);
+                  const panik = Number(s.panik ?? 0) === 1 || Boolean(s.panik);
+                  return (
+                    <tr key={String(s.satirId)}
+                        className={panik ? 'panik'
+                          : (seciliBarkod && barkod === seciliBarkod ? 'secili' : '')}>
+                      <td>{BOLUM[Number(s.bolum ?? 0)] ?? ''}</td>
+                      <td>
+                        <b>{metin(s.ad)}</b>
+                        <span className="not"> {metin(s.kod)}</span>
+                      </td>
+                      <td>
+                        {barkod ? (
+                          <>
+                            <span className="rozet gri"
+                                  style={{ background: t.renk, color: t.yazi ?? '#1f2d3a',
+                                           border: 'none' }}>
+                              {t.kisa}
+                            </span>{' '}
+                            <span className="not">{barkod}</span>
+                          </>
+                        ) : <span className="not">tüp planlanmadı</span>}
+                      </td>
+                      <td className="sag">
+                        {metin(s.deger) ? <b>{metin(s.deger)}</b>
+                                        : <span className="not">bekliyor</span>}
+                      </td>
+                      <td>{metin(s.birim)}</td>
+                      <td>{referansMetni(s.referansAlt, s.referansUst, s.referansMetin) || '—'}</td>
+                      <td className="orta">
+                        {bayrak && bayrak !== 'N'
+                          ? <span className={bayrakSinifi(bayrak)}>
+                              {bayrak} {BAYRAK_OK[bayrak] ?? ''}
+                            </span>
+                          : '—'}
+                        {Number(s.deltaUyari ?? 0) === 1 && (
+                          <span className="not" title="Önceki sonuçtan belirgin sapma"> Δ</span>
+                        )}
+                      </td>
+                      <td className="orta not">
+                        {s.olcumZamani ? tarihSaat(s.olcumZamani) : '—'}
+                      </td>
+                      <td className="orta">
+                        <span className="rozet gri">
+                          {SATIR_DURUM[Number(s.durum ?? 1)] ?? ''}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {satirlar.length === 0 && (
+                  <tr><td colSpan={9} className="not">Bu istemde tetkik yok.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div className="kagrup">
+          <h6>Hasta / İstem</h6>
+          <div className="lab-alanlar">
+            <div className="fld" style={{ gridColumn: '1 / -1' }}>
+              <label>Hasta</label>
+              <div className="deger buyuk">{metin(veri.hasta) || '—'}</div>
+            </div>
+            <div className="fld" style={{ gridColumn: '1 / -1' }}>
+              <label>Klinik bilgi / tanı</label>
+              <div className="deger">
+                {metin(veri.klinik) || '—'}
+                {metin(veri.tani) ? ` · ${metin(veri.tani)}` : ''}
+              </div>
+            </div>
+            <div className="fld">
+              <label>İstem zamanı</label>
+              <div className="deger">{veri.tarih ? tarihSaat(veri.tarih) : '—'}</div>
+            </div>
+            <div className="fld">
+              <label>Hedef bitiş (TAT)</label>
+              <div className="deger">
+                {veri.hedefBitis ? tarihSaat(veri.hedefBitis) : '—'}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ETİKETLER: mockup'taki tüp kutucukları. Tüp rengi metinden önce
+            gelir - teknisyen rafta rengi arar. */}
+        <div className="kagrup">
+          <h6>
+            Tüpler
+            <span className="sp">{numuneler.length} numune</span>
+          </h6>
+          <div className="detay-kaydir">
+            <table className="detay-tablo">
+              <thead>
+                <tr>
+                  <th>Barkod</th><th>Tüp</th><th>Numune</th>
+                  <th className="orta">Alım</th><th className="orta">Kabul</th>
+                  <th className="orta">Durum</th>
+                </tr>
+              </thead>
+              <tbody>
+                {numuneler.map(n => {
+                  const t = tup(n.tupTipi);
+                  const barkod = metin(n.barkod);
+                  return (
+                    <tr key={String(n.id)}
+                        className={seciliBarkod && barkod === seciliBarkod ? 'secili' : ''}>
+                      <td>{barkod}</td>
+                      <td>
+                        <span className="rozet gri"
+                              style={{ background: t.renk, color: t.yazi ?? '#1f2d3a',
+                                       border: 'none' }}>
+                          {t.kisa}
+                        </span>
+                      </td>
+                      <td>{NUMUNE[Number(n.numuneTipi ?? 9)] ?? ''}</td>
+                      <td className="orta not">{n.alim ? tarihSaat(n.alim) : '—'}</td>
+                      <td className="orta not">{n.kabul ? tarihSaat(n.kabul) : '—'}</td>
+                      <td className="orta">
+                        {n.ret
+                          ? <span className="rozet hata">Ret</span>
+                          : <span className="rozet gri">
+                              {NUMUNE_DURUM[Number(n.durum ?? 1)] ?? ''}
+                            </span>}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {numuneler.length === 0 && (
+                  <tr><td colSpan={6} className="not">Tüp planlanmadı.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          {/* RET NEDENİ görünür kalmalı: numune neden reddedildi sorusunun
+              cevabı, yeniden alım kararının kendisidir. */}
+          {numuneler.filter(n => n.ret).map(n => (
+            <div className="ic sonuk" key={`r${n.id}`}>
+              <b>{metin(n.barkod)} reddedildi:</b> {metin(n.retAciklama) || 'gerekçe yok'}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- kültür --
+   Mockup lab_mikrobiyoloji.html .ikiPanel: solda antibiyogram, sağda okuma
+   kaydı ve rapor önizleme.                                              */
+/** `lab_kultur_ureme.id_yontem`. */
+const ID_YONTEM: Record<number, string> = {
+  1: 'MALDI-TOF', 2: 'VITEK', 3: 'Manuel', 4: 'Moleküler', 9: 'Diğer',
+};
+
+/** Enfeksiyon kontrolüne bildirilen direnç işaretleri (436). */
+const DIRENC: { alan: string; ad: string }[] = [
+  { alan: 'mrsa', ad: 'MRSA' }, { alan: 'vre', ad: 'VRE' },
+  { alan: 'esbl', ad: 'ESBL' }, { alan: 'karbapenemaz', ad: 'Karbapenemaz' },
+  { alan: 'ampc', ad: 'AmpC' },
+];
+
+function KulturDetayi({ veri }: { veri: Kayit }) {
+  const k = (veri.kultur ?? {}) as Kayit;
+  const besiyeriler = dizi(veri.besiyeriler);
+  const okumalar = dizi(veri.okumalar);
+  const izolatlar = dizi(veri.izolatlar);
+  const antibiyogram = dizi(veri.antibiyogram);
+
+  return (
+    <div className="lab-ikili">
+      <div className="kagrup">
+        <h6>
+          💊 Antibiyogram
+          <span className="sp">
+            {metin(antibiyogram[0]?.standart) || 'EUCAST'}
+            {metin(antibiyogram[0]?.standartSurum)
+              ? ` ${metin(antibiyogram[0]?.standartSurum)}` : ''} · MIC
+          </span>
+        </h6>
+        <div className="detay-kaydir">
+          <table className="detay-tablo">
+            <thead>
+              <tr>
+                <th>Antibiyotik</th><th className="sag">MIC (µg/mL)</th>
+                <th className="orta">Zon</th><th className="orta">Yorum</th>
+                <th className="orta">Kaynak</th><th className="orta">Raporlanır</th>
+              </tr>
+            </thead>
+            <tbody>
+              {antibiyogram.map(a => (
+                <tr key={String(a.id)}>
+                  <td>
+                    {metin(a.ad)}<span className="not"> {metin(a.kod)}</span>
+                  </td>
+                  <td className="sag">
+                    {metin(a.micIsaret)}{a.mic === null || a.mic === undefined
+                      ? (metin(a.micIsaret) ? '' : '—') : ` ${sayi(a.mic, 3)}`}
+                  </td>
+                  <td className="orta">{a.zonMm ? `${String(a.zonMm)} mm` : '—'}</td>
+                  <td className="orta">
+                    <span className={sirSinifi(a.yorum)}>{metin(a.yorum) || '—'}</span>
+                  </td>
+                  <td className="orta not">
+                    {Number(a.kaynak ?? 1) === 2 ? 'disk (manuel)'
+                      : Number(a.kaynak ?? 1) === 3 ? 'uzman' : 'cihaz'}
+                  </td>
+                  {/* KADEMELİ BİLDİRİM: raporda görünmeyen ajan burada da
+                      işaretli - "niye yazmıyor" sorusu ekranda cevaplanır. */}
+                  <td className="orta">
+                    {a.bildir ? <span className="rozet olumlu">Evet</span>
+                              : <span className="rozet gri">Kademeli</span>}
+                  </td>
+                </tr>
+              ))}
+              {antibiyogram.length === 0 && (
+                <tr><td colSpan={6} className="not">Antibiyogram girilmedi.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        {metin(k.uzmanYorum) && <div className="ic sonuk">{metin(k.uzmanYorum)}</div>}
+      </div>
+
+      <div>
+        <div className="kagrup">
+          <h6>
+            🧫 Okumalar
+            <span className="sp">
+              {besiyeriler.map(b => metin(b.ad)).join(' · ') || 'besiyeri yok'}
+            </span>
+          </h6>
+          <table className="detay-tablo">
+            <thead>
+              <tr>
+                <th className="orta">Saat</th><th className="orta">Zaman</th>
+                <th className="orta">Üreme</th><th>Bulgu</th><th>Sonraki adım</th>
+              </tr>
+            </thead>
+            <tbody>
+              {okumalar.map(o => (
+                <tr key={String(o.id)}>
+                  <td className="orta">{String(o.saat ?? '')} s</td>
+                  <td className="orta not">
+                    {o.zaman ? tarihSaat(o.zaman) : '—'}
+                  </td>
+                  <td className="orta">
+                    {o.uremeVar ? <span className="rozet uyari">var</span>
+                                : <span className="rozet gri">yok</span>}
+                  </td>
+                  <td>{metin(o.bulgu) || '—'}</td>
+                  <td className="not">{metin(o.sonrakiAdim) || '—'}</td>
+                </tr>
+              ))}
+              {okumalar.length === 0 && (
+                <tr><td colSpan={5} className="not">Okuma kaydı yok.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="kagrup">
+          <h6>🔬 İzolatlar</h6>
+          <table className="detay-tablo">
+            <thead>
+              <tr>
+                <th className="orta">No</th><th>Organizma</th>
+                <th className="sag">Koloni</th><th className="orta">Yöntem</th>
+              </tr>
+            </thead>
+            <tbody>
+              {izolatlar.map(i => (
+                <tr key={String(i.id)}>
+                  <td className="orta">{String(i.izolatNo ?? '')}</td>
+                  <td>
+                    <b><i>{metin(i.organizma)}</i></b>
+                    <span className="not"> {metin(i.organizmaKod)}</span>
+                    {/* DİRENÇ İŞARETLERİ enfeksiyon kontrolünün konusudur:
+                        MRSA/VRE/ESBL/karbapenemaz gizlenirse bildirim
+                        yapılmaz. */}
+                    {DIRENC.filter(d => Number(i[d.alan] ?? 0) === 1).map(d => (
+                      <span className="rozet hata" key={d.alan}
+                            style={{ marginLeft: 4 }}>{d.ad}</span>
+                    ))}
+                  </td>
+                  <td className="sag">
+                    {i.koloniSayisi ? `${sayi(i.koloniSayisi, 0)} ${metin(i.koloniBirim)}`
+                                    : '—'}
+                    {i.anlamli === false && <span className="not"> · anlamsız</span>}
+                  </td>
+                  <td className="orta not">
+                    {ID_YONTEM[Number(i.idYontem ?? 0)] ?? '—'}
+                    {i.idGuven ? ` ${sayi(i.idGuven, 1)}` : ''}
+                  </td>
+                </tr>
+              ))}
+              {izolatlar.length === 0 && (
+                <tr><td colSpan={4} className="not">Üreme yok / izolat kaydedilmedi.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {metin(k.onRapor) && (
+          <div className="kagrup">
+            <h6>📄 Ön rapor</h6>
+            <div className="ic">{metin(k.onRapor)}</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* --------------------------------------------------------------- genetik --
+   Mockup lab_genetik.html: varyant tablosu + vaka/kalite bilgisi.        */
+function GenetikDetayi({ veri }: { veri: Kayit }) {
+  const v = (veri.vaka ?? {}) as Kayit;
+  const varyantlar = dizi(veri.varyantlar);
+
+  const sinif = (k: unknown) => {
+    const n = Number(k ?? 0);
+    if (n === 5 || n === 4) return 'rozet hata';        // patojenik / olası
+    if (n === 3) return 'rozet uyari';                  // VUS
+    return 'rozet olumlu';                              // benign / olası benign
+  };
+  const SINIF: Record<number, string> = {
+    1: 'Benign', 2: 'Olası benign', 3: 'VUS', 4: 'Olası patojenik', 5: 'Patojenik',
+  };
+
+  return (
+    <div className="lab-ikili">
+      <div className="kagrup">
+        <h6>
+          🧬 Varyantlar
+          <span className="sp">ACMG/AMP 2015 · sınıf sunucuda türetilir</span>
+        </h6>
+        <div className="detay-kaydir">
+          <table className="detay-tablo">
+            <thead>
+              <tr>
+                <th>Gen</th><th>Varyant</th><th className="orta">Zigosite</th>
+                <th className="sag">VAF</th><th className="orta">Sınıf</th>
+                <th className="orta">Doğrulama</th><th className="orta">Raporlanır</th>
+              </tr>
+            </thead>
+            <tbody>
+              {varyantlar.map(x => (
+                <tr key={String(x.id)}>
+                  <td><b>{metin(x.genSembol)}</b>
+                      <span className="not"> {metin(x.transkript)}</span></td>
+                  <td>
+                    {metin(x.hgvsC) || '—'}
+                    {metin(x.hgvsP)
+                      ? <span className="not"> · {metin(x.hgvsP)}</span> : null}
+                    {/* ACMG KANIT KODLARI sınıfın gerekçesidir: sınıf tek
+                        başına "neden patojenik" sorusunu cevaplamaz. */}
+                    {Array.isArray(x.acmg) && (x.acmg as string[]).length > 0 && (
+                      <span className="not"> · {(x.acmg as string[]).join(', ')}</span>
+                    )}
+                  </td>
+                  <td className="orta">{ZIGOSITE[Number(x.zigosite ?? 0)] ?? '—'}</td>
+                  <td className="sag">{x.vaf ? `%${sayi(x.vaf, 1)}` : '—'}</td>
+                  <td className="orta">
+                    <span className={sinif(x.sinif)}>
+                      {SINIF[Number(x.sinif ?? 0)] ?? '—'}
+                    </span>
+                  </td>
+                  <td className="orta not">
+                    {Number(x.dogrulama ?? 0) === 2 ? `Sanger · ${metin(x.dogrulamaYontem)}`
+                      : Number(x.dogrulama ?? 0) === 1 ? 'bekliyor' : '—'}
+                  </td>
+                  <td className="orta">
+                    {x.raporla ? <span className="rozet olumlu">Evet</span>
+                               : <span className="rozet gri">Hayır</span>}
+                  </td>
+                </tr>
+              ))}
+              {varyantlar.length === 0 && (
+                <tr><td colSpan={7} className="not">Varyant kaydedilmedi.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="kagrup">
+        <h6>Vaka</h6>
+        <div className="lab-alanlar">
+          <div className="fld">
+            <label>Vaka no</label>
+            <div className="deger buyuk">{metin(v.vakaNo) || '—'}</div>
+          </div>
+          <div className="fld">
+            <label>Test / panel</label>
+            <div className="deger">{metin(v.panel) || metin(v.tetkikAd) || '—'}</div>
+          </div>
+          {/* ONAM: KVKK md. 6 - onamsız rapor yok. Ekranda da en üstte. */}
+          <div className="fld">
+            <label>Onam</label>
+            <div className="deger">
+              {v.onamTarihi
+                ? <span className="rozet olumlu">
+                    alındı · {tarihSaat(v.onamTarihi)}
+                    {metin(v.onamSurum) ? ` · ${metin(v.onamSurum)}` : ''}
+                  </span>
+                : <span className="rozet hata">alınmadı</span>}
+            </div>
+          </div>
+          <div className="fld">
+            <label>Tesadüfi bulgu</label>
+            <div className="deger">
+              {Number(v.tesadufiBulgu ?? 0) === 1 ? 'bildirilsin' : 'bildirilmesin'}
+            </div>
+          </div>
+          <div className="fld">
+            <label>DNA (ng/µL · A260/280)</label>
+            <div className="deger">
+              {sayi(v.dnaKonsantrasyon, 1)} · {sayi(v.dnaSaflik, 2)}
+            </div>
+          </div>
+          <div className="fld">
+            <label>Run</label>
+            <div className="deger">{metin(v.run) || '—'}</div>
+          </div>
+          <div className="fld">
+            <label>Kapsama</label>
+            <div className="deger">
+              {v.kapsamaYuzde ? `%${sayi(v.kapsamaYuzde, 1)}` : '—'}
+            </div>
+          </div>
+          <div className="fld">
+            <label>Ortalama derinlik</label>
+            <div className="deger">{v.ortDerinlik ? `${sayi(v.ortDerinlik, 0)}×` : '—'}</div>
+          </div>
+        </div>
+        {metin(v.uzmanYorum) && <div className="ic sonuk">{metin(v.uzmanYorum)}</div>}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------- dış lab ----
+   Gönderim bir süreçtir: kurye, soğuk zincir ve satır durumları burada.  */
+function DisDetayi({ veri }: { veri: Kayit }) {
+  const g = (veri.gonderim ?? {}) as Kayit;
+  const satirlar = dizi(veri.satirlar);
+  const TASIMA: Record<number, string> = {
+    1: 'Oda sıcaklığı', 2: 'Soğuk (2-8 °C)', 3: 'Dondurulmuş (-20 °C)',
+    4: 'Kuru buz (-70 °C)',
+  };
+  const SDURUM: Record<number, string> = {
+    1: 'Gönderildi', 2: 'Sonuç geldi', 3: 'Dış lab reddetti', 4: 'Numune kayboldu',
+  };
+
+  return (
+    <div className="lab-ana-yan">
+      <div className="kagrup">
+        <h6>
+          {metin(g.gonderimNo)} · Gönderilen tetkikler
+          <span className="sp">{satirlar.length} tetkik</span>
+        </h6>
+        <div className="detay-kaydir">
+          <table className="detay-tablo">
+            <thead>
+              <tr>
+                <th>Hasta</th><th>Tetkik</th><th className="orta">Barkod</th>
+                <th className="sag">Sonuç</th><th className="orta">Sonuç zamanı</th>
+                <th className="orta">Durum</th>
+              </tr>
+            </thead>
+            <tbody>
+              {satirlar.map(s => (
+                <tr key={String(s.id)}
+                    className={Number(s.durum ?? 1) >= 3 ? 'panik' : ''}>
+                  <td>{metin(s.hasta)}</td>
+                  <td><b>{metin(s.ad)}</b><span className="not"> {metin(s.kod)}</span></td>
+                  <td className="orta not">{metin(s.barkod) || '—'}</td>
+                  <td className="sag">{metin(s.deger) || <span className="not">bekliyor</span>}</td>
+                  <td className="orta not">
+                    {s.sonucZamani ? tarihSaat(s.sonucZamani) : '—'}
+                  </td>
+                  <td className="orta">
+                    <span className={Number(s.durum ?? 1) >= 3 ? 'rozet hata'
+                                   : Number(s.durum) === 2 ? 'rozet olumlu' : 'rozet gri'}>
+                      {SDURUM[Number(s.durum ?? 1)] ?? ''}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {satirlar.length === 0 && (
+                <tr><td colSpan={6} className="not">Gönderim satırı yok.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        {satirlar.filter(s => metin(s.retNeden)).map(s => (
+          <div className="ic sonuk" key={`r${s.id}`}>
+            <b>{metin(s.kod)} reddedildi:</b> {metin(s.retNeden)}
+          </div>
+        ))}
+      </div>
+
+      <div className="kagrup">
+        <h6>Kurye / soğuk zincir</h6>
+        <div className="lab-alanlar">
+          <div className="fld" style={{ gridColumn: '1 / -1' }}>
+            <label>Dış laboratuvar</label>
+            <div className="deger buyuk">{metin(g.disLab) || '—'}</div>
+          </div>
+          <div className="fld">
+            <label>Kurye</label>
+            <div className="deger">
+              {[metin(g.kuryeFirma), metin(g.kuryeAd)].filter(Boolean).join(' · ') || '—'}
+            </div>
+          </div>
+          <div className="fld">
+            <label>Telefon</label>
+            <div className="deger">{metin(g.kuryeTel) || '—'}</div>
+          </div>
+          {/* SOĞUK ZİNCİR: -20 °C isteyen numune oda sıcaklığında gittiyse
+              sonuç geçersizdir; kayıt sonradan sorulur. */}
+          <div className="fld">
+            <label>Taşıma koşulu</label>
+            <div className="deger">{TASIMA[Number(g.tasimaKosulu ?? 2)] ?? '—'}</div>
+          </div>
+          <div className="fld">
+            <label>Sıcaklık / kap</label>
+            <div className="deger">
+              {g.sicaklik ? `${sayi(g.sicaklik, 1)} °C` : '—'} · {String(g.kapSayisi ?? 1)} kap
+            </div>
+          </div>
+          <div className="fld">
+            <label>Gönderim</label>
+            <div className="deger">
+              {g.gonderimZamani ? tarihSaat(g.gonderimZamani) : '—'}
+            </div>
+          </div>
+          <div className="fld">
+            <label>Teslim</label>
+            <div className="deger">
+              {g.teslimZamani ? tarihSaat(g.teslimZamani) : '—'}
+              {metin(g.teslimAlan) ? ` · ${metin(g.teslimAlan)}` : ''}
+            </div>
+          </div>
+          <div className="fld">
+            <label>Dış kabul no</label>
+            <div className="deger">{metin(g.disKabulNo) || '—'}</div>
+          </div>
+          <div className="fld">
+            <label>Alış faturası</label>
+            <div className="deger">{metin(g.faturaNo) || 'eşleştirilmedi'}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

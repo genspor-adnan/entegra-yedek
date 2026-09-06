@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { tarihSaat } from '../bilesenler/bicim';
+import { BOLUM, ZIGOSITE } from '../bilesenler/labKodlari';
 
 /**
  * LABORATUVAR SONUÇ RAPORU (mockuplar: Ekranlar/Lab/lab_sonuc_formu_*.html).
@@ -40,18 +41,9 @@ const yas = (dogum: unknown): string => {
 
 const CINSIYET: Record<number, string> = { 1: 'Erkek', 2: 'Kadın' };
 
-const BOLUM: Record<number, string> = {
-  1: 'Biyokimya', 2: 'Hematoloji', 3: 'Hormon', 4: 'Mikrobiyoloji',
-  5: 'Seroloji', 6: 'Koagülasyon', 7: 'İdrar', 9: 'Diğer',
-};
-
 /** Bayrak → rapor gösterimi. Boş bayrak "değerlendirilmedi" demektir. */
 const BAYRAK: Record<string, string> = {
   LL: '↓↓ Panik düşük', HH: '↑↑ Panik yüksek', L: '↓ Düşük', H: '↑ Yüksek', N: 'Normal',
-};
-
-const ZIGOSITE: Record<number, string> = {
-  1: 'Heterozigot', 2: 'Homozigot', 3: 'Hemizigot', 4: 'Mozaik',
 };
 
 const KALITIM: Record<number, string> = {

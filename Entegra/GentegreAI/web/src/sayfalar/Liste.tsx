@@ -59,6 +59,7 @@ import { mikroAksiyonu } from './liste/mikroAksiyonlari';
 import { genetikAksiyonu } from './liste/genetikAksiyonlari';
 import { kkAksiyonu } from './liste/kkAksiyonlari';
 import { disLabAksiyonu } from './liste/disLabAksiyonlari';
+import { LabDetayPaneli, labDetayVarMi } from '../bilesenler/LabDetayPaneli';
 import { DokumanKlasorPaneli, type KlasorSecimi } from '../bilesenler/DokumanKlasorPaneli';
 import { fiyatListesiAksiyonu } from './liste/fiyatListesiAksiyonlari';
 import { ebelgeAksiyonu } from './liste/ebelgeAksiyonlari';
@@ -1749,6 +1750,12 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       //   randevu takvimi listeye bassin"): takvim artik listenin ALTINDA
       //   degil, Liste/Grup/Analiz yanindaki "Takvim" dugmesiyle onun YERINE
       //   cizilir - ust serit (arama, cipler, bolum/hekim suzgeci) ortak kalir.
+      // LABORATUVAR (446): mockup'larda tablo ile secili kaydin ayrintisi
+      //   AYNI ekranda durur (tetkik/tup plani, antibiyogram, varyantlar).
+      //   Teknisyen listeyi kaybetmeden ayrintiya bakabilmeli.
+      altPanel={labDetayVarMi(tanim.kaynak)
+        ? <LabDetayPaneli kaynak={tanim.kaynak} satir={seciliSatir} />
+        : undefined}
       ekGorunum={tanim.kaynak === 'randevu' ? {
         ad: 'Takvim', ik: '📅',
         icerik: (

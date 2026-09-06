@@ -72,8 +72,8 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
   const bosMu = veri.istemler.length === 0 && veri.radyoloji.length === 0;
   if (bosMu) {
     return (
-      <div className="kart-bolum">
-        <p className="not">
+      <div className="kagrup">
+        <p className="not ic">
           Bu muayene ve başvurusu için açılmış istem yok. İstem açmak için
           listedeki “🧪 İstem Aç” düğmesini kullanın.
         </p>
@@ -103,8 +103,8 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
         const gorulen = i.hekimGordu ? tarihSaat(i.hekimGordu) : '';
 
         return (
-          <div className="kart-bolum" key={istemId}>
-            <div className="bolum-baslik">
+          <div className="kagrup" key={istemId}>
+            <h6>
               <b>{String(i.istemNo ?? '')}</b>
               <span className="rozet">{ISTEM_DURUM[Number(i.durum ?? 1)] ?? ''}</span>
               {Number(i.oncelik ?? 1) === 3 && <span className="rozet uyari">Acil</span>}
@@ -123,10 +123,10 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
                 : <button className="d bir" onClick={() => void gordu(bagId)}>
                     👁 Gördüm
                   </button>)}
-            </div>
+            </h6>
 
             {satirlar.length > 0 && (
-              <table className="gen-tablo dar">
+              <table className="detay-tablo">
                 <thead>
                   <tr>
                     <th>Tetkik</th><th>Sonuç</th><th>Birim</th><th>Referans</th>
@@ -179,7 +179,7 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
             )}
 
             {kultur.map(k => (
-              <div className="alt-kutu" key={`k${k.id}`}>
+              <div className="ic" key={`k${k.id}`}>
                 <b>🦠 {String(k.tetkik ?? '')}:</b> {String(k.ozet ?? '')}
                 {Number(k.abSayisi ?? 0) > 0 && (
                   <span className="not"> · {String(k.abSayisi)} antibiyotik raporlandı</span>
@@ -197,7 +197,7 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
             ))}
 
             {vaka.map(v => (
-              <div className="alt-kutu" key={`g${v.id}`}>
+              <div className="ic" key={`g${v.id}`}>
                 <b>🧬 {String(v.test ?? '')} ({String(v.vakaNo ?? '')}):</b>{' '}
                 {String(v.ozet ?? '')}
                 {Number(v.varyantSayisi ?? 0) > 0 && (
@@ -213,9 +213,9 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
       })}
 
       {veri.radyoloji.length > 0 && (
-        <div className="kart-bolum">
-          <div className="bolum-baslik"><b>Görüntüleme</b></div>
-          <table className="gen-tablo dar">
+        <div className="kagrup">
+          <h6>Görüntüleme</h6>
+          <table className="detay-tablo">
             <thead>
               <tr><th>Tetkik</th><th>Çekim</th><th>Rapor</th><th>Sonuç</th><th /></tr>
             </thead>
