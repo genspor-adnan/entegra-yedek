@@ -161,7 +161,7 @@ export function RadyolojiRaporCikti() {
         {!veri.bolumler.some(b => String(b.baslik ?? '')
                                     .toLocaleLowerCase('tr').includes('klinik'))
          && String(r.klinikBilgi ?? '').trim() !== '' && (
-          <div className="bolum">
+          <div className="rapor-bolum">
             <h3>Klinik Bilgi</h3>
             <p>
               {String(r.klinikBilgi)}
@@ -172,7 +172,7 @@ export function RadyolojiRaporCikti() {
 
         {/* --- RAPOR BOLUMLERI (yalniz basilacaklar) --- */}
         {veri.bolumler.map((b, i) => (
-          <div className="bolum" key={i}>
+          <div className="rapor-bolum" key={i}>
             <h3>{String(b.baslik ?? '')}</h3>
             <p>{String(b.metin ?? '')}</p>
           </div>
@@ -180,7 +180,7 @@ export function RadyolojiRaporCikti() {
 
         {/* --- SKOR / OLCUM ALANLARI --- */}
         {veri.alanlar.length > 0 && (
-          <div className="bolum">
+          <div className="rapor-bolum">
             <h3>Ölçüm / Skorlama</h3>
             <table className="cikti-alan">
               <tbody>

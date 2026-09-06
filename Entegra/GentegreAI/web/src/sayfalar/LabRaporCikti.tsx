@@ -201,7 +201,7 @@ export function LabRaporCikti() {
         </div>
 
         {String(i.klinikBilgi ?? '').trim() !== '' && (
-          <div className="bolum">
+          <div className="rapor-bolum">
             <h3>Klinik Bilgi</h3>
             <p>
               {String(i.klinikBilgi)}
@@ -212,7 +212,7 @@ export function LabRaporCikti() {
 
         {/* ================================================ SAYISAL SONUÇLAR */}
         {sayisal.length > 0 && (
-          <div className="bolum">
+          <div className="rapor-bolum">
             <h3>Sonuçlar</h3>
             <table className="cikti-tablo">
               <thead>
@@ -320,7 +320,7 @@ export function LabRaporCikti() {
           const kid = Number(kul.id);
           const izolat = veri.izolatlar.filter(u => Number(u.kulturId) === kid);
           return (
-            <div className="bolum" key={`k${kid}`}>
+            <div className="rapor-bolum" key={`k${kid}`}>
               <h3>{String(kul.ad ?? 'Kültür')} — Sonuç</h3>
               <table className="cikti-tablo">
                 <tbody>
@@ -435,7 +435,7 @@ export function LabRaporCikti() {
           const vid = Number(v.id);
           const vars = veri.varyantlar.filter(x => Number(x.vakaId) === vid);
           return (
-            <div className="bolum" key={`g${vid}`}>
+            <div className="rapor-bolum" key={`g${vid}`}>
               <h3>Genetik İnceleme — {String(v.panel ?? v.ad ?? '')}</h3>
 
               <table className="cikti-tablo">

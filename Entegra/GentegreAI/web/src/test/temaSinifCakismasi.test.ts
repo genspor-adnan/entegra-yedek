@@ -73,3 +73,63 @@ describe('tema sınıf çakışması', () => {
     expect(global.has('tup-etiket')).toBe(true);
   });
 });
+
+/**
+ * İKİ ANLAMLI AD KİLİDİ.
+ *
+ * Bir sınıf adı hem GLOBAL (görünüm veren, kapsamsız) hem de başka bir
+ * bileşenin kabı içinde tanımlıysa, o ad iki anlam taşır. Çoğu meşru (ortak
+ * `.detay-tablo`nun kart içinde daraltılması gibi); ama `.bolum` böyle
+ * başlayıp rapor metnini sol menü başlığına çevirmişti - global kural
+ * 10 px BÜYÜK HARF veriyor, kapsamlı kural yalnız `margin` ekliyordu.
+ *
+ * Liste KİLİTLİ: yeni bir ad iki anlamlı hâle gelirse test kırılır ve karar
+ * bilinçli verilir; sessizce sızmaz.
+ */
+const IKI_ANLAMLI = [
+  'alan-izgara', 'bos', 'cikti-arac', 'd', 'detay-tablo', 'dip-toplam',
+  'kagov', 'kagrup-resim', 'kawin', 'lookup-kutu', 'lookup-liste', 'mi',
+  'minibtn', 'resim-kutusu', 'satir-ici', 'tuslar', 'yan',
+];
+
+const GORUNUM = /\b(width|height|border|background|position|display|padding|flex)\b/;
+
+/** `.KAP .ad` biçiminde tanımlı (kabı kendi adıyla başlamayan) sınıf adları. */
+function kapIcinde(css: string): Set<string> {
+  const küme = new Set<string>();
+  for (const blok of css.matchAll(/([^{}]+)\{[^{}]*\}/g)) {
+    for (const parca of blok[1].split(',')) {
+      const p = parca.trim();
+      if (/^\.[a-zA-Z0-9_-]+$/.test(p)) continue;
+      const adlar = [...p.matchAll(/\.([a-zA-Z0-9_-]+)/g)].map(m => m[1]);
+      const son = adlar[adlar.length - 1];
+      if (adlar.length >= 2 && !p.startsWith('.' + son)) küme.add(son);
+    }
+  }
+  return küme;
+}
+
+/** Kapsamsız (`.ad { … }`) ve GÖRÜNÜM veren kurallar. */
+function globalGorunum(css: string): Set<string> {
+  const küme = new Set<string>();
+  for (const blok of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    if (!/^\s*\.[a-zA-Z0-9_-]+\s*$/.test(blok[1])) continue;
+    if (GORUNUM.test(blok[2])) küme.add(blok[1].trim().slice(1));
+  }
+  return küme;
+}
+
+describe('iki anlamlı sınıf adları', () => {
+  it('kilitli listenin dışında yeni iki anlamlı ad yok', () => {
+    const kap = kapIcinde(temaCss);
+    const bulunan = [...globalGorunum(temaCss)]
+      .filter(a => kap.has(a) && globalSiniflar(temaCss).has(a)).sort();
+    expect(bulunan).toEqual([...IKI_ANLAMLI].sort());
+  });
+
+  it('rapor bölümü artık sol menü başlığının adını taşımıyor', () => {
+    // `.cikti-sayfa .bolum` metni 10 px BÜYÜK HARF yapıyordu.
+    expect(temaCss).not.toMatch(/\.cikti-sayfa\s+\.bolum\b/);
+    expect(temaCss).toMatch(/\.cikti-sayfa\s+\.rapor-bolum\b/);
+  });
+});

@@ -7413,3 +7413,29 @@ sınıf adını sahiplenemez; iç sınıflar global tanımlı olamaz. Test yanl�
 sebeple yeşile dönmesin diye global adların (`ust`, `etiket-sayfa`) hâlâ
 durduğu da doğrulanıyor. `tsconfig.app.json`'a `node` tipleri eklendi (test
 kaynak dosyayı okuyor). Web **449** test.
+
+### Ek: aynı çakışmanın diğer ekranlarda taranması (446)
+
+Tüp etiketi düzeltilince aynı desen sistematik arandı: (1) `tema.css`'teki
+**global, görünüm veren** sınıflar ile bileşenlerdeki `className`
+kullanımları kesiştirildi, (2) aynı adın hem global hem bir kap içinde
+tanımlı olduğu yerler çıkarıldı, (3) 32 ekran headless Chrome'da gezilip
+**görünür iz** arandı (uzun metinde `text-transform: uppercase`, tek satır
+metne 60 px+ yükseklik, açık zeminde açık yazı).
+
+**İkinci gerçek çakışma bulundu:** `.bolum`. Global tanımı **sol menü grup
+başlığıdır** (10 px, BÜYÜK HARF, gri); rapor sayfaları da bölümlerine aynı
+adı vermişti. Kapsamlı kural yalnız `margin` eklediği için font ve
+`text-transform` kalıtımla geçiyordu: hasta sonuç raporunda ve radyoloji
+raporunda **bölüm metinleri 10 px büyük harf** basılıyordu ("DİS
+LABORATUVARA SEVK EDİLECEK TETKİKLER"). Sınıf `rapor-bolum` yapıldı
+(`LabRaporCikti`, `RadyolojiRaporCikti`); metin 12 px, normal harf.
+
+Başka görünür sızıntı çıkmadı. `.ara` (üst şeritteki komut paleti kutusu)
+sekiz bileşende yeniden kullanılıyor ama her kullanımda zemin/renk/ölçü
+**inline** eziliyor - bilinçli, ancak kırılgan bir desen.
+
+**Testler**: `temaSinifCakismasi` 4 test - etiket ekranı global ad
+sahiplenemez, iç sınıfları global tanımlı olamaz, **iki anlamlı ad listesi
+kilitli** (yeni bir ad iki anlama gelirse test kırılır), rapor bölümü artık
+menü başlığının adını taşımıyor. Web **451** test.

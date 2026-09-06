@@ -1424,12 +1424,16 @@ input.skt-gecmis {
 .cikti-sayfa .kimlik div { display: flex; gap: 6px }
 .cikti-sayfa .kimlik .et { color: #6b7a8d; min-width: 96px }
 .cikti-sayfa .kimlik .dg { font-weight: 700 }
-.cikti-sayfa .bolum { margin-top: 14px }
-.cikti-sayfa .bolum h3 {
+/* RAPOR BOLUMU `rapor-bolum` (446): kisa `.bolum` adi SOL MENUNUN grup
+   basligidir (10 px, BUYUK HARF, gri) ve kalitim yoluyla rapor metnini de
+   oyle yaziyordu - "Dış laboratuvara sevk edilecek tetkikler" satiri
+   raporda minik buyuk harfle cikiyordu. */
+.cikti-sayfa .rapor-bolum { margin-top: 14px }
+.cikti-sayfa .rapor-bolum h3 {
   margin: 0 0 3px; font-size: 11.5px; color: #1c4374; text-transform: uppercase;
   letter-spacing: .3px; border-bottom: 1px solid #e4eaf1; padding-bottom: 2px;
 }
-.cikti-sayfa .bolum p { margin: 0; line-height: 1.65; text-align: justify; white-space: pre-wrap }
+.cikti-sayfa .rapor-bolum p { margin: 0; line-height: 1.65; text-align: justify; white-space: pre-wrap }
 /* Ek rapor orijinalden ayirt edilsin - metin degismedi, EKLENDI. */
 .cikti-sayfa .ek-rapor { border-left: 3px solid #4d8fd6; padding-left: 10px }
 .cikti-alan { border-collapse: collapse; font-size: 11.5px; margin-top: 4px }
