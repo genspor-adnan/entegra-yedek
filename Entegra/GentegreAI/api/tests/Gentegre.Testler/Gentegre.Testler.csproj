@@ -21,6 +21,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Gentegre.Cekirdek\Gentegre.Cekirdek.csproj" />
     <ProjectReference Include="..\..\src\Gentegre.Veri\Gentegre.Veri.csproj" />
+    <!-- AI REHBER (447) testleri SERVISI cagirir: "yetkisiz kullaniciya adim
+         verilmez" kurali ancak servis uzerinden dogrulanabilir. -->
+    <ProjectReference Include="..\..\src\Gentegre.Api\Gentegre.Api.csproj" />
   </ItemGroup>
 
 </Project>

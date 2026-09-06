@@ -7458,3 +7458,55 @@ açık mavi yazı kalırdı; kutunun ölçüsü de sekiz yerde ayrı yazılıyd�
 
 **Test**: `temaSinifCakismasi`'a beşinci kontrol - `.ara` global sınıfı
 yeniden doğmamalı, `.ust-ara` ve `.ara-kutu` durmalı. Web **452** test.
+
+---
+
+## 07.09.2026 — AI Rehber, Faz 1: yol gösterici (`db/447`)
+
+Kullanıcı "AI sistemde operatör değil rehber olacak" diye çerçeveledi:
+kayıt değiştirmeyecek, doğru ekranı ve doğru sırayı gösterecek. Faz 1 bu
+sınırla kuruldu.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K180 | Rehber **veri yazmaz**; yalnız katalog okur ve metin üretir | Faz 1'in tek cümlesi bu. Yazma yolu hiç açılmazsa "yanlışlıkla kaydetti" diye bir olay da olmaz. Testler bunu iş tablolarının satır sayısıyla doğruluyor |
+| K181 | **Ekran kataloğu sunucuya** taşındı (`ai_rehber_ekran`, 144 ekran) | Menü ve rota bugüne dek yalnız istemcideydi (`listeTanimlari.ts`). Öneri yetkiye göre süzülecekse sunucunun bilmesi gerekir; istemciden gelen ekran listesine güvenmek, "bana şu ekranı öner" diyen isteğe güvenmektir |
+| K182 | **Yetkisi olmayan işin adımları verilmez** | "Şuraya git, şu düğmeye bas" demek, göremediği işlemi tarif etmek - yetkiyi delmenin yolunu anlatmaktır. Cevap "şu yetki gerekiyor" olur |
+| K183 | Bağlam **serbest metin DB erişimi değil**, güvenli metadata | Model bağlandığında da göreceği bağlam ekran/konu/aksiyon kataloğu ve çözülmüş yetkilerdir; hasta ve cari verisi rehber katmanına hiç girmez |
+| K184 | Emin değilse **kesin konuşmaz**: güven skoru döner, gerekirse tek soru sorar | Yanlış ekrana kendinden emin göndermek, "bilmiyorum" demekten kötüdür. Panel güveni açıkça yazar |
+| K185 | HBYS'e özel konu ERP'de gizlenir, **ERP çekirdeği her kurulumda görünür** | Fatura/stok/kasa HBYS kurulumunda da kullanılır; ilk denemede ERP konuları HBYS'de gizlenip "fatura nasıl keserim" cevapsız kalmıştı |
+| K186 | Ekran kodu **rota da olabilir** | Tek `belge` kaynağını on dört ekran paylaşıyor; konu `/belge` diyerek Satış Faturaları'nı seçer, `belge` derse ilk görünen ekran (Başvurular) gelirdi |
+| K187 | **Kontör altyapısı bugünden** (`ai_kontor`, `ai_kontor_hareket`) ama katalog cevabı ücretsiz | Yerel hesabın dış maliyeti yok. Model açıldığında ücretlendirme geriye dönük eklenmemeli - kullanım ile muhasebe aynı anda başlamalı |
+| K188 | Her soru `ai_rehber_log`'a | Cevapsız soru = eksik rehber konusu. Günlük olmadan "asistan işe yaramıyor" ölçülemez |
+
+### Yapılanlar
+
+- **`db/447`**: `ai_rehber_ekran` (144 ekran tohumu), `ai_rehber_konu`
+  (15 konu: hasta kaydı, başvuru, randevu, lab istem/numune/sonuç, dış lab,
+  satış faturası, e-Fatura, stok kartı/girişi, tahsilat, cari kartı, yetki,
+  modül ayarı), `ai_kontor` + `ai_kontor_hareket`, `ai_rehber_log`, yetki
+  `ai.rehber`.
+- **`RehberServisi`** + `POST /api/ai/rehber` (§9.13): kelime ayıklama
+  (soru kalıpları atılır), konu skorlaması (kelime sınırlı eşleşme +
+  trigram benzerliği), yetki/ürün modu/modül süzgeci, adım + ekran + aksiyon
+  önerisi, güven skoru, eksik bilgi sorusu, günlük.
+- **`AiRehberPaneli`**: sağ altta, her ekranda; aktif sayfayı bağlam olarak
+  gönderir, adımları numaralı çizer, yetkili ekranlara "Ekranı aç" düğmesi
+  koyar, uyarıları ve güveni gösterir.
+- **Testler**: `RehberTestleri` (7) - kelime ayıklama, konu adımları,
+  yetkisizde adım verilmemesi, yetkisiz ekranın önerilmemesi, anlamsız
+  soruda cevap uydurulmaması, **rehberin veri yazmadığı**, günlük kaydı;
+  `aiRehberPaneli` (4). API **130**, web **456** test.
+- Test projesi ilk kez `Gentegre.Api`'ye referans veriyor: "yetkisiz
+  kullanıcıya adım verilmez" kuralı ancak servis üzerinden doğrulanabilir.
+
+### Sıradaki fazlar (kullanıcı planı)
+
+2. **Bağlamsal yardım** — "bu ekranda ne yapabilirim", "bu alan ne işe yarar"
+   (aktif sayfa + kaynak metadata'sı zaten gönderiliyor).
+3. **Kontrollü öneri** — "bu caride VKN eksik", "bu faturada e-Fatura için şu
+   alan gerekli" (okur, yazmaz).
+4. **Onaylı işlem asistanı** — form hazırlar, kayıt ancak kullanıcı
+   onaylayınca oluşur (`ai_taslak` deseni 341'den beri hazır).

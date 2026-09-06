@@ -1034,6 +1034,61 @@ sayfası olarak çizmek, günde onlarca kez bakılan bir ekranı belgeye
 
 ---
 
+## 9.13 AI Rehber (447)
+
+**Asistan operatör değil REHBERDİR.** Faz 1'de tek iş yapar: "ne nerede,
+nasıl yapılır" sorusunu cevaplar. Kayıt açmaz, değiştirmez, silmez,
+onaylamaz; hiçbir iş tablosuna yazmaz.
+
+```http
+POST /api/ai/rehber   // { kullaniciMesaji, aktifMod?, aktifSayfa?, seciliKaynak? }
+```
+
+Yanıt:
+
+| Alan | Ne |
+|---|---|
+| `cevap` | Kısa giriş cümlesi (`**kalın**` işaretlemesi) |
+| `adimlar[]` | `{ no, metin, ekran?, rota? }` — `rota` **yalnız yetkili ekranda** dolar |
+| `onerilenEkranlar[]` | `{ kaynak, ad, rota, yol, menuGrup }`, yetki + ürün moduna süzülmüş |
+| `onerilenAksiyonlar[]` | O ekranın araç çubuğundaki, kullanıcının yetkili olduğu düğmeler |
+| `guvenSkoru` | 0–1; panelde açıkça yazılır |
+| `eksikBilgiSorusu` | Emin olunmadığında sorulacak tek soru |
+| `uyarilar[]` | Ön koşul, yetki ve kapalı modül notları |
+| `konuKod`, `kaynakTuru` | 1 katalog konusu · 2 ekran eşleşmesi · 0 eşleşme yok |
+| `kontorBakiye` | Kontör bakiyesi (katalog cevabı ücretsizdir) |
+
+**Bağlam serbest metin DB erişimi DEĞİL.** Model bağlansa da göreceği bağlam
+şudur: ekran kataloğu (`ai_rehber_ekran`, 144 ekran; `listeTanimlari.ts`'ten
+üretildi), konu kataloğu (`ai_rehber_konu`, adımlar + uyarılar), aksiyon
+kataloğu ve kullanıcının çözülmüş yetkileri. Hasta/cari verisi rehber
+katmanına hiç girmez.
+
+**Yetki sunucuda süzülür.** Konunun yetkisi yoksa **adım verilmez**: "şuraya
+git, şu düğmeye bas" demek, göremediği işlemi tarif etmektir - cevap "şu
+yetki gerekiyor" olur. Ekran önerisi de yetkiliye çizilir; adım metni kalır,
+düğmesi gitmez.
+
+**Ürün modu ve modül.** HBYS'e özel konu (`urun_modu = 2`) ERP kurulumunda
+hiç görünmez; ERP çekirdeği (fatura, stok, kasa) her kurulumda görünür.
+Konunun modülü `fn_kurum_modul_acik` ile kontrol edilir; kapalıysa cevaba
+"bu modül kapalı, ekran menüde çıkmayabilir" uyarısı eklenir.
+
+**Emin değilse kesin konuşmaz.** Eşleşme zayıfsa cevap "sanırım şunu
+soruyorsunuz" olur ve `eksikBilgiSorusu` döner; hiç eşleşme yoksa cevap
+uydurulmaz. Her soru `ai_rehber_log`'a yazılır - cevapsız soru, eksik rehber
+konusu demektir.
+
+**Kontör (`ai_kontor`).** Katalogdan üretilen cevap **ücretsizdir** (dış
+maliyet yok). Dil modeli bağlandığında çağrı başına `cagri_ucreti` düşülür ve
+`ai_kontor_hareket`e yazılır; bakiye bitince asistan kapanmaz, katalog
+rehberi çalışmaya devam eder.
+
+**Yetki**: `ai.rehber` (kaynak, tur 0) — rehber yeni kullanıcı için en
+gerekli araçtır, varsayılan olarak tüm rollere açılır; kurum isterse kapatır.
+
+---
+
 ---
 
 ## 10. Sürümleme

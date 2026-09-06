@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using Gentegre.Api.AraKatman;
+using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -42,6 +43,30 @@ public static class AiUclari
     public static void AiUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/ai").WithTags("Yapay Zeka").RequireAuthorization();
+
+        // ---------------------------------------------------------- rehber --
+        // POST /api/ai/rehber - "ne nerede, nasil yapilir" (447).
+        //
+        // FAZ 1: asistan REHBERDIR, operator degil. Bu uc veri yazmaz; katalog
+        //   okur ve metin uretir. Yetki sunucuda suzulur: kullanicinin
+        //   goremedigi ekran onerilmez, yetkisi olmayan isin adimlari
+        //   paylasilmaz.
+        grup.MapPost("/rehber", async (
+            RehberServisi.Istek istek, RehberServisi rehber, BaglamCozucu cozucu,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("ai.rehber", Islem.Gor);
+
+            var yanit = await rehber.CevaplaAsync(istek, baglam, iptal);
+            return Results.Ok(new
+            {
+                yanit.Cevap, yanit.Adimlar, yanit.OnerilenEkranlar,
+                yanit.OnerilenAksiyonlar, yanit.GuvenSkoru, yanit.EksikBilgiSorusu,
+                yanit.Uyarilar, yanit.KonuKod, yanit.KaynakTuru, yanit.KontorBakiye,
+                izlemeNo = baglam.IzlemeNo,
+            });
+        });
 
         // ------------------------------------------------------- sohbetler --
         grup.MapGet("/sohbetler", async (

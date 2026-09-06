@@ -9,6 +9,7 @@ import { cm, ceviriYukle, ceviriDinle } from '../dil/ceviri';
 import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { urunAdi } from '../api/sozlesme';
+import { AiRehberPaneli } from '../bilesenler/AiRehberPaneli';
 import { LISTELER } from './Liste';
 
 interface MenuOgesi {
@@ -704,6 +705,10 @@ export function Kabuk() {
           </div>
         </div>
       )}
+
+      {/* AI REHBER (447): sag altta, her ekranda. Yol gosterir; kayit
+          degistirmez. Yetkisi olmayana hic cizilmez. */}
+      {yetki('ai.rehber') && <AiRehberPaneli urunModu={kullanici?.urunModu} />}
     </div>
   );
 }

@@ -2542,3 +2542,75 @@ input.skt-gecmis {
 /* Grid kipinde başlık şeridi (seçim, ekle/sil, kolon menüsü) kutu başlığının
    yerine geçer; onun üst kenarlığı da gereksiz. */
 .kagrup.kutu-cercevesiz > .detay-arac { border-top: 0; padding-top: 0 }
+
+/* ============================================================== AI REHBER ==
+   Sag altta duran yol gosterici (447). Sinif adlari `rehber-` onekli:
+   `panel`, `bas`, `govde` gibi kisa adlar uygulamanin baska yerinde de var
+   ve o dersi bir kez odedik (bkz. tup etiketi / rapor bolumu). */
+.rehber-dugme {
+  position: fixed; right: 18px; bottom: 18px; z-index: 60;
+  display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px;
+  border: 1px solid var(--vurgu); border-radius: 18px; cursor: pointer;
+  background: linear-gradient(#4d8fd6, #2f6db3); color: #fff; font-weight: 700;
+  box-shadow: 0 3px 10px rgba(20, 40, 70, .25); font-size: 12px;
+}
+.rehber-dugme:hover { background: linear-gradient(#5c9bdd, #3577bd) }
+
+.rehber-panel {
+  position: fixed; right: 18px; bottom: 18px; z-index: 60;
+  width: 380px; max-width: calc(100vw - 24px);
+  max-height: min(72vh, 620px); display: flex; flex-direction: column;
+  background: var(--yuz); border: 1px solid var(--cizgi); border-radius: 6px;
+  box-shadow: var(--golge); overflow: hidden;
+}
+.rehber-bas {
+  display: flex; align-items: center; gap: 8px; padding: 7px 10px;
+  background: linear-gradient(var(--serit3), var(--serit4));
+  border-bottom: 1px solid var(--cizgi2); color: var(--yazi2);
+}
+.rehber-bas .d { margin-left: auto; height: 22px; padding: 0 8px }
+.rehber-not { font-size: 11px; color: var(--soluk) }
+.rehber-govde { padding: 10px; overflow: auto; flex: 1; font-size: 12px }
+.rehber-cevap { margin: 0 0 8px; line-height: 1.55 }
+
+/* ADIMLAR: numarali, her adimin sonunda (yetkiliyse) ekrana gotüren dugme. */
+.rehber-adimlar { margin: 0 0 8px; padding-left: 20px; display: flex;
+                  flex-direction: column; gap: 6px }
+.rehber-adimlar li { line-height: 1.5 }
+.rehber-git { height: 20px; padding: 0 8px; font-size: 11px; margin-left: 6px }
+
+.rehber-uyari {
+  background: var(--uyarizem); border: 1px solid var(--uyarikenar);
+  border-radius: var(--r); padding: 6px 8px; margin-bottom: 8px;
+  font-size: 11.5px; color: var(--uyari); line-height: 1.5;
+}
+.rehber-ekranlar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+                   margin-bottom: 8px }
+.rehber-ekranlar .rehber-not { width: 100% }
+.rehber-aksiyon { margin-bottom: 8px; line-height: 1.5 }
+.rehber-eksik {
+  background: var(--yuz2); border-left: 3px solid var(--vurgu);
+  padding: 6px 8px; border-radius: 2px; margin-bottom: 8px; line-height: 1.5;
+}
+.rehber-alt { display: flex; align-items: center; gap: 8px }
+
+.rehber-ornek { display: flex; flex-direction: column; gap: 6px }
+.rehber-ornek-dugme {
+  text-align: left; border: 1px solid var(--cizgi2); border-radius: var(--r);
+  background: var(--kartzem); color: var(--yazi); padding: 6px 8px;
+  font: inherit; cursor: pointer;
+}
+.rehber-ornek-dugme:hover { border-color: var(--dugkenar); background: var(--satirust) }
+
+.rehber-sorgu {
+  display: flex; gap: 6px; padding: 8px 10px; border-top: 1px solid var(--cizgi2);
+  background: var(--yuz2);
+}
+.rehber-sorgu input {
+  flex: 1; min-width: 0; height: 26px; padding: 0 8px; font-size: 12px;
+  border: 1px solid var(--cizgi); border-radius: var(--r);
+  background: var(--yuz); color: var(--yazi);
+}
+@media (max-width: 640px) {
+  .rehber-panel { right: 8px; left: 8px; width: auto; bottom: 8px }
+}

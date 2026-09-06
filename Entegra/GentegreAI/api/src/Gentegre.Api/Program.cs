@@ -89,6 +89,8 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.KulturServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.GenetikServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.KaliteKontrolServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.DisLabServisi>();
+// AI REHBER (447): katalog okur, veri yazmaz - kayit degistirmez.
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.RehberServisi>();
 kurucu.Services.AddHostedService<Gentegre.Api.Servisler.CihazDinleyici>();
 kurucu.Services.AddScoped<KasaDeposu>();
 kurucu.Services.AddScoped<GunlukDeposu>();

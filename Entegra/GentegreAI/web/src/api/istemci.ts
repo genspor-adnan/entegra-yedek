@@ -285,6 +285,14 @@ export const api = {
     gonder<{ id: number; barkodlar: string[]; mesaj: string }>(
       `/api/lab/istem/${istemId}/numune-plani`, {}),
 
+  /**
+   * AI REHBER (447): "ne nerede, nasil yapilir". Sunucu katalog + yetki ile
+   * cevaplar; panel yalniz cizer - istemcide is kurali yok.
+   */
+  aiRehber: (govde: { kullaniciMesaji: string; aktifMod?: number;
+                      aktifSayfa?: string; seciliKaynak?: string }) =>
+    gonder<Record<string, unknown>>('/api/ai/rehber', govde),
+
   /** Sonuc onay ekraninin ust serit sayaclari (446, mockup ".ozet"). */
   labOzet: () =>
     istek<{ sayaclar: Record<string, number>;
