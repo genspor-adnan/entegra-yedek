@@ -81,6 +81,16 @@ const TAHAKKUK_TURLERI  = new Set([13, 17]);
 const KONSINYE_TURLERI  = new Set([109, 119]);
 const STOK_FISI_TURLERI = new Set([3, 4]);
 
+/**
+ * URETIM BELGELERI (429): 121 sarf cikisi · 122 uretim girisi · 123 fire.
+ *
+ * GIRILEBILIR_TURLER'e EKLENMEZ: bu belgeler elle acilmaz, uretim emrinden
+ * uretilir (emirle miktarlari birbirini tutmali). Ama GORUNTULENEBILIRLER -
+ * tanimsiz birakilsa kart onlari fatura gibi cizer, olmayan cari ve KDV
+ * alanlariyla.
+ */
+const URETIM_TURLERI = new Set([121, 122, 123]);
+
 /** e-Belge'ye GIDEN turler; kalanlarda sekme/alan hic cizilmez. */
 const EBELGE_TURLERI = new Set([10, 11, 14, 15]);
 
@@ -94,11 +104,14 @@ const LISTE_YOLU: Record<number, string> = {
   13: '/borc-tahakkuk', 109: '/alis-konsinye',
   // STOK
   20: '/stok-transfer', 105: '/stok-talep', 3: '/giris-fis', 4: '/cikis-fis',
+  // URETIM (429): kendi liste ekrani yok - belge emrin kartindan acilir.
+  121: '/uretim-emri', 122: '/uretim-emri', 123: '/uretim-emri',
 };
 
 /** Baslik etiketlerinde kullanilan kisa ad ("<ad> No", "<ad> Tarihi"). */
 function turAdi(tur: number): string {
   if (tur === 18) return 'Teklif';
+  if (URETIM_TURLERI.has(tur)) return 'Fiş';
   if (STOK_FISI_TURLERI.has(tur)) return 'Fiş';
   if (tur === 105) return 'Talep';
   if (tur === 20) return 'Transfer';
@@ -120,6 +133,9 @@ function turAdi(tur: number): string {
  */
 export function belgeKisaAdi(tur: number, basvuruMu = false): string {
   if (basvuruMu) return 'Başvuru';
+  if (tur === 121) return 'Sarf Fişi';
+  if (tur === 122) return 'Üretim Girişi';
+  if (tur === 123) return 'Fire Fişi';
   if (tur === 18) return 'Teklif';
   if (tur === 20) return 'Transfer';
   if (tur === 105) return 'Talep';
@@ -140,7 +156,8 @@ export function belgeKisaAdi(tur: number, basvuruMu = false): string {
 export function belgeTuruBilgisi(tur: number): BelgeTuruBilgisi {
   const transfer = tur === 20;
   const talep    = tur === 105;
-  const stokFisi = STOK_FISI_TURLERI.has(tur);
+  // Uretim belgeleri stok fisi GIBI davranir: carisiz, tek depo, sade kalem.
+  const stokFisi = STOK_FISI_TURLERI.has(tur) || URETIM_TURLERI.has(tur);
   const depoBelgesi = transfer || talep;
   const irsaliye = IRSALIYE_TURLERI.has(tur);
   const tahakkuk = TAHAKKUK_TURLERI.has(tur);
@@ -179,12 +196,12 @@ export function belgeTuruBilgisi(tur: number): BelgeTuruBilgisi {
     // Mal DEPOYA GIRIYOR: izlemli stokta lot/seri bilgisi burada TOPLANIR
     //   (alis irsaliyesi/faturasi, konsinye giris, giris fisi). Cikista lot
     //   girilmez SECILIR - mevcut stoktan, ayri ekran.
-    girisIzlemi: (alis && !siparis && !tahakkuk) || tur === 3,
+    girisIzlemi: (alis && !siparis && !tahakkuk) || tur === 3 || tur === 122,
     // Satis irsaliyesi/faturasi/fisi, konsinye cikis, cikis fisi ve TRANSFER:
     //   lot girilmez, stoktakilerden secilir. Transferde mal stoktan CIKMAZ,
     //   depo degistirir - lot kalani korunur (sunucu: kalaniTasi).
     cikisIzlemi: (!alis && !siparis && !tahakkuk && !talep
                   && (irsaliye || FATURA_TURLERI.has(tur) || tur === 16 || tur === 119))
-                 || tur === 4 || transfer,
+                 || tur === 4 || tur === 121 || tur === 123 || transfer,
   };
 }

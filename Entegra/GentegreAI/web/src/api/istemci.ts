@@ -248,6 +248,77 @@ export const api = {
       `/api/dokuman-yonetim/klasor/${klasorId}/yukle`, { method: 'POST', body: govde });
   },
 
+  // ---------------------------------------------------------------- URETIM
+  /** Agacin birim maliyetini hesaplar ve TARIHLI olarak karta yazar (429). */
+  uretimAgacMaliyet: (agacId: number, gugYuzde = 0) =>
+    gonder<{ malzeme: number; iscilik: number; gug: number; toplam: number }>(
+      `/api/uretim/agac/${agacId}/maliyet`, { gugYuzde }),
+
+  /** Agaci kopyalar, surumu artirir; ESKI SURUM PASIFLESIR ama silinmez. */
+  uretimYeniSurum: (agacId: number) =>
+    gonder<{ id: number; kod: string; surum: number; mesaj: string }>(
+      `/api/uretim/agac/${agacId}/yeni-surum`, {}),
+
+  /** Ters agac: bilesen hangi mamullerde geciyor (fiyat degisim etkisi). */
+  uretimNeredeKullaniliyor: (stokId: number) =>
+    istek<{ kayitlar: { id: number; kod: string; ad: string; surum: number;
+                        miktar: number; mamul: string }[] }>(
+      `/api/uretim/agac/nerede-kullaniliyor/${stokId}`),
+
+  /** Emir acar ve agaci EMRE KOPYALAR (agac sonra degisse emir etkilenmez). */
+  uretimEmriAc: (govde: { stokId: number; agacId?: number; adet: number;
+                          tur?: number; planBas?: string; termin?: string;
+                          sarfDepoId?: number; mamulDepoId?: number;
+                          kaynakBelgeId?: number; kaynakSatirId?: number;
+                          ustEmirId?: number; aciklama?: string }) =>
+    gonder<{ id: number; no: string; bilesen: number; operasyon: number; mesaj: string }>(
+      '/api/uretim/emri', govde),
+
+  uretimAgactanYenile: (id: number) =>
+    gonder<{ mesaj: string }>(`/api/uretim/emri/${id}/agactan-yenile`, {}),
+
+  uretimRezerve: (id: number, ac: boolean) =>
+    gonder<{ satir: number; hazirlik: number; mesaj: string }>(
+      `/api/uretim/emri/${id}/rezerve?ac=${ac}`, {}),
+
+  uretimOnayla: (id: number) =>
+    gonder<{ mesaj: string }>(`/api/uretim/emri/${id}/onayla`, {}),
+
+  uretimBaslat: (id: number) =>
+    gonder<{ sarfBelgeId: number | null; mesaj: string }>(
+      `/api/uretim/emri/${id}/baslat`, {}),
+
+  uretimSarf: (id: number, satirlar?: { satirId: number; miktar: number }[]) =>
+    gonder<{ belgeId: number; mesaj: string }>(`/api/uretim/emri/${id}/sarf`,
+      satirlar ? { satirlar } : {}),
+
+  uretimMamulGiris: (id: number, adet: number, birimFiyat?: number) =>
+    gonder<{ belgeId: number; uretilen: number; adet: number; durum: number;
+             mesaj: string }>(
+      `/api/uretim/emri/${id}/mamul-giris`, { adet, birimFiyat }),
+
+  uretimFire: (id: number, stokId: number, adet: number, neden?: string) =>
+    gonder<{ belgeId: number; mesaj: string }>(
+      `/api/uretim/emri/${id}/fire`, { stokId, adet, neden }),
+
+  uretimMaliyetKapat: (id: number, gugYuzde = 0) =>
+    gonder<{ malzeme: number; iscilik: number; toplam: number; birim: number;
+             planBirim: number; farkYuzde: number; mesaj: string }>(
+      `/api/uretim/emri/${id}/maliyet-kapat`, { gugYuzde }),
+
+  uretimEmriKapat: (id: number) =>
+    gonder<{ mesaj: string }>(`/api/uretim/emri/${id}/kapat`, {}),
+
+  uretimEmriIptal: (id: number, neden: string) =>
+    gonder<{ mesaj: string }>(`/api/uretim/emri/${id}/iptal`, { neden }),
+
+  uretimEksikMalzeme: (id: number) =>
+    istek<{ hazirlik: number;
+            satirlar: { id: number; kod: string; ad: string; gerekli: number;
+                        rezerve: number; sarfEdilen: number; mevcut: number;
+                        eksik: number }[] }>(
+      `/api/uretim/emri/${id}/eksik-malzeme`),
+
   /** ITS karekod cozumleme (427): GS1 ayristirma SUNUCUDA - her ekranda ayri
       cozumleyici, ayirici gondermeyen okuyucuda birinde calisip otekinde
       bozulurdu. */

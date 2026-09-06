@@ -213,6 +213,7 @@ uygulama.FiyatListesiUclariniEkle();
 uygulama.AksiyonUclariniEkle();
 uygulama.KodListeUclariniEkle();
 uygulama.UtsUclariniEkle();
+uygulama.UretimUclariniEkle();
 
 // YETKI SENKRONU (kullanici: "menulerdeki ekle/sil/degisimlerde yetki matrisini
 //   update et"): katalogdaki ekran/aksiyon yetkileri ile `yetki` tablosu her

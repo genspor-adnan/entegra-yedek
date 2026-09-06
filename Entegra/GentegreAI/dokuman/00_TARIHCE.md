@@ -6621,3 +6621,72 @@ Yol üstünde bulunan tuzak: `VeriKaynagi.TekDegerAsync<T>` Nullable'ı
 desteklemiyordu (`int?` → *Invalid cast from Int32*), oysa bağlantı alan
 uzantı sürümünde koruma zaten vardı. Aynı adlı iki metottan birinin
 desteklemesi kendi başına bir tuzaktı; ikisi de eşitlendi.
+
+
+---
+
+## 06.09.2026 — Üretim v1: ürün ağacı ve üretim emri (`db/429`)
+
+Faz 1'in İTS'den sonraki adımı. Tasarım notu `Ekranlar/Uretim/uretim_sureci.html`,
+ekranlar `urun_agaci_listesi/karti` ve `uretim_emri_listesi/karti` mockuplarıdır.
+
+### Kapsam
+
+Ürün ağacı (BOM): tek seviye + yarı mamul (alt ağaç), **sürümlü**. Üretim emri:
+aç · malzeme kontrolü/rezerv · tek seferde sarf · kısmi mamul girişi · basit
+maliyet (malzeme + işçilik). Kapsam dışı ama şeması hazır: MRP planlama, iş
+merkezi terminali, geri-yıkama sarf, kalite ölçümü, fason.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| — | **Ağaç emre KOPYALANIR, referans verilmez** | Emir açıldığı andaki bileşen ve operasyon listesi emirde yaşar; ağaç sürümü sonra değişse açık emir etkilenmez. Delphi'de `KAYNAKRECETEID/HEDEFRECETEID` ile yarım uygulanmıştı. "Ağaçtan Yenile" yalnız Taslak/Onaylı emirde çalışır |
+| — | **Durum akışı sabit** (0 iptal · 1 taslak · 2 onaylı · 3 planlandı · 4 üretimde · 5 kısmi · 6 tamamlandı · 7 kapatıldı) | Delphi `URETIMEMRI.DURUM` serbest tanımlı bir listeydi; adı değişebilir, **sırası** değişemez — maliyet kapanışı ve stok hareketleri bu sıraya bağlı |
+| — | Gecikme **saklanmaz, hesaplanır** (`termin < bugün and durum < 6`) | Kolon olsaydı her gece bir işin güncellemesi gerekirdi; iş çalışmadığı gün liste yalan söylerdi |
+| — | Sarf / mamul girişi / fire, **normal belge hattından** geçer (tür 121/122/123) | Stok kontrolü, izleme, ağırlıklı ortalama ve fiş üretimi radyoloji sarfıyla aynı yolu izler; üretime özel ikinci bir stok yolu bakımı imkânsız hale getirirdi |
+| — | Üretim kendi **yetkisiyle** gelir (`uretim`, `uretim.onayla`, `uretim.maliyet`) | Stok yetkisine bağlamak, depoyu gören herkese reçeteyi ve maliyeti açardı; reçete rekabet bilgisidir |
+| — | İşçilik maliyeti **yalnız zaman kayıtlarından** doğar (tetik: süre × ücret) | Elle girilen bir "işçilik tutarı" kolonu olsaydı maliyet, kimin ne kadar çalıştığından koparadı |
+| — | Üretimde başlamış emir **iptal edilemez** (v1) | Sarf ve girişlerin ters kayıtla kapatılması gerekir; onu sessizce yapmak stok bakiyesini bozar — Faz 2 |
+
+### Tuzaklar
+
+**Kod uzayı ortak.** `kasa_islem_turu` tek tablodur: belge grubunda boş görünen
+21/22/23 aslında **kasa tahsilat** türleridir. İlk seçim sessizce hiçbir satır
+eklemedi (`insert … where not exists`); türler konsinyenin yanına, 121/122/123'e
+alındı.
+
+**Üretim belgesi fişlenmeye çalışıyordu.** `fn_belge_fis_turu_uygun` bilmediği
+her türü fişlenebilir sayıyor; üretim belgeleri carisiz olduğu için
+"Cari için muhasebe hesabı çözülemedi" hatası **sarfı da geri alıyordu** (aynı
+transaction). Üretimin muhasebe karşılığı cari değil, mamul/üretim maliyeti
+hesap çiftidir — o eşleme Muhasebe adımında gelene kadar üretim belgeleri
+transfer ve irsaliye gibi fiş üretmiyor.
+
+**Kaynak bağı sessizce düşüyordu.** Belge başlığındaki `kaynakTur/kaynakId`
+`BelgeDeposu.Yazma`'daki kolon sözlüğünde yoktu; belge kaydediliyor ama emre
+bağlanmıyordu, maliyet kapanışı da hiçbir sarf fişi bulamayıp malzemeyi **0**
+hesaplıyordu. Alanlar sözlüğe eklendi; belge ucunun kendi beyaz listesinde
+**yok**, yani yalnız sunucu içi çağrılar (üretim, dönüşüm) kullanabilir.
+
+**Sarf fişinin fiyatı maliyetin kendisidir.** Radyoloji sarfı satırı `birimFiyat
+= 0` ile yazıyor ("maliyet stok tarafında"); aynı deseni üretimde kullanmak
+malzeme maliyetini sıfırlıyordu. Sarf satırı artık **hareket anındaki ağırlıklı
+ortalamayla** (`fn_uretim_stok_maliyeti`) fiyatlanıyor.
+
+**Depo lookup'ı `public.depo` değil `v_depo_lookup`.** Beyaz listeye eklenmeyen
+kod tablosu kartı 500 ile düşürüyor — 358/375/409'daki aynı tuzak.
+
+### Uçtan uca doğrulama (yerel)
+
+1 mamul = 2 × HM1 (%10 fire, birim 10) + 3 × HM2 (birim 5), rota 30 dk hazırlık
++ 6 dk/adet, iş merkezi 150 ₺/saat.
+
+- Ağaç maliyeti: malzeme **37,00** (22 + 15) · işçilik **90,00** (0,6 sa × 150) · toplam **127,00**
+- 10 adetlik emir: gerekli 22 + 30 · plan malzeme **370** · plan işçilik **225** (1,5 sa) · plan birim **59,50**
+- Sarf + 6 ve 4 adetlik iki kısmi mamul girişi + 1,5 saat zaman kaydı
+- Maliyet kapanışı: malzeme **370** · işçilik **225** · toplam **595** · birim **59,50** · plan/gerçek farkı **%0**
+- Kapatma kalan rezervi bıraktı; kapalı emirde onay ve iptal reddedildi
+
+Test verisi (ağaç, emirler, üretim belgeleri, test stokları ve geçici kullanıcı)
+doğrulamadan sonra geliştirme veritabanından **silindi**.

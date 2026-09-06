@@ -226,6 +226,10 @@ public static partial class KartKatalogu
         Ekle(FiyatListesi());
         // Demirbas (216)
         Ekle(Demirbas());
+        // URETIM v1 (429): urun agaci (BOM), uretim emri, is merkezi.
+        Ekle(UrunAgaciKarti());
+        Ekle(UretimEmriKarti());
+        Ekle(IsMerkeziKarti());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
 

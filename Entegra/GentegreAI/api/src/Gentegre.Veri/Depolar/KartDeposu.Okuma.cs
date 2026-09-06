@@ -222,6 +222,10 @@ public sealed partial class KartDeposu
             "public.v_dokuman_turu_lookup", "public.v_dokuman_klasor_lookup",
             // Erisim sekmesi (425): rol adi.
             "public.v_rol_lookup",
+            // Uretim v1 (429): is merkezi, urun agaci (kod + surum), uretim emri
+            //   ve DEPO - uretim karti sarf/mamul/fire deposunu secer.
+            "public.v_is_merkezi_lookup", "public.v_urun_agaci_lookup",
+            "public.v_uretim_emri_lookup", "public.v_depo_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

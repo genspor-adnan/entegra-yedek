@@ -361,6 +361,69 @@ public static class AksiyonKatalogu
                 Yazdir(),
             ],
 
+            // URETIM v1 (429). Dugme SIRASI akisin sirasidir: emri ac,
+            //   malzemeyi rezerve et, onayla, baslat (sarf), mamul gir, maliyeti
+            //   kapat, emri kapat. Yapilamayacak adim GIZLENMEZ - sunucu sebebini
+            //   soyler; gizlenen dugme "neden yapamiyorum" sorusunu cevapsiz
+            //   birakirdi (ITS ile ayni gerekce).
+            ["urun-agaci-liste"] =
+            [
+                .. Crud("urun-agaci", "urun-agaci", "uretim"),
+                new("urun-agaci.maliyet", "🧮 Maliyet Hesapla", "urun-agaci",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "uretim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40),
+                new("urun-agaci.yeni-surum", "⧉ Yeni Sürüm", "urun-agaci",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "uretim", Islem: Islem.Ekle, KayitGerekir: true, Sira: 50),
+                new("urun-agaci.nerede", "🔎 Nerede Kullanılıyor", "urun-agaci",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "uretim", Islem: Islem.Gor, KayitGerekir: true, Sira: 60),
+                new("urun-agaci.emir-ac", "🏭 Üretim Emri Aç", "urun-agaci",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "uretim", Islem: Islem.Ekle, KayitGerekir: true, Sira: 70),
+            ],
+
+            ["uretim-emri-liste"] =
+            [
+                .. Crud("uretim-emri", "uretim-emri", "uretim"),
+                new("uretim.rezerve", "🔒 Malzeme Rezerve", "uretim-emri",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "uretim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40),
+                new("uretim.eksik", "⚠ Eksik Malzeme", "uretim-emri",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "uretim", Islem: Islem.Gor, KayitGerekir: true, Sira: 45),
+                new("uretim.onayla", "✔ Onayla", "uretim-emri",
+                    Hedef: "araccubugu,sagtus,palet",
+                    AksiyonYetkisi: "uretim.onayla", KayitGerekir: true, Sira: 50),
+                new("uretim.baslat", "▶ Üretime Başlat", "uretim-emri",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "uretim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 55),
+                new("uretim.sarf", "📤 Malzeme Sarf Fişi", "uretim-emri",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "uretim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 60),
+                new("uretim.mamul-giris", "📦 Mamul Girişi", "uretim-emri",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "uretim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 65),
+                new("uretim.fire", "🔥 Fire / Ret", "uretim-emri",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "uretim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 70),
+                new("uretim.agactan-yenile", "↻ Ağaçtan Yenile", "uretim-emri",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "uretim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 75),
+                new("uretim.maliyet-kapat", "🧮 Maliyet Kapat", "uretim-emri",
+                    Hedef: "araccubugu,sagtus,palet",
+                    AksiyonYetkisi: "uretim.maliyet", KayitGerekir: true, Sira: 80),
+                new("uretim.kapat", "🔒 Emri Kapat", "uretim-emri",
+                    Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "uretim.maliyet", KayitGerekir: true, Sira: 82),
+                new("uretim.iptal", "✖ İptal Et", "uretim-emri",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "uretim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 85),
+            ],
+
+            ["is-merkezi-liste"] = Crud("is-merkezi", "is-merkezi", "uretim",
+                                        "＋ Yeni", silHedef: null, yazdir: false),
+
             // ITS KUYRUGU (427): gonderilmis bildirim IPTAL EDILEMEZ - ITS'de
             //   kayit olustu, geri almak ayri bir bildirim turudur (iade /
             //   deaktivasyon). Kural sunucuda, dugme yine de gosterilir ki

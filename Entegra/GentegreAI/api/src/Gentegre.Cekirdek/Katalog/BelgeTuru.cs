@@ -23,10 +23,33 @@ public static class BelgeTuru
     /// tahakkuku (13) listede YOK, satis tahakkuku (17) VAR.
     /// </summary>
     private static readonly HashSet<int> CikisTurleri =
-        new() { 17, 14, 15, 16, 119, 29, 105, 133, 4 };
+        new() { 17, 14, 15, 16, 119, 29, 105, 133, 4, SarfCikisi, FireCikisi };
 
     /// <summary>Depolar arasi transfer: TEK satir iki depoyu birden oynatir.</summary>
     public const int Transfer = 20;
+
+    // ----------------------------------------------------------- uretim (429) ---
+    /// <summary>
+    /// URETIM BELGELERI (429). Kod uzayi kasa_islem_turu ile ORTAKTIR:
+    /// 21-23 zaten KASA tahsilat turleridir, belge grubuna bos gorunse de
+    /// doludur. Bu yuzden konsinyenin (109/119) yanindaki ust blok secildi.
+    ///
+    /// Ucu de carisiz stok belgesidir: uretim ic bir olaydir, karsi taraf yok.
+    /// </summary>
+    public const int SarfCikisi = 121;
+
+    /// <summary>Mamul deposuna giris; kismi partiler ayni lot ile girer.</summary>
+    public const int UretimGirisi = 122;
+
+    /// <summary>Ret/fire cikisi - mamule dagilmayan kayip.</summary>
+    public const int FireCikisi = 123;
+
+    /// <summary>
+    /// Uretimin urettigi belgeler emre baglanir: belge.kaynak_tur = bu deger,
+    /// kaynak_id = uretim emri id. Belge donusum izinde kullanilan desenin
+    /// aynisi - "bu sarf fisi hangi emirden cikti" tek sorgu.
+    /// </summary>
+    public const int KaynakTurUretimEmri = 60;
 
     /// <summary>Stoktan talep: stok/cari ETKILEMEZ, karsilanmasi transferle olur.</summary>
     public const int Talep = 105;

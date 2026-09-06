@@ -45,7 +45,14 @@ public sealed partial class BelgeDeposu
         ["aciklama"] = "aciklama", ["ozelKod"] = "ozel_kod", ["senaryo"] = "senaryo",
         ["gondericiUnvan"] = "gonderici_unvan", ["gondericiVkno"] = "gonderici_vkno",
         ["gondericiAlias"] = "gonderici_alias", ["saticiId"] = "satici_id",
-        ["merkezId"] = "merkez_id"
+        ["merkezId"] = "merkez_id",
+        // KAYNAK BAGI (429): belgeyi ureten kaydi gosterir (uretim emri icin
+        //   kaynak_tur = 60, kaynak_id = emir). SUNUCU ICI cagrilar icindir -
+        //   belge ucunun kendi beyaz listesinde (BelgeUclari.BaslikTipi) YOK,
+        //   yani istemci bu alanlari gonderemez; gonderse "bilinmeyen belge
+        //   alani" ile reddedilir. Donusum bagi (kaynak_tur = 30) yine
+        //   donusum kodunda yazilir, buradan gelmez.
+        ["kaynakTur"] = "kaynak_tur", ["kaynakId"] = "kaynak_id"
     };
 
     /// <summary>

@@ -1502,6 +1502,63 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuSira: 60,
   },
   {
+    // URUN AGACLARI (BOM / recete) - 429.
+    //   Ayni kod birden cok SURUMLE listelenir: eski surum silinmez, pasiflesir
+    //   (acik emirler kendi surumunde yasar). Bu yuzden varsayilan sirama
+    //   kod + surum, cipler de surum degil DURUM uzerinden.
+    kaynak: 'urun-agaci', rota: 'urun-agaci', baslik: 'Ürün Ağaçları',
+    yol: 'Üretim › Ürün Ağaçları',
+    kartYolu: '/urun-agaci', kartBaslik: 'Ürün Ağacı',
+    aksiyonEkrani: 'urun-agaci-liste',
+    cipler: [
+      { ad: 'Aktif',      filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Mamul',      filtre: { alan: 'tur',   op: 'esit', deger: 1 } },
+      { ad: 'Yarı Mamul', filtre: { alan: 'tur',   op: 'esit', deger: 2 } },
+      { ad: 'Tümü' },
+    ],
+    toplam: ['maliyetMalzeme', 'maliyetIscilik', 'maliyetToplam'],
+    modul: 'uretim',
+    menuGrup: 'Üretim', menuAd: 'Ürün Ağaçları', menuSira: 10,
+    ic: '🌳', yetkiKodu: 'uretim',
+  },
+  {
+    // URETIM EMIRLERI (429).
+    //   "Geciken" cipi SAKLANAN bir alana degil, hesaplanan `gecikti`
+    //   kolonuna bakar: gecikme termin ile bugunun farkidir, her gece bir isin
+    //   guncellemesi gerekseydi is calismadigi gun liste yalan soylerdi.
+    kaynak: 'uretim-emri', rota: 'uretim-emri', baslik: 'Üretim Emirleri',
+    yol: 'Üretim › Üretim Emirleri',
+    kartYolu: '/uretim-emri', kartBaslik: 'Üretim Emri',
+    aksiyonEkrani: 'uretim-emri-liste',
+    tarihAlani: 'termin',
+    cipler: [
+      { ad: 'Taslak',      filtre: { alan: 'durum',   op: 'esit', deger: 1 } },
+      { ad: 'Onaylı',      filtre: { alan: 'durum',   op: 'esit', deger: 2 } },
+      { ad: 'Üretimde',    filtre: { alan: 'durum',   op: 'esit', deger: 4 } },
+      { ad: 'Geciken',     filtre: { alan: 'gecikti', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    toplam: ['adet', 'uretilenAdet', 'gercekToplam'],
+    modul: 'uretim',
+    menuGrup: 'Üretim', menuAd: 'Üretim Emirleri', menuSira: 20,
+    ic: '🏭', yetkiKodu: 'uretim',
+  },
+  {
+    // IS MERKEZLERI (429) - saat ucreti iscilik maliyetinin kaynagi.
+    kaynak: 'is-merkezi', rota: 'is-merkezi', baslik: 'İş Merkezleri',
+    yol: 'Üretim › İş Merkezleri',
+    kartYolu: '/is-merkezi', kartBaslik: 'İş Merkezi',
+    aksiyonEkrani: 'is-merkezi-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Fason', filtre: { alan: 'fason', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    modul: 'uretim',
+    menuGrup: 'Üretim', menuAd: 'İş Merkezleri', menuSira: 30,
+    ic: '⚙️', yetkiKodu: 'uretim',
+  },
+  {
     // Kullanici: "İK altına Personel Listesi taşı" - tek ogeli grup, digerleriyle ayni desen.
     kaynak: 'personel', baslik: 'Personel', yol: 'IK › Personel', kartYolu: '/personel',
     aksiyonEkrani: 'personel-liste', cipler: DURUM_CIPLERI,
@@ -1823,6 +1880,7 @@ export const MENU_GRUP_MODUL: Record<string, string> = {
   'Satış':         'erp_satis',
   'Alış':          'erp_satis',
   'İletişim & AI': 'mesaj',
+  'Üretim':        'uretim',
 };
 
 /**

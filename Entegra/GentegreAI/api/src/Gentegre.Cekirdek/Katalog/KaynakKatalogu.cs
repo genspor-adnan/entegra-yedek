@@ -150,6 +150,10 @@ public static partial class KaynakKatalogu
         Ekle(EnabizPaket());
         // ITS ilac bildirimleri (427) - UTS ile ayri liste.
         Ekle(ItsBildirim());
+        // URETIM v1 (429): urun agaci (BOM), uretim emri, is merkezi.
+        Ekle(UrunAgaci());
+        Ekle(UretimEmri());
+        Ekle(IsMerkezi());
         // Dokuman v1 (419): kaynak ustu liste + katalog + onay kuyrugu.
         Ekle(Dokuman());
         Ekle(DokumanTuru());

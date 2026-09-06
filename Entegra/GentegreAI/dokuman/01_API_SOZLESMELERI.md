@@ -455,6 +455,37 @@ GET  /api/ebelge/{id}/xml | /pdf | /html
 
 ---
 
+## 9.1 Üretim uçları (429)
+
+```http
+POST /api/uretim/agac/{id}/maliyet          // { gugYuzde } -> malzeme/işçilik/gug/toplam (karta tarihli yazılır)
+POST /api/uretim/agac/{id}/yeni-surum       // kopya + sürüm+1 (taslak, varsayılan değil)
+GET  /api/uretim/agac/nerede-kullaniliyor/{stokId}
+
+POST /api/uretim/emri                       // { stokId, agacId?, adet, termin?… } -> ağaç EMRE KOPYALANIR
+POST /api/uretim/emri/{id}/agactan-yenile   // yalnız Taslak/Onaylı
+POST /api/uretim/emri/{id}/rezerve?ac=true  // stok_durum.rezerve ile birlikte
+POST /api/uretim/emri/{id}/onayla           // yetki: uretim.onayla
+POST /api/uretim/emri/{id}/baslat           // sarf modu "tek seferde" ise sarf fişi keser
+POST /api/uretim/emri/{id}/sarf             // { satirlar? } - kısmi/seçili sarf
+POST /api/uretim/emri/{id}/mamul-giris      // { adet, birimFiyat? } - kısmi parti
+POST /api/uretim/emri/{id}/fire             // { stokId, adet, neden }
+POST /api/uretim/emri/{id}/maliyet-kapat    // yetki: uretim.maliyet
+POST /api/uretim/emri/{id}/kapat
+POST /api/uretim/emri/{id}/iptal            // { neden } - yalnız Taslak/Onaylı
+GET  /api/uretim/emri/{id}/eksik-malzeme
+```
+
+**Belge türleri**: `121` sarf çıkışı · `122` üretim girişi · `123` fire. Üçü de
+carisizdir ve **fiş üretmez** (`fn_belge_fis_turu_uygun`); stok hareketi normal
+belge hattından geçer, `belge.kaynak_tur = 60` + `kaynak_id = <emir>` ile emre
+bağlanır.
+
+**Hesaplanan alanlar istemciden alınmaz** (§3.2): emir numarası, üretilen adet,
+rezerve/sarf edilen miktar, plan ve gerçek maliyet sunucuda yazılır.
+
+---
+
 ## 10. Sürümleme
 
 - Yol tabanlı sürüm yok; sözleşme **geriye uyumlu** genişletilir (yeni alan eklenir, alan silinmez).

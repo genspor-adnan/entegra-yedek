@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (193 ad, 62 tanesi birden cok dosyada)
+## Fonksiyonlar (199 ad, 62 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -14,7 +14,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_diptoplam` | `372_diptoplam_kdvli.sql` | 024_fn_belge_diptoplam.sql, 095_diptoplam_kdv_iskonto2.sql |
 | `fn_belge_durum_kapatma` | `086_belge_donusum_kurallar.sql` | — |
 | `fn_belge_fis_geri_al` | `190_belge_fisle.sql` | — |
-| `fn_belge_fis_turu_uygun` | `281_tahakkuk_fislenmez.sql` | 280_taahhut_belgesi_fislenmez.sql |
+| `fn_belge_fis_turu_uygun` | `429_uretim_v1.sql` | 280_taahhut_belgesi_fislenmez.sql, 281_tahakkuk_fislenmez.sql |
 | `fn_belge_fis_uretilsin` | `281_tahakkuk_fislenmez.sql` | 192_mali_ayarlar.sql, 280_taahhut_belgesi_fislenmez.sql |
 | `fn_belge_fisle` | `190_belge_fisle.sql` | — |
 | `fn_belge_fisle_toplu` | `190_belge_fisle.sql` | — |
@@ -162,6 +162,12 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_telefon_rakam` | `123_telefon_arama.sql` | — |
 | `fn_tevkifat_orani` | `176_tevkifat_istisna.sql` | — |
 | `fn_ubl_taraf` | `182_ebelge_ubl.sql` | — |
+| `fn_uretim_emri_no` | `429_uretim_v1.sql` | — |
+| `fn_uretim_malzeme_hazirlik` | `429_uretim_v1.sql` | — |
+| `fn_uretim_stok_maliyeti` | `429_uretim_v1.sql` | — |
+| `fn_uretim_zaman_hesapla` | `429_uretim_v1.sql` | — |
+| `fn_uretim_zaman_topla` | `429_uretim_v1.sql` | — |
+| `fn_urun_agaci_maliyet` | `429_uretim_v1.sql` | — |
 | `fn_uts_hesap` | `338_entegrasyon_baz_sube.sql` | 223_uts_sema.sql, 227_baz_sube.sql, 337_entegrasyon_uts_ebelge.sql |
 | `fn_yerel_para` | `111_ekstre_doviz_gruplu.sql` | — |
 | `fn_yetki_surumu_artir` | `020_sema_kimlik.sql` | — |
@@ -202,7 +208,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (93 ad, 37 tanesi birden cok dosyada)
+## Gorunumler (97 ad, 37 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -257,6 +263,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_hizmet_lookup` | `071_kasa_master.sql` | — |
 | `v_iade_edilebilir_satir` | `133_iade_irsaliye.sql` | 132_iade_satirlari.sql |
 | `v_icd_lookup` | `409_muayene_v1.sql` | — |
+| `v_is_merkezi_lookup` | `429_uretim_v1.sql` | — |
 | `v_kampanya_lookup` | `268_kampanya.sql` | — |
 | `v_kasa_islem_dagitim` | `322_avans_mahsup.sql` | — |
 | `v_kategori_lookup` | `347_sonomed_rad_kategori.sql` | 250_kategori_lookup.sql, 270_kategori_agaci.sql |
@@ -299,4 +306,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_tahsilat_turu_lookup` | `330_prim_tahsilat_turu_durum.sql` | — |
 | `v_taraf_avans` | `322_avans_mahsup.sql` | — |
 | `v_ulke_lookup` | `119_stok_uts.sql` | — |
+| `v_uretim_emri_lookup` | `429_uretim_v1.sql` | — |
+| `v_uretim_hareket` | `429_uretim_v1.sql` | — |
+| `v_urun_agaci_lookup` | `429_uretim_v1.sql` | — |
 
