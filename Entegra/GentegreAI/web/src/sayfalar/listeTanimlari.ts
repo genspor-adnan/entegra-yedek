@@ -338,7 +338,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // SIGORTA PROVIZYONLARI (430). Provizyon burada ALINMAZ - basvuru
     //   kartindan alinir (kalemler orada); bu ekran takip ve duzeltmedir.
     kaynak: 'sigorta-provizyon', rota: 'sigorta-provizyon',
-    baslik: 'Sigorta Provizyonları', yol: 'Yonetim › Sigorta Provizyonları',
+    baslik: 'Sigorta Provizyonları', yol: 'Cari › Sigorta › Provizyonlar',
     aksiyonEkrani: 'sigorta-provizyon-liste',
     tarihAlani: 'provizyonTarihi',
     cipler: [
@@ -350,14 +350,17 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ],
     toplam: ['talepToplam', 'sirketPayi', 'hastaPayi'],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Yönetim', menuAltGrup: 'Sigorta',
-    menuAd: 'Provizyonlar', ic: '🛡️', yetkiKodu: 'sigorta', menuSira: 10,
+    // SIGORTA CARI ALTINDA, KURUMLAR'IN ARDINDA (kullanici): sigorta sirketi
+    //   bir CARI kayittir; ayarlari da o kartin yaninda aranir.
+    //   YALNIZ HBYS (urunModu 2): ozel saglik sigortasi ERP kurulumunda yok.
+    menuGrup: 'Cari', menuAltGrup: 'Sigorta',
+    menuAd: 'Provizyonlar', ic: '🛡️', yetkiKodu: 'sigorta', menuSira: 11,
   },
   {
     // KURUM HESAPLARI (430): hangi sigorta sirketi hangi saglayici uzerinden.
     //   Parola/istemci sirri BURADA GORUNMEZ - entegrasyon hesabi kartinda.
     kaynak: 'sigorta-hesap', rota: 'sigorta-hesap', baslik: 'Sigorta Hesapları',
-    yol: 'Yonetim › Sigorta Hesapları',
+    yol: 'Cari › Sigorta › Kurum Hesapları',
     kartYolu: '/sigorta-hesap', kartBaslik: 'Sigorta Hesabı',
     aksiyonEkrani: 'sigorta-hesap-liste',
     cipler: [
@@ -365,24 +368,24 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Yönetim', menuAltGrup: 'Sigorta',
-    menuAd: 'Kurum Hesapları', ic: '🔌', yetkiKodu: 'sigorta', menuSira: 20,
+    menuGrup: 'Cari', menuAltGrup: 'Sigorta',
+    menuAd: 'Kurum Hesapları', ic: '🔌', yetkiKodu: 'sigorta', menuSira: 12,
   },
   {
     // KOD ESLEME (430): kanonik deger <-> saglayici degeri. Yeni sirket
     //   baglanirken doldurulan TEK tablo; sema ve ekran degismez.
     kaynak: 'sigorta-kod-esleme', rota: 'sigorta-kod-esleme',
-    baslik: 'Sigorta Kod Eşleme', yol: 'Yonetim › Sigorta Kod Eşleme',
+    baslik: 'Sigorta Kod Eşleme', yol: 'Cari › Sigorta › Kod Eşleme',
     kartYolu: '/sigorta-kod-esleme', kartBaslik: 'Kod Eşlemesi',
     aksiyonEkrani: 'sigorta-kod-esleme-liste',
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Yönetim', menuAltGrup: 'Sigorta',
-    menuAd: 'Kod Eşleme', ic: '🔤', yetkiKodu: 'sigorta', menuSira: 30,
+    menuGrup: 'Cari', menuAltGrup: 'Sigorta',
+    menuAd: 'Kod Eşleme', ic: '🔤', yetkiKodu: 'sigorta', menuSira: 13,
   },
   {
     // ISTEK GUNLUGU (430): "biz ne gonderdik, onlar ne dedi". Ihtilafta kanit.
     kaynak: 'sigorta-istek-log', rota: 'sigorta-istek-log',
-    baslik: 'Sigorta İstek Günlüğü', yol: 'Yonetim › Sigorta İstek Günlüğü',
+    baslik: 'Sigorta İstek Günlüğü', yol: 'Cari › Sigorta › İstek Günlüğü',
     aksiyonEkrani: 'sigorta-istek-log-liste',
     tarihAlani: 'tarih',
     icerikAlani: 'yanitMetni', icerikBaslik: 'Servis Yanıtı',
@@ -392,8 +395,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Yönetim', menuAltGrup: 'Sigorta',
-    menuAd: 'İstek Günlüğü', ic: '🧾', yetkiKodu: 'sigorta', menuSira: 40,
+    menuGrup: 'Cari', menuAltGrup: 'Sigorta',
+    menuAd: 'İstek Günlüğü', ic: '🧾', yetkiKodu: 'sigorta', menuSira: 14,
   },
   {
     // ITS BILDIRIM KUYRUGU (427) - ilac karekod bildirimleri.
@@ -783,6 +786,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   iki liste ayni tarafi iki adla gostermesin.
     urunModu: 1,
     menuGrup: 'Cari', menuAd: 'Müşteri Listesi', ic: '👥', yetkiKodu: 'cari',
+    menuSira: 20,
   },
   {
     // Musteri Listesi'nin BIREBIR kopyasi (kullanici istegi) - ayni kaynak ('cari'),
@@ -798,6 +802,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     yeniKayitVarsayilanlari: { musteri: false, tedarikci: true },
     yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
     menuGrup: 'Cari', menuAd: 'Tedarikçi Listesi', ic: '🚚', yetkiKodu: 'cari',
+    menuSira: 30,
   },
   {
     // ANLASMALI KURUMLAR (249, kullanici: "cari altina musteri benzeri Kurumlar
@@ -825,6 +830,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'kisi', baslik: 'Kisiler', yol: 'Cari › Kisiler', kartYolu: '/kisi',
     aksiyonEkrani: 'kisi-liste', cipler: DURUM_CIPLERI,
     menuGrup: 'Cari', menuAd: 'Kişi Listesi', ic: '🧑', yetkiKodu: 'cari',
+    menuSira: 50,
   },
   {
     // DIS DOKTORLAR (305, kullanici): goruntuleme merkezine hasta GONDEREN
@@ -849,6 +855,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   gorunmesi ayni kutuyu iki yere koymak olurdu.
     gizliKartSekmeleri: ['Hekim Bilgisi'],
     menuGrup: 'Cari', menuAd: 'Dış Doktorlar', ic: '🩺', yetkiKodu: 'personel',
+    menuSira: 60,
     urunModu: 2,
   },
   {

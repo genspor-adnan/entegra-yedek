@@ -376,8 +376,12 @@ public static class AksiyonKatalogu
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "dokuman", Islem: Islem.Degistir, KayitGerekir: true,
                     Sira: 50),
+                // SURUM GECMISI ARAC CUBUGUNDAN KALDIRILDI (kullanici):
+                //   surumler dokuman KARTININ kendi sekmesinde duruyor,
+                //   listede ayri dugme gerekmiyor. Sag tus ve komut
+                //   paletinde kaliyor - hizli erisim isteyen bulsun.
                 new("dokuman.surum", "🧾 Sürüm Geçmişi", "dokuman",
-                    Hedef: "araccubugu,sagtus,palet",
+                    Hedef: "sagtus,palet",
                     KaynakKodu: "dokuman", Islem: Islem.Gor, KayitGerekir: true, Sira: 55),
                 new("dokuman.depo", "📊 Depo Kullanımı", "dokuman",
                     Hedef: "araccubugu,palet",
