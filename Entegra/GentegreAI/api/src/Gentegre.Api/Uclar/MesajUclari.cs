@@ -25,13 +25,6 @@ public static class MesajUclari
     public sealed record GonderIstegi(string Metin, int? YanitId, KayitIstegi? Kayit);
     public sealed record BayrakIstegi(short? Favori, short? Sabit, short? Sessiz, short? Arsiv);
 
-    private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
-    {
-        var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
-        for (var i = 0; i < o.FieldCount; i++)
-            satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
-        return satir;
-    }
 
     /// <summary>Kullanıcı bu sohbetin üyesi mi - değilse hiçbir uç çalışmaz.</summary>
     private static async Task UyeMiAsync(NpgsqlConnection baglanti, int sohbetId, int kullaniciId,
@@ -39,7 +32,7 @@ public static class MesajUclari
     {
         var v = await baglanti.TekAsync(
             "select 1 from public.mesaj_uye where sohbet_id = @p0 and kullanici_id = @p1 "
-            + "and ayrilma_tarihi is null", null, [sohbetId, kullaniciId], Satir, iptal);
+            + "and ayrilma_tarihi is null", null, [sohbetId, kullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
         if (v is null)
             throw GentegreHatasi.IsKurali("Bu sohbetin üyesi değilsiniz.");
     }
@@ -80,7 +73,7 @@ public static class MesajUclari
                    and (@p1 = '' or v.baslik ilike '%' || @p1 || '%'
                         or coalesce(v.son_metin, '') ilike '%' || @p1 || '%')
                  order by v.sabit desc, v.son_mesaj_tarihi desc nulls last, v.id desc
-                """, null, [baglam.KullaniciId, ara ?? ""], Satir, iptal);
+                """, null, [baglam.KullaniciId, ara ?? ""], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Durum çubuğu sayaçları (mockup): okunmamış mesaj / sohbet.
             var ozet = await baglanti.TekAsync("""
@@ -108,7 +101,7 @@ public static class MesajUclari
                                           and u.kullanici_id = @p0))::int as "bugunKayit"
                   from public.v_mesaj_sohbet v
                  where v.kullanici_id = @p0 and v.arsiv = 0
-                """, null, [baglam.KullaniciId], Satir, iptal);
+                """, null, [baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { sohbetler, ozet });
         });
@@ -144,7 +137,7 @@ public static class MesajUclari
                                     and u.kullanici_id = @p1)
                        and (select count(*) from public.mesaj_uye u where u.sohbet_id = s.id) = 2
                      order by s.id limit 1
-                    """, null, [baglam.KullaniciId, uyeler[0]], Satir, iptal);
+                    """, null, [baglam.KullaniciId, uyeler[0]], OkuyucuGenisletmeleri.Sozluk, iptal);
                 if (mevcut is not null)
                     return Results.Ok(new { id = Convert.ToInt32(mevcut["id"]), mevcutMu = true });
             }
@@ -155,7 +148,7 @@ public static class MesajUclari
                 insert into public.mesaj_sohbet (tip, ad, olusturan, son_mesaj_tarihi)
                 values (@p0, @p1, @p2, (now())::timestamp)
                 returning id
-                """, tx, [istek.Tip, istek.Ad ?? "", baglam.KullaniciId], Satir, iptal);
+                """, tx, [istek.Tip, istek.Ad ?? "", baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
             var sohbetId = Convert.ToInt32(yeni!["id"]);
 
             // Kurucu YÖNETİCİ rolüyle girer (grup adını değiştirebilsin,
@@ -209,14 +202,14 @@ public static class MesajUclari
                  where m.sohbet_id = @p0
                    and (@p1 = 0 or m.id > @p1)
                  order by m.tarih, m.id
-                """, null, [sohbetId, sonrasi ?? 0], Satir, iptal);
+                """, null, [sohbetId, sonrasi ?? 0], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var sohbet = await baglanti.TekAsync("""
                 select v.id, v.tip, v.baslik, v.karsi_id as "karsiId", v.uye_sayisi as "uyeSayisi",
                        v.favori, v.sabit, v.sessiz, v.arsiv, v.rol
                   from public.v_mesaj_sohbet v
                  where v.id = @p0 and v.kullanici_id = @p1
-                """, null, [sohbetId, baglam.KullaniciId], Satir, iptal);
+                """, null, [sohbetId, baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { sohbet, mesajlar });
         });
@@ -240,7 +233,7 @@ public static class MesajUclari
                 values (@p0, @p1, 1, @p2, nullif(@p3, 0))
                 returning id, tarih
                 """, null,
-                [sohbetId, baglam.KullaniciId, metin, istek.YanitId ?? 0], Satir, iptal);
+                [sohbetId, baglam.KullaniciId, metin, istek.YanitId ?? 0], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // KAYIT İLİŞTİRME (mockup "Gentegre Kaydı İliştir"): kartın kendisi
             //   kopyalanmaz - modül + kayıt kimliği yazılır, "Kartı Aç" ilgili
@@ -331,21 +324,21 @@ public static class MesajUclari
                   left join public.taraf_personel p on p.id = u.kullanici_id
                  where u.sohbet_id = @p0 and u.ayrilma_tarihi is null
                  order by u.rol desc, ad
-                """, null, [sohbetId], Satir, iptal);
+                """, null, [sohbetId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var ekler = await baglanti.ListeAsync("""
                 select e.id, e.ad, e.dokuman_id as "dokumanId", m.tarih
                   from public.mesaj_ek e join public.mesaj m on m.id = e.mesaj_id
                  where m.sohbet_id = @p0 and m.durum = 1
                  order by m.tarih desc limit 50
-                """, null, [sohbetId], Satir, iptal);
+                """, null, [sohbetId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var kayitlar = await baglanti.ListeAsync("""
                 select k.id, k.modul, k.kayit_id as "kayitId", k.ozet, m.tarih
                   from public.mesaj_kayit k join public.mesaj m on m.id = k.mesaj_id
                  where m.sohbet_id = @p0 and m.durum = 1
                  order by m.tarih desc limit 50
-                """, null, [sohbetId], Satir, iptal);
+                """, null, [sohbetId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var sabitler = await baglanti.ListeAsync("""
                 select m.id, m.metin, m.tarih,
@@ -353,7 +346,7 @@ public static class MesajUclari
                   from public.mesaj m join public.taraf t on t.id = m.gonderen_id
                  where m.sohbet_id = @p0 and m.sabit = 1 and m.durum = 1
                  order by m.tarih desc
-                """, null, [sohbetId], Satir, iptal);
+                """, null, [sohbetId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // KÜNYE (mockup sağ panel): kişi sohbetinde karşı tarafın kartı -
             //   grup sohbetinde anlamı yok, null döner.
@@ -377,7 +370,7 @@ public static class MesajUclari
                   left join public.kod_liste kl on kl.kod = 'personel.departman'
                   left join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = p.departman
                  where v.id = @p0 and v.kullanici_id = @p1 and v.tip = 1
-                """, null, [sohbetId, baglam.KullaniciId], Satir, iptal);
+                """, null, [sohbetId, baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { kunye, uyeler, ekler, kayitlar, sabitler });
         });
@@ -443,7 +436,7 @@ public static class MesajUclari
                    and (@p1 = '' or coalesce(t.unvan, '') ilike '%' || @p1 || '%'
                         or k.kod ilike '%' || @p1 || '%')
                  order by ad limit 50
-                """, null, [baglam.KullaniciId, ara ?? ""], Satir, iptal);
+                """, null, [baglam.KullaniciId, ara ?? ""], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { kisiler });
         });

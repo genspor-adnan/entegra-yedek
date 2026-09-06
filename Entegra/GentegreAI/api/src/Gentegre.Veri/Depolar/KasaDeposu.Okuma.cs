@@ -25,7 +25,7 @@ public sealed partial class KasaDeposu
             komut.Parameters.AddWithValue("p0", id);
             await using var o = await komut.ExecuteReaderAsync(iptal);
             if (!await o.ReadAsync(iptal)) return null;
-            baslik = Satir(o);
+            baslik = o.Sozluk();
         }
 
         var bacaklar = new List<IDictionary<string, object?>>();
@@ -48,7 +48,7 @@ public sealed partial class KasaDeposu
         {
             komut.Parameters.AddWithValue("p0", id);
             await using var o = await komut.ExecuteReaderAsync(iptal);
-            while (await o.ReadAsync(iptal)) bacaklar.Add(Satir(o));
+            while (await o.ReadAsync(iptal)) bacaklar.Add(o.Sozluk());
         }
 
         var fisId = baslik.TryGetValue("muhasebeFisId", out var f) && f is not null

@@ -163,13 +163,13 @@ public sealed class BildirimDeposu
 
     // ------------------------------------------------------------------ ekran
     /// <summary>Tek bildirimin deneme günlüğü (kart penceresi).</summary>
-    public Task<List<Dictionary<string, object?>>> LogAsync(long bildirimId,
+    public Task<List<IDictionary<string, object?>>> LogAsync(long bildirimId,
                                                             CancellationToken iptal = default)
         => _veri.ListeAsync("""
             select id, deneme, basarili, http_durum as "httpDurum", sure_ms as "sureMs",
                    saglayici_ref as "saglayiciRef", hata, tarih
               from public.bildirim_log where bildirim_id = @p0 order by id desc
-            """, new object?[] { bildirimId }, Satir, iptal);
+            """, new object?[] { bildirimId }, OkuyucuGenisletmeleri.Sozluk, iptal);
 
     /// <summary>Kuyruktaki satırı kullanıcı isteğiyle iptal eder (yalnız gönderilmemişi).</summary>
     public Task<int> IptalAsync(long id, CancellationToken iptal = default)
@@ -191,13 +191,6 @@ public sealed class BildirimDeposu
     private static SablonSatir SablonSatiri(NpgsqlDataReader o) =>
         new(o.GetInt32(0), o.GetInt16(1), o.GetString(2), o.GetString(3), o.GetInt16(4));
 
-    private static Dictionary<string, object?> Satir(NpgsqlDataReader o)
-    {
-        var d = new Dictionary<string, object?>(StringComparer.Ordinal);
-        for (var i = 0; i < o.FieldCount; i++)
-            d[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
-        return d;
-    }
 
     private static string Kirp(string metin, int en) =>
         string.IsNullOrEmpty(metin) ? "" : metin.Length <= en ? metin : metin[..en];

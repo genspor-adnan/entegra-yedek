@@ -175,7 +175,7 @@ public sealed partial class BelgeDeposu
             komut.Parameters.AddWithValue("p0", belgeId);
             await using var o = await komut.ExecuteReaderAsync(iptal);
             if (!await o.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi();
-            belge = Satir(o);
+            belge = o.Sozluk();
         }
 
         if (baglam.SubeId is { } sube && belge["sube_id"] is { } bs
@@ -305,7 +305,7 @@ public sealed partial class BelgeDeposu
 
         var liste = new List<IDictionary<string, object?>>();
         await using var o = await komut.ExecuteReaderAsync(iptal);
-        while (await o.ReadAsync(iptal)) liste.Add(Satir(o));
+        while (await o.ReadAsync(iptal)) liste.Add(o.Sozluk());
         return liste;
     }
 
@@ -351,7 +351,7 @@ public sealed partial class BelgeDeposu
 
         var liste = new List<IDictionary<string, object?>>();
         await using var o = await komut.ExecuteReaderAsync(iptal);
-        while (await o.ReadAsync(iptal)) liste.Add(Satir(o));
+        while (await o.ReadAsync(iptal)) liste.Add(o.Sozluk());
         return liste;
     }
 
@@ -393,7 +393,7 @@ public sealed partial class BelgeDeposu
 
         var liste = new List<IDictionary<string, object?>>();
         await using var o = await komut.ExecuteReaderAsync(iptal);
-        while (await o.ReadAsync(iptal)) liste.Add(Satir(o));
+        while (await o.ReadAsync(iptal)) liste.Add(o.Sozluk());
         return liste;
     }
 

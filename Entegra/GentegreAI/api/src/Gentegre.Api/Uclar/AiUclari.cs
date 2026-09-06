@@ -32,13 +32,6 @@ public static class AiUclari
     public sealed record TaslakIstegi(int TaslakId, bool Iptal);
     public sealed record GeriBildirimIstegi(int MesajId, short Deger);
 
-    private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
-    {
-        var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
-        for (var i = 0; i < o.FieldCount; i++)
-            satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
-        return satir;
-    }
 
     public static void AiUclariniEkle(this IEndpointRouteBuilder yol)
     {
@@ -82,7 +75,7 @@ public static class AiUclari
                   from public.ai_sohbet s
                  where s.kullanici_id = @p0 and s.durum = 1
                  order by s.son_tarih desc limit 30
-                """, null, [baglam.KullaniciId], Satir, iptal);
+                """, null, [baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Araç kataloğu: kullanıcının YETKİSİ OLANLAR (mockup "İzinli
             //   Fonksiyonlar"). Yetkisiz fonksiyonu listede göstermek,
@@ -93,7 +86,7 @@ public static class AiUclari
                        coalesce(a.liste_rota, '') as "listeRota",
                        coalesce(a.liste_adi, '') as "listeAdi"
                   from public.ai_arac a where a.aktif = 1 order by a.sira, a.ad
-                """, null, [], Satir, iptal))
+                """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal))
                 .Where(a => baglam.Yetkiler.Var(a["yetkiKodu"]?.ToString() ?? "", Islem.Gor))
                 .ToList();
 
@@ -101,7 +94,7 @@ public static class AiUclari
                 select count(*)::int as adet from public.ai_taslak t
                   join public.ai_sohbet s on s.id = t.sohbet_id
                  where s.kullanici_id = @p0 and t.durum = 1
-                """, null, [baglam.KullaniciId], Satir, iptal);
+                """, null, [baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { sohbetler, araclar, bekleyenTaslak = bekleyen?["adet"] });
         });
@@ -115,7 +108,7 @@ public static class AiUclari
             await using var baglanti = await veri.AcAsync(iptal);
             var yeni = await baglanti.TekAsync("""
                 insert into public.ai_sohbet (kullanici_id) values (@p0) returning id
-                """, null, [baglam.KullaniciId], Satir, iptal);
+                """, null, [baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { id = Convert.ToInt32(yeni!["id"]) });
         });
@@ -132,21 +125,21 @@ public static class AiUclari
             var sohbet = await baglanti.TekAsync("""
                 select s.id, s.baslik, s.baglam, s.model, s.token_toplam as "token"
                   from public.ai_sohbet s where s.id = @p0 and s.kullanici_id = @p1
-                """, null, [sohbetId, baglam.KullaniciId], Satir, iptal)
+                """, null, [sohbetId, baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Sohbet bulunamadı.");
 
             var mesajlar = await baglanti.ListeAsync("""
                 select m.id, m.rol, m.metin, m.veri, m.token, m.tarih,
                        m.geribildirim as "geriBildirim"
                   from public.ai_mesaj m where m.sohbet_id = @p0 order by m.tarih, m.id
-                """, null, [sohbetId], Satir, iptal);
+                """, null, [sohbetId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var taslaklar = await baglanti.ListeAsync("""
                 select t.id, t.tip, t.baslik, t.icerik, t.durum,
                        t.hedef_modul as "hedefModul", t.hedef_id as "hedefId",
                        t.onay_tarihi as "onayTarihi", t.mesaj_id as "mesajId"
                   from public.ai_taslak t where t.sohbet_id = @p0 order by t.id
-                """, null, [sohbetId], Satir, iptal);
+                """, null, [sohbetId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Denetim izi (mockup sağ panel "AI log"): araç çağrıları.
             var gunluk = await baglanti.ListeAsync("""
@@ -162,7 +155,7 @@ public static class AiUclari
                   left join public.ai_arac a on a.kod = l.arac_kod
                  where l.sohbet_id = @p0
                  order by l.tarih desc limit 20
-                """, null, [sohbetId], Satir, iptal);
+                """, null, [sohbetId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { sohbet, mesajlar, taslaklar, gunluk });
         });
@@ -182,7 +175,7 @@ public static class AiUclari
             await using var baglanti = await veri.AcAsync(iptal);
             var sahip = await baglanti.TekAsync(
                 "select 1 from public.ai_sohbet where id = @p0 and kullanici_id = @p1",
-                null, [sohbetId, baglam.KullaniciId], Satir, iptal);
+                null, [sohbetId, baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
             if (sahip is null) throw GentegreHatasi.Bulunamadi("Sohbet bulunamadı.");
 
             var soru = (istek.Metin ?? "").Trim();
@@ -193,7 +186,7 @@ public static class AiUclari
             var kMesaj = await baglanti.TekAsync("""
                 insert into public.ai_mesaj (sohbet_id, rol, metin) values (@p0, 1, @p1)
                 returning id
-                """, null, [sohbetId, soru], Satir, iptal);
+                """, null, [sohbetId, soru], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             await baglanti.CalistirAsync("""
                 update public.ai_sohbet
@@ -212,7 +205,7 @@ public static class AiUclari
                 var arac = await baglanti.TekAsync("""
                     select kod, ad, yetki_kodu as "yetkiKodu", yazar
                       from public.ai_arac where kod = @p0 and aktif = 1
-                    """, null, [istek.Arac], Satir, iptal)
+                    """, null, [istek.Arac], OkuyucuGenisletmeleri.Sozluk, iptal)
                     ?? throw GentegreHatasi.IsKurali("Tanımsız fonksiyon.");
 
                 // YETKİ: asistan kullanıcının göremediği veriyi okuyamaz.
@@ -231,7 +224,7 @@ public static class AiUclari
                     values (@p0, 2, @p1, @p2::jsonb) returning id
                     """, null,
                     [sohbetId, metin, veri2 is null ? null : JsonSerializer.Serialize(veri2)],
-                    Satir, iptal);
+                    OkuyucuGenisletmeleri.Sozluk, iptal);
                 var aMesajId = Convert.ToInt32(aMesaj!["id"]);
 
                 await baglanti.CalistirAsync("""
@@ -268,7 +261,7 @@ public static class AiUclari
             var bMesaj = await baglanti.TekAsync("""
                 insert into public.ai_mesaj (sohbet_id, rol, metin) values (@p0, 2, @p1)
                 returning id
-                """, null, [sohbetId, yanit], Satir, iptal);
+                """, null, [sohbetId, yanit], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { mesajId = Convert.ToInt32(bMesaj!["id"]), kayit = 0 });
         });
@@ -287,7 +280,7 @@ public static class AiUclari
                   from public.ai_taslak t
                   join public.ai_sohbet s on s.id = t.sohbet_id
                  where t.id = @p0 and s.kullanici_id = @p1
-                """, null, [istek.TaslakId, baglam.KullaniciId], Satir, iptal)
+                """, null, [istek.TaslakId, baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Taslak bulunamadı.");
 
             if (Convert.ToInt32(t["durum"]) != 1)
@@ -317,7 +310,7 @@ public static class AiUclari
                     """, null,
                     [t["baslik"]?.ToString() ?? "AI görevi", t["icerik"]?.ToString() ?? "",
                      baglam.KullaniciId, t["tarafId"] is null ? 0 : Convert.ToInt32(t["tarafId"]),
-                     baglam.SubeId], Satir, iptal);
+                     baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
                 hedefId = Convert.ToInt32(g!["id"]);
             }
 
@@ -385,7 +378,7 @@ public static class AiUclari
                      group by t.id, cari
                     having sum(h.borc - h.alacak) > 0
                      order by bakiye desc limit 20
-                    """, null, [baglam.SubeId], Satir, iptal);
+                    """, null, [baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
                 var toplam = satirlar.Sum(s => Convert.ToDecimal(s["bakiye"] ?? 0m));
                 return ($"Vadesi geçmiş bakiyesi olan {satirlar.Count} cari var; "
@@ -408,7 +401,7 @@ public static class AiUclari
                      group by s.id, s.kod, s.ad
                     having sum(d.kalan) < sum(d.min_stok)
                      order by (sum(d.min_stok) - sum(d.kalan)) desc limit 20
-                    """, null, [], Satir, iptal);
+                    """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
 
                 return (satirlar.Count == 0
                         ? "Minimum seviyenin altına düşen ürün yok."
@@ -430,7 +423,7 @@ public static class AiUclari
                     select 'Açık görev',
                            (select count(*) from public.gorev g
                              where g.durum in (0, 1) and g.sorumlu_id = @p1)::int
-                    """, null, [baglam.SubeId, baglam.KullaniciId], Satir, iptal);
+                    """, null, [baglam.SubeId, baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
                 return ("Bugünün özeti:", satirlar, null);
             }

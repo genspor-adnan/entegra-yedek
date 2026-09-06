@@ -206,4 +206,20 @@ public static class OkuyucuGenisletmeleri
         var i = o.GetOrdinal(alan);
         return o.IsDBNull(i) ? null : o.GetDateTime(i);
     }
+
+    /// <summary>
+    /// SATIRI SOZLUGE cevirir: kolon adi -> deger (NULL yerine null).
+    ///
+    /// Sekli sorgunun kendisinden gelen uclar (rapor, panel, asistan) satiri
+    /// bir kayda esleyemez; JSON'a oldugu gibi yazilir. Bu yardimci ON UC
+    /// dosyada birebir kopyalanmisti - biri IsDBNull kontrolunu unutunca o
+    /// uc DBNull'i "{}" diye seri hale getiriyordu.
+    /// </summary>
+    public static IDictionary<string, object?> Sozluk(this NpgsqlDataReader o)
+    {
+        var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
+        for (var i = 0; i < o.FieldCount; i++)
+            satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
+        return satir;
+    }
 }

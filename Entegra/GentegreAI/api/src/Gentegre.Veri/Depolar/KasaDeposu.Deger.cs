@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
+using Gentegre.Veri;
 using Npgsql;
 
 namespace Gentegre.Veri.Depolar;
@@ -19,7 +20,7 @@ public sealed partial class KasaDeposu
             "from public.kasa_islem where id = @p0", tx,
             id);
         await using var o = await komut.ExecuteReaderAsync(iptal);
-        return await o.ReadAsync(iptal) ? Satir(o) : new Dictionary<string, object?>();
+        return await o.ReadAsync(iptal) ? o.Sozluk() : new Dictionary<string, object?>();
     }
 
     private async Task<KasaIslemTuru?> TurOkuAsync(NpgsqlConnection baglanti, NpgsqlTransaction tx,
@@ -81,13 +82,6 @@ public sealed partial class KasaDeposu
         return komut;
     }
 
-    private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
-    {
-        var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
-        for (var i = 0; i < o.FieldCount; i++)
-            satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
-        return satir;
-    }
 
     private static string Kirp(string deger, int sinir)
         => deger.Length <= sinir ? deger : deger[..sinir];

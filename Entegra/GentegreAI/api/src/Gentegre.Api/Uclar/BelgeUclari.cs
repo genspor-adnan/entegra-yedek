@@ -64,13 +64,6 @@ public static class BelgeUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
 
-            IDictionary<string, object?> Satir(NpgsqlDataReader o)
-            {
-                var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
-                for (var i = 0; i < o.FieldCount; i++)
-                    satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
-                return satir;
-            }
 
             // Basvuru = tur 19 + tipi 30 (liste tanimindaki sabit filtrenin ayni).
             //   Ad cozumu her sorguda KENDI join'i ile: ortak bir FROM parcasi
@@ -92,7 +85,7 @@ public static class BelgeUclari
                 {suz}
                  group by bb.odeyen_kurum_id
                  order by min(ok.unvan)
-                """, null, [bas, bit], Satir, iptal);
+                """, null, [bas, bit], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var bolumler = await baglanti.ListeAsync($"""
                 select x.bolum_id as id, min(d.ad) as ad, count(*) as adet
@@ -106,7 +99,7 @@ public static class BelgeUclari
                   join public.departman d on d.id = x.bolum_id
                  group by x.bolum_id
                  order by min(d.ad)
-                """, null, [bas, bit], Satir, iptal);
+                """, null, [bas, bit], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var doktorlar = await baglanti.ListeAsync($"""
                 select x.hekim_id as id, min(hk.unvan) as ad, count(*) as adet
@@ -120,7 +113,7 @@ public static class BelgeUclari
                   join public.taraf hk on hk.id = x.hekim_id
                  group by x.hekim_id
                  order by min(hk.unvan)
-                """, null, [bas, bit], Satir, iptal);
+                """, null, [bas, bit], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { odeyenler, bolumler, doktorlar });
         });

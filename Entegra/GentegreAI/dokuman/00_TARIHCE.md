@@ -7530,3 +7530,21 @@ sorusu artık "Bu ekranda ne yapabilirim?".
 sayımından **statik güvenceye** çevrildi (eşzamanlı testler kayıt açtığı için
 sayım yarışa açıktı): servis kaynağındaki her `insert/update/delete` hedefi
 `ai_` ile başlamalı. API **134** test.
+
+### Refaktör: satır→sözlük kopyaları ve rehber metin katmanı (447)
+
+- **13 dosyada birebir kopyalanmış** "satırı sözlüğe çevir" yardımcısı
+  (`Satir(NpgsqlDataReader)` / `RaporSatiri`) tek uzantıya indi:
+  `OkuyucuGenisletmeleri.Sozluk`. Şekli sorgudan gelen uçlar (rapor, panel,
+  asistan) satırı bir kayda eşleyemiyor; kopyaların birinde `IsDBNull`
+  kontrolü unutulsa o uç `DBNull`'ı JSON'a yazardı. `BildirimDeposu.LogAsync`
+  dönüş tipi de ortak `IDictionary` imzasına hizalandı.
+- **`RehberMetin`** ayrıldı: Türkçe sadeleştirme, kelime ayıklama, bağlamsal
+  kalıp tanıma ve kolon puanı. Veritabanı/yetki bilmiyor; test ucuz,
+  `RehberServisi` yalnız akışı yönetiyor (482 satır + 105 satır).
+- **Kolon puanı düzeltildi**: başlıkta geçen kelime 2, teknik adda geçen 1
+  puan. "Delta alanı ne demek" sorusu hem `deltaOnceki` (başlık "Önceki") hem
+  `deltaUyari` (başlık "Delta") kolonuna vuruyor, ağırlık olmadığı için
+  listedeki ilk kolon kazanıp **yanlış alanı** anlatıyordu.
+
+API **135** test.

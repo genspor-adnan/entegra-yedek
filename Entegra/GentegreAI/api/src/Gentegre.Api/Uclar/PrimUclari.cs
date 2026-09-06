@@ -30,13 +30,6 @@ public static class PrimUclari
     public sealed record KademeSatiri(int AdetAlt, int? AdetUst, decimal Deger);
     public sealed record KademeIstegi(IReadOnlyList<KademeSatiri> Satirlar);
 
-    private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
-    {
-        var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
-        for (var i = 0; i < o.FieldCount; i++)
-            satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
-        return satir;
-    }
 
     public static void PrimUclariniEkle(this IEndpointRouteBuilder yol)
     {
@@ -72,7 +65,7 @@ public static class PrimUclari
                    and (@p1::date is null or v.tarih <= @p1::date)
                  group by v.rol
                  order by v.rol
-                """, null, [bas, bit], Satir, iptal);
+                """, null, [bas, bit], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var kisiler = await baglanti.ListeAsync("""
                 select v.taraf_id as id, min(v.kisi) as ad, count(*) as adet
@@ -82,7 +75,7 @@ public static class PrimUclari
                    and (@p2::smallint is null or v.rol = @p2::smallint)
                  group by v.taraf_id
                  order by min(v.kisi)
-                """, null, [bas, bit, rol], Satir, iptal);
+                """, null, [bas, bit, rol], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { roller, kisiler });
         });
@@ -108,7 +101,7 @@ public static class PrimUclari
                   left join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = r.rol
                  where r.belge_satir_id = @p0
                  order by r.rol, r.id
-                """, null, [satirId], Satir, iptal);
+                """, null, [satirId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Bu kalemden DOGMUS primler: rol degistirilince ne olacagini
             //   kullanici gormeli (kesinlesmis satir yeniden hesaplanmaz).
@@ -119,7 +112,7 @@ public static class PrimUclari
                   left join public.taraf t on t.id = hs.taraf_id
                  where hs.belge_satir_id = @p0 and hs.durum <> 0
                  order by hs.id
-                """, null, [satirId], Satir, iptal);
+                """, null, [satirId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { satirlar, primler });
         });
@@ -220,7 +213,7 @@ public static class PrimUclari
                   from public.prim_plani_kademe k
                  where k.satir_id = @p0
                  order by k.adet_alt, k.id
-                """, null, [satirId], Satir, iptal);
+                """, null, [satirId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { satirlar });
         });
@@ -312,7 +305,7 @@ public static class PrimUclari
                        (select count(*) from public.hakedis_satir s where s.hakedis_id = h.id)
                        as "satirSayisi"
                   from public.hakedis h where h.id = @p0
-                """, null, [id], Satir, iptal);
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(kayit);
         });
@@ -368,7 +361,7 @@ public static class PrimUclari
                   from public.v_hakedis_ozet o
                  where o.acik_tutar > 0 or o.taslak_tutar > 0
                  order by o.acik_tutar desc, o.taslak_tutar desc
-                """, null, [], Satir, iptal));
+                """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal));
         });
     }
 }

@@ -837,7 +837,7 @@ public static class LabUclari
                   left join public.belge_basvuru bb on bb.id = b.id
                   left join public.taraf ok on ok.id = bb.odeyen_kurum_id
                  where i.id = @p0
-                """, null, [istemId], RaporSatiri, iptal)
+                """, null, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
 
             // SAYISAL SONUÇLAR (biyokimya/hematoloji): bayrak, referans ve
@@ -868,7 +868,7 @@ public static class LabUclari
                   left join public.taraf o on o.id = ls.onay_id
                  where s.istem_id = @p0 and s.durum <> 0 and t.tur in (1, 2, 3)
                  order by t.bolum, s.sira, t.kod
-                """, null, [istemId], RaporSatiri, iptal);
+                """, null, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // KÜLTÜR: rapor bölümü izolat + antibiyogram. Antibiyogramda
             //   YALNIZ bildir = 1 satırlar - kademeli bildirim kararı burada
@@ -893,7 +893,7 @@ public static class LabUclari
                   left join public.taraf o on o.id = k.onay_id
                  where k.istem_id = @p0 and k.durum <> 0
                  order by k.id
-                """, null, [istemId], RaporSatiri, iptal);
+                """, null, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var izolatlar = await baglanti.ListeAsync("""
                 select u.id, u.kultur_id as "kulturId", u.izolat_no as "izolatNo",
@@ -907,7 +907,7 @@ public static class LabUclari
                   join public.lab_kultur k on k.id = u.kultur_id
                  where k.istem_id = @p0 and u.durum = 1
                  order by u.kultur_id, u.izolat_no
-                """, null, [istemId], RaporSatiri, iptal);
+                """, null, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var antibiyogram = await baglanti.ListeAsync("""
                 select g.ureme_id as "uremeId", a.ad as antibiyotik, a.basamak,
@@ -920,7 +920,7 @@ public static class LabUclari
                   join public.lab_kultur k on k.id = u.kultur_id
                  where k.istem_id = @p0 and g.bildir = 1
                  order by g.ureme_id, a.basamak, a.ad
-                """, null, [istemId], RaporSatiri, iptal);
+                """, null, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // GENETİK: vaka başlığı, yöntem/kalite ve RAPORLANAN varyantlar.
             //   Hastanın istemediği ikincil bulgular raporla = 0 olduğu için
@@ -959,7 +959,7 @@ public static class LabUclari
                   left join public.taraf o on o.id = g.onay_id
                  where g.istem_id = @p0 and g.durum <> 0
                  order by g.id
-                """, null, [istemId], RaporSatiri, iptal);
+                """, null, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var varyantlar = await baglanti.ListeAsync("""
                 select v.vaka_id as "vakaId", v.gen_sembol as "genSembol",
@@ -972,7 +972,7 @@ public static class LabUclari
                   join public.lab_genetik_vaka g on g.id = v.vaka_id
                  where g.istem_id = @p0 and v.raporla = 1
                  order by v.vaka_id, v.sinif desc, v.gen_sembol
-                """, null, [istemId], RaporSatiri, iptal);
+                """, null, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // ANTET: istemin şubesi; yoksa varsayılan şube. Kurum kimliği
             //   hastaya verilen belgede zorunludur.
@@ -983,7 +983,7 @@ public static class LabUclari
                  where s.id = coalesce((select i.sube_id from public.lab_istem i
                                          where i.id = @p0),
                                        (select id from public.sube where varsayilan = 1 limit 1))
-                """, null, [istemId], RaporSatiri, iptal);
+                """, null, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { istem, sonuclar, kulturler, izolatlar, antibiyogram,
                                     vakalar, varyantlar, kurum, izlemeNo = baglam.IzlemeNo });
@@ -1193,7 +1193,7 @@ public static class LabUclari
                      join public.lab_istem i on i.id = s.istem_id
                     where s.durum = 6
                       and (@p0::int is null or i.sube_id = @p0))       as "tekrarNumune"
-                """, null, [baglam.SubeId], RaporSatiri, iptal);
+                """, null, [baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // CIHAZ DURUMU: mockup'taki yeşil/kırmızı rozetler. Cihaz sessizce
             //   durduğunda sonuçlar gelmez ve bu ekranda "onay bekleyen
@@ -1208,7 +1208,7 @@ public static class LabUclari
                  where c.tur = 1 and c.durum = 0
                    and (@p0::int is null or c.sube_id = @p0)
                  order by c.kod
-                """, null, [baglam.SubeId], RaporSatiri, iptal);
+                """, null, [baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { sayaclar, cihazlar, izlemeNo = baglam.IzlemeNo });
         });
@@ -1251,7 +1251,7 @@ public static class LabUclari
                   from public.muayene_istem mi
                  where mi.muayene_id = @p0
                  order by mi.istem_zamani desc, mi.id desc
-                """, [id], RaporSatiri, iptal);
+                """, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // LAB İSTEMLERİ: muayeneden açılanlar + aynı başvurunun diğerleri.
             var istemler = await veri.ListeAsync("""
@@ -1276,7 +1276,7 @@ public static class LabUclari
                                       and mi.hedef_tablo = 'lab_istem'
                                       and mi.hedef_id = i.id))
                  order by i.istem_tarihi desc, i.id desc
-                """, [id, m.BelgeId], RaporSatiri, iptal);
+                """, [id, m.BelgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // SONUÇ SATIRLARI: yalnız ONAYLI olanlar. Onaylanmamış değeri
             //   hekime göstermek, laboratuvarın henüz doğrulamadığı bir
@@ -1304,7 +1304,7 @@ public static class LabUclari
                                               and mi.hedef_tablo = 'lab_istem'
                                               and mi.hedef_id = i2.id)))
                  order by s.istem_id desc, t.bolum, s.sira
-                """, [id, m.BelgeId], RaporSatiri, iptal);
+                """, [id, m.BelgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Kültür ve genetik ÖZETİ: ayrıntı laboratuvar ekranında, hekime
             //   sonuç cümlesi ve raporlanan bulgular yeter.
@@ -1327,7 +1327,7 @@ public static class LabUclari
                                           and mi.hedef_tablo = 'lab_istem'
                                           and mi.hedef_id = i2.id))
                  order by k.id desc
-                """, [id, m.BelgeId], RaporSatiri, iptal);
+                """, [id, m.BelgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var vakalar = await veri.ListeAsync("""
                 select g.id, g.istem_id as "istemId", g.vaka_no as "vakaNo",
@@ -1349,7 +1349,7 @@ public static class LabUclari
                                           and mi.hedef_tablo = 'lab_istem'
                                           and mi.hedef_id = i2.id))
                  order by g.id desc
-                """, [id, m.BelgeId], RaporSatiri, iptal);
+                """, [id, m.BelgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // RADYOLOJİ: aynı sekmede görünür - hekim için "istem" tek
             //   kavramdır, modülü değil sonucu arar.
@@ -1376,7 +1376,7 @@ public static class LabUclari
                                   and mi.hedef_tablo = 'radyoloji_istem'
                                   and mi.hedef_id = ri.id)
                  order by ri.id desc
-                """, [id, m.BelgeId], RaporSatiri, iptal);
+                """, [id, m.BelgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { muayeneId = id, belgeId = m.BelgeId, baglar,
                                     istemler, sonuclar, kulturler, vakalar, radyoloji,
@@ -1449,7 +1449,7 @@ public static class LabUclari
                  where (@p0::int is null or n.istem_id = @p0)
                    and (@p1::int is null or n.id = @p1)
                  order by n.id
-                """, [istemId, numuneId], RaporSatiri, iptal);
+                """, [istemId, numuneId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             if (etiketler.Count == 0)
                 throw GentegreHatasi.Bulunamadi("Etiket basılacak numune bulunamadı.");
@@ -1462,7 +1462,7 @@ public static class LabUclari
                           where (@p0::int is null or n.istem_id = @p0)
                             and (@p1::int is null or n.id = @p1) limit 1),
                         (select id from public.sube where varsayilan = 1 limit 1))
-                """, [istemId, numuneId], RaporSatiri, iptal);
+                """, [istemId, numuneId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { etiketler, kurum, izlemeNo = baglam.IzlemeNo });
         });
@@ -1566,7 +1566,7 @@ public static class LabUclari
                   join public.lab_dis_lab d on d.id = g.dis_lab_id
                   left join public.belge b on b.id = g.fatura_belge_id
                  where g.id = @p0
-                """, [id], RaporSatiri, iptal)
+                """, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Gönderim bulunamadı.");
 
             var satirlar = await veri.ListeAsync("""
@@ -1590,7 +1590,7 @@ public static class LabUclari
                          order by x.id desc limit 1) ls on true
                  where gs.gonderim_id = @p0
                  order by gs.id
-                """, [id], RaporSatiri, iptal);
+                """, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { gonderim = g, satirlar, izlemeNo = baglam.IzlemeNo });
         });
@@ -1611,7 +1611,7 @@ public static class LabUclari
                        bekleyen, toplam, durum
                   from public.v_lab_dis_geciken
                  order by gecikme_gun desc
-                """, [], RaporSatiri, iptal);
+                """, [], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { liste, izlemeNo = baglam.IzlemeNo });
         });
@@ -1645,19 +1645,6 @@ public static class LabUclari
         });
     }
 
-    /// <summary>
-    /// Rapor sorgularinda satir -> sozluk. Cikti ucu genis ve degisken alan
-    /// kumesi tasiyor; her biri icin ayri DTO yazmak, rapora bir alan
-    /// eklemeyi uc dosyada degisiklige cevirirdi (radyoloji ciktisiyla ayni
-    /// desen).
-    /// </summary>
-    private static IDictionary<string, object?> RaporSatiri(NpgsqlDataReader o)
-    {
-        var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
-        for (var i = 0; i < o.FieldCount; i++)
-            satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
-        return satir;
-    }
 
     private sealed record IstemOzeti(string IstemNo, List<string> Barkodlar,
                                      int TetkikSayisi);

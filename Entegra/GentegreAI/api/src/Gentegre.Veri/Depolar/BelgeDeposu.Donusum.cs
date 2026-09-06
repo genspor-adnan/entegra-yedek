@@ -88,7 +88,7 @@ public sealed partial class BelgeDeposu
             komut.Parameters.AddWithValue("p0", kaynakBelgeId);
             await using var o = await komut.ExecuteReaderAsync(iptal);
             if (!await o.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi("Kaynak belge bulunamadı.");
-            kaynak = Satir(o);
+            kaynak = o.Sozluk();
         }
 
         if (Convert.ToInt32(kaynak["durum"]) != 0)
@@ -130,7 +130,7 @@ public sealed partial class BelgeDeposu
             await using var o = await komut.ExecuteReaderAsync(iptal);
             while (await o.ReadAsync(iptal))
             {
-                var satir = Satir(o);
+                var satir = o.Sozluk();
                 kaynakSatirlar[Convert.ToInt32(satir["id"])] = satir;
             }
         }

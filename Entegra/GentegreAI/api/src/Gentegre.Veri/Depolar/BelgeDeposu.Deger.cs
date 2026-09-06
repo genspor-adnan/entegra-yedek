@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
+using Gentegre.Veri;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -13,13 +14,6 @@ namespace Gentegre.Veri.Depolar;
 public sealed partial class BelgeDeposu
 {
     // ================================================================ yardimci ====
-    private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
-    {
-        var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
-        for (var i = 0; i < o.FieldCount; i++)
-            satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
-        return satir;
-    }
 
     private static void Varsayilan(IDictionary<string, object?> hedef, string ad, string deger)
     {
@@ -182,7 +176,7 @@ public sealed partial class BelgeDeposu
             komut.Parameters.AddWithValue("p0", belgeId);
             await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
             if (!await okuyucu.ReadAsync(iptal)) return null;
-            belge = Satir(okuyucu);
+            belge = okuyucu.Sozluk();
         }
 
         var satirlar = new List<IDictionary<string, object?>>();
@@ -226,7 +220,7 @@ public sealed partial class BelgeDeposu
         {
             komut.Parameters.AddWithValue("p0", belgeId);
             await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
-            while (await okuyucu.ReadAsync(iptal)) satirlar.Add(Satir(okuyucu));
+            while (await okuyucu.ReadAsync(iptal)) satirlar.Add(okuyucu.Sozluk());
         }
 
         // Kalemin LOT dagilimi: kart acilinca kullanici hangi lottan kac adet
@@ -245,7 +239,7 @@ public sealed partial class BelgeDeposu
             var haritali = new Dictionary<int, List<IDictionary<string, object?>>>();
             while (await okuyucu.ReadAsync(iptal))
             {
-                var kayit = Satir(okuyucu);
+                var kayit = okuyucu.Sozluk();
                 var satirId = Convert.ToInt32(kayit["satirId"]);
                 if (!haritali.TryGetValue(satirId, out var liste))
                     haritali[satirId] = liste = new List<IDictionary<string, object?>>();

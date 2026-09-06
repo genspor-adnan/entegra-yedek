@@ -55,59 +55,10 @@ public sealed class RehberServisi(VeriKaynagi veri)
         short KaynakTuru,
         decimal KontorBakiye);
 
-    /// <summary>Soruyu ayırt etmeyen kelimeler: skorlamada gürültü yaparlar.</summary>
-    private static readonly HashSet<string> Durak = new(StringComparer.Ordinal)
-    {
-        "nasil", "nerede", "nereden", "nedir", "icin", "bir", "bu", "su", "ile",
-        "ben", "biz", "yapilir", "yaparim", "yapmak", "istiyorum", "acilir",
-        "acmak", "olur", "lazim", "gerekir", "hangi", "kim", "mi", "mu", "ne",
-        "var", "yok", "sistem", "sistemde", "ekran", "ekrani", "menu", "nasıl",
-    };
 
-    /// <summary>
-    /// BAĞLAMSAL soru: "bu ekranda ne yapabilirim", "burada ne var", "şu alan
-    /// ne işe yarar". Cevap kullanıcının DURDUĞU ekrana bağlıdır - aynı soru
-    /// başka ekranda başka cevap alır.
-    /// </summary>
-    private static readonly string[] BaglamKaliplari =
-        ["bu ekran", "buekran", "bu sayfa", "burada", "buradan", "bu listede",
-         "bu kart", "bu alan", "su alan", "bu kolon", "bu dugme", "ne yapabilirim",
-         "ne ise yarar", "ne demek", "neler yapabilirim", "ne var"];
 
-    private static bool BaglamsalMi(string sadeSoru) =>
-        BaglamKaliplari.Any(k => sadeSoru.Contains(k, StringComparison.Ordinal));
 
-    private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
-    {
-        var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
-        for (var i = 0; i < o.FieldCount; i++)
-            satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
-        return satir;
-    }
 
-    /// <summary>Türkçe harfleri ASCII'ye indirger - `fn_ara_metin` ile aynı kural.</summary>
-    private static string Sadelestir(string metin)
-    {
-        var kaynak = "ÇĞİIÖŞÜçğıiöşü";
-        var hedef  = "CGIIOSUcgiiosu";
-        var sb = new System.Text.StringBuilder(metin.Length);
-        foreach (var h in metin)
-        {
-            var i = kaynak.IndexOf(h);
-            sb.Append(i >= 0 ? char.ToLowerInvariant(hedef[i]) : char.ToLowerInvariant(h));
-        }
-        return sb.ToString();
-    }
-
-    /// <summary>Sorudan anlamlı kelimeleri çıkarır (3+ harf, durak değil).</summary>
-    public static string[] Kelimeler(string soru) =>
-        Sadelestir(soru)
-            .Split(new[] { ' ', '\t', '\n', '\r', ',', '.', '?', '!', ':', ';', '/', '(', ')', '\'', '"' },
-                   StringSplitOptions.RemoveEmptyEntries)
-            .Where(k => k.Length >= 3 && !Durak.Contains(k))
-            .Distinct(StringComparer.Ordinal)
-            .Take(12)
-            .ToArray();
 
     public async Task<Yanit> CevaplaAsync(Istek istek, IstekBaglami baglam,
                                           CancellationToken iptal)
@@ -118,7 +69,7 @@ public sealed class RehberServisi(VeriKaynagi veri)
             throw GentegreHatasi.IsKurali("Soru boş olamaz.");
         if (soru.Length > 600) soru = soru[..600];
 
-        var kelimeler = Kelimeler(soru);
+        var kelimeler = RehberMetin.Kelimeler(soru);
         await using var baglanti = await veri.AcAsync(iptal);
 
         // ÜRÜN MODU sunucudan: istemcinin gönderdiği `aktifMod` yalnız ipucu.
@@ -137,7 +88,7 @@ public sealed class RehberServisi(VeriKaynagi veri)
         // "Bu ekranda ne yapabilirim?" sorusunun cevabı DURDUĞUNUZ ekrana
         //   bağlıdır: ekranın kendisi, yetkili düğmeleri ve o ekranla ilgili
         //   rehber konuları. Katalog araması bunu bilemez.
-        if (BaglamsalMi(Sadelestir(soru)) && !string.IsNullOrWhiteSpace(istek.AktifSayfa))
+        if (RehberMetin.BaglamsalMi(soru) && !string.IsNullOrWhiteSpace(istek.AktifSayfa))
         {
             var yardim = await BaglamsalYardimAsync(baglanti, istek, soru, urunModu,
                                                     baglam, uyarilar, kontorBakiye,
@@ -166,7 +117,7 @@ public sealed class RehberServisi(VeriKaynagi veri)
                  where k.durum = 0 and (k.urun_modu <> 2 or @p2 = 2)
                  order by vurus desc, benzerlik desc, k.sira
                  limit 4
-                """, null, [soru, kelimeler, urunModu], Satir, iptal);
+                """, null, [soru, kelimeler, urunModu], OkuyucuGenisletmeleri.Sozluk, iptal);
 
         var enIyi = konular.FirstOrDefault();
         var vurus = enIyi is null ? 0 : Convert.ToInt32(enIyi["vurus"]);
@@ -237,7 +188,7 @@ public sealed class RehberServisi(VeriKaynagi veri)
              where (e.rota = @p0 or e.rota = @p1) and e.durum = 0
              order by case when e.rota = @p0 then 0 else 1 end, e.id
              limit 1
-            """, null, [rota, kok], Satir, iptal);
+            """, null, [rota, kok], OkuyucuGenisletmeleri.Sozluk, iptal);
         if (ekran is null) return null;
 
         var kaynak = ekran["kaynak"]?.ToString() ?? "";
@@ -246,10 +197,7 @@ public sealed class RehberServisi(VeriKaynagi veri)
         var yol = ekran["yol"]?.ToString() ?? "";
         if (!YetkiVar(yetkiKodu, baglam)) return null;   // oraya zaten giremezdi
 
-        var sade = Sadelestir(soru);
-        var alanSorusu = sade.Contains("alan", StringComparison.Ordinal)
-                      || sade.Contains("kolon", StringComparison.Ordinal)
-                      || sade.Contains("ne demek", StringComparison.Ordinal);
+                var alanSorusu = RehberMetin.AlanSorusuMu(soru);
 
         // ------------------------------------------------------ alan sorusu
         if (alanSorusu)
@@ -287,7 +235,7 @@ public sealed class RehberServisi(VeriKaynagi veri)
              where k.durum = 0 and (k.urun_modu <> 2 or @p1 = 2)
                and (k.ekran_kaynak = @p0 or k.ekran_kaynak = @p2)
              order by k.sira limit 4
-            """, null, [kaynak, urunModu, rota], Satir, iptal);
+            """, null, [kaynak, urunModu, rota], OkuyucuGenisletmeleri.Sozluk, iptal);
 
         var adimlar = new List<Adim>();
         var no = 0;
@@ -324,22 +272,22 @@ public sealed class RehberServisi(VeriKaynagi veri)
     {
         var tanim = KaynakKatalogu.Bul(kaynak);
         if (tanim is null) return null;
-        var kelimeler = Kelimeler(soru)
-            .Where(k => k is not ("alan" or "kolon" or "demek")).ToArray();
+        var kelimeler = RehberMetin.AlanAramaKelimeleri(soru);
         if (kelimeler.Length == 0) return null;
 
         (string Ad, string Baslik, string Tip, bool Filtre)? enIyi = null;
-        var enSkor = 0;
+        var enPuan = 0;
         foreach (var k in tanim.Kolonlar)
         {
+            // ALAN YETKİSİ kapalı kolon hiç aranmaz: görmediği alanı tarif
+            //   etmek de bir sızıntıdır.
             if (!baglam.Yetkiler.AlanOkunur(kaynak, k.YetkiAlani ?? k.Ad)) continue;
-            var metin = Sadelestir(k.Baslik + " " + k.Ad);
-            var skor = kelimeler.Count(w => metin.Contains(w, StringComparison.Ordinal));
-            if (skor > enSkor)
-                enIyi = (k.Ad, k.Baslik, k.Tip, k.Filtrelenebilir);
-            if (skor > enSkor) enSkor = skor;
+            var puan = RehberMetin.KolonPuani(k.Baslik, k.Ad, kelimeler);
+            if (puan <= enPuan) continue;
+            enPuan = puan;
+            enIyi = (k.Ad, k.Baslik, k.Tip, k.Filtrelenebilir);
         }
-        return enSkor > 0 ? enIyi : null;
+        return enPuan > 0 ? enIyi : null;
     }
 
     // ------------------------------------------------------------- konu ----
@@ -452,7 +400,7 @@ public sealed class RehberServisi(VeriKaynagi veri)
                and (e.urun_modu <> 2 or @p2 = 2)
              order by vurus desc, benzerlik desc, e.baslik
              limit 20
-            """, null, [soru, kelimeler, urunModu], Satir, iptal);
+            """, null, [soru, kelimeler, urunModu], OkuyucuGenisletmeleri.Sozluk, iptal);
 
         return satirlar
             .Where(s => Convert.ToInt32(s["vurus"]) >= 1)
@@ -482,7 +430,7 @@ public sealed class RehberServisi(VeriKaynagi veri)
                and (e.urun_modu <> 2 or @p1 = 2)
              order by e.menu_gizli, e.id
              limit 1
-            """, null, [kaynak, urunModu], Satir, iptal);
+            """, null, [kaynak, urunModu], OkuyucuGenisletmeleri.Sozluk, iptal);
         if (s is null || !YetkiVar(s["yetkiKodu"]?.ToString(), baglam)) return null;
         return new EkranOnerisi(s["kaynak"]?.ToString() ?? "", s["baslik"]?.ToString() ?? "",
                                 s["rota"]?.ToString() ?? "", s["yol"]?.ToString() ?? "",

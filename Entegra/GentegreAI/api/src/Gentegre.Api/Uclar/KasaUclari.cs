@@ -55,7 +55,7 @@ public static class KasaUclari
               from public.v_belge_satir_tahsilat t
              where t.belge_id = @p0 and (t.hasta_kalan + t.kurum_kalan) > 0
              order by t.sira, t.satir_id
-            """, null, [belgeId], Satir, iptal);
+            """, null, [belgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
         decimal yazilan = 0;
         await using var tx = await baglanti.BeginTransactionAsync(iptal);
@@ -100,14 +100,6 @@ public static class KasaUclari
         return yazilan;
     }
 
-    /// <summary>Okuyucu satiri -> sozluk (kolon adlari JSON alan adi olur).</summary>
-    private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
-    {
-        var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
-        for (var i = 0; i < o.FieldCount; i++)
-            satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
-        return satir;
-    }
 
     public static void KasaUclariniEkle(this IEndpointRouteBuilder yol)
     {
@@ -263,7 +255,7 @@ public static class KasaUclari
                                     and d.kasa_islem_id = @p1), 0) as "buIslemKurum"
                   from public.v_belge_satir_tahsilat t
                  where t.belge_id = @p0
-                """, null, [belgeId, kasaIslemId ?? 0], Satir, iptal);
+                """, null, [belgeId, kasaIslemId ?? 0], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var belge = await baglanti.TekAsync("""
                 select b.belge_no as "belgeNo", b.genel_toplam as "genelToplam",
@@ -273,7 +265,7 @@ public static class KasaUclari
                   --   burada durur, belge basliginda degil.
                   left join public.belge_basvuru bb on bb.id = b.id
                  where b.id = @p0
-                """, null, [belgeId], Satir, iptal);
+                """, null, [belgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { belge, satirlar });
         });
@@ -298,7 +290,7 @@ public static class KasaUclari
             var islem = await baglanti.TekAsync("""
                 select k.tutar, k.belge_id as "belgeId", coalesce(k.durum, 0) as durum
                   from public.kasa_islem k where k.id = @p0
-                """, null, [id], Satir, iptal)
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Kasa işlemi bulunamadı.");
 
             var belgeId = istek.BelgeId ?? (islem["belgeId"] is null ? 0
@@ -328,7 +320,7 @@ public static class KasaUclari
                       from public.v_belge_satir_tahsilat t
                      where t.belge_id = @p0
                      order by t.sira, t.satir_id
-                    """, null, [belgeId], Satir, iptal);
+                    """, null, [belgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
                 var kalanTutar = tutar;
                 foreach (var sa in acik)
@@ -401,7 +393,7 @@ public static class KasaUclari
                   from public.v_taraf_avans a
                  where a.taraf_id = @p0
                  order by a.islem_tarihi
-                """, null, [tarafId], Satir, iptal);
+                """, null, [tarafId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new
             {
@@ -442,7 +434,7 @@ public static class KasaUclari
                  order by a.islem_tarihi
                 """, null,
                 [tarafId, istek.IslemIdler is { Count: > 0 } ? istek.IslemIdler.ToArray() : null],
-                Satir, iptal);
+                OkuyucuGenisletmeleri.Sozluk, iptal);
 
             decimal toplam = 0;
             var sayac = 0;

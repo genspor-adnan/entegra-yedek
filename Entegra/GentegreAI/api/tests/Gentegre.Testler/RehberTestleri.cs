@@ -31,11 +31,23 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
     };
 
     [Fact]
+    public void Kolon_puani_BASLIGA_agirlik_verir()
+    {
+        // "Delta alanı" sorusu hem `deltaOnceki` (başlık "Önceki") hem
+        //   `deltaUyari` (başlık "Delta") kolonuna vuruyordu; başlık ağırlığı
+        //   olmadan listedeki ilk kolon kazanıyor ve yanlış alan anlatılıyordu.
+        var kelimeler = RehberMetin.AlanAramaKelimeleri("Delta alanı ne demek");
+        var onceki = RehberMetin.KolonPuani("Önceki", "deltaOnceki", kelimeler);
+        var uyari  = RehberMetin.KolonPuani("Delta",  "deltaUyari",  kelimeler);
+        Assert.True(uyari > onceki, $"başlık ağırlığı yok: {uyari} <= {onceki}");
+    }
+
+    [Fact]
     public void Kelime_ayiklama_SORU_KALIPLARINI_atar()
     {
         // "nasıl", "yapılır", "istiyorum" her soruda geçer; skorlamada
         //   kalırlarsa her konu her soruya eşit uzaklıkta olur.
-        var k = RehberServisi.Kelimeler("Yeni hasta kaydı nasıl açılır?");
+        var k = RehberMetin.Kelimeler("Yeni hasta kaydı nasıl açılır?");
         Assert.Contains("hasta", k);
         Assert.Contains("kaydi", k);          // Türkçe harf ASCII'ye iner
         Assert.DoesNotContain("nasil", k);

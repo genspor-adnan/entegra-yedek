@@ -65,13 +65,6 @@ public static class EntegrasyonUclari
         ("ICD10",               "ICD"),
     };
 
-    private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
-    {
-        var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
-        for (var i = 0; i < o.FieldCount; i++)
-            satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
-        return satir;
-    }
 
     public static void EntegrasyonUclariniEkle(this IEndpointRouteBuilder yol)
     {
@@ -261,7 +254,7 @@ public static class EntegrasyonUclari
                      '') as adres,
                    e.aktif
               from public.entegrasyon_hesap e where e.id = @p0
-            """, null, [id], Satir, iptal)
+            """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
             ?? throw GentegreHatasi.Bulunamadi("Entegrasyon hesabı bulunamadı.");
 
         string M(string ad) => k[ad]?.ToString() ?? "";
@@ -649,7 +642,7 @@ public static class EntegrasyonUclari
             { atlanan++; continue; }
 
             var il = await baglanti.TekAsync(
-                "select id from public.il where skrs_kod = @p0", null, [ilSkrs], Satir, iptal);
+                "select id from public.il where skrs_kod = @p0", null, [ilSkrs], OkuyucuGenisletmeleri.Sozluk, iptal);
             if (il is null) { atlanan++; continue; }
             var ilId = Convert.ToInt32(il["id"]);
 

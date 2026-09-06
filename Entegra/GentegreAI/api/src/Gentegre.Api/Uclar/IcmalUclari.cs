@@ -77,7 +77,7 @@ public static class IcmalUclari
                   left join public.stok   st on st.id = s.stok_id
                 """ + AcikKurumPayiKosulu + """
                  order by b.belge_tarihi, b.id, s.sira
-                """, null, [kurumId, donemBas, donemBit], Satir, iptal);
+                """, null, [kurumId, donemBas, donemBit], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new
             {
@@ -158,7 +158,7 @@ public static class IcmalUclari
                   from public.kurum_icmal i
                   left join public.taraf t on t.id = i.kurum_id
                  where i.id = @p0
-                """, null, [id], Satir, iptal)
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İcmal bulunamadı.");
 
             if (Convert.ToInt32(icmal["durum"] ?? 0) != 1)
@@ -174,7 +174,7 @@ public static class IcmalUclari
                   left join public.hizmet hz on hz.id = s.hizmet_id
                   left join public.stok   st on st.id = s.stok_id
                  where ks.icmal_id = @p0 order by ks.id
-                """, null, [id], Satir, iptal);
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             if (kalemler.Count == 0)
                 throw GentegreHatasi.IsKurali("İcmalde satır yok.");
@@ -246,11 +246,4 @@ public static class IcmalUclari
         });
     }
 
-    private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
-    {
-        var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
-        for (var i = 0; i < o.FieldCount; i++)
-            satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
-        return satir;
-    }
 }

@@ -162,7 +162,7 @@ public static class RadyolojiUclari
                   left join public.kod_deger kd on kd.liste_id = kl.id
                                                and kd.deger = t.modalite
                  order by t.modalite, t.ad
-                """, null, [], Satir, iptal);
+                """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Bolum ve "randevu verilebilir" bayragi TARAF tablosunda
             //   (taraf.departman departman tablosuna isaret eder, 251) -
@@ -175,14 +175,14 @@ public static class RadyolojiUclari
                    and coalesce(t.randevu_verilebilir, 0) = 1
                    and coalesce(t.durum, 1) = 1
                  order by t.unvan
-                """, null, [], Satir, iptal);
+                """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // KAYITLI DIS HEKIMLER (305): dis istemde artik serbest metin yerine
             //   listeden secilir - "kim kac hasta gonderdi" sorusu ancak
             //   istek_hekim_id dolduysa cevaplanabiliyor.
             var disHekimler = await baglanti.ListeAsync("""
                 select id, ad, kurum, brans from public.v_dis_hekim_lookup order by ad
-                """, null, [], Satir, iptal);
+                """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Son 12 ay: aynı tetkik tekrar isteniyorsa hekim gerekçelendirsin.
             var gecmis = hastaId is null || hastaId <= 0
@@ -196,7 +196,7 @@ public static class RadyolojiUclari
                        and coalesce(i.cekim_tarihi, i.ekleme_tarihi)
                            >= (current_date - interval '12 months')
                      group by i.hizmet_id, hz.ad
-                    """, null, [hastaId.Value], Satir, iptal);
+                    """, null, [hastaId.Value], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { tetkikler, hekimler, disHekimler, gecmis });
         });
@@ -228,7 +228,7 @@ public static class RadyolojiUclari
                   from public.radyoloji_istem i
                   left join public.belge_satir s on s.id = i.belge_satir_id
                  where i.istek_hekim_id = @p0 and i.durum > 0
-                """, null, [id], Satir, iptal);
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Modalite dagilimi: hangi cihaz bu hekim icin kritik - MR
             //   kapasitesi planlanirken en cok gonderen hekimler buradan okunur.
@@ -241,7 +241,7 @@ public static class RadyolojiUclari
                  where i.istek_hekim_id = @p0 and i.durum > 0
                  group by coalesce(kd.ad, 'Diğer')
                  order by count(*) desc
-                """, null, [id], Satir, iptal);
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { ozet, dagilim });
         });
@@ -289,7 +289,7 @@ public static class RadyolojiUclari
                     select coalesce(unvan, '') as unvan, coalesce(vkno, '') as vkno,
                            coalesce(vd, '') as vd
                       from public.taraf where id = @p0
-                    """, null, [istek.HastaId], Satir, iptal)
+                    """, null, [istek.HastaId], OkuyucuGenisletmeleri.Sozluk, iptal)
                     ?? throw GentegreHatasi.Bulunamadi("Hasta bulunamadı.");
 
                 // Fiyat listesi belgenin KIMLIGIDIR (274/302): kampanya ->
@@ -493,7 +493,7 @@ public static class RadyolojiUclari
                            coalesce((select sum(s.hasta_tutar) from public.belge_satir s
                                       where s.belge_id = b.id), 0) as "hastaTutar"
                       from public.belge b where b.id = @p0
-                    """, null, [ozetId], Satir, iptal);
+                    """, null, [ozetId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             uyarilar.InsertRange(0, basvuruUyarilari);
             return Results.Ok(new { idler, accessionlar, uyarilar, belgeId, basvuru = basvuruOzeti });
@@ -523,7 +523,7 @@ public static class RadyolojiUclari
                   left join public.kod_deger kd
                          on kd.liste_id = kl.id and kd.deger = t.modalite
                  where t.hizmet_id = @p0
-                """, null, [hizmetId], Satir, iptal);
+                """, null, [hizmetId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Radyoloji tetkiki DEGILSE bos doner - randevu karti da uyari cizmez.
             return Results.Ok(satir);
@@ -559,7 +559,7 @@ public static class RadyolojiUclari
                                 where x.varsayilan = 1 and coalesce(x.durum, 1) = 1),
                               (select min(x.id) from public.depo x
                                 where coalesce(x.durum, 1) = 1))
-                """, null, [depoAyar], Satir, iptal);
+                """, null, [depoAyar], OkuyucuGenisletmeleri.Sozluk, iptal);
             var depoId = depo is null ? (int?)null : Convert.ToInt32(depo["id"]);
 
             // Istemin CD istegi (311): "istenirse" tipli malzeme (CD) yalniz
@@ -570,7 +570,7 @@ public static class RadyolojiUclari
                        coalesce(i.kontrast, 0) as kontrast,
                        coalesce(i.kontrast_ml, 0) as "kontrastMl", i.durum
                   from public.radyoloji_istem i where i.id = @p0
-                """, null, [id], Satir, iptal)
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
 
             var satirlar = await baglanti.ListeAsync("""
@@ -585,7 +585,7 @@ public static class RadyolojiUclari
                          on sd.stok_id = m.stok_id and sd.depo_id = @p1
                  where p.hizmet_id = @p0
                  order by m.sira, m.stok_id
-                """, null, [istem["hizmetId"], depoId], Satir, iptal);
+                """, null, [istem["hizmetId"], depoId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // IZLEMLI (lot/seri) stoklarin o depodaki bakiyeleri: modal lot
             //   sectirir, SKT'si en yakin olan basa gelir (ilk giren ilk cikar
@@ -602,14 +602,14 @@ public static class RadyolojiUclari
                                        join public.radyoloji_protokol p on p.id = m.protokol_id
                                       where p.hizmet_id = @p0 and m.izleme > 0)
                  order by sl.son_kullanma_tarihi nulls last, sl.id
-                """, null, [istem["hizmetId"], depoId], Satir, iptal);
+                """, null, [istem["hizmetId"], depoId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var dusulen = await baglanti.ListeAsync("""
                 select s.stok_id as "stokId", s.miktar, s.belge_id as "belgeId",
                        s.ekleme_tarihi as "zaman"
                   from public.radyoloji_sarf s where s.istem_id = @p0
                  order by s.id
-                """, null, [id], Satir, iptal);
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new
             {
@@ -645,7 +645,7 @@ public static class RadyolojiUclari
                   from public.radyoloji_istem i
                   left join public.hizmet hz on hz.id = i.hizmet_id
                  where i.id = @p0
-                """, null, [id], Satir, iptal)
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
 
             var depoAyar = await AyarDeposu.MetinAsync(baglanti, null,
@@ -723,7 +723,7 @@ public static class RadyolojiUclari
                   join public.stok s on s.id = sd.stok_id
                  where sd.depo_id = @p0 and sd.stok_id = any(@p1)
                    and coalesce(sd.min_stok, 0) > 0 and sd.kalan <= sd.min_stok
-                """, null, [depoId, satirlar.Select(x => x.StokId).ToArray()], Satir, iptal);
+                """, null, [depoId, satirlar.Select(x => x.StokId).ToArray()], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { belgeId, uyarilar, kritik });
         });
@@ -774,7 +774,7 @@ public static class RadyolojiUclari
                   (select count(*) from public.radyoloji_istem i
                     where i.durum = 1 and i.randevu_id is null
                       and (@p1::int is null or i.sube_id = @p1))          as "randevusuz"
-                """, null, [tarih, baglam.SubeId], Satir, iptal);
+                """, null, [tarih, baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // -------------------------------------------- cihaz dolulugu ----
             // Payda: cihazin o gunku MESAI dakikasi eksi ogle arasi ve kapatma.
@@ -827,7 +827,7 @@ public static class RadyolojiUclari
                   left join public.kod_liste kl on kl.kod = 'rad.modalite'
                   left join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = m.modalite
                  order by m.modalite, m.ad
-                """, null, [tarih, baglam.SubeId], Satir, iptal);
+                """, null, [tarih, baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // ------------------------------------------- modalite dagilimi ----
             // Son 30 gun: tek gunluk dagilim kucuk kurumda anlamsiz dalgalanir.
@@ -853,7 +853,7 @@ public static class RadyolojiUclari
                    and coalesce(i.cekim_tarihi, i.ekleme_tarihi) >= (@p0::date - interval '30 day')
                  group by i.modalite, kd.ad
                  order by 3 desc
-                """, null, [tarih, baglam.SubeId], Satir, iptal);
+                """, null, [tarih, baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // ---------------------------------------------- radyolog yuku ----
             // Acik = yazilmis ama onaylanmamis rapor (taslak / on rapor).
@@ -871,7 +871,7 @@ public static class RadyolojiUclari
                    and (r.durum < 3 or r.onay_tarihi::date = @p0)
                  group by t.unvan
                  order by 2 desc, 3 desc
-                """, null, [tarih, baglam.SubeId], Satir, iptal);
+                """, null, [tarih, baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // ------------------------------------------------- uyarilar ----
             // "Dikkat gerektirenler": her satir bir LISTEYE gider. Sayac
@@ -927,7 +927,7 @@ public static class RadyolojiUclari
                  where k.baslangic < (@p0::date + interval '1 day') and k.bitis > @p0::date
                    and (@p1::int is null or c.sube_id = @p1)
                  order by k.baslangic
-                """, null, [tarih, baglam.SubeId], Satir, iptal);
+                """, null, [tarih, baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
             foreach (var k in kapali)
                 uyarilar.Add(new { tip = "uy", ik = "🔒",
                     metin = $"{k["cihaz"]} bugün kapalı: {k["neden"]}.",
@@ -966,7 +966,7 @@ public static class RadyolojiUclari
                  where k.baslangic < @p1 and k.bitis > @p0
                    and (@p2::int is null or c.sube_id = @p2)
                  order by k.cihaz_id, k.baslangic
-                """, null, [bas, bit, baglam.SubeId], Satir, iptal);
+                """, null, [bas, bit, baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Cihazin OGLE ARASI: ayri tablo degil cihaz ayari - takvimde ayni
             //   bicimde cizilsin diye burada aralik satirina cevrilir.
@@ -977,7 +977,7 @@ public static class RadyolojiUclari
                  where coalesce(c.durum, 1) = 1 and c.randevu_verilir = 1
                    and c.ogle_baslangic <> '' and c.ogle_bitis <> ''
                    and (@p0::int is null or c.sube_id = @p0)
-                """, null, [baglam.SubeId], Satir, iptal);
+                """, null, [baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { kapatmalar = satirlar, ogleArasi = cihazlar });
         });
@@ -1049,7 +1049,7 @@ public static class RadyolojiUclari
                    and (@p0::int is null or i.sube_id = @p0)
                  order by i.oncelik desc, i.ekleme_tarihi
                  limit 100
-                """, null, [baglam.SubeId], Satir, iptal);
+                """, null, [baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(satirlar);
         });
@@ -1086,7 +1086,7 @@ public static class RadyolojiUclari
                   left join public.kod_deger kc
                          on kc.liste_id = kl.id and kc.deger = c.modalite
                  where i.id = @p0
-                """, null, [id, istek.CihazId], Satir, iptal)
+                """, null, [id, istek.CihazId], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
 
             if (Convert.ToInt32(istem["durum"]) == 0)
@@ -1162,7 +1162,7 @@ public static class RadyolojiUclari
                  where k.hasta_id = @p0 and coalesce(k.aktif, 1) = 1
                  order by k.id desc
                  limit 1
-                """, null, [id], Satir, iptal);
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(odeme ?? new Dictionary<string, object?>());
         });
@@ -1206,7 +1206,7 @@ public static class RadyolojiUclari
                   left join public.taraf ry on ry.id = r.yazan_id
                   left join public.taraf ek on ek.id = i.ekleyen
                  where i.id = @p0
-                """, null, [id], Satir, iptal)
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Istem bulunamadi.");
 
             return Results.Ok(akis);
@@ -1235,7 +1235,7 @@ public static class RadyolojiUclari
                   left join public.taraf p on p.id = k.kaydeden
                  where i.id = @p0
                  order by s.sira, s.id
-                """, null, [id], Satir, iptal);
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { sorular });
         });
@@ -1315,7 +1315,7 @@ public static class RadyolojiUclari
                   left join public.belge_basvuru bb on bb.id = b.id
                   left join public.taraf ok on ok.id = bb.odeyen_kurum_id
                  where i.id = @p0
-                """, null, [id], Satir, iptal)
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
 
             var hizmetId = Convert.ToInt32(istem["hizmetId"] ?? 0);
@@ -1330,7 +1330,7 @@ public static class RadyolojiUclari
                   left join public.taraf yz on yz.id = r.yazan_id
                   left join public.taraf on_ on on_.id = r.onaylayan_id
                  where r.istem_id = @p0 and r.ust_rapor_id is null
-                """, null, [id], Satir, iptal);
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var bolumler = rapor is null
                 ? new List<IDictionary<string, object?>>()
@@ -1342,14 +1342,14 @@ public static class RadyolojiUclari
                       left join public.radyoloji_sablon_bolum sb
                              on sb.sablon_id = r.sablon_id and sb.baslik = b.baslik
                      where b.rapor_id = @p0 order by b.sira
-                    """, null, [Convert.ToInt32(rapor["id"])], Satir, iptal);
+                    """, null, [Convert.ToInt32(rapor["id"])], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var alanlar = rapor is null
                 ? new List<IDictionary<string, object?>>()
                 : await baglanti.ListeAsync("""
                     select alan_kod as "alanKod", alan_ad as "alanAd", deger
                       from public.radyoloji_rapor_alan where rapor_id = @p0 order by id
-                    """, null, [Convert.ToInt32(rapor["id"])], Satir, iptal);
+                    """, null, [Convert.ToInt32(rapor["id"])], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Şablonlar: önce tetkike bağlı olanlar, sonra aynı modalitenin
             //   genel şablonları (tetkike özel yoksa hekim yine bir şey bulsun).
@@ -1361,7 +1361,7 @@ public static class RadyolojiUclari
                    and (s.hizmet_id = @p0
                         or (s.hizmet_id is null and s.modalite = @p1))
                  order by "tetkigeOzel" desc, s.varsayilan desc, s.ad
-                """, null, [hizmetId, Convert.ToInt32(istem["modalite"] ?? 0)], Satir, iptal);
+                """, null, [hizmetId, Convert.ToInt32(istem["modalite"] ?? 0)], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var sablonId = rapor?["sablonId"] as int?
                         ?? (sablonlar.Count > 0 ? Convert.ToInt32(sablonlar[0]["id"]) : (int?)null);
@@ -1371,7 +1371,7 @@ public static class RadyolojiUclari
                 : await baglanti.ListeAsync("""
                     select kisayol, ad, metin, hedef_bolum as "hedefBolum"
                       from public.radyoloji_sablon_makro where sablon_id = @p0 order by id
-                    """, null, [sablonId.Value], Satir, iptal);
+                    """, null, [sablonId.Value], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var skorlar = sablonId is null
                 ? new List<IDictionary<string, object?>>()
@@ -1379,7 +1379,7 @@ public static class RadyolojiUclari
                     select alan_kod as "alanKod", alan_ad as "alanAd", tip, secenekler,
                            zorunlu, rapora_bas as "raporaBas"
                       from public.radyoloji_sablon_alan where sablon_id = @p0 order by sira
-                    """, null, [sablonId.Value], Satir, iptal);
+                    """, null, [sablonId.Value], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Önceki tetkikler: karşılaştırma bölümü bunlardan yazılır.
             var gecmis = await baglanti.ListeAsync("""
@@ -1396,13 +1396,13 @@ public static class RadyolojiUclari
                   left join public.taraf on_ on on_.id = r.onaylayan_id
                  where i.hasta_id = @p0 and i.id <> @p1 and i.durum > 0
                  order by coalesce(i.cekim_tarihi, i.ekleme_tarihi) desc limit 8
-                """, null, [hastaId, id], Satir, iptal);
+                """, null, [hastaId, id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var kritikler = await baglanti.ListeAsync("""
                 select bulgu, bildirilen_ad as "bildirilenAd", yol,
                        bildirim_zamani as "bildirimZamani", geri_bildirim as "geriBildirim"
                   from public.radyoloji_kritik_bulgu where istem_id = @p0 order by id desc
-                """, null, [id], Satir, iptal);
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { istem, rapor, bolumler, alanlar, sablonlar, makrolar,
                                     skorlar, gecmis, kritikler });
@@ -1454,7 +1454,7 @@ public static class RadyolojiUclari
                   left join public.belge_basvuru bb on bb.id = b.id
                   left join public.taraf ok on ok.id = bb.odeyen_kurum_id
                  where r.id = @p0
-                """, null, [id], Satir, iptal)
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Rapor bulunamadı.");
 
             var bolumler = await baglanti.ListeAsync("""
@@ -1463,7 +1463,7 @@ public static class RadyolojiUclari
                  where rapor_id = @p0 and coalesce(yazdir, 1) = 1
                    and coalesce(metin, '') <> ''
                  order by sira
-                """, null, [id], Satir, iptal);
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Skor/ölçüm alanları rapora BASILACAK olanlarla sınırlı.
             var alanlar = await baglanti.ListeAsync("""
@@ -1476,7 +1476,7 @@ public static class RadyolojiUclari
                    and coalesce(sa.rapora_bas, 1) = 1
                    and coalesce(a.deger, '') <> ''
                  order by a.id
-                """, null, [id], Satir, iptal);
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // EK RAPORLAR (addendum): orijinalin altında, tarihleriyle basılır -
             //   düzeltme ayrı kayıttır, orijinal metin değişmez.
@@ -1490,7 +1490,7 @@ public static class RadyolojiUclari
                   left join public.taraf on_ on on_.id = r.onaylayan_id
                  where r.ust_rapor_id = @p0
                  order by r.id
-                """, null, [id], Satir, iptal);
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // ANTET: raporun ait olduğu şube (kurum kimliği hastaya verilen
             //   belgede zorunlu). Şube yoksa varsayılan şube kullanılır.
@@ -1502,7 +1502,7 @@ public static class RadyolojiUclari
                                          join public.radyoloji_rapor r on r.istem_id = i.id
                                         where r.id = @p0),
                                        (select id from public.sube where varsayilan = 1 limit 1))
-                """, null, [id], Satir, iptal);
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { rapor, bolumler, alanlar, ekler, kurum });
         });
@@ -1796,7 +1796,7 @@ public static class RadyolojiUclari
                   from public.radyoloji_teslim t
                   left join public.taraf p on p.id = t.teslim_eden_id
                  where t.istem_id = @p0 order by t.id desc
-                """, null, [id], Satir, iptal));
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal));
         });
 
         // ------------------------------------------------- konsültasyon ----
@@ -1863,17 +1863,10 @@ public static class RadyolojiUclari
                   left join public.taraf h on h.id = k.hekim_id
                   left join public.taraf kr on kr.id = k.kurum_id
                  where k.istem_id = @p0 order by k.id desc
-                """, null, [id], Satir, iptal));
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal));
         });
     }
 
-    private static IDictionary<string, object?> Satir(NpgsqlDataReader o)
-    {
-        var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
-        for (var i = 0; i < o.FieldCount; i++)
-            satir[o.GetName(i)] = o.IsDBNull(i) ? null : o.GetValue(i);
-        return satir;
-    }
 
     /// <summary>
     /// Sozluk -> BelgeDeposu'nun bekledigi JsonElement satiri. Belge yazma
@@ -1915,7 +1908,7 @@ public static class RadyolojiUclari
               from public.belge b
               left join public.belge_basvuru bb on bb.id = b.id
              where b.id = @p0
-            """, null, [belgeId], Satir, iptal)
+            """, null, [belgeId], OkuyucuGenisletmeleri.Sozluk, iptal)
             ?? throw GentegreHatasi.Bulunamadi("Başvuru bulunamadı.");
 
         var mevcut = await baglanti.ListeAsync("""
@@ -1930,7 +1923,7 @@ public static class RadyolojiUclari
                    s.pay, s.kurum_tutar as "kurumTutar", s.hasta_tutar as "hastaTutar",
                    s.sira
               from public.belge_satir s where s.belge_id = @p0 order by s.sira, s.id
-            """, null, [belgeId], Satir, iptal);
+            """, null, [belgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
         return (belge, mevcut.Select(SatirGovdesi).ToList());
     }
