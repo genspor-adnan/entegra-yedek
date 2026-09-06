@@ -779,6 +779,45 @@ olarak görünür.
 
 ---
 
+## 9.8 Muayene › İstem & Sonuçlar (443)
+
+```http
+GET  /api/lab/muayene/{id}/sonuclar   // bağlar + istemler + sonuç satırları
+                                      //      + kültür/genetik özeti + radyoloji
+POST /api/muayene/istem/{bagId}/gordu // hekim sonucu gördü (418)
+```
+
+**Bağ satırı yetmez.** `muayene_istem` yalnız "şu istem açıldı" der; hekimin
+ihtiyacı sonucun kendisidir. Kart yalnız bağ gridini gösterseydi hekim her
+sonuç için laboratuvar ekranına gitmek zorunda kalırdı — muayene sırasında
+olmayacak bir şey.
+
+**Aynı başvurunun laboratuvardan açılmış istemleri de gelir**: bankodan
+istenen tetkik de o hastanın o başvurusuna aittir ve hekimi ilgilendirir.
+Bağ satırı olmayan istemlerde "Gördüm" düğmesi çıkmaz (işaretlenecek bir bağ
+yoktur), sonuçlar yine görünür.
+
+**Yalnız ONAYLI sonuçlar** döner; onaylanmamış tetkik "sonuç bekleniyor"
+olarak listelenir — eksikliğin kendisi de hekim için bilgidir.
+
+**Kültür ve genetik ÖZET** gelir (sonuç cümlesi, raporlanan antibiyotik /
+varyant sayısı, uzman yorumu): ayrıntı laboratuvar ekranındadır, muayene
+sırasında okunacak şey sonuçtur. Radyoloji istemleri aynı sekmede listelenir —
+hekim için "istem" tek kavramdır, modülü değil sonucu arar.
+
+**"Gördüm" ayrı bir olaydır**: sonucun gelmesi ile hekimin görmesi farklı
+şeylerdir; panik değer teyidi ve "sonuç bekliyor" rozetinin kapanması buna
+bağlıdır.
+
+**Ekran**: muayene kartındaki **İstem & Sonuçlar** sekmesi; katalogdan gelen
+bağ gridinin altına panel eklenir (grid kaldırılmadı — aciliyet ve "görüldü"
+damgası orada tutuluyor). Her istem başlığında **🖨 Sonuç Raporu** düğmesi
+raporu açar.
+
+**Yetki**: `muayene` (Gör).
+
+---
+
 ---
 
 ## 10. Sürümleme

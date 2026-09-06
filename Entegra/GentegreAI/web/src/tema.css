@@ -1464,6 +1464,33 @@ input.skt-gecmis {
   font-weight: 700; color: #1c4374; margin-top: 8px; font-size: 12px;
 }
 .cikti-sayfa .not { font-size: 10.5px; color: #6b7a8d; line-height: 1.5; margin: 4px 0 0 }
+/* MUAYENE > ISTEM & SONUCLAR (443): kart sekmesinin icinde, gridin
+   altinda duran sonuc paneli. Tablo dar - muayene sirasinda hekim uzun
+   satir okumaz, bakisi bayraga ve degere gider. */
+.istem-sonuc { margin-top: 10px; display: flex; flex-direction: column; gap: 10px }
+.istem-sonuc .kart-bolum {
+  border: 1px solid #e6edf5; border-radius: 6px; padding: 8px 10px; background: #fff;
+}
+.istem-sonuc .bolum-baslik {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;
+}
+.istem-sonuc .gen-tablo.dar { width: 100%; border-collapse: collapse; font-size: 12px }
+.istem-sonuc .gen-tablo.dar th {
+  text-align: left; color: #6b7a8d; font-weight: 600; border-bottom: 1px solid #e6edf5;
+  padding: 3px 6px 3px 0;
+}
+.istem-sonuc .gen-tablo.dar td {
+  border-bottom: 1px solid #f2f6fa; padding: 3px 6px 3px 0; vertical-align: top;
+}
+.istem-sonuc .gen-tablo.dar td.sag { text-align: right }
+.istem-sonuc .gen-tablo.dar td.vurgu { color: #c0392b; font-weight: 700 }
+.istem-sonuc .gen-tablo.dar tr.panik td { background: #fdf4f3 }
+.istem-sonuc .alt-kutu {
+  margin-top: 6px; padding: 6px 8px; background: #f7fafd; border-radius: 4px;
+  font-size: 12px;
+}
+.istem-sonuc .not { color: #6b7a8d; font-size: 11px }
+
 /* LEVEY-JENNINGS (442): kagida da basilabilsin diye SVG - ayri bir
    grafik kutuphanesi yuklemek, tek grafik icin 200 KB demekti. */
 .lj-grafik { width: 100%; height: auto; margin-top: 10px; background: #fcfdfe;

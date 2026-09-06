@@ -7083,3 +7083,37 @@ ve tekrar ölçümünden sonra aynı test *"otomatik onaylandı"* (durum 5).
 
 DKK: KBUDEK GLU (SDI +0,50) ve KRE (SDI +1,90), RIQAS TSH (SDI −0,30) —
 üçü de kabul.
+
+---
+
+## 06.09.2026 — Muayene kartında "İstem & Sonuçlar" sekmesi (443)
+
+Sekme başlığı 411'den beri vardı ama içinde yalnız `muayene_istem` bağ gridi
+duruyordu: tür, hedef tablo, aciliyet, "görüldü". Sonucun kendisi yoktu.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K146 | Bağ gridi KALDI, altına sonuç paneli eklendi (`sekmeSarmalayici`) | Aciliyet ve "görüldü" damgası bağ satırında tutuluyor; gridi kaldırmak o iki alanı düzenlenemez yapardı |
+| K147 | Aynı **başvurunun** laboratuvardan açılmış istemleri de gelir | Bankodan istenen tetkik de o hastanın o başvurusuna ait; muayeneden açılmadı diye hekimden gizlenemez |
+| K148 | Yalnız **onaylı** sonuçlar; bekleyen tetkik "sonuç bekleniyor" satırı olarak görünür | Doğrulanmamış değere göre tedavi başlatılmamalı; ama eksikliğin kendisi de bilgidir - hekim neyin gelmediğini görmeli |
+| K149 | Kültür ve genetik **özet** (sonuç cümlesi + raporlanan bulgu sayısı), ayrıntı laboratuvar ekranında | Muayene sırasında okunacak şey sonuçtur; antibiyogram tablosunun tamamı sekmede yer kaplar ve asıl bulguyu gölgeler |
+| K150 | Radyoloji aynı sekmede | Hekim için "istem" tek kavram - modülü değil sonucu arar |
+| K151 | Panik uyarısı panelin **en üstünde** ayrı kutuda | Hekimin görmesi gereken tek şey buysa tabloların arasında kaybolmamalı |
+
+### Yapılanlar
+
+- **API**: `GET /api/lab/muayene/{id}/sonuclar` (sözleşme §9.8) — bağlar,
+  istemler (bağ id + görüldü damgası ile), onaylı sonuç satırları
+  (bayrak/panik/delta/referans), kültür ve genetik özetleri, radyoloji.
+- **Ekran**: `MuayeneIstemSonuc` bileşeni; muayene kartında "İstem &
+  Sonuçlar" sekmesinin altına yerleşir. Her istem için sonuç tablosu,
+  kültür/genetik özet kutuları, **🖨 Sonuç Raporu** ve **👁 Gördüm**.
+
+### Uçtan uca (yerel)
+
+ELİF ŞAHİN'in başvurusundan muayene açıldı (id 13): sekme, başvurunun **üç
+lab istemini** getirdi — biri tam onaylı (GLU 28 **LL panik**, KRE N, ALT/AST
+H), ikisi "sonuç bekleniyor". Muayeneden TSH istendi; bağ satırı oluştu,
+**👁 Gördüm** damgası yazıldı ve sekmede göründü.

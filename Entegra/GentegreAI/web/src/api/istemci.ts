@@ -336,6 +336,22 @@ export const api = {
     gonder<{ yazilan: number; atlanan: number; mesaj: string }>(
       `/api/lab/cihaz-mesaj/${mesajId}/isle`, {}),
 
+  /** Muayene karti "Istem & Sonuclar" sekmesi (443): bag + SONUCUN KENDISI. */
+  muayeneSonuclari: (muayeneId: number) =>
+    istek<{ muayeneId: number; belgeId: number | null;
+            baglar: Record<string, unknown>[];
+            istemler: Record<string, unknown>[];
+            sonuclar: Record<string, unknown>[];
+            kulturler: Record<string, unknown>[];
+            vakalar: Record<string, unknown>[];
+            radyoloji: Record<string, unknown>[] }>(
+      `/api/lab/muayene/${muayeneId}/sonuclar`),
+
+  /** Hekim sonucu gordu (418): sonucun gelmesi ile gorulmesi AYRI olaylar. */
+  muayeneIstemGordu: (bagId: number) =>
+    gonder<{ id: number; zaman: string; mesaj: string }>(
+      `/api/muayene/istem/${bagId}/gordu`, {}),
+
   // -------------------------------------------------- KALITE KONTROL (442)
   /** KK olcumu: z skoru ve Westgard degerlendirmesi SUNUCUDA hesaplanir. */
   kkOlcum: (govde: { lotId: number; tetkikId: number; seviye: number;

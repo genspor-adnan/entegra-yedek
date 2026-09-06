@@ -1116,6 +1116,176 @@ public static class LabUclari
             return Results.Ok(new { liste, izlemeNo = baglam.IzlemeNo });
         });
 
+        // --------------------------------------------- muayene istem & sonuç ---
+
+        // GET /api/lab/muayene/{id}/sonuclar - muayene kartının
+        //   "İstem & Sonuçlar" sekmesi.
+        //
+        // <b>Bağ satırı yetmez.</b> muayene_istem yalnız "şu istem açıldı"
+        // der; hekimin görmesi gereken SONUCUN KENDİSİDİR. Sekmede yalnız
+        // bağ gösterilirse hekim her sonuç için laboratuvar ekranına gitmek
+        // zorunda kalır - muayene sırasında olmayacak bir şey.
+        //
+        // <b>Aynı başvurunun laboratuvardan açılmış istemleri de gelir</b>:
+        // muayeneden değil bankodan istenen tetkik de o hastanın o
+        // başvurusuna aittir ve hekimi ilgilendirir.
+        grup.MapGet("/muayene/{id:int}/sonuclar", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Gor);
+
+            var m = await veri.TekAsync("""
+                select m.id, m.belge_id, m.taraf_id, m.durum
+                  from public.muayene m where m.id = @p0
+                """, [id],
+                o => new { Id = o.GetInt32(0),
+                           BelgeId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1),
+                           HastaId = o.GetInt32(2), Durum = o.GetInt16(3) }, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Muayene bulunamadı.");
+
+            // Bağ satırları: hekimin "gördüm" işareti bunlarda durur.
+            var baglar = await veri.ListeAsync("""
+                select mi.id, mi.tur, mi.hedef_tablo as "hedefTablo", mi.hedef_id as "hedefId",
+                       mi.aciliyet, mi.istem_zamani as "istemZamani",
+                       mi.sonuc_durum as "sonucDurum", mi.sonuc_zamani as "sonucZamani",
+                       mi.hekim_gordu as "hekimGordu"
+                  from public.muayene_istem mi
+                 where mi.muayene_id = @p0
+                 order by mi.istem_zamani desc, mi.id desc
+                """, [id], RaporSatiri, iptal);
+
+            // LAB İSTEMLERİ: muayeneden açılanlar + aynı başvurunun diğerleri.
+            var istemler = await veri.ListeAsync("""
+                select i.id, i.istem_no as "istemNo", i.istem_tarihi as "istemTarihi",
+                       i.durum, i.oncelik, i.klinik_bilgi as "klinikBilgi",
+                       i.hedef_bitis as "hedefBitis",
+                       (select count(*) from public.lab_istem_satir s
+                         where s.istem_id = i.id and s.durum <> 0) as tetkik,
+                       (select count(*) from public.lab_istem_satir s
+                         where s.istem_id = i.id and s.durum = 5) as onayli,
+                       (select mi.id from public.muayene_istem mi
+                         where mi.muayene_id = @p0 and mi.hedef_tablo = 'lab_istem'
+                           and mi.hedef_id = i.id limit 1) as "bagId",
+                       (select mi.hekim_gordu from public.muayene_istem mi
+                         where mi.muayene_id = @p0 and mi.hedef_tablo = 'lab_istem'
+                           and mi.hedef_id = i.id limit 1) as "hekimGordu"
+                  from public.lab_istem i
+                 where i.durum <> 9
+                   and (i.belge_id = @p1
+                        or exists (select 1 from public.muayene_istem mi
+                                    where mi.muayene_id = @p0
+                                      and mi.hedef_tablo = 'lab_istem'
+                                      and mi.hedef_id = i.id))
+                 order by i.istem_tarihi desc, i.id desc
+                """, [id, m.BelgeId], RaporSatiri, iptal);
+
+            // SONUÇ SATIRLARI: yalnız ONAYLI olanlar. Onaylanmamış değeri
+            //   hekime göstermek, laboratuvarın henüz doğrulamadığı bir
+            //   sayıya göre tedavi başlatılmasına yol açar.
+            var sonuclar = await veri.ListeAsync("""
+                select s.istem_id as "istemId", t.kod, t.ad, t.bolum, t.tur as "tetkikTur",
+                       ls.deger_metin as deger, ls.birim, ls.bayrak, ls.panik,
+                       ls.delta_uyari as "deltaUyari", ls.referans_alt as "referansAlt",
+                       ls.referans_ust as "referansUst", ls.referans_metin as "referansMetin",
+                       ls.olcum_zamani as "olcumZamani", ls.onay_zamani as "onayZamani",
+                       ls.yorum, s.durum as "satirDurum"
+                  from public.lab_istem_satir s
+                  join public.lab_tetkik t on t.id = s.tetkik_id
+                  left join lateral (
+                        select * from public.lab_sonuc x
+                         where x.istem_satir_id = s.id and x.durum = 3
+                         order by x.id desc limit 1) ls on true
+                 where s.durum <> 0
+                   and s.istem_id in (
+                        select i2.id from public.lab_istem i2
+                         where i2.durum <> 9
+                           and (i2.belge_id = @p1
+                                or exists (select 1 from public.muayene_istem mi
+                                            where mi.muayene_id = @p0
+                                              and mi.hedef_tablo = 'lab_istem'
+                                              and mi.hedef_id = i2.id)))
+                 order by s.istem_id desc, t.bolum, s.sira
+                """, [id, m.BelgeId], RaporSatiri, iptal);
+
+            // Kültür ve genetik ÖZETİ: ayrıntı laboratuvar ekranında, hekime
+            //   sonuç cümlesi ve raporlanan bulgular yeter.
+            var kulturler = await veri.ListeAsync("""
+                select k.id, k.istem_id as "istemId", t.ad as tetkik, k.durum,
+                       public.fn_lab_kultur_ozet(k.id) as ozet,
+                       k.on_rapor as "onRapor", k.uzman_yorum as "uzmanYorum",
+                       k.kritik, k.onay_zamani as "onayZamani",
+                       (select count(*) from public.lab_antibiyogram g
+                          join public.lab_kultur_ureme u on u.id = g.ureme_id
+                         where u.kultur_id = k.id and g.bildir = 1) as "abSayisi"
+                  from public.lab_kultur k
+                  join public.lab_tetkik t on t.id = k.tetkik_id
+                 where k.durum <> 0
+                   and k.istem_id in (
+                        select i2.id from public.lab_istem i2
+                         where i2.belge_id = @p1
+                            or exists (select 1 from public.muayene_istem mi
+                                        where mi.muayene_id = @p0
+                                          and mi.hedef_tablo = 'lab_istem'
+                                          and mi.hedef_id = i2.id))
+                 order by k.id desc
+                """, [id, m.BelgeId], RaporSatiri, iptal);
+
+            var vakalar = await veri.ListeAsync("""
+                select g.id, g.istem_id as "istemId", g.vaka_no as "vakaNo",
+                       coalesce(p.ad, t.ad) as test, g.durum,
+                       public.fn_lab_genetik_ozet(g.id) as ozet,
+                       g.uzman_yorum as "uzmanYorum", g.oneriler,
+                       g.onay_zamani as "onayZamani",
+                       (select count(*) from public.lab_varyant v
+                         where v.vaka_id = g.id and v.raporla = 1) as "varyantSayisi"
+                  from public.lab_genetik_vaka g
+                  join public.lab_tetkik t on t.id = g.tetkik_id
+                  left join public.lab_genetik_panel p on p.id = g.panel_id
+                 where g.durum <> 0
+                   and g.istem_id in (
+                        select i2.id from public.lab_istem i2
+                         where i2.belge_id = @p1
+                            or exists (select 1 from public.muayene_istem mi
+                                        where mi.muayene_id = @p0
+                                          and mi.hedef_tablo = 'lab_istem'
+                                          and mi.hedef_id = i2.id))
+                 order by g.id desc
+                """, [id, m.BelgeId], RaporSatiri, iptal);
+
+            // RADYOLOJİ: aynı sekmede görünür - hekim için "istem" tek
+            //   kavramdır, modülü değil sonucu arar.
+            var radyoloji = await veri.ListeAsync("""
+                select ri.id, hz.ad as tetkik, ri.durum, ri.cekim_tarihi as "cekimTarihi",
+                       coalesce(r.rapor_no, '') as "raporNo", r.onay_tarihi as "onayTarihi",
+                       coalesce((select string_agg(b.metin, ' ' order by b.sira)
+                                   from public.radyoloji_rapor_bolum b
+                                  where b.rapor_id = r.id
+                                    and lower(b.baslik) like '%sonu%'), '') as sonuc,
+                       (select mi.id from public.muayene_istem mi
+                         where mi.muayene_id = @p0 and mi.hedef_tablo = 'radyoloji_istem'
+                           and mi.hedef_id = ri.id limit 1) as "bagId",
+                       (select mi.hekim_gordu from public.muayene_istem mi
+                         where mi.muayene_id = @p0 and mi.hedef_tablo = 'radyoloji_istem'
+                           and mi.hedef_id = ri.id limit 1) as "hekimGordu"
+                  from public.radyoloji_istem ri
+                  left join public.hizmet hz on hz.id = ri.hizmet_id
+                  left join public.radyoloji_rapor r
+                         on r.istem_id = ri.id and r.ust_rapor_id is null
+                 where ri.belge_id = @p1
+                    or exists (select 1 from public.muayene_istem mi
+                                where mi.muayene_id = @p0
+                                  and mi.hedef_tablo = 'radyoloji_istem'
+                                  and mi.hedef_id = ri.id)
+                 order by ri.id desc
+                """, [id, m.BelgeId], RaporSatiri, iptal);
+
+            return Results.Ok(new { muayeneId = id, belgeId = m.BelgeId, baglar,
+                                    istemler, sonuclar, kulturler, vakalar, radyoloji,
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
         // ------------------------------------------------------------ cihaz ---
 
         // GET /api/lab/cihaz/{id}/calisma-listesi/{barkod} - HOST QUERY.

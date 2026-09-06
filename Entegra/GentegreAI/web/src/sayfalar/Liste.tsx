@@ -5,6 +5,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
 import { GenForm } from '../bilesenler/GenForm';
+import { MuayeneIstemSonuc } from '../bilesenler/MuayeneIstemSonuc';
 import {
   type EBelgeMesaji, type Kosul, type ListeSatiri, type RandevuBolumDugumu, hataMetni,
 } from '../api/sozlesme';
@@ -2070,6 +2071,20 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       <GenForm
         kaynak={tanim.kaynak}
         id={kartId}
+        // MUAYENE > ISTEM & SONUCLAR (443): katalogdan gelen bag gridi
+        //   "su istem acildi" der; hekimin ihtiyaci SONUCUN KENDISI.
+        //   Sarmalayici o sekmenin ALTINA sonuc panelini koyar - gridi
+        //   kaldirmadan, cunku "gorduм" isareti ve aciliyet orada duruyor.
+        sekmeSarmalayici={tanim.kaynak === 'muayene' && kartId !== 'yeni'
+          ? (baslik, icerik) => (
+              <>
+                {icerik}
+                {baslik.includes('Sonuç') && (
+                  <MuayeneIstemSonuc muayeneId={Number(kartId)} />
+                )}
+              </>
+            )
+          : undefined}
         baslik={tanim.kartBaslik ?? tanim.baslik.replace(/ler$|lar$/, '')}
         yerTutucuSekmeler={tanim.yerTutucuSekmeler}
         gizliAlanlar={tanim.gizliKartAlanlari}
