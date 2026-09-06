@@ -70,7 +70,7 @@ const GRUP_IKON: Record<string, string> = {
   'Stok & Hizmet': '📦',
   // Muhasebe ana menusu (kullanici): Stok'tan sonra gelir - hesap plani, fisler,
   //   fis satirlari, masraf merkezleri ve islem turleri Yonetim'den buraya alindi.
-  'Muhasebe': '📚',
+  'Muhasebe': '⚖️',
   'İK':      '👥',
   'Yönetim': '🛠️',
 };
@@ -97,7 +97,7 @@ const GRUP_IKON_CEV: Record<string, string> = {
   'Cash': '💵', 'Kasse': '💵',
   'Bank': '🏦',
   'Items & Services': '📦', 'Artikel & Leistungen': '📦',
-  'Accounting': '📚', 'Buchhaltung': '📚',
+  'Accounting': '⚖️', 'Buchhaltung': '⚖️',
   'HR': '👥', 'Personal': '👥',
   'Administration': '🛠️', 'Verwaltung': '🛠️',
 };
