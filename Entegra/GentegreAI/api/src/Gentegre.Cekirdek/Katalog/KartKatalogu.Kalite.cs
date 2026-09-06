@@ -193,4 +193,47 @@ public static partial class KartKatalogu
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 600,
                 Baslik: "Açıklama", Grup: "Olay"),
         });
+
+    private static readonly Dictionary<string, string> IndeksKodlari = new()
+        { ["1"] = "Hemoliz (H)", ["2"] = "Lipemi (L)", ["3"] = "İkter (İ)" };
+
+    // ETKİ YÖNÜ raporda yazılır: "hemoliz yüzünden yüksek görünüyor" ile
+    //   "hemoliz sonucu etkiler" arasındaki fark, hekimin kararını değiştirir.
+    private static readonly Dictionary<string, string> IndeksEtkiKodlari = new()
+    {
+        ["1"] = "Yalancı yükseklik", ["2"] = "Yalancı düşüklük",
+        ["3"] = "Yön belirsiz",
+    };
+
+    /// <summary>SERUM İNDEKSİ EŞİĞİ (444) — test bazlı HIL sınırları.</summary>
+    private static KartTanimi LabIndeksEsikKarti() => new(
+        Ad: "lab-indeks-esik",
+        YetkiKodu: "lab.tetkik",
+        Tablo: "public.lab_indeks_esik",
+        LogTabloId: 1027,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["indeks"] = (short)1,
+            ["etki"] = (short)3,
+            ["durum"] = (short)0,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("tetkikId", "tetkik_id", "kod", KodTablosu: "public.v_lab_tetkik_lookup",
+                Baslik: "Tetkik (boş = varsayılan)", Grup: "Eşik"),
+            new("indeks", "indeks", "kod", SabitKodlar: IndeksKodlari,
+                Baslik: "İndeks", Grup: "Eşik"),
+            // UYARI: sonuç raporlanır ama oto-onaya girmez.
+            new("uyariEsik", "uyari_esik", "sayi", Baslik: "Uyarı Eşiği", Grup: "Eşik"),
+            // RET: sonuç güvenilmez - tetkik tekrar numune bekler.
+            new("retEsik", "ret_esik", "sayi", Baslik: "Ret Eşiği", Grup: "Eşik"),
+            new("etki", "etki", "kod", SabitKodlar: IndeksEtkiKodlari,
+                Baslik: "Etki Yönü", Grup: "Eşik"),
+            new("durum", "durum", "kod", SabitKodlar: LabKayitDurumKodlari,
+                Baslik: "Durum", Grup: "Eşik"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300,
+                Baslik: "Açıklama", Grup: "Eşik"),
+        });
 }

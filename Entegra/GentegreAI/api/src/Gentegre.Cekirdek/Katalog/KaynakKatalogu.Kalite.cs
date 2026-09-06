@@ -208,4 +208,50 @@ public static partial class KaynakKatalogu
             new("kullanici", "coalesce(k.unvan, '')", "metin", "Kaydeden",
                                  Genislik: 180, Varsayilan: false),
         });
+
+    /// <summary>
+    /// SERUM İNDEKSİ EŞİKLERİ (444) — test bazlı HIL sınırları.
+    ///
+    /// Potasyum hemolizden 20 indekste etkilenir, sodyum 200'de bile
+    /// etkilenmez; tek eşikle bütün paneli reddetmek çalışılabilir
+    /// testleri de çöpe atmak olurdu.
+    /// </summary>
+    private static KaynakTanimi LabIndeksEsik() => new(
+        Ad: "lab-indeks-esik",
+        YetkiKodu: "lab.tetkik",
+        Kaynak: "public.lab_indeks_esik e "
+              + "  left join public.lab_tetkik t on t.id = e.tetkik_id",
+        SubeKolonu: null,
+        VarsayilanSirala: "e.tetkik_id nulls first, e.indeks",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id", "e.id", "sayi", "Id", Varsayilan: false),
+            new("kapsam",
+                "case when e.tetkik_id is null then 'Varsayılan (tüm testler)' "
+                + "else t.kod || ' · ' || t.ad end",
+                                 "metin", "Kapsam", Genislik: 240,
+                                 Filtrelenebilir: false),
+            new("indeksAdi",
+                "case e.indeks when 2 then 'Lipemi (L)' when 3 then 'İkter (İ)' "
+                + "else 'Hemoliz (H)' end",
+                                 "metin", "İndeks", Hizalama: "orta", Bicim: "rozet",
+                                 Genislik: 120, Filtrelenebilir: false),
+            new("indeks", "e.indeks", "kod", "İndeks Kodu", Varsayilan: false),
+            new("uyariEsik", "e.uyari_esik", "sayi", "Uyarı Eşiği", Hizalama: "sag",
+                                 Bicim: "#,##0.#", Genislik: 110),
+            new("retEsik", "e.ret_esik", "sayi", "Ret Eşiği", Hizalama: "sag",
+                                 Bicim: "#,##0.#", Genislik: 110),
+            new("etkiAdi",
+                "case e.etki when 1 then 'Yalancı yükseklik' "
+                + "when 2 then 'Yalancı düşüklük' else 'Belirsiz' end",
+                                 "metin", "Etki Yönü", Hizalama: "orta", Genislik: 150,
+                                 Filtrelenebilir: false),
+            new("etki", "e.etki", "kod", "Etki Kodu", Varsayilan: false),
+            new("aciklama", "e.aciklama", "metin", "Açıklama", Genislik: 360),
+            new("durumAdi", "case e.durum when 1 then 'Pasif' else 'Aktif' end",
+                                 "metin", "Durum", Hizalama: "orta", Bicim: "rozet",
+                                 Genislik: 90, Filtrelenebilir: false),
+            new("durum", "e.durum", "kod", "Durum Kodu", Varsayilan: false),
+            new("tetkikId", "e.tetkik_id", "sayi", "Tetkik Id", Varsayilan: false),
+        });
 }

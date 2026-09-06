@@ -181,6 +181,18 @@ public static partial class KaynakKatalogu
                                  "metin", "Durum", Hizalama: "orta", Bicim: "rozet",
                                  Genislik: 110, Filtrelenebilir: false),
             new("durum", "n.durum", "kod", "Durum Kodu", Varsayilan: false),
+            // SERUM İNDEKSLERİ (444): kabul ekranında "uygun" görünen numune
+            //   cihazda hemolizli çıkabilir - indeksler ölçümle gelir ve
+            //   hangi testin etkilendiğini kural belirler.
+            new("indeksler",
+                "case when n.hemoliz_idx is null and n.lipemi_idx is null "
+                + "          and n.ikter_idx is null then '' else "
+                + "concat_ws(' · ', "
+                + "  case when n.hemoliz_idx is not null then 'H ' || n.hemoliz_idx end, "
+                + "  case when n.lipemi_idx is not null then 'L ' || n.lipemi_idx end, "
+                + "  case when n.ikter_idx is not null then 'İ ' || n.ikter_idx end) end",
+                                 "metin", "HIL İndeks", Hizalama: "orta", Genislik: 130,
+                                 Filtrelenebilir: false, Siralanabilir: false),
             new("retAciklama", "n.ret_aciklama", "metin", "Ret Nedeni", Genislik: 220,
                                  Varsayilan: false),
             new("istemId", "n.istem_id", "sayi", "İstem Id", Varsayilan: false),
@@ -250,6 +262,12 @@ public static partial class KaynakKatalogu
                                  Varsayilan: false),
             new("onayZamani", "ls.onay_zamani", "tarih", "Onay", Hizalama: "orta",
                                  Bicim: "dd.MM.yyyy HH:mm", Genislik: 130,
+                                 Varsayilan: false),
+            // İNDEKS UYARISI sonucun yanında durur: "K yüksek" ile "hemoliz
+            //   yüzünden yüksek görünüyor" bambaşka iki şey.
+            new("indeksUyari", "ls.indeks_uyari", "metin", "Numune Kalitesi Uyarısı",
+                                 Genislik: 280),
+            new("indeksDurum", "ls.indeks_durum", "kod", "İndeks Durumu",
                                  Varsayilan: false),
             new("yorum", "ls.yorum", "metin", "Yorum", Genislik: 240, Varsayilan: false),
             new("istemId", "s.istem_id", "sayi", "İstem Id", Varsayilan: false),

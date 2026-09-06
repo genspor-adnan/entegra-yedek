@@ -195,6 +195,8 @@ public static partial class KaynakKatalogu
         Ekle(LabKkKural());
         Ekle(LabDkk());
         Ekle(LabCihazOlay());
+        // Serum indeksi esikleri (444): test bazli HIL sinirlari.
+        Ekle(LabIndeksEsik());
         // FAZ 0 ortak platform (398-401): onam, bildirim, klinik kataloglar.
         Ekle(OnamMetni());
         Ekle(Onam());

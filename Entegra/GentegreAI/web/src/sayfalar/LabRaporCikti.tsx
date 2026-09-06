@@ -276,6 +276,9 @@ export function LabRaporCikti() {
                             {s.deltaYuzde ? ` (%${sayiMetni(s.deltaYuzde, 1)})` : ''}
                           </div>
                         )}
+                        {String(s.indeksUyari ?? '').trim() !== '' && (
+                          <div className="not">{String(s.indeksUyari)}</div>
+                        )}
                       </td>
                       <td>{String(s.yontem ?? '') || String(s.cihazAdi ?? '') || '—'}</td>
                     </tr>
@@ -284,6 +287,33 @@ export function LabRaporCikti() {
                 })}
               </tbody>
             </table>
+            {/* NUMUNE KALİTESİ raporun zorunlu parçası (ISO 15189): "K
+                yüksek" ile "hemoliz nedeniyle yüksek görünüyor" hekim için
+                bambaşka iki bilgi. Etkilenen satırın uyarısı ayrıca yazılır. */}
+            {sayisal.some(s => String(s.indeksUyari ?? '').trim() !== '') && (
+              <p className="uyari-satir">
+                Numune kalitesi uyarısı:{' '}
+                {sayisal
+                  .filter(s => String(s.indeksUyari ?? '').trim() !== '')
+                  .map(s => `${String(s.kod ?? '')} — ${String(s.indeksUyari)}`)
+                  .join(' · ')}
+              </p>
+            )}
+            {(sayisal[0]?.hemolizIdx !== null && sayisal[0]?.hemolizIdx !== undefined)
+              || (sayisal[0]?.lipemiIdx !== null && sayisal[0]?.lipemiIdx !== undefined)
+              || (sayisal[0]?.ikterIdx !== null && sayisal[0]?.ikterIdx !== undefined)
+              ? (
+              <p className="not">
+                Numune kalitesi (serum indeksleri):{' '}
+                {[sayisal[0].hemolizIdx !== null && sayisal[0].hemolizIdx !== undefined
+                    ? `hemoliz ${sayiMetni(sayisal[0].hemolizIdx, 0)}` : '',
+                  sayisal[0].lipemiIdx !== null && sayisal[0].lipemiIdx !== undefined
+                    ? `lipemi ${sayiMetni(sayisal[0].lipemiIdx, 0)}` : '',
+                  sayisal[0].ikterIdx !== null && sayisal[0].ikterIdx !== undefined
+                    ? `ikter ${sayiMetni(sayisal[0].ikterIdx, 0)}` : ''
+                 ].filter(Boolean).join(' · ')}
+              </p>
+            ) : null}
             {panikVar && (
               <p className="uyari-satir">
                 ↑↑ / ↓↓ ile işaretli değerler PANİK DEĞER sınırındadır ve isteyen

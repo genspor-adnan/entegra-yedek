@@ -261,6 +261,7 @@ public static partial class KartKatalogu
         Ekle(LabKkKuralKarti());
         Ekle(LabDkkKarti());
         Ekle(LabCihazOlayKarti());
+        Ekle(LabIndeksEsikKarti());
         // Belge KARTI degil, ayri sozlesme (§4 belge kaydetme) - burada yer almaz.
     }
 

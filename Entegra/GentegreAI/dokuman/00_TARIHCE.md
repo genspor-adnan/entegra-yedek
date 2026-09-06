@@ -7161,3 +7161,49 @@ demekti. Düzeltme dar kapsamlı: yalnız kodu INR olan ve hâlâ 7 yazan satır
 MEHMET KAYA'nın acil istemi (LAB-2026/00019 · üç tüp): mor (WBC, HGB, PLT ·
 Hematoloji), mavi (INR · Koagülasyon), sarı (GLU · Biyokimya) — üçü de acil
 işaretli. 113 API testi + 429 web testi geçiyor.
+
+---
+
+## 06.09.2026 — Serum indeksi (HIL) kuralı (`db/444`)
+
+`lab_numune`'de hemoliz/lipemi/ikter indeks kolonları 433'ten beri vardı ama
+kimse yazmıyor, kimse okumuyordu. Cihazın gönderdiği `SI-H` gibi kalemler
+"eşleşmeyen test" sayılıp atılıyordu.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K159 | Kural **test bazlı** eşiklerle (`lab_indeks_esik`, `tetkik_id` boş = varsayılan) | Potasyum hemolizden 20 indekste etkilenir, sodyum 200'de bile etkilenmez. Tek bayrakla bütün paneli reddetmek, çalışılabilir 20 testi de çöpe atmak olurdu |
+| K160 | **Uyarı** ve **ret** ayrı eşikler | Uyarıda sonuç raporlanır (oto-onay kapanır), retde tetkik tekrar numune bekler. Tek eşik ya gereksiz tekrar ya sessiz yanlış sonuç üretirdi |
+| K161 | Ret hâlinde bile **sonuç kaydedilir** (`lab_sonuc.durum = 5`) | Ölçülmüş bir değeri yok saymak, teknisyenin cihazda gördüğü ile sistemin gösterdiğini ayırır |
+| K162 | **Etki yönü** (yalancı yükseklik/düşüklük) saklanır ve rapora yazılır | "K yüksek" ile "hemoliz nedeniyle yüksek görünüyor" hekim için bambaşka iki bilgi |
+| K163 | Cihaz indeks kodları ayrı tabloda (`lab_indeks_kod`), tetkik eşlemesinden bağımsız | İndeks bir tetkik değil numune özelliği; tetkik gibi eşlenirse sonuç satırı açılır ve hastaya "hemoliz indeksi 45" diye bir tetkik raporlanırdı |
+| K164 | Ölçülmemiş indeks **etki üretmez** | Cihaz göndermediyse "0 = temiz" varsaymak, bakılmamışı temiz saymak olurdu (KK'daki "bakılmadı ≠ negatif" ile aynı ilke) |
+| K165 | Uyarı metni **sonuçla birlikte** saklanır | Eşik sonradan değişse rapordaki cümle değişmemeli — bayrak ve referansla aynı gerekçe |
+
+### Yapılanlar
+
+- **`db/444`**: `lab_indeks_esik` (varsayılan + K/AST/ALT/CRP/KRE/NA'ya özel
+  eşikler), `lab_indeks_kod` (SI-H/SI-L/SI-I, HI/LI/II, HIL-*),
+  `fn_lab_indeks_etki`, `lab_sonuc.indeks_durum` / `indeks_uyari`.
+- **Servis**: `CihazMesajIsleAsync` indeks kalemlerini numuneye yazar (sonuç
+  satırı açmaz); `SonucYazAsync` etkiyi uygular — oto-onay kapanır, ret
+  eşiğinde satır 6'ya alınır, mesaj nedeni söyler.
+- **Ekranlar**: Numune Kabul'de "HIL İndeks" kolonu, Sonuçlar'da "Numune
+  Kalitesi Uyarısı" kolonu + **Numune Uygunsuz** çipi, Laboratuvar › **Serum
+  İndeksi** eşik ekranı ve kartı. Sonuç raporunda numune kalitesi satırı ve
+  etkilenen satırın altında uyarı.
+- **Testler**: `SerumIndeksiTestleri` (5 durum) — hemoliz potasyumu etkiler
+  sodyumu etkilemez, uyarı/ret eşikleri ayrı, ölçülmemiş indeks etki üretmez,
+  birden çok indekste en ağırı kazanır, teste özel eşik varsayılanı ezer.
+  Toplam **118 test** geçiyor.
+
+### Uçtan uca (yerel)
+
+ZEYNEP KOÇ'un başvurusuna K + Na istendi; COBAS'tan **SI-H 45 · SI-L 8 ·
+SI-I 4** ile birlikte K 6,3 ve Na 138 geldi. Sonuç: indeksler numuneye
+yazıldı (sonuç satırı açılmadı), **Na** normal → oto-onay (satır 5),
+**K** `HH` panik görünmesine rağmen *"Hemoliz indeksi 45 · yalancı yükseklik
+(RET eşiği - yeni numune gerekir)"* ile bekleyen duruma alındı ve tetkik
+**tekrar numune bekliyor** (satır 6) oldu — mockuptaki senaryonun aynısı.

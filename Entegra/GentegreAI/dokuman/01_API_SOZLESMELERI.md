@@ -863,6 +863,51 @@ lab istem listesinde "🏷 Etiket Bas" (istemin tüm tüpleri).
 
 ---
 
+## 9.10 Serum indeksi (HIL) kuralı (444)
+
+Ayrı bir uç yok; kural **sonuç yazma hattının içinde** çalışır ve iki yerden
+beslenir:
+
+- `POST /api/lab/cihaz-mesaj/{id}/isle` — cihazın gönderdiği `SI-H`, `SI-L`,
+  `SI-I` (ya da `HI`/`LI`/`II`, `HIL-*`) kalemleri **tetkik değil numune
+  kalitesi** olarak `lab_numune.hemoliz_idx / lipemi_idx / ikter_idx`
+  alanlarına yazılır. Önceden bunlar "eşleşmeyen test" sayılıp atılıyordu.
+- `POST /api/lab/sonuc` — sonuç yazılırken `fn_lab_indeks_etki(tetkikId,
+  numuneId)` çağrılır; sonuç `lab_sonuc.indeks_durum` (0 yok · 1 uyarı ·
+  2 ret) ve `indeks_uyari` metniyle saklanır.
+
+**Kural test bazlıdır** (`lab_indeks_esik`, `tetkik_id` boş = varsayılan):
+potasyum hemolizden 20 indekste etkilenir, sodyum 200'de bile etkilenmez.
+Tek bir "numune hemolizli" bayrağıyla bütün paneli reddetmek, çalışılabilir
+20 testi de çöpe atmak olurdu.
+
+**Uyarı ile ret ayrı eşikler**:
+- **Uyarı**: sonuç raporlanır ama **oto-onaya girmez**; rapora "Hemoliz
+  indeksi 25 · yalancı yükseklik" notu düşer.
+- **Ret**: sonuç yine kaydedilir (`lab_sonuc.durum = 5`, tekrar bekliyor) ve
+  istem satırı **"tekrar numune bekliyor" (6)** durumuna alınır. Ölçülmüş bir
+  değeri yok saymak, teknisyenin cihazda gördüğü ile sistemin gösterdiğini
+  ayırırdı.
+
+**Etki yönü** rapora yazılır (yalancı yükseklik / düşüklük): "K yüksek" ile
+"hemoliz nedeniyle yüksek görünüyor" hekim için bambaşka iki bilgidir.
+
+**Ölçülmemiş indeks etki üretmez**: cihaz göndermediyse "0 = temiz"
+varsayılmaz.
+
+**Rapor**: sonuç formunda numune kalitesi satırı (hemoliz/lipemi/ikter
+değerleri) ve etkilenen satırın altında uyarı metni basılır — ISO 15189
+raporda numune kalitesini zorunlu tutar.
+
+**Ekranlar**: Numune Kabul listesinde "HIL İndeks" kolonu, Sonuçlar
+listesinde "Numune Kalitesi Uyarısı" kolonu ve **Numune Uygunsuz** çipi,
+Laboratuvar › **Serum İndeksi** ekranında eşik kartları.
+
+**Yetki**: eşik kataloğu `lab.tetkik`; kural sonuç hattında çalıştığı için
+ayrı yetki istemez.
+
+---
+
 ---
 
 ## 10. Sürümleme

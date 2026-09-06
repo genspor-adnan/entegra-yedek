@@ -675,6 +675,8 @@ public static class AksiyonKatalogu
             ["lab-dkk-liste"] = Crud("lab-dkk", "lab-dkk", "lab.kk"),
             ["lab-cihaz-olay-liste"] =
                 Crud("lab-cihaz-olay", "lab-cihaz-olay", "lab.kk"),
+            ["lab-indeks-esik-liste"] =
+                Crud("lab-indeks-esik", "lab-indeks-esik", "lab.tetkik"),
 
             ["lab-gen-liste"] = Crud("lab-gen", "lab-gen", "lab.gen"),
             ["lab-genetik-panel-liste"] =

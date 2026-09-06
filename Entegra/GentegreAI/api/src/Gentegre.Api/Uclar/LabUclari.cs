@@ -841,7 +841,13 @@ public static class LabUclari
                        ls.olcum_zamani as "olcumZamani", ls.onay_zamani as "onayZamani",
                        coalesce(t.yontem, '') as yontem, coalesce(c.ad, '') as "cihazAdi",
                        coalesce(o.unvan, '') as "onaylayan", t.bolum,
-                       coalesce(n.barkod, '') as barkod
+                       coalesce(n.barkod, '') as barkod,
+                       -- NUMUNE KALİTESİ raporun zorunlu parçası (ISO 15189):
+                       --   "K yüksek" ile "hemoliz nedeniyle yüksek görünüyor"
+                       --   hekim için bambaşka iki bilgi.
+                       ls.indeks_durum as "indeksDurum", ls.indeks_uyari as "indeksUyari",
+                       n.hemoliz_idx as "hemolizIdx", n.lipemi_idx as "lipemiIdx",
+                       n.ikter_idx as "ikterIdx"
                   from public.lab_istem_satir s
                   join public.lab_tetkik t on t.id = s.tetkik_id
                   join public.lab_sonuc ls on ls.istem_satir_id = s.id and ls.durum = 3

@@ -680,6 +680,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Onay Bekleyen', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
       { ad: 'Panik',         filtre: { alan: 'panik', op: 'esit', deger: 1 } },
       { ad: 'Delta Uyarı',   filtre: { alan: 'deltaUyari', op: 'esit', deger: 1 } },
+      // NUMUNE UYGUNSUZ (444): hemoliz/lipemi/ikter eşiğini aşan sonuçlar -
+      //   uzman bakmadan yayınlanmazlar, kuyrukta ayrı görünmeliler.
+      { ad: 'Numune Uygunsuz', filtre: { alan: 'indeksDurum', op: 'icinde', deger: [1, 2] } },
       { ad: 'Teknik Onay',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
       { ad: 'Onaylı',        filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Tümü' },
@@ -845,6 +848,23 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAd: 'Kontrol Lotları', menuSira: 74,
     ic: '🧴', yetkiKodu: 'lab.kk',
+  },
+  {
+    // SERUM INDEKSI ESIKLERI (444): test bazli HIL sinirlari. Potasyum
+    //   hemolizden 20 indekste etkilenir, sodyum 200'de bile etkilenmez.
+    kaynak: 'lab-indeks-esik', rota: 'lab-indeks-esik',
+    baslik: 'Serum İndeksi Eşikleri', yol: 'Laboratuvar › Serum İndeksi',
+    kartYolu: '/lab-indeks-esik', kartBaslik: 'Serum İndeksi Eşiği',
+    aksiyonEkrani: 'lab-indeks-esik-liste',
+    cipler: [
+      { ad: 'Hemoliz', filtre: { alan: 'indeks', op: 'esit', deger: 1 } },
+      { ad: 'Lipemi',  filtre: { alan: 'indeks', op: 'esit', deger: 2 } },
+      { ad: 'İkter',   filtre: { alan: 'indeks', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Serum İndeksi', menuSira: 43,
+    ic: '🩸', yetkiKodu: 'lab.tetkik',
   },
   {
     // WESTGARD KURAL SETI (442): tetkik bos = varsayilan set.

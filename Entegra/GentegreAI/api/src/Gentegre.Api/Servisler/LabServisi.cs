@@ -388,6 +388,20 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
 
         var panik = bayrak is "LL" or "HH";
 
+        // SERUM İNDEKSİ (444): hemolizli numunede potasyum YALANCI YÜKSEK
+        //   çıkar (eritrosit içi potasyum seruma karışır); lipemi bazı
+        //   yöntemlerde yalancı düşüklük yapar. Etkilenen testin sonucu
+        //   kaydedilir ama oto-onaya girmez; ret eşiğinde satır "tekrar
+        //   numune bekliyor"a alınır - ölçülmüş bir değeri yok saymak,
+        //   teknisyenin cihazda gördüğü ile sistemin gösterdiğini ayırırdı.
+        var indeks = s.NumuneId is null ? null : await baglanti.TekAsync("""
+            select durum, uyari from public.fn_lab_indeks_etki(@p0, @p1)
+            """, islem, [s.TetkikId, s.NumuneId],
+            o => new { Durum = o.GetInt16(0), Uyari = o.GetString(1) }, iptal);
+
+        var indeksDurum = (short)(indeks?.Durum ?? 0);
+        var indeksUyari = indeks?.Uyari ?? "";
+
         // KALİTE KONTROL (442): testin son KK ölçümü RET ise oto-onay kapanır.
         //   Kural motorunun "temiz sonuç" kararı, cihazın o gün doğru ölçtüğü
         //   varsayımına dayanır; kontrol tutmuyorsa varsayım çürümüştür.
@@ -399,7 +413,7 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
         //   daha önce onaylanmış bir sonucu değiştiren satırın ikinci bir göz
         //   görmeden yayınlanması, düzeltmenin kendisini denetimsiz bırakırdı.
         var otoOnay = otoOnaySerbest && s.OtoOnay == 1 && bayrak == "N"
-                      && !panik && !deltaUyari && kkGecerli;
+                      && !panik && !deltaUyari && kkGecerli && indeksDurum == 0;
 
         var sonucId = await baglanti.TekDegerAsync<long>("""
             insert into public.lab_sonuc
@@ -407,12 +421,17 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
                     birim, ham_deger, ham_birim, cihaz_id, cihaz_mesaj_id, olcum_zamani,
                     bayrak, referans_alt, referans_ust, referans_metin, panik,
                     delta_onceki, delta_yuzde, delta_uyari, dilusyon, yorum,
-                    durum, oto_onay, onay_id, onay_zamani, sube_id, ekleyen)
+                    durum, oto_onay, onay_id, onay_zamani, sube_id, ekleyen,
+                    indeks_durum, indeks_uyari)
             values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, now(),
                     @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19,
-                    case when @p20 = 1 then 3 else 1 end, @p20,
+                    -- İNDEKS RET eşiği: sonuç "tekrar bekliyor" (5) durumunda
+                    --   durur; onaylı sayılmaz ama kaydı da kaybolmaz.
+                    case when @p23 = 2 then 5
+                         when @p20 = 1 then 3 else 1 end, @p20,
                     case when @p20 = 1 then @p21 else null end,
-                    case when @p20 = 1 then now() else null end, @p22, @p21)
+                    case when @p20 = 1 then now() else null end, @p22, @p21,
+                    @p23, @p24)
             returning id
             """, islem,
             [s.Id, s.NumuneId, s.TetkikId, sayisal, istek.Deger,
@@ -421,12 +440,17 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
              bayrak, r?.Alt, r?.Ust,
              r?.Metin ?? "", (short)(panik ? 1 : 0), oncekiDeger, deltaYuzde,
              (short)(deltaUyari ? 1 : 0), istek.Dilusyon, istek.Yorum ?? "",
-             (short)(otoOnay ? 1 : 0), baglam.KullaniciId, s.SubeId], iptal);
+             (short)(otoOnay ? 1 : 0), baglam.KullaniciId, s.SubeId,
+             indeksDurum, indeksUyari], iptal);
 
+        // Satır durumu: oto-onayda 5 (onaylı), indeks RET'inde 6 (tekrar
+        //   numune bekliyor), diğerinde 3 (sonuçlandı, onay bekliyor).
         await baglanti.CalistirAsync("""
-            update public.lab_istem_satir set durum = case when @p1 = 1 then 5 else 3 end
+            update public.lab_istem_satir
+               set durum = case when @p2 = 2 then 6
+                                when @p1 = 1 then 5 else 3 end
              where id = @p0
-            """, islem, [s.Id, (short)(otoOnay ? 1 : 0)], iptal);
+            """, islem, [s.Id, (short)(otoOnay ? 1 : 0), indeksDurum], iptal);
 
         await IstemDurumTazeleAsync(baglanti, islem, s.IstemId, iptal);
         await islem.CommitAsync(iptal);
@@ -436,6 +460,11 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
             : deltaUyari
                 ? $"Delta uyarısı: önceki {oncekiDeger:0.##}, değişim %{deltaYuzde:0.#}"
                 : otoOnay ? "Sonuç girildi ve otomatik onaylandı."
+                : indeksDurum == 2
+                    ? $"Sonuç girildi ({bayrak}) ama NUMUNE UYGUNSUZ: {indeksUyari}. "
+                      + "Tetkik tekrar numune bekliyor."
+                : indeksDurum == 1
+                    ? $"Sonuç girildi ({bayrak}) - {indeksUyari}; otomatik onaylanmadı."
                 : !kkGecerli
                     ? $"Sonuç girildi ({bayrak}) - KALİTE KONTROL RET durumunda "
                       + "olduğu için otomatik onaylanmadı."
@@ -614,8 +643,38 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
         int yazilan = 0;
         var eslesmeyen = new List<string>();
 
+        // SERUM İNDEKSLERİ (444) ÖNCE: cihaz bunları normal sonuç gibi
+        //   gönderir (SI-H, HI, HIL-L…). Tetkik eşlemesi olmadığı için
+        //   "eşleşmeyen test" sayılıp atılıyorlardı; oysa numune kalitesinin
+        //   kendisi ve sonraki sonuçların yorumunu değiştiriyorlar.
+        var indeksler = new List<string>();
         foreach (var k in kalemler)
         {
+            if (k.Sayisal is not { } indeksDeger) continue;
+            var tip = await _veri.TekDegerAsync<short?>("""
+                select indeks from public.lab_indeks_kod
+                 where upper(kod) = upper(@p1) and durum = 0
+                   and (cihaz_id = @p0 or cihaz_id is null)
+                 order by cihaz_id nulls last limit 1
+                """, [m.CihazId, k.Kod], iptal);
+            if (tip is null) continue;
+
+            var kolon = tip switch { 1 => "hemoliz_idx", 2 => "lipemi_idx",
+                                     _ => "ikter_idx" };
+            await _veri.CalistirAsync($"""
+                update public.lab_numune set {kolon} = @p1, degistirme_tarihi = now()
+                 where id = @p0
+                """, [numuneId, (short)Math.Round(indeksDeger)], iptal);
+            indeksler.Add($"{k.Kod}={indeksDeger:0.#}");
+        }
+
+        foreach (var k in kalemler)
+        {
+            // İndeks kalemi tetkik değildir: sonuç satırı açılmaz.
+            if (indeksler.Any(x => x.StartsWith(k.Kod + "=",
+                                                StringComparison.OrdinalIgnoreCase)))
+                continue;
+
             var e = await _veri.TekAsync("""
                 select tetkik_id, carpan, ofset
                   from public.fn_lab_cihaz_tetkik(@p0, @p1, '')
@@ -652,9 +711,13 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
              where id = @p0
             """, [mesajId, hata], iptal);
 
+        var indeksNot = indeksler.Count > 0
+            ? $" Serum indeksleri numuneye yazıldı ({string.Join(", ", indeksler)})."
+            : "";
+
         return new CihazIslemSonucu(yazilan, eslesmeyen.Count,
-            yazilan == 0 ? $"Sonuç yazılamadı. {hata}".Trim()
-                         : $"{yazilan} sonuç yazıldı. {hata}".Trim());
+            (yazilan == 0 ? $"Sonuç yazılamadı. {hata}"
+                          : $"{yazilan} sonuç yazıldı. {hata}").Trim() + indeksNot);
     }
 
     private async Task MesajHataAsync(long mesajId, string hata, CancellationToken iptal)
