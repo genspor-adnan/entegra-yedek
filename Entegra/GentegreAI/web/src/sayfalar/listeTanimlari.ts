@@ -403,22 +403,26 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   tanimi. Randevu tarafindaki radyoloji_cihaz'dan AYRI: o cekim
     //   planlamasi, bu entegrasyon kaydi.
     kaynak: 'cihaz', rota: 'cihaz', baslik: 'Cihazlar',
-    yol: 'Yonetim › Cihazlar',
+    yol: 'Laboratuvar › Cihazlar',
     kartYolu: '/cihaz', kartBaslik: 'Cihaz',
     aksiyonEkrani: 'cihaz-liste',
     cipler: [
       { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    urunModu: 2, modul: 'muayene',
-    menuGrup: 'Yönetim', menuAltGrup: 'Cihaz',
-    menuAd: 'Cihazlar', ic: '🔌', yetkiKodu: 'cihaz', menuSira: 10,
+    // Kullanici: "cihazlar menusunu laboratuvar altina sona al" - cihaz
+    //   entegrasyonunu gunluk kullanan lab teknisyeni; Yonetim altinda
+    //   ayri bir grupta durmasi onu her seferinde menu degistirmeye
+    //   zorluyordu. Sira lab ekranlarinin ARDINDAN (70/80).
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar',
+    menuAd: 'Cihazlar', ic: '🔌', yetkiKodu: 'cihaz', menuSira: 70,
   },
   {
     // CIHAZ MESAJLARI (432) - gelen ham mesajlar. Ham metin "İçerik"
     //   penceresinde okunur: cozumleme hatasinda bakilacak tek yer orasi.
     kaynak: 'cihaz-mesaj', rota: 'cihaz-mesaj', baslik: 'Cihaz Mesajları',
-    yol: 'Yonetim › Cihaz Mesajları',
+    yol: 'Laboratuvar › Cihaz Mesajları',
     aksiyonEkrani: 'cihaz-mesaj-liste',
     tarihAlani: 'eklemeTarihi',
     icerikAlani: 'ham', icerikBaslik: 'Ham Cihaz Mesajı',
@@ -428,9 +432,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'İşlendi',    filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Tümü' },
     ],
-    urunModu: 2, modul: 'muayene',
-    menuGrup: 'Yönetim', menuAltGrup: 'Cihaz',
-    menuAd: 'Cihaz Mesajları', ic: '📡', yetkiKodu: 'cihaz', menuSira: 20,
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar',
+    menuAd: 'Cihaz Mesajları', ic: '📡', yetkiKodu: 'cihaz', menuSira: 80,
   },
   {
     // ITS BILDIRIM KUYRUGU (427) - ilac karekod bildirimleri.
