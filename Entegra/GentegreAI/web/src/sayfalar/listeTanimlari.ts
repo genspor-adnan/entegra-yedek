@@ -399,6 +399,40 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuAd: 'İstek Günlüğü', ic: '🧾', yetkiKodu: 'sigorta', menuSira: 14,
   },
   {
+    // CIHAZLAR (432) - laboratuvar/goz/goruntuleme cihazlarinin baglanti
+    //   tanimi. Randevu tarafindaki radyoloji_cihaz'dan AYRI: o cekim
+    //   planlamasi, bu entegrasyon kaydi.
+    kaynak: 'cihaz', rota: 'cihaz', baslik: 'Cihazlar',
+    yol: 'Yonetim › Cihazlar',
+    kartYolu: '/cihaz', kartBaslik: 'Cihaz',
+    aksiyonEkrani: 'cihaz-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Yönetim', menuAltGrup: 'Cihaz',
+    menuAd: 'Cihazlar', ic: '🔌', yetkiKodu: 'cihaz', menuSira: 10,
+  },
+  {
+    // CIHAZ MESAJLARI (432) - gelen ham mesajlar. Ham metin "İçerik"
+    //   penceresinde okunur: cozumleme hatasinda bakilacak tek yer orasi.
+    kaynak: 'cihaz-mesaj', rota: 'cihaz-mesaj', baslik: 'Cihaz Mesajları',
+    yol: 'Yonetim › Cihaz Mesajları',
+    aksiyonEkrani: 'cihaz-mesaj-liste',
+    tarihAlani: 'eklemeTarihi',
+    icerikAlani: 'ham', icerikBaslik: 'Ham Cihaz Mesajı',
+    cipler: [
+      { ad: 'Hata',       filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Çözümlendi', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'İşlendi',    filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Yönetim', menuAltGrup: 'Cihaz',
+    menuAd: 'Cihaz Mesajları', ic: '📡', yetkiKodu: 'cihaz', menuSira: 20,
+  },
+  {
     // ITS BILDIRIM KUYRUGU (427) - ilac karekod bildirimleri.
     //   UTS ile KARISTIRILMAZ: UTS tibbi cihaz, ITS ilac; ayri kurum, ayri
     //   servis, ayri ekran.

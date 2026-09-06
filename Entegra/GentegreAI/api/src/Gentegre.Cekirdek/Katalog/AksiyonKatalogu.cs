@@ -400,6 +400,25 @@ public static class AksiyonKatalogu
                                               "dokuman", "＋ Yeni", silHedef: null,
                                               yazdir: false),
 
+            // CIHAZ ARA KATMANI (432). Mesaj listesi salt gorunum: kayit
+            //   cihazdan gelir, elle eklenmez. "Yeniden Isle" surucu
+            //   duzeltildikten sonra ayni ham metni tekrar cozumler.
+            ["cihaz-liste"] =
+            [
+                .. Crud("cihaz", "cihaz", "cihaz", "＋ Yeni", silHedef: null, yazdir: false),
+                new("cihaz.klasor-tara", "📂 Klasörleri Tara", "cihaz",
+                    Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "cihaz.isle", Sira: 40),
+            ],
+
+            ["cihaz-mesaj-liste"] =
+            [
+                new("cihaz.yeniden-isle", "↻ Yeniden İşle", "cihaz-mesaj",
+                    Hedef: "araccubugu,sagtus,palet",
+                    AksiyonYetkisi: "cihaz.isle", KayitGerekir: true, Sira: 10),
+                Yazdir(),
+            ],
+
             // SIGORTA v1 (430). Provizyon BASVURU KARTINDAN alinir; buradaki
             //   liste takip ve duzeltme icindir: tazele (searchProvisions),
             //   iptal (cancelProvision), dokuman gonderimi.

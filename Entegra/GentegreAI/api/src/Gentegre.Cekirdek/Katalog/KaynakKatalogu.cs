@@ -150,6 +150,10 @@ public static partial class KaynakKatalogu
         Ekle(EnabizPaket());
         // ITS ilac bildirimleri (427) - UTS ile ayri liste.
         Ekle(ItsBildirim());
+        // CIHAZ ARA KATMANI (432): cihazlar ve gelen mesaj kuyrugu.
+        Ekle(Cihaz());
+        Ekle(CihazMesaj());
+
         // SIGORTA v1 (430): provizyonlar, kurum hesaplari, kod eslemesi, gunluk.
         Ekle(SigortaProvizyon());
         Ekle(SigortaHesap());

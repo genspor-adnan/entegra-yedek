@@ -230,6 +230,8 @@ public sealed partial class KartDeposu
             // Sigorta v1 (430): saglayici, kurum hesabi ve entegrasyon hesabi.
             "public.v_sigorta_saglayici_lookup", "public.v_sigorta_hesap_lookup",
             "public.v_entegrasyon_hesap_lookup",
+            // Cihaz ara katmani (432).
+            "public.v_cihaz_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

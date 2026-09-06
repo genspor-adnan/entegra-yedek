@@ -230,6 +230,9 @@ public static partial class KartKatalogu
         Ekle(FiyatListesi());
         // Demirbas (216)
         Ekle(Demirbas());
+        // CIHAZ ARA KATMANI (432).
+        Ekle(CihazKarti());
+
         // SIGORTA v1 (430): kurum hesabi ve kod eslemesi (provizyonun karti YOK).
         Ekle(SigortaHesapKarti());
         Ekle(SigortaKodEslemeKarti());

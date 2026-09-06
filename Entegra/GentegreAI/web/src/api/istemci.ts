@@ -253,6 +253,25 @@ export const api = {
       `/api/dokuman-yonetim/klasor/${klasorId}/yukle`, govde);
   },
 
+  // ----------------------------------------------------------------- CIHAZ
+  /** Ham cihaz mesajini kuyruga alir (432) - kopru uygulamalari ve TEST icin. */
+  cihazMesaj: (cihazId: number, ham: string, kaynak?: string) =>
+    gonder<{ mesajId: number; durum: string; mesaj: string }>(
+      '/api/cihaz/mesaj', { cihazId, ham, kaynak }),
+
+  /** Surucu duzeltildikten sonra ayni ham metni tekrar cozumler. */
+  cihazYenidenIsle: (mesajId: number) =>
+    gonder<{ durum: string; mesaj: string }>(
+      `/api/cihaz/mesaj/${mesajId}/yeniden-isle`, {}),
+
+  cihazMesajOku: (mesajId: number) =>
+    istek<{ mesaj: Record<string, unknown>; kalemler: Record<string, unknown>[] }>(
+      `/api/cihaz/mesaj/${mesajId}`),
+
+  cihazKlasorTara: () =>
+    gonder<{ okunan: number; hatali: number; mesaj: string }>(
+      '/api/cihaz/klasor-tara', {}),
+
   // --------------------------------------------------------------- SIGORTA
   /** Sağlayıcı kataloğu + yetenekler (430): ekran düğmeleri buna göre çizilir. */
   sigortaSaglayicilar: () =>

@@ -55,6 +55,18 @@ public static class ZamanliIsler
             var s = await gonderim.CalistirAsync(50, null, null, iptal);
             return s.Aciklama;
         },
+
+        // CIHAZ KLASOR TARAMA (432): klasore dosya birakan cihazlar. MLLP
+        //   dinleyicisi surekli acik oldugu icin ise ihtiyaci yok; klasor
+        //   izleme ise yoklamayla yurur.
+        ["cihaz.klasor"] = async (servisler, iptal) =>
+        {
+            var cihaz = servisler.GetRequiredService<CihazServisi>();
+            var (okunan, hatali) = await cihaz.KlasorleriTaraAsync(iptal);
+            return okunan == 0 && hatali == 0
+                ? "Yeni dosya yok."
+                : $"{okunan} dosya alindi, {hatali} hata.";
+        },
     };
 }
 

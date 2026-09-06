@@ -77,6 +77,14 @@ kurucu.Services.AddScoped<Gentegre.Cekirdek.Sigorta.ISigortaKodCevirici>(
 kurucu.Services.AddScoped<Gentegre.Cekirdek.Sigorta.ISigortaSaglayici,
                           Gentegre.Api.Servisler.AsmedSaglayici>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.SigortaServisi>();
+// CIHAZ ARA KATMANI (432): surucu I/O YAPMAZ, yalniz metni cevirir - bu yuzden
+//   singleton. Alim/kayit CihazServisi'nde (scoped), dinleyici arka planda.
+kurucu.Services.AddSingleton<Gentegre.Cekirdek.Cihaz.ICihazSurucu,
+                             Gentegre.Cekirdek.Cihaz.Hl7Surucu>();
+kurucu.Services.AddSingleton<Gentegre.Cekirdek.Cihaz.ICihazSurucu,
+                             Gentegre.Cekirdek.Cihaz.AstmSurucu>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.CihazServisi>();
+kurucu.Services.AddHostedService<Gentegre.Api.Servisler.CihazDinleyici>();
 kurucu.Services.AddScoped<KasaDeposu>();
 kurucu.Services.AddScoped<GunlukDeposu>();
 kurucu.Services.AddScoped<UtsDeposu>();
@@ -223,6 +231,7 @@ uygulama.KodListeUclariniEkle();
 uygulama.UtsUclariniEkle();
 uygulama.UretimUclariniEkle();
 uygulama.SigortaUclariniEkle();
+uygulama.CihazUclariniEkle();
 
 // YETKI SENKRONU (kullanici: "menulerdeki ekle/sil/degisimlerde yetki matrisini
 //   update et"): katalogdaki ekran/aksiyon yetkileri ile `yetki` tablosu her
