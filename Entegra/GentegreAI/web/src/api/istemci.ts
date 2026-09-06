@@ -244,8 +244,13 @@ export const api = {
     const govde = new FormData();
     govde.append('dosya', dosya);
     if (kategoriId) govde.append('kategoriId', String(kategoriId));
-    return istek<{ dokumanId: number; mesaj: string }>(
-      `/api/dokuman-yonetim/klasor/${klasorId}/yukle`, { method: 'POST', body: govde });
+    // DOSYA YUKLEME `dosyaYukle` ILE: `istek` govdeyi JSON sayip
+    //   "Content-Type: application/json" basligini koyuyor; tarayici o zaman
+    //   multipart SINIRINI (boundary) yazamiyor ve sunucu istegi
+    //   "Incorrect Content-Type" ile reddediyordu - yukleme HER SEFERINDE
+    //   "beklenmeyen hata" veriyordu.
+    return dosyaYukle<{ dokumanId: number; mesaj: string }>(
+      `/api/dokuman-yonetim/klasor/${klasorId}/yukle`, govde);
   },
 
   // --------------------------------------------------------------- SIGORTA
