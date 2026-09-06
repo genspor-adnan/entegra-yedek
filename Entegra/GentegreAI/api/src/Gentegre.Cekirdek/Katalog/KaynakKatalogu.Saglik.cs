@@ -501,7 +501,6 @@ public static partial class KaynakKatalogu
             new("kaynak",    "d.kaynak",    "metin", "Kaynak", Hizalama: "orta",
                                             Genislik: 130),
             new("kaynakId",  "d.kaynak_id", "sayi",  "Kaynak Id", Varsayilan: false),
-            new("surumNo",   "d.surum_no",  "sayi",  "Sürüm", Hizalama: "orta", Genislik: 70),
             new("durumAdi",
                 """
                 case d.durum when 1 then 'Taslak' when 2 then 'Onayda' when 3 then 'Yayında'
@@ -526,14 +525,19 @@ public static partial class KaynakKatalogu
             //   tipler yeni sekmede acilir, otekiler indirilir.
             new("contentType", "d.content_type", "metin", "Dosya Türü", Genislik: 140,
                                             Varsayilan: false),
-            new("gecerliBit","d.gecerli_bit","tarih", "Geçerlilik", Hizalama: "orta",
-                                            Bicim: "dd.MM.yyyy", Genislik: 110),
             new("eklemeTarihi", "d.ekleme_tarihi", "tarih", "Yükleme", Hizalama: "orta",
                                             Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
             // KLASOR EN SONDA (kullanici): kolon secilen klasorde zaten
             //   gizleniyor; "Tumu"de de listenin sonunda dursun - ad ve tur
             //   once okunur.
             new("klasorYolu","coalesce(k.yol, '')", "metin", "Klasör", Genislik: 180),
+            // GECERLILIK ve SURUM DE SONDA (kullanici): gunluk kullanimda
+            //   "hangi dokuman" sorusu (ad, tur, durum) once cevaplanir;
+            //   surum numarasi ve gecerlilik tarihi ancak o dokumana
+            //   bakilirken gerekir.
+            new("gecerliBit","d.gecerli_bit","tarih", "Geçerlilik", Hizalama: "orta",
+                                            Bicim: "dd.MM.yyyy", Genislik: 110),
+            new("surumNo",   "d.surum_no",  "sayi",  "Sürüm", Hizalama: "orta", Genislik: 70),
             new("surumlu",   "d.surumlu",   "mantik","Sürümlü", Hizalama: "orta",
                                             Genislik: 90, Varsayilan: false),
             // Bekleyen onay: "onay kuyrugu" cipinin dayanagi.
