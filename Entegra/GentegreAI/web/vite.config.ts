@@ -14,6 +14,11 @@ export default defineConfig({
   //   durduruyordu. Paket tek parca (SPA, tamami girişte gerekiyor) - siniri
   //   gercek boyutun uzerine alip uyariyi susturuyoruz.
   build: { chunkSizeWarningLimit: 1500 },
+  // DEV SUNUCU IPv4'E DE BAGLANIR. Varsayilan 'localhost' Node 18+ ile once
+  //   ::1'e (IPv6) baglaniyor; tarayici `localhost`u 127.0.0.1'e cozunce
+  //   "baglanti reddedildi" aliniyordu - sunucu ayakta oldugu halde sayfa
+  //   acilmiyordu. 127.0.0.1 ile iki ad da ayni yere gider.
+  server: { host: '127.0.0.1', port: 5173, strictPort: true },
   // TEST ORTAMI: varsayilan `node` - saf mantik testleri (bicim, kurallar,
   //   imza, pay hesabi) hizli kossun. jsdom PAHALIDIR: hepsine acilinca takim
   //   1,7 sn'den 33 sn'ye cikti. DOM gerektiren BILESEN testleri kendi
