@@ -477,6 +477,29 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
    */
   const [klasorSecim, setKlasorSecim] = useState<KlasorSecimi>({ tur: 'tum', ad: 'Tümü' });
 
+  /*
+   * GIZLENECEK KOLONLAR - iki kural, tek yerde.
+   *
+   * 1) Dokuman listesinde KLASOR kolonu yalniz "Tümü"de gorunur: belli bir
+   *    klasor secildiginde her satirda ayni klasor adi yazmak, dar ekranda
+   *    yer harcayan bir tekrar olurdu.
+   * 2) e-FATURA ve SENARYO kolonlari YALNIZ e-Belge'ye donusen turlerde
+   *    (10 alis irsaliyesi · 11 alis faturasi · 14 satis irsaliyesi ·
+   *    15 satis faturasi) anlamli. Siparis, teklif, fis, tahakkuk, konsinye,
+   *    transfer ve basvuruda bu kolonlar HER SATIRDA BOS kaliyor - kolon
+   *    secicide de yer kapliyorlardi. Kural burada, ekran ekran
+   *    `gizliKolonlar` yazmak yerine: yeni bir belge listesi eklendiginde
+   *    kendiliginden dogru davranir.
+   */
+  const gizlenecekKolonlar = useMemo(() => {
+    const liste = [...(tanim.gizliKolonlar ?? [])];
+    if (tanim.kaynak === 'dokuman' && klasorSecim.tur !== 'tum') liste.push('klasorYolu');
+    const EBELGE_TURLERI = [10, 11, 14, 15];
+    if (tanim.kaynak === 'belge' && !EBELGE_TURLERI.includes(tanim.yeniBelgeTuru ?? 0))
+      liste.push('efaturaDurum', 'senaryoAdi', 'senaryo', 'efaturaKodu');
+    return liste;
+  }, [tanim.gizliKolonlar, tanim.kaynak, tanim.yeniBelgeTuru, klasorSecim.tur]);
+
   const klasorluFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
     if (tanim.kaynak !== 'dokuman' || klasorSecim.tur === 'tum') return temel;
     const kosul: Kosul = klasorSecim.tur === 'klasor'
@@ -1493,9 +1516,7 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       // KLASOR KOLONU YALNIZ "TUMU"DE (kullanici): belli bir klasor
       //   secildiginde her satirda ayni klasor adi yazmak, dar ekranda
       //   yer harcayan bir tekrar olurdu.
-      gizliKolonlar={tanim.kaynak === 'dokuman' && klasorSecim.tur !== 'tum'
-        ? [...(tanim.gizliKolonlar ?? []), 'klasorYolu']
-        : tanim.gizliKolonlar}
+      gizliKolonlar={gizlenecekKolonlar}
       kolonBasliklari={tanim.kolonBasliklari}
       aramaGorunumGizli={tanim.aramaGorunumGizli}
       kolonSirasi={tanim.kolonSirasi}
