@@ -30,14 +30,40 @@ public sealed class DokumanDeposu
         new(StringComparer.Ordinal)
             { "taraf", "stok", "ebelge-xslt", "sube", "radyoloji-istem", "klasor" };
 
+    /// <summary>
+    /// KABUL EDILEN ICERIK TIPLERI.
+    ///
+    /// BEYAZ LISTE, kara liste degil: yeni bir tip ancak bilerek eklenir.
+    /// Calistirilabilir dosyalar (exe/msi/bat/js) ve HTML/SVG DISARIDA -
+    /// icerik ucu dosyayi tarayiciya veriyor; HTML ve SVG betik tasiyabilir
+    /// ve ayni kaynakta calisirdi (XSS). Ofis dosyalari makro tasiyabilir ama
+    /// tarayicida calismaz, indirilip acilir.
+    /// </summary>
     private static readonly HashSet<string> IcerikTipiBeyazListe = new(StringComparer.OrdinalIgnoreCase)
     {
-        "image/jpeg", "image/png", "image/webp", "image/gif",
+        // Resim
+        "image/jpeg", "image/png", "image/webp", "image/gif", "image/bmp",
+        "image/tiff", "image/heic", "image/heif",
+        // PDF ve ofis
         "application/pdf", "application/msword",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "application/vnd.ms-excel",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "text/plain",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "application/vnd.oasis.opendocument.text",
+        "application/vnd.oasis.opendocument.spreadsheet",
+        "application/vnd.oasis.opendocument.presentation",
+        "application/rtf", "text/rtf",
+        // Duz metin ve veri. CSV'yi tarayici "text/csv", bazen
+        //   "application/csv" ya da Excel kuruluysa "application/vnd.ms-excel"
+        //   olarak gonderiyor - ucu de kabul edilir.
+        "text/plain", "text/csv", "application/csv",
+        "text/tab-separated-values", "text/markdown", "application/json",
+        // Arsiv: tarayici/isletim sistemine gore farkli ad kullaniyor.
+        "application/zip", "application/x-zip-compressed",
+        "application/vnd.rar", "application/x-rar-compressed",
+        "application/x-7z-compressed", "application/gzip", "application/x-tar",
         // e-Belge XSLT sablonlari (160). Tarayici .xsl/.xslt icin cogunlukla
         //   "text/xml" gonderir, bazen hic gondermez - ucta bos tip XSLT'ye
         //   sabitleniyor.
@@ -93,8 +119,13 @@ public sealed class DokumanDeposu
     {
         KaynakDogrula(kaynak);
         if (!IcerikTipiBeyazListe.Contains(contentType))
+            // MESAJ NE KABUL EDILDIGINI SOYLER: yalniz "kabul edilmiyor"
+            //   demek kullaniciyi deneme yanilmaya birakiyordu.
             throw GentegreHatasi.Dogrulama($"Desteklenmeyen dosya türü: {contentType}",
-                new AlanHatasi("dosya", "Bu dosya türü kabul edilmiyor."));
+                new AlanHatasi("dosya",
+                    "PDF, Office (Word/Excel/PowerPoint/OpenDocument), resim "
+                  + "(JPG/PNG/GIF/WEBP/BMP/TIFF), metin (TXT/CSV/JSON/XML) ve "
+                  + "arşiv (ZIP/RAR/7Z) kabul edilir."));
         if (veri.Length == 0 || veri.Length > AzamiBoyut)
             throw GentegreHatasi.Dogrulama("Dosya boyutu 5 MB'ı aşamaz.",
                 new AlanHatasi("dosya", "Dosya boş veya çok büyük."));
