@@ -6889,3 +6889,33 @@ girildi, **kademeli bildirim 4'ünü raporladı** (1. basamak: AMP R, AMC S,
 NIT S, SXT R; seftriakson/siprofloksasin/meropenem gizlendi çünkü 1.
 basamakta duyarlı seçenek var) → uzman onayı: özet `lab_sonuc`'a düştü ve
 istem "Onaylandı"ya geçti.
+
+### Örnek çalışma bir kusur gösterdi: kombinasyon ajanı (`db/437`)
+
+Üç senaryoluk örnek mikrobiyoloji çalışması yapıldı (kan / boğaz / yara) ve
+kademeli bildirim kuralının **klinik olarak yanlış** davrandığı görüldü:
+MRSA bakteriyemisinde 1. basamağın tamamı dirençli, 2. basamakta yalnız
+**gentamisin** duyarlıydı; kural "duyarlı seçenek var" deyip **vankomisini
+gizledi**. Aynı kusur ESBL pozitif *Klebsiella*'da amikasin yüzünden
+karbapenemi gizliyordu. Aminoglikozid bakteriyemide tek başına tedavi
+değildir; kombinasyonda kullanılır.
+
+`db/437`: `lab_antibiyotik.tek_basina_yetersiz` bayrağı (GEN, AMK). Bu
+ajanlar **kendi basamağında raporlanır** ama "duyarlı seçenek" sayımına
+girmez, yani üst basamağı kapatmaz. Mevcut antibiyogramlar göç içinde
+yeniden hesaplandı (onaylı rapor metni değişmez; değişen yalnız hangi
+satırın gösterileceğidir). Sayıma girmeyen ikinci grup: numuneye uymayan
+üriner-özel ajanlar - onlar da tedavi seçeneği sayılmamalı.
+
+**Yön tercihi bilinçli**: eksik raporlanan geniş spektrumlu ajan, gereksiz
+raporlanandan daha tehlikelidir (hasta tedavisiz kalır). Test eklendi
+(`Kombinasyon_ajani_UST_BASAMAGI_KAPATMAZ`); 98 test geçiyor.
+
+**Örnek çalışma (yerel, ekranda duruyor)**:
+
+| Kültür | Senaryo | Sonuç |
+|---|---|---|
+| 26000000567 · AYŞE YILMAZ | Kan kültürü, sepsis şüphesi | *S. aureus* **MRSA** · kritik + EKK bildirimi · ön rapor 14. saatte hekime · vankomisin/linezolid/daptomisin raporlandı |
+| 26000000575 · MEHMET KAYA | Boğaz kültürü | 24 ve 48. saat okundu, **üreme yok** (normal flora) · "antibiyotik endikasyonu yok" |
+| 26000000583 · ZEYNEP DEMİR | Yara kültürü (diyabetik ayak) | **Polimikrobiyal**: ESBL (+) *K. pneumoniae* + *E. faecalis* · EKK bildirimi · Klebsiella'da karbapenem açıldı, enterokokta ampisilin duyarlı olduğu için vankomisin gizli |
+| 26000000393 · ZEYNEP DEMİR | İdrar kültürü | *E. coli* 100.000 CFU/mL, ESBL negatif · 1. basamak duyarlı olduğu için üst basamaklar gizli |

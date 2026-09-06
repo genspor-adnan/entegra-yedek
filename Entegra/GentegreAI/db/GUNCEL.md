@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (216 ad, 64 tanesi birden cok dosyada)
+## Fonksiyonlar (216 ad, 65 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -121,7 +121,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kurum_kampanya` | `274_belge_kampanya.sql` | 272_kampanya_fiyat.sql |
 | `fn_kurum_modul_acik` | `364_kurum_profil_sube.sql` | 359_kurum_profil.sql |
 | `fn_kurum_profil` | `364_kurum_profil_sube.sql` | — |
-| `fn_lab_antibiyogram_bildirim` | `436_lab_mikrobiyoloji.sql` | — |
+| `fn_lab_antibiyogram_bildirim` | `437_lab_kombinasyon_ajani.sql` | 436_lab_mikrobiyoloji.sql |
 | `fn_lab_barkod_kontrol` | `433_lab_v1.sql` | — |
 | `fn_lab_barkod_uret` | `433_lab_v1.sql` | — |
 | `fn_lab_bayrak` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |

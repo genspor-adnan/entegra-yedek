@@ -178,6 +178,32 @@ public class MikroTestleri : IClassFixture<VeritabaniOlgusu>
     }
 
     [Fact]
+    public async Task Kombinasyon_ajani_UST_BASAMAGI_KAPATMAZ()
+    {
+        if (!_olgu.Baglandi(nameof(Kombinasyon_ajani_UST_BASAMAGI_KAPATMAZ))) return;
+        var veri = _olgu.Gerekli();
+
+        // MRSA bakteriyemisi: tüm 1. basamak dirençli, 2. basamakta yalnız
+        //   GENTAMİSİN duyarlı. Aminoglikozid tek başına bakteriyemi tedavisi
+        //   DEĞİLDİR - vankomisin gizlenirse hasta tedavisiz kalır (db/437).
+        var (hastaId, istemId, _, _, kulturId, uremeId) = await KurAsync(veri, 1);
+        try
+        {
+            await AntibiyogramAsync(veri, uremeId,
+                ("PEN", "R"), ("OXA", "R"), ("ERY", "R"), ("CLI", "R"),
+                ("GEN", "S"),
+                ("VAN", "S"), ("LNZ", "S"));
+
+            var b = await BildirimAsync(veri, uremeId);
+
+            Assert.True(b["GEN"]);   // kendi basamağında raporlanır
+            Assert.True(b["VAN"]);   // ama üst basamağı kapatmaz
+            Assert.True(b["LNZ"]);
+        }
+        finally { await TemizleAsync(veri, hastaId, istemId, kulturId); }
+    }
+
+    [Fact]
     public async Task Uriner_ajan_IDRAR_DISI_numunede_raporlanmaz()
     {
         if (!_olgu.Baglandi(nameof(Uriner_ajan_IDRAR_DISI_numunede_raporlanmaz))) return;
