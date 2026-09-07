@@ -250,7 +250,18 @@ public static class KartUclari
             //   TAM secenek listesi - kodAd yalniz kartta KULLANILAN tek degeri cozer.
             var tumAlanlar = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
                 .SelectMany(d => d.Alanlar).Concat(okunabilir).ToList();
-            var tabloGorevleri = tumAlanlar.Select(a => a.KodTablosu).Where(t => t is not null).Distinct()
+            // ARAMA EKRANINDAN secilen alanin TAM LISTESI CEKILMEZ (459):
+            //   ICD-10 lookup'i 15.800, hasta lookup'i binlerce satir. Kart her
+            //   acilista bunlari cekiyordu; ICD'de id METIN oldugu icin sorgu
+            //   "operator does not exist: character varying = integer" ile
+            //   dusuyor ve MUAYENE KARTI HIC ACILMIYORDU. Bu alanlarda secim
+            //   zaten arama modalinden yapiliyor, dropdown doldurulmuyor.
+            var aramaTablolari = tumAlanlar
+                .Where(a => a.AramaKaynagi is not null && a.KodTablosu is not null)
+                .Select(a => a.KodTablosu!).ToHashSet(StringComparer.Ordinal);
+            var tabloGorevleri = tumAlanlar.Select(a => a.KodTablosu)
+                .Where(t => t is not null && !aramaTablolari.Contains(t))
+                .Distinct()
                 .ToDictionary(t => t!, t => depo.KodTablosuSecenekleriAsync(t!, iptal));
             var listeGorevleri = tumAlanlar.Select(a => a.KodListesi).Where(t => t is not null).Distinct()
                 .ToDictionary(t => t!, t => depo.KodListesiSecenekleriAsync(t!, iptal));
@@ -275,10 +286,11 @@ public static class KartUclari
             KartAlanMeta MetaOptions(KartAlani a) => a.Ad == "kod" && entegrasyonKodlari is not null
                 ? Meta(a, tanim, baglam, entegrasyonKodlari)
                 : Meta(a, tanim, baglam,
-                a.KodTablosu is { } t ? tabloSecenekleri[t]
+                a.KodTablosu is { } t && tabloSecenekleri.TryGetValue(t, out var tsec) ? tsec
                 : a.KodListesi is { } l ? listeSecenekleri[l]
                 : null,
-                a.BagliAlan is not null && a.KodTablosu is { } bt ? ustHaritalari[bt] : null);
+                a.BagliAlan is not null && a.KodTablosu is { } bt
+                    && ustHaritalari.TryGetValue(bt, out var ust) ? ust : null);
 
             // Yerel para birimi kartla birlikte gider: arayuz "TL disi mi" karari
             //   icin ayri bir istek yapmasin (kur kutusu bu karara gore acilir).

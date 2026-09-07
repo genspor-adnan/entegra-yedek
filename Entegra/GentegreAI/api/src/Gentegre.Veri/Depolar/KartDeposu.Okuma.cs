@@ -262,10 +262,13 @@ public sealed partial class KartDeposu
         => (await _veri.ListeAsync(
                 // id = 0 satiri ("Kendisi" gibi sabit secenekler) alfabetik
                 //   siraya girmez, HEP basta durur (227).
+                // id METIN de olabilir (ICD-10 kodu "A09.0"): karsilastirma ve
+                //   okuma tip VARSAYMAZ - "id = 0" varchar kolonda
+                //   "operator does not exist" ile dusuyordu.
                 $"select id, ad from {KodTablosuDogrula(tablo)} where aktif = 1 " +
-                "order by case when id = 0 then 0 else 1 end, ad",
-                null, r => (Id: r.GetInt32(0), Ad: r.GetString(1)), iptal))
-            .ToDictionary(x => x.Id.ToString(CultureInfo.InvariantCulture), x => x.Ad, StringComparer.Ordinal);
+                "order by case when id::text = '0' then 0 else 1 end, ad",
+                null, r => (Id: r.GetValue(0)?.ToString() ?? "", Ad: r.GetString(1)), iptal))
+            .ToDictionary(x => x.Id, x => x.Ad, StringComparer.Ordinal);
 
     /// <summary>Yerel para birimi (ayar genel.yerel_para) - kart metasina eklenir.</summary>
     public async Task<string> YerelParaAsync(CancellationToken iptal = default)

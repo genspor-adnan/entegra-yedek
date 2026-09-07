@@ -7857,3 +7857,39 @@ servis düzelince çalıştırılacak; kurulum hazır.
 
 **Testler**: API **159** (klinik listesi senkronda, üretici bölüm kodunu okur,
 lookup görünümü var), web **460**.
+
+---
+
+## 07.09.2026 — Radyoloji isteminde hizmet kontrolü (`db/459`) ve muayene kartı hatası
+
+Çalışma listesinde modalitesi ve tetkiki boş satırlar görüldü. Sebep
+"hizmetsiz istem" değildi (hizmet_id hepsinde dolu), **yanlış hizmet**:
+`17-KETOSTEROİD` (bir laboratuvar tetkiki) radyoloji kuyruğuna düşmüş,
+`Alt Abdomen MR` ise hizmet kartında modalite seçilmediği için hiçbir cihaza
+gönderilemiyordu.
+
+Kart ekranında tetkik listesi zaten radyolojiyle sınırlıydı; **açık kapı
+muayeneden açılan istemdi** - hizmet id serbest geliyordu. Kural artık
+**veritabanı tetiğinde** (üç giriş yolu da aynı kontrolden geçsin):
+hizmetin modalitesi yoksa istem açılmaz, modalite isteme kopyalanır
+(muayene yolu bu alanı hiç yazmıyordu). Uygulama katmanında da anlaşılır
+mesaj var - kullanıcı ham tetik hatası görmesin.
+
+**Eski üç kayda dokunulmadı**: tetik yalnız INSERT'te ve hizmet değiştiren
+UPDATE'te çalışıyor. Düzeltme kullanıcının kararı (hizmet kartına modalite
+girmek ya da istemi iptal etmek); göç bu satırları NOTICE ile listeliyor.
+
+### Muayene kartı hiç açılmıyordu
+
+Aynı oturumda kullanıcı "muayene kartı açınca beklenmeyen hata" dedi:
+`operator does not exist: character varying = integer`. Kart metası HER
+`KodTablosu` alanı için tam seçenek listesini çekiyordu; ICD-10 lookup'ında
+id METİN ("A09.0") ve sıralama ifadesi `id = 0` ile karşılaştırıyordu.
+
+İki düzeltme: (1) **arama ekranından seçilen alanın tam listesi hiç
+çekilmiyor** - ICD 15.800, hasta lookup'ı binlerce satır; seçim zaten arama
+modalinden yapılıyor, dropdown doldurmak hem gereksiz hem yavaştı;
+(2) seçenek okuması tip varsaymıyor (`id::text`, `GetValue`).
+
+**Testler**: API **161** (yeni `RadyolojiKuralTestleri`: modalitesiz hizmetle
+istem açılamaz, modalite hizmetten kopyalanır), web 460.

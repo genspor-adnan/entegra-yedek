@@ -349,6 +349,22 @@ public static class RadyolojiUclari
                         select coalesce(modalite, 0) from public.hizmet where id = @p0
                         """, islem, [t.HizmetId], iptal);
 
+                    // MODALITESIZ TETKIK ISTEME DONUSMEZ (459): sifir yazmak
+                    //   calisma listesine hicbir cihaza gonderilemeyen satir
+                    //   birakiyordu. Ayni kural DB tetiginde de var; buradaki
+                    //   kontrol hangi tetkikin sorunlu oldugunu SOYLER.
+                    if (modalite <= 0)
+                    {
+                        var ad = await baglanti.TekDegerAsync<string>(
+                            "select coalesce(ad, '') from public.hizmet where id = @p0",
+                            islem, [t.HizmetId], iptal) ?? "";
+                        throw GentegreHatasi.Dogrulama(
+                            $"\"{(ad.Length > 0 ? ad : "#" + t.HizmetId)}\" radyoloji tetkiki "
+                            + "degil (hizmet kartinda modalite yok).",
+                            [new("hizmetId", "Radyoloji tetkiki secin ya da hizmet kartina "
+                                             + "modalite girin.")]);
+                    }
+
                     var id = await baglanti.TekDegerAsync<int>("""
                         insert into public.radyoloji_istem
                             (sube_id, belge_id, hasta_id, hizmet_id, modalite, durum, oncelik,

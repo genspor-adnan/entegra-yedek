@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (225 ad, 65 tanesi birden cok dosyada)
+## Fonksiyonlar (226 ad, 65 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -226,6 +226,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_radyoloji_cekim_kontrolu` | `312_cekim_kontrolu_is_kurali_kodu.sql` | 310_radyoloji_kontrol_listesi.sql |
 | `tg_radyoloji_istem_guncelle` | `287_radyoloji_accession_tetik.sql` | — |
 | `tg_radyoloji_istem_hazirla` | `287_radyoloji_accession_tetik.sql` | — |
+| `tg_radyoloji_istem_hizmet` | `459_radyoloji_istem_hizmet_kontrolu.sql` | — |
 | `tg_randevu_cakisma` | `317_randevu_tetkik_uyum.sql` | 316_randevu_cihaz_kaynagi.sql |
 | `tg_sube_vkn_dogrula` | `170_sube_vkn_dogrula.sql` | — |
 | `tg_tani_kronik_yansit` | `420_hasta_tibbi_gecmis.sql` | — |

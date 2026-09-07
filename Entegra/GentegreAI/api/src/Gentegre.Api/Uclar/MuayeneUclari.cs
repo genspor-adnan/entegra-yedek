@@ -243,16 +243,33 @@ public static class MuayeneUclari
                     throw GentegreHatasi.Dogrulama("Goruntuleme istemi icin hizmet secilmeli.",
                         [new("hizmetId", "Tetkik (hizmet) secin.")]);
 
+                // HIZMET RADYOLOJI TETKIKI OLMALI (459). Kart ekraninda tetkik
+                //   listesi zaten radyolojiyle sinirli; ACIK KAPI BURASIYDI -
+                //   muayeneden gonderilen hizmet id serbestti ve laboratuvar
+                //   tetkiki ("17-KETOSTEROİD") radyoloji kuyruguna dusuyordu.
+                //   Modalite = tetkikin cihaz ailesi; sifirsa istem hicbir
+                //   cihaza gonderilemez (MWL "hangi cihaz" sorusunu cevapsiz
+                //   birakir). Ayni kural DB tetiginde de var - bu kontrol
+                //   kullaniciya ANLASILIR mesaj vermek icin.
+                var modalite = await baglanti.TekDegerAsync<int>(
+                    "select coalesce(modalite, 0) from public.hizmet where id = @p0",
+                    islem, [istek.HizmetId], iptal);
+                if (modalite <= 0)
+                    throw GentegreHatasi.Dogrulama(
+                        "Secilen tetkik radyoloji tetkiki degil (hizmet kartinda modalite yok).",
+                        [new("hizmetId", "Radyoloji tetkiki secin ya da hizmet kartina "
+                                         + "modalite girin.")]);
+
                 hedefId = await baglanti.TekDegerAsync<int>("""
                     insert into public.radyoloji_istem
-                           (sube_id, belge_id, hasta_id, hizmet_id, durum, oncelik,
+                           (sube_id, belge_id, hasta_id, hizmet_id, modalite, durum, oncelik,
                             istek_hekim_id, on_tani, klinik_bilgi, aciklama, accession_no)
-                    values (@p0, @p1, @p2, @p3, 1, @p4, @p5, @p6, @p7, @p7, '')
+                    values (@p0, @p1, @p2, @p3, @p8, 1, @p4, @p5, @p6, @p7, @p7, '')
                     returning id
                     """, islem,
                     [m.SubeId, m.BelgeId, m.HastaId, istek.HizmetId,
                      (short)(istek.Aciliyet ?? 1), m.HekimId, m.OnTani,
-                     istek.Aciklama ?? "", istek.Aciklama ?? ""], iptal);
+                     istek.Aciklama ?? "", istek.Aciklama ?? "", (short)modalite], iptal);
                 hedefTablo = "radyoloji_istem";
             }
 
