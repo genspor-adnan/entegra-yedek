@@ -31,7 +31,7 @@ namespace Gentegre.Api.Servisler;
 /// Dil modeli bağlandığında çağrı başına `ai_kontor.cagri_ucreti` düşülür;
 /// bakiye yoksa asistan kapanmaz, katalog cevabı vermeye devam eder.
 /// </summary>
-public sealed class RehberServisi(VeriKaynagi veri)
+public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
 {
     /// <summary>Panelden gelen istek. `aktifSayfa` bağlamsal yardım içindir.</summary>
     public sealed record Istek(string KullaniciMesaji, short? AktifMod, string? AktifSayfa,
@@ -51,9 +51,12 @@ public sealed class RehberServisi(VeriKaynagi veri)
         string? EksikBilgiSorusu,
         IReadOnlyList<string> Uyarilar,
         string KonuKod,
-        /// <summary>1 katalog konusu · 2 ekran eşleşmesi · 3 bağlamsal yardım · 0 yok.</summary>
+        /// <summary>1 katalog · 2 ekran · 3 bağlamsal · 5 model destekli · 0 yok.</summary>
         short KaynakTuru,
-        decimal KontorBakiye);
+        decimal KontorBakiye,
+        /// <summary>Cevabı dil modeli mi yazdı? (katalog cevabı ücretsizdir)</summary>
+        bool ModelKullanildi = false,
+        string Model = "");
 
 
 
@@ -133,9 +136,21 @@ public sealed class RehberServisi(VeriKaynagi veri)
             return await KonuYanitiAsync(baglanti, enIyi, konular, soru, guven, urunModu,
                                          baglam, uyarilar, kontorBakiye, kronometre, iptal);
 
+        // --------------------------------------------------------- model
+        // Katalog konuyu bulamadı. MODEL BURADA DEVREYE GİRER: doğru cevabı
+        //   katalogdan üretemediğimiz yerde, kullanıcının kendi cümlesine
+        //   uyan yol tarifini yazsın. Bağlam yine katalogdur - model yalnız
+        //   ANLATIR, ekran uyduramaz (beyaz liste doğrulaması).
+        var modelEkranlari = await EkranAraAsync(baglanti, soru, kelimeler, urunModu,
+                                                 baglam, 12, iptal);
+        var modelYaniti = await ModelDeneAsync(baglanti, istek, soru, urunModu, konular,
+                                               modelEkranlari, baglam, uyarilar,
+                                               kronometre, iptal);
+        if (modelYaniti is not null) return modelYaniti;
+
         // ------------------------------------------------- ekran eşleşmesi
-        var ekranlar = await EkranAraAsync(baglanti, soru, kelimeler, urunModu, baglam,
-                                           6, iptal);
+        var ekranlar = modelEkranlari.Count > 0 ? modelEkranlari.Take(6).ToList()
+            : await EkranAraAsync(baglanti, soru, kelimeler, urunModu, baglam, 6, iptal);
         if (ekranlar.Count > 0)
         {
             var e = ekranlar[0];
@@ -160,6 +175,148 @@ public sealed class RehberServisi(VeriKaynagi veri)
             [], [], [], 0m,
             "Hangi modülde çalışıyorsunuz: hasta/randevu (HBYS) mu, fatura/stok (ERP) mü?",
             uyarilar, "", 0, kontorBakiye);
+    }
+
+    // ---------------------------------------------------------------- model --
+    /// <summary>
+    /// Katalog cevaplayamadığında modeli dener. Üç kapı sırayla: <b>model
+    /// hazır mı</b> (anahtar + ayar), <b>kontör var mı</b> (kurumsal açma,
+    /// bakiye, günlük tavan), <b>çıktı geçerli mi</b> (beyaz liste). Herhangi
+    /// biri tutmazsa <c>null</c> döner ve katalog akışı devam eder - asistan
+    /// susmaz, yalnız üslubu sadeleşir.
+    /// </summary>
+    private async Task<Yanit?> ModelDeneAsync(
+        NpgsqlConnection baglanti, Istek istek, string soru, short urunModu,
+        List<IDictionary<string, object?>> konular, List<EkranOnerisi> ekranlar,
+        IstekBaglami baglam, List<string> uyarilar, Stopwatch kronometre,
+        CancellationToken iptal)
+    {
+        if (model is null || !model.Hazir || ekranlar.Count == 0) return null;
+
+        var (izin, ucret, sebep) = await KontorDurumAsync(baglanti, iptal);
+        if (!izin)
+        {
+            if (sebep.Length > 0) uyarilar.Add(sebep);
+            return null;
+        }
+
+        // MODELE GİDEN BAĞLAM: yalnız güvenli metadata. Ekranlar zaten yetki
+        //   süzgecinden geçti; konu başlıkları katalogdan. Hasta/cari/belge
+        //   verisi bu katmana hiç girmez.
+        var konuOzetleri = konular
+            .Where(k => YetkiVar(k["yetkiKodu"]?.ToString(), baglam))
+            .Take(3)
+            .Select(k => new RehberModeli.KonuOzeti(
+                k["baslik"]?.ToString() ?? "", AdimOzeti(k["adimlar"]?.ToString())))
+            .ToList();
+
+        var cikti = await model.DeneAsync(new RehberModeli.Girdi(
+            soru, urunModu, istek.AktifSayfa,
+            ekranlar.Select(e => new RehberModeli.Ekran(e.Kaynak, e.Rota, e.Yol)).ToList(),
+            konuOzetleri), iptal);
+        if (cikti is null) return null;
+
+        var adimlar = cikti.Adimlar
+            .Select((a, i) => new Adim(i + 1, a.Metin,
+                                       ekranlar.FirstOrDefault(e => e.Rota == a.Ekran)?.Kaynak,
+                                       a.Ekran))
+            .ToList();
+
+        // Kullanılan ekranlar önerilere; model ekran vermediyse aramanın ilk üçü.
+        var oneriler = adimlar.Where(a => a.Rota is not null)
+            .Select(a => ekranlar.First(e => e.Rota == a.Rota))
+            .DistinctBy(e => e.Rota).ToList();
+        if (oneriler.Count == 0) oneriler = ekranlar.Take(3).ToList();
+
+        var jeton = cikti.GirisJeton + cikti.CikisJeton;
+        var logId = await LogAsync(baglanti, baglam, soru, 5, "model", cikti.Guven, istek,
+                                   kronometre, iptal, cikti.Model, cikti.GirisJeton,
+                                   cikti.CikisJeton, ucret);
+        // KONTÖR ÇAĞRI BAŞARILI OLUNCA DÜŞÜLÜR: ödemediğimiz bir çağrı için
+        //   müşteriden kontör almak savunulamaz.
+        await KontorDusAsync(baglanti, baglam, ucret, jeton, logId, cikti.Model, iptal);
+
+        return new Yanit(cikti.Cevap, adimlar, oneriler,
+                         Aksiyonlar(null, oneriler.FirstOrDefault()?.Kaynak ?? "", baglam),
+                         cikti.Guven, cikti.EksikBilgiSorusu, uyarilar, "model", 5,
+                         await BakiyeAsync(baglanti, iptal), true, cikti.Model);
+    }
+
+    /// <summary>Konu adımlarını modele tek satır özet olarak verir.</summary>
+    private static string AdimOzeti(string? adimlarJson)
+    {
+        if (string.IsNullOrWhiteSpace(adimlarJson)) return "";
+        try
+        {
+            using var belge = JsonDocument.Parse(adimlarJson);
+            var metinler = belge.RootElement.EnumerateArray()
+                .Select(o => o.TryGetProperty("metin", out var m) ? m.GetString() ?? "" : "")
+                .Where(m => m.Length > 0)
+                .Take(6);
+            return string.Join(" → ", metinler);
+        }
+        catch (JsonException) { return ""; }
+    }
+
+    /// <summary>
+    /// Model çağrısı yapılabilir mi? Üç kapı: kurum modeli kapatmış olabilir,
+    /// bakiye yetmeyebilir, günlük tavan dolmuş olabilir. Kapı kapalıysa
+    /// kullanıcıya SEBEP söylenir - sessizce sade cevap vermek "asistan
+    /// bozuldu" diye algılanır.
+    /// </summary>
+    private static async Task<(bool Izin, decimal Ucret, string Sebep)> KontorDurumAsync(
+        NpgsqlConnection baglanti, CancellationToken iptal)
+    {
+        var satir = await baglanti.TekAsync("""
+            select k.bakiye, k.cagri_ucreti as "ucret", k.model_aktif as "aktif",
+                   k.gunluk_cagri_siniri as "sinir",
+                   (select count(*) from public.ai_rehber_log l
+                     where l.kaynak = 5 and l.tarih >= current_date) as "bugun"
+              from public.ai_kontor k where k.id = 1
+            """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+        if (satir is null) return (false, 0m, "");
+
+        var ucret = Convert.ToDecimal(satir["ucret"]);
+        if (Convert.ToInt16(satir["aktif"]) != 1) return (false, ucret, "");
+
+        var bakiye = Convert.ToDecimal(satir["bakiye"]);
+        if (bakiye < ucret)
+            return (false, ucret,
+                    "AI kontörü bitti; cevaplar şimdilik katalogdan üretiliyor "
+                    + "(Yönetim › Yapay Zeka › Kontör).");
+
+        var sinir = Convert.ToInt32(satir["sinir"]);
+        if (sinir > 0 && Convert.ToInt64(satir["bugun"]) >= sinir)
+            return (false, ucret,
+                    "Bugünkü AI çağrı sınırına ulaşıldı; cevaplar katalogdan üretiliyor.");
+
+        return (true, ucret, "");
+    }
+
+    private static async Task<decimal> BakiyeAsync(NpgsqlConnection baglanti,
+                                                   CancellationToken iptal) =>
+        await baglanti.TekDegerAsync<decimal>(
+            "select bakiye from public.ai_kontor where id = 1", null, [], iptal);
+
+    /// <summary>Kontörü düşer ve hareketi yazar (tur 2 = harcama).</summary>
+    private static async Task KontorDusAsync(
+        NpgsqlConnection baglanti, IstekBaglami baglam, decimal ucret, int jeton,
+        long? logId, string modelAdi, CancellationToken iptal)
+    {
+        if (ucret <= 0) return;
+        await baglanti.CalistirAsync("""
+            update public.ai_kontor
+               set bakiye = greatest(0, bakiye - @p0), degistirme_tarihi = now()
+             where id = 1
+            """, null, [ucret], iptal);
+        await baglanti.CalistirAsync("""
+            insert into public.ai_kontor_hareket
+                   (tur, miktar, bakiye, aciklama, kullanici_id, rehber_log_id, jeton)
+            values (2, @p0, (select bakiye from public.ai_kontor where id = 1),
+                    @p1, @p2, @p3, @p4)
+            """, null,
+            [ucret, "AI rehber cevabı (" + modelAdi + ")", baglam.KullaniciId, logId, jeton],
+            iptal);
     }
 
     // -------------------------------------------------- bağlamsal yardım ---
@@ -473,21 +630,27 @@ public sealed class RehberServisi(VeriKaynagi veri)
     }
 
     // ---------------------------------------------------------------- log --
-    private static async Task LogAsync(
+    private static async Task<long?> LogAsync(
         NpgsqlConnection baglanti, IstekBaglami baglam, string soru, short kaynak,
         string konuKod, decimal guven, Istek? istek, Stopwatch kronometre,
-        CancellationToken iptal)
+        CancellationToken iptal, string model = "", int girisJeton = 0,
+        int cikisJeton = 0, decimal kontor = 0m)
     {
         // Cevapsız soru = eksik rehber konusu. Günlük olmadan "asistan işe
-        //   yaramıyor" geri bildirimi ölçülemez.
-        await baglanti.CalistirAsync("""
+        //   yaramıyor" geri bildirimi ölçülemez. Model cevabında jeton da
+        //   yazılır: kontör fiyatı ancak gerçek tüketimle ölçülür.
+        var satir = await baglanti.TekAsync("""
             insert into public.ai_rehber_log
                    (kullanici_id, sube_id, soru, kaynak, konu_kod, guven,
-                    aktif_mod, aktif_sayfa, sure_ms)
-            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8)
+                    aktif_mod, aktif_sayfa, sure_ms, model, giris_jeton, cikis_jeton,
+                    kontor)
+            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12)
+            returning id
             """, null,
             [baglam.KullaniciId, baglam.SubeId, soru, kaynak, konuKod, guven,
              (short)(istek?.AktifMod ?? 0), istek?.AktifSayfa ?? "",
-             (int)kronometre.ElapsedMilliseconds], iptal);
+             (int)kronometre.ElapsedMilliseconds, model, girisJeton, cikisJeton, kontor],
+            OkuyucuGenisletmeleri.Sozluk, iptal);
+        return satir is null ? null : Convert.ToInt64(satir["id"]);
     }
 }

@@ -29,6 +29,8 @@ interface Yanit {
   cevap: string; adimlar: Adim[]; onerilenEkranlar: Ekran[];
   onerilenAksiyonlar: Aksiyon[]; guvenSkoru: number; eksikBilgiSorusu?: string;
   uyarilar: string[]; konuKod: string; kaynakTuru: number; kontorBakiye: number;
+  /** Cevabı dil modeli mi yazdı (450)? Katalog cevabı ücretsizdir. */
+  modelKullanildi?: boolean; model?: string;
 }
 
 /**
@@ -230,6 +232,11 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
               {yanit.kaynakTuru === 2 && <span className="rehber-not">ekran eşleşmesi</span>}
               {yanit.kaynakTuru === 3 && <span className="rehber-not">bu ekranın yardımı</span>}
               {yanit.kaynakTuru === 0 && <span className="rehber-not">eşleşme yok</span>}
+              {/* Cevabın kaynağı gizlenmez: katalog cevabı kurumun yazdığı
+                  adımdır, model cevabı yorumdur - kullanıcı ayırt edebilmeli. */}
+              {yanit.modelKullanildi && (
+                <span className="rehber-not" title={yanit.model}>yapay zeka · kontör</span>
+              )}
             </div>
           </>
         )}

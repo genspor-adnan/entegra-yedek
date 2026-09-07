@@ -90,6 +90,15 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.GenetikServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.KaliteKontrolServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.DisLabServisi>();
 // AI REHBER (447): katalog okur, veri yazmaz - kayit degistirmez.
+// DIL MODELI (450): anahtar sunucudan okunur (ANTHROPIC_API_KEY / Ai:ApiAnahtar /
+//   gizli/ai-anahtar.txt); anahtar yokken saglayici "hazir degil" der ve rehber
+//   katalogdan cevap vermeye devam eder.
+kurucu.Services.AddHttpClient("ai");
+kurucu.Services.AddSingleton(kurucu.Configuration.GetSection("Ai")
+    .Get<Gentegre.Api.Servisler.ModelSecenekleri>() ?? new Gentegre.Api.Servisler.ModelSecenekleri());
+kurucu.Services.AddSingleton<Gentegre.Api.Servisler.IModelSaglayici,
+                             Gentegre.Api.Servisler.AnthropicSaglayici>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.RehberModeli>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RehberServisi>();
 // AI KONTROLLU ONERI (449): kayittaki eksikleri isaret eder, yazmaz.
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.OneriServisi>();

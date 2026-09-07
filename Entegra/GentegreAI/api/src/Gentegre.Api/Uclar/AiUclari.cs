@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
@@ -198,13 +199,14 @@ public static class AiUclari
         });
 
         // --------------------------------------------------------- soru sor --
-        // Bugün: `arac` verilmişse o fonksiyon çalışır (hazır komut). Serbest
-        //   metin model bağlanınca cevaplanacak - şimdilik kullanıcıya ne
-        //   yapabileceği söylenir (boş yanıt kullanıcıyı "bozuk mu" diye
-        //   arattırırdı).
+        // `arac` verilmişse o fonksiyon çalışır (hazır komut). SERBEST METİN
+        //   REHBERE gider (447-450): katalogdan "ne nerede, nasıl yapılır"
+        //   cevabı üretilir; sunucuda model anahtarı varsa cevabı model yazar
+        //   (kontör düşülür). Model yokken de ekran boş dönmez - "model bağlı
+        //   değil" cevabı kullanıcının sorusunu cevapsız bırakıyordu.
         grup.MapPost("/{sohbetId:int}/sor", async (
             int sohbetId, SoruIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            RehberServisi rehber, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("ai", Islem.Ekle);
@@ -287,20 +289,39 @@ public static class AiUclari
                 return Results.Ok(new { mesajId = aMesajId, kayit = veri2?.Count ?? 0 });
             }
 
-            // ------------------------------------------- model yok: bilgilendir
-            const string yanit =
-                "Model bağlantısı henüz tanımlı değil, bu yüzden serbest metin yanıtı "
-                + "üretemiyorum. Soldaki hazır komutlarla izinli fonksiyonları "
-                + "çalıştırabilirsin: vadesi geçen cariler, kritik stok, bugünün özeti, "
-                + "görev taslağı. Model tanımlandığında (Ayarlar › Genel › Entegrasyon, "
-                + "kod AI) aynı fonksiyonlar serbest sohbetten de çağrılacak.";
+            // ------------------------------------------------ serbest metin
+            // Rehber cevabı: adımlar + yetkili ekranlar. Yetki süzgeci
+            //   rehberin içinde; burada yalnız METNE çevriliyor.
+            var rehberYanit = await rehber.CevaplaAsync(
+                new RehberServisi.Istek(soru, null, istek.Baglam is not null
+                    && istek.Baglam.TryGetValue("rota", out var r) ? r?.ToString() : null,
+                    null),
+                baglam, iptal);
+
+            var kalem = new StringBuilder(rehberYanit.Cevap);
+            foreach (var adim in rehberYanit.Adimlar)
+                kalem.AppendLine().Append(adim.No).Append(". ").Append(adim.Metin);
+            if (rehberYanit.OnerilenEkranlar.Count > 0)
+                kalem.AppendLine().AppendLine()
+                     .Append("İlgili ekranlar: ")
+                     .Append(string.Join(" · ",
+                             rehberYanit.OnerilenEkranlar.Select(e => e.Yol)));
+            foreach (var u in rehberYanit.Uyarilar)
+                kalem.AppendLine().AppendLine().Append("⚠ ").Append(u);
+            if (rehberYanit.EksikBilgiSorusu is { Length: > 0 } ek)
+                kalem.AppendLine().AppendLine().Append(ek);
+
+            var yanit = kalem.ToString();
 
             var bMesaj = await baglanti.TekAsync("""
-                insert into public.ai_mesaj (sohbet_id, rol, metin) values (@p0, 2, @p1)
+                insert into public.ai_mesaj (sohbet_id, rol, metin, model)
+                values (@p0, 2, @p1, @p2)
                 returning id
-                """, null, [sohbetId, yanit], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [sohbetId, yanit, rehberYanit.Model],
+                OkuyucuGenisletmeleri.Sozluk, iptal);
 
-            return Results.Ok(new { mesajId = Convert.ToInt32(bMesaj!["id"]), kayit = 0 });
+            return Results.Ok(new { mesajId = Convert.ToInt32(bMesaj!["id"]), kayit = 0,
+                                    model = rehberYanit.ModelKullanildi });
         });
 
         // ------------------------------------------------------ taslak onayı --

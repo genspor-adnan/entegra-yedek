@@ -1155,6 +1155,56 @@ eksiğini saymak da bir sızıntıdır. Öneri sayısı ve kodları `ai_rehber_l
 
 ---
 
+## 9.15 AI dil modeli bağlantısı (450)
+
+**Model REHBERDİR, karar vermez.** Katalogdan (447-449) çıkan konu, ekran ve
+adım doğruluk kaynağıdır; modelin işi katalogun boş kaldığı yerde kullanıcının
+kendi cümlesine uyan kısa yol tarifini yazmaktır. Model **yalnız** şu durumda
+çağrılır: katalog konu bulamadı **ve** kullanıcının yetkili olduğu en az bir
+ekran eşleşti.
+
+**Anahtar depoda ve müşteri veritabanında durmaz.** Sunucudan okunur; sıra:
+`ANTHROPIC_API_KEY` ortam değişkeni → `Ai:ApiAnahtar` → dosya
+(`<içerik kökü>/gizli/ai-anahtar.txt`, üst dizin de denenir). Anahtar
+satıcının hesabıdır, müşteri kontör öder - müşteri DB'sinde duran anahtar,
+DB'yi görebilen herkese satıcının faturasını açardı. **Anahtar yoksa asistan
+kapanmaz**: katalog rehberi aynen çalışır.
+
+Ayarlar (`appsettings.json` › `Ai`): `Aktif`, `Model`
+(varsayılan `claude-haiku-4-5-20251001` — rehber cevabı kısa, bağlam hazır;
+pahalı model burada doğruluk değil yalnız üslup katardı), `AzamiCikisJeton`,
+`Sicaklik`, `ZamanAsimiSn`.
+
+### Üç kapı
+
+| Kapı | Ne yapar |
+|---|---|
+| **Bağlam** | Modele yalnız güvenli metadata gider: kullanıcının **yetkili** olduğu ekranlar (rota + menü yolu) ve eşleşen konu başlıkları/adım özetleri. Hasta, cari, belge verisi bu katmana hiç girmez. |
+| **Çıktı doğrulaması** | Model katı JSON döndürür (`cevap`, `adimlar[]`, `eksikBilgiSorusu`, `guven`). Adımdaki her `ekran` beyaz listede olmalı; uydurulan rota atılır (adım metni kalır, düğme çizilmez). En çok 6 adım, cevap 600 karakter. |
+| **Kontör** | Çağrı öncesi `ai_kontor` kontrol edilir: `model_aktif`, `bakiye ≥ cagri_ucreti`, `gunluk_cagri_siniri`. Kapı kapalıysa kullanıcıya sebep uyarı olarak döner ve katalog cevabı verilir. |
+
+Kontör **çağrı başarılı olunca** düşülür (`ai_kontor_hareket`, tur 2, `jeton` =
+giriş + çıkış); model hata verirse ya da cevabı çözümlenemezse kontör alınmaz
+ve katalog cevabı kullanılır. Her model cevabı `ai_rehber_log`'a `kaynak = 5`,
+`model`, `giris_jeton`, `cikis_jeton`, `kontor` ile yazılır.
+
+Yanıt sözleşmesine iki alan eklendi: `modelKullanildi` (bool) ve `model`
+(kullanılan model adı) — panelde "yapay zeka · kontör" rozetiyle gösterilir;
+katalog cevabı ile model yorumu kullanıcı gözünde ayrılabilmeli.
+
+**Yapay Zeka ekranı (`/api/ai/{sohbetId}/sor`) serbest metni artık rehbere
+verir.** Model bağlı değilken "model bağlantısı tanımlı değil" cevabı
+kullanıcının sorusunu cevapsız bırakıyordu; şimdi katalogdan adım adım cevap
+üretiliyor, anahtar varsa aynı akış model destekli çalışıyor.
+
+**Anahtar geldiğinde yapılacaklar**: (1) anahtarı sunucuya koy — ortam
+değişkeni ya da `~/gentegre-ai/gizli/ai-anahtar.txt`; (2) kontör yükle
+(`update public.ai_kontor set bakiye = <miktar> where id = 1`, hareket
+`tur = 1`); (3) `cagri_ucreti` ve `gunluk_cagri_siniri` değerlerini iş modeline
+göre ayarla.
+
+---
+
 ---
 
 ## 10. Sürümleme

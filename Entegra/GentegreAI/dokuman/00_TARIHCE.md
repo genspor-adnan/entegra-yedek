@@ -7627,3 +7627,42 @@ hep görmezden gelinen kural böyle bulunacak.
 yok, gizle/geri aç, bozuk kural paneli düşürmez, yazma yasağı), web **460**
 (panelde öneri çizimi, liste rotasında istek yok, seviye sınıfı, susturma).
 Belge: sözleşme §9.14.
+
+---
+
+## 07.09.2026 — AI dil modeli bağlantısı, anahtar beklemede (`db/450`)
+
+Kullanıcı Yapay Zeka ekranında "nasıl hasta kaydı açarım" diye sordu, ekran
+"model bağlantısı henüz tanımlı değil" dedi. Katalog o soruyu üç fazdır
+cevaplayabiliyordu; ekran sormuyordu bile. İki iş birden yapıldı: **model
+bağlantısı kuruldu (anahtar sonra verilecek)** ve **model olmadan da o ekran
+cevap veriyor**.
+
+**Anahtar depoya ve müşteri veritabanına yazılmıyor.** Sıra: ortam değişkeni
+(`ANTHROPIC_API_KEY`) → config → `gizli/ai-anahtar.txt`. Anahtar satıcının
+hesabıdır, müşteri kontör öder; müşteri DB'sinde duran anahtar DB'yi gören
+herkese bizim faturamızı açardı. Dosya seçeneği konteyneri yeniden kurmadan
+anahtar vermeyi sağlıyor - yayın `api/` klasörünü değiştiriyor, `gizli/`
+dokunulmuyor.
+
+**Model = Haiku 4.5.** Rehber cevabı kısa ve bağlam katalogdan hazır geliyor;
+pahalı model burada doğruluk değil yalnız üslup katardı.
+
+**Üç kapı**: (1) modele yalnız kullanıcının YETKİLİ olduğu ekranlar ve konu
+özetleri gider - hasta/cari/belge verisi bu katmana girmez; (2) modelin
+verdiği her ekran beyaz listeden doğrulanır, uydurulan rota atılır (adım
+metni kalır, düğme çizilmez); (3) kontör: `model_aktif` + bakiye + günlük
+tavan. Model ancak katalog cevaplayamadığında çağrılır - kurumun yazdığı
+adımlar ücretsiz ve denetlenebilir kalsın.
+
+Kontör **çağrı başarılı olunca** düşülüyor; model düşerse katalog cevabı
+veriliyor ve kontör alınmıyor - ödemediğimiz çağrı için müşteriden kontör
+almak savunulamaz. Günlüğe model adı ve jeton sayacı yazılıyor (`kaynak = 5`):
+kontör fiyatı ancak gerçek tüketimle ölçülür.
+
+**Testler**: API **151** (yeni `ModelTestleri`: uydurma ekran atılır, kod
+bloğundaki JSON okunur, kontör düşer + hareket yazılır, kontör yoksa çağrı
+yapılmaz, model düşünce katalog cevabı, yetkisiz ekran modele gönderilmez,
+katalog konuyu bulduysa model çağrılmaz), web **460**. Belge: sözleşme §9.15.
+
+**Bekleyen**: API anahtarı ve kontör yüklemesi (bakiye şu an 0).
