@@ -846,7 +846,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAd: 'Dış Lab Gönderimleri', menuSira: 50,
-    ic: '📦', yetkiKodu: 'lab.dislab',
+    // Kurye motoru (kullanici): numune kutusu degil, YOLDAKI numune anlatiliyor.
+    ic: '🏍️', yetkiKodu: 'lab.dislab',
   },
   {
     // DIS LABORATUVARLAR (445): cari bagi + anlasmali test listesi kartta.
