@@ -90,7 +90,14 @@ Bilgi "$((Get-ChildItem $dbHedef -Filter *.sql).Count) goc dosyasi"
 # ------------------------------------------------------------- paketle ------
 Adim 'paketleniyor ve yukleniyor'
 if (Test-Path $paket) { Remove-Item $paket }
-tar czf $paket -C $gecici .
+# TAR SECIMI: PATH'te Git/MSYS'in GNU tar'i one gecerse "C:\..." yolunu UZAK
+#   SUNUCU sanir ("Cannot connect to C: resolve failed") ve paket hic
+#   olusmaz. GNU tar'da --force-local bunu keser; Windows'un kendi
+#   bsdtar'inda boyle bir anahtar yok, oraya verilirse patlar.
+$tarSurum = (tar --version 2>&1) -join ' '
+$yerelBayrak = if ($tarSurum -match 'GNU tar') { @('--force-local') } else { @() }
+tar $yerelBayrak -czf $paket -C $gecici .
+if ($LASTEXITCODE -ne 0) { throw 'tar basarisiz' }
 Bilgi "paket: $([math]::Round((Get-Item $paket).Length/1MB,1)) MB"
 
 scp -q $paket "${Sunucu}:/tmp/gentegre-ai-paket.tgz"
