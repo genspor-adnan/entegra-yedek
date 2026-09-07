@@ -614,6 +614,9 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   {
     // LABORATUVAR ISTEMLERI (360): biyokimya / mikrobiyoloji / genetik.
     //   Satir = istem; testler ve sonuclari kartin "Testler" detayinda.
+    // ISTEM ve NUMUNE KABUL MENUNUN EN USTUNDE (kullanici): gunun isi
+    //   bunlardan baslar; dal basliklari (Biyokimya/Mikrobiyoloji/Genetik)
+    //   10-34, kalan ortak akis 50+.
     kaynak: 'lab-istem', rota: 'lab-istem', baslik: 'Laboratuvar İstemleri',
     yol: 'Laboratuvar › İstemler',
     kartYolu: '/lab-istem', kartBaslik: 'Laboratuvar İstemi',
@@ -630,7 +633,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'İstemler', menuSira: 50,
+    menuGrup: 'Laboratuvar', menuAd: 'İstemler', menuSira: 1,
     // Enjektor (kullanici): grup ikonu zaten tup (🧪), istem satiri ayrisiyor.
     ic: '💉', yetkiKodu: 'lab',
   },
@@ -650,7 +653,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Numune Kabul', menuSira: 52,
+    menuGrup: 'Laboratuvar', menuAd: 'Numune Kabul', menuSira: 2,
     ic: '🩸', yetkiKodu: 'lab.numune',
   },
   {
