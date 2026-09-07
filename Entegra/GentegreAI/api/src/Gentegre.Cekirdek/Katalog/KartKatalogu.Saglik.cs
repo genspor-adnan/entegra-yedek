@@ -403,8 +403,10 @@ public static partial class KartKatalogu
             new("bulgular", "public.muayene_bulgu", "muayene_id", new KartAlani[]
             {
                 new("id", "id", "sayi", Yazilabilir: false),
+                // Mockup basligi "Sistem" (muayene_karti.html fizik muayene
+                //   tablosu): satirlar branş şablonunun sistem alanlaridir.
                 new("sablonAlanId", "sablon_alan_id", "kod", Zorunlu: true,
-                    KodTablosu: "public.v_muayene_sablon_alan_lookup", Baslik: "Alan"),
+                    KodTablosu: "public.v_muayene_sablon_alan_lookup", Baslik: "Sistem"),
                 new("normal", "normal", "mantik", Baslik: "Normal"),
                 new("degerMetin", "deger_metin", "metin", Baslik: "Bulgu"),
                 new("degerSayi", "deger_sayi", "sayi", Baslik: "Değer"),

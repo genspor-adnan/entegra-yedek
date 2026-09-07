@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -264,6 +264,43 @@ public static class MuayeneUclari
 
             return Results.Ok(new { id, sablonId, acilan, bulguOzet = ozet,
                                     mesaj = $"{acilan} alan sablondan acildi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/muayene/{id}/tumu-normal - açık bulgu satırlarını "normal"
+        //   işaretle (mockup muayene_karti.html "Tümü normal işaretle").
+        //   Hekim yalnızca SAPANI yazar; normalleri tek tek işaretlemek
+        //   poliklinikte en çok tekrarlanan tıklamaydı.
+        //   BULGU METNİ YAZILMIŞ SATIRA DOKUNULMAZ: "normal" demek yazılmış
+        //   patolojik bulguyu geçersiz kılardı - orası hekimin kararı.
+        grup.MapPost("/{id:int}/tumu-normal", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var varMi = await baglanti.TekDegerAsync<int>(
+                "select count(*) from public.muayene where id = @p0", islem, [id], iptal);
+            if (varMi == 0) return Results.NotFound(new { hata = new
+                { kod = "BULUNAMADI", mesaj = "Muayene bulunamadi." } });
+
+            var isaretlenen = await baglanti.CalistirAsync(
+                "update public.muayene_bulgu set normal = 1 " +
+                " where muayene_id = @p0 and coalesce(normal, 0) = 0 " +
+                "   and coalesce(trim(deger_metin), '') = ''",
+                islem, [id], iptal);
+
+            var ozet = await OzetDerleAsync(baglanti, islem, id, iptal);
+            await islem.CommitAsync(iptal);
+
+            return Results.Ok(new { id, isaretlenen, bulguOzet = ozet,
+                                    mesaj = isaretlenen == 0
+                                        ? "Isaretlenecek bos bulgu satiri yok."
+                                        : $"{isaretlenen} sistem normal isaretlendi.",
                                     izlemeNo = baglam.IzlemeNo });
         });
 

@@ -26,6 +26,7 @@ export async function muayeneAksiyonu(
 ): Promise<boolean> {
   if (kod !== 'muayene.al' && kod !== 'muayene.tamamla'
       && kod !== 'muayene.sablon' && kod !== 'muayene.ozet'
+      && kod !== 'muayene.normal'
       && kod !== 'muayene.istem') return false;
 
   const id = Number(satir?.id ?? 0);
@@ -50,6 +51,18 @@ export async function muayeneAksiyonu(
       if (!secim) return;
 
       const y = await api.muayeneSablonUygula(id, Number(secim));
+      mesaj(y.mesaj);
+      b.tazele();
+    });
+    return true;
+  }
+
+  // TUMU NORMAL: sablonla acilmis ama HENUZ YAZILMAMIS satirlar "normal"
+  //   isaretlenir. Yazilmis bulguya dokunulmaz (kural sunucuda) - aksi halde
+  //   tek tikla patolojik bulgu silinebilirdi.
+  if (kod === 'muayene.normal') {
+    await guvenli(async () => {
+      const y = await api.muayeneTumuNormal(id);
       mesaj(y.mesaj);
       b.tazele();
     });

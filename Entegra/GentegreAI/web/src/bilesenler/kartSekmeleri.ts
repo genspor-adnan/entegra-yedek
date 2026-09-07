@@ -93,9 +93,16 @@ export function sekmeleriKur(secenek: {
   seritAlanlari?: string[];
   /** Detay satirlarini okur - "ozluk.calismaSekli=3" gibi kosullu sekmeler icin. */
   detaySatirlari?: (detayAd: string) => Record<string, unknown>[];
+  /**
+   * DETAYI BIR GRUP SEKMESININ ICINE GOMER: `{ bulgular: 'Muayene' }`.
+   * Detay kendi sekmesini ALMAZ, tablosu o grubun alanlarinin altina cizilir
+   * (mockup muayene_karti.html "Fizik Muayene": ust satirda sablon, altinda
+   * sistem/normal/bulgu tablosu - iki ayri sekme degil).
+   */
+  detayGrupta?: Record<string, string>;
 }): SekmeTanimi[] {
   const { gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
-          yerTutucuSekmeler, gizliSekmeler, seritAlanlari,
+          yerTutucuSekmeler, gizliSekmeler, seritAlanlari, detayGrupta,
           detaySatirlari = () => [] } = secenek;
   const dokumanliKart = personelGibiKart || kaynak === 'kisi' || kaynak === 'cari' || kaynak === 'stok';
   const yorumMedyaSekmesiVar = (yerTutucuSekmeler ?? []).includes('Yorum / Medya');
@@ -133,6 +140,8 @@ export function sekmeleriKur(secenek: {
     }
   }
   meta?.detaylar.forEach(d => {
+    // Bir grup sekmesine gomulen detay kendi sekmesini almaz.
+    if (detayGrupta?.[d.ad]) return;
     // KOSULLU sekme (ör. stok "Paket"): ilgili kutu isaretli degilse sekme
     //   hic acilmaz - bos sekme "burada doldurulacak bir sey var" izlenimi
     //   verir. Kutu isaretlenince ANINDA gorunur (deger state'i degisir).

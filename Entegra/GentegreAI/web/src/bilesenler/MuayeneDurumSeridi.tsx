@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 
 /**
- * MUAYENE DURUM ŞERİDİ (461) — mockup `muayene_karti.html` altındaki
- * `.statusbar`: "Tanı ✓ ana · İstem 4 · Süre 12 dk" ve sağda tamamlamanın
- * ne tetikleyeceği.
+ * MUAYENE UYARI BANDI (461, yeri kullanıcı isteğiyle değişti) — mockup
+ * `muayene_karti.html` `.statusbar` içeriği; artık kartın altında değil
+ * BAĞLAM ŞERİDİNİN (hasta / alerji / ilaç / bugün) ALTINDA bir bant.
  *
- * <b>Neden kartın altında:</b> hekim "Tamamla"ya basmadan önce eksiğini tek
- * satırda görmeli - tanı girilmemiş bir muayene tamamlanınca başvuru
- * tahakkuka düşmüyor ve e-Nabız paketi eksik alanla kuyrukta kalıyor.
+ * <b>Neden yukarıda:</b> "ana tanı girilmedi", "panik sonuç", "alerji kaydı
+ * var" gibi uyarılar hekimin yazmaya başlamadan önce göreceği yerde
+ * durmalı; kartın en altında oldukları sürece Tamamla'ya basılana kadar
+ * fark edilmiyordu.
  *
  * <b>İş kuralı burada DEĞİL:</b> şerit sunucudan gelen sayıları yazar;
  * "tamamlanabilir mi" kararını Tamamla ucu verir (ve gerekirse reddeder).
@@ -53,9 +54,17 @@ export function MuayeneDurumSeridi({ muayeneId }: { muayeneId: number }) {
   const bekleyen = sayi(satir.bekleyenIstem);
   const gecen = sure(satir.baslangic, satir.tamamlanma);
   const tamamlandi = sayi(satir.durum) === 2;
+  // `uyari` SUNUCUDA hesaplanir (panik sonuc / alerji / tanisiz / sonuc geldi)
+  //   ve listede de ayni kolon gosterilir - iki yerde iki kural olmasin.
+  const uyari = String(satir.uyari ?? '').trim();
 
   return (
-    <span className="muayene-durum">
+    <div className="muayene-uyari muayene-durum">
+      {uyari && (
+        <span className={`rozet ${uyari.startsWith('PANİK') ? 'hata' : 'uyari'}`}>
+          {uyari}
+        </span>
+      )}
       {/* ANA TANI ZORUNLU: e-Nabız 103 paketi ve provizyon onu bekler. */}
       <span className={anaTani ? 'rozet olumlu' : 'rozet uyari'}>
         {anaTani ? `Ana tanı: ${anaTani}` : 'Ana tanı girilmedi'}
@@ -70,6 +79,6 @@ export function MuayeneDurumSeridi({ muayeneId }: { muayeneId: number }) {
           ? 'Tamamlandı → başvuru tahakkuka düştü'
           : 'Tamamla → başvuru tahakkuk · e-Nabız paketi'}
       </span>
-    </span>
+    </div>
   );
 }

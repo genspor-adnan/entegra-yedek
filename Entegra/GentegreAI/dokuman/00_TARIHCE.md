@@ -8022,3 +8022,24 @@ yükseklikte (41 px) - `rows=4` niteliği `min-height`i ezdiği için yükseklik
 - Bağlam şeridi: hasta adının sağında `E 36y` rozeti, altında etiketsiz
   dosya/protokol numarası; "Bugün" kutusunun altında muayenenin penceresi
   ("07.09.2026 01:02 – 01:35 · 33 dk"; bitiş yoksa süren muayene).
+
+### Uyarı bandı ve "Fizik Muayene" tek sekme (kullanıcı)
+
+- **Uyarı bandı** bağlam şeridinin altına taşındı (eskiden kartın en altındaki
+  durum şeridiydi). "Ana tanı girilmedi", "panik sonuç", "alerji kaydı var",
+  "N sonuç bekliyor" hekim yazmaya başlamadan görülmeli - kartın altında
+  Tamamla'ya basılana kadar fark edilmiyordu. Listenin `uyari` kolonu da
+  banda eklendi: kural sunucuda tek yerde.
+- **GenForm `detayGrupta`**: bir detay tablosunu bir grup sekmesinin içine
+  gömer. Muayenede `{ bulgular: 'Muayene' }` - mockup'taki "Fizik Muayene"
+  tek sekmedir (üstte şablon, altında sistem/normal/bulgu tablosu); iki ayrı
+  sekme hekimi şablonla tablo arasında gidip getiriyordu.
+- **`POST /api/muayene/{id}/tumu-normal`** (mockup "Tümü normal işaretle"):
+  şablonla açılmış ama **boş** satırları normal işaretler. Bulgu metni
+  yazılmış satıra dokunmaz - "normal" demek patolojik bulguyu geçersiz
+  kılardı; o hekimin kararı. Sekme araç çubuğundaki iki düğme (Şablon Uygula ·
+  Tümü normal) uca gider, satırları istemci değiştirmez.
+
+**Zorunlu sapma:** grid'de mockup'ta olmayan "Değer" ve "Taraf" kolonları
+duruyor - `muayene_bulgu` alanları; kaldırmak sayısal ölçümü (GKS) ve taraf
+(sağ/sol) bilgisini girilemez yapardı.

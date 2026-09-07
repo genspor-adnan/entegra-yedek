@@ -99,6 +99,12 @@ interface Props {
   /** Bu EKRANDA cizilmeyecek alanlar (ör. Aday kartinda "Kod"). Alan katalogda
       kalir; deger tasinir, form onu gostermez. */
   gizliAlanlar?: string[];
+  /**
+   * DETAYI GRUP SEKMESINE GOMER: `{ bulgular: 'Muayene' }`. Detay kendi
+   * sekmesini almaz; tablosu o grubun alanlarinin ALTINA cizilir. Mockup
+   * "Fizik Muayene" boyle: ustte sablon, altinda sistem/bulgu tablosu.
+   */
+  detayGrupta?: Record<string, string>;
   /** Bu EKRANDA acilmayacak sekmeler (ör. Aday kartinda "Fatura Bilgileri").
       Ayni kart farkli ekranlarda farkli genislikte kullanilabilsin diye. */
   gizliSekmeler?: string[];
@@ -145,7 +151,7 @@ const SEKME_IKON: Record<string, string> = {
 };
 const sekmeIkonu = (baslik: string) => SEKME_IKON[baslik] ?? '▫️';
 
-export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, onKaydedildi, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, onKaydedildi, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
@@ -476,13 +482,13 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
 /** Mockup'taki gibi sekmeli kart: Kimlik disindaki her alan grubu + her detay tablosu ayri sekme. */
   const sekmeler = useMemo<SekmeTanimi[]>(
     () => sekmeleriKur({ gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
-                         yerTutucuSekmeler, gizliSekmeler, seritAlanlari,
+                         yerTutucuSekmeler, gizliSekmeler, seritAlanlari, detayGrupta,
                          // Kosullu sekme DETAY alanina da bakabilir (ör. personelde
                          //   "Prim Rolleri" yalniz ozluk.calismaSekli = 3 iken):
                          //   isaret degisince sekme ANINDA gorunur/kaybolur.
                          detaySatirlari: ad => detaylar[ad]?.guncel ?? [] }),
     [gruplar, meta, kaynak, deger, yeniMi, personelGibiKart, yerTutucuSekmeler,
-     gizliSekmeler, seritAlanlari, detaylar]);
+     gizliSekmeler, seritAlanlari, detayGrupta, detaylar]);
 
   const [aktifSekme, setAktifSekme] = useState<string | null>(null);
   const kayitAnahtari = `${kaynak}:${id}`;
@@ -1254,7 +1260,26 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
             />
           </>
         ) : govde;
-        return sekmeSarmalayici ? sekmeSarmalayici(aktif.baslik, tam, deger) : tam;
+        // GRUBA GOMULU DETAY (mockup "Fizik Muayene"): sablon alanlarinin
+        //   ALTINDA sistem/normal/bulgu tablosu - ayri sekme degil.
+        const gomulu = (meta?.detaylar ?? [])
+          .filter(d => detayGrupta?.[d.ad] === aktif.baslik);
+        const tumu = gomulu.length === 0 ? tam : (
+          <>
+            {tam}
+            {gomulu.map(d => (
+              <GenDetayTablo
+                key={d.ad}
+                meta={d}
+                durum={detaylar[d.ad] ?? bosDetay()}
+                saltOkunur={salt || d.saltOkunur}
+                hatalar={alanHatalari}
+                onDegis={yeni => setDetaylar(t => ({ ...t, [d.ad]: yeni }))}
+              />
+            ))}
+          </>
+        );
+        return sekmeSarmalayici ? sekmeSarmalayici(aktif.baslik, tumu, deger) : tumu;
       })()}
 
       {/* Stok > ÜTS: stok_uts 1:1 uzanti (119) - grid degil TEK kayit formu.

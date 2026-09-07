@@ -866,6 +866,12 @@ public static class AksiyonKatalogu
                 new("muayene.sablon", "📋 Şablon Uygula", "muayene",
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30),
+                // Mockup fizik muayene araç çubuğu: şablonla açılmış boş
+                //   satırları tek tıkla "normal" işaretler. Yazılmış bulguya
+                //   dokunmaz - kural uçta.
+                new("muayene.normal", "☑ Tümü Normal", "muayene",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 35),
                 new("muayene.ozet", "🧾 Özeti Derle", "muayene",
                     Hedef: "sagtus,palet",
                     KaynakKodu: "muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40),

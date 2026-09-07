@@ -2784,3 +2784,15 @@ input.skt-gecmis {
    pencerede gereksiz - alanlar tek sutunda okunur akar. */
 .muayene-bilgi .kaid { border: none; background: none; padding: 0 }
 .muayene-bilgi .alan-izgara { grid-template-columns: 1fr 1fr }
+
+/* MUAYENE UYARI BANDI: baglam seridinin altinda tam genislikte serit
+   (kullanici). Rozetler solda, tamamlamanin ne tetikleyecegi sagda. */
+.muayene-uyari {
+  margin: 0 10px 8px; padding: 5px 8px; border: 1px solid var(--cizgi2);
+  border-radius: var(--r); background: var(--yuz2); font-size: 11px;
+}
+.muayene-uyari .sonuk:last-child { margin-left: auto }
+
+/* FIZIK MUAYENE ARAC CUBUGU (mockup muayene_karti.html): sablon ve
+   "tumu normal" dugmeleri tablonun ustunde. */
+.muayene-arac { display: flex; gap: 6px; margin: 0 0 8px; flex-wrap: wrap }

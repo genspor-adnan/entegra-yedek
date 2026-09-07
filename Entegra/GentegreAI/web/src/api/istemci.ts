@@ -233,6 +233,12 @@ export const api = {
     gonder<{ acilan: number; bulguOzet: string; mesaj: string }>(
       `/api/muayene/${muayeneId}/sablon/${sablonId}`, {}),
 
+  /** Bos bulgu satirlarini "normal" isaretler (mockup "Tumu normal isaretle").
+      Bulgu METNI YAZILMIS satira dokunmaz - o hekimin karari. */
+  muayeneTumuNormal: (muayeneId: number) =>
+    gonder<{ isaretlenen: number; bulguOzet: string; mesaj: string }>(
+      `/api/muayene/${muayeneId}/tumu-normal`, {}),
+
   /** Bulgulardan muayene ozetini yeniden derler (rapora/e-Nabiz'a giden metin). */
   muayeneOzetDerle: (muayeneId: number) =>
     gonder<{ bulguOzet: string }>(`/api/muayene/${muayeneId}/ozet-derle`, {}),

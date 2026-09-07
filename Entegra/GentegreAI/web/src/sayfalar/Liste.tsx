@@ -2156,6 +2156,23 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
                 )
                 : (
                   <>
+                    {/* FIZIK MUAYENE ARAC CUBUGU (mockup): sablon uygula ve
+                        "tumu normal" - ikisi de SUNUCU ucuna gider, satirlari
+                        istemci degistirmez. */}
+                    {baslik === 'Muayene' && (
+                      <div className="muayene-arac">
+                        <button type="button" className="d"
+                                onClick={() => void aksiyon('muayene.sablon',
+                                                            { id: Number(kartId) })}>
+                          📋 Şablon Uygula
+                        </button>
+                        <button type="button" className="d"
+                                onClick={() => void aksiyon('muayene.normal',
+                                                            { id: Number(kartId) })}>
+                          ☑ Tümü normal işaretle
+                        </button>
+                      </div>
+                    )}
                     {icerik}
                     {baslik.includes('Sonuç') && (
                       <MuayeneIstemSonuc muayeneId={Number(kartId)} />
@@ -2180,16 +2197,26 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
               return <span className={`rozet ${sinif}`}>{ad}</span>;
             }
           : undefined}
+        // UYARI BANDI BAGLAM SERIDININ ALTINDA (kullanici): "ana tani
+        //   girilmedi", "panik sonuc", "alerji kaydi var" hekim yazmaya
+        //   baslamadan gorulmeli - kartin en altinda fark edilmiyordu.
         ustBaglam={tanim.kaynak === 'muayene' && kartId !== 'yeni'
           ? () => (
-            <MuayeneBaglamSeridi muayeneId={Number(kartId)}
-                                 onBugun={() => setMuayeneBilgiAcik(true)} />
+            <>
+              <MuayeneBaglamSeridi muayeneId={Number(kartId)}
+                                   onBugun={() => setMuayeneBilgiAcik(true)} />
+              <MuayeneDurumSeridi muayeneId={Number(kartId)} />
+            </>
           )
           : undefined}
         // PENCEREDEKI ALAN SIRASI (kullanici): once hekimin sectikleri
         //   (bolum, hekim, tur, isteyen muayene), EN ALTTA sistemin yazdigi
         //   baslama/bitis damgalari. `seritAlanlari` hem listeyi hem SIRAYI
         //   belirler; katalogdaki tanim sirasi degismedi.
+        // FIZIK MUAYENE TEK SEKME (mockup muayene_karti.html): "Bulgular"
+        //   detayi ayri sekme degil, "Muayene" sekmesinde sablon alanlarinin
+        //   ALTINDA - hekim sablonu secip ayni ekranda dolduruyor.
+        detayGrupta={tanim.kaynak === 'muayene' ? { bulgular: 'Muayene' } : undefined}
         seritAlanlari={tanim.kaynak === 'muayene'
           ? ['bolumId', 'personelId', 'tur', 'ustMuayeneId', 'baslangic', 'bitis']
           : undefined}
@@ -2206,9 +2233,7 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
               </Modal>
             ) : null)
           : undefined}
-        altBilgi={tanim.kaynak === 'muayene' && kartId !== 'yeni'
-          ? () => <MuayeneDurumSeridi muayeneId={Number(kartId)} />
-          : undefined}
+
         // MUAYENE EYLEMLERI KARTTA (461): ayni aksiyon kodlari listedekiyle
         //   BIREBIR ayni isleyiciye gider - kural ve yetki tek yerde kalir.
         ekAraclar={tanim.kaynak === 'muayene' && kartId !== 'yeni'
