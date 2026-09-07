@@ -110,8 +110,11 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
 
   return (
     <div className="kart-baglam">
-      <div className="kb-kutu">
+      {/* ETIKET KUTUNUN USTUNDE (kullanici): kutu icinde ilk satiri
+          yiyordu; disarida durunca kutunun tamami veriye kaliyor. */}
+      <div className="kb-hucre">
         <div className="kb-bas">Hasta</div>
+        <div className="kb-kutu">
         <div className="kb-ic">
           <b>{hastaAdi || '—'}</b>
           {/* CINSIYET + YAS ADIN SAGINDA (kullanici: "K 45y"): doz, referans
@@ -131,10 +134,12 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
           {protokol ? <span>· {protokol}</span> : null}
           {!metin(ust?.dosyaNo) && !protokol ? <span>—</span> : null}
         </div>
+        </div>
       </div>
 
-      <div className="kb-kutu">
+      <div className="kb-hucre">
         <div className="kb-bas">Alerji / Kronik</div>
+        <div className="kb-kutu">
         <div className="kb-ic">
           {/* ALERJİ YOKSA DA YAZILIR: boş kutu "bakılmadı" ile "yok"u
               ayırt ettirmez; mockup da "Alerji: yok" rozetini gösteriyor. */}
@@ -155,10 +160,12 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
           ))}
           {kronik.length > 4 && <span className="rozet gri">+{kronik.length - 4}</span>}
         </div>
+        </div>
       </div>
 
-      <div className="kb-kutu">
+      <div className="kb-hucre">
         <div className="kb-bas">Aktif ilaçlar</div>
+        <div className="kb-kutu">
         <div className="kb-ic">
           {ilac.length === 0
             ? <span className="sonuk">{yuklendi ? 'Kayıtlı ilaç yok' : '…'}</span>
@@ -174,6 +181,7 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
               </>
             )}
         </div>
+        </div>
       </div>
 
       {/* BUGUN: mockup'ta "acilden yonlendirme · panik sonuc" gibi o gune ait
@@ -182,15 +190,16 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
           TIKLANINCA kimlik alanlari (tur, bolum, hekim, baslama/bitis, isteyen
           muayene) modalda acilir (kullanici): bu alanlar arada bir duzeltilir,
           kart izgarasinda surekli yer kaplamalari gerekmiyor. */}
-      <div className={`kb-kutu${onBugun ? ' kb-tikla' : ''}`}
-           role={onBugun ? 'button' : undefined}
-           tabIndex={onBugun ? 0 : undefined}
-           title={onBugun ? 'Muayene bilgilerini aç' : undefined}
-           onClick={onBugun}
-           onKeyDown={e => {
-             if (onBugun && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onBugun() }
-           }}>
+      <div className="kb-hucre">
         <div className="kb-bas">Bugün{onBugun ? <span className="sonuk"> · düzenle</span> : null}</div>
+        <div className={`kb-kutu${onBugun ? ' kb-tikla' : ''}`}
+             role={onBugun ? 'button' : undefined}
+             tabIndex={onBugun ? 0 : undefined}
+             title={onBugun ? 'Muayene bilgilerini aç' : undefined}
+             onClick={onBugun}
+             onKeyDown={e => {
+               if (onBugun && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onBugun() }
+             }}>
         <div className="kb-ic">
           {tur ? <span className="rozet gri">{tur}</span> : null}
           {bolum ? <span>{bolum}</span> : null}
@@ -211,6 +220,7 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
               {gecen ? <span className="rozet gri">{gecen}</span> : null}
             </>
           ) : <span>Muayeneye alınmadı</span>}
+        </div>
         </div>
       </div>
     </div>

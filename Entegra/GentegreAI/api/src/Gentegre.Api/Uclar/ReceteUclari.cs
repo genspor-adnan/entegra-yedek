@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -130,6 +130,99 @@ public static class ReceteUclari
 
             await islem.CommitAsync(iptal);
             return Results.Ok(new { receteId, satirId, barkod, ilac.Ad, uyarilar,
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // DELETE /api/recete/{id}/ilac/{satirId} - imzalanmamış reçeteden ilaç çıkar
+        //   İMZALI REÇETEYE DOKUNULMAZ: imza reçeteyi kilitler; yanlış ilaç
+        //   varsa reçete iptal edilip yenisi yazılır - imzalanan kâğıdın
+        //   içeriğini sonradan değiştirmek izi bozar.
+        grup.MapDelete("/{id:int}/ilac/{satirId:int}", async (
+            int id, int satirId, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var durum = await baglanti.TekDegerAsync<int>(
+                "select durum from public.recete where id = @p0", null, [id], iptal);
+            if (durum != 1)
+                throw GentegreHatasi.IsKurali(
+                    "Imzalanmis ya da iptal edilmis receteden ilac cikarilamaz.");
+
+            var silinen = await baglanti.CalistirAsync(
+                "delete from public.recete_satir where id = @p0 and recete_id = @p1",
+                null, [satirId, id], iptal);
+            if (silinen == 0) return Results.NotFound(new { hata = new
+                { kod = "BULUNAMADI", mesaj = "Ilac satiri bulunamadi." } });
+
+            return Results.Ok(new { id, satirId, mesaj = "Ilac cikarildi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/recete/muayene/{muayeneId}/kopyala - önceki reçeteyi kopyala
+        //   Kronik hastada her muayenede aynı ilaçlar yeniden yazılıyor;
+        //   elle yazmak hem uzun hem de doz/periyot hatasının kapısı.
+        //   HASTANIN SON İMZALI reçetesi kopyalanır; zaten yazılmış barkodlar
+        //   atlanır (ikinci kez eklenmesi çift doz demek olurdu).
+        grup.MapPost("/muayene/{muayeneId:int}/kopyala", async (
+            int muayeneId, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var m = await baglanti.TekAsync(
+                "select m.taraf_id, m.personel_id, m.sube_id from public.muayene m " +
+                " where m.id = @p0", islem, [muayeneId],
+                o => new { HastaId = o.GetInt32(0),
+                           HekimId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1),
+                           SubeId = o.GetInt32(2) }, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Muayene bulunamadi.");
+
+            var kaynakId = await baglanti.TekDegerAsync<int>(
+                "select coalesce((select r.id from public.recete r " +
+                "                  where r.hasta_id = @p0 and r.muayene_id <> @p1 " +
+                "                    and r.durum >= 2 " +
+                "                  order by r.imza_zamani desc nulls last, r.id desc " +
+                "                  limit 1), 0)", islem, [m.HastaId, muayeneId], iptal);
+            if (kaynakId == 0)
+                throw GentegreHatasi.IsKurali("Bu hastanin kopyalanacak imzali recetesi yok.");
+
+            var hedefId = await baglanti.TekDegerAsync<int>(
+                "select coalesce((select r.id from public.recete r " +
+                "                  where r.muayene_id = @p0 and r.durum = 1 " +
+                "                  order by r.id desc limit 1), 0)",
+                islem, [muayeneId], iptal);
+            if (hedefId == 0)
+                hedefId = await baglanti.TekDegerAsync<int>(
+                    "insert into public.recete (muayene_id, hasta_id, hekim_id, " +
+                    "                           sube_id, ekleyen) " +
+                    "values (@p0, @p1, @p2, @p3, @p4) returning id",
+                    islem, [muayeneId, m.HastaId, m.HekimId, m.SubeId,
+                            baglam.KullaniciId], iptal);
+
+            var eklenen = await baglanti.CalistirAsync(
+                "insert into public.recete_satir (recete_id, ilac_barkod, ilac_ad, doz, " +
+                "        periyot, kullanim_sekli, sure_gun, kutu, aciklama, sira, ekleyen) " +
+                "select @p1, s.ilac_barkod, s.ilac_ad, s.doz, s.periyot, s.kullanim_sekli, " +
+                "       s.sure_gun, s.kutu, s.aciklama, s.sira, @p2 " +
+                "  from public.recete_satir s " +
+                " where s.recete_id = @p0 " +
+                "   and not exists (select 1 from public.recete_satir v " +
+                "                    where v.recete_id = @p1 " +
+                "                      and v.ilac_barkod = s.ilac_barkod)",
+                islem, [kaynakId, hedefId, baglam.KullaniciId], iptal);
+
+            await islem.CommitAsync(iptal);
+            return Results.Ok(new { receteId = hedefId, kaynakReceteId = kaynakId, eklenen,
+                                    mesaj = eklenen == 0
+                                        ? "Onceki recetedeki ilaclar zaten listede."
+                                        : $"{eklenen} ilac onceki receteden kopyalandi.",
                                     izlemeNo = baglam.IzlemeNo });
         });
 

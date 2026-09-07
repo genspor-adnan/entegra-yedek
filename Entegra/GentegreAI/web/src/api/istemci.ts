@@ -246,10 +246,36 @@ export const api = {
     gonder<{ eklendi: boolean; mesaj: string }>(
       `/api/muayene/${muayeneId}/tani/${encodeURIComponent(icdKod)}`, {}),
 
+  /** ILAC SECILIRKEN alerji/tekrar uyarisi (yazmadan once gorunsun). */
+  receteKontrol: (hastaId: number, barkod: string) =>
+    istek<{ uyarilar: { tur: string; metin: string }[] }>(
+      `/api/recete/kontrol?hastaId=${hastaId}&barkod=${encodeURIComponent(barkod)}`),
+
+  /** Receteye ilac ekler; recete yoksa acar. Uyari ENGEL degil - gerekce ile gecilir. */
+  receteIlacEkle: (muayeneId: number, istek_: {
+    barkod: string; doz?: string; periyot?: string; sureGun?: number;
+    kutu?: number; aciklama?: string; uyariGerekce?: string;
+  }) => gonder<{ receteId: number; satirId: number; uyarilar: unknown[]; mesaj: string }>(
+    `/api/recete/muayene/${muayeneId}`, istek_),
+
+  /** Imzalanmamis receteden ilac cikarir. */
+  receteIlacSil: (receteId: number, satirId: number) =>
+    istek<{ mesaj: string }>(`/api/recete/${receteId}/ilac/${satirId}`,
+                             { method: 'DELETE' }),
+
+  /** Hastanin son imzali recetesindeki ilaclari bu muayenenin recetesine kopyalar. */
+  receteOncekiKopyala: (muayeneId: number) =>
+    gonder<{ receteId: number; eklenen: number; mesaj: string }>(
+      `/api/recete/muayene/${muayeneId}/kopyala`, {}),
+
+  /** Receteyi imzalar: kilitler ve aktif ilac listesine isler. */
+  receteImzala: (receteId: number) =>
+    gonder<{ mesaj: string }>(`/api/recete/${receteId}/imzala`, {}),
+
   /** Muayene kartinin ek sekmeleri (e-Recete, konsultasyon, ucret, gecmis). */
   muayeneSekmeVerisi: (muayeneId: number) =>
     istek<{
-      belgeId: number | null; ustMuayeneId: number | null;
+      belgeId: number | null; ustMuayeneId: number | null; tanilar: string;
       receteler: Record<string, unknown>[]; receteSatirlari: Record<string, unknown>[];
       konsultasyonlar: Record<string, unknown>[]; islemler: Record<string, unknown>[];
       gecmis: Record<string, unknown>[];

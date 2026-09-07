@@ -361,8 +361,14 @@ public static class MuayeneUclari
                 " order by g.muayene_tarihi desc, g.id desc limit 50",
                 null, [id, m.HastaId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
+            // RECETENIN TANISI muayenenin tanisidir (mockup e-Recete basligi):
+            //   ayri sorulacak bir sey degil - ana tani once.
+            var tanilar = await baglanti.TekDegerAsync<string>(
+                "select coalesce(string_agg(t.icd_kod, ' · ' order by t.tur, t.sira, t.id), '') " +
+                "  from public.tani t where t.muayene_id = @p0", null, [id], iptal);
+
             return Results.Ok(new { muayeneId = id, belgeId = m.BelgeId,
-                                    ustMuayeneId = m.UstId,
+                                    ustMuayeneId = m.UstId, tanilar,
                                     receteler, receteSatirlari, konsultasyonlar,
                                     islemler, gecmis, izlemeNo = baglam.IzlemeNo });
         });

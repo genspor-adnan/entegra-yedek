@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
+import { KaynakArama } from './KaynakArama';
+import { guvenli, mesaj, onay } from './mesaj';
 import { tarihSaat, para } from './bicim';
 
 /**
@@ -23,6 +25,8 @@ type Satir = Record<string, unknown>;
 export interface SekmeVerisi {
   belgeId: number | null;
   ustMuayeneId: number | null;
+  /** Muayenenin tanı kodları ("I21.0 · E11.9") - reçete başlığında görünür. */
+  tanilar: string;
   receteler: Satir[];
   receteSatirlari: Satir[];
   konsultasyonlar: Satir[];
@@ -69,76 +73,183 @@ function Kabuk({ hata, veri, children }:
   return <>{children}</>;
 }
 
-/** e-REÇETE: bu muayenenin reçeteleri ve ilaç satırları (mockup tablosu). */
-export function MuayeneReceteSekmesi({ veri, hata }:
-  { veri: SekmeVerisi | null; hata: string | null }) {
-  const git = useNavigate();
+/**
+ * e-REÇETE (mockup muayene_karti.html "e-Reçete" paneli).
+ *
+ * Araç çubuğu · reçete başlığı (tür · provizyon · tanı · açıklama) · ilaç
+ * tablosu. <b>Yazma yolu SUNUCU uçlarıdır</b>: ilaç ekleme reçeteyi yoksa
+ * açar, uyarıyı ekleme ANINDA döndürür (hekim ilacı seçerken görsün, on ilaç
+ * yazıp imzaya basınca değil) ve imza reçeteyi kilitler. İstemci sırayı
+ * kurmaz, kuralı tekrarlamaz.
+ */
+export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tanilar, tazele }: {
+  veri: SekmeVerisi | null; hata: string | null;
+  muayeneId: number;
+  /** Muayenenin tanıları - mockup başlığında reçetenin tanısı görünür. */
+  tanilar: string;
+  tazele(): void;
+}) {
+  const [aramaAcik, setAramaAcik] = useState(false);
+
+  /** Seçilen ilacı ekler; sunucudan dönen uyarıyı hekime gösterir. */
+  const ilacEkle = (barkod: string, ad: string) => guvenli(async () => {
+    const y = await api.receteIlacEkle(muayeneId, { barkod });
+    const uyari = (y.uyarilar ?? []) as { metin?: string }[];
+    mesaj(uyari.length
+      ? `${ad} eklendi.\n\nUYARI:\n· ${uyari.map(u => u.metin ?? '').join('\n· ')}`
+      : `${ad} eklendi.`);
+    tazele();
+  });
+
+  const acikRecete = veri?.receteler.find(r => sayi(r.durum) === 1);
+
   return (
     <Kabuk hata={hata} veri={veri}>
+      {aramaAcik && (
+        <KaynakArama
+          kaynak="ilac" baslik="İlaç ara (barkod / ad / etken madde)"
+          kodAlani="barkod" adAlani="ad"
+          ekKosul={{ alan: 'aktif', op: 'esit', deger: 1 }}
+          onKapat={() => setAramaAcik(false)}
+          onSec={satir => {
+            setAramaAcik(false);
+            void ilacEkle(String(satir.barkod ?? ''), String(satir.ad ?? ''));
+          }}
+        />
+      )}
+
       <div className="muayene-arac">
-        <button type="button" className="d bir" onClick={() => git('/recete')}>
-          ＋ Yeni Reçete
+        <button type="button" className="d bir" onClick={() => setAramaAcik(true)}>
+          ＋ İlaç
         </button>
+        <button type="button" className="d"
+                onClick={() => void guvenli(async () => {
+                  const y = await api.receteOncekiKopyala(muayeneId);
+                  mesaj(y.mesaj);
+                  tazele();
+                })}>
+          🕘 Önceki reçeteyi kopyala
+        </button>
+        {acikRecete && (
+          <button type="button" className="d bir"
+                  onClick={() => void guvenli(async () => {
+                    if (!await onay('Reçete imzalanacak. İmzalanan reçete '
+                                  + 'değiştirilemez, ilaçlar hastanın aktif ilaç '
+                                  + 'listesine işlenir. Onaylıyor musunuz?')) return;
+                    const y = await api.receteImzala(sayi(acikRecete.id));
+                    mesaj(y.mesaj);
+                    tazele();
+                  })}>
+            ✍ e-İmzala
+          </button>
+        )}
       </div>
+
       {veri && veri.receteler.length === 0 && (
         <p className="not ic">
-          Bu muayenede reçete yok. Reçete <b>Reçeteler</b> ekranında yazılır;
-          imzalanınca e-Nabız reçete paketi kuyruğa girer.
+          Bu muayenede reçete yok. <b>＋ İlaç</b> ile ilk ilacı ekleyin -
+          reçete kendiliğinden açılır; imzalanınca e-Nabız reçete paketi
+          kuyruğa girer.
         </p>
       )}
+
       {veri?.receteler.map(r => {
         const id = sayi(r.id);
         const satirlar = veri.receteSatirlari.filter(s => sayi(s.receteId) === id);
         const durum = sayi(r.durum);
+        const uyariVar = satirlar.some(s => metin(s.uyari) !== '');
         return (
           <div className="kagrup" key={id}>
             <h6>
               <b>{metin(r.receteNo) || `#${id}`}</b>
-              <span className="rozet gri">{RECETE_TUR[sayi(r.tur)] ?? ''}</span>
               <span className={`rozet ${durum >= 2 ? 'olumlu' : durum === 0 ? 'gri' : 'uyari'}`}>
                 {RECETE_DURUM[durum] ?? ''}
               </span>
               <span className="not">
                 {r.tarih ? tarihSaat(r.tarih) : ''}
                 {metin(r.hekim) ? ` · ${metin(r.hekim)}` : ''}
-                {` · ${sayi(r.ilac)} ilaç`}
+                {` · ${satirlar.length} ilaç`}
+              </span>
+              <span style={{ marginLeft: 'auto' }} />
+              {/* ETKILESIM/ALERJI: uyari ekleme aninda dondu, burada OZET.
+                  "Temiz" demek kontrol edildi demektir - kontrol edilmedi ile
+                  ayni gorunmemeli. */}
+              <span className={`rozet ${uyariVar ? 'hata' : 'olumlu'}`}>
+                {uyariVar ? '⚠ Etkileşim / alerji uyarısı var' : '⚠ Etkileşim / alerji: temiz'}
               </span>
             </h6>
-            {satirlar.length > 0 && (
-              <table className="detay-tablo">
-                <thead>
-                  <tr>
-                    <th>İlaç (barkod)</th><th>Doz</th><th>Periyot</th>
-                    <th>Kullanım</th><th className="hiza-orta">Süre</th>
-                    <th className="hiza-sag">Kutu</th><th>Not</th>
+
+            {/* MOCKUP BASLIK IZGARASI: tur · provizyon · tani · aciklama */}
+            <div className="recete-baslik">
+              <div className="rb-kutu">
+                <div className="rb-etiket">Reçete türü</div>
+                <div className="rb-deger">{RECETE_TUR[sayi(r.tur)] ?? '—'}</div>
+              </div>
+              <div className="rb-kutu">
+                <div className="rb-etiket">Provizyon</div>
+                <div className="rb-deger sonuk">
+                  {metin(r.medulaSonuc) || 'Medula kapısı açık değil'}
+                </div>
+              </div>
+              <div className="rb-kutu">
+                <div className="rb-etiket">Tanı</div>
+                <div className="rb-deger">{tanilar || <span className="sonuk">—</span>}</div>
+              </div>
+              <div className="rb-kutu">
+                <div className="rb-etiket">Açıklama</div>
+                <div className="rb-deger">
+                  {metin(r.aciklama) || <span className="sonuk">—</span>}
+                </div>
+              </div>
+            </div>
+
+            <table className="detay-tablo">
+              <thead>
+                <tr>
+                  <th>İlaç (barkod)</th><th>Doz</th><th>Periyot</th>
+                  <th>Kullanım</th><th className="hiza-orta">Süre</th>
+                  <th className="hiza-sag">Kutu</th><th>Not</th><th />
+                </tr>
+              </thead>
+              <tbody>
+                {satirlar.length === 0 && (
+                  <tr><td colSpan={8} className="bos">İlaç yok</td></tr>
+                )}
+                {satirlar.map((s, i) => (
+                  <tr key={i}>
+                    <td>{metin(s.ilac)}
+                      {metin(s.barkod) && <span className="sonuk"> · {metin(s.barkod)}</span>}
+                    </td>
+                    <td>{metin(s.doz) || '—'}</td>
+                    <td>{metin(s.periyot) || '—'}</td>
+                    <td>{KULLANIM[sayi(s.kullanim)] || '—'}</td>
+                    <td className="hiza-orta">
+                      {sayi(s.sureGun) > 0 ? `${sayi(s.sureGun)} gün` : '—'}
+                    </td>
+                    <td className="hiza-sag">{sayi(s.kutu)}</td>
+                    <td>
+                      {metin(s.aciklama)}
+                      {metin(s.uyari) && (
+                        <span className="rozet hata" title="Uyarı gerekçesiyle geçildi">
+                          {metin(s.uyari).slice(0, 40)}
+                        </span>
+                      )}
+                    </td>
+                    <td className="hiza-orta">
+                      {/* IMZALI RECETEDEN ILAC CIKARILMAZ (kural uçta). */}
+                      {durum === 1 && (
+                        <button type="button" className="d teh ikon-dugme" title="İlacı çıkar"
+                                onClick={() => void guvenli(async () => {
+                                  const y = await api.receteIlacSil(id, sayi(s.id));
+                                  mesaj(y.mesaj);
+                                  tazele();
+                                })}>🗑</button>
+                      )}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {satirlar.map((s, i) => (
-                    <tr key={i}>
-                      <td>{metin(s.ilac)}
-                        {metin(s.barkod) && <span className="sonuk"> · {metin(s.barkod)}</span>}
-                      </td>
-                      <td>{metin(s.doz)}</td>
-                      <td>{metin(s.periyot)}</td>
-                      <td>{KULLANIM[sayi(s.kullanim)] ?? ''}</td>
-                      <td className="hiza-orta">
-                        {sayi(s.sureGun) > 0 ? `${sayi(s.sureGun)} gün` : '—'}
-                      </td>
-                      <td className="hiza-sag">{sayi(s.kutu)}</td>
-                      <td>
-                        {metin(s.aciklama)}
-                        {metin(s.uyari) && (
-                          <span className="rozet hata" title="Etkileşim/alerji uyarısı">
-                            {metin(s.uyari).slice(0, 40)}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+                ))}
+              </tbody>
+            </table>
           </div>
         );
       })}

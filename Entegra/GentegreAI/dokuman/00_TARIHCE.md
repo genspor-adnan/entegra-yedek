@@ -8177,3 +8177,34 @@ Geçmiş · Dosyalar.
   otomatik üretmek yanlış rapor verirdi). Hasta/hekim/şube tetikle
   muayeneden gelir - ekranda sorulan bir şey değil.
 - GenForm: `ekSekmeler` (ekrana özel sekme), `sekmeSirasi`, `gizliDetaylar`.
+
+### e-Reçete sekmesi mockup düzeninde (kullanıcı)
+
+Panel mockup'ın parçalarını taşıyor: araç çubuğu (**＋ İlaç** · 🕘 Önceki
+reçeteyi kopyala · ✍ e-İmzala) · reçete başlığı (tür · provizyon · tanı ·
+açıklama) · ilaç tablosu (İlaç/barkod · Doz · Periyot · Kullanım · Süre ·
+Kutu · Not).
+
+- İlaç seçimi `KaynakArama` ile ilaç kataloğundan (barkod/ad/etken madde).
+  Ekleme `POST /api/recete/muayene/{id}` - reçete yoksa açılır, **alerji /
+  tekrar uyarısı ekleme anında** döner (hekim ilacı seçerken görsün, on ilaç
+  yazıp imzaya basınca değil) ve uyarı engel değil, gerekçesiyle geçilir.
+- Yeni uçlar: **`DELETE /api/recete/{id}/ilac/{satirId}`** (imzalı reçeteden
+  ilaç çıkarılamaz - imzalanan kâğıdın içeriği sonradan değişmez, yanlışsa
+  reçete iptal edilip yenisi yazılır) ve **`POST /api/recete/muayene/{id}/kopyala`**
+  (hastanın son imzalı reçetesindeki ilaçlar; zaten yazılmış barkod atlanır -
+  ikinci kez eklemek çift doz demekti).
+- Reçetenin tanısı muayenenin tanılarıdır (ayrı sorulmaz, okunur gösterilir).
+- Doğrulandı: ilaç eklendi → imzalandı (durum 2, aktif ilaç listesine 2 ilaç
+  işlendi) → imzalıdan silme reddedildi; tamamlanmış muayeneye reçete yazma
+  zaten uçta engelli.
+
+**`db/463`**: boy + kilo girilince **BKİ** hesaplanır (tetik). Ölçüm üç yoldan
+giriliyor (kart, vital ekranı, cihaz) - formülü ekranlara yazmak üç ayrı kural
+demekti. Elle yazılan BKİ korunur; boy/kilo değişirse hesap yenilenir (eski
+ölçüme ait BKİ yanıltıcı olurdu). Test: 174/92 → 30,4 · kilo 80 → 26,4 · elle
+99 → korundu.
+
+Ayrıca (kullanıcı): sekme ikonları kaldırıldı ve sekmeler tek sıra (on sekme
+ikinci satıra taşıyordu; sığmazsa yatay kayar), bağlam şeridinde etiketler
+kutuların üstünde, sütun genişlikleri Hasta %20 dar / Bugün %20 geniş.

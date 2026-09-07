@@ -178,24 +178,9 @@ interface Props {
  *  - Alan hatalari (`alanlar[]`) ilgili girdinin altina yazilir.
  *  - Detaylar FARK olarak gonderilir (eklenen / degisen / silinen), tam liste degil.
  */
-/**
- * Sekme ikonlari (kullanici: "sekmelere ikon ekle"). Anahtar SEKME BASLIGI -
- * sekmeler katalogdan/alan gruplarindan uretildigi icin ayri bir ikon alani
- * yok; listede olmayan baslik notr simge alir.
- */
-const SEKME_IKON: Record<string, string> = {
-  'Genel': '📋', 'Kimlik': '🪪', 'İletişim': '📞', 'Adresler': '📍',
-  'Notlar': '📝', 'Mali': '💰', 'Adres / Fatura Bilgisi': '🧾', 'Banka': '🏦',
-  'Depolar': '🏬', 'Logo & Kaşe': '🖼️', 'e-Belge': '📨', 'ÜTS': '🩺',
-  'İzinler': '🌴', 'Eğitimler': '🎓', 'Resim / Doküman': '📎',
-  'Yorum / Medya': '💬', 'Yetki Matrisi': '🛡️', 'Kullanıcılar': '👥',
-  'Stok Durumu': '📦', 'Hareketler': '🔄', 'Fiyatlar': '🏷️',
-  'Ek Alanlar': '➕', 'Reçete': '🧪', 'Paket İçeriği': '🧺',
-  'Satırlar': '📄', 'Sevkiyat': '🚚', 'Özlük': '🗂️', 'Ayarlar': '⚙️',
-  // e-Nabiz kod eslemesi (454): notr kare iki sekmeyi de aynilastiriyordu.
-  'Eşleme': '🔗', 'SKRS': '🏥', 'Çevrim': '🔁',
-};
-const sekmeIkonu = (baslik: string) => SEKME_IKON[baslik] ?? '▫️';
+// SEKME IKONLARI KALDIRILDI (kullanici): on sekmeli kartta ikonlar seridi
+// ikinci satira tasiriyordu; sekme adi zaten ayirt ediyor.
+
 
 export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk,
@@ -1033,7 +1018,9 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
               className={`kat${s.anahtar === aktif?.anahtar ? ' on' : ''}`}
               onClick={() => setAktifSekme(s.anahtar)}
             >
-              {sekmeIkonu(s.baslik)} {c(s.baslik)}
+              {/* IKON YOK (kullanici): on sekmeli kartta ikonlar seridi
+                  ikinci satira tasiriyordu; sekme adi zaten ayirt ediyor. */}
+              {c(s.baslik)}
               {s.tur === 'detay' && <span className="b">{(detaylar[s.detay.ad] ?? bosDetay()).guncel.length}</span>}
             </div>
           ))}

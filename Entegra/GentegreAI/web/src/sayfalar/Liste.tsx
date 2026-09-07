@@ -2326,8 +2326,15 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         ekSekmeler={tanim.kaynak === 'muayene' && kartId !== 'yeni' && kartId !== null
           ? [
               { anahtar: 'ozel:recete', baslik: 'e-Reçete',
-                ciz: () => <MuayeneReceteSekmesi veri={sekmeVerisi.veri}
-                                                 hata={sekmeVerisi.hata} /> },
+                ciz: () => (
+                  <MuayeneReceteSekmesi
+                    veri={sekmeVerisi.veri} hata={sekmeVerisi.hata}
+                    muayeneId={Number(kartId)}
+                    // Recetenin tanisi muayenenin ANA + ek tanilaridir; ayri
+                    //   sorulacak bir sey degil (mockup da okunur gosteriyor).
+                    tanilar={sekmeVerisi.veri?.tanilar ?? ''}
+                    tazele={() => setKartTazele(t => t + 1)} />
+                ) },
               { anahtar: 'ozel:ucret', baslik: 'İşlem & Ücret',
                 ciz: () => <MuayeneUcretSekmesi veri={sekmeVerisi.veri}
                                                 hata={sekmeVerisi.hata} /> },

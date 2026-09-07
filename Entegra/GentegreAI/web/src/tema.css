@@ -488,13 +488,15 @@ table.grid tr.flt input {
    .kabas ile .kagov arasinda sabit kalir, icerik kaydiginda kaymaz. */
 /* flex: none SART - .kawin bir flex sutunu ve .kagov buyudukce sekme seridi
    SIKISIP kirpilliyordu ("Genel" / "Resim / Doküman" yazilari yarim goruluyordu). */
+/* TEK SIRA (kullanici): on sekmeli muayene kartinda sarma ikinci satir
+   uretiyordu. Sigmazsa YATAY KAYAR - satir yuksekligi sabit kalir. */
 .katab {
   display: flex; gap: 2px; padding: 0 8px; background: var(--yuz2);
-  border-bottom: 1px solid var(--cizgi); flex-wrap: wrap; overflow-x: auto;
+  border-bottom: 1px solid var(--cizgi); flex-wrap: nowrap; overflow-x: auto;
   flex: none;
 }
 .katab .kat {
-  padding: 7px 13px; font-size: 12px; color: var(--soluk); cursor: pointer; white-space: nowrap;
+  padding: 7px 11px; font-size: 12px; flex: none; color: var(--soluk); cursor: pointer; white-space: nowrap;
   background: var(--sekmezem); border: 1px solid var(--cizgi); border-bottom: none; border-radius: 3px 3px 0 0;
   margin-top: 5px; position: relative; top: 1px; display: flex; align-items: center; gap: 6px; user-select: none;
 }
@@ -2671,8 +2673,11 @@ input.skt-gecmis {
    Bugun. Mockup'ta oldugu gibi ACIK ZEMIN uzerinde ince cerceveli kutular,
    etiket 10.5px soluk, icerik 11.5px - kart alan izgarasiyla ayni yogunluk.
    =================================================================== */
+/* Sutun genislikleri (kullanici): hasta kutusu %20 dar, "Bugun" kutusu %20
+   genis - hasta kutusunda ad + numaralar, Bugun kutusunda tur/bolum/hekim,
+   bekleyen, ana tani ve zaman penceresi var. */
 .kart-baglam {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  display: grid; grid-template-columns: 0.8fr 1fr 1fr 1.2fr; gap: 8px;
   padding: 8px 10px; background: var(--yuz2); border-bottom: 1px solid var(--cizgi2);
 }
 @media (max-width: 1100px) { .kart-baglam { grid-template-columns: repeat(2, 1fr) } }
@@ -2856,3 +2861,15 @@ input.skt-gecmis {
 .mi-sag .vital-izgara-kip .alan.ikili input { grid-column: auto; width: 100%; min-width: 0 }
 .vital-izgara-kip .alan.ikili { grid-template-columns: 1fr 1fr; column-gap: 4px }
 .vital-izgara-kip .alan.ikili .etiket { grid-column: 1 / -1 }
+
+/* e-REÇETE başlık ızgarası (mockup): tür · provizyon · tanı · açıklama. */
+.recete-baslik { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+                 padding: 6px 8px }
+.recete-baslik .rb-etiket { font-size: 10.5px; color: var(--soluk) }
+.recete-baslik .rb-deger { border: 1px solid var(--cizgi2); border-radius: var(--r);
+                           background: var(--yuz); padding: 3px 6px; min-height: 22px }
+
+/* Bağlam şeridi: ETİKET KUTUNUN ÜSTÜNDE (kullanıcı) - hücre = etiket + kutu. */
+.kart-baglam .kb-hucre { display: flex; flex-direction: column; min-width: 0 }
+.kart-baglam .kb-hucre > .kb-bas { margin: 0 0 2px 2px }
+.kart-baglam .kb-hucre > .kb-kutu { flex: 1 }
