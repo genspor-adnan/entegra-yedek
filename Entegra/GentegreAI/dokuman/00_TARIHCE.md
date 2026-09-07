@@ -7893,3 +7893,33 @@ modalinden yapılıyor, dropdown doldurmak hem gereksiz hem yavaştı;
 
 **Testler**: API **161** (yeni `RadyolojiKuralTestleri`: modalitesiz hizmetle
 istem açılamaz, modalite hizmetten kopyalanır), web 460.
+
+### Aynı gün — hizmet kataloğunda modalite onarımı (`db/460`)
+
+459'un kuralı yürürlüğe girince katalogdaki asıl sorun görüldü: **radyoloji
+tetkiklerinin hiçbirinde modalite yoktu** (kural olduğu gibi kalsaydı MR, BT,
+ultrason, grafi… hiçbiriyle istem açılamazdı), modalitesi dolu olan iki kayıt
+ise laboratuvar tetkikiydi (`KONTROL PROSTAT SPESİFİK ANTİJEN`) - çalışma
+listesindeki istemlerin çoğunun PSA görünmesinin sebebi buydu.
+
+**374 hizmete modalite yazıldı, 2 lab tetkikinden temizlendi.** Modalite
+**addan** çözülüyor, kod önekinden değil: ilk deneme öneke bakıyordu ve
+yanıldı (`Res.` ailesinin adı "Akciğer Perfüzyon Sintigrafisi" - nükleer tıp;
+`SSK.` ailesinde hem arteriografi hem MR var).
+
+İki tuzak daha çıktı: (1) "ANGİOGRAFİ" küçültülünce `angi̇ografi̇` oluyor
+(İ'nin noktası ayrı birleşik karakter) ve düz `~*` eşleşmesi kaçıyordu -
+karşılaştırma `fn_ara_metin` ile ASCII'ye indirgeniyor; (2) "Sanal
+bronkoskopi" endoskopi değil BT tetkiki.
+
+**Dokunulmayanlar**: sintigrafi/PET (nükleer tıp - `rad.modalite` listesinde
+karşılığı yok), ekokardiyografi (kardiyoloji), paket (`P.`) ve kan merkezi
+(`KM.`) kodlu satırlar. Bunlar radyoloji istemi olarak açılmamalı.
+
+**Üç aykırı istem**: #28 "Alt Abdomen MR" gerçek MR ve raporu onaylı -
+modalitesi dolduruldu, kayıt duruyor; #29 (adı boş hizmet) ve #33
+(17-KETOSTEROİD) çekilemez oldukları için **iptal** edildi - silinmedi,
+açıklamaya iz düşüldü.
+
+Geri alınabilir: değişen her satırın eski değeri `_yedek_hizmet_modalite_460`
+tablosunda; göç yeniden çalıştırılırsa önce eski değerler geri yüklenir.

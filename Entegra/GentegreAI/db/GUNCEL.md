@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (226 ad, 65 tanesi birden cok dosyada)
+## Fonksiyonlar (227 ad, 65 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -99,6 +99,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_hasta_dosya_no` | `366_numara_onek_yil.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |
 | `fn_hesap_atama_adi` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
 | `fn_hesap_plani_alt_ac` | `076_fn_kasa.sql` | — |
+| `fn_hizmet_modalite_coz` | `460_hizmet_modalite_onarim.sql` | — |
 | `fn_ilac_alerji_kontrol` | `414_metin_sadelestir.sql` | 413_recete.sql |
 | `fn_ilac_fiyat` | `406_ilac_fiyat.sql` | — |
 | `fn_ilac_fiyat_golge_tazele` | `406_ilac_fiyat.sql` | — |
