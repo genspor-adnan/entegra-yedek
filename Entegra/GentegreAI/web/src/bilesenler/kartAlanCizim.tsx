@@ -11,6 +11,15 @@ export type Deger = string | number | boolean | null;
 export const EPOSTA_ALANLARI = new Set(['eposta']);
 
 /**
+ * SIRRI OLAN ALANLAR: uzunlugu buyuk olsa da COK SATIRLI cizilmez.
+ *
+ * `entegrasyon_hesap.sifre` 4000 karakter (sertifika/anahtar da tutulabiliyor);
+ * uzun-metin kuralina takilip dort satirlik kutu olarak ekrana yayiliyordu -
+ * omuz ustunden okunacak son sey.
+ */
+const GIZLI_METIN = /sifre|parola|token|anahtar|secret/i;
+
+/**
  * Alan cizimi - GenForm'un icinden cikarildi.
  *
  * Uc islev (girdi / etiketli alan / alan listesi) ayni baglami paylasiyor:
@@ -191,7 +200,8 @@ export function alanCizici(b: AlanCizimBaglami) {
           disabled={salt || !a.yazilabilir}
           onChange={v => setDeger(d => ({ ...d, [a.ad]: v }))}
         />
-      ) : a.tip === 'metin' && (a.enFazlaUzunluk ?? 0) >= 400 ? (
+      ) : a.tip === 'metin' && (a.enFazlaUzunluk ?? 0) >= 400
+             && !GIZLI_METIN.test(a.ad) ? (
         // UZUN METIN COK SATIRLI (kullanici): bildirim sablonunun govdesi,
         //   onam metni gibi alanlar 4000 karaktere kadar; tek satirlik kutuda
         //   yazilani gormeden yaziliyordu. Esik alan tanimindan gelir -

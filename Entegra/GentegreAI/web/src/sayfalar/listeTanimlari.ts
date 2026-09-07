@@ -1933,7 +1933,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     ],
     // Uc UTS ekrani "Stok & Hizmet > ÜTS" alt menusunde toplanir (kullanici).
     menuGrup: 'Stok & Hizmet', menuAltGrup: 'ÜTS',
-    menuAd: 'Gelen / Askıdakiler', ic: '🩺',
+    menuAd: 'Gelen / Askıdakiler', ic: '🪝',
     yetkiKodu: 'uts', menuSira: 70,
   },
   {
